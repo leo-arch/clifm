@@ -23,26 +23,22 @@
 */
 
 #pragma once
+#include <time.h>
 
-/* some memory wrapper functions */
+/* Some memory wrapper functions */
 void *xrealloc(void *ptr, size_t size);
 void *xcalloc(size_t nmemb, size_t size);
 void *xnmalloc(size_t nmemb, size_t size);
 
 char xgetchar(void);
-
-int *get_hex_num(const char *str);
-
+/*int *get_hex_num(const char *str); */
 char *url_encode(char *str);
 char *url_decode(char *str);
-
 int read_octal(char *str);
 int get_link_ref(const char *link);
 off_t dir_size(char *dir);
-
 char *get_size_unit(off_t size);
 char *get_cmd_path(const char *cmd);
-
 int count_dir(const char *dir, int pop);
 char *xitoa(int n);
 FILE *open_fstream_r(char *name, int *fd);
@@ -50,3 +46,4 @@ FILE *open_fstream_w(char *name, int *fd);
 void close_fstream(FILE *fp, int fd);
 int xmkdir(char *dir, mode_t mode);
 mode_t get_dt(const mode_t mode);
+char *gen_date_suffix(struct tm tm);

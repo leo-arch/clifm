@@ -1015,10 +1015,15 @@ trash_function(char **comm)
 		/* Create suffix from current date and time to create unique
 		 * file names for trashed files */
 		int exit_status = EXIT_SUCCESS;
+
 		time_t rawtime = time(NULL);
 		struct tm tm;
 		localtime_r(&rawtime, &tm);
-		char date[64] = "";
+		char *suffix = gen_date_suffix(tm);
+		if (!suffix)
+			return EXIT_FAILURE;
+
+/*		char date[64] = "";
 
 		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
 
@@ -1026,7 +1031,7 @@ trash_function(char **comm)
 
 		snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
 		    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min,
-		    tm.tm_sec);
+		    tm.tm_sec); */
 
 		/* Remove file(s) from Trash */
 		if (strcmp(comm[1], "del") == 0 || strcmp(comm[1], "rm") == 0) {
@@ -1097,6 +1102,7 @@ trash_function(char **comm)
 			}
 		}
 
+		free(suffix);
 		return exit_status;
 	}
 }
