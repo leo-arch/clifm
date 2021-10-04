@@ -295,6 +295,75 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	return EXIT_SUCCESS;
 }
 
+/* A basic pager for directories containing large amount of
+ * files. What's missing? It only goes downwards. To go
+ * backwards, use the terminal scrollback function */
+static int
+run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
+{
+	fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+
+	switch (xgetchar()) {
+	/* Advance one line at a time */
+	case 66: /* fallthrough */ /* Down arrow */
+	case 10: /* fallthrough */ /* Enter */
+	case 32:		   /* Space */
+		break;
+
+	/* Advance one page at a time */
+	case 126:
+		*counter = 0; /* Page Down */
+		break;
+
+	case 63: /* fallthrough */ /* ? */
+	case 104: {		   /* h: Print pager help */
+		CLEAR;
+
+		fputs(_("?, h: help\n"
+			"Down arrow, Enter, Space: Advance one line\n"
+			"Page Down: Advance one page\n"
+			"q: Stop pagging\n"), stdout);
+
+		int l = (int)term_rows - 5;
+		while (--l >= 0)
+			putchar('\n');
+
+		fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+
+		if (columns_n == -1) // Long view
+			*i -= (term_rows - 1);
+		else // Normal view
+			*i -= (int)((term_rows * columns_n) - 1);
+
+		if (*i < 0)
+			*i = 0;
+
+		*counter = 0;
+		xgetchar();
+		CLEAR;
+	} break;
+
+	/* Stop paging (and set a flag to reenable the pager
+	 * later) */
+	case 99:  /* 'c' */
+	case 112: /* 'p' */
+	case 113:
+		pager = 0, *reset_pager = 1; /* 'q' */
+		break;
+
+	/* If another key is pressed, go back one position.
+	 * Otherwise, some file names won't be listed.*/
+	default:
+		(*i)--;
+		fputs("\r\x1b[K\x1b[3J", stdout);
+		return (-1);
+	}
+
+	fputs("\r\x1b[K\x1b[3J", stdout);
+
+	return 0;
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -499,7 +568,7 @@ list_dir_light(void)
 		ENTSORT(file_info, n, entrycmp);
 
 	int i;
-	register size_t counter = 0;
+	size_t counter = 0;
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
@@ -567,61 +636,8 @@ list_dir_light(void)
 
 			if (pager) {
 				if (counter > (size_t)(term_rows - 2)) {
-					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
-
-					switch (xgetchar()) {
-					/* Advance one line at a time */
-					case 66: /* fallthrough */ /* Down arrow */
-					case 10: /* fallthrough */ /* Enter */
-					case 32:		   /* Space */
-						break;
-
-					/* Advance one page at a time */
-					case 126:
-						counter = 0; /* Page Down */
-						break;
-
-					case 63: /* fallthrough */ /* ? */
-					case 104: {		   /* h: Print pager help */
-						CLEAR;
-
-						fputs(_("?, h: help\n"
-							"Down arrow, Enter, Space: Advance one line\n"
-							"Page Down: Advance one page\n"
-							"q: Stop pagging\n"), stdout);
-
-						int l = (int)term_rows - 5;
-						while (--l >= 0)
-							putchar('\n');
-
-						fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
-
-						i -= (term_rows - 1);
-						if (i < 0)
-							i = 0;
-
-						counter = 0;
-						xgetchar();
-						CLEAR;
-					} break;
-
-					/* Stop paging (and set a flag to reenable the pager
-					 * later) */
-					case 99:  /* 'c' */
-					case 112: /* 'p' */
-					case 113:
-						pager = 0, reset_pager = 1; /* 'q' */
-						break;
-
-					/* If another key is pressed, go back one position.
-					 * Otherwise, some file names won't be listed.*/
-					default:
-						i--;
-						fputs("\r\x1b[K\x1b[3J", stdout);
+					if (run_pager(-1, &reset_pager, &i, &counter) == -1)
 						continue;
-					}
-
-					fputs("\r\x1b[K\x1b[3J", stdout);
 				}
 
 				counter++;
@@ -682,64 +698,9 @@ list_dir_light(void)
 		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
-			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
-				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
-
-				switch (xgetchar()) {
-
-				/* Advance one line at a time */
-				case 66: /* fallthrough */ /* Down arrow */
-				case 10: /* fallthrough */ /* Enter */
-				case 32:		   /* Space */
-					break;
-
-				/* Advance one page at a time */
-				case 126:
-					counter = 0; /* Page Down */
-					break;
-
-				case 63: /* fallthrough */ /* ? */
-				case 104: {		   /* h: Print pager help */
-					CLEAR;
-
-					fputs(_("?, h: help\n"
-						"Down arrow, Enter, Space: Advance one line\n"
-						"Page Down: Advance one page\n"
-						"q: Stop pagging\n"), stdout);
-
-					int l = (int)term_rows - 5;
-					while (--l >= 0)
-						putchar('\n');
-
-					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
-
-					i -= (int)((term_rows * columns_n) - 1);
-					if (i < 0)
-						i = 0;
-
-					counter = 0;
-					xgetchar();
-					CLEAR;
-				} break;
-
-				/* Stop paging (and set a flag to reenable the pager
-				 * later) */
-				case 99:  /* 'c' */
-				case 112: /* 'p' */
-				case 113:
-					pager = 0, reset_pager = 1; /* 'q' */
-					break;
-
-				/* If another key is pressed, go back one position.
-				 * Otherwise, some file names won't be listed.*/
-				default:
-					i--;
-					fputs("\r\x1b[K\x1b[3J", stdout);
+			if (last_column && counter > columns_n * ((size_t)term_rows - 2))
+				if (run_pager((int)columns_n, &reset_pager, &i, &counter) == -1)
 					continue;
-				}
-
-				fputs("\r\x1b[K\x1b[3J", stdout);
-			}
 
 			counter++;
 		}
@@ -1271,7 +1232,7 @@ list_dir(void)
 		 * ########################################## */
 
 	int i;
-	register size_t counter = 0;
+	size_t counter = 0;
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
@@ -1344,60 +1305,8 @@ list_dir(void)
 
 			if (pager) {
 				if (counter > (size_t)(term_rows - 2)) {
-					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
-
-					switch (xgetchar()) {
-					/* Advance one line at a time */
-					case 66: /* fallthrough */ /* Down arrow */
-					case 10: /* fallthrough */ /* Enter */
-					case 32: /* Space */
-						break;
-
-					/* Advance one page at a time */
-					case 126:  /* Page Down */
-						counter = 0;
-						break;
-
-					case 63: /* fallthrough */ /* ? */
-					case 104: {		   /* h: Print pager help */
-						CLEAR;
-						fputs(_("?, h: help\n"
-							"Down arrow, Enter, Space: Advance one line\n"
-							"Page Down: Advance one page\n"
-							"q: Stop pagging\n"), stdout);
-
-						int l = (int)term_rows - 5;
-						while (--l >= 0)
-							putchar('\n');
-
-						fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
-
-						i -= (term_rows - 1);
-						if (i < 0)
-							i = 0;
-
-						counter = 0;
-						xgetchar();
-						CLEAR;
-					} break;
-
-					/* Stop paging (and set a flag to reenable the pager
-					 * later) */
-					case 99:  /* fallthrough */ /* 'c' */
-					case 112: /* fallthrough */ /* 'p' */
-					case 113:
-						pager = 0, reset_pager = 1; /* 'q' */
-						break;
-
-					/* If another key is pressed, go back one position.
-					 * Otherwise, some file names won't be listed.*/
-					default:
-						i--;
-						fputs("\r\x1b[K\x1b[3J", stdout);
+					if (run_pager(-1, &reset_pager, &i, &counter) == -1)
 						continue;
-					}
-
-					fputs("\r\x1b[K\x1b[3J", stdout);
 				}
 
 				counter++;
@@ -1443,73 +1352,16 @@ list_dir(void)
 		if (max_files != UNSET && i == max_files)
 			break;
 
-				/* ######################
-				 * #   A SIMPLE PAGER   #
-				 * ###################### */
+				/* ##########################
+				 * #  MAS: A SIMPLE PAGER   #
+				 * ########################## */
 
-		/* A basic pager for directories containing large amount of
-		 * files. What's missing? It only goes downwards. To go
-		 * backwards, use the terminal scrollback function */
 		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
-			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
-				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
-
-				switch (xgetchar()) {
-				/* Advance one line at a time */
-				case 66: /* fallthrough */ /* Down arrow */
-				case 10: /* fallthrough */ /* Enter */
-				case 32: /* Space */
-					break;
-
-				/* Advance one page at a time */
-				case 126: /* Page Down */
-					counter = 0; break;
-
-				case 63: /* fallthrough */ /* ? */
-				case 104: {		   /* h: Print pager help */
-					CLEAR;
-
-					fputs(_("?, h: help\n"
-						"Down arrow, Enter, Space: Advance one line\n"
-						"Page Down: Advance one page\n"
-						"q: Stop pagging\n"), stdout);
-
-					int l = (int)term_rows - 5;
-					while (--l >= 0)
-						putchar('\n');
-
-					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
-
-					i -= ((term_rows * (int)columns_n) - 1);
-
-					if (i < 0)
-						i = 0;
-
-					counter = 0;
-					xgetchar();
-					CLEAR;
-				} break;
-
-				/* Stop paging (and set a flag to reenable the pager
-				 * later) */
-				case 99: /* fallthrough */  /* 'c' */
-				case 112: /* fallthrough */ /* 'p' */
-				case 113:
-					pager = 0, reset_pager = 1; /* 'q' */
-					break;
-
-				/* If another key is pressed, go back one position.
-				 * Otherwise, some file names won't be listed.*/
-				default:
-					i--;
-					fputs("\r\x1b[K\x1b[3J", stdout);
+			if (last_column && counter > columns_n * ((size_t)term_rows - 2))
+				if (run_pager((int)columns_n, &reset_pager, &i, &counter) == -1)
 					continue;
-				}
-
-				fputs("\r\x1b[K\x1b[3J", stdout);
-			}
 
 			counter++;
 		}
