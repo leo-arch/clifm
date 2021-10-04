@@ -371,6 +371,26 @@ surf_hist(char **comm)
 	return exit_status;
 }
 
+/* Set the path of the current workspace to NEW_PATH */
+static int
+set_path(const char *new_path)
+{
+	free(ws[cur_ws].path);
+	ws[cur_ws].path = savestring(new_path, strlen(new_path));
+	if (!ws[cur_ws].path)
+		return EXIT_FAILURE;
+
+	add_to_jumpdb(ws[cur_ws].path);
+	int exit_status = EXIT_SUCCESS;
+
+	if (cd_lists_on_the_fly) {
+		free_dirlist();
+		exit_status = list_dir();
+	}
+
+	return exit_status;
+}
+
 /* Go back one entry in dirhist */
 int
 back_function(char **comm)
@@ -392,38 +412,26 @@ back_function(char **comm)
 	if (dirhist_cur_index <= 0)
 		return EXIT_SUCCESS;
 
-	int exit_status = EXIT_FAILURE;
 	dirhist_cur_index--;
 
 	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
 		if (dirhist_cur_index)
 			dirhist_cur_index--;
 		else
-			return exit_status;
+			return EXIT_FAILURE;
 	}
 
-	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
-		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
-		    strlen(old_pwd[dirhist_cur_index]));
+	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
+		return set_path(old_pwd[dirhist_cur_index]);
 
-		exit_status = EXIT_SUCCESS;
-		add_to_jumpdb(ws[cur_ws].path);
+	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+	    old_pwd[dirhist_cur_index], strerror(errno));
+	/* Invalidate this entry */
+	*old_pwd[dirhist_cur_index] = _ESC;
+	if (dirhist_cur_index)
+		dirhist_cur_index--;
 
-		if (cd_lists_on_the_fly) {
-			free_dirlist();
-			exit_status = list_dir();
-		}
-	} else {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-		    old_pwd[dirhist_cur_index], strerror(errno));
-		/* Invalidate this entry */
-		*old_pwd[dirhist_cur_index] = _ESC;
-		if (dirhist_cur_index)
-			dirhist_cur_index--;
-	}
-
-	return exit_status;
+	return EXIT_FAILURE;
 }
 
 /* Go forth one entry in dirhist */
@@ -442,41 +450,28 @@ forth_function(char **comm)
 	}
 
 	/* If just 'forth', with no arguments */
-
 	/* If last path in dirhist was reached, do nothing */
 	if (dirhist_cur_index + 1 >= dirhist_total_index)
 		return EXIT_SUCCESS;
 
-	int exit_status = EXIT_FAILURE;
 	dirhist_cur_index++;
 
 	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
 		if (dirhist_cur_index < dirhist_total_index)
 			dirhist_cur_index++;
 		else
-			return exit_status;
+			return EXIT_FAILURE;
 	}
 
-	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
-		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
-		    strlen(old_pwd[dirhist_cur_index]));
+	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
+		return set_path(old_pwd[dirhist_cur_index]);
 
-		add_to_jumpdb(ws[cur_ws].path);
-		exit_status = EXIT_SUCCESS;
+	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+	    old_pwd[dirhist_cur_index], strerror(errno));
+	/* Invalidate this entry */
+	*old_pwd[dirhist_cur_index] = _ESC;
+	if (dirhist_cur_index < dirhist_total_index)
+		dirhist_cur_index++;
 
-		if (cd_lists_on_the_fly) {
-			free_dirlist();
-			exit_status = list_dir();
-		}
-	} else {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-		    old_pwd[dirhist_cur_index], strerror(errno));
-		/* Invalidate this entry */
-		*old_pwd[dirhist_cur_index] = _ESC;
-		if (dirhist_cur_index < dirhist_total_index)
-			dirhist_cur_index++;
-	}
-
-	return exit_status;
+	return EXIT_FAILURE;
 }
