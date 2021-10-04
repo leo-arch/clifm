@@ -1,4 +1,4 @@
-/* profiles.c -- functions controlling user profiles */
+/* profiles.c -- functions for manipulating user profiles */
 
 /*
  * This file is part of CliFM
@@ -70,7 +70,6 @@ get_profile_names(void)
 #endif
 
 	for (i = 0; i < (size_t)files_n; i++) {
-
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		char tmp[PATH_MAX];
 		snprintf(tmp, PATH_MAX - 1, "%s/%s", pf_dir,profs[i]->d_name);
@@ -100,83 +99,21 @@ get_profile_names(void)
 	return EXIT_SUCCESS;
 }
 
-int
-profile_function(char **comm)
+/* Check if NAME is an existing profile name */
+static int
+check_profile(const char *name)
 {
-	if (xargs.stealth_mode == 1) {
-		printf("%s: The profile function is disabled in stealth mode\n",
-		    PROGRAM_NAME);
-		return EXIT_SUCCESS;
+	size_t i;
+	for (i = 0; profile_names[i]; i++) {
+		if (*name == *profile_names[i] && strcmp(name, profile_names[i]) == 0)
+			return 1;
 	}
-
-	int exit_status = EXIT_SUCCESS;
-
-	if (comm[1]) {
-		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
-			puts(_(PROFILES_USAGE));
-
-		/* List profiles */
-		else if (comm[1] && (strcmp(comm[1], "ls") == 0
-		|| strcmp(comm[1], "list") == 0)) {
-			size_t i;
-
-			for (i = 0; profile_names[i]; i++)
-				printf("%s\n", profile_names[i]);
-		}
-
-		/* Create a new profile */
-		else if (strcmp(comm[1], "add") == 0)
-
-			if (comm[2]) {
-				exit_status = profile_add(comm[2]);
-			}
-
-			else {
-				fprintf(stderr, "%s\n", PROFILES_USAGE);
-				exit_status = EXIT_FAILURE;
-			}
-
-		/* Delete a profile */
-		else if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0)
-			if (comm[2])
-				exit_status = profile_del(comm[2]);
-			else {
-				fprintf(stderr, "%s\n", PROFILES_USAGE);
-				exit_status = EXIT_FAILURE;
-			}
-
-		/* Switch to another profile */
-		else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0) {
-
-			if (comm[2])
-				exit_status = profile_set(comm[2]);
-
-			else {
-				fprintf(stderr, "%s\n", PROFILES_USAGE);
-				exit_status = EXIT_FAILURE;
-			}
-		}
-
-		/* None of the above == error */
-		else {
-			fprintf(stderr, "%s\n", PROFILES_USAGE);
-			exit_status = EXIT_FAILURE;
-		}
-	}
-
-	/* If only "pr" print the current profile name */
-	else if (!alt_profile)
-		printf("%s: profile: default\n", PROGRAM_NAME);
-
-	else
-		printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile);
-
-	return exit_status;
+	return 0;
 }
 
 /* Switch profile to PROF */
 int
-profile_set(const char *prof)
+profile_set(char *prof)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: The profile function is disabled in stealth mode\n",
@@ -188,17 +125,7 @@ profile_set(const char *prof)
 		return EXIT_FAILURE;
 
 	/* Check if prof is a valid profile */
-	int found = 0;
-	int i;
-
-	for (i = 0; profile_names[i]; i++) {
-
-		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
-			found = 1;
-			break;
-		}
-	}
-
+	int found = check_profile(prof);
 	if (!found) {
 		fprintf(stderr, _("%s: %s: No such profile\nTo add a new "
 				  "profile enter 'pf add PROFILE'\n"),
@@ -240,7 +167,7 @@ profile_set(const char *prof)
 				PROGRAM_NAME, user.shell);
 	}
 
-	i = (int)usrvar_n;
+	int i = (int)usrvar_n;
 	while (--i >= 0) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
@@ -262,11 +189,8 @@ profile_set(const char *prof)
 	actions_n = 0;
 
 	/*  my_rl_unbind_functions();
-
 	create_kbinds_file();
-
 	load_keybinds();
-
 	rl_unbind_function_in_map(rl_hidden, rl_get_keymap());
 	rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
 	my_rl_bind_functions(); */
@@ -290,17 +214,13 @@ profile_set(const char *prof)
 			clear_history(); /* This is for readline */
 			read_history(hist_file);
 			history_truncate_file(hist_file, max_hist);
-		}
-
-		else {
+		} else {
 			FILE *hist_fp = fopen(hist_file, "w");
 
 			if (hist_fp) {
 				fputs("edit\n", hist_fp);
 				fclose(hist_fp);
-			}
-
-			else {
+			} else {
 				_err('w', PRINT_PROMPT, _("%s: Error opening the "
 						"history file\n"), PROGRAM_NAME);
 			}
@@ -311,12 +231,10 @@ profile_set(const char *prof)
 
 	free_bookmarks();
 	load_bookmarks();
-
 	load_actions();
 
 	/* Reload PATH commands (actions are profile specific) */
 	if (bin_commands) {
-
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
 
@@ -325,14 +243,12 @@ profile_set(const char *prof)
 	}
 
 	if (paths) {
-
 		i = (int)path_n;
 		while (--i >= 0)
 			free(paths[i]);
 	}
 
 	path_n = (size_t)get_path_env();
-
 	get_path_programs();
 
 	i = MAX_WS;
@@ -375,23 +291,13 @@ profile_set(const char *prof)
 	return exit_status;
 }
 
-int
-profile_add(const char *prof)
+static int
+profile_add(char *prof)
 {
 	if (!prof)
 		return EXIT_FAILURE;
 
-	int found = 0;
-	size_t i;
-
-	for (i = 0; profile_names[i]; i++) {
-
-		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
-			found = 1;
-			break;
-		}
-	}
-
+	int found = check_profile(prof);
 	if (found) {
 		fprintf(stderr, _("%s: %s: Profile already exists\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
@@ -466,6 +372,7 @@ profile_add(const char *prof)
 	if (exit_status == EXIT_SUCCESS) {
 		printf(_("%s: '%s': Profile succesfully created\n"), PROGRAM_NAME, prof);
 
+		size_t i;
 		for (i = 0; profile_names[i]; i++)
 			free(profile_names[i]);
 
@@ -478,8 +385,8 @@ profile_add(const char *prof)
 	return exit_status;
 }
 
-int
-profile_del(const char *prof)
+static int
+profile_del(char *prof)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: The profile function is disabled in stealth mode\n",
@@ -491,15 +398,7 @@ profile_del(const char *prof)
 		return EXIT_FAILURE;
 
 	/* Check if prof is a valid profile */
-	int found = 0;
-	size_t i;
-	for (i = 0; profile_names[i]; i++) {
-		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
-			found = 1;
-			break;
-		}
-	}
-
+	int found = check_profile(prof);
 	if (!found) {
 		fprintf(stderr, _("%s: %s: No such profile\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
@@ -515,15 +414,85 @@ profile_del(const char *prof)
 
 	if (ret == EXIT_SUCCESS) {
 		printf(_("%s: '%s': Profile successfully removed\n"), PROGRAM_NAME, prof);
-
+		size_t i;
 		for (i = 0; profile_names[i]; i++)
 			free(profile_names[i]);
 
 		get_profile_names();
-
 		return EXIT_SUCCESS;
 	}
 
 	fprintf(stderr, _("%s: %s: Error removing profile\n"), PROGRAM_NAME, prof);
 	return EXIT_FAILURE;
+}
+
+int
+profile_function(char **comm)
+{
+	if (xargs.stealth_mode == 1) {
+		printf("%s: The profile function is disabled in stealth mode\n",
+		    PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+
+	if (comm[1]) {
+		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+			puts(_(PROFILES_USAGE));
+
+		/* List profiles */
+		else if (comm[1] && (strcmp(comm[1], "ls") == 0
+		|| strcmp(comm[1], "list") == 0)) {
+			size_t i;
+
+			for (i = 0; profile_names[i]; i++)
+				printf("%s\n", profile_names[i]);
+		}
+
+		/* Create a new profile */
+		else if (strcmp(comm[1], "add") == 0) {
+			if (comm[2]) {
+				exit_status = profile_add(comm[2]);
+			} else {
+				fprintf(stderr, "%s\n", PROFILES_USAGE);
+				exit_status = EXIT_FAILURE;
+			}
+		}
+
+		/* Delete a profile */
+		else if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0) {
+			if (comm[2]) {
+				exit_status = profile_del(comm[2]);
+			} else {
+				fprintf(stderr, "%s\n", PROFILES_USAGE);
+				exit_status = EXIT_FAILURE;
+			}
+		}
+
+		/* Switch to another profile */
+		else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0) {
+			if (comm[2]) {
+				exit_status = profile_set(comm[2]);
+			} else {
+				fprintf(stderr, "%s\n", PROFILES_USAGE);
+				exit_status = EXIT_FAILURE;
+			}
+		}
+
+		/* None of the above == error */
+		else {
+			fprintf(stderr, "%s\n", PROFILES_USAGE);
+			exit_status = EXIT_FAILURE;
+		}
+	}
+
+	/* If only "pr" print the current profile name */
+	else if (!alt_profile)
+		printf("%s: profile: default\n", PROGRAM_NAME);
+
+	else
+		printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile);
+
+	return exit_status;
 }
