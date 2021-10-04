@@ -43,6 +43,27 @@
 #include "messages.h"
 #include "file_operations.h"
 
+/* Retrieve the color corresponding to dir FILENAME with mode MODE */
+char *
+get_dir_color(const char *filename, const mode_t mode)
+{
+	char *color = (char *)NULL;
+	int sticky = 0;
+	int is_oth_w = 0;
+	if (mode & S_ISVTX)
+		sticky = 1;
+
+	if (mode & S_IWOTH)
+		is_oth_w = 1;
+
+	int files_dir = count_dir(filename, CPOP);
+
+	color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
+		   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
+
+	return color;
+}
+
 /* Returns a pointer to the corresponding color code for EXT, if some
  * color was defined */
 char *

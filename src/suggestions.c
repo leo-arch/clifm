@@ -354,22 +354,10 @@ get_comp_color(const char *filename, const struct stat attr)
 	case S_IFDIR:
 		if (light_mode)
 			return di_c;
-		if (access(filename, R_OK | X_OK) != 0) {
+		if (access(filename, R_OK | X_OK) != 0)
 			color = nd_c;
-		} else {
-			int sticky = 0;
-			int is_oth_w = 0;
-			if (attr.st_mode & S_ISVTX)
-				sticky = 1;
-
-			if (attr.st_mode & S_IWOTH)
-				is_oth_w = 1;
-
-			int files_dir = count_dir(filename, CPOP);
-
-			color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
-				   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
-		}
+		else
+			color = get_dir_color(filename, attr.st_mode);
 		break;
 
 	case S_IFREG:

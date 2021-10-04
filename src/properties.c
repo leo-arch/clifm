@@ -53,21 +53,22 @@ get_properties(char *filename, const int dsize)
 		filename[len - 1] = '\0';
 
 	/* Check file existence */
-	struct stat file_attrib;
-	if (lstat(filename, &file_attrib) == -1) {
+	struct stat attr;
+	if (lstat(filename, &attr) == -1) {
 		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename,
 		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* Get file size */
-	char *size_type = get_size_unit(file_attrib.st_size);
+	char *size_type = get_size_unit(attr.st_size);
 
 	/* Get file type (and color): */
 	char file_type = 0;
-	char *linkname = (char *)NULL, *color = (char *)NULL;
+	char *linkname = (char *)NULL,
+		 *color = (char *)NULL;
 
-	switch (file_attrib.st_mode & S_IFMT) {
+	switch (attr.st_mode & S_IFMT) {
 	case S_IFREG: {
 		char *ext = (char *)NULL;
 		file_type = '-';
@@ -75,9 +76,9 @@ get_properties(char *filename, const int dsize)
 			color = fi_c;
 		else if (access(filename, R_OK) == -1)
 			color = nf_c;
-		else if (file_attrib.st_mode & S_ISUID)
+		else if (attr.st_mode & S_ISUID)
 			color = su_c;
-		else if (file_attrib.st_mode & S_ISGID)
+		else if (attr.st_mode & S_ISGID)
 			color = sg_c;
 		else {
 #ifdef _LINUX_CAP
@@ -85,19 +86,19 @@ get_properties(char *filename, const int dsize)
 			if (cap) {
 				color = ca_c;
 				cap_free(cap);
-			} else if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+			} else if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #else
-			if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+			if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
-				if (file_attrib.st_size == 0)
+				if (attr.st_size == 0)
 					color = ee_c;
 				else
 					color = ex_c;
 			}
 
-			else if (file_attrib.st_size == 0)
+			else if (attr.st_size == 0)
 				color = ef_c;
-			else if (file_attrib.st_nlink > 1)
+			else if (attr.st_nlink > 1)
 				color = mh_c;
 			else {
 				ext = strrchr(filename, '.');
@@ -123,20 +124,8 @@ get_properties(char *filename, const int dsize)
 			color = di_c;
 		else if (access(filename, R_OK | X_OK) != 0) {
 			color = nd_c;
-		} else {
-			int sticky = 0;
-			int is_oth_w = 0;
-			if (file_attrib.st_mode & S_ISVTX)
-				sticky = 1;
-
-			if (file_attrib.st_mode & S_IWOTH)
-				is_oth_w = 1;
-
-			int files_dir = count_dir(filename, CPOP);
-
-			color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
-				   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
-		}
+		} else
+			color = get_dir_color(filename, attr.st_mode);
 
 		break;
 	case S_IFLNK:
@@ -176,7 +165,7 @@ get_properties(char *filename, const int dsize)
 	     read_grp = '-', write_grp = '-', exec_grp = '-',
 	     read_others = '-', write_others = '-', exec_others = '-';
 
-	mode_t val = (file_attrib.st_mode & (mode_t)~S_IFMT);
+	mode_t val = (attr.st_mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) read_usr = 'r';
 	if (val & S_IWUSR) write_usr = 'w';
 	if (val & S_IXUSR) exec_usr = 'x';
@@ -189,18 +178,18 @@ get_properties(char *filename, const int dsize)
 	if (val & S_IWOTH) write_others = 'w';
 	if (val & S_IXOTH) exec_others = 'x';
 
-	if (file_attrib.st_mode & S_ISUID)
+	if (attr.st_mode & S_ISUID)
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
-	if (file_attrib.st_mode & S_ISGID)
+	if (attr.st_mode & S_ISGID)
 		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
-	if (file_attrib.st_mode & S_ISVTX)
+	if (attr.st_mode & S_ISVTX)
 		(val & S_IXOTH) ? (exec_others = 't'): (exec_others = 'T');
 
 	/* Get number of links to the file */
-	nlink_t link_n = file_attrib.st_nlink;
+	nlink_t link_n = attr.st_nlink;
 
 	/* Get modification time */
-	time_t time = (time_t)file_attrib.st_mtim.tv_sec;
+	time_t time = (time_t)attr.st_mtim.tv_sec;
 	struct tm tm;
 	localtime_r(&time, &tm);
 	char mod_time[128] = "";
@@ -213,8 +202,8 @@ get_properties(char *filename, const int dsize)
 		mod_time[0] = '-';
 
 	/* Get owner and group names */
-	uid_t owner_id = file_attrib.st_uid; /* owner ID */
-	gid_t group_id = file_attrib.st_gid; /* group ID */
+	uid_t owner_id = attr.st_uid; /* owner ID */
+	gid_t group_id = attr.st_gid; /* group ID */
 	struct group *group;
 	struct passwd *owner;
 	group = getgrgid(group_id);
@@ -222,7 +211,7 @@ get_properties(char *filename, const int dsize)
 
 	/* Print file properties */
 	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c%s %zu %s %s %s %s ",
-	    file_attrib.st_mode & 07777, file_type,
+	    attr.st_mode & 07777, file_type,
 	    read_usr, write_usr, exec_usr, read_grp,
 	    write_grp, exec_grp, read_others, write_others, exec_others,
 	    is_acl(filename) ? "+" : "", (size_t)link_n,
@@ -250,7 +239,7 @@ get_properties(char *filename, const int dsize)
 
 	/* Stat information */
 	/* Last access time */
-	time = (time_t)file_attrib.st_atim.tv_sec;
+	time = (time_t)attr.st_atim.tv_sec;
 	localtime_r(&time, &tm);
 	char access_time[128] = "";
 
@@ -262,7 +251,7 @@ get_properties(char *filename, const int dsize)
 		access_time[0] = '-';
 
 	/* Last properties change time */
-	time = (time_t)file_attrib.st_ctim.tv_sec;
+	time = (time_t)attr.st_ctim.tv_sec;
 	localtime_r(&time, &tm);
 	char change_time[128] = "";
 	if (time)
@@ -273,9 +262,9 @@ get_properties(char *filename, const int dsize)
 		/* Get creation (birth) time */
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
 #ifdef __OpenBSD__
-	time = file_attrib.__st_birthtim.tv_sec;
+	time = attr.__st_birthtim.tv_sec;
 #else
-	time = file_attrib.st_birthtime;
+	time = attr.st_birthtime;
 #endif
 	localtime_r(&time, &tm);
 	char creation_time[128] = "";
@@ -310,28 +299,28 @@ get_properties(char *filename, const int dsize)
 	default: break;
 	}
 #ifdef __OpenBSD__
-	printf(_("\tBlocks: %lld"), file_attrib.st_blocks);
+	printf(_("\tBlocks: %lld"), attr.st_blocks);
 #else
-	printf(_("\tBlocks: %ld"), file_attrib.st_blocks);
+	printf(_("\tBlocks: %ld"), attr.st_blocks);
 #endif
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-	printf(_("\tIO Block: %d"), file_attrib.st_blksize);
+	printf(_("\tIO Block: %d"), attr.st_blksize);
 #else
-	printf(_("\tIO Block: %ld"), file_attrib.st_blksize);
+	printf(_("\tIO Block: %ld"), attr.st_blksize);
 #endif
 #ifdef __OpenBSD__
-	printf(_("\tInode: %llu\n"), file_attrib.st_ino);
+	printf(_("\tInode: %llu\n"), attr.st_ino);
 #else
-	printf(_("\tInode: %zu\n"), file_attrib.st_ino);
+	printf(_("\tInode: %zu\n"), attr.st_ino);
 #endif
 #ifdef __OpenBSD__
-	printf(_("Device: %d"), file_attrib.st_dev);
+	printf(_("Device: %d"), attr.st_dev);
 #else
-	printf(_("Device: %zu"), file_attrib.st_dev);
+	printf(_("Device: %zu"), attr.st_dev);
 #endif
-	printf(_("\tUid: %u (%s)"), file_attrib.st_uid, (!owner) ? _("unknown")
+	printf(_("\tUid: %u (%s)"), attr.st_uid, (!owner) ? _("unknown")
 			: owner->pw_name);
-	printf(_("\tGid: %u (%s)\n"), file_attrib.st_gid, (!group) ? _("unknown")
+	printf(_("\tGid: %u (%s)\n"), attr.st_gid, (!group) ? _("unknown")
 			: group->gr_name);
 
 	/* Print file timestamps */
@@ -344,7 +333,7 @@ get_properties(char *filename, const int dsize)
 #endif
 
 	/* Print size */
-	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
+	if ((attr.st_mode & S_IFMT) == S_IFDIR) {
 		if (dsize) {
 			fputs(_("Total size: \t"), stdout);
 			off_t total_size = dir_size(filename);
