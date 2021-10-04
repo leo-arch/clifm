@@ -1378,7 +1378,7 @@ SUCCESS:
 		/* Restore color */
 		fputs("\x1b[0m", stdout);
 		if (!cur_color)
-			fputs(df_c, stdout);
+			fputs(tx_c, stdout);
 		else
 			fputs(cur_color, stdout);
 	} else {

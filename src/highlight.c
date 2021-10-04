@@ -74,7 +74,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	if ((rl_end == 0 && c == BS) || prev == '\\') {
 		if (prev == '\\')
 			goto END;
-		cl = df_c;
+		cl = tx_c;
 		goto END;
 	}
 
@@ -134,14 +134,14 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		switch(prev) {
 		case ')': /* fallthrough */
 		case ']': /* fallthrough */
-		case '}': cl = df_c; break;
+		case '}': cl = tx_c; break;
 		case '\'':
 			if (cur_color == hq_c && qn[_SINGLE] == 2)
-				cl = df_c;
+				cl = tx_c;
 			break;
 		case '"':
 			if (cur_color == hq_c && qn[_DOUBLE] == 2)
-				cl = df_c;
+				cl = tx_c;
 			break;
 		default: break;
 		}
@@ -150,7 +150,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	switch(c) {
 	case ' ':
 		if (cur_color != hq_c && cur_color != hc_c /*&& cur_color != hb_c */)
-			cl = df_c;
+			cl = tx_c;
 		break;
 	case '/': cl = hd_c; break;
 	case '\'': /* fallthrough */
@@ -179,7 +179,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	default:
 		if (cur_color != hq_c && /*cur_color != hb_c &&*/ cur_color != hc_c
 		&& cur_color != hv_c && cur_color != hp_c)
-			cl = df_c;
+			cl = tx_c;
 		break;
 	}
 
@@ -212,9 +212,9 @@ recolorize_line(void)
 	fputs("\x1b[?25l", stdout);
 
 	/* Set text color to default */
-	if (cur_color != df_c && cur_color != hw_c && cur_color != hn_c) {
-		cur_color = df_c;
-		fputs(df_c, stdout);
+	if (cur_color != tx_c && cur_color != hw_c && cur_color != hn_c) {
+		cur_color = tx_c;
+		fputs(tx_c, stdout);
 	}
 
 	int bk = rl_point;

@@ -588,7 +588,7 @@ prompt(void)
 	args_n = 0;
 
 	curhistindex = current_hist_n;
-	/* Restore forground color */
+	/* Restore foreground color */
 	fputs(df_c, stdout);
 	/* Print the prompt and get user input */
 	char *input = (char *)NULL;

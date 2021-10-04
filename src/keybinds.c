@@ -361,8 +361,8 @@ my_insert_text(char *text, char *s, const char _s)
 		/* Hide the cursor to minimize flickering */
 		fputs("\x1b[?25l", stdout);
 		/* Set text color to default */
-		fputs(df_c, stdout);
-		cur_color = df_c;
+		fputs(tx_c, stdout);
+		cur_color = tx_c;
 		char *t = text;
 		size_t i;
 
@@ -450,8 +450,8 @@ rl_accept_suggestion(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	cur_color = df_c;
-	fputs(df_c, stdout);
+	cur_color = tx_c;
+	fputs(tx_c, stdout);
 
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
@@ -879,7 +879,7 @@ rl_clear_line(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	cur_color = df_c;
+	cur_color = tx_c;
 	fputs(cur_color, stdout);
 
 	if (suggestion_buf) {
@@ -1426,7 +1426,7 @@ print_highlight_string(char *s)
 	size_t i;
 	rl_delete_text(0, rl_end);
 	rl_point = rl_end = 0;
-	fputs(df_c, stdout);
+	fputs(tx_c, stdout);
 	for (i = 0; s[i]; i++) {
 		rl_highlight(s, i, SET_COLOR);
 		char q[2];
@@ -1532,8 +1532,8 @@ rl_cmdhist(int count, int key)
 
 		fputs("\x1b[?25h", stdout);
 		rl_point = bk;
-		cur_color = df_c;
-		fputs(df_c, stdout);
+		cur_color = tx_c;
+		fputs(tx_c, stdout);
 		return EXIT_SUCCESS;
 	}
 
