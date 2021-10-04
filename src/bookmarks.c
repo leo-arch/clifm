@@ -84,6 +84,24 @@ bm_prompt(void)
 	return comm_bm;
 }
 
+static void
+free_del_elements(char **elements)
+{
+	size_t i;
+	for (i = 0; elements[i]; i++)
+		free(elements[i]);
+	free(elements);
+}
+
+static void
+free_bms(char **_bms, const size_t _bmn)
+{
+	size_t i;
+	for (i = 0; i < _bmn; i++)
+		free(_bms[i]);
+	free(_bms);
+}
+
 static int
 bookmark_del(char *name)
 {
@@ -165,9 +183,7 @@ bookmark_del(char *name)
 	/* If bookmark name was passed but it is not a valid bookmark */
 	else if (name) {
 		fprintf(stderr, _("bookmarks: %s: No such bookmark\n"), name);
-		for (i = 0; i < bmn; i++)
-			free(bms[i]);
-		free(bms);
+		free_bms(bms, bmn);
 		fclose(bm_fp);
 		return EXIT_FAILURE;
 	}
@@ -190,9 +206,7 @@ bookmark_del(char *name)
 		input = (char *)NULL;
 
 		if (!del_elements) {
-			for (i = 0; i < bmn; i++)
-				free(bms[i]);
-			free(bms);
+			free_bms(bms, bmn);
 			fclose(bm_fp);
 			fprintf(stderr, _("bookmarks: Error parsing input\n"));
 			return EXIT_FAILURE;
@@ -217,13 +231,8 @@ bookmark_del(char *name)
 		}
 
 		if (quit) {
-			for (i = 0; i < bmn; i++)
-				free(bms[i]);
-			free(bms);
-
-			for (i = 0; del_elements[i]; i++)
-				free(del_elements[i]);
-			free(del_elements);
+			free_bms(bms, bmn);
+			free_del_elements(del_elements);
 			fclose(bm_fp);
 			return EXIT_SUCCESS;
 		}
@@ -255,14 +264,8 @@ bookmark_del(char *name)
 					 "bookmark was deleted\n"));
 			}
 
-			for (i = 0; i < bmn; i++)
-				free(bms[i]);
-			free(bms);
-
-			for (i = 0; del_elements[i]; i++)
-				free(del_elements[i]);
-			free(del_elements);
-
+			free_bms(bms, bmn);
+			free_del_elements(del_elements);
 			fclose(bm_fp);
 			/* Update bookmark names for TAB completion */
 			/*          get_bm_names(); */
@@ -285,14 +288,8 @@ bookmark_del(char *name)
 
 	FILE *tmp_fp = fopen(tmp_file, "w+");
 	if (!tmp_fp) {
-		for (i = 0; i < bmn; i++)
-			free(bms[i]);
-		free(bms);
-
-		for (i = 0; del_elements[i]; i++)
-			free(del_elements[i]);
-		free(del_elements);
-
+		free_bms(bms, bmn);
+		free_del_elements(del_elements);
 		fclose(bm_fp);
 		fprintf(stderr, _("bookmarks: Error creating temporary file\n"));
 
@@ -329,15 +326,9 @@ bookmark_del(char *name)
 	free(lineb);
 
 	/* Free stuff */
-	for (i = 0; del_elements[i]; i++)
-		free(del_elements[i]);
-	free(del_elements);
+	free_del_elements(del_elements);
+	free_bms(bms, bmn);
 
-	for (i = 0; i < bmn; i++)
-		free(bms[i]);
-	free(bms);
-
-	/* Close files */
 	fclose(bm_fp);
 	fclose(tmp_fp);
 
