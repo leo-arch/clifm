@@ -834,16 +834,19 @@ parse_usrvar_value(const char *str, const char c)
 int
 create_usr_var(char *str)
 {
-	char *name = strbfr(str, '=');
-	char *value = parse_usrvar_value(str, '=');
-
-	if (!name) {
-		if (value)
-			free(value);
-		fprintf(stderr, _("%s: Error getting variable name\n"),
-		    PROGRAM_NAME);
+	if (!str || !*str)
 		return EXIT_FAILURE;
-	}
+
+	char *p = strchr(str, '=');
+	if (!p || p == str)
+		return EXIT_FAILURE;
+
+	*p = '\0';
+	char *name = (char *)xnmalloc((size_t)(p - str + 1), sizeof(char));
+	strcpy(name, str);
+	*p = '=';
+
+	char *value = parse_usrvar_value(str, '=');
 
 	if (!value) {
 		free(name);
@@ -852,9 +855,12 @@ create_usr_var(char *str)
 		return EXIT_FAILURE;
 	}
 
-	usr_var = xrealloc(usr_var, (size_t)(usrvar_n + 1) * sizeof(struct usrvar_t));
+	usr_var = xrealloc(usr_var, (size_t)(usrvar_n + 2) * sizeof(struct usrvar_t));
 	usr_var[usrvar_n].name = savestring(name, strlen(name));
 	usr_var[usrvar_n++].value = savestring(value, strlen(value));
+
+	usr_var[usrvar_n].name = (char *)NULL;
+	usr_var[usrvar_n].value = (char *)NULL;
 
 	free(name);
 	free(value);

@@ -1024,64 +1024,64 @@ extern char **environ;
 /* Colors */
 extern char
 	/* File types */
-    bd_c[MAX_COLOR],	     /* Block device */
-    ca_c[MAX_COLOR],	     /* Cap file */
-    cd_c[MAX_COLOR],	     /* Char device */
-    ee_c[MAX_COLOR],	     /* Empty executable */
-    ex_c[MAX_COLOR],	     /* Executable */
-    ef_c[MAX_COLOR],	     /* Empty reg file */
-    ed_c[MAX_COLOR],	     /* Empty dir */
-    fi_c[MAX_COLOR],	     /* Reg file */
-    di_c[MAX_COLOR],	     /* Directory */
-    ln_c[MAX_COLOR],	     /* Symlink */
-    mh_c[MAX_COLOR],	     /* Multi-hardlink file */
-    nd_c[MAX_COLOR],	     /* No read directory */
-    ne_c[MAX_COLOR],	     /* No read empty dir */
-    nf_c[MAX_COLOR],	     /* No read file */
-    no_c[MAX_COLOR],	     /* Unknown */
-    or_c[MAX_COLOR],	     /* Broken symlink */
-    ow_c[MAX_COLOR],	     /* Other writable */
-    pi_c[MAX_COLOR],	     /* FIFO, pipe */
-    sg_c[MAX_COLOR],	     /* SGID file */
-    so_c[MAX_COLOR],	     /* Socket */
-    st_c[MAX_COLOR],	     /* Sticky (not ow)*/
-    su_c[MAX_COLOR],	     /* SUID file */
-    tw_c[MAX_COLOR],	     /* Sticky other writable */
-    uf_c[MAX_COLOR],	     /* Non-'stat'able file */
+    bd_c[MAX_COLOR],	/* Block device */
+    ca_c[MAX_COLOR],	/* Cap file */
+    cd_c[MAX_COLOR],	/* Char device */
+    ee_c[MAX_COLOR],	/* Empty executable */
+    ex_c[MAX_COLOR],	/* Executable */
+    ef_c[MAX_COLOR],	/* Empty reg file */
+    ed_c[MAX_COLOR],	/* Empty dir */
+    fi_c[MAX_COLOR],	/* Reg file */
+    di_c[MAX_COLOR],	/* Directory */
+    ln_c[MAX_COLOR],	/* Symlink */
+    mh_c[MAX_COLOR],	/* Multi-hardlink file */
+    nd_c[MAX_COLOR],	/* No read directory */
+    ne_c[MAX_COLOR],	/* No read empty dir */
+    nf_c[MAX_COLOR],	/* No read file */
+    no_c[MAX_COLOR],	/* Unknown */
+    or_c[MAX_COLOR],	/* Broken symlink */
+    ow_c[MAX_COLOR],	/* Other writable */
+    pi_c[MAX_COLOR],	/* FIFO, pipe */
+    sg_c[MAX_COLOR],	/* SGID file */
+    so_c[MAX_COLOR],	/* Socket */
+    st_c[MAX_COLOR],	/* Sticky (not ow)*/
+    su_c[MAX_COLOR],	/* SUID file */
+    tw_c[MAX_COLOR],	/* Sticky other writable */
+    uf_c[MAX_COLOR],	/* Non-'stat'able file */
 
 	/* Interface */
-    bm_c[MAX_COLOR],	     /* Bookmarked directory */
-    dc_c[MAX_COLOR],	     /* Files counter color */
-    df_c[MAX_COLOR],	     /* Default color */
-    dh_c[MAX_COLOR],	     /* Dirhist index color */
-    dl_c[MAX_COLOR],	     /* Dividing line color */
-    el_c[MAX_COLOR],	     /* ELN color */
-    mi_c[MAX_COLOR],	     /* Misc indicators color */
-	ts_c[MAX_COLOR],	     /* TAB completion suffix */
+    bm_c[MAX_COLOR],	/* Bookmarked directory */
+    dc_c[MAX_COLOR],	/* Files counter color */
+    df_c[MAX_COLOR],	/* Default color */
+    dh_c[MAX_COLOR],	/* Dirhist index color */
+    dl_c[MAX_COLOR],	/* Dividing line color */
+    el_c[MAX_COLOR],	/* ELN color */
+    mi_c[MAX_COLOR],	/* Misc indicators color */
+	ts_c[MAX_COLOR],	/* TAB completion suffix */
 
 	/* Suggestions */
-	sc_c[MAX_COLOR],	     /* Auto-suggestions: external commands */
-	sf_c[MAX_COLOR],	     /* Auto-suggestions: filenames */
-	sh_c[MAX_COLOR],	     /* Auto-suggestions: history */
-	sx_c[MAX_COLOR],	     /* Auto-suggestions: internal commands and params */
-    wc_c[MAX_COLOR],	     /* Welcome message color */
+	sc_c[MAX_COLOR],	/* Auto-suggestions: external commands */
+	sf_c[MAX_COLOR],	/* Auto-suggestions: filenames */
+	sh_c[MAX_COLOR],	/* Auto-suggestions: history */
+	sx_c[MAX_COLOR],	/* Auto-suggestions: internal commands and params */
+    wc_c[MAX_COLOR],	/* Welcome message color */
 
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */
 #endif
 
 	/* Syntax highlighting */
-	hb_c[MAX_COLOR],		/* Brackets () [] {} */
-	hc_c[MAX_COLOR],		/* Comments */
-	hd_c[MAX_COLOR],		/* Paths (slashes) */
-	he_c[MAX_COLOR],		/* Expansion operators: * ~ */
-	hn_c[MAX_COLOR],		/* Numbers */
-	hp_c[MAX_COLOR],		/* Parameters: - */
-	hq_c[MAX_COLOR],		/* Quoted strings */
-	hr_c[MAX_COLOR],		/* Redirection > */
-	hs_c[MAX_COLOR],		/* Process separators | & ; */
-	hv_c[MAX_COLOR],		/* Variables $ */
-	hw_c[MAX_COLOR],		/* Wrong, non-existent command name $ */
+	hb_c[MAX_COLOR],	/* Brackets () [] {} */
+	hc_c[MAX_COLOR],	/* Comments */
+	hd_c[MAX_COLOR],	/* Paths (slashes) */
+	he_c[MAX_COLOR],	/* Expansion operators: * ~ */
+	hn_c[MAX_COLOR],	/* Numbers */
+	hp_c[MAX_COLOR],	/* Parameters: - */
+	hq_c[MAX_COLOR],	/* Quoted strings */
+	hr_c[MAX_COLOR],	/* Redirection > */
+	hs_c[MAX_COLOR],	/* Process separators | & ; */
+	hv_c[MAX_COLOR],	/* Variables $ */
+	hw_c[MAX_COLOR],	/* Wrong, non-existent command name $ */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
