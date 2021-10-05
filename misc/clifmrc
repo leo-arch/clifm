@@ -147,6 +147,8 @@ SuggestionStrategy=ehfjbac
 # file type color (set via the color scheme file)
 SuggestFiletypeColor=false
 
+SyntaxHighlighting=false
+
 # If set to true, expand bookmark names into the corresponding bookmark
 # path: if the bookmark is "name=/path", "name" will be interpreted
 # as /path. TAB completion is also available for bookmark names.
@@ -176,10 +178,6 @@ ShareSelbox=false
 # Choose the resource opener to open files with their default associated
 # application. If not set, 'lira', CLiFM's built-in opener, is used.
 Opener=
-
-# Set the shell to be used when running external commands. Defaults to the
-# user's shell as specified in '/etc/passwd'.
-SystemShell=
 
 # Only used when opening a directory via a new CliFM instance (with the 'x'
 # command), this option specifies the command to be used to launch a
