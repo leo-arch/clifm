@@ -1324,6 +1324,16 @@ create_bm_file(void)
 	return EXIT_SUCCESS;
 }
 
+static char *
+get_line_value(char *line)
+{
+	char *opt = strchr(line, '=');
+	if (!opt || !*opt || !*(++opt) )
+		return (char *)NULL;
+
+	return remove_quotes(opt);
+}
+
 static void
 read_config(void)
 {
@@ -1775,10 +1785,7 @@ read_config(void)
 		}
 
 		else if (!opener && *line == 'O' && strncmp(line, "Opener=", 7) == 0) {
-			char *opt = strchr(line, '=');
-			if (!opt || !*opt || !*(++opt))
-				continue;
-			char *tmp = remove_quotes(opt);
+			char *tmp = get_line_value(line);
 			if (!tmp)
 				continue;
 			opener = savestring(tmp, strlen(tmp));
@@ -1916,11 +1923,7 @@ read_config(void)
 
 		else if (xargs.path == UNSET && cur_ws == UNSET && *line == 'S'
 		&& strncmp(line, "StartingPath=", 13) == 0) {
-			char *opt = strchr(line, '=');
-			if (!opt || !*opt || !*(++opt) )
-				continue;
-
-			char *tmp = remove_quotes(opt);
+			char *tmp = get_line_value(line);
 			if (!tmp)
 				continue;
 
@@ -1929,6 +1932,8 @@ read_config(void)
 			 * set path to starting path. If any of these conditions
 			 * is false, path will be set to default, that is, CWD */
 			if (xchdir(tmp, SET_TITLE) == 0) {
+				if (cur_ws < 0)
+					cur_ws = 0;
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(tmp, strlen(tmp));
 			} else {
