@@ -368,6 +368,27 @@ quit:\\e[24~\n\n\
 }
 
 static int
+import_from_data_dir(char *src_filename, char *dest)
+{
+	if (!data_dir || !src_filename || !dest)
+		return EXIT_FAILURE;
+
+	if (!*data_dir || !*src_filename || !*dest)
+		return EXIT_FAILURE;
+
+	struct stat attr;
+	char sys_file[PATH_MAX];
+	snprintf(sys_file, PATH_MAX - 1, "%s/%s/%s", data_dir, PNL, src_filename);
+	if (stat(sys_file, &attr) == EXIT_SUCCESS) {
+		char *cmd[] = {"cp", sys_file, dest, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+			return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
+static int
 create_actions_file(char *file)
 {
 	struct stat attr;
@@ -376,15 +397,8 @@ create_actions_file(char *file)
 		return EXIT_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-	if (data_dir) {
-		char sys_file[PATH_MAX];
-		snprintf(sys_file, PATH_MAX - 1, "%s/%s/actions.cfm", data_dir, PNL);
-		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
-			char *cmd[] = {"cp", sys_file, file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
-				return EXIT_SUCCESS;
-		}
-	}
+	if (import_from_data_dir("actions.cfm", file) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
 
 	/* Else, create it */
 	int fd;
@@ -670,10 +684,14 @@ import_rl_file(void)
 int
 create_config(char *file)
 {
-	struct stat attr;
+//	struct stat attr;
 
 	/* First, try to import it from DATADIR */
-	if (data_dir) {
+	char src_filename[NAME_MAX];
+	snprintf(src_filename, NAME_MAX, "%src", PNL);
+	if (import_from_data_dir(src_filename, file) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+/*	if (data_dir) {
 		char sys_file[PATH_MAX];
 		snprintf(sys_file, PATH_MAX - 1, "%s/%s/%src", data_dir, PNL, PNL);
 		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
@@ -681,7 +699,7 @@ create_config(char *file)
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 				return EXIT_SUCCESS;
 		}
-	}
+	} */
 
 	/* If not found, create it */
 	int fd;
