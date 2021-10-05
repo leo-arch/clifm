@@ -395,6 +395,92 @@ set_events_checker(void)
 #endif /* LINUX_INOTIFY */
 }
 
+static inline void
+get_longest_filename(const int n)
+{
+	int i = n;
+	while (--i >= 0) {
+		size_t total_len = 0;
+		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
+		total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
+
+		if (!long_view && classify) {
+			if (file_info[i].dir)
+				total_len++;
+
+			if (file_info[i].filesn > 0 && files_counter)
+				total_len += DIGINUM(file_info[i].filesn);
+
+			if (!file_info[i].dir && !colorize) {
+				switch (file_info[i].type) {
+				case DT_REG:
+					if (file_info[i].exec)
+						total_len++;
+					break;
+				case DT_LNK:  /* fallthrough */
+				case DT_SOCK: /* fallthrough */
+				case DT_FIFO: /* fallthrough */
+				case DT_UNKNOWN: total_len++; break;
+				}
+			}
+		}
+
+		if (total_len > longest) {
+			if (max_files == UNSET)
+				longest = total_len;
+			else if (i < max_files)
+				longest = total_len;
+		}
+	}
+#ifndef _NO_ICONS
+	if (icons && !long_view && columned)
+		longest += 3;
+#endif
+}
+
+static void
+print_long_mode(size_t *counter, int *reset_pager)
+{
+	struct stat lattr;
+	int space_left = (int)term_cols - MAX_PROP_STR;
+
+	if (space_left < min_name_trim)
+		space_left = min_name_trim;
+
+	if ((int)longest < space_left)
+		space_left = (int)longest;
+
+	int i, k = (int)files;
+	for (i = 0; i < k; i++) {
+		if (max_files != UNSET && i == max_files)
+			break;
+		if (lstat(file_info[i].name, &lattr) == -1)
+			continue;
+
+		if (pager) {
+			if (*counter > (size_t)(term_rows - 2)) {
+				if (run_pager(-1, &*reset_pager, &i, &*counter) == -1)
+					continue;
+			}
+
+			(*counter)++;
+		}
+
+		file_info[i].uid = lattr.st_uid;
+		file_info[i].gid = lattr.st_gid;
+		file_info[i].ltime = (time_t)lattr.st_mtim.tv_sec;
+		file_info[i].mode = lattr.st_mode;
+		file_info[i].size = lattr.st_size;
+
+		/* Print ELN. The remaining part of the line will be
+		 * printed by print_entry_props() */
+		if (!no_eln)
+			printf("%s%d%s ", el_c, i + 1, df_c);
+
+		print_entry_props(&file_info[i], (size_t)space_left);
+	}
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -576,44 +662,8 @@ list_dir_light(void)
 
 	/* Get the longest file name */
 	if (columned || long_view) {
-		i = (int)n;
-		while (--i >= 0) {
-			size_t total_len = 0;
-			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
-			total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
-
-			if (!long_view && classify) {
-				if (file_info[i].dir)
-					total_len++;
-
-				if (file_info[i].filesn > 0 && files_counter)
-					total_len += DIGINUM(file_info[i].filesn);
-
-				if (!file_info[i].dir && !colorize) {
-					switch (file_info[i].type) {
-					case DT_REG:
-						if (file_info[i].exec)
-							total_len++;
-						break;
-					case DT_LNK:  /* fallthrough */
-					case DT_SOCK: /* fallthrough */
-					case DT_FIFO: /* fallthrough */
-					case DT_UNKNOWN: total_len++; break;
-					}
-				}
-			}
-
-			if (total_len > longest) {
-				if (max_files == UNSET)
-					longest = total_len;
-				else if (i < max_files)
-					longest = total_len;
-			}
-		}
-#ifndef _NO_ICONS
-		if (icons && !long_view && columned)
-			longest += 3;
-#endif
+		int nn = (int)n;
+		get_longest_filename(nn);
 	}
 
 				/* ########################
@@ -621,45 +671,7 @@ list_dir_light(void)
 				 * ######################## */
 
 	if (long_view) {
-		struct stat lattr;
-		int space_left = (int)term_cols - MAX_PROP_STR;
-
-		if (space_left < min_name_trim)
-			space_left = min_name_trim;
-
-		if ((int)longest < space_left)
-			space_left = (int)longest;
-
-		int k = (int)files;
-		for (i = 0; i < k; i++) {
-			if (max_files != UNSET && i == max_files)
-				break;
-			if (lstat(file_info[i].name, &lattr) == -1)
-				continue;
-
-			if (pager) {
-				if (counter > (size_t)(term_rows - 2)) {
-					if (run_pager(-1, &reset_pager, &i, &counter) == -1)
-						continue;
-				}
-
-				counter++;
-			}
-
-			file_info[i].uid = lattr.st_uid;
-			file_info[i].gid = lattr.st_gid;
-			file_info[i].ltime = (time_t)lattr.st_mtim.tv_sec;
-			file_info[i].mode = lattr.st_mode;
-			file_info[i].size = lattr.st_size;
-
-			/* Print ELN. The remaining part of the line will be
-			 * printed by print_entry_props() */
-			if (!no_eln)
-				printf("%s%d%s ", el_c, i + 1, df_c);
-
-			print_entry_props(&file_info[i], (size_t)space_left);
-		}
-
+		print_long_mode(&counter, &reset_pager);
 		goto END;
 	}
 
@@ -1216,47 +1228,8 @@ list_dir(void)
 
 	/* Get the longest file name */
 	if (columned || long_view) {
-		i = (int)n;
-		while (--i >= 0) {
-			size_t total_len = 0;
-			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
-			total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
-
-			if (!long_view && classify) {
-				if (file_info[i].dir)
-					total_len++;
-
-				if (file_info[i].filesn > 0 && files_counter)
-					total_len += DIGINUM(file_info[i].filesn);
-
-				if (!file_info[i].dir && !colorize) {
-					switch (file_info[i].type) {
-					case DT_REG:
-						if (file_info[i].exec)
-							total_len++;
-						break;
-					case DT_LNK:  /* fallthrough */
-					case DT_SOCK: /* fallthrough */
-					case DT_FIFO: /* fallthrough */
-					case DT_UNKNOWN: total_len += 1; break;
-					}
-				}
-			}
-
-			if (total_len > longest) {
-				if (max_files == UNSET)
-					longest = total_len;
-				/* If MAX_FILES is set, get longest file name from
-				 * the first MAX_FILES file names */
-				else if (i < max_files)
-					longest = total_len;
-			}
-		}
-
-#ifndef _NO_ICONS
-		if (icons && !long_view && columned)
-			longest += 3;
-#endif
+		int nn = (int)n;
+		get_longest_filename(nn);
 	}
 
 				/* ########################
@@ -1264,41 +1237,7 @@ list_dir(void)
 				 * ######################## */
 
 	if (long_view) {
-		int space_left = term_cols - MAX_PROP_STR;
-		/* SPACE_LEFT is the max space that should be used to print the
-		 * file name (plus space char) */
-
-		/* Do not allow SPACE_LEFT to be less than MIN_NAME_TRIM,
-		 * especially because the result of the above operation could
-		 * be negative */
-		if (space_left < min_name_trim)
-			space_left = min_name_trim;
-
-		if ((int)longest < space_left)
-			space_left = (int)longest;
-
-		int k = (int)files;
-		for (i = 0; i < k; i++) {
-			if (max_files != UNSET && i == max_files)
-				break;
-
-			if (pager) {
-				if (counter > (size_t)(term_rows - 2)) {
-					if (run_pager(-1, &reset_pager, &i, &counter) == -1)
-						continue;
-				}
-
-				counter++;
-			}
-
-			/* Print ELN. The remaining part of the line will be
-			 * printed by print_entry_props() */
-			if (!no_eln)
-				printf("%s%d%s ", el_c, i + 1, df_c);
-
-			print_entry_props(&file_info[i], (size_t)space_left);
-		}
-
+		print_long_mode(&counter, &reset_pager);
 		goto END;
 	}
 
