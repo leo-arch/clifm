@@ -981,10 +981,10 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the \f
 The following codes are used for different interface elements (in the \fIInterfaceColors\fR section of the current color scheme file):
 .sp
  \fBSuggestions\fR
- sh = commands history suggestions
- sf = ELN's, bookmarks, file and directory names suggestions
- sc = aliases and command names suggestions
- sx = suggestions for internal commands and parameters
+ sc = aliases and shell command names
+ sf = ELN's, bookmarks, file and directory names
+ sh = commands history entries
+ sx = suggestions for CliFM's internal commands and parameters
 
  \fBSyntax highlighting\fR
  hb = brackets '()[]{}'
@@ -1016,6 +1016,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  wc = welcome message
  dh = directory history index
  dl = dividing line
+ ts = matching suffix of a filename completed via TAB
 .TP
 Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the corresponding color scheme file: \fBdi=01;34\fR. If you want ELN's to be red, add this code to the \fIInterfaceColors\fR line: \fBel=00;31\fR
 .TP
