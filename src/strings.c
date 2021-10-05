@@ -1835,47 +1835,33 @@ home_tilde(const char *new_path)
 int *
 expand_range(char *str, int listdir)
 {
-	if (strcntchr(str, '-') == -1)
+	if (!str || !*str)
 		return (int *)NULL;
-
-	char *first = (char *)NULL;
-	first = strbfr(str, '-');
-
-	if (!first)
-		return (int *)NULL;
-
-	if (!is_number(first)) {
-		free(first);
-		return (int *)NULL;
-	}
 
 	char *p = strchr(str, '-');
-	if (!p || !*(++p))
+	if (!p || p == str || *(p - 1) < '0' || *(p - 1) > '9'
+	|| !*(p + 1) || *(p + 1) < '0' || *(p + 1) > '9')
 		return (int *)NULL;
-	char *second = savestring(p, strlen(p));
 
-	if (!second) {
-		free(first);
+	*p = '\0';
+	int ret = is_number(str);
+	*p = '-';
+	if (!ret)
 		return (int *)NULL;
-	}
 
-	if (!is_number(second)) {
-		free(first);
-		free(second);
+	int afirst = atoi(str);
+
+	if (!is_number(++p))
 		return (int *)NULL;
-	}
 
-	int afirst = atoi(first), asecond = atoi(second);
-	free(first);
-	free(second);
+	int asecond = atoi(p);
 
 	if (listdir) {
 		if (afirst <= 0 || afirst > (int)files || asecond <= 0
 		|| asecond > (int)files || afirst >= asecond)
 			return (int *)NULL;
-	} else {
-		if (afirst >= asecond)
-			return (int *)NULL;
+	} else if (afirst >= asecond) {
+		return (int *)NULL;
 	}
 
 	int *buf = (int *)NULL;
