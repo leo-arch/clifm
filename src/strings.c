@@ -1998,20 +1998,26 @@ get_substr(char *str, const char ifs)
 		for (j = 1; substr[i][j]; j++) {
 			if (substr[i][j] == '-') {
 				/* Get strings before and after the dash */
-				char *first = strbfr(substr[i], '-');
+				char *q = strchr(substr[i], '-');
+				if (!q || !*q || q == substr[i] || *(q - 1) < '1'
+				|| *(q - 1) > '9' || !*(q + 1) || *(q + 1) < '1'
+				|| *(q + 1) > '9')
+					break;
+
+				*q = '\0';
+				char *first = savestring(substr[i], strlen(substr[i]));
+				*(q++) = '-';
+
 				if (!first)
 					break;
 
-				char *q = strchr(substr[i], '-');
-				if (!q || !*(++q))
-					break;
 				char *second = savestring(q, strlen(q));
 				if (!second) {
 					free(first);
 					break;
 				}
 
-				/* Make sure it is a valid range */
+				/* Make sure we have a valid range */
 				if (is_number(first) && is_number(second)) {
 					afirst = atoi(first), asecond = atoi(second);
 					if (asecond <= afirst) {
@@ -2020,7 +2026,6 @@ get_substr(char *str, const char ifs)
 						break;
 					}
 
-					/* We have a valid range */
 					ranges_ok = 1;
 					free(first);
 					free(second);
