@@ -459,7 +459,7 @@ print_long_mode(size_t *counter, int *reset_pager)
 
 		if (pager) {
 			if (*counter > (size_t)(term_rows - 2)) {
-				if (run_pager(-1, &*reset_pager, &i, &*counter) == -1)
+				if (run_pager(-1, &(*reset_pager), &i, &(*counter)) == -1)
 					continue;
 			}
 
@@ -479,6 +479,22 @@ print_long_mode(size_t *counter, int *reset_pager)
 
 		print_entry_props(&file_info[i], (size_t)space_left);
 	}
+}
+
+static void
+get_columns(size_t *n)
+{
+	*n = (size_t)term_cols / (longest + 1); /* +1 for the
+	space between file names */
+
+	/* If longest is bigger than terminal columns, columns_n will
+	 * be negative or zero. To avoid this: */
+	if (*n < 1)
+		*n = 1;
+
+	/* If we have only three files, we don't want four columns */
+	if (*n > files)
+		*n = files;
 }
 
 /* List files in the current working directory (global variable 'path').
@@ -685,21 +701,10 @@ list_dir_light(void)
 	size_t line_sz = 0; */
 
 	/* Get possible amount of columns for the dirlist screen */
-	if (!columned) {
+	if (!columned)
 		columns_n = 1;
-	} else {
-		columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
-		space between file names */
-
-		/* If longest is bigger than terminal columns, columns_n will
-		 * be negative or zero. To avoid this: */
-		if (columns_n < 1)
-			columns_n = 1;
-
-		/* If we have only three files, we don't want four columns */
-		if (columns_n > (size_t)n)
-			columns_n = (size_t)n;
-	}
+	else
+		get_columns(&columns_n);
 
 	int nn = (int)n;
 	size_t cur_cols = 0;
@@ -1248,21 +1253,10 @@ list_dir(void)
 	int last_column = 0;
 
 	/* Get amount of columns needed to print files in CWD  */
-	if (!columned) {
+	if (!columned)
 		columns_n = 1;
-	} else {
-		columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
-		space between file names */
-
-		/* If longest is bigger than terminal columns, columns_n will
-		 * be negative or zero. To avoid this: */
-		if (columns_n < 1)
-			columns_n = 1;
-
-		/* If we have only three files, we don't want four columns */
-		if (columns_n > (size_t)n)
-			columns_n = (size_t)n;
-	}
+	else
+		get_columns(&columns_n);
 
 	int nn = (int)n;
 	size_t cur_cols = 0;
