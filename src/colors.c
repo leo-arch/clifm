@@ -503,9 +503,6 @@ set_filetype_colors(char **colors, const size_t words)
 
 		free(colors[i]);
 	}
-
-//	free(colors);
-//	colors = (char **)NULL;
 }
 
 static void
@@ -759,9 +756,6 @@ set_iface_colors(char **colors, const size_t words)
 
 		free(colors[i]);
 	}
-
-//	free(colors);
-//	colors = (char **)NULL;
 }
 
 static void

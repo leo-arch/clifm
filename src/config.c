@@ -1955,7 +1955,7 @@ read_config(void)
 		}
 #endif /* !_NO_SUGGESTIONS */
 
-		else if (*line == 'S' && strncmp(line, "SystemShell=", 12) == 0) {
+/*		else if (*line == 'S' && strncmp(line, "SystemShell=", 12) == 0) {
 			free(user.shell);
 			user.shell = (char *)NULL;
 			char *opt = strchr(line, '=');
@@ -1978,7 +1978,7 @@ read_config(void)
 				user.shell = savestring(shell_path, strlen(shell_path));
 				free(shell_path);
 			}
-		}
+		} */
 
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
 			if (term) {
