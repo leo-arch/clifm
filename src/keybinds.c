@@ -1116,8 +1116,6 @@ rl_previous_profile(int count, int key)
 		putchar('\n');
 
 	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
-		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
-		    profile_names[prev_prof]);
 		char *input = prompt();
 		free(input);
 	}
@@ -1153,8 +1151,6 @@ rl_next_profile(int count, int key)
 		putchar('\n');
 
 	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
-		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
-		    profile_names[next_prof]);
 		char *input = prompt();
 		free(input);
 	}
