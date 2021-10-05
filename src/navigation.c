@@ -72,7 +72,7 @@ workspaces(char *str)
 		tmp_ws = istr - 1;
 
 		if (tmp_ws == cur_ws) {
-			fprintf(stderr, "%s: %d is already the current workspace\n",
+			fprintf(stderr, _("%s: %d is already the current workspace\n"),
 					PROGRAM_NAME, tmp_ws + 1);
 			return EXIT_SUCCESS;
 		}
