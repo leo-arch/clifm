@@ -217,6 +217,7 @@ size_t
     prompt_cmds_n = 0,
     remotes_n = 0,
     sel_n = 0,
+	tab_offset = 0,
     user_home_len = 0,
     usrvar_n = 0;
 

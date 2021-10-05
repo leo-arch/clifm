@@ -376,7 +376,7 @@ after_usual_completion:
 			lowest common denominator, then the LCD is the string to
 			insert. */
 			if (j == 2 && strcmp(matches[0], matches[1]) == 0) {
-				free (matches[1]);
+				free(matches[1]);
 				matches[1] = (char *)NULL;
 			}
 		}
@@ -627,7 +627,6 @@ after_usual_completion:
 				fputs(df_c, stdout);
 #endif
 
-			char *p = (char *)NULL;
 			if (cur_comp_type == TCMP_PATH) {
 				if (*matches[0] == '~') {
 					char *exp_path = tilde_expand(matches[0]);
@@ -636,7 +635,7 @@ after_usual_completion:
 						free(exp_path);
 					}
 				} else {
-					p = strrchr(matches[0], '/');
+					char *p = strrchr(matches[0], '/');
 					if (p) {
 						if (p == matches[0]) {
 							if (*(p + 1)) {
@@ -670,10 +669,20 @@ after_usual_completion:
 					}
 					fputs("\r\r\r\r\r\r\r\r", stdout);
 				}
+
+				char *qq = strrchr(matches[0], '/');
+				if (qq) {
+					if (*(++qq))
+						tab_offset = strlen(qq);
+				} else {
+					tab_offset = strlen(matches[0]);
+				}
 				for (j = 0, l = (int)i; j < limit; j++) {
 					if (l > len || !matches[l]) {
 						break;
 					} else {
+						if (tab_offset)
+							printf("\x1b[1;35m%s", qq ? qq : matches[0]);
 						char *temp;
 						int printed_length;
 						temp = printable_part(matches[l]);
@@ -687,6 +696,8 @@ after_usual_completion:
 					}
 					l += count;
 				}
+				tab_offset = 0;
+
 				putchar('\n');
 //				rl_crlf();
 			}

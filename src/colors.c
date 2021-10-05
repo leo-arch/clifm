@@ -2099,7 +2099,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 	}
 
 	printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, color,
-	    ent, df_c, new_line ? "\n" : "", pad, "");
+	    ent + tab_offset, df_c, new_line ? "\n" : "", pad, "");
 	free(index);
 }
 

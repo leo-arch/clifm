@@ -933,6 +933,7 @@ extern size_t
     prompt_cmds_n,
     remotes_n,
     sel_n,
+	tab_offset,
     user_home_len,
     usrvar_n;
 

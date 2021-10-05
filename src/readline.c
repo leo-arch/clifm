@@ -1316,8 +1316,10 @@ my_rl_completion(const char *text, int start, int end)
 			}
 
 			/* Compĺete with files in CWD */
-			if (!matches && *text != '/')
+			if (!matches && *text != '/') {
+				cur_comp_type = TCMP_PATH;
 				matches = rl_completion_matches(text, &filenames_gen_text);
+			}
 
 			/* Complete with entries in the jump database */
 /*			if (autocd && !matches)
