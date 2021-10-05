@@ -1341,6 +1341,8 @@ static int
 rl_ws1(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+	if (cur_ws == 0)
+		return EXIT_SUCCESS;
 	return run_kb_cmd("ws 1");
 }
 
@@ -1348,6 +1350,8 @@ static int
 rl_ws2(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+	if (cur_ws == 1)
+		return EXIT_SUCCESS;
 	return run_kb_cmd("ws 2");
 }
 
@@ -1355,6 +1359,8 @@ static int
 rl_ws3(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+	if (cur_ws == 2)
+		return EXIT_SUCCESS;
 	return run_kb_cmd("ws 3");
 }
 
@@ -1362,6 +1368,8 @@ static int
 rl_ws4(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+	if (cur_ws == 3)
+		return EXIT_SUCCESS;
 	return run_kb_cmd("ws 4");
 }
 
