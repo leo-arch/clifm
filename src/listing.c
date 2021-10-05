@@ -239,6 +239,7 @@ get_ext_icon(const char *restrict ext, int n)
 }
 #endif /* _NO_ICONS */
 
+/*
 static inline mode_t
 get_file_type(mode_t m)
 {
@@ -252,7 +253,7 @@ get_file_type(mode_t m)
 	case S_IFSOCK: return DT_SOCK;
 	default: return DT_UNKNOWN;
 	}
-}
+} */
 
 static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
@@ -459,7 +460,7 @@ list_dir_light(void)
 
 		/* ################  */
 #if !defined(_DIRENT_HAVE_D_TYPE)
-		file_info[n].type = get_file_type(attr.st_mode);
+		file_info[n].type = get_dt(attr.st_mode);
 /*		switch (attr.st_mode & S_IFMT) {
 		case S_IFBLK: file_info[n].type = DT_BLK; break;
 		case S_IFCHR: file_info[n].type = DT_CHR; break;
@@ -470,8 +471,6 @@ list_dir_light(void)
 		case S_IFSOCK: file_info[n].type = DT_SOCK; break;
 		default: file_info[n].type = DT_UNKNOWN; break;
 		} */
-		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
-		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
 #else
 		/* If type is unknown, we might be facing a file system not
 		 * supporting d_type, for example, loop devices. In this case,
@@ -480,13 +479,14 @@ list_dir_light(void)
 			struct stat a;
 			if (lstat(ename, &a) == -1)
 				continue;
-			file_info[n].type = get_file_type(a.st_mode);
+			file_info[n].type = get_dt(a.st_mode);
 		} else {
 			file_info[n].type = ent->d_type;
 		}
+#endif /* !_DIRENT_HAVE_D_TYPE */
 		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
-#endif /* !_DIRENT_HAVE_D_TYPE */
+
 		file_info[n].inode = ent->d_ino;
 		file_info[n].linkn = 1;
 		file_info[n].size = 1;
