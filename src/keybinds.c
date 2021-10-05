@@ -1211,16 +1211,13 @@ rl_open_sel(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	if (sel_n == 0 || !sel_elements[sel_n - 1]) {
-		fprintf(stderr, _("\n%s: No selected files\n"), PROGRAM_NAME);
-		rl_reset_line_state();
-		return EXIT_FAILURE;
-	}
-
 	char cmd[PATH_MAX + 3];
-	sprintf(cmd, "o %s", sel_elements[sel_n - 1]);
+	sprintf(cmd, "o %s", (sel_n && sel_elements[sel_n - 1])
+			? sel_elements[sel_n - 1] : "sel");
 
+	kb_shortcut = 1;
 	keybind_exec_cmd(cmd);
+	kb_shortcut = 0;
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1232,16 +1229,13 @@ rl_bm_sel(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	if (sel_n == 0 || !sel_elements[sel_n - 1]) {
-		fprintf(stderr, _("\n%s: No selected files\n"), PROGRAM_NAME);
-		rl_reset_line_state();
-		return EXIT_FAILURE;
-	}
-
 	char cmd[PATH_MAX + 6];
-	sprintf(cmd, "bm a %s", sel_elements[sel_n - 1]);
+	sprintf(cmd, "bm a %s", (sel_n && sel_elements[sel_n - 1] )
+			? sel_elements[sel_n - 1] : "sel");
 
+	kb_shortcut = 1;
 	keybind_exec_cmd(cmd);
+	kb_shortcut = 0;
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
