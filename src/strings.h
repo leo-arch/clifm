@@ -34,7 +34,7 @@ char *home_tilde(const char *new_path);
 int strcntchr(const char *str, const char c);
 int strcntchrlst(const char *str, const char c);
 char *straftlst(char *str, const char c);
-char *strbfr(char *str, const char c);
+//char *strbfr(char *str, const char c);
 char *strbfrlst(char *str, const char c);
 char *strbtw(char *str, const char a, const char b);
 char *gen_rand_str(size_t len);

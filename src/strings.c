@@ -237,7 +237,7 @@ straftlst(char *str, const char c)
 
 /* Returns the substring in str before the first appearance of c. If
  * not found, or C is the first char in STR, returns NULL */
-char *
+/*char *
 strbfr(char *str, const char c)
 {
 	if (!str || !*str || !c)
@@ -246,25 +246,25 @@ strbfr(char *str, const char c)
 	char *p = str, *q = (char *)NULL;
 	while (*p) {
 		if (*p == c) {
-			q = p; /* q is now a pointer to C in STR */
+			q = p; // q is now a pointer to C in STR
 			break;
 		}
 		p++;
 	}
 
-	/* C was not found or it was the first char in STR */
+	// C was not found or it was the first char in STR
 	if (!q || q == str)
 		return (char *)NULL;
 
 	*q = '\0';
-	/* Now C (because q points to C) is the null byte and STR ends in
-	 * C, which is what we want */
+	// Now C (because q points to C) is the null byte and STR ends in
+	// C, which is what we want
 
 	char *buf = (char *)malloc((size_t)(q - str + 1));
 
-	if (!buf) { /* Memory allocation error */
-		/* Give back to C its original value, so that STR is not
-		 * modified in the process */
+	if (!buf) { // Memory allocation error
+		// Give back to C its original value, so that STR is not
+		// modified in the process
 		*q = c;
 		return (char *)NULL;
 	}
@@ -272,7 +272,7 @@ strbfr(char *str, const char c)
 	strcpy(buf, str);
 	*q = c;
 	return buf;
-}
+} */
 
 /* Get substring in STR before the last appearance of C. Returns
  * substring  if C is found and NULL if not (or if C was the first
