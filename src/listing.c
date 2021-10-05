@@ -365,6 +365,36 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 	return 0;
 }
 
+static inline void
+set_events_checker(void)
+{
+#ifdef LINUX_INOTIFY
+	reset_inotify();
+
+#elif defined(BSD_KQUEUE)
+	if (event_fd >= 0) {
+		close(event_fd);
+		event_fd = -1;
+		watch = 0;
+	}
+#if defined(O_EVTONLY)
+	event_fd = open(ws[cur_ws].path, O_EVTONLY);
+#else
+	event_fd = open(ws[cur_ws].path, O_RDONLY);
+#endif
+	if (event_fd >= 0) {
+		/* Prepare for events */
+		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
+				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, ws[cur_ws].path);
+		watch = 1;
+		/* Register events */
+		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
+				NULL, 0, NULL);
+
+	}
+#endif /* LINUX_INOTIFY */
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -388,24 +418,7 @@ list_dir_light(void)
 		goto END;
 	}
 
-#ifdef LINUX_INOTIFY
-	reset_inotify();
-
-#elif defined(BSD_KQUEUE)
-	if (event_fd >= 0) {
-		close(event_fd);
-		event_fd = -1;
-	}
-#if defined(O_EVTONLY)
-	event_fd = open(ws[cur_ws].path, O_EVTONLY);
-#else
-	event_fd = open(ws[cur_ws].path, O_RDONLY);
-#endif
-	if (event_fd >= 0) {
-		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
-		       EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, ws[cur_ws].path);
-	}
-#endif
+	set_events_checker();
 
 	errno = 0;
 	longest = 0;
@@ -461,16 +474,6 @@ list_dir_light(void)
 		/* ################  */
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		file_info[n].type = get_dt(attr.st_mode);
-/*		switch (attr.st_mode & S_IFMT) {
-		case S_IFBLK: file_info[n].type = DT_BLK; break;
-		case S_IFCHR: file_info[n].type = DT_CHR; break;
-		case S_IFDIR: file_info[n].type = DT_DIR; break;
-		case S_IFIFO: file_info[n].type = DT_FIFO; break;
-		case S_IFLNK: file_info[n].type = DT_LNK; break;
-		case S_IFREG: file_info[n].type = DT_REG; break;
-		case S_IFSOCK: file_info[n].type = DT_SOCK; break;
-		default: file_info[n].type = DT_UNKNOWN; break;
-		} */
 #else
 		/* If type is unknown, we might be facing a file system not
 		 * supporting d_type, for example, loop devices. In this case,
@@ -896,31 +899,7 @@ list_dir(void)
 		goto END;
 	}
 
-#ifdef LINUX_INOTIFY
-	reset_inotify();
-
-#elif defined(BSD_KQUEUE)
-	if (event_fd >= 0) {
-		close(event_fd);
-		event_fd = -1;
-		watch = 0;
-	}
-#if defined(O_EVTONLY)
-	event_fd = open(ws[cur_ws].path, O_EVTONLY);
-#else
-	event_fd = open(ws[cur_ws].path, O_RDONLY);
-#endif
-	if (event_fd >= 0) {
-		/* Prepare for events */
-		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
-				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, ws[cur_ws].path);
-		watch = 1;
-		/* Register events */
-		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
-				NULL, 0, NULL);
-
-	}
-#endif /* LINUX_INOTIFY */
+	set_events_checker();
 
 	int fd = dirfd(dir);
 
