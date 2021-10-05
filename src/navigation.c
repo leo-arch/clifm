@@ -71,8 +71,11 @@ workspaces(char *str)
 
 		tmp_ws = istr - 1;
 
-		if (tmp_ws == cur_ws)
-			return EXIT_FAILURE;
+		if (tmp_ws == cur_ws) {
+			fprintf(stderr, "%s: %d is already the current workspace\n",
+					PROGRAM_NAME, tmp_ws + 1);
+			return EXIT_SUCCESS;
+		}
 	} else if (*str == '+' && !str[1]) {
 		if ((cur_ws + 1) < MAX_WS)
 			tmp_ws = cur_ws + 1;
