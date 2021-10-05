@@ -1440,6 +1440,8 @@ static int
 rl_cmdhist(int count, int key)
 {
 	UNUSED(count);
+	if (rl_no_tabhist)
+		return EXIT_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestion_buf) {

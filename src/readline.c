@@ -411,11 +411,13 @@ rl_no_hist(const char *prompt)
 {
 	int bk = suggestions;
 	suggestions = 0;
-	stifle_history(0); /* Prevent readline from using the history
-	setting */
+	rl_no_tabhist = 1;
+//	stifle_history(0); /* Prevent readline from using the history
+//	setting */
 	char *input = readline(prompt);
-	unstifle_history();	 /* Reenable history */
-	read_history(hist_file); /* Reload history lines from file */
+	rl_no_tabhist = 0;
+//	unstifle_history();	 /* Reenable history */
+//	read_history(hist_file); /* Reload history lines from file */
 	suggestions = bk;
 
 	if (input) {

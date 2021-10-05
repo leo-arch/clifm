@@ -201,6 +201,9 @@ rl_strpbrk(char *s1, char *s2)
 int
 tab_complete(int what_to_do)
 {
+	if (rl_no_tabhist)
+		return EXIT_SUCCESS;
+
 	char **matches;
 	rl_compentry_func_t *our_func;
 	int start, scan, end, delimiter = 0, pass_next;
