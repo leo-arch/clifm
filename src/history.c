@@ -402,7 +402,6 @@ run_history_cmd(const char *cmd)
 {
 	/* If "!n" */
 	int exit_status = EXIT_SUCCESS;
-	size_t i;
 	size_t old_args = args_n;
 
 	if (is_number(cmd)) {
@@ -477,7 +476,7 @@ run_history_cmd(const char *cmd)
 	/* If !STRING */
 	if ((*cmd >= 'a' && *cmd <= 'z') || (*cmd >= 'A' && *cmd <= 'Z')) {
 		size_t len = strlen(cmd);
-
+		size_t i;
 		for (i = 0; history[i]; i++) {
 			if (*cmd == *history[i] && strncmp(cmd, history[i], len) == 0) {
 				char **cmd_hist = parse_input_str(history[i]);
