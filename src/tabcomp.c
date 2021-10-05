@@ -677,12 +677,13 @@ after_usual_completion:
 				} else {
 					tab_offset = strlen(matches[0]);
 				}
+
 				for (j = 0, l = (int)i; j < limit; j++) {
 					if (l > len || !matches[l]) {
 						break;
 					} else {
 						if (tab_offset)
-							printf("\x1b[1;35m%s", qq ? qq : matches[0]);
+							printf("%s%s\x1b[0m", ts_c, qq ? qq : matches[0]);
 						char *temp;
 						int printed_length;
 						temp = printable_part(matches[l]);

@@ -286,6 +286,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_DC_C "\x1b[0m"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
+#define DEF_TS_C "\x1b[04;35m"
 
 #define DEF_DF_C "\x1b[0m"
 
@@ -1056,6 +1057,7 @@ extern char
     dl_c[MAX_COLOR],	     /* Dividing line color */
     el_c[MAX_COLOR],	     /* ELN color */
     mi_c[MAX_COLOR],	     /* Misc indicators color */
+	ts_c[MAX_COLOR],	     /* TAB completion suffix */
 
 	/* Suggestions */
 	sc_c[MAX_COLOR],	     /* Auto-suggestions: external commands */

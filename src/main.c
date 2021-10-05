@@ -561,6 +561,7 @@ char
     dl_c[MAX_COLOR], /* Dividing line index color */
     el_c[MAX_COLOR], /* ELN color */
     mi_c[MAX_COLOR], /* Misc indicators color */
+	ts_c[MAX_COLOR], /* TAB completion suffix */
 
 	/* Suggestions */
     sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
