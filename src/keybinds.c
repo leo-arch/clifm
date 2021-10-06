@@ -1493,7 +1493,8 @@ rl_cmdhist(int count, int key)
 		if (--p < 0)
 			return EXIT_FAILURE;
 		while (p >= 0 && history[p]) {
-			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0) {
+			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
+			&& strcmp(rl_line_buffer, history[p]) != 0) {
 				found = 1;
 				break;
 			}
@@ -1503,7 +1504,8 @@ rl_cmdhist(int count, int key)
 		if (++p >= (int)current_hist_n)
 			return EXIT_FAILURE;
 		while (history[p]) {
-			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0) {
+			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
+			&& strcmp(rl_line_buffer, history[p]) != 0) {
 				found = 1;
 				break;
 			}
