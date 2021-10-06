@@ -239,22 +239,6 @@ get_ext_icon(const char *restrict ext, int n)
 }
 #endif /* _NO_ICONS */
 
-/*
-static inline mode_t
-get_file_type(mode_t m)
-{
-	switch (m & S_IFMT) {
-	case S_IFBLK: return DT_BLK;
-	case S_IFCHR: return DT_CHR;
-	case S_IFDIR: return DT_DIR;
-	case S_IFIFO: return DT_FIFO;
-	case S_IFLNK: return DT_LNK;
-	case S_IFREG: return DT_REG;
-	case S_IFSOCK: return DT_SOCK;
-	default: return DT_UNKNOWN;
-	}
-} */
-
 static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
