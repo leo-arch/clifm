@@ -109,7 +109,7 @@ print_filename(char *to_print, char *full_pathname)
 	if (colorize && cur_comp_type == TCMP_PATH) {
 		colors_list(to_print, 0, 0, 0);
 	} else {
-		for (s = to_print; *s; s++) {
+		for (s = to_print + tab_offset; *s; s++) {
 			PUTX(*s);
 		}
 	}
