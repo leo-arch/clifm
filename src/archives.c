@@ -62,9 +62,6 @@ get_extraction_path(void)
 		}
 	}
 
-	if (!ext_path)
-		return (char *)NULL;
-
 	if (!*ext_path) {
 		free(ext_path);
 		return (char *)NULL;
