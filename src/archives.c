@@ -45,6 +45,9 @@
 #include "mime.h"
 #endif
 
+#define OP_ISO 1
+#define OP_OTHERS 0
+
 static int zstandard(char *in_file, char *out_file, char mode, char op);
 
 static char *
@@ -91,6 +94,59 @@ get_extraction_path(void)
 	return ext_path;
 }
 
+static char get_operation(const int mode)
+{
+	char sel_op = 0;
+	char *op = (char *)NULL;
+	while (!op) {
+		op = rl_no_hist(_("Operation: "));
+		if (!op)
+			continue;
+		if (!*op || op[1] != '\0') {
+			free(op);
+			op = (char *)NULL;
+			continue;
+		}
+
+		switch (*op) {
+		case 'e': /* fallthrough */
+		case 'E': /* fallthrough */
+		case 'l': /* fallthrough */
+		case 'm': /* fallthrough */
+		case 't': /* fallthrough */
+		case 'r':
+			if (mode == OP_ISO && *op == 'r') {
+				free(op);
+				op = (char *)NULL;
+				break;
+			}
+			if (mode == OP_OTHERS && *op == 't') {
+				free(op);
+				op = (char *)NULL;
+				break;
+			}
+			sel_op = *op;
+			free(op);
+			break;
+
+		case 'q': /* fallthrough */
+		case 'Q':
+			free(op);
+			return EXIT_SUCCESS;
+
+		default:
+			free(op);
+			op = (char *)NULL;
+			break;
+		}
+
+		if (sel_op)
+			break;
+	}
+
+	return sel_op;
+}
+
 static int
 handle_iso(char *file)
 {
@@ -106,41 +162,7 @@ handle_iso(char *file)
 		 "%s[t]%stest %s[m]%sount %s[q]%suit\n"), BOLD, df_c, BOLD,
 	    df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
 
-	char sel_op = 0;
-	char *operation = (char *)NULL;
-	while (!operation) {
-		operation = rl_no_hist(_("Operation: "));
-		if (!operation)
-			continue;
-		if (!*operation || operation[1] != '\0') {
-			free(operation);
-			operation = (char *)NULL;
-			continue;
-		}
-
-		switch (*operation) {
-		case 'e': /* fallthrough */
-		case 'E': /* fallthrough */
-		case 'l': /* fallthrough */
-		case 'm': /* fallthrough */
-		case 't':
-			sel_op = *operation;
-			free(operation);
-			break;
-
-		case 'q':
-			free(operation);
-			return EXIT_SUCCESS;
-
-		default:
-			free(operation);
-			operation = (char *)NULL;
-			break;
-		}
-
-		if (sel_op)
-			break;
-	}
+	char sel_op = get_operation(OP_ISO);
 
 	char *ret = strchr(file, '\\');
 	if (ret) {
@@ -313,9 +335,8 @@ create_iso(char *in_file, char *out_file)
 	}
 
 	else {
-		fprintf(stderr, "archiver: %s: Invalid file format\nFile "
-				"should be either a directory or a block device\n",
-				in_file);
+		fprintf(stderr, "archiver: %s: Invalid file format\nFile should "
+				"be either a directory or a block device\n", in_file);
 		return EXIT_FAILURE;
 	}
 
@@ -330,7 +351,7 @@ check_iso(char *file)
 {
 	if (!file || !*file) {
 		fputs(_("Error querying file type\n"), stderr);
-		return -1;
+		return (-1);
 	}
 
 	int is_iso = 0;
@@ -427,7 +448,6 @@ check_iso(char *file)
 
 	if (is_iso)
 		return EXIT_SUCCESS;
-
 	return EXIT_FAILURE;
 }
 
@@ -822,42 +842,7 @@ archiver(char **args, char mode)
 		 "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), BOLD, df_c, BOLD,
 	    df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
 
-	char *operation = (char *)NULL;
-	char sel_op = 0;
-
-	while (!operation) {
-		operation = rl_no_hist(_("Operation: "));
-		if (!operation)
-			continue;
-		if (!*operation || operation[1] != '\0') {
-			free(operation);
-			operation = (char *)NULL;
-			continue;
-		}
-
-		switch (*operation) {
-		case 'e': /* fallthrough */
-		case 'E': /* fallthrough */
-		case 'l': /* fallthrough */
-		case 'm': /* fallthrough */
-		case 'r':
-			sel_op = *operation;
-			free(operation);
-			break;
-
-		case 'q':
-			free(operation);
-			return EXIT_SUCCESS;
-
-		default:
-			free(operation);
-			operation = (char *)NULL;
-			break;
-		}
-
-		if (sel_op)
-			break;
-	}
+	char sel_op = get_operation(OP_OTHERS);
 
 	/* 2) Prepare files based on operation
 	 * #################################### */
