@@ -30,6 +30,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "exec.h"
@@ -45,6 +46,53 @@
 #endif
 
 static int zstandard(char *in_file, char *out_file, char mode, char op);
+
+static char *
+get_extraction_path(void)
+{
+	char *ext_path = (char *)NULL;
+	while (!ext_path) {
+		ext_path = readline(_("Extraction path ('q' to quit): "));
+		if (!ext_path)
+			continue;
+		if (!*ext_path) {
+			free(ext_path);
+			ext_path = (char *)NULL;
+			continue;
+		}
+	}
+
+	if (!ext_path)
+		return (char *)NULL;
+
+	if (!*ext_path) {
+		free(ext_path);
+		return (char *)NULL;
+	}
+
+	if (TOUPPER(*ext_path) == 'Q' && !*(ext_path + 1)) {
+		free(ext_path);
+		return (char *)NULL;
+	}
+
+	if (*ext_path == '~') {
+		char *p = tilde_expand(ext_path);
+		if (p) {
+			free(ext_path);
+			return p;
+		}
+	}
+
+	if (*ext_path == '.') {
+		char *p = realpath(ext_path, NULL);
+		if (p) {
+			free(ext_path);
+			return p;
+		}
+	}
+
+	return ext_path;
+}
 
 static int
 handle_iso(char *file)
@@ -126,18 +174,9 @@ handle_iso(char *file)
 	/* ########## EXTRACT TO DIR ####### */
 	case 'E': {
 		/* 7z x -oDIR FILE (ask for DIR) */
-		char *ext_path = (char *)NULL;
-		while (!ext_path) {
-			ext_path = rl_no_hist(_("Extraction path: "));
-			if (!ext_path)
-				continue;
-			if (!*ext_path) {
-				free(ext_path);
-				ext_path = (char *)NULL;
-				continue;
-			}
-		}
-
+		char *ext_path = get_extraction_path();
+		if (!ext_path)
+			break;
 		char *o_option = (char *)xnmalloc(strlen(ext_path) + 3,
 		    sizeof(char));
 		sprintf(o_option, "-o%s", ext_path);
@@ -632,8 +671,7 @@ archiver(char **args, char mode)
 		/* Escape the string, if needed */
 		char *esc_name = escape_str(name);
 		if (!esc_name) {
-			fprintf(stderr, _("archiver: %s: Error escaping string\n"),
-					name);
+			fprintf(stderr, _("archiver: %s: Error escaping string\n"), name);
 			free(name);
 			return EXIT_FAILURE;
 		}
@@ -893,17 +931,9 @@ archiver(char **args, char mode)
 			/* Ask for extraction path */
 			printf(_("%sFile%s: %s\n"), BOLD, df_c, args[i]);
 
-			char *ext_path = (char *)NULL;
-			while (!ext_path) {
-				ext_path = rl_no_hist(_("Extraction path: "));
-				if (!ext_path)
-					continue;
-				if (!*ext_path) {
-					free(ext_path);
-					ext_path = (char *)NULL;
-					continue;
-				}
-			}
+			char *ext_path = get_extraction_path();
+			if (!ext_path)
+				break;
 
 			/* Construct and execute cmd */
 			char *cmd[] = {"atool", "-X", ext_path, args[i], NULL};
