@@ -238,7 +238,6 @@ recolorize_line(void)
 		return;
 	}
 
-
 	int point = rl_point;
 	char *ss = rl_copy_text(rl_point? rl_point - 1 : 0, rl_end);
 	rl_delete_text(rl_point, rl_end);

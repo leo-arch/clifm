@@ -234,18 +234,31 @@ fzftab(char **matches)
 	if (lw && *(lw + 1))
 		++lw;
 	else {
-		if (s == rl_line_buffer)
+		if (s == rl_line_buffer && *rl_line_buffer != '.')
 			lw = s;
 		else
 			lw = (char *)NULL;
 	}
-	
+
+	size_t height = 0;
+	if (i + 1 > term_rows - 2)
+		height = term_rows - 2;
+	else
+		height = i + 1;
+
 	/* Run FZF and store the ouput in FZFTABOUT file */
 	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
 	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer='>' "
-			"--color=\"gutter:-1,bg+:reverse,prompt:cyan:bold,hl:magenta:underline,hl+:magenta:bold:underline\" "
-			"--info=inline --reverse --height=%zu --query=\"%s\" > %s)",
-			FZFTABIN, i + 1, lw ? lw : "", FZFTABOUT);
+			"--color=\"%s,gutter:-1,prompt:%s:bold,"
+			"hl:%s:underline,hl+:%s:bold:underline\" "
+			"--info=inline --reverse --height=%zu --margin=0,0,0,%d "
+			"--query=\"%s\" > %s)",
+			FZFTABIN,
+			colorize ? "dark" : "bw",
+			colorize ? "cyan" : "-1",
+			"magenta", "magenta", 
+			height, (rl_point + prompt_offset < term_cols - 20)
+			? rl_point + prompt_offset - 4 : 0, lw ? lw : "", FZFTABOUT);
 	int ret = launch_execle(cmd);
 	free(cmd);
 	unlink(FZFTABIN);
@@ -299,7 +312,17 @@ fzftab(char **matches)
 		char *n = strchr(buf, '\n');
 		if (n)
 			*n = '\0';
-		rl_insert_text(buf + offset);
+		char *esc_buf = escape_str(buf);
+		if (esc_buf) {
+/*			if (strlen(esc_buf) + (size_t)total_line_len >= term_cols) {
+				printf("\x1b[1B");
+				fflush(stdout);
+			} */
+			rl_insert_text(esc_buf + offset);
+			free(esc_buf);
+		} else {
+			rl_insert_text(buf + offset);
+		}
 	}
 }
 #endif /* !_NO_FZF */
@@ -622,7 +645,7 @@ after_usual_completion:
 								rl_insert_text ("/");
 								rl_redisplay();
 								fputs(cc, stdout);
-							} else { 
+							} else {
 								rl_insert_text ("/");
 							}
 #else
@@ -695,24 +718,32 @@ after_usual_completion:
 
 			/* If there are many items, then ask the user if she
 			   really wants to see them all. */
-			if (len >= rl_completion_query_items) {
-				putchar('\n');
-#ifndef _NO_HIGHLIGHT
-				if (highlight && cur_color != df_c) {
-					cur_color = df_c;
-					fputs(df_c, stdout);
-				}
+#ifndef _NO_FZF
+			if (!xargs.fzftab) {
 #endif
-//				rl_crlf();
-				fprintf(rl_outstream,
-					 "Display all %d possibilities? (y or n) ", len);
-//				rl_crlf();
-				fflush(rl_outstream);
-				if (!get_y_or_n()) {
+			{
+				if (len >= rl_completion_query_items) {
+					putchar('\n');
+#ifndef _NO_HIGHLIGHT
+					if (highlight && cur_color != df_c) {
+						cur_color = df_c;
+						fputs(df_c, stdout);
+					}
+#endif
 //					rl_crlf();
-					goto restart;
+					fprintf(rl_outstream,
+						 "Display all %d possibilities? (y or n) ", len);
+//					rl_crlf();
+					fflush(rl_outstream);
+					if (!get_y_or_n()) {
+//						rl_crlf();
+						goto restart;
+					}
 				}
 			}
+#ifndef _NO_FZF
+			}
+#endif
 
 			/* How many items of MAX length can we fit in the screen window? */
 			max += 2;
