@@ -118,6 +118,10 @@ print_filename(char *to_print, char *full_pathname)
 
 //	int rl_visible_stats = 1;
 	if (rl_filename_completion_desired && !colorize) {
+		if (cur_comp_type == TCMP_CMD) {
+			putc('*', rl_outstream);
+			return 1;
+		}
       /* If to_print != full_pathname, to_print is the basename of the
 	 path passed.  In this case, we try to expand the directory
 	 name before checking for the stat character. */
@@ -147,7 +151,7 @@ print_filename(char *to_print, char *full_pathname)
 			extension_char = stat_char(s);
 		}
 
-		free (s);
+		free(s);
 		if (extension_char)
 			putc(extension_char, rl_outstream);
 		return (extension_char != 0);
@@ -775,7 +779,9 @@ after_usual_completion:
 						break;
 					} else {
 						if (tab_offset)
-							printf("%s%s\x1b[0m", ts_c, qq ? qq : matches[0]);
+							printf("%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
+							(cur_comp_type == TCMP_CMD) ? (colorize
+							? ex_c : "") : dc_c);
 						char *temp;
 						int printed_length;
 						temp = printable_part(matches[l]);
@@ -789,11 +795,13 @@ after_usual_completion:
 					}
 					l += count;
 				}
-				tab_offset = 0;
-
 				putchar('\n');
 //				rl_crlf();
 			}
+			tab_offset = 0;
+
+			if (colorize && cur_comp_type == TCMP_CMD)
+				fputs(df_c, stdout);
 
 #ifndef _NO_FZF
 		reset_path:

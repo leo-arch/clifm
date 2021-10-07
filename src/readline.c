@@ -1330,8 +1330,9 @@ my_rl_completion(const char *text, int start, int end)
 
 			/* Compĺete with files in CWD */
 			if (!matches && *text != '/') {
-				cur_comp_type = TCMP_PATH;
 				matches = rl_completion_matches(text, &filenames_gen_text);
+				if (matches)
+					cur_comp_type = TCMP_PATH;
 			}
 
 			/* Complete with entries in the jump database */
@@ -1345,8 +1346,11 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* If neither autocd nor auto-open, try to complete with
 		 * command names */
-		if (!matches)
+		if (!matches) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
+			if (matches)
+				cur_comp_type = TCMP_CMD;
+		}
 	}
 
 	/* Second word or more */
