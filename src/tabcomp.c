@@ -218,8 +218,10 @@ fzftab(char **matches)
 	fclose(fp);
 
 	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
-	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer=' ' --color=\"gutter:-1,fg+:blue:bold,prompt:cyan:bold\" --info=inline --reverse --height=%zu > %s)",
-			FZFTABIN, i + 1, FZFTABOUT);
+	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer=' ' "
+			"--color=\"gutter:-1,fg+:blue:bold,prompt:cyan:bold\" "
+			"--info=inline --reverse --height=%zu --query=\"%s\" > %s)",
+			FZFTABIN, i + 1, rl_line_buffer, FZFTABOUT);
 	int ret = launch_execle(cmd);
 	free(cmd);
 	unlink(FZFTABIN);
