@@ -218,7 +218,7 @@ fzftab(char **matches)
 	fclose(fp);
 
 	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
-	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --prompt=\": \" --color=\"gutter:-1,fg+:blue:bold,pointer:yellow:bold\" --info=inline --reverse --height=%zu > %s)",
+	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer=' ' --color=\"gutter:-1,fg+:blue:bold,prompt:cyan:bold\" --info=inline --reverse --height=%zu > %s)",
 			FZFTABIN, i + 1, FZFTABOUT);
 	int ret = launch_execle(cmd);
 	free(cmd);
@@ -252,7 +252,7 @@ fzftab(char **matches)
 
 	size_t offset = 0, mlen = strlen(matches[0]);
 
-	if (matches[0][mlen - 1] != '/') {
+	if (mlen && matches[0][mlen - 1] != '/') {
 		char *q = strrchr(matches[0], '/');
 		if (q)
 			offset = strlen(q + 1);
