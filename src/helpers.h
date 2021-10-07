@@ -693,6 +693,9 @@ struct param {
 	int ffirst;
 	int files_counter;
 	int follow_symlinks;
+#ifndef _NO_FZF
+	int fzftab;
+#endif
 	int hidden;
 #ifndef _NO_HIGHLIGHT
 	int highlight;
@@ -864,6 +867,7 @@ extern int
     pager,
     print_msg,
     print_selfiles,
+    prompt_offset,
     prompt_style,
     recur_perm_error_flag,
     restore_last_path,

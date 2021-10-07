@@ -47,3 +47,4 @@ void close_fstream(FILE *fp, int fd);
 int xmkdir(char *dir, mode_t mode);
 mode_t get_dt(const mode_t mode);
 char *gen_date_suffix(struct tm tm);
+int get_cursor_position(const int ifd, const int ofd);

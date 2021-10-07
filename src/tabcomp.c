@@ -10,7 +10,9 @@ typedef char *rl_cpvfunc_t;
 #else
 #include <readline/readline.h>
 #endif
+#include <errno.h>
 
+#include "exec.h"
 #include "aux.h"
 #include "strings.h"
 #include "colors.h"
@@ -188,6 +190,84 @@ rl_strpbrk(char *s1, char *s2)
 	}
 	return (char *)NULL;
 }
+
+#ifndef _NO_FZF
+/* Display possible completions using FZF. If one of these possible
+ * completions is selected, insert it into the current line buffer */
+static void
+fzftab(char **matches)
+{
+#define FZFTABIN "/tmp/clifm.fzf.in"
+#define FZFTABOUT "/tmp/clifm.fzf.out"
+
+	FILE *fp = fopen(FZFTABIN, "w");
+	if (!fp) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, FZFTABIN, strerror(errno));
+		return;
+	}
+
+	size_t i;
+	for (i = 1; matches[i]; i++) {
+		char *p = strrchr(matches[i], '/');
+		if (p && *(++p))
+			fprintf(fp, "%s\n", p);
+		else
+			fprintf(fp, "%s\n", matches[i]);
+	}
+
+	fclose(fp);
+
+	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
+	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --prompt=\": \" --color=\"gutter:-1,fg+:blue:bold,pointer:yellow:bold\" --info=inline --reverse --height=%zu > %s)",
+			FZFTABIN, i + 1, FZFTABOUT);
+	int ret = launch_execle(cmd);
+	free(cmd);
+	unlink(FZFTABIN);
+
+	int lines = 1, total_line_len = 0;
+	total_line_len = rl_end + prompt_offset;
+
+	if (total_line_len > term_cols) {
+		lines = total_line_len / term_cols;
+		int rem = (int)total_line_len % term_cols;
+		if (rem > 0)
+			lines++;
+	}
+
+	printf("\x1b[%dA", lines);
+
+	if (ret != EXIT_SUCCESS)
+		return;
+
+	fp = fopen(FZFTABOUT, "r");
+	if (!fp) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, FZFTABOUT, strerror(errno));
+		return;
+	}
+
+	char buf[PATH_MAX];
+	fgets(buf, PATH_MAX, fp);
+	fclose(fp);
+	unlink(FZFTABOUT);
+
+	size_t offset = 0, mlen = strlen(matches[0]);
+
+	if (matches[0][mlen - 1] != '/') {
+		char *q = strrchr(matches[0], '/');
+		if (q)
+			offset = strlen(q + 1);
+		else
+			offset = mlen;
+	}
+
+	if (*buf) {
+		char *n = strchr(buf, '\n');
+		if (n)
+			*n = '\0';
+		rl_insert_text(buf + offset);
+	}
+}
+#endif /* !_NO_FZF */
 
 /* Complete the word at or before point.
    WHAT_TO_DO says what to do with the completion.
@@ -659,6 +739,21 @@ after_usual_completion:
 				}
 			}
 
+			char *qq = strrchr(matches[0], '/');
+			if (qq) {
+				if (*(++qq))
+					tab_offset = strlen(qq);
+			} else {
+				tab_offset = strlen(matches[0]);
+			}
+
+#ifndef _NO_FZF
+			if (xargs.fzftab) {
+				fzftab(matches);
+				goto reset_path;
+			}
+#endif
+
 			for (i = 1; i <= (size_t)count; i++) {
 				if (i >= term_rows) {
 					// A little pager
@@ -671,14 +766,6 @@ after_usual_completion:
 						break;
 					}
 					fputs("\r\r\r\r\r\r\r\r", stdout);
-				}
-
-				char *qq = strrchr(matches[0], '/');
-				if (qq) {
-					if (*(++qq))
-						tab_offset = strlen(qq);
-				} else {
-					tab_offset = strlen(matches[0]);
 				}
 
 				for (j = 0, l = (int)i; j < limit; j++) {
@@ -705,6 +792,10 @@ after_usual_completion:
 				putchar('\n');
 //				rl_crlf();
 			}
+
+#ifndef _NO_FZF
+		reset_path:
+#endif
 			if (cur_comp_type == TCMP_PATH)
 				xchdir(ws[cur_ws].path, NO_TITLE);
 

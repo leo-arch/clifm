@@ -150,6 +150,7 @@ int
     tips = UNSET,
     print_msg = 0,
 	print_selfiles = UNSET,
+	prompt_offset = 0,
 	prompt_style = UNSET,
     recur_perm_error_flag = 0,
     restore_last_path = UNSET,

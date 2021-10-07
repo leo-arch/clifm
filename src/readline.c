@@ -309,6 +309,17 @@ my_rl_getc(FILE *stream)
 		return (getkey() & 0x7F);
 #endif /* __GO32__ */
 
+#ifndef _NO_FZF
+	if (xargs.fzftab) {
+		static int get_prompt_offset = 1;
+		if (get_prompt_offset) {
+			get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+			prompt_offset = curcol;
+			get_prompt_offset = 0;
+		}
+	}
+#endif /* !_NO_FZF */
+
 	while(1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {

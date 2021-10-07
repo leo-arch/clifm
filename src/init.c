@@ -950,6 +950,7 @@ external_arguments(int argc, char **argv)
 	    {"no-follow-symlink", no_argument, 0, 40},
 		{"control-d-exits", no_argument, 0, 41},
 		{"int-vars", no_argument, 0, 42},
+		{"fzftab", no_argument, 0, 43},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1089,6 +1090,9 @@ external_arguments(int argc, char **argv)
 		case 40: xargs.follow_symlinks = follow_symlinks = 0; break;
 		case 41: xargs.control_d_exits = control_d_exits = 1; break;
 		case 42: xargs.int_vars = int_vars = 1; break;
+#ifndef _NO_FZF
+		case 43: xargs.fzftab = 1; break;
+#endif
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
