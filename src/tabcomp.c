@@ -206,10 +206,11 @@ fzftab(char **matches)
 
 	FILE *fp = fopen(FZFTABIN, "w");
 	if (!fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, FZFTABIN, strerror(errno));
+		fprintf(stderr, "\n%s: %s: %s\n", PROGRAM_NAME, FZFTABIN, strerror(errno));
 		return;
 	}
 
+	/* Store possible completions in FZFTABOIN to pass them to FZF */
 	size_t i;
 	for (i = 1; matches[i]; i++) {
 		char *p = strrchr(matches[i], '/');
@@ -221,17 +222,41 @@ fzftab(char **matches)
 
 	fclose(fp);
 
+	/* Set a pointer to the last word (either space or slash). We'll
+	 * use this to highlight the matching prefix in FZF */
+	char *s = strrchr(rl_line_buffer, ' ');
+	if (s && *(s + 1) != ' ')
+		++s;
+	else
+		s = rl_line_buffer;
+
+	char *lw = strrchr(s, '/');
+	if (lw && *(lw + 1))
+		++lw;
+	else {
+		if (s == rl_line_buffer)
+			lw = s;
+		else
+			lw = (char *)NULL;
+	}
+	
+	/* Run FZF and store the ouput in FZFTABOUT file */
 	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
-	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer=' ' "
-			"--color=\"gutter:-1,fg+:blue:bold,prompt:cyan:bold\" "
+	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer='>' "
+			"--color=\"gutter:-1,bg+:reverse,prompt:cyan:bold,hl:magenta:underline,hl+:magenta:bold:underline\" "
 			"--info=inline --reverse --height=%zu --query=\"%s\" > %s)",
-			FZFTABIN, i + 1, rl_line_buffer, FZFTABOUT);
+			FZFTABIN, i + 1, lw ? lw : "", FZFTABOUT);
 	int ret = launch_execle(cmd);
 	free(cmd);
 	unlink(FZFTABIN);
 
+	/* Calculate currently used lines to go back to the correct cursor
+	 * position after running FZF */
 	int lines = 1, total_line_len = 0;
 	total_line_len = rl_end + prompt_offset;
+	/* PROMPT_OFFSET (the space used by the prompt in the current line)
+	 * is calculated the first time we print the prompt (in my_rl_getc
+	 * (readline.c)) */
 
 	if (total_line_len > term_cols) {
 		lines = total_line_len / term_cols;
@@ -247,17 +272,20 @@ fzftab(char **matches)
 
 	fp = fopen(FZFTABOUT, "r");
 	if (!fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, FZFTABOUT, strerror(errno));
+		fprintf(stderr, "\n%s: %s: %s\n", PROGRAM_NAME, FZFTABOUT, strerror(errno));
 		return;
 	}
 
+	/* Recover FZF ouput */
 	char buf[PATH_MAX];
 	fgets(buf, PATH_MAX, fp);
 	fclose(fp);
 	unlink(FZFTABOUT);
 
+	/* Calculate the length of the matching prefix to insert into the
+	 * line buffer only the non-matched part of the string returned
+	 * by FZF */
 	size_t offset = 0, mlen = strlen(matches[0]);
-
 	if (mlen && matches[0][mlen - 1] != '/') {
 		char *q = strrchr(matches[0], '/');
 		if (q)
@@ -267,6 +295,7 @@ fzftab(char **matches)
 	}
 
 	if (*buf) {
+		/* Remove ending new line char */
 		char *n = strchr(buf, '\n');
 		if (n)
 			*n = '\0';
