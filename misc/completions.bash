@@ -81,8 +81,10 @@ _clifm ()
         --disk-usage
         --enable-logs
         --expand-bookmarks
+        --fzftab
         --icons
         --icons-use-file-color
+        --highlight
         --list-and-quit
         --max-dirhist
         --max-files
