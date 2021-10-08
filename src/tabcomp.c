@@ -338,16 +338,13 @@ fzftab(char **matches)
 			*n = '\0';
 		char *esc_buf = escape_str(buf);
 		if (esc_buf) {
-/*			if (strlen(esc_buf) + (size_t)total_line_len >= term_cols) {
-				printf("\x1b[1B");
-				fflush(stdout);
-			} */
 			rl_insert_text(esc_buf + offset);
 			free(esc_buf);
 		} else {
 			rl_insert_text(buf + offset);
 		}
 
+		/* Append slash for dirs and space for non-dirs */
 		struct stat attr;
 		char *pp = strrchr(rl_line_buffer, ' ');
 		if (!pp || !*(++pp))

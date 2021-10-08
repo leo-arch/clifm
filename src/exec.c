@@ -934,8 +934,8 @@ exec_cmd(char **comm)
 	&& access(comm[0], F_OK) != 0) {
 		/* If not absolute path */
 		/* Try first globbing, and if no result, try regex */
-		if (search_glob(comm, (deq_str[1] == '!') ? 1 : 0) == EXIT_FAILURE)
-			exit_code = search_regex(comm, (deq_str[1] == '!') ? 1 : 0);
+		if (search_glob(comm, (comm[0][1] == '!') ? 1 : 0) == EXIT_FAILURE)
+			exit_code = search_regex(comm, (comm[0][1] == '!') ? 1 : 0);
 		else
 			exit_code = EXIT_SUCCESS;
 		return exit_code;
