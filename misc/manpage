@@ -272,6 +272,9 @@ enable program logs
 .B \-\-expand\-bookmarks
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
 .TP
+.B \-\-fzftab
+enable the FZF TAB completion mode. Depends on \fIFZF\fR (\fIhttps://github.com/junegunn/fzf\fR)
+.TP
 .B \-\-highlight
 enable syntax highlighting. To customize highlighting colors see the \fBCOLORS\fR section below
 .TP
