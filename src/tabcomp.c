@@ -348,6 +348,12 @@ fzftab(char **matches)
 		} else {
 			rl_insert_text(buf + offset);
 		}
+
+		struct stat attr;
+		if (lstat(rl_line_buffer, &attr) != -1 && S_ISDIR(attr.st_mode))
+			rl_insert_text("/");
+		else
+			rl_insert_text(" ");
 	}
 }
 #endif /* !_NO_FZF */
