@@ -406,7 +406,7 @@ my_insert_text(char *text, char *s, const char _s)
 			}
 		}
 
-		char q[12];
+		char q[PATH_MAX];
 		int l = 0;
 		for (i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
@@ -1432,7 +1432,7 @@ print_highlight_string(char *s)
 	rl_delete_text(0, rl_end);
 	rl_point = rl_end = 0;
 	fputs(tx_c, stdout);
-	char q[12];
+	char q[PATH_MAX];
 	for (i = 0; s[i]; i++) {
 		rl_highlight(s, i, SET_COLOR);
 		if (s[i] < 0) {

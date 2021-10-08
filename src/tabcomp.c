@@ -411,7 +411,7 @@ tab_complete(int what_to_do)
 			while (--rl_point) {
 				scan = rl_line_buffer[rl_point];
 
-				if (strchr (rl_completer_word_break_characters, scan) == 0)
+				if (strchr(rl_completer_word_break_characters, scan) == 0)
 					continue;
 
 				/* Convoluted code, but it avoids an n^2 algorithm with calls
@@ -589,7 +589,7 @@ after_usual_completion:
 					size_t k, l = 0;
 					char *cc = cur_color;
 					fputs("\x1b[?25l", stdout);
-					char t[12];
+					char t[PATH_MAX];
 					for (k = 0; replacement[k]; k++) {
 						rl_highlight(replacement, k, SET_COLOR);
 						if (replacement[k] < 0) {
@@ -785,7 +785,6 @@ after_usual_completion:
 			if (highlight && cur_color != tx_c)
 				fputs(tx_c, stdout);
 #endif
-
 			if (cur_comp_type == TCMP_PATH) {
 				if (*matches[0] == '~') {
 					char *exp_path = tilde_expand(matches[0]);
