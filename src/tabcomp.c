@@ -258,12 +258,10 @@ fzftab(char **matches)
 	int fzf_offset = (rl_point + prompt_offset < max_fzf_offset)
 			? (rl_point + prompt_offset - 4) : 0;
 
-	if (!lw) {
-		if (sl)
-			fzf_offset++;
-	} else {
+	if (!lw)
+		fzf_offset++;
+	else
 		fzf_offset -= (int)(strlen(lw) - 1);
-	}
 
 	if (fzf_offset < 0)
 		fzf_offset = 0;
