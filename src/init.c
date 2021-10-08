@@ -1102,7 +1102,6 @@ external_arguments(int argc, char **argv)
 			}
 			}
 			break;
-			
 #endif
 
 		case 'a':

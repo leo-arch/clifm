@@ -222,49 +222,73 @@ fzftab(char **matches)
 
 	fclose(fp);
 
-	/* Set a pointer to the last word (either space or slash). We'll
+	/* Set a pointer to the last word (either space or slash). We
 	 * use this to highlight the matching prefix in FZF */
-	char *s = strrchr(rl_line_buffer, ' ');
-	if (s && *(s + 1) != ' ')
+	char *s = strrchr(matches[0], ' ');
+	if (s && *(s + 1) != ' ') {
 		++s;
-	else
-		s = rl_line_buffer;
-
-	char *lw = strrchr(s, '/');
-	if (lw && *(lw + 1))
-		++lw;
-	else {
-		if (s == rl_line_buffer && *rl_line_buffer != '.')
-			lw = s;
-		else
-			lw = (char *)NULL;
+	} else {
+		s = matches[0];
 	}
 
+	char *sl = strrchr(s, '/');
+	if (sl) {
+		if (*(sl + 1)) {
+			sl++;
+		} else {
+			sl = (char *)NULL;
+		}
+	} else {
+		sl = s;
+	}
+
+	char *lw = sl;
+
+	/* Calculate the height of the FZF window based on the amount
+	 * of entries */
 	size_t height = 0;
 	if (i + 1 > term_rows - 2)
 		height = term_rows - 2;
 	else
-		height = i + 1;
+		height = i;
 
-	/* Run FZF and store the ouput in FZFTABOUT file */
+	/* Calculate the offset (left padding) of the FZF window based on
+	 * cursor position and current query string */
+	int max_fzf_offset = term_cols > 20 ? term_cols - 20 : 0;
+	int fzf_offset = (rl_point + prompt_offset < max_fzf_offset)
+			? (rl_point + prompt_offset - 4) : 0;
+
+	if (!lw) {
+		if (sl)
+			fzf_offset++;
+	} else {
+		fzf_offset -= (int)(strlen(lw) - 1);
+	}
+
+	if (fzf_offset < 0)
+		fzf_offset = 0;
+
+	/* Run FZF and store the ouput into the FZFTABOUT file */
 	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
 	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer='>' "
 			"--color=\"%s,gutter:-1,prompt:%s:bold,"
 			"hl:%s:underline,hl+:%s:bold:underline\" "
-			"--info=inline --reverse --height=%zu --margin=0,0,0,%d "
+			"--bind tab:accept,right:accept,left:abort "
+			"--info=inline --layout=reverse-list "
+			"--height=%zu "
+			"--margin=0,0,0,%d "
 			"--query=\"%s\" > %s)",
 			FZFTABIN,
 			colorize ? "dark" : "bw",
 			colorize ? "cyan" : "-1",
 			"magenta", "magenta", 
-			height, (rl_point + prompt_offset < term_cols - 20)
-			? rl_point + prompt_offset - 4 : 0, lw ? lw : "", FZFTABOUT);
+			height, fzf_offset, lw ? lw : "", FZFTABOUT);
 	int ret = launch_execle(cmd);
 	free(cmd);
 	unlink(FZFTABIN);
 
 	/* Calculate currently used lines to go back to the correct cursor
-	 * position after running FZF */
+	 * position after quitting FZF */
 	int lines = 1, total_line_len = 0;
 	total_line_len = rl_end + prompt_offset;
 	/* PROMPT_OFFSET (the space used by the prompt in the current line)
@@ -280,6 +304,7 @@ fzftab(char **matches)
 
 	printf("\x1b[%dA", lines);
 
+	/* No results */
 	if (ret != EXIT_SUCCESS)
 		return;
 
