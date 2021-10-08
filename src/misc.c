@@ -1723,6 +1723,7 @@ help_function(void)
 \n              corresponding bookmark paths. TAB \
 \n              completion for bookmark names is also \
 \n              available\
+\n     --fzftab\t\t\t enable FZF TAB completion mode\
 \n     --highlight\t\t enable syntax highlighting\
 \n     --icons\t\t\t enable icons\
 \n     --icons-use-file-color\t icons color follows file color\
