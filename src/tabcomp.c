@@ -411,7 +411,9 @@ tab_complete(int what_to_do)
 			while (--rl_point) {
 				scan = rl_line_buffer[rl_point];
 
-				if (strchr(rl_completer_word_break_characters, scan) == 0)
+				if (strchr(rl_completer_word_break_characters, scan) == 0
+				|| (scan == ' '
+				&& rl_point && rl_line_buffer[rl_point - 1] == '\\'))
 					continue;
 
 				/* Convoluted code, but it avoids an n^2 algorithm with calls
@@ -439,7 +441,7 @@ tab_complete(int what_to_do)
 	start = rl_point;
 	rl_point = end;
 	text = rl_copy_text(start, end);
-
+//	printf("'%s'", text);
   /* If the user wants to TRY to complete, but then wants to give
      up and use the default completion function, they set the
      variable rl_attempted_completion_function. */
