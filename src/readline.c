@@ -197,9 +197,9 @@ rl_exclude_input(unsigned char c)
 
 		case BS:
 			xbackspace();
-			if (rl_end == 0 && cur_color != df_c) {
-				cur_color = df_c;
-				fputs(df_c, stdout);
+			if (rl_end == 0 && cur_color != tx_c) {
+				cur_color = tx_c;
+				fputs(tx_c, stdout);
 			}
 //			return 2;
 			_del = 1;
@@ -210,8 +210,8 @@ rl_exclude_input(unsigned char c)
 			if (suggestion.printed && suggestion_buf)
 				clear_suggestion(CS_FREEBUF);
 #endif /* !_NO_SUGGESTIONS */
-			cur_color = df_c;
-			fputs(df_c, stdout);
+			cur_color = tx_c;
+			fputs(tx_c, stdout);
 			return 1;
 
 		case _ESC:

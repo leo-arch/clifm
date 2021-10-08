@@ -406,9 +406,20 @@ my_insert_text(char *text, char *s, const char _s)
 			}
 		}
 
+		char q[12];
+		int l = 0;
 		for (i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
-			char q[2];
+			if (t[i] < 0) {
+				q[l++] = t[i];
+				if (t[i + 1] >= 0) {
+					q[l] = '\0';
+					l = 0;
+					rl_insert_text(q);
+					rl_redisplay();
+				}
+				continue;
+			}
 			q[0] = t[i];
 			q[1] = '\0';
 			rl_insert_text(q);
@@ -1417,13 +1428,23 @@ rl_onlydirs(int count, int key)
 static void
 print_highlight_string(char *s)
 {
-	size_t i;
+	size_t i, l = 0;
 	rl_delete_text(0, rl_end);
 	rl_point = rl_end = 0;
 	fputs(tx_c, stdout);
+	char q[12];
 	for (i = 0; s[i]; i++) {
 		rl_highlight(s, i, SET_COLOR);
-		char q[2];
+		if (s[i] < 0) {
+			q[l++] = s[i];
+			if (s[i + 1] >= 0) {
+				q[l] = '\0';
+				l = 0;
+				rl_insert_text(q);
+				rl_redisplay();
+			}
+			continue;
+		}
 		q[0] = s[i];
 		q[1] = '\0';
 		rl_insert_text(q);

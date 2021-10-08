@@ -586,12 +586,22 @@ after_usual_completion:
 				rl_point = start;
 #ifndef _NO_HIGHLIGHT
 				if (highlight) {
-					size_t k;
+					size_t k, l = 0;
 					char *cc = cur_color;
 					fputs("\x1b[?25l", stdout);
+					char t[12];
 					for (k = 0; replacement[k]; k++) {
 						rl_highlight(replacement, k, SET_COLOR);
-						char t[2];
+						if (replacement[k] < 0) {
+							t[l++] = replacement[k];
+							if (replacement[k + 1] >= 0) {
+								t[l] = '\0';
+								l = 0;
+								rl_insert_text(t);
+								rl_redisplay();
+							}
+							continue;
+						}
 						t[0] = (char)replacement[k];
 						t[1] = '\0';
 						rl_insert_text(t);
@@ -725,9 +735,9 @@ after_usual_completion:
 				if (len >= rl_completion_query_items) {
 					putchar('\n');
 #ifndef _NO_HIGHLIGHT
-					if (highlight && cur_color != df_c) {
-						cur_color = df_c;
-						fputs(df_c, stdout);
+					if (highlight && cur_color != tx_c) {
+						cur_color = tx_c;
+						fputs(tx_c, stdout);
 					}
 #endif
 //					rl_crlf();
@@ -772,8 +782,8 @@ after_usual_completion:
 //			rl_crlf();
 			putchar('\n');
 #ifndef _NO_HIGHLIGHT
-			if (highlight && cur_color != df_c)
-				fputs(df_c, stdout);
+			if (highlight && cur_color != tx_c)
+				fputs(tx_c, stdout);
 #endif
 
 			if (cur_comp_type == TCMP_PATH) {
@@ -861,7 +871,7 @@ after_usual_completion:
 			tab_offset = 0;
 
 			if (colorize && cur_comp_type == TCMP_CMD)
-				fputs(df_c, stdout);
+				fputs(tx_c, stdout);
 
 #ifndef _NO_FZF
 		reset_path:
