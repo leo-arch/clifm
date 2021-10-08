@@ -930,11 +930,12 @@ exec_cmd(char **comm)
 	}
 
 	/*     ############### SEARCH ##################     */
-	else if (*comm[0] == '/' && access(comm[0], F_OK) != 0) {
+	else if (*comm[0] == '/' && !strchr(comm[0], '\\')
+	&& access(comm[0], F_OK) != 0) {
 		/* If not absolute path */
 		/* Try first globbing, and if no result, try regex */
-		if (search_glob(comm, (comm[0][1] == '!') ? 1 : 0) == EXIT_FAILURE)
-			exit_code = search_regex(comm, (comm[0][1] == '!') ? 1 : 0);
+		if (search_glob(comm, (deq_str[1] == '!') ? 1 : 0) == EXIT_FAILURE)
+			exit_code = search_regex(comm, (deq_str[1] == '!') ? 1 : 0);
 		else
 			exit_code = EXIT_SUCCESS;
 		return exit_code;
@@ -1652,30 +1653,48 @@ exec_cmd(char **comm)
 				 * #     AUTOCD & AUTO-OPEN (2)   #
 				 * ############################### */
 
-		if (autocd && cdpath_n && !comm[1]
-		&& cd_function(comm[0], CD_NO_PRINT_ERROR) == EXIT_SUCCESS)
-			return (exit_code = EXIT_SUCCESS);
+		char *tmp = (char *)xnmalloc(strlen(comm[0]) + 1, sizeof(char));
+		strcpy(tmp, comm[0]);
+		if (strchr(tmp, '\\')) {
+			char *dstr = dequote_str(tmp, 0);
+			if (dstr) {
+				strcpy(tmp, dstr);
+				free(dstr);
+			}
+		}
+
+		if (autocd && cdpath_n && !comm[1]) {
+			exit_code = cd_function(tmp, CD_NO_PRINT_ERROR);
+			if (exit_code == EXIT_SUCCESS) {
+				free(tmp);
+				return EXIT_SUCCESS;
+			}
+		}
 
 		struct stat attr;
-		if (stat(comm[0], &attr) == 0) {
+		if (stat(tmp, &attr) == 0) {
 			if ((attr.st_mode & S_IFMT) == S_IFDIR) {
 				if (autocd)
-					return (exit_code = cd_function(comm[0], CD_PRINT_ERROR));
-
-				fprintf(stderr, _("%s: %s: Is a directory\n"),
-						PROGRAM_NAME, comm[0]);
-				return (exit_code = EXIT_FAILURE);
+					exit_code = cd_function(tmp, CD_PRINT_ERROR);
+				else
+					fprintf(stderr, _("%s: %s: Is a directory\n"),
+							PROGRAM_NAME, tmp);
+				free(tmp);
+				return exit_code;
 			} else if (auto_open && (attr.st_mode & S_IFMT) == S_IFREG) {
 				/* Make sure we have not an executable file */
 				if (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
-					char *cmd[] = {"open", comm[0], (args_n >= 1) ? comm[1]
+					char *cmd[] = {"open", tmp, (args_n >= 1) ? comm[1]
 						: NULL, (args_n >= 2) ? comm[2] : NULL, NULL};
 					args_n++;
 					exit_code = open_function(cmd);
 					args_n--;
+					free(tmp);
 					return exit_code;
 				}
+				free(tmp);
 			}
+			free(tmp);
 		}
 
 	/* ####################################################
