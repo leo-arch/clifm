@@ -11,6 +11,7 @@ typedef char *rl_cpvfunc_t;
 #include <readline/readline.h>
 #endif
 #include <errno.h>
+#include <fcntl.h>
 
 #include "exec.h"
 #include "aux.h"
@@ -348,10 +349,23 @@ fzftab(char **matches)
 		}
 
 		struct stat attr;
-		if (lstat(rl_line_buffer, &attr) != -1 && S_ISDIR(attr.st_mode))
+		char *pp = strrchr(rl_line_buffer, ' ');
+		if (!pp || !*(++pp))
+			pp = rl_line_buffer;
+
+		char *_path = (char *)NULL;
+		if (*pp != '/') {
+			_path = (char *)xnmalloc(strlen(ws[cur_ws].path) + strlen(pp)
+					+ 2, sizeof(char));
+			sprintf(_path, "%s/%s", ws[cur_ws].path, pp);
+		}
+
+		if (stat(_path ? _path : pp, &attr) != -1 && S_ISDIR(attr.st_mode))
 			rl_insert_text("/");
 		else
 			rl_insert_text(" ");
+
+		free(_path);
 	}
 }
 #endif /* !_NO_FZF */
