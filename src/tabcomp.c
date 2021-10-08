@@ -731,7 +731,7 @@ after_usual_completion:
 			/* If there are many items, then ask the user if she
 			   really wants to see them all. */
 #ifndef _NO_FZF
-			if (!xargs.fzftab) {
+			if (xargs.fzftab != 1) {
 #endif
 			{
 				if (len >= rl_completion_query_items) {
@@ -825,7 +825,7 @@ after_usual_completion:
 			}
 
 #ifndef _NO_FZF
-			if (xargs.fzftab) {
+			if (xargs.fzftab == 1) {
 				fzftab(matches);
 				goto reset_path;
 			}

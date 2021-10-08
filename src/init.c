@@ -1091,7 +1091,18 @@ external_arguments(int argc, char **argv)
 		case 41: xargs.control_d_exits = control_d_exits = 1; break;
 		case 42: xargs.int_vars = int_vars = 1; break;
 #ifndef _NO_FZF
-		case 43: xargs.fzftab = 1; break;
+		case 43: {
+			char *p = get_cmd_path("fzf");
+			if (p) {
+				xargs.fzftab = 1;
+				free(p);
+			} else {
+				_err('w', PRINT_PROMPT, _("%s: FZF not found. Falling back "
+					"to standard TAB completion\n"), PROGRAM_NAME);
+			}
+			}
+			break;
+			
 #endif
 
 		case 'a':
@@ -1457,6 +1468,9 @@ unset_xargs(void)
 	xargs.ffirst = UNSET;
 	xargs.files_counter = UNSET;
 	xargs.follow_symlinks = UNSET;
+#ifndef _NO_FZF
+	xargs.fzftab = UNSET;
+#endif
 	xargs.hidden = UNSET;
 #ifndef _NO_HIGHLIGHT
 	xargs.highlight = UNSET;
