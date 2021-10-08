@@ -55,7 +55,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 	rl_insert_text(p);
 	rl_redisplay();
 	free(p);
-	fputs(df_c, stdout);
+	fputs(tx_c, stdout);
 	fputs("\x1b[?25h", stdout);
 }
 
@@ -116,13 +116,13 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	size_t m = 0;
 	for (; m < (size_t)rl_point; m++) {
 		if (rl_line_buffer[m] == '\'') {
-			if (qn[_DOUBLE] == 1)
+			if (qn[_DOUBLE] == 1 || (m && rl_line_buffer[m - 1] == '\\'))
 				continue;
 			qn[_SINGLE]++;
 			if (qn[_SINGLE] > 2)
 				qn[_SINGLE] = 1;
 		} else if (rl_line_buffer[m] == '"') {
-			if (qn[_SINGLE] == 1)
+			if (qn[_SINGLE] == 1 || (m && rl_line_buffer[m - 1] == '\\'))
 				continue;
 			qn[_DOUBLE]++;
 			if (qn[_DOUBLE] > 2)
@@ -149,14 +149,14 @@ rl_highlight(char *str, const size_t pos, const int flag)
 
 	switch(c) {
 	case ' ':
-		if (cur_color != hq_c && cur_color != hc_c /*&& cur_color != hb_c */)
+		if (cur_color != hq_c && cur_color != hc_c)
 			cl = tx_c;
 		break;
 	case '/': cl = hd_c; break;
 	case '\'': /* fallthrough */
 	case '"': cl = hq_c; break;
 	case '\\': /* fallthrough */
-	case ENTER: cl = df_c; break;
+	case ENTER: cl = tx_c; break;
 	case '~': /* fallthrough */
 	case '*': cl = he_c; break;
 	case '(': /* fallthrough */
@@ -177,7 +177,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		break;
 	case '#': cl = hc_c; break;
 	default:
-		if (cur_color != hq_c && /*cur_color != hb_c &&*/ cur_color != hc_c
+		if (cur_color != hq_c && cur_color != hc_c
 		&& cur_color != hv_c && cur_color != hp_c)
 			cl = tx_c;
 		break;
