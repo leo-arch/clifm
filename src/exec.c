@@ -1692,10 +1692,10 @@ exec_cmd(char **comm)
 					free(tmp);
 					return exit_code;
 				}
-				free(tmp);
 			}
-			free(tmp);
 		}
+
+		free(tmp);
 
 	/* ####################################################
 	 * #                EXTERNAL/SHELL COMMANDS           #
