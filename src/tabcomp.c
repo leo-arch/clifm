@@ -227,16 +227,18 @@ fzftab_color(const char *filename, const struct stat attr)
 #ifndef _NO_FZF
 /* Display possible completions using FZF. If one of these possible
  * completions is selected, insert it into the current line buffer */
-static void
+static int
 fzftab(char **matches)
 {
 #define FZFTABIN "/tmp/clifm.fzf.in"
 #define FZFTABOUT "/tmp/clifm.fzf.out"
 
+	int exit_status = EXIT_SUCCESS;
+
 	FILE *fp = fopen(FZFTABIN, "w");
 	if (!fp) {
 		fprintf(stderr, "\n%s: %s: %s\n", PROGRAM_NAME, FZFTABIN, strerror(errno));
-		return;
+		return exit_status;
 	}
 
 	/* Store possible completions in FZFTABIN to pass them to FZF */
@@ -249,6 +251,16 @@ fzftab(char **matches)
 			if (colorize && cur_comp_type == TCMP_PATH) {
 				stat(matches[i], &attr);
 				cl = fzftab_color(matches[i], attr);
+			}
+		} else if (*matches[i] == '~') {
+			if (colorize && cur_comp_type == TCMP_PATH) {
+				char *exp_path = tilde_expand(matches[i]);
+				if (exp_path) {
+					strncpy(tmp_path, exp_path, PATH_MAX);
+					free(exp_path);
+					stat(tmp_path, &attr);
+					cl = fzftab_color(tmp_path, attr);
+				}
 			}
 		} else {
 			snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
@@ -357,12 +369,12 @@ fzftab(char **matches)
 
 	/* No results */
 	if (ret != EXIT_SUCCESS)
-		return;
+		return exit_status;
 
 	fp = fopen(FZFTABOUT, "r");
 	if (!fp) {
 		fprintf(stderr, "\n%s: %s: %s\n", PROGRAM_NAME, FZFTABOUT, strerror(errno));
-		return;
+		return exit_status;
 	}
 
 	/* Recover FZF ouput */
@@ -397,24 +409,65 @@ fzftab(char **matches)
 		}
 
 		/* Append slash for dirs and space for non-dirs */
-		char *pp = strrchr(rl_line_buffer, ' ');
-		if (!pp || !*(++pp))
-			pp = rl_line_buffer;
-
-		char *_path = (char *)NULL;
-		if (*pp != '/') {
-			_path = (char *)xnmalloc(strlen(ws[cur_ws].path) + strlen(pp)
-					+ 2, sizeof(char));
-			sprintf(_path, "%s/%s", ws[cur_ws].path, pp);
+		char *pp = rl_line_buffer;
+		if (pp) {
+			while (*pp) {
+				if (pp == rl_line_buffer) {
+					pp++;
+					continue;
+				}
+				if (*pp == ' ' && *(pp - 1) != '\\' && *(pp + 1) != ' ') {
+					pp++;
+					break;
+				}
+				pp++;
+			}
 		}
 
-		if (stat(_path ? _path : pp, &attr) != -1 && S_ISDIR(attr.st_mode))
+		if (!*pp)
+			pp = rl_line_buffer;
+
+		char deq_str[PATH_MAX];
+		*deq_str = '\0';
+		if (strchr(pp, '\\')) {
+			i = 0;
+			char *b = pp;
+			while (*b && i < (PATH_MAX - 1)) {
+				if (*b != '\\')
+					deq_str[i++] = *b;
+				b++;
+			}
+			deq_str[i] = '\0';
+		}
+
+		char _path[PATH_MAX];
+		*_path = '\0';
+		if (*pp != '/' && *pp != '.' && *pp != '~')
+			snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, pp);
+
+		char *spath = *_path ? _path : (*deq_str ? deq_str : pp);
+		char *epath = (char *)NULL; 
+		if (*spath == '~')
+			epath = tilde_expand(spath);
+		else if (*spath == '.') {
+			xchdir(ws[cur_ws].path, NO_TITLE);
+			epath = realpath(spath, NULL);
+			/* No need to change back to CWD. Done here */
+			exit_status = -1;
+		}
+
+		if (epath)
+			spath = epath;
+
+		if (stat(spath, &attr) != -1 && S_ISDIR(attr.st_mode))
 			rl_insert_text("/");
 		else
 			rl_insert_text(" ");
 
-		free(_path);
+		free(epath);
 	}
+
+	return exit_status;
 }
 #endif /* !_NO_FZF */
 
@@ -917,7 +970,8 @@ after_usual_completion:
 
 #ifndef _NO_FZF
 			if (xargs.fzftab == 1) {
-				fzftab(matches);
+				if (fzftab(matches) == -1)
+					goto restart;
 				goto reset_path;
 			}
 #endif
@@ -986,7 +1040,6 @@ after_usual_completion:
 					cur_color = hw_c;
 					fputs(cur_color, stdout);
 				}
-//				int l = 0;
 				l = 0;
 				char t[PATH_MAX];
 				for (k = 0; ss[k]; k++) {
