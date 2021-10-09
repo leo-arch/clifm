@@ -246,13 +246,13 @@ fzftab(char **matches)
 	for (i = 1; matches[i]; i++) {
 		char *cl = (char *)NULL;
 		if (*matches[i] == '/') {
-			if (colorize) {
+			if (colorize && cur_comp_type == TCMP_PATH) {
 				stat(matches[i], &attr);
 				cl = fzftab_color(matches[i], attr);
 			}
 		} else {
 			snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
-			if (colorize) {
+			if (colorize && cur_comp_type == TCMP_PATH) {
 				stat(tmp_path, &attr);
 				cl = fzftab_color(tmp_path, attr);
 			}
@@ -495,7 +495,6 @@ tab_complete(int what_to_do)
 		}
 
 		if (rl_point == end && quote_char == '\0') {
-//			int quoted = 0;
 		/* We didn't find an unclosed quoted substring upon which to do
 	     completion, so use the word break characters to find the
 	     substring on which to complete. */
@@ -532,7 +531,7 @@ tab_complete(int what_to_do)
 	start = rl_point;
 	rl_point = end;
 	text = rl_copy_text(start, end);
-//	printf("'%s'", text);
+
   /* If the user wants to TRY to complete, but then wants to give
      up and use the default completion function, they set the
      variable rl_attempted_completion_function. */
@@ -702,7 +701,8 @@ after_usual_completion:
 					}
 					fputs("\x1b[?25h", stdout);
 					cur_color = cc;
-					fputs(cur_color, stdout);
+					if (cur_color)
+						fputs(cur_color, stdout);
 				} else {
 					rl_insert_text(replacement);
 				}

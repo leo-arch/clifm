@@ -1305,15 +1305,15 @@ my_rl_completion(const char *text, int start, int end)
 {
 	char **matches = (char **)NULL;
 	cur_comp_type = TCMP_NONE;
-
+	UNUSED(end);
 	if (start == 0) { /* Only for the first word entered in the prompt */
 		/* Commands completion */
-		if (end == 0) { /* If text is empty, do nothing */
-			/* Prevent readline from attempting path completion if
-			* rl_completion matches returns NULL */
+/*		if (end == 0) { // If text is empty, do nothing
+			// Prevent readline from attempting path completion if
+			// rl_completion matches returns NULL
 			rl_attempted_completion_over = 1;
 			return (char **)NULL;
-		}
+		} */
 
 		/* History cmd completion */
 		if (*text == '!')
@@ -1329,7 +1329,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 
 			/* Compĺete with files in CWD */
-			if (!matches && *text != '/') {
+			if (!matches && (!text || *text != '/')) {
 				matches = rl_completion_matches(text, &filenames_gen_text);
 				if (matches)
 					cur_comp_type = TCMP_PATH;
