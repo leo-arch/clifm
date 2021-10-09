@@ -211,14 +211,22 @@ fzftab(char **matches)
 		return;
 	}
 
-	/* Store possible completions in FZFTABOIN to pass them to FZF */
+	/* Store possible completions in FZFTABIN to pass them to FZF */
 	size_t i;
+	struct stat attr;
+	char tmp_path[PATH_MAX];
 	for (i = 1; matches[i]; i++) {
+		if (*matches[i] == '/') {
+			stat(matches[i], &attr);
+		} else {
+			snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
+			stat(tmp_path, &attr);
+		}
 		char *p = strrchr(matches[i], '/');
 		if (p && *(++p))
-			fprintf(fp, "%s\n", p);
+			fprintf(fp, "%s%s\n", S_ISDIR(attr.st_mode) ? di_c : fi_c, p);
 		else
-			fprintf(fp, "%s\n", matches[i]);
+			fprintf(fp, "%s%s\n", S_ISDIR(attr.st_mode) ? di_c : fi_c, matches[i]);
 	}
 
 	fclose(fp);
@@ -269,13 +277,14 @@ fzftab(char **matches)
 
 	/* Run FZF and store the ouput into the FZFTABOUT file */
 	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
-	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer='>' "
+	snprintf(cmd, PATH_MAX, "$(cat %s | sort | fzf --pointer='>' "
 			"--color=\"%s,gutter:-1,prompt:%s:bold,"
 			"hl:%s:underline,hl+:%s:bold:underline\" "
 			"--bind tab:accept,right:accept,left:abort "
 			"--info=inline --layout=reverse-list "
 			"--height=%zu "
 			"--margin=0,0,0,%d "
+			"--ansi "
 			"--query=\"%s\" > %s)",
 			FZFTABIN,
 			colorize ? "dark" : "bw",
@@ -345,7 +354,7 @@ fzftab(char **matches)
 		}
 
 		/* Append slash for dirs and space for non-dirs */
-		struct stat attr;
+//		struct stat attr;
 		char *pp = strrchr(rl_line_buffer, ' ');
 		if (!pp || !*(++pp))
 			pp = rl_line_buffer;
