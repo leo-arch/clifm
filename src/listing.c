@@ -1182,7 +1182,8 @@ list_dir(void)
 			if (files_counter) {
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			} else {
-				if (check_file_access(file_info[n]) == 0)
+//				if (check_file_access(file_info[n]) == 0)
+				if (check_file_access(attr) == 0)
 					file_info[n].filesn = -1;
 				else
 					file_info[n].filesn = 1;
@@ -1235,7 +1236,8 @@ list_dir(void)
 #endif
 			/* Do not perform the access check if the user is root */
 			if (!(flags & ROOT_USR)
-			&& check_file_access(file_info[n]) == 0) {
+//			&& check_file_access(file_info[n]) == 0) {
+			&& check_file_access(attr) == 0) {
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;

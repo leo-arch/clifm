@@ -23,6 +23,7 @@
 */
 
 #pragma once
+#include <sys/stat.h>
 
 /* checks.c */
 void file_cmd_check(void);
@@ -38,4 +39,4 @@ int is_number(const char *restrict str);
 int is_acl(char *file);
 char *get_sudo_path(void);
 void check_term(void);
-int check_file_access(const struct fileinfo file);
+int check_file_access(const struct stat file);

@@ -64,6 +64,42 @@ get_dir_color(const char *filename, const mode_t mode)
 	return color;
 }
 
+char *
+get_file_color(const char *filename, const struct stat attr)
+{
+	char *color = (char *)NULL;
+
+#ifdef _LINUX_CAP
+	cap_t cap;
+#endif
+	if (attr.st_mode & 04000) { /* SUID */
+		color = su_c;
+	} else if (attr.st_mode & 02000) { /* SGID */
+		color = sg_c;
+	}
+#ifdef _LINUX_CAP
+	else if (check_cap && (cap = cap_get_file(filename))) {
+		color = ca_c;
+		cap_free(cap);
+	}
+#endif
+	else if ((attr.st_mode & 00100) /* Exec */
+	|| (attr.st_mode & 00010) || (attr.st_mode & 00001)) {
+		if (attr.st_size == 0)
+			color = ee_c;
+		else
+			color = ex_c;
+	} else if (attr.st_size == 0) {
+		color = ef_c;
+	} else if (attr.st_nlink > 1) { /* Multi-hardlink */
+		color = mh_c;
+	} else { /* Regular file */
+		color = fi_c;
+	}
+
+	return color;
+}
+
 /* Returns a pointer to the corresponding color code for EXT, if some
  * color was defined */
 char *

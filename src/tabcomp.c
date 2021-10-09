@@ -15,6 +15,7 @@ typedef char *rl_cpvfunc_t;
 
 #include "exec.h"
 #include "aux.h"
+#include "checks.h"
 #include "strings.h"
 #include "colors.h"
 #include "navigation.h"
@@ -117,7 +118,7 @@ print_filename(char *to_print, char *full_pathname)
 		}
 	}
 
-//	int rl_visible_stats = 1;
+/*	int rl_visible_stats = 1; */
 	if (rl_filename_completion_desired && !colorize) {
 		if (cur_comp_type == TCMP_CMD) {
 			putc('*', rl_outstream);
@@ -196,6 +197,33 @@ rl_strpbrk(char *s1, char *s2)
 	return (char *)NULL;
 }
 
+static char *
+fzftab_color(const char *filename, const struct stat attr)
+{
+	switch(attr.st_mode & S_IFMT) {
+	case S_IFDIR:
+		if (!check_file_access(attr))
+			return nd_c;
+		return get_dir_color(filename, attr.st_mode);
+	case S_IFREG:
+		if (!check_file_access(attr))
+			return nf_c;
+		char *ext_cl = (char *)NULL;
+		char *ext = strrchr(filename, '.');
+		if (ext && ext != filename)
+			ext_cl = get_ext_color(ext);
+		if (ext_cl)
+			return ext_cl;
+		return get_file_color(filename, attr);
+	case S_IFSOCK: return so_c;
+	case S_IFIFO: return pi_c;
+	case S_IFBLK: return bd_c;
+	case S_IFCHR: return cd_c;
+	case S_IFLNK: return ln_c;
+	default: return uf_c;
+	}
+}
+
 #ifndef _NO_FZF
 /* Display possible completions using FZF. If one of these possible
  * completions is selected, insert it into the current line buffer */
@@ -216,17 +244,31 @@ fzftab(char **matches)
 	struct stat attr;
 	char tmp_path[PATH_MAX];
 	for (i = 1; matches[i]; i++) {
+		char *cl = (char *)NULL;
 		if (*matches[i] == '/') {
-			stat(matches[i], &attr);
+			if (colorize) {
+				stat(matches[i], &attr);
+				cl = fzftab_color(matches[i], attr);
+			}
 		} else {
 			snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
-			stat(tmp_path, &attr);
+			if (colorize) {
+				stat(tmp_path, &attr);
+				cl = fzftab_color(tmp_path, attr);
+			}
 		}
+
+		char ext_cl[MAX_COLOR];
+		*ext_cl = '\0';
+		if (cl && *cl != _ESC)
+			snprintf(ext_cl, MAX_COLOR, "\x1b[%sm", cl);
+
 		char *p = strrchr(matches[i], '/');
 		if (p && *(++p))
-			fprintf(fp, "%s%s\n", S_ISDIR(attr.st_mode) ? di_c : fi_c, p);
+			fprintf(fp, "%s%s%s\n", *ext_cl ? ext_cl : (cl ? cl : ""), p, df_c);
 		else
-			fprintf(fp, "%s%s\n", S_ISDIR(attr.st_mode) ? di_c : fi_c, matches[i]);
+			fprintf(fp, "%s%s%s\n", *ext_cl ? ext_cl : (cl ? cl : ""),
+					matches[i], df_c);
 	}
 
 	fclose(fp);
@@ -277,8 +319,9 @@ fzftab(char **matches)
 
 	/* Run FZF and store the ouput into the FZFTABOUT file */
 	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
-	snprintf(cmd, PATH_MAX, "$(cat %s | sort | fzf --pointer='>' "
+	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer='>' "
 			"--color=\"%s,gutter:-1,prompt:%s:bold,"
+			"fg+:-1,pointer:green:bold,"
 			"hl:%s:underline,hl+:%s:bold:underline\" "
 			"--bind tab:accept,right:accept,left:abort "
 			"--info=inline --layout=reverse-list "
@@ -354,7 +397,6 @@ fzftab(char **matches)
 		}
 
 		/* Append slash for dirs and space for non-dirs */
-//		struct stat attr;
 		char *pp = strrchr(rl_line_buffer, ' ');
 		if (!pp || !*(++pp))
 			pp = rl_line_buffer;
