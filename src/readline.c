@@ -1305,7 +1305,7 @@ my_rl_completion(const char *text, int start, int end)
 {
 	char **matches = (char **)NULL;
 	cur_comp_type = TCMP_NONE;
-	UNUSED(end);
+
 	if (start == 0) { /* Only for the first word entered in the prompt */
 		/* Commands completion */
 		if (end == 0 && !autocd && !auto_open) {

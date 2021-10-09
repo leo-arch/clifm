@@ -986,6 +986,9 @@ after_usual_completion:
 					cur_color = hw_c;
 					fputs(cur_color, stdout);
 				}
+//				int l = 0;
+				l = 0;
+				char t[PATH_MAX];
 				for (k = 0; ss[k]; k++) {
 					if (ss[k] == ' ')
 						wc = 0;
@@ -993,7 +996,17 @@ after_usual_completion:
 					if (!wc)
 						rl_highlight(ss, (size_t)k, SET_COLOR);
 
-					char t[2];
+					if (ss[k] < 0) {
+						t[l++] = ss[k];
+						if (ss[k + 1] >= 0) {
+							t[l] = '\0';
+							l = 0;
+							rl_insert_text(t);
+							rl_redisplay();
+						}
+						continue;
+					}
+
 					t[0] = (char)ss[k];
 					t[1] = '\0';
 					rl_insert_text(t);
