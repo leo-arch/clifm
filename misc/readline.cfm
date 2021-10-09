@@ -40,6 +40,8 @@ $if mode=emacs
 "\x1b\x4f\x63": forward-word
 
 # A few keybinds to avoid conflicts with CliFM specific keybinds
+"\C-d":
+"\e\e":
 "\C-r\C-r": re-read-init-file
 "\C-p\C-p": exchange-point-and-mark
 "\C-zA": do-lowercase-version
