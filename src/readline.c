@@ -1308,12 +1308,13 @@ my_rl_completion(const char *text, int start, int end)
 	UNUSED(end);
 	if (start == 0) { /* Only for the first word entered in the prompt */
 		/* Commands completion */
-/*		if (end == 0) { // If text is empty, do nothing
-			// Prevent readline from attempting path completion if
-			// rl_completion matches returns NULL
+		if (end == 0 && !autocd && !auto_open) {
+			/* If text is empty, do nothing */
+			/* Prevent readline from attempting path completion if
+			 * rl_completion matches returns NULL */
 			rl_attempted_completion_over = 1;
 			return (char **)NULL;
-		} */
+		}
 
 		/* History cmd completion */
 		if (*text == '!')
