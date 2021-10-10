@@ -392,8 +392,15 @@ fzftab(char **matches)
 	printf("\x1b[%dA", lines);
 
 	/* No results */
-	if (ret != EXIT_SUCCESS)
+	if (ret != EXIT_SUCCESS) {
+		if (cur_comp_type == TCMP_HIST) {
+			/* Reinsert the history char, removed before when calling
+			 * the history completion function */
+			rl_stuff_char('!');
+			rl_redisplay();
+		}
 		return exit_status;
+	}
 
 	fp = fopen(FZFTABOUT, "r");
 	if (!fp) {
