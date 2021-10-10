@@ -15,6 +15,7 @@ typedef char *rl_cpvfunc_t;
 
 #include "exec.h"
 #include "aux.h"
+#include "misc.h"
 #include "checks.h"
 #include "strings.h"
 #include "colors.h"
@@ -235,7 +236,8 @@ fzftab(char **matches)
 
 	FILE *fp = fopen(FZFTABIN, "w");
 	if (!fp) {
-		fprintf(stderr, "\n%s: %s: %s\n", PROGRAM_NAME, FZFTABIN, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			FZFTABIN, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -404,7 +406,8 @@ fzftab(char **matches)
 
 	fp = fopen(FZFTABOUT, "r");
 	if (!fp) {
-		fprintf(stderr, "\n%s: %s: %s\n", PROGRAM_NAME, FZFTABOUT, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			FZFTABOUT, strerror(errno));
 		return exit_status;
 	}
 
