@@ -198,6 +198,10 @@ rl_strpbrk(char *s1, char *s2)
 	return (char *)NULL;
 }
 
+#ifndef _NO_FZF
+#define FZFTABIN "/tmp/clifm.fzf.in"
+#define FZFTABOUT "/tmp/clifm.fzf.out"
+
 static char *
 fzftab_color(const char *filename, const struct stat attr)
 {
@@ -225,15 +229,167 @@ fzftab_color(const char *filename, const struct stat attr)
 	}
 }
 
-#ifndef _NO_FZF
+static inline char *
+get_entry_color(char **matches, const size_t i)
+{
+	struct stat attr;
+	char *cl = (char *)NULL;
+
+	if (*matches[i] == '/') {
+		if (colorize && cur_comp_type == TCMP_PATH) {
+			stat(matches[i], &attr);
+			cl = fzftab_color(matches[i], attr);
+		}
+	} else if (*matches[i] == '~') {
+		if (colorize && cur_comp_type == TCMP_PATH) {
+			char *exp_path = tilde_expand(matches[i]);
+			if (exp_path) {
+				char tmp_path[PATH_MAX];
+				strncpy(tmp_path, exp_path, PATH_MAX);
+				free(exp_path);
+				stat(tmp_path, &attr);
+				cl = fzftab_color(tmp_path, attr);
+			}
+		}
+	} else {
+		if (colorize) {
+			if (cur_comp_type == TCMP_PATH) {
+				char tmp_path[PATH_MAX];
+				snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
+				stat(tmp_path, &attr);
+				cl = fzftab_color(tmp_path, attr);
+			} else if (cur_comp_type == TCMP_CMD) {
+				if (is_internal_c(matches[i]))
+					cl = hv_c;
+			}
+		}
+	}
+
+	return cl;
+}
+
+static inline void
+write_completion(char *buf, const size_t *offset, int *exit_status)
+{
+	/* Remove ending new line char */
+	char *n = strchr(buf, '\n');
+	if (n)
+		*n = '\0';
+	if (cur_comp_type == TCMP_PATH) {
+		char *esc_buf = escape_str(buf);
+		if (esc_buf) {
+			rl_insert_text(esc_buf + *offset);
+			free(esc_buf);
+		} else {
+			rl_insert_text(buf + *offset);
+		}
+	} else {
+		rl_insert_text(buf + *offset);
+	}
+
+	/* Append slash for dirs and space for non-dirs */
+	char *pp = rl_line_buffer;
+	if (pp) {
+		while (*pp) {
+			if (pp == rl_line_buffer) {
+				pp++;
+				continue;
+			}
+			if (*pp == ' ' && *(pp - 1) != '\\' && *(pp + 1) != ' ') {
+				pp++;
+				break;
+			}
+			pp++;
+		}
+	}
+
+	if (!pp || !*pp)
+		pp = rl_line_buffer;
+
+	char deq_str[PATH_MAX];
+	*deq_str = '\0';
+	if (strchr(pp, '\\')) {
+		size_t i = 0;
+		char *b = pp;
+		while (*b && i < (PATH_MAX - 1)) {
+			if (*b != '\\')
+				deq_str[i++] = *b;
+			b++;
+		}
+		deq_str[i] = '\0';
+	}
+
+	char _path[PATH_MAX];
+	*_path = '\0';
+	if (*pp != '/' && *pp != '.' && *pp != '~')
+		snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, pp);
+
+	char *spath = *_path ? _path : (*deq_str ? deq_str : pp);
+	char *epath = (char *)NULL; 
+	if (*spath == '~')
+		epath = tilde_expand(spath);
+	else if (*spath == '.') {
+		xchdir(ws[cur_ws].path, NO_TITLE);
+		epath = realpath(spath, NULL);
+		/* No need to change back to CWD. Done here */
+		*exit_status = -1;
+	}
+
+	if (epath)
+		spath = epath;
+
+	struct stat attr;
+	if (stat(spath, &attr) != -1 && S_ISDIR(attr.st_mode))
+		rl_insert_text("/");
+	else
+		rl_insert_text(" ");
+
+	free(epath);
+}
+
+static inline char *
+get_last_word(char *matches)
+{
+	/* Get word after last non-escaped space */
+	char *ss = matches, *s = (char *)NULL;
+	while (*ss) {
+		if (ss == matches) {
+			ss++;
+			continue;
+		}
+		if (*ss == ' ' && *(ss - 1) != '\\' && *(ss + 1) != ' ')
+			s = ss;
+		ss++;
+	}
+	if (!s)
+		s = matches;
+
+	/* Get word after last non-escaped slash */
+	char *sl = s;
+	char *d = (char *)NULL;
+	while (*sl) {
+		if (sl == s) {
+			if (*sl == '/')
+				d = sl;
+		} else if (*sl == '/' && *(sl - 1) != '\\') {
+			d = sl;
+		}
+		sl++;
+	}
+
+	if (!d)
+		d = s;
+	else if (*d == '/')
+		d++;
+
+	return d;
+}
+
 /* Display possible completions using FZF. If one of these possible
  * completions is selected, insert it into the current line buffer */
 static int
 fzftab(char **matches)
 {
-#define FZFTABIN "/tmp/clifm.fzf.in"
-#define FZFTABOUT "/tmp/clifm.fzf.out"
-
 	FILE *fp = fopen(FZFTABIN, "w");
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
@@ -245,41 +401,11 @@ fzftab(char **matches)
 
 	/* Store possible completions in FZFTABIN to pass them to FZF */
 	size_t i;
-	struct stat attr;
 	for (i = 1; matches[i]; i++) {
 		if (!matches[i] || !*matches[i])
 			continue;
-		
-		char *cl = (char *)NULL;
-		if (*matches[i] == '/') {
-			if (colorize && cur_comp_type == TCMP_PATH) {
-				stat(matches[i], &attr);
-				cl = fzftab_color(matches[i], attr);
-			}
-		} else if (*matches[i] == '~') {
-			if (colorize && cur_comp_type == TCMP_PATH) {
-				char *exp_path = tilde_expand(matches[i]);
-				if (exp_path) {
-					char tmp_path[PATH_MAX];
-					strncpy(tmp_path, exp_path, PATH_MAX);
-					free(exp_path);
-					stat(tmp_path, &attr);
-					cl = fzftab_color(tmp_path, attr);
-				}
-			}
-		} else {
-			if (colorize) {
-				if (cur_comp_type == TCMP_PATH) {
-					char tmp_path[PATH_MAX];
-					snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
-					stat(tmp_path, &attr);
-					cl = fzftab_color(tmp_path, attr);
-				} else if (cur_comp_type == TCMP_CMD) {
-					if (is_internal_c(matches[i]))
-						cl = hv_c;
-				}
-			}
-		}
+
+		char *cl = get_entry_color(matches, i);
 
 		char ext_cl[MAX_COLOR];
 		*ext_cl = '\0';
@@ -301,40 +427,7 @@ fzftab(char **matches)
 
 	/* Set a pointer to the last word (either space or slash). We
 	 * use this to highlight the matching prefix in FZF */
-
-	/* Get word after last non-escaped space */
-	char *ss = matches[0], *s = (char *)NULL;
-	while (*ss) {
-		if (ss == matches[0]) {
-			ss++;
-			continue;
-		}
-		if (*ss == ' ' && *(ss - 1) != '\\' && *(ss + 1) != ' ')
-			s = ss;
-		ss++;
-	}
-	if (!s)
-		s = matches[0];
-
-	/* Get word after last non-escaped slash */
-	char *sl = s;
-	char *d = (char *)NULL;
-	while (*sl) {
-		if (sl == s) {
-			if (*sl == '/')
-				d = sl;
-		} else if (*sl == '/' && *(sl - 1) != '\\') {
-			d = sl;
-		}
-		sl++;
-	}
-
-	if (!d)
-		d = s;
-	else if (*d == '/')
-		d++;
-
-	char *lw = d;
+	char *lw = get_last_word(matches[0]);
 
 	/* Calculate the height of the FZF window based on the amount
 	 * of entries */
@@ -402,7 +495,6 @@ fzftab(char **matches)
 			/* Reinsert the history char, removed before when calling
 			 * the history completion function */
 			rl_stuff_char('!');
-			rl_redisplay();
 		}
 		return exit_status;
 	}
@@ -432,81 +524,8 @@ fzftab(char **matches)
 			offset = mlen;
 	}
 
-	if (*buf) {
-		/* Remove ending new line char */
-		char *n = strchr(buf, '\n');
-		if (n)
-			*n = '\0';
-		if (cur_comp_type == TCMP_PATH) {
-			char *esc_buf = escape_str(buf);
-			if (esc_buf) {
-				rl_insert_text(esc_buf + offset);
-				free(esc_buf);
-			} else {
-				rl_insert_text(buf + offset);
-			}
-		} else {
-			rl_insert_text(buf + offset);
-		}
-
-		/* Append slash for dirs and space for non-dirs */
-		char *pp = rl_line_buffer;
-		if (pp) {
-			while (*pp) {
-				if (pp == rl_line_buffer) {
-					pp++;
-					continue;
-				}
-				if (*pp == ' ' && *(pp - 1) != '\\' && *(pp + 1) != ' ') {
-					pp++;
-					break;
-				}
-				pp++;
-			}
-		}
-
-		if (!pp || !*pp)
-			pp = rl_line_buffer;
-
-		char deq_str[PATH_MAX];
-		*deq_str = '\0';
-		if (strchr(pp, '\\')) {
-			i = 0;
-			char *b = pp;
-			while (*b && i < (PATH_MAX - 1)) {
-				if (*b != '\\')
-					deq_str[i++] = *b;
-				b++;
-			}
-			deq_str[i] = '\0';
-		}
-
-		char _path[PATH_MAX];
-		*_path = '\0';
-		if (*pp != '/' && *pp != '.' && *pp != '~')
-			snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, pp);
-
-		char *spath = *_path ? _path : (*deq_str ? deq_str : pp);
-		char *epath = (char *)NULL; 
-		if (*spath == '~')
-			epath = tilde_expand(spath);
-		else if (*spath == '.') {
-			xchdir(ws[cur_ws].path, NO_TITLE);
-			epath = realpath(spath, NULL);
-			/* No need to change back to CWD. Done here */
-			exit_status = -1;
-		}
-
-		if (epath)
-			spath = epath;
-
-		if (stat(spath, &attr) != -1 && S_ISDIR(attr.st_mode))
-			rl_insert_text("/");
-		else
-			rl_insert_text(" ");
-
-		free(epath);
-	}
+	if (*buf)
+		write_completion(buf, &offset, &exit_status);
 
 	return exit_status;
 }
