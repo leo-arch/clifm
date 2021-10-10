@@ -1271,7 +1271,7 @@ sort_name_generator(const char *text, int state)
 	    NULL};
 
 	while ((name = sorts[i++]) != NULL) {
-		if (*text == *name && strncmp(name, text, len) == 0)
+		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
 
