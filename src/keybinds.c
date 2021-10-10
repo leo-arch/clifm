@@ -1480,6 +1480,7 @@ rl_cmdhist(int count, int key)
 				return EXIT_SUCCESS;
 			if (++p >= (int)current_hist_n) {
 				rl_replace_line("", 1);
+				curhistindex++;
 				return EXIT_SUCCESS;
 			}
 		} else {
