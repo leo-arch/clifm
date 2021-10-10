@@ -287,6 +287,8 @@ fzftab(char **matches)
 
 	/* Set a pointer to the last word (either space or slash). We
 	 * use this to highlight the matching prefix in FZF */
+
+	/* Get word after last non-escaped space */
 	char *ss = matches[0], *s = (char *)NULL;
 	while (*ss) {
 		if (ss == matches[0]) {
@@ -306,7 +308,7 @@ fzftab(char **matches)
 		s = matches[0];
 	} */
 
-	char *sl = strrchr(s, '/');
+/*	char *sl = strrchr(s, '/');
 	if (sl) {
 		if (*(sl + 1)) {
 			sl++;
@@ -315,9 +317,27 @@ fzftab(char **matches)
 		}
 	} else {
 		sl = s;
+	} */
+
+	/* Get word after last non-escaped slash */
+	char *sl = s;
+	char *d = (char *)NULL;
+	while (*sl) {
+		if (sl == s) {
+			if (*sl == '/')
+				d = sl;
+		} else if (*sl == '/' && *(sl - 1) != '\\') {
+			d = sl;
+		}
+		sl++;
 	}
 
-	char *lw = sl;
+	if (!d)
+		d = s;
+	else if (*d == '/')
+		d++;
+
+	char *lw = d;
 
 	/* Calculate the height of the FZF window based on the amount
 	 * of entries */
