@@ -75,7 +75,7 @@ stat_char(char *filename)
 }
 
 /* Stupid comparison routine for qsort () ing strings. */
-static int
+/*static int
 compare_strings(const void *s1, const void *s2)
 {
 	int result;
@@ -86,7 +86,7 @@ compare_strings(const void *s1, const void *s2)
 		result = strcmp(s1, s2);
 
 	return result;
-}
+} */
 
 /* The user must press "y" or "n". Non-zero return means "y" pressed. */
 static int
@@ -235,29 +235,29 @@ get_entry_color(char **matches, const size_t i)
 	struct stat attr;
 	char *cl = (char *)NULL;
 
-	if (*matches[i] == '/') {
+	if (*matches[i] == '/') { /* Absolute path */
 		if (colorize && cur_comp_type == TCMP_PATH) {
-			stat(matches[i], &attr);
-			cl = fzftab_color(matches[i], attr);
+			if (stat(matches[i], &attr) != -1)
+				cl = fzftab_color(matches[i], attr);
 		}
-	} else if (*matches[i] == '~') {
+	} else if (*matches[i] == '~') {  /* Tilde */
 		if (colorize && cur_comp_type == TCMP_PATH) {
 			char *exp_path = tilde_expand(matches[i]);
 			if (exp_path) {
 				char tmp_path[PATH_MAX];
 				strncpy(tmp_path, exp_path, PATH_MAX);
 				free(exp_path);
-				stat(tmp_path, &attr);
-				cl = fzftab_color(tmp_path, attr);
+				if (stat(tmp_path, &attr) != -1)
+					cl = fzftab_color(tmp_path, attr);
 			}
 		}
-	} else {
+	} else { /* Relative path */
 		if (colorize) {
 			if (cur_comp_type == TCMP_PATH) {
 				char tmp_path[PATH_MAX];
 				snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
-				stat(tmp_path, &attr);
-				cl = fzftab_color(tmp_path, attr);
+				if (stat(tmp_path, &attr) != -1)
+					cl = fzftab_color(tmp_path, attr);
 			} else if (cur_comp_type == TCMP_CMD) {
 				if (is_internal_c(matches[i]))
 					cl = hv_c;
@@ -682,11 +682,11 @@ after_usual_completion:
 			/* Sort the items. */
 			/* It is safe to sort this array, because the lowest common
 			denominator found in matches[0] will remain in place. */
-			for (i = 0; matches[i]; i++);
+//			for (i = 0; matches[i]; i++);
 			/* Try sorting the array without matches[0], since we need it to
 			stay in place no matter what. */
-			if (i)
-				qsort(matches + 1, i - 1, sizeof (char *), compare_strings);
+//			if (i)
+//				qsort(matches + 1, i - 1, sizeof (char *), compare_strings);
 
 			/* Remember the lowest common denominator for it may be unique. */
 			lowest_common = savestring(matches[0], strlen(matches[0]));
@@ -980,8 +980,8 @@ after_usual_completion:
 			   0 < len <= limit  implies  count = 1. */
 
 			/* Sort the items if they are not already sorted. */
-			if (!rl_ignore_completion_duplicates)
-				qsort(matches + 1, len ? (size_t)len - 1 : 0, sizeof (char *), compare_strings);
+//			if (!rl_ignore_completion_duplicates)
+//				qsort(matches + 1, len ? (size_t)len - 1 : 0, sizeof (char *), compare_strings);
 
 			/* Print the sorted items, up-and-down alphabetically, like
 			   ls might. */
