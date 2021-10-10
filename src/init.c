@@ -1084,7 +1084,11 @@ external_arguments(int argc, char **argv)
 		case 36: xargs.autojump = autojump = 0; break;
 #ifndef _NO_HIGHLIGHT
 		case 37: xargs.highlight = highlight = 1; break;
-#endif
+#else
+		case 37:
+			fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+				exit(EXIT_FAILURE);
+#endif /* !_NO_HIGHLIGHT */
 		case 38: xargs.check_cap = check_cap = 0; break;
 		case 39: xargs.check_ext = check_ext = 0; break;
 		case 40: xargs.follow_symlinks = follow_symlinks = 0; break;
@@ -1102,7 +1106,11 @@ external_arguments(int argc, char **argv)
 			}
 			}
 			break;
-#endif
+#else
+		case 43:
+			fprintf(stderr, _("%s: fzftab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+				exit(EXIT_FAILURE);
+#endif /* !_NO_FZF */
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
