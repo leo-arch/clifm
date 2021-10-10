@@ -276,23 +276,35 @@ fzftab(char **matches)
 			snprintf(ext_cl, MAX_COLOR, "\x1b[%sm", cl);
 
 		char *p = strrchr(matches[i], '/');
-		if (p && *(++p))
-			fprintf(fp, "%s%s%s\n", *ext_cl ? ext_cl : (cl ? cl : ""), p, df_c);
-		else
-			fprintf(fp, "%s%s%s\n", *ext_cl ? ext_cl : (cl ? cl : ""),
-					matches[i], df_c);
+		char *color = *ext_cl ? ext_cl : (cl ? cl : "");
+		char *entry = (p && *(++p)) ? p : matches[i];
+
+		if (!SELFORPARENT(entry))
+			fprintf(fp, "%s%s%s\n", color, entry, df_c);
 	}
 
 	fclose(fp);
 
 	/* Set a pointer to the last word (either space or slash). We
 	 * use this to highlight the matching prefix in FZF */
-	char *s = strrchr(matches[0], ' ');
+	char *ss = matches[0], *s = (char *)NULL;
+	while (*ss) {
+		if (ss == matches[0]) {
+			ss++;
+			continue;
+		}
+		if (*ss == ' ' && *(ss - 1) != '\\' && *(ss + 1) != ' ')
+			s = ss;
+		ss++;
+	}
+	if (!s)
+		s = matches[0];
+/*	char *s = strrchr(matches[0], ' ');
 	if (s && *(s + 1) != ' ') {
 		++s;
 	} else {
 		s = matches[0];
-	}
+	} */
 
 	char *sl = strrchr(s, '/');
 	if (sl) {
