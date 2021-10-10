@@ -1317,8 +1317,11 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* History cmd completion */
-		if (*text == '!')
+		if (*text == '!') {
 			matches = rl_completion_matches(text + 1, &hist_generator);
+			if (matches)
+				cur_comp_type = TCMP_HIST;
+		}
 
 		/* If autocd or auto-open, try to expand ELN's first */
 		if (!matches && (autocd || auto_open)) {

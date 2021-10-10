@@ -795,12 +795,13 @@ enum comp_type {
 	TCMP_CMD = 1,
 	TCMP_CSCHEME = 2,
 	TCMP_ELN = 3,
-	TCMP_JUMP = 4,
-	TCMP_NET = 5,
-	TCMP_NONE = 6,
-	TCMP_PATH = 7,
-	TCMP_PROF = 8,
-	TCMP_SORT = 9
+	TCMP_HIST = 4,
+	TCMP_JUMP = 5,
+	TCMP_NET = 6,
+	TCMP_NONE = 7,
+	TCMP_PATH = 8,
+	TCMP_PROF = 9,
+	TCMP_SORT = 10
 };
 
 extern enum comp_type cur_comp_type;

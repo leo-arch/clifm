@@ -432,10 +432,14 @@ fzftab(char **matches)
 		char *n = strchr(buf, '\n');
 		if (n)
 			*n = '\0';
-		char *esc_buf = escape_str(buf);
-		if (esc_buf) {
-			rl_insert_text(esc_buf + offset);
-			free(esc_buf);
+		if (cur_comp_type == TCMP_PATH) {
+			char *esc_buf = escape_str(buf);
+			if (esc_buf) {
+				rl_insert_text(esc_buf + offset);
+				free(esc_buf);
+			} else {
+				rl_insert_text(buf + offset);
+			}
 		} else {
 			rl_insert_text(buf + offset);
 		}
