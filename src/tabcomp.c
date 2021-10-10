@@ -233,18 +233,17 @@ fzftab(char **matches)
 #define FZFTABIN "/tmp/clifm.fzf.in"
 #define FZFTABOUT "/tmp/clifm.fzf.out"
 
-	int exit_status = EXIT_SUCCESS;
-
 	FILE *fp = fopen(FZFTABIN, "w");
 	if (!fp) {
 		fprintf(stderr, "\n%s: %s: %s\n", PROGRAM_NAME, FZFTABIN, strerror(errno));
-		return exit_status;
+		return EXIT_FAILURE;
 	}
+
+	int exit_status = EXIT_SUCCESS;
 
 	/* Store possible completions in FZFTABIN to pass them to FZF */
 	size_t i;
 	struct stat attr;
-	char tmp_path[PATH_MAX];
 	for (i = 1; matches[i]; i++) {
 		char *cl = (char *)NULL;
 		if (*matches[i] == '/') {
@@ -256,6 +255,7 @@ fzftab(char **matches)
 			if (colorize && cur_comp_type == TCMP_PATH) {
 				char *exp_path = tilde_expand(matches[i]);
 				if (exp_path) {
+					char tmp_path[PATH_MAX];
 					strncpy(tmp_path, exp_path, PATH_MAX);
 					free(exp_path);
 					stat(tmp_path, &attr);
@@ -263,15 +263,24 @@ fzftab(char **matches)
 				}
 			}
 		} else {
-			snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
-			if (colorize && cur_comp_type == TCMP_PATH) {
-				stat(tmp_path, &attr);
-				cl = fzftab_color(tmp_path, attr);
+			if (colorize) {
+				if (cur_comp_type == TCMP_PATH) {
+					char tmp_path[PATH_MAX];
+					snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
+					stat(tmp_path, &attr);
+					cl = fzftab_color(tmp_path, attr);
+				} else if (cur_comp_type == TCMP_CMD) {
+					if (is_internal_c(matches[i]))
+						cl = hv_c;
+				}
 			}
 		}
 
 		char ext_cl[MAX_COLOR];
 		*ext_cl = '\0';
+		/* If color does not start with escape, then we have a color
+		 * for a file extension. In this case, we need to properly
+		 * construct the color code */
 		if (cl && *cl != _ESC)
 			snprintf(ext_cl, MAX_COLOR, "\x1b[%sm", cl);
 
@@ -301,23 +310,6 @@ fzftab(char **matches)
 	}
 	if (!s)
 		s = matches[0];
-/*	char *s = strrchr(matches[0], ' ');
-	if (s && *(s + 1) != ' ') {
-		++s;
-	} else {
-		s = matches[0];
-	} */
-
-/*	char *sl = strrchr(s, '/');
-	if (sl) {
-		if (*(sl + 1)) {
-			sl++;
-		} else {
-			sl = (char *)NULL;
-		}
-	} else {
-		sl = s;
-	} */
 
 	/* Get word after last non-escaped slash */
 	char *sl = s;
@@ -460,7 +452,7 @@ fzftab(char **matches)
 			}
 		}
 
-		if (!*pp)
+		if (!pp || !*pp)
 			pp = rl_line_buffer;
 
 		char deq_str[PATH_MAX];

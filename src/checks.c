@@ -298,7 +298,6 @@ is_internal_c(char *restrict cmd)
 	    "ws",
 	    "x", "X",
 	    NULL};
-
 		
 //	int found = 0;
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
