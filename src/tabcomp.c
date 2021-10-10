@@ -247,6 +247,9 @@ fzftab(char **matches)
 	size_t i;
 	struct stat attr;
 	for (i = 1; matches[i]; i++) {
+		if (!matches[i] || !*matches[i])
+			continue;
+		
 		char *cl = (char *)NULL;
 		if (*matches[i] == '/') {
 			if (colorize && cur_comp_type == TCMP_PATH) {
