@@ -85,6 +85,10 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	if (cur_color == hw_c && !sp)
 		goto END;
 
+#ifdef _NO_HIGHLIGHT
+	/* This line just prevents a compiler warning */
+	int wrong_cmd_line = 1;
+#endif
 	if (!sp)
 		wrong_cmd_line = 0;
 

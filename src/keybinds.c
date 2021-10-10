@@ -353,6 +353,10 @@ rl_create_file(int count, int key)
 static void
 my_insert_text(char *text, char *s, const char _s)
 {
+#ifdef _NO_HIGHLIGHT
+	UNUSED(s); UNUSED(_s);
+#endif
+
 	if (!text || !*text)
 		return;
 
