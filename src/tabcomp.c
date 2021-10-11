@@ -468,10 +468,13 @@ fzftab(char **matches)
 	int fzf_offset = (rl_point + prompt_offset < max_fzf_offset)
 			? (rl_point + prompt_offset - 4) : 0;
 
-	if (!lw)
+	size_t lw_len = 0;
+	if (!lw) {
 		fzf_offset++;
-	else
-		fzf_offset -= (int)(strlen(lw) - 1);
+	} else {
+		lw_len = strlen(lw);
+		fzf_offset -= (int)(lw_len - 1);
+	}
 
 	if (fzf_offset < 0)
 		fzf_offset = 0;
@@ -530,6 +533,16 @@ fzftab(char **matches)
 			offset = strlen(q + 1);
 		else
 			offset = mlen;
+	}
+
+	/* Honor case insensitive completion */
+	if (!case_sens_path_comp && lw) {
+		if (strncmp(lw, buf, lw_len) != 0) {
+			int bk = rl_point;
+			rl_delete_text(bk - (int)lw_len, rl_end);
+			rl_point = rl_end = bk - (int)lw_len;
+			offset = 0;
+		}
 	}
 
 	if (*buf)
