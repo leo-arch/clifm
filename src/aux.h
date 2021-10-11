@@ -41,6 +41,7 @@ char *get_size_unit(off_t size);
 char *get_cmd_path(const char *cmd);
 int count_dir(const char *dir, int pop);
 char *xitoa(int n);
+int xatoi(const char *s);
 FILE *open_fstream_r(char *name, int *fd);
 FILE *open_fstream_w(char *name, int *fd);
 void close_fstream(FILE *fp, int fd);

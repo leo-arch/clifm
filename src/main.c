@@ -68,6 +68,7 @@ struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
 struct fileinfo *file_info = (struct fileinfo *)NULL;
 struct remote_t *remotes = (struct remote_t *)NULL;
 struct alias_t *aliases = (struct alias_t *)NULL;
+struct user_t user;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion;
 #endif

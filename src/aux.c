@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
+#include <limits.h>
 
 #include "aux.h"
 #include "exec.h"
@@ -480,6 +481,17 @@ xitoa(int n)
 	}
 
 	return &buf[++i];
+}
+
+int
+xatoi(const char *s)
+{
+	long ret = strtol(s, NULL, 10);
+	if (ret == LONG_MAX || ret == LONG_MIN) {
+		fprintf(stderr, "%s: strtol: %s: %s\n", PROGRAM_NAME, s, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	return (int)ret;
 }
 
 /* Some memory wrapper functions */

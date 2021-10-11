@@ -36,6 +36,7 @@
 #include <unistd.h>
 
 #include "aux.h"
+#include "checks.h"
 #include "colors.h"
 #include "listing.h"
 #include "mime.h"
@@ -1420,7 +1421,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 	switch (file_attrib.st_mode & S_IFMT) {
 
 	case S_IFREG:
-		if (access(ent, R_OK) == -1) {
+		if (!check_file_access(file_attrib)) {
 			color = nf_c;
 		} else if (file_attrib.st_mode & S_ISUID) { /* set uid file */
 			color = su_c;
@@ -1462,7 +1463,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 		break;
 
 	case S_IFDIR:
-		if (access(ent, R_OK | X_OK) != 0) {
+		if (!check_file_access(file_attrib)) {
 			color = nd_c;
 		} else {
 			int is_oth_w = 0;
@@ -1482,7 +1483,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 		break;
 
 	case S_IFLNK:
-		linkname = realpath(ent, (char *)NULL);
+		linkname = realpath(ent, NULL);
 		if (linkname) {
 			color = ln_c;
 			free(linkname);

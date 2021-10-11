@@ -24,6 +24,7 @@
 
 #include "helpers.h"
 
+#include <limits.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
@@ -54,7 +55,7 @@
 #include "history.h"
 #include "file_operations.h"
 
-struct user_t user;
+//struct user_t user;
 
 /* 
  * functions
@@ -418,7 +419,7 @@ load_jumpdb(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		if (!*line || *line == '\n')
+		if (!*line || *line == '\n' || *line == '#')
 			continue;
 		if (*line == '@') {
 			if (line[line_len - 1] == '\n')
@@ -987,7 +988,7 @@ external_arguments(int argc, char **argv)
 			if (!is_number(optarg))
 				break;
 			int opt_int = atoi(optarg);
-			if (opt_int >= 0)
+			if (opt_int >= 0 && opt_int <= INT_MAX)
 				xargs.max_dirhist = max_dirhist = opt_int;
 		} break;
 
@@ -1002,7 +1003,7 @@ external_arguments(int argc, char **argv)
 			if (!is_number(optarg))
 				break;
 			int opt_int = atoi(optarg);
-			if (opt_int >= 0)
+			if (opt_int >= 0 && opt_int <= INT_MAX)
 				xargs.max_path = max_path = opt_int;
 		} break;
 
@@ -1042,7 +1043,7 @@ external_arguments(int argc, char **argv)
 			if (!is_number(optarg))
 				break;
 			int opt_int = atoi(optarg);
-			if (opt_int >= 0)
+			if (opt_int >= 0 && opt_int <= INT_MAX)
 				xargs.max_files = max_files = opt_int;
 			break;
 
@@ -1218,8 +1219,10 @@ external_arguments(int argc, char **argv)
 		case 'y': light_mode = xargs.light = 1; break;
 
 		case 'z': {
+			if (!is_number(optarg))
+				break;
 			int arg = atoi(optarg);
-			if (!is_number(optarg) || arg < 0 || arg > SORT_TYPES)
+			if (arg < 0 || arg > SORT_TYPES)
 				sort = 1;
 			else
 				sort = arg;

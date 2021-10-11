@@ -249,10 +249,21 @@ recolorize_line(void)
 
 	/* Loop through each char from cursor position onward and colorize it */
 	i = rl_point ? 1 : 0;
+	size_t l = 0;
+	char t[PATH_MAX];
 	for (;ss[i]; i++) {
 		rl_highlight(ss, i, SET_COLOR);	
 		/* Redisplay the current char with the appropriate color */
-		char t[2];
+		if (ss[i] < 0) {
+			t[l++] = ss[i];
+			if (ss[i + 1] >= 0) {
+				t[l] = '\0';
+				l = 0;
+				rl_insert_text(t);
+				rl_redisplay();
+			}
+			continue;
+		}
 		t[0] = (char)ss[i];
 		t[1] = '\0';
 		rl_insert_text(t);

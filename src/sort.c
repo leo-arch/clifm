@@ -35,6 +35,7 @@
 //#include <sys/stat.h>
 
 #include "checks.h"
+//#include "aux.h" /* For xatoi */
 #include "listing.h"
 //#include "messages.h"
 

@@ -385,6 +385,31 @@ get_last_word(char *matches)
 	return d;
 }
 
+static inline int
+run_fzf(const size_t *height, const int *offset, const char *lw)
+{
+	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
+	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer='>' "
+			"--color=\"%s,gutter:-1,prompt:%s:bold,"
+			"fg+:-1,pointer:green:bold,"
+			"hl:%s:underline,hl+:%s:bold:underline\" "
+			"--bind tab:accept,right:accept,left:abort "
+			"--info=inline --layout=reverse-list "
+			"--height=%zu "
+			"--margin=0,0,0,%d "
+			"--ansi "
+			"--query=\"%s\" > %s)",
+			FZFTABIN,
+			colorize ? "dark" : "bw",
+			colorize ? "cyan" : "-1",
+			"magenta", "magenta", 
+			*height, *offset, lw ? lw : "", FZFTABOUT);
+	int ret = launch_execle(cmd);
+	free(cmd);
+
+	return ret;
+}
+
 /* Display possible completions using FZF. If one of these possible
  * completions is selected, insert it into the current line buffer */
 static int
@@ -452,24 +477,7 @@ fzftab(char **matches)
 		fzf_offset = 0;
 
 	/* Run FZF and store the ouput into the FZFTABOUT file */
-	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
-	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer='>' "
-			"--color=\"%s,gutter:-1,prompt:%s:bold,"
-			"fg+:-1,pointer:green:bold,"
-			"hl:%s:underline,hl+:%s:bold:underline\" "
-			"--bind tab:accept,right:accept,left:abort "
-			"--info=inline --layout=reverse-list "
-			"--height=%zu "
-			"--margin=0,0,0,%d "
-			"--ansi "
-			"--query=\"%s\" > %s)",
-			FZFTABIN,
-			colorize ? "dark" : "bw",
-			colorize ? "cyan" : "-1",
-			"magenta", "magenta", 
-			height, fzf_offset, lw ? lw : "", FZFTABOUT);
-	int ret = launch_execle(cmd);
-	free(cmd);
+	int ret = run_fzf(&height, &fzf_offset, lw);
 	unlink(FZFTABIN);
 
 	/* Calculate currently used lines to go back to the correct cursor
