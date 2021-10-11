@@ -546,13 +546,14 @@ tab_complete(int what_to_do)
 	if (rl_no_tabhist)
 		return EXIT_SUCCESS;
 
-	char **matches;
-	rl_compentry_func_t *our_func;
-	int start, scan, end, delimiter = 0, pass_next;
-	char *text, *saved_line_buffer;
-	char *replacement;
-	char quote_char = '\0';
-	int found_quote = 0;
+//	char **matches = (char **)NULL;
+	rl_compentry_func_t *our_func = (rl_compentry_func_t *)NULL;
+//	int start = 0; //scan = 0, delimiter = 0, pass_next = 0;
+//	char *text = (char *)NULL,
+	char *saved_line_buffer = (char *)NULL;
+//	char *replacement = (char *)NULL;
+//	char quote_char = '\0';
+//	int found_quote = 0;
 
 	if (rl_line_buffer)
 		saved_line_buffer = savestring(rl_line_buffer, (size_t)rl_end);
@@ -565,10 +566,13 @@ tab_complete(int what_to_do)
 	rl_filename_completion_desired = 0;
 	rl_filename_quoting_desired = 1;
 
-	/* We now look backwards for the start of a filename/variable word. */
-	end = rl_point;
+	int end = rl_point, delimiter = 0;
+	char quote_char = '\0';
 
+	/* We now look backwards for the start of a filename/variable word. */
 	if (rl_point) {
+		int scan = 0, pass_next = 0, found_quote = 0;
+
 		if (rl_completer_quote_characters) {
 		/* We have a list of characters which can be used in pairs to
 	     quote substrings for the completer.  Try to find the start
@@ -640,10 +644,12 @@ tab_complete(int what_to_do)
 		}
 	}
 
-	/* At this point, we know we have an open quote if quote_char != '\0'. */
-	start = rl_point;
+	int start = rl_point;
 	rl_point = end;
-	text = rl_copy_text(start, end);
+	char *text = rl_copy_text(start, end);
+	char **matches = (char **)NULL;
+
+	/* At this point, we know we have an open quote if quote_char != '\0'. */
 
   /* If the user wants to TRY to complete, but then wants to give
      up and use the default completion function, they set the
@@ -654,13 +660,13 @@ tab_complete(int what_to_do)
 		if (matches || rl_attempted_completion_over) {
 			rl_attempted_completion_over = 0;
 			our_func = (rl_compentry_func_t *)NULL;
-			goto after_usual_completion;
+			goto AFTER_USUAL_COMPLETION;
 		}
 	}
 
 	matches = rl_completion_matches(text, our_func);
 
-after_usual_completion:
+AFTER_USUAL_COMPLETION:
 	free(text);
 
 	if (!matches) {
@@ -670,7 +676,7 @@ after_usual_completion:
 		int should_quote;
 
 		/* It seems to me that in all the cases we handle we would like
-		to ignore duplicate possiblilities.  Scan for the text to
+		to ignore duplicate possiblilities. Scan for the text to
 		insert being identical to the other completions. */
 		if (rl_ignore_completion_duplicates) {
 			char *lowest_common;
@@ -728,7 +734,7 @@ after_usual_completion:
 		}
 
 		switch (what_to_do) {
-		case TAB:
+//		case TAB:
 		case '!':
 		/* If we are matching filenames, then here is our chance to
 	     do clever processing by re-examining the list.  Call the
@@ -753,7 +759,7 @@ after_usual_completion:
 			inserted quote character when it no longer is necessary, such as
 			if we change the string we are completing on and the new set of
 			matches don't require a quoted substring. */
-			replacement = matches[0];
+			char *replacement = matches[0];
 
 			should_quote = matches[0] && rl_completer_quote_characters &&
 			rl_filename_completion_desired && rl_filename_quoting_desired;
@@ -834,7 +840,7 @@ after_usual_completion:
 			 of the line, then add a space. */
 			if (matches[1]) {
 				if (what_to_do == '!')
-					goto display_matches;		/* XXX */
+					goto DISPLAY_MATCHES;		/* XXX */
 				else if (rl_editing_mode != 0) /* vi_mode */
 					rl_ding();	/* There are other matches remaining. */
 			} else {
@@ -852,7 +858,7 @@ after_usual_completion:
 					struct stat finfo;
 					char *filename = tilde_expand(matches[0]);
 
-					if ((stat(filename, &finfo) == 0) && S_ISDIR (finfo.st_mode)) {
+					if ((stat(filename, &finfo) == 0) && S_ISDIR(finfo.st_mode)) {
 						if (rl_line_buffer[rl_point] != '/') {
 #ifndef _NO_HIGHLIGHT
 							if (highlight) {
@@ -880,7 +886,7 @@ after_usual_completion:
 			}
 		break;
 
-		case '*': {
+/*		case '*': {
 			i = 1;
 
 			rl_begin_undo_group();
@@ -897,7 +903,7 @@ after_usual_completion:
 			}
 			rl_end_undo_group();
 		}
-		break;
+		break; */
 
 		case '?': {
 			int len, count, limit, max;
@@ -911,14 +917,14 @@ after_usual_completion:
 				rl_crlf();
 				print_filename(temp, matches[0]);
 				rl_crlf();
-				goto restart;
+				goto RESTART;
 			}
 
 			/* There is more than one answer.  Find out how many there are,
 			and find out what the maximum printed length of a single entry
 			is. */
 
-		display_matches:
+DISPLAY_MATCHES:
 			for (max = 0, i = 1; matches[i]; i++) {
 				char *temp;
 				size_t name_length;
@@ -953,7 +959,7 @@ after_usual_completion:
 					fflush(rl_outstream);
 					if (!get_y_or_n()) {
 //						rl_crlf();
-						goto restart;
+						goto RESTART;
 					}
 				}
 			}
@@ -961,19 +967,28 @@ after_usual_completion:
 			}
 #endif
 
-			/* How many items of MAX length can we fit in the screen window? */
-			max += 2;
-			limit = term_cols / max;
-			if (limit != 1 && (limit * max == term_cols))
-				limit--;
 
-			/* Avoid a possible floating exception.  If max > screenwidth,
-			   limit will be 0 and a divide-by-zero fault will result. */
-			if (limit == 0)
-			  limit = 1;
+#ifndef _NO_FZF
+			if (xargs.fzftab != 1) {
+#endif
+			{
+				/* How many items of MAX length can we fit in the screen window? */
+				max += 2;
+				limit = term_cols / max;
+				if (limit != 1 && (limit * max == term_cols))
+					limit--;
 
-			/* How many iterations of the printing loop? */
-			count = (len + (limit - 1)) / limit;
+				/* Avoid a possible floating exception.  If max > screenwidth,
+				   limit will be 0 and a divide-by-zero fault will result. */
+				if (limit == 0)
+				  limit = 1;
+
+				/* How many iterations of the printing loop? */
+				count = (len + (limit - 1)) / limit;
+			}
+#ifndef _NO_FZF
+		}
+#endif
 
 			/* Watch out for special case.  If LEN is less than LIMIT, then
 			   just do the inner printing loop.
@@ -988,39 +1003,45 @@ after_usual_completion:
 //			rl_crlf();
 			putchar('\n');
 #ifndef _NO_HIGHLIGHT
-			if (highlight && cur_color != tx_c)
+			if (highlight && cur_color != tx_c) {
+				cur_color = tx_c;
 				fputs(tx_c, stdout);
+			}
 #endif
-			if (cur_comp_type == TCMP_PATH) {
-				if (*matches[0] == '~') {
-					char *exp_path = tilde_expand(matches[0]);
-					if (exp_path) {
-						xchdir(exp_path, NO_TITLE);
-						free(exp_path);
+			char *qq = (char *)NULL;
+			if (cur_comp_type != TCMP_PATH)
+				goto CALC_OFFSET;
+
+			if (*matches[0] == '~') {
+				char *exp_path = tilde_expand(matches[0]);
+				if (exp_path) {
+					xchdir(exp_path, NO_TITLE);
+					free(exp_path);
+				}
+			} else {
+				char *p = strrchr(matches[0], '/');
+				if (!p)
+					goto CALC_OFFSET;
+
+				if (p == matches[0]) {
+					if (*(p + 1)) {
+						char pp = *(p + 1);
+						*(p + 1) = '\0';
+						xchdir(matches[0], NO_TITLE);
+						*(p + 1) = pp;
+					} else {
+						/* We have the root dir */
+						xchdir(matches[0], NO_TITLE);
 					}
 				} else {
-					char *p = strrchr(matches[0], '/');
-					if (p) {
-						if (p == matches[0]) {
-							if (*(p + 1)) {
-								char pp = *(p + 1);
-								*(p + 1) = '\0';
-								xchdir(matches[0], NO_TITLE);
-								*(p + 1) = pp;
-							} else {
-								/* We have the root dir */
-								xchdir(matches[0], NO_TITLE);
-							}
-						} else {
-							*p = '\0';
-							xchdir(matches[0], NO_TITLE);
-							*p = '/';
-						}
-					}
+					*p = '\0';
+					xchdir(matches[0], NO_TITLE);
+					*p = '/';
 				}
 			}
 
-			char *qq = strrchr(matches[0], '/');
+CALC_OFFSET:
+			qq = strrchr(matches[0], '/');
 			if (qq) {
 				if (*(++qq))
 					tab_offset = strlen(qq);
@@ -1031,19 +1052,19 @@ after_usual_completion:
 #ifndef _NO_FZF
 			if (xargs.fzftab == 1) {
 				if (fzftab(matches) == -1)
-					goto restart;
-				goto reset_path;
+					goto RESTART;
+				goto RESET_PATH;
 			}
 #endif
 
 			for (i = 1; i <= (size_t)count; i++) {
 				if (i >= term_rows) {
-					// A little pager
+					/* A little pager */
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 					int c = 0;
 					while ((c = xgetchar()) == _ESC);
 					if (c == 'q') {
-						// Delete the --Mas-- label
+						/* Delete the --Mas-- label */
 						fputs("\x1b[7D\x1b[7X\x1b[1A\n", stdout);
 						break;
 					}
@@ -1080,12 +1101,12 @@ after_usual_completion:
 				fputs(tx_c, stdout);
 
 #ifndef _NO_FZF
-		reset_path:
+RESET_PATH:
 #endif
 			if (cur_comp_type == TCMP_PATH)
 				xchdir(ws[cur_ws].path, NO_TITLE);
 
-		restart:
+RESTART:
 			rl_on_new_line();
 #ifndef _NO_HIGHLIGHT
 			if (highlight) {

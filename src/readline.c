@@ -1306,7 +1306,7 @@ my_rl_completion(const char *text, int start, int end)
 	char **matches = (char **)NULL;
 	cur_comp_type = TCMP_NONE;
 	UNUSED(end);
-	if (start == 0) { /* Only for the first word entered in the prompt */
+	if (start == 0) { /* Only for the first entered word */
 		/* Commands completion */
 /*		if (end == 0 && !autocd && !auto_open) {
 			// If text is empty, do nothing
@@ -1413,8 +1413,7 @@ my_rl_completion(const char *text, int start, int end)
 		else if (*rl_line_buffer == 'c' && ((rl_line_buffer[1] == 's'
 		&& rl_line_buffer[2] == ' ')
 		|| strncmp(rl_line_buffer, "colorschemes ", 13) == 0)) {
-			matches = rl_completion_matches(text,
-			    &cschemes_generator);
+			matches = rl_completion_matches(text, &cschemes_generator);
 		}
 
 		/* ### PROFILES COMPLETION ### */
