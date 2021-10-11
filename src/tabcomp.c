@@ -571,14 +571,14 @@ tab_complete(int what_to_do)
 
 	/* We now look backwards for the start of a filename/variable word. */
 	if (rl_point) {
-		int scan = 0, found_quote = 0;
+		int scan = 0;
 
 		if (rl_completer_quote_characters) {
 		/* We have a list of characters which can be used in pairs to
 	     quote substrings for the completer.  Try to find the start
 	     of an unclosed quoted substring. */
 		/* FOUND_QUOTE is set so we know what kind of quotes we found. */
-			int pass_next;
+			int pass_next, found_quote = 0;
 			for (scan = pass_next = 0; scan < end; scan++) {
 				if (pass_next) {
 					pass_next = 0;
