@@ -397,13 +397,14 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 			"--info=inline --layout=reverse-list "
 			"--height=%zu "
 			"--margin=0,0,0,%d "
-			"--ansi "
+			"--ansi %s "
 			"--query=\"%s\" > %s)",
 			FZFTABIN,
 			colorize ? "dark" : "bw",
 			colorize ? "cyan" : "-1",
 			"magenta", "magenta", 
-			*height, *offset, lw ? lw : "", FZFTABOUT);
+			*height, *offset, case_sens_path_comp ? "+i" : "-x",
+			lw ? lw : "", FZFTABOUT);
 	int ret = launch_execle(cmd);
 	free(cmd);
 
