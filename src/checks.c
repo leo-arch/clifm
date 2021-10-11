@@ -299,20 +299,9 @@ is_internal_c(char *restrict cmd)
 	    "x", "X",
 	    NULL};
 		
-//	int found = 0;
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
 	if (found_cmd(int_cmds, i, cmd))
 		return 1;
-
-/*	while (--i >= 0) {
-		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
-			found = 1;
-			break;
-		}
-	}
-
-	if (found)
-		return 1; */
 
 	/* Check for the search and history functions as well */
 	else if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
@@ -350,20 +339,9 @@ is_internal(char *restrict cmd)
 	    "te",
 	    NULL};
 
-//	int found = 0;
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
 	if (found_cmd(int_cmds, i, cmd))
 		return 1;
-
-/*	while (--i >= 0) {
-		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
-			found = 1;
-			break;
-		}
-	}
-
-	if (found)
-		return 1; */
 
 	/* Check for the search function as well */
 	else if (*cmd == '/' && access(cmd, F_OK) != 0)
