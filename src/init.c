@@ -1087,7 +1087,7 @@ external_arguments(int argc, char **argv)
 		case 37: xargs.highlight = highlight = 1; break;
 #else
 		case 37:
-			fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			fprintf(stderr, _("%s: highlight: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 				exit(EXIT_FAILURE);
 #endif /* !_NO_HIGHLIGHT */
 		case 38: xargs.check_cap = check_cap = 0; break;
