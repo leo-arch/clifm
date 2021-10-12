@@ -163,9 +163,12 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (!str || !*str)
 		return;
 
+	int baej_offset = 0;
 	if (wrong_cmd) {
-		if (!recover_from_wrong_cmd())
+		if (!recover_from_wrong_cmd()) {
+			baej_offset = 1;
 			offset++;
+		}
 	}
 
 	if (suggestion.printed && str != suggestion_buf)
@@ -230,8 +233,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * is the same (7 - 4 == 6 - 3 == 1) */
 
 	if (baej) {
-		/* Move the cursor two columns to the right and print "> " */
-		printf("\x1b[2C%s> \x1b[0m", mi_c);
+		/* Move the cursor %d columns to the right and print "> " */
+		printf("\x1b[%dC%s> \x1b[0m", baej_offset ? 1 : 2, mi_c);
 	}
 	/* Print the suggestion */
 	printf("%s%s", color, str + offset - (offset ? 1 : 0));
