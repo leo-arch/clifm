@@ -253,40 +253,21 @@ END:
 				remove_suggestion_not_end();
 		}
 	}
-
-/*	if (s == -1 && suggestions) {
-		if (check_cmds(rl_line_buffer, (size_t)rl_end)) {
-			suggestion.offset = 0;
-			if (cur_color == hw_c) {
-				change_word_color(rl_line_buffer, 0, df_c);
-				cur_color = df_c;
-			}
-			// return 2 to skip the suggestions function
-			return 2;
-		}
-#ifndef _NO_HIGHLIGHT
-		// We have a non-existent command name. Let's change the string
-		// color. Do this only once
-		else if (highlight && *rl_line_buffer != '#' && *rl_line_buffer != '$'
-		&& *rl_line_buffer != '\'' && *rl_line_buffer != '"') {
-			if (suggestion.printed)
-				clear_suggestion(CS_FREEBUF);
-
-			wrong_cmd = wrong_cmd_line = 1;
-			change_word_color(rl_line_buffer, 0, hw_c);
-			cur_color = hw_c;
-			return 0;
-		}
-#endif // _NO_HIGHLIGHT
-	} */
 #else
 	UNUSED(s);
-#endif // _NO_SUGGESTIONS
+#endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_HIGHLIGHT
-	if (!highlight /*|| rl_point == rl_end*/) {
+	if (!highlight) {
 		if (_del) {
 #ifndef _NO_SUGGESTIONS
+			/* Since we have removed a char, let's check if there is
+			 * a suggestion available using the modified input line */
+			char *sp = strchr(rl_line_buffer, ' ');
+			if (wrong_cmd && !sp) {
+				rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
+				return 2;
+			}
 			if (rl_point == 0 && rl_end == 0 && wrong_cmd)
 				recover_from_wrong_cmd();
 #endif
@@ -299,6 +280,11 @@ END:
 #endif
 	if (_del) {
 #ifndef _NO_SUGGESTIONS
+		char *sp = strchr(rl_line_buffer, ' ');
+		if (wrong_cmd && !sp) {
+			rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
+			return 2;
+		}
 		if (rl_point == 0 && rl_end == 0 && wrong_cmd)
 			recover_from_wrong_cmd();
 #endif
