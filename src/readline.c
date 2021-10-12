@@ -263,8 +263,9 @@ END:
 #ifndef _NO_SUGGESTIONS
 			/* Since we have removed a char, let's check if there is
 			 * a suggestion available using the modified input line */
-			char *sp = strchr(rl_line_buffer, ' ');
-			if (wrong_cmd && !sp) {
+			if (wrong_cmd && s == -1) {
+				/* If a suggestion is found, the normal prompt will be
+				 * restored and wrong_cmd will be set to zero */
 				rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
 				return 2;
 			}
@@ -280,8 +281,7 @@ END:
 #endif
 	if (_del) {
 #ifndef _NO_SUGGESTIONS
-		char *sp = strchr(rl_line_buffer, ' ');
-		if (wrong_cmd && !sp) {
+		if (wrong_cmd && s == -1) {
 			rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
 			return 2;
 		}
