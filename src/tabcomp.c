@@ -293,28 +293,29 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 
 	/* Append slash for dirs and space for non-dirs */
 	char *pp = rl_line_buffer;
+	char *ss = (char *)NULL;
 	if (pp) {
 		while (*pp) {
 			if (pp == rl_line_buffer) {
 				pp++;
 				continue;
 			}
-			if (*pp == ' ' && *(pp - 1) != '\\' && *(pp + 1) != ' ') {
-				pp++;
-				break;
-			}
+
+			if (*pp == ' ' && *(pp - 1) != '\\' && *(pp + 1) != ' ')
+				ss = pp + 1;
+
 			pp++;
 		}
 	}
 
-	if (!pp || !*pp)
-		pp = rl_line_buffer;
+	if (!ss || !*ss)
+		ss = rl_line_buffer;
 
 	char deq_str[PATH_MAX];
 	*deq_str = '\0';
-	if (strchr(pp, '\\')) {
+	if (strchr(ss, '\\')) {
 		size_t i = 0;
-		char *b = pp;
+		char *b = ss;
 		while (*b && i < (PATH_MAX - 1)) {
 			if (*b != '\\')
 				deq_str[i++] = *b;
@@ -325,10 +326,10 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 
 	char _path[PATH_MAX];
 	*_path = '\0';
-	if (*pp != '/' && *pp != '.' && *pp != '~')
-		snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, pp);
+	if (*ss != '/' && *ss != '.' && *ss != '~')
+		snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, ss);
 
-	char *spath = *_path ? _path : (*deq_str ? deq_str : pp);
+	char *spath = *_path ? _path : (*deq_str ? deq_str : ss);
 	char *epath = (char *)NULL; 
 	if (*spath == '~')
 		epath = tilde_expand(spath);
