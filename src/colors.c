@@ -281,6 +281,7 @@ reset_iface_colors(void)
 	*nm_c = '\0';
 	*si_c = '\0';
 	*ts_c = '\0';
+	*wp_c = '\0';
 }
 
 int
@@ -791,6 +792,13 @@ set_iface_colors(char **colors, const size_t words)
 				snprintf(ts_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
+		else if (*colors[i] == 'w' && strncmp(colors[i], "wp=", 3) == 0) {
+			if (!is_color_code(colors[i] + 3))
+				*wp_c = '\0';
+			else
+				snprintf(wp_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+		}
+
 		free(colors[i]);
 	}
 }
@@ -862,6 +870,8 @@ set_default_colors(void)
 		strcpy(bm_c, DEF_BM_C);
 	if (!*ts_c)
 		strcpy(ts_c, DEF_TS_C);
+	if (!*wp_c)
+		strcpy(wp_c, DEF_WP_C);
 
 	if (!*di_c)
 		strcpy(di_c, DEF_DI_C);

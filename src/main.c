@@ -558,20 +558,21 @@ char
 
 	/* Interface */
     bm_c[MAX_COLOR], /* Bookmarked directory */
-    dc_c[MAX_COLOR], /* Files counter color */
+    dc_c[MAX_COLOR], /* Files counter */
     df_c[MAX_COLOR], /* Default color */
-    dh_c[MAX_COLOR], /* Dirhist index color */
-    dl_c[MAX_COLOR], /* Dividing line index color */
-    el_c[MAX_COLOR], /* ELN color */
-    mi_c[MAX_COLOR], /* Misc indicators color */
+    dh_c[MAX_COLOR], /* Dirhist index */
+    dl_c[MAX_COLOR], /* Dividing line index */
+    el_c[MAX_COLOR], /* ELN */
+    mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* TAB completion suffix */
+    wc_c[MAX_COLOR], /* Welcome message color */
+	wp_c[MAX_COLOR], /* Warning prompt */
 
 	/* Suggestions */
     sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
     sh_c[MAX_COLOR], /* Auto-suggestions: history */
     sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
     sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
-    wc_c[MAX_COLOR], /* Welcome message color */
 
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */

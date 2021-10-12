@@ -163,7 +163,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (!str || !*str)
 		return;
 
-	int baej_offset = 0;
+	int baej_offset = 2;
 	if (wrong_cmd) {
 		if (!recover_from_wrong_cmd()) {
 			baej_offset = 1;
@@ -234,7 +234,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (baej) {
 		/* Move the cursor %d columns to the right and print "> " */
-		printf("\x1b[%dC%s> \x1b[0m", baej_offset ? 1 : 2, mi_c);
+		printf("\x1b[%dC%s> \x1b[0m", baej_offset, mi_c);
 	}
 	/* Print the suggestion */
 	printf("%s%s", color, str + offset - (offset ? 1 : 0));
@@ -1297,7 +1297,7 @@ rl_suggestions(const unsigned char c)
 				i--;
 			wprompt[i + 1] = '>';
 			wprompt[i + 2] = '\0';
-			rl_message("\1\x1b[1;31m\2%s\1%s\2 ", wprompt, tx_c);
+			rl_message("\1%s\2%s\1%s\2 ", wp_c, wprompt, tx_c);
 		}
 /*
 #ifndef _NO_HIGHLIGHT

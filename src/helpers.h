@@ -217,9 +217,9 @@ extern int watch;
 #define RL_NC "\001\x1b[0m\002"
 
 /* Default color definitions */
-#define DEF_LS_COLORS "di=01;34:fi=0:ln=01;36:mh=30;46:or=00;36:\
+/*#define DEF_LS_COLORS "di=01;34:fi=0:ln=01;36:mh=30;46:or=00;36:\
 pi=00;35:so=01;35:bd=01;33:cd=1:su=37;41:sg=30;43:st=37;44:\
-tw=30;42:ow=34;42:ex=01;32:no=31;47"
+tw=30;42:ow=34;42:ex=01;32:no=31;47" */
 
 #define DEF_FILE_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=0:\
 ef=00;33:nf=00;31:ln=01;36:mh=30;46:or=00;36:pi=00;35:\
@@ -228,7 +228,9 @@ ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=34;47:"
 
 #define DEF_IFACE_COLORS "el=01;33:mi=01;36:dl=01;34:tx=0:df=0:\
 dc=0:wc=01;36:dh=00;36:li=01;32:si=01;34:ti=01;33:em=01;31:wm=01;33:\
-nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
+nm=01;32:bm=01;36:sh=02;35:sf=02;04;36;sc=02;31:sx=02;32:\
+hb=00;36:hc=02;31:hd=00;36:he=00;36:hn=00;35:hp=02;36:hq=00;33:\
+hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=01;31:"
 
 #define DEF_EXT_COLORS "*.tar=01;31:*.tgz=01;31:*.arc=01;31:\
 *.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:\
@@ -287,6 +289,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
 #define DEF_TS_C "\x1b[04;35m"
+#define DEF_WP_C "\x1b[01;31m"
 
 #define DEF_DF_C "\x1b[0m"
 
@@ -1061,20 +1064,21 @@ extern char
 
 	/* Interface */
     bm_c[MAX_COLOR],	/* Bookmarked directory */
-    dc_c[MAX_COLOR],	/* Files counter color */
+    dc_c[MAX_COLOR],	/* Files counter */
     df_c[MAX_COLOR],	/* Default color */
-    dh_c[MAX_COLOR],	/* Dirhist index color */
-    dl_c[MAX_COLOR],	/* Dividing line color */
+    dh_c[MAX_COLOR],	/* Dirhist index */
+    dl_c[MAX_COLOR],	/* Dividing line */
     el_c[MAX_COLOR],	/* ELN color */
-    mi_c[MAX_COLOR],	/* Misc indicators color */
+    mi_c[MAX_COLOR],	/* Misc indicators */
 	ts_c[MAX_COLOR],	/* TAB completion suffix */
+    wc_c[MAX_COLOR],	/* Welcome message */
+	wp_c[MAX_COLOR],	/* Warning prompt */
 
 	/* Suggestions */
 	sc_c[MAX_COLOR],	/* Auto-suggestions: external commands */
 	sf_c[MAX_COLOR],	/* Auto-suggestions: filenames */
 	sh_c[MAX_COLOR],	/* Auto-suggestions: history */
 	sx_c[MAX_COLOR],	/* Auto-suggestions: internal commands and params */
-    wc_c[MAX_COLOR],	/* Welcome message color */
 
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */
