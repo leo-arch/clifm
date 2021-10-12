@@ -175,10 +175,10 @@ int
     unicode = UNSET,
     welcome_message = UNSET;
 
-#ifndef _NO_HIGHLIGHT
+//#ifndef _NO_HIGHLIGHT
 int wrong_cmd = 0;
 int wrong_cmd_line = 0;
-#endif
+//#endif
 
 int
     argc_bk = 0,

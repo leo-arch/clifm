@@ -80,6 +80,14 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 } */
 #endif
 
+void
+recover_from_wrong_cmd(void)
+{
+	rl_restore_prompt();
+	rl_clear_message();
+	wrong_cmd = 0;
+}
+
 /* This function is only used before running a keybind command. We don't
  * want the suggestion buffer after running a keybind */
 void
@@ -142,6 +150,11 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (!str || !*str)
 		return;
 
+	if (wrong_cmd) {
+		recover_from_wrong_cmd();
+		offset++;
+	}
+
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 #ifndef _NO_HIGHLIGHT
@@ -156,9 +169,10 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (offset > strlen(str))
 		return;
 
-	/* Store cursor position in two global variables: currow and curcol */
+	/* Store cursor position into two global variables: currow and curcol */
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
+//	printf("'%d:%zu'", curcol, offset);
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold */
 	size_t suggestion_len = wc_xstrlen(str + offset);
@@ -895,7 +909,7 @@ rl_suggestions(const unsigned char c)
 {
 	int printed = 0;
 	last_word_offset = 0;
-/*	static int msg_area = 0; */
+//	static int msg_area = 0;
 
 //	free(suggestion_buf);
 //	suggestion_buf = (char *)NULL;
@@ -903,6 +917,8 @@ rl_suggestions(const unsigned char c)
 	if (rl_end == 0 || rl_point == 0) {
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
+		if (wrong_cmd)
+			recover_from_wrong_cmd();
 		return EXIT_SUCCESS;
 	}
 
@@ -922,8 +938,11 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
-	if (!lw)
+	if (!lw) {
+//		if (wrong_cmd)
+//			recover_from_wrong_cmd();
 		return EXIT_SUCCESS;
+	}
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
@@ -932,13 +951,16 @@ rl_suggestions(const unsigned char c)
 	&& *(last_space - 1) == '\\')
 		last_space = (char *)NULL;
 
-#ifndef _NO_HIGHLIGHT
+//#ifndef _NO_HIGHLIGHT
 	/* Reset the wrong cmd flag whenever we have a new word or a new line */
-	if (rl_end == 0 || c == '\n')
-		wrong_cmd = wrong_cmd_line = 0;
-	if (c == ' ')
-		wrong_cmd = 0;
-#endif  /* !_NO_HIGHLIGHT */
+	if (rl_end == 0 || c == '\n') {
+		if (wrong_cmd)
+			recover_from_wrong_cmd();
+		wrong_cmd_line = 0;
+	}
+	if (c == ' ' && wrong_cmd)
+		recover_from_wrong_cmd();
+//#endif  /* !_NO_HIGHLIGHT */
 
 	/* We need a copy of the complete line */
 	char *full_line = rl_line_buffer;
@@ -1219,6 +1241,13 @@ rl_suggestions(const unsigned char c)
 		if (printed) {
 			suggestion.offset = 0;
 			goto SUCCESS;
+		} else if (xargs.warn_wrong_cmd == 1 && !wrong_cmd
+		&& *last_word != ';' && *last_word != ':'
+		&& *last_word != '#' && *last_word != '$'
+		&& *last_word != '\'' && *last_word != '"') {
+			wrong_cmd = 1;
+			rl_save_prompt();
+			rl_message("\1\x1b[1;31m\2(!):\1%s\2 ", tx_c);
 		}
 /*
 #ifndef _NO_HIGHLIGHT

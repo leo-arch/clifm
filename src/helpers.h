@@ -371,6 +371,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_EXT_CMD_OK 1
 #define DEF_FILES_COUNTER 1
 #define DEF_FOLLOW_SYMLINKS 1
+#define DEF_FZFTAB 0
 #define DEF_HIGHLIGHT 0
 #define DEF_ICONS 0
 #define DEF_INT_VARS 0
@@ -412,6 +413,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
+#define DEF_WARN_WRONG_CMD 0
 #define SUG_STRATS 7
 
 #define MAX_WS 8
@@ -738,6 +740,7 @@ struct param {
 #endif
 	int unicode;
 	int welcome_message;
+	int warn_wrong_cmd;
 };
 
 extern struct param xargs;
@@ -894,10 +897,10 @@ extern int
     unicode,
     welcome_message;
 
-#ifndef _NO_HIGHLIGHT
+//#ifndef _NO_HIGHLIGHT
 extern int wrong_cmd;
 extern int wrong_cmd_line;
-#endif
+//#endif
 
 extern int
     argc_bk,

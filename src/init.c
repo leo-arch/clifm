@@ -952,6 +952,7 @@ external_arguments(int argc, char **argv)
 		{"control-d-exits", no_argument, 0, 41},
 		{"int-vars", no_argument, 0, 42},
 		{"fzftab", no_argument, 0, 43},
+		{"warn-wrong-cmd", no_argument, 0, 44},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1112,6 +1113,8 @@ external_arguments(int argc, char **argv)
 			fprintf(stderr, _("%s: fzftab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 				exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
+		case 44:
+			xargs.warn_wrong_cmd = 1; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1521,6 +1524,7 @@ unset_xargs(void)
 #endif
 	xargs.unicode = UNSET;
 	xargs.welcome_message = UNSET;
+	xargs.warn_wrong_cmd = UNSET;
 }
 
 /* Keep track of attributes of the shell. Make sure the shell is running
@@ -2052,6 +2056,12 @@ check_options(void)
 	/* Do no override command line options */
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
+
+	if (xargs.fzftab == UNSET)
+		xargs.fzftab = DEF_FZFTAB;
+
+	if (xargs.warn_wrong_cmd == UNSET)
+		xargs.warn_wrong_cmd = DEF_WARN_WRONG_CMD;
 
 	if (xargs.control_d_exits == UNSET)
 		control_d_exits = DEF_CONTROL_D_EXITS;

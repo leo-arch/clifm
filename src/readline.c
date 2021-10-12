@@ -174,7 +174,7 @@ rl_exclude_input(unsigned char c)
 			clear_suggestion(CS_FREEBUF);
 #endif /* !_NO_SUGGESTIONS */
 
-		else if  (c == 'C' || c == 'D')
+		else if (c == 'C' || c == 'D')
 			cmdhist_flag = 0;
 
 		return 1;
@@ -279,19 +279,31 @@ END:
 		}
 #endif // _NO_HIGHLIGHT
 	} */
+#else
+	UNUSED(s);
 #endif // _NO_SUGGESTIONS
 
 #ifndef _NO_HIGHLIGHT
 	if (!highlight /*|| rl_point == rl_end*/) {
-		if (_del)
+		if (_del) {
+#ifndef _NO_SUGGESTIONS
+			if (rl_point == 0 && rl_end == 0 && wrong_cmd)
+				recover_from_wrong_cmd();
+#endif
 			return 2;
+		}
 		return 0;
 	}
 
 	recolorize_line();
 #endif
-	if (_del)
+	if (_del) {
+#ifndef _NO_SUGGESTIONS
+		if (rl_point == 0 && rl_end == 0 && wrong_cmd)
+			recover_from_wrong_cmd();
+#endif
 		return 2;
+	}
 	return 0;
 }
 

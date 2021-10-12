@@ -888,7 +888,10 @@ rl_clear_line(int count, int key)
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
+
 #ifndef _NO_SUGGESTIONS
+	if (wrong_cmd)
+		recover_from_wrong_cmd();
 	if (suggestion.nlines > term_rows) {
 		rl_on_new_line();
 		return EXIT_SUCCESS;
@@ -1567,9 +1570,10 @@ rl_cmdhist(int count, int key)
 static int
 rl_tab_comp(int count, int key)
 {
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
-
+#endif
 	UNUSED(count); UNUSED(key);
 
 	tab_complete('!');

@@ -25,6 +25,10 @@ typedef char *rl_cpvfunc_t;
 #include "highlight.h"
 #endif
 
+#ifndef _NO_SUGGESTIONS
+#include "suggestions.h"
+#endif
+
 #define PUTX(c) \
 	if (CTRL_CHAR(c)) { \
           putc('^', rl_outstream); \
@@ -342,7 +346,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 	if (stat(spath, &attr) != -1 && S_ISDIR(attr.st_mode))
 		rl_insert_text("/");
 	else
-		rl_insert_text(" ");
+		rl_stuff_char(' ');
 
 	free(epath);
 }
@@ -568,19 +572,11 @@ tab_complete(int what_to_do)
 	if (rl_no_tabhist)
 		return EXIT_SUCCESS;
 
-//	char **matches = (char **)NULL;
 	rl_compentry_func_t *our_func = (rl_compentry_func_t *)NULL;
-//	int start = 0; //scan = 0, delimiter = 0, pass_next = 0;
-//	char *text = (char *)NULL,
-	char *saved_line_buffer = (char *)NULL;
-//	char *replacement = (char *)NULL;
-//	char quote_char = '\0';
-//	int found_quote = 0;
 
+/*	char *saved_line_buffer = (char *)NULL;
 	if (rl_line_buffer)
-		saved_line_buffer = savestring(rl_line_buffer, (size_t)rl_end);
-	else
-		saved_line_buffer = (char *)NULL;
+		saved_line_buffer = savestring(rl_line_buffer, (size_t)rl_end); */
 
 	our_func = rl_completion_entry_function;
 
@@ -948,6 +944,11 @@ AFTER_USUAL_COMPLETION:
 			is. */
 
 DISPLAY_MATCHES:
+#ifndef _NO_SUGGESTIONS
+			if (wrong_cmd)
+				recover_from_wrong_cmd();
+#endif
+
 			for (max = 0, i = 1; matches[i]; i++) {
 				char *temp;
 				size_t name_length;
@@ -1188,12 +1189,12 @@ RESTART:
 	}
 
   /* Check to see if the line has changed through all of this manipulation. */
-	if (saved_line_buffer) {
+//	if (saved_line_buffer) {
 /*		if (strcmp (rl_line_buffer, saved_line_buffer) != 0)
 			completion_changed_buffer = 1;
 		else
 			completion_changed_buffer = 0; */
-		free(saved_line_buffer);
-	}
+//		free(saved_line_buffer);
+//	}
 	return 0;
 }
