@@ -239,7 +239,7 @@ rl_exclude_input(unsigned char c)
 	text[1] = '\0';
 	rl_insert_text(text);
 
-	int s;
+	int s = 0;
 
 END:
 #ifndef _NO_SUGGESTIONS
