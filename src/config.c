@@ -2229,6 +2229,7 @@ reset_variables(void)
 	no_eln = UNSET;
 	pager = UNSET;
 	print_selfiles = UNSET;
+	prompt_offset = UNSET;
 	prompt_style = UNSET;
 	restore_last_path = UNSET;
 	share_selbox = UNSET;

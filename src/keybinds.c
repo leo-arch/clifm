@@ -889,16 +889,22 @@ rl_clear_line(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
+#ifndef _NO_HIGHLIGHT
+	if (cur_color != tx_c) {
+		cur_color = tx_c;
+		fputs(cur_color, stdout);
+	}
+#endif
+
 #ifndef _NO_SUGGESTIONS
-	if (wrong_cmd)
-		recover_from_wrong_cmd();
+	if (wrong_cmd) {
+		if (!recover_from_wrong_cmd())
+			rl_point = 0;
+	}
 	if (suggestion.nlines > term_rows) {
 		rl_on_new_line();
 		return EXIT_SUCCESS;
 	}
-
-	cur_color = tx_c;
-	fputs(cur_color, stdout);
 
 	if (suggestion_buf) {
 		clear_suggestion(CS_FREEBUF);

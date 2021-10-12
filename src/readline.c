@@ -281,7 +281,7 @@ END:
 #endif
 	if (_del) {
 #ifndef _NO_SUGGESTIONS
-		if (wrong_cmd && s == -1) {
+		if (wrong_cmd && s == -1 && rl_end) {
 			rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
 			return 2;
 		}
@@ -308,15 +308,15 @@ my_rl_getc(FILE *stream)
 #endif /* __GO32__ */
 
 #ifndef _NO_FZF
-	if (xargs.fzftab) {
-		static int get_prompt_offset = 1;
-		if (get_prompt_offset) {
+	if (xargs.fzftab || xargs.warn_wrong_cmd) {
+#else
+	if (xargs.warn_wrong_cmd) {
+#endif /* !_NO_FZF */
+		if (prompt_offset == UNSET) {
 			get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 			prompt_offset = curcol;
-			get_prompt_offset = 0;
 		}
 	}
-#endif /* !_NO_FZF */
 
 	while(1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char));

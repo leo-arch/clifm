@@ -944,10 +944,10 @@ AFTER_USUAL_COMPLETION:
 			is. */
 
 DISPLAY_MATCHES:
-#ifndef _NO_SUGGESTIONS
+/*#ifndef _NO_SUGGESTIONS
 			if (wrong_cmd)
 				recover_from_wrong_cmd();
-#endif
+#endif */
 
 			for (max = 0, i = 1; matches[i]; i++) {
 				char *temp;

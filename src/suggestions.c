@@ -58,6 +58,9 @@ typedef char *rl_cpvfunc_t;
 #include "highlight.h"
 #endif
 
+#define PRINT_CMD 1
+#define CHECK_CMD 0
+
 static int free_color = 0;
 char *last_word = (char *)NULL;
 int last_word_offset = 0;
@@ -80,12 +83,22 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 } */
 #endif
 
-void
+int
 recover_from_wrong_cmd(void)
 {
+	/* Check rl_dispathing to know whether we are called from a keybind,
+	 * in which case we should skip this check */
+	if (rl_line_buffer && !rl_dispatching) {
+		char *p = (strrchr(rl_line_buffer, ' '));
+		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
+			return EXIT_FAILURE;
+	}
+
 	rl_restore_prompt();
 	rl_clear_message();
 	wrong_cmd = 0;
+
+	return EXIT_SUCCESS;
 }
 
 /* This function is only used before running a keybind command. We don't
@@ -151,20 +164,12 @@ print_suggestion(const char *str, size_t offset, const char *color)
 		return;
 
 	if (wrong_cmd) {
-		recover_from_wrong_cmd();
-		offset++;
+		if (!recover_from_wrong_cmd())
+			offset++;
 	}
 
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
-#ifndef _NO_HIGHLIGHT
-/*	if (highlight && wrong_cmd) {
-		wrong_cmd = 0;
-		change_word_color(last_word, last_word_offset, df_c);
-		cur_color = df_c;
-		offset = strlen(last_word) - (size_t)rl_point;
-	} */
-#endif /* !_NO_HIGHLIGHT */
 
 	if (offset > strlen(str))
 		return;
@@ -553,25 +558,33 @@ check_history(const char *str, const size_t len)
 }
 
 int
-check_cmds(const char *str, const size_t len)
+check_cmds(const char *str, const size_t len, const int print)
 {
+	if (!len)
+		return 0;
+
 	int i = (int)path_progsn;
 	while (--i >= 0) {
 		if (!bin_commands[i] || *str != *bin_commands[i])
 			continue;
 
-		if (len && strncmp(str, bin_commands[i], len) == 0
-		&& strlen(bin_commands[i]) > len) {
-			if (is_internal_c(bin_commands[i])) {
-				suggestion.type = CMD_SUG;
-				print_suggestion(bin_commands[i], len, sx_c);
-			} else if (ext_cmd_ok) {
-				suggestion.type = CMD_SUG;
-				print_suggestion(bin_commands[i], len, sc_c);
-			} else {
-				continue;
+		if (print) {
+			if (strncmp(str, bin_commands[i], len) == 0
+			&& strlen(bin_commands[i]) > len) {
+				if (is_internal_c(bin_commands[i])) {
+					suggestion.type = CMD_SUG;
+					print_suggestion(bin_commands[i], len, sx_c);
+				} else if (ext_cmd_ok) {
+					suggestion.type = CMD_SUG;
+					print_suggestion(bin_commands[i], len, sc_c);
+				} else {
+					continue;
+				}
+				return 1;
 			}
-			return 1;
+		} else {
+			if (strcmp(str, bin_commands[i]) == 0)
+				return 1;
 		}
 	}
 
@@ -958,8 +971,8 @@ rl_suggestions(const unsigned char c)
 			recover_from_wrong_cmd();
 		wrong_cmd_line = 0;
 	}
-	if (c == ' ' && wrong_cmd)
-		recover_from_wrong_cmd();
+/*	if (c == ' ' && wrong_cmd)
+		recover_from_wrong_cmd(); */
 //#endif  /* !_NO_HIGHLIGHT */
 
 	/* We need a copy of the complete line */
@@ -1235,9 +1248,27 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
-	if (!last_space) {
+	if (!last_space || !*last_space) {
 		size_t w_len = strlen(last_word);
-		printed = check_cmds(last_word, w_len);
+		int only_check = 0;
+		char lchar = rl_line_buffer[rl_end - 1];
+		if (last_space && !*last_space) {
+			/* At this point we know we have a command name plus an space
+			 * char. So, let's remove the space char and check the cmd
+			 * name only. No need to print any suggestion here: if the
+			 * command is valid, the suggestion should be already printed.
+			 * Otherwise, change the prompt to the warning prompt */
+			if (*rl_line_buffer == ' ')
+				goto SUCCESS;
+			only_check = 1;
+			rl_line_buffer[rl_end - 1] = '\0';
+		}
+		if (only_check) {
+			printed = check_cmds(rl_line_buffer, (size_t)rl_end - 1, CHECK_CMD);
+			rl_line_buffer[rl_end - 1] = lchar;
+		} else {
+			printed = check_cmds(last_word, w_len, PRINT_CMD);
+		}
 		if (printed) {
 			suggestion.offset = 0;
 			goto SUCCESS;
@@ -1247,7 +1278,23 @@ rl_suggestions(const unsigned char c)
 		&& *last_word != '\'' && *last_word != '"') {
 			wrong_cmd = 1;
 			rl_save_prompt();
-			rl_message("\1\x1b[1;31m\2(!):\1%s\2 ", tx_c);
+			/* Warning prompt */
+			/* Construct the prompt */
+			char wprompt[NAME_MAX];
+			wprompt[0] = '(';
+			wprompt[1] = '!';
+			wprompt[2] = ')';
+			wprompt[3] = ' ';
+			int i = 4;
+			for (; i < prompt_offset - 4; i++)
+				wprompt[i] = '-';
+			if (wprompt[i - 1] == '-')
+				wprompt[i] = ' ';
+			else
+				i--;
+			wprompt[i + 1] = '>';
+			wprompt[i + 2] = '\0';
+			rl_message("\1\x1b[1;31m\2%s\1%s\2 ", wprompt, tx_c);
 		}
 /*
 #ifndef _NO_HIGHLIGHT
