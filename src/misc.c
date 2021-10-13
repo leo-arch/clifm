@@ -1161,6 +1161,7 @@ free_stuff(void)
 	free(encoded_prompt);
 	free_dirlist();
 	free(opener);
+	free(wprompt_str);
 
 	if (stdin_tmp_dir) {
 		char *rm_cmd[] = {"rm", "-rd", "--", stdin_tmp_dir, NULL};

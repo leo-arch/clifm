@@ -276,6 +276,8 @@ char
 #endif
     *usr_cscheme = (char *)NULL,
     *user_home = (char *)NULL,
+	*wprompt_str = (char *)NULL,
+
     **argv_bk = (char **)NULL,
     **bin_commands = (char **)NULL,
     **bookmark_names = (char **)NULL,

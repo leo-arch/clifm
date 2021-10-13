@@ -2053,6 +2053,9 @@ check_options(void)
 	if (!usr_cscheme)
 		usr_cscheme = savestring("default", 7);
 
+	if (!wprompt_str)
+		wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
+
 	/* Do no override command line options */
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;

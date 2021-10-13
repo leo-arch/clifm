@@ -793,7 +793,11 @@ mvCmd=%d\n\n"
 # to the left of the prompt. Otherwise, if set to 'custom', this information\n\
 # will be stored in environment variables to be handled by the prompt string\n\
 # itself. Consult the manpage for more information.\n\
-PromptStyle=default\n\n",
+PromptStyle=default\n\n"
+
+"# String to be used by the warning prompt. The color of this prompt\n\
+# can be customized using the 'wp' code in the color scheme file\n\
+WarningPromptStr=\"%s\"\n\n",
 
 	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
@@ -802,7 +806,8 @@ PromptStyle=default\n\n",
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,
 		DEF_MV_CMD,
-	    DEFAULT_PROMPT);
+	    DEFAULT_PROMPT,
+	    DEF_WPROMPT_STR);
 
 	fprintf(config_fp,
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
@@ -1850,8 +1855,7 @@ read_config(void)
 
 		else if (*line == 'R' && strncmp(line, "RlEditMode=0", 12) == 0) {
 			rl_vi_editing_mode(1, 0);
-			/* By default, readline uses emacs editing
-			 * mode */
+			/* By default, readline uses emacs editing mode */
 		}
 
 		else if (xargs.share_selbox == UNSET && *line == 'S'
@@ -1978,31 +1982,6 @@ read_config(void)
 		}
 #endif /* !_NO_SUGGESTIONS */
 
-/*		else if (*line == 'S' && strncmp(line, "SystemShell=", 12) == 0) {
-			free(user.shell);
-			user.shell = (char *)NULL;
-			char *opt = strchr(line, '=');
-			if (!opt || !*opt || !*(++opt))
-				continue;
-
-			char *tmp = remove_quotes(opt);
-			if (!tmp)
-				continue;
-
-			if (*tmp == '/') {
-				if (access(tmp, F_OK | X_OK) != 0)
-					continue;
-				user.shell = savestring(tmp, strlen(tmp));
-			} else {
-				char *shell_path = get_cmd_path(tmp);
-				if (!shell_path)
-					continue;
-
-				user.shell = savestring(shell_path, strlen(shell_path));
-				free(shell_path);
-			}
-		} */
-
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
 			if (term) {
 				free(term);
@@ -2055,6 +2034,13 @@ read_config(void)
 				unicode = 1;
 			else if (strncmp(opt_str, "false", 5) == 0)
 				unicode = 0;
+		}
+
+		else if (*line == 'W' && strncmp(line, "WarningPromptStr=", 17) == 0) {
+			char *tmp = get_line_value(line);
+			if (!tmp)
+				continue;
+			wprompt_str = savestring(tmp, strlen(tmp));
 		}
 
 		else if (xargs.welcome_message == UNSET && *line == 'W'
@@ -2171,6 +2157,9 @@ reset_variables(void)
 	free(suggestion_strategy);
 	suggestion_strategy = (char *)NULL;
 #endif
+
+	free(wprompt_str);
+	wprompt_str = (char *)NULL;
 
 	free_remotes(0);
 

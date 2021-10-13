@@ -217,10 +217,6 @@ extern int watch;
 #define RL_NC "\001\x1b[0m\002"
 
 /* Default color definitions */
-/*#define DEF_LS_COLORS "di=01;34:fi=0:ln=01;36:mh=30;46:or=00;36:\
-pi=00;35:so=01;35:bd=01;33:cd=1:su=37;41:sg=30;43:st=37;44:\
-tw=30;42:ow=34;42:ex=01;32:no=31;47" */
-
 #define DEF_FILE_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=0:\
 ef=00;33:nf=00;31:ln=01;36:mh=30;46:or=00;36:pi=00;35:\
 so=01;35:bd=01;33:cd=1:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
@@ -424,6 +420,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=01;31:"
 #define DEFAULT_PROMPT "\\[\\e[0m\\][\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \
 \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]>\\[\\e[0;34m\\] \
 \\$\\[\\e[0m\\] "
+#define DEF_WPROMPT_STR "(!) > "
 
 #define DEFAULT_TERM_CMD "xterm -e"
 
@@ -1006,6 +1003,7 @@ extern char
 #endif
     *usr_cscheme,
     *user_home,
+	*wprompt_str,
 
     **argv_bk,
     **bin_commands,
