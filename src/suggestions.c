@@ -925,10 +925,6 @@ rl_suggestions(const unsigned char c)
 {
 	int printed = 0;
 	last_word_offset = 0;
-//	static int msg_area = 0;
-
-//	free(suggestion_buf);
-//	suggestion_buf = (char *)NULL;
 
 	if (rl_end == 0 || rl_point == 0) {
 		free(suggestion_buf);
@@ -954,11 +950,8 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
-	if (!lw) {
-//		if (wrong_cmd)
-//			recover_from_wrong_cmd();
+	if (!lw)
 		return EXIT_SUCCESS;
-	}
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
@@ -967,16 +960,12 @@ rl_suggestions(const unsigned char c)
 	&& *(last_space - 1) == '\\')
 		last_space = (char *)NULL;
 
-//#ifndef _NO_HIGHLIGHT
 	/* Reset the wrong cmd flag whenever we have a new word or a new line */
 	if (rl_end == 0 || c == '\n') {
 		if (wrong_cmd)
 			recover_from_wrong_cmd();
 		wrong_cmd_line = 0;
 	}
-/*	if (c == ' ' && wrong_cmd)
-		recover_from_wrong_cmd(); */
-//#endif  /* !_NO_HIGHLIGHT */
 
 	/* We need a copy of the complete line */
 	char *full_line = rl_line_buffer;
@@ -1004,18 +993,21 @@ rl_suggestions(const unsigned char c)
 		strcpy(last_word, rl_line_buffer);
 	}
 
-/*	if (c == ' ') {
-		rl_line_buffer[rl_end - 1] = '\0';
-		if (is_internal_c(rl_line_buffer)) {
-			rl_line_buffer[rl_end - 1] = ' ';
-			printf("'b'");
-			change_word_color(last_word, 0, sx_c);
-//			sleep(1);
-			cur_color = sx_c;
-		} else {
-			rl_line_buffer[rl_end - 1] = ' ';
+	/* Count words */
+	size_t words = 0, w = 0, fns = 0;
+	for (; rl_line_buffer[w]; w++) {
+		if (!fns && rl_line_buffer[w] != ' ') {
+			words++;
+			fns = 1;
 		}
-	} */
+		if (w && rl_line_buffer[w] == ' ' && rl_line_buffer[w - 1] != '\\'
+		&& rl_line_buffer[w + 1] && rl_line_buffer[w + 1] != ' ')
+			words++;
+/*		if (w && rl_line_buffer[w - 1] != '\\' && (rl_line_buffer[w] == '&'
+		|| rl_line_buffer[w] == '|' || rl_line_buffer[w] == ';')) {
+			words = fns = 0;
+		} */
+	}
 
 		/* ######################################
 		 * #	    Search for suggestions		#
@@ -1251,18 +1243,19 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
-	if (!last_space || !*last_space) {
+	if (words == 1 ) {//&& (!last_space || !*last_space)) {
 		size_t w_len = strlen(last_word);
 		int only_check = 0;
 		char lchar = rl_line_buffer[rl_end - 1];
 		if (last_space && !*last_space) {
+			char x = *rl_line_buffer;
+			if (x == '\'' || x == '"' || x == '$' || x == '#')
+				goto SUCCESS;
 			/* At this point we know we have a command name plus an space
 			 * char. So, let's remove the space char and check the cmd
 			 * name only. No need to print any suggestion here: if the
 			 * command is valid, the suggestion should be already printed.
 			 * Otherwise, change the prompt to the warning prompt */
-			if (*rl_line_buffer == ' ')
-				goto SUCCESS;
 			only_check = 1;
 			rl_line_buffer[rl_end - 1] = '\0';
 		}
@@ -1279,64 +1272,18 @@ rl_suggestions(const unsigned char c)
 		&& *last_word != ';' && *last_word != ':'
 		&& *last_word != '#' && *last_word != '$'
 		&& *last_word != '\'' && *last_word != '"') {
+		/* There's no suggestion nor any command name matching the
+		 * current input string. So, we assume we have an inavalid
+		 * command name. Switch to the warning prompt to warn the
+		 * user */
 			wrong_cmd = 1;
 			rl_save_prompt();
-			/* Warning prompt */
-			/* Construct the prompt */
-			char wprompt[NAME_MAX];
-			wprompt[0] = '(';
-			wprompt[1] = '!';
-			wprompt[2] = ')';
-			wprompt[3] = ' ';
-			int i = 4;
-			for (; i < prompt_offset - 4; i++)
-				wprompt[i] = '-';
-			if (wprompt[i - 1] == '-')
-				wprompt[i] = ' ';
-			else
-				i--;
-			wprompt[i + 1] = '>';
-			wprompt[i + 2] = '\0';
-			rl_message("\1%s\2%s\1%s\2 ", wp_c, wprompt, tx_c);
+			/* Print the warning prompt */
+			rl_message("\1%s\2%s\1%s\2", wp_c, wprompt_str, tx_c);
 		}
-/*
-#ifndef _NO_HIGHLIGHT
-		// We have a non-existent command name. Let's change the string
-		// color. Do this only once
-		else if (highlight && *last_word != '#' && *last_word != '$'
-		&& *last_word != '\'' && *last_word != '"') {
-			if (suggestion.printed)
-				clear_suggestion(1);
-			if (wrong_cmd || c == ' ')
-				goto FAIL;
-			wrong_cmd = wrong_cmd_line = 1;
-			change_word_color(last_word, last_word_offset, hw_c);
-			cur_color = hw_c;
-			goto FAIL;
-		}
-#endif // !_NO_HIGHLIGHT */
 	}
 
 	/* No suggestion found */
-
-/*	int k = bm_n;
-	while (--k >= 0) {
-		if (!bookmarks[k].name)
-			continue;
-		if (strncmp(last_word, bookmarks[k].name, strlen(last_word)) == 0) {
-			if (!bookmarks[k].path)
-				continue;
-			msg_area = 1;
-			rl_save_prompt();
-			rl_message("\001\x1b[0;36m(%s):\002\x1b[0m ", bookmarks[k].path);
-			break;
-		}
-	}
-
-	if (k < 0 && msg_area == 1) {
-		rl_restore_prompt();
-		rl_clear_message();
-	} */
 
 	/* Clear current suggestion, if any, only if no escape char is contained
 	 * in the current input sequence. This is mainly to avoid erasing
