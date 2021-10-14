@@ -1086,20 +1086,25 @@ CliFM's prompt is built from the \fIPrompt\fR line in the configuration file fol
 \\]: End a sequence of non\-printing characters
 
 .TP
-By default, for example, CliFM's prompt line is this: \fB[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[0;36m\\]\\w\\n\\[\\e[0m\\](\\z)\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]\fR, which once decoded should be something like this: 
+By default, for example, CliFM's prompt line is this: 
 
- [1] 13:45 user:hostname /my/path
- :) $
+\fB"\\[\\e[0m\\][\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]>\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "\fR
+
 .TP
-with the workspace number and the path printed in cyan and the dollar sign in blue.
+which once decoded should look something like this:
+
+ \fB[1] 13:45 user:hostname /my/path
+ <0> $\fR
+.TP
+with the workspace number and the path printed in cyan, the last exit status in green, and the dollar sign in blue.
 .TP
 A more "classic" prompt could be construed as follows:
 
- "\\u@\\U \\w> "
+ \fB"\\u@\\U \\w> "\fR
 .TP
 or, using now command substitution:
 
- "$(whoami)@$(hostname) $(pwd)> "
+ \fB"$(whoami)@$(hostname) $(pwd)> "\fR
 .TP
 
 \fBAdvanced prompt customization\fR
