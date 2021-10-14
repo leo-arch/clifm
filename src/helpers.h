@@ -491,6 +491,8 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=01;31:"
 #define SET_COLOR 1
 #define INFORM_COLOR 0
 
+#define MB_LEN_MAX 16
+
 #define FALLBACK_SHELL "/bin/sh"
 
 #ifdef __APPLE__

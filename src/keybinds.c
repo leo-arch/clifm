@@ -471,8 +471,11 @@ rl_accept_suggestion(int count, int key)
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
 	if (!suggestions || rl_point != rl_end || !suggestion_buf) {
-		if (rl_point < rl_end)
-			rl_point++; /* Just move the cursor forward one column */
+		if (rl_point < rl_end) {
+			/* Just move the cursor forward one column */
+			int mlen = mblen(rl_line_buffer + rl_point, MB_LEN_MAX);
+			rl_point += mlen;
+		}
 		return EXIT_SUCCESS;
 	}
 

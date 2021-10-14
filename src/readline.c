@@ -82,13 +82,18 @@ xdelete()
 		remove_suggestion_not_end();
 #endif // !_NO_SUGGESTIONS
 
-	int bk = rl_point;
-	while (bk < rl_end) {
-		rl_line_buffer[bk] = rl_line_buffer[bk + 1];
-		bk++;
-	}
+	if (rl_point == rl_end)
+		return;
 
-	rl_end--;
+	int bk = rl_point;
+	int mlen = mblen(rl_line_buffer + rl_point, MB_LEN_MAX);
+
+	rl_point = bk;
+	char *s = rl_copy_text(rl_point + mlen, rl_end);
+	rl_end = rl_point;
+	rl_insert_text(s);
+	free(s);
+	rl_point = bk;
 }
 
 /* Backspace implementation */
@@ -97,13 +102,17 @@ xbackspace()
 {
 	if (rl_point != rl_end) {
 		if (rl_point) {
-			int bk = rl_point - 1;
-			while (bk < rl_end) {
-				rl_line_buffer[bk] = rl_line_buffer[bk + 1];
-				bk++;
+			int bk = rl_point, cc = 0;
+			char *s = rl_copy_text(rl_point, rl_end);
+			while ((rl_line_buffer[rl_point - 1] & 0xc0) == 0x80) {
+				rl_point--;
+				cc++;
 			}
 			rl_point--;
-			rl_end--;
+			rl_end = rl_point;
+			rl_insert_text(s);
+			free(s);
+			rl_point = bk - 1 - cc;
 		}
 #ifndef _NO_SUGGESTIONS
 		if (suggestion.printed && suggestion_buf)
@@ -115,6 +124,11 @@ xbackspace()
 			clear_suggestion(CS_FREEBUF);
 #endif // !_NO_SUGGESTIONS
 		if (rl_end) {
+			while ((rl_line_buffer[rl_end - 1] & 0xc0) == 0x80) {
+				rl_line_buffer[rl_end - 1] = '\0';
+				rl_point--;
+				rl_end--;
+			}
 			rl_line_buffer[rl_end - 1] = '\0';
 			rl_point--;
 			rl_end--;
@@ -123,7 +137,7 @@ xbackspace()
 }
 
 static int
-rl_exclude_input(unsigned char c)
+rl_exclude_input(int c)
 {
 	/* If del or backspace, highlight, but do not suggest */
 	int _del = 0;
@@ -183,6 +197,10 @@ rl_exclude_input(unsigned char c)
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
 	 * enter (13), and escape (27) */
 	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC)
+		return 1;
+
+	/* Multi-byte char. Send it directly to the input buffer */
+	if (c > 127 || (c & 0xc0) == 0x80)
 		return 1;
 
 	if (c != _ESC)
@@ -325,7 +343,7 @@ my_rl_getc(FILE *stream)
 				rl_quit(0, 0);
 
 			/* Syntax highlighting is made from here */
-			int ret = rl_exclude_input(c);
+			int ret = rl_exclude_input((int)c);
 			if (ret == 1)
 				return c;
 
