@@ -60,19 +60,31 @@ stat_char(char *filename)
 		return 0;
 
 	int c = 0;
-	if (S_ISDIR(attr.st_mode))
+	if (S_ISDIR(attr.st_mode)) {
 		c = '/';
 #if defined(S_ISLNK)
-	else if (S_ISLNK(attr.st_mode))
+	} else if (S_ISLNK(attr.st_mode)) {
 		c = '@';
 #endif /* S_ISLNK */
 #if defined(S_ISSOCK)
-	else if (S_ISSOCK(attr.st_mode))
+	} else if (S_ISSOCK(attr.st_mode)) {
 		c = '=';
 #endif /* S_ISSOCK */
-	else if (S_ISREG(attr.st_mode)) {
+	} else if (S_ISREG(attr.st_mode)) {
 		if (access(filename, X_OK) == 0)
 			c = '*';
+#if defined(S_ISFIFO)
+	} else if (S_ISFIFO(attr.st_mode)) {
+		c = '|';
+#endif /* S_ISFIFO */
+/*#if defined(S_ISBLK)
+	} else if (S_ISBLK(attr.st_mode)) {
+		c = '%';
+#endif
+#if defined(S_ISCHR)
+	} else if (S_ISCHR(attr.st_mode)) {
+		c = '&';
+#endif */
 	}
 
 	return c;
@@ -393,7 +405,7 @@ get_last_word(char *matches)
 static inline int
 run_fzf(const size_t *height, const int *offset, const char *lw)
 {
-	char *cmd = (char *)xnmalloc(PATH_MAX, sizeof(char));
+	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer='>' "
 			"--color=\"%s,gutter:-1,prompt:%s:bold,"
 			"fg+:-1,pointer:green:bold,"
@@ -408,10 +420,9 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 			colorize ? "dark" : "bw",
 			colorize ? "cyan" : "-1",
 			"magenta", "magenta", 
-			*height, *offset, case_sens_path_comp ? "+i" : "-x",
+			*height, *offset, case_sens_path_comp ? "+i" : "-i",
 			lw ? lw : "", FZFTABOUT);
 	int ret = launch_execle(cmd);
-	free(cmd);
 
 	return ret;
 }
@@ -450,7 +461,7 @@ fzftab(char **matches)
 		char *color = *ext_cl ? ext_cl : (cl ? cl : "");
 		char *entry = (p && *(++p)) ? p : matches[i];
 
-		if (!SELFORPARENT(entry))
+		if (*entry && !SELFORPARENT(entry))
 			fprintf(fp, "%s%s%s\n", color, entry, df_c);
 	}
 
