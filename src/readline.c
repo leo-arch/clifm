@@ -117,12 +117,12 @@ xbackspace()
 #ifndef _NO_SUGGESTIONS
 		if (suggestion.printed && suggestion_buf)
 			remove_suggestion_not_end();
-#endif // !_NO_SUGGESTIONS
+#endif /* !_NO_SUGGESTIONS */
 	} else {
 #ifndef _NO_SUGGESTIONS
 		if (suggestion_buf)
 			clear_suggestion(CS_FREEBUF);
-#endif // !_NO_SUGGESTIONS
+#endif /* !_NO_SUGGESTIONS */
 		if (rl_end) {
 			while ((rl_line_buffer[rl_end - 1] & 0xc0) == 0x80) {
 				rl_line_buffer[rl_end - 1] = '\0';
@@ -175,7 +175,6 @@ rl_exclude_input(int c)
 		else if (c == '3' && rl_point != rl_end) {
 			xdelete();
 			_del = 1;
-//			return 2;
 			goto END;
 		}
 
@@ -199,7 +198,8 @@ rl_exclude_input(int c)
 	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC)
 		return 1;
 
-	/* Multi-byte char. Send it directly to the input buffer */
+	/* Multi-byte char. Send it directly to the input buffer. We can't
+	 * process it here, since we process only single chars */
 	if (c > 127 || (c & 0xc0) == 0x80)
 		return 1;
 
@@ -219,7 +219,6 @@ rl_exclude_input(int c)
 				cur_color = tx_c;
 				fputs(tx_c, stdout);
 			}
-//			return 2;
 			_del = 1;
 			goto END;
 
