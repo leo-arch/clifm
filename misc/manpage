@@ -3,7 +3,7 @@
 .ad l
 
 .SH NAME
-CLIFM \- The KISS file manager
+CLIFM \- The Command Line File Manager
 
 .SH SYNOPSIS
 \fIclifm\fR [OPTIONS] [PATH]
