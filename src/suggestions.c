@@ -171,6 +171,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (!str || !*str)
 		return;
 
+	/* This is just an ugly workaround */
 	int baej_offset = 2;
 	if (wrong_cmd) {
 		if (!recover_from_wrong_cmd()) {
@@ -228,19 +229,18 @@ print_suggestion(const char *str, size_t offset, const char *color)
 		strcpy(suggestion_buf, str);
 	}
 
-//	printf("'%d:%d:%zu'", rl_point, rl_end, offset);
-//	sleep(1);
-
 	/* If not at the end of the line, move the cursor there */
+	/* This is just another ugly workaround: the highlight function is
+	 * for some reason modifying the terminal's idea of the current
+	 * cursor position */
 	if (rl_end > rl_point) {
 #ifndef _NO_HIGHLIGHT
-		if (highlight)
-			printf("\x1b[1D");
-		else
+		if (!highlight)
 #endif
 			printf("\x1b[%dC", rl_end - rl_point);
+		fflush(stdout);
 	}
-	
+
 	/* rl_end and rl_point are not updated: they do not include
 	 * the last typed char. However, since we only care here about
 	 * the difference between them, it doesn't matter: the result
