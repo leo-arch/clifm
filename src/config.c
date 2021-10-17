@@ -440,6 +440,7 @@ create_actions_file(char *file)
 		"*=fzfsel.sh\n"
 		"**=fzfdesel.sh\n"
 		"h=fzfhist.sh\n"
+		"dh=fzfdirhist.sh\n"
 		"//=rgfind.sh\n"
 		"ih=ihelp.sh\n",
 	    PROGRAM_NAME, PROGRAM_NAME);
