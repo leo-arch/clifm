@@ -224,6 +224,9 @@ recolorize_line(void)
 		fputs(tx_c, stdout);
 	}
 
+//	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+//	if (curcol && rl_point != rl_end)
+//		curcol--;
 	int bk = rl_point;
 	if (rl_point && rl_point != rl_end)
 		rl_point--;
@@ -290,4 +293,5 @@ recolorize_line(void)
 	fputs("\x1b[?25h", stdout);
 	free(ss);
 	rl_point = bk;
+//	printf("\x1b[%d;%dH", currow, curcol);
 }

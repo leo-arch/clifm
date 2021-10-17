@@ -174,10 +174,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* This is just an ugly workaround */
 	int baej_offset = 2;
 	if (wrong_cmd) {
-		if (!recover_from_wrong_cmd()) {
-			baej_offset = 1;
+		if (!recover_from_wrong_cmd() && !highlight)
 			offset++;
-		}
 	}
 
 	if (suggestion.printed && str != suggestion_buf)
@@ -188,6 +186,13 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Store cursor position into two global variables: currow and curcol */
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+	/* The highlight function modifies the terminal's idea of the current
+	 * cursor position: let's correct it */
+	if (highlight && rl_point != rl_end) {
+		printf("\x1b[%dD", rl_end - rl_point);
+		fflush(stdout);
+		offset++;
+	}
 
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold */
@@ -230,17 +235,10 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	}
 
 	/* If not at the end of the line, move the cursor there */
-	/* This is just another ugly workaround: the highlight function is
-	 * for some reason modifying the terminal's idea of the current
-	 * cursor position */
 	if (rl_end > rl_point) {
-#ifndef _NO_HIGHLIGHT
-		if (!highlight)
-#endif
-			printf("\x1b[%dC", rl_end - rl_point);
+		printf("\x1b[%dC", rl_end - rl_point);
 		fflush(stdout);
 	}
-
 	/* rl_end and rl_point are not updated: they do not include
 	 * the last typed char. However, since we only care here about
 	 * the difference between them, it doesn't matter: the result
@@ -516,11 +514,19 @@ FREE:
 }
 
 static int
-check_filenames(const char *str, const size_t len, const unsigned char c,
+check_filenames(char *str, size_t len, const unsigned char c,
 				const int first_word, const size_t full_word)
 {
 	int i = (int)files;
 	char *color = (char *)NULL;
+
+	if (len >= 2 && *str == '.' && *(str + 1) == '/') {
+		str += 2;
+		len -= 2;
+	}
+
+	if (len && str[len - 1] == ' ')
+		str[len - 1] = '\0';
 
 	if (suggest_filetype_color)
 		color = no_c;
