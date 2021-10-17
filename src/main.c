@@ -631,7 +631,7 @@ main(int argc, char *argv[])
 	/* Though this program might perfectly work on other architectures,
 	 * I just didn't test anything beyond x86 and ARM */
 #if !defined(__x86_64__) && !defined(__i386__) && !defined(__ARM_ARCH)
-	fprintf(stderr, "%s: Unsupported CPU architecture\n", PROGRAM_NAME);
+	fprintf(stderr, _("%s: Unsupported CPU architecture\n"), PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #endif
 

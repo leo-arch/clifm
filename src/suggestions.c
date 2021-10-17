@@ -171,12 +171,11 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (!str || !*str)
 		return;
 
-	/* This is just an ugly workaround */
 	int baej_offset = 2;
-	if (wrong_cmd) {
-		if (!recover_from_wrong_cmd() && !highlight)
-			offset++;
-	}
+
+	if (wrong_cmd && !recover_from_wrong_cmd()
+	&& (rl_point == rl_end || !highlight))
+		offset++;
 
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
