@@ -62,6 +62,9 @@ typedef char *rl_cpvfunc_t;
 #define PARTIAL_MATCH 1
 #define FULL_MATCH 2
 
+#define CHECK_MATCH 0
+#define PRINT_MATCH 1
+
 static int free_color = 0;
 char *last_word = (char *)NULL;
 int last_word_offset = 0;
@@ -97,6 +100,10 @@ recover_from_wrong_cmd(void)
 
 	rl_restore_prompt();
 	rl_clear_message();
+#ifndef _NO_HIGHLIGHT
+	if (highlight)
+		recolorize_line();
+#endif
 	wrong_cmd = 0;
 
 	return EXIT_SUCCESS;
@@ -221,21 +228,32 @@ print_suggestion(const char *str, size_t offset, const char *color)
 		strcpy(suggestion_buf, str);
 	}
 
-	/* Erase everything after the current cursor position */
-	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
+//	printf("'%d:%d:%zu'", rl_point, rl_end, offset);
+//	sleep(1);
 
 	/* If not at the end of the line, move the cursor there */
-	if (rl_end > rl_point)
-		printf("\x1b[%dC", rl_end - rl_point);
+	if (rl_end > rl_point) {
+#ifndef _NO_HIGHLIGHT
+		if (highlight)
+			printf("\x1b[1D");
+		else
+#endif
+			printf("\x1b[%dC", rl_end - rl_point);
+	}
+	
 	/* rl_end and rl_point are not updated: they do not include
 	 * the last typed char. However, since we only care here about
 	 * the difference between them, it doesn't matter: the result
 	 * is the same (7 - 4 == 6 - 3 == 1) */
 
+	/* Erase everything after the current cursor position */
+	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
+
 	if (baej) {
 		/* Move the cursor %d columns to the right and print "> " */
 		printf("\x1b[%dC%s> \x1b[0m", baej_offset, mi_c);
 	}
+
 	/* Print the suggestion */
 	printf("%s%s", color, str + offset - (offset ? 1 : 0));
 	fflush(stdout);
@@ -353,12 +371,13 @@ get_comp_color(const char *filename, const struct stat attr)
 }
 
 static int
-check_completions(const char *str, size_t len, const unsigned char c, const size_t full_word)
+check_completions(char *str, size_t len, const unsigned char c,
+				const int print)
 {
 	if (!str || !*str)
 		return NO_MATCH;
 
-	int printed = 0;
+	int printed = NO_MATCH;
 	size_t i;
 	struct stat attr;
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
@@ -381,13 +400,13 @@ check_completions(const char *str, size_t len, const unsigned char c, const size
 	/* If only one match */
 //	if (_matches[0] && *_matches[0] && strlen(_matches[0]) > len)
 	if (!_matches[1] || !*_matches[1]) {
-		if (full_word) {
+		if (!print) {
 			if (suggestion.printed && suggestion_buf)
 				clear_suggestion(CS_FREEBUF);
 			if (strlen(_matches[0]) == len)
-				printed = PARTIAL_MATCH;
-			else
 				printed = FULL_MATCH;
+			else
+				printed = PARTIAL_MATCH;
 			goto FREE;
 		}
 
@@ -433,7 +452,7 @@ check_completions(const char *str, size_t len, const unsigned char c, const size
 	} else {
 		/* If multiple matches, suggest the first one */
 		if (_matches[1] && *_matches[1]) {
-			if (strlen(_matches[1]) == len) {
+			if (strlen(_matches[1]) == len || str[len - 1] == '/') {
 				if (suggestion.printed && suggestion_buf)
 					clear_suggestion(CS_FREEBUF);
 				printed = FULL_MATCH;
@@ -591,7 +610,8 @@ check_history(const char *str, const size_t len)
 }
 
 int
-check_cmds(const char *str, const size_t len, const int print, const size_t full_word)
+check_cmds(const char *str, const size_t len, const int print,
+			const size_t full_word)
 {
 	if (!len)
 		return 0;
@@ -942,7 +962,7 @@ is_last_word(void)
 {
 	int lw = 1;
 
-	if (rl_point == rl_end)
+	if (rl_point >= rl_end)
 		return lw;
 
 	char *p = strchr(rl_line_buffer + rl_point, ' ');
@@ -960,27 +980,56 @@ is_last_word(void)
 }
 
 static size_t
-count_words(size_t *full_word)
+count_words(size_t *start_word, size_t *full_word)
 {
+//	ncmds = 0;
 	size_t words = 0, w = 0, first_non_space = 0;
 	for (; rl_line_buffer[w]; w++) {
 		if (!first_non_space && rl_line_buffer[w] != ' ') {
-			words++;
+			words = 1;
+//			ncmds++;
+			*start_word = w;
 			first_non_space = 1;
+			continue;
 		}
 		if (w && rl_line_buffer[w] == ' ' && rl_line_buffer[w - 1] != '\\') {
-			if (!*full_word)
+			if (!*full_word && rl_line_buffer[w - 1] != '|'
+			&& rl_line_buffer[w - 1] != ';' && rl_line_buffer[w - 1] != '&')
 				*full_word = w; /* Index of the end of the first full word (cmd) */
-			if (rl_line_buffer[w + 1] && rl_line_buffer[w + 1] != ' ')
+			if (rl_line_buffer[w + 1] && rl_line_buffer[w + 1] != ' ') {
 				words++;
+			}
 		}
-//		if (w && rl_line_buffer[w - 1] != '\\' && (rl_line_buffer[w] == '&'
-//		|| rl_line_buffer[w] == '|' || rl_line_buffer[w] == ';')) {
-//			words = fns = 0;
-//		}
+		/* If a process separator char is found, reset variables so that we
+		 * can start counting again for the new command */
+		if (w && rl_line_buffer[w - 1] != '\\' && (rl_line_buffer[w] == '&'
+		|| rl_line_buffer[w] == '|' || rl_line_buffer[w] == ';')) {
+			words = first_non_space = *full_word = 0;
+		}
 	}
 
 	return words;
+}
+
+static void
+print_warning_prompt(const char c)
+{
+	if (xargs.warn_wrong_cmd == 1 && !wrong_cmd
+	&& c != ';' && c != ':' && c != '#'
+	&& c != '$' && c != '\'' && c != '"') {
+		if (suggestion.printed)
+			clear_suggestion(CS_FREEBUF);
+		wrong_cmd = 1;
+
+		rl_save_prompt();
+		/* Print the warning prompt */
+		rl_message("\1%s\2%s\1%s\2", wp_c, wprompt_str,
+					cur_color ? cur_color : tx_c);
+#ifndef _NO_HIGHLIGHT
+		if (highlight)
+			recolorize_line();
+#endif
+	}
 }
 
 /* Check for available suggestions. Returns zero if true, one if not,
@@ -1029,26 +1078,22 @@ rl_suggestions(const unsigned char c)
 	last_word = get_last_word(last_space, buflen);
 
 	/* Count words */
-	size_t full_word = 0;
-	size_t words = count_words(&full_word);
+	size_t full_word = 0, start_word = 0;
+	nwords = count_words(&start_word, &full_word);
 
 	/* And a copy of the first word as well */
 	char *first_word = (char *)NULL;
 	if (full_word) {
 		rl_line_buffer[full_word] = '\0';
-		first_word = savestring(rl_line_buffer, full_word);
+		char *q = rl_line_buffer + start_word;
+		first_word = savestring(q, strlen(q));
 		rl_line_buffer[full_word] = ' ';
 	}
 
-	char *word = (words == 1 && first_word) ? first_word : last_word;
+	char *word = (nwords == 1 && c != ' ' && first_word) ? first_word : last_word;
 	size_t wlen = strlen(word);
 
 	int only_check = 0;
-/*	if ((full_word || rl_point < rl_end) && c == ' ' && rl_point
-	&& rl_point - 1 <= (full_word ? (int)full_word : rl_end)) {
-		only_check = 1;
-		goto CHECK_CMDS;
-	} */
 
 		/* ######################################
 		 * #	    Search for suggestions		#
@@ -1060,7 +1105,7 @@ rl_suggestions(const unsigned char c)
 	switch(*lb) {
 	case 'b': /* Bookmarks names */
 		if (lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
-			size_t i = 0;//, len = strlen(word);
+			size_t i = 0;
 			for (; bookmark_names[i]; i++) {
 				if (*word == *bookmark_names[i]
 				&& strncmp(bookmark_names[i], word, wlen) == 0) {
@@ -1079,7 +1124,7 @@ rl_suggestions(const unsigned char c)
 
 	case 'c': /* Color schemes */
 		if (lb[1] == 's' && lb[2] == ' ') {
-			size_t i = 0;// len = strlen(word);
+			size_t i = 0;
 			for (; color_schemes[i]; i++) {
 				if (*last_word == *color_schemes[i]
 				&& strncmp(color_schemes[i], word, wlen) == 0) {
@@ -1110,7 +1155,7 @@ rl_suggestions(const unsigned char c)
 
 	case 'n': /* Remotes */
 		if (lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
-			size_t i = 0;//, len = strlen(word);
+			size_t i = 0;
 			for (; remotes[i].name; i++) {
 				if (*word == *remotes[i].name
 				&& strncmp(remotes[i].name, word, wlen) == 0) {
@@ -1129,7 +1174,7 @@ rl_suggestions(const unsigned char c)
 	case 'p': /* Profiles */
 		if (lb[1] == 'f' && lb[2] == ' ' && (strncmp(lb + 3, "set", 3) == 0
 		|| strncmp(lb + 3, "del", 3) == 0)) {
-			size_t i = 0;//, len = strlen(word);
+			size_t i = 0;
 			for (; profile_names[i]; i++) {
 				if (*word == *profile_names[i]
 				&& strncmp(profile_names[i], word, wlen) == 0) {
@@ -1162,7 +1207,6 @@ rl_suggestions(const unsigned char c)
 	/* 3.c) Check CliFM internal parameters */
 	char *ret = strchr(full_line, ' ');
 	if (ret) {
-//		size_t len = strlen(last_word);
 		/* 3.c.1) Suggest the sel keyword only if not first word */
 		if (*word == 's' && strncmp(word, "sel", wlen) == 0) {
 			suggestion.type = CMD_SUG;
@@ -1216,12 +1260,23 @@ rl_suggestions(const unsigned char c)
 
 		case 'c': /* 3.d.3) Possible completions */
 			if (last_space || autocd || auto_open) {
-				printed = check_completions(word, wlen, c, full_word);
-//				if ((printed == PARTIAL_MATCH && !full_word)
-//				|| (printed == FULL_MATCH && full_word)) {
+				if (nwords == 1) {
+					word = first_word ? first_word : last_word;
+					wlen = strlen(word);
+				}
+				int flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
+				printed = check_completions(word, wlen, c, flag);
 				if (printed) {
-					suggestion.offset = last_word_offset;
-					goto SUCCESS;
+					if (flag == CHECK_MATCH) {
+						if (printed == FULL_MATCH) {
+//							if (suggestion.printed)
+//								clear_suggestion(CS_FREEBUF);
+							goto SUCCESS;
+						}
+					} else {
+						suggestion.offset = last_word_offset;
+						goto SUCCESS;
+					}
 				}
 			}
 			break;
@@ -1240,10 +1295,12 @@ rl_suggestions(const unsigned char c)
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
 			if (last_space || autocd || auto_open) {
+				if (nwords == 1 && c != ' ') {
+					word = first_word ? first_word : last_word;
+					wlen = strlen(word);
+				}
 				printed = check_filenames(word, wlen,
 							c, last_space ? 0 : 1, full_word);
-//				if ((printed == PARTIAL_MATCH && !full_word)
-//				|| (printed == FULL_MATCH && full_word)) {
 				if (printed) {
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
@@ -1286,20 +1343,22 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
-			/* At this point we know we have a command name plus an space
-			 * char. So, let's remove the space char and check the cmd
-			 * name only. No need to print any suggestion here: if the
-			 * command is valid, the suggestion should be already printed.
-			 * Otherwise, change the prompt to the warning prompt */
-
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 //CHECK_CMDS:
-	if (words == 1) {//&& (!last_space || !*last_space)) {
+	if (nwords == 1) {
 		if (c == ' ' && (*word == '\'' || *word == '"'
-		|| *word == '$' || *word == '#'))
+		|| *word == '$' || *word == '#')) {
+			if (suggestion.printed && suggestion_buf)
+				clear_suggestion(CS_FREEBUF);
 			goto SUCCESS;
+		}
 		word = first_word ? first_word : last_word;
+		wlen = strlen(word);
+
+		if (word[wlen - 1] == ' ')
+			word[wlen - 1] = '\0';
+
 		printed = check_cmds(word, wlen, only_check ? 0 : 1, full_word);
 
 //		if ((printed == PARTIAL_MATCH && !full_word)
@@ -1310,21 +1369,15 @@ rl_suggestions(const unsigned char c)
 				recover_from_wrong_cmd();
 				rl_dispatching = 0;
 			}
-			suggestion.offset = 0;
+			suggestion.offset = last_word_offset;
+//			suggestion.offset = 0;
 			goto SUCCESS;
-		} else if (xargs.warn_wrong_cmd == 1 && !wrong_cmd
-		&& *word != ';' && *word != ':' && *word != '#'
-		&& *word != '$' && *word != '\'' && *word != '"') {
+		} else {
 		/* There's no suggestion nor any command name matching the
 		 * first entered word. So, we assume we have an invalid
 		 * command name. Switch to the warning prompt to warn the
 		 * user */
-			if (suggestion.printed)
-				clear_suggestion(CS_FREEBUF);
-			wrong_cmd = 1;
-			rl_save_prompt();
-			/* Print the warning prompt */
-			rl_message("\1%s\2%s\1%s\2", wp_c, wprompt_str, tx_c);
+			print_warning_prompt(*word);
 		}
 	}
 
@@ -1353,9 +1406,6 @@ SUCCESS:
 			fputs(tx_c, stdout);
 		else
 			fputs(cur_color, stdout);
-/*	} else if (printed == FULL_MATCH) {
-		if (suggestion.printed && suggestion_buf)
-			clear_suggestion(CS_FREEBUF); */
 	} else {
 		suggestion.printed = 0;
 	}

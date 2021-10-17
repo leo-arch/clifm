@@ -948,7 +948,9 @@ extern size_t
     sel_n,
 	tab_offset,
     user_home_len,
-    usrvar_n;
+    usrvar_n,
+//	ncmds,
+    nwords;
 
 extern struct termios shell_tmodes;
 extern off_t total_sel_size;

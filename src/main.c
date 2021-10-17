@@ -222,7 +222,9 @@ size_t
     sel_n = 0,
 	tab_offset = 0,
     user_home_len = 0,
-    usrvar_n = 0;
+    usrvar_n = 0,
+//	ncmds = 0,
+    nwords = 0;
 
 char
     div_line_char[NAME_MAX],

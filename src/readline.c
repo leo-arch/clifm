@@ -280,7 +280,7 @@ END:
 #ifndef _NO_SUGGESTIONS
 			/* Since we have removed a char, let's check if there is
 			 * a suggestion available using the modified input line */
-			if (wrong_cmd && s == -1) {
+			if (wrong_cmd && s == -1 && rl_end) {
 				/* If a suggestion is found, the normal prompt will be
 				 * restored and wrong_cmd will be set to zero */
 				rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
@@ -307,6 +307,7 @@ END:
 #endif
 		return 2;
 	}
+
 	return 0;
 }
 
@@ -1374,6 +1375,22 @@ my_rl_completion(const char *text, int start, int end)
 
 	/* Second word or more */
 	else {
+/*		int ps = 0, i = 0, c = 0, check_cmd = 0;
+		for (; (c = rl_line_buffer[i]); i++) {
+			if (c == '|' || c == ';' || c == '&') {
+				ps = i;
+				break;
+			}
+		} */
+
+		if (nwords == 1) {
+			matches = rl_completion_matches(text, &bin_cmd_generator);
+			if (matches) {
+				cur_comp_type = TCMP_CMD;
+				return matches;
+			}
+		}
+
 		/* #### ELN AND JUMP ORDER EXPANSION ### */
 
 		/* Perform this check only if the first char of the string to be

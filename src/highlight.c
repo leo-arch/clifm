@@ -32,6 +32,8 @@ typedef char *rl_cpvfunc_t;
 #include <readline/readline.h>
 #endif
 
+#include <unistd.h> // DELETE: ONLY TESTING
+
 #include "strings.h"
 #include "checks.h"
 #include "aux.h"
@@ -42,7 +44,7 @@ typedef char *rl_cpvfunc_t;
 
 /* Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
  * in the current input string */
-void
+/*void
 change_word_color(const char *_last_word, const int offset, const char *color)
 {
 	UNUSED(_last_word);
@@ -57,7 +59,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 	free(p);
 	fputs(tx_c, stdout);
 	fputs("\x1b[?25h", stdout);
-}
+} */
 
 /* Get the appropriate color for C and print the color (returning a null
  * pointer) if SET_COLOR is set to 1; otherwise, just return a pointer
@@ -243,17 +245,24 @@ recolorize_line(void)
 		return;
 	}
 
+//	if (wrong_cmd && nwords == 1)
+//		rl_point = 0;
 	int point = rl_point;
-	char *ss = rl_copy_text(rl_point? rl_point - 1 : 0, rl_end);
-	rl_delete_text(rl_point, rl_end);
-	rl_point = rl_end = point;
-
+//	int copy_start = (wrong_cmd && nwords == 1) ? 0 : point ? point - 1 : 0;
+//	int start = (wrong_cmd && nwords == 1) ? 0 : point;
+	int copy_start = point ? point - 1 : 0;
+	int start = point;
+	char *ss = rl_copy_text(copy_start, rl_end);
+	rl_delete_text(start, rl_end);
+	rl_point = rl_end = start;
 	/* Loop through each char from cursor position onward and colorize it */
-	i = rl_point ? 1 : 0;
+//	i = (wrong_cmd && nwords == 1) ? 0 : rl_point ? 1 : 0;
+	i = point ? 1 : 0;
 	size_t l = 0;
+
 	char t[PATH_MAX];
 	for (;ss[i]; i++) {
-		rl_highlight(ss, i, SET_COLOR);	
+		rl_highlight(ss, i, SET_COLOR);
 		/* Redisplay the current char with the appropriate color */
 		if (ss[i] < 0) {
 			t[l++] = ss[i];
@@ -267,8 +276,14 @@ recolorize_line(void)
 		}
 		t[0] = (char)ss[i];
 		t[1] = '\0';
+/*		printf("'a:%zu:%d:%s'", i, ss[i], t);
+		fflush(stdout);
+		sleep(1); */
 		rl_insert_text(t);
 		rl_redisplay();
+/*		printf("'b:%zu:%d:%c'", i, rl_point, ss[i]);
+		fflush(stdout);
+		sleep(1); */
 	}
 
 	/* Unhide the cursor */

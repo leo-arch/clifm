@@ -575,7 +575,6 @@ rl_accept_suggestion(int count, int key)
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
 	case VAR_SUG:
-
 		my_insert_text(suggestion_buf, NULL, 0);
 		rl_stuff_char(' ');
 		break;
@@ -891,6 +890,8 @@ rl_clear_line(int count, int key)
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
+
+	nwords = 0;
 
 #ifndef _NO_HIGHLIGHT
 	if (cur_color != tx_c) {
