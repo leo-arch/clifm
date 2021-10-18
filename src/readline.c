@@ -288,22 +288,15 @@ END:
 			}
 			if (rl_point == 0 && rl_end == 0 && wrong_cmd)
 				recover_from_wrong_cmd();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 			return 2;
 		}
 		return 0;
 	}
 
-/*	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
-	printf("'A:%d:%d'", currow, curcol);
-	fflush(stdout);
-	sleep(1); */
 	recolorize_line();
-/*	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
-	printf("'B:%d:%d'", currow, curcol);
-	fflush(stdout);
-	sleep(1); */
-#endif
+#endif /* !_NO_HIGHLIGHT */
+
 	if (_del) {
 #ifndef _NO_SUGGESTIONS
 		if (wrong_cmd && s == -1 && rl_end) {
@@ -312,7 +305,7 @@ END:
 		}
 		if (rl_point == 0 && rl_end == 0 && wrong_cmd)
 			recover_from_wrong_cmd();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 		return 2;
 	}
 

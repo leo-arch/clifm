@@ -374,6 +374,11 @@ check_completions(char *str, size_t len, const unsigned char c,
 	if (!str || !*str)
 		return NO_MATCH;
 
+	if (len) {
+		while (str[len - 1] == ' ')
+			str[--len] = '\0';
+	}
+
 	int printed = NO_MATCH;
 	size_t i;
 	struct stat attr;
@@ -524,8 +529,10 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		len -= 2;
 	}
 
-	if (len && str[len - 1] == ' ')
-		str[len - 1] = '\0';
+	if (len) {
+		while (str[len - 1] == ' ')
+			str[--len] = '\0';
+	}
 
 	if (suggest_filetype_color)
 		color = no_c;
@@ -1026,10 +1033,26 @@ print_warning_prompt(const char c)
 			clear_suggestion(CS_FREEBUF);
 		wrong_cmd = 1;
 
+//		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 		rl_save_prompt();
 		/* Print the warning prompt */
-		rl_message("\1%s\2%s\1%s\2", wp_c, wprompt_str,
-					cur_color ? cur_color : tx_c);
+		char tprompt[PATH_MAX];
+		snprintf(tprompt, PATH_MAX, "%c%s%c%s%c%s%c", RL_PROMPT_START_IGNORE,
+				wp_c, RL_PROMPT_END_IGNORE, wprompt_str, RL_PROMPT_START_IGNORE,
+				cur_color ? cur_color : tx_c, RL_PROMPT_END_IGNORE);
+//		snprintf(tprompt, PATH_MAX, "%c%s%s%s%c", RL_PROMPT_START_IGNORE,
+//				wp_c, wprompt_str, cur_color, RL_PROMPT_END_IGNORE);
+//		int visible_prompt_len = rl_expand_prompt(tprompt);
+/*		rl_message("%c%s%c%s%c%s%c", RL_PROMPT_START_IGNORE, wp_c,
+				RL_PROMPT_END_IGNORE, wprompt_str, RL_PROMPT_START_IGNORE,
+				cur_color ? cur_color : tx_c, RL_PROMPT_END_IGNORE); */
+		rl_set_prompt(tprompt);
+//		rl_display_prompt = wprompt_str;
+//		rl_redisplay();
+//		printf("\x1b[%d;%dH", currow, (int)strlen(wprompt_str) + rl_point + 1);
+//		printf("\x1b[%d;%dH", currow, visible_prompt_len + rl_point);
+//		fflush(stdout);
+
 #ifndef _NO_HIGHLIGHT
 		if (highlight)
 			recolorize_line();
