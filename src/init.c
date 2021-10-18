@@ -2060,8 +2060,10 @@ check_options(void)
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
 
+#ifndef _NO_FZF
 	if (xargs.fzftab == UNSET)
 		xargs.fzftab = DEF_FZFTAB;
+#endif
 
 	if (xargs.warn_wrong_cmd == UNSET)
 		xargs.warn_wrong_cmd = DEF_WARN_WRONG_CMD;
