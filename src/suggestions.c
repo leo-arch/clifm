@@ -100,10 +100,16 @@ recover_from_wrong_cmd(void)
 
 	rl_restore_prompt();
 	rl_clear_message();
+/*	int bk = rl_point;
+	rl_point = 0;
+	cur_color = tx_c;
+	fputs(cur_color, stdout);
+	fflush(stdout); */
 #ifndef _NO_HIGHLIGHT
 	if (highlight)
 		recolorize_line();
 #endif
+//	rl_point = bk;
 	wrong_cmd = 0;
 /*	if (rl_mark_active_p())
 		rl_deactivate_mark(); */
@@ -175,7 +181,11 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	int baej_offset = 2;
 
 	if (wrong_cmd && !recover_from_wrong_cmd()
+#ifndef _NO_HIGHLIGHT
 	&& (rl_point == rl_end || !highlight))
+#else
+	&& rl_point == rl_end)
+#endif
 		offset++;
 
 	if (suggestion.printed && str != suggestion_buf)
@@ -183,6 +193,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Store cursor position into two global variables: currow and curcol */
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+#ifndef _NO_HIGHLIGHT
 	/* The highlight function modifies the terminal's idea of the current
 	 * cursor position: let's correct it */
 	if (highlight && rl_point != rl_end) {
@@ -190,6 +201,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 		fflush(stdout);
 		offset++;
 	}
+#endif
 
 	if (offset > strlen(str))
 		return;
@@ -1034,6 +1046,17 @@ print_warning_prompt(const char c)
 			clear_suggestion(CS_FREEBUF);
 		wrong_cmd = 1;
 
+/*		fputs(wp_c, stdout);
+		fflush(stdout);
+		char *ss = rl_copy_text(0, rl_end);
+		rl_delete_text(0, rl_end);
+		rl_point = rl_end = 0;
+		rl_redisplay();
+		rl_insert_text(ss);
+		rl_redisplay();
+		free(ss);
+		return; */
+
 //		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 		rl_save_prompt();
 
@@ -1297,7 +1320,6 @@ rl_suggestions(const unsigned char c)
 
 		case 'c': /* 3.d.3) Possible completions */
 			if (last_space || autocd || auto_open) {
-				int wcbk = wrong_cmd;
 				if (nwords == 1) {
 					word = first_word ? first_word : last_word;
 					wlen = strlen(word);
@@ -1307,7 +1329,7 @@ rl_suggestions(const unsigned char c)
 				int flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 				printed = check_completions(word, wlen, c, flag);
 				if (printed) {
-					if (wrong_cmd && nwords == 1 && !wcbk) {
+					if (wrong_cmd && nwords == 1) {
 						rl_dispatching = 1;
 						recover_from_wrong_cmd();
 						rl_dispatching = 0;
@@ -1340,7 +1362,6 @@ rl_suggestions(const unsigned char c)
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
 			if (last_space || autocd || auto_open) {
-				int wcbk = wrong_cmd;
 				if (nwords == 1) {
 					word = (first_word && *first_word) ? first_word : last_word;
 					wlen = strlen(word);
@@ -1350,7 +1371,7 @@ rl_suggestions(const unsigned char c)
 				printed = check_filenames(word, wlen,
 							c, last_space ? 0 : 1, full_word);
 				if (printed) {
-					if (wrong_cmd && nwords == 1 && !wcbk) {
+					if (wrong_cmd && nwords == 1) {
 						rl_dispatching = 1;
 						recover_from_wrong_cmd();
 						rl_dispatching = 0;
@@ -1405,7 +1426,7 @@ rl_suggestions(const unsigned char c)
 				clear_suggestion(CS_FREEBUF);
 			goto SUCCESS;
 		}
-		int wcbk = wrong_cmd;
+//		int wcbk = wrong_cmd;
 		word = first_word ? first_word : last_word;
 		wlen = strlen(word);
 
@@ -1417,7 +1438,7 @@ rl_suggestions(const unsigned char c)
 		if (printed) {
 			/* If there was a previous wrong cmd, do not switch back to
 			 * the regular prompt */
-			if (wrong_cmd && !wcbk) {
+			if (wrong_cmd) {
 				rl_dispatching = 1;
 				recover_from_wrong_cmd();
 				rl_dispatching = 0;
