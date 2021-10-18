@@ -285,7 +285,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=01;31:"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
 #define DEF_TS_C "\x1b[04;35m"
-#define DEF_WP_C "\x1b[01;31m"
+#define DEF_WP_C "\x1b[02;31m"
 
 #define DEF_DF_C "\x1b[0m"
 
