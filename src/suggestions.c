@@ -180,9 +180,6 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 
-	if (offset > strlen(str))
-		return;
-
 	/* Store cursor position into two global variables: currow and curcol */
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 	/* The highlight function modifies the terminal's idea of the current
@@ -192,6 +189,9 @@ print_suggestion(const char *str, size_t offset, const char *color)
 		fflush(stdout);
 		offset++;
 	}
+
+	if (offset > strlen(str))
+		return;
 
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold */
@@ -1037,15 +1037,18 @@ print_warning_prompt(const char c)
 		rl_save_prompt();
 		/* Print the warning prompt */
 		char tprompt[PATH_MAX];
-		snprintf(tprompt, PATH_MAX, "%c%s%c%s%c%s%c", RL_PROMPT_START_IGNORE,
+		snprintf(tprompt, PATH_MAX, "\1%s\2%s", wp_c, wprompt_str);
+/*		snprintf(tprompt, PATH_MAX, "%c%s%c%s%c%s%c", RL_PROMPT_START_IGNORE,
 				wp_c, RL_PROMPT_END_IGNORE, wprompt_str, RL_PROMPT_START_IGNORE,
-				cur_color ? cur_color : tx_c, RL_PROMPT_END_IGNORE);
+				cur_color ? cur_color : tx_c, RL_PROMPT_END_IGNORE); */
 //		snprintf(tprompt, PATH_MAX, "%c%s%s%s%c", RL_PROMPT_START_IGNORE,
 //				wp_c, wprompt_str, cur_color, RL_PROMPT_END_IGNORE);
 //		int visible_prompt_len = rl_expand_prompt(tprompt);
 /*		rl_message("%c%s%c%s%c%s%c", RL_PROMPT_START_IGNORE, wp_c,
 				RL_PROMPT_END_IGNORE, wprompt_str, RL_PROMPT_START_IGNORE,
 				cur_color ? cur_color : tx_c, RL_PROMPT_END_IGNORE); */
+//		printf("%s", wp_c);
+//		fflush(stdout);
 		rl_set_prompt(tprompt);
 //		rl_display_prompt = wprompt_str;
 //		rl_redisplay();
@@ -1054,8 +1057,8 @@ print_warning_prompt(const char c)
 //		fflush(stdout);
 
 #ifndef _NO_HIGHLIGHT
-		if (highlight)
-			recolorize_line();
+//		if (highlight)
+//			recolorize_line();
 #endif
 	}
 }
@@ -1069,7 +1072,7 @@ rl_suggestions(const unsigned char c)
 	int printed = 0;
 	last_word_offset = 0;
 
-	if (rl_end == 0 || rl_point == 0) {
+	if (rl_end == 0 && rl_point == 0) {
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
 		if (wrong_cmd)
@@ -1292,9 +1295,16 @@ rl_suggestions(const unsigned char c)
 					word = first_word ? first_word : last_word;
 					wlen = strlen(word);
 				}
-				int flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
+				if (wlen && word[wlen - 1] == ' ')
+					word[wlen - 1] = '\0';
+				int flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 				printed = check_completions(word, wlen, c, flag);
 				if (printed) {
+					if (wrong_cmd) {
+						rl_dispatching = 1;
+						recover_from_wrong_cmd();
+						rl_dispatching = 0;
+					}
 					if (flag == CHECK_MATCH) {
 						if (printed == FULL_MATCH) {
 //							if (suggestion.printed)
@@ -1323,13 +1333,20 @@ rl_suggestions(const unsigned char c)
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
 			if (last_space || autocd || auto_open) {
-				if (nwords == 1 && c != ' ') {
-					word = first_word ? first_word : last_word;
+				if (nwords == 1) {
+					word = (first_word && *first_word) ? first_word : last_word;
 					wlen = strlen(word);
 				}
+				if (wlen && word[wlen - 1] == ' ')
+					word[wlen - 1] = '\0';
 				printed = check_filenames(word, wlen,
 							c, last_space ? 0 : 1, full_word);
 				if (printed) {
+					if (wrong_cmd) {
+						rl_dispatching = 1;
+						recover_from_wrong_cmd();
+						rl_dispatching = 0;
+					}
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
 				}

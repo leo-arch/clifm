@@ -294,7 +294,8 @@ END:
 		return 0;
 	}
 
-	recolorize_line();
+	if (!wrong_cmd)
+		recolorize_line();
 #endif /* !_NO_HIGHLIGHT */
 
 	if (_del) {
