@@ -897,6 +897,7 @@ extern int
     trash_ok,
 #endif
     unicode,
+	warn_wrong_cmd,
     welcome_message;
 
 //#ifndef _NO_HIGHLIGHT

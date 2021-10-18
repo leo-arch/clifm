@@ -173,6 +173,7 @@ int
     trash_ok = 1,
 #endif
     unicode = UNSET,
+	warn_wrong_cmd = UNSET,
     welcome_message = UNSET;
 
 //#ifndef _NO_HIGHLIGHT

@@ -796,7 +796,10 @@ mvCmd=%d\n\n"
 # itself. Consult the manpage for more information.\n\
 PromptStyle=default\n\n"
 
-"# String to be used by the warning prompt. The color of this prompt\n\
+		"# A prompt to warn the user about invalid command names\n\
+WarningPrompt=%s\n\n"
+
+		"# String to be used by the warning prompt. The color of this prompt\n\
 # can be customized using the 'wp' code in the color scheme file\n\
 WarningPromptStr=\"%s\"\n\n",
 
@@ -808,6 +811,7 @@ WarningPromptStr=\"%s\"\n\n",
 		DEF_CP_CMD,
 		DEF_MV_CMD,
 	    DEFAULT_PROMPT,
+		DEF_WARN_WRONG_CMD == 1 ? "true" : "false",
 	    DEF_WPROMPT_STR);
 
 	fprintf(config_fp,
@@ -2037,6 +2041,18 @@ read_config(void)
 				unicode = 0;
 		}
 
+		else if (xargs.warn_wrong_cmd == UNSET && *line == 'W'
+		&& strncmp(line, "WarningPrompt=", 14) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "WarningPrompt=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				warn_wrong_cmd = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				warn_wrong_cmd = 0;
+		}
+
 		else if (*line == 'W' && strncmp(line, "WarningPromptStr=", 17) == 0) {
 			char *tmp = get_line_value(line);
 			if (!tmp)
@@ -2228,6 +2244,7 @@ reset_variables(void)
 	splash_screen = UNSET;
 	tips = UNSET;
 	unicode = UNSET;
+	warn_wrong_cmd = UNSET;
 	welcome_message = UNSET;
 
 #ifndef _NO_SUGGESTIONS

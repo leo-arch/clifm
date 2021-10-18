@@ -1114,7 +1114,7 @@ external_arguments(int argc, char **argv)
 				exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
 		case 44:
-			xargs.warn_wrong_cmd = 1; break;
+			xargs.warn_wrong_cmd = warn_wrong_cmd = 1; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -2065,9 +2065,6 @@ check_options(void)
 		xargs.fzftab = DEF_FZFTAB;
 #endif
 
-	if (xargs.warn_wrong_cmd == UNSET)
-		xargs.warn_wrong_cmd = DEF_WARN_WRONG_CMD;
-
 	if (xargs.control_d_exits == UNSET)
 		control_d_exits = DEF_CONTROL_D_EXITS;
 
@@ -2113,6 +2110,13 @@ check_options(void)
 			highlight = xargs.highlight;
 	}
 #endif
+
+	if (warn_wrong_cmd == UNSET) {
+		if (xargs.warn_wrong_cmd == UNSET)
+			warn_wrong_cmd = DEF_WARN_WRONG_CMD;
+		else
+			warn_wrong_cmd = xargs.warn_wrong_cmd;
+	}
 
 #ifndef _NO_ICONS
 	if (icons == UNSET) {
