@@ -105,7 +105,8 @@ recover_from_wrong_cmd(void)
 		recolorize_line();
 #endif
 	wrong_cmd = 0;
-
+/*	if (rl_mark_active_p())
+		rl_deactivate_mark(); */
 	return EXIT_SUCCESS;
 }
 
@@ -1035,9 +1036,14 @@ print_warning_prompt(const char c)
 
 //		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 		rl_save_prompt();
+
 		/* Print the warning prompt */
 		char tprompt[PATH_MAX];
 		snprintf(tprompt, PATH_MAX, "\1%s\2%s", wp_c, wprompt_str);
+		rl_set_prompt(tprompt);
+/*		rl_mark = 0;
+		rl_activate_mark(); */
+
 /*		snprintf(tprompt, PATH_MAX, "%c%s%c%s%c%s%c", RL_PROMPT_START_IGNORE,
 				wp_c, RL_PROMPT_END_IGNORE, wprompt_str, RL_PROMPT_START_IGNORE,
 				cur_color ? cur_color : tx_c, RL_PROMPT_END_IGNORE); */
@@ -1049,7 +1055,7 @@ print_warning_prompt(const char c)
 				cur_color ? cur_color : tx_c, RL_PROMPT_END_IGNORE); */
 //		printf("%s", wp_c);
 //		fflush(stdout);
-		rl_set_prompt(tprompt);
+
 //		rl_display_prompt = wprompt_str;
 //		rl_redisplay();
 //		printf("\x1b[%d;%dH", currow, (int)strlen(wprompt_str) + rl_point + 1);
@@ -1291,6 +1297,7 @@ rl_suggestions(const unsigned char c)
 
 		case 'c': /* 3.d.3) Possible completions */
 			if (last_space || autocd || auto_open) {
+				int wcbk = wrong_cmd;
 				if (nwords == 1) {
 					word = first_word ? first_word : last_word;
 					wlen = strlen(word);
@@ -1300,7 +1307,7 @@ rl_suggestions(const unsigned char c)
 				int flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 				printed = check_completions(word, wlen, c, flag);
 				if (printed) {
-					if (wrong_cmd) {
+					if (wrong_cmd && nwords == 1 && !wcbk) {
 						rl_dispatching = 1;
 						recover_from_wrong_cmd();
 						rl_dispatching = 0;
@@ -1333,6 +1340,7 @@ rl_suggestions(const unsigned char c)
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
 			if (last_space || autocd || auto_open) {
+				int wcbk = wrong_cmd;
 				if (nwords == 1) {
 					word = (first_word && *first_word) ? first_word : last_word;
 					wlen = strlen(word);
@@ -1342,7 +1350,7 @@ rl_suggestions(const unsigned char c)
 				printed = check_filenames(word, wlen,
 							c, last_space ? 0 : 1, full_word);
 				if (printed) {
-					if (wrong_cmd) {
+					if (wrong_cmd && nwords == 1 && !wcbk) {
 						rl_dispatching = 1;
 						recover_from_wrong_cmd();
 						rl_dispatching = 0;
@@ -1390,7 +1398,6 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
-//CHECK_CMDS:
 	if (nwords == 1) {
 		if (c == ' ' && (*word == '\'' || *word == '"'
 		|| *word == '$' || *word == '#')) {
@@ -1398,24 +1405,24 @@ rl_suggestions(const unsigned char c)
 				clear_suggestion(CS_FREEBUF);
 			goto SUCCESS;
 		}
+		int wcbk = wrong_cmd;
 		word = first_word ? first_word : last_word;
 		wlen = strlen(word);
 
-		if (word[wlen - 1] == ' ')
+		if (wlen && word[wlen - 1] == ' ')
 			word[wlen - 1] = '\0';
 
 		printed = check_cmds(word, wlen, only_check ? 0 : 1, full_word);
 
-//		if ((printed == PARTIAL_MATCH && !full_word)
-//		|| (printed == FULL_MATCH && full_word)) {
 		if (printed) {
-			if (wrong_cmd) {
+			/* If there was a previous wrong cmd, do not switch back to
+			 * the regular prompt */
+			if (wrong_cmd && !wcbk) {
 				rl_dispatching = 1;
 				recover_from_wrong_cmd();
 				rl_dispatching = 0;
 			}
 			suggestion.offset = last_word_offset;
-//			suggestion.offset = 0;
 			goto SUCCESS;
 		} else {
 		/* There's no suggestion nor any command name matching the
@@ -1447,10 +1454,10 @@ SUCCESS:
 		suggestion.printed = 1;
 		/* Restore color */
 		fputs("\x1b[0m", stdout);
-		if (!cur_color)
-			fputs(tx_c, stdout);
+		if (!wrong_cmd)
+			fputs(cur_color ? cur_color : tx_c, stdout);
 		else
-			fputs(cur_color, stdout);
+			fputs(wp_c, stdout);
 	} else {
 		suggestion.printed = 0;
 	}

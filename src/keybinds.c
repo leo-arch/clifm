@@ -360,6 +360,9 @@ my_insert_text(char *text, char *s, const char _s)
 	if (!text || !*text)
 		return;
 
+	if (wrong_cmd)
+		goto INSERT_TEXT;
+
 #ifndef _NO_HIGHLIGHT
 	if (highlight) {
 		/* Hide the cursor to minimize flickering */
@@ -448,6 +451,7 @@ my_insert_text(char *text, char *s, const char _s)
 		fputs("\x1b[?25h", stdout);		
 	} else
 #endif
+INSERT_TEXT:
 	{
 		rl_insert_text(text);
 	}
@@ -465,8 +469,10 @@ rl_accept_suggestion(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	cur_color = tx_c;
-	fputs(tx_c, stdout);
+	if (!wrong_cmd) {
+		cur_color = tx_c;
+		fputs(tx_c, stdout);
+	}
 
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
