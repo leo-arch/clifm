@@ -88,6 +88,9 @@ WarningPrompt=false
 # can be customized using the 'wp' code in the color scheme file
 WarningPromptStr="(!) > "
 
+# TAB completion mode: either 'standard' (default) or 'fzf'
+TabCompletionMode=standard
+
 # MaxPath is only used for the /p option of the prompt: the current working
 # directory will be abbreviated to its basename (everything after last slash)
 # whenever the current path is longer than MaxPath.

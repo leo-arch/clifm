@@ -105,7 +105,7 @@ List of CliFM features:
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Commands and directory history function
-  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, and directory history (via the \fIjump\fR command)
+  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, and directory history (via the \fIjump\fR command). There are two available modes: standard and FZF (See the \fI--fzftab\fR command line option below)
   5) TAB ELN\-expansion
   6) More than 40 customizable keyboard shortcuts
   7) Wildcards and regex auto\-expansion
@@ -273,7 +273,7 @@ enable program logs
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
 .TP
 .B \-\-fzftab
-enable the FZF TAB completion mode. Depends on \fIFZF\fR (\fIhttps://github.com/junegunn/fzf\fR)
+enable the FZF mode for TAB completion (it depends on \fIFZF\fR (\fIhttps://github.com/junegunn/fzf\fR)). This feature can also be enabled by setting the \fITabCompletionMode\fR option to 'fzf' in the configuration file
 .TP
 .B \-\-highlight
 enable syntax highlighting. To customize highlighting colors see the \fBCOLORS\fR section below
@@ -1291,6 +1291,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | dragondrop        | dragon or dragon-drag-and-drop|
  | finder            | fzf or rofi                   |
  | rgfind            | fzf and ripgrep               |
+ | fzfdirhist        | fzf                           |
  | fzfhist           | fzf                           |
  | fzfnav            | fzf                           |
  |   -archives       | atool, bsdtar or tar          |
