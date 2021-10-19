@@ -714,9 +714,9 @@ create_config(char *file)
 	/* Do not translate anything in the config file */
 	fprintf(config_fp,
 
-	    "\t\t###########################################\n\
+"\t\t###########################################\n\
 \t\t#                  CLIFM                  #\n\
-\t\t#  The anti-eye-candy, KISS file manager  #\n\
+\t\t#      The command line file manager      #\n\
 \t\t###########################################\n\n"
 
 	    "# This is the configuration file for CliFM\n\n"
