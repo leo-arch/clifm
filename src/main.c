@@ -127,6 +127,7 @@ int
     files_counter = UNSET,
 	filter_rev = 0,
 	follow_symlinks = UNSET,
+	fzftab = UNSET,
 	highlight = UNSET,
     home_ok = 1,
 #ifndef _NO_ICONS

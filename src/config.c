@@ -815,6 +815,10 @@ WarningPromptStr=\"%s\"\n\n",
 	    DEF_WPROMPT_STR);
 
 	fprintf(config_fp,
+
+		"# TAB completion mode: either 'standard' (default) or 'fzf'\n\
+TabCompletionMode=%s\n\n"
+
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
 # whenever the current path is longer than MaxPath.\n\
@@ -893,6 +897,7 @@ ExpandBookmarks=%s\n\n"
 # well, so that the color per extension feature is disabled.\n\
 LightMode=%s\n\n",
 
+		DEF_FZFTAB == 1 ? "fzf" : "standard",
 		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
 		PROGRAM_NAME,
@@ -1987,6 +1992,18 @@ read_config(void)
 		}
 #endif /* !_NO_SUGGESTIONS */
 
+		else if (xargs.fzftab == UNSET && *line == 'T'
+		&& strncmp(line, "TabCompletionMode=", 18) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "TabCompletionMode=%8s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "standard", 8) == 0)
+				fzftab = 0;
+			else if (strncmp(opt_str, "fzf", 3) == 0)
+				fzftab = 1;
+		}
+
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
 			if (term) {
 				free(term);
@@ -2217,6 +2234,9 @@ reset_variables(void)
 	ext_cmd_ok = UNSET;
 	files_counter = UNSET;
 	follow_symlinks = UNSET;
+#ifndef _NO_FZF
+	fzftab = UNSET;
+#endif
 #ifndef _NO_HIGHLIGHT
 	highlight = UNSET;
 #endif

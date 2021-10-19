@@ -2060,11 +2060,6 @@ check_options(void)
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
 
-#ifndef _NO_FZF
-	if (xargs.fzftab == UNSET)
-		xargs.fzftab = DEF_FZFTAB;
-#endif
-
 	if (xargs.control_d_exits == UNSET)
 		control_d_exits = DEF_CONTROL_D_EXITS;
 
@@ -2117,6 +2112,15 @@ check_options(void)
 		else
 			warn_wrong_cmd = xargs.warn_wrong_cmd;
 	}
+
+#ifndef _NO_FZF
+	if (fzftab == UNSET) {
+		if (xargs.fzftab == UNSET)
+			fzftab = DEF_FZFTAB;
+		else
+			fzftab = xargs.fzftab;
+	}
+#endif
 
 #ifndef _NO_ICONS
 	if (icons == UNSET) {

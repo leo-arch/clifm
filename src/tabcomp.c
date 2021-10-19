@@ -430,7 +430,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 /* Display possible completions using FZF. If one of these possible
  * completions is selected, insert it into the current line buffer */
 static int
-fzftab(char **matches)
+fzftabcomp(char **matches)
 {
 	FILE *fp = fopen(FZFTABIN, "w");
 	if (!fp) {
@@ -977,7 +977,7 @@ DISPLAY_MATCHES:
 			/* If there are many items, then ask the user if she
 			   really wants to see them all. */
 #ifndef _NO_FZF
-			if (xargs.fzftab != 1) {
+			if (!fzftab) {
 #endif
 			{
 				if (len >= rl_completion_query_items) {
@@ -1005,7 +1005,7 @@ DISPLAY_MATCHES:
 
 
 #ifndef _NO_FZF
-			if (xargs.fzftab != 1) {
+			if (!fzftab) {
 #endif
 			{
 				/* How many items of MAX length can we fit in the screen window? */
@@ -1086,8 +1086,8 @@ CALC_OFFSET:
 			}
 
 #ifndef _NO_FZF
-			if (xargs.fzftab == 1) {
-				if (fzftab(matches) == -1)
+			if (fzftab == 1) {
+				if (fzftabcomp(matches) == -1)
 					goto RESTART;
 				goto RESET_PATH;
 			}
