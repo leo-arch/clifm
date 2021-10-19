@@ -1,7 +1,7 @@
 
 			/*  ########################################
 			 *  #               CliFM                  #
-			 *  # 	The KISS/non-curses file manager   #
+			 *  # 	  The command line file manager    #
 			 *  ######################################## */
 
 /* GPL2+ License 
