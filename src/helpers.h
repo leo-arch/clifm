@@ -372,6 +372,14 @@ extern int watch;
 
 #define DT_NONE 14
 
+/* Macros for the get_sys_shell function */
+#define SHELL_NONE 0
+#define SHELL_BASH 1
+#define SHELL_DASH 2
+#define SHELL_FISH 3
+#define SHELL_ZSH 4
+
+
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
@@ -694,6 +702,7 @@ extern int
     sel_is_last,
     selfile_ok,
     share_selbox,
+	shell,
     shell_terminal,
     show_hidden,
     sort,

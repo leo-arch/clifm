@@ -160,6 +160,7 @@ int
     sel_is_last = 0,
     selfile_ok = 1,
     share_selbox = UNSET,
+	shell = SHELL_NONE,
     shell_terminal = 0,
     show_hidden = UNSET,
     sort = UNSET,
@@ -794,6 +795,7 @@ main(int argc, char *argv[])
 		list_dir();
 	}
 
+	shell = get_sys_shell();
 	create_kbinds_file();
 	load_bookmarks();
 	load_keybinds();

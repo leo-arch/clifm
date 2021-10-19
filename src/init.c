@@ -61,6 +61,34 @@
  * functions
  */
 
+int
+get_sys_shell(void)
+{
+	char l[PATH_MAX] = "";
+	ssize_t ret = readlinkat(AT_FDCWD, "/bin/sh", l, PATH_MAX);
+
+	if (!*l || ret == -1)
+		return SHELL_NONE;
+
+	char *s = (char *)NULL;
+	char *p = strrchr(l, '/');
+	if (p && *(++p))
+		s = p;
+	else
+		s = l;
+
+	if (*s == 'b' && strcmp(s, "bash") == 0)
+		return SHELL_BASH;
+	if (*s == 'd' && strcmp(s, "dash") == 0)
+		return SHELL_DASH;
+	if (*s == 'f' && strcmp(s, "fish") == 0)
+		return SHELL_FISH;
+	if (*s == 'z' && strcmp(s, "zsh") == 0)
+		return SHELL_ZSH;
+
+	return SHELL_NONE;
+}
+
 #ifndef _NO_GETTEXT
 /* Initialize gettext for translations support */
 int

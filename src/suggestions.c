@@ -53,6 +53,7 @@ typedef char *rl_cpvfunc_t;
 #include "colors.h"
 #include "jump.h"
 #include "readline.h"
+#include "builtins.h"
 
 #ifndef _NO_HIGHLIGHT
 #include "highlight.h"
@@ -560,6 +561,7 @@ check_filenames(char *str, size_t len, const unsigned char c,
 			if ((case_sens_path_comp ? strcmp(str, file_info[i].name)
 			: strcasecmp(str, file_info[i].name)) == 0)
 				return FULL_MATCH;
+			continue;
 		}
 
 		if (len && (case_sens_path_comp ? strncmp(str, file_info[i].name, len)
@@ -607,6 +609,7 @@ check_filenames(char *str, size_t len, const unsigned char c,
 			return PARTIAL_MATCH;
 		}
 	}
+
 	return NO_MATCH;
 }
 
@@ -634,6 +637,49 @@ check_history(const char *str, const size_t len)
 	return 0;
 }
 
+static int
+check_builtins(const char *str, const size_t len, const int print,
+				const size_t full_word)
+{
+	char **b = (char **)NULL;
+
+	switch(shell) {
+	case SHELL_NONE: return NO_MATCH;
+	case SHELL_BASH: b = bash_builtins; break;
+	case SHELL_DASH: b = dash_builtins; break;
+	case SHELL_ZSH: b = zsh_builtins; break;
+	default: return NO_MATCH;
+	}
+
+	size_t i = 0;
+	for(; b[i]; i++) {
+		if (*str != *b[i])
+			continue;
+
+		if (full_word) {
+			if (strcmp(str, b[i]) == 0)
+				return FULL_MATCH;
+			continue;
+		}
+
+		if (strncmp(b[i], str, len) != 0)
+			continue;
+
+		size_t blen = strlen(b[i]);
+		if (blen > len) {
+			if (print) {
+				suggestion.type = CMD_SUG;
+				print_suggestion(b[i], len, "\x1b[02;33m");
+			}
+			return PARTIAL_MATCH;
+		} else {
+			return FULL_MATCH;
+		}
+	}
+
+	return NO_MATCH;
+}
+
 int
 check_cmds(const char *str, const size_t len, const int print,
 			const size_t full_word)
@@ -649,8 +695,7 @@ check_cmds(const char *str, const size_t len, const int print,
 		if (full_word) {
 			if (strcmp(str, bin_commands[i]) == 0)
 				return FULL_MATCH;
-			else
-				continue;
+			continue;
 		}
 		
 		if (strncmp(str, bin_commands[i], len) != 0)
@@ -675,7 +720,7 @@ check_cmds(const char *str, const size_t len, const int print,
 		return FULL_MATCH;
 	}
 
-	return NO_MATCH;
+	return check_builtins(str, len, print, full_word);
 }
 
 static int
@@ -1471,10 +1516,10 @@ rl_suggestions(const unsigned char c)
 	}
 
 SUCCESS:
+	fputs("\x1b[0m", stdout);
 	if (printed) {
 		suggestion.printed = 1;
 		/* Restore color */
-		fputs("\x1b[0m", stdout);
 		if (!wrong_cmd)
 			fputs(cur_color ? cur_color : tx_c, stdout);
 		else

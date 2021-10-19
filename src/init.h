@@ -51,4 +51,6 @@ int init_workspaces(void);
 int init_gettext(void);
 int get_home(void);
 int backup_argv(int argc, char **argv);
+int get_sys_shell(void);
+
 struct user_t get_user(void);
