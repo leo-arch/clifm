@@ -1994,7 +1994,7 @@ read_config(void)
 
 		else if (xargs.fzftab == UNSET && *line == 'T'
 		&& strncmp(line, "TabCompletionMode=", 18) == 0) {
-			char opt_str[MAX_BOOL] = "";
+			char opt_str[9] = "";
 			ret = sscanf(line, "TabCompletionMode=%8s\n", opt_str);
 			if (ret == -1)
 				continue;
