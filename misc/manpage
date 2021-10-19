@@ -33,7 +33,7 @@ CLIFM \- The Command Line File Manager
 .sp
 \fB12.\fR Resource opener
 .sp
-\fB13.\fR Auto-suggestions
+\fB13.\fR Auto-suggestions (including a warning prompt)
 .sp
 \fB14.\fR Shell functions
 .sp
@@ -142,7 +142,7 @@ List of CliFM features:
   38) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   39) Fastback function
   40) Remote file systems management
-  41) \fIGemini\fR, a Fish-like auto-suggestions system
+  41) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
   42) Syntax highlighting
 
 .SH 4. POSITIONAL PARAMETERS
@@ -371,6 +371,10 @@ sort in reverse order, for example: z-a instead of a-z, which is the default ord
 .TP
 .B \-\-trash\-as\-rm
 the \fIr\fR command executes the built-in 'trash' (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
+.TP
+.B \-\-warn\-wrong\-cmd
+enable the warning prompt to highlight invalid command names
+
 .TP
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
 
@@ -988,6 +992,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  sf = ELN's, bookmarks, file and directory names
  sh = commands history entries
  sx = suggestions for CliFM's internal commands and parameters
+ wp = warning prompt color (See below the \fBAUTO-SUGGESTIONS\fR section)
 
  \fBSyntax highlighting\fR
  hb = brackets '()[]{}'
@@ -1264,6 +1269,14 @@ Suggestions will be printed using one of the following color codes (see the \fBC
 
 You can set \fBSuggestFiletypeColor\fR to "true" in the configuration file to use the color of the file type of the current file name (as set in the color scheme file) instead of the value of
 \fIsf\fR. For example, if a suggestion is printed for a file that is a symbolic link, \fIln\fR or \fIor\fR (if a broken link) will be used instead of \fIsf\fR.
+
+\fBThe warning prompt\fR
+
+CliFM includes a \fBwarning prompt\fR to highlight invalid, wrong, or non-existent command names. Enable it via the \fI--warn-wrong-cmd\fR command line option or setting \fIWarningPrompt\fR to "true" in the configuration file. This features depends on suggestions (make sure suggestions are enabled before enabling the warning prompt).
+
+By default, the string used by the warning prompt is \fB"(!) > "\fR, though it can be customized using the \fIWarningPromptStr\fR in the condifuration file.
+
+The default color of the warning prompt is dimmed red (\fI02;32\fR), but it can be customized setting \fIwp\fR in the current color scheme file (in the \fIInterfaceColors\fR section) to the color you want. Consult the \fBCOLOR CODES\fR section above.
 
 .SH 14. SHELL FUNCTIONS
 CliFM includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.

@@ -81,6 +81,9 @@ Prompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[00;36m\]\w\n\[\e[0m\]
 # itself. Consult the manpage for more information.
 PromptStyle=default
 
+# A warning prompt to warn the user about invalid command names
+WarningPrompt=false
+
 # String to be used by the warning prompt. The color of this prompt
 # can be customized using the 'wp' code in the color scheme file
 WarningPromptStr="(!) > "

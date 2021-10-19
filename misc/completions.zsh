@@ -50,9 +50,9 @@ args=(
 	'--enable-logs[enable program logs]'
 	'--expand-bookmarks[expand bookmark names into the corresponding bookmark paths]'
 	'--fzftab[enable FZF TAB completion mode]'
+	'--highlight[enable syntax highlighting]'
 	'--icons[enable icons]'
 	'--icons-use-file-color[icons color follows file color]'
-	'--highlight[enable syntax highlighting]'
 	'--list-and-quit[list files and quit]'
 	'--max-dirhist=[maximum number of visited directories to remember]:int:'
 	'--max-files=[list only up to NUM files]:int:'
@@ -81,6 +81,7 @@ args=(
 	'--sort-reverse[sort in reverse order]'
 	'--trash-as-rm[the 'r' command executes 'trash' instead of 'rm']'
 	'*:filename:_files'
+	'--warn-wrong-cmd[enable the warning prompt to highlight wrong command names]'
 )
 
 _arguments -w -s -S $args[@] && ret=0

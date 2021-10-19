@@ -82,9 +82,9 @@ _clifm ()
         --enable-logs
         --expand-bookmarks
         --fzftab
+        --highlight
         --icons
         --icons-use-file-color
-        --highlight
         --list-and-quit
         --max-dirhist
         --max-files
@@ -112,6 +112,7 @@ _clifm ()
         --sort-reverse
         --no-suggestions
         --trash-as-rm
+	--warn-wrong-cmd
     )
 
     if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then
