@@ -766,7 +766,7 @@ check_jumpdb(const char *str, const size_t len, const int print, const size_t fu
 }
 
 static int
-check_bookmarks(const char *str, const size_t len)
+check_bookmarks(const char *str, const size_t len, const int print)
 {
 	if (!bm_n)
 		return 0;
@@ -780,6 +780,13 @@ check_bookmarks(const char *str, const size_t len)
 	while (--i >= 0) {
 		if (!bookmarks[i].name || TOUPPER(*str) != TOUPPER(*bookmarks[i].name))
 			continue;
+
+		if (!print) {
+			if ((case_sens_path_comp ? strcmp(str, bookmarks[i].name)
+			: strcasecmp(str, bookmarks[i].name)) == 0)
+				return FULL_MATCH;
+			continue;
+		}
 
 		if (len && (case_sens_path_comp ? strncmp(str, bookmarks[i].name, len)
 		: strncasecmp(str, bookmarks[i].name, len)) == 0) {
@@ -842,9 +849,9 @@ check_int_params(const char *str, const size_t len)
 }
 
 static int
-check_eln(const char *str, const size_t len, const int print)
+check_eln(const char *str, const int print)
 {
-	if (!str || !*str || len == 0)
+	if (!str || !*str)
 		return NO_MATCH;
 
 	int n = atoi(str);
@@ -874,7 +881,7 @@ check_eln(const char *str, const size_t len, const int print)
 }
 
 static int
-check_aliases(const char *str, const size_t len)
+check_aliases(const char *str, const size_t len, const int print)
 {
 	if (!aliases_n)
 		return NO_MATCH;
@@ -888,6 +895,14 @@ check_aliases(const char *str, const size_t len)
 		char *p = aliases[i].name;
 		if (TOUPPER(*p) != TOUPPER(*str))
 			continue;
+
+		if (!print) {
+			if ((case_sens_path_comp ? strcmp(p, str)
+			: strcasecmp(p, str)) == 0)
+				return FULL_MATCH;
+			continue;
+		}
+
 		if ((case_sens_path_comp ? strncmp(p, str, len)
 		: strncasecmp(p, str, len)) != 0)
 			continue;
@@ -1360,7 +1375,12 @@ rl_suggestions(const unsigned char c)
 		switch(suggestion_strategy[st]) {
 
 		case 'a': /* 3.d.1) Aliases */
-			printed = check_aliases(word, wlen);
+			flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+
+			if (flag == CHECK_MATCH && suggestion.printed)
+				clear_suggestion(CS_FREEBUF);
+
+			printed = check_aliases(word, wlen, flag);
 			if (printed) {
 				suggestion.offset = last_word_offset;
 				goto SUCCESS;
@@ -1369,7 +1389,12 @@ rl_suggestions(const unsigned char c)
 
 		case 'b': /* 3.d.2) Bookmarks */
 			if (last_space || autocd || auto_open) {
-				printed = check_bookmarks(word, wlen);
+				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+
+				if (flag == CHECK_MATCH && suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
+
+				printed = check_bookmarks(word, wlen, flag);
 				if (printed) {
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
@@ -1417,9 +1442,8 @@ rl_suggestions(const unsigned char c)
 				break;
 
 			int nlen = (int)wlen;
-			while (word[nlen - 1] == ' ') {
+			while (word[nlen - 1] == ' ')
 				word[--nlen] = '\0';
-			}
 
 			flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 
@@ -1427,7 +1451,7 @@ rl_suggestions(const unsigned char c)
 				clear_suggestion(CS_FREEBUF);
 
 			if (*word >= '1' && *word <= '9' && is_number(word)) {
-				printed = check_eln(word, wlen, flag);
+				printed = check_eln(word, flag);
 
 				if (printed) {
 					suggestion.offset = last_word_offset;
