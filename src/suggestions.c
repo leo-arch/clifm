@@ -842,14 +842,17 @@ check_int_params(const char *str, const size_t len)
 }
 
 static int
-check_eln(const char *str)
+check_eln(const char *str, const size_t len, const int print)
 {
-	if (!str || !*str)
+	if (!str || !*str || len == 0)
 		return NO_MATCH;
 
 	int n = atoi(str);
 	if (n < 1 || n > (int)files || !file_info[n - 1].name)
 		return NO_MATCH;
+
+	if (!print)
+		return FULL_MATCH;
 
 	n--;
 	char *color = sf_c;
@@ -1352,6 +1355,7 @@ rl_suggestions(const unsigned char c)
 	 * suggestion_strategy (the value is taken form the configuration
 	 * file) */
 	size_t st = 0;
+	int flag = 0;
 	for (; st < SUG_STRATS; st++) {
 		switch(suggestion_strategy[st]) {
 
@@ -1381,7 +1385,7 @@ rl_suggestions(const unsigned char c)
 				}
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
-				int flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 				printed = check_completions(word, wlen, c, flag);
 				if (printed) {
 					if (wrong_cmd && nwords == 1) {
@@ -1404,8 +1408,27 @@ rl_suggestions(const unsigned char c)
 			break;
 
 		case 'e': /* 3.d.4) ELN's */
+			if (nwords == 1 && first_word) {
+				word = first_word;
+				wlen = strlen(word);
+			}
+
+			if (wlen == 0)
+				break;
+
+			int nlen = (int)wlen;
+			while (word[nlen - 1] == ' ') {
+				word[--nlen] = '\0';
+			}
+
+			flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+
+			if (flag == CHECK_MATCH && suggestion.printed)
+				clear_suggestion(CS_FREEBUF);
+
 			if (*word >= '1' && *word <= '9' && is_number(word)) {
-				printed = check_eln(word);
+				printed = check_eln(word, wlen, flag);
+
 				if (printed) {
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
@@ -1455,7 +1478,7 @@ rl_suggestions(const unsigned char c)
 				}
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
-				int flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 				printed = check_jumpdb(word, wlen, flag, full_word);
 
 				if (printed) {
