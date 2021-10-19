@@ -724,7 +724,7 @@ check_cmds(const char *str, const size_t len, const int print,
 }
 
 static int
-check_jumpdb(const char *str, const size_t len)
+check_jumpdb(const char *str, const size_t len, const int print, const size_t full_word)
 {
 	char *color = (char *)NULL;
 
@@ -737,18 +737,28 @@ check_jumpdb(const char *str, const size_t len)
 		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
 			continue;
 
+		if (full_word) {
+			if ((case_sens_path_comp ? strcmp(str, jump_db[i].path)
+			: strcasecmp(str, jump_db[i].path)) == 0)
+				return FULL_MATCH;
+			continue;
+		}
+
 		size_t db_len = strlen(jump_db[i].path);
+	
 		if (len && (case_sens_path_comp ? strncmp(str, jump_db[i].path, len)
-		: strncasecmp(str, jump_db[i].path, len)) == 0
-		&& db_len > len) {
-			suggestion.type = FILE_SUG;
-			suggestion.filetype = DT_DIR;
-			char tmp[NAME_MAX + 2];
-			*tmp = '\0';
-			if (jump_db[i].path[db_len - 1] != '/')
-				snprintf(tmp, NAME_MAX + 2, "%s/", jump_db[i].path);
-			print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
-			return PARTIAL_MATCH;
+		: strncasecmp(str, jump_db[i].path, len)) == 0) {
+			if (print && db_len > len) {
+				suggestion.type = FILE_SUG;
+				suggestion.filetype = DT_DIR;
+				char tmp[PATH_MAX + 2];
+				*tmp = '\0';
+				if (jump_db[i].path[db_len - 1] != '/')
+					snprintf(tmp, PATH_MAX + 2, "%s/", jump_db[i].path);
+				print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
+				return PARTIAL_MATCH;
+			}
+			return FULL_MATCH;
 		}
 	}
 
@@ -1439,11 +1449,28 @@ rl_suggestions(const unsigned char c)
 			/* We don't care about auto-open here: the jump function
 			 * deals with directories only */
 			if (last_space || autocd) {
-				printed = check_jumpdb(word, wlen);
+				if (nwords == 1) {
+					word = (first_word && *first_word) ? first_word : last_word;
+					wlen = strlen(word);
+				}
+				if (wlen && word[wlen - 1] == ' ')
+					word[wlen - 1] = '\0';
+				int flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+				printed = check_jumpdb(word, wlen, flag, full_word);
+
 				if (printed) {
+					if (wrong_cmd && nwords == 1) {
+						rl_dispatching = 1;
+						recover_from_wrong_cmd();
+						rl_dispatching = 0;
+					}
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
 				}
+/*				if (printed) {
+					suggestion.offset = last_word_offset;
+					goto SUCCESS;
+				} */
 			}
 			break;
 
@@ -1516,14 +1543,15 @@ rl_suggestions(const unsigned char c)
 	}
 
 SUCCESS:
-	fputs("\x1b[0m", stdout);
 	if (printed) {
+		fputs("\x1b[0m", stdout);
 		suggestion.printed = 1;
 		/* Restore color */
-		if (!wrong_cmd)
+		if (!wrong_cmd) {
 			fputs(cur_color ? cur_color : tx_c, stdout);
-		else
+		} else {
 			fputs(wp_c, stdout);
+		}
 	} else {
 		suggestion.printed = 0;
 	}
