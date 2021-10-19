@@ -1591,6 +1591,9 @@ rl_suggestions(const unsigned char c)
 
 SUCCESS:
 	if (printed) {
+		if (printed == FULL_MATCH && suggestion_buf)
+			clear_suggestion(CS_FREEBUF);
+
 		fputs("\x1b[0m", stdout);
 		suggestion.printed = 1;
 		/* Restore color */
