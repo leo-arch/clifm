@@ -568,6 +568,7 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		: strncasecmp(str, file_info[i].name, len)) == 0) {
 			if (file_info[i].len == len)
 				return FULL_MATCH;
+
 			if (suggest_filetype_color)
 				color = file_info[i].color;
 
@@ -629,12 +630,13 @@ check_history(const char *str, const size_t len)
 			if (strlen(history[i]) > len) {
 				suggestion.type = HIST_SUG;
 				print_suggestion(history[i], len, sh_c);
+				return PARTIAL_MATCH;
 			}
-			return PARTIAL_MATCH;
+			return FULL_MATCH;
 		}
 	}
 
-	return 0;
+	return NO_MATCH;
 }
 
 static int
@@ -706,18 +708,20 @@ check_cmds(const char *str, const size_t len, const int print,
 				suggestion.type = CMD_SUG;
 				print_suggestion(bin_commands[i], len, sx_c);
 				return PARTIAL_MATCH;
+			} else {
+				return FULL_MATCH;
 			}
 		} else if (ext_cmd_ok) {
 			if (print && strlen(bin_commands[i]) > len) {
 				suggestion.type = CMD_SUG;
 				print_suggestion(bin_commands[i], len, sc_c);
 				return PARTIAL_MATCH;
+			} else {
+				return FULL_MATCH;
 			}
 		} else {
 			continue;
 		}
-
-		return FULL_MATCH;
 	}
 
 	return check_builtins(str, len, print, full_word);
@@ -1371,6 +1375,7 @@ rl_suggestions(const unsigned char c)
 	 * file) */
 	size_t st = 0;
 	int flag = 0;
+
 	for (; st < SUG_STRATS; st++) {
 		switch(suggestion_strategy[st]) {
 
@@ -1412,6 +1417,7 @@ rl_suggestions(const unsigned char c)
 					word[wlen - 1] = '\0';
 				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 				printed = check_completions(word, wlen, c, flag);
+
 				if (printed) {
 					if (wrong_cmd && nwords == 1) {
 						rl_dispatching = 1;
@@ -1476,6 +1482,7 @@ rl_suggestions(const unsigned char c)
 
 				printed = check_filenames(word, wlen,
 							c, last_space ? 0 : 1, full_word);
+
 				if (printed) {
 					if (wrong_cmd && nwords == 1) {
 						rl_dispatching = 1;
@@ -1522,10 +1529,6 @@ rl_suggestions(const unsigned char c)
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
 				}
-/*				if (printed) {
-					suggestion.offset = last_word_offset;
-					goto SUCCESS;
-				} */
 			}
 			break;
 
@@ -1605,8 +1608,9 @@ rl_suggestions(const unsigned char c)
 
 SUCCESS:
 	if (printed) {
-		if (printed == FULL_MATCH && suggestion_buf)
+		if (printed == FULL_MATCH && suggestion_buf) {
 			clear_suggestion(CS_FREEBUF);
+		}
 
 		fputs("\x1b[0m", stdout);
 		suggestion.printed = 1;
