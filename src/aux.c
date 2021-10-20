@@ -79,21 +79,24 @@ rl_ring_bell(void)
 		fflush(stderr);
 		return;
 
-	case BELL_VISIBLE:
+	case BELL_VISIBLE: {
+		int point = rl_point;
 		rl_mark = rl_last_word_start;
+		if (rl_end && rl_line_buffer[rl_end - 1] == ' ')
+			rl_point--;
 		rl_activate_mark();
 		rl_redisplay();
 		msleep(VISIBLE_BELL_DELAY);
 		rl_deactivate_mark();
 #ifndef _NO_HIGHLIGHT
 		if (highlight && !wrong_cmd) {
-			int point = rl_point;
 			rl_point = rl_mark;
 			recolorize_line();
-			rl_point = point;
 		}
 #endif
+		rl_point = point;
 		return;
+		}
 
 	default: return;
 	}

@@ -141,7 +141,7 @@ leftmost_bell(void)
 {
 	/* Leftmost margin bell */
 	if (bell == BELL_VISIBLE) {
-		rl_replace_line(" ", 1);
+		rl_stuff_char(' ');
 		rl_end = rl_point = 1;
 		*rl_line_buffer = ' ';
 	}
