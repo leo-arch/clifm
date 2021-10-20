@@ -1234,6 +1234,10 @@ f. Aliases names
 g. Bookmarks names
 .sp
 h. Program names in \fBPATH\fR 
+.sp
+i. Shell builtins
+
+\fBNOTE:\fR The shell name is taken from \fI/bin/sh\fR. The following shell are supported: bash, dash, fish, ksh, tcsh, and zsh. Command names are checked in the following order: CliFM internal commands, commands in \fBPATH\fR, and shell builtins.
 
 To accept the entire suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press \fBEnter\fR to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
 
