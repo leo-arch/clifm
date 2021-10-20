@@ -1537,6 +1537,7 @@ rl_cmdhist(int count, int key)
 	if (key == 65) {
 		if (--p < 0)
 			return EXIT_FAILURE;
+
 		while (p >= 0 && history[p]) {
 			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
 			&& strcmp(rl_line_buffer, history[p]) != 0) {
@@ -1548,6 +1549,7 @@ rl_cmdhist(int count, int key)
 	} else if (key == 66) {
 		if (++p >= (int)current_hist_n)
 			return EXIT_FAILURE;
+
 		while (history[p]) {
 			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
 			&& strcmp(rl_line_buffer, history[p]) != 0) {

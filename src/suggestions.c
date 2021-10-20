@@ -101,19 +101,13 @@ recover_from_wrong_cmd(void)
 
 	rl_restore_prompt();
 	rl_clear_message();
-/*	int bk = rl_point;
-	rl_point = 0;
-	cur_color = tx_c;
-	fputs(cur_color, stdout);
-	fflush(stdout); */
+
 #ifndef _NO_HIGHLIGHT
 	if (highlight)
 		recolorize_line();
 #endif
-//	rl_point = bk;
+
 	wrong_cmd = 0;
-/*	if (rl_mark_active_p())
-		rl_deactivate_mark(); */
 	return EXIT_SUCCESS;
 }
 
@@ -1097,7 +1091,8 @@ count_words(size_t *start_word, size_t *full_word)
 			continue;
 		}
 		if (w && b[w] == ' ' && b[w - 1] != '\\') {
-			rl_last_word_start = (int)w + (b + 1 ? 1 : 0);
+			if (b[w + 1] && b[w + 1] != ' ')
+				rl_last_word_start = (int)w + (b + 1 ? 1 : 0);
 			if (!*full_word && b[w - 1] != '|'
 			&& b[w - 1] != ';' && b[w - 1] != '&')
 				*full_word = w; /* Index of the end of the first full word (cmd) */

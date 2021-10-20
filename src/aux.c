@@ -41,6 +41,9 @@
 #include "aux.h"
 #include "exec.h"
 #include "misc.h"
+#ifndef _NO_HIGHLIGHT
+#include "highlight.h"
+#endif
 
 /* Sleep for MSEC milliseconds */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
@@ -73,6 +76,14 @@ rl_visible_bell(void)
 	rl_redisplay();
 	msleep(VISIBLE_BELL_DELAY);
 	rl_deactivate_mark();
+#ifndef _NO_HIGHLIGHT
+	if (highlight && !wrong_cmd) {
+		int point = rl_point;
+		rl_point = rl_mark;
+		recolorize_line();
+		rl_point = point;
+	}
+#endif
 }
 
 /* The following three functions were taken from

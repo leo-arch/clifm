@@ -1377,15 +1377,7 @@ my_rl_completion(const char *text, int start, int end)
 
 	/* Second word or more */
 	else {
-/*		int ps = 0, i = 0, c = 0, check_cmd = 0;
-		for (; (c = rl_line_buffer[i]); i++) {
-			if (c == '|' || c == ';' || c == '&') {
-				ps = i;
-				break;
-			}
-		} */
-
-		if (nwords == 1) {
+		if (nwords == 1 && rl_line_buffer[rl_end - 1] != ' ') {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 			if (matches) {
 				cur_comp_type = TCMP_CMD;
