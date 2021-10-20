@@ -699,6 +699,7 @@ extern int
     prompt_style,
     recur_perm_error_flag,
     restore_last_path,
+	rl_last_word_start,
 	rl_no_tabhist,
     sel_is_last,
     selfile_ok,

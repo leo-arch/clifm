@@ -156,6 +156,7 @@ int
 	prompt_style = UNSET,
     recur_perm_error_flag = 0,
     restore_last_path = UNSET,
+	rl_last_word_start = 0,
 	rl_no_tabhist = 0,
     sel_is_last = 0,
     selfile_ok = 1,

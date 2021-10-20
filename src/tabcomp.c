@@ -701,474 +701,145 @@ AFTER_USUAL_COMPLETION:
 	free(text);
 
 	if (!matches) {
-		rl_ding();
-	} else {
-		register size_t i;
-		int should_quote;
+//		rl_ding();
+		rl_visible_bell();
+		return EXIT_FAILURE;
+	}
 
-		/* It seems to me that in all the cases we handle we would like
-		to ignore duplicate possiblilities. Scan for the text to
-		insert being identical to the other completions. */
-		if (rl_ignore_completion_duplicates) {
-			char *lowest_common;
-			size_t j;
-			size_t newlen = 0;
-			char dead_slot;
-			char **temp_array;
+	register size_t i;
+	int should_quote;
 
-			/* Sort the items. */
-			/* It is safe to sort this array, because the lowest common
-			denominator found in matches[0] will remain in place. */
+	/* It seems to me that in all the cases we handle we would like
+	to ignore duplicate possiblilities. Scan for the text to
+	insert being identical to the other completions. */
+	if (rl_ignore_completion_duplicates) {
+		char *lowest_common;
+		size_t j;
+		size_t newlen = 0;
+		char dead_slot;
+		char **temp_array;
+
+		/* Sort the items. */
+		/* It is safe to sort this array, because the lowest common
+		denominator found in matches[0] will remain in place. */
 //			for (i = 0; matches[i]; i++);
-			/* Try sorting the array without matches[0], since we need it to
-			stay in place no matter what. */
+		/* Try sorting the array without matches[0], since we need it to
+		stay in place no matter what. */
 //			if (i)
 //				qsort(matches + 1, i - 1, sizeof (char *), compare_strings);
 
-			/* Remember the lowest common denominator for it may be unique. */
-			lowest_common = savestring(matches[0], strlen(matches[0]));
+		/* Remember the lowest common denominator for it may be unique. */
+		lowest_common = savestring(matches[0], strlen(matches[0]));
 
-			for (i = 0; matches[i + 1]; i++) {
-				if (strcmp(matches[i], matches[i + 1]) == 0) {
-					free(matches[i]);
-					matches[i] = (char *)&dead_slot;
-				} else {
-					newlen++;
-				}
-			}
-
-		/* We have marked all the dead slots with (char *)&dead_slot.
-	     Copy all the non-dead entries into a new array. */
-			temp_array = (char **)xnmalloc(3 + newlen, sizeof (char *));
-			for (i = j = 1; matches[i]; i++) {
-				if (matches[i] != (char *)&dead_slot)
-					temp_array[j++] = matches[i];
-			}
-			temp_array[j] = (char *)NULL;
-
-			if (matches[0] != (char *)&dead_slot)
-				free(matches[0]);
-			free(matches);
-
-			matches = temp_array;
-
-			/* Place the lowest common denominator back in [0]. */
-			matches[0] = lowest_common;
-
-			/* If there is one string left, and it is identical to the
-			lowest common denominator, then the LCD is the string to
-			insert. */
-			if (j == 2 && strcmp(matches[0], matches[1]) == 0) {
-				free(matches[1]);
-				matches[1] = (char *)NULL;
+		for (i = 0; matches[i + 1]; i++) {
+			if (strcmp(matches[i], matches[i + 1]) == 0) {
+				free(matches[i]);
+				matches[i] = (char *)&dead_slot;
+			} else {
+				newlen++;
 			}
 		}
 
-		switch (what_to_do) {
+		/* We have marked all the dead slots with (char *)&dead_slot.
+		 Copy all the non-dead entries into a new array. */
+		temp_array = (char **)xnmalloc(3 + newlen, sizeof (char *));
+		for (i = j = 1; matches[i]; i++) {
+			if (matches[i] != (char *)&dead_slot)
+				temp_array[j++] = matches[i];
+		}
+		temp_array[j] = (char *)NULL;
+
+		if (matches[0] != (char *)&dead_slot)
+			free(matches[0]);
+		free(matches);
+
+		matches = temp_array;
+
+		/* Place the lowest common denominator back in [0]. */
+		matches[0] = lowest_common;
+
+		/* If there is one string left, and it is identical to the
+		lowest common denominator, then the LCD is the string to
+		insert. */
+		if (j == 2 && strcmp(matches[0], matches[1]) == 0) {
+			free(matches[1]);
+			matches[1] = (char *)NULL;
+		}
+	}
+
+	switch (what_to_do) {
 //		case TAB:
-		case '!':
+	case '!':
 		/* If we are matching filenames, then here is our chance to
-	     do clever processing by re-examining the list.  Call the
-	     ignore function with the array as a parameter.  It can
-	     munge the array, deleting matches as it desires. */
-			if (rl_ignore_some_completions_function
-			&& our_func == rl_completion_entry_function) {
-				(void)(*rl_ignore_some_completions_function)(matches);
-				if (matches == 0 || matches[0] == 0) {
-					if (matches)
-						free(matches);
-					rl_ding();
-					return 0;
-				}
+		 do clever processing by re-examining the list.  Call the
+		 ignore function with the array as a parameter.  It can
+		 munge the array, deleting matches as it desires. */
+		if (rl_ignore_some_completions_function
+		&& our_func == rl_completion_entry_function) {
+			(void)(*rl_ignore_some_completions_function)(matches);
+			if (matches == 0 || matches[0] == 0) {
+				if (matches)
+					free(matches);
+				rl_ding();
+				return 0;
 			}
+		}
 
-			/* If we are doing completion on quoted substrings, and any matches
-			contain any of the completer_word_break_characters, then auto-
-			matically prepend the substring with a quote character (just pick
-			the first one from the list of such) if it does not already begin
-			with a quote string.  FIXME: Need to remove any such automatically
-			inserted quote character when it no longer is necessary, such as
-			if we change the string we are completing on and the new set of
-			matches don't require a quoted substring. */
-			char *replacement = matches[0];
+		/* If we are doing completion on quoted substrings, and any matches
+		contain any of the completer_word_break_characters, then auto-
+		matically prepend the substring with a quote character (just pick
+		the first one from the list of such) if it does not already begin
+		with a quote string.  FIXME: Need to remove any such automatically
+		inserted quote character when it no longer is necessary, such as
+		if we change the string we are completing on and the new set of
+		matches don't require a quoted substring. */
+		char *replacement = matches[0];
 
-			should_quote = matches[0] && rl_completer_quote_characters &&
-			rl_filename_completion_desired && rl_filename_quoting_desired;
+		should_quote = matches[0] && rl_completer_quote_characters &&
+		rl_filename_completion_desired && rl_filename_quoting_desired;
+
+		if (should_quote)
+			should_quote = should_quote && !quote_char;
+
+		if (should_quote) {
+			int do_replace;
+
+			do_replace = NO_MATCH;
+
+			/* If there is a single match, see if we need to quote it.
+			This also checks whether the common prefix of several
+			matches needs to be quoted.  If the common prefix should
+			not be checked, add !matches[1] to the if clause. */
+			should_quote = rl_strpbrk(matches[0],
+						   rl_completer_word_break_characters) != 0;
 
 			if (should_quote)
-				should_quote = should_quote && !quote_char;
+				do_replace = matches[1] ? MULT_MATCH : SINGLE_MATCH;
 
-			if (should_quote) {
-				int do_replace;
+			if (do_replace != NO_MATCH) {
 
-				do_replace = NO_MATCH;
-
-				/* If there is a single match, see if we need to quote it.
-				This also checks whether the common prefix of several
-				matches needs to be quoted.  If the common prefix should
-				not be checked, add !matches[1] to the if clause. */
-				should_quote = rl_strpbrk(matches[0],
-							   rl_completer_word_break_characters) != 0;
-
-				if (should_quote)
-					do_replace = matches[1] ? MULT_MATCH : SINGLE_MATCH;
-
-				if (do_replace != NO_MATCH) {
-
-					/* Found an embedded word break character in a potential
-					 match, so we need to prepend a quote character if we
-					 are replacing the completion string. */
-					replacement = escape_str(matches[0]);
-				}
+				/* Found an embedded word break character in a potential
+				 match, so we need to prepend a quote character if we
+				 are replacing the completion string. */
+				replacement = escape_str(matches[0]);
 			}
+		}
 
-			if (replacement) {
-				rl_begin_undo_group();
-				rl_delete_text(start, rl_point);
-				rl_point = start;
-#ifndef _NO_HIGHLIGHT
-				if (highlight) {
-					size_t k, l = 0;
-					char *cc = cur_color;
-					fputs("\x1b[?25l", stdout);
-					char t[PATH_MAX];
-					for (k = 0; replacement[k]; k++) {
-						rl_highlight(replacement, k, SET_COLOR);
-						if (replacement[k] < 0) {
-							t[l++] = replacement[k];
-							if (replacement[k + 1] >= 0) {
-								t[l] = '\0';
-								l = 0;
-								rl_insert_text(t);
-								rl_redisplay();
-							}
-							continue;
-						}
-						t[0] = (char)replacement[k];
-						t[1] = '\0';
-						rl_insert_text(t);
-						rl_redisplay();
-					}
-					fputs("\x1b[?25h", stdout);
-					cur_color = cc;
-					if (cur_color)
-						fputs(cur_color, stdout);
-				} else {
-					rl_insert_text(replacement);
-				}
-#else
-				rl_insert_text(replacement);
-#endif
-				rl_end_undo_group();
-				if (replacement != matches[0])
-					free(replacement);
-			}
-
-			/* If there are more matches, ring the bell to indicate.
-			 If this was the only match, and we are hacking files,
-			 check the file to see if it was a directory.  If so,
-			 add a '/' to the name.  If not, and we are at the end
-			 of the line, then add a space. */
-			if (matches[1]) {
-				if (what_to_do == '!')
-					goto DISPLAY_MATCHES;		/* XXX */
-				else if (rl_editing_mode != 0) /* vi_mode */
-					rl_ding();	/* There are other matches remaining. */
-			} else {
-				char temp_string[4];
-				int temp_string_index = 0;
-
-				if (quote_char)
-					temp_string[temp_string_index++] = quote_char;
-
-				temp_string[temp_string_index++] = (char)(delimiter
-												? delimiter : ' ');
-				temp_string[temp_string_index++] = '\0';
-
-				if (rl_filename_completion_desired) {
-					struct stat finfo;
-					char *filename = tilde_expand(matches[0]);
-
-					if ((stat(filename, &finfo) == 0) && S_ISDIR(finfo.st_mode)) {
-						if (rl_line_buffer[rl_point] != '/') {
-#ifndef _NO_HIGHLIGHT
-							if (highlight) {
-								char *cc = cur_color;
-								fputs(hd_c, stdout);
-								rl_insert_text ("/");
-								rl_redisplay();
-								fputs(cc, stdout);
-							} else {
-								rl_insert_text ("/");
-							}
-#else
-							rl_insert_text ("/");
-#endif
-						}
-					} else {
-						if (rl_point == rl_end)
-							rl_insert_text(temp_string);
-					}
-					free(filename);
-				} else {
-					if (rl_point == rl_end)
-						rl_insert_text(temp_string);
-				}
-			}
-		break;
-
-/*		case '*': {
-			i = 1;
-
+		if (replacement) {
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;
-			if (matches[1]) {
-				while (matches[i]) {
-					rl_insert_text(matches[i++]);
-					rl_insert_text(" ");
-				}
-			} else {
-				rl_insert_text(matches[0]);
-				rl_insert_text(" ");
-			}
-			rl_end_undo_group();
-		}
-		break; */
-
-		case '?': {
-			int len, count, limit, max;
-			int j, k, l;
-
-			/* Handle simple case first.  What if there is only one answer? */
-			if (!matches[1]) {
-				char *temp;
-
-				temp = printable_part(matches[0]);
-				rl_crlf();
-				print_filename(temp, matches[0]);
-				rl_crlf();
-				goto RESTART;
-			}
-
-			/* There is more than one answer.  Find out how many there are,
-			and find out what the maximum printed length of a single entry
-			is. */
-
-DISPLAY_MATCHES:
-/*#ifndef _NO_SUGGESTIONS
-			if (wrong_cmd)
-				recover_from_wrong_cmd();
-#endif */
-
-			for (max = 0, i = 1; matches[i]; i++) {
-				char *temp;
-				size_t name_length;
-
-				temp = printable_part(matches[i]);
-				name_length = strlen(temp);
-
-				if ((int)name_length > max)
-				  max = (int)name_length;
-			}
-
-			len = (int)i - 1;
-
-			/* If there are many items, then ask the user if she
-			   really wants to see them all. */
-#ifndef _NO_FZF
-			if (!fzftab) {
-#endif
-			{
-				if (len >= rl_completion_query_items) {
-					putchar('\n');
-#ifndef _NO_HIGHLIGHT
-					if (highlight && cur_color != tx_c) {
-						cur_color = tx_c;
-						fputs(tx_c, stdout);
-					}
-#endif
-//					rl_crlf();
-					fprintf(rl_outstream,
-						 "Display all %d possibilities? (y or n) ", len);
-//					rl_crlf();
-					fflush(rl_outstream);
-					if (!get_y_or_n()) {
-//						rl_crlf();
-						goto RESTART;
-					}
-				}
-			}
-#ifndef _NO_FZF
-			}
-#endif
-
-
-#ifndef _NO_FZF
-			if (!fzftab) {
-#endif
-			{
-				/* How many items of MAX length can we fit in the screen window? */
-				max += 2;
-				limit = term_cols / max;
-				if (limit != 1 && (limit * max == term_cols))
-					limit--;
-
-				/* Avoid a possible floating exception.  If max > screenwidth,
-				   limit will be 0 and a divide-by-zero fault will result. */
-				if (limit == 0)
-				  limit = 1;
-
-				/* How many iterations of the printing loop? */
-				count = (len + (limit - 1)) / limit;
-			}
-#ifndef _NO_FZF
-		}
-#endif
-
-			/* Watch out for special case.  If LEN is less than LIMIT, then
-			   just do the inner printing loop.
-			   0 < len <= limit  implies  count = 1. */
-
-			/* Sort the items if they are not already sorted. */
-//			if (!rl_ignore_completion_duplicates)
-//				qsort(matches + 1, len ? (size_t)len - 1 : 0, sizeof (char *), compare_strings);
-
-			/* Print the sorted items, up-and-down alphabetically, like
-			   ls might. */
-//			rl_crlf();
-			putchar('\n');
-#ifndef _NO_HIGHLIGHT
-			if (highlight && cur_color != tx_c) {
-				cur_color = tx_c;
-				fputs(tx_c, stdout);
-			}
-#endif
-			char *qq = (char *)NULL;
-			if (cur_comp_type != TCMP_PATH)
-				goto CALC_OFFSET;
-
-			if (*matches[0] == '~') {
-				char *exp_path = tilde_expand(matches[0]);
-				if (exp_path) {
-					xchdir(exp_path, NO_TITLE);
-					free(exp_path);
-				}
-			} else {
-				char *p = strrchr(matches[0], '/');
-				if (!p)
-					goto CALC_OFFSET;
-
-				if (p == matches[0]) {
-					if (*(p + 1)) {
-						char pp = *(p + 1);
-						*(p + 1) = '\0';
-						xchdir(matches[0], NO_TITLE);
-						*(p + 1) = pp;
-					} else {
-						/* We have the root dir */
-						xchdir(matches[0], NO_TITLE);
-					}
-				} else {
-					*p = '\0';
-					xchdir(matches[0], NO_TITLE);
-					*p = '/';
-				}
-			}
-
-CALC_OFFSET:
-			qq = strrchr(matches[0], '/');
-			if (qq) {
-				if (*(++qq))
-					tab_offset = strlen(qq);
-			} else {
-				tab_offset = strlen(matches[0]);
-			}
-
-#ifndef _NO_FZF
-			if (fzftab == 1) {
-				if (fzftabcomp(matches) == -1)
-					goto RESTART;
-				goto RESET_PATH;
-			}
-#endif
-
-			for (i = 1; i <= (size_t)count; i++) {
-				if (i >= term_rows) {
-					/* A little pager */
-					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
-					int c = 0;
-					while ((c = xgetchar()) == _ESC);
-					if (c == 'q') {
-						/* Delete the --Mas-- label */
-						fputs("\x1b[7D\x1b[7X\x1b[1A\n", stdout);
-						break;
-					}
-					fputs("\r\r\r\r\r\r\r\r", stdout);
-				}
-
-				for (j = 0, l = (int)i; j < limit; j++) {
-					if (l > len || !matches[l]) {
-						break;
-					} else {
-						if (tab_offset)
-							printf("%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
-							(cur_comp_type == TCMP_CMD) ? (colorize
-							? ex_c : "") : dc_c);
-						char *temp;
-						int printed_length;
-						temp = printable_part(matches[l]);
-						printed_length = (int)strlen(temp);
-						printed_length += print_filename(temp, matches[l]);
-
-						if (j + 1 < limit) {
-							for (k = 0; k < max - printed_length; k++)
-								putc(' ', rl_outstream);
-						}
-					}
-					l += count;
-				}
-				putchar('\n');
-//				rl_crlf();
-			}
-			tab_offset = 0;
-
-			if (colorize && cur_comp_type == TCMP_CMD)
-				fputs(tx_c, stdout);
-
-#ifndef _NO_FZF
-RESET_PATH:
-#endif
-			if (cur_comp_type == TCMP_PATH)
-				xchdir(ws[cur_ws].path, NO_TITLE);
-
-RESTART:
-			rl_on_new_line();
 #ifndef _NO_HIGHLIGHT
 			if (highlight) {
-				int bk = rl_point;
+				size_t k, l = 0;
+				char *cc = cur_color;
 				fputs("\x1b[?25l", stdout);
-				char *ss = rl_copy_text(0, rl_end);
-				rl_delete_text(0, rl_end);
-				rl_redisplay();
-				rl_point = rl_end = 0;
-				int wc = wrong_cmd_line;
-				if (wc) {
-					cur_color = hw_c;
-					fputs(cur_color, stdout);
-				}
-				l = 0;
 				char t[PATH_MAX];
-				for (k = 0; ss[k]; k++) {
-					if (ss[k] == ' ')
-						wc = 0;
-
-					if (!wc)
-						rl_highlight(ss, (size_t)k, SET_COLOR);
-
-					if (ss[k] < 0) {
-						t[l++] = ss[k];
-						if (ss[k + 1] >= 0) {
+				for (k = 0; replacement[k]; k++) {
+					rl_highlight(replacement, k, SET_COLOR);
+					if (replacement[k] < 0) {
+						t[l++] = replacement[k];
+						if (replacement[k + 1] >= 0) {
 							t[l] = '\0';
 							l = 0;
 							rl_insert_text(t);
@@ -1176,29 +847,360 @@ RESTART:
 						}
 						continue;
 					}
-
-					t[0] = (char)ss[k];
+					t[0] = (char)replacement[k];
 					t[1] = '\0';
 					rl_insert_text(t);
 					rl_redisplay();
 				}
 				fputs("\x1b[?25h", stdout);
-				rl_point = rl_end = bk;
-				free(ss);
+				cur_color = cc;
+				if (cur_color)
+					fputs(cur_color, stdout);
+			} else {
+				rl_insert_text(replacement);
 			}
+#else
+			rl_insert_text(replacement);
 #endif
-			}
-			break;
-
-		default:
-			fprintf(stderr, "\r\nreadline: bad value for what_to_do in rl_complete\n");
-			abort();
+			rl_end_undo_group();
+			if (replacement != matches[0])
+				free(replacement);
 		}
 
-		for (i = 0; matches[i]; i++)
-			free(matches[i]);
-		free(matches);
+		/* If there are more matches, ring the bell to indicate.
+		 If this was the only match, and we are hacking files,
+		 check the file to see if it was a directory.  If so,
+		 add a '/' to the name.  If not, and we are at the end
+		 of the line, then add a space. */
+		if (matches[1]) {
+			if (what_to_do == '!')
+				goto DISPLAY_MATCHES;		/* XXX */
+			else if (rl_editing_mode != 0) /* vi_mode */
+				rl_ding();	/* There are other matches remaining. */
+		} else {
+			char temp_string[4];
+			int temp_string_index = 0;
+
+			if (quote_char)
+				temp_string[temp_string_index++] = quote_char;
+
+			temp_string[temp_string_index++] = (char)(delimiter
+											? delimiter : ' ');
+			temp_string[temp_string_index++] = '\0';
+
+			if (rl_filename_completion_desired) {
+				struct stat finfo;
+				char *filename = tilde_expand(matches[0]);
+
+				if ((stat(filename, &finfo) == 0) && S_ISDIR(finfo.st_mode)) {
+					if (rl_line_buffer[rl_point] != '/') {
+#ifndef _NO_HIGHLIGHT
+						if (highlight) {
+							char *cc = cur_color;
+							fputs(hd_c, stdout);
+							rl_insert_text ("/");
+							rl_redisplay();
+							fputs(cc, stdout);
+						} else {
+							rl_insert_text ("/");
+						}
+#else
+						rl_insert_text ("/");
+#endif
+					}
+				} else {
+					if (rl_point == rl_end)
+						rl_insert_text(temp_string);
+				}
+				free(filename);
+			} else {
+				if (rl_point == rl_end)
+					rl_insert_text(temp_string);
+			}
+		}
+	break;
+
+/*		case '*': {
+		i = 1;
+
+		rl_begin_undo_group();
+		rl_delete_text(start, rl_point);
+		rl_point = start;
+		if (matches[1]) {
+			while (matches[i]) {
+				rl_insert_text(matches[i++]);
+				rl_insert_text(" ");
+			}
+		} else {
+			rl_insert_text(matches[0]);
+			rl_insert_text(" ");
+		}
+		rl_end_undo_group();
 	}
+	break; */
+
+	case '?': {
+		int len, count, limit, max;
+		int j, k, l;
+
+		/* Handle simple case first.  What if there is only one answer? */
+		if (!matches[1]) {
+			char *temp;
+
+			temp = printable_part(matches[0]);
+			rl_crlf();
+			print_filename(temp, matches[0]);
+			rl_crlf();
+			goto RESTART;
+		}
+
+		/* There is more than one answer.  Find out how many there are,
+		and find out what the maximum printed length of a single entry
+		is. */
+
+DISPLAY_MATCHES:
+/*#ifndef _NO_SUGGESTIONS
+		if (wrong_cmd)
+			recover_from_wrong_cmd();
+#endif */
+
+		for (max = 0, i = 1; matches[i]; i++) {
+			char *temp;
+			size_t name_length;
+
+			temp = printable_part(matches[i]);
+			name_length = strlen(temp);
+
+			if ((int)name_length > max)
+			  max = (int)name_length;
+		}
+
+		len = (int)i - 1;
+
+		/* If there are many items, then ask the user if she
+		   really wants to see them all. */
+#ifndef _NO_FZF
+		if (!fzftab) {
+#endif
+		{
+			if (len >= rl_completion_query_items) {
+				putchar('\n');
+#ifndef _NO_HIGHLIGHT
+				if (highlight && cur_color != tx_c) {
+					cur_color = tx_c;
+					fputs(tx_c, stdout);
+				}
+#endif
+//					rl_crlf();
+				fprintf(rl_outstream,
+					 "Display all %d possibilities? (y or n) ", len);
+//					rl_crlf();
+				fflush(rl_outstream);
+				if (!get_y_or_n()) {
+//						rl_crlf();
+					goto RESTART;
+				}
+			}
+		}
+#ifndef _NO_FZF
+		}
+#endif
+
+
+#ifndef _NO_FZF
+		if (!fzftab) {
+#endif
+		{
+			/* How many items of MAX length can we fit in the screen window? */
+			max += 2;
+			limit = term_cols / max;
+			if (limit != 1 && (limit * max == term_cols))
+				limit--;
+
+			/* Avoid a possible floating exception.  If max > screenwidth,
+			   limit will be 0 and a divide-by-zero fault will result. */
+			if (limit == 0)
+			  limit = 1;
+
+			/* How many iterations of the printing loop? */
+			count = (len + (limit - 1)) / limit;
+		}
+#ifndef _NO_FZF
+	}
+#endif
+
+		/* Watch out for special case.  If LEN is less than LIMIT, then
+		   just do the inner printing loop.
+		   0 < len <= limit  implies  count = 1. */
+
+		/* Sort the items if they are not already sorted. */
+//			if (!rl_ignore_completion_duplicates)
+//				qsort(matches + 1, len ? (size_t)len - 1 : 0, sizeof (char *), compare_strings);
+
+		/* Print the sorted items, up-and-down alphabetically, like
+		   ls might. */
+//			rl_crlf();
+		putchar('\n');
+#ifndef _NO_HIGHLIGHT
+		if (highlight && cur_color != tx_c) {
+			cur_color = tx_c;
+			fputs(tx_c, stdout);
+		}
+#endif
+		char *qq = (char *)NULL;
+		if (cur_comp_type != TCMP_PATH)
+			goto CALC_OFFSET;
+
+		if (*matches[0] == '~') {
+			char *exp_path = tilde_expand(matches[0]);
+			if (exp_path) {
+				xchdir(exp_path, NO_TITLE);
+				free(exp_path);
+			}
+		} else {
+			char *p = strrchr(matches[0], '/');
+			if (!p)
+				goto CALC_OFFSET;
+
+			if (p == matches[0]) {
+				if (*(p + 1)) {
+					char pp = *(p + 1);
+					*(p + 1) = '\0';
+					xchdir(matches[0], NO_TITLE);
+					*(p + 1) = pp;
+				} else {
+					/* We have the root dir */
+					xchdir(matches[0], NO_TITLE);
+				}
+			} else {
+				*p = '\0';
+				xchdir(matches[0], NO_TITLE);
+				*p = '/';
+			}
+		}
+
+CALC_OFFSET:
+		qq = strrchr(matches[0], '/');
+		if (qq) {
+			if (*(++qq))
+				tab_offset = strlen(qq);
+		} else {
+			tab_offset = strlen(matches[0]);
+		}
+
+#ifndef _NO_FZF
+		if (fzftab == 1) {
+			if (fzftabcomp(matches) == -1)
+				goto RESTART;
+			goto RESET_PATH;
+		}
+#endif
+
+		for (i = 1; i <= (size_t)count; i++) {
+			if (i >= term_rows) {
+				/* A little pager */
+				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+				int c = 0;
+				while ((c = xgetchar()) == _ESC);
+				if (c == 'q') {
+					/* Delete the --Mas-- label */
+					fputs("\x1b[7D\x1b[7X\x1b[1A\n", stdout);
+					break;
+				}
+				fputs("\r\r\r\r\r\r\r\r", stdout);
+			}
+
+			for (j = 0, l = (int)i; j < limit; j++) {
+				if (l > len || !matches[l]) {
+					break;
+				} else {
+					if (tab_offset)
+						printf("%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
+						(cur_comp_type == TCMP_CMD) ? (colorize
+						? ex_c : "") : dc_c);
+					char *temp;
+					int printed_length;
+					temp = printable_part(matches[l]);
+					printed_length = (int)strlen(temp);
+					printed_length += print_filename(temp, matches[l]);
+
+					if (j + 1 < limit) {
+						for (k = 0; k < max - printed_length; k++)
+							putc(' ', rl_outstream);
+					}
+				}
+				l += count;
+			}
+			putchar('\n');
+//				rl_crlf();
+		}
+		tab_offset = 0;
+
+		if (colorize && cur_comp_type == TCMP_CMD)
+			fputs(tx_c, stdout);
+
+#ifndef _NO_FZF
+RESET_PATH:
+#endif
+		if (cur_comp_type == TCMP_PATH)
+			xchdir(ws[cur_ws].path, NO_TITLE);
+
+RESTART:
+		rl_on_new_line();
+#ifndef _NO_HIGHLIGHT
+		if (highlight) {
+			int bk = rl_point;
+			fputs("\x1b[?25l", stdout);
+			char *ss = rl_copy_text(0, rl_end);
+			rl_delete_text(0, rl_end);
+			rl_redisplay();
+			rl_point = rl_end = 0;
+			int wc = wrong_cmd_line;
+			if (wc) {
+				cur_color = hw_c;
+				fputs(cur_color, stdout);
+			}
+			l = 0;
+			char t[PATH_MAX];
+			for (k = 0; ss[k]; k++) {
+				if (ss[k] == ' ')
+					wc = 0;
+
+				if (!wc)
+					rl_highlight(ss, (size_t)k, SET_COLOR);
+
+				if (ss[k] < 0) {
+					t[l++] = ss[k];
+					if (ss[k + 1] >= 0) {
+						t[l] = '\0';
+						l = 0;
+						rl_insert_text(t);
+						rl_redisplay();
+					}
+					continue;
+				}
+
+				t[0] = (char)ss[k];
+				t[1] = '\0';
+				rl_insert_text(t);
+				rl_redisplay();
+			}
+			fputs("\x1b[?25h", stdout);
+			rl_point = rl_end = bk;
+			free(ss);
+		}
+#endif
+		}
+		break;
+
+	default:
+		fprintf(stderr, "\r\nreadline: bad value for what_to_do in rl_complete\n");
+		abort();
+	}
+
+	for (i = 0; matches[i]; i++)
+		free(matches[i]);
+	free(matches);
 
   /* Check to see if the line has changed through all of this manipulation. */
 //	if (saved_line_buffer) {
@@ -1208,5 +1210,5 @@ RESTART:
 			completion_changed_buffer = 0; */
 //		free(saved_line_buffer);
 //	}
-	return 0;
+	return EXIT_SUCCESS;
 }

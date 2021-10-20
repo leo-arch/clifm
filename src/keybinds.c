@@ -1560,27 +1560,28 @@ rl_cmdhist(int count, int key)
 		return EXIT_FAILURE;
 	}
 
-	if (found) {
-		fputs("\x1b[?25l", stdout);
-		curhistindex = (size_t)p;
-		int bk = rl_point;
-#ifndef _NO_HIGHLIGHT
-		if (highlight)
-			print_highlight_string(history[p]);
-		else
-#endif
-		{
-			rl_replace_line(history[p], 1);
-		}
-
-		fputs("\x1b[?25h", stdout);
-		rl_point = bk;
-		cur_color = tx_c;
-		fputs(tx_c, stdout);
-		return EXIT_SUCCESS;
+	if (!found) {
+		rl_visible_bell();
+		return EXIT_FAILURE;
 	}
 
-	return EXIT_FAILURE;
+	fputs("\x1b[?25l", stdout);
+	curhistindex = (size_t)p;
+	int bk = rl_point;
+#ifndef _NO_HIGHLIGHT
+	if (highlight)
+		print_highlight_string(history[p]);
+	else
+#endif
+	{
+		rl_replace_line(history[p], 1);
+	}
+
+	fputs("\x1b[?25h", stdout);
+	rl_point = bk;
+	cur_color = tx_c;
+	fputs(tx_c, stdout);
+	return EXIT_SUCCESS;
 }
 
 static int

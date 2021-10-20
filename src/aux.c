@@ -36,10 +36,44 @@
 #include <fcntl.h>
 #include <time.h>
 #include <limits.h>
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "exec.h"
 #include "misc.h"
+
+/* Sleep for MSEC milliseconds */
+/* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
+static int
+msleep(long msec)
+{
+	struct timespec ts;
+	int res;
+
+	if (msec < 0) {
+		errno = EINVAL;
+		return (-1);
+	}
+
+	ts.tv_sec = msec / 1000;
+	ts.tv_nsec = (msec % 1000) * 1000000;
+
+	do {
+		res = nanosleep(&ts, &ts);
+	} while (res && errno == EINTR);
+
+	return res;
+}
+
+void
+rl_visible_bell(void)
+{
+	rl_mark = rl_last_word_start;
+	rl_activate_mark();
+	rl_redisplay();
+	msleep(30);
+	rl_deactivate_mark();
+}
 
 /* The following three functions were taken from
  * https://github.com/antirez/linenoise/blob/master/linenoise.c

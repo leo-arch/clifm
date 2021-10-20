@@ -1088,26 +1088,28 @@ count_words(size_t *start_word, size_t *full_word)
 {
 //	ncmds = 0;
 	size_t words = 0, w = 0, first_non_space = 0;
-	for (; rl_line_buffer[w]; w++) {
-		if (!first_non_space && rl_line_buffer[w] != ' ') {
+	char *b = rl_line_buffer;
+	for (; b[w]; w++) {
+		if (!first_non_space && b[w] != ' ') {
 			words = 1;
 //			ncmds++;
 			*start_word = w;
 			first_non_space = 1;
 			continue;
 		}
-		if (w && rl_line_buffer[w] == ' ' && rl_line_buffer[w - 1] != '\\') {
-			if (!*full_word && rl_line_buffer[w - 1] != '|'
-			&& rl_line_buffer[w - 1] != ';' && rl_line_buffer[w - 1] != '&')
+		if (w && b[w] == ' ' && b[w - 1] != '\\') {
+			rl_last_word_start = (int)w + (b + 1 ? 1 : 0);
+			if (!*full_word && b[w - 1] != '|'
+			&& b[w - 1] != ';' && b[w - 1] != '&')
 				*full_word = w; /* Index of the end of the first full word (cmd) */
-			if (rl_line_buffer[w + 1] && rl_line_buffer[w + 1] != ' ') {
+			if (b[w + 1] && b[w + 1] != ' ') {
 				words++;
 			}
 		}
 		/* If a process separator char is found, reset variables so that we
 		 * can start counting again for the new command */
-		if (w && rl_line_buffer[w - 1] != '\\' && (rl_line_buffer[w] == '&'
-		|| rl_line_buffer[w] == '|' || rl_line_buffer[w] == ';')) {
+		if (w && b[w - 1] != '\\' && (b[w] == '&'
+		|| b[w] == '|' || b[w] == ';')) {
 			words = first_non_space = *full_word = 0;
 		}
 	}
