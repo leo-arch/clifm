@@ -702,7 +702,7 @@ AFTER_USUAL_COMPLETION:
 
 	if (!matches) {
 //		rl_ding();
-		rl_visible_bell();
+		rl_ring_bell();
 		return EXIT_FAILURE;
 	}
 

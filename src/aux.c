@@ -69,21 +69,36 @@ msleep(long msec)
 }
 
 void
-rl_visible_bell(void)
+rl_ring_bell(void)
 {
-	rl_mark = rl_last_word_start;
-	rl_activate_mark();
-	rl_redisplay();
-	msleep(VISIBLE_BELL_DELAY);
-	rl_deactivate_mark();
+	switch(bell) {
+	case BELL_NONE: return;
+
+	case BELL_AUDIBLE:
+		fputs("\007", stderr);
+		fflush(stderr);
+		return;
+
+	case BELL_VISIBLE:
+		rl_mark = rl_last_word_start;
+		rl_activate_mark();
+		rl_redisplay();
+		msleep(VISIBLE_BELL_DELAY);
+		rl_deactivate_mark();
 #ifndef _NO_HIGHLIGHT
-	if (highlight && !wrong_cmd) {
-		int point = rl_point;
-		rl_point = rl_mark;
-		recolorize_line();
-		rl_point = point;
-	}
+		if (highlight && !wrong_cmd) {
+			int point = rl_point;
+			rl_point = rl_mark;
+			recolorize_line();
+			rl_point = point;
+		}
 #endif
+		return;
+
+	default: return;
+	}
+
+	return;
 }
 
 /* The following three functions were taken from

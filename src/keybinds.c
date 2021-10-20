@@ -1563,7 +1563,7 @@ rl_cmdhist(int count, int key)
 	}
 
 	if (!found) {
-		rl_visible_bell();
+		rl_ring_bell();
 		return EXIT_FAILURE;
 	}
 

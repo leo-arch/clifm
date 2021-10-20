@@ -381,6 +381,9 @@ extern int watch;
 #define SHELL_TCSH 	5
 #define SHELL_ZSH 	6
 
+#define BELL_NONE 		0
+#define BELL_AUDIBLE 	1
+#define BELL_VISIBLE 	2
 #define VISIBLE_BELL_DELAY 30
 
 				/** #########################
@@ -643,6 +646,7 @@ extern int
     auto_open,
     autocd,
     autojump,
+	bell,
     bg_proc,
     case_sensitive,
     case_sens_dirjump,

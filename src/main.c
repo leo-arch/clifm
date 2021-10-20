@@ -101,6 +101,7 @@ int
     auto_open = UNSET,
     autocd = UNSET,
 	autojump = UNSET,
+	bell = BELL_VISIBLE,
 	bg_proc = 0,
     case_sens_dirjump = UNSET,
     case_sens_path_comp = UNSET,
