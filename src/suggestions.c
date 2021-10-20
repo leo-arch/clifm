@@ -649,6 +649,8 @@ check_builtins(const char *str, const size_t len, const int print,
 	case SHELL_NONE: return NO_MATCH;
 	case SHELL_BASH: b = bash_builtins; break;
 	case SHELL_DASH: b = dash_builtins; break;
+	case SHELL_KSH: b = ksh_builtins; break;
+	case SHELL_TCSH: b = tcsh_builtins; break;
 	case SHELL_ZSH: b = zsh_builtins; break;
 	default: return NO_MATCH;
 	}
