@@ -166,6 +166,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	case ENTER: cl = tx_c; break;
 	case '~': /* fallthrough */
 	case '*': cl = he_c; break;
+	case '=': /* fallthrough */
 	case '(': /* fallthrough */
 	case ')': /* fallthrough */
 	case '[': /* fallthrough */
@@ -175,6 +176,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	case '|': /* fallthrough */
 	case '&': /* fallthrough */
 	case ';': cl = hs_c; break;
+	case '<': /* fallthrough */
 	case '>': cl = hr_c; break;
 	case '$': cl = hv_c; break;
 	case '-':

@@ -1547,8 +1547,10 @@ rl_suggestions(const unsigned char c)
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 	if (nwords == 1) {
-		if (c == ' ' && (*word == '\'' || *word == '"'
-		|| *word == '$' || *word == '#')) {
+		if ((c == ' ' && (*word == '\'' || *word == '"'	|| *word == '$'
+		|| *word == '#')) || *word == '<' || *word == '>' || *word == '!'
+		|| *word == '{' || *word == '[' || *word == '('
+		|| strchr(word, '=')) {
 			if (suggestion.printed && suggestion_buf)
 				clear_suggestion(CS_FREEBUF);
 			goto SUCCESS;
@@ -1574,7 +1576,8 @@ rl_suggestions(const unsigned char c)
 			goto SUCCESS;
 
 		/* Let's suppose that two slashes do not constitue a search
-		 * expression */
+		 * expression, and that a name containing an equal sign is an
+		 * assignement */
 		} else if (*word != '/' || strchr(word + 1, '/')) {
 		/* There's no suggestion nor any command name matching the
 		 * first entered word. So, we assume we have an invalid

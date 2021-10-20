@@ -25,8 +25,8 @@
 /* A list of different shells builtins to be recognized as valid command
  * names. Only useful for the warning prompt */
 
-/* Common */
-char *common_builtins[] = {
+/* Bash */
+char *bash_builtins[] = {
 	"{",
 	"case",
 	"continue",
@@ -43,11 +43,7 @@ char *common_builtins[] = {
 	"then",
 	"until",
 	"while",
-	NULL,
-};
 
-/* Bash */
-char *bash_builtins[] = {
 	"[",
 	"[[",
 	"bg",
@@ -110,6 +106,22 @@ char *bash_builtins[] = {
 
 /* Dash */
 char *dash_builtins[] = {
+	"case",
+	"continue",
+	"do",
+	"done",
+	"elif",
+	"else",
+	"esac",
+	"fi",
+	"for",
+	"if",
+	"in",
+	"return",
+	"then",
+	"until",
+	"while",
+
 	"bg",
 	"command",
 	"echo",
@@ -138,6 +150,23 @@ char *dash_builtins[] = {
 
 /* Fish */
 char *fish_builtins[] = {
+	"{",
+	"case",
+	"continue",
+	"do",
+	"done",
+	"elif",
+	"else",
+	"esac",
+	"fi",
+	"for",
+	"if",
+	"in",
+	"return",
+	"then",
+	"until",
+	"while",
+
 	"_",
 	"abbr",
 	"and",
@@ -243,6 +272,23 @@ char *fish_builtins[] = {
 
 /* KSH */
 char *ksh_builtins[] = {
+	"{",
+	"case",
+	"continue",
+	"do",
+	"done",
+	"elif",
+	"else",
+	"esac",
+	"fi",
+	"for",
+	"if",
+	"in",
+	"return",
+	"then",
+	"until",
+	"while",
+
 	"bg",
 	"break",
 	"builtin",
@@ -283,6 +329,23 @@ char *ksh_builtins[] = {
 
 /* TCSH */
 char *tcsh_builtins[] = {
+	"{",
+	"case",
+	"continue",
+	"do",
+	"done",
+	"elif",
+	"else",
+	"esac",
+	"fi",
+	"for",
+	"if",
+	"in",
+	"return",
+	"then",
+	"until",
+	"while",
+
 	"alloc",
 	"bg",
 	"bindkey",
@@ -358,6 +421,23 @@ char *tcsh_builtins[] = {
 
 /* ZSH */
 char *zsh_builtins[] = {
+	"{",
+	"case",
+	"continue",
+	"do",
+	"done",
+	"elif",
+	"else",
+	"esac",
+	"fi",
+	"for",
+	"if",
+	"in",
+	"return",
+	"then",
+	"until",
+	"while",
+
 	"autoload",
 	"bg",
 	"bindkey",
