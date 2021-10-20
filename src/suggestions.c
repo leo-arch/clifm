@@ -876,7 +876,7 @@ check_eln(const char *str, const int print)
 		suggestion.filetype = DT_REG;
 	}
 
-	print_suggestion(!*tmp ? file_info[n].name : tmp, 1, color);
+	print_suggestion(!*tmp ? file_info[n].name : tmp, 0, color);
 	return PARTIAL_MATCH;
 }
 
@@ -1375,7 +1375,7 @@ rl_suggestions(const unsigned char c)
 		switch(suggestion_strategy[st]) {
 
 		case 'a': /* 3.d.1) Aliases */
-			flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+			flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 
 			if (flag == CHECK_MATCH && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
@@ -1389,7 +1389,7 @@ rl_suggestions(const unsigned char c)
 
 		case 'b': /* 3.d.2) Bookmarks */
 			if (last_space || autocd || auto_open) {
-				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 
 				if (flag == CHECK_MATCH && suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
@@ -1410,7 +1410,7 @@ rl_suggestions(const unsigned char c)
 				}
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
-				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 				printed = check_completions(word, wlen, c, flag);
 				if (printed) {
 					if (wrong_cmd && nwords == 1) {
@@ -1445,7 +1445,7 @@ rl_suggestions(const unsigned char c)
 			while (word[nlen - 1] == ' ')
 				word[--nlen] = '\0';
 
-			flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+			flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 
 			if (flag == CHECK_MATCH && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
@@ -1470,6 +1470,10 @@ rl_suggestions(const unsigned char c)
 				}
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
+
+				if (c == ' ' && suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
+
 				printed = check_filenames(word, wlen,
 							c, last_space ? 0 : 1, full_word);
 				if (printed) {
@@ -1503,6 +1507,10 @@ rl_suggestions(const unsigned char c)
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
 				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+
+				if (flag == CHECK_MATCH && suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
+
 				printed = check_jumpdb(word, wlen, flag, full_word);
 
 				if (printed) {
