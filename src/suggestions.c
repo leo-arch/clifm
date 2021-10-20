@@ -1547,16 +1547,16 @@ rl_suggestions(const unsigned char c)
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 	if (nwords == 1) {
+		word = first_word ? first_word : last_word;
 		if ((c == ' ' && (*word == '\'' || *word == '"'	|| *word == '$'
 		|| *word == '#')) || *word == '<' || *word == '>' || *word == '!'
 		|| *word == '{' || *word == '[' || *word == '('
-		|| strchr(word, '=')) {
+		|| strchr(word, '=') || *rl_line_buffer == ' ') {
 			if (suggestion.printed && suggestion_buf)
 				clear_suggestion(CS_FREEBUF);
 			goto SUCCESS;
 		}
 
-		word = first_word ? first_word : last_word;
 		wlen = strlen(word);
 
 		if (wlen && word[wlen - 1] == ' ')
