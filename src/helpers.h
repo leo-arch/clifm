@@ -385,6 +385,7 @@ extern int watch;
 #define BELL_AUDIBLE 	1
 #define BELL_VISIBLE 	2
 #define VISIBLE_BELL_DELAY 30
+#define DEF_BELL_STYLE BELL_VISIBLE
 
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #

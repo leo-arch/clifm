@@ -199,7 +199,7 @@ rl_exclude_input(int c)
 		return 1;
 
 	/* Multi-byte char. Send it directly to the input buffer. We can't
-	 * process it here, since we process only single chars */
+	 * process it here, since we process only single bytes */
 	if (c > 127 || (c & 0xc0) == 0x80)
 		return 1;
 
@@ -304,8 +304,21 @@ END:
 			rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
 			return 2;
 		}
-		if (rl_point == 0 && rl_end == 0 && wrong_cmd)
-			recover_from_wrong_cmd();
+		if (rl_point == 0 && rl_end == 0) {
+			if (wrong_cmd)
+				recover_from_wrong_cmd();
+
+			if (bell == BELL_VISIBLE) {
+				rl_replace_line(" ", 1);
+				rl_end = rl_point = 1;
+				*rl_line_buffer = ' ';
+			}
+
+			rl_ring_bell();
+
+			if (bell == BELL_VISIBLE)
+				rl_end = rl_point = 0;
+		}
 #endif /* !_NO_SUGGESTIONS */
 		return 2;
 	}
