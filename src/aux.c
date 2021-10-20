@@ -71,7 +71,7 @@ rl_visible_bell(void)
 	rl_mark = rl_last_word_start;
 	rl_activate_mark();
 	rl_redisplay();
-	msleep(30);
+	msleep(VISIBLE_BELL_DELAY);
 	rl_deactivate_mark();
 }
 

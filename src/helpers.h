@@ -381,6 +381,8 @@ extern int watch;
 #define SHELL_TCSH 	5
 #define SHELL_ZSH 	6
 
+#define VISIBLE_BELL_DELAY 30
+
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
