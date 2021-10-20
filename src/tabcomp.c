@@ -830,7 +830,7 @@ AFTER_USUAL_COMPLETION:
 			rl_delete_text(start, rl_point);
 			rl_point = start;
 #ifndef _NO_HIGHLIGHT
-			if (highlight) {
+			if (highlight && !wrong_cmd) {
 				size_t k, l = 0;
 				char *cc = cur_color;
 				fputs("\x1b[?25l", stdout);
@@ -895,7 +895,7 @@ AFTER_USUAL_COMPLETION:
 				if ((stat(filename, &finfo) == 0) && S_ISDIR(finfo.st_mode)) {
 					if (rl_line_buffer[rl_point] != '/') {
 #ifndef _NO_HIGHLIGHT
-						if (highlight) {
+						if (highlight && !wrong_cmd) {
 							char *cc = cur_color;
 							fputs(hd_c, stdout);
 							rl_insert_text ("/");
@@ -986,7 +986,7 @@ DISPLAY_MATCHES:
 			if (len >= rl_completion_query_items) {
 				putchar('\n');
 #ifndef _NO_HIGHLIGHT
-				if (highlight && cur_color != tx_c) {
+				if (highlight && cur_color != tx_c && !wrong_cmd) {
 					cur_color = tx_c;
 					fputs(tx_c, stdout);
 				}
@@ -1042,7 +1042,7 @@ DISPLAY_MATCHES:
 //			rl_crlf();
 		putchar('\n');
 #ifndef _NO_HIGHLIGHT
-		if (highlight && cur_color != tx_c) {
+		if (highlight && cur_color != tx_c && !wrong_cmd) {
 			cur_color = tx_c;
 			fputs(tx_c, stdout);
 		}
@@ -1136,7 +1136,7 @@ CALC_OFFSET:
 		}
 		tab_offset = 0;
 
-		if (colorize && cur_comp_type == TCMP_CMD)
+		if (!wrong_cmd && colorize && cur_comp_type == TCMP_CMD)
 			fputs(tx_c, stdout);
 
 #ifndef _NO_FZF
@@ -1148,7 +1148,7 @@ RESET_PATH:
 RESTART:
 		rl_on_new_line();
 #ifndef _NO_HIGHLIGHT
-		if (highlight) {
+		if (highlight && !wrong_cmd) {
 			int bk = rl_point;
 			fputs("\x1b[?25l", stdout);
 			char *ss = rl_copy_text(0, rl_end);

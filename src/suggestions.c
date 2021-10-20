@@ -1086,13 +1086,12 @@ is_last_word(void)
 static size_t
 count_words(size_t *start_word, size_t *full_word)
 {
-//	ncmds = 0;
+	rl_last_word_start = 0;
 	size_t words = 0, w = 0, first_non_space = 0;
 	char *b = rl_line_buffer;
 	for (; b[w]; w++) {
 		if (!first_non_space && b[w] != ' ') {
 			words = 1;
-//			ncmds++;
 			*start_word = w;
 			first_non_space = 1;
 			continue;
