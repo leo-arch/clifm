@@ -1274,6 +1274,16 @@ You can set \fBSuggestFiletypeColor\fR to "true" in the configuration file to us
 
 CliFM includes a \fBwarning prompt\fR to highlight invalid, wrong, or non-existent command names. Enable it via the \fI--warn-wrong-cmd\fR command line option or setting \fIWarningPrompt\fR to "true" in the configuration file. This features depends on suggestions (make sure suggestions are enabled before enabling the warning prompt).
 
+The wrong command name check is omitted if the input string:
+
+    Is quoted (ex: "string" or 'string')
+    Is bracketed (ex: (string), [string], or {string})
+    It starts with a stream redirection character (ex: <string or >string)
+    Is a comment (ex: #string)
+    It starts with one or more spaces
+    Is an assignment (ex: foo=var)
+    It is escaped (ex: \string)
+
 By default, the string used by the warning prompt is \fB"(!) > "\fR, though it can be customized using the \fIWarningPromptStr\fR in the condifuration file.
 
 The default color of the warning prompt is dimmed red (\fI02;32\fR), but it can be customized setting \fIwp\fR in the current color scheme file (in the \fIInterfaceColors\fR section) to the color you want. Consult the \fBCOLOR CODES\fR section above.
