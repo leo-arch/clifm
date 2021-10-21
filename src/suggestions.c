@@ -1100,7 +1100,7 @@ count_words(size_t *start_word, size_t *full_word)
 		}
 		/* If a process separator char is found, reset variables so that we
 		 * can start counting again for the new command */
-		if (w && b[w - 1] != '\\' && (b[w] == '&'
+		if (w && b[w - 1] != '\\' && ((b[w] == '&' && b[w + 1] == '&')
 		|| b[w] == '|' || b[w] == ';')) {
 			words = first_non_space = *full_word = 0;
 		}
@@ -1492,23 +1492,24 @@ rl_suggestions(const unsigned char c)
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 
-	/* If there are more than one words, check if the cursor is currently
+	/* If there are more than one word, check if the cursor is currently
 	 * on the first word */
 	int point_is_first_word = 0;
 	if (nwords >= 2) {
 		if (rl_point == rl_end)
 			goto NO_SUGGESTION;
-		int sp = strcntchr(rl_line_buffer, ' ');
-		if (sp == -1 || rl_point > sp + 1)
+//		int sp = strcntchr(rl_line_buffer, ' ');
+		if (rl_point > (int)full_word + 1)
 			goto NO_SUGGESTION;
 		point_is_first_word = 1;
 	}
 
 	word = first_word ? first_word : last_word;
-	if ((c == ' ' && (*word == '\'' || *word == '"'	|| *word == '$'
-	|| *word == '#')) || *word == '<' || *word == '>' || *word == '!'
-	|| *word == '{' || *word == '[' || *word == '('
-	|| strchr(word, '=') || *rl_line_buffer == ' ') {
+	if (!word || !*word || (c == ' ' && (*word == '\'' || *word == '"'
+	|| *word == '$' || *word == '#')) || *word == '<' || *word == '>'
+	|| *word == '!' || *word == '{' || *word == '[' || *word == '('
+	|| strchr(word, '=') || *rl_line_buffer == ' '
+	|| *word == '|' || *word == ';' || *word == '&') {
 		if (suggestion.printed && suggestion_buf)
 			clear_suggestion(CS_FREEBUF);
 		goto SUCCESS;
