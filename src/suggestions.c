@@ -666,10 +666,8 @@ check_builtins(const char *str, const size_t len, const int print)
 
 		size_t blen = strlen(b[i]);
 		if (blen > len) {
-			if (print) {
-				suggestion.type = CMD_SUG;
-				print_suggestion(b[i], len, "\x1b[02;33m");
-			}
+			suggestion.type = CMD_SUG;
+			print_suggestion(b[i], len, "\x1b[02;33m");
 			return PARTIAL_MATCH;
 		} else {
 			return FULL_MATCH;
@@ -700,7 +698,7 @@ check_cmds(const char *str, const size_t len, const int print)
 			continue;
 
 		if (is_internal_c(bin_commands[i])) {
-			if (print && strlen(bin_commands[i]) > len) {
+			if (strlen(bin_commands[i]) > len) {
 				suggestion.type = CMD_SUG;
 				print_suggestion(bin_commands[i], len, sx_c);
 				return PARTIAL_MATCH;
@@ -708,7 +706,7 @@ check_cmds(const char *str, const size_t len, const int print)
 				return FULL_MATCH;
 			}
 		} else if (ext_cmd_ok) {
-			if (print && strlen(bin_commands[i]) > len) {
+			if (strlen(bin_commands[i]) > len) {
 				suggestion.type = CMD_SUG;
 				print_suggestion(bin_commands[i], len, sc_c);
 				return PARTIAL_MATCH;
@@ -1121,49 +1119,12 @@ print_warning_prompt(const char c)
 			clear_suggestion(CS_FREEBUF);
 		wrong_cmd = 1;
 
-/*		fputs(wp_c, stdout);
-		fflush(stdout);
-		char *ss = rl_copy_text(0, rl_end);
-		rl_delete_text(0, rl_end);
-		rl_point = rl_end = 0;
-		rl_redisplay();
-		rl_insert_text(ss);
-		rl_redisplay();
-		free(ss);
-		return; */
-
-//		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 		rl_save_prompt();
 
 		/* Print the warning prompt */
 		char tprompt[PATH_MAX];
 		snprintf(tprompt, PATH_MAX, "\1%s\2%s", wp_c, wprompt_str);
 		rl_set_prompt(tprompt);
-/*		rl_mark = 0;
-		rl_activate_mark(); */
-
-/*		snprintf(tprompt, PATH_MAX, "%c%s%c%s%c%s%c", RL_PROMPT_START_IGNORE,
-				wp_c, RL_PROMPT_END_IGNORE, wprompt_str, RL_PROMPT_START_IGNORE,
-				cur_color ? cur_color : tx_c, RL_PROMPT_END_IGNORE); */
-//		snprintf(tprompt, PATH_MAX, "%c%s%s%s%c", RL_PROMPT_START_IGNORE,
-//				wp_c, wprompt_str, cur_color, RL_PROMPT_END_IGNORE);
-//		int visible_prompt_len = rl_expand_prompt(tprompt);
-/*		rl_message("%c%s%c%s%c%s%c", RL_PROMPT_START_IGNORE, wp_c,
-				RL_PROMPT_END_IGNORE, wprompt_str, RL_PROMPT_START_IGNORE,
-				cur_color ? cur_color : tx_c, RL_PROMPT_END_IGNORE); */
-//		printf("%s", wp_c);
-//		fflush(stdout);
-
-//		rl_display_prompt = wprompt_str;
-//		rl_redisplay();
-//		printf("\x1b[%d;%dH", currow, (int)strlen(wprompt_str) + rl_point + 1);
-//		printf("\x1b[%d;%dH", currow, visible_prompt_len + rl_point);
-//		fflush(stdout);
-
-#ifndef _NO_HIGHLIGHT
-//		if (highlight)
-//			recolorize_line();
-#endif
 	}
 }
 
