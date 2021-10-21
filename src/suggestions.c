@@ -636,8 +636,7 @@ check_history(const char *str, const size_t len)
 }
 
 static int
-check_builtins(const char *str, const size_t len, const int print,
-				const size_t full_word)
+check_builtins(const char *str, const size_t len, const int print)
 {
 	char **b = (char **)NULL;
 
@@ -656,7 +655,7 @@ check_builtins(const char *str, const size_t len, const int print,
 		if (*str != *b[i])
 			continue;
 
-		if (full_word) {
+		if (!print) {
 			if (strcmp(str, b[i]) == 0)
 				return FULL_MATCH;
 			continue;
@@ -681,8 +680,7 @@ check_builtins(const char *str, const size_t len, const int print,
 }
 
 int
-check_cmds(const char *str, const size_t len, const int print,
-			const size_t full_word)
+check_cmds(const char *str, const size_t len, const int print)
 {
 	if (!len)
 		return 0;
@@ -692,7 +690,7 @@ check_cmds(const char *str, const size_t len, const int print,
 		if (!bin_commands[i] || *str != *bin_commands[i])
 			continue;
 
-		if (full_word) {
+		if (!print) {
 			if (strcmp(str, bin_commands[i]) == 0)
 				return FULL_MATCH;
 			continue;
@@ -722,7 +720,7 @@ check_cmds(const char *str, const size_t len, const int print,
 		}
 	}
 
-	return check_builtins(str, len, print, full_word);
+	return check_builtins(str, len, print);
 }
 
 static int
@@ -1229,8 +1227,6 @@ rl_suggestions(const unsigned char c)
 	char *word = (nwords == 1 && c != ' ' && first_word) ? first_word : last_word;
 	size_t wlen = strlen(word);
 
-	int only_check = 0;
-
 		/* ######################################
 		 * #	    Search for suggestions		#
 		 * ######################################*/
@@ -1562,7 +1558,9 @@ rl_suggestions(const unsigned char c)
 	if (wlen && word[wlen - 1] == ' ')
 		word[wlen - 1] = '\0';
 
-	printed = check_cmds(word, wlen, only_check ? 0 : 1, full_word);
+	flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+
+	printed = check_cmds(word, wlen, flag);
 
 	if (printed) {
 		if (wrong_cmd && (nwords == 1 || point_is_first_word)) {
