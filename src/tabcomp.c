@@ -1107,7 +1107,7 @@ CALC_OFFSET:
 					fputs("\x1b[7D\x1b[7X\x1b[1A\n", stdout);
 					break;
 				}
-				fputs("\r\r\r\r\r\r\r\r", stdout);
+				fputs("\x1b[7D\x1b[0K", stdout);
 			}
 
 			for (j = 0, l = (int)i; j < limit; j++) {

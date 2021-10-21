@@ -722,7 +722,7 @@ check_cmds(const char *str, const size_t len, const int print)
 }
 
 static int
-check_jumpdb(const char *str, const size_t len, const int print, const size_t full_word)
+check_jumpdb(const char *str, const size_t len, const int print)
 {
 	char *color = (char *)NULL;
 
@@ -735,7 +735,7 @@ check_jumpdb(const char *str, const size_t len, const int print, const size_t fu
 		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
 			continue;
 
-		if (full_word) {
+		if (!print) {
 			if ((case_sens_path_comp ? strcmp(str, jump_db[i].path)
 			: strcasecmp(str, jump_db[i].path)) == 0)
 				return FULL_MATCH;
@@ -746,7 +746,7 @@ check_jumpdb(const char *str, const size_t len, const int print, const size_t fu
 	
 		if (len && (case_sens_path_comp ? strncmp(str, jump_db[i].path, len)
 		: strncasecmp(str, jump_db[i].path, len)) == 0) {
-			if (print && db_len > len) {
+			if (db_len > len) {
 				suggestion.type = FILE_SUG;
 				suggestion.filetype = DT_DIR;
 				char tmp[PATH_MAX + 2];
@@ -1465,7 +1465,7 @@ rl_suggestions(const unsigned char c)
 				if (flag == CHECK_MATCH && suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
 
-				printed = check_jumpdb(word, wlen, flag, full_word);
+				printed = check_jumpdb(word, wlen, flag);
 
 				if (printed) {
 					suggestion.offset = last_word_offset;
