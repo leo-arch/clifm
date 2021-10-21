@@ -1380,7 +1380,6 @@ rl_suggestions(const unsigned char c)
 
 		case 'a': /* 3.d.1) Aliases */
 			flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
-
 			if (flag == CHECK_MATCH && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
 
@@ -1394,7 +1393,6 @@ rl_suggestions(const unsigned char c)
 		case 'b': /* 3.d.2) Bookmarks */
 			if (last_space || autocd || auto_open) {
 				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
-
 				if (flag == CHECK_MATCH && suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
 
@@ -1414,7 +1412,9 @@ rl_suggestions(const unsigned char c)
 				}
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
+
 				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
+
 				printed = check_completions(word, wlen, c, flag);
 
 				if (printed) {
@@ -1502,6 +1502,7 @@ rl_suggestions(const unsigned char c)
 				}
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
+
 				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 
 				if (flag == CHECK_MATCH && suggestion.printed)
@@ -1533,52 +1534,57 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
-	
-//	if (nwords == 1 || nwords >= 2) {
-//	printf("'%s:%zu'", first_word, nwords);
-/*	if (nwords >= 2) {
+
+	/* If there are more than one words, check if the cursor is currently
+	 * on the first word */
+	int point_is_first_word = 0;
+	if (nwords >= 2) {
 		if (rl_point == rl_end)
 			goto NO_SUGGESTION;
 		int sp = strcntchr(rl_line_buffer, ' ');
 		if (sp == -1 || rl_point > sp + 1)
 			goto NO_SUGGESTION;
-	} */
-
-	if (nwords == 1) {
-		word = first_word ? first_word : last_word;
-		if ((c == ' ' && (*word == '\'' || *word == '"'	|| *word == '$'
-		|| *word == '#')) || *word == '<' || *word == '>' || *word == '!'
-		|| *word == '{' || *word == '[' || *word == '('
-		|| strchr(word, '=') || *rl_line_buffer == ' ') {
-			if (suggestion.printed && suggestion_buf)
-				clear_suggestion(CS_FREEBUF);
-			goto SUCCESS;
-		}
-
-		wlen = strlen(word);
-
-		if (wlen && word[wlen - 1] == ' ')
-			word[wlen - 1] = '\0';
-
-		printed = check_cmds(word, wlen, only_check ? 0 : 1, full_word);
-
-		if (printed) {
-			suggestion.offset = last_word_offset;
-			goto SUCCESS;
-
-		/* Let's suppose that two slashes do not constitue a search
-		 * expression, and that a name containing an equal sign is an
-		 * assignement */
-		} else if (*word != '/' || strchr(word + 1, '/')) {
-		/* There's no suggestion nor any command name matching the
-		 * first entered word. So, we assume we have an invalid
-		 * command name. Switch to the warning prompt to warn the
-		 * user */
-			print_warning_prompt(*word);
-		}
+		point_is_first_word = 1;
 	}
 
-//NO_SUGGESTION:
+	word = first_word ? first_word : last_word;
+	if ((c == ' ' && (*word == '\'' || *word == '"'	|| *word == '$'
+	|| *word == '#')) || *word == '<' || *word == '>' || *word == '!'
+	|| *word == '{' || *word == '[' || *word == '('
+	|| strchr(word, '=') || *rl_line_buffer == ' ') {
+		if (suggestion.printed && suggestion_buf)
+			clear_suggestion(CS_FREEBUF);
+		goto SUCCESS;
+	}
+
+	wlen = strlen(word);
+
+	if (wlen && word[wlen - 1] == ' ')
+		word[wlen - 1] = '\0';
+
+	printed = check_cmds(word, wlen, only_check ? 0 : 1, full_word);
+
+	if (printed) {
+		if (wrong_cmd && (nwords == 1 || point_is_first_word)) {
+			rl_dispatching = 1;
+			recover_from_wrong_cmd();
+			rl_dispatching = 0;
+		}
+		suggestion.offset = last_word_offset;
+		goto SUCCESS;
+
+	/* Let's suppose that two slashes do not constitue a search
+	 * expression, and that a name containing an equal sign is an
+	 * assignement */
+	} else if (*word != '/' || strchr(word + 1, '/')) {
+	/* There's no suggestion nor any command name matching the
+	 * first entered word. So, we assume we have an invalid
+	 * command name. Switch to the warning prompt to warn the
+	 * user */
+		print_warning_prompt(*word);
+	}
+
+NO_SUGGESTION:
 	/* No suggestion found */
 
 	/* Clear current suggestion, if any, only if no escape char is contained
