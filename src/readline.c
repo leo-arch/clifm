@@ -1373,8 +1373,11 @@ my_rl_completion(const char *text, int start, int end)
 			if (*text >= '1' && *text <= '9') {
 				int num_text = atoi(text);
 
-				if (is_number(text) && num_text > 0 && num_text <= (int)files)
+				if (is_number(text) && num_text > 0 && num_text <= (int)files) {
 					matches = rl_completion_matches(text, &filenames_gen_eln);
+					if (matches)
+						cur_comp_type = TCMP_ELN;
+				}
 			}
 
 			/* Compĺete with files in CWD */
@@ -1426,6 +1429,8 @@ my_rl_completion(const char *text, int start, int end)
 				if (is_number(text) && num_text > 0 && num_text <= (int)jump_n) {
 					matches = rl_completion_matches(text,
 					    &jump_entries_generator);
+					if (matches)
+						cur_comp_type = TCMP_JUMP;
 				}
 			}
 
@@ -1433,12 +1438,18 @@ my_rl_completion(const char *text, int start, int end)
 			else if (*rl_line_buffer == 's'
 			&& (strncmp(rl_line_buffer, "st ", 3) == 0
 			|| strncmp(rl_line_buffer, "sort ", 5) == 0)
-			&& is_number(text) && num_text >= 0 && num_text <= SORT_TYPES)
+			&& is_number(text) && num_text >= 0 && num_text <= SORT_TYPES) {
 				matches = rl_completion_matches(text, &sort_num_generator);
+				if (matches)
+					cur_comp_type = TCMP_SORT;
+			}
 
 			/* ELN expansion */
-			else if (is_number(text) && num_text > 0 && num_text <= (int)files)
+			else if (is_number(text) && num_text > 0 && num_text <= (int)files) {
 				matches = rl_completion_matches(text, &filenames_gen_eln);
+				if (matches)
+					cur_comp_type = TCMP_ELN;
+			}
 		}
 
 		/* ### DIRJUMP COMPLETION ### */
@@ -1446,8 +1457,11 @@ my_rl_completion(const char *text, int start, int end)
 		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
 		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
 		&& rl_line_buffer[2] == ' ')
-		|| strncmp(rl_line_buffer, "jump ", 5) == 0))
+		|| strncmp(rl_line_buffer, "jump ", 5) == 0)) {
 			matches = rl_completion_matches(text, &jump_generator);
+			if (matches)
+				cur_comp_type = TCMP_JUMP;
+		}
 
 		/* ### BOOKMARKS COMPLETION ### */
 
@@ -1460,6 +1474,8 @@ my_rl_completion(const char *text, int start, int end)
 				rl_attempted_completion_over = 1;
 #endif
 			matches = rl_completion_matches(text, &bookmarks_generator);
+			if (matches)
+				cur_comp_type = TCMP_BOOKMARK;
 		}
 
 		/* ### COLOR SCHEMES COMPLETION ### */
@@ -1467,6 +1483,8 @@ my_rl_completion(const char *text, int start, int end)
 		&& rl_line_buffer[2] == ' ')
 		|| strncmp(rl_line_buffer, "colorschemes ", 13) == 0)) {
 			matches = rl_completion_matches(text, &cschemes_generator);
+			if (matches)
+				cur_comp_type = TCMP_CSCHEME;
 		}
 
 		/* ### PROFILES COMPLETION ### */
@@ -1482,20 +1500,30 @@ my_rl_completion(const char *text, int start, int end)
 				rl_attempted_completion_over = 1;
 #endif /* _NO_SUGGESTIONS */
 			matches = rl_completion_matches(text, &profiles_generator);
+			if (matches)
+				cur_comp_type = TCMP_PROF;
 		}
 
 		else if (expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
+			if (matches)
+				cur_comp_type = TCMP_BOOKMARK;
 		}
 
 		else if (*rl_line_buffer == 's'
 		&& (strncmp(rl_line_buffer, "st ", 3) == 0
-		|| strncmp(rl_line_buffer, "sort ", 5) == 0))
+		|| strncmp(rl_line_buffer, "sort ", 5) == 0)) {
 			matches = rl_completion_matches(text, &sort_name_generator);
+			if (matches)
+				cur_comp_type = TCMP_SORT;
+		}
 
 		else if (*rl_line_buffer == 'n'
-		&& strncmp(rl_line_buffer, "net ", 4) == 0)
+		&& strncmp(rl_line_buffer, "net ", 4) == 0) {
 			matches = rl_completion_matches(text, &nets_generator);
+			if (matches)
+				cur_comp_type = TCMP_NET;
+		}
 	}
 
 	/* ### PATH COMPLETION ### */

@@ -447,19 +447,25 @@ fzftabcomp(char **matches)
 		if (!matches[i] || !*matches[i])
 			continue;
 
-		char *cl = get_entry_color(matches, i);
+		char *cl = df_c;
+		char *color = df_c;
+		char *entry = matches[i];
 
-		char ext_cl[MAX_COLOR];
-		*ext_cl = '\0';
-		/* If color does not start with escape, then we have a color
-		 * for a file extension. In this case, we need to properly
-		 * construct the color code */
-		if (cl && *cl != _ESC)
-			snprintf(ext_cl, MAX_COLOR, "\x1b[%sm", cl);
+		if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
+			cl = get_entry_color(matches, i);
 
-		char *p = strrchr(matches[i], '/');
-		char *color = *ext_cl ? ext_cl : (cl ? cl : "");
-		char *entry = (p && *(++p)) ? p : matches[i];
+			char ext_cl[MAX_COLOR];
+			*ext_cl = '\0';
+			/* If color does not start with escape, then we have a color
+			 * for a file extension. In this case, we need to properly
+			 * construct the color code */
+			if (cl && *cl != _ESC)
+				snprintf(ext_cl, MAX_COLOR, "\x1b[%sm", cl);
+
+			char *p = strrchr(matches[i], '/');
+			color = *ext_cl ? ext_cl : (cl ? cl : "");
+			entry = (p && *(++p)) ? p : matches[i];
+		}
 
 		if (*entry && !SELFORPARENT(entry))
 			fprintf(fp, "%s%s%s\n", color, entry, df_c);
