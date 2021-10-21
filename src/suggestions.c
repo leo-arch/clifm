@@ -540,6 +540,8 @@ check_filenames(char *str, size_t len, const unsigned char c,
 	if (len) {
 		while (str[len - 1] == ' ')
 			str[--len] = '\0';
+		if (str[len - 1] == '/')
+			str[--len] = '\0';
 	}
 
 	if (suggest_filetype_color)
@@ -1187,7 +1189,6 @@ rl_suggestions(const unsigned char c)
 	/* If we are not at the end of the input string, make sure we are
 	 * at the last word: we only suggest stuff for the last entered
 	 * word */
-
 	int lw = is_last_word();
 	if (!lw)
 		return EXIT_SUCCESS;
@@ -1417,11 +1418,6 @@ rl_suggestions(const unsigned char c)
 				printed = check_completions(word, wlen, c, flag);
 
 				if (printed) {
-					if (wrong_cmd && nwords == 1) {
-						rl_dispatching = 1;
-						recover_from_wrong_cmd();
-						rl_dispatching = 0;
-					}
 					if (flag == CHECK_MATCH) {
 						if (printed == FULL_MATCH) {
 //							if (suggestion.printed)
@@ -1482,11 +1478,6 @@ rl_suggestions(const unsigned char c)
 							c, last_space ? 0 : 1, full_word);
 
 				if (printed) {
-					if (wrong_cmd && nwords == 1) {
-						rl_dispatching = 1;
-						recover_from_wrong_cmd();
-						rl_dispatching = 0;
-					}
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
 				}
@@ -1519,11 +1510,6 @@ rl_suggestions(const unsigned char c)
 				printed = check_jumpdb(word, wlen, flag, full_word);
 
 				if (printed) {
-					if (wrong_cmd && nwords == 1) {
-						rl_dispatching = 1;
-						recover_from_wrong_cmd();
-						rl_dispatching = 0;
-					}
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
 				}
@@ -1547,6 +1533,17 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
+	
+//	if (nwords == 1 || nwords >= 2) {
+//	printf("'%s:%zu'", first_word, nwords);
+/*	if (nwords >= 2) {
+		if (rl_point == rl_end)
+			goto NO_SUGGESTION;
+		int sp = strcntchr(rl_line_buffer, ' ');
+		if (sp == -1 || rl_point > sp + 1)
+			goto NO_SUGGESTION;
+	} */
+
 	if (nwords == 1) {
 		word = first_word ? first_word : last_word;
 		if ((c == ' ' && (*word == '\'' || *word == '"'	|| *word == '$'
@@ -1566,13 +1563,6 @@ rl_suggestions(const unsigned char c)
 		printed = check_cmds(word, wlen, only_check ? 0 : 1, full_word);
 
 		if (printed) {
-			/* If there was a previous wrong cmd, do not switch back to
-			 * the regular prompt */
-			if (wrong_cmd) {
-				rl_dispatching = 1;
-				recover_from_wrong_cmd();
-				rl_dispatching = 0;
-			}
 			suggestion.offset = last_word_offset;
 			goto SUCCESS;
 
@@ -1588,6 +1578,7 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
+//NO_SUGGESTION:
 	/* No suggestion found */
 
 	/* Clear current suggestion, if any, only if no escape char is contained
@@ -1608,6 +1599,12 @@ SUCCESS:
 	if (printed) {
 		if (printed == FULL_MATCH && suggestion_buf) {
 			clear_suggestion(CS_FREEBUF);
+		}
+
+		if (wrong_cmd && nwords == 1) {
+			rl_dispatching = 1;
+			recover_from_wrong_cmd();
+			rl_dispatching = 0;
 		}
 
 		fputs("\x1b[0m", stdout);
