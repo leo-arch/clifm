@@ -82,7 +82,7 @@ rl_ring_bell(void)
 	case BELL_VISIBLE: {
 		int point = rl_point;
 		rl_mark = rl_last_word_start;
-		if (rl_end && rl_line_buffer[rl_end - 1] == ' ')
+		if (rl_end > 1 && rl_line_buffer[rl_end - 1] == ' ')
 			rl_point--;
 		rl_activate_mark();
 		rl_redisplay();

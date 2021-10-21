@@ -136,20 +136,25 @@ xbackspace()
 	}
 }
 
+
 static void
 leftmost_bell(void)
 {
-	/* Leftmost margin bell */
 	if (bell == BELL_VISIBLE) {
-		rl_stuff_char(' ');
-		rl_end = rl_point = 1;
+		rl_extend_line_buffer(2);
 		*rl_line_buffer = ' ';
+		*(rl_line_buffer + 1) = '\0';
+		rl_end = rl_point = 1;
 	}
 
 	rl_ring_bell();
+/*	printf("'%s'", rl_line_buffer);
+	fflush(stdout);
+	sleep(1); */
 
-	if (bell == BELL_VISIBLE)
+	if (bell == BELL_VISIBLE) {
 		rl_end = rl_point = 0;
+	}
 }
 
 static int
