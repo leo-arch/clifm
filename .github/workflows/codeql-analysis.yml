@@ -67,6 +67,7 @@ jobs:
     - name: Install deps
       run: |
         sudo apt-get install make gcc libcap-dev libreadline-dev libacl1-dev libmagic-dev
+        grep "rl_activate_mark" /usr/include/readline/readline.h
 
     - name: Compile CliFM
       run: |
