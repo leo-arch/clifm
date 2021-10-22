@@ -45,6 +45,7 @@
 #include "highlight.h"
 #endif
 
+#ifdef RL81
 /* Sleep for MSEC milliseconds */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
 static int
@@ -67,6 +68,7 @@ msleep(long msec)
 
 	return res;
 }
+#endif
 
 void
 rl_ring_bell(void)
@@ -79,6 +81,9 @@ rl_ring_bell(void)
 		fflush(stderr);
 		return;
 
+/* rl_activate_mark and rl_deactivate mark are available only since
+ * readline 8.1 */
+#ifdef RL81
 	case BELL_VISIBLE: {
 		int point = rl_point;
 		rl_mark = rl_last_word_start;
@@ -93,10 +98,11 @@ rl_ring_bell(void)
 			rl_point = rl_mark;
 			recolorize_line();
 		}
-#endif
+#endif /* !_NO_HIGHLIGHT */
 		rl_point = point;
 		return;
 		}
+#endif /* RL81 */
 
 	default: return;
 	}
