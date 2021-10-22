@@ -456,6 +456,7 @@ exec_cmd(char **comm)
 	 * This will be the value returned by this function. Used by the \z
 	 * escape code in the prompt to print the exit status of the last
 	 * executed command */
+	int old_exit_code = exit_code;
 	exit_code = EXIT_SUCCESS;
 
 	if (*comm[0] == '#')
@@ -621,9 +622,9 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "refresh") == 0)) {
 		if (cd_lists_on_the_fly) {
 			free_dirlist();
-			exit_code = list_dir();
+			list_dir();
 		}
-		return exit_code;
+		return exit_code = old_exit_code;
 	}
 
 	/*         ############### BOOKMARKS ##################     */
