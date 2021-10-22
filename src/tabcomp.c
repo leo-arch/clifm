@@ -491,21 +491,15 @@ fzftabcomp(char **matches)
 	int fzf_offset = (rl_point + prompt_offset < max_fzf_offset)
 			? (rl_point + prompt_offset - 4) : 0;
 
-	size_t lw_len = 0;
-	if (!lw) {
+	if (!lw)
 		fzf_offset++;
-	} else {
-		lw_len = strlen(lw);
-		fzf_offset -= (int)(lw_len - 1);
-	}
+	else
+		fzf_offset -= (int)(strlen(lw) - 1);
 
-	if (fzf_offset < 0)
-		fzf_offset = 0;
-
-	/* Run FZF and store the ouput into the FZFTABOUT file */
 	char *query = (char *)NULL;
 	switch(cur_comp_type) {
 	case TCMP_HIST:
+		/* Skip the leading ! char of the input string */
 		query = rl_line_buffer + 1;
 		fzf_offset = 1 + prompt_offset - 3;
 		break;
@@ -514,8 +508,10 @@ fzftabcomp(char **matches)
 		if (sp && *(++sp)) {
 			query = sp;
 			if (*(rl_line_buffer + 1) == ' ')
+				/* The command is "j" */
 				fzf_offset = 2 + prompt_offset - 3;
 			else
+				/* The command is "jump" */
 				fzf_offset = 5 + prompt_offset - 3;
 		} else {
 			query = rl_line_buffer;
@@ -525,6 +521,10 @@ fzftabcomp(char **matches)
 	default: query = lw;
 	}
 
+	if (fzf_offset < 0)
+		fzf_offset = 0;
+
+	/* Run FZF and store the ouput into the FZFTABOUT file */
 	int ret = run_fzf(&height, &fzf_offset, query);
 	unlink(FZFTABIN);
 
@@ -546,14 +546,8 @@ fzftabcomp(char **matches)
 	printf("\x1b[%dA", lines);
 
 	/* No results */
-	if (ret != EXIT_SUCCESS) {
-/*		if (cur_comp_type == TCMP_HIST) {
-			// Reinsert the history char, removed before when calling
-			// the history completion function
-			rl_stuff_char('!');
-		} */
+	if (ret != EXIT_SUCCESS)
 		return exit_status;
-	}
 
 	fp = fopen(FZFTABOUT, "r");
 	if (!fp) {
