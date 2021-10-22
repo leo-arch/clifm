@@ -503,7 +503,29 @@ fzftabcomp(char **matches)
 		fzf_offset = 0;
 
 	/* Run FZF and store the ouput into the FZFTABOUT file */
-	int ret = run_fzf(&height, &fzf_offset, lw);
+	char *query = (char *)NULL;
+	switch(cur_comp_type) {
+	case TCMP_HIST:
+		query = rl_line_buffer + 1;
+		fzf_offset = 1 + prompt_offset - 3;
+		break;
+	case TCMP_JUMP: {
+		char *sp = strchr(rl_line_buffer, ' ');
+		if (sp && *(++sp)) {
+			query = sp;
+			if (*(rl_line_buffer + 1) == ' ')
+				fzf_offset = 2 + prompt_offset - 3;
+			else
+				fzf_offset = 5 + prompt_offset - 3;
+		} else {
+			query = rl_line_buffer;
+		}
+		}
+		break;
+	default: query = lw;
+	}
+
+	int ret = run_fzf(&height, &fzf_offset, query);
 	unlink(FZFTABIN);
 
 	/* Calculate currently used lines to go back to the correct cursor
@@ -525,11 +547,11 @@ fzftabcomp(char **matches)
 
 	/* No results */
 	if (ret != EXIT_SUCCESS) {
-		if (cur_comp_type == TCMP_HIST) {
-			/* Reinsert the history char, removed before when calling
-			 * the history completion function */
+/*		if (cur_comp_type == TCMP_HIST) {
+			// Reinsert the history char, removed before when calling
+			// the history completion function
 			rl_stuff_char('!');
-		}
+		} */
 		return exit_status;
 	}
 
@@ -558,12 +580,17 @@ fzftabcomp(char **matches)
 			offset = mlen;
 	}
 
-	/* Honor case insensitive completion */
-	if (!case_sens_path_comp && lw) {
-		if (strncmp(lw, buf, lw_len) != 0) {
+	if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
+		rl_delete_text(0, rl_end);
+		rl_point = rl_end = 0;
+		offset = 0;
+	} else if (!case_sens_path_comp && query) {
+		/* Honor case insensitive completion */
+		size_t query_len = strlen(query);
+		if (strncmp(query, buf, query_len) != 0) {
 			int bk = rl_point;
-			rl_delete_text(bk - (int)lw_len, rl_end);
-			rl_point = rl_end = bk - (int)lw_len;
+			rl_delete_text(bk - (int)query_len, rl_end);
+			rl_point = rl_end = bk - (int)query_len;
 			offset = 0;
 		}
 	}
@@ -823,7 +850,6 @@ AFTER_USUAL_COMPLETION:
 				do_replace = matches[1] ? MULT_MATCH : SINGLE_MATCH;
 
 			if (do_replace != NO_MATCH) {
-
 				/* Found an embedded word break character in a potential
 				 match, so we need to prepend a quote character if we
 				 are replacing the completion string. */
@@ -831,7 +857,8 @@ AFTER_USUAL_COMPLETION:
 			}
 		}
 
-		if (replacement) {
+		if (replacement && cur_comp_type != TCMP_HIST
+		&& cur_comp_type != TCMP_JUMP) {
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;
