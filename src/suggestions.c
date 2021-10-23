@@ -1326,6 +1326,14 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
+	/* If more than one word and the cursor is on the first word,
+	 * jump to the check command name section */
+	int point_is_first_word = 0;
+	if (nwords >= 2 && rl_point <= (int)full_word + 1) {
+		point_is_first_word = 1;
+		goto CHECK_CMD;
+	}
+
 	/* 3.d) Execute the following check in the order specified by
 	 * suggestion_strategy (the value is taken form the configuration
 	 * file) */
@@ -1489,19 +1497,15 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
+CHECK_CMD:
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 
-	/* If there are more than one word, check if the cursor is currently
-	 * on the first word */
-	int point_is_first_word = 0;
 	if (nwords >= 2) {
 		if (rl_point == rl_end)
 			goto NO_SUGGESTION;
-//		int sp = strcntchr(rl_line_buffer, ' ');
 		if (rl_point > (int)full_word + 1)
 			goto NO_SUGGESTION;
-		point_is_first_word = 1;
 	}
 
 	word = first_word ? first_word : last_word;
