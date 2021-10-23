@@ -562,7 +562,10 @@ int
 record_cmd(char *input)
 {
 	/* NULL input */
-	if (!input)
+	if (!input || !*input)
+		return 0;
+
+	if (SELFORPARENT(input))
 		return 0;
 
 	/* Blank lines */
