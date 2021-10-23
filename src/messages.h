@@ -53,7 +53,7 @@
 !!: Execute the last command. \
 !n: Execute the command number 'n' in the history list. \
 !-n: Execute the last-n command in the history list."
-#define HISTORY_USAGE "List or access commands history entries\nUsage: history [clear] [-n]"
+#define HISTORY_USAGE "List or access commands history entries\nUsage: history [edit] [clear] [-n]"
 #define ICONS_USAGE "Set icons on-off\nUsage: icons [on, off]"
 #define JUMP_USAGE "Change to a directory in the jump database\nUsage: j, jc, jp, jl [STRING ...], jo [NUM], je"
 #define KB_USAGE "Handle keybindings\nUsage: kb, keybinds [edit] [reset] [readline]"

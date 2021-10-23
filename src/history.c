@@ -37,6 +37,7 @@
 #include "init.h"
 #include "misc.h"
 #include "messages.h"
+#include "file_operations.h"
 
 /* Log COMM into LOG_FILE (global) */
 int
@@ -298,6 +299,23 @@ add_to_dirhist(const char *dir_path)
 	}
 }
 
+static int
+reload_history(char **comm)
+{
+	clear_history();
+	read_history(hist_file);
+	history_truncate_file(hist_file, max_hist);
+
+	/* Update the history array */
+	if (get_history() != 0)
+		return EXIT_FAILURE;
+
+	if (log_function(comm) != 0)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
 int
 history_function(char **comm)
 {
@@ -314,8 +332,41 @@ history_function(char **comm)
 		return EXIT_SUCCESS;
 	}
 
+	if (args_n >= 1 && *comm[1] == 'e' && strcmp(comm[1], "edit") == 0) {
+		struct stat attr;
+		if (stat(hist_file, &attr) == -1) {
+			fprintf(stderr, "%s: history: %s: %s\n", PROGRAM_NAME, hist_file,
+					strerror(errno));
+			return EXIT_FAILURE;
+		}
+		time_t mtime_bfr = (time_t)attr.st_mtime;
+		
+		int ret = EXIT_SUCCESS;
+
+		/* If there is an argument... */
+		if (comm[2]) {
+			char *cmd[] = {comm[2], hist_file, NULL};
+			ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		} else {
+			/* If no application was passed as 2nd argument */
+			ret = open_file(hist_file);
+		}
+
+		if (ret != EXIT_SUCCESS)
+			return EXIT_FAILURE;
+
+		/* Get modification time after opening the config file */
+		stat(config_file, &attr);
+		/* If modification times differ, the file was modified after being
+		 * opened */
+		if (mtime_bfr != (time_t)attr.st_mtime)
+			return reload_history(comm);
+
+		return EXIT_SUCCESS;
+	}
+
 	/* If 'history clear', guess what, clear the history list! */
-	if (args_n == 1 && strcmp(comm[1], "clear") == 0) {
+	if (args_n == 1 && *comm[1] == 'c' && strcmp(comm[1], "clear") == 0) {
 		FILE *hist_fp = fopen(hist_file, "w+");
 		if (!hist_fp) {
 			_err(0, NOPRINT_PROMPT, "%s: history: %s: %s\n",
@@ -328,20 +379,21 @@ history_function(char **comm)
 		fclose(hist_fp);
 
 		/* Reset readline history */
-		clear_history();
+		return reload_history(comm);
+/*		clear_history();
 		read_history(hist_file);
 		history_truncate_file(hist_file, max_hist);
 
-		/* Update the history array */
+		// Update the history array
 		int exit_status = EXIT_SUCCESS;
 
 		if (get_history() != 0)
 			exit_status = EXIT_FAILURE;
 
 		if (log_function(comm) != 0)
-			exit_code = EXIT_FAILURE;
+			exit_code = EXIT_FAILURE; */
 
-		return exit_status;
+//		return exit_status;
 	}
 
 	/* If 'history -n', print the last -n elements */

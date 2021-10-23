@@ -453,6 +453,7 @@ const char *param_str[] = {
 	"hidden off",
 	"hidden status",
 	"history clear",
+	"history edit",
 	"icons on",
 	"icons off",
 	"kb edit",

@@ -1821,7 +1821,7 @@ help_function(void)
  fs\n\
  ft, filter [unset] [REGEX]\n\
  hf, hidden [on, off, status]\n\
- history [clear] [-n]\n\
+ history [edit] [clear] [-n]\n\
  icons [on, off]\n\
  j, jc, jp, jl [STRING ...] jo [NUM], je (directory jumper function)\n\
  kb, keybinds [edit] [reset] [readline]\n\
