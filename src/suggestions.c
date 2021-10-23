@@ -1497,17 +1497,20 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
-CHECK_CMD:
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 
-	if (nwords >= 2) {
+	if (nwords >= 2)
+		goto NO_SUGGESTION;
+
+/*	if (nwords >= 2) {
 		if (rl_point == rl_end)
 			goto NO_SUGGESTION;
 		if (rl_point > (int)full_word + 1)
 			goto NO_SUGGESTION;
-	}
+	} */
 
+CHECK_CMD:
 	word = first_word ? first_word : last_word;
 	if (!word || !*word || (c == ' ' && (*word == '\'' || *word == '"'
 	|| *word == '$' || *word == '#')) || *word == '<' || *word == '>'
