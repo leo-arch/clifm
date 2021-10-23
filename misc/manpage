@@ -560,8 +560,8 @@ The filter will be lost at program exit. To permanently set a files filter use t
 .B hf, hidden \fR[on, off, status]
 toggle hidden files on/off.
 .TP
-.B history \fR[clear] [\-n]
-with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all entries in the history file. Finally, '\-n' tells the \fIhistory\fR command to list only the last 'n' commands in the history list.
+.B history \fR[edit] [clear] [\-n]
+with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all entries in the history file. Use 'edit' to open the history file and modify it if needed. Finally, '\-n' tells the \fIhistory\fR command to list only the last 'n' commands in the history list.
 .sp
 You can use the exclamation mark (!) to perform some history commands:
   !!: Execute the last command.
