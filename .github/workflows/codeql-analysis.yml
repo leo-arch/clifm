@@ -70,7 +70,7 @@ jobs:
 
     - name: Compile CliFM
       run: |
-        make PREFIX=/usr install
+        make
     
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
