@@ -1522,14 +1522,19 @@ CHECK_CMD:
 		goto SUCCESS;
 	}
 
-	wlen = strlen(word);
+	/* If absolute path */
+	if (point_is_first_word && *word == '/' && access(word, X_OK) == 0) {
+		printed = 1;
+	} else {
+		wlen = strlen(word);
 
-	if (wlen && word[wlen - 1] == ' ')
-		word[wlen - 1] = '\0';
+		if (wlen && word[wlen - 1] == ' ')
+			word[wlen - 1] = '\0';
 
-	flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+		flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 
-	printed = check_cmds(word, wlen, flag);
+		printed = check_cmds(word, wlen, flag);
+	}
 
 	if (printed) {
 		if (wrong_cmd && (nwords == 1 || point_is_first_word)) {
