@@ -480,7 +480,7 @@ fzftabcomp(char **matches)
 	/* Calculate the height of the FZF window based on the amount
 	 * of entries */
 	size_t height = 0;
-	if (i + 1 > term_rows - 2)
+	if ((int)i + 1 > term_rows - 2)
 		height = term_rows - 2;
 	else
 		height = i;
