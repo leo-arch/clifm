@@ -1148,9 +1148,9 @@ rl_suggestions(const unsigned char c)
 	/* If we are not at the end of the input string, make sure we are
 	 * at the last word: we only suggest stuff for the last entered
 	 * word */
-	int lw = is_last_word();
+/*	int lw = is_last_word();
 	if (!lw)
-		return EXIT_SUCCESS;
+		return EXIT_SUCCESS; */
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
@@ -1187,6 +1187,20 @@ rl_suggestions(const unsigned char c)
 
 	char *word = (nwords == 1 && c != ' ' && first_word) ? first_word : last_word;
 	size_t wlen = strlen(word);
+
+	/* If more than one word and the cursor is on the first word,
+	 * jump to the check command name section */
+	int point_is_first_word = 0;
+	if (nwords >= 2 && rl_point <= (int)full_word + 1) {
+		point_is_first_word = 1;
+		goto CHECK_CMD;
+	}
+
+	/* If not on the first word and not at the end of the last word,
+	 * do nothing */
+	int lw = is_last_word();
+	if (!lw)
+		goto SUCCESS;
 
 		/* ######################################
 		 * #	    Search for suggestions		#
@@ -1328,11 +1342,11 @@ rl_suggestions(const unsigned char c)
 
 	/* If more than one word and the cursor is on the first word,
 	 * jump to the check command name section */
-	int point_is_first_word = 0;
+/*	int point_is_first_word = 0;
 	if (nwords >= 2 && rl_point <= (int)full_word + 1) {
 		point_is_first_word = 1;
 		goto CHECK_CMD;
-	}
+	} */
 
 	/* 3.d) Execute the following check in the order specified by
 	 * suggestion_strategy (the value is taken form the configuration
