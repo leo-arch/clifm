@@ -568,6 +568,9 @@ You can use the exclamation mark (!) to perform some history commands:
   !n: Execute the command number 'n' in the history list.
   !\-n: Execute the last\-n command in the history list.
   ![STRING]: Execute command starting with STRING. TAB completion is available in this case.
+.sp
+TAB completion is available: just type '!' and then TAB to see the complete list of history commands, or '!str' and then TAB to see the list of entries matching 'STR'. 
+
 .TP
 .B icons \fR[on, off]
 toggle icons on/off
