@@ -33,6 +33,7 @@
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
 #include <wordexp.h>
 #endif
+
 #include "aux.h"
 #include "checks.h"
 #include "exec.h"
@@ -794,18 +795,31 @@ check_shell_functions(char *str)
 			return 1;
 	}
 
+/*	char **b = (char **)NULL;
+
+	switch(shell) {
+	case SHELL_NONE: return 0;
+	case SHELL_BASH: b = bash_builtins; break;
+	case SHELL_DASH: b = dash_builtins; break;
+	case SHELL_KSH: b = ksh_builtins; break;
+	case SHELL_TCSH: b = tcsh_builtins; break;
+	case SHELL_ZSH: b = zsh_builtins; break;
+	default: return 0;
+	} */
+
 	char *funcs[] = {
 		"for ", "for(",
+		"do ", "do(",
 		"while ", "while(",
 		"until ", "until(",
 		"if ", "if(",
-		"[ ", "test ",
+		"[ ", "[[ ", "test ",
 		"case ", "case(",
 		"echo ", "printf ",
 		"declare ",
 		"(( ",
 		"set ",
-		"source", ". ",
+		"source ", ". ",
 		NULL
 	};
 

@@ -1,4 +1,4 @@
-/* Icon definitions for CliFM */
+/* icons.h - Icons definitions for CliFM */
 
 #ifndef ICONS_H
 #define ICONS_H

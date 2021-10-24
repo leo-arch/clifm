@@ -719,7 +719,7 @@ mime_open(char **args)
 	}
 
 	/* If %f placeholder is found, replace it by FILE_PATH. Else, append
-	 * FILE_PATH to the end of CMD */
+	 * FILE_PATH to the end of the CMD array */
 	int i = pos,
 		found = 0;
 	while (--i >= 0) {
