@@ -1100,7 +1100,7 @@ count_words(size_t *start_word, size_t *full_word)
 		}
 		/* If a process separator char is found, reset variables so that we
 		 * can start counting again for the new command */
-		if (w && b[w - 1] != '\\' && ((b[w] == '&' && b[w + 1] == '&')
+		if (w && b[w - 1] != '\\' && ((b[w] == '&' && b[w - 1] == '&')
 		|| b[w] == '|' || b[w] == ';')) {
 			words = first_non_space = *full_word = 0;
 		}
@@ -1546,7 +1546,6 @@ CHECK_CMD:
 			word[wlen - 1] = '\0';
 
 		flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
-
 		printed = check_cmds(word, wlen, flag);
 	}
 
@@ -1560,8 +1559,7 @@ CHECK_CMD:
 		goto SUCCESS;
 
 	/* Let's suppose that two slashes do not constitue a search
-	 * expression, and that a name containing an equal sign is an
-	 * assignement */
+	 * expression */
 	} else if (*word != '/' || strchr(word + 1, '/')) {
 	/* There's no suggestion nor any command name matching the
 	 * first entered word. So, we assume we have an invalid
