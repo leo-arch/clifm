@@ -995,7 +995,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  sf = ELN's, bookmarks, file and directory names
  sh = commands history entries
  sx = suggestions for CliFM's internal commands and parameters
- sp = suggestions pointer (ex: 56 > filename)
+ sp = suggestions pointer (ex: 56 > filename, where '>' is the suggestion pointer)
  wp = warning prompt color (See below the \fBAUTO-SUGGESTIONS\fR section)
 
  \fBSyntax highlighting\fR
@@ -1021,7 +1021,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  \fBMiscellaneous interface elements\fR
  bm = bookmarked directory in the bookmarks screen
  el = ELN color
- mi = misc indicators (disk usage, sort method, bulk rename)
+ mi = misc indicators (disk usage, sort method, bulk rename, jump database list)
  tx = command line text
  df = default color
  dc = files counter
