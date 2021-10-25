@@ -801,7 +801,11 @@ WarningPrompt=%s\n\n"
 
 		"# String to be used by the warning prompt. The color of this prompt\n\
 # can be customized using the 'wp' code in the color scheme file\n\
-WarningPromptStr=\"%s\"\n\n",
+WarningPromptStr=\"%s\"\n\n"
+
+		"# Should we add padding to ELN's. Possible values: 0:none, 1=zeroes\n\
+# 2=spaces on the left, and 3=spaces on the right\n\
+ELNPad=%d\n\n",
 
 	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
@@ -812,7 +816,8 @@ WarningPromptStr=\"%s\"\n\n",
 		DEF_MV_CMD,
 	    DEFAULT_PROMPT,
 		DEF_WARN_WRONG_CMD == 1 ? "true" : "false",
-	    DEF_WPROMPT_STR);
+	    DEF_WPROMPT_STR,
+	    DEF_ELNPAD);
 
 	fprintf(config_fp,
 
@@ -1578,6 +1583,22 @@ read_config(void)
 			}
 		}
 
+		else if (*line == 'E' && strncmp(line, "ELNPad=", 7) == 0) {
+			char *opt = strchr(line, '=');
+			if (!opt || !*opt || !*(++opt)) {
+				elnpad = DEF_ELNPAD;
+			} else {
+				int ivalue = atoi(opt);
+				switch(ivalue) {
+				case NOPAD: elnpad = NOPAD; break;
+				case ZEROPAD: elnpad = ZEROPAD; break;
+				case LEFTSPACEPAD: elnpad = LEFTSPACEPAD; break;
+				case RIGHTSPACEPAD: elnpad = RIGHTSPACEPAD; break;
+				default: elnpad = DEF_ELNPAD;
+				}
+			}
+		}
+
 		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
 		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
 			char opt_str[MAX_BOOL] = "";
@@ -2231,6 +2252,7 @@ reset_variables(void)
 	columned = UNSET;
 	dirhist_map = UNSET;
 	disk_usage = UNSET;
+	elnpad = UNSET;
 	ext_cmd_ok = UNSET;
 	files_counter = UNSET;
 	follow_symlinks = UNSET;

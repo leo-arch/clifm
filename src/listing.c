@@ -458,8 +458,21 @@ print_long_mode(size_t *counter, int *reset_pager)
 
 		/* Print ELN. The remaining part of the line will be
 		 * printed by print_entry_props() */
-		if (!no_eln)
-			printf("%s%d%s ", el_c, i + 1, df_c);
+		if (!no_eln) {
+			int pad = DIGINUM(files + 1);
+			switch(elnpad) {
+			case NOPAD:
+				printf("%s%d%s ", el_c, i + 1, df_c); break;
+			case ZEROPAD:
+				printf("%s%0*d%s ", el_c, pad, i + 1, df_c); break;
+			case LEFTSPACEPAD:
+				printf("%s%*d%s ", el_c, pad, i + 1, df_c); break;
+			case RIGHTSPACEPAD:
+				printf("%s%-*d%s ", el_c, pad, i + 1, df_c); break;
+			default:
+				printf("%s%*d%s ", el_c, pad, i + 1, df_c);
+			}
+		}
 
 		print_entry_props(&file_info[i], (size_t)space_left);
 	}
@@ -488,6 +501,7 @@ print_entry_color_light(int *ind_char, const int i)
 	char *end_color = df_c;
 	if (file_info[i].dir)
 		end_color = dc_c;
+	int pad = DIGINUM(files + 1);
 #ifndef _NO_ICONS
 	if (icons) {
 		if (xargs.icons_use_file_color == 1)
@@ -498,17 +512,59 @@ print_entry_color_light(int *ind_char, const int i)
 			    file_info[i].icon, file_info[i].color,
 			    file_info[i].name, end_color);
 		} else {
-			xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
-			    file_info[i].icon_color, file_info[i].icon,
-			    file_info[i].color, file_info[i].name, end_color);
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			default:
+				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+			}
 		}
 	} else {
 		if (no_eln) {
 			xprintf("%s%s%s", file_info[i].color,
 			    file_info[i].name, end_color);
 		} else {
-			xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-			    file_info[i].color, file_info[i].name, end_color);
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			default:
+				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+			}
 /*					line_sz += (size_t)sprintf(line_buf + line_sz,
 				"%s%d%s %s%s%s", el_c, i + 1, df_c,
 			    file_info[i].color, file_info[i].name, df_c); */
@@ -518,8 +574,27 @@ print_entry_color_light(int *ind_char, const int i)
 	if (no_eln) {
 		xprintf("%s%s%s", file_info[i].color, file_info[i].name, end_color);
 	} else {
-		xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-		    file_info[i].color, file_info[i].name, end_color);
+		switch(elnpad) {
+		case NOPAD:
+			xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		case ZEROPAD:
+			xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		case LEFTSPACEPAD:
+			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		case RIGHTSPACEPAD:
+			xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		default:
+			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+		}
 	}
 #endif /* !_NO_ICONS */
 
@@ -538,24 +613,77 @@ print_entry_color_light(int *ind_char, const int i)
 static inline void
 print_entry_nocolor_light(int *ind_char, const int i)
 {
+	int pad = DIGINUM(files + 1);
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln)
 			xprintf("%s %s", file_info[i].icon, file_info[i].name);
-		else
-			xprintf("%s%d%s %s %s", el_c, i + 1, df_c,
-			    file_info[i].icon, file_info[i].name);
+		else {
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s %s", el_c, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			default:
+				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+			}
+		}
 	} else {
 		if (no_eln)
 			fputs(file_info[i].name, stdout);
-		else
-			xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+		else {
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+				break;
+			default:
+				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			}
+		}
 	}
 #else
 	if (no_eln)
 		fputs(file_info[i].name, stdout);
-	else
-		xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+	else {
+		switch(elnpad) {
+		case NOPAD:
+			xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+			break;
+		case ZEROPAD:
+			xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			break;
+		case LEFTSPACEPAD:
+			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			break;
+		case RIGHTSPACEPAD:
+			xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			break;
+		default:
+			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+		}
+	}
 #endif /* !_NO_ICONS */
 
 	if (classify) {
@@ -580,12 +708,24 @@ print_entry_nocolor_light(int *ind_char, const int i)
 static inline void
 pad_filename_light(int *ind_char, const int i)
 {
+	int cur_len = 0;
 #ifndef _NO_ICONS
-	int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
-#else
-	int cur_len = (int)file_info[i].eln_n + 1
-#endif
+	if (elnpad == NOPAD) {
+		cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
 				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+	} else {
+		cur_len = DIGINUM(files + 1) + 1 + (icons ? 3 : 0)
+				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+	}
+#else
+	if (elnpad == NOPAD) {
+		cur_len = (int)file_info[i].eln_n + 1
+				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+	} else {
+		cur_len = DIGINUM(files + 1) + 1
+			+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+	}
+#endif
 
 	if (classify) {
 		if (file_info[i].dir)
@@ -876,6 +1016,7 @@ print_entry_color(int *ind_char, const int i)
 	char *end_color = df_c;
 	if (file_info[i].dir)
 		end_color = dc_c;
+	int pad = DIGINUM(files + 1);
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln) {
@@ -883,25 +1024,86 @@ print_entry_color(int *ind_char, const int i)
 			    file_info[i].icon, file_info[i].color,
 			    file_info[i].name, end_color);
 		} else {
-			xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
-			    file_info[i].icon_color, file_info[i].icon,
-			    file_info[i].color, file_info[i].name, end_color);
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			default:
+				xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+			}
 		}
 	} else {
 		if (no_eln) {
 			xprintf("%s%s%s", file_info[i].color,
 			    file_info[i].name, end_color);
 		} else {
-			xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-				file_info[i].color, file_info[i].name, end_color);
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			default:
+				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+			}
 		}
 	}
 #else
 	if (no_eln) {
 		xprintf("%s%s%s", file_info[i].color, file_info[i].name, end_color);
 	} else {
-		xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-		    file_info[i].color, file_info[i].name, end_color);
+		switch(elnpad) {
+		case NOPAD:
+			xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		case ZEROPAD:
+			xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		case LEFTSPACEPAD:
+			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		case RIGHTSPACEPAD:
+			xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		default:
+			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+		}
 	}
 #endif /* !_NO_ICONS */
 
@@ -927,24 +1129,78 @@ print_entry_color(int *ind_char, const int i)
 static inline void
 print_entry_nocolor(int *ind_char, const int i)
 {
+	int pad = DIGINUM(files + 1);
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln)
 			xprintf("%s %s", file_info[i].icon, file_info[i].name);
-		else
-			xprintf("%s%d%s %s %s", el_c, i + 1, df_c,
-			    file_info[i].icon, file_info[i].name);
+		else {
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s %s", el_c, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			default:
+				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			}
+		}
 	} else {
 		if (no_eln)
 			fputs(file_info[i].name, stdout);
-		else
-			xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+		else {
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+				break;
+			default:
+				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			}
+		}
 	}
 #else
 	if (no_eln)
 		fputs(file_info[i].name, stdout);
-	else
-		xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+	else {
+		switch(elnpad) {
+		case NOPAD:
+			xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+			break;
+		case ZEROPAD:
+			xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			break;
+		case LEFTSPACEPAD:
+			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			break;
+		case RIGHTSPACEPAD:
+			xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			break;
+		default:
+			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+		}
+	}
 #endif /* !_NO_ICONS */
 
 	if (classify) {
@@ -987,11 +1243,20 @@ print_entry_nocolor(int *ind_char, const int i)
 static inline void
 pad_filename(int *ind_char, const int i)
 {
+	int cur_len = 0;
+
 #ifndef _NO_ICONS
-	int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	if (elnpad == NOPAD)
+		cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	else
+		cur_len = DIGINUM(files + 1) + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #else
-	int cur_len = (int)file_info[i].eln_n + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	if (elnpad == NOPAD)
+		cur_len = (int)file_info[i].eln_n + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	else
+		cur_len = DIGINUM(files + 1) + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
+
 	if (file_info[i].dir && classify) {
 		cur_len++;
 		if (file_info[i].filesn > 0 && files_counter && file_info[i].ruser)

@@ -2091,6 +2091,9 @@ check_options(void)
 	if (xargs.control_d_exits == UNSET)
 		control_d_exits = DEF_CONTROL_D_EXITS;
 
+	if (elnpad == UNSET)
+		elnpad = DEF_ELNPAD;
+
 	if (cp_cmd == UNSET)
 		cp_cmd = DEF_CP_CMD;
 

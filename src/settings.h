@@ -23,6 +23,13 @@
 */
 
 /* User settings */
+
+/* Macros for ELN padding */
+#define NOPAD 			0
+#define ZEROPAD 		1
+#define LEFTSPACEPAD 	2
+#define RIGHTSPACEPAD 	3
+
 /* Default color definitions */
 #define DEF_FILE_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=0:\
 ef=00;33:nf=00;31:ln=01;36:mh=30;46:or=00;36:pi=00;35:\
@@ -145,6 +152,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_DIRHIST_MAP 0
 #define DEF_DISK_USAGE 0
 #define DEF_DIV_LINE_CHAR '-'
+#define DEF_ELNPAD LEFTSPACEPAD
 #define DEF_EXPAND_BOOKMARKS 0
 #define DEF_EXT_CMD_OK 1
 #define DEF_FILES_COUNTER 1

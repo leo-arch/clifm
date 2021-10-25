@@ -289,6 +289,12 @@ extern int watch;
 #define E_NOSTDERR 	(1 << 3)
 #define E_MUTE 		(E_NOSTDOUT | E_NOSTDERR)
 
+/* Macros for ELN padding */
+#define NOPAD 			0
+#define ZEROPAD 		1
+#define LEFTSPACEPAD 	2
+#define RIGHTSPACEPAD 	3
+
 /* Macros for the clear_suggestion function */
 #define CS_FREEBUF 1
 #define CS_KEEPBUF 0
@@ -669,6 +675,7 @@ extern int
     dequoted,
     dirhist_map,
     disk_usage,
+	elnpad,
     expand_bookmarks,
     ext_cmd_ok,
     files_counter,

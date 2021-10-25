@@ -123,6 +123,7 @@ int
     dequoted = 0,
     dirhist_map = UNSET,
     disk_usage = UNSET,
+	elnpad = UNSET,
     expand_bookmarks = UNSET,
     ext_cmd_ok = UNSET,
     files_counter = UNSET,

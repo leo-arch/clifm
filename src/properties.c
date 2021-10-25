@@ -427,7 +427,11 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	char trim_name[NAME_MAX];
 	int trim = 0;
 
-	size_t cur_len = (size_t)props->eln_n + 1 + props->len;
+	size_t cur_len = 0;
+	if (elnpad == NOPAD)
+		cur_len = (size_t)props->eln_n + 1 + props->len;
+	else
+		cur_len = (size_t)DIGINUM(files + 1) + 1 + props->len;
 #ifndef _NO_ICONS
 	if (icons) {
 		cur_len += 3;
