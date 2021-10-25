@@ -584,6 +584,7 @@ char
     sh_c[MAX_COLOR], /* Auto-suggestions: history */
     sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
     sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
+	sp_c[MAX_COLOR], /* Auto-suggestions: suggestions pointer */
 
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */

@@ -256,7 +256,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (baej) {
 		/* Move the cursor %d columns to the right and print "> " */
-		printf("\x1b[%dC%s> \x1b[0m", baej_offset, mi_c);
+		printf("\x1b[%dC%s> \x1b[0m", baej_offset, sp_c);
 	}
 
 	/* Print the suggestion */

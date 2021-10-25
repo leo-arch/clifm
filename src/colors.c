@@ -264,6 +264,7 @@ reset_iface_colors(void)
 	*sf_c = '\0';
 	*sc_c = '\0';
 	*sx_c = '\0';
+	*sp_c = '\0';
 
 	*bm_c = '\0';
 	*dl_c = '\0';
@@ -680,6 +681,14 @@ set_iface_colors(char **colors, const size_t words)
 						colors[i] + 3);
 		}
 
+		else if (*colors[i] == 's' && strncmp(colors[i], "sp=", 3) == 0) {
+			if (!is_color_code(colors[i] + 3))
+				*sp_c = '\0';
+			else
+				snprintf(sp_c, MAX_COLOR - 1, "\x1b[%sm",
+						colors[i] + 3);
+		}
+
 		else if (*colors[i] == 'b' && strncmp(colors[i], "bm=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*bm_c = '\0';
@@ -837,6 +846,8 @@ set_default_colors(void)
 		strcpy(sc_c, DEF_SC_C);
 	if (!*sx_c)
 		strcpy(sx_c, DEF_SX_C);
+	if (!*sp_c)
+		strcpy(sp_c, DEF_SP_C);
 
 	if (!*el_c)
 		strcpy(el_c, DEF_EL_C);

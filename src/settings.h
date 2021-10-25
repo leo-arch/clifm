@@ -38,7 +38,7 @@ ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=34;47:"
 
 #define DEF_IFACE_COLORS "el=01;33:mi=01;36:dl=01;34:tx=0:df=0:\
 dc=0:wc=01;36:dh=00;36:li=01;32:si=01;34:ti=01;33:em=01;31:wm=01;33:\
-nm=01;32:bm=01;36:sh=02;35:sf=02;04;36;sc=02;31:sx=02;32:\
+nm=01;32:bm=01;36:sh=02;35:sf=02;04;36;sc=02;31:sx=02;32:sp=02;31:\
 hb=00;36:hc=02;31:hd=00;36:he=00;36:hn=00;35:hp=02;36:hq=00;33:\
 hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 
@@ -115,6 +115,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_SF_C "\x1b[02;04;36m"
 #define DEF_SC_C "\x1b[02;31m"
 #define DEF_SX_C "\x1b[02;32m"
+#define DEF_SP_C "\x1b[02;31m"
 
 #define DEF_HB_C "\x1b[00;36m"
 #define DEF_HC_C "\x1b[02;31m"

@@ -423,7 +423,7 @@ get_longest_filename(const int n)
 }
 
 static inline void
-print_long_mode(size_t *counter, int *reset_pager)
+print_long_mode(size_t *counter, int *reset_pager, const int pad)
 {
 	struct stat lattr;
 	int space_left = (int)term_cols - MAX_PROP_STR;
@@ -459,7 +459,6 @@ print_long_mode(size_t *counter, int *reset_pager)
 		/* Print ELN. The remaining part of the line will be
 		 * printed by print_entry_props() */
 		if (!no_eln) {
-			int pad = DIGINUM(files + 1);
 			switch(elnpad) {
 			case NOPAD:
 				printf("%s%d%s ", el_c, i + 1, df_c); break;
@@ -929,7 +928,7 @@ list_dir_light(void)
 				 * ######################## */
 
 	if (long_view) {
-		print_long_mode(&counter, &reset_pager);
+		print_long_mode(&counter, &reset_pager, pad);
 		goto END;
 	}
 
@@ -1601,13 +1600,13 @@ list_dir(void)
 	file_info[n].name = (char *)NULL;
 	files = n;
 
-	int pad = DIGINUM(files + 1);
-
 	if (n == 0) {
 		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
 		free(file_info);
 		goto END;
 	}
+
+	int pad = DIGINUM(files + 1);
 
 		/* #############################################
 		 * #    SORT FILES ACCORDING TO SORT METHOD    #
@@ -1635,7 +1634,7 @@ list_dir(void)
 				 * ######################## */
 
 	if (long_view) {
-		print_long_mode(&counter, &reset_pager);
+		print_long_mode(&counter, &reset_pager, pad);
 		goto END;
 	}
 
