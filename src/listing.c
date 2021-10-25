@@ -495,13 +495,13 @@ get_columns(size_t *n)
 }
 
 static inline void
-print_entry_color_light(int *ind_char, const int i)
+print_entry_color_light(int *ind_char, const int i, const int pad)
 {
 	*ind_char = 0;
 	char *end_color = df_c;
 	if (file_info[i].dir)
 		end_color = dc_c;
-	int pad = DIGINUM(files + 1);
+
 #ifndef _NO_ICONS
 	if (icons) {
 		if (xargs.icons_use_file_color == 1)
@@ -611,9 +611,8 @@ print_entry_color_light(int *ind_char, const int i)
 }
 
 static inline void
-print_entry_nocolor_light(int *ind_char, const int i)
+print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 {
-	int pad = DIGINUM(files + 1);
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln)
@@ -706,7 +705,7 @@ print_entry_nocolor_light(int *ind_char, const int i)
 
 /* Add spaces needed to equate the longest file name length */
 static inline void
-pad_filename_light(int *ind_char, const int i)
+pad_filename_light(int *ind_char, const int i, const int pad)
 {
 	int cur_len = 0;
 #ifndef _NO_ICONS
@@ -714,16 +713,15 @@ pad_filename_light(int *ind_char, const int i)
 		cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
 				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
 	} else {
-		cur_len = DIGINUM(files + 1) + 1 + (icons ? 3 : 0)
-				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+		cur_len = pad + 1 + (icons ? 3 : 0)	+ (int)file_info[i].len
+				+ (*ind_char ? 1 : 0);
 	}
 #else
 	if (elnpad == NOPAD) {
 		cur_len = (int)file_info[i].eln_n + 1
 				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
 	} else {
-		cur_len = DIGINUM(files + 1) + 1
-			+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+		cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 	}
 #endif
 
@@ -911,6 +909,8 @@ list_dir_light(void)
 		goto END;
 	}
 
+	int pad = DIGINUM(files + 1);
+
 	if (sort)
 		ENTSORT(file_info, n, entrycmp);
 
@@ -985,12 +985,12 @@ list_dir_light(void)
 			ind_char = 0;
 
 		if (colorize)
-			print_entry_color_light(&ind_char, i);
+			print_entry_color_light(&ind_char, i, pad);
 		else
-			print_entry_nocolor_light(&ind_char, i);
+			print_entry_nocolor_light(&ind_char, i, pad);
 
 		if (!last_column)
-			pad_filename_light(&ind_char, i);
+			pad_filename_light(&ind_char, i, pad);
 		else
 			putchar('\n');
 	}
@@ -1010,13 +1010,13 @@ END:
 }
 
 static inline void
-print_entry_color(int *ind_char, const int i)
+print_entry_color(int *ind_char, const int i, const int pad)
 {
 	*ind_char = 0;
 	char *end_color = df_c;
 	if (file_info[i].dir)
 		end_color = dc_c;
-	int pad = DIGINUM(files + 1);
+//	int pad = DIGINUM(files + 1);
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln) {
@@ -1127,9 +1127,9 @@ print_entry_color(int *ind_char, const int i)
 }
 
 static inline void
-print_entry_nocolor(int *ind_char, const int i)
+print_entry_nocolor(int *ind_char, const int i, const int pad)
 {
-	int pad = DIGINUM(files + 1);
+//	int pad = DIGINUM(files + 1);
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln)
@@ -1241,7 +1241,7 @@ print_entry_nocolor(int *ind_char, const int i)
 
 /* Pad the current file name to equate the longest file name length */
 static inline void
-pad_filename(int *ind_char, const int i)
+pad_filename(int *ind_char, const int i, const int pad)
 {
 	int cur_len = 0;
 
@@ -1249,12 +1249,12 @@ pad_filename(int *ind_char, const int i)
 	if (elnpad == NOPAD)
 		cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
 	else
-		cur_len = DIGINUM(files + 1) + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
+		cur_len = pad + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #else
 	if (elnpad == NOPAD)
 		cur_len = (int)file_info[i].eln_n + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 	else
-		cur_len = DIGINUM(files + 1) + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
+		cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
 
 	if (file_info[i].dir && classify) {
@@ -1601,6 +1601,8 @@ list_dir(void)
 	file_info[n].name = (char *)NULL;
 	files = n;
 
+	int pad = DIGINUM(files + 1);
+
 	if (n == 0) {
 		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
 		free(file_info);
@@ -1688,12 +1690,12 @@ list_dir(void)
 			ind_char = 0;
 
 		if (colorize)
-			print_entry_color(&ind_char, i);
+			print_entry_color(&ind_char, i, pad);
 		else
-			print_entry_nocolor(&ind_char, i);
+			print_entry_nocolor(&ind_char, i, pad);
 
 		if (!last_column)
-			pad_filename(&ind_char, i);
+			pad_filename(&ind_char, i, pad);
 		else
 			putchar('\n');
 	}
