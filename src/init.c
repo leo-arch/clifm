@@ -2229,7 +2229,7 @@ check_options(void)
 		if (xargs.no_colors == UNSET)
 			colorize = DEF_COLORS;
 		else
-			colorize = xargs.no_colors;
+			colorize = xargs.no_colors == 1 ? 0 : 1;
 	}
 
 	if (expand_bookmarks == UNSET) {

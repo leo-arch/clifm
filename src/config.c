@@ -2249,6 +2249,7 @@ reset_variables(void)
 	check_ext = UNSET;
 	classify = UNSET;
 	clear_screen = UNSET;
+	colorize = UNSET;
 	columned = UNSET;
 	dirhist_map = UNSET;
 	disk_usage = UNSET;
@@ -2405,7 +2406,7 @@ check_cmd_line_options(void)
 		max_path = xargs.max_path;
 
 	if (xargs.no_colors != UNSET)
-		colorize = xargs.no_colors;
+		colorize = xargs.no_colors == 1 ? 0 : 1;
 
 	if (xargs.no_columns != UNSET)
 		columned = xargs.no_columns;
