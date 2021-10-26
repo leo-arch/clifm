@@ -22,7 +22,7 @@
  * MA 02110-1301, USA.
 */
 
-#define GRAL_USAGE "[-aAefFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] [-D DIR] \
+#define GRAL_USAGE "[-aAefFgGhHiIlLmoOsSuUvxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define ACTIONS_USAGE "List or edit actions/plugins\nUsage: actions [edit]"

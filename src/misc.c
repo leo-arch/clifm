@@ -1670,6 +1670,7 @@ help_function(void)
 \n -g, --pager\t\t\t enable the pager\
 \n -G, --no-pager\t\t\t disable the pager (default)\
 \n -h, --help\t\t\t show this help and exit\
+\n -H, --horizontal-list\t\t list files horizontally\
 \n -i, --no-case-sensitive\t no case-sensitive files listing (default)\
 \n -I, --case-sensitive\t\t case-sensitive files listing\
 \n -k, --keybindings-file=FILE\t specify an alternative keybindings file\

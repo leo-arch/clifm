@@ -917,6 +917,7 @@ external_arguments(int argc, char **argv)
 	    {"pager", no_argument, 0, 'g'},
 	    {"no-pager", no_argument, 0, 'G'},
 	    {"help", no_argument, 0, 'h'},
+	    {"horizontal-list", no_argument, 0, 'H'},
 	    {"no-case-sensitive", no_argument, 0, 'i'},
 	    {"case-sensitive", no_argument, 0, 'I'},
 	    {"keybindings-file", no_argument, 0, 'k'},
@@ -995,7 +996,7 @@ external_arguments(int argc, char **argv)
 	     *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
-		    "+aAb:c:D:efFgGhiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
+		    "+aAb:c:D:efFgGhHiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
 		    (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -1186,6 +1187,8 @@ external_arguments(int argc, char **argv)
 			flags |= EXT_HELP;
 			help_function();
 			exit(EXIT_SUCCESS);
+
+		case 'H': xargs.horizontal_list = 1; listing_mode = HORLIST; break;
 
 		case 'i':
 			flags &= ~CASE_SENS;
@@ -1516,6 +1519,7 @@ unset_xargs(void)
 #ifndef _NO_HIGHLIGHT
 	xargs.highlight = UNSET;
 #endif
+	xargs.horizontal_list = UNSET;
 #ifndef _NO_ICONS
 	xargs.icons = UNSET;
 	xargs.icons_use_file_color = UNSET;
@@ -2094,9 +2098,6 @@ check_options(void)
 	if (elnpad == UNSET)
 		elnpad = DEF_ELNPAD;
 
-	if (listing_mode == UNSET)
-		listing_mode = DEF_LISTING_MODE;
-
 	if (cp_cmd == UNSET)
 		cp_cmd = DEF_CP_CMD;
 
@@ -2145,6 +2146,13 @@ check_options(void)
 			warn_wrong_cmd = DEF_WARN_WRONG_CMD;
 		else
 			warn_wrong_cmd = xargs.warn_wrong_cmd;
+	}
+
+	if (listing_mode == UNSET) {
+		if (xargs.horizontal_list == UNSET)
+			listing_mode = DEF_LISTING_MODE;
+		else
+			listing_mode = xargs.horizontal_list ? 1 : 0;
 	}
 
 #ifndef _NO_FZF

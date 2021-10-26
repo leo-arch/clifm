@@ -1716,7 +1716,8 @@ read_config(void)
 				list_folders_first = 0;
 		}
 
-		else if (*line == 'L' && strncmp(line, "ListingMode=", 12) == 0) {
+		else if (xargs.horizontal_list == UNSET && *line == 'L'
+		&& strncmp(line, "ListingMode=", 12) == 0) {
 			char *opt = strchr(line, '=');
 			if (!opt || !*opt || !*(++opt)) {
 				listing_mode = DEF_LISTING_MODE;
