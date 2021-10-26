@@ -698,6 +698,7 @@ extern int
     kbind_busy,
     light_mode,
     list_folders_first,
+	listing_mode,
     logs_enabled,
     long_view,
     mime_match,

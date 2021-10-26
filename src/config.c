@@ -738,6 +738,9 @@ FilesCounter=%s\n\n"
 # quotes) and decimal numbers.\n\
 DividingLineChar='%c'\n\n"
 
+		"# How to list files: 0=vertically (like ls(1) would), 1=horizontally\n\
+ListingMode=%d\n\n"
+
 	    "# If set to true, print a map of the current position in the directory\n\
 # history list, showing previous, current, and next entries\n\
 DirhistMap=%s\n\n"
@@ -811,6 +814,7 @@ ELNPad=%d\n\n",
 		DEF_COLOR_SCHEME,
 		DEF_FILES_COUNTER == 1 ? "true" : "false",
 		DEF_DIV_LINE_CHAR,
+		DEF_LISTING_MODE,
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,
 		DEF_MV_CMD,
@@ -1712,6 +1716,20 @@ read_config(void)
 				list_folders_first = 0;
 		}
 
+		else if (*line == 'L' && strncmp(line, "ListingMode=", 12) == 0) {
+			char *opt = strchr(line, '=');
+			if (!opt || !*opt || !*(++opt)) {
+				listing_mode = DEF_LISTING_MODE;
+			} else {
+				int ivalue = atoi(opt);
+				switch(ivalue) {
+				case VERTLIST: listing_mode = VERTLIST; break;
+				case HORLIST: listing_mode = HORLIST; break;
+				default: listing_mode = DEF_LISTING_MODE;
+				}
+			}
+		}
+
 		else if (xargs.longview == UNSET && *line == 'L'
 		&& strncmp(line, "LongViewMode=", 13) == 0) {
 			char opt_str[MAX_BOOL] = "";
@@ -2269,6 +2287,7 @@ reset_variables(void)
 	int_vars = UNSET;
 	light_mode = UNSET;
 	list_folders_first = UNSET;
+	listing_mode = UNSET;
 	logs_enabled = UNSET;
 	long_view = UNSET;
 	max_jump_total_rank = UNSET;

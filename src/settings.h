@@ -30,6 +30,10 @@
 #define LEFTSPACEPAD 	2
 #define RIGHTSPACEPAD 	3
 
+/* Macros for listing_mode */
+#define VERTLIST 0 /* ls-like listing mode */
+#define HORLIST 1
+
 /* Default color definitions */
 #define DEF_FILE_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=0:\
 ef=00;33:nf=00;31:ln=01;36:mh=30;46:or=00;36:pi=00;35:\
@@ -164,6 +168,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_INT_VARS 0
 #define DEF_LIGHT_MODE 0
 #define DEF_LIST_FOLDERS_FIRST 1
+#define DEF_LISTING_MODE VERTLIST
 #define DEF_LOGS_ENABLED 0
 #define DEF_LONG_VIEW 0
 #define DEF_MAX_DIRHIST 100

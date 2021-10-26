@@ -142,6 +142,7 @@ int
     kbind_busy = 0,
     light_mode = UNSET,
     list_folders_first = UNSET,
+	listing_mode = UNSET,
     logs_enabled = UNSET,
     long_view = UNSET,
     mime_match = 0,

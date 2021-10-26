@@ -2094,6 +2094,9 @@ check_options(void)
 	if (elnpad == UNSET)
 		elnpad = DEF_ELNPAD;
 
+	if (listing_mode == UNSET)
+		listing_mode = DEF_LISTING_MODE;
+
 	if (cp_cmd == UNSET)
 		cp_cmd = DEF_CP_CMD;
 

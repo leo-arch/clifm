@@ -380,13 +380,16 @@ set_events_checker(void)
 }
 
 static inline void
-get_longest_filename(const int n)
+get_longest_filename(const int n, const int pad)
 {
 	int i = n;
 	while (--i >= 0) {
 		size_t total_len = 0;
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
-		total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
+		if (elnpad == NOPAD)
+			total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
+		else
+			total_len = (size_t)pad + 1 + file_info[i].len;
 
 		if (!long_view && classify) {
 			if (file_info[i].dir)
@@ -920,7 +923,7 @@ list_dir_light(void)
 	/* Get the longest file name */
 	if (columned || long_view) {
 		int nn = (int)n;
-		get_longest_filename(nn);
+		get_longest_filename(nn, pad);
 	}
 
 				/* ########################
@@ -1265,6 +1268,149 @@ pad_filename(int *ind_char, const int i, const int pad)
 	int diff = (int)longest - cur_len;
 	/* Move the cursor %d columns to the right */
 	xprintf("\x1b[%dC", diff + 1);
+}
+
+/* List files horizontally:
+ * 1 AAA	2 AAB	3 AAC
+ * 4 AAD	5 AAE	6 AAF */
+static void
+list_files_hor(size_t *counter, int *reset_pager, const int pad,
+		const size_t columns_n, int *last_column)
+{
+	int nn = (int)files;
+
+	size_t cur_cols = 0;
+	int i;
+	for (i = 0; i < nn; i++) {
+		// Determine if current entry is in the last column, in which
+		// case a new line char will be appended
+		if (++cur_cols == columns_n) {
+			cur_cols = 0;
+			*last_column = 1;
+		} else {
+			*last_column = 0;
+		}
+
+		int ind_char = 1;
+		if (!classify)
+			ind_char = 0;
+
+		if (max_files != UNSET && i == max_files)
+			break;
+
+				// ##########################
+				// #  MAS: A SIMPLE PAGER   #
+				// ##########################
+
+		if (pager) {
+			// Run the pager only once all columns and rows fitting in
+			// the screen are filled with the corresponding file names
+			if (*last_column && *counter > columns_n * ((size_t)term_rows - 2))
+				if (run_pager((int)columns_n, &*reset_pager, &i, &*counter) == -1)
+					continue;
+
+			(*counter)++;
+		}
+
+			// #################################
+			// #    PRINT THE CURRENT ENTRY    #
+			// #################################
+
+		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
+
+		if (colorize)
+			print_entry_color(&ind_char, i, pad);
+		else
+			print_entry_nocolor(&ind_char, i, pad);
+
+		if (!*last_column)
+			pad_filename(&ind_char, i, pad);
+		else
+			putchar('\n');
+	}
+}
+
+/* List files vertically, like ls(1) would
+ * 1 AAA	3 AAC	5 AAE
+ * 2 AAB	4 AAD	6 AAF */
+static void
+list_files_vert(size_t *counter, int *reset_pager, const int pad,
+		const size_t columns_n, int *last_column)
+{
+	int rows = (int)files / (int)columns_n;
+	if (files % columns_n > 0)
+		rows++;
+
+	int nn = (int)files;
+
+	size_t cur_cols = 0, cc = columns_n;
+	int x = 0, xx = 0, i = 0;
+	for ( ; ; i++) {
+		if (cc == columns_n) {
+			x = xx;
+			xx++;
+			cc = 0;
+		} else {
+			x += rows;
+		}
+		cc++;
+
+		if (xx > rows)
+			break;
+
+		// Determine if current entry is in the last column, in which
+		// case a new line char will be appended
+		if (++cur_cols == columns_n) {
+			cur_cols = 0;
+			*last_column = 1;
+		} else {
+			*last_column = 0;
+		}
+
+		int ind_char = 1;
+		if (!classify)
+			ind_char = 0;
+
+		if (x > nn || !file_info[x].name) {
+			if (*last_column) {
+				putchar('\n');
+			}
+			continue;
+		}
+
+		if (max_files != UNSET && x == max_files)
+			break;
+
+				// ##########################
+				// #  MAS: A SIMPLE PAGER   #
+				// ##########################
+
+		if (pager) {
+			// Run the pager only once all columns and rows fitting in
+			// the screen are filled with the corresponding file names
+			if (*last_column && *counter > columns_n * ((size_t)term_rows - 2))
+				if (run_pager((int)columns_n, &*reset_pager, &x, &*counter) == -1)
+					continue;
+
+			(*counter)++;
+		}
+
+			// #################################
+			// #    PRINT THE CURRENT ENTRY    #
+			// #################################
+
+		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
+
+		if (colorize)
+			print_entry_color(&ind_char, x, pad);
+		else
+			print_entry_nocolor(&ind_char, x, pad);
+
+		if (!*last_column)
+			pad_filename(&ind_char, x, pad);
+		else
+			putchar('\n');
+	}
 }
 
 /* List files in the current working directory. Uses file type colors
@@ -1619,14 +1765,14 @@ list_dir(void)
 		 * #    GET INFO TO PRINT COLUMNED OUTPUT   #
 		 * ########################################## */
 
-	int i;
+//	int i;
 	size_t counter = 0;
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
 	if (columned || long_view) {
 		int nn = (int)n;
-		get_longest_filename(nn);
+		get_longest_filename(nn, pad);
 	}
 
 				/* ########################
@@ -1650,28 +1796,38 @@ list_dir(void)
 	else
 		get_columns(&columns_n);
 
+	if (listing_mode == VERTLIST) /* ls(1) like listing */
+		list_files_vert(&counter, &reset_pager, pad, columns_n, &last_column);
+	else
+		list_files_hor(&counter, &reset_pager, pad, columns_n, &last_column);
+/*	int rows = (int)files / (int)columns_n;
+	if (files % columns_n > 0)
+		rows++;
+
 	int nn = (int)n;
-	size_t cur_cols = 0;
-	for (i = 0; i < nn; i++) {
-		if (max_files != UNSET && i == max_files)
+
+//	size_t cur_cols = 0;
+//	int x = 0;
+//	for (i = 0; i < nn; i++) {
+//		x = i;
+
+	size_t cur_cols = 0, cc = columns_n;
+	int x = 0, xx = 0;
+	for (i = 0; ; i++) {
+		if (cc == columns_n) {
+			x = xx;
+			xx++;
+			cc = 0;
+		} else {
+			x += rows;
+		}
+		cc++;
+
+		if (xx > rows)
 			break;
 
-				/* ##########################
-				 * #  MAS: A SIMPLE PAGER   #
-				 * ########################## */
-
-		if (pager) {
-			/* Run the pager only once all columns and rows fitting in
-			 * the screen are filled with the corresponding file names */
-			if (last_column && counter > columns_n * ((size_t)term_rows - 2))
-				if (run_pager((int)columns_n, &reset_pager, &i, &counter) == -1)
-					continue;
-
-			counter++;
-		}
-
-		/* Determine if current entry is in the last column, in which
-		 * case a new line char will be appended */
+		// Determine if current entry is in the last column, in which
+		// case a new line char will be appended
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			last_column = 1;
@@ -1679,25 +1835,50 @@ list_dir(void)
 			last_column = 0;
 		}
 
-			/* #################################
-			 * #    PRINT THE CURRENT ENTRY    #
-			 * ################################# */
-
-		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 		int ind_char = 1;
 		if (!classify)
 			ind_char = 0;
 
+		if (x > nn || !file_info[x].name) {
+			if (last_column) {
+				putchar('\n');
+			}
+			continue;
+		}
+
+		if (max_files != UNSET && x == max_files)
+			break;
+
+				// ##########################
+				// #  MAS: A SIMPLE PAGER   #
+				// ##########################
+
+		if (pager) {
+			// Run the pager only once all columns and rows fitting in
+			// the screen are filled with the corresponding file names
+			if (last_column && counter > columns_n * ((size_t)term_rows - 2))
+				if (run_pager((int)columns_n, &reset_pager, &i, &counter) == -1)
+					continue;
+
+			counter++;
+		}
+
+			// #################################
+			// #    PRINT THE CURRENT ENTRY    #
+			// #################################
+
+		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
+
 		if (colorize)
-			print_entry_color(&ind_char, i, pad);
+			print_entry_color(&ind_char, x, pad);
 		else
-			print_entry_nocolor(&ind_char, i, pad);
+			print_entry_nocolor(&ind_char, x, pad);
 
 		if (!last_column)
-			pad_filename(&ind_char, i, pad);
+			pad_filename(&ind_char, x, pad);
 		else
 			putchar('\n');
-	}
+	} */
 
 	if (!last_column)
 		putchar('\n');
