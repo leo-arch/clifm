@@ -293,7 +293,7 @@ is_internal_c(char *restrict cmd)
 	    "u", "undel", "untrash",
 	    "uc", "unicode",
 	    "unlink",
-		"v",
+		"v", "vv",
 	    "ver", "version",
 	    "ws",
 	    "x", "X",

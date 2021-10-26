@@ -304,7 +304,7 @@ char
 /* This is not a comprehensive list of commands. It only lists
  * commands long version for TAB completion */
 const char *internal_cmds[] = {
-/*	"ac", "ad",
+	"ac", "ad",
 	"bm",
 	"br",
 	"cd", "o",
@@ -313,7 +313,7 @@ const char *internal_cmds[] = {
 	"n",
 	"t", "tr", "u",
 	"p", "pr",
-	"v",
+	"v", "vv", "ver",
 	"ao", "acd",
 	"lm",
 	"st",
@@ -338,8 +338,9 @@ const char *internal_cmds[] = {
 	"rl",
 	"uc",
 	"ws",
-	"x", "X", */
+	"x", "X",
 
+	"?", "help",
     "actions",
     "alias",
     "auto-open",
