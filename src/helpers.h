@@ -513,6 +513,8 @@ struct param {
 	int case_sens_path_comp;
 	int cd_list_auto;
 	int clear_screen;
+	int colorize;
+	int columns;
 	int config;
 	int cwd_in_title;
 	int dirmap;
@@ -547,8 +549,6 @@ struct param {
 	int max_dirhist;
 	int max_files;
 	int max_path;
-	int no_colors;
-	int no_columns;
 	int no_dirjump;
 	int noeln;
 	int only_dirs;

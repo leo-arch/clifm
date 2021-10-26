@@ -1056,12 +1056,12 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_FAILURE);
 #endif
 		case 26:
-			xargs.no_columns = 1;
+			xargs.columns = 0;
 			columned = 0;
 			break;
 
 		case 27:
-			xargs.no_colors = 1;
+			xargs.colorize = 0;
 			colorize = 0;
 #ifndef _NO_HIGHLIGHT
 			xargs.highlight = highlight = 0;
@@ -1527,8 +1527,8 @@ unset_xargs(void)
 	xargs.longview = UNSET;
 	xargs.max_dirhist = UNSET;
 	xargs.max_path = UNSET;
-	xargs.no_colors = UNSET;
-	xargs.no_columns = UNSET;
+	xargs.colorize = UNSET;
+	xargs.columns = UNSET;
 	xargs.no_dirjump = UNSET;
 	xargs.noeln = UNSET;
 	xargs.only_dirs = UNSET;
@@ -2226,10 +2226,10 @@ check_options(void)
 	}
 
 	if (colorize == UNSET) {
-		if (xargs.no_colors == UNSET)
+		if (xargs.colorize == UNSET)
 			colorize = DEF_COLORS;
 		else
-			colorize = xargs.no_colors == 1 ? 0 : 1;
+			colorize = xargs.colorize;
 	}
 
 	if (expand_bookmarks == UNSET) {

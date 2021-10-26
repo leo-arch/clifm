@@ -2405,11 +2405,11 @@ check_cmd_line_options(void)
 	if (xargs.max_path != UNSET)
 		max_path = xargs.max_path;
 
-	if (xargs.no_colors != UNSET)
-		colorize = xargs.no_colors == 1 ? 0 : 1;
+	if (xargs.colorize != UNSET)
+		colorize = xargs.colorize;
 
-	if (xargs.no_columns != UNSET)
-		columned = xargs.no_columns;
+	if (xargs.columns != UNSET)
+		columned = xargs.columns;
 
 	if (xargs.noeln != UNSET)
 		no_eln = xargs.noeln;
