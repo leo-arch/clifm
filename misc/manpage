@@ -188,6 +188,9 @@ disable the pager (default)
 .B \-h, \-\-help
 show this help and exit
 .TP
+.B \-H, \-\-horizontal-list
+list files horizontally
+.TP
 .B \-i, \-\-no\-case\-sensitive
 no case\-sensitive files listing (default)
 .TP
