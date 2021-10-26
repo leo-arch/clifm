@@ -154,6 +154,8 @@ To enjoy of any of the features tagged as NEW, clone this repository and install
 
 **NEW**: [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Specifics/#the-warning-prompt)
 
+**NEW**: `ls(1)`-like listing mode (default)
+
 ---
 
 ## Installing _CliFM_
@@ -183,7 +185,7 @@ It works on Linux, FreeBSD, NetBSD, OpenBSD, and Haiku, on x86 and ARM architect
 ## License
 This project is licensed GPL version 2 (or later). \
 See the [LICENSE file](https://github.com/leo-arch/clifm/blob/master/LICENSE) for details.
-
+takes
 ---
 
 ## Contributing
