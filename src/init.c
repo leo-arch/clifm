@@ -1037,7 +1037,21 @@ external_arguments(int argc, char **argv)
 				xargs.max_path = max_path = opt_int;
 		} break;
 
-		case 17: opener = savestring(optarg, strlen(optarg)); break;
+		case 17:
+			if (*optarg == '~') {
+				char *ep = tilde_expand(optarg);
+				if (ep) {
+					opener = savestring(ep, strlen(ep));
+					free(ep);
+				} else {
+					_err('w', PRINT_PROMPT, _("%s: Error expanding tilde. "
+						"Using default opener\n"), PROGRAM_NAME);
+				}
+			} else {
+				opener = savestring(optarg, strlen(optarg));
+			}
+			break;
+
 		case 18: xargs.expand_bookmarks = expand_bookmarks = 1; break;
 		case 19: xargs.only_dirs = only_dirs = 1; break;
 		case 20: xargs.list_and_quit = 1; break;
