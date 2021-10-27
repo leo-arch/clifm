@@ -497,521 +497,6 @@ get_columns(size_t *n)
 }
 
 static inline void
-print_entry_color_light(int *ind_char, const int i, const int pad)
-{
-	*ind_char = 0;
-	char *end_color = df_c;
-	if (file_info[i].dir)
-		end_color = dc_c;
-
-#ifndef _NO_ICONS
-	if (icons) {
-		if (xargs.icons_use_file_color == 1)
-			file_info[i].icon_color = file_info[i].color;
-
-		if (no_eln) {
-			xprintf("%s%s %s%s%s", file_info[i].icon_color,
-			    file_info[i].icon, file_info[i].color,
-			    file_info[i].name, end_color);
-		} else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, file_info[i].name, end_color);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, file_info[i].name, end_color);
-				break;
-			case LEFTSPACEPAD:
-				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, file_info[i].name, end_color);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, file_info[i].name, end_color);
-				break;
-			default:
-				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, file_info[i].name, end_color);
-			}
-		}
-	} else {
-		if (no_eln) {
-			xprintf("%s%s%s", file_info[i].color,
-			    file_info[i].name, end_color);
-		} else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-					file_info[i].color, file_info[i].name, end_color);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].color, file_info[i].name, end_color);
-				break;
-			case LEFTSPACEPAD:
-				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].color, file_info[i].name, end_color);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].color, file_info[i].name, end_color);
-				break;
-			default:
-				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].color, file_info[i].name, end_color);
-			}
-/*					line_sz += (size_t)sprintf(line_buf + line_sz,
-				"%s%d%s %s%s%s", el_c, i + 1, df_c,
-			    file_info[i].color, file_info[i].name, df_c); */
-		}
-	}
-#else
-	if (no_eln) {
-		xprintf("%s%s%s", file_info[i].color, file_info[i].name, end_color);
-	} else {
-		switch(elnpad) {
-		case NOPAD:
-			xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-				file_info[i].color, file_info[i].name, end_color);
-			break;
-		case ZEROPAD:
-			xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
-				file_info[i].color, file_info[i].name, end_color);
-			break;
-		case LEFTSPACEPAD:
-			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
-				file_info[i].color, file_info[i].name, end_color);
-			break;
-		case RIGHTSPACEPAD:
-			xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
-				file_info[i].color, file_info[i].name, end_color);
-			break;
-		default:
-			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
-				file_info[i].color, file_info[i].name, end_color);
-		}
-	}
-#endif /* !_NO_ICONS */
-
-	if (file_info[i].dir && classify) {
-//				*(line_buf + line_sz++) = '/';
-		putchar('/');
-		if (file_info[i].filesn > 0 && files_counter) {
-			fputs(xitoa(file_info[i].filesn), stdout);
-/*					char *fc = xitoa(file_info[i].filesn);
-			strcat(line_buf + line_sz, xitoa(file_info[i].filesn));
-			line_sz += strlen(fc); */
-		}
-	}
-}
-
-static inline void
-print_entry_nocolor_light(int *ind_char, const int i, const int pad)
-{
-#ifndef _NO_ICONS
-	if (icons) {
-		if (no_eln)
-			xprintf("%s %s", file_info[i].icon, file_info[i].name);
-		else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s %s %s", el_c, i + 1, df_c,
-					file_info[i].icon, file_info[i].name);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s %s %s", el_c, pad, i + 1, df_c,
-					file_info[i].icon, file_info[i].name);
-				break;
-			case LEFTSPACEPAD:
-				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
-					file_info[i].icon, file_info[i].name);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s %s", el_c, pad, i + 1, df_c,
-					file_info[i].icon, file_info[i].name);
-				break;
-			default:
-				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
-					file_info[i].icon, file_info[i].name);
-			}
-		}
-	} else {
-		if (no_eln)
-			fputs(file_info[i].name, stdout);
-		else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
-				break;
-			case LEFTSPACEPAD:
-				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
-				break;
-			default:
-				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
-			}
-		}
-	}
-#else
-	if (no_eln)
-		fputs(file_info[i].name, stdout);
-	else {
-		switch(elnpad) {
-		case NOPAD:
-			xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
-			break;
-		case ZEROPAD:
-			xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
-			break;
-		case LEFTSPACEPAD:
-			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
-			break;
-		case RIGHTSPACEPAD:
-			xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
-			break;
-		default:
-			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
-		}
-	}
-#endif /* !_NO_ICONS */
-
-	if (classify) {
-		switch (file_info[i].type) {
-		case DT_DIR:
-			*ind_char = 0;
-			putchar('/');
-			if (file_info[i].filesn > 0 && files_counter)
-				fputs(xitoa(file_info[i].filesn), stdout);
-			break;
-
-		case DT_FIFO: putchar('|'); break;
-		case DT_LNK: putchar('@'); break;
-		case DT_SOCK: putchar('='); break;
-		case DT_UNKNOWN: putchar('?'); break;
-		default: *ind_char = 0; break;
-		}
-	}
-}
-
-/* Add spaces needed to equate the longest file name length */
-static inline void
-pad_filename_light(int *ind_char, const int i, const int pad)
-{
-	int cur_len = 0;
-#ifndef _NO_ICONS
-	if (elnpad == NOPAD) {
-		cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
-				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
-	} else {
-		cur_len = pad + 1 + (icons ? 3 : 0)	+ (int)file_info[i].len
-				+ (*ind_char ? 1 : 0);
-	}
-#else
-	if (elnpad == NOPAD) {
-		cur_len = (int)file_info[i].eln_n + 1
-				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
-	} else {
-		cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
-	}
-#endif
-
-	if (classify) {
-		if (file_info[i].dir)
-			cur_len++;
-		if (file_info[i].filesn > 0 && files_counter
-		&& file_info[i].ruser)
-			cur_len += DIGINUM((int)file_info[i].filesn);
-	}
-
-	int diff = (int)longest - cur_len;
-	xprintf("\x1b[%dC", diff + 1);
-}
-
-/* List files in the current working directory (global variable 'path').
- * Unlike list_dir(), however, this function uses no color and runs
- * neither stat() nor count_dir(), which makes it quite faster. Return
- * zero on success or one on error */
-static int
-list_dir_light(void)
-{
-#ifdef _LIST_SPEED
-	clock_t start = clock();
-#endif
-
-	DIR *dir;
-	struct dirent *ent;
-	int reset_pager = 0;
-	int close_dir = 1;
-
-	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
-		    strerror(errno));
-		close_dir = 0;
-		goto END;
-	}
-
-	set_events_checker();
-
-	errno = 0;
-	longest = 0;
-	register unsigned int n = 0;
-	unsigned int total_dents = 0, count = 0;
-
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
-	    sizeof(struct fileinfo));
-
-	while ((ent = readdir(dir))) {
-		char *ename = ent->d_name;
-		/* Skip self and parent directories */
-		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
-			continue;
-
-		/* Skip files according to FILTER */
-		if (filter) {
-			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
-				if (filter_rev)
-					continue;
-			} else if (!filter_rev) {
-				continue;
-			}
-		}
-
-		if (!show_hidden && *ename == '.')
-			continue;
-#if !defined(_DIRENT_HAVE_D_TYPE)
-		struct stat attr;
-		if (lstat(ename, &attr) == -1)
-			continue;
-		if (only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
-#else
-		if (only_dirs && ent->d_type != DT_DIR)
-#endif /* !_DIRENT_HAVE_D_TYPE */
-			continue;
-
-		if (count > ENTRY_N) {
-			count = 0;
-			total_dents = n + ENTRY_N;
-			file_info = xrealloc(file_info, (total_dents + 2) * sizeof(struct fileinfo));
-		}
-
-		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-
-		if (!unicode) {
-			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
-		} else {
-			xstrsncpy(file_info[n].name, ename, NAME_MAX);
-			file_info[n].len = wc_xstrlen(ename);
-		}
-
-		/* ################  */
-#if !defined(_DIRENT_HAVE_D_TYPE)
-		file_info[n].type = get_dt(attr.st_mode);
-#else
-		/* If type is unknown, we might be facing a file system not
-		 * supporting d_type, for example, loop devices. In this case,
-		 * try falling back to stat(3) */
-		if (ent->d_type == DT_UNKNOWN) {
-			struct stat a;
-			if (lstat(ename, &a) == -1)
-				continue;
-			file_info[n].type = get_dt(a.st_mode);
-		} else {
-			file_info[n].type = ent->d_type;
-		}
-#endif /* !_DIRENT_HAVE_D_TYPE */
-		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
-		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
-
-		file_info[n].inode = ent->d_ino;
-		file_info[n].linkn = 1;
-		file_info[n].size = 1;
-		file_info[n].color = (char *)NULL;
-		file_info[n].ext_color = (char *)NULL;
-		file_info[n].exec = 0;
-		file_info[n].ruser = 1;
-		file_info[n].filesn = 0;
-		file_info[n].time = 0;
-#ifndef _NO_ICONS
-		file_info[n].icon = DEF_FILE_ICON;
-		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
-#endif
-		switch (file_info[n].type) {
-
-		case DT_DIR:
-#ifndef _NO_ICONS
-			if (icons) {
-				get_dir_icon(file_info[n].name, (int)n);
-				/* If set from the color scheme file */
-				if (*dir_ico_c)
-					file_info[n].icon_color = dir_ico_c;
-			}
-#endif
-
-			files_counter
-			    ? (file_info[n].filesn = (count_dir(ename, NO_CPOP) - 2))
-			    : (file_info[n].filesn = 1);
-
-			if (file_info[n].filesn > 0) {
-				file_info[n].color = di_c;
-			} else if (file_info[n].filesn == 0) {
-				file_info[n].color = ed_c;
-			} else {
-				file_info[n].color = nd_c;
-#ifndef _NO_ICONS
-				file_info[n].icon = ICON_LOCK;
-				file_info[n].icon_color = YELLOW;
-#endif
-			}
-
-			break;
-
-		case DT_LNK:
-#ifndef _NO_ICONS
-			file_info[n].icon = ICON_LINK;
-#endif
-			file_info[n].color = ln_c;
-			break;
-
-		case DT_REG: file_info[n].color = fi_c; break;
-		case DT_SOCK: file_info[n].color = so_c; break;
-		case DT_FIFO: file_info[n].color = pi_c; break;
-		case DT_BLK: file_info[n].color = bd_c; break;
-		case DT_CHR: file_info[n].color = cd_c; break;
-		case DT_UNKNOWN: file_info[n].color = uf_c; break;
-		default: file_info[n].color = df_c; break;
-		}
-
-#ifndef _NO_ICONS
-		if (xargs.icons_use_file_color == 1 && icons)
-			file_info[n].icon_color = file_info[n].color;
-#endif
-
-		n++;
-		count++;
-	}
-
-	file_info[n].name = (char *)NULL;
-	files = (size_t)n;
-
-	if (n == 0) {
-		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
-		free(file_info);
-		goto END;
-	}
-
-	int pad = DIGINUM(files + 1);
-
-	if (sort)
-		ENTSORT(file_info, n, entrycmp);
-
-	int i;
-	size_t counter = 0;
-	size_t columns_n = 1;
-
-	/* Get the longest file name */
-	if (columned || long_view) {
-		int nn = (int)n;
-		get_longest_filename(nn, pad);
-	}
-
-				/* ########################
-				 * #    LONG VIEW MODE    #
-				 * ######################## */
-
-	if (long_view) {
-		print_long_mode(&counter, &reset_pager, pad);
-		goto END;
-	}
-
-				/* ########################
-				 * #   NORMAL VIEW MODE   #
-				 * ######################## */
-
-	int last_column = 0;
-
-/*	char *line_buf = (char *)xcalloc(term_cols * 10, sizeof(char));
-	size_t line_sz = 0; */
-
-	/* Get possible amount of columns for the dirlist screen */
-	if (!columned)
-		columns_n = 1;
-	else
-		get_columns(&columns_n);
-
-	int nn = (int)n;
-	size_t cur_cols = 0;
-	for (i = 0; i < nn; i++) {
-		if (max_files != UNSET && i == max_files)
-			break;
-
-		/* A basic pager for directories containing large amount of
-		 * files. What's missing? It only goes downwards. To go
-		 * backwards, use the terminal scrollback function */
-		if (pager) {
-			/* Run the pager only once all columns and rows fitting in
-			 * the screen are filled with the corresponding file names */
-			if (last_column && counter > columns_n * ((size_t)term_rows - 2))
-				if (run_pager((int)columns_n, &reset_pager, &i, &counter) == -1)
-					continue;
-
-			counter++;
-		}
-
-		if (++cur_cols == columns_n) {
-			cur_cols = 0;
-			last_column = 1;
-		} else {
-			last_column = 0;
-		}
-
-				/* #########################
-				 * #  PRINT CURRENT ENTRY  #
-				 * ######################### */
-
-		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
-		int ind_char = 1;
-
-		if (!classify)
-			ind_char = 0;
-
-		if (colorize)
-			print_entry_color_light(&ind_char, i, pad);
-		else
-			print_entry_nocolor_light(&ind_char, i, pad);
-
-		if (!last_column)
-			pad_filename_light(&ind_char, i, pad);
-		else
-			putchar('\n');
-	}
-
-	if (!last_column)
-		putchar('\n');
-
-END:
-	exit_code = post_listing(dir, close_dir, reset_pager);
-
-#ifdef _LIST_SPEED
-	clock_t end = clock();
-	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
-#endif
-
-	return exit_code;
-}
-
-static inline void
 print_entry_color(int *ind_char, const int i, const int pad)
 {
 	*ind_char = 0;
@@ -1270,6 +755,249 @@ pad_filename(int *ind_char, const int i, const int pad)
 	xprintf("\x1b[%dC", diff + 1);
 }
 
+static inline void
+print_entry_color_light(int *ind_char, const int i, const int pad)
+{
+	*ind_char = 0;
+	char *end_color = df_c;
+	if (file_info[i].dir)
+		end_color = dc_c;
+
+#ifndef _NO_ICONS
+	if (icons) {
+		if (xargs.icons_use_file_color == 1)
+			file_info[i].icon_color = file_info[i].color;
+
+		if (no_eln) {
+			xprintf("%s%s %s%s%s", file_info[i].icon_color,
+			    file_info[i].icon, file_info[i].color,
+			    file_info[i].name, end_color);
+		} else {
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			default:
+				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, file_info[i].name, end_color);
+			}
+		}
+	} else {
+		if (no_eln) {
+			xprintf("%s%s%s", file_info[i].color,
+			    file_info[i].name, end_color);
+		} else {
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+				break;
+			default:
+				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+					file_info[i].color, file_info[i].name, end_color);
+			}
+/*					line_sz += (size_t)sprintf(line_buf + line_sz,
+				"%s%d%s %s%s%s", el_c, i + 1, df_c,
+			    file_info[i].color, file_info[i].name, df_c); */
+		}
+	}
+#else
+	if (no_eln) {
+		xprintf("%s%s%s", file_info[i].color, file_info[i].name, end_color);
+	} else {
+		switch(elnpad) {
+		case NOPAD:
+			xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		case ZEROPAD:
+			xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		case LEFTSPACEPAD:
+			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		case RIGHTSPACEPAD:
+			xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+			break;
+		default:
+			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				file_info[i].color, file_info[i].name, end_color);
+		}
+	}
+#endif /* !_NO_ICONS */
+
+	if (file_info[i].dir && classify) {
+//				*(line_buf + line_sz++) = '/';
+		putchar('/');
+		if (file_info[i].filesn > 0 && files_counter) {
+			fputs(xitoa(file_info[i].filesn), stdout);
+/*					char *fc = xitoa(file_info[i].filesn);
+			strcat(line_buf + line_sz, xitoa(file_info[i].filesn));
+			line_sz += strlen(fc); */
+		}
+	}
+}
+
+static inline void
+print_entry_nocolor_light(int *ind_char, const int i, const int pad)
+{
+#ifndef _NO_ICONS
+	if (icons) {
+		if (no_eln)
+			xprintf("%s %s", file_info[i].icon, file_info[i].name);
+		else {
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s %s", el_c, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+				break;
+			default:
+				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, file_info[i].name);
+			}
+		}
+	} else {
+		if (no_eln)
+			fputs(file_info[i].name, stdout);
+		else {
+			switch(elnpad) {
+			case NOPAD:
+				xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+				break;
+			case ZEROPAD:
+				xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+				break;
+			case LEFTSPACEPAD:
+				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+				break;
+			case RIGHTSPACEPAD:
+				xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+				break;
+			default:
+				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			}
+		}
+	}
+#else
+	if (no_eln)
+		fputs(file_info[i].name, stdout);
+	else {
+		switch(elnpad) {
+		case NOPAD:
+			xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+			break;
+		case ZEROPAD:
+			xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			break;
+		case LEFTSPACEPAD:
+			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			break;
+		case RIGHTSPACEPAD:
+			xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+			break;
+		default:
+			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, file_info[i].name);
+		}
+	}
+#endif /* !_NO_ICONS */
+
+	if (classify) {
+		switch (file_info[i].type) {
+		case DT_DIR:
+			*ind_char = 0;
+			putchar('/');
+			if (file_info[i].filesn > 0 && files_counter)
+				fputs(xitoa(file_info[i].filesn), stdout);
+			break;
+
+		case DT_FIFO: putchar('|'); break;
+		case DT_LNK: putchar('@'); break;
+		case DT_SOCK: putchar('='); break;
+		case DT_UNKNOWN: putchar('?'); break;
+		default: *ind_char = 0; break;
+		}
+	}
+}
+
+/* Add spaces needed to equate the longest file name length */
+static inline void
+pad_filename_light(int *ind_char, const int i, const int pad)
+{
+	int cur_len = 0;
+#ifndef _NO_ICONS
+	if (elnpad == NOPAD) {
+		cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
+				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+	} else {
+		cur_len = pad + 1 + (icons ? 3 : 0)	+ (int)file_info[i].len
+				+ (*ind_char ? 1 : 0);
+	}
+#else
+	if (elnpad == NOPAD) {
+		cur_len = (int)file_info[i].eln_n + 1
+				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+	} else {
+		cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	}
+#endif
+
+	if (classify) {
+		if (file_info[i].dir)
+			cur_len++;
+		if (file_info[i].filesn > 0 && files_counter
+		&& file_info[i].ruser)
+			cur_len += DIGINUM((int)file_info[i].filesn);
+	}
+
+	int diff = (int)longest - cur_len;
+	xprintf("\x1b[%dC", diff + 1);
+}
+
 /* List files horizontally:
  * 1 AAA	2 AAB	3 AAC
  * 4 AAD	5 AAE	6 AAF */
@@ -1318,15 +1046,26 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
-		if (colorize)
-			print_entry_color(&ind_char, i, pad);
-		else
-			print_entry_nocolor(&ind_char, i, pad);
+		if (colorize) {
+			if (light_mode)
+				print_entry_color_light(&ind_char, i, pad);
+			else
+				print_entry_color(&ind_char, i, pad);
+		} else {
+			if (light_mode)
+				print_entry_nocolor_light(&ind_char, i, pad);
+			else
+				print_entry_nocolor(&ind_char, i, pad);
+		}
 
-		if (!*last_column)
-			pad_filename(&ind_char, i, pad);
-		else
+		if (!*last_column) {
+			if (light_mode)
+				pad_filename_light(&ind_char, i, pad);
+			else
+				pad_filename(&ind_char, i, pad);
+		} else {
 			putchar('\n');
+		}
 	}
 }
 
@@ -1401,16 +1140,304 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 
 		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
 
-		if (colorize)
-			print_entry_color(&ind_char, x, pad);
-		else
-			print_entry_nocolor(&ind_char, x, pad);
+		if (colorize) {
+			if (light_mode)
+				print_entry_color_light(&ind_char, x, pad);
+			else
+				print_entry_color_light(&ind_char, x, pad);
+		} else {
+			if (light_mode)
+				print_entry_nocolor_light(&ind_char, x, pad);
+			else
+				print_entry_nocolor_light(&ind_char, x, pad);
+		}
 
-		if (!*last_column)
-			pad_filename(&ind_char, x, pad);
+		if (!*last_column) {
+			if (light_mode)
+				pad_filename_light(&ind_char, x, pad);
+			else
+				pad_filename_light(&ind_char, x, pad);
+		} else {
+			putchar('\n');
+		}
+	}
+}
+
+/* List files in the current working directory (global variable 'path').
+ * Unlike list_dir(), however, this function uses no color and runs
+ * neither stat() nor count_dir(), which makes it quite faster. Return
+ * zero on success or one on error */
+static int
+list_dir_light(void)
+{
+#ifdef _LIST_SPEED
+	clock_t start = clock();
+#endif
+
+	DIR *dir;
+	struct dirent *ent;
+	int reset_pager = 0;
+	int close_dir = 1;
+
+	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+		    strerror(errno));
+		close_dir = 0;
+		goto END;
+	}
+
+	set_events_checker();
+
+	errno = 0;
+	longest = 0;
+	register unsigned int n = 0;
+	unsigned int total_dents = 0, count = 0;
+
+	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
+	    sizeof(struct fileinfo));
+
+	while ((ent = readdir(dir))) {
+		char *ename = ent->d_name;
+		/* Skip self and parent directories */
+		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
+			continue;
+
+		/* Skip files according to FILTER */
+		if (filter) {
+			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
+				if (filter_rev)
+					continue;
+			} else if (!filter_rev) {
+				continue;
+			}
+		}
+
+		if (!show_hidden && *ename == '.')
+			continue;
+#if !defined(_DIRENT_HAVE_D_TYPE)
+		struct stat attr;
+		if (lstat(ename, &attr) == -1)
+			continue;
+		if (only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
+#else
+		if (only_dirs && ent->d_type != DT_DIR)
+#endif /* !_DIRENT_HAVE_D_TYPE */
+			continue;
+
+		if (count > ENTRY_N) {
+			count = 0;
+			total_dents = n + ENTRY_N;
+			file_info = xrealloc(file_info, (total_dents + 2) * sizeof(struct fileinfo));
+		}
+
+		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
+
+		if (!unicode) {
+			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
+		} else {
+			xstrsncpy(file_info[n].name, ename, NAME_MAX);
+			file_info[n].len = wc_xstrlen(ename);
+		}
+
+		/* ################  */
+#if !defined(_DIRENT_HAVE_D_TYPE)
+		file_info[n].type = get_dt(attr.st_mode);
+#else
+		/* If type is unknown, we might be facing a file system not
+		 * supporting d_type, for example, loop devices. In this case,
+		 * try falling back to stat(3) */
+		if (ent->d_type == DT_UNKNOWN) {
+			struct stat a;
+			if (lstat(ename, &a) == -1)
+				continue;
+			file_info[n].type = get_dt(a.st_mode);
+		} else {
+			file_info[n].type = ent->d_type;
+		}
+#endif /* !_DIRENT_HAVE_D_TYPE */
+		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
+		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
+
+		file_info[n].inode = ent->d_ino;
+		file_info[n].linkn = 1;
+		file_info[n].size = 1;
+		file_info[n].color = (char *)NULL;
+		file_info[n].ext_color = (char *)NULL;
+		file_info[n].exec = 0;
+		file_info[n].ruser = 1;
+		file_info[n].filesn = 0;
+		file_info[n].time = 0;
+#ifndef _NO_ICONS
+		file_info[n].icon = DEF_FILE_ICON;
+		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+#endif
+		switch (file_info[n].type) {
+
+		case DT_DIR:
+#ifndef _NO_ICONS
+			if (icons) {
+				get_dir_icon(file_info[n].name, (int)n);
+				/* If set from the color scheme file */
+				if (*dir_ico_c)
+					file_info[n].icon_color = dir_ico_c;
+			}
+#endif
+
+			files_counter
+			    ? (file_info[n].filesn = (count_dir(ename, NO_CPOP) - 2))
+			    : (file_info[n].filesn = 1);
+
+			if (file_info[n].filesn > 0) {
+				file_info[n].color = di_c;
+			} else if (file_info[n].filesn == 0) {
+				file_info[n].color = ed_c;
+			} else {
+				file_info[n].color = nd_c;
+#ifndef _NO_ICONS
+				file_info[n].icon = ICON_LOCK;
+				file_info[n].icon_color = YELLOW;
+#endif
+			}
+
+			break;
+
+		case DT_LNK:
+#ifndef _NO_ICONS
+			file_info[n].icon = ICON_LINK;
+#endif
+			file_info[n].color = ln_c;
+			break;
+
+		case DT_REG: file_info[n].color = fi_c; break;
+		case DT_SOCK: file_info[n].color = so_c; break;
+		case DT_FIFO: file_info[n].color = pi_c; break;
+		case DT_BLK: file_info[n].color = bd_c; break;
+		case DT_CHR: file_info[n].color = cd_c; break;
+		case DT_UNKNOWN: file_info[n].color = uf_c; break;
+		default: file_info[n].color = df_c; break;
+		}
+
+#ifndef _NO_ICONS
+		if (xargs.icons_use_file_color == 1 && icons)
+			file_info[n].icon_color = file_info[n].color;
+#endif
+
+		n++;
+		count++;
+	}
+
+	file_info[n].name = (char *)NULL;
+	files = (size_t)n;
+
+	if (n == 0) {
+		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
+		free(file_info);
+		goto END;
+	}
+
+	int pad = DIGINUM(files + 1);
+
+	if (sort)
+		ENTSORT(file_info, n, entrycmp);
+
+//	int i;
+	size_t counter = 0;
+	size_t columns_n = 1;
+
+	/* Get the longest file name */
+	if (columned || long_view) {
+		int nn = (int)n;
+		get_longest_filename(nn, pad);
+	}
+
+				/* ########################
+				 * #    LONG VIEW MODE    #
+				 * ######################## */
+
+	if (long_view) {
+		print_long_mode(&counter, &reset_pager, pad);
+		goto END;
+	}
+
+				/* ########################
+				 * #   NORMAL VIEW MODE   #
+				 * ######################## */
+
+	int last_column = 0;
+
+/*	char *line_buf = (char *)xcalloc(term_cols * 10, sizeof(char));
+	size_t line_sz = 0; */
+
+	/* Get possible amount of columns for the dirlist screen */
+	if (!columned)
+		columns_n = 1;
+	else
+		get_columns(&columns_n);
+
+	if (listing_mode == VERTLIST) /* ls(1) like listing */
+		list_files_vert(&counter, &reset_pager, pad, columns_n, &last_column);
+	else
+		list_files_hor(&counter, &reset_pager, pad, columns_n, &last_column);
+
+/*	int nn = (int)n;
+	size_t cur_cols = 0;
+	for (i = 0; i < nn; i++) {
+		if (max_files != UNSET && i == max_files)
+			break;
+
+		// A basic pager for directories containing large amount of
+		// files. What's missing? It only goes downwards. To go
+		// backwards, use the terminal scrollback function
+		if (pager) {
+			// Run the pager only once all columns and rows fitting in
+			// the screen are filled with the corresponding file names
+			if (last_column && counter > columns_n * ((size_t)term_rows - 2))
+				if (run_pager((int)columns_n, &reset_pager, &i, &counter) == -1)
+					continue;
+
+			counter++;
+		}
+
+		if (++cur_cols == columns_n) {
+			cur_cols = 0;
+			last_column = 1;
+		} else {
+			last_column = 0;
+		}
+
+				// #########################
+				// #  PRINT CURRENT ENTRY  #
+				// #########################
+
+		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
+		int ind_char = 1;
+
+		if (!classify)
+			ind_char = 0;
+
+		if (colorize)
+			print_entry_color_light(&ind_char, i, pad);
+		else
+			print_entry_nocolor_light(&ind_char, i, pad);
+
+		if (!last_column)
+			pad_filename_light(&ind_char, i, pad);
 		else
 			putchar('\n');
-	}
+	} */
+
+	if (!last_column)
+		putchar('\n');
+
+END:
+	exit_code = post_listing(dir, close_dir, reset_pager);
+
+#ifdef _LIST_SPEED
+	clock_t end = clock();
+	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
+#endif
+
+	return exit_code;
 }
 
 /* List files in the current working directory. Uses file type colors
