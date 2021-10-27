@@ -982,6 +982,7 @@ external_arguments(int argc, char **argv)
 		{"int-vars", no_argument, 0, 42},
 		{"fzftab", no_argument, 0, 43},
 		{"warn-wrong-cmd", no_argument, 0, 44},
+		{"stderr", no_argument, 0, 45},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1156,8 +1157,9 @@ external_arguments(int argc, char **argv)
 			fprintf(stderr, _("%s: fzftab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 				exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
-		case 44:
-			xargs.warn_wrong_cmd = warn_wrong_cmd = 1; break;
+
+		case 44: xargs.warn_wrong_cmd = warn_wrong_cmd = 1; break;
+		case 45: xargs.stderr = 1; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1560,6 +1562,7 @@ unset_xargs(void)
 	xargs.sort = UNSET;
 	xargs.sort_reverse = UNSET;
 	xargs.splash = UNSET;
+	xargs.stderr = UNSET;
 	xargs.stealth_mode = UNSET;
 #ifndef _NO_SUGGESTIONS
 	xargs.suggestions = UNSET;

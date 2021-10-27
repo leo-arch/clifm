@@ -563,6 +563,7 @@ struct param {
 	int sort;
 	int sort_reverse;
 	int splash;
+	int stderr;
 	int stealth_mode;
 #ifndef _NO_SUGGESTIONS
 	int suggestions;
