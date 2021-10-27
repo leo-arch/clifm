@@ -34,6 +34,8 @@ _clifm ()
         --no-pager
         -h
         --help
+		-H
+		--horizontal-list
         -i
         --no-case-sensitive
         -I
@@ -100,19 +102,19 @@ _clifm ()
         --no-files-counter
         --no-follow-symlink
         --no-open-auto
+        --no-restore-last-path
+        --no-suggestions
         --no-tips
         --no-welcome-message
         --only-dirs
         --open
         --opener
         --print-sel
-        --restore-last-path
         --rl-vi-mode
         --share-selbox
         --sort-reverse
-        --no-suggestions
         --trash-as-rm
-	--warn-wrong-cmd
+		--warn-wrong-cmd
     )
 
     if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then
