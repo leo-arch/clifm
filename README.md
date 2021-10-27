@@ -154,7 +154,7 @@ To enjoy of any of the features tagged as NEW, clone this repository and install
 
 **NEW**: [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Specifics/#the-warning-prompt)
 
-**NEW**: `ls(1)`-like listing mode (default)
+**NEW**: [ls-like listing mode](https://github.com/leo-arch/clifm/wiki/Customization#files-listing)
 
 ---
 
