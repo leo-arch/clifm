@@ -528,10 +528,19 @@ mime_list_open(char **apps, char *file)
 
 	int ret = EXIT_FAILURE;
 	if (input && a) {
-		char *cmd[] = {n[a - 1], file, NULL};
-		if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-		E_NOSTDERR) == EXIT_SUCCESS)
-			ret = EXIT_SUCCESS;
+		if (strchr(n[a - 1], ' ')) {
+			char *cmd = (char *)xnmalloc(strlen(n[a - 1])
+					+ strlen(file) + 3, sizeof(char));
+			sprintf(cmd, "%s %s%c", n[a - 1], file, bg_proc ? '&' : 0);
+			if (launch_execle(cmd) == EXIT_SUCCESS)
+				ret = EXIT_SUCCESS;
+			free(cmd);
+		} else {
+			char *cmd[] = {n[a - 1], file, NULL};
+			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+			E_NOSTDERR) == EXIT_SUCCESS)
+				ret = EXIT_SUCCESS;
+		}
 		bg_proc = 0;
 	}
 
