@@ -538,12 +538,7 @@ mime_list_open(char **apps, char *file)
 	free(input);
 	free(n);
 
-	for (i = 0; apps[i]; i++)
-		free(apps[i]);
-	free(apps);
-	apps = (char **)NULL;
-
-	return EXIT_SUCCESS;
+	return ret;
 }
 
 int
@@ -594,14 +589,10 @@ mime_list_apps(char *filename)
 	if (!defs_fp)
 		goto FAIL;
 
-	int found = 0;
 	size_t line_size = 0;
 	char *line = (char *)NULL, *app = (char *)NULL;
 
 	while (getline(&line, &line_size, defs_fp) > 0) {
-		found = mime_match = 0; /* Global variable to tell mime_open()
-		if the application is associated to the file's extension or MIME
-		type */
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 
@@ -626,6 +617,7 @@ mime_list_apps(char *filename)
 		*tmp = '\0';
 		regex_t regex;
 
+		int found = 0;
 		if (ext && *p == 'E' && *(p + 1) == ':') {
 			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
 			&& regexec(&regex, ext, 0, NULL, 0) == 0)
@@ -709,7 +701,13 @@ mime_list_apps(char *filename)
 	free(ext);
 
 	int ret = mime_list_open(apps, name);
+
+	size_t i;
+	for (i = 0; apps[i]; i++)
+		free(apps[i]);
+	free(apps);
 	free(name);
+
 	return ret;
 
 FAIL:
