@@ -540,13 +540,29 @@ mime_list_open(char **apps, char *file)
 	int ret = EXIT_FAILURE;
 	if (input && a) {
 		if (strchr(n[a - 1], ' ')) {
-			char *cmd = (char *)xnmalloc(strlen(n[a - 1])
-					+ strlen(file) + 3, sizeof(char));
-			sprintf(cmd, "%s %s%c", n[a - 1], file, bg_proc ? '&' : 0);
+			char *phcmd = (char *)NULL;
+			char *cmd = (char *)NULL;
+
+			/* Look for the %f placeholder. If is there, replace it by
+			 * the corresponding filename (FILE) */
+			char *ph = strchr(n[a - 1], '%');
+			if (ph && *(ph + 1) == 'f' && (!*(ph + 2) || *(ph + 2) == ' '))
+				phcmd = replace_substr(n[a - 1], "%f", file);
+
+			if (phcmd) {
+				cmd = phcmd;
+			} else {
+				/* If no placeholder, append FILE at the end of the command */
+				cmd = (char *)xnmalloc(strlen(n[a - 1])
+						+ strlen(file) + 3, sizeof(char));
+				sprintf(cmd, "%s %s%c", n[a - 1], file, bg_proc ? '&' : 0);
+			}
+
 			if (launch_execle(cmd) == EXIT_SUCCESS)
 				ret = EXIT_SUCCESS;
 			free(cmd);
 		} else {
+			/* We have just a command name: no parameter, no placeholder */
 			char *cmd[] = {n[a - 1], file, NULL};
 			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
 			E_NOSTDERR) == EXIT_SUCCESS)
