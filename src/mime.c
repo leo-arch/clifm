@@ -476,6 +476,42 @@ get_file_ext(char *name)
 	return ext;
 }
 
+static char *
+get_user_input(int *a, const size_t *nn)
+{
+	char *input = (char *)NULL;
+	while (!input) {
+		input = rl_no_hist(_("Choose an application ('q' to quit): "));
+		if (!input)
+			continue;
+		if (!*input) {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+		if (*input == 'q' && !*(input + 1)) {
+			free(input);
+			input = (char *)NULL;
+			break;
+		}
+
+		if (*input < '1' && *input > '9') {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+
+		*a = atoi(input);
+		if (*a <= 0 || *a > (int)*nn) {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+	}
+
+	return input;
+}
+
 static int
 mime_list_open(char **apps, char *file)
 {
@@ -506,36 +542,8 @@ mime_list_open(char **apps, char *file)
 	for (i = 0; i < nn; i++)
 		printf("%s%zu%s %s\n", el_c, i + 1, df_c, n[i]);
 
-	char *input = (char *)NULL;
 	int a = 0;
-	while (!input) {
-		input = rl_no_hist(_("Choose an application ('q' to quit): "));
-		if (!input)
-			continue;
-		if (!*input) {
-			free(input);
-			input = (char *)NULL;
-			continue;
-		}
-		if (*input == 'q' && !*(input + 1)) {
-			free(input);
-			input = (char *)NULL;
-			break;
-		}
-
-		if (*input < '1' && *input > '9') {
-			free(input);
-			input = (char *)NULL;
-			continue;
-		}
-
-		a = atoi(input);
-		if (a <= 0 || a > (int)nn) {
-			free(input);
-			input = (char *)NULL;
-			continue;
-		}
-	}
+	char *input = get_user_input(&a, &nn);
 
 	int ret = EXIT_FAILURE;
 	if (input && a) {
@@ -577,8 +585,9 @@ mime_list_open(char **apps, char *file)
 	return ret;
 }
 
+/* */
 int
-mime_list_apps(char *filename)
+mime_open_with(char *filename)
 {
 	if (!filename || !mime_file)
 		return EXIT_FAILURE;

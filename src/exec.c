@@ -598,15 +598,6 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
-	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2]) {
-		if (comm[1]) {
-			mime_list_apps(comm[1]);
-			return EXIT_SUCCESS;
-		}
-		// PRINT USAGE
-		return EXIT_SUCCESS;
-	}
-
 	/*         ############### OPEN ##################     */
 	else if (*comm[0] == 'o' && (!comm[0][1] || strcmp(comm[0], "open") == 0)) {
 		if (!comm[1]) {
@@ -618,6 +609,19 @@ exec_cmd(char **comm)
 			exit_code = open_function(comm);
 		}
 		return exit_code;
+	}
+
+	/*      ############### OPEN WITH ##################     */
+	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2]) {
+		if (comm[1]) {
+			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+				puts(_(OW_USAGE));
+				return EXIT_SUCCESS;
+			}
+			return mime_open_with(comm[1]);
+		}
+		puts(_(OW_USAGE));
+		return EXIT_SUCCESS;
 	}
 
 	/*   ############## DIRECTORY JUMPER ##################     */
