@@ -348,7 +348,7 @@ const char *internal_cmds[] = {
 	    "msg", "messages",
 	    "n", "new",
 	    "net",
-	    "o", "open",
+	    "o", "open", "ow",
 	    "opener",
 	    "p", "pp", "pr", "prop",
 	    "path", "cwd",

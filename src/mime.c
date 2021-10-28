@@ -45,6 +45,7 @@
 #include "mime.h"
 #include "messages.h"
 #include "navigation.h"
+#include "readline.h"
 
 /* Get application associated to a given MIME file type or file extension.
  * Returns the first matching line in the MIME file or NULL if none is
@@ -444,6 +445,281 @@ mime_edit(char **args)
 	return exit_status;
 }
 
+static char *
+get_file_ext(char *name)
+{
+	char *ext = (char *)NULL;
+	char *f = strrchr(name, '/');
+	if (f) {
+		f++; /* Skip leading slash */
+		if (*f == '.')
+			f++; /* Skip leading dot if hidden */
+
+		char *e = strrchr(f, '.');
+		if (e) {
+			e++; /* Remove dot from extension */
+			ext = savestring(e, strlen(e));
+		}
+	}
+
+	return ext;
+}
+
+static int
+mime_list_open(char **apps, char *file)
+{
+	if (!apps || !file)
+		return EXIT_FAILURE;
+
+	char **n = (char **)NULL;
+	size_t nn = 0;
+
+	size_t i = 0, j = 0;
+	for ( ; apps[i]; i++) {
+		int rep = 0;
+		if (i > 0) {
+			for (j = 0; j < i; j++) {
+				if (*apps[i] == *apps[j] && strcmp(apps[i], apps[j]) == 0) {
+					rep = 1;
+					break;
+				}
+			}
+		}
+		if (rep)
+			continue;
+
+		n = (char **)xrealloc(n, (nn + 1) * sizeof(char *));
+		n[nn++] = apps[i];
+	}
+
+	for (i = 0; i < nn; i++)
+		printf("%s%zu%s %s\n", el_c, i + 1, df_c, n[i]);
+
+	char *input = (char *)NULL;
+	int a = 0;
+	while (!input) {
+		input = rl_no_hist(_("Choose an application ('q' to quit): "));
+		if (!input)
+			continue;
+		if (!*input) {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+		if (*input == 'q' && !*(input + 1)) {
+			free(input);
+			input = (char *)NULL;
+			break;
+		}
+
+		if (*input < '1' && *input > '9') {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+
+		a = atoi(input);
+		if (a <= 0 || a >= (int)nn) {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+	}
+
+	int ret = EXIT_FAILURE;
+	if (input && a) {
+		char *cmd[] = {n[a - 1], file, NULL};
+		if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+		E_NOSTDERR) == EXIT_SUCCESS)
+			ret = EXIT_SUCCESS;
+		bg_proc = 0;
+	}
+
+	free(input);
+	free(n);
+
+	for (i = 0; apps[i]; i++)
+		free(apps[i]);
+	free(apps);
+	apps = (char **)NULL;
+
+	return EXIT_SUCCESS;
+}
+
+int
+mime_list_apps(char *filename)
+{
+	if (!filename || !mime_file)
+		return EXIT_FAILURE;
+
+	char *name = (char *)NULL,
+		 *deq_file = (char *)NULL,
+		 *mime = (char *)NULL,
+		 *ext = (char *)NULL,
+		 **apps = (char **)NULL;
+
+	size_t appsn = 0;
+
+	if (strchr(filename, '\\')) {
+		deq_file = dequote_str(filename, 0);
+		name = realpath(deq_file, NULL);
+		free(deq_file);
+		deq_file = (char *)NULL;
+	}
+
+	if (!name)
+		name = realpath(filename, NULL);
+
+	if (!name)
+		return EXIT_FAILURE;
+
+	struct stat a;
+	if ((lstat(name, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR)
+	|| access(name, R_OK) == -1) {
+		free(name);
+		return EXIT_FAILURE;
+	}
+
+#ifndef _NO_MAGIC
+	mime = xmagic(name, MIME_TYPE);
+#else
+	mime = get_mime(name);
+#endif
+	if (!mime)
+		goto FAIL;
+
+	ext = get_file_ext(name);
+
+	FILE *defs_fp = fopen(mime_file, "r");
+	if (!defs_fp)
+		goto FAIL;
+
+	int found = 0;
+	size_t line_size = 0;
+	char *line = (char *)NULL, *app = (char *)NULL;
+
+	while (getline(&line, &line_size, defs_fp) > 0) {
+		found = mime_match = 0; /* Global variable to tell mime_open()
+		if the application is associated to the file's extension or MIME
+		type */
+		if (*line == '#' || *line == '[' || *line == '\n')
+			continue;
+
+		char *p = line;
+		if (!(flags & GUI)) {
+			if (*p != '!' || *(p + 1) != 'X' || *(p + 2) != ':')
+				continue;
+			else
+				p += 3;
+		} else {
+			if (*p == '!' && *(p + 1) == 'X')
+				continue;
+			if (*p == 'X' && *(p + 1) == ':')
+				p += 2;
+		}
+
+		char *tmp = strchr(p, '=');
+		if (!tmp || !*(tmp + 1))
+			continue;
+
+		/* Truncate line in '=' to get only the ext/mimetype pattern/string */
+		*tmp = '\0';
+		regex_t regex;
+
+		if (ext && *p == 'E' && *(p + 1) == ':') {
+			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
+			&& regexec(&regex, ext, 0, NULL, 0) == 0)
+				found = 1;
+		} else if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
+		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
+			found = 1;
+		}
+
+		regfree(&regex);
+
+		if (!found)
+			continue;
+
+		tmp++; /* We don't want the '=' char */
+
+		size_t tmp_len = strlen(tmp);
+		app = (char *)xrealloc(app, (tmp_len + 1) * sizeof(char));
+
+		while (*tmp) {
+			size_t app_len = 0;
+			/* Split the appplications line into substrings, if
+			 * any */
+			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
+			&& *tmp != '"')
+				app[app_len++] = *(tmp++);
+
+			while (*tmp == ' ') /* Remove leading spaces */
+				tmp++;
+
+			if (app_len) {
+				app[app_len] = '\0';
+				/* Check each application existence */
+				char *file_path = (char *)NULL;
+				/* If app contains spaces, the command to check is
+				 * the string before the first space */
+				char *ret = strchr(app, ' ');
+				if (ret)
+					*ret = '\0';
+				if (*app == '~') {
+					file_path = tilde_expand(app);
+					if (access(file_path, X_OK) != 0) {
+						free(file_path);
+						file_path = (char *)NULL;
+					}
+				} else if (*app == '/') {
+					if (access(app, X_OK) == 0) {
+						file_path = app;
+					}
+				} else {
+					file_path = get_cmd_path(app);
+				}
+				if (ret)
+					*ret = ' ';
+
+				if (file_path) {
+					/* If the app exists, break the loops and
+					 * return it */
+					if (*app != '/') {
+						free(file_path);
+						file_path = (char *)NULL;
+					}
+					apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
+					apps[appsn++] = savestring(app, strlen(app));
+				} else {
+					continue;
+				}
+			}
+
+			tmp++;
+		}
+	}
+
+	apps[appsn] = (char *)NULL;
+
+	free(line);
+	fclose(defs_fp);
+
+	free(app);
+	free(mime);
+	free(ext);
+
+	int ret = mime_list_open(apps, name);
+	free(name);
+	return ret;
+
+FAIL:
+	free(mime);
+	free(ext);
+	free(name);
+
+	return EXIT_FAILURE;
+}
+
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
  * former providing MIME info about the corresponding file and the
@@ -598,22 +874,23 @@ mime_open(char **args)
 		printf(_("MIME type: %s\n"), mime);
 
 	/* Get file extension, if any */
-	char *ext = (char *)NULL;
+/*	char *ext = (char *)NULL;
 	char *filename = strrchr(file_path, '/');
 	if (filename) {
-		filename++; /* Remove leading slash */
+		filename++; // Remove leading slash
 		if (*filename == '.')
-			filename++; /* Skip leading dot if hidden */
+			filename++; // Skip leading dot if hidden
 
 		char *ext_tmp = strrchr(filename, '.');
 		if (ext_tmp) {
-			ext_tmp++; /* Remove dot from extension */
+			ext_tmp++; // Remove dot from extension
 			ext = savestring(ext_tmp, strlen(ext_tmp));
 			ext_tmp = (char *)NULL;
 		}
 
 		filename = (char *)NULL;
-	}
+	} */
+	char *ext = get_file_ext(file_path);
 
 	if (info)
 		printf(_("Extension: %s\n"), ext ? ext : "None");

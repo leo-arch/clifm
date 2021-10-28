@@ -695,7 +695,7 @@ is_internal_f(const char *restrict cmd)
 	    "md", "mkdir",
 	    "mf",
 	    "n", "new",
-	    "o", "open",
+	    "o", "open", "ow",
 	    "p", "pp", "pr", "prop",
 		"paste",
 	    "pin",

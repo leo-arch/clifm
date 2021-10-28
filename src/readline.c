@@ -54,7 +54,6 @@ typedef char *rl_cpvfunc_t;
 #include "keybinds.h"
 #include "navigation.h"
 #include "readline.h"
-
 #include "tabcomp.h"
 
 #ifndef _NO_SUGGESTIONS

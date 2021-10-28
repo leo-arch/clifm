@@ -270,7 +270,7 @@ is_internal_c(char *restrict cmd)
 	    "msg", "messages",
 	    "n", "new",
 	    "net",
-	    "o", "open",
+	    "o", "open", "ow",
 	    "opener",
 	    "p", "pp", "pr", "prop",
 	    "path", "cwd",

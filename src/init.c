@@ -1155,11 +1155,11 @@ external_arguments(int argc, char **argv)
 #else
 		case 43:
 			fprintf(stderr, _("%s: fzftab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-				exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
 
 		case 44: xargs.warn_wrong_cmd = warn_wrong_cmd = 1; break;
-		case 45: xargs.stderr = 1; break;
+//		case 45: xargs.stderr = 1; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1562,7 +1562,7 @@ unset_xargs(void)
 	xargs.sort = UNSET;
 	xargs.sort_reverse = UNSET;
 	xargs.splash = UNSET;
-	xargs.stderr = UNSET;
+//	xargs.stderr = UNSET;
 	xargs.stealth_mode = UNSET;
 #ifndef _NO_SUGGESTIONS
 	xargs.suggestions = UNSET;

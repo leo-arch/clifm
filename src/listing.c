@@ -1010,8 +1010,8 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 	size_t cur_cols = 0;
 	int i;
 	for (i = 0; i < nn; i++) {
-		// Determine if current entry is in the last column, in which
-		// case a new line char will be appended
+		/* Determine if current entry is in the last column, in which
+		 * case a new line char will be appended */
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			*last_column = 1;
@@ -1026,9 +1026,9 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 		if (max_files != UNSET && i == max_files)
 			break;
 
-				// ##########################
-				// #  MAS: A SIMPLE PAGER   #
-				// ##########################
+				/* ##########################
+				 * #  MAS: A SIMPLE PAGER   #
+				 * ########################## */
 
 		if (pager) {
 			// Run the pager only once all columns and rows fitting in
@@ -1040,9 +1040,9 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 			(*counter)++;
 		}
 
-			// #################################
-			// #    PRINT THE CURRENT ENTRY    #
-			// #################################
+			/* #################################
+			 * #    PRINT THE CURRENT ENTRY    #
+			 * ################################# */
 
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
@@ -1097,8 +1097,8 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 		if (xx > rows)
 			break;
 
-		// Determine if current entry is in the last column, in which
-		// case a new line char will be appended
+		/* Determine if current entry is in the last column, in which
+		 * case a new line char will be appended */
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			*last_column = 1;
@@ -1120,13 +1120,13 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 		if (max_files != UNSET && x == max_files)
 			break;
 
-				// ##########################
-				// #  MAS: A SIMPLE PAGER   #
-				// ##########################
+				/* ##########################
+				 * #  MAS: A SIMPLE PAGER   #
+				 * ########################## */
 
 		if (pager) {
-			// Run the pager only once all columns and rows fitting in
-			// the screen are filled with the corresponding file names
+			/* Run the pager only once all columns and rows fitting in
+			 * the screen are filled with the corresponding file names */
 			if (*last_column && *counter > columns_n * ((size_t)term_rows - 2))
 				if (run_pager((int)columns_n, &*reset_pager, &x, &*counter) == -1)
 					continue;
@@ -1134,9 +1134,9 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 			(*counter)++;
 		}
 
-			// #################################
-			// #    PRINT THE CURRENT ENTRY    #
-			// #################################
+			/* #################################
+			 * #    PRINT THE CURRENT ENTRY    #
+			 * ################################# */
 
 		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
 
@@ -1166,7 +1166,7 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
- * zero on success or one on error */
+ * zero on success and one on error */
 static int
 list_dir_light(void)
 {

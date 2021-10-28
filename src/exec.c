@@ -598,6 +598,15 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
+	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2]) {
+		if (comm[1]) {
+			mime_list_apps(comm[1]);
+			return EXIT_SUCCESS;
+		}
+		// PRINT USAGE
+		return EXIT_SUCCESS;
+	}
+
 	/*         ############### OPEN ##################     */
 	else if (*comm[0] == 'o' && (!comm[0][1] || strcmp(comm[0], "open") == 0)) {
 		if (!comm[1]) {

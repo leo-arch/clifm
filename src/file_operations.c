@@ -74,8 +74,8 @@ open_file(char *file)
 
 	if (opener) {
 		char *cmd[] = {opener, file, NULL};
-		if (launch_execve(cmd, FOREGROUND,
-		xargs.stderr ? E_NOFLAG : E_NOSTDERR) != EXIT_SUCCESS)
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+//		(xargs.stderr == 1) ? E_NOFLAG : E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	} else {
 #ifndef _NO_LIRA
