@@ -47,6 +47,26 @@
 #include "navigation.h"
 #include "readline.h"
 
+/* Move the pointer in LINE immediately after !X or X */
+static char *
+skip_line_prefix(char *line)
+{
+	char *p = line;
+	if (!(flags & GUI)) {
+		if (*p != '!' || *(p + 1) != 'X' || *(p + 2) != ':')
+			return (char *)NULL;
+		else
+			p += 3;
+	} else {
+		if (*p == '!' && *(p + 1) == 'X')
+			return (char *)NULL;
+		if (*p == 'X' && *(p + 1) == ':')
+			p += 2;
+	}
+
+	return p;
+}
+
 /* Get application associated to a given MIME file type or file extension.
  * Returns the first matching line in the MIME file or NULL if none is
  * found */
@@ -82,18 +102,9 @@ get_app(const char *mime, const char *ext)
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 
-		char *p = line;
-		if (!(flags & GUI)) {
-			if (*p != '!' || *(p + 1) != 'X' || *(p + 2) != ':')
-				continue;
-			else
-				p += 3;
-		} else {
-			if (*p == '!' && *(p + 1) == 'X')
-				continue;
-			if (*p == 'X' && *(p + 1) == ':')
-				p += 2;
-		}
+		char *p = skip_line_prefix(line);
+		if (!p)
+			continue;
 
 		char *tmp = strchr(p, '=');
 		if (!tmp || !*(tmp + 1))
@@ -605,18 +616,9 @@ mime_list_apps(char *filename)
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 
-		char *p = line;
-		if (!(flags & GUI)) {
-			if (*p != '!' || *(p + 1) != 'X' || *(p + 2) != ':')
-				continue;
-			else
-				p += 3;
-		} else {
-			if (*p == '!' && *(p + 1) == 'X')
-				continue;
-			if (*p == 'X' && *(p + 1) == ':')
-				p += 2;
-		}
+		char *p = skip_line_prefix(line);
+		if (!p)
+			continue;
 
 		char *tmp = strchr(p, '=');
 		if (!tmp || !*(tmp + 1))
