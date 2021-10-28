@@ -526,7 +526,7 @@ mime_list_open(char **apps, char *file)
 	for ( ; apps[i]; i++) {
 		int rep = 0;
 		if (i > 0) {
-			/* Do not list repeated entries */
+			/* Do not list duplicated entries */
 			for (j = 0; j < i; j++) {
 				if (*apps[i] == *apps[j] && strcmp(apps[i], apps[j]) == 0) {
 					rep = 1;
@@ -541,14 +541,21 @@ mime_list_open(char **apps, char *file)
 		n[nn++] = apps[i];
 	}
 
+	int pad = DIGINUM(nn + 1);
 	for (i = 0; i < nn; i++)
-		printf("%s%zu%s %s\n", el_c, i + 1, df_c, n[i]);
+		printf("%s%*zu%s %s\n", el_c, pad, i + 1, df_c, n[i]);
 
 	int a = 0;
 	char *input = get_user_input(&a, &nn);
 
 	int ret = EXIT_FAILURE;
 	if (input && a) {
+		char *qfile = escape_str(file);
+		if (!qfile) {
+			fprintf(stderr, _("%s: %s: Error escaping file name\n"),
+				PROGRAM_NAME, file);
+			goto END;
+		}
 		if (strchr(n[a - 1], ' ')) {
 			char *phcmd = (char *)NULL;
 			char *cmd = (char *)NULL;
@@ -557,15 +564,15 @@ mime_list_open(char **apps, char *file)
 			 * the corresponding filename (FILE) */
 			char *ph = strchr(n[a - 1], '%');
 			if (ph && *(ph + 1) == 'f' && (!*(ph + 2) || *(ph + 2) == ' '))
-				phcmd = replace_substr(n[a - 1], "%f", file);
+				phcmd = replace_substr(n[a - 1], "%f", qfile);
 
 			if (phcmd) {
 				cmd = phcmd;
 			} else {
 				/* If no placeholder, append FILE at the end of the command */
 				cmd = (char *)xnmalloc(strlen(n[a - 1])
-						+ strlen(file) + 3, sizeof(char));
-				sprintf(cmd, "%s %s%c", n[a - 1], file, bg_proc ? '&' : 0);
+						+ strlen(qfile) + 3, sizeof(char));
+				sprintf(cmd, "%s %s%c", n[a - 1], qfile, bg_proc ? '&' : 0);
 			}
 
 			if (launch_execle(cmd) == EXIT_SUCCESS)
@@ -573,14 +580,16 @@ mime_list_open(char **apps, char *file)
 			free(cmd);
 		} else {
 			/* We have just a command name: no parameter, no placeholder */
-			char *cmd[] = {n[a - 1], file, NULL};
+			char *cmd[] = {n[a - 1], qfile, NULL};
 			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
 			E_NOSTDERR) == EXIT_SUCCESS)
 				ret = EXIT_SUCCESS;
 		}
+		free(qfile);
 		bg_proc = 0;
 	}
 
+END:
 	free(input);
 	free(n);
 
