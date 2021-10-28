@@ -476,6 +476,7 @@ get_file_ext(char *name)
 	return ext;
 }
 
+/* Get user input for the 'open with' function */
 static char *
 get_user_input(int *a, const size_t *nn)
 {
@@ -525,6 +526,7 @@ mime_list_open(char **apps, char *file)
 	for ( ; apps[i]; i++) {
 		int rep = 0;
 		if (i > 0) {
+			/* Do not list repeated entries */
 			for (j = 0; j < i; j++) {
 				if (*apps[i] == *apps[j] && strcmp(apps[i], apps[j]) == 0) {
 					rep = 1;
@@ -585,7 +587,8 @@ mime_list_open(char **apps, char *file)
 	return ret;
 }
 
-/* */
+/* Display available opening applications for FILENAME, get user input,
+ * and open the file */
 int
 mime_open_with(char *filename)
 {
@@ -710,8 +713,7 @@ mime_open_with(char *filename)
 					*ret = ' ';
 
 				if (file_path) {
-					/* If the app exists, break the loops and
-					 * return it */
+					/* If the app exists, store it into the APPS array */
 					if (*app != '/') {
 						free(file_path);
 						file_path = (char *)NULL;
