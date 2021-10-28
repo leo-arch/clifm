@@ -580,7 +580,7 @@ mime_list_open(char **apps, char *file)
 			free(cmd);
 		} else {
 			/* We have just a command name: no parameter, no placeholder */
-			char *cmd[] = {n[a - 1], qfile, NULL};
+			char *cmd[] = {n[a - 1], file, NULL};
 			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
 			E_NOSTDERR) == EXIT_SUCCESS)
 				ret = EXIT_SUCCESS;
