@@ -519,7 +519,7 @@ mime_list_open(char **apps, char *file)
 		}
 
 		a = atoi(input);
-		if (a <= 0 || a >= (int)nn) {
+		if (a <= 0 || a > (int)nn) {
 			free(input);
 			input = (char *)NULL;
 			continue;
