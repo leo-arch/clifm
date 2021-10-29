@@ -596,10 +596,257 @@ END:
 	return ret;
 }
 
+char **
+mime_open_with_tab(char *filename, const char *prefix)
+{
+	if (!filename || !mime_file)
+		return (char **)NULL;
+
+	char *name = (char *)NULL,
+		 *deq_file = (char *)NULL,
+		 *mime = (char *)NULL,
+		 *ext = (char *)NULL,
+		 **apps = (char **)NULL;
+
+	int free_name = 1;
+	if (*filename == '~') {
+		char *ename = tilde_expand(filename);
+		if (!ename)
+			return (char **)NULL;
+		name = ename;
+		free_name = 0;
+	}
+
+	if (strchr(name ? name : filename, '\\')) {
+		deq_file = dequote_str(name ? name : filename, 0);
+		name = realpath(deq_file, NULL);
+		free(deq_file);
+		deq_file = (char *)NULL;
+	}
+
+	if (!name)
+		name = realpath(filename, NULL);
+
+	if (!name)
+		goto FAIL;
+
+	struct stat a;
+	if ((lstat(name, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR))
+		goto FAIL;
+
+#ifndef _NO_MAGIC
+	mime = xmagic(name, MIME_TYPE);
+#else
+	mime = get_mime(name);
+#endif
+	if (!mime)
+		goto FAIL;
+
+	ext = get_file_ext(name);
+
+	FILE *defs_fp = fopen(mime_file, "r");
+	if (!defs_fp)
+		goto FAIL;
+
+	size_t appsn = 1;
+
+	/* This is the first element in the matches array, which contains
+	 * the already matched string */
+	apps = (char **)xnmalloc(appsn + 1, sizeof(char *));
+	if (prefix) {
+		apps[0] = savestring(prefix, strlen(prefix));
+	} else {
+		apps[0] = (char *)xnmalloc(1, sizeof(char));
+		*apps[0] = '\0';
+	}
+
+	size_t prefix_len = 0;
+	if (prefix)
+		prefix_len = strlen(prefix);
+
+	size_t line_size = 0;
+	char *line = (char *)NULL, *app = (char *)NULL;
+
+	while (getline(&line, &line_size, defs_fp) > 0) {
+		if (*line == '#' || *line == '[' || *line == '\n')
+			continue;
+
+		char *p = skip_line_prefix(line);
+		if (!p)
+			continue;
+
+		char *tmp = strchr(p, '=');
+		if (!tmp || !*(tmp + 1))
+			continue;
+
+		/* Truncate line in '=' to get only the ext/mimetype pattern/string */
+		*tmp = '\0';
+		regex_t regex;
+
+		int found = 0;
+		if (ext && *p == 'E' && *(p + 1) == ':') {
+			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
+			&& regexec(&regex, ext, 0, NULL, 0) == 0)
+				found = 1;
+		} else if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
+		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
+			found = 1;
+		}
+
+		regfree(&regex);
+
+		if (!found)
+			continue;
+
+		tmp++; /* We don't want the '=' char */
+
+		size_t tmp_len = strlen(tmp);
+		app = (char *)xrealloc(app, (tmp_len + 1) * sizeof(char));
+
+		while (*tmp) {
+			size_t app_len = 0;
+			/* Split the appplications line into substrings, if
+			 * any */
+			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
+			&& *tmp != '"')
+				app[app_len++] = *(tmp++);
+
+			while (*tmp == ' ') /* Remove leading spaces */
+				tmp++;
+
+			if (app_len) {
+				if (prefix) {
+					if (strncmp(prefix, app, prefix_len) != 0)
+						continue;
+				}
+				app[app_len] = '\0';
+				/* Check each application existence */
+				char *file_path = (char *)NULL;
+				/* If app contains spaces, the command to check is
+				 * the string before the first space */
+				char *ret = strchr(app, ' ');
+				if (ret)
+					*ret = '\0';
+				if (*app == '~') {
+					file_path = tilde_expand(app);
+					if (access(file_path, X_OK) != 0) {
+						free(file_path);
+						file_path = (char *)NULL;
+					}
+				} else if (*app == '/') {
+					if (access(app, X_OK) == 0) {
+						file_path = app;
+					}
+				} else {
+					file_path = get_cmd_path(app);
+				}
+				if (ret)
+					*ret = ' ';
+
+				if (file_path) {
+					/* If the app exists, store it into the APPS array */
+					if (*app != '/') {
+						free(file_path);
+						file_path = (char *)NULL;
+					}
+					apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
+					apps[appsn++] = savestring(app, strlen(app));
+				} else {
+					continue;
+				}
+			}
+
+			tmp++;
+		}
+	}
+
+	apps[appsn] = (char *)NULL;
+
+	/* If only one match */
+	if (appsn == 2) {
+		apps[0] = (char *)xrealloc(apps[0], (strlen(apps[1]) + 1) * sizeof(char));
+		strcpy(apps[0], apps[1]);
+		free(apps[1]);
+		apps[1] = (char *)NULL;
+	}
+
+	free(line);
+	fclose(defs_fp);
+
+	free(app);
+	free(mime);
+	free(ext);
+	free(name);
+
+	return apps;
+
+FAIL:
+	free(mime);
+	free(ext);
+	if (free_name)
+		free(name);
+
+	return (char **)NULL;
+}
+
+static int
+join_and_run(char **args, char *name)
+{
+	/* Just an aplication name */
+	if (!args[1]) {
+		char *cmd[] = {args[0], name, NULL};
+		int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+		E_NOSTDERR);
+		if (ret == EXIT_SUCCESS)
+			return EXIT_SUCCESS;
+		return EXIT_FAILURE;
+	}
+
+	char *ename = escape_str(name);
+	if (!ename)
+		return EXIT_FAILURE;
+
+	name = ename;
+
+	/* We have an application name plus at least one parameter */
+	size_t l = strlen(args[0]) + 2;
+	char *cmd = (char *)xnmalloc(l, sizeof(char));
+	strcpy(cmd, args[0]);
+	cmd[l - 2] = ' ';
+	cmd[l - 1] = '\0';
+
+	size_t i = 1;
+	for (; args[i]; i++) {
+		l += strlen(args[i]) + 2;
+		cmd = (char *)xrealloc(cmd, l * sizeof(char));
+		strcat(cmd, args[i]);
+		strcat(cmd, " ");
+	}
+	char *ph = strchr(cmd, '%');
+	int ret = EXIT_FAILURE;
+
+	if (ph && *(ph + 1) == 'f') {
+		char *phcmd = replace_substr(cmd, "%f", name);
+		ret = launch_execle(phcmd);
+		free(phcmd);
+	} else {
+		cmd = (char *)xrealloc(cmd, (l + strlen(name) + 1) * sizeof(char));
+		strcat(cmd, name);
+		ret = launch_execle(cmd);
+	}
+
+	free(cmd);
+	free(name);
+
+	if (ret == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+	return EXIT_FAILURE;
+}
+
 /* Display available opening applications for FILENAME, get user input,
  * and open the file */
 int
-mime_open_with(char *filename)
+mime_open_with(char *filename, char **args)
 {
 	if (!filename || !mime_file)
 		return EXIT_FAILURE;
@@ -619,6 +866,14 @@ mime_open_with(char *filename)
 		deq_file = (char *)NULL;
 	}
 
+	if ((name && *name == '~') || *filename == '~') {
+		char *ename = tilde_expand(name ? name : filename);
+		if (!ename)
+			goto FAIL;
+		free(name);
+		name = ename;
+	}
+
 	if (!name)
 		name = realpath(filename, NULL);
 
@@ -630,6 +885,12 @@ mime_open_with(char *filename)
 	|| access(name, R_OK) == -1) {
 		free(name);
 		return EXIT_FAILURE;
+	}
+
+	if (args) {
+		int ret = join_and_run(args, name);
+		free(name);
+		return ret;
 	}
 
 #ifndef _NO_MAGIC
@@ -918,23 +1179,6 @@ mime_open(char **args)
 	if (info)
 		printf(_("MIME type: %s\n"), mime);
 
-	/* Get file extension, if any */
-/*	char *ext = (char *)NULL;
-	char *filename = strrchr(file_path, '/');
-	if (filename) {
-		filename++; // Remove leading slash
-		if (*filename == '.')
-			filename++; // Skip leading dot if hidden
-
-		char *ext_tmp = strrchr(filename, '.');
-		if (ext_tmp) {
-			ext_tmp++; // Remove dot from extension
-			ext = savestring(ext_tmp, strlen(ext_tmp));
-			ext_tmp = (char *)NULL;
-		}
-
-		filename = (char *)NULL;
-	} */
 	char *ext = get_file_ext(file_path);
 
 	if (info)

@@ -618,7 +618,7 @@ exec_cmd(char **comm)
 				puts(_(OW_USAGE));
 				return EXIT_SUCCESS;
 			}
-			return mime_open_with(comm[1]);
+			return mime_open_with(comm[1], comm[2] ? comm + 2 : NULL);
 		}
 		puts(_(OW_USAGE));
 		return EXIT_SUCCESS;
