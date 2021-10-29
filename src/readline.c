@@ -1416,11 +1416,12 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		/* #### OPEN WITH #### */
 		if (rl_end > 4 && *rl_line_buffer == 'o' && rl_line_buffer[1] == 'w'
 		&& rl_line_buffer[2] == ' ' && rl_line_buffer[3]
 		&& rl_line_buffer[3] != ' ') {
 			char *p = rl_line_buffer + 3;
-			char *s = strchr(p, ' ');
+			char *s = strrchr(p, ' ');
 			if (s)
 				*s = '\0';
 			matches = mime_open_with_tab(p, text);

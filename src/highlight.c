@@ -262,6 +262,9 @@ recolorize_line(void)
 	i = point ? 1 : 0;
 	size_t l = 0;
 
+//	if (!s[i])
+//		goto EXIT;
+
 	char t[PATH_MAX];
 	for (;ss[i]; i++) {
 		rl_highlight(ss, i, SET_COLOR);
@@ -288,6 +291,7 @@ recolorize_line(void)
 		sleep(1); */
 	}
 
+//EXIT:
 	/* Unhide the cursor */
 	fputs("\x1b[?25h", stdout);
 	free(ss);
