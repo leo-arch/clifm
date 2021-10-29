@@ -1835,6 +1835,7 @@ help_function(void)
  n, new FILE DIR/ ...n\n\
  net [NAME] [edit] [m, mount NAME] [u, unmount NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
+ ow [ELN/FILE] (open with ...)\n\
  opener [default] [APPLICATION]\n\
  p, pr, pp, prop [ELN/FILE ... n]\n\
  path, cwd\n\
