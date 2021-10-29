@@ -667,6 +667,9 @@ If you want to run the program in the background, simply add the ampersand chara
 .sp
 If the file to be opened is an archive/compressed file, the archive function (see the \fIad\fR command above) will be executed instead.
 .TP
+.B ow \fRELN/FILE [APPLICATION]
+Print a list of available applications associated to _ELN/FILENAME (either via its MIME type or its file extension), allowing the user to choose one of these applications, and then open the file with the selected application. In simple words, this is what in most GUI file managers is called \fBOpen with...\fR This command supports TAB completion: just type "\fIow filename \fR", then press TAB, and those applications able to open FILENAME will be listed.
+.TP
 .B opener \fR[default] [APPLICATION]
 with no argument, prints the currently used resource opener (by default, \fILira\fR, CliFM's built\-in opener). Otherwise, set APPLICATION as opener or, if 'default' is passed instead, use \fILira\fR. 
 .TP
