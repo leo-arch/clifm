@@ -376,8 +376,18 @@ my_rl_getc(FILE *stream)
 			while (pp[--plen] == ' ')
 				pp[plen] = '\0';
 		}
-		rl_replace_line(pp, 1);
-		rl_point = rl_end = (int)strlen(pp);
+		if (is_number(pp)) {
+			int ipp = atoi(pp);
+			if (ipp > 0 && ipp < (int)files) {
+				rl_replace_line(file_info[ipp - 1].name, 1);
+				rl_point = rl_end = (int)strlen(file_info[ipp - 1].name);
+			} else {
+				return (EOF);
+			}
+		} else {
+			rl_replace_line(pp, 1);
+			rl_point = rl_end = (int)strlen(pp);
+		}
 		rl_redisplay();
 		xrename = 0;
 	}
@@ -1377,6 +1387,9 @@ my_rl_completion(const char *text, int start, int end)
 			rl_attempted_completion_over = 1;
 			return (char **)NULL;
 		} */
+
+		/* If the xrename function (for the m command) is running
+		 * only filenames completion is available */
 
 		/* History cmd completion */
 		if (!_xrename && *text == '!') {

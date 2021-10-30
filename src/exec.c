@@ -79,7 +79,7 @@ get_new_name(void)
 
 	char m[NAME_MAX];
 	sprintf(m, "Enter new name ('q' to quit)\n%s>%s ", mi_c, tx_c);
-	while (!input) {
+	while (!input && _xrename) {
 		input = readline(m);
 		if (!input)
 			continue;
@@ -122,6 +122,12 @@ run_and_refresh(char **cmd)
 	}
 
 	if (xrename) {
+		if (is_number(cmd[1])) {
+			fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, cmd[1]);
+			free(tmp_cmd);
+			xrename = 0;
+			return EXIT_SUCCESS;
+		}
 		_xrename = 1;
 		char *new_name = get_new_name();
 		_xrename = 0;
