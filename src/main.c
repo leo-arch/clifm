@@ -160,7 +160,8 @@ int
     recur_perm_error_flag = 0,
     restore_last_path = UNSET,
 	rl_last_word_start = 0,
-	rl_no_tabhist = 0,
+	rl_nohist = 0,
+	rl_notab = 0,
     sel_is_last = 0,
     selfile_ok = 1,
     share_selbox = UNSET,
@@ -180,7 +181,9 @@ int
 #endif
     unicode = UNSET,
 	warn_wrong_cmd = UNSET,
-    welcome_message = UNSET;
+    welcome_message = UNSET,
+    _xrename = 0,
+    xrename = 0;
 
 //#ifndef _NO_HIGHLIGHT
 int wrong_cmd = 0;

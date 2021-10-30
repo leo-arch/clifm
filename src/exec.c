@@ -70,6 +70,36 @@
 
 char **_comm = (char **)NULL;
 
+static char *
+get_new_name(void)
+{
+	char *input = (char *)NULL;
+
+	rl_nohist = 1;
+
+	char m[NAME_MAX];
+	sprintf(m, "Enter new name ('q' to quit)\n%s>%s ", mi_c, tx_c);
+	while (!input) {
+		input = readline(m);
+		if (!input)
+			continue;
+		if (!*input || *input == ' ') {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+
+		if (*input == 'q' && !*(input + 1)) {
+			free(input);
+			input = (char *)NULL;
+			break;
+		}
+	}
+
+	rl_nohist = 0;
+	return input;
+}
+
 /* Run a command via execle() and refresh the screen in case of success */
 int
 run_and_refresh(char **cmd)
@@ -90,6 +120,27 @@ run_and_refresh(char **cmd)
 		strcat(tmp_cmd, cmd[i]);
 		strcat(tmp_cmd, " ");
 	}
+
+	if (xrename) {
+		_xrename = 1;
+		char *new_name = get_new_name();
+		_xrename = 0;
+		if (!new_name) {
+//			xrename = 0;
+			free(tmp_cmd);
+			return EXIT_SUCCESS;
+		}
+		tmp_cmd = (char *)xrealloc(tmp_cmd,
+				(total_len + (i + 1) + 1 + strlen(new_name)) * sizeof(char));
+		strcat(tmp_cmd, new_name);
+
+//		xrename = 0;
+		free(new_name);
+	}
+
+/*	printf("'%s'\n", tmp_cmd);
+	free(tmp_cmd);
+	return EXIT_SUCCESS; */
 
 	int ret = launch_execle(tmp_cmd);
 	free(tmp_cmd);
@@ -737,7 +788,10 @@ exec_cmd(char **comm)
 			if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 				puts(_(WRAPPERS_USAGE));
 				return EXIT_SUCCESS;
-			}	
+			}
+			if (!sel_is_last && comm[1] && !comm[2])
+				xrename = 1;
+
 			comm[0] = (char *)xrealloc(comm[0], 10 * sizeof(char));
 			if (mv_cmd == MV_MV)
 				strcpy(comm[0], "mv -i");

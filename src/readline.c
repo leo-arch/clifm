@@ -366,6 +366,22 @@ my_rl_getc(FILE *stream)
 		}
 	}
 
+	if (xrename) {
+		// We are in a secondary prompt for the xrename function
+		char *p = rl_line_buffer + 2;
+		size_t plen = strlen(p);
+		char pp[NAME_MAX];
+		strcpy(pp, p);
+		if (plen) {
+			while (pp[--plen] == ' ')
+				pp[plen] = '\0';
+		}
+		rl_replace_line(pp, 1);
+		rl_point = rl_end = (int)strlen(pp);
+		rl_redisplay();
+		xrename = 0;
+	}
+
 	while(1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
@@ -378,7 +394,7 @@ my_rl_getc(FILE *stream)
 				return c;
 
 #ifndef _NO_SUGGESTIONS
-			if (ret != 2 && suggestions) {
+			if (ret != 2 && !_xrename && suggestions) {
 				/* rl_suggestions returns -1 is C was inserted before
 				 * the end of the current line, in which case we don't
 				 * want to return it here (otherwise, it would be added
@@ -468,11 +484,11 @@ rl_no_hist(const char *prompt)
 {
 	int bk = suggestions;
 	suggestions = 0;
-	rl_no_tabhist = 1;
+	rl_nohist = rl_notab = 1;
 //	stifle_history(0); /* Prevent readline from using the history
 //	setting */
 	char *input = readline(prompt);
-	rl_no_tabhist = 0;
+	rl_notab = rl_nohist = 0;
 //	unstifle_history();	 /* Reenable history */
 //	read_history(hist_file); /* Reload history lines from file */
 	suggestions = bk;
@@ -1363,7 +1379,7 @@ my_rl_completion(const char *text, int start, int end)
 		} */
 
 		/* History cmd completion */
-		if (*text == '!') {
+		if (!_xrename && *text == '!') {
 			matches = rl_completion_matches(text + 1, &hist_generator);
 			if (matches)
 				cur_comp_type = TCMP_HIST;
@@ -1394,12 +1410,12 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* Bookmarks completion */
-		if (!matches && (autocd || auto_open) && expand_bookmarks)
+		if (!_xrename && !matches && (autocd || auto_open) && expand_bookmarks)
 			matches = rl_completion_matches(text, &bookmarks_generator);
 
 		/* If neither autocd nor auto-open, try to complete with
 		 * command names */
-		if (!matches) {
+		if (!_xrename && !matches) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 			if (matches)
 				cur_comp_type = TCMP_CMD;
@@ -1408,7 +1424,7 @@ my_rl_completion(const char *text, int start, int end)
 
 	/* Second word or more */
 	else {
-		if (nwords == 1 && rl_line_buffer[rl_end - 1] != ' ') {
+		if (!_xrename && nwords == 1 && rl_line_buffer[rl_end - 1] != ' ') {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 			if (matches) {
 				cur_comp_type = TCMP_CMD;
@@ -1417,7 +1433,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* #### OPEN WITH #### */
-		if (rl_end > 4 && *rl_line_buffer == 'o' && rl_line_buffer[1] == 'w'
+		if (!_xrename && rl_end > 4 && *rl_line_buffer == 'o' && rl_line_buffer[1] == 'w'
 		&& rl_line_buffer[2] == ' ' && rl_line_buffer[3]
 		&& rl_line_buffer[3] != ' ') {
 			char *p = rl_line_buffer + 3;
@@ -1436,7 +1452,7 @@ my_rl_completion(const char *text, int start, int end)
 		/* Perform this check only if the first char of the string to be
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
-		if (*text >= '0' && *text <= '9') {
+		if (!_xrename && *text >= '0' && *text <= '9') {
 			int num_text = atoi(text);
 
 			/* Dirjump: jo command */
@@ -1470,7 +1486,7 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* ### DIRJUMP COMPLETION ### */
 		/* j, jc, jp commands */
-		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
+		else if (!_xrename && *rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
 		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
 		&& rl_line_buffer[2] == ' ')
 		|| strncmp(rl_line_buffer, "jump ", 5) == 0)) {
@@ -1481,7 +1497,7 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* ### BOOKMARKS COMPLETION ### */
 
-		else if (*rl_line_buffer == 'b' && (rl_line_buffer[1] == 'm'
+		else if (!_xrename && *rl_line_buffer == 'b' && (rl_line_buffer[1] == 'm'
 		|| rl_line_buffer[1] == 'o')
 		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
 		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
@@ -1495,7 +1511,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### COLOR SCHEMES COMPLETION ### */
-		else if (*rl_line_buffer == 'c' && ((rl_line_buffer[1] == 's'
+		else if (!_xrename && *rl_line_buffer == 'c' && ((rl_line_buffer[1] == 's'
 		&& rl_line_buffer[2] == ' ')
 		|| strncmp(rl_line_buffer, "colorschemes ", 13) == 0)) {
 			matches = rl_completion_matches(text, &cschemes_generator);
@@ -1505,7 +1521,7 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* ### PROFILES COMPLETION ### */
 
-		else if (*rl_line_buffer == 'p' && (rl_line_buffer[1] == 'r'
+		else if (!_xrename && *rl_line_buffer == 'p' && (rl_line_buffer[1] == 'r'
 		|| rl_line_buffer[1] == 'f')
 		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0
 		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
@@ -1520,13 +1536,13 @@ my_rl_completion(const char *text, int start, int end)
 				cur_comp_type = TCMP_PROF;
 		}
 
-		else if (expand_bookmarks) {
+		else if (!_xrename && expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 			if (matches)
 				cur_comp_type = TCMP_BOOKMARK;
 		}
 
-		else if (*rl_line_buffer == 's'
+		else if (!_xrename && *rl_line_buffer == 's'
 		&& (strncmp(rl_line_buffer, "st ", 3) == 0
 		|| strncmp(rl_line_buffer, "sort ", 5) == 0)) {
 			matches = rl_completion_matches(text, &sort_name_generator);
@@ -1534,7 +1550,7 @@ my_rl_completion(const char *text, int start, int end)
 				cur_comp_type = TCMP_SORT;
 		}
 
-		else if (*rl_line_buffer == 'n'
+		else if (!_xrename && *rl_line_buffer == 'n'
 		&& strncmp(rl_line_buffer, "net ", 4) == 0) {
 			matches = rl_completion_matches(text, &nets_generator);
 			if (matches)

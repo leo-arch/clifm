@@ -717,7 +717,8 @@ extern int
     recur_perm_error_flag,
     restore_last_path,
 	rl_last_word_start,
-	rl_no_tabhist,
+	rl_nohist,
+	rl_notab,
     sel_is_last,
     selfile_ok,
     share_selbox,
@@ -738,7 +739,9 @@ extern int
 #endif
     unicode,
 	warn_wrong_cmd,
-    welcome_message;
+    welcome_message,
+    _xrename,
+    xrename;
 
 //#ifndef _NO_HIGHLIGHT
 extern int wrong_cmd;

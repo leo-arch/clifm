@@ -1451,6 +1451,9 @@ rl_onlydirs(int count, int key)
 static void
 print_highlight_string(char *s)
 {
+	if (!s || !*s)
+		return;
+	
 	size_t i, l = 0;
 	rl_delete_text(0, rl_end);
 	rl_point = rl_end = 0;
@@ -1480,7 +1483,7 @@ static int
 rl_cmdhist(int count, int key)
 {
 	UNUSED(count);
-	if (rl_no_tabhist)
+	if (rl_nohist)
 		return EXIT_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS

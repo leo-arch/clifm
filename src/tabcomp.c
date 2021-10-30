@@ -608,7 +608,7 @@ fzftabcomp(char **matches)
 int
 tab_complete(int what_to_do)
 {
-	if (rl_no_tabhist)
+	if (rl_notab)
 		return EXIT_SUCCESS;
 
 	rl_compentry_func_t *our_func = (rl_compentry_func_t *)NULL;
