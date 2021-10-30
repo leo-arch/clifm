@@ -262,8 +262,8 @@ recolorize_line(void)
 	i = point ? 1 : 0;
 	size_t l = 0;
 
-//	if (!s[i])
-//		goto EXIT;
+	if (!ss || !*ss)
+		goto EXIT;
 
 	char t[PATH_MAX];
 	for (;ss[i]; i++) {
@@ -291,7 +291,7 @@ recolorize_line(void)
 		sleep(1); */
 	}
 
-//EXIT:
+EXIT:
 	/* Unhide the cursor */
 	fputs("\x1b[?25h", stdout);
 	free(ss);

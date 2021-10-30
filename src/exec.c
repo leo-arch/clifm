@@ -122,6 +122,8 @@ run_and_refresh(char **cmd)
 	}
 
 	if (xrename) {
+		/* If we have a number here, it was not expanded by parse_input_str,
+		 * and thereby, we have an invalid ELN */
 		if (is_number(cmd[1])) {
 			fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, cmd[1]);
 			free(tmp_cmd);
