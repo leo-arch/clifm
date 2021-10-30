@@ -367,7 +367,7 @@ my_rl_getc(FILE *stream)
 	}
 
 	if (xrename) {
-		// We are in a secondary prompt for the xrename function
+		/* We are using a secondary prompt for the xrename function */
 		char *p = rl_line_buffer + 2;
 		size_t plen = strlen(p);
 		char pp[NAME_MAX];
@@ -378,10 +378,11 @@ my_rl_getc(FILE *stream)
 		}
 		if (is_number(pp)) {
 			int ipp = atoi(pp);
-			if (ipp > 0 && ipp < (int)files) {
+			if (ipp > 0 && ipp <= (int)files) {
 				rl_replace_line(file_info[ipp - 1].name, 1);
 				rl_point = rl_end = (int)strlen(file_info[ipp - 1].name);
 			} else {
+				xrename = 0;
 				return (EOF);
 			}
 		} else {

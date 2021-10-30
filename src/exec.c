@@ -126,13 +126,12 @@ run_and_refresh(char **cmd)
 			fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, cmd[1]);
 			free(tmp_cmd);
 			xrename = 0;
-			return EXIT_SUCCESS;
+			return EXIT_FAILURE;
 		}
 		_xrename = 1;
 		char *new_name = get_new_name();
 		_xrename = 0;
 		if (!new_name) {
-//			xrename = 0;
 			free(tmp_cmd);
 			return EXIT_SUCCESS;
 		}
@@ -140,13 +139,8 @@ run_and_refresh(char **cmd)
 				(total_len + (i + 1) + 1 + strlen(new_name)) * sizeof(char));
 		strcat(tmp_cmd, new_name);
 
-//		xrename = 0;
 		free(new_name);
 	}
-
-/*	printf("'%s'\n", tmp_cmd);
-	free(tmp_cmd);
-	return EXIT_SUCCESS; */
 
 	int ret = launch_execle(tmp_cmd);
 	free(tmp_cmd);
