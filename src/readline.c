@@ -341,6 +341,45 @@ END:
 	return 0;
 }
 
+/* Print the corresponding file name in the xrename prompt */
+static int
+prompt_xrename(void)
+{
+	char *p = rl_line_buffer + 2;
+	size_t plen = strlen(p);
+	char pp[NAME_MAX];
+	strcpy(pp, p);
+	if (plen) {
+		while (pp[--plen] == ' ')
+			pp[plen] = '\0';
+	}
+	if (is_number(pp)) {
+		int ipp = atoi(pp);
+		if (ipp > 0 && ipp <= (int)files) {
+			rl_replace_line(file_info[ipp - 1].name, 1);
+			rl_point = rl_end = (int)strlen(file_info[ipp - 1].name);
+		} else {
+			xrename = 0;
+			return EXIT_FAILURE;
+		}
+	} else {
+		char *dstr = dequote_str(pp, 0);
+		if (!dstr) {
+			fprintf(stderr, "%s: %s: Error dequoting file name\n",
+					PROGRAM_NAME, pp);
+			xrename = 0;
+			return EXIT_FAILURE;
+		}
+		rl_replace_line(dstr, 1);
+		rl_point = rl_end = (int)strlen(dstr);
+		free(dstr);
+	}
+	rl_redisplay();
+	xrename = 0;
+
+	return EXIT_SUCCESS;
+}
+
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
  * to introduce the suggestions system */
@@ -368,29 +407,8 @@ my_rl_getc(FILE *stream)
 
 	if (xrename) {
 		/* We are using a secondary prompt for the xrename function */
-		char *p = rl_line_buffer + 2;
-		size_t plen = strlen(p);
-		char pp[NAME_MAX];
-		strcpy(pp, p);
-		if (plen) {
-			while (pp[--plen] == ' ')
-				pp[plen] = '\0';
-		}
-		if (is_number(pp)) {
-			int ipp = atoi(pp);
-			if (ipp > 0 && ipp <= (int)files) {
-				rl_replace_line(file_info[ipp - 1].name, 1);
-				rl_point = rl_end = (int)strlen(file_info[ipp - 1].name);
-			} else {
-				xrename = 0;
-				return (EOF);
-			}
-		} else {
-			rl_replace_line(pp, 1);
-			rl_point = rl_end = (int)strlen(pp);
-		}
-		rl_redisplay();
-		xrename = 0;
+		if (prompt_xrename() == EXIT_FAILURE)
+			return (EOF);
 	}
 
 	while(1) {
