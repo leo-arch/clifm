@@ -135,11 +135,22 @@ run_and_refresh(char **cmd)
 			free(tmp_cmd);
 			return EXIT_SUCCESS;
 		}
+		char *enn = (char *)NULL;
+		if (!strchr(new_name, '\\')) {
+			enn = escape_str(new_name);
+			if (!enn) {
+				free(tmp_cmd);
+				fprintf(stderr, "%s: %s: Error escaping string\n", PROGRAM_NAME, new_name);
+				return EXIT_FAILURE;
+			}
+		}
 		tmp_cmd = (char *)xrealloc(tmp_cmd,
-				(total_len + (i + 1) + 1 + strlen(new_name)) * sizeof(char));
-		strcat(tmp_cmd, new_name);
+				(total_len + (i + 1) + 1 + strlen(enn ? enn : new_name))
+				* sizeof(char));
+		strcat(tmp_cmd, enn ? enn : new_name);
 
 		free(new_name);
+		free(enn);
 	}
 
 	int ret = launch_execle(tmp_cmd);
