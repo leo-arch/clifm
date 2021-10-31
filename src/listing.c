@@ -1368,7 +1368,7 @@ list_dir_light(void)
 		goto END;
 	}
 
-	int pad = DIGINUM(files + 1);
+	int pad = max_files != UNSET ? DIGINUM(max_files) : DIGINUM(files + 1);
 
 	if (sort)
 		ENTSORT(file_info, n, entrycmp);
