@@ -1036,8 +1036,13 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 		if (!classify)
 			ind_char = 0;
 
-		if (max_files != UNSET && i == max_files)
+		if (max_files != UNSET && i == max_files) {
+			/* Since we are exiting early, let's correct the LAST_COLUMN
+			 * value */
+			if (!*last_column && i % (int)columns_n == 0)
+				*last_column = 1;
 			break;
+		}
 
 				/* ##########################
 				 * #  MAS: A SIMPLE PAGER   #
