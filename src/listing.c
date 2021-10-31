@@ -318,10 +318,14 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 
 		fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-		if (columns_n == -1) /* Long view */
+		if (columns_n == -1) { /* Long view */
 			*i -= (term_rows - 1);
-		else /* Normal view */
-			*i -= (int)((term_rows * columns_n) - 1);
+		} else { /* Normal view */
+			if (listing_mode == HORLIST)
+				*i -= (int)((term_rows * columns_n) - columns_n);
+			else
+				*i -= (int)((term_rows * columns_n) + columns_n);
+		}
 
 		if (*i < 0)
 			*i = 0;
