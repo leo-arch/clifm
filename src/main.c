@@ -544,6 +544,7 @@ const char *param_str[] = {
 	"lm on",
 	"lm off",
 	"log clear",
+	"mf unset",
 	"mm info",
 	"mm edit",
 	"mm import",

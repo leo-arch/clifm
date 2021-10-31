@@ -1828,7 +1828,7 @@ help_function(void)
  kb, keybinds [edit] [reset] [readline]\n\
  lm [on, off] (lightmode)\n\
  log [clear]\n\
- mf NUM (List up to NUM files)\n\
+ mf [NUM, unset] (List up to NUM files)\n\
  mm, mime [info ELN/FILE] [edit] [import] (resource opener)\n\
  mp, mountpoints\n\
  msg, messages [clear]\n\

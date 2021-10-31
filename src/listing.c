@@ -1373,7 +1373,6 @@ list_dir_light(void)
 	if (sort)
 		ENTSORT(file_info, n, entrycmp);
 
-//	int i;
 	size_t counter = 0;
 	size_t columns_n = 1;
 
@@ -1398,9 +1397,6 @@ list_dir_light(void)
 
 	int last_column = 0;
 
-/*	char *line_buf = (char *)xcalloc(term_cols * 10, sizeof(char));
-	size_t line_sz = 0; */
-
 	/* Get possible amount of columns for the dirlist screen */
 	if (!columned)
 		columns_n = 1;
@@ -1411,53 +1407,6 @@ list_dir_light(void)
 		list_files_vert(&counter, &reset_pager, pad, columns_n, &last_column);
 	else
 		list_files_hor(&counter, &reset_pager, pad, columns_n, &last_column);
-
-/*	int nn = (int)n;
-	size_t cur_cols = 0;
-	for (i = 0; i < nn; i++) {
-		if (max_files != UNSET && i == max_files)
-			break;
-
-		// A basic pager for directories containing large amount of
-		// files. What's missing? It only goes downwards. To go
-		// backwards, use the terminal scrollback function
-		if (pager) {
-			// Run the pager only once all columns and rows fitting in
-			// the screen are filled with the corresponding file names
-			if (last_column && counter > columns_n * ((size_t)term_rows - 2))
-				if (run_pager((int)columns_n, &reset_pager, &i, &counter) == -1)
-					continue;
-
-			counter++;
-		}
-
-		if (++cur_cols == columns_n) {
-			cur_cols = 0;
-			last_column = 1;
-		} else {
-			last_column = 0;
-		}
-
-				// #########################
-				// #  PRINT CURRENT ENTRY  #
-				// #########################
-
-		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
-		int ind_char = 1;
-
-		if (!classify)
-			ind_char = 0;
-
-		if (colorize)
-			print_entry_color_light(&ind_char, i, pad);
-		else
-			print_entry_nocolor_light(&ind_char, i, pad);
-
-		if (!last_column)
-			pad_filename_light(&ind_char, i, pad);
-		else
-			putchar('\n');
-	} */
 
 	if (!last_column)
 		putchar('\n');
@@ -1825,7 +1774,6 @@ list_dir(void)
 		 * #    GET INFO TO PRINT COLUMNED OUTPUT   #
 		 * ########################################## */
 
-//	int i;
 	size_t counter = 0;
 	size_t columns_n = 1;
 
@@ -1860,85 +1808,6 @@ list_dir(void)
 		list_files_vert(&counter, &reset_pager, pad, columns_n, &last_column);
 	else
 		list_files_hor(&counter, &reset_pager, pad, columns_n, &last_column);
-/*	int rows = (int)files / (int)columns_n;
-	if (files % columns_n > 0)
-		rows++;
-
-	int nn = (int)n;
-
-//	size_t cur_cols = 0;
-//	int x = 0;
-//	for (i = 0; i < nn; i++) {
-//		x = i;
-
-	size_t cur_cols = 0, cc = columns_n;
-	int x = 0, xx = 0;
-	for (i = 0; ; i++) {
-		if (cc == columns_n) {
-			x = xx;
-			xx++;
-			cc = 0;
-		} else {
-			x += rows;
-		}
-		cc++;
-
-		if (xx > rows)
-			break;
-
-		// Determine if current entry is in the last column, in which
-		// case a new line char will be appended
-		if (++cur_cols == columns_n) {
-			cur_cols = 0;
-			last_column = 1;
-		} else {
-			last_column = 0;
-		}
-
-		int ind_char = 1;
-		if (!classify)
-			ind_char = 0;
-
-		if (x > nn || !file_info[x].name) {
-			if (last_column) {
-				putchar('\n');
-			}
-			continue;
-		}
-
-		if (max_files != UNSET && x == max_files)
-			break;
-
-				// ##########################
-				// #  MAS: A SIMPLE PAGER   #
-				// ##########################
-
-		if (pager) {
-			// Run the pager only once all columns and rows fitting in
-			// the screen are filled with the corresponding file names
-			if (last_column && counter > columns_n * ((size_t)term_rows - 2))
-				if (run_pager((int)columns_n, &reset_pager, &i, &counter) == -1)
-					continue;
-
-			counter++;
-		}
-
-			// #################################
-			// #    PRINT THE CURRENT ENTRY    #
-			// #################################
-
-		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
-
-		if (colorize)
-			print_entry_color(&ind_char, x, pad);
-		else
-			print_entry_nocolor(&ind_char, x, pad);
-
-		if (!last_column)
-			pad_filename(&ind_char, x, pad);
-		else
-			putchar('\n');
-	} */
 
 	if (!last_column)
 		putchar('\n');

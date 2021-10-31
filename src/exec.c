@@ -507,6 +507,47 @@ run_shell_cmd(char **comm)
 	return exit_status;
 }
 
+static int
+set_max_files(char **args)
+{
+	if (!args[1]) {
+		if (max_files == -1)
+			puts(_("Max files: unset"));
+		else
+			printf(_("Max files: %d\n"), max_files);
+		return EXIT_SUCCESS;
+	}
+
+	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+		puts(_(MF_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if ((*args[1] == 'u' && strcmp(args[1], "unset") == 0)
+	|| (*args[1] == '-' && args[1][1] == '1' && !args[1][2])) {
+		max_files = -1;
+		puts(_("Max files: unset (no limit)"));
+		return EXIT_SUCCESS;
+	}
+
+	if (!is_number(args[1])) {
+		fprintf(stderr, _("%s: %s\n"), PROGRAM_NAME, MF_USAGE);
+		return (exit_code = EXIT_FAILURE);
+	}
+
+	int inum = atoi(args[1]);
+	if (inum < -1) {
+		max_files = inum;
+		fprintf(stderr, _("%s: %d: Invalid number\n"), PROGRAM_NAME, inum);
+		return (exit_code = EXIT_FAILURE);
+	}
+
+	max_files = inum;
+	printf(_("Max files set to %d\n"), max_files);
+	return EXIT_SUCCESS;
+}
+
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error */
@@ -1313,41 +1354,8 @@ exec_cmd(char **comm)
 	}
 
 	/* #### MAX FILES #### */
-	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2]) {
-		if (!comm[1]) {
-			printf(_("Max files: %d"), max_files);
-			if (max_files == -1)
-				puts(_(" (no limit)"));
-			else
-				putchar('\n');
-			return EXIT_SUCCESS;
-		}
-
-		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-			puts(_(MF_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		if (strcmp(comm[1], "-1") != 0 && !is_number(comm[1])) {
-			fprintf(stderr, _("%s: %s\n"), PROGRAM_NAME, MF_USAGE);
-			return (exit_code = EXIT_FAILURE);
-		}
-
-		int inum = atoi(comm[1]);
-		if (inum < -1) {
-			max_files = inum;
-			fprintf(stderr, _("%s: %d: Invalid number\n"), PROGRAM_NAME,
-			    inum);
-			return (exit_code = EXIT_FAILURE);
-		}
-
-		max_files = inum;
-		if (max_files == -1)
-			puts(_("Max files unset"));
-		else
-			printf(_("Max files set to %d\n"), max_files);
-		return EXIT_SUCCESS;
-	}
+	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2])
+		return set_max_files(comm);
 
 	/* #### EXT #### */
 	else if (*comm[0] == 'e' && comm[0][1] == 'x' && comm[0][2] == 't'
