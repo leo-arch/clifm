@@ -346,7 +346,7 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 			fputs("\r\x1b[K\x1b[3J", stdout);
 			return (-2);
 		}
-		(*i)--;
+//		(*i)--;
 		fputs("\r\x1b[K\x1b[3J", stdout);
 		return (-1);
 	}
@@ -1055,10 +1055,18 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 		if (pager) {
 			// Run the pager only once all columns and rows fitting in
 			// the screen are filled with the corresponding file names
+			int ret = 0;
 			if (*last_column && *counter > columns_n * ((size_t)term_rows - 2))
-				if (run_pager((int)columns_n, &*reset_pager, &i, &*counter) == -1)
-					continue;
+				ret = run_pager((int)columns_n, &*reset_pager, &i, &*counter);
 
+			if (ret == - 1)
+				continue;
+
+			if (ret == -2) {
+				--i;
+				--cur_cols;
+				continue;
+			}
 			(*counter)++;
 		}
 
