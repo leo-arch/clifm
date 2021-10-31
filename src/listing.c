@@ -254,14 +254,11 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (reset_pager)
 		pager = 1;
 
-//	if (max_files != UNSET && (int)files > max_files)
-//		printf("%d/%zu\n", max_files, files);
+	if (max_files != UNSET && (int)files > max_files)
+		printf("%d/%zu\n", max_files, files);
 
 	/* Print a dividing line between the files list and the prompt */
 	print_div_line();
-
-	if (max_files != UNSET && (int)files > max_files)
-		printf("%d/%zu\n", max_files, files);
 
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
@@ -1102,9 +1099,9 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 	int blc = *last_column;
 
 	size_t cur_cols = 0, cc = columns_n;
-	int x = 0, xx = 0, i = 0, bi = 0, bx = 0;
+	int x = 0, xx = 0, i = 0;//, bi = 0, bx = 0;
 	for ( ; ; i++) {
-		bi = i; bx = x;
+//		bi = i; bx = x;
 		if (cc == columns_n) {
 			x = xx;
 			xx++;
@@ -1131,14 +1128,18 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 			ind_char = 0;
 
 		if (x > nn || !file_info[x].name) {
-			if (*last_column) {
+			if (*last_column)
 				putchar('\n');
-			}
 			continue;
 		}
 
-		if (max_files != UNSET && i == max_files)
+		if (max_files != UNSET && i == max_files) {
+			/* Since we are exiting early, let's correct the LAST_COLUMN
+			 * value */
+			if (!*last_column && ((x + rows) % (int)columns_n) == 0)
+				*last_column = 1;
 			break;
+		}
 
 				/* ##########################
 				 * #  MAS: A SIMPLE PAGER   #
