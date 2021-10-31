@@ -342,11 +342,6 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 	/* If another key is pressed, go back one position.
 	 * Otherwise, some file names won't be listed.*/
 	default:
-		if (c == _ESC || c == 91) {
-			fputs("\r\x1b[K\x1b[3J", stdout);
-			return (-2);
-		}
-//		(*i)--;
 		fputs("\r\x1b[K\x1b[3J", stdout);
 		return (-1);
 	}
@@ -1019,21 +1014,21 @@ pad_filename_light(int *ind_char, const int i, const int pad)
  * 1 AAA	2 AAB	3 AAC
  * 4 AAD	5 AAE	6 AAF */
 static void
-list_files_hor(size_t *counter, int *reset_pager, const int pad,
-		const size_t columns_n, int *last_column)
+list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
+		const size_t columns_n)
 {
 	int nn = (int)files;
 
 	size_t cur_cols = 0;
-	int i;
+	int i, last_column = 0;
 	for (i = 0; i < nn; i++) {
-		/* Determine if current entry is in the last column, in which
-		 * case a new line char will be appended */
+		/* If current entry is in the last column, we need to print
+		 * a new line char */
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
-			*last_column = 1;
+			last_column = 1;
 		} else {
-			*last_column = 0;
+			last_column = 0;
 		}
 
 		int ind_char = 1;
@@ -1043,8 +1038,8 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 		if (max_files != UNSET && i == max_files) {
 			/* Since we are exiting early, let's correct the LAST_COLUMN
 			 * value */
-			if (!*last_column && i % (int)columns_n == 0)
-				*last_column = 1;
+			if (!last_column && i % (int)columns_n == 0)
+				last_column = 1;
 			break;
 		}
 
@@ -1053,10 +1048,10 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 				 * ########################## */
 
 		if (pager) {
-			// Run the pager only once all columns and rows fitting in
-			// the screen are filled with the corresponding file names
+			/* Run the pager only once all columns and rows fitting in
+			 * the screen are filled with the corresponding file names */
 			int ret = 0;
-			if (*last_column && *counter > columns_n * ((size_t)term_rows - 2))
+			if (last_column && *counter > columns_n * ((size_t)term_rows - 2))
 				ret = run_pager((int)columns_n, &*reset_pager, &i, &*counter);
 
 			if (ret == - 1)
@@ -1088,7 +1083,7 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 				print_entry_nocolor(&ind_char, i, pad);
 		}
 
-		if (!*last_column) {
+		if (!last_column) {
 			if (light_mode)
 				pad_filename_light(&ind_char, i, pad);
 			else
@@ -1097,14 +1092,17 @@ list_files_hor(size_t *counter, int *reset_pager, const int pad,
 			putchar('\n');
 		}
 	}
+
+	if (!last_column)
+		putchar('\n');
 }
 
 /* List files vertically, like ls(1) would
  * 1 AAA	3 AAC	5 AAE
  * 2 AAB	4 AAD	6 AAF */
 static void
-list_files_vert(size_t *counter, int *reset_pager, const int pad,
-		const size_t columns_n, int *last_column)
+list_files_vertical(size_t *counter, int *reset_pager, const int pad,
+		const size_t columns_n)
 {
 	int rows = (int)files / (int)columns_n;
 	if (files % columns_n > 0)
@@ -1113,7 +1111,8 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 	int nn = (int)files;
 	/* The previous value of LAST_COLUMN. We need this value to run the
 	 * pager */
-	int blc = *last_column;
+	int last_column = 0;
+	int blc = last_column;
 
 	size_t cur_cols = 0, cc = columns_n, bcc = 0, bcur_cols = 0;
 	int x = 0, xx = 0, i = 0, bi = 0, bx = 0, bxx = 0;
@@ -1137,9 +1136,9 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 		 * a new line char */
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
-			*last_column = 1;
+			last_column = 1;
 		} else {
-			*last_column = 0;
+			last_column = 0;
 		}
 
 		int ind_char = 1;
@@ -1147,7 +1146,7 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 			ind_char = 0;
 
 		if (x > nn || !file_info[x].name) {
-			if (*last_column)
+			if (last_column)
 				putchar('\n');
 			continue;
 		}
@@ -1155,8 +1154,8 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 		if (max_files != UNSET && i == max_files) {
 			/* Since we are exiting early, let's correct the LAST_COLUMN
 			 * value */
-			if (!*last_column && ((x + rows) % (int)columns_n) == 0)
-				*last_column = 1;
+			if (!last_column && ((x + rows) % (int)columns_n) == 0)
+				last_column = 1;
 			break;
 		}
 
@@ -1166,16 +1165,12 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 
 		if (pager) {
 			int ret = 0;
-//			printf("'%d:%zu:%zu'", blc, *counter, columns_n * ((size_t)term_rows - 2));
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
-			if (blc && *counter > columns_n * ((size_t)term_rows - 2)) {
+			if (blc && *counter > columns_n * ((size_t)term_rows - 2))
 				ret = run_pager((int)columns_n, &*reset_pager, &x, &*counter);
-				if (ret == -1)
-					continue;
-			}
 
-			if (ret != -2)
+			if (ret != -1)
 				(*counter)++;
 			else {
 				/* Restore previous values */
@@ -1188,7 +1183,7 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 			}
 		}
 
-		blc = *last_column;
+		blc = last_column;
 
 			/* #################################
 			 * #    PRINT THE CURRENT ENTRY    #
@@ -1208,7 +1203,7 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 				print_entry_nocolor_light(&ind_char, x, pad);
 		}
 
-		if (!*last_column) {
+		if (!last_column) {
 			if (light_mode)
 				pad_filename_light(&ind_char, x, pad);
 			else
@@ -1217,6 +1212,10 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 			putchar('\n');
 		}
 	}
+
+	if (!last_column)
+		putchar('\n');
+	
 }
 
 /* List files in the current working directory (global variable 'path').
@@ -1418,8 +1417,6 @@ list_dir_light(void)
 				 * #   NORMAL VIEW MODE   #
 				 * ######################## */
 
-	int last_column = 0;
-
 	/* Get possible amount of columns for the dirlist screen */
 	if (!columned)
 		columns_n = 1;
@@ -1427,12 +1424,9 @@ list_dir_light(void)
 		get_columns(&columns_n);
 
 	if (listing_mode == VERTLIST) /* ls(1) like listing */
-		list_files_vert(&counter, &reset_pager, pad, columns_n, &last_column);
+		list_files_vertical(&counter, &reset_pager, pad, columns_n);
 	else
-		list_files_hor(&counter, &reset_pager, pad, columns_n, &last_column);
-
-	if (!last_column)
-		putchar('\n');
+		list_files_horizontal(&counter, &reset_pager, pad, columns_n);
 
 END:
 	exit_code = post_listing(dir, close_dir, reset_pager);
@@ -1819,8 +1813,6 @@ list_dir(void)
 				 * #   NORMAL VIEW MODE   #
 				 * ######################## */
 
-	int last_column = 0;
-
 	/* Get amount of columns needed to print files in CWD  */
 	if (!columned)
 		columns_n = 1;
@@ -1828,12 +1820,10 @@ list_dir(void)
 		get_columns(&columns_n);
 
 	if (listing_mode == VERTLIST) /* ls(1) like listing */
-		list_files_vert(&counter, &reset_pager, pad, columns_n, &last_column);
+		list_files_vertical(&counter, &reset_pager, pad, columns_n);
 	else
-		list_files_hor(&counter, &reset_pager, pad, columns_n, &last_column);
+		list_files_horizontal(&counter, &reset_pager, pad, columns_n);
 
-	if (!last_column)
-		putchar('\n');
 
 				/* #########################
 				 * #   POST LISTING STUFF  #
