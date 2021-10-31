@@ -70,6 +70,8 @@
 #define xprintf printf
 #endif
 
+#include <readline/readline.h>
+
 /* Print the line divinding files and prompt using DIV_LINE_CHAR. If
  * DIV_LINE_CHAR takes more than two columns to be printed (ASCII chars
  * take only one, but unicode chars could take two), print exactly the
@@ -289,7 +291,6 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 	fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 	int c = 0;
-
 	switch ((c = xgetchar())) {
 	/* Advance one line at a time */
 	case 66: /* fallthrough */ /* Down arrow */
@@ -317,9 +318,9 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 
 		fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-		if (columns_n == -1) // Long view
+		if (columns_n == -1) /* Long view */
 			*i -= (term_rows - 1);
-		else // Normal view
+		else /* Normal view */
 			*i -= (int)((term_rows * columns_n) - 1);
 
 		if (*i < 0)
@@ -343,10 +344,6 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 	default:
 		if (c == _ESC || c == 91) {
 			fputs("\r\x1b[K\x1b[3J", stdout);
-//			(*i)--;
-//			printf("'%d:%zu:%d'", c, *counter, *i);
-//			fflush(stdout);
-//			sleep(1);
 			return (-2);
 		}
 		(*i)--;
@@ -458,12 +455,19 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad)
 			continue;
 
 		if (pager) {
+			int ret = 0;
 			if (*counter > (size_t)(term_rows - 2)) {
-				if (run_pager(-1, &(*reset_pager), &i, &(*counter)) == -1)
+				ret = run_pager(-1, &(*reset_pager), &i, &(*counter));
+				if (ret == -1)
 					continue;
 			}
 
-			(*counter)++;
+			if (ret != -2)
+				(*counter)++;
+			else {
+				i--;
+				continue;
+			}
 		}
 
 		file_info[i].uid = lattr.st_uid;
@@ -1103,10 +1107,12 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 	 * pager */
 	int blc = *last_column;
 
-	size_t cur_cols = 0, cc = columns_n;
-	int x = 0, xx = 0, i = 0;//, bi = 0, bx = 0;
+	size_t cur_cols = 0, cc = columns_n, bcc = 0, bcur_cols = 0;
+	int x = 0, xx = 0, i = 0, bi = 0, bx = 0, bxx = 0;
 	for ( ; ; i++) {
-//		bi = i; bx = x;
+		/* Copy current values to restore them if necessary: done to
+		 * skip the first two chars of arrow keys : \x1b [ */
+		bi = i; bx = x; bxx = xx; bcc = cc; bcur_cols = cur_cols;
 		if (cc == columns_n) {
 			x = xx;
 			xx++;
@@ -1163,6 +1169,15 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 
 			if (ret != -2)
 				(*counter)++;
+			else {
+				/* Restore previous values */
+				i = bi ? bi - 1: bi;
+				x = bx;
+				xx = bxx;
+				cc = bcc;
+				cur_cols = bcur_cols;
+				continue;
+			}
 		}
 
 		blc = *last_column;
