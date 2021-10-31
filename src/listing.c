@@ -254,11 +254,14 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (reset_pager)
 		pager = 1;
 
-	if (max_files != UNSET && (int)files > max_files)
-		printf("%d/%zu\n", max_files, files);
+//	if (max_files != UNSET && (int)files > max_files)
+//		printf("%d/%zu\n", max_files, files);
 
 	/* Print a dividing line between the files list and the prompt */
 	print_div_line();
+
+	if (max_files != UNSET && (int)files > max_files)
+		printf("%d/%zu\n", max_files, files);
 
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
@@ -288,7 +291,9 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 {
 	fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-	switch (xgetchar()) {
+	int c = 0;
+
+	switch ((c = xgetchar())) {
 	/* Advance one line at a time */
 	case 66: /* fallthrough */ /* Down arrow */
 	case 10: /* fallthrough */ /* Enter */
@@ -339,13 +344,20 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 	/* If another key is pressed, go back one position.
 	 * Otherwise, some file names won't be listed.*/
 	default:
+		if (c == _ESC || c == 91) {
+			fputs("\r\x1b[K\x1b[3J", stdout);
+//			(*i)--;
+//			printf("'%d:%zu:%d'", c, *counter, *i);
+//			fflush(stdout);
+//			sleep(1);
+			return (-2);
+		}
 		(*i)--;
 		fputs("\r\x1b[K\x1b[3J", stdout);
 		return (-1);
 	}
 
 	fputs("\r\x1b[K\x1b[3J", stdout);
-
 	return 0;
 }
 
@@ -413,10 +425,14 @@ get_longest_filename(const int n, const int pad)
 		}
 
 		if (total_len > longest) {
-			if (max_files == UNSET)
+			if (listing_mode == VERTLIST)
 				longest = total_len;
-			else if (i < max_files)
-				longest = total_len;
+			else {
+				if (max_files == UNSET)
+					longest = total_len;
+				else if (i < max_files)
+					longest = total_len;
+			}
 		}
 	}
 #ifndef _NO_ICONS
@@ -1081,10 +1097,14 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 		rows++;
 
 	int nn = (int)files;
+	/* The previous value of LAST_COLUMN. We need this value to run the
+	 * pager */
+	int blc = *last_column;
 
 	size_t cur_cols = 0, cc = columns_n;
-	int x = 0, xx = 0, i = 0;
+	int x = 0, xx = 0, i = 0, bi = 0, bx = 0;
 	for ( ; ; i++) {
+		bi = i; bx = x;
 		if (cc == columns_n) {
 			x = xx;
 			xx++;
@@ -1097,8 +1117,8 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 		if (xx > rows)
 			break;
 
-		/* Determine if current entry is in the last column, in which
-		 * case a new line char will be appended */
+		/* If current entry is in the last column, we need to print a
+		 * a new line char */
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			*last_column = 1;
@@ -1117,7 +1137,7 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 			continue;
 		}
 
-		if (max_files != UNSET && x == max_files)
+		if (max_files != UNSET && i == max_files)
 			break;
 
 				/* ##########################
@@ -1125,14 +1145,21 @@ list_files_vert(size_t *counter, int *reset_pager, const int pad,
 				 * ########################## */
 
 		if (pager) {
+			int ret = 0;
+//			printf("'%d:%zu:%zu'", blc, *counter, columns_n * ((size_t)term_rows - 2));
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
-			if (*last_column && *counter > columns_n * ((size_t)term_rows - 2))
-				if (run_pager((int)columns_n, &*reset_pager, &x, &*counter) == -1)
+			if (blc && *counter > columns_n * ((size_t)term_rows - 2)) {
+				ret = run_pager((int)columns_n, &*reset_pager, &x, &*counter);
+				if (ret == -1)
 					continue;
+			}
 
-			(*counter)++;
+			if (ret != -2)
+				(*counter)++;
 		}
+
+		blc = *last_column;
 
 			/* #################################
 			 * #    PRINT THE CURRENT ENTRY    #
@@ -1779,7 +1806,7 @@ list_dir(void)
 		goto END;
 	}
 
-	int pad = DIGINUM(files + 1);
+	int pad = max_files != UNSET ? DIGINUM(max_files) : DIGINUM(files + 1);
 
 		/* #############################################
 		 * #    SORT FILES ACCORDING TO SORT METHOD    #
