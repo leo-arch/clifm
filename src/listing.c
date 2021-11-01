@@ -384,7 +384,9 @@ set_events_checker(void)
 static inline void
 get_longest_filename(const int n, const int pad)
 {
-	int i = n;
+//	int i = n;
+	int i = (max_files != UNSET && max_files < n) ? max_files : n;
+
 	while (--i >= 0) {
 		size_t total_len = 0;
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
@@ -1020,7 +1022,8 @@ static void
 list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
-	int nn = (int)files;
+	//int nn = (int)files;
+	int nn = (max_files != UNSET && max_files < (int)files) ? max_files : (int)files;
 
 	size_t cur_cols = 0;
 	int i, last_column = 0;
@@ -1040,13 +1043,13 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		if (!classify)
 			ind_char = 0;
 
-		if (max_files != UNSET && i == max_files) {
-			/* Since we are exiting early, let's correct the LAST_COLUMN
-			 * value */
+/*		if (max_files != UNSET && i == max_files) {
+			// Since we are exiting early, let's correct the LAST_COLUMN
+			// value
 			if (!last_column && i % (int)columns_n == 0)
 				last_column = 1;
 			break;
-		}
+		} */
 
 				/* ##########################
 				 * #  MAS: A SIMPLE PAGER   #
@@ -1109,11 +1112,13 @@ static void
 list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
-	int rows = (int)files / (int)columns_n;
-	if (files % columns_n > 0)
+//	int nn = (int)files;
+	int nn = (max_files != UNSET && max_files < (int)files) ? max_files : (int)files;
+
+	int rows = nn / (int)columns_n;
+	if (nn % (int)columns_n > 0)
 		rows++;
 
-	int nn = (int)files;
 	/* The previous value of LAST_COLUMN. We need this value to run the
 	 * pager */
 	int last_column = 0;
@@ -1152,19 +1157,23 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		if (!classify)
 			ind_char = 0;
 
-		if (x > nn || !file_info[x].name) {
+//		if (x > nn || !file_info[x].name) {
+		if (x >= nn || !file_info[x].name) {
 			if (last_column)
 				putchar('\n');
 			continue;
 		}
 
-		if (max_files != UNSET && i == max_files) {
-			/* Since we are exiting early, let's correct the LAST_COLUMN
-			 * value */
+/*		if (max_files != UNSET && i == max_files) {
+			// Since we are exiting early, let's correct the LAST_COLUMN
+			// value
+				printf("'%d:%d'", x, i);
+				fflush(stdout);
+				sleep(1);
 			if (!last_column && ((x + rows) % (int)columns_n) == 0)
 				last_column = 1;
 			break;
-		}
+		} */
 
 				/* ##########################
 				 * #  MAS: A SIMPLE PAGER   #
@@ -1225,7 +1234,6 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 
 	if (!last_column)
 		putchar('\n');
-	
 }
 
 /* List files in the current working directory (global variable 'path').
