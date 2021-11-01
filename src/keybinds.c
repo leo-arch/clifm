@@ -894,7 +894,7 @@ static int
 rl_clear_line(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy && !_xrename)
 		return EXIT_SUCCESS;
 
 	nwords = 0;
