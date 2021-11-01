@@ -1022,13 +1022,13 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 {
 	int nn = (int)files;
 
-	size_t cur_cols = 0, bcur_cols = 0;
+	size_t cur_cols = 0;
 	int i, last_column = 0;
-	int blc = last_column, bi = 0;
+	int blc = last_column;
 	for (i = 0; i < nn; i++) {
-		bcur_cols = cur_cols; bi = i;
 		/* If current entry is in the last column, we need to print
 		 * a new line char */
+		size_t bcur_cols = cur_cols;
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			last_column = 1;
@@ -1055,7 +1055,7 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
-			int ret = 0;
+			int ret = 0, bi = i;
 			if (blc && *counter > columns_n * ((size_t)term_rows - 2))
 				ret = run_pager((int)columns_n, reset_pager, &i, counter);
 
