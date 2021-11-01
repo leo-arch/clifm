@@ -453,17 +453,19 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad)
 		if (pager) {
 			int ret = 0;
 			if (*counter > (size_t)(term_rows - 2))
-				ret = run_pager(-1, &(*reset_pager), &i, &(*counter));
+				ret = run_pager(-1, reset_pager, &i, counter);
 
-			if (ret == -1)
-				continue;
-
-			if (ret != -2)
-				(*counter)++;
-			else {
-				i--;
+			if (ret == -1) {
+				--i;
 				continue;
 			}
+
+			if (ret == -2) {
+				i--;
+				*counter = 0;
+				continue;
+			}
+			(*counter)++;
 		}
 
 		file_info[i].uid = lattr.st_uid;
@@ -1055,7 +1057,7 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 			 * the screen are filled with the corresponding file names */
 			int ret = 0;
 			if (blc && *counter > columns_n * ((size_t)term_rows - 2))
-				ret = run_pager((int)columns_n, &*reset_pager, &i, &*counter);
+				ret = run_pager((int)columns_n, reset_pager, &i, counter);
 
 			if (ret == -1) {
 				i = bi ? bi - 1 : bi;
@@ -1117,12 +1119,14 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	int last_column = 0;
 	int blc = last_column;
 
-	size_t cur_cols = 0, cc = columns_n, bcc = 0, bcur_cols = 0;
-	int x = 0, xx = 0, i = 0, bi = 0, bx = 0, bxx = 0;
+	size_t cur_cols = 0, cc = columns_n, bcur_cols = 0;
+	int x = 0, xx = 0, i = 0, bx = 0, bxx = 0;
 	for ( ; ; i++) {
 		/* Copy current values to restore them if necessary: done to
 		 * skip the first two chars of arrow keys : \x1b [ */
-		bi = i; bx = x; bxx = xx; bcc = cc; bcur_cols = cur_cols;
+		bx = x; bxx = xx; bcur_cols = cur_cols;
+		size_t bcc = cc;
+		int bi = i;
 		if (cc == columns_n) {
 			x = xx;
 			xx++;
@@ -1171,7 +1175,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			if (blc && *counter > columns_n * ((size_t)term_rows - 2))
-				ret = run_pager((int)columns_n, &*reset_pager, &x, &*counter);
+				ret = run_pager((int)columns_n, reset_pager, &x, counter);
 
 			if (ret == -1) {
 				/* Restore previous values */
