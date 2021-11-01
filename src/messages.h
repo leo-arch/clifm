@@ -70,6 +70,8 @@
 #define OPEN_USAGE "Open a file\nUsage: o, open ELN/FILE [APPLICATION]"
 #define OW_USAGE "Open a file with...\nUsage: ow ELN/FILE"
 #define OPENER_USAGE "Set the resource opener\nUsage: opener APPLICATION"
+#define PAGER_HELP "?, h: help\nDown arrow, Enter, Space: Advance one line\nPage Down: Advance one page\nq: Stop pagging\n"
+#define PAGER_LABEL "\x1b[7;97m--Mas--\x1b[0;49m"
 #define PAGER_USAGE "Set the files list pager on-off\nUsage: pager, pg [on, off, status]"
 #define PIN_USAGE "Pin a file or directory\nUsage: pin FILE/DIR"
 #define PROFILES_USAGE "Manage profiles\nUsage: pf, prof, profile [ls, list] [set, add, del PROFILE]"

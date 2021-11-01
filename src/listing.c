@@ -282,65 +282,61 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	return EXIT_SUCCESS;
 }
 
-/* A basic pager for directories containing large amount of
- * files. What's missing? It only goes downwards. To go
- * backwards, use the terminal scrollback function */
+/* A basic pager for directories containing large amount of files.
+ * What's missing? It only goes downwards. To go backwards, use the
+ * terminal scrollback function */
 static int
 run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 {
-	fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+	fputs(PAGER_LABEL, stdout);
 
 	int c = 0;
 	switch ((c = xgetchar())) {
+
 	/* Advance one line at a time */
 	case 66: /* fallthrough */ /* Down arrow */
 	case 10: /* fallthrough */ /* Enter */
-	case 32:		   /* Space */
+	case 32: /* Space */
 		break;
 
 	/* Advance one page at a time */
-	case 126:
-		*counter = 0; /* Page Down */
+	case 126: /* Page Down */
+		*counter = 0;
 		break;
 
+	/* h: Print pager help */
 	case 63: /* fallthrough */ /* ? */
-	case 104: {		   /* h: Print pager help */
+	case 104: {
 		CLEAR;
 
-		fputs(_("?, h: help\n"
-			"Down arrow, Enter, Space: Advance one line\n"
-			"Page Down: Advance one page\n"
-			"q: Stop pagging\n"), stdout);
-
+		fputs(_(PAGER_HELP), stdout);
 		int l = (int)term_rows - 5;
-		while (--l >= 0)
-			putchar('\n');
+		printf("\x1b[%dB", l);
+		fputs(PAGER_LABEL, stdout);
 
-		fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+		xgetchar();
+		CLEAR;
 
 		if (columns_n == -1) { /* Long view */
-			*i -= (term_rows - 1);
+			*i = 0;
+/*			*i -= (term_rows - 1); */
 		} else { /* Normal view */
 			if (listing_mode == HORLIST)
 				*i -= (int)((term_rows * columns_n) - columns_n);
 			else
-				*i -= (int)((term_rows * columns_n) + columns_n);
+				return (-2);
 		}
 
+		*counter = 0;
 		if (*i < 0)
 			*i = 0;
-
-		*counter = 0;
-		xgetchar();
-		CLEAR;
 	} break;
 
-	/* Stop paging (and set a flag to reenable the pager
-	 * later) */
+	/* Stop paging (and set a flag to reenable the pager later) */
 	case 99:  /* 'c' */
 	case 112: /* 'p' */
-	case 113:
-		pager = 0, *reset_pager = 1; /* 'q' */
+	case 113: /* 'q' */
+		pager = 0, *reset_pager = 1;
 		break;
 
 	/* If another key is pressed, go back one position.
@@ -455,11 +451,11 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad)
 
 		if (pager) {
 			int ret = 0;
-			if (*counter > (size_t)(term_rows - 2)) {
+			if (*counter > (size_t)(term_rows - 2))
 				ret = run_pager(-1, &(*reset_pager), &i, &(*counter));
-				if (ret == -1)
-					continue;
-			}
+
+			if (ret == -1)
+				continue;
 
 			if (ret != -2)
 				(*counter)++;
@@ -1176,9 +1172,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			if (blc && *counter > columns_n * ((size_t)term_rows - 2))
 				ret = run_pager((int)columns_n, &*reset_pager, &x, &*counter);
 
-			if (ret != -1)
-				(*counter)++;
-			else {
+			if (ret == -1) {
 				/* Restore previous values */
 				i = bi ? bi - 1: bi;
 				x = bx;
@@ -1186,7 +1180,12 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 				cc = bcc;
 				cur_cols = bcur_cols;
 				continue;
+			} else if (ret == -2) {
+				i = x = xx = *counter = cur_cols = last_column = blc = 0;
+				cc = columns_n;
+				continue;
 			}
+			(*counter)++;
 		}
 
 		blc = last_column;
