@@ -1299,16 +1299,17 @@ external_arguments(int argc, char **argv)
 
 			/* Long options */
 			if (optopt >= 0 && optopt <= long_opts) {
-				fprintf(stderr, _("%s: option requires an argument\nTry '%s "
-					"--help' for more information.\n"), PROGRAM_NAME, PNL);
+				fprintf(stderr, _("%s: unrecognized option '%s'\n"
+					"Try '%s --help' for more information.\n"),
+					PROGRAM_NAME, argv[optind - 1], PNL);
 				exit(EXIT_FAILURE);
 			}
 
 			/* If unknown option is printable... */
 			if (isprint(optopt)) {
-				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: "
-						  "%s %s\nTry '%s --help' for more information.\n"),
-				    PROGRAM_NAME, optopt, GRAL_USAGE, PNL, PNL);
+				fprintf(stderr, _("%s: unrecognized option '%c'\n"
+					"Try '%s --help' for more information.\n"),
+				    PROGRAM_NAME, optopt, PNL);
 			} else {
 				fprintf(stderr, _("%s: unknown option character '\\%x'\n"),
 				    PROGRAM_NAME, (unsigned int)optopt);
