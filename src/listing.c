@@ -1119,14 +1119,14 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	int last_column = 0;
 	int blc = last_column;
 
-	size_t cur_cols = 0, cc = columns_n, bcur_cols = 0;
-	int x = 0, xx = 0, i = 0, bx = 0, bxx = 0;
+	size_t cur_cols = 0, cc = columns_n;
+	int x = 0, xx = 0, i = 0, bxx = 0;
 	for ( ; ; i++) {
 		/* Copy current values to restore them if necessary: done to
 		 * skip the first two chars of arrow keys : \x1b [ */
-		bx = x; bxx = xx; bcur_cols = cur_cols;
-		size_t bcc = cc;
-		int bi = i;
+		bxx = xx;
+		size_t bcc = cc, bcur_cols = cur_cols;
+		int bi = i, bx = x;
 		if (cc == columns_n) {
 			x = xx;
 			xx++;
