@@ -486,13 +486,16 @@ This built-in bulk rename function won't deal with deletions, replacements, file
 .B c, l [e, edit], m, md, r
 short for the following commands respectively: 'cp -iRp', 'ln -sn', 'mv -i', 'mkdir -p', and 'rm -I' (for files) or 'rm -dIr' (for directories). To use these commands without any of these arguments, or with any other argument you need, just use the non-abbreviated command, for instance, 'cp' instead of 'c'.
 .sp
+The \fIln\fR command allows the use of the 'e, edit' option to modify the destination of a symbolic link. Example: 'l e 12', or 'le 12',  to relink the symbolic link corresponding to the ELN 12.
+.sp
+The \fIm\fR command is just like 'mv -i', but with the following differences: When using the \fIsel\fR keyword and no destiny is provided, \fIm\fR will move selected files into the current directory. Otherwise, whenever \fIsel\fR is not used, but just a source file name (and no destiny is provided), the \fIm\fR command behaves much like the \fBimv(1)\fR shell command (from the `renameutils` package), providing an interactive renaming function: it prompts the user to enter a new name using the source file name as base, so that it does not need to be typed twice. For this alternative prompt, only TAB completion for file names is available.
+.sp
 NOTE: On POSIX compliant systems, like NetBSD, the \fIr\fR command amounts to \fIrm -r\fR for directories and \fIrm -f\fR for files, since the \fI-I\fR option is not available and \fI-i\fR is too instrusive.
 .sp
 CliFM supports \fIadvcp\fR and \fIwcp\fR to copy files (to add a progress bar to \fIcp\fR). To use them instead of \fIcp\fR set the corresponding option (cpCmd) in the configuration file. If \fIadvcp\fR is selected, the command used is 'advcp -giRp'. \fIwcp\fR takes no argument.
 .sp
 \fIadvmv\fR is also supported to move files (to add a progress bar to \fImv\fR). Use the 'mvCmd' option in the configuration file to choose this alternative implementation of \fImv\fR. In this case, the command used is 'advmv -gi'.
-.sp
-The \fIln\fR command allows the use of the 'e, edit' option to modify the destination of a symbolic link. Example: 'l e 12', or 'le 12',  to relink the symbolic link corresponding to the ELN 12.
+
 .TP
 .B cc, colors
 print the color codes list currently used for files listing.
