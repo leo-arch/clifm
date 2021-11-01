@@ -322,7 +322,8 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 /*			*i -= (term_rows - 1); */
 		} else { /* Normal view */
 			if (listing_mode == HORLIST)
-				*i -= (int)((term_rows * columns_n) - columns_n);
+				*i = 0;
+/*				*i -= (int)((term_rows * columns_n) - columns_n); */
 			else
 				return (-2);
 		}
