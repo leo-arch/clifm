@@ -1120,13 +1120,12 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	int blc = last_column;
 
 	size_t cur_cols = 0, cc = columns_n;
-	int x = 0, xx = 0, i = 0, bxx = 0;
+	int x = 0, xx = 0, i = 0;
 	for ( ; ; i++) {
 		/* Copy current values to restore them if necessary: done to
 		 * skip the first two chars of arrow keys : \x1b [ */
-		bxx = xx;
-		size_t bcc = cc, bcur_cols = cur_cols;
-		int bi = i, bx = x;
+		int bxx = xx, bx = x;
+		size_t bcc = cc;
 		if (cc == columns_n) {
 			x = xx;
 			xx++;
@@ -1139,6 +1138,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		if (xx > rows)
 			break;
 
+		size_t bcur_cols = cur_cols;
 		/* If current entry is in the last column, we need to print a
 		 * a new line char */
 		if (++cur_cols == columns_n) {
@@ -1171,7 +1171,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 				 * ########################## */
 
 		if (pager) {
-			int ret = 0;
+			int ret = 0, bi = i;
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			if (blc && *counter > columns_n * ((size_t)term_rows - 2))
