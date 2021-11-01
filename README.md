@@ -158,7 +158,7 @@ To enjoy of any of the features tagged as NEW, clone this repository and install
 
 **NEW**: [Open-with command](https://github.com/leo-arch/clifm/wiki/Introduction#ow-elnfilename-application)
 
-**NEW**: [imv-like functionality for the `m` command](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
+**NEW**: [Interactive rename functionality for the `m` command](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
 
 ---
 
