@@ -35,6 +35,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <readline/readline.h>
+#include <limits.h>
 
 #include "actions.h"
 #ifndef _NO_ARCHIVING
@@ -526,23 +527,18 @@ set_max_files(char **args)
 	if ((*args[1] == 'u' && strcmp(args[1], "unset") == 0)
 	|| (*args[1] == '-' && args[1][1] == '1' && !args[1][2])) {
 		max_files = -1;
-		puts(_("Max files: unset (no limit)"));
+		puts(_("Max files: unset"));
 		return EXIT_SUCCESS;
 	}
 
-	if (!is_number(args[1])) {
-		fprintf(stderr, _("%s: %s\n"), PROGRAM_NAME, MF_USAGE);
+	long inum = strtol(args[1], NULL, 10);
+	if (inum == LONG_MAX || inum == LONG_MIN || inum == 0
+	|| inum < -1 || (size_t)inum > files) {
+		fprintf(stderr, _("%s: %s: Invalid number\n"), PROGRAM_NAME, args[1]);
 		return (exit_code = EXIT_FAILURE);
 	}
 
-	int inum = atoi(args[1]);
-	if (inum < -1) {
-		max_files = inum;
-		fprintf(stderr, _("%s: %d: Invalid number\n"), PROGRAM_NAME, inum);
-		return (exit_code = EXIT_FAILURE);
-	}
-
-	max_files = inum;
+	max_files = (int)inum;
 	printf(_("Max files set to %d\n"), max_files);
 	return EXIT_SUCCESS;
 }
