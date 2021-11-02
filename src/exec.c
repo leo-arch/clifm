@@ -530,6 +530,12 @@ set_max_files(char **args)
 		return EXIT_SUCCESS;
 	}
 
+	if (*args[1] == '0' && !args[1][1]) {
+		max_files = 0;
+		printf(_("Max files set to %d\n"), max_files);
+		return EXIT_SUCCESS;
+	}
+
 	long inum = strtol(args[1], NULL, 10);
 	if (inum == LONG_MAX || inum == LONG_MIN || inum <= 0) {
 		fprintf(stderr, _("%s: %s: Invalid number\n"), PROGRAM_NAME, args[1]);
