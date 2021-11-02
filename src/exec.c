@@ -524,16 +524,14 @@ set_max_files(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	if ((*args[1] == 'u' && strcmp(args[1], "unset") == 0)
-	|| (*args[1] == '-' && args[1][1] == '1' && !args[1][2])) {
+	if (*args[1] == 'u' && strcmp(args[1], "unset") == 0) {
 		max_files = -1;
 		puts(_("Max files: unset"));
 		return EXIT_SUCCESS;
 	}
 
 	long inum = strtol(args[1], NULL, 10);
-	if (inum == LONG_MAX || inum == LONG_MIN || inum == 0
-	|| inum < -1 || (size_t)inum > files) {
+	if (inum == LONG_MAX || inum == LONG_MIN || inum <= 0) {
 		fprintf(stderr, _("%s: %s: Invalid number\n"), PROGRAM_NAME, args[1]);
 		return (exit_code = EXIT_FAILURE);
 	}
