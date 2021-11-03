@@ -23,7 +23,7 @@ FilesCounter=true
 # chars (no more) will be printed
 DividingLineChar='-'
 
-# How to list files: 0=vertically (like ls(1) would), 1=horizontally
+# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally
 ListingMode=0
 
 # If set to true, print a map of the current position in the directory

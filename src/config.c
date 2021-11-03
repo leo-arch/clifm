@@ -740,7 +740,7 @@ FilesCounter=%s\n\n"
 # drawn with bow-drawing characters (not supported by all terminals/consoles)\n\
 DividingLineChar='%c'\n\n"
 
-		"# How to list files: 0=vertically (like ls(1) would), 1=horizontally\n\
+		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
 ListingMode=%d\n\n"
 
 	    "# If set to true, print a map of the current position in the directory\n\
