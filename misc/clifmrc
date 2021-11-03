@@ -73,7 +73,7 @@ mvCmd=0
 # add color to the prompt line
 # \]: End a sequence of non-printing characters
 
-Prompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0;36m\]\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
+Prompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 
 # If set to 'default', CliFM state information (selected files,
 # trashed files, current workspace, messages, and stealth mode) will be printed
