@@ -87,7 +87,7 @@ WarningPrompt=false
 
 # String to be used by the warning prompt. The color of this prompt
 # can be customized using the 'wp' code in the color scheme file
-WarningPromptStr="(!) > "
+WarningPromptStr="(!) >>> "
 
 # TAB completion mode: either 'standard' (default) or 'fzf'
 TabCompletionMode=standard
