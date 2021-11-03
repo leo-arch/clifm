@@ -76,24 +76,34 @@
  * DIV_LINE_CHAR takes more than two columns to be printed (ASCII chars
  * take only one, but unicode chars could take two), print exactly the
  * content of DIV_LINE_CHAR. Otherwise, repeat DIV_LINE_CHAR to fulfill
- * all terminal columns. */
+ * all terminal columns. If DIV_LINE_CHAR is '0', print no line at all */
 static void
 print_div_line(void)
 {
-	if (!*div_line_char) {
-		putchar('\n');
-		return;
-	}
-
 	fputs(dl_c, stdout);
 
-	size_t len = wc_xstrlen(div_line_char);
-	if (len <= 2) {
-		int i;
-		for (i = (int)(term_cols / len); i--;)
-			fputs(div_line_char, stdout);
+	if (!*div_line_char) {
+		/* Default line */
+		fputs("\x1b(0m", stdout);
+		int k = 0;
+		for (; k < (int)term_cols - 2; k++)
+			putchar('q');
+		fputs("\x1b(0j\x1b(B", stdout);
+	} else if (*div_line_char == '0' && !div_line_char[1]) {
+		/* No line */
+		putchar('\n');
 	} else {
-		puts(div_line_char);
+		/* Custom line */
+		size_t len = wc_xstrlen(div_line_char);
+		if (len <= 2) {
+			/* Extend DIV_LINE_CHAR to the end of the screen */
+			int i;
+			for (i = (int)(term_cols / len); i--;)
+				fputs(div_line_char, stdout);
+		} else {
+			/* Print DIV_LINE_CHAR exactly */
+			puts(div_line_char);
+		}
 	}
 
 	fputs(df_c, stdout);

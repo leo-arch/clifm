@@ -733,10 +733,11 @@ ColorScheme=%s\n\n"
 # command while in the program itself.\n\
 FilesCounter=%s\n\n"
 
-	    "# The character used to construct the line dividing the list of files and\n\
-# the prompt. DividingLineChar accepts both literal characters (in single\n\
-# quotes) and decimal numbers.\n\
-DividingLineChar='%c'\n\n"
+		"# The character(s) used to construct the line dividing the list of files and\n\
+# the prompt. If empty, the default line is printed; if '0', just an empty line;\n\
+# if only one char, this char is printed reapeatedly to fulfill the screen;\n\
+if 3 or more chars, only these chars (no more) will be printed.\n\
+DividingLineChar=\n\n"
 
 		"# How to list files: 0=vertically (like ls(1) would), 1=horizontally\n\
 ListingMode=%d\n\n"
@@ -813,7 +814,6 @@ ELNPad=%d\n\n",
 	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
 		DEF_FILES_COUNTER == 1 ? "true" : "false",
-		DEF_DIV_LINE_CHAR,
 		DEF_LISTING_MODE,
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,

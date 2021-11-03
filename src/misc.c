@@ -47,6 +47,10 @@
 #include <sys/inotify.h>
 #endif
 
+#ifdef __linux__
+#include <libudev.h>
+#endif
+
 #include "aux.h"
 #include "bookmarks.h"
 #include "checks.h"
@@ -748,8 +752,7 @@ save_last_path(void)
 	FILE *last_fp;
 	last_fp = fopen(last_dir, "w");
 	if (!last_fp) {
-		fprintf(stderr, _("%s: Error saving last visited "
-				  "directory\n"),
+		fprintf(stderr, _("%s: Error saving last visited directory\n"),
 		    PROGRAM_NAME);
 		free(last_dir);
 		return;
@@ -960,6 +963,70 @@ set_shell(char *str)
 	return EXIT_SUCCESS;
 }
 
+#ifdef __linux__
+static struct udev_device*
+get_child(struct udev* udev, struct udev_device* parent, const char* subsystem)
+{
+	struct udev_device* child = NULL;
+	struct udev_enumerate *enumerate = udev_enumerate_new(udev);
+
+	udev_enumerate_add_match_parent(enumerate, parent);
+	udev_enumerate_add_match_subsystem(enumerate, subsystem);
+	udev_enumerate_scan_devices(enumerate);
+
+	struct udev_list_entry *devices = udev_enumerate_get_list_entry(enumerate);
+	struct udev_list_entry *entry;
+
+	udev_list_entry_foreach(entry, devices) {
+		const char *path = udev_list_entry_get_name(entry);
+		child = udev_device_new_from_syspath(udev, path);
+		break;
+	}
+
+	udev_enumerate_unref(enumerate);
+	return child;
+}
+
+/* Return an array of block devices partitions */
+static char **
+get_block_devices(void)
+{
+	struct udev* udev = udev_new();
+	struct udev_enumerate* enumerate = udev_enumerate_new(udev);
+
+	udev_enumerate_add_match_property(enumerate, "DEVTYPE", "partition");
+	udev_enumerate_scan_devices(enumerate);
+
+	struct udev_list_entry *devices = udev_enumerate_get_list_entry(enumerate);
+	struct udev_list_entry *entry;
+
+	char **mps = (char **)NULL;
+	size_t n = 0;
+
+	udev_list_entry_foreach(entry, devices) {
+	const char* path = udev_list_entry_get_name(entry);
+	struct udev_device* scsi = udev_device_new_from_syspath(udev, path);
+
+	struct udev_device* block = get_child(udev, scsi, "block");
+
+	const char *dev = udev_device_get_devnode(block);
+	mps = (char **)xrealloc(mps, (n + 2) * sizeof(char *));
+	mps[n++] = savestring(dev, strlen(dev));
+
+	if (block)
+		udev_device_unref(block);
+
+	udev_device_unref(scsi);
+	}
+	mps[n] = (char *)NULL;
+
+	udev_enumerate_unref(enumerate);
+	udev_unref(udev);
+
+	return mps;
+}
+#endif /* __linux__ */
+
 /* List available mountpoints and chdir into one of them */
 int
 list_mountpoints(void)
@@ -981,7 +1048,12 @@ list_mountpoints(void)
 
 	printf(_("%sMountpoints%s\n\n"), BOLD, df_c);
 
-	char **mountpoints = (char **)NULL;
+	struct mnt_t {
+		char *mnt;
+		char *dev;
+	};
+
+	struct mnt_t *mountpoints = (struct mnt_t *)NULL;
 	size_t mp_n = 0;
 	int i, exit_status = EXIT_SUCCESS;
 
@@ -1001,32 +1073,72 @@ list_mountpoints(void)
 			str = strtok(line, " ");
 			size_t dev_len = strlen(str);
 
-			char *device = savestring(str, dev_len);
+			mountpoints = (struct mnt_t *)xrealloc(mountpoints,
+				    (mp_n + 2) * sizeof(struct mnt_t));
+			mountpoints[mp_n].dev = savestring(str, dev_len);
 			/* Print only the first two fileds of each /proc/mounts
 			 * line */
 			while (str && counter < 2) {
 				if (counter == 1) { /* 1 == second field */
 					printf("%s%zu%s %s%s%s (%s)\n", el_c, mp_n + 1,
 					    df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c,
-					    str, df_c, device);
+					    str, df_c, mountpoints[mp_n].dev);
 					/* Store the second field (mountpoint) into an
 					 * array */
-					mountpoints = (char **)xrealloc(mountpoints,
-					    (mp_n + 1) * sizeof(char *));
-					mountpoints[mp_n++] = savestring(str, strlen(str));
+//					mountpoints = (mnt_t **)xrealloc(mountpoints,
+//					    (mp_n + 2) * sizeof(char *));
+//					mountpoints[mp_n++] = savestring(str, strlen(str));
+					mountpoints[mp_n++].mnt = savestring(str, strlen(str));
 				}
 
 				str = strtok(NULL, " ,");
 				counter++;
 			}
 
-			free(device);
+//			free(device);
 		}
 	}
 
 	free(line);
 	line = (char *)NULL;
 	fclose(mp_fp);
+
+	mountpoints[mp_n].dev = (char *)NULL;
+	mountpoints[mp_n].mnt = (char *)NULL;
+
+	char **unm_devs = get_block_devices();
+	if (unm_devs) {
+		printf(_("\n%sUnmounted devices%s\n\n"), BOLD, df_c);
+		i = 0;
+		size_t k = mp_n;
+		for (; unm_devs[i]; i++) {
+			int skip = 0;
+			size_t j = 0;
+			/* Skip already mounted devices */
+			for (; j < k; j++) {
+				if (strcmp(mountpoints[j].dev, unm_devs[i] + 1) == 0)
+					skip = 1;
+			}
+			if (skip) {
+				free(unm_devs[i]);
+				continue;
+			}
+
+
+			mountpoints = (struct mnt_t *)xrealloc(mountpoints,
+				    (mp_n + 2) * sizeof(struct mnt_t));
+			mountpoints[mp_n].mnt = (char *)NULL;
+			mountpoints[mp_n].dev = savestring(unm_devs[i], strlen(unm_devs[i]));
+			printf("%s%zu %s%s\n", el_c, mp_n + 1, df_c, mountpoints[mp_n].dev);
+			mp_n++;
+			free(unm_devs[i]);
+		}
+		free(unm_devs);
+
+		mountpoints[mp_n].dev = (char *)NULL;
+		mountpoints[mp_n].mnt = (char *)NULL;
+	}
+
 
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
 	struct statfs *fslist;
@@ -1053,13 +1165,22 @@ list_mountpoints(void)
 			    (access(fslist[i].f_mntonname, R_OK | X_OK) == 0)
 			    ? di_c : nd_c, fslist[i].f_mntonname,
 			    df_c, fslist[i].f_mntfromname);
-			/* Store the mountpoint into an array */
-			mountpoints = (char **)xrealloc(mountpoints,
+			/* Store the mountpoint into the mounpoints struct */
+			mountpoints = (struct mnt_t *)xrealloc(mountpoints,
+				    (j + 2) * sizeof(struct mnt_t));
+			mountpoints[j].mnt = savestring(fslist[i].f_mntonname,
+					strlen(fslist[i].f_mntonname));
+			mountpoints[j++].dev = (char *)NULL;
+
+/*			mountpoints = (char **)xrealloc(mountpoints,
 			    (size_t)(j + 1) * sizeof(char *));
 			mountpoints[j++] = savestring(fslist[i].f_mntonname,
-			    strlen(fslist[i].f_mntonname));
+			    strlen(fslist[i].f_mntonname)); */
 		}
 	}
+
+	mountpoints[j].dev = (char *)NULL;
+	mountpoints[j].mnt = (char *)NULL;
 	/* Update filesystem counter as it would be used to free() the
 	 * mountpoints entries later (below) */
 	mp_n = (size_t)j;
@@ -1069,15 +1190,27 @@ list_mountpoints(void)
 	/* Ask the user and chdir into the selected mountpoint */
 	char *input = (char *)NULL;
 	while (!input)
+#ifdef __linux__
+		input = rl_no_hist(_("Choose a mountpoint/device ('q' to quit): "));
+#else
 		input = rl_no_hist(_("Choose a mountpoint ('q' to quit): "));
+#endif
 
 	if (!(*input == 'q' && *(input + 1) == '\0')) {
 		int atoi_num = atoi(input);
 		if (atoi_num > 0 && atoi_num <= (int)mp_n) {
-			if (xchdir(mountpoints[atoi_num - 1], SET_TITLE) == EXIT_SUCCESS) {
+
+			if (!mountpoints[atoi_num - 1].mnt) {
+				/* Here we should mount the device */
+				fprintf(stderr, "%s: %s: Unmounted drive\n", PROGRAM_NAME,
+						mountpoints[atoi_num - 1].dev);
+				goto EXIT;
+			}
+
+			if (xchdir(mountpoints[atoi_num - 1].mnt, SET_TITLE) == EXIT_SUCCESS) {
 				free(ws[cur_ws].path);
-				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1],
-				    strlen(mountpoints[atoi_num - 1]));
+				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1].mnt,
+				    strlen(mountpoints[atoi_num - 1].mnt));
 
 				if (cd_lists_on_the_fly) {
 					free_dirlist();
@@ -1089,22 +1222,25 @@ list_mountpoints(void)
 				add_to_jumpdb(ws[cur_ws].path);
 			} else {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    mountpoints[atoi_num - 1], strerror(errno));
+				    mountpoints[atoi_num - 1].mnt, strerror(errno));
 				exit_status = EXIT_FAILURE;
 			}
 		} else {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			    mountpoints[atoi_num - 1], strerror(errno));
+			    mountpoints[atoi_num - 1].mnt, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
 	}
 
+EXIT:
 	/* Free stuff and exit */
 	free(input);
 
 	i = (int)mp_n;
-	while (--i >= 0)
-		free(mountpoints[i]);
+	while (--i >= 0) {
+		free(mountpoints[i].mnt);
+		free(mountpoints[i].dev);
+	}
 	free(mountpoints);
 
 	return exit_status;
