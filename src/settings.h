@@ -210,12 +210,11 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 
 #define MAX_WS 8
 
-#define DEFAULT_PROMPT "\\[\\e[0;36m\\]\\[\\e(0\\]lq\\[\\e(B\\]\\[\\e[0m\\]\
-[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\
-\\[\\e[0;36m\\]\\[\\e(0\\]mq\\[\\e(B\\]\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
+#define DEFAULT_PROMPT "\\[\\e[0m\\][\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \
+\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0;36m\\]\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
 >\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
-#define DEF_WPROMPT_STR "(!) >>> "
+#define DEF_WPROMPT_STR "(!) > "
 
 #define DEFAULT_TERM_CMD "xterm -e"
 
