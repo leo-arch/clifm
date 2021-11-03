@@ -951,7 +951,7 @@ check_jcmd(char *line)
 		print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c
 					: sf_c);
 	}
-	suggestion.offset = 0;
+//	suggestion.offset = 0;
 	free(jump_suggestion);
 	jump_suggestion = (char *)NULL;
 	return 1;
@@ -1029,12 +1029,16 @@ static char*
 get_last_word(const char *last_space, size_t buflen)
 {
 	if (last_space) {
-		int j = (int)buflen;
+		char *rl = rl_line_buffer;
+//		int j = (int)buflen;
+		int j = rl_end;
 		while (--j >= 0) {
-			if (rl_line_buffer[j] == ' ')
+			if (j + 1 && rl[j] == ' ' && rl[j + 1] && rl[j + 1] != ' ')
+//			if (rl_line_buffer[j] == ' ')
 				break;
 		}
 		last_word_offset = j + 1;
+//		printf("'%d'", last_word_offset);
 		buflen = strlen(last_space);
 
 		if (*(++last_space)) {
@@ -1134,7 +1138,7 @@ print_warning_prompt(const char c)
 int
 rl_suggestions(const unsigned char c)
 {
-	int printed = 0;
+	int printed = 0, zero_offset = 0;
 	last_word_offset = 0;
 
 	if (rl_end == 0 && rl_point == 0) {
@@ -1217,7 +1221,7 @@ rl_suggestions(const unsigned char c)
 				if (*word == *bookmark_names[i]
 				&& strncmp(bookmark_names[i], word, wlen) == 0) {
 					suggestion.type = CMD_SUG;
-					suggestion.offset = last_word_offset;
+//					suggestion.offset = last_word_offset;
 					print_suggestion(bookmark_names[i], wlen, sx_c);
 					printed = 1;
 					break;
@@ -1236,7 +1240,7 @@ rl_suggestions(const unsigned char c)
 				if (*last_word == *color_schemes[i]
 				&& strncmp(color_schemes[i], word, wlen) == 0) {
 					suggestion.type = CMD_SUG;
-					suggestion.offset = last_word_offset;
+//					suggestion.offset = last_word_offset;
 					print_suggestion(color_schemes[i], wlen, sx_c);
 					printed = 1;
 					break;
@@ -1253,6 +1257,7 @@ rl_suggestions(const unsigned char c)
 		|| lb[1] == 'p') && lb[2] == ' ')) {
 			printed = check_jcmd(full_line);
 			if (printed) {
+				zero_offset = 1;
 				goto SUCCESS;
 			} else {
 				goto FAIL;
@@ -1267,7 +1272,7 @@ rl_suggestions(const unsigned char c)
 				if (*word == *remotes[i].name
 				&& strncmp(remotes[i].name, word, wlen) == 0) {
 					suggestion.type = CMD_SUG;
-					suggestion.offset = last_word_offset;
+//					suggestion.offset = last_word_offset;
 					print_suggestion(remotes[i].name, wlen, sx_c);
 					printed = 1;
 					break;
@@ -1286,7 +1291,7 @@ rl_suggestions(const unsigned char c)
 				if (*word == *profile_names[i]
 				&& strncmp(profile_names[i], word, wlen) == 0) {
 					suggestion.type = CMD_SUG;
-					suggestion.offset = last_word_offset;
+//					suggestion.offset = last_word_offset;
 					print_suggestion(profile_names[i], wlen, sx_c);
 					printed = 1;
 					break;
@@ -1306,8 +1311,8 @@ rl_suggestions(const unsigned char c)
 	/* 3.b) Check already suggested string */
 	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)
 	&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
-		printed = 1;
-		suggestion.offset = 0;
+		printed = zero_offset = 1;
+//		suggestion.offset = 0;
 		goto SUCCESS;
 	}
 
@@ -1317,7 +1322,7 @@ rl_suggestions(const unsigned char c)
 		/* 3.c.1) Suggest the sel keyword only if not first word */
 		if (*word == 's' && strncmp(word, "sel", wlen) == 0) {
 			suggestion.type = CMD_SUG;
-			suggestion.offset = last_word_offset;
+//			suggestion.offset = last_word_offset;
 			printed = 1;
 			print_suggestion("sel", wlen, sx_c);
 			goto SUCCESS;
@@ -1326,7 +1331,8 @@ rl_suggestions(const unsigned char c)
 		/* 3.c.2) Check commands fixed parameters */
 		printed = check_int_params(full_line, (size_t)rl_end);
 		if (printed) {
-			suggestion.offset = 0;
+			zero_offset = 1;
+//			suggestion.offset = 0;
 			goto SUCCESS;
 		}
 	}
@@ -1335,7 +1341,7 @@ rl_suggestions(const unsigned char c)
 	if (*word == '-') {
 		printed = check_help(full_line, word);
 		if (printed) {
-			suggestion.offset = last_word_offset;
+//			suggestion.offset = last_word_offset;
 			goto SUCCESS;
 		}
 	}
@@ -1364,7 +1370,7 @@ rl_suggestions(const unsigned char c)
 
 			printed = check_aliases(word, wlen, flag);
 			if (printed) {
-				suggestion.offset = last_word_offset;
+//				suggestion.offset = last_word_offset;
 				goto SUCCESS;
 			}
 			break;
@@ -1377,7 +1383,7 @@ rl_suggestions(const unsigned char c)
 
 				printed = check_bookmarks(word, wlen, flag);
 				if (printed) {
-					suggestion.offset = last_word_offset;
+//					suggestion.offset = last_word_offset;
 					goto SUCCESS;
 				}
 			}
@@ -1404,7 +1410,7 @@ rl_suggestions(const unsigned char c)
 							goto SUCCESS;
 						}
 					} else {
-						suggestion.offset = last_word_offset;
+//						suggestion.offset = last_word_offset;
 						goto SUCCESS;
 					}
 				}
@@ -1433,7 +1439,7 @@ rl_suggestions(const unsigned char c)
 				printed = check_eln(word, flag);
 
 				if (printed) {
-					suggestion.offset = last_word_offset;
+//					suggestion.offset = last_word_offset;
 					goto SUCCESS;
 				}
 			}
@@ -1457,7 +1463,7 @@ rl_suggestions(const unsigned char c)
 							c, last_space ? 0 : 1, full_word);
 
 				if (printed) {
-					suggestion.offset = last_word_offset;
+//					suggestion.offset = last_word_offset;
 					goto SUCCESS;
 				}
 			}
@@ -1466,7 +1472,8 @@ rl_suggestions(const unsigned char c)
 		case 'h': /* 3.d.6) Commands history */
 			printed = check_history(full_line, (size_t)rl_end);
 			if (printed) {
-				suggestion.offset = 0;
+				zero_offset = 1;
+//				suggestion.offset = 0;
 				goto SUCCESS;
 			}
 			break;
@@ -1490,7 +1497,7 @@ rl_suggestions(const unsigned char c)
 				printed = check_jumpdb(word, wlen, flag);
 
 				if (printed) {
-					suggestion.offset = last_word_offset;
+//					suggestion.offset = last_word_offset;
 					goto SUCCESS;
 				}
 			}
@@ -1506,7 +1513,7 @@ rl_suggestions(const unsigned char c)
 	if (*word == '$') {
 		printed = check_variables(word + 1, wlen - 1);
 		if (printed) {
-			suggestion.offset = last_word_offset;
+//			suggestion.offset = last_word_offset;
 			goto SUCCESS;
 		}
 	}
@@ -1555,7 +1562,7 @@ CHECK_CMD:
 			recover_from_wrong_cmd();
 			rl_dispatching = 0;
 		}
-		suggestion.offset = last_word_offset;
+//		suggestion.offset = last_word_offset;
 		goto SUCCESS;
 
 	/* Let's suppose that two slashes do not constitue a search
@@ -1587,6 +1594,8 @@ NO_SUGGESTION:
 
 SUCCESS:
 	if (printed) {
+		suggestion.offset = zero_offset ? 0 : last_word_offset;
+
 		if (printed == FULL_MATCH && suggestion_buf) {
 			clear_suggestion(CS_FREEBUF);
 		}
