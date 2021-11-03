@@ -734,9 +734,9 @@ ColorScheme=%s\n\n"
 FilesCounter=%s\n\n"
 
 		"# The character(s) used to construct the line dividing the list of files and\n\
-# the prompt. If empty, the default line is printed; if '0', just an empty line;\n\
-# if only one char, this char is printed reapeatedly to fulfill the screen;\n\
-if 3 or more chars, only these chars (no more) will be printed.\n\
+# the prompt. if '0', prints just an empty line; if only one char, this char \n\
+# is printed reapeatedly to fulfill the screen; if 3 or more chars, only these \n\
+# chars (no more) will be printed.\n\
 DividingLineChar='%c'\n\n"
 
 		"# How to list files: 0=vertically (like ls(1) would), 1=horizontally\n\
