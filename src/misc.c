@@ -47,9 +47,10 @@
 #include <sys/inotify.h>
 #endif
 
+/*
 #ifdef __linux__
 #include <libudev.h>
-#endif
+#endif */
 
 #include "aux.h"
 #include "bookmarks.h"
@@ -963,6 +964,7 @@ set_shell(char *str)
 	return EXIT_SUCCESS;
 }
 
+/*
 #ifdef __linux__
 static struct udev_device*
 get_child(struct udev* udev, struct udev_device* parent, const char* subsystem)
@@ -987,7 +989,7 @@ get_child(struct udev* udev, struct udev_device* parent, const char* subsystem)
 	return child;
 }
 
-/* Return an array of block devices partitions */
+// Return an array of block devices partitions
 static char **
 get_block_devices(void)
 {
@@ -1025,7 +1027,8 @@ get_block_devices(void)
 
 	return mps;
 }
-#endif /* __linux__ */
+#endif // __linux__
+*/
 
 /* List available mountpoints and chdir into one of them */
 int
@@ -1106,7 +1109,7 @@ list_mountpoints(void)
 	mountpoints[mp_n].dev = (char *)NULL;
 	mountpoints[mp_n].mnt = (char *)NULL;
 
-	char **unm_devs = get_block_devices();
+/*	char **unm_devs = get_block_devices();
 	if (unm_devs) {
 		printf(_("\n%sUnmounted devices%s\n\n"), BOLD, df_c);
 		i = 0;
@@ -1114,7 +1117,7 @@ list_mountpoints(void)
 		for (; unm_devs[i]; i++) {
 			int skip = 0;
 			size_t j = 0;
-			/* Skip already mounted devices */
+			// Skip already mounted devices
 			for (; j < k; j++) {
 				if (strcmp(mountpoints[j].dev, unm_devs[i] + 1) == 0)
 					skip = 1;
@@ -1137,7 +1140,7 @@ list_mountpoints(void)
 
 		mountpoints[mp_n].dev = (char *)NULL;
 		mountpoints[mp_n].mnt = (char *)NULL;
-	}
+	} */
 
 
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
