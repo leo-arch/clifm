@@ -1001,6 +1001,7 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the \f
 The following codes are used for different interface elements (in the \fIInterfaceColors\fR section of the current color scheme file):
 .sp
  \fBSuggestions\fR
+ sb = shell built-ins
  sc = aliases and shell command names
  sf = ELN's, bookmarks, file and directory names
  sh = commands history entries
