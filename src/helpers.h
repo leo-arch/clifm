@@ -922,6 +922,7 @@ extern char
 	wp_c[MAX_COLOR],	/* Warning prompt */
 
 	/* Suggestions */
+	sb_c[MAX_COLOR],	/* Auto-suggestions: shell builtins */
 	sc_c[MAX_COLOR],	/* Auto-suggestions: external commands */
 	sf_c[MAX_COLOR],	/* Auto-suggestions: filenames */
 	sh_c[MAX_COLOR],	/* Auto-suggestions: history */

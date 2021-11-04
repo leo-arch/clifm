@@ -659,6 +659,7 @@ char
 	wp_c[MAX_COLOR], /* Warning prompt */
 
 	/* Suggestions */
+	sb_c[MAX_COLOR], /* Auto-suggestions: shell builtins */
     sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
     sh_c[MAX_COLOR], /* Auto-suggestions: history */
     sf_c[MAX_COLOR], /* Auto-suggestions: filenames */

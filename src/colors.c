@@ -637,6 +637,20 @@ set_iface_colors(char **colors, const size_t words)
 				snprintf(hw_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
+		else if (*colors[i] == 's' && strncmp(colors[i], "sb=", 3) == 0) {
+			if (!is_color_code(colors[i] + 3))
+				*sb_c = '\0';
+			else
+				snprintf(sb_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+		}
+
+		else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0) {
+			if (!is_color_code(colors[i] + 3))
+				*sc_c = '\0';
+			else
+				snprintf(sc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+		}
+
 		else if (*colors[i] == 's' && strncmp(colors[i], "sh=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*sh_c = '\0';
@@ -651,11 +665,11 @@ set_iface_colors(char **colors, const size_t words)
 				snprintf(sf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
-		else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0) {
+		else if (*colors[i] == 's' && strncmp(colors[i], "sp=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
-				*sc_c = '\0';
+				*sp_c = '\0';
 			else
-				snprintf(sc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+				snprintf(sp_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "sx=", 3) == 0) {
@@ -663,13 +677,6 @@ set_iface_colors(char **colors, const size_t words)
 				*sx_c = '\0';
 			else
 				snprintf(sx_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
-		}
-
-		else if (*colors[i] == 's' && strncmp(colors[i], "sp=", 3) == 0) {
-			if (!is_color_code(colors[i] + 3))
-				*sp_c = '\0';
-			else
-				snprintf(sp_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'b' && strncmp(colors[i], "bm=", 3) == 0) {
@@ -814,12 +821,14 @@ set_default_colors(void)
 	if (!*hw_c)
 		strcpy(hw_c, DEF_HW_C);
 
+	if (!*sb_c)
+		strcpy(sb_c, DEF_SB_C);
+	if (!*sc_c)
+		strcpy(sc_c, DEF_SC_C);
 	if (!*sh_c)
 		strcpy(sh_c, DEF_SH_C);
 	if (!*sf_c)
 		strcpy(sf_c, DEF_SF_C);
-	if (!*sc_c)
-		strcpy(sc_c, DEF_SC_C);
 	if (!*sx_c)
 		strcpy(sx_c, DEF_SX_C);
 	if (!*sp_c)

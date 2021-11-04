@@ -668,7 +668,7 @@ check_builtins(const char *str, const size_t len, const int print)
 		size_t blen = strlen(b[i]);
 		if (blen > len) {
 			suggestion.type = CMD_SUG;
-			print_suggestion(b[i], len, "\x1b[02;33m");
+			print_suggestion(b[i], len, sb_c);
 			return PARTIAL_MATCH;
 		} else {
 			return FULL_MATCH;
