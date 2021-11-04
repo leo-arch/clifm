@@ -160,6 +160,8 @@ To enjoy of any of the features tagged as NEW, clone this repository and install
 
 **NEW**: [Interactive rename functionality for the `m` command](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
 
+**NEW**: [Limit file names length for listed files](https://github.com/leo-arch/clifm/wiki/Specifics#configuration-file)
+
 ---
 
 ## Installing _CliFM_
