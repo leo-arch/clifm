@@ -538,9 +538,6 @@ prompt(void)
 	}
 
 	size_t decoded_prompt_len;
-/*	if (unicode || prompt_style == CUSTOM_PROMPT_STYLE)
-		decoded_prompt_len = u8_xstrlen(decoded_prompt);
-	else */
 	decoded_prompt_len = strlen(decoded_prompt);
 
 	size_t prompt_length = 0;
@@ -556,7 +553,8 @@ prompt(void)
 
 	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+RL_NC;
 	 * 6 = RL_NC
-	 * 1 = null terminating char */
+	 * 1 = null terminating char
+	 * 2 = \001 and \002 for tx_c */
 
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
 

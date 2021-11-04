@@ -72,6 +72,17 @@
 
 #include <readline/readline.h>
 
+/* Struct to store information about trimmed file names */
+struct trim_t {
+	int state;
+	int a; /* trimmed char */
+	int b; /* char next to trimmed char */
+	int pad;
+	size_t len; /* Lenght of file name before trimming */
+};
+
+struct trim_t trim;
+
 /* Print the line divinding files and prompt using DIV_LINE_CHAR. If
  * DIV_LINE_CHAR takes more than two columns to be printed (ASCII chars
  * take only one, but unicode chars could take two), print exactly the
@@ -400,10 +411,17 @@ get_longest_filename(const int n, const int pad)
 	while (--i >= 0) {
 		size_t total_len = 0;
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
+
+		size_t blen = file_info[i].len;
+		if (file_info[i].len > (size_t)max_name_len)
+			file_info[i].len = (size_t)max_name_len;
+
 		if (elnpad == NOPAD)
 			total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
 		else
 			total_len = (size_t)pad + 1 + file_info[i].len;
+
+		file_info[i].len = blen;
 
 		if (!long_view && classify) {
 			if (file_info[i].dir)
@@ -1025,6 +1043,27 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 	xprintf("\x1b[%dC", diff + 1);
 }
 
+static inline void
+trim_filename(int i)
+{
+	trim.state = 1;
+	trim.a = file_info[i].name[max_name_len - 1];
+	trim.b = file_info[i].name[max_name_len];
+	trim.len = file_info[i].len;
+	file_info[i].name[max_name_len - 1] = '~';
+	file_info[i].name[max_name_len] = '\0';
+	file_info[i].len = (size_t)max_name_len;
+}
+
+static inline void
+untrim_filename(int i)
+{
+	file_info[i].len = trim.len;
+	file_info[i].name[max_name_len - 1] = (char)trim.a;
+	file_info[i].name[max_name_len] = (char)trim.b;
+	trim.state = trim.a = trim.b = trim.len = 0;
+}
+
 /* List files horizontally:
  * 1 AAA	2 AAB	3 AAC
  * 4 AAD	5 AAE	6 AAF */
@@ -1087,6 +1126,11 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
+		/* Trim file name to MAX_NAME_LEN */
+		if (max_name_len != UNSET && !long_view
+		&& (int)file_info[i].len > max_name_len)
+			trim_filename(i);
+
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
 		if (colorize) {
@@ -1109,6 +1153,9 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		} else {
 			putchar('\n');
 		}
+
+		if (trim.state == 1)
+			untrim_filename(i);
 	}
 
 	if (!last_column)
@@ -1218,28 +1265,36 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
+		/* Trim file name to MAX_NAME_LEN */
+		if (max_name_len != UNSET && !long_view
+		&& (int)file_info[x].len > max_name_len)
+			trim_filename(x);
+
 		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
 
 		if (colorize) {
 			if (light_mode)
 				print_entry_color_light(&ind_char, x, pad);
 			else
-				print_entry_color_light(&ind_char, x, pad);
+				print_entry_color(&ind_char, x, pad);
 		} else {
 			if (light_mode)
 				print_entry_nocolor_light(&ind_char, x, pad);
 			else
-				print_entry_nocolor_light(&ind_char, x, pad);
+				print_entry_nocolor(&ind_char, x, pad);
 		}
 
 		if (!last_column) {
 			if (light_mode)
 				pad_filename_light(&ind_char, x, pad);
 			else
-				pad_filename_light(&ind_char, x, pad);
+				pad_filename(&ind_char, x, pad);
 		} else {
 			putchar('\n');
 		}
+
+		if (trim.state == 1)
+			untrim_filename(x);
 	}
 
 	if (!last_column)
@@ -1477,6 +1532,8 @@ list_dir(void)
 #endif
 	if (clear_screen)
 		CLEAR;
+
+	trim.state = trim.a = trim.b = trim.len = 0;
 
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;

@@ -703,6 +703,7 @@ extern int
 	listing_mode,
     logs_enabled,
     long_view,
+	max_name_len,
     mime_match,
     min_name_trim,
     mv_cmd,

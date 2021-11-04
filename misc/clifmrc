@@ -231,6 +231,10 @@ Unicode=true
 # does not fit in the screen)
 Pager=false
 
+# Maximum file name length for listed files. Names larger than
+# MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde
+MaxFilenameLen=
+
 MaxHistory=1000
 MaxDirhist=100
 MaxLog=500

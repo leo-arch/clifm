@@ -977,8 +977,13 @@ CaseSensitivePathComp=%s\n\n\
 Unicode=%s\n\n\
 # Enable Mas, the files list pager (executed whenever the list of files\n\
 # does not fit in the screen)\n\
-Pager=%s\n\n\
-MaxHistory=%d\n\
+Pager=%s\n\n"
+
+	"# Maximum file name length for listed files. Names larger than\n\
+# MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde\n\
+MaxFilenameLen=\n\n"
+
+	"MaxHistory=%d\n\
 MaxDirhist=%d\n\
 MaxLog=%d\n\
 Icons=%s\n\
@@ -1376,6 +1381,8 @@ read_config(void)
 	if (xargs.rl_vi_mode == 1)
 		rl_vi_editing_mode(1, 0);
 
+	max_name_len = UNSET;
+
 	*div_line_char = '\0';
 #define MAX_BOOL 6 /* false (5) + 1 */
 	/* starting path(14) + PATH_MAX + \n(1)*/
@@ -1768,6 +1775,14 @@ read_config(void)
 				max_dirhist = opt_num;
 			else /* default */
 				max_dirhist = DEF_MAX_DIRHIST;
+		}
+
+		else if (*line == 'M' && strncmp(line, "MaxFilenameLen=", 15) == 0) {
+			int opt_num = 0;
+			sscanf(line, "MaxFilenameLen=%d\n", &opt_num);
+			if (opt_num <= 0)
+				continue;
+			max_name_len = opt_num;
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {
