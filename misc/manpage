@@ -105,7 +105,7 @@ List of CliFM features:
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Commands and directory history function
-  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, and directory history (via the \fIjump\fR command). There are two available modes: standard and FZF (See the \fI--fzftab\fR command line option below)
+  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), and the open-with command (\fIow\fR). There are two available modes: standard and FZF (See the \fI--fzftab\fR command line option below)
   5) TAB ELN\-expansion
   6) More than 40 customizable keyboard shortcuts
   7) Wildcards and regex auto\-expansion
@@ -144,6 +144,7 @@ List of CliFM features:
   40) Remote file systems management
   41) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
   42) Syntax highlighting
+  42) Interactive rename functionality for the \fIm\fR command.
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
