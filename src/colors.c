@@ -550,143 +550,126 @@ set_iface_colors(char **colors, const size_t words)
 	int i = (int)words;
 	while (--i >= 0) {
 		if (*colors[i] == 't' && strncmp(colors[i], "tx=", 3) == 0) {
-			if (!is_color_code(colors[i] + 3)) {
+			if (!is_color_code(colors[i] + 3))
 				/* zero the corresponding variable as a flag for
-				 * the check after this for loop to prepare the
+				 * the check after this loop to prepare the
 				 * variable to hold the default color */
 				*tx_c = '\0';
-			} else {
-				snprintf(tx_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-				    colors[i] + 3);
-			}
+			else
+//				snprintf(tx_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3);
+				snprintf(tx_c, MAX_COLOR + 2, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hb=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hb_c = '\0';
 			else
-				snprintf(hb_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hb_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hc=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hc_c = '\0';
 			else
-				snprintf(hc_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hd=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hd_c = '\0';
 			else
-				snprintf(hd_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "he=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*he_c = '\0';
 			else
-				snprintf(he_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(he_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hn=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hn_c = '\0';
 			else
-				snprintf(hn_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hn_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hp=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hp_c = '\0';
 			else
-				snprintf(hp_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hp_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hq=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hq_c = '\0';
 			else
-				snprintf(hq_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hq_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hr=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hr_c = '\0';
 			else
-				snprintf(hr_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hr_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hs=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hs_c = '\0';
 			else
-				snprintf(hs_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hs_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hv=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hv_c = '\0';
 			else
-				snprintf(hv_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hv_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hw=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*hw_c = '\0';
 			else
-				snprintf(hw_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(hw_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "sh=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*sh_c = '\0';
 			else
-				snprintf(sh_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(sh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "sf=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*sf_c = '\0';
 			else
-				snprintf(sf_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(sf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*sc_c = '\0';
 			else
-				snprintf(sc_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(sc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "sx=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*sx_c = '\0';
 			else
-				snprintf(sx_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(sx_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "sp=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*sp_c = '\0';
 			else
-				snprintf(sp_c, MAX_COLOR - 1, "\x1b[%sm",
-						colors[i] + 3);
+				snprintf(sp_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'b' && strncmp(colors[i], "bm=", 3) == 0) {
@@ -700,48 +683,42 @@ set_iface_colors(char **colors, const size_t words)
 			if (!is_color_code(colors[i] + 3))
 				*li_c = '\0';
 			else
-				snprintf(li_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-				    colors[i] + 3);
+				snprintf(li_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 't' && strncmp(colors[i], "ti=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*ti_c = '\0';
 			else
-				snprintf(ti_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-				    colors[i] + 3);
+				snprintf(ti_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'e' && strncmp(colors[i], "em=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*em_c = '\0';
 			else
-				snprintf(em_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-				    colors[i] + 3);
+				snprintf(em_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'w' && strncmp(colors[i], "wm=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*wm_c = '\0';
 			else
-				snprintf(wm_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-				    colors[i] + 3);
+				snprintf(wm_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'n' && strncmp(colors[i], "nm=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*nm_c = '\0';
 			else
-				snprintf(nm_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-				    colors[i] + 3);
+				snprintf(nm_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "si=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*si_c = '\0';
 			else
-				snprintf(si_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-				    colors[i] + 3);
+				snprintf(si_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'e' && strncmp(colors[i], "el=", 3) == 0) {
@@ -769,8 +746,7 @@ set_iface_colors(char **colors, const size_t words)
 			if (!is_color_code(colors[i] + 3))
 				*df_c = '\0';
 			else
-				snprintf(df_c, MAX_COLOR - 1, "\x1b[%s;49m",
-						colors[i] + 3);
+				snprintf(df_c, MAX_COLOR - 1, "\x1b[%s;49m", colors[i] + 3);
 		}
 
 		else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0) {

@@ -549,7 +549,7 @@ prompt(void)
 		prompt_length = (size_t)(decoded_prompt_len
 		+ (xargs.stealth_mode == 1 ? 16 : 0) + ((flags & ROOT_USR) ? 16 : 0)
 		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg) ? 16 : 0)
-		+ 6 + sizeof(tx_c) + 1);
+		+ 6 + sizeof(tx_c) + 1 + 2);
 	} else {
 		prompt_length = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
 	}
@@ -561,7 +561,7 @@ prompt(void)
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
 
 	if (prompt_style == DEF_PROMPT_STYLE) {
-		snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s%s",
+		snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s\001%s\002",
 			(flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
 			(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
 			? si_c : "", (xargs.stealth_mode == 1) ? "S\001\x1b[0m\002"
@@ -569,8 +569,8 @@ prompt(void)
 			(sel_n) ? li_c : "", (sel_n) ? "*\001\x1b[0m\002" : "",
 			decoded_prompt, RL_NC, tx_c);
 	} else {
-		snprintf(the_prompt, prompt_length, "%s%s%s", decoded_prompt, RL_NC,
-				tx_c);
+		snprintf(the_prompt, prompt_length, "%s%s\001%s\002", decoded_prompt,
+			RL_NC, tx_c);
 	}
 
 	free(decoded_prompt);

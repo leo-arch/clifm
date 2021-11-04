@@ -149,9 +149,6 @@ leftmost_bell(void)
 	}
 
 	rl_ring_bell();
-/*	printf("'%s'", rl_line_buffer);
-	fflush(stdout);
-	sleep(1); */
 
 	if (bell == BELL_VISIBLE) {
 		rl_end = rl_point = 0;

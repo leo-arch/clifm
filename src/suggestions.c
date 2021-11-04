@@ -286,6 +286,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* Let's keep a record of the suggestion color in case we need to
 	 * reprint it */
 	suggestion.color = (char *)color;
+
 	return;
 }
 

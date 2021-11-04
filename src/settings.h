@@ -107,7 +107,8 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 
 #define DEF_DF_C "\x1b[0m"
 
-#define DEF_TX_C "\001\x1b[0m\002"
+#define DEF_TX_C "\x1b[0m"
+//#define DEF_TX_C "\001\x1b[0m\002"
 #define DEF_LI_C "\001\x1b[01;32m\002"
 #define DEF_TI_C "\001\x1b[01;33m\002"
 #define DEF_EM_C "\001\x1b[01;31m\002"
