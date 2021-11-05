@@ -150,7 +150,7 @@ edit_function(char **comm)
 		reload_config();
 		welcome_message = 0;
 
-		if (cd_lists_on_the_fly) {
+		if (autols) {
 			free_dirlist();
 			ret = list_dir();
 		}
@@ -743,6 +743,9 @@ DividingLineChar='%c'\n\n"
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
 ListingMode=%d\n\n"
 
+		"# List files automatically after changing current directory\n\
+AutoLs=%s\n\n"
+
 	    "# If set to true, print a map of the current position in the directory\n\
 # history list, showing previous, current, and next entries\n\
 DirhistMap=%s\n\n"
@@ -817,6 +820,7 @@ ELNPad=%d\n\n",
 		DEF_FILES_COUNTER == 1 ? "true" : "false",
 		DEF_DIV_LINE_CHAR,
 		DEF_LISTING_MODE,
+		DEF_AUTOLS == 1 ? "true" : "false",
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,
 		DEF_MV_CMD,
@@ -965,8 +969,7 @@ SortReverse=%s\n\n"
 
 	    "# Print a usage tip at startup\n\
 Tips=%s\n\n\
-ListFoldersFirst=%s\n\
-CdListsAutomatically=%s\n\n\
+ListFoldersFirst=%s\n\n\
 # Enable case sensitive listing for files in the current directory\n\
 CaseSensitiveList=%s\n\n\
 # Enable case sensitive lookup for the directory jumper function (via \n\
@@ -1023,7 +1026,7 @@ RlEditMode=%d\n\n"
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
 		DEF_TIPS == 1 ? "true" : "false",
 		DEF_LIST_FOLDERS_FIRST == 1 ? "true" : "false",
-		DEF_CD_LISTS_ON_THE_FLY == 1 ? "true" : "false",
+		DEF_AUTOLS == 1 ? "true" : "false",
 		DEF_CASE_SENSITIVE == 1 ? "true" : "false",
 		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
 		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
@@ -1483,17 +1486,17 @@ read_config(void)
 				case_sens_path_comp = 0;
 		}
 
-		else if (xargs.cd_list_auto == UNSET && *line == 'C'
-		&& strncmp(line, "CdListsAutomatically=", 21) == 0) {
+		else if (xargs.autols == UNSET && *line == 'A'
+		&& strncmp(line, "AutoLs=", 7) == 0) {
 			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "CdListsAutomatically=%5s\n",
+			ret = sscanf(line, "AutoLs=%5s\n",
 			    opt_str);
 			if (ret == -1)
 				continue;
 			if (strncmp(opt_str, "true", 4) == 0)
-				cd_lists_on_the_fly = 1;
+				autols = 1;
 			else if (strncmp(opt_str, "false", 5) == 0)
-				cd_lists_on_the_fly = 0;
+				autols = 0;
 		}
 
 		else if (xargs.cd_on_quit == UNSET && *line == 'C'
@@ -2276,10 +2279,10 @@ reset_variables(void)
 	auto_open = UNSET;
 	autocd = UNSET;
 	autojump = UNSET;
+	autols = UNSET;
 	case_sens_dirjump = UNSET;
 	case_sens_path_comp = UNSET;
 	case_sensitive = UNSET;
-	cd_lists_on_the_fly = UNSET;
 	cd_on_quit = UNSET;
 	check_cap = UNSET;
 	check_ext = UNSET;
@@ -2394,8 +2397,8 @@ check_cmd_line_options(void)
 	if (xargs.case_sens_path_comp != UNSET)
 		case_sens_path_comp = xargs.case_sens_path_comp;
 
-	if (xargs.cd_list_auto != UNSET)
-		cd_lists_on_the_fly = xargs.cd_list_auto;
+	if (xargs.autols != UNSET)
+		autols = xargs.autols;
 
 	if (xargs.cd_on_quit != UNSET)
 		cd_on_quit = xargs.cd_on_quit;

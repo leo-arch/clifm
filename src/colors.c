@@ -349,7 +349,7 @@ cschemes_function(char **args)
 			stat(file, &attr);
 			if (mtime_bfr != (time_t)attr.st_mtime
 			&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS
-			&& cd_lists_on_the_fly) {
+			&& autols) {
 				free_dirlist();
 				list_dir();
 			}
@@ -373,7 +373,7 @@ cschemes_function(char **args)
 				cur_cscheme = color_schemes[i];
 				switch_cscheme = 1;
 
-				if (cd_lists_on_the_fly) {
+				if (autols) {
 					free_dirlist();
 					list_dir();
 				}

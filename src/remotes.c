@@ -138,7 +138,7 @@ remotes_mount(char *name)
 	}
 
 	int exit_status = EXIT_SUCCESS;
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(remotes[i].mountpoint,
 							strlen(remotes[i].mountpoint));

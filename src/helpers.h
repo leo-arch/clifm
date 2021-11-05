@@ -153,7 +153,7 @@ extern int watch;
 #define FOLDERS_FIRST 	(1 << 1)
 #define HELP 			(1 << 2)
 #define HIDDEN 			(1 << 3)
-#define ON_THE_FLY 		(1 << 4)
+#define AUTOLS	 		(1 << 4)
 #define SPLASH 			(1 << 5)
 #define CASE_SENS 		(1 << 6)
 #define START_PATH 		(1 << 7)
@@ -508,10 +508,10 @@ struct param {
 	int auto_open;
 	int autocd;
 	int autojump;
+	int autols;
 	int bm_file;
 	int case_sens_dirjump;
 	int case_sens_path_comp;
-	int cd_list_auto;
 	int clear_screen;
 	int colorize;
 	int columns;
@@ -655,12 +655,12 @@ extern int
     auto_open,
     autocd,
     autojump,
+	autols,
 	bell,
     bg_proc,
     case_sensitive,
     case_sens_dirjump,
     case_sens_path_comp,
-    cd_lists_on_the_fly,
     cd_on_quit,
 	check_cap,
 	check_ext,

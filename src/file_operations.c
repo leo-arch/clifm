@@ -378,7 +378,7 @@ create_file(char **cmd)
 	}
 
 #ifdef __HAIKU__
-	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly && file_in_cwd) {
+	if (exit_status == EXIT_SUCCESS && autols && file_in_cwd) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
@@ -757,7 +757,7 @@ copy_function(char **comm)
 		clear_selbox();
 
 #ifdef __HAIKU__
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		free_dirlist();
 		list_dir();
 	}
@@ -831,7 +831,7 @@ remove_file(char **args)
 		exit_status = EXIT_FAILURE;
 #ifdef __HAIKU__
 	else {
-		if (cwd && cd_lists_on_the_fly && strcmp(args[1], "--help") != 0
+		if (cwd && autols && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0) {
 			free_dirlist();
 			exit_status = list_dir();
@@ -1063,7 +1063,7 @@ bulk_rename(char **args)
 	close_fstream(fp, fd);
 
 #ifdef __HAIKU__
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
@@ -1164,7 +1164,7 @@ batch_link(char **args)
 	}
 
 #ifdef __HAIKU__
-	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly) {
+	if (exit_status == EXIT_SUCCESS && autols) {
 		free_dirlist();
 
 		if (list_dir() != EXIT_SUCCESS)

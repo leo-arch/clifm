@@ -1215,7 +1215,7 @@ list_mountpoints(void)
 				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1].mnt,
 				    strlen(mountpoints[atoi_num - 1].mnt));
 
-				if (cd_lists_on_the_fly) {
+				if (autols) {
 					free_dirlist();
 					if (list_dir() != EXIT_SUCCESS)
 						exit_status = EXIT_FAILURE;
@@ -1637,7 +1637,7 @@ FREE_N_EXIT:
 	/* Go back to tty */
 	dup2(STDOUT_FILENO, STDIN_FILENO);
 
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		free_dirlist();
 		list_dir();
 		add_to_dirhist(ws[cur_ws].path);
@@ -1754,7 +1754,7 @@ hidden_function(char **comm)
 		if (show_hidden == 1) {
 			show_hidden = 0;
 
-			if (cd_lists_on_the_fly) {
+			if (autols) {
 				free_dirlist();
 				exit_status = list_dir();
 			}
@@ -1763,7 +1763,7 @@ hidden_function(char **comm)
 		if (show_hidden == 0) {
 			show_hidden = 1;
 
-			if (cd_lists_on_the_fly) {
+			if (autols) {
 				free_dirlist();
 				exit_status = list_dir();
 			}
@@ -1816,8 +1816,8 @@ help_function(void)
 \n -l, --no-long-view\t\t disable long view mode (default)\
 \n -L, --long-view\t\t enable long view mode\
 \n -m, --dihist-map\t\t enable the directory history map\
-\n -o, --no-list-on-the-fly\t 'cd' works as the shell 'cd' command\
-\n -O, --list-on-the-fly\t\t 'cd' lists files on the fly (default)\
+\n -o, --no-autols\t\t 'cd' works as the shell 'cd' command\
+\n -O, --autols\t\t\t 'cd' lists files on the fly (default)\
 \n -p, --path=PATH\t\t (Deprecated: use positional parameters instead)\
 \n              use PATH as %s starting path\
 \n -P, --profile=PROFILE\t\t use (or create) PROFILE as profile\

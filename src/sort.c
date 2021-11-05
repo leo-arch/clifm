@@ -375,7 +375,7 @@ sort_function(char **arg)
 			else
 				sort_reverse = 1;
 
-			if (cd_lists_on_the_fly) {
+			if (autols) {
 				/* sort_switch just tells list_dir() to print a line
 				 * with the current sorting method at the end of the
 				 * files list */
@@ -405,7 +405,7 @@ sort_function(char **arg)
 				sort_reverse = 1;
 		}
 
-		if (cd_lists_on_the_fly) {
+		if (autols) {
 			sort_switch = 1;
 			free_dirlist();
 			exit_status = list_dir();

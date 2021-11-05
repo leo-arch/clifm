@@ -268,7 +268,7 @@ handle_iso(char *file)
 		ws[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
 		add_to_jumpdb(ws[cur_ws].path);
 
-		if (cd_lists_on_the_fly) {
+		if (autols) {
 			free_dirlist();
 			if (list_dir() != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
@@ -990,7 +990,7 @@ archiver(char **args, char mode)
 
 			add_to_jumpdb(ws[cur_ws].path);
 
-			if (cd_lists_on_the_fly) {
+			if (autols) {
 				free_dirlist();
 				if (list_dir() != EXIT_SUCCESS)
 					exit_status = EXIT_FAILURE;

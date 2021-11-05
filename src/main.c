@@ -101,12 +101,12 @@ int
     auto_open = UNSET,
     autocd = UNSET,
 	autojump = UNSET,
+    autols = UNSET,
 	bell = DEF_BELL_STYLE,
 	bg_proc = 0,
     case_sens_dirjump = UNSET,
     case_sens_path_comp = UNSET,
     case_sensitive = UNSET,
-    cd_lists_on_the_fly = UNSET,
     cd_on_quit = UNSET,
 	check_cap = UNSET,
 	check_ext = UNSET,
@@ -862,7 +862,7 @@ main(int argc, char *argv[])
 	get_sel_files();
 
 	/* Start listing as soon as possible to speed up startup time */
-	if (cd_lists_on_the_fly && isatty(STDIN_FILENO)) {
+	if (autols && isatty(STDIN_FILENO)) {
 #ifdef LINUX_INOTIFY
 		/* Initialize inotify */
 		inotify_fd = inotify_init1(IN_NONBLOCK);

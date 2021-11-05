@@ -174,7 +174,7 @@ run_and_refresh(char **cmd)
 	}
 
 #ifdef __HAIKU__
-	if (cd_lists_on_the_fly && strcmp(cmd[1], "--help") != 0
+	if (autols && strcmp(cmd[1], "--help") != 0
 	&& strcmp(cmd[1], "--version") != 0) {
 		free_dirlist();
 		list_dir();
@@ -738,7 +738,7 @@ exec_cmd(char **comm)
 	/*       ############### REFRESH ##################     */
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "refresh") == 0)) {
-		if (cd_lists_on_the_fly) {
+		if (autols) {
 			free_dirlist();
 			list_dir();
 		}
@@ -1134,13 +1134,13 @@ exec_cmd(char **comm)
 			return EXIT_SUCCESS;
 		} else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
 			columned = 1;
-			if (cd_lists_on_the_fly) {
+			if (autols) {
 				free_dirlist();
 				exit_code = list_dir();
 			}
 		} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
 			columned = 0;
-			if (cd_lists_on_the_fly) {
+			if (autols) {
 				free_dirlist();
 				exit_code = list_dir();
 			}
@@ -1157,13 +1157,13 @@ exec_cmd(char **comm)
 			puts(_(ICONS_USAGE));
 		} else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
 			icons = 1;
-			if (cd_lists_on_the_fly) {
+			if (autols) {
 				free_dirlist();
 				exit_code = list_dir();
 			}
 		} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
 			icons = 0;
-			if (cd_lists_on_the_fly) {
+			if (autols) {
 				free_dirlist();
 				exit_code = list_dir();
 			}
@@ -1281,7 +1281,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "reload") == 0)) {
 		exit_code = reload_config();
 		welcome_message = 0;
-		if (cd_lists_on_the_fly) {
+		if (autols) {
 			free_dirlist();
 			if (list_dir() != EXIT_SUCCESS)
 				exit_code = EXIT_FAILURE;
@@ -1326,7 +1326,7 @@ exec_cmd(char **comm)
 #endif
 	}
 
-	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2] && !cd_lists_on_the_fly) {
+	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2] && !autols) {
 		free_dirlist();
 		exit_code = list_dir();
 		if (get_sel_files() != EXIT_SUCCESS)
@@ -1472,7 +1472,7 @@ exec_cmd(char **comm)
 	/* #### FOLDERS FIRST #### */
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "folders-first") == 0)) {
-		if (cd_lists_on_the_fly == 0)
+		if (autols == 0)
 			return EXIT_SUCCESS;
 		if (!comm[1]) {
 			fprintf(stderr, "%s\n", _(FF_USAGE));
@@ -1497,7 +1497,7 @@ exec_cmd(char **comm)
 		}
 
 		if (list_folders_first != status) {
-			if (cd_lists_on_the_fly) {
+			if (autols) {
 				free_dirlist();
 				exit_code = list_dir();
 			}
@@ -1795,7 +1795,7 @@ exec_cmd(char **comm)
 	}
 
 CHECK_EVENTS:
-	if (!cd_lists_on_the_fly)
+	if (!autols)
 		return exit_code;
 
 #ifdef LINUX_INOTIFY

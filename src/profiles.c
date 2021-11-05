@@ -283,7 +283,7 @@ profile_set(char *prof)
 
 	int exit_status = EXIT_SUCCESS;
 
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		free_dirlist();
 		exit_status = list_dir();
 	}

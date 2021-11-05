@@ -853,7 +853,7 @@ deselect(char **comm)
 
 				free(desel_elements);
 
-				if (cd_lists_on_the_fly) {
+				if (autols) {
 					free_dirlist();
 					if (list_dir() != EXIT_SUCCESS)
 						exit_status = EXIT_FAILURE;

@@ -110,7 +110,7 @@ workspaces(char *str)
 	cur_ws = tmp_ws;
 	int exit_status = EXIT_SUCCESS;
 
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		free_dirlist();
 		exit_status = list_dir();
 	}
@@ -237,7 +237,7 @@ cd_function(char *new_path, const int print_error)
 	int exit_status = EXIT_SUCCESS;
 	add_to_dirhist(ws[cur_ws].path);
 
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
@@ -355,7 +355,7 @@ surf_hist(char **comm)
 
 				exit_status = EXIT_SUCCESS;
 
-				if (cd_lists_on_the_fly) {
+				if (autols) {
 					free_dirlist();
 					exit_status = list_dir();
 				}
@@ -386,7 +386,7 @@ set_path(const char *new_path)
 	add_to_jumpdb(ws[cur_ws].path);
 	int exit_status = EXIT_SUCCESS;
 
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		free_dirlist();
 		exit_status = list_dir();
 	}

@@ -749,7 +749,7 @@ rl_folders_first(int count, int key)
 
 	list_folders_first = list_folders_first ? 0 : 1;
 
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		if (clear_screen)
 			CLEAR;
 		free_dirlist();
@@ -791,7 +791,7 @@ rl_hidden(int count, int key)
 #endif
 	show_hidden = show_hidden ? 0 : 1;
 
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		if (clear_screen)
 			CLEAR;
 		free_dirlist();
@@ -943,7 +943,7 @@ rl_sort_next(int count, int key)
 	if (sort > SORT_TYPES)
 		sort = 0;
 
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		if (clear_screen)
 			CLEAR;
 		sort_switch = 1;
@@ -971,7 +971,7 @@ rl_sort_previous(int count, int key)
 	if (sort < 0)
 		sort = SORT_TYPES;
 
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		if (clear_screen)
 			CLEAR;
 		sort_switch = 1;
@@ -1432,7 +1432,7 @@ rl_onlydirs(int count, int key)
 	only_dirs = only_dirs ? 0 : 1;
 
 	int exit_status = EXIT_SUCCESS;
-	if (cd_lists_on_the_fly) {
+	if (autols) {
 		if (clear_screen)
 			CLEAR;
 		free_dirlist();

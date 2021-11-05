@@ -924,8 +924,8 @@ external_arguments(int argc, char **argv)
 	    {"no-long-view", no_argument, 0, 'l'},
 	    {"long-view", no_argument, 0, 'L'},
 	    {"dirhist-map", no_argument, 0, 'm'},
-	    {"no-list-on-the-fly", no_argument, 0, 'o'},
-	    {"list-on-the-fly", no_argument, 0, 'O'},
+	    {"no-autols", no_argument, 0, 'o'},
+	    {"autols", no_argument, 0, 'O'},
 	    {"path", required_argument, 0, 'p'},
 	    {"profile", required_argument, 0, 'P'},
 	    {"splash", no_argument, 0, 's'},
@@ -1222,13 +1222,13 @@ external_arguments(int argc, char **argv)
 		case 'm': dirhist_map = xargs.dirmap = 1; break;
 
 		case 'o':
-			flags &= ~ON_THE_FLY;
-			cd_lists_on_the_fly = xargs.cd_list_auto = 0;
+			flags &= ~AUTOLS;
+			autols = xargs.autols = 0;
 			break;
 
 		case 'O':
-			flags |= ON_THE_FLY;
-			cd_lists_on_the_fly = xargs.cd_list_auto = 1;
+			flags |= AUTOLS;
+			autols = xargs.autols = 1;
 			break;
 
 		case 'p':
@@ -1506,13 +1506,13 @@ external_arguments(int argc, char **argv)
 void
 unset_xargs(void)
 {
-	xargs.autojump = UNSET;
 	xargs.auto_open = UNSET;
 	xargs.autocd = UNSET;
+	xargs.autojump = UNSET;
+	xargs.autols= UNSET;
 	xargs.bm_file = UNSET;
 	xargs.case_sens_dirjump = UNSET;
 	xargs.case_sens_path_comp = UNSET;
-	xargs.cd_list_auto = UNSET;
 	xargs.check_cap = UNSET;
 	xargs.check_ext = UNSET;
 	xargs.cd_on_quit = UNSET;
@@ -2338,11 +2338,11 @@ check_options(void)
 			list_folders_first = xargs.ffirst;
 	}
 
-	if (cd_lists_on_the_fly == UNSET) {
-		if (xargs.cd_list_auto == UNSET)
-			cd_lists_on_the_fly = DEF_CD_LISTS_ON_THE_FLY;
+	if (autols == UNSET) {
+		if (xargs.autols == UNSET)
+			autols = DEF_AUTOLS;
 		else
-			cd_lists_on_the_fly = xargs.cd_list_auto;
+			autols = xargs.autols;
 	}
 
 	if (case_sensitive == UNSET) {
