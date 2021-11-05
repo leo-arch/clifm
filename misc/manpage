@@ -210,11 +210,11 @@ enable long view mode to list files and their properties. For each file, the fol
 .B \-m, \-\-dirhist\-map
 enable the directory history map to keep in view previous, current and next entries in the directory history list
 .TP
-.B \-o, \-\-no\-list\-on\-the\-fly
+.B \-o, \-\-no\-autols
 \'cd\' works like the shell 'cd' command: change directory but do not list files automatically
 .TP
-.B \-O, \-\-list\-on\-the\-fly
-\'cd\' changes directory and lists files on the fly (default)
+.B \-O, \-\-autols
+\'cd\' changes directory and lists files automatically (default)
 .TP
 .B \-p, \-\-path\fR=PATH
 use \fIPATH\fR as CliFM starting path. Default starting path is the current working directory. If no workspace is specified via the \fB--workspace\fR option (see below), the first workspace (1) is used. This option is deprecated: use positional parameters instead.
