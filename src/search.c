@@ -58,25 +58,20 @@ search_glob(char **comm, int invert)
 	/* If there are two arguments, the one starting with '-' is the
 	 * file type and the other is the path */
 	if (comm[1] && comm[2]) {
-
 		if (comm[1][0] == '-') {
 			file_type = (mode_t)comm[1][1];
 			search_path = comm[2];
-		}
-
-		else if (comm[2][0] == '-') {
+		} else if (comm[2][0] == '-') {
 			file_type = (mode_t)comm[2][1];
 			search_path = comm[1];
-		}
-
-		else
+		} else {
 			search_path = comm[1];
+		}
 	}
 
 	/* If just one argument, '-' indicates file type. Else, we have a
 	 * path */
 	else if (comm[1]) {
-
 		if (comm[1][0] == '-')
 			file_type = (mode_t)comm[1][1];
 		else
@@ -84,11 +79,9 @@ search_glob(char **comm, int invert)
 	}
 
 	/* If no arguments, search_path will be NULL and file_type zero */
-
 	int recursive = 0;
 
 	if (file_type) {
-
 		/* Convert file type into a macro that can be decoded by stat().
 		 * If file type is specified, matches will be checked against
 		 * this value */
@@ -159,7 +152,7 @@ search_glob(char **comm, int invert)
 	for (i = 1; tmp[i]; i++) {
 		if (tmp[i] == '*' || tmp[i] == '?' || tmp[i] == '[' || tmp[i] == '{'
 		    /* Consider regex chars as well: we don't want this "r$"
-		 * to become this "*r$*" */
+		     * to become this "*r$*" */
 		    || tmp[i] == '|' || tmp[i] == '^' || tmp[i] == '+' || tmp[i] == '$'
 		    || tmp[i] == '.') {
 			glob_char_found = 1;
@@ -169,22 +162,43 @@ search_glob(char **comm, int invert)
 
 	/* If search string is just "STR" (no glob chars), change it
 	 * to "*STR*" */
-
 	if (!glob_char_found) {
 		size_t search_str_len = strlen(comm[0]);
 
-		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
+//		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
+//							sizeof(char));
+		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) *
 							sizeof(char));
+
 		tmp = comm[0];
 		if (invert) {
 			++tmp;
 			search_str_len = strlen(tmp);
 		}
 
-		tmp[0] = '*';
-		tmp[search_str_len] = '*';
-		tmp[search_str_len + 1] = '\0';
-		search_str = tmp;
+		char *s = xnmalloc(strlen(tmp) + 1, sizeof(char));
+		strcpy(s, tmp);
+
+		*(tmp + 1) = '.';
+		*(tmp + 2) = '*';
+		strcpy(tmp + 3, s + 1);
+		size_t slen = strlen(tmp);
+		tmp[slen] = '.';
+		tmp[slen + 1] = '*';
+		tmp[slen + 2] = '\0';
+//		*(tmp + 2 + search_str_len) = '.';
+//		*(tmp + 2 + search_str_len + 1) = '*';
+//		*(tmp + 2 + search_str_len + 2) = '\0';
+
+//		tmp[0] = '*';
+//		tmp[search_str_len] = '*';
+//		tmp[search_str_len + 1] = '\0';
+		search_str = tmp + 1;
+//		printf("'%s'", search_str);
+//		fflush(stdout);
+
+		free(s);
+		return (-1);
 	} else {
 		search_str = tmp + 1;
 	}
@@ -439,7 +453,7 @@ search_glob(char **comm, int invert)
 /* List matching (or not marching, if inverse is set to 1) file names
  * in the specified directory */
 int
-search_regex(char **comm, int invert)
+search_regex(char **comm, int invert, int insensitive)
 {
 	if (!comm || !comm[0])
 		return EXIT_FAILURE;
@@ -477,32 +491,16 @@ search_regex(char **comm, int invert)
 	/* If no arguments, search_path will be NULL and file_type zero */
 
 	if (file_type) {
-
 		/* If file type is specified, matches will be checked against
 		 * this value */
 		switch (file_type) {
-		case 'd':
-			file_type = DT_DIR;
-			break;
-		case 'r':
-			file_type = DT_REG;
-			break;
-		case 'l':
-			file_type = DT_LNK;
-			break;
-		case 's':
-			file_type = DT_SOCK;
-			break;
-		case 'f':
-			file_type = DT_FIFO;
-			break;
-		case 'b':
-			file_type = DT_BLK;
-			break;
-		case 'c':
-			file_type = DT_CHR;
-			break;
-
+		case 'd': file_type = DT_DIR; break;
+		case 'r': file_type = DT_REG; break;
+		case 'l': file_type = DT_LNK; break;
+		case 's': file_type = DT_SOCK; break;
+		case 'f': file_type = DT_FIFO; break;
+		case 'b': file_type = DT_BLK; break;
+		case 'c': file_type = DT_CHR; break;
 		default:
 			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
 			    PROGRAM_NAME, (char)file_type);
@@ -516,7 +514,6 @@ search_regex(char **comm, int invert)
 	/* If we have a path ("/str /path"), chdir into it, since
 	 * regex() works on CWD */
 	if (search_path && *search_path) {
-
 		/* Deescape the search path, if necessary */
 		if (strchr(search_path, '\\')) {
 			char *deq_dir = dequote_str(search_path, 0);
@@ -548,7 +545,6 @@ search_regex(char **comm, int invert)
 			}
 
 			tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
-
 			/*      tmp_files = scandir(".", &reg_dirlist, skip_files,
 							sort == 0 ? NULL : sort == 1 ? m_alphasort
 							: sort == 2 ? size_sort : sort == 3
@@ -603,7 +599,9 @@ search_regex(char **comm, int invert)
 
 	/* Get matches, if any, using regular expressions */
 	regex_t regex_files;
-	int ret = regcomp(&regex_files, search_str, REG_NOSUB | REG_EXTENDED);
+	int reg_flags = insensitive ? (REG_NOSUB | REG_EXTENDED | REG_ICASE)
+				: (REG_NOSUB | REG_EXTENDED);
+	int ret = regcomp(&regex_files, search_str, reg_flags);
 
 	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("'%s': Invalid regular expression\n"), search_str);
@@ -626,9 +624,7 @@ search_regex(char **comm, int invert)
 
 	size_t found = 0;
 	int *regex_index = (int *)xnmalloc((search_path ? (size_t)tmp_files
-							: files) +
-					       1,
-	    sizeof(int));
+						: files) + 1, sizeof(int));
 
 	for (i = 0; i < (search_path ? (size_t)tmp_files : files); i++) {
 		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
@@ -646,11 +642,9 @@ search_regex(char **comm, int invert)
 		free(regex_index);
 
 		if (search_path) {
-
 			int j = tmp_files;
 			while (--j >= 0)
 				free(reg_dirlist[j]);
-
 			free(reg_dirlist);
 
 			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
@@ -671,10 +665,8 @@ search_regex(char **comm, int invert)
 	/* Get the longest file name in the list */
 	int j = (int)found;
 	while (--j >= 0) {
-
 		/* Simply skip all files not matching file_type */
 		if (file_type) {
-
 			match_type[j] = 0;
 
 			if (search_path) {
@@ -731,7 +723,6 @@ search_regex(char **comm, int invert)
 	}
 
 	if (type_ok) {
-
 		int last_column = 0;
 		size_t total_cols = 0;
 
@@ -752,7 +743,6 @@ search_regex(char **comm, int invert)
 			   counter = 0;
 
 		for (i = 0; i < found; i++) {
-
 			if (match_type[i] == 0)
 				continue;
 
@@ -800,7 +790,6 @@ search_regex(char **comm, int invert)
 		j = tmp_files;
 		while (--j >= 0)
 			free(reg_dirlist[j]);
-
 		free(reg_dirlist);
 
 		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
