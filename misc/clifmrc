@@ -27,6 +27,9 @@ DividingLineChar='-'
 # How to list files: 0 = vertically (like ls(1) would), 1 = horizontally
 ListingMode=0
 
+# List files automatically after changinh current directory
+AutoLs=true
+
 # If set to true, print a map of the current position in the directory
 # history list, showing previous, current, and next entries
 DirhistMap=false
@@ -213,7 +216,6 @@ SortReverse=false
 Tips=true
 
 ListFoldersFirst=true
-CdListsAutomatically=true
 
 # Enable case sensitive listing for files in the current directory
 CaseSensitiveList=false
