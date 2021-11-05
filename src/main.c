@@ -106,7 +106,8 @@ int
 	bg_proc = 0,
     case_sens_dirjump = UNSET,
     case_sens_path_comp = UNSET,
-    case_sensitive = UNSET,
+    case_sensitive = UNSET, /* Case sensitive file listing */
+	case_sens_search = UNSET,
     cd_on_quit = UNSET,
 	check_cap = UNSET,
 	check_ext = UNSET,

@@ -661,6 +661,7 @@ extern int
     case_sensitive,
     case_sens_dirjump,
     case_sens_path_comp,
+	case_sens_search,
     cd_on_quit,
 	check_cap,
 	check_ext,

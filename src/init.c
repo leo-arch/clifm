@@ -2223,6 +2223,16 @@ check_options(void)
 	if (max_printselfiles == UNSET)
 		max_printselfiles = DEF_MAXPRINTSEL;
 
+	if (case_sensitive == UNSET) {
+		if (xargs.sensitive == UNSET)
+			case_sensitive = DEF_CASE_SENS_LIST;
+		else
+			case_sensitive = xargs.sensitive;
+	}
+
+	if (case_sens_search == UNSET)
+		case_sens_search = DEF_CASE_SENS_SEARCH;
+
 	if (case_sens_dirjump == UNSET) {
 		if (xargs.case_sens_dirjump == UNSET)
 			case_sens_dirjump = DEF_CASE_SENS_DIRJUMP;
@@ -2236,6 +2246,7 @@ check_options(void)
 		else
 			case_sens_path_comp = xargs.case_sens_path_comp;
 	}
+
 #ifndef _NO_TRASH
 	if (tr_as_rm == UNSET) {
 		if (xargs.trasrm == UNSET)
@@ -2244,6 +2255,7 @@ check_options(void)
 			tr_as_rm = xargs.trasrm;
 	}
 #endif
+
 	if (xargs.stealth_mode == 1 && !opener)
 		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
 
@@ -2343,13 +2355,6 @@ check_options(void)
 			autols = DEF_AUTOLS;
 		else
 			autols = xargs.autols;
-	}
-
-	if (case_sensitive == UNSET) {
-		if (xargs.sensitive == UNSET)
-			case_sensitive = DEF_CASE_SENSITIVE;
-		else
-			case_sensitive = xargs.sensitive;
 	}
 
 	if (unicode == UNSET) {

@@ -977,6 +977,8 @@ CaseSensitiveList=%s\n\n\
 CaseSensitiveDirJump=%s\n\n\
 # Enable case sensitive completion for file names\n\
 CaseSensitivePathComp=%s\n\n\
+# Enable case sensitive search\n\
+CaseSensitiveSearch=%s\n\n\
 Unicode=%s\n\n\
 # Enable Mas, the files list pager (executed whenever the list of files\n\
 # does not fit in the screen)\n\
@@ -1026,9 +1028,10 @@ RlEditMode=%d\n\n"
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
 		DEF_TIPS == 1 ? "true" : "false",
 		DEF_LIST_FOLDERS_FIRST == 1 ? "true" : "false",
-		DEF_CASE_SENSITIVE == 1 ? "true" : "false",
+		DEF_CASE_SENS_LIST == 1 ? "true" : "false",
 		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
 		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
+		DEF_CASE_SENS_SEARCH == 1 ? "true" : "false",
 		DEF_UNICODE == 1 ? "true" : "false",
 		DEF_PAGER == 1 ? "true" : "false",
 		DEF_MAX_HIST,
@@ -1458,6 +1461,20 @@ read_config(void)
 				case_sens_dirjump = 1;
 			else if (strncmp(opt_str, "false", 5) == 0)
 				case_sens_dirjump = 0;
+		}
+
+		else if (*line == 'C'
+		&& strncmp(line, "CaseSensitiveSearch=", 20) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "CaseSensitiveSearch=%5s\n", opt_str);
+
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				case_sens_search = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				case_sens_search = 0;
 		}
 
 		else if (xargs.sensitive == UNSET && *line == 'C'
@@ -2282,6 +2299,7 @@ reset_variables(void)
 	case_sens_dirjump = UNSET;
 	case_sens_path_comp = UNSET;
 	case_sensitive = UNSET;
+	case_sens_search = UNSET;
 	cd_on_quit = UNSET;
 	check_cap = UNSET;
 	check_ext = UNSET;

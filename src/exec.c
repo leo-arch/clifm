@@ -1056,13 +1056,11 @@ exec_cmd(char **comm)
 	&& access(comm[0], F_OK) != 0) {
 		/* If not absolute path */
 		/* Try first globbing, and if no result, try regex */
-		int ret = search_glob(comm, (comm[0][1] == '!') ? 1 : 0);
-		if (ret != EXIT_SUCCESS) {
+		if (search_glob(comm, (comm[0][1] == '!') ? 1 : 0) == EXIT_FAILURE)
 			exit_code = search_regex(comm, (comm[0][1] == '!') ? 1 : 0,
-						ret == -1 ? 1 : 0);
-		} else {
+					case_sens_search ? 1 : 0);
+		else
 			exit_code = EXIT_SUCCESS;
-		}
 		return exit_code;
 	}
 
