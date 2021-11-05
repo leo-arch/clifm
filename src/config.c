@@ -1026,7 +1026,6 @@ RlEditMode=%d\n\n"
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
 		DEF_TIPS == 1 ? "true" : "false",
 		DEF_LIST_FOLDERS_FIRST == 1 ? "true" : "false",
-		DEF_AUTOLS == 1 ? "true" : "false",
 		DEF_CASE_SENSITIVE == 1 ? "true" : "false",
 		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
 		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",

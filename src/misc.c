@@ -1816,8 +1816,8 @@ help_function(void)
 \n -l, --no-long-view\t\t disable long view mode (default)\
 \n -L, --long-view\t\t enable long view mode\
 \n -m, --dihist-map\t\t enable the directory history map\
-\n -o, --no-autols\t\t 'cd' works as the shell 'cd' command\
-\n -O, --autols\t\t\t 'cd' lists files on the fly (default)\
+\n -o, --no-autols\t\t do not list files automatically\
+\n -O, --autols\t\t\t lists files automatically (default)\
 \n -p, --path=PATH\t\t (Deprecated: use positional parameters instead)\
 \n              use PATH as %s starting path\
 \n -P, --profile=PROFILE\t\t use (or create) PROFILE as profile\
