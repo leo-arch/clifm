@@ -165,24 +165,24 @@ search_glob(char **comm, int invert)
 	if (!glob_char_found) {
 		size_t search_str_len = strlen(comm[0]);
 
-#ifndef __TEST
-		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) * sizeof(char));
-#else
+//#ifndef __TEST
+//		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) * sizeof(char));
+//#else
 		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) * sizeof(char));
-#endif
+//#endif
 
 		tmp = comm[0];
 		if (invert) {
 			++tmp;
 			search_str_len = strlen(tmp);
 		}
-
+/*
 #ifndef __TEST
 		tmp[0] = '*';
 		tmp[search_str_len] = '*';
 		tmp[search_str_len + 1] = '\0';
 		search_str = tmp;
-#else
+#else */
 		char *s = xnmalloc(strlen(tmp) + 1, sizeof(char));
 		strcpy(s, tmp);
 
@@ -196,7 +196,7 @@ search_glob(char **comm, int invert)
 
 		free(s);
 		return EXIT_FAILURE;
-#endif
+//#endif
 	} else {
 		search_str = tmp + 1;
 	}
@@ -781,7 +781,7 @@ search_regex(char **comm, int invert, int case_sens)
 	free(files_len);
 	free(match_type);
 	free(regex_index);
-	regfree(&regex_files);
+//	regfree(&regex_files);
 
 	/* If needed, go back to the directory we came from */
 	if (search_path) {
