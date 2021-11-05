@@ -260,7 +260,7 @@ get_entry_color(char **matches, const size_t i)
 		if (colorize && cur_comp_type == TCMP_PATH) {
 			char *exp_path = tilde_expand(matches[i]);
 			if (exp_path) {
-				char tmp_path[PATH_MAX];
+				char tmp_path[PATH_MAX + 1];
 				strncpy(tmp_path, exp_path, PATH_MAX);
 				free(exp_path);
 				if (stat(tmp_path, &attr) != -1)
@@ -454,13 +454,13 @@ fzftabcomp(char **matches)
 		if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
 			cl = get_entry_color(matches, i);
 
-			char ext_cl[MAX_COLOR];
+			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
 			/* If color does not start with escape, then we have a color
 			 * for a file extension. In this case, we need to properly
 			 * construct the color code */
 			if (cl && *cl != _ESC)
-				snprintf(ext_cl, MAX_COLOR, "\x1b[%sm", cl);
+				snprintf(ext_cl, MAX_COLOR + 4, "\x1b[%sm", cl);
 
 			char *p = strrchr(matches[i], '/');
 			color = *ext_cl ? ext_cl : (cl ? cl : "");
@@ -967,8 +967,8 @@ AFTER_USUAL_COMPLETION:
 	break; */
 
 	case '?': {
-		int len, count, limit, max;
-		int j, k, l;
+		int len = 0, count = 0, limit = 0, max = 0;
+		int j = 0, k = 0, l = 0;
 
 		/* Handle simple case first.  What if there is only one answer? */
 		if (!matches[1]) {

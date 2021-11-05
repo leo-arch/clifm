@@ -165,8 +165,11 @@ search_glob(char **comm, int invert)
 	if (!glob_char_found) {
 		size_t search_str_len = strlen(comm[0]);
 
-		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) *
-							sizeof(char));
+#ifndef __TEST
+		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) * sizeof(char));
+#else
+		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) * sizeof(char));
+#endif
 
 		tmp = comm[0];
 		if (invert) {
@@ -174,6 +177,12 @@ search_glob(char **comm, int invert)
 			search_str_len = strlen(tmp);
 		}
 
+#ifndef __TEST
+		tmp[0] = '*';
+		tmp[search_str_len] = '*';
+		tmp[search_str_len + 1] = '\0';
+		search_str = tmp;
+#else
 		char *s = xnmalloc(strlen(tmp) + 1, sizeof(char));
 		strcpy(s, tmp);
 
@@ -184,17 +193,10 @@ search_glob(char **comm, int invert)
 		tmp[slen] = '.';
 		tmp[slen + 1] = '*';
 		tmp[slen + 2] = '\0';
-/*		*(tmp + 2 + search_str_len) = '.';
-		*(tmp + 2 + search_str_len + 1) = '*';
-		*(tmp + 2 + search_str_len + 2) = '\0';
-
-		tmp[0] = '*';
-		tmp[search_str_len] = '*';
-		tmp[search_str_len + 1] = '\0'; */
-		search_str = tmp + 1;
 
 		free(s);
 		return EXIT_FAILURE;
+#endif
 	} else {
 		search_str = tmp + 1;
 	}
