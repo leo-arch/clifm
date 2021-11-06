@@ -50,7 +50,7 @@ _CliFM_ is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input 
 
 Unlike most terminal file managers out there, indeed, _CliFM_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface.<sup>1</sup>
 
-If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic fles listing, files selection, bookmarks, directory jumper, directory history, auto-cd and auto-open, bulk rename, and a trash system, among [other features](#features). In this sense, _CliFM_ is certainly a file manager, but also a shell extension.
+If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, directory jumper, directory history, auto-cd and auto-open, bulk rename, and a trash system, among [other features](#features). In this sense, _CliFM_ is certainly a file manager, but also a shell extension.
 
 Briefly put, with _CliFM_ the command-line is always already there, never hidden.
 
