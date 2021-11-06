@@ -656,6 +656,9 @@ print_entry_color(int *ind_char, const int i, const int pad)
 			break;
 		}
 	}
+
+	if (end_color == dc_c)
+		fputs(df_c, stdout);
 }
 
 static inline void
@@ -914,6 +917,9 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 			line_sz += strlen(fc); */
 		}
 	}
+
+	if (end_color == dc_c)
+		fputs(df_c, stdout);
 }
 
 static inline void
