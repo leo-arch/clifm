@@ -970,8 +970,8 @@ deselect(char **comm)
 			free(comm[i]);
 			comm[i] = (char *)NULL;
 		}
-		comm = (char **)xrealloc(comm, 2 * sizeof(char *));
-		comm[1] = (char *)NULL;
+/*		comm = (char **)xrealloc(comm, 2 * sizeof(char *));
+		comm[1] = (char *)NULL; */
 		args_n = 0;
 	}
 
