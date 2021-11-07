@@ -69,6 +69,7 @@ struct fileinfo *file_info = (struct fileinfo *)NULL;
 struct remote_t *remotes = (struct remote_t *)NULL;
 struct alias_t *aliases = (struct alias_t *)NULL;
 struct user_t user;
+struct devino_t *sel_devino = (struct devino_t *)NULL;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion;
 #endif

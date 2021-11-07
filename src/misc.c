@@ -1348,6 +1348,7 @@ free_stuff(void)
 			free(sel_elements[i]);
 		free(sel_elements);
 	}
+	free(sel_devino);
 
 	if (bin_commands) {
 		i = (int)path_progsn;

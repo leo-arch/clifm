@@ -598,7 +598,8 @@ print_entry_color(int *ind_char, const int i, const int pad)
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			case LEFTSPACEPAD:
-				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			case RIGHTSPACEPAD:
@@ -1528,6 +1529,21 @@ END:
 	return exit_code;
 }
 
+static inline int
+check_seltag(dev_t dev, ino_t ino)
+{
+	if (sel_n == 0)
+		return 0;
+
+	int j = (int)sel_n;
+	while (--j >= 0) {
+		if (sel_devino[j].dev == dev && sel_devino[j].ino == ino)
+			return 1;
+	}
+
+	return 0;
+}
+
 /* List files in the current working directory. Uses file type colors
  * and columns. Return zero on success or one on error */
 int
@@ -1627,6 +1643,7 @@ list_dir(void)
 		file_info[n].exec = 0;
 
 		if (stat_ok) {
+			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino);
 			switch (attr.st_mode & S_IFMT) {
 			case S_IFBLK: file_info[n].type = DT_BLK; break;
 			case S_IFCHR: file_info[n].type = DT_CHR; break;

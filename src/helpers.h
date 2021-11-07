@@ -485,6 +485,8 @@ struct fileinfo {
 	int filesn; /* Number of files in subdir */
 	int ruser; /* User read permission for dir */
 	int symlink;
+	int sel;
+	int pad;
 	size_t len;
 	mode_t mode; /* Store st_mode (for long view mode) */
 	mode_t type; /* Store d_type value */
@@ -498,6 +500,21 @@ struct fileinfo {
 };
 
 extern struct fileinfo *file_info;
+
+struct devino_t {
+	dev_t dev;
+	ino_t ino;
+	char pad1;
+	char pad2;
+	char pad3;
+	char pad4;
+	char pad5;
+	char pad6;
+	char pad7;
+	char mark;
+};
+
+extern struct devino_t *sel_devino;
 
 /* Struct to specify which parameters have been set from the command
  * line, to avoid overriding them with init_config(). While no command

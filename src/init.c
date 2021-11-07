@@ -1643,6 +1643,7 @@ get_sel_files(void)
 	if (!fp)
 		return EXIT_FAILURE;
 
+	struct stat a;
 	/* Since this file contains only paths, we can be sure no line
 	 * length will be larger than PATH_MAX */
 	char line[PATH_MAX] = "";
@@ -1656,7 +1657,13 @@ get_sel_files(void)
 			continue;
 
 		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1) * sizeof(char *));
-		sel_elements[sel_n++] = savestring(line, len);
+		sel_elements[sel_n] = savestring(line, len);
+		if (lstat(line, &a) != -1) {
+			sel_devino = (struct devino_t *)xrealloc(sel_devino, (sel_n + 1) * sizeof(struct devino_t));
+			sel_devino[sel_n].ino = a.st_ino;
+			sel_devino[sel_n].dev = a.st_dev;
+		}
+		sel_n++;
 	}
 
 	close_fstream(fp, fd);
