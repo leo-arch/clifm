@@ -552,49 +552,59 @@ print_entry_color(int *ind_char, const int i, const int pad)
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln) {
-			xprintf("%s%s %s%s%s", file_info[i].icon_color,
+			xprintf("%s%c%s%s%s %s%s%s",
+				li_c, file_info[i].sel ? '*' : ' ', df_c,
+				file_info[i].icon_color,
 			    file_info[i].icon, file_info[i].color,
 			    file_info[i].name, end_color);
 		} else {
 			switch(elnpad) {
 			case NOPAD:
-				xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+				xprintf("%s%d%s%s%c%s%s%s %s%s%s", el_c, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			case ZEROPAD:
-				xprintf("%s%0*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%0*d%s%s%c%s%s%s %s%s%s", el_c, pad, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			case LEFTSPACEPAD:
-				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%*d%s%s%c%s%s%s %s%s%s", el_c, pad, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%-*d%s%s%c%s%s%s %s%s%s", el_c, pad, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			default:
-				xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+				xprintf("%s%d%s%s%c%s%s%s %s%s%s", el_c, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, file_info[i].name, end_color);
 			}
 		}
 	} else {
 		if (no_eln) {
-			xprintf("%s%s%s", file_info[i].color,
-			    file_info[i].name, end_color);
+			xprintf("%s%c%s%s%s%s",
+				li_c, file_info[i].sel ? '*' : ' ', df_c,
+				file_info[i].color, file_info[i].name, end_color);
 		} else {
 			switch(elnpad) {
 			case NOPAD:
-				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+				xprintf("%s%d%s%s%c%s%s%s%s", el_c, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			case ZEROPAD:
-				xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%0*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			case LEFTSPACEPAD:
@@ -603,38 +613,46 @@ print_entry_color(int *ind_char, const int i, const int pad)
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%-*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].color, file_info[i].name, end_color);
 				break;
 			default:
-				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
+					li_c, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].color, file_info[i].name, end_color);
 			}
 		}
 	}
 #else
 	if (no_eln) {
-		xprintf("%s%s%s", file_info[i].color, file_info[i].name, end_color);
+		xprintf("%s%s%s", li_c, file_info[i].sel ? '*' : ' ', df_c,
+			file_info[i].color, file_info[i].name, end_color);
 	} else {
 		switch(elnpad) {
 		case NOPAD:
-			xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+			xprintf("%s%d%s%s%c%s%s%s%s", el_c, i + 1, df_c,
+				li_c, file_info[i].sel ? '*' : ' ', df_c,
 				file_info[i].color, file_info[i].name, end_color);
 			break;
 		case ZEROPAD:
-			xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
+			xprintf("%s%0*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
+				li_c, file_info[i].sel ? '*' : ' ', df_c,
 				file_info[i].color, file_info[i].name, end_color);
 			break;
 		case LEFTSPACEPAD:
-			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+			xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
+				li_c, file_info[i].sel ? '*' : ' ', df_c,
 				file_info[i].color, file_info[i].name, end_color);
 			break;
 		case RIGHTSPACEPAD:
-			xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
+			xprintf("%s%-*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
+				li_c, file_info[i].sel ? '*' : ' ', df_c,
 				file_info[i].color, file_info[i].name, end_color);
 			break;
 		default:
-			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
+			xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
+				li_c, file_info[i].sel ? '*' : ' ', df_c,
 				file_info[i].color, file_info[i].name, end_color);
 		}
 	}
