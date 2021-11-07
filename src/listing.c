@@ -1563,6 +1563,8 @@ END:
 	return exit_code;
 }
 
+/* Check whether the file in the device DEV with inode INO is selected.
+ * Used to mark selected files in the files list */
 static inline int
 check_seltag(dev_t dev, ino_t ino)
 {
