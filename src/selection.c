@@ -102,6 +102,10 @@ select_file(char *file)
 	 * box */
 	int exists = 0, new_sel = 0, j;
 
+	size_t flen = strlen(file);
+	if (file[flen - 1] == '/')
+		file[flen - 1] = '\0';
+
 	j = (int)sel_n;
 	while (--j >= 0) {
 		if (*file == *sel_elements[j] && strcmp(sel_elements[j], file) == 0) {
@@ -758,9 +762,8 @@ deselect(char **comm)
 	if (!comm)
 		return EXIT_FAILURE;
 
-	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
+	if (comm[1] && *comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
 	|| strcmp(comm[1], "all") == 0)) {
-
 		if (sel_n > 0) {
 			int i = (int)sel_n;
 			while (--i >= 0)
@@ -963,9 +966,12 @@ deselect(char **comm)
 	free(desel_elements);
 
 	if (args_n > 0) {
-		for (i = 1; i <= (int)args_n; i++)
+		for (i = 1; i <= (int)args_n; i++) {
 			free(comm[i]);
-		comm = (char **)xrealloc(comm, 1 * sizeof(char *));
+			comm[i] = (char *)NULL;
+		}
+		comm = (char **)xrealloc(comm, 2 * sizeof(char *));
+		comm[1] = (char *)NULL;
 		args_n = 0;
 	}
 
