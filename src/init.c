@@ -1653,6 +1653,8 @@ get_sel_files(void)
 		if (line[len - 1] == '\n')
 			line[--len] = '\0';
 
+		/* Remove the ending slash: fstatat() won't take a symlink to dir as
+		 * a symlink (but as a dir), if the file name ends with a slash */
 		if (line[len - 1] == '/')
 			line[--len] = '\0';
 

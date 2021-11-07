@@ -1391,7 +1391,7 @@ set_colors(const char *colorscheme, int env)
  * chars and terminating ENTRY with or without a new line char (NEW_LINE
  * 1 or 0 respectivelly) */
 void
-colors_list(const char *ent, const int i, const int pad, const int new_line)
+colors_list(char *ent, const int i, const int pad, const int new_line)
 {
 	size_t i_digits = (size_t)DIGINUM(i);
 
@@ -1409,7 +1409,18 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 		index[0] = '\0';
 
 	struct stat file_attrib;
-	if (lstat(ent, &file_attrib) == -1) {
+	size_t elen = strlen(ent);
+	int rem_slash = 0;
+	/* Remove the ending slash: lstat() won't take a symlink to dir as
+	 * a symlink (but as a dir), if the file name ends with a slash */
+	if (ent[elen - 1] == '/') {
+		ent[elen - 1] = '\0';
+		rem_slash = 1;
+	}
+	int ret = lstat(ent, &file_attrib);
+	if (rem_slash)
+		ent[elen - 1] = '/';
+	if (ret == -1) {
 		fprintf(stderr, "%s%s%s%s%-*s%s%s", el_c, index, df_c,
 		    uf_c, pad, ent, df_c, new_line ? "\n" : "");
 		free(index);

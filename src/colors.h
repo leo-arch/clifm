@@ -30,7 +30,7 @@ int set_colors(const char *colorscheme, int env);
 void color_codes(void);
 size_t get_colorschemes(void);
 int cschemes_function(char **args);
-void colors_list(const char *ent, const int i, const int pad, const int new_line);
+void colors_list(char *ent, const int i, const int pad, const int new_line);
 char *get_ext_color(const char *ext);
 char *get_dir_color(const char *filename, const mode_t mode);
 char *get_file_color(const char *filename, const struct stat attr);
