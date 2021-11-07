@@ -626,7 +626,7 @@ print_entry_color(int *ind_char, const int i, const int pad)
 	}
 #else
 	if (no_eln) {
-		xprintf("%s%s%s", li_c, file_info[i].sel ? '*' : ' ', df_c,
+		xprintf("%s%c%s%s%s%s", li_c, file_info[i].sel ? '*' : ' ', df_c,
 			file_info[i].color, file_info[i].name, end_color);
 	} else {
 		switch(elnpad) {
