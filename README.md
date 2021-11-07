@@ -162,7 +162,7 @@ To enjoy of any of the features tagged as NEW, clone this repository and install
 
 **NEW**: [Limit file names length for listed files](https://github.com/leo-arch/clifm/wiki/Specifics#configuration-file)
 
-**NEW**: Mark selected files in the files list
+**NEW**: [Mark selected files in the files list](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection)
 
 ---
 
