@@ -1391,9 +1391,6 @@ jump_gen(const char *text, int state)
 static char *
 sel_entries_generator(const char *text, int state)
 {
-	if (sel_n == 0)
-		return (char *)NULL;
-
 	static int i;
 	static size_t len;
 	char *name;
@@ -1537,7 +1534,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### SEL KEYWORD EXPANSION ### */
-		else if (!_xrename && *text == 's'
+		else if (!_xrename && sel_n && *text == 's'
 		&& strncmp(text, "sel", 3) == 0) {
 			matches = rl_completion_matches("", &sel_entries_generator);
 			if (matches)
@@ -1545,7 +1542,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### DESELECT COMPLETION ### */
-		else if (!_xrename && *rl_line_buffer == 'd'
+		else if (!_xrename && sel_n && *rl_line_buffer == 'd'
 		&& (strncmp(rl_line_buffer, "ds ", 3) == 0
 		|| strncmp(rl_line_buffer, "desel ", 6) == 0)) {
 			matches = rl_completion_matches(text, &sel_entries_generator);
