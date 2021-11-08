@@ -1546,7 +1546,8 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* ### DESELECT COMPLETION ### */
 		else if (!_xrename && *rl_line_buffer == 'd'
-		&& strncmp(rl_line_buffer, "ds ", 3) == 0) {
+		&& (strncmp(rl_line_buffer, "ds ", 3) == 0
+		|| strncmp(rl_line_buffer, "desel ", 6) == 0)) {
 			matches = rl_completion_matches(text, &sel_entries_generator);
 			if (matches)
 				cur_comp_type = TCMP_SEL;

@@ -542,6 +542,7 @@ rl_accept_suggestion(int count, int key)
 	|| suggestion.type == JCMD_SUG || suggestion.type == JCMD_SUG_NOACD))
 		clear_suggestion(CS_KEEPBUF);
 
+	/* Complete according to the suggestion type */
 	switch(suggestion.type) {
 
 	case JCMD_SUG: /* fallthrough */
@@ -576,6 +577,7 @@ rl_accept_suggestion(int count, int key)
 
 	case FIRST_WORD:
 		my_insert_text(suggestion_buf, s, _s); break;
+
 	case JCMD_SUG_NOACD: /* fallthrough */
 	case SEL_SUG: /* fallthrough */
 	case HIST_SUG:
