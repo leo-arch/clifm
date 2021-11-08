@@ -1388,6 +1388,29 @@ jump_gen(const char *text, int state)
 	return (char *)NULL;
 } */
 
+static char *
+sel_entries_generator(const char *text, int state)
+{
+	if (sel_n == 0)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while (i < (int)sel_n && (name = sel_elements[i++]) != NULL) {
+		if (strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -1511,6 +1534,22 @@ my_rl_completion(const char *text, int start, int end)
 				if (matches)
 					cur_comp_type = TCMP_ELN;
 			}
+		}
+
+		/* ### SEL KEYWORD EXPANSION ### */
+		else if (!_xrename && *text == 's'
+		&& strncmp(text, "sel", 3) == 0) {
+			matches = rl_completion_matches("", &sel_entries_generator);
+			if (matches)
+				cur_comp_type = TCMP_SEL;
+		}
+
+		/* ### DESELECT COMPLETION ### */
+		else if (!_xrename && *rl_line_buffer == 'd'
+		&& strncmp(rl_line_buffer, "ds ", 3) == 0) {
+			matches = rl_completion_matches(text, &sel_entries_generator);
+			if (matches)
+				cur_comp_type = TCMP_SEL;
 		}
 
 		/* ### DIRJUMP COMPLETION ### */

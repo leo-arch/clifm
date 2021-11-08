@@ -275,6 +275,7 @@ extern int watch;
 #define JCMD_SUG 	10
 #define JCMD_SUG_NOACD 11 /* No auto-cd */
 #define VAR_SUG 	12
+#define SEL_SUG 	13
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -656,7 +657,8 @@ enum comp_type {
 	TCMP_NONE = 7,
 	TCMP_PATH = 8,
 	TCMP_PROF = 9,
-	TCMP_SORT = 10
+	TCMP_SORT = 10,
+	TCMP_SEL = 11
 };
 
 extern enum comp_type cur_comp_type;

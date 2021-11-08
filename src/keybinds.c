@@ -577,6 +577,7 @@ rl_accept_suggestion(int count, int key)
 	case FIRST_WORD:
 		my_insert_text(suggestion_buf, s, _s); break;
 	case JCMD_SUG_NOACD: /* fallthrough */
+	case SEL_SUG: /* fallthrough */
 	case HIST_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
