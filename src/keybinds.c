@@ -216,7 +216,7 @@ load_keybinds(void)
 
 /* Runs any command recognized by CliFM via a keybind. Example:
  * keybind_exec_cmd("sel *") */
-static int
+int
 keybind_exec_cmd(char *str)
 {
 	size_t old_args = args_n;

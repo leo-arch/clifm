@@ -39,6 +39,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+//#include <signal.h>
+
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -61,6 +63,7 @@
 
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct actions_t *usr_actions = (struct actions_t *)NULL;
+/* Workspaces */
 struct ws_t *ws = (struct ws_t *)NULL;
 struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
 struct jump_t *jump_db = (struct jump_t *)NULL;
@@ -69,6 +72,7 @@ struct fileinfo *file_info = (struct fileinfo *)NULL;
 struct remote_t *remotes = (struct remote_t *)NULL;
 struct alias_t *aliases = (struct alias_t *)NULL;
 struct user_t user;
+/* Store device and inode number of selected files */
 struct devino_t *sel_devino = (struct devino_t *)NULL;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion;
@@ -709,6 +713,21 @@ struct timespec timeout;
 #endif
 int watch = -1;
 
+/*
+static void
+handle_sigwinch(int c)
+{
+	UNUSED(c);
+
+	if (kbind_busy)
+		return;
+
+	if (clear_screen)
+		CLEAR;
+
+	keybind_exec_cmd("rf");
+} */
+
 			/**
 				 * #############################
 				 * #           MAIN            #
@@ -733,6 +752,8 @@ main(int argc, char *argv[])
 
 	/* Make sure we are running on a supported terminal */
 	check_term();
+
+//	signal(SIGWINCH, handle_sigwinch);
 
 	/* Set the default color */
 /*	fputs(DEF_DF_C, stdout);

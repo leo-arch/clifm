@@ -756,33 +756,286 @@ ERROR:
 	return EXIT_FAILURE;
 }
 
+static int
+desel_entries(char **desel_elements, size_t desel_n, int a)
+{
+	/* If a valid ELN and not asterisk... */
+	/* Store the full path of all the elements to be deselected in a new
+	 * array (desel_path). I need to do this because after the first
+	 * rearragement of the sel array, that is, after the removal of the
+	 * first element, the index of the next elements changed, and cannot
+	 * thereby be found by their index. The only way to find them is
+	 * comparing string by string */
+	char **desel_path = (char **)NULL;
+
+	int i = (int)desel_n;
+
+	if (a == 0) {
+		desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
+		while (--i >= 0) {
+			int desel_int = atoi(desel_elements[i]);
+			desel_path[i] = savestring(sel_elements[desel_int - 1],
+				strlen(sel_elements[desel_int - 1]));
+		}
+	} else {
+		desel_path = desel_elements;
+	}
+
+	/* Search the sel array for the path of the element to deselect and
+	 * store its index */
+	struct stat attr;
+
+	int desel_index = -1, err = 0;
+	i = (int)desel_n;
+	while (--i >= 0) {
+		int j, k;
+
+		k = (int)sel_n;
+		while (--k >= 0) {
+			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
+				/* Sustract size from total size */
+				if (lstat(sel_elements[k], &attr) != -1) {
+					if ((attr.st_mode & S_IFMT) == S_IFDIR)
+						total_sel_size -= dir_size(sel_elements[k]);
+					else
+						total_sel_size -= attr.st_size;
+				}
+
+				desel_index = k;
+				break;
+			}
+		}
+
+		if (desel_index == -1) {
+			desel_n--;
+			if (a)
+				fprintf(stderr, _("%s: %s: No such selected file\n"),
+					PROGRAM_NAME, desel_path[i]);
+			continue;
+		}
+
+		/* Once the index was found, rearrange the sel array removing the
+		 * deselected element (actually, moving each string after it to
+		 * the previous position) */
+		for (j = desel_index; j < (int)(sel_n - 1); j++) {
+			sel_elements[j] = (char *)xrealloc(sel_elements[j],
+			    (strlen(sel_elements[j + 1]) + 1) * sizeof(char));
+			strcpy(sel_elements[j], sel_elements[j + 1]);
+		}
+	}
+
+	if (desel_index == -1) {
+		err = 1;
+		goto FREE;
+	}
+
+	/* Free the last DESEL_N elements from the old sel array. They won't
+	 * be used anymore, for they contain the same value as the last
+	 * non-deselected element due to the above array rearrangement */
+	for (i = 1; i <= (int)desel_n; i++)
+		if (((int)sel_n - i) >= 0 && sel_elements[(int)sel_n - i])
+			free(sel_elements[(int)sel_n - i]);
+
+	/* Reallocate the sel array according to the new size */
+	sel_n = (sel_n - desel_n);
+
+	if ((int)sel_n < 0) {
+		sel_n = 0;
+		total_sel_size = 0;
+	}
+
+	if (sel_n)
+		sel_elements = (char **)xrealloc(sel_elements, sel_n * sizeof(char *));
+
+FREE:
+	/* Deallocate local arrays */
+	i = (int)desel_n;
+	while (--i >= 0) {
+		if (a == 0)
+			free(desel_path[i]);
+		free(desel_elements[i]);
+	}
+	if (a == 0)
+		free(desel_path);
+	else
+		printf("%s: %zu file(s) deselected\n", PROGRAM_NAME, desel_n);
+	free(desel_elements);
+
+	if (err)
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
+}
+
+/*
+static char *
+normalize_path(const char *src, size_t src_len)
+{
+	char *res;
+	size_t res_len;
+	const char *ptr = src;
+	const char *end = &src[src_len];
+	const char *next;
+
+	if (src_len == 0 || src[0] != '/') {
+		// relative path
+		size_t pwd_len;
+		pwd_len = strlen(ws[cur_ws].path);
+		res = malloc(pwd_len + 1 + src_len + 1);
+		memcpy(res, ws[cur_ws].path, pwd_len);
+		res_len = pwd_len;
+	} else {
+		res = malloc((src_len > 0 ? src_len : 1) + 1);
+		res_len = 0;
+	}
+
+	for (ptr = src; ptr < end; ptr = next + 1) {
+		size_t len;
+		next = memchr(ptr, '/', (size_t)(end - ptr));
+		if (next == NULL)
+			next = end;
+		len = (size_t)(next - ptr);
+
+		switch(len) {
+		case 2:
+			if (ptr[0] == '.' && ptr[1] == '.') {
+				const char * slash = memrchr(res, '/', res_len);
+				if (slash != NULL)
+					res_len = (size_t)(slash - res);
+				continue;
+			}
+			break;
+
+		case 1:
+			if (ptr[0] == '.')
+				continue;
+			break;
+
+		case 0: continue;
+		}
+		res[res_len++] = '/';
+		memcpy(&res[res_len], ptr, len);
+		res_len += len;
+	}
+
+	if (res_len == 0)
+		res[res_len++] = '/';
+
+	res[res_len] = '\0';
+	return res;
+} */
+
+static int
+canonicalize_names(char **ds)
+{
+	size_t i = 0;
+	int err = 0;
+	for (; ds[i]; i++) {
+		char *d = dequote_str(ds[i], 0);
+		if (!d) {
+			err = 1;
+			break;
+		}
+		strcpy(ds[i], d);
+		free(d);
+
+		if (*ds[i] == '~') {
+			char *p = tilde_expand(ds[i]);
+			if (!p) {
+				err = 1;
+				break;
+			}
+			ds[i] = (char *)xrealloc(ds[i], (strlen(p) + 1) * sizeof(char));
+			strcpy(ds[i], p);
+			free(p);
+		}
+
+		else if (*ds[i] == '.' && ((ds[i][1] == '.' && ds[i][2] == '/')
+		|| ds[i][1] == '/')) {
+			char *r = realpath(ds[i], NULL);
+			if (!r) {
+				err = 1;
+				break;
+			}
+			ds[i] = (char *)xrealloc(ds[i], (strlen(r) + 1) * sizeof(char));
+			strcpy(ds[i], r);
+			free(r);
+		}
+
+		else if (*ds[i] != '/') {
+			char *t = savestring(ds[i], strlen(ds[i]));
+			ds[i] = (char *)xrealloc(ds[i], (strlen(t)
+					+ strlen(ws[cur_ws].path) + 2) * sizeof(char));
+			sprintf(ds[i], "%s/%s", ws[cur_ws].path, t);
+			free(t);
+		}
+
+		size_t len = strlen(ds[i]);
+		if (ds[i][len - 1] == '/')
+			ds[i][len - 1] = '\0';
+	}
+
+	if (err)
+		return (-1);
+	return 1;
+}
+
 int
 deselect(char **comm)
 {
 	if (!comm)
 		return EXIT_FAILURE;
 
-	if (comm[1] && *comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
-	|| strcmp(comm[1], "all") == 0)) {
-		if (sel_n > 0) {
-			int i = (int)sel_n;
-			while (--i >= 0)
-				free(sel_elements[i]);
-
-			sel_n = 0;
-			total_sel_size = 0;
-
-			if (save_sel() != 0)
-				return EXIT_FAILURE;
-			else
-				return EXIT_SUCCESS;
-		} else {
-			puts(_("desel: There are no selected files"));
-			return EXIT_SUCCESS;
-		}
+	if (sel_n == 0) {
+		puts(_("desel: There are no selected files"));
+		return EXIT_SUCCESS;
 	}
 
-	register int i;
+	register int i = 0;
+	int err = 0;
+
+	if (comm[1] && *comm[1]) {
+		if (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
+		|| strcmp(comm[1], "all") == 0) {
+			if (sel_n > 0) {
+				i = (int)sel_n;
+				while (--i >= 0)
+					free(sel_elements[i]);
+
+				sel_n = 0;
+				total_sel_size = 0;
+
+				if (save_sel() != 0)
+					return EXIT_FAILURE;
+				else
+					return EXIT_SUCCESS;
+			} else {
+				puts(_("desel: There are no selected files"));
+				return EXIT_SUCCESS;
+			}
+		} else {
+			char **ds = (char **)xnmalloc(args_n + 1, sizeof(char *));
+			size_t j = 1, k = 0;
+			for (; j <= args_n; j++)
+				ds[k++] = savestring(comm[j], strlen(comm[j]));
+			ds[k] = (char *)NULL;
+
+			if (canonicalize_names(ds) == -1) {
+				err = 1;
+				for (j = 0; j < k; j++)
+					free(ds[j]);
+				free(ds);
+				goto END;
+			}
+
+			if (desel_entries(ds, args_n, 1) == EXIT_FAILURE) {
+/*				for (j = 0; j < k; j++)
+					free(ds[j]);
+				free(ds); */
+				err = 1;
+			}
+			goto END;
+		}
+	}
 
 /*	if (clear_screen)
 		CLEAR; */
@@ -887,84 +1140,12 @@ deselect(char **comm)
 		}
 	}
 
-	/* If a valid ELN and not asterisk... */
-	/* Store the full path of all the elements to be deselected in a new
-	 * array (desel_path). I need to do this because after the first
-	 * rearragement of the sel array, that is, after the removal of the
-	 * first element, the index of the next elements changed, and cannot
-	 * thereby be found by their index. The only way to find them is
-	 * comparing string by string */
-	char **desel_path = (char **)NULL;
-	desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
+	desel_entries(desel_elements, desel_n, 0);
 
-	i = (int)desel_n;
-	while (--i >= 0) {
-		int desel_int = atoi(desel_elements[i]);
-		desel_path[i] = savestring(sel_elements[desel_int - 1],
-		    strlen(sel_elements[desel_int - 1]));
-	}
+END: {
+	int exit_status = EXIT_SUCCESS;
 
-	/* Search the sel array for the path of the element to deselect and
-	 * store its index */
-	struct stat desel_attrib;
-
-	i = (int)desel_n;
-	while (--i >= 0) {
-		int j, k, desel_index = 0;
-
-		k = (int)sel_n;
-		while (--k >= 0) {
-			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
-				/* Sustract size from total size */
-				if (lstat(sel_elements[k], &desel_attrib) != -1) {
-					if ((desel_attrib.st_mode & S_IFMT) == S_IFDIR)
-						total_sel_size -= dir_size(sel_elements[k]);
-					else
-						total_sel_size -= desel_attrib.st_size;
-				}
-
-				desel_index = k;
-				break;
-			}
-		}
-
-		/* Once the index was found, rearrange the sel array removing the
-		 * deselected element (actually, moving each string after it to
-		 * the previous position) */
-		for (j = desel_index; j < (int)(sel_n - 1); j++) {
-			sel_elements[j] = (char *)xrealloc(sel_elements[j],
-			    (strlen(sel_elements[j + 1]) + 1) * sizeof(char));
-			strcpy(sel_elements[j], sel_elements[j + 1]);
-		}
-	}
-
-	/* Free the last DESEL_N elements from the old sel array. They won't
-	 * be used anymore, for they contain the same value as the last
-	 * non-deselected element due to the above array rearrangement */
-	for (i = 1; i <= (int)desel_n; i++)
-		if (((int)sel_n - i) >= 0 && sel_elements[(int)sel_n - i])
-			free(sel_elements[(int)sel_n - i]);
-
-	/* Reallocate the sel array according to the new size */
-	sel_n = (sel_n - desel_n);
-
-	if ((int)sel_n < 0) {
-		sel_n = 0;
-		total_sel_size = 0;
-	}
-
-	if (sel_n)
-		sel_elements = (char **)xrealloc(sel_elements, sel_n * sizeof(char *));
-
-	/* Deallocate local arrays */
-	i = (int)desel_n;
-	while (--i >= 0) {
-		free(desel_path[i]);
-		free(desel_elements[i]);
-	}
-	free(desel_path);
-	free(desel_elements);
-
+	size_t argsbk = args_n;
 	if (args_n > 0) {
 		for (i = 1; i <= (int)args_n; i++) {
 			free(comm[i]);
@@ -975,15 +1156,14 @@ deselect(char **comm)
 		args_n = 0;
 	}
 
-	int exit_status = EXIT_SUCCESS;
-
-	if (save_sel() != 0)
+	if (!err && save_sel() != 0)
 		exit_status = EXIT_FAILURE;
 
 	/* If there is still some selected file, reload the desel screen */
-	if (sel_n)
+	if (sel_n && argsbk == 0)
 		if (deselect(comm) != 0)
 			exit_status = EXIT_FAILURE;
 
 	return exit_status;
+	}
 }
