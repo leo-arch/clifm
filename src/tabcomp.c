@@ -861,7 +861,7 @@ AFTER_USUAL_COMPLETION:
 
 		if (replacement && cur_comp_type != TCMP_HIST
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
-		&& cur_comp_type != TCMP_SEL) {
+		&& (cur_comp_type != TCMP_SEL || !fzftab)) {
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;

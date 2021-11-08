@@ -74,7 +74,7 @@ CliFM is a completely text\-based, \fBshell\-like\fR file manager for the termin
 .sp
   \fBb)\fR The use of \fBshort (and even one\-character) commands\fR, and \fBentry list numbers (ELN's)\fR instead of file names. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fBautocd\fR and \fBauto-open\fR functions are enabled, which is the default (see below \fIac\fR and \fIad\fR commands), you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
 .sp
-With the \fBautomatic ELN expansion\fR feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. \fBRanges\fR are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, \fBTAB completion\fR is available for ELN's, just as for commands, paths, profiles, and bookmarks. \fIGemini\fR, a powerful \fBauto-suggestions\fR system (heavily inspired by the Fish shell), was developed with this very purpose in mind.
+With the \fBautomatic ELN expansion\fR feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. \fBRanges\fR are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, \fBTAB completion\fR is available for ELN's and ELN ranges, just as for many other things (see the \fBBUILT-IN EXPANSIONS\fR section below). \fIGemini\fR, a powerful \fBauto-suggestions\fR system (heavily inspired by the Fish shell), was developed with this very purpose in mind.
 .sp
   \fBc)\fR \fBAutomatic files listing\fR: Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function automatically lists files in the new directory.
 .sp
@@ -105,45 +105,44 @@ List of CliFM features:
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Commands and directory history function
-  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), selected files, and the open-with command (\fIow\fR). There are two available modes: standard and FZF (See the \fBBUILT\-IN EXPANSIONS\fR section below)
-  5) TAB ELN\-expansion
-  6) More than 40 customizable keyboard shortcuts
-  7) Wildcards and regex auto\-expansion
-  8) Braces auto\-expansion
-  9) ELN's auto\-expansion
+  4) TAB completion/expansion for ELN's, ELN ranges, commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, selected files, the 'sel' keyword, plus the deselect and the open-with commands (\fIow\fR). There are two available modes: standard and FZF (see the \fBBUILT\-IN EXPANSIONS\fR section below)
+  5) More than 40 customizable keyboard shortcuts
+  6) Wildcards and regex auto\-expansion
+  7) Braces auto\-expansion
+  8) ELN's auto\-expansion
+  9) ELN ranges auto\-expansion
   10) 'sel' keyword auto\-expansion
-  11) Ranges auto\-expansion
-  12) Bookmarks auto\-expansion
-  13) Bash\-like quoting system
-  14) Custom aliases and variables
-  15) Customizable colors for file types and extensions
-  16) Customizable prompt
-  17) Shell commands execution
-  18) Startup and prompt commands
-  19) User profiles
-  20) Commands sequential and conditional execution
-  21) \fILira\fR, a built-in resource opener
-  22) Eleven sorting methods and reverse sorting
-  23) Bulk rename
-  24) Archiving and compression support
-  25) Auto\-cd and auto\-open
-  26) Plugins support via custom actions linked to executable files
-  27) Symbolic links editor
-  28) Regular expressions, file type filter, and inverse matching support for both search and selection functions
-  29) Command substitution and regular expressions for all internal commands
-  30) Theming support via color schemes
-  31) Privacy oriented
-  32) \fIKangaroo\fR, a built\-in directory jumper function
-  33) Icons support (depends on icons\-in\-terminal: \fIhttps://github.com/sebastiencs/icons\-in\-terminal\fR)
-  34) Batch symbolic links
-  35) Files filter via regular expressions for the files list
-  36) Up to eight workspaces
-  37) Fused parameters support for ELN's
-  38) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
-  39) Fastback function
-  40) Remote file systems management
-  41) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
-  42) Syntax highlighting
+  11) Bookmarks auto\-expansion
+  12) Bash\-like quoting system
+  13) Custom aliases and variables
+  14) Customizable colors for file types and extensions
+  15) Customizable prompt
+  16) Shell commands execution
+  17) Startup and prompt commands
+  18) User profiles
+  19) Commands sequential and conditional execution
+  20) \fILira\fR, a built-in resource opener
+  21) Eleven sorting methods and reverse sorting
+  22) Bulk rename
+  23) Archiving and compression support
+  24) Auto\-cd and auto\-open
+  25) Plugins support via custom actions linked to executable files
+  26) Symbolic links editor
+  27) Regular expressions, file type filter, and inverse matching support for both search and selection functions
+  28) Command substitution and regular expressions for all internal commands
+  29) Theming support via color schemes
+  30) Privacy oriented
+  31) \fIKangaroo\fR, a built\-in directory jumper function
+  32) Icons support (depends on icons\-in\-terminal: \fIhttps://github.com/sebastiencs/icons\-in\-terminal\fR)
+  33) Batch symbolic links
+  34) Files filter via regular expressions for the files list
+  35) Up to eight workspaces
+  36) Fused parameters support for ELN's
+  37) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
+  38) Fastback function
+  39) Remote file systems management
+  40) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
+  41) Syntax highlighting
   42) Interactive rename functionality for the \fIm\fR command.
 
 .SH 4. POSITIONAL PARAMETERS
@@ -1195,13 +1194,17 @@ To operate only on \fIsome\fR selected files, you can use TAB completion. Just e
 .TP
 \fBTAB completion\fR
 .TP
-There are modes for TAB completion: \fIstandard\fR (interface provided by readline), and \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR). To enable the \fIfzf\fR mode (the standard mode is used by default), you can either use the \fI--fzftab\fR command line option, or set \fITabCompletionMode\fR to \fIfzf\fR in the configuration file.
+There are two modes for TAB completion: \fIstandard\fR (interface provided by readline), and \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR). To enable the \fIfzf\fR mode (the standard mode is used by default), you can either use the \fI--fzftab\fR command line option, or set \fITabCompletionMode\fR to \fIfzf\fR in the configuration file.
 .TP
 Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
-ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some file name is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
+ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some file name is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. 
 .TP
-TAB completion for \fBbookmarks, color schemes, profiles, sort method, the sel keyword, the ds (or desel) and the open-with (ow) commands, and directory history\fR (via the \fIjump\fR command) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function. 
+Since ranges could be a bit tricky, TAB completion is available to make sure this range actually includes the desired file names.
+.TP
+If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
+.TP
+TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, selected files, the 'sel' keyword, plus the deselect and the open-with commands (\fIow\fR) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function. 
 .TP
 Of course, combinations of all these features is also possible. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
 .TP
