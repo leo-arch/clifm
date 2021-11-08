@@ -578,6 +578,14 @@ fzftabcomp(char **matches)
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
 		offset = 0;
+	} else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL) {
+		char *s = strrchr(rl_line_buffer, ' ');
+		if (s) {
+			rl_point = (int)(s - rl_line_buffer + 1);
+			rl_delete_text(rl_point, rl_end);
+			rl_end = rl_point;
+			offset = 0;
+		}
 	} else if (!case_sens_path_comp && query) {
 		/* Honor case insensitive completion */
 		size_t query_len = strlen(query);
@@ -852,7 +860,8 @@ AFTER_USUAL_COMPLETION:
 		}
 
 		if (replacement && cur_comp_type != TCMP_HIST
-		&& cur_comp_type != TCMP_JUMP) {
+		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
+		&& cur_comp_type != TCMP_SEL) {
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;

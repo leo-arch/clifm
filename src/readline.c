@@ -1247,6 +1247,42 @@ filenames_gen_eln(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Used by ELN ranges expansion */
+static char *
+filenames_gen_ranges(const char *text, int state)
+{
+	static int i;
+	char *name;
+	rl_filename_completion_desired = 1;
+
+	if (!state)
+		i = 0;
+
+	char *r = strchr(text, '-');
+	if (!r)
+		return (char *)NULL;
+
+	*r = '\0';
+	int a = atoi(text);
+	int b = atoi(r + 1);
+	*r = '-';
+	if (a >= b)
+		return (char *)NULL;
+
+	/* Check list of currently displayed files for a match */
+	while (i < (int)files && (name = file_info[i++].name) != NULL) {
+		if (i >= a && i <= b) {
+#ifndef _NO_SUGGESTIONS
+			if (suggestion_buf)
+				clear_suggestion(CS_FREEBUF);
+#endif
+			return strdup(name);
+		}
+	}
+
+	return (char *)NULL;
+}
+
 /* Used by commands completion */
 static char *
 bin_cmd_generator(const char *text, int state)
@@ -1492,8 +1528,10 @@ my_rl_completion(const char *text, int start, int end)
 			matches = mime_open_with_tab(p, text);
 			if (s)
 				*s = ' ';
-			if (matches)
+			if (matches) {
+				cur_comp_type = TCMP_OPENWITH;
 				return matches;
+			}
 		}
 
 		/* #### ELN AND JUMP ORDER EXPANSION ### */
@@ -1502,6 +1540,22 @@ my_rl_completion(const char *text, int start, int end)
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
 		if (!_xrename && *text >= '0' && *text <= '9') {
+			/* Check ranges */
+			char *r = strchr(text, '-');
+			if (r && *(r + 1) >= '0' && *(r + 1) <= '9') {
+				*r = '\0';
+				if (is_number(text) && is_number(r + 1)) {
+					*r = '-';
+					matches = rl_completion_matches(text, &filenames_gen_ranges);
+					if (matches) {
+						cur_comp_type = TCMP_RANGES;
+						return matches;
+					}
+				} else {
+					*r = '-';
+				}
+			}
+			
 			int num_text = atoi(text);
 
 			/* Dirjump: jo command */
@@ -1547,7 +1601,7 @@ my_rl_completion(const char *text, int start, int end)
 		|| strncmp(rl_line_buffer, "desel ", 6) == 0)) {
 			matches = rl_completion_matches(text, &sel_entries_generator);
 			if (matches)
-				cur_comp_type = TCMP_SEL;
+				cur_comp_type = TCMP_DESEL;
 		}
 
 		/* ### DIRJUMP COMPLETION ### */
