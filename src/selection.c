@@ -1021,18 +1021,11 @@ deselect(char **comm)
 
 			if (canonicalize_names(ds) == -1) {
 				err = 1;
-				for (j = 0; j < k; j++)
-					free(ds[j]);
-				free(ds);
 				goto END;
 			}
 
-			if (desel_entries(ds, args_n, 1) == EXIT_FAILURE) {
-/*				for (j = 0; j < k; j++)
-					free(ds[j]);
-				free(ds); */
+			if (desel_entries(ds, args_n, 1) == EXIT_FAILURE)
 				err = 1;
-			}
 			goto END;
 		}
 	}
