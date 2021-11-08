@@ -164,7 +164,7 @@ To enjoy of any of the features tagged as NEW, clone this repository and install
 
 **NEW**: [Mark selected files in the files list](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection)
 
-**NEW**: [TAB completion for the `sel` keyword and the deselect command](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)
+**NEW**: [TAB completion for the `sel` keyword, the deselect command, and ELN ranges](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)
 
 ---
 
