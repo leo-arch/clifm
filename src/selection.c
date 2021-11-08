@@ -860,9 +860,10 @@ FREE:
 	if (a == 0)
 		free(desel_path);
 	else if (err_printed)
-		printf(_("%d file(s) deselected\n"), dn);
+		printf(_("%d file(s) deselected. "), dn);
 	else
-		printf(_("%s: %d file(s) deselected\n"), PROGRAM_NAME, dn);
+		printf(_("%s: %d file(s) deselected. "), PROGRAM_NAME, dn);
+	printf(_("%zu file(s) currently selected\n"), sel_n);
 	free(desel_elements);
 
 	if (err)
