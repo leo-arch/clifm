@@ -1102,7 +1102,8 @@ untrim_filename(int i)
 	file_info[i].len = trim.len;
 	file_info[i].name[max_name_len - 1] = (char)trim.a;
 	file_info[i].name[max_name_len] = (char)trim.b;
-	trim.state = trim.a = trim.b = trim.len = 0;
+	trim.state = trim.a = trim.b = 0;
+	trim.len = 0;
 }
 
 /* List files horizontally:
@@ -1293,7 +1294,8 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 				cur_cols = bcur_cols;
 				continue;
 			} else if (ret == -2) {
-				i = x = xx = *counter = cur_cols = last_column = blc = 0;
+				i = x = xx = last_column = blc = 0;
+				*counter = cur_cols = 0;
 				cc = columns_n;
 				continue;
 			}
@@ -1591,7 +1593,8 @@ list_dir(void)
 	if (clear_screen)
 		CLEAR;
 
-	trim.state = trim.a = trim.b = trim.len = 0;
+	trim.state = trim.a = trim.b = 0;
+	trim.len = 0;
 
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
