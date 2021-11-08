@@ -870,51 +870,86 @@ FREE:
 	return EXIT_SUCCESS;
 }
 
-/*
 static char *
-normalize_path(const char *src, size_t src_len)
+normalize_path(char *src, size_t src_len)
 {
+	if (!src || !*src)
+		return (char *)NULL;
+
+	/* Deescape SRC */
+	char *tmp = (char *)NULL;
+
+	if (strchr(src, '\\')) {
+		tmp = dequote_str(src, 0);
+		if (!tmp) {
+			fprintf(stderr, _("%s: %s: Error deescaping string\n"),
+					PROGRAM_NAME, src);
+			return (char *)NULL;
+		}
+		size_t tlen = strlen(tmp);
+		if (tmp[tlen - 1] == '/')
+			tmp[tlen - 1] = '\0';
+		strcpy(src, tmp);
+		free(tmp);
+		tmp = (char *)NULL;
+	}
+
+	/* Expand tilde */
+	if (*src == '~') {
+		tmp = tilde_expand(src);
+		if (!tmp) {
+			fprintf(stderr, _("%s: %s: Error expanding tilde\n"),
+					PROGRAM_NAME, src);
+			return (char *)NULL;
+		}
+		size_t tlen = strlen(tmp);
+		if (tmp[tlen - 1] == '/')
+			tmp[tlen - 1] = '\0';
+		return tmp;
+	}
+
+	/* Resolve references to . and .. */
 	char *res;
 	size_t res_len;
 	const char *ptr = src;
 	const char *end = &src[src_len];
 	const char *next;
 
-	if (src_len == 0 || src[0] != '/') {
+	if (src_len == 0 || *src != '/') {
 		// relative path
 		size_t pwd_len;
 		pwd_len = strlen(ws[cur_ws].path);
-		res = malloc(pwd_len + 1 + src_len + 1);
+		res = (char *)xnmalloc(pwd_len + 1 + src_len + 1, sizeof(char));
 		memcpy(res, ws[cur_ws].path, pwd_len);
 		res_len = pwd_len;
 	} else {
-		res = malloc((src_len > 0 ? src_len : 1) + 1);
+		res = (char *)xnmalloc((src_len > 0 ? src_len : 1) + 1, sizeof(char));
 		res_len = 0;
 	}
 
 	for (ptr = src; ptr < end; ptr = next + 1) {
 		size_t len;
 		next = memchr(ptr, '/', (size_t)(end - ptr));
-		if (next == NULL)
+		if (!next)
 			next = end;
 		len = (size_t)(next - ptr);
 
 		switch(len) {
+		case 0: continue;
+
+		case 1:
+			if (*ptr == '.')
+				continue;
+			break;
+
 		case 2:
 			if (ptr[0] == '.' && ptr[1] == '.') {
-				const char * slash = memrchr(res, '/', res_len);
-				if (slash != NULL)
+				const char *slash = memrchr(res, '/', res_len);
+				if (slash)
 					res_len = (size_t)(slash - res);
 				continue;
 			}
 			break;
-
-		case 1:
-			if (ptr[0] == '.')
-				continue;
-			break;
-
-		case 0: continue;
 		}
 		res[res_len++] = '/';
 		memcpy(&res[res_len], ptr, len);
@@ -925,62 +960,11 @@ normalize_path(const char *src, size_t src_len)
 		res[res_len++] = '/';
 
 	res[res_len] = '\0';
+
+	if (res[res_len - 1] == '/')
+		res[res_len - 1] = '\0';
+
 	return res;
-} */
-
-static int
-canonicalize_names(char **ds)
-{
-	size_t i = 0;
-	int err = 0;
-	for (; ds[i]; i++) {
-		char *d = dequote_str(ds[i], 0);
-		if (!d) {
-			err = 1;
-			break;
-		}
-		strcpy(ds[i], d);
-		free(d);
-
-		if (*ds[i] == '~') {
-			char *p = tilde_expand(ds[i]);
-			if (!p) {
-				err = 1;
-				break;
-			}
-			ds[i] = (char *)xrealloc(ds[i], (strlen(p) + 1) * sizeof(char));
-			strcpy(ds[i], p);
-			free(p);
-		}
-
-		else if (*ds[i] == '.' && ((ds[i][1] == '.' && ds[i][2] == '/')
-		|| ds[i][1] == '/')) {
-			char *r = realpath(ds[i], NULL);
-			if (!r) {
-				err = 1;
-				break;
-			}
-			ds[i] = (char *)xrealloc(ds[i], (strlen(r) + 1) * sizeof(char));
-			strcpy(ds[i], r);
-			free(r);
-		}
-
-		else if (*ds[i] != '/') {
-			char *t = savestring(ds[i], strlen(ds[i]));
-			ds[i] = (char *)xrealloc(ds[i], (strlen(t)
-					+ strlen(ws[cur_ws].path) + 2) * sizeof(char));
-			sprintf(ds[i], "%s/%s", ws[cur_ws].path, t);
-			free(t);
-		}
-
-		size_t len = strlen(ds[i]);
-		if (ds[i][len - 1] == '/')
-			ds[i][len - 1] = '\0';
-	}
-
-	if (err)
-		return (-1);
-	return 1;
 }
 
 int
@@ -1019,14 +1003,14 @@ deselect(char **comm)
 		} else {
 			char **ds = (char **)xnmalloc(args_n + 1, sizeof(char *));
 			size_t j = 1, k = 0;
-			for (; j <= args_n; j++)
-				ds[k++] = savestring(comm[j], strlen(comm[j]));
-			ds[k] = (char *)NULL;
-
-			if (canonicalize_names(ds) == -1) {
-				err = 1;
-				goto END;
+			for (; j <= args_n; j++) {
+				char *pp = normalize_path(comm[j], strlen(comm[j]));
+				if (!pp)
+					continue;
+				ds[k++] = savestring(pp, strlen(pp));
+				free(pp);
 			}
+			ds[k] = (char *)NULL;
 
 			if (desel_entries(ds, args_n, 1) == EXIT_FAILURE)
 				err = 1;
