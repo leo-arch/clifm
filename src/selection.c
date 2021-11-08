@@ -785,7 +785,7 @@ desel_entries(char **desel_elements, size_t desel_n, int a)
 	 * store its index */
 	struct stat attr;
 
-	int desel_index = -1, err = 0;
+	int desel_index = -1, err = 0, err_printed = 0, dn = (int)desel_n;
 	i = (int)desel_n;
 	while (--i >= 0) {
 		int j, k;
@@ -807,10 +807,12 @@ desel_entries(char **desel_elements, size_t desel_n, int a)
 		}
 
 		if (desel_index == -1) {
-			desel_n--;
-			if (a)
+			dn--;
+			if (a) {
+				err_printed = 1;
 				fprintf(stderr, _("%s: %s: No such selected file\n"),
 					PROGRAM_NAME, desel_path[i]);
+			}
 			continue;
 		}
 
@@ -857,8 +859,10 @@ FREE:
 	}
 	if (a == 0)
 		free(desel_path);
+	else if (err_printed)
+		printf(_("%d file(s) deselected\n"), dn);
 	else
-		printf("%s: %zu file(s) deselected\n", PROGRAM_NAME, desel_n);
+		printf(_("%s: %d file(s) deselected\n"), PROGRAM_NAME, dn);
 	free(desel_elements);
 
 	if (err)
