@@ -105,7 +105,7 @@ List of CliFM features:
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Commands and directory history function
-  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), selected files, and the open-with command (\fIow\fR). There are two available modes: standard and FZF (See the \fI--fzftab\fR command line option below)
+  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), selected files, and the open-with command (\fIow\fR). There are two available modes: standard and FZF (See the \fBBUILT\-IN EXPANSIONS\fR section below)
   5) TAB ELN\-expansion
   6) More than 40 customizable keyboard shortcuts
   7) Wildcards and regex auto\-expansion
@@ -277,7 +277,7 @@ enable program logs
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
 .TP
 .B \-\-fzftab
-enable the FZF mode for TAB completion (it depends on \fIFZF\fR (\fIhttps://github.com/junegunn/fzf\fR)). This feature can also be enabled by setting the \fITabCompletionMode\fR option to 'fzf' in the configuration file
+enable the FZF mode for TAB completion (See the \fBBUILT\-IN EXPANSIONS\fR section below)
 .TP
 .B \-\-highlight
 enable syntax highlighting. To customize highlighting colors see the \fBCOLORS\fR section below
@@ -1194,6 +1194,8 @@ To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectively.
 To operate only on \fIsome\fR selected files, you can use TAB completion. Just enter 'sel' and, without appending any space char, press TAB: the list of selected files will be displayed. Choose one to oeprate on that specific file.
 .TP
 \fBTAB completion\fR
+.TP
+There are modes for TAB completion: \fIstandard\fR (interface provided by readline), and \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR). To enable the \fIfzf\fR mode (the standard mode is used by default), you can either use the \fI--fzftab\fR command line option, or set \fITabCompletionMode\fR to \fIfzf\fR in the configuration file.
 .TP
 Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
