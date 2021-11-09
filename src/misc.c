@@ -392,6 +392,7 @@ print_tips(int all)
 	    "Use the 'mf' command to limit the amount of files listed on the screen",
 	    "Set a maximum file name length for listed files via the MaxFilenameLen "
 	    "option in the configuration file (F10)",
+	    "Use the 'm' command to interactively rename a file",
 	    NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
