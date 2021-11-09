@@ -603,8 +603,19 @@ fzftabcomp(char **matches)
 		}
 	}
 
-	if (*buf)
-		write_completion(buf, &offset, &exit_status);
+	if (*buf) {
+		size_t blen = strlen(buf);
+		int j = (int)blen;
+		if (buf[j - 1] == '\n')
+			buf[--j] = '\0';
+		while (buf[--j] == ' ')
+			buf[j] = '\0';
+		char *q = escape_str(buf);
+		if (!q)
+			return EXIT_FAILURE;
+		write_completion(q, &offset, &exit_status);
+		free(q);
+	}
 
 	return exit_status;
 }
@@ -867,7 +878,19 @@ AFTER_USUAL_COMPLETION:
 
 		if (replacement && cur_comp_type != TCMP_HIST
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
-		&& (cur_comp_type != TCMP_SEL || !fzftab)) {
+		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)) {
+			if (cur_comp_type == TCMP_SEL && !strchr(replacement, '\\')) {
+				char *r = escape_str(replacement);
+				if (!r) {
+					if (replacement != matches[0])
+						free(replacement);
+					break;
+				}
+				if (replacement != matches[0])
+					free(replacement);
+				replacement = r;
+			}
+
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;
@@ -905,6 +928,7 @@ AFTER_USUAL_COMPLETION:
 			rl_insert_text(replacement);
 #endif
 			rl_end_undo_group();
+
 			if (replacement != matches[0])
 				free(replacement);
 		}
@@ -988,7 +1012,6 @@ AFTER_USUAL_COMPLETION:
 		/* Handle simple case first.  What if there is only one answer? */
 		if (!matches[1]) {
 			char *temp;
-
 			temp = printable_part(matches[0]);
 			rl_crlf();
 			print_filename(temp, matches[0]);
