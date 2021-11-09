@@ -451,7 +451,8 @@ fzftabcomp(char **matches)
 		char *color = df_c;
 		char *entry = matches[i];
 
-		if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
+		if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
+		&& cur_comp_type != TCMP_DESEL && cur_comp_type != TCMP_SEL) {
 			cl = get_entry_color(matches, i);
 
 			char ext_cl[MAX_COLOR + 5];
@@ -500,11 +501,13 @@ fzftabcomp(char **matches)
 	switch(cur_comp_type) {
 	case TCMP_SEL: /* fallthrough */
 	case TCMP_RANGES: break;
+
 	case TCMP_HIST:
 		/* Skip the leading ! char of the input string */
 		query = rl_line_buffer + 1;
 		fzf_offset = 1 + prompt_offset - 3;
 		break;
+
 	case TCMP_JUMP: {
 		char *sp = strchr(rl_line_buffer, ' ');
 		if (sp && *(++sp)) {
@@ -520,6 +523,7 @@ fzftabcomp(char **matches)
 		}
 		}
 		break;
+
 	default: query = lw;
 	}
 
@@ -1125,6 +1129,8 @@ CALC_OFFSET:
 		} else {
 			tab_offset = strlen(matches[0]);
 		}
+//		if (cur_comp_type == TCMP_RANGES)
+//			tab_offset = 0;
 
 #ifndef _NO_FZF
 		if (fzftab == 1) {
@@ -1156,6 +1162,9 @@ CALC_OFFSET:
 						printf("%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
 						(cur_comp_type == TCMP_CMD) ? (colorize
 						? ex_c : "") : dc_c);
+/*					else if (cur_comp_type == TCMP_RANGES
+					|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL)
+						fputs("\x1b[0;35m", stdout); */
 					char *temp;
 					int printed_length;
 					temp = printable_part(matches[l]);
