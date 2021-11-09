@@ -509,15 +509,25 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad)
 		if (!no_eln) {
 			switch(elnpad) {
 			case NOPAD:
-				printf("%s%d%s ", el_c, i + 1, df_c); break;
+				printf("%s%d%s%s%c%s", el_c, i + 1, df_c,
+						li_cb, file_info[i].sel ? '*' : ' ', df_c);
+				break;
 			case ZEROPAD:
-				printf("%s%0*d%s ", el_c, pad, i + 1, df_c); break;
+				printf("%s%0*d%s%s%c%s", el_c, pad, i + 1, df_c,
+						li_cb, file_info[i].sel ? '*' : ' ', df_c);
+				break;
 			case LEFTSPACEPAD:
-				printf("%s%*d%s ", el_c, pad, i + 1, df_c); break;
+				printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
+						li_cb, file_info[i].sel ? '*' : ' ', df_c);
+				break;
 			case RIGHTSPACEPAD:
-				printf("%s%-*d%s ", el_c, pad, i + 1, df_c); break;
+				printf("%s%-*d%s%s%c%s", el_c, pad, i + 1, df_c,
+						li_cb, file_info[i].sel ? '*' : ' ', df_c);
+				break;
 			default:
-				printf("%s%*d%s ", el_c, pad, i + 1, df_c);
+				printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
+						li_cb, file_info[i].sel ? '*' : ' ', df_c);
+				break;
 			}
 		}
 
