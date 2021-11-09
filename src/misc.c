@@ -384,6 +384,14 @@ print_tips(int all)
 	    "Accept only the first suggested word by pressing Alt-f or Alt-Right",
 	    "Enter 'c sel' to copy selected files into the current directory",
 	    "Take a look at available plugins via the 'actions' command",
+	    "Enable the FZF mode for a better TAB completion experience",
+	    "Press Alt-q to delete the last typed word",
+	    "Check ELN ranges by pressing TAB",
+	    "Select a specific selected file by typing 'sel' and then TAB",
+	    "Use the 'ow' command to open a file with an specific application",
+	    "Use the 'mf' command to limit the amount of files listed on the screen",
+	    "Set a maximum file name length for listed files via the MaxFilenameLen "
+	    "option in the configuration file (F10)",
 	    NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
