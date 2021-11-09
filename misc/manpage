@@ -800,6 +800,8 @@ CliFM offers three kinds of file filters:
 .TP
 \fBM\-c:\fR Clear the current command line buffer
 .TP
+\fBM\-q:\fR Delete last word (up to last slash or space)
+.TP
 \fBM\-g:\fR Toggle list\-folders\-first on/off
 .TP
 \fBM\-,:\fR Toggle list only directories on/off
