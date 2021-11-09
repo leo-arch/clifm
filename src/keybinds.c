@@ -1605,6 +1605,47 @@ rl_tab_comp(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+static int
+rl_del_last_word(int count, int key)
+{
+#ifndef _NO_SUGGESTIONS
+	if (suggestion.printed && suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+#endif
+	UNUSED(count); UNUSED(key);
+
+	if (rl_point == 0)
+		return EXIT_SUCCESS;
+
+	char *b = rl_line_buffer;
+
+	if (b[rl_point - 1] == '/' || b[rl_point - 1] == ' ') {
+		--rl_point;
+		b[rl_point] = '\0';
+		--rl_end;
+	}
+
+	int p = 0;
+	char *s = strrchr(b, '/');
+	char *a = strrchr(b, ' ');
+	if (!a) {
+		if (s)
+			p = (int)(s - b) + 1;
+	} else if (!s)
+		p = (int)(a - b) + 1;
+	else if (a > s)
+		p = (int)(a - b) + 1;
+	else
+		p = (int)(s - b) + 1;
+
+	rl_delete_text(p, rl_end);
+	rl_point = rl_end = p;
+	rl_redisplay();
+
+	return EXIT_SUCCESS;
+}
+
+
 /*
 void
 add_func_to_rl(void)
@@ -1811,6 +1852,7 @@ readline_kbinds(void)
 	rl_bind_keyseq("\x1b[A", rl_cmdhist);
 	rl_bind_keyseq("\x1b[B", rl_cmdhist);
 
+	rl_bind_keyseq("\\M-q", rl_del_last_word);
 	rl_bind_key('\t', rl_tab_comp);
 /*	char *term = getenv("TERM");
 	tgetent(NULL, term);
