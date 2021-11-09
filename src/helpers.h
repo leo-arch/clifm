@@ -973,6 +973,7 @@ extern char
 	 * be added. This is why MAX_COLOR + 2 */
     em_c[MAX_COLOR + 2], /* Error msg color */
     li_c[MAX_COLOR + 2], /* Sel indicator color */
+    li_cb[MAX_COLOR], /* Sel indicator color (for the files list) */
     nm_c[MAX_COLOR + 2], /* Notice msg color */
     ti_c[MAX_COLOR + 2], /* Trash indicator color */
     tx_c[MAX_COLOR + 2], /* Text color */

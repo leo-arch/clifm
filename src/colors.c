@@ -276,6 +276,7 @@ reset_iface_colors(void)
 	*wc_c = '\0';
 	*dh_c = '\0';
 	*li_c = '\0';
+	*li_cb = '\0';
 	*ti_c = '\0';
 	*em_c = '\0';
 	*wm_c = '\0';
@@ -687,10 +688,13 @@ set_iface_colors(char **colors, const size_t words)
 		}
 
 		else if (*colors[i] == 'l' && strncmp(colors[i], "li=", 3) == 0) {
-			if (!is_color_code(colors[i] + 3))
+			if (!is_color_code(colors[i] + 3)) {
 				*li_c = '\0';
-			else
+				*li_cb = '\0';
+			} else {
 				snprintf(li_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3);
+				snprintf(li_cb, MAX_COLOR, "\x1b[%sm", colors[i] + 3);
+			}
 		}
 
 		else if (*colors[i] == 't' && strncmp(colors[i], "ti=", 3) == 0) {
@@ -852,6 +856,8 @@ set_default_colors(void)
 		strcpy(tx_c, DEF_TX_C);
 	if (!*li_c)
 		strcpy(li_c, DEF_LI_C);
+	if (!*li_cb)
+		strcpy(li_cb, DEF_LI_CB);
 	if (!*ti_c)
 		strcpy(ti_c, DEF_TI_C);
 	if (!*em_c)
