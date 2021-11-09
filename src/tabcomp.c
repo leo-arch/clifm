@@ -452,7 +452,7 @@ fzftabcomp(char **matches)
 		char *entry = matches[i];
 
 		if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
-		&& cur_comp_type != TCMP_DESEL && cur_comp_type != TCMP_SEL) {
+		&& cur_comp_type != TCMP_SEL) {
 			cl = get_entry_color(matches, i);
 
 			char ext_cl[MAX_COLOR + 5];
