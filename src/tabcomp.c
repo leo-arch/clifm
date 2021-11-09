@@ -498,6 +498,8 @@ fzftabcomp(char **matches)
 
 	char *query = (char *)NULL;
 	switch(cur_comp_type) {
+	case TCMP_SEL: /* fallthrough */
+	case TCMP_RANGES: break;
 	case TCMP_HIST:
 		/* Skip the leading ! char of the input string */
 		query = rl_line_buffer + 1;
