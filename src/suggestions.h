@@ -29,5 +29,5 @@ int rl_suggestions(const unsigned char c);
 void free_suggestion(void);
 void remove_suggestion_not_end(void);
 int check_cmds(const char *str, const size_t len);
-void print_suggestion(const char *str, size_t offset, const char *color);
+void print_suggestion(char *str, size_t offset, const char *color);
 int recover_from_wrong_cmd(void);

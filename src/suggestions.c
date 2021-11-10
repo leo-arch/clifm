@@ -679,7 +679,7 @@ check_builtins(const char *str, const size_t len, const int print)
 }
 
 int
-check_cmds(const char *str, const size_t len, const int print)
+check_cmds(char *str, const size_t len, const int print)
 {
 	if (!len)
 		return 0;
@@ -719,7 +719,24 @@ check_cmds(const char *str, const size_t len, const int print)
 		}
 	}
 
-	return check_builtins(str, len, print);
+	/* Check internal command with fused parameter */
+	char *p = (char *)NULL;
+	size_t j = 0;
+	for (; str[j]; j++) {
+		if (str[j] >= '1' && str[j] <= '9') {
+			p = str + j;
+			break;
+		}
+	}
+
+	if (!p)
+		return check_builtins(str, len, print);
+	
+	*p = '\0';
+	if (!is_internal_c(str))
+		return NO_MATCH;
+
+	return FULL_MATCH;
 }
 
 static int
