@@ -642,7 +642,13 @@ fzftabcomp(char **matches)
 
 	char *query = (char *)NULL;
 	switch(cur_comp_type) {
-	case TCMP_SEL: /* fallthrough */
+	case TCMP_SEL: break;
+	case TCMP_DESEL: {
+		char *sp = strrchr(rl_line_buffer, ' ');
+		query = (sp && *(++sp)) ? sp : rl_line_buffer;
+		}
+		break;
+
 	case TCMP_RANGES: break;
 
 	case TCMP_HIST:
@@ -723,7 +729,9 @@ fzftabcomp(char **matches)
 			offset = mlen;
 	}
 
-	if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
+	if (cur_comp_type == TCMP_DESEL) {
+		offset = strlen(query);
+	} else if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
 		offset = 0;
