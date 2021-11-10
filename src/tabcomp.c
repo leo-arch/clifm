@@ -13,7 +13,7 @@ typedef char *rl_cpvfunc_t;
 #include <errno.h>
 #include <fcntl.h>
 
-/* #include <curses.h> */
+//#include <curses.h>
 
 #include "exec.h"
 #include "aux.h"
@@ -129,7 +129,8 @@ print_filename(char *to_print, char *full_pathname)
 {
 	char *s;
 
-	if (colorize && cur_comp_type == TCMP_PATH) {
+	if (colorize && (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_SEL
+	|| cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_RANGES)) {
 		colors_list(to_print, 0, 0, 0);
 	} else {
 		for (s = to_print + tab_offset; *s; s++) {
@@ -221,7 +222,7 @@ rl_strpbrk(char *s1, char *s2)
 #define FZFTABOUT "/tmp/clifm.fzf.out"
 
 static char *
-fzftab_color(const char *filename, const struct stat attr)
+fzftab_color(char *filename, const struct stat attr)
 {
 	switch(attr.st_mode & S_IFMT) {
 	case S_IFDIR:
@@ -254,8 +255,9 @@ get_entry_color(char **matches, const size_t i)
 	char *cl = (char *)NULL;
 
 	if (*matches[i] == '/') { /* Absolute path */
-		if (colorize && cur_comp_type == TCMP_PATH) {
-			if (stat(matches[i], &attr) != -1)
+		if (colorize && (cur_comp_type == TCMP_PATH
+		|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL)) {
+			if (lstat(matches[i], &attr) != -1)
 				cl = fzftab_color(matches[i], attr);
 		}
 	} else if (*matches[i] == '~') {  /* Tilde */
@@ -265,16 +267,16 @@ get_entry_color(char **matches, const size_t i)
 				char tmp_path[PATH_MAX + 1];
 				strncpy(tmp_path, exp_path, PATH_MAX);
 				free(exp_path);
-				if (stat(tmp_path, &attr) != -1)
+				if (lstat(tmp_path, &attr) != -1)
 					cl = fzftab_color(tmp_path, attr);
 			}
 		}
 	} else { /* Relative path */
 		if (colorize) {
-			if (cur_comp_type == TCMP_PATH) {
+			if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_RANGES) {
 				char tmp_path[PATH_MAX];
 				snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
-				if (stat(tmp_path, &attr) != -1)
+				if (lstat(tmp_path, &attr) != -1)
 					cl = fzftab_color(tmp_path, attr);
 			} else if (cur_comp_type == TCMP_CMD) {
 				if (is_internal_c(matches[i]))
@@ -440,7 +442,11 @@ curses_tab(char **list)
 
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
-	size_t n = 0, i = 0;
+	char *l = list[0];
+	list++;
+
+	size_t n = 0;
+	int i = 0;
 	for (; list[n]; n++);
 
 	WINDOW *w;
@@ -478,23 +484,30 @@ curses_tab(char **list)
 //		printf("\x1b[%dB", term_rows - (currow + (int)height));
 //	}
 
+	int a = (int)height <= term_rows -2 ? (int)height : term_rows - 2; 
+
 	initscr(); // initialize Ncurses
-	w = newwin((int)height, 12, currow - 3, curses_offset); // create a new window
+//	start_color();
+//	init_pair(1, COLOR_RED, COLOR_BLACK);
+//	init_pair(2, COLOR_CYAN, COLOR_BLACK);
+
+	w = newwin(a + 1, PATH_MAX, 1, curses_offset); // create a new window
 //	box(w, 0, 0); // sets default borders for the window
 
 	// now print all the menu items and highlight the first one
-	for (i = 0; i < n; i++) {
+	for (i = 0; i < (int)n; i++) {
 		if (i == 0)
 			wattron(w, A_STANDOUT); // highlights the first item.
 		else
 			wattroff(w, A_STANDOUT);
 		sprintf(item, "%-7s",  list[i]);
-		mvwprintw(w, (int)i + 1, 2, "%s", item);
+		mvwprintw(w, i + 1, 2, "%s", item);
 	}
 
 	wrefresh(w); // update the terminal screen
 
 	i = 0;
+	scrollok(w, TRUE);
 	noecho(); // disable echoing of characters on the screen
 	keypad(w, TRUE); // enable keyboard input for the window.
 	curs_set(0); // hide the default screen cursor.
@@ -502,17 +515,25 @@ curses_tab(char **list)
 	// get the input
 	while ((c = wgetch(w))) {
 		// right pad with spaces to make the items appear with even width.
-		sprintf(item, "%-7s",  list[i]); 
-		mvwprintw(w, (int)i + 1, 2, "%s", item); 
+		sprintf(item, "%-7s",  list[i]);
+		mvwprintw(w, i + 1, 2, "%s", item);
 		// use a variable to increment or decrement the value based on the input.
 		switch(c) {
 		case KEY_UP:
 			i--;
-			i = i < 0 ? n : i;
+			i = i < 0 ? (int)n - 1 : i;
+//			if (i > term_rows - 3) {
+//				wscrl(w, -1);
+//				wrefresh(w);
+//			}
 		break;
 		case KEY_DOWN:
 			i++;
-			i = i > n ? 0 : i;
+			i = i > (int)n - 1 ? 0 : i;
+//			if (i > term_rows - 3) {
+//				wscrl(w, 1);
+//				wrefresh(w);
+//			}
 		break;
 
 //		case CONTROL('c'): goto END;
@@ -528,6 +549,7 @@ curses_tab(char **list)
 		sprintf(item, "%-7s", list[i]);
 		mvwprintw(w, (int)i + 1, 2, "%s", item);
 		wattroff(w, A_STANDOUT);
+		wrefresh(w);
 	}
 
 END:
@@ -539,9 +561,11 @@ END:
 PRINT:
 	delwin(w);
 	endwin();
-	rl_insert_text(list[i]);
-	rl_redisplay();
-	printf("\x1b[%dA", lines);
+	// Restore cursor position
+	printf("\x1b[%d;%dH", currow - lines, curcol);
+	char *d = escape_str(list[i]);
+	rl_insert_text(d + strlen(l));
+	free(d);
 	return EXIT_SUCCESS;
 } */
 
@@ -569,8 +593,7 @@ fzftabcomp(char **matches)
 		char *color = df_c;
 		char *entry = matches[i];
 
-		if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
-		&& cur_comp_type != TCMP_SEL) {
+		if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
 			cl = get_entry_color(matches, i);
 
 			char ext_cl[MAX_COLOR + 5];
@@ -581,7 +604,9 @@ fzftabcomp(char **matches)
 			if (cl && *cl != _ESC)
 				snprintf(ext_cl, MAX_COLOR + 4, "\x1b[%sm", cl);
 
-			char *p = strrchr(matches[i], '/');
+			char *p = (char *)NULL;
+			if (cur_comp_type != TCMP_SEL && cur_comp_type != TCMP_DESEL)
+				p = strrchr(matches[i], '/');
 			color = *ext_cl ? ext_cl : (cl ? cl : "");
 			entry = (p && *(++p)) ? p : matches[i];
 		}
@@ -592,8 +617,8 @@ fzftabcomp(char **matches)
 
 	fclose(fp);
 
-	/* Set a pointer to the last word (either space or slash). We
-	 * use this to highlight the matching prefix in FZF */
+	/* Set a pointer to the last word (either space or slash) in the
+	 * input buffer. We use this to highlight the matching prefix in FZF */
 	char *lw = get_last_word(matches[0]);
 
 	/* Calculate the height of the FZF window based on the amount
@@ -732,6 +757,7 @@ fzftabcomp(char **matches)
 		char *q = escape_str(buf);
 		if (!q)
 			return EXIT_FAILURE;
+
 		write_completion(q, &offset, &exit_status);
 		free(q);
 	}
@@ -1309,9 +1335,7 @@ CALC_OFFSET:
 						printf("%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
 						(cur_comp_type == TCMP_CMD) ? (colorize
 						? ex_c : "") : dc_c);
-					else if (cur_comp_type == TCMP_RANGES
-					|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL)
-						fputs("\x1b[0;35m", stdout);
+
 					char *temp;
 					int printed_length;
 					temp = printable_part(matches[l]);
