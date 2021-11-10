@@ -729,7 +729,7 @@ check_cmds(char *str, const size_t len, const int print)
 		}
 	}
 
-	if (!p)
+	if (!p || p == str)
 		return check_builtins(str, len, print);
 	
 	*p = '\0';
