@@ -1301,8 +1301,12 @@ DISPLAY_MATCHES:
 CALC_OFFSET:
 		qq = strrchr(matches[0], '/');
 		if (qq) {
-			if (*(++qq))
+			if (*(++qq)) {
 				tab_offset = strlen(qq);
+			} else if (cur_comp_type == TCMP_DESEL) {
+				tab_offset = strlen(matches[0]);
+				qq = matches[0];
+			}
 		} else {
 			tab_offset = strlen(matches[0]);
 		}
@@ -1339,11 +1343,14 @@ CALC_OFFSET:
 				if (l > len || !matches[l]) {
 					break;
 				} else {
-					if (tab_offset)
+					if (tab_offset) {
+						/* Print the matching part of the match */
 						printf("%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
 						(cur_comp_type == TCMP_CMD) ? (colorize
 						? ex_c : "") : dc_c);
+					}
 
+					/* Now print the non-matching part of the match */
 					char *temp;
 					int printed_length;
 					temp = printable_part(matches[l]);
