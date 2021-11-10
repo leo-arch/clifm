@@ -13,6 +13,8 @@ typedef char *rl_cpvfunc_t;
 #include <errno.h>
 #include <fcntl.h>
 
+/* #include <curses.h> */
+
 #include "exec.h"
 #include "aux.h"
 #include "misc.h"
@@ -406,7 +408,7 @@ static inline int
 run_fzf(const size_t *height, const int *offset, const char *lw)
 {
 	char cmd[PATH_MAX];
-	snprintf(cmd, PATH_MAX, "$(cat %s | fzf --pointer='>' "
+	snprintf(cmd, PATH_MAX, "$(fzf --pointer='>' "
 			"--color=\"%s,gutter:-1,prompt:%s:bold,"
 			"fg+:-1,pointer:green:bold,"
 			"hl:%s:underline,hl+:%s:bold:underline\" "
@@ -415,17 +417,133 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 			"--height=%zu "
 			"--margin=0,0,0,%d "
 			"--ansi %s "
-			"--query=\"%s\" > %s)",
-			FZFTABIN,
+			"--query=\"%s\" "
+			"< %s > %s)",
 			colorize ? "dark" : "bw",
 			colorize ? "cyan" : "-1",
 			"magenta", "magenta", 
-			*height, *offset, case_sens_path_comp ? "+i" : "-i",
-			lw ? lw : "", FZFTABOUT);
+			*height, *offset,
+			case_sens_path_comp ? "+i" : "-i",
+			lw ? lw : "",
+			FZFTABIN, FZFTABOUT);
 	int ret = launch_execle(cmd);
 
 	return ret;
 }
+
+/*
+static int
+curses_tab(char **list)
+{
+	if (!list || !list[0])
+		return (-1);
+
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+
+	size_t n = 0, i = 0;
+	for (; list[n]; n++);
+
+	WINDOW *w;
+	char item[PATH_MAX];
+	int c;
+
+	size_t height = 0;
+	if ((int)n + 1 > term_rows - 2)
+		height = term_rows - 2;
+	else
+		height = n;
+
+	// Calculate the offset (left padding) of the FZF window based on
+	// cursor position and current query string
+	int max_curses_offset = term_cols > 20 ? term_cols - 20 : 0;
+	int curses_offset = (rl_point + prompt_offset < max_curses_offset)
+			? (rl_point + prompt_offset - 4) : 0;
+
+	// Calculate currently used lines to go back to the correct cursor
+	// position after quitting FZF
+	int lines = 1, total_line_len = 0;
+	total_line_len = rl_end + prompt_offset;
+	// PROMPT_OFFSET (the space used by the prompt in the current line)
+	// is calculated the first time we print the prompt (in my_rl_getc
+	// (readline.c))
+
+	if (total_line_len > term_cols) {
+		lines = total_line_len / term_cols;
+		int rem = (int)total_line_len % term_cols;
+		if (rem > 0)
+			lines++;
+	}
+
+//	if (currow + (int)height > term_rows) {
+//		printf("\x1b[%dB", term_rows - (currow + (int)height));
+//	}
+
+	initscr(); // initialize Ncurses
+	w = newwin((int)height, 12, currow - 3, curses_offset); // create a new window
+//	box(w, 0, 0); // sets default borders for the window
+
+	// now print all the menu items and highlight the first one
+	for (i = 0; i < n; i++) {
+		if (i == 0)
+			wattron(w, A_STANDOUT); // highlights the first item.
+		else
+			wattroff(w, A_STANDOUT);
+		sprintf(item, "%-7s",  list[i]);
+		mvwprintw(w, (int)i + 1, 2, "%s", item);
+	}
+
+	wrefresh(w); // update the terminal screen
+
+	i = 0;
+	noecho(); // disable echoing of characters on the screen
+	keypad(w, TRUE); // enable keyboard input for the window.
+	curs_set(0); // hide the default screen cursor.
+
+	// get the input
+	while ((c = wgetch(w))) {
+		// right pad with spaces to make the items appear with even width.
+		sprintf(item, "%-7s",  list[i]); 
+		mvwprintw(w, (int)i + 1, 2, "%s", item); 
+		// use a variable to increment or decrement the value based on the input.
+		switch(c) {
+		case KEY_UP:
+			i--;
+			i = i < 0 ? n : i;
+		break;
+		case KEY_DOWN:
+			i++;
+			i = i > n ? 0 : i;
+		break;
+
+//		case CONTROL('c'): goto END;
+
+//		case ESC: // fallthrough
+		case 'q': goto END;
+
+		case 10: goto PRINT; // Enter
+		}
+
+		// now highlight the next item in the list.
+		wattron(w, A_STANDOUT);
+		sprintf(item, "%-7s", list[i]);
+		mvwprintw(w, (int)i + 1, 2, "%s", item);
+		wattroff(w, A_STANDOUT);
+	}
+
+END:
+	delwin(w);
+	endwin();
+	printf("\x1b[%dA", lines);
+	return (-1);
+
+PRINT:
+	delwin(w);
+	endwin();
+	rl_insert_text(list[i]);
+	rl_redisplay();
+	printf("\x1b[%dA", lines);
+	return EXIT_SUCCESS;
+} */
 
 /* Display possible completions using FZF. If one of these possible
  * completions is selected, insert it into the current line buffer */
@@ -604,6 +722,7 @@ fzftabcomp(char **matches)
 	}
 
 	if (*buf) {
+		/* Some buffer clean up: remove new line char and ending spaces */
 		size_t blen = strlen(buf);
 		int j = (int)blen;
 		if (buf[j - 1] == '\n')
@@ -1155,6 +1274,10 @@ CALC_OFFSET:
 		}
 		if (cur_comp_type == TCMP_RANGES)
 			tab_offset = 0;
+
+/*		if (curses_tab(matches) == -1)
+			goto RESTART;
+		goto RESET_PATH; */
 
 #ifndef _NO_FZF
 		if (fzftab == 1) {
