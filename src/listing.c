@@ -1394,7 +1394,7 @@ list_dir_light(void)
 			continue;
 
 		/* Skip files according to FILTER */
-		if (filter) {
+		if (_filter) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (filter_rev)
 					continue;
@@ -1655,7 +1655,7 @@ list_dir(void)
 			continue;
 
 		/* Filter files according to FILTER */
-		if (filter) {
+		if (_filter) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (filter_rev)
 					continue;

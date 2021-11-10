@@ -213,7 +213,7 @@ filter_function(const char *arg)
 {
 	if (!arg) {
 		printf(_("Current filter: %c%s\n"), filter_rev ? '!' : 0,
-				filter ? filter : "none");
+				_filter ? _filter : "none");
 		return EXIT_SUCCESS;
 	}
 
@@ -223,9 +223,9 @@ filter_function(const char *arg)
 	}
 
 	if (*arg == 'u' && strcmp(arg, "unset") == 0) {
-		if (filter) {
-			free(filter);
-			filter = (char *)NULL;
+		if (_filter) {
+			free(_filter);
+			_filter = (char *)NULL;
 			regfree(&regex_exp);
 			puts(_("Filter unset"));
 			filter_rev = 0;
@@ -236,8 +236,8 @@ filter_function(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	if (filter)
-		free(filter);
+	if (_filter)
+		free(_filter);
 
 	regfree(&regex_exp);
 
@@ -248,13 +248,13 @@ filter_function(const char *arg)
 		filter_rev = 0;
 	}
 
-	filter = savestring(arg, strlen(arg));
+	_filter = savestring(arg, strlen(arg));
 
-	if (regcomp(&regex_exp, filter, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
+	if (regcomp(&regex_exp, _filter, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: '%s': Invalid regular expression\n"),
-		    PROGRAM_NAME, filter);
-		free(filter);
-		filter = (char *)NULL;
+		    PROGRAM_NAME, _filter);
+		free(_filter);
+		_filter = (char *)NULL;
 		regfree(&regex_exp);
 	} else {
 		puts(_("New filter successfully set"));
@@ -1333,9 +1333,9 @@ free_stuff(void)
 	if (pinned_dir)
 		free(pinned_dir);
 
-	if (filter) {
+	if (_filter) {
 		regfree(&regex_exp);
-		free(filter);
+		free(_filter);
 	}
 
 	if (eln_as_file_n)

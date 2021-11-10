@@ -264,7 +264,7 @@ char
     *dirhist_file = (char *)NULL,
     *encoded_prompt = (char *)NULL,
     *file_cmd_path = (char *)NULL,
-    *filter = (char *)NULL,
+    *_filter = (char *)NULL,
     *hist_file = (char *)NULL,
     *jump_suggestion = (char *)NULL,
     *kbinds_file = (char *)NULL,

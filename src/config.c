@@ -1669,7 +1669,7 @@ read_config(void)
 				files_counter = 0;
 		}
 
-		else if (!filter && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
+		else if (!_filter && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
 			char *opt_str = strchr(line, '=');
 			if (!opt_str)
 				continue;
@@ -1688,7 +1688,7 @@ read_config(void)
 				filter_rev = 0;
 			}
 
-			filter = savestring(opt_str, len);
+			_filter = savestring(opt_str, len);
 		}
 
 #ifndef _NO_HIGHLIGHT
@@ -2169,13 +2169,13 @@ read_config(void)
 
 	close_fstream(config_fp, fd);
 
-	if (filter) {
-		ret = regcomp(&regex_exp, filter, REG_NOSUB | REG_EXTENDED);
+	if (_filter) {
+		ret = regcomp(&regex_exp, _filter, REG_NOSUB | REG_EXTENDED);
 		if (ret != EXIT_SUCCESS) {
 			_err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
-				  "expression\n"), PROGRAM_NAME, filter);
-			free(filter);
-			filter = (char *)NULL;
+				  "expression\n"), PROGRAM_NAME, _filter);
+			free(_filter);
+			_filter = (char *)NULL;
 			regfree(&regex_exp);
 		}
 	}
@@ -2273,10 +2273,10 @@ reset_variables(void)
 
 	free_remotes(0);
 
-	if (filter) {
+	if (_filter) {
 		regfree(&regex_exp);
-		free(filter);
-		filter = (char *)NULL;
+		free(_filter);
+		_filter = (char *)NULL;
 	}
 
 	free(opener);

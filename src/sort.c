@@ -85,7 +85,7 @@ skip_files(const struct dirent *ent)
 		return 0;
 
 	/* Skip files matching FILTER */
-	if (filter && regexec(&regex_exp, ent->d_name, 0, NULL, 0) == EXIT_SUCCESS)
+	if (_filter && regexec(&regex_exp, ent->d_name, 0, NULL, 0) == EXIT_SUCCESS)
 		return 0;
 
 	/* If not hidden files */

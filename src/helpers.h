@@ -845,7 +845,7 @@ extern char
     *dirhist_file,
     *encoded_prompt,
     *file_cmd_path,
-    *filter,
+    *_filter,
     *hist_file,
     *kbinds_file,
     *jump_suggestion,

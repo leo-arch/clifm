@@ -322,7 +322,7 @@ get_data_dir(void)
 void
 check_env_filter(void)
 {
-	if (filter)
+	if (_filter)
 		return;
 
 	char *p = getenv("CLIFM_FILTER");
@@ -336,7 +336,7 @@ check_env_filter(void)
 		filter_rev = 0;
 	}
 	
-	filter = savestring(p, strlen(p));
+	_filter = savestring(p, strlen(p));
 }
 
 char *
