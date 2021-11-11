@@ -703,8 +703,8 @@ char
 #ifdef LINUX_INOTIFY
 int inotify_fd, inotify_wd = -1;
 unsigned int INOTIFY_MASK = /*IN_ATTRIB |*/ IN_CREATE | IN_DELETE
-	| IN_DELETE_SELF | /*IN_MODIFY |*/ IN_MOVE_SELF
-	| IN_MOVED_FROM | IN_MOVED_TO | IN_EXCL_UNLINK;
+	| IN_DELETE_SELF | /*IN_MODIFY |*/ IN_MOVE_SELF | IN_MOVE
+	| IN_DONT_FOLLOW | IN_EXCL_UNLINK | IN_ONLYDIR | IN_MASK_CREATE;
 #elif defined(BSD_KQUEUE)
 int kq, event_fd = -1;
 struct kevent events_to_monitor[NUM_EVENT_FDS];
