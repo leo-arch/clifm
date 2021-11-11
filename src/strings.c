@@ -1740,7 +1740,8 @@ parse_input_str(char *str)
 		 * #             5) REGEX EXPANSION            #
 		 * ############################################# */
 
-	if (*substr[0] == 's' && (!substr[0][1] || strcmp(substr[0], "sel") == 0))
+	if ((*substr[0] == 's' && (!substr[0][1] || strcmp(substr[0], "sel") == 0))
+	|| (*substr[0] == 'n' && (!substr[0][1] || strcmp(substr[0], "new") == 0)))
 		return substr;
 
 	char **regex_files = (char **)xnmalloc(files + args_n + 2, sizeof(char *));
@@ -1807,6 +1808,7 @@ parse_input_str(char *str)
 	free(regex_files);
 	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
+
 	return substr;
 }
 

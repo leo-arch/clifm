@@ -1255,7 +1255,7 @@ set_colors(const char *colorscheme, int env)
 		int i = (int)ext_colors_n;
 		while (--i >= 0) {
 			char *ret = strrchr(ext_colors[i], '=');
-			if (!ret || !is_color_code(ret + 1)) {
+			if (!ret || !*(++ret) || !is_color_code(ret)) {
 				*ext_colors[i] = '\0';
 				ext_colors_len[i] = 0;
 				continue;
