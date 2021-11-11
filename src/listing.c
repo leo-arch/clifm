@@ -1603,6 +1603,37 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t
 	return 0;
 }
 
+/* initialize the file_info struct, mostly in case stat fails */
+static inline void
+init_fileinfo(const size_t n)
+{
+	file_info[n].color = df_c;
+	file_info[n].ext_color = (char *)NULL;
+#ifndef _NO_ICONS
+	file_info[n].icon = DEF_FILE_ICON;
+	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+#endif
+	file_info[n].name = (char *)NULL;
+	file_info[n].dir = 0;
+	file_info[n].eln_n = 0;
+	file_info[n].exec = 0;
+	file_info[n].filesn = 0; /* Number of files in subdir */
+	file_info[n].ruser = 1; /* User read permission for dir */
+	file_info[n].symlink = 0;
+	file_info[n].sel = 0;
+	file_info[n].pad = 0;
+	file_info[n].len = 0;
+	file_info[n].mode = 0; /* Store st_mode (for long view mode) */
+	file_info[n].type = 0; /* Store d_type value */
+	file_info[n].inode = 0;
+	file_info[n].size = 1;
+	file_info[n].uid = 0;
+	file_info[n].gid = 0;
+	file_info[n].linkn = 1;
+	file_info[n].ltime = 0; /* For long view mode */
+	file_info[n].time = 0;
+}
+
 /* List files in the current working directory. Uses file type colors
  * and columns. Return zero on success or one on error */
 int
@@ -1678,6 +1709,8 @@ list_dir(void)
 		if (!show_hidden && *ename == '.')
 			continue;
 
+		init_fileinfo(n);
+
 		int stat_ok = 1;
 		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1)
 			stat_ok = 0;
@@ -1700,7 +1733,7 @@ list_dir(void)
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
-		file_info[n].exec = 0;
+//		file_info[n].exec = 0;
 
 		if (stat_ok) {
 			switch (attr.st_mode & S_IFMT) {
@@ -1713,46 +1746,59 @@ list_dir(void)
 			case S_IFSOCK: file_info[n].type = DT_SOCK; break;
 			default: file_info[n].type = DT_UNKNOWN; break;
 			}
+
 			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino,
 							attr.st_nlink, n);
+			file_info[n].inode = ent->d_ino;
+			file_info[n].linkn = attr.st_nlink;
+			file_info[n].size = attr.st_size;
+
+			file_info[n].uid = attr.st_uid;
+			file_info[n].gid = attr.st_gid;
+			file_info[n].mode = attr.st_mode;
+
+			if (long_view)
+				file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
 		} else {
 			file_info[n].type = DT_UNKNOWN;
 		}
 		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
 
-		file_info[n].inode = ent->d_ino;
-		file_info[n].linkn = attr.st_nlink;
-		file_info[n].size = attr.st_size;
+/*		if (stat_ok) {
+			file_info[n].inode = ent->d_ino;
+			file_info[n].linkn = attr.st_nlink;
+			file_info[n].size = attr.st_size;
 
-		file_info[n].uid = attr.st_uid;
-		file_info[n].gid = attr.st_gid;
-		file_info[n].mode = attr.st_mode;
-		if (long_view)
-			file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
+			file_info[n].uid = attr.st_uid;
+			file_info[n].gid = attr.st_gid;
+			file_info[n].mode = attr.st_mode;
+			if (long_view)
+				file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
+		} */
 
-		file_info[n].color = (char *)NULL;
-		file_info[n].ext_color = (char *)NULL;
+//		file_info[n].color = (char *)NULL;
+//		file_info[n].ext_color = (char *)NULL;
 
 #ifndef _NO_ICONS
 		/* Default icon for all files */
-		file_info[n].icon = DEF_FILE_ICON;
-		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+//		file_info[n].icon = DEF_FILE_ICON;
+//		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
 #endif
 
-		file_info[n].ruser = 1;
-		file_info[n].filesn = 0;
+//		file_info[n].ruser = 1;
+//		file_info[n].filesn = 0;
 
 		switch (sort) {
 		case SATIME:
-			file_info[n].time = (time_t)attr.st_atime;
+			file_info[n].time = stat_ok ? (time_t)attr.st_atime : 0;
 			break;
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
 		case SBTIME:
 #ifdef __OpenBSD__
-			file_info[n].time = (time_t)attr.__st_birthtim.tv_sec;
+			file_info[n].time = stat_ok ? (time_t)attr.__st_birthtim.tv_sec : 0;
 #else
-			file_info[n].time = (time_t)attr.st_birthtime;
+			file_info[n].time = stat_ok ? (time_t)attr.st_birthtime : 0;
 #endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
 			break;
 #elif defined(_STATX)
@@ -1765,10 +1811,10 @@ list_dir(void)
 				file_info[n].time = (time_t)attx.stx_btime.tv_sec;
 		} break;
 #else
-		case SBTIME: file_info[n].time = (time_t)attr.st_ctime; break;
+		case SBTIME: file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0; break;
 #endif /* _STATX */
-		case SCTIME: file_info[n].time = (time_t)attr.st_ctime;	break;
-		case SMTIME: file_info[n].time = (time_t)attr.st_mtime; break;
+		case SCTIME: file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0; break;
+		case SMTIME: file_info[n].time = stat_ok ? (time_t)attr.st_mtime : 0; break;
 		default: file_info[n].time = 0; break;
 		}
 
@@ -1788,20 +1834,22 @@ list_dir(void)
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			} else {
 //				if (check_file_access(file_info[n]) == 0)
-				if (check_file_access(attr) == 0)
+				if (stat_ok && check_file_access(attr) == 0)
 					file_info[n].filesn = -1;
 				else
 					file_info[n].filesn = 1;
 			}
 			if (file_info[n].filesn > 0) { /* S_ISVTX*/
-				file_info[n].color = (attr.st_mode & 01000)
+				file_info[n].color = stat_ok ? ((attr.st_mode & 01000)
 							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
-							 : ((attr.st_mode & 00002) ? ow_c : di_c);
+							 : ((attr.st_mode & 00002) ? ow_c : di_c))
+							 : df_c;
 				/* S_ISWOTH*/
 			} else if (file_info[n].filesn == 0) {
-				file_info[n].color = (attr.st_mode & 01000)
+				file_info[n].color = stat_ok ? ((attr.st_mode & 01000)
 							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
-							 : ((attr.st_mode & 00002) ? ow_c : ed_c);
+							 : ((attr.st_mode & 00002) ? ow_c : ed_c))
+							 : df_c;
 			} else {
 				file_info[n].color = nd_c;
 #ifndef _NO_ICONS
@@ -1842,19 +1890,19 @@ list_dir(void)
 			/* Do not perform the access check if the user is root */
 			if (!(flags & ROOT_USR)
 //			&& check_file_access(file_info[n]) == 0) {
-			&& check_file_access(attr) == 0) {
+			&& stat_ok && check_file_access(attr) == 0) {
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
 #endif
 				file_info[n].color = nf_c;
-			} else if (attr.st_mode & 04000) { /* SUID */
+			} else if (stat_ok && (attr.st_mode & 04000)) { /* SUID */
 				file_info[n].exec = 1;
 				file_info[n].color = su_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif
-			} else if (attr.st_mode & 02000) { /* SGID */
+			} else if (stat_ok && (attr.st_mode & 02000)) { /* SGID */
 				file_info[n].exec = 1;
 				file_info[n].color = sg_c;
 #ifndef _NO_ICONS
@@ -1869,8 +1917,8 @@ list_dir(void)
 			}
 #endif
 
-			else if ((attr.st_mode & 00100) /* Exec */
-			|| (attr.st_mode & 00010) || (attr.st_mode & 00001)) {
+			else if (stat_ok && ((attr.st_mode & 00100) /* Exec */
+			|| (attr.st_mode & 00010) || (attr.st_mode & 00001))) {
 				file_info[n].exec = 1;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
