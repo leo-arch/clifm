@@ -91,19 +91,29 @@ read_inotify(void)
 	memset((void *)inotify_buf, '\0', EVENT_BUF_LEN);
 	i = (int)read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 
-	if (i <= 0)
+	if (i <= 0) {
+#ifdef INOTIFY_DEBUG
+		puts("INOTIFY_RETURN");
+#endif
 		return;
+	}
 
 	int ignore_event = 0, refresh = 0;
 	for (char *ptr = inotify_buf;
 	ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 	ptr += sizeof(struct inotify_event) + event->len) {
 		event = (struct inotify_event *)ptr;
-		if (!event->wd)
+		if (!event->wd) {
+#ifdef INOTIFY_DEBUG
+			puts("INOTIFY_BREAK");
+#endif
 			break;
+		}
 
 		if (event->mask & IN_CREATE) {
-/*			puts("IN_CREATE"); */
+#ifdef INOTIFY_DEBUG
+			puts("IN_CREATE");
+#endif
 			struct stat a;
 			if (event->len && lstat(event->name, &a) != 0) {
 				/* The file was created, but doesn't exist anymore */
@@ -116,13 +126,16 @@ read_inotify(void)
 			ignore_event = 0;
 
 		if (event->mask & IN_DELETE) {
-/*			puts("IN_DELETE"); */
+#ifdef INOTIFY_DEBUG
+			puts("IN_DELETE");
+#endif
 			struct stat a;
 			if (event->len && lstat(event->name, &a) == 0)
 				/* The file was removed, but is still there (recreated) */
 				ignore_event = 1;
 		}
-/*
+
+#ifdef INOTIFY_DEBUG
 		if (event->mask & IN_DELETE_SELF)
 			puts("IN_DELETE_SELF");
 		if (event->mask & IN_MOVE_SELF)
@@ -132,16 +145,23 @@ read_inotify(void)
 		if (event->mask & IN_MOVED_TO)
 			puts("IN_MOVED_TO");
 		if (event->mask & IN_IGNORED)
-			puts("IN_IGNORED"); */
+			puts("IN_IGNORED");
+#endif
 
 		if (!ignore_event && (event->mask & INOTIFY_MASK))
 			refresh = 1;
 	}
 
 	if (refresh) {
+#ifdef INOTIFY_DEBUG
+		puts("INOTIFY_REFRESH");
+#endif
 		free_dirlist();
 		list_dir();
 	} else {
+#ifdef INOTIFY_DEBUG
+		puts("INOTIFY_RESET");
+#endif
 		/* Reset the inotify watch list */
 		reset_inotify();
 	}
