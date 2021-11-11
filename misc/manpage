@@ -719,7 +719,7 @@ Reload all settings, except those passed as command line arguments, from the con
 .B s, sel \fRELN/FILE ... n [[!]PATTERN] [-filetype] [:PATH]
 send one or multiple elements (either files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: 's 1 4\-10 ^r file* file name /path/to/filename'. To deselect selected files, use the \fIds\fR command (see above), or the M-d keyboard shortcut.
 .sp
-Once a file is selected, and if the file is in the current working directory, the corresponding file name will be marked with an asterisk (colored according to the value of \fIli\fR in the color scheme file (by default bold green)), at the left of the file name (and at the right of its ELN).
+If not in light mode, once a file is selected, and if the file is in the current working directory, the corresponding file name will be marked with an asterisk (colored according to the value of \fIli\fR in the color scheme file (by default bold green)), at the left of the file name (and at the right of its ELN).
 .sp
 Just as in the \fIsearch\fR function, it is also possible to further filter the list of matches indicating the desired file type. For instance, 's ^ -d' will select all directories in the current working directory. For available file type filters see the \fIsearch\fR function above.
 .sp

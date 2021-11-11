@@ -1586,6 +1586,7 @@ check_seltag(dev_t dev, ino_t ino, nlink_t links, size_t index)
 	int j = (int)sel_n;
 	while (--j >= 0) {
 		if (sel_devino[j].dev == dev && sel_devino[j].ino == ino) {
+			/* Only check file names for hardlinks */
 			if (!file_info[index].dir && links > 1) {
 				char *p = strrchr(sel_elements[j], '/');
 				if (!p || !*(++p))
