@@ -1117,12 +1117,13 @@ set_colors(const char *colorscheme, int env)
 						continue;
 
 					opt_str++;
-					char *color_line = strip_color_line(opt_str, 'x');
+					extcolors = savestring(opt_str, strlen(opt_str));
+/*					char *color_line = strip_color_line(opt_str, 'x');
 					if (!color_line)
 						continue;
 
 					extcolors = savestring(color_line, strlen(color_line));
-					free(color_line);
+					free(color_line); */
 				}
 
 #ifndef _NO_ICONS
