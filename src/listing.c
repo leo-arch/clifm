@@ -1578,7 +1578,7 @@ END:
 /* Check whether the file in the device DEV with inode INO is selected.
  * Used to mark selected files in the files list */
 static inline int
-check_seltag(dev_t dev, ino_t ino, nlink_t links, size_t index)
+check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t index)
 {
 	if (sel_n == 0)
 		return 0;
