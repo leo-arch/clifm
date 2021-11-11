@@ -1578,15 +1578,25 @@ END:
 /* Check whether the file in the device DEV with inode INO is selected.
  * Used to mark selected files in the files list */
 static inline int
-check_seltag(dev_t dev, ino_t ino)
+check_seltag(dev_t dev, ino_t ino, nlink_t links, size_t index)
 {
 	if (sel_n == 0)
 		return 0;
 
 	int j = (int)sel_n;
 	while (--j >= 0) {
-		if (sel_devino[j].dev == dev && sel_devino[j].ino == ino)
-			return 1;
+		if (sel_devino[j].dev == dev && sel_devino[j].ino == ino) {
+			if (!file_info[index].dir && links > 1) {
+				char *p = strrchr(sel_elements[j], '/');
+				if (!p || !*(++p))
+					continue;
+				if (*p == *file_info[index].name
+				&& strcmp(p, file_info[index].name) == 0)
+					return 1;
+			} else {
+				return 1;
+			}
+		}
 	}
 
 	return 0;
@@ -1692,7 +1702,8 @@ list_dir(void)
 		file_info[n].exec = 0;
 
 		if (stat_ok) {
-			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino);
+			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino,
+							attr.st_nlink, n);
 			switch (attr.st_mode & S_IFMT) {
 			case S_IFBLK: file_info[n].type = DT_BLK; break;
 			case S_IFCHR: file_info[n].type = DT_CHR; break;
