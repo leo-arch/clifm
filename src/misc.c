@@ -75,6 +75,7 @@ reset_inotify(void)
 		inotify_wd = -1;
 		watch = 0;
 	}
+
 	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
 	if (inotify_wd > 0)
 		watch = 1;
@@ -104,7 +105,7 @@ read_inotify(void)
 		if (event->mask & IN_CREATE) {
 /*			puts("IN_CREATE"); */
 			struct stat a;
-			if (event->len && stat(event->name, &a) != 0) {
+			if (event->len && lstat(event->name, &a) != 0) {
 				/* The file was created, but doesn't exist anymore */
 				ignore_event = 1;
 			}
@@ -117,7 +118,7 @@ read_inotify(void)
 		if (event->mask & IN_DELETE) {
 /*			puts("IN_DELETE"); */
 			struct stat a;
-			if (event->len && stat(event->name, &a) == 0)
+			if (event->len && lstat(event->name, &a) == 0)
 				/* The file was removed, but is still there (recreated) */
 				ignore_event = 1;
 		}
