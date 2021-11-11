@@ -1587,7 +1587,7 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t
 	while (--j >= 0) {
 		if (sel_devino[j].dev == dev && sel_devino[j].ino == ino) {
 			/* Only check file names for hardlinks */
-			if (!file_info[index].dir && links > 1) {
+			if (file_info[index].type != DT_DIR && links > 1) {
 				char *p = strrchr(sel_elements[j], '/');
 				if (!p || !*(++p))
 					continue;
@@ -1703,8 +1703,6 @@ list_dir(void)
 		file_info[n].exec = 0;
 
 		if (stat_ok) {
-			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino,
-							attr.st_nlink, n);
 			switch (attr.st_mode & S_IFMT) {
 			case S_IFBLK: file_info[n].type = DT_BLK; break;
 			case S_IFCHR: file_info[n].type = DT_CHR; break;
@@ -1715,6 +1713,8 @@ list_dir(void)
 			case S_IFSOCK: file_info[n].type = DT_SOCK; break;
 			default: file_info[n].type = DT_UNKNOWN; break;
 			}
+			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino,
+							attr.st_nlink, n);
 		} else {
 			file_info[n].type = DT_UNKNOWN;
 		}
