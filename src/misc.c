@@ -384,7 +384,7 @@ print_tips(int all)
 	    "Need root privileges? Launch a new instance of CLifM as root "
 	    "running the 'X' command",
 	    "Create custom commands and features using the 'actions' command",
-	    "Create a fresh configuration file by running 'edit gen'",
+	    "Create a fresh configuration file by running 'edit reset'",
 	    "Use 'ln edit' (or 'le') to edit symbolic links",
 	    "Change default keyboard shortcuts by editing the keybindings file (F9)",
 	    "Keep in sight previous and next visited directories enabling the "
