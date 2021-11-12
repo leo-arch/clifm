@@ -8,10 +8,10 @@
 <h3 align="center">Fast, extensible, lightweight | Written in C</h3>
 <h3 align="center">Linux, FreeBSD, NetBSD, OpenBSD, Haiku | x86, ARM</h3>
 <h4 align="center"><a
-href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-report.md">Report bug</a> · <a
-href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature-request.md">Request feature</a> · <a
+href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm">Downloads</a> · <a
 href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a> · <a
-href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm">Downloads</a></h4>
+href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature-request.md">Request feature</a> · <a
+href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-report.md">Report bug</a></h4>
 
 ---
 
