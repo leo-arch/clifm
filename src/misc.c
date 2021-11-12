@@ -70,10 +70,11 @@
 void
 reset_inotify(void)
 {
+	watch = 0;
+
 	if (inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
 		inotify_wd = -1;
-		watch = 0;
 	}
 
 	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
