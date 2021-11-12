@@ -103,6 +103,11 @@ read_inotify(void)
 	ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 	ptr += sizeof(struct inotify_event) + event->len) {
 		event = (struct inotify_event *)ptr;
+
+#ifdef INOTIFY_DEBUG
+		printf("%s (%u): ", event->name, event->len);
+#endif
+
 		if (!event->wd) {
 #ifdef INOTIFY_DEBUG
 			puts("INOTIFY_BREAK");
