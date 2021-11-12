@@ -227,6 +227,9 @@ CaseSensitiveDirJump=false
 # Enable case sensitive completion for file names
 CaseSensitivePathComp=false
 
+# Enable case sensitive search
+CaseSensitiveSearch=false
+
 Unicode=true
 
 # Enable Mas, the files list pager (executed whenever the list of files
