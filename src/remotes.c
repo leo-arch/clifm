@@ -73,34 +73,6 @@ remotes_list(void)
 	return EXIT_SUCCESS;
 }
 
-/* Get the index of the remote named NAME from the remotes list */
-static int
-get_remote(char *name)
-{
-	int i = (int)remotes_n,
-		found = 0;
-
-	while (--i >= 0) {
-		if (*name == *remotes[i].name && strcmp(name, remotes[i].name) == 0) {
-			found = 1;
-			break;
-		}
-	}
-
-	if (!found) {
-		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME, name);
-		return -1;
-	}
-
-	if (!remotes[i].mountpoint) {
-		fprintf(stderr, _("%s: No mountpoint specified for '%s'\n"), PROGRAM_NAME,
-				remotes[i].name);
-		return -1;
-	}
-
-	return i;
-}
-
 static int
 dequote_remote_name(char *name)
 {
@@ -120,15 +92,44 @@ dequote_remote_name(char *name)
 	return EXIT_SUCCESS;
 }
 
+/* Get the index of the remote named NAME from the remotes list. Returns
+ * this index incase of success and -1 in case of error */
+static int
+get_remote(char *name)
+{
+	if (!name || !*name)
+		return (-1);
+
+	if (dequote_remote_name(name) == EXIT_FAILURE)
+		return (-1);
+
+	int i = (int)remotes_n,
+		found = 0;
+
+	while (--i >= 0) {
+		if (*name == *remotes[i].name && strcmp(name, remotes[i].name) == 0) {
+			found = 1;
+			break;
+		}
+	}
+
+	if (!found) {
+		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME, name);
+		return (-1);
+	}
+
+	if (!remotes[i].mountpoint) {
+		fprintf(stderr, _("%s: No mountpoint specified for '%s'\n"), PROGRAM_NAME,
+				remotes[i].name);
+		return (-1);
+	}
+
+	return i;
+}
+
 static int
 remotes_mount(char *name)
 {
-	if (!name || !*name)
-		return EXIT_FAILURE;
-
-	if (dequote_remote_name(name) == EXIT_FAILURE)
-		return EXIT_FAILURE;
-
 	int i = get_remote(name);
 	if (i == -1)
 		return EXIT_FAILURE;
@@ -181,12 +182,6 @@ remotes_mount(char *name)
 static int
 remotes_unmount(char *name)
 {
-	if (!name || !*name)
-		return EXIT_FAILURE;
-
-	if (dequote_remote_name(name) == EXIT_FAILURE)
-		return EXIT_FAILURE;
-
 	int i = get_remote(name);
 	if (i == -1)
 		return EXIT_FAILURE;
