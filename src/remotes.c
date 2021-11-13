@@ -140,8 +140,9 @@ remotes_mount(char *name)
 		return EXIT_FAILURE;
 	}
 
+	/* If mountpoint doesn't exist, create ir */
 	struct stat attr;
-	if (lstat(remotes[i].mountpoint, &attr) == -1) {
+	if (stat(remotes[i].mountpoint, &attr) == -1) {
 		char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME,
@@ -150,6 +151,7 @@ remotes_mount(char *name)
 		}
 	}
 
+	/* Make sure mountpoint is not populated */
 	if (count_dir(remotes[i].mountpoint, CPOP) <= 2
 	&& launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -185,6 +187,42 @@ remotes_unmount(char *name)
 	int i = get_remote(name);
 	if (i == -1)
 		return EXIT_FAILURE;
+
+	if (remotes[i].mounted == 0) {
+		fprintf(stderr, _("%s: %s: Not mounted\n"), PROGRAM_NAME, remotes[i].name);
+		return EXIT_FAILURE;
+	}
+
+	if (!remotes[i].mountpoint)
+		return EXIT_FAILURE;
+
+	/* Get out of mountpoint before unmounting */
+	size_t mlen = strlen(remotes[i].mountpoint);
+	if (strncmp(remotes[i].mountpoint, ws[cur_ws].path, mlen) == 0) {
+		if (remotes[i].mountpoint[mlen - 1] == '/')
+			remotes[i].mountpoint[--mlen] = '\0';
+
+		char *p = strrchr(remotes[i].mountpoint, '/');
+		if (!p) {
+			fprintf(stderr, _("%s: %s: Error getting parent directory\n"),
+					PROGRAM_NAME, remotes[i].mountpoint);
+			return EXIT_FAILURE;
+		}
+
+		*p = '\0';
+		errno = 0;
+		if (xchdir(remotes[i].mountpoint, SET_TITLE) == EXIT_FAILURE) {
+			*p = '/';
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+					remotes[i].mountpoint, strerror(errno));
+			return EXIT_FAILURE;
+		}
+
+		free(ws[cur_ws].path);
+		ws[cur_ws].path = savestring(remotes[i].mountpoint,
+						strlen(remotes[i].mountpoint));
+		*p = '/';
+	}
 
 	if (!remotes[i].unmount_cmd) {
 		fprintf(stderr, _("%s: No unmount command found for '%s'\n"),
