@@ -850,7 +850,7 @@ load_remotes(void)
 			}
 
 			if (!replaced) {
-				remotes[n].mount_cmd = (char *)xrealloc(remotes[n].unmount_cmd,
+				remotes[n].unmount_cmd = (char *)xrealloc(remotes[n].unmount_cmd,
 								(ret_len + 1) * sizeof(char));
 				strcpy(remotes[n].unmount_cmd, ret);
 			}

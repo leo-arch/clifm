@@ -345,7 +345,7 @@ prompt_xrename(void)
 	char *p = (char *)NULL;
 	if (*(rl_line_buffer + 1) == ' ')
 		p = rl_line_buffer + 2;
-	else
+	else /* We have a fused parameter */
 		p = rl_line_buffer + 1;
 
 	size_t plen = strlen(p);

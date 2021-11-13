@@ -107,6 +107,19 @@ remotes_mount(char *name)
 	if (!name || !*name)
 		return EXIT_FAILURE;
 
+	char *deq = (char *)NULL;
+	if (strchr(name, '\\')) {
+		deq = dequote_str(name, 0);
+		if (deq) {
+			strcpy(name, deq);
+			free(deq);
+		} else {
+			fprintf(stderr, "%s: %s: Error dequoting resource name\n",
+					PROGRAM_NAME, name);
+			return EXIT_FAILURE;
+		}
+	}
+
 	int i = get_remote(name);
 	if (i == -1)
 		return EXIT_FAILURE;
@@ -161,6 +174,19 @@ remotes_unmount(char *name)
 {
 	if (!name || !*name)
 		return EXIT_FAILURE;
+
+	char *deq = (char *)NULL;
+	if (strchr(name, '\\')) {
+		deq = dequote_str(name, 0);
+		if (deq) {
+			strcpy(name, deq);
+			free(deq);
+		} else {
+			fprintf(stderr, "%s: %s: Error dequoting resource name\n",
+					PROGRAM_NAME, name);
+			return EXIT_FAILURE;
+		}
+	}
 
 	int i = get_remote(name);
 	if (i == -1)
