@@ -193,8 +193,11 @@ remotes_unmount(char *name)
 		return EXIT_FAILURE;
 	}
 
-	if (!remotes[i].mountpoint)
+	if (!remotes[i].mountpoint) {
+		fprintf(stderr, "%s: Error getting mountpoint for '%s'\n", PROGRAM_NAME,
+				remotes[i].name);
 		return EXIT_FAILURE;
+	}
 
 	/* Get out of mountpoint before unmounting */
 	size_t mlen = strlen(remotes[i].mountpoint);
