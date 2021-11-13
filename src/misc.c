@@ -135,12 +135,13 @@ read_inotify(void)
 				&& strcmp(file_info[j].name, event->name) == 0)
 					break;
 			}
-			if (j == 0)
+			if (j < 0)
 				ignore_event = 0;
-			else
+			else {
 				/* If destiny file name is already in the files list,
 				 * ignore this event */
 				ignore_event = 1;
+			}
 		}
 
 		if (event->mask & IN_DELETE) {
