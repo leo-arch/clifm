@@ -347,13 +347,16 @@ prompt_xrename(void)
 		p = rl_line_buffer + 2;
 	else
 		p = rl_line_buffer + 1;
+
 	size_t plen = strlen(p);
 	char pp[NAME_MAX];
 	strcpy(pp, p);
+
 	if (plen) {
 		while (pp[--plen] == ' ')
 			pp[plen] = '\0';
 	}
+
 	if (is_number(pp)) {
 		int ipp = atoi(pp);
 		if (ipp > 0 && ipp <= (int)files) {
@@ -366,7 +369,7 @@ prompt_xrename(void)
 	} else {
 		char *dstr = dequote_str(pp, 0);
 		if (!dstr) {
-			fprintf(stderr, "%s: %s: Error dequoting file name\n",
+			fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
 					PROGRAM_NAME, pp);
 			xrename = 0;
 			return EXIT_FAILURE;
@@ -375,6 +378,7 @@ prompt_xrename(void)
 		rl_point = rl_end = (int)strlen(dstr);
 		free(dstr);
 	}
+
 	rl_redisplay();
 	xrename = 0;
 
