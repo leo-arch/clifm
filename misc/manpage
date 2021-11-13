@@ -657,7 +657,7 @@ The \fInet\fR command manages connections to remote systems via a simple samba-l
 .sp
 \fBNote\fR: \fI%m\fR could be used as a placeholder for \fIMountpoint\fR. \fI%m\fR will be replaced by the value of \fIMountpoint\fR.
 .sp
-\fBNote 2\fR: Though originally intended to manage remote file systems, \fInet\fR can also manage \fBlocal file systems\fR. Just provide the appropriate mount and unmount commands.
+\fBNote 2\fR: Though originally intended to manage remote file systems, \fInet\fR can also manage \fBlocal file systems\fR. Just provide the appropriate mount and unmount commands. Since the device name assigned by the kernel might change accross reboots (specially when it comes to removable drives), it is recommended to mount using the device's UUID (Universal Unique Identifier) instead of the drive name. For example: 'MountCmd=sudo mount -U c98d91g4-6781... %m'.
 .sp
 \fBCommand syntax\fR
 .sp
