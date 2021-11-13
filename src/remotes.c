@@ -102,11 +102,8 @@ get_remote(char *name)
 }
 
 static int
-remotes_mount(char *name)
+dequote_remote_name(char *name)
 {
-	if (!name || !*name)
-		return EXIT_FAILURE;
-
 	char *deq = (char *)NULL;
 	if (strchr(name, '\\')) {
 		deq = dequote_str(name, 0);
@@ -119,6 +116,18 @@ remotes_mount(char *name)
 			return EXIT_FAILURE;
 		}
 	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+remotes_mount(char *name)
+{
+	if (!name || !*name)
+		return EXIT_FAILURE;
+
+	if (dequote_remote_name(name) == EXIT_FAILURE)
+		return EXIT_FAILURE;
 
 	int i = get_remote(name);
 	if (i == -1)
@@ -175,18 +184,8 @@ remotes_unmount(char *name)
 	if (!name || !*name)
 		return EXIT_FAILURE;
 
-	char *deq = (char *)NULL;
-	if (strchr(name, '\\')) {
-		deq = dequote_str(name, 0);
-		if (deq) {
-			strcpy(name, deq);
-			free(deq);
-		} else {
-			fprintf(stderr, "%s: %s: Error dequoting resource name\n",
-					PROGRAM_NAME, name);
-			return EXIT_FAILURE;
-		}
-	}
+	if (dequote_remote_name(name) == EXIT_FAILURE)
+		return EXIT_FAILURE;
 
 	int i = get_remote(name);
 	if (i == -1)
