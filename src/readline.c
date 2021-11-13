@@ -342,7 +342,11 @@ END:
 static int
 prompt_xrename(void)
 {
-	char *p = rl_line_buffer + 2;
+	char *p = (char *)NULL;
+	if (*(rl_line_buffer + 1) == ' ')
+		p = rl_line_buffer + 2;
+	else
+		p = rl_line_buffer + 1;
 	size_t plen = strlen(p);
 	char pp[NAME_MAX];
 	strcpy(pp, p);
