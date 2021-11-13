@@ -128,8 +128,20 @@ read_inotify(void)
 		}
 
 		/* A file was renamed */
-		if (event->mask & IN_MOVE)
-			ignore_event = 0;
+		if (event->mask & IN_MOVED_TO) {
+			int j = (int)files;
+			while (--j >= 0) {
+				if (*file_info[j].name == *event->name
+				&& strcmp(file_info[j].name, event->name) == 0)
+					break;
+			}
+			if (j == 0)
+				ignore_event = 0;
+			else
+				/* If destiny file name is already in the files list,
+				 * ignore this event */
+				ignore_event = 1;
+		}
 
 		if (event->mask & IN_DELETE) {
 #ifdef INOTIFY_DEBUG
