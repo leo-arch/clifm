@@ -1355,6 +1355,21 @@ exec_cmd(char **comm)
 		}
 	}
 
+	/* #### MEDIA #### */
+	else if (*comm[0] == 'm' && strcmp(comm[0], "media") == 0) {
+		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+			puts(_(MEDIA_USAGE));
+			return EXIT_SUCCESS;
+		} else {
+			kbind_busy = 1;
+			rl_attempted_completion_function = NULL;
+			exit_code = media_menu(MEDIA_MOUNT);
+			rl_attempted_completion_function = my_rl_completion;
+			kbind_busy = 0;
+			return exit_code;
+		}
+	}
+
 	/* #### MAX FILES #### */
 	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2])
 		return set_max_files(comm);

@@ -429,18 +429,26 @@ free_media(void)
 	media = (struct mnt_t *)NULL;
 }
 
-/* List available media devices */
+/* If MODE is MEDIA_MOUNT (used by the 'media' command) list mounted and
+ * unmounted devices allowing the user to mount or unmount any of them.
+ * If MODE is rather MEDIA_LIST, just list available mountpoints and
+ * allow the user to cd into the selected one */
 int
 media_menu(int mode)
 {
 	UNUSED(mode);
 #if defined(__HAIKU__)
-	fprintf(stderr, "%s: Mountpoints: This feature is not available on Haiku\n",
-			PROGRAM_NAME);
+	fprintf(stderr, "%s: %s: This feature is not available on Haiku\n",
+			PROGRAM_NAME, mode == MEDIA_LIST ? "Mountpoints" : "Media");
 	return EXIT_FAILURE;
 #endif
 
+#ifdef __linux__
+	printf("%s%s%s\n\n", BOLD, mode == MEDIA_LIST ? _("Mountpoints")
+			: _("Mounted devices"), df_c);
+#else
 	printf(_("%sMountpoints%s\n\n"), BOLD, df_c);
+#endif
 
 	media = (struct mnt_t *)xnmalloc(1, sizeof(struct mnt_t));
 	mp_n = 0;
@@ -455,7 +463,8 @@ media_menu(int mode)
 
 	size_t k = mp_n;
 
-	list_unmounted_devs();
+	if (mode == MEDIA_MOUNT)
+		list_unmounted_devs();
 
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
 	struct statfs *fslist;
@@ -469,7 +478,12 @@ media_menu(int mode)
 	 * at least "/" */
 	// cppcheck-suppress knownConditionTrueFalse
 	if (mp_n == 0) {
+#ifdef __linux__
+		printf(_("%s: There are no %s\n"), mode == MEDIA_LIST ? "mp"
+			: "media", mode == MEDIA_LIST ? _("mountpoints") : _("devices"));
+#else
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
+#endif
 		return EXIT_SUCCESS;
 	}
 
@@ -509,12 +523,18 @@ media_menu(int mode)
 	putchar('\n');
 	/* Ask the user and chdir into the selected mountpoint */
 #ifdef __linux__
-	puts(_("Enter 'q' to quit and 'u' to unmount"));
+	if (mode == MEDIA_LIST)
+		puts(_("Enter 'q' to quit"));
+	else
+		puts(_("Enter 'q' to quit and 'u' to unmount"));
 #endif
 
 	char *input = (char *)NULL;
 	while (!input)
 #ifdef __linux__
+	if (mode == MEDIA_LIST)
+		input = rl_no_hist(_("Choose a mountpoint: "));
+	else
 		input = rl_no_hist(_("Choose a mountpoint/device: "));
 #else
 		input = rl_no_hist(_("Choose a mountpoint ('q' to quit): "));
@@ -523,7 +543,7 @@ media_menu(int mode)
 	if (*input == 'q' && *(input + 1) == '\0')
 		goto EXIT;
 
-	if (*input == 'u' && *(input + 1) == '\0') {
+	if (mode == MEDIA_MOUNT && *input == 'u' && *(input + 1) == '\0') {
 		unmount_dev(k);
 		goto EXIT;
 	}

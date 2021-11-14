@@ -267,6 +267,7 @@ is_internal_c(char *restrict cmd)
 	    "mf",
 	    "mm", "mime",
 	    "mp", "mountpoints",
+	    "media",
 	    "msg", "messages",
 	    "n", "new",
 	    "net",
