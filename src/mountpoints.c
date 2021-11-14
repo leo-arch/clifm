@@ -144,6 +144,15 @@ get_block_devices(void)
 			continue;
 		}
 
+		/* Skip /dev/ram and /dev/loop devices */
+		if ((*blockdev[i]->d_name == 'l'
+		&& strncmp(blockdev[i]->d_name, "loop", 4) == 0)
+		|| (*blockdev[i]->d_name == 'r'
+		&& strncmp(blockdev[i]->d_name, "ram", 3) == 0)) {
+			free(blockdev[i]);
+			continue;
+		}
+
 		size_t blen = strlen(blockdev[i]->d_name);
 		if (blockdev[i]->d_name[blen - 1] < '1'
 		|| blockdev[i]->d_name[blen - 1] > '9') {
