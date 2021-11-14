@@ -35,6 +35,8 @@
 #endif
 #include <dirent.h>
 
+//#include <libudev.h>
+
 #include "aux.h"
 #include "readline.h"
 #include "navigation.h"
@@ -49,6 +51,9 @@ struct mnt_t {
 	char *dev;
 	char *label;
 };
+
+struct mnt_t *mountpoints = (struct mnt_t *)NULL;
+size_t mp_n = 0;
 
 /*
 #ifdef __linux__
@@ -171,7 +176,7 @@ get_block_devices(void)
 }
 
 static int
-unmount_dev(struct mnt_t *mountpoints, size_t i)
+unmount_dev(size_t i)
 {
 	char *input = (char *)NULL;
 	char msg[64];
@@ -202,28 +207,9 @@ unmount_dev(struct mnt_t *mountpoints, size_t i)
 	/* Get out of mountpoint before unmounting */
 	size_t mlen = strlen(mnt);
 	if (strncmp(mnt, ws[cur_ws].path, mlen) == 0) {
-		if (mnt[mlen - 1] == '/')
-			mnt[mlen - 1] = '\0';
-		char *p = strrchr(mnt, '/');
-		if (!p) {
-			fprintf(stderr, _("%s: %s: Error getting parent directory\n"),
-					PROGRAM_NAME, mnt);
-			return EXIT_FAILURE;
-		}
-
-		*p = '\0';
-		errno = 0;
-		if (xchdir(mnt, SET_TITLE) != EXIT_SUCCESS) {
-			*p = '/';
-			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, mnt, strerror(errno));
-			return EXIT_FAILURE;
-		}
-
-		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(mnt, strlen(mnt));
-		*p = '/';
-		add_to_dirhist(ws[cur_ws].path);
-		add_to_jumpdb(ws[cur_ws].path);
+		char *cmd[] = {"b", NULL};
+		if (back_function(cmd) == EXIT_FAILURE)
+			cd_function(NULL, CD_PRINT_ERROR);
 	}
 
 	char *cmd[] = {"udisksctl", "unmount", "-b", mountpoints[am - 1].dev, NULL};
@@ -234,10 +220,11 @@ unmount_dev(struct mnt_t *mountpoints, size_t i)
 }
 
 static char *
-get_dev_label(struct mnt_t *mountpoints, size_t n)
+get_dev_label(void)
 {
 #define DISK_LABELS_PATH "/dev/disk/by-label"
 
+	size_t n = mp_n;
 	struct dirent **labels = (struct dirent **)NULL;
 	int ln = scandir(DISK_LABELS_PATH, &labels, NULL, alphasort);
 	if (ln == - 1)
@@ -273,32 +260,16 @@ get_dev_label(struct mnt_t *mountpoints, size_t n)
 }
 #endif // __linux__
 
-/* List available mountpoints and chdir into one of them */
-int
-list_mountpoints(void)
+static int
+list_mounted_devs(void)
 {
-#if defined(__HAIKU__)
-	fprintf(stderr, "%s: Mountpoints: This feature is not available on Haiku\n",
-			PROGRAM_NAME);
-	return EXIT_FAILURE;
-#endif
-
-#if defined(__linux__)
 	FILE *mp_fp = fopen("/proc/mounts", "r");
 	if (!mp_fp) {
 		fprintf(stderr, "%s: mp: fopen: /proc/mounts: %s\n",
 				PROGRAM_NAME, strerror(errno));
 		return EXIT_FAILURE;
 	}
-#endif
 
-	printf(_("%sMountpoints%s\n\n"), BOLD, df_c);
-
-	struct mnt_t *mountpoints = (struct mnt_t *)NULL;
-	size_t mp_n = 0;
-	int i, exit_status = EXIT_SUCCESS;
-
-#ifdef __linux__
 	size_t line_size = 0;
 	char *line = (char *)NULL;
 
@@ -327,9 +298,6 @@ list_mountpoints(void)
 					    str, df_c, mountpoints[mp_n].dev);
 					/* Store the second field (mountpoint) into an
 					 * array */
-//					mountpoints = (mnt_t **)xrealloc(mountpoints,
-//					    (mp_n + 2) * sizeof(char *));
-//					mountpoints[mp_n++] = savestring(str, strlen(str));
 					mountpoints[mp_n++].mnt = savestring(str, strlen(str));
 				}
 
@@ -349,13 +317,17 @@ list_mountpoints(void)
 	mountpoints[mp_n].mnt = (char *)NULL;
 	mountpoints[mp_n].label = (char *)NULL;
 
-	size_t k = mp_n;
+	return EXIT_SUCCESS;
+}
 
-	/* Now list unmounted devices */
+static void
+list_unmounted_devs(void)
+{
+	size_t k = mp_n;
 	char **unm_devs = get_block_devices();
 	if (unm_devs) {
 		printf(_("\n%sUnmounted devices%s\n\n"), BOLD, df_c);
-		i = 0;
+		int i = 0;
 		for (; unm_devs[i]; i++) {
 			int skip = 0;
 			size_t j = 0;
@@ -374,7 +346,7 @@ list_mountpoints(void)
 			mountpoints[mp_n].dev = savestring(unm_devs[i], strlen(unm_devs[i]));
 			mountpoints[mp_n].mnt = (char *)NULL;
 #ifdef __linux__
-			mountpoints[mp_n].label = get_dev_label(mountpoints, mp_n);
+			mountpoints[mp_n].label = get_dev_label();
 #else
 			mountpoints[mp_n].label = (char *)NULL;
 #endif // __linux__
@@ -392,7 +364,97 @@ list_mountpoints(void)
 		mountpoints[mp_n].mnt = (char *)NULL;
 		mountpoints[mp_n].label = (char *)NULL;
 	}
+}
 
+static int
+mount_dev(int n)
+{
+	char file[PATH_MAX];
+	snprintf(file, PATH_MAX, "%s/clifm.XXXXXX", P_tmpdir);
+
+	int fd = mkstemp(file);
+	if (fd == -1)
+		return EXIT_FAILURE;
+
+	int stdout_bk = dup(STDOUT_FILENO); // Save original stdout
+	dup2(fd, STDOUT_FILENO); // Redirect stdout to the desired file
+	close(fd);
+
+	char *cmd[] = {"udisksctl", "mount", "-b",
+				mountpoints[n].dev, NULL};
+	launch_execve(cmd, FOREGROUND, E_NOFLAG);
+
+	dup2(stdout_bk, STDOUT_FILENO); // Restore original stdout
+	close(stdout_bk);
+
+	FILE *fp = open_fstream_r(file, &fd);
+	if (!fp) {
+		unlink(file);
+		return EXIT_FAILURE;
+	}
+
+	char out_line[PATH_MAX];
+	if (fgets(out_line, (int)sizeof(out_line), fp) == NULL) {
+		close_fstream(fp, fd);
+		unlink(file);
+		return EXIT_FAILURE;
+	}
+
+	close_fstream(fp, fd);
+	unlink(file);
+	char *p = strrchr(out_line, ' ');
+	if (!p || !*(p + 1) || *(p + 1) != '/')
+		return EXIT_FAILURE;
+	++p;
+
+	size_t plen = strlen(p);
+	if (p[plen - 1] == '\n')
+		p[plen - 1] = '\0';
+
+	mountpoints[n].mnt = savestring(p, strlen(p));
+
+	return EXIT_SUCCESS;
+}
+
+static void
+free_mountpoints(void)
+{
+	int i = (int)mp_n;
+	while (--i >= 0) {
+		free(mountpoints[i].mnt);
+		free(mountpoints[i].dev);
+		free(mountpoints[i].label);
+	}
+	free(mountpoints);
+	mountpoints = (struct mnt_t *)NULL;
+}
+
+/* List available mountpoints and chdir into one of them */
+int
+list_mountpoints(void)
+{
+#if defined(__HAIKU__)
+	fprintf(stderr, "%s: Mountpoints: This feature is not available on Haiku\n",
+			PROGRAM_NAME);
+	return EXIT_FAILURE;
+#endif
+
+	printf(_("%sMountpoints%s\n\n"), BOLD, df_c);
+
+	mountpoints = (struct mnt_t *)xnmalloc(1, sizeof(struct mnt_t));
+	mp_n = 0;
+	int exit_status = EXIT_SUCCESS;
+
+#ifdef __linux__
+	if (list_mounted_devs() == EXIT_FAILURE) {
+		free(mountpoints);
+		mountpoints = (struct mnt_t *)NULL;
+		return EXIT_FAILURE;
+	}
+
+	size_t k = mp_n;
+
+	list_unmounted_devs();
 
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
 	struct statfs *fslist;
@@ -409,8 +471,9 @@ list_mountpoints(void)
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
 		return EXIT_SUCCESS;
 	}
+
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-	int j;
+	int i, j;
 	for (i = j = 0; i < (int)mp_n; i++) {
 		/* Do not list all mountpoints, but only those corresponding
 		 * to a block device (/dev) */
@@ -460,7 +523,7 @@ list_mountpoints(void)
 		goto EXIT;
 
 	if (*input == 'u' && *(input + 1) == '\0') {
-		unmount_dev(mountpoints, k);
+		unmount_dev(k);
 		goto EXIT;
 	}
 
@@ -468,50 +531,8 @@ list_mountpoints(void)
 	if (atoi_num > 0 && atoi_num <= (int)mp_n) {
 #ifdef __linux__
 		if (!mountpoints[atoi_num - 1].mnt) {
-			/* Here we should mount the device */
-			char file[PATH_MAX];
-			snprintf(file, PATH_MAX, "%s/clifm.XXXXXX", P_tmpdir);
-
-			int fd = mkstemp(file);
-			if (fd == -1)
+			if (mount_dev(atoi_num - 1) == EXIT_FAILURE)
 				goto EXIT;
-
-			int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
-			dup2(fd, STDOUT_FILENO); /* Redirect stdout to the desired file */
-			close(fd);
-
-			char *cmd[] = {"udisksctl", "mount", "-b",
-						mountpoints[atoi_num - 1].dev, NULL};
-			launch_execve(cmd, FOREGROUND, E_NOFLAG);
-
-			dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-			close(stdout_bk);
-
-			FILE *fp = open_fstream_r(file, &fd);
-			if (!fp) {
-				unlink(file);
-				goto EXIT;
-			}
-
-			char out_line[PATH_MAX];
-			if (fgets(out_line, (int)sizeof(out_line), fp) == NULL) {
-				close_fstream(fp, fd);
-				unlink(file);
-				goto EXIT;
-			}
-
-			close_fstream(fp, fd);
-			unlink(file);
-			char *p = strrchr(out_line, ' ');
-			if (!p || !*(p + 1) || *(p + 1) != '/')
-				goto EXIT;
-			++p;
-
-			size_t plen = strlen(p);
-			if (p[plen - 1] == '\n')
-				p[plen - 1] = '\0';
-
-			mountpoints[atoi_num - 1].mnt = savestring(p, strlen(p));
 		}
 #endif // __linux__
 		if (xchdir(mountpoints[atoi_num - 1].mnt, SET_TITLE) == EXIT_SUCCESS) {
@@ -538,16 +559,7 @@ list_mountpoints(void)
 	}
 
 EXIT:
-	/* Free stuff and exit */
 	free(input);
-
-	i = (int)mp_n;
-	while (--i >= 0) {
-		free(mountpoints[i].mnt);
-		free(mountpoints[i].dev);
-		free(mountpoints[i].label);
-	}
-	free(mountpoints);
-
+	free_mountpoints();
 	return exit_status;
 }
