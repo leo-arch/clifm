@@ -166,8 +166,10 @@ static int
 unmount_dev(struct mnt_t *mountpoints, size_t i)
 {
 	char *input = (char *)NULL;
+	char msg[64];
+	snprintf(msg, 64, _("Choose mountpoint to be unmounted ('q' to quit) [1-%zu]: "), i);
 	while (!input)
-		input = rl_no_hist(_("Choose mountpoint to be unmounted ('q' to quit): "));
+		input = rl_no_hist(msg);
 
 	if (*input == 'q' && !*(input + 1)) {
 		free(input);
