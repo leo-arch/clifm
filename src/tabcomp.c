@@ -810,10 +810,10 @@ tab_complete(int what_to_do)
 
 		if (rl_completer_quote_characters) {
 		/* We have a list of characters which can be used in pairs to
-	     quote substrings for the completer.  Try to find the start
-	     of an unclosed quoted substring. */
+		 * quote substrings for the completer. Try to find the start
+		 * of an unclosed quoted substring. */
 		/* FOUND_QUOTE is set so we know what kind of quotes we found. */
-			int pass_next, found_quote = 0;
+			int pass_next; //found_quote = 0;
 			for (scan = pass_next = 0; scan < end; scan++) {
 				if (pass_next) {
 					pass_next = 0;
@@ -822,7 +822,7 @@ tab_complete(int what_to_do)
 
 				if (rl_line_buffer[scan] == '\\') {
 					pass_next = 1;
-					found_quote |= 4;
+//					found_quote |= 4;
 					continue;
 				}
 
@@ -839,18 +839,18 @@ tab_complete(int what_to_do)
 					quote_char = rl_line_buffer[scan];
 					rl_point = scan + 1;
 					/* Shell-like quoting conventions. */
-					if (quote_char == '\'')
+/*					if (quote_char == '\'')
 						found_quote |= 1;
 					else if (quote_char == '"')
-						found_quote |= 2;
+						found_quote |= 2; */
 				}
 			}
 		}
 
 		if (rl_point == end && quote_char == '\0') {
 		/* We didn't find an unclosed quoted substring upon which to do
-	     completion, so use the word break characters to find the
-	     substring on which to complete. */
+		 * completion, so use the word break characters to find the
+		 * substring on which to complete. */
 			while (--rl_point) {
 				scan = rl_line_buffer[rl_point];
 
@@ -859,8 +859,8 @@ tab_complete(int what_to_do)
 				&& rl_point && rl_line_buffer[rl_point - 1] == '\\'))
 					continue;
 
-				/* Convoluted code, but it avoids an n^2 algorithm with calls
-				to char_is_quoted. */
+				/* Convoluted code, but it avoids an n^2 algorithm with
+				 * calls to char_is_quoted. */
 				break;
 			}
 		}
@@ -869,12 +869,12 @@ tab_complete(int what_to_do)
 		scan = rl_line_buffer[rl_point];
 		if (strchr(rl_completer_word_break_characters, scan)) {
 		/* If the character that caused the word break was a quoting
-	     character, then remember it as the delimiter. */
+		 * character, then remember it as the delimiter. */
 			if (strchr("\"'", scan) && (end - rl_point) > 1)
 				delimiter = scan;
 
 		/* If the character isn't needed to determine something special
-		about what kind of completion to perform, then advance past it. */
+		 * about what kind of completion to perform, then advance past it. */
 			if (!rl_special_prefixes || strchr(rl_special_prefixes, scan) == 0)
 				rl_point++;
 		}
@@ -888,8 +888,8 @@ tab_complete(int what_to_do)
 	/* At this point, we know we have an open quote if quote_char != '\0'. */
 
   /* If the user wants to TRY to complete, but then wants to give
-     up and use the default completion function, they set the
-     variable rl_attempted_completion_function. */
+   * up and use the default completion function, they set the
+   * variable rl_attempted_completion_function. */
 	if (rl_attempted_completion_function) {
 		matches = (*rl_attempted_completion_function) (text, start, end);
 
@@ -915,8 +915,8 @@ AFTER_USUAL_COMPLETION:
 	int should_quote;
 
 	/* It seems to me that in all the cases we handle we would like
-	to ignore duplicate possiblilities. Scan for the text to
-	insert being identical to the other completions. */
+	 * to ignore duplicate possiblilities. Scan for the text to
+	 * insert being identical to the other completions. */
 	if (rl_ignore_completion_duplicates) {
 		char *lowest_common;
 		size_t j;
@@ -946,7 +946,7 @@ AFTER_USUAL_COMPLETION:
 		}
 
 		/* We have marked all the dead slots with (char *)&dead_slot.
-		 Copy all the non-dead entries into a new array. */
+		 * Copy all the non-dead entries into a new array. */
 		temp_array = (char **)xnmalloc(3 + newlen, sizeof (char *));
 		for (i = j = 1; matches[i]; i++) {
 			if (matches[i] != (char *)&dead_slot)
@@ -964,8 +964,8 @@ AFTER_USUAL_COMPLETION:
 		matches[0] = lowest_common;
 
 		/* If there is one string left, and it is identical to the
-		lowest common denominator, then the LCD is the string to
-		insert. */
+		 * lowest common denominator, then the LCD is the string to
+		 * insert. */
 		if (j == 2 && strcmp(matches[0], matches[1]) == 0) {
 			free(matches[1]);
 			matches[1] = (char *)NULL;
@@ -976,9 +976,9 @@ AFTER_USUAL_COMPLETION:
 //		case TAB:
 	case '!':
 		/* If we are matching filenames, then here is our chance to
-		 do clever processing by re-examining the list.  Call the
-		 ignore function with the array as a parameter.  It can
-		 munge the array, deleting matches as it desires. */
+		 * do clever processing by re-examining the list.  Call the
+		 * ignore function with the array as a parameter.  It can
+		 * munge the array, deleting matches as it desires. */
 		if (rl_ignore_some_completions_function
 		&& our_func == rl_completion_entry_function) {
 			(void)(*rl_ignore_some_completions_function)(matches);
@@ -991,13 +991,13 @@ AFTER_USUAL_COMPLETION:
 		}
 
 		/* If we are doing completion on quoted substrings, and any matches
-		contain any of the completer_word_break_characters, then auto-
-		matically prepend the substring with a quote character (just pick
-		the first one from the list of such) if it does not already begin
-		with a quote string.  FIXME: Need to remove any such automatically
-		inserted quote character when it no longer is necessary, such as
-		if we change the string we are completing on and the new set of
-		matches don't require a quoted substring. */
+		 * contain any of the completer_word_break_characters, then
+		 * automatically prepend the substring with a quote character
+		 * (just pick the first one from the list of such) if it does not
+		 * already begin with a quote string.  FIXME: Need to remove any such
+		 * automatically inserted quote character when it no longer is necessary,
+		 * such as if we change the string we are completing on and the new
+		 * set of matches don't require a quoted substring. */
 		char *replacement = matches[0];
 
 		should_quote = matches[0] && rl_completer_quote_characters &&

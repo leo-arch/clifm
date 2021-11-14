@@ -68,6 +68,7 @@
 #include "trash.h"
 #endif
 #include "messages.h"
+#include "mountpoints.h"
 
 char **_comm = (char **)NULL;
 
