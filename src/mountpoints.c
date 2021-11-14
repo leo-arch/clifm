@@ -144,25 +144,24 @@ get_block_devices(void)
 			continue;
 		}
 
+		char *name = blockdev[i]->d_name;
+
 		/* Skip /dev/ram and /dev/loop devices */
-		if ((*blockdev[i]->d_name == 'l'
-		&& strncmp(blockdev[i]->d_name, "loop", 4) == 0)
-		|| (*blockdev[i]->d_name == 'r'
-		&& strncmp(blockdev[i]->d_name, "ram", 3) == 0)) {
+		if ((*name == 'l' && strncmp(name, "loop", 4) == 0)
+		|| (*name == 'r' && strncmp(name, "ram", 3) == 0)) {
 			free(blockdev[i]);
 			continue;
 		}
 
-		size_t blen = strlen(blockdev[i]->d_name);
-		if (blockdev[i]->d_name[blen - 1] < '1'
-		|| blockdev[i]->d_name[blen - 1] > '9') {
+		size_t blen = strlen(name);
+		if (name[blen - 1] < '1' || name[blen - 1] > '9') {
 			free(blockdev[i]);
 			continue;
 		}
 
 		bd = (char **)xrealloc(bd, (n + 2) * sizeof(char *));
 		bd[n] = (char *)xnmalloc(blen + 6, sizeof(char *));
-		sprintf(bd[n], "/dev/%s", blockdev[i]->d_name);
+		sprintf(bd[n], "/dev/%s", name);
 		bd[++n] = (char *)NULL;
 		free(blockdev[i]);
 	}
