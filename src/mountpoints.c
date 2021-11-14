@@ -188,8 +188,8 @@ unmount_dev(struct mnt_t *mountpoints, size_t i)
 	}
 
 	/* Get out of mountpoint before unmounting */
-	if (strcmp(mountpoints[am - 1].mnt, ws[cur_ws].path) == 0) {
-		size_t mlen = strlen(mountpoints[am - 1].mnt);
+	size_t mlen = strlen(mountpoints[am - 1].mnt);
+	if (strncmp(mountpoints[am - 1].mnt, ws[cur_ws].path, mlen) == 0) {
 		if (mountpoints[am - 1].mnt[mlen - 1] == '/')
 			mountpoints[am - 1].mnt[mlen - 1] = '\0';
 		char *p = strrchr(mountpoints[am - 1].mnt, '/');
@@ -212,6 +212,8 @@ unmount_dev(struct mnt_t *mountpoints, size_t i)
 		ws[cur_ws].path = savestring(mountpoints[am - 1].mnt,
 						strlen(mountpoints[am - 1].mnt));
 		*p = '/';
+		add_to_dirhist(ws[cur_ws].path);
+		add_to_jumpdb(ws[cur_ws].path);
 	}
 
 	char *cmd[] = {"udisksctl", "unmount", "-b", mountpoints[am - 1].dev, NULL};
@@ -224,8 +226,10 @@ unmount_dev(struct mnt_t *mountpoints, size_t i)
 static char *
 get_dev_label(struct mnt_t *mountpoints, size_t n)
 {
+#define DISK_LABELS_PATH "/dev/disk/by-label"
+
 	struct dirent **labels = (struct dirent **)NULL;
-	int ln = scandir("/dev/disk/by-label", &labels, NULL, alphasort);
+	int ln = scandir(DISK_LABELS_PATH, &labels, NULL, alphasort);
 	if (ln == - 1)
 		return (char *)NULL;
 
@@ -238,7 +242,7 @@ get_dev_label(struct mnt_t *mountpoints, size_t n)
 		}
 
 		char lpath[PATH_MAX];
-		snprintf(lpath, PATH_MAX, "/dev/disk/by-label/%s", labels[i]->d_name);
+		snprintf(lpath, PATH_MAX, "%s/%s", DISK_LABELS_PATH, labels[i]->d_name);
 		char *rpath = realpath(lpath, NULL);
 		if (!rpath) {
 			free(labels[i]);
