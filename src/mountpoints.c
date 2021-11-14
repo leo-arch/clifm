@@ -197,30 +197,30 @@ unmount_dev(struct mnt_t *mountpoints, size_t i)
 		return EXIT_FAILURE;
 	}
 
+	char *mnt = mountpoints[am - 1].mnt;
+
 	/* Get out of mountpoint before unmounting */
-	size_t mlen = strlen(mountpoints[am - 1].mnt);
-	if (strncmp(mountpoints[am - 1].mnt, ws[cur_ws].path, mlen) == 0) {
-		if (mountpoints[am - 1].mnt[mlen - 1] == '/')
-			mountpoints[am - 1].mnt[mlen - 1] = '\0';
-		char *p = strrchr(mountpoints[am - 1].mnt, '/');
+	size_t mlen = strlen(mnt);
+	if (strncmp(mnt, ws[cur_ws].path, mlen) == 0) {
+		if (mnt[mlen - 1] == '/')
+			mnt[mlen - 1] = '\0';
+		char *p = strrchr(mnt, '/');
 		if (!p) {
 			fprintf(stderr, _("%s: %s: Error getting parent directory\n"),
-					PROGRAM_NAME, mountpoints[am - 1].mnt);
+					PROGRAM_NAME, mnt);
 			return EXIT_FAILURE;
 		}
 
 		*p = '\0';
 		errno = 0;
-		if (xchdir(mountpoints[am - 1].mnt, SET_TITLE) != EXIT_SUCCESS) {
+		if (xchdir(mnt, SET_TITLE) != EXIT_SUCCESS) {
 			*p = '/';
-			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, mountpoints[am - 1].mnt,
-					strerror(errno));
+			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, mnt, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
 		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(mountpoints[am - 1].mnt,
-						strlen(mountpoints[am - 1].mnt));
+		ws[cur_ws].path = savestring(mnt, strlen(mnt));
 		*p = '/';
 		add_to_dirhist(ws[cur_ws].path);
 		add_to_jumpdb(ws[cur_ws].path);
@@ -251,8 +251,9 @@ get_dev_label(struct mnt_t *mountpoints, size_t n)
 			continue;
 		}
 
+		char *name = labels[i]->d_name;
 		char lpath[PATH_MAX];
-		snprintf(lpath, PATH_MAX, "%s/%s", DISK_LABELS_PATH, labels[i]->d_name);
+		snprintf(lpath, PATH_MAX, "%s/%s", DISK_LABELS_PATH, name);
 		char *rpath = realpath(lpath, NULL);
 		if (!rpath) {
 			free(labels[i]);
@@ -262,7 +263,7 @@ get_dev_label(struct mnt_t *mountpoints, size_t n)
 		int ret = strcmp(rpath, mountpoints[n].dev);
 		free(rpath);
 		if (ret == 0)
-			label = savestring(labels[i]->d_name, strlen(labels[i]->d_name));
+			label = savestring(name, strlen(name));
 
 		free(labels[i]);
 	}
