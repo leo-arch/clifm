@@ -1,4 +1,4 @@
-/* mountpoints.h */
+/* media.h */
 
 /*
  * This file is part of CliFM
@@ -24,4 +24,4 @@
 
 #pragma once
 
-int list_mountpoints(void);
+int media_menu(int mode);

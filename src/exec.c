@@ -68,7 +68,7 @@
 #include "trash.h"
 #endif
 #include "messages.h"
-#include "mountpoints.h"
+#include "media.h"
 
 char **_comm = (char **)NULL;
 
@@ -1348,7 +1348,7 @@ exec_cmd(char **comm)
 		} else {
 			kbind_busy = 1;
 			rl_attempted_completion_function = NULL;
-			exit_code = list_mountpoints();
+			exit_code = media_menu(MEDIA_LIST);
 			rl_attempted_completion_function = my_rl_completion;
 			kbind_busy = 0;
 			return exit_code;

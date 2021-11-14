@@ -315,6 +315,10 @@ extern int watch;
 #define SUG_JUMP 	0
 #define NO_SUG_JUMP 1
 
+/* Macros for the media_menu function */
+#define MEDIA_LIST 	0
+#define MEDIA_MOUNT 1
+
 /* Macros for the rl_highlight function */
 #define SET_COLOR 		1
 #define INFORM_COLOR 	0
