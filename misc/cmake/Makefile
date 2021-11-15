@@ -16,17 +16,16 @@ SHELL ?= /bin/sh
 INSTALL ?= install
 RM ?= rm
 
-SRCDIR = src
+SRCDIR = ../clifm-build
 SRC = $(SRCDIR)/*.c
 HEADERS = $(SRCDIR)/*.h
 
 clean:
-	$(RM) -- $(BIN)
-	$(RM) -f -- $(SRCDIR)/*.o
+	$(RM) -rf -- $(SRCDIR)
 
 install:
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) -m 0755 $(SRCDIR)/$(BIN) $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/bash-completion/completions
