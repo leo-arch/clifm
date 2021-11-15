@@ -46,10 +46,11 @@
 #include "checks.h"
 #include "history.h"
 
+/* Information about devices */
 struct mnt_t {
-	char *mnt;
-	char *dev;
-	char *label;
+	char *mnt; /* Mountpoint */
+	char *dev; /* Device name (ex: /dev/sda1) */
+	char *label; /* Device label */
 };
 
 struct mnt_t *media = (struct mnt_t *)NULL;
@@ -144,7 +145,7 @@ get_block_devices(void)
 		if (!S_ISBLK(a.st_mode)) {
 #else
 		if (blockdev[i]->d_type != DT_BLK) {
-#endif // !DIRENT_HAVE_D_TYPE
+#endif /* !DIRENT_HAVE_D_TYPE */
 			free(blockdev[i]);
 			continue;
 		}
@@ -158,6 +159,7 @@ get_block_devices(void)
 			continue;
 		}
 
+		/* Get only partition names, normally ending with a number */
 		size_t blen = strlen(name);
 		if (name[blen - 1] < '1' || name[blen - 1] > '9') {
 			free(blockdev[i]);
@@ -178,25 +180,6 @@ get_block_devices(void)
 static int
 unmount_dev(size_t i, const int n)
 {
-/*	char *input = (char *)NULL;
-	char msg[64];
-	snprintf(msg, 64, _("Choose mountpoint to be unmounted ('q' to quit) [1-%zu]: "), i);
-	while (!input)
-		input = rl_no_hist(msg);
-
-	if (*input == 'q' && !*(input + 1)) {
-		free(input);
-		return (-1);
-	}
-
-	if (!is_number(input)) {
-		fprintf(stderr, _("%s: %s: Invalid ELN\n"), PROGRAM_NAME, input);
-		free(input);
-		return EXIT_FAILURE;
-	} */
-
-//	int am = atoi(input);
-//	free(input);
 	if (n + 1 < 1 || n + 1 > (int)i) {
 		fprintf(stderr, _("%s: %d: Invalid ELN\n"), PROGRAM_NAME, n + 1);
 		return EXIT_FAILURE;
@@ -211,7 +194,7 @@ unmount_dev(size_t i, const int n)
 		char *cmd[] = {"b", NULL};
 		if (back_function(cmd) == EXIT_FAILURE)
 			cd_function(NULL, CD_PRINT_ERROR);
-		exit_status = -1;
+		exit_status = (-1);
 	}
 
 	char *cmd[] = {"udisksctl", "unmount", "-b", media[n].dev, NULL};
@@ -306,8 +289,6 @@ list_mounted_devs(void)
 				str = strtok(NULL, " ,");
 				counter++;
 			}
-
-//			free(device);
 		}
 	}
 
@@ -368,6 +349,7 @@ list_unmounted_devs(void)
 	}
 }
 
+/* Mount device and store mountpoint */
 static int
 mount_dev(int n)
 {
@@ -378,15 +360,14 @@ mount_dev(int n)
 	if (fd == -1)
 		return EXIT_FAILURE;
 
-	int stdout_bk = dup(STDOUT_FILENO); // Save original stdout
-	dup2(fd, STDOUT_FILENO); // Redirect stdout to the desired file
+	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
+	dup2(fd, STDOUT_FILENO); /* Redirect stdout to the desired file */
 	close(fd);
 
-	char *cmd[] = {"udisksctl", "mount", "-b",
-				media[n].dev, NULL};
+	char *cmd[] = {"udisksctl", "mount", "-b", media[n].dev, NULL};
 	launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
-	dup2(stdout_bk, STDOUT_FILENO); // Restore original stdout
+	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	close(stdout_bk);
 
 	FILE *fp = open_fstream_r(file, &fd);
@@ -404,6 +385,8 @@ mount_dev(int n)
 
 	close_fstream(fp, fd);
 	unlink(file);
+
+	/* Recover the mountpoint used the the mounting command (udisksctl) */
 	char *p = strrchr(out_line, ' ');
 	if (!p || !*(p + 1) || *(p + 1) != '/')
 		return EXIT_FAILURE;
@@ -523,7 +506,8 @@ media_menu(int mode)
 #endif
 
 	putchar('\n');
-	/* Ask the user and chdir into the selected mountpoint */
+	/* Ask the user and mount/unmount or chdir into the selected
+	 * device/mountpoint */
 #ifdef __linux__
 	puts(_("Enter 'q' to quit"));
 #endif
@@ -547,18 +531,20 @@ media_menu(int mode)
 #ifdef __linux__
 		if (mode == MEDIA_MOUNT) {
 			if (!media[atoi_num - 1].mnt) {
+				/* The device is unmounted: mount it */
 				if (mount_dev(atoi_num - 1) == EXIT_FAILURE) {
 					exit_status = EXIT_FAILURE;
 					goto EXIT;
 				}
 			} else {
+				/* The device is mounted: unmount it */
 				int ret = unmount_dev(k, atoi_num - 1);
 				if (ret == EXIT_FAILURE)
 					exit_status = EXIT_FAILURE;
 				goto EXIT;
 			}
 		}
-#endif // __linux__
+#endif /* __linux__ */
 		if (xchdir(media[atoi_num - 1].mnt, SET_TITLE) == EXIT_SUCCESS) {
 			free(ws[cur_ws].path);
 			ws[cur_ws].path = savestring(media[atoi_num - 1].mnt,
