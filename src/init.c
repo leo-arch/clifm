@@ -986,7 +986,7 @@ external_arguments(int argc, char **argv)
 		{"int-vars", no_argument, 0, 42},
 		{"fzftab", no_argument, 0, 43},
 		{"warn-wrong-cmd", no_argument, 0, 44},
-		{"mnt-udevil", no_argument, 0, 45},
+		{"mnt-udisks2", no_argument, 0, 45},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1163,7 +1163,7 @@ external_arguments(int argc, char **argv)
 #endif /* !_NO_FZF */
 
 		case 44: xargs.warn_wrong_cmd = warn_wrong_cmd = 1; break;
-		case 45: xargs.mount_cmd = MNT_UDEVIL; break;
+		case 45: xargs.mount_cmd = MNT_UDISKS2; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */

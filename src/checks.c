@@ -73,28 +73,36 @@ check_term(void)
 }
 
 void
-check_mnt_cmd(void)
+check_third_party_cmds(void)
 {
 	if (xargs.mount_cmd != UNSET)
 		return;
 
-	int udisks2ok = 0, udevilok = 0;
+	int udisks2ok = 0, udevilok = 0, fzfok = 0;
 	int i = (int)path_progsn;
 	while (--i >= 0) {
-		if (*bin_commands[i] != 'u')
+		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f')
 			continue;
-		if (strcmp(bin_commands[i], "udisksctl") == 0)
+		if (strcmp(bin_commands[i], "fzf") == 0)
+			fzfok = 1;
+		else if (strcmp(bin_commands[i], "udisksctl") == 0)
 			udisks2ok = 1;
 		else if (strcmp(bin_commands[i], "udevil") == 0)
 			udevilok = 1;
-		if (udevilok && udisks2ok)
+		if (udevilok && udisks2ok && fzfok)
 			break;
 	}
 
-	if (udisks2ok)
-		xargs.mount_cmd = MNT_UDISKS2;
-	else if (udevilok)
+	if (fzftab && !fzfok) {
+		_err('w', PRINT_PROMPT, _("%s: fzf not found. Falling back to "
+			"standard TAB completion\n"), PROGRAM_NAME);
+		fzftab = 0;
+	}
+
+	if (udevilok)
 		xargs.mount_cmd = MNT_UDEVIL;
+	else if (udisks2ok)
+		xargs.mount_cmd = MNT_UDISKS2;
 	else
 		xargs.mount_cmd = UNSET;
 }

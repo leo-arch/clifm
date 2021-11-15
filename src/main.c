@@ -834,7 +834,9 @@ main(int argc, char *argv[])
 	/* Get the list of available applications in PATH to be used by my
 	 * custom TAB-completion function */
 	get_path_programs();
-	check_mnt_cmd();
+
+	/* Check third-party programs availability: FZF, udevil, and udisks2 */
+	check_third_party_cmds();
 
 	/* Initialize gettext() for translations */
 #ifndef _NO_GETTEXT

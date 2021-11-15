@@ -202,6 +202,8 @@ unmount_dev(size_t i, const int n)
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
+	if (xargs.mount_cmd == MNT_UDEVIL)
+		printf(_("%s: Unmounted %s\n"), PROGRAM_NAME, media[n].dev);
 	return exit_status;
 }
 
