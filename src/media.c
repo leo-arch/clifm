@@ -246,7 +246,7 @@ get_dev_label(void)
 #endif // __linux__
 
 static int
-list_mounted_devs(void)
+list_mounted_devs(int mode)
 {
 	FILE *mp_fp = fopen("/proc/mounts", "r");
 	if (!mp_fp) {
@@ -278,9 +278,16 @@ list_mounted_devs(void)
 			 * line */
 			while (str && counter < 2) {
 				if (counter == 1) { /* 1 == second field */
-					printf("%s%zu%s %s%s%s (%s)\n", el_c, mp_n + 1,
-					    df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c,
-					    str, df_c, media[mp_n].dev);
+					if (mode == MEDIA_LIST) {
+						printf("%s%zu%s %s%s%s [%s]\n", el_c, mp_n + 1,
+							df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c,
+							str, df_c, media[mp_n].dev);
+					} else {
+						printf("%s%zu%s %s [%s%s%s]\n", el_c, mp_n + 1,
+							df_c, media[mp_n].dev,
+							(access(str, R_OK | X_OK) == 0) ? di_c
+							: nd_c, str, df_c);
+					}
 					/* Store the second field (mountpoint) into an
 					 * array */
 					media[mp_n++].mnt = savestring(str, strlen(str));
@@ -334,8 +341,8 @@ list_unmounted_devs(void)
 			media[mp_n].label = (char *)NULL;
 #endif // __linux__
 			if (media[mp_n].label)
-				printf("%s%zu %s%s (%s)\n", el_c, mp_n + 1, df_c,
-						media[mp_n].dev, media[mp_n].label);
+				printf("%s%zu %s%s [%s%s%s]\n", el_c, mp_n + 1, df_c,
+						media[mp_n].dev, mi_c, media[mp_n].label, df_c);
 			else
 				printf("%s%zu %s%s\n", el_c, mp_n + 1, df_c, media[mp_n].dev);
 			mp_n++;
@@ -429,8 +436,8 @@ media_menu(int mode)
 
 #ifndef __linux__
 	if (mode == MEDIA_MOUNT) {
-		fprintf(stderr, "%s: media: function only available on Linux systems\n",
-				PROGRAM_NAME);
+		fprintf(stderr, _("%s: media: Function only available on Linux "
+				"systems\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 #endif
@@ -447,7 +454,7 @@ media_menu(int mode)
 	int exit_status = EXIT_SUCCESS;
 
 #ifdef __linux__
-	if (list_mounted_devs() == EXIT_FAILURE) {
+	if (list_mounted_devs(mode) == EXIT_FAILURE) {
 		free(media);
 		media = (struct mnt_t *)NULL;
 		return EXIT_FAILURE;
@@ -471,7 +478,7 @@ media_menu(int mode)
 	// cppcheck-suppress knownConditionTrueFalse
 	if (mp_n == 0) {
 #ifdef __linux__
-		printf(_("%s: There are no %s\n"), mode == MEDIA_LIST ? "mp"
+		printf(_("%s: There are no available %s\n"), mode == MEDIA_LIST ? "mp"
 			: "media", mode == MEDIA_LIST ? _("mountpoints") : _("devices"));
 #else
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
@@ -510,9 +517,7 @@ media_menu(int mode)
 	putchar('\n');
 	/* Ask the user and mount/unmount or chdir into the selected
 	 * device/mountpoint */
-#ifdef __linux__
 	puts(_("Enter 'q' to quit"));
-#endif
 
 	char *input = (char *)NULL;
 	while (!input)
@@ -522,7 +527,7 @@ media_menu(int mode)
 	else
 		input = rl_no_hist(_("Choose a mountpoint/device: "));
 #else
-		input = rl_no_hist(_("Choose a mountpoint ('q' to quit): "));
+		input = rl_no_hist(_("Choose a mountpoint: "));
 #endif
 
 	if (*input == 'q' && *(input + 1) == '\0')
@@ -530,27 +535,28 @@ media_menu(int mode)
 
 	int atoi_num = atoi(input);
 	if (atoi_num > 0 && atoi_num <= (int)mp_n) {
+		int n = atoi_num - 1;
 #ifdef __linux__
 		if (mode == MEDIA_MOUNT) {
-			if (!media[atoi_num - 1].mnt) {
+			if (!media[n].mnt) {
 				/* The device is unmounted: mount it */
-				if (mount_dev(atoi_num - 1) == EXIT_FAILURE) {
+				if (mount_dev(n) == EXIT_FAILURE) {
 					exit_status = EXIT_FAILURE;
 					goto EXIT;
 				}
 			} else {
 				/* The device is mounted: unmount it */
-				int ret = unmount_dev(k, atoi_num - 1);
+				int ret = unmount_dev(k, n);
 				if (ret == EXIT_FAILURE)
 					exit_status = EXIT_FAILURE;
 				goto EXIT;
 			}
 		}
 #endif /* __linux__ */
-		if (xchdir(media[atoi_num - 1].mnt, SET_TITLE) == EXIT_SUCCESS) {
+		if (xchdir(media[n].mnt, SET_TITLE) == EXIT_SUCCESS) {
 			free(ws[cur_ws].path);
-			ws[cur_ws].path = savestring(media[atoi_num - 1].mnt,
-			    strlen(media[atoi_num - 1].mnt));
+			ws[cur_ws].path = savestring(media[n].mnt,
+			    strlen(media[n].mnt));
 
 			if (autols) {
 				free_dirlist();
@@ -562,7 +568,7 @@ media_menu(int mode)
 			add_to_jumpdb(ws[cur_ws].path);
 		} else {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			    media[atoi_num - 1].mnt, strerror(errno));
+			    media[n].mnt, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
 	} else {
