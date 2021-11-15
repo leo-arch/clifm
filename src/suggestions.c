@@ -1561,6 +1561,9 @@ CHECK_CMD:
 		goto SUCCESS;
 	}
 
+	if (cur_color == hq_c)
+		goto SUCCESS;
+
 	/* If absolute path */
 	if (point_is_first_word && *word == '/' && access(word, X_OK) == 0) {
 		printed = 1;
