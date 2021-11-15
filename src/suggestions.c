@@ -1122,8 +1122,8 @@ count_words(size_t *start_word, size_t *full_word)
 		}
 		/* If a process separator char is found, reset variables so that we
 		 * can start counting again for the new command */
-		if (w && b[w - 1] != '\\' && ((b[w] == '&' && b[w - 1] == '&')
-		|| b[w] == '|' || b[w] == ';')) {
+		if (cur_color != hq_c && w && b[w - 1] != '\\'
+		&& ((b[w] == '&' && b[w - 1] == '&') || b[w] == '|' || b[w] == ';')) {
 			words = first_non_space = *full_word = 0;
 		}
 	}
@@ -1551,18 +1551,15 @@ rl_suggestions(const unsigned char c)
 
 CHECK_CMD:
 	word = first_word ? first_word : last_word;
-	if (!word || !*word || (c == ' ' && (*word == '\'' || *word == '"'
-	|| *word == '$' || *word == '#')) || *word == '<' || *word == '>'
-	|| *word == '!' || *word == '{' || *word == '[' || *word == '('
-	|| strchr(word, '=') || *rl_line_buffer == ' '
+	if (!word || !*word || (c == ' ' && (*word == '\''
+	|| *word == '"' || *word == '$' || *word == '#')) || *word == '<'
+	|| *word == '>' || *word == '!' || *word == '{' || *word == '['
+	|| *word == '(' || strchr(word, '=') || *rl_line_buffer == ' '
 	|| *word == '|' || *word == ';' || *word == '&') {
 		if (suggestion.printed && suggestion_buf)
 			clear_suggestion(CS_FREEBUF);
 		goto SUCCESS;
 	}
-
-	if (cur_color == hq_c)
-		goto SUCCESS;
 
 	/* If absolute path */
 	if (point_is_first_word && *word == '/' && access(word, X_OK) == 0) {
