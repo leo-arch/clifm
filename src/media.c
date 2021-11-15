@@ -176,9 +176,9 @@ get_block_devices(void)
 }
 
 static int
-unmount_dev(size_t i)
+unmount_dev(size_t i, const int n)
 {
-	char *input = (char *)NULL;
+/*	char *input = (char *)NULL;
 	char msg[64];
 	snprintf(msg, 64, _("Choose mountpoint to be unmounted ('q' to quit) [1-%zu]: "), i);
 	while (!input)
@@ -186,23 +186,24 @@ unmount_dev(size_t i)
 
 	if (*input == 'q' && !*(input + 1)) {
 		free(input);
-		return EXIT_SUCCESS;
+		return (-1);
 	}
 
 	if (!is_number(input)) {
 		fprintf(stderr, _("%s: %s: Invalid ELN\n"), PROGRAM_NAME, input);
 		free(input);
 		return EXIT_FAILURE;
-	}
+	} */
 
-	int am = atoi(input);
-	free(input);
-	if (am < 1 || am > (int)i) {
-		fprintf(stderr, _("%s: %d: Invalid ELN\n"), PROGRAM_NAME, am);
+//	int am = atoi(input);
+//	free(input);
+	if (n + 1 < 1 || n + 1 > (int)i) {
+		fprintf(stderr, _("%s: %d: Invalid ELN\n"), PROGRAM_NAME, n + 1);
 		return EXIT_FAILURE;
 	}
 
-	char *mnt = media[am - 1].mnt;
+	char *mnt = media[n].mnt;
+	int exit_status = EXIT_SUCCESS;
 
 	/* Get out of mountpoint before unmounting */
 	size_t mlen = strlen(mnt);
@@ -210,13 +211,14 @@ unmount_dev(size_t i)
 		char *cmd[] = {"b", NULL};
 		if (back_function(cmd) == EXIT_FAILURE)
 			cd_function(NULL, CD_PRINT_ERROR);
+		exit_status = -1;
 	}
 
-	char *cmd[] = {"udisksctl", "unmount", "-b", media[am - 1].dev, NULL};
+	char *cmd[] = {"udisksctl", "unmount", "-b", media[n].dev, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+		exit_status = EXIT_FAILURE;
 
-	return EXIT_SUCCESS;
+	return exit_status;
 }
 
 static char *
@@ -431,8 +433,8 @@ free_media(void)
 
 /* If MODE is MEDIA_MOUNT (used by the 'media' command) list mounted and
  * unmounted devices allowing the user to mount or unmount any of them.
- * If MODE is rather MEDIA_LIST, just list available mountpoints and
- * allow the user to cd into the selected one */
+ * If MODE is rather MEDIA_LIST (used by the 'mp' command), just list
+ * available mountpoints and allow the user to cd into the selected one */
 int
 media_menu(int mode)
 {
@@ -523,10 +525,7 @@ media_menu(int mode)
 	putchar('\n');
 	/* Ask the user and chdir into the selected mountpoint */
 #ifdef __linux__
-	if (mode == MEDIA_LIST)
-		puts(_("Enter 'q' to quit"));
-	else
-		puts(_("Enter 'q' to quit and 'u' to unmount"));
+	puts(_("Enter 'q' to quit"));
 #endif
 
 	char *input = (char *)NULL;
@@ -543,17 +542,21 @@ media_menu(int mode)
 	if (*input == 'q' && *(input + 1) == '\0')
 		goto EXIT;
 
-	if (mode == MEDIA_MOUNT && *input == 'u' && *(input + 1) == '\0') {
-		unmount_dev(k);
-		goto EXIT;
-	}
-
 	int atoi_num = atoi(input);
 	if (atoi_num > 0 && atoi_num <= (int)mp_n) {
 #ifdef __linux__
-		if (!media[atoi_num - 1].mnt) {
-			if (mount_dev(atoi_num - 1) == EXIT_FAILURE)
+		if (mode == MEDIA_MOUNT) {
+			if (!media[atoi_num - 1].mnt) {
+				if (mount_dev(atoi_num - 1) == EXIT_FAILURE) {
+					exit_status = EXIT_FAILURE;
+					goto EXIT;
+				}
+			} else {
+				int ret = unmount_dev(k, atoi_num - 1);
+				if (ret == EXIT_FAILURE)
+					exit_status = EXIT_FAILURE;
 				goto EXIT;
+			}
 		}
 #endif // __linux__
 		if (xchdir(media[atoi_num - 1].mnt, SET_TITLE) == EXIT_SUCCESS) {
