@@ -421,11 +421,18 @@ free_media(void)
 int
 media_menu(int mode)
 {
-	UNUSED(mode);
 #if defined(__HAIKU__)
 	fprintf(stderr, "%s: %s: This feature is not available on Haiku\n",
 			PROGRAM_NAME, mode == MEDIA_LIST ? "Mountpoints" : "Media");
 	return EXIT_FAILURE;
+#endif
+
+#ifndef __linux__
+	if (mode == MEDIA_MOUNT) {
+		fprintf(stderr, "%s: media: function only available on Linux systems\n",
+				PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
 #endif
 
 #ifdef __linux__
@@ -489,11 +496,6 @@ media_menu(int mode)
 					strlen(fslist[i].f_mntonname));
 			media[j].label = (char *)NULL;
 			media[j++].dev = (char *)NULL;
-
-/*			media = (char **)xrealloc(media,
-			    (size_t)(j + 1) * sizeof(char *));
-			media[j++] = savestring(fslist[i].f_mntonname,
-			    strlen(fslist[i].f_mntonname)); */
 		}
 	}
 
