@@ -138,6 +138,9 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 
 #define DEF_DIR_ICO_C "\x1b[00;33m"
 
+#define MNT_UDEVIL 	0
+#define MNT_UDISKS2 1
+
 /* Default options */
 #define DEF_AUTOCD 1
 #define DEF_AUTOJUMP 0
@@ -185,6 +188,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_MAXPRINTSEL 0
 #define DEF_MIN_JUMP_RANK 10
 #define DEF_MIN_NAME_TRIM 20
+#define DEF_MOUNT_CMD MNT_UDISKS2
 #define DEF_MV_CMD MV_MV
 #define DEF_NOELN 0
 #define DEF_ONLY_DIRS 0

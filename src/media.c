@@ -197,7 +197,8 @@ unmount_dev(size_t i, const int n)
 		exit_status = (-1);
 	}
 
-	char *cmd[] = {"udisksctl", "unmount", "-b", media[n].dev, NULL};
+	char *cmd[] = {xargs.mount_cmd == MNT_UDISKS2 ? "udisksctl" : "udevil",
+					"unmount", "-b", media[n].dev, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
@@ -371,8 +372,13 @@ mount_dev(int n)
 	dup2(fd, STDOUT_FILENO); /* Redirect stdout to the desired file */
 	close(fd);
 
-	char *cmd[] = {"udisksctl", "mount", "-b", media[n].dev, NULL};
-	launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	if (xargs.mount_cmd == MNT_UDISKS2) {
+		char *cmd[] = {"udisksctl", "mount", "-b", media[n].dev, NULL};
+		launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	} else {
+		char *cmd[] = {"udevil", "mount", media[n].dev, NULL};
+		launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	}
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	close(stdout_bk);
@@ -393,7 +399,7 @@ mount_dev(int n)
 	close_fstream(fp, fd);
 	unlink(file);
 
-	/* Recover the mountpoint used the the mounting command (udisksctl) */
+	/* Recover the mountpoint used by the mounting command (udisksctl) */
 	char *p = strrchr(out_line, ' ');
 	if (!p || !*(p + 1) || *(p + 1) != '/')
 		return EXIT_FAILURE;

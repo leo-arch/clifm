@@ -572,6 +572,7 @@ struct param {
 	int max_dirhist;
 	int max_files;
 	int max_path;
+	int mount_cmd;
 	int no_dirjump;
 	int noeln;
 	int only_dirs;

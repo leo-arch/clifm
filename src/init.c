@@ -982,7 +982,8 @@ external_arguments(int argc, char **argv)
 		{"int-vars", no_argument, 0, 42},
 		{"fzftab", no_argument, 0, 43},
 		{"warn-wrong-cmd", no_argument, 0, 44},
-		{"stderr", no_argument, 0, 45},
+		{"mnt-udevil", no_argument, 0, 45},
+		
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1159,7 +1160,7 @@ external_arguments(int argc, char **argv)
 #endif /* !_NO_FZF */
 
 		case 44: xargs.warn_wrong_cmd = warn_wrong_cmd = 1; break;
-//		case 45: xargs.stderr = 1; break;
+		case 45: xargs.mount_cmd = MNT_UDEVIL; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1548,6 +1549,7 @@ unset_xargs(void)
 	xargs.longview = UNSET;
 	xargs.max_dirhist = UNSET;
 	xargs.max_path = UNSET;
+	xargs.mount_cmd = UNSET;
 	xargs.colorize = UNSET;
 	xargs.columns = UNSET;
 	xargs.no_dirjump = UNSET;
@@ -2123,6 +2125,9 @@ check_options(void)
 	/* Do no override command line options */
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
+
+	if (xargs.mount_cmd == UNSET)
+		xargs.mount_cmd = DEF_MOUNT_CMD;
 
 	if (xargs.control_d_exits == UNSET)
 		control_d_exits = DEF_CONTROL_D_EXITS;
