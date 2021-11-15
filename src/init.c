@@ -875,6 +875,7 @@ load_remotes(void)
 	return EXIT_SUCCESS;
 }
 
+/* Opener function: open FILENAME and exit */
 static void
 open_reg_exit(char *filename)
 {
@@ -884,12 +885,15 @@ open_reg_exit(char *filename)
 				PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
+
 	tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
+
 	size_t mime_file_len = strlen(homedir) + (alt_profile
 					? strlen(alt_profile) : 7) + 38;
 	mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
 	sprintf(mime_file, "%s/.config/clifm/profiles/%s/mimelist.cfm",
 			homedir, alt_profile ? alt_profile : "default");
+
 	int ret = open_file(filename);
 	exit(ret);
 }
@@ -983,11 +987,10 @@ external_arguments(int argc, char **argv)
 		{"fzftab", no_argument, 0, 43},
 		{"warn-wrong-cmd", no_argument, 0, 44},
 		{"mnt-udevil", no_argument, 0, 45},
-		
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
-	int long_opts = 33;
+	int long_opts = 45;
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
 	char *path_value = (char *)NULL,
@@ -1565,7 +1568,6 @@ unset_xargs(void)
 	xargs.sort = UNSET;
 	xargs.sort_reverse = UNSET;
 	xargs.splash = UNSET;
-//	xargs.stderr = UNSET;
 	xargs.stealth_mode = UNSET;
 #ifndef _NO_SUGGESTIONS
 	xargs.suggestions = UNSET;
