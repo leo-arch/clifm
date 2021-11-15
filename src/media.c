@@ -448,6 +448,12 @@ media_menu(int mode)
 	}
 #endif
 
+	if (mode == MEDIA_MOUNT && xargs.mount_cmd == UNSET) {
+		fprintf(stderr, _("%s: No mount command found. Install either"
+				"udisks2 or udevil\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
 #ifdef __linux__
 	printf("%s%s%s\n\n", BOLD, mode == MEDIA_LIST ? _("Mountpoints")
 			: _("Mounted devices"), df_c);

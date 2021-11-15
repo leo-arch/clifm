@@ -72,6 +72,33 @@ check_term(void)
 	return;
 }
 
+void
+check_mnt_cmd(void)
+{
+	if (xargs.mount_cmd != UNSET)
+		return;
+
+	int udisks2ok = 0, udevilok = 0;
+	int i = (int)path_progsn;
+	while (--i >= 0) {
+		if (*bin_commands[i] != 'u')
+			continue;
+		if (strcmp(bin_commands[i], "udisksctl") == 0)
+			udisks2ok = 1;
+		else if (strcmp(bin_commands[i], "udevil") == 0)
+			udevilok = 1;
+		if (udevilok && udisks2ok)
+			break;
+	}
+
+	if (udisks2ok)
+		xargs.mount_cmd = MNT_UDISKS2;
+	else if (udevilok)
+		xargs.mount_cmd = MNT_UDEVIL;
+	else
+		xargs.mount_cmd = UNSET;
+}
+
 /* Return 1 if current user has access to FILE. Otherwise, return zero */
 int
 check_file_access(const struct stat file)

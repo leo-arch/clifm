@@ -40,3 +40,4 @@ int is_acl(char *file);
 char *get_sudo_path(void);
 void check_term(void);
 int check_file_access(const struct stat file);
+void check_mnt_cmd(void);

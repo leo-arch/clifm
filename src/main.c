@@ -834,6 +834,7 @@ main(int argc, char *argv[])
 	/* Get the list of available applications in PATH to be used by my
 	 * custom TAB-completion function */
 	get_path_programs();
+	check_mnt_cmd();
 
 	/* Initialize gettext() for translations */
 #ifndef _NO_GETTEXT

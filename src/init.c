@@ -2128,8 +2128,8 @@ check_options(void)
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
 
-	if (xargs.mount_cmd == UNSET)
-		xargs.mount_cmd = DEF_MOUNT_CMD;
+/*	if (xargs.mount_cmd == UNSET)
+		xargs.mount_cmd = DEF_MOUNT_CMD; */
 
 	if (xargs.control_d_exits == UNSET)
 		control_d_exits = DEF_CONTROL_D_EXITS;
