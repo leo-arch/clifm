@@ -411,9 +411,9 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 {
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX, "$(fzf --pointer='>' "
-			"--color=\"%s,gutter:-1,prompt:%s:bold,"
-			"fg+:-1,pointer:green:bold,"
-			"hl:%s:underline,hl+:%s:bold:underline\" "
+			"--color=\"%s,gutter:-1,prompt:%d:bold,"
+			"fg+:-1,pointer:2:bold,"
+			"hl:%d:underline,hl+:%d:bold:underline\" "
 			"--bind tab:accept,right:accept,left:abort "
 			"--info=inline --layout=reverse-list "
 			"--height=%zu "
@@ -422,8 +422,8 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 			"--query=\"%s\" "
 			"< %s > %s)",
 			colorize ? "dark" : "bw",
-			colorize ? "cyan" : "-1",
-			"magenta", "magenta", 
+			colorize ? 6 : -1,
+			5, 5, 
 			*height, *offset,
 			case_sens_path_comp ? "+i" : "-i",
 			lw ? lw : "",
