@@ -317,7 +317,10 @@ static void
 list_unmounted_devs(void)
 {
 	size_t k = mp_n;
-	char **unm_devs = get_block_devices();
+	char **unm_devs = (char **)NULL;
+#ifdef __linux__
+	unm_devs = get_block_devices();
+#endif
 	if (unm_devs) {
 		printf(_("\n%sUnmounted devices%s\n\n"), BOLD, df_c);
 		int i = 0;
