@@ -412,7 +412,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX, "$(fzf --pointer='>' "
 			"--color=\"%s,gutter:-1,prompt:%d:bold,"
-			"fg+:-1,pointer:2:bold,"
+			"fg+:-1,pointer:%d:bold,"
 			"hl:%d:underline,hl+:%d:bold:underline\" "
 			"--bind tab:accept,right:accept,left:abort "
 			"--info=inline --layout=reverse-list "
@@ -423,7 +423,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 			"< %s > %s)",
 			colorize ? "dark" : "bw",
 			colorize ? 6 : -1,
-			5, 5, 
+			2, 5, 5, 
 			*height, *offset,
 			case_sens_path_comp ? "+i" : "-i",
 			lw ? lw : "",
