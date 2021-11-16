@@ -98,6 +98,7 @@ j, jc, @
 kb, keybinds@
 log @
 lm @
+media@
 mf @
 mm, mime@
 mp, mountpoints@
