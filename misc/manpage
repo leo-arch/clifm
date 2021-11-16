@@ -143,7 +143,8 @@ List of CliFM features:
   39) Remote file systems management
   40) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
   41) Syntax highlighting
-  42) Interactive rename functionality for the \fIm\fR command.
+  42) Interactive rename functionality for the \fIm\fR command
+  43) Easily mount/unmount storage devices via the \fImedia\fR command
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
@@ -289,6 +290,9 @@ instead of an specific color, icons take the color of the corresponding file nam
 .TP
 .B \-\-list\-and\-quit
 list files and quit. It may be used in conjunction parameter substitution. Ex: 'clifm --list-and-quit /etc'
+.TP
+.B \-\-mnt\-udisks2
+use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
 .TP
 .B \-\-max\-dirhist
 maximum number of visited directories to remember
@@ -622,6 +626,16 @@ Toggle the light mode on/off. This option, aimed to make files listing faster th
 .TP
 .B log \fR[clear] [on, off, status]
 with no arguments, it prints the contents of the log file. If 'clear' is passed as argument, all the logs will be deleted. 'on', 'off', and 'status' enable, disable, and check the status of the \fIlog\fR function for the current session.
+.TP
+.B media
+.sp
+\fBNOTE\fR: This command is Linux-specific
+.sp
+List available storage devices and mount/unmount the selected one using either \fIudevil\fR or \fIudisks2\fR (at least one of these must be installed. \fIudevil\fR will be preferred over \fIudisks2\fR). If the device is unmounted, it will be automatically mounted, and if mounted, it will be automatically unmounted.
+.sp
+Though mountpoints are determined by the mounting application itself (\fIudevil\fR or \fIudisks2\fR), CliFM will automatically cd into the corresponding mountpoint whenever the mount operation was succesfull.
+.sp
+When unmounting, and if the current directory is inside the mountpoint, CliFM will attempt to cd into the previous visited directory, and, if none, into the home directory, before unmounting the device.
 .TP
 .B mf \fR[NUM, unset]
 List only up to NUM files (valid range: >= 0). Use 'unset' to list all files (default). An indicator (listed_files/total_files) will be printed below the list of files whenever some file is excluded from the current list (e.g. 20/310). Note however that though some files are excluded, all of them are loaded anyway, so that you can still perform any valid operation on them. For example, even if only 10 files are listed, you can still search for ALL symbolic links in the corresponding directory using the appropriate command: '/* -l'.
