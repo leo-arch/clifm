@@ -166,6 +166,8 @@ To enjoy of any of the features tagged as NEW, clone this repository and install
 
 **NEW**: [TAB completion for the `sel` keyword, the deselect command, and ELN ranges](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)
 
+**NEW**: [New command, `media`, to easily mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
+
 ---
 
 ## Installing _CliFM_
