@@ -1212,6 +1212,8 @@ To operate only on \fIsome\fR selected files, you can use TAB completion. Just e
 .TP
 There are two modes for TAB completion: \fIstandard\fR (interface provided by readline), and \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR). To enable the \fIfzf\fR mode (the standard mode is used by default), you can either use the \fI--fzftab\fR command line option, or set \fITabCompletionMode\fR to \fIfzf\fR in the configuration file.
 .TP
+If using the \fIfzf\fR mode, the completions interface could be customized using the \fIFzfTabOptions\fR option in the configuration file. --height, --margin, +i/-i, and --query will be appended to set up some details of the completions interface.
+.TP
 Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
 ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some file name is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. 
