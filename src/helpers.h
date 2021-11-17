@@ -851,6 +851,7 @@ extern char
     *encoded_prompt,
     *file_cmd_path,
     *_filter,
+	*fzftab_options,
     *hist_file,
     *kbinds_file,
     *jump_suggestion,

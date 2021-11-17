@@ -410,20 +410,12 @@ static inline int
 run_fzf(const size_t *height, const int *offset, const char *lw)
 {
 	char cmd[PATH_MAX];
-	snprintf(cmd, PATH_MAX, "$(fzf --pointer='>' "
-			"--color=\"%s,gutter:-1,prompt:%d:bold,"
-			"fg+:-1,pointer:%d:bold,"
-			"hl:%d:underline,hl+:%d:bold:underline\" "
-			"--bind tab:accept,right:accept,left:abort "
-			"--info=inline --layout=reverse-list "
-			"--height=%zu "
-			"--margin=0,0,0,%d "
-			"--ansi %s "
+	snprintf(cmd, PATH_MAX, "$(fzf %s "
+			"--height=%zu --margin=0,0,0,%d "
+			"%s "
 			"--query=\"%s\" "
 			"< %s > %s)",
-			colorize ? "dark" : "bw",
-			colorize ? 6 : -1,
-			2, 5, 5, 
+			fzftab_options,
 			*height, *offset,
 			case_sens_path_comp ? "+i" : "-i",
 			lw ? lw : "",

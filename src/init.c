@@ -2121,6 +2121,9 @@ check_options(void)
 	if (!usr_cscheme)
 		usr_cscheme = savestring("default", 7);
 
+	if (!fzftab_options)
+		fzftab_options = savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
+
 	if (!wprompt_str)
 		wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
 

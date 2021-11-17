@@ -1067,6 +1067,7 @@ free_stuff(void)
 	free_dirlist();
 	free(opener);
 	free(wprompt_str);
+	free(fzftab_options);
 
 	if (stdin_tmp_dir) {
 		char *rm_cmd[] = {"rm", "-rd", "--", stdin_tmp_dir, NULL};

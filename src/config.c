@@ -834,6 +834,11 @@ ELNPad=%d\n\n",
 		"# TAB completion mode: either 'standard' (default) or 'fzf'\n\
 TabCompletionMode=%s\n\n"
 
+		"# If FZF TAB completion mode is enabled, pass these options to fzf.\n\
+# --height, --margin, +i/-i, and --query will be appended to set up the \n\
+# completions interface.\n\
+FzfTabOptions=%s\n\n"
+
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
 # whenever the current path is longer than MaxPath.\n\
@@ -913,6 +918,7 @@ ExpandBookmarks=%s\n\n"
 LightMode=%s\n\n",
 
 		DEF_FZFTAB == 1 ? "fzf" : "standard",
+		DEF_FZFTAB_OPTIONS,
 		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
 		PROGRAM_NAME,
@@ -2080,6 +2086,13 @@ read_config(void)
 				fzftab = 1;
 		}
 
+		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
+			char *tmp = get_line_value(line);
+			if (!tmp)
+				continue;
+			fzftab_options = savestring(tmp, strlen(tmp));
+		}
+
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
 			if (term) {
 				free(term);
@@ -2267,6 +2280,9 @@ reset_variables(void)
 	free(suggestion_strategy);
 	suggestion_strategy = (char *)NULL;
 #endif
+
+	free(fzftab_options);
+	fzftab_options = (char *)NULL;
 
 	free(wprompt_str);
 	wprompt_str = (char *)NULL;
