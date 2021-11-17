@@ -32,6 +32,11 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#ifdef __NetBSD__
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#endif
+
 /*
 #if defined(__HAIKU__)
 #include <private/libs/compat/freebsd_network/compat/sys/mount.h>
