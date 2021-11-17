@@ -42,6 +42,22 @@
 #include "navigation.h"
 #include "sort.h"
 
+static int
+check_glob_char(char *str)
+{
+	size_t i;
+	for (i = 1; str[i]; i++) {
+		if (str[i] == '*' || str[i] == '?' || str[i] == '[' || str[i] == '{'
+		    /* Consider regex chars as well: we don't want this "r$"
+		    * to become this "*r$*" */
+		|| str[i] == '|' || str[i] == '^' || str[i] == '+' || str[i] == '$'
+		|| str[i] == '.')
+			return 1;
+	}
+
+	return 0;
+}
+
 /* List matching file names in the specified directory */
 int
 search_glob(char **comm, int invert)
@@ -58,10 +74,10 @@ search_glob(char **comm, int invert)
 	/* If there are two arguments, the one starting with '-' is the
 	 * file type and the other is the path */
 	if (comm[1] && comm[2]) {
-		if (comm[1][0] == '-') {
+		if (*comm[1] == '-') {
 			file_type = (mode_t)comm[1][1];
 			search_path = comm[2];
-		} else if (comm[2][0] == '-') {
+		} else if (*comm[2] == '-') {
 			file_type = (mode_t)comm[2][1];
 			search_path = comm[1];
 		} else {
@@ -72,7 +88,7 @@ search_glob(char **comm, int invert)
 	/* If just one argument, '-' indicates file type. Else, we have a
 	 * path */
 	else if (comm[1]) {
-		if (comm[1][0] == '-')
+		if (*comm[1] == '-')
 			file_type = (mode_t)comm[1][1];
 		else
 			search_path = comm[1];
@@ -102,9 +118,19 @@ search_glob(char **comm, int invert)
 	}
 
 	if (recursive) {
-		char *cmd[] = {"find", (search_path && *search_path) ? search_path
-					: ".", "-name", comm[0] + 1, NULL};
-		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		int glob_char = check_glob_char(comm[0] + 1);
+		if (glob_char) {
+			char *cmd[] = {"find", (search_path && *search_path) ? search_path
+						: ".", "-name", comm[0] + 1, NULL};
+			launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		} else {
+			char *ss = (char *)xnmalloc(strlen(comm[0] + 1) + 3, sizeof(char));
+			sprintf(ss, "*%s*", comm[0] + 1);
+			char *cmd[] = {"find", (search_path && *search_path) ? search_path
+						: ".", "-name", ss, NULL};
+			launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+			free(ss);
+		}
 		return EXIT_SUCCESS;
 	}
 
@@ -148,17 +174,17 @@ search_glob(char **comm, int invert)
 		tmp++;
 
 	/* Search for globbing char */
-	int glob_char_found = 0;
-	for (i = 1; tmp[i]; i++) {
+	int glob_char_found = check_glob_char(tmp);
+/*	for (i = 1; tmp[i]; i++) {
 		if (tmp[i] == '*' || tmp[i] == '?' || tmp[i] == '[' || tmp[i] == '{'
-		    /* Consider regex chars as well: we don't want this "r$"
-		     * to become this "*r$*" */
+		    // Consider regex chars as well: we don't want this "r$"
+		    // to become this "*r$*"
 		    || tmp[i] == '|' || tmp[i] == '^' || tmp[i] == '+' || tmp[i] == '$'
 		    || tmp[i] == '.') {
 			glob_char_found = 1;
 			break;
 		}
-	}
+	} */
 
 	/* If search string is just "STR" (no glob chars), change it
 	 * to "*STR*" */
