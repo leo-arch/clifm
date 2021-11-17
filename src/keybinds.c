@@ -360,7 +360,7 @@ my_insert_text(char *text, char *s, const char _s)
 	if (!text || !*text)
 		return;
 
-	if (wrong_cmd)
+	if (wrong_cmd || cur_color == hq_c)
 		goto INSERT_TEXT;
 
 #ifndef _NO_HIGHLIGHT
@@ -469,7 +469,7 @@ rl_accept_suggestion(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	if (!wrong_cmd) {
+	if (!wrong_cmd && cur_color != hq_c) {
 		cur_color = tx_c;
 		fputs(tx_c, stdout);
 	}

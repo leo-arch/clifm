@@ -103,7 +103,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 			change_word_color(str, 0, sx_c);
 	} */
 
-	if (c >= '0' && c <= '9') {
+	if (cur_color != hq_c && c >= '0' && c <= '9') {
 		if (prev == ' ' || cur_color == hn_c || rl_end == 1) {
 			cl = hn_c;
 			goto END;
