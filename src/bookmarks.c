@@ -776,13 +776,18 @@ bookmarks_function(char **cmd)
 	if (*cmd[1] == 'e' && (!cmd[1][1] || strcmp(cmd[1], "edit") == 0))
 		return edit_bookmarks(cmd[2] ? cmd[2] : NULL);
 
-	/* Shortcut or bm name */
+	/* Shortcut, bm name, or (if expand_bookmarks) bm path */
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
 		if ((bookmarks[i].shortcut && *cmd[1] == *bookmarks[i].shortcut
 			&& strcmp(cmd[1], bookmarks[i].shortcut) == 0)
+
 			|| (bookmarks[i].name && *cmd[1] == *bookmarks[i].name
-			&& strcmp(cmd[1], bookmarks[i].name) == 0)) {
+			&& strcmp(cmd[1], bookmarks[i].name) == 0)
+
+			|| (expand_bookmarks && bookmarks[i].path
+			&& *cmd[1] == *bookmarks[i].path
+			&& strcmp(cmd[1], bookmarks[i].path) == 0)) {
 
 			if (bookmarks[i].path) {
 				char *tmp_cmd[] = {"o", bookmarks[i].path,
