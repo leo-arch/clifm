@@ -1053,10 +1053,12 @@ free_stuff(void)
 	close(kq);
 #endif
 
-/*	i = (int)autocmds_n;
+#ifdef AUTOCMDS_TEST
+	i = (int)autocmds_n;
 	while (--i >= 0)
 		free(autocmds[i].pattern);
-	free(autocmds); */
+	free(autocmds);
+#endif
 
 	if (xargs.stealth_mode != 1)
 		save_jumpdb();

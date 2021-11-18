@@ -1376,7 +1376,7 @@ get_line_value(char *line)
 	return remove_quotes(opt);
 }
 
-/*
+#ifdef AUTOCMDS_TEST
 static void
 set_autocmd_opt(char *opt)
 {
@@ -1410,10 +1410,10 @@ set_autocmd_opt(char *opt)
 static void
 init_autocmd_opts()
 {
-	autocmds[autocmds_n].light_mode = light_mode;
-	autocmds[autocmds_n].files_counter = files_counter;
-	autocmds[autocmds_n].long_view = long_view;
-	autocmds[autocmds_n].max_files = max_files;
+	autocmds[autocmds_n].light_mode = opts.light_mode;
+	autocmds[autocmds_n].files_counter = opts.files_counter;
+	autocmds[autocmds_n].long_view = opts.long_view;
+	autocmds[autocmds_n].max_files = opts.max_files;
 	autocmds[autocmds_n].color_scheme = cur_cscheme;
 }
 
@@ -1460,7 +1460,8 @@ parse_autocmd_line(char *cmd)
 	}
 
 	autocmds_n++;
-} */
+}
+#endif
 
 static void
 read_config(void)
@@ -1491,8 +1492,10 @@ read_config(void)
 		if (*line == '#' && strncmp(line, "#END OF OPTIONS", 15) == 0)
 			break;
 
-/*		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0)
-			parse_autocmd_line(line + 8); */
+#ifdef AUTOCMDS_TEST
+		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0)
+			parse_autocmd_line(line + 8);
+#endif
 
 		else if (xargs.autocd == UNSET && *line == 'A'
 		&& strncmp(line, "Autocd=", 7) == 0) {
@@ -2333,7 +2336,7 @@ init_config(void)
 	}
 }
 
-/*
+#ifdef AUTOCMDS_TEST
 static void
 free_autocmds(void)
 {
@@ -2345,7 +2348,8 @@ free_autocmds(void)
 	autocmds_n = autocmd_set = 0;
 
 	opts.color_scheme = (char *)NULL;
-} */
+}
+#endif
 
 static void
 reset_variables(void)
@@ -2399,7 +2403,9 @@ reset_variables(void)
 	free(wprompt_str);
 	wprompt_str = (char *)NULL;
 
-//	free_autocmds();
+#ifdef AUTOCMDS_TEST
+	free_autocmds();
+#endif
 
 	free_remotes(0);
 

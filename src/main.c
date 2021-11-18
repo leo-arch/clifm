@@ -77,8 +77,11 @@ struct devino_t *sel_devino = (struct devino_t *)NULL;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion;
 #endif
-//struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
-//struct opts_t opts;
+
+#ifdef AUTOCMDS_TEST
+struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
+struct opts_t opts;
+#endif
 
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = NOMSG;
@@ -107,7 +110,9 @@ size_t *ext_colors_len = (size_t *)NULL;
 int
     auto_open = UNSET,
     autocd = UNSET,
-//	autocmd_set = 0,
+#ifdef AUTOCMDS_TEST
+	autocmd_set = 0,
+#endif
 	autojump = UNSET,
     autols = UNSET,
 	bell = DEF_BELL_STYLE,
@@ -222,7 +227,9 @@ size_t
     actions_n = 0,
     aliases_n = 0,
     args_n = 0,
-//	autocmds_n = 0,
+#ifdef AUTOCMDS_TEST
+	autocmds_n = 0,
+#endif
     bm_n = 0,
 	cdpath_n = 0,
     cschemes_n = 0,

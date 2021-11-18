@@ -1635,7 +1635,7 @@ init_fileinfo(const size_t n)
 	file_info[n].time = 0;
 }
 
-/*
+#ifdef AUTOCMDS_TEST
 static inline int
 check_autocmds(void)
 {
@@ -1657,10 +1657,14 @@ check_autocmds(void)
 		}
 
 		// Set options for current directory
-		light_mode = autocmds[i].light_mode;
-		files_counter = autocmds[i].files_counter;
+		if (autocmds[i].light_mode != -1)
+			light_mode = autocmds[i].light_mode;
+		if (autocmds[i].files_counter != -1)
+			files_counter = autocmds[i].files_counter;
+		if (autocmds[i].long_view != -1)
 		long_view = autocmds[i].long_view;
-		max_files = autocmds[i].max_files;
+		if (autocmds[i].max_files != -2)
+			max_files = autocmds[i].max_files;
 		if (autocmds[i].color_scheme)
 			set_colors(autocmds[i].color_scheme, 0);
 		found++;
@@ -1681,7 +1685,8 @@ revert_autocmd_opts(void)
 	if (opts.color_scheme)
 		set_colors(opts.color_scheme, 0);
 	autocmd_set = 0;
-} */
+}
+#endif
 
 /* List files in the current working directory. Uses file type colors
  * and columns. Return zero on success or one on error */
@@ -1691,8 +1696,10 @@ list_dir(void)
 #ifdef _LIST_SPEED
 	clock_t start = clock();
 #endif
-/*	if (autocmds_n && !check_autocmds() && autocmd_set)
-		revert_autocmd_opts(); */
+#ifdef AUTOCMDS_TEST
+	if (autocmds_n && !check_autocmds() && autocmd_set)
+		revert_autocmd_opts();
+#endif
 
 	if (clear_screen)
 		CLEAR;
