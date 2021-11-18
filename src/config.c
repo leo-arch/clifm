@@ -2729,6 +2729,7 @@ reload_config(void)
 	 * entry */
 	dirhist_cur_index = dirhist_total_index - 1;
 
+	dir_changed = 1;
 	set_env();
 	return EXIT_SUCCESS;
 }
