@@ -123,8 +123,11 @@ init_workspaces(void)
 {
 	ws = (struct ws_t *)xnmalloc(MAX_WS, sizeof(struct ws_t));
 	int i = MAX_WS;
-	while (--i >= 0)
+	while (--i >= 0) {
 		ws[i].path = (char *)NULL;
+//		ws[i].autocmd = 0;
+//		ws[i].num = 0;
+	}
 
 	return EXIT_SUCCESS;
 }

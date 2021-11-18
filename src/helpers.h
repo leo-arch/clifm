@@ -434,7 +434,7 @@ extern struct actions_t *usr_actions;
 struct ws_t {
 	char *path;
 	int num;
-	int padding;
+	int pad;
 };
 
 extern struct ws_t *ws;
@@ -520,6 +520,28 @@ struct devino_t {
 };
 
 extern struct devino_t *sel_devino;
+
+/*
+struct autocmds_t {
+	char *pattern;
+	char *color_scheme;
+	int long_view;
+	int light_mode;
+	int files_counter;
+	int max_files;
+};
+
+extern struct autocmds_t *autocmds;
+
+struct opts_t {
+	char *color_scheme;
+	int long_view;
+	int light_mode;
+	int files_counter;
+	int max_files;
+};
+
+extern struct opts_t opts; */
 
 /* Struct to specify which parameters have been set from the command
  * line, to avoid overriding them with init_config(). While no command
@@ -681,6 +703,7 @@ extern int
 extern int
     auto_open,
     autocd,
+//	autocmd_set,
     autojump,
 	autols,
 	bell,
@@ -801,6 +824,7 @@ extern size_t
     actions_n,
     aliases_n,
     args_n,
+//	autocmds_n,
     bm_n,
 	cdpath_n,
     cschemes_n,
@@ -822,7 +846,6 @@ extern size_t
 	tab_offset,
     user_home_len,
     usrvar_n,
-//	ncmds,
     nwords;
 
 extern struct termios shell_tmodes;
@@ -977,6 +1000,16 @@ extern char
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
+	/* Workspaces */
+	ws1_c[MAX_COLOR + 2],
+	ws2_c[MAX_COLOR + 2],
+	ws3_c[MAX_COLOR + 2],
+	ws4_c[MAX_COLOR + 2],
+	ws5_c[MAX_COLOR + 2],
+	ws6_c[MAX_COLOR + 2],
+	ws7_c[MAX_COLOR + 2],
+	ws8_c[MAX_COLOR + 2],
+
     em_c[MAX_COLOR + 2], /* Error msg color */
     li_c[MAX_COLOR + 2], /* Sel indicator color */
     li_cb[MAX_COLOR], /* Sel indicator color (for the files list) */

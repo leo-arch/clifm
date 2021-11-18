@@ -225,9 +225,20 @@ decode_prompt(const char *line)
 			}
 
 			case 'S': { /* Current workspace */
-				char s[12];
-				sprintf(s, "%d", cur_ws + 1);
-				temp = savestring(s, 1);
+				char s[sizeof(int) + 2 + (MAX_COLOR * 2)];
+				char *cl = (char *)NULL;
+				switch(cur_ws + 1) {
+				case 1: cl = ws1_c; break;
+				case 2: cl = ws2_c; break;
+				case 3: cl = ws3_c; break;
+				case 4: cl = ws4_c; break;
+				case 5: cl = ws5_c; break;
+				case 6: cl = ws6_c; break;
+				case 7: cl = ws7_c; break;
+				case 8: cl = ws8_c; break;
+				}
+				sprintf(s, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
+				temp = savestring(s, strlen(s));
 				goto add_string;
 			}
 

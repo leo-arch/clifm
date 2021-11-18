@@ -70,6 +70,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 *.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:\
 *.opus=00;36:*.spx=00;36:*.xspf=00;36:"
 
+/* Filetypes */
 #define DEF_DI_C "\x1b[01;34m"
 #define DEF_ND_C "\x1b[01;31m"
 #define DEF_ED_C "\x1b[00;34m"
@@ -96,6 +97,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_MH_C "\x1b[30;46m"
 #define DEF_BM_C "\x1b[01;36m"
 
+/* Interface */
 #define DEF_EL_C "\x1b[01;33m"
 #define DEF_MI_C "\x1b[01;36m"
 #define DEF_DL_C "\x1b[00;34m"
@@ -117,6 +119,17 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_NM_C "\001\x1b[01;32m\002"
 #define DEF_SI_C "\001\x1b[01;34m\002"
 
+/* Workspaces */
+#define DEF_WS1_C "\001\x1b[0;34m\002"
+#define DEF_WS2_C "\001\x1b[0;31m\002"
+#define DEF_WS3_C "\001\x1b[0;33m\002"
+#define DEF_WS4_C "\001\x1b[0;32m\002"
+#define DEF_WS5_C "\001\x1b[0;36m\002"
+#define DEF_WS6_C "\001\x1b[0;36m\002"
+#define DEF_WS7_C "\001\x1b[0;36m\002"
+#define DEF_WS8_C "\001\x1b[0;36m\002"
+
+/* Suggestions */
 #define DEF_SB_C "\x1b[02;33m"
 #define DEF_SH_C "\x1b[02;35m"
 #define DEF_SF_C "\x1b[02;04;36m"
@@ -124,6 +137,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_SX_C "\x1b[02;32m"
 #define DEF_SP_C "\x1b[02;31m"
 
+/* Highlight */
 #define DEF_HB_C "\x1b[00;36m"
 #define DEF_HC_C "\x1b[02;31m"
 #define DEF_HD_C "\x1b[00;36m"

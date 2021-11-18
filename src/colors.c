@@ -284,6 +284,15 @@ reset_iface_colors(void)
 	*si_c = '\0';
 	*ts_c = '\0';
 	*wp_c = '\0';
+
+	*ws1_c = '\0';
+	*ws2_c = '\0';
+	*ws3_c = '\0';
+	*ws4_c = '\0';
+	*ws5_c = '\0';
+	*ws6_c = '\0';
+	*ws7_c = '\0';
+	*ws8_c = '\0';
 }
 
 int
@@ -557,8 +566,61 @@ set_iface_colors(char **colors, const size_t words)
 				 * variable to hold the default color */
 				*tx_c = '\0';
 			else
-//				snprintf(tx_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3);
 				snprintf(tx_c, MAX_COLOR + 2, "\x1b[%sm", colors[i] + 3);
+		}
+
+		else if (*colors[i] == 'w' && strncmp(colors[i], "ws1=", 4) == 0) {
+			if (!is_color_code(colors[i] + 4))
+				*ws1_c = '\0';
+			else
+				snprintf(ws1_c, MAX_COLOR - 1, "\001\x1b[%sm\002", colors[i] + 4);
+		}
+		else if (*colors[i] == 'w' && strncmp(colors[i], "ws2=", 4) == 0) {
+			if (!is_color_code(colors[i] + 4))
+				*ws2_c = '\0';
+			else
+				snprintf(ws2_c, MAX_COLOR - 1, "\001\x1b[%sm\002", colors[i] + 4);
+		}
+		else if (*colors[i] == 'w' && strncmp(colors[i], "ws3=", 4) == 0) {
+			if (!is_color_code(colors[i] + 4))
+				*ws3_c = '\0';
+			else
+				snprintf(ws3_c, MAX_COLOR - 1, "\001\x1b[%sm\002", colors[i] + 4);
+		}
+
+		else if (*colors[i] == 'w' && strncmp(colors[i], "ws4=", 4) == 0) {
+			if (!is_color_code(colors[i] + 4))
+				*ws4_c = '\0';
+			else
+				snprintf(ws4_c, MAX_COLOR - 1, "\001\x1b[%sm\002", colors[i] + 4);
+		}
+
+		else if (*colors[i] == 'w' && strncmp(colors[i], "ws5=", 4) == 0) {
+			if (!is_color_code(colors[i] + 4))
+				*ws5_c = '\0';
+			else
+				snprintf(ws5_c, MAX_COLOR - 1, "\001\x1b[%sm\002", colors[i] + 4);
+		}
+
+		else if (*colors[i] == 'w' && strncmp(colors[i], "ws6=", 4) == 0) {
+			if (!is_color_code(colors[i] + 4))
+				*ws6_c = '\0';
+			else
+				snprintf(ws6_c, MAX_COLOR - 1, "\001\x1b[%sm\002", colors[i] + 4);
+		}
+
+		else if (*colors[i] == 'w' && strncmp(colors[i], "ws7=", 4) == 0) {
+			if (!is_color_code(colors[i] + 4))
+				*ws7_c = '\0';
+			else
+				snprintf(ws7_c, MAX_COLOR - 1, "\001\x1b[%sm\002", colors[i] + 4);
+		}
+
+		else if (*colors[i] == 'w' && strncmp(colors[i], "ws8=", 4) == 0) {
+			if (!is_color_code(colors[i] + 4))
+				*ws8_c = '\0';
+			else
+				snprintf(ws8_c, MAX_COLOR - 1, "\001\x1b[%sm\002", colors[i] + 4);
 		}
 
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hb=", 3) == 0) {
@@ -874,6 +936,23 @@ set_default_colors(void)
 		strcpy(ts_c, DEF_TS_C);
 	if (!*wp_c)
 		strcpy(wp_c, DEF_WP_C);
+
+	if (!*ws1_c)
+		strcpy(ws1_c, DEF_WS1_C);
+	if (!*ws2_c)
+		strcpy(ws2_c, DEF_WS2_C);
+	if (!*ws3_c)
+		strcpy(ws3_c, DEF_WS3_C);
+	if (!*ws4_c)
+		strcpy(ws4_c, DEF_WS4_C);
+	if (!*ws5_c)
+		strcpy(ws5_c, DEF_WS5_C);
+	if (!*ws6_c)
+		strcpy(ws6_c, DEF_WS6_C);
+	if (!*ws7_c)
+		strcpy(ws7_c, DEF_WS7_C);
+	if (!*ws8_c)
+		strcpy(ws8_c, DEF_WS8_C);
 
 	if (!*di_c)
 		strcpy(di_c, DEF_DI_C);

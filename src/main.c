@@ -77,6 +77,8 @@ struct devino_t *sel_devino = (struct devino_t *)NULL;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion;
 #endif
+//struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
+//struct opts_t opts;
 
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = NOMSG;
@@ -105,6 +107,7 @@ size_t *ext_colors_len = (size_t *)NULL;
 int
     auto_open = UNSET,
     autocd = UNSET,
+//	autocmd_set = 0,
 	autojump = UNSET,
     autols = UNSET,
 	bell = DEF_BELL_STYLE,
@@ -219,6 +222,7 @@ size_t
     actions_n = 0,
     aliases_n = 0,
     args_n = 0,
+//	autocmds_n = 0,
     bm_n = 0,
 	cdpath_n = 0,
     cschemes_n = 0,
@@ -240,7 +244,6 @@ size_t
 	tab_offset = 0,
     user_home_len = 0,
     usrvar_n = 0,
-//	ncmds = 0,
     nwords = 0;
 
 char
@@ -692,6 +695,16 @@ char
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
+	/* Workspaces */
+	ws1_c[MAX_COLOR + 2],
+	ws2_c[MAX_COLOR + 2],
+	ws3_c[MAX_COLOR + 2],
+	ws4_c[MAX_COLOR + 2],
+	ws5_c[MAX_COLOR + 2],
+	ws6_c[MAX_COLOR + 2],
+	ws7_c[MAX_COLOR + 2],
+	ws8_c[MAX_COLOR + 2],
+
     em_c[MAX_COLOR + 2], /* Error msg color */
     li_c[MAX_COLOR + 2], /* Sel indicator color */
     li_cb[MAX_COLOR], /* Sel indicator color (for the files list) */
@@ -844,10 +857,10 @@ main(int argc, char *argv[])
 	init_gettext();
 #endif
 
-	cschemes_n = get_colorschemes();
+/*	cschemes_n = get_colorschemes();
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
 	free(usr_cscheme);
-	usr_cscheme = (char *)NULL;
+	usr_cscheme = (char *)NULL; */
 
 	fputs(df_c, stdout);
 	fflush(stdout);

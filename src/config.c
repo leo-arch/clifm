@@ -1376,6 +1376,92 @@ get_line_value(char *line)
 	return remove_quotes(opt);
 }
 
+/*
+static void
+set_autocmd_opt(char *opt)
+{
+	if (!opt || !*opt)
+		return;
+
+	char *p = strchr(opt, '=');
+	if (!p || !*(++p))
+		return;
+
+	*(p - 1) = '\0';
+	// cs, fc, lm, lv, mf
+	if (*opt == 'c' && opt[1] == 's') {
+		int i = (int)cschemes_n;
+		while (--i >= 0) {
+			if (*color_schemes[i] == *p && strcmp(color_schemes[i], p) == 0) {
+				autocmds[autocmds_n].color_scheme = color_schemes[i];
+				break;
+			}
+		}
+	} else if (*opt == 'f' && opt[1] == 'c')
+		autocmds[autocmds_n].files_counter = atoi(p);
+	else if (*opt == 'l' && opt[1] == 'm')
+		autocmds[autocmds_n].light_mode = atoi(p);
+	else if (*opt == 'l' && opt[1] == 'v')
+		autocmds[autocmds_n].long_view = atoi(p);
+	else if (*opt == 'm' && opt[1] == 'f')
+		autocmds[autocmds_n].max_files = atoi(p);
+}
+
+static void
+init_autocmd_opts()
+{
+	autocmds[autocmds_n].light_mode = light_mode;
+	autocmds[autocmds_n].files_counter = files_counter;
+	autocmds[autocmds_n].long_view = long_view;
+	autocmds[autocmds_n].max_files = max_files;
+	autocmds[autocmds_n].color_scheme = cur_cscheme;
+}
+
+static void
+parse_autocmd_line(char *cmd)
+{
+	if (!cmd || !*cmd)
+		return;
+
+	size_t clen = strlen(cmd);
+	if (cmd[clen - 1] == '\n')
+		cmd[clen - 1] = '\0';
+
+	char *p = strchr(cmd, ' ');
+	if (!p || !*(p + 1))
+		return;
+
+	*p = '\0';
+
+	autocmds = (struct autocmds_t *)xrealloc(autocmds,
+				(autocmds_n + 1) * sizeof(struct autocmds_t));
+	autocmds[autocmds_n].pattern = savestring(cmd, strlen(cmd));
+
+	init_autocmd_opts();
+
+	char *q = ++p;
+	while (1) {
+		char *val = (char *)NULL;
+		if (*p == ',') {
+			*(p++) = '\0';
+			val = q;
+			q = p;
+		} else if (!*p) {
+			val = q;
+		} else {
+			++p;
+			continue;
+		}
+
+		set_autocmd_opt(val);
+
+		if (!*p)
+			break;
+	}
+
+	autocmds_n++;
+} */
+
 static void
 read_config(void)
 {
@@ -1404,6 +1490,9 @@ read_config(void)
 			continue;
 		if (*line == '#' && strncmp(line, "#END OF OPTIONS", 15) == 0)
 			break;
+
+/*		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0)
+			parse_autocmd_line(line + 8); */
 
 		else if (xargs.autocd == UNSET && *line == 'A'
 		&& strncmp(line, "Autocd=", 7) == 0) {
@@ -2220,6 +2309,15 @@ init_config(void)
 	define_config_file_names();
 	create_config_files();
 
+	static int c = 0;
+	if (c == 0) {
+		c = 1;
+		cschemes_n = get_colorschemes();
+		set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+		free(usr_cscheme);
+		usr_cscheme = (char *)NULL;
+	}
+
 	if (config_ok)
 		read_config();
 
@@ -2234,6 +2332,20 @@ init_config(void)
 		("\x1b[>1m" and "\x1b[>2m", reset to initial value) */
 	}
 }
+
+/*
+static void
+free_autocmds(void)
+{
+	int i = (int)autocmds_n;
+	while (--i >= 0)
+		free(autocmds[i].pattern);
+	free(autocmds);
+	autocmds = (struct autocmds_t *)NULL;
+	autocmds_n = autocmd_set = 0;
+
+	opts.color_scheme = (char *)NULL;
+} */
 
 static void
 reset_variables(void)
@@ -2286,6 +2398,8 @@ reset_variables(void)
 
 	free(wprompt_str);
 	wprompt_str = (char *)NULL;
+
+//	free_autocmds();
 
 	free_remotes(0);
 

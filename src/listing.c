@@ -1458,6 +1458,7 @@ list_dir_light(void)
 		file_info[n].ruser = 1;
 		file_info[n].filesn = 0;
 		file_info[n].time = 0;
+		file_info[n].sel = 0;
 #ifndef _NO_ICONS
 		file_info[n].icon = DEF_FILE_ICON;
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
@@ -1634,6 +1635,54 @@ init_fileinfo(const size_t n)
 	file_info[n].time = 0;
 }
 
+/*
+static inline int
+check_autocmds(void)
+{
+	int i = (int)autocmds_n, found = 0;
+	while (--i >= 0) {
+		if (!autocmds[i].pattern
+		|| strcmp(ws[cur_ws].path, autocmds[i].pattern) != 0)
+			continue;
+
+		if (!autocmd_set) {
+			// Backup current options
+			opts.light_mode = light_mode;
+			opts.files_counter = files_counter;
+			opts.long_view = long_view;
+			opts.max_files = max_files;
+			if (autocmds[i].color_scheme)
+				opts.color_scheme = cur_cscheme;
+			autocmd_set = 1;
+		}
+
+		// Set options for current directory
+		light_mode = autocmds[i].light_mode;
+		files_counter = autocmds[i].files_counter;
+		long_view = autocmds[i].long_view;
+		max_files = autocmds[i].max_files;
+		if (autocmds[i].color_scheme)
+			set_colors(autocmds[i].color_scheme, 0);
+		found++;
+
+		break;
+	}
+
+	return found;
+}
+
+static inline void
+revert_autocmd_opts(void)
+{
+	light_mode = opts.light_mode;
+	files_counter = opts.files_counter;
+	long_view = opts.long_view;
+	max_files = opts.max_files;
+	if (opts.color_scheme)
+		set_colors(opts.color_scheme, 0);
+	autocmd_set = 0;
+} */
+
 /* List files in the current working directory. Uses file type colors
  * and columns. Return zero on success or one on error */
 int
@@ -1642,6 +1691,9 @@ list_dir(void)
 #ifdef _LIST_SPEED
 	clock_t start = clock();
 #endif
+/*	if (autocmds_n && !check_autocmds() && autocmd_set)
+		revert_autocmd_opts(); */
+
 	if (clear_screen)
 		CLEAR;
 
