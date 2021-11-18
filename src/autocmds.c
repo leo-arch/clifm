@@ -32,6 +32,7 @@
 #include "aux.h"
 #include "colors.h"
 #include "exec.h"
+#include "listing.h"
 #include "strings.h"
 
 void
@@ -123,8 +124,22 @@ check_autocmds(void)
 			max_files = autocmds[i].max_files;
 		if (autocmds[i].color_scheme)
 			set_colors(autocmds[i].color_scheme, 0);
-		if (autocmds[i].cmd)
+		if (autocmds[i].cmd) {
+//			if (*autocmds[i].cmd != '!') {
 			launch_execle(autocmds[i].cmd);
+/*			} else {
+//				size_t old_args_n = args_n;
+				free_dirlist();
+				char **cmd = parse_input_str(autocmds[i].cmd + 1);
+				if (!cmd)
+					break;
+				exec_cmd(cmd);
+//				args_n = old_args_n;
+				for (j = 0; cmd[j]; j++)
+					free(cmd[j]);
+				free(cmd);
+			} */
+		}
 
 		break;
 	}
@@ -180,7 +195,6 @@ set_autocmd_opt(char *opt)
 		return;
 
 	*(p - 1) = '\0';
-	// cs, fc, lm, lv, mf
 	if (*opt == 'c' && opt[1] == 's') {
 		int i = (int)cschemes_n;
 		while (--i >= 0) {
@@ -211,15 +225,15 @@ static void
 init_autocmd_opts()
 {
 	autocmds[autocmds_n].cmd = (char *)NULL;
-	autocmds[autocmds_n].light_mode = opts.light_mode;
+	autocmds[autocmds_n].color_scheme = opts.color_scheme;
 	autocmds[autocmds_n].files_counter = opts.files_counter;
+	autocmds[autocmds_n].light_mode = opts.light_mode;
 	autocmds[autocmds_n].long_view = opts.long_view;
 	autocmds[autocmds_n].max_files = max_files;
-	autocmds[autocmds_n].show_hidden = opts.show_hidden;
-	autocmds[autocmds_n].pager = opts.pager;
-	autocmds[autocmds_n].sort = sort;
 	autocmds[autocmds_n].max_name_len = max_name_len;
-	autocmds[autocmds_n].color_scheme = opts.color_scheme;
+	autocmds[autocmds_n].pager = opts.pager;
+	autocmds[autocmds_n].show_hidden = opts.show_hidden;
+	autocmds[autocmds_n].sort = sort;
 }
 
 void

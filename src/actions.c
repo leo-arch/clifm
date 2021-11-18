@@ -142,7 +142,6 @@ run_action(char *action, char **args)
 			_exit(EXIT_FAILURE);
 
 		launch_execle(cmd);
-
 		close(wfd);
 		_exit(EXIT_SUCCESS);
 	}
@@ -191,32 +190,23 @@ run_action(char *action, char **args)
 	if (lstat(buf, &attr) != -1) {
 		char *o_cmd[] = {"o", buf, NULL};
 		exit_status = open_function(o_cmd);
-	}
-
-	/* If not a file, take it as a command*/
-	else {
+	} else { /* If not a file, take it as a command*/
 		size_t old_args = args_n;
 		args_n = 0;
 
 		char **_cmd = parse_input_str(buf);
-
 		if (_cmd) {
-
 			char **alias_cmd = check_for_alias(_cmd);
 
 			if (alias_cmd) {
 				exit_status = exec_cmd(alias_cmd);
-
 				for (i = 0; alias_cmd[i]; i++)
 					free(alias_cmd[i]);
-
 				free(alias_cmd);
 			} else {
 				exit_status = exec_cmd(_cmd);
-
 				for (i = 0; i <= args_n; i++)
 					free(_cmd[i]);
-
 				free(_cmd);
 			}
 		}
@@ -262,7 +252,6 @@ edit_actions(void)
 	/* If modification times differ, the file was modified after being
 	 * opened */
 	if (mtime_bfr != (time_t)file_attrib.st_mtime) {
-
 		/* Reload the array of available actions */
 		if (load_actions() != EXIT_SUCCESS)
 			return EXIT_FAILURE;
@@ -284,7 +273,6 @@ edit_actions(void)
 		}
 
 		path_n = (size_t)get_path_env();
-
 		get_path_programs();
 	}
 
