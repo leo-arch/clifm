@@ -1651,6 +1651,7 @@ check_autocmds(void)
 			opts.files_counter = files_counter;
 			opts.long_view = long_view;
 			opts.max_files = max_files;
+			opts.show_hidden = show_hidden;
 			if (autocmds[i].color_scheme)
 				opts.color_scheme = cur_cscheme;
 			autocmd_set = 1;
@@ -1662,7 +1663,9 @@ check_autocmds(void)
 		if (autocmds[i].files_counter != -1)
 			files_counter = autocmds[i].files_counter;
 		if (autocmds[i].long_view != -1)
-		long_view = autocmds[i].long_view;
+			long_view = autocmds[i].long_view;
+		if (autocmds[i].show_hidden != -1)
+			show_hidden = autocmds[i].show_hidden;
 		if (autocmds[i].max_files != -2)
 			max_files = autocmds[i].max_files;
 		if (autocmds[i].color_scheme)
@@ -1682,7 +1685,8 @@ revert_autocmd_opts(void)
 	files_counter = opts.files_counter;
 	long_view = opts.long_view;
 	max_files = opts.max_files;
-	if (opts.color_scheme)
+	show_hidden = opts.show_hidden;
+	if (opts.color_scheme && opts.color_scheme != cur_cscheme)
 		set_colors(opts.color_scheme, 0);
 	autocmd_set = 0;
 }
@@ -1697,8 +1701,10 @@ list_dir(void)
 	clock_t start = clock();
 #endif
 #ifdef AUTOCMDS_TEST
-	if (autocmds_n && !check_autocmds() && autocmd_set)
+	if (autocmds_n) {
 		revert_autocmd_opts();
+		check_autocmds();
+	}
 #endif
 
 	if (clear_screen)

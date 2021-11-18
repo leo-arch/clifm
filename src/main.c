@@ -846,7 +846,6 @@ main(int argc, char *argv[])
 
 	init_config();
 	check_options();
-
 	set_sel_file();
 	create_tmp_files();
 	load_actions();

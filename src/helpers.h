@@ -529,6 +529,8 @@ struct autocmds_t {
 	int light_mode;
 	int files_counter;
 	int max_files;
+	int show_hidden;
+	int pad;
 };
 
 extern struct autocmds_t *autocmds;
@@ -539,6 +541,8 @@ struct opts_t {
 	int light_mode;
 	int files_counter;
 	int max_files;
+	int show_hidden;
+	int pad;
 };
 
 extern struct opts_t opts;

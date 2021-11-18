@@ -2117,6 +2117,17 @@ get_prompt_cmds(void)
 	close_fstream(fp, fd);
 }
 
+static void
+reset_opts(void)
+{
+	opts.color_scheme = cur_cscheme;
+	opts.files_counter = files_counter;
+	opts.light_mode = light_mode;
+	opts.max_files = max_files;
+	opts.long_view = long_view;
+	opts.show_hidden = show_hidden;
+}
+
 /* If some option was not set, set it to the default value */
 void
 check_options(void)
@@ -2532,4 +2543,6 @@ check_options(void)
 	 * Set it thus to xdg-open, if not already set via command line */
 	if (xargs.stealth_mode == 1 && !opener)
 		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
+
+	reset_opts();
 }

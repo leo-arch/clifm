@@ -1399,6 +1399,8 @@ set_autocmd_opt(char *opt)
 		}
 	} else if (*opt == 'f' && opt[1] == 'c')
 		autocmds[autocmds_n].files_counter = atoi(p);
+	else if (*opt == 'h' && opt[1] == 'f')
+		autocmds[autocmds_n].show_hidden = atoi(p);
 	else if (*opt == 'l' && opt[1] == 'm')
 		autocmds[autocmds_n].light_mode = atoi(p);
 	else if (*opt == 'l' && opt[1] == 'v')
@@ -1413,8 +1415,9 @@ init_autocmd_opts()
 	autocmds[autocmds_n].light_mode = opts.light_mode;
 	autocmds[autocmds_n].files_counter = opts.files_counter;
 	autocmds[autocmds_n].long_view = opts.long_view;
-	autocmds[autocmds_n].max_files = opts.max_files;
-	autocmds[autocmds_n].color_scheme = cur_cscheme;
+	autocmds[autocmds_n].max_files = max_files;
+	autocmds[autocmds_n].show_hidden = opts.show_hidden;
+	autocmds[autocmds_n].color_scheme = opts.color_scheme;
 }
 
 static void
