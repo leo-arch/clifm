@@ -1750,13 +1750,12 @@ list_dir(void)
 #ifdef _LIST_SPEED
 	clock_t start = clock();
 #endif
-#ifdef AUTOCMDS_TEST
+
 	if (dir_changed && autocmds_n) {
 		if (autocmd_set)
 			revert_autocmd_opts();
 		check_autocmds();
 	}
-#endif
 
 	if (clear_screen)
 		CLEAR;

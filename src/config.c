@@ -1406,10 +1406,8 @@ read_config(void)
 		if (*line == '#' && strncmp(line, "#END OF OPTIONS", 15) == 0)
 			break;
 
-#ifdef AUTOCMDS_TEST
 		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0)
 			parse_autocmd_line(line + 8);
-#endif
 
 		else if (xargs.autocd == UNSET && *line == 'A'
 		&& strncmp(line, "Autocd=", 7) == 0) {

@@ -521,7 +521,6 @@ struct devino_t {
 
 extern struct devino_t *sel_devino;
 
-#ifdef AUTOCMDS_TEST
 struct autocmds_t {
 	char *pattern;
 	char *color_scheme;
@@ -551,7 +550,6 @@ struct opts_t {
 };
 
 extern struct opts_t opts;
-#endif
 
 /* Struct to specify which parameters have been set from the command
  * line, to avoid overriding them with init_config(). While no command
@@ -713,9 +711,7 @@ extern int
 extern int
     auto_open,
     autocd,
-#ifdef AUTOCMDS_TEST
 	autocmd_set,
-#endif
     autojump,
 	autols,
 	bell,
@@ -837,9 +833,7 @@ extern size_t
     actions_n,
     aliases_n,
     args_n,
-#ifdef AUTOCMDS_TEST
 	autocmds_n,
-#endif
     bm_n,
 	cdpath_n,
     cschemes_n,
