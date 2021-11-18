@@ -38,6 +38,8 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
+#include <glob.h>
+
 #ifdef _LIST_SPEED
 #include <time.h>
 #endif
@@ -1645,8 +1647,29 @@ check_autocmds(void)
 {
 	int i = (int)autocmds_n, found = 0;
 	while (--i >= 0) {
-		if (!autocmds[i].pattern
-		|| strcmp(ws[cur_ws].path, autocmds[i].pattern) != 0)
+		if (!autocmds[i].pattern)
+			continue;
+
+		glob_t g;
+		int ret = glob(autocmds[i].pattern, GLOB_NOMAGIC | GLOB_TILDE
+				| GLOB_BRACE | GLOB_ONLYDIR, NULL, &g);
+
+		if (ret != EXIT_SUCCESS) {
+			globfree(&g);
+			continue;
+		}
+
+		size_t j = 0;
+		for (; j < g.gl_pathc; j++) {
+			if (*ws[cur_ws].path == *g.gl_pathv[j]
+			&& strcmp(ws[cur_ws].path, g.gl_pathv[j]) == 0) {
+				found = 1;
+				break;
+			}
+		}
+		globfree(&g);
+
+		if (!found)
 			continue;
 
 		if (!autocmd_set) {
@@ -1685,7 +1708,6 @@ check_autocmds(void)
 			set_colors(autocmds[i].color_scheme, 0);
 		if (autocmds[i].cmd)
 			launch_execle(autocmds[i].cmd);
-		found++;
 
 		break;
 	}

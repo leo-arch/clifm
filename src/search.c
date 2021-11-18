@@ -33,12 +33,12 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <glob.h>
 
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
 #include "exec.h"
-#include "glob.h"
 #include "navigation.h"
 #include "sort.h"
 
