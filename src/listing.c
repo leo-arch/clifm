@@ -1650,8 +1650,15 @@ check_autocmds(void)
 		if (!autocmds[i].pattern)
 			continue;
 
+		int rev = 0;
+		char *p = autocmds[i].pattern;
+		if (*p == '!') {
+			++p;
+			rev = 1;
+		}
+
 		glob_t g;
-		int ret = glob(autocmds[i].pattern, GLOB_NOMAGIC | GLOB_TILDE
+		int ret = glob(p, GLOB_NOMAGIC | GLOB_TILDE
 				| GLOB_BRACE | GLOB_ONLYDIR, NULL, &g);
 
 		if (ret != EXIT_SUCCESS) {
@@ -1669,7 +1676,10 @@ check_autocmds(void)
 		}
 		globfree(&g);
 
-		if (!found)
+		if (!rev) {
+			if (!found)
+				continue;
+		} else if (found)
 			continue;
 
 		if (!autocmd_set) {
