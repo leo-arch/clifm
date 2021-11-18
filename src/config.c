@@ -1446,7 +1446,7 @@ init_autocmd_opts()
 	autocmds[autocmds_n].max_files = max_files;
 	autocmds[autocmds_n].show_hidden = opts.show_hidden;
 	autocmds[autocmds_n].pager = opts.pager;
-	autocmds[autocmds_n].sort = opts.sort;
+	autocmds[autocmds_n].sort = sort;
 	autocmds[autocmds_n].max_name_len = max_name_len;
 	autocmds[autocmds_n].color_scheme = opts.color_scheme;
 }
@@ -2511,6 +2511,7 @@ reset_variables(void)
 	trash_ok = 1;
 #endif
 
+	dir_changed = 0;
 	dequoted = 0;
 	internal_cmd = 0;
 	is_sel = 0;

@@ -135,6 +135,7 @@ int
     cp_cmd = UNSET,
     cur_ws = UNSET,
     dequoted = 0,
+	dir_changed = 0,
     dirhist_map = UNSET,
     disk_usage = UNSET,
 	elnpad = UNSET,

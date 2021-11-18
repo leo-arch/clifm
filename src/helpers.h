@@ -738,6 +738,7 @@ extern int
     cp_cmd,
     cur_ws,
     dequoted,
+	dir_changed, /* flag to know is dir was changed: used by autocmds */
     dirhist_map,
     disk_usage,
 	elnpad,

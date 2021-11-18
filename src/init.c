@@ -259,6 +259,8 @@ set_start_path(void)
 		ws[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
+	dir_changed = 1;
+
 	return EXIT_SUCCESS;
 }
 

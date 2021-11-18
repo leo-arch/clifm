@@ -273,6 +273,8 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (close_dir && closedir(dir) == -1)
 		return EXIT_FAILURE;
 
+	dir_changed = 0;
+
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
 
@@ -1681,10 +1683,8 @@ check_autocmds(void)
 			max_files = autocmds[i].max_files;
 		if (autocmds[i].color_scheme)
 			set_colors(autocmds[i].color_scheme, 0);
-		if (autocmds[i].cmd) {
-			printf("'%s'\n", autocmds[i].cmd);
+		if (autocmds[i].cmd)
 			launch_execle(autocmds[i].cmd);
-		}
 		found++;
 
 		break;
@@ -1719,7 +1719,7 @@ list_dir(void)
 	clock_t start = clock();
 #endif
 #ifdef AUTOCMDS_TEST
-	if (autocmds_n) {
+	if (dir_changed && autocmds_n) {
 		if (autocmd_set)
 			revert_autocmd_opts();
 		check_autocmds();
