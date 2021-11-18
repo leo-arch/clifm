@@ -2126,6 +2126,9 @@ reset_opts(void)
 	opts.max_files = max_files;
 	opts.long_view = long_view;
 	opts.show_hidden = show_hidden;
+	opts.max_name_len = max_name_len;
+	opts.pager = pager;
+	opts.sort = sort;
 }
 
 /* If some option was not set, set it to the default value */

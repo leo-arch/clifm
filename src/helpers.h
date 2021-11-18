@@ -525,12 +525,15 @@ extern struct devino_t *sel_devino;
 struct autocmds_t {
 	char *pattern;
 	char *color_scheme;
+	char *cmd;
 	int long_view;
 	int light_mode;
 	int files_counter;
 	int max_files;
+	int max_name_len;
 	int show_hidden;
-	int pad;
+	int sort;
+	int pager;
 };
 
 extern struct autocmds_t *autocmds;
@@ -541,8 +544,10 @@ struct opts_t {
 	int light_mode;
 	int files_counter;
 	int max_files;
+	int max_name_len;
 	int show_hidden;
-	int pad;
+	int sort;
+	int pager;
 };
 
 extern struct opts_t opts;

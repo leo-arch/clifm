@@ -1378,10 +1378,31 @@ get_line_value(char *line)
 
 #ifdef AUTOCMDS_TEST
 static void
+free_autocmds(void)
+{
+	int i = (int)autocmds_n;
+	while (--i >= 0) {
+		free(autocmds[i].pattern);
+		free(autocmds[i].cmd);
+	}
+	free(autocmds);
+	autocmds = (struct autocmds_t *)NULL;
+	autocmds_n = autocmd_set = 0;
+
+	opts.color_scheme = (char *)NULL;
+}
+
+static void
 set_autocmd_opt(char *opt)
 {
 	if (!opt || !*opt)
 		return;
+
+	if (*opt == '!' && *(++opt)) {
+		free(autocmds[autocmds_n].cmd);
+		autocmds[autocmds_n].cmd = savestring(opt, strlen(opt));
+		return;
+	}
 
 	char *p = strchr(opt, '=');
 	if (!p || !*(++p))
@@ -1407,16 +1428,26 @@ set_autocmd_opt(char *opt)
 		autocmds[autocmds_n].long_view = atoi(p);
 	else if (*opt == 'm' && opt[1] == 'f')
 		autocmds[autocmds_n].max_files = atoi(p);
+	else if (*opt == 'm' && opt[1] == 'n')
+		autocmds[autocmds_n].max_name_len = atoi(p);
+	else if (*opt == 'p' && opt[1] == 'g')
+		autocmds[autocmds_n].pager = atoi(p);
+	else if (*opt == 's' && opt[1] == 't')
+		autocmds[autocmds_n].sort = atoi(p);
 }
 
 static void
 init_autocmd_opts()
 {
+	autocmds[autocmds_n].cmd = (char *)NULL;
 	autocmds[autocmds_n].light_mode = opts.light_mode;
 	autocmds[autocmds_n].files_counter = opts.files_counter;
 	autocmds[autocmds_n].long_view = opts.long_view;
 	autocmds[autocmds_n].max_files = max_files;
 	autocmds[autocmds_n].show_hidden = opts.show_hidden;
+	autocmds[autocmds_n].pager = opts.pager;
+	autocmds[autocmds_n].sort = opts.sort;
+	autocmds[autocmds_n].max_name_len = max_name_len;
 	autocmds[autocmds_n].color_scheme = opts.color_scheme;
 }
 
@@ -2338,21 +2369,6 @@ init_config(void)
 		("\x1b[>1m" and "\x1b[>2m", reset to initial value) */
 	}
 }
-
-#ifdef AUTOCMDS_TEST
-static void
-free_autocmds(void)
-{
-	int i = (int)autocmds_n;
-	while (--i >= 0)
-		free(autocmds[i].pattern);
-	free(autocmds);
-	autocmds = (struct autocmds_t *)NULL;
-	autocmds_n = autocmd_set = 0;
-
-	opts.color_scheme = (char *)NULL;
-}
-#endif
 
 static void
 reset_variables(void)

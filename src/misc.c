@@ -1055,8 +1055,10 @@ free_stuff(void)
 
 #ifdef AUTOCMDS_TEST
 	i = (int)autocmds_n;
-	while (--i >= 0)
+	while (--i >= 0) {
 		free(autocmds[i].pattern);
+		free(autocmds[i].cmd);
+	}
 	free(autocmds);
 #endif
 

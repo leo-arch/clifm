@@ -59,6 +59,8 @@
 
 #include "checks.h"
 
+#include "exec.h"
+
 #ifndef _NO_ICONS
 #include "icons.h"
 #endif
@@ -1652,6 +1654,9 @@ check_autocmds(void)
 			opts.long_view = long_view;
 			opts.max_files = max_files;
 			opts.show_hidden = show_hidden;
+			opts.sort = sort;
+			opts.max_name_len = max_name_len;
+			opts.pager = pager;
 			if (autocmds[i].color_scheme)
 				opts.color_scheme = cur_cscheme;
 			autocmd_set = 1;
@@ -1666,10 +1671,20 @@ check_autocmds(void)
 			long_view = autocmds[i].long_view;
 		if (autocmds[i].show_hidden != -1)
 			show_hidden = autocmds[i].show_hidden;
+		if (autocmds[i].pager != -1)
+			pager = autocmds[i].pager;
+		if (autocmds[i].sort != -1)
+			sort = autocmds[i].sort;
+		if (autocmds[i].max_name_len != -1)
+			max_name_len = autocmds[i].max_name_len;
 		if (autocmds[i].max_files != -2)
 			max_files = autocmds[i].max_files;
 		if (autocmds[i].color_scheme)
 			set_colors(autocmds[i].color_scheme, 0);
+		if (autocmds[i].cmd) {
+			printf("'%s'\n", autocmds[i].cmd);
+			launch_execle(autocmds[i].cmd);
+		}
 		found++;
 
 		break;
@@ -1686,6 +1701,9 @@ revert_autocmd_opts(void)
 	long_view = opts.long_view;
 	max_files = opts.max_files;
 	show_hidden = opts.show_hidden;
+	max_name_len = opts.max_name_len;
+	pager = opts.pager;
+	sort = opts.sort;
 	if (opts.color_scheme && opts.color_scheme != cur_cscheme)
 		set_colors(opts.color_scheme, 0);
 	autocmd_set = 0;
@@ -1702,7 +1720,8 @@ list_dir(void)
 #endif
 #ifdef AUTOCMDS_TEST
 	if (autocmds_n) {
-		revert_autocmd_opts();
+		if (autocmd_set)
+			revert_autocmd_opts();
 		check_autocmds();
 	}
 #endif
