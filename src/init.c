@@ -54,6 +54,7 @@
 #include "string.h"
 #include "history.h"
 #include "file_operations.h"
+#include "autocmds.h"
 
 //struct user_t user;
 
@@ -2117,20 +2118,6 @@ get_prompt_cmds(void)
 
 	free(line);
 	close_fstream(fp, fd);
-}
-
-static void
-reset_opts(void)
-{
-	opts.color_scheme = cur_cscheme;
-	opts.files_counter = files_counter;
-	opts.light_mode = light_mode;
-	opts.max_files = max_files;
-	opts.long_view = long_view;
-	opts.show_hidden = show_hidden;
-	opts.max_name_len = max_name_len;
-	opts.pager = pager;
-	opts.sort = sort;
 }
 
 /* If some option was not set, set it to the default value */

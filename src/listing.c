@@ -58,10 +58,9 @@
 #include "misc.h"
 #include "properties.h"
 #include "sort.h"
-
 #include "checks.h"
-
 #include "exec.h"
+#include "autocmds.h"
 
 #ifndef _NO_ICONS
 #include "icons.h"
@@ -1640,7 +1639,7 @@ init_fileinfo(const size_t n)
 	file_info[n].ltime = 0; /* For long view mode */
 	file_info[n].time = 0;
 }
-
+/*
 #ifdef AUTOCMDS_TEST
 static inline int
 check_autocmds(void)
@@ -1679,8 +1678,9 @@ check_autocmds(void)
 		if (!rev) {
 			if (!found)
 				continue;
-		} else if (found)
+		} else if (found) {
 			continue;
+		}
 
 		if (!autocmd_set) {
 			// Backup current options
@@ -1740,7 +1740,7 @@ revert_autocmd_opts(void)
 		set_colors(opts.color_scheme, 0);
 	autocmd_set = 0;
 }
-#endif
+#endif */
 
 /* List files in the current working directory. Uses file type colors
  * and columns. Return zero on success or one on error */
