@@ -67,7 +67,7 @@ check_autocmds(void)
 		glob_t g;
 //		int ret = glob(p, GLOB_NOMAGIC | GLOB_TILDE
 //				| GLOB_BRACE | GLOB_ONLYDIR, NULL, &g);
-		int ret = glob(p, GLOB_NOCHECK | GLOB_TILDE | GLOB_BRACE, NULL, &g);
+		int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK | GLOB_TILDE | GLOB_BRACE, NULL, &g);
 
 		if (ret != EXIT_SUCCESS) {
 			globfree(&g);
