@@ -1024,9 +1024,7 @@ RestoreLastPath=%s\n\n"
 TrashAsRm=%s\n\n"
 
 	    "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
-RlEditMode=%d\n\n"
-
-	    "#END OF OPTIONS\n\n",
+RlEditMode=%d\n\n",
 
 		DEF_CLASSIFY == 1 ? "true" : "false",
 		DEF_SHARE_SELBOX == 1 ? "true" : "false",
@@ -1056,15 +1054,13 @@ RlEditMode=%d\n\n"
 
 	fputs(
 
-	    "#ALIASES\n\
+	    "### ALIASES\n\
 #alias ls='ls --color=auto -A'\n\n"
 
-	    "#PROMPT COMMANDS\n\n"
-	    "# Write below the commands you want to be executed before the prompt.\n\
-# Ex:\n\
-#/usr/share/clifm/plugins/git_status.sh\n\
-#date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n"
-	    "#END OF PROMPT COMMANDS\n\n",
+	    "### PROMPT COMMANDS\n\n"
+	    "# Write below the commands you want to be executed before the prompt. Ex:\n\
+#promptcmd /usr/share/clifm/plugins/git_status.sh\n\
+#promptcmd date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n",
 	    config_fp);
 
 	close_fstream(config_fp, fd);

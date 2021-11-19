@@ -275,17 +275,10 @@ TrashAsRm=false
 # Set readline editing mode: 0 for vi and 1 for emacs (default).
 RlEditMode=1
 
-#END OF OPTIONS
-
-#ALIASES
+# ALIASES
 #alias ls='ls --color=auto -A'
 
-#PROMPT COMMANDS
-
-# Write below the commands you want to be executed before the prompt.
-# Ex:
-#/usr/share/clifm/plugins/git_status.sh
-#date | awk '{print $1", "$2,$3", "$4}'
-
-#END OF PROMPT COMMANDS
-
+# PROMPT COMMANDS
+# Write below the commands you want to be executed before the prompt. Ex:
+#promptcmd /usr/share/clifm/plugins/git_status.sh
+#promptcmd date | awk '{print $1", "$2,$3", "$4}'
