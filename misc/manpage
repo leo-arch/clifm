@@ -117,7 +117,7 @@ List of CliFM features:
   11) Bookmarks auto\-expansion
   12) Bash\-like quoting system
   13) Custom aliases and variables
-  14) Customizable colors for file types and extensions
+  14) Customizable color schemes (themes), including file types and extensions
   15) Customizable prompt
   16) Shell commands execution
   17) Startup and prompt commands
@@ -142,11 +142,12 @@ List of CliFM features:
   36) Fused parameters support for ELN's
   37) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   38) Fastback function
-  39) Remote file systems management
+  39) Remote file systems management via the \fInet\fR command
   40) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
   41) Syntax highlighting
   42) Interactive rename functionality for the \fIm\fR command
   43) Easily mount/unmount storage devices via the \fImedia\fR command
+  44) Fine-grained control over the program settings via the \fIautocommands\fR function
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
