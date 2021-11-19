@@ -1401,10 +1401,13 @@ read_config(void)
 	char line[PATH_MAX + 15];
 
 	while (fgets(line, (int)sizeof(line), config_fp)) {
-		if (*line == '\n' || (*line == '#' && line[1] != 'E'))
+
+		if (*line == '\n' || *line == '#')
+			continue;
+/* 		if (*line == '\n' || (*line == '#' && line[1] != 'E'))
 			continue;
 		if (*line == '#' && strncmp(line, "#END OF OPTIONS", 15) == 0)
-			break;
+			break; */
 
 		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0)
 			parse_autocmd_line(line + 8);
