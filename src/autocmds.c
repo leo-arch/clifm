@@ -64,6 +64,17 @@ check_autocmds(void)
 			rev = 1;
 		}
 
+		size_t plen = strlen(p), n = 0;
+		if (!rev && plen > 3 && p[plen - 1] == '*' && p[plen - 2] == '*') {
+			n = 2;
+			if (p[plen - 3] == '/')
+				n++;
+			if (strncmp(autocmds[i].pattern, ws[cur_ws].path, plen - n) == 0) {
+				found = 1;
+				goto RUN_AUTOCMD;
+			}
+		}
+
 		glob_t g;
 		int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK
 				| GLOB_TILDE | GLOB_BRACE, NULL, &g);
@@ -90,6 +101,7 @@ check_autocmds(void)
 			continue;
 		}
 
+RUN_AUTOCMD:
 		if (!autocmd_set) {
 			// Backup current options
 			opts.light_mode = light_mode;
