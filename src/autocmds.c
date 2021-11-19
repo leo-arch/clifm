@@ -68,9 +68,9 @@ check_autocmds(void)
 		size_t plen = strlen(p), n = 0;
 		if (!rev && plen > 3 && p[plen - 1] == '*' && p[plen - 2] == '*') {
 			n = 2;
+			if (p[plen - 3] == '/')
+				n++;
 			if (*p == '~') {
-				if (p[plen - 3] == '/')
-					n++;
 				p[plen - n] = '\0';
 				char *path = tilde_expand(p);
 				if (!path)
@@ -84,8 +84,6 @@ check_autocmds(void)
 					goto RUN_AUTOCMD;
 				}
 			} else {
-				if (p[plen - 3] == '/')
-					n++;
 				if (strncmp(autocmds[i].pattern, ws[cur_ws].path, plen - n) == 0) {
 					found = 1;
 					goto RUN_AUTOCMD;
