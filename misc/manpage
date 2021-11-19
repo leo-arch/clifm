@@ -39,19 +39,21 @@ CLIFM \- The Command Line File Manager
 .sp
 \fB15.\fR Plugins
 .sp
-\fB16.\fR Standard input
+\fB16.\fR Autocommands
 .sp
-\fB17.\fR Note on speed
+\fB17.\fR Standard input
 .sp
-\fB18.\fR Kangaroo frecency algorithm
+\fB18.\fR Note on speed
 .sp
-\fB19.\fR Environment
+\fB19.\fR Kangaroo frecency algorithm
 .sp
-\fB20.\fR Miscellaneous notes
+\fB20.\fR Environment
 .sp
-\fB21.\fR Files
+\fB21.\fR Miscellaneous notes
 .sp
-\fB22.\fR Examples
+\fB22.\fR Files
+.sp
+\fB23.\fR Examples
 
 .SH 1. GETTING HELP
 There are several ways of getting help in CliFM. Once in the program, enter '\fB?\fR' to see a minimal list of options, commands, and keybindings, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section.
@@ -1414,7 +1416,44 @@ NOTE 2: The \fIgit_status\fR plugin is not intended to be used as a normal plugi
 .TP
 Whereas this plugin provides basic Git integration, it could be easily modified (it is just a few lines long) to include whatever git function you might need.
 
-.SH 16. STANDARD INPUT (STDIN)
+.SH 16. AUTOCOMMANDS
+Heavily inspired by vifm, the \fIautocommands\fR function allows the user a fine-grained control over CliFM settings. It is mostly devised as a way to improve performance for remote file systems (usually slower than local ones) by allowing you to turn off some features (like the files counter) that might greatly affect performance under some circumstances (like remote connections). However, this function is not restricted to this use: use it for whatever purpose you find useful.
+.sp
+Add a line preceded by the \fIautocmd\fR keyword to the config file. The general syntax is: \fBautocmd PATTERN cmd,cmd,cmd\fR
+.sp
+\fBPATTERN\fR is a glob expression to match directory names. If no glob metacharacter is provided, the string will be compared as is to the current working directory. To invert the meaning of a pattern, prepend an exclamation mark: \fB!PATTERN\fR
+.sp
+\fBPATTERN\fR is followed by a comma separated list of commands:
+.sp
+\fB!CMD\fR: The exclamation mark allows you to run shell commands, custom binaries or scripts
+.sp
+The following codes are used to control CliFM's files list:
+.sp
+ \fBCode   Description           Example\fR
+ \fBcs\fR     Color scheme          cs=amber-256
+ \fBfc\fR     Files counter         fc=0
+ \fBhf\fR     Hidden files          hf=0
+ \fBlm\fR     Light mode            lm=1
+ \fBlv\fR     Long/detail view      lm=0
+ \fBmf\fR     Max files             mf=100
+ \fBmn\fR     Max file name length  mn=20
+ \fBpg\fR     Pager                 pg=0
+ \fBst\fR     Sort method           st=5
+.sp
+A few example lines:
+.sp
+ autocmd /media/remotes/* lm=1,fc=0,lv=0,cs=cga
+ autocmd /usr/bin mf=100,pg=1
+ autocmd /home/user hf=0,cs=amber-256,lv=1
+ autocmd ~/Documents fc=0
+ autocmd ~/Downloads mn=20,!~/.config/clifm/plugins/fzfnav.sh
+ autocmd / lv=1,fc=0,cs=solarized,st=5
+.sp
+As seen in the fifth line, plugins could be used here as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
+.sp
+\fBNOTE\fR: If you decide to use a plugin, bear in mind that it won't be able to communicate with CliFM, because autocommands always executes commands as external applications using the system shell.
+
+.SH 17. STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
 .sp
 Each file passed via standard input will be stored as a symbolic link pointing to the original file in a temporary directory (which will be deleted at program exit) and listed on startup. Bear in mind that the restore last path function is disabled when listing in this way. Examples:
@@ -1436,7 +1475,7 @@ You can also use stream redirection:
 .sp
 All operations performed on these symbolic links (provided the current working directory is the temporary directory where all these files are stored) will be performed on the target files and NOT on the symbolic links themselves.
 
-.SH 17. NOTE ON SPEED
+.SH 18. NOTE ON SPEED
 CliFM is by itself quite fast by default, but if speed is still an issue, it is possible to get some extra performance.
 .sp
 The two most time consuming features are:
@@ -1449,7 +1488,7 @@ Besides these two features, a few more things can be disabled to get some extra 
 .sp
 Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel built-in console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 
-.SH 18. KANGAROO FRECENCY ALGORITHM
+.SH 19. KANGAROO FRECENCY ALGORITHM
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
@@ -1490,7 +1529,7 @@ NOTE: Directories visited in the last 24 hours will not be removed from the data
 .sp
 The idea of 'frecency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
-.SH 19. ENVIRONMENT
+.SH 20. ENVIRONMENT
 The following variables are read at initialization time:
 .TP
 .B CLIFM_FILE_COLORS
@@ -1548,7 +1587,7 @@ Exit code of the last executed command
 .B CLIFM_STAT_STEALTH
 1 if running in stealth mode, 0 otherwise
 
-.SH 20. MISCELLANEOUS NOTES
+.SH 21. MISCELLANEOUS NOTES
 .sp
 \fBSequential and conditional execution of commands\fR:
 
@@ -1588,7 +1627,7 @@ By default, CliFM starts in the current working directory. However, you can alwa
 
 CliFM's default profile is "default". To create alternative profiles use the \-P command line option or the 'pf add' command (see above).
 
-.SH 21. FILES
+.SH 22. FILES
 .TP
 .B CONFIGURATION FILE
 The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
@@ -1636,7 +1675,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .TP
 \fBNOTE\fR: If \fI$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config/\fR is used instead.
 
-.SH 22. EXAMPLES
+.SH 23. EXAMPLES
 The following are just a few basic usage examples.
 
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
