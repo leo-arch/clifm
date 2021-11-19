@@ -168,6 +168,8 @@ To enjoy of any of the features tagged as NEW, clone this repository and install
 
 **NEW**: [New command, `media`, to easily mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
 
+**NEW**: Get a fine-grained control over _CliFM_ settings via the [autocommands](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands) function
+
 ---
 
 ## Installing _CliFM_
