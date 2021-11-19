@@ -1408,10 +1408,9 @@ NOTE: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and 
 .TP
 In addition to the built-in BFG previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR. To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path of the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1. 
 .TP
-NOTE 2: The \fIgit_status\fR plugin is not intended to be used as a normal plugin, that is, executed via an action name, but rather to be executed as a prompt command. Just add the path of the script to the \fBPROMPT COMMANDS\fR section in the configuration file:
+NOTE 2: The \fIgit_status\fR plugin is not intended to be used as a normal plugin, that is, executed via an action name, but rather to be executed as a prompt command:
 
- # PROMPT COMMANDS
- /usr/share/clifm/plugins/git_status.sh
+ promptcmd /usr/share/clifm/plugins/git_status.sh
 .TP
 Whereas this plugin provides basic Git integration, it could be easily modified (it is just a few lines long) to include whatever git function you might need.
 
