@@ -209,7 +209,8 @@ free_autocmds(void)
 	}
 	free(autocmds);
 	autocmds = (struct autocmds_t *)NULL;
-	autocmds_n = autocmd_set = 0;
+	autocmds_n = 0;
+	autocmd_set = 0;
 
 	opts.color_scheme = (char *)NULL;
 }
