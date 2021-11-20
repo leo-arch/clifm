@@ -1447,7 +1447,7 @@ A few example lines:
     autocmd /media/remotes/** lm=1,fc=0
 
  \fB2.\fR Just a friendly reminder:
-    autcomd ~/important !printf "Important: keep your fingers outta here!" && read -n1
+    autcomd ~/important !printf "Important: keep your fingers outta here!\n" && read -n1
 
  \fB3.\fR This directory has thousands of files. Show only the first hundred and enable the pager:
     autocmd /usr/bin mf=100,pg=1
