@@ -225,7 +225,8 @@ decode_prompt(const char *line)
 			}
 
 			case 'S': { /* Current workspace */
-				char s[sizeof(int) + 2 + (MAX_COLOR * 2)];
+#define __WS_STR_LEN sizeof(int) + 3 + (MAX_COLOR + 2) * 2
+				char s[__WS_STR_LEN];
 				char *cl = (char *)NULL;
 				switch(cur_ws + 1) {
 				case 1: cl = ws1_c; break;
@@ -237,7 +238,7 @@ decode_prompt(const char *line)
 				case 7: cl = ws7_c; break;
 				case 8: cl = ws8_c; break;
 				}
-				sprintf(s, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
+				snprintf(s, __WS_STR_LEN, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
 				temp = savestring(s, strlen(s));
 				goto add_string;
 			}
