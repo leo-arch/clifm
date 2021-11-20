@@ -1443,14 +1443,26 @@ The following codes are used to control CliFM's files list:
 .sp
 A few example lines:
 .sp
- autocmd /media/remotes/* lm=1,fc=0,lv=0,cs=cga
- autocmd /usr/bin mf=100,pg=1
- autocmd /home/user hf=0,cs=amber-256,lv=1
- autocmd ~/Documents fc=0
- autocmd ~/Downloads mn=20,!~/.config/clifm/plugins/fzfnav.sh
- autocmd / lv=1,fc=0,cs=solarized,st=5
+ \fB1.\fR Run in light mode and disable the files counter for the remotes folder:
+    autocmd /media/remotes/** lm=1,fc=0
+
+ \fB2.\fR Just a friendly reminder:
+    autcomd ~/important !printf "Important: keep your fingers outta here!" && read -n1
+
+ \fB3.\fR This directory has thousands of files. Show only the first hundred and enable the pager:
+    autocmd /usr/bin mf=100,pg=1
+
+ \fB4.\fR Lots of media files (with large file names). Trim file names to 20 chars max and  run the files previewer:
+    autocmd ~/Downloads mn=20,!~/.config/clifm/plugins/fzfnav.sh
+
+ \fB5.\fR Mmm, just because I can. Be creative!
+    autocmd /home/user hf=0,cs=amber-256,lv=1
+    autocmd / lv=1,fc=0,cs=solarized,st=5
+
 .sp
-As seen in the fifth line, plugins could be used here as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
+The first example is the recommended configuration for directories containing remote file systems
+.sp
+As seen in the fifth example, plugins could be used here as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
 .sp
 \fBNOTE\fR: If you decide to use a plugin, bear in mind that it won't be able to communicate with CliFM, because autocommands always executes commands as external applications using the system shell.
 
