@@ -36,6 +36,8 @@
 #include "listing.h"
 #include "strings.h"
 
+/* The opts struct contains option values previous to any autocommand
+ * call */
 void
 reset_opts(void)
 {
@@ -50,6 +52,7 @@ reset_opts(void)
 	opts.sort = sort;
 }
 
+/* Run autocommands for the current directory */
 int
 check_autocmds(void)
 {
@@ -65,6 +68,8 @@ check_autocmds(void)
 			rev = 1;
 		}
 
+		/* Double asterisk: match everything starting with PATTERN
+		 * (less double asterisk itself and ending slash)*/
 		size_t plen = strlen(p), n = 0;
 		if (!rev && plen > 3 && p[plen - 1] == '*' && p[plen - 2] == '*') {
 			n = 2;
@@ -83,7 +88,7 @@ check_autocmds(void)
 					found = 1;
 					goto RUN_AUTOCMD;
 				}
-			} else {
+			} else { /* We have an absolute path */
 				if (strncmp(autocmds[i].pattern, ws[cur_ws].path, plen - n) == 0) {
 					found = 1;
 					goto RUN_AUTOCMD;
@@ -91,6 +96,7 @@ check_autocmds(void)
 			}
 		}
 
+		/* Glob expression or plain text for PATTERN */
 		glob_t g;
 		int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK
 				| GLOB_TILDE | GLOB_BRACE, NULL, &g);
@@ -119,7 +125,8 @@ check_autocmds(void)
 
 RUN_AUTOCMD:
 		if (!autocmd_set) {
-			// Backup current options
+			/* Backup current options, only if there was no autocmd for
+			 * this directory */
 			opts.light_mode = light_mode;
 			opts.files_counter = files_counter;
 			opts.long_view = long_view;
@@ -133,7 +140,7 @@ RUN_AUTOCMD:
 			autocmd_set = 1;
 		}
 
-		// Set options for current directory
+		/* Set options for current directory */
 		if (autocmds[i].light_mode != -1)
 			light_mode = autocmds[i].light_mode;
 		if (autocmds[i].files_counter != -1)
@@ -175,6 +182,7 @@ RUN_AUTOCMD:
 	return found;
 }
 
+/* Revert back to options previous to autocommand */
 void
 revert_autocmd_opts(void)
 {
@@ -206,6 +214,8 @@ free_autocmds(void)
 	opts.color_scheme = (char *)NULL;
 }
 
+/* Store each autocommand option in the corresponding field of the
+ * autocmds struct */
 static void
 set_autocmd_opt(char *opt)
 {
@@ -264,6 +274,8 @@ init_autocmd_opts()
 	autocmds[autocmds_n].sort = sort;
 }
 
+/* Take an autocmd line (from the config file) and store parameters
+ * in a struct */
 void
 parse_autocmd_line(char *cmd)
 {
