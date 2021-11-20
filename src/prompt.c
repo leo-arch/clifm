@@ -225,7 +225,7 @@ decode_prompt(const char *line)
 			}
 
 			case 'S': { /* Current workspace */
-#define __WS_STR_LEN sizeof(int) + 3 + (MAX_COLOR + 2) * 2
+#define __WS_STR_LEN sizeof(int) + 6 + (MAX_COLOR + 2) * 2
 				char s[__WS_STR_LEN];
 				char *cl = (char *)NULL;
 				switch(cur_ws + 1) {
