@@ -943,7 +943,7 @@ LightMode=%s\n\n",
 		);
 
 	fprintf(config_fp,
-	    "# If running with colors, append directory indicator and files counter\n\
+	    "# If running with colors, append directory indicator\n\
 # to directories. If running without colors (via the --no-colors option),\n\
 # append file type indicator at the end of file names: '/' for directories,\n\
 # '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'\n\
@@ -1054,13 +1054,20 @@ RlEditMode=%d\n\n",
 
 	fputs(
 
-	    "### ALIASES\n\
+	    "# ALIASES\n\
 #alias ls='ls --color=auto -A'\n\n"
 
-	    "### PROMPT COMMANDS\n\n"
-	    "# Write below the commands you want to be executed before the prompt. Ex:\n\
+	    "# PROMPT COMMANDS\n\
+# Write below the commands you want to be executed before the prompt. Ex:\n\
 #promptcmd /usr/share/clifm/plugins/git_status.sh\n\
-#promptcmd date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n",
+#promptcmd date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n"
+
+		"# AUTOCOMMANDS\n\
+# Control CliFM settings on a per directory basis. For more information\n\
+# consult the manpage\n\
+#autocmd /media/remotes/** lm=1,fc=0\n\
+#autocmd ~/important !printf \"Keep your fingers outta here!\n\" && read -n1\n\
+#autocmd ~/Downloads !/usr/share/clifm/plugins/fzfnav.sh\n\n",
 	    config_fp);
 
 	close_fstream(config_fp, fd);

@@ -186,12 +186,11 @@ ExpandBookmarks=false
 # well, so that the color per extension feature is disabled.
 LightMode=false
 
-# If running with colors, append directory indicator and files counter
-# to directories. If running without colors (via the --no-colors option),
-# append file type indicator at the end of file names: '/' for directories,
-# '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'
-# for for executable files, and '?' for unknown file types. Bear in mind
-# that when running in light mode the check for executable files won't be
+# If running with colors, append directory indicator to directories. If running
+# without colors (via the --no-colors option), # append file type indicator at the
+# end of file names: '/' for directories, '@' for symbolic links, '=' for sockets, '|'
+# for FIFO/pipes, '*' for for executable files, and '?' for unknown file types.
+# Bear in mind that when running in light mode the check for executable files won't be
 # performed, and thereby no indicator will be added to executable files.
 Classify=true
 
@@ -279,6 +278,13 @@ RlEditMode=1
 #alias ls='ls --color=auto -A'
 
 # PROMPT COMMANDS
-# Write below the commands you want to be executed before the prompt. Ex:
+# Write below the commands you want to be executed before each prompt. Ex:
 #promptcmd /usr/share/clifm/plugins/git_status.sh
 #promptcmd date | awk '{print $1", "$2,$3", "$4}'
+
+# AUTOCOMMANDS
+# Control CliFM settings on a per directory basis. For more information consult
+# the manpage
+#autocmd /media/remotes/** lm=1,fc=0
+#autocmd ~/important !printf "Keep your fingers outta here!\n" && read -n1
+#autocmd ~/Downloads !/usr/share/clifm/plugins/fzfnav.sh
