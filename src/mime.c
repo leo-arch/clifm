@@ -1226,8 +1226,13 @@ mime_open(char **args)
 		if (ret)
 			*ret = '\0';
 
-		printf(_("Associated application: %s (%s)\n"), app,
-		    mime_match ? "MIME" : "ext");
+		if (*app == 'a' && app[1] == 'd' && !app[2]) {
+			printf(_("Associated application: ad [built-in] [%s]\n"),
+				mime_match ? "MIME" : "ext");
+		} else {
+			printf(_("Associated application: %s [%s]\n"), app,
+				mime_match ? "MIME" : "ext");
+		}
 
 		free(file_path);
 		free(mime);
