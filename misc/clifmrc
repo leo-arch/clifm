@@ -102,7 +102,7 @@ TabCompletionMode=standard
 # If FZF TAB completion mode is enabled, pass these options to fzf.
 # --height, --margin, +i/-i, and --query will be appended to set up the
 # completions interface.
-FzfTabOptions="--pointer='>' --color='dark,gutter:-1,prompt:6,fg+:-1,pointer:2,hl:5,hl+:5' --bind tab:accept,right:accept,left:abort --info=inline --layout=reverse-list --ansi"
+FzfTabOptions="--color='dark,prompt:6,fg+:-1,pointer:2,hl:5,hl+:5' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list --ansi"
 
 # MaxPath is only used for the /p option of the prompt: the current working
 # directory will be abbreviated to its basename (everything after last slash)

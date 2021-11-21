@@ -231,10 +231,10 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_WARN_WRONG_CMD 0
 #define SUG_STRATS 7
 
-#define DEF_FZFTAB_OPTIONS "--pointer='>' \
---color=\"dark,gutter:-1,prompt:6,fg+:-1,pointer:2,\
+/* These options should work with FZF 0.17 or later */
+#define DEF_FZFTAB_OPTIONS "--color=\"dark,prompt:6,fg+:-1,pointer:2,\
 hl:5,hl+:5\" --bind tab:accept,right:accept,\
-left:abort --info=inline --layout=reverse-list --ansi"
+left:abort --inline-info --layout=reverse-list --ansi"
 
 #define MAX_WS 8
 
