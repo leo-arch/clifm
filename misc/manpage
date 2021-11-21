@@ -1440,6 +1440,7 @@ The following codes are used to control CliFM's files list:
  \fBmn\fR     Max file name length  mn=20
  \fBpg\fR     Pager                 pg=0
  \fBst\fR     Sort method           st=5
+ \fBsr\fR     Reverse sort          sr=1
 .sp
 A few example lines:
 .sp
