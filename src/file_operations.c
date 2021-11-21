@@ -75,7 +75,6 @@ open_file(char *file)
 	if (opener) {
 		char *cmd[] = {opener, file, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-//		(xargs.stderr == 1) ? E_NOFLAG : E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	} else {
 #ifndef _NO_LIRA
@@ -459,13 +458,13 @@ open_function(char **cmd)
 		}
 		/* fallthrough */
 	case S_IFREG:
-#ifndef _NO_ARCHIVING
-		/* If an archive/compressed file, call archiver() */
+/*#ifndef _NO_ARCHIVING
+		// If an archive/compressed file, call archiver()
 		if (is_compressed(file, 1) == 0) {
 			char *tmp_cmd[] = {"ad", file, NULL};
 			return archiver(tmp_cmd, 'd');
 		}
-#endif
+#endif */
 		no_open_file = 0;
 		break;
 

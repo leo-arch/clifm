@@ -163,6 +163,8 @@ get_app(const char *mime, const char *ext)
 					if (access(app, X_OK) == 0) {
 						file_path = app;
 					}
+				} else if (*app == 'a' && app[1] == 'd' && !app[2]) {
+					file_path = savestring("ad", 2);
 				} else {
 					file_path = get_cmd_path(app);
 				}
@@ -1239,6 +1241,14 @@ mime_open(char **args)
 	free(ext);
 
 	/* If not info, open the file with the associated application */
+
+	if (*app == 'a' && app[1] == 'd' && !app[2]) {
+		char *cmd[] = {"ad", file_path, NULL};
+		int exit_status = archiver(cmd, 'd');
+		free(file_path);
+		free(app);
+		return exit_status;
+	}
 
 	/* Get number of arguments to check for final ampersand */
 	int args_num = 0;
