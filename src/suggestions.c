@@ -212,8 +212,9 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
 	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
 	|| suggestion.type == JCMD_SUG_NOACD) {
-		/* 4 = 2 (two chars forward) + 2 (" >") */
-		cuc += 4;
+		/* 3 = 1 (one char forward) + 2 (" >") */
+//		cuc += 4;
+		cuc += 3;
 		baej = 1;
 	}
 
@@ -224,6 +225,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (cucs > term_cols) {
 		slines = cucs / (size_t)term_cols;
+		fflush(stdout);
 		int cucs_rem = (int)cucs % term_cols;
 		if (cucs_rem > 0)
 			slines++;
@@ -463,12 +465,23 @@ check_completions(char *str, size_t len, const unsigned char c,
 	} else {
 		/* If multiple matches, suggest the first one */
 		if (_matches[1] && *_matches[1]) {
-			if (strlen(_matches[1]) == len || str[len - 1] == '/') {
+
+			if (!print) {
+				if (suggestion.printed && suggestion_buf)
+					clear_suggestion(CS_FREEBUF);
+				if (strlen(_matches[1]) == len || str[len - 1] == '/')
+					printed = FULL_MATCH;
+				else
+					printed = PARTIAL_MATCH;
+				goto FREE;
+			}
+
+/*			if (strlen(_matches[1]) == len || str[len - 1] == '/') {
 				if (suggestion.printed && suggestion_buf)
 					clear_suggestion(CS_FREEBUF);
 				printed = FULL_MATCH;
 				goto FREE;
-			}
+			} */
 
 			int append_slash = 0;
 
