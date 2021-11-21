@@ -532,7 +532,9 @@ struct autocmds_t {
 	int max_name_len;
 	int show_hidden;
 	int sort;
+	int sort_reverse;
 	int pager;
+	int pad;
 };
 
 extern struct autocmds_t *autocmds;
@@ -546,7 +548,9 @@ struct opts_t {
 	int max_name_len;
 	int show_hidden;
 	int sort;
+	int sort_reverse;
 	int pager;
+	int pad;
 };
 
 extern struct opts_t opts;
