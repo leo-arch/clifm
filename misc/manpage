@@ -1254,7 +1254,8 @@ or, for file extensions:
 .TP
 Use '!X' to specify applications when running on non-graphical environments:
  !X:E:EXT=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
-
+.TP
+\fBNOTE\fR: In case of archives, the built-in \fIad\fR command could be used as opening application.
 .TP
 Examples:
 .TP
