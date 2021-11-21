@@ -159,7 +159,7 @@ handle_iso(char *file)
 	 * test (t) */
 
 	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
-		 "%s[t]%stest %s[m]%sount %s[q]%suit\n"), BOLD, df_c, BOLD,
+		 "%s[t]%sest %s[m]%sount %s[q]%suit\n"), BOLD, df_c, BOLD,
 	    df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
 
 	char sel_op = get_operation(OP_ISO);
