@@ -214,15 +214,9 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	|| suggestion.type == JCMD_SUG_NOACD) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 //		cuc += 4;
-		if (suggestion.type == ELN_SUG)
-			cuc += 3;
-		else
-			cuc += 4;
+		cuc += suggestion.type == ELN_SUG ? 3 : 4;
 		baej = 1;
 	}
-
-/*	printf("'%zu:%zu'\n", suggestion_len, offset);
-	fflush(stdout); */
 
 	size_t cucs = cuc + suggestion_len;
 	/* slines: amount of lines we need to print the suggestion, including
