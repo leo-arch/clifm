@@ -1,7 +1,6 @@
 # Mimelist file for CliFM
 
-# This mimelist covers the most common filetypes
-
+# This mimelist covers the most common filetypes.
 # Commented and blank lines are omitted
 
 # It is recommended to edit this file leaving only applications you need to speed up the opening process
@@ -16,7 +15,15 @@
 # Regular expressions are allowed for both file types and extensions.
 
 # Use the %f placeholder to specify the position of the file name to be executed in the command. Example:
-# 'mpv %f --terminal=no'. If %f is not specified, the file name will be added to the end of the command. 
+# 'mpv %f --terminal=no'. If %f is not specified, the file name will be added to the end of the command.
+
+# Running the opening application in the background:
+# For GUI applications:
+#    APP %f &
+# For terminal applications:
+#    xterm -e APP %f &
+# Replace 'xterm' by whatever terminal emulator you're using. The -e option might vary
+# depending on the terminal emulator
 
 ### File Extensions ###
 
@@ -26,6 +33,11 @@ X:E:^mobi$=ebook-viewer
 X:E:^(cbr|cbz)$=zathura
 
 ### MIME types ###
+
+# Directories - only for the open-with command (ow)
+# Directories will be opened in a new window
+X:inode/directory=xterm -e clifm %f &;xterm -e vifm %f &;xterm -e ncdu %f &;pcmanfm %f &;thunar %f &
+!X:inode/directory=vifm;ranger;nnn;ncdu
 
 # Web content
 X:^text/html$=surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m
