@@ -731,15 +731,16 @@ fzftabcomp(char **matches)
 		if (!sp || !*(sp++))
 			return EXIT_FAILURE;
 
-		char *tmp = strrchr(sp, ' ');
-		if (tmp && tmp != sp && *(tmp - 1) != '\\')
-			*tmp = '\0';
+		char *t = sp;
+		while (*t) {
+			if (t != sp && *t == ' ' && *(t - 1) != '\\') {
+				*t = '\0';
+				break;
+			}
+			++t;
+		}
 
-		size_t splen = (size_t)(tmp - sp);
-//		size_t splen = strlen(sp);
-/*		printf("len: '%ld:%zu'\n", tmp - sp, splen);
-		fflush(stdout);
-		sleep(2); */
+		size_t splen = (size_t)(t - sp);
 		if (sp[splen - 1] == '/')
 			sp[--splen] = '\0';
 
@@ -747,8 +748,8 @@ fzftabcomp(char **matches)
 		rl_point = rl_end = 0;
 		offset = 0;
 
-		tmp = strchr(buf, '%');
-		if (tmp && *(tmp + 1) == 'f') {
+		t = strchr(buf, '%');
+		if (t && *(t + 1) == 'f') {
 			char *ss = replace_substr(buf, "%f", sp);
 			if (ss) {
 				strncpy(buf, ss, sizeof(buf));
