@@ -597,7 +597,8 @@ fzftabcomp(char **matches)
 				snprintf(ext_cl, MAX_COLOR + 4, "\x1b[%sm", cl);
 
 			char *p = (char *)NULL;
-			if (cur_comp_type != TCMP_SEL && cur_comp_type != TCMP_DESEL)
+			if (cur_comp_type != TCMP_SEL && cur_comp_type != TCMP_DESEL
+			&& cur_comp_type != TCMP_OPENWITH)
 				p = strrchr(matches[i], '/');
 			color = *ext_cl ? ext_cl : (cl ? cl : "");
 			entry = (p && *(++p)) ? p : matches[i];
