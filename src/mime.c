@@ -739,6 +739,8 @@ mime_open_with_tab(char *filename, const char *prefix)
 					if (access(app, X_OK) == 0) {
 						file_path = app;
 					}
+				} else if (*app == 'a' && app[1] == 'd' && !app[2]){
+					file_path = savestring("ad", 2);
 				} else {
 					file_path = get_cmd_path(app);
 				}
@@ -797,8 +799,13 @@ join_and_run(char **args, char *name)
 	/* Just an aplication name */
 	if (!args[1]) {
 		char *cmd[] = {args[0], name, NULL};
-		int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-		E_NOSTDERR);
+		int ret = EXIT_SUCCESS;
+		if (*args[0] == 'a' && args[0][1] == 'd' && !args[0][2]) {
+			ret = archiver(cmd, 'd');
+		} else {
+			ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+				E_NOSTDERR);
+		}
 		if (ret == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
 		return EXIT_FAILURE;
@@ -1327,7 +1334,9 @@ mime_open(char **args)
 
 	cmd[pos] = (char *)NULL;
 
-	int ret = launch_execve(cmd, (bg || bg_proc) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	int is_config = (args[1] && args[1] == config_file) ? 1 : 0;
+	int ret = launch_execve(cmd, ((bg || bg_proc) && !is_config)
+			? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	free(file_path);
 	free(app);

@@ -723,6 +723,8 @@ fzftabcomp(char **matches)
 	}
 
 	if (cur_comp_type == TCMP_OPENWITH) {
+		/* Interpret the corresponding cmd line in the mimelist file
+		 * and replace the input input by the interpreted line */
 		char *sp = strchr(rl_line_buffer, ' ');
 		if (!sp || !*(sp++))
 			return EXIT_FAILURE;
