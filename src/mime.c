@@ -824,6 +824,7 @@ join_and_run(char **args, char *name)
 		strcat(cmd, args[i]);
 		strcat(cmd, " ");
 	}
+
 	char *ph = strchr(cmd, '%');
 	int ret = EXIT_FAILURE;
 
@@ -889,6 +890,8 @@ mime_open_with(char *filename, char **args)
 		return EXIT_FAILURE;
 	} */
 
+	/* We already have the opening app. Just join the app, option
+	 * parameters, and file name, and execute the command */
 	if (args) {
 		int ret = join_and_run(args, name);
 		free(name);

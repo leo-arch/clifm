@@ -362,7 +362,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 	struct stat attr;
 	if (stat(spath, &attr) != -1 && S_ISDIR(attr.st_mode))
 		rl_insert_text("/");
-	else
+	else if (cur_comp_type != TCMP_OPENWITH)
 		rl_stuff_char(' ');
 
 	free(epath);
@@ -694,18 +694,18 @@ fzftabcomp(char **matches)
 
 	/* No results */
 	if (ret != EXIT_SUCCESS)
-		return exit_status;
+		return EXIT_FAILURE;
 
 	fp = fopen(FZFTABOUT, "r");
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
 			FZFTABOUT, strerror(errno));
-		return exit_status;
+		return EXIT_FAILURE;
 	}
 
 	/* Recover FZF ouput */
-	char buf[PATH_MAX];
-	fgets(buf, PATH_MAX, fp);
+	char buf[PATH_MAX + NAME_MAX];
+	fgets(buf, sizeof(buf), fp);
 	fclose(fp);
 	unlink(FZFTABOUT);
 
@@ -721,12 +721,45 @@ fzftabcomp(char **matches)
 			offset = mlen;
 	}
 
-	if (cur_comp_type == TCMP_DESEL) {
+	if (cur_comp_type == TCMP_OPENWITH) {
+		char *sp = strchr(rl_line_buffer, ' ');
+		if (!sp || !*(sp++))
+			return EXIT_FAILURE;
+
+		char *tmp = strrchr(sp, ' ');
+		if (tmp && tmp != sp && *(tmp - 1) != '\\')
+			*tmp = '\0';
+
+		size_t splen = strlen(sp);
+		if (sp[splen - 1] == '/')
+			sp[--splen] = '\0';
+
+		rl_delete_text(0, rl_end);
+		rl_point = rl_end = 0;
+		offset = 0;
+
+		tmp = strchr(buf, '%');
+		if (tmp && *(tmp + 1) == 'f') {
+			char *ss = replace_substr(buf, "%f", sp);
+			if (ss) {
+				strncpy(buf, ss, sizeof(buf));
+				free(ss);
+			}
+		} else {
+			size_t blen = strlen(buf);
+			if (buf[blen - 1] == '\n')
+				buf[--blen] = '\0';
+			snprintf(buf + blen, sizeof(buf) - blen, " %s", sp);
+		}
+
+	} else if (cur_comp_type == TCMP_DESEL) {
 		offset = strlen(query);
+
 	} else if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
 		offset = 0;
+
 	} else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL) {
 		char *s = strrchr(rl_line_buffer, ' ');
 		if (s) {
@@ -735,6 +768,7 @@ fzftabcomp(char **matches)
 			rl_end = rl_point;
 			offset = 0;
 		}
+
 	} else if (!case_sens_path_comp && query) {
 		/* Honor case insensitive completion */
 		size_t query_len = strlen(query);
@@ -754,9 +788,15 @@ fzftabcomp(char **matches)
 			buf[--j] = '\0';
 		while (buf[--j] == ' ')
 			buf[j] = '\0';
-		char *q = escape_str(buf);
-		if (!q)
-			return EXIT_FAILURE;
+
+		char *q = (char *)NULL;
+		if (cur_comp_type != TCMP_OPENWITH) {
+			q = escape_str(buf);
+			if (!q)
+				return EXIT_FAILURE;
+		} else {
+			q = savestring(buf, blen);
+		}
 
 		write_completion(q, &offset, &exit_status);
 		free(q);
