@@ -1279,6 +1279,7 @@ mime_open(char **args)
 
 	/* Rewind P to the beginning of APP */
 	p = pp;
+	int bg = 0;
 
 	/* Store each substring in APP into a two dimensional array (CMD) */
 	int pos = 0;
@@ -1290,10 +1291,14 @@ mime_open(char **args)
 		}
 
 		if (*p == ' ') {
+			if (*(p + 1) == '&')
+				bg = 1;
 			*p = '\0';
 			if (*pp)
 				cmd[pos++] = savestring(pp, strlen(pp));
 			pp = ++p;
+			if (bg)
+				++pp;
 		} else {
 			p++;
 		}
@@ -1319,7 +1324,7 @@ mime_open(char **args)
 
 	cmd[pos] = (char *)NULL;
 
-	int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	int ret = launch_execve(cmd, (bg || bg_proc) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	free(file_path);
 	free(app);
