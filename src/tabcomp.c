@@ -705,6 +705,8 @@ fzftabcomp(char **matches)
 	}
 
 	/* Recover FZF ouput */
+	/* This should be enough space for a file name and the char taken by the
+	 * command itself */
 	char buf[PATH_MAX + NAME_MAX];
 	fgets(buf, sizeof(buf), fp);
 	fclose(fp);
@@ -724,7 +726,7 @@ fzftabcomp(char **matches)
 
 	if (cur_comp_type == TCMP_OPENWITH) {
 		/* Interpret the corresponding cmd line in the mimelist file
-		 * and replace the input input by the interpreted line */
+		 * and replace the input string by the interpreted line */
 		char *sp = strchr(rl_line_buffer, ' ');
 		if (!sp || !*(sp++))
 			return EXIT_FAILURE;
@@ -733,7 +735,11 @@ fzftabcomp(char **matches)
 		if (tmp && tmp != sp && *(tmp - 1) != '\\')
 			*tmp = '\0';
 
-		size_t splen = strlen(sp);
+		size_t splen = (size_t)(tmp - sp);
+//		size_t splen = strlen(sp);
+/*		printf("len: '%ld:%zu'\n", tmp - sp, splen);
+		fflush(stdout);
+		sleep(2); */
 		if (sp[splen - 1] == '/')
 			sp[--splen] = '\0';
 

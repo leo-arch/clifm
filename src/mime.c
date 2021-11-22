@@ -582,13 +582,16 @@ mime_list_open(char **apps, char *file)
 			free(cmd);
 		} else {
 			/* We have just a command name: no parameter, no placeholder */
-			char *cmd[] = {n[a - 1], file, NULL};
 			if (*n[a - 1] == 'a' && n[a - 1][1] == 'd' && !n[a - 1][2]) {
-				char *tmp[] = {"ad", qfile, NULL}; 
-				ret = archiver(tmp, 'd');
-			} else if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-			E_NOSTDERR) == EXIT_SUCCESS) {
-				ret = EXIT_SUCCESS;
+				/* 'ad' is the internal archiver command */
+				char *cmd[] = {"ad", qfile, NULL};
+				ret = archiver(cmd, 'd');
+			} else {
+				char *cmd[] = {n[a - 1], file, NULL};
+				if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+				E_NOSTDERR) == EXIT_SUCCESS) {
+					ret = EXIT_SUCCESS;
+				}
 			}
 		}
 		free(qfile);
@@ -739,6 +742,8 @@ mime_open_with_tab(char *filename, const char *prefix)
 						free(file_path);
 						file_path = (char *)NULL;
 					}
+				/* Do not allow APP to be plain "clifm", since
+				 * nested executions of clifm are not allowed */
 				} else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
 					;
 				} else if (*app == '/') {
@@ -993,6 +998,8 @@ mime_open_with(char *filename, char **args)
 						free(file_path);
 						file_path = (char *)NULL;
 					}
+				/* Do not allow APP to be plain "clifm", since
+				 * nested executions of clifm are not allowed */
 				} else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
 					;
 				} else if (*app == '/') {
