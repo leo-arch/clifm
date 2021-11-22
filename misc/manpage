@@ -1239,21 +1239,31 @@ When running for the first time, or whenever the MIME list file cannot be found,
 .TP
 Each line in the MIME list file consists of:
 .TP
-a) 'X' or '!X' to specify GUI and non-GUI environments.
-b) A left value, containing either a file extension or a MIME type to be matched. Regular expressions are supported;
+\fBa)\fR 'X' or '!X' to specify GUI and non-GUI environments respectivelly;
 .TP
-c) A right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value. Use the %f placeholder to specify the position of the file name to be executed in the command, for example: 'mpv %f --terminal=no'. If the placeholder is not specified, the file name will be added to the end of the command string.
+\fBb)\fR 'E' to instruct \fILira\fR to match a file extension instead of a MIME type;
+.TP
+\fBc)\fR A left value, containing either a file extension or a MIME type to be matched. Regular expressions are supported;
+.TP
+\fBd)\fR A right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value;
 .TP
 Note that the syntax departs here from the Freedesktop specification in that we do not rely on desktop files (mostly used by desktop environments), but rather on commands and parameters. In general thus, the syntax is this:
 
- X:MIME=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
+ [E][!]X:MIME=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
 .TP
-or, for file extensions:
+Use the \fB%f\fR placeholder to specify the position of the file name to be executed in the command, for example: 'mpv %f --terminal=no'. If the placeholder is not specified, the file name will be appended to command string.
+.TP
+Running the opening application in the background:
+.TP
+For GUI applications:
 
- X:E:EXT=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
+ APP %f &
 .TP
-Use '!X' to specify applications when running on non-graphical environments:
- !X:E:EXT=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
+For terminal applications:
+
+ xterm -e APP %f &
+.TP
+Replace 'xterm' by whatever terminal emulator you're using. The -e option might vary depending on the terminal emulator.
 .TP
 \fBNOTE\fR: In case of archives, the built-in \fIad\fR command could be used as opening application.
 .TP
@@ -1279,6 +1289,10 @@ In case of MIME types, you can also write the entire expression without relying 
  !X:text/plain=nano
 .TP
 \fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right (for applications).
+.TP
+\fBNOTE\fR: In case of directories (whose MIME type is \fIinode/directory\fR), the entry will be used only for the open-with command (\fIow\fR).
+.TP
+For more information take a look at the mimelist file itself (\fIF6\fR or \fImm edit\fR).
 
 .SH 13. AUTO-SUGGESTIONS
 \fIGemini\fR is a built-in suggestions system (similar to that provided by the Fish shell). As you type, \fIGemini\fR will suggest possible completions right after the current cursor position.
