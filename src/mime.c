@@ -739,6 +739,8 @@ mime_open_with_tab(char *filename, const char *prefix)
 						free(file_path);
 						file_path = (char *)NULL;
 					}
+				} else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
+					;
 				} else if (*app == '/') {
 					if (access(app, X_OK) == 0) {
 						file_path = app;
@@ -987,10 +989,12 @@ mime_open_with(char *filename, char **args)
 					*ret = '\0';
 				if (*app == '~') {
 					file_path = tilde_expand(app);
-					if (access(file_path, X_OK) != 0) {
+					if (file_path && access(file_path, X_OK) != 0) {
 						free(file_path);
 						file_path = (char *)NULL;
 					}
+				} else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
+					;
 				} else if (*app == '/') {
 					if (access(app, X_OK) == 0) {
 						file_path = app;
