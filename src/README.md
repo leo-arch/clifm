@@ -163,6 +163,8 @@ This is the basic structure of CliFM: generally speaking, it is just a shell. In
 ## 4) Hacking
 **Work in progress**
 
+Default settings: `settings.h`
+
 Add a new command: `exec.c`
 
 Add a new prompt feature: `prompt.c`
@@ -171,7 +173,7 @@ Modify/add keybindings: `keybindings.c`
 
 Icons: `icons.h` and `listing.c`. Consult the [customizing icons](https://github.com/leo-arch/clifm/wiki/Advanced#customizing-icons) section
 
-TAB completion: `readline.c`
+TAB completion: `readline.c`, `tabcomp.c`
 
 Interface: `listing.c`
 
@@ -180,6 +182,8 @@ Directory jumper: `jump.c`
 Suggestions: `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` function)
 
 Syntax highlighting: `highlight.c` (see also `readline.c` and `keybinds.c`)
+
+Autocommands: `autocmds.c`
 
 ## 5) Compilation
 
