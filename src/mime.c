@@ -632,9 +632,9 @@ mime_open_with_tab(char *filename, const char *prefix)
 	if (!name)
 		goto FAIL;
 
-	struct stat a;
+/*	struct stat a;
 	if ((lstat(name, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR))
-		goto FAIL;
+		goto FAIL; */
 
 #ifndef _NO_MAGIC
 	mime = xmagic(name, MIME_TYPE);
@@ -882,12 +882,12 @@ mime_open_with(char *filename, char **args)
 	if (!name)
 		return EXIT_FAILURE;
 
-	struct stat a;
+/*	struct stat a;
 	if ((lstat(name, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR)
 	|| access(name, R_OK) == -1) {
 		free(name);
 		return EXIT_FAILURE;
-	}
+	} */
 
 	if (args) {
 		int ret = join_and_run(args, name);
@@ -1139,12 +1139,12 @@ mime_open(char **args)
 			return (-1);
 		}
 
-		struct stat a;
+/*		struct stat a;
 		if (lstat(file_path, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR) {
 			int _exit_status = cd_function(file_path, CD_PRINT_ERROR);
 			free(file_path);
 			return _exit_status;
-		}
+		} */
 
 		if (access(file_path, R_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
