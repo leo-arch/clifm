@@ -752,7 +752,7 @@ fzftabcomp(char **matches)
 		if (t && *(t + 1) == 'f') {
 			char *ss = replace_substr(buf, "%f", sp);
 			if (ss) {
-				strncpy(buf, ss, sizeof(buf));
+				xstrsncpy(buf, ss, sizeof(buf));
 				free(ss);
 			}
 		} else {
