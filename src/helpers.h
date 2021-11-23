@@ -173,7 +173,7 @@ extern int watch;
 #define EXT_HELP	(1 << 11)
 //#define FILE_CMD_OK (1 << 12)
 #define GUI		(1 << 13)
-#define IS_USRVAR_DEF 	(1 << 14)
+#define IS_USRVAR_DEF	(1 << 14)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or
  * not */
@@ -185,8 +185,8 @@ extern int watch;
 #define NO_TITLE 	0
 
 /* Macros for cd_function */
-#define CD_PRINT_ERROR 		1
-#define CD_NO_PRINT_ERROR 	0
+#define CD_PRINT_ERROR		1
+#define CD_NO_PRINT_ERROR	0
 
 /* Macros for the count_dir function. CPOP tells the function to only
  * check if a given directory is populated (it has at least 3 files) */
@@ -194,12 +194,12 @@ extern int watch;
 #define NO_CPOP 0
 
 /* Error codes, used by the launch_exec functions */
-#define EXNULLERR 	79
-#define EXFORKERR 	81
-#define EXCRASHERR 	82
+#define EXNULLERR	79
+#define EXFORKERR	81
+#define EXCRASHERR	82
 
-#define BACKGROUND 1
-#define FOREGROUND 0
+#define BACKGROUND	1
+#define FOREGROUND	0
 
 /* A few colors */
 #define GRAY "\x1b[1;30m"
@@ -252,30 +252,30 @@ extern int watch;
 #define PRINT_NEWLINE	1
 
 /* A few key macros used by the auto-suggestions system */
-#define _ESC 	27
-#define _TAB 	9
+#define _ESC	27
+#define _TAB	9
 #define BS	8
-#define DELETE 	127
-#define ENTER 	13
+#define DELETE	127
+#define ENTER	13
 /* #define OP_BRACKET 91
 #define UC_O 79
 #define SPACE 32 */
 
 /* Macros to specify suggestions type */
 #define NO_SUG 		0
-#define HIST_SUG 	1
-#define FILE_SUG 	2
-#define CMD_SUG 	3
-#define INT_CMD 	4
-#define COMP_SUG 	5
-#define BOOKMARK_SUG 	6
-#define ALIAS_SUG 	7
-#define ELN_SUG 	8
-#define FIRST_WORD 	9
-#define JCMD_SUG 	10
+#define HIST_SUG	1
+#define FILE_SUG	2
+#define CMD_SUG		3
+#define INT_CMD		4
+#define COMP_SUG	5
+#define BOOKMARK_SUG	6
+#define ALIAS_SUG	7
+#define ELN_SUG		8
+#define FIRST_WORD	9
+#define JCMD_SUG	10
 #define JCMD_SUG_NOACD 	11 /* No auto-cd */
-#define VAR_SUG 	12
-#define SEL_SUG 	13
+#define VAR_SUG		12
+#define SEL_SUG		13
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -284,17 +284,17 @@ extern int watch;
 #define MAX_COLOR 46
 
 /* Macros to control file descriptors in exec functions */
-#define E_NOFLAG 	0
-#define E_NOSTDIN 	(1 << 1)
-#define E_NOSTDOUT 	(1 << 2)
-#define E_NOSTDERR 	(1 << 3)
-#define E_MUTE 		(E_NOSTDOUT | E_NOSTDERR)
+#define E_NOFLAG	0
+#define E_NOSTDIN	(1 << 1)
+#define E_NOSTDOUT	(1 << 2)
+#define E_NOSTDERR	(1 << 3)
+#define E_MUTE		(E_NOSTDOUT | E_NOSTDERR)
 
 /* Macros for ELN padding */
-#define NOPAD 		0
-#define ZEROPAD 	1
-#define LEFTSPACEPAD 	2
-#define RIGHTSPACEPAD 	3
+#define NOPAD		0
+#define ZEROPAD		1
+#define LEFTSPACEPAD	2
+#define RIGHTSPACEPAD	3
 
 /* Macros for the clear_suggestion function */
 #define CS_FREEBUF 1
@@ -313,11 +313,11 @@ extern int watch;
 
 /* Macros for the dirjump function */
 #define SUG_JUMP	0
-#define NO_SUG_JUMP 	1
+#define NO_SUG_JUMP	1
 
 /* Macros for the media_menu function */
 #define MEDIA_LIST 	0
-#define MEDIA_MOUNT 	1
+#define MEDIA_MOUNT	1
 
 /* Macros for the rl_highlight function */
 #define SET_COLOR 		1
@@ -372,16 +372,16 @@ extern int watch;
 
 #if defined(__HAIKU__)
 # define DT_UNKNOWN	0
-# define DT_FIFO 	1
-# define DT_CHR 	2
-# define DT_DIR 	4
-# define DT_BLK 	6
-# define DT_REG 	8
-# define DT_LNK 	10
-# define DT_SOCK 	12
+# define DT_FIFO	1
+# define DT_CHR		2
+# define DT_DIR		4
+# define DT_BLK		6
+# define DT_REG		8
+# define DT_LNK		10
+# define DT_SOCK	12
 #endif
 
-#define DT_NONE 14
+#define DT_NONE		14
 
 /* Macros for the get_sys_shell function */
 #define SHELL_NONE 	0
@@ -679,10 +679,10 @@ extern enum prog_msg pmsg;
 /* Enumeration for the dirjump function options */
 enum jump {
 	NONE = 		0,
-	JPARENT = 	1,
-	JCHILD = 	2,
-	JORDER = 	4,
-	JLIST = 	8
+	JPARENT =	1,
+	JCHILD =	2,
+	JORDER =	4,
+	JLIST =		8
 };
 
 enum comp_type {
