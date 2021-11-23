@@ -546,8 +546,6 @@ prompt(void)
 		fprintf(stderr, _("%s: Error decoding prompt line. Using an "
 				"emergency prompt\n"), PROGRAM_NAME);
 		decoded_prompt = savestring("\001\x1b[0m\002> ", 8);
-//		decoded_prompt = (char *)xnmalloc(9, sizeof(char));
-//		sprintf(decoded_prompt, "\001\x1b[0m\002> ");
 	}
 
 	size_t decoded_prompt_len;
