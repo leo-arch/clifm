@@ -106,96 +106,96 @@ regex_t regex_exp;
 size_t *ext_colors_len = (size_t *)NULL;
 
 int
-    auto_open = UNSET,
-    autocd = UNSET,
+	auto_open = UNSET,
+	autocd = UNSET,
 	autocmd_set = 0,
 	autojump = UNSET,
-    autols = UNSET,
+	autols = UNSET,
 	bell = DEF_BELL_STYLE,
 	bg_proc = 0,
-    case_sens_dirjump = UNSET,
-    case_sens_path_comp = UNSET,
-    case_sensitive = UNSET, /* Case sensitive file listing */
+	case_sens_dirjump = UNSET,
+	case_sens_path_comp = UNSET,
+	case_sensitive = UNSET, /* Case sensitive file listing */
 	case_sens_search = UNSET,
-    cd_on_quit = UNSET,
+	cd_on_quit = UNSET,
 	check_cap = UNSET,
 	check_ext = UNSET,
-    classify = UNSET,
-    clear_screen = UNSET,
+	classify = UNSET,
+	clear_screen = UNSET,
 	cmdhist_flag = 0,
-    colorize = UNSET,
-    columned = UNSET,
-    config_ok = 1,
+	colorize = UNSET,
+	columned = UNSET,
+	config_ok = 1,
 	control_d_exits = 0,
-    copy_n_rename = 0,
-    cp_cmd = UNSET,
-    cur_ws = UNSET,
-    dequoted = 0,
+	copy_n_rename = 0,
+	cp_cmd = UNSET,
+	cur_ws = UNSET,
+	dequoted = 0,
 	dir_changed = 0,
-    dirhist_map = UNSET,
-    disk_usage = UNSET,
+	dirhist_map = UNSET,
+	disk_usage = UNSET,
 	elnpad = UNSET,
-    expand_bookmarks = UNSET,
-    ext_cmd_ok = UNSET,
-    files_counter = UNSET,
+	expand_bookmarks = UNSET,
+	ext_cmd_ok = UNSET,
+	files_counter = UNSET,
 	filter_rev = 0,
 	follow_symlinks = UNSET,
 	fzftab = UNSET,
 	highlight = UNSET,
-    home_ok = 1,
+	home_ok = 1,
 #ifndef _NO_ICONS
-    icons = UNSET,
+	icons = UNSET,
 #endif
 	int_vars = UNSET,
-    internal_cmd = 0,
-    is_sel = 0,
-    kb_shortcut = 0,
-    kbind_busy = 0,
-    light_mode = UNSET,
-    list_folders_first = UNSET,
+	internal_cmd = 0,
+	is_sel = 0,
+	kb_shortcut = 0,
+	kbind_busy = 0,
+	light_mode = UNSET,
+	list_folders_first = UNSET,
 	listing_mode = UNSET,
-    logs_enabled = UNSET,
-    long_view = UNSET,
+	logs_enabled = UNSET,
+	long_view = UNSET,
 	max_name_len = UNSET,
-    mime_match = 0,
-    min_name_trim = UNSET,
-    mv_cmd = UNSET,
-    no_eln = UNSET,
-    no_log = 0,
-    only_dirs = UNSET,
-    pager = UNSET,
-    tips = UNSET,
-    print_msg = 0,
+	mime_match = 0,
+	min_name_trim = UNSET,
+	mv_cmd = UNSET,
+	no_eln = UNSET,
+	no_log = 0,
+	only_dirs = UNSET,
+	pager = UNSET,
+	tips = UNSET,
+	print_msg = 0,
 	print_selfiles = UNSET,
 	prompt_offset = UNSET,
 	prompt_style = UNSET,
-    recur_perm_error_flag = 0,
-    restore_last_path = UNSET,
+	recur_perm_error_flag = 0,
+	restore_last_path = UNSET,
 	rl_last_word_start = 0,
 	rl_nohist = 0,
 	rl_notab = 0,
-    sel_is_last = 0,
-    selfile_ok = 1,
-    share_selbox = UNSET,
+	sel_is_last = 0,
+	selfile_ok = 1,
+	share_selbox = UNSET,
 	shell = SHELL_NONE,
-    shell_terminal = 0,
-    show_hidden = UNSET,
-    sort = UNSET,
-    sort_reverse = 0,
-    sort_switch = 0,
-    splash_screen = UNSET,
-    suggestions = UNSET,
-    suggest_filetype_color = UNSET,
-    switch_cscheme = 0,
+	shell_terminal = 0,
+	show_hidden = UNSET,
+	sort = UNSET,
+	sort_reverse = 0,
+	sort_switch = 0,
+	splash_screen = UNSET,
+	suggestions = UNSET,
+	suggest_filetype_color = UNSET,
+	switch_cscheme = 0,
 #ifndef _NO_TRASH
-    tr_as_rm = UNSET,
-    trash_ok = 1,
+	tr_as_rm = UNSET,
+	trash_ok = 1,
 #endif
-    unicode = UNSET,
+	unicode = UNSET,
 	warn_wrong_cmd = UNSET,
-    welcome_message = UNSET,
-    _xrename = 0,
-    xrename = 0;
+	welcome_message = UNSET,
+	_xrename = 0,
+	xrename = 0;
 
 //#ifndef _NO_HIGHLIGHT
 int wrong_cmd = 0;
@@ -203,287 +203,195 @@ int wrong_cmd_line = 0;
 //#endif
 
 int
-    argc_bk = 0,
-    dirhist_cur_index = 0,
-    exit_code = 0,
-    dirhist_total_index = 0,
-    jump_total_rank = 0,
-    max_dirhist = UNSET,
-    max_files = UNSET,
-    max_hist = UNSET,
-    min_jump_rank = UNSET,
-    max_jump_total_rank = UNSET,
-    max_log = UNSET,
-    max_path = UNSET,
+	argc_bk = 0,
+	dirhist_cur_index = 0,
+	exit_code = 0,
+	dirhist_total_index = 0,
+	jump_total_rank = 0,
+	max_dirhist = UNSET,
+	max_files = UNSET,
+	max_hist = UNSET,
+	min_jump_rank = UNSET,
+	max_jump_total_rank = UNSET,
+	max_log = UNSET,
+	max_path = UNSET,
 	max_printselfiles = UNSET,
-    shell_is_interactive = 0,
-    trash_n = 0,
-    *eln_as_file = (int *)0;
+	shell_is_interactive = 0,
+	trash_n = 0,
+	*eln_as_file = (int *)0;
 
 size_t
-    actions_n = 0,
-    aliases_n = 0,
-    args_n = 0,
+	actions_n = 0,
+	aliases_n = 0,
+	args_n = 0,
 	autocmds_n = 0,
-    bm_n = 0,
+	bm_n = 0,
 	cdpath_n = 0,
-    cschemes_n = 0,
-    current_hist_n = 0,
+	cschemes_n = 0,
+	current_hist_n = 0,
 	curhistindex = 0,
-    eln_as_file_n = 0,
-    ext_colors_n = 0,
-    files = 0,
-    jump_n = 0,
-    kbinds_n = 0,
-    longest = 0,
-    msgs_n = 0,
+	eln_as_file_n = 0,
+	ext_colors_n = 0,
+	files = 0,
+	jump_n = 0,
+	kbinds_n = 0,
+	longest = 0,
+	msgs_n = 0,
 	P_tmpdir_len = 0,
-    path_n = 0,
-    path_progsn = 0,
-    prompt_cmds_n = 0,
-    remotes_n = 0,
-    sel_n = 0,
+	path_n = 0,
+	path_progsn = 0,
+	prompt_cmds_n = 0,
+	remotes_n = 0,
+	sel_n = 0,
 	tab_offset = 0,
-    user_home_len = 0,
-    usrvar_n = 0,
-    nwords = 0;
+	user_home_len = 0,
+	usrvar_n = 0,
+	nwords = 0;
 
 char
-    div_line_char[NAME_MAX],
-    hostname[HOST_NAME_MAX],
+	div_line_char[NAME_MAX],
+	hostname[HOST_NAME_MAX],
 
-    *actions_file = (char *)NULL,
-    *alt_bm_file = (char *)NULL,
-    *alt_config_dir = (char *)NULL,
-    *alt_config_file = (char *)NULL,
-    *alt_kbinds_file = (char *)NULL,
-    *alt_profile = (char *)NULL,
-    *bm_file = (char *)NULL,
-    *colors_dir = (char *)NULL,
-    *config_dir = (char *)NULL,
-    *config_dir_gral = (char *)NULL,
-    *config_file = (char *)NULL,
+	*actions_file = (char *)NULL,
+	*alt_bm_file = (char *)NULL,
+	*alt_config_dir = (char *)NULL,
+	*alt_config_file = (char *)NULL,
+	*alt_kbinds_file = (char *)NULL,
+	*alt_profile = (char *)NULL,
+	*bm_file = (char *)NULL,
+	*colors_dir = (char *)NULL,
+	*config_dir = (char *)NULL,
+	*config_dir_gral = (char *)NULL,
+	*config_file = (char *)NULL,
 	*cur_color = (char *)NULL,
-    *data_dir = (char *)NULL,
-    *cur_cscheme = (char *)NULL,
-    *dirhist_file = (char *)NULL,
-    *encoded_prompt = (char *)NULL,
-    *file_cmd_path = (char *)NULL,
-    *_filter = (char *)NULL,
+	*data_dir = (char *)NULL,
+	*cur_cscheme = (char *)NULL,
+	*dirhist_file = (char *)NULL,
+	*encoded_prompt = (char *)NULL,
+	*file_cmd_path = (char *)NULL,
+	*_filter = (char *)NULL,
 	*fzftab_options = (char *)NULL,
 	*hist_file = (char *)NULL,
-    *jump_suggestion = (char *)NULL,
-    *kbinds_file = (char *)NULL,
-    *last_cmd = (char *)NULL,
-    *log_file = (char *)NULL,
-    *ls_colors_bk = (char *)NULL,
-    *mime_file = (char *)NULL,
-    *msg_log_file = (char *)NULL,
-    *opener = (char *)NULL,
-    *pinned_dir = (char *)NULL,
-    *plugins_dir = (char *)NULL,
-    *profile_file = (char *)NULL,
-    *qc = (char *)NULL,
-    *remotes_file = (char *)NULL,
-    *sel_file = (char *)NULL,
-    *stdin_tmp_dir = (char *)NULL,
+	*jump_suggestion = (char *)NULL,
+	*kbinds_file = (char *)NULL,
+	*last_cmd = (char *)NULL,
+	*log_file = (char *)NULL,
+	*ls_colors_bk = (char *)NULL,
+	*mime_file = (char *)NULL,
+	*msg_log_file = (char *)NULL,
+	*opener = (char *)NULL,
+	*pinned_dir = (char *)NULL,
+	*plugins_dir = (char *)NULL,
+	*profile_file = (char *)NULL,
+	*qc = (char *)NULL,
+	*remotes_file = (char *)NULL,
+	*sel_file = (char *)NULL,
+	*stdin_tmp_dir = (char *)NULL,
 #ifndef _NO_SUGGESTIONS
 	*suggestion_buf = (char *)NULL,
-    *suggestion_strategy = (char *)NULL,
+	*suggestion_strategy = (char *)NULL,
 #endif
-    *sys_shell = (char *)NULL,
-    *term = (char *)NULL,
-    *tmp_dir = (char *)NULL,
+	*sys_shell = (char *)NULL,
+	*term = (char *)NULL,
+	*tmp_dir = (char *)NULL,
 #ifndef _NO_TRASH
-    *trash_dir = (char *)NULL,
-    *trash_files_dir = (char *)NULL,
-    *trash_info_dir = (char *)NULL,
+	*trash_dir = (char *)NULL,
+	*trash_files_dir = (char *)NULL,
+	*trash_info_dir = (char *)NULL,
 #endif
-    *usr_cscheme = (char *)NULL,
-    *user_home = (char *)NULL,
+	*usr_cscheme = (char *)NULL,
+	*user_home = (char *)NULL,
 	*wprompt_str = (char *)NULL,
 
-    **argv_bk = (char **)NULL,
-    **bin_commands = (char **)NULL,
-    **bookmark_names = (char **)NULL,
-    **cdpaths = (char **)NULL,
-    **color_schemes = (char **)NULL,
-    **ext_colors = (char **)NULL,
-    **history = (char **)NULL,
-    **messages = (char **)NULL,
-    **old_pwd = (char **)NULL,
-    **paths = (char **)NULL,
-    **profile_names = (char **)NULL,
-    **prompt_cmds = (char **)NULL,
-    **sel_elements = (char **)NULL;
+	**argv_bk = (char **)NULL,
+	**bin_commands = (char **)NULL,
+	**bookmark_names = (char **)NULL,
+	**cdpaths = (char **)NULL,
+	**color_schemes = (char **)NULL,
+	**ext_colors = (char **)NULL,
+	**history = (char **)NULL,
+	**messages = (char **)NULL,
+	**old_pwd = (char **)NULL,
+	**paths = (char **)NULL,
+	**profile_names = (char **)NULL,
+	**prompt_cmds = (char **)NULL,
+	**sel_elements = (char **)NULL;
 
 /* A list of internal commands, with short and long formats. We use two
  * more lists of commands: one of commands dealing with file names
  * (is_internal(), in checks.c), and another one listing commands
  * taking ELN's as parameters (is_internal_f() in strings.c) */
 const char *internal_cmds[] = {
-	    "?", "help",
-	    "ac", "ad",
-	    "acd", "autocd",
-	    "actions",
-	    "alias",
-	    "ao", "auto-open",
-	    "b", "back",
-	    "bh", "fh",
-	    "bm", "bookmarks",
-	    "br", "bulk",
-	    "c", "cp",
-	    "cc", "colors",
-	    "cd",
-	    "cl", "columns",
-	    "cmd", "commands",
-	    "cs", "colorschemes",
-		"d", "dup",
-	    "ds", "desel",
-	    "edit",
-	    "exp", "export",
-	    "ext",
-	    "f", "forth",
-	    "fc",
-	    "ff", "folders-first",
-	    "fs",
-	    "ft", "filter",
-	    "history",
-	    "hf", "hidden",
-	    "icons",
-	    "jump", "je", "jc", "jp", "jo",
-	    "kb", "keybinds",
-	    "l", "ln", "le",
-	    "lm",
-	    "log",
-	    "m", "mv",
-	    "md", "mkdir",
-	    "mf",
-	    "mm", "mime",
-	    "mp", "mountpoints",
-	    "msg", "messages",
-	    "n", "new",
-	    "net",
-	    "o", "open", "ow",
-	    "opener",
-	    "p", "pp", "pr", "prop",
-	    "path", "cwd",
-		"paste",
-	    "pf", "prof", "profile",
-	    "pg", "pager",
-	    "pin", "unpin",
-		"quit",
-	    "r", "rm",
-	    "rf", "refresh",
-	    "rl", "reload",
-	    "s", "sel",
-	    "sb", "selbox",
-	    "splash",
-	    "st", "sort",
-	    "t", "tr", "trash",
-	    "te",
-	    "tips",
-	    "touch",
-	    "u", "undel", "untrash",
-	    "uc", "unicode",
-	    "unlink",
-		"v", "vv",
-	    "ver", "version",
-	    "ws",
-	    "x", "X",
-	    NULL};
-/*	"?",
+	"?", "help",
 	"ac", "ad",
-	"ao", "acd",
-	"b",
-	"bm",
-	"br",
-	"c", "m", "r", "l", "le", "v", "vv",
-	"cc",
+	"acd", "autocd",
+	"actions",
+	"alias",
+	"ao", "auto-open",
+	"b", "back",
+	"bh", "fh",
+	"bm", "bookmarks",
+	"br", "bulk",
+	"c", "cp",
+	"cc", "colors",
 	"cd",
-	"cmd",
-	"cs",
-	"d",
-	"f",
-	"ft",
-	"j", "jc", "jl", "jp", "je",
-	"kb",
+	"cl", "columns",
+	"cmd", "commands",
+	"cs", "colorschemes",
+	"d", "dup",
+	"ds", "desel",
+	"edit",
+	"exp", "export",
+	"ext",
+	"f", "forth",
+	"fc",
+	"ff", "folders-first",
+	"fs",
+	"ft", "filter",
+	"history",
+	"hf", "hidden",
+	"icons",
+	"jump", "je", "jc", "jp", "jo",
+	"kb", "keybinds",
+	"l", "ln", "le",
 	"lm",
+	"log",
+	"m", "mv",
+	"md", "mkdir",
 	"mf",
-	"mm",
-	"mp",
-	"msg",
-	"n",
-	"o",
-	"p", "pr",
-	"pf",
-	"pg",
-	"rf",
-	"rl",
-	"s", "sb", "ds",
-	"st",
-	"t", "tr", "u",
+	"mm", "mime",
+	"mp", "mountpoints",
+	"msg", "messages",
+	"n", "new",
+	"net",
+	"o", "open", "ow",
+	"opener",
+	"p", "pp", "pr", "prop",
+	"path", "cwd",
+	"paste",
+	"pf", "prof", "profile",
+	"pg", "pager",
+	"pin", "unpin",
+	"quit",
+	"r", "rm",
+	"rf", "refresh",
+	"rl", "reload",
+	"s", "sel",
+	"sb", "selbox",
+	"splash",
+	"st", "sort",
+	"t", "tr", "trash",
 	"te",
-	"uc",
-	"ver",
+	"tips",
+	"touch",
+	"u", "undel", "untrash",
+	"uc", "unicode",
+	"unlink",
+	"v", "vv",
+	"ver", "version",
 	"ws",
 	"x", "X",
-
-    "actions",
-    "alias",
-    "auto-open",
-    "autocd",
-    "back",
-    "bookmarks",
-    "colors",
-    "colorschemes",
-    "columns",
-    "commands",
-    "desel",
-	"dup",
-    "edit",
-    "exit",
-	"exp",
-	"ext",
-    "filter",
-    "folders-first",
-    "forth",
-    "help",
-    "hidden",
-    "history",
-    "icons",
-    "jump",
-    "keybinds",
-    "log",
-    "messages",
-    "mime",
-    "mountpoints",
-    "move",
-	"net",
-	"new",
-    "open",
-    "opener",
-    "pager",
-    "paste",
-    "path",
-    "pin",
-    "profile",
-    "prop",
-    "quit",
-    "refresh",
-    "reload",
-    "sel",
-    "selbox",
-    "sort",
-    "splash",
-    "tips",
-    "trash",
-    "undel",
-    "unicode",
-    "unpin",
-    "untrash",
-    "version",
-    NULL}; */
+	NULL};
 
 /* Just a list of internal commands and fixed parameters for the
  * auto-suggestions system */
@@ -633,53 +541,53 @@ const char *param_str[] = {
 /* Colors */
 char
 	/* File types */
-    bd_c[MAX_COLOR],  /* Block device */
-    ca_c[MAX_COLOR],  /* Cap file */
-    cd_c[MAX_COLOR],  /* Char device */
-    di_c[MAX_COLOR],  /* Directory */
-    ed_c[MAX_COLOR],  /* Empty dir */
-    ee_c[MAX_COLOR],  /* Empty executable */
-    ef_c[MAX_COLOR],  /* Empty reg file */
-    ex_c[MAX_COLOR],  /* Executable */
-    fi_c[MAX_COLOR],  /* Reg file */
-    ln_c[MAX_COLOR],  /* Symlink */
-    mh_c[MAX_COLOR],  /* Multi-hardlink file */
-    nd_c[MAX_COLOR],  /* No read directory */
-    ne_c[MAX_COLOR],  /* No read empty dir */
-    nf_c[MAX_COLOR],  /* No read file */
-    no_c[MAX_COLOR],  /* Unknown */
-    or_c[MAX_COLOR],  /* Broken symlink */
-    ow_c[MAX_COLOR],  /* Other writable */
-    pi_c[MAX_COLOR],  /* FIFO, pipe */
-    sg_c[MAX_COLOR],  /* SGID file */
-    so_c[MAX_COLOR],  /* Socket */
-    st_c[MAX_COLOR],  /* Sticky (not ow)*/
-    su_c[MAX_COLOR],  /* SUID file */
-    tw_c[MAX_COLOR],  /* Sticky other writable */
-    uf_c[MAX_COLOR],  /* Non-'stat'able file */
+	bd_c[MAX_COLOR],  /* Block device */
+	ca_c[MAX_COLOR],  /* Cap file */
+	cd_c[MAX_COLOR],  /* Char device */
+	di_c[MAX_COLOR],  /* Directory */
+	ed_c[MAX_COLOR],  /* Empty dir */
+	ee_c[MAX_COLOR],  /* Empty executable */
+	ef_c[MAX_COLOR],  /* Empty reg file */
+	ex_c[MAX_COLOR],  /* Executable */
+	fi_c[MAX_COLOR],  /* Reg file */
+	ln_c[MAX_COLOR],  /* Symlink */
+	mh_c[MAX_COLOR],  /* Multi-hardlink file */
+	nd_c[MAX_COLOR],  /* No read directory */
+	ne_c[MAX_COLOR],  /* No read empty dir */
+	nf_c[MAX_COLOR],  /* No read file */
+	no_c[MAX_COLOR],  /* Unknown */
+	or_c[MAX_COLOR],  /* Broken symlink */
+	ow_c[MAX_COLOR],  /* Other writable */
+	pi_c[MAX_COLOR],  /* FIFO, pipe */
+	sg_c[MAX_COLOR],  /* SGID file */
+	so_c[MAX_COLOR],  /* Socket */
+	st_c[MAX_COLOR],  /* Sticky (not ow)*/
+	su_c[MAX_COLOR],  /* SUID file */
+	tw_c[MAX_COLOR],  /* Sticky other writable */
+	uf_c[MAX_COLOR],  /* Non-'stat'able file */
 
 	/* Interface */
-    bm_c[MAX_COLOR], /* Bookmarked directory */
-    dc_c[MAX_COLOR], /* Files counter */
-    df_c[MAX_COLOR], /* Default color */
-    dh_c[MAX_COLOR], /* Dirhist index */
-    dl_c[MAX_COLOR], /* Dividing line index */
-    el_c[MAX_COLOR], /* ELN */
-    mi_c[MAX_COLOR], /* Misc indicators */
+	bm_c[MAX_COLOR], /* Bookmarked directory */
+	dc_c[MAX_COLOR], /* Files counter */
+	df_c[MAX_COLOR], /* Default color */
+	dh_c[MAX_COLOR], /* Dirhist index */
+	dl_c[MAX_COLOR], /* Dividing line index */
+	el_c[MAX_COLOR], /* ELN */
+	mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* TAB completion suffix */
-    wc_c[MAX_COLOR], /* Welcome message color */
+	wc_c[MAX_COLOR], /* Welcome message color */
 	wp_c[MAX_COLOR], /* Warning prompt */
 
 	/* Suggestions */
 	sb_c[MAX_COLOR], /* Auto-suggestions: shell builtins */
-    sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
-    sh_c[MAX_COLOR], /* Auto-suggestions: history */
-    sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
-    sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
+	sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
+	sh_c[MAX_COLOR], /* Auto-suggestions: history */
+	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
+	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
 	sp_c[MAX_COLOR], /* Auto-suggestions: suggestions pointer */
 
 #ifndef _NO_ICONS
-    dir_ico_c[MAX_COLOR], /* Directories icon color */
+	dir_ico_c[MAX_COLOR], /* Directories icon color */
 #endif
 
 	/* Syntax highlighting */
@@ -695,7 +603,7 @@ char
 	hv_c[MAX_COLOR],		/* Variables: $ */
 	hw_c[MAX_COLOR],		/* Wrong, non-existent command name */
 
-    /* Colors used in the prompt, so that \001 and \002 needs to
+	/* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
 	/* Workspaces */
 	ws1_c[MAX_COLOR + 2],
@@ -707,14 +615,14 @@ char
 	ws7_c[MAX_COLOR + 2],
 	ws8_c[MAX_COLOR + 2],
 
-    em_c[MAX_COLOR + 2], /* Error msg color */
-    li_c[MAX_COLOR + 2], /* Sel indicator color */
-    li_cb[MAX_COLOR], /* Sel indicator color (for the files list) */
-    nm_c[MAX_COLOR + 2], /* Notice msg color */
-    wm_c[MAX_COLOR + 2], /* Warning msg color */
-    si_c[MAX_COLOR + 2], /* stealth indicator color */
-    ti_c[MAX_COLOR + 2], /* Trash indicator color */
-    tx_c[MAX_COLOR + 2]; /* Text color */
+	em_c[MAX_COLOR + 2], /* Error msg color */
+	li_c[MAX_COLOR + 2], /* Sel indicator color */
+	li_cb[MAX_COLOR], /* Sel indicator color (for the files list) */
+	nm_c[MAX_COLOR + 2], /* Notice msg color */
+	wm_c[MAX_COLOR + 2], /* Warning msg color */
+	si_c[MAX_COLOR + 2], /* stealth indicator color */
+	ti_c[MAX_COLOR + 2], /* Trash indicator color */
+	tx_c[MAX_COLOR + 2]; /* Text color */
 
 #ifdef LINUX_INOTIFY
 int inotify_fd, inotify_wd = -1;

@@ -151,12 +151,12 @@ extern int watch;
 
 /* Options flags */
 #define FOLDERS_FIRST 	(1 << 1)
-#define HELP 			(1 << 2)
-#define HIDDEN 			(1 << 3)
-#define AUTOLS	 		(1 << 4)
-#define SPLASH 			(1 << 5)
-#define CASE_SENS 		(1 << 6)
-#define START_PATH 		(1 << 7)
+#define HELP		(1 << 2)
+#define HIDDEN		(1 << 3)
+#define AUTOLS		(1 << 4)
+#define SPLASH		(1 << 5)
+#define CASE_SENS	(1 << 6)
+#define START_PATH	(1 << 7)
 #define PRINT_VERSION 	(1 << 8)
 #define ALT_PROFILE 	(1 << 9)
 
@@ -169,10 +169,10 @@ extern int watch;
 #define X_OTH (1 << 6)
 
 /* Internal flags */
-#define ROOT_USR		(1 << 10)
-#define EXT_HELP 		(1 << 11)
+#define ROOT_USR	(1 << 10)
+#define EXT_HELP	(1 << 11)
 //#define FILE_CMD_OK (1 << 12)
-#define GUI 			(1 << 13)
+#define GUI		(1 << 13)
 #define IS_USRVAR_DEF 	(1 << 14)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or
@@ -224,10 +224,10 @@ extern int watch;
 #define UNSET -1
 
 /* Macros for the cp and mv cmds */
-#define CP_CP 		0
-#define CP_ADVCP 	1
-#define CP_WCP 		2
-#define MV_MV 		0
+#define CP_CP		0
+#define CP_ADVCP	1
+#define CP_WCP		2
+#define MV_MV		0
 #define MV_ADVMV	1
 
 /* Sort macros */
@@ -246,15 +246,15 @@ extern int watch;
 #define SORT_TYPES 11
 
 /* Macros for the colors_list function */
-#define NO_ELN 			0
-#define NO_NEWLINE 		0
-#define NO_PAD 			0
-#define PRINT_NEWLINE 	1
+#define NO_ELN 		0
+#define NO_NEWLINE 	0
+#define NO_PAD 		0
+#define PRINT_NEWLINE	1
 
 /* A few key macros used by the auto-suggestions system */
 #define _ESC 	27
 #define _TAB 	9
-#define BS 		8
+#define BS	8
 #define DELETE 	127
 #define ENTER 	13
 /* #define OP_BRACKET 91
@@ -268,12 +268,12 @@ extern int watch;
 #define CMD_SUG 	3
 #define INT_CMD 	4
 #define COMP_SUG 	5
-#define BOOKMARK_SUG 6
+#define BOOKMARK_SUG 	6
 #define ALIAS_SUG 	7
 #define ELN_SUG 	8
 #define FIRST_WORD 	9
 #define JCMD_SUG 	10
-#define JCMD_SUG_NOACD 11 /* No auto-cd */
+#define JCMD_SUG_NOACD 	11 /* No auto-cd */
 #define VAR_SUG 	12
 #define SEL_SUG 	13
 
@@ -291,8 +291,8 @@ extern int watch;
 #define E_MUTE 		(E_NOSTDOUT | E_NOSTDERR)
 
 /* Macros for ELN padding */
-#define NOPAD 			0
-#define ZEROPAD 		1
+#define NOPAD 		0
+#define ZEROPAD 	1
 #define LEFTSPACEPAD 	2
 #define RIGHTSPACEPAD 	3
 
@@ -312,12 +312,12 @@ extern int watch;
 #define CUSTOM_PROMPT_STYLE 1
 
 /* Macros for the dirjump function */
-#define SUG_JUMP 	0
-#define NO_SUG_JUMP 1
+#define SUG_JUMP	0
+#define NO_SUG_JUMP 	1
 
 /* Macros for the media_menu function */
 #define MEDIA_LIST 	0
-#define MEDIA_MOUNT 1
+#define MEDIA_MOUNT 	1
 
 /* Macros for the rl_highlight function */
 #define SET_COLOR 		1
@@ -347,14 +347,14 @@ extern int watch;
 #define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define DIGINUM(n) (((n) < 10) ? 1 : ((n) < 100)      ? 2 \
-				 : ((n) < 1000)	      ? 3 \
-				 : ((n) < 10000)      ? 4 \
-				 : ((n) < 100000)     ? 5 \
-				 : ((n) < 1000000)    ? 6 \
-				 : ((n) < 10000000)   ? 7 \
-				 : ((n) < 100000000)  ? 8 \
-				 : ((n) < 1000000000) ? 9 \
-						      : 10)
+		 : ((n) < 1000)	      ? 3 \
+		 : ((n) < 10000)      ? 4 \
+		 : ((n) < 100000)     ? 5 \
+		 : ((n) < 1000000)    ? 6 \
+		 : ((n) < 10000000)   ? 7 \
+		 : ((n) < 100000000)  ? 8 \
+		 : ((n) < 1000000000) ? 9 \
+				      : 10)
 #define _ISDIGIT(n) ((unsigned int)(n) - '0' <= 9)
 #define _ISALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
@@ -392,7 +392,7 @@ extern int watch;
 #define SHELL_TCSH 	5
 #define SHELL_ZSH 	6
 
-#define BELL_NONE 		0
+#define BELL_NONE 	0
 #define BELL_AUDIBLE 	1
 #define BELL_VISIBLE 	2
 #define VISIBLE_BELL_DELAY 30
@@ -687,19 +687,19 @@ enum jump {
 
 enum comp_type {
 	TCMP_BOOKMARK = 0,
-	TCMP_CMD = 		1,
+	TCMP_CMD =	1,
 	TCMP_CSCHEME = 	2,
 	TCMP_DESEL = 	3,
-	TCMP_ELN = 		4,
+	TCMP_ELN =	4,
 	TCMP_HIST = 	5,
 	TCMP_JUMP = 	6,
-	TCMP_NET = 		7,
+	TCMP_NET =	7,
 	TCMP_NONE = 	8,
 	TCMP_OPENWITH = 9,
 	TCMP_PATH = 	10,
 	TCMP_PROF = 	11,
 	TCMP_RANGES = 	12,
-	TCMP_SEL = 		13,
+	TCMP_SEL =	13,
 	TCMP_SORT = 	14
 };
 
@@ -713,100 +713,100 @@ extern int
 	flags;
 
 extern int
-    auto_open,
-    autocd,
+	auto_open,
+	autocd,
 	autocmd_set,
-    autojump,
+	autojump,
 	autols,
 	bell,
-    bg_proc,
-    case_sensitive,
-    case_sens_dirjump,
-    case_sens_path_comp,
+	bg_proc,
+	case_sensitive,
+	case_sens_dirjump,
+	case_sens_path_comp,
 	case_sens_search,
-    cd_on_quit,
+	cd_on_quit,
 	check_cap,
 	check_ext,
-    classify,
-    clear_screen,
+	classify,
+	clear_screen,
 	cmdhist_flag,
-    colorize,
-    columned,
-    config_ok,
+	colorize,
+	columned,
+	config_ok,
 	control_d_exits,
-    copy_n_rename,
-    cp_cmd,
-    cur_ws,
-    dequoted,
+	copy_n_rename,
+	cp_cmd,
+	cur_ws,
+	dequoted,
 	dir_changed, /* flag to know is dir was changed: used by autocmds */
-    dirhist_map,
-    disk_usage,
+	dirhist_map,
+	disk_usage,
 	elnpad,
-    expand_bookmarks,
-    ext_cmd_ok,
-    files_counter,
-    filter_rev,
+	expand_bookmarks,
+	ext_cmd_ok,
+	files_counter,
+	filter_rev,
 	follow_symlinks,
 #ifndef _NO_FZF
 	fzftab,
 #endif
 #ifndef _NO_HIGHLIGHT
-    highlight,
+	highlight,
 #endif
-    home_ok,
+	home_ok,
 #ifndef _NO_ICONS
-    icons,
+	icons,
 #endif
 	int_vars,
-    internal_cmd,
-    is_sel,
-    kb_shortcut,
-    kbind_busy,
-    light_mode,
-    list_folders_first,
+	internal_cmd,
+	is_sel,
+	kb_shortcut,
+	kbind_busy,
+	light_mode,
+	list_folders_first,
 	listing_mode,
-    logs_enabled,
-    long_view,
+	logs_enabled,
+	long_view,
 	max_name_len,
-    mime_match,
-    min_name_trim,
-    mv_cmd,
-    no_eln,
-    no_log,
-    only_dirs,
-    pager,
-    print_msg,
-    print_selfiles,
-    prompt_offset,
-    prompt_style,
-    recur_perm_error_flag,
-    restore_last_path,
+	mime_match,
+	min_name_trim,
+	mv_cmd,
+	no_eln,
+	no_log,
+	only_dirs,
+	pager,
+	print_msg,
+	print_selfiles,
+	prompt_offset,
+	prompt_style,
+	recur_perm_error_flag,
+	restore_last_path,
 	rl_last_word_start,
 	rl_nohist,
 	rl_notab,
-    sel_is_last,
-    selfile_ok,
-    share_selbox,
+	sel_is_last,
+	selfile_ok,
+	share_selbox,
 	shell,
-    shell_terminal,
-    show_hidden,
-    sort,
-    sort_reverse,
-    sort_switch,
-    splash_screen,
-    suggest_filetype_color,
-    suggestions,
-    switch_cscheme,
-    tips,
+	shell_terminal,
+	show_hidden,
+	sort,
+	sort_reverse,
+	sort_switch,
+	splash_screen,
+	suggest_filetype_color,
+	suggestions,
+	switch_cscheme,
+	tips,
 #ifndef _NO_TRASH
-    tr_as_rm,
-    trash_ok,
+	tr_as_rm,
+	trash_ok,
 #endif
-    unicode,
+	unicode,
 	warn_wrong_cmd,
-    welcome_message,
-    _xrename,
-    xrename;
+	welcome_message,
+	_xrename,
+	xrename;
 
 //#ifndef _NO_HIGHLIGHT
 extern int wrong_cmd;
@@ -814,124 +814,124 @@ extern int wrong_cmd_line;
 //#endif
 
 extern int
-    argc_bk,
-    dirhist_cur_index,
-    dirhist_total_index,
-    exit_code,
-    jump_total_rank,
-    max_dirhist,
-    max_files,
-    max_hist,
-    max_jump_total_rank,
-    max_log,
-    max_path,
-    max_printselfiles,
-    min_jump_rank,
-    trash_n,
-    shell_is_interactive,
-    *eln_as_file;
+	argc_bk,
+	dirhist_cur_index,
+	dirhist_total_index,
+	exit_code,
+	jump_total_rank,
+	max_dirhist,
+	max_files,
+	max_hist,
+	max_jump_total_rank,
+	max_log,
+	max_path,
+	max_printselfiles,
+	min_jump_rank,
+	trash_n,
+	shell_is_interactive,
+	*eln_as_file;
 
 extern unsigned short term_cols, term_rows;
 
 extern size_t
-    actions_n,
-    aliases_n,
-    args_n,
+	actions_n,
+	aliases_n,
+	args_n,
 	autocmds_n,
-    bm_n,
+	bm_n,
 	cdpath_n,
-    cschemes_n,
-    current_hist_n,
-    curhistindex,
-    eln_as_file_n,
-    ext_colors_n,
-    files,
-    jump_n,
-    kbinds_n,
-    longest,
-    msgs_n,
+	cschemes_n,
+	current_hist_n,
+	curhistindex,
+	eln_as_file_n,
+	ext_colors_n,
+	files,
+	jump_n,
+	kbinds_n,
+	longest,
+	msgs_n,
 	P_tmpdir_len,
-    path_n,
-    path_progsn,
-    prompt_cmds_n,
-    remotes_n,
-    sel_n,
+	path_n,
+	path_progsn,
+	prompt_cmds_n,
+	remotes_n,
+	sel_n,
 	tab_offset,
-    user_home_len,
-    usrvar_n,
-    nwords;
+	user_home_len,
+	usrvar_n,
+	nwords;
 
 extern struct termios shell_tmodes;
 extern off_t total_sel_size;
 extern pid_t own_pid;
 
 extern char
-    div_line_char[NAME_MAX],
-    hostname[HOST_NAME_MAX],
+	div_line_char[NAME_MAX],
+	hostname[HOST_NAME_MAX],
 
-    *actions_file,
+	*actions_file,
 	*alt_config_dir,
-    *alt_bm_file,
-    *alt_config_file,
-    *alt_kbinds_file,
-    *alt_profile,
-    *bm_file,
-    *colors_dir,
-    *config_dir,
-    *config_dir_gral,
-    *config_file,
+	*alt_bm_file,
+	*alt_config_file,
+	*alt_kbinds_file,
+	*alt_profile,
+	*bm_file,
+	*colors_dir,
+	*config_dir,
+	*config_dir_gral,
+	*config_file,
 	*cur_color,
-    *data_dir,
-    *cur_cscheme,
-    *dirhist_file,
-    *encoded_prompt,
-    *file_cmd_path,
-    *_filter,
+	*data_dir,
+	*cur_cscheme,
+	*dirhist_file,
+	*encoded_prompt,
+	*file_cmd_path,
+	*_filter,
 	*fzftab_options,
-    *hist_file,
-    *kbinds_file,
-    *jump_suggestion,
-    *last_cmd,
-    *log_file,
-    *ls_colors_bk,
-    *mime_file,
-    *msg_log_file,
-    *opener,
-    *pinned_dir,
-    *plugins_dir,
-    *profile_file,
-    *qc,
-    *remotes_file,
-    *sel_file,
-    *stdin_tmp_dir,
+	*hist_file,
+	*kbinds_file,
+	*jump_suggestion,
+	*last_cmd,
+	*log_file,
+	*ls_colors_bk,
+	*mime_file,
+	*msg_log_file,
+	*opener,
+	*pinned_dir,
+	*plugins_dir,
+	*profile_file,
+	*qc,
+	*remotes_file,
+	*sel_file,
+	*stdin_tmp_dir,
 #ifndef _NO_SUGGESTIONS
-    *suggestion_buf,
-    *suggestion_strategy,
+	*suggestion_buf,
+	*suggestion_strategy,
 #endif
-    *term,
-    *tmp_dir,
+	*term,
+	*tmp_dir,
 #ifndef _NO_TRASH
-    *trash_dir,
-    *trash_files_dir,
-    *trash_info_dir,
+	*trash_dir,
+	*trash_files_dir,
+	*trash_info_dir,
 #endif
-    *usr_cscheme,
-    *user_home,
+	*usr_cscheme,
+	*user_home,
 	*wprompt_str,
 
-    **argv_bk,
-    **bin_commands,
-    **bookmark_names,
-    **cdpaths,
-    **color_schemes,
-    **ext_colors,
-    **history,
-    **messages,
-    **old_pwd,
-    **paths,
-    **profile_names,
-    **prompt_cmds,
-    **sel_elements;
+	**argv_bk,
+	**bin_commands,
+	**bookmark_names,
+	**cdpaths,
+	**color_schemes,
+	**ext_colors,
+	**history,
+	**messages,
+	**old_pwd,
+	**paths,
+	**profile_names,
+	**prompt_cmds,
+	**sel_elements;
 
 extern const char
 	*internal_cmds[],
@@ -949,41 +949,41 @@ extern char **environ;
 /* Colors */
 extern char
 	/* File types */
-    bd_c[MAX_COLOR],	/* Block device */
-    ca_c[MAX_COLOR],	/* Cap file */
-    cd_c[MAX_COLOR],	/* Char device */
-    ee_c[MAX_COLOR],	/* Empty executable */
-    ex_c[MAX_COLOR],	/* Executable */
-    ef_c[MAX_COLOR],	/* Empty reg file */
-    ed_c[MAX_COLOR],	/* Empty dir */
-    fi_c[MAX_COLOR],	/* Reg file */
-    di_c[MAX_COLOR],	/* Directory */
-    ln_c[MAX_COLOR],	/* Symlink */
-    mh_c[MAX_COLOR],	/* Multi-hardlink file */
-    nd_c[MAX_COLOR],	/* No read directory */
-    ne_c[MAX_COLOR],	/* No read empty dir */
-    nf_c[MAX_COLOR],	/* No read file */
-    no_c[MAX_COLOR],	/* Unknown */
-    or_c[MAX_COLOR],	/* Broken symlink */
-    ow_c[MAX_COLOR],	/* Other writable */
-    pi_c[MAX_COLOR],	/* FIFO, pipe */
-    sg_c[MAX_COLOR],	/* SGID file */
-    so_c[MAX_COLOR],	/* Socket */
-    st_c[MAX_COLOR],	/* Sticky (not ow)*/
-    su_c[MAX_COLOR],	/* SUID file */
-    tw_c[MAX_COLOR],	/* Sticky other writable */
-    uf_c[MAX_COLOR],	/* Non-'stat'able file */
+	bd_c[MAX_COLOR],	/* Block device */
+	ca_c[MAX_COLOR],	/* Cap file */
+	cd_c[MAX_COLOR],	/* Char device */
+	ee_c[MAX_COLOR],	/* Empty executable */
+	ex_c[MAX_COLOR],	/* Executable */
+	ef_c[MAX_COLOR],	/* Empty reg file */
+	ed_c[MAX_COLOR],	/* Empty dir */
+	fi_c[MAX_COLOR],	/* Reg file */
+	di_c[MAX_COLOR],	/* Directory */
+	ln_c[MAX_COLOR],	/* Symlink */
+	mh_c[MAX_COLOR],	/* Multi-hardlink file */
+	nd_c[MAX_COLOR],	/* No read directory */
+	ne_c[MAX_COLOR],	/* No read empty dir */
+	nf_c[MAX_COLOR],	/* No read file */
+	no_c[MAX_COLOR],	/* Unknown */
+	or_c[MAX_COLOR],	/* Broken symlink */
+	ow_c[MAX_COLOR],	/* Other writable */
+	pi_c[MAX_COLOR],	/* FIFO, pipe */
+	sg_c[MAX_COLOR],	/* SGID file */
+	so_c[MAX_COLOR],	/* Socket */
+	st_c[MAX_COLOR],	/* Sticky (not ow)*/
+	su_c[MAX_COLOR],	/* SUID file */
+	tw_c[MAX_COLOR],	/* Sticky other writable */
+	uf_c[MAX_COLOR],	/* Non-'stat'able file */
 
 	/* Interface */
-    bm_c[MAX_COLOR],	/* Bookmarked directory */
-    dc_c[MAX_COLOR],	/* Files counter */
-    df_c[MAX_COLOR],	/* Default color */
-    dh_c[MAX_COLOR],	/* Dirhist index */
-    dl_c[MAX_COLOR],	/* Dividing line */
-    el_c[MAX_COLOR],	/* ELN color */
-    mi_c[MAX_COLOR],	/* Misc indicators */
+	bm_c[MAX_COLOR],	/* Bookmarked directory */
+	dc_c[MAX_COLOR],	/* Files counter */
+	df_c[MAX_COLOR],	/* Default color */
+	dh_c[MAX_COLOR],	/* Dirhist index */
+	dl_c[MAX_COLOR],	/* Dividing line */
+	el_c[MAX_COLOR],	/* ELN color */
+	mi_c[MAX_COLOR],	/* Misc indicators */
 	ts_c[MAX_COLOR],	/* TAB completion suffix */
-    wc_c[MAX_COLOR],	/* Welcome message */
+	wc_c[MAX_COLOR],	/* Welcome message */
 	wp_c[MAX_COLOR],	/* Warning prompt */
 
 	/* Suggestions */
@@ -1023,11 +1023,11 @@ extern char
 	ws7_c[MAX_COLOR + 2],
 	ws8_c[MAX_COLOR + 2],
 
-    em_c[MAX_COLOR + 2], /* Error msg color */
-    li_c[MAX_COLOR + 2], /* Sel indicator color */
-    li_cb[MAX_COLOR], /* Sel indicator color (for the files list) */
-    nm_c[MAX_COLOR + 2], /* Notice msg color */
-    ti_c[MAX_COLOR + 2], /* Trash indicator color */
-    tx_c[MAX_COLOR + 2], /* Text color */
-    si_c[MAX_COLOR + 2], /* stealth indicator color */
-    wm_c[MAX_COLOR + 2]; /* Warning msg color */
+	em_c[MAX_COLOR + 2], /* Error msg color */
+	li_c[MAX_COLOR + 2], /* Sel indicator color */
+	li_cb[MAX_COLOR], /* Sel indicator color (for the files list) */
+	nm_c[MAX_COLOR + 2], /* Notice msg color */
+	ti_c[MAX_COLOR + 2], /* Trash indicator color */
+	tx_c[MAX_COLOR + 2], /* Text color */
+	si_c[MAX_COLOR + 2], /* stealth indicator color */
+	wm_c[MAX_COLOR + 2]; /* Warning msg color */
