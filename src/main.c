@@ -723,8 +723,11 @@ unsigned int INOTIFY_MASK = /*IN_ATTRIB |*/ IN_CREATE | IN_DELETE
 /*#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
 	| IN_DONT_FOLLOW | IN_EXCL_UNLINK | IN_ONLYDIR | IN_MASK_CREATE;
 #else */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 15)
 	| IN_DONT_FOLLOW | IN_EXCL_UNLINK | IN_ONLYDIR;
-//#endif
+#else
+	| IN_DONT_FOLLOW | IN_EXCL_UNLINK;
+#endif /* LINUX >= 2.6.15 */
 #elif defined(BSD_KQUEUE)
 int kq, event_fd = -1;
 struct kevent events_to_monitor[NUM_EVENT_FDS];
