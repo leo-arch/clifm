@@ -705,7 +705,7 @@ fzftabcomp(char **matches)
 	}
 
 	/* Recover FZF ouput */
-	/* This should be enough space for a file name and the char taken by the
+	/* This should be enough space for a file name and the chars taken by the
 	 * command itself */
 	char buf[PATH_MAX + NAME_MAX];
 	fgets(buf, sizeof(buf), fp);

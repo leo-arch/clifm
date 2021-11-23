@@ -435,6 +435,7 @@ print_tips(int all)
 	    "Set a maximum file name length for listed files via the MaxFilenameLen "
 	    "option in the configuration file (F10)",
 	    "Use the 'm' command to interactively rename a file",
+	    "Set options on a per directory basis via the autocommands function",
 	    NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
