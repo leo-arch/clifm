@@ -930,7 +930,6 @@ main(int argc, char *argv[])
 
 			for (i = 0; alias_cmd[i]; i++)
 				free(alias_cmd[i]);
-
 			free(alias_cmd);
 			alias_cmd = (char **)NULL;
 		} else {
@@ -939,7 +938,6 @@ main(int argc, char *argv[])
 			i = (int)args_n + 1;
 			while (--i >= 0)
 				free(cmd[i]);
-
 			free(cmd);
 			cmd = (char **)NULL;
 		}

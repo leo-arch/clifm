@@ -1,4 +1,4 @@
-/* trash.c -- functions controlling the trash system */
+/* trash.c -- functions to manage the trash system */
 
 /*
  * This file is part of CliFM
@@ -488,8 +488,36 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 }
 
 static int
-remove_from_trash(void)
+remove_file_from_trash(char *name)
 {
+	char rm_file[PATH_MAX], rm_info[PATH_MAX];
+	snprintf(rm_file, PATH_MAX, "%s/%s", trash_files_dir, name);
+	snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir, name);
+	char *cmd[] = {"rm", "-r", rm_file, rm_info, NULL};
+	return launch_execve(cmd, FOREGROUND, E_NOFLAG);
+}
+
+static int
+remove_from_trash(char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	/* Remove from trash files passed as parameters */
+	size_t i = 2;
+	if (args[2]) {
+		for (; args[i]; i++) {
+			char *d = (char *)NULL;
+			if (strchr(args[i], '\\'))
+				d = dequote_str(args[i], 0);
+			if (remove_file_from_trash(d ? d : args[i]) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+			free(d);
+		}
+		return exit_status;
+	}
+
+	/* No parameters */
+
 	/* List trashed files */
 	/* Change CWD to the trash directory. Otherwise, scandir() will fail */
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
@@ -498,7 +526,6 @@ remove_from_trash(void)
 		return EXIT_FAILURE;
 	}
 
-	size_t i = 0;
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = scandir(trash_files_dir, &trash_files,
 					skip_files, (unicode) ? alphasort : (case_sensitive)
@@ -506,12 +533,12 @@ remove_from_trash(void)
 
 	if (files_n) {
 		printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
-
-		for (i = 0; i < (size_t)files_n; i++)
+		for (i = 0; i < (size_t)files_n; i++) {
 			colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
 			    PRINT_NEWLINE);
+		}
 	} else {
-		puts(_("trash: There are no trashed files"));
+		puts(_("trash: No trashed files"));
 		/* Restore CWD and return */
 		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
@@ -542,8 +569,7 @@ remove_from_trash(void)
 		return EXIT_FAILURE;
 
 	/* Remove files */
-	char rm_file[PATH_MAX] = "", rm_info[PATH_MAX] = "";
-	int ret = -1, exit_status = EXIT_SUCCESS;
+	int ret = -1;
 
 	/* First check for exit, wildcard, and non-number args */
 	for (i = 0; rm_elements[i]; i++) {
@@ -565,14 +591,7 @@ remove_from_trash(void)
 		else if (strcmp(rm_elements[i], "*") == 0) {
 			size_t j;
 			for (j = 0; j < (size_t)files_n; j++) {
-				snprintf(rm_file, PATH_MAX, "%s/%s", trash_files_dir,
-				    trash_files[j]->d_name);
-				snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo",
-				    trash_info_dir, trash_files[j]->d_name);
-
-				char *tmp_cmd[] = {"rm", "-r", rm_file, rm_info, NULL};
-
-				ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+				ret = remove_file_from_trash(trash_files[j]->d_name);
 				if (ret != EXIT_SUCCESS) {
 					fprintf(stderr, _("%s: trash: Error trashing %s\n"),
 					    PROGRAM_NAME, trash_files[j]->d_name);
@@ -586,7 +605,6 @@ remove_from_trash(void)
 
 			for (j = 0; rm_elements[j]; j++)
 				free(rm_elements[j]);
-
 			free(rm_elements);
 
 			return exit_status;
@@ -623,14 +641,7 @@ remove_from_trash(void)
 			continue;
 		}
 
-		snprintf(rm_file, PATH_MAX, "%s/%s", trash_files_dir,
-		    trash_files[rm_num - 1]->d_name);
-		snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir,
-		    trash_files[rm_num - 1]->d_name);
-
-		char *tmp_cmd2[] = {"rm", "-r", rm_file, rm_info, NULL};
-
-		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
+		ret = remove_file_from_trash(trash_files[rm_num - 1]->d_name);
 		if (ret != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: trash: Error trashing %s\n"),
 			    PROGRAM_NAME, trash_files[rm_num - 1]->d_name);
@@ -789,6 +800,22 @@ untrash_function(char **comm)
 		return EXIT_FAILURE;
 	}
 
+	int exit_status = EXIT_SUCCESS;
+
+	if (comm[1] && *comm[1] != '*' && strcmp(comm[1], "a") != 0
+	&& strcmp(comm[1], "all") != 0) {
+		size_t j = 1;
+		for (; comm[j]; j++) {
+			char *d = (char *)NULL;
+			if (strchr(comm[j], '\\'))
+				d = dequote_str(comm[j], 0);
+			if (untrash_element(d ? d : comm[j]) != 0)
+				exit_status = EXIT_FAILURE;
+			free(d);
+		}
+		return exit_status;
+	}
+
 	/* Change CWD to the trash directory to make scandir() work */
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
@@ -802,7 +829,7 @@ untrash_function(char **comm)
 	    skip_files, (unicode) ? alphasort : (case_sensitive) ? xalphasort
 					 : alphasort_insensitive);
 	if (trash_files_n <= 0) {
-		puts(_("trash: There are no trashed files"));
+		puts(_("trash: No trashed files"));
 
 		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
@@ -813,7 +840,6 @@ untrash_function(char **comm)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
 	/* if "undel all" (or "u a" or "u *") */
 	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
 	|| strcmp(comm[1], "all") == 0)) {
@@ -821,10 +847,8 @@ untrash_function(char **comm)
 		for (j = 0; j < (size_t)trash_files_n; j++) {
 			if (untrash_element(trash_files[j]->d_name) != 0)
 				exit_status = EXIT_FAILURE;
-
 			free(trash_files[j]);
 		}
-
 		free(trash_files);
 
 		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
@@ -999,7 +1023,7 @@ trash_function(char **comm)
 
 			free(trash_files);
 		} else {
-			puts(_("trash: There are no trashed files"));
+			puts(_("trash: No trashed files"));
 		}
 
 		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
@@ -1034,8 +1058,8 @@ trash_function(char **comm)
 		    tm.tm_sec); */
 
 		/* Remove file(s) from Trash */
-		if (strcmp(comm[1], "del") == 0 || strcmp(comm[1], "rm") == 0) {
-			exit_status = remove_from_trash();
+		if (strcmp(comm[1], "del") == 0) {
+			exit_status = remove_from_trash(comm);
 		} else if (strcmp(comm[1], "clear") == 0) {
 			trash_clear();
 		} else {

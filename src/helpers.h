@@ -686,21 +686,23 @@ enum jump {
 };
 
 enum comp_type {
-	TCMP_BOOKMARK = 0,
-	TCMP_CMD =	1,
+	TCMP_BOOKMARK =	0,
+	TCMP_CMD =		1,
 	TCMP_CSCHEME = 	2,
 	TCMP_DESEL = 	3,
-	TCMP_ELN =	4,
+	TCMP_ELN =		4,
 	TCMP_HIST = 	5,
 	TCMP_JUMP = 	6,
-	TCMP_NET =	7,
+	TCMP_NET =		7,
 	TCMP_NONE = 	8,
 	TCMP_OPENWITH = 9,
 	TCMP_PATH = 	10,
 	TCMP_PROF = 	11,
 	TCMP_RANGES = 	12,
-	TCMP_SEL =	13,
-	TCMP_SORT = 	14
+	TCMP_SEL =		13,
+	TCMP_SORT = 	14,
+	TCMP_TRASHDEL=	15,
+	TCMP_UNTRASH=	16
 };
 
 extern enum comp_type cur_comp_type;

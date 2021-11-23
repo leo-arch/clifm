@@ -1452,6 +1452,62 @@ sel_entries_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Return the list of currently trashed files matching TEXT or NULL */
+static char **
+rl_trashed_files(const char *text)
+{
+	if (!trash_files_dir || !*trash_files_dir)
+		return (char **)NULL;
+
+	if (xchdir(trash_files_dir, NO_TITLE) == -1)
+		return (char **)NULL;
+
+	struct dirent **t = (struct dirent **)NULL;
+	int n = scandir(trash_files_dir, &t, NULL, alphasort);
+
+	xchdir(ws[cur_ws].path, NO_TITLE);
+
+	if (n == - 1 || n == 2)
+		return (char **)NULL;
+
+	char **tfiles = (char **)xnmalloc((size_t)n + 2, sizeof(char *));
+	if (text) {
+		tfiles[0] = savestring(text, strlen(text));
+	} else {
+		tfiles[0] = (char *)xnmalloc(1, sizeof(char));
+		*tfiles[0] = '\0';
+	}
+
+	int nn = 1, i = 0;
+	size_t tlen = strlen(text);
+	for (; i < n; i++) {
+		char *name = t[i]->d_name;
+		if (SELFORPARENT(name) || strncmp(text, name, tlen) != 0) {
+			free(t[i]);
+			continue;
+		}
+		tfiles[nn++] = savestring(name, strlen(name));
+		free(t[i]);
+	}
+	free(t);
+
+	tfiles[nn] = (char *)NULL;
+
+	/* If only one match */
+	if (nn == 2) {
+		char *d = escape_str(tfiles[1]);
+		free(tfiles[1]);
+		tfiles[1] = (char *)NULL;
+		if (d) {
+			tfiles[0] = (char *)xrealloc(tfiles[0], (strlen(d) + 1) * sizeof(char));
+			strcpy(tfiles[0], d);
+			free(d);
+		}
+	}
+
+	return tfiles;
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -1538,6 +1594,31 @@ my_rl_completion(const char *text, int start, int end)
 				*s = ' ';
 			if (matches) {
 				cur_comp_type = TCMP_OPENWITH;
+				return matches;
+			}
+		}
+
+		/* ### UNTRASH ### */
+		if (!_xrename && *rl_line_buffer == 'u' && (rl_line_buffer[1] == ' '
+		|| (rl_line_buffer[1] == 'n'
+		&& (strncmp(rl_line_buffer, "untrash ", 8) == 0
+		|| strncmp(rl_line_buffer, "undel ", 6) == 0)))) {
+			matches = rl_trashed_files(text);
+			if (matches) {
+				cur_comp_type = TCMP_UNTRASH;
+				return matches;
+			}
+		}
+
+		/* ### TRASH DEL ### */
+		if (!_xrename && *rl_line_buffer == 't' && (rl_line_buffer[1] == ' '
+		|| rl_line_buffer[1] == 'r')
+		&& (strncmp(rl_line_buffer, "t del ", 6) == 0
+		|| strncmp(rl_line_buffer, "tr del ", 7) == 0
+		|| strncmp(rl_line_buffer, "trash del ", 10) == 0)) {
+			matches = rl_trashed_files(text);
+			if (matches) {
+				cur_comp_type = TCMP_TRASHDEL;
 				return matches;
 			}
 		}
