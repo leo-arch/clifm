@@ -718,16 +718,18 @@ char
 
 #ifdef LINUX_INOTIFY
 int inotify_fd, inotify_wd = -1;
-unsigned int INOTIFY_MASK = /*IN_ATTRIB |*/ IN_CREATE | IN_DELETE
-	| IN_DELETE_SELF | /*IN_MODIFY |*/ IN_MOVE_SELF | IN_MOVE
+unsigned int INOTIFY_MASK =
+	IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE | IN_MOVE_SELF
 /*#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
 	| IN_DONT_FOLLOW | IN_EXCL_UNLINK | IN_ONLYDIR | IN_MASK_CREATE;
 #else */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 15)
-	| IN_DONT_FOLLOW | IN_EXCL_UNLINK | IN_ONLYDIR;
-#else
-	| IN_DONT_FOLLOW | IN_EXCL_UNLINK;
+	| IN_DONT_FOLLOW | IN_ONLYDIR
 #endif /* LINUX >= 2.6.15 */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 36)
+	| IN_EXCL_UNLINK
+#endif /* LINUX >= 2.6.36 */
+	;
 #elif defined(BSD_KQUEUE)
 int kq, event_fd = -1;
 struct kevent events_to_monitor[NUM_EVENT_FDS];
