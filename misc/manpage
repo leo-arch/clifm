@@ -1257,11 +1257,11 @@ Running the opening application in the background:
 .TP
 For GUI applications:
 
- APP %f &
+ APP %f &>/dev/null &
 .TP
 For terminal applications:
 
- xterm -e APP %f &
+ xterm -e APP %f &>/dev/null &
 .TP
 Replace 'xterm' by whatever terminal emulator you're using. The -e option might vary depending on the terminal emulator.
 .TP
