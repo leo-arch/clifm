@@ -35,8 +35,8 @@ X:E:^(cbr|cbz)$=zathura
 ### MIME types ###
 
 # Directories - only for the open-with command (ow)
-# Directories will be opened in a new window
-X:inode/directory=xterm -e clifm %f &;xterm -e vifm %f &;xterm -e ncdu %f &;pcmanfm %f &;thunar %f &
+# In graphical environment directories will be opened in a new window
+X:inode/directory=xterm -e clifm %f &>/dev/null &>/dev/null &;xterm -e vifm %f &>/dev/null &;pcmanfm %f &>/dev/null &;thunar %f &>/dev/null &;xterm -e ncdu %f &;sxiv -aqt %f/* &>/dev/null &
 !X:inode/directory=vifm;ranger;nnn;ncdu
 
 # Web content
