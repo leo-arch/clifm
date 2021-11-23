@@ -465,7 +465,7 @@ prompt(void)
 	}
 
 	if (welcome_message) {
-		printf(_("%s%s > %s\n%s%s\n"), wc_c, PROGRAM_NAME, PROG_DESC,
+		printf("%s%s > %s\n%s%s\n", wc_c, PROGRAM_NAME, _(PROG_DESC),
 				df_c, _(HELP_MESSAGE));
 		welcome_message = 0;
 	}
@@ -545,8 +545,9 @@ prompt(void)
 	if (!decoded_prompt) {
 		fprintf(stderr, _("%s: Error decoding prompt line. Using an "
 				"emergency prompt\n"), PROGRAM_NAME);
-		decoded_prompt = (char *)xnmalloc(9, sizeof(char));
-		sprintf(decoded_prompt, "\001\x1b[0m\002> ");
+		decoded_prompt = savestring("\001\x1b[0m\002> ", 8);
+//		decoded_prompt = (char *)xnmalloc(9, sizeof(char));
+//		sprintf(decoded_prompt, "\001\x1b[0m\002> ");
 	}
 
 	size_t decoded_prompt_len;
