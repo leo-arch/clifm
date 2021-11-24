@@ -1465,6 +1465,18 @@ parse_input_str(char *str)
 			}
 		}
 
+				/* ###############################
+				 * #    ENVIRONEMNT VARIABLES    #
+				 * ###############################*/
+
+		if (*substr[i] == '$') {
+			char *p = getenv(substr[i] + 1);
+			if (p) {
+				substr[i] = (char *)xrealloc(substr[i], (strlen(p) + 1) * sizeof(char));
+				strcpy(substr[i], p);
+			}
+		}
+	
 		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
 		if (stdin_dir_ok) {
 			char *real_path = realpath(substr[i], NULL);

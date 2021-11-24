@@ -170,7 +170,7 @@ set_env(void)
 	 * scripts via the actions function */
 	/* CLIFM env variable is set to one when CliFM is running, so that
 	 * external programs can determine if they were spawned by CliFM */
-	setenv("CLIFM", config_file ? config_file : "1", 1);
+	setenv("CLIFM", config_dir ? config_dir : "1", 1);
 	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
 
 	if (sel_file)

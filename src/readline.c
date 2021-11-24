@@ -74,6 +74,10 @@ typedef char *rl_cpvfunc_t;
 int freebsd_sc_console = 0;
 #endif /* __FreeBSD__ */
 
+/* Wide chars */
+/*char wc[12];
+size_t wcn = 0; */
+
 /* Delete key implementation */
 static void
 xdelete()
@@ -270,10 +274,26 @@ rl_exclude_input(int c)
 		default: break;
 	}
 
-	char text[2];
-	text[0] = (char)c;
-	text[1] = '\0';
-	rl_insert_text(text);
+/*	if (c <= 127) {
+		char t[2];
+		t[0] = (char)c;
+		t[1] = '\0';
+		rl_insert_text(t);
+	} else if (wcn >= sizeof(wc) || (c & 0xc0) != 0x80) {
+		wc[wcn] = '\0';
+		rl_insert_text(wc);
+		memset(wc, '\0', sizeof(wc));
+		wcn = 0;
+		wc[wcn++] = (char)c;
+	} else {
+		wc[wcn++] = (char)c;
+		return -2;
+	} */
+
+	char t[2];
+	t[0] = (char)c;
+	t[1] = '\0';
+	rl_insert_text(t);
 
 	int s = 0;
 
@@ -428,7 +448,7 @@ my_rl_getc(FILE *stream)
 				return c;
 
 #ifndef _NO_SUGGESTIONS
-			if (ret != 2 && !_xrename && suggestions) {
+			if (ret != 2 && ret != -2 && !_xrename && suggestions) {
 				/* rl_suggestions returns -1 is C was inserted before
 				 * the end of the current line, in which case we don't
 				 * want to return it here (otherwise, it would be added
@@ -447,7 +467,8 @@ my_rl_getc(FILE *stream)
 #endif /* __FreeBSD__ */
 			}
 #endif /* !_NO_SUGGESTIONS */
-			rl_redisplay();
+			if (ret != -2)
+				rl_redisplay();
 			continue;
 		}
 		/* If zero characters are returned, then the file that we are
