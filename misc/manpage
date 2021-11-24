@@ -1577,7 +1577,7 @@ Define a file filter. If set, this variable overrides the \fIFilter\fR option in
 Except when running in stealth mode, CliFM sets the following environment variables:
 .TP
 .B CLIFM
-This variable is set to the path of current configuration file. By inspecting this variable other programs can find out if they were spawned by CliFM
+This variable is set to the path of the configuration directory. By inspecting this variable other programs can find out if they were spawned by CliFM. It can also be used to quickly jump into the configuration directory: 'cd $CLIFM' or just '$CLIFM'
 .TP
 .B CLIFM_PROFILE
 This variable is set to the current profile of CliFM (if using two or more instances of CliFM under different profiles, the last onw wil be used). Specially useful to develop CliFM plugins on a per profile basis.
