@@ -163,6 +163,7 @@ int
 	no_eln = UNSET,
 	no_log = 0,
 	only_dirs = UNSET,
+	open_in_foreground = 0,
 	pager = UNSET,
 	tips = UNSET,
 	print_msg = 0,

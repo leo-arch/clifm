@@ -223,7 +223,9 @@ edit_jumpdb(void)
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	char *cmd[] = {"o", jump_file, NULL};
+	open_in_foreground = 1;
 	open_function(cmd);
+	open_in_foreground = 0;
 
 	stat(jump_file, &attr);
 

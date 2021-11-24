@@ -110,7 +110,9 @@ kbinds_edit(void)
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
+	open_in_foreground = 1;
 	int ret = open_file(kbinds_file);
+	open_in_foreground = 0;
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 

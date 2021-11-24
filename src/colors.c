@@ -354,7 +354,9 @@ cschemes_function(char **args)
 		stat(file, &attr);
 		time_t mtime_bfr = (time_t)attr.st_mtime;
 
+		open_in_foreground = 1;
 		int ret = open_file(file);
+		open_in_foreground = 0;
 		if (ret != EXIT_FAILURE) {
 			stat(file, &attr);
 			if (mtime_bfr != (time_t)attr.st_mtime

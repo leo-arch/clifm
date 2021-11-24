@@ -135,7 +135,9 @@ edit_function(char **comm)
 		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
 		/* If no application was passed as 2nd argument */
+		open_in_foreground = 1;
 		ret = open_file(config_file);
+		open_in_foreground = 0;
 	}
 
 	if (ret != EXIT_SUCCESS)

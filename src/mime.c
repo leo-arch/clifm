@@ -444,10 +444,12 @@ mime_edit(char **args)
 
 	if (!args[2]) {
 		char *cmd[] = {"mime", mime_file, NULL};
+		open_in_foreground = 1;
 		if (mime_open(cmd) != 0) {
 			fputs(_("Try 'mm, mime edit APPLICATION'\n"), stderr);
 			exit_status = EXIT_FAILURE;
 		}
+		open_in_foreground = 0;
 
 	} else {
 		char *cmd[] = {args[2], mime_file, NULL};
@@ -1354,16 +1356,18 @@ mime_open(char **args)
 
 	cmd[pos] = (char *)NULL;
 
-	/* Do not run in the background if opening the config file or if the command
-	 * is bulk rename */
-	int no_bg = (args[1] && args[1] == config_file) ? 1 : 0;
+/*	int no_bg = (args[1] && args[1] == config_file) ? 1 : 0;
 	if (!no_bg) {
 		char *l = rl_line_buffer;
 		if (*l == 'b' && ((l[1] == 'r' && l[2] == ' ')
 		|| (l[1] == 'u' && strncmp(l, "bulk ", 5) == 0)))
 			no_bg = 1;
-	}
-	int ret = launch_execve(cmd, ((bg || bg_proc) && !no_bg)
+	} */
+	/* - bg comes from the command in the mimelist file
+	 * - bg_proc comes from the command line
+	 * - no_bg is set by some function that requires to open the file in
+	 * the foreground */
+	int ret = launch_execve(cmd, ((bg || bg_proc) && !open_in_foreground)
 			? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	free(file_path);

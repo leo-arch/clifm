@@ -569,7 +569,9 @@ edit_bookmarks(char *cmd)
 	int exit_status = EXIT_SUCCESS;
 
 	if (!cmd) {
+		open_in_foreground = 1;
 		exit_status = open_file(bm_file);
+		open_in_foreground = 0;
 	} else {
 		char *tmp_cmd[] = {cmd, bm_file, NULL};
 		if (launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)

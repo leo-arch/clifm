@@ -776,6 +776,7 @@ extern int
 	no_eln,
 	no_log,
 	only_dirs,
+	open_in_foreground,
 	pager,
 	print_msg,
 	print_selfiles,
