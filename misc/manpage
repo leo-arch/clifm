@@ -107,7 +107,7 @@ List of CliFM features:
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Commands and directory history function
-  4) TAB completion/expansion for ELN's, ELN ranges, commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, selected files, the 'sel' keyword, plus the deselect and the open-with commands (\fIow\fR). There are two available modes: standard and FZF (see the \fBBUILT\-IN EXPANSIONS\fR section below)
+  4) TAB completion/expansion for ELN's, ELN ranges, commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, selected files, the 'sel' keyword, trashed files, plus the deselect and the open-with commands (\fIow\fR). There are two available modes: standard and FZF (see the \fBBUILT\-IN EXPANSIONS\fR section below)
   5) More than 40 customizable keyboard shortcuts
   6) Wildcards and regex auto\-expansion
   7) Braces auto\-expansion
@@ -147,7 +147,7 @@ List of CliFM features:
   41) Syntax highlighting
   42) Interactive rename functionality for the \fIm\fR command
   43) Easily mount/unmount storage devices via the \fImedia\fR command
-  44) Fine-grained control over the program settings via the \fIautocommands\fR function
+  44) Control settings on a per directory basis via the \fIautocommands\fR function
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
@@ -764,10 +764,11 @@ with no argument, print the current sorting method. Else, set sorting method to 
 .sp
 By default, files are sorted from less to more (ex: from 'a' to 'z' if using the "name" method). Use the 'rev' option to invert this order. Ex: 'st rev' or 'st 3 rev'. Switch back to the previous ordering running 'st rev' again.
 .TP
-.B t, tr, trash  \fR[ELN/FILE ... n] [ls, list] [clear] [del, rm]
-with no argument (or by passing the 'ls' option), it prints a list of currently trashed files. The 'clear' option removes all files from the trash can, while the 'del' option lists trashed files allowing you to remove one or more of them.
+.B t, tr, trash  \fR[ELN/FILE ... n] [ls, list] [clear] [del [FILE(s)]]
+with no argument (or by passing the 'ls' option), it prints the list of currently trashed files. The 'clear' parameter removes all files from the trash can, while the 'del' parameter lists trashed files allowing the user to remove one or more of them. If using 'del', TAB completion to list/select currently trashed files is available.
 .sp
 The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the Freedesktop specification, it is able to handle files trashed by different Trash implementations.
+.sp To undelete/untrash trashed files see the \fIundel\fR command below.
 .TP
 .B te \fRFILE(s)
 toggle executable bit (on user, group, and others) on FILE(s). It is equivalent to the -x and +x options for the shell \fBchmod\fR(1) command.
@@ -775,8 +776,8 @@ toggle executable bit (on user, group, and others) on FILE(s). It is equivalent 
 .B tips
 print the list of CliFM tips
 .TP
-.B u, undel, untrash \fR[*, a, all]
-print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the '*', 'a' or 'all' option.
+.B u, undel, untrash \fR[*, a, all] [FILE(s)]
+If file names are passed as parameters, undelete these files, that is, restore them to their original location. Otherwise, this function prints a list of currently trashed files allowing you to choose one or more of these files to be undeleted. Use the '*', 'a' or 'all' parameter to undelete all trashed files at once. TAB completion to list/select currently trashed files is available.
 .TP
 .B uc, unicode \fR[on, off, status]
 toggle unicode on/off.
@@ -1226,7 +1227,7 @@ Since ranges could be a bit tricky, TAB completion is available to make sure thi
 .TP
 If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
 .TP
-TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, selected files, the 'sel' keyword, plus the deselect and the open-with commands (\fIow\fR) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function. 
+TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, selected files, the 'sel' keyword, trashed files, plus the deselect and the open-with commands (\fIow\fR) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function.
 .TP
 Of course, combinations of all these features is also possible. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
 .TP
