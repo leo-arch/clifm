@@ -1354,8 +1354,16 @@ mime_open(char **args)
 
 	cmd[pos] = (char *)NULL;
 
-	int is_config = (args[1] && args[1] == config_file) ? 1 : 0;
-	int ret = launch_execve(cmd, ((bg || bg_proc) && !is_config)
+	/* Do not run in the background if opening the config file or if the command
+	 * is bulk rename */
+	int no_bg = (args[1] && args[1] == config_file) ? 1 : 0;
+	if (!no_bg) {
+		char *l = rl_line_buffer;
+		if (*l == 'b' && ((l[1] == 'r' && l[2] == ' ')
+		|| (l[1] == 'u' && strncmp(l, "bulk ", 5) == 0)))
+			no_bg = 1;
+	}
+	int ret = launch_execve(cmd, ((bg || bg_proc) && !no_bg)
 			? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	free(file_path);

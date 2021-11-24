@@ -1395,6 +1395,41 @@ nets_generator(const char *text, int state)
 
 	return (char *)NULL;
 }
+/*
+static char *
+env_var_generator(const char *text, int state)
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while ((name = environ[i++]) != NULL) {
+		char *p = strchr(name, '=');
+		if (!p)
+			return (char *)NULL;
+		else
+			*p = '\0';
+		if (len == 0) {
+			char *pp = strdup(name);
+			*p = '=';
+			return pp;
+		}
+		int ret = strncmp(name, text, len);
+		if (ret == 0) {
+			char *pp = strdup(name);
+			*p = '=';
+			return pp;
+		}
+		*p = '=';
+	}
+
+	return (char *)NULL;
+} */
 
 static char *
 sort_name_generator(const char *text, int state)
@@ -1590,6 +1625,10 @@ my_rl_completion(const char *text, int start, int end)
 			if (matches)
 				cur_comp_type = TCMP_CMD;
 		}
+
+/*		if (!_xrename && !matches && *text == '$') {
+			matches = rl_completion_matches(text + 1, &env_var_generator);
+		} */
 	}
 
 	/* Second word or more */
