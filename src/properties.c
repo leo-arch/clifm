@@ -424,7 +424,7 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	/*  If file name length is greater than max, truncate it
 	 * to max (later a tilde (~) will be appended to let the user know
 	 * the file name was truncated) */
-	char trim_name[NAME_MAX];
+	char tname[NAME_MAX];
 	int trim = 0;
 
 	size_t cur_len = 0;
@@ -439,17 +439,18 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	}
 #endif
 
+	int dif = 0;
 	if (cur_len > max) {
 		int rest = (int)(cur_len - max);
 		trim = 1;
-		strcpy(trim_name, props->name);
+		strcpy(tname, props->name);
 		int a = (int)props->len - rest - 1;
 		if (a < 0)
 			a = 0;
 		if (unicode)
-			u8truncstr(trim_name, (size_t)(a));
+			dif = u8truncstr(tname, (size_t)(a));
 		else
-			trim_name[a] = '\0';
+			tname[a] = '\0';
 		cur_len -= (size_t)rest;
 	}
 
@@ -459,17 +460,20 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	if (pad < 0)
 		pad = 0;
 
+	if (!trim)
+		mbstowcs((wchar_t *)tname, props->name, NAME_MAX);
+
 #ifndef _NO_ICONS
-	printf("%s%s%c%s%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
+	printf("%s%s%c%s%ls\x1b[%dC%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
 	       "%u:%u  %s  %s\n",
 	    colorize ? props->icon_color : "",
 	    icons ? props->icon : "", icons ? ' ' : 0, df_c,
 #else
-	printf("%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
+	printf("%s%ls\x1b[%dC%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
 	       "%u:%u  %s  %s\n",
 #endif
 	    colorize ? props->color : "",
-	    !trim ? props->name : trim_name,
+		(wchar_t *)tname, dif > 0 ? dif + 1 : 0,
 	    light_mode ? "" : df_c, pad, "", df_c,
 	    trim ? '~' : 0, file_type,
 	    read_usr, write_usr, exec_usr,

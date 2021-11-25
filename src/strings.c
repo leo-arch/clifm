@@ -91,16 +91,37 @@ wc_xstrlen(const char *restrict str)
 	return len;
 }
 
-/* Truncate an UTF-8 string at length N. Returns zero if truncated and
- * one if not */
+/* Truncate an UTF-8 string at width N. Returns the difference beetween
+ * N and the point at which STR was trimmed (this difference should be
+ * added to STR as spaces to equate N and get a correct length) */
+int
+u8truncstr(char *restrict str, size_t n)
+{
+	int len = 0;
+	wchar_t buf[NAME_MAX];
+	if (mbstowcs(buf, str, NAME_MAX) == (size_t)-1)
+		return 0;
+
+	int i = 0;
+	for (; buf[i]; i++) {
+		int l = wcwidth(buf[i]);
+		if (len + l > (int)n) {
+			buf[i] = L'\0';
+			break;
+		}
+		len += l;
+	}
+
+	wcscpy((wchar_t *)str, buf);
+	return (int)n - len;
+}
+/*
 int
 u8truncstr(char *restrict str, size_t n)
 {
 	size_t len = 0;
 
 	while (*(str++)) {
-		/* Do not count continuation bytes (used by multibyte, that is,
-		 * wide or non-ASCII characters) */
 		if ((*str & 0xc0) != 0x80) {
 			len++;
 			if (len == n) {
@@ -111,7 +132,7 @@ u8truncstr(char *restrict str, size_t n)
 	}
 
 	return EXIT_FAILURE;
-}
+} */
 
 /* An strlen implementation able to handle unicode characters. Taken from:
 * https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
