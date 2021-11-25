@@ -1389,7 +1389,8 @@ nets_generator(const char *text, int state)
 	}
 
 	while ((name = remotes[i++].name) != NULL) {
-		if (strncmp(name, text, len) == 0)
+		if (case_sens_path_comp ? strncmp(name, text, len)
+		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
 	}
 
