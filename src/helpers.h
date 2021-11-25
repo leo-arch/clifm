@@ -776,7 +776,7 @@ extern int
 	no_eln,
 	no_log,
 	only_dirs,
-	open_in_foreground,
+	open_in_foreground, /* Override mimelist file: used by mime_open */
 	pager,
 	print_msg,
 	print_selfiles,
@@ -809,7 +809,7 @@ extern int
 	warn_wrong_cmd,
 	welcome_message,
 	_xrename,
-	xrename;
+	xrename; /* We're running a secondary prompt for the rename function */
 
 //#ifndef _NO_HIGHLIGHT
 extern int wrong_cmd;

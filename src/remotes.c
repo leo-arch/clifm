@@ -260,7 +260,9 @@ remotes_edit(char *app)
 		char *cmd[] = {app, remotes_file, NULL};
 		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
+		open_in_foreground = 1;
 		ret = open_file(remotes_file);
+		open_in_foreground = 0;
 	}
 
 	if (ret != EXIT_SUCCESS)

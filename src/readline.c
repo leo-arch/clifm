@@ -1789,7 +1789,6 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### PROFILES COMPLETION ### */
-
 		else if (!_xrename && *rl_line_buffer == 'p' && (rl_line_buffer[1] == 'r'
 		|| rl_line_buffer[1] == 'f')
 		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0
