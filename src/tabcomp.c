@@ -1387,7 +1387,7 @@ CALC_OFFSET:
 				} else {
 					if (tab_offset) {
 						/* Print the matching part of the match */
-						printf("%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
+						printf("\x1b[0m%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
 						(cur_comp_type == TCMP_CMD) ? (colorize
 						? ex_c : "") : dc_c);
 					}
