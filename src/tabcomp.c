@@ -1074,8 +1074,8 @@ AFTER_USUAL_COMPLETION:
 		if (replacement && cur_comp_type != TCMP_HIST
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
 		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)) {
-			if ((cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL)
-			&& !strchr(replacement, '\\')) {
+			if ((cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL
+			|| cur_comp_type == TCMP_NET) && !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
 					if (replacement != matches[0])
