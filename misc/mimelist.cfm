@@ -52,7 +52,7 @@ X:(^text/.*|application/json|inode/x-empty)=micro;nano;vim;vi;emacs;ed;leafpad;m
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
 
 # Archives
-X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
+X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %f &>/dev/null &
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
 
 # PDF
