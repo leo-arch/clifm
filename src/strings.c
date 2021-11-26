@@ -101,8 +101,7 @@ int
 u8truncstr(char *restrict str, size_t n)
 {
 	int len = 0;
-	wchar_t buf[PATH_MAX];
-	*buf = '\0';
+	wchar_t buf[PATH_MAX] = "";
 	if (mbstowcs(buf, str, sizeof(buf)) == (size_t)-1)
 		return 0;
 
