@@ -101,8 +101,6 @@ int
 u8truncstr(char *restrict str, size_t n)
 {
 	int len = 0;
-	/* NAME_MAX should be enough: this function is used to trim file names,
-	 * not paths */
 	wchar_t buf[PATH_MAX];
 	if (mbstowcs(buf, str, sizeof(buf)) == (size_t)-1)
 		return 0;

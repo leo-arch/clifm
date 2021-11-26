@@ -51,6 +51,10 @@ X:(^text/.*|application/json|inode/x-empty)=micro;nano;vim;vi;emacs;ed;leafpad;m
 # Office documents
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
 
+# Archives
+X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
+!X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
+
 # PDF
 X:.*/pdf$=mupdf;llpp;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;qpdfview
 
