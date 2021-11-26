@@ -180,7 +180,7 @@ get_block_devices(void)
 static int
 unmount_dev(size_t i, const int n)
 {
-	if (n + 1 < 1 || n + 1 > (int)i) {
+	if (n + (unsigned int)1 < (unsigned int)1 || n + 1 > (int)i) {
 		fprintf(stderr, _("%s: %d: Invalid ELN\n"), PROGRAM_NAME, n + 1);
 		return EXIT_FAILURE;
 	}
