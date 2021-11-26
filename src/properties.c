@@ -464,7 +464,7 @@ print_entry_props(const struct fileinfo *props, size_t max)
 		mbstowcs((wchar_t *)tname, props->name, sizeof(tname));
 
 #ifndef _NO_ICONS
-	printf("%s%s%c%s%ls\x1b[%dC%s%s%-*s%s%s %c/%c%c%c/%c%c%c/%c%c%c%s  "
+	printf("%s%s%c%s%s%ls\x1b[%dC%s%-*s%s%s %c/%c%c%c/%c%c%c/%c%c%c%s  "
 	       "%u:%u  %s  %s\n",
 	    colorize ? props->icon_color : "",
 	    icons ? props->icon : "", icons ? ' ' : 0, df_c,
