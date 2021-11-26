@@ -70,11 +70,11 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	return (size_t)(end - dst - 1);
 }
 
+/* A strlen implementation able to handle wide chars */
 size_t
 wc_xstrlen(const char *restrict str)
 {
 	size_t len, _len;
-/*#ifndef _BE_POSIX */
 	wchar_t *const wbuf = (wchar_t *)len_buf;
 
 	/* Convert multi-byte to wide char */
@@ -84,20 +84,24 @@ wc_xstrlen(const char *restrict str)
 		len = (size_t)p;
 	else
 		len = 0;
-/*#else
-	len = u8_xstrlen(str);
-#endif */
 
 	return len;
 }
 
 /* Truncate an UTF-8 string at width N. Returns the difference beetween
- * N and the point at which STR was trimmed (this difference should be
- * added to STR as spaces to equate N and get a correct length) */
+ * N and the point at which STR was actually trimmed (this difference
+ * should be added to STR as spaces to equate N and get a correct length)
+ * Since a wide char could take two o more columns to be draw, and since
+ * you might want to trim the name in the middle of a wide char, this
+ * function won't store the last wide char to avoid taking more columns
+ * than N. In this case, the programmer should take care of filling the
+ * empty spaces (usually no more than one) herself */
 int
 u8truncstr(char *restrict str, size_t n)
 {
 	int len = 0;
+	/* NAME_MAX should be enough: this function is used to trim file names,
+	 * not paths */
 	wchar_t buf[NAME_MAX];
 	if (mbstowcs(buf, str, NAME_MAX) == (size_t)-1)
 		return 0;
@@ -115,24 +119,6 @@ u8truncstr(char *restrict str, size_t n)
 	wcscpy((wchar_t *)str, buf);
 	return (int)n - len;
 }
-/*
-int
-u8truncstr(char *restrict str, size_t n)
-{
-	size_t len = 0;
-
-	while (*(str++)) {
-		if ((*str & 0xc0) != 0x80) {
-			len++;
-			if (len == n) {
-				*str = '\0';
-				return EXIT_SUCCESS;
-			}
-		}
-	}
-
-	return EXIT_FAILURE;
-} */
 
 /* An strlen implementation able to handle unicode characters. Taken from:
 * https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
@@ -142,7 +128,7 @@ u8truncstr(char *restrict str, size_t n)
 * takes more than 1 byte, and this is why strlen() does not work as
 * expected for this kind of chars: a 6 chars string might take 12 or
 * more bytes */
-size_t
+/*size_t
 u8_xstrlen(const char *restrict str)
 {
 	size_t len = 0;
@@ -153,7 +139,7 @@ u8_xstrlen(const char *restrict str)
 	}
 
 	return len;
-}
+} */
 
 /* Returns the index of the first appearance of c in str, if any, and
  * -1 if c was not found or if no str. NOTE: Same thing as strchr(),
