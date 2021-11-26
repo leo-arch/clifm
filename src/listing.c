@@ -410,7 +410,6 @@ set_events_checker(void)
 static inline void
 get_longest_filename(const int n, const int pad)
 {
-//	int i = n;
 	int i = (max_files != UNSET && max_files < n) ? max_files : n;
 
 	while (--i >= 0) {

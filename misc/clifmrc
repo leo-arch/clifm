@@ -124,7 +124,8 @@ LongViewMode=false
 LogCmds=false
 
 # Minimum length at which a file name can be trimmed in long view mode
-# (including ELN length and spaces)
+# (including ELN length and spaces). When running in long mode, this
+# setting overrides MaxFilenameLen.
 MinFilenameTrim=20
 
 # When a directory rank in the jump database is below MinJumpRank, it
@@ -242,6 +243,7 @@ Pager=false
 
 # Maximum file name length for listed files. Names larger than
 # MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde
+# When running in long mode, this setting is overriden by MinFilenameTrim
 MaxFilenameLen=
 
 MaxHistory=1000

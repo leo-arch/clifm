@@ -858,7 +858,8 @@ LongViewMode=%s\n\n\
 LogCmds=%s\n\n"
 
 	    "# Minimum length at which a file name can be trimmed in long view mode\n\
-# (including ELN length and spaces)\n\
+# (including ELN length and spaces). When running in long mode, this setting\n\
+# overrides MaxFilenameLen\n\
 MinFilenameTrim=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
@@ -994,7 +995,8 @@ Unicode=%s\n\n\
 Pager=%s\n\n"
 
 	"# Maximum file name length for listed files. Names larger than\n\
-# MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde\n\
+# MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde.\n\
+# When running in long mode, this setting is overriden by MinFilenameTrim\n\
 MaxFilenameLen=\n\n"
 
 	"MaxHistory=%d\n\
