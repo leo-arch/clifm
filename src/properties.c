@@ -461,7 +461,7 @@ print_entry_props(const struct fileinfo *props, size_t max)
 		pad = 0;
 
 	if (!trim || !unicode)
-		mbstowcs((wchar_t *)tname, props->name, sizeof(tname));
+		mbstowcs((wchar_t *)tname, props->name, PATH_MAX);
 
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls\x1b[%dC%s%-*s%s%s %c/%c%c%c/%c%c%c/%c%c%c%s  "
