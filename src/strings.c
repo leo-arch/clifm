@@ -56,7 +56,8 @@ xstrnlen(const char *restrict s)
 	return (size_t)((char *)memchr(s, '\0', MAX_STR_SZ) - s);
 }
 
-/* Taken from NNN's source code: very clever */
+/* Taken from NNN's source code: very clever. Copy SRC into DST
+ * and return the string size all at once */
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
@@ -120,27 +121,6 @@ u8truncstr(char *restrict str, size_t n)
 	return (int)n - len;
 }
 
-/* An strlen implementation able to handle unicode characters. Taken from:
-* https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
-* Explanation: strlen() counts bytes, not chars. Now, since ASCII chars
-* take each 1 byte, the amount of bytes equals the amount of chars.
-* However, non-ASCII or wide chars are multibyte chars, that is, one char
-* takes more than 1 byte, and this is why strlen() does not work as
-* expected for this kind of chars: a 6 chars string might take 12 or
-* more bytes */
-/*size_t
-u8_xstrlen(const char *restrict str)
-{
-	size_t len = 0;
-
-	while (*(str++)) {
-		if ((*str & 0xc0) != 0x80)
-			len++;
-	}
-
-	return len;
-} */
-
 /* Returns the index of the first appearance of c in str, if any, and
  * -1 if c was not found or if no str. NOTE: Same thing as strchr(),
  * except that returns an index, not a pointer */
@@ -183,38 +163,6 @@ strcntchrlst(const char *str, const char c)
 	return p;
 }
 
-/* Returns the string after the first appearance of a given char, or
- * returns NULL if C is not found in STR or C is the last char in STR. */
-/*
-char *
-straft(char *str, const char c)
-{
-	if (!str || !*str || !c)
-		return (char *)NULL;
-
-	char *p = str, *q = (char *)NULL;
-
-	while (*p) {
-		if (*p == c) {
-			q = p;
-			break;
-		}
-		p++;
-	}
-
-	// If C was not found or there is nothing after C
-	if (!q || !*(q + 1))
-		return (char *)NULL;
-
-	char *buf = (char *)malloc(strlen(q + 1) + 1);
-
-	if (!buf)
-		return (char *)NULL;
-
-	strcpy(buf, q + 1);
-	return buf;
-} */
-
 /* Returns the string after the last appearance of a given char, or
  * NULL if no match */
 char *
@@ -242,45 +190,6 @@ straftlst(char *str, const char c)
 	strcpy(buf, q + 1);
 	return buf;
 }
-
-/* Returns the substring in str before the first appearance of c. If
- * not found, or C is the first char in STR, returns NULL */
-/*char *
-strbfr(char *str, const char c)
-{
-	if (!str || !*str || !c)
-		return (char *)NULL;
-
-	char *p = str, *q = (char *)NULL;
-	while (*p) {
-		if (*p == c) {
-			q = p; // q is now a pointer to C in STR
-			break;
-		}
-		p++;
-	}
-
-	// C was not found or it was the first char in STR
-	if (!q || q == str)
-		return (char *)NULL;
-
-	*q = '\0';
-	// Now C (because q points to C) is the null byte and STR ends in
-	// C, which is what we want
-
-	char *buf = (char *)malloc((size_t)(q - str + 1));
-
-	if (!buf) { // Memory allocation error
-		// Give back to C its original value, so that STR is not
-		// modified in the process
-		*q = c;
-		return (char *)NULL;
-	}
-
-	strcpy(buf, str);
-	*q = c;
-	return buf;
-} */
 
 /* Get substring in STR before the last appearance of C. Returns
  * substring  if C is found and NULL if not (or if C was the first
@@ -871,6 +780,8 @@ check_shell_functions(char *str)
  * simply use rl_line_buffer. However, since I use this function to
  * parse other strings, like history lines, I need to keep the str
  * argument */
+
+/* This shit is HUGE! Almost 1000 LOC and a lot of indentation! */
 char **
 parse_input_str(char *str)
 {
