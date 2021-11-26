@@ -424,7 +424,7 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	/*  If file name length is greater than max, truncate it
 	 * to max (later a tilde (~) will be appended to let the user know
 	 * the file name was truncated) */
-	char tname[PATH_MAX];
+	char tname[PATH_MAX * sizeof(wchar_t)];
 	int trim = 0;
 
 	size_t cur_len = 0;
