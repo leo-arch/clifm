@@ -421,6 +421,10 @@ get_longest_filename(const int n, const int pad)
 		if (file_info[i].len > (size_t)max_name_len)
 			file_info[i].len = (size_t)max_name_len;
 
+		if (long_view && min_name_trim != UNSET
+		&& file_info[i].len < (size_t)min_name_trim)
+			file_info[i].len = (size_t)min_name_trim;
+
 		if (elnpad == NOPAD)
 			total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
 		else
