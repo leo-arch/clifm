@@ -464,18 +464,18 @@ print_entry_props(const struct fileinfo *props, size_t max)
 		mbstowcs((wchar_t *)tname, props->name, NAME_MAX);
 
 #ifndef _NO_ICONS
-	printf("%s%s%c%s%ls\x1b[%dC%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
+	printf("%s%s%c%s%ls\x1b[%dC%s%s%-*s%s%s %c/%c%c%c/%c%c%c/%c%c%c%s  "
 	       "%u:%u  %s  %s\n",
 	    colorize ? props->icon_color : "",
 	    icons ? props->icon : "", icons ? ' ' : 0, df_c,
 #else
-	printf("%s%ls\x1b[%dC%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
+	printf("%s%ls\x1b[%dC%s%-*s%s%s %c/%c%c%c/%c%c%c/%c%c%c%s  "
 	       "%u:%u  %s  %s\n",
 #endif
 	    colorize ? props->color : "",
-		(wchar_t *)tname, dif > 0 ? dif + 1 : 0,
+		(wchar_t *)tname, dif > 0 ? dif : -1,
 	    light_mode ? "" : df_c, pad, "", df_c,
-	    trim ? '~' : 0, file_type,
+	    trim ? "\x1b[1;31m~\x1b[0m" : "", file_type,
 	    read_usr, write_usr, exec_usr,
 	    read_grp, write_grp, exec_grp,
 	    read_others, write_others, exec_others,
