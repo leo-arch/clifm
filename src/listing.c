@@ -1438,7 +1438,7 @@ list_dir_light(void)
 		}
 
 		/* ################  */
-#if !defined(_DIRENT_HAVE_D_TYPE)
+#ifndef _DIRENT_HAVE_D_TYPE
 		file_info[n].type = get_dt(attr.st_mode);
 #else
 		/* If type is unknown, we might be facing a file system not
@@ -1854,8 +1854,6 @@ list_dir(void)
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
-//		file_info[n].exec = 0;
-
 		if (stat_ok) {
 			switch (attr.st_mode & S_IFMT) {
 			case S_IFBLK: file_info[n].type = DT_BLK; break;
@@ -1885,30 +1883,6 @@ list_dir(void)
 		}
 		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
-
-/*		if (stat_ok) {
-			file_info[n].inode = ent->d_ino;
-			file_info[n].linkn = attr.st_nlink;
-			file_info[n].size = attr.st_size;
-
-			file_info[n].uid = attr.st_uid;
-			file_info[n].gid = attr.st_gid;
-			file_info[n].mode = attr.st_mode;
-			if (long_view)
-				file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
-		} */
-
-//		file_info[n].color = (char *)NULL;
-//		file_info[n].ext_color = (char *)NULL;
-
-#ifndef _NO_ICONS
-		/* Default icon for all files */
-//		file_info[n].icon = DEF_FILE_ICON;
-//		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
-#endif
-
-//		file_info[n].ruser = 1;
-//		file_info[n].filesn = 0;
 
 		switch (sort) {
 		case SATIME:
@@ -1954,7 +1928,6 @@ list_dir(void)
 			if (files_counter) {
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			} else {
-//				if (check_file_access(file_info[n]) == 0)
 				if (stat_ok && check_file_access(attr) == 0)
 					file_info[n].filesn = -1;
 				else
@@ -2010,7 +1983,6 @@ list_dir(void)
 #endif
 			/* Do not perform the access check if the user is root */
 			if (!(flags & ROOT_USR)
-//			&& check_file_access(file_info[n]) == 0) {
 			&& stat_ok && check_file_access(attr) == 0) {
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
