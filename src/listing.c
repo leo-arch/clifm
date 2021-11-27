@@ -316,8 +316,7 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 {
 	fputs(PAGER_LABEL, stdout);
 
-	int c = 0;
-	switch ((c = xgetchar())) {
+	switch (xgetchar()) {
 
 	/* Advance one line at a time */
 	case 66: /* fallthrough */ /* Down arrow */

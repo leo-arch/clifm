@@ -327,6 +327,9 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 	if (!ss || !*ss)
 		ss = rl_line_buffer;
 
+	if (!ss)
+		return;
+
 	char deq_str[PATH_MAX];
 	*deq_str = '\0';
 	if (strchr(ss, '\\')) {

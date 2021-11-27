@@ -680,12 +680,12 @@ copy_function(char **comm)
 	char *tmp_cmd = (char *)NULL;
 	size_t total_len = 0, i = 0;
 
-	for (i = 0; i <= args_n; i++)
+	for (i = 0; comm[i]; i++)
 		total_len += strlen(comm[i]);
 
 	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
 
-	for (i = 0; i <= args_n; i++) {
+	for (i = 0; comm[i]; i++) {
 		strcat(tmp_cmd, comm[i]);
 		strcat(tmp_cmd, " ");
 	}

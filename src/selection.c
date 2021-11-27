@@ -757,7 +757,7 @@ ERROR:
 }
 
 static int
-desel_entries(char **desel_elements, size_t desel_n, int a)
+desel_entries(char **desel_elements, size_t desel_n, int all)
 {
 	/* If a valid ELN and not asterisk... */
 	/* Store the full path of all the elements to be deselected in a new
@@ -770,14 +770,14 @@ desel_entries(char **desel_elements, size_t desel_n, int a)
 
 	int i = (int)desel_n;
 
-	if (a == 0) {
+	if (all == 0) {
 		desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
 		while (--i >= 0) {
 			int desel_int = atoi(desel_elements[i]);
 			desel_path[i] = savestring(sel_elements[desel_int - 1],
 				strlen(sel_elements[desel_int - 1]));
 		}
-	} else {
+	} else { /* Deselect all selected files */
 		desel_path = desel_elements;
 	}
 
@@ -789,6 +789,9 @@ desel_entries(char **desel_elements, size_t desel_n, int a)
 	i = (int)desel_n;
 	while (--i >= 0) {
 		int j, k;
+
+		if (!desel_path[i])
+			continue;
 
 		k = (int)sel_n;
 		while (--k >= 0) {
@@ -808,7 +811,7 @@ desel_entries(char **desel_elements, size_t desel_n, int a)
 
 		if (desel_index == -1) {
 			dn--;
-			if (a) {
+			if (all) {
 				err_printed = 1;
 				fprintf(stderr, _("%s: %s: No such selected file\n"),
 					PROGRAM_NAME, desel_path[i]);
@@ -853,11 +856,11 @@ FREE:
 	/* Deallocate local arrays */
 	i = (int)desel_n;
 	while (--i >= 0) {
-		if (a == 0)
+		if (all == 0)
 			free(desel_path[i]);
 		free(desel_elements[i]);
 	}
-	if (a == 0)
+	if (all == 0)
 		free(desel_path);
 	else if (err_printed)
 		printf(_("%d file(s) deselected. "), dn);

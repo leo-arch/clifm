@@ -1329,7 +1329,9 @@ bin_cmd_generator(const char *text, int state)
 	}
 
 	while ((name = bin_commands[i++]) != NULL) {
-		if ((!text || !*text || *text == *name) && strncmp(name, text, len) == 0)
+		if (!text || !*text)
+			return strdup(name);
+		if (*text == *name && strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
 
@@ -1524,8 +1526,15 @@ rl_trashed_files(const char *text)
 
 	xchdir(ws[cur_ws].path, NO_TITLE);
 
-	if (n == - 1 || n == 2)
+	if (n == - 1)
 		return (char **)NULL;
+
+	if (n == 2) {
+		free(t[0]);
+		free(t[1]);
+		free(t);
+		return (char **)NULL;
+	}
 
 	char **tfiles = (char **)xnmalloc((size_t)n + 2, sizeof(char *));
 	if (text) {
@@ -1536,10 +1545,10 @@ rl_trashed_files(const char *text)
 	}
 
 	int nn = 1, i = 0;
-	size_t tlen = strlen(text);
+	size_t tlen = text ? strlen(text) : 0;
 	for (; i < n; i++) {
 		char *name = t[i]->d_name;
-		if (SELFORPARENT(name) || strncmp(text, name, tlen) != 0) {
+		if (SELFORPARENT(name) || !text || strncmp(text, name, tlen) != 0) {
 			free(t[i]);
 			continue;
 		}

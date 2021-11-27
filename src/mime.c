@@ -545,6 +545,9 @@ mime_list_open(char **apps, char *file)
 		n[nn++] = apps[i];
 	}
 
+	if (!n)
+		return EXIT_FAILURE;
+
 	int pad = DIGINUM(nn + 1);
 	for (i = 0; i < nn; i++)
 		printf("%s%*zu%s %s\n", el_c, pad, i + 1, df_c, n[i]);
@@ -553,7 +556,7 @@ mime_list_open(char **apps, char *file)
 	char *input = get_user_input(&a, &nn);
 
 	int ret = EXIT_FAILURE;
-	if (input && a) {
+	if (input && a && n[a - 1]) {
 		char *qfile = escape_str(file);
 		if (!qfile) {
 			fprintf(stderr, _("%s: %s: Error escaping file name\n"),
@@ -1033,14 +1036,19 @@ mime_open_with(char *filename, char **args)
 		}
 	}
 
-	apps[appsn] = (char *)NULL;
-
 	free(line);
 	fclose(defs_fp);
 
 	free(app);
 	free(mime);
 	free(ext);
+
+	if (!apps) {
+		free(name);
+		return EXIT_FAILURE;
+	}
+
+	apps[appsn] = (char *)NULL;
 
 	int ret = mime_list_open(apps, name);
 

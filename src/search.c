@@ -187,7 +187,7 @@ search_glob(char **comm, int invert)
 	} */
 
 	/* If search string is just "STR" (no glob chars), change it
-	 * to "*STR*" */
+	 * to ".*STR.*" */
 	if (!glob_char_found) {
 		size_t search_str_len = strlen(comm[0]);
 
@@ -200,7 +200,7 @@ search_glob(char **comm, int invert)
 		tmp = comm[0];
 		if (invert) {
 			++tmp;
-			search_str_len = strlen(tmp);
+//			search_str_len = strlen(tmp);
 		}
 /*
 #ifndef __TEST
