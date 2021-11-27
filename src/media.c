@@ -246,7 +246,54 @@ get_dev_label(void)
 	free(labels);
 	return label;
 }
-#endif // __linux__
+
+static void
+list_unmounted_devs(void)
+{
+	size_t k = mp_n;
+	char **unm_devs = (char **)NULL;
+	unm_devs = get_block_devices();
+
+	if (!unm_devs)
+		return;
+
+	printf(_("\n%sUnmounted devices%s\n\n"), BOLD, df_c);
+	int i = 0;
+	for (; unm_devs[i]; i++) {
+		int skip = 0;
+		size_t j = 0;
+		// Skip already mounted devices
+		for (; j < k; j++) {
+			if (strcmp(media[j].dev, unm_devs[i]) == 0)
+				skip = 1;
+		}
+		if (skip) {
+			free(unm_devs[i]);
+			continue;
+		}
+
+		media = (struct mnt_t *)xrealloc(media,
+			    (mp_n + 2) * sizeof(struct mnt_t));
+		media[mp_n].dev = savestring(unm_devs[i], strlen(unm_devs[i]));
+		media[mp_n].mnt = (char *)NULL;
+
+		media[mp_n].label = get_dev_label();
+
+		if (media[mp_n].label)
+			printf("%s%zu %s%s [%s%s%s]\n", el_c, mp_n + 1, df_c,
+					media[mp_n].dev, mi_c, media[mp_n].label, df_c);
+		else
+			printf("%s%zu %s%s\n", el_c, mp_n + 1, df_c, media[mp_n].dev);
+		mp_n++;
+		free(unm_devs[i]);
+	}
+	free(unm_devs);
+
+	media[mp_n].dev = (char *)NULL;
+	media[mp_n].mnt = (char *)NULL;
+	media[mp_n].label = (char *)NULL;
+}
+#endif /* __linux__ */
 
 static int
 list_mounted_devs(int mode)
@@ -311,55 +358,6 @@ list_mounted_devs(int mode)
 	media[mp_n].label = (char *)NULL;
 
 	return EXIT_SUCCESS;
-}
-
-static void
-list_unmounted_devs(void)
-{
-	size_t k = mp_n;
-	char **unm_devs = (char **)NULL;
-#ifdef __linux__
-	unm_devs = get_block_devices();
-#endif
-	if (unm_devs) {
-		printf(_("\n%sUnmounted devices%s\n\n"), BOLD, df_c);
-		int i = 0;
-		for (; unm_devs[i]; i++) {
-			int skip = 0;
-			size_t j = 0;
-			// Skip already mounted devices
-			for (; j < k; j++) {
-				if (strcmp(media[j].dev, unm_devs[i]) == 0)
-					skip = 1;
-			}
-			if (skip) {
-				free(unm_devs[i]);
-				continue;
-			}
-
-			media = (struct mnt_t *)xrealloc(media,
-				    (mp_n + 2) * sizeof(struct mnt_t));
-			media[mp_n].dev = savestring(unm_devs[i], strlen(unm_devs[i]));
-			media[mp_n].mnt = (char *)NULL;
-#ifdef __linux__
-			media[mp_n].label = get_dev_label();
-#else
-			media[mp_n].label = (char *)NULL;
-#endif // __linux__
-			if (media[mp_n].label)
-				printf("%s%zu %s%s [%s%s%s]\n", el_c, mp_n + 1, df_c,
-						media[mp_n].dev, mi_c, media[mp_n].label, df_c);
-			else
-				printf("%s%zu %s%s\n", el_c, mp_n + 1, df_c, media[mp_n].dev);
-			mp_n++;
-			free(unm_devs[i]);
-		}
-		free(unm_devs);
-
-		media[mp_n].dev = (char *)NULL;
-		media[mp_n].mnt = (char *)NULL;
-		media[mp_n].label = (char *)NULL;
-	}
 }
 
 /* Mount device and store mountpoint */
