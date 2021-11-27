@@ -134,7 +134,7 @@ get_block_devices(void)
 	char **bd = (char **)NULL;
 	size_t i = 0, n = 0;
 	for (; (int)i < block_n; i++) {
-#ifndef DIRENT_HAVE_D_TYPE
+#ifndef _DIRENT_HAVE_D_TYPE
 		char bpath[PATH_MAX];
 		snprintf(bpath, PATH_MAX, "/dev/%s", blockdev[i]->d_name);
 		struct stat a;
@@ -145,7 +145,7 @@ get_block_devices(void)
 		if (!S_ISBLK(a.st_mode)) {
 #else
 		if (blockdev[i]->d_type != DT_BLK) {
-#endif /* !DIRENT_HAVE_D_TYPE */
+#endif /* !_DIRENT_HAVE_D_TYPE */
 			free(blockdev[i]);
 			continue;
 		}

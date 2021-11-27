@@ -1813,7 +1813,7 @@ list_dir(void)
 		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
 			continue;
 
-		/* Filter files according to FILTER */
+		/* Filter files according to _FILTER */
 		if (_filter) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (filter_rev)
@@ -1832,7 +1832,11 @@ list_dir(void)
 		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1)
 			stat_ok = 0;
 
-		if (only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
+#ifdef _DIRENT_HAVE_D_TYPE
+		if (only_dirs && ent->d_type != DT_DIR)
+#else
+		if (stat_ok && only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
+#endif
 			continue;
 
 		if (count > ENTRY_N) {
