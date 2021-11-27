@@ -1397,7 +1397,7 @@ list_dir_light(void)
 	while ((ent = readdir(dir))) {
 		char *ename = ent->d_name;
 		/* Skip self and parent directories */
-		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
+		if (SELFORPARENT(ename))
 			continue;
 
 		/* Skip files according to FILTER */
@@ -1412,11 +1412,11 @@ list_dir_light(void)
 
 		if (!show_hidden && *ename == '.')
 			continue;
-#if !defined(_DIRENT_HAVE_D_TYPE)
+#ifndef _DIRENT_HAVE_D_TYPE
 		struct stat attr;
 		if (lstat(ename, &attr) == -1)
 			continue;
-		if (only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
+		if (only_dirs && !S_ISDIR(attr.st_mode))
 #else
 		if (only_dirs && ent->d_type != DT_DIR)
 #endif /* !_DIRENT_HAVE_D_TYPE */
@@ -1810,7 +1810,7 @@ list_dir(void)
 	while ((ent = readdir(dir))) {
 		char *ename = ent->d_name;
 		/* Skip self and parent directories */
-		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
+		if (SELFORPARENT(ename))
 			continue;
 
 		/* Filter files according to _FILTER */
@@ -1835,7 +1835,7 @@ list_dir(void)
 #ifdef _DIRENT_HAVE_D_TYPE
 		if (only_dirs && ent->d_type != DT_DIR)
 #else
-		if (stat_ok && only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
+		if (stat_ok && only_dirs && !S_ISDIR(attr.st_mode))
 #endif
 			continue;
 
