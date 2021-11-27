@@ -800,7 +800,7 @@ fzftabcomp(char **matches)
 			buf[j] = '\0';
 
 		char *q = (char *)NULL;
-		if (cur_comp_type != TCMP_OPENWITH) {
+		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_PATH) {
 			q = escape_str(buf);
 			if (!q)
 				return EXIT_FAILURE;
@@ -947,7 +947,7 @@ tab_complete(int what_to_do)
 AFTER_USUAL_COMPLETION:
 	free(text);
 
-	if (!matches) {
+	if (!matches || !matches[0]) {
 //		rl_ding();
 		rl_ring_bell();
 		return EXIT_FAILURE;
