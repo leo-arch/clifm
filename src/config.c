@@ -2234,17 +2234,11 @@ init_config(void)
 	define_config_file_names();
 	create_config_files();
 
-	static int c = 0;
-	if (c == 0) {
-		c = 1;
-		cschemes_n = get_colorschemes();
-		set_colors(usr_cscheme ? usr_cscheme : "default", 1);
-		free(usr_cscheme);
-		usr_cscheme = (char *)NULL;
-	}
-
 	if (config_ok)
 		read_config();
+
+	cschemes_n = get_colorschemes();
+	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
 
 	if ((flags & GUI) && getenv("XTERM_VERSION")) {
 		/* If running Xterm, instruct it to send an escape code (27)
@@ -2330,6 +2324,15 @@ reset_variables(void)
 
 	free(term);
 	term = (char *)NULL;
+
+	int i = (int)cschemes_n;
+	while (--i >= 0)
+		free(color_schemes[i]);
+	free(color_schemes);
+	color_schemes = (char **)NULL;
+	cschemes_n = 0;
+	free(usr_cscheme);
+	usr_cscheme = (char *)NULL;
 
 	free(user.shell);
 	user.shell = (char *)NULL;
@@ -2566,9 +2569,6 @@ reload_config(void)
 	check_options();
 	set_sel_file();
 	create_tmp_files();
-	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
-	free(usr_cscheme);
-	usr_cscheme = (char *)NULL;
 
 	/* If some option was set via command line, keep that value
 	 * for any profile */
@@ -2578,7 +2578,6 @@ reload_config(void)
 	int i = dirhist_total_index;
 	while (--i >= 0)
 		free(old_pwd[i]);
-
 	free(old_pwd);
 	old_pwd = (char **)NULL;
 

@@ -1083,11 +1083,12 @@ free_stuff(void)
 		free(stdin_tmp_dir);
 	}
 
-	if (color_schemes) {
-		for (i = 0; color_schemes[i]; i++)
-			free(color_schemes[i]);
-		free(color_schemes);
-	}
+	i = (int)cschemes_n;
+//		for (i = 0; color_schemes[i]; i++)
+	while (i-- > 0)
+		free(color_schemes[i]);
+	free(color_schemes);
+	free(usr_cscheme);
 
 	if (jump_db) {
 		i = (int)jump_n;

@@ -160,7 +160,7 @@ leftmost_bell(void)
 }
 
 static int
-rl_exclude_input(int c)
+rl_exclude_input(unsigned char c)
 {
 	/* If del or backspace, highlight, but do not suggest */
 	int _del = 0;
@@ -443,7 +443,7 @@ my_rl_getc(FILE *stream)
 				rl_quit(0, 0);
 
 			/* Syntax highlighting is made from here */
-			int ret = rl_exclude_input((int)c);
+			int ret = rl_exclude_input(c);
 			if (ret == 1)
 				return c;
 

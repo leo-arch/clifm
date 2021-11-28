@@ -1027,8 +1027,8 @@ static void
 get_cur_colorscheme(const char *colorscheme)
 {
 	char *def_cscheme = (char *)NULL;
-	size_t i;
-	for (i = 0; color_schemes[i]; i++) {
+	int i = (int)cschemes_n;
+	while (--i >= 0) {
 		if (*colorscheme == *color_schemes[i]
 		&& strcmp(colorscheme, color_schemes[i]) == 0) {
 			cur_cscheme = color_schemes[i];
@@ -1042,7 +1042,7 @@ get_cur_colorscheme(const char *colorscheme)
 
 	if (!cur_cscheme) {
 		_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
-			"Falling back to the default one\n"),
+			"Falling back to default\n"),
 			PROGRAM_NAME, colorscheme);
 
 		if (def_cscheme)
