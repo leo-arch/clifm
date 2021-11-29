@@ -83,7 +83,7 @@ preview_image() {
 		pixterm) pixterm -s 2 -tc $((COLUMNS - 2)) "$img" && return 0 ;;
 		catimg) catimg -H$LINES "$img" && return 0 ;;
 		img2txt) img2txt -H$LINES -W$((COLUMNS - 2)) "$img" && return 0 ;;
-		chafa) chafa -s "$((COLUMNS - 2))"x"$LINES" "$img" && return 0 ;;
+		chafa) chafa -s "$((COLUMNS - 2))x$LINES" "$img" && return 0 ;;
 		viu) viu -h$LINES -w$((COLUMNS - 2)) "$img" && return 0 ;;
 		*) "$IMG_VIEWER" "$img" && return 0 ;;
 	esac
@@ -132,6 +132,10 @@ handle_ext() {
 			md)
 				if [ "$GLOW_OK" = 1 ]; then
 					glow -s dark "$PWD/$entry" && exit 0
+				elif [ "$MDCAT_OK" = 1 ]; then
+					mdcat "$entry" && exit 0
+				elif [ "$BAT_OK" = 1 ]; then
+					bat "$entry" && exit 0
 				elif [ "$CAT_OK" =  1 ]; then
 					cat "$entry" && exit 0
 				fi
@@ -223,6 +227,7 @@ handle_mime() {
 
 			case "$ext" in
 				odt|ods|odp|sxw)
+					# shellcheck disable=SC2153
 					if [ "$ODT2TXT_OK" = 1 ]; then
 						odt2txt "$PWD/$entry" && exit 0
 					elif [ "$PANDOC_OK" = 1 ]; then

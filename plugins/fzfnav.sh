@@ -359,6 +359,7 @@ main() {
 				MARKDOWN="$value"
 				case "$value" in
 					glow) export GLOW_OK=1 ;;
+					mdcat) export MDCAT_OK=1 ;;
 					cat) export CAT_OK=1 ;;
 					none) ;;
 					*) MARKDOWN="" ;;
@@ -624,6 +625,8 @@ main() {
 	if [ -z "$MARKDOWN" ]; then
 		if type glow > /dev/null 2>&1; then
 			export GLOW_OK=1
+		elif type mdcat > /dev/null 2>&1; then
+			export MDCAT_OK=1
 		fi
 	fi
 
@@ -662,11 +665,11 @@ main() {
 
 	fcd "$@"
 
-	if [ -z "$DISPLAY" ]; then
-		clear
-	else
-		tput clear
-	fi
+#	if [ -z "$DISPLAY" ]; then
+#		clear
+#	else
+#		tput clear
+#	fi
 
 	[ -n "$CLIFM" ] && cat "$TMP" 2>/dev/null > "$CLIFM_BUS"
 	rm -f -- "$TMP" 2>/dev/null
