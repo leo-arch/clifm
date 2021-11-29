@@ -1364,13 +1364,6 @@ mime_open(char **args)
 
 	cmd[pos] = (char *)NULL;
 
-/*	int no_bg = (args[1] && args[1] == config_file) ? 1 : 0;
-	if (!no_bg) {
-		char *l = rl_line_buffer;
-		if (*l == 'b' && ((l[1] == 'r' && l[2] == ' ')
-		|| (l[1] == 'u' && strncmp(l, "bulk ", 5) == 0)))
-			no_bg = 1;
-	} */
 	/* - bg comes from the command in the mimelist file
 	 * - bg_proc comes from the command line
 	 * - no_bg is set by some function that requires to open the file in

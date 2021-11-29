@@ -915,7 +915,10 @@ bulk_rename(char **args)
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	/* Open the bulk file */
-	if (open_file(bulk_file) != EXIT_SUCCESS) {
+	open_in_foreground = 1;
+	exit_status = open_file(bulk_file);
+	open_in_foreground = 0;
+	if (exit_status != EXIT_SUCCESS) {
 		fprintf(stderr, _("bulk: %s\n"), strerror(errno));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,

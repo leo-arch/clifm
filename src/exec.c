@@ -1086,9 +1086,7 @@ exec_cmd(char **comm)
 			puts(_(BULK_USAGE));
 			return EXIT_SUCCESS;
 		}
-		open_in_foreground = 1;
 		exit_code = bulk_rename(comm);
-		open_in_foreground = 0;
 	}
 
 	/*      ################ SORT ##################     */
