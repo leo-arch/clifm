@@ -133,12 +133,12 @@ get_uft8_dec_value(size_t *i, char *str)
 
 	int utf8_width = get_utf_8_width((char)c);
 	switch (utf8_width) {
-		case 1:	new_value = (unsigned char)str[0]; break;
-		case 2: new_value = unpack_start(c, 2);	break;
+		case 1: new_value = (unsigned char)str[0]; break;
+		case 2: new_value = unpack_start(c, 2); break;
 		case 3: new_value = unpack_start(c, 3); break;
 		case 4: new_value = unpack_start(c, 4); break;
-		case 5:	new_value = unpack_start(c, 5);	break;
-		case 6:	new_value = unpack_start(c, 6); break;
+		case 5: new_value = unpack_start(c, 5); break;
+		case 6: new_value = unpack_start(c, 6); break;
 		default: return (-1); // -1
 	}
 
