@@ -477,11 +477,13 @@ Finally, you can also clear this history list by typing 'b clear'.
 The best way of navigating the directory history list, however, is via the \fIdirectory jumper\fR function. See the \fIj\fR command below.
 .TP
 .B bb, bleach \fRELN/FILE ... n
-\fIBleach\fR is a built-in file names cleaner.
+\fIBleach\fR is a built-in file names cleaner based on detox (\fIhttps://github.com/dharple/detox\fR)
 .sp
 It cleans file names up either by removing those (extended-ASCII/Unicode) characters without an ASCII alternative/similar character, or by translating extended-ASCII/Unicode characters into an alternative ASCII character based on familiarity/similarity. Disallowed characters (NUL and slash) will be simply removed.
 .sp
 The file name length will be trimmed down to \fINAME_MAX\fR (usually 255). If the replacement file name is only one character long, "bleach" will be appended to avoid too short file names.
+.sp
+Modified file names will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing the 'e' key) the list of modified file names via a text editor.
 .TP
 .B bl \fRELN/FILE ... n
 Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
