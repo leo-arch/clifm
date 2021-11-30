@@ -506,7 +506,7 @@ bleach_files(char **names)
 CONFIRM:
 	printf("\nPress 'e' to edit");
 	int rename = 0;
-	char ch = -1;
+	char ch = '-';
 	while (!strchr("yYnNeE\n", ch)) {
 		printf("\nIs this ok? [y/N] ");
 		ch = xgetchar();
@@ -549,8 +549,10 @@ CONFIRM:
 				rep_suffix++;
 			}
 			
-			if (renameat(AT_FDCWD, o, AT_FDCWD, r) == -1)
+			if (renameat(AT_FDCWD, o, AT_FDCWD, r) == -1) {
+				fprintf(stderr, "renameat: '%s': %s\n", o, strerror(errno));
 				exit_status = EXIT_FAILURE;
+			}
 		}
 		free(o);
 		free(r);
