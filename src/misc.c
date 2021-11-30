@@ -108,7 +108,7 @@ read_inotify(void)
 		event = (struct inotify_event *)ptr;
 
 #ifdef INOTIFY_DEBUG
-		printf("%s (%u): ", event->name ? event->name : NULL, event->len);
+		printf("%s (%u): ", *event->name ? event->name : NULL, event->len);
 #endif
 
 		if (!event->wd) {
