@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef STRINGS_H
+#define STRINGS_H
 
 char **parse_input_str(char *str);
 char *savestring(const char *restrict str, size_t size);
@@ -44,3 +45,5 @@ char *remove_quotes(char *str);
 char *replace_substr(char *haystack, char *needle, char *rep);
 size_t xstrnlen(const char *restrict s);
 int is_internal_f(const char *restrict cmd);
+
+#endif /* STRINGS_H */

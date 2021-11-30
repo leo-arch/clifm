@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef SORT_H
+#define SORT_H
 
 #include <dirent.h>
 int alphasort_insensitive(const struct dirent **a, const struct dirent **b);
@@ -32,3 +33,5 @@ int entrycmp(const void *a, const void *b);
 int skip_nonexec(const struct dirent *ent);
 int skip_files(const struct dirent *ent);
 void print_sort_method(void);
+
+#endif /* SORT_H */

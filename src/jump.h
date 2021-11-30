@@ -22,10 +22,13 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef JUMP_H
+#define JUMP_H
 
 int add_to_jumpdb(const char *dir);
 void save_jumpdb(void);
 int dirjump(char **args, int mode);
 int run_autojump(char **cmd);
 /* int edit_jumpdb(void); */
+
+#endif /* JUMP_H */

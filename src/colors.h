@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef COLORS_H
+#define COLORS_H
 
 #include <sys/stat.h>
 
@@ -34,3 +35,5 @@ void colors_list(char *ent, const int i, const int pad, const int new_line);
 char *get_ext_color(const char *ext);
 char *get_dir_color(const char *filename, const mode_t mode);
 char *get_file_color(const char *filename, const struct stat attr);
+
+#endif /* COLORS_H */

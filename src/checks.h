@@ -22,7 +22,9 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef CHECKS_H
+#define CHECKS_H
+
 #include <sys/stat.h>
 
 /* checks.c */
@@ -41,3 +43,5 @@ char *get_sudo_path(void);
 void check_term(void);
 int check_file_access(const struct stat file);
 void check_third_party_cmds(void);
+
+#endif /* CHECKS_H */

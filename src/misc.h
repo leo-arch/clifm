@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef MISC_H
+#define MISC_H
 
 int _err(int, int, const char *, ...);
 int alias_import(char *file);
@@ -55,3 +56,5 @@ void reset_inotify(void);
 #elif defined(BSD_KQUEUE)
 void read_kqueue(void);
 #endif
+
+#endif /* MISC_H */

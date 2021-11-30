@@ -22,7 +22,10 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef HIGHLIGHT_H
+#define HIGHLIGHT_H
+
 char *rl_highlight(const char *str, const size_t pos, const int flag);
 void recolorize_line(void);
-//void change_word_color(const char *_last_word, const int offset, const char *color);
+
+#endif /* HIGHLIGHT_H */

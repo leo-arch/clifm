@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef INIT_H
+#define INIT_H
 
 void check_env_filter(void);
 void get_prompt_cmds(void);
@@ -54,3 +55,5 @@ int backup_argv(int argc, char **argv);
 int get_sys_shell(void);
 
 struct user_t get_user(void);
+
+#endif /* INIT_H */

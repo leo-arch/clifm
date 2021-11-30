@@ -22,8 +22,11 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef _REMOTES_H
+#define _REMOTES_H
 
 int remotes_function(char **args);
 int automount_remotes(void);
 int autounmount_remotes(void);
+
+#endif /* _REMOTES_H */

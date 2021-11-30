@@ -22,6 +22,9 @@
  * MA 02110-1301, USA.
 */
 
+#ifndef SETTINGS_H
+#define SETTINGS_H
+
 /* User settings */
 
 /* Macros for ELN padding */
@@ -257,3 +260,5 @@ left:abort --inline-info --layout=reverse-list --ansi"
 #else
 #define FALLBACK_OPENER "xdg-open"
 #endif
+
+#endif /* SETTINGS_H */

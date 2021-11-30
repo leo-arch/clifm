@@ -22,7 +22,10 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef ACTIONS_H
+#define ACTIONS_H
 
 int edit_actions(void);
 int run_action(char *action, char **args);
+
+#endif /* ACTIONS_H */

@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef EXEC_H
+#define EXEC_H
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <signal.h>
@@ -34,3 +35,5 @@ void exec_profile(void);
 int launch_execve(char **cmd, int bg, int xflags);
 int launch_execle(const char *cmd);
 int run_and_refresh(char **comm);
+
+#endif /* EXEC_H */

@@ -21,6 +21,9 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef NAME_CLEANER_H
+#define NAME_CLEANER_H
 
 int bleach_files(char **names);
+
+#endif /* NAME_CLEANER_H */

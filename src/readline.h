@@ -22,10 +22,13 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef __READLINE_H
+#define __READLINE_H
 
 int initialize_readline(void);
 char **my_rl_completion(const char *text, int start, int end);
 char *rl_no_hist(const char *prompt);
 int is_quote_char(const char c);
 int tab_complete(int mode);
+
+#endif /* __READLINE_H */

@@ -21,7 +21,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef CLEANER_TABLE_H
+#define CLEANER_TABLE_H
 
 struct utable_t {
 	int key;
@@ -685,3 +686,5 @@ struct utable_t unitable[] = {
 	{0x02bc, 0, "_"},
 	{0, 0, NULL},
 };
+
+#endif /* CLEANER_TABLE_H */

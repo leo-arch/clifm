@@ -22,7 +22,9 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef CONFIG_H
+#define CONFIG_H
+
 int edit_function(char **comm);
 int create_config(char *file);
 int create_kbinds_file(void);
@@ -33,3 +35,5 @@ int reload_config(void);
 void create_tmp_files(void);
 void set_sel_file(void);
 void set_env(void);
+
+#endif /* CONFIG_H */

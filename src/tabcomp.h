@@ -22,6 +22,9 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef TABCOMP_H
+#define TABCOMP_H
 
 int tab_complete(int what_to_do);
+
+#endif /* TABCOMP_H */

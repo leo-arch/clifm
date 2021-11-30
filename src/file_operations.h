@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef FILE_OPERATIONS_H
+#define FILE_OPERATIONS_H
 
 /* Macros for open_function */
 #define OPEN_BLK 0
@@ -44,3 +45,5 @@ int create_file(char **cmd);
 int dup_file(char*source, char *dest);
 int open_file(char *file);
 void clear_selbox(void);
+
+#endif /* FILE_OPERATIONS_H */

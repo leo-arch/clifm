@@ -22,8 +22,11 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef PROPERTIES_H
+#define PROPERTIES_H
 
 /* properties.c */
 int properties_function(char **comm);
 int print_entry_props(const struct fileinfo *props, size_t max);
+
+#endif /* PROPERTIES_H */

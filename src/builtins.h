@@ -25,7 +25,8 @@
 /* A list of different shells builtins to be recognized as valid command
  * names. Only useful for the warning prompt */
 
-#pragma once
+#ifndef BUILTINS_H
+#define BUILTINS_H
 
 /* Bash */
 char *bash_builtins[] = {
@@ -537,3 +538,5 @@ char *zsh_builtins[] = {
 	"ztcp",
 	NULL
 };
+
+#endif /* BUILTINS_H */

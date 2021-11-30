@@ -22,7 +22,10 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef SEARCH_H
+#define SEARCH_H
 
 int search_glob(char **comm, int invert);
 int search_regex(char **comm, int invert, int case_sens);
+
+#endif /* SEARCH_H */

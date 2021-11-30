@@ -22,10 +22,13 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef BOOKMARKS_H
+#define BOOKMARKS_H
 
 /* bookmarks.c */
 int bookmarks_function(char **cmd);
 int edit_bookmarks(char *cmd);
 int open_bookmark(void);
 void free_bookmarks(void);
+
+#endif /* BOOKMARKS_H */

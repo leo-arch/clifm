@@ -22,6 +22,9 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef MEDIA_H
+#define MEDIA_H
 
 int media_menu(int mode);
+
+#endif /* MEDIA_H */

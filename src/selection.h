@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef SELECTION_H
+#define SELECTION_H
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/ioctl.h>
@@ -33,3 +34,5 @@ int deselect(char **comm);
 int sel_function(char **args);
 void show_sel_files(void);
 int save_sel(void);
+
+#endif /* _SELECTION_H */

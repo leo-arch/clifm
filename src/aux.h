@@ -22,7 +22,9 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef AUX_H
+#define AUX_H
+
 #include <time.h>
 
 /* Some memory wrapper functions */
@@ -50,3 +52,5 @@ mode_t get_dt(const mode_t mode);
 char *gen_date_suffix(struct tm tm);
 int get_cursor_position(const int ifd, const int ofd);
 void rl_ring_bell(void);
+
+#endif /* AUX_H */

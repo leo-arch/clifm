@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef HELPERS_H
+#define HELPERS_H
 
 #if defined(__linux__) && !defined(_BE_POSIX)
 #define _GNU_SOURCE
@@ -1034,3 +1035,5 @@ extern char
 	tx_c[MAX_COLOR + 2], /* Text color */
 	si_c[MAX_COLOR + 2], /* stealth indicator color */
 	wm_c[MAX_COLOR + 2]; /* Warning msg color */
+
+#endif /* HELPERS_H */

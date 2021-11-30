@@ -22,7 +22,10 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef LISTING_H
+#define LISTING_H
 
 void free_dirlist(void);
 int list_dir(void);
+
+#endif /* LISTING_H */

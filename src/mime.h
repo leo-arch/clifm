@@ -22,10 +22,13 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef MIME_H
+#define MIME_H
 
 /* mime.c */
 int mime_open(char **args);
 char *xmagic(const char *file, const int mime);
 int mime_open_with(char *filename, char **args);
 char **mime_open_with_tab(char *filename, const char *prefix);
+
+#endif /* MIME_H */

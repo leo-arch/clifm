@@ -22,6 +22,9 @@
  * MA 02110-1301, USA.
 */
 
+#ifndef MESSAGES_H
+#define MESSAGES_H
+
 #define GRAL_USAGE "[-aAefFgGhHiIlLmoOsSuUvxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
@@ -97,3 +100,5 @@
 #else
 #define HELP_MESSAGE "Enter '?' or press F5-F7 for instructions"
 #endif
+
+#endif /* MESSAGES_H */

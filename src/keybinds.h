@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef KEYBINDS_H
+#define KEYBINDS_H
 
 /*void add_func_to_rl(void); */
 void readline_kbinds(void);
@@ -30,3 +31,5 @@ int kbinds_function(char **args);
 int load_keybinds(void);
 int rl_quit(int count, int key);
 int keybind_exec_cmd(char *str);
+
+#endif /* KEYBINDS_H */

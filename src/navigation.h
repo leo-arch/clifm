@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef NAVIGATION_H
+#define NAVIGATION_H
 
 int back_function(char **comm);
 int forth_function(char **comm);
@@ -31,3 +32,5 @@ int cd_function(char *new_path, const int print_error);
 char *fastback(const char *str);
 int workspaces(char *str);
 void print_dirhist(void);
+
+#endif /* NAVIGATION_H */

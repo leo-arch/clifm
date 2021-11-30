@@ -22,7 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef SUGGESTIONS_H
+#define SUGGESTIONS_H
 
 void clear_suggestion(const int free_sug);
 int rl_suggestions(const unsigned char c);
@@ -31,3 +32,5 @@ void remove_suggestion_not_end(void);
 int check_cmds(const char *str, const size_t len);
 void print_suggestion(char *str, size_t offset, const char *color);
 int recover_from_wrong_cmd(void);
+
+#endif /* SUGGESTIONS_H */

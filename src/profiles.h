@@ -22,8 +22,11 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef PROFILES_H
+#define PROFILES_H
 
 int get_profile_names(void);
 int profile_function(char **comm);
 int profile_set(char *prof);
+
+#endif /* PROFILES_H */

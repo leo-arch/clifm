@@ -22,6 +22,9 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef PROMPT_H
+#define PROMPT_H
 
 char *prompt(void);
+
+#endif /* PROMPT_H */

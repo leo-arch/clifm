@@ -22,10 +22,12 @@
  * MA 02110-1301, USA.
 */
 
-#pragma once
+#ifndef TRASH_H
+#define TRASH_H
 
 #include <time.h>
 
-/* trash.c */
 int trash_function(char **comm);
 int untrash_function(char **comm);
+
+#endif /* TRASH_H */

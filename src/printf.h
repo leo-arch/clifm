@@ -53,4 +53,4 @@
 //#define xprintf printf_
 void printf_(const char* format, ...);
 
-#endif  // _PRINTF_H_
+#endif /* _PRINTF_H_ */

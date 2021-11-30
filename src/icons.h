@@ -457,4 +457,4 @@ struct icons_t icon_filenames[] = {
     {"TODO", ICON_LIST, WHITE},
 };
 
-#endif /* !ICONS_H */
+#endif /* ICONS_H */
