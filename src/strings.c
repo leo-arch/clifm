@@ -1334,7 +1334,6 @@ parse_input_str(char *str)
 							    (strlen(esc_str) + 1) * sizeof(char));
 							strcpy(substr[i], esc_str);
 						}
-
 						free(esc_str);
 						esc_str = (char *)NULL;
 					} else {
@@ -1435,7 +1434,6 @@ parse_input_str(char *str)
 #endif
 
 	for (i = 0; substr[i]; i++) {
-
 		/* Do not perform any of the expansions below for selected
 		 * elements: they are full path file names that, as such, do not
 		 * need any expansion */
@@ -1687,7 +1685,15 @@ parse_input_str(char *str)
 			continue;
 		}
 
-		if (check_regex(substr[i]) != EXIT_SUCCESS) {
+		/* At this point, all file names are escaped. But check_regex()
+		 * needs unescaped file names. So, let's deescape it */
+		char *p = strchr(substr[i], '\\');
+		char *dstr = (char *)NULL;
+		if (p)
+			dstr = dequote_str(substr[i], 0);
+		int ret = check_regex(dstr ? dstr : substr[i]);
+		free(dstr);
+		if (ret != EXIT_SUCCESS) {
 			regex_files[r_files++] = substr[i];
 			continue;
 		}
