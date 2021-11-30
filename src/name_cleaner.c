@@ -559,8 +559,18 @@ CONFIRM:
 	}
 	free(bfiles);
 
+#ifndef __HAIKU__
 	return exit_status;
+#else
+	if (exit_status == EXIT_FAILURE)
+		return EXIT_FAILURE;
+	if (autols) {
+		free_dirlist();
+		return list_dir();
+	}
+	return EXIT_SUCCESS;
+#endif /* __HAIKU__ */
 }
 #else
 void *__skip_me_bleach;
-#endif
+#endif /* !_NO_BLEACH */
