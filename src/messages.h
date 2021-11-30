@@ -32,6 +32,7 @@
 #define AUTO_OPEN_USAGE "Turn auto-open on-off\nUsage: ao, auto-open [on, off, status]"
 #define BACK_USAGE "Change to the previous directory in the directory history list\nUsage: back, b [h, hist] [clear] [!ELN]"
 #define BL_USAGE "Create multiple symbolic links at once\nUsage: bl FILE(s)"
+#define BLEACH_USAGE "Clean up file names from non-ASCII characters\nUsage: bb, bleach FILE(s)"
 #define BOOKMARKS_USAGE "Handle bookmarks\nUsage: bm, bookmarks [a, add FILE] [d, del] [edit]"
 #define BULK_USAGE "Bulk rename files\nUsage: br, bulk ELN/FILE ..."
 #define CD_USAGE "Change current working directory\nUsage: cd [ELN/DIR]"

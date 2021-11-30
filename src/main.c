@@ -330,6 +330,7 @@ const char *internal_cmds[] = {
 	"alias",
 	"ao", "auto-open",
 	"b", "back",
+	"bb", "bleach",
 	"bh", "fh",
 	"bm", "bookmarks",
 	"br", "bulk",

@@ -1,4 +1,6 @@
-/* This file is part of CliFM
+/* autocmds.h
+ *
+ * This file is part of CliFM
  * 
  * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.

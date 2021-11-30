@@ -1,6 +1,5 @@
-/* file_operations.h */
-
-/*
+/* name_cleaner.h
+ *
  * This file is part of CliFM
  * 
  * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
@@ -24,23 +23,4 @@
 
 #pragma once
 
-/* Macros for open_function */
-#define OPEN_BLK 0
-#define OPEN_CHR 1
-#define OPEN_SOCK 2
-#define OPEN_FIFO 3
-#define OPEN_UNK 4
-
-/* file_operations.c */
-int batch_link(char **args);
-char *export(char **filenames, int open);
-int bulk_rename(char **args);
-int remove_file(char **args);
-int copy_function(char **comm);
-int edit_link(char *link);
-int open_function(char **cmd);
-int xchmod(const char *file, mode_t mode);
-int create_file(char **cmd);
-int dup_file(char*source, char *dest);
-int open_file(char *file);
-void clear_selbox(void);
+int bleach_files(char **names);

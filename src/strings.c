@@ -598,6 +598,7 @@ is_internal_f(const char *restrict cmd)
 {
 	const char *int_cmds[] = {
 	    "ac", "ad",
+		"bb", "bleach",
 	    "bm", "bookmarks",
 	    "br", "bulk",
 	    "c", "cp",

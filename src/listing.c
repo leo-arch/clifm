@@ -1588,7 +1588,7 @@ END:
 static inline int
 check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t index)
 {
-	if (sel_n == 0)
+	if (sel_n == 0 || !sel_devino)
 		return 0;
 
 	int j = (int)sel_n;

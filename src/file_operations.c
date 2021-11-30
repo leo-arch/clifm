@@ -51,7 +51,7 @@
 #include "selection.h"
 #include "messages.h"
 
-static void
+void
 clear_selbox(void)
 {
 	size_t i;

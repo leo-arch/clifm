@@ -1667,5 +1667,5 @@ FAIL:
 	return EXIT_FAILURE;
 }
 #else
-void *__skip_me;
+void *__skip_me_suggestions;
 #endif

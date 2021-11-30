@@ -69,6 +69,9 @@
 #endif
 #include "messages.h"
 #include "media.h"
+#ifndef _NO_BLEACH
+#include "name_cleaner.h"
+#endif
 
 char **_comm = (char **)NULL;
 
@@ -746,7 +749,7 @@ exec_cmd(char **comm)
 		return exit_code = old_exit_code;
 	}
 
-	/*         ############### BOOKMARKS ##################     */
+	/*     ############### BOOKMARKS ##################     */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'm' && !comm[0][2])
 	|| strcmp(comm[0], "bookmarks") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
@@ -781,7 +784,7 @@ exec_cmd(char **comm)
 	}
 
 
-	/*     ############### NEW FILE ##################     */
+	/*     ################# NEW FILE ##################     */
 	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "new") == 0))
 		exit_code = create_file(comm);
 
@@ -903,7 +906,7 @@ exec_cmd(char **comm)
 #endif /* !_NO_TRASH */
 	}
 
-	/*         ############### SELECTION ##################     */
+	/*     ############### SELECTION ##################     */
 	else if (*comm[0] == 's' && (!comm[0][1] || strcmp(comm[0], "sel") == 0))
 		return (exit_code = sel_function(comm));
 
@@ -928,7 +931,7 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
-	/*  ############### SOME SHELL CMD WRAPPERS ##################  */
+	/*  ############# SOME SHELL CMD WRAPPERS ###############  */
 
 	else if ((*comm[0] == 'r' || *comm[0] == 'm' || *comm[0] == 'l')
 	&& (strcmp(comm[0], "r") == 0 || strcmp(comm[0], "l") == 0
@@ -1065,7 +1068,7 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
-	/*      ############### HISTORY ##################     */
+	/*      ############## HISTORY ##################     */
 	else if (*comm[0] == '!' && comm[0][1] != ' ' && comm[0][1] != '\t'
 	&& comm[0][1] != '\n' && comm[0][1] != '=' && comm[0][1] != '(')
 		exit_code = run_history_cmd(comm[0] + 1);
@@ -1097,6 +1100,21 @@ exec_cmd(char **comm)
 			return EXIT_SUCCESS;
 		}
 		return (exit_code = sort_function(comm));
+	}
+
+	/*    ########## FILE NAMES CLEANER ############## */
+	else if (*comm[0] == 'b' && ((comm[0][1] == 'b' && !comm[0][2])
+	|| strcmp(comm[0], "bleach") == 0)) {
+		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+			puts(_(BLEACH_USAGE));
+			return EXIT_SUCCESS;
+		}
+#ifndef _NO_BLEACH
+		return (exit_code = bleach_files(comm));
+#else
+		fprintf(stderr, _("%s: bleach: %s\n"), PROGRAM_NAME, NOT_AVAILABLE);
+		return EXIT_FAILURE;
+#endif
 	}
 
 	/*   ################ ARCHIVER ##################     */

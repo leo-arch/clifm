@@ -273,6 +273,7 @@ is_internal_c(char *restrict cmd)
 	    "alias",
 	    "ao", "auto-open",
 	    "b", "back",
+		"bb", "bleach",
 	    "bh", "fh",
 	    "bm", "bookmarks",
 	    "br", "bulk",
@@ -360,6 +361,7 @@ is_internal(char *restrict cmd)
 {
 	char *int_cmds[] = {
 	    "ac", "ad",
+		"bb", "bleach",
 	    "bm", "bookmarks",
 	    "bl", "le",
 	    "br", "bulk",
