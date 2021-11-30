@@ -170,6 +170,8 @@ To enjoy of any of the features tagged as NEW, clone this repository and install
 
 **NEW**: [Get a fine-grained control over _CliFM_ settings via the `autocommands` function](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
 
+**NEW**: [_Bleach_, a file names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n)
+
 ---
 
 ## Installing _CliFM_
