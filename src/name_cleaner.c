@@ -114,7 +114,7 @@ translate_unsafe_char(unsigned char c)
 
 	else if (c == '(' || c == ')' || c == '[' || c == ']'
 	|| c == '{' || c == '}')
-		t = '-';
+		t = BRACKETS_TRANSLATION;
 
 	else
 		t = c;
