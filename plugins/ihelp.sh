@@ -30,7 +30,7 @@ if [ "$(which fzf 2>/dev/null)" ]; then
 elif [ "$(which rofi 2>/dev/null)" ]; then
 	filter="rofi"
 else
-	printf "CliFM: No finder found. Install fzf or rofi\n" >&2
+	printf "CliFM: No finder found. Install either fzf or rofi\n" >&2
 	exit 1
 fi
 
@@ -56,13 +56,14 @@ CMDS="
 13. AUTO-SUGGESTIONS@
 14. SHELL FUNCTIONS@
 15. PLUGINS@
-16. STANDARD INPUT@
-17. NOTE ON SPEED
-18. KANGAROO FRECENCY ALGORITHM@
-19. ENVIRONMENT@
-20. MISCELLANEOUS NOTES@
-21. FILES@
-22. EXAMPLES@
+16. AUTCOMMANDS@
+17. STANDARD INPUT@
+18. NOTE ON SPEED
+19. KANGAROO FRECENCY ALGORITHM@
+20. ENVIRONMENT@
+21. MISCELLANEOUS NOTES@
+22. FILES@
+23. EXAMPLES@
 FILE/DIR@
 /PATTERN@
 ;\[CMD\], :\[CMD\]@
@@ -72,6 +73,7 @@ actions @
 alias @
 ao, auto-open@
 b, back@
+bb, bleach@
 bl @
 bm, bookmarks@
 br, bulk@
