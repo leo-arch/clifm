@@ -243,6 +243,7 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | `_NERD` | Enable Nerdfont support for icons |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 | `_NO_ARCHIVING` | Disable archiving support |
+| `_NO_BLEACH` | Disable support for `Bleach`, the built-in file names cleaner |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
 | `_NO_HIGHLIGHT`| Disable syntax highlighting support |
 | `_NO_ICONS` | Disable icons support |
