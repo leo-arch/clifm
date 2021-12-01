@@ -283,9 +283,6 @@ expand bookmark names into the corresponding bookmark paths and enable TAB compl
 .B \-\-fzftab
 enable the FZF mode for TAB completion (See the \fBBUILT\-IN EXPANSIONS\fR section below)
 .TP
-.B \-\-highlight
-enable syntax highlighting. To customize highlighting colors see the \fBCOLORS\fR section below
-.TP
 .B \-\-icons
 enable icons. Depends on the \fBicons-in-terminal\fR project.
 .TP
@@ -344,6 +341,9 @@ disable the files counter for directories. This option is especially useful to s
 .B \-\-no\-follow\-symlink
 do not follow symbolic links when listing files
 .TP
+.B \-\-no\-highlight
+disable syntax highlighting. To customize highlighting colors see the \fBCOLORS\fR section below
+.TP
 .B \-\-no\-open\-auto
 same as no-cd-auto, but for files instead of directories
 .TP
@@ -355,6 +355,9 @@ disable the auto-suggestions system
 .TP
 .B \-\-no\-tips
 disable startup tips
+.TP
+.B \-\-no\-warning\-prompt
+disable the warning prompt (used to highlight invalid command names)
 .TP
 .B \-\-no\-welcome\-message
 disable the welcome message
@@ -383,10 +386,7 @@ sort in reverse order, for example: z-a instead of a-z, which is the default ord
 .B \-\-trash\-as\-rm
 the \fIr\fR command executes the built-in 'trash' (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
 .TP
-.B \-\-warn\-wrong\-cmd
-enable the warning prompt to highlight invalid command names
 
-.TP
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
 
 .SH 6. COMMANDS
