@@ -607,8 +607,9 @@ mime_list_open(char **apps, char *file)
 			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
 			E_NOSTDERR) == EXIT_SUCCESS)
 				ret = EXIT_SUCCESS;
-		}
 #endif /* NO_ARCHIVING */
+		}
+
 		free(qfile);
 		bg_proc = 0;
 	}
