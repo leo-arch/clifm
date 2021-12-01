@@ -109,7 +109,8 @@ translate_unsafe_char(unsigned char c)
 	unsigned char t = 0;
 	if (c == ' ' || c == '/'|| c == '\'' || c == '"' || c == '$'
 	|| c == '>' || c == '<' || c == '|' || c == '!' || c == '\\'
-	|| c == '*' || c == ';' || c == ':' || c == '`' || c == '@')
+	|| c == '*' || c == ';' || c == ':' || c == '`' || c == '@'
+	|| c == '\n' || c == '\t')
 		t = DEFAULT_TRANSLATION;
 
 	else if (c == '(' || c == ')' || c == '[' || c == ']'
