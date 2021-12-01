@@ -129,7 +129,7 @@ static int
 get_uft8_dec_value(size_t *i, char *str)
 {
 	unsigned char c = (unsigned char)str[*i];
-	unsigned int new_value = 0;
+	int new_value = 0;
 
 	int utf8_width = get_utf_8_width((char)c);
 	switch (utf8_width) {
@@ -169,7 +169,7 @@ get_uft8_dec_value(size_t *i, char *str)
 
 	if (failed)
 		return (-2);
-	return (int)new_value;
+	return new_value;
 }
 
 /* Clean up NAME either by removing those (extended-ASCII/Unicode) characters
@@ -215,7 +215,7 @@ clean_file_name(const char *restrict name)
 				q += 5;
 				cur_len += 5;
 			} else {
-				sprintf(q - 1, "_and_");
+				sprintf((q == p) ? q : q - 1, "_and_");
 				q += 4;
 				cur_len += 4;
 			}
@@ -280,7 +280,7 @@ clean_file_name(const char *restrict name)
 			q += tlen;
 			cur_len += tlen;
 		} else {
-			sprintf(q - 1, "%s", t);
+			sprintf((q == p) ? q : q - 1, "%s", t);
 			q += tlen - 1;
 			cur_len += tlen - 1;
 		}

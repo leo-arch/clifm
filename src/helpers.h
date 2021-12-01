@@ -42,9 +42,10 @@
 #endif
 #endif
 
-/* Setting GLOB_BRACE to ZERO which disables support for GLOB_BRACE if not available on current platform */
-#ifndef GLOB_BRACE
-    #define GLOB_BRACE 0
+/* Setting GLOB_BRACE to ZERO disables support for GLOB_BRACE if not
+ * available on current platform */
+#if !defined(__TINYC__) && !defined(GLOB_BRACE)
+#define GLOB_BRACE 0
 #endif
 
 /* Support large files on ARM or 32-bit machines */
