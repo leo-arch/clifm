@@ -312,6 +312,10 @@ clean_file_name(const char *restrict name)
 	if (*name != '.' && *p == '.')
 		*p = DEFAULT_TRANSLATION;
 
+	/* File names shouldn't start with a dash (reserved for command options)*/
+	if (*p == '-')
+		*p = DEFAULT_TRANSLATION;
+
 	return p;
 }
 
