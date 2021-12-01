@@ -477,13 +477,19 @@ Finally, you can also clear this history list by typing 'b clear'.
 The best way of navigating the directory history list, however, is via the \fIdirectory jumper\fR function. See the \fIj\fR command below.
 .TP
 .B bb, bleach \fRELN/FILE ... n
-\fIBleach\fR is a built-in file names cleaner based on detox (\fIhttps://github.com/dharple/detox\fR)
+\fIBleach\fR is a built-in file names cleaner (based on detox [\fIhttps://github.com/dharple/detox\fR]), whose main aim is to rename file names using only safe characters.
+Bleach cleans file names up either by removing unsafe (extended-ASCII/Unicode) characters without an ASCII alternative/similar character, or by translating these unsafe characters into an alternative ASCII character based on familiarity/similarity.
 .sp
-It cleans file names up either by removing those (extended-ASCII/Unicode) characters without an ASCII alternative/similar character, or by translating extended-ASCII/Unicode characters into an alternative ASCII character based on familiarity/similarity. Disallowed characters (NUL and slash) will be simply removed.
+These following simple rules are used to compose clean/safe file names:
+    - NUL (\\0) and slash characters are completely disallowed
+    - Only use this set of characters: [a-z][A-Z][._-]
+    - File names never start with a dash (-)
+    - Files named . and .. are not allowed
+    - Append .bleach to one character long file names
+    - Do not let a replacement file name start with a dot (hidden) if the original does not
+    - Max file name length is NAME_MAX (usually 255)
 .sp
-The file name length will be trimmed down to \fINAME_MAX\fR (usually 255). If the replacement file name is only one character long, "bleach" will be appended to avoid too short file names.
-.sp
-Modified file names will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing the 'e' key) the list of modified file names via a text editor.
+Modified file names will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing e) the list of modified file names via a text editor.
 .sp
 If the replacement file name already exists, a dash and a number (starting from 1) will be appended. Ex: file-3.
 .TP
