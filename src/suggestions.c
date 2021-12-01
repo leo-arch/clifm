@@ -1147,7 +1147,7 @@ count_words(size_t *start_word, size_t *full_word)
 static void
 print_warning_prompt(const char c)
 {
-	if (warn_wrong_cmd == 1 && !wrong_cmd
+	if (warning_prompt == 1 && !wrong_cmd
 	&& c != ';' && c != ':' && c != '#'
 	&& c != '$' && c != '\'' && c != '"') {
 		if (suggestion.printed)

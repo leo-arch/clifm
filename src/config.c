@@ -828,7 +828,7 @@ ELNPad=%d\n\n",
 		DEF_CP_CMD,
 		DEF_MV_CMD,
 	    DEFAULT_PROMPT,
-		DEF_WARN_WRONG_CMD == 1 ? "true" : "false",
+		DEF_WARNING_PROMPT == 1 ? "true" : "false",
 	    DEF_WPROMPT_STR,
 	    DEF_ELNPAD);
 
@@ -2161,16 +2161,16 @@ read_config(void)
 				unicode = 0;
 		}
 
-		else if (xargs.warn_wrong_cmd == UNSET && *line == 'W'
+		else if (xargs.warning_prompt == UNSET && *line == 'W'
 		&& strncmp(line, "WarningPrompt=", 14) == 0) {
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "WarningPrompt=%5s\n", opt_str);
 			if (ret == -1)
 				continue;
 			if (strncmp(opt_str, "true", 4) == 0)
-				warn_wrong_cmd = 1;
+				warning_prompt = 1;
 			else if (strncmp(opt_str, "false", 5) == 0)
-				warn_wrong_cmd = 0;
+				warning_prompt = 0;
 		}
 
 		else if (*line == 'W' && strncmp(line, "WarningPromptStr=", 17) == 0) {
@@ -2390,7 +2390,7 @@ reset_variables(void)
 	splash_screen = UNSET;
 	tips = UNSET;
 	unicode = UNSET;
-	warn_wrong_cmd = UNSET;
+	warning_prompt = UNSET;
 	welcome_message = UNSET;
 
 #ifndef _NO_SUGGESTIONS

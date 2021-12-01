@@ -193,7 +193,7 @@ int
 	trash_ok = 1,
 #endif
 	unicode = UNSET,
-	warn_wrong_cmd = UNSET,
+	warning_prompt = UNSET,
 	welcome_message = UNSET,
 	_xrename = 0,
 	xrename = 0;

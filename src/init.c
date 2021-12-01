@@ -984,14 +984,14 @@ external_arguments(int argc, char **argv)
 	    {"print-sel", no_argument, 0, 34},
 	    {"no-suggestions", no_argument, 0, 35},
 	    {"autojump", no_argument, 0, 36},
-	    {"highlight", no_argument, 0, 37},
+	    {"no-highlight", no_argument, 0, 37},
 	    {"no-file-cap", no_argument, 0, 38},
 	    {"no-file-ext", no_argument, 0, 39},
 	    {"no-follow-symlink", no_argument, 0, 40},
 		{"control-d-exits", no_argument, 0, 41},
 		{"int-vars", no_argument, 0, 42},
 		{"fzftab", no_argument, 0, 43},
-		{"warn-wrong-cmd", no_argument, 0, 44},
+		{"no-warning-prompt", no_argument, 0, 44},
 		{"mnt-udisks2", no_argument, 0, 45},
 	    {0, 0, 0, 0}};
 
@@ -1139,7 +1139,7 @@ external_arguments(int argc, char **argv)
 #endif
 		case 36: xargs.autojump = autojump = 0; break;
 #ifndef _NO_HIGHLIGHT
-		case 37: xargs.highlight = highlight = 1; break;
+		case 37: xargs.highlight = highlight = 0; break;
 #else
 		case 37:
 			fprintf(stderr, _("%s: highlight: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
@@ -1168,7 +1168,7 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
 
-		case 44: xargs.warn_wrong_cmd = warn_wrong_cmd = 1; break;
+		case 44: xargs.warning_prompt = warning_prompt = 0; break;
 		case 45: xargs.mount_cmd = MNT_UDISKS2; break;
 
 		case 'a':
@@ -1584,7 +1584,7 @@ unset_xargs(void)
 #endif
 	xargs.unicode = UNSET;
 	xargs.welcome_message = UNSET;
-	xargs.warn_wrong_cmd = UNSET;
+	xargs.warning_prompt = UNSET;
 }
 
 /* Keep track of attributes of the shell. Make sure the shell is running
@@ -2200,11 +2200,11 @@ check_options(void)
 	}
 #endif
 
-	if (warn_wrong_cmd == UNSET) {
-		if (xargs.warn_wrong_cmd == UNSET)
-			warn_wrong_cmd = DEF_WARN_WRONG_CMD;
+	if (warning_prompt == UNSET) {
+		if (xargs.warning_prompt == UNSET)
+			warning_prompt = DEF_WARNING_PROMPT;
 		else
-			warn_wrong_cmd = xargs.warn_wrong_cmd;
+			warning_prompt = xargs.warning_prompt;
 	}
 
 	if (listing_mode == UNSET) {

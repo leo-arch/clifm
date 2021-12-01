@@ -187,7 +187,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_FILES_COUNTER 1
 #define DEF_FOLLOW_SYMLINKS 1
 #define DEF_FZFTAB 0
-#define DEF_HIGHLIGHT 0
+#define DEF_HIGHLIGHT 1
 #define DEF_ICONS 0
 #define DEF_INT_VARS 0
 #define DEF_LIGHT_MODE 0
@@ -231,7 +231,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
-#define DEF_WARN_WRONG_CMD 0
+#define DEF_WARNING_PROMPT 1
 #define SUG_STRATS 7
 
 /* These options should work with FZF 0.17 or later */

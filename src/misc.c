@@ -1643,7 +1643,6 @@ help_function(void)
 \n              completion for bookmark names is also \
 \n              available\
 \n     --fzftab\t\t\t enable FZF mode for TAB completion\
-\n     --highlight\t\t enable syntax highlighting\
 \n     --icons\t\t\t enable icons\
 \n     --icons-use-file-color\t icons color follows file color\
 \n     --int-vars\t\t\t enable internal variables\
@@ -1678,11 +1677,13 @@ help_function(void)
 \n              counting files in directories is expensive\
 \n     --no-follow-symlink\t do not follow symbolic links when\
 \n              listing files\
+\n     --no-highlight\t\t Disable syntax highlighting\
 \n     --no-open-auto\t\t same as no-cd-auto, but for files\
 \n     --no-tips\t\t\t disable startup tips\
 \n     --no-restore-last-path\t save last visited directory to be \
 \n              restored in the next session\
 \n     --no-suggestions\t\t disable auto-suggestions\
+\n     --no-warning-prompt\t Disable the warning prompt\
 \n     --no-welcome-message\t disable the welcome message\
 \n     --only-dirs\t\t list only directories and symbolic links\
 \n              to directories\

@@ -420,9 +420,9 @@ my_rl_getc(FILE *stream)
 #endif /* __GO32__ */
 
 #ifndef _NO_FZF
-	if (xargs.fzftab == 1 || warn_wrong_cmd == 1) {
+	if (xargs.fzftab == 1 || warning_prompt == 1) {
 #else
-	if (warn_wrong_cmd == 1) {
+	if (warning_prompt == 1) {
 #endif /* !_NO_FZF */
 		if (prompt_offset == UNSET) {
 			get_cursor_position(STDIN_FILENO, STDOUT_FILENO);

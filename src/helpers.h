@@ -632,7 +632,7 @@ struct param {
 #endif
 	int unicode;
 	int welcome_message;
-	int warn_wrong_cmd;
+	int warning_prompt;
 };
 
 extern struct param xargs;
@@ -807,7 +807,7 @@ extern int
 	trash_ok,
 #endif
 	unicode,
-	warn_wrong_cmd,
+	warning_prompt,
 	welcome_message,
 	_xrename,
 	xrename; /* We're running a secondary prompt for the rename function */
