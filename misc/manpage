@@ -482,7 +482,7 @@ Bleach cleans file names up either by removing unsafe (extended-ASCII/Unicode) c
 .sp
 These following simple rules are used to compose clean/safe file names:
     - NUL (\\0) and slash characters are completely disallowed
-    - Only use this set of characters: [a-z][A-Z][._-]
+    - Only use this set of characters: [a-Z][0-9][._-]
     - File names never start with a dash (-)
     - Files named . and .. are not allowed
     - Append .bleach to one character long file names
