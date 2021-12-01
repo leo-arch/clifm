@@ -90,7 +90,7 @@ Prompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<
 PromptStyle=default
 
 # A warning prompt to warn the user about invalid command names
-WarningPrompt=false
+WarningPrompt=true
 
 # String to be used by the warning prompt. The color of this prompt
 # can be customized using the 'wp' code in the color scheme file
@@ -171,7 +171,7 @@ SuggestionStrategy=ehfjbac
 # file type color (set via the color scheme file)
 SuggestFiletypeColor=false
 
-SyntaxHighlighting=false
+SyntaxHighlighting=true
 
 # If set to true, expand bookmark names into the corresponding bookmark
 # path: if the bookmark is "name=/path", "name" will be interpreted
