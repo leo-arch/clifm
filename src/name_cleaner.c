@@ -530,6 +530,8 @@ CONFIRM:
 	}
 
 	if (f == 0) {
+		/* Just in case either the original or the replacement file name
+		 * was removed from the list by the user */
 		free(bfiles[0].original);
 		free(bfiles[0].replacement);
 		free(bfiles);

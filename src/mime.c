@@ -38,7 +38,10 @@
 #include <magic.h>
 #endif
 
+#ifndef _NO_ARCHIVING
 #include "archives.h"
+#endif
+
 #include "aux.h"
 #include "checks.h"
 #include "exec.h"
@@ -586,6 +589,7 @@ mime_list_open(char **apps, char *file)
 				ret = EXIT_SUCCESS;
 			free(cmd);
 		} else {
+#ifndef _NO_ARCHIVING
 			/* We have just a command name: no parameter, no placeholder */
 			if (*n[a - 1] == 'a' && n[a - 1][1] == 'd' && !n[a - 1][2]) {
 				/* 'ad' is the internal archiver command */
@@ -598,7 +602,13 @@ mime_list_open(char **apps, char *file)
 					ret = EXIT_SUCCESS;
 				}
 			}
+#else
+			char *cmd[] = {n[a - 1], file, NULL};
+			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+			E_NOSTDERR) == EXIT_SUCCESS)
+				ret = EXIT_SUCCESS;
 		}
+#endif /* NO_ARCHIVING */
 		free(qfile);
 		bg_proc = 0;
 	}
@@ -817,12 +827,16 @@ join_and_run(char **args, char *name)
 	if (!args[1]) {
 		char *cmd[] = {args[0], name, NULL};
 		int ret = EXIT_SUCCESS;
+#ifndef _NO_ARCHIVING
 		if (*args[0] == 'a' && args[0][1] == 'd' && !args[0][2]) {
 			ret = archiver(cmd, 'd');
 		} else {
 			ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
 				E_NOSTDERR);
 		}
+#else
+		ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+#endif
 		if (ret == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
 		return EXIT_FAILURE;
@@ -1286,7 +1300,7 @@ mime_open(char **args)
 	free(ext);
 
 	/* If not info, open the file with the associated application */
-
+#ifndef _NO_ARCHIVING
 	if (*app == 'a' && app[1] == 'd' && !app[2]) {
 		char *cmd[] = {"ad", file_path, NULL};
 		int exit_status = archiver(cmd, 'd');
@@ -1294,6 +1308,7 @@ mime_open(char **args)
 		free(app);
 		return exit_status;
 	}
+#endif
 
 	/* Get number of arguments to check for final ampersand */
 	int args_num = 0;

@@ -1142,5 +1142,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	free(deq_file);
 	return exit_status;
 }
+#else
+void *__skip_me_archiving;
 #endif /* !_NO_ARCHIVING */
 
