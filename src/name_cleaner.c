@@ -101,7 +101,7 @@ get_utf_8_width(char c)
 }
 
 /* Replace unsafe characters by safe ones.
- * ' /\'"$><|!*;:&`' are replaced by an underscore (_)
+ * ' /\'"$><|!*;:`@' are replaced by an underscore (_)
  * '{[()]}' are replaced by a dash (-) */
 static int
 translate_unsafe_char(unsigned char c)
@@ -109,8 +109,7 @@ translate_unsafe_char(unsigned char c)
 	unsigned char t = 0;
 	if (c == ' ' || c == '/'|| c == '\'' || c == '"' || c == '$'
 	|| c == '>' || c == '<' || c == '|' || c == '!' || c == '\\'
-	|| c == '*' || c == ';' || c == ':' || c == '`' || c == '@'
-	|| c == '\n' || c == '\t')
+	|| c == '*' || c == ';' || c == ':' || c == '`' || c == '@')
 		t = DEFAULT_TRANSLATION;
 
 	else if (c == '(' || c == ')' || c == '[' || c == ']'
@@ -140,7 +139,7 @@ get_uft8_dec_value(size_t *i, char *str)
 		case 4: new_value = unpack_start(c, 4); break;
 		case 5: new_value = unpack_start(c, 5); break;
 		case 6: new_value = unpack_start(c, 6); break;
-		default: return (-1); // -1
+		default: return (-1); /* -1 */
 	}
 
 	int expected_chars = utf8_width - 1;
@@ -210,7 +209,7 @@ clean_file_name(const char *restrict name)
 		}
 
 		/* ASCII chars */
-		if (n == 38) { // &
+		if (n == 38) { /* & */
 			if (q == p || *(q - 1) != DEFAULT_TRANSLATION) {
 				strcat(q, "_and_");
 				q += 5;
@@ -340,7 +339,6 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 	edited_names = 1;
 	log_function(NULL);
 
-	int exit_status = MOD_NAMES;
 	char f[PATH_MAX];
 	if (xargs.stealth_mode == 1)
 		snprintf(f, PATH_MAX - 1, "%s/%s", P_tmpdir, TMP_FILENAME);
@@ -375,7 +373,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 
 	/* Open the temp file */
 	open_in_foreground = 1;
-	exit_status = open_file(f);
+	int exit_status = open_file(f);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: %s\n"), FUNC_NAME, strerror(errno));
@@ -445,7 +443,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 				bfiles[i].original = (char *)NULL;
 			}
 			bfiles[i].original = savestring(p, strlen(p));
-		/* Do not store the replacement file name is there was no original */
+		/* Do not store the replacement file name is there is no original */
 		} else if (strncmp(line, "replacement: ", 13) == 0
 		&& bfiles[i].original) {
 			bfiles[i].replacement = savestring(p, strlen(p));
@@ -543,7 +541,8 @@ CONFIRM:
 
 	if (f == 0) {
 		/* Just in case either the original or the replacement file name
-		 * was removed from the list by the user */
+		 * was removed from the list by the user, leaving only one of the
+		 * two */
 		free(bfiles[0].original);
 		free(bfiles[0].replacement);
 		free(bfiles);
@@ -594,6 +593,7 @@ CONFIRM:
 	return EXIT_SUCCESS;
 #endif /* __HAIKU__ */
 }
+
 #else
 void *__skip_me_bleach;
 #endif /* !_NO_BLEACH */
