@@ -484,6 +484,8 @@ It cleans file names up either by removing those (extended-ASCII/Unicode) charac
 The file name length will be trimmed down to \fINAME_MAX\fR (usually 255). If the replacement file name is only one character long, "bleach" will be appended to avoid too short file names.
 .sp
 Modified file names will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing the 'e' key) the list of modified file names via a text editor.
+.sp
+If the replacement file name already exists, a dash and a number (starting from 1) will be appended. Ex: file-3.
 .TP
 .B bl \fRELN/FILE ... n
 Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
