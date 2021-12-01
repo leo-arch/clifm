@@ -320,7 +320,7 @@ clean_file_name(const char *restrict name)
  * the original list of files is returned instead. In case of error
  * returns NULL */
 static struct bleach_t *
-edit_replacements(struct bleach_t *bfiles, size_t n)
+edit_replacements(struct bleach_t *bfiles, size_t *n)
 {
 	if (!bfiles || !bfiles[0].original)
 		return (struct bleach_t *)NULL;
@@ -343,7 +343,7 @@ edit_replacements(struct bleach_t *bfiles, size_t n)
 
 	size_t i = 0;
 	/* Copy all files to be renamed to the temp file */
-	for (; i < n; i++) {
+	for (; i < *n; i++) {
 		dprintf(fd, "original: %s\nreplacement: %s\n\n",
 			bfiles[i].original, bfiles[i].replacement);
 	}
@@ -389,7 +389,7 @@ edit_replacements(struct bleach_t *bfiles, size_t n)
 	}
 
 	/* Free the original list of files */
-	for (i = 0; i < n; i++) {
+	for (i = 0; i < *n; i++) {
 		free(bfiles[i].original);
 		free(bfiles[i].replacement);
 	}
@@ -445,6 +445,7 @@ edit_replacements(struct bleach_t *bfiles, size_t n)
 		}
 	}
 
+	*n = i;
 	free(line);
 	return bfiles;
 }
@@ -517,15 +518,23 @@ CONFIRM:
 		case 'y': /* fallthrough */
 		case 'Y': rename = 1; break;
 		case 'e':
-			bfiles = edit_replacements(bfiles, f);
+			bfiles = edit_replacements(bfiles, &f);
 			if (bfiles) {
-				if (edited_names)
+				if (edited_names && f > 0)
 					goto CONFIRM;
 				else
 					rename = 1;
 			}
 			break;
 		default: break;
+	}
+
+	if (f == 0) {
+		free(bfiles[0].original);
+		free(bfiles[0].replacement);
+		free(bfiles);
+		printf(_("%s: Nothing to do\n"), FUNC_NAME);
+		return EXIT_SUCCESS;
 	}
 
 	/* If renaming all selected files, deselect them */
