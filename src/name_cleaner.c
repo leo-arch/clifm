@@ -533,12 +533,6 @@ bleach_files(char **names)
 	char *input = (char *)NULL;
 
 CONFIRM:
-/*	while (!strchr("yYnNeE\n", ch)) {
-		printf("\nIs this ok? [y/N/(e)dit] ");
-		ch = xgetchar();
-	}
-	if (ch != '\n')
-		printf("%c", ch); */
 	putchar('\n');
 
 	while (!input) {
@@ -558,14 +552,14 @@ CONFIRM:
 			case 'Y': rename = 1; break;
 			case 'e':
 				bfiles = edit_replacements(bfiles, &f);
-				if (bfiles) {
-					if (edited_names && f > 0) {
-						free(input);
-						input = (char *)NULL;
-						goto CONFIRM;
-					} else {
-						rename = 1;
-					}
+				if (!bfiles)
+					break;
+				if (edited_names && f > 0) {
+					free(input);
+					input = (char *)NULL;
+					goto CONFIRM;
+				} else {
+					rename = 1;
 				}
 				break;
 			default: break;
