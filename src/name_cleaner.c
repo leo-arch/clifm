@@ -320,7 +320,7 @@ clean_file_name(const char *restrict name)
 		*p = DEFAULT_TRANSLATION;
 
 	/* No file name should be named dot-dot (..) */
-	if (curlen == 3 && *p == '.' && *(p + 1) == '.' && !*(p + 2))
+	if (cur_len == 3 && *p == '.' && *(p + 1) == '.' && !*(p + 2))
 		*(p + 1) = DEFAULT_TRANSLATION;
 
 	return p;
