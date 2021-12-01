@@ -308,7 +308,7 @@ clean_file_name(const char *restrict name)
 		/* Avoid one character long file names. Specially because files
 		 * named with a single dot should be avoided */
 		char c = *p;
-		snprintf(p, NAME_MAX, "%c%s", c, FUNC_NAME);
+		snprintf(p, NAME_MAX, "%c.%s", c, FUNC_NAME);
 	}
 
 	/* Do not make hidden a file that wasn't */
