@@ -291,7 +291,9 @@ clean_file_name(const char *restrict name)
 	if (too_long)
 		p[NAME_MAX] = '\0';
 
-	if (!*p) { // empty translated file name
+	/* Handle some file names that should be avoided */
+
+	if (!*p) { /* Empty file name */
 		time_t rawtime = time(NULL);
 		struct tm tm;
 		localtime_r(&rawtime, &tm);
@@ -303,7 +305,8 @@ clean_file_name(const char *restrict name)
 		snprintf(p, NAME_MAX, "%s.%s", FUNC_NAME, suffix);
 		free(suffix);
 	} else if (!*(p + 1)) {
-		/* Avoid one character long file names */
+		/* Avoid one character long file names. Specially because files
+		 * named with a single dot should be avoided */
 		char c = *p;
 		snprintf(p, NAME_MAX, "%c%s", c, FUNC_NAME);
 	}
@@ -312,9 +315,13 @@ clean_file_name(const char *restrict name)
 	if (*name != '.' && *p == '.')
 		*p = DEFAULT_TRANSLATION;
 
-	/* File names shouldn't start with a dash (reserved for command options)*/
+	/* File names shouldn't start with a dash/hyphen (reserved for command options)*/
 	if (*p == '-')
 		*p = DEFAULT_TRANSLATION;
+
+	/* No file name should be named dot-dot (..) */
+	if (curlen == 3 && *p == '.' && *(p + 1) == '.' && !*(p + 2))
+		*(p + 1) = DEFAULT_TRANSLATION;
 
 	return p;
 }
