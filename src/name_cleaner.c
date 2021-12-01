@@ -44,6 +44,7 @@
 #include "history.h"
 #include "misc.h"
 #include "cleaner_table.h"
+#include "readline.h"
 
 #define FUNC_NAME "bleach"
 #define DEFAULT_TRANSLATION  '_'
@@ -434,7 +435,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 			continue;
 
 		char *p = strchr(line, ' ');
-		if (!p || !*(p++))
+		if (!p || !*(++p))
 			continue;
 
 		if (strncmp(line, "original: ", 10) == 0) {
@@ -455,7 +456,21 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 		}
 	}
 
-	*n = i;
+	/* Make sure no fields of the struct is empty/NULL*/
+	size_t j = 0;
+	for (i = 0; i < total_files; i++) {
+		if (!bfiles[i].original || !*bfiles[i].original
+		|| !bfiles[i].replacement || !*bfiles[i].replacement) {
+			free(bfiles[i].original);
+			free(bfiles[i].replacement);
+			bfiles[i].original = (char *)NULL;
+			bfiles[i].replacement = (char *)NULL;
+		} else {
+			j++;
+		}
+	}
+
+	*n = j;
 	free(line);
 	return bfiles;
 }
@@ -514,30 +529,50 @@ bleach_files(char **names)
 		return EXIT_SUCCESS;
 	}
 
-CONFIRM:
-	printf("\nPress 'e' to edit");
 	int rename = 0;
-	char ch = '-';
-	while (!strchr("yYnNeE\n", ch)) {
-		printf("\nIs this ok? [y/N] ");
+	char *input = (char *)NULL;
+
+CONFIRM:
+/*	while (!strchr("yYnNeE\n", ch)) {
+		printf("\nIs this ok? [y/N/(e)dit] ");
 		ch = xgetchar();
 	}
+	if (ch != '\n')
+		printf("%c", ch); */
 	putchar('\n');
 
-	switch(ch) {
-		case 'y': /* fallthrough */
-		case 'Y': rename = 1; break;
-		case 'e':
-			bfiles = edit_replacements(bfiles, &f);
-			if (bfiles) {
-				if (edited_names && f > 0)
-					goto CONFIRM;
-				else
-					rename = 1;
-			}
+	while (!input) {
+		input = rl_no_hist(_("Is this OK? [y/N/(e)dit] "));
+
+		if (input && (*(input + 1) || !strchr("yYnNeE", *input))) {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+
+		if (!input)
 			break;
-		default: break;
+
+		switch(*input) {
+			case 'y': /* fallthrough */
+			case 'Y': rename = 1; break;
+			case 'e':
+				bfiles = edit_replacements(bfiles, &f);
+				if (bfiles) {
+					if (edited_names && f > 0) {
+						free(input);
+						input = (char *)NULL;
+						goto CONFIRM;
+					} else {
+						rename = 1;
+					}
+				}
+				break;
+			default: break;
+		}
 	}
+
+	free(input);
 
 	if (f == 0) {
 		/* Just in case either the original or the replacement file name
@@ -554,6 +589,7 @@ CONFIRM:
 	if (rename && is_sel)
 		clear_selbox();
 
+	int total_rename = rename ? (int)f : 0;
 	size_t rep_suffix = 1;
 	int exit_status = EXIT_SUCCESS;
 	for (i = 0; i < f; i++) {
@@ -573,6 +609,7 @@ CONFIRM:
 			
 			if (renameat(AT_FDCWD, o, AT_FDCWD, r) == -1) {
 				fprintf(stderr, "renameat: '%s': %s\n", o, strerror(errno));
+				total_rename--;
 				exit_status = EXIT_FAILURE;
 			}
 		}
@@ -580,6 +617,8 @@ CONFIRM:
 		free(r);
 	}
 	free(bfiles);
+
+	printf(_("%s: %d file(s) bleached\n"), FUNC_NAME, total_rename);
 
 #ifndef __HAIKU__
 	return exit_status;
