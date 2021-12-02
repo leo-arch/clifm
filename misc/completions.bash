@@ -84,7 +84,6 @@ _clifm ()
         --enable-logs
         --expand-bookmarks
         --fzftab
-        --highlight
         --icons
         --icons-use-file-color
         --list-and-quit
@@ -101,10 +100,12 @@ _clifm ()
         --no-file-ext
         --no-files-counter
         --no-follow-symlink
+        --no-highlight
         --no-open-auto
         --no-restore-last-path
         --no-suggestions
         --no-tips
+		--no-warning-prompt
         --no-welcome-message
         --only-dirs
         --open
@@ -114,7 +115,6 @@ _clifm ()
         --share-selbox
         --sort-reverse
         --trash-as-rm
-		--warn-wrong-cmd
     )
 
     if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then

@@ -51,7 +51,6 @@ args=(
 	'--enable-logs[enable program logs]'
 	'--expand-bookmarks[expand bookmark names into the corresponding bookmark paths]'
 	'--fzftab[enable FZF TAB completion mode]'
-	'--highlight[enable syntax highlighting]'
 	'--icons[enable icons]'
 	'--icons-use-file-color[icons color follows file color]'
 	'--list-and-quit[list files and quit]'
@@ -68,10 +67,12 @@ args=(
 	'--no-file-ext[do not check files extension when listing files]'
 	'--no-files-counter[disable the files counter for directories]'
 	'--no-follow-symlink[do not follow symbolic links when listing files]'
+	'--no-highlight[disable syntax highlighting]'
     '--no-restore-last-path[do not restore last visited directory at startup]'
 	'--no-open-auto[same as no-cd-auto, but for files]'
 	'--no-suggestions[disable auto-suggestions]'
 	'--no-tips[disable startup tips]'
+	'--no-warning-prompt[disable the warning prompt, used to highlight invalid command names]'
 	'--no-welcome-message[disable the welcome message]'
 	'--only-dirs[list only directories and symbolic links to directories]'
 	'--open[run as a stand-alone resource opener: open FILE and exit]'
@@ -82,7 +83,6 @@ args=(
 	'--sort-reverse[sort in reverse order]'
 	'--trash-as-rm[the 'r' command executes 'trash' instead of 'rm']'
 	'*:filename:_files'
-	'--warn-wrong-cmd[enable the warning prompt to highlight wrong command names]'
 )
 
 _arguments -w -s -S $args[@] && ret=0
