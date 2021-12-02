@@ -388,6 +388,10 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 
 	close_fstream(fp, fd);
 	fp = open_fstream_r(f, &fd);
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", FUNC_NAME, f, strerror(errno));
+		return (struct bleach_t *)NULL;
+	}
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
