@@ -1962,7 +1962,6 @@ bonus_function(void)
 	    ":(){:|:&};:",
 	    "Keep it simple, stupid",
 	    "If ain't broken, brake it",
-	    "An Archer knows her target like the back of her hands",
 	    "\"I only know that I know nothing\" (Socrates)",
 	    "(Learned) Ignorance is the true outcome of wisdom (Nicholas "
 	    "of Cusa)",

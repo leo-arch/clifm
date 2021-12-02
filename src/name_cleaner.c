@@ -42,6 +42,9 @@
 #include "exec.h"
 #include "file_operations.h"
 #include "history.h"
+#ifdef __HAIKU__
+#include "listing.c"
+#endif
 #include "misc.h"
 #include "cleaner_table.h"
 #include "readline.h"
