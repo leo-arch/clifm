@@ -928,6 +928,13 @@ bulk_rename(char **args)
 		return EXIT_FAILURE;
 	}
 
+	close_fstream(fp, fd);
+	fp = open_fstream_r(bulk_file, &fd);
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
 	fstat(fd, &attr);
@@ -941,9 +948,6 @@ bulk_rename(char **args)
 		close_fstream(fp, fd);
 		return exit_status;
 	}
-
-	/* Go back to the beginning of the bulk file */
-	fseek(fp, 0, SEEK_SET);
 
 	/* Make sure there are as many lines in the bulk file as files
 	 * to be renamed */
