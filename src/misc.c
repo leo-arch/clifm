@@ -1924,8 +1924,8 @@ splash(void)
 "        :c::::::::::::::::::::::::::::::::::.",
 	D_CYAN);
 
-	printf(_("\n\n%s%s\t\t       CliFM%s\n\tThe command line file manager\n"),
-	    df_c, BOLD, df_c);
+	printf("\n\n%s%s\t\t       %s%s\n           %s\n",
+			df_c, BOLD, df_c, PROGRAM_NAME, _(PROGRAM_DESC));
 
 	if (splash_screen) {
 		printf(_("\n\t\t\tPress any key to continue... "));

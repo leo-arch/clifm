@@ -138,7 +138,7 @@ extern int watch;
 
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */
-#define PROG_DESC "The command line file manager"
+#define PROGRAM_DESC "The command line file manager"
 #ifndef __HAIKU__
 #define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
 #else
