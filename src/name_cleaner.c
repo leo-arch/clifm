@@ -615,7 +615,12 @@ CONFIRM:
 	}
 	free(bfiles);
 
-	printf(_("%s: %d file(s) bleached\n"), FUNC_NAME, total_rename);
+	if (exit_status == EXIT_FAILURE || total_rename == 0) {
+		printf(_("%s: %d file(s) bleached\n"), FUNC_NAME, total_rename);
+	} else {
+		_err(0, PRINT_PROMPT, ("%s: %d file(s) bleached\n"),
+			FUNC_NAME, total_rename);
+	}
 
 #ifndef __HAIKU__
 	return exit_status;
