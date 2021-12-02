@@ -51,6 +51,7 @@ int xmkdir(char *dir, mode_t mode);
 mode_t get_dt(const mode_t mode);
 char *gen_date_suffix(struct tm tm);
 int get_cursor_position(const int ifd, const int ofd);
+//int get_term_bgcolor(const int ifd, const int ofd);
 void rl_ring_bell(void);
 
 #endif /* AUX_H */

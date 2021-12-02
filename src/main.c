@@ -294,6 +294,7 @@ char
 #endif
 	*sys_shell = (char *)NULL,
 	*term = (char *)NULL,
+//	*term_bgcolor = (char *)NULL,
 	*tmp_dir = (char *)NULL,
 #ifndef _NO_TRASH
 	*trash_dir = (char *)NULL,
@@ -688,6 +689,9 @@ main(int argc, char *argv[])
 
 	/* Make sure we are running on a supported terminal */
 	check_term();
+
+/*	get_term_bgcolor(STDIN_FILENO, STDOUT_FILENO);
+	printf("\x1b]11;#111111\007"); */
 
 //	signal(SIGWINCH, handle_sigwinch);
 

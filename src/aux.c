@@ -204,6 +204,43 @@ FAIL:
 	disable_raw_mode(ifd);
 	return EXIT_FAILURE;
 }
+/*
+int
+get_term_bgcolor(const int ifd, const int ofd)
+{
+	char buf[32] = {0};
+	unsigned int i = 0;
+
+	if (enable_raw_mode(ifd) == -1)
+		return EXIT_FAILURE;
+
+	// Report terminal background color
+	if (write(ofd, "\x1b]11;?\007", 7) != 7)
+		goto FAIL;
+
+	// Read the response: "ESC ] 11 ; rgb:COLOR BEL"
+	while (i < sizeof(buf) - 1) {
+		if (i > 22)
+			break;
+		if (read(ifd, buf + i, 1) != 1)
+			break;
+		printf("%d:'%c'\n", buf[i], buf[i]);
+		i++;
+	}
+	buf[i] = '\0';
+
+	char *p = strchr(buf, ':');
+	if (!p || !*(++p))
+		goto FAIL;
+	term_bgcolor = savestring(p, strlen(p));
+
+	disable_raw_mode(ifd);
+	return EXIT_SUCCESS;
+
+FAIL:
+	disable_raw_mode(ifd);
+	return EXIT_FAILURE;
+} */
 
 char *
 gen_date_suffix(struct tm tm)

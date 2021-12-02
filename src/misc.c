@@ -1044,6 +1044,11 @@ free_stuff(void)
 {
 	int i = 0;
 
+/*	if (term_bgcolor) {
+		printf("\x1b]11;rgb:%s\007", term_bgcolor);
+		free(term_bgcolor);
+	} */
+
 #ifdef LINUX_INOTIFY
 	/* Shutdown inotify */
 	if (inotify_wd >= 0)
@@ -1919,7 +1924,7 @@ splash(void)
 "        :c::::::::::::::::::::::::::::::::::.",
 	D_CYAN);
 
-	printf(_("\n\n%s%s\t\t       CliFM%s\n\tThe KISS/non-curses file manager\n"),
+	printf(_("\n\n%s%s\t\t       CliFM%s\n\tThe command line file manager\n"),
 	    df_c, BOLD, df_c);
 
 	if (splash_screen) {
