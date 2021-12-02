@@ -386,6 +386,9 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 		return (struct bleach_t *)NULL;
 	}
 
+	close_fstream(fp, fd);
+	fp = open_fstream_r(f, &fd);
+
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
 	fstat(fd, &attr);
@@ -398,7 +401,6 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 		edited_names = 0;
 		return bfiles; /* Return the original list of files */
 	}
-
 	/* Free the original list of files */
 	for (i = 0; i < *n; i++) {
 		free(bfiles[i].original);
@@ -415,8 +417,6 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 		bfiles[i].original = (char *)NULL;
 		bfiles[i].replacement = (char *)NULL;
 	}
-
-	fseek(fp, 0, SEEK_SET);
 
 	size_t line_size = 0;
 	char *line = (char *)NULL;
@@ -471,7 +471,10 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 	}
 
 	*n = j;
+
 	free(line);
+	close_fstream(fp, fd);
+
 	return bfiles;
 }
 
