@@ -1110,7 +1110,7 @@ exec_cmd(char **comm)
 			return EXIT_SUCCESS;
 		}
 #ifndef _NO_BLEACH
-		return (exit_code = bleach_files(comm));
+		exit_code = bleach_files(comm);
 #else
 		fprintf(stderr, _("%s: bleach: %s\n"), PROGRAM_NAME, NOT_AVAILABLE);
 		return EXIT_FAILURE;
