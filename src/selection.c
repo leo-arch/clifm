@@ -644,9 +644,12 @@ sel_function(char **args)
 		printf(_("%zu selected %s:\n\n"), sel_n, (sel_n == 1) ? _("file")
 				: _("files"));
 
+		size_t t = tab_offset;
+		tab_offset = 0;
 		for (i = 0; i < (int)sel_n; i++)
 			colors_list(sel_elements[i], (int)i + 1, NO_PAD,
 			    PRINT_NEWLINE);
+		tab_offset = t;
 	}
 
 	/* Print total size */
@@ -682,6 +685,9 @@ show_sel_files(void)
 		t_rows -= 2;
 		size_t i;
 
+		size_t t = tab_offset;
+		tab_offset = 0;
+
 		for (i = 0; i < sel_n; i++) {
 			/* if (pager && counter > (term_rows-2)) { */
 			if (pager && counter > (size_t)t_rows) {
@@ -714,6 +720,8 @@ show_sel_files(void)
 			counter++;
 			colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
 		}
+
+		tab_offset = t;
 
 		char *human_size = get_size_unit(total_sel_size);
 		printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);

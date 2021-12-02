@@ -456,7 +456,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 		}
 	}
 
-	/* Make sure no fields of the struct is empty/NULL*/
+	/* Make sure no field of the struct is empty/NULL*/
 	size_t j = 0;
 	for (i = 0; i < total_files; i++) {
 		if (!bfiles[i].original || !*bfiles[i].original
