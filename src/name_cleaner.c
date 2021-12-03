@@ -43,7 +43,7 @@
 #include "file_operations.h"
 #include "history.h"
 #ifdef __HAIKU__
-#include "listing.c"
+#include "listing.h"
 #endif
 #include "misc.h"
 #include "cleaner_table.h"
