@@ -115,7 +115,7 @@ run_and_refresh(char **cmd)
 	log_function(cmd);
 
 	size_t i = 0, total_len = 0;
-	for (i = 0; i <= args_n; i++)
+	for (; i <= args_n; i++)
 		total_len += strlen(cmd[i]);
 
 	char *tmp_cmd = (char *)NULL;
@@ -178,7 +178,7 @@ run_and_refresh(char **cmd)
 	}
 
 #ifdef __HAIKU__
-	if (autols && strcmp(cmd[1], "--help") != 0
+	if (autols && cmd[1] && strcmp(cmd[1], "--help") != 0
 	&& strcmp(cmd[1], "--version") != 0) {
 		free_dirlist();
 		list_dir();

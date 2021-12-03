@@ -96,6 +96,7 @@ run_action(char *action, char **args)
 	}
 
 	/* Append arguments to command */
+	/* Arguments are already escaped */
 	size_t i;
 	len = strlen(cmd);
 	for (i = 1; args[i]; i++) {

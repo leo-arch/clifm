@@ -1010,7 +1010,11 @@ archiver(char **args, char mode)
 			format = rl_no_hist(_("New format (Ex: .tar.xz): "));
 			if (!format)
 				continue;
-			if (!*format || (*format != '.' && *format != 'q')) {
+			/* Do not allow any of these characters (mitigate
+			 * command injection) */
+			char invalid_c[] = " \t\n\"\\/'`@$><=;|&{([*?!%";
+			if (!*format || (*format != '.' && *format != 'q')
+			|| strpbrk(format, invalid_c)) {
 				free(format);
 				format = (char *)NULL;
 				continue;
