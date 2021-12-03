@@ -447,10 +447,14 @@ print_entry_props(const struct fileinfo *props, size_t max)
 		int a = (int)props->len - rest - 1;
 		if (a < 0)
 			a = 0;
+#ifndef _BE_POSIX
 		if (unicode)
 			diff = u8truncstr(tname, (size_t)(a));
 		else
 			tname[a] = '\0';
+#else
+		tname[a] = '\0';
+#endif
 		cur_len -= (size_t)rest;
 	}
 
