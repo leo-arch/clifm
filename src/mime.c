@@ -503,7 +503,8 @@ get_user_input(int *a, const size_t *nn)
 			break;
 		}
 
-		if (*input < '1' && *input > '9') {
+		if (!is_number(input)) {
+//		if (*input < '1' || *input > '9') {
 			free(input);
 			input = (char *)NULL;
 			continue;
@@ -559,7 +560,7 @@ mime_list_open(char **apps, char *file)
 	char *input = get_user_input(&a, &nn);
 
 	int ret = EXIT_FAILURE;
-	if (input && a && n[a - 1]) {
+	if (input && a > 0 && n[a - 1]) {
 		char *qfile = escape_str(file);
 		if (!qfile) {
 			fprintf(stderr, _("%s: %s: Error escaping file name\n"),
@@ -826,6 +827,7 @@ join_and_run(char **args, char *name)
 {
 	/* Just an aplication name */
 	if (!args[1]) {
+		errno = 0;
 		char *cmd[] = {args[0], name, NULL};
 		int ret = EXIT_SUCCESS;
 #ifndef _NO_ARCHIVING
@@ -840,6 +842,7 @@ join_and_run(char **args, char *name)
 #endif
 		if (ret == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[0], strerror(ret));
 		return EXIT_FAILURE;
 	}
 
@@ -869,14 +872,29 @@ join_and_run(char **args, char *name)
 
 	if (ph && *(ph + 1) == 'f') {
 		char *phcmd = replace_substr(cmd, "%f", name);
+		if (!phcmd)
+			goto EXIT;
+		if (bg_proc) {
+			phcmd = (char *)xrealloc(phcmd, (strlen(phcmd) + 3) * sizeof(char));
+			char t[3];
+			t[0] = ' '; t[1] = '&'; t[2] = '\0';
+			strcat(phcmd, t);
+		}
 		ret = launch_execle(phcmd);
 		free(phcmd);
 	} else {
-		cmd = (char *)xrealloc(cmd, (l + strlen(name) + 1) * sizeof(char));
+		cmd = (char *)xrealloc(cmd, (l + strlen(name) + 1
+			+ (bg_proc ? 3 : 0)) * sizeof(char));
 		strcat(cmd, name);
+		if (bg_proc) {
+			char t[3];
+			t[0] = ' '; t[1] = '&'; t[2] = '\0';
+			strcat(cmd, t);
+		}
 		ret = launch_execle(cmd);
 	}
 
+EXIT:
 	free(cmd);
 	free(name);
 
