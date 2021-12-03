@@ -600,6 +600,16 @@ check_file_size(char *file, int max)
 		return;
 	}
 
+#ifdef __HAIKU__
+	FILE *fpp = fopen(tmp, "w");
+	if (!fpp) {
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp, strerror(errno));
+		close_fstream(fp, fd);
+		free(tmp);
+		return;
+	}
+#endif
+
 	int i = 1;
 	size_t line_size = 0;
 	char *line = (char *)NULL;
@@ -607,8 +617,16 @@ check_file_size(char *file, int max)
 	while (getline(&line, &line_size, fp) > 0) {
 		/* Delete old entries = copy only new ones */
 		if (i++ >= n - (max - 1))
+#ifndef __HAIKU__
 			dprintf(fdd, "%s", line);
+#else
+			fprintf(fpp, "%s", line);
+#endif
 	}
+
+#ifdef __HAIKU__
+	fclose(fpp);
+#endif
 
 	free(line);
 	unlinkat(fd, file, 0);

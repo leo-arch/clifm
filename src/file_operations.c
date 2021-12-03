@@ -880,6 +880,15 @@ bulk_rename(char **args)
 	}
 
 	size_t i, arg_total = 0;
+	FILE *fp = (FILE *)NULL;
+
+#ifdef __HAIKU__
+	fp = fopen(bulk_file, "w");
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "bulk: %s: %s\n", bulk_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+#endif
 
 	/* Copy all files to be renamed to the bulk file */
 	for (i = 1; args[i]; i++) {
@@ -894,14 +903,19 @@ bulk_rename(char **args)
 			strcpy(args[i], deq_file);
 			free(deq_file);
 		}
-
+#ifndef __HAIKU__
 		dprintf(fd, "%s\n", args[i]);
+#else
+		fprintf(fp, "%s\n", args[i]);
+#endif
 	}
-
+#ifndef __HAIKU__
+	fclose(fp);
+#endif
 	arg_total = i;
 	close(fd);
 
-	FILE *fp = open_fstream_r(bulk_file, &fd);
+	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -1095,19 +1109,37 @@ char *export(char **filenames, int open)
 	}
 	
 	size_t i;
+#ifdef __HAIKU__
+	FILE *fp = fopen(tmp_file, "w");
+	if (!fp) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		free(tmp_file);
+		return (char *)NULL;
+	}
+#endif
 
 	/* If no argument, export files in CWD */
 	if (!filenames[1]) {
 		for (i = 0; file_info[i].name; i++)
+#ifndef __HAIKU__
 			dprintf(fd, "%s\n", file_info[i].name);
+#else
+			fprintf(fp, "%s\n", file_info[i].name);
+#endif
 	} else {
 		for (i = 1; filenames[i]; i++) {
 			if (*filenames[i] == '.' && (!filenames[i][1] || (filenames[i][1] == '.' && !filenames[i][2])))
 				continue;
+#ifndef __HAIKU__
 			dprintf(fd, "%s\n", filenames[i]);
+#else
+			fprintf(fp, "%s\n", filenames[i]);
+#endif
 		}
 	}
-
+#ifdef __HAIKU__
+	fclose(fp);
+#endif
 	close(fd);
 
 	if (!open)

@@ -355,17 +355,34 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 		return (struct bleach_t *)NULL;
 	}
 
+	FILE *fp = (FILE *)NULL;
+
+#ifdef __HAIKU__
+	fp = fopen(f, "w");
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, f, strerror(errno));
+		return (struct bleach_t *)NULL;
+	}
+#endif
+
 	size_t i = 0;
 	/* Copy all files to be renamed to the temp file */
 	for (; i < *n; i++) {
+#ifndef __HAIKU__
 		dprintf(fd, "original: %s\nreplacement: %s\n\n",
+#else
+		fprintf(fp, "original: %s\nreplacement: %s\n\n",
+#endif
 			bfiles[i].original, bfiles[i].replacement);
 	}
 	size_t total_files = i;
 
+#ifdef __HAIKU__
+	fclose(fp);
+#endif
 	close(fd);
 
-	FILE *fp = open_fstream_r(f, &fd);
+	fp = open_fstream_r(f, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", FUNC_NAME, f, strerror(errno));
 		return (struct bleach_t *)NULL;
