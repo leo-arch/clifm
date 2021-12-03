@@ -187,7 +187,7 @@ get_uft8_dec_value(size_t *i, char *str)
  *
  * @parameter: the file name to be cleaned up. If it contains a slash, only
  * the string after the slash will be taken a the actual file name
- * 
+ *
  * @return: the cleaned file name or NULL in case of error. If the translated
  * file name is empty, it will be replaced by "bleach.YYYYMMDDHHMMS"
  * */
@@ -433,7 +433,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 
 	/* Allocate memory for the new list */
 	free(bfiles);
-	bfiles = (struct bleach_t *)xnmalloc(total_files + 1, 
+	bfiles = (struct bleach_t *)xnmalloc(total_files + 1,
 			sizeof(struct bleach_t));
 
 	/* Initialize all values */
@@ -622,12 +622,12 @@ CONFIRM:
 			struct stat a;
 			while (lstat(r, &a) == 0) {
 				char tmp[PATH_MAX];
-				strncpy(tmp, r, PATH_MAX);
+				strncpy(tmp, r, PATH_MAX - 1);
 				r = (char *)xrealloc(r,	PATH_MAX * sizeof(char));
 				sprintf(r, "%s-%zu", tmp, rep_suffix);
 				rep_suffix++;
 			}
-			
+
 			if (renameat(AT_FDCWD, o, AT_FDCWD, r) == -1) {
 				fprintf(stderr, "renameat: '%s': %s\n", o, strerror(errno));
 				total_rename--;
