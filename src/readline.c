@@ -1515,6 +1515,10 @@ sel_entries_generator(const char *text, int state)
 static char **
 rl_trashed_files(const char *text)
 {
+#ifdef _NO_TRASH
+	UNUSED(text);
+	return (char **)NULL;
+#else
 	if (!trash_files_dir || !*trash_files_dir)
 		return (char **)NULL;
 
@@ -1572,6 +1576,7 @@ rl_trashed_files(const char *text)
 	}
 
 	return tfiles;
+#endif /* _NO_TRASH */
 }
 
 char **
@@ -1651,6 +1656,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+#ifndef _NO_LIRA
 		/* #### OPEN WITH #### */
 		if (!_xrename && rl_end > 4 && *rl_line_buffer == 'o' && rl_line_buffer[1] == 'w'
 		&& rl_line_buffer[2] == ' ' && rl_line_buffer[3]
@@ -1667,6 +1673,7 @@ my_rl_completion(const char *text, int start, int end)
 				return matches;
 			}
 		}
+#endif /* _NO_LIRA */
 
 		/* ### UNTRASH ### */
 		if (!_xrename && *rl_line_buffer == 'u' && (rl_line_buffer[1] == ' '

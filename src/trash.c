@@ -1130,5 +1130,6 @@ trash_function(char **comm)
 		return exit_status;
 	}
 }
+#else
+void *__skip_me_trash;
 #endif /* !_NO_TRASH */
-

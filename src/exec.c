@@ -722,6 +722,7 @@ exec_cmd(char **comm)
 
 	/*      ############### OPEN WITH ##################     */
 	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2]) {
+#ifndef _NO_LIRA
 		if (comm[1]) {
 			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 				puts(_(OW_USAGE));
@@ -731,6 +732,10 @@ exec_cmd(char **comm)
 		}
 		puts(_(OW_USAGE));
 		return EXIT_SUCCESS;
+#else
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+		return EXIT_FAILURE;
+#endif
 	}
 
 	/*   ############## DIRECTORY JUMPER ##################     */

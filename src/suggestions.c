@@ -1668,4 +1668,4 @@ FAIL:
 }
 #else
 void *__skip_me_suggestions;
-#endif
+#endif /* _NO_SUGGESTIONS */

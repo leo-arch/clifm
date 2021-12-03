@@ -1396,4 +1396,6 @@ mime_open(char **args)
 	free(cmd);
 	return ret;
 }
+#else
+void *__skip_me_lira;
 #endif /* !_NO_LIRA */
