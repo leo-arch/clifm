@@ -67,6 +67,10 @@ run_action(char *action, char **args)
 		strcpy(cmd, action);
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
+		if (!plugins_dir || !*plugins_dir) {
+			fprintf(stderr, "%s: Plugins directory not defined\n", PROGRAM_NAME);
+			return EXIT_FAILURE;
+		}
 		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2,
 								sizeof(char));
 		sprintf(cmd, "%s/%s", plugins_dir, action);
@@ -106,7 +110,6 @@ run_action(char *action, char **args)
 			 * ############################## */
 
 	char *rand_ext = gen_rand_str(6);
-
 	if (!rand_ext) {
 		free(cmd);
 		return EXIT_FAILURE;
