@@ -956,7 +956,11 @@ normalize_path(char *src, size_t src_len)
 
 		case 2:
 			if (ptr[0] == '.' && ptr[1] == '.') {
+#ifndef __HAIKU__
 				const char *slash = memrchr(res, '/', res_len);
+#else
+				const char *slash = strrchr(res, '/');
+#endif
 				if (slash)
 					res_len = (size_t)(slash - res);
 				continue;
@@ -1042,8 +1046,11 @@ deselect(char **comm)
 
 	putchar('\0');
 
+	size_t t = tab_offset;
+	tab_offset = 0;
 	for (i = 0; i < (int)sel_n; i++)
 		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
+	tab_offset = t;
 
 	char *human_size = get_size_unit(total_sel_size);
 	printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);

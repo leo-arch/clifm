@@ -422,6 +422,8 @@ search_glob(char **comm, int invert)
 		if (columns_n > found)
 			columns_n = found;
 
+		size_t t = tab_offset;
+		tab_offset = 0;
 		for (i = 0; i < found; i++) {
 			if (!pfiles[i])
 				continue;
@@ -440,6 +442,7 @@ search_glob(char **comm, int invert)
 			 * Positive number: Print positive number as ELN
 			 * -1: Print "?" instead of an ELN */
 		}
+		tab_offset = t;
 
 		printf(_("Matches found: %d\n"), found);
 	}
@@ -766,6 +769,8 @@ search_regex(char **comm, int invert, int case_sens)
 		size_t cur_col = 0,
 			   counter = 0;
 
+		size_t t = tab_offset;
+		tab_offset = 0;
 		for (i = 0; i < found; i++) {
 			if (match_type[i] == 0)
 				continue;
@@ -796,6 +801,7 @@ search_regex(char **comm, int invert, int case_sens)
 					(last_column || counter == type_ok) ? PRINT_NEWLINE
 					: NO_NEWLINE);
 		}
+		tab_offset = t;
 
 		printf(_("Matches found: %zu\n"), counter);
 	}
