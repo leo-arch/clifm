@@ -909,7 +909,7 @@ bulk_rename(char **args)
 		fprintf(fp, "%s\n", args[i]);
 #endif
 	}
-#ifndef __HAIKU__
+#ifdef __HAIKU__
 	fclose(fp);
 #endif
 	arg_total = i;
