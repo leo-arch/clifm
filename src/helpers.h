@@ -347,7 +347,7 @@ extern int watch;
 
 #define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
-#define DIGINUM(n) (((n) < 10) ? 1
+#define DIGINUM(n) (((n) < 10) ? 1 \
 		: ((n) < 100)        ? 2 \
 		: ((n) < 1000)       ? 3 \
 		: ((n) < 10000)      ? 4 \
