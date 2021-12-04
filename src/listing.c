@@ -1280,17 +1280,6 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			continue;
 		}
 
-/*		if (max_files != UNSET && i == max_files) {
-			// Since we are exiting early, let's correct the LAST_COLUMN
-			// value
-				printf("'%d:%d'", x, i);
-				fflush(stdout);
-				sleep(1);
-			if (!last_column && ((x + rows) % (int)columns_n) == 0)
-				last_column = 1;
-			break;
-		} */
-
 				/* ##########################
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */

@@ -40,10 +40,8 @@
 #include "navigation.h"
 #include "readline.h"
 
-#ifndef _BE_POSIX
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
 char len_buf[CMD_LEN_MAX] __attribute__((aligned));
-#endif
 
 /* states: S_N: normal, S_I: comparing integral part, S_F: comparing
            fractionnal parts, S_Z: idem but with leading Zeroes only */
@@ -170,34 +168,10 @@ xstrverscmp(const char *s1, const char *s2)
 	}
 }
 
-#ifdef _BE_POSIX
-/* An strlen implementation able to handle unicode characters. Taken from:
-* https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
-* Explanation: strlen() counts bytes, not chars. Now, since ASCII chars
-* take each 1 byte, the amount of bytes equals the amount of chars.
-* However, non-ASCII or wide chars are multibyte chars, that is, one char
-* takes more than 1 byte, and this is why strlen() does not work as
-* expected for this kind of chars: a 6 chars string might take 12 or
-* more bytes */
-static size_t
-u8_xstrlen(const char *restrict str)
-{
-	size_t len = 0;
-
-	while (*(str++)) {
-		if ((*str & 0xc0) != 0x80)
-			len++;
-	}
-
-	return len;
-}
-#endif /* _BE_POSIX */
-
 /* A strlen implementation able to handle wide chars */
 size_t
 wc_xstrlen(const char *restrict str)
 {
-#ifndef _BE_POSIX
 	size_t len, _len;
 	wchar_t *const wbuf = (wchar_t *)len_buf;
 
@@ -208,13 +182,10 @@ wc_xstrlen(const char *restrict str)
 		len = (size_t)p;
 	else
 		len = 0;
-#else
-	size_t len = u8_xstrlen(str);
-#endif /* _BE_POSIX */
+
 	return len;
 }
 
-#ifndef _BE_POSIX
 /* Truncate an UTF-8 string at width N. Returns the difference beetween
  * N and the point at which STR was actually trimmed (this difference
  * should be added to STR as spaces to equate N and get a correct length)
@@ -244,7 +215,6 @@ u8truncstr(char *restrict str, size_t n)
 	wcscpy((wchar_t *)str, buf);
 	return (int)n - len;
 }
-#endif /* _BE_POSIX */
 
 /* Returns the index of the first appearance of c in str, if any, and
  * -1 if c was not found or if no str. NOTE: Same thing as strchr(),

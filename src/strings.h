@@ -40,9 +40,7 @@ char *strbtw(char *str, const char a, const char b);
 char *gen_rand_str(size_t len);
 size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
 size_t wc_xstrlen(const char *restrict str);
-#ifndef _BE_POSIX
 int u8truncstr(char *restrict str, size_t n);
-#endif
 char *remove_quotes(char *str);
 char *replace_substr(char *haystack, char *needle, char *rep);
 size_t xstrnlen(const char *restrict s);

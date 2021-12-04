@@ -30,6 +30,7 @@
 #else
 #define _POSIX_C_SOURCE 200809L
 #define _DEFAULT_SOURCE
+#define _XOPEN_SOURCE /* wcwidth() */
 #if defined(__FreeBSD__)
 #define __XSI_VISIBLE 700
 #define __BSD_VISIBLE 1
