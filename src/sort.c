@@ -156,10 +156,10 @@ entrycmp(const void *a, const void *b)
 
 	int ret = 0, st = sort;
 
-#ifndef _GNU_SOURCE
-	if (st == SVER)
-		st = SNAME;
-#endif
+//#ifndef _GNU_SOURCE
+//	if (st == SVER)
+//		st = SNAME;
+//#endif
 
 	if (light_mode && (st == SOWN || st == SGRP))
 		st = SNAME;
@@ -183,11 +183,11 @@ entrycmp(const void *a, const void *b)
 			ret = -1;
 		break;
 
-#ifdef _GNU_SOURCE
+//#ifdef _GNU_SOURCE
 	case SVER:
-		ret = strverscmp(pa->name, pb->name);
+		ret = xstrverscmp(pa->name, pb->name);
 		break;
-#endif
+//#endif
 
 	case SEXT: {
 		char *aext = (char *)NULL, *bext = (char *)NULL, *val;
@@ -303,12 +303,7 @@ print_sort_method(void)
 		break;
 
 	case SVER:
-#if __FreeBSD__ || __NetBSD__ || __OpenBSD__ || _BE_POSIX
-		printf(_("version (not available: using 'name') %s\n"),
-		    (sort_reverse) ? "[rev]" : "");
-#else
 		printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
-#endif
 		break;
 
 	case SEXT:
@@ -358,7 +353,7 @@ sort_function(char **arg)
 		struct sort_t {
 			const char *name;
 			int num;
-			int padding; /* Used only to properly align the struct */
+			int pad; /* Used only to properly align the struct */
 		};
 
 		static struct sort_t sorts[] = {

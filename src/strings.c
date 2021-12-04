@@ -45,6 +45,17 @@
 char len_buf[CMD_LEN_MAX] __attribute__((aligned));
 #endif
 
+/* states: S_N: normal, S_I: comparing integral part, S_F: comparing
+           fractionnal parts, S_Z: idem but with leading Zeroes only */
+#define S_N 0x0
+#define S_I 0x3
+#define S_F 0x6
+#define S_Z 0x9
+
+/* result_type: VCMP: return diff; VLEN: compare using len_diff/diff */
+#define VCMP 2
+#define VLEN 3
+
 #define MAX_STR_SZ 4096
 
 
@@ -69,6 +80,94 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	}
 
 	return (size_t)(end - dst - 1);
+}
+
+/* strverscmp() is a GNU extension, and as such not available on some systems
+ * This function is a modified version of the GLIBC and uClibc strverscmp()
+ * taken from here:
+ * https://elixir.bootlin.com/uclibc-ng/latest/source/libc/string/strverscmp.c
+ */
+
+/* Compare S1 and S2 as strings holding indices/version numbers,
+   returning less than, equal to or greater than zero if S1 is less than,
+   equal to or greater than S2 (for more info, see the texinfo doc).
+*/
+int
+xstrverscmp(const char *s1, const char *s2)
+{
+	if ((*s1 & 0xc0) == 0xc0 || (*s2 & 0xc0) == 0xc0)
+		return strcoll(s1, s2);
+
+	const unsigned char *p1 = (const unsigned char *)s1;
+	const unsigned char *p2 = (const unsigned char *)s2;
+
+	/* Symbol(s)    0       [1-9]   others
+	 Transition   (10) 0  (01) d  (00) x   */
+	static const uint8_t next_state[] = {
+	/* state    x    d    0  */
+	/* S_N */  S_N, S_I, S_Z,
+	/* S_I */  S_N, S_I, S_I,
+	/* S_F */  S_N, S_F, S_F,
+	/* S_Z */  S_N, S_F, S_Z
+	};
+
+	static const int8_t result_type[] __attribute__ ((aligned)) = {
+		/* state   x/x  x/d  x/0  d/x  d/d  d/0  0/x  0/d  0/0  */
+		/* S_N */  VCMP, VCMP, VCMP, VCMP, VLEN, VCMP, VCMP, VCMP, VCMP,
+		/* S_I */  VCMP,   -1,   -1,    1, VLEN, VLEN,    1, VLEN, VLEN,
+		/* S_F */  VCMP, VCMP, VCMP, VCMP, VCMP, VCMP, VCMP, VCMP, VCMP,
+		/* S_Z */  VCMP,    1,    1,   -1, VCMP, VCMP,   -1, VCMP, VCMP
+	};
+
+	unsigned char c1, c2;
+	int state, diff;
+
+	if (p1 == p2)
+		return 0;
+
+	if (!case_sensitive) {
+		c1 = TOUPPER(*p1);
+		++p1;
+		c2 = TOUPPER(*p2);
+		++p2;
+	} else {
+		c1 = *p1++;
+		c2 = *p2++;
+	}
+
+	/* Hint: '0' is a digit too.  */
+	state = S_N + ((c1 == '0') + (_ISDIGIT(c1) != 0));
+
+	while ((diff = c1 - c2) == 0) {
+		if (c1 == '\0')
+			return diff;
+
+		state = next_state[state];
+		if (!case_sensitive) {
+			c1 = TOUPPER(*p1);
+			++p1;
+			c2 = TOUPPER(*p2);
+			++p2;
+		} else {
+			c1 = *p1++;
+			c2 = *p2++;
+		}
+		state += (c1 == '0') + (_ISDIGIT(c1) != 0);
+	}
+
+	state = result_type[state * 3 + (((c2 == '0') + (_ISDIGIT(c2) != 0)))];
+
+	switch (state) {
+	case VCMP: return diff;
+	case VLEN:
+		while (_ISDIGIT(*p1++))
+			if (!_ISDIGIT(*p2++))
+				return 1;
+
+		return _ISDIGIT(*p2) ? -1 : diff;
+
+	default: return state;
+	}
 }
 
 #ifdef _BE_POSIX

@@ -105,7 +105,7 @@ get_utf_8_width(char c)
 }
 
 /* Replace unsafe characters by safe ones.
- * ' /\'"$><|!*;:`@' are replaced by an underscore (_)
+ * ' /\'"$><|!*;:`@^%~' are replaced by an underscore (_)
  * '{[()]}' are replaced by a dash (-) */
 static int
 translate_unsafe_char(unsigned char c)
@@ -113,7 +113,8 @@ translate_unsafe_char(unsigned char c)
 	unsigned char t = 0;
 	if (c == ' ' || c == '/'|| c == '\'' || c == '"' || c == '$'
 	|| c == '>' || c == '<' || c == '|' || c == '!' || c == '\\'
-	|| c == '*' || c == ';' || c == ':' || c == '`' || c == '@')
+	|| c == '*' || c == ';' || c == ':' || c == '`' || c == '@'
+	|| c == '^' || c == '%' || c == '~')
 		t = DEFAULT_TRANSLATION;
 
 	else if (c == '(' || c == ')' || c == '[' || c == ']'
