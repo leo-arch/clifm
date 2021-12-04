@@ -105,6 +105,17 @@ namecmp(const char *s1, const char *s2)
 	if (*s2 == '.')
 		s2++;
 
+	/* If both string starts with number, sort them as numbers, not as strings */
+	if (_ISDIGIT(*s1) && _ISDIGIT(*s2)) {
+		char *p1, *p2;
+		long long n1 = strtoll(s1, &p1, 10);
+		long long n2 = strtoll(s2, &p2, 10);
+		if (n2 > n1)
+			return -1;
+		if (n2 < n1)
+			return 1;
+	}
+
 	char ac = *s1, bc = *s2;
 
 	if ((*s1 & 0xc0) != 0xc0 && (*s1 & 0xc0) != 0xc0) {
