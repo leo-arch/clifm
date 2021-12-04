@@ -114,7 +114,7 @@ translate_unsafe_char(unsigned char c)
 	if (c == ' ' || c == '/'|| c == '\'' || c == '"' || c == '$'
 	|| c == '>' || c == '<' || c == '|' || c == '!' || c == '\\'
 	|| c == '*' || c == ';' || c == ':' || c == '`' || c == '@'
-	|| c == '^' || c == '%' || c == '~')
+	|| c == '~')
 		t = DEFAULT_TRANSLATION;
 
 	else if (c == '(' || c == ')' || c == '[' || c == ']'

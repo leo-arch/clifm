@@ -438,8 +438,8 @@ int
 media_menu(int mode)
 {
 #if defined(__HAIKU__)
-	fprintf(stderr, "%s: %s: This feature is not available on Haiku\n",
-			PROGRAM_NAME, mode == MEDIA_LIST ? "Mountpoints" : "Media");
+	fprintf(stderr, _("%s: %s: This feature is not available on Haiku\n"),
+			PROGRAM_NAME, mode == MEDIA_LIST ? _("Mountpoints") : _("Media"));
 	return EXIT_FAILURE;
 #endif
 
