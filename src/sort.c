@@ -118,7 +118,7 @@ namecmp(const char *s1, const char *s2)
 
 	char ac = *s1, bc = *s2;
 
-	if ((*s1 & 0xc0) != 0xc0 && (*s1 & 0xc0) != 0xc0) {
+	if ((*s1 & 0xc0) != 0xc0 && (*s2 & 0xc0) != 0xc0) {
 	/* None of the strings starts with a unicode char: compare the first
 	 * byte of both strings */
 		if (!case_sensitive) {
@@ -133,7 +133,7 @@ namecmp(const char *s1, const char *s2)
 			return 1;
 	}
 
-	if (!case_sensitive || (*s1 & 0xc0) == 0xc0 || (*s1 & 0xc0) == 0xc0)
+	if (!case_sensitive || (*s1 & 0xc0) == 0xc0 || (*s2 & 0xc0) == 0xc0)
 		return strcoll(s1, s2);
 
 	return strcmp(s1, s2);
