@@ -152,15 +152,15 @@ extern int watch;
 #define LICENSE "GPL2+"
 
 /* Options flags */
-#define FOLDERS_FIRST 	(1 << 1)
-#define HELP		(1 << 2)
-#define HIDDEN		(1 << 3)
-#define AUTOLS		(1 << 4)
-#define SPLASH		(1 << 5)
-#define CASE_SENS	(1 << 6)
-#define START_PATH	(1 << 7)
-#define PRINT_VERSION 	(1 << 8)
-#define ALT_PROFILE 	(1 << 9)
+#define FOLDERS_FIRST (1 << 1)
+#define HELP          (1 << 2)
+#define HIDDEN        (1 << 3)
+#define AUTOLS        (1 << 4)
+#define SPLASH        (1 << 5)
+#define CASE_SENS     (1 << 6)
+#define START_PATH    (1 << 7)
+#define PRINT_VERSION (1 << 8)
+#define ALT_PROFILE   (1 << 9)
 
 /* File ownership flags */
 #define R_USR (1 << 1)
@@ -171,45 +171,45 @@ extern int watch;
 #define X_OTH (1 << 6)
 
 /* Internal flags */
-#define ROOT_USR	(1 << 10)
-#define EXT_HELP	(1 << 11)
+#define ROOT_USR      (1 << 10)
+#define EXT_HELP      (1 << 11)
 //#define FILE_CMD_OK (1 << 12)
-#define GUI		(1 << 13)
-#define IS_USRVAR_DEF	(1 << 14)
+#define GUI           (1 << 13)
+#define IS_USRVAR_DEF (1 << 14)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or
  * not */
-#define PRINT_PROMPT 	1
-#define NOPRINT_PROMPT 	0
+#define PRINT_PROMPT   1
+#define NOPRINT_PROMPT 0
 
 /* Macros for xchdir (for setting term title or not) */
-#define SET_TITLE 	1
-#define NO_TITLE 	0
+#define SET_TITLE 1
+#define NO_TITLE  0
 
 /* Macros for cd_function */
-#define CD_PRINT_ERROR		1
-#define CD_NO_PRINT_ERROR	0
+#define CD_PRINT_ERROR    1
+#define CD_NO_PRINT_ERROR 0
 
 /* Macros for the count_dir function. CPOP tells the function to only
  * check if a given directory is populated (it has at least 3 files) */
-#define CPOP 1
+#define CPOP    1
 #define NO_CPOP 0
 
 /* Error codes, used by the launch_exec functions */
-#define EXNULLERR	79
-#define EXFORKERR	81
-#define EXCRASHERR	82
+#define EXNULLERR  79
+#define EXFORKERR  81
+#define EXCRASHERR 82
 
-#define BACKGROUND	1
-#define FOREGROUND	0
+#define BACKGROUND 1
+#define FOREGROUND 0
 
 /* A few colors */
-#define GRAY "\x1b[1;30m"
-#define _RED "\x1b[1;31m"
+#define GRAY   "\x1b[1;30m"
+#define _RED   "\x1b[1;31m"
 #define _GREEN "\x1b[0;32m"
 #define D_CYAN "\x1b[0;36m"
-#define BOLD "\x1b[1m"
-#define NC "\x1b[0m"
+#define BOLD   "\x1b[1m"
+#define NC     "\x1b[0m"
 
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
@@ -217,67 +217,66 @@ extern int watch;
 /* \001 and \002 tell readline that color codes between them are
  * non-printing chars. This is specially useful for the prompt, i.e.,
  * when passing color codes to readline */
-#define RL_NC "\001\x1b[0m\002"
-
-#define DLFC "\x1b[0K" /* Delete line from cursor */
-#define CNL "\x1b[1E" /* Move the cursor to beginning next line*/
-#define DLFC_LEN 4 /* Length of the above escape codes */
+#define RL_NC    "\001\x1b[0m\002"
+#define DLFC     "\x1b[0K"         /* Delete line from cursor */
+#define CNL      "\x1b[1E"         /* Move the cursor to beginning next line*/
+#define DLFC_LEN 4                 /* Length of the above escape codes */
 
 #define UNSET -1
 
 /* Macros for the cp and mv cmds */
-#define CP_CP		0
-#define CP_ADVCP	1
-#define CP_WCP		2
-#define MV_MV		0
-#define MV_ADVMV	1
+#define CP_CP    0
+#define CP_ADVCP 1
+#define CP_WCP   2
+#define MV_MV    0
+#define MV_ADVMV 1
 
 /* Sort macros */
-#define SNONE 	0
-#define SNAME 	1
-#define SSIZE 	2
-#define SATIME 	3
-#define SBTIME 	4
-#define SCTIME 	5
-#define SMTIME 	6
-#define SVER 	7
-#define SEXT 	8
-#define SINO 	9
-#define SOWN 	10
-#define SGRP 	11
+#define SNONE      0
+#define SNAME      1
+#define SSIZE      2
+#define SATIME     3
+#define SBTIME     4
+#define SCTIME     5
+#define SMTIME     6
+#define SVER       7
+#define SEXT       8
+#define SINO       9
+#define SOWN       10
+#define SGRP       11
 #define SORT_TYPES 11
 
 /* Macros for the colors_list function */
-#define NO_ELN 		0
-#define NO_NEWLINE 	0
-#define NO_PAD 		0
-#define PRINT_NEWLINE	1
+#define NO_ELN        0
+#define NO_NEWLINE    0
+#define NO_PAD        0
+#define PRINT_NEWLINE 1
 
 /* A few key macros used by the auto-suggestions system */
-#define _ESC	27
-#define _TAB	9
-#define BS	8
-#define DELETE	127
-#define ENTER	13
+#define _ESC   27
+#define _TAB   9
+#define BS     8
+#define DELETE 127
+#define ENTER  13
 /* #define OP_BRACKET 91
 #define UC_O 79
 #define SPACE 32 */
 
 /* Macros to specify suggestions type */
-#define NO_SUG 		0
-#define HIST_SUG	1
-#define FILE_SUG	2
-#define CMD_SUG		3
-#define INT_CMD		4
-#define COMP_SUG	5
-#define BOOKMARK_SUG	6
-#define ALIAS_SUG	7
-#define ELN_SUG		8
-#define FIRST_WORD	9
-#define JCMD_SUG	10
-#define JCMD_SUG_NOACD 	11 /* No auto-cd */
-#define VAR_SUG		12
-#define SEL_SUG		13
+#define NO_SUG         0
+#define HIST_SUG       1
+#define FILE_SUG       2
+#define CMD_SUG        3
+#define INT_CMD        4
+#define COMP_SUG       5
+#define BOOKMARK_SUG   6
+#define ALIAS_SUG      7
+#define ELN_SUG        8
+#define FIRST_WORD     9
+#define JCMD_SUG       10
+#define JCMD_SUG_NOACD 11 /* No auto-cd */
+#define VAR_SUG	       12
+#define SEL_SUG	       13
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -286,17 +285,17 @@ extern int watch;
 #define MAX_COLOR 46
 
 /* Macros to control file descriptors in exec functions */
-#define E_NOFLAG	0
-#define E_NOSTDIN	(1 << 1)
-#define E_NOSTDOUT	(1 << 2)
-#define E_NOSTDERR	(1 << 3)
-#define E_MUTE		(E_NOSTDOUT | E_NOSTDERR)
+#define E_NOFLAG   0
+#define E_NOSTDIN  (1 << 1)
+#define E_NOSTDOUT (1 << 2)
+#define E_NOSTDERR (1 << 3)
+#define E_MUTE     (E_NOSTDOUT | E_NOSTDERR)
 
 /* Macros for ELN padding */
-#define NOPAD		0
-#define ZEROPAD		1
-#define LEFTSPACEPAD	2
-#define RIGHTSPACEPAD	3
+#define NOPAD         0
+#define ZEROPAD       1
+#define LEFTSPACEPAD  2
+#define RIGHTSPACEPAD 3
 
 /* Macros for the clear_suggestion function */
 #define CS_FREEBUF 1
@@ -310,20 +309,20 @@ extern int watch;
 #define MAX_PROP_STR 55
 
 /* Macros for the prompt style */
-#define DEF_PROMPT_STYLE 0
+#define DEF_PROMPT_STYLE    0
 #define CUSTOM_PROMPT_STYLE 1
 
 /* Macros for the dirjump function */
-#define SUG_JUMP	0
-#define NO_SUG_JUMP	1
+#define SUG_JUMP    0
+#define NO_SUG_JUMP 1
 
 /* Macros for the media_menu function */
 #define MEDIA_LIST 	0
 #define MEDIA_MOUNT	1
 
 /* Macros for the rl_highlight function */
-#define SET_COLOR 		1
-#define INFORM_COLOR 	0
+#define SET_COLOR    1
+#define INFORM_COLOR 0
 
 #define MB_LEN_MAX 16
 
@@ -348,57 +347,58 @@ extern int watch;
 
 #define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
-#define DIGINUM(n) (((n) < 10) ? 1 : ((n) < 100)      ? 2 \
-		 : ((n) < 1000)	      ? 3 \
-		 : ((n) < 10000)      ? 4 \
-		 : ((n) < 100000)     ? 5 \
-		 : ((n) < 1000000)    ? 6 \
-		 : ((n) < 10000000)   ? 7 \
-		 : ((n) < 100000000)  ? 8 \
-		 : ((n) < 1000000000) ? 9 \
+#define DIGINUM(n) (((n) < 10) ? 1
+		: ((n) < 100)        ? 2 \
+		: ((n) < 1000)       ? 3 \
+		: ((n) < 10000)      ? 4 \
+		: ((n) < 100000)     ? 5 \
+		: ((n) < 1000000)    ? 6 \
+		: ((n) < 10000000)   ? 7 \
+		: ((n) < 100000000)  ? 8 \
+		: ((n) < 1000000000) ? 9 \
 				      : 10)
 #define _ISDIGIT(n) ((unsigned int)(n) - '0' <= 9)
 #define _ISALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
 
 /* dirjump macros for calculating directories rank extra points */
-#define BASENAME_BONUS 		300
-#define BOOKMARK_BONUS 		500
-#define PINNED_BONUS 		1000
-#define WORKSPACE_BONUS 	300
+#define BASENAME_BONUS 	300
+#define BOOKMARK_BONUS 	500
+#define PINNED_BONUS    1000
+#define WORKSPACE_BONUS 300
 /* Last directory access */
-#define JHOUR(n) ((n) *= 4) /* Within last hour */
-#define JDAY(n) ((n) *= 2)  /* Within last day */
-#define JWEEK(n) ((n) / 2)  /* Within last week */
-#define JOLDER(n) ((n) / 4) /* More than a week */
+#define JHOUR(n)  ((n) *= 4) /* Within last hour */
+#define JDAY(n)   ((n) *= 2) /* Within last day */
+#define JWEEK(n)  ((n) / 2)  /* Within last week */
+#define JOLDER(n) ((n) / 4)  /* More than a week */
 
 #if defined(__HAIKU__)
-# define DT_UNKNOWN	0
-# define DT_FIFO	1
-# define DT_CHR		2
-# define DT_DIR		4
-# define DT_BLK		6
-# define DT_REG		8
-# define DT_LNK		10
-# define DT_SOCK	12
+# define DT_UNKNOWN 0
+# define DT_FIFO    1
+# define DT_CHR     2
+# define DT_DIR     4
+# define DT_BLK     6
+# define DT_REG     8
+# define DT_LNK     10
+# define DT_SOCK    12
 #endif
 
-#define DT_NONE		14
+#define DT_NONE     14
 
 /* Macros for the get_sys_shell function */
-#define SHELL_NONE 	0
-#define SHELL_BASH 	1
-#define SHELL_DASH 	2
-#define SHELL_FISH 	3
-#define SHELL_KSH 	4
-#define SHELL_TCSH 	5
-#define SHELL_ZSH 	6
+#define SHELL_NONE 0
+#define SHELL_BASH 1
+#define SHELL_DASH 2
+#define SHELL_FISH 3
+#define SHELL_KSH  4
+#define SHELL_TCSH 5
+#define SHELL_ZSH  6
 
-#define BELL_NONE 	0
-#define BELL_AUDIBLE 	1
-#define BELL_VISIBLE 	2
+#define BELL_NONE          0
+#define BELL_AUDIBLE       1
+#define BELL_VISIBLE       2
 #define VISIBLE_BELL_DELAY 30
-#define DEF_BELL_STYLE BELL_VISIBLE
+#define DEF_BELL_STYLE     BELL_VISIBLE
 
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
