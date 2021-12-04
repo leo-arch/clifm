@@ -443,7 +443,7 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	if (cur_len > max) {
 		int rest = (int)(cur_len - max);
 		trim = 1;
-		strcpy(tname, props->name);
+		strncpy(tname, props->name, (PATH_MAX * sizeof(wchar_t)) - 1);
 		int a = (int)props->len - rest - 1;
 		if (a < 0)
 			a = 0;

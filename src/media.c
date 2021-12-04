@@ -530,66 +530,92 @@ media_menu(int mode)
 #endif
 
 	putchar('\n');
+	int n = -1;
 	/* Ask the user and mount/unmount or chdir into the selected
 	 * device/mountpoint */
 	puts(_("Enter 'q' to quit"));
 
 	char *input = (char *)NULL;
-	while (!input)
+	while (!input) {
 #ifdef __linux__
-	if (mode == MEDIA_LIST)
-		input = rl_no_hist(_("Choose a mountpoint: "));
-	else
-		input = rl_no_hist(_("Choose a mountpoint/device: "));
+		if (mode == MEDIA_LIST)
+			input = rl_no_hist(_("Choose a mountpoint: "));
+		else
+			input = rl_no_hist(_("Choose a mountpoint/device: "));
 #else
 		input = rl_no_hist(_("Choose a mountpoint: "));
 #endif
+		if (!input)
+			continue;
 
-	if (*input == 'q' && *(input + 1) == '\0')
+		if (!*input) {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+
+		if (*input == 'q' && *(input + 1) == '\0')
+			goto EXIT;
+
+		int atoi_num = atoi(input);
+		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
+			fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, input);
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+
+		n = atoi_num - 1;
+	}
+
+	if (n == -1)
 		goto EXIT;
 
-	int atoi_num = atoi(input);
-	if (atoi_num > 0 && atoi_num <= (int)mp_n) {
-		int n = atoi_num - 1;
 #ifdef __linux__
-		if (mode == MEDIA_MOUNT) {
-			if (!media[n].mnt) {
-				/* The device is unmounted: mount it */
-				if (mount_dev(n) == EXIT_FAILURE) {
-					exit_status = EXIT_FAILURE;
-					goto EXIT;
-				}
-			} else {
-				/* The device is mounted: unmount it */
-				int ret = unmount_dev(k, n);
-				if (ret == EXIT_FAILURE)
-					exit_status = EXIT_FAILURE;
+	if (mode == MEDIA_MOUNT) {
+		if (!media[n].mnt) {
+			/* The device is unmounted: mount it */
+			if (mount_dev(n) == EXIT_FAILURE) {
+				exit_status = EXIT_FAILURE;
 				goto EXIT;
 			}
-		}
-#endif /* __linux__ */
-		if (xchdir(media[n].mnt, SET_TITLE) == EXIT_SUCCESS) {
-			free(ws[cur_ws].path);
-			ws[cur_ws].path = savestring(media[n].mnt,
-			    strlen(media[n].mnt));
-
-			if (autols) {
-				free_dirlist();
-				if (list_dir() != EXIT_SUCCESS)
-					exit_status = EXIT_FAILURE;
-			}
-
-			add_to_dirhist(ws[cur_ws].path);
-			add_to_jumpdb(ws[cur_ws].path);
 		} else {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			    media[n].mnt, strerror(errno));
-			exit_status = EXIT_FAILURE;
+			/* The device is mounted: unmount it */
+			int ret = unmount_dev(k, n);
+			if (ret == EXIT_FAILURE)
+				exit_status = EXIT_FAILURE;
+			goto EXIT;
 		}
-	} else {
-		fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, input);
-		exit_status = EXIT_FAILURE;
 	}
+#endif /* __linux__ */
+
+	char *p = escape_str(media[n].mnt);
+	if (!p) {
+		fprintf(stderr, _("%s: %s: Error escaping path\n"),
+				PROGRAM_NAME, media[n].mnt);
+		exit_status = EXIT_FAILURE;
+		goto EXIT;
+	}
+
+	int ret = xchdir(p, SET_TITLE);
+	free(p);
+	if (ret != EXIT_SUCCESS) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, media[n].mnt, strerror(errno));
+		exit_status = EXIT_FAILURE;
+		goto EXIT;
+	}
+
+	free(ws[cur_ws].path);
+	ws[cur_ws].path = savestring(media[n].mnt, strlen(media[n].mnt));
+
+	if (autols) {
+		free_dirlist();
+		if (list_dir() != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	add_to_dirhist(ws[cur_ws].path);
+	add_to_jumpdb(ws[cur_ws].path);
 
 EXIT:
 	free(input);
