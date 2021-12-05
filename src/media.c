@@ -180,6 +180,12 @@ get_block_devices(void)
 static int
 unmount_dev(size_t i, const int n)
 {
+	if (xargs.mount_cmd == UNSET) {
+		fprintf(stderr, "%s: No mount application found. Install either "
+			"udevil or udisks2\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
 	if ((unsigned int)n + (unsigned int)1 < (unsigned int)1 || n + 1 > (int)i) {
 		fprintf(stderr, _("%s: %d: Invalid ELN\n"), PROGRAM_NAME, n + 1);
 		return EXIT_FAILURE;
@@ -237,8 +243,17 @@ get_dev_label(void)
 
 		int ret = strcmp(rpath, media[n].dev);
 		free(rpath);
-		if (ret == 0)
+		if (ret == 0) {
+			/* Device label is encoded using hex. Let's decode it */
+			char *p = strchr(name, '\\');
+			if (p && *(p + 1) == 'x') {
+				char pp = 0;
+				pp = (char)(from_hex(*(p + 2)) << 4 | from_hex(*(p + 3)));
+				*p = pp;
+				strcpy(p + 1, p + 4);
+			}
 			label = savestring(name, strlen(name));
+		}
 
 		free(labels[i]);
 	}
@@ -328,6 +343,21 @@ list_mounted_devs(int mode)
 			 * line */
 			while (str && counter < 2) {
 				if (counter == 1) { /* 1 == second field */
+					/* /proc/mounts encode special chars as octal.
+					 * Let's decode it */
+					char *p = strchr(str, '\\');
+					if (p && *(p + 1)) {
+						char *q = p++;
+						char pp = 0;
+						p += 3;
+						pp = *p;
+						*p = '\0';
+						int d = read_octal(q + 1);
+						*p = pp;
+						*q = (char)d;
+						strcpy(q + 1, q + 4);
+					}
+
 					if (mode == MEDIA_LIST) {
 						printf("%s%zu%s %s%s%s [%s]\n", el_c, mp_n + 1,
 							df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c,
@@ -338,6 +368,7 @@ list_mounted_devs(int mode)
 							(access(str, R_OK | X_OK) == 0) ? di_c
 							: nd_c, str, df_c);
 					}
+
 					/* Store the second field (mountpoint) into an
 					 * array */
 					media[mp_n++].mnt = savestring(str, strlen(str));
@@ -364,6 +395,12 @@ list_mounted_devs(int mode)
 static int
 mount_dev(int n)
 {
+	if (xargs.mount_cmd == UNSET) {
+		fprintf(stderr, "%s: No mount application found. Install either "
+			"udevil or udisks2\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
 	char file[PATH_MAX];
 	snprintf(file, PATH_MAX, "%s/clifm.XXXXXX", P_tmpdir);
 
@@ -402,11 +439,15 @@ mount_dev(int n)
 	close_fstream(fp, fd);
 	unlink(file);
 
-	/* Recover the mountpoint used by the mounting command (udisksctl) */
-	char *p = strrchr(out_line, ' ');
-	if (!p || !*(p + 1) || *(p + 1) != '/')
+	if (xargs.mount_cmd == MNT_UDISKS2)
+		puts("udisks2");
+	else if (xargs.mount_cmd == MNT_UDEVIL)
+		puts("udevil");
+	/* Recover the mountpoint used by the mounting command */
+	char *p = strstr(out_line, " at ");
+	if (!p || !*(p + 4) || *(p + 4) != '/')
 		return EXIT_FAILURE;
-	++p;
+	p += 4;
 
 	size_t plen = strlen(p);
 	if (p[plen - 1] == '\n')
@@ -589,17 +630,7 @@ media_menu(int mode)
 	}
 #endif /* __linux__ */
 
-	char *p = escape_str(media[n].mnt);
-	if (!p) {
-		fprintf(stderr, _("%s: %s: Error escaping path\n"),
-				PROGRAM_NAME, media[n].mnt);
-		exit_status = EXIT_FAILURE;
-		goto EXIT;
-	}
-
-	int ret = xchdir(p, SET_TITLE);
-	free(p);
-	if (ret != EXIT_SUCCESS) {
+	if (xchdir(media[n].mnt, SET_TITLE) != EXIT_SUCCESS) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, media[n].mnt, strerror(errno));
 		exit_status = EXIT_FAILURE;
 		goto EXIT;

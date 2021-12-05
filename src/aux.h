@@ -36,6 +36,8 @@ char xgetchar(void);
 /*int *get_hex_num(const char *str); */
 char *url_encode(char *str);
 char *url_decode(char *str);
+char from_hex(char c);
+//char *from_octal(char *s);
 int read_octal(char *str);
 int get_link_ref(const char *link);
 off_t dir_size(char *dir);

@@ -993,7 +993,8 @@ external_arguments(int argc, char **argv)
 		{"fzftab", no_argument, 0, 43},
 		{"no-warning-prompt", no_argument, 0, 44},
 		{"mnt-udisks2", no_argument, 0, 45},
-	    {0, 0, 0, 0}};
+	    {0, 0, 0, 0}
+	};
 
 	/* Increment whenever a new (only) long option is added */
 	int long_opts = 45;

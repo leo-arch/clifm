@@ -675,7 +675,7 @@ from_hex(char c)
 }
 
 /* Converts an integer value to its hex form */
-char
+static char
 to_hex(char c)
 {
 	static char hex[] = "0123456789ABCDEF";

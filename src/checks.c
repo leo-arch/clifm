@@ -96,18 +96,19 @@ check_third_party_cmds(void)
 		fzftab = 0;
 	}
 
-	int b = xargs.mount_cmd;
+	if (xargs.mount_cmd == MNT_UDISKS2 && !udisks2ok && udevilok) {
+		_err('w', PRINT_PROMPT, _("%s: udisks2 not found. Falling back to "
+			"udevil\n"), PROGRAM_NAME);
+		xargs.mount_cmd = MNT_UDEVIL;
+		return;
+	}
 
-	if (udevilok)
+	if (xargs.mount_cmd != MNT_UDISKS2 && udevilok)
 		xargs.mount_cmd = MNT_UDEVIL;
 	else if (udisks2ok)
 		xargs.mount_cmd = MNT_UDISKS2;
 	else
 		xargs.mount_cmd = UNSET;
-
-	if (b == MNT_UDISKS2 && !udisks2ok && udevilok)
-		_err('w', PRINT_PROMPT, _("%s: udisks2 not found. Falling back to "
-			"udevil\n"), PROGRAM_NAME);
 }
 
 /* Return 1 if current user has access to FILE. Otherwise, return zero */
