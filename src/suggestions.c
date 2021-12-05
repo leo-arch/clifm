@@ -543,10 +543,11 @@ static int
 check_filenames(char *str, size_t len, const unsigned char c,
 				const int first_word, const size_t full_word)
 {
-	int i = (int)files;
+	int i = (int)files, dot_slash = 0;
 	char *color = (char *)NULL;
 
 	if (len >= 2 && *str == '.' && *(str + 1) == '/') {
+		dot_slash = 1;
 		str += 2;
 		len -= 2;
 	}
@@ -611,10 +612,23 @@ check_filenames(char *str, size_t len, const unsigned char c,
 
 				char *tmp = escape_str(file_info[i].name);
 				if (tmp) {
-					print_suggestion(tmp, len, color);
+					if (dot_slash) {
+						/* Reinsert './', removed to check file name*/
+						char t[NAME_MAX + 2];
+						snprintf(t, NAME_MAX + 1, "./%s", tmp);
+						print_suggestion(t, len + 2, color);
+					} else {
+						print_suggestion(tmp, len, color);
+					}
 					free(tmp);
 				} else {
-					print_suggestion(file_info[i].name, len, color);
+					if (dot_slash) {
+						char t[NAME_MAX + 2];
+						snprintf(t, NAME_MAX + 1, "./%s", file_info[i].name);
+						print_suggestion(t, len + 2, color);
+					} else {
+						print_suggestion(file_info[i].name, len, color);
+					}
 				}
 			}
 			return PARTIAL_MATCH;
