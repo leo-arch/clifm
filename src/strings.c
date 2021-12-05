@@ -24,6 +24,9 @@
 
 #include "helpers.h"
 
+#ifdef __HAIKU__
+#include <stdint.h>
+#endif
 #include <glob.h>
 #include <stdio.h>
 #include <string.h>
