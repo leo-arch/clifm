@@ -433,6 +433,7 @@ mount_dev(int n)
 	if (fgets(out_line, (int)sizeof(out_line), fp) == NULL) {
 		close_fstream(fp, fd);
 		unlink(file);
+		fprintf(stderr, _("%s: Error getting output from mount command\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -441,8 +442,10 @@ mount_dev(int n)
 
 	/* Recover the mountpoint used by the mounting command */
 	char *p = strstr(out_line, " at ");
-	if (!p || *(p + 4) != '/')
+	if (!p || *(p + 4) != '/') {
+		fprintf(stderr, _("%s: Error retrieving mountpoint\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
+	}
 	p += 4;
 
 	size_t plen = strlen(p);
