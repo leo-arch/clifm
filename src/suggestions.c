@@ -1115,8 +1115,13 @@ count_words(size_t *start_word, size_t *full_word)
 {
 	rl_last_word_start = 0;
 	size_t words = 0, w = 0, first_non_space = 0;
+	char q = 0;
 	char *b = rl_line_buffer;
 	for (; b[w]; w++) {
+		/* Keep track of open quotes */
+		if (b[w] == '\'' || b[w] == '"')
+			q = q == b[w] ? 0 : b[w];
+
 		if (!first_non_space && b[w] != ' ') {
 			words = 1;
 			*start_word = w;
@@ -1135,7 +1140,7 @@ count_words(size_t *start_word, size_t *full_word)
 		}
 		/* If a process separator char is found, reset variables so that we
 		 * can start counting again for the new command */
-		if (cur_color != hq_c && w && b[w - 1] != '\\'
+		if (!q && cur_color != hq_c && w && b[w - 1] != '\\'
 		&& ((b[w] == '&' && b[w - 1] == '&') || b[w] == '|' || b[w] == ';')) {
 			words = first_non_space = *full_word = 0;
 		}
