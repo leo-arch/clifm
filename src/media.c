@@ -445,7 +445,7 @@ mount_dev(int n)
 		puts("udevil");
 	/* Recover the mountpoint used by the mounting command */
 	char *p = strstr(out_line, " at ");
-	if (!p || !*(p + 4) || *(p + 4) != '/')
+	if (!p || *(p + 4) != '/')
 		return EXIT_FAILURE;
 	p += 4;
 
