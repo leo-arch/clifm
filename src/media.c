@@ -439,10 +439,6 @@ mount_dev(int n)
 	close_fstream(fp, fd);
 	unlink(file);
 
-	if (xargs.mount_cmd == MNT_UDISKS2)
-		puts("udisks2");
-	else if (xargs.mount_cmd == MNT_UDEVIL)
-		puts("udevil");
 	/* Recover the mountpoint used by the mounting command */
 	char *p = strstr(out_line, " at ");
 	if (!p || *(p + 4) != '/')
