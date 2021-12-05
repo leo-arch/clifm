@@ -36,6 +36,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#ifdef __OpenBSD__
+#include <strings.h>
+#endif
 #include <sys/ioctl.h>
 
 #include <glob.h>
