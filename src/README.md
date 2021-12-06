@@ -161,7 +161,6 @@ This is the basic structure of CliFM: generally speaking, it is just a shell. In
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), operating on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
 
 ## 4) Hacking
-**Work in progress**
 
 * Default settings: `settings.h`
 
@@ -254,9 +253,8 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | `_NO_SUGGESTIONS` | Disable suggestions support |
 | `_NO_TRASH` | Disable trash support |
 
-<sup>1</sup> Only two features are lost:
+<sup>1</sup> Only one features is lost:
 1)  Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
-2)  Version sort: We use here [versionsort](https://man7.org/linux/man-pages/man3/scandir.3.html), a GNU extension.
 
 <sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is not as optimal as directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
 
