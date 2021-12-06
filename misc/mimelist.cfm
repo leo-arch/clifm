@@ -64,8 +64,8 @@ X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image
 X:.*/pdf$=mupdf;llpp;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;qpdfview
 
 # Images
-X:^image/gif$=animate;pqiv;sxiv -a
-X:^image/.*=fim;feh;display;sxiv;pqiv;gpicview;inkscape;mirage;ristretto;eog;eom;nomacs;geeqie;gwenview;gimp
+X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a
+X:^image/.*=fim;feh;display;sxiv;nsxiv;pqiv;gpicview;inkscape;mirage;ristretto;eog;eom;nomacs;geeqie;gwenview;gimp
 !X:^image/*=fim;img2txt;cacaview;fbi;fbv
 
 # Video and audio
