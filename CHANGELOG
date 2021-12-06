@@ -1,4 +1,5 @@
 1.3 - Sebastian
+* Bleach, a file names cleaner
 * Improved sorting for Unicode file names
 * Version sort for non-GNU systems
 * Environment variables expansion
