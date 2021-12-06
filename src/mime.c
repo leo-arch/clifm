@@ -79,12 +79,31 @@ get_app(const char *mime, const char *ext)
 	if (!mime || !mime_file || !*mime_file)
 		return (char *)NULL;
 
-	/* Directories are always opened by CliFM itself */
+	/* Directories are always opened by CliFM itself, except in the case
+	 * of the open-with command (ow) */
 	if (*mime == 'i' && strcmp(mime, "inode/directory") == 0) {
 		char *p = savestring("clifm", 5);
 		mime_match = 1;
 		return p;
 	}
+
+	/* If a plain text file, check first EDITOR and VISUAL env variables */
+	if (*mime == 't' && strcmp(mime, "text/plain") == 0) {
+		char *app = (char *)NULL;
+		char *e = getenv("EDITOR");
+		if (e) {
+			mime_match = 1;
+			app = savestring(e, strlen(e));
+			return app;
+		}
+		e = getenv("VISUAL");
+		if (e) {
+			mime_match = 1;
+			app = savestring(e, strlen(e));
+			return app;
+		}
+	}
+	
 
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
