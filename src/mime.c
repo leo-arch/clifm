@@ -995,6 +995,17 @@ mime_open_with(char *filename, char **args)
 	if (!mime)
 		goto FAIL;
 
+	/* Add EDITOR/VISUAL value, if any */
+	if (*mime == 't' && strcmp(mime, "text/plain") == 0) {
+		char *e = getenv("EDITOR");
+		if (!e)
+			e = getenv("VISUAL");
+		if (e) {
+			apps = (char **)xrealloc(apps, (appsn + 1) * sizeof(char *));
+			apps[appsn++] = savestring(e, strlen(e));
+		}
+	}
+
 	ext = get_file_ext(name);
 
 	FILE *defs_fp = fopen(mime_file, "r");
