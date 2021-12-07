@@ -93,6 +93,9 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
   - [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
   - [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions).
+  - [copy(-as), move(-as)](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), [interactive rename](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), and [open-with](https://github.com/leo-arch/clifm/wiki/Introduction#ow-elnfilename-application) functions.
+  - [_Bleach_, a built-in file names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n)
+  - [Autocommands](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
   - [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd-on-off-status), [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open-on-off-status), and [autols](https://github.com/leo-arch/clifm/wiki/Common-Operations#navigation).
   - [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
   - [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function).
@@ -101,14 +104,18 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters).
   - [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces).
   - [Eleven sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev).
-  - [Bulk renaming](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename).
+  - [Bulk rename](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename).
   - [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n).
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660).
   - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r).
   - Directory history map to keep in sight previous, current, and next entries in the directory history list.
 - Shell
   - _[Gemini](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)_, a Fish-like auto-suggestions system.
-  - [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
+  - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
+  - [FZF mode for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)
+  - [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting)
+  - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Specifics/#the-warning-prompt)
+  - [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
   - Bash-like quoting system.
   - Shell commands execution.
   - Sequential and conditional commands execution .
@@ -134,10 +141,10 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) :smirk:.
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
   - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
+  - [Easily mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
   - Unicode suppport.
   - Disk usage.
   - [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions.
-  - [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
   - [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
   - [_Mas_, a built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status) for files listing.
   - Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input).
@@ -147,32 +154,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
 
 ---
 For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki). \
-To enjoy of any of the features tagged as NEW, clone this repository and install the program via the Makefile. Follow the instructions below.
 </details>
-
-**NEW**: [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting)
-
-**NEW**: [FZF mode for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)
-
-**NEW**: [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Specifics/#the-warning-prompt)
-
-**NEW**: [ls-like listing mode](https://github.com/leo-arch/clifm/wiki/Customization#files-listing)
-
-**NEW**: [Open-with command](https://github.com/leo-arch/clifm/wiki/Introduction#ow-elnfilename-application)
-
-**NEW**: [Interactive rename functionality for the `m` command](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
-
-**NEW**: [Limit file names length for listed files](https://github.com/leo-arch/clifm/wiki/Specifics#configuration-file)
-
-**NEW**: [Mark selected files in the files list](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection)
-
-**NEW**: [TAB completion for the `sel` keyword, the deselect command, ELN ranges, and the trash function](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)
-
-**NEW**: [New command, `media`, to easily mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
-
-**NEW**: [Get a fine-grained control over _CliFM_ settings via the `autocommands` function](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
-
-**NEW**: [_Bleach_, a file names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n)
 
 ---
 
