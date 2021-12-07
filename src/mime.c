@@ -401,6 +401,7 @@ mime_import(char *file)
 	int mime_defs = 0;
 
 	for (i = 0; mime_paths[i]; i++) {
+		printf("Checking %s ...\n", mime_paths[i]);
 		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
 		if (!sys_mime_fp)
 			continue;
@@ -439,11 +440,9 @@ mime_import(char *file)
 	free(config_path);
 	free(local_path);
 
-	if (mime_defs <= 0) {
-		fclose(mime_fp);
+	if (mime_defs == 0) {
 		fprintf(stderr, _("%s: Nothing was imported. No MIME definitions "
 			"found\n"), PROGRAM_NAME);
-		return (-1);
 	}
 
 	/* Make sure there is an entry for text/plain files, so that at least
