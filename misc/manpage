@@ -708,7 +708,7 @@ The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmoun
 .B o, open \fRELN/FILE [APPLICATION]
 open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see above), a regular file, or a symbolic link to either of the two. For example: 'o 12', 'o filename', 'o /path/to/filename'.
 .sp
-By default, the \fIopen\fR function will open files with the default application associated to them via \FbLira\fR, the built\-in resource opener (see the \fImime\fR command above). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad' or 'o12 leafpad'.
+By default, the \fIopen\fR function will open files with the default application associated to them via \fILira\fR, the built\-in resource opener (see the \fImime\fR command above). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad' or 'o12 leafpad'.
 .sp
 If you want to run the program in the background, simply add the ampersand character, as usual: 'o 12 &', 'o 12&', 'o12&' or (if auto-open is enabled) just '12&'.
 .sp
@@ -1253,9 +1253,13 @@ Of course, combinations of all these features is also possible. Example: 'cp sel
 In addition to completions and expansions, an \fIauto-suggestions system\fR is also available. See the \fBAUTO-SUGGESTIONS\fR section below.
 
 .SH 12. RESOURCE OPENER
-\fBLira\fR is CliFM's built-in resource opener, and is controlled via the \fImime\fR command (see above). File associations are stored in the MIME list file (see the \fBFILES\fR section below).
+As CliFM's built-in resource opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a file extension), then checks the existence of the command associated with this pattern, and finally executes it.
 .TP
-When running for the first time, or whenever the MIME list file cannot be found, CliFM will copy the MIME definitions file from the DATADIR directory (usually \fI/usr/share/clifm/mimelist.cfm\fR) to the local configuration directory. This file follows these simple syntax rules:
+\fBNOTE\fR: When it comes to plain text files, \fILira\fR checks first the \fBEDITOR\fR and \fBVISUAL\fR environment variables (in this order), and, if either of them is set, it will use this value to open the corresponding file. If none of them is set, by contrast, it will try to find a suitable application by parsing the MIME list file.
+.TP
+\fILira\fR is controlled via the \fImime\fR command. File associations are stored in the MIME list file.
+.TP
+When running for the first time, or whenever the MIME list file cannot be found, CliFM will copy the MIME definitions file from the \fBDATADIR\fR directory (usually \fI/usr/share/clifm/mimelist.cfm\fR) to the local configuration directory. This file follows these simple syntax rules:
 .TP
 Each line in the MIME list file consists of:
 .TP
