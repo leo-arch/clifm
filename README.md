@@ -82,7 +82,8 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 Besides common file operations such as copy, move, remove, etc., _CliFM_ provides the following features:
 - Specific
-  - [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI (or curses) at all, just a command-line. It can run on the kernel built-in console and even on a SSH or any other remote session.
+  - [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI (or curses) at all, just a command-line. 
+  - It can run on the kernel built-in console and even on a SSH or any other remote session.
   - [High performance](https://github.com/leo-arch/clifm/wiki/Performance). With a memory footprint below 5 MiB and a disk usage of less than 1 MiB it is incredibly lightweight and fast even on really old hardware.
   - [Short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and [entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names. 
   - [Extended color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions.
