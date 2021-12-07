@@ -1752,14 +1752,6 @@ list_dir(void)
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
 		if (dir_changed)
 			check_autocmd_file(ename);
-/*		if (*ename == '.' && ename[1] == 'c' && ename[2] == 'f'
-		&& ename[3] == 'm' && ename[4] == '.') {
-			if (ename[5] == 'o' && ename[6] == 'u' && ename[7] == 't'
-			&& !ename[8])
-				dir_out = 1;
-			else if (ename[5] == 'i' && ename[6] == 'n' && !ename[7])
-				run_dir_cmd(DIR_IN);
-		} */
 
 		/* Filter files according to _FILTER */
 		if (_filter) {
