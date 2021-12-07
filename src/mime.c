@@ -446,14 +446,12 @@ mime_import(char *file)
 		return (-1);
 	}
 
-	/* Make sure there is an entry for text/plain and *.cfm files, so
-	 * that at least 'mm edit' will work. Gedit, kate, pluma, mousepad,
-	 * and leafpad, are the default text editors of Gnome, KDE, Mate,
-	 * XFCE, and LXDE respectivelly */
-	fputs("X:text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
-	      "vi;emacs;ed\n"
-	      "X:E:^cfm$=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
-	      "emacs;ed\n", mime_fp);
+	/* Make sure there is an entry for text/plain files, so that at least
+	 * 'mm edit' will work */
+	fputs("X:text/plain=nano;vim;vi;emacs;ed;vis;micro;kakoune;"
+		  "gedit;kate;pluma;mousepad;leafpad;fetchpad\n"
+		  "!X:text/plain=nano;vim;vi;emacs;ed;vis;micro;kakoune\n",
+		  mime_fp);
 
 	fclose(mime_fp);
 	return mime_defs;
@@ -969,13 +967,6 @@ mime_open_with(char *filename, char **args)
 
 	if (!name)
 		return EXIT_FAILURE;
-
-/*	struct stat a;
-	if ((lstat(name, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR)
-	|| access(name, R_OK) == -1) {
-		free(name);
-		return EXIT_FAILURE;
-	} */
 
 	/* We already have the opening app. Just join the app, option
 	 * parameters, and file name, and execute the command */
