@@ -705,6 +705,17 @@ mime_open_with_tab(char *filename, const char *prefix)
 		*apps[0] = '\0';
 	}
 
+	/* Add EDITOR/VISUAL value, if any */
+	if (*mime == 't' && strcmp(mime, "text/plain") == 0) {
+		char *e = getenv("EDITOR");
+		if (!e)
+			e = getenv("VISUAL");
+		if (e) {
+			apps = (char **)xrealloc(apps, (++appsn + 1) * sizeof(char *));
+			apps[1] = savestring(e, strlen(e));
+		}
+	}
+
 	size_t prefix_len = 0;
 	if (prefix)
 		prefix_len = strlen(prefix);
