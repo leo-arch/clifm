@@ -78,6 +78,12 @@
 
 #include <readline/readline.h>
 
+/* Macros for run_dir_cmd function */
+#define DIR_IN 0
+#define DIR_OUT 1
+#define DIR_IN_NAME ".cfm.in"
+#define DIR_OUT_NAME ".cfm.out"
+
 /* Struct to store information about trimmed file names */
 struct trim_t {
 	int state;
@@ -347,11 +353,9 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 
 		if (columns_n == -1) { /* Long view */
 			*i = 0;
-/*			*i -= (term_rows - 1); */
 		} else { /* Normal view */
 			if (listing_mode == HORLIST)
 				*i = 0;
-/*				*i -= (int)((term_rows * columns_n) - columns_n); */
 			else
 				return (-2);
 		}
@@ -963,14 +967,9 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 #endif /* !_NO_ICONS */
 
 	if (file_info[i].dir && classify) {
-//				*(line_buf + line_sz++) = '/';
 		putchar('/');
-		if (file_info[i].filesn > 0 && files_counter) {
+		if (file_info[i].filesn > 0 && files_counter)
 			fputs(xitoa(file_info[i].filesn), stdout);
-/*					char *fc = xitoa(file_info[i].filesn);
-			strcat(line_buf + line_sz, xitoa(file_info[i].filesn));
-			line_sz += strlen(fc); */
-		}
 	}
 
 	if (end_color == dc_c)
@@ -1154,14 +1153,6 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		if (!classify)
 			ind_char = 0;
 
-/*		if (max_files != UNSET && i == max_files) {
-			// Since we are exiting early, let's correct the LAST_COLUMN
-			// value
-			if (!last_column && i % (int)columns_n == 0)
-				last_column = 1;
-			break;
-		} */
-
 				/* ##########################
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */
@@ -1231,7 +1222,6 @@ static void
 list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
-//	int nn = (int)files;
 	int nn = (max_files != UNSET && max_files < (int)files) ? max_files : (int)files;
 
 	int rows = nn / (int)columns_n;
@@ -1276,7 +1266,6 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		if (!classify)
 			ind_char = 0;
 
-//		if (x > nn || !file_info[x].name) {
 		if (x >= nn || !file_info[x].name) {
 			if (last_column)
 				putchar('\n');
@@ -1353,6 +1342,54 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		putchar('\n');
 }
 
+/* Execute commands in either DIR_IN_NAME or DIR_OUT_NAME files
+ * MODE (either DIR_IN or DIR_OUT) tells the function whether to check
+ * for DIR_IN_NAME or DIR_OUT_NAME files
+ * Used by the autocommands function */
+static inline void
+run_dir_cmd(const int mode)
+{
+	FILE *fp = (FILE *)NULL;
+	char path[PATH_MAX];
+
+	if (mode == DIR_IN) {
+		snprintf(path, PATH_MAX - 1, "%s/%s", ws[cur_ws].path, DIR_IN_NAME);
+	} else if (mode == DIR_OUT) {
+		if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
+			return;
+		snprintf(path, PATH_MAX - 1, "%s/%s", old_pwd[dirhist_cur_index - 1],
+				DIR_OUT_NAME);
+	}
+
+	fp = fopen(path, "r");
+	if (!fp)
+		return;
+
+	char buf[PATH_MAX];
+	*buf = '\0';
+	fgets(buf, sizeof(buf), fp);
+
+	fclose(fp);
+
+	if (!*buf)
+		return;
+
+	launch_execle(buf);
+}
+
+/* Check if S is either .cfm.in or .cfm.out */
+static inline void
+check_autocmd_file(char *s)
+{
+	if (*s == '.' && s[1] == 'c' && s[2] == 'f' && s[3] == 'm'
+	&& s[4] == '.') {
+		if (s[5] == 'o' && s[6] == 'u' && s[7] == 't' && !s[8])
+			dir_out = 1;
+		else if (s[5] == 'i' && s[6] == 'n' && !s[7])
+			run_dir_cmd(DIR_IN);
+	}
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -1391,6 +1428,10 @@ list_dir_light(void)
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
 			continue;
+
+		/* Check .cfm.in and .cfm.out files for the autocommands function */
+		if (dir_changed)
+			check_autocmd_file(ename);
 
 		/* Skip files according to FILTER */
 		if (_filter) {
@@ -1603,7 +1644,7 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t
 	return 0;
 }
 
-/* initialize the file_info struct, mostly in case stat fails */
+/* Initialize the file_info struct, mostly in case stat fails */
 static inline void
 init_fileinfo(const size_t n)
 {
@@ -1647,6 +1688,11 @@ list_dir(void)
 		if (autocmd_set)
 			revert_autocmd_opts();
 		check_autocmds();
+	}
+
+	if (dir_changed && dir_out) {
+		run_dir_cmd(DIR_OUT);
+		dir_out = 0;
 	}
 
 	if (clear_screen)
@@ -1702,6 +1748,18 @@ list_dir(void)
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
 			continue;
+
+		/* Check .cfm.in and .cfm.out files for the autocommands function */
+		if (dir_changed)
+			check_autocmd_file(ename);
+/*		if (*ename == '.' && ename[1] == 'c' && ename[2] == 'f'
+		&& ename[3] == 'm' && ename[4] == '.') {
+			if (ename[5] == 'o' && ename[6] == 'u' && ename[7] == 't'
+			&& !ename[8])
+				dir_out = 1;
+			else if (ename[5] == 'i' && ename[6] == 'n' && !ename[7])
+				run_dir_cmd(DIR_IN);
+		} */
 
 		/* Filter files according to _FILTER */
 		if (_filter) {

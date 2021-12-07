@@ -198,14 +198,13 @@ int
 	_xrename = 0,
 	xrename = 0;
 
-//#ifndef _NO_HIGHLIGHT
 int wrong_cmd = 0;
 int wrong_cmd_line = 0;
-//#endif
 
 int
 	argc_bk = 0,
 	dirhist_cur_index = 0,
+	dir_out = 0,
 	exit_code = 0,
 	dirhist_total_index = 0,
 	jump_total_rank = 0,

@@ -814,15 +814,14 @@ extern int
 	_xrename,
 	xrename; /* We're running a secondary prompt for the rename function */
 
-//#ifndef _NO_HIGHLIGHT
 extern int wrong_cmd;
 extern int wrong_cmd_line;
-//#endif
 
 extern int
-	argc_bk,
+	argc_bk,  /* A copy of argc taken from main() */
 	dirhist_cur_index,
 	dirhist_total_index,
+	dir_out, /* Autocommands: A .cfm.out file was found in CWD*/
 	exit_code,
 	jump_total_rank,
 	max_dirhist,
