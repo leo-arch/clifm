@@ -1255,8 +1255,6 @@ In addition to completions and expansions, an \fIauto-suggestions system\fR is a
 .SH 12. RESOURCE OPENER
 As CliFM's built-in resource opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a file extension), then checks the existence of the command associated with this pattern, and finally executes it.
 .TP
-\fBNOTE\fR: When it comes to plain text files, \fILira\fR checks first the \fBEDITOR\fR and \fBVISUAL\fR environment variables (in this order), and, if either of them is set, it will use this value to open the corresponding file. If none of them is set, by contrast, it will try to find a suitable application by parsing the MIME list file.
-.TP
 \fILira\fR is controlled via the \fImime\fR command. File associations are stored in the MIME list file.
 .TP
 When running for the first time, or whenever the MIME list file cannot be found, CliFM will copy the MIME definitions file from the \fBDATADIR\fR directory (usually \fI/usr/share/clifm/mimelist.cfm\fR) to the local configuration directory. This file follows these simple syntax rules:
@@ -1285,11 +1283,13 @@ For GUI applications:
 .TP
 For terminal applications:
 
- xterm -e APP %f &>/dev/null &
+ TERM -e APP %f &>/dev/null &
 .TP
-Replace 'xterm' by whatever terminal emulator you're using. The -e option might vary depending on the terminal emulator.
+Replace 'TERM' and 'APP' by the corresponding values. The \fI-e\fR option might vary depending on the terminal emulator (TERM).
 .TP
 \fBNOTE\fR: In case of archives, the built-in \fIad\fR command could be used as opening application.
+.TP
+\fBNOTE 2\fR: Environment variables (e.g. \fB$EDITOR\fR, \fB$VISUAL\fR, \fB$BROWSER\fR, and even \fB$PAGER\fR) are also recognized by \fILira\fR. If an environment variable is used, the corresponding file name will be appended to the content of the variable. Wathever else added to the variable name will be ignored. Ex: 'X:text/plain:$EDITOR' will be executed, provided the content of \fB$EDITOR\fR is \fIvi\fR, as follows: \fIvi FILENAME\fR.
 .TP
 Examples:
 .TP
