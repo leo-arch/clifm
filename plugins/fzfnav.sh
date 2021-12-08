@@ -111,7 +111,7 @@ fcd() {
 	# Keep FZF running until the user presses Esc or q
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; $ls_cmd)
-		file="$(printf "%s\n" "$lsd" | fzf \
+		file="$(printf "%s\n" "$lsd" | fzf --height='80%' \
 			--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
 			--bind "ctrl-s:execute(touch $TMP_SEL)+accept" \
 			--bind "right:accept,left:first+accept" \
