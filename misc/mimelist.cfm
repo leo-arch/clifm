@@ -45,13 +45,13 @@ X:inode/directory=xterm -e clifm %f &>/dev/null &>/dev/null &;xterm -e vifm %f &
 !X:inode/directory=vifm;ranger;nnn;ncdu
 
 # Web content
-X:^text/html$=surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m
-!X:^text/html$=elinks;links2;links;lynx;w3m
+X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m
+!X:^text/html$=$BROWSER;elinks;links2;links;lynx;w3m
 
 # Text
 #X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
-X:(^text/.*|application/json|inode/x-empty)=nano;vim;vi;vis;emacs;ed;micro;kakoune;leafpad;mousepad;featherpad;kate;gedit;pluma
-!X:(^text/.*|application/json|inode/x-empty)=nano;vim;vi;vis;emacs;ed;micro;kakoune
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;vim;vi;vis;emacs;ed;micro;kakoune;leafpad;mousepad;featherpad;kate;gedit;pluma
+!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;vim;vi;vis;emacs;ed;micro;kakoune
 
 # Office documents
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
