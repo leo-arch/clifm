@@ -111,7 +111,7 @@ fcd() {
 	# Keep FZF running until the user presses Esc or q
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; $ls_cmd)
-		file="$(printf "%s\n" "$lsd" | fzf \
+		file="$(printf "%s\n" "$lsd" | fzf --height="${fzfheight:-100%}" \
 			--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
 			--bind "ctrl-s:execute(touch $TMP_SEL)+accept" \
 			--bind "right:accept,left:first+accept" \
@@ -202,6 +202,10 @@ main() {
 
 		case $option in
 			# CHECK GENERAL OPTIONS
+			FZFHEIGHT)
+				if echo "$value" | grep -qE "[0-9]+%"; then
+					fzfheight="$value"
+				fi ;;
 			LS)
 				if [ "${value:-posix}" = posix ]; then
 					export ls_cmd="ls -Ap"
@@ -677,7 +681,8 @@ main() {
 
 main "$@"
 
-# Reset terminal settings
-printf "\033c"
+# Erase the FZF window
+_lines="${LINES:-100}"
+printf "\033[%dM" "$_lines"
 
 exit 0
