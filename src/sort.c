@@ -172,11 +172,6 @@ entrycmp(const void *a, const void *b)
 
 	int ret = 0, st = sort;
 
-//#ifndef _GNU_SOURCE
-//	if (st == SVER)
-//		st = SNAME;
-//#endif
-
 	if (light_mode && (st == SOWN || st == SGRP))
 		st = SNAME;
 
@@ -199,11 +194,9 @@ entrycmp(const void *a, const void *b)
 			ret = -1;
 		break;
 
-//#ifdef _GNU_SOURCE
 	case SVER:
 		ret = xstrverscmp(pa->name, pb->name);
 		break;
-//#endif
 
 	case SEXT: {
 		char *aext = (char *)NULL, *bext = (char *)NULL, *val;
