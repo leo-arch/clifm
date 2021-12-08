@@ -22,6 +22,9 @@
 # 'mpv %f --terminal=no'. If %f is not specified, the file name will be added to the
 # end of the command.
 
+# Environment variables could be used as well. Example:
+# X:text/plain=$EDITOR;$VISUAL;nano;vi
+
 # Running the opening application in the background:
 # For GUI applications:
 #    APP %f &
@@ -41,7 +44,7 @@ X:E:^(cbr|cbz)$=zathura
 
 # Directories - only for the open-with command (ow)
 # In graphical environment directories will be opened in a new window
-X:inode/directory=xterm -e clifm %f &>/dev/null &>/dev/null &;xterm -e vifm %f &>/dev/null &;pcmanfm %f &>/dev/null &;thunar %f &>/dev/null &;xterm -e ncdu %f &;sxiv -aqt %f/* &>/dev/null &
+X:inode/directory=xterm -e clifm %f &>/dev/null &;xterm -e vifm %f &>/dev/null &;pcmanfm %f &>/dev/null &;thunar %f &>/dev/null &;xterm -e ncdu %f &
 !X:inode/directory=vifm;ranger;nnn;ncdu
 
 # Web content
