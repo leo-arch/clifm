@@ -87,24 +87,6 @@ get_app(const char *mime, const char *ext)
 		return p;
 	}
 
-	/* If a plain text file, check first EDITOR and VISUAL env variables */
-	if (*mime == 't' && strcmp(mime, "text/plain") == 0) {
-		char *app = (char *)NULL;
-		char *e = getenv("EDITOR");
-		if (e) {
-			mime_match = 1;
-			app = savestring(e, strlen(e));
-			return app;
-		}
-		e = getenv("VISUAL");
-		if (e) {
-			mime_match = 1;
-			app = savestring(e, strlen(e));
-			return app;
-		}
-	}
-	
-
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
 		fprintf(stderr, _("%s: %s: Error opening file\n"),
@@ -175,6 +157,22 @@ get_app(const char *mime, const char *ext)
 				char *ret = strchr(app, ' ');
 				if (ret)
 					*ret = '\0';
+
+				/* Expand and check environment variables such as EDITOR,
+				 * VISUAL, BROWSER, and so on */
+				if (*app == '$') {
+					char *env_value = getenv(app + 1);
+					if (!env_value)
+						continue;
+					file_path = get_cmd_path(env_value);
+					if (file_path) {
+						free(app);
+						free(line);
+						fclose(defs_fp);
+						return file_path;
+					}
+				}
+
 				if (*app == '~') {
 					file_path = tilde_expand(app);
 					if (access(file_path, X_OK) != 0) {
