@@ -220,21 +220,11 @@ get_app(const char *mime, const char *ext)
 				if (ret)
 					*ret = '\0';
 
-				if (*app == '~') {
-					file_path = tilde_expand(app);
-					if (access(file_path, X_OK) != 0) {
-						free(file_path);
-						file_path = (char *)NULL;
-					}
-				} else if (*app == '/') {
-					if (access(app, X_OK) == 0) {
-						file_path = app;
-					}
-				} else if (*app == 'a' && app[1] == 'd' && !app[2]) {
+				if (*app == 'a' && app[1] == 'd' && !app[2])
 					file_path = savestring("ad", 2);
-				} else {
+				else
 					file_path = get_cmd_path(app);
-				}
+
 				if (ret)
 					*ret = ' ';
 

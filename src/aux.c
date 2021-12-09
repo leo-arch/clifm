@@ -452,6 +452,13 @@ get_cmd_path(const char *cmd)
 
 	char *cmd_path = (char *)NULL;
 
+	if (*cmd == '~') {
+		char *p = tilde_expand(cmd);
+		if (p && access(p, X_OK) == 0)
+			cmd_path = savestring(p, strlen(p));
+		return cmd_path;
+	}
+
 	if (*cmd == '/') {
 		if (access(cmd, X_OK) == 0)
 			cmd_path = savestring(cmd, strlen(cmd));
