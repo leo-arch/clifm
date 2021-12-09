@@ -1,46 +1,52 @@
-# Mimelist file for CliFM
+###############################
+#   Mimelist file for CliFM   #
+###############################
 
-# This mimelist covers the most common filetypes.
+# This mimelist covers the most common filetypes
 # Commented and blank lines are omitted
 
-# It is recommended to edit this file leaving only applications you need to speed up
-# the opening process
-# The file is read top to bottom and left to right; the first existent application
-# found will be used
-# Applications defined here are NOT desktop files, but commands (arguments could be
-# used as well)
+# It is recommended to edit this file leaving only applications you need to # speed up the opening process
+# The file is read top to bottom and left to right; the first existent
+# application found will be used
+# Applications defined here are NOT desktop files, but commands (arguments
+# could be used as well)
 
 # Use 'E' to match file extensions instead of MIME types.
 
-# Use 'X' to specify a GUI environment and '!X' for non-GUI environments, like the
-# kernel built-in console or a remote SSH session.
+# Use 'X' to specify a GUI environment and '!X' for non-GUI environments,
+# like the kernel built-in console or a remote SSH session.
 
 # Regular expressions are allowed for both file types and extensions.
 
-# Use the %f placeholder to specify the position of the file name to be executed in
-# the command. Example:
-# 'mpv %f --terminal=no'. If %f is not specified, the file name will be added to the
-# end of the command.
-
-# Environment variables could be used as well. Example:
-# X:text/plain=$EDITOR;$VISUAL;nano;vi
+# Use the %f placeholder to specify the position of the file name to be
+# executed in the command. Example:
+# mpv %f --terminal=no
+# If %f is not specified, the file name will be added to the end of the
+# command.
 
 # Running the opening application in the background:
 # For GUI applications:
-#    APP %f &
+#    APP %f &>/dev/null &
 # For terminal applications:
-#    xterm -e APP %f &
-# Replace 'xterm' by whatever terminal emulator you're using. The -e option might vary
-# depending on the terminal emulator
+#    TERM -e APP %f &>/dev/null &
+# Replace 'TERM' and 'APP' by the corresponding values. The -e option might
+# vary depending on the terminal emulator used (TERM)
 
-### File Extensions ###
+# Environment variables could be used as well. Example:
+# X:text/plain=$TERM -e $EDITOR %f &>/dev/null &;$VISUAL;nano;vi
+
+########################
+#    File Extensions   #
+########################
 
 X:E:^djvu$=djview;zathura;evince;atril
 X:E:^epub$=mupdf;zathura;ebook-viewer
 X:E:^mobi$=ebook-viewer
 X:E:^(cbr|cbz)$=zathura
 
-### MIME types ###
+##################
+#   MIME types   #
+##################
 
 # Directories - only for the open-with command (ow)
 # In graphical environment directories will be opened in a new window
