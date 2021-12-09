@@ -50,6 +50,57 @@
 #include "navigation.h"
 #include "readline.h"
 
+/* Expand all environment variables in the string S
+ * Returns the expanded string or NULL on error */
+static char *
+expand_env(char *s)
+{
+	char *p = strchr(s, '$');
+	if (!p)
+		return (char *)NULL;
+
+	int buf_size = PATH_MAX;
+	p = (char *)xnmalloc((size_t)buf_size, sizeof(char));
+	char *ret = p;
+
+	while (*s) {
+		if (*s != '$') {
+			*(p++) = *(s++);
+			continue;
+		}
+
+		char *env = (char *)NULL;
+		char *r = strchr(s, ' ');
+		if (r)
+			*r = '\0';
+		env = getenv(s + 1);
+		if (r)
+			*r = ' ';
+		if(!env) {
+			free(ret);
+			return (char *)NULL;
+		}
+
+		size_t env_len = strlen(env);
+		int rem = buf_size - (int)(p - ret) - 1;
+		if (rem >= (int)env_len) {
+			memccpy(p, env, 0, (size_t)rem);
+			p += env_len;
+		} else {
+			break;
+		}
+
+		if (r)
+			*r = '\0';
+		s += strlen(s);
+		if (r)
+			*r = ' ';
+	}
+
+	*p = '\0';
+	return ret;
+}
+
 /* Move the pointer in LINE immediately after !X or X */
 static char *
 skip_line_prefix(char *line)
@@ -152,26 +203,22 @@ get_app(const char *mime, const char *ext)
 				app[app_len] = '\0';
 				/* Check each application existence */
 				char *file_path = (char *)NULL;
+
+				/* Expand environment variables */
+				if (strchr(app, '$')) {
+					char *t = expand_env(app);
+					if (t) {
+						app = (char *)xrealloc(app, (strlen(t) + 1) * sizeof(char));
+						strcpy(app, t);
+						free(t);
+					}
+				}
+
 				/* If app contains spaces, the command to check is
 				 * the string before the first space */
 				char *ret = strchr(app, ' ');
 				if (ret)
 					*ret = '\0';
-
-				/* Expand and check environment variables such as EDITOR,
-				 * VISUAL, BROWSER, and so on */
-				if (*app == '$') {
-					char *env_value = getenv(app + 1);
-					if (!env_value)
-						continue;
-					file_path = get_cmd_path(env_value);
-					if (file_path) {
-						free(app);
-						free(line);
-						fclose(defs_fp);
-						return file_path;
-					}
-				}
 
 				if (*app == '~') {
 					file_path = tilde_expand(app);
@@ -251,7 +298,7 @@ xmagic(const char *file, const int query_mime)
 	return str;
 }
 
-#else
+#else /* _NO_MAGIC */
 static char *
 get_mime(char *file)
 {
@@ -518,7 +565,6 @@ get_user_input(int *a, const size_t *nn)
 		}
 
 		if (!is_number(input)) {
-//		if (*input < '1' || *input > '9') {
 			free(input);
 			input = (char *)NULL;
 			continue;
@@ -585,7 +631,7 @@ mime_list_open(char **apps, char *file)
 			char *phcmd = (char *)NULL;
 			char *cmd = (char *)NULL;
 
-			/* Look for the %f placeholder. If is there, replace it by
+			/* Look for the %f placeholder. If there, replace it by
 			 * the corresponding filename (FILE) */
 			char *ph = strchr(n[a - 1], '%');
 			if (ph && *(ph + 1) == 'f' && (!*(ph + 2) || *(ph + 2) == ' '))
@@ -670,10 +716,6 @@ mime_open_with_tab(char *filename, const char *prefix)
 	if (!name)
 		goto FAIL;
 
-/*	struct stat a;
-	if ((lstat(name, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR))
-		goto FAIL; */
-
 #ifndef _NO_MAGIC
 	mime = xmagic(name, MIME_TYPE);
 #else
@@ -698,17 +740,6 @@ mime_open_with_tab(char *filename, const char *prefix)
 	} else {
 		apps[0] = (char *)xnmalloc(1, sizeof(char));
 		*apps[0] = '\0';
-	}
-
-	/* Add EDITOR/VISUAL value, if any */
-	if (*mime == 't' && strcmp(mime, "text/plain") == 0) {
-		char *e = getenv("EDITOR");
-		if (!e)
-			e = getenv("VISUAL");
-		if (e) {
-			apps = (char **)xrealloc(apps, (++appsn + 1) * sizeof(char *));
-			apps[1] = savestring(e, strlen(e));
-		}
 	}
 
 	size_t prefix_len = 0;
@@ -773,11 +804,31 @@ mime_open_with_tab(char *filename, const char *prefix)
 				app[app_len] = '\0';
 				/* Check each application existence */
 				char *file_path = (char *)NULL;
+
+				/* Expand environment variables */
+				char *appb = (char *)NULL;
+				if (strchr(app, '$')) {
+					char *t = expand_env(app);
+					if (t) {
+						/* appb: A copy of the original string: let's display
+						 * the env var name itself instead of its expanded
+						 * value */
+						appb = savestring(app, strlen(app));
+						/* app: the expanded value */
+						app = (char *)xrealloc(app, (strlen(t) + 1) * sizeof(char));
+						strcpy(app, t);
+						free(t);
+					} else {
+						continue;
+					}
+				}
+
 				/* If app contains spaces, the command to check is
 				 * the string before the first space */
 				char *ret = strchr(app, ' ');
 				if (ret)
 					*ret = '\0';
+
 				if (*app == '~') {
 					file_path = tilde_expand(app);
 					if (access(file_path, X_OK) != 0) {
@@ -807,8 +858,15 @@ mime_open_with_tab(char *filename, const char *prefix)
 						free(file_path);
 						file_path = (char *)NULL;
 					}
+
 					apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
-					apps[appsn++] = savestring(app, strlen(app));
+					/* appb is not NULL if we have an environment variable */
+					if (appb) {
+						apps[appsn++] = savestring(appb, strlen(appb));
+						free(appb);
+					} else {
+						apps[appsn++] = savestring(app, strlen(app));
+					}
 				} else {
 					continue;
 				}
@@ -983,17 +1041,6 @@ mime_open_with(char *filename, char **args)
 	if (!mime)
 		goto FAIL;
 
-	/* Add EDITOR/VISUAL value, if any */
-	if (*mime == 't' && strcmp(mime, "text/plain") == 0) {
-		char *e = getenv("EDITOR");
-		if (!e)
-			e = getenv("VISUAL");
-		if (e) {
-			apps = (char **)xrealloc(apps, (appsn + 1) * sizeof(char *));
-			apps[appsn++] = savestring(e, strlen(e));
-		}
-	}
-
 	ext = get_file_ext(name);
 
 	FILE *defs_fp = fopen(mime_file, "r");
@@ -1054,11 +1101,31 @@ mime_open_with(char *filename, char **args)
 				app[app_len] = '\0';
 				/* Check each application existence */
 				char *file_path = (char *)NULL;
+
+				/* Expand environment variables */
+				char *appb = (char *)NULL;
+				if (strchr(app, '$')) {
+					char *t = expand_env(app);
+					if (t) {
+						/* appb: A copy of the original string: let's display
+						 * the env var name itself instead of its expanded
+						 * value */
+						appb = savestring(app, strlen(app));
+						/* app: the expanded value */
+						app = (char *)xrealloc(app, (strlen(t) + 1) * sizeof(char));
+						strcpy(app, t);
+						free(t);
+					} else {
+						continue;
+					}
+				}
+
 				/* If app contains spaces, the command to check is
 				 * the string before the first space */
 				char *ret = strchr(app, ' ');
 				if (ret)
 					*ret = '\0';
+
 				if (*app == '~') {
 					file_path = tilde_expand(app);
 					if (file_path && access(file_path, X_OK) != 0) {
@@ -1078,6 +1145,7 @@ mime_open_with(char *filename, char **args)
 				} else {
 					file_path = get_cmd_path(app);
 				}
+
 				if (ret)
 					*ret = ' ';
 
@@ -1088,7 +1156,13 @@ mime_open_with(char *filename, char **args)
 						file_path = (char *)NULL;
 					}
 					apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
-					apps[appsn++] = savestring(app, strlen(app));
+					/* appb is not NULL if we have an environment variable */
+					if (appb) {
+						apps[appsn++] = savestring(appb, strlen(appb));
+						free(appb);
+					} else {
+						apps[appsn++] = savestring(app, strlen(app));
+					}
 				} else {
 					continue;
 				}
@@ -1241,13 +1315,6 @@ mime_open(char **args)
 			return (-1);
 		}
 
-/*		struct stat a;
-		if (lstat(file_path, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR) {
-			int _exit_status = cd_function(file_path, CD_PRINT_ERROR);
-			free(file_path);
-			return _exit_status;
-		} */
-
 		if (access(file_path, R_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
 			    strerror(errno));
@@ -1268,7 +1335,7 @@ mime_open(char **args)
 		return EXIT_FAILURE;
 	}
 
-	/* Get file's mime-type */
+	/* Get file's MIME type */
 #ifndef _NO_MAGIC
 	char *mime = xmagic(file_path, MIME_TYPE);
 #else
@@ -1358,89 +1425,50 @@ mime_open(char **args)
 	}
 #endif
 
-	/* Get number of arguments to check for final ampersand */
-	int args_num = 0;
-	for (args_num = 0; args[args_num]; args_num++);
-
-	/* Construct the command and run it */
-
-	/* Two pointers to store different positions in the APP string */
-	char *p = app;
-	char *pp = app;
-
-	/* The number of spaces in APP is (at least) the number of paramenters
-	 * passed to the command. Extra spaces will be ignored */
-	size_t spaces = 0;
-	while (*p) {
-		if (*(p++) == ' ')
-			spaces++;
+	/* Escape the file name, if necessary */
+	if (!strchr(file_path, '\\')) {
+		char *tmp = escape_str(file_path);
+		if (tmp) {
+			free(file_path);
+			file_path = tmp;
+		}
 	}
 
-	/* To the number of spaces/parametes we need to add the command itself,
-	 * the file name and the final NULL string (spaces + 3) */
-	char **cmd = (char **)xnmalloc(spaces + 3, sizeof(char *));
-
-	/* Rewind P to the beginning of APP */
-	p = pp;
-	int bg = 0;
-
-	/* Store each substring in APP into a two dimensional array (CMD) */
-	int pos = 0;
-	while (1) {
-		if (!*p) {
-			if (*pp)
-				cmd[pos++] = savestring(pp, strlen(pp));
-			break;
-		}
-
-		if (*p == ' ') {
-			if (*(p + 1) == '&')
-				bg = 1;
-			*p = '\0';
-			if (*pp)
-				cmd[pos++] = savestring(pp, strlen(pp));
-			pp = ++p;
-			if (bg)
-				++pp;
+	/* If the %f placeholder is found, replace it by the file to be opened */
+	int ret = EXIT_SUCCESS;
+	char *t = (char *)NULL;
+	char *p = strchr(app, '%');
+	if (p && *(p + 1) == 'f') {
+		t = replace_substr(app, "%f", file_path);
+		if (t) {
+			if (open_in_foreground) {
+				/* Remove last ampersand, if any */
+				char *s = strrchr(t, '&');
+				if (s && s != t) {
+					if (*(s - 1) == ' ')
+						*(s - 1) = '\0';
+					else
+						*s = '\0';
+				}
+			}
 		} else {
-			p++;
+			fprintf(stderr, _("%s: Error converting placeholder\n"), PROGRAM_NAME);
+			ret = EXIT_FAILURE;
+			goto ERROR;
 		}
-	}
-
-	/* If %f placeholder is found, replace it by FILE_PATH. Else, append
-	 * FILE_PATH to the end of the CMD array */
-	int i = pos,
-		found = 0;
-	while (--i >= 0) {
-		if (*cmd[i] == '%' && *(cmd[i] + 1) == 'f') {
-			found = 1;
-			break;
-		}
-	}
-
-	if (found) {
-		cmd[i] = (char *)xrealloc(cmd[i], (strlen(file_path) + 1) * sizeof(char));
-		strcpy(cmd[i], file_path);
 	} else {
-		cmd[pos++] = savestring(file_path, strlen(file_path));
+		/* No placeholder. Just append file name */
+		t = (char *)xnmalloc(strlen(app) + strlen(file_path) + 2, sizeof(char));
+		sprintf(t, "%s %s", app, file_path);
 	}
 
-	cmd[pos] = (char *)NULL;
 
-	/* - bg comes from the command in the mimelist file
-	 * - bg_proc comes from the command line
-	 * - no_bg is set by some function that requires to open the file in
-	 * the foreground */
-	int ret = launch_execve(cmd, ((bg || bg_proc) && !open_in_foreground)
-			? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	ret = launch_execle(t);
+	free(t);
 
+ERROR:
 	free(file_path);
 	free(app);
-
-	i = pos;
-	while (--i >= 0)
-		free(cmd[i]);
-	free(cmd);
 	return ret;
 }
 #else
