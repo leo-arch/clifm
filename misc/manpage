@@ -1257,7 +1257,13 @@ As CliFM's built-in resource opener, \fILira\fR takes care of opening files when
 .TP
 \fILira\fR is controlled via the \fImime\fR command. File associations are stored in the MIME list file.
 .TP
-When running for the first time, or whenever the MIME list file cannot be found, CliFM will copy the MIME definitions file from the \fBDATADIR\fR directory (usually \fI/usr/share/clifm/mimelist.cfm\fR) to the local configuration directory. This file follows these simple syntax rules:
+When running for the first time, or whenever the MIME list file cannot be found, CliFM will copy the MIME definitions file from the \fBDATADIR\fR directory (usually \fI/usr/share/clifm/mimelist.cfm\fR) to the local configuration directory.
+.TP
+\fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right (for applications).
+.TP
+\fBNOTE\fR: In case of directories (whose MIME type is \fIinode/directory\fR), the entry will be used \fBonly\fR for the open-with command (\fIow\fR).
+.TP
+This MIME list file follows a few simple syntax rules:
 .TP
 Each line in the MIME list file consists of:
 .TP
@@ -1285,13 +1291,15 @@ For terminal applications:
 
  TERM -e APP %f &>/dev/null &
 .TP
-Replace 'TERM' and 'APP' by the corresponding values. The \fI-e\fR option might vary depending on the terminal emulator (TERM).
+Replace 'TERM' and 'APP' by the corresponding values. The \fI-e\fR option might vary depending on the terminal emulator used (TERM).
 .TP
 \fBNOTE\fR: In case of archives, the built-in \fIad\fR command could be used as opening application.
 .TP
-\fBNOTE 2\fR: Environment variables (e.g. \fB$EDITOR\fR, \fB$VISUAL\fR, \fB$BROWSER\fR, and even \fB$PAGER\fR) are also recognized by \fILira\fR. If an environment variable is used, the corresponding file name will be appended to the content of the variable. Wathever else added to the variable name will be ignored. Ex: 'X:text/plain:$EDITOR' will be executed, provided the content of \fB$EDITOR\fR is \fIvi\fR, as follows: \fIvi FILENAME\fR.
+\fBNOTE 2\fR: Environment variables (e.g. \fB$EDITOR\fR, \fB$VISUAL\fR, \fB$BROWSER\fR, and even \fB$PAGER\fR) are also recognized by \fILira\fR. You can even set custom environment variables to be used exclusively by CliFM. For example, you can set \fBCLIFM_TERM\fR, \fBCLIFM_EDITOR\fR, and \fBCLIFM_PDF\fR, and then use them to define some associations:
+ X:text/plain=$CLIFM_TERM -e $CLIFM_EDITOR %f &>/dev/null &
+ X:E:^pdf$=$CLIFM_PDF &
 .TP
-Examples:
+\fBExamples\fR:
 .TP
 Match single extension:
  E:^txt$:leafpad;mousepad;kate;gedit
@@ -1310,11 +1318,7 @@ Match mutiple mimetypes:
  X:^audio/.*=mplayer;mplayer2;vlc;gmplayer;smplayer;totem
 .TP
 In case of MIME types, you can also write the entire expression without relying on any regular expression. For example:
- !X:text/plain=nano
-.TP
-\fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right (for applications).
-.TP
-\fBNOTE\fR: In case of directories (whose MIME type is \fIinode/directory\fR), the entry will be used only for the open-with command (\fIow\fR).
+ !X:text/plain=$TERM -e $EDITOR %f &>/dev/null &
 .TP
 For more information take a look at the mimelist file itself (\fIF6\fR or \fImm edit\fR).
 
