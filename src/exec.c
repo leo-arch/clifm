@@ -547,7 +547,7 @@ exec_cmd(char **comm)
 	int old_exit_code = exit_code;
 	exit_code = EXIT_SUCCESS;
 
-	if (*comm[0] == '#')
+	if (*comm[0] == '#' && access(comm[0], F_OK) != 0)
 		return exit_code;
 
 				/* ##########################
