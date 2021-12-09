@@ -3,7 +3,7 @@
 # CliFM plugin to navigate the jump database via fzf/Rofi
 # Written by L. Abramovich
 
-if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
+if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
 	name="$(basename "$0")"
 	printf "Navigate CLiFM jump database via FZF or Rofi. Press Enter to cd into the selected directory\n"
 	printf "Usage: %s\n" "$name"
@@ -28,7 +28,11 @@ if ! [ -f "$FILE" ]; then
 fi
 
 if [ "$finder" = "fzf" ]; then
-	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" | fzf --prompt="CliFM> ")"
+	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" |\
+fzf --reverse --height 15 \
+--bind "tab:accept" \
+--color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold \
+--prompt="CliFM> ")"
 else
 	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" | rofi -dmenu -p CliFM)"
 fi
