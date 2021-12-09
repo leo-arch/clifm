@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Find and change directory using find and fzf
+
 DIR="$(find . -type d 2> /dev/null |\
 fzf --prompt "Change DIR :" \
 --reverse --border --height 15 \
