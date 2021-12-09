@@ -6,22 +6,23 @@
 # This is the configuration file for CliFM
 
 # Color schemes are stored in the colors directory. By default,
-# the 'default' color scheme is used. Visit https://github.com/leo-arch/clifm-colors
-# to get a few more
+# the 'default' color scheme is used. Visit
+# 'https://github.com/leo-arch/clifm-colors' to get a few more
 ColorScheme=default
 
 # The amount of files contained by a directory is informed next
-# to the directory name. However, this feature might slow things down when,
-# for example, listing files on a remote server. The filescounter can be
-# disabled here, via the --no-files-counter option, or using the 'fc'
-# command while in the program itself.
+# to the directory name. However, this feature might slow things down
+# when, for example, listing files on a remote server. The files counter
+# can be disabled here, via the --no-files-counter option, or using the
+# 'fc' command while in the program itself.
 FilesCounter=true
 
-# The character(s) used to construct the line dividing the list of files and
-# the prompt. if '0', print just an empty line; if only one char, this char
-# is printed reapeatedly to fulfill the screen; if 3 or more chars, only these
-# chars (no more) will be printed. Finally, if unset, print a special line
-# drawn with box-drawing characters (not supported by all terminals/consoles)
+# The character(s) used to construct the line dividing the list of files
+# and the prompt. If '0', print just an empty line; if only one char, this
+# char is printed reapeatedly to fulfill the screen; if 3 or more chars,
+# only these chars (no more) will be printed. Finally, if unset, print a
+# special line drawn with box-drawing characters (not supported by all
+# terminals/consoles)
 DividingLineChar='-'
 
 # How to list files: 0 = vertically (like ls(1) would), 1 = horizontally
@@ -49,6 +50,7 @@ mvCmd=0
 
 # The prompt line is built using string literals and/or one or more of
 # the following escape sequences:
+#
 # \xnn: The character whose hexadecimal code is nn.
 # \e: Escape character
 # \h: The hostname, up to the first dot
@@ -58,8 +60,8 @@ mvCmd=0
 # \r: A carriage return
 # \a: A bell character
 # \d: The date, in abbrevieted form (ex: 'Tue May 26')
-# \s: The name of the shell (everything after the last slash) currently used
-# by CliFM
+# \s: The name of the shell (everything after the last slash) currently
+#     used by CliFM
 # \S: The number of the current workspace
 # \l: Print an 'L' if running in light mode
 # \P: Current profile name
@@ -67,12 +69,14 @@ mvCmd=0
 # \T: The time, in 12-hour HH:MM:SS format
 # \@: The time, in 12-hour am/pm format
 # \A: The time, in 24-hour HH:MM format
-# \w: The full current working directory, with $HOME abbreviated with a tilde
+# \w: The full current working directory, with $HOME abbreviated with a
+#     tilde
 # \W: The basename of $PWD, with $HOME abbreviated with a tilde
-# \p: A mix of the two above, it abbreviates the current working directory 
-# only if longer than PathMax (a value defined in the configuration file).
-# \z: Exit code of the last executed command. :) if success and :( in case of
-# error
+# \p: A mix of the two above, it abbreviates the current working
+#     directory only if longer than PathMax (a value defined in the
+#     configuration file).
+# \z: Exit code of the last executed command. :) if success and :( in case
+#     of error
 # \$ '#', if the effective user ID is 0, and '$' otherwise
 # \nnn: The character whose ASCII code is the octal value nnn
 # \\: A backslash
@@ -83,10 +87,10 @@ mvCmd=0
 Prompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 
 # If set to 'default', CliFM state information (selected files,
-# trashed files, current workspace, messages, and stealth mode) will be printed
-# to the left of the prompt. Otherwise, if set to 'custom', this information
-# will be stored in environment variables to be handled by the prompt string
-# itself. Consult the manpage for more information.
+# trashed files, current workspace, messages, and stealth mode) will be
+# printed to the left of the prompt. Otherwise, if set to 'custom', this
+# information will be stored in environment variables to be handled by the
+# prompt string itself. Consult the manpage for more information.
 PromptStyle=default
 
 # A warning prompt to warn the user about invalid command names
@@ -104,9 +108,9 @@ TabCompletionMode=standard
 # completions interface.
 FzfTabOptions="--color='dark,prompt:6,fg+:-1,pointer:2,hl:5,hl+:5' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list --ansi"
 
-# MaxPath is only used for the /p option of the prompt: the current working
-# directory will be abbreviated to its basename (everything after last slash)
-# whenever the current path is longer than MaxPath.
+# MaxPath is only used for the /p option of the prompt: the current
+# working directory will be abbreviated to its basename (everything after
+# the last slash) whenever the current path is longer than MaxPath.
 MaxPath=40
 
 WelcomeMessage=true
@@ -164,11 +168,12 @@ AutoSuggestions=true
 # f = File names in current directory\n\
 # h = Commands history\n\
 # j = Jump database\n\
-# Use a dash (-) to skip a check. Ex: 'ehfj-ac' to skip the bookmarks check\n\
+# Use a dash (-) to skip a check. Ex: 'ehfj-ac' to skip the bookmarks
+# check
 SuggestionStrategy=ehfjbac
 
-# If set to true, suggest file names using the corresponding
-# file type color (set via the color scheme file)
+# If set to true, suggest file names using the corresponding file type
+# color (set via the color scheme file)
 SuggestFiletypeColor=false
 
 SyntaxHighlighting=true
@@ -187,12 +192,18 @@ ExpandBookmarks=false
 # well, so that the color per extension feature is disabled.
 LightMode=false
 
-# If running with colors, append directory indicator to directories. If running
-# without colors (via the --no-colors option), # append file type indicator at the
-# end of file names: '/' for directories, '@' for symbolic links, '=' for sockets, '|'
-# for FIFO/pipes, '*' for for executable files, and '?' for unknown file types.
-# Bear in mind that when running in light mode the check for executable files won't be
-# performed, and thereby no indicator will be added to executable files.
+# If running with colors, append directory indicator to directories. If
+# running without colors (via the --no-colors option), append file type
+# indicator at the end of file names:
+# '/' for directories
+# '@' for symbolic links
+# '=' for sockets
+# '|' for FIFO/pipes
+# '*' for for executable files
+# '?' for unknown file types
+# Bear in mind that when running in light mode the check for executable
+# files won't be performed, and thereby no indicator will be added to
+# executable files.
 Classify=true
 
 # Should the Selection Box be shared among different profiles?
@@ -202,16 +213,17 @@ ShareSelbox=false
 # application. If not set, 'lira', CLiFM's built-in opener, is used.
 Opener=
 
-# Only used when opening a directory via a new CliFM instance (with the 'x'
-# command), this option specifies the command to be used to launch a
+# Only used when opening a directory via a new CliFM instance (with the
+# 'x' command), this option specifies the command to be used to launch a
 # terminal emulator to run CliFM on it.
 TerminalCmd='xterm -e'
 
 # Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime
 # 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version
-# (name if note available) 8 = extension, 9 = inode, 10 = owner, 11 = group
-# NOTE: the 'version' method is not available on FreeBSD
+# (name if note available) 8 = extension, 9 = inode, 10 = owner,
+# 11 = group
 Sort=1
+
 # By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if
 # using the "name" method). To invert this ordering, set SortReverse to
 # true (you can also use the --sort-reverse option or the 'st' command)
@@ -253,8 +265,8 @@ DiskUsage=false
 
 # If set to true, always print the list of selected files. Since this
 # list could become quite extensive, you can limit the number of printed 
-# entries using the MaxPrintSelfiles option (-1 = no limit, 0 = auto (never
-# print more than half terminal height), or any custom value)
+# entries using the MaxPrintSelfiles option (-1 = no limit, 0 = auto
+# (never print more than half terminal height), or any custom value)
 PrintSelfiles=false
 MaxPrintSelfiles=0
 
@@ -285,8 +297,8 @@ RlEditMode=1
 #promptcmd date | awk '{print $1", "$2,$3", "$4}'
 
 # AUTOCOMMANDS
-# Control CliFM settings on a per directory basis. For more information consult
-# the manpage
+# Control CliFM's settings on a per directory basis. For more information
+# consult the manpage
 #autocmd /media/remotes/** lm=1,fc=0
 #autocmd ~/important !printf "Keep your fingers outta here!\n" && read -n1
 #autocmd ~/Downloads !/usr/share/clifm/plugins/fzfnav.sh
