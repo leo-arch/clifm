@@ -5,7 +5,8 @@
 # This mimelist covers the most common filetypes
 # Commented and blank lines are omitted
 
-# It is recommended to edit this file leaving only applications you need to # speed up the opening process
+# It is recommended to edit this file leaving only applications you need
+# to speed up the opening process
 # The file is read top to bottom and left to right; the first existent
 # application found will be used
 # Applications defined here are NOT desktop files, but commands (arguments
