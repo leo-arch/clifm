@@ -461,7 +461,7 @@ run_shell_cmd(char **comm)
 		cmd[len - 2] = '&';
 		cmd[len - 1] = '\0';
 	}
-	printf("C:'%s'\n", cmd);
+
 	int exit_status = launch_execle(cmd);
 	free(cmd);
 
