@@ -1914,7 +1914,7 @@ initialize_readline(void)
 
 	/* Whenever readline finds any of the following chars, it will call
 	 * the quoting function */
-	rl_filename_quote_characters = " \t\n\"\\'`@$><=,;|&{[()]}?!*^";
+	rl_filename_quote_characters = " \t\n\"\\'`@$><=,;|&{[()]}?!*^#~";
 	/* According to readline documentation, the following string is
 	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
 

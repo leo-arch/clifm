@@ -461,7 +461,7 @@ run_shell_cmd(char **comm)
 		cmd[len - 2] = '&';
 		cmd[len - 1] = '\0';
 	}
-
+	printf("C:'%s'\n", cmd);
 	int exit_status = launch_execle(cmd);
 	free(cmd);
 
@@ -547,7 +547,7 @@ exec_cmd(char **comm)
 	int old_exit_code = exit_code;
 	exit_code = EXIT_SUCCESS;
 
-	if (*comm[0] == '#')
+	if (*comm[0] == '#' && access(comm[0], F_OK) != 0)
 		return exit_code;
 
 				/* ##########################

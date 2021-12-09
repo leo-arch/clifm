@@ -1060,8 +1060,9 @@ AFTER_USUAL_COMPLETION:
 			This also checks whether the common prefix of several
 			matches needs to be quoted.  If the common prefix should
 			not be checked, add !matches[1] to the if clause. */
-			should_quote = rl_strpbrk(matches[0],
-						   rl_completer_word_break_characters) != 0;
+/*			should_quote = rl_strpbrk(matches[0],
+						   rl_completer_word_break_characters) != 0; */
+			should_quote = rl_strpbrk(matches[0], qc) != 0;
 
 			if (should_quote)
 				do_replace = matches[1] ? MULT_MATCH : SINGLE_MATCH;
