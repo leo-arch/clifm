@@ -49,7 +49,8 @@ else
 	BORDERS="--no-unicode"
 fi
 
-fzf --multi --marker='*' --info=inline --height='80%' \
+fzf --multi --marker='*' --info=inline \
+	--height="${CLIFM_FZF_HEIGHT:-80}%" --keep-right \
 	--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
 	--bind "alt-down:toggle+down" \
 	--bind "alt-up:toggle+up" \
