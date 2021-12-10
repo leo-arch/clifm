@@ -1413,6 +1413,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | dragondrop        | dragon or dragon-drag-and-drop|
  | finder            | fzf or rofi                   |
  | rgfind            | fzf and ripgrep               |
+ | fzcd              | fzf                           |
  | fzfdirhist        | fzf                           |
  | fzfhist           | fzf                           |
  | fzfnav            | fzf                           |
