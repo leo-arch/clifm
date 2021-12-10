@@ -26,4 +26,5 @@ bn=batch_create.sh
 **=fzfdesel.sh
 h=fzfhist.sh
 //=rgfind.sh
+_=fzcd.sh
 ih=ihelp.sh
