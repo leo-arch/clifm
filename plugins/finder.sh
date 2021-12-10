@@ -2,6 +2,7 @@
 
 # CliFM plugin to find/open/cd files in CWD using FZF/Rofi
 # Written by L. Abramovich
+# License GPL3
 
 SUCCESS=0
 ERROR=1
@@ -36,7 +37,10 @@ esac
 
 if [ "$finder" = "fzf" ]; then
 	# shellcheck disable=SC2012
-	FILE="$($ls_cmd | fzf --ansi --prompt "CliFM> ")"
+	FILE="$($ls_cmd | fzf --ansi --prompt 'CliFM> ' \
+--reverse --height 15 \
+--bind "tab:accept" \
+--color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold)"
 else
 	# shellcheck disable=SC2012
 	FILE="$(ls -A | rofi -dmenu -p CliFM)"
