@@ -256,8 +256,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	char *wname = (char *)NULL;
 	if (suggestion.type == ELN_SUG || suggestion.type == COMP_SUG
 	|| suggestion.type == FILE_SUG) {
-		int wlen = wcswidth((wchar_t *)str, NAME_MAX);
-		if (wlen == -1)
+		size_t wlen = wc_xstrlen(str);
+		if (wlen == 0)
 			wname = truncate_wname(str);
 	}
 
