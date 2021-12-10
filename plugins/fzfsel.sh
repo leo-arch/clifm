@@ -68,6 +68,8 @@ if [ -z "$OS" ]; then
 	exit 1
 fi
 
+exit_status=0
+
 if [ -n "$cmd" ]; then
 
 	case "$OS" in
@@ -109,6 +111,7 @@ if [ -n "$cmd" ]; then
 		--bind "alt-h:toggle-preview" --preview-window=:wrap \
 		--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
 		--reverse "$BORDERS" --ansi --prompt "CliFM> " > "$TMPFILE"
+	exit_status=$?
 
 else
 	case "$OS" in
@@ -117,6 +120,7 @@ else
 	esac
 	# shellcheck disable=SC2012
 	$ls_cmd | fzf --multi --marker='*' --info=inline \
+		--height "${CLIFM_FZF_HEIGHT:-80}%" \
 		--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
@@ -124,6 +128,7 @@ else
 		--bind "alt-h:toggle-preview" --preview-window=:wrap \
 		--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
 		--reverse "$BORDERS" --no-sort --ansi --prompt "CliFM> " > "$TMPFILE"
+	exit_status=$?
 fi
 
 args="$*"
@@ -142,12 +147,10 @@ else
 	done < "$TMPFILE"
 fi
 
-if [ -z "$DISPLAY" ]; then
-	clear
-else
-	tput clear
-fi
-
 rm -f -- "$TMPFILE" > /dev/null 2>&1
 
-exit 0
+# Erase the FZF window
+_lines="${LINES:-100}"
+printf "\033[%dM" "$_lines"
+
+exit "$exit_status"

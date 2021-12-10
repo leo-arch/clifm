@@ -2,6 +2,7 @@
 
 # Plugins to check for CliFM's updates
 # Written by L. Abramovich
+# License GPL3
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"

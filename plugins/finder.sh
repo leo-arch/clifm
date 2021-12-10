@@ -38,8 +38,8 @@ esac
 if [ "$finder" = "fzf" ]; then
 	# shellcheck disable=SC2012
 	FILE="$($ls_cmd | fzf --ansi --prompt 'CliFM> ' \
---reverse --height 15 \
---bind "tab:accept" \
+--reverse --height "${CLIFM_FZF_HEIGHT:-80}%" \
+--bind "tab:accept" --info=inline \
 --color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold)"
 else
 	# shellcheck disable=SC2012

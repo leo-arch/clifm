@@ -24,21 +24,16 @@ fi
 
 while true; do
 	file="$(rg --color=ansi --hidden --heading --line-number \
-			--trim -- "$1" 2>/dev/null | \
-			fzf --ansi --reverse --prompt="CliFM > " \
-			--no-clear --bind "right:accept" --no-info \
-			--header="Select a file and press Enter or Right to open it")"
+		--trim -- "$1" 2>/dev/null | \
+		fzf --ansi --reverse --prompt="CliFM > " --height="${CLIFM_FZF_HEIGHT:-80}%" \
+		--no-clear --bind "right:accept" --no-info \
+		--header="Select a file name and press Enter or Right to open it")"
 	[ -z "$file" ] && break
 	clifm --open "$PWD/$(printf "%s" "$file" | cut -d: -f1)"
 done
 
-if [ -z "$DISPLAY" ]; then
-	clear
-else
-	tput clear
-fi
-
-# Reset terminal settings
-printf "\033c"
+# Erase the FZF window
+_lines="${LINES:-100}"
+printf "\033[%dM" "$_lines"
 
 exit 0

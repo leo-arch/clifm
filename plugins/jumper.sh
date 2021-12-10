@@ -2,6 +2,7 @@
 
 # CliFM plugin to navigate the jump database via fzf/Rofi
 # Written by L. Abramovich
+# Lincese GPL3
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
@@ -29,8 +30,8 @@ fi
 
 if [ "$finder" = "fzf" ]; then
 	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" |\
-fzf --reverse --height 15 \
---bind "tab:accept" \
+fzf --reverse --height "${CLIFM_FZF_HEIGHT:-80}%" \
+--bind "tab:accept" --info=inline \
 --color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold \
 --prompt="CliFM> ")"
 else

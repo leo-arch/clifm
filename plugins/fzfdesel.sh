@@ -4,7 +4,6 @@
 # Description: Deselect currently selected files using FZF
 
 # Written by L. Abramovich
-
 # License: GPL3
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
@@ -50,7 +49,7 @@ else
 	BORDERS="--no-unicode"
 fi
 
-fzf --multi --marker='*' --info=inline \
+fzf --multi --marker='*' --info=inline --height='80%' \
 	--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
 	--bind "alt-down:toggle+down" \
 	--bind "alt-up:toggle+up" \
