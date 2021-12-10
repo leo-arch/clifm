@@ -445,6 +445,7 @@ create_actions_file(char *file)
 		"h=fzfhist.sh\n"
 		"dh=fzfdirhist.sh\n"
 		"//=rgfind.sh\n"
+		"_=fzcd.sh\n"
 		"ih=ihelp.sh\n",
 	    PROGRAM_NAME, PROGRAM_NAME);
 
