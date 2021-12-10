@@ -196,14 +196,14 @@ set_sel_file(void)
 	if (!share_selbox) {
 		/* Private selection box is stored in the profile
 		 * directory */
-		sel_file = (char *)xnmalloc(config_len + 9, sizeof(char));
+		sel_file = (char *)xnmalloc(config_len + 12, sizeof(char));
 
-		sprintf(sel_file, "%s/selbox", config_dir);
+		sprintf(sel_file, "%s/selbox.cfm", config_dir);
 	} else {
 		/* Common selection box is stored in the general
 		 * configuration directory */
-		sel_file = (char *)xnmalloc(config_len + 17, sizeof(char));
-		sprintf(sel_file, "%s/.config/%s/selbox", user.home, PNL);
+		sel_file = (char *)xnmalloc(config_len + 21, sizeof(char));
+		sprintf(sel_file, "%s/.config/%s/selbox.cfm", user.home, PNL);
 	}
 
 	return;
@@ -534,13 +534,13 @@ create_tmp_files(void)
 		else
 			prof_len = 7; /* Lenght of "default" */
 
-		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 9,
+		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 13,
 		    sizeof(char));
-		sprintf(sel_file, "%s/selbox_%s", P_tmpdir,
+		sprintf(sel_file, "%s/selbox_%s.cfm", P_tmpdir,
 		    (alt_profile) ? alt_profile : "default");
 	} else {
-		sel_file = (char *)xnmalloc(P_tmpdir_len + 8, sizeof(char));
-		sprintf(sel_file, "%s/selbox", P_tmpdir);
+		sel_file = (char *)xnmalloc(P_tmpdir_len + 12, sizeof(char));
+		sprintf(sel_file, "%s/selbox.cfm", P_tmpdir);
 	}
 
 	_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary directory for "
