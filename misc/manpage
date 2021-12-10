@@ -481,8 +481,9 @@ The best way of navigating the directory history list, however, is via the \fIdi
 Bleach cleans file names up either by removing unsafe (extended-ASCII/Unicode) characters without an ASCII alternative/similar character, or by translating these unsafe characters into an alternative ASCII character based on familiarity/similarity.
 .sp
 These following simple rules are used to compose clean/safe file names:
-    - NUL (\\0) and slash characters are completely disallowed
-    - Exclude characters that might have special meaning for the shell: \fB/ \ ' " ` $ > < | ! * ; : @ ~\fR (space included) are replaced by an underscore (_), just as \fB{ [ ( ) ] }\fR are replaced by a dash (-)
+    - NUL (\\0) and slash (/) characters are completely disallowed
+    - Only characters from the \fBPortable Filename Characters Set\fR (a-zA-Z0-9._-) are allowed
+    - { [ ( ) ] } are replaced by a dash (-). Everything else is replaced by an underscore (_)
     - Unicode characters are translated, whenever possible, into an ASCII replacement. Otherwise, they are just ignored. For example, Ä will be replaced by A (ě by e, Ĭ by I, and so on), but 😀 (the smiley face) will be simply ignored. A few special signs will be translated into text, for instance, £ will be replaced by _pound_ and € by EUR. Translations are made via a translation table (cleaner_table.h)
     - File names never start with a dash (-)
     - Files named . and .. are not allowed
