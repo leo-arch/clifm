@@ -104,25 +104,23 @@ get_utf_8_width(char c)
 	return 1;
 }
 
-/* Replace unsafe characters by safe ones.
- * ' /\'"$><|!*;:`@^%~' are replaced by an underscore (_)
- * '{[()]}' are replaced by a dash (-) */
+/* Replace unsafe characters by safe, portable ones.
+ * a-zA-Z0-9._- (Portable Filename Character Set) are kept
+ * {[()]} are replaced by a dash (-)
+ * Everything else is replaced by an underscore (_) */
 static int
 translate_unsafe_char(unsigned char c)
 {
 	unsigned char t = 0;
-	if (c == ' ' || c == '/'|| c == '\'' || c == '"' || c == '$'
-	|| c == '>' || c == '<' || c == '|' || c == '!' || c == '\\'
-	|| c == '*' || c == ';' || c == ':' || c == '`' || c == '@'
-	|| c == '~')
-		t = DEFAULT_TRANSLATION;
 
+	if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')
+	|| (c >= 'A' && c <= 'Z') || c == '.' || c == '_' || c == '-')
+		t = c;
 	else if (c == '(' || c == ')' || c == '[' || c == ']'
 	|| c == '{' || c == '}')
 		t = BRACKETS_TRANSLATION;
-
 	else
-		t = c;
+		t = DEFAULT_TRANSLATION;
 
 	if (t == 0)
 		return (-1);
