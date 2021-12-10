@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <wchar.h>
 
 #include "aux.h"
 #include "checks.h"
@@ -1508,10 +1509,17 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	int ret = lstat(ent, &file_attrib);
 	if (rem_slash)
 		ent[elen - 1] = '/';
+
+	char *wname = (char *)NULL;
+	int wlen = wcswidth((wchar_t *)ent, NAME_MAX);
+	if (wlen == -1)
+		wname = truncate_wname(ent);
+
 	if (ret == -1) {
 		fprintf(stderr, "%s%s%s%s%-*s%s%s", el_c, index, df_c,
-		    uf_c, pad, ent, df_c, new_line ? "\n" : "");
+		    uf_c, pad, wname ? wname : ent, df_c, new_line ? "\n" : "");
 		free(index);
+		free(wname);
 		return;
 	}
 
@@ -1606,8 +1614,10 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	}
 
 	printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, color,
-	    ent + tab_offset, df_c, new_line ? "\n" : "", pad, "");
+	    (wname ? wname : ent) + tab_offset, df_c,
+	    new_line ? "\n" : "", pad, "");
 	free(index);
+	free(wname);
 }
 
 size_t

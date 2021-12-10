@@ -1657,7 +1657,7 @@ get_sel_files(void)
 	struct stat a;
 	/* Since this file contains only paths, we can be sure no line
 	 * length will be larger than PATH_MAX */
-	char line[PATH_MAX] = "";
+	char line[PATH_MAX];
 	while (fgets(line, (int)sizeof(line), fp)) {
 		size_t len = strlen(line);
 

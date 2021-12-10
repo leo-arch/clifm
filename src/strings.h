@@ -46,5 +46,6 @@ char *replace_substr(char *haystack, char *needle, char *rep);
 size_t xstrnlen(const char *restrict s);
 int is_internal_f(const char *restrict cmd);
 int xstrverscmp(const char *s1, const char *s2);
+char *truncate_wname(const char *name);
 
 #endif /* STRINGS_H */

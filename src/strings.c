@@ -183,7 +183,7 @@ wc_xstrlen(const char *restrict str)
 	int p = wcswidth(wbuf, _len);
 	if (p != -1)
 		len = (size_t)p;
-	else
+	else /* A non-printable character was found */
 		len = 0;
 
 	return len;
@@ -217,6 +217,26 @@ u8truncstr(char *restrict str, size_t n)
 
 	wcscpy((wchar_t *)str, buf);
 	return (int)n - len;
+}
+
+/* Replace control characters in NAME by '^' */
+char *
+truncate_wname(const char *name)
+{
+	int i = 0;
+	char *n = (char *)xnmalloc(NAME_MAX, sizeof(char));
+	char *p = n;
+	for (; name[i]; i++) {
+		if (i >= NAME_MAX)
+			break;
+		if (name[i] >= 0 && name[i] <= 31)
+			*(n++) = '^';
+		else
+			*(n++) = name[i];
+	}
+//	file_info[i].len = (size_t)y;
+	*n = '\0';
+	return p;
 }
 
 /* Returns the index of the first appearance of c in str, if any, and
@@ -484,6 +504,12 @@ split_str(const char *str)
 	int quote = 0, close = 0;
 	char **substr = (char **)NULL;
 
+	/* Do not dequote expressions for the filter command */
+	int ft_cmd = 0;
+	if (*str == 'f' && ((*(str + 1) == 't' && *(str + 2) == ' ')
+	|| strncmp(str, "filter ", 7) == 0))
+		ft_cmd = 1;
+
 	while (*str) {
 		switch (*str) {
 		/* Command substitution */
@@ -551,7 +577,7 @@ split_str(const char *str)
 		case '\'': /* fallthrough */
 		case '"':
 			/* If the quote is escaped, it has no special meaning */
-			if (str_len && *(str - 1) == '\\') {
+			if (ft_cmd || (str_len && *(str - 1) == '\\')) {
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 				buf[buf_len++] = *str;
 				break;

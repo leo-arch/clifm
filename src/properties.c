@@ -37,6 +37,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <wchar.h>
 
 #include "aux.h"
 #include "checks.h"
@@ -209,6 +210,11 @@ get_properties(char *filename, const int dsize)
 	group = getgrgid(group_id);
 	owner = getpwuid(owner_id);
 
+	char *wname = (char *)NULL;
+	int wlen = wcswidth((wchar_t *)filename, NAME_MAX);
+	if (wlen == -1)
+		wname = truncate_wname(filename);
+
 	/* Print file properties */
 	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c%s %zu %s %s %s %s ",
 	    attr.st_mode & 07777, file_type,
@@ -221,21 +227,23 @@ get_properties(char *filename, const int dsize)
 	    (mod_time[0] != '\0') ? mod_time : "?");
 
 	if (file_type && file_type != 'l') {
-		printf("%s%s%s\n", color, filename, df_c);
+		printf("%s%s%s\n", color, wname ? wname : filename, df_c);
 	} else if (linkname) {
-		printf("%s%s%s -> %s\n", color, filename, df_c, linkname);
+		printf("%s%s%s -> %s\n", color, wname ? wname : filename, df_c, linkname);
 		free(linkname);
 	} else { /* Broken link */
 		char link[PATH_MAX] = "";
 		ssize_t ret = readlinkat(AT_FDCWD, filename, link, PATH_MAX);
 
 		if (ret) {
-			printf(_("%s%s%s -> %s (broken link)\n"), color, filename,
+			printf(_("%s%s%s -> %s (broken link)\n"), color, wname ? wname : filename,
 			    df_c, link);
 		} else {
-			printf("%s%s%s -> ???\n", color, filename, df_c);
+			printf("%s%s%s -> ???\n", color, wname ? wname : filename, df_c);
 		}
 	}
+
+	free(wname);
 
 	/* Stat information */
 	/* Last access time */
@@ -427,11 +435,19 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	char tname[PATH_MAX * sizeof(wchar_t)];
 	int trim = 0;
 
+	/* Handle file names with embedded control characters */
+	size_t plen = props->len;
+	char *wname = (char *)NULL;
+	if (props->len == 0) {
+		wname = truncate_wname(props->name);
+		plen = wc_xstrlen(wname);
+	}
+
 	size_t cur_len = 0;
 	if (elnpad == NOPAD)
-		cur_len = (size_t)props->eln_n + 1 + props->len;
+		cur_len = (size_t)props->eln_n + 1 + plen;
 	else
-		cur_len = (size_t)DIGINUM(files + 1) + 1 + props->len;
+		cur_len = (size_t)DIGINUM(files + 1) + 1 + plen;
 #ifndef _NO_ICONS
 	if (icons) {
 		cur_len += 3;
@@ -443,8 +459,8 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	if (cur_len > max) {
 		int rest = (int)(cur_len - max);
 		trim = 1;
-		strncpy(tname, props->name, (PATH_MAX * sizeof(wchar_t)) - 1);
-		int a = (int)props->len - rest - 1;
+		strncpy(tname, wname ? wname : props->name, (PATH_MAX * sizeof(wchar_t)) - 1);
+		int a = (int)plen - rest - 1;
 		if (a < 0)
 			a = 0;
 		if (unicode)
@@ -462,7 +478,9 @@ print_entry_props(const struct fileinfo *props, size_t max)
 		pad = 0;
 
 	if (!trim || !unicode)
-		mbstowcs((wchar_t *)tname, props->name, PATH_MAX);
+		mbstowcs((wchar_t *)tname, wname ? wname : props->name, PATH_MAX);
+
+	free(wname);
 
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls\x1b[%dC%s%-*s%s%s %c/%c%c%c/%c%c%c/%c%c%c%s  "

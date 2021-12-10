@@ -37,6 +37,8 @@
 #include <dirent.h>
 #include <termios.h>
 
+#include <wchar.h>
+
 #ifdef __linux__
 #include <sys/capability.h>
 #endif
@@ -204,8 +206,10 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold */
 	size_t suggestion_len = wc_xstrlen(str + offset);
+
 	if ((int)suggestion_len > (term_cols * term_rows) - curcol)
 		return;
+
 	size_t cuc = (size_t)curcol; /* Current cursor column position*/
 	int baej = 0; /* Bookmark, alias, ELN, or jump */
 
@@ -248,6 +252,15 @@ print_suggestion(const char *str, size_t offset, const char *color)
 		printf("\x1b[%dC", rl_end - rl_point);
 		fflush(stdout);
 	}
+
+	char *wname = (char *)NULL;
+	if (suggestion.type == ELN_SUG || suggestion.type == COMP_SUG
+	|| suggestion.type == FILE_SUG) {
+		int wlen = wcswidth((wchar_t *)str, NAME_MAX);
+		if (wlen == -1)
+			wname = truncate_wname(str);
+	}
+
 	/* rl_end and rl_point are not updated: they do not include
 	 * the last typed char. However, since we only care here about
 	 * the difference between them, it doesn't matter: the result
@@ -262,8 +275,9 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	}
 
 	/* Print the suggestion */
-	printf("%s%s", color, str + offset - (offset ? 1 : 0));
+	printf("%s%s", color, (wname ? wname : str) + offset - (offset ? 1 : 0));
 	fflush(stdout);
+	free(wname);
 
 	/* Update the row number, if needed */
 	/* If the cursor is in the last row, printing a multi-line suggestion
@@ -920,6 +934,7 @@ check_eln(const char *str, const int print)
 	}
 
 	print_suggestion(!*tmp ? file_info[n].name : tmp, 0, color);
+
 	return PARTIAL_MATCH;
 }
 

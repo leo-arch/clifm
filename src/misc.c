@@ -290,7 +290,10 @@ filter_function(const char *arg)
 		filter_rev = 0;
 	}
 
-	_filter = savestring(arg, strlen(arg));
+	char *p = (char *)arg;
+	if (*arg == '\'' || *arg == '"')
+		p = remove_quotes((char *)arg);
+	_filter = savestring(p, strlen(p));
 
 	if (regcomp(&regex_exp, _filter, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: '%s': Invalid regular expression\n"),
