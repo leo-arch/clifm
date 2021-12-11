@@ -30,6 +30,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "checks.h"
@@ -128,14 +129,18 @@ get_bd_matches(const char *str, int *n, int mode)
 	char **matches = (char **)NULL;
 
 	if (mode == BD_TAB) {
+		/* matches will be passed to readline for TAB completion, so
+		 * that we need to reserve the first slot to hold the query
+		 * string */
+		nwords = 0;
 		*n = 1;
 		matches = (char **)xnmalloc(2, sizeof(char *));
 	}
 
 	while(1) {
 		char *p = (char *)NULL;
-		if (str && *str) {
-			p = strstr(cwd, str);
+		if (str && *str) { /* Non-empty query string */
+			p = case_sens_path_comp ? strstr(cwd, str) : strcasestr(cwd, str);
 			if (!p)
 				break;
 		}
@@ -152,6 +157,8 @@ get_bd_matches(const char *str, int *n, int mode)
 			char *ss = strrchr(ws[cur_ws].path, '/');
 			if (ss && *(++ss))
 				matches[(*n)++] = savestring(ss, strlen(ss));
+			else /* Last slash is the first and only char: We have root dir */
+				matches[(*n)++] = savestring("/", 1);
 		} else {
 			matches[(*n)++] = savestring(ws[cur_ws].path, strlen(ws[cur_ws].path));
 		}
@@ -196,23 +203,34 @@ backdir(const char* str)
 		return EXIT_SUCCESS;
 	}
 
-	/* If STR is a directory, just change to it */
 	char *deq_str = (char *)NULL;
 	if (str) {
 		deq_str = dequote_str((char *)str, 0);
 		if (!deq_str) {
-			fprintf(stderr, "%s: %s: Error dequoting string\n", PROGRAM_NAME,
-				str);
+			fprintf(stderr, _("%s: %s: Error dequoting string\n"),
+				PROGRAM_NAME, str);
 			return EXIT_FAILURE;
 		}
 
+		if (*deq_str == '~') {
+			char *exp_path = tilde_expand(deq_str);
+			if (!exp_path) {
+				fprintf(stderr, _("%s: %s: Error expanding tilde\n"),
+					PROGRAM_NAME, deq_str);
+				free(deq_str);
+				return EXIT_FAILURE;
+			}
+			free(deq_str);
+			deq_str = exp_path;
+		}
+
+		/* If STR is a directory, just change to it */
 		struct stat a;
 		if (stat(deq_str, &a) == 0 && S_ISDIR(a.st_mode)) {
 			int ret = cd_function(deq_str, CD_PRINT_ERROR);
 			free(deq_str);
 			return ret;
 		}
-//		free(deq_str);
 	}
 
 	if (!ws[cur_ws].path) {

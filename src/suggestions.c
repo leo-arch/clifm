@@ -1298,6 +1298,12 @@ rl_suggestions(const unsigned char c)
 		}
 		/* Backdir function (bd) */
 		else if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {
+			if (*(lb + 3) == '/' && !*(lb + 4)) {
+				/* The query string is a single slash: do nothing */
+				if (suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
+				goto FAIL;
+			}
 			char *p = strstr(ws[cur_ws].path, lb + 3);
 			if (p) {
 				char *pp = strchr(p, '/');

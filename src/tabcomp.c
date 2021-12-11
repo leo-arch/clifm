@@ -295,6 +295,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 	char *n = strchr(buf, '\n');
 	if (n)
 		*n = '\0';
+
 	if (cur_comp_type == TCMP_PATH) {
 		char *esc_buf = escape_str(buf);
 		if (esc_buf) {
@@ -363,10 +364,13 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 		spath = epath;
 
 	struct stat attr;
-	if (stat(spath, &attr) != -1 && S_ISDIR(attr.st_mode))
-		rl_insert_text("/");
-	else if (cur_comp_type != TCMP_OPENWITH)
+	if (stat(spath, &attr) != -1 && S_ISDIR(attr.st_mode)) {
+		/* If not the root directory, append a slash */
+		if (*spath != '/' || *(spath + 1))
+			rl_insert_text("/");
+	} else if (cur_comp_type != TCMP_OPENWITH) {
 		rl_stuff_char(' ');
+	}
 
 	free(epath);
 }
@@ -1164,14 +1168,14 @@ AFTER_USUAL_COMPLETION:
 						if (highlight && !wrong_cmd) {
 							char *cc = cur_color;
 							fputs(hd_c, stdout);
-							rl_insert_text ("/");
+							rl_insert_text("/");
 							rl_redisplay();
 							fputs(cc, stdout);
 						} else {
-							rl_insert_text ("/");
+							rl_insert_text("/");
 						}
 #else
-						rl_insert_text ("/");
+						rl_insert_text("/");
 #endif
 					}
 				} else {
@@ -1401,7 +1405,6 @@ CALC_OFFSET:
 					int printed_length;
 					temp = printable_part(matches[l]);
 					printed_length = (int)strlen(temp);
-//					printf("'%s:%s'\n", temp, matches[l]);
 					printed_length += print_filename(temp, matches[l]);
 
 					if (j + 1 < limit) {
