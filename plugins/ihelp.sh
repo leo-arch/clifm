@@ -74,6 +74,7 @@ alias @
 ao, auto-open@
 b, back@
 bb, bleach@
+bd @
 bl @
 bm, bookmarks@
 br, bulk@
