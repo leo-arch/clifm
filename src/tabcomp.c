@@ -1356,7 +1356,7 @@ CALC_OFFSET:
 		} else {
 			tab_offset = strlen(matches[0]);
 		}
-		if (cur_comp_type == TCMP_RANGES)
+		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR)
 			tab_offset = 0;
 
 /*		if (curses_tab(matches) == -1)
@@ -1386,7 +1386,7 @@ CALC_OFFSET:
 			}
 
 			for (j = 0, l = (int)i; j < limit; j++) {
-				if (l > len || !matches[l]) {
+				if (l > len || !matches[l] || !*matches[l]) {
 					break;
 				} else {
 					if (tab_offset) {
@@ -1401,6 +1401,7 @@ CALC_OFFSET:
 					int printed_length;
 					temp = printable_part(matches[l]);
 					printed_length = (int)strlen(temp);
+//					printf("'%s:%s'\n", temp, matches[l]);
 					printed_length += print_filename(temp, matches[l]);
 
 					if (j + 1 < limit) {

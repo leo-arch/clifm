@@ -1656,12 +1656,16 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		if (!_xrename && rl_end >= 3 && *rl_line_buffer == 'b'
+		if (!_xrename && nwords <= 2 && rl_end >= 3 && *rl_line_buffer == 'b'
 		&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' ') {
-			int n = 0;
-			matches = get_bd_matches(text, &n, BD_TAB);
-			if (matches)
-				return matches;
+			if (nwords < 2 || (rl_end && rl_line_buffer[rl_end - 1] != ' ')) {
+				int n = 0;
+				matches = get_bd_matches(text, &n, BD_TAB);
+				if (matches) {
+					cur_comp_type = TCMP_BACKDIR;
+					return matches;
+				}
+			}
 		}
 
 #ifndef _NO_LIRA

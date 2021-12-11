@@ -147,7 +147,13 @@ get_bd_matches(const char *str, int *n, int mode)
 		}
 		*q = '\0';
 		matches = (char **)xrealloc(matches, (size_t)(*n + 2) * sizeof(char *));
-		matches[(*n)++] = savestring(ws[cur_ws].path, strlen(ws[cur_ws].path));
+		if (mode == BD_TAB) {
+			char *ss = strrchr(ws[cur_ws].path, '/');
+			if (ss && *(++ss))
+				matches[(*n)++] = savestring(ss, strlen(ss));
+		} else {
+			matches[(*n)++] = savestring(ws[cur_ws].path, strlen(ws[cur_ws].path));
+		}
 		*q = '/';
 		cwd = q + 1;
 

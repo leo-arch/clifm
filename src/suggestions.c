@@ -215,7 +215,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
 	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
-	|| suggestion.type == JCMD_SUG_NOACD) {
+	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 //		cuc += 4;
 		cuc += suggestion.type == ELN_SUG ? 3 : 4;
@@ -1293,6 +1293,21 @@ rl_suggestions(const unsigned char c)
 				}
 			}
 			if (printed) {
+				goto SUCCESS;
+			}
+		}
+		/* Backdir function (bd) */
+		else if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {
+			char *p = strstr(ws[cur_ws].path, lb + 3);
+			if (p) {
+				char *pp = strchr(p, '/');
+				if (pp)
+					*pp = '\0';
+				suggestion.type = BACKDIR_SUG;
+				print_suggestion(ws[cur_ws].path, 1, sf_c);
+				printed = 1;
+				if (pp)
+					*pp = '/';
 				goto SUCCESS;
 			}
 		}
