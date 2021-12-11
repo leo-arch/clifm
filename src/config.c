@@ -1405,17 +1405,12 @@ read_config(void)
 
 	*div_line_char = '\0';
 #define MAX_BOOL 6 /* false (5) + 1 */
-	/* starting path(14) + PATH_MAX + \n(1)*/
 	char line[PATH_MAX + 15];
 
 	while (fgets(line, (int)sizeof(line), config_fp)) {
 
 		if (*line == '\n' || *line == '#')
 			continue;
-/* 		if (*line == '\n' || (*line == '#' && line[1] != 'E'))
-			continue;
-		if (*line == '#' && strncmp(line, "#END OF OPTIONS", 15) == 0)
-			break; */
 
 		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0)
 			parse_autocmd_line(line + 8);
@@ -1432,7 +1427,7 @@ read_config(void)
 				autocd = 0;
 		}
 
-		else if (xargs.autojump == UNSET && *line == 'A'
+/*		else if (xargs.autojump == UNSET && *line == 'A'
 		&& strncmp(line, "AutoJump=", 9) == 0) {
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "AutoJump=%5s\n", opt_str);
@@ -1442,7 +1437,7 @@ read_config(void)
 				autojump = autocd = 1;
 			else if (strncmp(opt_str, "false", 5) == 0)
 				autojump = 0;
-		}
+		} */
 
 		else if (xargs.auto_open == UNSET && *line == 'A'
 		&& strncmp(line, "AutoOpen=", 9) == 0) {
@@ -2225,20 +2220,17 @@ init_config(void)
 		return;
 	}
 
-	/* Store a pointer to the current LS_COLORS value to be used by
-	 * external commands */
-	ls_colors_bk = getenv("LS_COLORS");
-
 	if (!home_ok)
 		return;
 
 	define_config_file_names();
 	create_config_files();
 
+	cschemes_n = get_colorschemes();
+
 	if (config_ok)
 		read_config();
 
-	cschemes_n = get_colorschemes();
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
 
 	if ((flags & GUI) && getenv("XTERM_VERSION")) {
@@ -2334,6 +2326,7 @@ reset_variables(void)
 	cschemes_n = 0;
 	free(usr_cscheme);
 	usr_cscheme = (char *)NULL;
+	cur_cscheme = (char *)NULL;
 
 	free(user.shell);
 	user.shell = (char *)NULL;

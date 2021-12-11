@@ -229,15 +229,11 @@ set_autocmd_opt(char *opt)
 	*(p - 1) = '\0';
 	if (*opt == 'c' && opt[1] == 's') {
 		int i = (int)cschemes_n;
-		int no_cs = 1;
 		while (--i >= 0) {
 			if (*color_schemes[i] == *p && strcmp(color_schemes[i], p) == 0) {
 				autocmds[autocmds_n].color_scheme = color_schemes[i];
-				no_cs = 0;
 				break;
 			}
-			if (no_cs)
-				autocmds[autocmds_n].color_scheme = (char *)NULL;
 		}
 	} else if (*opt == 'f' && opt[1] == 'c')
 		autocmds[autocmds_n].files_counter = atoi(p);
