@@ -1511,8 +1511,8 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 		ent[elen - 1] = '/';
 
 	char *wname = (char *)NULL;
-	int wlen = wcswidth((wchar_t *)ent, NAME_MAX);
-	if (wlen == -1)
+	size_t wlen = wc_xstrlen(ent);
+	if (wlen == 0)
 		wname = truncate_wname(ent);
 
 	if (ret == -1) {

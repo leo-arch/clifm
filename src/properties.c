@@ -211,8 +211,8 @@ get_properties(char *filename, const int dsize)
 	owner = getpwuid(owner_id);
 
 	char *wname = (char *)NULL;
-	int wlen = wcswidth((wchar_t *)filename, NAME_MAX);
-	if (wlen == -1)
+	size_t wlen = wc_xstrlen(filename);
+	if (wlen == 0)
 		wname = truncate_wname(filename);
 
 	/* Print file properties */

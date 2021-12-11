@@ -1656,7 +1656,8 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		if (!_xrename && nwords <= 2 && rl_end >= 3 && *rl_line_buffer == 'b'
+		if (*text != '/' && !_xrename && nwords <= 2 && rl_end >= 3
+		&& *rl_line_buffer == 'b'
 		&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' ') {
 			if (nwords < 2 || (rl_end && rl_line_buffer[rl_end - 1] != ' ')) {
 				int n = 0;
