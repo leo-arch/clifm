@@ -1729,6 +1729,7 @@ help_function(void)
  ao, auto-open [on, off, status]\n\
  b, back [h, hist] [clear] [!ELN]\n\
  bb, bleach ELN/FILE ... (file names cleaner)\n\
+ bd [NAME] ... (backdir function)\n\
  bl ELN/FILE ... (batch links)\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  br, bulk ELN/FILE ...\n\
