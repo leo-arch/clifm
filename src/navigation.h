@@ -32,5 +32,7 @@ int cd_function(char *new_path, const int print_error);
 char *fastback(const char *str);
 int workspaces(char *str);
 void print_dirhist(void);
+int backdir(const char* str);
+char **get_bd_matches(const char *str, int *n, int mode);
 
 #endif /* NAVIGATION_H */

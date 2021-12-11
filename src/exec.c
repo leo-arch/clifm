@@ -699,6 +699,9 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
+	else if (*comm[0] == 'b' && comm[0][1] == 'd' && !comm[0][2])
+		return (exit_code = backdir(comm[1] ? comm[1] : NULL));
+
 	/*      ############### OPEN WITH ##################     */
 	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2]) {
 #ifndef _NO_LIRA

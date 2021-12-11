@@ -276,7 +276,6 @@ char
 	*kbinds_file = (char *)NULL,
 	*last_cmd = (char *)NULL,
 	*log_file = (char *)NULL,
-	*ls_colors_bk = (char *)NULL,
 	*mime_file = (char *)NULL,
 	*msg_log_file = (char *)NULL,
 	*opener = (char *)NULL,
@@ -331,6 +330,7 @@ const char *internal_cmds[] = {
 	"ao", "auto-open",
 	"b", "back",
 	"bb", "bleach",
+	"bd",
 	"bh", "fh",
 	"bm", "bookmarks",
 	"br", "bulk",
@@ -688,15 +688,6 @@ main(int argc, char *argv[])
 
 	/* Make sure we are running on a supported terminal */
 	check_term();
-
-/*	get_term_bgcolor(STDIN_FILENO, STDOUT_FILENO);
-	printf("\x1b]11;#111111\007"); */
-
-//	signal(SIGWINCH, handle_sigwinch);
-
-	/* Set the default color */
-/*	fputs(DEF_DF_C, stdout);
-	fflush(stdout); */
 
 	/* If running the program locally, that is, not from a path in PATH,
 	 * remove the leading "./" to get the correct program invocation

@@ -298,6 +298,10 @@ extern int watch;
 #define LEFTSPACEPAD  2
 #define RIGHTSPACEPAD 3
 
+/* Macros for the backdir (bd) function */
+#define BD_TAB    1
+#define BD_NO_TAB 0
+
 /* Macros for the clear_suggestion function */
 #define CS_FREEBUF 1
 #define CS_KEEPBUF 0
@@ -898,7 +902,6 @@ extern char
 	*jump_suggestion,
 	*last_cmd,
 	*log_file,
-	*ls_colors_bk,
 	*mime_file,
 	*msg_log_file,
 	*opener,

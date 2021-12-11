@@ -120,6 +120,109 @@ workspaces(char *str)
 	return exit_status;
 }
 
+/* Return the list of paths in CWD matching STR */
+char **
+get_bd_matches(const char *str, int *n, int mode)
+{
+	char *cwd = ws[cur_ws].path;
+	char **matches = (char **)NULL;
+
+	if (mode == BD_TAB) {
+		*n = 1;
+		matches = (char **)xnmalloc(2, sizeof(char *));
+	}
+
+	while(1) {
+		char *p = (char *)NULL;
+		if (str && *str) {
+			p = strstr(cwd, str);
+			if (!p)
+				break;
+		}
+		char *q = strchr(p ? p : cwd, '/');
+		if (!q) {
+			if (!*(++cwd))
+				break;
+			continue;
+		}
+		*q = '\0';
+		matches = (char **)xrealloc(matches, (size_t)(*n + 2) * sizeof(char *));
+		matches[(*n)++] = savestring(ws[cur_ws].path, strlen(ws[cur_ws].path));
+		*q = '/';
+		cwd = q + 1;
+
+		if (!*cwd)
+			break;
+	}
+
+	if (mode == BD_TAB) {
+		if (*n == 1) { /* No matches */
+			matches[0] = savestring(str, strlen(str));
+			matches[1] = (char *)NULL;
+		} else if (*n == 2) { /* One match */
+			matches[0] = savestring(matches[1], strlen(matches[1]));
+			free(matches[1]);
+			matches[1] = (char *)NULL;
+		} else { /* Multiple matches */
+			matches[0] = savestring(str, strlen(str));
+			matches[*n] = (char *)NULL;
+		}
+	} else if (*n > 0) {
+		matches[*n] = (char *)NULL;
+	}
+
+	return matches;
+}
+
+/* Change to parent directory matching STR */
+int
+backdir(const char* str)
+{
+	if (str && *str == '-' && strcmp(str, "--help") == 0) {
+		puts(_(BD_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	/* If STR is a directory, just change to it */
+	if (str && *str == '/') {
+		struct stat a;
+		if (stat(str, &a) == 0 && S_ISDIR(a.st_mode))
+			return cd_function((char *)str, CD_PRINT_ERROR);
+	}
+
+	if (!ws[cur_ws].path)
+		return EXIT_FAILURE;
+
+	int n = 0;
+	char **matches = get_bd_matches(str, &n, BD_NO_TAB);
+
+	if (n == 0) {
+		fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+	if (n == 1)
+		exit_status = cd_function(matches[0], CD_PRINT_ERROR);
+
+	int i = n, j = 1;
+	while (--i >= 0) {
+		/* If multiple matches, print them */
+		if (n > 1) {
+			char *sl = strrchr(matches[i], '/');
+			if (sl && *(sl + 1))
+				*(sl++) = '\0';
+			printf("%s%d%s %s/%s%s%s\n", el_c, j, df_c, matches[i],
+					BOLD, sl ? sl : "", df_c);
+			j++;
+		}
+		free(matches[i]);
+	}
+	free(matches);
+
+	return exit_status;
+}
+
 /* Make sure DIR exists, it is actually a directory and is readable.
  * Only then change directory */
 int

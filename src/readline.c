@@ -1656,6 +1656,14 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		if (!_xrename && rl_end >= 3 && *rl_line_buffer == 'b'
+		&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' ') {
+			int n = 0;
+			matches = get_bd_matches(text, &n, BD_TAB);
+			if (matches)
+				return matches;
+		}
+
 #ifndef _NO_LIRA
 		/* #### OPEN WITH #### */
 		if (!_xrename && rl_end > 4 && *rl_line_buffer == 'o' && rl_line_buffer[1] == 'w'
