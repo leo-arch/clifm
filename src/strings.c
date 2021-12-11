@@ -234,7 +234,6 @@ truncate_wname(const char *name)
 		else
 			*(n++) = name[i];
 	}
-//	file_info[i].len = (size_t)y;
 	*n = '\0';
 	return p;
 }

@@ -163,8 +163,8 @@ get_bd_matches(const char *str, int *n, int mode)
 
 	if (mode == BD_TAB) {
 		if (*n == 1) { /* No matches */
-			matches[0] = savestring(str, strlen(str));
-			matches[1] = (char *)NULL;
+			free(matches);
+			return (char **)NULL;
 		} else if (*n == 2) { /* One match */
 			matches[0] = savestring(matches[1], strlen(matches[1]));
 			free(matches[1]);
