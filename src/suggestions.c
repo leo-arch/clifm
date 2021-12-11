@@ -1406,7 +1406,7 @@ rl_suggestions(const unsigned char c)
 	char *ret = strchr(full_line, ' ');
 	if (ret) {
 		/* 3.c.1) Suggest the sel keyword only if not first word */
-		if (*word == 's' && strncmp(word, "sel", wlen) == 0) {
+		if (sel_n > 0 && *word == 's' && strncmp(word, "sel", wlen) == 0) {
 			suggestion.type = SEL_SUG;
 //			suggestion.offset = last_word_offset;
 			printed = 1;
