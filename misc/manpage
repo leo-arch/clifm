@@ -149,6 +149,7 @@ List of CliFM features:
   43) Easily mount/unmount storage devices via the \fImedia\fR command
   44) Control settings on a per directory basis via the \fIautocommands\fR function
   45) \fIBleach\fR, a built-in file names cleaner
+  46) Backdir: quickly change to a parent directory
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
@@ -494,6 +495,21 @@ These following simple rules are used to compose clean/safe file names:
 Modified file names will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing e) the list of modified file names via a text editor.
 .sp
 If the replacement file name already exists, a dash and a number (starting from 1) will be appended. Ex: file-3.
+.TP
+.B bd \fR[NAME]
+\fIbd\fR is the \fBbackdir\fR function: it takes you back to the parent directory matching NAME.
+.sp
+With no arguments, \fIbd\fR just prints the list of all parent directories relative to the current directory. Otherwise, it checks the absolute current directory against the provided query string (NAME): if only one match is found, it automatically changes to that directory; if multiple matches are found, the list of matches is printed. If NAME is a directory name, \fIbd\fR just changes to that directory, be it a parent of the current directory or not.
+.sp
+TAB completion and suggestions are available for this function.
+.sp
+\fBExample\fR:
+.sp
+Provided that the current directory is \fI/home/user/git/repositories/lambda\fR, entering \fIbd git\fR will take you immediatelly to \fI/home/user/git\fR.
+.sp
+Note that there is no need to type the entire directory name; if the query is unambiguous, only a few characters, and even just one, suffices to match the appropriate directory. In our example, \fIbd g\fR is enough to take you to \fI/home/user/git\fR, just as \fIbd h\fR will take you to \fI/home\fR.
+
+The query string could match any part of a directory name: \fIbd er\fR, for instance, will take you to \fI/home/user\fR, since it is an unambiguous query.
 .TP
 .B bl \fRELN/FILE ... n
 Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
