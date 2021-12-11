@@ -167,9 +167,15 @@ get_bd_matches(const char *str, int *n, int mode)
 			free(matches);
 			return (char **)NULL;
 		} else if (*n == 2) { /* One match */
-			matches[0] = savestring(matches[1], strlen(matches[1]));
+			char *p = escape_str(matches[1]);
+			if (!p) {
+				free(matches);
+				return (char **)NULL;
+			}
+			matches[0] = savestring(p, strlen(p));
 			free(matches[1]);
 			matches[1] = (char *)NULL;
+			free(p);
 		} else { /* Multiple matches */
 			matches[0] = savestring(str, strlen(str));
 			matches[*n] = (char *)NULL;
@@ -191,8 +197,9 @@ backdir(const char* str)
 	}
 
 	/* If STR is a directory, just change to it */
+	char *deq_str = (char *)NULL;
 	if (str) {
-		char *deq_str = dequote_str((char *)str, 0);
+		deq_str = dequote_str((char *)str, 0);
 		if (!deq_str) {
 			fprintf(stderr, "%s: %s: Error dequoting string\n", PROGRAM_NAME,
 				str);
@@ -205,14 +212,17 @@ backdir(const char* str)
 			free(deq_str);
 			return ret;
 		}
-		free(deq_str);
+//		free(deq_str);
 	}
 
-	if (!ws[cur_ws].path)
+	if (!ws[cur_ws].path) {
+		free(deq_str);
 		return EXIT_FAILURE;
+	}
 
 	int n = 0;
-	char **matches = get_bd_matches(str, &n, BD_NO_TAB);
+	char **matches = get_bd_matches(deq_str ? deq_str : str, &n, BD_NO_TAB);
+	free(deq_str);
 
 	if (n == 0) {
 		fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
