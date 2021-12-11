@@ -555,19 +555,19 @@ rl_accept_suggestion(int count, int key)
 	case ELN_SUG: /* fallthrough */
 	case FILE_SUG: {
 		char *tmp = (char *)NULL;
-		size_t i, isquote = 0; //, backslash = 0;
+		size_t i, isquote = 0, backslash = 0;
 		for (i = 0; suggestion_buf[i]; i++) {
 			if (is_quote_char(suggestion_buf[i])) {
 				isquote = 1;
-				break;
+//				break;
 			}
-/*			if (suggestion_buf[i] == '\\') {
+			if (suggestion_buf[i] == '\\') {
 				backslash = 1;
 				break;
-			} */
+			}
 		}
-//		if (isquote && !backslash)
-		if (isquote)
+		if (isquote && !backslash)
+//		if (isquote)
 			tmp = escape_str(suggestion_buf);
 
 		if (tmp) {

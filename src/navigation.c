@@ -148,6 +148,7 @@ get_bd_matches(const char *str, int *n, int mode)
 		*q = '\0';
 		matches = (char **)xrealloc(matches, (size_t)(*n + 2) * sizeof(char *));
 		if (mode == BD_TAB) {
+			/* Print only the path base name */
 			char *ss = strrchr(ws[cur_ws].path, '/');
 			if (ss && *(++ss))
 				matches[(*n)++] = savestring(ss, strlen(ss));
@@ -190,10 +191,21 @@ backdir(const char* str)
 	}
 
 	/* If STR is a directory, just change to it */
-	if (str && *str == '/') {
+	if (str) {
+		char *deq_str = dequote_str((char *)str, 0);
+		if (!deq_str) {
+			fprintf(stderr, "%s: %s: Error dequoting string\n", PROGRAM_NAME,
+				str);
+			return EXIT_FAILURE;
+		}
+
 		struct stat a;
-		if (stat(str, &a) == 0 && S_ISDIR(a.st_mode))
-			return cd_function((char *)str, CD_PRINT_ERROR);
+		if (stat(deq_str, &a) == 0 && S_ISDIR(a.st_mode)) {
+			int ret = cd_function(deq_str, CD_PRINT_ERROR);
+			free(deq_str);
+			return ret;
+		}
+		free(deq_str);
 	}
 
 	if (!ws[cur_ws].path)
