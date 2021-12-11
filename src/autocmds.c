@@ -226,6 +226,8 @@ set_autocmd_opt(char *opt)
 	if (!p || !*(++p))
 		return;
 
+	autocmds[autocmds_n].color_scheme = (char *)NULL;
+
 	*(p - 1) = '\0';
 	if (*opt == 'c' && opt[1] == 's') {
 		int i = (int)cschemes_n;
