@@ -56,9 +56,9 @@ CMDS="
 13. AUTO-SUGGESTIONS@
 14. SHELL FUNCTIONS@
 15. PLUGINS@
-16. AUTCOMMANDS@
+16. AUTOCOMMANDS@
 17. STANDARD INPUT@
-18. NOTE ON SPEED
+17. NOTE ON SPEED
 19. KANGAROO FRECENCY ALGORITHM@
 20. ENVIRONMENT@
 21. MISCELLANEOUS NOTES@
@@ -139,7 +139,7 @@ a="-"
 # shellcheck disable=SC2046
 while [ -n "$a" ]; do
 	if [ "$filter" = "fzf" ]; then
-		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | fzf --prompt "CliFM> " --layout=reverse-list)"
+		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | fzf --prompt "CliFM> " --reverse --height=15 --info=inline --color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold)"
 	else
 		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | rofi -dmenu -p "CliFM")"
 	fi
