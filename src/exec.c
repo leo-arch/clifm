@@ -83,7 +83,7 @@ get_new_name(void)
 	rl_nohist = 1;
 
 	char m[NAME_MAX];
-	snprintf(m, NAME_MAX, "Enter new name ('Ctrl-x' to quit)\n%s>%s ", mi_c, tx_c);
+	snprintf(m, NAME_MAX, "Enter new name ('Ctrl-x' to quit)\n\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	while (!input && _xrename) {
 		input = readline(m);
@@ -93,12 +93,6 @@ get_new_name(void)
 			free(input);
 			input = (char *)NULL;
 			continue;
-		}
-
-		if (*input == 'q' && !*(input + 1)) {
-			free(input);
-			input = (char *)NULL;
-			break;
 		}
 	}
 

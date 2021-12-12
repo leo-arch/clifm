@@ -442,7 +442,7 @@ my_rl_getc(FILE *stream)
 			if (control_d_exits && c == 4) /* Ctrl-d */
 				rl_quit(0, 0);
 
-			if (_xrename && (c == 4 || c == 24)) {
+			if (_xrename && ((!control_d_exits && c == 4) || c == 24)) {
 				xrename = _xrename = 0;
 				return (EOF);
 			}
