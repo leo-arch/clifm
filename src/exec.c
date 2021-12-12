@@ -1792,20 +1792,9 @@ exec_cmd(char **comm)
 				free(tmp);
 				return exit_code;
 			} else if (auto_open && (attr.st_mode & S_IFMT) == S_IFREG) {
-				/* Open the file only if not a file in the current directory,
-				 * and either it's not preceded by "./" or is not an
-				 * executable file */
-				int i = (int)files;
-				while (--i >= 0) {
-					if (*comm[0] == *file_info[i].name
-					&& strcmp(comm[0], file_info[i].name) == 0) {
-						break;
-					}
-				}
-				if (i != -1 && (!(*tmp == '.' && *(tmp + 1) == '/')
-				|| !(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))) {
-					char *cmd[] = {"open", tmp, (args_n >= 1) ? comm[1]
-						: NULL, (args_n >= 2) ? comm[2] : NULL, NULL};
+				if (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
+					char *cmd[] = {"open", tmp, comm[1] ? comm[1]
+						: NULL, comm[2] ? comm[2] : NULL, NULL};
 					args_n++;
 					exit_code = open_function(cmd);
 					args_n--;
