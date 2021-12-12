@@ -44,8 +44,8 @@ X:E:^djvu$=djview;zathura;evince;atril
 X:E:^epub$=mupdf;zathura;ebook-viewer
 X:E:^mobi$=ebook-viewer
 X:E:^(cbr|cbz)$=zathura
-X:E:^cfm$=$EDITOR;$VISUAL;nano;vim;vi;vis;emacs;ed;micro;kakoune;leafpad;mousepad;featherpad;gedit;kate;pluma
-!X:E:^cfm$=$EDITOR;$VISUAL;nano;vim;vi;vis;emacs;ed;micro;kakoune
+X:E:^cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vi;vis;emacs;ed;micro;kakoune;leafpad;mousepad;featherpad;gedit;kate;pluma
+!X:E:^cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vi;vis;emacs;ed;micro;kakoune
 
 ##################
 #   MIME types   #
@@ -62,8 +62,8 @@ X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;lua
 
 # Text
 #X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;vim;vi;vis;emacs;ed;micro;kakoune;leafpad;mousepad;featherpad;kate;gedit;pluma
-!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;vim;vi;vis;emacs;ed;micro;kakoune
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vi;vis;emacs;ed;micro;kakoune;leafpad;mousepad;featherpad;kate;gedit;pluma
+!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vi;vis;emacs;ed;micro;kakoune
 
 # Office documents
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
