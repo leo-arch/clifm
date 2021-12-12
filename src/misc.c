@@ -1579,6 +1579,15 @@ void
 help_function(void)
 {
 	fputs("\x1b[0m", stdout);
+	fputs(
+"           ¸_______¸   ¸_¸\n"
+"           | ,---, |   | |\n"
+"           | |   | |   | |\n"
+"           | |   | |   | |\n"
+"           | |   | |   | |\n"
+"           | !___! !___! |\n"
+"           `-------------'\n\n", stdout);
+
 	printf(_("%s%s %s (%s), by %s\n"), (flags & EXT_HELP) ? "" : df_c,
 			PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
@@ -1630,8 +1639,6 @@ help_function(void)
 	    PNL, GRAL_USAGE, PROGRAM_NAME);
 
 	printf("\
-\n     --autojump\t enable the autojump function (run the directory \
-\n              jumper omitting the j command: 'STR...' == 'j STR...')\
 \n     --case-sens-dirjump\t do not ignore case when consulting the \
 \n              jump database (via the 'j' command)\
 \n     --case-sens-path-comp\t enable case sensitive path completion\
