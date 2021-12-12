@@ -807,7 +807,8 @@ fzftabcomp(char **matches)
 			buf[j] = '\0';
 
 		char *q = (char *)NULL;
-		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_PATH) {
+		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_PATH
+		&& cur_comp_type != TCMP_HIST) {
 			q = escape_str(buf);
 			if (!q)
 				return EXIT_FAILURE;
