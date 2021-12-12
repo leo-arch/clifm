@@ -1580,7 +1580,7 @@ help_function(void)
 {
 	fputs("\x1b[0m", stdout);
 	fputs(
-"                       ¸_______¸   ¸_¸\n"
+"                        _______     _ \n"
 "                       | ,---, |   | |\n"
 "                       | |   | |   | |\n"
 "                       | |   | |   | |\n"
