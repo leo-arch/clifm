@@ -1580,13 +1580,13 @@ help_function(void)
 {
 	fputs("\x1b[0m", stdout);
 	fputs(
-"           ¸_______¸   ¸_¸\n"
-"           | ,---, |   | |\n"
-"           | |   | |   | |\n"
-"           | |   | |   | |\n"
-"           | |   | |   | |\n"
-"           | !___! !___! |\n"
-"           `-------------'\n\n", stdout);
+"                       ¸_______¸   ¸_¸\n"
+"                       | ,---, |   | |\n"
+"                       | |   | |   | |\n"
+"                       | |   | |   | |\n"
+"                       | |   | |   | |\n"
+"                       | !___! !___! |\n"
+"                       `-------------'\n\n", stdout);
 
 	printf(_("%s%s %s (%s), by %s\n"), (flags & EXT_HELP) ? "" : df_c,
 			PROGRAM_NAME, VERSION, DATE, AUTHOR);
@@ -1597,8 +1597,7 @@ help_function(void)
 \n -b, --bookmarks-file=FILE\t specify an alternative bookmarks file\
 \n -c, --config-file=FILE\t\t specify an alternative configuration file\
 \n -D, --config-dir=DIR\t\t specify an alternative configuration directory\
-\n -e, --no-eln\t\t\t do not print ELN (entry list number) at \
-\n              the left of each file name \
+\n -e, --no-eln\t\t\t do not print ELN's (entry list number) \
 \n -f, --no-folders-first\t\t do not list folders first\
 \n -F, --folders-first\t\t list folders first (default)\
 \n -g, --pager\t\t\t enable the pager\
@@ -1613,109 +1612,73 @@ help_function(void)
 \n -m, --dihist-map\t\t enable the directory history map\
 \n -o, --no-autols\t\t do not list files automatically\
 \n -O, --autols\t\t\t lists files automatically (default)\
-\n -p, --path=PATH\t\t (Deprecated: use positional parameters instead)\
-\n              use PATH as %s starting path\
+\n -p, --path=PATH\t\t Use PATH as %s starting path (deprecated: use positional \
+parameters instead)\
 \n -P, --profile=PROFILE\t\t use (or create) PROFILE as profile\
 \n -s, --splash \t\t\t enable the splash screen\
-\n -S, --stealth-mode \t\t leave no trace on the host system.\
-\n              Nothing is read from any file nor any file \
-\n              is created: all settings are set to the \
-\n              default value. However, most settings can \
-\n              be controlled via command line options\
+\n -S, --stealth-mode \t\t leave no trace on the host system (see the manpage)\
 \n -u, --no-unicode \t\t disable unicode\
-\n -U, --unicode \t\t\t enable unicode to correctly list file names \
-\n              containing accents, tildes, umlauts, \
-\n              non-latin letters, etc. This option is \
-\n              enabled by default\
+\n -U, --unicode \t\t\t enable Unicode support (default)\
 \n -v, --version\t\t\t show version details and exit\
 \n -w, --workspace=NUM\t\t start in workspace NUM\
 \n -x, --no-ext-cmds\t\t disallow the use of external commands\
 \n -y, --light-mode\t\t enable the light mode\
-\n -z, --sort=METHOD\t\t sort files by METHOD, where METHOD \
-\n              could be: 0 = none, 1 = name, 2 = size, \
-\n              3 = atime, 4 = btime, 5 = ctime, \
-\n              6 = mtime, 7 = version, 8 = extension, \
-\n              9 = inode, 10 = owner, 11 = group"),
+\n -z, --sort=METHOD\t\t sort files by METHOD (see the manpage)"),
 	    PNL, GRAL_USAGE, PROGRAM_NAME);
 
 	printf("\
-\n     --case-sens-dirjump\t do not ignore case when consulting the \
-\n              jump database (via the 'j' command)\
+\n     --case-sens-dirjump\t do not ignore case when consulting the jump \
+database (via the 'j' command)\
 \n     --case-sens-path-comp\t enable case sensitive path completion\
-\n     --cd-on-quit\t\t write last visited path to \
-\n              $XDG_CONFIG_HOME/clifm/.last to be accessed\
-\n              later by a shell funtion. See the manpage\
+\n     --cd-on-quit\t\t enable cd-on-quit functionality. See the manpage\
 \n     --color-scheme=NAME\t use color scheme NAME\
 \n     --control-d-exits\t\t use Control-d to exit from CliFM\
-\n     --cwd-in-title\t\t print current directory in terminal \
-\n              window title\
-\n     --disk-usage\t\t show disk usage (free/total) for the\
-\n              filesystem to which the current directory \
-\n              belongs\
+\n     --cwd-in-title\t\t print current directory in terminal window title\
+\n     --disk-usage\t\t show disk usage (free/total)\
 \n     --enable-logs\t\t enable program logs\
-\n     --expand-bookmarks\t\t expand bookmark names into the \
-\n              corresponding bookmark paths. TAB \
-\n              completion for bookmark names is also \
-\n              available\
+\n     --expand-bookmarks\t\t expand bookmark names into corresponding \
+bookmark paths\
 \n     --fzftab\t\t\t enable FZF mode for TAB completion\
 \n     --icons\t\t\t enable icons\
 \n     --icons-use-file-color\t icons color follows file color\
 \n     --int-vars\t\t\t enable internal variables\
-\n     --list-and-quit\t\t list files and quit. It may be used\
-\n              in conjunction with -p\
-\n     --max-dirhist\t\t maximum number of visited directories to \
-\n              remember\
+\n     --list-and-quit\t\t list files and quit. It may be used in conjunction with -p\
+\n     --max-dirhist\t\t maximum number of visited directories to remember\
 \n     --max-files=NUM\t\t list only up to NUM files\
 \n     --max-path=NUM\t\t set the maximun number of characters \
-\n              after which the current directory in the \
-\n              prompt line will be abreviated to the \
-\n              directory base name (if \\z is used in \
-\n              the prompt\
+after which the current directory in the prompt line will be abreviated to the \
+directory base name (if \\z is used in the prompt)\
 \n     --no-dir-jumper\t\t disable the directory jumper function\
-\n     --no-cd-auto\t\t by default, %s changes to directories \
-\n\t\t\t\tby just specifying the corresponding ELN \
-\n              (e.g. '12' instead of 'cd 12'). This \
-\n              option forces the use of 'cd'\
+\n     --no-cd-auto\t\t disable the autocd function\
 \n     --no-classify\t\t do not append file type indicators\
-\n     --no-clear-screen\t\t do not clear the screen when listing \
-\n              directories\
+\n     --no-clear-screen\t\t do not clear the screen when listing directories\
 \n     --no-colors\t\t disable file type colors for files listing \
 \n     --no-columns\t\t disable columned files listing\
 \n     --no-eln\t\t\t do not print ELN's\
-\n     --no-file-cap\t\t do not check files capabilities when\
-\n              listing files\
-\n     --no-file-ext\t\t do not check files extension when\
-\n              listing files\
-\n     --no-files-counter\t\t disable the files counter for \
-\n              directories. This option is especially \
-\n              useful to speed up the listing process; \
-\n              counting files in directories is expensive\
-\n     --no-follow-symlink\t do not follow symbolic links when\
-\n              listing files\
+\n     --no-file-cap\t\t do not check files capabilities when listing files\
+\n     --no-file-ext\t\t do not check files extension when listing files\
+\n     --no-files-counter\t\t disable the files counter for directories\
+\n     --no-follow-symlink\t do not follow symbolic links when listing files\
 \n     --no-highlight\t\t Disable syntax highlighting\
 \n     --no-open-auto\t\t same as no-cd-auto, but for files\
 \n     --no-tips\t\t\t disable startup tips\
-\n     --no-restore-last-path\t save last visited directory to be \
-\n              restored in the next session\
+\n     --no-restore-last-path\t save last visited directory to be restored \
+in the next session\
 \n     --no-suggestions\t\t disable auto-suggestions\
 \n     --no-warning-prompt\t Disable the warning prompt\
 \n     --no-welcome-message\t disable the welcome message\
-\n     --only-dirs\t\t list only directories and symbolic links\
-\n              to directories\
-\n     --open=FILE\t run as a stand-alone resource opener: open\
-\n              FILE and exit\
+\n     --only-dirs\t\t list only directories and symbolic links to directories\
+\n     --open=FILE\t\t run as a stand-alone resource opener: open FILE and exit\
 \n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
-\n              %s built-in opener\
+%s built-in opener\
 \n     --print-sel\t\t keep the list of selected files in sight\
-\n     --rl-vi-mode\t\t set readline to vi editing mode (defaults \
-\n              to emacs editing mode)\
-\n     --share-selbox\t\t make the Selection Box common to \
-\n              different profiles\
-\n     --sort-reverse\t\t sort in reverse order, for example: z-a \
-\n              instead of a-z, which is the default order)\
+\n     --rl-vi-mode\t\t set readline to vi editing mode (defaults to emacs mode)\
+\n     --share-selbox\t\t make the Selection Box common to different profiles\
+\n     --sort-reverse\t\t sort in reverse order, for example: z-a instead \
+of a-z, which is the default order)\
 \n     --trash-as-rm\t\t the 'r' command executes 'trash' instead of \
-				'rm' to prevent accidental deletions\n",
-	    PROGRAM_NAME, PROGRAM_NAME);
+'rm' to prevent accidental deletions\n",
+	    PROGRAM_NAME);
 
 	printf(_("\nBUILT-IN COMMANDS:\n\nThe following is just a brief list of "
 			"available commands and possible parameters.\n\nFor a complete "
