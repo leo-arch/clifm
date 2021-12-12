@@ -1516,6 +1516,10 @@ rl_suggestions(const unsigned char c)
 			while (word[nlen - 1] == ' ')
 				word[--nlen] = '\0';
 
+			/* If ELN&, remove ending '&' to check the ELN */
+			if (word[nlen - 1] == '&')
+				word[--nlen] = '\0';
+
 			flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 
 			if (flag == CHECK_MATCH && suggestion.printed)
