@@ -499,7 +499,7 @@ If the replacement file name already exists, a dash and a number (starting from 
 .B bd \fR[NAME]
 \fIbd\fR is the \fBbackdir\fR function: it takes you back to the parent directory matching NAME.
 .sp
-With no arguments, \fIbd\fR just prints the list of all parent directories relative to the current directory. Otherwise, it checks the absolute current directory against the provided query string (NAME): if only one match is found, it automatically changes to that directory; if multiple matches are found, the list of matches is printed. If NAME is a directory name, \fIbd\fR just changes to that directory, be it a parent of the current directory or not.
+With no arguments, \fIbd\fR prints a menu with all parent directories relative to the current directory, allowing the user to select an entry. Otherwise, it checks the absolute current directory against the provided query string (NAME): if only one match is found, it automatically changes to that directory; if multiple matches are found, the list of matches is presented to the user in a selection menu. If NAME is a directory name, \fIbd\fR just changes to that directory, be it a parent of the current directory or not.
 .sp
 TAB completion and suggestions are available for this function.
 .sp
