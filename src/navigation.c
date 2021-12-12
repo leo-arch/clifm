@@ -40,6 +40,7 @@
 #include "misc.h"
 #include "navigation.h"
 #include "messages.h"
+#include "readline.h"
 
 int
 workspaces(char *str)
@@ -125,6 +126,9 @@ workspaces(char *str)
 char **
 get_bd_matches(const char *str, int *n, int mode)
 {
+	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
+		return (char **)NULL;
+
 	char *cwd = ws[cur_ws].path;
 	char **matches = (char **)NULL;
 
@@ -132,7 +136,6 @@ get_bd_matches(const char *str, int *n, int mode)
 		/* matches will be passed to readline for TAB completion, so
 		 * that we need to reserve the first slot to hold the query
 		 * string */
-		nwords = 0;
 		*n = 1;
 		matches = (char **)xnmalloc(2, sizeof(char *));
 	}
@@ -160,7 +163,12 @@ get_bd_matches(const char *str, int *n, int mode)
 			else /* Last slash is the first and only char: We have root dir */
 				matches[(*n)++] = savestring("/", 1);
 		} else {
-			matches[(*n)++] = savestring(ws[cur_ws].path, strlen(ws[cur_ws].path));
+			if (!*ws[cur_ws].path) {
+				matches[(*n)++] = savestring("/", 1);
+			} else {
+				matches[(*n)++] = savestring(ws[cur_ws].path,
+						strlen(ws[cur_ws].path));
+			}
 		}
 		*q = '/';
 		cwd = q + 1;
@@ -194,12 +202,54 @@ get_bd_matches(const char *str, int *n, int mode)
 	return matches;
 }
 
+static int
+grab_bd_input(int n)
+{
+	char *input = (char *)NULL;
+	putchar('\n');
+	while (!input) {
+		input = rl_no_hist("Choose a directory ('q' to quit): ");
+		if (!input)
+			continue;
+		if (!*input) {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+		if (is_number(input)) {
+			int a = atoi(input);
+			if (a > 0 && a <= n) {
+				free(input);
+				return a - 1;
+			} else {
+				free(input);
+				input = (char *)NULL;
+				continue;
+			}
+		} else if (*input == 'q' && !*(input + 1)) {
+			free(input);
+			return (-1);
+		} else {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+	}
+
+	return (-1); // Never reached
+}
+
 /* Change to parent directory matching STR */
 int
 backdir(const char* str)
 {
 	if (str && *str == '-' && strcmp(str, "--help") == 0) {
 		puts(_(BD_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1]) {
+		printf(_("%s: No parent directory\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -247,23 +297,31 @@ backdir(const char* str)
 		return EXIT_FAILURE;
 	}
 
-	int exit_status = EXIT_SUCCESS;
-	if (n == 1)
+	int exit_status = EXIT_SUCCESS, i = 0;
+	if (n == 1) {
+		/* Just one match: change to it */
 		exit_status = cd_function(matches[0], CD_PRINT_ERROR);
-
-	int i = n, j = 1;
-	while (--i >= 0) {
-		/* If multiple matches, print them */
-		if (n > 1) {
+	} else if (n > 1) {
+		/* If multiple matches, print a menu to choose from */
+		for (; matches[i]; i++) {
 			char *sl = strrchr(matches[i], '/');
-			if (sl && *(sl + 1))
+			int flag = 0;
+			if (sl && *(sl + 1)) {
 				*(sl++) = '\0';
-			printf("%s%d%s %s/%s%s%s\n", el_c, j, df_c, matches[i],
-					BOLD, sl ? sl : "", df_c);
-			j++;
+				flag = 1;
+			}
+			printf("%s%d%s %s%s%s\n", el_c, i + 1, df_c, di_c, sl ? sl : "/", df_c);
+			if (flag)
+				*(--sl) = '/';
 		}
-		free(matches[i]);
+		int choice = grab_bd_input(i);
+		if (choice != -1)
+			exit_status = cd_function(matches[choice], CD_PRINT_ERROR);
 	}
+
+	i = n;
+	while (--i >= 0)
+		free(matches[i]);
 	free(matches);
 
 	return exit_status;

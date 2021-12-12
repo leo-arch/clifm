@@ -1648,7 +1648,9 @@ my_rl_completion(const char *text, int start, int end)
 
 	/* Second word or more */
 	else {
-		if (!_xrename && nwords == 1 && rl_line_buffer[rl_end - 1] != ' ') {
+		if (!_xrename && nwords == 1 && rl_line_buffer[rl_end - 1] != ' '
+		/* No command name contains slashes */
+		&& (*text != '/' || !strchr(text, '/'))) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 			if (matches) {
 				cur_comp_type = TCMP_CMD;
