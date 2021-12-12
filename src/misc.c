@@ -1592,91 +1592,91 @@ help_function(void)
 			PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
 	printf(_("\nUSAGE: %s %s\n\
-\n -a, --no-hidden\t\t do not show hidden files (default)\
-\n -A, --show-hidden\t\t show hidden files\
-\n -b, --bookmarks-file=FILE\t specify an alternative bookmarks file\
-\n -c, --config-file=FILE\t\t specify an alternative configuration file\
-\n -D, --config-dir=DIR\t\t specify an alternative configuration directory\
-\n -e, --no-eln\t\t\t do not print ELN's (entry list number) \
-\n -f, --no-folders-first\t\t do not list folders first\
-\n -F, --folders-first\t\t list folders first (default)\
-\n -g, --pager\t\t\t enable the pager\
-\n -G, --no-pager\t\t\t disable the pager (default)\
-\n -h, --help\t\t\t show this help and exit\
-\n -H, --horizontal-list\t\t list files horizontally\
-\n -i, --no-case-sensitive\t no case-sensitive files listing (default)\
-\n -I, --case-sensitive\t\t case-sensitive files listing\
-\n -k, --keybindings-file=FILE\t specify an alternative keybindings file\
-\n -l, --no-long-view\t\t disable long view mode (default)\
-\n -L, --long-view\t\t enable long view mode\
-\n -m, --dihist-map\t\t enable the directory history map\
-\n -o, --no-autols\t\t do not list files automatically\
-\n -O, --autols\t\t\t lists files automatically (default)\
-\n -p, --path=PATH\t\t Use PATH as %s starting path (deprecated: use positional \
+\n -a, --no-hidden\t\t Do not show hidden files (default)\
+\n -A, --show-hidden\t\t Show hidden files\
+\n -b, --bookmarks-file=FILE\t Specify an alternative bookmarks file\
+\n -c, --config-file=FILE\t\t Specify an alternative configuration file\
+\n -D, --config-dir=DIR\t\t Specify an alternative configuration directory\
+\n -e, --no-eln\t\t\t Do not print ELN's (entry list number) \
+\n -f, --no-folders-first\t\t Do not list folders first\
+\n -F, --folders-first\t\t List folders first (default)\
+\n -g, --pager\t\t\t Enable the pager\
+\n -G, --no-pager\t\t\t Disable the pager (default)\
+\n -h, --help\t\t\t Show this help and exit\
+\n -H, --horizontal-list\t\t List files horizontally\
+\n -i, --no-case-sensitive\t No case-sensitive files listing (default)\
+\n -I, --case-sensitive\t\t Case-sensitive files listing\
+\n -k, --keybindings-file=FILE\t Specify an alternative keybindings file\
+\n -l, --no-long-view\t\t Disable long view mode (default)\
+\n -L, --long-view\t\t Enable long view mode\
+\n -m, --dihist-map\t\t Enable the directory history map\
+\n -o, --no-autols\t\t Do not list files automatically\
+\n -O, --autols\t\t\t List files automatically (default)\
+\n -p, --path=PATH\t\t Use PATH as %s's starting path (deprecated: use positional \
 parameters instead)\
-\n -P, --profile=PROFILE\t\t use (or create) PROFILE as profile\
-\n -s, --splash \t\t\t enable the splash screen\
-\n -S, --stealth-mode \t\t leave no trace on the host system (see the manpage)\
-\n -u, --no-unicode \t\t disable unicode\
-\n -U, --unicode \t\t\t enable Unicode support (default)\
-\n -v, --version\t\t\t show version details and exit\
-\n -w, --workspace=NUM\t\t start in workspace NUM\
-\n -x, --no-ext-cmds\t\t disallow the use of external commands\
-\n -y, --light-mode\t\t enable the light mode\
-\n -z, --sort=METHOD\t\t sort files by METHOD (see the manpage)"),
+\n -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
+\n -s, --splash \t\t\t Enable the splash screen\
+\n -S, --stealth-mode \t\t Leave no trace on the host system (see the manpage)\
+\n -u, --no-unicode \t\t Disable Unicode\
+\n -U, --unicode \t\t\t Enable Unicode support (default)\
+\n -v, --version\t\t\t Show version details and exit\
+\n -w, --workspace=NUM\t\t Start in workspace NUM\
+\n -x, --no-ext-cmds\t\t Disallow the use of external commands\
+\n -y, --light-mode\t\t Enable the light mode\
+\n -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"),
 	    PNL, GRAL_USAGE, PROGRAM_NAME);
 
 	printf("\
-\n     --case-sens-dirjump\t do not ignore case when consulting the jump \
+\n     --case-sens-dirjump\t Do not ignore case when consulting the jump \
 database (via the 'j' command)\
-\n     --case-sens-path-comp\t enable case sensitive path completion\
-\n     --cd-on-quit\t\t enable cd-on-quit functionality. See the manpage\
-\n     --color-scheme=NAME\t use color scheme NAME\
-\n     --control-d-exits\t\t use Control-d to exit from CliFM\
-\n     --cwd-in-title\t\t print current directory in terminal window title\
-\n     --disk-usage\t\t show disk usage (free/total)\
-\n     --enable-logs\t\t enable program logs\
-\n     --expand-bookmarks\t\t expand bookmark names into corresponding \
+\n     --case-sens-path-comp\t Enable case sensitive path completion\
+\n     --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
+\n     --color-scheme=NAME\t Use color scheme NAME\
+\n     --control-d-exits\t\t Use Control-d to exit from CliFM\
+\n     --cwd-in-title\t\t Print current directory in terminal window title\
+\n     --disk-usage\t\t Show disk usage (free/total)\
+\n     --enable-logs\t\t Enable program logs\
+\n     --expand-bookmarks\t\t Expand bookmark names into the corresponding \
 bookmark paths\
-\n     --fzftab\t\t\t enable FZF mode for TAB completion\
-\n     --icons\t\t\t enable icons\
-\n     --icons-use-file-color\t icons color follows file color\
-\n     --int-vars\t\t\t enable internal variables\
-\n     --list-and-quit\t\t list files and quit. It may be used in conjunction with -p\
-\n     --max-dirhist\t\t maximum number of visited directories to remember\
-\n     --max-files=NUM\t\t list only up to NUM files\
-\n     --max-path=NUM\t\t set the maximun number of characters \
+\n     --fzftab\t\t\t Enable FZF mode for TAB completion\
+\n     --icons\t\t\t Enable icons\
+\n     --icons-use-file-color\t Icons color follows file color\
+\n     --int-vars\t\t\t Enable internal variables\
+\n     --list-and-quit\t\t List files and quit. It may be used in conjunction with -p\
+\n     --max-dirhist\t\t Maximum number of visited directories to recall\
+\n     --max-files=NUM\t\t List only up to NUM files\
+\n     --max-path=NUM\t\t Set the maximun number of characters \
 after which the current directory in the prompt line will be abreviated to the \
 directory base name (if \\z is used in the prompt)\
-\n     --no-dir-jumper\t\t disable the directory jumper function\
-\n     --no-cd-auto\t\t disable the autocd function\
-\n     --no-classify\t\t do not append file type indicators\
-\n     --no-clear-screen\t\t do not clear the screen when listing directories\
-\n     --no-colors\t\t disable file type colors for files listing \
-\n     --no-columns\t\t disable columned files listing\
-\n     --no-eln\t\t\t do not print ELN's\
-\n     --no-file-cap\t\t do not check files capabilities when listing files\
-\n     --no-file-ext\t\t do not check files extension when listing files\
-\n     --no-files-counter\t\t disable the files counter for directories\
-\n     --no-follow-symlink\t do not follow symbolic links when listing files\
+\n     --no-dir-jumper\t\t Disable the directory jumper function\
+\n     --no-cd-auto\t\t Disable the autocd function\
+\n     --no-classify\t\t Do not append file type indicators\
+\n     --no-clear-screen\t\t Do not clear the screen when listing directories\
+\n     --no-colors\t\t Disable file type colors for files listing \
+\n     --no-columns\t\t Disable columned files listing\
+\n     --no-eln\t\t\t Do not print ELN's\
+\n     --no-file-cap\t\t Do not check files capabilities when listing files\
+\n     --no-file-ext\t\t Do not check files extension when listing files\
+\n     --no-files-counter\t\t Disable the files counter for directories\
+\n     --no-follow-symlink\t Do not follow symbolic links when listing files\
 \n     --no-highlight\t\t Disable syntax highlighting\
-\n     --no-open-auto\t\t same as no-cd-auto, but for files\
-\n     --no-tips\t\t\t disable startup tips\
-\n     --no-restore-last-path\t save last visited directory to be restored \
+\n     --no-open-auto\t\t Same as no-cd-auto, but for files\
+\n     --no-tips\t\t\t Disable startup tips\
+\n     --no-restore-last-path\t Save last visited directory to be restored \
 in the next session\
-\n     --no-suggestions\t\t disable auto-suggestions\
+\n     --no-suggestions\t\t Disable auto-suggestions\
 \n     --no-warning-prompt\t Disable the warning prompt\
-\n     --no-welcome-message\t disable the welcome message\
-\n     --only-dirs\t\t list only directories and symbolic links to directories\
-\n     --open=FILE\t\t run as a stand-alone resource opener: open FILE and exit\
-\n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
-%s built-in opener\
-\n     --print-sel\t\t keep the list of selected files in sight\
-\n     --rl-vi-mode\t\t set readline to vi editing mode (defaults to emacs mode)\
-\n     --share-selbox\t\t make the Selection Box common to different profiles\
-\n     --sort-reverse\t\t sort in reverse order, for example: z-a instead \
-of a-z, which is the default order)\
-\n     --trash-as-rm\t\t the 'r' command executes 'trash' instead of \
+\n     --no-welcome-message\t Disable the welcome message\
+\n     --only-dirs\t\t List only directories and symbolic links to directories\
+\n     --open=FILE\t\t Run as a stand-alone resource opener: open FILE and exit\
+\n     --opener=APPLICATION\t Resource opener to use instead of 'lira',\
+%s's built-in opener\
+\n     --print-sel\t\t Keep the list of selected files in sight\
+\n     --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
+\n     --share-selbox\t\t Make the Selection Box common to different profiles\
+\n     --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z \
+(default order)\
+\n     --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 'rm' to prevent accidental deletions\n",
 	    PROGRAM_NAME);
 
