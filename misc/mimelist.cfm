@@ -44,6 +44,8 @@ X:E:^djvu$=djview;zathura;evince;atril
 X:E:^epub$=mupdf;zathura;ebook-viewer
 X:E:^mobi$=ebook-viewer
 X:E:^(cbr|cbz)$=zathura
+X:E:^cfm$=$EDITOR;$VISUAL;nano;vim;vi;vis;emacs;ed;micro;kakoune;leafpad;mousepad;featherpad;gedit;kate;pluma
+!X:E:^cfm$=$EDITOR;$VISUAL;nano;vim;vi;vis;emacs;ed;micro;kakoune
 
 ##################
 #   MIME types   #
