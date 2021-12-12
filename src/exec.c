@@ -1793,8 +1793,8 @@ exec_cmd(char **comm)
 				return exit_code;
 			} else if (auto_open && (attr.st_mode & S_IFMT) == S_IFREG) {
 				if (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
-					char *cmd[] = {"open", tmp, comm[1] ? comm[1]
-						: NULL, comm[2] ? comm[2] : NULL, NULL};
+					char *cmd[] = {"open", tmp, (args_n >= 1) ? comm[1]
+						: NULL, (args_n >= 2) ? comm[2] : NULL, NULL};
 					args_n++;
 					exit_code = open_function(cmd);
 					args_n--;
