@@ -220,10 +220,15 @@ get_app(const char *mime, const char *ext)
 				if (ret)
 					*ret = '\0';
 
-				if (*app == 'a' && app[1] == 'd' && !app[2])
-					file_path = savestring("ad", 2);
-				else
+				if (*app == 'a' && app[1] == 'd' && !app[2]) {
+					/* No need to check: ad is an internal command */
+					cmd_ok = 1;
+					if (ret)
+						*ret = ' ';
+					break;
+				} else {
 					file_path = get_cmd_path(app);
+				}
 
 				if (ret)
 					*ret = ' ';
@@ -231,10 +236,8 @@ get_app(const char *mime, const char *ext)
 				if (file_path) {
 					/* If the app exists, break the loops and
 					 * return it */
-					if (*app != '/') {
-						free(file_path);
-						file_path = (char *)NULL;
-					}
+					free(file_path);
+					file_path = (char *)NULL;
 					cmd_ok = 1;
 				} else {
 					continue;
@@ -1448,10 +1451,10 @@ mime_open(char **args)
 		}
 	} else {
 		/* No placeholder. Just append file name */
-		t = (char *)xnmalloc(strlen(app) + strlen(file_path) + 2, sizeof(char));
-		sprintf(t, "%s %s", app, file_path);
+		t = (char *)xnmalloc(strlen(app) + strlen(file_path)
+			+ (bg_proc ? 4 : 2), sizeof(char));
+		sprintf(t, "%s %s%s", app, file_path, bg_proc ? " &" : "");
 	}
-
 
 	ret = launch_execle(t);
 	free(t);
