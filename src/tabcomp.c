@@ -419,7 +419,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX, "$(fzf %s "
 			"--height=%zu --margin=0,0,0,%d "
-			"%s "
+			"%s --read0 "
 			"--query=\"%s\" "
 			"< %s > %s)",
 			fzftab_options,
@@ -583,8 +583,8 @@ fzftabcomp(char **matches)
 	int exit_status = EXIT_SUCCESS;
 
 	/* Store possible completions in FZFTABIN to pass them to FZF */
-	size_t i;
-	for (i = 1; matches[i]; i++) {
+	size_t i = 1;
+	for (; matches[i]; i++) {
 		if (!matches[i] || !*matches[i])
 			continue;
 
@@ -592,7 +592,9 @@ fzftabcomp(char **matches)
 		char *color = df_c;
 		char *entry = matches[i];
 
-		if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
+		if (cur_comp_type == TCMP_BACKDIR)
+			color = di_c;
+		else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
 			cl = get_entry_color(matches, i);
 
 			char ext_cl[MAX_COLOR + 5];
@@ -605,14 +607,21 @@ fzftabcomp(char **matches)
 
 			char *p = (char *)NULL;
 			if (cur_comp_type != TCMP_SEL && cur_comp_type != TCMP_DESEL
-			&& cur_comp_type != TCMP_OPENWITH)
+			&& cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_BACKDIR)
 				p = strrchr(matches[i], '/');
 			color = *ext_cl ? ext_cl : (cl ? cl : "");
 			entry = (p && *(++p)) ? p : matches[i];
 		}
 
-		if (*entry && !SELFORPARENT(entry))
-			fprintf(fp, "%s%s%s\n", color, entry, df_c);
+		if (*entry && !SELFORPARENT(entry)) {
+			if (wc_xstrlen(entry) == 0) {
+				char *wname = truncate_wname(entry);
+				fprintf(fp, "%s%c", wname ? wname : entry, '\0');
+				free(wname);
+			} else {
+				fprintf(fp, "%s%s%s%c", color, entry, df_c, '\0');
+			}
+		}
 	}
 
 	fclose(fp);
