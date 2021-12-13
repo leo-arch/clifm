@@ -824,10 +824,11 @@ extern int wrong_cmd;
 extern int wrong_cmd_line;
 
 extern int
-	argc_bk,  /* A copy of argc taken from main() */
+	argc_bk, /* A copy of argc taken from main() */
 	dirhist_cur_index,
 	dirhist_total_index,
 	dir_out, /* Autocommands: A .cfm.out file was found in CWD*/
+	env_fzf_max_height,
 	exit_code,
 	jump_total_rank,
 	max_dirhist,

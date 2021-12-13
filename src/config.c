@@ -34,6 +34,7 @@
 #include <unistd.h>
 
 #include "aux.h"
+#include "checks.h"
 #include "colors.h"
 #include "config.h"
 #include "exec.h"
@@ -2206,6 +2207,18 @@ read_config(void)
 	return;
 }
 
+/* Get the FZF max window size from environemnt. The value returned
+ * by this function will be used by set_fzf_max_win_height(), in
+ * tabcomp.h, called every time FZF is invoked for TAB completion */
+static inline int
+getenv_fzf_win_height(void)
+{
+	char *ptr = getenv("CLIFM_FZF_HEIGHT");
+	if (ptr && is_number(ptr) == 1)
+		return atoi(ptr);
+	return (-1);
+}
+
 /* Set up CliFM directories and config files. Load the user's
  * configuration from clifmrc */
 void
@@ -2232,6 +2245,9 @@ init_config(void)
 		read_config();
 
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+
+	if (fzftab)
+		env_fzf_max_height = getenv_fzf_win_height();
 
 	if ((flags & GUI) && getenv("XTERM_VERSION")) {
 		/* If running Xterm, instruct it to send an escape code (27)

@@ -145,7 +145,7 @@ print_filename(char *to_print, char *full_pathname)
 			return 1;
 		}
       /* If to_print != full_pathname, to_print is the basename of the
-	 path passed.  In this case, we try to expand the directory
+	 path passed. In this case, we try to expand the directory
 	 name before checking for the stat character. */
 		int extension_char = 0;
 		if (to_print != full_pathname) {
@@ -183,9 +183,9 @@ print_filename(char *to_print, char *full_pathname)
 }
 
 /* Return the portion of PATHNAME that should be output when listing
-   possible completions.  If we are hacking filename completion, we
+   possible completions. If we are hacking filename completion, we
    are only interested in the basename, the portion following the
-   final slash.  Otherwise, we return what we were passed. */
+   final slash. Otherwise, we return what we were passed. */
 static char *
 printable_part(char *pathname)
 {
@@ -568,6 +568,24 @@ PRINT:
 	return EXIT_SUCCESS;
 } */
 
+/* Set FZF window's max height. No more than MAX HEIGHT entries will
+ * be listed at once. */
+static inline size_t
+set_fzf_max_win_height(void)
+{
+	int s = 0;
+	/* ENV_FZF_MAX_HEIGHT is taken from the environment variable
+	 * CLIFM_FZF_HEIGHT at startup (init_config, in config.c)
+	 * to avoid doing this every time FZF is invoked */
+	if (env_fzf_max_height >= 1 && env_fzf_max_height <= 100)
+		s = env_fzf_max_height * term_rows / 100;
+
+	if (s <= 0)
+		s = DEF_FZF_WIN_HEIHGT * term_rows / 100;
+
+	return (size_t)s;
+}
+
 /* Display possible completions using FZF. If one of these possible
  * completions is selected, insert it into the current line buffer */
 static int
@@ -631,10 +649,12 @@ fzftabcomp(char **matches)
 	char *lw = get_last_word(matches[0]);
 
 	/* Calculate the height of the FZF window based on the amount
-	 * of entries */
+	 * of entries. This specifies how many entries will be displayed
+	 * at once */
 	size_t height = 0;
-	if ((int)i + 1 > term_rows - 2)
-		height = term_rows - 2;
+	size_t max_height = set_fzf_max_win_height();
+	if (i + 1 > max_height)
+		height = max_height;
 	else
 		height = i;
 

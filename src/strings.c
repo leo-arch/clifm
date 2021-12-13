@@ -226,14 +226,16 @@ truncate_wname(const char *name)
 	int i = 0;
 	char *n = (char *)xnmalloc(NAME_MAX, sizeof(char));
 	char *p = n;
+
 	for (; name[i]; i++) {
-		if (i >= NAME_MAX)
+		if (i == NAME_MAX)
 			break;
 		if (name[i] >= 0 && name[i] <= 31)
 			*(n++) = '^';
 		else
 			*(n++) = name[i];
 	}
+
 	*n = '\0';
 	return p;
 }

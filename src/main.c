@@ -205,6 +205,7 @@ int
 	argc_bk = 0,
 	dirhist_cur_index = 0,
 	dir_out = 0,
+	env_fzf_max_height = UNSET,
 	exit_code = 0,
 	dirhist_total_index = 0,
 	jump_total_rank = 0,

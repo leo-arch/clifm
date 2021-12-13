@@ -187,6 +187,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_FILES_COUNTER 1
 #define DEF_FOLLOW_SYMLINKS 1
 #define DEF_FZFTAB 0
+#define DEF_FZF_WIN_HEIHGT 80 /* Max win percentage taken by FZF */
 #define DEF_HIGHLIGHT 1
 #define DEF_ICONS 0
 #define DEF_INT_VARS 0
