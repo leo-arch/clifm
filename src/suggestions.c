@@ -1304,16 +1304,22 @@ rl_suggestions(const unsigned char c)
 					clear_suggestion(CS_FREEBUF);
 				goto FAIL;
 			}
-			char *p = strstr(ws[cur_ws].path, lb + 3);
+			/* Remove the last component of the current path name:
+			 * we want to match only PARENT directories */
+			char bk_cwd[PATH_MAX];
+			strcpy(bk_cwd, ws[cur_ws].path);
+			char *q = strrchr(bk_cwd, '/');
+			if (q)
+				*q = '\0';
+			/* Find the query string in the list of parent dirs */
+			char *p = strstr(bk_cwd, lb + 3);
 			if (p) {
 				char *pp = strchr(p, '/');
 				if (pp)
 					*pp = '\0';
 				suggestion.type = BACKDIR_SUG;
-				print_suggestion(ws[cur_ws].path, 1, sf_c);
+				print_suggestion(bk_cwd, 1, sf_c);
 				printed = 1;
-				if (pp)
-					*pp = '/';
 				goto SUCCESS;
 			}
 		}

@@ -249,7 +249,7 @@ backdir(const char* str)
 	}
 
 	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1]) {
-		printf(_("%s: No parent directory\n"), PROGRAM_NAME);
+		printf(_("%s: /: No parent directory\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -293,7 +293,7 @@ backdir(const char* str)
 	free(deq_str);
 
 	if (n == 0) {
-		fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: %s: No matches found\n"), PROGRAM_NAME, str);
 		return EXIT_FAILURE;
 	}
 
