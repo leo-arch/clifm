@@ -1304,14 +1304,14 @@ rl_suggestions(const unsigned char c)
 					clear_suggestion(CS_FREEBUF);
 				goto FAIL;
 			}
-			/* Remove the last component of the current path name:
+			/* Remove the last component of the current path name (CWD):
 			 * we want to match only PARENT directories */
 			char bk_cwd[PATH_MAX];
 			strcpy(bk_cwd, ws[cur_ws].path);
 			char *q = strrchr(bk_cwd, '/');
 			if (q)
 				*q = '\0';
-			/* Find the query string in the list of parent dirs */
+			/* Find the query string in the list of parent directories */
 			char *p = strstr(bk_cwd, lb + 3);
 			if (p) {
 				char *pp = strchr(p, '/');
