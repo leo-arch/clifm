@@ -1306,8 +1306,8 @@ rl_suggestions(const unsigned char c)
 			}
 			/* Remove the last component of the current path name (CWD):
 			 * we want to match only PARENT directories */
-			char bk_cwd[PATH_MAX];
-			strcpy(bk_cwd, ws[cur_ws].path);
+			char bk_cwd[PATH_MAX + 1];
+			xstrsncpy(bk_cwd, ws[cur_ws].path, PATH_MAX);
 			char *q = strrchr(bk_cwd, '/');
 			if (q)
 				*q = '\0';

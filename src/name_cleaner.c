@@ -620,7 +620,7 @@ CONFIRM:
 			struct stat a;
 			while (lstat(r, &a) == 0) {
 				char tmp[PATH_MAX];
-				strncpy(tmp, r, PATH_MAX - 1);
+				xstrsncpy(tmp, r, PATH_MAX - 1);
 				r = (char *)xrealloc(r,	PATH_MAX * sizeof(char));
 				sprintf(r, "%s-%zu", tmp, rep_suffix);
 				rep_suffix++;

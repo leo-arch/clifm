@@ -440,7 +440,7 @@ run_shell_cmd(char **comm)
 	char *cmd = (char *)NULL;
 	size_t len = strlen(first) + 2;
 	cmd = (char *)xnmalloc(len + (bg_proc ? 2 : 0), sizeof(char));
-	strncpy(cmd, first, len);
+	xstrsncpy(cmd, first, len);
 
 	size_t i;
 	for (i = 1; comm[i]; i++) {

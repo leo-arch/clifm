@@ -265,7 +265,7 @@ get_entry_color(char **matches, const size_t i)
 			char *exp_path = tilde_expand(matches[i]);
 			if (exp_path) {
 				char tmp_path[PATH_MAX + 1];
-				strncpy(tmp_path, exp_path, PATH_MAX);
+				xstrsncpy(tmp_path, exp_path, PATH_MAX);
 				free(exp_path);
 				if (lstat(tmp_path, &attr) != -1)
 					cl = fzftab_color(tmp_path, attr);
