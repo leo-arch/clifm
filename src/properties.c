@@ -49,6 +49,7 @@ get_properties(char *filename, const int dsize)
 	if (!filename || !*filename)
 		return EXIT_FAILURE;
 
+	/* Remove ending slash and leading dot-slash (./) */
 	size_t len = strlen(filename);
 	if (filename[len - 1] == '/')
 		filename[len - 1] = '\0';
@@ -67,7 +68,7 @@ get_properties(char *filename, const int dsize)
 	/* Get file size */
 	char *size_type = get_size_unit(attr.st_size);
 
-	/* Get file type (and color): */
+	/* Get file type (and color) */
 	char file_type = 0;
 	char *linkname = (char *)NULL,
 		 *color = (char *)NULL;
@@ -364,9 +365,7 @@ get_properties(char *filename, const int dsize)
 		printf(_("Size: \t\t%s\n"), size_type ? size_type : "?");
 	}
 
-	if (size_type)
-		free(size_type);
-
+	free(size_type);
 	return EXIT_SUCCESS;
 }
 
