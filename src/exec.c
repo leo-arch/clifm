@@ -402,7 +402,7 @@ run_shell_cmd(char **comm)
 		return EXIT_FAILURE;
 	}
 
-	/* Little export implementation */
+	/* Little export implementation. What it lacks? Command substitution */
 	if (*comm[0] == 'e' && strcmp(comm[0], "export") == 0 && comm[1]) {
 		char *p = strchr(comm[1], '=');
 		if (p && *(p + 1)) {
@@ -419,16 +419,9 @@ run_shell_cmd(char **comm)
 		}
 	}
 
-	/*
-	 * By making precede the command by a colon or a semicolon, the
+	/* By making precede the command by a colon or a semicolon, the
 	 * user can BYPASS CliFM parsing, expansions, and checks to be
-	 * executed DIRECTLY by the system shell (execle). For example:
-	 * if the amount of files listed on the screen (ELN's) is larger
-	 * or equal than 644 and the user tries to issue this command:
-	 * "chmod 644 filename", CLIFM will take 644 to be an ELN, and
-	 * will thereby try to expand it into the corresponding file name,
-	 * which is not what the user wants. To prevent this, simply run
-	 * the command as follows: ";chmod 644 filename" */
+	 * executed DIRECTLY by the system shell (execle) */
 	char *first = comm[0]; 
 	if (*comm[0] == ':' || *comm[0] == ';')
 		first++;
@@ -502,7 +495,7 @@ run_shell_cmd(char **comm)
 static int
 set_max_files(char **args)
 {
-	if (!args[1]) {
+	if (!args[1]) { /* Inform about the current value */
 		if (max_files == -1)
 			puts(_("Max files: unset"));
 		else

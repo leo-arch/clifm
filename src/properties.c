@@ -53,6 +53,9 @@ get_properties(char *filename, const int dsize)
 	if (filename[len - 1] == '/')
 		filename[len - 1] = '\0';
 
+	if (*filename == '.' && *(filename + 1) == '/' && *(filename + 2))
+		filename += 2;
+
 	/* Check file existence */
 	struct stat attr;
 	if (lstat(filename, &attr) == -1) {
