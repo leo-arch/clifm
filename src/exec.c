@@ -438,24 +438,36 @@ run_shell_cmd(char **comm)
 	/* Store the command and each argument into a single array to be
 	 * executed by execle() using the system shell (/bin/sh -c) */
 	char *cmd = (char *)NULL;
-	size_t len = strlen(first) + 2;
+	size_t len = strlen(first) + 3;
 	cmd = (char *)xnmalloc(len + (bg_proc ? 2 : 0), sizeof(char));
-	xstrsncpy(cmd, first, len);
+	strcpy(cmd, first);
+	cmd[len - 3] = ' ';
+	cmd[len - 2] = '\0';
 
 	size_t i;
 	for (i = 1; comm[i]; i++) {
-		cmd[len - 2] = ' ';
-		cmd[len - 1] = '\0';
+		/* Dest string (cmd) is NULL terminated, just as the source
+		 * string (comm[i]) */
+		if (i > 1) {
+			cmd[len - 3] = ' ';
+			cmd[len - 2] = '\0';
+		}
 		len += strlen(comm[i]) + 1;
-		cmd = (char *)xrealloc(cmd, (len + 2 + (bg_proc ? 2 : 0))
+		/* LEN holds the previous size of the buffer, plus space, the
+		 * ampersand character, and the new src string. The buffer is
+		 * thus big enough */
+		cmd = (char *)xrealloc(cmd, (len + 3 + (bg_proc ? 2 : 0))
 				* sizeof(char));
-		strncat(cmd, comm[i], len);
+		strcat(cmd, comm[i]);
 	}
 
 	/* Append final ampersand if backgrounded */
 	if (bg_proc) {
+		cmd[len - 3] = ' ';
 		cmd[len - 2] = '&';
 		cmd[len - 1] = '\0';
+	} else {
+		cmd[len - 3] = '\0';
 	}
 
 	int exit_status = launch_execle(cmd);
