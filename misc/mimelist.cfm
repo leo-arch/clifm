@@ -62,8 +62,8 @@ X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;lua
 
 # Text
 #X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;leafpad;mousepad;featherpad;kate;gedit;pluma
-!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;dte;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit
+!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;dte
 
 # Office documents
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
