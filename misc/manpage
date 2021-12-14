@@ -343,7 +343,7 @@ disable the files counter for directories. This option is especially useful to s
 do not follow symbolic links when listing files
 .TP
 .B \-\-no\-highlight
-disable syntax highlighting. To customize highlighting colors see the \fBCOLORS\fR section below
+disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below
 .TP
 .B \-\-no\-open\-auto
 same as no-cd-auto, but for files instead of directories
@@ -1119,6 +1119,10 @@ Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as we
 File types and file extension colors, just as interface colors, are specified by the current color scheme and can be modified as you wish (see the \fIcs\fR command above).
 .TP
 To see a colored list of the currently used file color codes run \fIcc\fR or \fIcolors\fR in CliFM.
+.TP
+To run colorless use the \fI--no-color\fR command line option or set \fBNO_COLOR\fR environment variable to any value. For more information about the no-color initiative see \fIhttps://no-color.org/\fR
+.TP
+For a full no-color experience recall to edit your prompt removing all color codes.
 
 .SH 10. THE PROMPT
 .TP
@@ -1233,7 +1237,7 @@ Though not strictly part of the prompt, the line dividing the current list of fi
 .TP
 \fIDividingLineChar\fR accepts one or more ASCII or Unicode characters (in both cases you only need to type/paste here the chosen character(s)). If only one character is specified (by default, '-'), it will be repeatedly printed to fulfill the current line up to the edge of the screen or terminal window. If you don't want to cover the whole line, just specify three or more characters, in which case only these characters (and no more) will be used as dividing line. For example: ------->. To use an empty line, set \fIDividingLineChar\fR to '0' (that is, as a character, not as a number). Finally, is this value is not set, a special line drawn with box-drawing characters will be used (box-drawing characters are not supported by all terminal-emulators).
 .TP
-The color of this line is set via the \fIdl\fR color code in the color scheme file. Consult the \fBCOLORS\fR section above for more information.
+The color of this line is set via the \fIdl\fR color code in the color scheme file. Consult the \fBCOLOR CODE\fR section above for more information.
 
 .SH 11. BUILT\-IN EXPANSIONS
 .TP
