@@ -77,7 +77,7 @@ X:.*/pdf$=mupdf;llpp;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;q
 
 # Images
 X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a
-X:^image/.*=fim;feh;display;sxiv;nsxiv;pqiv;gpicview;inkscape;mirage;ristretto;eog;eom;nomacs;geeqie;gwenview;gimp
+X:^image/.*=fim;feh;display;sxiv;nsxiv;pqiv;gpicview;qview;qimgv;inkscape;mirage;ristretto;eog;eom;xviewer;viewnior;nomacs;geeqie;gwenview;gthumb;gimp
 !X:^image/*=fim;img2txt;cacaview;fbi;fbv
 
 # Video and audio
