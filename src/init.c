@@ -2308,13 +2308,6 @@ check_options(void)
 			only_dirs = xargs.only_dirs;
 	}
 
-	if (colorize == UNSET) {
-		if (xargs.colorize == UNSET)
-			colorize = DEF_COLORS;
-		else
-			colorize = xargs.colorize;
-	}
-
 	if (expand_bookmarks == UNSET) {
 		if (xargs.expand_bookmarks == UNSET)
 			expand_bookmarks = DEF_EXPAND_BOOKMARKS;

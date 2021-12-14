@@ -217,7 +217,7 @@ strip_color_line(const char *str, char mode)
 	return buf;
 }
 
-static void
+void
 reset_filetype_colors(void)
 {
 	*nd_c = '\0';
@@ -246,7 +246,7 @@ reset_filetype_colors(void)
 	*uf_c = '\0';
 }
 
-static void
+void
 reset_iface_colors(void)
 {
 	*hb_c = '\0';

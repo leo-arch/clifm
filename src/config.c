@@ -2219,6 +2219,27 @@ getenv_fzf_win_height(void)
 	return (-1);
 }
 
+static void
+check_colors(void)
+{
+	char *p = (getenv("NO_COLOR"));
+	if (p) {
+		colorize = 0;
+	} else if (colorize == UNSET) {
+		if (xargs.colorize == UNSET)
+			colorize = DEF_COLORS;
+		else
+			colorize = xargs.colorize;
+	}
+
+	if (colorize == 1) {
+		set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+	} else {
+		reset_filetype_colors();
+		reset_iface_colors();
+	}
+}
+
 /* Set up CliFM directories and config files. Load the user's
  * configuration from clifmrc */
 void
@@ -2244,7 +2265,7 @@ init_config(void)
 	if (config_ok)
 		read_config();
 
-	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+	check_colors();
 
 	if (fzftab)
 		env_fzf_max_height = getenv_fzf_win_height();
