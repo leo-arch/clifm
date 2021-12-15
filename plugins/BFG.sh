@@ -37,8 +37,9 @@ calculate_position() {
 	$(</dev/tty stty size)
 EOF
 
-	 X=$((TERM_COLS - COLUMNS - 2))
-	 Y=2
+	X=$((TERM_COLS - COLUMNS - 2))
+	fzf_height="${CLIFM_FZF_HEIGHT:-80}"
+	Y=$((TERM_LINES - (fzf_height * TERM_LINES / 100) + 1))
 }
 
 uz_image() {
