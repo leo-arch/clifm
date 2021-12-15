@@ -5,9 +5,10 @@
 # License: GPL3
 
 # Description: Navigate the filesystem (including file previews) with FZF.
-# Previews are shown by just hovering on the file. Each generated preview is
-# cached in $HOME/.cache/clifm/previews to speed up the previewing process. A
-# separate script is used for file previewing: $HOME/.config/clifm/plugins/BFG.sh
+# Previews are shown by just hovering on the file. Each generated preview
+# is cached in $HOME/.cache/clifm/previews to speed up the previewing
+# process. A separate script is used for file previewing:
+# $HOME/.config/clifm/plugins/BFG.sh
 
 # Usage:
 # Left: go to parent directory
@@ -17,7 +18,7 @@
 # Ctrl-s: Confirm selection: send selected files to CliFM Selbox
 # Shift+up/down: Move one line up/down in the preview window
 # Alt+up/down: Move to the beginning/end in the preview window
-# At exit (pressing q) CliFM will change to the last directory visited
+# At exit (pressing C-q) CliFM will change to the last directory visited
 # with FZF or open the last accepted file (Enter).
 # Press Esc to cancel and exit.
 
@@ -96,8 +97,8 @@ fcd() {
 	fi
 	[ -z "$dir_color" ] && dir_color="34"
 
-	# Make sure FZF interface won't be messed up when running on an 8 bit terminal
-	# emulator
+	# Make sure FZF interface won't be messed up when running on an 8 bit
+	# terminal emulator
 	if [ "$COLORS" -eq 256 ]; then
 		BORDERS="--border=left"
 	else
@@ -105,11 +106,18 @@ fcd() {
 	fi
 
 	[ -n "$CLIFM" ] && fzf_prompt="CliFM "
-	[ -n "$NO_COLOR" ] && color_opt="--color=bw"
+
+	if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
+		color_opt="bw"
+	elif [ -n "$COLOR" ] && [ "$COLOR" = "256" ]; then
+		color_opt="dark"
+	else
+		color_opt="16"
+	fi
 
 #--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
 
-	# Keep FZF running until the user presses Esc or q
+	# Keep FZF running until the user presses Esc or C-q
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; $ls_cmd)
 		file="$(printf "%s\n" "$lsd" | fzf --height="${CLIFM_FZF_HEIGHT:-${fzfheight:-100}}%" \
@@ -125,7 +133,7 @@ fcd() {
 			--bind "alt-up:preview-page-up" \
 			--bind "alt-down:preview-page-down" \
 			--bind "esc:execute(rm $TMP)+abort" \
-			--bind "ctrl-q:abort" "$color_opt" \
+			--bind "ctrl-q:abort" --color="$color_opt" \
 			--ansi --prompt="${fzf_prompt}> " --reverse --no-clear \
 			--no-info --keep-right --multi --header="Press 'Alt-h' for help
 $PWD
@@ -149,8 +157,8 @@ $FZF_HEADER" --marker="*" --preview-window=:wrap "$BORDERS" \
 			continue
 		fi
 
-		# If the returned file is a directory, just cd into it. Otherwise, open
-		# it via OPENER
+		# If the returned file is a directory, just cd into it. Otherwise,
+		# open it via OPENER
 		if [ -d "${PWD}/$file" ]; then
 			[ -n "$CLIFM" ] && printf "cd %s" "${PWD}/$file" > "$TMP"
 			cd "$file" || return
@@ -174,8 +182,8 @@ main() {
 	# The variables below are exported to the environment so that the
 	# previewer script, BFG.sh, executed from within FZF, can make use of
 	# them. Here we define which application should be used for different
-	# file types. The implementation for each application is defined in the
-	# BFG file.
+	# file types. The implementation for each application is defined in
+	# the BFG file.
 
 	export TMP_SEL="/tmp/fzfnav.sel"
 	rm -rf -- "$TMP_SEL"
