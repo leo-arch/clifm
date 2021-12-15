@@ -224,6 +224,9 @@ rl_strpbrk(char *s1, char *s2)
 static char *
 fzftab_color(char *filename, const struct stat attr)
 {
+	if (!colorize)
+		return df_c;
+
 	switch(attr.st_mode & S_IFMT) {
 	case S_IFDIR:
 		if (!check_file_access(attr))
@@ -420,12 +423,12 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 	snprintf(cmd, PATH_MAX, "$(fzf %s "
 			"--height=%zu --margin=0,0,0,%d "
 			"%s --read0 "
-			"--query=\"%s\" "
+			"--query=\"%s\" %s "
 			"< %s > %s)",
 			fzftab_options,
 			*height, *offset,
 			case_sens_path_comp ? "+i" : "-i",
-			lw ? lw : "",
+			lw ? lw : "", colorize == 0 ? "--no-color" : "",
 			FZFTABIN, FZFTABOUT);
 	int ret = launch_execle(cmd);
 
