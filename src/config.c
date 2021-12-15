@@ -2238,6 +2238,11 @@ check_colors(void)
 		setenv("CLIFM_NO_COLOR", "1", 1);
 		reset_filetype_colors();
 		reset_iface_colors();
+		strcpy(sh_c, "\x1b[4m");
+		strcpy(sf_c, "\x1b[4m");
+		strcpy(sc_c, "\x1b[4m");
+		strcpy(sx_c, "\x1b[4m");
+		strcpy(sp_c, "\x1b[4m");
 	}
 }
 
