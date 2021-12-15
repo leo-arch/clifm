@@ -72,7 +72,8 @@ decode_prompt(const char *line)
 				temp = (char *)xnmalloc(strlen(xitoa(exit_code)) + 12 + MAX_COLOR,
 						sizeof(char));
 				sprintf(temp, "\001%s\002%d\001%s\002",
-						(exit_code == 0) ? _GREEN : _RED, exit_code, df_c);
+						(exit_code == 0) ? (colorize ? _GREEN : "")
+						: (colorize ? _RED : ""), exit_code, df_c);
 				goto add_string;
 /*				temp = (char *)xnmalloc(3, sizeof(char));
 				temp[0] = ':';
