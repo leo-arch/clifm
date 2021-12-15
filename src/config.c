@@ -2235,6 +2235,7 @@ check_colors(void)
 	if (colorize == 1) {
 		set_colors(usr_cscheme ? usr_cscheme : "default", 1);
 	} else {
+		setenv("CLIFM_NO_COLOR", "1", 1);
 		reset_filetype_colors();
 		reset_iface_colors();
 	}
