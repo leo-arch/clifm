@@ -105,6 +105,7 @@ fcd() {
 	fi
 
 	[ -n "$CLIFM" ] && fzf_prompt="CliFM "
+	[ -n "$NO_COLOR" ] && color_opt="--color=bw"
 
 #--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
 
@@ -124,7 +125,7 @@ fcd() {
 			--bind "alt-up:preview-page-up" \
 			--bind "alt-down:preview-page-down" \
 			--bind "esc:execute(rm $TMP)+abort" \
-			--bind "ctrl-q:abort" \
+			--bind "ctrl-q:abort" "$color_opt" \
 			--ansi --prompt="${fzf_prompt}> " --reverse --no-clear \
 			--no-info --keep-right --multi --header="Press 'Alt-h' for help
 $PWD
