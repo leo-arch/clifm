@@ -86,6 +86,9 @@ mvCmd=0
 
 Prompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 
+# Default prompt, but colorless
+#Prompt="\[\e[0m\][\S]\l \A \u:\H \w\n<\z\[\e[0m\]> \$ "
+
 # If set to 'default', CliFM state information (selected files,
 # trashed files, current workspace, messages, and stealth mode) will be
 # printed to the left of the prompt. Otherwise, if set to 'custom', this
