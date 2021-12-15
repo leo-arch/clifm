@@ -94,7 +94,7 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBj)\fR \fBPlugins\fR: Build your own custom commands using executable files (shell scripts or binaries). Just drop an executable file (all languages are supported) in the plugins directory, tell CliFM to use this executable file via a custom action name, and use it as any other command.
 .sp
-  \fBk)\fR \fBFiles preview\fR: Via the \fIfzfnav\fR plugin (see the \fBPLUGINS\fR section below), CliFM is able to preview several kinds of files, including not only text files, but also GIF's, images, office documents, PDF's, and more. This plugin requires \fIFZF\Fr to be installed. For basic images preview \fIueberzug\fR is required. A list of optional dependencies to preview different kinds of files is available in the \fBPLUGINS\fR section.
+  \fBk)\fR \fBFiles preview\fR: Via the \fIfzfnav\fR plugin (see the \fBPLUGINS\fR section below), CliFM is able to preview several kinds of files, including not only text files, but also GIF's, images, office documents, PDF's, and more. This plugin requires \fIFZF\fR to be installed. For basic images preview \fIueberzug\fR is required. A list of optional dependencies to preview different kinds of files is available in the \fBPLUGINS\fR section.
 .sp
   \fBl)\fR It is blazing \fBfast\fR and incredibly \fBlightweight\fR. With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it can run on really ancient hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or any other remote session. And if this is not enough, you can still try the \fBlight mode\fR to make it even faster.
 .sp
@@ -804,7 +804,8 @@ By default, files are sorted from less to more (ex: from 'a' to 'z' if using the
 with no argument (or by passing the 'ls' option), it prints the list of currently trashed files. The 'clear' parameter removes all files from the trash can, while the 'del' parameter lists trashed files allowing the user to remove one or more of them. If using 'del', TAB completion to list/select currently trashed files is available.
 .sp
 The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the Freedesktop specification, it is able to handle files trashed by different Trash implementations.
-.sp To undelete/untrash trashed files see the \fIundel\fR command below.
+.sp
+To undelete/untrash trashed files see the \fIundel\fR command below.
 .TP
 .B te \fRFILE(s)
 toggle executable bit (on user, group, and others) on FILE(s). It is equivalent to the -x and +x options for the shell \fBchmod\fR(1) command.
@@ -1414,8 +1415,8 @@ The wrong command name check is omitted if the input string:
     It starts with a stream redirection character (ex: <string or >string)
     Is a comment (ex: #string)
     It starts with one or more spaces
-    Is an assignment (ex: foo=var)
-    It is escaped (ex: \string)
+    Is an assignment (ex: foo\=var)
+    It is escaped (ex: \\string)
 
 By default, the string used by the warning prompt is \fB"(!) > "\fR, though it can be customized using the \fIWarningPromptStr\fR in the condifuration file.
 
@@ -1649,6 +1650,9 @@ This variable is set to the current profile of CliFM (if using two or more insta
 .TP
 .B CLIFM_SELFILE
 The path to the current selection file.
+.TP
+.B CLIFM_NO_COLOR
+Set to 1 if running colorless (via the \fBNO_COLOR\fR environment variable or the \fI--no-color\fR command line option).
 .TP
 .B CLIFM_BUS
 This variable contains the path of a pipe by means of which plugins can talk to CliFM. Just write to the pipe and CliFM will hear and handle the message immediately after the plugin's execution. If the message is a path, CliFM will run the open function, changing the current directory to the new path, if a directory, or opening it with the resource opener, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
