@@ -22,10 +22,16 @@ if ! [ "$(which fzf 2>/dev/null)" ]; then
 	exit 1
 fi
 
+if [ -n "$CLIFM_NO_COLOR" ] || [ "$NO_COLOR" ]; then
+	color_opt="bw"
+else
+	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
+fi
+
 while true; do
 	file="$(rg --color=ansi --hidden --heading --line-number \
 		--trim -- "$1" 2>/dev/null | \
-		fzf --ansi --reverse --prompt="CliFM > " --height="${CLIFM_FZF_HEIGHT:-80}%" \
+		fzf --ansi --reverse --prompt="CliFM > " --height="${CLIFM_FZF_HEIGHT:-80}%" --color="$color_opt" \
 		--no-clear --bind "right:accept" --no-info \
 		--header="Select a file name and press Enter or Right to open it")"
 	[ -z "$file" ] && break

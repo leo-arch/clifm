@@ -49,14 +49,20 @@ else
 	BORDERS="--no-unicode"
 fi
 
+if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
+	color_opt="bw"
+else
+	color_opt="prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7"
+fi
+
 fzf --multi --marker='*' --info=inline \
 	--height="${CLIFM_FZF_HEIGHT:-80}%" --keep-right \
-	--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
 	--bind "alt-down:toggle+down" \
 	--bind "alt-up:toggle+up" \
 	--bind "alt-right:select-all,alt-left:deselect-all" \
 	--bind "alt-h:toggle-preview" --preview-window=:wrap \
 	--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
+	--color="$color_opt" \
 	--reverse "$BORDERS" --no-sort --ansi --prompt "CliFM> " > "$TMPFILE" \
 	< "$CLIFM_SELFILE"
 

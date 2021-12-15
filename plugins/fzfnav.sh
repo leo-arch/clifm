@@ -109,19 +109,15 @@ fcd() {
 
 	if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
 		color_opt="bw"
-	elif [ -n "$COLOR" ] && [ "$COLOR" = "256" ]; then
-		color_opt="dark"
 	else
-		color_opt="16"
+		color_opt="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold"
 	fi
-
-#--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
 
 	# Keep FZF running until the user presses Esc or C-q
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; $ls_cmd)
 		file="$(printf "%s\n" "$lsd" | fzf --height="${CLIFM_FZF_HEIGHT:-${fzfheight:-100}}%" \
-			--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
+			--color="$color_opt" \
 			--bind "ctrl-s:execute(touch $TMP_SEL)+accept" \
 			--bind "right:accept,left:first+accept" \
 			--bind "insert:clear-query" \
@@ -133,7 +129,7 @@ fcd() {
 			--bind "alt-up:preview-page-up" \
 			--bind "alt-down:preview-page-down" \
 			--bind "esc:execute(rm $TMP)+abort" \
-			--bind "ctrl-q:abort" --color="$color_opt" \
+			--bind "ctrl-q:abort" \
 			--ansi --prompt="${fzf_prompt}> " --reverse --no-clear \
 			--no-info --keep-right --multi --header="Press 'Alt-h' for help
 $PWD

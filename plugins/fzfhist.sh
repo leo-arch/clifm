@@ -18,10 +18,16 @@ fi
 
 FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/history.cfm"
 
+if [ -n "$CLIFM_NO_COLOR" ] || [ "$NO_COLOR" ]; then
+	color_opt="bw"
+else
+	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
+fi
+
 fzf --prompt="CliFM > " \
 --reverse --height 15 --info=inline \
 --bind "tab:accept" \
---color="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold" \
+--color="$color_opt" \
  < "$FILE" > "$CLIFM_BUS"
 printf "\n"
 

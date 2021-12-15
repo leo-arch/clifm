@@ -36,11 +36,17 @@ case "$OS" in
 esac
 
 if [ "$finder" = "fzf" ]; then
+	COLORS="$(tput colors)"
+	if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
+		color_opt="bw"
+	else
+		color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
+	fi
+
 	# shellcheck disable=SC2012
 	FILE="$($ls_cmd | fzf --ansi --prompt 'CliFM> ' \
---reverse --height "${CLIFM_FZF_HEIGHT:-80}%" \
---bind "tab:accept" --info=inline \
---color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold)"
+	--reverse --height "${CLIFM_FZF_HEIGHT:-80}%" \
+	--bind "tab:accept" --info=inline --color="$color_opt")"
 else
 	# shellcheck disable=SC2012
 	FILE="$(ls -A | rofi -dmenu -p CliFM)"

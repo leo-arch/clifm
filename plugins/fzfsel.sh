@@ -59,6 +59,12 @@ else
 	BORDERS="--no-unicode"
 fi
 
+if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
+	color_opt="bw"
+else
+	color_opt="prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7"
+fi
+
 marksel_mode=0
 cmd="$1"
 
@@ -104,7 +110,7 @@ if [ -n "$cmd" ]; then
 	marksel_mode=1
 	$ls_cmd "$(cat "$CLIFM_SELFILE")" | \
 	fzf --multi --marker='*' --info=inline --keep-right \
-		--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
+		--color="$color_opt" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
 		--bind "alt-right:select-all,alt-left:deselect-all" \
@@ -121,7 +127,7 @@ else
 	# shellcheck disable=SC2012
 	$ls_cmd | fzf --multi --marker='*' --info=inline \
 		--height "${CLIFM_FZF_HEIGHT:-80}%" \
-		--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
+		--color "$color_opt" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
 		--bind "alt-right:select-all,alt-left:deselect-all" \

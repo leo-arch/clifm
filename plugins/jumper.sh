@@ -28,11 +28,17 @@ if ! [ -f "$FILE" ]; then
 	exit 1
 fi
 
+if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
+	color_opt="bw"
+else
+	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
+fi
+
 if [ "$finder" = "fzf" ]; then
 	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" |\
 fzf --reverse --height "${CLIFM_FZF_HEIGHT:-80}%" \
 --bind "tab:accept" --info=inline \
---color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold \
+--color="$color_opt" \
 --prompt="CliFM> ")"
 else
 	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" | rofi -dmenu -p CliFM)"

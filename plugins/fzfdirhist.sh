@@ -18,8 +18,16 @@ fi
 
 FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/dirhist.cfm"
 
-sort -u "$FILE" | fzf --prompt="CliFM > " > "$CLIFM_BUS"
-#cat "$CLIFM_BUS"
+if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
+	color_opt="bw"
+else
+	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
+fi
+
+sort -u "$FILE" | fzf --prompt="CliFM > " \
+--reverse --height "${CLIFM_FZF_HEIGHT:-80}%" \
+--bind "tab:accept" --info=inline \
+--color="$color_opt" > "$CLIFM_BUS"
 printf "\n"
 
 exit 0

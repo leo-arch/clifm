@@ -24,12 +24,18 @@ while [ -z "$mime" ]; do
 	read -r mime
 done
 
-{ [ "$mime" = "q" ] || [ "$mime" = "quit" ] ; } && exit 0
+{ [ "$mime" = "q" ] || [ "$mime" = "quit" ]; } && exit 0
+
+if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
+	color_opt="bw"
+else
+	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
+fi
 
 find . -maxdepth 1 -mindepth 1 | \
 file -F'@' -N -n --mime-type -if- | \
 grep "@\ .*${mime}" | cut -d"@" -f1 | cut -d"/" -f2-10 | sort | \
 fzf --reverse --height=15 --exit-0 \
---info=inline --color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold
+--info=inline --color="$color_opt"
 
 exit 0
