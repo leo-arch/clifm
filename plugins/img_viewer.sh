@@ -2,6 +2,7 @@
 
 # Image thumbnails plugin for CliFM
 # Written by L. Abramovich
+# License: GPL3
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
 	name="$(basename "$0")"

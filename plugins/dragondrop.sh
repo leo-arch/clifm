@@ -2,6 +2,7 @@
 
 # Drag and drop plugin for CliFM
 # Written by L. Abramovich
+# License: GPL3
 
 # Depends on dragon (https://github.com/mwh/dragon). For Archers, it
 # is available on the AUR as 'dragon-drag-and-drop'

@@ -2,6 +2,7 @@
 
 # Music player plugin for CliFM
 # Written by L. Abramovich
+# License: GPL3
 
 SUCCESS=0
 ERROR=1

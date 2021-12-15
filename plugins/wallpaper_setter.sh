@@ -2,6 +2,7 @@
 
 # Wallpaper setter plugin for CliFM
 # Written by L. Abramovich
+# License: GPL3
 
 # Dependencies: file, and feh, xsetbg (xloadimage), or hsetroot
 

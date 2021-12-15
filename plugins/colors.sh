@@ -2,7 +2,7 @@
 
 # Terminal colors test script for CliFM
 # Written by L. Abramovich
-# License GPL2+
+# License GPL3
 
 name="$(basename "$0")"
 

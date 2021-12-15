@@ -2,7 +2,8 @@
 
 # Clipboard plugin for CliFM
 # Written by L. Abramovich
-# Depends on xclip
+# License: GPL3
+# Dependencies: xclip
 
 # Use the 's' parameter to send files to the X primary clipboard, and
 # the 'i' parameter to import files in the clipboard to the Selection

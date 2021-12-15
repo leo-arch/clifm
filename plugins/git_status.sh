@@ -2,6 +2,7 @@
 
 # Git status plugin for CliFM
 # Written by L. Abramovich
+# License: GPL3
 
 # Description: Check if the current directory is inside a git work
 # tree, and, if true, print status, i.e., branch name and non
