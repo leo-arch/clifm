@@ -31,7 +31,8 @@ fi
 while true; do
 	file="$(rg --color=ansi --hidden --heading --line-number \
 		--trim -- "$1" 2>/dev/null | \
-		fzf --ansi --reverse --prompt="CliFM > " --height="${CLIFM_FZF_HEIGHT:-80}%" --color="$color_opt" \
+		fzf --ansi --reverse --prompt="CliFM > " \
+		--height="${CLIFM_FZF_HEIGHT:-80}%" --color="$color_opt" \
 		--no-clear --bind "right:accept" --no-info \
 		--header="Select a file name and press Enter or Right to open it")"
 	[ -z "$file" ] && break
