@@ -332,6 +332,9 @@ backdir(const char* str)
 int
 xchdir(const char *dir, const int set_title)
 {
+	if (!dir || !*dir)
+		return -1;
+
 	DIR *dirp = opendir(dir);
 
 	if (!dirp)
@@ -670,7 +673,8 @@ forth_function(char **comm)
 	dirhist_cur_index++;
 
 	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
-		if (dirhist_cur_index < dirhist_total_index)
+		if (dirhist_cur_index < dirhist_total_index
+		&& old_pwd[dirhist_cur_index + 1])
 			dirhist_cur_index++;
 		else
 			return EXIT_FAILURE;
