@@ -2101,7 +2101,12 @@ read_config(void)
 			char *tmp = get_line_value(line);
 			if (!tmp)
 				continue;
-			fzftab_options = savestring(tmp, strlen(tmp));
+			if (*tmp == 'n' && strcmp(tmp, "none") == 0) {
+				fzftab_options = (char *)xnmalloc(1, sizeof(char));
+				*fzftab_options = '\0';
+			} else {
+				fzftab_options = savestring(tmp, strlen(tmp));
+			}
 		}
 
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {

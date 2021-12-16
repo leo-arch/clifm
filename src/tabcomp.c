@@ -422,7 +422,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX, "$(fzf %s "
 			"--height=%zu --margin=0,0,0,%d "
-			"%s --read0 "
+			"%s --read0 --ansi "
 			"--query=\"%s\" %s "
 			"< %s > %s)",
 			fzftab_options,
