@@ -59,6 +59,7 @@ install: build
 	$(INSTALL) -m 0755 plugins/* $(DESTDIR)$(PROG_DATADIR)/plugins
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/BFG.cfg
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/kbgen.c
+	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/plugins-helper
 	$(INSTALL) -m 0644 misc/colors/*.cfm $(DESTDIR)$(PROG_DATADIR)/colors
 	$(INSTALL) -m 0644 functions/* $(DESTDIR)$(PROG_DATADIR)/functions
 	@printf "Successfully installed $(BIN)\n"
