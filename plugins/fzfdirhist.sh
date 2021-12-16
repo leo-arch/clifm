@@ -6,11 +6,11 @@
 
 get_helper_file()
 {
-	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
 	if ! [ -f "$helper_file" ]; then
-		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		helper_file="/usr/share/clifm/plugins/plugins-helper"
 		if ! [ -f "$helper_file" ]; then
-			printf "CliFM: .plugins-helper: File not found\n" >&2
+			printf "CliFM: plugins-helper: File not found\n" >&2
 			exit 1
 		fi
 	fi
@@ -31,8 +31,10 @@ fi
 FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/dirhist.cfm"
 
 get_helper_file
+# shellcheck source=/dev/null
 . "$helper_file"
 
+# shellcheck disable=SC2154
 sort -u "$FILE" | fzf --prompt="$fzf_prompt" \
 --reverse --height "$fzf_height" \
 --bind "tab:accept" --info=inline \

@@ -32,11 +32,11 @@ fi
 # Find the helper file
 get_helper_file()
 {
-	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
 	if ! [ -f "$helper_file" ]; then
-		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		helper_file="/usr/share/clifm/plugins/plugins-helper"
 		if ! [ -f "$helper_file" ]; then
-			printf "CliFM: .plugins-helper: File not found\n" >&2
+			printf "CliFM: plugins-helper: File not found\n" >&2
 			exit 1
 		fi
 	fi
@@ -111,9 +111,11 @@ fcd() {
 	[ -z "$dir_color" ] && dir_color="34"
 
 	# Keep FZF running until the user presses Esc or C-q
+	# shellcheck disable=SC2154
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; $ls_cmd)
-		file="$(printf "%s\n" "$lsd" | fzf --height="$fzf_height" \
+		file="$(printf "%s\n" "$lsd" | fzf \
+			--height="${fzfheight:-$fzf_height}" \
 			--color="$(get_fzf_colors)" \
 			--bind "ctrl-s:execute(touch $TMP_SEL)+accept" \
 			--bind "right:accept,left:first+accept" \
@@ -677,6 +679,7 @@ main() {
 
 # Source our plugins helper
 get_helper_file
+# shellcheck source=/dev/null
 . "$helper_file"
 
 main "$@"

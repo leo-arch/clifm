@@ -6,11 +6,11 @@
 
 get_helper_file()
 {
-	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
 	if ! [ -f "$helper_file" ]; then
-		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		helper_file="/usr/share/clifm/plugins/plugins-helper"
 		if ! [ -f "$helper_file" ]; then
-			printf "CliFM: .plugins-helper: File not found\n" >&2
+			printf "CliFM: plugins-helper: File not found\n" >&2
 			exit 1
 		fi
 	fi
@@ -45,6 +45,7 @@ TMPDIR="/tmp/clifm/$CLIFM_PROFILE"
 TMPFILE="$TMPDIR/${CLIFM_PROFILE}.fzfsel"
 
 get_helper_file
+# shellcheck source=/dev/null
 . "$helper_file"
 
 ! [ -d "$TMPDIR" ] && mkdir -p "$TMPDIR"
@@ -67,18 +68,6 @@ Enter: Confirm selection, exit, and send selected files to CliFM
 
 Esc: Cancel and exit"
 
-if [ "$(tput colors)" -eq 256 ]; then
-	BORDERS="--border=left"
-else
-	BORDERS="--no-unicode"
-fi
-
-if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
-	color_opt="bw"
-else
-	color_opt="prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7"
-fi
-
 marksel_mode=0
 cmd="$1"
 
@@ -91,7 +80,6 @@ fi
 exit_status=0
 
 if [ -n "$cmd" ]; then
-
 	case "$OS" in
 		Linux) ls_cmd="ls --color=always --indicator=none" ;;
 		*) ls_cmd="ls" ;;
@@ -122,6 +110,7 @@ if [ -n "$cmd" ]; then
 	fi
 
 	marksel_mode=1
+	# shellcheck disable=SC2154
 	$ls_cmd "$(cat "$CLIFM_SELFILE")" | \
 	fzf --multi --marker='*' --info=inline --keep-right \
 		--color="$(get_fzf_colors)" \
@@ -139,6 +128,7 @@ else
 		*) ls_cmd="ls -A"
 	esac
 	# shellcheck disable=SC2012
+	# shellcheck disable=SC2154
 	$ls_cmd | fzf --multi --marker='*' --info=inline \
 		--height "$fzf_height" \
 		--color "$(get_fzf_colors)" \

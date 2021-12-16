@@ -9,24 +9,26 @@
 # Find the helper file
 get_helper_file()
 {
-	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
 	if ! [ -f "$helper_file" ]; then
-		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		helper_file="/usr/share/clifm/plugins/plugins-helper"
 		if ! [ -f "$helper_file" ]; then
-			printf "CliFM: .plugins-helper: File not found\n" >&2
+			printf "CliFM: plugins-helper: File not found\n" >&2
 			exit 1
 		fi
 	fi
 }
 
-if ! type fzf > /dev/null >2&1; then
+if ! type fzf > /dev/null 2>&1; then
 	printf "%s" "CliFM: fzf: Command not found\n" >&2
 	exit 1
 fi
 
 get_helper_file
+# shellcheck source=/dev/null
 . "$helper_file"
 
+# shellcheck disable=SC2154
 DIR="$(find / -type d -print0 2> /dev/null | \
 fzf --read0 --prompt "Change DIR: " \
 --reverse --height 15 \

@@ -10,11 +10,11 @@ ERROR=1
 # Find the helper file
 get_helper_file()
 {
-	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
 	if ! [ -f "$helper_file" ]; then
-		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		helper_file="/usr/share/clifm/plugins/plugins-helper"
 		if ! [ -f "$helper_file" ]; then
-			printf "CliFM: .plugins-helper: File not found\n" >&2
+			printf "CliFM: plugins-helper: File not found\n" >&2
 			exit 1
 		fi
 	fi
@@ -44,6 +44,7 @@ if [ -z "$OS" ]; then
 fi
 
 get_helper_file
+# shellcheck source=/dev/null
 . "$helper_file"
 
 case "$OS" in
@@ -53,6 +54,7 @@ esac
 
 if [ "$finder" = "fzf" ]; then
 	# shellcheck disable=SC2012
+	# shellcheck disable=SC2154
 	FILE="$($ls_cmd | fzf --ansi --prompt "$fzf_prompt" \
 	--reverse --height "$fzf_height" \
 	--bind "tab:accept" --info=inline --color="$(get_fzf_colors)")"

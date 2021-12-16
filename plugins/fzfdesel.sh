@@ -8,11 +8,11 @@
 
 get_helper_file()
 {
-	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
 	if ! [ -f "$helper_file" ]; then
-		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		helper_file="/usr/share/clifm/plugins/plugins-helper"
 		if ! [ -f "$helper_file" ]; then
-			printf "CliFM: .plugins-helper: File not found\n" >&2
+			printf "CliFM: plugins-helper: File not found\n" >&2
 			exit 1
 		fi
 	fi
@@ -30,12 +30,13 @@ if ! [ -f "$CLIFM_SELFILE" ]; then
 	exit 1
 fi
 
-if ! type fzf > /dev/null >2&1; then
+if ! type fzf > /dev/null 2>&1; then
 	printf "CliFM: fzf: Command not found\n" >&2
 	exit 1
 fi
 
 get_helper_file
+# shellcheck source=/dev/null
 . "$helper_file"
 
 HELP="Usage:
@@ -57,7 +58,7 @@ Enter: Confirm and deselect all marked files
 Esc: Cancel and exit"
 
 TMPFILE="$(mktemp /tmp/clifm_desel.XXXXXX)"
-
+# shellcheck disable=SC2154
 fzf --multi --marker='*' --info=inline \
 	--height="$fzf_height" --keep-right \
 	--bind "alt-down:toggle+down" \

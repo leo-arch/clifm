@@ -7,11 +7,11 @@
 
 get_helper_file()
 {
-	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
 	if ! [ -f "$helper_file" ]; then
-		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		helper_file="/usr/share/clifm/plugins/plugins-helper"
 		if ! [ -f "$helper_file" ]; then
-			printf "CliFM: .plugins-helper: File not found\n" >&2
+			printf "CliFM: plugins-helper: File not found\n" >&2
 			exit 1
 		fi
 	fi
@@ -35,13 +35,16 @@ if ! type fzf > /dev/null 2>&1; then
 fi
 
 get_helper_file
+# shellcheck source=/dev/null
 . "$helper_file"
 
+# shellcheck disable=SC2154
 fzf_colors="$(get_fzf_colors)"
 rg_colors="ansi"
 [ "$fzf_colors" = "bw" ] && rg_colors="never"
 
 while true; do
+	# shellcheck disable=SC2154
 	file="$(rg --color="$rg_colors" --hidden --heading --line-number \
 		--trim -- "$1" 2>/dev/null | \
 		fzf --ansi --reverse --prompt="$fzf_prompt" \

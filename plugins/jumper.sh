@@ -6,11 +6,11 @@
 
 get_helper_file()
 {
-	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
 	if ! [ -f "$helper_file" ]; then
-		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		helper_file="/usr/share/clifm/plugins/plugins-helper"
 		if ! [ -f "$helper_file" ]; then
-			printf "CliFM: .plugins-helper: File not found\n" >&2
+			printf "CliFM: plugins-helper: File not found\n" >&2
 			exit 1
 		fi
 	fi
@@ -41,8 +41,10 @@ fi
 
 if [ "$finder" = "fzf" ]; then
 	get_helper_file
+	# shellcheck source=/dev/null
 	. "$helper_file"
 
+	# shellcheck disable=SC2154
 	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" |\
 fzf --reverse --height "$fzf_height" \
 --bind "tab:accept" --info=inline \

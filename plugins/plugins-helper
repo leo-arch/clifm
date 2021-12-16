@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Some common functions for CliFM plugins  
+# Some common functions for CliFM plugins
 # Author: L. Abramovich
 # License: GPL3
 
@@ -34,7 +34,7 @@ get_fzf_colors()
 # terminal emulator
 fzf_borders()
 {
-	if [ "$COLORS" -eq 256 ]; then
+	if [ "$(term_colors)" -eq 256 ]; then
 		echo "--border=left"
 	else
 		echo "--no-unicode"
