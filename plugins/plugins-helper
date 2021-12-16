@@ -26,7 +26,7 @@ get_fzf_colors()
 	if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
 		echo "bw"
 	else
-		echo "fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
+		echo "16,prompt:6,fg+:-1,pointer:2,marker:2,hl:5,hl+:5,gutter:-1"
 	fi
 }
 
