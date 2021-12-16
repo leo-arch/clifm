@@ -4,6 +4,18 @@
 # Written by L. Abramovich
 # License GPL3
 
+get_helper_file()
+{
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	if ! [ -f "$helper_file" ]; then
+		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		if ! [ -f "$helper_file" ]; then
+			printf "CliFM: .plugins-helper: File not found\n" >&2
+			exit 1
+		fi
+	fi
+}
+
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "Navigate and execute CliFM commands history via FZF\n"
@@ -11,23 +23,20 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	exit 0
 fi
 
-if ! [ "$(which fzf 2>/dev/null)" ]; then
+if ! type fzf > /dev/null 2>&1; then
 	printf "CliFM: fzf: Command not found" >&2
 	exit 1
 fi
 
 FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/history.cfm"
 
-if [ -n "$CLIFM_NO_COLOR" ] || [ "$NO_COLOR" ]; then
-	color_opt="bw"
-else
-	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
-fi
+get_helper_file
+. "$helper_file"
 
-fzf --prompt="CliFM > " \
+fzf --prompt="$fzf_prompt" \
 --reverse --height 15 --info=inline \
 --bind "tab:accept" \
---color="$color_opt" \
+--color="$(get_fzf_colors)" \
  < "$FILE" > "$CLIFM_BUS"
 printf "\n"
 

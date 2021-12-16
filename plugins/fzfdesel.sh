@@ -6,6 +6,18 @@
 # Written by L. Abramovich
 # License: GPL3
 
+get_helper_file()
+{
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	if ! [ -f "$helper_file" ]; then
+		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		if ! [ -f "$helper_file" ]; then
+			printf "CliFM: .plugins-helper: File not found\n" >&2
+			exit 1
+		fi
+	fi
+}
+
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "Deselect CliFM selected files using FZF\n"
@@ -18,10 +30,13 @@ if ! [ -f "$CLIFM_SELFILE" ]; then
 	exit 1
 fi
 
-if ! [ "$(which fzf 2>/dev/null)" ]; then
+if ! type fzf > /dev/null >2&1; then
 	printf "CliFM: fzf: Command not found\n" >&2
 	exit 1
 fi
+
+get_helper_file
+. "$helper_file"
 
 HELP="Usage:
 
@@ -43,27 +58,15 @@ Esc: Cancel and exit"
 
 TMPFILE="$(mktemp /tmp/clifm_desel.XXXXXX)"
 
-if [ "$(tput colors)" -eq 256 ]; then
-	BORDERS="--border=left"
-else
-	BORDERS="--no-unicode"
-fi
-
-if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
-	color_opt="bw"
-else
-	color_opt="prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7"
-fi
-
 fzf --multi --marker='*' --info=inline \
-	--height="${CLIFM_FZF_HEIGHT:-80}%" --keep-right \
+	--height="$fzf_height" --keep-right \
 	--bind "alt-down:toggle+down" \
 	--bind "alt-up:toggle+up" \
 	--bind "alt-right:select-all,alt-left:deselect-all" \
 	--bind "alt-h:toggle-preview" --preview-window=:wrap \
 	--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
-	--color="$color_opt" \
-	--reverse "$BORDERS" --no-sort --ansi --prompt "CliFM> " > "$TMPFILE" \
+	--color="$(get_fzf_colors)" \
+	--reverse "$(fzf_borders)" --no-sort --ansi --prompt "$fzf_prompt" > "$TMPFILE" \
 	< "$CLIFM_SELFILE"
 
 # If no file was marked for deselection (that is, if TMPFILE is empty), exit

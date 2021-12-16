@@ -7,6 +7,19 @@
 SUCCESS=0
 ERROR=1
 
+# Find the helper file
+get_helper_file()
+{
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	if ! [ -f "$helper_file" ]; then
+		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		if ! [ -f "$helper_file" ]; then
+			printf "CliFM: .plugins-helper: File not found\n" >&2
+			exit 1
+		fi
+	fi
+}
+
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "Find/open/cd files in the current directory using FZF/Rofi. Once found, press Enter to cd/open the desired file.\n"
@@ -14,9 +27,9 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	exit $SUCCESS
 fi
 
-if [ "$(which fzf)" ]; then
+if type fzf > /dev/null 2>&1; then
 	finder="fzf"
-elif [ "$(which rofi)" ]; then
+elif type rofi > /dev/null 2>&1; then
 	finder="rofi"
 else
 	printf "CliFM: No finder found. Install either FZF or Rofi\n" >&2
@@ -30,23 +43,19 @@ if [ -z "$OS" ]; then
 	exit $ERROR
 fi
 
+get_helper_file
+. "$helper_file"
+
 case "$OS" in
 	Linux) ls_cmd="ls -A --group-directories-first --color=always" ;;
 	*) ls_cmd="ls -A" ;;
 esac
 
 if [ "$finder" = "fzf" ]; then
-	COLORS="$(tput colors)"
-	if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
-		color_opt="bw"
-	else
-		color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
-	fi
-
 	# shellcheck disable=SC2012
-	FILE="$($ls_cmd | fzf --ansi --prompt 'CliFM> ' \
-	--reverse --height "${CLIFM_FZF_HEIGHT:-80}%" \
-	--bind "tab:accept" --info=inline --color="$color_opt")"
+	FILE="$($ls_cmd | fzf --ansi --prompt "$fzf_prompt" \
+	--reverse --height "$fzf_height" \
+	--bind "tab:accept" --info=inline --color="$(get_fzf_colors)")"
 else
 	# shellcheck disable=SC2012
 	FILE="$(ls -A | rofi -dmenu -p CliFM)"

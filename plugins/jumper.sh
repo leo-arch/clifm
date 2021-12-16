@@ -4,6 +4,18 @@
 # Written by L. Abramovich
 # Lincese GPL3
 
+get_helper_file()
+{
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	if ! [ -f "$helper_file" ]; then
+		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		if ! [ -f "$helper_file" ]; then
+			printf "CliFM: .plugins-helper: File not found\n" >&2
+			exit 1
+		fi
+	fi
+}
+
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "Navigate CLiFM jump database via FZF or Rofi. Press Enter to cd into the selected directory\n"
@@ -11,12 +23,11 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	exit 0
 fi
 
-if [ "$(which fzf 2>/dev/null)" ]; then
+if type fzf > /dev/null 2>&1; then
 	finder="fzf"
 
-elif [ "$(which rofi)" ]; then
+elif type rofi > /dev/null 2>&1; then
 	finder="rofi"
-
 else
 	printf "CliFM: No finder found. Install either FZF or Rofi\n" >&2
 	exit 1
@@ -28,18 +39,15 @@ if ! [ -f "$FILE" ]; then
 	exit 1
 fi
 
-if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
-	color_opt="bw"
-else
-	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
-fi
-
 if [ "$finder" = "fzf" ]; then
+	get_helper_file
+	. "$helper_file"
+
 	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" |\
-fzf --reverse --height "${CLIFM_FZF_HEIGHT:-80}%" \
+fzf --reverse --height "$fzf_height" \
 --bind "tab:accept" --info=inline \
---color="$color_opt" \
---prompt="CliFM> ")"
+--color="$(get_fzf_colors)" \
+--prompt="$fzf_prompt")"
 else
 	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" | rofi -dmenu -p CliFM)"
 fi

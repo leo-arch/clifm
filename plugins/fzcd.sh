@@ -6,22 +6,32 @@
 # Author: Docbroke
 # License: GPL3
 
-if ! [ "$(which fzf 2>/dev/null)" ]; then
+# Find the helper file
+get_helper_file()
+{
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	if ! [ -f "$helper_file" ]; then
+		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		if ! [ -f "$helper_file" ]; then
+			printf "CliFM: .plugins-helper: File not found\n" >&2
+			exit 1
+		fi
+	fi
+}
+
+if ! type fzf > /dev/null >2&1; then
 	printf "%s" "CliFM: fzf: Command not found\n" >&2
 	exit 1
 fi
 
-if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
-	color_opt="bw"
-else
-	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
-fi
+get_helper_file
+. "$helper_file"
 
 DIR="$(find / -type d -print0 2> /dev/null | \
 fzf --read0 --prompt "Change DIR: " \
 --reverse --height 15 \
 --bind "tab:accept" --info=inline \
---color="$color_opt")"
+--color="$(get_fzf_colors)")"
 
 if [ -n "$DIR" ]; then
     printf "%s\n" "$DIR" > "$CLIFM_BUS"

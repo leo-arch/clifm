@@ -29,6 +29,19 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	exit 0
 fi
 
+# Find the helper file
+get_helper_file()
+{
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	if ! [ -f "$helper_file" ]; then
+		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		if ! [ -f "$helper_file" ]; then
+			printf "CliFM: .plugins-helper: File not found\n" >&2
+			exit 1
+		fi
+	fi
+}
+
 uz_cleanup() {
     rm "$FIFO_UEBERZUG" 2>/dev/null
     pkill -P $$ >/dev/null
@@ -97,27 +110,11 @@ fcd() {
 	fi
 	[ -z "$dir_color" ] && dir_color="34"
 
-	# Make sure FZF interface won't be messed up when running on an 8 bit
-	# terminal emulator
-	if [ "$COLORS" -eq 256 ]; then
-		BORDERS="--border=left"
-	else
-		BORDERS="--no-unicode"
-	fi
-
-	[ -n "$CLIFM" ] && fzf_prompt="CliFM "
-
-	if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
-		color_opt="bw"
-	else
-		color_opt="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold"
-	fi
-
 	# Keep FZF running until the user presses Esc or C-q
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; $ls_cmd)
-		file="$(printf "%s\n" "$lsd" | fzf --height="${CLIFM_FZF_HEIGHT:-${fzfheight:-100}}%" \
-			--color="$color_opt" \
+		file="$(printf "%s\n" "$lsd" | fzf --height="$fzf_height" \
+			--color="$(get_fzf_colors)" \
 			--bind "ctrl-s:execute(touch $TMP_SEL)+accept" \
 			--bind "right:accept,left:first+accept" \
 			--bind "insert:clear-query" \
@@ -130,10 +127,10 @@ fcd() {
 			--bind "alt-down:preview-page-down" \
 			--bind "esc:execute(rm $TMP)+abort" \
 			--bind "ctrl-q:abort" \
-			--ansi --prompt="${fzf_prompt}> " --reverse --no-clear \
+			--ansi --prompt="${fzf_prompt}" --reverse --no-clear \
 			--no-info --keep-right --multi --header="Press 'Alt-h' for help
 $PWD
-$FZF_HEADER" --marker="*" --preview-window=:wrap "$BORDERS" \
+$FZF_HEADER" --marker="*" --preview-window=:wrap "$(fzf_borders)" \
 			--preview "printf \"\033[2J\"; $BFG_FILE {}")"
 
 		# If FZF returned no file, exit
@@ -177,7 +174,7 @@ main() {
 
 	# The variables below are exported to the environment so that the
 	# previewer script, BFG.sh, executed from within FZF, can make use of
-	# them. Here we define which application should be used for different
+	# them. Here we define cmd_exists application should be used for different
 	# file types. The implementation for each application is defined in
 	# the BFG file.
 
@@ -669,7 +666,7 @@ main() {
 	TMP="$(mktemp /tmp/clifm.XXXXXX)"
 
 				#####################################
-				#	 3. RUN FZF, WHICH CALLS BFG	#
+				#	 3. RUN FZF, which CALLS BFG	#
 				#####################################
 
 	fcd "$@"
@@ -677,6 +674,10 @@ main() {
 	[ -n "$CLIFM" ] && cat "$TMP" 2>/dev/null > "$CLIFM_BUS"
 	rm -f -- "$TMP" 2>/dev/null
 }
+
+# Source our plugins helper
+get_helper_file
+. "$helper_file"
 
 main "$@"
 

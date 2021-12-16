@@ -6,6 +6,18 @@
 
 mime=""
 
+get_helper_file()
+{
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	if ! [ -f "$helper_file" ]; then
+		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		if ! [ -f "$helper_file" ]; then
+			printf "CliFM: .plugins-helper: File not found\n" >&2
+			exit 1
+		fi
+	fi
+}
+
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "List files in CWD by mime type\n"
@@ -13,7 +25,7 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	exit 0
 fi
 
-if [ ! "$(which fzf 2>/dev/null)" ]; then
+if ! type fzf > /dev/null 2>&1; then
 	printf "CliFM: fzf: Command not found\n"
 	exit 1
 fi
@@ -26,16 +38,13 @@ done
 
 { [ "$mime" = "q" ] || [ "$mime" = "quit" ]; } && exit 0
 
-if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
-	color_opt="bw"
-else
-	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
-fi
+get_helper_file
+. "$helper_file"
 
 find . -maxdepth 1 -mindepth 1 | \
 file -F'@' -N -n --mime-type -if- | \
 grep "@\ .*${mime}" | cut -d"@" -f1 | cut -d"/" -f2-10 | sort | \
 fzf --reverse --height=15 --exit-0 \
---info=inline --color="$color_opt"
+--info=inline --color="$(get_fzf_colors)"
 
 exit 0

@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Some common functions for CliFM plugins  
+# Author: L. Abramovich
+# License: GPL3
+
+cmd_exists()
+{
+	if type "$1" > /dev/null 2>&1; then
+		echo "1";
+	else
+		echo "0";
+	fi
+}
+
+# Get the current terminal amount of supported colors: normally 8 or 256
+term_colors()
+{
+	echo "$(tput colors)"
+}
+
+# Return the appropriate value for FZF --color option, honoring no-color
+# directives
+get_fzf_colors()
+{
+	if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
+		echo "bw"
+	else
+		echo "fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
+	fi
+}
+
+# Make sure FZF interface won't be messed up when running on an 8 bit
+# terminal emulator
+fzf_borders()
+{
+	if [ "$COLORS" -eq 256 ]; then
+		echo "--border=left"
+	else
+		echo "--no-unicode"
+	fi
+}
+
+# A few fixed values to construct the FZF interface
+fzf_height="${CLIFM_FZF_HEIGHT:-80}%"
+fzf_prompt="CliFM > "

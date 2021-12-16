@@ -2,8 +2,19 @@
 
 # FZF selection plugin for CliFM
 # Written by L. Abramovich
-
 # License: GPL3
+
+get_helper_file()
+{
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	if ! [ -f "$helper_file" ]; then
+		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		if ! [ -f "$helper_file" ]; then
+			printf "CliFM: .plugins-helper: File not found\n" >&2
+			exit 1
+		fi
+	fi
+}
 
 if [ -n "$1" ]; then
 	if [ "$1" = "--help" ] || [ "$1" = "help" ]; then
@@ -25,13 +36,16 @@ the end of CMD.\n" "$name" "$name"
 	fi
 fi
 
-if ! [ "$(which fzf 2>/dev/null)" ]; then
+if ! type fzf > /dev/null 2>&1; then
 	printf "CLiFM: fzf: Command not found\n" >&2
 	exit 1
 fi
 
 TMPDIR="/tmp/clifm/$CLIFM_PROFILE"
 TMPFILE="$TMPDIR/${CLIFM_PROFILE}.fzfsel"
+
+get_helper_file
+. "$helper_file"
 
 ! [ -d "$TMPDIR" ] && mkdir -p "$TMPDIR"
 
@@ -110,13 +124,13 @@ if [ -n "$cmd" ]; then
 	marksel_mode=1
 	$ls_cmd "$(cat "$CLIFM_SELFILE")" | \
 	fzf --multi --marker='*' --info=inline --keep-right \
-		--color="$color_opt" \
+		--color="$(get_fzf_colors)" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
 		--bind "alt-right:select-all,alt-left:deselect-all" \
 		--bind "alt-h:toggle-preview" --preview-window=:wrap \
 		--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
-		--reverse "$BORDERS" --ansi --prompt "CliFM> " > "$TMPFILE"
+		--reverse "$(fzf_borders)" --ansi --prompt "$fzf_prompt" > "$TMPFILE"
 	exit_status=$?
 
 else
@@ -126,14 +140,14 @@ else
 	esac
 	# shellcheck disable=SC2012
 	$ls_cmd | fzf --multi --marker='*' --info=inline \
-		--height "${CLIFM_FZF_HEIGHT:-80}%" \
-		--color "$color_opt" \
+		--height "$fzf_height" \
+		--color "$(get_fzf_colors)" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
 		--bind "alt-right:select-all,alt-left:deselect-all" \
 		--bind "alt-h:toggle-preview" --preview-window=:wrap \
 		--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
-		--reverse "$BORDERS" --no-sort --ansi --prompt "CliFM> " > "$TMPFILE"
+		--reverse "$(fzf_borders)" --no-sort --ansi --prompt "$fzf_prompt" > "$TMPFILE"
 	exit_status=$?
 fi
 

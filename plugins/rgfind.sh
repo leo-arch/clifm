@@ -5,6 +5,18 @@
 # Written by L. Abramovich
 # License: GPL3
 
+get_helper_file()
+{
+	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/.plugins-helper"
+	if ! [ -f "$helper_file" ]; then
+		helper_file="/usr/share/clifm/plugins/.plugins-helper"
+		if ! [ -f "$helper_file" ]; then
+			printf "CliFM: .plugins-helper: File not found\n" >&2
+			exit 1
+		fi
+	fi
+}
+
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "Search files by content via Ripgrep and FZF\n"
@@ -12,27 +24,28 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	exit 0
 fi
 
-if ! [ "$(which rg 2>/dev/null)" ]; then
+if ! type rg > /dev/null 2>&1; then
 	printf "CliFM: rg: Command not found\nInstall ripgrep to use this plugin\n" >&2
 	exit 1
 fi
 
-if ! [ "$(which fzf 2>/dev/null)" ]; then
+if ! type fzf > /dev/null 2>&1; then
 	printf "CliFM: fzf: Command not found\nInstall fzf to use this plugin\n" >&2
 	exit 1
 fi
 
-if [ -n "$CLIFM_NO_COLOR" ] || [ "$NO_COLOR" ]; then
-	color_opt="bw"
-else
-	color_opt="fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold"
-fi
+get_helper_file
+. "$helper_file"
+
+fzf_colors="$(get_fzf_colors)"
+rg_colors="ansi"
+[ "$fzf_colors" = "bw" ] && rg_colors="never"
 
 while true; do
-	file="$(rg --color=ansi --hidden --heading --line-number \
+	file="$(rg --color="$rg_colors" --hidden --heading --line-number \
 		--trim -- "$1" 2>/dev/null | \
-		fzf --ansi --reverse --prompt="CliFM > " \
-		--height="${CLIFM_FZF_HEIGHT:-80}%" --color="$color_opt" \
+		fzf --ansi --reverse --prompt="$fzf_prompt" \
+		--height="$fzf_height" --color="$fzf_colors" \
 		--no-clear --bind "right:accept" --no-info \
 		--header="Select a file name and press Enter or Right to open it")"
 	[ -z "$file" ] && break
