@@ -339,7 +339,7 @@ extern int watch;
 #endif
 
 #define itoa xitoa /* itoa does not exist in some OS's */
-//#define atoi xatoi
+#define atoi xatoi
 
 #ifndef _NO_GETTEXT
 #define _(String) gettext(String)

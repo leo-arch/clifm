@@ -31,7 +31,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <readline/readline.h>
-
+#include <limits.h>
 #include <fcntl.h>
 
 #ifndef _NO_ARCHIVING
@@ -579,11 +579,18 @@ edit_link(char *link)
 
 	/* If an ELN, replace by the corresponding file name */
 	if (is_number(new_path)) {
-		int i_new_path = atoi(new_path) - 1;
-		if (file_info[i_new_path].name) {
-			new_path = (char *)xrealloc(new_path,
-			    (strlen(file_info[i_new_path].name) + 1) * sizeof(char));
-			strcpy(new_path, file_info[i_new_path].name);
+		int a = atoi(new_path);
+		if (a > 0 && a <= (int)files) {
+			--a;
+			if (file_info[a].name) {
+				new_path = (char *)xrealloc(new_path,
+					(strlen(file_info[a].name) + 1) * sizeof(char));
+				strcpy(new_path, file_info[a].name);
+			}
+		} else {
+			fprintf(stderr, _("%s: %s: Invalid ELN\n"), PROGRAM_NAME, new_path);
+			free(new_path);
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -654,7 +661,7 @@ edit_link(char *link)
 
 	real_path = realpath(link, NULL);
 	printf(_("%s%s%s successfully relinked to "), real_path ? ln_c
-												: or_c, link, df_c);
+			: or_c, link, df_c);
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 	free(new_path);
 	if (real_path)

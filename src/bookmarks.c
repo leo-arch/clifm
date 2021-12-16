@@ -29,6 +29,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "aux.h"
 #include "bookmarks.h"
@@ -313,7 +314,10 @@ bookmark_del(char *name)
 		for (j = 0; del_elements[j]; j++) {
 			if (!is_number(del_elements[j]))
 				continue;
-			if (strcmp(bms[atoi(del_elements[j]) - 1], lineb) == 0)
+			int a = atoi(del_elements[j]);
+			if (a == INT_MIN)
+				continue;
+			if (strcmp(bms[a - 1], lineb) == 0)
 				bm_found = 1;
 		}
 
@@ -678,7 +682,7 @@ open_bookmark(void)
 	if (is_number(arg[0])) {
 		int num = atoi(arg[0]);
 		if (num <= 0 || (size_t)num > bm_n) {
-			fprintf(stderr, _("Bookmarks: %d: No such ELN\n"), num);
+			fprintf(stderr, _("Bookmarks: %s: No such ELN\n"), arg[0]);
 			exit_status = EXIT_FAILURE;
 			goto FREE_AND_EXIT;
 		} else {
@@ -710,8 +714,7 @@ open_bookmark(void)
 	}
 
 	if (!tmp_path) {
-		fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"),
-		    arg[0]);
+		fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), arg[0]);
 		exit_status = EXIT_FAILURE;
 		goto FREE_AND_EXIT;
 	}

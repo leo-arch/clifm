@@ -576,8 +576,7 @@ surf_hist(char **comm)
 				    old_pwd[atoi_comm - 1], strerror(errno));
 			}
 		} else {
-			fprintf(stderr, _("history: %d: No such ELN\n"),
-			    atoi(comm[1] + 1));
+			fprintf(stderr, _("history: %s: No such ELN\n"), comm[1] + 1);
 		}
 	} else {
 		fprintf(stderr, "%s\n", _(DIRHIST_USAGE));
@@ -687,7 +686,8 @@ forth_function(char **comm)
 	    old_pwd[dirhist_cur_index], strerror(errno));
 	/* Invalidate this entry */
 	*old_pwd[dirhist_cur_index] = _ESC;
-	if (dirhist_cur_index < dirhist_total_index)
+	if (dirhist_cur_index < dirhist_total_index
+	&& old_pwd[dirhist_cur_index + 1])
 		dirhist_cur_index++;
 
 	return EXIT_FAILURE;

@@ -38,6 +38,7 @@
 #endif
 #include <unistd.h>
 #include <errno.h>
+#include <limits.h>
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
@@ -1172,6 +1173,8 @@ jump_entries_generator(const char *text, int state)
 		i = 0;
 
 	int num_text = atoi(text);
+	if (num_text == INT_MIN)
+		return (char *)NULL;
 
 	/* Check list of jump entries for a match */
 	while (i <= jump_n && (name = jump_db[i++].path) != NULL)
@@ -1274,6 +1277,8 @@ filenames_gen_eln(const char *text, int state)
 		i = 0;
 
 	int num_text = atoi(text);
+	if (num_text == INT_MIN)
+		return (char *)NULL;
 
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = file_info[i++].name) != NULL) {
@@ -1308,6 +1313,8 @@ filenames_gen_ranges(const char *text, int state)
 	*r = '\0';
 	int a = atoi(text);
 	int b = atoi(r + 1);
+	if (a == INT_MIN || b == INT_MIN)
+		return (char *)NULL;
 	*r = '-';
 	if (a >= b)
 		return (char *)NULL;
@@ -1363,6 +1370,9 @@ sort_num_generator(const char *text, int state)
 		i = 0;
 
 	int num_text = atoi(text);
+	if (num_text == INT_MIN)
+		return (char *)NULL;
+
 	static char *sorts[] = {
 	    "none",
 	    "name",
@@ -1752,6 +1762,8 @@ my_rl_completion(const char *text, int start, int end)
 			}
 			
 			int num_text = atoi(text);
+			if (num_text == INT_MIN)
+				return (char **)NULL;
 
 			/* Dirjump: jo command */
 			if (*rl_line_buffer == 'j' && rl_line_buffer[1] == 'o'

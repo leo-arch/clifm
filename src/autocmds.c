@@ -29,6 +29,7 @@
 #include <string.h>
 #include <glob.h>
 #include <readline/readline.h>
+#include <limits.h>
 
 #include "aux.h"
 #include "colors.h"
@@ -237,24 +238,29 @@ set_autocmd_opt(char *opt)
 				break;
 			}
 		}
-	} else if (*opt == 'f' && opt[1] == 'c')
-		autocmds[autocmds_n].files_counter = atoi(p);
-	else if (*opt == 'h' && opt[1] == 'f')
-		autocmds[autocmds_n].show_hidden = atoi(p);
-	else if (*opt == 'l' && opt[1] == 'm')
-		autocmds[autocmds_n].light_mode = atoi(p);
-	else if (*opt == 'l' && opt[1] == 'v')
-		autocmds[autocmds_n].long_view = atoi(p);
-	else if (*opt == 'm' && opt[1] == 'f')
-		autocmds[autocmds_n].max_files = atoi(p);
-	else if (*opt == 'm' && opt[1] == 'n')
-		autocmds[autocmds_n].max_name_len = atoi(p);
-	else if (*opt == 'p' && opt[1] == 'g')
-		autocmds[autocmds_n].pager = atoi(p);
-	else if (*opt == 's' && opt[1] == 't')
-		autocmds[autocmds_n].sort = atoi(p);
-	else if (*opt == 's' && opt[1] == 'r')
-		autocmds[autocmds_n].sort_reverse = atoi(p);
+	} else {
+		int a = atoi(p);
+		if (a == INT_MIN)
+			a = 0;
+		if (*opt == 'f' && opt[1] == 'c')
+			autocmds[autocmds_n].files_counter = a;
+		else if (*opt == 'h' && opt[1] == 'f')
+			autocmds[autocmds_n].show_hidden = a;
+		else if (*opt == 'l' && opt[1] == 'm')
+			autocmds[autocmds_n].light_mode = a;
+		else if (*opt == 'l' && opt[1] == 'v')
+			autocmds[autocmds_n].long_view = a;
+		else if (*opt == 'm' && opt[1] == 'f')
+			autocmds[autocmds_n].max_files = a;
+		else if (*opt == 'm' && opt[1] == 'n')
+			autocmds[autocmds_n].max_name_len = a;
+		else if (*opt == 'p' && opt[1] == 'g')
+			autocmds[autocmds_n].pager = a;
+		else if (*opt == 's' && opt[1] == 't')
+			autocmds[autocmds_n].sort = a;
+		else if (*opt == 's' && opt[1] == 'r')
+			autocmds[autocmds_n].sort_reverse = a;
+	}
 }
 
 static void

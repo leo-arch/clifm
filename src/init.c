@@ -458,8 +458,10 @@ load_jumpdb(void)
 		if (*line == '@') {
 			if (line[line_len - 1] == '\n')
 				line[line_len - 1] = '\0';
-			if (is_number(line + 1))
-				jump_total_rank = atoi(line + 1);
+			if (is_number(line + 1)) {
+				int a = atoi(line + 1);
+				jump_total_rank = a == INT_MIN ? 0 : a;
+			}
 			continue;
 		}
 		if (*line < '0' || *line > '9')
@@ -478,8 +480,11 @@ load_jumpdb(void)
 
 		int visits = 1;
 
-		if (is_number(line))
+		if (is_number(line)) {
 			visits = atoi(line);
+			if (visits == INT_MIN)
+				visits = 0;
+		}
 
 		char *tmpb = strchr(tmp, ':');
 		if (!tmpb)
@@ -492,8 +497,10 @@ load_jumpdb(void)
 
 		time_t first = 0;
 
-		if (is_number(tmp))
-			first = (time_t)atoi(tmp);
+		if (is_number(tmp)) {
+			int a = atoi(tmp);
+			first = a == INT_MIN ? 0 : (time_t)a;
+		}
 
 		char *tmpc = strchr(tmpb, ':');
 		if (!tmpc)
@@ -511,8 +518,10 @@ load_jumpdb(void)
 		jump_db[jump_n].visits = (size_t)visits;
 		jump_db[jump_n].first_visit = first;
 
-		if (is_number(tmpb))
-			jump_db[jump_n].last_visit = (time_t)atoi(tmpb);
+		if (is_number(tmpb)) {
+			int a = atoi(tmpb);
+			jump_db[jump_n].last_visit = a == INT_MIN ? 0 : (time_t)a;
+		}
 		else
 			jump_db[jump_n].last_visit = 0; /* UNIX Epoch */
 
@@ -1271,7 +1280,6 @@ external_arguments(int argc, char **argv)
 			if (!is_number(optarg))
 				break;
 			int iopt = atoi(optarg);
-
 			if (iopt >= 0 && iopt <= MAX_WS)
 				cur_ws = iopt - 1;
 		} break;

@@ -462,7 +462,7 @@ run_history_cmd(const char *cmd)
 		int num = atoi(cmd);
 
 		if (num <= 0 || num > (int)current_hist_n) {
-			fprintf(stderr, _("%s: !%d: event not found\n"), PROGRAM_NAME, num);
+			fprintf(stderr, _("%s: !%s: event not found\n"), PROGRAM_NAME, cmd);
 			return EXIT_FAILURE;
 		}
 
@@ -504,7 +504,7 @@ run_history_cmd(const char *cmd)
 		/* If not number or zero or bigger than max... */
 		int acmd = atoi(cmd + 1);
 
-		if (!is_number(cmd + 1) || acmd == 0 || acmd > (int)current_hist_n - 1) {
+		if (!is_number(cmd + 1) || acmd <= 0 || acmd > (int)current_hist_n - 1) {
 			fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
 			return EXIT_FAILURE;
 		}

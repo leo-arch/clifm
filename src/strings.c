@@ -36,6 +36,7 @@
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
 #include <wordexp.h>
 #endif
+#include <limits.h>
 
 #include "aux.h"
 #include "checks.h"
@@ -1933,6 +1934,8 @@ expand_range(char *str, int listdir)
 		return (int *)NULL;
 
 	int asecond = atoi(p);
+	if (afirst == INT_MIN || asecond == INT_MIN)
+		return (int *)NULL;
 
 	if (listdir) {
 		if (afirst <= 0 || afirst > (int)files || asecond <= 0
@@ -2098,6 +2101,8 @@ get_substr(char *str, const char ifs)
 				/* Make sure we have a valid range */
 				if (is_number(first) && is_number(second)) {
 					afirst = atoi(first), asecond = atoi(second);
+					if (afirst == INT_MIN || asecond == INT_MIN)
+						break;
 					if (asecond <= afirst) {
 						free(first);
 						free(second);

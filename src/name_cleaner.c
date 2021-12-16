@@ -224,7 +224,7 @@ clean_file_name(const char *restrict name)
 			continue;
 		}
 
-		if (n >= 0 && n <= 126) {
+		if (n <= 126) {
 			int ret = translate_unsafe_char(n);
 			if (ret == -1)
 				continue;

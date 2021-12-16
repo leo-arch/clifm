@@ -607,14 +607,19 @@ xitoa(int n)
 	return &buf[++i];
 }
 
+/* A secure atoi implementation to prevent integer under- and overflow.
+ * Returns the corresponding integer, if valid, or INT_MIN if invalid,
+ * setting errno to ERANGE */
 int
 xatoi(const char *s)
 {
 	long ret = strtol(s, NULL, 10);
-	if (ret == LONG_MAX || ret == LONG_MIN) {
-		fprintf(stderr, "%s: strtol: %s: %s\n", PROGRAM_NAME, s, strerror(errno));
-		exit(EXIT_FAILURE);
+
+	if (ret < INT_MIN || ret > INT_MAX) {
+		errno = ERANGE;
+		return INT_MIN;
 	}
+
 	return (int)ret;
 }
 
@@ -777,6 +782,8 @@ read_octal(char *str)
 		return (-1);
 
 	int n = atoi(str);
+	if (n == INT_MIN)
+		return (-1);
 	int num = n;
 	int dec_value = 0;
 

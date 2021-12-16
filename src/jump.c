@@ -418,11 +418,10 @@ dirjump(char **args, int mode)
 				return EXIT_FAILURE;
 		} else {
 			int int_order = atoi(args[1]);
-
 			if (int_order <= 0 || int_order > (int)jump_n) {
 				if (mode == NO_SUG_JUMP) {
-					fprintf(stderr, _("%s: %d: No such order number\n"),
-						PROGRAM_NAME, int_order);
+					fprintf(stderr, _("%s: %s: No such order number\n"),
+						PROGRAM_NAME, args[1]);
 				}
 				return EXIT_FAILURE;
 			}

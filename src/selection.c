@@ -40,6 +40,7 @@
 #endif
 #include <sys/ioctl.h>
 #endif
+#include <limits.h>
 
 #include "aux.h"
 #include "checks.h"
@@ -782,6 +783,10 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 		desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
 		while (--i >= 0) {
 			int desel_int = atoi(desel_elements[i]);
+			if (desel_int == INT_MIN) {
+				desel_path[i] = (char *)NULL;
+				continue;
+			}
 			desel_path[i] = savestring(sel_elements[desel_int - 1],
 				strlen(sel_elements[desel_int - 1]));
 		}
@@ -1129,7 +1134,7 @@ deselect(char **comm)
 		/* If a number, check it's a valid ELN */
 		else {
 			int atoi_desel = atoi(desel_elements[i]);
-			if (atoi_desel == 0 || (size_t)atoi_desel > sel_n) {
+			if (atoi_desel <= 0 || (size_t)atoi_desel > sel_n) {
 				printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
 				int j = (int)desel_n;
 				while (--j >= 0)
