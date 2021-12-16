@@ -1428,6 +1428,8 @@ CliFM includes a few shell functions to perform specific actions (cd-on-quit, fi
 .SH 15. PLUGINS
 Plugins are just scripts or programs (written in any language) able to add, extend or improve CliFM functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
 
+A convenient helper script is provided to get a consistent look across all plugins, specially those running FZF. Edit this file is you want to change how FZF plugins look like. Source it and use any of the provided functions and variables to write a new FZF plugin. This helper script is located in \fIDATADIR/clifm/plugins/plugins-helper\fR, but it will be overridden by \fIXDG_CONFIG_HOME/clifm/plugins/plugins-helper\fR if found.
+
  +-------------------+-------------------------------+
  | Plugin            | Dependencies                  |
  +-------------------+-------------------------------+
