@@ -1384,9 +1384,9 @@ mime_open(char **args)
 
 	if (info) {
 		/* In case of "cmd args" print only cmd */
-		char *ret = strchr(app, ' ');
+/*		char *ret = strchr(app, ' ');
 		if (ret)
-			*ret = '\0';
+			*ret = '\0'; */
 
 		if (*app == 'a' && app[1] == 'd' && !app[2]) {
 			printf(_("Associated application: ad [built-in] [%s]\n"),
