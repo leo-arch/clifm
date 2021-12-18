@@ -1685,6 +1685,7 @@ c sel              Copy selected files into the current directory\n\
 r sel              Remove all selected files\n\
 br sel             Bulk rename selected files\n\
 c 34 file_copy     Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
+d myfile           Duplicate 'myfile' (via rsync)\n\
 m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
 m myfile.txt       Rename 'myfile.txt'\n\
 l myfile mylink    Create a symbolic link named 'mylink' to 'myfile'\n\
