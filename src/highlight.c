@@ -87,21 +87,8 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	if (cur_color == hw_c && !sp)
 		goto END;
 
-/*
-#ifdef _NO_HIGHLIGHT
-	// This line just prevents a compiler warning
-	int wrong_cmd_line = 1;
-#endif */
 	if (!sp)
 		wrong_cmd_line = 0;
-
-/*	if (*(str + pos) == ' ') {
-		*(str + pos) = '\0';
-		int ret = is_internal_c(str);
-		*(str + pos) = ' ';
-		if (ret)
-			change_word_color(str, 0, sx_c);
-	} */
 
 	if (cur_color != hq_c && c >= '0' && c <= '9') {
 		if (prev == ' ' || cur_color == hn_c || rl_end == 1) {
@@ -159,32 +146,31 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		if (cur_color != hq_c && cur_color != hc_c)
 			cl = tx_c;
 		break;
-	case '/': cl = hd_c; break;
+	case '/': cl = cur_color != hq_c ? hd_c : (char *)NULL; break;
 	case '\'': /* fallthrough */
 	case '"': cl = hq_c; break;
 	case '\\': /* fallthrough */
 	case ENTER: cl = tx_c; break;
 	case '~': /* fallthrough */
-	case '*': cl = he_c; break;
+	case '*': cl = cur_color != hq_c ? he_c : (char *)NULL; break;
 	case '=': /* fallthrough */
 	case '(': /* fallthrough */
 	case ')': /* fallthrough */
 	case '[': /* fallthrough */
 	case ']': /* fallthrough */
 	case '{': /* fallthrough */
-	case '}': cl = hb_c; break;
+	case '}': cl = cur_color != hq_c ? hb_c : (char *)NULL; break;
 	case '|': /* fallthrough */
 	case '&': /* fallthrough */
-	case ';': cl = hs_c; break;
+	case ';': cl = cur_color != hq_c ? hs_c : (char *)NULL; break;
 	case '<': /* fallthrough */
-	case '>': cl = hr_c; break;
-	case '$': cl = hv_c; break;
+	case '>': cl = cur_color != hq_c ? hr_c : (char *)NULL; break;
+	case '$': cl = cur_color != hq_c ? hv_c : (char *)NULL; break;
 	case '-':
-		if (prev == ' ' || prev == 0) {
-			cl = hp_c;
-		}
+		if (prev == ' ' || prev == 0)
+			cl = cur_color != hq_c ? hp_c : (char *)NULL;
 		break;
-	case '#': cl = hc_c; break;
+	case '#': cl = cur_color != hq_c ? hc_c : (char *)NULL; break;
 	default:
 		if (cur_color != hq_c && cur_color != hc_c
 		&& cur_color != hv_c && cur_color != hp_c)
@@ -247,18 +233,13 @@ recolorize_line(void)
 		return;
 	}
 
-//	if (wrong_cmd && nwords == 1)
-//		rl_point = 0;
 	int point = rl_point;
-//	int copy_start = (wrong_cmd && nwords == 1) ? 0 : point ? point - 1 : 0;
-//	int start = (wrong_cmd && nwords == 1) ? 0 : point;
 	int copy_start = point ? point - 1 : 0;
 	int start = point;
 	char *ss = rl_copy_text(copy_start, rl_end);
 	rl_delete_text(start, rl_end);
 	rl_point = rl_end = start;
 	/* Loop through each char from cursor position onward and colorize it */
-//	i = (wrong_cmd && nwords == 1) ? 0 : rl_point ? 1 : 0;
 	i = point ? 1 : 0;
 	size_t l = 0;
 
@@ -281,14 +262,8 @@ recolorize_line(void)
 		}
 		t[0] = (char)ss[i];
 		t[1] = '\0';
-/*		printf("'a:%zu:%d:%s'", i, ss[i], t);
-		fflush(stdout);
-		sleep(1); */
 		rl_insert_text(t);
 		rl_redisplay();
-/*		printf("'b:%zu:%d:%c'", i, rl_point, ss[i]);
-		fflush(stdout);
-		sleep(1); */
 	}
 
 EXIT:
@@ -296,5 +271,4 @@ EXIT:
 	fputs("\x1b[?25h", stdout);
 	free(ss);
 	rl_point = bk;
-//	printf("\x1b[%d;%dH", currow, curcol);
 }
