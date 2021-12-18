@@ -1636,11 +1636,12 @@ quick_help(void)
 "                           | |   | |   | |\n"
 "                           | |   | |   | |\n"
 "                           | !___! !___! |\n"
-"                           `-------------'\n\n"
-"For more information and advanced tricks consult the manpage and/or the\n\
-Wiki (https://github.com/leo-arch/clifm/wiki)\n\
+"                           `-------------'\n"
+"                                %s\n\n"
+"This is only a quick help. For more information and advanced tricks \n\
+consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)\n\
 \n\
-Navigation\n\
+NAVIGATION\n\
 ----------\n\
 /etc                     Change the current directory to '/etc'.\n\
 5                        Change to the directory whose ELN is 5.\n\
@@ -1653,7 +1654,7 @@ ws2 | Alt-2              Switch to the second workspace\n\
 j xproj                  Jump to the best ranked directory matching 'xproj'\n\
 -                        Navigate the file system via fzf (with files preview)\n\
 \n\
-Basic file operations\n\
+BASIC FILE OPERATIONS\n\
 ---------------------\n\
 myfile.txt         Open 'myfile.txt' with the default associated application\n\
 myfile.txt vi      Open 'myfile.txt' with vi\n\
@@ -1684,9 +1685,9 @@ u                  Undelete trashed files\n\
 bm a mydir         Bookmark the directory named mydir\n\
 bm d mybm          Remove the bookmark named 'mybm'\n\
 ac sel             Compress/archive selected files\n\
-bb *               Clean all file names in the current directory\n\
+bb *               Clean up all file names in the current directory\n\
 \n\
-Misc\n\
+MISC\n\
 ----\n\
 cmd --help     Get help for command 'cmd'\n\
 F1             Open the manpage\n\
@@ -1705,7 +1706,7 @@ media          (Un)mount storage devices\n\
 net work       Mount the network resource named 'work'\n\
 actions        List available actions/plugins\n\
 icons on       Enable icons\n\
-q              I'm tired, quit\n");
+q              I'm tired, quit\n", PROGRAM_NAME);
 
 	char *cmd[] = {_pager, tmp_file, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
