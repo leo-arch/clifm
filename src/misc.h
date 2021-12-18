@@ -35,6 +35,7 @@ void free_stuff(void);
 void free_remotes(int exit);
 void handle_stdin(void);
 void help_function(void);
+int quick_help(void);
 int hidden_function(char **comm);
 int list_commands(void);
 int list_mountpoints(void);

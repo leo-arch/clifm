@@ -1575,6 +1575,152 @@ list_commands(void)
 	return EXIT_SUCCESS;
 }
 
+int
+quick_help(void)
+{
+	char _pager[NAME_MAX];
+	*_pager = '\0';
+	char *p = getenv("PAGER");
+	if (p)
+		strcpy(_pager, p);
+	else {
+		p = get_cmd_path("less");
+		if (p) {
+			strcpy(_pager, "less");
+			free(p);
+		} else {
+			p = get_cmd_path("more");
+			if (p) {
+				strcpy(_pager, "more");
+				free(p);
+			}
+		}
+	}
+
+	if (!*_pager) {
+		fprintf(stderr, _("%s: Unable to find any pager\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	char tmp_file[PATH_MAX];
+	if (xargs.stealth_mode == 1)
+		snprintf(tmp_file, PATH_MAX - 1, "%s/%s", P_tmpdir, TMP_FILENAME);
+	else
+		snprintf(tmp_file, PATH_MAX - 1, "%s/%s", tmp_dir, TMP_FILENAME);
+
+	int fd = mkstemp(tmp_file);
+	if (fd == -1) {
+		fprintf(stderr, "%s: Error creating temporary file\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	FILE *fp;
+#ifdef __HAIKU__
+	fp = fopen(tmp_file, "w");
+#else
+	fp = open_fstream_w(tmp_file, &fd);
+#endif
+	if (!fp) {
+		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+#ifdef __HAIKU__
+	fprintf(fp,
+#else
+	dprintf(fd,
+#endif
+"                            _______     _ \n"
+"                           | ,---, |   | |\n"
+"                           | |   | |   | |\n"
+"                           | |   | |   | |\n"
+"                           | |   | |   | |\n"
+"                           | !___! !___! |\n"
+"                           `-------------'\n\n"
+"For more information and advanced tricks consult the manpage and/or the\n\
+Wiki (https://github.com/leo-arch/clifm/wiki)\n\
+\n\
+Navigation\n\
+----------\n\
+/etc                     Change the current directory to '/etc'.\n\
+5                        Change to the directory whose ELN is 5.\n\
+b | Shift-left | Alt-j   Go back in the directory history list\n\
+f | Shift-right | Alt-k  Go forth in the directory history list\n\
+Shift-up | Alt-u         Change to the parent directory\n\
+bd media                 Change to the parent directory matching 'media'\n\
+bm | Alt-b               Open the bookmarks screen\n\
+ws2 | Alt-2              Switch to the second workspace\n\
+j xproj                  Jump to the best ranked directory matching 'xproj'\n\
+-                        Navigate the file system via fzf (with files preview)\n\
+\n\
+Basic file operations\n\
+---------------------\n\
+myfile.txt         Open 'myfile.txt' with the default associated application\n\
+myfile.txt vi      Open 'myfile.txt' with vi\n\
+12                 Open the file whose ELN is 12\n\
+12&                Open the file whose ELN is 12 in the background\n\
+ow myfile.txt      Choose opening application for 'myfile.txt' from a menu\n\
+n myfile           Create a new file named 'myfile'\n\
+n mydir/           Create a new directory named 'mydir'\n\
+p4                 Print the properties of the file whose ELN is 4\n\
+te4                Toggle the executable bit on the file whose ELN is 4\n\
+/*.png             Search for files ending with .png in the current directory\n\
+s *.c              Select all C files\n\
+s 1-4 8 19-26      Select multiple files by ELN\n\
+sb                 List currently selected files\n\
+ds                 Deselect a few selected files\n\
+ds *               Deselect all selected files\n\
+c sel              Copy selected files into the current directory\n\
+r sel              Remove all selected files\n\
+br sel             Bulk rename selected files\n\
+c 34 file_copy     Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
+m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
+m myfile.txt       Rename 'myfile.txt'\n\
+l myfile mylink    Create a symbolic link named 'mylink' to 'myfile'\n\
+le mylink          Edit the symbolic link 'mylink'\n\
+t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
+t del              Select trashed files and remove them permanently\n\
+u                  Undelete trashed files\n\
+bm a mydir         Bookmark the directory named mydir\n\
+bm d mybm          Remove the bookmark named 'mybm'\n\
+ac sel             Compress/archive selected files\n\
+bb *               Clean all file names in the current directory\n\
+\n\
+Misc\n\
+----\n\
+cmd --help     Get help for command 'cmd'\n\
+F1             Open the manpage\n\
+edit | F10     View and/or edit the configuration file\n\
+Right          Accept the entire suggestion\n\
+Alt-f          Accept the first/next word of the current suggestion\n\
+rf | .         Reprint the current list of files\n\
+Alt-l          Toggle detail/long view mode on/off\n\
+pf set test    Change to the profile named 'test'\n\
+hf on | Alt-.  Show hidden files. Press Alt-. to hide them again\n\
+st size rev    Sort files by size in reverse order\n\
+Alt-x | Alt-z  Toggle sort method\n\
+mm info 12     Get MIME information for the file whose ELN is 12\n\
+mm edit        Change default associated applications\n\
+media          (Un)mount storage devices\n\
+net work       Mount the network resource named 'work'\n\
+actions        List available actions/plugins\n\
+icons on       Enable icons\n\
+q              I'm tired, quit\n");
+
+	char *cmd[] = {_pager, tmp_file, NULL};
+	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	unlink(tmp_file);
+
+#ifdef __HAIKU__
+	fclose(fp);
+#else
+	close_fstream(fp, fd);
+#endif
+	if (ret != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
+}
+
 void
 help_function(void)
 {
