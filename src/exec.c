@@ -110,16 +110,29 @@ run_and_refresh(char **cmd)
 
 	log_function(cmd);
 
-	size_t i = 0, total_len = 0;
-	for (; i <= args_n; i++)
+	size_t i, total_len = 0;
+	for (i = 0; i <= args_n; i++)
 		total_len += strlen(cmd[i]);
 
 	char *tmp_cmd = (char *)NULL;
-	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 1, sizeof(char));
+	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
 
 	for (i = 0; i <= args_n; i++) {
 		strcat(tmp_cmd, cmd[i]);
 		strcat(tmp_cmd, " ");
+	}
+
+	/* If cp, and no destiny was provided, append '.' to copy source
+	 * into CWD */
+	if (!cmd[2] && cmd[1] && *cmd[0] == 'c' && *(cmd[0] + 1) == 'p'
+	&& *(cmd[0] + 2) == ' ') {
+		char *p = strrchr(cmd[1], '/');
+		if (p && *(p + 1)) {
+			*p = '\0';
+			if (strcmp(cmd[1], ws[cur_ws].path) != 0)
+				strcat(tmp_cmd, ".");
+			*p = '/';
+		}
 	}
 
 	if (xrename) {
@@ -1711,7 +1724,7 @@ exec_cmd(char **comm)
 	}
 
 	else if ((*comm[0] == '?' && !comm[0][1]) || strcmp(comm[0], "help") == 0) {
-		help_function();
+		quick_help();
 		return EXIT_SUCCESS;
 	}
 

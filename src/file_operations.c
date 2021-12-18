@@ -208,8 +208,7 @@ dup_file(char *source, char *dest)
 			exit_status = EXIT_FAILURE;
 	}
 
-	if (free_dest)
-		free(dest);
+	free(dest);
 	return exit_status;
 }
 

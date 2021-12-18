@@ -537,8 +537,8 @@ const char *param_str[] = {
 	"unicode status",
 	NULL};
 
-/* To store all the 39 color variables I use, with 46 bytes each, I need
- * a total of 1,8Kb. It's not much but it could be less if I'd use
+/* To store all the 68 color variables I use, with 46 bytes each, I need
+ * a total of 3,1Kb. It's not much but it could be less if I'd use
  * dynamically allocated arrays for them (which, on the other side,
  * would make the whole thing slower and more tedious) */
 

@@ -430,9 +430,8 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 			case_sens_path_comp ? "+i" : "-i",
 			lw ? lw : "", colorize == 0 ? "--no-color" : "",
 			FZFTABIN, FZFTABOUT);
-	int ret = launch_execle(cmd);
 
-	return ret;
+	return launch_execle(cmd);
 }
 
 /*

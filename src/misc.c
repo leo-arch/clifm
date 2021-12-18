@@ -1648,8 +1648,8 @@ consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)\n\
 \n\
 NAVIGATION\n\
 ----------\n\
-/etc                     Change the current directory to '/etc'.\n\
-5                        Change to the directory whose ELN is 5.\n\
+/etc                     Change the current directory to '/etc'\n\
+5                        Change to the directory whose ELN is 5\n\
 b | Shift-left | Alt-j   Go back in the directory history list\n\
 f | Shift-right | Alt-k  Go forth in the directory history list\n\
 .. | Shift-up | Alt-u    Change to the parent directory\n\
