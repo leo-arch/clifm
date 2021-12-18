@@ -323,6 +323,7 @@ char
  * (is_internal(), in checks.c), and another one listing commands
  * taking ELN's as parameters (is_internal_f() in strings.c) */
 const char *internal_cmds[] = {
+	",",
 	"?", "help",
 	"ac", "ad",
 	"acd", "autocd",
