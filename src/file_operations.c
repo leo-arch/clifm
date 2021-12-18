@@ -155,7 +155,6 @@ dup_file(char *source, char *dest)
 	}
 
 	int exit_status =  EXIT_SUCCESS;
-	int free_dest = 0;
 
 	/* If no dest, use source as file name: source.copy, and, if already
 	 * exists, source.copy.YYYYMMDDHHMMSS */
@@ -172,7 +171,6 @@ dup_file(char *source, char *dest)
 		else
 			source_name = source;
 			
-		free_dest = 1;
 		dest = (char *)xnmalloc(strlen(source_name) + 6, sizeof(char));
 		sprintf(dest, "%s.copy", source_name);
 
