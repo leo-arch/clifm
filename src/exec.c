@@ -246,7 +246,14 @@ launch_execle(const char *cmd)
 	if (!cmd || !*cmd)
 		return EXNULLERR;
 
+	signal(SIGINT, SIG_DFL);
+	signal(SIGQUIT, SIG_DFL);
+	signal(SIGTSTP, SIG_DFL);
+
 	int ret = system(cmd);
+
+	set_signals_to_ignore();
+
 	if (WIFEXITED(ret) && !WEXITSTATUS(ret))
 		return EXIT_SUCCESS;
 	if (WIFEXITED(ret) && WEXITSTATUS(ret))
