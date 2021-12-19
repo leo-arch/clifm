@@ -84,17 +84,6 @@
 #define DIR_IN_NAME ".cfm.in"
 #define DIR_OUT_NAME ".cfm.out"
 
-/* Struct to store information about trimmed file names */
-struct trim_t {
-	int state;
-	int a; /* trimmed char */
-	int b; /* char next to trimmed char */
-	int pad;
-	size_t len; /* Lenght of file name before trimming */
-};
-
-struct trim_t trim;
-
 /* Print the line divinding files and prompt using DIV_LINE_CHAR. If
  * DIV_LINE_CHAR takes more than two columns to be printed (ASCII chars
  * take only one, but unicode chars could take two), print exactly the
@@ -521,28 +510,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad)
 		/* Print ELN. The remaining part of the line will be
 		 * printed by print_entry_props() */
 		if (!no_eln) {
-			switch(elnpad) {
-			case NOPAD:
-				printf("%s%d%s%s%c%s", el_c, i + 1, df_c,
-						li_cb, file_info[i].sel ? '*' : ' ', df_c);
-				break;
-			case ZEROPAD:
-				printf("%s%0*d%s%s%c%s", el_c, pad, i + 1, df_c,
-						li_cb, file_info[i].sel ? '*' : ' ', df_c);
-				break;
-			case LEFTSPACEPAD:
-				printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
-						li_cb, file_info[i].sel ? '*' : ' ', df_c);
-				break;
-			case RIGHTSPACEPAD:
-				printf("%s%-*d%s%s%c%s", el_c, pad, i + 1, df_c,
-						li_cb, file_info[i].sel ? '*' : ' ', df_c);
-				break;
-			default:
-				printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
-						li_cb, file_info[i].sel ? '*' : ' ', df_c);
-				break;
-			}
+			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
+				li_cb, file_info[i].sel ? '*' : ' ', df_c);
 		}
 
 		print_entry_props(&file_info[i], (size_t)space_left);
@@ -572,118 +541,101 @@ print_entry_color(int *ind_char, const int i, const int pad)
 	char *end_color = df_c;
 	if (file_info[i].dir)
 		end_color = dc_c;
-//	int pad = DIGINUM(files + 1);
 
 	char *wname = (char *)NULL;
 	/* wc_xstrlen returns 0 if a non-printable char was found in the file name */
-	if (file_info[i].len == 0)
+	if (file_info[i].len == 0) {
 		wname = truncate_wname(file_info[i].name);
+		file_info[i].len = wc_xstrlen(wname);
+	}
+
+	char *n = wname ? wname : file_info[i].name;
+	int _trim = 0, diff = 0;
+	char tname[NAME_MAX * sizeof(wchar_t)];
+	if (max_name_len != UNSET && !long_view
+	&& (int)file_info[i].len > max_name_len) {
+		_trim = 1;
+		xstrsncpy(tname, wname ? wname : file_info[i].name,
+				(NAME_MAX * sizeof(wchar_t)) - 1);
+		diff = u8truncstr(tname, (size_t)max_name_len - 1);
+		file_info[i].len = (size_t)max_name_len;
+		n = tname;
+	}
 
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln) {
-			xprintf("%s%c%s%s%s %s%s%s",
-				li_cb, file_info[i].sel ? '*' : ' ', df_c,
-				file_info[i].icon_color,
-			    file_info[i].icon, file_info[i].color,
-			    wname ? wname : file_info[i].name, end_color);
+			if (_trim) {
+				xprintf("%s%c%s%s%s %s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s",
+					li_cb, file_info[i].sel ? '*' : ' ', df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, (wchar_t *)n, diff > 0 ? diff : -1,
+					_trim ? '~' : 0, end_color);
+			} else {
+				xprintf("%s%c%s%s%s %s%s%s",
+					li_cb, file_info[i].sel ? '*' : ' ', df_c,
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, n, end_color);
+			}
 		} else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s%s%c%s%s%s %s%s%s", el_c, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s%s%c%s%s%s %s%s%s", el_c, pad, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case LEFTSPACEPAD:
+			if (_trim) {
+				xprintf("%s%*d%s%s%c%s%s%s %s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s",
+					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? '*' : ' ',
+					df_c, file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, (wchar_t *)n, diff > 0 ? diff : -1,
+					_trim ? '~' : 0, end_color);
+			} else {
 				xprintf("%s%*d%s%s%c%s%s%s %s%s%s", el_c, pad, i + 1, df_c,
 					li_cb, file_info[i].sel ? '*' : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s%s%c%s%s%s %s%s%s", el_c, pad, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			default:
-				xprintf("%s%d%s%s%c%s%s%s %s%s%s", el_c, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
+					file_info[i].color, n, end_color);
 			}
 		}
 	} else {
 		if (no_eln) {
-			xprintf("%s%c%s%s%s%s",
-				li_cb, file_info[i].sel ? '*' : ' ', df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
+			if (_trim) {
+				xprintf("%s%c%s%s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s",
+					li_cb, file_info[i].sel ? '*' : ' ', df_c,
+					file_info[i].color, (wchar_t *)n, diff > 0 ? diff : -1,
+					_trim ? '~' : 0, end_color);
+			} else {
+				xprintf("%s%c%s%s%s%s",
+					li_cb, file_info[i].sel ? '*' : ' ', df_c,
+					file_info[i].color, n, end_color);
+			}
 		} else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s%s%c%s%s%s%s", el_c, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case LEFTSPACEPAD:
+			if (_trim) {
+				xprintf("%s%*d%s%s%c%s%s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s",
+					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? '*' : ' ',
+					df_c, file_info[i].color, (wchar_t *)n,
+					diff > 0 ? diff : -1, _trim ? '~' : 0, end_color);
+			} else {
 				xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
 					li_cb, file_info[i].sel ? '*' : ' ', df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			default:
-				xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
+					file_info[i].color, n, end_color);
 			}
 		}
 	}
 #else
 	if (no_eln) {
-		xprintf("%s%c%s%s%s%s", li_cb, file_info[i].sel ? '*' : ' ', df_c,
-			file_info[i].color, wname ? wname : file_info[i].name, end_color);
+		if (_trim) {
+			xprintf("%s%c%s%s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s", li_cb,
+				file_info[i].sel ? '*' : ' ', df_c, file_info[i].color,
+				(wchar_t *)n, diff > 0 ? diff : -1, _trim ? '~' : 0, end_color);
+		} else {
+			xprintf("%s%c%s%s%s%s", li_cb, file_info[i].sel ? '*' : ' ',
+				df_c, file_info[i].color, n, end_color);
+		}
 	} else {
-		switch(elnpad) {
-		case NOPAD:
-			xprintf("%s%d%s%s%c%s%s%s%s", el_c, i + 1, df_c,
-				li_cb, file_info[i].sel ? '*' : ' ', df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
-			break;
-		case ZEROPAD:
-			xprintf("%s%0*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
-				li_cb, file_info[i].sel ? '*' : ' ', df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
-			break;
-		case LEFTSPACEPAD:
+		if (_trim) {
+			xprintf("%s%*d%s%s%c%s%s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s",
+				el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? '*' : ' ',
+				df_c, file_info[i].color, (wchar_t *)n,
+				diff > 0 ? diff : -1, _trim ? '~' : 0, end_color);
+		} else {
 			xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
 				li_cb, file_info[i].sel ? '*' : ' ', df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
-			break;
-		case RIGHTSPACEPAD:
-			xprintf("%s%-*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
-				li_cb, file_info[i].sel ? '*' : ' ', df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
-			break;
-		default:
-			xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
-				li_cb, file_info[i].sel ? '*' : ' ', df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
+				file_info[i].color, n, end_color);
 		}
 	}
 #endif /* !_NO_ICONS */
@@ -717,107 +669,80 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 {
 	char *wname = (char *)NULL;
 	/* wc_strlen returns 0 if a non-printable char was found in the file name */
-	if (file_info[i].len == 0)
+	if (file_info[i].len == 0) {
 		wname = truncate_wname(file_info[i].name);
+		file_info[i].len = wc_xstrlen(wname);
+	}
 
-//	int pad = DIGINUM(files + 1);
+	char *n = wname ? wname : file_info[i].name;
+	int _trim = 0, diff = 0;
+	char tname[NAME_MAX * sizeof(wchar_t)];
+	if (max_name_len != UNSET && !long_view
+	&& (int)file_info[i].len > max_name_len) {
+		_trim = 1;
+		xstrsncpy(tname, wname ? wname : file_info[i].name,
+				(NAME_MAX * sizeof(wchar_t)) - 1);
+		diff = u8truncstr(tname, (size_t)max_name_len - 1);
+		file_info[i].len = (size_t)max_name_len;
+		n = tname;
+	}
+
 #ifndef _NO_ICONS
 	if (icons) {
-		if (no_eln)
-			xprintf("%c%s %s", file_info[i].sel ? '*' : ' ',
-				file_info[i].icon, wname ? wname : file_info[i].name);
-		else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s%c%s %s", el_c, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					file_info[i].icon, wname ? wname : file_info[i].name);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s%c%s %s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					file_info[i].icon, wname ? wname : file_info[i].name);
-				break;
-			case LEFTSPACEPAD:
+		if (no_eln) {
+			if (_trim) {
+				xprintf("%c%s %ls\x1b[%dC%c", file_info[i].sel ? '*' : ' ',
+					file_info[i].icon, (wchar_t *)n, diff > 0 ? diff : -1,
+					_trim ? '~' : 0);
+			} else {
+				xprintf("%c%s %s", file_info[i].sel ? '*' : ' ',
+				file_info[i].icon, n);
+			}
+		} else {
+			if (_trim) {
+				xprintf("%s%*d%s%c%s %ls\x1b[%dC%c", el_c, pad, i + 1, df_c,
+					file_info[i].sel ? '*' : ' ', file_info[i].icon,
+					(wchar_t *)n, diff > 0 ? diff : -1, _trim ? '~' : 0);
+			} else {
 				xprintf("%s%*d%s%c%s %s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					file_info[i].icon, wname ? wname : file_info[i].name);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s%c%s %s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					file_info[i].icon, wname ? wname : file_info[i].name);
-				break;
-			default:
-				xprintf("%s%*d%s%c%s %s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					file_info[i].icon, wname ? wname : file_info[i].name);
-				break;
+					file_info[i].sel ? '*' : ' ', file_info[i].icon, n);
 			}
 		}
 	} else {
-		if (no_eln)
-			xprintf("%c%s", file_info[i].sel ? '*' : ' ',
-				wname ? wname : file_info[i].name);
-		else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s%c%s", el_c, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					wname ? wname : file_info[i].name);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s%c%s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					wname ? wname : file_info[i].name);
-				break;
-			case LEFTSPACEPAD:
+		if (no_eln) {
+			if (_trim) {
+				xprintf("%c%ls\x1b[%dC%c", file_info[i].sel ? '*' : ' ',
+					(wchar_t *)n, diff > 0 ? diff : -1, _trim ? '~' : 0);
+			} else {
+				xprintf("%c%s", file_info[i].sel ? '*' : ' ', n);
+			}
+		} else {
+			if (_trim) {
+				xprintf("%s%*d%s%c%ls\x1b[%dC%c", el_c, pad, i + 1, df_c,
+					file_info[i].sel ? '*' : ' ', (wchar_t *)n,
+					diff > 0 ? diff : -1, _trim ? '~' : 0);
+			} else {
 				xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					wname ? wname : file_info[i].name);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s%c%s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					wname ? wname : file_info[i].name);
-				break;
-			default:
-				xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ',
-					wname ? wname : file_info[i].name);
+					file_info[i].sel ? '*' : ' ', n);
 			}
 		}
 	}
 #else /* NO_ICONS */
-	if (no_eln)
-		xprintf("%c%s", file_info[i].sel ? '*' : ' ',
-			wname ? wname : file_info[i].name);
-	else {
-		switch(elnpad) {
-		case NOPAD:
-			xprintf("%s%d%s%c%s", el_c, i + 1, df_c,
-				file_info[i].sel ? '*' : ' ',
-				wname ? wname : file_info[i].name);
-			break;
-		case ZEROPAD:
-			xprintf("%s%0*d%s%c%s", el_c, pad, i + 1, df_c,
-				file_info[i].sel ? '*' : ' ',
-				wname ? wname : file_info[i].name);
-			break;
-		case LEFTSPACEPAD:
+	if (no_eln) {
+		if (_trim) {
+			xprintf("%c%ls\x1b[%dC%c", file_info[i].sel ? '*' : ' ',
+				(wchar_t *)n, diff > 0 ? diff : -1, _trim ? '~' : 0);
+		} else {
+			xprintf("%c%s", file_info[i].sel ? '*' : ' ', n);
+		}
+	} else {
+		if (_trim) {
+			xprintf("%s%*d%s%c%ls\x1b[%dC%c", el_c, pad, i + 1, df_c,
+				file_info[i].sel ? '*' : ' ', (wchar_t *)n,
+				diff > 0 ? diff : -1, _trim ? '~' : 0);
+		} else {
 			xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
-				file_info[i].sel ? '*' : ' ',
-				wname ? wname : file_info[i].name);
-			break;
-		case RIGHTSPACEPAD:
-			xprintf("%s%-*d%s%c%s", el_c, pad, i + 1, df_c,
-				file_info[i].sel ? '*' : ' ',
-				wname ? wname : file_info[i].name);
-			break;
-		default:
-			xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
-				file_info[i].sel ? '*' : ' ',
-				wname ? wname : file_info[i].name);
+				file_info[i].sel ? '*' : ' ', n);
 		}
 	}
 #endif /* !_NO_ICONS */
@@ -899,8 +824,24 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 
 	char *wname = (char *)NULL;
 	/* wc_strlen returns 0 if a non-printable char was found in the file name */
-	if (file_info[i].len == 0)
+	if (file_info[i].len == 0) {
 		wname = truncate_wname(file_info[i].name);
+		file_info[i].len = wc_xstrlen(wname);
+	}
+
+	char *n = wname ? wname : file_info[i].name;
+
+	int _trim = 0, diff = 0;
+	char tname[NAME_MAX * sizeof(wchar_t)];
+	if (max_name_len != UNSET && !long_view
+	&& (int)file_info[i].len > max_name_len) {
+		_trim = 1;
+		xstrsncpy(tname, wname ? wname : file_info[i].name,
+				(NAME_MAX * sizeof(wchar_t)) - 1);
+		diff = u8truncstr(tname, (size_t)max_name_len - 1);
+		file_info[i].len = (size_t)max_name_len;
+		n = tname;
+	}
 
 #ifndef _NO_ICONS
 	if (icons) {
@@ -908,90 +849,64 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 			file_info[i].icon_color = file_info[i].color;
 
 		if (no_eln) {
-			xprintf("%s%s %s%s%s", file_info[i].icon_color,
-			    file_info[i].icon, file_info[i].color,
-			    wname ? wname : file_info[i].name, end_color);
+			if (_trim) {
+				xprintf("%s%s %s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s",
+					file_info[i].icon_color, file_info[i].icon,
+					file_info[i].color, (wchar_t *)n, diff > 0 ? diff : -1,
+					_trim ? '~' : 0, end_color);
+			} else {
+				xprintf("%s%s %s%s%s", file_info[i].icon_color,
+					file_info[i].icon, file_info[i].color, n, end_color);
+			}
 		} else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case LEFTSPACEPAD:
+			if (_trim) {
+				xprintf("%s%*d%s %s%s %s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s",
+					el_c, pad, i + 1, df_c,	file_info[i].icon_color,
+					file_info[i].icon, file_info[i].color, (wchar_t *)n,
+					diff > 0 ? diff : -1, _trim ? '~' : 0, end_color);
+			} else {
 				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
 					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			default:
-				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].icon_color, file_info[i].icon,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
+					file_info[i].color, n, end_color);
 			}
 		}
 	} else {
 		if (no_eln) {
-			xprintf("%s%s%s", file_info[i].color,
-			    wname ? wname : file_info[i].name, end_color);
+			if (_trim) {
+				xprintf("%s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s",
+					file_info[i].color, (wchar_t *)n,
+					diff > 0 ? diff : -1, _trim ? '~' : 0, end_color);
+			} else {
+				xprintf("%s%s%s", file_info[i].color, n, end_color);
+			}
 		} else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case LEFTSPACEPAD:
+			if (_trim) {
+				xprintf("%s%*d%s %s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s",
+					el_c, pad, i + 1, df_c,
+					file_info[i].color, (wchar_t *)n,
+					diff > 0 ? diff : -1, _trim ? '~' : 0, end_color);
+			} else {
 				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
-				break;
-			default:
-				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
-					file_info[i].color, wname ? wname : file_info[i].name, end_color);
+					file_info[i].color, n, end_color);
 			}
 		}
 	}
 #else
 	if (no_eln) {
-		xprintf("%s%s%s", file_info[i].color,
-			wname ? wname : file_info[i].name, end_color);
+		if (_trim) {
+			xprintf("%s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s", file_info[i].color,
+				(wchar_t *)n, diff > 0 ? diff : -1, _trim ? '~' : 0, end_color);
+		} else {
+			xprintf("%s%s%s", file_info[i].color, n, end_color);
+		}
 	} else {
-		switch(elnpad) {
-		case NOPAD:
-			xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
-			break;
-		case ZEROPAD:
-			xprintf("%s%0*d%s %s%s%s", el_c, pad, i + 1, df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
-			break;
-		case LEFTSPACEPAD:
+		if (_trim) {
+			xprintf("%s%*d%s %s%ls\x1b[%dC\x1b[0;1;31m%c\x1b[0m%s", el_c,
+				pad, i + 1, df_c, file_info[i].color, (wchar_t *)n,
+				diff > 0 ? diff : -1, _trim ? '~' : 0, end_color);
+		} else {
 			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
-			break;
-		case RIGHTSPACEPAD:
-			xprintf("%s%-*d%s %s%s%s", el_c, pad, i + 1, df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
-			break;
-		default:
-			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
-				file_info[i].color, wname ? wname : file_info[i].name, end_color);
+				file_info[i].color, n, end_color);
 		}
 	}
 #endif /* !_NO_ICONS */
@@ -1013,87 +928,74 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 {
 	char *wname = (char *)NULL;
 	/* wc_strlen returns 0 if a non-printable char was found in the file name */
-	if (file_info[i].len == 0)
+	if (file_info[i].len == 0) {
 		wname = truncate_wname(file_info[i].name);
+		file_info[i].len = wc_xstrlen(wname);
+	}
+
+	char *n = wname ? wname : file_info[i].name;
+	int _trim = 0, diff = 0;
+	char tname[NAME_MAX * sizeof(wchar_t)];
+	if (max_name_len != UNSET && !long_view
+	&& (int)file_info[i].len > max_name_len) {
+		_trim = 1;
+		xstrsncpy(tname, wname ? wname : file_info[i].name,
+				(NAME_MAX * sizeof(wchar_t)) - 1);
+		diff = u8truncstr(tname, (size_t)max_name_len - 1);
+		file_info[i].len = (size_t)max_name_len;
+		n = tname;
+	}
 
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln)
-			xprintf("%s %s", file_info[i].icon, wname ? wname : file_info[i].name);
+			if (_trim) {
+				xprintf("%s %ls\x1b[%dC%c", file_info[i].icon, (wchar_t *)n,
+					diff > 0 ? diff : -1, _trim ? '~' : 0);
+			} else {
+				xprintf("%s %s", file_info[i].icon, n);
+			}
 		else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s %s %s", el_c, i + 1, df_c,
-					file_info[i].icon, wname ? wname : file_info[i].name);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s %s %s", el_c, pad, i + 1, df_c,
-					file_info[i].icon, wname ? wname : file_info[i].name);
-				break;
-			case LEFTSPACEPAD:
+			if (_trim) {
+				xprintf("%s%*d%s %s %ls\x1b[%dC%c", el_c, pad, i + 1, df_c,
+					file_info[i].icon, (wchar_t *)n, diff > 0 ? diff : -1,
+					_trim ? '~' : 0);
+			} else {
 				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
-					file_info[i].icon, wname ? wname : file_info[i].name);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s %s", el_c, pad, i + 1, df_c,
-					file_info[i].icon, wname ? wname : file_info[i].name);
-				break;
-			default:
-				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
-					file_info[i].icon, wname ? wname : file_info[i].name);
+					file_info[i].icon, n);
 			}
 		}
 	} else {
 		if (no_eln)
-			fputs(file_info[i].name, stdout);
+			if (_trim) {
+				printf("%ls\x1b[%dC%c", (wchar_t *)file_info[i].name,
+					diff > 0 ? diff : -1, _trim ? '~' : 0);
+			} else {
+				fputs(file_info[i].name, stdout);
+			}
 		else {
-			switch(elnpad) {
-			case NOPAD:
-				xprintf("%s%d%s %s", el_c, i + 1, df_c,
-					wname ? wname : file_info[i].name);
-				break;
-			case ZEROPAD:
-				xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c,
-					wname ? wname : file_info[i].name);
-				break;
-			case LEFTSPACEPAD:
-				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c,
-					wname ? wname : file_info[i].name);
-				break;
-			case RIGHTSPACEPAD:
-				xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c,
-					wname ? wname : file_info[i].name);
-				break;
-			default:
-				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c,
-					wname ? wname : file_info[i].name);
+			if (_trim) {
+				xprintf("%s%*d%s %ls\x1b[%dC%c", el_c, pad, i + 1, df_c,
+					(wchar_t *)n, diff > 0 ? diff : -1, _trim ? '~' : 0);
+			} else {
+				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, n);
 			}
 		}
 	}
 #else
-	if (no_eln)
-		fputs(file_info[i].name, stdout);
-	else {
-		switch(elnpad) {
-		case NOPAD:
-			xprintf("%s%d%s %s", el_c, i + 1, df_c,
-				wname ? wname : file_info[i].name);
-			break;
-		case ZEROPAD:
-			xprintf("%s%0*d%s %s", el_c, pad, i + 1, df_c,
-				wname ? wname : file_info[i].name);
-			break;
-		case LEFTSPACEPAD:
-			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c,
-				wname ? wname : file_info[i].name);
-			break;
-		case RIGHTSPACEPAD:
-			xprintf("%s%-*d%s %s", el_c, pad, i + 1, df_c,
-				wname ? wname : file_info[i].name);
-			break;
-		default:
-			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c,
-				wname ? wname : file_info[i].name);
+	if (no_eln) {
+		if (_trim) {
+			printf("%ls\x1b[%dC%c", (wchar_t *)file_info[i].name,
+				diff > 0 ? diff : -1, _trim ? '~' : 0);
+		} else {
+			fputs(file_info[i].name, stdout);
+		}
+	} else {
+		if (_trim) {
+			xprintf("%s%*d%s %ls\x1b[%dC%c", el_c, pad, i + 1, df_c,
+				(wchar_t *)n, diff > 0 ? diff : -1, _trim ? '~' : 0);
+		} else {
+			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, n);
 		}
 	}
 #endif /* !_NO_ICONS */
@@ -1152,28 +1054,6 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 	xprintf("\x1b[%dC", diff + 1);
 }
 
-static inline void
-trim_filename(int i)
-{
-	trim.state = 1;
-	trim.a = file_info[i].name[max_name_len - 1];
-	trim.b = file_info[i].name[max_name_len];
-	trim.len = file_info[i].len;
-	file_info[i].name[max_name_len - 1] = '~';
-	file_info[i].name[max_name_len] = '\0';
-	file_info[i].len = (size_t)max_name_len;
-}
-
-static inline void
-untrim_filename(int i)
-{
-	file_info[i].len = trim.len;
-	file_info[i].name[max_name_len - 1] = (char)trim.a;
-	file_info[i].name[max_name_len] = (char)trim.b;
-	trim.state = trim.a = trim.b = 0;
-	trim.len = 0;
-}
-
 /* List files horizontally:
  * 1 AAA	2 AAB	3 AAC
  * 4 AAD	5 AAE	6 AAF */
@@ -1228,11 +1108,6 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		/* Trim file name to MAX_NAME_LEN */
-		if (max_name_len != UNSET && !long_view
-		&& (int)file_info[i].len > max_name_len)
-			trim_filename(i);
-
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
 		if (colorize) {
@@ -1255,9 +1130,6 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		} else {
 			putchar('\n');
 		}
-
-		if (trim.state == 1)
-			untrim_filename(i);
 	}
 
 	if (!last_column)
@@ -1355,11 +1227,6 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
-		/* Trim file name to MAX_NAME_LEN */
-		if (max_name_len != UNSET && !long_view
-		&& (int)file_info[x].len > max_name_len)
-			trim_filename(x);
-
 		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
 
 		if (colorize) {
@@ -1382,9 +1249,6 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		} else {
 			putchar('\n');
 		}
-
-		if (trim.state == 1)
-			untrim_filename(x);
 	}
 
 	if (!last_column)
@@ -1752,9 +1616,6 @@ list_dir(void)
 
 	if (clear_screen)
 		CLEAR;
-
-	trim.state = trim.a = trim.b = 0;
-	trim.len = 0;
 
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
