@@ -446,10 +446,7 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	}
 
 	size_t cur_len = 0;
-	if (elnpad == NOPAD)
-		cur_len = (size_t)props->eln_n + 1 + plen;
-	else
-		cur_len = (size_t)DIGINUM(files + 1) + 1 + plen;
+	cur_len = (size_t)DIGINUM(files + 1) + 1 + plen;
 #ifndef _NO_ICONS
 	if (icons) {
 		cur_len += 3;

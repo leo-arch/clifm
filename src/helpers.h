@@ -752,7 +752,7 @@ extern int
 	dir_changed, /* flag to know is dir was changed: used by autocmds */
 	dirhist_map,
 	disk_usage,
-	elnpad,
+/*	elnpad, */
 	expand_bookmarks,
 	ext_cmd_ok,
 	files_counter,

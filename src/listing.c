@@ -419,11 +419,7 @@ get_longest_filename(const int n, const int pad)
 		&& file_info[i].len < (size_t)min_name_trim)
 			file_info[i].len = (size_t)min_name_trim;
 
-		if (elnpad == NOPAD)
-			total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
-		else
-			total_len = (size_t)pad + 1 + file_info[i].len;
-
+		total_len = (size_t)pad + 1 + file_info[i].len;
 		file_info[i].len = blen;
 
 		if (!long_view && classify) {
@@ -792,15 +788,9 @@ pad_filename(int *ind_char, const int i, const int pad)
 	int cur_len = 0;
 
 #ifndef _NO_ICONS
-	if (elnpad == NOPAD)
-		cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
-	else
-		cur_len = pad + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	cur_len = pad + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #else
-	if (elnpad == NOPAD)
-		cur_len = (int)file_info[i].eln_n + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
-	else
-		cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
 
 	if (file_info[i].dir && classify) {
@@ -1026,20 +1016,10 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 {
 	int cur_len = 0;
 #ifndef _NO_ICONS
-	if (elnpad == NOPAD) {
-		cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
-				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
-	} else {
-		cur_len = pad + 1 + (icons ? 3 : 0)	+ (int)file_info[i].len
-				+ (*ind_char ? 1 : 0);
-	}
+	cur_len = pad + 1 + (icons ? 3 : 0)	+ (int)file_info[i].len
+			+ (*ind_char ? 1 : 0);
 #else
-	if (elnpad == NOPAD) {
-		cur_len = (int)file_info[i].eln_n + 1
-				+ (int)file_info[i].len + (*ind_char ? 1 : 0);
-	} else {
-		cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
-	}
+	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
 
 	if (classify) {
