@@ -575,10 +575,10 @@ print_entry_color(int *ind_char, const int i, const int pad)
 //	int pad = DIGINUM(files + 1);
 
 	char *wname = (char *)NULL;
-	/* wc_strlen returns 0 if a non-printable char was found in the file name */
+	/* wc_xstrlen returns 0 if a non-printable char was found in the file name */
 	if (file_info[i].len == 0)
 		wname = truncate_wname(file_info[i].name);
-	
+
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln) {

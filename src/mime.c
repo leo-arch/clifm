@@ -935,8 +935,8 @@ join_and_run(char **args, char *name)
 	cmd[l - 2] = ' ';
 	cmd[l - 1] = '\0';
 
-	size_t i = 1;
-	for (; args[i]; i++) {
+	size_t i;
+	for (i = 1; args[i]; i++) {
 		l += strlen(args[i]) + 2;
 		cmd = (char *)xrealloc(cmd, l * sizeof(char));
 		strcat(cmd, args[i]);
@@ -1346,7 +1346,7 @@ mime_open(char **args)
 	char *ext = get_file_ext(file_path);
 
 	if (info)
-		printf(_("Extension: %s\n"), ext ? ext : "None");
+		printf(_("Extension: %s\n"), ext ? ext : _("None"));
 
 	/* Get default application for MIME or extension */
 	char *app = get_app(mime, ext);
