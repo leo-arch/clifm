@@ -84,6 +84,18 @@
 #define DIR_IN_NAME ".cfm.in"
 #define DIR_OUT_NAME ".cfm.out"
 
+/* Struct to store information about trimmed file names. Used only when
+ * Unicode is disabled */
+struct trim_t {
+	int state;
+	int a; /* trimmed char */
+	int b; /* char next to trimmed char */
+	int pad;
+	size_t len; /* Lenght of file name before trimming */
+};
+
+struct trim_t trim;
+
 /* Print the line divinding files and prompt using DIV_LINE_CHAR. If
  * DIV_LINE_CHAR takes more than two columns to be printed (ASCII chars
  * take only one, but unicode chars could take two), print exactly the
@@ -420,6 +432,7 @@ get_longest_filename(const int n, const int pad)
 			file_info[i].len = (size_t)min_name_trim;
 
 		total_len = (size_t)pad + 1 + file_info[i].len;
+
 		file_info[i].len = blen;
 
 		if (!long_view && classify) {
@@ -548,7 +561,7 @@ print_entry_color(int *ind_char, const int i, const int pad)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (max_name_len != UNSET && !long_view
+	if (unicode && max_name_len != UNSET && !long_view
 	&& (int)file_info[i].len > max_name_len) {
 		_trim = 1;
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
@@ -673,7 +686,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (max_name_len != UNSET && !long_view
+	if (unicode && max_name_len != UNSET && !long_view
 	&& (int)file_info[i].len > max_name_len) {
 		_trim = 1;
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
@@ -738,7 +751,8 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 				diff > 0 ? diff : -1, _trim ? '~' : 0);
 		} else {
 			xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
-				file_info[i].sel ? '*' : ' ', n);
+				file_info[i].sel ? '*' : ' ', n, diff > 0 ? diff : -1,
+				_trim ? '~' : 0);
 		}
 	}
 #endif /* !_NO_ICONS */
@@ -823,7 +837,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (max_name_len != UNSET && !long_view
+	if (unicode && max_name_len != UNSET && !long_view
 	&& (int)file_info[i].len > max_name_len) {
 		_trim = 1;
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
@@ -926,7 +940,7 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (max_name_len != UNSET && !long_view
+	if (unicode && max_name_len != UNSET && !long_view
 	&& (int)file_info[i].len > max_name_len) {
 		_trim = 1;
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
@@ -1034,6 +1048,30 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 	xprintf("\x1b[%dC", diff + 1);
 }
 
+/* Trim and untrim file names when current file name length exceeds
+ * man file name length. Only used when Unicode is disabled */
+static inline void
+trim_filename(int i)
+{
+	trim.state = 1;
+	trim.a = file_info[i].name[max_name_len - 1];
+	trim.b = file_info[i].name[max_name_len];
+	trim.len = file_info[i].len;
+	file_info[i].name[max_name_len - 1] = '~';
+	file_info[i].name[max_name_len] = '\0';
+	file_info[i].len = (size_t)max_name_len;
+}
+
+static inline void
+untrim_filename(int i)
+{
+	file_info[i].len = trim.len;
+	file_info[i].name[max_name_len - 1] = (char)trim.a;
+	file_info[i].name[max_name_len] = (char)trim.b;
+	trim.state = trim.a = trim.b = 0;
+	trim.len = 0;
+}
+
 /* List files horizontally:
  * 1 AAA	2 AAB	3 AAC
  * 4 AAD	5 AAE	6 AAF */
@@ -1088,6 +1126,11 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
+		/* Trim file name to MAX_NAME_LEN */
+		if (!unicode && max_name_len != UNSET && !long_view
+		&& (int)file_info[i].len > max_name_len)
+			trim_filename(i);
+
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
 		if (colorize) {
@@ -1110,6 +1153,9 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		} else {
 			putchar('\n');
 		}
+
+		if (!unicode && trim.state == 1)
+			untrim_filename(i);
 	}
 
 	if (!last_column)
@@ -1207,6 +1253,11 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			 * #    PRINT THE CURRENT ENTRY    #
 			 * ################################# */
 
+		/* Trim file name to MAX_NAME_LEN */
+		if (!unicode && max_name_len != UNSET && !long_view
+		&& (int)file_info[x].len > max_name_len)
+			trim_filename(x);
+
 		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
 
 		if (colorize) {
@@ -1229,6 +1280,9 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		} else {
 			putchar('\n');
 		}
+
+		if (!unicode && trim.state == 1)
+			untrim_filename(x);
 	}
 
 	if (!last_column)
@@ -1596,6 +1650,11 @@ list_dir(void)
 
 	if (clear_screen)
 		CLEAR;
+
+	if (!unicode) {
+		trim.state = trim.a = trim.b = 0;
+		trim.len = 0;
+	}
 
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
