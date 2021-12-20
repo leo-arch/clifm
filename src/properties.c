@@ -481,19 +481,24 @@ print_entry_props(const struct fileinfo *props, size_t max)
 
 	free(wname);
 
+	char trim_diff[8];
+	*trim_diff = '\0';
+	if (diff > 0)
+		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
+
 #ifndef _NO_ICONS
-	printf("%s%s%c%s%s%ls\x1b[%dC%s%-*s%s%s %c/%c%c%c/%c%c%c/%c%c%c%s  "
-	       "%u:%u  %s  %s\n",
+	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
+		   "%c/%c%c%c/%c%c%c/%c%c%c%s  %u:%u  %s  %s\n",
 	    colorize ? props->icon_color : "",
 	    icons ? props->icon : "", icons ? ' ' : 0, df_c,
 #else
-	printf("%s%ls\x1b[%dC%s%-*s%s%s %c/%c%c%c/%c%c%c/%c%c%c%s  "
+	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m %c/%c%c%c/%c%c%c/%c%c%c%s  "
 	       "%u:%u  %s  %s\n",
 #endif
 	    colorize ? props->color : "",
-		(wchar_t *)tname, diff > 0 ? diff : -1,
+		(wchar_t *)tname, trim_diff,
 	    light_mode ? "" : df_c, pad, "", df_c,
-	    trim ? "\x1b[1;31m~\x1b[0m" : "", file_type,
+	    trim ? tt_c : "", trim ? '~' : 0, file_type,
 	    read_usr, write_usr, exec_usr,
 	    read_grp, write_grp, exec_grp,
 	    read_others, write_others, exec_others,

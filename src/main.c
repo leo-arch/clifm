@@ -581,6 +581,7 @@ char
 	ts_c[MAX_COLOR], /* TAB completion suffix */
 	wc_c[MAX_COLOR], /* Welcome message color */
 	wp_c[MAX_COLOR], /* Warning prompt */
+	tt_c[MAX_COLOR], /* Tilde for trimmed files */
 
 	/* Suggestions */
 	sb_c[MAX_COLOR], /* Auto-suggestions: shell builtins */

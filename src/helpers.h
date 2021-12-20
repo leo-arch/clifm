@@ -752,7 +752,6 @@ extern int
 	dir_changed, /* flag to know is dir was changed: used by autocmds */
 	dirhist_map,
 	disk_usage,
-/*	elnpad, */
 	expand_bookmarks,
 	ext_cmd_ok,
 	files_counter,
@@ -997,6 +996,7 @@ extern char
 	ts_c[MAX_COLOR],	/* TAB completion suffix */
 	wc_c[MAX_COLOR],	/* Welcome message */
 	wp_c[MAX_COLOR],	/* Warning prompt */
+	tt_c[MAX_COLOR],	/* Tilde for trimmed files */
 
 	/* Suggestions */
 	sb_c[MAX_COLOR],	/* Auto-suggestions: shell builtins */
