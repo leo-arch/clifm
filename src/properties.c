@@ -70,8 +70,8 @@ get_properties(char *filename, const int dsize)
 
 	/* Get file type (and color) */
 	char file_type = 0;
-	char *linkname = (char *)NULL,
-		 *color = (char *)NULL;
+	char *linkname = (char *)NULL, *color = (char *)NULL;
+	char ext_color[MAX_COLOR];
 
 	switch (attr.st_mode & S_IFMT) {
 	case S_IFREG: {
@@ -110,7 +110,6 @@ get_properties(char *filename, const int dsize)
 				if (ext) {
 					char *extcolor = get_ext_color(ext);
 					if (extcolor) {
-						char ext_color[MAX_COLOR] = "";
 						sprintf(ext_color, "\x1b[%sm", extcolor);
 						color = ext_color;
 						extcolor = (char *)NULL;
