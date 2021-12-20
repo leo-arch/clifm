@@ -1684,10 +1684,13 @@ get_sel_files(void)
 		sel_elements[sel_n] = savestring(line, len);
 		/* Store device and inode number to identify later selected files
 		 * and mark them in the files list */
+		sel_devino = (struct devino_t *)xrealloc(sel_devino, (sel_n + 1) * sizeof(struct devino_t));
 		if (fstatat(AT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) != -1) {
-			sel_devino = (struct devino_t *)xrealloc(sel_devino, (sel_n + 1) * sizeof(struct devino_t));
 			sel_devino[sel_n].ino = a.st_ino;
 			sel_devino[sel_n].dev = a.st_dev;
+		} else {
+			sel_devino[sel_n].ino = 0;
+			sel_devino[sel_n].dev = 0;
 		}
 		sel_n++;
 	}
