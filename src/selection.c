@@ -550,22 +550,25 @@ sel_function(char **args)
 			}
 
 			char *tmp = (char *)NULL;
+			char *name = args[i];
+			if (*name == '.' && *(name + 1) == '/')
+				name += 2;
 
 			if (*args[i] != '/') {
 				if (!sel_path) {
 					if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
-						tmp = (char *)xnmalloc(strlen(args[i]) + 2,
+						tmp = (char *)xnmalloc(strlen(name) + 2,
 									sizeof(char));
-						sprintf(tmp, "/%s", args[i]);
+						sprintf(tmp, "/%s", name);
 					} else {
 						tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
-									+ strlen(args[i]) + 2, sizeof(char));
-						sprintf(tmp, "%s/%s", ws[cur_ws].path, args[i]);
+									+ strlen(name) + 2, sizeof(char));
+						sprintf(tmp, "%s/%s", ws[cur_ws].path, name);
 					}
 				} else {
-					tmp = (char *)xnmalloc(strlen(dir) + strlen(args[i])
-													+ 2, sizeof(char));
-					sprintf(tmp, "%s/%s", dir, args[i]);
+					tmp = (char *)xnmalloc(strlen(dir) + strlen(name)
+							+ 2, sizeof(char));
+					sprintf(tmp, "%s/%s", dir, name);
 				}
 
 				struct stat fattr;
@@ -580,9 +583,9 @@ sel_function(char **args)
 				struct stat fattr;
 				if (lstat(args[i], &fattr) == -1) {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					    args[i], strerror(errno));
+					    name, strerror(errno));
 				} else {
-					new_sel += select_file(args[i]);
+					new_sel += select_file(name);
 				}
 			}
 		} else {
