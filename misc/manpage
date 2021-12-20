@@ -1099,17 +1099,18 @@ The following codes are used for different interface elements (in the \fIInterfa
  si = stealth mode indicator
 
  \fBMiscellaneous interface elements\fR
- bm = bookmarked directory in the bookmarks screen
- el = ELN color
- mi = misc indicators (disk usage, sort method, bulk rename, jump database list)
- tx = command line text
- df = default color
- dc = files counter
- wc = welcome message
- dh = directory history index
- dl = dividing line
- ts = matching suffix for possible TAB completed entries
+ bm  = bookmarked directory in the bookmarks screen
+ el  = ELN color
+ mi  = misc indicators (disk usage, sort method, bulk rename, jump database list)
+ tx  = command line text
+ df  = default color
+ dc  = files counter
+ wc  = welcome message
+ dh  = directory history index
+ dl  = dividing line
+ ts  = matching suffix for possible TAB completed entries
  wsN = color for workspace N (1-8)
+ tt  = tilde for trimmed file names
 .TP
 Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the corresponding color scheme file: \fBdi=01;34\fR. If you want ELN's to be red, add this code to the \fIInterfaceColors\fR line: \fBel=00;31\fR
 .TP
