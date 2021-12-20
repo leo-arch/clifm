@@ -83,8 +83,9 @@ get_profile_names(void)
 		    && *profs[i]->d_name != '.') {
 			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
 												* sizeof(char *));
-			profile_names[pf_n++] = savestring(profs[i]->d_name,
+			profile_names[pf_n] = savestring(profs[i]->d_name,
 			    strlen(profs[i]->d_name));
+			pf_n++;
 		}
 
 		free(profs[i]);

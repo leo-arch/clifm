@@ -133,8 +133,10 @@ xstrverscmp(const char *s1, const char *s2)
 		c2 = TOUPPER(*p2);
 		++p2;
 	} else {
-		c1 = *p1++;
-		c2 = *p2++;
+		c1 = *p1;
+		c2 = *p2;
+		p1++;
+		p2++;
 	}
 
 	/* Hint: '0' is a digit too.  */
@@ -151,8 +153,10 @@ xstrverscmp(const char *s1, const char *s2)
 			c2 = TOUPPER(*p2);
 			++p2;
 		} else {
-			c1 = *p1++;
-			c2 = *p2++;
+			c1 = *p1;
+			c2 = *p2;
+			p1++;
+			p2++;
 		}
 		state += (c1 == '0') + (_ISDIGIT(c1) != 0);
 	}
@@ -202,12 +206,12 @@ int
 u8truncstr(char *restrict str, size_t n)
 {
 	int len = 0;
-	wchar_t buf[PATH_MAX] = {0};
+	wchar_t buf[PATH_MAX];
 	if (mbstowcs(buf, str, PATH_MAX) == (size_t)-1)
 		return 0;
 
-	int i = 0;
-	for (; buf[i]; i++) {
+	int i;
+	for (i = 0; buf[i]; i++) {
 		int l = wcwidth(buf[i]);
 		if (len + l > (int)n) {
 			buf[i] = L'\0';
@@ -224,17 +228,18 @@ u8truncstr(char *restrict str, size_t n)
 char *
 truncate_wname(const char *name)
 {
-	int i = 0;
+	int i;
 	char *n = (char *)xnmalloc(NAME_MAX, sizeof(char));
 	char *p = n;
 
-	for (; name[i]; i++) {
+	for (i = 0; name[i]; i++) {
 		if (i == NAME_MAX)
 			break;
 		if (name[i] >= 0 && name[i] <= 31)
-			*(n++) = '^';
+			*n = '^';
 		else
-			*(n++) = name[i];
+			*n = name[i];
+		n++;
 	}
 
 	*n = '\0';
@@ -248,7 +253,7 @@ int
 strcntchr(const char *str, const char c)
 {
 	if (!str)
-		return -1;
+		return (-1);
 
 	register int i = 0;
 
@@ -259,7 +264,7 @@ strcntchr(const char *str, const char c)
 		str++;
 	}
 
-	return -1;
+	return (-1);
 }
 
 /* Returns the index of the last appearance of c in str, if any, and
@@ -268,7 +273,7 @@ int
 strcntchrlst(const char *str, const char c)
 {
 	if (!str)
-		return -1;
+		return (-1);
 
 	register int i = 0;
 
@@ -436,7 +441,8 @@ gen_rand_str(size_t len)
 
 	while (len--) {
 		int i = rand() % (int)(sizeof(charset) - 1);
-		*p++ = charset[i];
+		*p = charset[i];
+		p++;
 	}
 
 	*p = '\0';
@@ -531,7 +537,8 @@ split_str(const char *str)
 				/* If escaped, it has no special meaning */
 				if (str_len && *(str - 1) == '\\') {
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-					buf[buf_len++] = *str;
+					buf[buf_len] = *str;
+					buf_len++;
 					break;
 				} else {
 					/* If '`' advance one char. Otherwise the while
@@ -540,14 +547,17 @@ split_str(const char *str)
 					close = *str;
 					str++;
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-					buf[buf_len++] = '`';
+					buf[buf_len] = '`';
+					buf_len++;
 				}
 			}
 
 			/* Copy everything until null byte or closing char */
 			while (*str && *str != close) {
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-				buf[buf_len++] = *(str++);
+				buf[buf_len] = *str;
+				buf_len++;
+				str++;
 			}
 
 			/* If the while loop stopped with a null byte, there was
@@ -581,7 +591,8 @@ split_str(const char *str)
 			/* If the quote is escaped, it has no special meaning */
 			if (ft_cmd || (str_len && *(str - 1) == '\\')) {
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-				buf[buf_len++] = *str;
+				buf[buf_len] = *str;
+				buf_len++;
 				break;
 			}
 
@@ -595,11 +606,14 @@ split_str(const char *str)
 				/* If char has special meaning, escape it */
 				if (is_quote_char(*str)) {
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-					buf[buf_len++] = '\\';
+					buf[buf_len] = '\\';
+					buf_len++;
 				}
 
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-				buf[buf_len++] = *(str++);
+				buf[buf_len] = *str;
+				buf_len++;
+				str++;
 			}
 
 			/* The above while breaks with NULL or quote, so that if
@@ -627,7 +641,8 @@ split_str(const char *str)
 			/* If escaped, just copy it into the buffer */
 			if (str_len && *(str - 1) == '\\') {
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-				buf[buf_len++] = *str;
+				buf[buf_len] = *str;
+				buf_len++;
 			} else {
 				/* If not escaped, break the string */
 				/* Add a terminating null byte to the buffer, and, if
@@ -651,7 +666,8 @@ split_str(const char *str)
 		 * substitution, just dump it into the buffer */
 		default:
 			buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-			buf[buf_len++] = *str;
+			buf[buf_len] = *str;
+			buf_len++;
 			break;
 		}
 
@@ -1022,7 +1038,9 @@ parse_input_str(char *str)
 		buf = (char *)xcalloc(str_len + 1, sizeof(char));
 		for (j = 0; j < str_len; j++) {
 			while (str[j] && str[j] != ' ' && str[j] != ';' && str[j] != '&') {
-				buf[len++] = str[j++];
+				buf[len] = str[j];
+				len++;
+				j++;
 			}
 
 			if (strcmp(buf, "&&") != 0) {
@@ -1098,7 +1116,8 @@ parse_input_str(char *str)
 	if (*substr[args_n] == '&' && !*(substr[args_n] + 1)) {
 		bg_proc = 1;
 		free(substr[args_n]);
-		substr[args_n--] = (char *)NULL;
+		substr[args_n] = (char *)NULL;
+		args_n--;
 	} else {
 		size_t len = strlen(substr[args_n]);
 		if (substr[args_n][len - 1] == '&' && !substr[args_n][len]) {
@@ -1266,13 +1285,15 @@ parse_input_str(char *str)
 				for (i = 0; i < ranges_n; i++) {
 					ranges_cmd[j] = (char *)xcalloc((size_t)DIGINUM(ranges[i])
 													+ 1, sizeof(int));
-					sprintf(ranges_cmd[j++], "%d", ranges[i]);
+					sprintf(ranges_cmd[j], "%d", ranges[i]);
+					j++;
 				}
 
 				for (i = (size_t)range_array[r] + old_ranges_n + 1;
 				     i <= args_n; i++) {
-					ranges_cmd[j++] = savestring(substr[i],
+					ranges_cmd[j] = savestring(substr[i],
 					    strlen(substr[i]));
+					j++;
 				}
 
 				ranges_cmd[j] = NULL;
@@ -1316,7 +1337,8 @@ parse_input_str(char *str)
 			for (i = 0; i < (size_t)is_sel; i++) {
 				if (!substr[i])
 					continue;
-				sel_array[j++] = savestring(substr[i], strlen(substr[i]));
+				sel_array[j] = savestring(substr[i], strlen(substr[i]));
+				j++;
 			}
 
 			for (i = 0; i < sel_n; i++) {
@@ -1670,7 +1692,8 @@ parse_input_str(char *str)
 					/* Escape the globbed file name and copy it */
 					char *esc_str = escape_str(globbuf.gl_pathv[i]);
 					if (esc_str) {
-						glob_cmd[j++] = savestring(esc_str, strlen(esc_str));
+						glob_cmd[j] = savestring(esc_str, strlen(esc_str));
+						j++;
 						free(esc_str);
 					} else {
 						fprintf(stderr, _("%s: %s: Error quoting "
@@ -1690,8 +1713,10 @@ parse_input_str(char *str)
 				}
 
 				for (i = (size_t)glob_array[g] + old_pathc + 1;
-				i <= args_n; i++)
-					glob_cmd[j++] = savestring(substr[i], strlen(substr[i]));
+				i <= args_n; i++) {
+					glob_cmd[j] = savestring(substr[i], strlen(substr[i]));
+					j++;
+				}
 
 				glob_cmd[j] = (char *)NULL;
 
@@ -1733,14 +1758,16 @@ parse_input_str(char *str)
 				word_cmd = (char **)xcalloc(args_n + wordbuf.we_wordc + 1,
 											sizeof(char *));
 
-				for (i = 0; i < ((size_t)word_array[w] + old_pathc); i++)
-					word_cmd[j++] = savestring(substr[i], strlen(substr[i]));
-
+				for (i = 0; i < ((size_t)word_array[w] + old_pathc); i++) {
+					word_cmd[j] = savestring(substr[i], strlen(substr[i]));
+					j++;
+				}
 				for (i = 0; i < wordbuf.we_wordc; i++) {
 					/* Escape the globbed file name and copy it*/
 					char *esc_str = escape_str(wordbuf.we_wordv[i]);
 					if (esc_str) {
-						word_cmd[j++] = savestring(esc_str, strlen(esc_str));
+						word_cmd[j] = savestring(esc_str, strlen(esc_str));
+						j++;
 						free(esc_str);
 					} else {
 						fprintf(stderr, _("%s: %s: Error quoting "
@@ -1761,8 +1788,10 @@ parse_input_str(char *str)
 				}
 
 				for (i = (size_t)word_array[w] + old_pathc + 1;
-				i <= args_n; i++)
-					word_cmd[j++] = savestring(substr[i], strlen(substr[i]));
+				i <= args_n; i++) {
+					word_cmd[j] = savestring(substr[i], strlen(substr[i]));
+					j++;
+				}
 
 				word_cmd[j] = (char *)NULL;
 
@@ -1831,7 +1860,8 @@ parse_input_str(char *str)
 			/*          fprintf(stderr, "%s: %s: Invalid regular expression",
 					PROGRAM_NAME, substr[i]); */
 			regfree(&regex);
-			regex_files[r_files++] = substr[i];
+			regex_files[r_files] = substr[i];
+			r_files++;
 			continue;
 		}
 
@@ -1839,13 +1869,16 @@ parse_input_str(char *str)
 
 		for (j = 0; j < files; j++) {
 			if (regexec(&regex, file_info[j].name, 0, NULL, 0) == EXIT_SUCCESS) {
-				regex_files[r_files++] = file_info[j].name;
+				regex_files[r_files] = file_info[j].name;
+				r_files++;
 				reg_found = 1;
 			}
 		}
 
-		if (!reg_found)
-			regex_files[r_files++] = substr[i];
+		if (!reg_found) {
+			regex_files[r_files] = substr[i];
+			r_files++;
+		}
 
 		regfree(&regex);
 	}
@@ -1854,8 +1887,10 @@ parse_input_str(char *str)
 		regex_files[r_files] = (char *)NULL;
 		char **tmp_files = (char **)xnmalloc(r_files + 2, sizeof(char *));
 		size_t k = 0;
-		for (j = 0; regex_files[j]; j++)
-			tmp_files[k++] = savestring(regex_files[j], strlen(regex_files[j]));
+		for (j = 0; regex_files[j]; j++) {
+			tmp_files[k] = savestring(regex_files[j], strlen(regex_files[j]));
+			k++;
+		}
 		tmp_files[k] = (char *)NULL;
 
 		for (j = 0; j <= args_n; j++)
@@ -1930,7 +1965,8 @@ expand_range(char *str, int listdir)
 
 	int afirst = atoi(str);
 
-	if (!is_number(++p))
+	++p;
+	if (!is_number(p))
 		return (int *)NULL;
 
 	int asecond = atoi(p);
@@ -1949,8 +1985,10 @@ expand_range(char *str, int listdir)
 	buf = (int *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(int));
 
 	size_t i, j = 0;
-	for (i = (size_t)afirst; i <= (size_t)asecond; i++)
-		buf[j++] = (int)i;
+	for (i = (size_t)afirst; i <= (size_t)asecond; i++) {
+		buf[j] = (int)i;
+		j++;
+	}
 
 	return buf;
 }
@@ -1987,9 +2025,13 @@ escape_str(const char *str)
 	buf = (char *)xnmalloc(strlen(str) * 2 + 1, sizeof(char));
 
 	while (*str) {
-		if (is_quote_char(*str))
-			buf[len++] = '\\';
-		buf[len++] = *(str++);
+		if (is_quote_char(*str)) {
+			buf[len] = '\\';
+			len++;
+		}
+		buf[len] = *str;
+		len++;
+		str++;
 	}
 
 	buf[len] = '\0';
@@ -2042,7 +2084,8 @@ get_substr(char *str, const char ifs)
 
 			substr[substr_n] = p;
 			p = (char *)NULL;
-			xstrsncpy(substr[substr_n++], buf, length);
+			xstrsncpy(substr[substr_n], buf, length);
+			substr_n++;
 			length = 0;
 		} else {
 			str++;
@@ -2087,7 +2130,8 @@ get_substr(char *str, const char ifs)
 
 				*q = '\0';
 				char *first = savestring(substr[i], strlen(substr[i]));
-				*(q++) = '-';
+				*q = '-';
+				q++;
 
 				if (!first)
 					break;
@@ -2130,13 +2174,16 @@ get_substr(char *str, const char ifs)
 								sizeof(char *));
 		/* Copy everything before the range expression
 		 * into the buffer */
-		for (j = 0; j < i; j++)
-			rbuf[k++] = savestring(substr[j], strlen(substr[j]));
+		for (j = 0; j < i; j++) {
+			rbuf[k] = savestring(substr[j], strlen(substr[j]));
+			k++;
+		}
 
 		/* Copy the expanded range into the buffer */
 		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
 			rbuf[k] = (char *)xnmalloc((size_t)DIGINUM((int)j) + 1, sizeof(char));
-			sprintf(rbuf[k++], "%zu", j);
+			sprintf(rbuf[k], "%zu", j);
+			k++;
 		}
 
 		/* Copy everything after the range expression into
@@ -2144,7 +2191,8 @@ get_substr(char *str, const char ifs)
 		if (substr[i + 1]) {
 			next = k;
 			for (j = (i + 1); substr[j]; j++) {
-				rbuf[k++] = savestring(substr[j], strlen(substr[j]));
+				rbuf[k] = savestring(substr[j], strlen(substr[j]));
+				k++;
 			}
 		} else { /* If there's nothing after last range, there's no next
 		either */
@@ -2194,7 +2242,8 @@ get_substr(char *str, const char ifs)
 		}
 
 		dstr = (char **)xrealloc(dstr, (len + 1) * sizeof(char *));
-		dstr[len++] = savestring(substr[i], strlen(substr[i]));
+		dstr[len] = savestring(substr[i], strlen(substr[i]));
+		len++;
 		free(substr[i]);
 	}
 
@@ -2224,10 +2273,13 @@ dequote_str(char *text, int mt)
 	while (*text) {
 		switch (*text) {
 		case '\\':
-			buf[len++] = *(++text);
+			++text;
+			buf[len] = *text;
+			len++;
 			break;
 		default:
-			buf[len++] = *text;
+			buf[len] = *text;
+			len++;
 			break;
 		}
 		if (!*text)

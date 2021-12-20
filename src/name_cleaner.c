@@ -232,23 +232,30 @@ clean_file_name(const char *restrict name)
 			if (ret == BRACKETS_TRANSLATION) {
 				if (q == p || (*(q - 1) != BRACKETS_TRANSLATION
 				&& *(q - 1) != DEFAULT_TRANSLATION)) {
-					*(q++) = (char)ret;
+					*q = (char)ret;
+					q++;
 					cur_len++;
 				}
-				else if (q != p && *(q - 1) == DEFAULT_TRANSLATION)
-					*(--q) = (char)ret;
+				else {
+					if (q != p && *(q - 1) == DEFAULT_TRANSLATION) {
+						q--;
+						*q = (char)ret;
+					}
+				}
 			}
 
 			else if (ret == DEFAULT_TRANSLATION && (q == p
 			|| (*(q - 1) != DEFAULT_TRANSLATION
 			&& *(q - 1) != BRACKETS_TRANSLATION))) {
-				*(q++) = (char)ret;
+				*q = (char)ret;
+				q++;
 				cur_len++;
 			}
 
 			else if (ret != BRACKETS_TRANSLATION
 			&& ret != DEFAULT_TRANSLATION) {
-				*(q++) = (char)ret;
+				*q = (char)ret;
+				q++;
 				cur_len++;
 			}
 			continue;
@@ -260,7 +267,8 @@ clean_file_name(const char *restrict name)
 			continue;
 		if (dec_value == -2) {
 			if (q != p && *(q - 1) != DEFAULT_TRANSLATION) {
-				*(q++) = DEFAULT_TRANSLATION;
+				*q = DEFAULT_TRANSLATION;
+				q++;
 				cur_len++;
 			}
 			continue;
@@ -306,11 +314,13 @@ clean_file_name(const char *restrict name)
 		}
 		snprintf(p, NAME_MAX, "%s.%s", FUNC_NAME, suffix);
 		free(suffix);
-	} else if (!*(p + 1)) {
-		/* Avoid one character long file names. Specially because files
-		 * named with a single dot should be avoided */
-		char c = *p;
-		snprintf(p, NAME_MAX, "%c.%s", c, FUNC_NAME);
+	} else {
+		if (!*(p + 1)) {
+			/* Avoid one character long file names. Specially because files
+			 * named with a single dot should be avoided */
+			char c = *p;
+			snprintf(p, NAME_MAX, "%c.%s", c, FUNC_NAME);
+		}
 	}
 
 	/* Do not make hidden a file that wasn't */
@@ -363,9 +373,9 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 	}
 #endif
 
-	size_t i = 0;
+	size_t i;
 	/* Copy all files to be renamed to the temp file */
-	for (; i < *n; i++) {
+	for (i = 0; i < *n; i++) {
 #ifndef __HAIKU__
 		dprintf(fd, "original: %s\nreplacement: %s\n\n",
 #else
@@ -493,10 +503,8 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 	}
 
 	*n = j;
-
 	free(line);
 	close_fstream(fp, fd);
-
 	return bfiles;
 }
 

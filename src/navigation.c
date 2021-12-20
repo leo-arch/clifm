@@ -83,11 +83,13 @@ workspaces(char *str)
 			tmp_ws = cur_ws + 1;
 		else
 			return EXIT_FAILURE;
-	} else if (*str == '-' && !str[1]) {
-		if ((cur_ws - 1) >= 0)
-			tmp_ws = cur_ws - 1;
-		else
-			return EXIT_FAILURE;
+	} else {
+		if (*str == '-' && !str[1]) {
+			if ((cur_ws - 1) >= 0)
+				tmp_ws = cur_ws - 1;
+			else
+				return EXIT_FAILURE;
+		}
 	}
 
 	/* If new workspace has no path yet, copy the path of the current
@@ -95,12 +97,14 @@ workspaces(char *str)
 	if (!ws[tmp_ws].path) {
 		ws[tmp_ws].path = savestring(ws[cur_ws].path,
 		    strlen(ws[cur_ws].path));
-	} else if (access(ws[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
-		    strerror(errno));
-		free(ws[tmp_ws].path);
-		ws[tmp_ws].path = savestring(ws[cur_ws].path,
-		    strlen(ws[cur_ws].path));
+	} else {
+		if (access(ws[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
+				strerror(errno));
+			free(ws[tmp_ws].path);
+			ws[tmp_ws].path = savestring(ws[cur_ws].path,
+				strlen(ws[cur_ws].path));
+		}
 	}
 
 	if (xchdir(ws[tmp_ws].path, SET_TITLE) == -1) {
@@ -297,22 +301,25 @@ backdir(const char* str)
 		return EXIT_FAILURE;
 	}
 
-	int exit_status = EXIT_SUCCESS, i = 0;
+	int exit_status = EXIT_SUCCESS, i;
 	if (n == 1) {
 		/* Just one match: change to it */
 		exit_status = cd_function(matches[0], CD_PRINT_ERROR);
 	} else if (n > 1) {
 		/* If multiple matches, print a menu to choose from */
-		for (; matches[i]; i++) {
+		for (i = 0; matches[i]; i++) {
 			char *sl = strrchr(matches[i], '/');
 			int flag = 0;
 			if (sl && *(sl + 1)) {
-				*(sl++) = '\0';
+				*sl = '\0';
+				sl++;
 				flag = 1;
 			}
 			printf("%s%d%s %s%s%s\n", el_c, i + 1, df_c, di_c, sl ? sl : "/", df_c);
-			if (flag)
-				*(--sl) = '/';
+			if (flag) {
+				sl--;
+				*sl = '/';
+			}
 		}
 		int choice = grab_bd_input(i);
 		if (choice != -1)
@@ -493,9 +500,9 @@ fastback(const char *str)
 
 	size_t i, c = 2;
 	for (i = 2; c < dots;) {
-		q[i++] = '/';
-		q[i++] = '.';
-		q[i++] = '.';
+		q[i] = '/'; i++;
+		q[i] = '.'; i++;
+		q[i] = '.'; i++;
 		c++;
 	}
 
