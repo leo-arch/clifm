@@ -516,7 +516,8 @@ rl_accept_suggestion(int count, int key)
 			} else {
 				/* In case of slash, keep a copy of the next char, if any:
 				 * we cannot know in advance what comes after the slash */
-				if (*(++s))
+				s++;
+				if (*s)
 					_s = *s;
 				slash = 1;
 			}

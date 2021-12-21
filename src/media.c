@@ -558,7 +558,8 @@ media_menu(int mode)
 			media[j].mnt = savestring(fslist[i].f_mntonname,
 					strlen(fslist[i].f_mntonname));
 			media[j].label = (char *)NULL;
-			media[j++].dev = (char *)NULL;
+			media[j].dev = (char *)NULL;
+			j++;
 		}
 	}
 

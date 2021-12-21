@@ -342,14 +342,15 @@ is_internal_c(char *restrict cmd)
 		NULL};
 		
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
-	if (found_cmd(int_cmds, i, cmd))
+	if (found_cmd(int_cmds, i, cmd)) {
 		return 1;
-
-	/* Check for the search and history functions as well */
-	else if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
-	&& (_ISDIGIT(cmd[1]) || (cmd[1] == '-' && _ISDIGIT(cmd[2]))
-	|| cmd[1] == '!')))
-		return 1;
+	} else {
+		/* Check for the search and history functions as well */
+		if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
+		&& (_ISDIGIT(cmd[1]) || (cmd[1] == '-' && _ISDIGIT(cmd[2]))
+		|| cmd[1] == '!')))
+			return 1;
+	}
 
 	return 0;
 }
@@ -440,25 +441,6 @@ digit_found(char *str)
 
 	return 0;
 }
-
-/* Check if the 'file' command is available: it is needed by the mime
- * function */
-/*
-void
-file_cmd_check(void)
-{
-	file_cmd_path = get_cmd_path("file");
-
-	if (!file_cmd_path) {
-		flags &= ~FILE_CMD_OK;
-		_err('n', PRINT_PROMPT, _("%s: 'file' command not found. "
-				  "Specify an application when opening files. Ex: 'o 12 nano' "
-				  "or just 'nano 12'\n"), PROGRAM_NAME);
-	}
-
-	else
-		flags |= FILE_CMD_OK;
-} */
 
 int
 check_regex(char *str)

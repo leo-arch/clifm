@@ -202,8 +202,10 @@ remotes_unmount(char *name)
 	/* Get out of mountpoint before unmounting */
 	size_t mlen = strlen(remotes[i].mountpoint);
 	if (strncmp(remotes[i].mountpoint, ws[cur_ws].path, mlen) == 0) {
-		if (remotes[i].mountpoint[mlen - 1] == '/')
-			remotes[i].mountpoint[--mlen] = '\0';
+		if (remotes[i].mountpoint[mlen - 1] == '/') {
+			mlen--;
+			remotes[i].mountpoint[mlen] = '\0';
+		}
 
 		char *p = strrchr(remotes[i].mountpoint, '/');
 		if (!p) {
@@ -340,8 +342,9 @@ automount_remotes(void)
 				char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 					continue;
-			} else if (count_dir(remotes[i].mountpoint, CPOP) > 2) {
-				continue;
+			} else {
+				if (count_dir(remotes[i].mountpoint, CPOP) > 2)
+					continue;
 			}
 			printf(_("%s: Mounting remote...\n"), remotes[i].name);
 			if (launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)

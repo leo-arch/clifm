@@ -238,6 +238,7 @@ decode_prompt(const char *line)
 				case 6: cl = ws6_c; break;
 				case 7: cl = ws7_c; break;
 				case 8: cl = ws8_c; break;
+				default: break;
 				}
 				snprintf(s, __WS_STR_LEN, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
 				temp = savestring(s, strlen(s));

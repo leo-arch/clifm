@@ -246,8 +246,7 @@ set_term_title(const char *str)
 	printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : str);
 	fflush(stdout);
 
-	if (tmp)
-		free(tmp);
+	free(tmp);
 }
 
 int
@@ -581,9 +580,11 @@ new_instance(char *dir, int sudo)
 			}
 
 			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1, sizeof(char));
-			strcpy(tmp_cmd[i + plus++], self);
+			strcpy(tmp_cmd[i + plus], self);
+			plus++;
 			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(path_dir) + 1, sizeof(char));
-			strcpy(tmp_cmd[i + plus++], path_dir);
+			strcpy(tmp_cmd[i + plus], path_dir);
+			plus++;
 			tmp_cmd[i + plus] = (char *)NULL;
 		}
 	}
@@ -917,7 +918,8 @@ create_usr_var(char *str)
 
 	usr_var = xrealloc(usr_var, (size_t)(usrvar_n + 2) * sizeof(struct usrvar_t));
 	usr_var[usrvar_n].name = savestring(name, strlen(name));
-	usr_var[usrvar_n++].value = savestring(value, strlen(value));
+	usr_var[usrvar_n].value = savestring(value, strlen(value));
+	usrvar_n++;
 
 	usr_var[usrvar_n].name = (char *)NULL;
 	usr_var[usrvar_n].value = (char *)NULL;

@@ -139,6 +139,7 @@ int main(int argc, char **argv)
 				printw("\\x%02x | \\%03o | RS\n", c, c); break;
 			case 31:
 				printw("\\x%02x | \\%03o | US\n", c, c); break;
+			default: break;
 		}
 	}
 

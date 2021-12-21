@@ -400,8 +400,10 @@ check_completions(char *str, size_t len, const unsigned char c,
 		return NO_MATCH;
 
 	if (len) {
-		while (str[len - 1] == ' ')
-			str[--len] = '\0';
+		while (str[len - 1] == ' ') {
+			len--;
+			str[len] = '\0';
+		}
 	}
 
 	int printed = NO_MATCH;
@@ -567,10 +569,14 @@ check_filenames(char *str, size_t len, const unsigned char c,
 	}
 
 	if (len) {
-		while (str[len - 1] == ' ')
-			str[--len] = '\0';
-		if (str[len - 1] == '/')
-			str[--len] = '\0';
+		while (str[len - 1] == ' ') {
+			len--;
+			str[len] = '\0';
+		}
+		if (str[len - 1] == '/') {
+			len--;
+			str[len] = '\0';
+		}
 	}
 
 	if (suggest_filetype_color)
@@ -1090,15 +1096,12 @@ get_last_word(const char *last_space, size_t buflen)
 {
 	if (last_space) {
 		char *rl = rl_line_buffer;
-//		int j = (int)buflen;
 		int j = rl_end;
 		while (--j >= 0) {
 			if (j + 1 && rl[j] == ' ' && rl[j + 1] && rl[j + 1] != ' ')
-//			if (rl_line_buffer[j] == ' ')
 				break;
 		}
 		last_word_offset = j + 1;
-//		printf("'%d'", last_word_offset);
 		buflen = strlen(last_space);
 
 		if (*(++last_space)) {
