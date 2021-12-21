@@ -2131,7 +2131,6 @@ get_prompt_cmds(void)
 		prompt_cmds_n = 0;
 	}
 
-//	int prompt_line_found = 0;
 	char *line = (char *)NULL;
 	size_t line_size = 0;
 	ssize_t line_len = 0;
@@ -2148,19 +2147,6 @@ get_prompt_cmds(void)
 		prompt_cmds[prompt_cmds_n] = savestring(
 		    line + 10, (size_t)line_len - 10);
 		prompt_cmds_n++;
-
-/*		if (prompt_line_found) {
-			if (strncmp(line, "#END OF PROMPT", 14) == 0)
-				break;
-			if (*line != '#') {
-				prompt_cmds = (char **)xrealloc(prompt_cmds,
-				    (prompt_cmds_n + 1) * sizeof(char *));
-				prompt_cmds[prompt_cmds_n++] = savestring(
-				    line, (size_t)line_len);
-			}
-		} else if (strncmp(line, "#PROMPT", 7) == 0) {
-			prompt_line_found = 1;
-		} */
 	}
 
 	free(line);
