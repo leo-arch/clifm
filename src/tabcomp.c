@@ -627,7 +627,9 @@ fzftabcomp(char **matches)
 
 	int multi = 0;
 	/* TAB completion cases allowing multiple selection */
-	if (cur_comp_type == TCMP_SEL)
+	if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL
+	|| cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_TRASHDEL
+	|| cur_comp_type == TCMP_UNTRASH)
 		multi = 1;
 
 	/* Run FZF and store the ouput into the FZFTABOUT file */
