@@ -485,7 +485,7 @@ These following simple rules are used to compose clean/safe file names:
     - NUL (\\0) and slash (/) characters are completely disallowed
     - Only characters from the \fBPortable Filename Characters Set\fR (a-zA-Z0-9._-) are allowed
     - { [ ( ) ] } are replaced by a dash (-). Everything else is replaced by an underscore (_)
-    - Unicode characters are translated, whenever possible, into an ASCII replacement. Otherwise, they are just ignored. For example, Ä will be replaced by A (ě by e, Ĭ by I, and so on), but 😀 (the smiley face) will be simply ignored. A few special signs will be translated into text, for instance, £ will be replaced by _pound_ and € by EUR. Translations are made via a translation table (cleaner_table.h)
+    - Unicode characters are translated, whenever possible, into an ASCII replacement. Otherwise, they are just ignored. For example, an upper case A with diacritic (accent, umlaut, diaresis, and so on) will be replaced by an ASCII A, but the smiley face emoji will be simply ignored. A few special signs will be translated into text, for instance, the pound sign will be replaced by "_pound_" and the Euro symbol by "EUR". Translations are made via a translation table (cleaner_table.h)
     - File names never start with a dash (-)
     - Files named . and .. are not allowed
     - Append .bleach to one character long file names
@@ -1253,7 +1253,7 @@ If the destiny directory is omitted, selected files are copied into the current 
 .TP
 To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectively. The same goes for wildcards and braces: 'chmod +x *', for example, will set the executable bit on all files (excluding hidden files) in the current working directory, while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 respectively.
 .TP
-To operate only on \fIsome\fR selected files, you can use TAB completion. Just enter 'sel' and, without appending any space char, press TAB: the list of selected files will be displayed. Choose one to oeprate on that specific file.
+If using the FZF mode for TAB completion (see below), you can operate only on \fIsome\fR selected files as follows: type 'CMD sel' and, without appending any space char, press TAB: the list of selected files will be displayed. Choose one or more of them (use TAB to mark entries) to operate only on those specific files. For example, to print the file properties of some specific selected files: p sel->TAB, select the files you want via TAB, press Enter or Right (marked files will be inserted in the command line), and the press Enter, as usual.
 .TP
 \fBTAB completion\fR
 .TP
