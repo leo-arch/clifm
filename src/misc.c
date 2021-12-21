@@ -2109,6 +2109,8 @@ bonus_function(void)
 	    "\"A work of art is never finished, but adandoned\" (J. L. Guerrero)",
 	    "At the beginning, software was hardware; but today hardware is "
 	    "being absorbed by software",
+	    "\"What you're referring to as Linux, is in fact, GNU/Linux\" (RMS)",
+	    "\"Given enough eyeballs, all bugs are shallow.\" (Linus's law)",
 	    NULL};
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
