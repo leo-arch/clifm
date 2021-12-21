@@ -2065,7 +2065,7 @@ splash(void)
 			df_c, BOLD, df_c, PROGRAM_NAME, _(PROGRAM_DESC));
 
 	if (splash_screen) {
-		printf(_("\n\t\t\tPress any key to continue... "));
+		printf(_("\n            Press any key to continue... "));
 		xgetchar();
 		putchar('\n');
 	} else {
