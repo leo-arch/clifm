@@ -796,13 +796,8 @@ exec_cmd(char **comm)
 		exit_code = create_file(comm);
 
 	/*     ############### DUPLICATE FILE ##################     */
-	else if (*comm[0] == 'd' && (!comm[0][1] || strcmp(comm[0], "dup") == 0)) {
-		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)) {
-			puts(DUP_USAGE);
-			return EXIT_SUCCESS;
-		}
-		exit_code = dup_file(comm[1], comm[2] ? comm[2] : NULL);
-	}
+	else if (*comm[0] == 'd' && (!comm[0][1] || strcmp(comm[0], "dup") == 0))
+		exit_code = dup_file(comm);
 
 #ifdef __HAIKU__
 	else if ((*comm[0] == 'c' || *comm[0] == 'r' || *comm[0] == 'm'

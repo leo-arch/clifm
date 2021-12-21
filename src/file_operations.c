@@ -121,46 +121,37 @@ xchmod(const char *file, mode_t mode)
 	return EXIT_SUCCESS;
 }
 
-/* Create a duplicate of a file/dir using rsync or cp */
 int
-dup_file(char *source, char *dest)
+dup_file(char **cmd)
 {
-	if (!source || !*source)
-		return EXIT_FAILURE;
+	if (!cmd[1] || (*cmd[1] == '-' && strcmp(cmd[1], "--help") == 0)) {
+		puts(_(DUP_USAGE));
+		return EXIT_SUCCESS;
+	}
 
 	log_function(NULL);
 
-	if (strchr(source, '\\')) {
-		char *deq_str = dequote_str(source, 0);
-		if (!deq_str) {
-			fprintf(stderr, "%s: %s: Error dequoting file name\n",
-				PROGRAM_NAME, source);
-			return EXIT_FAILURE;
-		}
-		strcpy(source, deq_str);
-		free(deq_str);
-	}
+	char *rsync_path = get_cmd_path("rsync");
+	int exit_status =  EXIT_SUCCESS;
 
-	int free_dest = 0;
-	if (dest) {
-		if (strchr(dest, '\\')) {
-			char *deq_str = dequote_str(dest, 0);
+	size_t i;
+	for (i = 1; cmd[i]; i++) {
+		if (!cmd[i] || !*cmd[i])
+			continue;
+		char *source = cmd[i];
+		if (strchr(source, '\\')) {
+			char *deq_str = dequote_str(source, 0);
 			if (!deq_str) {
 				fprintf(stderr, "%s: %s: Error dequoting file name\n",
 					PROGRAM_NAME, source);
-				return EXIT_FAILURE;
+				continue;
 			}
-			strcpy(dest, deq_str);
+			strcpy(source, deq_str);
 			free(deq_str);
 		}
-	}
 
-	int exit_status =  EXIT_SUCCESS;
-
-	/* If no dest, use source as file name: source.copy, and, if already
-	 * exists, source.copy.YYYYMMDDHHMMSS */
-	if (!dest) {
-		free_dest = 1;
+		// Use source as destiny file name: source.copy, and, if already
+		// exists, source.copy-n, where N is an integer greater than zero
 		size_t source_len = strlen(source);
 		if (strcmp(source, "/") != 0 && source[source_len - 1] == '/')
 			source[source_len - 1] = '\0';
@@ -172,38 +163,35 @@ dup_file(char *source, char *dest)
 			source_name = tmp + 1;
 		else
 			source_name = source;
-			
-		dest = (char *)xnmalloc(strlen(source_name) + 6, sizeof(char));
-		sprintf(dest, "%s.copy", source_name);
 
 		char tmp_dest[PATH_MAX];
-		xstrsncpy(tmp_dest, dest, PATH_MAX);
+		snprintf(tmp_dest, PATH_MAX - 1, "%s.copy", source_name);
+		char bk[PATH_MAX];
+		xstrsncpy(bk, tmp_dest, PATH_MAX - 1);
 		struct stat attr;
 		int suffix = 1;
-		while (stat(tmp_dest, &attr) == EXIT_SUCCESS) {
-			snprintf(tmp_dest, PATH_MAX - 1, "%s-%d", dest, suffix);
+		while (stat(bk, &attr) == EXIT_SUCCESS) {
+			snprintf(bk, PATH_MAX - 1, "%s-%d", tmp_dest, suffix);
 			suffix++;
 		}
-		dest = (char *)xrealloc(dest, (strlen(tmp_dest) + 1) * sizeof(char));
-		strcpy(dest, tmp_dest);
-	}
+		char *dest = savestring(bk, strlen(bk));
 
-	char *rsync_path = get_cmd_path("rsync");
-	if (rsync_path) {
-		char *cmd[] = {"rsync", "-aczvAXHS", "--progress", source, dest, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-		free(rsync_path);
-	} else {
-		char *cmd[] = {"cp", "-a", source, dest, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-	}
+		if (rsync_path) {
+			char *_cmd[] = {"rsync", "-aczvAXHS", "--progress", source, dest, NULL};
+			if (launch_execve(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+		} else {
+			char *_cmd[] = {"cp", "-a", source, dest, NULL};
+			if (launch_execve(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+		}
 
-	if (free_dest)
 		free(dest);
+	}
+
+	free(rsync_path);
 	return exit_status;
-}
+} 
 
 int
 create_file(char **cmd)

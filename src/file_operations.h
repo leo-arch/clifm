@@ -42,7 +42,7 @@ int edit_link(char *link);
 int open_function(char **cmd);
 int xchmod(const char *file, mode_t mode);
 int create_file(char **cmd);
-int dup_file(char*source, char *dest);
+int dup_file(char **cmd);
 int open_file(char *file);
 void clear_selbox(void);
 
