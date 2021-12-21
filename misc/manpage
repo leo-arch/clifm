@@ -1261,8 +1261,8 @@ There are two modes for TAB completion: \fIstandard\fR (interface provided by re
 .TP
 If using the \fIfzf\fR mode, the completions interface could be customized using the \fIFzfTabOptions\fR option in the configuration file. --height, --margin, +i/-i, --read0, --query, and --ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
 .TP
-Default values for this option are: 
- --color=16,prompt:6,fg+:-1,pointer:2,hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list
+Default values for this option are:
+ --color=16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list
 .TP
 The maximum size of the FZF window is by default 80% of the current terminal amount of line/rows. Use the \fBCLIFM_FZF_HEIGHT\fR environment variable to modify this value. Ex: \fIexport CLIFM_FZF_HEIGHT=50\fR.
 .TP
