@@ -831,7 +831,10 @@ exec_cmd(char **comm)
 		|| strcmp(comm[0], "paste") == 0) {
 
 			if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-				puts(_(WRAPPERS_USAGE));
+				if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
+					puts(_(VV_USAGE));
+				else
+					puts(_(WRAPPERS_USAGE));
 				return EXIT_SUCCESS;
 			}
 
