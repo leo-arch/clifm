@@ -176,24 +176,16 @@ dup_file(char *source, char *dest)
 		dest = (char *)xnmalloc(strlen(source_name) + 6, sizeof(char));
 		sprintf(dest, "%s.copy", source_name);
 
+		char tmp_dest[PATH_MAX];
+		xstrsncpy(tmp_dest, dest, PATH_MAX);
 		struct stat attr;
-		if (stat(dest, &attr) == EXIT_SUCCESS) {
-			time_t rawtime = time(NULL);
-			struct tm tm;
-			localtime_r(&rawtime, &tm);
-			char *suffix = gen_date_suffix(tm);
-			if (!suffix) {
-				free(dest);
-				return EXIT_FAILURE;
-			}
-
-			char tmp_dest[PATH_MAX];
-			xstrsncpy(tmp_dest, dest, PATH_MAX);
-			dest = (char *)xrealloc(dest, (strlen(tmp_dest) + strlen(suffix) + 2)
-									* sizeof(char));
-			sprintf(dest, "%s.%s", tmp_dest, suffix);
-			free(suffix);
+		int suffix = 1;
+		while (stat(tmp_dest, &attr) == EXIT_SUCCESS) {
+			snprintf(tmp_dest, PATH_MAX - 1, "%s-%d", dest, suffix);
+			suffix++;
 		}
+		dest = (char *)xrealloc(dest, (strlen(tmp_dest) + 1) * sizeof(char));
+		strcpy(dest, tmp_dest);
 	}
 
 	char *rsync_path = get_cmd_path("rsync");
