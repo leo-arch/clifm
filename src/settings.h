@@ -236,7 +236,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define SUG_STRATS 7
 
 /* These options should work with FZF 0.17.5 or later */
-#define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:2,\
+#define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:4,\
 hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,\
 left:abort --inline-info --layout=reverse-list"
 
