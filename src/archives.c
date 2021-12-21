@@ -287,6 +287,8 @@ handle_iso(char *file)
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	} break;
+
+	default: break;
 	}
 
 	return exit_status;
@@ -483,10 +485,12 @@ is_compressed(char *file, int test_iso)
 		ret = strstr(t, "compressed");
 		if (ret) {
 			compressed = 1;
-		} else if (test_iso) {
-			ret = strstr(t, "ISO 9660");
-			if (ret)
-				compressed = 1;
+		} else {
+			if (test_iso) {
+				ret = strstr(t, "ISO 9660");
+				if (ret)
+					compressed = 1;
+			}
 		}
 	}
 
@@ -1085,6 +1089,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 		case 'e': strcpy(option, "-d"); break;
 		case 't': strcpy(option, "-t"); break;
 		case 'i': strcpy(option, "-l"); break;
+		default: break;
 		}
 
 		char *cmd[] = {"zstd", option, deq_file, NULL};

@@ -347,7 +347,8 @@ list_mounted_devs(int mode)
 					 * Let's decode it */
 					char *p = strchr(str, '\\');
 					if (p && *(p + 1)) {
-						char *q = p++;
+						char *q = p;
+						p++;
 						char pp = 0;
 						p += 3;
 						pp = *p;

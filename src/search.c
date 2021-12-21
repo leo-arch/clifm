@@ -87,11 +87,13 @@ search_glob(char **comm, int invert)
 
 	/* If just one argument, '-' indicates file type. Else, we have a
 	 * path */
-	else if (comm[1]) {
-		if (*comm[1] == '-')
-			file_type = (mode_t)comm[1][1];
-		else
-			search_path = comm[1];
+	else {
+		if (comm[1]) {
+			if (*comm[1] == '-')
+				file_type = (mode_t)comm[1][1];
+			else
+				search_path = comm[1];
+		}
 	}
 
 	/* If no arguments, search_path will be NULL and file_type zero */
@@ -656,10 +658,16 @@ search_regex(char **comm, int invert, int case_sens)
 	for (i = 0; i < (search_path ? (size_t)tmp_files : files); i++) {
 		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
 		: file_info[i].name), 0, NULL, 0) == EXIT_SUCCESS) {
-			if (!invert)
-				regex_index[found++] = (int)i;
-		} else if (invert)
-			regex_index[found++] = (int)i;
+			if (!invert) {
+				regex_index[found] = (int)i;
+				found++;
+			}
+		} else {
+			if (invert) {
+				regex_index[found] = (int)i;
+				found++;
+			}
+		}
 	}
 
 	regfree(&regex_files);

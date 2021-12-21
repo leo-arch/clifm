@@ -395,9 +395,9 @@ is_internal(char *restrict cmd)
 
 /* Return one if STR is a command in PATH or zero if not */
 int
-is_bin_cmd(const char *str)
+is_bin_cmd(char *str)
 {
-	char *p = (char *)str, *q = (char *)str;
+	char *p = str, *q = str;
 	int index = 0, space_index = -1;
 
 	while (*p) {
@@ -427,9 +427,9 @@ is_bin_cmd(const char *str)
 
 /* Returns 0 if digit is found and preceded by a letter in STR, or one if not */
 int
-digit_found(const char *str)
+digit_found(char *str)
 {
-	char *p = (char *)str;
+	char *p = str;
 	int c = 0;
 
 	while (*p) {

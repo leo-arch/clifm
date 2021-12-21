@@ -179,29 +179,36 @@ static size_t _ntoa_format(out_fct_type out, char* buffer, size_t idx, size_t ma
       }
     }
     if ((base == 16U) && !(flags & FLAGS_UPPERCASE) && (len < PRINTF_NTOA_BUFFER_SIZE)) {
-      buf[len++] = 'x';
+      buf[len] = 'x';
+      len++;
     }
     else if ((base == 16U) && (flags & FLAGS_UPPERCASE) && (len < PRINTF_NTOA_BUFFER_SIZE)) {
-      buf[len++] = 'X';
+      buf[len] = 'X';
+      len++;
     }
     else if ((base == 2U) && (len < PRINTF_NTOA_BUFFER_SIZE)) {
-      buf[len++] = 'b';
+      buf[len] = 'b';
+      len++;
     }
     if (len < PRINTF_NTOA_BUFFER_SIZE) {
-      buf[len++] = '0';
+      buf[len] = '0';
+      len++;
     }
   }
 
   if (len < PRINTF_NTOA_BUFFER_SIZE) {
-    if (negative) {
-      buf[len++] = '-';
-    }
-    else if (flags & FLAGS_PLUS) {
-      buf[len++] = '+';  // ignore the space if the '+' exists
-    }
-    else if (flags & FLAGS_SPACE) {
-      buf[len++] = ' ';
-    }
+	if (negative) {
+		buf[len] = '-';
+		len++;
+	}
+	else if (flags & FLAGS_PLUS) {
+		buf[len] = '+';  // ignore the space if the '+' exists
+		len++;
+	}
+	else if (flags & FLAGS_SPACE) {
+		buf[len] = ' ';
+		len++;
+	}
   }
 
   return _out_rev(out, buffer, idx, maxlen, buf, len, width);
@@ -223,7 +230,8 @@ static size_t _ntoa_long(out_fct_type out, char* buffer, size_t idx, size_t maxl
   if (!(flags & FLAGS_PRECISION) || value) {
     do {
       const char digit = (char)(value % base);
-      buf[len++] = digit < 10 ? '0' + digit : 'a' + digit - 10;
+      buf[len] = digit < 10 ? '0' + digit : 'a' + digit - 10;
+      len++;
       value /= base;
     } while (value && (len < PRINTF_NTOA_BUFFER_SIZE));
   }
@@ -271,8 +279,10 @@ static void __vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, con
       case 's' : {
         const char* p = va_arg(va, char*);
         // string output
-        while ((*p != 0))
-            out(*(p++), buffer, idx++, maxlen);
+        while ((*p != 0)) {
+            out(*p, buffer, idx++, maxlen);
+			p++;
+		}
         format++;
         break;
       }

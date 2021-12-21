@@ -361,7 +361,7 @@ my_insert_text(char *text, char *s, const char _s)
 
 	if (!text || !*text)
 		return;
-
+	{
 	if (wrong_cmd || cur_color == hq_c)
 		goto INSERT_TEXT;
 
@@ -456,6 +456,7 @@ my_insert_text(char *text, char *s, const char _s)
 INSERT_TEXT:
 	{
 		rl_insert_text(text);
+	}
 	}
 }
 
@@ -1126,9 +1127,11 @@ get_cur_prof(int *cur, int *total)
 			if (*profile_names[i] == 'd'
 			&& strcmp(profile_names[i], "default") == 0)
 				*cur = i;
-		} else if (*alt_profile == *profile_names[i]
+		} else {
+			if (*alt_profile == *profile_names[i]
 			&& strcmp(alt_profile, profile_names[i]) == 0)
 				*cur = i;
+		}
 	}
 }
 

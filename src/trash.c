@@ -183,10 +183,9 @@ wx_parent_check(char *file)
 					    file);
 					exit_status = EXIT_FAILURE;
 				}
-			}
-
-			else
+			} else {
 				exit_status = EXIT_SUCCESS;
+			}
 		} else { /* No permission for parent */
 			fprintf(stderr, _("%s: Permission denied\n"), parent);
 			exit_status = EXIT_FAILURE;
@@ -203,12 +202,14 @@ wx_parent_check(char *file)
 		} else if (ret == 1) {
 			fprintf(stderr, _("%s: File is immutable\n"), file);
 			exit_status = EXIT_FAILURE;
-		} else if (parent) {
-			if (access(parent, W_OK | X_OK) == 0) {
-				exit_status = EXIT_SUCCESS;
-			} else {
-				fprintf(stderr, _("%s: Permission denied\n"), parent);
-				exit_status = EXIT_FAILURE;
+		} else {
+			if (parent) {
+				if (access(parent, W_OK | X_OK) == 0) {
+					exit_status = EXIT_SUCCESS;
+				} else {
+					fprintf(stderr, _("%s: Permission denied\n"), parent);
+					exit_status = EXIT_FAILURE;
+				}
 			}
 		}
 

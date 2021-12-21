@@ -170,7 +170,7 @@ remove_suggestion_not_end(void)
  * OFFSET marks the point in STR that is already typed: the suggestion
  * will be printed starting from this point */
 void
-print_suggestion(const char *str, size_t offset, const char *color)
+print_suggestion(const char *str, size_t offset, char *color)
 {
 	if (!str || !*str)
 		return;
@@ -301,7 +301,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	suggestion.nlines = slines;
 	/* Let's keep a record of the suggestion color in case we need to
 	 * reprint it */
-	suggestion.color = (char *)color;
+	suggestion.color = color;
 
 	return;
 }
@@ -1297,30 +1297,32 @@ rl_suggestions(const unsigned char c)
 			}
 		}
 		/* Backdir function (bd) */
-		else if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {
-			if (*(lb + 3) == '/' && !*(lb + 4)) {
-				/* The query string is a single slash: do nothing */
-				if (suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
-				goto FAIL;
-			}
-			/* Remove the last component of the current path name (CWD):
-			 * we want to match only PARENT directories */
-			char bk_cwd[PATH_MAX + 1];
-			xstrsncpy(bk_cwd, ws[cur_ws].path, PATH_MAX);
-			char *q = strrchr(bk_cwd, '/');
-			if (q)
-				*q = '\0';
-			/* Find the query string in the list of parent directories */
-			char *p = strstr(bk_cwd, lb + 3);
-			if (p) {
-				char *pp = strchr(p, '/');
-				if (pp)
-					*pp = '\0';
-				suggestion.type = BACKDIR_SUG;
-				print_suggestion(bk_cwd, 1, sf_c);
-				printed = 1;
-				goto SUCCESS;
+		else {
+			if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {
+				if (*(lb + 3) == '/' && !*(lb + 4)) {
+					/* The query string is a single slash: do nothing */
+					if (suggestion.printed)
+						clear_suggestion(CS_FREEBUF);
+					goto FAIL;
+				}
+				/* Remove the last component of the current path name (CWD):
+				 * we want to match only PARENT directories */
+				char bk_cwd[PATH_MAX + 1];
+				xstrsncpy(bk_cwd, ws[cur_ws].path, PATH_MAX);
+				char *q = strrchr(bk_cwd, '/');
+				if (q)
+					*q = '\0';
+				/* Find the query string in the list of parent directories */
+				char *p = strstr(bk_cwd, lb + 3);
+				if (p) {
+					char *pp = strchr(p, '/');
+					if (pp)
+						*pp = '\0';
+					suggestion.type = BACKDIR_SUG;
+					print_suggestion(bk_cwd, 1, sf_c);
+					printed = 1;
+					goto SUCCESS;
+				}
 			}
 		}
 		break;
