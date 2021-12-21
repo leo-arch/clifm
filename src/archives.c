@@ -377,9 +377,9 @@ check_iso(char *file)
 
 	char iso_tmp_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		sprintf(iso_tmp_file, "%s/.clifm%s", P_tmpdir, rand_ext);
+		snprintf(iso_tmp_file, PATH_MAX - 1, "%s/.clifm%s", P_tmpdir, rand_ext);
 	else
-		sprintf(iso_tmp_file, "%s/.clifm%s", tmp_dir, rand_ext);
+		snprintf(iso_tmp_file, PATH_MAX - 1, "%s/.clifm%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;
@@ -502,9 +502,9 @@ is_compressed(char *file, int test_iso)
 
 	char archiver_tmp_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		sprintf(archiver_tmp_file, "%s/.clifm%s", P_tmpdir, rand_ext);
+		snprintf(archiver_tmp_file, PATH_MAX - 1, "%s/.clifm%s", P_tmpdir, rand_ext);
 	else
-		sprintf(archiver_tmp_file, "%s/.clifm%s", tmp_dir, rand_ext);
+		snprintf(archiver_tmp_file, PATH_MAX - 1, "%s/.clifm%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;
