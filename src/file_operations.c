@@ -141,6 +141,7 @@ dup_file(char *source, char *dest)
 		free(deq_str);
 	}
 
+	int free_dest = 0;
 	if (dest) {
 		if (strchr(dest, '\\')) {
 			char *deq_str = dequote_str(dest, 0);
@@ -159,6 +160,7 @@ dup_file(char *source, char *dest)
 	/* If no dest, use source as file name: source.copy, and, if already
 	 * exists, source.copy.YYYYMMDDHHMMSS */
 	if (!dest) {
+		free_dest = 1;
 		size_t source_len = strlen(source);
 		if (strcmp(source, "/") != 0 && source[source_len - 1] == '/')
 			source[source_len - 1] = '\0';
@@ -206,7 +208,8 @@ dup_file(char *source, char *dest)
 			exit_status = EXIT_FAILURE;
 	}
 
-	free(dest);
+	if (free_dest)
+		free(dest);
 	return exit_status;
 }
 
