@@ -112,7 +112,7 @@ TabCompletionMode=standard
 # no option, to the empty string to load the default values (same as those
 # specified below), or to any other custom value. Unless set to 'none',
 # values set here will override FZF_DEFAULT_OPTS.
-FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:2,hl:5,hl+:5,gutter:-1' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
+FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:2,hl:5,hl+:5,gutter:-1,marker:2' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
 
 # MaxPath is only used for the /p option of the prompt: the current
 # working directory will be abbreviated to its basename (everything after
