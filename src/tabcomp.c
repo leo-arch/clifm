@@ -417,12 +417,8 @@ get_last_word(char *matches)
 }
 
 static inline int
-run_fzf(const size_t *height, const int *offset, const char *lw)
+run_fzf(const size_t *height, const int *offset, const char *lw, const int multi)
 {
-	int multi = 0;
-	if (cur_comp_type == TCMP_SEL)
-		multi = 1;
-
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX, "$(fzf %s "
 			"--height=%zu --margin=0,0,0,%d "
@@ -433,7 +429,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw)
 			*height, *offset,
 			case_sens_path_comp ? "+i" : "-i",
 			lw ? lw : "", colorize == 0 ? "--no-color" : "",
-			multi ? "--marker=* --multi --bind tab:toggle+down" : "",
+			multi ? "--multi --bind tab:toggle+down" : "",
 			FZFTABIN, FZFTABOUT);
 
 	return launch_execle(cmd);
@@ -460,7 +456,7 @@ set_fzf_max_win_height(void)
 /* Recover FZF output from FZFTABOUT file
  * Return this output or NULL in case of error */
 static inline char *
-get_fzf_output(void)
+get_fzf_output(const int multi)
 {
 	FILE *fp = fopen(FZFTABOUT, "r");
 	if (!fp) {
@@ -468,11 +464,6 @@ get_fzf_output(void)
 			FZFTABOUT, strerror(errno));
 		return (char *)NULL;
 	}
-
-	int multi = 0;
-	/* TAB completion cases allowing multiple selection */
-	if (cur_comp_type == TCMP_SEL)
-		multi = 1;
 
 	char *buf = (char *)xnmalloc(1, sizeof(char));
 	*buf = '\0';
@@ -486,7 +477,7 @@ get_fzf_output(void)
 			line[--line_len] = '\0';
 
 		char *q = line;
-		if (multi) {
+		if (multi == 1) {
 			q = escape_str(line);
 			if (!q)
 				continue;
@@ -497,7 +488,7 @@ get_fzf_output(void)
 		buf = (char *)xrealloc(buf, bsize * sizeof(char));
 		strcat(buf, q);
 
-		if (multi) {
+		if (multi == 1) {
 			size_t l = strlen(buf);
 			buf[l] = ' ';
 			buf[l + 1] = '\0';
@@ -634,8 +625,13 @@ fzftabcomp(char **matches)
 	if (fzf_offset < 0)
 		fzf_offset = 0;
 
+	int multi = 0;
+	/* TAB completion cases allowing multiple selection */
+	if (cur_comp_type == TCMP_SEL)
+		multi = 1;
+
 	/* Run FZF and store the ouput into the FZFTABOUT file */
-	int ret = run_fzf(&height, &fzf_offset, query);
+	int ret = run_fzf(&height, &fzf_offset, query, multi);
 	unlink(FZFTABIN);
 
 	/* Calculate currently used lines to go back to the correct cursor
@@ -659,7 +655,7 @@ fzftabcomp(char **matches)
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	char *buf = get_fzf_output();
+	char *buf = get_fzf_output(multi);
 	if (!buf)
 		return EXIT_FAILURE;
 
@@ -756,7 +752,7 @@ fzftabcomp(char **matches)
 
 		char *q = (char *)NULL;
 		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_PATH
-		&& cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_SEL) {
+		&& cur_comp_type != TCMP_HIST && !multi) {
 			q = escape_str(buf);
 			if (!q) {
 				free(buf);
