@@ -1684,6 +1684,7 @@ ds *               Deselect all selected files\n\
 c sel              Copy selected files into the current directory\n\
 r sel              Remove all selected files\n\
 br sel             Bulk rename selected files\n\
+d sel              Duplicate all selected files\n\
 c 34 file_copy     Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
 d myfile           Duplicate 'myfile' (via rsync)\n\
 m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
@@ -1871,7 +1872,7 @@ in the next session\
  cl, columns [on, off]\n\
  cmd, commands\n\
  cs, colorscheme [edit] [COLORSCHEME]\n\
- d, dup SOURCE [DEST]\n\
+ d, dup FILE(s)\n\
  ds, desel [*, a, all]\n\
  edit [APPLICATION] [reset]\n\
  exp [ELN/FILE ...]\n\
