@@ -124,11 +124,8 @@ init_workspaces(void)
 {
 	ws = (struct ws_t *)xnmalloc(MAX_WS, sizeof(struct ws_t));
 	int i = MAX_WS;
-	while (--i >= 0) {
+	while (--i >= 0)
 		ws[i].path = (char *)NULL;
-//		ws[i].autocmd = 0;
-//		ws[i].num = 0;
-	}
 
 	return EXIT_SUCCESS;
 }
@@ -527,7 +524,8 @@ load_jumpdb(void)
 
 		jump_db[jump_n].keep = 0;
 		jump_db[jump_n].rank = 0;
-		jump_db[jump_n++].path = savestring(tmpc, strlen(tmpc));
+		jump_db[jump_n].path = savestring(tmpc, strlen(tmpc));
+		jump_n++;
 	}
 
 	close_fstream(fp, fd);
@@ -592,7 +590,8 @@ load_bookmarks(void)
 		if (*line == '/') {
 			bookmarks[bm_n].shortcut = (char *)NULL;
 			bookmarks[bm_n].name = (char *)NULL;
-			bookmarks[bm_n++].path = savestring(line, strlen(line));
+			bookmarks[bm_n].path = savestring(line, strlen(line));
+			bm_n++;
 			continue;
 		}
 
@@ -603,7 +602,8 @@ load_bookmarks(void)
 			if (!tmp) {
 				bookmarks[bm_n].shortcut = (char *)NULL;
 				bookmarks[bm_n].name = (char *)NULL;
-				bookmarks[bm_n++].path = (char *)NULL;
+				bookmarks[bm_n].path = (char *)NULL;
+				bm_n++;
 				continue;
 			}
 
@@ -618,9 +618,10 @@ load_bookmarks(void)
 			if (!tmp) {
 				bookmarks[bm_n].name = (char *)NULL;
 				if (*p)
-					bookmarks[bm_n++].path = savestring(p, strlen(p));
+					bookmarks[bm_n].path = savestring(p, strlen(p));
 				else
-					bookmarks[bm_n++].path = (char *)NULL;
+					bookmarks[bm_n].path = (char *)NULL;
+				bm_n++;
 				continue;
 			}
 
@@ -628,11 +629,13 @@ load_bookmarks(void)
 			bookmarks[bm_n].name = savestring(p, strlen(p));
 
 			if (!*(++tmp)) {
-				bookmarks[bm_n++].path = (char *)NULL;
+				bookmarks[bm_n].path = (char *)NULL;
+				bm_n++;
 				continue;
 			}
 
-			bookmarks[bm_n++].path = savestring(tmp, strlen(tmp));
+			bookmarks[bm_n].path = savestring(tmp, strlen(tmp));
+			bm_n++;
 			continue;
 		}
 
@@ -677,8 +680,9 @@ load_bookmarks(void)
 	for (i = 0; i < bm_n; i++) {
 		if (!bookmarks[i].name || !*bookmarks[i].name)
 			continue;
-		bookmark_names[j++] = savestring(bookmarks[i].name,
+		bookmark_names[j] = savestring(bookmarks[i].name,
 		    strlen(bookmarks[i].name));
+		j++;
 	}
 
 	bookmark_names[j] = (char *)NULL;
@@ -732,7 +736,8 @@ load_actions(void)
 								* sizeof(struct actions_t));
 		usr_actions[actions_n].value = savestring(tmp + 1, strlen(tmp + 1));
 		*tmp = '\0';
-		usr_actions[actions_n++].name = savestring(line, strlen(line));
+		usr_actions[actions_n].name = savestring(line, strlen(line));
+		actions_n++;
 	}
 
 	free(line);
@@ -1713,15 +1718,19 @@ get_cdpath(void)
 	for (i = 0; t[i]; i++) {
 		/* Store path in CDPATH in a tmp buffer */
 		char buf[PATH_MAX];
-		while (t[i] && t[i] != ':')
-			buf[len++] = t[i++];
+		while (t[i] && t[i] != ':') {
+			buf[len] = t[i];
+			len++;
+			i++;
+		}
 		buf[len] = '\0';
 
 		/* Make room in cdpaths for a new path */
 		cdpaths = (char **)xrealloc(cdpaths, (n + 2) * sizeof(char *));
 
 		/* Dump the buffer into the global cdpaths array */
-		cdpaths[n++] = savestring(buf, len);
+		cdpaths[n] = savestring(buf, len);
+		n++;
 
 		len = 0;
 		if (!t[i])
@@ -1755,8 +1764,11 @@ get_path_env(void)
 	for (i = 0; path_tmp[i]; i++) {
 		/* Store path in PATH in a tmp buffer */
 		char buf[PATH_MAX];
-		while (path_tmp[i] && path_tmp[i] != ':')
-			buf[length++] = path_tmp[i++];
+		while (path_tmp[i] && path_tmp[i] != ':') {
+			buf[length] = path_tmp[i];
+			length++;
+			i++;
+		}
 		buf[length] = '\0';
 
 		/* Make room in paths for a new path */
@@ -1921,16 +1933,19 @@ get_path_programs(void)
 					     aliases_n + actions_n + 2, sizeof(char *));
 
 	i = (int)internal_cmd_n;
-	while (--i >= 0)
-		bin_commands[l++] = savestring(internal_cmds[i],
+	while (--i >= 0) {
+		bin_commands[l] = savestring(internal_cmds[i],
 		    strlen(internal_cmds[i]));
+		l++;
+	}
 
 	/* Now add aliases, if any */
 	if (aliases_n) {
 		i = (int)aliases_n;
 		while (--i >= 0) {
-			bin_commands[l++] = savestring(aliases[i].name,
+			bin_commands[l] = savestring(aliases[i].name,
 				strlen(aliases[i].name));
+			l++;
 		}
 	}
 
@@ -1938,8 +1953,9 @@ get_path_programs(void)
 	if (actions_n) {
 		i = (int)actions_n;
 		while (--i >= 0) {
-			bin_commands[l++] = savestring(usr_actions[i].name,
+			bin_commands[l] = savestring(usr_actions[i].name,
 			    strlen(usr_actions[i].name));
+			l++;
 		}
 	}
 
@@ -1952,8 +1968,9 @@ get_path_programs(void)
 
 			int j = cmd_n[i];
 			while (--j >= 0) {
-				bin_commands[l++] = savestring(commands_bin[i][j]->d_name,
+				bin_commands[l] = savestring(commands_bin[i][j]->d_name,
 					strlen(commands_bin[i][j]->d_name));
+				l++;
 				free(commands_bin[i][j]);
 			}
 
@@ -2025,10 +2042,15 @@ get_aliases(void)
 			aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 1)
 						* sizeof(struct alias_t));
 			aliases[aliases_n].name = savestring(s, strlen(s));
-			if (*p == '\'')
-				aliases[aliases_n++].cmd = strbtw(p, '\'', '\'');
-			else if (*p == '"')
-				aliases[aliases_n++].cmd = strbtw(p, '"', '"');
+			if (*p == '\'') {
+				aliases[aliases_n].cmd = strbtw(p, '\'', '\'');
+				aliases_n++;
+			} else {
+				if (*p == '"') {
+					aliases[aliases_n].cmd = strbtw(p, '"', '"');
+					aliases_n++;
+				}
+			}
 		}
 	}
 
@@ -2075,7 +2097,8 @@ load_dirhist(void)
 			line[line_len - 1] = '\0';
 		old_pwd[dirhist_total_index] = (char *)xnmalloc((size_t)line_len + 1,
 										sizeof(char));
-		strcpy(old_pwd[dirhist_total_index++], line);
+		strcpy(old_pwd[dirhist_total_index], line);
+		dirhist_total_index++;
 	}
 
 	close_fstream(fp, fd);
@@ -2122,8 +2145,9 @@ get_prompt_cmds(void)
 			continue;
 		prompt_cmds = (char **)xrealloc(prompt_cmds,
 		    (prompt_cmds_n + 1) * sizeof(char *));
-		prompt_cmds[prompt_cmds_n++] = savestring(
+		prompt_cmds[prompt_cmds_n] = savestring(
 		    line + 10, (size_t)line_len - 10);
+		prompt_cmds_n++;
 
 /*		if (prompt_line_found) {
 			if (strncmp(line, "#END OF PROMPT", 14) == 0)
