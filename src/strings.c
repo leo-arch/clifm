@@ -778,7 +778,7 @@ is_internal_f(const char *restrict cmd)
 }
 
 static char *
-split_fusedcmd(char *str)
+split_fused_param(char *str)
 {
 	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
 		return (char *)NULL;
@@ -975,7 +975,7 @@ parse_input_str(char *str)
 
 	/* If internal command plus fused parameter, split it */
 	if (is_fused_param(str) == EXIT_SUCCESS) {
-		char *p = split_fusedcmd(str);
+		char *p = split_fused_param(str);
 		if (p) {
 			fusedcmd_ok = 1;
 			str = p;
