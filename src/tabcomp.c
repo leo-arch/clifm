@@ -423,10 +423,11 @@ static inline int
 run_fzf(const size_t *height, const int *offset, const char *lw,
 		const int multi)
 {
-	/* If height was not specified in FZF_DEFAULT_OPTS, let's define it
-	 * ourselves */
+	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
+	 * file, let's define it ourselves */
 	char height_str[sizeof(size_t) + 11];
-	if (fzf_env_height == 0)
+	*height_str = '\0';
+	if (fzf_height_set == 0)
 		snprintf(height_str, sizeof(height_str), "--height=%zu", *height);
 
 	char cmd[PATH_MAX];
@@ -436,7 +437,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 			"--query=\"%s\" %s %s "
 			"< %s > %s)",
 			fzftab_options,
-			fzf_env_height == 0 ? height_str : "", *offset,
+			*height_str ? height_str : "", *offset,
 			case_sens_path_comp ? "+i" : "-i",
 			lw ? lw : "", colorize == 0 ? "--no-color" : "",
 			multi ? "--multi --bind tab:toggle+down" : "",
@@ -450,17 +451,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 static inline size_t
 set_fzf_max_win_height(void)
 {
-	int s = 0;
-	/* ENV_FZF_MAX_HEIGHT is taken from the environment variable
-	 * CLIFM_FZF_HEIGHT at startup (init_config, in config.c)
-	 * to avoid doing this every time FZF is invoked */
-	if (env_fzf_max_height >= 1 && env_fzf_max_height <= 100)
-		s = env_fzf_max_height * term_rows / 100;
-
-	if (s <= 0)
-		s = DEF_FZF_WIN_HEIGHT * term_rows / 100;
-
-	return (size_t)s;
+	return (size_t)(DEF_FZF_WIN_HEIGHT * term_rows / 100);
 }
 
 /* Recover FZF output from FZFTABOUT file
@@ -575,11 +566,11 @@ fzftabcomp(char **matches)
 	 * input buffer. We use this to highlight the matching prefix in FZF */
 	char *lw = get_last_word(matches[0]);
 
-	/* Calculate the height of the FZF window based on the amount
-	 * of entries. This specifies how many entries will be displayed
-	 * at once */
+	/* If not already defined (environment or config file), calculate the
+	 * height of the FZF window based on the amount of entries. This
+	 * specifies how many entries will be displayed at once */
 	size_t height = 0;
-	if (fzf_env_height == 0) {
+	if (fzf_height_set == 0) {
 		size_t max_height = set_fzf_max_win_height();
 		if (i + 1 > max_height)
 			height = max_height;

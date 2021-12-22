@@ -2089,8 +2089,10 @@ read_config(void)
 				continue;
 			if (strncmp(opt_str, "standard", 8) == 0)
 				fzftab = 0;
-			else if (strncmp(opt_str, "fzf", 3) == 0)
-				fzftab = 1;
+			else {
+				if (strncmp(opt_str, "fzf", 3) == 0)
+					fzftab = 1;
+			}
 		}
 #endif /* !_NO_FZF */
 
@@ -2103,6 +2105,8 @@ read_config(void)
 				*fzftab_options = '\0';
 			} else {
 				fzftab_options = savestring(tmp, strlen(tmp));
+				if (strstr(fzftab_options, "--height"))
+					fzf_height_set = 1;
 			}
 		}
 
@@ -2238,29 +2242,7 @@ check_colors(void)
 }
 
 #ifndef _NO_FZF
-/* Get the FZF max window size from environemnt. The value returned
- * by this function will be used by set_fzf_max_win_height(), in
- * tabcomp.h, called every time FZF is invoked for TAB completion */
-static inline int
-getenv_fzf_win_height(void)
-{
-	char *ptr = getenv("CLIFM_FZF_HEIGHT");
-	if (ptr == NULL)
-		return (-1);
-
-	size_t l = strlen(ptr);
-	if (ptr[l - 1] == '%')
-		ptr[l - 1] = '\0';
-	if (is_number(ptr) == 0)
-		return (-1);
-
-	int n = xatoi(ptr);
-	if (n == INT_MIN)
-		return (-1);
-
-	return n;
-}
-
+/* Just check if --height is specified in FZF_DEFAULT_OPTS */
 static int
 get_fzf_win_height()
 {
@@ -2304,13 +2286,10 @@ init_config(void)
 	check_colors();
 
 #ifndef _NO_FZF
-	if (fzftab) {
-		/* Check whether --height is present in FZF_DEFAULT_OPTS */
-		fzf_env_height = get_fzf_win_height();
-		if (fzf_env_height == 0)
-			/* Get max win height from CLIFM_FZF_HEIGHT */
-			env_fzf_max_height = getenv_fzf_win_height();
-	}
+	/* If FZF win height was not defined in the config file,
+	 * check whether it is present in FZF_DEFAULT_OPTS */
+	if (fzftab && fzf_height_set == 0)
+		fzf_height_set = get_fzf_win_height();
 #endif
 
 	if ((flags & GUI) && getenv("XTERM_VERSION")) {
