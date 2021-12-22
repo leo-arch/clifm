@@ -426,22 +426,6 @@ is_bin_cmd(char *str)
 	return 0;
 }
 
-/* Returns 0 if digit is found and preceded by a letter in STR, or one if not */
-int
-digit_found(char *str)
-{
-	char *p = str;
-	int c = 0;
-
-	while (*p) {
-		if (c++ && _ISDIGIT(*p) && _ISALPHA(*(p - 1)))
-			return 1;
-		p++;
-	}
-
-	return 0;
-}
-
 int
 check_regex(char *str)
 {

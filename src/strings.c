@@ -808,8 +808,8 @@ split_fusedcmd(char *str)
 			if (*(p + 1))
 				pp = p + 1;
 			break;
-		case '&': // fallthrough
-		case '|': // fallthrough
+		case '&': /* fallthrough */
+		case '|': /* fallthrough */
 		case ';':
 			words = 1;
 			if (*(p + 1))
@@ -822,12 +822,16 @@ split_fusedcmd(char *str)
 			if (check_fused_param(p)) {
 				char t = *p;
 				*p = '\0';
-				if (is_internal_f(pp))
-					*(b++) = ' ';
+				if (is_internal_f(pp)) {
+					*b = ' ';
+					b++;
+				}
 				*p = t;
 			}
 		}
-		*(b++) = *(p++);
+		*b = *p;
+		b++;
+		p++;
 		c++;
 	}
 
@@ -892,6 +896,44 @@ check_shell_functions(char *str)
 	return 0;
 }
 
+/* Check whether STRINGDIGIT expression is an internal command with a
+ * fused parameter. Returns 1 if true and 0 if false */
+static int
+is_fused_param(char *str)
+{
+	if (!str || !*str)
+		return EXIT_FAILURE;
+
+	char *p = str, *q = (char *)NULL;
+	int d = 0;
+
+	while (*p) {
+		if (d == 0 && p != str && _ISDIGIT(*p) && _ISALPHA(*(p - 1))) {
+			q = p;
+			d = 1;
+		}
+		if (d == 1 && _ISALPHA(*p))
+			return EXIT_FAILURE;
+		p++;
+	}
+
+	if (d == 0)
+		return EXIT_FAILURE;
+	if (!q)
+		return EXIT_FAILURE;
+
+	char c = *q;
+	*q = '\0';
+
+	int ret = is_internal_f(str);
+	*q = c;
+
+	if (ret == 0)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
 /*
  * This function is one of the keys of CliFM. It will perform a series of
  * actions:
@@ -931,10 +973,8 @@ parse_input_str(char *str)
 	register size_t i = 0;
 	int fusedcmd_ok = 0;
 
-	/** ###################### */
-	/* Before splitting 'CMDNUM' into 'CMD NUM', make sure CMDNUM is not
-	 * a cmd in PATH (for example, md5sum) */
-	if (digit_found(str) && !is_bin_cmd(str)) {
+	/* If internal command plus fused parameter, split it */
+	if (is_fused_param(str) == EXIT_SUCCESS) {
 		char *p = split_fusedcmd(str);
 		if (p) {
 			fusedcmd_ok = 1;
@@ -942,7 +982,6 @@ parse_input_str(char *str)
 			p = (char *)NULL;
 		}
 	}
-	/** ###################### */
 
 			/* ########################################
 			* #    0) CHECK FOR SPECIAL FUNCTIONS    #
