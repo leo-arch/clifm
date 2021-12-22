@@ -158,6 +158,8 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 **NEW**: [Backdir - Quickly change to a parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#bd-name)
 
+**NEW**: [Multi-selection for FZF TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions)
+
 ---
 
 ## Installing _CliFM_
