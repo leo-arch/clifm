@@ -692,8 +692,10 @@ fzftabcomp(char **matches)
 		}
 
 		size_t splen = (size_t)(t - sp);
-		if (sp[splen - 1] == '/')
-			sp[--splen] = '\0';
+		if (sp[splen - 1] == '/') {
+			splen--;
+			sp[splen] = '\0';
+		}
 
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
@@ -709,10 +711,15 @@ fzftabcomp(char **matches)
 			}
 		} else {
 			size_t blen = strlen(buf);
-			if (buf[blen - 1] == '\n')
-				buf[--blen] = '\0';
-			buf = (char *)xrealloc(buf, (blen + strlen(sp) + 2) * sizeof(char));
-			snprintf(buf + blen, sizeof(buf) - blen, " %s", sp);
+			if (buf[blen - 1] == '\n') {
+				blen--;
+				buf[blen] = '\0';
+			}
+			splen = strlen(sp);
+			buf = (char *)xrealloc(buf, (blen + splen + 2) * sizeof(char));
+			buf[blen] = ' ';
+			buf[blen + 1] = '\0';
+			xstrsncpy(buf + blen + 1, sp, splen);
 		}
 
 	} else if (cur_comp_type == TCMP_DESEL) {
@@ -747,8 +754,10 @@ fzftabcomp(char **matches)
 		/* Some buffer clean up: remove new line char and ending spaces */
 		size_t blen = strlen(buf);
 		int j = (int)blen;
-		if (buf[j - 1] == '\n')
-			buf[--j] = '\0';
+		if (buf[j - 1] == '\n') {
+			j--;
+			buf[j] = '\0';
+		}
 		while (buf[--j] == ' ')
 			buf[j] = '\0';
 
