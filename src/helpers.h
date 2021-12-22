@@ -757,9 +757,8 @@ extern int
 	files_counter,
 	filter_rev,
 	follow_symlinks,
-#ifndef _NO_FZF
 	fzftab,
-#endif
+	fzf_env_height,
 #ifndef _NO_HIGHLIGHT
 	highlight,
 #endif

@@ -141,6 +141,7 @@ int
 	filter_rev = 0,
 	follow_symlinks = UNSET,
 	fzftab = UNSET,
+	fzf_env_height = 0,
 	highlight = UNSET,
 	home_ok = 1,
 #ifndef _NO_ICONS

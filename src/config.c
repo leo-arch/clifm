@@ -2080,6 +2080,7 @@ read_config(void)
 		}
 #endif /* !_NO_SUGGESTIONS */
 
+#ifndef _NO_FZF
 		else if (xargs.fzftab == UNSET && *line == 'T'
 		&& strncmp(line, "TabCompletionMode=", 18) == 0) {
 			char opt_str[9] = "";
@@ -2091,6 +2092,7 @@ read_config(void)
 			else if (strncmp(opt_str, "fzf", 3) == 0)
 				fzftab = 1;
 		}
+#endif /* !_NO_FZF */
 
 		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
 			char *tmp = get_line_value(line);
@@ -2207,18 +2209,6 @@ read_config(void)
 	return;
 }
 
-/* Get the FZF max window size from environemnt. The value returned
- * by this function will be used by set_fzf_max_win_height(), in
- * tabcomp.h, called every time FZF is invoked for TAB completion */
-static inline int
-getenv_fzf_win_height(void)
-{
-	char *ptr = getenv("CLIFM_FZF_HEIGHT");
-	if (ptr && is_number(ptr) == 1)
-		return atoi(ptr);
-	return (-1);
-}
-
 static void
 check_colors(void)
 {
@@ -2247,6 +2237,45 @@ check_colors(void)
 	}
 }
 
+#ifndef _NO_FZF
+/* Get the FZF max window size from environemnt. The value returned
+ * by this function will be used by set_fzf_max_win_height(), in
+ * tabcomp.h, called every time FZF is invoked for TAB completion */
+static inline int
+getenv_fzf_win_height(void)
+{
+	char *ptr = getenv("CLIFM_FZF_HEIGHT");
+	if (ptr == NULL)
+		return (-1);
+
+	size_t l = strlen(ptr);
+	if (ptr[l - 1] == '%')
+		ptr[l - 1] = '\0';
+	if (is_number(ptr) == 0)
+		return (-1);
+
+	int n = xatoi(ptr);
+	if (n == INT_MIN)
+		return (-1);
+
+	return n;
+}
+
+static int
+get_fzf_win_height()
+{
+	char *p = getenv("FZF_DEFAULT_OPTS");
+	if (!p || !*p)
+		return 0;
+
+	char *q = strstr(p, "--height");
+	if (!q)
+		return 0;
+
+	return 1;
+}
+#endif /* !_NO_FZF */
+
 /* Set up CliFM directories and config files. Load the user's
  * configuration from clifmrc */
 void
@@ -2274,8 +2303,15 @@ init_config(void)
 
 	check_colors();
 
-	if (fzftab)
-		env_fzf_max_height = getenv_fzf_win_height();
+#ifndef _NO_FZF
+	if (fzftab) {
+		/* Check whether --height is present in FZF_DEFAULT_OPTS */
+		fzf_env_height = get_fzf_win_height();
+		if (fzf_env_height == 0)
+			/* Get max win height from CLIFM_FZF_HEIGHT */
+			env_fzf_max_height = getenv_fzf_win_height();
+	}
+#endif
 
 	if ((flags & GUI) && getenv("XTERM_VERSION")) {
 		/* If running Xterm, instruct it to send an escape code (27)
@@ -2393,7 +2429,6 @@ reset_variables(void)
 	columned = UNSET;
 	dirhist_map = UNSET;
 	disk_usage = UNSET;
-/*	elnpad = UNSET; */
 	ext_cmd_ok = UNSET;
 	files_counter = UNSET;
 	follow_symlinks = UNSET;

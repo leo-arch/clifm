@@ -330,7 +330,6 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 
 	if (!ss || !*ss)
 		ss = rl_line_buffer;
-
 	if (!ss)
 		return;
 
@@ -349,18 +348,20 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 
 	char _path[PATH_MAX];
 	*_path = '\0';
-	if (*ss != '/' && *ss != '.' && *ss != '~')
+	if (!*deq_str && *ss != '/' && *ss != '.' && *ss != '~')
 		snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, ss);
 
 	char *spath = *_path ? _path : (*deq_str ? deq_str : ss);
 	char *epath = (char *)NULL; 
 	if (*spath == '~')
 		epath = tilde_expand(spath);
-	else if (*spath == '.') {
-		xchdir(ws[cur_ws].path, NO_TITLE);
-		epath = realpath(spath, NULL);
-		/* No need to change back to CWD. Done here */
-		*exit_status = -1;
+	else {
+		if (*spath == '.') {
+			xchdir(ws[cur_ws].path, NO_TITLE);
+			epath = realpath(spath, NULL);
+			/* No need to change back to CWD. Done here */
+			*exit_status = -1;
+		}
 	}
 
 	if (epath)
@@ -371,8 +372,10 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 		/* If not the root directory, append a slash */
 		if (*spath != '/' || *(spath + 1))
 			rl_insert_text("/");
-	} else if (cur_comp_type != TCMP_OPENWITH) {
-		rl_stuff_char(' ');
+	} else {
+		if (cur_comp_type != TCMP_OPENWITH) {
+			rl_stuff_char(' ');
+		}
 	}
 
 	free(epath);
@@ -417,16 +420,23 @@ get_last_word(char *matches)
 }
 
 static inline int
-run_fzf(const size_t *height, const int *offset, const char *lw, const int multi)
+run_fzf(const size_t *height, const int *offset, const char *lw,
+		const int multi)
 {
+	/* If height was not specified in FZF_DEFAULT_OPTS, let's define it
+	 * ourselves */
+	char height_str[sizeof(size_t) + 11];
+	if (fzf_env_height == 0)
+		snprintf(height_str, sizeof(height_str), "--height=%zu", *height);
+
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX, "$(fzf %s "
-			"--height=%zu --margin=0,0,0,%d "
+			"%s --margin=0,0,0,%d "
 			"%s --read0 --ansi "
 			"--query=\"%s\" %s %s "
 			"< %s > %s)",
 			fzftab_options,
-			*height, *offset,
+			fzf_env_height == 0 ? height_str : "", *offset,
 			case_sens_path_comp ? "+i" : "-i",
 			lw ? lw : "", colorize == 0 ? "--no-color" : "",
 			multi ? "--multi --bind tab:toggle+down" : "",
@@ -448,7 +458,7 @@ set_fzf_max_win_height(void)
 		s = env_fzf_max_height * term_rows / 100;
 
 	if (s <= 0)
-		s = DEF_FZF_WIN_HEIHGT * term_rows / 100;
+		s = DEF_FZF_WIN_HEIGHT * term_rows / 100;
 
 	return (size_t)s;
 }
@@ -569,11 +579,13 @@ fzftabcomp(char **matches)
 	 * of entries. This specifies how many entries will be displayed
 	 * at once */
 	size_t height = 0;
-	size_t max_height = set_fzf_max_win_height();
-	if (i + 1 > max_height)
-		height = max_height;
-	else
-		height = i;
+	if (fzf_env_height == 0) {
+		size_t max_height = set_fzf_max_win_height();
+		if (i + 1 > max_height)
+			height = max_height;
+		else
+			height = i;
+	}
 
 	/* Calculate the offset (left padding) of the FZF window based on
 	 * cursor position and current query string */

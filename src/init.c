@@ -63,6 +63,78 @@
  */
 
 int
+xsecure_env(void)
+{
+	static char *namebuf = NULL;
+	static size_t lastlen = 0;
+
+//	char *display = getenv("DISPLAY");
+
+	/* Unset environ: little implementation of clearenv(3), not available
+	 * on some system (not POSIX) */
+	while (environ != NULL && environ[0] != NULL) {
+		size_t len = strcspn(environ[0], "=");
+		if (len == 0) {
+			/* Handle empty variable name (corrupted environ[]) */
+			continue;
+		}
+		if (len > lastlen) {
+			namebuf = (char *)xrealloc(namebuf, (len + 1) * sizeof(char));
+			lastlen = len;
+		}
+		memcpy(namebuf, environ[0], len);
+		namebuf[len] = '\0';
+		if (unsetenv(namebuf) == -1) {
+			fprintf(stderr, "%s: unsetenv: %s: %s\n", PROGRAM_NAME,
+				namebuf, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	/* Set a few basic environment variables */
+	char *p = (char *)NULL;
+	size_t n = confstr(_CS_PATH, NULL, 0); // get value size
+	p = (char *)xnmalloc(n, sizeof(char)); // allocate space
+	confstr(_CS_PATH, p, n); // get value
+	int ret = setenv("PATH", p, 1);  // set it
+
+	if (ret == -1) {
+		free(p);
+		fprintf(stderr, "%s: setenv: PATH: %s\n", PROGRAM_NAME,
+			strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	n = confstr(_CS_V7_ENV, NULL, 0);
+	p = (char *)xrealloc(p, n * sizeof(char));
+	confstr(_CS_V7_ENV, p, n);
+	char *e = strchr(p, '=');
+	if (e && *(e + 1)) {
+		*e = '\0';
+		setenv(p, e + 1, 1);
+		*e = '=';
+	}
+
+	free(p);
+
+	if (setenv("IFS", " \t\n", 1) == -1) {
+		fprintf(stderr, "%s: setenv: IFS: %s\n", PROGRAM_NAME,
+			strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+/*	if (display) {
+		if (setenv("DISPLAY", display, 1) == -1) {
+			fprintf(stderr, "%s: setenv: DISPLAY: %s\n", PROGRAM_NAME,
+				strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+	} */
+
+	return 0;
+}
+
+int
 get_sys_shell(void)
 {
 	char l[PATH_MAX] = "";
@@ -1007,6 +1079,7 @@ external_arguments(int argc, char **argv)
 		{"fzftab", no_argument, 0, 43},
 		{"no-warning-prompt", no_argument, 0, 44},
 		{"mnt-udisks2", no_argument, 0, 45},
+		{"secure-env", no_argument, 0, 46},
 	    {0, 0, 0, 0}
 	};
 
@@ -1185,6 +1258,7 @@ external_arguments(int argc, char **argv)
 
 		case 44: xargs.warning_prompt = warning_prompt = 0; break;
 		case 45: xargs.mount_cmd = MNT_UDISKS2; break;
+		case 46: xsecure_env(); break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
