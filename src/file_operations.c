@@ -166,12 +166,12 @@ dup_file(char **cmd)
 
 		char tmp_dest[PATH_MAX];
 		snprintf(tmp_dest, PATH_MAX - 1, "%s.copy", source_name);
-		char bk[PATH_MAX];
-		xstrsncpy(bk, tmp_dest, PATH_MAX - 1);
+		char bk[PATH_MAX + 2];
+		xstrsncpy(bk, tmp_dest, PATH_MAX);
 		struct stat attr;
 		int suffix = 1;
 		while (stat(bk, &attr) == EXIT_SUCCESS) {
-			snprintf(bk, PATH_MAX - 1, "%s-%d", tmp_dest, suffix);
+			snprintf(bk, sizeof(bk), "%s-%d", tmp_dest, suffix);
 			suffix++;
 		}
 		char *dest = savestring(bk, strlen(bk));
