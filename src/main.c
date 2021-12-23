@@ -720,9 +720,10 @@ main(int argc, char *argv[])
 
 	/* Running in a graphical environment? */
 #if __linux__
-	if (getenv("DISPLAY") != NULL && strncmp(getenv("TERM"), "linux", 5) != 0)
+	if ((getenv("DISPLAY") != NULL || getenv("WAYLAND_DISPLAY") != NULL)
+	&& strncmp(getenv("TERM"), "linux", 5) != 0)
 #else
-	if (getenv("DISPLAY") != NULL)
+	if (getenv("DISPLAY") != NULL || getenv("WAYLAND_DISPLAY") != NULL)
 #endif
 		flags |= GUI;
 
