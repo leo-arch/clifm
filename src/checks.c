@@ -113,11 +113,11 @@ check_third_party_cmds(void)
 
 /* Return 1 if current user has access to FILE. Otherwise, return zero */
 int
-check_file_access(const struct stat file)
+check_file_access(const struct stat *file)
 {
 	int f = 0; /* Hold file ownership flags */
 
-	mode_t val = (file.st_mode & (mode_t)~S_IFMT);
+	mode_t val = (file->st_mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) f |= R_USR;
 	if (val & S_IXUSR) f |= X_USR;
 
@@ -127,17 +127,17 @@ check_file_access(const struct stat file)
 	if (val & S_IROTH) f |= R_OTH;
 	if (val & S_IXOTH) f |= X_OTH;
 
-	if ((file.st_mode & S_IFMT) == S_IFDIR) {
-		if ((f & R_USR) && (f & X_USR) && file.st_uid == user.uid)
+	if ((file->st_mode & S_IFMT) == S_IFDIR) {
+		if ((f & R_USR) && (f & X_USR) && file->st_uid == user.uid)
 			return 1;
-		if ((f & R_GRP) && (f & X_GRP) && file.st_gid == user.gid)
+		if ((f & R_GRP) && (f & X_GRP) && file->st_gid == user.gid)
 			return 1;
 		if ((f & R_OTH) && (f & X_OTH))
 			return 1;
 	} else {
-		if ((f & R_USR) && file.st_uid == user.uid)
+		if ((f & R_USR) && file->st_uid == user.uid)
 			return 1;
-		if ((f & R_GRP) && file.st_gid == user.gid)
+		if ((f & R_GRP) && file->st_gid == user.gid)
 			return 1;
 		if (f & R_OTH)
 			return 1;
@@ -558,7 +558,7 @@ check_file_size(char *file, int max)
 	fseek(fp, 0, SEEK_SET);
 
 	char *tmp = (char *)xnmalloc(strlen(config_dir) + 12, sizeof(char));
-	sprintf(tmp, "%s/log.XXXXXX", config_dir);
+	sprintf(tmp, "%s/log.XXXXXX", config_dir); /* NOLINT */
 
 	int fdd = mkstemp(tmp);
 	if (fdd == -1) {
