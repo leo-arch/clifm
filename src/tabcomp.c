@@ -22,6 +22,7 @@ typedef char *rl_cpvfunc_t;
 #include "strings.h"
 #include "colors.h"
 #include "navigation.h"
+#include "readline.h"
 
 #ifndef _NO_HIGHLIGHT
 #include "highlight.h"
@@ -348,10 +349,11 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 
 	char _path[PATH_MAX];
 	*_path = '\0';
-	if (!*deq_str && *ss != '/' && *ss != '.' && *ss != '~')
-		snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, ss);
+	char *tmp = *deq_str ? deq_str : ss;
+	if (*tmp != '/' && *tmp != '.' && *tmp != '~')
+		snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, tmp);
 
-	char *spath = *_path ? _path : (*deq_str ? deq_str : ss);
+	char *spath = *_path ? _path : tmp;
 	char *epath = (char *)NULL; 
 	if (*spath == '~')
 		epath = tilde_expand(spath);
@@ -385,38 +387,45 @@ static inline char *
 get_last_word(char *matches)
 {
 	/* Get word after last non-escaped space */
-	char *ss = matches, *s = (char *)NULL;
-	while (*ss) {
-		if (ss == matches) {
-			ss++;
-			continue;
-		}
-		if (*ss == ' ' && *(ss - 1) != '\\' && *(ss + 1) != ' ')
+//	char *ss = matches, *s = (char *)NULL;
+/*	while (*ss) {
+		if (ss != matches && *ss == ' ' && *(ss - 1) != '\\' && *(ss + 1) != ' ')
 			s = ss;
 		ss++;
 	}
 	if (!s)
-		s = matches;
+		s = matches; */
 
 	/* Get word after last non-escaped slash */
-	char *sl = s;
+	char *sl = matches;
+//	char *sl = s;
 	char *d = (char *)NULL;
 	while (*sl) {
-		if (sl == s) {
+		if (sl == matches) {
 			if (*sl == '/')
 				d = sl;
-		} else if (*sl == '/' && *(sl - 1) != '\\') {
-			d = sl;
+		} else {
+			if (*sl == '/' && *(sl - 1) != '\\')
+				d = sl;
 		}
 		sl++;
 	}
 
-	if (!d)
-		d = s;
-	else if (*d == '/')
-		d++;
+	if (!d) {
+		return matches;
+//		d = matches;
+	} else {
+		if (*d == '/')
+			return d + 1;
+		return d;
+//			d++;
+	}
 
-	return d;
+//	if (*d == ' ' && !*(d + 1))
+//		d = matches;
+//	printf("AA:'%s'\n", d);
+
+//	return d;
 }
 
 static inline int
@@ -519,8 +528,8 @@ fzftabcomp(char **matches)
 	int exit_status = EXIT_SUCCESS;
 
 	/* Store possible completions in FZFTABIN to pass them to FZF */
-	size_t i = 1;
-	for (; matches[i]; i++) {
+	size_t i;
+	for (i = 1; matches[i]; i++) {
 		if (!matches[i] || !*matches[i])
 			continue;
 
@@ -622,7 +631,7 @@ fzftabcomp(char **matches)
 		}
 		break;
 
-	default: query = lw;
+	default: query = lw; break;
 	}
 
 	if (fzf_offset < 0)
@@ -670,10 +679,36 @@ fzftabcomp(char **matches)
 	size_t offset = 0, mlen = strlen(matches[0]);
 	if (mlen && matches[0][mlen - 1] != '/') {
 		char *q = strrchr(matches[0], '/');
-		if (q)
-			offset = strlen(q + 1);
-		else
-			offset = mlen;
+		if (q) {
+			size_t qlen = strlen(q);
+			if (cur_comp_type == TCMP_PATH) {
+				/* Add backslashes to the len of the match: every quoted
+				 * char will be escaped later by write_completion(), so that
+				 * backslashes should be counted as well to get the right
+				 * offset */
+				size_t c = 0;
+				int x = (int)qlen;
+				while (--x >= 0) {
+					if (is_quote_char(q[x]))
+						c++;
+				}
+				offset = qlen - 1 + c;
+			} else {
+				offset = qlen + 1;
+			}
+		} else { /* We have just a name, no slash */
+			if (cur_comp_type == TCMP_PATH) {
+				size_t c = 0;
+				int x = (int)mlen;
+				while (--x >= 0) {
+					if (is_quote_char(matches[0][x]))
+						c++;
+				}
+				offset = mlen + c;
+			} else {
+				offset = mlen;
+			}
+		}
 	}
 
 	if (cur_comp_type == TCMP_OPENWITH) {
@@ -742,14 +777,16 @@ fzftabcomp(char **matches)
 			offset = 0;
 		}
 
-	} else if (!case_sens_path_comp && query) {
-		/* Honor case insensitive completion */
-		size_t query_len = strlen(query);
-		if (strncmp(query, buf, query_len) != 0) {
-			int bk = rl_point;
-			rl_delete_text(bk - (int)query_len, rl_end);
-			rl_point = rl_end = bk - (int)query_len;
-			offset = 0;
+	} else {
+		if (!case_sens_path_comp && query) {
+			/* Honor case insensitive completion */
+			size_t query_len = strlen(query);
+			if (strncmp(query, buf, query_len) != 0) {
+				int bk = rl_point;
+				rl_delete_text(bk - (int)query_len, rl_end);
+				rl_point = rl_end = bk - (int)query_len;
+				offset = 0;
+			}
 		}
 	}
 
