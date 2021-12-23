@@ -350,8 +350,12 @@ write_completion(char *buf, const size_t *offset, int *exit_status)
 	char _path[PATH_MAX];
 	*_path = '\0';
 	char *tmp = *deq_str ? deq_str : ss;
-	if (*tmp != '/' && *tmp != '.' && *tmp != '~')
-		snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, tmp);
+	if (*tmp != '/' && *tmp != '.' && *tmp != '~') {
+		if (*(ws[cur_ws].path + 1))
+			snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, tmp);
+		else /* Root directory */
+			snprintf(_path, PATH_MAX, "/%s", tmp);
+	}
 
 	char *spath = *_path ? _path : tmp;
 	char *epath = (char *)NULL; 
