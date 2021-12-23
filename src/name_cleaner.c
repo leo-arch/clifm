@@ -121,8 +121,6 @@ translate_unsafe_char(unsigned char c)
 	else
 		t = DEFAULT_TRANSLATION;
 
-	if (t == 0)
-		return (-1);
 	return t;
 }
 

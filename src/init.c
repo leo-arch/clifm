@@ -167,8 +167,15 @@ xsecure_env(const int mode)
 		}
 	}
 
-	if (mode != SECURE_ENV_FULL)
+	if (mode != SECURE_ENV_FULL) {
 		setenv("LC_ALL", "C", 1);
+		if (user.name)
+			setenv("USER", user.name, 1);
+		if (user.home)
+			setenv("HOME", user.home, 1);
+		if (user.shell)
+			setenv("SHELL", user.shell, 1);
+	}
 
 	if (fzfopts) {
 		if (setenv("FZF_DEFAULT_OPTS", fzfopts, 1) == -1) {
@@ -337,6 +344,7 @@ set_start_path(void)
 	 * changes the CWD, this will be the CWD for CliFM */
 	if (!ws[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
+		/* Avoid compiler warning */
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
 
 		if (!*cwd || strlen(cwd) == 0) {
@@ -509,11 +517,11 @@ get_user(void)
 
 	tmp_user.uid = pw->pw_uid;
 	tmp_user.gid = pw->pw_gid;
-	char *p = getenv("HOME");
-	if (!p)
+/*	char *p = getenv("HOME"); 
+	if (!p) */
 		tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
-	else
-		tmp_user.home = savestring(p, strlen(p));
+/*	else
+		tmp_user.home = savestring(p, strlen(p)); */
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
@@ -2022,6 +2030,7 @@ get_path_programs(void)
 	if (ext_cmd_ok) {
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
+		/* Avoid compiler warning */
 
 		commands_bin = (struct dirent ***)xnmalloc(
 						path_n, sizeof(struct dirent));

@@ -130,7 +130,7 @@ clear_suggestion(const int free_sug)
 	/* Delete everything in the current line starting from the current
 	 * cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
-
+	/* Avoid compiler warning */
 	if (suggestion.nlines > 1) {
 		/* Save cursor position */
 		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
@@ -139,8 +139,10 @@ clear_suggestion(const int free_sug)
 		while (--i > 0) {
 			/* Move the cursor to the beginning of the next line */
 			if (write(STDOUT_FILENO, "\x1b[1E", 4) <= 0) {}
+			/* Avoid compiler warning */
 			/* Delete the line */
 			if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+			/* Avoid compiler warning */
 		}
 		/* Restore cursor position */
 		printf("\x1b[%d;%dH", currow, curcol);
@@ -309,18 +311,18 @@ print_suggestion(const char *str, size_t offset, char *color)
 /* Used by the check_completions function to get file names color
  * according to file type */
 static char *
-get_comp_color(const char *filename, const struct stat attr)
+get_comp_color(const char *filename, const struct stat *attr)
 {
 	char *color = no_c; 
 
-	switch(attr.st_mode & S_IFMT) {
+	switch(attr->st_mode & S_IFMT) {
 	case S_IFDIR:
 		if (light_mode)
 			return di_c;
 		if (access(filename, R_OK | X_OK) != 0)
 			color = nd_c;
 		else
-			color = get_dir_color(filename, attr.st_mode);
+			color = get_dir_color(filename, attr->st_mode);
 		break;
 
 	case S_IFREG:
@@ -328,9 +330,9 @@ get_comp_color(const char *filename, const struct stat attr)
 			return fi_c;
 		if (access(filename, R_OK) == -1)
 			color = nf_c;
-		else if (attr.st_mode & S_ISUID)
+		else if (attr->st_mode & S_ISUID)
 			color = su_c;
-		else if (attr.st_mode & S_ISGID)
+		else if (attr->st_mode & S_ISGID)
 			color = sg_c;
 		else {
 #ifdef _LINUX_CAP
@@ -338,17 +340,17 @@ get_comp_color(const char *filename, const struct stat attr)
 			if (cap) {
 				color = ca_c;
 				cap_free(cap);
-			} else if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+			} else if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #else
-			if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+			if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
-				if (attr.st_size == 0)
+				if (attr->st_size == 0)
 					color = ee_c;
 				else
 					color = ex_c;
-			} else if (attr.st_size == 0)
+			} else if (attr->st_size == 0)
 				color = ef_c;
-			else if (attr.st_nlink > 1)
+			else if (attr->st_nlink > 1)
 				color = mh_c;
 			else {
 				char *ext = strrchr(filename, '.');
@@ -451,7 +453,7 @@ check_completions(char *str, size_t len, const unsigned char c,
 				suggestion.filetype = DT_DIR;
 			}
 			if (suggest_filetype_color)
-				color = get_comp_color(p ? p : _matches[0], attr);
+				color = get_comp_color(p ? p : _matches[0], &attr);
 		} else {
 			/* We have a partial completion. Set filetype to DT_DIR
 			 * so that the rl_accept_suggestion function won't append
@@ -512,7 +514,7 @@ check_completions(char *str, size_t len, const unsigned char c,
 				}
 
 				if (suggest_filetype_color) {
-					_color = get_comp_color(p ? p : _matches[1], attr);
+					_color = get_comp_color(p ? p : _matches[1], &attr);
 					if (_color)
 						color = _color;
 				}
@@ -879,7 +881,7 @@ check_bookmarks(const char *str, const size_t len, const int print)
 				suggestion.filetype = DT_REG;
 
 				if (suggest_filetype_color)
-					color = get_comp_color(bookmarks[i].path, attr);
+					color = get_comp_color(bookmarks[i].path, &attr);
 
 				char *_tmp = escape_str(bookmarks[i].path);
 				print_suggestion(_tmp ? _tmp : bookmarks[i].path, 1, color);

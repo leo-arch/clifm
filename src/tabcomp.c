@@ -223,18 +223,18 @@ rl_strpbrk(char *s1, char *s2)
 #define FZFTABOUT "/tmp/clifm.fzf.out"
 
 static char *
-fzftab_color(char *filename, const struct stat attr)
+fzftab_color(char *filename, const struct stat *attr)
 {
 	if (!colorize)
 		return df_c;
 
-	switch(attr.st_mode & S_IFMT) {
+	switch(attr->st_mode & S_IFMT) {
 	case S_IFDIR:
-		if (!check_file_access(&attr))
+		if (!check_file_access(attr))
 			return nd_c;
-		return get_dir_color(filename, attr.st_mode);
+		return get_dir_color(filename, attr->st_mode);
 	case S_IFREG:
-		if (!check_file_access(&attr))
+		if (!check_file_access(attr))
 			return nf_c;
 		char *ext_cl = (char *)NULL;
 		char *ext = strrchr(filename, '.');
@@ -262,7 +262,7 @@ get_entry_color(char **matches, const size_t i)
 		if (colorize && (cur_comp_type == TCMP_PATH
 		|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL)) {
 			if (lstat(matches[i], &attr) != -1)
-				cl = fzftab_color(matches[i], attr);
+				cl = fzftab_color(matches[i], &attr);
 		}
 	} else if (*matches[i] == '~') {  /* Tilde */
 		if (colorize && cur_comp_type == TCMP_PATH) {
@@ -272,7 +272,7 @@ get_entry_color(char **matches, const size_t i)
 				xstrsncpy(tmp_path, exp_path, PATH_MAX);
 				free(exp_path);
 				if (lstat(tmp_path, &attr) != -1)
-					cl = fzftab_color(tmp_path, attr);
+					cl = fzftab_color(tmp_path, &attr);
 			}
 		}
 	} else { /* Relative path */
@@ -281,7 +281,7 @@ get_entry_color(char **matches, const size_t i)
 				char tmp_path[PATH_MAX];
 				snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
 				if (lstat(tmp_path, &attr) != -1)
-					cl = fzftab_color(tmp_path, attr);
+					cl = fzftab_color(tmp_path, &attr);
 			} else if (cur_comp_type == TCMP_CMD) {
 				if (is_internal_c(matches[i]))
 					cl = hv_c;

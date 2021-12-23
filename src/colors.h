@@ -34,7 +34,7 @@ int cschemes_function(char **args);
 void colors_list(char *ent, const int i, const int pad, const int new_line);
 char *get_ext_color(const char *ext);
 char *get_dir_color(const char *filename, const mode_t mode);
-char *get_file_color(const char *filename, const struct stat attr);
+char *get_file_color(const char *filename, const struct stat *attr);
 void reset_filetype_colors(void);
 void reset_iface_colors(void);
 #endif /* COLORS_H */
