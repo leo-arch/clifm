@@ -406,6 +406,9 @@ extern int watch;
 #define VISIBLE_BELL_DELAY 30
 #define DEF_BELL_STYLE     BELL_VISIBLE
 
+#define SECURE_ENV_FULL   1
+#define SECURE_ENV_IMPORT 0
+
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */

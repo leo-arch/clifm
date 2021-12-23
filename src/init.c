@@ -62,13 +62,29 @@
  * functions
  */
 
+/* Sanitize the environment: delete all inherited environment variables
+ * and set a few to get a minimally working environment */
 int
-xsecure_env(void)
+xsecure_env(const int mode)
 {
 	static char *namebuf = NULL;
 	static size_t lastlen = 0;
 
-//	char *display = getenv("DISPLAY");
+	char *display = (char *)NULL;
+	char *_term = (char *)NULL;
+	char *tz = (char *)NULL;
+	char *lang = (char *)NULL;
+	char *fzfopts = (char *)NULL;
+
+	if (mode != SECURE_ENV_FULL) {
+		/* Let's keep these values from the current environment */
+		display = getenv("DISPLAY");
+		_term = getenv("TERM");
+		tz = getenv("TZ");
+		lang = getenv("LANG");
+		if (fzftab)
+			fzfopts = getenv("FZF_DEFAULT_OPTS");
+	}
 
 	/* Unset environ: little implementation of clearenv(3), not available
 	 * on some system (not POSIX) */
@@ -123,13 +139,43 @@ xsecure_env(void)
 		exit(EXIT_FAILURE);
 	}
 
-/*	if (display) {
+	if (display) {
 		if (setenv("DISPLAY", display, 1) == -1) {
 			fprintf(stderr, "%s: setenv: DISPLAY: %s\n", PROGRAM_NAME,
 				strerror(errno));
-			exit(EXIT_FAILURE);
 		}
-	} */
+	}
+
+	if (_term) {
+		if (setenv("TERM", _term, 1) == -1) {
+			fprintf(stderr, "%s: setenv: TERM: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}
+	}
+
+	if (tz) {
+		if (setenv("TZ", tz, 1) == -1) {
+			fprintf(stderr, "%s: setenv: TZ: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}
+	}
+
+	if (lang) {
+		if (setenv("LANG", lang, 1) == -1) {
+			fprintf(stderr, "%s: setenv: LANG: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}
+	}
+
+	if (mode != SECURE_ENV_FULL)
+		setenv("LC_ALL", "C", 1);
+
+	if (fzfopts) {
+		if (setenv("FZF_DEFAULT_OPTS", fzfopts, 1) == -1) {
+			fprintf(stderr, "%s: setenv: FZF_DEFAULT_OPTS: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}
+	}
 
 	return 0;
 }
@@ -1080,6 +1126,7 @@ external_arguments(int argc, char **argv)
 		{"no-warning-prompt", no_argument, 0, 44},
 		{"mnt-udisks2", no_argument, 0, 45},
 		{"secure-env", no_argument, 0, 46},
+		{"secure-env-full", no_argument, 0, 47},
 	    {0, 0, 0, 0}
 	};
 
@@ -1258,7 +1305,8 @@ external_arguments(int argc, char **argv)
 
 		case 44: xargs.warning_prompt = warning_prompt = 0; break;
 		case 45: xargs.mount_cmd = MNT_UDISKS2; break;
-		case 46: xsecure_env(); break;
+		case 46: xsecure_env(SECURE_ENV_IMPORT); break;
+		case 47: xsecure_env(SECURE_ENV_FULL); break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
