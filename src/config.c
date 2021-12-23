@@ -1827,7 +1827,7 @@ read_config(void)
 		else if (*line == 'M' && strncmp(line, "MaxJumpTotalRank=", 17) == 0) {
 			int opt_num = 0;
 			ret = sscanf(line, "MaxJumpTotalRank=%d\n", &opt_num);
-			if (ret == -1 || opt_num < INT_MIN || opt_num > INT_MAX)
+			if (ret == -1)
 				continue;
 			max_jump_total_rank = opt_num;
 		}
@@ -1871,7 +1871,7 @@ read_config(void)
 		else if (*line == 'M' && strncmp(line, "MinJumpRank=", 12) == 0) {
 			int opt_num = 0;
 			ret = sscanf(line, "MinJumpRank=%d\n", &opt_num);
-			if (ret == -1 || opt_num < INT_MIN || opt_num > INT_MAX)
+			if (ret == -1)
 				continue;
 			min_jump_rank = opt_num;
 		}

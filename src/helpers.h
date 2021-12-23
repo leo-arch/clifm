@@ -920,7 +920,6 @@ extern char
 	*suggestion_strategy,
 #endif
 	*term,
-//	*term_bgcolor,
 	*tmp_dir,
 #ifndef _NO_TRASH
 	*trash_dir,

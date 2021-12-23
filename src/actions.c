@@ -64,7 +64,7 @@ run_action(char *action, char **args)
 	int dir_path = 0;
 	if (strchr(action, '/')) {
 		cmd = (char *)xnmalloc(action_len + 1, sizeof(char));
-		strcpy(cmd, action);
+		strcpy(cmd, action); /* NOLINT */
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
@@ -73,7 +73,7 @@ run_action(char *action, char **args)
 		}
 		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2,
 								sizeof(char));
-		sprintf(cmd, "%s/%s", plugins_dir, action);
+		sprintf(cmd, "%s/%s", plugins_dir, action); /* NOLINT */
 	}
 
 	/* Check if the action file exists and is executable */
@@ -82,7 +82,7 @@ run_action(char *action, char **args)
 		if (data_dir && !dir_path) {
 			cmd = (char *)xrealloc(cmd, (action_len + strlen(data_dir)
 						+ strlen(PNL) + 11) * sizeof(char));
-			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action);
+			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action); /* NOLINT */
 			if (access(cmd, X_OK) == -1) {
 				fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
 				free(cmd);
@@ -102,8 +102,8 @@ run_action(char *action, char **args)
 	for (i = 1; args[i]; i++) {
 		len += (strlen(args[i]) + 2);
 		cmd = (char *)xrealloc(cmd, len * sizeof(char));
-		strcat(cmd, " ");
-		strcat(cmd, args[i]);
+		strcat(cmd, " "); /* NOLINT */
+		strcat(cmd, args[i]); /* NOLINT */
 	}
 
 			/* ##############################
@@ -117,7 +117,7 @@ run_action(char *action, char **args)
 	}
 
 	char fifo_path[PATH_MAX];
-	sprintf(fifo_path, "%s/.pipe.%s", tmp_dir, rand_ext);
+	snprintf(fifo_path, PATH_MAX -1, "%s/.pipe.%s", tmp_dir, rand_ext); /* NOLINT */
 	free(rand_ext);
 
 	setenv("CLIFM_BUS", fifo_path, 1);

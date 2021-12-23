@@ -249,7 +249,7 @@ gen_date_suffix(struct tm tm)
 	strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
 
 	char *suffix = (char *)xnmalloc(68, sizeof(char));
-	snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
+	snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900, /* NOLINT */
 	    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
 	return suffix;
@@ -471,7 +471,7 @@ get_cmd_path(const char *cmd)
 	for (; i < path_n; i++) { /* Check each path in PATH */
 		/* Append cmd to each path and check if it exists and is
 		 * executable */
-		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i], cmd);
+		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i], cmd); /* NOLINT */
 		if (access(cmd_path, X_OK) == 0)
 			return cmd_path;
 	}
@@ -501,7 +501,7 @@ get_size_unit(off_t size)
 	 * We don't want to print the reminder when it is zero */
 
 	const char *const u = "BKMGTPEZY";
-	snprintf(str, MAX_UNIT_SIZE, "%.*f%c", (s == 0 || s - (float)x == 0)
+	snprintf(str, MAX_UNIT_SIZE, "%.*f%c", (s == 0 || s - (float)x == 0) /* NOLINT */
 			? 0 : 2, (double)s, u[n]);
 
 	return str;
@@ -514,7 +514,7 @@ dir_size(char *dir)
 		return (-1);
 
 	char file[PATH_MAX];
-	snprintf(file, PATH_MAX, "%s/duXXXXXX", P_tmpdir);
+	snprintf(file, PATH_MAX, "%s/duXXXXXX", P_tmpdir); /* NOLINT */
 
 	int fd = mkstemp(file);
 	if (fd == -1)

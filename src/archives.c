@@ -168,7 +168,7 @@ handle_iso(char *file)
 	if (ret) {
 		char *deq_file = dequote_str(file, 0);
 		if (deq_file) {
-			strcpy(file, deq_file);
+			strcpy(file, deq_file); /* NOLINT */
 			free(deq_file);
 		}
 		ret = (char *)NULL;
@@ -180,7 +180,7 @@ handle_iso(char *file)
 	case 'e': {
 		/* 7z x -oDIR FILE (use FILE as DIR) */
 		char *o_option = (char *)xnmalloc(strlen(file) + 7, sizeof(char));
-		sprintf(o_option, "-o%s.dir", file);
+		sprintf(o_option, "-o%s.dir", file); /* NOLINT */
 
 		/* Construct and execute cmd */
 		char *cmd[] = {"7z", "x", o_option, file, NULL};
@@ -198,7 +198,7 @@ handle_iso(char *file)
 			break;
 		char *o_option = (char *)xnmalloc(strlen(ext_path) + 3,
 		    sizeof(char));
-		sprintf(o_option, "-o%s", ext_path);
+		sprintf(o_option, "-o%s", ext_path); /* NOLINT */
 
 		/* Construct and execute cmd */
 		char *cmd[] = {"7z", "x", o_option, file, NULL};
@@ -227,11 +227,11 @@ handle_iso(char *file)
 		if (xargs.stealth_mode == 1) {
 			mountpoint = (char *)xnmalloc(strlen(file) + P_tmpdir_len + 15,
 						sizeof(char));
-			sprintf(mountpoint, "%s/clifm-mounts/%s", P_tmpdir, file);
+			sprintf(mountpoint, "%s/clifm-mounts/%s", P_tmpdir, file); /* NOLINT */
 		} else {
 			mountpoint = (char *)xnmalloc(strlen(config_dir) + strlen(file) + 9,
 						sizeof(char));
-			sprintf(mountpoint, "%s/mounts/%s", config_dir, file);
+			sprintf(mountpoint, "%s/mounts/%s", config_dir, file); /* NOLINT */
 		}
 
 		char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
@@ -314,10 +314,10 @@ create_iso(char *in_file, char *out_file)
 	/* If IN_FILE is a block device */
 	else if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
 		char *if_option = (char *)xnmalloc(strlen(in_file) + 4, sizeof(char));
-		sprintf(if_option, "if=%s", in_file);
+		sprintf(if_option, "if=%s", in_file); /* NOLINT */
 
 		char *of_option = (char *)xnmalloc(strlen(out_file) + 4, sizeof(char));
-		sprintf(of_option, "of=%s", out_file);
+		sprintf(of_option, "of=%s", out_file); /* NOLINT */
 
 		char *sudo = get_sudo_path();
 		if (!sudo) {
@@ -637,9 +637,9 @@ archiver(char **args, char mode)
 			if (!dot) {
 				size_t name_len = strlen(name);
 				char *t = (char *)xnmalloc(name_len + 1, sizeof(char));
-				strcpy(t, name);
+				strcpy(t, name); /* NOLINT */
 				name = (char *)xrealloc(name, (name_len + 8) * sizeof(char));
-				sprintf(name, "%s.tar.gz", t);
+				sprintf(name, "%s.tar.gz", t); /* NOLINT */
 				free(t);
 			} else if (dot == name) { /* Dot is first char */
 				fprintf(stderr, _("Invalid file name\n"));
@@ -705,7 +705,7 @@ archiver(char **args, char mode)
 		size_t cmd_len = strlen(esc_name) + 10 + (!ext_ok ? 8 : 0);
 		cmd = (char *)xnmalloc(cmd_len, sizeof(char));
 		/* If name has no extension, add the default */
-		sprintf(cmd, "atool -a %s%s", esc_name, !ext_ok ? ".tar.gz" : "");
+		sprintf(cmd, "atool -a %s%s", esc_name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
 
 		for (i = 1; args[i]; i++) {
 			char *_name = (char *)NULL;
@@ -718,8 +718,8 @@ archiver(char **args, char mode)
 			}
 			cmd_len += strlen(_name ? _name : args[i]) + 1;
 			cmd = (char *)xrealloc(cmd, (cmd_len + 1) * sizeof(char));
-			strcat(cmd, " ");
-			strcat(cmd, _name ? _name : args[i]);
+			strcat(cmd, " "); /* NOLINT */
+			strcat(cmd, _name ? _name : args[i]); /* NOLINT */
 			free(_name);
 		}
 
@@ -742,7 +742,7 @@ archiver(char **args, char mode)
 		char *deq = (char *)NULL;
 		if (strchr(args[i], '\\')) {
 			deq = dequote_str(args[i], 0);
-			strcpy(args[i], deq);
+			strcpy(args[i], deq); /* NOLINT */
 			free(deq);
 		}
 
@@ -869,8 +869,8 @@ archiver(char **args, char mode)
 
 			len += strlen(esc_name) + 1;
 			dec_files = (char *)xrealloc(dec_files, (len + 1) * sizeof(char));
-			strcat(dec_files, " ");
-			strcat(dec_files, esc_name);
+			strcat(dec_files, " "); /* NOLINT */
+			strcat(dec_files, esc_name); /* NOLINT */
 			free(esc_name);
 		}
 	} break;
@@ -889,7 +889,7 @@ archiver(char **args, char mode)
 					return EXIT_FAILURE;
 				}
 
-				strcpy(args[i], deq_name);
+				strcpy(args[i], deq_name); /* NOLINT */
 				free(deq_name);
 				deq_name = (char *)NULL;
 			}
@@ -904,7 +904,7 @@ archiver(char **args, char mode)
 	case 'e': { /* ########## EXTRACT ############## */
 		char *cmd = (char *)NULL;
 		cmd = (char *)xnmalloc(strlen(dec_files) + 13, sizeof(char));
-		sprintf(cmd, "atool -x -e %s", dec_files);
+		sprintf(cmd, "atool -x -e %s", dec_files); /* NOLINT */
 		if (launch_execle(cmd) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
@@ -952,10 +952,11 @@ archiver(char **args, char mode)
 			char *mountpoint = (char *)NULL;
 			if (xargs.stealth_mode == 1) {
 				mountpoint = (char *)xnmalloc(strlen(args[i]) + 19, sizeof(char));
-				sprintf(mountpoint, "/tmp/clifm-mounts/%s", args[i]);
+				sprintf(mountpoint, "/tmp/clifm-mounts/%s", args[i]); /* NOLINT */
 			} else {
-				mountpoint = (char *)xnmalloc(strlen(config_dir) + strlen(args[i]) + 9, sizeof(char));
-				sprintf(mountpoint, "%s/mounts/%s", config_dir, args[i]);
+				mountpoint = (char *)xnmalloc(strlen(config_dir)
+							+ strlen(args[i]) + 9, sizeof(char));
+				sprintf(mountpoint, "%s/mounts/%s", config_dir, args[i]); /* NOLINT */
 			}
 
 			char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
@@ -989,7 +990,7 @@ archiver(char **args, char mode)
 			free(ws[cur_ws].path);
 			ws[cur_ws].path = (char *)xnmalloc(strlen(mountpoint) + 1,
 			    sizeof(char));
-			strcpy(ws[cur_ws].path, mountpoint);
+			strcpy(ws[cur_ws].path, mountpoint); /* NOLINT */
 			free(mountpoint);
 
 			add_to_jumpdb(ws[cur_ws].path);
@@ -1033,7 +1034,7 @@ archiver(char **args, char mode)
 		/* Construct and execute cmd */
 		char *cmd = (char *)NULL;
 		cmd = (char *)xnmalloc(strlen(format) + strlen(dec_files) + 16, sizeof(char));
-		sprintf(cmd, "arepack -F %s -e %s", format, dec_files);
+		sprintf(cmd, "arepack -F %s -e %s", format, dec_files); /* NOLINT */
 
 		if (launch_execle(cmd) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;

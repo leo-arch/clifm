@@ -177,7 +177,7 @@ bookmark_del(char *name)
 	if (cmd_line != -1) {
 		del_elements = (char **)xnmalloc(2, sizeof(char *));
 		del_elements[0] = (char *)xnmalloc((size_t)DIGINUM(cmd_line + 1) + 1, sizeof(char));
-		sprintf(del_elements[0], "%d", cmd_line + 1);
+		sprintf(del_elements[0], "%d", cmd_line + 1); /* NOLINT */
 		del_elements[1] = (char *)NULL;
 	}
 
@@ -249,7 +249,7 @@ bookmark_del(char *name)
 			char *bk_file = (char *)NULL;
 			bk_file = (char *)xcalloc(strlen(config_dir) + 14,
 			    sizeof(char));
-			sprintf(bk_file, "%s/bookmarks.bk", config_dir);
+			sprintf(bk_file, "%s/bookmarks.bk", config_dir); /* NOLINT */
 			char *tmp_cmd[] = {"cp", bm_file, bk_file, NULL};
 
 			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
@@ -285,7 +285,7 @@ bookmark_del(char *name)
 	/* Open a temporary file */
 	char *tmp_file = (char *)NULL;
 	tmp_file = (char *)xnmalloc(strlen(config_dir) + 8, sizeof(char));
-	sprintf(tmp_file, "%s/bm_tmp", config_dir);
+	sprintf(tmp_file, "%s/bm_tmp", config_dir); /* NOLINT */
 
 	FILE *tmp_fp = fopen(tmp_file, "w+");
 	if (!tmp_fp) {
@@ -365,7 +365,7 @@ bookmark_add(char *file)
 	if (*file != '/') {
 		char *tmp_file = (char *)NULL;
 		tmp_file = (char *)xnmalloc((strlen(ws[cur_ws].path) + strlen(file) + 2), sizeof(char));
-		sprintf(tmp_file, "%s/%s", ws[cur_ws].path, file);
+		sprintf(tmp_file, "%s/%s", ws[cur_ws].path, file); /* NOLINT */
 		file = tmp_file;
 		tmp_file = (char *)NULL;
 		mod_file = 1;
@@ -503,12 +503,12 @@ bookmark_add(char *file)
 		/* Generate the bookmark line */
 		if (hk) { /* name AND hk */
 			tmp = (char *)xcalloc(strlen(hk) + strlen(name) + strlen(file) + 5, sizeof(char));
-			sprintf(tmp, "[%s]%s:%s\n", hk, name, file);
+			sprintf(tmp, "[%s]%s:%s\n", hk, name, file); /* NOLINT */
 			free(hk);
 		} else { /* Only name */
 			tmp = (char *)xnmalloc(strlen(name) + strlen(file) + 3,
 			    sizeof(char));
-			sprintf(tmp, "%s:%s\n", name, file);
+			sprintf(tmp, "%s:%s\n", name, file); /* NOLINT */
 		}
 
 		free(name);
@@ -518,12 +518,12 @@ bookmark_add(char *file)
 	else if (hk) { /* Only hk */
 		tmp = (char *)xnmalloc(strlen(hk) + strlen(file) + 4,
 		    sizeof(char));
-		sprintf(tmp, "[%s]%s\n", hk, file);
+		sprintf(tmp, "[%s]%s\n", hk, file); /* NOLINT */
 		free(hk);
 		hk = (char *)NULL;
 	} else { /* Neither shortcut nor name: only path */
 		tmp = (char *)xnmalloc(strlen(file) + 2, sizeof(char));
-		sprintf(tmp, "%s\n", file);
+		sprintf(tmp, "%s\n", file); /* NOLINT */
 	}
 
 	for (i = 0; i < bmn; i++)
