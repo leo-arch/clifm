@@ -2094,7 +2094,7 @@ get_path_programs(void)
 		/* And finally, add commands in PATH */
 		i = (int)path_n;
 		while (--i >= 0) {
-			if (!cmd_n[i] || cmd_n[i] <= 0)
+			if (cmd_n[i] <= 0)
 				continue;
 
 			int j = cmd_n[i];
