@@ -1483,9 +1483,10 @@ list_dir_light(void)
 			}
 #endif
 
-			files_counter
-			    ? (file_info[n].filesn = (count_dir(ename, NO_CPOP) - 2))
-			    : (file_info[n].filesn = 1);
+			if (files_counter == 1)
+				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
+			else
+				file_info[n].filesn = 1;
 
 			if (file_info[n].filesn > 0) {
 				file_info[n].color = di_c;

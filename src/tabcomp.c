@@ -1273,16 +1273,7 @@ DISPLAY_MATCHES:
 					goto RESTART;
 				}
 			}
-		}
-#ifndef _NO_FZF
-		}
-#endif
 
-
-#ifndef _NO_FZF
-		if (!fzftab) {
-#endif
-		{
 			/* How many items of MAX length can we fit in the screen window? */
 			max += 2;
 			limit = term_cols / max;
@@ -1296,10 +1287,34 @@ DISPLAY_MATCHES:
 
 			/* How many iterations of the printing loop? */
 			count = (len + (limit - 1)) / limit;
+
+		}
+#ifndef _NO_FZF
+		}
+#endif
+
+/*
+#ifndef _NO_FZF
+		if (!fzftab) {
+#endif
+		{
+			// How many items of MAX length can we fit in the screen window?
+			max += 2;
+			limit = term_cols / max;
+			if (limit != 1 && (limit * max == term_cols))
+				limit--;
+
+			// Avoid a possible floating exception.  If max > screenwidth,
+			   limit will be 0 and a divide-by-zero fault will result.
+			if (limit == 0)
+			  limit = 1;
+
+			// How many iterations of the printing loop?
+			count = (len + (limit - 1)) / limit;
 		}
 #ifndef _NO_FZF
 	}
-#endif
+#endif */
 
 		/* Watch out for special case.  If LEN is less than LIMIT, then
 		   just do the inner printing loop.
