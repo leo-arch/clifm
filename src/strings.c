@@ -1017,7 +1017,7 @@ parse_input_str(char *str)
 
 			/* Check for conditional execution (cmd1 && cmd 2)*/
 			if (!cond_cmd && str[i] == '&' && i > 0 && str[i - 1] != '\\'
-			&& str[i + 1] && str[i + 1] == '&')
+			&& str[i + 1] == '&')
 				cond_cmd = 1;
 
 				/* ##################################
