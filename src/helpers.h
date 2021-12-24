@@ -944,9 +944,8 @@ extern char
 	**prompt_cmds,
 	**sel_elements;
 
-extern const char
-	*internal_cmds[],
-	*param_str[];
+extern char *internal_cmds[];
+extern const char *param_str[];
 
 extern regex_t regex_exp;
 extern size_t *ext_colors_len;

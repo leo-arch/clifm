@@ -322,7 +322,7 @@ char
  * more lists of commands: one of commands dealing with file names
  * (is_internal(), in checks.c), and another one listing commands
  * taking ELN's as parameters (is_internal_f() in strings.c) */
-const char *internal_cmds[] = {
+char *internal_cmds[] = {
 	",",
 	"?", "help",
 	"ac", "ad",
