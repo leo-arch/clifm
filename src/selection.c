@@ -931,12 +931,9 @@ normalize_path(char *src, size_t src_len)
 	/* Resolve references to . and .. */
 	char *res;
 	size_t res_len;
-	const char *ptr = src;
-	const char *end = &src[src_len];
-	const char *next;
 
 	if (src_len == 0 || *src != '/') {
-		// relative path
+		/* Relative path */
 		size_t pwd_len;
 		pwd_len = strlen(ws[cur_ws].path);
 		res = (char *)xnmalloc(pwd_len + 1 + src_len + 1, sizeof(char));
@@ -946,6 +943,10 @@ normalize_path(char *src, size_t src_len)
 		res = (char *)xnmalloc((src_len > 0 ? src_len : 1) + 1, sizeof(char));
 		res_len = 0;
 	}
+
+	const char *ptr;
+	const char *end = &src[src_len];
+	const char *next;
 
 	for (ptr = src; ptr < end; ptr = next + 1) {
 		size_t len;
