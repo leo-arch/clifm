@@ -94,6 +94,39 @@ xclearenv(void)
 	} */
 }
 
+static inline void
+set_path_env(void)
+{
+	int ret = -1;
+
+#ifdef _PATH_STDPATH
+	ret = setenv("PATH", _PATH_STDPATH, 1);
+#else
+	char *p = (char *)NULL;
+	size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
+	p = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
+	confstr(_CS_PATH, p, n);               /* Get value */
+	ret = setenv("PATH", p, 1);            /* Set it */
+	free(p);
+#endif
+
+	if (ret == -1) {
+		fprintf(stderr, "%s: setenv: PATH: %s\n", PROGRAM_NAME,
+			strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+}
+
+static inline void
+set_ifs_env(void)
+{
+	if (setenv("IFS", " \t\n", 1) == -1) {
+		fprintf(stderr, "%s: setenv: IFS: %s\n", PROGRAM_NAME,
+			strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+}
+
 /* Sanitize the environment: delete all inherited environment variables
  * and set a few to get a minimally working environment */
 int
@@ -108,6 +141,7 @@ xsecure_env(const int mode)
 		"on NetBSD\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #endif
+
 	char *display = (char *)NULL;
 	char *wayland_display = (char *)NULL;
 	char *_term = (char *)NULL;
@@ -128,50 +162,29 @@ xsecure_env(const int mode)
 	}
 
 	xclearenv();
-
-	/* Set a few basic environment variables */
-//	char *p = (char *)NULL;
-//	size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-//	p = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
-//	confstr(_CS_PATH, p, n);               /* Get value */
-//	int ret = setenv("PATH", p, 1);        /* Set it */
-	int ret = setenv("PATH", _PATH_STDPATH, 1);
-
-	if (ret == -1) {
-//		free(p);
-		fprintf(stderr, "%s: setenv: PATH: %s\n", PROGRAM_NAME,
-			strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	set_path_env();
+	set_ifs_env();
 
 /*	n = confstr(_CS_V7_ENV, NULL, 0);
-	p = (char *)xrealloc(p, n * sizeof(char));
+	char *p = (char *)xrealloc(p, n * sizeof(char));
 	confstr(_CS_V7_ENV, p, n);
 	char *e = strchr(p, '=');
 	if (e && *(e + 1)) {
 		*e = '\0';
 		setenv(p, e + 1, 1);
 		*e = '=';
-	} */
+	} 
+	free(p); */
 
-//	free(p);
+	if (mode == SECURE_ENV_FULL)
+		return EXIT_SUCCESS;
 
-	if (setenv("IFS", " \t\n", 1) == -1) {
-		fprintf(stderr, "%s: setenv: IFS: %s\n", PROGRAM_NAME,
-			strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
-	/* Only if NOT secure env full */
-	if (mode != SECURE_ENV_FULL) {
-		setenv("LC_ALL", "C", 1);
-		if (user.name)
-			setenv("USER", user.name, 1);
-		if (user.home)
-			setenv("HOME", user.home, 1);
-		if (user.shell)
-			setenv("SHELL", user.shell, 1);
-	}
+	if (user.name)
+		setenv("USER", user.name, 1);
+	if (user.home)
+		setenv("HOME", user.home, 1);
+	if (user.shell)
+		setenv("SHELL", user.shell, 1);
 
 	if (display) {
 		if (setenv("DISPLAY", display, 1) == -1) {
@@ -204,6 +217,15 @@ xsecure_env(const int mode)
 	if (lang) {
 		if (setenv("LANG", lang, 1) == -1) {
 			fprintf(stderr, "%s: setenv: LANG: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}
+		if (setenv("LC_ALL", lang, 1) == -1) {
+			fprintf(stderr, "%s: setenv: LC_ALL: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}	
+	} else {
+		if (mode != SECURE_ENV_FULL && setenv("LC_ALL", "C", 1) == -1) {
+			fprintf(stderr, "%s: setenv: LC_ALL: %s\n", PROGRAM_NAME,
 				strerror(errno));
 		}
 	}

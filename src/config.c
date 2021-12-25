@@ -2219,11 +2219,13 @@ check_colors(void)
 	char *p = (getenv("NO_COLOR"));
 	if (p) {
 		colorize = 0;
-	} else if (colorize == UNSET) {
-		if (xargs.colorize == UNSET)
-			colorize = DEF_COLORS;
-		else
-			colorize = xargs.colorize;
+	} else {
+		if (colorize == UNSET) {
+			if (xargs.colorize == UNSET)
+				colorize = DEF_COLORS;
+			else
+				colorize = xargs.colorize;
+		}
 	}
 
 	if (colorize == 1) {
@@ -2269,6 +2271,7 @@ init_config(void)
 			"logs and configuration files, are disabled.\n"),
 		    PROGRAM_NAME);
 		config_ok = 0;
+		check_colors();
 		return;
 	}
 
