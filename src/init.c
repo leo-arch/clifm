@@ -103,6 +103,10 @@ xsecure_env(const int mode)
 	fprintf(stderr, "%s: secure-env: This feature is not available "
 		"on Haiku\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
+#elif __NetBSD__
+	fprintf(stderr, "%s: secure-env: This feature is not available "
+		"on NetBSD\n", PROGRAM_NAME);
+	exit(EXIT_FAILURE);
 #endif
 	char *display = (char *)NULL;
 	char *wayland_display = (char *)NULL;
