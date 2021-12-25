@@ -647,8 +647,7 @@ prompt(void)
 	/* Keep a literal copy of the last entered command to compose the
 	 * commands log, if needed and enabled */
 	if (logs_enabled) {
-		if (last_cmd)
-			free(last_cmd);
+		free(last_cmd);
 		last_cmd = savestring(input, strlen(input));
 	}
 

@@ -282,8 +282,8 @@ get_entry_color(char **matches, const size_t i)
 				snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
 				if (lstat(tmp_path, &attr) != -1)
 					cl = fzftab_color(tmp_path, &attr);
-			} else if (cur_comp_type == TCMP_CMD) {
-				if (is_internal_c(matches[i]))
+			} else {
+				if (cur_comp_type == TCMP_CMD && is_internal_c(matches[i]))
 					cl = hv_c;
 			}
 		}
@@ -293,14 +293,15 @@ get_entry_color(char **matches, const size_t i)
 }
 
 static inline void
-write_completion(char *buf, const size_t *offset, int *exit_status)
+write_completion(char *buf, const size_t *offset, int *exit_status,
+				const int multi)
 {
 	/* Remove ending new line char */
 	char *n = strchr(buf, '\n');
 	if (n)
 		*n = '\0';
 
-	if (cur_comp_type == TCMP_PATH) {
+	if (cur_comp_type == TCMP_PATH && multi == 0) {
 		char *esc_buf = escape_str(buf);
 		if (esc_buf) {
 			rl_insert_text(esc_buf + *offset);
@@ -517,21 +518,11 @@ get_fzf_output(const int multi)
 	return buf;
 }
 
-/* Display possible completions using FZF. If one of these possible
- * completions is selected, insert it into the current line buffer */
-static int
-fzftabcomp(char **matches)
+/* Store possible completions (MATCHES) in FZFTABIN to pass them to FZF
+ * Return the number of stored matches */
+static inline size_t
+store_completions(char **matches, FILE *fp)
 {
-	FILE *fp = fopen(FZFTABIN, "w");
-	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			FZFTABIN, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	int exit_status = EXIT_SUCCESS;
-
-	/* Store possible completions in FZFTABIN to pass them to FZF */
 	size_t i;
 	for (i = 1; matches[i]; i++) {
 		if (!matches[i] || !*matches[i])
@@ -541,9 +532,9 @@ fzftabcomp(char **matches)
 		char *color = df_c;
 		char *entry = matches[i];
 
-		if (cur_comp_type == TCMP_BACKDIR)
+		if (cur_comp_type == TCMP_BACKDIR) {
 			color = di_c;
-		else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
+		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
 			cl = get_entry_color(matches, i);
 
 			char ext_cl[MAX_COLOR + 5];
@@ -572,6 +563,151 @@ fzftabcomp(char **matches)
 			}
 		}
 	}
+
+	return i;
+}
+
+static inline char *
+get_query_str(int *fzf_offset)
+{
+	char *query = (char *)NULL;
+
+	switch(cur_comp_type) {
+	case TCMP_DESEL: {
+		char *sp = strrchr(rl_line_buffer, ' ');
+		query = (sp && *(++sp)) ? sp : rl_line_buffer;
+		}
+		break;
+
+	case TCMP_HIST:
+		/* Skip the leading ! char of the input string */
+		query = rl_line_buffer + 1;
+		*fzf_offset = 1 + prompt_offset - 3;
+		break;
+
+	case TCMP_JUMP: {
+		char *sp = strchr(rl_line_buffer, ' ');
+		if (sp && *(++sp)) {
+			query = sp;
+			if (*(rl_line_buffer + 1) == ' ')
+				/* The command is "j" */
+				*fzf_offset = 2 + prompt_offset - 3;
+			else
+				/* The command is "jump" */
+				*fzf_offset = 5 + prompt_offset - 3;
+		} else {
+			query = rl_line_buffer;
+		}
+		}
+		break;
+
+	default: break;
+	}
+
+	return query;
+}
+
+/* Calculate the length of the matching prefix to insert into the line
+ * buffer only the non-matched part of the string returned by FZF */
+static inline size_t
+calculate_prefix_len(char *str)
+{
+	size_t prefix_len = 0, len = strlen(str);
+
+	if (len == 0 || str[len - 1] == '/')
+		return prefix_len;
+
+	char *q = strrchr(str, '/');
+	if (q) {
+		size_t qlen = strlen(q);
+		if (cur_comp_type == TCMP_PATH) {
+			/* Add backslashes to the len of the match: every quoted
+			 * char will be escaped later by write_completion(), so that
+			 * backslashes should be counted as well to get the right
+			 * offset */
+			size_t c = 0;
+			int x = (int)qlen;
+			while (--x >= 0) {
+				if (is_quote_char(q[x]))
+					c++;
+			}
+			prefix_len = qlen - 1 + c;
+		} else {
+			prefix_len = qlen + 1;
+		}
+	} else { /* We have just a name, no slash */
+		if (cur_comp_type == TCMP_PATH) {
+			size_t c = 0;
+			int x = (int)len;
+			while (--x >= 0) {
+				if (is_quote_char(str[x]))
+					c++;
+			}
+			prefix_len = len + c;
+		} else {
+			prefix_len = len;
+		}
+	}
+
+	return prefix_len;
+}
+
+static inline int
+decide_multi(void)
+{
+	int multi;
+	enum comp_type t = cur_comp_type;
+	char *l = rl_line_buffer;
+
+	if (t == TCMP_SEL || t == TCMP_DESEL || t == TCMP_RANGES
+	|| t == TCMP_TRASHDEL || t == TCMP_UNTRASH) {
+		multi = 1;
+	/* Do not allow multi-sel if we have a path, only file names */
+	} else if (t == TCMP_PATH && *l != '/' && !strchr(l, '/')) {
+		if (
+		/* Select */
+		(*l == 's' && l[1] == ' ')
+		/* Trash */
+		|| (*l == 't' && (l[1] == ' ' || (l[1] == 't' && l[2] == ' ')
+		|| strncmp(l, "trash ", 6) == 0))
+		/* ac and ad */
+		|| (*l == 'a' && ((l[1] == 'c' || l[1] == 'd') && l[2] == ' '))
+		/* bb and br */
+		|| (*l == 'b' && ((l[1] == 'b' || l[1] == 'r') && l[2] == ' '))
+		/* r */
+		|| (*l == 'r' && l[1] == ' ')
+		/* d/dup */
+		|| (*l == 'd' && (l[1] == ' ' || strncmp(l, "dup ", 4) == 0))
+		/* Properties */
+		|| (*l == 'p' && l[1] == 'r' && (l[1] == ' '
+		|| strncmp (l, "prop ", 5) == 0))
+		/* te */
+		|| (*l == 't' && l[1] == 'e' && l[2] == ' ') )
+			multi = 1;
+		else
+			multi = 0;
+	} else
+		multi = 0;
+
+	return multi;
+}
+
+/* Display possible completions using FZF. If one of these possible
+ * completions is selected, insert it into the current line buffer */
+static int
+fzftabcomp(char **matches)
+{
+	FILE *fp = fopen(FZFTABIN, "w");
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			FZFTABIN, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+
+	/* Store possible completions in FZFTABIN to pass them to FZF */
+	size_t i = store_completions(matches, fp);
 
 	fclose(fp);
 
@@ -603,51 +739,19 @@ fzftabcomp(char **matches)
 		fzf_offset -= (int)(strlen(lw) - 1);
 
 	char *query = (char *)NULL;
-	switch(cur_comp_type) {
-	case TCMP_SEL: break;
-	case TCMP_DESEL: {
-		char *sp = strrchr(rl_line_buffer, ' ');
-		query = (sp && *(++sp)) ? sp : rl_line_buffer;
-		}
-		break;
-
-	case TCMP_RANGES: break;
-
-	case TCMP_HIST:
-		/* Skip the leading ! char of the input string */
-		query = rl_line_buffer + 1;
-		fzf_offset = 1 + prompt_offset - 3;
-		break;
-
-	case TCMP_JUMP: {
-		char *sp = strchr(rl_line_buffer, ' ');
-		if (sp && *(++sp)) {
-			query = sp;
-			if (*(rl_line_buffer + 1) == ' ')
-				/* The command is "j" */
-				fzf_offset = 2 + prompt_offset - 3;
-			else
-				/* The command is "jump" */
-				fzf_offset = 5 + prompt_offset - 3;
-		} else {
-			query = rl_line_buffer;
-		}
-		}
-		break;
-
-	default: query = lw; break;
+	/* In case of a range or the sel keyword, the query string is just empty */
+	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL) {
+		query = get_query_str(&fzf_offset);
+		if (!query)
+			query = lw;
 	}
 
 	if (fzf_offset < 0)
 		fzf_offset = 0;
 
-	int multi = 0;
 	/* TAB completion cases allowing multiple selection */
-	if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL
-	|| cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_TRASHDEL
-	|| cur_comp_type == TCMP_UNTRASH)
-		multi = 1;
-
+	int multi = decide_multi();
+	
 	/* Run FZF and store the ouput into the FZFTABOUT file */
 	int ret = run_fzf(&height, &fzf_offset, query, multi);
 	unlink(FZFTABIN);
@@ -680,40 +784,7 @@ fzftabcomp(char **matches)
 	/* Calculate the length of the matching prefix to insert into the
 	 * line buffer only the non-matched part of the string returned
 	 * by FZF */
-	size_t offset = 0, mlen = strlen(matches[0]);
-	if (mlen && matches[0][mlen - 1] != '/') {
-		char *q = strrchr(matches[0], '/');
-		if (q) {
-			size_t qlen = strlen(q);
-			if (cur_comp_type == TCMP_PATH) {
-				/* Add backslashes to the len of the match: every quoted
-				 * char will be escaped later by write_completion(), so that
-				 * backslashes should be counted as well to get the right
-				 * offset */
-				size_t c = 0;
-				int x = (int)qlen;
-				while (--x >= 0) {
-					if (is_quote_char(q[x]))
-						c++;
-				}
-				offset = qlen - 1 + c;
-			} else {
-				offset = qlen + 1;
-			}
-		} else { /* We have just a name, no slash */
-			if (cur_comp_type == TCMP_PATH) {
-				size_t c = 0;
-				int x = (int)mlen;
-				while (--x >= 0) {
-					if (is_quote_char(matches[0][x]))
-						c++;
-				}
-				offset = mlen + c;
-			} else {
-				offset = mlen;
-			}
-		}
-	}
+	size_t prefix_len = calculate_prefix_len(matches[0]);
 
 	if (cur_comp_type == TCMP_OPENWITH) {
 		/* Interpret the corresponding cmd line in the mimelist file
@@ -741,7 +812,7 @@ fzftabcomp(char **matches)
 
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
-		offset = 0;
+		prefix_len = 0;
 
 		t = strchr(buf, '%');
 		if (t && *(t + 1) == 'f') {
@@ -765,12 +836,12 @@ fzftabcomp(char **matches)
 		}
 
 	} else if (cur_comp_type == TCMP_DESEL) {
-		offset = strlen(query);
+		prefix_len = strlen(query);
 
 	} else if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
-		offset = 0;
+		prefix_len = 0;
 
 	} else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL) {
 		char *s = strrchr(rl_line_buffer, ' ');
@@ -778,7 +849,7 @@ fzftabcomp(char **matches)
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
 			rl_end = rl_point;
-			offset = 0;
+			prefix_len = 0;
 		}
 
 	} else {
@@ -789,7 +860,7 @@ fzftabcomp(char **matches)
 				int bk = rl_point;
 				rl_delete_text(bk - (int)query_len, rl_end);
 				rl_point = rl_end = bk - (int)query_len;
-				offset = 0;
+				prefix_len = 0;
 			}
 		}
 	}
@@ -817,7 +888,7 @@ fzftabcomp(char **matches)
 			q = savestring(buf, blen);
 		}
 
-		write_completion(q, &offset, &exit_status);
+		write_completion(q, &prefix_len, &exit_status, multi);
 		free(q);
 	}
 
@@ -1135,10 +1206,10 @@ AFTER_USUAL_COMPLETION:
 			rl_insert_text(replacement);
 #endif
 			rl_end_undo_group();
-
-			if (replacement != matches[0])
-				free(replacement);
 		}
+
+		if (replacement != matches[0])
+			free(replacement);
 
 		/* If there are more matches, ring the bell to indicate.
 		 If this was the only match, and we are hacking files,
