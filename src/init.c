@@ -2711,10 +2711,10 @@ check_options(void)
 			restore_last_path = xargs.restore_last_path;
 	}
 
-/*	if (!*div_line_char) {
+	if (xargs.stealth_mode == 1 && !*div_line_char) {
 		*div_line_char = DEF_DIV_LINE_CHAR;
 		div_line_char[1] = '\0';
-	} */
+	}
 
 	if (max_hist == UNSET)
 		max_hist = DEF_MAX_HIST;
