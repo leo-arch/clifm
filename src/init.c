@@ -2360,9 +2360,6 @@ check_options(void)
 	if (xargs.control_d_exits == UNSET)
 		control_d_exits = DEF_CONTROL_D_EXITS;
 
-/*	if (elnpad == UNSET)
-		elnpad = DEF_ELNPAD; */
-
 	if (cp_cmd == UNSET)
 		cp_cmd = DEF_CP_CMD;
 
@@ -2502,9 +2499,6 @@ check_options(void)
 			tr_as_rm = xargs.trasrm;
 	}
 #endif
-
-	if (xargs.stealth_mode == 1 && !opener)
-		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
 
 	if (only_dirs == UNSET) {
 		if (xargs.only_dirs == UNSET)
@@ -2711,11 +2705,6 @@ check_options(void)
 			restore_last_path = xargs.restore_last_path;
 	}
 
-	if (xargs.stealth_mode == 1 && !*div_line_char) {
-		*div_line_char = DEF_DIV_LINE_CHAR;
-		div_line_char[1] = '\0';
-	}
-
 	if (max_hist == UNSET)
 		max_hist = DEF_MAX_HIST;
 
@@ -2740,11 +2729,18 @@ check_options(void)
 	if (!encoded_prompt)
 		encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
 
-	/* Since in stealth mode we have no access to the config file, we
-	 * cannot use 'lira', since it relays on a file.
-	 * Set it thus to xdg-open, if not already set via command line */
-	if (xargs.stealth_mode == 1 && !opener)
-		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
+	if (xargs.stealth_mode == 1) {
+		if (!opener)
+			/* Since in stealth mode we have no access to the config
+			 * file, we cannot use 'lira', since it relays on a file.
+			 * Set it thus to xdg-open, if not already set via command
+			 * line */
+			opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
+		if (!*div_line_char) {
+			*div_line_char = DEF_DIV_LINE_CHAR;
+			div_line_char[1] = '\0';
+		}
+	}
 
 	reset_opts();
 }
