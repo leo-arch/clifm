@@ -679,8 +679,8 @@ decide_multi(void)
 		/* d/dup */
 		|| (*l == 'd' && (l[1] == ' ' || strncmp(l, "dup ", 4) == 0))
 		/* Properties */
-		|| (*l == 'p' && l[1] == 'r' && (l[1] == ' '
-		|| strncmp (l, "prop ", 5) == 0))
+		|| (*l == 'p' && (l[1] == ' ' || ((l[1] == 'r' && l[2] == ' ')
+		|| strncmp (l, "prop ", 5) == 0)))
 		/* te */
 		|| (*l == 't' && l[1] == 'e' && l[2] == ' ') )
 			multi = 1;
