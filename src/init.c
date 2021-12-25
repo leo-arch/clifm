@@ -41,9 +41,7 @@
 #ifdef __NetBSD__
 #include <ctype.h>
 #endif
-#ifndef __HAIKU__
 #include <paths.h>
-#endif
 
 #include "aux.h"
 #include "checks.h"
