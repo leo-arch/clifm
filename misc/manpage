@@ -1278,7 +1278,7 @@ If this feature somehow conflicts with the command you want to run, say, 'chmod 
 .TP
 TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, ranges\fB*\fR, the 'sel' keyword\fB*\fR, trashed files\fB*\fR, plus the deselect\fB*\fR and the open-with commands (\fIow\fR) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function.
 .TP
-\fB*\fR When using FZF mode for TAB completion, multi-selection is available: Press TAB to expand possible selections, then press TAB again to mark desired entries. Once desired entries are marked, press Enter or the Right arrow key: marked entries will be inserted into the command line.
+\fB*\fR When using FZF mode for TAB completion, multi-selection is available: Press TAB to expand possible selections, then press TAB again to mark desired entries. Once desired entries are marked, press Enter or the Right arrow key: marked entries will be inserted into the command line. Multi-selection is also available for the following commands, provided there is no slash in the query string: \fIac\fR, \fIad\fR, \fIbb\fR, \fIbr\fR, \fId/dup\fR, \fIp/pr/prop\fR, \fIr\fR, \fIs\fR, \fIt/tr/trash\fR, and \fIte\fR. 
 .TP
 Of course, combinations of all these features is also possible. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
 .TP
