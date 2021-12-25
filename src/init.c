@@ -41,6 +41,9 @@
 #ifdef __NetBSD__
 #include <ctype.h>
 #endif
+#ifndef __HAIKU__
+#include <paths.h>
+#endif
 
 #include "aux.h"
 #include "checks.h"
@@ -62,36 +65,21 @@
  * functions
  */
 
-/* Sanitize the environment: delete all inherited environment variables
- * and set a few to get a minimally working environment */
-int
-xsecure_env(const int mode)
+/* Unset environ: little implementation of clearenv(3), not available
+ * on some system (not POSIX) */
+static void
+xclearenv(void)
 {
-	static char *namebuf = NULL;
-	static size_t lastlen = 0;
+	environ = NULL; /* This seems to be enough (it is it according to
+	the Linux manpage for clearenv(3)) */
+/*
+//	static char *namebuf = NULL;
+//	static size_t lastlen = 0;
 
-	char *display = (char *)NULL;
-	char *_term = (char *)NULL;
-	char *tz = (char *)NULL;
-	char *lang = (char *)NULL;
-	char *fzfopts = (char *)NULL;
-
-	if (mode != SECURE_ENV_FULL) {
-		/* Let's keep these values from the current environment */
-		display = getenv("DISPLAY");
-		_term = getenv("TERM");
-		tz = getenv("TZ");
-		lang = getenv("LANG");
-		if (fzftab)
-			fzfopts = getenv("FZF_DEFAULT_OPTS");
-	}
-
-	/* Unset environ: little implementation of clearenv(3), not available
-	 * on some system (not POSIX) */
-	while (environ != NULL && environ[0] != NULL) {
+ 	while (environ != NULL && environ[0] != NULL) {
 		size_t len = strcspn(environ[0], "=");
 		if (len == 0) {
-			/* Handle empty variable name (corrupted environ[]) */
+			// Handle empty variable name (corrupted environ[])
 			continue;
 		}
 		if (len > lastlen) {
@@ -105,23 +93,56 @@ xsecure_env(const int mode)
 				namebuf, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
+	} */
+}
+
+/* Sanitize the environment: delete all inherited environment variables
+ * and set a few to get a minimally working environment */
+int
+xsecure_env(const int mode)
+{
+#ifdef __HAIKU__
+	fprintf(stderr, "%s: secure-env: This feature is not available "
+		"on Haiku\n", PROGRAM_NAME);
+	exit(EXIT_FAILURE);
+#endif
+	char *display = (char *)NULL;
+	char *wayland_display = (char *)NULL;
+	char *_term = (char *)NULL;
+	char *tz = (char *)NULL;
+	char *lang = (char *)NULL;
+	char *fzfopts = (char *)NULL;
+
+	if (mode != SECURE_ENV_FULL) {
+		/* Let's keep these values from the current environment */
+		display = getenv("DISPLAY");
+		if (!display)
+			wayland_display = getenv("WAYLAND_DISPLAY");
+		_term = getenv("TERM");
+		tz = getenv("TZ");
+		lang = getenv("LANG");
+		if (fzftab)
+			fzfopts = getenv("FZF_DEFAULT_OPTS");
 	}
 
+	xclearenv();
+
 	/* Set a few basic environment variables */
-	char *p = (char *)NULL;
-	size_t n = confstr(_CS_PATH, NULL, 0); // get value size
-	p = (char *)xnmalloc(n, sizeof(char)); // allocate space
-	confstr(_CS_PATH, p, n); // get value
-	int ret = setenv("PATH", p, 1);  // set it
+//	char *p = (char *)NULL;
+//	size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
+//	p = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
+//	confstr(_CS_PATH, p, n);               /* Get value */
+//	int ret = setenv("PATH", p, 1);        /* Set it */
+	int ret = setenv("PATH", _PATH_STDPATH, 1);
 
 	if (ret == -1) {
-		free(p);
+//		free(p);
 		fprintf(stderr, "%s: setenv: PATH: %s\n", PROGRAM_NAME,
 			strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	n = confstr(_CS_V7_ENV, NULL, 0);
+/*	n = confstr(_CS_V7_ENV, NULL, 0);
 	p = (char *)xrealloc(p, n * sizeof(char));
 	confstr(_CS_V7_ENV, p, n);
 	char *e = strchr(p, '=');
@@ -129,9 +150,9 @@ xsecure_env(const int mode)
 		*e = '\0';
 		setenv(p, e + 1, 1);
 		*e = '=';
-	}
+	} */
 
-	free(p);
+//	free(p);
 
 	if (setenv("IFS", " \t\n", 1) == -1) {
 		fprintf(stderr, "%s: setenv: IFS: %s\n", PROGRAM_NAME,
@@ -139,10 +160,28 @@ xsecure_env(const int mode)
 		exit(EXIT_FAILURE);
 	}
 
+	/* Only if NOT secure env full */
+	if (mode != SECURE_ENV_FULL) {
+		setenv("LC_ALL", "C", 1);
+		if (user.name)
+			setenv("USER", user.name, 1);
+		if (user.home)
+			setenv("HOME", user.home, 1);
+		if (user.shell)
+			setenv("SHELL", user.shell, 1);
+	}
+
 	if (display) {
 		if (setenv("DISPLAY", display, 1) == -1) {
 			fprintf(stderr, "%s: setenv: DISPLAY: %s\n", PROGRAM_NAME,
 				strerror(errno));
+		}
+	} else {
+		if (wayland_display) {
+			if (setenv("WAYLAND_DISPLAY", wayland_display, 1) == -1) {
+				fprintf(stderr, "%s: setenv: WAYLAND_DISPLAY: %s\n",
+					PROGRAM_NAME, strerror(errno));
+			}
 		}
 	}
 
@@ -165,16 +204,6 @@ xsecure_env(const int mode)
 			fprintf(stderr, "%s: setenv: LANG: %s\n", PROGRAM_NAME,
 				strerror(errno));
 		}
-	}
-
-	if (mode != SECURE_ENV_FULL) {
-		setenv("LC_ALL", "C", 1);
-		if (user.name)
-			setenv("USER", user.name, 1);
-		if (user.home)
-			setenv("HOME", user.home, 1);
-		if (user.shell)
-			setenv("SHELL", user.shell, 1);
 	}
 
 	if (fzfopts) {
@@ -501,17 +530,17 @@ get_own_pid(void)
 	return pid;
 }
 
-/* Returns pointer to user data struct, exits if not found */
+/* Retrieve user information and store in a user_t struct for later access */
 struct user_t
 get_user(void)
 {
 	struct passwd *pw;
 	struct user_t tmp_user;
 
+	errno = 0;
 	pw = getpwuid(geteuid());
 	if (!pw) {
-		_err('e', NOPRINT_PROMPT, _("%s: Cannot detect user data. Exiting early"),
-			PROGRAM_NAME);
+		fprintf(stderr, "%s: getpwuid: %s\n", PROGRAM_NAME, strerror(errno));
 		exit(-1);
 	}
 
@@ -526,7 +555,7 @@ get_user(void)
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
 	if (!tmp_user.home || !tmp_user.name || !tmp_user.shell) {
-		_err('e', NOPRINT_PROMPT, _("%s: Cannot detect user data. Exiting"),
+		_err('e', NOPRINT_PROMPT, _("%s: Error retrieving user data\n"),
 			PROGRAM_NAME);
 		exit(-1);
 	}

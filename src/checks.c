@@ -417,8 +417,7 @@ check_for_alias(char **args)
 			for (j = 1; args[j]; j++) {
 				alias_comm = (char **)xrealloc(alias_comm,
 				    (++args_n + 2) * sizeof(char *));
-				alias_comm[args_n] = savestring(args[j],
-				    strlen(args[j]));
+				alias_comm[args_n] = savestring(args[j], strlen(args[j]));
 			}
 		}
 
