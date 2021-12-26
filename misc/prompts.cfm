@@ -37,6 +37,12 @@
 # Default
 #Prompt="[\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[00;36m\]\w\n\[\e[0m\]\z \[\e[0;34m\]\$\[\e[0m\] "
 
+# Default, but colorless
+#Prompt="\[\e[0m\][\S]\l \A \u:\H \w\n<\z\[\e[0m\]> \$ "
+
+# Default, plus some box-drawing characters
+#Prompt="\[\e[0;36m\]\[\e(0\]lq\[\e(B\]\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0;36m\]\[\e(0\]mq\[\e(B\]\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
+
 # Simple
 #Prompt="[\u@\H] \w \$ "
 
