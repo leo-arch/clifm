@@ -1838,6 +1838,8 @@ in the next session\
 %s's built-in opener\
 \n     --print-sel\t\t Keep the list of selected files in sight\
 \n     --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
+\n     --secure-env\t\t Run in a sanitized environment (regular mode)\
+\n     --secure-env-full\t\t Run in a sanitized environment (full mode)\
 \n     --share-selbox\t\t Make the Selection Box common to different profiles\
 \n     --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z \
 (default order)\
