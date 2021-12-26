@@ -1819,17 +1819,16 @@ directory base name (if \\z is used in the prompt)\
 \n     --no-clear-screen\t\t Do not clear the screen when listing directories\
 \n     --no-colors\t\t Disable file type colors for files listing \
 \n     --no-columns\t\t Disable columned files listing\
-\n     --no-eln\t\t\t Do not print ELN's\
 \n     --no-file-cap\t\t Do not check files capabilities when listing files\
 \n     --no-file-ext\t\t Do not check files extension when listing files\
 \n     --no-files-counter\t\t Disable the files counter for directories\
 \n     --no-follow-symlink\t Do not follow symbolic links when listing files\
 \n     --no-highlight\t\t Disable syntax highlighting\
 \n     --no-open-auto\t\t Same as no-cd-auto, but for files\
-\n     --no-tips\t\t\t Disable startup tips\
 \n     --no-restore-last-path\t Save last visited directory to be restored \
 in the next session\
 \n     --no-suggestions\t\t Disable auto-suggestions\
+\n     --no-tips\t\t\t Disable startup tips\
 \n     --no-warning-prompt\t Disable the warning prompt\
 \n     --no-welcome-message\t Disable the welcome message\
 \n     --only-dirs\t\t List only directories and symbolic links to directories\

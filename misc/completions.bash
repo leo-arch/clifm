@@ -49,9 +49,9 @@ _clifm ()
         -m
         --dirhist-map
         -o
-        --no-list-on-the-fly
+        --no-autols
         -O
-        --list-on-the-fly
+        --autols
         -p
         --path
         -P
@@ -112,6 +112,8 @@ _clifm ()
         --opener
         --print-sel
         --rl-vi-mode
+        --secure-env
+        --secure-env-full
         --share-selbox
         --sort-reverse
         --trash-as-rm
