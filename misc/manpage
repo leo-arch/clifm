@@ -49,6 +49,8 @@ CLIFM \- The Command Line File Manager
 .sp
 \fB20.\fR Environment
 .sp
+\fB20.1.\fR Secure environment
+.sp
 \fB21.\fR Miscellaneous notes
 .sp
 \fB22.\fR Files
@@ -150,6 +152,7 @@ List of CliFM features:
   44) Control settings on a per directory basis via the \fIautocommands\fR function
   45) \fIBleach\fR, a built-in file names cleaner
   46) Backdir: quickly change to a parent directory
+  47) Secure environment
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
@@ -377,6 +380,12 @@ always print the list of selected files. Since this list could be quite extensiv
 .TP
 .B \-\-rl\-vi\-mode
 set readline to vi editing mode (defaults to emacs editing mode)
+.TP
+.B \-\-secure\-env
+run CliFM in a secure environment (regular mode). Consult the \fBENVIRONMENT\fR section below
+.TP
+.B \-\-secure\-env\-full
+run CliFM in a secure environment (full mode). Consult the \fBENVIRONMENT\fR section below
 .TP
 .B \-\-share\-selbox
 make the Selection Box common (that is, accessible) to different profiles. By default, each profile has a private Selection Box.
@@ -1697,6 +1706,24 @@ Exit code of the last executed command
 .TP
 .B CLIFM_STAT_STEALTH
 1 if running in stealth mode, 0 otherwise
+
+.SH 20.1. SECURE ENVIRONMENT
+Programs inherit the environment from the parent process. However, if this inherited environment is not trusted, not secure, it is always a good idea to sanitize it using only sane values, preventing thus undesired and uncontrolled input that might endanger the program and the system itself.
+.TP
+The \fIsecure-environment\fR function forces CliFM to run on a such a sanitized environment.
+.TP
+There are two secure-environment modes, the \fIregular\fR, and the \fIfull\fR one. To enable the regular mode, run CliFM with the \fI--secure-env\fR command line option. Otherwise, enable the full mode using \fI--secure-env-full\fR.
+.TP
+\fBa)\fR \fIRegular\fR: in this mode, the inherited environment is cleared, though a few variables are preserved to keep CliFM running as stable as possible. These preserved variables are: \fBTERM\fR, \fBDISPLAY\fR, \fBLANG\fR, \fBTZ\fR, and, if FZF TAB completion mode is enabled, \fBFZF_DEFAULT_OPTS\fR.
+.TP
+The following variables are set in an environment agnostic way (that is, securely):     
+  - \fBHOME\fR, \fBSHELL\fR, and \fBUSER\fR are retrieved using \fBgetpwuid(3)\fR
+  - \fBPATH\fR is set consulting \fB_PATH_STDPATH\fR (or \fB_CS_PATH\fR if the former is not available)
+  - \fBIFS\fR is set to a sane, hard-coded value: " \\n\\t"
+.TP
+\fBb)\fR \fIFull\fR: this mode is just like the regular mode, except that nothing is imported from the environment at all and only \fBPATH\fR and \fBIFS\fR are set (as described above). Everything else remains unset, and is the user's responsibility to set environment variables (via the export function), as needed. In this case, you might want to set, at least, \fBTERM\fR, and, if running in a graphical environment, \fBDISPLAY\fR.
+.TP
+Be aware that enabling secure-environment might break some functions, depending on the system configuration.
 
 .SH 21. MISCELLANEOUS NOTES
 .sp
