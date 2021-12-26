@@ -160,6 +160,8 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 **NEW**: [Multi-selection for FZF TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions)
 
+**NEW**: [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#secure-environment)
+
 ---
 
 ## Installing _CliFM_
