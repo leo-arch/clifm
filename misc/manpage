@@ -49,13 +49,13 @@ CLIFM \- The Command Line File Manager
 .sp
 \fB20.\fR Environment
 .sp
-\fB20.1.\fR Secure environment
+\fB21.\fR Security
 .sp
-\fB21.\fR Miscellaneous notes
+\fB22.\fR Miscellaneous notes
 .sp
-\fB22.\fR Files
+\fB23.\fR Files
 .sp
-\fB23.\fR Examples
+\fB24.\fR Examples
 
 .SH 1. GETTING HELP
 There are several ways of getting help in CliFM. Once in the program, enter '\fB?\fR' to see some basic usage examples, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section.
@@ -153,6 +153,7 @@ List of CliFM features:
   45) \fIBleach\fR, a built-in file names cleaner
   46) Backdir: quickly change to a parent directory
   47) Secure environment
+  48) Secure commands
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
@@ -381,11 +382,14 @@ always print the list of selected files. Since this list could be quite extensiv
 .B \-\-rl\-vi\-mode
 set readline to vi editing mode (defaults to emacs editing mode)
 .TP
+.B \-\-secure\-cmds
+Filter commands passed to the OS to mitigate command injection attacks. Consult the \fBSECURITY\fR section below
+.TP
 .B \-\-secure\-env
-run CliFM in a secure environment (regular mode). Consult the \fBENVIRONMENT\fR section below
+run CliFM in a secure environment (regular mode). Consult the \fBSECURITY\fR section below
 .TP
 .B \-\-secure\-env\-full
-run CliFM in a secure environment (full mode). Consult the \fBENVIRONMENT\fR section below
+run CliFM in a secure environment (full mode). Consult the \fBSECURITY\fR section below
 .TP
 .B \-\-share\-selbox
 make the Selection Box common (that is, accessible) to different profiles. By default, each profile has a private Selection Box.
@@ -1707,7 +1711,15 @@ Exit code of the last executed command
 .B CLIFM_STAT_STEALTH
 1 if running in stealth mode, 0 otherwise
 
-.SH 20.1. SECURE ENVIRONMENT
+.SH 21. SECURITY
+Since CliFM executes OS commands, it needs to provide a way to securely run these commands, specially when it comes to untrusted environments. Two features are provided to achieve this aim: \fBsecure environment\fR and \fBsecure commands\fR.
+.TP
+Both features are aimed to protect the program and the system as such from malicious input, either coming from environment variables or from indirect input, that is to say, input coming not from the command line (in which is assumed that it is the user herself who is executing the given command), but from files: this is the case of default associated applications (the \fImime\fR command), autocommands, (un)mount commands (via the \fInet\fR command), just as profile and prompt commands.
+.TP
+In an untrusted environment, an attacker could cause unexpected and insecure behavior using environment variables, or inject malicious commands via indirect input, commands which will be later executed by CliFM without the user's consent (i.e. automatically). This is why we provide a mechanism to minimize this danger: if running in an untrusted environment, the secure environment and secure commands features are there to prevent (at least as far as possible) this kind of attacks.
+.TP
+\fBA) Secure environment\fR
+.TP
 Programs inherit the environment from the parent process. However, if this inherited environment is not trusted, not secure, it is always a good idea to sanitize it using only sane values, preventing thus undesired and uncontrolled input that might endanger the program and the system itself.
 .TP
 The \fIsecure-environment\fR function forces CliFM to run on a such a sanitized environment.
@@ -1724,8 +1736,27 @@ The following variables are set in an environment agnostic way (that is, securel
 \fBb)\fR \fIFull\fR: this mode is just like the regular mode, except that nothing is imported from the environment at all and only \fBPATH\fR and \fBIFS\fR are set (as described above). Everything else remains unset, and is the user's responsibility to set environment variables (via the export function), as needed. In this case, you might want to set, at least, \fBTERM\fR, and, if running in a graphical environment, \fBDISPLAY\fR.
 .TP
 Be aware that enabling secure-environment might break some functions, depending on the system configuration.
+.TP
+\fBB) Secure commands\fR
+.TP
+The secure commands function preforms two different, though intrinsically related tasks to mitigate command injection:
+.TP
+\fBa)\fR It validates commands using a whitelist of safe characters. This set of safe characters vary depending on the command being executed:
+.sp
+ Net command:                   a-zA-Z -_.,/=
+ Prompt, profile, autocommands: a-zA-Z -_.,/"'
+ Mime command:                  az-AZ -_.,%&
+.TP
+Commands containing at least one unsafe character will be rejected. Of course, we cannot (and should not) prevent what looks like legitimate, benign commands from being executed. But we can stop commands that, in an untrusted environment, look suspicious. This is specially the case of stream redirection (>), pipes (|), sequential (;) and conditional execution (&&, ||), command substitution ($(cmd)), and environment variables ($VAR).
+.TP
+\fBb)\fR Unless already running in a secure environment (via the \fI--secure-env-full\fR option), a sanitized environment will be created for the command to be executed (returning afterwards to the original environment). The values for this secure environment are as follows:
+.sp            
+ \fBPATH\fR               Taken from \fB_PATH_STDPATH\fR
+ \fBIFS\fR                " \\t\\n"
+ \fBUSER\fR, \fBHOME\fR, \fBSHELL\fR  Retrieved from the password database via \fBgetpwuid(3)\fR
+ \fBTERM\fR               Set to "xterm" (only if running in a graphical environment). Otherwise, unset.
 
-.SH 21. MISCELLANEOUS NOTES
+.SH 22. MISCELLANEOUS NOTES
 .sp
 \fBSequential and conditional execution of commands\fR:
 
@@ -1765,7 +1796,7 @@ By default, CliFM starts in the current working directory. However, you can alwa
 
 CliFM's default profile is "default". To create alternative profiles use the \-P command line option or the 'pf add' command (see above).
 
-.SH 22. FILES
+.SH 23. FILES
 .TP
 .B CONFIGURATION FILE
 The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
@@ -1813,7 +1844,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .TP
 \fBNOTE\fR: If \fI$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config/\fR is used instead.
 
-.SH 23. EXAMPLES
+.SH 24. EXAMPLES
 The following are just a few basic usage examples.
 
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
