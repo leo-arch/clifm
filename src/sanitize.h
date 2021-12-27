@@ -38,7 +38,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 0123456789 -_.,/'\""
 
 int sanitize_cmd(char *cmd, int type);
-void sanitize_environ(void);
-void restore_environ(void);
+void sanitize_cmd_environ(void);
+void restore_cmd_environ(void);
 int xsecure_env(const int mode);
 #endif /* SANITIZE_H */

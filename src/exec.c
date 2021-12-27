@@ -252,12 +252,12 @@ launch_execle(const char *cmd)
 	signal(SIGTSTP, SIG_DFL);
 
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0)
-		sanitize_environ();
+		sanitize_cmd_environ();
 
 	int ret = system(cmd);
 
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0)
-		restore_environ();
+		restore_cmd_environ();
 
 	set_signals_to_ignore();
 

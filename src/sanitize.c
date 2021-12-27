@@ -1,4 +1,4 @@
-/* sanitize.c -- functions for commands sanitization */
+/* sanitize.c -- functions for commands and environment sanitization */
 
 /*
  * This file is part of CliFM
@@ -214,7 +214,7 @@ xsecure_env(const int mode)
 }
 
 void
-sanitize_environ(void)
+sanitize_cmd_environ(void)
 {
 	/* Pointer to environ original address */
 	env_bk = environ;
@@ -242,7 +242,7 @@ sanitize_environ(void)
 }
 
 void
-restore_environ(void)
+restore_cmd_environ(void)
 {
 	/* Free the buffer holding the controlled environ */
 	size_t i;
