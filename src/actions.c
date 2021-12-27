@@ -49,12 +49,13 @@ run_action(char *action, char **args)
 		return EXIT_FAILURE;
 
 	int exit_status = EXIT_SUCCESS;
-	char *cmd = (char *)NULL;
-	size_t action_len = strlen(action);
 
 		/* #####################################
 		 * #    1) CREATE CMD TO BE EXECUTED   #
 		 * ##################################### */
+
+	char *cmd = (char *)NULL;
+	size_t action_len = strlen(action);
 
 	/* Remove terminating new line char */
 	if (action[action_len - 1] == '\n')
@@ -100,26 +101,13 @@ run_action(char *action, char **args)
 
 	free(cmd);
 
-	/* Append arguments to command */
-	/* Arguments are already escaped */
-/*	size_t i;
-	len = strlen(cmd);
-	for (i = 1; args[i]; i++) {
-		len += (strlen(args[i]) + 2);
-		cmd = (char *)xrealloc(cmd, len * sizeof(char));
-		strcat(cmd, " "); // NOLINT
-		strcat(cmd, args[i]); // NOLINT
-	} */
-
 			/* ##############################
 			 * #    2) CREATE A PIPE FILE   #
 			 * ############################## */
 
 	char *rand_ext = gen_rand_str(6);
-	if (!rand_ext) {
-		free(cmd);
+	if (!rand_ext)
 		return EXIT_FAILURE;
-	}
 
 	char fifo_path[PATH_MAX];
 	snprintf(fifo_path, PATH_MAX -1, "%s/.pipe.%s", tmp_dir, rand_ext); /* NOLINT */
@@ -128,7 +116,6 @@ run_action(char *action, char **args)
 	setenv("CLIFM_BUS", fifo_path, 1);
 
 	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
-		free(cmd);
 		printf("%s: %s\n", fifo_path, strerror(errno));
 		return EXIT_FAILURE;
 	}
