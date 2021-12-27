@@ -1255,11 +1255,13 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 				cc = bcc;
 				cur_cols = bcur_cols;
 				continue;
-			} else if (ret == -2) {
-				i = x = xx = last_column = blc = 0;
-				*counter = cur_cols = 0;
-				cc = columns_n;
-				continue;
+			} else {
+				if (ret == -2) {
+					i = x = xx = last_column = blc = 0;
+					*counter = cur_cols = 0;
+					cc = columns_n;
+					continue;
+				}
 			}
 			(*counter)++;
 		}
@@ -1318,11 +1320,13 @@ run_dir_cmd(const int mode)
 
 	if (mode == DIR_IN) {
 		snprintf(path, PATH_MAX - 1, "%s/%s", ws[cur_ws].path, DIR_IN_NAME);
-	} else if (mode == DIR_OUT) {
-		if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
-			return;
-		snprintf(path, PATH_MAX - 1, "%s/%s", old_pwd[dirhist_cur_index - 1],
-				DIR_OUT_NAME);
+	} else {
+		if (mode == DIR_OUT) {
+			if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
+				return;
+			snprintf(path, PATH_MAX - 1, "%s/%s", old_pwd[dirhist_cur_index - 1],
+					DIR_OUT_NAME);
+		}
 	}
 
 	fp = fopen(path, "r");
@@ -1338,7 +1342,9 @@ run_dir_cmd(const int mode)
 	if (!*buf)
 		return;
 
-	launch_execle(buf);
+	if (xargs.secure_cmds == 0
+	|| sanitize_cmd(buf, SNT_AUTOCMD) == EXIT_SUCCESS)
+		launch_execle(buf);
 }
 
 /* Check if S is either .cfm.in or .cfm.out */
@@ -1349,8 +1355,10 @@ check_autocmd_file(char *s)
 	&& s[4] == '.') {
 		if (s[5] == 'o' && s[6] == 'u' && s[7] == 't' && !s[8])
 			dir_out = 1;
-		else if (s[5] == 'i' && s[6] == 'n' && !s[7])
-			run_dir_cmd(DIR_IN);
+		else {
+			if (s[5] == 'i' && s[6] == 'n' && !s[7])
+				run_dir_cmd(DIR_IN);
+		}
 	}
 }
 

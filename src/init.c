@@ -127,8 +127,8 @@ set_ifs_env(void)
 	}
 }
 
-/* Sanitize the environment: delete all inherited environment variables
- * and set a few to get a minimally working environment */
+/* Sanitize the environment: set environ to NULL and then set a few
+ * environment variables to get a minimally working environment */
 int
 xsecure_env(const int mode)
 {
@@ -1188,6 +1188,7 @@ external_arguments(int argc, char **argv)
 		{"mnt-udisks2", no_argument, 0, 45},
 		{"secure-env", no_argument, 0, 46},
 		{"secure-env-full", no_argument, 0, 47},
+		{"secure-cmds", no_argument, 0, 48},
 	    {0, 0, 0, 0}
 	};
 
@@ -1366,8 +1367,15 @@ external_arguments(int argc, char **argv)
 
 		case 44: xargs.warning_prompt = warning_prompt = 0; break;
 		case 45: xargs.mount_cmd = MNT_UDISKS2; break;
-		case 46: xsecure_env(SECURE_ENV_IMPORT); break;
-		case 47: xsecure_env(SECURE_ENV_FULL); break;
+		case 46:
+			xargs.secure_env = 1;
+			xsecure_env(SECURE_ENV_IMPORT);
+			break;
+		case 47:
+			xargs.secure_env_full = 1;
+			xsecure_env(SECURE_ENV_FULL);
+			break;
+		case 48: xargs.secure_cmds = 1; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1766,6 +1774,9 @@ unset_xargs(void)
 	xargs.printsel = UNSET;
 	xargs.restore_last_path = UNSET;
 	xargs.rl_vi_mode = UNSET;
+	xargs.secure_env_full = UNSET;
+	xargs.secure_env = UNSET;
+	xargs.secure_cmds = UNSET;
 	xargs.sensitive = UNSET;
 	xargs.share_selbox = UNSET;
 	xargs.sort = UNSET;
@@ -2353,6 +2364,15 @@ check_options(void)
 	/* Do no override command line options */
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
+
+	if (xargs.secure_cmds == UNSET)
+		xargs.secure_cmds = DEF_SECURE_CMDS;
+
+	if (xargs.secure_env == UNSET)
+		xargs.secure_env = DEF_SECURE_ENV;
+
+	if (xargs.secure_env_full == UNSET)
+		xargs.secure_env_full = DEF_SECURE_ENV_FULL;
 
 /*	if (xargs.mount_cmd == UNSET)
 		xargs.mount_cmd = DEF_MOUNT_CMD; */

@@ -44,6 +44,7 @@
 #else
 #include <time.h>
 #endif
+#include "sanitize.h"
 
 #define CTLESC '\001'
 #define CTLNUL '\177'
@@ -487,8 +488,15 @@ run_prompt_cmds(void)
 {
 	if (ext_cmd_ok && prompt_cmds_n > 0) {
 		size_t i;
-		for (i = 0; i < prompt_cmds_n; i++)
+		for (i = 0; i < prompt_cmds_n; i++) {
+			if (xargs.secure_cmds == 1
+			&& sanitize_cmd(prompt_cmds[i], SNT_PROMPT) != EXIT_SUCCESS) {
+				_err('w', PRINT_PROMPT, "%s: %s: Command contains unsafe "
+					"characters\n", PROGRAM_NAME, prompt_cmds[i]);
+				continue;
+			}
 			launch_execle(prompt_cmds[i]);
+		}
 	}
 }
 

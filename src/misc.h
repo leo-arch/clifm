@@ -57,5 +57,6 @@ void reset_inotify(void);
 #elif defined(BSD_KQUEUE)
 void read_kqueue(void);
 #endif
+int sanitize_cmd(char *cmd, int type);
 
 #endif /* MISC_H */

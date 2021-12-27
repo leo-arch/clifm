@@ -409,6 +409,16 @@ extern int watch;
 #define SECURE_ENV_FULL   1
 #define SECURE_ENV_IMPORT 0
 
+/* Macros for the sanitization function */
+/* Commands send to the system shell and taken from an untrusted source,
+ * mostly config files, need to be sanitized first */
+#define SNT_MIME    0
+#define SNT_PROMPT  1
+#define SNT_PROFILE 2
+#define SNT_AUTOCMD 3
+#define SNT_NET     4
+#define SNT_NONE    5 /* Trusted command: do not sanitize*/
+
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
@@ -626,6 +636,9 @@ struct param {
 	int printsel;
 	int restore_last_path;
 	int rl_vi_mode;
+	int secure_cmds;
+	int secure_env;
+	int secure_env_full;
 	int sensitive;
 	int share_selbox;
 	int sort;

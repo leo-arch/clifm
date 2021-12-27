@@ -72,6 +72,7 @@
 #ifndef _NO_BLEACH
 #include "name_cleaner.h"
 #endif
+#include "sanitize.h"
 
 char **_comm = (char **)NULL;
 
@@ -250,7 +251,13 @@ launch_execle(const char *cmd)
 	signal(SIGQUIT, SIG_DFL);
 	signal(SIGTSTP, SIG_DFL);
 
+	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0)
+		sanitize_environ();
+
 	int ret = system(cmd);
+
+	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0)
+		restore_environ();
 
 	set_signals_to_ignore();
 
@@ -1929,10 +1936,18 @@ exec_profile(void)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		if (strchr(line, '=') && !_ISDIGIT(*line)) {
+		if (int_vars && strchr(line, '=') && !_ISDIGIT(*line)) {
 			create_usr_var(line);
 		} else if (strlen(line) != 0) {
 		/* Parse line and execute it */
+
+			if (xargs.secure_cmds == 1
+			&& sanitize_cmd(line, SNT_PROFILE) != EXIT_SUCCESS) {
+				_err('w', PRINT_PROMPT, "%s: %s: Command contains unsafe "
+					"characters\n", PROGRAM_NAME, line);
+				continue;
+			}
+
 			args_n = 0;
 
 			char **cmds = parse_input_str(line);

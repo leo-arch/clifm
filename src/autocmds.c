@@ -36,6 +36,7 @@
 #include "exec.h"
 #include "listing.h"
 #include "strings.h"
+#include "sanitize.h"
 
 /* The opts struct contains option values previous to any autocommand
  * call */
@@ -166,8 +167,11 @@ RUN_AUTOCMD:
 			max_files = autocmds[i].max_files;
 		if (autocmds[i].color_scheme)
 			set_colors(autocmds[i].color_scheme, 0);
-		if (autocmds[i].cmd)
-			launch_execle(autocmds[i].cmd);
+		if (autocmds[i].cmd) {
+			if (xargs.secure_cmds == 0
+			|| sanitize_cmd(autocmds[i].cmd, SNT_AUTOCMD) == EXIT_SUCCESS)
+				launch_execle(autocmds[i].cmd);
+		}
 
 		break;
 	}
