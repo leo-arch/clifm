@@ -111,70 +111,73 @@ run_and_refresh(char **cmd)
 
 	log_function(cmd);
 
-	size_t i, total_len = 0;
-	for (i = 0; i <= args_n; i++)
-		total_len += strlen(cmd[i]);
-
-	char *tmp_cmd = (char *)NULL;
-	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
-
-	for (i = 0; i <= args_n; i++) {
-		strcat(tmp_cmd, cmd[i]);
-		strcat(tmp_cmd, " ");
-	}
-
-	/* If cp, and no destiny was provided, append '.' to copy source
-	 * into CWD */
-	if (!cmd[2] && cmd[1] && *cmd[0] == 'c' && *(cmd[0] + 1) == 'p'
-	&& *(cmd[0] + 2) == ' ') {
-		char *p = strrchr(cmd[1], '/');
-		if (p && *(p + 1)) {
-			*p = '\0';
-			if (strcmp(cmd[1], ws[cur_ws].path) != 0)
-				strcat(tmp_cmd, ".");
-			*p = '/';
-		}
-	}
-
+	char *new_name = (char *)NULL;
 	if (xrename) {
 		/* If we have a number here, it was not expanded by parse_input_str,
 		 * and thereby, we have an invalid ELN */
 		if (is_number(cmd[1])) {
 			fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, cmd[1]);
-			free(tmp_cmd);
 			xrename = 0;
 			return EXIT_FAILURE;
 		}
 		_xrename = 1;
-		char *new_name = get_new_name();
-		_xrename = 0;
+		new_name = get_new_name();
+/*		_xrename = 0; */
 		if (!new_name) {
-			free(tmp_cmd);
+			_xrename = 0;
 			return EXIT_SUCCESS;
 		}
-		char *enn = (char *)NULL;
-		if (!strchr(new_name, '\\')) {
-			enn = escape_str(new_name);
-			if (!enn) {
-				free(tmp_cmd);
-				fprintf(stderr, "%s: %s: Error escaping string\n", PROGRAM_NAME, new_name);
-				return EXIT_FAILURE;
-			}
-		}
-		tmp_cmd = (char *)xrealloc(tmp_cmd,
-				(total_len + (i + 1) + 1 + strlen(enn ? enn : new_name))
-				* sizeof(char));
-		strcat(tmp_cmd, enn ? enn : new_name);
-
-		free(new_name);
-		free(enn);
 	}
 
-	int ret = launch_execle(tmp_cmd);
-	free(tmp_cmd);
+	char **tcmd = xnmalloc(2 + args_n + 2, sizeof(char *));
+	size_t n = 0;
+	char *p = strchr(cmd[0], ' ');
+	if (p && *(p + 1)) {
+		*p = '\0';
+		p++;
+		tcmd[0] = savestring(cmd[0], strlen(cmd[0]));
+		tcmd[1] = savestring(p, strlen(p));
+		n += 2;
+	} else {
+		tcmd[0] = savestring(cmd[0], strlen(cmd[0]));
+		n++;
+	}
+
+	size_t i;
+	for (i = 1; cmd[i]; i++) {
+		p = dequote_str(cmd[i], 0);
+		if (!p)
+			continue;
+		tcmd[n] = savestring(p, strlen(p));
+		free(p);
+		n++;
+	}
+
+	if (!cmd[2] && cmd[1] && *cmd[0] == 'c' && *(cmd[0] + 1) == 'p'
+	&& *(cmd[0] + 2) == ' ') {
+		tcmd[n][0] = '.';
+		tcmd[n][1] = '\0';
+		n++;
+	} else {
+		if (_xrename) {
+			_xrename = 0;
+			tcmd[n] = savestring(new_name, strlen(new_name));
+			free(new_name);
+			n++;
+		}
+	}
+
+	tcmd[n] = (char *)NULL;
+
+	int ret = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
+
+	for (i = 0; tcmd[i]; i++)
+		free(tcmd[i]);
+	free(tcmd);
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
+
 	/* Error messages will be printed by launch_execve() itself */
 
 	/* If 'rm sel' and command is successful, deselect everything */

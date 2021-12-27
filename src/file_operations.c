@@ -664,25 +664,43 @@ copy_function(char **comm)
 	if (!is_sel)
 		return run_and_refresh(comm);
 
-	char *tmp_cmd = (char *)NULL;
-	size_t total_len = 0, i = 0;
-
-	for (i = 0; comm[i]; i++)
-		total_len += strlen(comm[i]);
-
-	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
-
-	for (i = 0; comm[i]; i++) {
-		strcat(tmp_cmd, comm[i]);
-		strcat(tmp_cmd, " ");
+	size_t n = 0;
+	char **tcmd = (char **)xnmalloc(2 + args_n + 2, sizeof(char *));
+	char *p = strchr(comm[0], ' ');
+	if (p && *(p + 1)) {
+		*p = '\0';
+		p++;
+		tcmd[0] = savestring(comm[0], strlen(comm[0]));
+		tcmd[1] = savestring(p, strlen(p));
+		n += 2;
+	} else {
+		tcmd[0] = savestring(comm[0], strlen(comm[0]));
+		n++;
 	}
 
-	if (sel_is_last)
-		strcat(tmp_cmd, ".");
+	size_t i;
+	for (i = 1; comm[i]; i++) {
+		p = dequote_str(comm[i], 0);
+		if (!p)
+			continue;
+		tcmd[n] = savestring(p, strlen(p));
+		free(p);
+		n++;
+	}
 
-	int ret = 0;
-	ret = launch_execle(tmp_cmd);
-	free(tmp_cmd);
+	if (sel_is_last) {
+		tcmd[n][0] = '.';
+		tcmd[n][1] = '\0';
+		n++;
+	}
+
+	tcmd[n] = (char *)NULL;
+
+	int ret = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
+
+	for (i = 0; tcmd[i]; i++)
+		free(tcmd[i]);
+	free(tcmd);
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
