@@ -641,10 +641,12 @@ archiver(char **args, char mode)
 				name = (char *)xrealloc(name, (name_len + 8) * sizeof(char));
 				sprintf(name, "%s.tar.gz", t); /* NOLINT */
 				free(t);
-			} else if (dot == name) { /* Dot is first char */
-				fprintf(stderr, _("Invalid file name\n"));
-				free(name);
-				name = (char *)NULL;
+			} else {
+				if (dot == name) { /* Dot is first char */
+					fprintf(stderr, _("Invalid file name\n"));
+					free(name);
+					name = (char *)NULL;
+				}
 			}
 		}
 
@@ -689,45 +691,36 @@ archiver(char **args, char mode)
 				 * #          OTHERS        #
 				 * ########################## */
 
-		/* Escape the string, if needed */
-		char *esc_name = escape_str(name);
-		if (!esc_name) {
-			fprintf(stderr, _("archiver: %s: Error escaping string\n"), name);
-			free(name);
-			return EXIT_FAILURE;
-		}
-
-		free(name);
-
 		/* Construct the command */
-		char *cmd = (char *)NULL;
-		char *ext_ok = strrchr(esc_name, '.');
-		size_t cmd_len = strlen(esc_name) + 10 + (!ext_ok ? 8 : 0);
-		cmd = (char *)xnmalloc(cmd_len, sizeof(char));
-		/* If name has no extension, add the default */
-		sprintf(cmd, "atool -a %s%s", esc_name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
+		size_t n = 0;
+		for (i = 1; args[i]; i++);
+		char *ext_ok = strrchr(name, '.');
+		char **tcmd = (char **)xnmalloc(3 + i + 1, sizeof(char *));
+		tcmd[0] = savestring("atool", 5);
+		tcmd[1] = savestring("-a", 2);
+		tcmd[2] = (char *)xnmalloc(strlen(name) + (!ext_ok ? 7 : 0) + 1, sizeof(char *));
+		sprintf(tcmd[2], "%s%s", name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
+		n += 3;
 
 		for (i = 1; args[i]; i++) {
-			char *_name = (char *)NULL;
-			if (!strchr(args[i], '\\')) {
-				_name = escape_str(args[i]);
-				if (!_name) {
-					fprintf(stderr, _("%s: Error escaping file name\n"), args[i]);
-					continue;
-				}
-			}
-			cmd_len += strlen(_name ? _name : args[i]) + 1;
-			cmd = (char *)xrealloc(cmd, (cmd_len + 1) * sizeof(char));
-			strcat(cmd, " "); /* NOLINT */
-			strcat(cmd, _name ? _name : args[i]); /* NOLINT */
-			free(_name);
+			char *p = dequote_str(args[i], 0);
+			if (!p)
+				continue;
+			tcmd[n] = savestring(p, strlen(p));
+			free(p);
+			n++;
 		}
 
-		if (launch_execle(cmd) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		tcmd[n] = (char *)NULL;
 
-		free(cmd);
-		free(esc_name);
+		/* Run it */
+		exit_status = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
+
+		for (i = 0; tcmd[i]; i++)
+			free(tcmd[i]);
+		free(tcmd);
+		free(name);
+
 		return exit_status;
 	}
 
@@ -848,68 +841,31 @@ archiver(char **args, char mode)
 
 	char sel_op = get_operation(OP_OTHERS);
 
-	/* 2) Prepare files based on operation
-	 * #################################### */
-
-	char *dec_files = (char *)NULL;
-
-	switch (sel_op) {
-	case 'e': /* fallthrough */
-	case 'r': {
-		/* Store all file names into one single variable */
-		size_t len = 1;
-		dec_files = (char *)xnmalloc(len, sizeof(char));
-		*dec_files = '\0';
-
-		for (i = 1; args[i]; i++) {
-			/* Escape the string, if needed */
-			char *esc_name = escape_str(args[i]);
-			if (!esc_name)
-				continue;
-
-			len += strlen(esc_name) + 1;
-			dec_files = (char *)xrealloc(dec_files, (len + 1) * sizeof(char));
-			strcat(dec_files, " "); /* NOLINT */
-			strcat(dec_files, esc_name); /* NOLINT */
-			free(esc_name);
-		}
-	} break;
-
-	case 'E': /* fallthtough */
-	case 'l': /* fallthtough */
-	case 'm': {
-		/* These operation won't be executed via the system shell,
-			 * so that we need to deescape files if necessary */
-		for (i = 1; args[i]; i++) {
-			if (strchr(args[i], '\\')) {
-				char *deq_name = dequote_str(args[i], 0);
-				if (!deq_name) {
-					fprintf(stderr, _("archiver: %s: Error "
-							"dequoting file name\n"), args[i]);
-					return EXIT_FAILURE;
-				}
-
-				strcpy(args[i], deq_name); /* NOLINT */
-				free(deq_name);
-				deq_name = (char *)NULL;
-			}
-		}
-	} break;
-	}
-
-	/* 3) Construct and run the corresponding commands
+	/* 2) Construct and run the corresponding commands
 	 * ############################################### */
 
 	switch (sel_op) {
 	case 'e': { /* ########## EXTRACT ############## */
-		char *cmd = (char *)NULL;
-		cmd = (char *)xnmalloc(strlen(dec_files) + 13, sizeof(char));
-		sprintf(cmd, "atool -x -e %s", dec_files); /* NOLINT */
-		if (launch_execle(cmd) != EXIT_SUCCESS)
+		char **tcmd = (char **)NULL;
+		size_t n = 0;
+		for (i = 1; args[i]; i++);
+		tcmd = (char **)xnmalloc(3 + i + 1, sizeof(char *));
+		tcmd[0] = savestring("atool", 5);
+		tcmd[1] = savestring("-x", 2);
+		tcmd[2] = savestring("-e", 2);
+		n += 3;
+		for (i = 1; args[i]; i++) {
+			tcmd[n] = savestring(args[i], strlen(args[i]));
+			n++;
+		}
+		tcmd[n] = (char *)NULL;
+
+		if (launch_execve(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
-		free(cmd);
-		free(dec_files);
+		for (i = 0; tcmd[i]; i++)
+			free(tcmd[i]);
+		free(tcmd);
 	} break;
 
 	case 'E': /* ########## EXTRACT TO DIR ############## */
@@ -1012,7 +968,7 @@ archiver(char **args, char mode)
 
 		char *format = (char *)NULL;
 		while (!format) {
-			format = rl_no_hist(_("New format (Ex: .tar.xz): "));
+			format = rl_no_hist(_("New format (ex: .tar.xz): "));
 			if (!format)
 				continue;
 			/* Do not allow any of these characters (mitigate
@@ -1026,22 +982,33 @@ archiver(char **args, char mode)
 			}
 			if (*format == 'q' && format[1] == '\0') {
 				free(format);
-				free(dec_files);
 				return EXIT_SUCCESS;
 			}
 		}
 
 		/* Construct and execute cmd */
-		char *cmd = (char *)NULL;
-		cmd = (char *)xnmalloc(strlen(format) + strlen(dec_files) + 16, sizeof(char));
-		sprintf(cmd, "arepack -F %s -e %s", format, dec_files); /* NOLINT */
+		for (i = 1; args[i]; i++);
+		size_t n = 0;
+		char **tcmd = (char **)xnmalloc(4 + i + 1, sizeof(char *));
+		tcmd[0] = savestring("arepack", 7);
+		tcmd[1] = savestring("-F", 2);
+		tcmd[2] = savestring(format, strlen(format));
+		tcmd[3] = savestring("-e", 2);
+		n += 4;
+		for (i = 1; args[i]; i++) {
+			tcmd[n] = savestring(args[i], strlen(args[i]));
+			n++;
+		}
 
-		if (launch_execle(cmd) != EXIT_SUCCESS)
+		tcmd[n] = (char *)NULL;
+
+		if (launch_execve(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
+		for (i = 0; tcmd[i]; i++)
+			free(tcmd[i]);
+		free(tcmd);
 		free(format);
-		free(dec_files);
-		free(cmd);
 	} break;
 	}
 
