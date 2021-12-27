@@ -372,14 +372,14 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 		deq_str[i] = '\0';
 	}
 
-	char _path[PATH_MAX];
+	char _path[PATH_MAX + NAME_MAX];
 	*_path = '\0';
 	char *tmp = *deq_str ? deq_str : ss;
 	if (*tmp != '/' && *tmp != '.' && *tmp != '~') {
 		if (*(ws[cur_ws].path + 1))
-			snprintf(_path, PATH_MAX, "%s/%s", ws[cur_ws].path, tmp);
+			snprintf(_path, PATH_MAX + NAME_MAX, "%s/%s", ws[cur_ws].path, tmp);
 		else /* Root directory */
-			snprintf(_path, PATH_MAX, "/%s", tmp);
+			snprintf(_path, PATH_MAX + NAME_MAX, "/%s", tmp);
 	}
 
 	char *spath = *_path ? _path : tmp;
@@ -463,7 +463,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 {
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
 	 * file, let's define it ourselves */
-	char height_str[sizeof(size_t) + 11];
+	char height_str[sizeof(size_t) + 19];
 	*height_str = '\0';
 	if (fzf_height_set == 0)
 		snprintf(height_str, sizeof(height_str), "--height=%zu", *height);
