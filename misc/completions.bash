@@ -112,6 +112,7 @@ _clifm ()
         --opener
         --print-sel
         --rl-vi-mode
+        --secure-cmds
         --secure-env
         --secure-env-full
         --share-selbox
