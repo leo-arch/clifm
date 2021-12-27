@@ -50,8 +50,7 @@ run_action(char *action, char **args)
 
 	int exit_status = EXIT_SUCCESS;
 	char *cmd = (char *)NULL;
-	size_t len = 0,
-		   action_len = strlen(action);
+	size_t action_len = strlen(action);
 
 		/* #####################################
 		 * #    1) CREATE CMD TO BE EXECUTED   #
@@ -95,16 +94,22 @@ run_action(char *action, char **args)
 		}
 	}
 
+	size_t cmd_len = strlen(cmd);
+	args[0] = (char *)xrealloc(args[0], (cmd_len + 1) * sizeof(char));
+	xstrsncpy(args[0], cmd, cmd_len);
+
+	free(cmd);
+
 	/* Append arguments to command */
 	/* Arguments are already escaped */
-	size_t i;
+/*	size_t i;
 	len = strlen(cmd);
 	for (i = 1; args[i]; i++) {
 		len += (strlen(args[i]) + 2);
 		cmd = (char *)xrealloc(cmd, len * sizeof(char));
-		strcat(cmd, " "); /* NOLINT */
-		strcat(cmd, args[i]); /* NOLINT */
-	}
+		strcat(cmd, " "); // NOLINT
+		strcat(cmd, args[i]); // NOLINT
+	} */
 
 			/* ##############################
 			 * #    2) CREATE A PIPE FILE   #
@@ -145,12 +150,13 @@ run_action(char *action, char **args)
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
 
-		launch_execle(cmd);
+//		launch_execle(cmd);
+		launch_execve(args, FOREGROUND, E_NOFLAG);
 		close(wfd);
 		_exit(EXIT_SUCCESS);
 	}
 
-	free(cmd);
+//	free(cmd);
 
 		/* ########################################
 		 * #    4) LET THE PARENT READ THE PIPE   #
@@ -195,7 +201,7 @@ run_action(char *action, char **args)
 		char *o_cmd[] = {"o", buf, NULL};
 		exit_status = open_function(o_cmd);
 	} else { /* If not a file, take it as a command*/
-		size_t old_args = args_n;
+		size_t old_args = args_n, i;
 		args_n = 0;
 
 		char **_cmd = parse_input_str(buf);

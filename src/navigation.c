@@ -1,4 +1,4 @@
-/* navigation.c -- functions the navigation system */
+/* navigation.c -- functions to control the navigation system */
 
 /*
  * This file is part of CliFM

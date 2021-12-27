@@ -56,7 +56,6 @@ typedef char *rl_cpvfunc_t;
 #include "navigation.h"
 #include "readline.h"
 #include "tabcomp.h"
-
 #include "mime.h"
 
 #ifndef _NO_SUGGESTIONS
