@@ -268,8 +268,7 @@ profile_set(char *prof)
 
 	if (!ws[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
-		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
-		/* Avoid compiler warning */
+		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 		if (!*cwd) {
 			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 			exit(EXIT_FAILURE);

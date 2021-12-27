@@ -397,8 +397,7 @@ set_start_path(void)
 	 * changes the CWD, this will be the CWD for CliFM */
 	if (!ws[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
-		/* Avoid compiler warning */
-		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
+		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 
 		if (!*cwd || strlen(cwd) == 0) {
 			if (user_home) {
@@ -2093,8 +2092,7 @@ get_path_programs(void)
 
 	if (ext_cmd_ok) {
 		char cwd[PATH_MAX] = "";
-		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
-		/* Avoid compiler warning */
+		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 
 		commands_bin = (struct dirent ***)xnmalloc(
 						path_n, sizeof(struct dirent));

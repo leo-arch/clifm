@@ -129,8 +129,8 @@ clear_suggestion(const int free_sug)
 {
 	/* Delete everything in the current line starting from the current
 	 * cursor position */
-	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
-	/* Avoid compiler warning */
+	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
+
 	if (suggestion.nlines > 1) {
 		/* Save cursor position */
 		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
@@ -138,11 +138,9 @@ clear_suggestion(const int free_sug)
 		int i = (int)suggestion.nlines;
 		while (--i > 0) {
 			/* Move the cursor to the beginning of the next line */
-			if (write(STDOUT_FILENO, "\x1b[1E", 4) <= 0) {}
-			/* Avoid compiler warning */
+			if (write(STDOUT_FILENO, "\x1b[1E", 4) <= 0) {/* Avoid compiler warning */}
 			/* Delete the line */
-			if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-			/* Avoid compiler warning */
+			if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {/* Avoid compiler warning */}
 		}
 		/* Restore cursor position */
 		printf("\x1b[%d;%dH", currow, curcol);
@@ -269,7 +267,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	 * is the same (7 - 4 == 6 - 3 == 1) */
 
 	/* Erase everything after the current cursor position */
-	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
+	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
 
 	if (baej) {
 		/* Move the cursor %d columns to the right and print "> " */
