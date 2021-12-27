@@ -188,11 +188,12 @@ run_action(char *action, char **args)
 		char *o_cmd[] = {"o", buf, NULL};
 		exit_status = open_function(o_cmd);
 	} else { /* If not a file, take it as a command*/
-		size_t old_args = args_n, i;
+		size_t old_args = args_n;
 		args_n = 0;
 
 		char **_cmd = parse_input_str(buf);
 		if (_cmd) {
+			size_t i;
 			char **alias_cmd = check_for_alias(_cmd);
 
 			if (alias_cmd) {
