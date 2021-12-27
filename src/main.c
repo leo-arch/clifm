@@ -283,7 +283,7 @@ char
 	*pinned_dir = (char *)NULL,
 	*plugins_dir = (char *)NULL,
 	*profile_file = (char *)NULL,
-	*qc = (char *)NULL,
+	*quote_chars = (char *)NULL,
 	*remotes_file = (char *)NULL,
 	*sel_file = (char *)NULL,
 	*stdin_tmp_dir = (char *)NULL,

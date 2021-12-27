@@ -531,15 +531,15 @@ my_rl_getc(FILE *stream)
 }
 
 /* Simply check a single chartacter (c) against the quoting characters
- * list defined in the qc global array (which takes its values from
+ * list defined in the quote_chars global array (which takes its values from
  * rl_filename_quote_characters */
 int
 is_quote_char(const char c)
 {
-	if (c == '\0' || !qc)
+	if (c == '\0' || !quote_chars)
 		return -1;
 
-	char *p = qc;
+	char *p = quote_chars;
 
 	while (*p) {
 		if (c == *(p++))
@@ -1986,7 +1986,7 @@ initialize_readline(void)
 	/* Copy the list of quote chars to a global variable to be used
 	 * later by some of the program functions like split_str(),
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
-	qc = savestring(rl_filename_quote_characters,
+	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
 
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)

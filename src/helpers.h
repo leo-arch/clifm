@@ -644,7 +644,6 @@ struct param {
 	int sort;
 	int sort_reverse;
 	int splash;
-//	int stderr;
 	int stealth_mode;
 #ifndef _NO_SUGGESTIONS
 	int suggestions;
@@ -924,7 +923,7 @@ extern char
 	*pinned_dir,
 	*plugins_dir,
 	*profile_file,
-	*qc,
+	*quote_chars,
 	*remotes_file,
 	*sel_file,
 	*stdin_tmp_dir,

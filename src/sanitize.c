@@ -213,6 +213,7 @@ xsecure_env(const int mode)
 	return 0;
 }
 
+/* Create a sanitized environment to run a single command */
 void
 sanitize_cmd_environ(void)
 {
@@ -241,6 +242,8 @@ sanitize_cmd_environ(void)
 	environ = new_env;
 }
 
+/* Restore the environment after running a cmd with a sanitized environment
+ * via sanitize_cmd_environ() */
 void
 restore_cmd_environ(void)
 {
