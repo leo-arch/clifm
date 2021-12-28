@@ -300,9 +300,9 @@ trash_clear(void)
 
 	free(trash_files);
 
-	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
-		    ws[cur_ws].path, strerror(errno));
+		    workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -327,7 +327,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 	if (*file != '/') {
 		/* Construct absolute path for file */
-		snprintf(full_path, PATH_MAX, "%s/%s", ws[cur_ws].path, file);
+		snprintf(full_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, file);
 		if (wx_parent_check(full_path) != 0)
 			return EXIT_FAILURE;
 	} else if (wx_parent_check(file) != 0) {
@@ -541,18 +541,18 @@ remove_from_trash(char **args)
 	} else {
 		puts(_("trash: No trashed files"));
 		/* Restore CWD and return */
-		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
-			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
+			    PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_SUCCESS;
 	}
 
 	/* Restore CWD and continue */
-	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
-		    ws[cur_ws].path, strerror(errno));
+		    workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -832,9 +832,9 @@ untrash_function(char **comm)
 	if (trash_files_n <= 0) {
 		puts(_("trash: No trashed files"));
 
-		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
-			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
+			    PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -852,9 +852,9 @@ untrash_function(char **comm)
 		}
 		free(trash_files);
 
-		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
-			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
+			    PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -870,9 +870,9 @@ untrash_function(char **comm)
 		    PRINT_NEWLINE);
 
 	/* Go back to previous path */
-	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
-		    ws[cur_ws].path, strerror(errno));
+		    workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1027,9 +1027,9 @@ trash_function(char **comm)
 			puts(_("trash: No trashed files"));
 		}
 
-		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
-			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
+			    PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		} else {
 			return EXIT_SUCCESS;
@@ -1074,7 +1074,7 @@ trash_function(char **comm)
 					strcpy(tmp_comm, deq_file);
 				} else { /* If relative path, add path to check against
 					TRASH_DIR */
-					snprintf(tmp_comm, PATH_MAX, "%s/%s", ws[cur_ws].path,
+					snprintf(tmp_comm, PATH_MAX, "%s/%s", workspaces[cur_ws].path,
 					    deq_file);
 				}
 

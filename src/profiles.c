@@ -254,8 +254,8 @@ profile_set(char *prof)
 
 	i = MAX_WS;
 	while (--i >= 0) {
-		free(ws[i].path);
-		ws[i].path = (char *)NULL;
+		free(workspaces[i].path);
+		workspaces[i].path = (char *)NULL;
 	}
 
 	cur_ws = UNSET;
@@ -266,18 +266,18 @@ profile_set(char *prof)
 	if (cur_ws == UNSET)
 		cur_ws = DEF_CUR_WS;
 
-	if (!ws[cur_ws].path) {
+	if (!workspaces[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 		if (!*cwd) {
 			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
-		ws[cur_ws].path = savestring(cwd, strlen(cwd));
+		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
-	if (xchdir(ws[cur_ws].path, SET_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+	if (xchdir(workspaces[cur_ws].path, SET_TITLE) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
 		    strerror(errno));
 		return EXIT_FAILURE;
 	}

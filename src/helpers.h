@@ -458,7 +458,7 @@ struct ws_t {
 	int pad;
 };
 
-extern struct ws_t *ws;
+extern struct ws_t *workspaces;
 
 /* Struct to store user defined keybindings */
 struct kbinds_t {

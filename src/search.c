@@ -159,8 +159,8 @@ search_glob(char **comm, int invert)
 
 		/* If search is current directory */
 		if ((*search_path == '.' && !search_path[1]) ||
-		    (search_path[1] == ws[cur_ws].path[1]
-		    && strcmp(search_path, ws[cur_ws].path) == 0)) {
+		    (search_path[1] == workspaces[cur_ws].path[1]
+		    && strcmp(search_path, workspaces[cur_ws].path) == 0)) {
 			search_path = (char *)NULL;
 		} else if (xchdir(search_path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path,
@@ -240,9 +240,9 @@ search_glob(char **comm, int invert)
 
 		if (search_path) {
 			/* Go back to the directory we came from */
-			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
+			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    ws[cur_ws].path, strerror(errno));
+				    workspaces[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_FAILURE;
@@ -467,9 +467,9 @@ search_glob(char **comm, int invert)
 
 	/* If needed, go back to the directory we came from */
 	if (search_path) {
-		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			    ws[cur_ws].path, strerror(errno));
+			    workspaces[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
@@ -562,8 +562,8 @@ search_regex(char **comm, int invert, int case_sens)
 			search_path[path_len - 1] = '\0';
 
 		if ((*search_path == '.' && !search_path[1])
-		|| (search_path[1] == ws[cur_ws].path[1]
-		&& strcmp(search_path, ws[cur_ws].path) == 0))
+		|| (search_path[1] == workspaces[cur_ws].path[1]
+		&& strcmp(search_path, workspaces[cur_ws].path) == 0))
 			search_path = (char *)NULL;
 
 		if (search_path && *search_path) {
@@ -586,9 +586,9 @@ search_regex(char **comm, int invert, int case_sens)
 				fprintf(stderr, "scandir: %s: %s\n", search_path,
 				    strerror(errno));
 
-				if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
+				if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					    ws[cur_ws].path, strerror(errno));
+					    workspaces[cur_ws].path, strerror(errno));
 
 				return EXIT_FAILURE;
 			}
@@ -643,9 +643,9 @@ search_regex(char **comm, int invert, int case_sens)
 
 			free(reg_dirlist);
 
-			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
+			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    ws[cur_ws].path, strerror(errno));
+				    workspaces[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_FAILURE;
@@ -682,9 +682,9 @@ search_regex(char **comm, int invert, int case_sens)
 				free(reg_dirlist[j]);
 			free(reg_dirlist);
 
-			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
+			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    ws[cur_ws].path, strerror(errno));
+				    workspaces[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_FAILURE;
@@ -830,9 +830,9 @@ search_regex(char **comm, int invert, int case_sens)
 			free(reg_dirlist[j]);
 		free(reg_dirlist);
 
-		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			    ws[cur_ws].path, strerror(errno));
+			    workspaces[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}

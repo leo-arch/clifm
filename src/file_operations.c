@@ -731,8 +731,7 @@ copy_function(char **comm)
 
 			char dest[PATH_MAX];
 			strcpy(dest, (sel_is_last || strcmp(comm[args_n], ".") == 0)
-					 ? ws[cur_ws].path
-					 : comm[args_n]);
+					 ? workspaces[cur_ws].path : comm[args_n]);
 
 			char *ret_val = strrchr(sel_elements[j], '/');
 			char *tmp_str = (char *)xnmalloc(strlen(dest)

@@ -172,11 +172,11 @@ remotes_mount(char *name)
 
 	int exit_status = EXIT_SUCCESS;
 	if (autols) {
-		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(remotes[i].mountpoint,
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(remotes[i].mountpoint,
 							strlen(remotes[i].mountpoint));
-		add_to_jumpdb(ws[cur_ws].path);
-		add_to_dirhist(ws[cur_ws].path);
+		add_to_jumpdb(workspaces[cur_ws].path);
+		add_to_dirhist(workspaces[cur_ws].path);
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
@@ -222,7 +222,7 @@ remotes_unmount(char *name)
 
 	/* Get out of mountpoint before unmounting */
 	size_t mlen = strlen(remotes[i].mountpoint);
-	if (strncmp(remotes[i].mountpoint, ws[cur_ws].path, mlen) == 0) {
+	if (strncmp(remotes[i].mountpoint, workspaces[cur_ws].path, mlen) == 0) {
 		if (remotes[i].mountpoint[mlen - 1] == '/') {
 			mlen--;
 			remotes[i].mountpoint[mlen] = '\0';
@@ -244,8 +244,8 @@ remotes_unmount(char *name)
 			return EXIT_FAILURE;
 		}
 
-		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(remotes[i].mountpoint,
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(remotes[i].mountpoint,
 						strlen(remotes[i].mountpoint));
 		*p = '/';
 	}
@@ -402,8 +402,8 @@ autounmount_remotes(void)
 			if (count_dir(remotes[i].mountpoint, CPOP) <= 2)
 				continue;
 			int dir_change = 0;
-			if (*ws[cur_ws].path == *remotes[i].mountpoint
-			&& strcmp(remotes[i].mountpoint, ws[cur_ws].path) == 0) {
+			if (*workspaces[cur_ws].path == *remotes[i].mountpoint
+			&& strcmp(remotes[i].mountpoint, workspaces[cur_ws].path) == 0) {
 				xchdir("/", NO_TITLE);
 				dir_change = 1;
 			}
@@ -411,7 +411,7 @@ autounmount_remotes(void)
 			if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 			if (dir_change)
-				xchdir(ws[cur_ws].path, NO_TITLE);
+				xchdir(workspaces[cur_ws].path, NO_TITLE);
 		}
 	}
 

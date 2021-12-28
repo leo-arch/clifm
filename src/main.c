@@ -63,8 +63,7 @@
 
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct actions_t *usr_actions = (struct actions_t *)NULL;
-/* Workspaces */
-struct ws_t *ws = (struct ws_t *)NULL;
+struct ws_t *workspaces = (struct ws_t *)NULL;
 struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
 struct jump_t *jump_db = (struct jump_t *)NULL;
 struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
@@ -799,7 +798,8 @@ main(int argc, char *argv[])
 
 	set_start_path();
 
-	if (ws == (struct ws_t *)NULL || !ws[cur_ws].path || !*ws[cur_ws].path) {
+	if (workspaces == (struct ws_t *)NULL || !workspaces[cur_ws].path
+	|| !*workspaces[cur_ws].path) {
 		_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
 			"retrieving current working directory\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
@@ -811,13 +811,13 @@ main(int argc, char *argv[])
 			printf("\033]2;%s\007", PROGRAM_NAME);
 			fflush(stdout);
 		} else {
-			set_term_title(ws[cur_ws].path);
+			set_term_title(workspaces[cur_ws].path);
 		}
 	}
 
 	exec_profile();
 	load_dirhist();
-	add_to_dirhist(ws[cur_ws].path);
+	add_to_dirhist(workspaces[cur_ws].path);
 	get_sel_files();
 
 	/* Start listing as soon as possible to speed up startup time */
@@ -845,7 +845,7 @@ main(int argc, char *argv[])
 	load_keybinds();
 	load_jumpdb();
 	if (!jump_db || xargs.path == 1)
-		add_to_jumpdb(ws[cur_ws].path);
+		add_to_jumpdb(workspaces[cur_ws].path);
 
 	initialize_readline();
 

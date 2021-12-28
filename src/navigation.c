@@ -43,15 +43,17 @@
 #include "readline.h"
 
 int
-workspaces(char *str)
+handle_workspaces(char *str)
 {
 	if (!str || !*str) {
 		int i;
 		for (i = 0; i < MAX_WS; i++) {
-			if (i == cur_ws)
-				printf("%s%d: %s%s\n", mi_c, i + 1, ws[i].path, df_c);
-			else
-				printf("%d: %s\n", i + 1, ws[i].path ? ws[i].path : "none");
+			if (i == cur_ws) {
+				printf("%s%d: %s%s\n", mi_c, i + 1, workspaces[i].path, df_c);
+			} else {
+				printf("%d: %s\n", i + 1, workspaces[i].path
+				? workspaces[i].path : "none");
+			}
 		}
 		return EXIT_SUCCESS;
 	}
@@ -94,21 +96,21 @@ workspaces(char *str)
 
 	/* If new workspace has no path yet, copy the path of the current
 	 * workspace */
-	if (!ws[tmp_ws].path) {
-		ws[tmp_ws].path = savestring(ws[cur_ws].path,
-		    strlen(ws[cur_ws].path));
+	if (!workspaces[tmp_ws].path) {
+		workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
+		    strlen(workspaces[cur_ws].path));
 	} else {
-		if (access(ws[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
-				strerror(errno));
-			free(ws[tmp_ws].path);
-			ws[tmp_ws].path = savestring(ws[cur_ws].path,
-				strlen(ws[cur_ws].path));
+		if (access(workspaces[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+				workspaces[tmp_ws].path, strerror(errno));
+			free(workspaces[tmp_ws].path);
+			workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
+				strlen(workspaces[cur_ws].path));
 		}
 	}
 
-	if (xchdir(ws[tmp_ws].path, SET_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
+	if (xchdir(workspaces[tmp_ws].path, SET_TITLE) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[tmp_ws].path,
 		    strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -122,7 +124,7 @@ workspaces(char *str)
 		exit_status = list_dir();
 	}
 
-	add_to_dirhist(ws[cur_ws].path);
+	add_to_dirhist(workspaces[cur_ws].path);
 	return exit_status;
 }
 
@@ -130,10 +132,10 @@ workspaces(char *str)
 char **
 get_bd_matches(const char *str, int *n, int mode)
 {
-	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
+	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
 		return (char **)NULL;
 
-	char *cwd = ws[cur_ws].path;
+	char *cwd = workspaces[cur_ws].path;
 	char **matches = (char **)NULL;
 
 	if (mode == BD_TAB) {
@@ -161,17 +163,17 @@ get_bd_matches(const char *str, int *n, int mode)
 		matches = (char **)xrealloc(matches, (size_t)(*n + 2) * sizeof(char *));
 		if (mode == BD_TAB) {
 			/* Print only the path base name */
-			char *ss = strrchr(ws[cur_ws].path, '/');
+			char *ss = strrchr(workspaces[cur_ws].path, '/');
 			if (ss && *(++ss))
 				matches[(*n)++] = savestring(ss, strlen(ss));
 			else /* Last slash is the first and only char: We have root dir */
 				matches[(*n)++] = savestring("/", 1);
 		} else {
-			if (!*ws[cur_ws].path) {
+			if (!*workspaces[cur_ws].path) {
 				matches[(*n)++] = savestring("/", 1);
 			} else {
-				matches[(*n)++] = savestring(ws[cur_ws].path,
-						strlen(ws[cur_ws].path));
+				matches[(*n)++] = savestring(workspaces[cur_ws].path,
+						strlen(workspaces[cur_ws].path));
 			}
 		}
 		*q = '/';
@@ -252,7 +254,7 @@ backdir(const char* str)
 		return EXIT_SUCCESS;
 	}
 
-	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1]) {
+	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1]) {
 		printf(_("%s: /: No parent directory\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
@@ -287,7 +289,7 @@ backdir(const char* str)
 		}
 	}
 
-	if (!ws[cur_ws].path) {
+	if (!workspaces[cur_ws].path) {
 		free(deq_str);
 		return EXIT_FAILURE;
 	}
@@ -410,8 +412,8 @@ cd_function(char *new_path, const int print_error)
 			return EXIT_FAILURE;
 		}
 
-		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(user.home, strlen(user.home));
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(user.home, strlen(user.home));
 	}
 
 	/* If we have some argument, dequote it, resolve it with realpath(),
@@ -447,13 +449,13 @@ cd_function(char *new_path, const int print_error)
 			return EXIT_FAILURE;
 		}
 
-		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(q, strlen(q));
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(q, strlen(q));
 		free(q);
 	}
 
 	int exit_status = EXIT_SUCCESS;
-	add_to_dirhist(ws[cur_ws].path);
+	add_to_dirhist(workspaces[cur_ws].path);
 
 	dir_changed = 1;
 	if (autols) {
@@ -462,7 +464,7 @@ cd_function(char *new_path, const int print_error)
 			exit_status = EXIT_FAILURE;
 	}
 
-	add_to_jumpdb(ws[cur_ws].path);
+	add_to_jumpdb(workspaces[cur_ws].path);
 	return exit_status;
 }
 
@@ -547,7 +549,7 @@ surf_hist(char **comm)
 		while (--i >= 0)
 			free(old_pwd[i]);
 		dirhist_cur_index = dirhist_total_index = 0;
-		add_to_dirhist(ws[cur_ws].path);
+		add_to_dirhist(workspaces[cur_ws].path);
 		return EXIT_SUCCESS;
 	}
 
@@ -565,10 +567,10 @@ surf_hist(char **comm)
 			}
 			int ret = xchdir(old_pwd[atoi_comm - 1], SET_TITLE);
 			if (ret == 0) {
-				free(ws[cur_ws].path);
-				ws[cur_ws].path = (char *)xnmalloc(strlen(
+				free(workspaces[cur_ws].path);
+				workspaces[cur_ws].path = (char *)xnmalloc(strlen(
 						old_pwd[atoi_comm - 1]) + 1, sizeof(char));
-				strcpy(ws[cur_ws].path, old_pwd[atoi_comm - 1]);
+				strcpy(workspaces[cur_ws].path, old_pwd[atoi_comm - 1]);
 
 				dirhist_cur_index = atoi_comm - 1;
 
@@ -596,12 +598,12 @@ surf_hist(char **comm)
 static int
 set_path(const char *new_path)
 {
-	free(ws[cur_ws].path);
-	ws[cur_ws].path = savestring(new_path, strlen(new_path));
-	if (!ws[cur_ws].path)
+	free(workspaces[cur_ws].path);
+	workspaces[cur_ws].path = savestring(new_path, strlen(new_path));
+	if (!workspaces[cur_ws].path)
 		return EXIT_FAILURE;
 
-	add_to_jumpdb(ws[cur_ws].path);
+	add_to_jumpdb(workspaces[cur_ws].path);
 	int exit_status = EXIT_SUCCESS;
 
 	dir_changed = 1;

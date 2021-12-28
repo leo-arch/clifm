@@ -196,7 +196,7 @@ unmount_dev(size_t i, const int n)
 
 	/* Get out of mountpoint before unmounting */
 	size_t mlen = strlen(mnt);
-	if (strncmp(mnt, ws[cur_ws].path, mlen) == 0) {
+	if (strncmp(mnt, workspaces[cur_ws].path, mlen) == 0) {
 		char *cmd[] = {"b", NULL};
 		if (back_function(cmd) == EXIT_FAILURE)
 			cd_function(NULL, CD_PRINT_ERROR);
@@ -637,8 +637,8 @@ media_menu(int mode)
 		goto EXIT;
 	}
 
-	free(ws[cur_ws].path);
-	ws[cur_ws].path = savestring(media[n].mnt, strlen(media[n].mnt));
+	free(workspaces[cur_ws].path);
+	workspaces[cur_ws].path = savestring(media[n].mnt, strlen(media[n].mnt));
 
 	if (autols) {
 		free_dirlist();
@@ -646,8 +646,8 @@ media_menu(int mode)
 			exit_status = EXIT_FAILURE;
 	}
 
-	add_to_dirhist(ws[cur_ws].path);
-	add_to_jumpdb(ws[cur_ws].path);
+	add_to_dirhist(workspaces[cur_ws].path);
+	add_to_jumpdb(workspaces[cur_ws].path);
 
 EXIT:
 	free(input);

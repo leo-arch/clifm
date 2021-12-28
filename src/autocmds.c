@@ -85,14 +85,14 @@ check_autocmds(void)
 					continue;
 				p[plen - n] = (n == 2 ? '*' : '/');
 				size_t tlen = strlen(path);
-				int ret = strncmp(path, ws[cur_ws].path, tlen);
+				int ret = strncmp(path, workspaces[cur_ws].path, tlen);
 				free(path);
 				if (ret == 0) {
 					found = 1;
 					goto RUN_AUTOCMD;
 				}
 			} else { /* We have an absolute path */
-				if (strncmp(autocmds[i].pattern, ws[cur_ws].path, plen - n) == 0) {
+				if (strncmp(autocmds[i].pattern, workspaces[cur_ws].path, plen - n) == 0) {
 					found = 1;
 					goto RUN_AUTOCMD;
 				}
@@ -111,8 +111,8 @@ check_autocmds(void)
 
 		size_t j = 0;
 		for (; j < g.gl_pathc; j++) {
-			if (*ws[cur_ws].path == *g.gl_pathv[j]
-			&& strcmp(ws[cur_ws].path, g.gl_pathv[j]) == 0) {
+			if (*workspaces[cur_ws].path == *g.gl_pathv[j]
+			&& strcmp(workspaces[cur_ws].path, g.gl_pathv[j]) == 0) {
 				found = 1;
 				break;
 			}

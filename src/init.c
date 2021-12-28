@@ -124,10 +124,10 @@ backup_argv(int argc, char **argv)
 int
 init_workspaces(void)
 {
-	ws = (struct ws_t *)xnmalloc(MAX_WS, sizeof(struct ws_t));
+	workspaces = (struct ws_t *)xnmalloc(MAX_WS, sizeof(struct ws_t));
 	int i = MAX_WS;
 	while (--i >= 0)
-		ws[i].path = (char *)NULL;
+		workspaces[i].path = (char *)NULL;
 
 	return EXIT_SUCCESS;
 }
@@ -219,33 +219,33 @@ set_start_path(void)
 	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and
 	 * the shell will read its config file. Now, if this config file
 	 * changes the CWD, this will be the CWD for CliFM */
-	if (!ws[cur_ws].path) {
+	if (!workspaces[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 
 		if (!*cwd || strlen(cwd) == 0) {
 			if (user_home) {
-				ws[cur_ws].path = savestring(user_home, strlen(user_home));
+				workspaces[cur_ws].path = savestring(user_home, strlen(user_home));
 			} else {
 				if (access("/", R_OK | X_OK) == -1) {
 					fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME,
 					    strerror(errno));
 					exit(EXIT_FAILURE);
 				} else {
-					ws[cur_ws].path = savestring("/", 1);
+					workspaces[cur_ws].path = savestring("/", 1);
 				}
 			}
 		} else {
-			ws[cur_ws].path = savestring(cwd, strlen(cwd));
+			workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
 		}
 	}
 
 	/* Make path the CWD */
 	/* If chdir(path) fails, set path to cwd, list files and print the
 	 * error message. If no access to CWD either, exit */
-	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
-		    ws[cur_ws].path, strerror(errno));
+		    workspaces[cur_ws].path, strerror(errno));
 
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {
@@ -254,9 +254,9 @@ set_start_path(void)
 			exit(EXIT_FAILURE);
 		}
 
-		if (ws[cur_ws].path)
-			free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(cwd, strlen(cwd));
+		if (workspaces[cur_ws].path)
+			free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
 	dir_changed = 1;
@@ -1515,10 +1515,10 @@ external_arguments(int argc, char **argv)
 		if (xchdir(path_tmp, SET_TITLE) == 0) {
 			if (cur_ws == UNSET)
 				cur_ws = DEF_CUR_WS;
-			if (ws[cur_ws].path)
-				free(ws[cur_ws].path);
+			if (workspaces[cur_ws].path)
+				free(workspaces[cur_ws].path);
 
-			ws[cur_ws].path = savestring(path_tmp, strlen(path_tmp));
+			workspaces[cur_ws].path = savestring(path_tmp, strlen(path_tmp));
 		} else { /* Error changing directory */
 			if (xargs.list_and_quit == 1) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
@@ -1825,9 +1825,9 @@ get_last_path(void)
 	/*  size_t i;
 	for (i = 0; i < MAX_WS; i++) {
 
-		if (ws[i].path) {
-			free(ws[i].path);
-			ws[i].path = (char *)NULL;
+		if (workspaces[i].path) {
+			free(workspaces[i].path);
+			workspaces[i].path = (char *)NULL;
 		}
 	} */
 
@@ -1854,8 +1854,8 @@ get_last_path(void)
 		if (cur && cur_ws == UNSET)
 			cur_ws = ws_n;
 
-		if (ws_n >= 0 && ws_n < MAX_WS && !ws[ws_n].path)
-			ws[ws_n].path = savestring(p + 2, strlen(p + 2));
+		if (ws_n >= 0 && ws_n < MAX_WS && !workspaces[ws_n].path)
+			workspaces[ws_n].path = savestring(p + 2, strlen(p + 2));
 	}
 
 	close_fstream(fp, fd);

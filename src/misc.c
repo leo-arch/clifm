@@ -79,7 +79,8 @@ reset_inotify(void)
 		inotify_wd = -1;
 	}
 
-	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
+	inotify_wd = inotify_add_watch(inotify_fd, workspaces[cur_ws].path,
+				INOTIFY_MASK);
 	if (inotify_wd > 0)
 		watch = 1;
 }
@@ -542,9 +543,9 @@ new_instance(char *dir, int sudo)
 	char *path_dir = (char *)NULL;
 
 	if (*deq_dir != '/') {
-		path_dir = (char *)xnmalloc(strlen(ws[cur_ws].path)
+		path_dir = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
 							+ strlen(deq_dir) + 2, sizeof(char));
-		sprintf(path_dir, "%s/%s", ws[cur_ws].path, deq_dir);
+		sprintf(path_dir, "%s/%s", workspaces[cur_ws].path, deq_dir);
 		free(deq_dir);
 	} else {
 		path_dir = deq_dir;
@@ -600,7 +601,7 @@ new_instance(char *dir, int sudo)
 	} else {
 		fprintf(stderr, _("%s: No option specified for '%s'\n"
 				"Trying '%s -e %s %s'\n"), PROGRAM_NAME, term,
-				term, self, ws[cur_ws].path);
+				term, self, workspaces[cur_ws].path);
 		if (sudo) {
 			char *cmd[] = {term, "-e", _sudo, self, path_dir, NULL};
 			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
@@ -818,13 +819,13 @@ save_last_path(void)
 
 	size_t i;
 	for (i = 0; i < MAX_WS; i++) {
-		if (ws[i].path) {
+		if (workspaces[i].path) {
 			/* Mark current workspace with an asterisk. It will
 			 * be read at startup by get_last_path */
 			if ((size_t)cur_ws == i)
-				fprintf(last_fp, "*%zu:%s\n", i, ws[i].path);
+				fprintf(last_fp, "*%zu:%s\n", i, workspaces[i].path);
 			else
-				fprintf(last_fp, "%zu:%s\n", i, ws[i].path);
+				fprintf(last_fp, "%zu:%s\n", i, workspaces[i].path);
 		}
 	}
 
@@ -1229,12 +1230,12 @@ free_stuff(void)
 		free(ext_colors);
 	}
 
-	if (ws && ws[0].path) {
+	if (workspaces && workspaces[0].path) {
 		i = MAX_WS;
 		while (--i >= 0)
-			if (ws[i].path)
-				free(ws[i].path);
-		free(ws);
+			if (workspaces[i].path)
+				free(workspaces[i].path);
+		free(workspaces);
 	}
 
 	free(actions_file);
@@ -1413,10 +1414,10 @@ handle_stdin()
 
 	free(cwd);
 
-	if (ws[cur_ws].path)
-		free(ws[cur_ws].path);
+	if (workspaces[cur_ws].path)
+		free(workspaces[cur_ws].path);
 
-	ws[cur_ws].path = savestring(stdin_tmp_dir, strlen(stdin_tmp_dir));
+	workspaces[cur_ws].path = savestring(stdin_tmp_dir, strlen(stdin_tmp_dir));
 	goto FREE_N_EXIT;
 
 FREE_N_EXIT:
@@ -1428,7 +1429,7 @@ FREE_N_EXIT:
 	if (autols) {
 		free_dirlist();
 		list_dir();
-		add_to_dirhist(ws[cur_ws].path);
+		add_to_dirhist(workspaces[cur_ws].path);
 	}
 
 	return;
@@ -1478,13 +1479,13 @@ pin_directory(char *dir)
 	if (*dir == '/') {
 		pinned_dir = savestring(dir, strlen(dir));
 	} else { /* If relative path */
-		if (strcmp(ws[cur_ws].path, "/") == 0) {
+		if (strcmp(workspaces[cur_ws].path, "/") == 0) {
 			pinned_dir = (char *)xnmalloc(strlen(dir) + 2, sizeof(char));
 			sprintf(pinned_dir, "/%s", dir);
 		} else {
 			pinned_dir = (char *)xnmalloc(strlen(dir)
-								+ strlen(ws[cur_ws].path) + 2, sizeof(char));
-			sprintf(pinned_dir, "%s/%s", ws[cur_ws].path, dir);
+						+ strlen(workspaces[cur_ws].path) + 2, sizeof(char));
+			sprintf(pinned_dir, "%s/%s", workspaces[cur_ws].path, dir);
 		}
 	}
 

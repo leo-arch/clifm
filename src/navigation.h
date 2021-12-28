@@ -30,7 +30,7 @@ int forth_function(char **comm);
 int xchdir(const char *dir, const int set_title);
 int cd_function(char *new_path, const int print_error);
 char *fastback(const char *str);
-int workspaces(char *str);
+int handle_workspaces(char *str);
 void print_dirhist(void);
 int backdir(const char* str);
 char **get_bd_matches(const char *str, int *n, int mode);

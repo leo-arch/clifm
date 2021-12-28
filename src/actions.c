@@ -174,7 +174,7 @@ run_action(char *action, char **args)
 	if (!*buf) {
 		unlink(fifo_path);
 		if (xargs.cwd_in_title == 1)
-			set_term_title(ws[cur_ws].path);
+			set_term_title(workspaces[cur_ws].path);
 		return EXIT_SUCCESS;
 	}
 
@@ -216,7 +216,7 @@ run_action(char *action, char **args)
 	unlink(fifo_path);
 
 	if (xargs.cwd_in_title == 1)
-		set_term_title(ws[cur_ws].path);
+		set_term_title(workspaces[cur_ws].path);
 
 	return exit_status;
 }

@@ -364,8 +364,8 @@ bookmark_add(char *file)
 	/* If not absolute path, prepend current path to file */
 	if (*file != '/') {
 		char *tmp_file = (char *)NULL;
-		tmp_file = (char *)xnmalloc((strlen(ws[cur_ws].path) + strlen(file) + 2), sizeof(char));
-		sprintf(tmp_file, "%s/%s", ws[cur_ws].path, file); /* NOLINT */
+		tmp_file = (char *)xnmalloc((strlen(workspaces[cur_ws].path) + strlen(file) + 2), sizeof(char));
+		sprintf(tmp_file, "%s/%s", workspaces[cur_ws].path, file); /* NOLINT */
 		file = tmp_file;
 		tmp_file = (char *)NULL;
 		mod_file = 1;

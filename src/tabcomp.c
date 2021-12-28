@@ -303,7 +303,7 @@ get_entry_color(char **matches, const size_t i)
 		if (colorize) {
 			if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_RANGES) {
 				char tmp_path[PATH_MAX];
-				snprintf(tmp_path, PATH_MAX, "%s/%s", ws[cur_ws].path, matches[i]);
+				snprintf(tmp_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, matches[i]);
 				if (lstat(tmp_path, &attr) != -1)
 					cl = fzftab_color(tmp_path, &attr);
 			} else {
@@ -376,8 +376,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 	*_path = '\0';
 	char *tmp = *deq_str ? deq_str : ss;
 	if (*tmp != '/' && *tmp != '.' && *tmp != '~') {
-		if (*(ws[cur_ws].path + 1))
-			snprintf(_path, PATH_MAX + NAME_MAX, "%s/%s", ws[cur_ws].path, tmp);
+		if (*(workspaces[cur_ws].path + 1))
+			snprintf(_path, PATH_MAX + NAME_MAX, "%s/%s", workspaces[cur_ws].path, tmp);
 		else /* Root directory */
 			snprintf(_path, PATH_MAX + NAME_MAX, "/%s", tmp);
 	}
@@ -388,7 +388,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 		epath = tilde_expand(spath);
 	else {
 		if (*spath == '.') {
-			xchdir(ws[cur_ws].path, NO_TITLE);
+			xchdir(workspaces[cur_ws].path, NO_TITLE);
 			epath = realpath(spath, NULL);
 			/* No need to change back to CWD. Done here */
 			*exit_status = -1;
@@ -1545,7 +1545,7 @@ CALC_OFFSET:
 RESET_PATH:
 #endif
 		if (cur_comp_type == TCMP_PATH)
-			xchdir(ws[cur_ws].path, NO_TITLE);
+			xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 RESTART:
 		rl_on_new_line();

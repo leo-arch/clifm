@@ -90,10 +90,10 @@ gen_pwd(int c)
 	// Reduce HOME to "~"
 	int free_tmp_path = 0;
 	char *tmp_path = (char *)NULL;
-	if (strncmp(ws[cur_ws].path, user.home, user.home_len) == 0)
-		tmp_path = home_tilde(ws[cur_ws].path);
+	if (strncmp(workspaces[cur_ws].path, user.home, user.home_len) == 0)
+		tmp_path = home_tilde(workspaces[cur_ws].path);
 	if (!tmp_path)
-		tmp_path = ws[cur_ws].path;
+		tmp_path = workspaces[cur_ws].path;
 	else
 		free_tmp_path = 1;
 
@@ -292,7 +292,7 @@ decode_prompt(const char *line)
 			case 'w': /* Full PWD */
 			case 'W': /* Short PWD */
 			{
-				if (!ws[cur_ws].path) {
+				if (!workspaces[cur_ws].path) {
 					line++;
 					break;
 				}
@@ -438,9 +438,9 @@ ADD_STRING:
 static inline void
 check_cwd(void)
 {
-	while (xchdir(ws[cur_ws].path, SET_TITLE) != EXIT_SUCCESS) {
-		char *ret = strrchr(ws[cur_ws].path, '/');
-		if (ret && ret != ws[cur_ws].path)
+	while (xchdir(workspaces[cur_ws].path, SET_TITLE) != EXIT_SUCCESS) {
+		char *ret = strrchr(workspaces[cur_ws].path, '/');
+		if (ret && ret != workspaces[cur_ws].path)
 			*ret = '\0';
 		else
 			break;
@@ -451,13 +451,13 @@ check_cwd(void)
 static inline void
 trim_final_slashes(void)
 {
-	size_t path_len = strlen(ws[cur_ws].path), i;
+	size_t path_len = strlen(workspaces[cur_ws].path), i;
 
-	for (i = path_len - 1; ws[cur_ws].path[i] && i > 0; i--) {
-		if (ws[cur_ws].path[i] != '/')
+	for (i = path_len - 1; workspaces[cur_ws].path[i] && i > 0; i--) {
+		if (workspaces[cur_ws].path[i] != '/')
 			break;
 		else
-			ws[cur_ws].path[i] = '\0';
+			workspaces[cur_ws].path[i] = '\0';
 	}
 }
 

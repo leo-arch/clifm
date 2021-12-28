@@ -126,11 +126,12 @@ log_function(char **comm)
 	}
 
 	char *date = get_date();
-	size_t log_len = strlen(date) + strlen(ws[cur_ws].path)
+	size_t log_len = strlen(date) + strlen(workspaces[cur_ws].path)
 					+ strlen(last_cmd) + 6;
 	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
 
-	snprintf(full_log, log_len, "[%s] %s:%s\n", date, ws[cur_ws].path, last_cmd);
+	snprintf(full_log, log_len, "[%s] %s:%s\n", date,
+			workspaces[cur_ws].path, last_cmd);
 
 	free(date);
 	free(last_cmd);

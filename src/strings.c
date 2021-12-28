@@ -1443,7 +1443,7 @@ parse_input_str(char *str)
 	}
 
 	int stdin_dir_ok = 0;
-	if (stdin_tmp_dir && strcmp(ws[cur_ws].path, stdin_tmp_dir) == 0)
+	if (stdin_tmp_dir && strcmp(workspaces[cur_ws].path, stdin_tmp_dir) == 0)
 		stdin_dir_ok = 1;
 
 	for (i = 0; i <= args_n; i++) {

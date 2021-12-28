@@ -966,8 +966,8 @@ exec_cmd(char **comm)
 				char *tmp = (char *)xnmalloc(len + 1, sizeof(char));
 				xstrsncpy(tmp, comm[1], len);
 				comm[1] = (char *)xrealloc(comm[1], (len
-							+ strlen(ws[cur_ws].path) + 2) * sizeof(char));
-				sprintf(comm[1], "%s/%s", ws[cur_ws].path, tmp);
+						+ strlen(workspaces[cur_ws].path) + 2) * sizeof(char));
+				sprintf(comm[1], "%s/%s", workspaces[cur_ws].path, tmp);
 				free(tmp);
 			}
 		} else if (*comm[0] == 'r' && !comm[0][1]) {
@@ -1155,7 +1155,7 @@ exec_cmd(char **comm)
 	 * ##################################################*/
 
 	else if (*comm[0] == 'w' && comm[0][1] == 's' && !comm[0][2])
-		return (exit_code = workspaces(comm[1] ? comm[1] : NULL));
+		return (exit_code = handle_workspaces(comm[1] ? comm[1] : NULL));
 
 	else if (*comm[0] == 'f' && ((comm[0][1] == 't' && !comm[0][2])
 	|| strcmp(comm[0], "filter") == 0))
@@ -1337,9 +1337,9 @@ exec_cmd(char **comm)
 		} else {
 		/* Run new instance in CWD */
 			if (*comm[0] == 'x')
-				exit_code = new_instance(ws[cur_ws].path, 0);
+				exit_code = new_instance(workspaces[cur_ws].path, 0);
 			else
-				exit_code = new_instance(ws[cur_ws].path, 1);
+				exit_code = new_instance(workspaces[cur_ws].path, 1);
 		}
 
 		return exit_code;
@@ -1733,7 +1733,7 @@ exec_cmd(char **comm)
 	/* These functions just print stuff, so that the value of exit_code
 	 * is always zero, that is to say, success */
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) {
-		printf("%s\n", ws[cur_ws].path);
+		printf("%s\n", workspaces[cur_ws].path);
 		return EXIT_SUCCESS;
 	}
 

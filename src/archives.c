@@ -264,15 +264,15 @@ handle_iso(char *file)
 			return EXIT_FAILURE;
 		}
 
-		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
-		add_to_jumpdb(ws[cur_ws].path);
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
+		add_to_jumpdb(workspaces[cur_ws].path);
 
 		if (autols) {
 			free_dirlist();
 			if (list_dir() != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
-			add_to_dirhist(ws[cur_ws].path);
+			add_to_dirhist(workspaces[cur_ws].path);
 		} else {
 			printf("%s: Successfully mounted on %s\n", file, mountpoint);
 		}
@@ -943,19 +943,19 @@ archiver(char **args, char mode)
 				return EXIT_FAILURE;
 			}
 
-			free(ws[cur_ws].path);
-			ws[cur_ws].path = (char *)xnmalloc(strlen(mountpoint) + 1,
+			free(workspaces[cur_ws].path);
+			workspaces[cur_ws].path = (char *)xnmalloc(strlen(mountpoint) + 1,
 			    sizeof(char));
-			strcpy(ws[cur_ws].path, mountpoint); /* NOLINT */
+			strcpy(workspaces[cur_ws].path, mountpoint); /* NOLINT */
 			free(mountpoint);
 
-			add_to_jumpdb(ws[cur_ws].path);
+			add_to_jumpdb(workspaces[cur_ws].path);
 
 			if (autols) {
 				free_dirlist();
 				if (list_dir() != EXIT_SUCCESS)
 					exit_status = EXIT_FAILURE;
-				add_to_dirhist(ws[cur_ws].path);
+				add_to_dirhist(workspaces[cur_ws].path);
 			}
 		}
 		break;

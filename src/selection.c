@@ -269,14 +269,15 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 				new_sel += select_file(matches[i]);
 			} else {
 				char *tmp = (char *)NULL;
-				if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+				if (*workspaces[cur_ws].path == '/'
+				&& !*(workspaces[cur_ws].path + 1)) {
 					tmp = (char *)xnmalloc(strlen(matches[i]) + 2,
 								sizeof(char));
 					sprintf(tmp, "/%s", matches[i]);
 				} else {
-					tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
+					tmp = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
 								+ strlen(matches[i]) + 2, sizeof(char));
-					sprintf(tmp, "%s/%s", ws[cur_ws].path, matches[i]);
+					sprintf(tmp, "%s/%s", workspaces[cur_ws].path, matches[i]);
 				}
 				new_sel += select_file(tmp);
 				free(tmp);
@@ -335,10 +336,11 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 				continue;
 
 			char tmp_path[PATH_MAX];
-			if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+			if (*workspaces[cur_ws].path == '/'
+			&& !*(workspaces[cur_ws].path + 1)) {
 				snprintf(tmp_path, PATH_MAX - 1, "/%s", file_info[i].name);
 			} else {
-				snprintf(tmp_path, PATH_MAX - 1, "%s/%s", ws[cur_ws].path,
+				snprintf(tmp_path, PATH_MAX - 1, "%s/%s", workspaces[cur_ws].path,
 						file_info[i].name);
 			}
 
@@ -506,7 +508,7 @@ sel_function(char **args)
 		}
 
 		if (*tmpdir != '/') {
-			snprintf(dir, PATH_MAX, "%s/%s", ws[cur_ws].path, tmpdir);
+			snprintf(dir, PATH_MAX, "%s/%s", workspaces[cur_ws].path, tmpdir);
 		} else
 			strcpy(dir, tmpdir);
 
@@ -556,14 +558,15 @@ sel_function(char **args)
 
 			if (*args[i] != '/') {
 				if (!sel_path) {
-					if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+					if (*workspaces[cur_ws].path == '/'
+					&& !*(workspaces[cur_ws].path + 1)) {
 						tmp = (char *)xnmalloc(strlen(name) + 2,
 									sizeof(char));
 						sprintf(tmp, "/%s", name);
 					} else {
-						tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
+						tmp = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
 									+ strlen(name) + 2, sizeof(char));
-						sprintf(tmp, "%s/%s", ws[cur_ws].path, name);
+						sprintf(tmp, "%s/%s", workspaces[cur_ws].path, name);
 					}
 				} else {
 					tmp = (char *)xnmalloc(strlen(dir) + strlen(name)
@@ -614,8 +617,8 @@ sel_function(char **args)
 		}
 	}
 
-	if (sel_path && xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+	if (sel_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
 		    strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -935,9 +938,9 @@ normalize_path(char *src, size_t src_len)
 	if (src_len == 0 || *src != '/') {
 		/* Relative path */
 		size_t pwd_len;
-		pwd_len = strlen(ws[cur_ws].path);
+		pwd_len = strlen(workspaces[cur_ws].path);
 		res = (char *)xnmalloc(pwd_len + 1 + src_len + 1, sizeof(char));
-		memcpy(res, ws[cur_ws].path, pwd_len);
+		memcpy(res, workspaces[cur_ws].path, pwd_len);
 		res_len = pwd_len;
 	} else {
 		res = (char *)xnmalloc((src_len > 0 ? src_len : 1) + 1, sizeof(char));

@@ -2036,8 +2036,8 @@ read_config(void)
 			if (xchdir(tmp, SET_TITLE) == 0) {
 				if (cur_ws < 0)
 					cur_ws = 0;
-				free(ws[cur_ws].path);
-				ws[cur_ws].path = savestring(tmp, strlen(tmp));
+				free(workspaces[cur_ws].path);
+				workspaces[cur_ws].path = savestring(tmp, strlen(tmp));
 			} else {
 				_err('w', PRINT_PROMPT, _("%s: '%s': %s. Using the "
 					"current working directory as starting path\n"),

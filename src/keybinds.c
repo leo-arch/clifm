@@ -657,7 +657,7 @@ rl_parent_dir(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	/* If already root dir, do nothing */
-	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
+	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
 		return EXIT_SUCCESS;
 	return run_kb_cmd("cd ..");
 }
@@ -667,7 +667,7 @@ rl_root_dir(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	/* If already root dir, do nothing */
-	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
+	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1])
 		return EXIT_SUCCESS;
 	return run_kb_cmd("cd /");
 }
@@ -677,7 +677,8 @@ rl_home_dir(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	/* If already in home, do nothing */
-	if (*ws[cur_ws].path == *user.home && strcmp(ws[cur_ws].path, user.home) == 0)
+	if (*workspaces[cur_ws].path == *user.home
+	&& strcmp(workspaces[cur_ws].path, user.home) == 0)
 		return EXIT_SUCCESS;
 	return run_kb_cmd("cd");
 }

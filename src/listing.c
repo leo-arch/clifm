@@ -139,11 +139,11 @@ print_div_line(void)
 static void
 print_disk_usage(void)
 {
-	if (!ws || !ws[cur_ws].path || !*ws[cur_ws].path)
+	if (!workspaces || !workspaces[cur_ws].path || !*workspaces[cur_ws].path)
 		return;
 
 	struct statvfs stat;
-	if (statvfs(ws[cur_ws].path, &stat) != EXIT_SUCCESS) {
+	if (statvfs(workspaces[cur_ws].path, &stat) != EXIT_SUCCESS) {
 		_err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
 		return;
 	}
@@ -397,14 +397,14 @@ set_events_checker(void)
 		watch = 0;
 	}
 #if defined(O_EVTONLY)
-	event_fd = open(ws[cur_ws].path, O_EVTONLY);
+	event_fd = open(workspaces[cur_ws].path, O_EVTONLY);
 #else
-	event_fd = open(ws[cur_ws].path, O_RDONLY);
+	event_fd = open(workspaces[cur_ws].path, O_RDONLY);
 #endif
 	if (event_fd >= 0) {
 		/* Prepare for events */
 		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
-				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, ws[cur_ws].path);
+				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, workspaces[cur_ws].path);
 		watch = 1;
 		/* Register events */
 		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
@@ -1319,7 +1319,7 @@ run_dir_cmd(const int mode)
 	char path[PATH_MAX];
 
 	if (mode == DIR_IN) {
-		snprintf(path, PATH_MAX - 1, "%s/%s", ws[cur_ws].path, DIR_IN_NAME);
+		snprintf(path, PATH_MAX - 1, "%s/%s", workspaces[cur_ws].path, DIR_IN_NAME);
 	} else {
 		if (mode == DIR_OUT) {
 			if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
@@ -1379,8 +1379,8 @@ list_dir_light(void)
 	int close_dir = 1;
 	int excluded_files = 0;
 
-	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
 		    strerror(errno));
 		close_dir = 0;
 		goto END;
@@ -1702,8 +1702,8 @@ list_dir(void)
 	int close_dir = 1;
 	int excluded_files = 0;
 
-	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
 		    strerror(errno));
 		close_dir = 0;
 		goto END;

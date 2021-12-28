@@ -148,8 +148,8 @@ save_jumpdb(void)
 
 		j = MAX_WS;
 		while (--j >= 0) {
-			if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
-			&& strcmp(jump_db[i].path, ws[j].path) == 0) {
+			if (workspaces[j].path && workspaces[j].path[1] == jump_db[i].path[1]
+			&& strcmp(jump_db[i].path, workspaces[j].path) == 0) {
 				jump_db[i].rank += WORKSPACE_BONUS;
 				jump_db[i].keep = 1;
 				break;
@@ -346,8 +346,8 @@ dirjump(char **args, int mode)
 
 			j = MAX_WS;
 			while (--j >= 0) {
-				if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
-				&& strcmp(jump_db[i].path, ws[j].path) == 0) {
+				if (workspaces[j].path && workspaces[j].path[1] == jump_db[i].path[1]
+				&& strcmp(jump_db[i].path, workspaces[j].path) == 0) {
 					rank += WORKSPACE_BONUS;
 					bpw = 1;
 					break;
@@ -362,8 +362,8 @@ dirjump(char **args, int mode)
 			ranks_sum += rank;
 			visits_sum += (int)jump_db[i].visits;
 
-			if (ws[cur_ws].path[1] == jump_db[i].path[1]
-			&& strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
+			if (workspaces[cur_ws].path[1] == jump_db[i].path[1]
+			&& strcmp(workspaces[cur_ws].path, jump_db[i].path) == 0) {
 				printf("  %s%zu\t %zu\t %d\t %d\t%d%c\t%s%s \n", mi_c,
 				    i + 1, jump_db[i].visits, days_since_first,
 				    hours_since_last, rank, bpw ? '*' : 0,
@@ -499,8 +499,8 @@ dirjump(char **args, int mode)
 				}
 
 				/* Exclue CWD */
-				if (jump_db[j].path[1] == ws[cur_ws].path[1]
-				&& strcmp(jump_db[j].path, ws[cur_ws].path) == 0)
+				if (jump_db[j].path[1] == workspaces[cur_ws].path[1]
+				&& strcmp(jump_db[j].path, workspaces[cur_ws].path) == 0)
 					continue;
 
 				int exclude = 0;
@@ -508,12 +508,12 @@ dirjump(char **args, int mode)
 				 * child options */
 				switch (jump_opt) {
 				case JPARENT:
-					if (!strstr(ws[cur_ws].path, jump_db[j].path))
+					if (!strstr(workspaces[cur_ws].path, jump_db[j].path))
 						exclude = 1;
 					break;
 
 				case JCHILD:
-					if (!strstr(jump_db[j].path, ws[cur_ws].path))
+					if (!strstr(jump_db[j].path, workspaces[cur_ws].path))
 						exclude = 1;
 
 				case NONE: /* fallthrough */
@@ -635,8 +635,8 @@ dirjump(char **args, int mode)
 
 			k = MAX_WS;
 			while (--k >= 0) {
-				if (ws[k].path && ws[k].path[1] == matches[j][1]
-				&& strcmp(ws[k].path, matches[j]) == 0) {
+				if (workspaces[k].path && workspaces[k].path[1] == matches[j][1]
+				&& strcmp(workspaces[k].path, matches[j]) == 0) {
 					rank += WORKSPACE_BONUS;
 					break;
 				}

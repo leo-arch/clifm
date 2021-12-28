@@ -1140,16 +1140,17 @@ jump_generator(const char *text, int state)
 	/* Look for matches in the dirhist list */
 	while ((name = jump_db[i++].path) != NULL) {
 		/* Exclude CWD */
-		if (name[1] == ws[cur_ws].path[1] && strcmp(name, ws[cur_ws].path) == 0)
+		if (name[1] == workspaces[cur_ws].path[1]
+		&& strcmp(name, workspaces[cur_ws].path) == 0)
 			continue;
 		/* Filter by parent */
 		if (rl_line_buffer[1] == 'p') {
-			if (!strstr(ws[cur_ws].path, name))
+			if (!strstr(workspaces[cur_ws].path, name))
 				continue;
 		}
 		/* Filter by child */
 		else if (rl_line_buffer[1] == 'c') {
-			if (!strstr(name, ws[cur_ws].path))
+			if (!strstr(name, workspaces[cur_ws].path))
 				continue;
 		}
 
@@ -1551,7 +1552,7 @@ rl_trashed_files(const char *text)
 	struct dirent **t = (struct dirent **)NULL;
 	int n = scandir(trash_files_dir, &t, NULL, alphasort);
 
-	xchdir(ws[cur_ws].path, NO_TITLE);
+	xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 	if (n == - 1)
 		return (char **)NULL;
