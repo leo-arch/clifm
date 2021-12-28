@@ -52,6 +52,8 @@
 #include "misc.h"
 #include "sanitize.h"
 
+#include "strings.h"
+
 /* Expand all environment variables in the string S
  * Returns the expanded string or NULL on error */
 static char *
@@ -592,8 +594,8 @@ mime_list_open(char **apps, char *file)
 	char **n = (char **)NULL;
 	size_t nn = 0;
 
-	size_t i = 0, j = 0;
-	for ( ; apps[i]; i++) {
+	size_t i, j = 0;
+	for (i = 0; apps[i]; i++) {
 		int rep = 0;
 		if (i > 0) {
 			/* Do not list duplicated entries */
@@ -648,7 +650,7 @@ mime_list_open(char **apps, char *file)
 				sprintf(cmd, "%s %s%c", n[a - 1], qfile, bg_proc ? '&' : 0);
 			}
 
-			if (launch_execle(cmd) == EXIT_SUCCESS)
+			if (launch_execle(cmd) == EXIT_SUCCESS) /* lgtm [cpp/command-line-injection] */
 				ret = EXIT_SUCCESS;
 			free(cmd);
 		} else {
@@ -791,9 +793,12 @@ mime_open_with_tab(char *filename, const char *prefix)
 			size_t app_len = 0;
 			/* Split the appplications line into substrings, if
 			 * any */
-			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
-			&& *tmp != '"')
-				app[app_len++] = *(tmp++);
+			while (*tmp != '\0' && *tmp != ';'
+			&& *tmp != '\n' && *tmp != '\'' && *tmp != '"') {
+				app[app_len] = *tmp;
+				app_len++;
+				tmp++;
+			}
 
 			while (*tmp == ' ') /* Remove leading spaces */
 				tmp++;
@@ -817,7 +822,8 @@ mime_open_with_tab(char *filename, const char *prefix)
 						 * value */
 						appb = savestring(app, strlen(app));
 						/* app: the expanded value */
-						app = (char *)xrealloc(app, (strlen(t) + 1) * sizeof(char));
+						app = (char *)xrealloc(app, (app_len + strlen(t) + 1)
+								* sizeof(char));
 						strcpy(app, t);
 						free(t);
 					} else {
@@ -1114,7 +1120,8 @@ mime_open_with(char *filename, char **args)
 						 * value */
 						appb = savestring(app, strlen(app));
 						/* app: the expanded value */
-						app = (char *)xrealloc(app, (strlen(t) + 1) * sizeof(char));
+						app = (char *)xrealloc(app, (app_len + strlen(t) + 1)
+								* sizeof(char));
 						strcpy(app, t);
 						free(t);
 					} else {
@@ -1460,7 +1467,24 @@ mime_open(char **args)
 		sprintf(t, "%s %s%s", app, file_path, bg_proc ? " &" : "");
 	}
 
-	ret = launch_execle(t);
+/*	char *a = strchr(t, '&');
+	if (a) {
+		*a = '\0';
+		bg_proc = 1;
+	}
+
+	size_t bk = args_n;
+	args_n = 0;
+	char **sstr = split_str(t);
+	args_n = bk;
+	free(t);
+	ret = launch_execve(sstr, bg_proc ? BACKGROUND : FOREGROUND,
+			bg_proc ? E_NOSTDERR : E_NOFLAG);
+	size_t i;
+	for (i = 0; sstr[i]; i++)
+		free(sstr[i]);
+	free(sstr); */
+	ret = launch_execle(t); /* lgtm [cpp/command-line-injection] */
 	free(t);
 
 ERROR:
