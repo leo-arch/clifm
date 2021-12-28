@@ -29,6 +29,9 @@ href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-r
 <a href="https://codecov.io/gh/leo-arch/clifm"><img src="https://codecov.io/gh/leo-arch/clifm/branch/master/graph/badge.svg?token=YC3NIS180Z"/></a>
 -->
 </p>
+<!---
+[![LGTM](https://img.shields.io/lgtm/grade/cpp/g/leo-arch/clifm.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/leo-arch/clifm/context:cpp)
+-->
 
 ---
 
