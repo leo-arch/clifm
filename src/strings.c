@@ -2186,8 +2186,11 @@ get_substr(char *str, const char ifs)
 				/* Make sure we have a valid range */
 				if (is_number(first) && is_number(second)) {
 					afirst = atoi(first), asecond = atoi(second);
-					if (afirst == INT_MIN || asecond == INT_MIN)
+					if (afirst == INT_MIN || asecond == INT_MIN) {
+						free(first);
+						free(second);
 						break;
+					}
 					if (asecond <= afirst) {
 						free(first);
 						free(second);

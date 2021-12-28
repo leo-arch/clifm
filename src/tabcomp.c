@@ -767,7 +767,7 @@ fzftabcomp(char **matches)
 	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL) {
 		query = get_query_str(&fzf_offset);
 		if (!query)
-			query = lw;
+			query = lw ? lw : (char *)NULL;
 	}
 
 	if (fzf_offset < 0)
@@ -813,8 +813,14 @@ fzftabcomp(char **matches)
 	if (cur_comp_type == TCMP_OPENWITH) {
 		/* Interpret the corresponding cmd line in the mimelist file
 		 * and replace the input string by the interpreted line */
-		char *sp = strchr(rl_line_buffer, ' ');
-		if (!sp || !*(sp++)) {
+		char *sp = (char *)NULL;
+		if (rl_line_buffer) {
+			sp = strchr(rl_line_buffer, ' ');
+			if (!sp || !*(sp++)) {
+				free(buf);
+				return EXIT_FAILURE;
+			}
+		} else {
 			free(buf);
 			return EXIT_FAILURE;
 		}
@@ -860,7 +866,7 @@ fzftabcomp(char **matches)
 		}
 
 	} else if (cur_comp_type == TCMP_DESEL) {
-		prefix_len = strlen(query);
+		prefix_len = strlen(query ? query : (lw ? lw : ""));
 
 	} else if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
 		rl_delete_text(0, rl_end);

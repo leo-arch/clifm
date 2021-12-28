@@ -122,7 +122,7 @@ run_and_refresh(char **cmd)
 		}
 		_xrename = 1;
 		new_name = get_new_name();
-/*		_xrename = 0; */
+		_xrename = 0;
 		if (!new_name) {
 			_xrename = 0;
 			return EXIT_SUCCESS;
@@ -159,8 +159,7 @@ run_and_refresh(char **cmd)
 		tcmd[n][1] = '\0';
 		n++;
 	} else {
-		if (_xrename) {
-			_xrename = 0;
+		if (new_name) {
 			tcmd[n] = savestring(new_name, strlen(new_name));
 			free(new_name);
 			n++;
