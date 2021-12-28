@@ -1727,8 +1727,14 @@ icons on       Enable icons\n\
 q              I'm tired, quit\n\
 Q              cd on quit\n");
 
-	char *cmd[] = {_pager, tmp_file, NULL};
-	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	int ret;
+	if (*_pager == 'l' && strcmp(_pager, "less") == 0) {
+		char *cmd[] = {_pager, "-FIRX", tmp_file, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	} else {
+		char *cmd[] = {_pager, tmp_file, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	}
 	unlink(tmp_file);
 
 #ifdef __HAIKU__
