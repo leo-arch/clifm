@@ -498,7 +498,10 @@ run_shell_cmd(char **comm)
 		cmd[len - 3] = '\0';
 	}
 
-	int exit_status = launch_execle(cmd);
+	/* Calling the system shell is vulnerable to command injection, true.
+	 * But it is the user here who is directly running the command: in this
+	 * case, we cannot prevent the user from breaking her own system */
+	int exit_status = launch_execle(cmd); /* lgtm [cpp/command-line-injection] */
 	free(cmd);
 
 	/* Reload the list of available commands in PATH for TAB completion.
