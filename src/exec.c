@@ -499,8 +499,8 @@ run_shell_cmd(char **comm)
 	}
 
 	/* Calling the system shell is vulnerable to command injection, true.
-	 * But it is the user here who is directly running the command: in this
-	 * case, we cannot prevent the user from breaking her own system */
+	 * But it is the user here who is directly running the command: this
+	 * is not an untrusted source */
 	int exit_status = launch_execle(cmd); /* lgtm [cpp/command-line-injection] */
 	free(cmd);
 

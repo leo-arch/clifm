@@ -27,14 +27,14 @@
 
 # Running the opening application in the background:
 # For GUI applications:
-#    APP %f &>/dev/null &
+#    APP %f &
 # For terminal applications:
-#    TERM -e APP %f &>/dev/null &
+#    TERM -e APP %f &
 # Replace 'TERM' and 'APP' by the corresponding values. The -e option might
 # vary depending on the terminal emulator used (TERM)
 
 # Environment variables could be used as well. Example:
-# X:text/plain=$TERM -e $EDITOR %f &>/dev/null &;$VISUAL;nano;vi
+# X:text/plain=$TERM -e $EDITOR %f &;$VISUAL;nano;vi
 
 ########################
 #    File Extensions   #
@@ -53,7 +53,7 @@ X:E:^cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;leafpad;mou
 
 # Directories - only for the open-with command (ow)
 # In graphical environment directories will be opened in a new window
-X:inode/directory=xterm -e clifm %f &>/dev/null &;xterm -e vifm %f &>/dev/null &;pcmanfm %f &>/dev/null &;thunar %f &>/dev/null &;xterm -e ncdu %f &
+X:inode/directory=xterm -e clifm %f &;xterm -e vifm %f &;pcmanfm %f &;thunar %f &;xterm -e ncdu %f &
 !X:inode/directory=vifm;ranger;nnn;ncdu
 
 # Web content
