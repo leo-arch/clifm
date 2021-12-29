@@ -689,8 +689,7 @@ copy_function(char **comm)
 	}
 
 	if (sel_is_last) {
-		tcmd[n][0] = '.';
-		tcmd[n][1] = '\0';
+		tcmd[n] = savestring(".", 1);
 		n++;
 	}
 
