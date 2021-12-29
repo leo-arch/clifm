@@ -221,22 +221,58 @@ sanitize_cmd_environ(void)
 	env_bk = environ;
 
 	/* Create a controlled environment to securely run shell commands */
-	new_env = (char **)xnmalloc(7, sizeof(char *));
+	new_env = (char **)xnmalloc(9, sizeof(char *));
+	size_t n = 0;
 	char p[PATH_MAX];
+#ifdef _PATH_STDPATH
 	snprintf(p, PATH_MAX, "PATH=%s", _PATH_STDPATH);
-	new_env[0] = savestring(p, strlen(p));
-	new_env[1] = savestring("IFS=\" \n\t\"", 9);
-	snprintf(p, PATH_MAX, "USER=%s", user.name);
-	new_env[2] = savestring(p, strlen(p));
-	snprintf(p, PATH_MAX, "HOME=%s", user.home);
-	new_env[3] = savestring(p, strlen(p));
-	snprintf(p, PATH_MAX, "SHELL=%s", user.shell);
-	new_env[4] = savestring(p, strlen(p));
-	if ((flags & GUI))
-		new_env[5] = savestring("TERM=xterm", 10);
-	else
-		new_env[5] = savestring("\0", 1);
-	new_env[6] = (char *)NULL;
+	new_env[n] = savestring(p, strlen(p));
+	n++;
+#else
+	char *q = (char *)NULL;
+	size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
+	q = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
+	confstr(_CS_PATH, q, n);               /* Get value */
+	new_env[n] = savestring(q, strlen(q)); /* Set it */
+	n++;
+	free(q);
+#endif
+	new_env[n] = savestring("IFS=\" \n\t\"", 9);
+	n++;
+	if (user.name) {
+		snprintf(p, PATH_MAX, "USER=%s", user.name);
+		new_env[n] = savestring(p, strlen(p));
+		n++;
+	}
+	if (user.home) {
+		snprintf(p, PATH_MAX, "HOME=%s", user.home);
+		new_env[n] = savestring(p, strlen(p));
+		n++;
+	}
+
+	if (user.shell) {
+		snprintf(p, PATH_MAX, "SHELL=%s", user.shell);
+		new_env[n] = savestring(p, strlen(p));
+		n++;
+	}
+	if ((flags & GUI)) {
+		new_env[n] = savestring("TERM=xterm", 10);
+		n++;
+		if (getenv("DISPLAY")) {
+			/* Set DISPLAY default value
+			 * https://datacadamia.com/ssh/x11/display*/
+			new_env[n] = savestring("DISPLAY=localhost:0.0", 21);
+			n++;
+		}
+		/* If running on Wayland and WAYLAND_DISPLAY isn't set, Wayland
+		 * client will try a fallback dispay, usually wayland-0 or wayland-1.
+		 * So, there's no need to set WAYLAND_DISPLAY */
+	}
+
+	new_env[n] = savestring("LC_ALL=C", 8);
+	n++;
+
+	new_env[n] = (char *)NULL;
 
 	/* Set environ to our controlled environment */
 	environ = new_env;
