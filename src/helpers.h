@@ -774,6 +774,7 @@ extern int
 	follow_symlinks,
 	fzftab,
 	fzf_height_set,
+	fzf_open_with,
 #ifndef _NO_HIGHLIGHT
 	highlight,
 #endif

@@ -918,6 +918,7 @@ fzftabcomp(char **matches)
 			q = savestring(buf, blen);
 		}
 
+		fzf_open_with = 1;
 		write_completion(q, &prefix_len, &exit_status, multi);
 		free(q);
 	}

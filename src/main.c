@@ -141,6 +141,7 @@ int
 	follow_symlinks = UNSET,
 	fzftab = UNSET,
 	fzf_height_set = 0,
+	fzf_open_with = 0,
 	highlight = UNSET,
 	home_ok = 1,
 #ifndef _NO_ICONS

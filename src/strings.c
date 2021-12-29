@@ -502,7 +502,7 @@ remove_quotes(char *str)
  * str is NULL or if no substring was found, i.e., if str contains
  * only spaces. */
 char **
-split_str(const char *str)
+split_str(const char *str, const int update_args)
 {
 	if (!str)
 		return (char **)NULL;
@@ -529,7 +529,8 @@ split_str(const char *str)
 				/* If escaped, it has no special meaning */
 				if ((str_len && *(str - 1) == '\\') || *(str + 1) != '(') {
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-					buf[buf_len++] = *str;
+					buf[buf_len] = *str;
+					buf_len++;
 					break;
 				} else {
 					close = ')';
@@ -700,10 +701,12 @@ split_str(const char *str)
 		substr = (char **)xrealloc(substr, (words + 1) * sizeof(char *));
 		substr[words] = (char *)NULL;
 
-		args_n = words - 1;
+		if (update_args == 1)
+			args_n = words - 1;
 		return substr;
 	} else {
-		args_n = 0; /* Just in case, but I think it's not needed */
+		if (update_args == 1)
+			args_n = 0; /* Just in case, but I think it's not needed */
 		return (char **)NULL;
 	}
 }
@@ -1137,7 +1140,7 @@ parse_input_str(char *str)
 
 	/* split_str() returns an array of strings without leading,
 	 * terminating and double spaces. */
-	char **substr = split_str(str);
+	char **substr = split_str(str, UPDATE_ARGS);
 
 	/** ###################### */
 	if (fusedcmd_ok) /* Just in case split_fusedcmd returned NULL */

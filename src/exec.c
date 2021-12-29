@@ -461,7 +461,8 @@ run_shell_cmd(char **comm)
 	 * executed by execle() using the system shell (/bin/sh -c) */
 	char *cmd = (char *)NULL;
 	size_t len = strlen(first) + 3;
-	cmd = (char *)xnmalloc(len + (bg_proc ? 2 : 0), sizeof(char));
+	cmd = (char *)xnmalloc(len + (bg_proc ? 2 : 0) + (fzf_open_with ? 12 : 0),
+			sizeof(char));
 	strcpy(cmd, first);
 	cmd[len - 3] = ' ';
 	cmd[len - 2] = '\0';
@@ -478,13 +479,18 @@ run_shell_cmd(char **comm)
 		/* LEN holds the previous size of the buffer, plus space, the
 		 * ampersand character, and the new src string. The buffer is
 		 * thus big enough */
-		cmd = (char *)xrealloc(cmd, (len + 3 + (bg_proc ? 2 : 0))
-				* sizeof(char));
+		cmd = (char *)xrealloc(cmd, (len + 3 + (bg_proc ? 2 : 0)
+				+ (fzf_open_with ? 12 : 0)) * sizeof(char));
 		strcat(cmd, comm[i]);
 	}
 
 	/* Append final ampersand if backgrounded */
 	if (bg_proc) {
+		if (fzf_open_with == 1) {
+			fzf_open_with = 0;
+			strcat(cmd, " &>/dev/null");
+			len += 12;
+		}
 		cmd[len - 3] = ' ';
 		cmd[len - 2] = '&';
 		cmd[len - 1] = '\0';

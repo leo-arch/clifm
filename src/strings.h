@@ -25,6 +25,10 @@
 #ifndef STRINGS_H
 #define STRINGS_H
 
+/* Macros for the split_str function */
+#define UPDATE_ARGS    1
+#define NO_UPDATE_ARGS 0
+
 char **parse_input_str(char *str);
 char *savestring(const char *restrict str, size_t size);
 char **get_substr(char *str, const char ifs);
@@ -47,5 +51,5 @@ size_t xstrnlen(const char *restrict s);
 int is_internal_f(const char *restrict cmd);
 int xstrverscmp(const char *s1, const char *s2);
 char *truncate_wname(const char *name);
-
+char **split_str(const char *str, const int update_args);
 #endif /* STRINGS_H */

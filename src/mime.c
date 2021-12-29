@@ -80,7 +80,7 @@ expand_env(char *s)
 		env = getenv(s + 1);
 		if (r)
 			*r = ' ';
-		if(!env) {
+		if (!env) {
 			free(ret);
 			return (char *)NULL;
 		}
@@ -625,61 +625,71 @@ mime_list_open(char **apps, char *file)
 
 	int ret = EXIT_FAILURE;
 	if (input && a > 0 && n[a - 1]) {
-		char *qfile = escape_str(file);
-		if (!qfile) {
-			fprintf(stderr, _("%s: %s: Error escaping file name\n"),
-				PROGRAM_NAME, file);
-			goto END;
-		}
 		if (strchr(n[a - 1], ' ')) {
-			char *phcmd = (char *)NULL;
-			char *cmd = (char *)NULL;
+			size_t f = 0;
+			char **cmd = split_str(n[a - 1], NO_UPDATE_ARGS);
 
-			/* Look for the %f placeholder. If there, replace it by
-			 * the corresponding filename (FILE) */
-			char *ph = strchr(n[a - 1], '%');
-			if (ph && *(ph + 1) == 'f' && (!*(ph + 2) || *(ph + 2) == ' '))
-				phcmd = replace_substr(n[a - 1], "%f", qfile);
-
-			if (phcmd) {
-				cmd = phcmd;
-			} else {
-				/* If no placeholder, append FILE at the end of the command */
-				cmd = (char *)xnmalloc(strlen(n[a - 1])
-						+ strlen(qfile) + 3, sizeof(char));
-				sprintf(cmd, "%s %s%c", n[a - 1], qfile, bg_proc ? '&' : 0);
+			for (i = 0; cmd[i]; i++) {
+				if (*cmd[i] == '&') {
+					bg_proc = 1;
+					free(cmd[i]);
+					cmd[i] = (char *)NULL;
+					continue;
+				}
+				if (*cmd[i] == '%' && cmd[i][1] == 'f') {
+					cmd[i] = (char *)xrealloc(cmd[i], (strlen(file) + 1) * sizeof(char));
+					strcpy(cmd[i], file);
+					f = 1;
+				}
+				if (*cmd[i] == '$' && cmd[i][1] >= 'A' && cmd[i][1] <= 'Z') {
+					char *env = expand_env(cmd[i]);
+					if (env) {
+						free(cmd[i]);
+						cmd[i] = env;
+					}
+				}
 			}
 
-			if (launch_execle(cmd) == EXIT_SUCCESS) /* lgtm [cpp/command-line-injection] */
+			/* If file to be opened was not specified via %f, append
+			 * ir to the cmd array */
+			if (f == 0) {
+				cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
+				cmd[i] = savestring(file, strlen(file));
+				cmd[i + 1] = (char *)NULL;
+			}
+
+			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+			bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS)
 				ret = EXIT_SUCCESS;
+
+			for (i = 0; cmd[i]; i++)
+				free(cmd[i]);
 			free(cmd);
 		} else {
 #ifndef _NO_ARCHIVING
 			/* We have just a command name: no parameter, no placeholder */
 			if (*n[a - 1] == 'a' && n[a - 1][1] == 'd' && !n[a - 1][2]) {
 				/* 'ad' is the internal archiver command */
-				char *cmd[] = {"ad", qfile, NULL};
+				char *cmd[] = {"ad", file, NULL};
 				ret = archiver(cmd, 'd');
 			} else {
 				char *cmd[] = {n[a - 1], file, NULL};
 				if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-				E_NOSTDERR) == EXIT_SUCCESS) {
+				bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS) {
 					ret = EXIT_SUCCESS;
 				}
 			}
 #else
 			char *cmd[] = {n[a - 1], file, NULL};
 			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-			E_NOSTDERR) == EXIT_SUCCESS)
+			bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS)
 				ret = EXIT_SUCCESS;
 #endif /* NO_ARCHIVING */
 		}
 
-		free(qfile);
 		bg_proc = 0;
 	}
 
-END:
 	free(input);
 	free(n);
 
@@ -937,57 +947,44 @@ join_and_run(char **args, char *name)
 		return EXIT_FAILURE;
 	}
 
-	char *ename = escape_str(name);
-	if (!ename)
-		return EXIT_FAILURE;
+	size_t i, n = 1, f = 0;
+	for (i = 0; args[i]; i++);
+	char **cmd = (char **)xnmalloc(i + 2, sizeof(char *));
+	cmd[0] = savestring(args[0], strlen(args[0]));
 
-	name = ename;
-
-	/* We have an application name plus at least one parameter */
-	size_t l = strlen(args[0]) + 2;
-	char *cmd = (char *)xnmalloc(l, sizeof(char));
-	strcpy(cmd, args[0]);
-	cmd[l - 2] = ' ';
-	cmd[l - 1] = '\0';
-
-	size_t i;
 	for (i = 1; args[i]; i++) {
-		l += strlen(args[i]) + 2;
-		cmd = (char *)xrealloc(cmd, l * sizeof(char));
-		strcat(cmd, args[i]);
-		strcat(cmd, " ");
+		if (*args[i] == '%' && *(args[i] + 1) == 'f' && !*(args[i] + 2)) {
+			f = 1;
+			cmd[n] = savestring(name, strlen(name));
+			n++;
+		} else if (*args[i] == '$' && *(args[i] + 1) >= 'A'
+		&& *(args[i] + 1) <= 'Z') {
+			char *env = expand_env(args[i]);
+			if (env) {
+				cmd[n] = savestring(env, strlen(env));
+				n++;
+			}
+		} else if (*args[i] == '&') {
+			bg_proc = 1;
+		} else {
+			cmd[n] = savestring(args[i], strlen(args[i]));
+			n++;
+		}
 	}
 
-	char *ph = strchr(cmd, '%');
-	int ret = EXIT_FAILURE;
-
-	if (ph && *(ph + 1) == 'f') {
-		char *phcmd = replace_substr(cmd, "%f", name);
-		if (!phcmd)
-			goto EXIT;
-		if (bg_proc) {
-			phcmd = (char *)xrealloc(phcmd, (strlen(phcmd) + 3) * sizeof(char));
-			char t[3];
-			t[0] = ' '; t[1] = '&'; t[2] = '\0';
-			strcat(phcmd, t);
-		}
-		ret = launch_execle(phcmd);
-		free(phcmd);
-	} else {
-		cmd = (char *)xrealloc(cmd, (l + strlen(name) + 1
-			+ (bg_proc ? 3 : 0)) * sizeof(char));
-		strcat(cmd, name);
-		if (bg_proc) {
-			char t[3];
-			t[0] = ' '; t[1] = '&'; t[2] = '\0';
-			strcat(cmd, t);
-		}
-		ret = launch_execle(cmd);
+	if (f == 0) {
+		cmd[n] = savestring(name, strlen(name));
+		n++;
 	}
 
-EXIT:
+	cmd[n] = (char *)NULL;
+
+	int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+			bg_proc ? E_NOSTDERR : E_NOFLAG);
+
+	for (i = 0; cmd[i]; i++)
+		free(cmd[i]);
 	free(cmd);
-	free(name);
 
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
@@ -1031,7 +1028,8 @@ mime_open_with(char *filename, char **args)
 	if (!name)
 		return EXIT_FAILURE;
 
-	/* We already have the opening app. Just join the app, option
+	/* ow FILE APP [ARGS]
+	 * We already have the opening app. Just join the app, option
 	 * parameters, and file name, and execute the command */
 	if (args) {
 		int ret = join_and_run(args, name);
@@ -1263,17 +1261,14 @@ mime_open(char **args)
 	}
 
 	free(file_path_tmp);
-	file_path_tmp = (char *)NULL;
 #endif /* _NO_MAGIC */
 
 	char *file_path = (char *)NULL,
 		 *deq_file = (char *)NULL;
-	int info = 0,
-		file_index = 0;
+	int info = 0, file_index = 0;
 
-	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0) {
+	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return mime_edit(args);
-	}
 
 	else if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
 		if (!args[2]) {
@@ -1429,63 +1424,49 @@ mime_open(char **args)
 	}
 #endif
 
-	/* Escape the file name, if necessary */
-	if (!strchr(file_path, '\\')) {
-		char *tmp = escape_str(file_path);
-		if (tmp) {
-			free(file_path);
-			file_path = tmp;
-		}
-	}
+	int ret = EXIT_FAILURE;
+	char **cmd = split_str(app, NO_UPDATE_ARGS);
+	if (!cmd)
+		goto ERROR;
 
-	/* If the %f placeholder is found, replace it by the file to be opened */
-	int ret = EXIT_SUCCESS;
-	char *t = (char *)NULL;
-	char *p = strchr(app, '%');
-	if (p && *(p + 1) == 'f') {
-		t = replace_substr(app, "%f", file_path);
-		if (t) {
-			if (open_in_foreground) {
-				/* Remove last ampersand, if any */
-				char *s = strrchr(t, '&');
-				if (s && s != t) {
-					if (*(s - 1) == ' ')
-						*(s - 1) = '\0';
-					else
-						*s = '\0';
-				}
-			}
+	size_t i, f = 0, n = 0;
+	for (i = 0; cmd[i]; i++) {
+		if (*cmd[i] == '%' && *(cmd[i] + 1) == 'f') {
+			cmd[i] = (char *)xrealloc(cmd[i], (strlen(file_path) + 1)
+					* sizeof(char *));
+			strcpy(cmd[i], file_path);
+			f = 1;
+		} else if (*cmd[i] == '$' && *(cmd[i] + 1) >= 'A'
+		&& *(cmd[i] + 1) <= 'Z') {
+			char *p = expand_env(cmd[i]);
+			if (!p)
+				continue;
+			cmd[i] = (char *)xrealloc(cmd[i], (strlen(p) + 1) * sizeof(char *));
+			strcpy(cmd[i], p);
+			free(p);
 		} else {
-			fprintf(stderr, _("%s: Error converting placeholder\n"), PROGRAM_NAME);
-			ret = EXIT_FAILURE;
-			goto ERROR;
+			if (*cmd[i] == '&') {
+				free(cmd[i]);
+				cmd[i] = (char *)NULL;
+				bg_proc = 1;
+			}
 		}
-	} else {
-		/* No placeholder. Just append file name */
-		t = (char *)xnmalloc(strlen(app) + strlen(file_path)
-			+ (bg_proc ? 4 : 2), sizeof(char));
-		sprintf(t, "%s %s%s", app, file_path, bg_proc ? " &" : "");
 	}
 
-/*	char *a = strchr(t, '&');
-	if (a) {
-		*a = '\0';
-		bg_proc = 1;
+	n = i;
+	if (f == 0) {
+		cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
+		cmd[i] = savestring(file_path, strlen(file_path));
+		cmd[i + 1] = (char *)NULL;
+		n++;
 	}
 
-	size_t bk = args_n;
-	args_n = 0;
-	char **sstr = split_str(t);
-	args_n = bk;
-	free(t);
-	ret = launch_execve(sstr, bg_proc ? BACKGROUND : FOREGROUND,
-			bg_proc ? E_NOSTDERR : E_NOFLAG);
-	size_t i;
-	for (i = 0; sstr[i]; i++)
-		free(sstr[i]);
-	free(sstr); */
-	ret = launch_execle(t); /* lgtm [cpp/command-line-injection] */
-	free(t);
+	ret = launch_execve(cmd, (bg_proc && !open_in_foreground)
+			? BACKGROUND : FOREGROUND, bg_proc ? E_NOSTDERR : E_NOFLAG);
+
+	for (i = 0; i < n; i++)
+		free(cmd[i]);
+	free(cmd);
 
 ERROR:
 	free(file_path);
