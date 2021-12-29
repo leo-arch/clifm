@@ -463,7 +463,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 {
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
 	 * file, let's define it ourselves */
-	char height_str[sizeof(size_t) + 19];
+	char height_str[sizeof(size_t) + 20];
 	*height_str = '\0';
 	if (fzf_height_set == 0)
 		snprintf(height_str, sizeof(height_str), "--height=%zu", *height);

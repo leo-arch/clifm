@@ -480,7 +480,7 @@ print_entry_props(const struct fileinfo *props, size_t max)
 
 	free(wname);
 
-	char trim_diff[10];
+	char trim_diff[12];
 	*trim_diff = '\0';
 	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
