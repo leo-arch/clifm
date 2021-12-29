@@ -81,7 +81,7 @@ X:^image/.*=fim;feh;display;sxiv;nsxiv;pqiv;gpicview;qview;qimgv;inkscape;mirage
 !X:^image/*=fim;img2txt;cacaview;fbi;fbv
 
 # Video and audio
-X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
+X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;celluloid;qmplayer2;haruna;totem
 X:^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
 
 # Fonts
