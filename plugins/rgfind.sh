@@ -24,7 +24,7 @@ get_helper_file()
 
 	[ -f "$file5" ] && helper_file="$file5" && return
 
-	printf "CliFM: plugins-helper: File not found. Copy this file to $HOME/.config/clifm/plugins to fix this issue\n" >&2
+	printf "CliFM: plugins-helper: File not found. Copy this file to ~/.config/clifm/plugins to fix this issue\n" >&2
 	exit 1
 }
 
