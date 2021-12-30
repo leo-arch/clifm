@@ -33,14 +33,17 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 0123456789 -_.,%&"
 
+/* Used to sanitize DISPLAY env variable */
 #define ALLOWED_CHARS_DISPLAY "abcdefghijklmnopqrstuvwxyz\
 ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 0123456789-_.,:"
 
+/* Used to sanitize TZ, LANG, and TERM env variables */
 #define ALLOWED_CHARS_MISC "abcdefghijklmnopqrstuvwxyz\
 ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 0123456789-_.,"
 
+/* Used to sanitize commands in gral */
 #define ALLOWED_CHARS_GRAL "abcdefghijklmnopqrstuvwxyz\
 ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 0123456789 -_.,/'\""

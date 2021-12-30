@@ -159,7 +159,7 @@ xsecure_env(const int mode)
 	if (user.shell)
 		setenv("SHELL", user.shell, 1);
 
-	if (display) {
+	if (display && sanitize_cmd(display, SNT_DISPLAY) == EXIT_SUCCESS) {
 		if (setenv("DISPLAY", display, 1) == -1) {
 			fprintf(stderr, "%s: setenv: DISPLAY: %s\n", PROGRAM_NAME,
 				strerror(errno));
@@ -173,21 +173,21 @@ xsecure_env(const int mode)
 		}
 	}
 
-	if (_term) {
+	if (_term && sanitize_cmd(_term, SNT_MISC) == EXIT_SUCCESS) {
 		if (setenv("TERM", _term, 1) == -1) {
 			fprintf(stderr, "%s: setenv: TERM: %s\n", PROGRAM_NAME,
 				strerror(errno));
 		}
 	}
 
-	if (tz) {
+	if (tz && sanitize_cmd(tz, SNT_MISC) ==  EXIT_SUCCESS) {
 		if (setenv("TZ", tz, 1) == -1) {
 			fprintf(stderr, "%s: setenv: TZ: %s\n", PROGRAM_NAME,
 				strerror(errno));
 		}
 	}
 
-	if (lang) {
+	if (lang && sanitize_cmd(lang, SNT_MISC) ==  EXIT_SUCCESS) {
 		if (setenv("LANG", lang, 1) == -1) {
 			fprintf(stderr, "%s: setenv: LANG: %s\n", PROGRAM_NAME,
 				strerror(errno));
