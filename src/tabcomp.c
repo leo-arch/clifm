@@ -748,7 +748,7 @@ fzftabcomp(char **matches)
 		if (i + 1 > max_height)
 			height = max_height;
 		else
-			height = i;
+			height = i + 1;
 	}
 
 	/* Calculate the offset (left padding) of the FZF window based on
