@@ -208,13 +208,6 @@ get_app(const char *mime, const char *ext)
 				/* Check each application existence */
 				char *file_path = (char *)NULL;
 
-				if (xargs.secure_cmds == 1
-				&& sanitize_cmd(app, SNT_MIME) != EXIT_SUCCESS) {
-					_err('w', PRINT_PROMPT, "Lira: %s: Command contains "
-						"unsafe characters\n", app);
-					continue;
-				}
-
 				/* Expand environment variables */
 				if (strchr(app, '$')) {
 					char *t = expand_env(app);
@@ -223,6 +216,13 @@ get_app(const char *mime, const char *ext)
 						strcpy(app, t);
 						free(t);
 					}
+				}
+
+				if (xargs.secure_cmds == 1
+				&& sanitize_cmd(app, SNT_MIME) != EXIT_SUCCESS) {
+					_err('w', PRINT_PROMPT, "Lira: %s: Command contains "
+						"unsafe characters\n", app);
+					continue;
 				}
 
 				/* If app contains spaces, the command to check is
