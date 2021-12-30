@@ -1266,7 +1266,7 @@ create_config_files(void)
 		} else {
 			fprintf(profile_fp, _("#%s profile\n\
 # Write here the commands you want to be executed at startup\n\
-# Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"),
+# Ex:\n#echo -e \"%s, the command line file manager\"\n"),
 			    PROGRAM_NAME, PROGRAM_NAME);
 			fclose(profile_fp);
 		}
