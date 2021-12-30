@@ -230,10 +230,10 @@ sanitize_cmd_environ(void)
 	n++;
 #else
 	char *q = (char *)NULL;
-	size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-	q = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
-	confstr(_CS_PATH, q, n);               /* Get value */
-	new_env[n] = savestring(q, strlen(q)); /* Set it */
+	size_t len = confstr(_CS_PATH, NULL, 0); /* Get value's size */
+	q = (char *)xnmalloc(len, sizeof(char)); /* Allocate space */
+	confstr(_CS_PATH, q, len);               /* Get value */
+	new_env[n] = savestring(q, strlen(q));   /* Set it */
 	n++;
 	free(q);
 #endif
