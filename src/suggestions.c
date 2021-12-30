@@ -101,6 +101,7 @@ recover_from_wrong_cmd(void)
 			return EXIT_FAILURE;
 	}
 
+	fputs(NC, stdout);
 	rl_restore_prompt();
 	rl_clear_message();
 
@@ -108,7 +109,6 @@ recover_from_wrong_cmd(void)
 	if (highlight)
 		recolorize_line();
 #endif
-
 	wrong_cmd = 0;
 	return EXIT_SUCCESS;
 }
