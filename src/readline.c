@@ -554,12 +554,8 @@ rl_no_hist(const char *prompt)
 	int bk = suggestions;
 	suggestions = 0;
 	rl_nohist = rl_notab = 1;
-//	stifle_history(0); /* Prevent readline from using the history
-//	setting */
 	char *input = readline(prompt);
 	rl_notab = rl_nohist = 0;
-//	unstifle_history();	 /* Reenable history */
-//	read_history(hist_file); /* Reload history lines from file */
 	suggestions = bk;
 
 	if (input) {
