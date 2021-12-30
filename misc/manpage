@@ -1739,9 +1739,11 @@ Be aware that enabling secure-environment might break some functions, depending 
 .TP
 \fBB) Secure commands\fR
 .TP
-The secure commands function preforms two different, though intrinsically related tasks to mitigate command injection:
+Some commands are automatically executed by CliFM: (un)mount commands (via the \fInet\fR command), opening applications (via \fILira\fR), just as prompt, profile, and autocommands. These commands are read from a configuration file and then executed. Now, if an attacker has access to any of these files, she might force CliFM to run any arbitrary command, and thereby possibly exposing the whole system.
 .TP
-\fBa)\fR It validates commands using a whitelist of safe characters. This set of safe characters vary depending on the command being executed:
+Every time a command is thus automatically executed via the system shell (i.e. without the user's direct consent), the secure commands function performs two different, though intrinsically related tasks aimed to mitigate command injection and/or unexpected behavior:
+.TP
+\fBa)\fR It validates commands using a whitelist of safe characters. This set of safe characters slightly vary depending on the command being executed:
 .sp
  Net command:                   a-zA-Z -_.,/=
  Prompt, profile, autocommands: a-zA-Z -_.,/"'
@@ -1754,9 +1756,9 @@ Commands containing at least one unsafe character will be rejected. Of course, w
  \fBPATH\fR               Taken from \fB_PATH_STDPATH\fR (or \fB_CS_PATH\fR)
  \fBIFS\fR                " \\t\\n"
  \fBUSER\fR, \fBHOME\fR, \fBSHELL\fR  Retrieved from the password database via \fBgetpwuid(3)\fR
- \fBTERM\fR               Set to "xterm" (only if running in a graphical environment). Otherwise, unset.
- \fBDISPLAY\fR            Set to "localhost:0.0" (only if running in a graphical environment). Otherwise, unset.
- \fBLC_ALL\fR             Set to "C".
+ \fBLOGNAME\fR            Same as \fBUSER\fR
+ \fBDISPLAY\fR, \fBTZ\fR, \fBLANG\fR, \fBTERM\fR Imported from the environment and sanitized
+ \fBLC_ALL\fR             Same as \fBLANG\fR
 
 .SH 22. MISCELLANEOUS NOTES
 .sp
