@@ -55,7 +55,10 @@ get_extraction_path(void)
 {
 	char *ext_path = (char *)NULL;
 	while (!ext_path) {
+		int bk = warning_prompt;
+		warning_prompt = 0;
 		ext_path = readline(_("Extraction path ('q' to quit): "));
+		warning_prompt = bk;
 		if (!ext_path)
 			continue;
 		if (!*ext_path) {
