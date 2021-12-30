@@ -418,7 +418,10 @@ extern int watch;
 #define SNT_PROFILE 2
 #define SNT_AUTOCMD 3
 #define SNT_NET     4
-#define SNT_NONE    5 /* Trusted command: do not sanitize*/
+#define SNT_GRAL    5
+#define SNT_DISPLAY 6 /* Sanitize DISPLAY environment variable */
+#define SNT_MISC    7 /* Used to sanitize a few environment variables */
+#define SNT_NONE    8 /* Trusted command: do not sanitize*/
 
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #

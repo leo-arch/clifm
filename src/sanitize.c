@@ -221,7 +221,7 @@ sanitize_cmd_environ(void)
 	env_bk = environ;
 
 	/* Create a controlled environment to securely run shell commands */
-	new_env = (char **)xnmalloc(9, sizeof(char *));
+	new_env = (char **)xnmalloc(12, sizeof(char *));
 	size_t n = 0;
 	char p[PATH_MAX];
 #ifdef _PATH_STDPATH
@@ -243,25 +243,34 @@ sanitize_cmd_environ(void)
 		snprintf(p, PATH_MAX, "USER=%s", user.name);
 		new_env[n] = savestring(p, strlen(p));
 		n++;
+		snprintf(p, PATH_MAX, "LOGNAME=%s", user.name);
+		new_env[n] = savestring(p, strlen(p));
+		n++;
 	}
 	if (user.home) {
 		snprintf(p, PATH_MAX, "HOME=%s", user.home);
 		new_env[n] = savestring(p, strlen(p));
 		n++;
 	}
-
 	if (user.shell) {
 		snprintf(p, PATH_MAX, "SHELL=%s", user.shell);
 		new_env[n] = savestring(p, strlen(p));
 		n++;
 	}
+
+	char *e = (char *)NULL;
 	if ((flags & GUI)) {
-		new_env[n] = savestring("TERM=xterm", 10);
-		n++;
-		if (getenv("DISPLAY")) {
-			/* Set DISPLAY default value
-			 * https://datacadamia.com/ssh/x11/display*/
-			new_env[n] = savestring("DISPLAY=localhost:0.0", 21);
+		e = getenv("DISPLAY");
+		if (e && sanitize_cmd(e, SNT_DISPLAY) == EXIT_SUCCESS) {
+			new_env[n] = (char *)xnmalloc(9 + strlen(e), sizeof(char));
+			sprintf(new_env[n], "DISPLAY=%s", e);
+			n++;
+		}
+		/* Import and sanitize */
+		e = getenv("TERM");
+		if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
+			new_env[n] = (char *)xnmalloc(6 + strlen(e), sizeof(char));
+			sprintf(new_env[n], "TERM=%s", e);
 			n++;
 		}
 		/* If running on Wayland and WAYLAND_DISPLAY isn't set, Wayland
@@ -269,8 +278,23 @@ sanitize_cmd_environ(void)
 		 * So, there's no need to set WAYLAND_DISPLAY */
 	}
 
-	new_env[n] = savestring("LC_ALL=C", 8);
-	n++;
+	/* Import and sanitize */
+	e = getenv("TZ");
+	if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
+		new_env[n] = (char *)xnmalloc(4 + strlen(e), sizeof(char));
+		sprintf(new_env[n], "TZ=%s", e);
+		n++;
+	}
+
+	e = getenv("LANG");
+	if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
+		new_env[n] = (char *)xnmalloc(6 + strlen(e), sizeof(char));
+		sprintf(new_env[n], "LANG=%s", e);
+		n++;
+		new_env[n] = (char *)xnmalloc(8 + strlen(e), sizeof(char));
+		sprintf(new_env[n], "LC_ALL=%s", e);
+		n++;
+	}
 
 	new_env[n] = (char *)NULL;
 
@@ -325,6 +349,26 @@ sanitize_net(char *cmd)
 	return EXIT_SUCCESS;
 }
 
+/* Sanitize value of DISPLAY env var */
+static inline int
+sanitize_misc(char *str)
+{
+	if (strlen(str) > strspn(str, ALLOWED_CHARS_MISC))
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+/* Sanitize value of DISPLAY env var */
+static inline int
+sanitize_display(char *str)
+{
+	if (strlen(str) > strspn(str, ALLOWED_CHARS_DISPLAY))
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
 /* Sanitize cmd string coming from profile, prompt, and autocmds */
 static inline int
 sanitize_gral(char *cmd)
@@ -338,20 +382,25 @@ sanitize_gral(char *cmd)
 /* Sanitize CMD according to TYPE. Returns zero if safe command and
  * one if not */
 int
-sanitize_cmd(char *cmd, int type)
+sanitize_cmd(char *str, int type)
 {
-	if (!cmd || !*cmd)
+	if (!str || !*str)
 		return EXIT_FAILURE;
 
 	switch(type) {
 	case SNT_MIME:
-		return sanitize_mime(cmd);
+		return sanitize_mime(str);
 	case SNT_NET:
-		return sanitize_net(cmd);
+		return sanitize_net(str);
+	case SNT_DISPLAY:
+		return sanitize_display(str);
+	case SNT_MISC:
+		return sanitize_misc(str);
 	case SNT_PROFILE: /* fallthrough */
 	case SNT_PROMPT: /* fallthrough */
-	case SNT_AUTOCMD:
-		return sanitize_gral(cmd);
+	case SNT_AUTOCMD: /* fallthrough */
+	case SNT_GRAL:
+		return sanitize_gral(str);
 	case SNT_NONE: break;
 	default: break;
 	}
