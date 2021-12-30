@@ -10,14 +10,24 @@ ERROR=1
 # Find the helper file
 get_helper_file()
 {
-	helper_file="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
-	if ! [ -f "$helper_file" ]; then
-		helper_file="/usr/share/clifm/plugins/plugins-helper"
-		if ! [ -f "$helper_file" ]; then
-			printf "CliFM: plugins-helper: File not found\n" >&2
-			exit 1
-		fi
-	fi
+	file1="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/plugins-helper"
+	file2="/usr/share/clifm/plugins/plugins-helper"
+	file3="/usr/local/share/clifm/plugins/plugins-helper"
+	file4="/boot/system/non-packaged/data/clifm/plugins/plugins-helper"
+	file5="/boot/system/data/clifm/plugins/plugins-helper"
+
+	[ -f "$file1" ] && helper_file="$file1" && return
+
+	[ -f "$file2" ] && helper_file="$file2" && return
+
+	[ -f "$file3" ] && helper_file="$file3" && return
+
+	[ -f "$file4" ] && helper_file="$file4" && return
+
+	[ -f "$file5" ] && helper_file="$file5" && return
+
+	printf "CliFM: plugins-helper: File not found. Copy this file to $HOME/.config/clifm/plugins to fix this issue\n" >&2
+	exit 1
 }
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
