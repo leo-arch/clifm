@@ -40,8 +40,8 @@ get_helper_file
 
 # shellcheck disable=SC2154
 DIR="$(find / -type d -print0 2> /dev/null | \
-fzf --read0 --prompt "Change DIR: " \
---reverse --height 15 \
+fzf --read0 --prompt "$fzf_prompt" \
+--reverse --height 15 --header "Fuzzy directory changer" \
 --bind "tab:accept" --info=inline \
 --color="$(get_fzf_colors)")"
 

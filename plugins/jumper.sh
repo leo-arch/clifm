@@ -60,7 +60,7 @@ if [ "$finder" = "fzf" ]; then
 fzf --reverse --height "$fzf_height" \
 --bind "tab:accept" --info=inline \
 --color="$(get_fzf_colors)" \
---prompt="$fzf_prompt")"
+--prompt="$fzf_prompt" --header "Jump to a directory in the jump database")"
 else
 	path="$(cut -d ":" -f4 "$FILE" | grep -v ^"@" | rofi -dmenu -p CliFM)"
 fi

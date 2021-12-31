@@ -57,7 +57,7 @@ get_helper_file
 find . -maxdepth 1 -mindepth 1 | \
 file -F'@' -N -n --mime-type -if- | \
 grep "@\ .*${mime}" | cut -d"@" -f1 | cut -d"/" -f2-10 | sort | \
-fzf --reverse --height=15 --exit-0 \
+fzf --reverse --height=15 --exit-0 --header "Choose a file" \
 --info=inline --color="$(get_fzf_colors)"
 
 exit 0

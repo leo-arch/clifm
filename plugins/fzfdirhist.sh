@@ -49,6 +49,7 @@ get_helper_file
 sort -u "$FILE" | fzf --prompt="$fzf_prompt" \
 --reverse --height "$fzf_height" \
 --bind "tab:accept" --info=inline \
+--header "Change to a visited directory" \
 --color="$(get_fzf_colors)" > "$CLIFM_BUS"
 printf "\n"
 

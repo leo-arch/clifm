@@ -48,7 +48,7 @@ get_helper_file
 # shellcheck disable=SC2154
 fzf --prompt="$fzf_prompt" \
 --reverse --height 15 --info=inline \
---bind "tab:accept" \
+--bind "tab:accept" --header "Run a command from history" \
 --color="$(get_fzf_colors)" \
  < "$FILE" > "$CLIFM_BUS"
 printf "\n"

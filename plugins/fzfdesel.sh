@@ -78,6 +78,7 @@ fzf --multi --marker='*' --info=inline \
 	--bind "alt-h:toggle-preview" --preview-window=:wrap \
 	--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
 	--color="$(get_fzf_colors)" \
+	--header "Deselect selected files" \
 	--reverse "$(fzf_borders)" --no-sort --ansi --prompt "$fzf_prompt" > "$TMPFILE" \
 	< "$CLIFM_SELFILE"
 

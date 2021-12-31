@@ -90,7 +90,7 @@ get_bfg_cfg_file() {
 
 start_ueberzug() {
 	mkfifo "$FIFO_UEBERZUG"
-	tail --follow "$FIFO_UEBERZUG" \
+	tail -f "$FIFO_UEBERZUG" \
 	| ueberzug layer --silent --parser json > /dev/null 2>&1 &
 }
 
@@ -128,9 +128,9 @@ fcd() {
 			--height="${fzfheight:-$fzf_height}" \
 			--color="$(get_fzf_colors)" \
 			--bind "ctrl-s:execute(touch $TMP_SEL)+accept" \
-			--bind "right:accept,left:first+accept" \
+			--bind "right:accept,left:top+accept" \
 			--bind "insert:clear-query" \
-			--bind "home:first,end:last" \
+			--bind "home:top,end:page-down" \
 			--bind "alt-h:preview(printf %s \"$HELP\")" \
 			--bind "alt-p:toggle-preview" \
 			--bind "shift-up:preview-up" \

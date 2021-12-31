@@ -124,7 +124,7 @@ if [ -n "$cmd" ]; then
 	# shellcheck disable=SC2154
 	$ls_cmd "$(cat "$CLIFM_SELFILE")" | \
 	fzf --multi --marker='*' --info=inline --keep-right \
-		--color="$(get_fzf_colors)" \
+		--color="$(get_fzf_colors)" --header "Select files in the current directory" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
 		--bind "alt-right:select-all,alt-left:deselect-all" \
@@ -141,7 +141,7 @@ else
 	# shellcheck disable=SC2012
 	# shellcheck disable=SC2154
 	$ls_cmd | fzf --multi --marker='*' --info=inline \
-		--height "$fzf_height" \
+		--height "$fzf_height" --header "Select files in the current directory" \
 		--color "$(get_fzf_colors)" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
