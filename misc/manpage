@@ -65,9 +65,9 @@ A convenient way of getting full information about CliFM commands is via the '\f
 For a quick introduction jump to the \fBEXAMPLES\fR section at the bottom of this document.
 
 .SH 3. DESCRIPTION
-CliFM is a \fBC\fRommand \fBL\fRine \fBI\fRnterface \fBF\fRile \fBM\fRanager. This is its main feature and strength: all input and interacion is performed via commands typed in a prompt.
+CliFM is a \fBC\fRommand \fBL\fRine \fBI\fRnterface \fBF\fRile \fBM\fRanager. This is its main feature and strength: all input and interacion is performed via commands typed in a prompt. In other words, CliFM is a REPL, since it's basic structure is simply this: \fBR\fRead (user input via a command line), \fBE\fRvaluate/Execute the command, \fBP\fRrint the results, \fBL\fRoop (start all over again).
 .sp
-Unlike most terminal file managers out there, indeed, CliFM replaces the traditional TUI interface (also known as curses or text-menu based interface) by a simple command-line interface. In this sense, it is a file manager, but also \fBa shell extension\fR: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
+Unlike most terminal file managers out there, indeed, CliFM replaces the traditional TUI interface (also known as curses or text-menu based interface) by a simple command-line interface (REPL). In this sense, it is a file manager, but also \fBa shell extension\fR: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 .sp
 Simply put, with CliFM the command-line is still there, never hidden, but enriched with file management oriented functionalities.
 
