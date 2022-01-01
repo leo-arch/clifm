@@ -760,10 +760,16 @@ fzftabcomp(char **matches)
 	int fzf_offset = (rl_point + prompt_offset < max_fzf_offset)
 			? (rl_point + prompt_offset - 4) : 0;
 
-	if (!lw)
+	if (!lw) {
 		fzf_offset++;
-	else
-		fzf_offset -= (int)(strlen(lw) - 1);
+	} else {
+		size_t lw_len = strlen(lw);
+		if (lw_len > 1) {
+			fzf_offset -= (int)(lw_len - 1);
+			if (fzf_offset < 0)
+				fzf_offset = 0;
+		}
+	}
 
 	char *query = (char *)NULL;
 	/* In case of a range or the sel keyword, the query string is just empty */

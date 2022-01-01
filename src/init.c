@@ -1772,63 +1772,66 @@ get_path_env(void)
 	/* Get the value of the PATH env variable */
 	char *path_tmp = (char *)NULL;
 	char *ptr = (char *)NULL;
-	int free_ptr = 0;
+	int malloced_ptr = 0;
 
 	/* If running in a sanitized environment, get PATH value from
 	 * a secure source */
 	if (xargs.secure_cmds == 1 || xargs.secure_env == 1
 	|| xargs.secure_env_full == 1) {
+		malloced_ptr = 1;
 #ifdef _PATH_STDPATH
-		ptr = _PATH_STDPATH;
+		ptr = savestring(_PATH_STDPATH, strlen(_PATH_STDPATH));
 #else
 		size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
 		char *p = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
 		confstr(_CS_PATH, p, n);               /* Get value */
 		ptr = p;
-		free_ptr = 1;
 #endif
 	} else {
 		ptr = getenv("PATH");
 	}
 
-	if (!ptr || !*ptr) {
-		if (free_ptr)
+	if (!ptr)
+		return 0;
+
+	if (!*ptr) {
+		if (malloced_ptr)
 			free(ptr);
 		return 0;
 	}
 
-	path_tmp = savestring(ptr, strlen(ptr));
-	if (free_ptr)
-		free(ptr);
+	if (malloced_ptr)
+		path_tmp = ptr;
+	else
+		path_tmp = savestring(ptr, strlen(ptr));
 
 	if (!path_tmp)
 		return 0;
 
 	/* Get each path in PATH */
-	size_t path_num = 0, length = 0;
+	size_t n = 0, len = 0;
 	for (i = 0; path_tmp[i]; i++) {
 		/* Store path in PATH in a tmp buffer */
 		char buf[PATH_MAX];
 		while (path_tmp[i] && path_tmp[i] != ':') {
-			buf[length] = path_tmp[i];
-			length++;
+			buf[len] = path_tmp[i];
+			len++;
 			i++;
 		}
-		buf[length] = '\0';
+		buf[len] = '\0';
 
 		/* Make room in paths for a new path */
-		paths = (char **)xrealloc(paths, (path_num + 1) * sizeof(char *));
-
+		paths = (char **)xrealloc(paths, (n + 1) * sizeof(char *));
 		/* Dump the buffer into the global paths array */
-		paths[path_num] = savestring(buf, length);
-		path_num++;
-		length = 0;
+		paths[n] = savestring(buf, len);
+		n++;
+		len = 0;
 		if (!path_tmp[i])
 			break;
 	}
 
 	free(path_tmp);
-	return path_num;
+	return n;
 }
 
 /* Set PATH to last visited directory and CUR_WS to last used

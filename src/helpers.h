@@ -364,7 +364,7 @@ extern int watch;
 		: ((n) < 100000000)  ? 8 \
 		: ((n) < 1000000000) ? 9 \
 				      : 10)
-#define _ISDIGIT(n) ((unsigned int)(n) - '0' <= 9)
+#define _ISDIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
 #define _ISALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
 

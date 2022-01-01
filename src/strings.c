@@ -432,15 +432,11 @@ gen_rand_str(size_t len)
 
 	srand((unsigned int)time(NULL));
 
-	char *str = (char *)malloc((len + 1) * sizeof(char));
-	char *p = str;
+	char *p = (char *)xnmalloc(len + 1, sizeof(char));
+	char *str = p;
 
-	if (!p) {
-		fprintf(stderr, "Error allocating %zu bytes\n", len);
-		return (char *)NULL;
-	}
-
-	while (len--) {
+	int x = (int)len;
+	while (x--) {
 		int i = rand() % (int)(sizeof(charset) - 1);
 		*p = charset[i];
 		p++;
