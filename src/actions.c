@@ -117,6 +117,7 @@ run_action(char *action, char **args)
 
 	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
 		printf("%s: %s\n", fifo_path, strerror(errno));
+		unsetenv("CLIFM_BUS");
 		return EXIT_FAILURE;
 	}
 
@@ -137,13 +138,10 @@ run_action(char *action, char **args)
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
 
-//		launch_execle(cmd);
 		launch_execve(args, FOREGROUND, E_NOFLAG);
 		close(wfd);
 		_exit(EXIT_SUCCESS);
 	}
-
-//	free(cmd);
 
 		/* ########################################
 		 * #    4) LET THE PARENT READ THE PIPE   #
@@ -175,6 +173,7 @@ run_action(char *action, char **args)
 		unlink(fifo_path);
 		if (xargs.cwd_in_title == 1)
 			set_term_title(workspaces[cur_ws].path);
+		unsetenv("CLIFM_BUS");
 		return EXIT_SUCCESS;
 	}
 
@@ -218,6 +217,7 @@ run_action(char *action, char **args)
 	if (xargs.cwd_in_title == 1)
 		set_term_title(workspaces[cur_ws].path);
 
+	unsetenv("CLIFM_BUS");
 	return exit_status;
 }
 
