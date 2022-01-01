@@ -5,7 +5,7 @@
 			 *  ######################################## */
 
 /* GPL2+ License 
- * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+ * Copyright (C) 2016-2022, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.
 
  * This program is free software; you can redistribute it and/or modify

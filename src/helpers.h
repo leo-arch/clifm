@@ -3,7 +3,7 @@
 /*
  * This file is part of CliFM
  * 
- * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+ * Copyright (C) 2016-2022, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.
 
  * CliFM is free software; you can redistribute it and/or modify
@@ -146,11 +146,11 @@ extern int watch;
 #else
 #define CLEAR fputs("\x1b[H\x1b[2J", stdout);
 #endif
-#define VERSION "1.3"
+#define VERSION "1.3.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "Dec 5, 2021"
+#define DATE "Jan 1, 2022"
 #define LICENSE "GPL2+"
 
 /* Options flags */
