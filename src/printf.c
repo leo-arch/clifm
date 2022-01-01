@@ -210,9 +210,11 @@ static size_t _ntoa_format(out_fct_type out, char* buffer, size_t idx, size_t ma
 		buf[len] = '+';  // ignore the space if the '+' exists
 		len++;
 	}
-	else if (flags & FLAGS_SPACE) {
-		buf[len] = ' ';
-		len++;
+	else {
+		if (flags & FLAGS_SPACE) {
+			buf[len] = ' ';
+			len++;
+		}
 	}
   }
 
