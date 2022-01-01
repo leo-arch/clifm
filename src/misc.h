@@ -45,7 +45,7 @@ int pin_directory(char *dir);
 void print_tips(int all);
 void save_last_path(void);
 /* void save_pinned_dir(void); */
-int set_shell(char *str);
+/*int set_shell(char *str); */
 void set_signals_to_ignore(void);
 void set_term_title(const char *str);
 void splash(void);

@@ -986,14 +986,14 @@ _err(int msg_type, int prompt, const char *format, ...)
 }
 
 /* Set STR as the program current shell */
-int
+/*int
 set_shell(char *str)
 {
 	if (!str || !*str)
 		return EXIT_FAILURE;
 
-	/* IF no slash in STR, check PATH env variable for a file named STR
-	 * and get its full path*/
+	// IF no slash in STR, check PATH env variable for a file named STR
+	// and get its full path
 	char *full_path = (char *)NULL;
 
 	if (strcntchr(str, '/') == -1)
@@ -1021,7 +1021,7 @@ set_shell(char *str)
 	if (full_path)
 		free(full_path);
 	return EXIT_SUCCESS;
-}
+} */
 
 int
 free_remotes(int exit)
