@@ -642,7 +642,8 @@ load_bookmarks(void)
 		/* No name either */
 		if (!tmp) {
 			bookmarks[bm_n].name = (char *)NULL;
-			bookmarks[bm_n++].path = (char *)NULL;
+			bookmarks[bm_n].path = (char *)NULL;
+			bm_n++;
 			continue;
 		}
 
@@ -810,8 +811,10 @@ load_remotes(void)
 			continue;
 
 		size_t ret_len = strlen(ret);
-		if (ret[ret_len - 1] == '\n')
-			ret[--ret_len] = '\0';
+		if (ret[ret_len - 1] == '\n') {
+			ret_len--;
+			ret[ret_len] = '\0';
+		}
 
 		char *deq_str = remove_quotes(ret);
 		if (deq_str)
@@ -873,9 +876,11 @@ load_remotes(void)
 		} else if (strncmp(line, "AutoUnmount=", 12) == 0) {
 			if (strcmp(ret, "true") == 0)
 				remotes[n].auto_unmount = 1;
-		} else if (strncmp(line, "AutoMount=", 10) == 0) {
-			if (strcmp(ret, "true") == 0)
-				remotes[n].auto_mount = 1;
+		} else {
+			if (strncmp(line, "AutoMount=", 10) == 0) {
+				if (strcmp(ret, "true") == 0)
+					remotes[n].auto_mount = 1;
+			}
 		}
 	}
 
@@ -1327,6 +1332,7 @@ external_arguments(int argc, char **argv)
 						  "'%c'\nTry '%s --help' for more information.\n"),
 				    PROGRAM_NAME, optopt, PNL);
 				exit(EXIT_FAILURE);
+			default: break;
 			}
 
 			/* Long options */
@@ -1349,8 +1355,7 @@ external_arguments(int argc, char **argv)
 
 			exit(EXIT_FAILURE);
 
-		default:
-			break;
+		default: break;
 		}
 	}
 
@@ -1685,13 +1690,17 @@ get_sel_files(void)
 	while (fgets(line, (int)sizeof(line), fp)) {
 		size_t len = strlen(line);
 
-		if (line[len - 1] == '\n')
-			line[--len] = '\0';
+		if (line[len - 1] == '\n') {
+			len--;
+			line[len] = '\0';
+		}
 
 		/* Remove the ending slash: fstatat() won't take a symlink to dir as
 		 * a symlink (but as a dir), if the file name ends with a slash */
-		if (line[len - 1] == '/')
-			line[--len] = '\0';
+		if (line[len - 1] == '/') {
+			len--;
+			line[len] = '\0';
+		}
 
 		if (!*line || *line == '#')
 			continue;
@@ -1812,7 +1821,6 @@ get_path_env(void)
 
 		/* Dump the buffer into the global paths array */
 		paths[path_num] = savestring(buf, length);
-
 		path_num++;
 		length = 0;
 		if (!path_tmp[i])
@@ -2051,7 +2059,8 @@ get_aliases(void)
 			char *p = strchr(s, '=');
 			if (!p || !*(p + 1))
 				continue;
-			*(p++) = '\0';
+			*p = '\0';
+			p++;
 
 			/* Skip duplicated aliases names */
 			int i = (int)aliases_n, exists = 0;

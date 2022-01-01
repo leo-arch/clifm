@@ -1272,7 +1272,7 @@ AFTER_USUAL_COMPLETION:
 			temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
 			temp_string_index++;
 			temp_string[temp_string_index] = '\0';
-			temp_string_index++;
+//			temp_string_index++;
 
 			if (rl_filename_completion_desired) {
 				struct stat finfo;

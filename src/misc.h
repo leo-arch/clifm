@@ -29,7 +29,7 @@ int _err(int, int, const char *, ...);
 int alias_import(char *file);
 void bonus_function(void);
 int create_usr_var(char *str);
-int filter_function(const char *arg);
+int filter_function(char *arg);
 void free_software(void);
 void free_stuff(void);
 void free_remotes(int exit);

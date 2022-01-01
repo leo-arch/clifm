@@ -69,7 +69,9 @@ expand_env(char *s)
 
 	while (*s) {
 		if (*s != '$') {
-			*(p++) = *(s++);
+			*p = *s;
+			p++;
+			s++;
 			continue;
 		}
 
@@ -177,9 +179,11 @@ get_app(const char *mime, const char *ext)
 			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
 			&& regexec(&regex, ext, 0, NULL, 0) == 0)
 				found = 1;
-		} else if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
-		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
-			found = mime_match = 1;
+		} else {
+			if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
+			&& regexec(&regex, mime, 0, NULL, 0) == 0) {
+				found = mime_match = 1;
+			}
 		}
 
 		regfree(&regex);
@@ -197,8 +201,11 @@ get_app(const char *mime, const char *ext)
 			/* Split the appplications line into substrings, if
 			 * any */
 			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
-			&& *tmp != '"')
-				app[app_len++] = *(tmp++);
+			&& *tmp != '"') {
+				app[app_len] = *tmp;
+				app_len++;
+				tmp++;
+			}
 
 			while (*tmp == ' ') /* Remove leading spaces */
 				tmp++;
@@ -645,7 +652,8 @@ mime_list_open(char **apps, char *file)
 			continue;
 
 		n = (char **)xrealloc(n, (nn + 1) * sizeof(char *));
-		n[nn++] = apps[i];
+		n[nn] = apps[i];
+		nn++;
 	}
 
 	if (!n)
@@ -915,10 +923,12 @@ mime_open_with_tab(char *filename, const char *prefix)
 					apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
 					/* appb is not NULL if we have an environment variable */
 					if (appb) {
-						apps[appsn++] = savestring(appb, strlen(appb));
+						apps[appsn] = savestring(appb, strlen(appb));
+						appsn++;
 						free(appb);
 					} else {
-						apps[appsn++] = savestring(app, strlen(app));
+						apps[appsn] = savestring(app, strlen(app));
+						appsn++;
 					}
 				} else {
 					continue;
@@ -1132,8 +1142,11 @@ mime_open_with(char *filename, char **args)
 			/* Split the appplications line into substrings, if
 			 * any */
 			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
-			&& *tmp != '"')
-				app[app_len++] = *(tmp++);
+			&& *tmp != '"') {
+				app[app_len] = *tmp;
+				app_len++;
+				tmp++;
+			}
 
 			while (*tmp == ' ') /* Remove leading spaces */
 				tmp++;
@@ -1200,10 +1213,12 @@ mime_open_with(char *filename, char **args)
 					apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
 					/* appb is not NULL if we have an environment variable */
 					if (appb) {
-						apps[appsn++] = savestring(appb, strlen(appb));
+						apps[appsn] = savestring(appb, strlen(appb));
+						appsn++;
 						free(appb);
 					} else {
-						apps[appsn++] = savestring(app, strlen(app));
+						apps[appsn] = savestring(app, strlen(app));
+						appsn++;
 					}
 				} else {
 					continue;

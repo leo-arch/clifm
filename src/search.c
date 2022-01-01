@@ -162,10 +162,12 @@ search_glob(char **comm, int invert)
 		    (search_path[1] == workspaces[cur_ws].path[1]
 		    && strcmp(search_path, workspaces[cur_ws].path) == 0)) {
 			search_path = (char *)NULL;
-		} else if (xchdir(search_path, NO_TITLE) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path,
-			    strerror(errno));
-			return EXIT_FAILURE;
+		} else {
+			if (xchdir(search_path, NO_TITLE) == -1) {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path,
+					strerror(errno));
+				return EXIT_FAILURE;
+			}
 		}
 	}
 
@@ -291,7 +293,8 @@ search_glob(char **comm, int invert)
 					if (files_len[found] > flongest)
 						flongest = files_len[found];
 
-					pfiles[found++] = file_info[k].name;
+					pfiles[found] = file_info[k].name;
+					found++;
 				}
 			}
 		} else {
@@ -340,7 +343,8 @@ search_glob(char **comm, int invert)
 						if (files_len[found] > flongest)
 							flongest = files_len[found];
 
-						pfiles[found++] = ent[k]->d_name;
+						pfiles[found] = ent[k]->d_name;
+						found++;
 					}
 				}
 			}

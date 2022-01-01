@@ -188,7 +188,7 @@ get_uft8_dec_value(size_t *i, char *str)
  * file name is empty, it will be replaced by "bleach.YYYYMMDDHHMMS"
  * */
 static char *
-clean_file_name(const char *restrict name)
+clean_file_name(char *restrict name)
 {
 	if (!name || !*name)
 		return (char *)NULL;
@@ -250,17 +250,19 @@ clean_file_name(const char *restrict name)
 				cur_len++;
 			}
 
-			else if (ret != BRACKETS_TRANSLATION
-			&& ret != DEFAULT_TRANSLATION) {
-				*q = (char)ret;
-				q++;
-				cur_len++;
+			else {
+				if (ret != BRACKETS_TRANSLATION
+				&& ret != DEFAULT_TRANSLATION) {
+					*q = (char)ret;
+					q++;
+					cur_len++;
+				}
 			}
 			continue;
 		}
 
 		/* Extended ASCII and Unicode chars */
-		int dec_value = get_uft8_dec_value(&i, (char *)name);
+		int dec_value = get_uft8_dec_value(&i, name);
 		if (dec_value == -1)
 			continue;
 		if (dec_value == -2) {

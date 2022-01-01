@@ -630,10 +630,12 @@ exec_cmd(char **comm)
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_code = EXIT_FAILURE;
 			return exit_code;
-		} else if (comm[0][1] == ';' || comm[0][1] == ':') {
-		/* If double semi colon or colon (or ";:" or ":;") */
-			fprintf(stderr, _("%s: '%s': Syntax error\n"), PROGRAM_NAME, comm[0]);
-			return (exit_code = EXIT_FAILURE);
+		} else {
+			if (comm[0][1] == ';' || comm[0][1] == ':') {
+			/* If double semi colon or colon (or ";:" or ":;") */
+				fprintf(stderr, _("%s: '%s': Syntax error\n"), PROGRAM_NAME, comm[0]);
+				return (exit_code = EXIT_FAILURE);
+			}
 		}
 	}
 
@@ -1882,8 +1884,11 @@ exec_chained_cmds(char *cmd)
 
 		/* Get command */
 		str = (char *)xcalloc(strlen(cmd) + 1, sizeof(char));
-		while (cmd[i] && cmd[i] != '&' && cmd[i] != ';')
-			str[len++] = cmd[i++];
+		while (cmd[i] && cmd[i] != '&' && cmd[i] != ';') {
+			str[len] = cmd[i];
+			len++;
+			i++;
+		}
 
 		if (!*str) {
 			free(str);

@@ -169,7 +169,8 @@ get_block_devices(void)
 		bd = (char **)xrealloc(bd, (n + 2) * sizeof(char *));
 		bd[n] = (char *)xnmalloc(blen + 6, sizeof(char *));
 		sprintf(bd[n], "/dev/%s", name);
-		bd[++n] = (char *)NULL;
+		n++;
+		bd[n] = (char *)NULL;
 		free(blockdev[i]);
 	}
 
@@ -372,7 +373,8 @@ list_mounted_devs(int mode)
 
 					/* Store the second field (mountpoint) into an
 					 * array */
-					media[mp_n++].mnt = savestring(str, strlen(str));
+					media[mp_n].mnt = savestring(str, strlen(str));
+					mp_n++;
 				}
 
 				str = strtok(NULL, " ,");

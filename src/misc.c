@@ -251,7 +251,7 @@ set_term_title(const char *str)
 }
 
 int
-filter_function(const char *arg)
+filter_function(char *arg)
 {
 	if (!arg) {
 		printf(_("Current filter: %c%s\n"), filter_rev ? '!' : 0,
@@ -290,9 +290,9 @@ filter_function(const char *arg)
 		filter_rev = 0;
 	}
 
-	char *p = (char *)arg;
+	char *p = arg;
 	if (*arg == '\'' || *arg == '"')
-		p = remove_quotes((char *)arg);
+		p = remove_quotes(arg);
 	_filter = savestring(p, strlen(p));
 
 	if (regcomp(&regex_exp, _filter, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
@@ -768,9 +768,11 @@ alias_import(char *file)
 	/* Aliases were found in FILE, but none was imported (either because
 	 * they conflicted with internal commands or the alias already
 	 * existed) */
-	else if (alias_imported == 0) {
-		fprintf(stderr, _("%s: No alias imported\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+	else {
+		if (alias_imported == 0) {
+			fprintf(stderr, _("%s: No alias imported\n"), PROGRAM_NAME);
+			return EXIT_FAILURE;
+		}
 	}
 
 	/* If some alias was found and imported, print the corresponding

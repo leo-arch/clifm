@@ -80,12 +80,16 @@ check_third_party_cmds(void)
 	while (--i >= 0) {
 		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f')
 			continue;
-		if (strcmp(bin_commands[i], "fzf") == 0)
+
+		if (strcmp(bin_commands[i], "fzf") == 0) {
 			fzfok = 1;
-		else if (strcmp(bin_commands[i], "udisksctl") == 0)
+		} else if (strcmp(bin_commands[i], "udisksctl") == 0) {
 			udisks2ok = 1;
-		else if (strcmp(bin_commands[i], "udevil") == 0)
-			udevilok = 1;
+		} else {
+			if (strcmp(bin_commands[i], "udevil") == 0)
+				udevilok = 1;
+		}
+
 		if (udevilok && udisks2ok && fzfok)
 			break;
 	}
@@ -320,8 +324,10 @@ is_internal(char *restrict cmd)
 		return 1;
 
 	/* Check for the search function as well */
-	else if (*cmd == '/' && access(cmd, F_OK) != 0)
-		return 1;
+	else {
+		if (*cmd == '/' && access(cmd, F_OK) != 0)
+			return 1;
+	}
 
 	return 0;
 }

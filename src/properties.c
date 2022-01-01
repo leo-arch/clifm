@@ -385,7 +385,7 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	case S_IFBLK: file_type = 'b'; break;
 	case S_IFCHR: file_type = 'c'; break;
 	case S_IFIFO: file_type = 'p'; break;
-	default: file_type = '?';
+	default: file_type = '?'; break;
 	}
 
 	/* Get file permissions */

@@ -1524,12 +1524,16 @@ rl_suggestions(const unsigned char c)
 				break;
 
 			int nlen = (int)wlen;
-			while (word[nlen - 1] == ' ')
-				word[--nlen] = '\0';
+			while (word[nlen - 1] == ' ') {
+				nlen--;
+				word[nlen] = '\0';
+			}
 
 			/* If ELN&, remove ending '&' to check the ELN */
-			if (word[nlen - 1] == '&')
-				word[--nlen] = '\0';
+			if (word[nlen - 1] == '&') {
+				nlen--;
+				word[nlen] = '\0';
+			}
 
 			flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 

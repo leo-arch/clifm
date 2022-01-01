@@ -138,7 +138,8 @@ bookmark_del(char *name)
 			line[line_len - 1] = '\0';
 
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
-		bms[bmn++] = savestring(line, (size_t)line_len);
+		bms[bmn] = savestring(line, (size_t)line_len);
+		bmn++;
 	}
 
 	free(line);
@@ -224,11 +225,13 @@ bookmark_del(char *name)
 
 		if (strcmp(del_elements[i], "q") == 0) {
 			quit = 1;
-		} else if (is_number(del_elements[i]) && (atoi(del_elements[i]) <= 0
-		|| atoi(del_elements[i]) > (int)bmn)) {
-			fprintf(stderr, _("bookmarks: %s: No such bookmark\n"),
-			    del_elements[i]);
-			quit = 1;
+		} else {
+			if (is_number(del_elements[i]) && (atoi(del_elements[i]) <= 0
+			|| atoi(del_elements[i]) > (int)bmn)) {
+				fprintf(stderr, _("bookmarks: %s: No such bookmark\n"),
+					del_elements[i]);
+				quit = 1;
+			}
 		}
 
 		if (quit) {
@@ -401,8 +404,7 @@ bookmark_add(char *file)
 
 			if (strcmp(tmp_line, file) == 0) {
 				fprintf(stderr, _("bookmarks: %s: Path already "
-						  "bookmarked\n"),
-				    file);
+						  "bookmarked\n"), file);
 				dup = 1;
 				break;
 			}
@@ -412,7 +414,8 @@ bookmark_add(char *file)
 
 		/* Store lines: used later to check hotkeys */
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
-		bms[bmn++] = savestring(line, strlen(line));
+		bms[bmn] = savestring(line, strlen(line));
+		bmn++;
 	}
 
 	free(line);
@@ -447,7 +450,6 @@ bookmark_add(char *file)
 				if (strcmp(hk, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: %s: This shortcut is "
 							  "already in use\n"), hk);
-
 					dup = 1;
 					free(tmp_line);
 					break;
@@ -479,7 +481,7 @@ bookmark_add(char *file)
 			if (tmp_line) {
 				if (strcmp(name, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: %s: This name is "
-							  "already in use\n"), name);
+							"already in use\n"), name);
 					dup = 1;
 					free(tmp_line);
 					break;
@@ -516,8 +518,7 @@ bookmark_add(char *file)
 	}
 
 	else if (hk) { /* Only hk */
-		tmp = (char *)xnmalloc(strlen(hk) + strlen(file) + 4,
-		    sizeof(char));
+		tmp = (char *)xnmalloc(strlen(hk) + strlen(file) + 4, sizeof(char));
 		sprintf(tmp, "[%s]%s\n", hk, file); /* NOLINT */
 		free(hk);
 		hk = (char *)NULL;
@@ -698,8 +699,7 @@ open_bookmark(void)
 
 				if (bookmarks[i].path) {
 					char *tmp_cmd[] = {"o", bookmarks[i].path,
-					    arg[1] ? arg[1] : NULL,
-					    NULL};
+					    arg[1] ? arg[1] : NULL, NULL};
 
 					exit_status = open_function(tmp_cmd);
 					goto FREE_AND_EXIT;
