@@ -156,12 +156,15 @@ static inline void _out_char(char character, void* buffer, size_t idx, size_t ma
 static size_t _out_rev(out_fct_type out, char* buffer, size_t idx, size_t maxlen, const char* buf, size_t len, unsigned int width)
 {
   // pad spaces up to given width
-  for (size_t i = len; i < width; i++)
-    out(' ', buffer, idx++, maxlen);
+  for (size_t i = len; i < width; i++) {
+    out(' ', buffer, idx, maxlen);
+	idx++;
+}
 
   // reverse string
   while (len) {
-    out(buf[--len], buffer, idx++, maxlen);
+    --len;
+    out(buf[len], buffer, idx++, maxlen);
   }
 
   return idx;
@@ -186,10 +189,12 @@ static size_t _ntoa_format(out_fct_type out, char* buffer, size_t idx, size_t ma
       buf[len] = 'X';
       len++;
     }
-    else if ((base == 2U) && (len < PRINTF_NTOA_BUFFER_SIZE)) {
-      buf[len] = 'b';
-      len++;
-    }
+    else {
+		if ((base == 2U) && (len < PRINTF_NTOA_BUFFER_SIZE)) {
+		  buf[len] = 'b';
+		  len++;
+		}
+	}
     if (len < PRINTF_NTOA_BUFFER_SIZE) {
       buf[len] = '0';
       len++;
@@ -253,7 +258,8 @@ static void __vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, con
     // format specifier?  %[flags][width][.precision][length]
     if (*format != '%') {
       // no
-      out(*format, buffer, idx++, maxlen);
+      out(*format, buffer, idx, maxlen);
+      idx++;
       format++;
       continue;
     } else {
@@ -280,7 +286,8 @@ static void __vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, con
         const char* p = va_arg(va, char*);
         // string output
         while ((*p != 0)) {
-            out(*p, buffer, idx++, maxlen);
+            out(*p, buffer, idx, maxlen);
+			idx++;
 			p++;
 		}
         format++;
@@ -288,12 +295,14 @@ static void __vsnprintf(out_fct_type out, char* buffer, const size_t maxlen, con
       }
 
       case '%' :
-        out('%', buffer, idx++, maxlen);
+        out('%', buffer, idx, maxlen);
+		idx++;
         format++;
         break;
 
       default :
-        out(*format, buffer, idx++, maxlen);
+        out(*format, buffer, idx, maxlen);
+		idx++;
         format++;
         break;
     }
