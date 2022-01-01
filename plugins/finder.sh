@@ -67,7 +67,7 @@ if [ "$finder" = "fzf" ]; then
 	# shellcheck disable=SC2154
 	FILE="$($ls_cmd | fzf --ansi --prompt "$fzf_prompt" \
 	--reverse --height "$fzf_height" --info=inline \
-	--header "Find files in the current directory"
+	--header "Find files in the current directory" \
 	--bind "tab:accept" --info=inline --color="$(get_fzf_colors)")"
 else
 	# shellcheck disable=SC2012
