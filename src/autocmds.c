@@ -309,7 +309,8 @@ parse_autocmd_line(char *cmd)
 
 	init_autocmd_opts();
 
-	char *q = ++p;
+	++p;
+	char *q = p;
 	while (1) {
 		char *val = (char *)NULL;
 		if (*p == ',') {

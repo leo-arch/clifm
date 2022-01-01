@@ -769,7 +769,8 @@ url_decode(char *str)
 				pstr += 2;
 			}
 		} else {
-			*pbuf++ = *pstr;
+			*pbuf = *pstr;
+			pbuf++;
 		}
 	}
 

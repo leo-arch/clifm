@@ -1015,6 +1015,8 @@ archiver(char **args, char mode)
 		free(tcmd);
 		free(format);
 	} break;
+
+	default: break;
 	}
 
 	return exit_status;

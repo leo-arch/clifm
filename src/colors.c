@@ -159,9 +159,11 @@ is_color_code(const char *str)
 				return 0;
 			digits = 0;
 			semicolon++;
-		} else if (*str != '\n') {
-		/* Neither digit nor semicolon */
-			return 0;
+		} else {
+			if (*str != '\n') {
+			/* Neither digit nor semicolon */
+				return 0;
+			}
 		}
 		str++;
 	}

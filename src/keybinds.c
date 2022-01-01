@@ -420,7 +420,8 @@ my_insert_text(char *text, char *s, const char _s)
 		for (i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
 			if (t[i] < 0) {
-				q[l++] = t[i];
+				q[l] = t[i];
+				l++;
 				if (t[i + 1] >= 0) {
 					q[l] = '\0';
 					l = 0;
@@ -1479,7 +1480,8 @@ print_highlight_string(char *s)
 	for (i = 0; s[i]; i++) {
 		rl_highlight(s, i, SET_COLOR);
 		if (s[i] < 0) {
-			q[l++] = s[i];
+			q[l] = s[i];
+			l++;
 			if (s[i + 1] >= 0) {
 				q[l] = '\0';
 				l = 0;

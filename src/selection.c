@@ -180,8 +180,10 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 					}
 				}
 
-				if (!found)
-					matches[k++] = file_info[i].name;
+				if (!found) {
+					matches[k] = file_info[i].name;
+					k++;
+				}
 			}
 		} else {
 			ret = scandir(sel_path, &ent, skip_files, xalphasort);
@@ -215,8 +217,10 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 						break;
 				}
 
-				if (j == -1)
-					matches[k++] = ent[i]->d_name;
+				if (j == -1) {
+					matches[k] = ent[i]->d_name;
+					k++;
+				}
 			}
 		}
 	}
@@ -234,6 +238,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 			case DT_FIFO: t = S_IFIFO; break;
 			case DT_BLK: t = S_IFBLK; break;
 			case DT_CHR: t = S_IFCHR; break;
+			default: break;
 			}
 		}
 
@@ -253,7 +258,8 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 			|| (gbuf.gl_pathv[i][1] == '.' && !gbuf.gl_pathv[i][2])))
 				continue;
 
-			matches[k++] = gbuf.gl_pathv[i];
+			matches[k] = gbuf.gl_pathv[i];
+			k++;
 		}
 	}
 
@@ -663,10 +669,12 @@ sel_function(char **args)
 	/* Print total size */
 	char *human_size = get_size_unit(total_sel_size);
 
-	if (sel_n > 10)
+	if (sel_n > 10) {
 		printf(_("Total size: %s\n"), human_size);
-	else if (sel_n > 0)
-		printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
+	} else {
+		if (sel_n > 0)
+			printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
+	}
 
 	free(human_size);
 	return EXIT_SUCCESS;

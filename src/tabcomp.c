@@ -751,7 +751,7 @@ fzftabcomp(char **matches)
 		if (i + 1 > max_height)
 			height = max_height;
 		else
-			height = i + 1;
+			height = i;
 	}
 
 	/* Calculate the offset (left padding) of the FZF window based on
@@ -1349,7 +1349,8 @@ DISPLAY_MATCHES:
 			recover_from_wrong_cmd();
 #endif */
 
-		for (max = 0, i = 1; matches[i]; i++) {
+		max = 0; 
+		for (i = 1; matches[i]; i++) {
 			char *temp;
 			size_t name_length;
 
@@ -1522,7 +1523,8 @@ CALC_OFFSET:
 				fputs("\x1b[7D\x1b[0K", stdout);
 			}
 
-			for (j = 0, l = (int)i; j < limit; j++) {
+			l = (int)i;
+			for (j = 0; j < limit; j++) {
 				if (l > len || !matches[l] || !*matches[l]) {
 					break;
 				} else {
@@ -1613,6 +1615,7 @@ RESTART:
 	default:
 		fprintf(stderr, "\r\nreadline: bad value for what_to_do in rl_complete\n");
 		abort();
+		break;
 	}
 
 	for (i = 0; matches[i]; i++)

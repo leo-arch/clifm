@@ -2245,18 +2245,20 @@ read_config(void)
 			wprompt_str = savestring(tmp, strlen(tmp));
 		}
 
-		else if (xargs.welcome_message == UNSET && *line == 'W'
-		&& strncmp(line, "WelcomeMessage=", 15) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "WelcomeMessage=%5s\n",
-			    opt_str);
-			if (ret == -1)
-				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				welcome_message = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					welcome_message = 0;
+		else {
+			if (xargs.welcome_message == UNSET && *line == 'W'
+			&& strncmp(line, "WelcomeMessage=", 15) == 0) {
+				char opt_str[MAX_BOOL] = "";
+				ret = sscanf(line, "WelcomeMessage=%5s\n",
+					opt_str);
+				if (ret == -1)
+					continue;
+				if (strncmp(opt_str, "true", 4) == 0) {
+					welcome_message = 1;
+				} else {
+					if (strncmp(opt_str, "false", 5) == 0)
+						welcome_message = 0;
+				}
 			}
 		}
 	}

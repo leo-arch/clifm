@@ -115,12 +115,14 @@ rl_highlight(char *str, const size_t pos, const int flag)
 			qn[_SINGLE]++;
 			if (qn[_SINGLE] > 2)
 				qn[_SINGLE] = 1;
-		} else if (rl_line_buffer[m] == '"') {
-			if (qn[_SINGLE] == 1 || (m && rl_line_buffer[m - 1] == '\\'))
-				continue;
-			qn[_DOUBLE]++;
-			if (qn[_DOUBLE] > 2)
-				qn[_DOUBLE] = 1;
+		} else {
+			if (rl_line_buffer[m] == '"') {
+				if (qn[_SINGLE] == 1 || (m && rl_line_buffer[m - 1] == '\\'))
+					continue;
+				qn[_DOUBLE]++;
+				if (qn[_DOUBLE] > 2)
+					qn[_DOUBLE] = 1;
+			}
 		}
 	}
 

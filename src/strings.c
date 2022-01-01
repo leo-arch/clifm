@@ -583,7 +583,8 @@ split_str(const char *str, const int update_args)
 			 * takes space as word breaking char, so that everything
 			 * in the buffer will be copied as one single word */
 			buf = (char *)xrealloc(buf, (buf_len + 2) * sizeof(char *));
-			buf[buf_len++] = *str;
+			buf[buf_len] = *str;
+			buf_len++;
 			buf[buf_len] = ' ';
 
 			break;
@@ -1207,7 +1208,7 @@ parse_input_str(char *str)
 			char *tmp = (char *)NULL;
 			tmp = realpath(substr[i], NULL);
 			substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
-											* sizeof(char));
+						* sizeof(char));
 			strcpy(substr[i], tmp);
 			free(tmp);
 		}
@@ -1220,7 +1221,7 @@ parse_input_str(char *str)
 			char *tmp = fastback(substr[i]);
 			if (tmp) {
 				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
-														* sizeof(char));
+							* sizeof(char));
 				strcpy(substr[i], tmp);
 				free(tmp);
 			}
@@ -1232,7 +1233,7 @@ parse_input_str(char *str)
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
 			substr[i] = (char *)xrealloc(substr[i], (strlen(pinned_dir) + 1)
-													* sizeof(char));
+						* sizeof(char));
 			strcpy(substr[i], pinned_dir);
 		}
 
@@ -1289,9 +1290,12 @@ parse_input_str(char *str)
 
 			/* If a range is found, store its index */
 			if (j > 0 && j < substr_len && substr[i][j] == '-' &&
-			    _ISDIGIT(substr[i][j - 1]) && _ISDIGIT(substr[i][j + 1]))
-				if (ranges_ok < int_array_max)
-					range_array[ranges_ok++] = (int)i;
+			    _ISDIGIT(substr[i][j - 1]) && _ISDIGIT(substr[i][j + 1])) {
+				if (ranges_ok < int_array_max) {
+					range_array[ranges_ok] = (int)i;
+					ranges_ok++;
+				}
+			}
 		}
 
 		/* Expand 'sel' only as an argument, not as command */
@@ -1313,7 +1317,7 @@ parse_input_str(char *str)
 		for (r = 0; r < ranges_ok; r++) {
 			size_t ranges_n = 0;
 			int *ranges = expand_range(substr[range_array[r] +
-							  (int)old_ranges_n], 1);
+						(int)old_ranges_n], 1);
 			if (ranges) {
 				register size_t j = 0;
 
@@ -1321,22 +1325,23 @@ parse_input_str(char *str)
 
 				char **ranges_cmd = (char **)NULL;
 				ranges_cmd = (char **)xcalloc(args_n + ranges_n + 2,
-				    sizeof(char *));
+							sizeof(char *));
 
-				for (i = 0; i < (size_t)range_array[r] + old_ranges_n; i++)
-					ranges_cmd[j++] = savestring(substr[i], strlen(substr[i]));
+				for (i = 0; i < (size_t)range_array[r] + old_ranges_n; i++) {
+					ranges_cmd[j] = savestring(substr[i], strlen(substr[i]));
+					j++;
+				}
 
 				for (i = 0; i < ranges_n; i++) {
 					ranges_cmd[j] = (char *)xcalloc((size_t)DIGINUM(ranges[i])
-													+ 1, sizeof(int));
+									+ 1, sizeof(int));
 					sprintf(ranges_cmd[j], "%d", ranges[i]);
 					j++;
 				}
 
 				for (i = (size_t)range_array[r] + old_ranges_n + 1;
 				     i <= args_n; i++) {
-					ranges_cmd[j] = savestring(substr[i],
-					    strlen(substr[i]));
+					ranges_cmd[j] = savestring(substr[i], strlen(substr[i]));
 					j++;
 				}
 
@@ -1347,7 +1352,7 @@ parse_input_str(char *str)
 					free(substr[i]);
 
 				substr = (char **)xrealloc(substr, (args_n + ranges_n + 2)
-													* sizeof(char *));
+							* sizeof(char *));
 
 				for (i = 0; i < j; i++) {
 					substr[i] = savestring(ranges_cmd[i], strlen(ranges_cmd[i]));
@@ -1390,7 +1395,8 @@ parse_input_str(char *str)
 				 * array */
 				char *esc_str = escape_str(sel_elements[i]);
 				if (esc_str) {
-					sel_array[j++] = savestring(esc_str, strlen(esc_str));
+					sel_array[j] = savestring(esc_str, strlen(esc_str));
+					j++;
 					free(esc_str);
 					esc_str = (char *)NULL;
 				} else {
@@ -1411,8 +1417,10 @@ parse_input_str(char *str)
 				}
 			}
 
-			for (i = (size_t)is_sel + 1; i <= args_n; i++)
-				sel_array[j++] = savestring(substr[i], strlen(substr[i]));
+			for (i = (size_t)is_sel + 1; i <= args_n; i++) {
+				sel_array[j] = savestring(substr[i], strlen(substr[i]));
+				j++;
+			}
 
 			for (i = 0; i <= args_n; i++)
 				free(substr[i]);
@@ -1645,8 +1653,10 @@ parse_input_str(char *str)
 
 		/* Tilde expansion is made by glob() */
 		if (*substr[i] == '~') {
-			if (glob_n < int_array_max)
-				glob_array[glob_n++] = (int)i;
+			if (glob_n < int_array_max) {
+				glob_array[glob_n] = (int)i;
+				glob_n++;
+			}
 		}
 
 		register size_t j = 0;
@@ -1659,21 +1669,27 @@ parse_input_str(char *str)
 				/* Strings containing these characters are taken as
 			 * wildacard patterns and are expanded by the glob
 			 * function. See man (7) glob */
-				if (glob_n < int_array_max)
-					glob_array[glob_n++] = (int)i;
+				if (glob_n < int_array_max) {
+					glob_array[glob_n] = (int)i;
+					glob_n++;
+				}
 			}
 
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
 			/* Command substitution is made by wordexp() */
 			if (substr[i][j] == '$' && (substr[i][j + 1] == '('
 			|| substr[i][j + 1] == '{')) {
-				if (word_n < int_array_max)
-					word_array[word_n++] = (int)i;
+				if (word_n < int_array_max) {
+					word_array[word_n] = (int)i;
+					word_n++;
+				}
 			}
 
 			if (substr[i][j] == '`' && substr[i][j + 1] != ' ') {
-				if (word_n < int_array_max)
-					word_array[word_n++] = (int)i;
+				if (word_n < int_array_max) {
+					word_array[word_n] = (int)i;
+					word_n++;
+				}
 			}
 #endif /* __HAIKU__ */
 		}
@@ -1898,7 +1914,8 @@ parse_input_str(char *str)
 		int ret = check_regex(dstr ? dstr : substr[i]);
 		free(dstr);
 		if (ret != EXIT_SUCCESS) {
-			regex_files[r_files++] = substr[i];
+			regex_files[r_files] = substr[i];
+			r_files++;
 			continue;
 		}
 
@@ -2024,8 +2041,9 @@ expand_range(char *str, int listdir)
 		if (afirst <= 0 || afirst > (int)files || asecond <= 0
 		|| asecond > (int)files || afirst >= asecond)
 			return (int *)NULL;
-	} else if (afirst >= asecond) {
-		return (int *)NULL;
+	} else {
+		if (afirst >= asecond) 
+			return (int *)NULL;
 	}
 
 	int *buf = (int *)NULL;
@@ -2105,8 +2123,11 @@ get_substr(char *str, const char ifs)
 	char *buf = (char *)xnmalloc(str_len + 1, sizeof(char));
 
 	while (*str) {
-		while (*str != ifs && *str != '\0' && length < (str_len + 1))
-			buf[length++] = *(str++);
+		while (*str != ifs && *str != '\0' && length < (str_len + 1)) {
+			buf[length] = *str;
+			length++;
+			str++;
+		}
 		if (length) {
 			buf[length] = '\0';
 			p = (char *)realloc(substr, (substr_n + 1) * sizeof(char *));
