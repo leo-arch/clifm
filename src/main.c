@@ -719,19 +719,9 @@ main(int argc, char *argv[])
 		flags |= ROOT_USR;
 
 	/* Running in a graphical environment? */
-#if __linux__
-	if ((getenv("DISPLAY") != NULL || getenv("WAYLAND_DISPLAY") != NULL)
-	&& strncmp(getenv("TERM"), "linux", 5) != 0)
-#else
-	if (getenv("DISPLAY") != NULL || getenv("WAYLAND_DISPLAY") != NULL)
-#endif
+	if (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))
 		flags |= GUI;
 
-	/* Get paths from PATH environment variable. These paths will be
-	 * used later by get_path_programs (for the autocomplete function)
-	 * and get_cmd_path() */
-	path_n = get_path_env();
-	cdpath_n = get_cdpath();
 	P_tmpdir_len = strlen(P_tmpdir);
 	init_workspaces();
 
@@ -747,6 +737,12 @@ main(int argc, char *argv[])
 	/* external_arguments is executed before init_config because, if
 	 * specified (-P option), it sets the value of alt_profile, which
 	 * is then checked by init_config */
+
+	/* Get paths from PATH environment variable. These paths will be
+	 * used later by get_path_programs (for the autocomplete function)
+	 * and get_cmd_path() */
+	path_n = get_path_env();
+	cdpath_n = get_cdpath();
 
 	check_env_filter();
 	get_data_dir();

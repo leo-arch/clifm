@@ -58,12 +58,6 @@
 #include "autocmds.h"
 #include "sanitize.h"
 
-//struct user_t user;
-
-/* 
- * functions
- */
-
 int
 get_sys_shell(void)
 {
@@ -1768,10 +1762,35 @@ get_path_env(void)
 	size_t i = 0;
 	/* Get the value of the PATH env variable */
 	char *path_tmp = (char *)NULL;
-	char *ptr = getenv("PATH");
-	if (!ptr || !*ptr)
+	char *ptr = (char *)NULL;
+	int free_ptr = 0;
+
+	/* If running in a sanitized environment, get PATH value from
+	 * a secure source */
+	if (xargs.secure_cmds == 1 || xargs.secure_env == 1
+	|| xargs.secure_env_full == 1) {
+#ifdef _PATH_STDPATH
+		ptr = _PATH_STDPATH;
+#else
+		size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
+		char *p = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
+		confstr(_CS_PATH, p, n);               /* Get value */
+		ptr = p;
+		free_ptr = 1;
+#endif
+	} else {
+		ptr = getenv("PATH");
+	}
+
+	if (!ptr || !*ptr) {
+		if (free_ptr)
+			free(ptr);
 		return 0;
+	}
+
 	path_tmp = savestring(ptr, strlen(ptr));
+	if (free_ptr)
+		free(ptr);
 
 	if (!path_tmp)
 		return 0;
@@ -1821,15 +1840,6 @@ get_last_path(void)
 		free(last_file);
 		return EXIT_FAILURE;
 	}
-
-	/*  size_t i;
-	for (i = 0; i < MAX_WS; i++) {
-
-		if (workspaces[i].path) {
-			free(workspaces[i].path);
-			workspaces[i].path = (char *)NULL;
-		}
-	} */
 
 	char line[PATH_MAX] = "";
 	while (fgets(line, (int)sizeof(line), fp)) {
