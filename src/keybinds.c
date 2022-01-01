@@ -521,8 +521,9 @@ rl_accept_suggestion(int count, int key)
 					_s = *s;
 				slash = 1;
 			}
-		} else if (sp) {
-			s = sp;
+		} else {
+			if (sp)
+				s = sp;
 		}
 
 		if (s && (slash ? *s : *(s + 1)) && s != p) {

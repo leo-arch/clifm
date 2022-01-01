@@ -251,7 +251,8 @@ recolorize_line(void)
 		rl_highlight(ss, i, SET_COLOR);
 		/* Redisplay the current char with the appropriate color */
 		if (ss[i] < 0) {
-			t[l++] = ss[i];
+			t[l] = ss[i];
+			l++;
 			if (ss[i + 1] >= 0) {
 				t[l] = '\0';
 				l = 0;

@@ -262,8 +262,10 @@ set_autocmd_opt(char *opt)
 			autocmds[autocmds_n].pager = a;
 		else if (*opt == 's' && opt[1] == 't')
 			autocmds[autocmds_n].sort = a;
-		else if (*opt == 's' && opt[1] == 'r')
-			autocmds[autocmds_n].sort_reverse = a;
+		else {
+			if (*opt == 's' && opt[1] == 'r')
+				autocmds[autocmds_n].sort_reverse = a;
+		}
 	}
 }
 
@@ -311,7 +313,8 @@ parse_autocmd_line(char *cmd)
 	while (1) {
 		char *val = (char *)NULL;
 		if (*p == ',') {
-			*(p++) = '\0';
+			*(p) = '\0';
+			p++;
 			val = q;
 			q = p;
 		} else if (!*p) {

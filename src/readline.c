@@ -186,11 +186,13 @@ rl_exclude_input(unsigned char c)
 	if (rl_readline_state & RL_STATE_MOREINPUT) {
 		if (c == '~') {
 #ifndef _NO_SUGGESTIONS
-			if (rl_point != rl_end && suggestion.printed)
+			if (rl_point != rl_end && suggestion.printed) {
 				/* This should be the delete key */
 				remove_suggestion_not_end();
-			else if (suggestion.printed)
-				clear_suggestion(CS_FREEBUF);
+			} else {
+				if (suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
+			}
 			return 1;
 #endif /* !_NO_SUGGESTIONS */
 		}
@@ -210,8 +212,10 @@ rl_exclude_input(unsigned char c)
 			clear_suggestion(CS_FREEBUF);
 #endif /* !_NO_SUGGESTIONS */
 
-		else if (c == 'C' || c == 'D')
-			cmdhist_flag = 0;
+		else {
+			if (c == 'C' || c == 'D')
+				cmdhist_flag = 0;
+		}
 
 		return 1;
 	}
@@ -472,10 +476,12 @@ my_rl_getc(FILE *stream)
 			 * console (vt). The escape code to retrieve the current cursor
 			 * position doesn't seem to work. Switching the console to 'sc'
 			 * solves the issue */
-				if (flags & GUI)
+				if (flags & GUI) {
 					rl_suggestions(c);
-				else if (freebsd_sc_console)
-					rl_suggestions(c);
+				} else {
+					if (freebsd_sc_console)
+						rl_suggestions(c);
+				}
 #else
 				rl_suggestions(c);
 #endif /* __FreeBSD__ */
@@ -633,10 +639,13 @@ my_rl_quote(char *text, int mt, char *qp)
 
 	/* Escape whatever char that needs to be escaped */
 	for (tp = text; *tp; tp++) {
-		if (is_quote_char(*tp))
-			*p++ = '\\';
+		if (is_quote_char(*tp)) {
+			*p = '\\';
+			p++;
+		}
 
-		*p++ = *tp;
+		*p = *tp;
+		p++;
 	}
 
 	/* Add a final null byte to the string */

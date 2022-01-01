@@ -118,7 +118,8 @@ select_file(char *file)
 	if (!exists) {
 		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2)
 											* sizeof(char *));
-		sel_elements[sel_n++] = savestring(file, strlen(file));
+		sel_elements[sel_n] = savestring(file, strlen(file));
+		sel_n++;
 		sel_elements[sel_n] = (char *)NULL;
 		new_sel++;
 	} else {
@@ -979,13 +980,16 @@ normalize_path(char *src, size_t src_len)
 			}
 			break;
 		}
-		res[res_len++] = '/';
+		res[res_len] = '/';
+		res_len++;
 		memcpy(&res[res_len], ptr, len);
 		res_len += len;
 	}
 
-	if (res_len == 0)
-		res[res_len++] = '/';
+	if (res_len == 0) {
+		res[res_len] = '/';
+		res_len++;
+	}
 
 	res[res_len] = '\0';
 
@@ -1035,7 +1039,8 @@ deselect(char **comm)
 				char *pp = normalize_path(comm[j], strlen(comm[j]));
 				if (!pp)
 					continue;
-				ds[k++] = savestring(pp, strlen(pp));
+				ds[k] = savestring(pp, strlen(pp));
+				k++;
 				free(pp);
 			}
 			ds[k] = (char *)NULL;
@@ -1163,8 +1168,6 @@ END: {
 			free(comm[i]);
 			comm[i] = (char *)NULL;
 		}
-/*		comm = (char **)xrealloc(comm, 2 * sizeof(char *));
-		comm[1] = (char *)NULL; */
 		args_n = 0;
 	}
 

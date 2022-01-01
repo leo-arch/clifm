@@ -122,7 +122,7 @@ print_div_line(void)
 		if (len <= 2) {
 			/* Extend DIV_LINE_CHAR to the end of the screen */
 			int i;
-			for (i = (int)(term_cols / len); i--;)
+			for (i = (int)(term_cols / len); i; i--)
 				fputs(div_line_char, stdout);
 		} else {
 			/* Print DIV_LINE_CHAR exactly */
@@ -452,6 +452,7 @@ get_longest_filename(const int n, const int pad)
 				case DT_SOCK: /* fallthrough */
 				case DT_FIFO: /* fallthrough */
 				case DT_UNKNOWN: total_len++; break;
+				default: break;
 				}
 			}
 		}
@@ -460,10 +461,12 @@ get_longest_filename(const int n, const int pad)
 			if (listing_mode == VERTLIST)
 				longest = total_len;
 			else {
-				if (max_files == UNSET)
+				if (max_files == UNSET) {
 					longest = total_len;
-				else if (i < max_files)
-					longest = total_len;
+				} else {
+					if (i < max_files)
+						longest = total_len;
+				}
 			}
 		}
 	}
@@ -760,8 +763,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 				trim_diff, '~');
 		} else {
 			xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
-				file_info[i].sel ? '*' : ' ', n, diff > 0 ? diff : -1,
-				_trim ? '~' : 0);
+				file_info[i].sel ? '*' : ' ', n);
 		}
 	}
 #endif /* !_NO_ICONS */

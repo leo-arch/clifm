@@ -274,7 +274,8 @@ add_to_dirhist(const char *dir_path)
 		end_counter++; */
 
 		dirhist_cur_index = dirhist_total_index;
-		old_pwd[dirhist_total_index++] = savestring(dir_path, strlen(dir_path));
+		old_pwd[dirhist_total_index] = savestring(dir_path, strlen(dir_path));
+		dirhist_total_index++;
 		old_pwd[dirhist_total_index] = (char *)NULL;
 	}
 
@@ -289,12 +290,14 @@ add_to_dirhist(const char *dir_path)
 
 		mid_counter++; */
 
-		old_pwd[dirhist_total_index++] = savestring(
+		old_pwd[dirhist_total_index] = savestring(
 		    old_pwd[dirhist_cur_index],
 		    strlen(old_pwd[dirhist_cur_index]));
+		dirhist_total_index++;
 
 		dirhist_cur_index = dirhist_total_index;
-		old_pwd[dirhist_total_index++] = savestring(dir_path, strlen(dir_path));
+		old_pwd[dirhist_total_index] = savestring(dir_path, strlen(dir_path));
+		dirhist_total_index++;
 
 		old_pwd[dirhist_total_index] = (char *)NULL;
 	}
@@ -608,7 +611,8 @@ add_to_cmdhist(const char *cmd)
 	/* Add the new input to the history array */
 	size_t cmd_len = strlen(cmd);
 	history = (char **)xrealloc(history, (size_t)(current_hist_n + 2) * sizeof(char *));
-	history[current_hist_n++] = savestring(cmd, cmd_len);
+	history[current_hist_n] = savestring(cmd, cmd_len);
+	current_hist_n++;
 	history[current_hist_n] = (char *)NULL;
 }
 

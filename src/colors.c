@@ -105,7 +105,7 @@ get_file_color(const char *filename, const struct stat *attr)
 /* Returns a pointer to the corresponding color code for EXT, if some
  * color was defined */
 char *
-get_ext_color(const char *ext)
+get_ext_color(char *ext)
 {
 	if (!ext || !ext_colors_n)
 		return (char *)NULL;
@@ -117,17 +117,19 @@ get_ext_color(const char *ext)
 		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
 			continue;
 
-		char *p = (char *)ext,
+		char *p = ext,
 			 *q = ext_colors[i];
 		/* +2 because stored extensions have this form: *.ext */
 		q += 2;
 
 		size_t match = 1;
 		while (*p) {
-			if (*p++ != *q++) {
+			if (*p != *q) {
 				match = 0;
 				break;
 			}
+			p++;
+			q++;
 		}
 
 		if (!match || *q != '=')
@@ -191,8 +193,10 @@ strip_color_line(const char *str, char mode)
 	case 't': /* di=01;31: */
 		while (*str) {
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
-			|| *str == '=' || *str == ';' || *str == ':')
-				buf[len++] = *str;
+			|| *str == '=' || *str == ';' || *str == ':') {
+				buf[len] = *str;
+				len++;
+			}
 			str++;
 		}
 		break;
@@ -201,8 +205,10 @@ strip_color_line(const char *str, char mode)
 		while (*str) {
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z') || *str == '*' || *str == '.'
-			|| *str == '=' || *str == ';' || *str == ':')
-				buf[len++] = *str;
+			|| *str == '=' || *str == ';' || *str == ':') {
+				buf[len] = *str;
+				len++;
+			}
 			str++;
 		}
 		break;
@@ -1319,7 +1325,9 @@ set_colors(const char *colorscheme, int env)
 
 			default:
 				buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
-				buf[len++] = *(p++);
+				buf[len] = *p;
+				len++;
+				p++;
 				break;
 			}
 		}
@@ -1383,7 +1391,8 @@ set_colors(const char *colorscheme, int env)
 					break;
 				buf[len] = '\0';
 				colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
-				colors[words++] = savestring(buf, len);
+				colors[words] = savestring(buf, len);
+				words++;
 				*buf = '\0';
 
 				if (!*p)
@@ -1395,7 +1404,9 @@ set_colors(const char *colorscheme, int env)
 
 			default:
 				buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
-				buf[len++] = *(p++);
+				buf[len] = *p;
+				len++;
+				p++;
 				break;
 			}
 		}
@@ -1441,7 +1452,8 @@ set_colors(const char *colorscheme, int env)
 					break;
 				buf[len] = '\0';
 				colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
-				colors[words++] = savestring(buf, len);
+				colors[words] = savestring(buf, len);
+				words++;
 				*buf = '\0';
 
 				if (!*p)
@@ -1453,7 +1465,9 @@ set_colors(const char *colorscheme, int env)
 
 			default:
 				buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
-				buf[len++] = *(p++);
+				buf[len] = *p;
+				len++;
+				p++;
 				break;
 			}
 		}
@@ -1660,7 +1674,8 @@ get_colorschemes(void)
 					continue;
 
 				*ret = '\0';
-				color_schemes[i++] = savestring(name, strlen(name));
+				color_schemes[i] = savestring(name, strlen(name));
+				i++;
 			}
 
 			closedir(dir_p);
@@ -1715,7 +1730,8 @@ get_colorschemes(void)
 		if (dup)
 			continue;
 
-		color_schemes[i++] = savestring(name, strlen(name));
+		color_schemes[i] = savestring(name, strlen(name));
+		i++;
 	}
 
 	closedir(dir_p);

@@ -658,11 +658,13 @@ dirjump(char **args, int mode)
 		if (mode == NO_SUG_JUMP)
 			printf(_("%s: jump: No matches found\n"), PROGRAM_NAME);
 		exit_status = EXIT_FAILURE;
-	} else if (jump_opt != JLIST) {
-		if (mode == NO_SUG_JUMP)
-			exit_status = cd_function(matches[best_ranked], CD_PRINT_ERROR);
-		else
-			exit_status = save_suggestion(matches[best_ranked]);
+	} else {
+		if (jump_opt != JLIST) {
+			if (mode == NO_SUG_JUMP)
+				exit_status = cd_function(matches[best_ranked], CD_PRINT_ERROR);
+			else
+				exit_status = save_suggestion(matches[best_ranked]);
+		}
 	}
 
 	free(matches);

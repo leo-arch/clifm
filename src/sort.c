@@ -165,7 +165,6 @@ entrycmp(const void *a, const void *b)
 		if (pb->dir != pa->dir) {
 			if (pb->dir)
 				return 1;
-
 			return -1;
 		}
 	}
@@ -178,20 +177,24 @@ entrycmp(const void *a, const void *b)
 	switch (st) {
 
 	case SSIZE:
-		if (pa->size > pb->size)
+		if (pa->size > pb->size) {
 			ret = 1;
-		else if (pa->size < pb->size)
-			ret = -1;
+		} else {
+			if (pa->size < pb->size)
+				ret = -1;
+		}
 		break;
 
 	case SATIME: /* fallthrough */
 	case SBTIME: /* fallthrough */
 	case SCTIME: /* fallthrough */
 	case SMTIME:
-		if (pa->time > pb->time)
+		if (pa->time > pb->time) {
 			ret = 1;
-		else if (pa->time < pb->time)
-			ret = -1;
+		} else {
+			if (pa->time < pb->time)
+				ret = -1;
+		}
 		break;
 
 	case SVER:
@@ -213,32 +216,39 @@ entrycmp(const void *a, const void *b)
 				ret = -1;
 			else if (!bext)
 				ret = 1;
-
 			else
 				ret = strcasecmp(aext, bext);
 		}
 	} break;
 
 	case SINO:
-		if (pa->inode > pb->inode)
+		if (pa->inode > pb->inode) {
 			ret = 1;
-		else if (pa->inode < pb->inode)
-			ret = -1;
+		} else {
+			if (pa->inode < pb->inode)
+				ret = -1;
+		}
 		break;
 
 	case SOWN:
-		if (pa->uid > pb->uid)
+		if (pa->uid > pb->uid) {
 			ret = 1;
-		else if (pa->uid < pb->uid)
-			ret = -1;
+		} else {
+			if (pa->uid < pb->uid)
+				ret = -1;
+		}
 		break;
 
 	case SGRP:
-		if (pa->gid > pb->gid)
+		if (pa->gid > pb->gid) {
 			ret = 1;
-		else if (pa->gid < pb->gid)
-			ret = -1;
+		} else {
+			if (pa->gid < pb->gid)
+				ret = -1;
+		}
 		break;
+
+	default: break;
 	}
 
 	if (!ret)

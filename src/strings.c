@@ -1724,8 +1724,10 @@ parse_input_str(char *str)
 				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1,
 											sizeof(char *));
 
-				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++)
-					glob_cmd[j++] = savestring(substr[i], strlen(substr[i]));
+				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
+					glob_cmd[j] = savestring(substr[i], strlen(substr[i]));
+					j++;
+				}
 
 				for (i = 0; i < globbuf.gl_pathc; i++) {
 					/* Do not match "." or ".." */
@@ -1882,7 +1884,8 @@ parse_input_str(char *str)
 		/* Ignore the first string of the search function: it will be
 		 * expanded by the search function itself */
 		if (*substr[0] == '/') {
-			regex_files[r_files++] = substr[i];
+			regex_files[r_files] = substr[i];
+			r_files++;
 			continue;
 		}
 

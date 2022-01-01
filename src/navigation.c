@@ -165,16 +165,18 @@ get_bd_matches(const char *str, int *n, int mode)
 			/* Print only the path base name */
 			char *ss = strrchr(workspaces[cur_ws].path, '/');
 			if (ss && *(++ss))
-				matches[(*n)++] = savestring(ss, strlen(ss));
+				matches[*n] = savestring(ss, strlen(ss));
 			else /* Last slash is the first and only char: We have root dir */
-				matches[(*n)++] = savestring("/", 1);
+				matches[*n] = savestring("/", 1);
+			(*n)++;
 		} else {
 			if (!*workspaces[cur_ws].path) {
-				matches[(*n)++] = savestring("/", 1);
+				matches[*n] = savestring("/", 1);
 			} else {
-				matches[(*n)++] = savestring(workspaces[cur_ws].path,
+				matches[*n] = savestring(workspaces[cur_ws].path,
 						strlen(workspaces[cur_ws].path));
 			}
+			(*n)++;
 		}
 		*q = '/';
 		cwd = q + 1;
@@ -201,8 +203,9 @@ get_bd_matches(const char *str, int *n, int mode)
 			matches[0] = savestring(str, strlen(str));
 			matches[*n] = (char *)NULL;
 		}
-	} else if (*n > 0) {
-		matches[*n] = (char *)NULL;
+	} else {
+		if (*n > 0)
+			matches[*n] = (char *)NULL;
 	}
 
 	return matches;
@@ -247,7 +250,7 @@ grab_bd_input(int n)
 
 /* Change to parent directory matching STR */
 int
-backdir(const char* str)
+backdir(char* str)
 {
 	if (str && *str == '-' && strcmp(str, "--help") == 0) {
 		puts(_(BD_USAGE));
@@ -261,7 +264,7 @@ backdir(const char* str)
 
 	char *deq_str = (char *)NULL;
 	if (str) {
-		deq_str = dequote_str((char *)str, 0);
+		deq_str = dequote_str(str, 0);
 		if (!deq_str) {
 			fprintf(stderr, _("%s: %s: Error dequoting string\n"),
 				PROGRAM_NAME, str);
@@ -470,12 +473,12 @@ cd_function(char *new_path, const int print_error)
 
 /* Convert ... n into ../.. n */
 char *
-fastback(const char *str)
+fastback(char *str)
 {
 	if (!str || !*str)
 		return (char *)NULL;
 
-	char *p = (char *)str;
+	char *p = str;
 	size_t dots = 0;
 
 	char *rem = (char *)NULL;

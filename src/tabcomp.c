@@ -101,8 +101,9 @@ stat_char(char *filename)
 		if (access(filename, X_OK) == 0)
 			c = '*';
 #if defined(S_ISFIFO)
-	} else if (S_ISFIFO(attr.st_mode)) {
-		c = '|';
+	} else {
+		if (S_ISFIFO(attr.st_mode))
+			c = '|';
 #endif /* S_ISFIFO */
 /*#if defined(S_ISBLK)
 	} else if (S_ISBLK(attr.st_mode)) {
@@ -365,8 +366,10 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 		size_t i = 0;
 		char *b = ss;
 		while (*b && i < (PATH_MAX - 1)) {
-			if (*b != '\\')
-				deq_str[i++] = *b;
+			if (*b != '\\') {
+				deq_str[i] = *b;
+				i++;
+			}
 			b++;
 		}
 		deq_str[i] = '\0';
@@ -1103,8 +1106,10 @@ AFTER_USUAL_COMPLETION:
 		 * Copy all the non-dead entries into a new array. */
 		temp_array = (char **)xnmalloc(3 + newlen, sizeof (char *));
 		for (i = j = 1; matches[i]; i++) {
-			if (matches[i] != (char *)&dead_slot)
-				temp_array[j++] = matches[i];
+			if (matches[i] != (char *)&dead_slot) {
+				temp_array[j] = matches[i];
+				j++;
+			}
 		}
 		temp_array[j] = (char *)NULL;
 
@@ -1212,7 +1217,8 @@ AFTER_USUAL_COMPLETION:
 				for (k = 0; replacement[k]; k++) {
 					rl_highlight(replacement, k, SET_COLOR);
 					if (replacement[k] < 0) {
-						t[l++] = replacement[k];
+						t[l] = replacement[k];
+						l++;
 						if (replacement[k + 1] >= 0) {
 							t[l] = '\0';
 							l = 0;
@@ -1248,20 +1254,25 @@ AFTER_USUAL_COMPLETION:
 		 add a '/' to the name.  If not, and we are at the end
 		 of the line, then add a space. */
 		if (matches[1]) {
-			if (what_to_do == '!')
+			if (what_to_do == '!') {
 				goto DISPLAY_MATCHES;		/* XXX */
-			else if (rl_editing_mode != 0) /* vi_mode */
-				rl_ding();	/* There are other matches remaining. */
+			} else {
+				if (rl_editing_mode != 0) /* vi_mode */
+					rl_ding();	/* There are other matches remaining. */
+			}
 		} else {
 			char temp_string[4];
 			int temp_string_index = 0;
 
-			if (quote_char)
-				temp_string[temp_string_index++] = quote_char;
+			if (quote_char) {
+				temp_string[temp_string_index] = quote_char;
+				temp_string_index++;
+			}
 
-			temp_string[temp_string_index++] = (char)(delimiter
-											? delimiter : ' ');
-			temp_string[temp_string_index++] = '\0';
+			temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
+			temp_string_index++;
+			temp_string[temp_string_index] = '\0';
+			temp_string_index++;
 
 			if (rl_filename_completion_desired) {
 				struct stat finfo;
@@ -1473,9 +1484,11 @@ CALC_OFFSET:
 		if (qq) {
 			if (*(++qq)) {
 				tab_offset = strlen(qq);
-			} else if (cur_comp_type == TCMP_DESEL) {
-				tab_offset = strlen(matches[0]);
-				qq = matches[0];
+			} else {
+				if (cur_comp_type == TCMP_DESEL) {
+					tab_offset = strlen(matches[0]);
+					qq = matches[0];
+				}
 			}
 		} else {
 			tab_offset = strlen(matches[0]);
@@ -1573,7 +1586,8 @@ RESTART:
 					rl_highlight(ss, (size_t)k, SET_COLOR);
 
 				if (ss[k] < 0) {
-					t[l++] = ss[k];
+					t[l] = ss[k];
+					l++;
 					if (ss[k + 1] >= 0) {
 						t[l] = '\0';
 						l = 0;

@@ -522,7 +522,7 @@ is_compressed(char *file, int test_iso)
 	if (!fpp) {
 		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
 		close_fstream(fp, fd);
-		return -1;
+		return (-1);
 	}
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
@@ -575,10 +575,12 @@ is_compressed(char *file, int test_iso)
 				ret = strstr(line, "compressed");
 				if (ret) {
 					compressed = 1;
-				} else if (test_iso) {
-					ret = strstr(line, "ISO 9660");
-					if (ret)
-						compressed = 1;
+				} else {
+					if (test_iso) {
+						ret = strstr(line, "ISO 9660");
+						if (ret)
+							compressed = 1;
+					}
 				}
 			}
 

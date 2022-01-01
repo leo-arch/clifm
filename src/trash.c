@@ -330,9 +330,10 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		snprintf(full_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, file);
 		if (wx_parent_check(full_path) != 0)
 			return EXIT_FAILURE;
-	} else if (wx_parent_check(file) != 0) {
-	/* If absolute path */
-		return EXIT_FAILURE;
+	} else {
+		if (wx_parent_check(file) != 0)
+			/* If absolute path */
+			return EXIT_FAILURE;
 	}
 
 	int ret = -1;

@@ -335,6 +335,7 @@ decode_prompt(const char *line)
 			default:
 				temp = savestring("\\ ", 2);
 				temp[1] = (char)c;
+				break;
 
 ADD_STRING:
 				if (!temp)

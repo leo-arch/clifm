@@ -325,10 +325,13 @@ create_file(char **cmd)
 	for (i = 1; cmd[i]; i++) {
 		size_t cmd_len = strlen(cmd[i]);
 		/* Filenames ending with a slash are taken as dir names */
-		if (cmd[i][cmd_len - 1] == '/')
-			ndirs[cndirs++] = cmd[i];
-		else
-			nfiles[cnfiles++] = cmd[i];
+		if (cmd[i][cmd_len - 1] == '/') {
+			ndirs[cndirs] = cmd[i];
+			cndirs++;
+		} else {
+			nfiles[cnfiles] = cmd[i];
+			cnfiles++;
+		}
 	}
 
 	ndirs[cndirs] = (char *)NULL;
@@ -795,7 +798,8 @@ remove_file(char **args)
 			if (tmp) {
 				/* Start storing file names in 3: 0 is for 'rm', and 1
 				 * and 2 for parameters, including end of parameters (--) */
-				rm_cmd[j++] = savestring(tmp, strlen(tmp));
+				rm_cmd[j] = savestring(tmp, strlen(tmp));
+				j++;
 				free(tmp);
 			} else {
 				fprintf(stderr, "%s: %s: Error dequoting file name\n",
@@ -803,7 +807,8 @@ remove_file(char **args)
 				continue;
 			}
 		} else {
-			rm_cmd[j++] = savestring(args[i], strlen(args[i]));
+			rm_cmd[j] = savestring(args[i], strlen(args[i]));
+			j++;
 		}
 
 		struct stat attr;

@@ -728,12 +728,16 @@ url_encode(char *str)
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
 		|| *pstr == '~' || *pstr == '/') {
 			/* Do not encode any of the above chars */
-			*pbuf++ = *pstr;
+			*pbuf = *pstr;
+			pbuf++;
 		} else {
 			/* Encode char to URL format. Example: space char to %20 */
-			*pbuf++ = '%';
-			*pbuf++ = to_hex(*pstr >> 4); /* Right shift operation */
-			*pbuf++ = to_hex(*pstr & 15); /* Bitwise AND operation */
+			*pbuf = '%';
+			pbuf++;
+			*pbuf = to_hex(*pstr >> 4); /* Right shift operation */
+			pbuf++;
+			*pbuf = to_hex(*pstr & 15); /* Bitwise AND operation */
+			pbuf++;
 		}
 	}
 
@@ -760,7 +764,8 @@ url_decode(char *str)
 			if (pstr[1] && pstr[2]) {
 				/* Decode URL code. Example: %20 to space char */
 				/* Left shift and bitwise OR operations */
-				*pbuf++ = (char)(from_hex(pstr[1]) << 4 | from_hex(pstr[2]));
+				*pbuf = (char)(from_hex(pstr[1]) << 4 | from_hex(pstr[2]));
+				pbuf++;
 				pstr += 2;
 			}
 		} else {
