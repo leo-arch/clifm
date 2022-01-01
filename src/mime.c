@@ -205,6 +205,7 @@ get_app(const char *mime, const char *ext)
 
 			if (app_len) {
 				app[app_len] = '\0';
+
 				/* Check each application existence */
 				char *file_path = (char *)NULL;
 
@@ -238,15 +239,30 @@ get_app(const char *mime, const char *ext)
 						*ret = ' ';
 					break;
 				} else {
-					file_path = get_cmd_path(app);
+					/* Expand tilde */
+					if (*app == '~' && *(app + 1) == '/' && *(app + 2)) {
+						file_path = (char *)xnmalloc(strlen(user.home)
+									+ strlen(app), sizeof(char));
+						sprintf(file_path, "%s/%s", user.home, app + 2);
+						if (access(file_path, X_OK) == -1) {
+							free(file_path);
+							file_path = (char *)NULL;
+						} else {
+							app = (char *)xrealloc(app, (strlen(file_path) + 1)
+								* sizeof(char));
+							strcpy(app, file_path);
+						}
+					} else {
+						/* Either a command name or an absolute path */
+						file_path = get_cmd_path(app);
+					}
 				}
 
 				if (ret)
 					*ret = ' ';
 
 				if (file_path) {
-					/* If the app exists, break the loops and
-					 * return it */
+					/* If the app exists, break the loops and return it */
 					free(file_path);
 					file_path = (char *)NULL;
 					cmd_ok = 1;
