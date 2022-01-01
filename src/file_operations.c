@@ -508,6 +508,10 @@ edit_link(char *link)
 		free(tmp);
 	}
 
+	size_t len = strlen(link);
+	if (link[len - 1] == '/')
+		link[len - 1] = '\0';
+
 	/* Check we have a valid symbolic link */
 	struct stat file_attrib;
 	if (lstat(link, &file_attrib) == -1) {
