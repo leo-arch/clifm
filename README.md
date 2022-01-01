@@ -54,7 +54,7 @@ href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-r
 
 _CliFM_ is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
 
-Unlike most terminal file managers out there, indeed, _CliFM_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface.<sup>1</sup>
+Unlike most terminal file managers out there, indeed, _CliFM_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface, also known as REPL.<sup>1</sup>
 
 If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, directory jumper, directory history, auto-cd and auto-open, bulk rename, and a trash system, among [other features](#features). In this sense, _CliFM_ is certainly a file manager, but also a shell extension.
 
