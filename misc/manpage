@@ -316,7 +316,7 @@ by default, CliFM changes to directories by just specifying the corresponding EL
 disable the directory jumper function
 .TP
 .B \-\-no-classify
-by default, CliFM appends a file type indicator character to file names when running with no colors (see the \fB--no-colors\fR option below) and both a directory indicator and a files counter for directories when running with colors. Classification characters are: 
+by default, CliFM appends a file type indicator character to file names when running with no colors (see the \fB--no-color\fR option below) and both a directory indicator and a files counter for directories when running with colors. Classification characters are: 
  /n: directories (n = files counter)
  @: symbolic links
  |: fifo/pipes
@@ -328,8 +328,8 @@ Use this option to disable this file type classification.
 .B \-\-no\-clear\-screen
 do not clear the screen before listing files
 .TP
-.B \-\-no\-colors
-disable colors for files listing
+.B \-\-no\-color
+disable colors
 .TP
 .B \-\-no\-columns
 disable columns for files listing
