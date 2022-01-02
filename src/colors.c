@@ -317,6 +317,11 @@ cschemes_function(char **args)
 		return EXIT_FAILURE;
 	}
 
+	if (colorize == 0) {
+		printf("%s: Colors are disabled\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
 	if (!args)
 		return EXIT_FAILURE;
 
@@ -381,7 +386,7 @@ cschemes_function(char **args)
 	}
 
 	if (*args[1] == 'n' && (!args[1][1] || strcmp(args[1], "name") == 0)) {
-		printf(_("%s: current color scheme: %s\n"), PROGRAM_NAME,
+		printf(_("%s: Current color scheme: %s\n"), PROGRAM_NAME,
 		    cur_cscheme ? cur_cscheme : "?");
 		return EXIT_SUCCESS;
 	}
