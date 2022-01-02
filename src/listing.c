@@ -312,6 +312,9 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 		print_sort_method();
 	}
 
+	if (switch_cscheme)
+		printf(_("Color scheme %s->%s %s\n"), mi_c, df_c, cur_cscheme);
+
 	if (print_selfiles && sel_n > 0)
 		_print_selfiles(term_rows);
 
