@@ -2124,6 +2124,8 @@ bonus_function(void)
 	    "being absorbed by software",
 	    "\"What you're referring to as Linux, is in fact, GNU/Linux\" (RMS)",
 	    "\"Given enough eyeballs, all bugs are shallow.\" (Linus's law)",
+	    "\"We're gonna need a bigger boat.\" (Caleb)",
+	    "\"Ein Verletzter, Alarm, Alarm!\"",
 	    NULL};
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;

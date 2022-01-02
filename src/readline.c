@@ -446,6 +446,9 @@ my_rl_getc(FILE *stream)
 			if (control_d_exits && c == 4) /* Ctrl-d */
 				rl_quit(0, 0);
 
+			if (rl_end == 0)
+				fzf_open_with = 0;
+
 			/* 24 == Ctrl-x */
 			if (_xrename) {
 /*				if (RL_ISSTATE(RL_STATE_MOREINPUT))
