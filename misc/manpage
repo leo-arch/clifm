@@ -444,8 +444,8 @@ The archive mount function for non ISO files depends on \fBarchivemount\fR, whil
 .B acd, autocd [on, off, status]
 toggle the autocd function on/off. If set to on, 'DIR' amounts to 'cd DIR'.
 .TP
-.B actions \fR[edit]
-with no argument, lists available custom actions (or plugins). Use the 'edit' option to add, remove or modify custom actions. The aim of this function is to allow the user to easily add custom commands and functions to CliFM. In other words, the actions function is a plugins capability.
+.B actions \fR[edit [APP]]
+with no argument, lists available custom actions (or plugins). Use the 'edit' option to add, remove or modify custom actions (using APP if specified or the default associated application otherwise). The aim of this function is to allow the user to easily add custom commands and functions to CliFM. In other words, the actions function is a plugins capability.
 .sp
 The general procedure is quite simple: a) bind a custom action name to an executable file written in any language you want, be it a shell or Python script, a C program or whatever you like (using the \fIactions.cfm\fR file located in the configuration directory). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, myscript.sh) into the plugins directory (see the \fBFILES\fR section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run 'myaction', and myscript.sh will be executed.
 .sp
