@@ -44,6 +44,7 @@
 #include "misc.h"
 #include "messages.h"
 #include "file_operations.h"
+#include "exec.h"
 
 /* Retrieve the color corresponding to dir FILENAME with mode MODE */
 char *
@@ -369,14 +370,23 @@ cschemes_function(char **args)
 		stat(file, &attr);
 		time_t mtime_bfr = (time_t)attr.st_mtime;
 
-		open_in_foreground = 1;
-		int ret = open_file(file);
-		open_in_foreground = 0;
+		int ret = EXIT_FAILURE;
+		char *app = (char *)NULL;
+		if (args[2] && *args[2] && (app = get_cmd_path(args[2])) != NULL) {
+			char *cmd[] = {app, file, NULL};
+			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
+				ret = EXIT_SUCCESS;
+			free(app);
+		} else {
+			open_in_foreground = 1;
+			ret = open_file(file);
+			open_in_foreground = 0;
+		}
+
 		if (ret != EXIT_FAILURE) {
 			stat(file, &attr);
 			if (mtime_bfr != (time_t)attr.st_mtime
-			&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS
-			&& autols) {
+			&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && autols) {
 				free_dirlist();
 				list_dir();
 			}
