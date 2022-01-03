@@ -32,6 +32,7 @@
 #include "sanitize.h"
 #include "strings.h"
 #include "aux.h"
+#include "misc.h"
 
 char **env_bk = (char **)NULL; 
 char **new_env = (char **)NULL;
@@ -217,7 +218,8 @@ xsecure_env(const int mode)
 void
 sanitize_cmd_environ(void)
 {
-	/* Pointer to environ original address */
+	/* Pointer to environ original address. We will use these to restore
+	 * the original environ later (restore_cmd_environ()) */
 	env_bk = environ;
 
 	/* Create a controlled environment to securely run shell commands */
@@ -379,6 +381,33 @@ sanitize_gral(char *cmd)
 	return EXIT_SUCCESS;
 }
 
+/* Check if command name in STR contains slashes. Return 1 if found,
+ * zero otherwise. This means: do not allow custom scripts or binaries,
+ * but only whatever could be found in the sanitized PATH variable */
+static inline int
+clean_cmd(char *str)
+{
+	if (!str || !*str)
+		return EXIT_FAILURE;
+
+	char *p = strchr(str, ' ');
+	if (p)
+		*p = '\0';
+
+	char *q = strchr(str, '/');
+	if (p)
+		*p = ' ';
+
+	if (q) {
+		_err('w', PRINT_PROMPT, _("%s: %s: Only command base names "
+			"are allowed. Ex: 'nano' instead of '/usr/bin/nano'\n"),
+			PROGRAM_NAME, str);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 /* Sanitize CMD according to TYPE. Returns zero if safe command and
  * one if not */
 int
@@ -387,22 +416,39 @@ sanitize_cmd(char *str, int type)
 	if (!str || !*str)
 		return EXIT_FAILURE;
 
+	int exit_status = EXIT_FAILURE;
+
 	switch(type) {
 	case SNT_MIME:
-		return sanitize_mime(str);
+		if (clean_cmd(str) == EXIT_SUCCESS)
+			exit_status = sanitize_mime(str);
+		else /* Error message already pŕinted by clean_cmd() */
+			return EXIT_FAILURE;
+		break;
 	case SNT_NET:
-		return sanitize_net(str);
+		exit_status = sanitize_net(str);
+		break;
 	case SNT_DISPLAY:
 		return sanitize_display(str);
 	case SNT_MISC:
 		return sanitize_misc(str);
 	case SNT_PROFILE: /* fallthrough */
-	case SNT_PROMPT: /* fallthrough */
+	case SNT_PROMPT:  /* fallthrough */
 	case SNT_AUTOCMD: /* fallthrough */
 	case SNT_GRAL:
-		return sanitize_gral(str);
-	case SNT_NONE: break;
-	default: break;
+		if (clean_cmd(str) == EXIT_SUCCESS)
+			exit_status = sanitize_gral(str);
+		else
+			return EXIT_FAILURE;
+		break;
+	case SNT_NONE: return EXIT_SUCCESS;
+	default: return EXIT_SUCCESS;
+	}
+
+	if (exit_status == EXIT_FAILURE) {
+		_err('w', PRINT_PROMPT, _("%s: %s: Command is not safe. Consult "
+			"the manpage for more information\n"), PROGRAM_NAME, str);
+		return EXIT_FAILURE;
 	}
 
 	return EXIT_SUCCESS;

@@ -227,11 +227,8 @@ get_app(const char *mime, const char *ext)
 				}
 
 				if (xargs.secure_cmds == 1
-				&& sanitize_cmd(app, SNT_MIME) != EXIT_SUCCESS) {
-					_err('w', PRINT_PROMPT, "Lira: %s: Command contains "
-						"unsafe characters\n", app);
+				&& sanitize_cmd(app, SNT_MIME) != EXIT_SUCCESS)
 					continue;
-				}
 
 				/* If app contains spaces, the command to check is
 				 * the string before the first space */

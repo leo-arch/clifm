@@ -142,11 +142,8 @@ remotes_mount(char *name)
 	}
 
 	if (xargs.secure_cmds == 1
-	&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != EXIT_SUCCESS) {
-		fprintf(stderr, "%s: %s: Command contains unsafe characters\n",
-			PROGRAM_NAME, remotes[i].mount_cmd);
+	&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-	}
 
 	/* If mountpoint doesn't exist, create it */
 	struct stat attr;
@@ -214,11 +211,8 @@ remotes_unmount(char *name)
 	}
 
 	if (xargs.secure_cmds == 1
-	&& sanitize_cmd(remotes[i].unmount_cmd, SNT_NET) != EXIT_SUCCESS) {
-		fprintf(stderr, "%s: %s: Command contains unsafe characters\n",
-			PROGRAM_NAME, remotes[i].unmount_cmd);
+	&& sanitize_cmd(remotes[i].unmount_cmd, SNT_NET) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-	}
 
 	/* Get out of mountpoint before unmounting */
 	size_t mlen = strlen(remotes[i].mountpoint);
@@ -354,11 +348,8 @@ automount_remotes(void)
 		&& remotes[i].mountpoint && remotes[i].mount_cmd) {
 
 			if (xargs.secure_cmds == 1
-			&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != EXIT_SUCCESS) {
-				_err('w', PRINT_PROMPT, "%s: %s: Command contains unsafe "
-					"characters\n", PROGRAM_NAME, remotes[i].mount_cmd);
+			&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != EXIT_SUCCESS)
 				continue;
-			}
 
 			struct stat attr;
 			if (stat(remotes[i].mountpoint, &attr) == -1) {
@@ -393,11 +384,8 @@ autounmount_remotes(void)
 		&& remotes[i].mountpoint && remotes[i].unmount_cmd) {
 
 			if (xargs.secure_cmds == 1
-			&& sanitize_cmd(remotes[i].unmount_cmd, SNT_NET) != EXIT_SUCCESS) {
-				_err('w', PRINT_PROMPT, "%s: %s: Command contains unsafe "
-					"characters\n", PROGRAM_NAME, remotes[i].unmount_cmd);
+			&& sanitize_cmd(remotes[i].unmount_cmd, SNT_NET) != EXIT_SUCCESS)
 				continue;
-			}
 
 			if (count_dir(remotes[i].mountpoint, CPOP) <= 2)
 				continue;

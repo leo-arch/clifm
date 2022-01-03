@@ -487,17 +487,14 @@ _print_tips(void)
 static inline void
 run_prompt_cmds(void)
 {
-	if (ext_cmd_ok && prompt_cmds_n > 0) {
-		size_t i;
-		for (i = 0; i < prompt_cmds_n; i++) {
-			if (xargs.secure_cmds == 1
-			&& sanitize_cmd(prompt_cmds[i], SNT_PROMPT) != EXIT_SUCCESS) {
-				_err('w', PRINT_PROMPT, "%s: %s: Command contains unsafe "
-					"characters\n", PROGRAM_NAME, prompt_cmds[i]);
-				continue;
-			}
+	if (ext_cmd_ok == 0 || prompt_cmds_n <= 0)
+		return;
+
+	size_t i;
+	for (i = 0; i < prompt_cmds_n; i++) {
+		if (xargs.secure_cmds == 0
+		|| sanitize_cmd(prompt_cmds[i], SNT_PROMPT) == EXIT_SUCCESS)
 			launch_execle(prompt_cmds[i]);
-		}
 	}
 }
 

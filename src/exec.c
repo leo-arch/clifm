@@ -1954,15 +1954,14 @@ exec_profile(void)
 
 		if (int_vars && strchr(line, '=') && !_ISDIGIT(*line)) {
 			create_usr_var(line);
-		} else if (strlen(line) != 0) {
-		/* Parse line and execute it */
+		} else {
+			if (strlen(line) == 0)
+				continue;
+			/* Parse line and execute it */
 
 			if (xargs.secure_cmds == 1
-			&& sanitize_cmd(line, SNT_PROFILE) != EXIT_SUCCESS) {
-				_err('w', PRINT_PROMPT, "%s: %s: Command contains unsafe "
-					"characters\n", PROGRAM_NAME, line);
+			&& sanitize_cmd(line, SNT_PROFILE) != EXIT_SUCCESS)
 				continue;
-			}
 
 			args_n = 0;
 
