@@ -1857,7 +1857,6 @@ exec_cmd(char **comm)
 CHECK_EVENTS:
 	if (!autols)
 		return exit_code;
-
 #ifdef LINUX_INOTIFY
 	if (watch)
 		read_inotify();
@@ -1865,7 +1864,6 @@ CHECK_EVENTS:
 	if (watch && event_fd >= 0)
 		read_kqueue();
 #endif
-
 	return exit_code;
 }
 

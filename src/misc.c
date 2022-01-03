@@ -88,6 +88,9 @@ reset_inotify(void)
 void
 read_inotify(void)
 {
+	if (inotify_fd == UNSET)
+		return;
+
 	int i;
 	struct inotify_event *event;
 	char inotify_buf[EVENT_BUF_LEN];

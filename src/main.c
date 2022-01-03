@@ -630,7 +630,7 @@ char
 	tx_c[MAX_COLOR + 2]; /* Text color */
 
 #ifdef LINUX_INOTIFY
-int inotify_fd, inotify_wd = -1;
+int inotify_fd = UNSET, inotify_wd = UNSET;
 unsigned int INOTIFY_MASK =
 	IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE | IN_MOVE_SELF
 /*#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
@@ -644,13 +644,13 @@ unsigned int INOTIFY_MASK =
 #endif /* LINUX >= 2.6.36 */
 	;
 #elif defined(BSD_KQUEUE)
-int kq, event_fd = -1;
+int kq, event_fd = UNSET;
 struct kevent events_to_monitor[NUM_EVENT_FDS];
 unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND| NOTE_LINK
 	| NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
 struct timespec timeout;
 #endif
-int watch = -1;
+int watch = UNSET;
 
 /*
 static void
@@ -931,7 +931,6 @@ main(int argc, char *argv[])
 			alias_cmd = (char **)NULL;
 		} else {
 			exec_cmd(cmd);
-
 			i = (int)args_n + 1;
 			while (--i >= 0)
 				free(cmd[i]);
