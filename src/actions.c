@@ -221,14 +221,17 @@ run_action(char *action, char **args)
 	return exit_status;
 }
 
-int
-edit_actions(void)
+static int
+edit_actions(char *app)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
 		       "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
+
+	if (!actions_file)
+		return EXIT_FAILURE;
 
 	/* Get actions file's current modification time */
 	struct stat file_attrib;
@@ -240,7 +243,16 @@ edit_actions(void)
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
-	int ret = open_file(actions_file);
+	int ret = EXIT_SUCCESS;
+
+	if (app && *app) {
+		char *cmd[] = {app, actions_file, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+			ret = EXIT_FAILURE;
+	} else {
+		ret = open_file(actions_file);
+	}
+
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -275,4 +287,35 @@ edit_actions(void)
 	}
 
 	return EXIT_SUCCESS;
+}
+
+int
+actions_function(char **args)
+{
+	if (!args[1]) {
+		if (actions_n) {
+			/* Just list available actions */
+			size_t i;
+			for (i = 0; i < actions_n; i++) {
+				printf("%s %s->%s %s\n", usr_actions[i].name,
+				    mi_c, df_c, usr_actions[i].value);
+			}
+			return EXIT_SUCCESS;
+		} else {
+			puts(_("actions: No actions defined. Use the 'actions "
+			       "edit' command to add some"));
+			return EXIT_FAILURE;
+		}
+
+	} else if (strcmp(args[1], "edit") == 0) {
+		return edit_actions(args[2] ? args[2] : NULL);
+
+	} else if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+		puts(_(ACTIONS_USAGE));
+		return EXIT_SUCCESS;
+
+	} else {
+		fprintf(stderr, "%s\n", _(ACTIONS_USAGE));
+		return EXIT_FAILURE;
+	}
 }

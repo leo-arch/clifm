@@ -1268,7 +1268,7 @@ exec_cmd(char **comm)
 			opener = (char *)xnmalloc(strlen(comm[1]) + 1, sizeof(char));
 			strcpy(opener, comm[1]);
 		}
-		printf(_("opener: Opener set to '%s'\n"), (opener) ? opener
+		printf(_("opener: Opener set to '%s'\n"), opener ? opener
 								   : "lira (built-in)");
 		return EXIT_SUCCESS;
 	}
@@ -1280,28 +1280,8 @@ exec_cmd(char **comm)
 	}
 
 	/* #### ACTIONS #### */
-	else if (*comm[0] == 'a' && strcmp(comm[0], "actions") == 0) {
-		if (!comm[1]) {
-			if (actions_n) {
-				size_t i;
-				for (i = 0; i < actions_n; i++)
-					printf("%s %s->%s %s\n", usr_actions[i].name,
-					    mi_c, df_c, usr_actions[i].value);
-			} else {
-				puts(_("actions: No actions defined. Use the 'actions "
-				       "edit' command to add some"));
-			}
-		} else if (strcmp(comm[1], "edit") == 0) {
-			return (exit_code = edit_actions());
-		} else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-			puts(_(ACTIONS_USAGE));
-		} else {
-			fprintf(stderr, "%s\n", _(ACTIONS_USAGE));
-			exit_code = EXIT_FAILURE;
-			return EXIT_FAILURE;
-		}
-		return exit_code;
-	}
+	else if (*comm[0] == 'a' && strcmp(comm[0], "actions") == 0)
+		return (exit_code = actions_function(comm));
 
 	/* #### LIGHT MODE #### */
 	else if (*comm[0] == 'l' && comm[0][1] == 'm' && !comm[0][2]) {

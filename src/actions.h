@@ -25,7 +25,6 @@
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
-int edit_actions(void);
+int actions_function(char **args);
 int run_action(char *action, char **args);
-
 #endif /* ACTIONS_H */
