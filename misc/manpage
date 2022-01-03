@@ -1716,22 +1716,22 @@ Since CliFM executes OS commands, it needs to provide a way to securely run thes
 .TP
 Both features are aimed to protect the program and the system as such from malicious input, either coming from environment variables or from indirect input, that is to say, input coming not from the command line (in which is assumed that it is the user herself who is executing the given command), but from files: this is the case of default associated applications (the \fImime\fR command), autocommands, (un)mount commands (via the \fInet\fR command), just as profile and prompt commands.
 .TP
-In an untrusted environment, an attacker could cause unexpected and insecure behavior using environment variables, or inject malicious commands via indirect input, commands which will be later executed by CliFM without the user's consent (i.e. automatically). This is why we provide a mechanism to minimize this danger: if running in an untrusted environment, the secure environment and secure commands features are there to prevent (at least as far as possible) this kind of attacks.
+In an untrusted environment, an attacker could cause unexpected and insecure behavior (even command injection) using environment variables, or inject malicious commands via indirect input, commands which will be later executed by CliFM without the user's consent (i.e. automatically). This is why we provide a mechanism to minimize this danger: if running in an untrusted environment, the secure environment and secure commands features are there to prevent (at least as far as possible) this kind of attacks.
 .TP
 \fBA) Secure environment\fR
 .TP
 Programs inherit the environment from the parent process. However, if this inherited environment is not trusted, not secure, it is always a good idea to sanitize it using only sane values, preventing thus undesired and uncontrolled input that might endanger the program and the system itself.
 .TP
-The \fIsecure-environment\fR function forces CliFM to run on a such a sanitized environment.
+The \fIsecure\-environment\fR function forces CliFM to run on a such a sanitized environment.
 .TP
-There are two secure-environment modes, the \fIregular\fR, and the \fIfull\fR one. To enable the regular mode, run CliFM with the \fI--secure-env\fR command line option. Otherwise, enable the full mode using \fI--secure-env-full\fR.
+There are two secure\-environment modes, the \fIregular\fR, and the \fIfull\fR one. To enable the regular mode, run CliFM with the \fI\-\-secure\-env\fR command line option. Otherwise, enable the full mode using \fI\-\-secure\-env-full\fR.
 .TP
 \fBa)\fR \fIRegular\fR: in this mode, the inherited environment is cleared, though a few variables are preserved to keep CliFM running as stable as possible. These preserved variables are: \fBTERM\fR, \fBDISPLAY\fR, \fBLANG\fR, \fBTZ\fR, and, if FZF TAB completion mode is enabled, \fBFZF_DEFAULT_OPTS\fR.
 .TP
 The following variables are set in an environment agnostic way (that is, securely):     
-  - \fBHOME\fR, \fBSHELL\fR, and \fBUSER\fR are retrieved using \fBgetpwuid(3)\fR
-  - \fBPATH\fR is set consulting \fB_PATH_STDPATH\fR (or \fB_CS_PATH\fR if the former is not available)
-  - \fBIFS\fR is set to a sane, hard-coded value: " \\n\\t"
+  \- \fBHOME\fR, \fBSHELL\fR, and \fBUSER\fR are retrieved using \fBgetpwuid(3)\fR
+  \- \fBPATH\fR is set consulting \fB_PATH_STDPATH\fR (or \fB_CS_PATH\fR if the former is not available)
+  \- \fBIFS\fR is set to a sane, hard\-coded value: " \\n\\t"
 .TP
 \fBb)\fR \fIFull\fR: this mode is just like the regular mode, except that nothing is imported from the environment at all and only \fBPATH\fR and \fBIFS\fR are set (as described above). Everything else remains unset, and is the user's responsibility to set environment variables (via the export function), as needed. In this case, you might want to set, at least, \fBTERM\fR, and, if running in a graphical environment, \fBDISPLAY\fR.
 .TP
@@ -1741,17 +1741,19 @@ Be aware that enabling secure-environment might break some functions, depending 
 .TP
 Some commands are automatically executed by CliFM: (un)mount commands (via the \fInet\fR command), opening applications (via \fILira\fR), just as prompt, profile, and autocommands. These commands are read from a configuration file and then executed. Now, if an attacker has access to any of these files, she might force CliFM to run any arbitrary command, and thereby possibly exposing the whole system.
 .TP
-Every time a command is thus automatically executed via the system shell (i.e. without the user's direct consent), the secure commands function performs two different, though intrinsically related tasks aimed to mitigate command injection and/or unexpected behavior:
+Every time a command is thus automatically executed via the system shell (i.e. without the user's direct consent), the secure commands function performs three different, though intrinsically related tasks aimed to mitigate command injection and/or unexpected behavior:
 .TP
-\fBa)\fR It validates commands using a whitelist of safe characters. This set of safe characters slightly vary depending on the command being executed:
+\fBa)\fR Only command base names are allowed: \fInano\fR, for instance, is allowed, while \fI/usr/bin/nano\fR is not. In this way we can guarantee that only commands found in a sanitized \fBPATH\fR (see the point \fBc\fR below) will be executed. This is done in order to prevent the execution of custom binaries/scripts, for example: \fI/tmp/exec_file\fR.
+.TP
+\fBb)\fR Commands are validated using a \fBwhitelist\fR of safe characters (mostly to prevent stream redirection, conditional execution, and so on, for example, 'your_command;some_injected_command'). This set of safe characters slightly vary depending on the command being executed (because they use different syntaxes):
 .sp
- Net command:                   a-zA-Z -_.,/=
- Prompt, profile, autocommands: a-zA-Z -_.,/"'
- Mime command:                  az-AZ -_.,%&
+ Net command:                   a\-zA\-Z \-_.,/=
+ Prompt, profile, autocommands: a\-zA\-Z \-_.,/"'
+ Mime command:                  a\-zA\-Z \-_.,%&
 .TP
-Commands containing at least one unsafe character will be rejected. Of course, we cannot (and should not) prevent what looks like legitimate, benign commands from being executed. But we can stop commands that, in an untrusted environment, look suspicious. This is specially the case of stream redirection (>), pipes (|), sequential (;) and conditional execution (&&, ||), command substitution ($(cmd)), and environment variables ($VAR).
+Commands containing \fIat least one\fR unsafe character will be rejected. Of course, we cannot (and should not) prevent what looks like legitimate, benign commands from being executed. But we can stop commands that, in an untrusted environment, look suspicious. This is specially the case of stream redirection (>), pipes (|), sequential (;) and conditional execution (&&, ||), command substitution ($(cmd)), and environment variables ($VAR).
 .TP
-\fBb)\fR Unless already running in a secure environment (via the \fI--secure-env-full\fR option), a sanitized environment will be created for the command to be executed (returning afterwards to the original environment). The values for this secure environment are as follows:
+\fBc)\fR Unless already running in a secure environment (via the \fI\-\-secure\-env\fR or \fI\-\-secure\-env\-full\fR options), a sanitized environment will be created for the command to be executed (returning afterwards to the original environment). The values for this secure environment are as follows:
 .sp            
  \fBPATH\fR               Taken from \fB_PATH_STDPATH\fR (or \fB_CS_PATH\fR)
  \fBIFS\fR                " \\t\\n"
