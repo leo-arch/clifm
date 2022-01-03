@@ -498,6 +498,7 @@ run_prompt_cmds(void)
 	}
 }
 
+#ifndef _NO_TRASH
 static inline void
 update_trash_indicator(void)
 {
@@ -507,6 +508,7 @@ update_trash_indicator(void)
 			trash_n = 0;
 	}
 }
+#endif
 
 static inline void
 setenv_prompt(void)
@@ -518,8 +520,10 @@ setenv_prompt(void)
 		char t[32];
 		sprintf(t, "%d", (int)sel_n);
 		setenv("CLIFM_STAT_SEL", t, 1);
+#ifndef _NO_TRASH
 		sprintf(t, "%d", (int)trash_n);
 		setenv("CLIFM_STAT_TRASH", t, 1);
+#endif
 		sprintf(t, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
 		setenv("CLIFM_STAT_MSG", t, 1);
 		sprintf(t, "%d", cur_ws + 1);
@@ -550,11 +554,23 @@ prompt(void)
 #endif
 	get_sel_files();
 
+	/* Construct indicators: MSGS, SEL, and TRASH */
+
+#define ROOT_IND "\001\x1b[1;31mR\x1b[0m\002"
+#define ROOT_IND_SIZE 15
+#define STEALTH_IND "S\001\x1b[0m\002"
+#define STEALTH_IND_SIZE MAX_COLOR + 7 + 1
+
+/* Size of the indicator for msgs, trash, and sel */
+#define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1
+/* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
+
 	/* Messages are categorized in three groups: errors, warnings, and
 	 * notices. The kind of message should be specified by the function
 	 * printing the message itself via a global enum: pmsg, with the
 	 * following values: NOMSG, ERROR, WARNING, and NOTICE. */
-	char msg_str[MAX_COLOR + 1 + 16] = "";
+	char msg_ind[N_IND];
+	*msg_ind = '\0';
 
 	if (msgs_n) {
 		/* Errors take precedence over warnings, and warnings over
@@ -563,12 +579,28 @@ prompt(void)
 		 * message sign: a red 'E'. */
 		switch (pmsg) {
 		case NOMSG:	break;
-		case ERROR:	sprintf(msg_str, "%sE%s", em_c, RL_NC); break;
-		case WARNING: sprintf(msg_str, "%sW%s", wm_c, RL_NC); break;
-		case NOTICE: sprintf(msg_str, "%sN%s", nm_c, RL_NC); break;
+		case ERROR:
+			snprintf(msg_ind, N_IND, "%sE%zu%s", em_c, msgs_n, RL_NC);
+			break;
+		case WARNING:
+			snprintf(msg_ind, N_IND, "%sW%zu%s", wm_c, msgs_n, RL_NC);
+			break;
+		case NOTICE:
+			snprintf(msg_ind, N_IND, "%sN%zu%s", nm_c, msgs_n, RL_NC);
+			break;
 		default: break;
 		}
 	}
+
+	char trash_ind[N_IND];
+	*trash_ind = '\0';
+	if (trash_n > 2)
+		snprintf(trash_ind, N_IND, "%sT%zu%s", ti_c, (size_t)trash_n - 2, RL_NC);
+
+	char sel_ind[N_IND];
+	*sel_ind = '\0';
+	if (sel_n > 0)
+		snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
 
 	setenv_prompt();
 
@@ -592,27 +624,31 @@ prompt(void)
 
 	if (prompt_style == DEF_PROMPT_STYLE) {
 		prompt_length = (size_t)(decoded_prompt_len
-		+ (xargs.stealth_mode == 1 ? 16 : 0) + ((flags & ROOT_USR) ? 16 : 0)
-		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg) ? 16 : 0)
+		+ (xargs.stealth_mode == 1 ? STEALTH_IND_SIZE : 0)
+		+ ((flags & ROOT_USR) ? ROOT_IND_SIZE : 0)
+		+ (sel_n ? N_IND : 0)
+		+ (trash_n ? N_IND : 0)
+		+ ((msgs_n && pmsg) ? N_IND : 0)
 		+ 6 + sizeof(tx_c) + 1 + 2);
+		/* 16 = color_b({red,green,yellow}_b) + letter (sel, trash, msg)+RL_NC;
+		 * 6 = RL_NC
+		 * 1 = null terminating char
+		 * 2 = \001 and \002 for tx_c */
 	} else {
 		prompt_length = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
 	}
 
-	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+RL_NC;
-	 * 6 = RL_NC
-	 * 1 = null terminating char
-	 * 2 = \001 and \002 for tx_c */
-
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
 
 	if (prompt_style == DEF_PROMPT_STYLE) {
-		snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s\001%s\002",
-			(flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
-			(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
-			? si_c : "", (xargs.stealth_mode == 1) ? "S\001\x1b[0m\002"
-			: "", (trash_n) ? ti_c : "", (trash_n) ? "T\001\x1b[0m\002" : "",
-			(sel_n) ? li_c : "", (sel_n) ? "*\001\x1b[0m\002" : "",
+		snprintf(the_prompt, prompt_length,
+			"%s%s%s%s%s%s%s%s\001%s\002",
+			(flags & ROOT_USR) ? ROOT_IND : "",
+			(msgs_n && pmsg) ? msg_ind : "",
+			(xargs.stealth_mode == 1) ? si_c : "",
+			(xargs.stealth_mode == 1) ? STEALTH_IND : "",
+			(trash_n) ? trash_ind : "",
+			(sel_n) ? sel_ind : "",
 			decoded_prompt, RL_NC, tx_c);
 	} else {
 		snprintf(the_prompt, prompt_length, "%s%s\001%s\002", decoded_prompt,
