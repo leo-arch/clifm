@@ -1954,8 +1954,11 @@ exec_profile(void)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		if (int_vars && strchr(line, '=') && !_ISDIGIT(*line)) {
-			create_usr_var(line);
+		if (strchr(line, '=') && !_ISDIGIT(*line)) {
+			if (int_vars)
+				create_usr_var(line);
+			else
+				continue;
 		} else {
 			if (strlen(line) == 0)
 				continue;
