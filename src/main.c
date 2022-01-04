@@ -334,6 +334,7 @@ char *internal_cmds[] = {
 	"bb", "bleach",
 	"bd",
 	"bh", "fh",
+	"bl",
 	"bm", "bookmarks",
 	"br", "bulk",
 	"c", "cp",
