@@ -728,9 +728,10 @@ enum comp_type {
 	TCMP_RANGES = 	12,
 	TCMP_SEL =		13,
 	TCMP_SORT = 	14,
-	TCMP_TRASHDEL=	15,
-	TCMP_UNTRASH=	16,
-	TCMP_BACKDIR=   17
+	TCMP_TRASHDEL =	15,
+	TCMP_UNTRASH =	16,
+	TCMP_BACKDIR =  17,
+	TCMP_ENVIRON =  18
 };
 
 extern enum comp_type cur_comp_type;

@@ -396,12 +396,12 @@ launch_execve(char **cmd, int bg, int xflags)
 static int
 run_shell_cmd(char **comm)
 {
-	/* LOG EXTERNAL COMMANDS
+	/* Log external commands
 	* 'no_log' will be true when running profile or prompt commands */
 	if (!no_log)
 		log_function(comm);
 
-	/* PREVENT UNGRACEFUL EXIT */
+	/* Prevent ungraceful exit */
 	/* Prevent the user from killing the program via the 'kill',
 	 * 'pkill' or 'killall' commands, from within CliFM itself.
 	 * Otherwise, the program will be forcefully terminated without
@@ -420,7 +420,7 @@ run_shell_cmd(char **comm)
 		}
 	}
 
-	/* CHECK WHETHER SHELL COMMANDS ARE ALLOWED */
+	/* Check whether shell commands are allowed */
 	if (!ext_cmd_ok) {
 		fprintf(stderr, _("%s: External commands are not allowed. "
 				  "Run 'ext on' to enable them.\n"), PROGRAM_NAME);

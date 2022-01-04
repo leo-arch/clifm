@@ -1131,6 +1131,41 @@ hist_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Used by environment variables completion */
+static char *
+environ_generator(const char *text, int state)
+{
+	if (!environ)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text + 1);
+	}
+
+	/* Look for cmd history entries for a match */
+	while ((name = environ[i++]) != NULL) {
+		if (case_sens_path_comp ? strncmp(name, text + 1, len) == 0
+		: strncasecmp(name, text + 1, len) == 0) {
+			char *p = strrchr(name, '=');
+			if (!p)
+				continue;
+			*p = '\0';
+			char tmp[NAME_MAX];
+			snprintf(tmp, NAME_MAX, "$%s", name);
+			char *q = strdup(tmp);
+			*p = '=';
+			return q;
+		}
+	}
+
+	return (char *)NULL;
+}
+
 /* Expand string into matching path in the jump database. Used by
  * j, jc, and jp commands */
 static char *
@@ -1633,27 +1668,41 @@ my_rl_completion(const char *text, int start, int end)
 		/* History cmd completion */
 		if (!_xrename && *text == '!') {
 			matches = rl_completion_matches(text + 1, &hist_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_HIST;
+				return matches;
+			}
+		}
+
+		if (!_xrename && *text == '$' && *(text + 1) != '(') {
+			matches = rl_completion_matches(text, &environ_generator);
+			if (matches) {
+				cur_comp_type = TCMP_ENVIRON;
+				return matches;
+			}
 		}
 
 		/* If autocd or auto-open, try to expand ELN's first */
-		if (!matches && (autocd || auto_open)) {
+		if (autocd || auto_open) {
 			if (*text >= '1' && *text <= '9') {
 				int num_text = atoi(text);
 
 				if (is_number(text) && num_text > 0 && num_text <= (int)files) {
 					matches = rl_completion_matches(text, &filenames_gen_eln);
-					if (matches)
+					if (matches) {
 						cur_comp_type = TCMP_ELN;
+						return matches;
+					}
 				}
 			}
 
 			/* Compĺete with files in CWD */
-			if (!matches && (!text || *text != '/')) {
+			if (!text || *text != '/') {
 				matches = rl_completion_matches(text, &filenames_gen_text);
-				if (matches)
+				if (matches) {
 					cur_comp_type = TCMP_PATH;
+					return matches;
+				}
 			}
 
 			/* Complete with entries in the jump database */
@@ -1662,15 +1711,20 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* Bookmarks completion */
-		if (!_xrename && !matches && (autocd || auto_open) && expand_bookmarks)
+		if (!_xrename && (autocd || auto_open) && expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
+			if (matches)
+				return matches;
+		}
 
 		/* If neither autocd nor auto-open, try to complete with
 		 * command names */
-		if (!_xrename && !matches) {
+		if (!_xrename) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_CMD;
+				return matches;
+			}
 		}
 
 /*		if (!_xrename && !matches && *text == '$') {
@@ -1686,6 +1740,14 @@ my_rl_completion(const char *text, int start, int end)
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 			if (matches) {
 				cur_comp_type = TCMP_CMD;
+				return matches;
+			}
+		}
+
+		if (!_xrename && *text == '$' && *(text + 1) != '(') {
+			matches = rl_completion_matches(text, &environ_generator);
+			if (matches) {
+				cur_comp_type = TCMP_ENVIRON;
 				return matches;
 			}
 		}

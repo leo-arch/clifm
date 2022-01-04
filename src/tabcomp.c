@@ -326,6 +326,10 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 	if (n)
 		*n = '\0';
 
+	if (cur_comp_type == TCMP_ENVIRON)
+		/* Skip the leading $*/
+		buf++;
+
 	if (cur_comp_type == TCMP_PATH && multi == 0) {
 		char *esc_buf = escape_str(buf);
 		if (esc_buf) {
