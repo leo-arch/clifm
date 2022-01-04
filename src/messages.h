@@ -213,9 +213,9 @@ Usage:\n\
 Examples:\n\
 - Print the current filter, if any:\n\
     ft\n\
-- Prevent hidden files from being listed:\n\
-    ft ^.\n\
-- Do not list backup files:\n\
+- Do not list hidden files:\n\
+    ft !^\\.\n\
+- Do not list backup files (ending with tilde):\n\
     ft .*~$\n\
 - Unset the current filter:\n\
     ft unset"
