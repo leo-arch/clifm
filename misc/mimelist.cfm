@@ -69,7 +69,7 @@ X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
 
 # Archives
-X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %f &>/dev/null &;lxqt-archiver %f &>/dev/null &;ark %f &>/dev/null &
+X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %f &;lxqt-archiver %f &;ark %f &
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
 
 # PDF
