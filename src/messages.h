@@ -239,7 +239,7 @@ Usage:\n\
 Usage: \
 !!: Execute the last command. \
 !n: Execute the command number 'n' in the history list. \
-!-n: Execute the last-n command in the history list."
+!-n: Execute the last - n command in the history list."
 
 #define HISTORY_USAGE "List or access commands history entries\n\
 Usage:\n\
@@ -254,7 +254,16 @@ Examples:\n\
 - Print the complete list of commands in history:\n\
     history\n\
 - Print the last 4 commands in history:\n\
-    history -4"
+    history -4\n\n\
+You can also access the commands history via the exclamation mark (!):\n\
+- Execute the last command: \n\
+    !!\n\
+- Execute the command number 'n' in the history list:\n\
+    !n\n\
+- Execute the last - n command in the history list:\n\
+    !-n\n\n\
+Note: If FZF TAB completion mode is enabled, you can easily navigate the \
+commands history list by typing '!' and then pressing TAB"
 
 #define ICONS_USAGE "Set icons on-off\n\
 Usage:\n\
