@@ -95,7 +95,7 @@ Usage: icons [on, off]"
 #define JUMP_USAGE "Change to a directory in the jump database\n\
 Usage: j, jc, jp, jl [STRING ...], jo [NUM], je"
 #define KB_USAGE "Handle keybindings\n\
-Usage: kb, keybinds [edit] [reset] [readline]"
+Usage: kb, keybinds [edit [APP]] [reset] [readline]"
 #define LE_USAGE "Edit a symbolic link\n\
 Usage: le SYMLINK"
 #define LM_USAGE "Set light mode on-off\n\

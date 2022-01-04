@@ -250,7 +250,9 @@ edit_actions(char *app)
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			ret = EXIT_FAILURE;
 	} else {
+		open_in_foreground = 1;
 		ret = open_file(actions_file);
+		open_in_foreground = 0;
 	}
 
 	if (ret != EXIT_SUCCESS)

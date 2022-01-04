@@ -269,7 +269,8 @@ remotes_edit(char *app)
 	int ret = EXIT_SUCCESS;
 	if (app) {
 		char *cmd[] = {app, remotes_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+			ret = EXIT_FAILURE;
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(remotes_file);

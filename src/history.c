@@ -350,7 +350,8 @@ history_function(char **comm)
 		/* If there is an argument... */
 		if (comm[2]) {
 			char *cmd[] = {comm[2], hist_file, NULL};
-			ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+				ret = EXIT_FAILURE;
 		} else {
 			/* If no application was passed as 2nd argument */
 			open_in_foreground = 1;

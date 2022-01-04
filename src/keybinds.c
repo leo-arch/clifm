@@ -91,7 +91,7 @@ kbinds_reset(void)
 }
 
 static int
-kbinds_edit(void)
+kbinds_edit(char *app)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
@@ -110,9 +110,17 @@ kbinds_edit(void)
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
-	open_in_foreground = 1;
-	int ret = open_file(kbinds_file);
-	open_in_foreground = 0;
+	int ret = EXIT_SUCCESS;
+	if (app && *app) {
+		char *cmd[] = {app, kbinds_file, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+			ret = EXIT_FAILURE;
+	} else {
+		open_in_foreground = 1;
+		ret = open_file(kbinds_file);
+		open_in_foreground = 0;
+	}
+
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -146,7 +154,7 @@ kbinds_function(char **args)
 	}
 
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
-		return kbinds_edit();
+		return kbinds_edit(args[2] ? args[2] : NULL);
 
 	if (*args[1] == 'r' && strcmp(args[1], "reset") == 0)
 		return kbinds_reset();

@@ -1902,7 +1902,7 @@ in the next session\
  history [edit [APP]] [clear] [-n]\n\
  icons [on, off]\n\
  j, jc, jp, jl [STRING ...] jo [NUM], je (directory jumper function)\n\
- kb, keybinds [edit] [reset] [readline]\n\
+ kb, keybinds [edit [APP]] [reset] [readline]\n\
  lm [on, off] (lightmode)\n\
  log [clear]\n\
  mf [NUM, unset] (List up to NUM files)\n\
