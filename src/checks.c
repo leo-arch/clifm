@@ -351,7 +351,8 @@ is_bin_cmd(char *str)
 
 	size_t i;
 	for (i = 0; bin_commands[i]; i++) {
-		if (*q == *bin_commands[i] && q[1] == bin_commands[i][1] && strcmp(q, bin_commands[i]) == 0) {
+		if (*q == *bin_commands[i] && q[1] == bin_commands[i][1]
+		&& strcmp(q, bin_commands[i]) == 0) {
 			if (space_index != -1)
 				q[space_index] = ' ';
 			return 1;

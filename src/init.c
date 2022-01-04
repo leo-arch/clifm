@@ -1632,27 +1632,27 @@ init_shell(void)
 	}
 
 	/* Loop until we are in the foreground */
-	while (tcgetpgrp(STDIN_FILENO) != (own_pid = getpgrp()))
-		kill(-own_pid, SIGTTIN);
+/*	while (tcgetpgrp(STDIN_FILENO) != (own_pid = getpgrp()))
+		kill(-own_pid, SIGTTIN); */
 
 	/* Ignore interactive and job-control signals */
 	set_signals_to_ignore();
 	/* Put ourselves in our own process group */
 	own_pid = get_own_pid();
 
-	if (flags & ROOT_USR) {
+//	if (flags & ROOT_USR) {
 		/* Make the shell pgid (process group id) equal to its pid */
 		/* Without the setpgid line below, the program cannot be run
 		 * with sudo, but it can be run nonetheless by the root user */
-		if (setpgid(own_pid, own_pid) < 0) {
+/*		if (setpgid(own_pid, own_pid) < 0) {
 			_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME,
 			    strerror(errno));
 			exit(EXIT_FAILURE);
-		}
-	}
+		} */
+//	}
 
 	/* Grab control of the terminal */
-	tcsetpgrp(STDIN_FILENO, own_pid);
+//	tcsetpgrp(STDIN_FILENO, own_pid);
 	/* Save default terminal attributes for shell */
 	tcgetattr(STDIN_FILENO, &shell_tmodes);
 	return;
@@ -1952,6 +1952,7 @@ get_path_programs(void)
 
 			cmd_n[i] = scandir(paths[i], &commands_bin[i],
 						light_mode ? NULL : skip_nonexec, xalphasort);
+//						NULL, xalphasort);
 			/* If paths[i] directory does not exist, scandir returns -1.
 			 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
 			 * PATH disregarding if they exist or not. If paths[i] dir is

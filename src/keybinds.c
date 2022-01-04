@@ -1124,7 +1124,6 @@ rl_quit(int count, int key)
 	 * quits, but terminal input is not printed to STDOUT */
 	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
 	exit(EXIT_SUCCESS);
-	return EXIT_SUCCESS;
 }
 
 /* Get current profile and total amount of profiles and store this info

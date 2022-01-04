@@ -81,7 +81,8 @@ skip_files(const struct dirent *ent)
 	} */
 
 	/* Skip "." and ".." */
-	if (*ent->d_name == '.' && (!ent->d_name[1] || (ent->d_name[1] == '.' && !ent->d_name[2])))
+	if (*ent->d_name == '.' && (!ent->d_name[1]
+	|| (ent->d_name[1] == '.' && !ent->d_name[2])))
 		return 0;
 
 	/* Skip files matching FILTER */
