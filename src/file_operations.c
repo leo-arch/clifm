@@ -1179,16 +1179,12 @@ batch_link(char **args)
 
 	log_function(NULL);
 
-	char *suffix = (char *)NULL;
-	while (!suffix) {
-		suffix = rl_no_hist(_("Enter links suffix ('n' for none): "));
-		if (!suffix)
-			continue;
-		if (!*suffix) {
-			free(suffix);
-			suffix = (char *)NULL;
-			continue;
-		}
+	puts("Suffix defaults to '.link'");
+	char *suffix = rl_no_hist(_("Enter links suffix ('q' to quit): "));
+
+	if (suffix && *suffix == 'q' && !*(suffix + 1)) {
+		free(suffix);
+		return EXIT_SUCCESS;
 	}
 
 	size_t i;
@@ -1198,8 +1194,9 @@ batch_link(char **args)
 	for (i = 1; args[i]; i++) {
 		char *linkname = (char *)NULL;
 
-		if (*suffix == 'n' && !suffix[1]) {
-			linkname = args[i];
+		if (!suffix || !*suffix) {
+			snprintf(tmp, NAME_MAX, "%s.link", args[i]);
+			linkname = tmp;
 		} else {
 			snprintf(tmp, NAME_MAX, "%s%s", args[i], suffix);
 			linkname = tmp;
