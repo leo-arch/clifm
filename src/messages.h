@@ -30,7 +30,7 @@
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define ACTIONS_USAGE "List or edit actions/plugins\n\
-Usage: actions [edit]"
+Usage: actions [edit [APP]]"
 #define ALIAS_USAGE "List or import aliases\n\
 Usage: alias [import FILE]"
 #define ARCHIVE_USAGE "Compress/archive files\n\
@@ -60,7 +60,7 @@ Usage: cc, colors"
 #define COLUMNS_USAGE "Set columned list of files on-off\n\
 Usage: cl, columns [on, off]"
 #define CS_USAGE "Switch color schemes\n\
-Usage: cs, colorschemes [edit] [COLORSCHEME]"
+Usage: cs, colorschemes [edit [APP]] [COLORSCHEME]"
 #define DESEL_USAGE "Deselect one or more selected files\n\
 Usage: ds, desel [*, a, all]"
 #define DIRHIST_USAGE "List or access entries in the directory history list\n\
@@ -89,7 +89,7 @@ Usage: \
 !n: Execute the command number 'n' in the history list. \
 !-n: Execute the last-n command in the history list."
 #define HISTORY_USAGE "List or access commands history entries\n\
-Usage: history [edit] [clear] [-n]"
+Usage: history [edit [APP]] [clear] [-n]"
 #define ICONS_USAGE "Set icons on-off\n\
 Usage: icons [on, off]"
 #define JUMP_USAGE "Change to a directory in the jump database\n\
@@ -115,7 +115,7 @@ Usage: msg, messages [clear]"
 #define MOUNPOINTS_USAGE "List and change to a mountpoint\n\
 Usage: mp, mountpoints"
 #define NET_USAGE "Handle network resources\n\
-Usage: net [NAME] [edit] [m, mount NAME] [u, unmount NAME]"
+Usage: net [NAME] [edit [APP]] [m, mount NAME] [u, unmount NAME]"
 #define NEW_USAGE "Create a new file or directory\n\
 Usage: n, new [FILE DIR/ ...n]"
 #define OPEN_USAGE "Open a file\n\

@@ -1873,7 +1873,7 @@ in the next session\
  ;[CMD], :[CMD] (run CMD via the system shell)\n\
  ac, ad ELN/FILE ... (archiving functions)\n\
  acd, autocd [on, off, status]\n\
- actions [edit]\n\
+ actions [edit [APP]]\n\
  alias [import FILE]\n\
  ao, auto-open [on, off, status]\n\
  b, back [h, hist] [clear] [!ELN]\n\
@@ -1887,7 +1887,7 @@ in the next session\
  cd [ELN/DIR]\n\
  cl, columns [on, off]\n\
  cmd, commands\n\
- cs, colorscheme [edit] [COLORSCHEME]\n\
+ cs, colorscheme [edit [APP]] [COLORSCHEME]\n\
  d, dup FILE(s)\n\
  ds, desel [*, a, all]\n\
  edit [APPLICATION] [reset]\n\
@@ -1899,7 +1899,7 @@ in the next session\
  fs\n\
  ft, filter [unset] [REGEX]\n\
  hf, hidden [on, off, status]\n\
- history [edit] [clear] [-n]\n\
+ history [edit [APP]] [clear] [-n]\n\
  icons [on, off]\n\
  j, jc, jp, jl [STRING ...] jo [NUM], je (directory jumper function)\n\
  kb, keybinds [edit] [reset] [readline]\n\
@@ -1910,7 +1910,7 @@ in the next session\
  mp, mountpoints\n\
  msg, messages [clear]\n\
  n, new FILE DIR/ ...n\n\
- net [NAME] [edit] [m, mount NAME] [u, unmount NAME]\n\
+ net [NAME] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  ow [ELN/FILE] [APPLICATION] (open with ...)\n\
  opener [default] [APPLICATION]\n\
