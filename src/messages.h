@@ -55,7 +55,7 @@ Examples:\n\
     ac sel\n\
 - Compress/archive a range of files:\n\
     ac 12-24\n\
-- Decompress a file\n\
+- Decompress a file:\n\
     ad file.tar.gz"
 
 #define AUTOCD_USAGE "Turn autocd on-off\n\
@@ -91,8 +91,7 @@ Usage:\n\
   bl FILE(s)\n\n\
 Example:\n\
 - Symlink files file1 file2 file3 and file4 at once:\n\
-    bl file*\n\
-  Note: Choose a suffix for the new symbolic links"
+    bl file*"
 
 #define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\
 Usage:\n\
@@ -180,7 +179,7 @@ Usage:\n\
   edit [reset] [APPLICATION]\n\n\
 Examples:\n\
 - Open/edit the configuration file:\n\
-    edit\n\
+    edit (or F10)\n\
 - Open/edit the configuration file using nano:\n\
     edit nano\n\
 - Create a fresh configuration file (making abackup of the old one):\n\
@@ -205,7 +204,11 @@ Usage:\n\
 
 #define FF_USAGE "Set show folders first on-off\n\
 Usage:\n\
-  ff, folders-first [on, off, status]"
+  ff, folders-first [on, off, status]\n\
+Example:\n\
+- Disable listing folders first:\n\
+    ff off\n\
+  Note: Toggle folders first on/off pressing Alt-g"
 
 #define FILTER_USAGE "Set a filter for the files list\n\
 Usage:\n\
@@ -233,7 +236,11 @@ Examples:\n\
 
 #define HF_USAGE "Set hidden files on-off\n\
 Usage:\n\
-  hf, hidden [on, off, status]"
+  hf, hidden [on, off, status]\n\
+Example:\n\
+- Show hidden files:\n\
+    hf on\n\
+  Note: Press Alt-. to toggle hidden files on/off"
 
 #define HISTEXEC_USAGE "Access commands history entries\n\
 Usage: \
@@ -473,7 +480,7 @@ Examples:\n\
 - Select all regular files in /etc ending starting with 'd':\n\
     s ^d.* -r :/etc\n\
 - Select all files in the current directory (including hidden files):\n\
-    s * .*\n\
+    s * .* (or Alt-a)\n\
 - List currently selected files:\n\
     sb\n\
 - Copy selected files to the current directory:\n\
@@ -483,9 +490,10 @@ Examples:\n\
 - Deselect all selected files\n\
     ds * (or Alt-d)"
 
+/*
 #define SHELL_USAGE "Set the shell used to run external commands\n\
 Usage:\n\
-  shell [SHELL]"
+  shell [SHELL]" */
 
 #define SORT_USAGE "Change sort method for the files list\n\
 Usage:\n\
@@ -574,8 +582,8 @@ Examples:\n\
 - Create a symbolic link pointing to the directory whose ELN is 12 named link:\n\
     l 12 link\n\
 - Create a directory named mydir:\n\
-    md mydir\n\
-    Note: To create files and directories you can use the 'n' command as well\n\
+    md mydir\n\n\
+Note: To create files and directories you can use the 'n' command as well\n\
 - Edit the symbolic link named mylink:\n\
     le mylink"
 
