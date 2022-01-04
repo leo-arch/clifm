@@ -968,6 +968,9 @@ FAIL:
 static int
 join_and_run(char **args, char *name)
 {
+	if (!args || !args[0])
+		return EXIT_FAILURE;
+
 	/* Just an aplication name */
 	if (!args[1]) {
 		errno = 0;
@@ -991,6 +994,7 @@ join_and_run(char **args, char *name)
 
 	size_t i, n = 1, f = 0;
 	for (i = 0; args[i]; i++);
+
 	char **cmd = (char **)xnmalloc(i + 2, sizeof(char *));
 	cmd[0] = savestring(args[0], strlen(args[0]));
 
