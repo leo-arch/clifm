@@ -487,7 +487,7 @@ _print_tips(void)
 static inline void
 run_prompt_cmds(void)
 {
-	if (ext_cmd_ok == 0 || prompt_cmds_n <= 0)
+	if (ext_cmd_ok == 0 || prompt_cmds_n == 0)
 		return;
 
 	size_t i;
