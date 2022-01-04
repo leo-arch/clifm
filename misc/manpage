@@ -630,8 +630,8 @@ The filter will be lost at program exit. To permanently set a files filter use t
 .B hf, hidden \fR[on, off, status]
 toggle hidden files on/off.
 .TP
-.B history \fR[edit] [clear] [\-n]
-with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all entries in the history file. Use 'edit' to open the history file and modify it if needed. Finally, '\-n' tells the \fIhistory\fR command to list only the last 'n' commands in the history list.
+.B history \fR[edit [APP]] [clear] [\-n]
+with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all entries in the history file. Use 'edit' to open the history file and modify it if needed (the file will be opened with APP, if specified, or with the default associated application otherwise). Finally, '\-n' tells the \fIhistory\fR command to list only the last 'n' commands in the history list.
 .sp
 You can use the exclamation mark (!) to perform some history commands:
   !!: Execute the last command.
@@ -670,8 +670,8 @@ To reset or modify the jump database as you wish, simply open the jump file usin
 .sp
 An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and bound by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Just enter ++ to perform a fuzzy search over the jump database.
 .TP
-.B kb, keybinds [edit] [reset] [readline]
-with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the 'edit' option. If you somehow messed up your keybindings, use the 'reset' option to create a fresh keybindings file with the default values. To list readline keybindings, use the 'readline' option. Bear in mind that these keybindings are not provided by CliFM, but by readline itself, and as such depend on the system settings (they can be customized however via the '~/.inputrc' file).
+.B kb, keybinds [edit [APP]] [reset] [readline]
+with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the 'edit' option (the file will be opened with APP, if specified, or with the default associated application otherwise). If you somehow messed up your keybindings, use the 'reset' option to create a fresh keybindings file with the default values. To list readline keybindings, use the 'readline' option. Bear in mind that these keybindings are not provided by CliFM, but by readline itself, and as such depend on the system settings (they can be customized however via the '~/.inputrc' file).
 .TP
 .B lm \fR[on, off]
 Toggle the light mode on/off. This option, aimed to make files listing faster than the default mode, is especially useful for really old hardware or when working on remote machines. For more details see the \fBNOTE ON SPEED\fR section below.
