@@ -1064,11 +1064,13 @@ free_stuff(void)
 	/* Shutdown inotify */
 	if (inotify_wd >= 0)
 		inotify_rm_watch(inotify_fd, inotify_wd);
-	close(inotify_fd);
+	if (inotify_fd != UNSET)
+		close(inotify_fd);
 #elif defined(BSD_KQUEUE)
 	if (event_fd >= 0)
 		close(event_fd);
-	close(kq);
+	if (kq != UNSET)
+		close(kq);
 #endif
 
 	i = (int)autocmds_n;

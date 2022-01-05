@@ -137,8 +137,8 @@ get_app(const char *mime, const char *ext)
 		return (char *)NULL;
 
 	/* Directories are always opened by CliFM itself, except in the case
-	 * of the open-with command (ow) */
-	if (*mime == 'i' && strcmp(mime, "inode/directory") == 0) {
+	 * of the open-with command (ow) and the --open command line option */
+	if (xargs.open != 1 && *mime == 'i' && strcmp(mime, "inode/directory") == 0) {
 		char *p = savestring("clifm", 5);
 		mime_match = 1;
 		return p;

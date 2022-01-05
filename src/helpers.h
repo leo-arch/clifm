@@ -635,6 +635,7 @@ struct param {
 	int no_dirjump;
 	int noeln;
 	int only_dirs;
+	int open;
 	int pager;
 	int path;
 	int printsel;

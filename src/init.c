@@ -915,6 +915,11 @@ open_reg_exit(char *filename)
 	sprintf(mime_file, "%s/.config/clifm/profiles/%s/mimelist.cfm",
 			homedir, alt_profile ? alt_profile : "default");
 
+	/* This should be the case when using CliFM as a resource opener
+	 * via --open */
+	if (path_n == 0)
+		path_n = get_path_env();
+
 	int ret = open_file(filename);
 	exit(ret);
 }
@@ -1132,20 +1137,20 @@ external_arguments(int argc, char **argv)
 		case 31: xargs.case_sens_path_comp = case_sens_path_comp = 1; break;
 		case 32: xargs.cwd_in_title = 1; break;
 
-		case 33: {
+		case 33: { /* --open */
 			struct stat attr;
 			if (stat(optarg, &attr) == -1) {
 				fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, optarg,
 				    strerror(errno));
 				exit(EXIT_FAILURE);
 			}
-
-			if ((attr.st_mode & S_IFMT) != S_IFDIR) {
-				open_reg_exit(optarg);
-			} else {
+			xargs.open = 1;
+//			if ((attr.st_mode & S_IFMT) != S_IFDIR) {
+			open_reg_exit(optarg);
+/*			} else {
 				printf(_("%s: %s: Is a directory\n"), PROGRAM_NAME, optarg);
 				exit(EXIT_FAILURE);
-			}
+			} */
 
 			/*			flags |= START_PATH;
 			path_value = optarg;
@@ -1591,8 +1596,9 @@ unset_xargs(void)
 	xargs.no_dirjump = UNSET;
 	xargs.noeln = UNSET;
 	xargs.only_dirs = UNSET;
-	xargs.path = UNSET;
+	xargs.open = UNSET;
 	xargs.pager = UNSET;
+	xargs.path = UNSET;
 	xargs.printsel = UNSET;
 	xargs.restore_last_path = UNSET;
 	xargs.rl_vi_mode = UNSET;
@@ -1640,16 +1646,16 @@ init_shell(void)
 	/* Put ourselves in our own process group */
 	own_pid = get_own_pid();
 
-//	if (flags & ROOT_USR) {
-		/* Make the shell pgid (process group id) equal to its pid */
-		/* Without the setpgid line below, the program cannot be run
-		 * with sudo, but it can be run nonetheless by the root user */
-/*		if (setpgid(own_pid, own_pid) < 0) {
+/*	if (flags & ROOT_USR) {
+		// Make the shell pgid (process group id) equal to its pid 
+		// Without the setpgid line below, the program cannot be run
+		// with sudo, but it can be run nonetheless by the root user
+		if (setpgid(own_pid, own_pid) < 0) {
 			_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME,
 			    strerror(errno));
 			exit(EXIT_FAILURE);
-		} */
-//	}
+		}
+	} */
 
 	/* Grab control of the terminal */
 //	tcsetpgrp(STDIN_FILENO, own_pid);
