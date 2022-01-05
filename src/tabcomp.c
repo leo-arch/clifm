@@ -1196,6 +1196,14 @@ AFTER_USUAL_COMPLETION:
 				 match, so we need to prepend a quote character if we
 				 are replacing the completion string. */
 				replacement = escape_str(matches[0]);
+
+				/* escape_str escapes the leading tilde, but we don't
+				 * want it here. Remove it */
+				if (cur_comp_type == TCMP_PATH && *matches[0] == '~') {
+					char *tmp = strdup(replacement + 1);
+					free(replacement);
+					replacement = tmp;
+				}
 			}
 		}
 
@@ -1282,7 +1290,6 @@ AFTER_USUAL_COMPLETION:
 			temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
 			temp_string_index++;
 			temp_string[temp_string_index] = '\0';
-//			temp_string_index++;
 
 			if (rl_filename_completion_desired) {
 				struct stat finfo;

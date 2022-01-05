@@ -471,7 +471,13 @@ check_completions(char *str, size_t len, const unsigned char c,
 			suggestion.type = COMP_SUG;
 
 		if (tmp) {
-			print_suggestion(tmp, len, color);
+			char *q;
+			if (cur_comp_type == TCMP_PATH && *tmp == '\\'
+			&& *(tmp + 1) == '~')
+				q = tmp + 1;
+			else
+				q = tmp;
+			print_suggestion(q, len, color);
 			free(tmp);
 		} else {
 			print_suggestion(_matches[0], len, color);
@@ -532,7 +538,13 @@ check_completions(char *str, size_t len, const unsigned char c,
 				suggestion.type = COMP_SUG;
 
 			if (tmp) {
-				print_suggestion(tmp, len, color);
+				char *q;
+				if (cur_comp_type == TCMP_PATH && *tmp == '\\'
+				&& *(tmp + 1) == '~')
+					q = tmp + 1;
+				else
+					q = tmp;
+				print_suggestion(q, len, color);
 				free(tmp);
 			} else {
 				print_suggestion(_matches[1], len, color);

@@ -562,7 +562,7 @@ prompt(void)
 #define STEALTH_IND_SIZE MAX_COLOR + 7 + 1
 
 /* Size of the indicator for msgs, trash, and sel */
-#define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1
+#define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
 /* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
 
 	/* Messages are categorized in three groups: errors, warnings, and

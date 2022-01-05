@@ -560,30 +560,36 @@ rl_accept_suggestion(int count, int key)
 	/* Complete according to the suggestion type */
 	switch(suggestion.type) {
 
-	case BACKDIR_SUG: /* fallthrough */
-	case JCMD_SUG: /* fallthrough */
+	case BACKDIR_SUG:  /* fallthrough */
+	case JCMD_SUG:     /* fallthrough */
 	case BOOKMARK_SUG: /* fallthrough */
-	case COMP_SUG: /* fallthrough */
-	case ELN_SUG: /* fallthrough */
+	case COMP_SUG:     /* fallthrough */
+	case ELN_SUG:      /* fallthrough */
 	case FILE_SUG: {
 		char *tmp = (char *)NULL;
 		size_t i, isquote = 0, backslash = 0;
 		for (i = 0; suggestion_buf[i]; i++) {
-			if (is_quote_char(suggestion_buf[i])) {
+			if (is_quote_char(suggestion_buf[i]))
 				isquote = 1;
-//				break;
-			}
+
 			if (suggestion_buf[i] == '\\') {
 				backslash = 1;
 				break;
 			}
 		}
 		if (isquote && !backslash)
-//		if (isquote)
 			tmp = escape_str(suggestion_buf);
 
 		if (tmp) {
-			rl_insert_text(tmp);
+			/* escape_str escapes leading tilde. But we don't want it
+			 * here. Remove it */
+			char *q;
+			if (cur_comp_type == TCMP_PATH && *tmp == '\\'
+			&& *(tmp + 1) == '~')
+				q = tmp + 1;
+			else
+				q = tmp;
+			rl_insert_text(q);
 			free(tmp);
 		} else {
 			my_insert_text(suggestion_buf, NULL, 0);
@@ -598,7 +604,7 @@ rl_accept_suggestion(int count, int key)
 		my_insert_text(suggestion_buf, s, _s); break;
 
 	case JCMD_SUG_NOACD: /* fallthrough */
-	case SEL_SUG: /* fallthrough */
+	case SEL_SUG:        /* fallthrough */
 	case HIST_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 

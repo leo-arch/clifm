@@ -641,7 +641,7 @@ exec_cmd(char **comm)
 		return (exit_code = create_usr_var(comm[0]));
 	}
 
-	if (comm[0][0] == ';' || comm[0][0] == ':') {
+	if (*comm[0] == ';' || *comm[0] == ':') {
 		if (!comm[0][1]) {
 			/* If just ":" or ";", launch the default shell */
 			char *cmd[] = {user.shell, NULL};
@@ -667,21 +667,14 @@ exec_cmd(char **comm)
 		if (*comm[0] == '~') {
 			char *exp_path = tilde_expand(comm[0]);
 			if (exp_path) {
-				comm[0] = (char *)xrealloc(comm[0], (strlen(exp_path) + 1) * sizeof(char));
-				strcpy(comm[0], exp_path);
-				free(exp_path);
+				free(comm[0]);
+				comm[0] = exp_path;
 			}
 		}
 
 		/* Deescape the string (only if file name) */
-		if (strchr(comm[0], '\\')) {
+		if (strchr(comm[0], '\\'))
 			deq_str = dequote_str(comm[0], 0);
-/*			if (deq_str) {
-				if (access(deq_str, F_OK) == 0)
-					strcpy(comm[0], deq_str);
-				free(deq_str);
-			} */
-		}
 	}
 
 	/* Only autocd or auto-open here if not absolute path and if there
