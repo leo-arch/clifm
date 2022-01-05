@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=CliFM
-Comment=CliFM file manager
+Comment=The command line file manager
 Icon=clifm
 Terminal=true
 Exec=clifm
