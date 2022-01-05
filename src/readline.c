@@ -1204,30 +1204,6 @@ jump_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-/* Expand jump order number into the corresponding path. Used by the
- * jo command */
-static char *
-jump_entries_generator(const char *text, int state)
-{
-	static size_t i;
-	char *name;
-
-	if (!state)
-		i = 0;
-
-	int num_text = atoi(text);
-	if (num_text == INT_MIN)
-		return (char *)NULL;
-
-	/* Check list of jump entries for a match */
-	while (i <= jump_n && (name = jump_db[i++].path) != NULL)
-		if (*name == *jump_db[num_text - 1].path && strcmp(name,
-					jump_db[num_text - 1].path) == 0)
-			return strdup(name);
-
-	return (char *)NULL;
-}
-
 static char *
 cschemes_generator(const char *text, int state)
 {
@@ -1465,41 +1441,6 @@ nets_generator(const char *text, int state)
 
 	return (char *)NULL;
 }
-/*
-static char *
-env_var_generator(const char *text, int state)
-{
-	static int i;
-	static size_t len;
-	char *name;
-
-	if (!state) {
-		i = 0;
-		len = strlen(text);
-	}
-
-	while ((name = environ[i++]) != NULL) {
-		char *p = strchr(name, '=');
-		if (!p)
-			return (char *)NULL;
-		else
-			*p = '\0';
-		if (len == 0) {
-			char *pp = strdup(name);
-			*p = '=';
-			return pp;
-		}
-		int ret = strncmp(name, text, len);
-		if (ret == 0) {
-			char *pp = strdup(name);
-			*p = '=';
-			return pp;
-		}
-		*p = '=';
-	}
-
-	return (char *)NULL;
-} */
 
 static char *
 sort_name_generator(const char *text, int state)
@@ -1535,28 +1476,6 @@ sort_name_generator(const char *text, int state)
 
 	return (char *)NULL;
 }
-
-/* Generate entries from the jump database (not using the j function)*/
-/*char *
-jump_gen(const char *text, int state)
-{
-	static int i;
-	static size_t len;
-	char *name;
-
-	if (!state) {
-		i = 0;
-		len = strlen(text);
-	}
-
-	while ((name = jump_db[i++].path) != NULL) {
-		if (case_sens_path_comp ? strncmp(name, text, len) == 0
-		: strncasecmp(name, text, len) == 0)
-			return strdup(name);
-	}
-
-	return (char *)NULL;
-} */
 
 static char *
 sel_entries_generator(const char *text, int state)
@@ -1652,16 +1571,8 @@ my_rl_completion(const char *text, int start, int end)
 	char **matches = (char **)NULL;
 	cur_comp_type = TCMP_NONE;
 	UNUSED(end);
-	if (start == 0) { /* Only for the first entered word */
-		/* Commands completion */
-/*		if (end == 0 && !autocd && !auto_open) {
-			// If text is empty, do nothing
-			// Prevent readline from attempting path completion if
-			// rl_completion matches returns NULL
-			rl_attempted_completion_over = 1;
-			return (char **)NULL;
-		} */
 
+	if (start == 0) { /* Only for the first entered word */
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
 
@@ -1726,15 +1637,14 @@ my_rl_completion(const char *text, int start, int end)
 				return matches;
 			}
 		}
-
-/*		if (!_xrename && !matches && *text == '$') {
-			matches = rl_completion_matches(text + 1, &env_var_generator);
-		} */
 	}
 
 	/* Second word or more */
 	else {
-		if (!_xrename && nwords == 1 && rl_line_buffer[rl_end - 1] != ' '
+		if (_xrename)
+			return (char **)NULL;
+
+		if (nwords == 1 && rl_line_buffer[rl_end - 1] != ' '
 		/* No command name contains slashes */
 		&& (*text != '/' || !strchr(text, '/'))) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
@@ -1744,7 +1654,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		if (!_xrename && *text == '$' && *(text + 1) != '(') {
+		if (*text == '$' && *(text + 1) != '(') {
 			matches = rl_completion_matches(text, &environ_generator);
 			if (matches) {
 				cur_comp_type = TCMP_ENVIRON;
@@ -1752,7 +1662,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		if (*text != '/' && !_xrename && nwords <= 2 && rl_end >= 3
+		if (*text != '/' && nwords <= 2 && rl_end >= 3
 		&& *rl_line_buffer == 'b' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ') {
 			if (nwords < 2 || (rl_end && rl_line_buffer[rl_end - 1] != ' ')) {
@@ -1767,7 +1677,7 @@ my_rl_completion(const char *text, int start, int end)
 
 #ifndef _NO_LIRA
 		/* #### OPEN WITH #### */
-		if (!_xrename && rl_end > 4 && *rl_line_buffer == 'o' && rl_line_buffer[1] == 'w'
+		if (rl_end > 4 && *rl_line_buffer == 'o' && rl_line_buffer[1] == 'w'
 		&& rl_line_buffer[2] == ' ' && rl_line_buffer[3]
 		&& rl_line_buffer[3] != ' ') {
 			char *p = rl_line_buffer + 3;
@@ -1785,7 +1695,7 @@ my_rl_completion(const char *text, int start, int end)
 #endif /* _NO_LIRA */
 
 		/* ### UNTRASH ### */
-		if (!_xrename && *rl_line_buffer == 'u' && (rl_line_buffer[1] == ' '
+		if (*rl_line_buffer == 'u' && (rl_line_buffer[1] == ' '
 		|| (rl_line_buffer[1] == 'n'
 		&& (strncmp(rl_line_buffer, "untrash ", 8) == 0
 		|| strncmp(rl_line_buffer, "undel ", 6) == 0)))) {
@@ -1797,7 +1707,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### TRASH DEL ### */
-		if (!_xrename && *rl_line_buffer == 't' && (rl_line_buffer[1] == ' '
+		if (*rl_line_buffer == 't' && (rl_line_buffer[1] == ' '
 		|| rl_line_buffer[1] == 'r')
 		&& (strncmp(rl_line_buffer, "t del ", 6) == 0
 		|| strncmp(rl_line_buffer, "tr del ", 7) == 0
@@ -1814,7 +1724,7 @@ my_rl_completion(const char *text, int start, int end)
 		/* Perform this check only if the first char of the string to be
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
-		if (!_xrename && *text >= '0' && *text <= '9') {
+		if (*text >= '0' && *text <= '9') {
 			/* Check ranges */
 			char *r = strchr(text, '-');
 			if (r && *(r + 1) >= '0' && *(r + 1) <= '9') {
@@ -1831,70 +1741,84 @@ my_rl_completion(const char *text, int start, int end)
 				}
 			}
 			
-			int num_text = atoi(text);
-			if (num_text == INT_MIN)
+			int n = atoi(text);
+			if (n == INT_MIN)
 				return (char **)NULL;
 
 			/* Dirjump: jo command */
 			if (*rl_line_buffer == 'j' && rl_line_buffer[1] == 'o'
 			&& rl_line_buffer[2] == ' ') {
-				if (is_number(text) && num_text > 0 && num_text <= (int)jump_n) {
-					matches = rl_completion_matches(text,
-					    &jump_entries_generator);
-					if (matches)
-						cur_comp_type = TCMP_JUMP;
+				if (is_number(text) && n > 0 && n <= (int)jump_n
+				&& jump_db[n - 1].path) {
+					char *p = jump_db[n - 1].path;
+					matches = (char **)xrealloc(matches, 2 * sizeof(char **));
+					matches[0] = savestring(p, strlen(p));
+					matches[1] = (char *)NULL;
+					cur_comp_type = TCMP_PATH;
+					rl_filename_completion_desired = 1;
+					return matches;
 				}
 			}
 
 			/* Sort number expansion */
-			else if (*rl_line_buffer == 's'
+			if (*rl_line_buffer == 's'
 			&& (strncmp(rl_line_buffer, "st ", 3) == 0
 			|| strncmp(rl_line_buffer, "sort ", 5) == 0)
-			&& is_number(text) && num_text >= 0 && num_text <= SORT_TYPES) {
+			&& is_number(text) && n >= 0 && n <= SORT_TYPES) {
 				matches = rl_completion_matches(text, &sort_num_generator);
-				if (matches)
+				if (matches) {
 					cur_comp_type = TCMP_SORT;
+					return matches;
+				}
 			}
 
 			/* ELN expansion */
-			else if (is_number(text) && num_text > 0 && num_text <= (int)files) {
+			if (is_number(text) && n > 0 && n <= (int)files) {
 				matches = rl_completion_matches(text, &filenames_gen_eln);
-				if (matches)
+				if (matches) {
 					cur_comp_type = TCMP_ELN;
+					return matches;
+				}
 			}
 		}
 
 		/* ### SEL KEYWORD EXPANSION ### */
-		else if (!_xrename && sel_n && *text == 's'
+		if (sel_n && *text == 's'
 		&& strncmp(text, "sel", 3) == 0) {
 			matches = rl_completion_matches("", &sel_entries_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_SEL;
+				return matches;
+			}
 		}
 
 		/* ### DESELECT COMPLETION ### */
-		else if (!_xrename && sel_n && *rl_line_buffer == 'd'
+		if (sel_n && *rl_line_buffer == 'd'
 		&& (strncmp(rl_line_buffer, "ds ", 3) == 0
 		|| strncmp(rl_line_buffer, "desel ", 6) == 0)) {
 			matches = rl_completion_matches(text, &sel_entries_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_DESEL;
+				return matches;
+			}
 		}
 
 		/* ### DIRJUMP COMPLETION ### */
 		/* j, jc, jp commands */
-		else if (!_xrename && *rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
+		if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
 		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
 		&& rl_line_buffer[2] == ' ')
 		|| strncmp(rl_line_buffer, "jump ", 5) == 0)) {
 			matches = rl_completion_matches(text, &jump_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_JUMP;
+				return matches;
+			}
 		}
 
 		/* ### BOOKMARKS COMPLETION ### */
 
-		else if (!_xrename && *rl_line_buffer == 'b' && (rl_line_buffer[1] == 'm'
+		if (*rl_line_buffer == 'b' && (rl_line_buffer[1] == 'm'
 		|| rl_line_buffer[1] == 'o')
 		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
 		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
@@ -1903,21 +1827,25 @@ my_rl_completion(const char *text, int start, int end)
 				rl_attempted_completion_over = 1;
 #endif
 			matches = rl_completion_matches(text, &bookmarks_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_BOOKMARK;
+				return matches;
+			}
 		}
 
 		/* ### COLOR SCHEMES COMPLETION ### */
-		else if (!_xrename && *rl_line_buffer == 'c' && ((rl_line_buffer[1] == 's'
+		if (*rl_line_buffer == 'c' && ((rl_line_buffer[1] == 's'
 		&& rl_line_buffer[2] == ' ')
 		|| strncmp(rl_line_buffer, "colorschemes ", 13) == 0)) {
 			matches = rl_completion_matches(text, &cschemes_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_CSCHEME;
+				return matches;
+			}
 		}
 
 		/* ### PROFILES COMPLETION ### */
-		else if (!_xrename && *rl_line_buffer == 'p' && (rl_line_buffer[1] == 'r'
+		if (*rl_line_buffer == 'p' && (rl_line_buffer[1] == 'r'
 		|| rl_line_buffer[1] == 'f')
 		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0
 		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
@@ -1928,29 +1856,37 @@ my_rl_completion(const char *text, int start, int end)
 				rl_attempted_completion_over = 1;
 #endif /* _NO_SUGGESTIONS */
 			matches = rl_completion_matches(text, &profiles_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_PROF;
+				return matches;
+			}
 		}
 
-		else if (!_xrename && expand_bookmarks) {
+		if (expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_BOOKMARK;
+				return matches;
+			}
 		}
 
-		else if (!_xrename && *rl_line_buffer == 's'
+		if (*rl_line_buffer == 's'
 		&& (strncmp(rl_line_buffer, "st ", 3) == 0
 		|| strncmp(rl_line_buffer, "sort ", 5) == 0)) {
 			matches = rl_completion_matches(text, &sort_name_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_SORT;
+				return matches;
+			}
 		}
 
-		else if (!_xrename && *rl_line_buffer == 'n'
+		if (*rl_line_buffer == 'n'
 		&& strncmp(rl_line_buffer, "net ", 4) == 0) {
 			matches = rl_completion_matches(text, &nets_generator);
-			if (matches)
+			if (matches) {
 				cur_comp_type = TCMP_NET;
+				return matches;
+			}
 		}
 	}
 
