@@ -532,6 +532,22 @@ run_shell_cmd(char **comm)
 	return exit_status;
 }
 
+/* Free everything and exit the program */
+static void
+_quit(char **args)
+{
+	if (!args || !args[0])
+		return;
+
+	if (*args[0] == 'Q')
+		cd_on_quit = 1;
+	int i = (int)args_n + 1;
+	while (--i >= 0)
+		free(args[i]);
+	free(args);
+	exit(exit_code);
+}
+
 static int
 set_max_files(char **args)
 {
@@ -719,28 +735,18 @@ exec_cmd(char **comm)
 
 	/*          ############### CD ##################     */
 	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2]) {
-		if (!comm[1])
-			exit_code = cd_function(NULL, CD_PRINT_ERROR);
-		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_(CD_USAGE));
-		else
-			exit_code = cd_function(comm[1], CD_PRINT_ERROR);
-		return exit_code;
+			return EXIT_SUCCESS;
+		}
+		return (exit_code = cd_function(comm[1], CD_PRINT_ERROR));
 	}
 
 	/*         ############### OPEN ##################     */
-	else if (*comm[0] == 'o' && (!comm[0][1] || strcmp(comm[0], "open") == 0)) {
-		if (!comm[1]) {
-			puts(_(OPEN_USAGE));
-			exit_code = EXIT_FAILURE;
-		} else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-			puts(_(OPEN_USAGE));
-		} else {
-			exit_code = open_function(comm);
-		}
-		return exit_code;
-	}
+	else if (*comm[0] == 'o' && (!comm[0][1] || strcmp(comm[0], "open") == 0))
+		return (exit_code = open_function(comm));
 
+	/*         ############### BACKDIR ##################     */
 	else if (*comm[0] == 'b' && comm[0][1] == 'd' && !comm[0][2])
 		return (exit_code = backdir(comm[1] ? comm[1] : NULL));
 
@@ -1768,16 +1774,8 @@ exec_cmd(char **comm)
 	/* #### QUIT #### */
 	else if ((*comm[0] == 'q' && (!comm[0][1] || strcmp(comm[0], "quit") == 0))
 	|| (*comm[0] == 'e' && strcmp(comm[0], "exit") == 0)
-	|| (*comm[0] == 'Q' && !comm[0][1])) {
-		/* Free everything and exit */
-		if (*comm[0] == 'Q')
-			cd_on_quit = 1;
-		int i = (int)args_n + 1;
-		while (--i >= 0)
-			free(comm[i]);
-		free(comm);
-		exit(exit_code);
-	}
+	|| (*comm[0] == 'Q' && !comm[0][1]))
+		_quit(comm);
 
 	else {
 				/* ###############################

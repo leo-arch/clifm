@@ -266,25 +266,6 @@ get_app(const char *mime, const char *ext)
 					*ret = ' ';
 
 				if (file_path) {
-/*					if (xargs.secure_cmds == 1) {
-#ifndef _NO_MAGIC
-						char *m = xmagic(file_path, MIME_TYPE);
-#else
-						char *m = get_mime(file_path);
-#endif
-						if (!m) {
-							free(file_path);
-							continue;
-						}
-						if (*m == 't' && strncmp(m, "text/", 5) == 0) {
-							_err('w', PRINT_PROMPT, "Lira: %s: Scipts are "
-								"not allowed\n", app);
-							free(m);
-							free(file_path);
-							continue;
-						}
-						free(m);
-					} */
 					/* If the app exists, break the loops and return it */
 					free(file_path);
 					file_path = (char *)NULL;

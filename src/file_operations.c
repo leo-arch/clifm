@@ -376,6 +376,11 @@ open_function(char **cmd)
 	if (!cmd)
 		return EXIT_FAILURE;
 
+	if (!cmd[1] || (*cmd[1] == '-' && strcmp(cmd[1], "--help") == 0)) {
+		puts(_(OPEN_USAGE));
+		return EXIT_SUCCESS;
+	}
+
 	if (*cmd[0] == 'o' && (!cmd[0][1] || strcmp(cmd[0], "open") == 0)) {
 		if (strchr(cmd[1], '\\')) {
 			char *deq_path = dequote_str(cmd[1], 0);
