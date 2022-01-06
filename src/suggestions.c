@@ -1362,6 +1362,8 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'j': /* j command */
+		if (lb[1] == ' ' && lb[2] == '-' && strncmp(lb + 2, "--help", strlen(lb + 2)) == 0)
+			break;
 		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'o'
 		|| lb[1] == 'p') && lb[2] == ' ')) {
 			printed = check_jcmd(full_line);
