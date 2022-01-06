@@ -547,7 +547,7 @@ new_instance(char *dir, int sudo)
 
 	if (*deq_dir != '/') {
 		path_dir = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
-							+ strlen(deq_dir) + 2, sizeof(char));
+					+ strlen(deq_dir) + 2, sizeof(char));
 		sprintf(path_dir, "%s/%s", workspaces[cur_ws].path, deq_dir);
 		free(deq_dir);
 	} else {

@@ -1140,7 +1140,7 @@ external_arguments(int argc, char **argv)
 		case 33: { /* --open */
 			struct stat attr;
 			if (stat(optarg, &attr) == -1) {
-				fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, optarg,
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg,
 				    strerror(errno));
 				exit(EXIT_FAILURE);
 			}
@@ -1373,7 +1373,7 @@ external_arguments(int argc, char **argv)
 		char *_exp_path = tilde_expand(argv[i]);
 		if (_exp_path) {
 			if (stat(_exp_path, &attr) == -1) {
-				fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, _exp_path,
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
 					strerror(errno));
 				free(_exp_path);
 				exit(EXIT_FAILURE);
