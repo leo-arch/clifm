@@ -399,8 +399,8 @@ static int
 mount_dev(int n)
 {
 	if (xargs.mount_cmd == UNSET) {
-		fprintf(stderr, "%s: No mount application found. Install either "
-			"udevil or udisks2\n", PROGRAM_NAME);
+		fprintf(stderr, _("%s: No mount application found. Install either "
+			"udevil or udisks2\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -495,8 +495,8 @@ media_menu(int mode)
 #endif
 
 	if (mode == MEDIA_MOUNT && xargs.mount_cmd == UNSET) {
-		fprintf(stderr, _("%s: No mount command found. Install either"
-				"udisks2 or udevil\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: No mount command found. Install either "
+				"udevil or udisks2\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
