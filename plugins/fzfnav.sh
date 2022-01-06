@@ -95,20 +95,21 @@ start_ueberzug() {
 }
 
 HELP="Usage:
-Type in the prompt to filter the current list of files. Regular expressions are \
+  Type in the prompt to filter the current list of files. Regular expressions are \
 allowed.
 
-At exit (Ctrl-q) CliFM will change to the last directory visited or \
+  At exit (Ctrl-q) CliFM will change to the last directory visited or \
 open the last accepted file (Enter). Press Esc to cancel and exit.
 
 Keybindings:
-Left: go to parent directory
-Right or Enter: cd into hovered directory or open hovered file and exit
-Home/end: go to first/last file in the files list
-TAB: Select files
-Ctrl-s: Confirm selection (send them to CliFM Selection Box)
-Shift-up/down: Move one line up/down in the preview window
-Alt-up/down: Move to the beginning/end in the preview window"
+
+  * Left: Change to parent directory
+  * Right or Enter: Change to the highlighted directory or open the highlighted file and exit
+  * Home/end: Change to first/last file in the files list
+  * TAB: Select currently highlighted file
+  * Ctrl-s: Confirm selection (send files to CliFM's Selection Box)
+  * Shift-up/down: Move one line up/down in the preview window
+  * Alt-up/down: Move to the beginning/end in the preview window"
 
 fcd() {
 	if [ "$#" -ne 0 ]; then
@@ -152,7 +153,7 @@ $FZF_HEADER" --marker="*" --preview-window=:wrap "$(fzf_borders)" \
 		if [ -f "$TMP_SEL" ]; then
 			echo "$file" > "$TMP_SEL"
 			while read -r line; do
-				if ! grep -q "$PWD/$line" "$CLIFM_SELFILE"; then
+				if ! grep -q -s "$PWD/$line" "$CLIFM_SELFILE"; then
 					printf "%s/%s\n" "$PWD" "$line" >> "$CLIFM_SELFILE"
 					c=$((c+1))
 				fi
@@ -218,7 +219,7 @@ main() {
 			# CHECK GENERAL OPTIONS
 			FZFHEIGHT)
 				if echo "$value" | grep -qE "[0-9]+"; then
-					fzfheight="$value"
+					export fzfheight="$value"
 				fi ;;
 			LS)
 				if [ "${value:-posix}" = posix ]; then

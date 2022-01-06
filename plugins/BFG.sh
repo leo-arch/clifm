@@ -33,12 +33,25 @@ HEIGHT=1080
 
 calculate_position() {
 	# shellcheck disable=SC2034
+	# TERM_LINES and TERM_COLS hold the number of lines and columns
+	# of the terminal window respectivelly, while LINES and COLUMNS
+	# refer rather to the preview window's size
 	read -r TERM_LINES TERM_COLS << EOF
 	$(</dev/tty stty size)
 EOF
 
 	X=$((TERM_COLS - COLUMNS - 2))
-	fzf_height="${CLIFM_FZF_HEIGHT:-80}"
+
+	if [ -z "$fzfheight" ]; then
+		if [ -n "$CLIFM_FZF_HEIGHT" ]; then
+			fzf_height="${CLIFM_FZF_HEIGHT/\%/}"
+		else
+			fzf_height=80
+		fi
+	else
+		fzf_height="${fzfheight/\%/}"
+	fi
+
 	Y=$((TERM_LINES - (fzf_height * TERM_LINES / 100) + 1))
 }
 
@@ -577,5 +590,6 @@ are required\n" >&2
 	file_info "$entry" # Fallback to file information
 }
 
+#calculate_position
 main "$@"
 exit 1
