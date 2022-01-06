@@ -209,7 +209,7 @@ unmount_dev(size_t i, const int n)
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
-	if (xargs.mount_cmd == MNT_UDEVIL)
+	if (exit_status != EXIT_FAILURE && xargs.mount_cmd == MNT_UDEVIL)
 		printf(_("%s: Unmounted %s\n"), PROGRAM_NAME, media[n].dev);
 	return exit_status;
 }
@@ -473,6 +473,27 @@ free_media(void)
 	media = (struct mnt_t *)NULL;
 }
 
+/* Get device information via external application */
+static int
+print_dev_info(int n)
+{
+	if (!media[n].dev)
+		return EXIT_FAILURE;
+
+	int exit_status = EXIT_SUCCESS;
+	if (xargs.mount_cmd == MNT_UDEVIL) {
+		char *cmd[] = {"udevil", "info", media[n].dev, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	} else {
+		char *cmd[] = {"udisksctl", "info", "-b", media[n].dev, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
 /* If MODE is MEDIA_MOUNT (used by the 'media' command) list mounted and
  * unmounted devices allowing the user to mount or unmount any of them.
  * If MODE is rather MEDIA_LIST (used by the 'mp' command), just list
@@ -578,6 +599,9 @@ media_menu(int mode)
 	/* Ask the user and mount/unmount or chdir into the selected
 	 * device/mountpoint */
 	puts(_("Enter 'q' to quit"));
+	puts(_("Enter 'iNUM' for device information. Ex: i4"));
+
+	int info = 0;
 
 	char *input = (char *)NULL;
 	while (!input) {
@@ -601,7 +625,12 @@ media_menu(int mode)
 		if (*input == 'q' && *(input + 1) == '\0')
 			goto EXIT;
 
-		int atoi_num = atoi(input);
+		char *p = input;
+		if (*p == 'i') {
+			info = 1;
+			++p;
+		}
+		int atoi_num = atoi(p);
 		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
 			fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, input);
 			free(input);
@@ -614,6 +643,18 @@ media_menu(int mode)
 
 	if (n == -1)
 		goto EXIT;
+
+	if (info == 1) {
+		exit_status = print_dev_info(n);
+		if (exit_status == EXIT_SUCCESS) {
+			printf("\nPress any key to continue... ");
+			xgetchar();
+		}
+		free(input);
+		free_media();
+		media_menu(mode);
+		return exit_status;
+	}
 
 #ifdef __linux__
 	if (mode == MEDIA_MOUNT) {
