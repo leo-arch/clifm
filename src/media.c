@@ -599,7 +599,7 @@ media_menu(int mode)
 	/* Ask the user and mount/unmount or chdir into the selected
 	 * device/mountpoint */
 	puts(_("Enter 'q' to quit"));
-	puts(_("Enter 'iNUM' for device information. Ex: i4"));
+	puts(_("Enter 'iELN' for device information. Ex: i4"));
 
 	int info = 0;
 

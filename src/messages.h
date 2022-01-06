@@ -326,9 +326,13 @@ Usage:\n\
   log [clear]"
 
 #define MEDIA_USAGE "List available media devices, allowing to mount or \
-unmount them\n\
+unmount them\n\n\
 Usage:\n\
-  media"
+  media\n\n\
+The list of mounted and unmounted devices will be displayed. Choose the \
+device you want. If mounted, it will be unmounted; if unmounted, it will \
+be mounted.\n\
+To get information about a device, enter iELN. For example: i12"
 
 #define MF_USAGE "Limit the amount of files listed on the screen to NUM \
 (valid range: >= 0). Use 'unset' to remove the files limit.\n\

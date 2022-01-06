@@ -363,6 +363,7 @@ char *internal_cmds[] = {
 	"log",
 	"m", "mv",
 	"md", "mkdir",
+	"media",
 	"mf",
 	"mm", "mime",
 	"mp", "mountpoints",
