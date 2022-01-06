@@ -182,8 +182,8 @@ static int
 unmount_dev(size_t i, const int n)
 {
 	if (xargs.mount_cmd == UNSET) {
-		fprintf(stderr, "%s: No mount application found. Install either "
-			"udevil or udisks2\n", PROGRAM_NAME);
+		fprintf(stderr, _("%s: No mount application found. Install either "
+			"udevil or udisks2\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -434,9 +434,9 @@ mount_dev(int n)
 
 	char out_line[PATH_MAX];
 	if (fgets(out_line, (int)sizeof(out_line), fp) == NULL) {
+		/* Error is printed by the mount command itself */
 		close_fstream(fp, fd);
 		unlink(file);
-		fprintf(stderr, _("%s: Error getting output from mount command\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
