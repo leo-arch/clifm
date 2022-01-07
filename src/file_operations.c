@@ -73,9 +73,15 @@ open_file(char *file)
 	int exit_status = EXIT_SUCCESS;
 
 	if (opener) {
-		char *cmd[] = {opener, file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if (*opener == 'g' && strcmp(opener, "gio") == 0) {
+			char *cmd[] = {"gio", "open", file, NULL};
+			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+		} else {
+			char *cmd[] = {opener, file, NULL};
+			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+		}
 	} else {
 #ifndef _NO_LIRA
 		char *cmd[] = {"mm", file, NULL};
