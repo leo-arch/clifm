@@ -68,7 +68,6 @@ typedef char *rl_cpvfunc_t;
 #define CHECK_MATCH 0
 #define PRINT_MATCH 1
 
-static int free_color = 0;
 char *last_word = (char *)NULL;
 int last_word_offset = 0;
 
@@ -309,7 +308,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 /* Used by the check_completions function to get file names color
  * according to file type */
 static char *
-get_comp_color(const char *filename, const struct stat *attr)
+get_comp_color(const char *filename, const struct stat *attr, size_t *free_color)
 {
 	char *color = no_c; 
 
@@ -359,7 +358,7 @@ get_comp_color(const char *filename, const struct stat *attr)
 											+ 4, sizeof(char));
 						sprintf(ext_color, "\x1b[%sm", extcolor);
 						color = ext_color;
-						free_color = 1;
+						*free_color = 1;
 						extcolor = (char *)NULL;
 					} else  {
 						color = fi_c;
@@ -412,7 +411,7 @@ check_completions(char *str, size_t len, const unsigned char c,
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
 
 	suggestion.filetype = DT_REG;
-	free_color = 0;
+	size_t free_color = 0;
 
 	char *color = (char *)NULL, *_color = (char *)NULL;
 	if (suggest_filetype_color)
@@ -451,7 +450,7 @@ check_completions(char *str, size_t len, const unsigned char c,
 				suggestion.filetype = DT_DIR;
 			}
 			if (suggest_filetype_color)
-				color = get_comp_color(p ? p : _matches[0], &attr);
+				color = get_comp_color(p ? p : _matches[0], &attr, &free_color);
 		} else {
 			/* We have a partial completion. Set filetype to DT_DIR
 			 * so that the rl_accept_suggestion function won't append
@@ -518,7 +517,8 @@ check_completions(char *str, size_t len, const unsigned char c,
 				}
 
 				if (suggest_filetype_color) {
-					_color = get_comp_color(p ? p : _matches[1], &attr);
+					_color = get_comp_color(p ? p : _matches[1], &attr,
+							&free_color);
 					if (_color)
 						color = _color;
 				}
@@ -559,10 +559,8 @@ FREE:
 		free(_matches[i]);
 	free(_matches);
 
-	if (free_color) {
+	if (free_color)
 		free(_color);
-		free_color = 0;
-	}
 
 	return printed;
 }
@@ -674,7 +672,7 @@ static int
 check_history(const char *str, const size_t len)
 {
 	if (!str || !*str || !len)
-		return 0;
+		return NO_MATCH;
 
 	int i = (int)current_hist_n;
 	while (--i >= 0) {
@@ -741,7 +739,7 @@ int
 check_cmds(char *str, const size_t len, const int print)
 {
 	if (!len)
-		return 0;
+		return NO_MATCH;
 
 	int i = (int)path_progsn;
 	while (--i >= 0) {
@@ -807,6 +805,7 @@ check_jumpdb(const char *str, const size_t len, const int print)
 		color = di_c;
 	else
 		color = sf_c;
+
 	int i = (int)jump_n;
 	while (--i >= 0) {
 		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
@@ -844,10 +843,12 @@ static int
 check_bookmarks(const char *str, const size_t len, const int print)
 {
 	if (!bm_n)
-		return 0;
+		return NO_MATCH;
 
+	size_t free_color = 0;
 	char *color = (char *)NULL;
 	struct stat attr;
+
 	if (!suggest_filetype_color)
 		color = sf_c;
 
@@ -865,10 +866,9 @@ check_bookmarks(const char *str, const size_t len, const int print)
 
 		if (len && (case_sens_path_comp ? strncmp(str, bookmarks[i].name, len)
 		: strncasecmp(str, bookmarks[i].name, len)) == 0) {
-			if (lstat(bookmarks[i].path, &attr) == -1)
+			if (lstat(bookmarks[i].path, &attr) == -1) {
 				continue;
-
-			else if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+			} else if ((attr.st_mode & S_IFMT) == S_IFDIR) {
 				suggestion.type = BOOKMARK_SUG;
 				suggestion.filetype = DT_DIR;
 
@@ -884,19 +884,20 @@ check_bookmarks(const char *str, const size_t len, const int print)
 
 				char *_tmp = escape_str(tmp);
 				print_suggestion(_tmp ? _tmp : tmp, 1, color);
-				if (_tmp)
-					free(_tmp);
+				free(_tmp);
 			} else {
 				suggestion.type = BOOKMARK_SUG;
 				suggestion.filetype = DT_REG;
 
 				if (suggest_filetype_color)
-					color = get_comp_color(bookmarks[i].path, &attr);
+					color = get_comp_color(bookmarks[i].path, &attr, &free_color);
 
 				char *_tmp = escape_str(bookmarks[i].path);
 				print_suggestion(_tmp ? _tmp : bookmarks[i].path, 1, color);
-				if (_tmp)
-					free(_tmp);
+				free(_tmp);
+
+				if (free_color == 1)
+					free(color);
 			}
 			return PARTIAL_MATCH;
 		}
@@ -1032,7 +1033,7 @@ check_jcmd(char *line)
 //	suggestion.offset = 0;
 	free(jump_suggestion);
 	jump_suggestion = (char *)NULL;
-	return 1;
+	return PARTIAL_MATCH;
 }
 
 /* Check if we must suggest --help for internal commands */
