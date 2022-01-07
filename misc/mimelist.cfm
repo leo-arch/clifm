@@ -1,51 +1,64 @@
-###############################
-#   Mimelist file for CliFM   #
-###############################
+                  ###################################
+                  #   Configuration file for Lira   #
+                  #     CliFM's resource opener     #
+                  ###################################
 
-# This mimelist covers the most common filetypes
 # Commented and blank lines are omitted
 
-# It is recommended to edit this file leaving only applications you need
+# The below settings cover the most common filetypes
+# It is recommended to edit this file keeping only applications you need
 # to speed up the opening process
+
 # The file is read top to bottom and left to right; the first existent
 # application found will be used
+
 # Applications defined here are NOT desktop files, but commands (arguments
 # could be used as well)
-
-# Use 'E' to match file extensions instead of MIME types.
 
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments,
 # like the kernel built-in console or a remote SSH session.
 
-# Regular expressions are allowed for both file types and extensions.
+# Use 'N' to match file names instead of MIME types.
+
+# Regular expressions are allowed for both file types and file names.
 
 # Use the %f placeholder to specify the position of the file name to be
-# executed in the command. Example:
-# mpv %f --terminal=no
+# opened in the command. Example:
+# 'mpv %f --terminal=no' -> 'mpv FILE --terminal=no' 
 # If %f is not specified, the file name will be added to the end of the
-# command.
+# command. Ex: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'
 
 # Running the opening application in the background:
 # For GUI applications:
 #    APP %f &
 # For terminal applications:
 #    TERM -e APP %f &
-# Replace 'TERM' and 'APP' by the corresponding values. The -e option might
-# vary depending on the terminal emulator used (TERM)
+# Replace 'TERM' and 'APP' by the corresponding values. The -e option
+# might vary depending on the terminal emulator used (TERM)
 
 # Environment variables could be used as well. Example:
 # X:text/plain=$TERM -e $EDITOR %f &;$VISUAL;nano;vi
 
 ########################
-#    File Extensions   #
+#      File Names      #
 ########################
 
-X:E:^djvu$=djview;zathura;evince;atril
-X:E:^epub$=mupdf;zathura;ebook-viewer
-X:E:^mobi$=ebook-viewer
-X:E:^(cbr|cbz)$=zathura
-X:E:^cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;leafpad;mousepad;featherpad;gedit;kate;pluma
-!X:E:^cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak
+# Match a full file name
+#X:N:some_filename=cmd
+
+# Match all file names starting with 'str'
+#X:N:^str.*:cmd
+
+########################
+#    File extensions   #
+########################
+
+X:N:.*\.djvu$=djview;zathura;evince;atril
+X:N:.*\.epub$=mupdf;zathura;ebook-viewer
+X:N:.*\.mobi$=ebook-viewer
+X:N:.*\.(cbr|cbz)$=zathura
+X:N:.*\.cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;leafpad;mousepad;featherpad;gedit;kate;pluma
+!X:N:.*\.cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak
 
 ##################
 #   MIME types   #
