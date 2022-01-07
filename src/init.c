@@ -1142,9 +1142,21 @@ external_arguments(int argc, char **argv)
 
 		case 33: { /* --open */
 			int url = 1;
+			char *_path = optarg;
+			struct stat attr;
+			if (_path[4] == ':' && _path[7] && strncmp(_path, "file://", 7) == 0) {
+				_path = optarg + 7;
+				if (stat(_path, &attr) == -1) {
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg,
+						strerror(errno));
+					exit(EXIT_FAILURE);
+				}
+				url = 0;
+				goto RUN;
+			}
+
 			if (is_url(optarg) == EXIT_FAILURE) {
 				url = 0;
-				struct stat attr;
 				if (stat(optarg, &attr) == -1) {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg,
 						strerror(errno));
@@ -1152,8 +1164,9 @@ external_arguments(int argc, char **argv)
 				}
 			}
 
+RUN:
 			xargs.open = 1;
-			open_reg_exit(optarg, url);
+			open_reg_exit(_path, url);
 		} break;
 
 		case 34: xargs.printsel = 1; break;
@@ -1370,9 +1383,19 @@ external_arguments(int argc, char **argv)
 	if (argv[i]) {
 		struct stat attr;
 		int url = 0;
+		char *_path = argv[i];
 		char *_exp_path = tilde_expand(argv[i]);
 		if (_exp_path) {
-			if (is_url(_exp_path) == EXIT_SUCCESS) {
+			if (_exp_path[4] == ':' && _exp_path[7]
+			&& strncmp(_exp_path, "file://", 7) == 0) {
+				_path = argv[i] + 7;
+				if (stat(_path, &attr) == -1) {
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
+						strerror(errno));
+					free(_exp_path);
+					exit(EXIT_FAILURE);
+				}
+			} else if (is_url(_exp_path) == EXIT_SUCCESS) {
 				url = 1;
 			} else {
 				if (stat(_exp_path, &attr) == -1) {
@@ -1389,10 +1412,10 @@ external_arguments(int argc, char **argv)
 		}
 
 		if (url == 1 || (attr.st_mode & S_IFMT) != S_IFDIR)
-			open_reg_exit(argv[i], url);
+			open_reg_exit(_path, url);
 
 		flags |= START_PATH;
-		path_value = argv[i];
+		path_value = _path;
 		xargs.path = 1;
 	}
 
