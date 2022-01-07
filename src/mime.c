@@ -131,18 +131,18 @@ skip_line_prefix(char *line)
  * Returns the first matching line in the MIME file or NULL if none is
  * found */
 static char *
-get_app(const char *mime, const char *ext)
+get_app(const char *mime, const char *name)
 {
 	if (!mime || !mime_file || !*mime_file)
 		return (char *)NULL;
 
 	/* Directories are always opened by CliFM itself, except in the case
 	 * of the open-with command (ow) and the --open command line option */
-	if (xargs.open != 1 && *mime == 'i' && strcmp(mime, "inode/directory") == 0) {
+/*	if (xargs.open != 1 && *mime == 'i' && strcmp(mime, "inode/directory") == 0) {
 		char *p = savestring("clifm", 5);
 		mime_match = 1;
 		return p;
-	}
+	} */
 
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
@@ -175,15 +175,14 @@ get_app(const char *mime, const char *ext)
 		*tmp = '\0';
 		regex_t regex;
 
-		if (ext && *p == 'E' && *(p + 1) == ':') {
+		if (name && (*p == 'N' || *p == 'E') && *(p + 1) == ':') {
 			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
-			&& regexec(&regex, ext, 0, NULL, 0) == 0)
+			&& regexec(&regex, name, 0, NULL, 0) == 0)
 				found = 1;
 		} else {
 			if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
-			&& regexec(&regex, mime, 0, NULL, 0) == 0) {
+			&& regexec(&regex, mime, 0, NULL, 0) == 0)
 				found = mime_match = 1;
-			}
 		}
 
 		regfree(&regex);
@@ -210,73 +209,75 @@ get_app(const char *mime, const char *ext)
 			while (*tmp == ' ') /* Remove leading spaces */
 				tmp++;
 
-			if (app_len) {
-				app[app_len] = '\0';
+			if (app_len == 0) {
+				tmp++;
+				continue;
+			}
 
-				/* Check each application existence */
-				char *file_path = (char *)NULL;
+			app[app_len] = '\0';
 
-				/* Expand environment variables */
-				if (strchr(app, '$')) {
-					char *t = expand_env(app);
-					if (t) {
-						app = (char *)xrealloc(app, (strlen(t) + 1) * sizeof(char));
-						strcpy(app, t);
-						free(t);
-					}
-				}
+			/* Check each application existence */
+			char *file_path = (char *)NULL;
 
-				if (xargs.secure_cmds == 1
-				&& sanitize_cmd(app, SNT_MIME) != EXIT_SUCCESS)
-					continue;
-
-				/* If app contains spaces, the command to check is
-				 * the string before the first space */
-				char *ret = strchr(app, ' ');
-				if (ret)
-					*ret = '\0';
-
-				if (*app == 'a' && app[1] == 'd' && !app[2]) {
-					/* No need to check: ad is an internal command */
-					cmd_ok = 1;
-					if (ret)
-						*ret = ' ';
-					break;
-				} else {
-					/* Expand tilde */
-					if (*app == '~' && *(app + 1) == '/' && *(app + 2)) {
-						file_path = (char *)xnmalloc(strlen(user.home)
-									+ strlen(app), sizeof(char));
-						sprintf(file_path, "%s/%s", user.home, app + 2);
-						if (access(file_path, X_OK) == -1) {
-							free(file_path);
-							file_path = (char *)NULL;
-						} else {
-							app = (char *)xrealloc(app, (strlen(file_path) + 1)
-								* sizeof(char));
-							strcpy(app, file_path);
-						}
-					} else {
-						/* Either a command name or an absolute path */
-						file_path = get_cmd_path(app);
-					}
-				}
-
-				if (ret)
-					*ret = ' ';
-
-				if (file_path) {
-					/* If the app exists, break the loops and return it */
-					free(file_path);
-					file_path = (char *)NULL;
-					cmd_ok = 1;
-				} else {
-					continue;
+			/* Expand environment variables */
+			if (strchr(app, '$')) {
+				char *t = expand_env(app);
+				if (t) {
+					app = (char *)xrealloc(app, (strlen(t) + 1) * sizeof(char));
+					strcpy(app, t);
+					free(t);
 				}
 			}
 
-			if (cmd_ok)
+			if (xargs.secure_cmds == 1
+			&& sanitize_cmd(app, SNT_MIME) != EXIT_SUCCESS)
+				continue;
+
+			/* If app contains spaces, the command to check is
+			 * the string before the first space */
+			char *ret = strchr(app, ' ');
+			if (ret)
+				*ret = '\0';
+
+			if (*app == 'a' && app[1] == 'd' && !app[2]) {
+				/* No need to check: ad is an internal command */
+				cmd_ok = 1;
+				if (ret)
+					*ret = ' ';
 				break;
+			} else {
+				/* Expand tilde */
+				if (*app == '~' && *(app + 1) == '/' && *(app + 2)) {
+					file_path = (char *)xnmalloc(strlen(user.home)
+								+ strlen(app), sizeof(char));
+					sprintf(file_path, "%s/%s", user.home, app + 2);
+					if (access(file_path, X_OK) == -1) {
+						free(file_path);
+						file_path = (char *)NULL;
+					} else {
+						app = (char *)xrealloc(app, (strlen(file_path) + 1)
+							* sizeof(char));
+						strcpy(app, file_path);
+					}
+				} else {
+					/* Either a command name or an absolute path */
+					file_path = get_cmd_path(app);
+				}
+			}
+
+			if (ret)
+				*ret = ' ';
+
+			if (file_path) {
+				/* If the app exists, break the loops and return it */
+				free(file_path);
+				file_path = (char *)NULL;
+				cmd_ok = 1;
+				break;
+			} else {
+				continue;
+			}
+
 			tmp++;
 		}
 
@@ -549,23 +550,14 @@ mime_edit(char **args)
 }
 
 static char *
-get_file_ext(char *name)
+get_filename(char *file_path)
 {
-	char *ext = (char *)NULL;
-	char *f = strrchr(name, '/');
-	if (f) {
-		f++; /* Skip leading slash */
-		if (*f == '.')
-			f++; /* Skip leading dot if hidden */
+	char *f = strrchr(file_path, '/');
 
-		char *e = strrchr(f, '.');
-		if (e) {
-			e++; /* Remove dot from extension */
-			ext = savestring(e, strlen(e));
-		}
-	}
+	if (f)
+		return (f + 1);
 
-	return ext;
+	return (char *)NULL;
 }
 
 /* Get user input for the 'open with' function */
@@ -617,16 +609,17 @@ mime_list_open(char **apps, char *file)
 	size_t i, j = 0;
 	for (i = 0; apps[i]; i++) {
 		int rep = 0;
-		if (i > 0) {
-			/* Do not list duplicated entries */
-			for (j = 0; j < i; j++) {
-				if (*apps[i] == *apps[j] && strcmp(apps[i], apps[j]) == 0) {
-					rep = 1;
-					break;
-				}
+		if (i == 0)
+			continue;
+		/* Do not list duplicated entries */
+		for (j = 0; j < i; j++) {
+			if (*apps[i] == *apps[j] && strcmp(apps[i], apps[j]) == 0) {
+				rep = 1;
+				break;
 			}
 		}
-		if (rep)
+
+		if (rep == 1)
 			continue;
 
 		n = (char **)xrealloc(n, (nn + 1) * sizeof(char *));
@@ -645,71 +638,76 @@ mime_list_open(char **apps, char *file)
 	char *input = get_user_input(&a, &nn);
 
 	int ret = EXIT_FAILURE;
-	if (input && a > 0 && n[a - 1]) {
-		if (strchr(n[a - 1], ' ')) {
-			size_t f = 0;
-			char **cmd = split_str(n[a - 1], NO_UPDATE_ARGS);
+	char *app = n[a - 1];
 
-			for (i = 0; cmd[i]; i++) {
-				if (*cmd[i] == '&') {
-					bg_proc = 1;
-					free(cmd[i]);
-					cmd[i] = (char *)NULL;
-					continue;
-				}
-				if (*cmd[i] == '%' && cmd[i][1] == 'f') {
-					cmd[i] = (char *)xrealloc(cmd[i], (strlen(file) + 1) * sizeof(char));
-					strcpy(cmd[i], file);
-					f = 1;
-				}
-				if (*cmd[i] == '$' && cmd[i][1] >= 'A' && cmd[i][1] <= 'Z') {
-					char *env = expand_env(cmd[i]);
-					if (env) {
-						free(cmd[i]);
-						cmd[i] = env;
-					}
-				}
-			}
+	if (!input || a <= 0 || !app) {
+		free(input);
+		free(n);
+		return ret;
+	}
 
-			/* If file to be opened was not specified via %f, append
-			 * ir to the cmd array */
-			if (f == 0) {
-				cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
-				cmd[i] = savestring(file, strlen(file));
-				cmd[i + 1] = (char *)NULL;
-			}
-
-			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-			bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS)
-				ret = EXIT_SUCCESS;
-
-			for (i = 0; cmd[i]; i++)
+	if (strchr(app, ' ')) {
+		size_t f = 0;
+		char **cmd = split_str(app, NO_UPDATE_ARGS);
+		for (i = 0; cmd[i]; i++) {
+			if (*cmd[i] == '&') {
+				bg_proc = 1;
 				free(cmd[i]);
-			free(cmd);
-		} else {
-#ifndef _NO_ARCHIVING
-			/* We have just a command name: no parameter, no placeholder */
-			if (*n[a - 1] == 'a' && n[a - 1][1] == 'd' && !n[a - 1][2]) {
-				/* 'ad' is the internal archiver command */
-				char *cmd[] = {"ad", file, NULL};
-				ret = archiver(cmd, 'd');
-			} else {
-				char *cmd[] = {n[a - 1], file, NULL};
-				if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-				bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS) {
-					ret = EXIT_SUCCESS;
+				cmd[i] = (char *)NULL;
+				continue;
+			}
+			if (*cmd[i] == '%' && cmd[i][1] == 'f') {
+				cmd[i] = (char *)xrealloc(cmd[i], (strlen(file) + 1) * sizeof(char));
+				strcpy(cmd[i], file);
+				f = 1;
+			}
+			if (*cmd[i] == '$' && cmd[i][1] >= 'A' && cmd[i][1] <= 'Z') {
+				char *env = expand_env(cmd[i]);
+				if (env) {
+					free(cmd[i]);
+					cmd[i] = env;
 				}
 			}
-#else
-			char *cmd[] = {n[a - 1], file, NULL};
-			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-			bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS)
-				ret = EXIT_SUCCESS;
-#endif /* NO_ARCHIVING */
 		}
 
-		bg_proc = 0;
+		/* If file to be opened was not specified via %f, append
+		 * ir to the cmd array */
+		if (f == 0) {
+			cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
+			cmd[i] = savestring(file, strlen(file));
+			cmd[i + 1] = (char *)NULL;
+		}
+
+		if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+		bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS)
+			ret = EXIT_SUCCESS;
+
+		for (i = 0; cmd[i]; i++)
+			free(cmd[i]);
+		free(cmd);
+	} else {
+#ifndef _NO_ARCHIVING
+		/* We have just a command name: no parameter, no placeholder */
+		if (*app == 'a' && app[1] == 'd' && !app[2]) {
+			/* 'ad' is the internal archiver command */
+			char *cmd[] = {"ad", file, NULL};
+			ret = archiver(cmd, 'd');
+		} else
+#endif /* _NO_ARCHIVING */
+		{
+			char *env = (char *)NULL;
+			if (*app == '$' && app[1] >= 'A' && app[2] <= 'Z')
+				env = expand_env(app);
+
+			char *cmd[] = {env ? env : app, file, NULL};
+			if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
+			bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS)
+				ret = EXIT_SUCCESS;
+			free(env);
+		}
 	}
+
+	bg_proc = 0;
 
 	free(input);
 	free(n);
@@ -726,7 +724,7 @@ mime_open_with_tab(char *filename, const char *prefix)
 	char *name = (char *)NULL,
 		 *deq_file = (char *)NULL,
 		 *mime = (char *)NULL,
-		 *ext = (char *)NULL,
+		 *file_name = (char *)NULL,
 		 **apps = (char **)NULL;
 
 	int free_name = 1;
@@ -759,7 +757,7 @@ mime_open_with_tab(char *filename, const char *prefix)
 	if (!mime)
 		goto FAIL;
 
-	ext = get_file_ext(name);
+	file_name = get_filename(name);
 
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp)
@@ -801,9 +799,9 @@ mime_open_with_tab(char *filename, const char *prefix)
 		regex_t regex;
 
 		int found = 0;
-		if (ext && *p == 'E' && *(p + 1) == ':') {
+		if (file_name && (*p == 'N' || *p == 'E') && *(p + 1) == ':') {
 			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
-			&& regexec(&regex, ext, 0, NULL, 0) == 0)
+			&& regexec(&regex, file_name, 0, NULL, 0) == 0)
 				found = 1;
 		} else if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
 		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
@@ -834,83 +832,98 @@ mime_open_with_tab(char *filename, const char *prefix)
 			while (*tmp == ' ') /* Remove leading spaces */
 				tmp++;
 
-			if (app_len) {
-				if (prefix) {
-					if (strncmp(prefix, app, prefix_len) != 0)
-						continue;
+			if (app_len == 0) {
+				tmp++;
+				continue;
+			}
+
+			if (prefix) {
+				if (strncmp(prefix, app, prefix_len) != 0)
+					continue;
+			}
+			app[app_len] = '\0';
+
+			/* Do not list duplicated entries */
+			size_t i, dup = 0;
+			for (i = 0; i < appsn; i++) {
+				if (*app == *apps[i] && strcmp(app, apps[i]) == 0) {
+					dup = 1;
+					break;
 				}
-				app[app_len] = '\0';
-				/* Check each application existence */
-				char *file_path = (char *)NULL;
+			}
+			if (dup == 1)
+				continue;
 
-				/* Expand environment variables */
-				char *appb = (char *)NULL;
-				if (strchr(app, '$')) {
-					char *t = expand_env(app);
-					if (t) {
-						/* appb: A copy of the original string: let's display
-						 * the env var name itself instead of its expanded
-						 * value */
-						appb = savestring(app, strlen(app));
-						/* app: the expanded value */
-						app = (char *)xrealloc(app, (app_len + strlen(t) + 1)
-								* sizeof(char));
-						strcpy(app, t);
-						free(t);
-					} else {
-						continue;
-					}
-				}
+			/* Check each application existence */
+			char *file_path = (char *)NULL;
 
-				/* If app contains spaces, the command to check is
-				 * the string before the first space */
-				char *ret = strchr(app, ' ');
-				if (ret)
-					*ret = '\0';
-
-				if (*app == '~') {
-					file_path = tilde_expand(app);
-					if (access(file_path, X_OK) != 0) {
-						free(file_path);
-						file_path = (char *)NULL;
-					}
-				/* Do not allow APP to be plain "clifm", since
-				 * nested executions of clifm are not allowed */
-				} else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
-					;
-				} else if (*app == '/') {
-					if (access(app, X_OK) == 0) {
-						file_path = app;
-					}
-				/* 'ad' is an internal command, no need to check it */
-				} else if (*app == 'a' && app[1] == 'd' && !app[2]){
-					file_path = savestring("ad", 2);
-				} else {
-					file_path = get_cmd_path(app);
-				}
-				if (ret)
-					*ret = ' ';
-
-				if (file_path) {
-					/* If the app exists, store it into the APPS array */
-					if (*app != '/') {
-						free(file_path);
-						file_path = (char *)NULL;
-					}
-
-					apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
-					/* appb is not NULL if we have an environment variable */
-					if (appb) {
-						apps[appsn] = savestring(appb, strlen(appb));
-						appsn++;
-						free(appb);
-					} else {
-						apps[appsn] = savestring(app, strlen(app));
-						appsn++;
-					}
+			/* Expand environment variables */
+			char *appb = (char *)NULL;
+			if (strchr(app, '$')) {
+				char *t = expand_env(app);
+				if (t) {
+					/* appb: A copy of the original string: let's display
+					 * the env var name itself instead of its expanded
+					 * value */
+					appb = savestring(app, strlen(app));
+					/* app: the expanded value */
+					app = (char *)xrealloc(app, (app_len + strlen(t) + 1)
+							* sizeof(char));
+					strcpy(app, t);
+					free(t);
 				} else {
 					continue;
 				}
+			}
+
+			/* If app contains spaces, the command to check is
+			 * the string before the first space */
+			char *ret = strchr(app, ' ');
+			if (ret)
+				*ret = '\0';
+
+			if (*app == '~') {
+				file_path = tilde_expand(app);
+				if (access(file_path, X_OK) != 0) {
+					free(file_path);
+					file_path = (char *)NULL;
+				}
+			}
+			/* Do not allow APP to be plain "clifm", since
+			 * nested executions of clifm are not allowed */
+			else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
+				;
+			} else if (*app == '/') {
+				if (access(app, X_OK) == 0)
+					file_path = app;
+			/* 'ad' is an internal command, no need to check it */
+			} else if (*app == 'a' && app[1] == 'd' && !app[2]){
+				file_path = savestring("ad", 2);
+			} else {
+				file_path = get_cmd_path(app);
+			}
+
+			if (ret)
+				*ret = ' ';
+
+			if (!file_path)
+				continue;
+
+			/* If the app exists, store it into the APPS array */
+			if (*app != '/') {
+				free(file_path);
+				file_path = (char *)NULL;
+			}
+
+			apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
+			/* appb is not NULL if we have an environment variable */
+			if (appb) {
+				apps[appsn] = savestring(appb, strlen(appb));
+				appsn++;
+				free(appb);
+			} else {
+				apps[appsn] = savestring(app, strlen(app));
+				appsn++;
 			}
 
 			tmp++;
@@ -932,14 +945,12 @@ mime_open_with_tab(char *filename, const char *prefix)
 
 	free(app);
 	free(mime);
-	free(ext);
 	free(name);
 
 	return apps;
 
 FAIL:
 	free(mime);
-	free(ext);
 	if (free_name)
 		free(name);
 
@@ -1029,7 +1040,7 @@ mime_open_with(char *filename, char **args)
 	char *name = (char *)NULL,
 		 *deq_file = (char *)NULL,
 		 *mime = (char *)NULL,
-		 *ext = (char *)NULL,
+		 *file_name = (char *)NULL,
 		 **apps = (char **)NULL;
 
 	size_t appsn = 0;
@@ -1074,7 +1085,7 @@ mime_open_with(char *filename, char **args)
 	if (!mime)
 		goto FAIL;
 
-	ext = get_file_ext(name);
+	file_name = get_filename(name);
 
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp)
@@ -1100,13 +1111,14 @@ mime_open_with(char *filename, char **args)
 		regex_t regex;
 
 		int found = 0;
-		if (ext && *p == 'E' && *(p + 1) == ':') {
+		if (file_name && (*p == 'N' || *p == 'E') && *(p + 1) == ':') {
 			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
-			&& regexec(&regex, ext, 0, NULL, 0) == 0)
+			&& regexec(&regex, file_name, 0, NULL, 0) == 0)
 				found = 1;
-		} else if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
-		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
-			found = 1;
+		} else {
+			if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
+			&& regexec(&regex, mime, 0, NULL, 0) == 0)
+				found = 1;
 		}
 
 		regfree(&regex);
@@ -1133,78 +1145,79 @@ mime_open_with(char *filename, char **args)
 			while (*tmp == ' ') /* Remove leading spaces */
 				tmp++;
 
-			if (app_len) {
-				app[app_len] = '\0';
-				/* Check each application existence */
-				char *file_path = (char *)NULL;
+			if (app_len == 0) {
+				tmp++;
+				continue;
+			}
 
-				/* Expand environment variables */
-				char *appb = (char *)NULL;
-				if (strchr(app, '$')) {
-					char *t = expand_env(app);
-					if (t) {
-						/* appb: A copy of the original string: let's display
-						 * the env var name itself instead of its expanded
-						 * value */
-						appb = savestring(app, strlen(app));
-						/* app: the expanded value */
-						app = (char *)xrealloc(app, (app_len + strlen(t) + 1)
-								* sizeof(char));
-						strcpy(app, t);
-						free(t);
-					} else {
-						continue;
-					}
-				}
+			app[app_len] = '\0';
+			/* Check each application existence */
+			char *file_path = (char *)NULL;
 
-				/* If app contains spaces, the command to check is
-				 * the string before the first space */
-				char *ret = strchr(app, ' ');
-				if (ret)
-					*ret = '\0';
-
-				if (*app == '~') {
-					file_path = tilde_expand(app);
-					if (file_path && access(file_path, X_OK) != 0) {
-						free(file_path);
-						file_path = (char *)NULL;
-					}
-				/* Do not allow APP to be plain "clifm", since
-				 * nested executions of clifm are not allowed */
-				} else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
-					;
-				} else if (*app == '/') {
-					if (access(app, X_OK) == 0) {
-						file_path = app;
-					}
-				} else if (*app == 'a' && app[1] == 'd' && !app[2]) {
-					file_path = savestring("ad", 2);
-				} else {
-					file_path = get_cmd_path(app);
-				}
-
-				if (ret)
-					*ret = ' ';
-
-				if (file_path) {
-					/* If the app exists, store it into the APPS array */
-					if (*app != '/') {
-						free(file_path);
-						file_path = (char *)NULL;
-					}
-					apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
-					/* appb is not NULL if we have an environment variable */
-					if (appb) {
-						apps[appsn] = savestring(appb, strlen(appb));
-						appsn++;
-						free(appb);
-					} else {
-						apps[appsn] = savestring(app, strlen(app));
-						appsn++;
-					}
-				} else {
+			/* Expand environment variables */
+			char *appb = (char *)NULL;
+			if (strchr(app, '$')) {
+				char *t = expand_env(app);
+				if (!t)
 					continue;
+				/* appb: A copy of the original string: let's display
+				 * the env var name itself instead of its expanded
+				 * value */
+				appb = savestring(app, strlen(app));
+				/* app: the expanded value */
+				app = (char *)xrealloc(app, (app_len + strlen(t) + 1)
+						* sizeof(char));
+				strcpy(app, t);
+				free(t);
+			}
+
+			/* If app contains spaces, the command to check is
+			 * the string before the first space */
+			char *ret = strchr(app, ' ');
+			if (ret)
+				*ret = '\0';
+
+			if (*app == '~') {
+				file_path = tilde_expand(app);
+				if (file_path && access(file_path, X_OK) != 0) {
+					free(file_path);
+					file_path = (char *)NULL;
 				}
+			}
+			/* Do not allow APP to be plain "clifm", since
+			 * nested executions of clifm are not allowed */
+			else if (*app == PNL[0] && strcmp(app, PNL) == 0) {
+				;
+			} else if (*app == '/') {
+				if (access(app, X_OK) == 0) {
+					file_path = app;
+				}
+			} else if (*app == 'a' && app[1] == 'd' && !app[2]) {
+				file_path = savestring("ad", 2);
+			} else {
+				file_path = get_cmd_path(app);
+			}
+
+			if (ret)
+				*ret = ' ';
+
+			if (!file_path)
+				continue;
+
+			/* If the app exists, store it into the APPS array */
+			if (*app != '/') {
+				free(file_path);
+				file_path = (char *)NULL;
+			}
+			apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
+			/* appb is not NULL if we have an environment variable */
+			if (appb) {
+				apps[appsn] = savestring(appb, strlen(appb));
+				appsn++;
+				free(appb);
+			} else {
+				apps[appsn] = savestring(app, strlen(app));
+				appsn++;
 			}
 
 			tmp++;
@@ -1216,7 +1229,6 @@ mime_open_with(char *filename, char **args)
 
 	free(app);
 	free(mime);
-	free(ext);
 
 	if (!apps) {
 		free(name);
@@ -1237,7 +1249,6 @@ mime_open_with(char *filename, char **args)
 
 FAIL:
 	free(mime);
-	free(ext);
 	free(name);
 
 	return EXIT_FAILURE;
@@ -1259,7 +1270,7 @@ mime_open_url(char *url)
 	char *p = strchr(app, ' ');
 	if (p)
 		*p = '\0';
-	printf("APP: %s\n", app);
+
 	char *cmd[] = {app, url, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	free(app);
@@ -1410,16 +1421,15 @@ mime_open(char **args)
 		return EXIT_FAILURE;
 	}
 
-	if (info)
+	char *filename = get_filename(file_path);
+
+	if (info) {
+		printf(_("Name: %s\n"), filename ? filename : _("None"));
 		printf(_("MIME type: %s\n"), mime);
+	}
 
-	char *ext = get_file_ext(file_path);
-
-	if (info)
-		printf(_("Extension: %s\n"), ext ? ext : _("None"));
-
-	/* Get default application for MIME or extension */
-	char *app = get_app(mime, ext);
+	/* Get default application for MIME or filename */
+	char *app = get_app(mime, filename);
 	if (!app) {
 		if (info) {
 			fputs(_("Associated application: None\n"), stderr);
@@ -1432,7 +1442,6 @@ mime_open(char **args)
 
 				free(file_path);
 				free(mime);
-				free(ext);
 
 				return exit_status;
 			} else {
@@ -1447,7 +1456,6 @@ mime_open(char **args)
 
 		free(file_path);
 		free(mime);
-		free(ext);
 
 		return EXIT_FAILURE;
 	}
@@ -1455,22 +1463,22 @@ mime_open(char **args)
 	if (info) {
 		if (*app == 'a' && app[1] == 'd' && !app[2]) {
 			printf(_("Associated application: ad [built-in] [%s]\n"),
-				mime_match ? "MIME" : "ext");
+				mime_match ? "MIME" : "name");
 		} else {
 			printf(_("Associated application: %s [%s]\n"), app,
-				mime_match ? "MIME" : "ext");
+				mime_match ? "MIME" : "name");
 		}
 
 		free(file_path);
 		free(mime);
 		free(app);
-		free(ext);
 
 		return EXIT_SUCCESS;
 	}
 
 	free(mime);
-	free(ext);
+
+	/* Construct the command */
 
 	/* If not info, open the file with the associated application */
 #ifndef _NO_ARCHIVING
@@ -1490,12 +1498,15 @@ mime_open(char **args)
 
 	size_t i, f = 0, n = 0;
 	for (i = 0; cmd[i]; i++) {
+		/* Expand %f pĺaceholder */
 		if (*cmd[i] == '%' && *(cmd[i] + 1) == 'f') {
 			cmd[i] = (char *)xrealloc(cmd[i], (strlen(file_path) + 1)
 					* sizeof(char *));
 			strcpy(cmd[i], file_path);
 			f = 1;
-		} else if (*cmd[i] == '$' && *(cmd[i] + 1) >= 'A'
+		}
+		/* Expand environment variable */
+		else if (*cmd[i] == '$' && *(cmd[i] + 1) >= 'A'
 		&& *(cmd[i] + 1) <= 'Z') {
 			char *p = expand_env(cmd[i]);
 			if (!p)
@@ -1504,6 +1515,7 @@ mime_open(char **args)
 			strcpy(cmd[i], p);
 			free(p);
 		} else {
+			/* Check if the command needs to be backgrounded */
 			if (*cmd[i] == '&') {
 				free(cmd[i]);
 				cmd[i] = (char *)NULL;
