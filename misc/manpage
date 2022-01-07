@@ -1368,6 +1368,21 @@ In case of MIME types, you can also write the entire expression without relying 
  !X:text/plain=$TERM -e $EDITOR %f &>/dev/null &
 .TP
 For more information take a look at the mimelist file itself (\fIF6\fR or \fImm edit\fR).
+.TP
+\fBUsing CliFM as a standalone resource opener\fR
+.TP
+Thought CliFM is a file manager, it can be used as a simple resource opener via the --open command line option. For example:
+
+ clifm --open /path/to/my_file.jpg
+ clifm --open /path/to/my_dir
+ clifm --open https://some_domain
+.TP
+\fBNOTE\fR: When opening web resources CliFM will query the mimelist file using text/html as MIME type. Whatever association it finds for this specific MIME type will be used to open the web resource.
+.TP
+Positional parameters could be used as well, provided the parameter does not point to a directory name, in which case it will be used as CliFM starting path. For instance:
+
+ clifm /path/to/my_file.jpg
+ clifm https://some_domain
 
 .SH 13. AUTO-SUGGESTIONS
 \fIGemini\fR is a built-in suggestions system (similar to that provided by the Fish shell). As you type, \fIGemini\fR will suggest possible completions right after the current cursor position.
