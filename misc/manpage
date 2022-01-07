@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 1, 2022" "CliFM 1.3.1" "CliFM Manual"
+.TH "CLIFM" "1" "Jan 7, 2022" "CliFM 1.4" "CliFM Manual"
 .nh
 .ad l
 
@@ -371,7 +371,7 @@ disable the welcome message
 list only directories
 .TP
 .B \-\-open\fR=FILE
-run as a stand-alone resource opener: open \fIFILE\fR and exit. This option is deprecated: use positional parameters instead
+run as a stand-alone resource opener: open \fIFILE\fR and exit.
 .TP
 .B \-\-opener\fR=APPLICATION
 specify a resource opener to use. If \fIopener\fR is not set, \fILira\fR will be used instead
@@ -1300,7 +1300,7 @@ Of course, combinations of all these features is also possible. Example: 'cp sel
 In addition to completions and expansions, an \fIauto-suggestions system\fR is also available. See the \fBAUTO-SUGGESTIONS\fR section below.
 
 .SH 12. RESOURCE OPENER
-As CliFM's built-in resource opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a file extension), then checks the existence of the command associated with this pattern, and finally executes it.
+As CliFM's built-in resource opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a file name), then checks the existence of the command associated to this pattern, and finally executes it.
 .TP
 \fILira\fR is controlled via the \fImime\fR command. File associations are stored in the MIME list file.
 .TP
@@ -1316,17 +1316,17 @@ Each line in the MIME list file consists of:
 .TP
 \fBa)\fR 'X' or '!X' to specify GUI and non-GUI environments respectivelly;
 .TP
-\fBb)\fR 'E' to instruct \fILira\fR to match a file extension instead of a MIME type;
+\fBb)\fR 'N' to instruct \fILira\fR to match a file name instead of a MIME type;
 .TP
-\fBc)\fR A left value, containing either a file extension or a MIME type to be matched. Regular expressions are supported;
+\fBc)\fR A left value, containing either a file name or a MIME type to be matched. Regular expressions are supported;
 .TP
 \fBd)\fR A right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value;
 .TP
 Note that the syntax departs here from the Freedesktop specification in that we do not rely on desktop files (mostly used by desktop environments), but rather on commands and parameters. In general thus, the syntax is this:
 
- [E][!]X:MIME=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
+ [!]X[:N]:REGEX=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
 .TP
-Use the \fB%f\fR placeholder to specify the position of the file name to be executed in the command, for example: 'mpv %f --terminal=no'. If the placeholder is not specified, the file name will be appended to command string.
+Use the \fB%f\fR placeholder to specify the position of the file name to be opened in the command. For example, 'mpv %f --terminal=no' will be translated into 'mpv FILE --terminal=no'. If the placeholder is not specified, the file name will be appended to command string. Thus, this: 'mpv --terminal=no' amounts to this: 'mpv --terminal=no FILE'.
 .TP
 Running the opening application in the background:
 .TP
@@ -1343,28 +1343,43 @@ Replace 'TERM' and 'APP' by the corresponding values. The \fI-e\fR option might 
 \fBNOTE\fR: In case of archives, the built-in \fIad\fR command could be used as opening application.
 .TP
 \fBNOTE 2\fR: Environment variables (e.g. \fB$EDITOR\fR, \fB$VISUAL\fR, \fB$BROWSER\fR, and even \fB$PAGER\fR) are also recognized by \fILira\fR. You can even set custom environment variables to be used exclusively by CliFM. For example, you can set \fBCLIFM_TERM\fR, \fBCLIFM_EDITOR\fR, and \fBCLIFM_PDF\fR, and then use them to define some associations:
- X:text/plain=$CLIFM_TERM -e $CLIFM_EDITOR %f &>/dev/null &
- X:E:^pdf$=$CLIFM_PDF &
+
+ X:text/plain=$CLIFM_TERM -e $CLIFM_EDITOR %f &
+ X:N:.*\\.pdf$=$CLIFM_PDF %f &
 .TP
 \fBExamples\fR:
 .TP
-Match single extension:
- E:^txt$:leafpad;mousepad;kate;gedit
- !E:^txt$:nano;vim;vi;emacs
+Match a full file name:
 
+ X:N:some_filename:leafpad;mousepad;kate;gedit
 .TP
-Note the 'E' character: it indicates that this rule is intended to match a file extension and not a MIME type, just as 'X' means that this rule is aimed to graphical environments, and '!X' that the rule is aimed to non-graphical environments.
+\fBNote\fR: the 'N' character indicates that this rule is intended to match a \fBfile name\fR instead of a MIME type, just as 'X' means that this rule is aimed to \fBgraphical\fR environments and '!X' that it is aimed rather to \fBnon-graphical\fR environments.
+.TP
+\fBNote 2\fR: If the file name contains a dot, quote it like this: some_filename\.ext (to prevent the REGEX parser from interpreting the dot)
+.TP
+Match multiple file names (starting with 'str'):
+
+ X:N:^str.*:leafpad;mousepad;kate;gedit
+.TP
+Match a single extension:
+
+ X:N:.*\\.txt$:leafpad;mousepad;kate;gedit
+ !X:N:.*\\.^txt$:nano;vim;vi;emacs
 .TP
 Match multiple extensions:
- X:E:^(sh|c|py|pl)$:geany;leafpad;nano
+.TP
+ X:N:.*\\.(sh|c|py|pl)$:geany;leafpad;nano
 .TP
 Match single mimetype:
+
  X:^audio/mp3$=mpv %f --terminal=no;ffplay -nodisp -autoexit;mpv;mplayer
 .TP
 Match mutiple mimetypes:
+
  X:^audio/.*=mplayer;mplayer2;vlc;gmplayer;smplayer;totem
 .TP
 In case of MIME types, you can also write the entire expression without relying on any regular expression. For example:
+
  !X:text/plain=$TERM -e $EDITOR %f &>/dev/null &
 .TP
 For more information take a look at the mimelist file itself (\fIF6\fR or \fImm edit\fR).
