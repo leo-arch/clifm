@@ -1243,6 +1243,33 @@ FAIL:
 	return EXIT_FAILURE;
 }
 
+/* Open URL using the application associated to text/html MIME-type in
+ * the mimelist file. Returns zero if success and 1 on error */
+int
+mime_open_url(char *url)
+{
+	if (!url || !*url)
+		return EXIT_FAILURE;
+
+	char *app = get_app("text/html", 0);
+
+	if (!app)
+		return EXIT_FAILURE;
+
+	char *p = strchr(app, ' ');
+	if (p)
+		*p = '\0';
+	printf("APP: %s\n", app);
+	char *cmd[] = {app, url, NULL};
+	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	free(app);
+
+	if (ret != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
  * former providing MIME info about the corresponding file and the

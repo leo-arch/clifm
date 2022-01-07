@@ -49,6 +49,15 @@
 /* Terminals known not to be able to handle escape sequences */
 static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
 
+int
+is_url(char *url)
+{
+	if ((*url == 'w' && url[1] == 'w' && url[2] == 'w' && url[3] == '.'
+	&& url[4]) || strstr(url, "://") != NULL)
+		return EXIT_SUCCESS;
+	return EXIT_FAILURE;
+}
+
 void
 check_term(void)
 {

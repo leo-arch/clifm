@@ -42,5 +42,6 @@ char *get_sudo_path(void);
 void check_term(void);
 int check_file_access(const struct stat *file);
 void check_third_party_cmds(void);
+int is_url(char *url);
 
 #endif /* CHECKS_H */

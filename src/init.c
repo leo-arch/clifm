@@ -898,7 +898,7 @@ load_remotes(void)
 
 /* Opener function: open FILENAME and exit */
 static void
-open_reg_exit(char *filename)
+open_reg_exit(char *filename, int url)
 {
 	char *homedir = getenv("HOME");
 	if (!homedir) {
@@ -919,6 +919,9 @@ open_reg_exit(char *filename)
 	 * via --open */
 	if (path_n == 0)
 		path_n = get_path_env();
+
+	if (url == 1 && mime_open_url(filename) == EXIT_SUCCESS)
+		exit(EXIT_SUCCESS);
 
 	int ret = open_file(filename);
 	exit(ret);
@@ -1138,23 +1141,19 @@ external_arguments(int argc, char **argv)
 		case 32: xargs.cwd_in_title = 1; break;
 
 		case 33: { /* --open */
-			struct stat attr;
-			if (stat(optarg, &attr) == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg,
-				    strerror(errno));
-				exit(EXIT_FAILURE);
+			int url = 1;
+			if (is_url(optarg) == EXIT_FAILURE) {
+				url = 0;
+				struct stat attr;
+				if (stat(optarg, &attr) == -1) {
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg,
+						strerror(errno));
+					exit(EXIT_FAILURE);
+				}
 			}
-			xargs.open = 1;
-//			if ((attr.st_mode & S_IFMT) != S_IFDIR) {
-			open_reg_exit(optarg);
-/*			} else {
-				printf(_("%s: %s: Is a directory\n"), PROGRAM_NAME, optarg);
-				exit(EXIT_FAILURE);
-			} */
 
-			/*			flags |= START_PATH;
-			path_value = optarg;
-			xargs.path = 1; */
+			xargs.open = 1;
+			open_reg_exit(optarg, url);
 		} break;
 
 		case 34: xargs.printsel = 1; break;
@@ -1370,13 +1369,18 @@ external_arguments(int argc, char **argv)
 	int i = optind;
 	if (argv[i]) {
 		struct stat attr;
+		int url = 0;
 		char *_exp_path = tilde_expand(argv[i]);
 		if (_exp_path) {
-			if (stat(_exp_path, &attr) == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
-					strerror(errno));
-				free(_exp_path);
-				exit(EXIT_FAILURE);
+			if (is_url(_exp_path) == EXIT_SUCCESS) {
+				url = 1;
+			} else {
+				if (stat(_exp_path, &attr) == -1) {
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
+						strerror(errno));
+					free(_exp_path);
+					exit(EXIT_FAILURE);
+				}
 			}
 			free(_exp_path);
 		} else {
@@ -1384,8 +1388,8 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 
-		if ((attr.st_mode & S_IFMT) != S_IFDIR)
-			open_reg_exit(argv[i]);
+		if (url == 1 || (attr.st_mode & S_IFMT) != S_IFDIR)
+			open_reg_exit(argv[i], url);
 
 		flags |= START_PATH;
 		path_value = argv[i];

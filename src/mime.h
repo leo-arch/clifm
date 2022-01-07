@@ -30,5 +30,6 @@ int mime_open(char **args);
 char *xmagic(const char *file, const int mime);
 int mime_open_with(char *filename, char **args);
 char **mime_open_with_tab(char *filename, const char *prefix);
+int mime_open_url(char *url);
 
 #endif /* MIME_H */
