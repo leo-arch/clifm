@@ -170,7 +170,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ➕ **NEW**: [Secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security)
 
-✔️ **NOTE**: Since verion 1.4, and in order to make _Lira_ more powerful<sup>1</sup>, it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
+✔️ **NOTE**: Since verion 1.4, and in order to make _Lira_ more powerful,<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
 <sup>1</sup> _It can now match entire file names instead of just file extensions_
 
