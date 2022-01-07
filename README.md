@@ -162,13 +162,17 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
 For a detailed explanation of each of these features, follow the corresponding links or consult the [Wiki](https://github.com/leo-arch/clifm/wiki).
 </details>
 
-**NEW**: [Backdir - Quickly change to a parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#bd-name)
+➕ **NEW**: [Backdir - Quickly change to a parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#bd-name)
 
-**NEW**: [Multi-selection for FZF TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions)
+➕ **NEW**: [Multi-selection for FZF TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions)
 
-**NEW**: [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security)
+➕ **NEW**: [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security)
 
-**NEW**: [Secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security)
+➕ **NEW**: [Secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security)
+
+✔️ **NOTE**: In order to make _Lira_ more powerful<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) in its configuration file.
+
+<sup>1</sup> _It can now match entire file names instead of just file extensions_
 
 ---
 
