@@ -39,14 +39,14 @@ href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-r
 ---
 
 ## Table of contents
-*   [Description](#description)
-*   [Features](#features)
-*   [Installing _CliFM_](#installing-clifm)
-*   [First steps](#first-steps)
-*   [Support](#support)
-*   [License](#license)
-*   [Contributing](#contributing)
-*   [Community](#community)
+🔸 [Description](#description) \
+🔸 [Features](#features) \
+🔸 [Installing _CliFM_](#installing-clifm) \
+🔸 [First steps](#first-steps) \
+🔸 [Support](#support) \
+🔸 [License](#license) \
+🔸 [Contributing](#contributing) \
+🔸 [Community](#community)
 
 ---
 
