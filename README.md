@@ -39,14 +39,14 @@ href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-r
 ---
 
 ## Table of contents
-*   [Description](#description)
-*   [Features](#features)
-*   [Installing _CliFM_](#installing-clifm)
-*   [First steps](#first-steps)
-*   [Support](#support)
-*   [License](#license)
-*   [Contributing](#contributing)
-*   [Community](#community)
+🔸 [Description](#description) \
+🔸 [Features](#features) \
+🔸 [Installing _CliFM_](#installing-clifm) \
+🔸 [First steps](#first-steps) \
+🔸 [Support](#support) \
+🔸 [License](#license) \
+🔸 [Contributing](#contributing) \
+🔸 [Community](#community)
 
 ---
 
@@ -58,7 +58,7 @@ Unlike most terminal file managers out there, indeed, _CliFM_ replaces the tradi
 
 If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, directory jumper, directory history, auto-cd and auto-open, bulk rename, and a trash system, among [other features](#features). In this sense, _CliFM_ is certainly a file manager, but also a shell extension.
 
-Briefly put, with _CliFM_ the command-line is always already there, never hidden.
+Briefly put, with _CliFM_ the command-line is always already there, never hidden :godmode:
 
 ---
 <sup>1</sup> <i>For a detailed explanation consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki. For more information about these concepts (CLI and TUI) see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>.
@@ -170,7 +170,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ➕ **NEW**: [Secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security)
 
-✔️ **NOTE**: In order to make _Lira_ more powerful<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
+✔️ **NOTE**: Since verion 1.4, and in order to make _Lira_ more powerful<sup>1</sup>, it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
 <sup>1</sup> _It can now match entire file names instead of just file extensions_
 
