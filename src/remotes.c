@@ -391,14 +391,17 @@ autounmount_remotes(void)
 			if (count_dir(remotes[i].mountpoint, CPOP) <= 2)
 				continue;
 			int dir_change = 0;
+
 			if (*workspaces[cur_ws].path == *remotes[i].mountpoint
 			&& strcmp(remotes[i].mountpoint, workspaces[cur_ws].path) == 0) {
 				xchdir("/", NO_TITLE);
 				dir_change = 1;
 			}
+
 			printf(_("%s: Unmounting remote...\n"), remotes[i].name);
 			if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
+
 			if (dir_change)
 				xchdir(workspaces[cur_ws].path, NO_TITLE);
 		}

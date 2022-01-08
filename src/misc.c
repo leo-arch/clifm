@@ -1080,6 +1080,8 @@ free_stuff(void)
 	}
 	free(autocmds);
 
+	free_remotes(1);
+
 	if (xargs.stealth_mode != 1)
 		save_jumpdb();
 
@@ -1261,8 +1263,6 @@ free_stuff(void)
 	free(plugins_dir);
 	free(profile_file);
 	free(remotes_file);
-
-	free_remotes(1);
 
 #ifndef _NO_SUGGESTIONS
 	free(suggestion_buf);
