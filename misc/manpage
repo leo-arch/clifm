@@ -154,11 +154,13 @@ List of CliFM features:
   46) Backdir: quickly change to a parent directory
   47) Secure environment
   48) Secure commands
+  49) URI file scheme support
+  50) URL support when running as standalone resource opener (see the \fI--open\fR option)
 
 .SH 4. POSITIONAL PARAMETERS
-If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
+If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener). URL's and the URI file scheme (for local file systems) is supported.
 .sp
-For example, by running 'clifm /etc/hosts', the \fIhosts\fR file will be opened and CliFM will immediately exit.
+For example, by running 'clifm /etc/hosts', the \fIhosts\fR file will be opened and CliFM will immediately exit. In the same way 'clifm https://some_domain' will open this web resource with the application associated to the \fItext/html\fR MIME type.
 .sp
 On the other side, the command 'clifm /etc' instructs CliFM to start in the directory \fI/etc\fR. If not specified, the first workspace will be used. To start in a different workspace use the \fI\-w\fR option. For instance: 'clifm \-w4 /etc'.
 .sp
@@ -371,7 +373,7 @@ disable the welcome message
 list only directories
 .TP
 .B \-\-open\fR=FILE
-run as a stand-alone resource opener: open \fIFILE\fR and exit.
+run as a stand-alone resource opener: open \fIFILE\fR and exit, where FILE could be a regular file or a directory, using either standard notation (/dir/file) or the URI file scheme (file:///dir/file]), or a URL (www.domain or https://domain).
 .TP
 .B \-\-opener\fR=APPLICATION
 specify a resource opener to use. If \fIopener\fR is not set, \fILira\fR will be used instead
