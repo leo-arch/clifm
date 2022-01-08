@@ -719,9 +719,10 @@ my_rl_path_completion(const char *text, int state)
 			free(users_dirname);
 
 		/* tmp_text is true whenever text was dequoted */
-		size_t text_len = strlen((tmp_text) ? tmp_text : text);
+		char *p = tmp_text ? tmp_text : (char *)text;
+		size_t text_len = strlen(p);
 		if (text_len)
-			filename = savestring((tmp_text) ? tmp_text : text, text_len);
+			filename = savestring(p, text_len);
 		else
 			filename = savestring("", 1);
 
@@ -729,7 +730,7 @@ my_rl_path_completion(const char *text, int state)
 			text = ".";
 
 		if (text_len)
-			dirname = savestring((tmp_text) ? tmp_text : text, text_len);
+			dirname = savestring(p, text_len);
 		else
 			dirname = savestring("", 1);
 
@@ -772,7 +773,12 @@ my_rl_path_completion(const char *text, int state)
 			users_dirname = savestring(dirname, dirname_len);
 		}
 		/*      } */
-		directory = opendir(dirname);
+
+		char *d = dirname;
+		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(text))
+			d = dirname + FILE_URI_PREFIX_LEN;
+
+		directory = opendir(d);
 		filename_len = strlen(filename);
 
 		rl_filename_completion_desired = 1;

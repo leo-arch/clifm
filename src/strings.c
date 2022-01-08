@@ -1198,6 +1198,16 @@ parse_input_str(char *str)
 			continue;
 
 		register size_t j = 0;
+
+		/* Normalize URI file scheme
+		 * file:///some/file -> /some/file */
+		size_t slen = strlen(substr[i]);
+		if (slen > FILE_URI_PREFIX_LEN && IS_FILE_URI(substr[i])) {
+			char tmp[PATH_MAX];
+			strncpy(tmp, substr[i], PATH_MAX - 1);
+			strcpy(substr[i], tmp + FILE_URI_PREFIX_LEN);
+		}
+
 		/* Replace . and .. by absolute paths */
 		if (*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
 		&& !substr[i][2]))) {

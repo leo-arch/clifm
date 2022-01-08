@@ -280,41 +280,47 @@ fzftab_color(char *filename, const struct stat *attr)
 static inline char *
 get_entry_color(char **matches, const size_t i)
 {
-	struct stat attr;
-	char *cl = (char *)NULL;
+	if (colorize == 0)
+		return (char *)NULL;
 
-	if (*matches[i] == '/') { /* Absolute path */
-		if (colorize && (cur_comp_type == TCMP_PATH
-		|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL)) {
-			if (lstat(matches[i], &attr) != -1)
-				cl = fzftab_color(matches[i], &attr);
-		}
-	} else if (*matches[i] == '~') {  /* Tilde */
-		if (colorize && cur_comp_type == TCMP_PATH) {
-			char *exp_path = tilde_expand(matches[i]);
-			if (exp_path) {
-				char tmp_path[PATH_MAX + 1];
-				xstrsncpy(tmp_path, exp_path, PATH_MAX);
-				free(exp_path);
-				if (lstat(tmp_path, &attr) != -1)
-					cl = fzftab_color(tmp_path, &attr);
-			}
-		}
-	} else { /* Relative path */
-		if (colorize) {
-			if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_RANGES) {
-				char tmp_path[PATH_MAX];
-				snprintf(tmp_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, matches[i]);
-				if (lstat(tmp_path, &attr) != -1)
-					cl = fzftab_color(tmp_path, &attr);
-			} else {
-				if (cur_comp_type == TCMP_CMD && is_internal_c(matches[i]))
-					cl = hv_c;
-			}
+	struct stat attr;
+
+	/* Normalize URI file scheme */
+	char *dir = matches[i];
+	size_t dlen = strlen(dir);
+	if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
+		dir += FILE_URI_PREFIX_LEN;
+
+	/* Absolute path */
+	if (*dir == '/'  && (cur_comp_type == TCMP_PATH
+	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL)) {
+		if (lstat(dir, &attr) != -1)
+			return fzftab_color(dir, &attr);
+	}
+
+	/* Tilde */
+	if (*dir == '~' && cur_comp_type == TCMP_PATH) {
+		char *exp_path = tilde_expand(matches[i]);
+		if (exp_path) {
+			char tmp_path[PATH_MAX + 1];
+			xstrsncpy(tmp_path, exp_path, PATH_MAX);
+			free(exp_path);
+			if (lstat(tmp_path, &attr) != -1)
+				return fzftab_color(tmp_path, &attr);
 		}
 	}
 
-	return cl;
+	if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_RANGES) {
+		char tmp_path[PATH_MAX];
+		snprintf(tmp_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, dir);
+		if (lstat(tmp_path, &attr) != -1)
+			return fzftab_color(tmp_path, &attr);
+	}
+
+	if (cur_comp_type == TCMP_CMD && is_internal_c(dir))
+		return hv_c;
+
+	return (char *)NULL;
 }
 
 static inline void
@@ -382,7 +388,12 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 	char _path[PATH_MAX + NAME_MAX];
 	*_path = '\0';
 	char *tmp = *deq_str ? deq_str : ss;
-	if (*tmp != '/' && *tmp != '.' && *tmp != '~') {
+	size_t dlen = strlen(tmp), is_file_uri = 0;
+	if (*tmp == 'f' && *(tmp + 1) == 'i' && dlen > FILE_URI_PREFIX_LEN
+	&& IS_FILE_URI(tmp))
+		is_file_uri = 1;
+
+	if (is_file_uri == 0 && *tmp != '/' && *tmp != '.' && *tmp != '~') {
 		if (*(workspaces[cur_ws].path + 1))
 			snprintf(_path, PATH_MAX + NAME_MAX, "%s/%s", workspaces[cur_ws].path, tmp);
 		else /* Root directory */
@@ -405,15 +416,18 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 	if (epath)
 		spath = epath;
 
+	char *d = spath;
+	if (is_file_uri == 1)
+		d += FILE_URI_PREFIX_LEN;
+
 	struct stat attr;
-	if (stat(spath, &attr) != -1 && S_ISDIR(attr.st_mode)) {
+	if (stat(d, &attr) != -1 && S_ISDIR(attr.st_mode)) {
 		/* If not the root directory, append a slash */
-		if (*spath != '/' || *(spath + 1))
+		if (*d != '/' || *(d + 1))
 			rl_insert_text("/");
 	} else {
-		if (cur_comp_type != TCMP_OPENWITH) {
+		if (cur_comp_type != TCMP_OPENWITH)
 			rl_stuff_char(' ');
-		}
 	}
 
 	free(epath);
@@ -1295,7 +1309,14 @@ AFTER_USUAL_COMPLETION:
 				struct stat finfo;
 				char *filename = tilde_expand(matches[0]);
 
-				if ((stat(filename, &finfo) == 0) && S_ISDIR(finfo.st_mode)) {
+				char *d = filename;
+				if (*filename == 'f' && filename[1] == 'i') {
+					size_t flen = strlen(filename);
+					if (flen > FILE_URI_PREFIX_LEN && IS_FILE_URI(filename))
+						d = filename + FILE_URI_PREFIX_LEN;
+				}
+
+				if ((stat(d, &finfo) == 0) && S_ISDIR(finfo.st_mode)) {
 					if (rl_line_buffer[rl_point] != '/') {
 #ifndef _NO_HIGHLIGHT
 						if (highlight && !wrong_cmd) {
@@ -1476,23 +1497,27 @@ DISPLAY_MATCHES:
 				free(exp_path);
 			}
 		} else {
-			char *p = strrchr(matches[0], '/');
+			char *dir = matches[0];
+			size_t dlen = strlen(dir);
+			if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
+				dir += FILE_URI_PREFIX_LEN;
+			char *p = strrchr(dir, '/');
 			if (!p)
 				goto CALC_OFFSET;
 
-			if (p == matches[0]) {
+			if (p == dir) {
 				if (*(p + 1)) {
 					char pp = *(p + 1);
 					*(p + 1) = '\0';
-					xchdir(matches[0], NO_TITLE);
+					xchdir(dir, NO_TITLE);
 					*(p + 1) = pp;
 				} else {
 					/* We have the root dir */
-					xchdir(matches[0], NO_TITLE);
+					xchdir(dir, NO_TITLE);
 				}
 			} else {
 				*p = '\0';
-				xchdir(matches[0], NO_TITLE);
+				xchdir(dir, NO_TITLE);
 				*p = '/';
 			}
 		}

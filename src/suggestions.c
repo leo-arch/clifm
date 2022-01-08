@@ -1512,7 +1512,13 @@ rl_suggestions(const unsigned char c)
 
 				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 
-				printed = check_completions(word, wlen, c, flag);
+				char *d = word;
+				if (wlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(word)) {
+					d += FILE_URI_PREFIX_LEN;
+					wlen -= FILE_URI_PREFIX_LEN;
+					last_word_offset += FILE_URI_PREFIX_LEN;
+				}
+				printed = check_completions(d, wlen, c, flag);
 
 				if (printed) {
 					if (flag == CHECK_MATCH) {

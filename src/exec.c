@@ -681,19 +681,21 @@ exec_cmd(char **comm)
 	 * is no second argument or if second argument is "&" */
 	if (*comm[0] != '/' && (autocd || auto_open) && (!comm[1]
 	|| (*comm[1] == '&' && !comm[1][1]))) {
+
 		char *tmp = deq_str ? deq_str : comm[0];
 		size_t tmp_len = strlen(tmp);
 		if (tmp[tmp_len - 1] == '/')
 			tmp[tmp_len - 1] = '\0';
 
 		if (autocd && cdpath_n && !comm[1]
-		&& cd_function(comm[0], CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
+		&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
 			free(deq_str);
 			return EXIT_SUCCESS;
 		}
 
 		int i = (int)files;
 		while (--i >= 0) {
+
 			if (*tmp != *file_info[i].name)
 				continue;
 
@@ -708,8 +710,7 @@ exec_cmd(char **comm)
 
 			if (auto_open && (file_info[i].type == DT_REG
 			|| file_info[i].type == DT_LNK)) {
-				char *cmd[] = {"open", comm[0],
-				    comm[1] ? comm[1] : NULL, NULL};
+				char *cmd[] = {"open", comm[0], comm[1] ? comm[1] : NULL, NULL};
 				return (exit_code = open_function(cmd));
 			} else {
 				break;
@@ -1780,8 +1781,8 @@ exec_cmd(char **comm)
 		if (strchr(tmp, '\\')) {
 			char *dstr = dequote_str(tmp, 0);
 			if (dstr) {
-				strcpy(tmp, dstr);
-				free(dstr);
+				free(tmp);
+				tmp = dstr;
 			}
 		}
 

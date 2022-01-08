@@ -365,7 +365,10 @@ extern int watch;
 #define _ISDIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
 #define _ISALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
-#define IS_FILE_URI(f) ((f)[4] == ':' && (f)[7] && strncmp((f), "file://", 7) == 0)
+#define FILE_URI_PREFIX_LEN 7
+#define IS_FILE_URI(f) ((f)[4] == ':' \
+				&& (f)[FILE_URI_PREFIX_LEN] \
+				&& strncmp((f), "file://", FILE_URI_PREFIX_LEN) == 0)
 
 /* dirjump macros for calculating directories rank extra points */
 #define BASENAME_BONUS 	300
