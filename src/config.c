@@ -1647,22 +1647,6 @@ read_config(void)
 			}
 		}
 
-/*		else if (*line == 'E' && strncmp(line, "ELNPad=", 7) == 0) {
-			char *opt = strchr(line, '=');
-			if (!opt || !*opt || !*(++opt)) {
-				elnpad = DEF_ELNPAD;
-			} else {
-				int ivalue = atoi(opt);
-				switch(ivalue) {
-				case NOPAD: elnpad = NOPAD; break;
-				case ZEROPAD: elnpad = ZEROPAD; break;
-				case LEFTSPACEPAD: elnpad = LEFTSPACEPAD; break;
-				case RIGHTSPACEPAD: elnpad = RIGHTSPACEPAD; break;
-				default: elnpad = DEF_ELNPAD;
-				}
-			}
-		} */
-
 		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
 		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
 			char opt_str[MAX_BOOL] = "";

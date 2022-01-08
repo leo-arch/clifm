@@ -233,6 +233,10 @@ extern int watch;
 #define MV_MV    0
 #define MV_ADVMV 1
 
+/* Macros for listing_mode */
+#define VERTLIST 0 /* ls-like listing mode */
+#define HORLIST  1
+
 /* Sort macros */
 #define SNONE      0
 #define SNAME      1
@@ -294,12 +298,6 @@ extern int watch;
 #define E_NOSTDERR (1 << 3)
 #define E_MUTE     (E_NOSTDOUT | E_NOSTDERR)
 
-/* Macros for ELN padding */
-#define NOPAD         0
-#define ZEROPAD       1
-#define LEFTSPACEPAD  2
-#define RIGHTSPACEPAD 3
-
 /* Macros for the backdir (bd) function */
 #define BD_TAB    1
 #define BD_NO_TAB 0
@@ -340,7 +338,7 @@ extern int watch;
 #endif
 
 #define itoa xitoa /* itoa does not exist in some OS's */
-#define atoi xatoi
+#define atoi xatoi /* xatoi is just a secure atoi */
 
 #ifndef _NO_GETTEXT
 #define _(String) gettext(String)
