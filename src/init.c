@@ -1144,7 +1144,7 @@ external_arguments(int argc, char **argv)
 			int url = 1;
 			char *_path = optarg;
 			struct stat attr;
-			if (_path[4] == ':' && _path[7] && strncmp(_path, "file://", 7) == 0) {
+			if (IS_FILE_URI(_path)) {
 				_path = optarg + 7;
 				if (stat(_path, &attr) == -1) {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg,
@@ -1155,10 +1155,10 @@ external_arguments(int argc, char **argv)
 				goto RUN;
 			}
 
-			if (is_url(optarg) == EXIT_FAILURE) {
+			if (is_url(_path) == EXIT_FAILURE) {
 				url = 0;
-				if (stat(optarg, &attr) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg,
+				if (stat(_path, &attr) == -1) {
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _path,
 						strerror(errno));
 					exit(EXIT_FAILURE);
 				}
@@ -1386,8 +1386,7 @@ RUN:
 		char *_path = argv[i];
 		char *_exp_path = tilde_expand(argv[i]);
 		if (_exp_path) {
-			if (_exp_path[4] == ':' && _exp_path[7]
-			&& strncmp(_exp_path, "file://", 7) == 0) {
+			if (IS_FILE_URI(_path)) {
 				_path = argv[i] + 7;
 				if (stat(_path, &attr) == -1) {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
