@@ -187,7 +187,8 @@ Consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduct
 To sart using _CliFM_ **you don't need to learn anything new**: the usual shell commands will just work. However, there is much more that just shell commands... \
 The `help` command teaches you about most of _CliFM_ commands: once in the _CliFM_ prompt, type `help` or `?`. \
 To jump into the **COMMANDS** section in the manpage, simply enter `cmd` or press <kbd>F2</kbd>. \
-Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page.
+Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page. \
+To get help about some specific command, just type `CMD -h`, for instance, `s -h`.
 
 You can also take a look at some of these [basic usage-examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started.
 
