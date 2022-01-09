@@ -1977,7 +1977,7 @@ parse_input_str(char *str)
 		}
 		tmp_files[k] = (char *)NULL;
 
-		for (j = 0; substr[i]; j++)
+		for (j = 0; substr[j]; j++)
 			free(substr[j]);
 		free(substr);
 
