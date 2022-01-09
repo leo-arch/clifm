@@ -51,11 +51,11 @@ Example:\n\
 Usage:\n\
   ac, ad ELN/FILE ...\n\n\
 Examples:\n\
-- Compress archive all selected files:\n\
+- Compress/archive all selected files:\n\
     ac sel\n\
 - Compress/archive a range of files:\n\
     ac 12-24\n\
-- Decompress a file:\n\
+- Decompress/dearchive a file:\n\
     ad file.tar.gz"
 
 #define AUTOCD_USAGE "Turn autocd on-off\n\
@@ -75,7 +75,7 @@ Examples:\n\
     b (Alt-j or Shift-Left also work)\n\
 - Print the directory history list:\n\
     bh\n\
-- Change to directory whose ELN in the list is 24:\n\
+- Change to the directory whose ELN in the list is 24:\n\
     b !24"
 
 #define BD_USAGE "Quickly change to a parent directory matching NAME. If \
@@ -126,7 +126,7 @@ Examples:\n\
 - Bulk rename all selected files:\n\
     br sel"
 
-#define CD_USAGE "Change current working directory\n\
+#define CD_USAGE "Change the current working directory\n\
 Usage:\n\
   cd [ELN/DIR]\n\n\
 Examples:\n\
@@ -135,7 +135,7 @@ Examples:\n\
   Or, if autocd is enabled (default):\n\
     /var"
 
-#define COLORS_USAGE "Print a list of currently used color codes\n\
+#define COLORS_USAGE "Print the list of currently used color codes\n\
 Usage:\n\
   cc, colors"
 
@@ -182,7 +182,7 @@ Examples:\n\
     edit (or F10)\n\
 - Open/edit the configuration file using nano:\n\
     edit nano\n\
-- Create a fresh configuration file (making abackup of the old one):\n\
+- Create a fresh configuration file (making a backup of the old one):\n\
     edit reset"
 
 #define EXT_USAGE "Turn the use of external commands on-off\n\
@@ -202,13 +202,13 @@ Examples:\n\
 Usage:\n\
   fc, filescounter [on, off, status]"
 
-#define FF_USAGE "Set show folders first on-off\n\
+#define FF_USAGE "Set list folders first on-off\n\
 Usage:\n\
   ff, folders-first [on, off, status]\n\
 Example:\n\
-- Disable listing folders first:\n\
+- Disable list folders-first:\n\
     ff off\n\
-  Note: Toggle folders first on/off pressing Alt-g"
+  Note: Toggle folders-first on/off pressing Alt-g"
 
 #define FILTER_USAGE "Set a filter for the files list\n\
 Usage:\n\
@@ -339,7 +339,7 @@ To get information about a device, enter iELN. For example: i12"
 Usage:\n\
   mf [NUM, unset]"
 
-#define MIME_USAGE "Set default opening applications based on MIME types\n\
+#define MIME_USAGE "Set default opening applications based on MIME types or file names\n\
 Usage:\n\
   mm, mime [info ELN/FILENAME] [edit [APP]] [import]\n\n\
 Examples:\n\
@@ -352,7 +352,7 @@ Examples:\n\
 - Try to import MIME file associations from the system:\n\
     mm import\n\
 - Add/modify default opening application for myfile\n\
-    1) Find out the MIME type (or extension) of the file\n\
+    1) Find out the MIME type (or file name) of the file\n\
       mm info myfile\n\
     2) Edit the mimelist file:\n\
       mm edit (or F6)\n\
@@ -399,7 +399,7 @@ Examples:\n\
     n file1 file2\n\
 - Create two directories named dir1 and dir2:\n\
     n dir1/ dir2/\n\
-    Note: Note the ending slash\n\
+    Note: Note the ending slashes\n\
 - Both of the above at once:\n\
     n file1 file2 dir1/ dir2/"
 
@@ -415,10 +415,12 @@ Examples:\n\
     12\n\
     12 vi"
 
-#define OW_USAGE "Open a file with...\n\
+#define OW_USAGE "Open a file with a specific application\n\
 Usage:\n\
   ow ELN/FILE\n\n\
 Example:\n\
+- Choose opening application for test.c from a menu:\n\
+    ow test.c\n\
 - Open the file test.c with geany:\n\
     ow test.c geany\n\
    Note: Type 'ow test.c' and then press TAB to get a list of applications able to open this file"
@@ -451,11 +453,11 @@ Examples:\n\
 Usage:\n\
   pf, prof, profile [ls, list] [set, add, del PROFILE]\n\n\
 Examples:\n\
-- Print current profile name:\n\
+- Print the current profile name:\n\
     pf\n\
 - List available profiles:\n\
     pf ls\n\
-- Set profile to profile named myprofile:\n\
+- Set profile to the profile named myprofile:\n\
     pf set myprofile\n\
 - Add a new profile named new_profile:\n\
     pf add new_profile\n\
@@ -483,15 +485,15 @@ Examples:\n\
     s *.odt\n\
 - Select multiple files at once:\n\
     s 12 15-21 *.pdf\n\
-- Select all regular files in /etc ending starting with 'd':\n\
+- Select all regular files in /etc starting with 'd':\n\
     s ^d.* -r :/etc\n\
 - Select all files in the current directory (including hidden files):\n\
     s * .* (or Alt-a)\n\
 - List currently selected files:\n\
     sb\n\
-- Copy selected files to the current directory:\n\
+- Copy selected files into the current directory:\n\
     c sel\n\
-- Move selected files to the directory whose ELN is 24:\n\
+- Move selected files into the directory whose ELN is 24:\n\
     m sel 24\n\
 - Deselect all selected files\n\
     ds * (or Alt-d)"
@@ -553,7 +555,7 @@ Examples:\n\
 - Untrash files using a menu:\n\
     u"
 
-#define VV_USAGE "Copy selected files to a directory and rename them at once\n\
+#define VV_USAGE "Copy selected files into a directory and rename them at once\n\
 Usage:\n\
   vv sel DIR\n\n\
 Example:\n\
@@ -562,7 +564,7 @@ Example:\n\
 
 #define WRAPPERS_USAGE "c (v, paste), l, m, md, and r commands are wrappers \
 for cp, ln, mv, mkdir, and rm shell commands respectivelly.\n\n\
-Without option parameters:\n\
+\n\
 c -> cp -iRp\n\
 l -> ln -sn\n\
 m -> mv -i\n\
@@ -577,13 +579,13 @@ Examples:\n\
     c file1 file2\n\
 - Create a copy of file1 in the directory dir1 named file2\n\
     c file1 dir1/file2\n\
-- Copy all selected files in the current directory:\n\
+- Copy all selected files into the current directory:\n\
     c sel\n\
-- Move all selected files to the directory named testdir:\n\
+- Move all selected files into the directory named testdir:\n\
     m sel testdir\n\
 - Remove all selected files:\n\
     r sel\n\
-- Rename file1 into file_test:\n\
+- Rename file1 as file_test:\n\
     m file1 file_test\n\
 - Create a symbolic link pointing to the directory whose ELN is 12 named link:\n\
     l 12 link\n\
