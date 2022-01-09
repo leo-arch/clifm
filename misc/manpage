@@ -713,23 +713,69 @@ with no arguments, prints the list of messages in the current session. The 'clea
 create new empty files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name and created via the shell command 'mkdir -p'. Else, it will be created via the 'touch' shell command. Ex: 'n myfile mydir/', to create a file named "myfile" and a directory named "mydir". If no file name is specified, the user will be asked for one. If one or more of the specified file names already exist, ".new" will be appended to the file name.
 .TP
 .B net \fR[NAME] [edit] [m, mount NAME] [u, unmount NAME]
-\fBThe configuration file\fR
+\fB1. The configuration file\fR
 .sp
 The \fInet\fR command manages connections to remote systems via a simple samba-like configuration file (\fI$HOME/.config/clifm/profiles/PROFILE/nets.cfm\fR). Here you can specify multiple remotes and options for each of these remotes. Syntax example for this file:
 .sp
  [remote_name] 
  Comment=A nice descriptive comment
  Mountpoint=/path/to/mountpoint
- MountCmd=sudo mount.cifs //111.111.111.111/share %m -o OPTIONS
+ MountCmd=sudo mount.cifs //192.168.0.12/share %m -o OPTIONS
  UnmountCmd=sudo umount %m
- AutoUnmount=true (Auto-mount this remote at startup)
- AutoMount=false (Auto-unmount this remote at exit)
+ AutoUnmount=true (Auto-unmount this remote at exit)
+ AutoMount=false (Auto-mount this remote at startup)
 .sp
 \fBNote\fR: \fI%m\fR could be used as a placeholder for \fIMountpoint\fR. \fI%m\fR will be replaced by the value of \fIMountpoint\fR.
 .sp
-\fBNote 2\fR: Though originally intended to manage remote file systems, \fInet\fR can also manage \fBlocal file systems\fR. Just provide the appropriate mount and unmount commands. Since the device name assigned by the kernel might change accross reboots (specially when it comes to removable drives), it is recommended to mount using the device's UUID (Universal Unique Identifier) instead of the drive name. For example: 'MountCmd=sudo mount -U c98d91g4-6781... %m'.
+\fB1.a.\fR Mounting remote file systems
 .sp
-\fBCommand syntax\fR
+\fBA Samba share\fR:
+  [samba_share]
+  Comment=My samba share
+  Mountpoint="~/.config/clifm/mounts/smb_share"
+  MountCmd=sudo mount.cifs //192.168.0.26/samba_share %m -o mapchars,credentials=/etc/samba/credentials/samba_share
+  UnmountCmd=sudo umount %m
+  AutoUnmount=false
+  AutoMount=false
+
+\fBA SSH file system (sshfs)\fR:
+  [ssh_share]
+  Comment=My ssh share
+  Mountpoint="/media/ssh"
+  MountCmd=sshfs user@192.168.0.26: %m -C -p 22
+  UnmountCmd=fusermount3 -u %m
+  AutoUnmount=true
+  AutoMount=false
+.sp
+\fB1.b.\fR Mounting local file systems
+.sp
+Though originally intended to manage remote file systems, \fInet\fR can also manage \fBlocal file systems\fR. Just provide the appropriate mount and unmount commands. Since the device name assigned by the kernel might change accross reboots (specially when it comes to removable drives), it is recommended to mount using the device's UUID (Universal Unique Identifier) instead of the drive name. For example:
+
+  MountCmd=sudo mount -U c98d91g4-6781... %m
+
+Here's an example of how to set up \fInet\fR to mount USB devices, one with a FAT file system, and another with an ISO9660 file system:
+
+  [Sandisk USB]
+  Comment=Sandisk USB drive
+  Mountpoint="/media/usb"
+  MountCmd=sudo mount -o gid=1000,fmask=113,dmask=002 -U 5847-xxxx %m
+  UnmountCmd=sudo umount %m
+  AutoUnmount=false
+  AutoMount=false
+
+  [Kingston USB]
+  Comment=Kingston USB drive
+  Mountpoint="/media/usb2"
+  MountCmd=sudo mount -t iso9660 -U 2020-10-01-15-xx-yy-zz %m
+  UnmountCmd=sudo umount %m
+  AutoUnmount=false
+  AutoMount=false
+
+\fBNOTE\fR: The \fIgid\fR, \fIfmask\fR, and \fIdmask\fR options are used to allow the user to access the mountpoint without elevated privileges.
+.sp
+If the device data is unknown, as it often happens when it comes to removable devices, you should use the \fImedia\fR command instead.
+.sp
+\fB2. Command syntax\fR
 .sp
 Without arguments, \fInet\fR lists the configuration for each remote available in the configuration file.
 .sp
