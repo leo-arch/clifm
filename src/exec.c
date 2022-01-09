@@ -167,7 +167,6 @@ run_and_refresh(char **cmd)
 	}
 
 	tcmd[n] = (char *)NULL;
-
 	int ret = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
 
 	for (i = 0; tcmd[i]; i++)
@@ -177,7 +176,7 @@ run_and_refresh(char **cmd)
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	/* Error messages will be printed by launch_execve() itself */
+	/* Error messages are printed by launch_execve() itself */
 
 	/* If 'rm sel' and command is successful, deselect everything */
 	if (is_sel && *cmd[0] == 'r' && cmd[0][1] == 'm' && (!cmd[0][2]

@@ -1642,6 +1642,7 @@ parse_input_str(char *str)
 #endif
 
 	for (i = 0; substr[i]; i++) {
+
 		/* Do not perform any of the expansions below for selected
 		 * elements: they are full path file names that, as such, do not
 		 * need any expansion */
@@ -1896,18 +1897,20 @@ parse_input_str(char *str)
 	|| (*substr[0] == 'n' && (!substr[0][1] || strcmp(substr[0], "new") == 0)))
 		return substr;
 
-	char **regex_files = (char **)xnmalloc(files + args_n + 2, sizeof(char *));
-	size_t j, r_files = 0;
+	/* Let's store all strings currently in substr plus REGEX expanded
+	 * files, if any, in a temporary array */
+	char **tmp = (char **)xnmalloc(files + args_n + 2, sizeof(char *));
+	size_t j, n = 0;
 
 	for (i = 0; substr[i]; i++) {
-		if (r_files > (files + args_n))
+		if (n > (files + args_n))
 			break;
 
 		/* Ignore the first string of the search function: it will be
 		 * expanded by the search function itself */
 		if (*substr[0] == '/') {
-			regex_files[r_files] = substr[i];
-			r_files++;
+			tmp[n] = substr[i];
+			n++;
 			continue;
 		}
 
@@ -1920,50 +1923,61 @@ parse_input_str(char *str)
 		int ret = check_regex(dstr ? dstr : substr[i]);
 		free(dstr);
 		if (ret != EXIT_SUCCESS) {
-			regex_files[r_files] = substr[i];
-			r_files++;
+			tmp[n] = substr[i];
+			n++;
 			continue;
 		}
 
 		regex_t regex;
 		if (regcomp(&regex, substr[i], REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
-			/*          fprintf(stderr, "%s: %s: Invalid regular expression",
-					PROGRAM_NAME, substr[i]); */
 			regfree(&regex);
-			regex_files[r_files] = substr[i];
-			r_files++;
+			tmp[n] = substr[i];
+			n++;
 			continue;
 		}
 
 		int reg_found = 0;
 
 		for (j = 0; j < files; j++) {
-			if (regexec(&regex, file_info[j].name, 0, NULL, 0) == EXIT_SUCCESS) {
-				regex_files[r_files] = file_info[j].name;
-				r_files++;
-				reg_found = 1;
+			if (regexec(&regex, file_info[j].name, 0, NULL, 0) != EXIT_SUCCESS)
+				continue;
+
+			/* Make sure the matching file name is not already in the
+			 * tmp array */
+			int m = (int)n, found = 0;
+			while (--m >= 0) {
+				if (*file_info[j].name == *tmp[m]
+				&& strcmp(file_info[j].name, tmp[m]) == 0)
+					found = 1;
 			}
+
+			if (found)
+				continue;
+
+			tmp[n] = file_info[j].name;
+			n++;
+			reg_found = 1;
 		}
 
 		if (!reg_found) {
-			regex_files[r_files] = substr[i];
-			r_files++;
+			tmp[n] = substr[i];
+			n++;
 		}
 
 		regfree(&regex);
 	}
 
-	if (r_files) {
-		regex_files[r_files] = (char *)NULL;
-		char **tmp_files = (char **)xnmalloc(r_files + 2, sizeof(char *));
+	if (n) {
+		tmp[n] = (char *)NULL;
+		char **tmp_files = (char **)xnmalloc(n + 2, sizeof(char *));
 		size_t k = 0;
-		for (j = 0; regex_files[j]; j++) {
-			tmp_files[k] = savestring(regex_files[j], strlen(regex_files[j]));
+		for (j = 0; tmp[j]; j++) {
+			tmp_files[k] = savestring(tmp[j], strlen(tmp[j]));
 			k++;
 		}
 		tmp_files[k] = (char *)NULL;
 
-		for (j = 0; j <= args_n; j++)
+		for (j = 0; substr[i]; j++)
 			free(substr[j]);
 		free(substr);
 
@@ -1973,7 +1987,7 @@ parse_input_str(char *str)
 		free(tmp_files);
 	}
 
-	free(regex_files);
+	free(tmp);
 	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
 
