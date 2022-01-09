@@ -1140,9 +1140,22 @@ create_remotes_file(void)
 		return EXIT_FAILURE;
 
 	struct stat attr;
+
+	/* If the file already exists, do nothing */
 	if (stat(remotes_file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
+	/* Let's try to copy the file from DATADIR */
+	char sys_remotes[PATH_MAX];
+	snprintf(sys_remotes, PATH_MAX - 1, "%s/%s/nets.cfm", data_dir, PNL);
+
+	if (stat(sys_remotes, &attr) == EXIT_SUCCESS) {
+		char *cmd[] = {"cp", "-f", sys_remotes, remotes_file, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+			return EXIT_SUCCESS;
+	}
+
+	/* If not in DATADIR, let's create a minimal file here */
 	int fd;
 	FILE *fp = open_fstream_w(remotes_file, &fd);
 	if (!fp) {

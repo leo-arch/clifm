@@ -280,7 +280,7 @@ get_data_dir(void)
 		snprintf(tmp, PATH_MAX - 1, "%s/%s", data_dirs[i], PNL);
 		if (stat(tmp, &attr) == EXIT_SUCCESS) {
 			data_dir = (char *)xrealloc(data_dir, (strlen(data_dirs[i]) + 1)
-										* sizeof(char));
+						* sizeof(char));
 			strcpy(data_dir, data_dirs[i]);
 			break;
 		}
