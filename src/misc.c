@@ -262,7 +262,7 @@ filter_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	if (*arg == '-' && strcmp(arg, "--help") == 0) {
+	if (IS_HELP(arg)) {
 		puts(_(FILTER_USAGE));
 		return EXIT_SUCCESS;
 	}

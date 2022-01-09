@@ -342,7 +342,7 @@ cschemes_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+	if (IS_HELP(args[1])) {
 		puts(_(CS_USAGE));
 		return EXIT_SUCCESS;
 	}

@@ -306,7 +306,7 @@ remotes_function(char **args)
 	if (!args[1])
 		return remotes_list();
 
-	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+	if (IS_HELP(args[1])) {
 		puts(_(NET_USAGE));
 		return EXIT_SUCCESS;
 	}

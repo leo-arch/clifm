@@ -130,7 +130,7 @@ xchmod(const char *file, mode_t mode)
 int
 dup_file(char **cmd)
 {
-	if (!cmd[1] || (*cmd[1] == '-' && strcmp(cmd[1], "--help") == 0)) {
+	if (!cmd[1] || IS_HELP(cmd[1])) {
 		puts(_(DUP_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -202,7 +202,7 @@ dup_file(char **cmd)
 int
 create_file(char **cmd)
 {
-	if (cmd[1] && *cmd[1] == '-' && strcmp(cmd[1], "--help") == 0) {
+	if (cmd[1] && IS_HELP(cmd[1])) {
 		puts(_(NEW_USAGE));
 		return EXIT_FAILURE;
 	}
@@ -382,7 +382,7 @@ open_function(char **cmd)
 	if (!cmd)
 		return EXIT_FAILURE;
 
-	if (!cmd[1] || (*cmd[1] == '-' && strcmp(cmd[1], "--help") == 0)) {
+	if (!cmd[1] || IS_HELP(cmd[1])) {
 		puts(_(OPEN_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -853,7 +853,7 @@ remove_file(char **args)
 		exit_status = EXIT_FAILURE;
 #ifdef __HAIKU__
 	else {
-		if (cwd && autols && strcmp(args[1], "--help") != 0
+		if (cwd && autols && !IS_HELP(comm[1])
 		&& strcmp(args[1], "--version") != 0) {
 			free_dirlist();
 			exit_status = list_dir();
@@ -1183,7 +1183,7 @@ batch_link(char **args)
 	if (!args)
 		return EXIT_FAILURE;
 
-	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
+	if (!args[1] || IS_HELP(args[1])) {
 		puts(_(BL_USAGE));
 		return EXIT_SUCCESS;
 	}

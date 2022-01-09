@@ -1289,7 +1289,7 @@ int
 mime_open(char **args)
 {
 	/* Check arguments */
-	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
+	if (!args[1] || IS_HELP(args[1])) {
 		puts(_(MIME_USAGE));
 		return EXIT_FAILURE;
 	}

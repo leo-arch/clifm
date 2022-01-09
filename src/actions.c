@@ -312,7 +312,7 @@ actions_function(char **args)
 	} else if (strcmp(args[1], "edit") == 0) {
 		return edit_actions(args[2] ? args[2] : NULL);
 
-	} else if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+	} else if (IS_HELP(args[1])) {
 		puts(_(ACTIONS_USAGE));
 		return EXIT_SUCCESS;
 

@@ -58,7 +58,7 @@ handle_workspaces(char *str)
 		return EXIT_SUCCESS;
 	}
 
-	if (*str == '-' && strcmp(str, "--help") == 0) {
+	if (IS_HELP(str)) {
 		puts(_(WS_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -252,7 +252,7 @@ grab_bd_input(int n)
 int
 backdir(char* str)
 {
-	if (str && *str == '-' && strcmp(str, "--help") == 0) {
+	if (str && IS_HELP(str)) {
 		puts(_(BD_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -626,7 +626,7 @@ back_function(char **comm)
 		return EXIT_FAILURE;
 
 	if (comm[1]) {
-		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+		if (IS_HELP(comm[1])) {
 			puts(_(BACK_USAGE));
 			return EXIT_SUCCESS;
 		}
@@ -669,7 +669,7 @@ forth_function(char **comm)
 		return EXIT_FAILURE;
 
 	if (comm[1]) {
-		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+		if (IS_HELP(comm[1])) {
 			puts(_(FORTH_USAGE));
 			return EXIT_SUCCESS;
 		}

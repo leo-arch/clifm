@@ -382,8 +382,7 @@ dirjump(char **args, int mode)
 		return EXIT_SUCCESS;
 	}
 
-	if (mode == NO_SUG_JUMP && args[1] && *args[1] == '-'
-	&& strcmp(args[1], "--help") == 0) {
+	if (mode == NO_SUG_JUMP && args[1] && IS_HELP(args[1])) {
 		puts(_(JUMP_USAGE));
 		return EXIT_SUCCESS;
 	}

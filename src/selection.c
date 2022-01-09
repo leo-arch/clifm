@@ -421,8 +421,7 @@ sel_function(char **args)
 	if (!args)
 		return EXIT_FAILURE;
 
-	if (!args[1] || (*args[1] == '-' && args[1][1] == '-'
-	&& strcmp(args[1], "--help") == 0)) {
+	if (!args[1] || IS_HELP(args[1])) {
 		puts(_(SEL_USAGE));
 		return EXIT_SUCCESS;
 	}

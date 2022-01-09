@@ -101,7 +101,7 @@ edit_function(char **comm)
 		return EXIT_SUCCESS;
 	}
 
-	if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+	if (comm[1] && IS_HELP(comm[1])) {
 		printf("%s\n", EDIT_USAGE);
 		return EXIT_SUCCESS;
 	}

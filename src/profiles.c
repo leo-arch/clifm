@@ -442,7 +442,7 @@ profile_function(char **comm)
 	int exit_status = EXIT_SUCCESS;
 
 	if (comm[1]) {
-		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+		if (IS_HELP(comm[1]))
 			puts(_(PROFILES_USAGE));
 
 		/* List profiles */
