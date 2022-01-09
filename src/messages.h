@@ -468,7 +468,9 @@ Usage:\n\
 Examples:\n\
 - Print the properties of the file whose ELN is 12:\n\
     p 12\n\
-- Print the properties of the directory 'dir' (inclusing its total size):\n\
+- Print the properties of all selected files:\n\
+    p sel\n\
+- Print the properties of the directory 'dir' (including its total size):\n\
     pp dir"
 
 #define SEL_USAGE "Select one or multiple files\n\
