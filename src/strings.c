@@ -60,6 +60,38 @@ char len_buf[CMD_LEN_MAX] __attribute__((aligned));
 
 #define MAX_STR_SZ 4096
 
+#if defined(__linux__) && defined(_BE_POSIX)
+/* strcasestr(3) is a GNU extension on Linux. If GNU extensions are not
+ * available, let's use this as replacement */
+char *
+xstrcasestr(char *a, const char *b)
+{
+	if (!a || !b)
+		return (char *)NULL;
+
+	size_t f = 0;
+	char *p = (char *)NULL;
+	while (*a) {
+		if (!*b)
+			break;
+		if (TOUPPER(*a) != TOUPPER(*b)) {
+			++a;
+			f = 0;
+			continue;
+		}
+		if (f == 0)
+			p = a;
+		f = 1;
+		++a;
+		++b;
+	}
+
+	if (!*b && f == 1)
+		return p;
+
+	return (char *)NULL;
+}
+#endif /* __linux && _BE_POSIX */
 
 /* Just a strlen that sets a read limit in case of non-null terminated
  * string */

@@ -52,4 +52,7 @@ int is_internal_f(const char *restrict cmd);
 int xstrverscmp(const char *s1, const char *s2);
 char *truncate_wname(const char *name);
 char **split_str(const char *str, const int update_args);
+#if defined(__linux__) && defined(_BE_POSIX)
+char *xstrcasestr(char *a, const char *b);
+#endif /* __linux && _BE_POSIX */
 #endif /* STRINGS_H */
