@@ -122,7 +122,7 @@ xstrsncpy(buf, src, PATH_MAX);
 
 These are just a few examples. There are plenty of resources out there on how to write secure code.
 
-**2)** Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you don't need it any more.
+**2)** Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you don't need it any more. As a plus, compile with `clang` using the following flags to detect undefined behavior and integer overflow at run-time: `-fsanitize=integer -fsanitize=undefined`.
 
 **3)** Static analysis tools are an invaluable resource: use them! **Always** check your code via tools like `cppcheck`, `scan-build`, `flawdiner`, or `splint`. Use them all if necessary. Once done, fix all warnings and errors (provided they are not false positives, of course). This said, we use three online platforms to check our code quality: [Codacy](https://app.codacy.com/gh/leo-arch/clifm/dashboard), [Codiga](https://app.codiga.io/project/30518/dashboard), and [LGTM](https://lgtm.com/projects/g/leo-arch/clifm).
 
