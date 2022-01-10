@@ -186,6 +186,8 @@ This is the basic structure of CliFM: generally speaking, it is just a shell. In
 
 * File names cleaner(`bleach`): `name_cleaner.c` and `cleaner_table.h`
 
+* Improve my security: `sanitize.c`
+
 ## 5) Compilation
 
 **Note**: For the list of dependencies, see the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
