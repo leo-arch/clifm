@@ -316,134 +316,137 @@ void
 print_tips(int all)
 {
 	const char *TIPS[] = {
-	    "Try the autocd and auto-open functions: run 'FILE' instead "
-	    "of 'open FILE' or 'cd FILE'",
-	    "Add a new entry to the mimelist file with 'mm edit' or F6",
-	    "Do not forget to take a look at the manpage",
-	    "Need more speed? Try the light mode (Alt-y)",
-	    "The Selection Box is shared among different instances of CliFM",
-	    "Select files here and there with the 's' command",
-	    "Use wildcards and regular expressions with the 's' command: "
-	    "'s *.c' or 's .*\\.c$'",
-	    "ELN's and the 'sel' keyword work for shell commands as well: "
-	    "'file 1 sel'",
-	    "Press TAB to automatically expand an ELN: 's 2' -> TAB -> "
-	    "'s FILENAME'",
-	    "Easily copy everything in CWD into another directory: 's * "
-	    "&& c sel ELN/DIR'",
-	    "Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 "
-	    "ELN/DIR'",
-	    "Trash files with a simple 't ELN'",
-	    "Get mime information for a file: 'mm info ELN'",
-	    "If too many files are listed, try enabling the pager ('pg on')",
-	    "Once in the pager, go backwards pressing the keyboard shortcut "
-	    "provided by your terminal emulator",
-	    "Once in the pager, press 'q' to stop it",
-	    "Press 'Alt-l' to switch to long view mode",
-	    "Search for files using the slash command: '/*.png'",
-	    "The search function allows regular expressions: '/^c'",
-	    "Add a new bookmark by just entering 'bm a ELN/FILE'",
-	    "Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
-	    "Access a remote file system using the 'net' command",
-	    "Manage default associated applications with the 'mime' command",
-	    "Go back and forth in the directory history with 'Alt-j' and 'Alt-k' "
-	    "or Shift-Left and Shift-Right",
-	    "Open a new instance of CliFM with the 'x' command: 'x ELN/DIR'",
-	    "Send a command directly to the system shell with ';CMD'",
-	    "Run the last executed command by just running '!!'",
-	    "Import aliases from file using 'alias import FILE'",
-	    "List available aliases by running 'alias'",
-	    "Create aliases to easily run your preferred commands",
-	    "Open and edit the configuration file with 'edit'",
-	    "Find a description for each CliFM command by running 'cmd'",
-	    "Print the currently used color codes list by entering 'cc'",
-	    "Press 'Alt-i' or 'Alt-.' to toggle hidden files on/off",
-	    "List mountpoints by pressing 'Alt-m'",
-	    "Disallow the use of shell commands with the -x option: 'clifm -x'",
-	    "Go to the root directory by just pressing 'Alt-r'",
-	    "Go to the home directory by just pressing 'Alt-e'",
-	    "Press 'F8' to open and edit current color scheme",
-	    "Press 'F9' to open and edit the keybindings file",
-	    "Press 'F10' to open and edit the configuration file",
-	    "Press 'F11' to open and edit the bookmarks file",
-	    "Set the starting path: 'clifm PATH'",
-	    "Use the 'o' command to open files and directories: '12'",
-	    "Bypass the resource opener specifying an application: '12 "
-	    "leafpad'",
-	    "Open a file and send it to the background running '24&'",
-	    "Create a custom prompt editing the configuration file",
-	    "Customize color codes via 'cs edit' command (F6)",
-	    "Open the bookmarks manager by just pressing 'Alt-b'",
-	    "Chain commands using ; and &&: 's 2 7-10; r sel'",
-	    "Add emojis to the prompt by copying them to the Prompt line "
-	    "in the configuration file",
-	    "Create a new profile running 'pf add PROFILE' or 'clifm -P "
-	    "PROFILE'",
-	    "Switch profiles using 'pf set PROFILE'",
-	    "Delete a profile using 'pf del PROFILE'",
-	    "Copy selected files into CWD by just running 'v sel' or "
-	    "pressing Ctrl-Alt-v",
-	    "Use 'p ELN' to print file properties for ELN",
-	    "Deselect all selected files by pressing 'Alt-d'",
-	    "Select all files in CWD by pressing 'Alt-a'",
-	    "Jump to the Selection Box by pressing 'Alt-s'",
-	    "Restore trashed files using the 'u' command",
-	    "Empty the trash bin running 't clear'",
-	    "Press Alt-f to toggle list-folders-first on/off",
-	    "Use the 'fc' command to disable the files counter",
-	    "Take a look at the splash screen with the 'splash' command",
-	    "Have some fun trying the 'bonus' command",
-	    "Launch the default system shell in CWD using ':' or ';'",
-	    "Use 'Alt-z' and 'Alt-x' to switch sorting methods",
-	    "Reverse sorting order using the 'rev' option: 'st rev'",
-	    "Compress and decompress files using the 'ac' and 'ad' "
-	    "commands respectivelly",
-	    "Rename multiple files at once with the bulk rename function: "
-	    "'br *.txt'",
-	    "Need no more tips? Disable this feature in the configuration "
-	    "file",
-	    "Need root privileges? Launch a new instance of CLifM as root "
-	    "running the 'X' command",
-	    "Create custom commands and features using the 'actions' command",
-	    "Create a fresh configuration file by running 'edit reset'",
-	    "Use 'ln edit' (or 'le') to edit symbolic links",
-	    "Change default keyboard shortcuts by editing the keybindings file (F9)",
-	    "Keep in sight previous and next visited directories enabling the "
-	    "DirhistMap option in the configuration file",
-	    "Leave no traces at all running in stealth mode (-S)",
-	    "Pin a file via the 'pin' command and then use it with the "
-	    "period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
-	    "Switch between color schemes using the 'cs' command",
-	    "Try the 'j' command to quickly navigate through visited "
-	    "directories",
-	    "Switch workspaces by pressing Alt-[1-4]",
-	    "Use the 'ws' command to list available workspaces",
-	    "Take a look at available plugins using the 'actions' command",
-	    "Space is not needed: enter 'p12' instead of 'p 12'",
-	    "When searching or selecting files, use the exclamation mark "
-	    "to reverse the meaning of a pattern",
-	    "Enable the TrashAsRm option to prevent accidental deletions",
-	    "Don't like ELN's? Disable them using the -e option",
-	    "Use the 'n' command to create multiple files and/or directories",
-	    "Customize your prompt by adding prompt commands via the 'edit' "
-	    "command (F10)",
-	    "Need git integration? Consult the manpage",
-	    "Accept a given suggestion by pressing the Right arrow key",
-	    "Accept only the first suggested word by pressing Alt-f or Alt-Right",
-	    "Enter 'c sel' to copy selected files into the current directory",
-	    "Take a look at available plugins via the 'actions' command",
-	    "Enable the FZF mode for a better TAB completion experience",
-	    "Press Alt-q to delete the last typed word",
-	    "Check ELN ranges by pressing TAB",
-	    "Select a specific selected file by typing 'sel' and then TAB",
-	    "Use the 'ow' command to open a file with an specific application",
-	    "Use the 'mf' command to limit the amount of files listed on the screen",
-	    "Set a maximum file name length for listed files via the MaxFilenameLen "
-	    "option in the configuration file (F10)",
-	    "Use the 'm' command to interactively rename a file",
-	    "Set options on a per directory basis via the autocommands function",
-	    "Clean up non-ASCII file names using the 'bleach' command",
-	    NULL};
+		"Try the autocd and auto-open functions: run 'FILE' instead "
+		"of 'open FILE' or 'cd FILE'",
+		"Add a new entry to the mimelist file with 'mm edit' or F6",
+		"Do not forget to take a look at the manpage",
+		"Need more speed? Try the light mode (Alt-y)",
+		"The Selection Box is shared among different instances of CliFM",
+		"Select files here and there with the 's' command",
+		"Use wildcards and regular expressions with the 's' command: "
+		"'s *.c' or 's .*\\.c$'",
+		"ELN's and the 'sel' keyword work for shell commands as well: "
+		"'file 1 sel'",
+		"Press TAB to automatically expand an ELN: 's 2' -> TAB -> "
+		"'s FILENAME'",
+		"Easily copy everything in CWD into another directory: 's * "
+		"&& c sel ELN/DIR'",
+		"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 "
+		"ELN/DIR'",
+		"Trash files with a simple 't ELN'",
+		"Get mime information for a file: 'mm info ELN'",
+		"If too many files are listed, try enabling the pager ('pg on')",
+		"Once in the pager, go backwards pressing the keyboard shortcut "
+		"provided by your terminal emulator",
+		"Once in the pager, press 'q' to stop it",
+		"Press 'Alt-l' to switch to long view mode",
+		"Search for files using the slash command: '/*.png'",
+		"The search function allows regular expressions: '/^c'",
+		"Add a new bookmark by just entering 'bm a ELN/FILE'",
+		"Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
+		"Access a remote file system using the 'net' command",
+		"Manage default associated applications with the 'mime' command",
+		"Go back and forth in the directory history with 'Alt-j' and 'Alt-k' "
+		"or Shift-Left and Shift-Right",
+		"Open a new instance of CliFM with the 'x' command: 'x ELN/DIR'",
+		"Send a command directly to the system shell with ';CMD'",
+		"Run the last executed command by just running '!!'",
+		"Import aliases from file using 'alias import FILE'",
+		"List available aliases by running 'alias'",
+		"Create aliases to easily run your preferred commands",
+		"Open and edit the configuration file with 'edit'",
+		"Find a description for each CliFM command by running 'cmd'",
+		"Print the currently used color codes list by entering 'cc'",
+		"Press 'Alt-i' or 'Alt-.' to toggle hidden files on/off",
+		"List mountpoints by pressing 'Alt-m'",
+		"Disallow the use of shell commands with the -x option: 'clifm -x'",
+		"Go to the root directory by just pressing 'Alt-r'",
+		"Go to the home directory by just pressing 'Alt-e'",
+		"Press 'F8' to open and edit the current color scheme",
+		"Press 'F9' to open and edit the keybindings file",
+		"Press 'F10' to open and edit the configuration file",
+		"Press 'F11' to open and edit the bookmarks file",
+		"Set the starting path: 'clifm PATH'",
+		"Use the 'o' command to open files and directories: '12'",
+		"Bypass the resource opener specifying an application: '12 "
+		"leafpad'",
+		"Open a file and send it to the background running '24&'",
+		"Create a custom prompt editing the configuration file",
+		"Customize color codes via 'cs edit' command (F6)",
+		"Open the bookmarks manager by just pressing 'Alt-b'",
+		"Chain commands using ; and &&: 's 2 7-10; r sel'",
+		"Add emojis to the prompt by copying them to the Prompt line "
+		"in the configuration file",
+		"Create a new profile running 'pf add PROFILE' or 'clifm -P "
+		"PROFILE'",
+		"Switch profiles using 'pf set PROFILE'",
+		"Delete a profile using 'pf del PROFILE'",
+		"Copy selected files into CWD by just running 'v sel' or "
+		"pressing Ctrl-Alt-v",
+		"Use 'p ELN' to print file properties for ELN",
+		"Deselect all selected files by pressing 'Alt-d'",
+		"Select all files in CWD by pressing 'Alt-a'",
+		"Jump to the Selection Box by pressing 'Alt-s'",
+		"Restore trashed files using the 'u' command",
+		"Empty the trash bin running 't clear'",
+		"Press Alt-f to toggle list-folders-first on/off",
+		"Use the 'fc' command to disable the files counter",
+		"Take a look at the splash screen with the 'splash' command",
+		"Have some fun trying the 'bonus' command",
+		"Launch the default system shell in CWD using ':' or ';'",
+		"Use 'Alt-z' and 'Alt-x' to switch sorting methods",
+		"Reverse sorting order using the 'rev' option: 'st rev'",
+		"Compress and decompress files using the 'ac' and 'ad' "
+		"commands respectively",
+		"Rename multiple files at once with the bulk rename function: "
+		"'br *.txt'",
+		"Need no more tips? Disable this feature in the configuration "
+		"file",
+		"Need root privileges? Launch a new instance of CLifM as root "
+		"running the 'X' command",
+		"Create custom commands and features using the 'actions' command",
+		"Create a fresh configuration file by running 'edit reset'",
+		"Use 'ln edit' (or 'le') to edit symbolic links",
+		"Change default keyboard shortcuts by editing the keybindings file (F9)",
+		"Keep in sight previous and next visited directories enabling the "
+		"DirhistMap option in the configuration file",
+		"Leave no traces at all running in stealth mode (-S)",
+		"Pin a file via the 'pin' command and then use it with the "
+		"period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
+		"Switch between color schemes using the 'cs' command",
+		"Try the 'j' command to quickly navigate through visited "
+		"directories",
+		"Switch workspaces by pressing Alt-[1-4]",
+		"Use the 'ws' command to list available workspaces",
+		"Take a look at available plugins using the 'actions' command",
+		"Space is not needed: enter 'p12' instead of 'p 12'",
+		"When searching or selecting files, use the exclamation mark "
+		"to reverse the meaning of a pattern",
+		"Enable the TrashAsRm option to prevent accidental deletions",
+		"Don't like ELN's? Disable them using the -e option",
+		"Use the 'n' command to create multiple files and/or directories",
+		"Customize your prompt by adding prompt commands via the 'edit' "
+		"command (F10)",
+		"Need git integration? Consult the manpage",
+		"Accept a given suggestion by pressing the Right arrow key",
+		"Accept only the first suggested word by pressing Alt-f or Alt-Right",
+		"Enter 'c sel' to copy selected files into the current directory",
+		"Take a look at available plugins via the 'actions' command",
+		"Enable the FZF mode for a better TAB completion experience",
+		"Press Alt-q to delete the last typed word",
+		"Check ELN ranges by pressing TAB",
+		"Select a specific selected file by typing 'sel' and then TAB",
+		"Use the 'ow' command to open a file with an specific application",
+		"Use the 'mf' command to limit the amount of files listed on the screen",
+		"Set a maximum file name length for listed files via the MaxFilenameLen "
+		"option in the configuration file (F10)",
+		"Use the 'm' command to interactively rename a file",
+		"Set options on a per directory basis via the autocommands function",
+		"Clean up non-ASCII file names using the 'bleach' command",
+		"Running in an untrusted environment? Try the --secure-env and "
+		"--secure-cmds options",
+		"Get help for any internal command via -h or --help parameters",
+		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
 
