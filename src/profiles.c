@@ -47,6 +47,8 @@
 #include "sort.h"
 #include "messages.h"
 
+/* Get the list of all available profile names and store them in the
+ * profile_names global array. Return zero on success, one otherwise */
 int
 get_profile_names(void)
 {
@@ -189,13 +191,6 @@ profile_set(char *prof)
 	}
 	actions_n = 0;
 
-	/*  my_rl_unbind_functions();
-	create_kbinds_file();
-	load_keybinds();
-	rl_unbind_function_in_map(rl_hidden, rl_get_keymap());
-	rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
-	my_rl_bind_functions(); */
-
 	exec_profile();
 
 	if (msgs_n) {
@@ -295,6 +290,7 @@ profile_set(char *prof)
 	return exit_status;
 }
 
+/* Add a new profile named PROF */
 static int
 profile_add(char *prof)
 {
@@ -389,6 +385,7 @@ profile_add(char *prof)
 	return exit_status;
 }
 
+/* Delete the profile PROF */
 static int
 profile_del(char *prof)
 {
@@ -409,7 +406,7 @@ profile_del(char *prof)
 	}
 
 	char *tmp = (char *)xnmalloc(strlen(config_dir_gral) + strlen(prof) + 11,
-															sizeof(char));
+				sizeof(char));
 	sprintf(tmp, "%s/profiles/%s", config_dir_gral, prof);
 
 	char *cmd[] = {"rm", "-r", tmp, NULL};
@@ -430,6 +427,8 @@ profile_del(char *prof)
 	return EXIT_FAILURE;
 }
 
+/* Main profiles function. Call the operation specified by the first
+ * argument option: list, add, set, or delete */
 int
 profile_function(char **comm)
 {

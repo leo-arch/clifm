@@ -605,10 +605,6 @@ exec_cmd(char **comm)
 	if (*comm[0] == '#' && access(comm[0], F_OK) != 0)
 		return exit_code;
 
-				/* ##########################
-				 * #     	AUTOJUMP	    #
-				 * ########################## */
-
 /*	if (autojump) {
 		exit_code = run_autojump(comm);
 		if (exit_code != -1)
@@ -1254,7 +1250,7 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0) {
 		if (!comm[1]) {
-			printf("opener: %s\n", (opener) ? opener : "lira (built-in)");
+			printf("opener: %s\n", opener ? opener : "lira (built-in)");
 			return EXIT_SUCCESS;
 		}
 		if (IS_HELP(comm[1])) {
