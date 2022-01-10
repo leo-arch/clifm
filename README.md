@@ -5,7 +5,7 @@
 </p>
 <h1 align="center">CliFM</h1>
 <h2 align="center">The Command Line File Manager</h2>
-<h3 align="center">Fast, extensible, lightweight | Written in C</h3>
+<h3 align="center">Fast, extensible, lightweight</h3>
 <h3 align="center">Linux, FreeBSD, NetBSD, OpenBSD, Haiku | x86, ARM</h3>
 <h4 align="center"><a
 href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm">Downloads</a> · <a
