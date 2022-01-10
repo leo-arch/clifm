@@ -26,21 +26,25 @@
 #define HELPERS_H
 
 #if defined(__linux__) && !defined(_BE_POSIX)
-#define _GNU_SOURCE
+# define _GNU_SOURCE
 #else
-#define _POSIX_C_SOURCE 200809L
-#define _DEFAULT_SOURCE
-#define _XOPEN_SOURCE /* wcwidth() */
-#if defined(__FreeBSD__)
-#define __XSI_VISIBLE 700
-#define __BSD_VISIBLE 1
-#endif
-#ifdef __NetBSD__
-#define _NETBSD_SOURCE
-#endif
-#ifdef __OpenBSD__
-#define _BSD_SOURCE
-#endif
+# define _POSIX_C_SOURCE 200809L
+# define _DEFAULT_SOURCE
+# if defined(__linux__)
+#  define _XOPEN_SOURCE /* wcwidth() */
+# endif
+# if defined(__FreeBSD__)
+#  define _XOPEN_SOURCE
+#  define __XSI_VISIBLE 700
+#  define __BSD_VISIBLE 1
+# endif
+# ifdef __NetBSD__
+#  define _XOPEN_SOURCE
+#  define _NETBSD_SOURCE
+# endif
+# ifdef __OpenBSD__
+#  define _BSD_SOURCE
+# endif
 #endif
 
 /* Setting GLOB_BRACE to ZERO disables support for GLOB_BRACE if not
@@ -347,6 +351,10 @@ extern int watch;
 #endif /* _GETTEXT */
 
 #define strlen(s) xstrnlen(s)
+
+#if defined(__linux) && defined(_BE_POSIX)
+#define strcasestr xstrcasestr
+#endif /* __linux && _BE_POSIX */
 
 #define ENTRY_N 64
 

@@ -445,7 +445,7 @@ print_tips(int all)
 		"Clean up non-ASCII file names using the 'bleach' command",
 		"Running in an untrusted environment? Try the --secure-env and "
 		"--secure-cmds options",
-		"Get help for any internal command via -h or --help parameters",
+		"Get help for any internal command via the -h or --help parameters",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
