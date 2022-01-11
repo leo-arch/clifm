@@ -781,10 +781,13 @@ main(int argc, char *argv[])
 	fputs(df_c, stdout);
 	fflush(stdout);
 
+#ifndef __HAIKU__
+	/* No need for this warning on Haiku: it runs as root by default */
 	if (flags & ROOT_USR) {
 		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root%s\n"),
 			BOLD, PROGRAM_NAME, _RED, df_c);
 	}
+#endif
 
 	load_remotes();
 	automount_remotes();
