@@ -104,7 +104,7 @@ WarningPrompt=true
 WarningPromptStr="(!) > "
 
 # TAB completion mode: either 'standard' (default) or 'fzf'
-TabCompletionMode=standard
+TabCompletionMode=
 
 # If FZF TAB completion mode is enabled, pass these options to fzf.
 # --height, --margin, +i/-i,--read0, --query, and --ansi will be appended
