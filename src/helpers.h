@@ -886,6 +886,7 @@ extern size_t
 	autocmds_n,
 	bm_n,
 	cdpath_n,
+	config_dir_len,
 	cschemes_n,
 	current_hist_n,
 	curhistindex,

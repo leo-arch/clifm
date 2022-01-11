@@ -250,8 +250,7 @@ bookmark_del(char *name)
 		if (strcmp(del_elements[i], "*") == 0) {
 			/* Create a backup copy of the bookmarks file, just in case */
 			char *bk_file = (char *)NULL;
-			bk_file = (char *)xcalloc(strlen(config_dir) + 14,
-			    sizeof(char));
+			bk_file = (char *)xcalloc(config_dir_len + 14, sizeof(char));
 			sprintf(bk_file, "%s/bookmarks.bk", config_dir); /* NOLINT */
 			char *tmp_cmd[] = {"cp", bm_file, bk_file, NULL};
 
@@ -287,7 +286,7 @@ bookmark_del(char *name)
 	/* Remove single bookmarks */
 	/* Open a temporary file */
 	char *tmp_file = (char *)NULL;
-	tmp_file = (char *)xnmalloc(strlen(config_dir) + 8, sizeof(char));
+	tmp_file = (char *)xnmalloc(config_dir_len + 8, sizeof(char));
 	sprintf(tmp_file, "%s/bm_tmp", config_dir); /* NOLINT */
 
 	FILE *tmp_fp = fopen(tmp_file, "w+");

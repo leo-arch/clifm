@@ -232,7 +232,7 @@ handle_iso(char *file)
 						sizeof(char));
 			sprintf(mountpoint, "%s/clifm-mounts/%s", P_tmpdir, file); /* NOLINT */
 		} else {
-			mountpoint = (char *)xnmalloc(strlen(config_dir) + strlen(file) + 9,
+			mountpoint = (char *)xnmalloc(config_dir_len + strlen(file) + 9,
 						sizeof(char));
 			sprintf(mountpoint, "%s/mounts/%s", config_dir, file); /* NOLINT */
 		}
@@ -915,7 +915,7 @@ archiver(char **args, char mode)
 				mountpoint = (char *)xnmalloc(strlen(args[i]) + 19, sizeof(char));
 				sprintf(mountpoint, "/tmp/clifm-mounts/%s", args[i]); /* NOLINT */
 			} else {
-				mountpoint = (char *)xnmalloc(strlen(config_dir)
+				mountpoint = (char *)xnmalloc(config_dir_len
 							+ strlen(args[i]) + 9, sizeof(char));
 				sprintf(mountpoint, "%s/mounts/%s", config_dir, args[i]); /* NOLINT */
 			}

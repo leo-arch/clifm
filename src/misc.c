@@ -813,7 +813,7 @@ save_last_path(void)
 	if (!config_ok || !config_dir)
 		return;
 
-	char *last_dir = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
+	char *last_dir = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 	sprintf(last_dir, "%s/.last", config_dir);
 
 	FILE *last_fp;
@@ -1452,7 +1452,7 @@ save_pinned_dir(void)
 	if (!pinned_dir || !config_ok)
 		return EXIT_FAILURE;
 
-	char *pin_file = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
+	char *pin_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 	sprintf(pin_file, "%s/.pin", config_dir);
 
 	FILE *fp = fopen(pin_file, "w");
@@ -1521,7 +1521,7 @@ unpin_dir(void)
 
 	if (config_dir && xargs.stealth_mode != 1) {
 		int cmd_error = 0;
-		char *pin_file = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
+		char *pin_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 		sprintf(pin_file, "%s/.pin", config_dir);
 		if (unlink(pin_file) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, pin_file,

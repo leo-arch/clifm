@@ -504,7 +504,7 @@ check_file_size(char *file, int max)
 	/* Set the file pointer to the beginning of the log file */
 	fseek(fp, 0, SEEK_SET);
 
-	char *tmp = (char *)xnmalloc(strlen(config_dir) + 12, sizeof(char));
+	char *tmp = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 	sprintf(tmp, "%s/log.XXXXXX", config_dir); /* NOLINT */
 
 	int fdd = mkstemp(tmp);

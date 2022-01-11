@@ -228,6 +228,7 @@ size_t
 	autocmds_n = 0,
 	bm_n = 0,
 	cdpath_n = 0,
+	config_dir_len = 0,
 	cschemes_n = 0,
 	current_hist_n = 0,
 	curhistindex = 0,
@@ -293,7 +294,6 @@ char
 #endif
 	*sys_shell = (char *)NULL,
 	*term = (char *)NULL,
-//	*term_bgcolor = (char *)NULL,
 	*tmp_dir = (char *)NULL,
 #ifndef _NO_TRASH
 	*trash_dir = (char *)NULL,

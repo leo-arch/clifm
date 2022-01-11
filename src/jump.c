@@ -89,7 +89,7 @@ save_jumpdb(void)
 	|| jump_n == 0)
 		return;
 
-	char *jump_file = (char *)xnmalloc(strlen(config_dir) + 10, sizeof(char));
+	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
 	sprintf(jump_file, "%s/jump.cfm", config_dir);
 
 	FILE *fp = fopen(jump_file, "w+");
@@ -191,8 +191,7 @@ save_jumpdb(void)
 #else
 		fprintf(fp, "%zu:%lld:%lld:%s\n", jump_db[i].visits,
 #endif
-		    jump_db[i].first_visit, jump_db[i].last_visit,
-		    jump_db[i].path);
+		    jump_db[i].first_visit, jump_db[i].last_visit, jump_db[i].path);
 	}
 
 	fprintf(fp, "@%d\n", total_rank);
@@ -208,8 +207,7 @@ edit_jumpdb(void)
 
 	save_jumpdb();
 
-	char *jump_file = (char *)xnmalloc(strlen(config_dir) + 10,
-	    sizeof(char));
+	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
 	sprintf(jump_file, "%s/jump.cfm", config_dir);
 
 	struct stat attr;

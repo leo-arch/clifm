@@ -192,18 +192,15 @@ set_sel_file(void)
 	if (!config_dir)
 		return;
 
-	size_t config_len = strlen(config_dir);
-
 	if (!share_selbox) {
 		/* Private selection box is stored in the profile
 		 * directory */
-		sel_file = (char *)xnmalloc(config_len + 12, sizeof(char));
-
+		sel_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 		sprintf(sel_file, "%s/selbox.cfm", config_dir);
 	} else {
 		/* Common selection box is stored in the general
 		 * configuration directory */
-		sel_file = (char *)xnmalloc(config_len + 21, sizeof(char));
+		sel_file = (char *)xnmalloc(config_dir_len + 21, sizeof(char));
 		sprintf(sel_file, "%s/.config/%s/selbox.cfm", user.home, PNL);
 	}
 
@@ -587,6 +584,8 @@ define_config_file_names(void)
 		config_dir = (char *)xnmalloc(config_gral_len + 18, sizeof(char));
 		sprintf(config_dir, "%s/profiles/default", config_dir_gral);
 	}
+
+	config_dir_len = strlen(config_dir);
 
 	if (alt_kbinds_file) {
 		kbinds_file = savestring(alt_kbinds_file, strlen(alt_kbinds_file));

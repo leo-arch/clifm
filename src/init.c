@@ -412,9 +412,8 @@ load_jumpdb(void)
 	if (xargs.no_dirjump == 1 || !config_ok || !config_dir)
 		return;
 
-	size_t dir_len = strlen(config_dir);
-	char *jump_file = (char *)xnmalloc(dir_len + 10, sizeof(char));
-	snprintf(jump_file, dir_len + 10, "%s/jump.cfm", config_dir);
+	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
+	snprintf(jump_file, config_dir_len + 10, "%s/jump.cfm", config_dir);
 
 	int fd;
 	FILE *fp = open_fstream_r(jump_file, &fd);
@@ -1874,7 +1873,7 @@ get_last_path(void)
 	if (!config_dir)
 		return EXIT_FAILURE;
 
-	char *last_file = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
+	char *last_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 	sprintf(last_file, "%s/.last", config_dir);
 
 	int fd;
@@ -1923,7 +1922,7 @@ load_pinned_dir(void)
 	if (!config_ok)
 		return EXIT_FAILURE;
 
-	char *pin_file = (char *)xnmalloc(strlen(config_dir) + 6, sizeof(char));
+	char *pin_file = (char *)xnmalloc(config_dir_len + 6, sizeof(char));
 	sprintf(pin_file, "%s/.pin", config_dir);
 
 	int fd;
