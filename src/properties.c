@@ -79,7 +79,7 @@ get_properties(char *filename, const int dsize)
 		file_type = '-';
 		if (light_mode)
 			color = fi_c;
-		else if (access(filename, R_OK) == -1)
+		else if (check_file_access(&attr) == 0)
 			color = nf_c;
 		else if (attr.st_mode & S_ISUID)
 			color = su_c;
@@ -196,11 +196,9 @@ get_properties(char *filename, const int dsize)
 	time_t time = (time_t)attr.st_mtim.tv_sec;
 	struct tm tm;
 	localtime_r(&time, &tm);
-	char mod_time[128] = "";
+	char mod_time[128];
 
 	if (time)
-		/* Store formatted (and localized) date-time string into
-		 * mod_time */
 		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", &tm);
 	else
 		mod_time[0] = '-';
@@ -252,11 +250,9 @@ get_properties(char *filename, const int dsize)
 	/* Last access time */
 	time = (time_t)attr.st_atim.tv_sec;
 	localtime_r(&time, &tm);
-	char access_time[128] = "";
+	char access_time[128];
 
 	if (time)
-		/* Store formatted (and localized) date-time string into
-		 * access_time */
 		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", &tm);
 	else
 		access_time[0] = '-';
@@ -264,7 +260,7 @@ get_properties(char *filename, const int dsize)
 	/* Last properties change time */
 	time = (time_t)attr.st_ctim.tv_sec;
 	localtime_r(&time, &tm);
-	char change_time[128] = "";
+	char change_time[128];
 	if (time)
 		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", &tm);
 	else
@@ -278,7 +274,7 @@ get_properties(char *filename, const int dsize)
 	time = attr.st_birthtime;
 #endif
 	localtime_r(&time, &tm);
-	char creation_time[128] = "";
+	char creation_time[128];
 	if (!time)
 		creation_time[0] = '-';
 	else
@@ -289,7 +285,7 @@ get_properties(char *filename, const int dsize)
 	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
 	time = (time_t)attrx.stx_btime.tv_sec;
 	localtime_r(&time, &tm);
-	char creation_time[128] = "";
+	char creation_time[128];
 
 	if (!time) {
 		creation_time[0] = '-';
