@@ -2315,10 +2315,15 @@ check_options(void)
 
 #ifndef _NO_FZF
 	if (fzftab == UNSET) {
-		if (xargs.fzftab == UNSET)
-			fzftab = DEF_FZFTAB;
-		else
+		if (xargs.fzftab == UNSET) {
+			char *val = getenv("CLIFM_USE_FZF");
+			if (val && (*val == '1' || (*val == 't' && strcmp(val, "true") == 0)))
+				fzftab = 1;
+			else
+				fzftab = DEF_FZFTAB;
+		} else {
 			fzftab = xargs.fzftab;
+		}
 	}
 #endif
 
