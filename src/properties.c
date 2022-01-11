@@ -126,11 +126,10 @@ get_properties(char *filename, const int dsize)
 		file_type = 'd';
 		if (light_mode)
 			color = di_c;
-		else if (access(filename, R_OK | X_OK) != 0) {
+		else if (check_file_access(&attr) == 0)
 			color = nd_c;
-		} else
+		else
 			color = get_dir_color(filename, attr.st_mode);
-
 		break;
 	case S_IFLNK:
 		file_type = 'l';
@@ -162,6 +161,7 @@ get_properties(char *filename, const int dsize)
 	default:
 		file_type = '?';
 		color = no_c;
+		break;
 	}
 
 	/* Get file permissions */
@@ -270,7 +270,7 @@ get_properties(char *filename, const int dsize)
 	else
 		change_time[0] = '-';
 
-		/* Get creation (birth) time */
+	/* Get creation (birth) time */
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
 #ifdef __OpenBSD__
 	time = attr.__st_birthtim.tv_sec;
@@ -297,7 +297,7 @@ get_properties(char *filename, const int dsize)
 		strftime(creation_time, sizeof(creation_time),
 		    "%b %d %H:%M:%S %Y", &tm);
 	}
-#endif
+#endif /* _STATX */
 
 	switch (file_type) {
 	case 'd': printf(_("Directory")); break;
@@ -424,12 +424,6 @@ print_entry_props(const struct fileinfo *props, size_t max)
 		strcpy(mod_time, "-               ");
 	}
 
-	/* Get owner and group names */
-	/*  struct group *group;
-	struct passwd *owner;
-	group = getgrgid(props->uid);
-	owner = getpwuid(props->gid); */
-
 	/*  If file name length is greater than max, truncate it
 	 * to max (later a tilde (~) will be appended to let the user know
 	 * the file name was truncated) */
@@ -502,14 +496,11 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	    read_grp, write_grp, exec_grp,
 	    read_others, write_others, exec_others,
 	    is_acl(props->name) ? "+" : "",
-	    /*          !owner ? _("?") : owner->pw_name,
-			!group ? _("?") : group->gr_name, */
 	    props->uid, props->gid,
 	    *mod_time ? mod_time : "?",
 	    size_type ? size_type : "?");
 
-	if (size_type)
-		free(size_type);
+	free(size_type);
 
 	return EXIT_SUCCESS;
 }
