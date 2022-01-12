@@ -250,7 +250,7 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
 | `_NO_HIGHLIGHT`| Disable syntax highlighting support |
 | `_NO_ICONS` | Disable icons support |
-| `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support |
+| `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support. Implies `_NO_MAGIC` |
 | `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
 | `_NO_SUGGESTIONS` | Disable suggestions support |
 | `_NO_TRASH` | Disable trash support |
