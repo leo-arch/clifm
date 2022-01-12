@@ -853,7 +853,7 @@ remove_file(char **args)
 		exit_status = EXIT_FAILURE;
 #ifdef __HAIKU__
 	else {
-		if (cwd && autols && !IS_HELP(comm[1])
+		if (cwd && autols && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0) {
 			free_dirlist();
 			exit_status = list_dir();
