@@ -1935,80 +1935,146 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 \fBNOTE\fR: If \fI$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config/\fR is used instead.
 
 .SH 24. EXAMPLES
-The following are just a few basic usage examples.
-
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
+
+\fBNOTE2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press Left (or Alt-f to accept onlt the first suggested word). Otherwise, the suggestion is just ignored
 
 Get help:
 \fBF1\fR: manpage
 \fBF2\fR: keybindings
 \fBF3\fR: commands
 
-\fBn myfile mydir/\fR: Create a new file named 'myfile' and a new directory named 'mydir'. Since CliFM is integrated into the system shell, you can also use any of the shell commands you usually use to create new files. Ex: 'touch myfile' or 'nano myfile'
+- Change directory to \fI/etc\fR
 
-\fBmd DIR(s)\fR: Create new directories
+    \fB/etc\fR
 
-\fB/etc\fR: Change directory to \fI/etc\fR
+- Change-to/open the directory/file whose ELN is 5 in the current directory:
 
-\fB5\fR: Change-to/open the directory/file in the current directory whose ELN is 5
-.sp
-TIP: Press TAB to make sure 5 is the file you want. If the suggestions system is enabled, just pay attention to the suggestion
+    \fB5\fR
 
-\fBj xproj\fR: Jump to \fI~/media/data/docs/work/mike/xproject\fR:
-.sp
-NOTE: This depends however on the database ranking. For more accuracy: \fBj mike xproj\fR
+TIP: Press TAB to make sure 5 is the file you want. If the suggestions system is enabled, just pay attention to the suggestion. Press Left to accept the given suggestion
 
-\fBb\fR or \fBShift+left\fR or \fBAlt+j\fR: Go back to the directory you came from
+- Open \fImyfile.txt\fR (with the default associated application):
+
+    \fBmyfile.txt\fR
+
+- Open \fImyfile.txt\fR using \fIvi\fR:
+
+    \fBmyfile.txt vi\fR (or \fBvi myfile.txt\fR)
+
+- Open the file whose ELN is 24 in the background:
+
+    \fB24&\fR
+
+- Jump to \fI~/media/data/docs/work/mike/xproject\fR:
+
+    \fBj xproj\fR
+
+NOTE: This depends however on the database ranking. For more accuracy: 'j mike xproj'
+
+- Go back to the directory you came from:
+
+    \fBb\fR (or \fBShift+left\fR or \fBAlt+j\fR)
 
 NOTE: Enter \fBf\fR, or press \fBShift+right\fR or \fBAlt+k\fR to go back to the first directory
 
-\fBAlt+l\fR: Change to detail/long view mode
+- Create a new file named 'myfile' and a new directory named 'mydir':
 
-\fBp4\fR: Print the properties of the file whose ELN is 4
+    \fBn myfile mydir/\fR
 
-\fBrf\fR: Reprint the list of files in the current directory
+NOTE: Since CliFM is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: 'touch myfile' or 'nano myfile'
 
-\fBs *.c :/my_project\fR: Select all c files in \fImy_project/\fR
+- Change to detail/long view mode:
 
-\fBs 1-4 8 19-26\fR: Select multiple files in the current directory by ELN
+    \fBAlt+l\fR
 
-\fBsb\fR: List selected files
+- Print the properties of the file whose ELN is 4:
 
-\fBds\fR: Deselect a few files
+    \fBp4\fR
 
-\fBmd mydir && mydir\fR: Create a directory named \fImydir\fR and cd into it
+- Reprint the list of files in the current directory:
 
-\fBm sel\fR: Move selected files into the current directory
+    \fBrf\fR
 
-\fBr sel\fR: Remove all selected files
+- Select all c files in the current directory:
 
-\fBmyfile.txt\fR: Open \fImyfile.txt\fR (with the default associated application)
+    \fBs *.c\fR
 
-\fBo myfile.txt application\fR or \fBapplication myfile.txt\fR: Open \fImyfile.txt\fB using "application"
+- Select multiple files in the current directory by ELN:
 
-\fBbm add mydir\fR: Bookmark \fImydir/\fR
+    \fBs 1-4 8 19-26\fR
 
-\fBbm\fR or \fBCtrl+b\fR: Open the bookmarks screen. Once there, enter the bookmark ELN (1 ... n) or its hotkey ([xx]) to open it
+- List selected files:
 
-\fBws2\fR or \fBAlt+2\fR: Switch to workspace 2
+    \fBsb\fR
 
-\fBedit\fR or \fBF10\fR: View and/or edit the configuration file
+- Deselect a few files:
 
-\fBpf set test\fR: Change to profile \fItest\fR
+    \fBds\fR
 
-\fBhf\fR on or \fBAlt+.\fR: Show hidden files
+- Search for all PDF file in the current dirctory:
 
-\fBactions\fR: List available actions/plugins
+    \fB/*.pdf\fR
 
-\fB-\fR or \fBAlt+-\fR: Want file previews?
+- Create a directory named \fImydir\fR and cd into it:
+
+    \fBn mydir/ && mydir\fR
+
+- Copy selected files into the current directory:
+
+    \fBc sel\fR
+
+- Remove all selected files:
+
+    \fBr sel\fR
+
+- Rename the file whose ELN is 12:
+
+    \fBm12\fR
+
+- Bookmark \fImydir\fR:
+
+    \fBbm add mydir\fR
+
+- Open the bookmarks screen. Once there, enter the bookmark ELN (1 ... n) or its hotkey ([xx]) to open it:
+
+    \fBbm\fR (or \fBCtrl+b\fR)
+
+- Switch to workspace 2:
+
+    \fBws2\fR (or \fBAlt+2\fR)
+
+- View and/or edit the configuration file:
+
+    \fBedit\fR (or \fBF10\fR)
+
+- Change to profile \fItest\fR:
+
+    \fBpf set test\fR
+
+- Show hidden files:
+
+    \fBhf on\fB (or \fBAlt+.\fR)
+
+List available actions/plugins:
+    
+    \fBactions\fR
+
+- Want file previews?
+    
+    \fB-\fR (yes, just a dash)
 
 NOTE: This runs the plugin fzfnav.sh. Take a look at the manpage for needed dependencies
 
-\fBicons on\fR: Want icons?
+- Want icons?
+
+    \fBicons on\fR
 
 NOTE: Recall to install \fBicons-in-terminal\fR before
 
-\fBq\fR: I'm tired, quit
+- I'm tired, quit:
+
+    \fBq\fR
 
 There is a lot more you can do, but this should be enough to get you started.
 
