@@ -1,6 +1,6 @@
 <p align="center">
 	<a href="https://github.com/leo-arch/clifm">
-		<img src="images/logo/256x256c.png" alt="CliFM logo" width="160" height="160">
+		<img src="https://i.postimg.cc/Gm5vxMLp/256x256c.png" alt="CliFM logo" width="160" height="160">
 	</a>
 </p>
 <h1 align="center">CliFM</h1>
@@ -66,20 +66,18 @@ Briefly put, with _CliFM_ the command-line is always already there, never hidden
 ---
 
 <h4 align="center">CliFM's interface</h4>
-<p align="center"><img src="images/clifm_interface8.png"></p>
+<p align="center"><img src="https://i.postimg.cc/Zqp4sgLK/clifm-interface8.png"></p>
 
 <details>
 <summary>Watch me fly!</summary>
 
 <h3 align="center"><br><i>Did I say it's fast?</i></h3>
-<p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="images/vid_thumb.png"></a></p>
+<p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="https://i.postimg.cc/CKx6zrvL/vid-thumb.png"></a></p>
 
 Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Dikiciyan) \
 **Note**: Icons and files preview depend on third-party software. Consult the [icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) and [files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) sections.
 
 </details>
-
-
 
 ## Features
 
