@@ -141,7 +141,7 @@ xbackspace()
 	}
 }
 
-
+#ifndef _NO_SUGGESTIONS
 static void
 leftmost_bell(void)
 {
@@ -158,6 +158,7 @@ leftmost_bell(void)
 		rl_end = rl_point = 0;
 	}
 }
+#endif
 
 static int
 rl_exclude_input(unsigned char c)

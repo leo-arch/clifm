@@ -919,8 +919,12 @@ open_reg_exit(char *filename, int url)
 	if (path_n == 0)
 		path_n = get_path_env();
 
+#ifndef _NO_LIRA
 	if (url == 1 && mime_open_url(filename) == EXIT_SUCCESS)
 		exit(EXIT_SUCCESS);
+#else
+	UNUSED(url);
+#endif
 
 	int ret = open_file(filename);
 	exit(ret);
