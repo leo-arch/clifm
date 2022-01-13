@@ -959,7 +959,7 @@ Classify=%s\n\n"
 ShareSelbox=%s\n\n"
 
 	    "# Choose the resource opener to open files with their default associated\n\
-# application. If not set, 'lira', CLiFM's built-in opener, is used.\n\
+# application. If not set, 'lira', CliFM's built-in opener, is used.\n\
 Opener=\n\n"
 
 	    "# Only used when opening a directory via a new CliFM instance (with the 'x'\n\
