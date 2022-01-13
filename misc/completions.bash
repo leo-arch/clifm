@@ -102,6 +102,7 @@ _clifm ()
         --no-follow-symlink
         --no-highlight
         --no-open-auto
+        --no-props-color
         --no-restore-last-path
         --no-suggestions
         --no-tips
