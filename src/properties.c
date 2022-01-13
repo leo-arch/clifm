@@ -259,32 +259,33 @@ get_properties(char *filename, const int dsize)
 
 	/* Print file properties */
 	printf("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
-		   "%zu %s%s %s%s %s%s%s %s%s%s ",
+//		   "%zu %s%s %s%s %s%s%s %s%s%s ",
+		   "Links: %s%zu%s ",
 	    cnum_val, attr.st_mode & 07777, cend,
 	    ctype, file_type, cend,
 	    cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
 	    cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
 	    co1, read_others, co2, write_others, co3, exec_others, cend,
-	    is_acl(filename) ? "+" : "", (size_t)link_n,
-	    cid, !owner ? _("unknown") : owner->pw_name,
+	    is_acl(filename) ? "+" : "", cbold, (size_t)link_n, cend);
+/*	    cid, !owner ? _("unknown") : owner->pw_name,
 	    !group ? _("unknown") : group->gr_name, cend,
 	    csize, size_type ? size_type : "?", cend,
-	    cdate, mod_time[0] != '\0' ? mod_time : "?", cend);
+	    cdate, mod_time[0] != '\0' ? mod_time : "?", cend); */
 
 	if (file_type && file_type != 'l') {
-		printf("%s%s%s\n", color, wname ? wname : filename, df_c);
+		printf("\tName: %s%s%s\n", color, wname ? wname : filename, df_c);
 	} else if (linkname) {
-		printf("%s%s%s -> %s\n", color, wname ? wname : filename, df_c, linkname);
+		printf("\tName: %s%s%s -> %s\n", color, wname ? wname : filename, df_c, linkname);
 		free(linkname);
 	} else { /* Broken link */
 		char link[PATH_MAX] = "";
 		ssize_t ret = readlinkat(AT_FDCWD, filename, link, PATH_MAX);
 
 		if (ret) {
-			printf(_("%s%s%s -> %s (broken link)\n"), color, wname ? wname : filename,
+			printf(_("\tName: %s%s%s -> %s (broken link)\n"), color, wname ? wname : filename,
 			    df_c, link);
 		} else {
-			printf("%s%s%s -> ???\n", color, wname ? wname : filename, df_c);
+			printf("\tName: %s%s%s -> ???\n", color, wname ? wname : filename, df_c);
 		}
 	}
 
@@ -374,9 +375,9 @@ get_properties(char *filename, const int dsize)
 #else
 	printf(_("Device: %s%zu%s"), cbold, attr.st_dev, cend);
 #endif
-	printf(_("\tUid: %s%u (%s)%s"), cid, attr.st_uid, (!owner) ? _("unknown")
+	printf(_("\tUid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("unknown")
 			: owner->pw_name, cend);
-	printf(_("\tGid: %s%u (%s)%s\n"), cid, attr.st_gid, (!group) ? _("unknown")
+	printf(_("\tGid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("unknown")
 			: group->gr_name, cend);
 
 	/* Print file timestamps */
