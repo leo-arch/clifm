@@ -114,6 +114,9 @@ TabCompletionMode=
 # values set here will override FZF_DEFAULT_OPTS.
 FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
 
+# Should we colorize files properties (long mode and pr command)?
+ColorizeProperties=true
+
 # MaxPath is only used for the /p option of the prompt: the current
 # working directory will be abbreviated to its basename (everything after
 # the last slash) whenever the current path is longer than MaxPath.
