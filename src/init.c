@@ -1022,6 +1022,7 @@ external_arguments(int argc, char **argv)
 		{"secure-env", no_argument, 0, 46},
 		{"secure-env-full", no_argument, 0, 47},
 		{"secure-cmds", no_argument, 0, 48},
+		{"no-props-color", no_argument, 0, 49},
 	    {0, 0, 0, 0}
 	};
 
@@ -1102,23 +1103,16 @@ external_arguments(int argc, char **argv)
 #ifndef _NO_ICONS
 		case 24: xargs.icons = icons = 1; break;
 		case 25:
-			xargs.icons = icons = 1;
-			xargs.icons_use_file_color = 1;
-			break;
+			xargs.icons = icons = xargs.icons_use_file_color = 1; break;
 #else
 		case 24: /* fallthrough */
 		case 25:
 			fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif
-		case 26:
-			xargs.columns = 0;
-			columned = 0;
-			break;
-
+		case 26: xargs.columns = columned = 0; break;
 		case 27:
-			xargs.colorize = 0;
-			colorize = 0;
+			xargs.colorize = colorize = xargs.props_color = props_color = 0;
 #ifndef _NO_HIGHLIGHT
 			xargs.highlight = highlight = 0;
 #endif
@@ -1218,6 +1212,7 @@ RUN:
 			xsecure_env(SECURE_ENV_FULL);
 			break;
 		case 48: xargs.secure_cmds = 1; break;
+		case 49: xargs.props_color = props_color = 0; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1629,6 +1624,7 @@ unset_xargs(void)
 	xargs.pager = UNSET;
 	xargs.path = UNSET;
 	xargs.printsel = UNSET;
+	xargs.props_color = UNSET;
 	xargs.restore_last_path = UNSET;
 	xargs.rl_vi_mode = UNSET;
 	xargs.secure_env_full = UNSET;
@@ -2302,6 +2298,13 @@ check_options(void)
 			highlight = xargs.highlight;
 	}
 #endif
+
+	if (props_color == UNSET) {
+		if (xargs.props_color == UNSET)
+			props_color = DEF_PROPS_COLOR;
+		else
+			props_color = xargs.props_color;
+	}
 
 	if (warning_prompt == UNSET) {
 		if (xargs.warning_prompt == UNSET)

@@ -171,6 +171,7 @@ int
 	print_selfiles = UNSET,
 	prompt_offset = UNSET,
 	prompt_style = UNSET,
+	props_color = UNSET,
 	recur_perm_error_flag = 0,
 	restore_last_path = UNSET,
 	rl_last_word_start = 0,

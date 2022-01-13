@@ -1842,6 +1842,7 @@ directory base name (if \\z is used in the prompt)\
 \n     --no-follow-symlink\t Do not follow symbolic links when listing files\
 \n     --no-highlight\t\t Disable syntax highlighting\
 \n     --no-open-auto\t\t Same as no-cd-auto, but for files\
+\n     --no-props-color\t\t Do not colorize files properties\
 \n     --no-restore-last-path\t Save last visited directory to be restored \
 in the next session\
 \n     --no-suggestions\t\t Disable auto-suggestions\

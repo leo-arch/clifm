@@ -838,6 +838,9 @@ TabCompletionMode=%s\n\n"
 # completions interface.\n\
 FzfTabOptions=%s\n\n"
 
+	    "# Should we colorize files properties (long mode and pr command)?\n\
+ColorizeProperties=%s\n\n"
+
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
 # whenever the current path is longer than MaxPath.\n\
@@ -919,6 +922,7 @@ LightMode=%s\n\n",
 
 		DEF_FZFTAB == 1 ? "fzf" : "standard",
 		DEF_FZFTAB_OPTIONS,
+		DEF_PROPS_COLOR == 1 ? "true" : "false",
 		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
 		PROGRAM_NAME,
@@ -1589,6 +1593,20 @@ read_config(void)
 			} else {
 				if (strncmp(opt_str, "false", 5) == 0)
 					clear_screen = 0;
+			}
+		}
+
+		else if (xargs.props_color == UNSET && *line == 'C'
+		&& strncmp(line, "ColorizeProperties=", 19) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "ColorizeProperties=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (*opt_str == 't' && strncmp(opt_str, "true", 4) == 0) {
+				props_color = 1;
+			} else {
+				if (*opt_str == 'f' && strncmp(opt_str, "false", 5) == 0)
+					props_color = 0;
 			}
 		}
 

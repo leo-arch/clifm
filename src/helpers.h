@@ -214,6 +214,8 @@ extern int watch;
 #define BACKGROUND 1
 #define FOREGROUND 0
 
+#define EMPTY_STR ""
+
 /* A few colors */
 #define GRAY   "\x1b[1;30m"
 #define _RED   "\x1b[1;31m"
@@ -221,6 +223,17 @@ extern int watch;
 #define D_CYAN "\x1b[0;36m"
 #define BOLD   "\x1b[1m"
 #define NC     "\x1b[0m"
+
+/* Colors for file properties */
+#define PR_READ    "\x1b[1;31m"
+#define PR_WRITE   "\x1b[1;33m"
+#define PR_EXEC    "\x1b[1;32m"
+#define PR_NONE    "\x1b[1;30m"
+#define PR_SPECIAL "\x1b[1;35m"
+#define PR_DATE    "\x1b[0;34m"
+#define PR_ID      "\x1b[1;33m"
+#define PR_SIZE    "\x1b[1;32m"
+#define PR_NUM_VAL "\x1b[1;36m" /* Properties in octal */
 
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
@@ -659,6 +672,7 @@ struct param {
 	int pager;
 	int path;
 	int printsel;
+	int props_color;
 	int restore_last_path;
 	int rl_vi_mode;
 	int secure_cmds;
@@ -829,6 +843,7 @@ extern int
 	pager,
 	print_msg,
 	print_selfiles,
+	props_color,
 	prompt_offset,
 	prompt_style,
 	recur_perm_error_flag,

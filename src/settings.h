@@ -202,6 +202,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_ONLY_DIRS 0
 #define DEF_PAGER 0
 #define DEF_PRINTSEL 0
+#define DEF_PROPS_COLOR 1
 #define DEF_RESTORE_LAST_PATH 1
 #define DEF_RL_EDIT_MODE 1
 #define DEF_SECURE_CMDS 0
