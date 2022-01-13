@@ -225,11 +225,11 @@ extern int watch;
 #define NC     "\x1b[0m"
 
 /* Colors for file properties */
-#define PR_READ    "\x1b[1;31m"
-#define PR_WRITE   "\x1b[1;33m"
-#define PR_EXEC    "\x1b[1;32m"
-#define PR_NONE    "\x1b[1;30m"
-#define PR_SPECIAL "\x1b[1;35m"
+#define PR_READ    "\x1b[0;1;31m"
+#define PR_WRITE   "\x1b[0;1;33m"
+#define PR_EXEC    "\x1b[0;1;32m"
+#define PR_NONE    "\x1b[0;2;37m"
+#define PR_SPECIAL "\x1b[0;1;35m"
 #define PR_DATE    "\x1b[0;34m"
 #define PR_ID      "\x1b[1;33m"
 #define PR_SIZE    "\x1b[1;32m"
