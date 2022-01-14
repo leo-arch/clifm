@@ -229,7 +229,7 @@ extern int watch;
 #define PR_WRITE   "\x1b[0;1;31m"
 #define PR_EXEC    "\x1b[0;1;33m"
 #define PR_NONE    "\x1b[0;2;37m"
-#define PR_SPECIAL "\x1b[0;1;35m"
+#define PR_SPECIAL "\x1b[0;1;35m" /* SUID, GUID, ISVTX */
 #define PR_DATE    "\x1b[0;34m"
 #define PR_ID      "\x1b[1;33m"
 #define PR_SIZE    "\x1b[1;32m"
