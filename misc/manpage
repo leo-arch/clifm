@@ -60,7 +60,7 @@ CLIFM \- The Command Line File Manager
 .SH 1. GETTING HELP
 There are several ways of getting help in CliFM. Once in the program, enter '\fB?\fR' to see some basic usage examples, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section.
 .sp
-Help for all internal commands can be accessed via the \fI-h\fR or \fI--help\fR options: CMD -h,--help
+Help for all internal commands can be accessed via the \fI-h\fR or \fI--help\fR options. For example, \fIs -h\fR or \fIs --help\fR.
 .sp
 A convenient way of getting full information about CliFM commands is via the '\fBih\fR' action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Just type 'ih' to run the plugin (it depends on \fIFZF\fR) and select the command you want to obtain information about.
 .sp
