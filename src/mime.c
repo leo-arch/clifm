@@ -1542,7 +1542,10 @@ mime_open(char **args)
 ERROR:
 	free(file_path);
 	free(app);
-	return ret;
+
+	if (ret != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
 }
 #else
 void *__skip_me_lira;

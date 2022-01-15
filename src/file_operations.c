@@ -913,6 +913,15 @@ bulk_rename(char **args)
 	}
 #endif
 
+#define BULK_MESSAGE "# Edit the file names, save, and quit the editor\n\
+# Just quit the editor to cancel the operation\n\n"
+
+#ifndef __HAIKU__
+	dprintf(fd, BULK_MESSAGE);
+#else
+	fprintf(fp, BULK_MESSAGE);
+#endif
+
 	/* Copy all files to be renamed to the bulk file */
 	for (i = 1; args[i]; i++) {
 		/* Dequote file name, if necessary */
@@ -990,8 +999,11 @@ bulk_rename(char **args)
 	 * to be renamed */
 	size_t file_total = 1;
 	char tmp_line[256];
-	while (fgets(tmp_line, (int)sizeof(tmp_line), fp))
+	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
+		if (!*tmp_line || *tmp_line == '\n' || *tmp_line == '#')
+			continue;
 		file_total++;
+	}
 
 	if (arg_total != file_total) {
 		fputs(_("bulk: Line mismatch in rename file\n"), stderr);
@@ -1013,6 +1025,8 @@ bulk_rename(char **args)
 	i = 1;
 	/* Print what would be done */
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+		if (!*line || *line == '\n' || *line == '#')
+			continue;
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
@@ -1081,6 +1095,9 @@ bulk_rename(char **args)
 
 	/* Rename each file */
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+		if (!*line || *line == '\n' || *line == '#')
+			continue;
+
 		if (!args[i]) {
 			i++;
 			continue;
