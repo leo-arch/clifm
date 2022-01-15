@@ -57,7 +57,7 @@ X:N:.*\.djvu$=djview;zathura;evince;atril
 X:N:.*\.epub$=mupdf;zathura;ebook-viewer
 X:N:.*\.mobi$=ebook-viewer
 X:N:.*\.(cbr|cbz)$=zathura
-X:N:.*\.cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;leafpad;mousepad;featherpad;gedit;kate;pluma
+X:N:.*\.cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;mili;leafpad;mousepad;featherpad;gedit;kate;pluma
 !X:N:.*\.cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak
 
 ##################
@@ -75,7 +75,7 @@ X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;lua
 
 # Text
 #X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;dte;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;dte;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;dte
 
 # Office documents
