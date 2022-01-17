@@ -609,8 +609,6 @@ mime_list_open(char **apps, char *file)
 	size_t i, j = 0;
 	for (i = 0; apps[i]; i++) {
 		int rep = 0;
-		if (i == 0)
-			continue;
 
 		/* Do not list duplicated entries */
 		for (j = 0; j < i; j++) {
