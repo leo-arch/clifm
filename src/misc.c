@@ -1643,99 +1643,12 @@ quick_help(void)
 #else
 	dprintf(fd,
 #endif
-"                            _______     _ \n"
-"                           | ,---, |   | |\n"
-"                           | |   | |   | |\n"
-"                           | |   | |   | |\n"
-"                           | |   | |   | |\n"
-"                           | !___! !___! |\n"
-"                           `-------------'\n"
-"                                %s\n\n", PROGRAM_NAME);
+"%s                                %s\n\n", ASCII_LOGO, PROGRAM_NAME);
 #ifdef __HAIKU__
-	fprintf(fp,
+	fprintf(fp, QUICK_HELP);
 #else
-	dprintf(fd,
+	dprintf(fd, QUICK_HELP);
 #endif
-"This is only a quick help. For more information and advanced tricks \n\
-consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)\n\
-\n\
-NAVIGATION\n\
-----------\n\
-/etc                     Change the current directory to '/etc'\n\
-5                        Change to the directory whose ELN is 5\n\
-b | Shift-left | Alt-j   Go back in the directory history list\n\
-f | Shift-right | Alt-k  Go forth in the directory history list\n\
-.. | Shift-up | Alt-u    Change to the parent directory\n\
-bd media                 Change to the parent directory matching 'media'\n\
-bm | Alt-b               Open the bookmarks screen\n\
-bm mybm                  Change to bookmark named 'mybm'\n\
-ws2 | Alt-2              Switch to the second workspace\n\
-j xproj                  Jump to the best ranked directory matching 'xproj'\n\
-mp                       Change to a mountpoint\n\
-pin mydir                Pin the directory 'mydir'\n\
-,                        Change to pinned directory\n\
-x                        Run new instance in the current directory\n\
--                        Navigate the file system via fzf (with files preview)\n\
-\n\
-BASIC FILE OPERATIONS\n\
----------------------\n\
-myfile.txt         Open 'myfile.txt' with the default associated application\n\
-myfile.txt vi      Open 'myfile.txt' with vi\n\
-12                 Open the file whose ELN is 12\n\
-12&                Open the file whose ELN is 12 in the background\n\
-ow myfile.txt      Choose opening application for 'myfile.txt' from a menu\n\
-n myfile           Create a new file named 'myfile'\n\
-n mydir/           Create a new directory named 'mydir'\n\
-p4                 Print the properties of the file whose ELN is 4\n\
-te4                Toggle the executable bit on the file whose ELN is 4\n\
-/*.png             Search for files ending with .png in the current directory\n\
-s *.c              Select all C files\n\
-s 1-4 8 19-26      Select multiple files by ELN\n\
-sb                 List currently selected files\n\
-ds                 Deselect a few selected files\n\
-ds *               Deselect all selected files\n\
-c sel              Copy selected files into the current directory\n\
-r sel              Remove all selected files\n\
-br sel             Bulk rename selected files\n\
-d sel              Duplicate all selected files\n\
-c 34 file_copy     Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
-d myfile           Duplicate 'myfile' (via rsync)\n\
-m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
-m myfile.txt       Rename 'myfile.txt'\n\
-l myfile mylink    Create a symbolic link named 'mylink' to 'myfile'\n\
-le mylink          Edit the symbolic link 'mylink'\n\
-bl sel             Create symbolic links for all selected files\n\
-t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
-t del              Select trashed files and remove them permanently\n\
-u                  Undelete trashed files\n\
-bm a mydir         Bookmark the directory named mydir\n\
-bm d mybm          Remove the bookmark named 'mybm'\n\
-ac sel             Compress/archive selected files\n\
-bb *               Clean up all file names in the current directory\n\
-\n\
-MISC\n\
-----\n\
-cmd --help     Get help for command 'cmd'\n\
-F1             Open the manpage\n\
-edit | F10     View and/or edit the configuration file\n\
-kb edit | F9   Edit keybindings\n\
-mm edit | F6   Change default associated applications\n\
-mm info 12     Get MIME information for the file whose ELN is 12\n\
-Alt-l          Toggle detail/long view mode on/off\n\
-cs             Manage color schemes\n\
-Right          Accept the entire suggestion\n\
-Alt-f          Accept the first/next word of the current suggestion\n\
-rf | .         Reprint the current list of files\n\
-pf set test    Change to the profile named 'test'\n\
-Alt-.          Toggle hidden files\n\
-st size rev    Sort files by size in reverse order\n\
-Alt-x | Alt-z  Toggle sort method\n\
-media          (Un)mount storage devices\n\
-net work       Mount the network resource named 'work'\n\
-actions        List available actions/plugins\n\
-icons on       Enable icons\n\
-q              I'm tired, quit\n\
-Q              cd on quit\n");
 
 	int ret;
 	if (*_pager == 'l' && strcmp(_pager, "less") == 0) {
@@ -1761,245 +1674,16 @@ void
 help_function(void)
 {
 	fputs("\x1b[0m", stdout);
-	fputs(
-"                        _______     _ \n"
-"                       | ,---, |   | |\n"
-"                       | |   | |   | |\n"
-"                       | |   | |   | |\n"
-"                       | |   | |   | |\n"
-"                       | !___! !___! |\n"
-"                       `-------------'\n\n", stdout);
+
+	printf("%s\n", ASCII_LOGO);
 
 	printf(_("%s%s %s (%s), by %s\n"), (flags & EXT_HELP) ? "" : df_c,
 			PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
-	printf(_("\nUSAGE: %s %s\n\
-\n -a, --no-hidden\t\t Do not show hidden files (default)\
-\n -A, --show-hidden\t\t Show hidden files\
-\n -b, --bookmarks-file=FILE\t Specify an alternative bookmarks file\
-\n -c, --config-file=FILE\t\t Specify an alternative configuration file\
-\n -D, --config-dir=DIR\t\t Specify an alternative configuration directory\
-\n -e, --no-eln\t\t\t Do not print ELN's (entry list number) \
-\n -f, --no-folders-first\t\t Do not list folders first\
-\n -F, --folders-first\t\t List folders first (default)\
-\n -g, --pager\t\t\t Enable the pager\
-\n -G, --no-pager\t\t\t Disable the pager (default)\
-\n -h, --help\t\t\t Show this help and exit\
-\n -H, --horizontal-list\t\t List files horizontally\
-\n -i, --no-case-sensitive\t No case-sensitive files listing (default)\
-\n -I, --case-sensitive\t\t Case-sensitive files listing\
-\n -k, --keybindings-file=FILE\t Specify an alternative keybindings file\
-\n -l, --no-long-view\t\t Disable long view mode (default)\
-\n -L, --long-view\t\t Enable long view mode\
-\n -m, --dihist-map\t\t Enable the directory history map\
-\n -o, --no-autols\t\t Do not list files automatically\
-\n -O, --autols\t\t\t List files automatically (default)\
-\n -p, --path=PATH\t\t Use PATH as %s's starting path (deprecated: use positional \
-parameters instead)\
-\n -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
-\n -s, --splash \t\t\t Enable the splash screen\
-\n -S, --stealth-mode \t\t Leave no trace on the host system (see the manpage)\
-\n -u, --no-unicode \t\t Disable Unicode\
-\n -U, --unicode \t\t\t Enable Unicode support (default)\
-\n -v, --version\t\t\t Show version details and exit\
-\n -w, --workspace=NUM\t\t Start in workspace NUM\
-\n -x, --no-ext-cmds\t\t Disallow the use of external commands\
-\n -y, --light-mode\t\t Enable the light mode\
-\n -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"),
-	    PNL, GRAL_USAGE, PROGRAM_NAME);
+	printf("\nUSAGE: %s %s\n%s%s", PNL, GRAL_USAGE, _(SHORT_OPTIONS), _(LONG_OPTIONS));
 
-	printf("\
-\n     --case-sens-dirjump\t Do not ignore case when consulting the jump \
-database (via the 'j' command)\
-\n     --case-sens-path-comp\t Enable case sensitive path completion\
-\n     --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
-\n     --color-scheme=NAME\t Use color scheme NAME\
-\n     --control-d-exits\t\t Use Control-d to exit from CliFM\
-\n     --cwd-in-title\t\t Print current directory in terminal window title\
-\n     --disk-usage\t\t Show disk usage (free/total)\
-\n     --enable-logs\t\t Enable program logs\
-\n     --expand-bookmarks\t\t Expand bookmark names into the corresponding \
-bookmark paths\
-\n     --fzftab\t\t\t Enable FZF mode for TAB completion\
-\n     --icons\t\t\t Enable icons\
-\n     --icons-use-file-color\t Icons color follows file color\
-\n     --int-vars\t\t\t Enable internal variables\
-\n     --list-and-quit\t\t List files and quit. It may be used in conjunction with -p\
-\n     --max-dirhist\t\t Maximum number of visited directories to recall\
-\n     --max-files=NUM\t\t List only up to NUM files\
-\n     --max-path=NUM\t\t Set the maximun number of characters \
-after which the current directory in the prompt line will be abreviated to the \
-directory base name (if \\z is used in the prompt)\
-\n     --no-dir-jumper\t\t Disable the directory jumper function\
-\n     --no-cd-auto\t\t Disable the autocd function\
-\n     --no-classify\t\t Do not append file type indicators\
-\n     --no-clear-screen\t\t Do not clear the screen when listing directories\
-\n     --no-color\t\t Disable colors \
-\n     --no-columns\t\t Disable columned files listing\
-\n     --no-file-cap\t\t Do not check files capabilities when listing files\
-\n     --no-file-ext\t\t Do not check files extension when listing files\
-\n     --no-files-counter\t\t Disable the files counter for directories\
-\n     --no-follow-symlink\t Do not follow symbolic links when listing files\
-\n     --no-highlight\t\t Disable syntax highlighting\
-\n     --no-open-auto\t\t Same as no-cd-auto, but for files\
-\n     --no-props-color\t\t Do not colorize files properties\
-\n     --no-restore-last-path\t Save last visited directory to be restored \
-in the next session\
-\n     --no-suggestions\t\t Disable auto-suggestions\
-\n     --no-tips\t\t\t Disable startup tips\
-\n     --no-warning-prompt\t Disable the warning prompt\
-\n     --no-welcome-message\t Disable the welcome message\
-\n     --only-dirs\t\t List only directories and symbolic links to directories\
-\n     --open=FILE\t\t Run as a stand-alone resource opener: open FILE and exit\
-\n     --opener=APPLICATION\t Resource opener to use instead of 'lira',\
-%s's built-in opener\
-\n     --print-sel\t\t Keep the list of selected files in sight\
-\n     --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
-\n     --secure-cmds\t\t Filter commands to prevent command injection\
-\n     --secure-env\t\t Run in a sanitized environment (regular mode)\
-\n     --secure-env-full\t\t Run in a sanitized environment (full mode)\
-\n     --share-selbox\t\t Make the Selection Box common to different profiles\
-\n     --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z \
-(default order)\
-\n     --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
-'rm' to prevent accidental deletions\n",
-	    PROGRAM_NAME);
-
-	printf(_("\nBUILT-IN COMMANDS:\n\nThe following is just a brief list of "
-			"available commands and possible parameters.\n\nFor a complete "
-			"description of each of these commands run 'cmd' (or press "
-			"F2) or consult the manpage (F1).\n\nYou can also try "
-			"the 'ih' action to run the interactive help plugin (it "
-			"depends on FZF). Just enter 'ih', that's it.\n\nIt is also "
-			"recommended to consult the project's wiki "
-			"(https://github.com/leo-arch/clifm/wiki)\n\n"));
-
-	puts(_("ELN/FILE/DIR (auto-open and autocd functions)\n\
- /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
- ;[CMD], :[CMD] (run CMD via the system shell)\n\
- ac, ad ELN/FILE ... (archiving functions)\n\
- acd, autocd [on, off, status]\n\
- actions [edit [APP]]\n\
- alias [import FILE]\n\
- ao, auto-open [on, off, status]\n\
- b, back [h, hist] [clear] [!ELN]\n\
- bb, bleach ELN/FILE ... (file names cleaner)\n\
- bd [NAME] ... (backdir function)\n\
- bl ELN/FILE ... (batch links)\n\
- bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
- br, bulk ELN/FILE ...\n\
- c, l [e, edit], m, md, r (copy, link, move, makedir, and remove)\n\
- cc, colors\n\
- cd [ELN/DIR]\n\
- cl, columns [on, off]\n\
- cmd, commands\n\
- cs, colorscheme [edit [APP]] [COLORSCHEME]\n\
- d, dup FILE(s)\n\
- ds, desel [*, a, all]\n\
- edit [APPLICATION] [reset]\n\
- exp [ELN/FILE ...]\n\
- ext [on, off, status]\n\
- f, forth [h, hist] [clear] [!ELN]\n\
- fc, filescounter [on, off, status]\n\
- ff, folders-first [on, off, status]\n\
- fs\n\
- ft, filter [unset] [REGEX]\n\
- hf, hidden [on, off, status]\n\
- history [edit [APP]] [clear] [-n]\n\
- icons [on, off]\n\
- j, jc, jp, jl [STRING ...] jo [NUM], je (directory jumper function)\n\
- kb, keybinds [edit [APP]] [reset] [readline]\n\
- lm [on, off] (lightmode)\n\
- log [clear]\n\
- mf [NUM, unset] (List up to NUM files)\n\
- mm, mime [info ELN/FILE] [edit] [import] (resource opener)\n\
- mp, mountpoints\n\
- msg, messages [clear]\n\
- n, new FILE DIR/ ...n\n\
- net [NAME] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\
- o, open [ELN/FILE] [APPLICATION]\n\
- ow [ELN/FILE] [APPLICATION] (open with ...)\n\
- opener [default] [APPLICATION]\n\
- p, pr, pp, prop [ELN/FILE ... n]\n\
- path, cwd\n\
- pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
- pg, pager [on, off, status]\n\
- pin [FILE/DIR]\n\
- q, quit, exit\n\
- Q\n\
- rf, refresh\n\
- rl, reload\n\
- s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\
- sb, selbox\n\
- splash\n\
- st, sort [METHOD] [rev]\n\
- t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]\n\
- te [FILE(s)]\n\
- tips\n\
- u, undel, untrash [*, a, all]\n\
- uc, unicode [on, off, status]\n\
- unpin\n\
- v, vv, paste sel [DESTINY]\n\
- ver, version\n\
- ws [NUM, +, -] (workspaces)\n\
- x, X [ELN/DIR] (new instance)\n"));
-
-	printf(_("DEFAULT KEYBOARD SHORTCUTS:\n\n"
-		 " Right, C-f: Accept the entire suggestion\n\
- M-Right, M-f: Accept the first suggested word\n\
- M-c: Clear the current command line buffer\n\
- M-g: Toggle list-folders-first on/off\n\
- C-r: Refresh the screen\n\
- M-l: Toggle long view mode on/off\n\
- M-m: List mountpoints\n\
- M-t: Clear messages\n\
- M-h: Show directory history\n\
- M-i, M-.: Toggle hidden files on/off\n\
- M-s: Open the Selection Box\n\
- M-a: Select all files in the current working directory\n\
- M-d: Deselect all selected files\n\
- M-r: Change to the root directory\n\
- M-e, Home: Change to the home directory\n\
- M-u, S-Up: Change to the parent directory\n\
- M-j, S-Left: Change to previous visited directory\n\
- M-k, S-Right: Change to next visited directory\n\
- M-o: Lock terminal\n\
- M-p: Change to pinned directory\n\
- M-v: Toggle prepend sudo\n\
- M-1: Switch to workspace 1\n\
- M-2: Switch to workspace 2\n\
- M-3: Switch to workspace 3\n\
- M-4: Switch to workspace 4\n\
- C-M-j: Change to first visited directory\n\
- C-M-k: Change to last visited directory\n\
- C-M-o: Switch to previous profile\n\
- C-M-p: Switch to next profile\n\
- C-M-a: Archive selected files\n\
- C-M-e: Export selected files\n\
- C-M-r: Rename selected files\n\
- C-M-d: Remove selected files\n\
- C-M-t: Trash selected files\n\
- C-M-u: Restore trashed files\n\
- C-M-b: Bookmark last selected file or directory\n\
- C-M-g: Open/change-into last selected file/directory\n\
- C-M-n: Move selected files into the current working directory\n\
- C-M-v: Copy selected files into the current working directory\n\
- M-y: Toggle light mode on/off\n\
- M-z: Switch to previous sorting method\n\
- M-x: Switch to next sorting method\n\
- C-x: Launch a new instance\n\
- F1: Manual page\n\
- F2: Commands help\n\
- F3: Keybindings help\n\
- F6: Open the MIME list file\n\
- F7: Open the jump database file\n\
- F8: Open the current color scheme file\n\
- F9: Open the keybindings file\n\
- F10: Open the configuration file\n\
- F11: Open the bookmarks file\n\
- F12: Quit\n\n"
-		 "NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in "
-		 "most keyboards)\n\n"));
+	puts(_(CLIFM_COMMANDS));
+	printf(_(CLIFM_KEYBOARD_SHORTCUTS));
 
 	puts(_("Run the 'colors' or 'cc' command to see the list "
 	       "of currently used color codes.\n"));
@@ -2012,39 +1696,7 @@ in the next session\
 void
 free_software(void)
 {
-	puts(_("Excerpt from 'What is Free Software?', by Richard Stallman. \
-Source: https://www.gnu.org/philosophy/free-sw.html\n \
-\n\"'Free software' means software that respects users' freedom and \
-community. Roughly, it means that the users have the freedom to run, \
-copy, distribute, study, change and improve the software. Thus, 'free \
-software' is a matter of liberty, not price. To understand the concept, \
-you should think of 'free' as in 'free speech', not as in 'free beer'. \
-We sometimes call it 'libre software', borrowing the French or Spanish \
-word for 'free' as in freedom, to show we do not mean the software is \
-gratis.\n\
-\nWe campaign for these freedoms because everyone deserves them. With \
-these freedoms, the users (both individually and collectively) control \
-the program and what it does for them. When users don't control the \
-program, we call it a 'nonfree' or proprietary program. The nonfree \
-program controls the users, and the developer controls the program; \
-this makes the program an instrument of unjust power. \n\
-\nA program is free software if the program's users have the four \
-essential freedoms:\n\n\
-- The freedom to run the program as you wish, for any purpose \
-(freedom 0).\n\
-- The freedom to study how the program works, and change it so it does \
-your computing as you wish (freedom 1). Access to the source code is a \
-precondition for this.\n\
-- The freedom to redistribute copies so you can help your neighbor \
-(freedom 2).\n\
-- The freedom to distribute copies of your modified versions to others \
-(freedom 3). By doing this you can give the whole community a chance to \
-benefit from your changes. Access to the source code is a precondition \
-for this. \n\
-\nA program is free software if it gives users adequately all of these \
-freedoms. Otherwise, it is nonfree. While we can distinguish various \
-nonfree distribution schemes in terms of how far they fall short of \
-being free, we consider them all equally unethical (...)\""));
+	puts(_(FREE_SOFTWARE));
 }
 
 void
@@ -2058,33 +1710,9 @@ version_function(void)
 void
 splash(void)
 {
-	printf("\n%s"
-"     .okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkd. \n"
-"    'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkc\n"
-"    xkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\n"
-"    xkkkkkc::::::::::::::::::dkkkkkkc:::::kkkkkk\n"
-"    xkkkkk'..................okkkkkk'.....kkkkkk\n"
-"    xkkkkk'..................okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....okkkkkk,.....okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
-"    xkkkkk'.....coooooo'.....:llllll......kkkkkk\n"
-"    xkkkkk'...............................kkkkkk\n"
-"    xkkkkk'...............................kkkkkk\n"
-"    xkkkkklccccccccccccccccccccccccccccccckkkkkk\n"
-"    lkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkx\n"
-"     ;kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkc \n"
-"        :c::::::::::::::::::::::::::::::::::.",
-	D_CYAN);
-
-	printf("\n\n%s%s\t\t       %s%s\n           %s\n",
-			df_c, BOLD, df_c, PROGRAM_NAME, _(PROGRAM_DESC));
+	printf("\n%s%s\n\n%s%s\t\t       %s%s\n           %s\n",
+		D_CYAN, ASCII_LOGO_BIG, df_c,
+		BOLD, df_c, PROGRAM_NAME, _(PROGRAM_DESC));
 
 	if (splash_screen) {
 		printf(_("\n            Press any key to continue... "));
