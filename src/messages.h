@@ -853,7 +853,14 @@ parameters.\n\n\
  F11: Open the bookmarks file\n\
  F12: Quit\n\n\
 NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in \
-most keyboards)\n\n"
+most keyboards)\n"
+
+#define HELP_END_NOTE "Run the 'colors' or 'cc' command to see the list \
+of currently used color codes.\n\n\
+The color schemes file, just as the configuration and profile \
+files, allow you to customize colors, the prompt string, define \
+some prompt and profile commands, aliases, autocommands, and more.\n\
+For a full description consult the manpage."
 
 #define ASCII_LOGO "\
                             _______     _ \n\

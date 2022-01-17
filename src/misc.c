@@ -1683,20 +1683,14 @@ help_function(void)
 
 	printf("%s\n", ASCII_LOGO);
 
-	printf(_("%s%s %s (%s), by %s\n"), (flags & EXT_HELP) ? "" : df_c,
-			PROGRAM_NAME, VERSION, DATE, AUTHOR);
+	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
-	printf("\nUSAGE: %s %s\n%s%s", PNL, GRAL_USAGE, _(SHORT_OPTIONS), _(LONG_OPTIONS));
+	printf("\nUSAGE: %s %s\n%s%s", PNL, GRAL_USAGE, _(SHORT_OPTIONS),
+			_(LONG_OPTIONS));
 
 	puts(_(CLIFM_COMMANDS));
-	printf(_(CLIFM_KEYBOARD_SHORTCUTS));
-
-	puts(_("Run the 'colors' or 'cc' command to see the list "
-	       "of currently used color codes.\n"));
-
-	puts(_("The configuration and profile files allow you to customize "
-	       "colors, define some prompt commands and aliases, and more. "
-	       "For a full description consult the manpage."));
+	puts(_(CLIFM_KEYBOARD_SHORTCUTS));
+	puts(_(HELP_END_NOTE));
 }
 
 void
