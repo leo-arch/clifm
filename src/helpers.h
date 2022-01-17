@@ -159,7 +159,7 @@ extern int watch;
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "Jan 7, 2022"
+#define DATE "Jan 17, 2022"
 #define LICENSE "GPL2+"
 
 /* Options flags */
