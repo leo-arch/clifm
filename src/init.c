@@ -1252,8 +1252,6 @@ RUN:
 
 		case 'h':
 			flags |= HELP;
-			/* Do not display "Press any key to continue" */
-			flags |= EXT_HELP;
 			help_function();
 			exit(EXIT_SUCCESS);
 

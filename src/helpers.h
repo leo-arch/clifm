@@ -183,10 +183,8 @@ extern int watch;
 
 /* Internal flags */
 #define ROOT_USR      (1 << 10)
-#define EXT_HELP      (1 << 11)
-//#define FILE_CMD_OK (1 << 12)
-#define GUI           (1 << 13)
-#define IS_USRVAR_DEF (1 << 14)
+#define GUI           (1 << 11)
+#define IS_USRVAR_DEF (1 << 12)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or
  * not */
