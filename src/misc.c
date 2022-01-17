@@ -1591,6 +1591,11 @@ list_commands(void)
 int
 quick_help(void)
 {
+#ifdef __HAIKU__
+	printf("%s                                %s\n\n%s",
+		ASCII_LOGO, PROGRAM_NAME, QUICK_HELP);
+	return EXIT_SUCCESS;
+#else
 	char _pager[NAME_MAX];
 	*_pager = '\0';
 	char *p = getenv("PAGER");
@@ -1628,27 +1633,14 @@ quick_help(void)
 	}
 
 	FILE *fp;
-#ifdef __HAIKU__
-	fp = fopen(tmp_file, "w");
-#else
 	fp = open_fstream_w(tmp_file, &fd);
-#endif
 	if (!fp) {
 		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-#ifdef __HAIKU__
-	fprintf(fp,
-#else
-	dprintf(fd,
-#endif
-"%s                                %s\n\n", ASCII_LOGO, PROGRAM_NAME);
-#ifdef __HAIKU__
-	fprintf(fp, QUICK_HELP);
-#else
-	dprintf(fd, QUICK_HELP);
-#endif
+	dprintf(fd, "%s                                %s\n\n%s",
+			ASCII_LOGO, PROGRAM_NAME, QUICK_HELP);
 
 	int ret;
 	if (*_pager == 'l' && strcmp(_pager, "less") == 0) {
@@ -1660,14 +1652,12 @@ quick_help(void)
 	}
 	unlink(tmp_file);
 
-#ifdef __HAIKU__
-	fclose(fp);
-#else
 	close_fstream(fp, fd);
-#endif
+
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 	return EXIT_SUCCESS;
+#endif
 }
 
 void
