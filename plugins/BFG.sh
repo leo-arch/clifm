@@ -44,12 +44,12 @@ EOF
 
 	if [ -z "$fzfheight" ]; then
 		if [ -n "$CLIFM_FZF_HEIGHT" ]; then
-			fzf_height="${CLIFM_FZF_HEIGHT/\%/}"
+			fzf_height="$(echo "$CLIFM_FZF_HEIGHT" | cut -d'%' -f1)"
 		else
 			fzf_height=80
 		fi
 	else
-		fzf_height="${fzfheight/\%/}"
+		fzf_height="$(echo "$fzfheight" | cut -d'%' -f1)"
 	fi
 
 	Y=$((TERM_LINES - (fzf_height * TERM_LINES / 100) + 1))
