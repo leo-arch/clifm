@@ -611,6 +611,7 @@ mime_list_open(char **apps, char *file)
 		int rep = 0;
 		if (i == 0)
 			continue;
+
 		/* Do not list duplicated entries */
 		for (j = 0; j < i; j++) {
 			if (*apps[i] == *apps[j] && strcmp(apps[i], apps[j]) == 0) {
@@ -638,9 +639,15 @@ mime_list_open(char **apps, char *file)
 	char *input = get_user_input(&a, &nn);
 
 	int ret = EXIT_FAILURE;
-	char *app = n[a - 1];
 
-	if (!input || a <= 0 || !app) {
+	if (!input || a <= 0) {
+		free(input);
+		free(n);
+		return ret;
+	}
+
+	char *app = n[a - 1];
+	if (!app) {
 		free(input);
 		free(n);
 		return ret;
@@ -1213,13 +1220,12 @@ mime_open_with(char *filename, char **args)
 			/* appb is not NULL if we have an environment variable */
 			if (appb) {
 				apps[appsn] = savestring(appb, strlen(appb));
-				appsn++;
 				free(appb);
 			} else {
 				apps[appsn] = savestring(app, strlen(app));
-				appsn++;
 			}
 
+			appsn++;
 			tmp++;
 		}
 	}
