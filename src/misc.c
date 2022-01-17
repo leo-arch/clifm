@@ -1588,32 +1588,45 @@ list_commands(void)
 	return EXIT_SUCCESS;
 }
 
+/* Retrieve pager path, first from PAGER, then try less(1), and finally
+ * more(1). If none is found returns NULL */
+static char *
+get_pager(void)
+{
+	char *_pager = (char *)NULL;
+
+	char *p = getenv("PAGER");
+	if (p)
+		_pager = savestring(p, strlen(p));
+	else {
+		p = get_cmd_path("less");
+		if (p) {
+			_pager = savestring(p, strlen(p));
+			free(p);
+		} else {
+			p = get_cmd_path("more");
+			if (p) {
+				_pager = savestring(p, strlen(p));
+				free(p);
+			}
+		}
+	}
+
+	return _pager;
+}
+
 int
 quick_help(void)
 {
 #ifdef __HAIKU__
 	printf("%s                                %s\n\n%s",
 		ASCII_LOGO, PROGRAM_NAME, QUICK_HELP);
+	puts(_("\nNOTE: Some keybindings on Haiku might differ. Take a look "
+		"at your current keybindings via the 'kb' command"));
 	return EXIT_SUCCESS;
 #else
-	char _pager[NAME_MAX];
-	*_pager = '\0';
-	char *p = getenv("PAGER");
-	if (p)
-		strcpy(_pager, p);
-	else {
-		p = get_cmd_path("less");
-		if (p) {
-			strcpy(_pager, "less");
-			free(p);
-		} else {
-			p = get_cmd_path("more");
-			if (p) {
-				strcpy(_pager, "more");
-				free(p);
-			}
-		}
-	}
+
+	char *_pager = get_pager();
 
 	if (!*_pager) {
 		fprintf(stderr, _("%s: Unable to find any pager\n"), PROGRAM_NAME);
@@ -1629,6 +1642,7 @@ quick_help(void)
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {
 		fprintf(stderr, "%s: Error creating temporary file\n", PROGRAM_NAME);
+		free(_pager);
 		return EXIT_FAILURE;
 	}
 
@@ -1636,6 +1650,7 @@ quick_help(void)
 	fp = open_fstream_w(tmp_file, &fd);
 	if (!fp) {
 		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		free(_pager);
 		return EXIT_FAILURE;
 	}
 
@@ -1653,6 +1668,7 @@ quick_help(void)
 	unlink(tmp_file);
 
 	close_fstream(fp, fd);
+	free(_pager);
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
