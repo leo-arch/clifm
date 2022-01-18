@@ -69,7 +69,7 @@ search_glob(char **comm, int invert)
 		 *search_path = (char *)NULL;
 
 	mode_t file_type = 0;
-	struct stat file_attrib;
+	struct stat attr;
 
 	/* If there are two arguments, the one starting with '-' is the
 	 * file type and the other is the path */
@@ -231,8 +231,8 @@ search_glob(char **comm, int invert)
 		int *dirs = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
 		gfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, sizeof(char *));
 		for (i = 0; globbed_files.gl_pathv[i]; i++) {
-			if (stat(globbed_files.gl_pathv[i], &file_attrib) != -1
-			&& S_ISDIR(file_attrib.st_mode))
+			if (stat(globbed_files.gl_pathv[i], &attr) != -1
+			&& S_ISDIR(attr.st_mode))
 				dirs[i] = 1;
 			else
 				dirs[i] = 0;
@@ -260,8 +260,7 @@ search_glob(char **comm, int invert)
 	}
 
 	/* We have matches */
-	int scandir_files = 0,
-		found = 0;
+	int sfiles = 0, found = 0;
 
 	size_t flongest = 0;
 
@@ -292,70 +291,65 @@ search_glob(char **comm, int invert)
 					}
 				}
 
-				if (!f) {
-					if (file_type && file_info[k].type != file_type)
-						continue;
+				if (f == 1 || (file_type && file_info[k].type != file_type))
+					continue;
 
-					eln[found] = (int)(k + 1);
-					files_len[found] = strlen(file_info[k].name)
-								+ (size_t)file_info[k].eln_n + 1;
-					if (files_len[found] > flongest)
-						flongest = files_len[found];
+				eln[found] = (int)(k + 1);
+				files_len[found] = strlen(file_info[k].name)
+							+ (size_t)file_info[k].eln_n + 1;
+				if (files_len[found] > flongest)
+					flongest = files_len[found];
 
-					pfiles[found] = file_info[k].name;
-					found++;
-				}
+				pfiles[found] = file_info[k].name;
+				found++;
 			}
 		} else {
-			scandir_files = scandir(search_path, &ent, skip_files,
-			    xalphasort);
+			sfiles = scandir(search_path, &ent, skip_files, xalphasort);
+			if (sfiles == -1)
+				goto SCANDIR_ERROR;
 
-			if (scandir_files != -1) {
-				pfiles = (char **)xnmalloc((size_t)scandir_files + 1,
-				    sizeof(char *));
-				eln = (int *)xnmalloc((size_t)scandir_files + 1,
-				    sizeof(int));
-				files_len = (size_t *)xnmalloc((size_t)scandir_files + 1,
-				    sizeof(size_t));
+			pfiles = (char **)xnmalloc((size_t)sfiles + 1,
+			    sizeof(char *));
+			eln = (int *)xnmalloc((size_t)sfiles + 1,
+			    sizeof(int));
+			files_len = (size_t *)xnmalloc((size_t)sfiles + 1,
+			    sizeof(size_t));
 
-				int k, l;
-
-				for (k = 0; k < scandir_files; k++) {
-					int f = 0;
-
-					for (l = 0; gfiles[l]; l++) {
-						if (*ent[k]->d_name == *gfiles[l]
-						&& strcmp(ent[k]->d_name, gfiles[l]) == 0) {
-							f = 1;
-							break;
-						}
-					}
-
-					if (!f) {
-#if !defined(_DIRENT_HAVE_D_TYPE)
-						struct stat attr;
-						mode_t type;
-						if (lstat(ent[k]->d_name, &attr) == -1)
-							continue;
-						type = get_dt(attr.st_mode);
-						if (file_type && type != file_type)
-#else
-						if (file_type && ent[k]->d_type != file_type)
-#endif
-							continue;
-
-						eln[found] = -1;
-						files_len[found] = unicode
-								       ? wc_xstrlen(ent[k]->d_name)
-								       : strlen(ent[k]->d_name);
-
-						if (files_len[found] > flongest)
-							flongest = files_len[found];
-
-						pfiles[found] = ent[k]->d_name;
-						found++;
+			int k, l;
+			for (k = 0; k < sfiles; k++) {
+				int f = 0;
+				for (l = 0; gfiles[l]; l++) {
+					if (*ent[k]->d_name == *gfiles[l]
+					&& strcmp(ent[k]->d_name, gfiles[l]) == 0) {
+						f = 1;
+						break;
 					}
 				}
+
+				if (f == 1)
+					continue;
+
+#if !defined(_DIRENT_HAVE_D_TYPE)
+				struct stat attr;
+				mode_t type;
+				if (lstat(ent[k]->d_name, &attr) == -1)
+					continue;
+				type = get_dt(attr.st_mode);
+				if (file_type && type != file_type)
+#else
+				if (file_type && ent[k]->d_type != file_type)
+#endif
+					continue;
+
+				eln[found] = -1;
+				files_len[found] = unicode
+					? wc_xstrlen(ent[k]->d_name) : strlen(ent[k]->d_name);
+
+				if (files_len[found] > flongest)
+					flongest = files_len[found];
+
+				pfiles[found] = ent[k]->d_name;
+				found++;
 			}
 		}
 	}
@@ -373,9 +367,9 @@ search_glob(char **comm, int invert)
 
 			if (file_type) {
 				/* Simply skip all files not matching file_type */
-				if (lstat(gfiles[i], &file_attrib) == -1)
+				if (lstat(gfiles[i], &attr) == -1)
 					continue;
-				if ((file_attrib.st_mode & S_IFMT) != file_type)
+				if ((attr.st_mode & S_IFMT) != file_type)
 					continue;
 			}
 
@@ -394,73 +388,78 @@ search_glob(char **comm, int invert)
 					flongest = files_len[found];
 
 				found++;
-			} else {
-				/* If searching in CWD, take into account the file's ELN
-				 * when calculating its legnth */
-				size_t j;
-				for (j = 0; file_info[j].name; j++) {
-
-					if (*pfiles[found] != *file_info[j].name
-					|| strcmp(pfiles[found], file_info[j].name) != 0)
-						continue;
-
-					eln[found] = (int)(j + 1);
-					files_len[found] = strlen(file_info[j].name)
-							+ (size_t)file_info[j].eln_n + 1;
-
-					if (files_len[found] > flongest)
-						flongest = files_len[found];
-				}
-
-				found++;
+				continue;
 			}
+
+			/* If no search_path */
+			/* If searching in CWD, take into account the file's ELN
+			 * when calculating its legnth */
+			size_t j;
+			for (j = 0; file_info[j].name; j++) {
+
+				if (*pfiles[found] != *file_info[j].name
+				|| strcmp(pfiles[found], file_info[j].name) != 0)
+					continue;
+
+				eln[found] = (int)(j + 1);
+				files_len[found] = strlen(file_info[j].name)
+						+ (size_t)file_info[j].eln_n + 1;
+
+				if (files_len[found] > flongest)
+					flongest = files_len[found];
+			}
+
+			found++;
 		}
 	}
+
+SCANDIR_ERROR:
+	if (!found)
+		goto END;
 
 	/* Print the results using colors and columns */
-	if (found) {
-		int columns_n = 0, last_column = 0;
+	int columns_n = 0, last_column = 0;
 
-		struct winsize w;
-		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-		unsigned short tcols = w.ws_col;
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	unsigned short tcols = w.ws_col;
 
-		if (flongest == 0 || flongest > tcols)
-			columns_n = 1;
+	if (flongest == 0 || flongest > tcols)
+		columns_n = 1;
+	else
+		columns_n = (int)(tcols / (flongest + 1));
+
+	if (columns_n > found)
+		columns_n = found;
+
+	size_t t = tab_offset;
+	tab_offset = 0;
+	for (i = 0; i < found; i++) {
+		if (!pfiles[i])
+			continue;
+
+		if ((i + 1) % columns_n == 0)
+			last_column = 1;
 		else
-			columns_n = (int)(tcols / (flongest + 1));
+			last_column = 0;
 
-		if (columns_n > found)
-			columns_n = found;
-
-		size_t t = tab_offset;
-		tab_offset = 0;
-		for (i = 0; i < found; i++) {
-			if (!pfiles[i])
-				continue;
-
-			if ((i + 1) % columns_n == 0)
-				last_column = 1;
-			else
-				last_column = 0;
-
-			colors_list(pfiles[i], (eln[i] && eln[i] != -1) ? eln[i] : 0,
-			    (last_column || i == (found - 1)) ? 0 :
-			    (int)(flongest - files_len[i]) + 1,
-			    (last_column || i == found - 1) ? 1 : 0);
-			/* Second argument to colors_list() is:
-			 * 0: Do not print any ELN
-			 * Positive number: Print positive number as ELN
-			 * -1: Print "?" instead of an ELN */
-		}
-		tab_offset = t;
-
-		printf(_("Matches found: %d\n"), found);
+		colors_list(pfiles[i], (eln[i] && eln[i] != -1) ? eln[i] : 0,
+		    (last_column || i == (found - 1)) ? 0 :
+		    (int)(flongest - files_len[i]) + 1,
+		    (last_column || i == found - 1) ? 1 : 0);
+		/* Second argument to colors_list() is:
+		 * 0: Do not print any ELN
+		 * Positive number: Print positive number as ELN
+		 * -1: Print "?" instead of an ELN */
 	}
+	tab_offset = t;
 
+	printf(_("Matches found: %d\n"), found);
+
+END:
 	/* Free stuff */
 	if (invert && search_path) {
-		i = scandir_files;
+		i = sfiles;
 		while (--i >= 0)
 			free(ent[i]);
 		free(ent);
@@ -474,12 +473,10 @@ search_glob(char **comm, int invert)
 	globfree(&globbed_files);
 
 	/* If needed, go back to the directory we came from */
-	if (search_path) {
-		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			    workspaces[cur_ws].path, strerror(errno));
-			return EXIT_FAILURE;
-		}
+	if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+		    workspaces[cur_ws].path, strerror(errno));
+		return EXIT_FAILURE;
 	}
 
 	if (!found)
@@ -501,28 +498,24 @@ search_regex(char **comm, int invert, int case_sens)
 	/* If there are two arguments, the one starting with '-' is the
 	 * file type and the other is the path */
 	if (comm[1] && comm[2]) {
-
 		if (*comm[1] == '-') {
 			file_type = (mode_t) * (comm[1] + 1);
 			search_path = comm[2];
-		}
-
-		else if (*comm[2] == '-') {
+		} else if (*comm[2] == '-') {
 			file_type = (mode_t) * (comm[2] + 1);
 			search_path = comm[1];
+		} else {
+			search_path = comm[1];
 		}
-
-		else
-			search_path = comm[1];
-	}
-
-	/* If just one argument, '-' indicates file type. Else, we have a
-	 * path */
-	else if (comm[1]) {
-		if (*comm[1] == '-')
-			file_type = (mode_t) * (comm[1] + 1);
-		else
-			search_path = comm[1];
+	} else {
+		/* If just one argument, '-' indicates file type. Else, we have a
+		 * path */
+		if (comm[1]) {
+			if (*comm[1] == '-')
+				file_type = (mode_t) * (comm[1] + 1);
+			else
+				search_path = comm[1];
+		}
 	}
 
 	/* If no arguments, search_path will be NULL and file_type zero */
@@ -658,7 +651,7 @@ search_regex(char **comm, int invert, int case_sens)
 
 	size_t found = 0;
 	int *regex_index = (int *)xnmalloc((search_path ? (size_t)tmp_files
-						: files) + 1, sizeof(int));
+					: files) + 1, sizeof(int));
 
 	for (i = 0; i < (search_path ? (size_t)tmp_files : files); i++) {
 		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
@@ -824,7 +817,6 @@ search_regex(char **comm, int invert, int case_sens)
 	free(files_len);
 	free(match_type);
 	free(regex_index);
-//	regfree(&regex_files);
 
 	/* If needed, go back to the directory we came from */
 	if (search_path) {
