@@ -1303,8 +1303,7 @@ RUN:
 		case 'U': unicode = xargs.unicode = 1; break;
 
 		case 'v':
-			flags |= PRINT_VERSION;
-			version_function();
+			printf("%s\n", VERSION);
 			exit(EXIT_SUCCESS);
 
 		case 'w': {

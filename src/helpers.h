@@ -170,8 +170,7 @@ extern int watch;
 #define SPLASH        (1 << 5)
 #define CASE_SENS     (1 << 6)
 #define START_PATH    (1 << 7)
-#define PRINT_VERSION (1 << 8)
-#define ALT_PROFILE   (1 << 9)
+#define ALT_PROFILE   (1 << 8)
 
 /* File ownership flags */
 #define R_USR (1 << 1)
