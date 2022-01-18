@@ -1606,6 +1606,8 @@ NOTE 2: The \fIgit_status\fR plugin is not intended to be used as a normal plugi
  promptcmd /usr/share/clifm/plugins/git_status.sh
 .TP
 Whereas this plugin provides basic Git integration, it could be easily modified (it is just a few lines long) to include whatever git function you might need.
+.TP
+Take a look at the Wiki for more information: \fIhttps://github.com/clifm/wiki/Advanced#plugins\fR
 
 .SH 16. AUTOCOMMANDS
 Heavily inspired by \fBVifm\fR, the \fIautocommands\fR function allows the user a fine-grained control over CliFM settings. It is mostly devised as a way to improve performance for remote file systems (usually slower than local ones) by allowing you to turn off some features (like the files counter) that might greatly affect performance under some circumstances (like remote connections). However, this function is not restricted to this use: use it for whatever purpose you find useful.
@@ -1768,6 +1770,9 @@ Except when running in stealth mode, CliFM sets the following environment variab
 .TP
 .B CLIFM
 This variable is set to the path of the configuration directory. By inspecting this variable other programs can find out if they were spawned by CliFM. It can also be used to quickly jump into the configuration directory: 'cd $CLIFM' or just '$CLIFM'
+.TP
+.B CLIFM_PLUGINS_HELPER
+Set to the full path of the plugins-helper script used by many plugins.
 .TP
 .B CLIFM_PROFILE
 This variable is set to the current profile of CliFM (if using two or more instances of CliFM under different profiles, the last onw wil be used). Specially useful to develop CliFM plugins on a per profile basis.
