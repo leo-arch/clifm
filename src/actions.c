@@ -40,6 +40,42 @@
 #include "mime.h"
 #include "misc.h"
 
+/* Find the plugins-helper file and set CLIFM_PLUGINS_HELPER accordingly
+ * This envionment variable will be used by plugins. Returns zero on
+ * success and one on error */
+static int
+setenv_plugins_helper(void)
+{
+	if (getenv("CLIFM_PLUGINS_HELPER"))
+		return EXIT_SUCCESS;
+
+	char _path[PATH_MAX];
+	snprintf(_path, PATH_MAX, "%s/plugins-helper", plugins_dir);
+
+	struct stat attr;
+	if (stat(_path, &attr) != -1 && setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
+		return EXIT_SUCCESS;
+
+	const char *_paths[] = {
+#ifndef __HAIKU__
+		"/usr/share/clifm/plugins/plugins-helper",
+		"/usr/local/share/clifm/plugins/plugins-helper",
+#else
+		"/boot/system/non-packaged/data/clifm/plugins/plugins-helper",
+		"/boot/system/data/clifm/plugins/plugins-helper",
+#endif
+		NULL};
+
+	size_t i;
+	for (i = 0; _paths[i]; i++) {
+		if (stat(_paths[i], &attr) != -1
+		&& setenv("CLIFM_PLUGINS_HELPER", _paths[i], 1) == 0)
+			return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
 /* The core of this function was taken from NNN's run_selected_plugin
  * function and modified to fit our needs. Thanks NNN! */
 int
@@ -128,6 +164,11 @@ run_action(char *action, char **args)
 	/* Set terminal title to plugin name */
 	if (xargs.cwd_in_title == 1)
 		set_term_title(action);
+
+	/* Let's set CLIFM_PLUGINS_HELPER. Do it only once */
+	static int plugins_helper_set = 0;
+	if (plugins_helper_set == 0 && setenv_plugins_helper() == EXIT_SUCCESS)
+		plugins_helper_set = 1;
 
 	pid_t pid = fork();
 
