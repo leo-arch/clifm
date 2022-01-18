@@ -164,7 +164,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
 For a detailed explanation of each of these features, follow the corresponding links or consult the [Wiki](https://github.com/leo-arch/clifm/wiki).
 </details>
 
-✔️ **NOTE**: Since verion 1.4, and in order to make _Lira_ more powerful,<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
+✔️ **NOTE**: Since `verion 1.4`, and in order to make _Lira_ more powerful,<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
 <sup>1</sup> _It can now match entire file names instead of just file extensions_
 
