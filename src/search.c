@@ -83,11 +83,9 @@ search_glob(char **comm, int invert)
 		} else {
 			search_path = comm[1];
 		}
-	}
-
-	/* If just one argument, '-' indicates file type. Else, we have a
-	 * path */
-	else {
+	} else {
+		/* If just one argument, '-' indicates file type. Else, we have a
+		 * path */
 		if (comm[1]) {
 			if (*comm[1] == '-')
 				file_type = (mode_t)comm[1][1];
@@ -179,54 +177,30 @@ search_glob(char **comm, int invert)
 
 	/* Search for globbing char */
 	int glob_char_found = check_glob_char(tmp);
-/*	for (i = 1; tmp[i]; i++) {
-		if (tmp[i] == '*' || tmp[i] == '?' || tmp[i] == '[' || tmp[i] == '{'
-		    // Consider regex chars as well: we don't want this "r$"
-		    // to become this "*r$*"
-		    || tmp[i] == '|' || tmp[i] == '^' || tmp[i] == '+' || tmp[i] == '$'
-		    || tmp[i] == '.') {
-			glob_char_found = 1;
-			break;
-		}
-	} */
 
 	/* If search string is just "STR" (no glob chars), change it
 	 * to ".*STR.*" */
 	if (!glob_char_found) {
 		size_t search_str_len = strlen(comm[0]);
 
-//#ifndef __TEST
-//		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) * sizeof(char));
-//#else
 		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) * sizeof(char));
-//#endif
-
 		tmp = comm[0];
-		if (invert) {
+
+		if (invert)
 			++tmp;
-//			search_str_len = strlen(tmp);
-		}
-/*
-#ifndef __TEST
-		tmp[0] = '*';
-		tmp[search_str_len] = '*';
-		tmp[search_str_len + 1] = '\0';
-		search_str = tmp;
-#else */
-		char *s = xnmalloc(strlen(tmp) + 1, sizeof(char));
-		strcpy(s, tmp);
+
+		size_t slen = strlen(tmp);
+		char *s = savestring(tmp, slen);
 
 		*(tmp + 1) = '.';
 		*(tmp + 2) = '*';
 		strcpy(tmp + 3, s + 1);
-		size_t slen = strlen(tmp);
 		tmp[slen] = '.';
 		tmp[slen + 1] = '*';
 		tmp[slen + 2] = '\0';
 
 		free(s);
 		return EXIT_FAILURE;
-//#endif
 	} else {
 		search_str = tmp + 1;
 	}
@@ -234,7 +208,6 @@ search_glob(char **comm, int invert)
 	/* Get matches, if any */
 	glob_t globbed_files;
 	int ret = glob(search_str, GLOB_BRACE, NULL, &globbed_files);
-
 	if (ret != 0) {
 		puts(_("Glob: No matches found. Trying regex..."));
 
@@ -248,6 +221,42 @@ search_glob(char **comm, int invert)
 		}
 
 		return EXIT_FAILURE;
+	}
+
+	size_t g = 0;
+	char **gfiles = (char **)NULL;
+
+	/* glob(3) doesn't sort folders first. Let's do it ourselves */
+	if (list_folders_first == 1) {
+		int *dirs = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
+		gfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, sizeof(char *));
+		for (i = 0; globbed_files.gl_pathv[i]; i++) {
+			if (stat(globbed_files.gl_pathv[i], &file_attrib) != -1
+			&& S_ISDIR(file_attrib.st_mode))
+				dirs[i] = 1;
+			else
+				dirs[i] = 0;
+		}
+
+		for (i = 0; globbed_files.gl_pathv[i]; i++) {
+			if (dirs[i] == 1) {
+				gfiles[g] = globbed_files.gl_pathv[i];
+				g++;
+			}
+		}
+
+		for (i = 0; globbed_files.gl_pathv[i]; i++) {
+			if (dirs[i] == 0) {
+				gfiles[g] = globbed_files.gl_pathv[i];
+				g++;
+			}
+		}
+
+		free(dirs);
+		gfiles[g] = (char *)NULL;
+	} else {
+		gfiles = globbed_files.gl_pathv;
+		g = globbed_files.gl_pathc;
 	}
 
 	/* We have matches */
@@ -275,9 +284,9 @@ search_glob(char **comm, int invert)
 			for (k = 0; file_info[k].name; k++) {
 				int l, f = 0;
 
-				for (l = 0; globbed_files.gl_pathv[l]; l++) {
-					if (*globbed_files.gl_pathv[l] == *file_info[k].name
-					&& strcmp(globbed_files.gl_pathv[l], file_info[k].name) == 0) {
+				for (l = 0; gfiles[l]; l++) {
+					if (*gfiles[l] == *file_info[k].name
+					&& strcmp(gfiles[l], file_info[k].name) == 0) {
 						f = 1;
 						break;
 					}
@@ -288,7 +297,7 @@ search_glob(char **comm, int invert)
 						continue;
 
 					eln[found] = (int)(k + 1);
-					files_len[found] = file_info[k].len
+					files_len[found] = strlen(file_info[k].name)
 								+ (size_t)file_info[k].eln_n + 1;
 					if (files_len[found] > flongest)
 						flongest = files_len[found];
@@ -314,9 +323,9 @@ search_glob(char **comm, int invert)
 				for (k = 0; k < scandir_files; k++) {
 					int f = 0;
 
-					for (l = 0; globbed_files.gl_pathv[l]; l++) {
-						if (*ent[k]->d_name == *globbed_files.gl_pathv[l]
-						&& strcmp(ent[k]->d_name, globbed_files.gl_pathv[l]) == 0) {
+					for (l = 0; gfiles[l]; l++) {
+						if (*ent[k]->d_name == *gfiles[l]
+						&& strcmp(ent[k]->d_name, gfiles[l]) == 0) {
 							f = 1;
 							break;
 						}
@@ -353,27 +362,24 @@ search_glob(char **comm, int invert)
 
 	else { /* No invert search */
 
-		pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1,
-		    sizeof(char *));
-		eln = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
-		files_len = (size_t *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(size_t));
+		pfiles = (char **)xnmalloc(g + 1, sizeof(char *));
+		eln = (int *)xnmalloc(g + 1, sizeof(int));
+		files_len = (size_t *)xnmalloc(g + 1, sizeof(size_t));
 
-		for (i = 0; globbed_files.gl_pathv[i]; i++) {
-			if (*globbed_files.gl_pathv[i] == '.'
-			&& (!globbed_files.gl_pathv[i][1]
-			|| (globbed_files.gl_pathv[i][1] == '.'
-			&& !globbed_files.gl_pathv[i][2])))
+		for (i = 0; gfiles[i]; i++) {
+			if (*gfiles[i] == '.' && (!gfiles[i][1]
+			|| (gfiles[i][1] == '.'	&& !gfiles[i][2])))
 				continue;
 
 			if (file_type) {
 				/* Simply skip all files not matching file_type */
-				if (lstat(globbed_files.gl_pathv[i], &file_attrib) == -1)
+				if (lstat(gfiles[i], &file_attrib) == -1)
 					continue;
 				if ((file_attrib.st_mode & S_IFMT) != file_type)
 					continue;
 			}
 
-			pfiles[found] = globbed_files.gl_pathv[i];
+			pfiles[found] = gfiles[i];
 
 			/* Get the longest file name in the list */
 			/* If not searching in CWD, we only need to know the file's
@@ -382,7 +388,7 @@ search_glob(char **comm, int invert)
 				/* This will be passed to colors_list(): -1 means no ELN */
 				eln[found] = -1;
 				files_len[found] = unicode ? wc_xstrlen(pfiles[found])
-							   : strlen(pfiles[found]);
+						: strlen(pfiles[found]);
 
 				if (files_len[found] > flongest)
 					flongest = files_len[found];
@@ -399,7 +405,7 @@ search_glob(char **comm, int invert)
 						continue;
 
 					eln[found] = (int)(j + 1);
-					files_len[found] = file_info[j].len
+					files_len[found] = strlen(file_info[j].name)
 							+ (size_t)file_info[j].eln_n + 1;
 
 					if (files_len[found] > flongest)
@@ -413,8 +419,7 @@ search_glob(char **comm, int invert)
 
 	/* Print the results using colors and columns */
 	if (found) {
-		int columns_n = 0,
-			last_column = 0;
+		int columns_n = 0, last_column = 0;
 
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -453,9 +458,6 @@ search_glob(char **comm, int invert)
 		printf(_("Matches found: %d\n"), found);
 	}
 
-	/*  else
-		printf(_("%s: No matches found\n"), PROGRAM_NAME); */
-
 	/* Free stuff */
 	if (invert && search_path) {
 		i = scandir_files;
@@ -467,6 +469,8 @@ search_glob(char **comm, int invert)
 	free(eln);
 	free(files_len);
 	free(pfiles);
+	if (list_folders_first == 1)
+		free(gfiles);
 	globfree(&globbed_files);
 
 	/* If needed, go back to the directory we came from */
@@ -613,7 +617,6 @@ search_regex(char **comm, int invert, int case_sens)
 							sizeof(char));
 
 		char *tmp_str = (char *)xnmalloc(search_str_len + 1, sizeof(char));
-
 		strcpy(tmp_str, comm[0] + (invert ? 2 : 1));
 
 		*comm[0] = '.';
@@ -625,10 +628,9 @@ search_regex(char **comm, int invert, int case_sens)
 		*(comm[0] + search_str_len + 2) = '*';
 		*(comm[0] + search_str_len + 3) = '\0';
 		search_str = comm[0];
-	}
-
-	else
+	} else {
 		search_str = comm[0] + (invert ? 2 : 1);
+	}
 
 	/* Get matches, if any, using regular expressions */
 	regex_t regex_files;
@@ -644,7 +646,6 @@ search_regex(char **comm, int invert, int case_sens)
 		if (search_path) {
 			for (i = 0; i < (size_t)tmp_files; i++)
 				free(reg_dirlist[i]);
-
 			free(reg_dirlist);
 
 			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
@@ -695,8 +696,7 @@ search_regex(char **comm, int invert, int case_sens)
 	}
 
 	/* We have matches */
-	size_t flongest = 0,
-		   type_ok = 0;
+	size_t flongest = 0, type_ok = 0;
 
 	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
 	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
@@ -729,8 +729,9 @@ search_regex(char **comm, int invert, int case_sens)
 				if (reg_dirlist[regex_index[j]]->d_type != file_type)
 #endif
 					continue;
-			} else if (file_info[regex_index[j]].type != file_type) {
-				continue;
+			} else {
+				if (file_info[regex_index[j]].type != file_type)
+					continue;
 			}
 		}
 
@@ -748,13 +749,12 @@ search_regex(char **comm, int invert, int case_sens)
 
 			if (files_len[j] > flongest)
 				flongest = files_len[j];
-		}
-
-		/* If searching in CWD, take into account the file's ELN
-		 * when calculating its legnth */
-		else {
-			files_len[j] = file_info[regex_index[j]].len
-							+ (size_t)DIGINUM(regex_index[j] + 1) + 1;
+		} else {
+			/* If searching in CWD, take into account the file's ELN
+			 * when calculating its legnth */
+/*			files_len[j] = file_info[regex_index[j]].len */
+			files_len[j] = strlen(file_info[regex_index[j]].name)
+					+ (size_t)DIGINUM(regex_index[j] + 1) + 1;
 
 			if (files_len[j] > flongest)
 				flongest = files_len[j];
@@ -778,8 +778,7 @@ search_regex(char **comm, int invert, int case_sens)
 			total_cols = type_ok;
 
 		/* cur_col: Current columns number */
-		size_t cur_col = 0,
-			   counter = 0;
+		size_t cur_col = 0, counter = 0;
 
 		size_t t = tab_offset;
 		tab_offset = 0;
@@ -807,19 +806,19 @@ search_regex(char **comm, int invert, int case_sens)
 			counter++;
 
 			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
-					: file_info[regex_index[i]].name, search_path ? NO_ELN
-					: regex_index[i] + 1, (last_column || counter == type_ok)
-					? NO_PAD : (int)(flongest - files_len[i]) + 1,
+					: file_info[regex_index[i]].name,
+					search_path ? NO_ELN : regex_index[i] + 1,
+					(last_column || counter == type_ok) ? NO_PAD
+					: (int)(flongest - files_len[i]) + 1,
 					(last_column || counter == type_ok) ? PRINT_NEWLINE
 					: NO_NEWLINE);
 		}
 		tab_offset = t;
 
 		printf(_("Matches found: %zu\n"), counter);
-	}
-
-	else
+	} else {
 		fputs(_("No matches found\n"), stderr);
+	}
 
 	/* Free stuff */
 	free(files_len);
