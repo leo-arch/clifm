@@ -333,7 +333,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 		*n = '\0';
 
 	if (cur_comp_type == TCMP_ENVIRON)
-		/* Skip the leading $*/
+		/* Skip the leading dollar sign ($) */
 		buf++;
 
 	if (cur_comp_type == TCMP_PATH && multi == 0) {
@@ -372,6 +372,10 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 
 	char deq_str[PATH_MAX];
 	*deq_str = '\0';
+	/* Clang static analysis complains that tmp[4] (deq_str[4]) is a
+	 * garbage value. Initialize only this exact value to get rid of the
+	 * warning */
+	deq_str[4] = '\0';
 	if (strchr(ss, '\\')) {
 		size_t i = 0;
 		char *b = ss;
@@ -436,19 +440,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 static inline char *
 get_last_word(char *matches)
 {
-	/* Get word after last non-escaped space */
-//	char *ss = matches, *s = (char *)NULL;
-/*	while (*ss) {
-		if (ss != matches && *ss == ' ' && *(ss - 1) != '\\' && *(ss + 1) != ' ')
-			s = ss;
-		ss++;
-	}
-	if (!s)
-		s = matches; */
-
 	/* Get word after last non-escaped slash */
 	char *sl = matches;
-//	char *sl = s;
 	char *d = (char *)NULL;
 	while (*sl) {
 		if (sl == matches) {
@@ -463,19 +456,11 @@ get_last_word(char *matches)
 
 	if (!d) {
 		return matches;
-//		d = matches;
 	} else {
 		if (*d == '/')
 			return d + 1;
 		return d;
-//			d++;
 	}
-
-//	if (*d == ' ' && !*(d + 1))
-//		d = matches;
-//	printf("AA:'%s'\n", d);
-
-//	return d;
 }
 
 static inline int
