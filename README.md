@@ -106,6 +106,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd-on-off-status), [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open-on-off-status), and [autols](https://github.com/leo-arch/clifm/wiki/Common-Operations#navigation).
   - [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
   - [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function).
+  - [Backdir - Quickly change to a parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#bd-name).
   - [_Lira_, a built-in resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) (supports regular expressions and is able to discern between GUI and non-GUI environments).
   - [A built-in Freedesktop-compliant trash system](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files).
   - [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters).
@@ -155,23 +156,13 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
   - [_Mas_, a built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status) for files listing.
   - Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input).
-
+  - [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security) and [secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security).
 <h4 align="center"><br><i>Gemini in action</i></h4>
 <p align="center"><img src="https://i.postimg.cc/1XSKBRh8/suggestions.gif"></a></p>
 
 ---
 For a detailed explanation of each of these features, follow the corresponding links or consult the [Wiki](https://github.com/leo-arch/clifm/wiki).
 </details>
-
-➕ **NEW**: [Backdir - Quickly change to a parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#bd-name)
-
-➕ **NEW**: [Multi-selection for FZF TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions)
-
-➕ **NEW**: [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security)
-
-➕ **NEW**: [Secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security)
-
-➕ **NEW**: Colorized files properties
 
 ✔️ **NOTE**: Since verion 1.4, and in order to make _Lira_ more powerful,<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
