@@ -1538,15 +1538,25 @@ CliFM includes a few shell functions to perform specific actions (cd-on-quit, fi
 .SH 15. PLUGINS
 Plugins are just scripts or programs (written in any language) able to add, extend or improve CliFM functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
 
-A convenient helper script is provided to get a consistent look across all plugins, specially those running FZF. Edit this file is you want to change how FZF plugins look like. Source it and use any of the provided functions and variables to write a new FZF plugin. This helper script is located in \fIDATADIR/clifm/plugins/plugins-helper\fR, but it will be overridden by \fIXDG_CONFIG_HOME/clifm/plugins/plugins-helper\fR if found.
+A convenient helper script is provided to get a consistent look across all plugins, specially those running FZF. This helper script is located in \fIDATADIR/clifm/plugins/plugins-helper\fR, but it will be overridden by \fIXDG_CONFIG_HOME/clifm/plugins/plugins-helper\fR if found. The location of this file is set by CliFM itself in the \fBCLIFM_PLUGINS_HELPER\fR environment variable to be used by plugins. Source the file and use any of the functions and variables provided by it to write a new FZF plugin:
+
+    # Source our plugins helper
+    if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
+        printf "CliFM: Unable to find plugins-helper file\\n" >&2
+        exit 1
+    fi
+    # shellcheck source=/dev/null
+    . "$CLIFM_PLUGINS_HELPER"
 
  +-------------------+-------------------------------+
  | Plugin            | Dependencies                  |
  +-------------------+-------------------------------+
+ | batch_create      |                               |
+ | batch_copy        |                               |
  | clip              | xclip                         |
+ | colors            |                               |
  | dragondrop        | dragon or dragon-drag-and-drop|
  | finder            | fzf or rofi                   |
- | rgfind            | fzf and ripgrep               |
  | fzcd              | fzf                           |
  | fzfdirhist        | fzf                           |
  | fzfhist           | fzf                           |
@@ -1571,17 +1581,19 @@ A convenient helper script is provided to get a consistent look across all plugi
  |   -json           | python or pq                  |
  |   -file info      | exiftool, mediainfo or file   |
  | fzfsel            | fzf                           |
+ | fzfdesel          | fzf                           |
+ | git_status        | git                           |
  | ihelp             | fzf or rofi                   |
  | img_viewer        | sxiv, feh or lsix             |
  | jumper            | fzf or rofi                   |
+ | kbgen             | (C source file)               |
+ | mime_list         | file, fzf                     |
  | music_player      | mplayer                       |
  | pdf_viewer        | pdftotext                     |
+ | rgfind            | fzf and ripgrep               |
  | update            |                               |
  | vid_viewer        | ffmpegthumbnailer             |
  | wallpapper_setter | feh, xloadimage or hsetroot   |
- | git_status        | git                           |
- | batch_create      |                               |
- | batch_copy        |                               |
  +-------------------+-------------------------------+
 
 .TP
