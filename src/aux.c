@@ -70,6 +70,111 @@ msleep(long msec)
 }
 #endif
 
+char *
+normalize_path(char *src, size_t src_len)
+{
+	if (!src || !*src)
+		return (char *)NULL;
+
+	/* Deescape SRC */
+	char *tmp = (char *)NULL;
+
+	if (strchr(src, '\\')) {
+		tmp = dequote_str(src, 0);
+		if (!tmp) {
+			fprintf(stderr, _("%s: %s: Error deescaping string\n"),
+					PROGRAM_NAME, src);
+			return (char *)NULL;
+		}
+		size_t tlen = strlen(tmp);
+		if (tmp[tlen - 1] == '/')
+			tmp[tlen - 1] = '\0';
+		strcpy(src, tmp);
+		free(tmp);
+		tmp = (char *)NULL;
+	}
+
+	/* Expand tilde */
+	if (*src == '~') {
+		tmp = tilde_expand(src);
+		if (!tmp) {
+			fprintf(stderr, _("%s: %s: Error expanding tilde\n"),
+					PROGRAM_NAME, src);
+			return (char *)NULL;
+		}
+		size_t tlen = strlen(tmp);
+		if (tmp[tlen - 1] == '/')
+			tmp[tlen - 1] = '\0';
+		return tmp;
+	}
+
+	/* Resolve references to . and .. */
+	char *res;
+	size_t res_len;
+
+	if (src_len == 0 || *src != '/') {
+		/* Relative path */
+		size_t pwd_len;
+		pwd_len = strlen(workspaces[cur_ws].path);
+		res = (char *)xnmalloc(pwd_len + 1 + src_len + 1, sizeof(char));
+		memcpy(res, workspaces[cur_ws].path, pwd_len);
+		res_len = pwd_len;
+	} else {
+		res = (char *)xnmalloc((src_len > 0 ? src_len : 1) + 1, sizeof(char));
+		res_len = 0;
+	}
+
+	const char *ptr;
+	const char *end = &src[src_len];
+	const char *next;
+
+	for (ptr = src; ptr < end; ptr = next + 1) {
+		size_t len;
+		next = memchr(ptr, '/', (size_t)(end - ptr));
+		if (!next)
+			next = end;
+		len = (size_t)(next - ptr);
+
+		switch(len) {
+		case 0: continue;
+
+		case 1:
+			if (*ptr == '.')
+				continue;
+			break;
+
+		case 2:
+			if (ptr[0] == '.' && ptr[1] == '.') {
+#if !defined(__HAIKU__) && !defined(_BE_POSIX)
+				const char *slash = memrchr(res, '/', res_len);
+#else
+				const char *slash = strrchr(res, '/');
+#endif
+				if (slash)
+					res_len = (size_t)(slash - res);
+				continue;
+			}
+			break;
+		}
+		res[res_len] = '/';
+		res_len++;
+		memcpy(&res[res_len], ptr, len);
+		res_len += len;
+	}
+
+	if (res_len == 0) {
+		res[res_len] = '/';
+		res_len++;
+	}
+
+	res[res_len] = '\0';
+
+	if (res[res_len - 1] == '/')
+		res[res_len - 1] = '\0';
+
+	return res;
+}
+
 void
 rl_ring_bell(void)
 {
