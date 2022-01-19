@@ -607,10 +607,12 @@ open_bookmark(void)
 
 	printf(_("%sBookmarks Manager%s\n\n"), BOLD, df_c);
 
+	/* Get longest shortcut name to properly pad output */
+	size_t i, eln = 0;
+	int eln_pad = DIGINUM(bm_n);
+
 	/* Print bookmarks taking into account the existence of shortcut,
 	 * name, and path for each bookmark */
-	size_t i, eln = 0;
-
 	for (i = 0; i < bm_n; i++) {
 		if (!bookmarks[i].path || !*bookmarks[i].path)
 			continue;
@@ -634,9 +636,10 @@ open_bookmark(void)
 			}
 		}
 
-		printf("%s%zu%s %s%c%s%c%s %s%s%s\n", el_c, eln, df_c,
+		printf("%s%-*zu%s %s%c%s%c%s %s%s%s\n", el_c, eln_pad, eln, df_c,
 		    BOLD, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
-		    sc_ok ? ']' : 0, df_c, non_existent ? GRAY : (is_dir ? bm_c : fi_c),
+		    sc_ok ? ']' : 0, df_c,
+		    non_existent ? GRAY : (is_dir ? bm_c : fi_c),
 		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
 	}
 
