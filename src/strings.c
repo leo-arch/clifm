@@ -135,7 +135,7 @@ xstrverscmp(const char *s1, const char *s2)
 	const unsigned char *p1 = (const unsigned char *)s1;
 	const unsigned char *p2 = (const unsigned char *)s2;
 
-/*	if (*p1 == '.') {
+	if (*p1 == '.') {
 		if (*(p1 + 1) == '#')
 			p1 += 2;
 		else
@@ -153,7 +153,7 @@ xstrverscmp(const char *s1, const char *s2)
 	} else {
 		if (*p2 == '#' || *p2 == '~')
 			p2++;
-	} */
+	}
 
 	/* Symbol(s)    0       [1-9]   others
 	 Transition   (10) 0  (01) d  (00) x   */
