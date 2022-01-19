@@ -600,7 +600,7 @@ open_bookmark(void)
 	}
 
 	/* We have bookmarks... */
-	struct stat file_attrib;
+	struct stat attr;
 
 	if (clear_screen)
 		CLEAR;
@@ -618,7 +618,7 @@ open_bookmark(void)
 			continue;
 		eln++;
 		int is_dir = 0, sc_ok = 0, name_ok = 0, non_existent = 0;
-		int path_ok = stat(bookmarks[i].path, &file_attrib);
+		int path_ok = stat(bookmarks[i].path, &attr);
 
 		if (bookmarks[i].shortcut)
 			sc_ok = 1;
@@ -629,7 +629,7 @@ open_bookmark(void)
 		if (path_ok == -1) {
 			non_existent = 1;
 		} else {
-			switch ((file_attrib.st_mode & S_IFMT)) {
+			switch ((attr.st_mode & S_IFMT)) {
 			case S_IFDIR: is_dir = 1; break;
 			case S_IFREG: break;
 			default: non_existent = 1; break;
@@ -639,7 +639,7 @@ open_bookmark(void)
 		printf("%s%-*zu%s %s%c%s%c%s %s%s%s\n", el_c, eln_pad, eln, df_c,
 		    BOLD, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
 		    sc_ok ? ']' : 0, df_c,
-		    non_existent ? GRAY : (is_dir ? bm_c : fi_c),
+		    non_existent ? GRAY : (!is_dir ? fi_c : (name_ok ? bm_c : di_c)),
 		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
 	}
 
@@ -652,13 +652,13 @@ open_bookmark(void)
 
 	/* Case "edit" */
 	if (*arg[0] == 'e' && (!arg[0][1] || strcmp(arg[0], "edit") == 0)) {
-		stat(bm_file, &file_attrib);
-		time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+		stat(bm_file, &attr);
+		time_t mtime_bfr = (time_t)attr.st_mtime;
 
 		edit_bookmarks(arg[1] ? arg[1] : NULL);
 
-		stat(bm_file, &file_attrib);
-		if (mtime_bfr != (time_t)file_attrib.st_mtime) {
+		stat(bm_file, &attr);
+		if (mtime_bfr != (time_t)attr.st_mtime) {
 			free_bookmarks();
 			load_bookmarks();
 		}
@@ -723,7 +723,6 @@ open_bookmark(void)
 
 	char *tmp_cmd[] = {"o", tmp_path, arg[1] ? arg[1] : NULL, NULL};
 	exit_status = open_function(tmp_cmd);
-	goto FREE_AND_EXIT;
 
 FREE_AND_EXIT : {
 	for (i = 0; arg[i]; i++)
