@@ -37,8 +37,6 @@ typedef char *rl_cpvfunc_t;
 #include <errno.h>
 #include <fcntl.h>
 
-//#include <curses.h>
-
 #include "exec.h"
 #include "aux.h"
 #include "misc.h"
@@ -104,33 +102,11 @@ stat_char(char *filename)
 	} else {
 		if (S_ISFIFO(attr.st_mode))
 			c = '|';
-#endif /* S_ISFIFO */
-/*#if defined(S_ISBLK)
-	} else if (S_ISBLK(attr.st_mode)) {
-		c = '%';
 #endif
-#if defined(S_ISCHR)
-	} else if (S_ISCHR(attr.st_mode)) {
-		c = '&';
-#endif */
 	}
 
 	return c;
 }
-
-/* Stupid comparison routine for qsort () ing strings. */
-/*static int
-compare_strings(const void *s1, const void *s2)
-{
-	int result;
-	char *ss1 = (char *)s1, *ss2 = (char *)s2;
-
-	result = (int)(ss1 - ss2);
-	if (result == 0)
-		result = strcmp(s1, s2);
-
-	return result;
-} */
 
 /* The user must press "y" or "n". Non-zero return means "y" pressed. */
 static int
@@ -164,7 +140,6 @@ print_filename(char *to_print, char *full_pathname)
 		}
 	}
 
-/*	int rl_visible_stats = 1; */
 	if (rl_filename_completion_desired && !colorize) {
 		if (cur_comp_type == TCMP_CMD) {
 			putc('*', rl_outstream);
@@ -172,10 +147,10 @@ print_filename(char *to_print, char *full_pathname)
 		}
       /* If to_print != full_pathname, to_print is the basename of the
 	 path passed. In this case, we try to expand the directory
-	 name before checking for the stat character. */
+	 name before checking for the stat character */
 		int extension_char = 0;
 		if (to_print != full_pathname) {
-		/* Terminate the directory name. */
+			/* Terminate the directory name */
 			char c = to_print[-1];
 			to_print[-1] = '\0';
 
@@ -957,10 +932,6 @@ tab_complete(int what_to_do)
 
 	rl_compentry_func_t *our_func = (rl_compentry_func_t *)NULL;
 
-/*	char *saved_line_buffer = (char *)NULL;
-	if (rl_line_buffer)
-		saved_line_buffer = savestring(rl_line_buffer, (size_t)rl_end); */
-
 	our_func = rl_completion_entry_function;
 
 	/* Only the completion entry function can change these. */
@@ -988,14 +959,13 @@ tab_complete(int what_to_do)
 
 				if (rl_line_buffer[scan] == '\\') {
 					pass_next = 1;
-//					found_quote |= 4;
 					continue;
 				}
 
 				if (quote_char != '\0') {
 				/* Ignore everything until the matching close quote char. */
 					if (rl_line_buffer[scan] == quote_char) {
-					/* Found matching close.  Abandon this substring. */
+					/* Found matching close. Abandon this substring. */
 						quote_char = '\0';
 						rl_point = end;
 					}
@@ -1004,11 +974,6 @@ tab_complete(int what_to_do)
 					/* Found start of a quoted substring. */
 					quote_char = rl_line_buffer[scan];
 					rl_point = scan + 1;
-					/* Shell-like quoting conventions. */
-/*					if (quote_char == '\'')
-						found_quote |= 1;
-					else if (quote_char == '"')
-						found_quote |= 2; */
 				}
 			}
 		}
@@ -1053,9 +1018,9 @@ tab_complete(int what_to_do)
 
 	/* At this point, we know we have an open quote if quote_char != '\0'. */
 
-  /* If the user wants to TRY to complete, but then wants to give
-   * up and use the default completion function, they set the
-   * variable rl_attempted_completion_function. */
+	/* If the user wants to TRY to complete, but then wants to give
+	* up and use the default completion function, they set the
+	* variable rl_attempted_completion_function. */
 	if (rl_attempted_completion_function) {
 		matches = (*rl_attempted_completion_function) (text, start, end);
 
@@ -1072,7 +1037,6 @@ AFTER_USUAL_COMPLETION:
 	free(text);
 
 	if (!matches || !matches[0]) {
-//		rl_ding();
 		rl_ring_bell();
 		return EXIT_FAILURE;
 	}
@@ -1089,15 +1053,6 @@ AFTER_USUAL_COMPLETION:
 		size_t newlen = 0;
 		char dead_slot;
 		char **temp_array;
-
-		/* Sort the items. */
-		/* It is safe to sort this array, because the lowest common
-		denominator found in matches[0] will remain in place. */
-//			for (i = 0; matches[i]; i++);
-		/* Try sorting the array without matches[0], since we need it to
-		stay in place no matter what. */
-//			if (i)
-//				qsort(matches + 1, i - 1, sizeof (char *), compare_strings);
 
 		/* Remember the lowest common denominator for it may be unique. */
 		lowest_common = savestring(matches[0], strlen(matches[0]));
@@ -1132,7 +1087,7 @@ AFTER_USUAL_COMPLETION:
 		matches[0] = lowest_common;
 
 		/* If there is one string left, and it is identical to the
-		 * lowest common denominator, then the LCD is the string to
+		 * lowest common denominator (LCD), then the LCD is the string to
 		 * insert. */
 		if (j == 2 && strcmp(matches[0], matches[1]) == 0) {
 			free(matches[1]);
@@ -1141,7 +1096,6 @@ AFTER_USUAL_COMPLETION:
 	}
 
 	switch (what_to_do) {
-//		case TAB:
 	case '!':
 		/* If we are matching filenames, then here is our chance to
 		 * do clever processing by re-examining the list.  Call the
@@ -1183,8 +1137,6 @@ AFTER_USUAL_COMPLETION:
 			This also checks whether the common prefix of several
 			matches needs to be quoted.  If the common prefix should
 			not be checked, add !matches[1] to the if clause. */
-/*			should_quote = rl_strpbrk(matches[0],
-						   rl_completer_word_break_characters) != 0; */
 			should_quote = rl_strpbrk(matches[0], quote_chars) != 0;
 
 			if (should_quote)
@@ -1267,7 +1219,7 @@ AFTER_USUAL_COMPLETION:
 
 		/* If there are more matches, ring the bell to indicate.
 		 If this was the only match, and we are hacking files,
-		 check the file to see if it was a directory.  If so,
+		 check the file to see if it was a directory. If so,
 		 add a '/' to the name.  If not, and we are at the end
 		 of the line, then add a space. */
 		if (matches[1]) {
@@ -1329,30 +1281,11 @@ AFTER_USUAL_COMPLETION:
 		}
 	break;
 
-/*		case '*': {
-		i = 1;
-
-		rl_begin_undo_group();
-		rl_delete_text(start, rl_point);
-		rl_point = start;
-		if (matches[1]) {
-			while (matches[i]) {
-				rl_insert_text(matches[i++]);
-				rl_insert_text(" ");
-			}
-		} else {
-			rl_insert_text(matches[0]);
-			rl_insert_text(" ");
-		}
-		rl_end_undo_group();
-	}
-	break; */
-
 	case '?': {
 		int len = 0, count = 0, limit = 0, max = 0;
 		int j = 0, k = 0, l = 0;
 
-		/* Handle simple case first.  What if there is only one answer? */
+		/* Handle simple case first. Just one match */
 		if (!matches[1]) {
 			char *temp;
 			temp = printable_part(matches[0]);
@@ -1362,36 +1295,31 @@ AFTER_USUAL_COMPLETION:
 			goto RESTART;
 		}
 
-		/* There is more than one answer.  Find out how many there are,
+		/* There is more than one match. Find out how many there are,
 		and find out what the maximum printed length of a single entry
 		is. */
 
 DISPLAY_MATCHES:
-/*#ifndef _NO_SUGGESTIONS
-		if (wrong_cmd)
-			recover_from_wrong_cmd();
-#endif */
-
-		max = 0; 
-		for (i = 1; matches[i]; i++) {
-			char *temp;
-			size_t name_length;
-
-			temp = printable_part(matches[i]);
-			name_length = strlen(temp);
-
-			if ((int)name_length > max)
-			  max = (int)name_length;
-		}
-
-		len = (int)i - 1;
-
-		/* If there are many items, then ask the user if she
-		   really wants to see them all. */
 #ifndef _NO_FZF
 		if (!fzftab) {
 #endif
 		{
+			max = 0;
+			for (i = 1; matches[i]; i++) {
+				char *temp;
+				size_t name_length;
+
+				temp = printable_part(matches[i]);
+				name_length = strlen(temp);
+
+				if ((int)name_length > max)
+				  max = (int)name_length;
+			}
+
+			len = (int)i - 1;
+
+			/* If there are many items, then ask the user if she
+			   really wants to see them all. */
 			if (len >= rl_completion_query_items) {
 				putchar('\n');
 #ifndef _NO_HIGHLIGHT
@@ -1400,15 +1328,11 @@ DISPLAY_MATCHES:
 					fputs(tx_c, stdout);
 				}
 #endif
-//					rl_crlf();
 				fprintf(rl_outstream,
 					 "Display all %d possibilities? (y or n) ", len);
-//					rl_crlf();
 				fflush(rl_outstream);
-				if (!get_y_or_n()) {
-//						rl_crlf();
+				if (!get_y_or_n())
 					goto RESTART;
-				}
 			}
 
 			/* How many items of MAX length can we fit in the screen window? */
@@ -1430,40 +1354,6 @@ DISPLAY_MATCHES:
 		}
 #endif
 
-/*
-#ifndef _NO_FZF
-		if (!fzftab) {
-#endif
-		{
-			// How many items of MAX length can we fit in the screen window?
-			max += 2;
-			limit = term_cols / max;
-			if (limit != 1 && (limit * max == term_cols))
-				limit--;
-
-			// Avoid a possible floating exception.  If max > screenwidth,
-			   limit will be 0 and a divide-by-zero fault will result.
-			if (limit == 0)
-			  limit = 1;
-
-			// How many iterations of the printing loop?
-			count = (len + (limit - 1)) / limit;
-		}
-#ifndef _NO_FZF
-	}
-#endif */
-
-		/* Watch out for special case.  If LEN is less than LIMIT, then
-		   just do the inner printing loop.
-		   0 < len <= limit  implies  count = 1. */
-
-		/* Sort the items if they are not already sorted. */
-//			if (!rl_ignore_completion_duplicates)
-//				qsort(matches + 1, len ? (size_t)len - 1 : 0, sizeof (char *), compare_strings);
-
-		/* Print the sorted items, up-and-down alphabetically, like
-		   ls might. */
-//			rl_crlf();
 		putchar('\n');
 #ifndef _NO_HIGHLIGHT
 		if (highlight && cur_color != tx_c && !wrong_cmd) {
@@ -1524,10 +1414,6 @@ CALC_OFFSET:
 		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR)
 			tab_offset = 0;
 
-/*		if (curses_tab(matches) == -1)
-			goto RESTART;
-		goto RESET_PATH; */
-
 #ifndef _NO_FZF
 		if (fzftab == 1) {
 			if (fzftabcomp(matches) == -1)
@@ -1577,7 +1463,6 @@ CALC_OFFSET:
 				l += count;
 			}
 			putchar('\n');
-//				rl_crlf();
 		}
 		tab_offset = 0;
 
@@ -1649,13 +1534,5 @@ RESTART:
 		free(matches[i]);
 	free(matches);
 
-  /* Check to see if the line has changed through all of this manipulation. */
-//	if (saved_line_buffer) {
-/*		if (strcmp (rl_line_buffer, saved_line_buffer) != 0)
-			completion_changed_buffer = 1;
-		else
-			completion_changed_buffer = 0; */
-//		free(saved_line_buffer);
-//	}
 	return EXIT_SUCCESS;
 }
