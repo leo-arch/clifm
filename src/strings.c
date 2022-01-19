@@ -135,6 +135,26 @@ xstrverscmp(const char *s1, const char *s2)
 	const unsigned char *p1 = (const unsigned char *)s1;
 	const unsigned char *p2 = (const unsigned char *)s2;
 
+	if (*p1 == '.') {
+		if (*(p1 + 1) == '#')
+			p1 += 2;
+		else
+			p1++;
+	} else {
+		if (*p1 == '#' || *p1 == '~')
+			p1++;
+	}
+
+	if (*p2 == '.') {
+		if (*(p2 + 1) == '#')
+			p2 += 2;
+		else
+			p2++;
+	} else {
+		if (*p2 == '#' || *p2 == '~')
+			p2++;
+	}
+
 	/* Symbol(s)    0       [1-9]   others
 	 Transition   (10) 0  (01) d  (00) x   */
 	static const uint8_t next_state[] = {
@@ -171,7 +191,7 @@ xstrverscmp(const char *s1, const char *s2)
 		p2++;
 	}
 
-	/* Hint: '0' is a digit too.  */
+	/* Hint: '0' is a digit too. */
 	state = S_N + ((c1 == '0') + (_ISDIGIT(c1) != 0));
 
 	while ((diff = c1 - c2) == 0) {
@@ -198,10 +218,10 @@ xstrverscmp(const char *s1, const char *s2)
 	switch (state) {
 	case VCMP: return diff;
 	case VLEN:
-		while (_ISDIGIT(*p1++))
+		while (_ISDIGIT(*p1++)) {
 			if (!_ISDIGIT(*p2++))
 				return 1;
-
+		}
 		return _ISDIGIT(*p2) ? -1 : diff;
 
 	default: return state;
