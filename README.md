@@ -132,10 +132,12 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases).
   - [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status).
   - [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup).
-- 3 Modes
-  - Normal
+- Modes
+  - Standard mode
   - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
   - [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#light-mode) (just in case it is not fast enough for you).
+  - [Resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#using-clifm-as-a-standalone-resource-opener)
+  - [Files lister (ls-mode)](https://github.com/leo-arch/clifm/wiki/Advanced#files-lister-ls-mode)
 - Customization
   - [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
   - [Customizable keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
