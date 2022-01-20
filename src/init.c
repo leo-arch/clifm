@@ -944,8 +944,8 @@ external_arguments(int argc, char **argv)
 	static struct option longopts[] = {
 	    {"no-hidden", no_argument, 0, 'a'},
 	    {"show-hidden", no_argument, 0, 'A'},
-	    {"bookmarks-file", no_argument, 0, 'b'},
-	    {"config-file", no_argument, 0, 'c'},
+	    {"bookmarks-file", required_argument, 0, 'b'},
+	    {"config-file", required_argument, 0, 'c'},
 	    {"config-dir", required_argument, 0, 'D'},
 	    {"no-eln", no_argument, 0, 'e'},
 	    {"no-folders-first", no_argument, 0, 'f'},
@@ -956,7 +956,7 @@ external_arguments(int argc, char **argv)
 	    {"horizontal-list", no_argument, 0, 'H'},
 	    {"no-case-sensitive", no_argument, 0, 'i'},
 	    {"case-sensitive", no_argument, 0, 'I'},
-	    {"keybindings-file", no_argument, 0, 'k'},
+	    {"keybindings-file", required_argument, 0, 'k'},
 	    {"no-long-view", no_argument, 0, 'l'},
 	    {"long-view", no_argument, 0, 'L'},
 	    {"dirhist-map", no_argument, 0, 'm'},
@@ -1335,6 +1335,7 @@ RUN:
 			switch (optopt) {
 			case 'b': /* fallthrough */
 			case 'c': /* fallthrough */
+			case 'D': /* fallthrough */
 			case 'k': /* fallthrough */
 			case 'p': /* fallthrough */
 			case 'P': /* fallthrough */

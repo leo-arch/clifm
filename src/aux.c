@@ -519,7 +519,7 @@ get_hex_num(const char *str)
 } */
 
 /* Count files in DIR_PATH, including self and parent. If POP is set to 1,
- * The function will just check if the directory is populated (it has at
+ * the function will just check if the directory is populated (it has at
  * least 3 files, including self and parent)*/
 int
 count_dir(const char *dir, int pop)

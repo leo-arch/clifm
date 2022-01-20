@@ -54,7 +54,7 @@
 #define BRACKETS_TRANSLATION '-'
 
 #define UNMOD_NAMES 0
-#define MOD_NAMES 1
+#define MOD_NAMES   1
 
 #define UTF_8_ENCODED_MASK  0xC0
 #define UTF_8_ENCODED_START 0xC0
