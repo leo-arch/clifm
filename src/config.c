@@ -552,9 +552,7 @@ define_config_file_names(void)
 	size_t pnl_len = strlen(PNL);
 
 	if (alt_config_dir) {
-		config_dir_gral = (char *)xnmalloc(strlen(alt_config_dir) + pnl_len
-											+ 2, sizeof(char));
-		sprintf(config_dir_gral, "%s/%s", alt_config_dir, PNL);
+		config_dir_gral = savestring(alt_config_dir, strlen(alt_config_dir));
 		free(alt_config_dir);
 	} else {
 		/* If $XDG_CONFIG_HOME is set, use it for the config file.
@@ -563,12 +561,12 @@ define_config_file_names(void)
 		if (xdg_config_home) {
 			size_t xdg_config_home_len = strlen(xdg_config_home);
 			config_dir_gral = (char *)xnmalloc(xdg_config_home_len + pnl_len
-												+ 2, sizeof(char));
+							+ 2, sizeof(char));
 			sprintf(config_dir_gral, "%s/%s", xdg_config_home, PNL);
 			xdg_config_home = (char *)NULL;
 		} else {
 			config_dir_gral = (char *)xnmalloc(user.home_len + pnl_len + 11,
-												sizeof(char));
+							sizeof(char));
 			sprintf(config_dir_gral, "%s/.config/%s", user.home, PNL);
 		}
 	}
@@ -616,13 +614,11 @@ define_config_file_names(void)
 	sprintf(trash_info_dir, "%s/info", trash_dir);
 #endif
 
-	size_t config_len = strlen(config_dir);
-
-	dirhist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+	dirhist_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
 	sprintf(dirhist_file, "%s/dirhist.cfm", config_dir);
 
 	if (!alt_bm_file) {
-		bm_file = (char *)xnmalloc(config_len + 15, sizeof(char));
+		bm_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
 		sprintf(bm_file, "%s/bookmarks.cfm", config_dir);
 	} else {
 		bm_file = savestring(alt_bm_file, strlen(alt_bm_file));
@@ -630,14 +626,14 @@ define_config_file_names(void)
 		alt_bm_file = (char *)NULL;
 	}
 
-	log_file = (char *)xnmalloc(config_len + 9, sizeof(char));
+	log_file = (char *)xnmalloc(config_dir_len + 9, sizeof(char));
 	sprintf(log_file, "%s/log.cfm", config_dir);
 
-	hist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+	hist_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
 	sprintf(hist_file, "%s/history.cfm", config_dir);
 
 	if (!alt_config_file) {
-		config_file = (char *)xnmalloc(config_len + pnl_len + 4, sizeof(char));
+		config_file = (char *)xnmalloc(config_dir_len + pnl_len + 4, sizeof(char));
 		sprintf(config_file, "%s/%src", config_dir, PNL);
 	} else {
 		config_file = savestring(alt_config_file, strlen(alt_config_file));
@@ -645,19 +641,19 @@ define_config_file_names(void)
 		alt_config_file = (char *)NULL;
 	}
 
-	profile_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+	profile_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
 	sprintf(profile_file, "%s/profile.cfm", config_dir);
 
-	msg_log_file = (char *)xnmalloc(config_len + 14, sizeof(char));
+	msg_log_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
 	sprintf(msg_log_file, "%s/messages.cfm", config_dir);
 
-	mime_file = (char *)xnmalloc(config_len + 14, sizeof(char));
+	mime_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
 	sprintf(mime_file, "%s/mimelist.cfm", config_dir);
 
-	actions_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+	actions_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
 	sprintf(actions_file, "%s/actions.cfm", config_dir);
 
-	remotes_file = (char *)xnmalloc(config_len + 10, sizeof(char));
+	remotes_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
 	sprintf(remotes_file, "%s/nets.cfm", config_dir);
 
 	return;
