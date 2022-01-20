@@ -443,7 +443,7 @@ my_rl_getc(FILE *stream)
 
 	while(1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char));
-		if (result == sizeof(unsigned char)) {
+		if (result > 0 && result == sizeof(unsigned char)) {
 			if (control_d_exits && c == 4) /* Ctrl-d */
 				rl_quit(0, 0);
 
@@ -500,6 +500,7 @@ my_rl_getc(FILE *stream)
 		if (result == 0)
 			return (EOF);
 
+		/* read(3) either failed (returned -1) or is > sizeof(unsigned char) */
 #if defined(EWOULDBLOCK)
 		if (errno == EWOULDBLOCK) {
 			int xflags;
@@ -531,7 +532,7 @@ my_rl_getc(FILE *stream)
 
 #if !defined(__GO32__)
       /* If the error that we received was SIGINT, then try again,
-	 this is simply an interrupted system call to read ().
+	 this is simply an interrupted system call to read().
 	 Otherwise, some error ocurred, also signifying EOF. */
 		if (errno != EINTR)
 			return (EOF);
