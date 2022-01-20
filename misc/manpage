@@ -514,7 +514,7 @@ These following simple rules are used to compose clean/safe file names:
     - Do not let a replacement file name start with a dot (hidden) if the original does not
     - Max file name length is NAME_MAX (usually 255)
 .sp
-Modified file names will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing e) the list of modified file names via a text editor.
+Modified file names will be listed on screen asking the user for confirmation, allowing besides to edit (by pressing 'e') the list of modified file names via a text editor.
 .sp
 If the replacement file name already exists, a dash and a number (starting from 1) will be appended. Ex: file-3.
 .TP
@@ -1188,7 +1188,7 @@ Color codes can be used for file extensions as well using this format: *.ext=col
 .TP
 Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: \fBfi=04;38;2;245;76;00;48;2;00;00;255\fR will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal emulator supporting RGB colors. To test your terminal color capabilities use the \fIcolors.sh\fR script (in the plugins directory).
 .TP
-File types and file extension colors, just as interface colors, are specified by the current color scheme and can be modified as you wish (see the \fIcs\fR command above).
+File types and file name (or extension) colors, just as interface colors, are specified by the current color scheme and can be modified as you wish (see the \fIcs\fR command above).
 .TP
 To see a colored list of the currently used file color codes run \fIcc\fR or \fIcolors\fR in CliFM.
 .TP
@@ -1280,17 +1280,17 @@ Inserting Unicode characters in the prompt can be made in two ways:
 .TP
 \fBa)\fR Pasting the character itself using a text editor
 .TP
-\fBb)\fR Entering the hexadecimal code corresponding to the character. Use \fBhexdump\fR(1) as follows to get the appropriate hex code:
+\fBb)\fR Entering the octal code corresponding to the character. Use \fBhexdump\fR(1) as follows to get the appropriate hex code:
 
- echo -ne "[paste the char here]" | hexdump -C
+ echo -ne "[paste the char here]" | hexdump -c
 .TP
 The first line of the output will be something along these lines:
 
- 00000000  ef ae 8a               |...|
+ 00000000  256 234 356               |...|
 .TP
-In this case, the hex code is: "ef ae 8a". So, to insert this Unicode character in the prompt, add this code as follows:
+In this case, the octal code is: "256 234 356". So, to insert this Unicode character in the prompt, add it as follows:
 
- Prompt="... \\xef\\xae\\x8a ..."
+ Prompt="... \\256\\234\\356 ..."
 .TP
 \fBNote\fR: Make sure you have installed a font able to display Unicode characters.
 .TP
