@@ -182,7 +182,7 @@ set an alternative bookmarks file
 set an alternative configuration file
 .TP
 .B \-D \-\-config\-dir\fR=DIR
-use \fIDIR/clifm\fR as an alternative configuration directory. Everything will be created anew in \fIDIR\fR
+use \fIDIR\fR as an alternative configuration directory. If configuration files do not exist already, they will be created anew here
 .TP
 .B \-e, \-\-no\-eln
 do not print ELN's (entry list number) at the left of file names. Bear in mind, however, that though ELN's are not printed, they are still there and can be used as always
