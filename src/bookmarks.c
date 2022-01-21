@@ -747,11 +747,6 @@ bookmarks_function(char **cmd)
 		return EXIT_FAILURE;
 	}
 
-	/* If the bookmarks file doesn't exist, create it. NOTE: This file
-	 * should be created at startup (by get_bm_names()), but we check
-	 * it again here just in case it was meanwhile deleted for some
-	 * reason */
-
 	/* If no arguments */
 	if (!cmd[1])
 		return open_bookmark();

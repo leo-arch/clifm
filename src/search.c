@@ -330,7 +330,6 @@ search_glob(char **comm, int invert)
 					continue;
 
 #if !defined(_DIRENT_HAVE_D_TYPE)
-				struct stat attr;
 				mode_t type;
 				if (lstat(ent[k]->d_name, &attr) == -1)
 					continue;
