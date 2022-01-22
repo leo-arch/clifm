@@ -547,13 +547,14 @@ int
 is_quote_char(const char c)
 {
 	if (c == '\0' || !quote_chars)
-		return -1;
+		return (-1);
 
 	char *p = quote_chars;
 
 	while (*p) {
-		if (c == *(p++))
+		if (c == *p)
 			return 1;
+		p++;
 	}
 
 	return 0;
@@ -805,16 +806,13 @@ my_rl_path_completion(const char *text, int state)
 	 * executable check via access() */
 	exec_path = 0;
 
-	if (dirname_len > 2) {
+	if (dirname_len > 2 && dirname[dirname_len - 3] == '/'
+	&& dirname[dirname_len - 2] == '.' && dirname[dirname_len - 1] == '/') {
+		dir_tmp = savestring(dirname, dirname_len);
 
-		if (dirname[dirname_len - 3] == '/' && dirname[dirname_len - 2] == '.'
-		&& dirname[dirname_len - 1] == '/') {
-			dir_tmp = savestring(dirname, dirname_len);
-
-			if (dir_tmp) {
-				dir_tmp[dirname_len - 2] = '\0';
-				exec_path = 1;
-			}
+		if (dir_tmp) {
+			dir_tmp[dirname_len - 2] = '\0';
+			exec_path = 1;
 		}
 	}
 
@@ -831,9 +829,8 @@ my_rl_path_completion(const char *text, int state)
 		else
 			snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
 
-		if (lstat(tmp, &attr) == -1) {
+		if (lstat(tmp, &attr) == -1)
 			continue;
-		}
 
 		type = get_dt(attr.st_mode);
 #else
@@ -1016,8 +1013,9 @@ my_rl_path_completion(const char *text, int state)
 				}
 			}
 
-			else
+			else {
 				match = 1;
+			}
 		}
 
 		if (match)

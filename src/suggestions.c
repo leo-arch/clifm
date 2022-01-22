@@ -648,6 +648,12 @@ check_filenames(char *str, size_t len, const unsigned char c,
 						snprintf(t, NAME_MAX + 1, "./%s", tmp);
 						print_suggestion(t, len + 2, color);
 					} else {
+						char *s = str;
+						while(*s) {
+							if (is_quote_char(*s))
+								len++;
+							s++;
+						}
 						print_suggestion(tmp, len, color);
 					}
 					free(tmp);
