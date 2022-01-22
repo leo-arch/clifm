@@ -1932,7 +1932,7 @@ set_rl_init_file(void)
 	if (!config_dir_gral || !*config_dir_gral)
 		return;
 
-	char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14);
+	char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14, sizeof(char));
 	sprintf(rl_file, "%s/readline.cfm", config_dir_gral);
 	rl_read_init_file(rl_file);
 	free(rl_file);
