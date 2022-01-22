@@ -1593,6 +1593,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		/* Environment variables completion */
 		if (!_xrename && *text == '$' && *(text + 1) != '(') {
 			matches = rl_completion_matches(text, &environ_generator);
 			if (matches) {
@@ -1652,6 +1653,8 @@ my_rl_completion(const char *text, int start, int end)
 		if (_xrename)
 			return (char **)NULL;
 
+		/* Command names completion for words after process separator:
+		 * ; | && */
 		if (nwords == 1 && rl_line_buffer[rl_end - 1] != ' '
 		/* No command name contains slashes */
 		&& (*text != '/' || !strchr(text, '/'))) {
@@ -1662,6 +1665,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		/* Complete environment variables */
 		if (*text == '$' && *(text + 1) != '(') {
 			matches = rl_completion_matches(text, &environ_generator);
 			if (matches) {
@@ -1670,6 +1674,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		/* Backdir completion */
 		if (*text != '/' && nwords <= 2 && rl_end >= 3
 		&& *rl_line_buffer == 'b' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ') {
@@ -1825,7 +1830,6 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### BOOKMARKS COMPLETION ### */
-
 		if (*rl_line_buffer == 'b' && (rl_line_buffer[1] == 'm'
 		|| rl_line_buffer[1] == 'o')
 		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
@@ -1878,6 +1882,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		/* sort command completion */
 		if (*rl_line_buffer == 's'
 		&& (strncmp(rl_line_buffer, "st ", 3) == 0
 		|| strncmp(rl_line_buffer, "sort ", 5) == 0)) {
@@ -1888,6 +1893,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		/* net command completion */
 		if (*rl_line_buffer == 'n'
 		&& strncmp(rl_line_buffer, "net ", 4) == 0) {
 			matches = rl_completion_matches(text, &nets_generator);
@@ -1900,9 +1906,34 @@ my_rl_completion(const char *text, int start, int end)
 
 	/* ### PATH COMPLETION ### */
 
-	/* If none of the above, readline will attempt
-	 * path completion instead via my custom my_rl_path_completion() */
+	/* If none of the above, readline will attempt path completion
+	 * instead via my custom my_rl_path_completion() */
 	return matches;
+}
+
+/* Load readline initialization file (inputrc) */
+static inline void
+set_rl_init_file(void)
+{
+	/* Check order:
+	 * 1) INPUTRC environment variable
+	 * 2) ~/.config/clifm/readline.cfm
+	 * 3) ~/.inputrc
+	 * 4) /etc/inputrc
+	 * If neither 1 nor 2 exist, readline will try to read 3 and 4
+	 * by default) */
+	char *p = getenv("INPUTRC");
+	if (p) {
+		rl_read_init_file(p);
+	} else {
+		if (config_dir_gral) {
+			char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14,
+							sizeof(char));
+			sprintf(rl_file, "%s/readline.cfm", config_dir_gral);
+			rl_read_init_file(rl_file);
+			free(rl_file);
+		}
+	}
 }
 
 int
@@ -1914,31 +1945,15 @@ initialize_readline(void)
 	 * conditional constructs in the inputrc file */
 	rl_readline_name = argv_bk[0];
 
-/*	add_func_to_rl(); */
-
-	/* Load readline initialization file. Check order:
-	 * INPUTRC env var
-	 * ~/.config/clifm/readline.cfm
-	 * ~/.inputrc
-	 * /etc/inputrc */
-	char *p = getenv("INPUTRC");
-	if (p) {
-		rl_read_init_file(p);
-	} else if (config_dir_gral) {
-		char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14,
-							sizeof(char));
-		sprintf(rl_file, "%s/readline.cfm", config_dir_gral);
-		rl_read_init_file(rl_file);
-		free(rl_file);
-	}
+	set_rl_init_file();
 
 	/* Enable tab auto-completion for commands (in PATH) in case of
 	  * first entered string (if autocd and/or auto-open are enabled, check
 	  * for paths as well). The second and later entered strings will
 	  * be autocompleted with paths instead, just like in Bash, or with
-	  * listed file names, in case of ELN's. I use a custom completion
-	  * function to add command and ELN completion, since readline's
-	  * internal completer only performs path completion */
+	  * completion for custom commands. I use a custom completion
+	  * function to add custom completions, since readline's internal
+	  * completer only performs path completion */
 
 	/* Define a function for path completion.
 	 * NULL means to use filename_entry_function (), the default

@@ -930,9 +930,7 @@ tab_complete(int what_to_do)
 	if (rl_notab)
 		return EXIT_SUCCESS;
 
-	rl_compentry_func_t *our_func = (rl_compentry_func_t *)NULL;
-
-	our_func = rl_completion_entry_function;
+	rl_compentry_func_t *our_func = rl_completion_entry_function;
 
 	/* Only the completion entry function can change these. */
 	rl_filename_completion_desired = 0;
@@ -1098,8 +1096,8 @@ AFTER_USUAL_COMPLETION:
 	switch (what_to_do) {
 	case '!':
 		/* If we are matching filenames, then here is our chance to
-		 * do clever processing by re-examining the list.  Call the
-		 * ignore function with the array as a parameter.  It can
+		 * do clever processing by re-examining the list. Call the
+		 * ignore function with the array as a parameter. It can
 		 * munge the array, deleting matches as it desires. */
 		if (rl_ignore_some_completions_function
 		&& our_func == rl_completion_entry_function) {
@@ -1116,7 +1114,7 @@ AFTER_USUAL_COMPLETION:
 		 * contain any of the completer_word_break_characters, then
 		 * automatically prepend the substring with a quote character
 		 * (just pick the first one from the list of such) if it does not
-		 * already begin with a quote string.  FIXME: Need to remove any such
+		 * already begin with a quote string. FIXME: Need to remove any such
 		 * automatically inserted quote character when it no longer is necessary,
 		 * such as if we change the string we are completing on and the new
 		 * set of matches don't require a quoted substring. */
