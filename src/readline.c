@@ -1542,15 +1542,16 @@ rl_trashed_files(const char *text)
 		*tfiles[0] = '\0';
 	}
 
-	int nn = 1, i = 0;
+	int nn = 1, i;
 	size_t tlen = text ? strlen(text) : 0;
-	for (; i < n; i++) {
+	for (i = 0; i < n; i++) {
 		char *name = t[i]->d_name;
 		if (SELFORPARENT(name) || !text || strncmp(text, name, tlen) != 0) {
 			free(t[i]);
 			continue;
 		}
-		tfiles[nn++] = savestring(name, strlen(name));
+		tfiles[nn] = savestring(name, strlen(name));
+		nn++;
 		free(t[i]);
 	}
 	free(t);
@@ -1925,15 +1926,15 @@ set_rl_init_file(void)
 	char *p = getenv("INPUTRC");
 	if (p) {
 		rl_read_init_file(p);
-	} else {
-		if (config_dir_gral) {
-			char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14,
-							sizeof(char));
-			sprintf(rl_file, "%s/readline.cfm", config_dir_gral);
-			rl_read_init_file(rl_file);
-			free(rl_file);
-		}
+		return;
 	}
+
+	if (!config_dir_gral || !*config_dir_gral)
+		return;
+
+	char rl_file[PATH_MAX];
+	snprintf(rl_file, PATH_MAX, "%s/readline.cfm", config_dir_gral);
+	rl_read_init_file(rl_file);
 }
 
 int
