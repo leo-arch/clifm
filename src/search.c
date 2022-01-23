@@ -185,7 +185,6 @@ search_glob(char **comm, int invert)
 
 		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) * sizeof(char));
 		tmp = comm[0];
-
 		if (invert)
 			++tmp;
 
@@ -195,10 +194,10 @@ search_glob(char **comm, int invert)
 		*(tmp + 1) = '.';
 		*(tmp + 2) = '*';
 		strcpy(tmp + 3, s + 1);
+		slen += 2;
 		tmp[slen] = '.';
 		tmp[slen + 1] = '*';
 		tmp[slen + 2] = '\0';
-
 		free(s);
 		return EXIT_FAILURE;
 	} else {
@@ -610,7 +609,6 @@ search_regex(char **comm, int invert, int case_sens)
 
 		char *tmp_str = (char *)xnmalloc(search_str_len + 1, sizeof(char));
 		strcpy(tmp_str, comm[0] + (invert ? 2 : 1));
-
 		*comm[0] = '.';
 		*(comm[0] + 1) = '*';
 		*(comm[0] + 2) = '\0';
