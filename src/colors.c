@@ -1185,7 +1185,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			free(color_line);
 		}
 
-		/* Filetype Colors */
+		/* Filetype colors */
 		if (!*filecolors && *line == 'F'
 		&& strncmp(line, "FiletypeColors=", 15) == 0) {
 			file_type_found = 1;
@@ -1214,7 +1214,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		}
 
 #ifndef _NO_ICONS
-		/* Dir icons Color */
+		/* Directory icon color */
 		if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
 			dir_icon_found = 1;
 			char *opt_str = strchr(line, '=');
@@ -1431,7 +1431,7 @@ split_filetype_colors(char *filecolors)
 		colors[words] = (char *)NULL;
 	}
 
-	/* Set the color variables */
+	/* Set the file type color variables */
 	set_filetype_colors(colors, words);
 	free(colors);
 }

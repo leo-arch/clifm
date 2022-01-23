@@ -254,8 +254,6 @@ save_dirhist(void)
 void
 add_to_dirhist(const char *dir_path)
 {
-	/*  static size_t end_counter = 11, mid_counter = 11; */
-
 	/* If already at the end of dirhist, add new entry */
 	if (dirhist_cur_index + 1 >= dirhist_total_index) {
 		/* Do not add anything if new path equals last entry in
@@ -263,15 +261,8 @@ add_to_dirhist(const char *dir_path)
 		if ((dirhist_total_index - 1) >= 0 && old_pwd[dirhist_total_index - 1] && *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1) && strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
 			return;
 
-		/* Realloc only once per 10 operations */
-		/*      if (end_counter > 10) {
-			end_counter = 1; */
-		/* 20: Realloc dirhist_total + (2 * 10) */
 		old_pwd = (char **)xrealloc(old_pwd,
 		    (size_t)(dirhist_total_index + 2) * sizeof(char *));
-		/*      }
-
-		end_counter++; */
 
 		dirhist_cur_index = dirhist_total_index;
 		old_pwd[dirhist_total_index] = savestring(dir_path, strlen(dir_path));
@@ -281,14 +272,8 @@ add_to_dirhist(const char *dir_path)
 
 	/* I not at the end of dirhist, add previous AND new entry */
 	else {
-		/*      if (mid_counter > 10) {
-			mid_counter = 1; */
-		/* 30: Realloc dirhist_total + (3 * 10) */
 		old_pwd = (char **)xrealloc(old_pwd,
 		    (size_t)(dirhist_total_index + 3) * sizeof(char *));
-		/*      }
-
-		mid_counter++; */
 
 		old_pwd[dirhist_total_index] = savestring(
 		    old_pwd[dirhist_cur_index],
@@ -304,20 +289,75 @@ add_to_dirhist(const char *dir_path)
 }
 
 static int
-reload_history(char **comm)
+reload_history(char **args)
 {
 	clear_history();
 	read_history(hist_file);
 	history_truncate_file(hist_file, max_hist);
 
 	/* Update the history array */
-	if (get_history() != 0)
+	int ret = get_history();
+
+	if (log_function(args) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	if (log_function(comm) != 0)
+	return ret;
+}
+
+static int
+edit_history(char **args)
+{
+	struct stat attr;
+	if (stat(hist_file, &attr) == -1) {
+		fprintf(stderr, "%s: history: %s: %s\n", PROGRAM_NAME, hist_file,
+				strerror(errno));
 		return EXIT_FAILURE;
+	}
+	time_t mtime_bfr = (time_t)attr.st_mtime;
+
+	int ret = EXIT_SUCCESS;
+
+	/* If we have an opening application (2nd argument) */
+	if (args[2]) {
+		char *cmd[] = {args[2], hist_file, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+			ret = EXIT_FAILURE;
+	} else {
+		open_in_foreground = 1;
+		ret = open_file(hist_file);
+		open_in_foreground = 0;
+	}
+
+	if (ret != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	/* Get modification time after opening the config file */
+	stat(config_file, &attr);
+	/* If modification times differ, the file was modified after being
+	 * opened */
+	if (mtime_bfr != (time_t)attr.st_mtime)
+		return reload_history(args);
 
 	return EXIT_SUCCESS;
+}
+
+static int
+__clear_history(char **args)
+{
+	/* Let's overwrite whatever was there */
+	FILE *hist_fp = fopen(hist_file, "w+");
+	if (!hist_fp) {
+		_err(0, NOPRINT_PROMPT, "%s: history: %s: %s\n",
+		    PROGRAM_NAME, hist_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	/* Do not create an empty file */
+	fprintf(hist_fp, "%s %s\n", args[0], args[1]);
+	fclose(hist_fp);
+
+	/* Reset readline history */
+	return reload_history(args);
 }
 
 int
@@ -329,82 +369,22 @@ history_function(char **comm)
 	}
 
 	/* If no arguments, print the history list */
-	if (args_n == 0) {
+	if (!comm[1]) {
 		size_t i;
 		for (i = 0; i < current_hist_n; i++)
 			printf("  %zu  %s\n", i + 1, history[i]);
 		return EXIT_SUCCESS;
 	}
 
-	if (args_n >= 1 && *comm[1] == 'e' && strcmp(comm[1], "edit") == 0) {
-		struct stat attr;
-		if (stat(hist_file, &attr) == -1) {
-			fprintf(stderr, "%s: history: %s: %s\n", PROGRAM_NAME, hist_file,
-					strerror(errno));
-			return EXIT_FAILURE;
-		}
-		time_t mtime_bfr = (time_t)attr.st_mtime;
-		
-		int ret = EXIT_SUCCESS;
-
-		/* If there is an argument... */
-		if (comm[2]) {
-			char *cmd[] = {comm[2], hist_file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-				ret = EXIT_FAILURE;
-		} else {
-			/* If no application was passed as 2nd argument */
-			open_in_foreground = 1;
-			ret = open_file(hist_file);
-			open_in_foreground = 0;
-		}
-
-		if (ret != EXIT_SUCCESS)
-			return EXIT_FAILURE;
-
-		/* Get modification time after opening the config file */
-		stat(config_file, &attr);
-		/* If modification times differ, the file was modified after being
-		 * opened */
-		if (mtime_bfr != (time_t)attr.st_mtime)
-			return reload_history(comm);
-
-		return EXIT_SUCCESS;
-	}
+	if (comm[1] && *comm[1] == 'e' && strcmp(comm[1], "edit") == 0)
+		return edit_history(comm);
 
 	/* If 'history clear', guess what, clear the history list! */
-	if (args_n == 1 && *comm[1] == 'c' && strcmp(comm[1], "clear") == 0) {
-		FILE *hist_fp = fopen(hist_file, "w+");
-		if (!hist_fp) {
-			_err(0, NOPRINT_PROMPT, "%s: history: %s: %s\n",
-			    PROGRAM_NAME, hist_file, strerror(errno));
-			return EXIT_FAILURE;
-		}
-
-		/* Do not create an empty file */
-		fprintf(hist_fp, "%s %s\n", comm[0], comm[1]);
-		fclose(hist_fp);
-
-		/* Reset readline history */
-		return reload_history(comm);
-/*		clear_history();
-		read_history(hist_file);
-		history_truncate_file(hist_file, max_hist);
-
-		// Update the history array
-		int exit_status = EXIT_SUCCESS;
-
-		if (get_history() != 0)
-			exit_status = EXIT_FAILURE;
-
-		if (log_function(comm) != 0)
-			exit_code = EXIT_FAILURE; */
-
-//		return exit_status;
-	}
+	if (comm[1] && *comm[1] == 'c' && strcmp(comm[1], "clear") == 0)
+		return __clear_history(comm);
 
 	/* If 'history -n', print the last -n elements */
-	if (args_n == 1 && comm[1][0] == '-' && is_number(comm[1] + 1)) {
+	if (comm[1] && *comm[1] == '-' && is_number(comm[1] + 1)) {
 		int num = atoi(comm[1] + 1);
 
 		if (num < 0 || num > (int)current_hist_n)
