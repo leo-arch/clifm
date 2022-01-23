@@ -306,107 +306,83 @@ reset_iface_colors(void)
 	*ws8_c = '\0';
 }
 
-int
-cschemes_function(char **args)
+static int
+print_cur_colorscheme(void)
 {
-	if (xargs.stealth_mode == 1) {
-		fprintf(stderr, _("%s: The color schemes function is "
-				  "disabled in stealth mode\nTIP: To change the current "
-				  "color scheme use the following environment "
-				  "variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
-				  "and CLIFM_EXT_COLORS\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
-
-	if (colorize == 0) {
-		printf("%s: Colors are disabled\n", PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
-
-	if (!args)
-		return EXIT_FAILURE;
-
-	if (!args[1]) {
-		if (!cschemes_n) {
-			printf(_("%s: No color schemes found\n"), PROGRAM_NAME);
-			return EXIT_SUCCESS;
-		}
-		size_t i;
-		for (i = 0; color_schemes[i]; i++) {
-			if (cur_cscheme == color_schemes[i])
-				printf("%s%s%s\n", mi_c, color_schemes[i], df_c);
-			else
-				printf("%s\n", color_schemes[i]);
-		}
-
+	if (!cschemes_n) {
+		printf(_("%s: No color schemes found\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
-
-	if (IS_HELP(args[1])) {
-		puts(_(CS_USAGE));
-		return EXIT_SUCCESS;
+	size_t i;
+	for (i = 0; color_schemes[i]; i++) {
+		if (cur_cscheme == color_schemes[i])
+			printf("%s%s%s\n", mi_c, color_schemes[i], df_c);
+		else
+			printf("%s\n", color_schemes[i]);
 	}
 
-	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0)) {
-		char file[PATH_MAX];
-		snprintf(file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, cur_cscheme); /* NOLINT */
-		struct stat attr;
-		if (stat(file, &attr) == -1) {
-			if (data_dir) {
-				snprintf(file, PATH_MAX - 1, "%s/%s/colors/%s.cfm", /* NOLINT */
-						data_dir, PNL, cur_cscheme);
-				if (access(file, W_OK) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-							file, strerror(errno));
-					return EXIT_FAILURE;
-				}
-			} else {
+	return EXIT_SUCCESS;
+}
+
+static int
+edit_colorscheme(char *app)
+{
+	char file[PATH_MAX];
+	snprintf(file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, cur_cscheme); /* NOLINT */
+	struct stat attr;
+	if (stat(file, &attr) == -1) {
+		if (data_dir) {
+			snprintf(file, PATH_MAX - 1, "%s/%s/colors/%s.cfm", /* NOLINT */
+					data_dir, PNL, cur_cscheme);
+			if (access(file, W_OK) == -1) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						file, strerror(errno));
 				return EXIT_FAILURE;
 			}
-		}
-
-		stat(file, &attr);
-		time_t mtime_bfr = (time_t)attr.st_mtime;
-
-		int ret = EXIT_FAILURE;
-		char *app = (char *)NULL;
-		if (args[2] && *args[2] && (app = get_cmd_path(args[2])) != NULL) {
-			char *cmd[] = {app, file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
-				ret = EXIT_SUCCESS;
-			free(app);
 		} else {
-			open_in_foreground = 1;
-			ret = open_file(file);
-			open_in_foreground = 0;
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+					file, strerror(errno));
+			return EXIT_FAILURE;
 		}
-
-		if (ret != EXIT_FAILURE) {
-			stat(file, &attr);
-			if (mtime_bfr != (time_t)attr.st_mtime
-			&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && autols) {
-				free_dirlist();
-				list_dir();
-			}
-		}
-
-		return ret;
 	}
 
-	if (*args[1] == 'n' && (!args[1][1] || strcmp(args[1], "name") == 0)) {
-		printf(_("%s: Current color scheme: %s\n"), PROGRAM_NAME,
-		    cur_cscheme ? cur_cscheme : "?");
-		return EXIT_SUCCESS;
+	stat(file, &attr);
+	time_t mtime_bfr = (time_t)attr.st_mtime;
+
+	int ret = EXIT_FAILURE;
+	char *app_path = (char *)NULL;
+	if (app && *app && (app_path = get_cmd_path(app)) != NULL) {
+		char *cmd[] = {app_path, file, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
+			ret = EXIT_SUCCESS;
+		free(app_path);
+	} else {
+		open_in_foreground = 1;
+		ret = open_file(file);
+		open_in_foreground = 0;
 	}
 
+	if (ret != EXIT_FAILURE) {
+		stat(file, &attr);
+		if (mtime_bfr != (time_t)attr.st_mtime
+		&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && autols) {
+			free_dirlist();
+			list_dir();
+		}
+	}
+
+	return ret;
+}
+
+static int
+set_colorscheme(char *arg)
+{
 	size_t i, cs_found = 0;
 	for (i = 0; color_schemes[i]; i++) {
-		if (*args[1] == *color_schemes[i]
-		&& strcmp(args[1], color_schemes[i]) == 0) {
+		if (*arg == *color_schemes[i]
+		&& strcmp(arg, color_schemes[i]) == 0) {
 			cs_found = 1;
-			if (set_colors(args[1], 0) == EXIT_SUCCESS) {
+			if (set_colors(arg, 0) == EXIT_SUCCESS) {
 				cur_cscheme = color_schemes[i];
 				switch_cscheme = 1;
 
@@ -425,6 +401,46 @@ cschemes_function(char **args)
 		fprintf(stderr, _("%s: No such color scheme\n"), PROGRAM_NAME);
 
 	return EXIT_FAILURE;
+}
+
+int
+cschemes_function(char **args)
+{
+	if (xargs.stealth_mode == 1) {
+		fprintf(stderr, _("%s: The color schemes function is "
+			"disabled in stealth mode\nTIP: To change the current "
+			"color scheme use the following environment "
+			"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
+			"and CLIFM_EXT_COLORS\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	if (colorize == 0) {
+		printf("%s: Colors are disabled\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	if (!args)
+		return EXIT_FAILURE;
+
+	if (!args[1])
+		return print_cur_colorscheme();
+
+	if (IS_HELP(args[1])) {
+		puts(_(CS_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0))
+		return edit_colorscheme(args[2]);
+
+	if (*args[1] == 'n' && (!args[1][1] || strcmp(args[1], "name") == 0)) {
+		printf(_("%s: Current color scheme: %s\n"), PROGRAM_NAME,
+		    cur_cscheme ? cur_cscheme : "?");
+		return EXIT_SUCCESS;
+	}
+
+	return set_colorscheme(args[1]);
 }
 
 static void
@@ -1082,37 +1098,349 @@ get_cur_colorscheme(const char *colorscheme)
 			cur_cscheme = def_cscheme;
 	}
 }
-/*
+
+/* Try to retrieve colors from the environment */
 static void
-get_env_colors(char **file, char **ext, char **iface)
+get_colors_from_env(char **file, char **ext, char **iface)
 {
-	char *filecolors = (void *)file;
-	char *extcolors = (void *)ext;
-	char *ifacecolors = (void *)iface;
-	
 	char *env_filecolors = getenv("CLIFM_FILE_COLORS");
 	char *env_extcolors = getenv("CLIFM_EXT_COLORS");
 	char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
 
 	if (env_filecolors)
-		filecolors = savestring(env_filecolors, strlen(env_filecolors));
+		*file = savestring(env_filecolors, strlen(env_filecolors));
 
-	env_filecolors = (char *)NULL;
 	if (env_extcolors)
-		extcolors = savestring(env_extcolors, strlen(env_extcolors));
+		*ext = savestring(env_extcolors, strlen(env_extcolors));
 
-	env_extcolors = (char *)NULL;
 	if (env_ifacecolors)
-		ifacecolors = savestring(env_ifacecolors, strlen(env_ifacecolors));
+		*iface = savestring(env_ifacecolors, strlen(env_ifacecolors));
+}
 
-	env_ifacecolors = (char *)NULL;
-} */
+/* Get color lines from the configuration file */
+static int
+get_colors_from_file(const char *colorscheme, char **filecolors,
+                     char **extcolors, char **ifacecolors, const int env)
+{
+	char colorscheme_file[PATH_MAX];
+	*colorscheme_file = '\0';
+	if (config_ok) {
+		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, /* NOLINT */
+			colorscheme ? colorscheme : "default");
+	}
+
+	/* If not in local dir, check system data dir as well */
+	struct stat attr;
+	if (data_dir && (!*colorscheme_file || stat(colorscheme_file, &attr) == -1)) {
+		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s/colors/%s.cfm", /* NOLINT */
+			data_dir, PNL, colorscheme ? colorscheme : "default");
+	}
+
+	FILE *fp_colors = fopen(colorscheme_file, "r");
+	if (!fp_colors) {
+		if (!env) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+			    colorscheme_file, strerror(errno));
+			return EXIT_FAILURE;
+		} else {
+			_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
+				"Falling back to the default one\n"), PROGRAM_NAME,
+				colorscheme);
+			return EXIT_SUCCESS;
+		}
+	}
+
+	/* If called from the color scheme function, reset all
+	 * color values before proceeding */
+	if (!env) {
+		reset_filetype_colors();
+		reset_iface_colors();
+	}
+
+	char *line = (char *)NULL;
+	size_t line_size = 0;
+	ssize_t line_len = 0;
+	int file_type_found = 0,
+		ext_type_found = 0,
+#ifndef _NO_ICONS
+	    dir_icon_found = 0,
+#endif
+	    iface_found = 0;
+
+	while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
+		/* Interface colors */
+		if (!*ifacecolors && *line == 'I'
+		&& strncmp(line, "InterfaceColors=", 16) == 0) {
+			iface_found = 1;
+			char *opt_str = strchr(line, '=');
+			if (!opt_str)
+				continue;
+
+			opt_str++;
+			char *color_line = strip_color_line(opt_str, 't');
+			if (!color_line)
+				continue;
+
+			*ifacecolors = savestring(color_line, strlen(color_line));
+			free(color_line);
+		}
+
+		/* Filetype Colors */
+		if (!*filecolors && *line == 'F'
+		&& strncmp(line, "FiletypeColors=", 15) == 0) {
+			file_type_found = 1;
+			char *opt_str = strchr(line, '=');
+			if (!opt_str)
+				continue;
+
+			opt_str++;
+
+			char *color_line = strip_color_line(opt_str, 't');
+			if (!color_line)
+				continue;
+
+			*filecolors = savestring(color_line, strlen(color_line));
+			free(color_line);
+		}
+
+		/* File extension colors */
+		if (!*extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
+			ext_type_found = 1;
+			char *opt_str = strchr(line, '=');
+			if (!opt_str)
+				continue;
+
+			*extcolors = savestring(opt_str, strlen(opt_str));
+		}
+
+#ifndef _NO_ICONS
+		/* Dir icons Color */
+		if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
+			dir_icon_found = 1;
+			char *opt_str = strchr(line, '=');
+			if (!opt_str)
+				continue;
+			if (!*(++opt_str))
+				continue;
+
+			if (*opt_str == '\'' || *opt_str == '"')
+				opt_str++;
+			if (!*opt_str)
+				continue;
+
+			int nl_removed = 0;
+			if (line[line_len - 1] == '\n') {
+				line[line_len - 1] = '\0';
+				nl_removed = 1;
+			}
+
+			int end_char = (int)line_len - 1;
+
+			if (nl_removed)
+				end_char--;
+
+			if (line[end_char] == '\'' || line[end_char] == '"')
+				line[end_char] = '\0';
+
+			sprintf(dir_ico_c, "\x1b[%sm", opt_str);
+		}
+#endif /* !_NO_ICONS */
+
+		if (file_type_found && ext_type_found
+#ifndef _NO_ICONS
+		&& iface_found && dir_icon_found)
+#else
+		&& iface_found)
+#endif
+			break;
+	}
+
+	free(line);
+	fclose(fp_colors);
+
+	return EXIT_SUCCESS;
+}
+
+static void
+split_extensions_colors(char *extcolors)
+{
+	char *p = extcolors, *buf = (char *)NULL;
+	size_t len = 0;
+	int eol = 0;
+
+	if (ext_colors_n)
+		free_extension_colors();
+
+	while (!eol) {
+		switch (*p) {
+
+		case '\0': /* fallthrough */
+		case '\n': /* fallthrough */
+		case ':':
+			if (!buf)
+				break;
+			buf[len] = '\0';
+			ext_colors = (char **)xrealloc(ext_colors,
+			    (ext_colors_n + 1) * sizeof(char *));
+			ext_colors[ext_colors_n] = savestring(buf, len);
+			ext_colors_n++;
+			*buf = '\0';
+
+			if (!*p)
+				eol = 1;
+
+			len = 0;
+			p++;
+			break;
+
+		default:
+			buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
+			buf[len] = *p;
+			len++;
+			p++;
+			break;
+		}
+	}
+
+	p = (char *)NULL;
+
+	free(buf);
+
+	if (ext_colors) {
+		ext_colors = (char **)xrealloc(ext_colors, (ext_colors_n + 1) * sizeof(char *));
+		ext_colors[ext_colors_n] = (char *)NULL;
+	}
+
+	/* Make sure we have valid color codes and store the length
+	 * of each stored extension: this length will be used later
+	 * when listing files */
+	ext_colors_len = (size_t *)xnmalloc(ext_colors_n, sizeof(size_t));
+
+	int i = (int)ext_colors_n;
+	while (--i >= 0) {
+		char *ret = strrchr(ext_colors[i], '=');
+		if (!ret || !*(++ret) || !is_color_code(ret)) {
+			*ext_colors[i] = '\0';
+			ext_colors_len[i] = 0;
+			continue;
+		}
+
+		size_t j, ext_len = 0;
+		for (j = 2; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
+			ext_len++;
+
+		ext_colors_len[i] = ext_len;
+	}
+}
+
+static void
+split_iface_colors(char *ifacecolors)
+{
+	char *p = ifacecolors, *buf = (char *)NULL,
+	     **colors = (char **)NULL;
+	size_t len = 0, words = 0;
+	int eol = 0;
+
+	while (!eol) {
+		switch (*p) {
+
+		case '\0': /* fallthrough */
+		case '\n': /* fallthrough */
+		case ':':
+			if (!buf)
+				break;
+			buf[len] = '\0';
+			colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
+			colors[words] = savestring(buf, len);
+			words++;
+			*buf = '\0';
+
+			if (!*p)
+				eol = 1;
+
+			len = 0;
+			p++;
+			break;
+
+		default:
+			buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
+			buf[len] = *p;
+			len++;
+			p++;
+			break;
+		}
+	}
+
+	p = (char *)NULL;
+
+	free(buf);
+
+	if (colors) {
+		colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
+		colors[words] = (char *)NULL;
+	}
+
+	set_iface_colors(colors, words);
+	free(colors);
+}
+
+static void
+split_filetype_colors(char *filecolors)
+{
+	/* Split the colors line into substrings (one per color) */
+	char *p = filecolors, *buf = (char *)NULL, **colors = (char **)NULL;
+	size_t len = 0, words = 0;
+	int eol = 0;
+
+	while (!eol) {
+		switch (*p) {
+
+		case '\0': /* fallthrough */
+		case '\n': /* fallthrough */
+		case ':':
+			if (!buf)
+				break;
+			buf[len] = '\0';
+			colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
+			colors[words] = savestring(buf, len);
+			words++;
+			*buf = '\0';
+
+			if (!*p)
+				eol = 1;
+
+			len = 0;
+			p++;
+			break;
+
+		default:
+			buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
+			buf[len] = *p;
+			len++;
+			p++;
+			break;
+		}
+	}
+
+	p = (char *)NULL;
+
+	free(buf);
+
+	if (colors) {
+		colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
+		colors[words] = (char *)NULL;
+	}
+
+	/* Set the color variables */
+	set_filetype_colors(colors, words);
+	free(colors);
+}
 
 /* Open the config file, get values for file type and extension colors
  * and copy these values into the corresponding variable. If some value
  * is not found, or if it's a wrong value, the default is set. */
 int
-set_colors(const char *colorscheme, int env)
+set_colors(const char *colorscheme, const int env)
 {
 	char *filecolors = (char *)NULL,
 		 *extcolors = (char *)NULL,
@@ -1126,387 +1454,41 @@ set_colors(const char *colorscheme, int env)
 		get_cur_colorscheme(colorscheme);
 
 	/* env is true only when the function is called from main() */
-	if (env) {
-//		get_env_colors(&filecolors, &extcolors, &ifacecolors);
-//		printf("FC: %s\n", filecolors);
-		/* Try to get colors from environment variables */
-		char *env_filecolors = getenv("CLIFM_FILE_COLORS");
-		char *env_extcolors = getenv("CLIFM_EXT_COLORS");
-		char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
-
-		if (env_filecolors)
-			filecolors = savestring(env_filecolors, strlen(env_filecolors));
-
-		env_filecolors = (char *)NULL;
-		if (env_extcolors)
-			extcolors = savestring(env_extcolors, strlen(env_extcolors));
-
-		env_extcolors = (char *)NULL;
-		if (env_ifacecolors)
-			ifacecolors = savestring(env_ifacecolors, strlen(env_ifacecolors));
-
-		env_ifacecolors = (char *)NULL;
-	} 
+	if (env)
+		get_colors_from_env(&filecolors, &extcolors, &ifacecolors);
 
 	if (xargs.stealth_mode != 1 && (!filecolors || !extcolors || !ifacecolors)) {
 		/* Get color lines, for both file types and extensions, from
-	 * COLORSCHEME file */
-		char colorscheme_file[PATH_MAX];
-		*colorscheme_file = '\0';
-		if (config_ok) {
-			snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, /* NOLINT */
-				colorscheme ? colorscheme : "default");
-		}
-
-		/* If not in local dir, check system data dir as well */
-		struct stat attr;
-		if (data_dir && (!*colorscheme_file || stat(colorscheme_file, &attr) == -1)) {
-			snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s/colors/%s.cfm", /* NOLINT */
-				data_dir, PNL, colorscheme ? colorscheme : "default");
-		}
-
-		FILE *fp_colors = fopen(colorscheme_file, "r");
-		if (fp_colors) {
-
-			/* If called from the color scheme function, reset all
-			 * color values before proceeding */
-			if (!env) {
-				reset_filetype_colors();
-				reset_iface_colors();
-			}
-
-			char *line = (char *)NULL;
-			size_t line_size = 0;
-			ssize_t line_len = 0;
-			int file_type_found = 0,
-				ext_type_found = 0,
-#ifndef _NO_ICONS
-			    iface_found = 0,
-			    dir_icon_found = 0;
-#else
-			    iface_found = 0;
-#endif
-
-			while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
-				/* Interface colors */
-				if (!ifacecolors && *line == 'I'
-				&& strncmp(line, "InterfaceColors=", 16) == 0) {
-					iface_found = 1;
-					char *opt_str = strchr(line, '=');
-					if (!opt_str)
-						continue;
-
-					opt_str++;
-					char *color_line = strip_color_line(opt_str, 't');
-					if (!color_line)
-						continue;
-
-					ifacecolors = savestring(color_line, strlen(color_line));
-					free(color_line);
-				}
-
-				/* Filetype Colors */
-				if (!filecolors && *line == 'F'
-				&& strncmp(line, "FiletypeColors=", 15) == 0) {
-					file_type_found = 1;
-					char *opt_str = strchr(line, '=');
-					if (!opt_str)
-						continue;
-
-					opt_str++;
-
-					char *color_line = strip_color_line(opt_str, 't');
-					if (!color_line)
-						continue;
-
-					filecolors = savestring(color_line, strlen(color_line));
-					free(color_line);
-				}
-
-				/* File extension colors */
-				if (!extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
-					ext_type_found = 1;
-					char *opt_str = strchr(line, '=');
-					if (!opt_str)
-						continue;
-
-					opt_str++;
-					extcolors = savestring(opt_str, strlen(opt_str));
-/*					char *color_line = strip_color_line(opt_str, 'x');
-					if (!color_line)
-						continue;
-
-					extcolors = savestring(color_line, strlen(color_line));
-					free(color_line); */
-				}
-
-#ifndef _NO_ICONS
-				/* Dir icons Color */
-				if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
-					dir_icon_found = 1;
-					char *opt_str = strchr(line, '=');
-					if (!opt_str)
-						continue;
-					if (!*(++opt_str))
-						continue;
-
-					if (*opt_str == '\'' || *opt_str == '"')
-						opt_str++;
-					if (!*opt_str)
-						continue;
-
-					int nl_removed = 0;
-					if (line[line_len - 1] == '\n') {
-						line[line_len - 1] = '\0';
-						nl_removed = 1;
-					}
-
-					int end_char = (int)line_len - 1;
-
-					if (nl_removed)
-						end_char--;
-
-					if (line[end_char] == '\'' || line[end_char] == '"')
-						line[end_char] = '\0';
-
-					sprintf(dir_ico_c, "\x1b[%sm", opt_str);
-				}
-#endif /* !_NO_ICONS */
-
-				if (file_type_found && ext_type_found
-#ifndef _NO_ICONS
-				&& iface_found && dir_icon_found)
-#else
-				&& iface_found)
-#endif
-					break;
-			}
-
-			free(line);
-			line = (char *)NULL;
-			fclose(fp_colors);
-		}
-
-		/* If fopen failed */
-		else {
-			if (!env) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    colorscheme_file, strerror(errno));
-				return EXIT_FAILURE;
-			} else {
-				_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
-					"Falling back to the default one\n"), PROGRAM_NAME,
-					colorscheme);
-			}
-		}
+		 * COLORSCHEME file */
+		if (get_colors_from_file(colorscheme, &filecolors,
+		&extcolors, &ifacecolors, env) == EXIT_FAILURE)
+			return EXIT_FAILURE;
 	}
 
-			/* ##############################
-			 * #    FILE EXTENSION COLORS   #
-			 * ############################## */
-
-	/* Split the colors line into substrings (one per color) */
+	/* Split the color lines into substrings (one per color) */
 
 	if (!extcolors) {
 		/* Unload current extension colors */
 		if (ext_colors_n)
 			free_extension_colors();
 	} else {
-		char *p = extcolors, *buf = (char *)NULL;
-		size_t len = 0;
-		int eol = 0;
-
-		if (ext_colors_n)
-			free_extension_colors();
-
-		while (!eol) {
-			switch (*p) {
-
-			case '\0': /* fallthrough */
-			case '\n': /* fallthrough */
-			case ':':
-				if (!buf)
-					break;
-				buf[len] = '\0';
-				ext_colors = (char **)xrealloc(ext_colors,
-				    (ext_colors_n + 1) * sizeof(char *));
-				ext_colors[ext_colors_n++] = savestring(buf, len);
-				*buf = '\0';
-
-				if (!*p)
-					eol = 1;
-
-				len = 0;
-				p++;
-				break;
-
-			default:
-				buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
-				buf[len] = *p;
-				len++;
-				p++;
-				break;
-			}
-		}
-
-		p = (char *)NULL;
+		split_extensions_colors(extcolors);
 		free(extcolors);
-		extcolors = (char *)NULL;
-
-		if (buf) {
-			free(buf);
-			buf = (char *)NULL;
-		}
-
-		if (ext_colors) {
-			ext_colors = (char **)xrealloc(ext_colors, (ext_colors_n + 1) * sizeof(char *));
-			ext_colors[ext_colors_n] = (char *)NULL;
-		}
-
-		/* Make sure we have valid color codes and store the length
-		 * of each stored extension: this length will be used later
-		 * when listing files */
-		ext_colors_len = (size_t *)xnmalloc(ext_colors_n, sizeof(size_t));
-
-		int i = (int)ext_colors_n;
-		while (--i >= 0) {
-			char *ret = strrchr(ext_colors[i], '=');
-			if (!ret || !*(++ret) || !is_color_code(ret)) {
-				*ext_colors[i] = '\0';
-				ext_colors_len[i] = 0;
-				continue;
-			}
-
-			size_t j, ext_len = 0;
-			for (j = 2; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
-				ext_len++;
-
-			ext_colors_len[i] = ext_len;
-		}
 	}
-
-			/* ##############################
-			 * #      INTERFACE COLORS      #
-			 * ############################## */
 
 	if (!ifacecolors) {
 		/* Free and reset whatever value was loaded */
 		reset_iface_colors();
 	} else {
-		char *p = ifacecolors, *buf = (char *)NULL,
-		     **colors = (char **)NULL;
-		size_t len = 0, words = 0;
-		int eol = 0;
-
-		while (!eol) {
-			switch (*p) {
-
-			case '\0': /* fallthrough */
-			case '\n': /* fallthrough */
-			case ':':
-				if (!buf)
-					break;
-				buf[len] = '\0';
-				colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
-				colors[words] = savestring(buf, len);
-				words++;
-				*buf = '\0';
-
-				if (!*p)
-					eol = 1;
-
-				len = 0;
-				p++;
-				break;
-
-			default:
-				buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
-				buf[len] = *p;
-				len++;
-				p++;
-				break;
-			}
-		}
-
-		p = (char *)NULL;
+		split_iface_colors(ifacecolors);
 		free(ifacecolors);
-		ifacecolors = (char *)NULL;
-
-		if (buf) {
-			free(buf);
-			buf = (char *)NULL;
-		}
-
-		if (colors) {
-			colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
-			colors[words] = (char *)NULL;
-		}
-
-		set_iface_colors(colors, words);
-		free(colors);
-		colors = (char **)NULL;
 	}
-
-			/* ##############################
-			 * #       FILETYPE COLORS      #
-			 * ############################## */
 
 	if (!filecolors) {
 		reset_filetype_colors();
 	} else {
-		/* Split the colors line into substrings (one per color) */
-		char *p = filecolors, *buf = (char *)NULL, **colors = (char **)NULL;
-		size_t len = 0, words = 0;
-		int eol = 0;
-
-		while (!eol) {
-			switch (*p) {
-
-			case '\0': /* fallthrough */
-			case '\n': /* fallthrough */
-			case ':':
-				if (!buf)
-					break;
-				buf[len] = '\0';
-				colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
-				colors[words] = savestring(buf, len);
-				words++;
-				*buf = '\0';
-
-				if (!*p)
-					eol = 1;
-
-				len = 0;
-				p++;
-				break;
-
-			default:
-				buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
-				buf[len] = *p;
-				len++;
-				p++;
-				break;
-			}
-		}
-
-		p = (char *)NULL;
+		split_filetype_colors(filecolors);
 		free(filecolors);
-		filecolors = (char *)NULL;
-
-		if (buf) {
-			free(buf);
-			buf = (char *)NULL;
-		}
-
-		if (colors) {
-			colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
-			colors[words] = (char *)NULL;
-		}
-
-		/* Set the color variables */
-		set_filetype_colors(colors, words);
-		free(colors);
-		colors = (char **)NULL;
 	}
 
 	/* If some color was not set or it was a wrong color code, set the
@@ -1564,7 +1546,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	}
 
 	char *linkname = (char *)NULL;
-	char ext_color[MAX_COLOR] = "";
+	char ext_color[MAX_COLOR];
 	char *color = fi_c;
 
 #ifdef _LINUX_CAP

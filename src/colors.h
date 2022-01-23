@@ -27,7 +27,7 @@
 
 #include <sys/stat.h>
 
-int set_colors(const char *colorscheme, int env);
+int set_colors(const char *colorscheme, const int env);
 void color_codes(void);
 size_t get_colorschemes(void);
 int cschemes_function(char **args);
