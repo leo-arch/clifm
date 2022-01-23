@@ -1021,7 +1021,6 @@ tab_complete(int what_to_do)
 	* variable rl_attempted_completion_function. */
 	if (rl_attempted_completion_function) {
 		matches = (*rl_attempted_completion_function) (text, start, end);
-
 		if (matches || rl_attempted_completion_over) {
 			rl_attempted_completion_over = 0;
 			our_func = (rl_compentry_func_t *)NULL;
@@ -1208,7 +1207,7 @@ AFTER_USUAL_COMPLETION:
 			}
 #else
 			rl_insert_text(replacement);
-#endif
+#endif /* !_NO_HIGHLIGHT */
 			rl_end_undo_group();
 		}
 
@@ -1265,7 +1264,7 @@ AFTER_USUAL_COMPLETION:
 						}
 #else
 						rl_insert_text("/");
-#endif
+#endif /* !_NO_HIGHLIGHT */
 					}
 				} else {
 					if (rl_point == rl_end)
@@ -1300,7 +1299,7 @@ AFTER_USUAL_COMPLETION:
 DISPLAY_MATCHES:
 #ifndef _NO_FZF
 		if (!fzftab) {
-#endif
+#endif /* !_NO_FZF */
 		{
 			max = 0;
 			for (i = 1; matches[i]; i++) {
@@ -1325,7 +1324,7 @@ DISPLAY_MATCHES:
 					cur_color = tx_c;
 					fputs(tx_c, stdout);
 				}
-#endif
+#endif /* !_NO_HIGHLIGHT */
 				fprintf(rl_outstream,
 					 "Display all %d possibilities? (y or n) ", len);
 				fflush(rl_outstream);
@@ -1339,7 +1338,7 @@ DISPLAY_MATCHES:
 			if (limit != 1 && (limit * max == term_cols))
 				limit--;
 
-			/* Avoid a possible floating exception.  If max > screenwidth,
+			/* Avoid a possible floating exception. If max > screenwidth,
 			   limit will be 0 and a divide-by-zero fault will result. */
 			if (limit == 0)
 			  limit = 1;
@@ -1350,7 +1349,7 @@ DISPLAY_MATCHES:
 		}
 #ifndef _NO_FZF
 		}
-#endif
+#endif /* !_NO_FZF */
 
 		putchar('\n');
 #ifndef _NO_HIGHLIGHT
@@ -1358,8 +1357,8 @@ DISPLAY_MATCHES:
 			cur_color = tx_c;
 			fputs(tx_c, stdout);
 		}
-#endif
-		char *qq = (char *)NULL;
+#endif /* !_NO_HIGHLIGHT */
+		char *qq = (char *)NULL, *ptr = (char *)NULL;
 		if (cur_comp_type != TCMP_PATH)
 			goto CALC_OFFSET;
 
@@ -1396,7 +1395,23 @@ DISPLAY_MATCHES:
 		}
 
 CALC_OFFSET:
-		qq = strrchr(matches[0], '/');
+#ifndef _NO_FZF
+		if (fzftab == 1) {
+			if (fzftabcomp(matches) == -1)
+				goto RESTART;
+			goto RESET_PATH;
+		}
+#endif /* !_NO_FZF */
+
+		ptr = matches[0];
+		/* Skip leading backslashes */
+		while (*ptr) {
+			if (*ptr != '\\')
+				break;
+			ptr++;
+		}
+
+		qq = strrchr(ptr, '/');
 		if (qq) {
 			if (*(++qq)) {
 				tab_offset = strlen(qq);
@@ -1407,18 +1422,11 @@ CALC_OFFSET:
 				}
 			}
 		} else {
-			tab_offset = strlen(matches[0]);
+			tab_offset = strlen(ptr);
 		}
+
 		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR)
 			tab_offset = 0;
-
-#ifndef _NO_FZF
-		if (fzftab == 1) {
-			if (fzftabcomp(matches) == -1)
-				goto RESTART;
-			goto RESET_PATH;
-		}
-#endif
 
 		for (i = 1; i <= (size_t)count; i++) {
 			if (i >= term_rows) {
@@ -1469,7 +1477,7 @@ CALC_OFFSET:
 
 #ifndef _NO_FZF
 RESET_PATH:
-#endif
+#endif /* !_NO_FZF */
 		if (cur_comp_type == TCMP_PATH)
 			xchdir(workspaces[cur_ws].path, NO_TITLE);
 
@@ -1518,7 +1526,7 @@ RESTART:
 			rl_point = rl_end = bk;
 			free(ss);
 		}
-#endif
+#endif /* !_NO_HIGHLIGHT */
 		}
 		break;
 

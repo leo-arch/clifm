@@ -405,6 +405,11 @@ check_completions(char *str, size_t len, const unsigned char c,
 		}
 	}
 
+	while (*str == '\\') {
+		++str;
+		--len;
+	}
+
 	int printed = NO_MATCH;
 	size_t i;
 	struct stat attr;
@@ -571,6 +576,11 @@ check_filenames(char *str, size_t len, const unsigned char c,
 {
 	int i = (int)files, dot_slash = 0;
 	char *color = (char *)NULL;
+
+	while (*str == '\\') {
+		++str;
+		--len;
+	}
 
 	if (len >= 2 && *str == '.' && *(str + 1) == '/') {
 		dot_slash = 1;
@@ -784,8 +794,8 @@ check_cmds(char *str, const size_t len, const int print)
 
 	/* Check internal command with fused parameter */
 	char *p = (char *)NULL;
-	size_t j = 0;
-	for (; str[j]; j++) {
+	size_t j;
+	for (j = 0; str[j]; j++) {
 		if (str[j] >= '1' && str[j] <= '9') {
 			p = str + j;
 			break;

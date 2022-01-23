@@ -1579,6 +1579,9 @@ my_rl_completion(const char *text, int start, int end)
 	cur_comp_type = TCMP_NONE;
 	UNUSED(end);
 
+	while (*text == '\\')
+		++text;
+
 	if (start == 0) { /* Only for the first entered word */
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
