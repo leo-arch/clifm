@@ -34,6 +34,8 @@
 #include "aux.h"
 #include "misc.h"
 
+#define UNSAFE_CMD "Unsafe command. Consult the manpage for more information"
+
 char **env_bk = (char **)NULL; 
 char **new_env = (char **)NULL;
 
@@ -92,12 +94,11 @@ set_path_env(void)
 }
 
 static inline void
-set_ifs_env(void)
+xsetenv(const char *name, const char *value)
 {
-	if (setenv("IFS", " \t\n", 1) == -1) {
-		fprintf(stderr, "%s: setenv: IFS: %s\n", PROGRAM_NAME,
+	if (setenv(name, value, 1) == -1) {
+		fprintf(stderr, "%s: setenv: %s: %s\n", PROGRAM_NAME, name,
 			strerror(errno));
-		exit(EXIT_FAILURE);
 	}
 }
 
@@ -116,12 +117,12 @@ xsecure_env(const int mode)
 	exit(EXIT_FAILURE);
 #endif
 
-	char *display = (char *)NULL;
-	char *wayland_display = (char *)NULL;
-	char *_term = (char *)NULL;
-	char *tz = (char *)NULL;
-	char *lang = (char *)NULL;
-	char *fzfopts = (char *)NULL;
+	char *display = (char *)NULL,
+		 *wayland_display = (char *)NULL,
+		 *_term = (char *)NULL,
+		 *tz = (char *)NULL,
+		 *lang = (char *)NULL,
+		 *fzfopts = (char *)NULL;
 
 	if (mode != SECURE_ENV_FULL) {
 		/* Let's keep these values from the current environment */
@@ -137,81 +138,42 @@ xsecure_env(const int mode)
 
 	xclearenv();
 	set_path_env();
-	set_ifs_env();
-
-/*	n = confstr(_CS_V7_ENV, NULL, 0);
-	char *p = (char *)xrealloc(p, n * sizeof(char));
-	confstr(_CS_V7_ENV, p, n);
-	char *e = strchr(p, '=');
-	if (e && *(e + 1)) {
-		*e = '\0';
-		setenv(p, e + 1, 1);
-		*e = '=';
-	} 
-	free(p); */
+	xsetenv("IFS", " \t\n");
 
 	if (mode == SECURE_ENV_FULL)
 		return EXIT_SUCCESS;
 
 	if (user.name)
-		setenv("USER", user.name, 1);
+		xsetenv("USER", user.name);
 	if (user.home)
-		setenv("HOME", user.home, 1);
+		xsetenv("HOME", user.home);
 	if (user.shell)
-		setenv("SHELL", user.shell, 1);
+		xsetenv("SHELL", user.shell);
 
 	if (display && sanitize_cmd(display, SNT_DISPLAY) == EXIT_SUCCESS) {
-		if (setenv("DISPLAY", display, 1) == -1) {
-			fprintf(stderr, "%s: setenv: DISPLAY: %s\n", PROGRAM_NAME,
-				strerror(errno));
-		}
+		xsetenv("DISPLAY", display);
 	} else {
-		if (wayland_display) {
-			if (setenv("WAYLAND_DISPLAY", wayland_display, 1) == -1) {
-				fprintf(stderr, "%s: setenv: WAYLAND_DISPLAY: %s\n",
-					PROGRAM_NAME, strerror(errno));
-			}
-		}
+		if (wayland_display)
+			xsetenv("WAYLAND_DISPLAY", wayland_display);
 	}
 
-	if (_term && sanitize_cmd(_term, SNT_MISC) == EXIT_SUCCESS) {
-		if (setenv("TERM", _term, 1) == -1) {
-			fprintf(stderr, "%s: setenv: TERM: %s\n", PROGRAM_NAME,
-				strerror(errno));
-		}
-	}
+	if (_term && sanitize_cmd(_term, SNT_MISC) == EXIT_SUCCESS)
+		xsetenv("TERM", _term);
 
-	if (tz && sanitize_cmd(tz, SNT_MISC) ==  EXIT_SUCCESS) {
-		if (setenv("TZ", tz, 1) == -1) {
-			fprintf(stderr, "%s: setenv: TZ: %s\n", PROGRAM_NAME,
-				strerror(errno));
-		}
-	}
+	if (tz && sanitize_cmd(tz, SNT_MISC) == EXIT_SUCCESS)
+		xsetenv("TZ", tz);
 
 	if (lang && sanitize_cmd(lang, SNT_MISC) ==  EXIT_SUCCESS) {
-		if (setenv("LANG", lang, 1) == -1) {
-			fprintf(stderr, "%s: setenv: LANG: %s\n", PROGRAM_NAME,
-				strerror(errno));
-		}
-		if (setenv("LC_ALL", lang, 1) == -1) {
-			fprintf(stderr, "%s: setenv: LC_ALL: %s\n", PROGRAM_NAME,
-				strerror(errno));
-		}	
+		xsetenv("LANG", lang);
+		xsetenv("LC_ALL", lang);
 	} else {
-		if (mode != SECURE_ENV_FULL && setenv("LC_ALL", "C", 1) == -1) {
-			fprintf(stderr, "%s: setenv: LC_ALL: %s\n", PROGRAM_NAME,
-				strerror(errno));
-		}
+		xsetenv("LC_ALL", "C");
 	}
 
-	if (fzfopts) {
-		if (setenv("FZF_DEFAULT_OPTS", fzfopts, 1) == -1) {
-			fprintf(stderr, "%s: setenv: FZF_DEFAULT_OPTS: %s\n", PROGRAM_NAME,
-				strerror(errno));
-		}
-	}
+	if (fzfopts)
+		xsetenv("FZF_DEFAULT_OPTS", fzfopts);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /* Create a sanitized environment to run a single command */
@@ -408,7 +370,7 @@ clean_cmd(char *str)
 	return EXIT_SUCCESS;
 }
 
-/* Sanitize CMD according to TYPE. Returns zero if safe command and
+/* Sanitize CMD according to TYPE. Returns zero if safe command or
  * one if not */
 int
 sanitize_cmd(char *str, int type)
@@ -420,14 +382,13 @@ sanitize_cmd(char *str, int type)
 
 	switch(type) {
 	case SNT_MIME:
-		if (clean_cmd(str) == EXIT_SUCCESS)
-			exit_status = sanitize_mime(str);
-		else /* Error message already pŕinted by clean_cmd() */
+		if (clean_cmd(str) != EXIT_SUCCESS)
+			/* Error message already pŕinted by clean_cmd() */
 			return EXIT_FAILURE;
+		exit_status = sanitize_mime(str);
 		break;
 	case SNT_NET:
-		exit_status = sanitize_net(str);
-		break;
+		exit_status = sanitize_net(str); break;
 	case SNT_DISPLAY:
 		return sanitize_display(str);
 	case SNT_MISC:
@@ -436,18 +397,16 @@ sanitize_cmd(char *str, int type)
 	case SNT_PROMPT:  /* fallthrough */
 	case SNT_AUTOCMD: /* fallthrough */
 	case SNT_GRAL:
-		if (clean_cmd(str) == EXIT_SUCCESS)
-			exit_status = sanitize_gral(str);
-		else
+		if (clean_cmd(str) != EXIT_SUCCESS)
 			return EXIT_FAILURE;
+		exit_status = sanitize_gral(str);
 		break;
 	case SNT_NONE: return EXIT_SUCCESS;
 	default: return EXIT_SUCCESS;
 	}
 
 	if (exit_status == EXIT_FAILURE) {
-		_err('w', PRINT_PROMPT, _("%s: %s: Command is not safe. Consult "
-			"the manpage for more information\n"), PROGRAM_NAME, str);
+		_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, str, _(UNSAFE_CMD));
 		return EXIT_FAILURE;
 	}
 
