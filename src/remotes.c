@@ -259,8 +259,7 @@ remotes_edit(char *app)
 
 	struct stat attr;
 	if (stat(remotes_file, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file,
-				strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -281,8 +280,7 @@ remotes_edit(char *app)
 		return EXIT_FAILURE;
 
 	if (stat(remotes_file, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file,
-				strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

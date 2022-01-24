@@ -278,8 +278,7 @@ get_ext_icon(const char *restrict ext, int n)
 static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
-	/* Unhide the cursor */
-	fputs("\x1b[?25h", stdout);
+	fputs("\x1b[?25h", stdout);	/* Unhide the cursor */
 
 	if (close_dir && closedir(dir) == -1)
 		return EXIT_FAILURE;
@@ -298,8 +297,7 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	/* Print a dividing line between the files list and the prompt */
 	print_div_line();
 
-	if (dirhist_map) {
-		/* Print current, previous, and next entries */
+	if (dirhist_map) { /* Print current, previous, and next entries */
 		print_dirhist_map();
 		print_div_line();
 	}

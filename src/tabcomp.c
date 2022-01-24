@@ -624,10 +624,9 @@ calculate_prefix_len(char *str)
 	if (q) {
 		size_t qlen = strlen(q);
 		if (cur_comp_type == TCMP_PATH) {
-			/* Add backslashes to the len of the match: every quoted
-			 * char will be escaped later by write_completion(), so that
-			 * backslashes should be counted as well to get the right
-			 * offset */
+			/* Add backslashes to the len of the match: every quoted char
+			 * will be escaped later by write_completion(), so that backslashes
+			 * should be counted as well to get the right offset */
 			size_t c = 0;
 			int x = (int)qlen;
 			while (--x >= 0) {

@@ -622,16 +622,14 @@ my_rl_quote(char *text, int mt, char *qp)
 	 * rl_filename_quoting_function */
 	UNUSED(mt); UNUSED(qp);
 
-	/*
-	 * How it works: P and R are pointers to the same memory location
-	 * initialized (calloced) twice as big as the line that needs to be
+	/* How it works: P and R are pointers to the same memory location
+	 * initialized (malloced) twice as big as the line that needs to be
 	 * quoted (in case all chars in the line need to be quoted); TP is a
 	 * pointer to TEXT, which contains the string to be quoted. We move
 	 * through TP to find all chars that need to be quoted ("a's" becomes
 	 * "a\'s", for example). At this point we cannot return P, since this
 	 * pointer is at the end of the string, so that we return R instead,
-	 * which is at the beginning of the same string pointed to by P.
-	 * */
+	 * which is at the beginning of the same string pointed to by P. */
 	char *r = (char *)NULL, *p = (char *)NULL, *tp = (char *)NULL;
 
 	size_t text_len = strlen(text);

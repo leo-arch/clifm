@@ -102,13 +102,13 @@ kbinds_edit(char *app)
 	if (!kbinds_file)
 		return EXIT_FAILURE;
 
-	struct stat file_attrib;
-	if (stat(kbinds_file, &file_attrib) == -1) {
+	struct stat attr;
+	if (stat(kbinds_file, &attr) == -1) {
 		create_kbinds_file();
-		stat(kbinds_file, &file_attrib);
+		stat(kbinds_file, &attr);
 	}
 
-	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	int ret = EXIT_SUCCESS;
 	if (app && *app) {
@@ -124,8 +124,8 @@ kbinds_edit(char *app)
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	stat(kbinds_file, &file_attrib);
-	if (mtime_bfr == (time_t)file_attrib.st_mtime)
+	stat(kbinds_file, &attr);
+	if (mtime_bfr == (time_t)attr.st_mtime)
 		return EXIT_SUCCESS;
 
 	_err('n', PRINT_PROMPT, _("%s: Restart the program for changes to "

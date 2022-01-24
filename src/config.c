@@ -2344,8 +2344,7 @@ init_config(void)
 	if (xargs.stealth_mode == 1) {
 		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
 			"persistent selection and directory history, just as bookmarks, "
-			"logs and configuration files, are disabled.\n"),
-		    PROGRAM_NAME);
+			"logs and configuration files, are disabled.\n"), PROGRAM_NAME);
 		config_ok = 0;
 		check_colors();
 		return;
@@ -2356,7 +2355,6 @@ init_config(void)
 
 	define_config_file_names();
 	create_config_files();
-
 	cschemes_n = get_colorschemes();
 
 	if (config_ok)
@@ -2371,16 +2369,10 @@ init_config(void)
 		fzf_height_set = get_fzf_win_height();
 #endif
 
-	if ((flags & GUI) && getenv("XTERM_VERSION")) {
-		/* If running Xterm, instruct it to send an escape code (27)
-		 * for Meta (Alt) key sequences. Otherwise, Alt keybindings won't
-		 * work */
+	if ((flags & GUI) && getenv("XTERM_VERSION"))
+		/* If running Xterm, instruct it to send an escape code (27) for
+		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work */
 		printf("\x1b[?1036h"); /* metaSendsEscape = true */
-/*		printf("\x1b[?1034l"); // eightBitInput = false
-		printf("\x1b[>1;1m"); // modifyCursorKeys = 1
-		printf("\x1b[>2;1m"); // modifyFunctionKeys = 1
-		("\x1b[>1m" and "\x1b[>2m", reset to initial value) */
-	}
 }
 
 static void

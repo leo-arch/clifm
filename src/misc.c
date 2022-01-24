@@ -323,7 +323,7 @@ print_tips(int all)
 		"Need more speed? Try the light mode (Alt-y)",
 		"The Selection Box is shared among different instances of CliFM",
 		"Select files here and there with the 's' command",
-		"Use wildcards and regular expressions with the 's' command: "
+		"Use wildcards and regular expressions to select files: "
 		"'s *.c' or 's .*\\.c$'",
 		"ELN's and the 'sel' keyword work for shell commands as well: "
 		"'file 1 sel'",
@@ -435,7 +435,7 @@ print_tips(int all)
 		"Enable the FZF mode for a better TAB completion experience",
 		"Press Alt-q to delete the last typed word",
 		"Check ELN ranges by pressing TAB",
-		"Select a specific selected file by typing 'sel' and then TAB",
+		"Operate on specific selected files by typing 'sel' and then TAB",
 		"Use the 'ow' command to open a file with an specific application",
 		"Use the 'mf' command to limit the amount of files listed on the screen",
 		"Set a maximum file name length for listed files via the MaxFilenameLen "

@@ -81,11 +81,30 @@ check_term(void)
 	return;
 }
 
+static void
+set_mount_cmd(const int udisks2ok, const int udevilok)
+{
+	if (xargs.mount_cmd == MNT_UDISKS2 && !udisks2ok && udevilok) {
+		_err('w', PRINT_PROMPT, _("%s: udisks2 not found. Falling back to "
+			"udevil\n"), PROGRAM_NAME);
+		xargs.mount_cmd = MNT_UDEVIL;
+		return;
+	}
+
+	if (xargs.mount_cmd != MNT_UDISKS2 && udevilok)
+		xargs.mount_cmd = MNT_UDEVIL;
+	else if (udisks2ok)
+		xargs.mount_cmd = MNT_UDISKS2;
+	else
+		xargs.mount_cmd = UNSET;
+}
+
 void
 check_third_party_cmds(void)
 {
 	int udisks2ok = 0, udevilok = 0, fzfok = 0;
 	int i = (int)path_progsn;
+
 	while (--i >= 0) {
 		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f')
 			continue;
@@ -109,19 +128,7 @@ check_third_party_cmds(void)
 		fzftab = 0;
 	}
 
-	if (xargs.mount_cmd == MNT_UDISKS2 && !udisks2ok && udevilok) {
-		_err('w', PRINT_PROMPT, _("%s: udisks2 not found. Falling back to "
-			"udevil\n"), PROGRAM_NAME);
-		xargs.mount_cmd = MNT_UDEVIL;
-		return;
-	}
-
-	if (xargs.mount_cmd != MNT_UDISKS2 && udevilok)
-		xargs.mount_cmd = MNT_UDEVIL;
-	else if (udisks2ok)
-		xargs.mount_cmd = MNT_UDISKS2;
-	else
-		xargs.mount_cmd = UNSET;
+	set_mount_cmd(udisks2ok, udevilok);
 }
 
 /* Return 1 if current user has access to FILE. Otherwise, return zero */
