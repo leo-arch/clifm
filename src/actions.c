@@ -107,8 +107,7 @@ run_action(char *action, char **args)
 			fprintf(stderr, "%s: Plugins directory not defined\n", PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
-		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2,
-								sizeof(char));
+		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2, sizeof(char));
 		sprintf(cmd, "%s/%s", plugins_dir, action); /* NOLINT */
 	}
 
@@ -302,32 +301,33 @@ edit_actions(char *app)
 	/* Get modification time after opening the file */
 	stat(actions_file, &attr);
 
+	if (mtime_bfr == (time_t)attr.st_mtime)
+		return EXIT_SUCCESS;
+
 	/* If modification times differ, the file was modified after being
 	 * opened */
-	if (mtime_bfr != (time_t)attr.st_mtime) {
-		/* Reload the array of available actions */
-		if (load_actions() != EXIT_SUCCESS)
-			return EXIT_FAILURE;
+	/* Reload the array of available actions */
+	if (load_actions() != EXIT_SUCCESS)
+		return EXIT_FAILURE;
 
-		/* Reload PATH commands as well to add new action(s) */
-		if (bin_commands) {
-			size_t i;
-			for (i = 0; bin_commands[i]; i++)
-				free(bin_commands[i]);
+	/* Reload PATH commands as well to add new action(s) */
+	if (bin_commands) {
+		size_t i;
+		for (i = 0; bin_commands[i]; i++)
+			free(bin_commands[i]);
 
-			free(bin_commands);
-			bin_commands = (char **)NULL;
-		}
-
-		if (paths) {
-			size_t i;
-			for (i = 0; i < path_n; i++)
-				free(paths[i]);
-		}
-
-		path_n = (size_t)get_path_env();
-		get_path_programs();
+		free(bin_commands);
+		bin_commands = (char **)NULL;
 	}
+
+	if (paths) {
+		size_t i;
+		for (i = 0; i < path_n; i++)
+			free(paths[i]);
+	}
+
+	path_n = (size_t)get_path_env();
+	get_path_programs();
 
 	return EXIT_SUCCESS;
 }
