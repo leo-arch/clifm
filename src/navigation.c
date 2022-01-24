@@ -530,14 +530,15 @@ fastback(char *str)
 void
 print_dirhist(void)
 {
-	int i;
+	int n = DIGINUM(dirhist_total_index), i;
+
 	for (i = 0; i < dirhist_total_index; i++) {
 		if (!old_pwd[i] || *old_pwd[i] == _ESC)
 			continue;
 		if (i == dirhist_cur_index)
-			printf("  %d  %s%s%s\n", i + 1, dh_c, old_pwd[i], df_c);
+			printf(" %s%-*d%s %s%s%s\n", el_c, n, i + 1, df_c, mi_c, old_pwd[i], df_c);
 		else
-			printf("  %d  %s\n", i + 1, old_pwd[i]);
+			printf(" %s%-*d%s %s%s%s\n", el_c, n, i + 1, df_c, di_c, old_pwd[i], df_c);
 	}
 }
 
@@ -629,15 +630,13 @@ back_function(char **comm)
 		return EXIT_FAILURE;
 
 	if (comm[1]) {
-		if (IS_HELP(comm[1])) {
-			puts(_(BACK_USAGE));
-			return EXIT_SUCCESS;
-		}
-		return surf_hist(comm);
+		if (!IS_HELP(comm[1]))
+			return surf_hist(comm);
+		puts(_(BACK_USAGE));
+		return EXIT_SUCCESS;
 	}
 
 	/* If just 'back', with no arguments */
-
 	/* If first path in current dirhist was reached, do nothing */
 	if (dirhist_cur_index <= 0)
 		return EXIT_SUCCESS;
@@ -645,20 +644,19 @@ back_function(char **comm)
 	dirhist_cur_index--;
 
 	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
-		if (dirhist_cur_index)
-			dirhist_cur_index--;
-		else
+		if (dirhist_cur_index <= 0)
 			return EXIT_FAILURE;
+		dirhist_cur_index--;
 	}
 
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
-
 	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 	    old_pwd[dirhist_cur_index], strerror(errno));
+
 	/* Invalidate this entry */
 	*old_pwd[dirhist_cur_index] = _ESC;
-	if (dirhist_cur_index)
+	if (dirhist_cur_index > 0)
 		dirhist_cur_index--;
 
 	return EXIT_FAILURE;
@@ -670,13 +668,11 @@ forth_function(char **comm)
 {
 	if (!comm)
 		return EXIT_FAILURE;
-
 	if (comm[1]) {
-		if (IS_HELP(comm[1])) {
-			puts(_(FORTH_USAGE));
-			return EXIT_SUCCESS;
-		}
-		return surf_hist(comm);
+		if (!IS_HELP(comm[1]))
+			return surf_hist(comm);
+		puts(_(FORTH_USAGE));
+		return EXIT_SUCCESS;
 	}
 
 	/* If just 'forth', with no arguments */
@@ -687,18 +683,17 @@ forth_function(char **comm)
 	dirhist_cur_index++;
 
 	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
-		if (dirhist_cur_index < dirhist_total_index
-		&& old_pwd[dirhist_cur_index + 1])
-			dirhist_cur_index++;
-		else
+		if (dirhist_cur_index >= dirhist_total_index
+		|| !old_pwd[dirhist_cur_index + 1])
 			return EXIT_FAILURE;
+		dirhist_cur_index++;
 	}
 
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
-
 	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 	    old_pwd[dirhist_cur_index], strerror(errno));
+
 	/* Invalidate this entry */
 	*old_pwd[dirhist_cur_index] = _ESC;
 	if (dirhist_cur_index < dirhist_total_index
