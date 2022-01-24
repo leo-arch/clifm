@@ -298,7 +298,10 @@ TrashAsRm=false
 RlEditMode=1
 
 # ALIASES
-#alias ls='ls --color=auto -A'
+# Bind '?' to the interactive help plugin. Run 'actions' to print the # list of available plugins
+#alias ?='ih'
+# Bind 'b' to the directory history navigation plugin
+#alias b='dh'
 
 # PROMPT COMMANDS
 # Write below the commands you want to be executed before each prompt. Ex:
