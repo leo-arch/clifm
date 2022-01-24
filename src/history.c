@@ -363,9 +363,10 @@ __clear_history(char **args)
 static int
 print_history_list(void)
 {
+	int n = DIGINUM(current_hist_n);
 	size_t i;
 	for (i = 0; i < current_hist_n; i++)
-		printf("  %zu  %s\n", i + 1, history[i]);
+		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i]);
 
 	return EXIT_SUCCESS;
 }
@@ -378,9 +379,10 @@ print_last_items(char *str)
 	if (num < 0 || num > (int)current_hist_n)
 		num = (int)current_hist_n;
 
+	int n = DIGINUM(current_hist_n);
 	size_t i;
 	for (i = current_hist_n - (size_t)num; i < current_hist_n; i++)
-		printf("%zu %s\n", i + 1, history[i]);
+		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i]);
 
 	return EXIT_SUCCESS;
 }
