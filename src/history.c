@@ -360,6 +360,31 @@ __clear_history(char **args)
 	return reload_history(args);
 }
 
+static int
+print_history_list(void)
+{
+	size_t i;
+	for (i = 0; i < current_hist_n; i++)
+		printf("  %zu  %s\n", i + 1, history[i]);
+
+	return EXIT_SUCCESS;
+}
+
+static int
+print_last_items(char *str)
+{
+	int num = atoi(str);
+
+	if (num < 0 || num > (int)current_hist_n)
+		num = (int)current_hist_n;
+
+	size_t i;
+	for (i = current_hist_n - (size_t)num; i < current_hist_n; i++)
+		printf("%zu %s\n", i + 1, history[i]);
+
+	return EXIT_SUCCESS;
+}
+
 int
 history_function(char **comm)
 {
@@ -369,33 +394,18 @@ history_function(char **comm)
 	}
 
 	/* If no arguments, print the history list */
-	if (!comm[1]) {
-		size_t i;
-		for (i = 0; i < current_hist_n; i++)
-			printf("  %zu  %s\n", i + 1, history[i]);
-		return EXIT_SUCCESS;
-	}
+	if (!comm[1])
+		return print_history_list();
 
 	if (comm[1] && *comm[1] == 'e' && strcmp(comm[1], "edit") == 0)
 		return edit_history(comm);
 
-	/* If 'history clear', guess what, clear the history list! */
 	if (comm[1] && *comm[1] == 'c' && strcmp(comm[1], "clear") == 0)
 		return __clear_history(comm);
 
 	/* If 'history -n', print the last -n elements */
-	if (comm[1] && *comm[1] == '-' && is_number(comm[1] + 1)) {
-		int num = atoi(comm[1] + 1);
-
-		if (num < 0 || num > (int)current_hist_n)
-			num = (int)current_hist_n;
-
-		size_t i;
-		for (i = current_hist_n - (size_t)num; i < current_hist_n; i++)
-			printf("%zu %s\n", i + 1, history[i]);
-
-		return EXIT_SUCCESS;
-	}
+	if (comm[1] && *comm[1] == '-' && is_number(comm[1] + 1))
+		return print_last_items(comm[1] + 1);
 
 	/* None of the above */
 	puts(_(HISTORY_USAGE));

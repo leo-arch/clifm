@@ -311,11 +311,8 @@ remotes_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0) {
-		if (args[2])
-			return remotes_edit(args[2]);
-		return remotes_edit(NULL);
-	}
+	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
+		return remotes_edit(args[2] ? args[2] : NULL);
 
 	if (*args[1] == 'u' && (!*(args[1] + 1) || strcmp(args[1], "unmount") == 0)) {
 		if (!args[2]) {

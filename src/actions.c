@@ -275,14 +275,14 @@ edit_actions(char *app)
 		return EXIT_FAILURE;
 
 	/* Get actions file's current modification time */
-	struct stat file_attrib;
+	struct stat attr;
 
-	if (stat(actions_file, &file_attrib) == -1) {
+	if (stat(actions_file, &attr) == -1) {
 		fprintf(stderr, "actions: %s: %s\n", actions_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	int ret = EXIT_SUCCESS;
 
@@ -300,11 +300,11 @@ edit_actions(char *app)
 		return EXIT_FAILURE;
 
 	/* Get modification time after opening the file */
-	stat(actions_file, &file_attrib);
+	stat(actions_file, &attr);
 
 	/* If modification times differ, the file was modified after being
 	 * opened */
-	if (mtime_bfr != (time_t)file_attrib.st_mtime) {
+	if (mtime_bfr != (time_t)attr.st_mtime) {
 		/* Reload the array of available actions */
 		if (load_actions() != EXIT_SUCCESS)
 			return EXIT_FAILURE;

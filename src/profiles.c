@@ -305,7 +305,7 @@ profile_add(char *prof)
 
 	if (!home_ok) {
 		fprintf(stderr, _("%s: %s: Cannot create profile: Home "
-				"directory not found\n"), PROGRAM_NAME, prof);
+			"directory not found\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
 
@@ -331,8 +331,7 @@ profile_add(char *prof)
 	int exit_status = EXIT_SUCCESS;
 	size_t config_len = strlen(nconfig_dir);
 
-	char *nconfig_file = (char *)xnmalloc(config_len + pnl_len + 4,
-	    sizeof(char));
+	char *nconfig_file = (char *)xnmalloc(config_len + pnl_len + 4, sizeof(char));
 	sprintf(nconfig_file, "%s/%src", nconfig_dir, PNL);
 	char *nhist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
 	sprintf(nhist_file, "%s/history.cfm", nconfig_dir);
@@ -438,64 +437,61 @@ profile_function(char **comm)
 		return EXIT_SUCCESS;
 	}
 
+	/* If just 'pr', print current profile and exit */
+	if (!comm[1]) {
+		printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile
+			? alt_profile : "default");
+		return EXIT_SUCCESS;
+	}
+
 	int exit_status = EXIT_SUCCESS;
 
-	if (comm[1]) {
-		if (IS_HELP(comm[1]))
-			puts(_(PROFILES_USAGE));
+	if (IS_HELP(comm[1]))
+		puts(_(PROFILES_USAGE));
 
-		/* List profiles */
-		else if (comm[1] && (strcmp(comm[1], "ls") == 0
-		|| strcmp(comm[1], "list") == 0)) {
-			size_t i;
+	/* List profiles */
+	else if (comm[1] && (strcmp(comm[1], "ls") == 0
+	|| strcmp(comm[1], "list") == 0)) {
+		size_t i;
+		for (i = 0; profile_names[i]; i++)
+			printf("%s\n", profile_names[i]);
+	}
 
-			for (i = 0; profile_names[i]; i++)
-				printf("%s\n", profile_names[i]);
-		}
-
-		/* Create a new profile */
-		else if (strcmp(comm[1], "add") == 0) {
-			if (comm[2]) {
-				exit_status = profile_add(comm[2]);
-			} else {
-				fprintf(stderr, "%s\n", PROFILES_USAGE);
-				exit_status = EXIT_FAILURE;
-			}
-		}
-
-		/* Delete a profile */
-		else if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0) {
-			if (comm[2]) {
-				exit_status = profile_del(comm[2]);
-			} else {
-				fprintf(stderr, "%s\n", PROFILES_USAGE);
-				exit_status = EXIT_FAILURE;
-			}
-		}
-
-		/* Switch to another profile */
-		else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0) {
-			if (comm[2]) {
-				exit_status = profile_set(comm[2]);
-			} else {
-				fprintf(stderr, "%s\n", PROFILES_USAGE);
-				exit_status = EXIT_FAILURE;
-			}
-		}
-
-		/* None of the above == error */
-		else {
+	/* Create a new profile */
+	else if (strcmp(comm[1], "add") == 0) {
+		if (comm[2]) {
+			exit_status = profile_add(comm[2]);
+		} else {
 			fprintf(stderr, "%s\n", PROFILES_USAGE);
 			exit_status = EXIT_FAILURE;
 		}
 	}
 
-	/* If only "pr" print the current profile name */
-	else if (!alt_profile)
-		printf("%s: profile: default\n", PROGRAM_NAME);
+	/* Delete a profile */
+	else if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0) {
+		if (comm[2]) {
+			exit_status = profile_del(comm[2]);
+		} else {
+			fprintf(stderr, "%s\n", PROFILES_USAGE);
+			exit_status = EXIT_FAILURE;
+		}
+	}
 
-	else
-		printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile);
+	/* Switch to another profile */
+	else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0) {
+		if (comm[2]) {
+			exit_status = profile_set(comm[2]);
+		} else {
+			fprintf(stderr, "%s\n", PROFILES_USAGE);
+			exit_status = EXIT_FAILURE;
+		}
+	}
+
+	/* None of the above == error */
+	else {
+		fprintf(stderr, "%s\n", PROFILES_USAGE);
+		exit_status = EXIT_FAILURE;
+	}
 
 	return exit_status;
 }

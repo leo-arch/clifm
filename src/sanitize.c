@@ -84,7 +84,7 @@ set_path_env(void)
 	confstr(_CS_PATH, p, n);               /* Get value */
 	ret = setenv("PATH", p, 1);            /* Set it */
 	free(p);
-#endif
+#endif /* _PATH_STDPATH */
 
 	if (ret == -1) {
 		fprintf(stderr, "%s: setenv: PATH: %s\n", PROGRAM_NAME,
@@ -115,7 +115,7 @@ xsecure_env(const int mode)
 	fprintf(stderr, "%s: secure-env: This feature is not available "
 		"on NetBSD\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
-#endif
+#endif /* __NetBSD__ */
 
 	char *display = (char *)NULL,
 		 *wayland_display = (char *)NULL,
@@ -176,7 +176,7 @@ xsecure_env(const int mode)
 	return EXIT_SUCCESS;
 }
 
-/* Create a sanitized environment to run a single command */
+/* Create a sanitized environment to run a single shell command */
 void
 sanitize_cmd_environ(void)
 {
@@ -184,10 +184,10 @@ sanitize_cmd_environ(void)
 	 * the original environ later (restore_cmd_environ()) */
 	env_bk = environ;
 
-	/* Create a controlled environment to securely run shell commands */
 	new_env = (char **)xnmalloc(12, sizeof(char *));
 	size_t n = 0;
 	char p[PATH_MAX];
+
 #ifdef _PATH_STDPATH
 	snprintf(p, PATH_MAX, "PATH=%s", _PATH_STDPATH);
 	new_env[n] = savestring(p, strlen(p));
@@ -200,7 +200,8 @@ sanitize_cmd_environ(void)
 	new_env[n] = savestring(q, strlen(q));   /* Set it */
 	n++;
 	free(q);
-#endif
+#endif /* _PATH_STDPATH */
+
 	new_env[n] = savestring("IFS=\" \n\t\"", 9);
 	n++;
 	if (user.name) {
@@ -222,6 +223,7 @@ sanitize_cmd_environ(void)
 		n++;
 	}
 
+	/* Import and sanitize */
 	char *e = (char *)NULL;
 	if ((flags & GUI)) {
 		e = getenv("DISPLAY");
@@ -230,7 +232,6 @@ sanitize_cmd_environ(void)
 			sprintf(new_env[n], "DISPLAY=%s", e);
 			n++;
 		}
-		/* Import and sanitize */
 		e = getenv("TERM");
 		if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
 			new_env[n] = (char *)xnmalloc(6 + strlen(e), sizeof(char));
@@ -242,7 +243,6 @@ sanitize_cmd_environ(void)
 		 * So, there's no need to set WAYLAND_DISPLAY */
 	}
 
-	/* Import and sanitize */
 	e = getenv("TZ");
 	if (e && sanitize_cmd(e, SNT_MISC) == EXIT_SUCCESS) {
 		new_env[n] = (char *)xnmalloc(4 + strlen(e), sizeof(char));
