@@ -600,8 +600,6 @@ get_query_str(int *fzf_offset)
 			else
 				/* The command is "jump" */
 				*fzf_offset = 5 + prompt_offset - 3;
-		} else {
-			query = rl_line_buffer;
 		}
 		}
 		break;
@@ -762,7 +760,7 @@ fzftabcomp(char **matches)
 
 	/* TAB completion cases allowing multiple selection */
 	int multi = decide_multi();
-	
+
 	/* Run FZF and store the ouput into the FZFTABOUT file */
 	int ret = run_fzf(&height, &fzf_offset, query, multi);
 	unlink(FZFTABIN);

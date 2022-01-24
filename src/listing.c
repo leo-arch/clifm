@@ -461,9 +461,9 @@ get_longest_filename(const int n, const int pad)
 		}
 
 		if (total_len > longest) {
-			if (listing_mode == VERTLIST)
+			if (listing_mode == VERTLIST) {
 				longest = total_len;
-			else {
+			} else {
 				if (max_files == UNSET) {
 					longest = total_len;
 				} else {
@@ -477,6 +477,17 @@ get_longest_filename(const int n, const int pad)
 	if (icons && !long_view && columned)
 		longest += 3;
 #endif
+}
+
+/* Set a few extra attributes needed for long view mode */
+static inline void
+set_long_attribs(const int n, const struct stat *attr)
+{
+	file_info[n].uid = attr->st_uid;
+	file_info[n].gid = attr->st_gid;
+	file_info[n].ltime = (time_t)attr->st_mtim.tv_sec;
+	file_info[n].mode = attr->st_mode;
+	file_info[n].size = attr->st_size;
 }
 
 static inline void
@@ -503,31 +514,23 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad)
 			if (*counter > (size_t)(term_rows - 2))
 				ret = run_pager(-1, reset_pager, &i, counter);
 
-			if (ret == -1) {
+			if (ret == -1 || ret == -2) {
 				--i;
+				if (ret == -2)
+					*counter = 0;
 				continue;
 			}
 
-			if (ret == -2) {
-				i--;
-				*counter = 0;
-				continue;
-			}
 			(*counter)++;
 		}
 
-		file_info[i].uid = lattr.st_uid;
-		file_info[i].gid = lattr.st_gid;
-		file_info[i].ltime = (time_t)lattr.st_mtim.tv_sec;
-		file_info[i].mode = lattr.st_mode;
-		file_info[i].size = lattr.st_size;
+		set_long_attribs(i, &lattr);
 
 		/* Print ELN. The remaining part of the line will be
 		 * printed by print_entry_props() */
-		if (!no_eln) {
+		if (!no_eln)
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
 				li_cb, file_info[i].sel ? '*' : ' ', df_c);
-		}
 
 		print_entry_props(&file_info[i], (size_t)space_left);
 	}
