@@ -1625,9 +1625,7 @@ quick_help(void)
 		"at your current keybindings via the 'kb' command"));
 	return EXIT_SUCCESS;
 #else
-
 	char *_pager = get_pager();
-
 	if (!*_pager) {
 		fprintf(stderr, _("%s: Unable to find any pager\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;

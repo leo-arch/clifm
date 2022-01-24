@@ -881,6 +881,7 @@ NAVIGATION\n\
 5                        Change to the directory whose ELN is 5\n\
 b | Shift-left | Alt-j   Go back in the directory history list\n\
 f | Shift-right | Alt-k  Go forth in the directory history list\n\
+dh                       Navigate the directory history list (needs fzf)\n\
 .. | Shift-up | Alt-u    Change to the parent directory\n\
 bd media                 Change to the parent directory matching 'media'\n\
 bm | Alt-b               Open the bookmarks screen\n\
@@ -891,7 +892,7 @@ mp                       Change to a mountpoint\n\
 pin mydir                Pin the directory 'mydir'\n\
 ,                        Change to pinned directory\n\
 x                        Run new instance in the current directory\n\
--                        Navigate the file system via fzf (with files preview)\n\
+-                        Navigate the file system with files preview (needs fzf)\n\
 \n\
 BASIC FILE OPERATIONS\n\
 ---------------------\n\
@@ -903,7 +904,6 @@ ow myfile.txt      Choose opening application for 'myfile.txt' from a menu\n\
 n myfile           Create a new file named 'myfile'\n\
 n mydir/           Create a new directory named 'mydir'\n\
 p4                 Print the properties of the file whose ELN is 4\n\
-te4                Toggle the executable bit on the file whose ELN is 4\n\
 /*.png             Search for files ending with .png in the current directory\n\
 s *.c              Select all C files\n\
 s 1-4 8 19-26      Select multiple files by ELN\n\
@@ -921,29 +921,30 @@ m myfile.txt       Rename 'myfile.txt'\n\
 l myfile mylink    Create a symbolic link named 'mylink' to 'myfile'\n\
 le mylink          Edit the symbolic link 'mylink'\n\
 bl sel             Create symbolic links for all selected files\n\
+te *.sh            Toggle the executable bit on all .sh files\n\
 t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
 t del              Select trashed files and remove them permanently\n\
 u                  Undelete trashed files\n\
 bm a mydir         Bookmark the directory named mydir\n\
 bm d mybm          Remove the bookmark named 'mybm'\n\
 ac sel             Compress/archive selected files\n\
-bb *               Clean up all file names in the current directory\n\
 \n\
 MISC\n\
 ----\n\
 cmd --help     Get help for command 'cmd'\n\
 F1             Open the manpage\n\
+ih             Run the interactive help plugin (needs fzf)\n\
 edit | F10     View and/or edit the configuration file\n\
+Alt-l          Toggle detail/long view mode on/off\n\
+Alt-.          Toggle hidden files on/off\n\
 kb edit | F9   Edit keybindings\n\
 mm edit | F6   Change default associated applications\n\
 mm info 12     Get MIME information for the file whose ELN is 12\n\
-Alt-l          Toggle detail/long view mode on/off\n\
 cs             Manage color schemes\n\
 Right          Accept the entire suggestion\n\
 Alt-f          Accept the first/next word of the current suggestion\n\
 rf | .         Reprint the current list of files\n\
 pf set test    Change to the profile named 'test'\n\
-Alt-.          Toggle hidden files\n\
 st size rev    Sort files by size in reverse order\n\
 Alt-x | Alt-z  Toggle sort method\n\
 media          (Un)mount storage devices\n\
