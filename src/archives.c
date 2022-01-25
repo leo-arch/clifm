@@ -48,7 +48,8 @@
 #define OP_ISO    1
 #define OP_OTHERS 0
 
-static int zstandard(char *in_file, char *out_file, char mode, char op);
+#define QUERY_ARCHIVE 1
+#define QUERY_ISO     0
 
 static char *
 ask_user_for_path(void)
@@ -229,21 +230,23 @@ test_iso(char *file)
 	return exit_status;
 }
 
-/* Return the path to the mountpoint if mounted succesfully. Otherwise,
- * return NULL */
+/* Create mountpoint for file. Returns the path to the mountpoint in case
+ * of success, or NULL in case of error */
 static char *
-create_iso_mountpoint(char *file)
+create_mountpoint(char *file)
 {
 	char *mountpoint = (char *)NULL;
+	char *p = strrchr(file, '/');
+	char *tfile = (p && *(++p)) ? p : file;
 
 	if (xargs.stealth_mode == 1) {
-		mountpoint = (char *)xnmalloc(strlen(file) + P_tmpdir_len + 15,
+		mountpoint = (char *)xnmalloc(strlen(tfile) + P_tmpdir_len + 15,
 					sizeof(char));
-		sprintf(mountpoint, "%s/clifm-mounts/%s", P_tmpdir, file); /* NOLINT */
+		sprintf(mountpoint, "%s/clifm-mounts/%s", P_tmpdir, tfile); /* NOLINT */
 	} else {
-		mountpoint = (char *)xnmalloc(config_dir_len + strlen(file) + 9,
+		mountpoint = (char *)xnmalloc(config_dir_len + strlen(tfile) + 9,
 					sizeof(char));
-		sprintf(mountpoint, "%s/mounts/%s", config_dir, file); /* NOLINT */
+		sprintf(mountpoint, "%s/mounts/%s", config_dir, tfile); /* NOLINT */
 	}
 
 	char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
@@ -283,11 +286,11 @@ cd_to_mountpoint(char *file, char *mountpoint)
 static int
 mount_iso(char *file)
 {
-	char *mountpoint = create_iso_mountpoint(file);
+	char *mountpoint = create_mountpoint(file);
 	if (!mountpoint)
 		return EXIT_FAILURE;
 
-	/* Construct and execute cmd */
+	/* Construct and execute the cmd */
 	char *sudo = get_sudo_path();
 	if (!sudo) {
 		free(mountpoint);
@@ -302,9 +305,9 @@ mount_iso(char *file)
 	}
 	free(sudo);
 
-	int ret = cd_to_mountpoint(file, mountpoint);
+	int exit_status = cd_to_mountpoint(file, mountpoint);
 	free(mountpoint);
-	return ret;
+	return exit_status;
 }
 
 /* Use 7z to
@@ -646,429 +649,54 @@ is_compressed(char *file, int test_iso)
 	return EXIT_FAILURE;
 }
 
-/* Handle archives and/or compressed files (ARGS) according to MODE:
- * 'c' for archiving/compression, and 'd' for dearchiving/decompression
- * (including listing, extracting, repacking, and mounting). Returns
- * zero on success and one on error. Depends on 'zstd' for Zdtandard
- * files 'atool' and 'archivemount' for the remaining types. */
-int
-archiver(char **args, char mode)
+static char *
+add_default_extension(char *name)
 {
-	size_t i;
-	int exit_status = EXIT_SUCCESS;
+	size_t name_len = strlen(name);
 
-	if (!args[1])
-		return EXIT_FAILURE;
+	char *t = savestring(name, name_len);
+	name = (char *)xrealloc(name, (name_len + 8) * sizeof(char));
+	sprintf(name, "%s.tar.gz", t); /* NOLINT */
+	free(t);
 
-	if (mode == 'c') {
+	return name;
+}
 
-			/* ##################################
-			 * #        1 - COMPRESSION         #
-			 * ##################################*/
-
-		/* Get archive name/type */
-
-		puts(_("Use extension to specify archive/compression type "
-		       "(defaults to .tar.gz)\nExample: myarchive.xz"));
-		char *name = (char *)NULL;
-		while (!name) {
-			name = rl_no_hist(_("File name ('q' to quit): "));
-			if (!name)
-				continue;
-			if (!*name) {
-				free(name);
-				name = (char *)NULL;
-				continue;
-			}
-
-			if (*name == 'q' && name[1] == '\0') {
-				free(name);
-				return EXIT_SUCCESS;
-			}
-
-			char *dot = strrchr(name, '.');
-			/* If no extension, add the default */
-			if (!dot) {
-				size_t name_len = strlen(name);
-				char *t = (char *)xnmalloc(name_len + 1, sizeof(char));
-				strcpy(t, name); /* NOLINT */
-				name = (char *)xrealloc(name, (name_len + 8) * sizeof(char));
-				sprintf(name, "%s.tar.gz", t); /* NOLINT */
-				free(t);
-			} else {
-				if (dot == name) { /* Dot is first char */
-					fprintf(stderr, _("Invalid file name\n"));
-					free(name);
-					name = (char *)NULL;
-				}
-			}
-		}
-
-				/* ##########################
-				 * #        ZSTANDARD       #
-				 * ########################## */
-
-		char *ret = strrchr(name, '.');
-		if (strcmp(ret, ".zst") == 0) {
-			/* Multiple files */
-			if (args[2]) {
-				printf(_("\n%sNOTE%s: Zstandard does not support "
-					 "compression of multiple files into one single "
-					 "compressed file. Files will be compressed rather "
-					 "into multiple compressed files using original "
-					 "file names\n"), BOLD, df_c);
-
-				for (i = 1; args[i]; i++) {
-					if (zstandard(args[i], NULL, 'c', 0) != EXIT_SUCCESS)
-						exit_status = EXIT_FAILURE;
-				}
-			}
-
-			/* Only one file */
-			else
-				exit_status = zstandard(args[1], name, 'c', 0);
+/* Get archive name/type */
+static char *
+get_archive_filename(void)
+{
+	puts(_("Use extension to specify archive/compression type "
+	       "(defaults to .tar.gz)\nExample: myarchive.xz"));
+	char *name = (char *)NULL;
+	while (!name) {
+		name = rl_no_hist(_("File name ('q' to quit): "));
+		if (!name)
+			continue;
+		if (!*name) {
 			free(name);
-			return exit_status;
+			name = (char *)NULL;
+			continue;
 		}
 
-				/* ##########################
-				 * #        ISO 9660        #
-				 * ########################## */
-
-		if (strcmp(ret, ".iso") == 0) {
-			exit_status = create_iso(args[1], name);
+		if (*name == 'q' && name[1] == '\0') {
 			free(name);
-			return exit_status;
+			return (char *)NULL;
 		}
 
-				/* ##########################
-				 * #          OTHERS        #
-				 * ########################## */
+		char *dot = strrchr(name, '.');
+		if (!dot) /* If no extension, add the default */
+			return add_default_extension(name);
 
-		/* Construct the command */
-		size_t n = 0;
-		for (i = 1; args[i]; i++);
-		char *ext_ok = strrchr(name, '.');
-		char **tcmd = (char **)xnmalloc(3 + i + 1, sizeof(char *));
-		tcmd[0] = savestring("atool", 5);
-		tcmd[1] = savestring("-a", 2);
-		tcmd[2] = (char *)xnmalloc(strlen(name) + (!ext_ok ? 7 : 0) + 1, sizeof(char *));
-		sprintf(tcmd[2], "%s%s", name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
-		n += 3;
-
-		for (i = 1; args[i]; i++) {
-			char *p = dequote_str(args[i], 0);
-			if (!p)
-				continue;
-			tcmd[n] = savestring(p, strlen(p));
-			free(p);
-			n++;
-		}
-
-		tcmd[n] = (char *)NULL;
-
-		/* Run it */
-		exit_status = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
-
-		for (i = 0; tcmd[i]; i++)
-			free(tcmd[i]);
-		free(tcmd);
-		free(name);
-
-		return exit_status;
-	}
-
-	/* mode == 'd' */
-
-			/* ##################################
-			 * #      2 - DECOMPRESSION         #
-			 * ##################################*/
-
-	/* Exit if at least one non-compressed file is found */
-	for (i = 1; args[i]; i++) {
-		char *deq = (char *)NULL;
-		if (strchr(args[i], '\\')) {
-			deq = dequote_str(args[i], 0);
-			strcpy(args[i], deq); /* NOLINT */
-			free(deq);
-		}
-
-		if (is_compressed(args[i], 1) != 0) {
-			fprintf(stderr, _("archiver: %s: Not an archive/compressed file\n"),
-					args[i]);
-			return EXIT_FAILURE;
+		if (dot == name) { /* Dot is first char */
+			fprintf(stderr, _("Invalid file name\n"));
+			free(name);
+			name = (char *)NULL;
+			continue;
 		}
 	}
 
-				/* ##########################
-				 * #        ISO 9660        #
-				 * ########################## */
-
-	char *ret = strrchr(args[1], '.');
-	if ((ret && strcmp(ret, ".iso") == 0) || check_iso(args[1]) == 0)
-		return handle_iso(args[1]);
-
-				/* ##########################
-				 * #        ZSTANDARD       #
-				 * ########################## */
-
-	/* Check if we have at least one Zstandard file */
-
-	int zst_index = -1;
-	size_t files_num = 0;
-
-	for (i = 1; args[i]; i++) {
-		files_num++;
-		if (args[i][strlen(args[i]) - 1] == 't') {
-			char *retval = strrchr(args[i], '.');
-			if (retval) {
-				if (strcmp(retval, ".zst") == 0)
-					zst_index = (int)i;
-			}
-		}
-	}
-
-	if (zst_index != -1) {
-		/* Multiple files */
-		if (files_num > 1) {
-			printf(_("%sNOTE%s: Using Zstandard\n"), BOLD, df_c);
-			printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
-			    BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
-
-			char *operation = (char *)NULL;
-			char sel_op = 0;
-			while (!operation) {
-				operation = rl_no_hist(_("Operation: "));
-				if (!operation)
-					continue;
-				if (!*operation || operation[1] != '\0') {
-					free(operation);
-					operation = (char *)NULL;
-					continue;
-				}
-
-				switch (*operation) {
-				case 'e': /* fallthrough */
-				case 't': /* fallthrough */
-				case 'i':
-					sel_op = *operation;
-					break;
-
-				case 'q':
-					free(operation);
-					return EXIT_SUCCESS;
-
-				default:
-					free(operation);
-					operation = (char *)NULL;
-					break;
-				}
-			}
-
-			for (i = 1; args[i]; i++) {
-				if (zstandard(args[i], NULL, 'd', sel_op) != EXIT_SUCCESS)
-					exit_status = EXIT_FAILURE;
-			}
-
-			free(operation);
-			return exit_status;
-		}
-
-		/* Just one file */
-		else {
-			if (zstandard(args[zst_index], NULL, 'd', 0) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
-			return exit_status;
-		}
-	}
-
-				/* ##########################
-				 * #          OTHERS        #
-				 * ########################## */
-
-	/* 1) Get operation to be performed
-	 * ################################ */
-
-	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
-		 "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), BOLD, df_c, BOLD,
-	    df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
-
-	char sel_op = get_operation(OP_OTHERS);
-
-	/* 2) Construct and run the corresponding commands
-	 * ############################################### */
-
-	switch (sel_op) {
-	case 'e': { /* ########## EXTRACT ############## */
-		char **tcmd = (char **)NULL;
-		size_t n = 0;
-		for (i = 1; args[i]; i++);
-		tcmd = (char **)xnmalloc(3 + i + 1, sizeof(char *));
-		tcmd[0] = savestring("atool", 5);
-		tcmd[1] = savestring("-x", 2);
-		tcmd[2] = savestring("-e", 2);
-		n += 3;
-		for (i = 1; args[i]; i++) {
-			tcmd[n] = savestring(args[i], strlen(args[i]));
-			n++;
-		}
-		tcmd[n] = (char *)NULL;
-
-		if (launch_execve(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-
-		for (i = 0; tcmd[i]; i++)
-			free(tcmd[i]);
-		free(tcmd);
-	} break;
-
-	case 'E': /* ########## EXTRACT TO DIR ############## */
-		for (i = 1; args[i]; i++) {
-			/* Ask for extraction path */
-			printf(_("%sFile%s: %s\n"), BOLD, df_c, args[i]);
-
-			char *ext_path = get_extraction_path();
-			if (!ext_path)
-				break;
-
-			/* Construct and execute cmd */
-			char *cmd[] = {"atool", "-X", ext_path, args[i], NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
-
-			free(ext_path);
-			ext_path = (char *)NULL;
-		}
-		break;
-
-		/* ########## LIST ############## */
-
-	case 'l':
-		for (i = 1; args[i]; i++) {
-			printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "",
-			    BOLD, df_c, args[i]);
-
-			char *cmd[] = {"atool", "-l", args[i], NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
-		}
-		break;
-
-		/* ########## MOUNT ############## */
-
-	case 'm':
-		for (i = 1; args[i]; i++) {
-			/* Create mountpoint */
-			char *mountpoint = (char *)NULL;
-			if (xargs.stealth_mode == 1) {
-				mountpoint = (char *)xnmalloc(strlen(args[i]) + 19, sizeof(char));
-				sprintf(mountpoint, "/tmp/clifm-mounts/%s", args[i]); /* NOLINT */
-			} else {
-				mountpoint = (char *)xnmalloc(config_dir_len
-							+ strlen(args[i]) + 9, sizeof(char));
-				sprintf(mountpoint, "%s/mounts/%s", config_dir, args[i]); /* NOLINT */
-			}
-
-			char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
-			if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-				free(mountpoint);
-				return EXIT_FAILURE;
-			}
-
-			/* Construct and execute cmd */
-			char *cmd[] = {"archivemount", args[i], mountpoint, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-				free(mountpoint);
-				continue;
-			}
-
-			/* List content of mountpoint if there is only
-				 * one archive */
-			if (files_num > 1) {
-				printf(_("%s%s%s: Succesfully mounted on %s\n"),
-						BOLD, args[i], df_c, mountpoint);
-				free(mountpoint);
-				continue;
-			}
-
-			if (xchdir(mountpoint, SET_TITLE) == -1) {
-				fprintf(stderr, "archiver: %s: %s\n", mountpoint, strerror(errno));
-				free(mountpoint);
-				return EXIT_FAILURE;
-			}
-
-			free(workspaces[cur_ws].path);
-			workspaces[cur_ws].path = (char *)xnmalloc(strlen(mountpoint) + 1,
-			    sizeof(char));
-			strcpy(workspaces[cur_ws].path, mountpoint); /* NOLINT */
-			free(mountpoint);
-
-			add_to_jumpdb(workspaces[cur_ws].path);
-
-			if (autols) {
-				free_dirlist();
-				if (list_dir() != EXIT_SUCCESS)
-					exit_status = EXIT_FAILURE;
-				add_to_dirhist(workspaces[cur_ws].path);
-			}
-		}
-		break;
-
-		/* ########## REPACK ############## */
-
-	case 'r': {
-		/* Ask for new archive/compression format */
-		puts(_("Enter 'q' to quit"));
-
-		char *format = (char *)NULL;
-		while (!format) {
-			format = rl_no_hist(_("New format (ex: .tar.xz): "));
-			if (!format)
-				continue;
-			/* Do not allow any of these characters (mitigate
-			 * command injection) */
-			char invalid_c[] = " \t\n\"\\/'`@$><=;|&{([*?!%";
-			if (!*format || (*format != '.' && *format != 'q')
-			|| strpbrk(format, invalid_c)) {
-				free(format);
-				format = (char *)NULL;
-				continue;
-			}
-			if (*format == 'q' && format[1] == '\0') {
-				free(format);
-				return EXIT_SUCCESS;
-			}
-		}
-
-		/* Construct and execute cmd */
-		for (i = 1; args[i]; i++);
-		size_t n = 0;
-		char **tcmd = (char **)xnmalloc(4 + i + 1, sizeof(char *));
-		tcmd[0] = savestring("arepack", 7);
-		tcmd[1] = savestring("-F", 2);
-		tcmd[2] = savestring(format, strlen(format));
-		tcmd[3] = savestring("-e", 2);
-		n += 4;
-		for (i = 1; args[i]; i++) {
-			tcmd[n] = savestring(args[i], strlen(args[i]));
-			n++;
-		}
-
-		tcmd[n] = (char *)NULL;
-
-		if (launch_execve(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-
-		for (i = 0; tcmd[i]; i++)
-			free(tcmd[i]);
-		free(tcmd);
-		free(format);
-	} break;
-
-	default: break;
-	}
-
-	return exit_status;
+	return name;
 }
 
 /* If MODE is 'c', compress IN_FILE producing a zstandard compressed
@@ -1076,7 +704,7 @@ archiver(char **args, char mode)
  * information about IN_FILE. OP is used only for the 'd' mode: it
  * tells if we have one or multiple file. Returns zero on success and
  * one on error */
-int
+static int
 zstandard(char *in_file, char *out_file, char mode, char op)
 {
 	int exit_status = EXIT_SUCCESS;
@@ -1175,6 +803,464 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	free(deq_file);
 	return exit_status;
 }
+
+static int
+compress_zstandard(char *name, char **args)
+{
+	if (!args[2]) /* Only one file */
+		return zstandard(args[1], name, 'c', 0);
+
+	int exit_status = EXIT_SUCCESS;
+
+	/* Multiple files */
+	printf(_("\n%sNOTE%s: Zstandard does not support compression of "
+		 "multiple files into one single compressed file. Files will "
+		 "be compressed rather into multiple compressed files using the "
+		 "original file names\n"), BOLD, df_c);
+
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		if (zstandard(args[i], NULL, 'c', 0) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
+static int
+compress_others(char **args, char *name)
+{
+	size_t n = 0, i;
+	for (i = 1; args[i]; i++);
+
+	char *ext_ok = strrchr(name, '.');
+	char **tcmd = (char **)xnmalloc(3 + i + 1, sizeof(char *));
+	tcmd[0] = savestring("atool", 5);
+	tcmd[1] = savestring("-a", 2);
+	tcmd[2] = (char *)xnmalloc(strlen(name) + (!ext_ok ? 7 : 0) + 1, sizeof(char *));
+	sprintf(tcmd[2], "%s%s", name, !ext_ok ? ".tar.gz" : ""); /* NOLINT */
+	n += 3;
+
+	for (i = 1; args[i]; i++) {
+		char *p = dequote_str(args[i], 0);
+		if (!p)
+			continue;
+		tcmd[n] = savestring(p, strlen(p));
+		free(p);
+		n++;
+	}
+	tcmd[n] = (char *)NULL;
+
+	int ret = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
+
+	for (i = 0; tcmd[i]; i++)
+		free(tcmd[i]);
+	free(tcmd);
+
+	return ret;
+}
+
+static int
+compress_files(char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	char *name = get_archive_filename();
+	if (!name)
+		return exit_status;
+
+	/* # ZSTANDARD # */
+	char *ret = strrchr(name, '.');
+	if (strcmp(ret, ".zst") == 0) {
+		exit_status = compress_zstandard(name, args);
+		free(name);
+		return exit_status;
+	}
+
+	/* # ISO 9660 # */
+	if (strcmp(ret, ".iso") == 0) {
+		exit_status = create_iso(args[1], name);
+		free(name);
+		return exit_status;
+	}
+
+	/* # OTHER FORMATS # */
+	/* Construct the command */
+	exit_status = compress_others(args, name);
+	free(name);
+
+	return exit_status;
+}
+
+/* Return one if at least one non-compressed file is found, zero otherwise */
+static int
+check_not_compressed(char **args)
+{
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		char *deq = (char *)NULL;
+		if (strchr(args[i], '\\')) {
+			deq = dequote_str(args[i], 0);
+			strcpy(args[i], deq); /* NOLINT */
+			free(deq);
+		}
+
+		if (is_compressed(args[i], 1) != 0) {
+			fprintf(stderr, _("archiver: %s: Not an archive/compressed file\n"),
+					args[i]);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+/* Check if we have at least one Zstandard file */
+static size_t
+check_zstandard(char **args)
+{
+	size_t zst = 0, i;
+
+	for (i = 1; args[i]; i++) {
+		if (args[i][strlen(args[i]) - 1] != 't')
+			continue;
+		char *ret = strrchr(args[i], '.');
+		if (ret && strcmp(ret, ".zst") == 0) {
+			zst = 1;
+			break;
+		}
+	}
+
+	return zst;
+}
+
+static char
+get_zstandard_operation(void)
+{
+	printf(_("%sNOTE%s: Using Zstandard\n"), BOLD, df_c);
+	printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
+	    BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
+
+	char sel_op = 0;
+	char *operation = (char *)NULL;
+
+	while (!operation) {
+		operation = rl_no_hist(_("Operation: "));
+		if (!operation)
+			continue;
+		if (!*operation || operation[1] != '\0') {
+			free(operation);
+			operation = (char *)NULL;
+			continue;
+		}
+
+		switch (*operation) {
+		case 'e': /* fallthrough */
+		case 't': /* fallthrough */
+		case 'i': sel_op = *operation; break;
+		case 'q': break;
+
+		default:
+			free(operation);
+			operation = (char *)NULL;
+			continue;
+		}
+	}
+
+	free(operation);
+	return sel_op;
+}
+
+static int
+decompress_zstandard(char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	size_t files_num = 0, i;
+	for (i = 1; args[i]; i++)
+		files_num++;
+
+	if (files_num == 1) {
+		if (zstandard(args[1], NULL, 'd', 0) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+		return exit_status;
+	}
+
+	/* Multiple files */
+	char sel_op = get_zstandard_operation();
+	if (sel_op == 0) /* quit */
+		return EXIT_SUCCESS;
+
+	for (i = 1; args[i]; i++) {
+		if (zstandard(args[i], NULL, 'd', sel_op) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
+static int
+list_others(char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "",
+		    BOLD, df_c, args[i]);
+
+		char *cmd[] = {"atool", "-l", args[i], NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
+static int
+extract_to_dir_others(char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		/* Ask for extraction path */
+		printf(_("%sFile%s: %s\n"), BOLD, df_c, args[i]);
+
+		char *ext_path = get_extraction_path();
+		if (!ext_path)
+			break;
+
+		/* Construct and execute cmd */
+		char *cmd[] = {"atool", "-X", ext_path, args[i], NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+
+		free(ext_path);
+		ext_path = (char *)NULL;
+	}
+
+	return exit_status;
+}
+
+static int
+extract_others(char **args)
+{
+	char **tcmd = (char **)NULL;
+	size_t n = 0, i;
+
+	for (i = 1; args[i]; i++);
+
+	/* Construct the cmd */
+	tcmd = (char **)xnmalloc(3 + i + 1, sizeof(char *));
+	tcmd[0] = savestring("atool", 5);
+	tcmd[1] = savestring("-x", 2);
+	tcmd[2] = savestring("-e", 2);
+	n += 3;
+	for (i = 1; args[i]; i++) {
+		tcmd[n] = savestring(args[i], strlen(args[i]));
+		n++;
+	}
+	tcmd[n] = (char *)NULL;
+
+	/* Launch it */
+	int exit_status = EXIT_SUCCESS;
+	if (launch_execve(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+
+	for (i = 0; tcmd[i]; i++)
+		free(tcmd[i]);
+	free(tcmd);
+
+	return exit_status;
+}
+
+static char *
+get_repack_format(void)
+{
+	puts(_("Enter 'q' to quit"));
+
+	char *format = (char *)NULL;
+	while (!format) {
+		format = rl_no_hist(_("New format (ex: .tar.xz): "));
+		if (!format)
+			continue;
+
+		/* Do not allow any of these characters (mitigate command injection) */
+		char invalid_c[] = " \t\n\"\\/'`@$><=;|&{([*?!%";
+		if (!*format || (*format != '.' && *format != 'q')
+		|| strpbrk(format, invalid_c)) {
+			free(format);
+			format = (char *)NULL;
+			continue;
+		}
+
+		if (*format == 'q' && format[1] == '\0') {
+			free(format);
+			return (char *)NULL;
+		}
+	}
+
+	return format;
+}
+
+static int
+repack_others(char **args)
+{
+	/* Ask for new archive/compression format */
+	char *format = get_repack_format();
+	if (!format) /* quit */
+		return EXIT_SUCCESS;
+
+	/* Construct and execute the cmd */
+	size_t n = 0, i;
+	for (i = 1; args[i]; i++);
+
+	char **tcmd = (char **)xnmalloc(4 + i + 1, sizeof(char *));
+	tcmd[0] = savestring("arepack", 7);
+	tcmd[1] = savestring("-F", 2);
+	tcmd[2] = savestring(format, strlen(format));
+	tcmd[3] = savestring("-e", 2);
+	n += 4;
+	for (i = 1; args[i]; i++) {
+		tcmd[n] = savestring(args[i], strlen(args[i]));
+		n++;
+	}
+	tcmd[n] = (char *)NULL;
+
+	int exit_status = EXIT_SUCCESS;
+	if (launch_execve(tcmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+
+	for (i = 0; tcmd[i]; i++)
+		free(tcmd[i]);
+	free(tcmd);
+	free(format);
+
+	return exit_status;
+}
+
+static int
+list_mounted_files(char *mountpoint)
+{
+	if (xchdir(mountpoint, SET_TITLE) == -1) {
+		fprintf(stderr, "archiver: %s: %s\n", mountpoint, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	free(workspaces[cur_ws].path);
+	workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint)); /* NOLINT */
+	add_to_jumpdb(workspaces[cur_ws].path);
+
+	int exit_status = EXIT_SUCCESS;
+	if (autols) {
+		free_dirlist();
+		if (list_dir() != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+		add_to_dirhist(workspaces[cur_ws].path);
+	}
+
+	return exit_status;
+}
+
+static int
+mount_others(char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+	size_t files_num = 0, i;
+	for (i = 1; args[i]; i++)
+		files_num++;
+
+	for (i = 1; args[i]; i++) {
+		char *mountpoint = create_mountpoint(args[i]);
+		if (!mountpoint)
+			continue;
+
+		/* Construct and execute cmd */
+		char *cmd[] = {"archivemount", args[i], mountpoint, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+			free(mountpoint);
+			continue;
+		}
+
+		/* List content of mountpoint if there is only one archive */
+		if (files_num > 1) {
+			printf(_("%s%s%s: Succesfully mounted on %s\n"),
+					BOLD, args[i], df_c, mountpoint);
+			free(mountpoint);
+			continue;
+		}
+
+		if (list_mounted_files(mountpoint) == EXIT_FAILURE)
+			exit_status = EXIT_FAILURE;
+		free(mountpoint);
+	}
+
+	return exit_status;
+}
+
+static int
+decompress_others(char **args)
+{
+	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
+		 "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), BOLD, df_c, BOLD,
+	    df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
+
+	char sel_op = get_operation(OP_OTHERS);
+
+	switch (sel_op) {
+	case 'e': return extract_others(args);
+	case 'E': return extract_to_dir_others(args);
+	case 'l': return list_others(args);
+	case 'm': return mount_others(args);
+	case 'r': return repack_others(args);
+	default: break;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+decompress_files(char **args)
+{
+	if (check_not_compressed(args) == 1)
+		return EXIT_FAILURE;
+
+	/* # ISO 9660 # */
+	char *ret = strrchr(args[1], '.');
+	if ((ret && strcmp(ret, ".iso") == 0) || check_iso(args[1]) == 0)
+		return handle_iso(args[1]);
+
+	/* Check if we have at least one Zstandard file */
+	size_t zst = check_zstandard(args);
+
+	/* # ZSTANDARD # */
+	if (zst == 1)
+		return decompress_zstandard(args);
+
+	/* # OTHER FORMATS # */
+	return decompress_others(args);
+
+}
+
+/* Handle archives and/or compressed files (ARGS) according to MODE:
+ * 'c' for archiving/compression, and 'd' for dearchiving/decompression
+ * (including listing, extracting, repacking, and mounting). Returns
+ * zero on success and one on error. Depends on 'zstd' for Zdtandard
+ * files, 'atool' and 'archivemount' for the remaining types. */
+int
+archiver(char **args, char mode)
+{
+	if (!args[1])
+		return EXIT_FAILURE;
+
+	if (mode == 'c')
+		return compress_files(args);
+
+	/* Decompression: mode == 'd' */
+	return decompress_files(args);
+}
+
 #else
 void *__skip_me_archiving;
 #endif /* !_NO_ARCHIVING */

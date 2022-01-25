@@ -806,8 +806,8 @@ untrash_function(char **comm)
 
 	if (comm[1] && *comm[1] != '*' && strcmp(comm[1], "a") != 0
 	&& strcmp(comm[1], "all") != 0) {
-		size_t j = 1;
-		for (; comm[j]; j++) {
+		size_t j;
+		for (j = 1; comm[j]; j++) {
 			char *d = (char *)NULL;
 			if (strchr(comm[j], '\\'))
 				d = dequote_str(comm[j], 0);
