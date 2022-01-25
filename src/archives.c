@@ -249,7 +249,6 @@ cd_to_mountpoint(char *file, char *mountpoint)
 {
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
 		fprintf(stderr, "archiver: %s: %s\n", mountpoint, strerror(errno));
-		free(mountpoint);
 		return EXIT_FAILURE;
 	}
 
@@ -374,19 +373,17 @@ create_iso(char *in_file, char *out_file)
 		char *cmd[] = {"mkisofs", "-R", "-o", out_file, in_file, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			return EXIT_FAILURE;
+		return EXIT_SUCCESS;
 	}
 
 	/* If IN_FILE is a block device */
-	else if ((attr.st_mode & S_IFMT) == S_IFBLK)
+	if ((attr.st_mode & S_IFMT) == S_IFBLK)
 		return create_iso_from_block_dev(in_file, out_file);
 
-	else {
-		fprintf(stderr, "archiver: %s: Invalid file format\nFile should "
-				"be either a directory or a block device\n", in_file);
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
+	/* If any other file format */
+	fprintf(stderr, "archiver: %s: Invalid file format\nFile should "
+			"be either a directory or a block device\n", in_file);
+	return EXIT_FAILURE;
 }
 
 /* Run the 'file' command on FILE and look for "ISO 9660" and
