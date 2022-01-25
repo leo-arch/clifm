@@ -165,7 +165,14 @@ Examples:\n\
 
 #define DIRHIST_USAGE "List or access entries in the directory history list\n\
 Usage:\n\
-  b/f [hist] [clear] [!ELN]"
+  b/f [hist] [clear] [!ELN]\n\n\
+Examples:\n\
+- Print the directory history list:\n\
+    bh (or 'b hist')\n\
+- Change to the directory whose ELN is 12 in the directory history list:\n\
+    b !12\n\
+- Remove all entries from the directory history list:\n\
+    b clear\n"
 
 #define DUP_USAGE "Duplicate files\n\
 Usage:\n\
