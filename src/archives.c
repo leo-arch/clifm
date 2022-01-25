@@ -45,15 +45,16 @@
 #include "mime.h"
 #endif
 
-#define OP_ISO 1
+#define OP_ISO    1
 #define OP_OTHERS 0
 
 static int zstandard(char *in_file, char *out_file, char mode, char op);
 
 static char *
-get_extraction_path(void)
+ask_user_for_path(void)
 {
 	char *ext_path = (char *)NULL;
+
 	while (!ext_path) {
 		int bk = warning_prompt;
 		warning_prompt = 0;
@@ -67,6 +68,16 @@ get_extraction_path(void)
 			continue;
 		}
 	}
+
+	return ext_path;
+}
+
+static char *
+get_extraction_path(void)
+{
+	char *ext_path = ask_user_for_path();
+	if (!ext_path)
+		return (char *)NULL;
 
 	if (!*ext_path) {
 		free(ext_path);
