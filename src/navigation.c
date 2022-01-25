@@ -45,58 +45,47 @@
 #include "strings.h"
 #endif /* __linux__ && _BE_POSIX */
 
-int
-handle_workspaces(char *str)
+static int
+list_workspaces(void)
 {
-	if (!str || !*str) {
-		int i;
-		for (i = 0; i < MAX_WS; i++) {
-			if (i == cur_ws) {
-				printf("%s%d: %s%s\n", mi_c, i + 1, workspaces[i].path, df_c);
-			} else {
-				printf("%d: %s\n", i + 1, workspaces[i].path
-				? workspaces[i].path : "none");
-			}
+	int i;
+
+	for (i = 0; i < MAX_WS; i++) {
+		if (i == cur_ws) {
+			printf("%s%d: %s%s\n", mi_c, i + 1, workspaces[i].path, df_c);
+		} else {
+			printf("%d: %s\n", i + 1, workspaces[i].path
+			? workspaces[i].path : "none");
 		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+check_workspace_num(char *str, int *tmp_ws)
+{
+	int istr = atoi(str);
+	if (istr <= 0 || istr > MAX_WS) {
+		fprintf(stderr, _("%s: %d: Invalid workspace number\n"),
+		    PROGRAM_NAME, istr);
+		return EXIT_FAILURE;
+	}
+
+	*tmp_ws = istr - 1;
+
+	if (*tmp_ws == cur_ws) {
+		fprintf(stderr, _("%s: %d is already the current workspace\n"),
+				PROGRAM_NAME, *tmp_ws + 1);
 		return EXIT_SUCCESS;
 	}
 
-	if (IS_HELP(str)) {
-		puts(_(WS_USAGE));
-		return EXIT_SUCCESS;
-	}
+	return 2;
+}
 
-	int tmp_ws = 0;
-
-	if (is_number(str)) {
-		int istr = atoi(str);
-		if (istr <= 0 || istr > MAX_WS) {
-			fprintf(stderr, _("%s: %d: Invalid workspace number\n"),
-			    PROGRAM_NAME, istr);
-			return EXIT_FAILURE;
-		}
-
-		tmp_ws = istr - 1;
-
-		if (tmp_ws == cur_ws) {
-			fprintf(stderr, _("%s: %d is already the current workspace\n"),
-					PROGRAM_NAME, tmp_ws + 1);
-			return EXIT_SUCCESS;
-		}
-	} else if (*str == '+' && !str[1]) {
-		if ((cur_ws + 1) < MAX_WS)
-			tmp_ws = cur_ws + 1;
-		else
-			return EXIT_FAILURE;
-	} else {
-		if (*str == '-' && !str[1]) {
-			if ((cur_ws - 1) >= 0)
-				tmp_ws = cur_ws - 1;
-			else
-				return EXIT_FAILURE;
-		}
-	}
-
+static int
+switch_workspace(int tmp_ws)
+{
 	/* If new workspace has no path yet, copy the path of the current
 	 * workspace */
 	if (!workspaces[tmp_ws].path) {
@@ -129,6 +118,38 @@ handle_workspaces(char *str)
 
 	add_to_dirhist(workspaces[cur_ws].path);
 	return exit_status;
+}
+
+int
+handle_workspaces(char *str)
+{
+	if (!str || !*str)
+		return list_workspaces();
+
+	if (IS_HELP(str)) {
+		puts(_(WS_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	int tmp_ws = 0;
+
+	if (is_number(str)) {
+		int ret = check_workspace_num(str, &tmp_ws);
+		if (ret != 2)
+			return ret;
+	} else if (*str == '+' && !str[1]) {
+		if ((cur_ws + 1) >= MAX_WS)
+			return EXIT_FAILURE;
+		tmp_ws = cur_ws + 1;
+	} else {
+		if (*str == '-' && !str[1]) {
+			if ((cur_ws - 1) < 0)
+				return EXIT_FAILURE;
+			tmp_ws = cur_ws - 1;
+		}
+	}
+
+	return switch_workspace(tmp_ws);
 }
 
 /* Return the list of paths in CWD matching STR */
@@ -396,68 +417,84 @@ check_cdpath(char *name)
 	return p;
 }
 
-/* Change CliFM working directory to NEW_PATH */
+/* Change the current directory to the home directory */
+static int
+go_home(const int print_error)
+{
+	if (!user.home) {
+		if (print_error) {
+			fprintf(stderr, _("%s: cd: Home directory not found\n"),
+				PROGRAM_NAME);
+		}
+		return EXIT_FAILURE;
+	}
+
+	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
+		if (print_error) {
+			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+				user.home, strerror(errno));
+		}
+		return EXIT_FAILURE;
+	}
+
+	free(workspaces[cur_ws].path);
+	workspaces[cur_ws].path = savestring(user.home, strlen(user.home));
+
+	return EXIT_SUCCESS;
+}
+
+/* Change current directory to NEW_PATH */
+static int
+change_to_path(char *new_path, const int print_error)
+{
+	if (strchr(new_path, '\\')) {
+		char *deq_path = dequote_str(new_path, 0);
+		if (deq_path) {
+			strcpy(new_path, deq_path);
+			free(deq_path);
+		}
+	}
+
+	char *p = check_cdpath(new_path);
+	char *q = realpath(p ? p : new_path, NULL);
+	if (!q) {
+		if (print_error) {
+			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+				p ? p : new_path, strerror(errno));
+		}
+		free(p);
+		return EXIT_FAILURE;
+	}
+	free(p);
+
+	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
+		if (print_error) {
+			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+				q, strerror(errno));
+		}
+		free(q);
+		return EXIT_FAILURE;
+	}
+
+	free(workspaces[cur_ws].path);
+	workspaces[cur_ws].path = savestring(q, strlen(q));
+	free(q);
+
+	return EXIT_SUCCESS;
+}
+
+/* Change current directory to NEW_PATH, or to HOME if new_path is NULL.
+ * Errors are printed only if PRINT_ERROR is set to one */
 int
 cd_function(char *new_path, const int print_error)
 {
 	/* If no argument, change to home */
 	if (!new_path || !*new_path) {
-		if (!user.home) {
-			if (print_error) {
-				fprintf(stderr, _("%s: cd: Home directory not found\n"),
-					PROGRAM_NAME);
-			}
+		if (go_home(print_error) == EXIT_FAILURE)
 			return EXIT_FAILURE;
-		}
-
-		if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
-			if (print_error) {
-				fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-					user.home, strerror(errno));
-			}
+	} else {
+		if (change_to_path(new_path, print_error) == EXIT_FAILURE)
 			return EXIT_FAILURE;
-		}
-
-		free(workspaces[cur_ws].path);
-		workspaces[cur_ws].path = savestring(user.home, strlen(user.home));
-	}
-
-	/* If we have some argument, dequote it, resolve it with realpath(),
-	 * cd into the resolved path, and set the path variable to this
-	 * latter */
-	else {
-		if (strchr(new_path, '\\')) {
-			char *deq_path = dequote_str(new_path, 0);
-			if (deq_path) {
-				strcpy(new_path, deq_path);
-				free(deq_path);
-			}
-		}
-
-		char *p = check_cdpath(new_path);
-		char *q = realpath(p ? p : new_path, NULL);
-		if (!q) {
-			if (print_error) {
-				fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-					p ? p : new_path, strerror(errno));
-			}
-			free(p);
-			return EXIT_FAILURE;
-		}
-		free(p);
-
-		if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
-			if (print_error) {
-				fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-					q, strerror(errno));
-			}
-			free(q);
-			return EXIT_FAILURE;
-		}
-
-		free(workspaces[cur_ws].path);
-		workspaces[cur_ws].path = savestring(q, strlen(q));
-		free(q);
 	}
 
 	int exit_status = EXIT_SUCCESS;
@@ -543,62 +580,75 @@ print_dirhist(void)
 }
 
 static int
+clear_dirhist(void)
+{
+	int i = dirhist_total_index;
+
+	while (--i >= 0)
+		free(old_pwd[i]);
+	dirhist_cur_index = dirhist_total_index = 0;
+	add_to_dirhist(workspaces[cur_ws].path);
+
+	printf("%s: Directory history cleared\n", PROGRAM_NAME);
+
+	return EXIT_SUCCESS;
+}
+
+/* Change to the specified directory  number (N) in the directory
+ * history list */
+static int
+change_to_num(int n)
+{
+	if (n <= 0 || n > dirhist_total_index) {
+		fprintf(stderr, _("history: %d: No such ELN\n"), n);
+		return EXIT_FAILURE;
+	}
+
+	n--;
+	if (!old_pwd[n] || *old_pwd[n] == _ESC) {
+		fprintf(stderr, _("%s: Invalid history entry\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	int ret = xchdir(old_pwd[n], SET_TITLE);
+	if (ret != 0) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+		    old_pwd[n], strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	free(workspaces[cur_ws].path);
+	workspaces[cur_ws].path = savestring(old_pwd[n], strlen(old_pwd[n]));
+
+	dirhist_cur_index = n;
+	ret = EXIT_SUCCESS;
+
+	if (autols) {
+		free_dirlist();
+		ret = list_dir();
+	}
+
+	return ret;
+}
+
+static int
 surf_hist(char **comm)
 {
-	if (*comm[1] == 'h' && (strcmp(comm[1], "h") == 0
-	|| strcmp(comm[1], "hist") == 0)) {
+	if (*comm[1] == 'h' && (!comm[1][1] || strcmp(comm[1], "hist") == 0)) {
 		print_dirhist();
 		return EXIT_SUCCESS;
 	}
 
-	if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0) {
-		int i = dirhist_total_index;
-		while (--i >= 0)
-			free(old_pwd[i]);
-		dirhist_cur_index = dirhist_total_index = 0;
-		add_to_dirhist(workspaces[cur_ws].path);
-		return EXIT_SUCCESS;
-	}
+	if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0)
+		return clear_dirhist();
 
-	int exit_status = EXIT_FAILURE;
-
-	if (*comm[1] == '!' && is_number(comm[1] + 1) == 1) {
-		/* Go the the specified directory (first arg) in the directory
-		 * history list */
-		int atoi_comm = atoi(comm[1] + 1);
-		if (atoi_comm > 0 && atoi_comm <= dirhist_total_index) {
-			if (!old_pwd[atoi_comm - 1] || *old_pwd[atoi_comm - 1] == _ESC) {
-				fprintf(stderr, _("%s: Invalid history entry\n"), PROGRAM_NAME);
-				exit_status = EXIT_FAILURE;
-				return exit_status;
-			}
-			int ret = xchdir(old_pwd[atoi_comm - 1], SET_TITLE);
-			if (ret == 0) {
-				free(workspaces[cur_ws].path);
-				workspaces[cur_ws].path = (char *)xnmalloc(strlen(
-						old_pwd[atoi_comm - 1]) + 1, sizeof(char));
-				strcpy(workspaces[cur_ws].path, old_pwd[atoi_comm - 1]);
-
-				dirhist_cur_index = atoi_comm - 1;
-
-				exit_status = EXIT_SUCCESS;
-
-				if (autols) {
-					free_dirlist();
-					exit_status = list_dir();
-				}
-			} else {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    old_pwd[atoi_comm - 1], strerror(errno));
-			}
-		} else {
-			fprintf(stderr, _("history: %s: No such ELN\n"), comm[1] + 1);
-		}
-	} else {
+	if (*comm[1] != '!' || is_number(comm[1] + 1) != 1) {
 		fprintf(stderr, "%s\n", _(DIRHIST_USAGE));
+		return EXIT_FAILURE;
 	}
 
-	return exit_status;
+	int n = atoi(comm[1] + 1);
+	return change_to_num(n);
 }
 
 /* Set the path of the current workspace to NEW_PATH */
