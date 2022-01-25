@@ -39,6 +39,28 @@
 #include "messages.h"
 #include "file_operations.h"
 
+/* Print available logs */
+static int
+print_logs(void)
+{
+	FILE *log_fp = fopen(log_file, "r");
+	if (!log_fp) {
+		_err(0, NOPRINT_PROMPT, "%s: log: '%s': %s\n",
+		    PROGRAM_NAME, log_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	size_t line_size = 0;
+	char *line_buff = (char *)NULL;
+
+	while (getline(&line_buff, &line_size, log_fp) > 0)
+		fputs(line_buff, stdout);
+
+	free(line_buff);
+	fclose(log_fp);
+	return EXIT_SUCCESS;
+}
+
 /* Log COMM into LOG_FILE (global) */
 int
 log_function(char **comm)
@@ -55,25 +77,8 @@ log_function(char **comm)
 	int clear_log = 0;
 
 	/* If the command was just 'log' */
-	if (comm && comm[0] && *comm[0] == 'l' && strcmp(comm[0], "log") == 0 && !comm[1]) {
-		FILE *log_fp;
-		log_fp = fopen(log_file, "r");
-		if (!log_fp) {
-			_err(0, NOPRINT_PROMPT, "%s: log: '%s': %s\n",
-			    PROGRAM_NAME, log_file, strerror(errno));
-			return EXIT_FAILURE;
-		} else {
-			size_t line_size = 0;
-			char *line_buff = (char *)NULL;
-
-			while (getline(&line_buff, &line_size, log_fp) > 0)
-				fputs(line_buff, stdout);
-
-			free(line_buff);
-			fclose(log_fp);
-			return EXIT_SUCCESS;
-		}
-	}
+	if (comm && comm[0] && *comm[0] == 'l' && strcmp(comm[0], "log") == 0 && !comm[1])
+		return print_logs();
 
 	else if (comm && comm[0] && *comm[0] == 'l' && strcmp(comm[0], "log") == 0
 	&& comm[1]) {
@@ -162,6 +167,34 @@ log_function(char **comm)
 	}
 }
 
+/* Write _MSG into the log file: [date] _MSG */
+static void
+write_msg_into_logfile(const char *_msg)
+{
+	FILE *msg_fp = fopen(msg_log_file, "a");
+	if (!msg_fp) {
+		/* Do not log this error: We might incur in an infinite loop
+		 * trying to access a file that cannot be accessed */
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, msg_log_file,
+		    strerror(errno));
+		fputs("Press any key to continue... ", stdout);
+		xgetchar();
+		putchar('\n');
+		return;
+	}
+
+	time_t rawtime = time(NULL);
+	struct tm tm;
+	localtime_r(&rawtime, &tm);
+	char date[64] = "";
+
+	strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
+	fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm.tm_year + 1900,
+	    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	fputs(_msg, msg_fp);
+	fclose(msg_fp);
+}
+
 /* Handle the error message MSG. Store MSG in an array of error
  * messages, write it into an error log file, and print it immediately
  * (if PRINT is zero (NOPRINT_PROMPT) or tell the next prompt, if PRINT
@@ -198,28 +231,7 @@ log_msg(char *_msg, int print)
 	if (!config_ok || !msg_log_file || !*msg_log_file)
 		return;
 
-	FILE *msg_fp = fopen(msg_log_file, "a");
-	if (!msg_fp) {
-		/* Do not log this error: We might incur in an infinite loop
-		 * trying to access a file that cannot be accessed */
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, msg_log_file,
-		    strerror(errno));
-		fputs("Press any key to continue... ", stdout);
-		xgetchar();
-		putchar('\n');
-	} else {
-		/* Write message to messages file: [date] msg */
-		time_t rawtime = time(NULL);
-		struct tm tm;
-		localtime_r(&rawtime, &tm);
-		char date[64] = "";
-
-		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
-		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm.tm_year + 1900,
-		    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
-		fputs(_msg, msg_fp);
-		fclose(msg_fp);
-	}
+	write_msg_into_logfile(_msg);
 }
 
 int
@@ -445,6 +457,103 @@ exec_hist_cmd(char **cmd)
 	return exit_status;
 }
 
+/* Run history command number CMD */
+static int
+run_hist_num(const char *cmd)
+{
+	size_t old_args = args_n;
+	int num = atoi(cmd);
+
+	if (num <= 0 || num > (int)current_hist_n) {
+		fprintf(stderr, _("%s: !%s: event not found\n"), PROGRAM_NAME, cmd);
+		return EXIT_FAILURE;
+	}
+
+	if (record_cmd(history[num - 1]))
+		add_to_cmdhist(history[num - 1]);
+
+	char **cmd_hist = parse_input_str(history[num - 1]);
+	if (!cmd_hist) {
+		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	int exit_status = exec_hist_cmd(cmd_hist);
+	args_n = old_args;
+	return exit_status;
+}
+
+/* Run the last command in history */
+static int
+run_last_hist_cmd(void)
+{
+	size_t old_args = args_n;
+	if (record_cmd(history[current_hist_n - 1]))
+		add_to_cmdhist(history[current_hist_n - 1]);
+
+	char **cmd_hist = parse_input_str(history[current_hist_n - 1]);
+	if (!cmd_hist) {
+		fprintf(stderr, _("%s: Error parsing history command\n"),
+			PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	int exit_status = exec_hist_cmd(cmd_hist);
+	args_n = old_args;
+	return exit_status;
+}
+
+/* Run history command number "last - N" */
+static int
+run_last_lessn_hist_cmd(const char *cmd)
+{
+	size_t old_args = args_n;
+	int acmd = atoi(cmd + 1);
+
+	if (!is_number(cmd + 1) || acmd <= 0 || acmd > (int)current_hist_n - 1) {
+		fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
+		return EXIT_FAILURE;
+	}
+
+	size_t n = current_hist_n - (size_t)acmd - 1;
+
+	if (record_cmd(history[n]))
+		add_to_cmdhist(history[n]);
+
+	char **cmd_hist = parse_input_str(history[n]);
+	if (cmd_hist) {
+		int exit_status = exec_hist_cmd(cmd_hist);
+		args_n = old_args;
+		return exit_status;
+	}
+
+	fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
+	return EXIT_FAILURE;
+}
+
+/* Run history command matching CMD */
+static int
+run_hist_string(const char *cmd)
+{
+	size_t i, len = strlen(cmd), old_args = args_n;
+
+	for (i = 0; history[i]; i++) {
+		if (*cmd != *history[i] || strncmp(cmd, history[i], len) != 0)
+			continue;
+
+		char **cmd_hist = parse_input_str(history[i]);
+		if (!cmd_hist)
+			continue;
+
+		int exit_status = exec_hist_cmd(cmd_hist);
+		args_n = old_args;
+		return exit_status;
+	}
+
+	fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
+	return EXIT_FAILURE;
+}
+
 /* Takes as argument the history cmd less the first exclamation mark.
  * Example: if exec_cmd() gets "!-10" it pass to this function "-10",
  * that is, comm + 1 */
@@ -452,97 +561,20 @@ int
 run_history_cmd(const char *cmd)
 {
 	/* If "!n" */
-	int exit_status = EXIT_SUCCESS;
-	size_t old_args = args_n;
-
-	if (is_number(cmd)) {
-		int num = atoi(cmd);
-
-		if (num <= 0 || num > (int)current_hist_n) {
-			fprintf(stderr, _("%s: !%s: event not found\n"), PROGRAM_NAME, cmd);
-			return EXIT_FAILURE;
-		}
-
-		if (record_cmd(history[num - 1]))
-			add_to_cmdhist(history[num - 1]);
-
-		char **cmd_hist = parse_input_str(history[num - 1]);
-		if (!cmd_hist) {
-			fprintf(stderr, _("%s: Error parsing history command\n"),
-				PROGRAM_NAME);
-			return EXIT_FAILURE;
-		}
-
-		exit_status = exec_hist_cmd(cmd_hist);
-		args_n = old_args;
-		return exit_status;
-	}
+	if (is_number(cmd))
+		return run_hist_num(cmd);
 
 	/* If "!!", execute the last command */
-	if (*cmd == '!' && !cmd[1]) {
-
-		if (record_cmd(history[current_hist_n - 1]))
-			add_to_cmdhist(history[current_hist_n - 1]);
-
-		char **cmd_hist = parse_input_str(history[current_hist_n - 1]);
-		if (!cmd_hist) {
-			fprintf(stderr, _("%s: Error parsing history command\n"),
-				PROGRAM_NAME);
-			return EXIT_FAILURE;
-		}
-
-		exit_status = exec_hist_cmd(cmd_hist);
-		args_n = old_args;
-		return exit_status;
-	}
+	if (*cmd == '!' && !cmd[1])
+		return run_last_hist_cmd();
 
 	/* If "!-n" */
-	if (*cmd == '-') {
-		/* If not number or zero or bigger than max... */
-		int acmd = atoi(cmd + 1);
-
-		if (!is_number(cmd + 1) || acmd <= 0 || acmd > (int)current_hist_n - 1) {
-			fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
-			return EXIT_FAILURE;
-		}
-
-		char **cmd_hist = parse_input_str(history[current_hist_n - (size_t)acmd - 1]);
-		if (cmd_hist) {
-			exit_status = exec_hist_cmd(cmd_hist);
-
-			if (record_cmd(history[current_hist_n - (size_t)acmd - 1]))
-				add_to_cmdhist(history[current_hist_n - (size_t)acmd - 1]);
-
-			args_n = old_args;
-			return exit_status;
-		}
-
-		if (record_cmd(history[current_hist_n - (size_t)acmd - 1]))
-			add_to_cmdhist(history[current_hist_n - (size_t)acmd - 1]);
-
-		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
+	if (*cmd == '-')
+		return run_last_lessn_hist_cmd(cmd);
 
 	/* If !STRING */
-	if ((*cmd >= 'a' && *cmd <= 'z') || (*cmd >= 'A' && *cmd <= 'Z')) {
-		size_t len = strlen(cmd);
-		size_t i;
-		for (i = 0; history[i]; i++) {
-			if (*cmd == *history[i] && strncmp(cmd, history[i], len) == 0) {
-				char **cmd_hist = parse_input_str(history[i]);
-				if (!cmd_hist)
-					continue;
-
-				exit_status = exec_hist_cmd(cmd_hist);
-				args_n = old_args;
-				return exit_status;
-			}
-		}
-
-		fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
-		return EXIT_FAILURE;
-	}
+	if ((*cmd >= 'a' && *cmd <= 'z') || (*cmd >= 'A' && *cmd <= 'Z'))
+		return run_hist_string(cmd);
 
 	puts(_(HISTEXEC_USAGE));
 	return EXIT_SUCCESS;
