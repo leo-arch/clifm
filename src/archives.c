@@ -151,16 +151,160 @@ static char get_operation(const int mode)
 }
 
 static int
-handle_iso(char *file)
+extract_iso(char *file)
 {
 	int exit_status = EXIT_SUCCESS;
 
-	/* Use 7z to
-	 * list (l)
-	 * extract (e)
-	 * extrat to dir (x -oDIR FILE)
-	 * test (t) */
+	/* 7z x -oDIR FILE (use FILE as DIR) */
+	char *o_option = (char *)xnmalloc(strlen(file) + 7, sizeof(char));
+	sprintf(o_option, "-o%s.dir", file); /* NOLINT */
 
+	/* Construct and execute cmd */
+	char *cmd[] = {"7z", "x", o_option, file, NULL};
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+
+	free(o_option);
+	return exit_status;
+}
+
+static int
+extract_iso_to_dir(char *file)
+{
+	/* 7z x -oDIR FILE (ask for DIR) */
+	int exit_status = EXIT_SUCCESS;
+
+	char *ext_path = get_extraction_path();
+	if (!ext_path)
+		return EXIT_FAILURE;
+
+	char *o_option = (char *)xnmalloc(strlen(ext_path) + 3, sizeof(char));
+	sprintf(o_option, "-o%s", ext_path); /* NOLINT */
+	free(ext_path);
+
+	/* Construct and execute cmd */
+	char *cmd[] = {"7z", "x", o_option, file, NULL};
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+
+	free(o_option);
+
+	return exit_status;
+}
+
+static int
+list_iso_contents(char *file)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	/* 7z l FILE */
+	char *cmd[] = {"7z", "l", file, NULL};
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+
+	return exit_status;
+}
+
+static int
+test_iso(char *file)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	/* 7z t FILE */
+	char *cmd[] = {"7z", "t", file, NULL};
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+
+	return exit_status;
+}
+
+/* Return the path to the mountpoint if mounted succesfully. Otherwise,
+ * return NULL */
+static char *
+create_iso_mountpoint(char *file)
+{
+	char *mountpoint = (char *)NULL;
+
+	if (xargs.stealth_mode == 1) {
+		mountpoint = (char *)xnmalloc(strlen(file) + P_tmpdir_len + 15,
+					sizeof(char));
+		sprintf(mountpoint, "%s/clifm-mounts/%s", P_tmpdir, file); /* NOLINT */
+	} else {
+		mountpoint = (char *)xnmalloc(config_dir_len + strlen(file) + 9,
+					sizeof(char));
+		sprintf(mountpoint, "%s/mounts/%s", config_dir, file); /* NOLINT */
+	}
+
+	char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
+	if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+		free(mountpoint);
+		mountpoint = (char *)NULL;
+	}
+
+	return mountpoint;
+}
+
+static int
+cd_to_mountpoint(char *file, char *mountpoint)
+{
+	if (xchdir(mountpoint, SET_TITLE) == -1) {
+		fprintf(stderr, "archiver: %s: %s\n", mountpoint, strerror(errno));
+		free(mountpoint);
+		return EXIT_FAILURE;
+	}
+
+	free(workspaces[cur_ws].path);
+	workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
+	add_to_jumpdb(workspaces[cur_ws].path);
+
+	int exit_status = EXIT_SUCCESS;
+	if (autols) {
+		free_dirlist();
+		if (list_dir() != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+		add_to_dirhist(workspaces[cur_ws].path);
+	} else {
+		printf("%s: Successfully mounted on %s\n", file, mountpoint);
+	}
+
+	return exit_status;
+}
+
+static int
+mount_iso(char *file)
+{
+	char *mountpoint = create_iso_mountpoint(file);
+	if (!mountpoint)
+		return EXIT_FAILURE;
+
+	/* Construct and execute cmd */
+	char *sudo = get_sudo_path();
+	if (!sudo) {
+		free(mountpoint);
+		return EXIT_FAILURE;
+	}
+	
+	char *cmd[] = {sudo, "mount", "-o", "loop", file, mountpoint, NULL};
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+		free(mountpoint);
+		free(sudo);
+		return EXIT_FAILURE;
+	}
+	free(sudo);
+
+	int ret = cd_to_mountpoint(file, mountpoint);
+	free(mountpoint);
+	return ret;
+}
+
+/* Use 7z to
+ * list (l)
+ * extract (e)
+ * extrat to dir (x -oDIR FILE)
+ * test (t) */
+static int
+handle_iso(char *file)
+{
 	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
 		 "%s[t]%sest %s[m]%sount %s[q]%suit\n"), BOLD, df_c, BOLD,
 	    df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
@@ -178,121 +322,40 @@ handle_iso(char *file)
 	}
 
 	switch (sel_op) {
-
-	/* ########## EXTRACT #######*/
-	case 'e': {
-		/* 7z x -oDIR FILE (use FILE as DIR) */
-		char *o_option = (char *)xnmalloc(strlen(file) + 7, sizeof(char));
-		sprintf(o_option, "-o%s.dir", file); /* NOLINT */
-
-		/* Construct and execute cmd */
-		char *cmd[] = {"7z", "x", o_option, file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-
-		free(o_option);
-	} break;
-
-	/* ########## EXTRACT TO DIR ####### */
-	case 'E': {
-		/* 7z x -oDIR FILE (ask for DIR) */
-		char *ext_path = get_extraction_path();
-		if (!ext_path)
-			break;
-		char *o_option = (char *)xnmalloc(strlen(ext_path) + 3,
-		    sizeof(char));
-		sprintf(o_option, "-o%s", ext_path); /* NOLINT */
-
-		/* Construct and execute cmd */
-		char *cmd[] = {"7z", "x", o_option, file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-
-		free(ext_path);
-		free(o_option);
-		ext_path = (char *)NULL;
-	} break;
-
-	/* ########## LIST ####### */
-	case 'l': {
-		/* 7z l FILE */
-		char *cmd[] = {"7z", "l", file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-	} break;
-
-		/* ########## MOUNT ####### */
-
-	case 'm': {
-		/* Create mountpoint */
-		char *mountpoint = (char *)NULL;
-
-		if (xargs.stealth_mode == 1) {
-			mountpoint = (char *)xnmalloc(strlen(file) + P_tmpdir_len + 15,
-						sizeof(char));
-			sprintf(mountpoint, "%s/clifm-mounts/%s", P_tmpdir, file); /* NOLINT */
-		} else {
-			mountpoint = (char *)xnmalloc(config_dir_len + strlen(file) + 9,
-						sizeof(char));
-			sprintf(mountpoint, "%s/mounts/%s", config_dir, file); /* NOLINT */
-		}
-
-		char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
-		if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			free(mountpoint);
-			return EXIT_FAILURE;
-		}
-
-		/* Construct and execute cmd */
-		char *sudo = get_sudo_path();
-		if (!sudo) {
-			free(mountpoint);
-			return EXIT_FAILURE;
-		}
-		
-		char *cmd[] = {sudo, "mount", "-o", "loop", file,
-		    mountpoint, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			free(mountpoint);
-			free(sudo);
-			return EXIT_FAILURE;
-		}
-		free(sudo);
-
-		/* List content of mountpoint */
-		if (xchdir(mountpoint, SET_TITLE) == -1) {
-			fprintf(stderr, "archiver: %s: %s\n", mountpoint,
-			    strerror(errno));
-			free(mountpoint);
-			return EXIT_FAILURE;
-		}
-
-		free(workspaces[cur_ws].path);
-		workspaces[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
-		add_to_jumpdb(workspaces[cur_ws].path);
-
-		if (autols) {
-			free_dirlist();
-			if (list_dir() != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
-			add_to_dirhist(workspaces[cur_ws].path);
-		} else {
-			printf("%s: Successfully mounted on %s\n", file, mountpoint);
-		}
-
-		free(mountpoint);
-	} break;
-
-	/* ########## TEST #######*/
-	case 't': {
-		/* 7z t FILE */
-		char *cmd[] = {"7z", "t", file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-	} break;
-
-	default: break;
+	case 'e': return extract_iso(file);
+	case 'E': return extract_iso_to_dir(file);
+	case 'l': return list_iso_contents(file);
+	case 'm': return mount_iso(file);
+	case 't': return test_iso(file);
+	default: return EXIT_SUCCESS;
 	}
+}
+
+static int
+create_iso_from_block_dev(char *in_file, char *out_file)
+{
+	char *if_option = (char *)xnmalloc(strlen(in_file) + 4, sizeof(char));
+	sprintf(if_option, "if=%s", in_file); /* NOLINT */
+
+	char *of_option = (char *)xnmalloc(strlen(out_file) + 4, sizeof(char));
+	sprintf(of_option, "of=%s", out_file); /* NOLINT */
+
+	char *sudo = get_sudo_path();
+	if (!sudo) {
+		free(if_option);
+		free(of_option);
+		return EXIT_FAILURE;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+	char *cmd[] = {sudo, "dd", if_option, of_option, "bs=64k",
+	    "conv=noerror,sync", "status=progress", NULL};
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+
+	free(sudo);
+	free(if_option);
+	free(of_option);
 
 	return exit_status;
 }
@@ -300,44 +363,22 @@ handle_iso(char *file)
 static int
 create_iso(char *in_file, char *out_file)
 {
-	int exit_status = EXIT_SUCCESS;
-	struct stat file_attrib;
-	if (lstat(in_file, &file_attrib) == -1) {
+	struct stat attr;
+	if (lstat(in_file, &attr) == -1) {
 		fprintf(stderr, "archiver: %s: %s\n", in_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* If IN_FILE is a directory */
-	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
+	if ((attr.st_mode & S_IFMT) == S_IFDIR) {
 		char *cmd[] = {"mkisofs", "-R", "-o", out_file, in_file, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+			return EXIT_FAILURE;
 	}
 
 	/* If IN_FILE is a block device */
-	else if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
-		char *if_option = (char *)xnmalloc(strlen(in_file) + 4, sizeof(char));
-		sprintf(if_option, "if=%s", in_file); /* NOLINT */
-
-		char *of_option = (char *)xnmalloc(strlen(out_file) + 4, sizeof(char));
-		sprintf(of_option, "of=%s", out_file); /* NOLINT */
-
-		char *sudo = get_sudo_path();
-		if (!sudo) {
-			free(if_option);
-			free(of_option);
-			return EXIT_FAILURE;
-		}
-
-		char *cmd[] = {sudo, "dd", if_option, of_option, "bs=64k",
-		    "conv=noerror,sync", "status=progress", NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-
-		free(sudo);
-		free(if_option);
-		free(of_option);
-	}
+	else if ((attr.st_mode & S_IFMT) == S_IFBLK)
+		return create_iso_from_block_dev(in_file, out_file);
 
 	else {
 		fprintf(stderr, "archiver: %s: Invalid file format\nFile should "
@@ -345,7 +386,7 @@ create_iso(char *in_file, char *out_file)
 		return EXIT_FAILURE;
 	}
 
-	return exit_status;
+	return EXIT_SUCCESS;
 }
 
 /* Run the 'file' command on FILE and look for "ISO 9660" and
