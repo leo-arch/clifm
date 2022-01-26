@@ -964,36 +964,125 @@ untrash_function(char **comm)
 	return exit_status;
 }
 
+/* List files currently in the trash can */
+static int
+list_trashed_files(void)
+{
+	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
+		_err(0, NOPRINT_PROMPT, "%s: trash: %s: %s\n",
+		    PROGRAM_NAME, trash_files_dir, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	struct dirent **trash_files = (struct dirent **)NULL;
+	int files_n = scandir(trash_files_dir, &trash_files,
+			skip_files, (unicode) ? alphasort : (case_sensitive)
+			? xalphasort : alphasort_insensitive);
+
+	if (files_n == -1) {
+		fprintf(stderr, "%s: trash: %s\n", PROGRAM_NAME, strerror(errno));
+		return EXIT_FAILURE;
+	}
+	if (files_n <= 0) {
+		puts(_("trash: No trashed files"));
+		return (-1);
+	}
+
+	size_t i;
+	for (i = 0; i < (size_t)files_n; i++) {
+		colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD, PRINT_NEWLINE);
+		free(trash_files[i]);
+	}
+	free(trash_files);
+
+	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
+		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
+		    PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+/* Make sure we are trashing a valid file */
+static int
+check_trash_file(char *deq_file)
+{
+	char tmp_cmd[PATH_MAX];
+	if (*deq_file == '/') /* If absolute path */
+		strcpy(tmp_cmd, deq_file);
+	else /* If relative path, add path to check against TRASH_DIR */
+		snprintf(tmp_cmd, PATH_MAX, "%s/%s", workspaces[cur_ws].path, deq_file);
+
+	/* Do not trash any of the parent directories of TRASH_DIR */
+	if (strncmp(tmp_cmd, trash_dir, strlen(tmp_cmd)) == 0) {
+		fprintf(stderr, _("trash: Cannot trash '%s'\n"), tmp_cmd);
+		return EXIT_FAILURE;
+	}
+
+	/* Do no trash TRASH_DIR itself nor anything inside it (trashed files) */
+	if (strncmp(tmp_cmd, trash_dir, strlen(trash_dir)) == 0) {
+		puts(_("trash: Use 'trash del' to remove trashed files"));
+		return EXIT_FAILURE;
+	}
+
+	struct stat attr;
+	if (lstat(deq_file, &attr) == -1) {
+		fprintf(stderr, _("trash: %s: %s\n"), deq_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	/* Do not trash block or character devices */
+	if ((attr.st_mode & S_IFMT) == S_IFBLK || (attr.st_mode & S_IFMT) == S_IFCHR) {
+		fprintf(stderr, _("trash: %s: Cannot trash a %s device\n"), deq_file,
+			((attr.st_mode & S_IFMT) == S_IFCHR) ? "character" : "block");
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+/* Trash files passed as arguments to the trash command */
+static int
+trash_files_args(char **args)
+{
+	time_t rawtime = time(NULL);
+	struct tm tm;
+	localtime_r(&rawtime, &tm);
+	char *suffix = gen_date_suffix(tm);
+	if (!suffix)
+		return EXIT_FAILURE;
+
+	int exit_status = EXIT_SUCCESS;
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		char *deq_file = dequote_str(args[i], 0);
+		/* Make sure we are trashing a valid file */
+		if (check_trash_file(deq_file) == EXIT_FAILURE) {
+			exit_status = EXIT_FAILURE;
+			free(deq_file);
+			continue;
+		}
+
+		/* Once here, everything is fine: trash the file */
+		exit_status = trash_element(suffix, &tm, deq_file);
+		free(deq_file);
+	}
+
+	free(suffix);
+	return exit_status;
+}
+
 int
-trash_function(char **comm)
+trash_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: The trash function is disabled in "
-			"stealth mode\n", PROGRAM_NAME);
+		printf("%s: The trash function is disabled in stealth mode\n",
+			PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
-	/* Create trash dirs, if necessary */
-	/*  struct stat file_attrib;
-	if (stat (trash_dir, &file_attrib) == -1) {
-		char *trash_files = NULL;
-		trash_files = xcalloc(strlen(trash_dir) + 7, sizeof(char));
-		sprintf(trash_files, "%s/files", trash_dir);
-		char *trash_info=NULL;
-		trash_info = xcalloc(strlen(trash_dir) + 6, sizeof(char));
-		sprintf(trash_info, "%s/info", trash_dir);
-		char *cmd[] = { "mkdir", "-p", trash_files, trash_info, NULL };
-		int ret = launch_execve (cmd, FOREGROUND, E_NOFLAG);
-		free(trash_files);
-		free(trash_info);
-		if (ret != EXIT_SUCCESS) {
-			_err(0, NOPRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
-				 "trash directory\n"), PROGRAM_NAME, trash_dir);
-			return;
-		}
-	} */
-
-	if (!comm)
+	if (!args)
 		return EXIT_FAILURE;
 
 	if (!trash_ok || !config_ok) {
@@ -1002,134 +1091,21 @@ trash_function(char **comm)
 	}
 
 	/* List trashed files ('tr' or 'tr ls') */
-	if (!comm[1] || strcmp(comm[1], "ls") == 0 || strcmp(comm[1], "list") == 0) {
-		/* List files in the Trash/files dir */
-		if (xchdir(trash_files_dir, NO_TITLE) == -1) {
-			_err(0, NOPRINT_PROMPT, "%s: trash: %s: %s\n",
-			    PROGRAM_NAME, trash_files_dir, strerror(errno));
-			return EXIT_FAILURE;
-		}
-
-		struct dirent **trash_files = (struct dirent **)NULL;
-		int files_n = scandir(trash_files_dir, &trash_files,
-						skip_files, (unicode) ? alphasort : (case_sensitive)
-						? xalphasort : alphasort_insensitive);
-		if (files_n) {
-			size_t i;
-			for (i = 0; i < (size_t)files_n; i++) {
-				colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
-							PRINT_NEWLINE);
-				free(trash_files[i]);
-			}
-
-			free(trash_files);
-		} else {
-			puts(_("trash: No trashed files"));
-		}
-
-		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
-			    PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
-			return EXIT_FAILURE;
-		} else {
+	if (!args[1] || (*args[1] == 'l'
+	&& (strcmp(args[1], "ls") == 0 || strcmp(args[1], "list") == 0))) {
+		int ret = list_trashed_files();
+		if (ret == -1 || ret == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
-		}
+		return EXIT_FAILURE;
 	}
 
-	else {
-		/* Create suffix from current date and time to create unique
-		 * file names for trashed files */
-		int exit_status = EXIT_SUCCESS;
+	if (*args[1] == 'd' && strcmp(args[1], "del") == 0)
+		return remove_from_trash(args);
 
-		time_t rawtime = time(NULL);
-		struct tm tm;
-		localtime_r(&rawtime, &tm);
-		char *suffix = gen_date_suffix(tm);
-		if (!suffix)
-			return EXIT_FAILURE;
-
-/*		char date[64] = "";
-
-		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
-
-		char suffix[68] = "";
-
-		snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
-		    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min,
-		    tm.tm_sec); */
-
-		/* Remove file(s) from Trash */
-		if (strcmp(comm[1], "del") == 0) {
-			exit_status = remove_from_trash(comm);
-		} else if (strcmp(comm[1], "clear") == 0) {
-			trash_clear();
-		} else {
-			/* Trash files passed as arguments */
-			size_t i;
-			for (i = 1; comm[i]; i++) {
-				char *deq_file = dequote_str(comm[i], 0);
-				char tmp_comm[PATH_MAX] = "";
-
-				if (deq_file[0] == '/') { /* If absolute path */
-					strcpy(tmp_comm, deq_file);
-				} else { /* If relative path, add path to check against
-					TRASH_DIR */
-					snprintf(tmp_comm, PATH_MAX, "%s/%s", workspaces[cur_ws].path,
-					    deq_file);
-				}
-
-				/* Some filters: you cannot trash wathever you want */
-				/* Do not trash any of the parent directories of TRASH_DIR,
-				 * that is, /, /home, ~/, ~/.local, ~/.local/share */
-				if (strncmp(tmp_comm, trash_dir, strlen(tmp_comm)) == 0) {
-					fprintf(stderr, _("trash: Cannot trash '%s'\n"), tmp_comm);
-					exit_status = EXIT_FAILURE;
-					free(deq_file);
-					continue;
-				} else if (strncmp(tmp_comm, trash_dir, strlen(trash_dir)) == 0) {
-				/* Do no trash TRASH_DIR itself nor anything inside it,
-				 * that is, already trashed files */
-					puts(_("trash: Use 'trash del' to remove trashed files"));
-					exit_status = EXIT_FAILURE;
-					free(deq_file);
-					continue;
-				}
-
-				struct stat file_attrib;
-				if (lstat(deq_file, &file_attrib) == -1) {
-					fprintf(stderr, _("trash: %s: %s\n"), deq_file,
-					    strerror(errno));
-					exit_status = EXIT_FAILURE;
-					free(deq_file);
-					continue;
-				} else {
-				/* Do not trash block or character devices */
-					if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
-						fprintf(stderr, _("trash: %s: Cannot trash a "
-								"block device\n"), deq_file);
-						exit_status = EXIT_FAILURE;
-						free(deq_file);
-						continue;
-					} else if ((file_attrib.st_mode & S_IFMT) == S_IFCHR) {
-						fprintf(stderr, _("trash: %s: Cannot trash a "
-								"character device\n"), deq_file);
-						exit_status = EXIT_FAILURE;
-						free(deq_file);
-						continue;
-					}
-				}
-
-				/* Once here, everything is fine: trash the file */
-				exit_status = trash_element(suffix, &tm, deq_file);
-				/* The trash_element() function will take care of
-				 * printing error messages, if any */
-				free(deq_file);
-			}
-		}
-
-		free(suffix);
-		return exit_status;
-	}
+	if (*args[1] == 'c' && strcmp(args[1], "clear") == 0)
+		return trash_clear();
+	else
+		return trash_files_args(args);
 }
 #else
 void *__skip_me_trash;
