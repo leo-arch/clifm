@@ -839,6 +839,11 @@ columns_function(char *arg)
 static int
 icons_function(char *arg)
 {
+#ifdef _NO_ICONS
+	UNUSED(arg);
+	fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	return EXIT_SUCCESS;
+#else
 	if (!arg || IS_HELP(arg)) {
 		puts(_(ICONS_USAGE));
 		return EXIT_SUCCESS;
@@ -862,6 +867,7 @@ icons_function(char *arg)
 	}
 
 	return EXIT_SUCCESS;
+#endif /* _NO_ICONS */
 }
 
 static int
@@ -1009,6 +1015,242 @@ _hidden_function(char **args)
 	return hidden_function(args);
 }
 
+static int
+toggle_exec(char **args)
+{
+	if (!args[1] || IS_HELP(args[1])) {
+		puts(_(TE_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		struct stat attr;
+		if (strchr(args[i], '\\')) {
+			char *tmp = dequote_str(args[i], 0);
+			if (tmp) {
+				strcpy(args[i], tmp);
+				free(tmp);
+			}
+		}
+
+		if (lstat(args[i], &attr) == -1) {
+			fprintf(stderr, "stat: %s: %s\n", args[i], strerror(errno));
+			exit_status = EXIT_FAILURE;
+			continue;
+		}
+
+		if (xchmod(args[i], attr.st_mode) == -1)
+			exit_status = EXIT_FAILURE;
+	}
+
+	if (exit_status == EXIT_SUCCESS) {
+		printf(_("%s: Toggled executable bit on %zu file(s)\n"),
+		    PROGRAM_NAME, args_n);
+	}
+
+	return exit_status;
+}
+
+static int
+pin_function(char *arg)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	if (arg) {
+		if (IS_HELP(arg))
+			puts(PIN_USAGE);
+		else
+			exit_status = pin_directory(arg);
+	} else {
+		if (pinned_dir)
+			printf(_("pinned file: %s\n"), pinned_dir);
+		else
+			puts(_("No pinned file"));
+	}
+
+	return exit_status;
+}
+
+static int
+props_function(char **args)
+{
+	if (!args[1]) {
+		fprintf(stderr, "%s\n", _(PROP_USAGE));
+		return EXIT_FAILURE;
+	} else {
+		if (IS_HELP(args[1])) {
+			puts(_(PROP_USAGE));
+			return EXIT_SUCCESS;
+		}
+	}
+
+	return properties_function(args);
+}
+
+static int
+ow_function(char **args)
+{
+#ifndef _NO_LIRA
+	if (args[1]) {
+		if (IS_HELP(args[1])) {
+			puts(_(OW_USAGE));
+			return EXIT_SUCCESS;
+		}
+		return mime_open_with(args[1], args[2] ? args + 2 : NULL);
+	}
+	puts(_(OW_USAGE));
+	return EXIT_SUCCESS;
+#else
+	UNUSED(args);
+	fprintf(stderr, "%s: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+	return EXIT_FAILURE;
+#endif
+}
+
+static int
+refresh_function(int old_exit_code)
+{
+	if (autols) {
+		free_dirlist();
+		list_dir();
+	}
+
+	return old_exit_code;
+}
+
+static int
+export_function(char **args)
+{
+	if (args[1] && IS_HELP(args[1])) {
+		puts(_(EXPORT_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	char *ret = export(args, 1);
+	if (ret) {
+		printf("Files exported to: %s\n", ret);
+		free(ret);
+		return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
+static int
+_bookmarks_function(char **args)
+{
+	if (args[1] && IS_HELP(args[1])) {
+		puts(_(BOOKMARKS_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	/* Disable keyboard shortcuts. Otherwise, the function will
+	 * still be waiting for input while the screen have been taken
+	 * by another function */
+	kbind_busy = 1;
+	/* Disable TAB completion while in Bookmarks */
+	rl_attempted_completion_function = NULL;
+	int exit_status = bookmarks_function(args);
+	/* Reenable TAB completion */
+	rl_attempted_completion_function = my_rl_completion;
+	/* Reenable keyboard shortcuts */
+	kbind_busy = 0;
+
+	return exit_status;
+}
+
+static int
+desel_function(char **args)
+{
+	if (args[1] && IS_HELP(args[1])) {
+		puts(_(DESEL_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	kbind_busy = 1;
+	rl_attempted_completion_function = NULL;
+	int exit_status = deselect(args);
+	rl_attempted_completion_function = my_rl_completion;
+	kbind_busy = 0;
+
+	return exit_status;
+}
+
+static int
+search_function(char **args)
+{
+	/* Try first globbing, and if no result, try regex */
+	if (search_glob(args, (args[0][1] == '!') ? 1 : 0) == EXIT_FAILURE) {
+		return search_regex(args, (args[0][1] == '!') ? 1 : 0,
+		case_sens_search ? 1 : 0);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+new_instance_function(char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	if (args[1]) {
+		if (IS_HELP(args[1])) {
+			puts(_(X_USAGE));
+			return EXIT_SUCCESS;
+		} else if (*args[0] == 'x') {
+			exit_status = new_instance(args[1], 0);
+		} else { /* Run as root */
+			exit_status = new_instance(args[1], 1);
+		}
+	} else {
+		/* Run new instance in CWD */
+		if (*args[0] == 'x')
+			exit_status = new_instance(workspaces[cur_ws].path, 0);
+		else
+			exit_status = new_instance(workspaces[cur_ws].path, 1);
+	}
+
+	return exit_status;
+}
+
+static int
+reload_function(void)
+{
+	int exit_status = reload_config();
+	welcome_message = 0;
+
+	if (autols) {
+		free_dirlist();
+		if (list_dir() != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
+/* MODE could be either MEDIA_LIST (mp command) or MEDIA_MOUNT (media command) */
+static int
+media_function(char *arg, int mode)
+{
+	if (arg && IS_HELP(arg)) {
+		if (mode == MEDIA_LIST)
+			puts(_(MOUNTPOINTS_USAGE));
+		else
+			puts(_(MEDIA_USAGE));
+		return EXIT_SUCCESS;
+	} 
+
+	kbind_busy = 1;
+	rl_attempted_completion_function = NULL;
+	int exit_status = media_menu(mode);
+	rl_attempted_completion_function = my_rl_completion;
+	kbind_busy = 0;
+
+	return exit_status;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error */
@@ -1132,7 +1374,7 @@ exec_cmd(char **comm)
 	free(deq_str);
 
 	/* The more often a function is used, the more on top should it be
-	 * in this if...else..if chain. It will be found faster this way. */
+	 * in this if...else chain. It will be found faster this way. */
 
 	/* ####################################################
 	 * #                 BUILTIN COMMANDS                 #
@@ -1156,22 +1398,8 @@ exec_cmd(char **comm)
 		return (exit_code = backdir(comm[1] ? comm[1] : NULL));
 
 	/*      ############### OPEN WITH ##################     */
-	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2]) {
-#ifndef _NO_LIRA
-		if (comm[1]) {
-			if (IS_HELP(comm[1])) {
-				puts(_(OW_USAGE));
-				return EXIT_SUCCESS;
-			}
-			return mime_open_with(comm[1], comm[2] ? comm + 2 : NULL);
-		}
-		puts(_(OW_USAGE));
-		return EXIT_SUCCESS;
-#else
-		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
-		return EXIT_FAILURE;
-#endif
-	}
+	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2])
+		return (exit_code = ow_function(comm));
 
 	/*   ############## DIRECTORY JUMPER ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1] || ((comm[0][1] == 'c'
@@ -1181,34 +1409,13 @@ exec_cmd(char **comm)
 
 	/*       ############### REFRESH ##################     */
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'f' && !comm[0][2])
-	|| strcmp(comm[0], "refresh") == 0)) {
-		if (autols) {
-			free_dirlist();
-			list_dir();
-		}
-		return exit_code = old_exit_code;
-	}
+	|| strcmp(comm[0], "refresh") == 0))
+		return (exit_code = refresh_function(old_exit_code));
 
 	/*     ############### BOOKMARKS ##################     */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'm' && !comm[0][2])
-	|| strcmp(comm[0], "bookmarks") == 0)) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(BOOKMARKS_USAGE));
-			return EXIT_SUCCESS;
-		}
-		/* Disable keyboard shortcuts. Otherwise, the function will
-		 * still be waiting for input while the screen have been taken
-		 * by another function */
-		kbind_busy = 1;
-		/* Disable TAB completion while in Bookmarks */
-		rl_attempted_completion_function = NULL;
-		exit_code = bookmarks_function(comm);
-		/* Reenable TAB completion */
-		rl_attempted_completion_function = my_rl_completion;
-		/* Reenable keyboard shortcuts */
-		kbind_busy = 0;
-		return exit_code;
-	}
+	|| strcmp(comm[0], "bookmarks") == 0))
+		return (exit_code = _bookmarks_function(comm));
 
 	/*       ############### BACK AND FORTH ##################     */
 	else if (*comm[0] == 'b' && (!comm[0][1] || strcmp(comm[0], "back") == 0))
@@ -1355,19 +1562,8 @@ exec_cmd(char **comm)
 	}
 
 	else if (*comm[0] == 'd' && (strcmp(comm[0], "ds") == 0
-	|| strcmp(comm[0], "desel") == 0)) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(DESEL_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		kbind_busy = 1;
-		rl_attempted_completion_function = NULL;
-		exit_code = deselect(comm);
-		rl_attempted_completion_function = my_rl_completion;
-		kbind_busy = 0;
-		return exit_code;
-	}
+	|| strcmp(comm[0], "desel") == 0))
+		return (exit_code = desel_function(comm));
 
 	/*  ############# SOME SHELL CMD WRAPPERS ###############  */
 
@@ -1427,86 +1623,25 @@ exec_cmd(char **comm)
 	}
 
 	/*    ############### TOGGLE EXEC ##################     */
-	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2]) {
-		if (!comm[1] || IS_HELP(comm[1])) {
-			puts(_(TE_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		size_t j;
-		for (j = 1; comm[j]; j++) {
-			struct stat attr;
-			if (strchr(comm[j], '\\')) {
-				char *tmp = dequote_str(comm[j], 0);
-				if (tmp) {
-					strcpy(comm[j], tmp);
-					free(tmp);
-				}
-			}
-
-			if (lstat(comm[j], &attr) == -1) {
-				fprintf(stderr, "stat: %s: %s\n", comm[j], strerror(errno));
-				exit_code = EXIT_FAILURE;
-				continue;
-			}
-
-			if (xchmod(comm[j], attr.st_mode) == -1)
-				exit_code = EXIT_FAILURE;
-		}
-
-		if (exit_code == EXIT_SUCCESS)
-			printf(_("%s: Toggled executable bit on %zu file(s)\n"),
-			    PROGRAM_NAME, args_n);
-	}
+	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])
+		return (exit_code = toggle_exec(comm));
 
 	/*    ############### PINNED FILE ##################     */
-	else if (*comm[0] == 'p' && strcmp(comm[0], "pin") == 0) {
-		if (comm[1]) {
-			if (IS_HELP(comm[1]))
-				puts(PIN_USAGE);
-			else
-				exit_code = pin_directory(comm[1]);
-		} else {
-			if (pinned_dir)
-				printf(_("pinned file: %s\n"), pinned_dir);
-			else
-				puts(_("No pinned file"));
-		}
-		return exit_code;
-	}
+	else if (*comm[0] == 'p' && strcmp(comm[0], "pin") == 0)
+		return (exit_code = pin_function(comm[1]));
 
 	else if (*comm[0] == 'u' && strcmp(comm[0], "unpin") == 0)
 		return (exit_code = unpin_dir());
 
 	/*    ############### PROPERTIES ##################     */
 	else if (*comm[0] == 'p' && (!comm[0][1] || strcmp(comm[0], "pr") == 0
-	|| strcmp(comm[0], "pp") == 0 || strcmp(comm[0], "prop") == 0)) {
-		if (!comm[1]) {
-			fprintf(stderr, "%s\n", _(PROP_USAGE));
-			exit_code = EXIT_FAILURE;
-			return EXIT_FAILURE;
-		} else {
-			if (IS_HELP(comm[1])) {
-				puts(_(PROP_USAGE));
-				return EXIT_SUCCESS;
-			}
-		}
-
-		return (exit_code = properties_function(comm));
-	}
+	|| strcmp(comm[0], "pp") == 0 || strcmp(comm[0], "prop") == 0))
+		return (exit_code = props_function(comm));
 
 	/*     ############### SEARCH ##################     */
 	else if (*comm[0] == '/' && !strchr(comm[0], '\\')
-	&& access(comm[0], F_OK) != 0) {
-		/* If not absolute path */
-		/* Try first globbing, and if no result, try regex */
-		if (search_glob(comm, (comm[0][1] == '!') ? 1 : 0) == EXIT_FAILURE)
-			exit_code = search_regex(comm, (comm[0][1] == '!') ? 1 : 0,
-					case_sens_search ? 1 : 0);
-		else
-			exit_code = EXIT_SUCCESS;
-		return exit_code;
-	}
+	&& access(comm[0], F_OK) != 0)
+		return (exit_code = search_function(comm));
 
 	/*      ############## HISTORY ##################     */
 	else if (*comm[0] == '!' && comm[0][1] != ' ' && comm[0][1] != '\t'
@@ -1591,14 +1726,8 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "columns") == 0))
 		return (exit_code = columns_function(comm[1]));
 
-	else if (*comm[0] == 'i' && strcmp(comm[0], "icons") == 0) {
-#ifndef _NO_ICONS
+	else if (*comm[0] == 'i' && strcmp(comm[0], "icons") == 0)
 		return (exit_code = icons_function(comm[1]));
-#else
-		fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-		return EXIT_SUCCESS;
-#endif /* _NO_ICONS */
-	}
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 's' && !comm[0][2])
 	|| strcmp(comm[0], "colorschemes") == 0))
@@ -1608,73 +1737,30 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "keybinds") == 0))
 		return (exit_code = kbinds_function(comm));
 
-	else if (*comm[0] == 'e' && strcmp(comm[0], "exp") == 0) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(EXPORT_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		char *ret = export(comm, 1);
-		if (ret) {
-			printf("Files exported to: %s\n", ret);
-			free(ret);
-			return EXIT_SUCCESS;
-		}
-
-		return (exit_code = EXIT_FAILURE);
-	}
+	else if (*comm[0] == 'e' && strcmp(comm[0], "exp") == 0)
+		return (exit_code = export_function(comm));
 
 	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0)
 		return (exit_code = opener_function(comm[1]));
 
-	/* #### TIPS #### */
 	else if (*comm[0] == 't' && strcmp(comm[0], "tips") == 0) {
 		print_tips(1);
 		return EXIT_SUCCESS;
 	}
 
-	/* #### ACTIONS #### */
 	else if (*comm[0] == 'a' && strcmp(comm[0], "actions") == 0)
 		return (exit_code = actions_function(comm));
 
-	/* #### LIGHT MODE #### */
 	else if (*comm[0] == 'l' && comm[0][1] == 'm' && !comm[0][2])
 		return (exit_code = lightmode_function(comm[1]));
 
-	/*    ############### RELOAD ##################     */
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2])
-	|| strcmp(comm[0], "reload") == 0)) {
-		exit_code = reload_config();
-		welcome_message = 0;
-		if (autols) {
-			free_dirlist();
-			if (list_dir() != EXIT_SUCCESS)
-				exit_code = EXIT_FAILURE;
-		}
-		return exit_code;
-	}
+	|| strcmp(comm[0], "reload") == 0))
+		return (exit_code = reload_function());
 
 	/* #### NEW INSTANCE #### */
-	else if ((*comm[0] == 'x' || *comm[0] == 'X') && !comm[0][1]) {
-		if (comm[1]) {
-			if (IS_HELP(comm[1])) {
-				puts(_(X_USAGE));
-				return EXIT_SUCCESS;
-			} else if (*comm[0] == 'x') {
-				exit_code = new_instance(comm[1], 0);
-			} else { /* Run as root */
-				exit_code = new_instance(comm[1], 1);
-			}
-		} else {
-		/* Run new instance in CWD */
-			if (*comm[0] == 'x')
-				exit_code = new_instance(workspaces[cur_ws].path, 0);
-			else
-				exit_code = new_instance(workspaces[cur_ws].path, 1);
-		}
-
-		return exit_code;
-	}
+	else if ((*comm[0] == 'x' || *comm[0] == 'X') && !comm[0][1])
+		return (exit_code = new_instance_function(comm));
 
 	/* #### NET #### */
 	else if (*comm[0] == 'n' && (strcmp(comm[0], "net") == 0))
@@ -1700,38 +1786,18 @@ exec_cmd(char **comm)
 	}
 
 	/* #### PROFILE #### */
-	else if (*comm[0] == 'p' && ((comm[0][1] == 'f' && !comm[0][2]) || strcmp(comm[0], "prof") == 0 || strcmp(comm[0], "profile") == 0))
+	else if (*comm[0] == 'p' && ((comm[0][1] == 'f' && !comm[0][2])
+	|| strcmp(comm[0], "prof") == 0 || strcmp(comm[0], "profile") == 0))
 		return (exit_code = profile_function(comm));
 
 	/* #### MOUNTPOINTS #### */
-	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2]) || strcmp(comm[0], "mountpoints") == 0)) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(MOUNPOINTS_USAGE));
-			return EXIT_SUCCESS;
-		} else {
-			kbind_busy = 1;
-			rl_attempted_completion_function = NULL;
-			exit_code = media_menu(MEDIA_LIST);
-			rl_attempted_completion_function = my_rl_completion;
-			kbind_busy = 0;
-			return exit_code;
-		}
-	}
+	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2])
+	|| strcmp(comm[0], "mountpoints") == 0))
+		return (exit_code = media_function(comm[1], MEDIA_LIST));
 
 	/* #### MEDIA #### */
-	else if (*comm[0] == 'm' && strcmp(comm[0], "media") == 0) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(MEDIA_USAGE));
-			return EXIT_SUCCESS;
-		} else {
-			kbind_busy = 1;
-			rl_attempted_completion_function = NULL;
-			exit_code = media_menu(MEDIA_MOUNT);
-			rl_attempted_completion_function = my_rl_completion;
-			kbind_busy = 0;
-			return exit_code;
-		}
-	}
+	else if (*comm[0] == 'm' && strcmp(comm[0], "media") == 0)
+		return (exit_code = media_function(comm[1], MEDIA_MOUNT));
 
 	/* #### MAX FILES #### */
 	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2])
