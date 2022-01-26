@@ -45,6 +45,8 @@
 #include "strings.h"
 #endif /* __linux__ && _BE_POSIX */
 
+#define BD_CONTINUE 2
+
 static int
 list_workspaces(void)
 {
@@ -269,12 +271,63 @@ grab_bd_input(int n)
 		}
 	}
 
-	return (-1); // Never reached
+	return (-1); /* Never reached */
 }
 
-/* Change to parent directory matching STR */
-int
-backdir(char* str)
+static int
+backdir_directory(char *dir, const char *str)
+{
+	if (!dir) {
+		fprintf(stderr, _("%s: %s: Error dequoting string\n"), PROGRAM_NAME, str);
+		return EXIT_FAILURE;
+	}
+
+	if (*dir == '~') {
+		char *exp_path = tilde_expand(dir);
+		if (!exp_path) {
+			fprintf(stderr, _("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, dir);
+			return EXIT_FAILURE;
+		}
+		dir = exp_path;
+	}
+
+	/* If STR is a directory, just change to it */
+	struct stat a;
+	if (stat(dir, &a) == 0 && S_ISDIR(a.st_mode))
+		return cd_function(dir, CD_PRINT_ERROR);
+
+	return BD_CONTINUE;
+}
+
+/* If multiple matches, print a menu to choose from */
+static int
+backdir_menu(char **matches)
+{
+	int i;
+	for (i = 0; matches[i]; i++) {
+		char *sl = strrchr(matches[i], '/');
+		int flag = 0;
+		if (sl && *(sl + 1)) {
+			*sl = '\0';
+			sl++;
+			flag = 1;
+		}
+		printf("%s%d%s %s%s%s\n", el_c, i + 1, df_c, di_c, sl ? sl : "/", df_c);
+		if (flag) {
+			sl--;
+			*sl = '/';
+		}
+	}
+
+	int choice = grab_bd_input(i);
+	if (choice != -1)
+		return cd_function(matches[choice], CD_PRINT_ERROR);
+
+	return EXIT_SUCCESS;
+}
+
+static int
+help_or_root(char *str)
 {
 	if (str && IS_HELP(str)) {
 		puts(_(BD_USAGE));
@@ -286,31 +339,20 @@ backdir(char* str)
 		return EXIT_SUCCESS;
 	}
 
-	char *deq_str = (char *)NULL;
+	return EXIT_FAILURE;
+}
+
+/* Change to parent directory matching STR */
+int
+backdir(char* str)
+{
+	if (help_or_root(str) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+
+	char *deq_str = str ? dequote_str(str, 0) : (char *)NULL;
 	if (str) {
-		deq_str = dequote_str(str, 0);
-		if (!deq_str) {
-			fprintf(stderr, _("%s: %s: Error dequoting string\n"),
-				PROGRAM_NAME, str);
-			return EXIT_FAILURE;
-		}
-
-		if (*deq_str == '~') {
-			char *exp_path = tilde_expand(deq_str);
-			if (!exp_path) {
-				fprintf(stderr, _("%s: %s: Error expanding tilde\n"),
-					PROGRAM_NAME, deq_str);
-				free(deq_str);
-				return EXIT_FAILURE;
-			}
-			free(deq_str);
-			deq_str = exp_path;
-		}
-
-		/* If STR is a directory, just change to it */
-		struct stat a;
-		if (stat(deq_str, &a) == 0 && S_ISDIR(a.st_mode)) {
-			int ret = cd_function(deq_str, CD_PRINT_ERROR);
+		int ret = backdir_directory(deq_str, str);
+		if (ret != BD_CONTINUE) {
 			free(deq_str);
 			return ret;
 		}
@@ -330,36 +372,15 @@ backdir(char* str)
 		return EXIT_FAILURE;
 	}
 
-	int exit_status = EXIT_SUCCESS, i;
-	if (n == 1) {
-		/* Just one match: change to it */
+	int exit_status = EXIT_SUCCESS, i = n;
+	if (n == 1) /* Just one match: change to it */
 		exit_status = cd_function(matches[0], CD_PRINT_ERROR);
-	} else if (n > 1) {
-		/* If multiple matches, print a menu to choose from */
-		for (i = 0; matches[i]; i++) {
-			char *sl = strrchr(matches[i], '/');
-			int flag = 0;
-			if (sl && *(sl + 1)) {
-				*sl = '\0';
-				sl++;
-				flag = 1;
-			}
-			printf("%s%d%s %s%s%s\n", el_c, i + 1, df_c, di_c, sl ? sl : "/", df_c);
-			if (flag) {
-				sl--;
-				*sl = '/';
-			}
-		}
-		int choice = grab_bd_input(i);
-		if (choice != -1)
-			exit_status = cd_function(matches[choice], CD_PRINT_ERROR);
-	}
+	else if (n > 1) /* Multiple matches: print a menu to choose from */
+		exit_status = backdir_menu(matches);
 
-	i = n;
 	while (--i >= 0)
 		free(matches[i]);
 	free(matches);
-
 	return exit_status;
 }
 
