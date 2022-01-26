@@ -1251,6 +1251,28 @@ media_function(char *arg, int mode)
 	return exit_status;
 }
 
+static int
+_cd_function(char *arg)
+{
+	if (arg && IS_HELP(arg)) {
+		puts(_(CD_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	return cd_function(arg, CD_PRINT_ERROR);
+}
+
+static int
+_sort_function(char **args)
+{
+	if (args[1] && IS_HELP(args[1])) {
+		puts(_(SORT_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	return sort_function(args);
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error */
@@ -1381,13 +1403,8 @@ exec_cmd(char **comm)
 	 * ####################################################*/
 
 	/*          ############### CD ##################     */
-	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2]) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(CD_USAGE));
-			return EXIT_SUCCESS;
-		}
-		return (exit_code = cd_function(comm[1], CD_PRINT_ERROR));
-	}
+	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2])
+		return (exit_code = _cd_function(comm[1]));
 
 	/*         ############### OPEN ##################     */
 	else if (*comm[0] == 'o' && (!comm[0][1] || strcmp(comm[0], "open") == 0))
@@ -1395,7 +1412,7 @@ exec_cmd(char **comm)
 
 	/*         ############### BACKDIR ##################     */
 	else if (*comm[0] == 'b' && comm[0][1] == 'd' && !comm[0][2])
-		return (exit_code = backdir(comm[1] ? comm[1] : NULL));
+		return (exit_code = backdir(comm[1]));
 
 	/*      ############### OPEN WITH ##################     */
 	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2])
@@ -1429,7 +1446,6 @@ exec_cmd(char **comm)
 		print_dirhist();
 		return EXIT_SUCCESS;
 	}
-
 
 	/*     ################# NEW FILE ##################     */
 	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "new") == 0))
@@ -1626,7 +1642,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])
 		return (exit_code = toggle_exec(comm));
 
-	/*    ############### PINNED FILE ##################     */
+	/*    ############### (UN)PIN FILE ##################     */
 	else if (*comm[0] == 'p' && strcmp(comm[0], "pin") == 0)
 		return (exit_code = pin_function(comm[1]));
 
@@ -1669,13 +1685,8 @@ exec_cmd(char **comm)
 
 	/*      ################ SORT ##################     */
 	else if (*comm[0] == 's' && ((comm[0][1] == 't' && !comm[0][2])
-	|| strcmp(comm[0], "sort") == 0)) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(SORT_USAGE));
-			return EXIT_SUCCESS;
-		}
-		return (exit_code = sort_function(comm));
-	}
+	|| strcmp(comm[0], "sort") == 0))
+		return (exit_code = _sort_function(comm));
 
 	/*    ########## FILE NAMES CLEANER ############## */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'b' && !comm[0][2])
