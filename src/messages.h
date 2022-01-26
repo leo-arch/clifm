@@ -375,7 +375,7 @@ Examples:\n\
 - Clear the current list of messages:\n\
     msg clear (or Alt-t)"
 
-#define MOUNPOINTS_USAGE "List and change to a mountpoint\n\
+#define MOUNTPOINTS_USAGE "List and change to a mountpoint\n\
 Usage:\n\
   mp, mountpoints\n\n\
 Example:\n\
