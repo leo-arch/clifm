@@ -390,7 +390,7 @@ get_properties(char *filename, const int dsize)
 #endif
 
 	/* Print size */
-	if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+	if (S_ISDIR(attr.st_mode)) {
 		if (dsize) {
 			fputs(_("Total size: \t"), stdout);
 			off_t total_size = dir_size(filename);
@@ -588,34 +588,34 @@ print_entry_props(const struct fileinfo *props, size_t max)
 }
 
 int
-properties_function(char **comm)
+properties_function(char **args)
 {
-	if (!comm)
+	if (!args)
 		return EXIT_FAILURE;
 
 	size_t i;
 	int exit_status = EXIT_SUCCESS;
 	int _dir_size = 0;
 
-	if (*comm[0] == 'p' && comm[0][1] == 'p' && !comm[0][2])
+	if (*args[0] == 'p' && args[0][1] == 'p' && !args[0][2])
 		_dir_size = 1;
 
 	/* If "pr file file..." */
 	for (i = 1; i <= args_n; i++) {
-		if (strchr(comm[i], '\\')) {
-			char *deq_file = dequote_str(comm[i], 0);
+		if (strchr(args[i], '\\')) {
+			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
 				fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
-				    PROGRAM_NAME, comm[i]);
+				    PROGRAM_NAME, args[i]);
 				exit_status = EXIT_FAILURE;
 				continue;
 			}
 
-			strcpy(comm[i], deq_file);
+			strcpy(args[i], deq_file);
 			free(deq_file);
 		}
 
-		if (get_properties(comm[i], _dir_size) != 0)
+		if (get_properties(args[i], _dir_size) != 0)
 			exit_status = EXIT_FAILURE;
 	}
 

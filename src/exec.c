@@ -586,6 +586,37 @@ set_max_files(char **args)
 	return EXIT_SUCCESS;
 }
 
+static int
+unicode_function(char *arg)
+{
+	if (!arg) {
+		fprintf(stderr, "%s\n", _(UNICODE_USAGE));
+		return (exit_code = EXIT_FAILURE);
+	}
+
+	if (IS_HELP(arg)) {
+		puts(_(UNICODE_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+
+	if (*arg == 's' && strcmp(arg, "status") == 0) {
+		printf(_("%s: Unicode %s\n"), PROGRAM_NAME,
+		    (unicode) ? _("enabled") : _("disabled"));
+	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
+		unicode = 1;
+		printf(_("%s: Unicode enabled\n"), PROGRAM_NAME);
+	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		unicode = 0;
+		printf(_("%s: Unicode disabled\n"), PROGRAM_NAME);
+	} else {
+		fprintf(stderr, "%s\n", _(UNICODE_USAGE));
+		exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
 
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -604,12 +635,6 @@ exec_cmd(char **comm)
 
 	if (*comm[0] == '#' && access(comm[0], F_OK) != 0)
 		return exit_code;
-
-/*	if (autojump) {
-		exit_code = run_autojump(comm);
-		if (exit_code != -1)
-			return exit_code;
-	} */
 
 	/* Warn when using the ',' keyword and there's no pinned file */
 	int k = (int)args_n + 1;
@@ -1483,30 +1508,8 @@ exec_cmd(char **comm)
 
 	/* #### UNICODE #### */
 	else if (*comm[0] == 'u' && ((comm[0][1] == 'c' && !comm[0][2])
-	|| strcmp(comm[0], "unicode") == 0)) {
-		if (!comm[1]) {
-			fprintf(stderr, "%s\n", _(UNICODE_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		} else if (IS_HELP(comm[1])) {
-			puts(_(UNICODE_USAGE));
-			return EXIT_SUCCESS;
-		} else {
-			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
-				printf(_("%s: Unicode %s\n"), PROGRAM_NAME,
-				    (unicode) ? _("enabled") : _("disabled"));
-			} else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
-				unicode = 1;
-				printf(_("%s: Unicode enabled\n"), PROGRAM_NAME);
-			} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
-				unicode = 0;
-				printf(_("%s: Unicode disabled\n"), PROGRAM_NAME);
-			} else {
-				fprintf(stderr, "%s\n", _(UNICODE_USAGE));
-				exit_code = EXIT_FAILURE;
-			}
-		}
-		return exit_code;
-	}
+	|| strcmp(comm[0], "unicode") == 0))
+		return (exit_code = unicode_function(comm[1]));
 
 	/* #### FOLDERS FIRST #### */
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'f' && !comm[0][2])
@@ -1618,21 +1621,6 @@ exec_cmd(char **comm)
 		}
 		return EXIT_SUCCESS;
 	}
-
-	/* #### SHELL #### */
-/*	else if (*comm[0] == 's' && strcmp(comm[0], "shell") == 0) {
-		if (!comm[1]) {
-			if (user.shell)
-				printf("%s: shell: %s\n", PROGRAM_NAME, user.shell);
-			else
-				printf(_("%s: shell: unknown\n"), PROGRAM_NAME);
-		} else if (IS_HELP(comm[1])) {
-			puts(_(SHELL_USAGE));
-			return EXIT_SUCCESS;
-		} else {
-			return (exit_code = set_shell(comm[1]));
-		}
-	} */
 
 	/* #### EDIT #### */
 	else if (*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
@@ -1793,7 +1781,7 @@ exec_cmd(char **comm)
 
 		struct stat attr;
 		if (stat(tmp, &attr) == 0) {
-			if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+			if (S_ISDIR(attr.st_mode)) {
 				if (autocd)
 					exit_code = cd_function(tmp, CD_PRINT_ERROR);
 				else
@@ -1801,7 +1789,7 @@ exec_cmd(char **comm)
 							PROGRAM_NAME, tmp);
 				free(tmp);
 				return exit_code;
-			} else if (auto_open && (attr.st_mode & S_IFMT) == S_IFREG) {
+			} else if (auto_open && S_ISREG(attr.st_mode)) {
 				if (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
 					char *cmd[] = {"open", tmp, (args_n >= 1) ? comm[1]
 						: NULL, (args_n >= 2) ? comm[2] : NULL, NULL};

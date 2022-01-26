@@ -1406,7 +1406,7 @@ RUN:
 			exit(EXIT_FAILURE);
 		}
 
-		if (url == 1 || (attr.st_mode & S_IFMT) != S_IFDIR)
+		if (url == 1 || !S_ISDIR(attr.st_mode))
 			open_reg_exit(_path, url);
 
 		flags |= START_PATH;

@@ -529,17 +529,16 @@ new_instance(char *dir, int sudo)
 		return EXIT_FAILURE;
 	}
 
-	struct stat file_attrib;
+	struct stat attr;
 
-	if (stat(deq_dir, &file_attrib) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, deq_dir,
-		    strerror(errno));
+	if (stat(deq_dir, &attr) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, deq_dir, strerror(errno));
 		free(self);
 		free(deq_dir);
 		return EXIT_FAILURE;
 	}
 
-	if ((file_attrib.st_mode & S_IFMT) != S_IFDIR) {
+	if (!S_ISDIR(attr.st_mode)) {
 		fprintf(stderr, _("%s: %s: Not a directory\n"), PROGRAM_NAME, deq_dir);
 		free(self);
 		free(deq_dir);

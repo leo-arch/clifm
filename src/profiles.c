@@ -77,14 +77,14 @@ get_profile_names(void)
 		snprintf(tmp, PATH_MAX - 1, "%s/%s", pf_dir,profs[i]->d_name);
 		if (lstat(tmp, &attr) == -1)
 			continue;
-		if ((attr.st_mode & S_IFMT) == S_IFDIR
+		if (S_ISDIR(attr.st_mode)
 #else
 		if (profs[i]->d_type == DT_DIR
 #endif
 		    /* Discard ".", "..", and hidden dirs */
 		    && *profs[i]->d_name != '.') {
 			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
-												* sizeof(char *));
+						* sizeof(char *));
 			profile_names[pf_n] = savestring(profs[i]->d_name,
 			    strlen(profs[i]->d_name));
 			pf_n++;

@@ -51,6 +51,15 @@
 
 #define __WS_STR_LEN sizeof(int) + 6 + (MAX_COLOR + 2) * 2
 
+#define ROOT_IND "\001\x1b[1;31mR\x1b[0m\002"
+#define ROOT_IND_SIZE 15
+#define STEALTH_IND "S\001\x1b[0m\002"
+#define STEALTH_IND_SIZE MAX_COLOR + 7 + 1
+
+/* Size of the indicator for msgs, trash, and sel */
+#define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
+/* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
+
 static inline char *
 gen_time(const int c)
 {
@@ -74,7 +83,7 @@ gen_time(const int c)
 		char time[12] = "";
 		strftime(time, sizeof(time), "%I:%M:%S %p", &tm);
 		temp = savestring(time, sizeof(time));
-	} else { // c == 'd'
+	} else { /* c == 'd' */
 		char time[12] = "";
 		strftime(time, sizeof(time), "%a %b %d", &tm);
 		temp = savestring(time, sizeof(time));
@@ -87,7 +96,7 @@ static inline char *
 gen_pwd(int c)
 {
 	char *temp = (char *)NULL;
-	// Reduce HOME to "~"
+	/* Reduce HOME to "~" */
 	int free_tmp_path = 0;
 	char *tmp_path = (char *)NULL;
 	if (strncmp(workspaces[cur_ws].path, user.home, user.home_len) == 0)
@@ -99,7 +108,7 @@ gen_pwd(int c)
 
 	if (c == 'W') {
 		char *ret = (char *)NULL;
-		// If not root dir (/), get last dir name
+		/* If not root dir (/), get last dir name */
 		if (!(*tmp_path == '/' && !*(tmp_path + 1)))
 			ret = strrchr(tmp_path, '/');
 
@@ -109,7 +118,7 @@ gen_pwd(int c)
 			temp = savestring(ret + 1, strlen(ret) - 1);
 	}
 
-	// Reduce path only if longer than max_path
+	/* Reduce path only if longer than max_path */
 	else if (c == 'p') {
 		if (strlen(tmp_path) > (size_t)max_path) {
 			char *ret = (char *)NULL;
@@ -121,7 +130,7 @@ gen_pwd(int c)
 		} else {
 			temp = savestring(tmp_path, strlen(tmp_path));
 		}
-	} else { // If c == 'w'
+	} else { /* If c == 'w' */
 		temp = savestring(tmp_path, strlen(tmp_path));
 	}
 
@@ -408,12 +417,6 @@ ADD_STRING:
 							result = (char *)xrealloc(result, (result_len + 2)
 													* sizeof(char));
 						strcat(result, wordbuf.we_wordv[j]);
-
-						/* If not the last word in cmd output, add an space */
-/*						if (j < wordbuf.we_wordc - 1) {
-							result[result_len++] = ' ';
-							result[result_len] = '\0';
-						} */
 					}
 				}
 
@@ -423,7 +426,8 @@ ADD_STRING:
 #endif /* __HAIKU__ && __OpenBSD__ */
 
 			result = (char *)xrealloc(result, (result_len + 2) * sizeof(char));
-			result[result_len++] = (char)c;
+			result[result_len] = (char)c;
+			result_len++;
 			result[result_len] = '\0';
 		}
 	}
@@ -431,6 +435,13 @@ ADD_STRING:
 	/* Remove trailing new line char, if any */
 	if (result && result[result_len - 1] == '\n')
 		result[result_len - 1] = '\0';
+
+	/* Emergency prompt, just in case something goes wrong */
+	if (!result) {
+		fprintf(stderr, _("%s: Error decoding prompt line. Using an "
+				"emergency prompt\n"), PROGRAM_NAME);
+		result = savestring("\001\x1b[0m\002> ", 8);
+	}
 
 	return result;
 }
@@ -475,12 +486,13 @@ print_welcome_msg(void)
 static inline void
 _print_tips(void)
 {
-	if (tips) {
-		static int first_run = 1;
-		if (first_run) {
-			print_tips(0);
-			first_run = 0;
-		}
+	if (tips == 0)
+		return;
+
+	static int first_run = 1;
+	if (first_run) {
+		print_tips(0);
+		first_run = 0;
 	}
 }
 
@@ -513,57 +525,53 @@ update_trash_indicator(void)
 static inline void
 setenv_prompt(void)
 {
-	if (prompt_style == CUSTOM_PROMPT_STYLE) {
-		/* Set environment variables with CliFM state information
-		 * (sel files, trash, stealth mode, messages) to be handled by
-		 * the prompt itself */
-		char t[32];
-		sprintf(t, "%d", (int)sel_n);
-		setenv("CLIFM_STAT_SEL", t, 1);
+	if (prompt_style != CUSTOM_PROMPT_STYLE)
+		return;
+
+	/* Set environment variables with CliFM state information
+	 * (sel files, trash, stealth mode, messages) to be handled by
+	 * the prompt itself */
+	char t[32];
+	sprintf(t, "%d", (int)sel_n);
+	setenv("CLIFM_STAT_SEL", t, 1);
 #ifndef _NO_TRASH
-		sprintf(t, "%d", (int)trash_n);
-		setenv("CLIFM_STAT_TRASH", t, 1);
+	sprintf(t, "%d", (int)trash_n);
+	setenv("CLIFM_STAT_TRASH", t, 1);
 #endif
-		sprintf(t, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
-		setenv("CLIFM_STAT_MSG", t, 1);
-		sprintf(t, "%d", cur_ws + 1);
-		setenv("CLIFM_STAT_WS", t, 1);
-		sprintf(t, "%d", exit_code);
-		setenv("CLIFM_STAT_EXIT", t, 1);
-		setenv("CLIFM_STAT_ROOT", (flags & ROOT_USR) ? "1" : "0", 1);
-		setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);
-	}
+	sprintf(t, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
+	setenv("CLIFM_STAT_MSG", t, 1);
+	sprintf(t, "%d", cur_ws + 1);
+	setenv("CLIFM_STAT_WS", t, 1);
+	sprintf(t, "%d", exit_code);
+	setenv("CLIFM_STAT_EXIT", t, 1);
+	setenv("CLIFM_STAT_ROOT", (flags & ROOT_USR) ? "1" : "0", 1);
+	setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);
 }
 
-/* Print the prompt and return the string entered by the user (to be
- * parsed later by parse_input_str()) */
-char *
-prompt(void)
+static inline size_t
+set_prompt_length(size_t decoded_prompt_len)
 {
-	check_cwd();
-	trim_final_slashes();
-	print_welcome_msg();
-	_print_tips();
+	size_t len = 0;
 
-	fputs(df_c, stdout);
-	fflush(stdout);
+	if (prompt_style == DEF_PROMPT_STYLE) {
+		len = (size_t)(decoded_prompt_len
+		+ (xargs.stealth_mode == 1 ? STEALTH_IND_SIZE : 0)
+		+ ((flags & ROOT_USR) ? ROOT_IND_SIZE : 0)
+		+ (sel_n ? N_IND : 0)
+		+ (trash_n ? N_IND : 0)
+		+ ((msgs_n && pmsg) ? N_IND : 0)
+		+ 6 + sizeof(tx_c) + 1 + 2);
+	} else {
+		len = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
+	}
 
-	run_prompt_cmds();
-#ifndef _NO_TRASH
-	update_trash_indicator();
-#endif
-	get_sel_files();
+	return len;
+}
 
+static inline char *
+construct_prompt(const char *decoded_prompt)
+{
 	/* Construct indicators: MSGS, SEL, and TRASH */
-
-#define ROOT_IND "\001\x1b[1;31mR\x1b[0m\002"
-#define ROOT_IND_SIZE 15
-#define STEALTH_IND "S\001\x1b[0m\002"
-#define STEALTH_IND_SIZE MAX_COLOR + 7 + 1
-
-/* Size of the indicator for msgs, trash, and sel */
-#define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
-/* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
 
 	/* Messages are categorized in three groups: errors, warnings, and
 	 * notices. The kind of message should be specified by the function
@@ -579,15 +587,9 @@ prompt(void)
 		 * message sign: a red 'E'. */
 		switch (pmsg) {
 		case NOMSG:	break;
-		case ERROR:
-			snprintf(msg_ind, N_IND, "%sE%zu%s", em_c, msgs_n, RL_NC);
-			break;
-		case WARNING:
-			snprintf(msg_ind, N_IND, "%sW%zu%s", wm_c, msgs_n, RL_NC);
-			break;
-		case NOTICE:
-			snprintf(msg_ind, N_IND, "%sN%zu%s", nm_c, msgs_n, RL_NC);
-			break;
+		case ERROR:	snprintf(msg_ind, N_IND, "%sE%zu%s", em_c, msgs_n, RL_NC); break;
+		case WARNING: snprintf(msg_ind, N_IND, "%sW%zu%s", wm_c, msgs_n, RL_NC); break;
+		case NOTICE: snprintf(msg_ind, N_IND, "%sN%zu%s", nm_c, msgs_n, RL_NC); break;
 		default: break;
 		}
 	}
@@ -602,46 +604,11 @@ prompt(void)
 	if (sel_n > 0)
 		snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
 
-	setenv_prompt();
-
-	/* Generate the prompt string */
-
-	/* First, grab and decode the prompt line of the config file (stored
-	 * in encoded_prompt at startup) */
-	char *decoded_prompt = decode_prompt(encoded_prompt);
-
-	/* Emergency prompt, just in case decode_prompt fails */
-	if (!decoded_prompt) {
-		fprintf(stderr, _("%s: Error decoding prompt line. Using an "
-				"emergency prompt\n"), PROGRAM_NAME);
-		decoded_prompt = savestring("\001\x1b[0m\002> ", 8);
-	}
-
-	size_t decoded_prompt_len;
-	decoded_prompt_len = strlen(decoded_prompt);
-
-	size_t prompt_length = 0;
+	size_t prompt_len = set_prompt_length(strlen(decoded_prompt));
+	char *the_prompt = (char *)xnmalloc(prompt_len, sizeof(char));
 
 	if (prompt_style == DEF_PROMPT_STYLE) {
-		prompt_length = (size_t)(decoded_prompt_len
-		+ (xargs.stealth_mode == 1 ? STEALTH_IND_SIZE : 0)
-		+ ((flags & ROOT_USR) ? ROOT_IND_SIZE : 0)
-		+ (sel_n ? N_IND : 0)
-		+ (trash_n ? N_IND : 0)
-		+ ((msgs_n && pmsg) ? N_IND : 0)
-		+ 6 + sizeof(tx_c) + 1 + 2);
-		/* 16 = color_b({red,green,yellow}_b) + letter (sel, trash, msg)+RL_NC;
-		 * 6 = RL_NC
-		 * 1 = null terminating char
-		 * 2 = \001 and \002 for tx_c */
-	} else {
-		prompt_length = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
-	}
-
-	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
-
-	if (prompt_style == DEF_PROMPT_STYLE) {
-		snprintf(the_prompt, prompt_length,
+		snprintf(the_prompt, prompt_len,
 			"%s%s%s%s%s%s%s%s\001%s\002",
 			(flags & ROOT_USR) ? ROOT_IND : "",
 			(msgs_n && pmsg) ? msg_ind : "",
@@ -651,41 +618,45 @@ prompt(void)
 			(sel_n) ? sel_ind : "",
 			decoded_prompt, RL_NC, tx_c);
 	} else {
-		snprintf(the_prompt, prompt_length, "%s%s\001%s\002", decoded_prompt,
+		snprintf(the_prompt, prompt_len, "%s%s\001%s\002", decoded_prompt,
 			RL_NC, tx_c);
 	}
 
-	free(decoded_prompt);
+	return the_prompt;
+}
 
-	/* Print error messages, if any. 'print_errors' is set to true by
-	 * log_msg() with the PRINT_PROMPT flag. If NOPRINT_PROMPT is
-	 * passed instead, 'print_msg' will be false and the message will
-	 * be printed in place by log_msg() itself, without waiting for
-	 * the next prompt */
+static inline void
+initialize_prompt_data(void)
+{
+	check_cwd();
+	trim_final_slashes();
+	print_welcome_msg();
+	_print_tips();
+
+	/* Set foreground color to default */
+	fputs(df_c, stdout);
+	fflush(stdout);
+
+	run_prompt_cmds();
+#ifndef _NO_TRASH
+	update_trash_indicator();
+#endif
+	get_sel_files();
+	setenv_prompt();
+
+	args_n = 0;
+	curhistindex = current_hist_n;
+
+	/* Print error messages */
 	if (print_msg && msgs_n) {
 		fputs(messages[msgs_n - 1], stderr);
 		print_msg = 0; /* Print messages only once */
 	}
+}
 
-	args_n = 0;
-
-	curhistindex = current_hist_n;
-	/* Restore foreground color */
-	fputs(df_c, stdout);
-	/* Print the prompt and get user input */
-	char *input = (char *)NULL;
-	input = readline(the_prompt);
-	free(the_prompt);
-
-	if (!input)
-		return (char *)NULL;
-
-	if (!*input) {
-		free(input);
-		input = (char *)NULL;
-		return (char *)NULL;
-	}
-
+static inline void
+log_and_record(char *input)
+{
 	/* Keep a literal copy of the last entered command to compose the
 	 * commands log, if needed and enabled */
 	if (logs_enabled) {
@@ -697,6 +668,32 @@ prompt(void)
 	 * equal inputs, or lines starting with space */
 	if (record_cmd(input))
 		add_to_cmdhist(input);
+}
+
+/* Print the prompt and return the string entered by the user (to be
+ * parsed later by parse_input_str()) */
+char *
+prompt(void)
+{
+	initialize_prompt_data();
+
+	/* Generate the prompt string using the prompt line in the config
+	 * file (stored in encoded_prompt at startup) */
+	char *decoded_prompt = decode_prompt(encoded_prompt);
+	char *the_prompt = construct_prompt(decoded_prompt);
+	free(decoded_prompt);
+
+	/* Print the prompt and get user input */
+	char *input = (char *)NULL;
+	input = readline(the_prompt);
+	free(the_prompt);
+
+	if (!input || !*input) {
+		free(input);
+		return (char *)NULL;
+	}
+
+	log_and_record(input);
 
 	return input;
 }

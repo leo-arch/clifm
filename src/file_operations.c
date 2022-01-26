@@ -524,14 +524,14 @@ edit_link(char *link)
 		link[len - 1] = '\0';
 
 	/* Check we have a valid symbolic link */
-	struct stat file_attrib;
-	if (lstat(link, &file_attrib) == -1) {
+	struct stat attr;
+	if (lstat(link, &attr) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, link,
 		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	if ((file_attrib.st_mode & S_IFMT) != S_IFLNK) {
+	if (!S_ISLNK(attr.st_mode)) {
 		fprintf(stderr, _("%s: %s: Not a symbolic link\n"),
 		    PROGRAM_NAME, link);
 		return EXIT_FAILURE;
@@ -580,11 +580,8 @@ edit_link(char *link)
 		int a = atoi(new_path);
 		if (a > 0 && a <= (int)files) {
 			--a;
-			if (file_info[a].name) {
-				new_path = (char *)xrealloc(new_path,
-					(strlen(file_info[a].name) + 1) * sizeof(char));
-				strcpy(new_path, file_info[a].name);
-			}
+			if (file_info[a].name)
+				new_path = savestring(file_info[a].name, strlen(file_info[a].name));
 		} else {
 			fprintf(stderr, _("%s: %s: Invalid ELN\n"), PROGRAM_NAME, new_path);
 			free(new_path);
@@ -614,7 +611,7 @@ edit_link(char *link)
 
 	/* Check new_path existence and warn the user if it does not
 	 * exist */
-	if (lstat(new_path, &file_attrib) == -1) {
+	if (lstat(new_path, &attr) == -1) {
 		printf("'%s': %s\n", new_path, strerror(errno));
 		char *answer = (char *)NULL;
 		while (!answer) {
@@ -669,36 +666,36 @@ edit_link(char *link)
 }
 
 int
-copy_function(char **comm)
+copy_function(char **args)
 {
 	log_function(NULL);
 
-	if (*comm[0] == 'm' && comm[1]) {
-		size_t len = strlen(comm[1]);
-		if (comm[1][len - 1] == '/')
-			comm[1][len - 1] = '\0';
+	if (*args[0] == 'm' && args[1]) {
+		size_t len = strlen(args[1]);
+		if (args[1][len - 1] == '/')
+			args[1][len - 1] = '\0';
 	}
 
 	if (!is_sel)
-		return run_and_refresh(comm);
+		return run_and_refresh(args);
 
 	size_t n = 0;
 	char **tcmd = (char **)xnmalloc(2 + args_n + 2, sizeof(char *));
-	char *p = strchr(comm[0], ' ');
+	char *p = strchr(args[0], ' ');
 	if (p && *(p + 1)) {
 		*p = '\0';
 		p++;
-		tcmd[0] = savestring(comm[0], strlen(comm[0]));
+		tcmd[0] = savestring(args[0], strlen(args[0]));
 		tcmd[1] = savestring(p, strlen(p));
 		n += 2;
 	} else {
-		tcmd[0] = savestring(comm[0], strlen(comm[0]));
+		tcmd[0] = savestring(args[0], strlen(args[0]));
 		n++;
 	}
 
 	size_t i;
-	for (i = 1; comm[i]; i++) {
-		p = dequote_str(comm[i], 0);
+	for (i = 1; args[i]; i++) {
+		p = dequote_str(args[i], 0);
 		if (!p)
 			continue;
 		tcmd[n] = savestring(p, strlen(p));
@@ -733,26 +730,25 @@ copy_function(char **comm)
 			if (sel_elements[j][arg_len - 1] == '/')
 				sel_elements[j][arg_len - 1] = '\0';
 
-			if (*comm[args_n] == '~') {
-				char *exp_dest = tilde_expand(comm[args_n]);
-				comm[args_n] = xrealloc(comm[args_n],
+			if (*args[args_n] == '~') {
+				char *exp_dest = tilde_expand(args[args_n]);
+				args[args_n] = xrealloc(args[args_n],
 				    (strlen(exp_dest) + 1) * sizeof(char));
-				strcpy(comm[args_n], exp_dest);
+				strcpy(args[args_n], exp_dest);
 				free(exp_dest);
 			}
 
-			size_t dest_len = strlen(comm[args_n]);
-			if (comm[args_n][dest_len - 1] == '/') {
-				comm[args_n][dest_len - 1] = '\0';
-			}
+			size_t dest_len = strlen(args[args_n]);
+			if (args[args_n][dest_len - 1] == '/')
+				args[args_n][dest_len - 1] = '\0';
 
 			char dest[PATH_MAX];
-			strcpy(dest, (sel_is_last || strcmp(comm[args_n], ".") == 0)
-					 ? workspaces[cur_ws].path : comm[args_n]);
+			strcpy(dest, (sel_is_last || strcmp(args[args_n], ".") == 0)
+					 ? workspaces[cur_ws].path : args[args_n]);
 
 			char *ret_val = strrchr(sel_elements[j], '/');
 			char *tmp_str = (char *)xnmalloc(strlen(dest)
-								+ strlen(ret_val + 1) + 2, sizeof(char));
+					+ strlen(ret_val + 1) + 2, sizeof(char));
 
 			sprintf(tmp_str, "%s/%s", dest, ret_val + 1);
 
@@ -772,8 +768,8 @@ copy_function(char **comm)
 
 	/* If 'mv sel' and command is successful deselect everything,
 	 * since sel files are note there anymore */
-	if (*comm[0] == 'm' && comm[0][1] == 'v'
-	&& (!comm[0][2] || comm[0][2] == ' '))
+	if (*args[0] == 'm' && args[0][1] == 'v'
+	&& (!args[0][2] || args[0][2] == ' '))
 		clear_selbox();
 
 #ifdef __HAIKU__
@@ -827,8 +823,7 @@ remove_file(char **args)
 		}
 
 		struct stat attr;
-		if (!dirs && lstat(rm_cmd[j - 1], &attr) != -1
-		&& (attr.st_mode & S_IFMT) == S_IFDIR)
+		if (!dirs && lstat(rm_cmd[j - 1], &attr) != -1 && S_ISDIR(attr.st_mode))
 			dirs = 1;
 	}
 

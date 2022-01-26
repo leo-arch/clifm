@@ -390,17 +390,15 @@ int
 xchdir(const char *dir, const int set_title)
 {
 	if (!dir || !*dir)
-		return -1;
+		return (-1);
 
 	DIR *dirp = opendir(dir);
-
 	if (!dirp)
-		return -1;
+		return (-1);
 
 	closedir(dirp);
 
-	int ret;
-	ret = chdir(dir);
+	int ret = chdir(dir);
 
 	if (set_title && ret == 0 && xargs.cwd_in_title == 1)
 		set_term_title(dir);
@@ -421,16 +419,15 @@ check_cdpath(char *name)
 	size_t i;
 	char t[PATH_MAX];
 	char *p = (char *)NULL;
-	struct stat attr;
+	struct stat a;
 	for (i = 0; cdpaths[i]; i++) {
 		size_t len = strlen(cdpaths[i]);
 		if (cdpaths[i][len - 1] == '/')
 			snprintf(t, PATH_MAX, "%s%s", cdpaths[i], name);
 		else
 			snprintf(t, PATH_MAX, "%s/%s", cdpaths[i], name);
-		if (stat(t, &attr) != -1 && (attr.st_mode & S_IFMT) == S_IFDIR) {
-			p = (char *)xnmalloc(strlen(t) + 1, sizeof(char));
-			strcpy(p, t);
+		if (stat(t, &a) != -1 && S_ISDIR(a.st_mode)) {
+			p = savestring(t, strlen(t));
 			break;
 		}
 	}
@@ -443,10 +440,8 @@ static int
 go_home(const int print_error)
 {
 	if (!user.home) {
-		if (print_error) {
-			fprintf(stderr, _("%s: cd: Home directory not found\n"),
-				PROGRAM_NAME);
-		}
+		if (print_error)
+			fprintf(stderr, _("%s: cd: Home directory not found\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 

@@ -64,7 +64,7 @@ recur_perm_check(const char *dirname)
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		if (lstat(ent->d_name, &attr) == -1)
 			continue;
-		if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+		if (S_ISDIR(attr.st_mode)) {
 #else
 		if (ent->d_type == DT_DIR) {
 #endif
@@ -111,14 +111,14 @@ recur_perm_check(const char *dirname)
 static int
 wx_parent_check(char *file)
 {
-	struct stat file_attrib;
+	struct stat attr;
 	int exit_status = -1, ret = -1;
 	size_t file_len = strlen(file);
 
 	if (file[file_len - 1] == '/')
 		file[file_len - 1] = '\0';
 
-	if (lstat(file, &file_attrib) == -1) {
+	if (lstat(file, &attr) == -1) {
 		fprintf(stderr, _("%s: No such file or directory\n"), file);
 		return EXIT_FAILURE;
 	}
@@ -139,7 +139,7 @@ wx_parent_check(char *file)
 		}
 	}
 
-	switch (file_attrib.st_mode & S_IFMT) {
+	switch (attr.st_mode & S_IFMT) {
 	case S_IFDIR:
 		ret = check_immutable_bit(file);
 
@@ -232,9 +232,9 @@ wx_parent_check(char *file)
 	/* DO NOT TRASH BLOCK AND CHAR DEVICES */
 	default:
 		fprintf(stderr, _("%s: trash: %s (%s): Unsupported file type\n"),
-		    PROGRAM_NAME, file, ((file_attrib.st_mode & S_IFMT) == S_IFBLK)
-		    ? "Block device" : ((file_attrib.st_mode & S_IFMT) == S_IFCHR)
-		    ? "Character device" : "Unknown file type");
+		    PROGRAM_NAME, file, S_ISBLK(attr.st_mode) ? "Block device"
+		    : (S_ISCHR(attr.st_mode) ? "Character device"
+		    : "Unknown file type"));
 		exit_status = EXIT_FAILURE;
 		break;
 	}
@@ -1026,16 +1026,16 @@ check_trash_file(char *deq_file)
 		return EXIT_FAILURE;
 	}
 
-	struct stat attr;
-	if (lstat(deq_file, &attr) == -1) {
+	struct stat a;
+	if (lstat(deq_file, &a) == -1) {
 		fprintf(stderr, _("trash: %s: %s\n"), deq_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* Do not trash block or character devices */
-	if ((attr.st_mode & S_IFMT) == S_IFBLK || (attr.st_mode & S_IFMT) == S_IFCHR) {
+	if (S_ISBLK(a.st_mode) || S_ISCHR(a.st_mode)) {
 		fprintf(stderr, _("trash: %s: Cannot trash a %s device\n"), deq_file,
-			((attr.st_mode & S_IFMT) == S_IFCHR) ? "character" : "block");
+			S_ISCHR(a.st_mode) ? "character" : "block");
 		return EXIT_FAILURE;
 	}
 

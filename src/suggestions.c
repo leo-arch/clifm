@@ -450,7 +450,7 @@ check_completions(char *str, size_t len, const unsigned char c,
 			p = tilde_expand(_matches[0]);
 
 		if (lstat(p ? p : _matches[0], &attr) != -1) {
-			if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+			if (S_ISDIR(attr.st_mode)) {
 				append_slash = 1;
 				suggestion.filetype = DT_DIR;
 			}
@@ -509,7 +509,7 @@ check_completions(char *str, size_t len, const unsigned char c,
 				p = tilde_expand(_matches[1]);
 
 			if (lstat(p ? p : _matches[1], &attr) != -1) {
-				if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+				if (S_ISDIR(attr.st_mode)) {
 					append_slash = 1;
 					suggestion.filetype = DT_DIR;
 				}

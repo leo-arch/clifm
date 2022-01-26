@@ -147,7 +147,7 @@ check_file_access(const struct stat *file)
 	if (val & S_IROTH) f |= R_OTH;
 	if (val & S_IXOTH) f |= X_OTH;
 
-	if ((file->st_mode & S_IFMT) == S_IFDIR) {
+	if (S_ISDIR(file->st_mode)) {
 		if ((f & R_USR) && (f & X_USR) && file->st_uid == user.uid)
 			return 1;
 		if ((f & R_GRP) && (f & X_GRP) && file->st_gid == user.gid)

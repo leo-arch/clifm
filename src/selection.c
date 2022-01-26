@@ -825,7 +825,7 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
 				/* Sustract size from total size */
 				if (lstat(sel_elements[k], &attr) != -1) {
-					if ((attr.st_mode & S_IFMT) == S_IFDIR)
+					if (S_ISDIR(attr.st_mode))
 						total_sel_size -= dir_size(sel_elements[k]);
 					else
 						total_sel_size -= attr.st_size;

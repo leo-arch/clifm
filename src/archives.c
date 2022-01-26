@@ -383,7 +383,7 @@ create_iso(char *in_file, char *out_file)
 	}
 
 	/* If IN_FILE is a directory */
-	if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+	if (S_ISDIR(attr.st_mode)) {
 		char *cmd[] = {"mkisofs", "-R", "-o", out_file, in_file, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			return EXIT_FAILURE;
@@ -391,7 +391,7 @@ create_iso(char *in_file, char *out_file)
 	}
 
 	/* If IN_FILE is a block device */
-	if ((attr.st_mode & S_IFMT) == S_IFBLK)
+	if (S_ISBLK(attr.st_mode))
 		return create_iso_from_block_dev(in_file, out_file);
 
 	/* If any other file format */
