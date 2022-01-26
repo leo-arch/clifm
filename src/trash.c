@@ -447,9 +447,8 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 			return EXIT_FAILURE;
 		}
 
-		/* Write trashed file information into the info file */
 		fprintf(info_fp,
-		    "[Trash Info]\nPath=%s\nDeletionDate=%d%d%dT%d:%d:%d\n",
+		    "[Trash Info]\nPath=%s\nDeletionDate=%d-%d-%dT%d:%d:%d\n",
 		    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 		    tm->tm_hour, tm->tm_min, tm->tm_sec);
 		fclose(info_fp);
