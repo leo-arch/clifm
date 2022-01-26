@@ -618,6 +618,397 @@ unicode_function(char *arg)
 	return exit_status;
 }
 
+static int
+folders_first_function(char *arg)
+{
+	if (autols == 0)
+		return EXIT_SUCCESS;
+	if (!arg) {
+		fprintf(stderr, "%s\n", _(FF_USAGE));
+		return (exit_code = EXIT_FAILURE);
+	}
+	if (IS_HELP(arg)) {
+		puts(_(FF_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	int status = list_folders_first, exit_status = EXIT_SUCCESS;
+
+	if (*arg == 's' && strcmp(arg, "status") == 0) {
+		printf(_("%s: Folders first %s\n"), PROGRAM_NAME,
+		    (list_folders_first) ? _("enabled") : _("disabled"));
+	}  else if (*arg == 'o' && strcmp(arg, "on") == 0) {
+		list_folders_first = 1;
+	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		list_folders_first = 0;
+	} else {
+		fprintf(stderr, "%s\n", _(FF_USAGE));
+		return (exit_status = EXIT_FAILURE);
+	}
+
+	if (list_folders_first != status) {
+		if (autols) {
+			free_dirlist();
+			exit_status = list_dir();
+		}
+	}
+	return exit_status;
+}
+
+static int
+filescounter_function(char *arg)
+{
+	if (!arg) {
+		fprintf(stderr, "%s\n", _(FC_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	if (*arg == 'o' && strcmp(arg, "on") == 0) {
+		files_counter = 1;
+		puts(_("Filescounter is enabled"));
+		return EXIT_SUCCESS;
+	}
+
+	if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		files_counter = 0;
+		puts(_("Filescounter is disabled"));
+		return EXIT_SUCCESS;
+	}
+
+	if (*arg == 's' && strcmp(arg, "status") == 0) {
+		if (files_counter)
+			puts(_("Filescounter is enabled"));
+		else
+			puts(_("Filescounter is disabled"));
+		return EXIT_SUCCESS;
+	}
+
+	fprintf(stderr, "%s\n", _(FC_USAGE));
+	return EXIT_FAILURE;
+}
+
+static int
+pager_function(char *arg)
+{
+	if (!arg) {
+		puts(_(PAGER_USAGE));
+		return (exit_code = EXIT_FAILURE);
+	}
+
+	if (IS_HELP(arg)) {
+		puts(_(PAGER_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+	if (*arg == 's' && strcmp(arg, "status") == 0) {
+		printf(_("%s: Pager %s\n"), PROGRAM_NAME,
+		    (pager) ? _("enabled") : _("disabled"));
+	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
+		pager = 1;
+		printf(_("%s: Pager enabled\n"), PROGRAM_NAME);
+	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		pager = 0;
+		printf(_("%s: Pager disabled\n"), PROGRAM_NAME);
+	} else {
+		fprintf(stderr, "%s\n", _(PAGER_USAGE));
+		exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
+static int
+ext_args_function(char *arg)
+{
+	if (!arg) {
+		puts(_(EXT_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	if (IS_HELP(arg)) {
+		puts(_(EXT_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+	if (*arg == 's' && strcmp(arg, "status") == 0) {
+		printf(_("%s: External commands %s\n"), PROGRAM_NAME,
+		    (ext_cmd_ok) ? _("enabled") : _("disabled"));
+	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
+		ext_cmd_ok = 1;
+		printf(_("%s: External commands enabled\n"), PROGRAM_NAME);
+	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		ext_cmd_ok = 0;
+		printf(_("%s: External commands disabled\n"), PROGRAM_NAME);
+	} else {
+		fprintf(stderr, "%s\n", _(EXT_USAGE));
+		exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
+static int
+autocd_function(char *arg)
+{
+	if (!arg) {
+		fprintf(stderr, "%s\n", _(AUTOCD_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	if (strcmp(arg, "on") == 0) {
+		autocd = 1;
+		printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
+	} else if (strcmp(arg, "off") == 0) {
+		autocd = 0;
+		printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
+	} else if (strcmp(arg, "status") == 0) {
+		if (autocd)
+			printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
+		else
+			printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
+	} else if (IS_HELP(arg)) {
+		puts(_(AUTOCD_USAGE));
+	} else {
+		fprintf(stderr, "%s\n", _(AUTOCD_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+auto_open_function(char *arg)
+{
+	if (!arg) {
+		fprintf(stderr, "%s\n", _(AUTO_OPEN_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	if (strcmp(arg, "on") == 0) {
+		auto_open = 1;
+		printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
+	} else if (strcmp(arg, "off") == 0) {
+		auto_open = 0;
+		printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
+	} else if (strcmp(arg, "status") == 0) {
+		if (auto_open)
+			printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
+		else
+			printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
+	} else if (IS_HELP(arg)) {
+		puts(_(AUTO_OPEN_USAGE));
+	} else {
+		fprintf(stderr, "%s\n", _(AUTO_OPEN_USAGE));
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
+}
+
+static int
+columns_function(char *arg)
+{
+	if (!arg || IS_HELP(arg)) {
+		puts(_(COLUMNS_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+
+	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
+		columned = 1;
+		if (autols) {
+			free_dirlist();
+			exit_status = list_dir();
+		}
+	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		columned = 0;
+		if (autols) {
+			free_dirlist();
+			exit_status = list_dir();
+		}
+	} else {
+		fprintf(stderr, "%s\n", _(COLUMNS_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
+static int
+icons_function(char *arg)
+{
+	if (!arg || IS_HELP(arg)) {
+		puts(_(ICONS_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
+		icons = 1;
+		if (autols) {
+			free_dirlist();
+			return list_dir();
+		}
+	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		icons = 0;
+		if (autols) {
+			free_dirlist();
+			return list_dir();
+		}
+	} else {
+		fprintf(stderr, "%s\n", _(ICONS_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+msgs_function(char *arg)
+{
+	if (arg && IS_HELP(arg)) {
+		puts(_(MSG_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if (arg && strcmp(arg, "clear") == 0) {
+		if (!msgs_n) {
+			printf(_("%s: There are no messages\n"), PROGRAM_NAME);
+			return EXIT_SUCCESS;
+		}
+
+		size_t i;
+		for (i = 0; i < (size_t)msgs_n; i++)
+			free(messages[i]);
+
+		msgs_n = 0;
+		pmsg = NOMSG;
+	} else {
+		if (msgs_n) {
+			size_t i;
+			for (i = 0; i < (size_t)msgs_n; i++)
+				printf("%s", messages[i]);
+		} else {
+			printf(_("%s: There are no messages\n"), PROGRAM_NAME);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+opener_function(char *arg)
+{
+	if (!arg) {
+		printf("opener: %s\n", opener ? opener : "lira (built-in)");
+		return EXIT_SUCCESS;
+	}
+	if (IS_HELP(arg)) {
+		puts(_(OPENER_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if (opener) {
+		free(opener);
+		opener = (char *)NULL;
+	}
+
+	if (strcmp(arg, "default") != 0 && strcmp(arg, "lira") != 0)
+		opener = savestring(arg, strlen(arg));
+	printf(_("opener: Opener set to '%s'\n"), opener ? opener : "lira (built-in)");
+
+	return EXIT_SUCCESS;
+}
+
+static int
+lightmode_function(char *arg)
+{
+	if (!arg || IS_HELP(arg)) {
+		fprintf(stderr, "%s\n", _(LM_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if (*arg == 'o' && strcmp(arg, "on") == 0) {
+		light_mode = 1;
+		puts(_("Light mode is on"));
+	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		light_mode = 0;
+		puts(_("Light mode is off"));
+	} else {
+		puts(_(LM_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+alias_function(char **args)
+{
+	if (args[1]) {
+		if (IS_HELP(args[1])) {
+			puts(_(ALIAS_USAGE));
+			return EXIT_SUCCESS;
+		}
+
+		if (*args[1] == 'i' && strcmp(args[1], "import") == 0) {
+			if (!args[2]) {
+				fprintf(stderr, "%s\n", _(ALIAS_USAGE));
+				return EXIT_FAILURE;
+			}
+			return alias_import(args[2]);
+		}
+	}
+
+	if (aliases_n) {
+		size_t i;
+		for (i = 0; i < aliases_n; i++)
+			printf("%s %s->%s %s\n", aliases[i].name, mi_c, df_c, aliases[i].cmd);
+	} else {
+		printf("%s: No aliases found\n", PROGRAM_NAME);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+_log_function(char **args)
+{
+	if (args[1] && IS_HELP(args[1])) {
+		puts(_(LOG_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	/* I make this check here, and not in the function itself,
+	 * because this function is also called by other instances of
+	 * the program where no message should be printed */
+	if (!config_ok) {
+		fprintf(stderr, _("%s: Log function disabled\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	return log_function(args);
+}
+
+static int
+_hidden_function(char **args)
+{
+	if (!args[1]) {
+		puts(_(HF_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	if (IS_HELP(args[1])) {
+		/* The same message is in hidden_function(), and printed
+		 * whenever an invalid argument is entered */
+		puts(_(HF_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	return hidden_function(args);
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error */
@@ -1197,52 +1588,12 @@ exec_cmd(char **comm)
 		return (exit_code = filter_function(comm[1]));
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'l' && !comm[0][2])
-	|| strcmp(comm[0], "columns") == 0)) {
-		if (!comm[1] || IS_HELP(comm[1])) {
-			puts(_(COLUMNS_USAGE));
-			return EXIT_SUCCESS;
-		} else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
-			columned = 1;
-			if (autols) {
-				free_dirlist();
-				exit_code = list_dir();
-			}
-		} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
-			columned = 0;
-			if (autols) {
-				free_dirlist();
-				exit_code = list_dir();
-			}
-		} else {
-			fprintf(stderr, "%s\n", _(COLUMNS_USAGE));
-			exit_code = EXIT_FAILURE;
-			return EXIT_FAILURE;
-		}
-		return exit_code;
-	}
+	|| strcmp(comm[0], "columns") == 0))
+		return (exit_code = columns_function(comm[1]));
+
 	else if (*comm[0] == 'i' && strcmp(comm[0], "icons") == 0) {
 #ifndef _NO_ICONS
-		if (!comm[1] || IS_HELP(comm[1])) {
-			puts(_(ICONS_USAGE));
-		} else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
-			icons = 1;
-			if (autols) {
-				free_dirlist();
-				exit_code = list_dir();
-			}
-		} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
-			icons = 0;
-			if (autols) {
-				free_dirlist();
-				exit_code = list_dir();
-			}
-		} else {
-			fprintf(stderr, "%s\n", _(ICONS_USAGE));
-			exit_code = EXIT_FAILURE;
-			return EXIT_FAILURE;
-		}
-
-		return EXIT_SUCCESS;
+		return (exit_code = icons_function(comm[1]));
 #else
 		fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_SUCCESS;
@@ -1273,27 +1624,8 @@ exec_cmd(char **comm)
 		return (exit_code = EXIT_FAILURE);
 	}
 
-	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0) {
-		if (!comm[1]) {
-			printf("opener: %s\n", opener ? opener : "lira (built-in)");
-			return EXIT_SUCCESS;
-		}
-		if (IS_HELP(comm[1])) {
-			puts(_(OPENER_USAGE));
-			return EXIT_SUCCESS;
-		}
-		if (opener) {
-			free(opener);
-			opener = (char *)NULL;
-		}
-		if (strcmp(comm[1], "default") != 0 && strcmp(comm[1], "lira") != 0) {
-			opener = (char *)xnmalloc(strlen(comm[1]) + 1, sizeof(char));
-			strcpy(opener, comm[1]);
-		}
-		printf(_("opener: Opener set to '%s'\n"), opener ? opener
-								   : "lira (built-in)");
-		return EXIT_SUCCESS;
-	}
+	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0)
+		return (exit_code = opener_function(comm[1]));
 
 	/* #### TIPS #### */
 	else if (*comm[0] == 't' && strcmp(comm[0], "tips") == 0) {
@@ -1306,24 +1638,8 @@ exec_cmd(char **comm)
 		return (exit_code = actions_function(comm));
 
 	/* #### LIGHT MODE #### */
-	else if (*comm[0] == 'l' && comm[0][1] == 'm' && !comm[0][2]) {
-		if (comm[1]) {
-			if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
-				light_mode = 1;
-				puts(_("Light mode is on"));
-			} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
-				light_mode = 0;
-				puts(_("Light mode is off"));
-			} else {
-				puts(_(LM_USAGE));
-				exit_code = EXIT_FAILURE;
-			}
-		} else {
-			fprintf(stderr, "%s\n", _(LM_USAGE));
-			exit_code = EXIT_FAILURE;
-		}
-		return exit_code;
-	}
+	else if (*comm[0] == 'l' && comm[0][1] == 'm' && !comm[0][2])
+		return (exit_code = lightmode_function(comm[1]));
 
 	/*    ############### RELOAD ##################     */
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2])
@@ -1423,88 +1739,18 @@ exec_cmd(char **comm)
 
 	/* #### EXT #### */
 	else if (*comm[0] == 'e' && comm[0][1] == 'x' && comm[0][2] == 't'
-	&& !comm[0][3]) {
-		if (!comm[1]) {
-			puts(_(EXT_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		} else if (IS_HELP(comm[1])) {
-			puts(_(EXT_USAGE));
-		} else {
-			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
-				printf(_("%s: External commands %s\n"), PROGRAM_NAME,
-				    (ext_cmd_ok) ? _("enabled") : _("disabled"));
-			} else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
-				ext_cmd_ok = 1;
-				printf(_("%s: External commands enabled\n"), PROGRAM_NAME);
-			} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
-				ext_cmd_ok = 0;
-				printf(_("%s: External commands disabled\n"), PROGRAM_NAME);
-			} else {
-				fprintf(stderr, "%s\n", _(EXT_USAGE));
-				exit_code = EXIT_FAILURE;
-			}
-		}
-		return exit_code;
-	}
+	&& !comm[0][3])
+		return (exit_code = ext_args_function(comm[1]));
 
 	/* #### PAGER #### */
 	else if (*comm[0] == 'p' && ((comm[0][1] == 'g' && !comm[0][2])
-	|| strcmp(comm[0], "pager") == 0)) {
-		if (!comm[1]) {
-			puts(_(PAGER_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		} else if (IS_HELP(comm[1])) {
-			puts(_(PAGER_USAGE));
-			return EXIT_SUCCESS;
-		} else {
-			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
-				printf(_("%s: Pager %s\n"), PROGRAM_NAME,
-				    (pager) ? _("enabled") : _("disabled"));
-			} else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
-				pager = 1;
-				printf(_("%s: Pager enabled\n"), PROGRAM_NAME);
-			} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
-				pager = 0;
-				printf(_("%s: Pager disabled\n"), PROGRAM_NAME);
-			} else {
-				fprintf(stderr, "%s\n", _(PAGER_USAGE));
-				exit_code = EXIT_FAILURE;
-			}
-		}
-		return exit_code;
-	}
+	|| strcmp(comm[0], "pager") == 0))
+		return (exit_code = pager_function(comm[1]));
 
 	/* #### FILES COUNTER #### */
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'c' && !comm[0][2])
-	|| strcmp(comm[0], "filescounter") == 0)) {
-		if (!comm[1]) {
-			fprintf(stderr, "%s\n", _(FC_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		}
-
-		if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
-			files_counter = 1;
-			puts(_("Filescounter is enabled"));
-			return EXIT_SUCCESS;
-		}
-
-		if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
-			files_counter = 0;
-			puts(_("Filescounter is disabled"));
-			return EXIT_SUCCESS;
-		}
-
-		if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
-			if (files_counter)
-				puts(_("Filescounter is enabled"));
-			else
-				puts(_("Filescounter is disabled"));
-			return EXIT_SUCCESS;
-		} else {
-			fprintf(stderr, "%s\n", _(FC_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		}
-	}
+	|| strcmp(comm[0], "filescounter") == 0))
+		return (exit_code = filescounter_function(comm[1]));
 
 	/* #### UNICODE #### */
 	else if (*comm[0] == 'u' && ((comm[0][1] == 'c' && !comm[0][2])
@@ -1513,114 +1759,21 @@ exec_cmd(char **comm)
 
 	/* #### FOLDERS FIRST #### */
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'f' && !comm[0][2])
-	|| strcmp(comm[0], "folders-first") == 0)) {
-		if (autols == 0)
-			return EXIT_SUCCESS;
-		if (!comm[1]) {
-			fprintf(stderr, "%s\n", _(FF_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		}
-		if (IS_HELP(comm[1])) {
-			puts(_(FF_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		int status = list_folders_first;
-		if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
-			printf(_("%s: Folders first %s\n"), PROGRAM_NAME,
-			    (list_folders_first) ? _("enabled") : _("disabled"));
-		}  else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
-			list_folders_first = 1;
-		} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
-			list_folders_first = 0;
-		} else {
-			fprintf(stderr, "%s\n", _(FF_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		}
-
-		if (list_folders_first != status) {
-			if (autols) {
-				free_dirlist();
-				exit_code = list_dir();
-			}
-		}
-		return exit_code;
-	}
+	|| strcmp(comm[0], "folders-first") == 0))
+		return (exit_code = folders_first_function(comm[1]));
 
 	/* #### LOG #### */
-	else if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(LOG_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		/* I make this check here, and not in the function itself,
-		 * because this function is also called by other instances of
-		 * the program where no message should be printed */
-		if (!config_ok) {
-			fprintf(stderr, _("%s: Log function disabled\n"), PROGRAM_NAME);
-			return (exit_code = EXIT_FAILURE);
-		}
-
-		return (exit_code = log_function(comm));
-	}
+	else if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0)
+		return (exit_code = _log_function(comm));
 
 	/* #### MESSAGES #### */
 	else if (*comm[0] == 'm' && (strcmp(comm[0], "msg") == 0
-	|| strcmp(comm[0], "messages") == 0)) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(MSG_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		if (comm[1] && strcmp(comm[1], "clear") == 0) {
-			if (!msgs_n) {
-				printf(_("%s: There are no messages\n"), PROGRAM_NAME);
-				return EXIT_SUCCESS;
-			}
-
-			size_t i;
-			for (i = 0; i < (size_t)msgs_n; i++)
-				free(messages[i]);
-
-			msgs_n = 0;
-			pmsg = NOMSG;
-		} else {
-			if (msgs_n) {
-				size_t i;
-				for (i = 0; i < (size_t)msgs_n; i++)
-					printf("%s", messages[i]);
-			} else {
-				printf(_("%s: There are no messages\n"), PROGRAM_NAME);
-			}
-		}
-		return exit_code;
-	}
+	|| strcmp(comm[0], "messages") == 0))
+		return (exit_code = msgs_function(comm[1]));
 
 	/* #### ALIASES #### */
-	else if (*comm[0] == 'a' && strcmp(comm[0], "alias") == 0) {
-		if (comm[1]) {
-			if (IS_HELP(comm[1])) {
-				puts(_(ALIAS_USAGE));
-				return EXIT_SUCCESS;
-			} else if (*comm[1] == 'i' && strcmp(comm[1], "import") == 0) {
-				if (!comm[2]) {
-					fprintf(stderr, "%s\n", _(ALIAS_USAGE));
-					return (exit_code = EXIT_FAILURE);
-				}
-				return (exit_code = alias_import(comm[2]));
-			}
-		}
-
-		if (aliases_n) {
-			size_t i;
-			for (i = 0; i < aliases_n; i++)
-				printf("%s %s->%s %s\n", aliases[i].name, mi_c, df_c, aliases[i].cmd);
-		} else {
-			printf("%s: No aliases found\n", PROGRAM_NAME);
-		}
-		return EXIT_SUCCESS;
-	}
+	else if (*comm[0] == 'a' && strcmp(comm[0], "alias") == 0)
+		return (exit_code = alias_function(comm));
 
 	/* #### EDIT #### */
 	else if (*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
@@ -1632,75 +1785,18 @@ exec_cmd(char **comm)
 
 	/* #### HIDDEN FILES #### */
 	else if (*comm[0] == 'h' && ((comm[0][1] == 'f' && !comm[0][2])
-	|| strcmp(comm[0], "hidden") == 0)) {
-		if (!comm[1]) {
-			fprintf(stderr, "%s\n", _(HF_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		} else if (IS_HELP(comm[1])) {
-			/* The same message is in hidden_function(), and printed
-			 * whenever an invalid argument is entered */
-			puts(_(HF_USAGE));
-			return EXIT_SUCCESS;
-		} else {
-			return (exit_code = hidden_function(comm));
-		}
-	}
+	|| strcmp(comm[0], "hidden") == 0))
+		return (exit_code = _hidden_function(comm));
 
 	/* #### AUTOCD #### */
 	else if (*comm[0] == 'a' && (strcmp(comm[0], "acd") == 0
-	|| strcmp(comm[0], "autocd") == 0)) {
-		if (!comm[1]) {
-			fprintf(stderr, "%s\n", _(AUTOCD_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		}
-
-		if (strcmp(comm[1], "on") == 0) {
-			autocd = 1;
-			printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
-		} else if (strcmp(comm[1], "off") == 0) {
-			autocd = 0;
-			printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
-		} else if (strcmp(comm[1], "status") == 0) {
-			if (autocd)
-				printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
-			else
-				printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
-		} else if (IS_HELP(comm[1])) {
-			puts(_(AUTOCD_USAGE));
-		} else {
-			fprintf(stderr, "%s\n", _(AUTOCD_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		}
-		return EXIT_SUCCESS;
-	}
+	|| strcmp(comm[0], "autocd") == 0))
+		return (exit_code = autocd_function(comm[1]));
 
 	/* #### AUTO-OPEN #### */
 	else if (*comm[0] == 'a' && ((comm[0][1] == 'o' && !comm[0][2])
-	|| strcmp(comm[0], "auto-open") == 0)) {
-		if (!comm[1]) {
-			fprintf(stderr, "%s\n", _(AUTO_OPEN_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		}
-
-		if (strcmp(comm[1], "on") == 0) {
-			auto_open = 1;
-			printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
-		} else if (strcmp(comm[1], "off") == 0) {
-			auto_open = 0;
-			printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
-		} else if (strcmp(comm[1], "status") == 0) {
-			if (auto_open)
-				printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
-			else
-				printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
-		} else if (IS_HELP(comm[1])) {
-			puts(_(AUTO_OPEN_USAGE));
-		} else {
-			fprintf(stderr, "%s\n", _(AUTO_OPEN_USAGE));
-			return (exit_code = EXIT_FAILURE);
-		}
-		return EXIT_SUCCESS;
-	}
+	|| strcmp(comm[0], "auto-open") == 0))
+		return (exit_code = auto_open_function(comm[1]));
 
 	/* #### COMMANDS #### */
 	else if (*comm[0] == 'c' && (strcmp(comm[0], "cmd") == 0
