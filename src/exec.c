@@ -1498,6 +1498,28 @@ lira_function(char **args)
 #endif
 }
 
+static inline int
+check_comments(const char *name)
+{
+	if (*name != '#')
+		return EXIT_FAILURE;
+
+	/* Skip lines starting with '#' if there is no such file name
+	 * in the current directory. This implies that no command starting
+	 * with '#' will be executed */
+	struct stat a;
+	if (lstat(name, &a) == -1)
+		return EXIT_SUCCESS;
+
+	if (autocd == 1 && S_ISDIR(a.st_mode))
+		return EXIT_FAILURE;
+
+	if (auto_open == 1 && !S_ISDIR(a.st_mode))
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -1515,8 +1537,9 @@ exec_cmd(char **comm)
 	int old_exit_code = exit_code;
 	exit_code = EXIT_SUCCESS;
 
-	if (*comm[0] == '#' && access(comm[0], F_OK) != 0)
-		return exit_code;
+	/* Skip comments */
+	if (check_comments(comm[0]) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
 
 	/* Warn when using the ',' keyword and there's no pinned file */
 	if (check_pinned_file(comm) == EXIT_FAILURE)
@@ -2136,6 +2159,28 @@ exec_chained_cmds(char *cmd)
 	}
 }
 
+static inline void
+run_profile_line(char *line)
+{
+	if (xargs.secure_cmds == 1
+	&& sanitize_cmd(line, SNT_PROFILE) != EXIT_SUCCESS)
+		return;
+
+	args_n = 0;
+	char **cmds = parse_input_str(line);
+	if (!cmds)
+		return;
+
+	no_log = 1;
+	exec_cmd(cmds);
+	no_log = 0;
+	int i = (int)args_n + 1;
+	while (--i >= 0)
+		free(cmds[i]);
+	free(cmds);
+	args_n = 0;
+}
+
 void
 exec_profile(void)
 {
@@ -2151,44 +2196,16 @@ exec_profile(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		/* Skip empty and commented lines */
-		if (!*line || *line == '\n' || *line == '#')
+		if (line_len == 0 || !*line || *line == '\n' || *line == '#')
 			continue;
 
-		/* Remove trailing new line char */
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		if (strchr(line, '=') && !_ISDIGIT(*line)) {
-			if (int_vars)
-				create_usr_var(line);
-			else
-				continue;
-		} else {
-			if (strlen(line) == 0)
-				continue;
-			/* Parse line and execute it */
-
-			if (xargs.secure_cmds == 1
-			&& sanitize_cmd(line, SNT_PROFILE) != EXIT_SUCCESS)
-				continue;
-
-			args_n = 0;
-
-			char **cmds = parse_input_str(line);
-
-			if (cmds) {
-				no_log = 1;
-				exec_cmd(cmds);
-				no_log = 0;
-				int i = (int)args_n + 1;
-				while (--i >= 0)
-					free(cmds[i]);
-				free(cmds);
-				cmds = (char **)NULL;
-			}
-			args_n = 0;
-		}
+		if (int_vars == 1 && strchr(line, '=') && !_ISDIGIT(*line))
+			create_usr_var(line);
+		else
+			run_profile_line(line);
 	}
 
 	free(line);
