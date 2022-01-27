@@ -1273,96 +1273,88 @@ _sort_function(char **args)
 	return sort_function(args);
 }
 
-/* Take the command entered by the user, already splitted into substrings
- * by parse_input_str(), and call the corresponding function. Return zero
- * in case of success and one in case of error */
-int
-exec_cmd(char **comm)
+static int
+check_pinned_file(char **args)
 {
-	fputs(df_c, stdout);
-	/* Exit flag. exit_code is zero (sucess) by default. In case of error
-	 * in any of the functions below, it will be set to one (failure).
-	 * This will be the value returned by this function. Used by the \z
-	 * escape code in the prompt to print the exit status of the last
-	 * executed command */
-	int old_exit_code = exit_code;
-	exit_code = EXIT_SUCCESS;
-
-	if (*comm[0] == '#' && access(comm[0], F_OK) != 0)
-		return exit_code;
-
-	/* Warn when using the ',' keyword and there's no pinned file */
-	int k = (int)args_n + 1;
-	while (--k >= 0) {
-		if (*comm[k] == ',' && !comm[k][1]) {
+	int i = (int)args_n + 1;
+	while (--i >= 0) {
+		if (*args[i] == ',' && !args[i][1]) {
 			fprintf(stderr, _("%s: No pinned file\n"), PROGRAM_NAME);
-			return (exit_code = EXIT_FAILURE);
+			return EXIT_FAILURE;
 		}
 	}
 
-	/* User defined actions */
-	if (actions_n) {
-		int i = (int)actions_n;
-		while (--i >= 0) {
-			if (*comm[0] == *usr_actions[i].name
-			&& strcmp(comm[0], usr_actions[i].name) == 0)
-				return (exit_code = run_action(usr_actions[i].value, comm));
-		}
+	return EXIT_SUCCESS;
+}
+
+static int
+check_actions(char **args)
+{
+	if (actions_n == 0)
+		return (-1);
+
+	int i = (int)actions_n;
+	while (--i >= 0) {
+		if (*args[0] == *usr_actions[i].name
+		&& strcmp(args[0], usr_actions[i].name) == 0)
+			return run_action(usr_actions[i].value, args);
 	}
 
-	/* User defined variables */
-	if (flags & IS_USRVAR_DEF) {
-		flags &= ~IS_USRVAR_DEF;
-		return (exit_code = create_usr_var(comm[0]));
+	return (-1);
+}
+
+static int
+launch_shell(char **args)
+{
+	if (!args[0][1]) {
+		/* If just ":" or ";", launch the default shell */
+		char *cmd[] = {user.shell, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			return EXIT_FAILURE;
+		return EXIT_SUCCESS;
 	}
 
-	if (*comm[0] == ';' || *comm[0] == ':') {
-		if (!comm[0][1]) {
-			/* If just ":" or ";", launch the default shell */
-			char *cmd[] = {user.shell, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-				exit_code = EXIT_FAILURE;
-			return exit_code;
-		} else {
-			if (comm[0][1] == ';' || comm[0][1] == ':') {
-			/* If double semi colon or colon (or ";:" or ":;") */
-				fprintf(stderr, _("%s: '%s': Syntax error\n"), PROGRAM_NAME, comm[0]);
-				return (exit_code = EXIT_FAILURE);
-			}
-		}
+	if (args[0][1] == ';' || args[0][1] == ':') {
+		/* If double semi colon or colon (or ";:" or ":;") */
+		fprintf(stderr, _("%s: '%s': Syntax error\n"), PROGRAM_NAME, args[0]);
+		return EXIT_FAILURE;
 	}
 
-				/* ###############################
-				 * #    AUTOCD & AUTO-OPEN (1)   #
-				 * ############################### */
+	return (-1);
+}
 
+/* Try to autocd or auto-open */
+static int
+check_auto_first(char **args)
+{
 	char *deq_str = (char *)NULL;
+
 	if (autocd || auto_open) {
 		/* Expand tilde */
-		if (*comm[0] == '~') {
-			char *exp_path = tilde_expand(comm[0]);
+		if (*args[0] == '~') {
+			char *exp_path = tilde_expand(args[0]);
 			if (exp_path) {
-				free(comm[0]);
-				comm[0] = exp_path;
+				free(args[0]);
+				args[0] = exp_path;
 			}
 		}
 
 		/* Deescape the string (only if file name) */
-		if (strchr(comm[0], '\\'))
-			deq_str = dequote_str(comm[0], 0);
+		if (strchr(args[0], '\\'))
+			deq_str = dequote_str(args[0], 0);
 	}
 
 	/* Only autocd or auto-open here if not absolute path and if there
 	 * is no second argument or if second argument is "&" */
-	if (*comm[0] != '/' && (autocd || auto_open) && (!comm[1]
-	|| (*comm[1] == '&' && !comm[1][1]))) {
+	if (*args[0] != '/' && (autocd || auto_open) && (!args[1]
+	|| (*args[1] == '&' && !args[1][1]))) {
 
-		char *tmp = deq_str ? deq_str : comm[0];
-		size_t tmp_len = strlen(tmp);
-		if (tmp[tmp_len - 1] == '/')
-			tmp[tmp_len - 1] = '\0';
+		char *tmp = deq_str ? deq_str : args[0];
+		size_t len = strlen(tmp);
+		if (tmp[len - 1] == '/')
+			tmp[len - 1] = '\0';
 
-		if (autocd && cdpath_n && !comm[1]
+		if (autocd && cdpath_n && !args[1]
 		&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
 			free(deq_str);
 			return EXIT_SUCCESS;
@@ -1370,30 +1362,150 @@ exec_cmd(char **comm)
 
 		int i = (int)files;
 		while (--i >= 0) {
-
-			if (*tmp != *file_info[i].name)
-				continue;
-
-			if (strcmp(tmp, file_info[i].name) != 0)
+			if (*tmp != *file_info[i].name || strcmp(tmp, file_info[i].name) != 0)
 				continue;
 
 			free(deq_str);
 			deq_str = (char *)NULL;
 
 			if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1))
-				return (exit_code = cd_function(comm[0], CD_PRINT_ERROR));
+				return cd_function(args[0], CD_PRINT_ERROR);
 
 			if (auto_open && (file_info[i].type == DT_REG
 			|| file_info[i].type == DT_LNK)) {
-				char *cmd[] = {"open", comm[0], comm[1] ? comm[1] : NULL, NULL};
-				return (exit_code = open_function(cmd));
-			} else {
-				break;
+				char *cmd[] = {"open", args[0], args[1] ? args[1] : NULL, NULL};
+				return open_function(cmd);
 			}
+
+			break;
 		}
 	}
 
 	free(deq_str);
+	return (-1);
+}
+
+/* Try to autocd or auto-open */
+static int
+check_auto_second(char **args)
+{
+	char *tmp = savestring(args[0], strlen(args[0]));
+
+	if (strchr(tmp, '\\')) {
+		char *dstr = dequote_str(tmp, 0);
+		if (dstr) {
+			free(tmp);
+			tmp = dstr;
+		}
+	}
+
+	int ret = EXIT_SUCCESS;
+	if (autocd && cdpath_n && !args[1]) {
+		ret = cd_function(tmp, CD_NO_PRINT_ERROR);
+		if (ret == EXIT_SUCCESS) {
+			free(tmp);
+			return EXIT_SUCCESS;
+		}
+	}
+
+	struct stat attr;
+	if (stat(tmp, &attr) != 0) {
+		free(tmp);
+		return (-1);
+	}
+
+	if (S_ISDIR(attr.st_mode)) {
+		if (autocd) {
+			ret = cd_function(tmp, CD_PRINT_ERROR);
+		} else {
+			fprintf(stderr, _("%s: %s: Is a directory\n"), PROGRAM_NAME, tmp);
+			ret = EXIT_FAILURE;
+		}
+		free(tmp);
+		return ret;
+	}
+
+	/* Regular, non-executable file */
+	if (auto_open && S_ISREG(attr.st_mode)
+	&& !(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
+		char *cmd[] = {"open", tmp, (args_n >= 1) ? args[1]
+			: NULL, (args_n >= 2) ? args[2] : NULL, NULL};
+		args_n++;
+		ret = open_function(cmd);
+		args_n--;
+		free(tmp);
+		return ret;
+	}
+
+	free(tmp);
+	return (-1);
+}
+
+static int
+colors_function(char *arg)
+{
+	if (arg && IS_HELP(arg))
+		puts(_(COLORS_USAGE));
+	else
+		color_codes();
+	return EXIT_SUCCESS;
+}
+
+static int
+ls_function(void)
+{
+	free_dirlist();
+	int exit_status = list_dir();
+	if (get_sel_files() != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+
+	return exit_status;
+}
+
+/* Take the command entered by the user, already splitted into substrings
+ * by parse_input_str(), and call the corresponding function. Return zero
+ * in case of success and one in case of error
+
+ * Exit flag. exit_code is zero (sucess) by default. In case of error
+ * in any of the functions below, it will be set to one (failure).
+ * This will be the value returned by this function. Used by the \z
+ * escape code in the prompt to print the exit status of the last
+ * executed command */
+int
+exec_cmd(char **comm)
+{
+	fputs(df_c, stdout);
+
+	int old_exit_code = exit_code;
+	exit_code = EXIT_SUCCESS;
+
+	if (*comm[0] == '#' && access(comm[0], F_OK) != 0)
+		return exit_code;
+
+	/* Warn when using the ',' keyword and there's no pinned file */
+	if (check_pinned_file(comm) == EXIT_FAILURE)
+		return (exit_code = EXIT_FAILURE);
+
+	/* User defined actions */
+	if ((exit_code = check_actions(comm)) != -1)
+		return exit_code;
+
+	/* User defined variables */
+	if (flags & IS_USRVAR_DEF) {
+		flags &= ~IS_USRVAR_DEF;
+		return (exit_code = create_usr_var(comm[0]));
+	}
+
+	/* Check if we need to send input directly to the system shell */
+	if (*comm[0] == ';' || *comm[0] == ':')
+		if ((exit_code = launch_shell(comm)) != -1)
+			return exit_code;
+
+	/* #  AUTOCD & AUTO-OPEN (1) # */
+	if ((exit_code = check_auto_first(comm)) != -1)
+		return exit_code;
+
+	exit_code = EXIT_SUCCESS;
 
 	/* The more often a function is used, the more on top should it be
 	 * in this if...else chain. It will be found faster this way. */
@@ -1788,13 +1900,8 @@ exec_cmd(char **comm)
 #endif
 	}
 
-	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2] && !autols) {
-		free_dirlist();
-		exit_code = list_dir();
-		if (get_sel_files() != EXIT_SUCCESS)
-			exit_code = EXIT_FAILURE;
-		return exit_code;
-	}
+	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2] && !autols)
+		return (exit_code = ls_function());
 
 	/* #### PROFILE #### */
 	else if (*comm[0] == 'p' && ((comm[0][1] == 'f' && !comm[0][2])
@@ -1894,13 +2001,8 @@ exec_cmd(char **comm)
 	}
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'c' && !comm[0][2])
-	|| strcmp(comm[0], "colors") == 0)) {
-		if (comm[1] && IS_HELP(comm[1]))
-			puts(_(COLORS_USAGE));
-		else
-			color_codes();
-		return EXIT_SUCCESS;
-	}
+	|| strcmp(comm[0], "colors") == 0))
+		return (exit_code = colors_function(comm[1]));
 
 	else if (*comm[0] == 'v' && (strcmp(comm[0], "ver") == 0
 	|| strcmp(comm[0], "version") == 0)) {
@@ -1930,56 +2032,11 @@ exec_cmd(char **comm)
 		_quit(comm);
 
 	else {
-				/* ###############################
-				 * #     AUTOCD & AUTO-OPEN (2)   #
-				 * ############################### */
+		/* #  AUTOCD & AUTO-OPEN (2) # */
+		if ((exit_code = check_auto_second(comm)) != -1)
+			return exit_code;
 
-		char *tmp = (char *)xnmalloc(strlen(comm[0]) + 1, sizeof(char));
-		strcpy(tmp, comm[0]);
-		if (strchr(tmp, '\\')) {
-			char *dstr = dequote_str(tmp, 0);
-			if (dstr) {
-				free(tmp);
-				tmp = dstr;
-			}
-		}
-
-		if (autocd && cdpath_n && !comm[1]) {
-			exit_code = cd_function(tmp, CD_NO_PRINT_ERROR);
-			if (exit_code == EXIT_SUCCESS) {
-				free(tmp);
-				return EXIT_SUCCESS;
-			}
-		}
-
-		struct stat attr;
-		if (stat(tmp, &attr) == 0) {
-			if (S_ISDIR(attr.st_mode)) {
-				if (autocd)
-					exit_code = cd_function(tmp, CD_PRINT_ERROR);
-				else
-					fprintf(stderr, _("%s: %s: Is a directory\n"),
-							PROGRAM_NAME, tmp);
-				free(tmp);
-				return exit_code;
-			} else if (auto_open && S_ISREG(attr.st_mode)) {
-				if (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
-					char *cmd[] = {"open", tmp, (args_n >= 1) ? comm[1]
-						: NULL, (args_n >= 2) ? comm[2] : NULL, NULL};
-					args_n++;
-					exit_code = open_function(cmd);
-					args_n--;
-					free(tmp);
-					return exit_code;
-				}
-			}
-		}
-
-		free(tmp);
-
-	/* ####################################################
-	 * #                EXTERNAL/SHELL COMMANDS           #
-	 * ####################################################*/
+		/* #  EXTERNAL/SHELL COMMANDS # */
 		if ((exit_code = run_shell_cmd(comm)) == EXIT_FAILURE)
 			return EXIT_FAILURE;
 	}
