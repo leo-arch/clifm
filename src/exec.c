@@ -643,7 +643,7 @@ folders_first_function(char *arg)
 		list_folders_first = 0;
 	} else {
 		fprintf(stderr, "%s\n", _(FF_USAGE));
-		return (exit_status = EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 
 	if (list_folders_first != status) {
@@ -652,6 +652,7 @@ folders_first_function(char *arg)
 			exit_status = list_dir();
 		}
 	}
+
 	return exit_status;
 }
 
@@ -1273,7 +1274,7 @@ _sort_function(char **args)
 	return sort_function(args);
 }
 
-static int
+static inline int
 check_pinned_file(char **args)
 {
 	int i = (int)args_n + 1;
@@ -1287,7 +1288,7 @@ check_pinned_file(char **args)
 	return EXIT_SUCCESS;
 }
 
-static int
+static inline int
 check_actions(char **args)
 {
 	if (actions_n == 0)
@@ -1323,32 +1324,50 @@ launch_shell(char **args)
 	return (-1);
 }
 
-/* Try to autocd or auto-open */
-static int
+static inline void
+expand_and_deescape(char **arg, char **deq_str)
+{
+	if (*(*arg) == '~') {
+		char *exp_path = tilde_expand(*arg);
+		if (exp_path) {
+			free(*arg);
+			*arg = exp_path;
+		}
+	}
+
+	/* Deescape the string (only if file name) */
+	if (strchr(*arg, '\\'))
+		*deq_str = dequote_str(*arg, 0);
+}
+
+static inline int
+_open_file(char **args, const int i)
+{
+	if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1))
+		return cd_function(args[0], CD_PRINT_ERROR);
+
+	if (auto_open && (file_info[i].type == DT_REG
+	|| file_info[i].type == DT_LNK)) {
+		char *cmd[] = {"open", args[0], args[1] ? args[1] : NULL, NULL};
+		return open_function(cmd);
+	}
+
+	return (-1);
+}
+
+/* Try to autocd or auto-open dir/file
+ * Only autocd or auto-open here if not absolute path and if there
+ * is no second argument or if second argument is "&" */
+static inline int
 check_auto_first(char **args)
 {
 	char *deq_str = (char *)NULL;
 
-	if (autocd || auto_open) {
-		/* Expand tilde */
-		if (*args[0] == '~') {
-			char *exp_path = tilde_expand(args[0]);
-			if (exp_path) {
-				free(args[0]);
-				args[0] = exp_path;
-			}
-		}
+	if (autocd || auto_open)
+		expand_and_deescape(&args[0], &deq_str);
 
-		/* Deescape the string (only if file name) */
-		if (strchr(args[0], '\\'))
-			deq_str = dequote_str(args[0], 0);
-	}
-
-	/* Only autocd or auto-open here if not absolute path and if there
-	 * is no second argument or if second argument is "&" */
 	if (*args[0] != '/' && (autocd || auto_open) && (!args[1]
 	|| (*args[1] == '&' && !args[1][1]))) {
-
 		char *tmp = deq_str ? deq_str : args[0];
 		size_t len = strlen(tmp);
 		if (tmp[len - 1] == '/')
@@ -1368,15 +1387,8 @@ check_auto_first(char **args)
 			free(deq_str);
 			deq_str = (char *)NULL;
 
-			if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1))
-				return cd_function(args[0], CD_PRINT_ERROR);
-
-			if (auto_open && (file_info[i].type == DT_REG
-			|| file_info[i].type == DT_LNK)) {
-				char *cmd[] = {"open", args[0], args[1] ? args[1] : NULL, NULL};
-				return open_function(cmd);
-			}
-
+			int ret = _open_file(args, i);
+			if (ret != -1) return ret;
 			break;
 		}
 	}
@@ -1385,8 +1397,37 @@ check_auto_first(char **args)
 	return (-1);
 }
 
+static inline int
+auto_open_file(char **args, char *tmp)
+{
+	char *cmd[] = {"open", tmp, (args_n >= 1) ? args[1]
+		: NULL, (args_n >= 2) ? args[2] : NULL, NULL};
+	args_n++;
+	int ret = open_function(cmd);
+	args_n--;
+	free(tmp);
+
+	return ret;
+}
+
+static inline int
+autocd_dir(char *tmp)
+{
+	int ret = EXIT_SUCCESS;
+
+	if (autocd) {
+		ret = cd_function(tmp, CD_PRINT_ERROR);
+	} else {
+		fprintf(stderr, _("%s: %s: Is a directory\n"), PROGRAM_NAME, tmp);
+		ret = EXIT_FAILURE;
+	}
+	free(tmp);
+
+	return ret;
+}
+
 /* Try to autocd or auto-open */
-static int
+static inline int
 check_auto_second(char **args)
 {
 	char *tmp = savestring(args[0], strlen(args[0]));
@@ -1414,28 +1455,13 @@ check_auto_second(char **args)
 		return (-1);
 	}
 
-	if (S_ISDIR(attr.st_mode)) {
-		if (autocd) {
-			ret = cd_function(tmp, CD_PRINT_ERROR);
-		} else {
-			fprintf(stderr, _("%s: %s: Is a directory\n"), PROGRAM_NAME, tmp);
-			ret = EXIT_FAILURE;
-		}
-		free(tmp);
-		return ret;
-	}
+	if (S_ISDIR(attr.st_mode))
+		return autocd_dir(tmp);
 
 	/* Regular, non-executable file */
 	if (auto_open && S_ISREG(attr.st_mode)
-	&& !(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
-		char *cmd[] = {"open", tmp, (args_n >= 1) ? args[1]
-			: NULL, (args_n >= 2) ? args[2] : NULL, NULL};
-		args_n++;
-		ret = open_function(cmd);
-		args_n--;
-		free(tmp);
-		return ret;
-	}
+	&& !(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
+		return auto_open_file(args, tmp);
 
 	free(tmp);
 	return (-1);
@@ -1460,6 +1486,17 @@ ls_function(void)
 		exit_status = EXIT_FAILURE;
 
 	return exit_status;
+}
+
+static int
+lira_function(char **args)
+{
+#ifndef _NO_LIRA
+	return mime_open(args);
+#else
+	fprintf(stderr, _("%s: Lira: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	return EXIT_FAILURE;
+#endif
 }
 
 /* Take the command entered by the user, already splitted into substrings
@@ -1555,8 +1592,7 @@ exec_cmd(char **comm)
 
 	else if ((*comm[0] == 'b' && comm[0][1] == 'h' && !comm[0][2])
 	|| (*comm[0] == 'f' && comm[0][1] == 'h' && !comm[0][2])) {
-		print_dirhist();
-		return EXIT_SUCCESS;
+		print_dirhist(); return EXIT_SUCCESS;
 	}
 
 	/*     ################# NEW FILE ##################     */
@@ -1685,8 +1721,7 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 's' && (strcmp(comm[0], "sb") == 0
 	|| strcmp(comm[0], "selbox") == 0)) {
-		show_sel_files();
-		return EXIT_SUCCESS;
+		show_sel_files(); return EXIT_SUCCESS;
 	}
 
 	else if (*comm[0] == 'd' && (strcmp(comm[0], "ds") == 0
@@ -1700,8 +1735,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "md") == 0 || strcmp(comm[0], "le") == 0)) {
 		/* This help is only for c, l, le, m, r, t, and md commands */
 		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(WRAPPERS_USAGE));
-			return EXIT_SUCCESS;
+			puts(_(WRAPPERS_USAGE)); return EXIT_SUCCESS;
 		}
 
 		if (*comm[0] == 'l' && !comm[0][1]) {
@@ -1867,8 +1901,7 @@ exec_cmd(char **comm)
 		return (exit_code = opener_function(comm[1]));
 
 	else if (*comm[0] == 't' && strcmp(comm[0], "tips") == 0) {
-		print_tips(1);
-		return EXIT_SUCCESS;
+		print_tips(1); return EXIT_SUCCESS;
 	}
 
 	else if (*comm[0] == 'a' && strcmp(comm[0], "actions") == 0)
@@ -1891,14 +1924,8 @@ exec_cmd(char **comm)
 
 	/* #### MIME #### */
 	else if (*comm[0] == 'm' && ((comm[0][1] == 'm' && !comm[0][2])
-	|| strcmp(comm[0], "mime") == 0)) {
-#ifndef _NO_LIRA
-		return (exit_code = mime_open(comm));
-#else
-		fprintf(stderr, _("%s: Lira: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-		return EXIT_FAILURE;
-#endif
-	}
+	|| strcmp(comm[0], "mime") == 0))
+		return (exit_code = lira_function(comm));
 
 	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2] && !autols)
 		return (exit_code = ls_function());
@@ -1987,42 +2014,36 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "commands") == 0))
 		return (exit_code = list_commands());
 
-	/* #### AND THESE ONES TOO #### */
 	/* These functions just print stuff, so that the value of exit_code
 	 * is always zero, that is to say, success */
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) {
-		printf("%s\n", workspaces[cur_ws].path);
-		return EXIT_SUCCESS;
+		printf("%s\n", workspaces[cur_ws].path); return EXIT_SUCCESS;
 	}
 
 	else if ((*comm[0] == '?' && !comm[0][1]) || strcmp(comm[0], "help") == 0) {
-		quick_help();
-		return EXIT_SUCCESS;
+		quick_help(); return EXIT_SUCCESS;
 	}
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'c' && !comm[0][2])
-	|| strcmp(comm[0], "colors") == 0))
-		return (exit_code = colors_function(comm[1]));
+	|| strcmp(comm[0], "colors") == 0)) {
+		colors_function(comm[1]); return EXIT_SUCCESS;
+	}
 
 	else if (*comm[0] == 'v' && (strcmp(comm[0], "ver") == 0
 	|| strcmp(comm[0], "version") == 0)) {
-		version_function();
-		return EXIT_SUCCESS;
+		version_function();	return EXIT_SUCCESS;
 	}
 
 	else if (*comm[0] == 'f' && comm[0][1] == 's' && !comm[0][2]) {
-		free_software();
-		return EXIT_SUCCESS;
+		free_software(); return EXIT_SUCCESS;
 	}
 
 	else if (*comm[0] == 'b' && strcmp(comm[0], "bonus") == 0) {
-		bonus_function();
-		return EXIT_SUCCESS;
+		bonus_function(); return EXIT_SUCCESS;
 	}
 
 	else if (*comm[0] == 's' && strcmp(comm[0], "splash") == 0) {
-		splash();
-		return EXIT_SUCCESS;
+		splash(); return EXIT_SUCCESS;
 	}
 
 	/* #### QUIT #### */
