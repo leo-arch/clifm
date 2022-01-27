@@ -1440,9 +1440,8 @@ check_auto_second(char **args)
 		}
 	}
 
-	int ret = EXIT_SUCCESS;
 	if (autocd && cdpath_n && !args[1]) {
-		ret = cd_function(tmp, CD_NO_PRINT_ERROR);
+		int ret = cd_function(tmp, CD_NO_PRINT_ERROR);
 		if (ret == EXIT_SUCCESS) {
 			free(tmp);
 			return EXIT_SUCCESS;
