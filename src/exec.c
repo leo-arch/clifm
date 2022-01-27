@@ -2097,6 +2097,26 @@ CHECK_EVENTS:
 	return exit_code;
 }
 
+static inline void
+run_chained_cmd(char **cmd, size_t *err_code)
+{
+	size_t i;
+	char **alias_cmd = check_for_alias(cmd);
+	if (alias_cmd) {
+		if (exec_cmd(alias_cmd) != 0)
+			*err_code = 1;
+		for (i = 0; alias_cmd[i]; i++)
+			free(alias_cmd[i]);
+		free(alias_cmd);
+	} else {
+		if (exec_cmd(cmd) != 0)
+			*err_code = 1;
+		for (i = 0; i <= args_n; i++)
+			free(cmd[i]);
+		free(cmd);
+	}
+}
+
 /* Execute chained commands (cmd1;cmd2 and/or cmd1 && cmd2). The function
  * is called by parse_input_str() if some non-quoted double ampersand or
  * semicolon is found in the input string AND at least one of these
@@ -2104,13 +2124,12 @@ CHECK_EVENTS:
 void
 exec_chained_cmds(char *cmd)
 {
-	if (!cmd)
-		return;
+	if (!cmd) return;
 
 	size_t i = 0, cmd_len = strlen(cmd);
 	for (i = 0; i < cmd_len; i++) {
 		char *str = (char *)NULL;
-		size_t len = 0, cond_exec = 0;
+		size_t len = 0, cond_exec = 0, error_code = 0;
 
 		/* Get command */
 		str = (char *)xcalloc(strlen(cmd) + 1, sizeof(char));
@@ -2125,33 +2144,15 @@ exec_chained_cmds(char *cmd)
 			continue;
 		}
 
-		/* Should we execute conditionally? */
-		if (cmd[i] == '&')
-			cond_exec = 1;
+		if (cmd[i] == '&') cond_exec = 1;
 
-		/* Execute the command */
 		char **tmp_cmd = parse_input_str(str);
 		free(str);
 
-		if (!tmp_cmd)
-			continue;
-		
-		int error_code = 0;
-		size_t j;
-		char **alias_cmd = check_for_alias(tmp_cmd);
-		if (alias_cmd) {
-			if (exec_cmd(alias_cmd) != 0)
-				error_code = 1;
-			for (j = 0; alias_cmd[j]; j++)
-				free(alias_cmd[j]);
-			free(alias_cmd);
-		} else {
-			if (exec_cmd(tmp_cmd) != 0)
-				error_code = 1;
-			for (j = 0; j <= args_n; j++)
-				free(tmp_cmd[j]);
-			free(tmp_cmd);
-		}
+		if (!tmp_cmd) continue;
+
+		run_chained_cmd(tmp_cmd, &error_code);
+
 		/* Do not continue if the execution was condtional and
 		 * the previous command failed */
 		if (cond_exec && error_code)
@@ -2160,24 +2161,26 @@ exec_chained_cmds(char *cmd)
 }
 
 static inline void
-run_profile_line(char *line)
+run_profile_line(char *cmd)
 {
 	if (xargs.secure_cmds == 1
-	&& sanitize_cmd(line, SNT_PROFILE) != EXIT_SUCCESS)
+	&& sanitize_cmd(cmd, SNT_PROFILE) != EXIT_SUCCESS)
 		return;
 
 	args_n = 0;
-	char **cmds = parse_input_str(line);
+	char **cmds = parse_input_str(cmd);
 	if (!cmds)
 		return;
 
 	no_log = 1;
 	exec_cmd(cmds);
 	no_log = 0;
+
 	int i = (int)args_n + 1;
 	while (--i >= 0)
 		free(cmds[i]);
 	free(cmds);
+
 	args_n = 0;
 }
 
