@@ -1437,18 +1437,6 @@ read_config(void)
 			}
 		}
 
-/*		else if (xargs.autojump == UNSET && *line == 'A'
-		&& strncmp(line, "AutoJump=", 9) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "AutoJump=%5s\n", opt_str);
-			if (ret == -1)
-				continue;
-			if (strncmp(opt_str, "true", 4) == 0)
-				autojump = autocd = 1;
-			else if (strncmp(opt_str, "false", 5) == 0)
-				autojump = 0;
-		} */
-
 		else if (xargs.auto_open == UNSET && *line == 'A'
 		&& strncmp(line, "AutoOpen=", 9) == 0) {
 			char opt_str[MAX_BOOL] = "";
@@ -1618,6 +1606,7 @@ read_config(void)
 			if (!*(++opt))
 				continue;
 
+			free(usr_cscheme);
 			usr_cscheme = savestring(opt, len);
 		}
 
@@ -1736,6 +1725,7 @@ read_config(void)
 				filter_rev = 0;
 			}
 
+			free(_filter);
 			_filter = savestring(opt_str, len);
 		}
 
@@ -1939,6 +1929,7 @@ read_config(void)
 			char *tmp = get_line_value(line);
 			if (!tmp)
 				continue;
+			free(opener);
 			opener = savestring(tmp, strlen(tmp));
 		}
 
@@ -1971,8 +1962,8 @@ read_config(void)
 		}
 
 		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
-			if (encoded_prompt)
-				free(encoded_prompt);
+			free(encoded_prompt);
+			encoded_prompt = (char *)NULL;
 			char *p = strchr(line, '=');
 			if (p && *(++p))
 				encoded_prompt = savestring(p, strlen(p));
@@ -2140,6 +2131,7 @@ read_config(void)
 			}
 			if (fail || s != SUG_STRATS)
 				continue;
+			free(suggestion_strategy);
 			suggestion_strategy = savestring(opt_str, strlen(opt_str));
 		}
 #endif /* !_NO_SUGGESTIONS */
@@ -2168,6 +2160,7 @@ read_config(void)
 				fzftab_options = (char *)xnmalloc(1, sizeof(char));
 				*fzftab_options = '\0';
 			} else {
+				free(fzftab_options);
 				fzftab_options = savestring(tmp, strlen(tmp));
 				if (strstr(fzftab_options, "--height"))
 					fzf_height_set = 1;
@@ -2175,11 +2168,6 @@ read_config(void)
 		}
 
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
-			if (term) {
-				free(term);
-				term = (char *)NULL;
-			}
-
 			char *opt = strchr(line, '=');
 			if (!opt || !*opt || !*(++opt))
 				continue;
@@ -2188,6 +2176,7 @@ read_config(void)
 			if (!tmp)
 				continue;
 
+			free(term);
 			term = savestring(tmp, strlen(tmp));
 		}
 
@@ -2248,10 +2237,12 @@ read_config(void)
 			}
 		}
 
-		else if (*line == 'W' && strncmp(line, "WarningPromptStr=", 17) == 0) {
+		else if (*line == 'W'
+		&& strncmp(line, "WarningPromptStr=", 17) == 0) {
 			char *tmp = get_line_value(line);
 			if (!tmp)
 				continue;
+			free(wprompt_str);
 			wprompt_str = savestring(tmp, strlen(tmp));
 		}
 
