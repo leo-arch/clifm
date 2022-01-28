@@ -25,6 +25,17 @@
 #ifndef MESSAGES_H
 #define MESSAGES_H
 
+#define PROGRAM_NAME "CliFM"
+#define PNL "clifm" /* Program name lowercase */
+#define PROGRAM_DESC "The command line file manager"
+#define VERSION "1.4"
+#define AUTHOR "L. Abramovich"
+#define CONTACT "johndoe.arch@outlook.com"
+#define WEBSITE "https://github.com/leo-arch/clifm"
+#define DATE "Jan 17, 2022"
+#define LICENSE "GPL2+"
+#define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
+
 /* Usage messages*/
 #define GRAL_USAGE "[-aAefFgGhHiIlLmoOsSuUvxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
@@ -629,6 +640,7 @@ Examples:\n\
 Page Down: Advance one page\nq: Stop pagging\n"
 #define PAGER_LABEL "\x1b[7;97m--Mas--\x1b[0;49m"
 #define NOT_AVAILABLE "This feature has been disabled at compile time"
+#define STEALTH_DISABLED "This function is disabled in stealth mode"
 
 #ifndef __HAIKU__
 #define HELP_MESSAGE "Enter '?' or press F1-F3 for instructions"

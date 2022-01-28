@@ -296,8 +296,7 @@ int
 remotes_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
-		fprintf(stderr, "%s: The net function is disabled in stealth mode\n",
-				PROGRAM_NAME);
+		fprintf(stderr, "%s: net: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_FAILURE;
 	}
 

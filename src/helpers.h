@@ -147,21 +147,6 @@ extern struct timespec timeout;
 #endif /* LINUX_INOTIFY */
 extern int watch;
 
-#define PROGRAM_NAME "CliFM"
-#define PNL "clifm" /* Program name lowercase */
-#define PROGRAM_DESC "The command line file manager"
-#ifndef __HAIKU__
-#define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
-#else
-#define CLEAR fputs("\x1b[H\x1b[2J", stdout);
-#endif
-#define VERSION "1.4"
-#define AUTHOR "L. Abramovich"
-#define CONTACT "johndoe.arch@outlook.com"
-#define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "Jan 17, 2022"
-#define LICENSE "GPL2+"
-
 /* Options flags */
 #define FOLDERS_FIRST (1 << 1)
 #define HELP          (1 << 2)
@@ -231,8 +216,6 @@ extern int watch;
 #define PR_ID      "\x1b[1;33m"
 #define PR_SIZE    "\x1b[1;32m"
 #define PR_NUM_VAL "\x1b[1;36m" /* Properties in octal */
-
-#define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are
@@ -356,49 +339,7 @@ extern int watch;
 #define P_tmpdir "/tmp"
 #endif
 
-#define itoa xitoa /* itoa does not exist in some OS's */
-#define atoi xatoi /* xatoi is just a secure atoi */
-
-#ifndef _NO_GETTEXT
-#define _(String) gettext(String)
-#else
-#define _(String) String
-#endif /* _GETTEXT */
-
-#define strlen(s) xstrnlen(s)
-
-#if defined(__linux) && defined(_BE_POSIX)
-#define strcasestr xstrcasestr
-#endif /* __linux && _BE_POSIX */
-
-#define ENTRY_N 64
-
-#define UNUSED(x) (void)x /* Just silence the compiler's warning */
-#define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
-#define DIGINUM(n) (((n) < 10) ? 1 \
-		: ((n) < 100)        ? 2 \
-		: ((n) < 1000)       ? 3 \
-		: ((n) < 10000)      ? 4 \
-		: ((n) < 100000)     ? 5 \
-		: ((n) < 1000000)    ? 6 \
-		: ((n) < 10000000)   ? 7 \
-		: ((n) < 100000000)  ? 8 \
-		: ((n) < 1000000000) ? 9 \
-				      : 10)
-#define _ISDIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
-#define _ISALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
-
-#define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
-
-#define FILE_URI_PREFIX_LEN 7
-#define IS_FILE_URI(f) ((f)[4] == ':' \
-				&& (f)[FILE_URI_PREFIX_LEN] \
-				&& strncmp((f), "file://", FILE_URI_PREFIX_LEN) == 0)
-
-#define IS_HELP(s) (*(s) == '-' && (((s)[1] == 'h' && !(s)[2]) \
-				|| strcmp((s), "--help") == 0))
-
-/* dirjump macros for calculating directories rank extra points */
+/* Dirjump macros for calculating directories rank extra points */
 #define BASENAME_BONUS 	300
 #define BOOKMARK_BONUS 	500
 #define PINNED_BONUS    1000
@@ -452,6 +393,55 @@ extern int watch;
 #define SNT_DISPLAY 6 /* Sanitize DISPLAY environment variable */
 #define SNT_MISC    7 /* Used to sanitize a few environment variables */
 #define SNT_NONE    8 /* Trusted command: do not sanitize*/
+
+/* Function macros */
+#define itoa xitoa /* itoa does not exist in some OS's */
+#define atoi xatoi /* xatoi is just a secure atoi */
+
+#ifndef _NO_GETTEXT
+#define _(String) gettext(String)
+#else
+#define _(String) String
+#endif /* _GETTEXT */
+
+#define strlen(s) xstrnlen(s)
+
+#if defined(__linux) && defined(_BE_POSIX)
+#define strcasestr xstrcasestr
+#endif /* __linux && _BE_POSIX */
+
+#define ENTRY_N 64
+
+#define UNUSED(x) (void)x /* Just silence the compiler's warning */
+#define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
+#define DIGINUM(n) (((n) < 10) ? 1 \
+		: ((n) < 100)        ? 2 \
+		: ((n) < 1000)       ? 3 \
+		: ((n) < 10000)      ? 4 \
+		: ((n) < 100000)     ? 5 \
+		: ((n) < 1000000)    ? 6 \
+		: ((n) < 10000000)   ? 7 \
+		: ((n) < 100000000)  ? 8 \
+		: ((n) < 1000000000) ? 9 \
+				      : 10)
+#define _ISDIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
+#define _ISALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
+
+#define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
+
+#define FILE_URI_PREFIX_LEN 7
+#define IS_FILE_URI(f) ((f)[4] == ':' \
+				&& (f)[FILE_URI_PREFIX_LEN] \
+				&& strncmp((f), "file://", FILE_URI_PREFIX_LEN) == 0)
+
+#define IS_HELP(s) (*(s) == '-' && (((s)[1] == 'h' && !(s)[2]) \
+				|| strcmp((s), "--help") == 0))
+
+#ifndef __HAIKU__
+#define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
+#else
+#define CLEAR fputs("\x1b[H\x1b[2J", stdout);
+#endif
 
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #

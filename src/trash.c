@@ -788,8 +788,7 @@ int
 untrash_function(char **comm)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: The trash function is disabled in stealth mode\n",
-		    PROGRAM_NAME);
+		printf("%s: trash: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
@@ -1077,8 +1076,7 @@ int
 trash_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: The trash function is disabled in stealth mode\n",
-			PROGRAM_NAME);
+		printf("%s: trash: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 

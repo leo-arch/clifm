@@ -119,8 +119,7 @@ int
 profile_set(char *prof)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: The profile function is disabled in stealth mode\n",
-		    PROGRAM_NAME);
+		printf("%s: profile: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
@@ -131,9 +130,7 @@ profile_set(char *prof)
 	int found = check_profile(prof);
 	if (!found) {
 		fprintf(stderr, _("%s: %s: No such profile\nTo add a new "
-				  "profile enter 'pf add PROFILE'\n"),
-		    PROGRAM_NAME, prof);
-
+			"profile enter 'pf add PROFILE'\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
 
@@ -316,14 +313,10 @@ profile_add(char *prof)
 
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
-	int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
-
-	if (ret != EXIT_SUCCESS) {
+	if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: mkdir: %s: Error creating "
 			"configuration directory\n"), PROGRAM_NAME, nconfig_dir);
-
 		free(nconfig_dir);
-
 		return EXIT_FAILURE;
 	}
 
@@ -389,8 +382,7 @@ static int
 profile_del(char *prof)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: The profile function is disabled in stealth mode\n",
-		    PROGRAM_NAME);
+		printf("%s: profile: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
@@ -480,8 +472,7 @@ int
 profile_function(char **comm)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: The profile function is disabled in stealth mode\n",
-		    PROGRAM_NAME);
+		printf("%s: profile: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 

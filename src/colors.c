@@ -407,11 +407,10 @@ int
 cschemes_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
-		fprintf(stderr, _("%s: The color schemes function is "
-			"disabled in stealth mode\nTIP: To change the current "
-			"color scheme use the following environment "
+		fprintf(stderr, _("%s: color schemes: %s\nTIP: To change the "
+			"current color scheme use the following environment "
 			"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
-			"and CLIFM_EXT_COLORS\n"), PROGRAM_NAME);
+			"and CLIFM_EXT_COLORS\n"), PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_FAILURE;
 	}
 

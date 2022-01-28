@@ -632,8 +632,7 @@ int
 alias_import(char *file)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: The alias function is disabled in stealth mode\n",
-				PROGRAM_NAME);
+		printf("%s: alias: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
