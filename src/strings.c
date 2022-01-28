@@ -833,7 +833,7 @@ is_internal_f(const char *restrict cmd)
 	return 0;
 }
 
-static char *
+char *
 split_fused_param(char *str)
 {
 	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
@@ -905,7 +905,7 @@ check_shell_functions(char *str)
 	if (!str || !*str)
 		return 0;
 
-	if (!int_vars) {
+	if (!int_vars) { /* Take assignements as shell functions */
 		char *s = strchr(str, ' ');
 		char *e = strchr(str, '=');
 		if (!s && e)
@@ -1130,13 +1130,14 @@ parse_input_str(char *str)
 		char *buf = (char *)NULL;
 
 		/* Get each word (cmd) in STR */
-		buf = (char *)xcalloc(str_len + 1, sizeof(char));
+		buf = (char *)xnmalloc(str_len + 1, sizeof(char));
 		for (j = 0; j < str_len; j++) {
 			while (str[j] && str[j] != ' ' && str[j] != ';' && str[j] != '&') {
 				buf[len] = str[j];
 				len++;
 				j++;
 			}
+			buf[len] = '\0';
 
 			if (strcmp(buf, "&&") != 0) {
 				if (is_internal_c(buf)) {
@@ -2068,7 +2069,7 @@ home_tilde(const char *new_path)
 	&& strncmp(new_path, user.home, user.home_len) == 0) {
 		/* If path == HOME/file */
 		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3,
-										sizeof(char));
+					sizeof(char));
 		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);
 	} else {
 		path_tilde = (char *)xnmalloc(strlen(new_path) + 1, sizeof(char));

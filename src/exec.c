@@ -2146,7 +2146,7 @@ exec_chained_cmds(char *cmd)
 
 		if (cmd[i] == '&') cond_exec = 1;
 
-		char **tmp_cmd = parse_input_str(str);
+		char **tmp_cmd = parse_input_str((*str == ' ') ? str + 1 : str);
 		free(str);
 
 		if (!tmp_cmd) continue;

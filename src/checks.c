@@ -45,6 +45,7 @@
 
 #include "aux.h"
 #include "misc.h"
+#include "strings.h"
 
 /* Terminals known not to be able to handle escape sequences */
 static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
@@ -270,12 +271,22 @@ found_cmd(char **cmds_list, int list_size, char *cmd)
 	int found = 0;
 	int i = list_size;
 
+	char *t = split_fused_param(cmd);
+	if (t) {
+		char *sp = strchr(t, ' ');
+		if (sp)
+			*sp = '\0';
+	}
+	char *p = (t && *t) ? t : cmd;
+
 	while (--i >= 0) {
-		if (*cmd == *cmds_list[i] && strcmp(cmd, cmds_list[i]) == 0) {
+		if (*p == *cmds_list[i] && strcmp(p, cmds_list[i]) == 0) {
 			found = 1;
 			break;
 		}
 	}
+
+	free(t);
 
 	if (found)
 		return 1;
@@ -289,15 +300,14 @@ is_internal_c(char *restrict cmd)
 	int i;
 	for (i = 0; internal_cmds[i]; i++);
 
-	if (found_cmd(internal_cmds, i, cmd)) {
+	if (found_cmd(internal_cmds, i, cmd))
 		return 1;
-	} else {
-		/* Check for the search and history functions as well */
-		if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
-		&& (_ISDIGIT(cmd[1]) || (cmd[1] == '-' && _ISDIGIT(cmd[2]))
-		|| cmd[1] == '!')))
-			return 1;
-	}
+
+	/* Check for the search and history functions as well */
+	if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
+	&& (_ISDIGIT(cmd[1]) || (cmd[1] == '-' && _ISDIGIT(cmd[2]))
+	|| cmd[1] == '!')))
+		return 1;
 
 	return 0;
 }
