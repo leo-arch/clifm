@@ -39,8 +39,6 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-//#include <signal.h>
-
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -60,7 +58,6 @@
 #include "remotes.h"
 
 /* Globals */
-
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct actions_t *usr_actions = (struct actions_t *)NULL;
 struct ws_t *workspaces = (struct ws_t *)NULL;
@@ -133,7 +130,6 @@ int
 	dir_changed = 0,
 	dirhist_map = UNSET,
 	disk_usage = UNSET,
-/*	elnpad = UNSET, */
 	expand_bookmarks = UNSET,
 	ext_cmd_ok = UNSET,
 	files_counter = UNSET,
@@ -659,29 +655,55 @@ struct timespec timeout;
 #endif
 int watch = UNSET;
 
-/*
-static void
-handle_sigwinch(int c)
+/* This is the main structure of any basic shell
+	 1 - Infinite loop
+	 2 - Grab user input
+	 3 - Parse user input
+	 4 - Execute command
+	 See https://brennan.io/2015/01/16/write-a-shell-in-c/
+	 */
+static inline void
+run_main_loop(void)
 {
-	UNUSED(c);
+	int i;
+	/* 1) Infinite loop to keep the program running */
+	while (1) {
+		/* 2) Grab input string from the prompt */
+		char *input = prompt();
+		if (!input)
+			continue;
 
-	if (kbind_busy)
-		return;
+		/* 3) Parse input string */
+		char **cmd = parse_input_str(input);
+		free(input);
+		input = (char *)NULL;
 
-	if (clear_screen)
-		CLEAR;
+		if (!cmd)
+			continue;
 
-	keybind_exec_cmd("rf");
-} */
+		/* 4) Execute input string */
+		char **alias_cmd = check_for_alias(cmd);
+		if (alias_cmd) {
+			/* If an alias is found, check_for_alias() frees cmd
+			 * and returns alias_cmd in its place to be executed by
+			 * exec_cmd() */
+			exec_cmd(alias_cmd);
 
-			/**
-				 * #############################
-				 * #           MAIN            #
-				 * #############################
-				 * */
+			for (i = 0; alias_cmd[i]; i++)
+				free(alias_cmd[i]);
+			free(alias_cmd);
+		} else {
+			exec_cmd(cmd);
+			i = (int)args_n + 1;
+			while (--i >= 0)
+				free(cmd[i]);
+			free(cmd);
+		}
+	}
+}
 
-int
-main(int argc, char *argv[])
+static inline void
+check_cpu_os(void)
 {
 	/* Though this program might perfectly work on other architectures,
 	 * I just didn't test anything beyond x86 and ARM */
@@ -695,7 +717,119 @@ main(int argc, char *argv[])
 	fprintf(stderr, _("%s: Unsupported operating system\n"), PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #endif
+}
 
+static inline void
+set_root_indicator(void)
+{
+	if (flags & ROOT_USR) {
+		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root%s\n"),
+			BOLD, PROGRAM_NAME, _RED, df_c);
+	}
+}
+
+static inline void
+__list()
+{
+	if (autols && isatty(STDIN_FILENO)) {
+#ifdef LINUX_INOTIFY
+		/* Initialize inotify */
+		inotify_fd = inotify_init1(IN_NONBLOCK);
+		if (inotify_fd < 0) {
+			_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}
+#elif defined(BSD_KQUEUE)
+		kq = kqueue();
+		if (kq < 0) {
+			_err('w', PRINT_PROMPT, "%s: kqueue: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}
+#endif
+		list_dir();
+	}
+}
+
+static inline void
+_splash(void)
+{
+	if (splash_screen) {
+		splash();
+		splash_screen = 0;
+		CLEAR;
+	}
+}
+
+/* Set terminal window title */
+static inline void
+_set_term_title(void)
+{
+	if (flags & GUI) {
+		if (xargs.cwd_in_title == 0) {
+			printf("\033]2;%s\007", PROGRAM_NAME);
+			fflush(stdout);
+		} else {
+			set_term_title(workspaces[cur_ws].path);
+		}
+	}
+}
+
+static inline void
+check_working_directory(void)
+{
+	if (workspaces == (struct ws_t *)NULL || !workspaces[cur_ws].path
+	|| !*workspaces[cur_ws].path) {
+		_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
+			"retrieving current working directory\n"), PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+}
+
+/* Check whether we have a working shell */
+static inline void
+check_working_shell(void)
+{
+	if (access(user.shell, X_OK) == -1) {
+		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. "
+				"Please edit the configuration file to specify a working "
+				"shell.\n"), PROGRAM_NAME, user.shell);
+	}
+}
+
+static inline void
+init_trash(void)
+{
+	if (trash_ok) {
+		trash_n = count_dir(trash_files_dir, NO_CPOP);
+		if (trash_n <= 2)
+			trash_n = 0;
+	}
+}
+
+static inline void
+get_hostname(void)
+{
+	if (gethostname(hostname, sizeof(hostname)) == -1) {
+		hostname[0] = '?';
+		hostname[1] = '\0';
+		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"),
+			PROGRAM_NAME);
+	}
+}
+
+				/**
+				 * #############################
+				 * #           MAIN            #
+				 * #############################
+				 * */
+
+/* 1. Initialize stuff
+ * 2. Run the main program loop */
+int
+main(int argc, char *argv[])
+{
+	/* Make sure we are running on supported CPU and operating system */
+	check_cpu_os();
 	/* Make sure we are running on a supported terminal */
 	check_term();
 
@@ -735,10 +869,8 @@ main(int argc, char *argv[])
 	/* Set all external arguments flags to uninitialized state */
 	unset_xargs();
 
-	/* Manage external arguments, but only if any: argc == 1 equates to
-	 * no argument, since this '1' is just the program invokation name.
-	 * External arguments will override initialization values
-	 * (init_config) */
+	/* Manage external arguments
+	 * External arguments will override initialization values (init_config) */
 	if (argc > 1)
 		external_arguments(argc, argv);
 	/* external_arguments is executed before init_config because, if
@@ -758,7 +890,6 @@ main(int argc, char *argv[])
 	 * file, if they were not already set via external arguments, and
 	 * load sel elements, if any. All these configurations are made
 	 * per user basis */
-
 	init_config();
 	check_options();
 	set_sel_file();
@@ -778,73 +909,27 @@ main(int argc, char *argv[])
 	init_gettext();
 #endif
 
-/*	cschemes_n = get_colorschemes();
-	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
-	free(usr_cscheme);
-	usr_cscheme = (char *)NULL; */
-
 	fputs(df_c, stdout);
 	fflush(stdout);
 
 #ifndef __HAIKU__
 	/* No need for this warning on Haiku: it runs as root by default */
-	if (flags & ROOT_USR) {
-		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root%s\n"),
-			BOLD, PROGRAM_NAME, _RED, df_c);
-	}
+	set_root_indicator();
 #endif
 
 	load_remotes();
 	automount_remotes();
-
-	if (splash_screen) {
-		splash();
-		splash_screen = 0;
-		CLEAR;
-	}
-
+	_splash();
 	set_start_path();
-
-	if (workspaces == (struct ws_t *)NULL || !workspaces[cur_ws].path
-	|| !*workspaces[cur_ws].path) {
-		_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
-			"retrieving current working directory\n"), PROGRAM_NAME);
-		exit(EXIT_FAILURE);
-	}
-
-	/* Set terminal window title */
-	if (flags & GUI) {
-		if (xargs.cwd_in_title == 0) {
-			printf("\033]2;%s\007", PROGRAM_NAME);
-			fflush(stdout);
-		} else {
-			set_term_title(workspaces[cur_ws].path);
-		}
-	}
-
+	check_working_directory();
+	_set_term_title();
 	exec_profile();
 	load_dirhist();
 	add_to_dirhist(workspaces[cur_ws].path);
 	get_sel_files();
 
 	/* Start listing as soon as possible to speed up startup time */
-	if (autols && isatty(STDIN_FILENO)) {
-#ifdef LINUX_INOTIFY
-		/* Initialize inotify */
-		inotify_fd = inotify_init1(IN_NONBLOCK);
-		if (inotify_fd < 0) {
-			_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME,
-				strerror(errno));
-		}
-#elif defined(BSD_KQUEUE)
-		kq = kqueue();
-		if (kq < 0) {
-			_err('w', PRINT_PROMPT, "%s: kqueue: %s\n", PROGRAM_NAME,
-				strerror(errno));
-		}
-#endif
-		list_dir();
-	}
+	__list();
 
 	shell = get_sys_shell();
 	create_kbinds_file();
@@ -855,34 +940,16 @@ main(int argc, char *argv[])
 		add_to_jumpdb(workspaces[cur_ws].path);
 
 	initialize_readline();
-
 	/*Trim the directory history file if necessary */
 	check_file_size(dirhist_file, max_dirhist);
-
-	/* Check whether we have a working shell */
-	if (access(user.shell, X_OK) == -1) {
-		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. "
-				"Please edit the configuration file to specify a working "
-				"shell.\n"), PROGRAM_NAME, user.shell);
-	}
-
+	check_working_shell();
 	get_prompt_cmds();
 
 #ifndef _NO_TRASH
-	if (trash_ok) {
-		trash_n = count_dir(trash_files_dir, NO_CPOP);
-		if (trash_n <= 2)
-			trash_n = 0;
-	}
+	init_trash();
 #endif
 
-	if (gethostname(hostname, sizeof(hostname)) == -1) {
-		hostname[0] = '?';
-		hostname[1] = '\0';
-		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"),
-			PROGRAM_NAME);
-	}
-
+	get_hostname();
 	init_shell();
 
 	if (config_ok)
@@ -891,63 +958,12 @@ main(int argc, char *argv[])
 	/* Store history into an array to be able to manipulate it */
 	get_history();
 
-	/* Check if the 'file' command is available: we need it for Lira */
-/*	if (!opener)
-		file_cmd_check(); */
-
 	get_profile_names();
 	load_pinned_dir();
 	set_env();
 
-				/* ###########################
-				 * #   2) MAIN PROGRAM LOOP  #
-				 * ########################### */
-
-	/* This is the main structure of any basic shell
-		 1 - Infinite loop
-		 2 - Grab user input
-		 3 - Parse user input
-		 4 - Execute command
-		 See https://brennan.io/2015/01/16/write-a-shell-in-c/
-		 */
-
-	int i;
-	/* 1) Infinite loop to keep the program running */
-	while (1) {
-		/* 2) Grab input string from the prompt */
-		char *input = prompt();
-		if (!input)
-			continue;
-
-		/* 3) Parse input string */
-		char **cmd = parse_input_str(input);
-		free(input);
-		input = (char *)NULL;
-
-		if (!cmd)
-			continue;
-
-		/* 4) Execute input string */
-		char **alias_cmd = check_for_alias(cmd);
-		if (alias_cmd) {
-			/* If an alias is found, check_for_alias() frees cmd
-			 * and returns alias_cmd in its place to be executed by
-			 * exec_cmd() */
-			exec_cmd(alias_cmd);
-
-			for (i = 0; alias_cmd[i]; i++)
-				free(alias_cmd[i]);
-			free(alias_cmd);
-			alias_cmd = (char **)NULL;
-		} else {
-			exec_cmd(cmd);
-			i = (int)args_n + 1;
-			while (--i >= 0)
-				free(cmd[i]);
-			free(cmd);
-			cmd = (char **)NULL;
-		}
-	}
+	/* # 2. MAIN PROGRAM LOOP # */
+	run_main_loop();
 
 	return exit_code; /* Never reached */
 }
