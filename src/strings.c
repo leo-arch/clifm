@@ -833,7 +833,7 @@ is_internal_f(const char *restrict cmd)
 	return 0;
 }
 
-char *
+static char *
 split_fused_param(char *str)
 {
 	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')

@@ -45,7 +45,6 @@
 
 #include "aux.h"
 #include "misc.h"
-#include "strings.h"
 
 /* Terminals known not to be able to handle escape sequences */
 static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
@@ -264,29 +263,49 @@ is_number(const char *restrict str)
 	return 1;
 }
 
-/* Returns 1 if CMD is found in CMDS_LIST and zero otherwise */
-static int
-found_cmd(char **cmds_list, int list_size, char *cmd)
+/* Check if command STR contains a digit and this digit is not the first
+ * char of STR. Used by find_cmd() (called by is_internal_c()) to check
+ * for fused parameters in internal commands
+ * Returns the index of the digit in STR or -1 if no digit is found */
+static inline int
+contains_digit(char *str)
 {
-	int found = 0;
-	int i = list_size;
+	if (!str || !*(++str))
+		return (-1);
 
-	char *t = split_fused_param(cmd);
-	if (t) {
-		char *sp = strchr(t, ' ');
-		if (sp)
-			*sp = '\0';
+	int i = 1;
+
+	while (*str) {
+		if (*str >= '1' && *str <= '9')
+			return i;
+		str++;
+		i++;
 	}
-	char *p = (t && *t) ? t : cmd;
+
+	return (-1);
+}
+
+/* Returns 1 if CMD is found in CMDS_LIST and zero otherwise */
+static inline int
+find_cmd(char **cmds_list, int list_size, char *cmd)
+{
+	int found = 0, i = list_size;
+	int c = -1, d = contains_digit(cmd);
+
+	if (d != -1) {
+		c = cmd[d];
+		cmd[d] = '\0';
+	}
 
 	while (--i >= 0) {
-		if (*p == *cmds_list[i] && strcmp(p, cmds_list[i]) == 0) {
+		if (*cmd == *cmds_list[i] && strcmp(cmd, cmds_list[i]) == 0) {
 			found = 1;
 			break;
 		}
 	}
 
-	free(t);
+	if (d != -1)
+		cmd[d] = (char)c;
 
 	if (found)
 		return 1;
@@ -300,7 +319,7 @@ is_internal_c(char *restrict cmd)
 	int i;
 	for (i = 0; internal_cmds[i]; i++);
 
-	if (found_cmd(internal_cmds, i, cmd))
+	if (find_cmd(internal_cmds, i, cmd))
 		return 1;
 
 	/* Check for the search and history functions as well */
@@ -346,14 +365,12 @@ is_internal(char *restrict cmd)
 		NULL};
 
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
-	if (found_cmd(int_cmds, i, cmd))
+	if (find_cmd(int_cmds, i, cmd))
 		return 1;
 
 	/* Check for the search function as well */
-	else {
-		if (*cmd == '/' && access(cmd, F_OK) != 0)
-			return 1;
-	}
+	if (*cmd == '/' && access(cmd, F_OK) != 0)
+		return 1;
 
 	return 0;
 }
@@ -420,8 +437,8 @@ check_regex(char *str)
 	return EXIT_FAILURE;
 }
 
-/* Returns the parsed aliased command in an array of strings, if
- * matching alias is found, or NULL if not. */
+/* Returns the parsed aliased command in an array of strings if
+ * matching alias is found, or NULL if not */
 char **
 check_for_alias(char **args)
 {
@@ -442,7 +459,6 @@ check_for_alias(char **args)
 
 		/* Parse the aliased cmd */
 		char **alias_comm = parse_input_str(aliases[i].cmd);
-
 		if (!alias_comm) {
 			args_n = 0;
 			fprintf(stderr, _("%s: Error parsing aliased command\n"), PROGRAM_NAME);
