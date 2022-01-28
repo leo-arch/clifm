@@ -48,7 +48,7 @@
 #include "messages.h"
 
 /* Get the list of all available profile names and store them in the
- * profile_names global array. Return zero on success, one otherwise */
+ * profile_names global array. Returns zero on success, one otherwise */
 int
 get_profile_names(void)
 {
@@ -74,13 +74,13 @@ get_profile_names(void)
 	for (i = 0; i < (size_t)files_n; i++) {
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		char tmp[PATH_MAX];
-		snprintf(tmp, PATH_MAX - 1, "%s/%s", pf_dir,profs[i]->d_name);
+		snprintf(tmp, PATH_MAX - 1, "%s/%s", pf_dir, profs[i]->d_name);
 		if (lstat(tmp, &attr) == -1)
 			continue;
 		if (S_ISDIR(attr.st_mode)
 #else
 		if (profs[i]->d_type == DT_DIR
-#endif
+#endif /* _DIRENT_HAVE_D_TYPE */
 		    /* Discard ".", "..", and hidden dirs */
 		    && *profs[i]->d_name != '.') {
 			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
@@ -426,6 +426,54 @@ profile_del(char *prof)
 	return EXIT_FAILURE;
 }
 
+static int
+print_profiles(void)
+{
+	size_t i;
+	for (i = 0; profile_names[i]; i++)
+		printf("%s\n", profile_names[i]);
+
+	return EXIT_SUCCESS;
+}
+
+static int
+print_current_profile(void)
+{
+	printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile
+		? alt_profile : "default");
+	return EXIT_SUCCESS;
+}
+
+static int
+create_profile(char *name)
+{
+	if (name)
+		return profile_add(name);
+
+	fprintf(stderr, "%s\n", PROFILES_USAGE);
+	return EXIT_FAILURE;
+}
+
+static int
+delete_profile(char *name)
+{
+	if (name)
+		return profile_del(name);
+
+	fprintf(stderr, "%s\n", PROFILES_USAGE);
+	return EXIT_FAILURE;
+}
+
+static int
+switch_profile(char *name)
+{
+	if (name)
+		return profile_set(name);
+
+	fprintf(stderr, "%s\n", PROFILES_USAGE);
+	return EXIT_FAILURE;
+}
+
 /* Main profiles function. Call the operation specified by the first
  * argument option: list, add, set, or delete */
 int
@@ -437,61 +485,31 @@ profile_function(char **comm)
 		return EXIT_SUCCESS;
 	}
 
-	/* If just 'pr', print current profile and exit */
-	if (!comm[1]) {
-		printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile
-			? alt_profile : "default");
+	if (!comm[1])
+		return print_current_profile();
+
+	if (IS_HELP(comm[1])) {
+		puts(_(PROFILES_USAGE));
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
-
-	if (IS_HELP(comm[1]))
-		puts(_(PROFILES_USAGE));
-
 	/* List profiles */
-	else if (comm[1] && (strcmp(comm[1], "ls") == 0
-	|| strcmp(comm[1], "list") == 0)) {
-		size_t i;
-		for (i = 0; profile_names[i]; i++)
-			printf("%s\n", profile_names[i]);
-	}
+	if (*comm[1] == 'l' && (strcmp(comm[1], "ls") == 0
+	|| strcmp(comm[1], "list") == 0))
+		return print_profiles();
 
 	/* Create a new profile */
-	else if (strcmp(comm[1], "add") == 0) {
-		if (comm[2]) {
-			exit_status = profile_add(comm[2]);
-		} else {
-			fprintf(stderr, "%s\n", PROFILES_USAGE);
-			exit_status = EXIT_FAILURE;
-		}
-	}
+	if (*comm[1] == 'a' && strcmp(comm[1], "add") == 0)
+		return create_profile(comm[2]);
 
 	/* Delete a profile */
-	else if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0) {
-		if (comm[2]) {
-			exit_status = profile_del(comm[2]);
-		} else {
-			fprintf(stderr, "%s\n", PROFILES_USAGE);
-			exit_status = EXIT_FAILURE;
-		}
-	}
+	if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0)
+		return delete_profile(comm[2]);
 
 	/* Switch to another profile */
-	else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0) {
-		if (comm[2]) {
-			exit_status = profile_set(comm[2]);
-		} else {
-			fprintf(stderr, "%s\n", PROFILES_USAGE);
-			exit_status = EXIT_FAILURE;
-		}
-	}
+	else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0)
+		return switch_profile(comm[2]);
 
-	/* None of the above == error */
-	else {
-		fprintf(stderr, "%s\n", PROFILES_USAGE);
-		exit_status = EXIT_FAILURE;
-	}
-
-	return exit_status;
+	fprintf(stderr, "%s\n", PROFILES_USAGE);
+	return EXIT_FAILURE;
 }
