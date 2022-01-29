@@ -122,7 +122,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
   - [FZF mode for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)
   - [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting)
-  - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Specifics/#the-warning-prompt)
+  - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt)
   - [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
   - Bash-like quoting system.
   - Shell commands execution.
