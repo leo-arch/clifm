@@ -347,7 +347,7 @@ gen_shell_name(void)
 	char *p = (char *)NULL,
 		 *shell_name = strrchr(user.shell, '/');
 
-	if (shell_name && shell_name + 1)
+	if (shell_name && *(shell_name + 1))
 		p = shell_name + 1;
 	else
 		p = user.shell;
@@ -435,8 +435,8 @@ gen_emergency_prompt(void)
 		f = 1;
 		fprintf(stderr, _("%s: %s\n"), PROGRAM_NAME, EMERGENCY_PROMPT_MSG);
 	}
-	char *prompt = savestring(EMERGENCY_PROMPT, EMERGENCY_PROMPT_LEN);
-	return prompt;
+	char *_prompt = savestring(EMERGENCY_PROMPT, EMERGENCY_PROMPT_LEN);
+	return _prompt;
 }
 
 /*
