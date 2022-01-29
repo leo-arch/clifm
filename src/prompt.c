@@ -56,6 +56,11 @@
 #define STEALTH_IND "S\001\x1b[0m\002"
 #define STEALTH_IND_SIZE MAX_COLOR + 7 + 1
 
+#define EMERGENCY_PROMPT_MSG "Error decoding prompt line. Using an \
+emergency prompt"
+#define EMERGENCY_PROMPT "\001\x1b[0m\002> "
+#define EMERGENCY_PROMPT_LEN 8
+
 /* Size of the indicator for msgs, trash, and sel */
 #define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
 /* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
@@ -67,6 +72,7 @@ gen_time(const int c)
 	time_t rawtime = time(NULL);
 	struct tm tm;
 	localtime_r(&rawtime, &tm);
+
 	if (c == 't') {
 		char time[9] = "";
 		strftime(time, sizeof(time), "%H:%M:%S", &tm);
@@ -93,43 +99,61 @@ gen_time(const int c)
 }
 
 static inline char *
+get_dir_basename(char *_path)
+{
+	char *temp = (char *)NULL,
+		 *ret = (char *)NULL;
+
+	/* If not root dir (/), get last path component */
+	if (!(*_path == '/' && !*(_path + 1)))
+		ret = strrchr(_path, '/');
+
+	if (!ret)
+		temp = savestring(_path, strlen(_path));
+	else
+		temp = savestring(ret + 1, strlen(ret + 1));
+
+	return temp;
+}
+
+static inline char *
+reduce_path(char *_path)
+{
+	char *temp = (char *)NULL;
+
+	if (strlen(_path) > (size_t)max_path) {
+		char *ret = strrchr(_path, '/');
+		if (!ret)
+			temp = savestring(_path, strlen(_path));
+		else
+			temp = savestring(ret + 1, strlen(ret + 1));
+	} else {
+		temp = savestring(_path, strlen(_path));
+	}
+
+	return temp;
+}
+
+static inline char *
 gen_pwd(int c)
 {
 	char *temp = (char *)NULL;
 	/* Reduce HOME to "~" */
 	int free_tmp_path = 0;
 	char *tmp_path = (char *)NULL;
+
 	if (strncmp(workspaces[cur_ws].path, user.home, user.home_len) == 0)
 		tmp_path = home_tilde(workspaces[cur_ws].path);
+
 	if (!tmp_path)
 		tmp_path = workspaces[cur_ws].path;
 	else
 		free_tmp_path = 1;
 
 	if (c == 'W') {
-		char *ret = (char *)NULL;
-		/* If not root dir (/), get last dir name */
-		if (!(*tmp_path == '/' && !*(tmp_path + 1)))
-			ret = strrchr(tmp_path, '/');
-
-		if (!ret)
-			temp = savestring(tmp_path, strlen(tmp_path));
-		else
-			temp = savestring(ret + 1, strlen(ret) - 1);
-	}
-
-	/* Reduce path only if longer than max_path */
-	else if (c == 'p') {
-		if (strlen(tmp_path) > (size_t)max_path) {
-			char *ret = (char *)NULL;
-			ret = strrchr(tmp_path, '/');
-			if (!ret)
-				temp = savestring(tmp_path, strlen(tmp_path));
-			else
-				temp = savestring(ret + 1, strlen(ret) - 1);
-		} else {
-			temp = savestring(tmp_path, strlen(tmp_path));
-		}
+		temp = get_dir_basename(tmp_path);
+	} else if (c == 'p') {
+		temp = reduce_path(tmp_path);
 	} else { /* If c == 'w' */
 		temp = savestring(tmp_path, strlen(tmp_path));
 	}
@@ -164,11 +188,272 @@ gen_workspace(void)
 	return temp;
 }
 
+static inline char *
+gen_exit_status(void)
+{
+	size_t code_len = (size_t)DIGINUM(exit_code);
+
+	char *temp = (char *)xnmalloc(code_len + 12 + MAX_COLOR, sizeof(char));
+	sprintf(temp, "\001%s\002%d\001%s\002",
+			(exit_code == 0) ? (colorize ? _GREEN : "")
+			: (colorize ? _RED : ""), exit_code, df_c);
+
+	return temp;
+}
+
+static inline char *
+gen_escape_char(char **line, int *c)
+{
+	(*line)++;
+	*c = 0;
+	/* 27 (dec) == 033 (octal) == 0x1b (hex) == \e */
+	char *temp = (char *)xnmalloc(2, sizeof(char));
+	*temp = '\033';
+	temp[1] = '\0';
+
+	return temp;
+}
+
+static inline char *
+gen_octal(char **line, int *c)
+{
+	char octal_string[4];
+	int n;
+
+	xstrsncpy(octal_string, *line, 3);
+	octal_string[3] = '\0';
+
+	n = read_octal(octal_string);
+	char *temp = (char *)xnmalloc(3, sizeof(char));
+
+	if (n == CTLESC || n == CTLNUL) {
+		*line += 3;
+		temp[0] = CTLESC;
+		temp[1] = (char)n;
+		temp[2] = '\0';
+	} else if (n == -1) {
+		temp[0] = '\\';
+		temp[1] = '\0';
+	} else {
+		*line += 3;
+		temp[0] = (char)n;
+		temp[1] = '\0';
+	}
+
+	*c = 0;
+
+	return temp;
+}
+
+static inline char *
+gen_profile(void)
+{
+	char *temp = (char *)NULL;
+
+	if (!alt_profile)
+		temp = savestring("default", 7);
+	else
+		temp = savestring(alt_profile, strlen(alt_profile));
+
+	return temp;
+}
+
+static inline char *
+gen_user_name(void)
+{
+	char *temp = (char *)NULL;
+
+	if (!user.name)
+		temp = savestring("?", 1);
+	else
+		temp = savestring(user.name, strlen(user.name));
+
+	return temp;
+}
+
+static inline char *
+gen_hostname(const int c)
+{
+	char *temp = savestring(hostname, strlen(hostname));
+	if (c != 'h')
+		return temp;
+
+	char *ret = strchr(temp, '.');
+	if (ret)
+		*ret = '\0';
+
+	return temp;
+}
+
+static inline char *
+gen_user_flag(void)
+{
+	char *temp = (char *)xnmalloc(2, sizeof(char));
+
+	if ((flags & ROOT_USR))
+		*temp = '#';
+	else
+		*temp = '$';
+
+	temp[1] = '\0';
+	return temp;
+}
+
+static inline char *
+gen_mode(void)
+{
+	char *temp = (char *)xnmalloc(2, sizeof(char));
+	if (light_mode) {
+		*temp = 'L';
+		temp[1] = '\0';
+	} else {
+		*temp = '\0';
+	}
+
+	return temp;
+}
+
+static inline char*
+gen_misc(const int c)
+{
+	char *temp = (char *)xnmalloc(2, sizeof(char));
+
+	if (c == 'n')
+		*temp = '\n';
+	else if (c == 'r')
+		*temp = '\r';
+	else
+		*temp = '\a';
+
+	temp[1] = '\0';
+
+	return temp;
+}
+
+static inline char *
+gen_non_print_sequence(const int c)
+{
+	char *temp = (char *)xnmalloc(2, sizeof(char));
+	*temp = (c == '[') ? RL_PROMPT_START_IGNORE
+			: RL_PROMPT_END_IGNORE;
+	temp[1] = '\0';
+
+	return temp;
+}
+
+static inline char *
+gen_shell_name(void)
+{
+	char *p = (char *)NULL,
+		 *shell_name = strrchr(user.shell, '/');
+
+	if (shell_name && shell_name + 1)
+		p = shell_name + 1;
+	else
+		p = user.shell;
+
+	return savestring(p, strlen(p));
+}
+
+static inline void
+add_string(char **tmp, const int c, char **line, char **res, size_t *len)
+{
+	if (!*tmp)
+		return;
+
+	if (c)
+		(*line)++;
+
+	*len += strlen(*tmp);
+
+	if (!*res) {
+		*res = (char *)xnmalloc(*len + 1, sizeof(char));
+		*(*res) = '\0';
+	} else {
+		*res = (char *)xrealloc(*res, (*len + 1) * sizeof(char));
+	}
+
+	strcat(*res, *tmp);
+	free(*tmp);
+}
+
+static inline void
+reset_ifs(const char *value)
+{
+	if (value)
+		setenv("IFS", value, 1);
+	else
+		unsetenv("IFS");
+}
+
+static inline void
+substitute_cmd(char **line, char **res, size_t *len)
+{
+	int tmp = strcntchr(*line, ')');
+	if (tmp == -1) return; /* No ending bracket */
+
+	char *tmp_str = (char *)xnmalloc(strlen(*line) + 2, sizeof(char));
+	sprintf(tmp_str, "$%s", *line);
+
+	tmp_str[tmp + 2] = '\0';
+	*line += tmp + 1;
+
+	const char *old_value = getenv("IFS");
+	setenv("IFS", "", 1);
+
+	wordexp_t wordbuf;
+	if (wordexp(tmp_str, &wordbuf, 0) != EXIT_SUCCESS) {
+		free(tmp_str);
+		reset_ifs(old_value);
+		return;
+	}
+	reset_ifs(old_value);
+	free(tmp_str);
+
+	if (wordbuf.we_wordc) {
+		for (size_t j = 0; j < wordbuf.we_wordc; j++) {
+			*len += strlen(wordbuf.we_wordv[j]);
+			if (!*res) {
+				*res = (char *)xnmalloc(*len + 2, sizeof(char));
+				*(*res) = '\0';
+			} else {
+				*res = (char *)xrealloc(*res, (*len + 2) * sizeof(char));
+			}
+			strcat(*res, wordbuf.we_wordv[j]);
+		}
+	}
+
+	wordfree(&wordbuf);
+	return;
+}
+
+static inline char *
+gen_emergency_prompt(void)
+{
+	static int f = 0;
+	if (f == 0) {
+		f = 1;
+		fprintf(stderr, _("%s: %s\n"), PROGRAM_NAME, EMERGENCY_PROMPT_MSG);
+	}
+	char *prompt = savestring(EMERGENCY_PROMPT, EMERGENCY_PROMPT_LEN);
+	return prompt;
+}
+
+/*
+static inline void
+write_result(char **res, size_t *len, const int c)
+{
+	*res = (char *)xrealloc(*res, (*len + 2) * sizeof(char));
+	*res[*len] = (char)c;
+	(*len)++;
+	*res[*len] = '\0';
+} */
+
 /* Decode the prompt string (encoded_prompt global variable) taken from
  * the configuration file. Based on the decode_prompt_string function
  * found in an old bash release (1.14.7). */
-static char *
-decode_prompt(const char *line)
+char *
+decode_prompt(char *line)
 {
 	if (!line)
 		return (char *)NULL;
@@ -183,181 +468,79 @@ decode_prompt(const char *line)
 			/* Now move on to the next char */
 			c = *line;
 			switch (c) {
-
 			case 'z': /* Exit status of last executed command */
-				temp = (char *)xnmalloc(strlen(xitoa(exit_code)) + 12 + MAX_COLOR,
-						sizeof(char));
-				sprintf(temp, "\001%s\002%d\001%s\002",
-						(exit_code == 0) ? (colorize ? _GREEN : "")
-						: (colorize ? _RED : ""), exit_code, df_c);
-				goto ADD_STRING;
+				temp = gen_exit_status(); goto ADD_STRING;
 
 			case 'e': /* Escape char */
-				temp = xnmalloc(2, sizeof(char));
-				line++;
-				/* 27 (dec) == 033 (octal) == 0x1b (hex) == \e */
-				temp[0] = '\033';
-				temp[1] = '\0';
-				c = 0;
-				goto ADD_STRING;
+				temp = gen_escape_char(&line, &c); goto ADD_STRING;
 
-			case '0': /* Octal char */
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7': {
-				char octal_string[4];
-				int n;
-
-				xstrsncpy(octal_string, line, 3);
-				octal_string[3] = '\0';
-
-				n = read_octal(octal_string);
-				temp = xnmalloc(3, sizeof(char));
-
-				if (n == CTLESC || n == CTLNUL) {
-					line += 3;
-					temp[0] = CTLESC;
-					temp[1] = (char)n;
-					temp[2] = '\0';
-				} else if (n == -1) {
-					temp[0] = '\\';
-					temp[1] = '\0';
-				} else {
-					line += 3;
-					temp[0] = (char)n;
-					temp[1] = '\0';
-				}
-
-				c = 0;
-				goto ADD_STRING;
-			}
+			case '0': /* fallthrough */ /* Octal char */
+			case '1': /* fallthrough */
+			case '2': /* fallthrough */
+			case '3': /* fallthrough */
+			case '4': /* fallthrough */
+			case '5': /* fallthrough */
+			case '6': /* fallthrough */
+			case '7':
+				temp = gen_octal(&line, &c); goto ADD_STRING;
 
 			case 'c': /* Program name */
-				temp = savestring(PNL, strlen(PNL));
-				goto ADD_STRING;
+				temp = savestring(PNL, strlen(PNL)); goto ADD_STRING;
 
 			case 'P': /* Current profile name */
-				if (!alt_profile)
-					temp = savestring("default", 7);
-				else
-					temp = savestring(alt_profile, strlen(alt_profile));
-				goto ADD_STRING;
+				temp = gen_profile(); goto ADD_STRING;
 
-			case 't': /* Time: 24-hour HH:MM:SS format */
-			case 'T': /* 12-hour HH:MM:SS format */
-			case 'A': /* 24-hour HH:MM format */
-			case '@': /* 12-hour HH:MM:SS am/pm format */
+			case 't': /* fallthrough */ /* Time: 24-hour HH:MM:SS format */
+			case 'T': /* fallthrough */ /* 12-hour HH:MM:SS format */
+			case 'A': /* fallthrough */ /* 24-hour HH:MM format */
+			case '@': /* fallthrough */ /* 12-hour HH:MM:SS am/pm format */
 			case 'd': /* Date: abrev_weak_day, abrev_month_day month_num */
-			{
-				temp = gen_time(c);
-				goto ADD_STRING;
-			}
+				temp = gen_time(c); goto ADD_STRING;
 
 			case 'u': /* User name */
-				if (!user.name)
-					temp = savestring("?", 1);
-				else
-					temp = savestring(user.name, strlen(user.name));
-				goto ADD_STRING;
+				temp = gen_user_name(); goto ADD_STRING;
 
-			case 'h': /* Hostname up to first '.' */
+			case 'h': /* fallthrough */ /* Hostname up to first '.' */
 			case 'H': /* Full hostname */
-				temp = savestring(hostname, strlen(hostname));
-				if (c == 'h') {
-					int ret = strcntchr(hostname, '.');
-					if (ret != -1)
-						temp[ret] = '\0';
-				}
-				goto ADD_STRING;
+				temp = gen_hostname(c); goto ADD_STRING;
 
 			case 's': /* Shell name (after last slash)*/
-			{
-				if (!user.shell) {
-					line++;
-					break;
-				}
-				char *shell_name = strrchr(user.shell, '/');
-				temp = savestring(shell_name + 1, strlen(shell_name) - 1);
-				goto ADD_STRING;
-			}
+				if (!user.shell) { line++; break; }
+				temp = gen_shell_name(); goto ADD_STRING;
 
 			case 'S': /* Current workspace */
-				temp = gen_workspace();
-				goto ADD_STRING;
+				temp = gen_workspace(); goto ADD_STRING;
 
-			case 'l': { /* Current mode */
-				char s[2];
-				s[0] = (light_mode ? 'L' : '\0');
-				s[1] = '\0';
-				temp = savestring(s, 1);
-				goto ADD_STRING;
-			}
+			case 'l': /* Current mode */
+				temp = gen_mode(); goto ADD_STRING;
 
-			case 'p':
-			case 'w': /* Full PWD */
+			case 'p': /* fallthrough */ /* Abbreviated if longer than PathMax */
+			case 'w': /* fallthrough */ /* Full PWD */
 			case 'W': /* Short PWD */
-			{
-				if (!workspaces[cur_ws].path) {
-					line++;
-					break;
-				}
-				temp = gen_pwd(c);
-				goto ADD_STRING;
-			}
+				if (!workspaces[cur_ws].path) {	line++;	break; }
+				temp = gen_pwd(c); goto ADD_STRING;
 
 			case '$': /* '$' or '#' for normal and root user */
-				if ((flags & ROOT_USR))
-					temp = savestring("#", 1);
-				else
-					temp = savestring("$", 1);
-				goto ADD_STRING;
+				temp = gen_user_flag();	goto ADD_STRING;
 
-			case 'a': /* Bell character */
-			case 'r': /* Carriage return */
-			case 'n': /* New line char */
-				temp = savestring(" ", 1);
-				if (c == 'n')
-					temp[0] = '\n';
-				else if (c == 'r')
-					temp[0] = '\r';
-				else
-					temp[0] = '\a';
-				goto ADD_STRING;
+			case 'a': /* fallthrough */ /* Bell character */
+			case 'r': /* fallthrough */ /* Carriage return */
+			case 'n': /* fallthrough */ /* New line char */
+				temp = gen_misc(c); goto ADD_STRING;
 
-			case '[': /* Begin a sequence of non-printing characters.
-			Mostly used to add color sequences. Ex: \[\033[1;34m\] */
+			case '[': /* fallthrough */ /* Begin a sequence of non-printing characters */
 			case ']': /* End the sequence */
-				temp = xnmalloc(2, sizeof(char));
-				temp[0] = (c == '[') ? RL_PROMPT_START_IGNORE
-						     : RL_PROMPT_END_IGNORE;
-				temp[1] = '\0';
-				goto ADD_STRING;
+				temp = gen_non_print_sequence(c); goto ADD_STRING;
 
 			case '\\': /* Literal backslash */
-				temp = savestring("\\", 1);
-				goto ADD_STRING;
+				temp = savestring("\\", 1); goto ADD_STRING;
 
 			default:
 				temp = savestring("\\ ", 2);
 				temp[1] = (char)c;
-				break;
 
 ADD_STRING:
-				if (!temp)
-					break;
-				if (c)
-					line++;
-				result_len += strlen(temp);
-				if (!result)
-					result = (char *)xcalloc(result_len + 1, sizeof(char));
-				else
-					result = (char *)xrealloc(result, (result_len + 1) * sizeof(char));
-				strcat(result, temp);
-				free(temp);
+				add_string(&temp, c, &line, &result, &result_len);
 				break;
 			}
 		}
@@ -372,59 +555,12 @@ ADD_STRING:
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
 			/* Command substitution */
 			if (c == '$' && *line == '(') {
-				/* Look for the ending parenthesis */
-				int tmp = strcntchr(line, ')');
-				if (tmp == -1)
-					continue;
-
-				/* Copy the cmd to be substituted and pass it to wordexp */
-				char *tmp_str = (char *)xnmalloc(strlen(line) + 2, sizeof(char));
-				sprintf(tmp_str, "$%s", line);
-
-				tmp_str[tmp + 2] = '\0';
-				line += tmp + 1;
-
-				const char *old_value = getenv("IFS");
-				setenv("IFS", "", 1);
-
-				wordexp_t wordbuf;
-				if (wordexp(tmp_str, &wordbuf, 0) != EXIT_SUCCESS) {
-					free(tmp_str);
-					if (old_value)
-						setenv("IFS", old_value, 1);
-					else
-						unsetenv("IFS");
-					continue;
-				}
-
-				if (old_value)
-					setenv("IFS", old_value, 1);
-				else
-					unsetenv("IFS");
-
-				free(tmp_str);
-
-				if (wordbuf.we_wordc) {
-					size_t j;
-					for (j = 0; j < wordbuf.we_wordc; j++) {
-
-						size_t word_len = strlen(wordbuf.we_wordv[j]);
-						result_len += word_len;
-
-						if (!result)
-							result = (char *)xcalloc(result_len + 2, sizeof(char));
-						else
-							result = (char *)xrealloc(result, (result_len + 2)
-													* sizeof(char));
-						strcat(result, wordbuf.we_wordv[j]);
-					}
-				}
-
-				wordfree(&wordbuf);
+				substitute_cmd(&line, &result, &result_len);
 				continue;
 			}
 #endif /* __HAIKU__ && __OpenBSD__ */
 
+/*			write_result(&result, &result_len, c); */
 			result = (char *)xrealloc(result, (result_len + 2) * sizeof(char));
 			result[result_len] = (char)c;
 			result_len++;
@@ -436,12 +572,9 @@ ADD_STRING:
 	if (result && result[result_len - 1] == '\n')
 		result[result_len - 1] = '\0';
 
-	/* Emergency prompt, just in case something goes wrong */
-	if (!result) {
-		fprintf(stderr, _("%s: Error decoding prompt line. Using an "
-				"emergency prompt\n"), PROGRAM_NAME);
-		result = savestring("\001\x1b[0m\002> ", 8);
-	}
+	/* Emergency prompt, just in case something went wrong */
+	if (!result)
+		result = gen_emergency_prompt();
 
 	return result;
 }

@@ -26,5 +26,6 @@
 #define PROMPT_H
 
 char *prompt(void);
+char *decode_prompt(char *line);
 
 #endif /* PROMPT_H */

@@ -56,6 +56,7 @@ typedef char *rl_cpvfunc_t;
 #include "jump.h"
 #include "readline.h"
 #include "builtins.h"
+#include "prompt.h"
 
 #ifndef _NO_HIGHLIGHT
 #include "highlight.h"
@@ -1214,10 +1215,13 @@ print_warning_prompt(const char c)
 
 		rl_save_prompt();
 
+		char *decoded_prompt = decode_prompt(wprompt_str);
 		/* Print the warning prompt */
-		char tprompt[PATH_MAX];
+/*		char tprompt[PATH_MAX];
 		snprintf(tprompt, PATH_MAX, "\1%s\2%s", wp_c, wprompt_str);
-		rl_set_prompt(tprompt);
+		rl_set_prompt(tprompt); */
+		rl_set_prompt(decoded_prompt);
+		free(decoded_prompt);
 	}
 }
 
@@ -1697,14 +1701,14 @@ SUCCESS:
 		/* Restore color */
 		if (!wrong_cmd) {
 			fputs(cur_color ? cur_color : tx_c, stdout);
-		} else {
+		} /*else {
 			fputs(wp_c, stdout);
-		}
+		} */
 	} else {
-		if (wrong_cmd) {
+/*		if (wrong_cmd) {
 			fputs("\x1b[0m", stdout);
 			fputs(wp_c, stdout);
-		}
+		} */
 		suggestion.printed = 0;
 	}
 	free(first_word);

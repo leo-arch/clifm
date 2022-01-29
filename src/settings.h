@@ -25,6 +25,17 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#define PROGRAM_NAME "CliFM"
+#define PNL "clifm" /* Program name lowercase */
+#define PROGRAM_DESC "The command line file manager"
+#define VERSION "1.4.1"
+#define AUTHOR "L. Abramovich"
+#define CONTACT "johndoe.arch@outlook.com"
+#define WEBSITE "https://github.com/leo-arch/clifm"
+#define DATE "Jan 29, 2022"
+#define LICENSE "GPL2+"
+#define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
+
 /* User settings */
 
 /* Default color definitions */
@@ -215,9 +226,9 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0
 #ifdef __OpenBSD__
-#define DEF_SUDO_CMD "doas"
+# define DEF_SUDO_CMD "doas"
 #else
-#define DEF_SUDO_CMD "sudo"
+# define DEF_SUDO_CMD "sudo"
 #endif
 #define DEF_SUG_FILETYPE_COLOR 0
 #define DEF_SUG_STRATEGY "ehfjbac"
@@ -240,20 +251,19 @@ left:abort --inline-info --layout=reverse-list"
 \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
 >\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
-#define DEF_WPROMPT_STR "(!) > "
+#define DEF_WPROMPT_STR "\\[\\e[00;02;31m\\](!) > "
 
 #define DEFAULT_TERM_CMD "xterm -e"
-
 #define FALLBACK_SHELL "/bin/sh"
 
 #ifdef __APPLE__
-#define FALLBACK_OPENER "/usr/bin/open"
+# define FALLBACK_OPENER "/usr/bin/open"
 #elif defined __CYGWIN__
-#define FALLBACK_OPENER "cygstart"
+# define FALLBACK_OPENER "cygstart"
 #elif __HAIKU__
-#define FALLBACK_OPENER "open"
+# define FALLBACK_OPENER "open"
 #else
-#define FALLBACK_OPENER "xdg-open"
+# define FALLBACK_OPENER "xdg-open"
 #endif
 
 #endif /* SETTINGS_H */

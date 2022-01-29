@@ -763,21 +763,22 @@ cpCmd=%d\n\n"
 # and 1 = advmv. 1 adds a progress bar to mv.\n\
 mvCmd=%d\n\n"
 
-	    "# The prompt line is built using string literals and/or one or more of\n\
-# the following escape sequences:\n"
+	    "# The prompt line (for both regular and warning prompts) is built \n\
+# using command substitution ($(cmd)), string literals, and/or one or more \n\
+# of the following escape sequences:\n"
 	    "# \\e: Escape character\n\
-# \\h: The hostname, up to the first dot\n\
 # \\u: The username\n\
 # \\H: The full hostname\n\
-# \\n: A newline character\n\
-# \\r: A carriage return\n\
-# \\a: A bell character\n\
-# \\d: The date, in abbrevieted form (ex: 'Tue May 26')\n\
+# \\h: The hostname, up to the first dot\n\
 # \\s: The name of the shell (everything after the last slash) currently used\n\
 # by CliFM\n\
 # \\S: The number of the current workspace\n\
 # \\l: Print an 'L' if running in light mode\n\
 # \\P: Current profile name\n\
+# \\n: A newline character\n\
+# \\r: A carriage return\n\
+# \\a: A bell character\n\
+# \\d: The date, in abbrevieted form (ex: 'Tue May 26')\n\
 # \\t: The time, in 24-hour HH:MM:SS format\n\
 # \\T: The time, in 12-hour HH:MM:SS format\n\
 # \\@: The time, in 12-hour am/pm format\n\
@@ -807,8 +808,8 @@ PromptStyle=default\n\n"
 		"# A prompt to warn the user about invalid command names\n\
 WarningPrompt=%s\n\n"
 
-		"# String to be used by the warning prompt. The color of this prompt\n\
-# can be customized using the 'wp' code in the color scheme file\n\
+		"# String to be used by the warning prompt. It can be customized by \n\
+means of the same rules using by the regular prompt (see above)\n\
 WarningPromptStr=\"%s\"\n\n",
 
 	    COLORS_REPO,
