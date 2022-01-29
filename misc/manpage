@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 17, 2022" "CliFM 1.4" "CliFM Manual"
+.TH "CLIFM" "1" "Jan 29, 2022" "CliFM 1.4.1" "CliFM Manual"
 .nh
 .ad l
 
@@ -1146,7 +1146,6 @@ The following codes are used for different interface elements (in the \fIInterfa
  sh = commands history entries
  sx = suggestions for CliFM's internal commands and parameters
  sp = suggestions pointer (ex: 56 > filename, where '>' is the suggestion pointer)
- wp = warning prompt color (See below the \fBAUTO-SUGGESTIONS\fR section)
 
  \fBSyntax highlighting\fR
  hb = brackets '()[]{}'
@@ -1198,23 +1197,9 @@ For a full no-color experience recall to edit your prompt removing all color cod
 
 .SH 10. THE PROMPT
 .TP
-CliFM's prompt is built from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
+CliFM's prompt (regular and warning ones) is built from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
 \\e: Escape character
-.TP
-\\h: The hostname, up to the first ‘.’
-.TP
-\\u: The username
-.TP
-\\H: The full hostname
-.TP
-\\n: A newline character
-.TP
-\\r: A carriage return
-.TP
-\\a: A bell character
-.TP
-\\d: The date, in abbreviated form (ex: “Tue May 26”)
 .TP
 \\s: The name of the shell (everything after the last slash) currently used by CliFM
 .TP
@@ -1223,6 +1208,20 @@ CliFM's prompt is built from the \fIPrompt\fR line in the configuration file fol
 \\l: Print an 'L' if in light mode
 .TP
 \\P: The current profile name
+.TP
+\\u: The username
+.TP
+\\H: The full hostname
+.TP
+\\h: The hostname, up to the first ‘.’
+.TP
+\\n: A newline character
+.TP
+\\r: A carriage return
+.TP
+\\a: A bell character
+.TP
+\\d: The date, in abbreviated form (ex: “Tue May 26”)
 .TP
 \\t: The time, in 24\-hour HH:MM:SS format
 .TP
@@ -1262,6 +1261,14 @@ which once decoded should look something like this:
  <0> $\fR
 .TP
 with the workspace number and the path printed in cyan, the last exit status in green, and the dollar sign in blue.
+.TP
+The default warning prompt looks like this:
+
+\fB"\\[\\e[00;02;31m\\](!) > "\fR
+
+.TP
+The last line of the regular prompt becomes "\fB(!) > \fR", printed in a dimmed red color, including the typed text. To change the color of the typed text while in the warning prompt add a color code at the end of the warning prompt string. For example: '\fB\\[\\e[1;35m\\]\fR' to make the text bold magenta, or '\fB\\[\\e[0m\\]\fR' to use the default terminal foreground color.
+
 .TP
 A more "classic" prompt could be construed as follows:
 
