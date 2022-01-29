@@ -48,8 +48,8 @@ cpCmd=0
 # and 1 = advmv. 1 adds a progress bar to mv.
 mvCmd=0
 
-# The prompt line is built using string literals and/or one or more of
-# the following escape sequences:
+# The prompt line (both regular and warning ones) is built using string
+# literals and/or one or more of the following escape sequences:
 #
 # \xnn: The character whose hexadecimal code is nn.
 # \e: Escape character
@@ -99,9 +99,9 @@ PromptStyle=default
 # A warning prompt to warn the user about invalid command names
 WarningPrompt=true
 
-# String to be used by the warning prompt. The color of this prompt
-# can be customized using the 'wp' code in the color scheme file
-WarningPromptStr="(!) > "
+# String to be used by the warning prompt. It can be customized by means of
+# the same rules used by the regular prompt (see above).
+WarningPromptStr="\[\e[00;02;31m\](!) > "
 
 # TAB completion mode: either 'standard' (default) or 'fzf'
 TabCompletionMode=
