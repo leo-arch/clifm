@@ -166,7 +166,9 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
 For a detailed explanation of each of these features, follow the corresponding links or consult the [Wiki](https://github.com/leo-arch/clifm/wiki).
 </details>
 
-✔️ **NOTE**: Since `verion 1.4`, and in order to make _Lira_ more powerful,<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
+✔️ **Changelog** 
+* `verion 1.4`: In order to make _Lira_ more powerful<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
+* `version 1.4.1`: The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is not supported anymore. 
 
 <sup>1</sup> _It can now match entire file names instead of just file extensions_
 
