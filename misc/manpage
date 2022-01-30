@@ -1199,56 +1199,95 @@ For a full no-color experience recall to edit your prompt removing all color cod
 .TP
 CliFM's prompt (regular and warning ones) is built from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
-\\e: Escape character
+\fB\\e\fR: Escape character
 .TP
-\\s: The name of the shell (everything after the last slash) currently used by CliFM
+\fB\\s\fR: The name of the shell (everything after the last slash) currently used by CliFM
 .TP
-\\S: Current workspace number
+\fB\\S\fR: Current workspace number
 .TP
-\\l: Print an 'L' if in light mode
+\fB\\l\fR: Print an 'L' if in light mode
 .TP
-\\P: The current profile name
+\fB\\P\fR: The current profile name
 .TP
-\\u: The username
+\fB\\u\fR: The username
 .TP
-\\H: The full hostname
+\fB\\H\fR: The full hostname
 .TP
-\\h: The hostname, up to the first ‘.’
+\fB\\h\fR: The hostname, up to the first ‘.’
 .TP
-\\n: A newline character
+\fB\\n\fR: A newline character
 .TP
-\\r: A carriage return
+\fB\\r\fR: A carriage return
 .TP
-\\a: A bell character
+\fB\\a\fR: A bell character
 .TP
-\\d: The date, in abbreviated form (ex: “Tue May 26”)
+\fB\\d\fR: The date, in abbreviated form (ex: “Tue May 26”)
 .TP
-\\t: The time, in 24\-hour HH:MM:SS format
+\fB\\t\fR: The time, in 24\-hour HH:MM:SS format
 .TP
-\\T: The time, in 12\-hour HH:MM:SS format
+\fB\\T\fR: The time, in 12\-hour HH:MM:SS format
 .TP
-\\@: The time, in 12\-hour am/pm format
+\fB\\@\fR: The time, in 12\-hour am/pm format
 .TP
-\\A: The time, in 24\-hour HH:MM format
+\fB\\A\fR: The time, in 24\-hour HH:MM format
 .TP
-\\w: The full current working directory, with $HOME abbreviated with a tilde
+\fB\\w\fR: The full current working directory, with $HOME abbreviated with a tilde
 .TP
-\\W: The basename of $PWD, with $HOME abbreviated with a tilde
+\fB\\W\fR: The basename of $PWD, with $HOME abbreviated with a tilde
 .TP
-\\p: A mix of the two above, it abbreviates the current working directory only if longer than PathMax (a value defined in the configuration file).
+\fB\\p\fR: A mix of the two above, it abbreviates the current working directory only if longer than PathMax (a value defined in the configuration file).
 .TP
-\\z: Exit code of the last executed command. Green in case of success and bold red in case of error
+\fB\\z\fR: Exit code of the last executed command. Green in case of success and bold red in case of error
 .TP
-\\$ '#', if the effective user ID is 0, and '$' otherwise
+\fB\\$\fR '#', if the effective user ID is 0, and '$' otherwise
 .TP
-\\nnn: The character whose ASCII code is the octal value nnn
+\fB\\nnn\fR: The character whose ASCII code is the octal value nnn
 .TP
-\\\\: A backslash
+\fB\\\\\fR: A literal backslash
 .TP
-\\[: Begin a sequence of non\-printing characters. This is mostly used to add color to the prompt line
+\fB\\[\fR: Begin a sequence of non\-printing characters. This is mostly used to add color to the prompt line
 .TP
-\\]: End a sequence of non\-printing characters
-
+\fB\\]\fR: End a sequence of non\-printing characters
+.TP
+The following files statistics escape codes are also recognized (not available in light mode)
+.TP
+\fB\\D\fR: Amount of sub-directories in the current directory
+.TP
+\fB\\R\fR: Amount of regular files in the current directory
+.TP
+\fB\\X\fR: Amount of executable files in the current directory
+.TP
+\fB\\.\fR: Amount of hidden files in the current directory
+.TP
+\fB\\U\fR: Amount of SUID files in the current directory
+.TP
+\fB\\G\fR: Amount of SGID files in the current directory
+.TP
+\fB\\F\fR: Amount of FIFO/pipe files in the current directory
+.TP
+\fB\\K\fR: Amount of socket files in the current directory
+.TP
+\fB\\B\fR: Amount of block device files in the current directory
+.TP
+\fB\\C\fR: Amount of character device files in the current directory
+.TP
+\fB\\x\fR: Amount of files with capabilities in the current directory
+.TP
+\fB\\L\fR: Amount of symbolic links in the current directory
+.TP
+\fB\\o\fR: Amount of broken symbolic links in the current directory
+.TP
+\fB\\M\fR: Amount of multi-link files in the current directory
+.TP
+\fB\\E\fR: Amount of files with extended attributes in the current directory.TP
+.TP
+\fB\\O\fR: Amount of other-writable files in the current directory
+.TP
+\fB\\*\fR: Amount of files with the sticky bit set in the current directory
+.TP
+\fB\\?\fR: Amount of files of unknown file type in the current directory
+.TP
+\fB\\!\fR: Amount of unstatable files in the current directory
 .TP
 By default, for example, CliFM's prompt line is this: 
 
@@ -1302,6 +1341,23 @@ In this case, the octal code is: "256 234 356". So, to insert this Unicode chara
 \fBNote\fR: Make sure you have installed a font able to display Unicode characters.
 .TP
 A few advanced prompt examples can be found in the prompts file in our Github site. Take a look at <https://github.com/leo-arch/clifm/wiki/Customization#the-prompt>
+.TP
+\fBA simple use case for the files statistics escape codes\fR
+.TP
+We all want to keep our systems safe. One of the many ways to get a bit of safety is by checking that there is not file in our file system that could somehow endanger our machines. SUID, SGID, executable, and other-writable files are to be count among these dangers. This is why it could be useful to build a little files scanner for our prompt using the above mentioned files statistics escape codes. This is the code for our scanner:
+
+\fB"\\[\\e[0m\\]\\[\\e[1;31m\\]\\U\\[\\e[0m\\]:\\[\\e[1;33m\\]\\G\\[\\e[0m\\]:\\[\\e[1;32m\\]\\O\\[\\e[0m\\]:\\[\\e[1;34m\\]\\X\\[\\e[0m\\]"\fR
+.TP
+By adding this code to our prompt line, we get something like this:
+
+ 24:2:-:2389
+.TP
+This tells us that in the current directory we have 24 SUID files (printed in bold red), 2 SGID files (bold yellow), no other-writable file, and 2389 executable files.
+.TP
+\fBNOTE\fR: A predefined prompt with this files scanner integrated can be found in the \fIprompts.cfm\fR file.
+.TP
+\fBNOTE 2\fR: Most of the information these escape codes rely on depends on \fBstat\fR(3). Now, since \fBstat\fR(3) is not used when running in light mode (for performance reasons), this information won't be available in light mode either.
+
 .TP
 \fBPrompt notifications\fR
 .TP
