@@ -61,6 +61,27 @@ emergency prompt"
 #define EMERGENCY_PROMPT "\001\x1b[0m\002> "
 #define EMERGENCY_PROMPT_LEN 8
 
+/* Flag macros to generate files statistic string for the prompt */
+#define STATS_DIR      0
+#define STATS_REG      1
+#define STATS_EXE      2
+#define STATS_HIDDEN   3
+#define STATS_SUID     4
+#define STATS_SGID     5
+#define STATS_FIFO     6
+#define STATS_SOCK     7
+#define STATS_BLK      8
+#define STATS_CHR      9
+#define STATS_CAP      10
+#define STATS_LNK      11
+#define STATS_BROKEN_L 12 /* Broken link */
+#define STATS_MULTI_L  13 /* Multi-link */
+#define STATS_OTHER_W  14 /* Other writable */
+#define STATS_STICKY   15
+#define STATS_EXTENDED 16 /* Extended attributes (acl) */
+#define STATS_UNKNOWN  17
+#define STATS_UNSTAT   18
+
 /* Size of the indicator for msgs, trash, and sel */
 #define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
 /* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
@@ -439,6 +460,47 @@ gen_emergency_prompt(void)
 	return _prompt;
 }
 
+static inline char *
+gen_stats_str(int flag)
+{
+	size_t val = 0;
+
+	switch(flag) {
+	case STATS_DIR: val = stats.dir; break;
+	case STATS_REG: val = stats.reg; break;
+	case STATS_EXE: val = stats.exec; break;
+	case STATS_HIDDEN: val = stats.hidden; break;
+	case STATS_SUID: val = stats.suid; break;
+	case STATS_SGID: val = stats.sgid; break;
+	case STATS_FIFO: val = stats.fifo; break;
+	case STATS_SOCK: val = stats.socket; break;
+	case STATS_BLK: val = stats.block_dev; break;
+	case STATS_CHR: val = stats.char_dev; break;
+	case STATS_CAP: val = stats.caps; break;
+	case STATS_LNK: val = stats.link; break;
+	case STATS_BROKEN_L: val = stats.broken_link; break;
+	case STATS_MULTI_L: val = stats.multi_link; break;
+	case STATS_OTHER_W: val = stats.other_writable; break;
+	case STATS_STICKY: val = stats.sticky; break;
+	case STATS_EXTENDED: val = stats.extended; break;
+	case STATS_UNKNOWN: val = stats.unknown; break;
+	case STATS_UNSTAT: val = stats.unstat; break;
+	default: break;
+	}
+
+	char *p = (char *)NULL;
+	if (val != 0) {
+		p = (char *)xnmalloc(sizeof(size_t) + 1, sizeof(char));
+		sprintf(p, "%zu", val);
+	} else {
+		p = (char *)xnmalloc(2, sizeof(char));
+		*p = '-';
+		p[1] = '\0';
+	}
+
+	return p;
+}
+
 /*
 static inline void
 write_result(char **res, size_t *len, const int c)
@@ -468,6 +530,27 @@ decode_prompt(char *line)
 			/* Now move on to the next char */
 			c = *line;
 			switch (c) {
+			/* Files statistics */
+			case 'D': temp = gen_stats_str(STATS_DIR); goto ADD_STRING;
+			case 'R': temp = gen_stats_str(STATS_REG); goto ADD_STRING;
+			case '.': temp = gen_stats_str(STATS_HIDDEN); goto ADD_STRING;
+			case 'X': temp = gen_stats_str(STATS_EXE); goto ADD_STRING;
+			case 'U': temp = gen_stats_str(STATS_SUID); goto ADD_STRING;
+			case 'G': temp = gen_stats_str(STATS_SGID); goto ADD_STRING;
+			case 'F': temp = gen_stats_str(STATS_FIFO); goto ADD_STRING;
+			case 'K': temp = gen_stats_str(STATS_SOCK); goto ADD_STRING;
+			case 'B': temp = gen_stats_str(STATS_BLK); goto ADD_STRING;
+			case 'C': temp = gen_stats_str(STATS_CHR); goto ADD_STRING;
+			case 'x': temp = gen_stats_str(STATS_CAP); goto ADD_STRING;
+			case 'L': temp = gen_stats_str(STATS_LNK); goto ADD_STRING;
+			case 'o': temp = gen_stats_str(STATS_BROKEN_L); goto ADD_STRING;
+			case 'M': temp = gen_stats_str(STATS_MULTI_L); goto ADD_STRING;
+			case 'E': temp = gen_stats_str(STATS_EXTENDED); goto ADD_STRING;
+			case 'O': temp = gen_stats_str(STATS_OTHER_W); goto ADD_STRING;
+			case '*': temp = gen_stats_str(STATS_STICKY); goto ADD_STRING;
+			case '?': temp = gen_stats_str(STATS_UNKNOWN); goto ADD_STRING;
+			case '!': temp = gen_stats_str(STATS_UNSTAT); goto ADD_STRING;
+
 			case 'z': /* Exit status of last executed command */
 				temp = gen_exit_status(); goto ADD_STRING;
 

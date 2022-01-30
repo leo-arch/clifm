@@ -1056,11 +1056,6 @@ free_stuff(void)
 {
 	int i = 0;
 
-/*	if (term_bgcolor) {
-		printf("\x1b]11;rgb:%s\007", term_bgcolor);
-		free(term_bgcolor);
-	} */
-
 #ifdef LINUX_INOTIFY
 	/* Shutdown inotify */
 	if (inotify_wd >= 0)
@@ -1106,7 +1101,6 @@ free_stuff(void)
 	}
 
 	i = (int)cschemes_n;
-//		for (i = 0; color_schemes[i]; i++)
 	while (i-- > 0)
 		free(color_schemes[i]);
 	free(color_schemes);
@@ -1222,9 +1216,6 @@ free_stuff(void)
 	while (--i >= 0)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
-
-/*	if (flags & FILE_CMD_OK)
-		free(file_cmd_path); */
 
 	if (msgs_n) {
 		i = (int)msgs_n;

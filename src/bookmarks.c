@@ -49,14 +49,9 @@ free_bookmarks(void)
 
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
-		if (bookmarks[i].shortcut)
-			free(bookmarks[i].shortcut);
-
-		if (bookmarks[i].name)
-			free(bookmarks[i].name);
-
-		if (bookmarks[i].path)
-			free(bookmarks[i].path);
+		free(bookmarks[i].shortcut);
+		free(bookmarks[i].name);
+		free(bookmarks[i].path);
 	}
 
 	free(bookmarks);
@@ -66,23 +61,26 @@ free_bookmarks(void)
 		free(bookmark_names[i]);
 	free(bookmark_names);
 	bookmark_names = (char **)NULL;
+
 	bm_n = 0;
+
 	return;
 }
 
 static char **
 bm_prompt(void)
 {
-	char *bm_sel = (char *)NULL;
+	char *bm = (char *)NULL;
 	printf(_("%s%s\nEnter '%c' to edit your bookmarks or '%c' to quit.\n"),
 	    NC, df_c, 'e', 'q');
 
-	while (!bm_sel)
-		bm_sel = rl_no_hist(_("Choose a bookmark: "));
+	while (!bm)
+		bm = rl_no_hist(_("Choose a bookmark: "));
 
-	char **comm_bm = get_substr(bm_sel, ' ');
-	free(bm_sel);
-	return comm_bm;
+	char **bm_cmd = get_substr(bm, ' ');
+	free(bm);
+
+	return bm_cmd;
 }
 
 static void
@@ -223,11 +221,11 @@ bookmark_del(char *name)
 	for (i = 0; del_elements[i]; i++) {
 		int quit = 0;
 
-		if (strcmp(del_elements[i], "q") == 0) {
+		if (*del_elements[i] == 'q' && !*(del_elements[i] + 1)) {
 			quit = 1;
 		} else {
-			if (is_number(del_elements[i]) && (atoi(del_elements[i]) <= 0
-			|| atoi(del_elements[i]) > (int)bmn)) {
+			int n = atoi(del_elements[i]);
+			if (is_number(del_elements[i]) && (n <= 0 || n > (int)bmn)) {
 				fprintf(stderr, _("bookmarks: %s: No such bookmark\n"),
 					del_elements[i]);
 				quit = 1;

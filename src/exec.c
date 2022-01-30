@@ -1520,6 +1520,97 @@ check_comments(const char *name)
 	return EXIT_SUCCESS;
 }
 
+static int
+print_stats(void)
+{
+	if (light_mode) {
+		puts("Running in light mode: files statistics are not available");
+		return EXIT_SUCCESS;
+	}
+
+	printf(_("Total files:                 %zu\n\
+Directories:                 %zu\n\
+Regular files:               %zu\n\
+Executable files:            %zu\n\
+Hidden files:                %zu\n\
+SUID files:                  %zu\n\
+SGID files:                  %zu\n\
+Files w/capabilities:        %zu\n\
+FIFO/pipes:                  %zu\n\
+Sockets:                     %zu\n\
+Block devices:               %zu\n\
+Character devices:           %zu\n\
+Symbolic links:              %zu\n\
+Broken symbolic links:       %zu\n\
+Multi-link files:            %zu (%zu are directories)\n\
+Files w/extended attributes: %zu\n\
+Other-writable files:        %zu\n\
+Sticky files:                %zu\n\
+Unknown file types:          %zu\n\
+Unstatable files:            %zu\n\
+"),
+	files, stats.dir, stats.reg, stats.exec, stats.hidden, stats.suid,
+	stats.sgid, stats.caps, stats.fifo, stats.socket, stats.block_dev,
+	stats.char_dev, stats.link, stats.broken_link, stats.multi_link,
+	stats.dir, stats.extended, stats.other_writable, stats.sticky,
+	stats.unknown, stats.unstat);
+
+	return EXIT_SUCCESS;
+}
+
+static int
+_trash_function(char **args, int *_cont)
+{
+#ifndef _NO_TRASH
+	if (args[1] && IS_HELP(args[1])) {
+		puts(_(TRASH_USAGE));
+		*_cont = 0;
+		return EXIT_SUCCESS;
+	}
+
+	int exit_status = trash_function(args);
+
+	if (is_sel) { /* If 'tr sel', deselect everything */
+		int i = (int)sel_n;
+		while (--i >= 0)
+			free(sel_elements[i]);
+		sel_n = 0;
+		if (save_sel() != 0)
+			exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+#else
+	fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	*_cont = 0;
+	return EXIT_FAILURE;
+#endif /* !_NO_TRASH */
+}
+
+static int
+_untrash_function(char **args, int *_cont)
+{
+#ifndef _NO_TRASH
+	if (args[1] && IS_HELP(args[1])) {
+		puts(_(UNTRASH_USAGE));
+		*_cont = 0;
+		return EXIT_SUCCESS;
+	}
+
+	kbind_busy = 1;
+	rl_attempted_completion_function = NULL;
+	int exit_status = untrash_function(args);
+	rl_attempted_completion_function = my_rl_completion;
+	kbind_busy = 0;
+
+	return exit_status;
+#else
+	fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	*_cont = 0;
+	return EXIT_FAILURE;
+#endif /* !_NO_TRASH */
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -1612,8 +1703,8 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'f' && (!comm[0][1] || strcmp(comm[0], "forth") == 0))
 		return (exit_code = forth_function(comm));
 
-	else if ((*comm[0] == 'b' && comm[0][1] == 'h' && !comm[0][2])
-	|| (*comm[0] == 'f' && comm[0][1] == 'h' && !comm[0][2])) {
+	else if ((*comm[0] == 'b' || *comm[0] == 'f')
+	&& comm[0][1] == 'h' && !comm[0][2]) {
 		print_dirhist(); return EXIT_SUCCESS;
 	}
 
@@ -1639,13 +1730,13 @@ exec_cmd(char **comm)
 	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'
 	&& !comm[0][2])))
 
-		|| (*comm[0] == 'm' && (!comm[0][1] || (comm[0][1] == 'v'
-		&& !comm[0][2])))
+	|| (*comm[0] == 'm' && (!comm[0][1] || (comm[0][1] == 'v'
+	&& !comm[0][2])))
 
-		|| (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
-		&& !comm[0][2])))
+	|| (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
+	&& !comm[0][2])))
 
-		|| (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
+	|| (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
 
 		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
 		|| (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
@@ -1696,45 +1787,18 @@ exec_cmd(char **comm)
 	/*         ############### TRASH ##################     */
 	else if (*comm[0] == 't' && (!comm[0][1] || strcmp(comm[0], "tr") == 0
 	|| strcmp(comm[0], "trash") == 0)) {
-#ifndef _NO_TRASH
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(TRASH_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		exit_code = trash_function(comm);
-
-		if (is_sel) { /* If 'tr sel', deselect everything */
-			int i = (int)sel_n;
-			while (--i >= 0)
-				free(sel_elements[i]);
-			sel_n = 0;
-			if (save_sel() != 0)
-				exit_code = EXIT_FAILURE;
-		}
-#else
-		fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-		return EXIT_FAILURE;
-#endif /* !_NO_TRASH */
+		int _cont = 1;
+		exit_code = _trash_function(comm, &_cont);
+		if (_cont == 0)
+			return exit_code;
 	}
 		
 	else if (*comm[0] == 'u' && (!comm[0][1] || strcmp(comm[0], "undel") == 0
 	|| strcmp(comm[0], "untrash") == 0)) {
-#ifndef _NO_TRASH
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(UNTRASH_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		kbind_busy = 1;
-		rl_attempted_completion_function = NULL;
-		exit_code = untrash_function(comm);
-		rl_attempted_completion_function = my_rl_completion;
-		kbind_busy = 0;
-#else
-		fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-		return EXIT_FAILURE;
-#endif /* !_NO_TRASH */
+		int _cont = 1; /* Tells whether to continue or return right here */
+		exit_code = _untrash_function(comm, &_cont);
+		if (_cont == 0)
+			return exit_code;
 	}
 
 	/*     ############### SELECTION ##################     */
@@ -1897,6 +1961,9 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'w' && comm[0][1] == 's' && !comm[0][2])
 		return (exit_code = handle_workspaces(comm[1] ? comm[1] : NULL));
 
+	else if (*comm[0] == 's' && strcmp(comm[0], "stats") == 0)
+		return (exit_code = print_stats());
+
 	else if (*comm[0] == 'f' && ((comm[0][1] == 't' && !comm[0][2])
 	|| strcmp(comm[0], "filter") == 0))
 		return (exit_code = filter_function(comm[1]));
@@ -1949,7 +2016,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "mime") == 0))
 		return (exit_code = lira_function(comm));
 
-	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2] && !autols)
+	else if (!autols && *comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2])
 		return (exit_code = ls_function());
 
 	/* #### PROFILE #### */

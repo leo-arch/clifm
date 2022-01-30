@@ -73,7 +73,7 @@ struct devino_t *sel_devino = (struct devino_t *)NULL;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion;
 #endif
-
+struct stats_t stats;
 struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
 struct opts_t opts;
 

@@ -712,6 +712,30 @@ struct suggestions_t {
 
 extern struct suggestions_t suggestion;
 
+struct stats_t {
+	size_t dir;
+	size_t reg;
+	size_t exec;
+	size_t hidden;
+	size_t suid;
+	size_t sgid;
+	size_t fifo;
+	size_t socket;
+	size_t block_dev;
+	size_t char_dev;
+	size_t caps;
+	size_t link;
+	size_t broken_link;
+	size_t multi_link;
+	size_t other_writable;
+	size_t sticky;
+	size_t extended;
+	size_t unknown;
+	size_t unstat; /* Non-statable file */
+};
+
+extern struct stats_t stats;
+
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */

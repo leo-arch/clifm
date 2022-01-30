@@ -1611,18 +1611,18 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t
 
 	int j = (int)sel_n;
 	while (--j >= 0) {
-		if (sel_devino[j].dev == dev && sel_devino[j].ino == ino) {
-			/* Only check file names for hardlinks */
-			if (file_info[index].type != DT_DIR && links > 1) {
-				char *p = strrchr(sel_elements[j], '/');
-				if (!p || !*(++p))
-					continue;
-				if (*p == *file_info[index].name
-				&& strcmp(p, file_info[index].name) == 0)
-					return 1;
-			} else {
+		if (sel_devino[j].dev != dev || sel_devino[j].ino != ino)
+			continue;
+		/* Only check file names for hardlinks */
+		if (file_info[index].type != DT_DIR && links > 1) {
+			char *p = strrchr(sel_elements[j], '/');
+			if (!p || !*(++p))
+				continue;
+			if (*p == *file_info[index].name
+			&& strcmp(p, file_info[index].name) == 0)
 				return 1;
-			}
+		} else {
+			return 1;
 		}
 	}
 
@@ -1658,6 +1658,31 @@ init_fileinfo(const size_t n)
 	file_info[n].linkn = 1;
 	file_info[n].ltime = 0; /* For long view mode */
 	file_info[n].time = 0;
+}
+
+/* Initialize the stats struct */
+static inline void
+reset_stats(void)
+{
+	stats.dir = 0;
+	stats.reg = 0;
+	stats.exec = 0;
+	stats.hidden = 0;
+	stats.suid = 0;
+	stats.sgid = 0;
+	stats.fifo = 0;
+	stats.socket = 0;
+	stats.block_dev = 0;
+	stats.char_dev = 0;
+	stats.caps = 0;
+	stats.link = 0;
+	stats.broken_link = 0;
+	stats.multi_link = 0;
+	stats.other_writable = 0;
+	stats.sticky = 0;
+	stats.extended = 0;
+	stats.unknown = 0;
+	stats.unstat = 0;
 }
 
 /* List files in the current working directory. Uses file type colors
@@ -1697,6 +1722,8 @@ list_dir(void)
 
 	/* Hide the cursor while listing */
 	fputs("\x1b[?25l", stdout);
+
+	reset_stats();
 
 	if (light_mode)
 		return list_dir_light();
@@ -1754,14 +1781,19 @@ list_dir(void)
 			}
 		}
 
+		if (*ename == '.')
+			stats.hidden++;
+
 		if (!show_hidden && *ename == '.')
 			continue;
 
 		init_fileinfo(n);
 
 		int stat_ok = 1;
-		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1)
+		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1) {
 			stat_ok = 0;
+			stats.unstat++;
+		}
 
 #ifdef _DIRENT_HAVE_D_TYPE
 		if (only_dirs && ent->d_type != DT_DIR)
@@ -1787,14 +1819,14 @@ list_dir(void)
 
 		if (stat_ok) {
 			switch (attr.st_mode & S_IFMT) {
-			case S_IFBLK: file_info[n].type = DT_BLK; break;
-			case S_IFCHR: file_info[n].type = DT_CHR; break;
-			case S_IFDIR: file_info[n].type = DT_DIR; break;
-			case S_IFIFO: file_info[n].type = DT_FIFO; break;
-			case S_IFLNK: file_info[n].type = DT_LNK; break;
-			case S_IFREG: file_info[n].type = DT_REG; break;
-			case S_IFSOCK: file_info[n].type = DT_SOCK; break;
-			default: file_info[n].type = DT_UNKNOWN; break;
+			case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
+			case S_IFCHR: file_info[n].type = DT_CHR; stats.char_dev++; break;
+			case S_IFDIR: file_info[n].type = DT_DIR; stats.dir++; break;
+			case S_IFIFO: file_info[n].type = DT_FIFO; stats.fifo++; break;
+			case S_IFLNK: file_info[n].type = DT_LNK; stats.link++; break;
+			case S_IFREG: file_info[n].type = DT_REG; stats.reg++; break;
+			case S_IFSOCK: file_info[n].type = DT_SOCK; stats.socket++; break;
+			default: file_info[n].type = DT_UNKNOWN; stats.unknown++; break;
 			}
 
 			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino,
@@ -1802,7 +1834,6 @@ list_dir(void)
 			file_info[n].inode = ent->d_ino;
 			file_info[n].linkn = attr.st_nlink;
 			file_info[n].size = attr.st_size;
-
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
 			file_info[n].mode = attr.st_mode;
@@ -1811,6 +1842,7 @@ list_dir(void)
 				file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
 		} else {
 			file_info[n].type = DT_UNKNOWN;
+			stats.unknown++;
 		}
 		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
@@ -1883,6 +1915,17 @@ list_dir(void)
 #endif
 			}
 
+			/* Let's gather some file statistics based on the
+			 * corresponding file type color */
+			if (file_info[n].color == tw_c) {
+				stats.other_writable++; stats.sticky++;
+			} else if (file_info[n].color == ow_c) {
+				stats.other_writable++;
+			} else
+				if (file_info[n].color == st_c) {
+					stats.sticky++;
+			}
+
 			break;
 
 		case DT_LNK: {
@@ -1896,6 +1939,7 @@ list_dir(void)
 			struct stat attrl;
 			if (fstatat(fd, ename, &attrl, 0) == -1) {
 				file_info[n].color = or_c;
+				stats.broken_link++;
 			} else {
 				if (S_ISDIR(attrl.st_mode)) {
 					file_info[n].dir = 1;
@@ -1922,12 +1966,14 @@ list_dir(void)
 				file_info[n].color = nf_c;
 			} else if (stat_ok && (attr.st_mode & 04000)) { /* SUID */
 				file_info[n].exec = 1;
+				stats.exec++; stats.suid++;
 				file_info[n].color = su_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif
 			} else if (stat_ok && (attr.st_mode & 02000)) { /* SGID */
 				file_info[n].exec = 1;
+				stats.exec++; stats.sgid++;
 				file_info[n].color = sg_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
@@ -1937,6 +1983,7 @@ list_dir(void)
 #ifdef _LINUX_CAP
 			else if (check_cap && (cap = cap_get_file(ename))) {
 				file_info[n].color = ca_c;
+				stats.caps++;
 				cap_free(cap);
 			}
 #endif
@@ -1944,6 +1991,7 @@ list_dir(void)
 			else if (stat_ok && ((attr.st_mode & 00100) /* Exec */
 			|| (attr.st_mode & 00010) || (attr.st_mode & 00001))) {
 				file_info[n].exec = 1;
+				stats.exec++;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif
@@ -1955,6 +2003,7 @@ list_dir(void)
 				file_info[n].color = ef_c;
 			} else if (file_info[n].linkn > 1) { /* Multi-hardlink */
 				file_info[n].color = mh_c;
+				stats.multi_link++;
 			} else { /* Regular file */
 				file_info[n].color = fi_c;
 			}
