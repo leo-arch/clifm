@@ -593,25 +593,19 @@ print_bookmarks(void)
 {
 	printf(_("%sBookmarks Manager%s\n\n"), BOLD, df_c);
 
-	/* Get longest shortcut name to properly pad output */
-	size_t i, eln = 0;
+	size_t i;
 	struct stat attr;
-	int eln_pad = DIGINUM(bm_n);
+	int eln_pad = DIGINUM(bm_n); /* Longest shortcut name to properly pad output */
 
-	/* Print bookmarks taking into account the existence of shortcut,
-	 * name, and path for each bookmark */
+	/* Print bookmarks, taking into account shortcut, name, and path */
 	for (i = 0; i < bm_n; i++) {
 		if (!bookmarks[i].path || !*bookmarks[i].path)
 			continue;
-		eln++;
 		int is_dir = 0, sc_ok = 0, name_ok = 0, non_existent = 0;
 		int path_ok = stat(bookmarks[i].path, &attr);
 
-		if (bookmarks[i].shortcut)
-			sc_ok = 1;
-
-		if (bookmarks[i].name)
-			name_ok = 1;
+		if (bookmarks[i].shortcut) sc_ok = 1;
+		if (bookmarks[i].name) name_ok = 1;
 
 		if (path_ok == -1) {
 			non_existent = 1;
@@ -623,18 +617,15 @@ print_bookmarks(void)
 			}
 		}
 
-		printf("%s%-*zu%s %s%c%s%c%s %s%s%s\n", el_c, eln_pad, eln, df_c,
+		printf("%s%-*zu%s %s%c%s%c%s %s%s%s\n", el_c, eln_pad, i + 1, df_c,
 		    BOLD, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
 		    sc_ok ? ']' : 0, df_c,
 		    non_existent ? GRAY : (!is_dir ? fi_c : (name_ok ? bm_c : di_c)),
 		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
 	}
 
-	/* User selection. Display the prompt */
-	char **arg = bm_prompt();
-	if (!arg || !*arg)
-		return (char **)NULL;
-
+	char **arg = bm_prompt(); /* User selection. Display the prompt */
+	if (!arg || !*arg) return (char **)NULL;
 	return arg;
 }
 
@@ -700,6 +691,7 @@ get_bm_path(char **arg, int *exit_status)
 
 	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), arg[0]);
 	*exit_status = EXIT_FAILURE;
+
 	return (char *)NULL;
 }
 
@@ -739,6 +731,7 @@ FREE_AND_EXIT : {
 	for (i = 0; arg[i]; i++)
 		free(arg[i]);
 	free(arg);
+
 	return exit_status;
 }
 }
