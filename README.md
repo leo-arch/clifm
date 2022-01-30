@@ -122,7 +122,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
   - [FZF mode for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)
   - [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting)
-  - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Specifics/#the-warning-prompt)
+  - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt)
   - [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
   - Bash-like quoting system.
   - Shell commands execution.
@@ -166,7 +166,9 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
 For a detailed explanation of each of these features, follow the corresponding links or consult the [Wiki](https://github.com/leo-arch/clifm/wiki).
 </details>
 
-✔️ **NOTE**: Since `verion 1.4`, and in order to make _Lira_ more powerful,<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
+✔️ **Changelog** 
+* `version 1.4.1`: The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is not supported anymore.
+* `verion 1.4`: In order to make _Lira_ more powerful<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
 <sup>1</sup> _It can now match entire file names instead of just file extensions_
 
