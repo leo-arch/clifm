@@ -1301,14 +1301,6 @@ which once decoded should look something like this:
 .TP
 with the workspace number and the path printed in cyan, the last exit status in green, and the dollar sign in blue.
 .TP
-The default warning prompt looks like this:
-
-\fB"\\[\\e[00;02;31m\\](!) > "\fR
-
-.TP
-The last line of the regular prompt becomes "\fB(!) > \fR", printed in a dimmed red color, including the typed text. To change the color of the typed text while in the warning prompt add a color code at the end of the warning prompt string. For example: '\fB\\[\\e[1;35m\\]\fR' to make the text bold magenta, or '\fB\\[\\e[0m\\]\fR' to use the default terminal foreground color.
-
-.TP
 A more "classic" prompt could be construed as follows:
 
  \fB"\\u@\\U \\w> "\fR
@@ -1346,11 +1338,12 @@ A few advanced prompt examples can be found in the prompts file in our Github si
 .TP
 We all want to keep our systems safe. One of the many ways to get a bit of safety is by checking that there is not file in our file system that could somehow endanger our machines. SUID, SGID, executable, and other-writable files are to be count among these dangers. This is why it could be useful to build a little files scanner for our prompt using the above mentioned files statistics escape codes. This is the code for our scanner:
 
-\fB"\\[\\e[0m\\]\\[\\e[1;31m\\]\\U\\[\\e[0m\\]:\\[\\e[1;33m\\]\\G\\[\\e[0m\\]:\\[\\e[1;32m\\]\\O\\[\\e[0m\\]:\\[\\e[1;34m\\]\\X\\[\\e[0m\\]"\fR
+\fB"\\[\\e[0m\\]\\[\\e[1;31m\\]\\U\\[\\e[0m\\]:\\[\\e[1;33m\\]\\G\\[\\e[0m\\]:
+\\[\\e[1;32m\\]\\O\\[\\e[0m\\]:\\[\\e[1;34m\\]\\X\\[\\e[0m\\]"\fR
 .TP
 By adding this code to our prompt line, we get something like this:
 
- 24:2:-:2389
+ \fB24:2:-:2389\fR
 .TP
 This tells us that in the current directory we have 24 SUID files (printed in bold red), 2 SGID files (bold yellow), no other-writable file, and 2389 executable files.
 .TP
@@ -1364,8 +1357,42 @@ This tells us that in the current directory we have 24 SUID files (printed in bo
 A bold red 'R' at the left of the prompt reminds the user that the program is running as root. A bold green asterisk indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 .TP
 If \fIPromptStyle\fR is set to "custom" in the configuration file, the above notifications won't be printed by the prompt, and the information necessary to construct them will be exported to the envitonment to let your custom prompt handle them itself. See the \fBENVIRONMENT\fR section below.
-
 .TP
+\fBThe Warning Prompt\fR
+.TP
+The suggestions system includes a secondary, warning prompt, used to highlight wrong/invalid/non-existent command names. Once an invalid command is entered, the regular prompt will be switched to the warning prompt and the whole input line will turn dimmed red (though it can be customized to fit your needs).
+.TP
+The wrong command name check is omitted if the input string:
+
+ Is quoted (ex: "string" or 'string')
+ Is bracketed (ex: (string), [string], or {string})
+ It starts with a stream redirection character (ex: <string or >string)
+ Is a comment (ex: #string)
+ It starts with one or more spaces
+ Is an assignment (ex: foo=var)
+ It is escaped (ex: \\string)
+.TP
+The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt just modify the \fIWarningPromptStr\fR line in the configuration file. It defaults to 
+
+ \fB"\\[\\e[00;02;31m\\](!) > "\fR
+.TP
+the last line of the regular prompt will become "\fB(!) > \fR", printed in a dimmed red color, including the input string.
+.TP
+To change the color of the input string while in the warning prompt add the corresponding color code to the end of the warning prompt string. For example: 
+
+ \fB\\[\\e[00;02;31m\\](!) > \\[\\e[01;36m\\]\fR
+.TP
+makes the input text bold magenta, while
+
+ \fB\\[\\e[00;02;31m\\](!) > \\[\\e[0m\\]\fR
+.TP
+disables color (the input string uses the current foreground color of the running terminal).
+.TP
+To disable this feature use the \fI--no-warning-prompt\fR command line option or set the \fIWarningPrompt\fR option to \fBfalse\fR in the configuration file.
+.TP
+\fBNOTE\fR: Bear in mind that the warning prompt depends on the suggestions system, so that it won't be available if this system is disabled.
+.TP
+
 \fBThe dividing line\fR
 .TP
 Though not strictly part of the prompt, the line dividing the current list of files and the prompt could be customized, via the \fIDividingLineChar\fR option in the configuration file, to fit your prompt design and/or color scheme.
@@ -1576,24 +1603,6 @@ Suggestions will be printed using one of the following color codes (see the \fBC
 
 You can set \fBSuggestFiletypeColor\fR to "true" in the configuration file to use the color of the file type of the current file name (as set in the color scheme file) instead of the value of
 \fIsf\fR. For example, if a suggestion is printed for a file that is a symbolic link, \fIln\fR or \fIor\fR (if a broken link) will be used instead of \fIsf\fR.
-
-\fBThe warning prompt\fR
-
-CliFM includes a \fBwarning prompt\fR to highlight invalid, wrong, or non-existent command names. Enable it via the \fI--warn-wrong-cmd\fR command line option or setting \fIWarningPrompt\fR to "true" in the configuration file. This features depends on suggestions (make sure suggestions are enabled before enabling the warning prompt).
-
-The wrong command name check is omitted if the input string:
-
-    Is quoted (ex: "string" or 'string')
-    Is bracketed (ex: (string), [string], or {string})
-    It starts with a stream redirection character (ex: <string or >string)
-    Is a comment (ex: #string)
-    It starts with one or more spaces
-    Is an assignment (ex: foo\=var)
-    It is escaped (ex: \\string)
-
-By default, the string used by the warning prompt is \fB"(!) > "\fR, though it can be customized using the \fIWarningPromptStr\fR in the condifuration file.
-
-The default color of the warning prompt is dimmed red (\fI02;32\fR), but it can be customized setting \fIwp\fR in the current color scheme file (in the \fIInterfaceColors\fR section) to the color you want. Consult the \fBCOLOR CODES\fR section above.
 
 .SH 14. SHELL FUNCTIONS
 CliFM includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
