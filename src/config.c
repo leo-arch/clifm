@@ -826,7 +826,6 @@ WarningPromptStr=\"%s\"\n\n",
 	    DEF_WPROMPT_STR);
 
 	fprintf(config_fp,
-
 		"# TAB completion mode: either 'standard' (default) or 'fzf'\n\
 TabCompletionMode=%s\n\n"
 
@@ -848,7 +847,9 @@ MaxPath=%d\n\n"
 SplashScreen=%s\n\n\
 ShowHiddenFiles=%s\n\n\
 # List files properties next to file names instead of just file names\n\
-LongViewMode=%s\n\n\
+LongViewMode=%s\n\
+# If running in long view, print directories full size (including contents)\n\
+FullDirSize=false\n\n\
 # Keep a record of both external commands and internal commands able to\n\
 # modify the files system (e.g. 'r', 'c', 'm', and so on)\n\
 LogCmds=%s\n\n"
