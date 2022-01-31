@@ -134,7 +134,6 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup).
 - Modes
   - Standard mode
-  - Disk usage analyzer (via `-t, --disk-usage-analyzer`)
   - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
   - [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#light-mode) (just in case it is not fast enough for you).
   - [Resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#using-clifm-as-a-standalone-resource-opener)
@@ -167,8 +166,10 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
 For a detailed explanation of each of these features, follow the corresponding links or consult the [Wiki](https://github.com/leo-arch/clifm/wiki).
 </details>
 
-✔️ **Changelog** 
-* `version 1.4.1`: The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is not supported anymore.
+✔️ **Changelog**
+* `version 1.4.1`:
+  - Disk usage analyzer mode (via `-t, --disk-usage-analyzer`)
+  - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is not supported anymore.
 * `verion 1.4`: In order to make _Lira_ more powerful<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
 <sup>1</sup> _It can now match entire file names instead of just file extensions_
