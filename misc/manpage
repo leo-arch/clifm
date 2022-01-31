@@ -876,6 +876,9 @@ with no argument, print the current sorting method. Else, set sorting method to 
 .sp
 By default, files are sorted from less to more (ex: from 'a' to 'z' if using the "name" method). Use the 'rev' option to invert this order. Ex: 'st rev' or 'st 3 rev'. Switch back to the previous ordering running 'st rev' again.
 .TP
+.B stats
+print statistics about files in the current directory (not available in light mode).
+.TP
 .B t, tr, trash  \fR[ELN/FILE ... n] [ls, list] [clear] [del [FILE(s)]]
 with no argument (or by passing the 'ls' option), it prints the list of currently trashed files. The 'clear' parameter removes all files from the trash can, while the 'del' parameter lists trashed files allowing the user to remove one or more of them. If using 'del', TAB completion to list/select currently trashed files is available.
 .sp
