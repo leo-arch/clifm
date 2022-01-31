@@ -83,6 +83,7 @@ _clifm ()
         --disk-usage
         --enable-logs
         --expand-bookmarks
+        --full-dir-size
         --fzftab
         --icons
         --icons-use-file-color

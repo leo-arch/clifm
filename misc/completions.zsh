@@ -50,6 +50,7 @@ args=(
 	'--disk-usage[show disk usage (free/total) for the filesystem to which the current directory belongs]'
 	'--enable-logs[enable program logs]'
 	'--expand-bookmarks[expand bookmark names into the corresponding bookmark paths]'
+	'--full-dir-size[print size of directories and their contents in long view mode]'
 	'--fzftab[enable FZF TAB completion mode]'
 	'--icons[enable icons]'
 	'--icons-use-file-color[icons color follows file color]'
