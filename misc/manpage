@@ -287,7 +287,10 @@ show disk usage (free/total) for the file system the current directory belongs t
 enable program logs
 .TP
 .B \-\-expand\-bookmarks
-expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
+expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path"
+.TP
+.B \-\-full\-dir\-size
+if running in long view, print directories size and their contents
 .TP
 .B \-\-fzftab
 enable the FZF mode for TAB completion (See the \fBBUILT\-IN EXPANSIONS\fR section below)
