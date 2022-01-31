@@ -134,6 +134,8 @@ ShowHiddenFiles=false
 
 # List files properties next to file names instead of just file names
 LongViewMode=false
+# If running in long view, print directories full size (including contents)
+FullDirSize=false
 
 # Keep a record of both external commands and internal commands able to
 # modify the files system (e.g. 'r', 'c', 'm', and so on)
