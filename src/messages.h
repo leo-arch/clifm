@@ -26,7 +26,7 @@
 #define MESSAGES_H
 
 /* Usage messages*/
-#define GRAL_USAGE "[-aAefFgGhHiIlLmoOsSuUvxy] [-b FILE] [-c FILE] [-D DIR] \
+#define GRAL_USAGE "[-aAefFgGhHiIlLmoOsStuUvxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define ACTIONS_USAGE "List or edit actions/plugins\n\
@@ -663,6 +663,7 @@ parameters instead)\
 \n -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
 \n -s, --splash \t\t\t Enable the splash screen\
 \n -S, --stealth-mode \t\t Leave no trace on the host system (see the manpage)\
+\n -t, --disk-usage-analyzer \t Run in disk usage analyzer mode\
 \n -u, --no-unicode \t\t Disable Unicode\
 \n -U, --unicode \t\t\t Enable Unicode support (default)\
 \n -v, --version\t\t\t Show version details and exit\
@@ -699,7 +700,7 @@ directory base name (if \\z is used in the prompt)\
 \n     --no-cd-auto\t\t Disable the autocd function\
 \n     --no-classify\t\t Do not append file type indicators\
 \n     --no-clear-screen\t\t Do not clear the screen when listing directories\
-\n     --no-color\t\t Disable colors \
+\n     --no-color\t\t\t Disable colors \
 \n     --no-columns\t\t Disable columned files listing\
 \n     --no-file-cap\t\t Do not check files capabilities when listing files\
 \n     --no-file-ext\t\t Do not check files extension when listing files\

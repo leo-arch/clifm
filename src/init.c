@@ -966,6 +966,7 @@ external_arguments(int argc, char **argv)
 	    {"profile", required_argument, 0, 'P'},
 	    {"splash", no_argument, 0, 's'},
 	    {"stealth-mode", no_argument, 0, 'S'},
+	    {"disk-usage-analyzer", no_argument, 0, 't'},
 	    {"unicode", no_argument, 0, 'U'},
 	    {"no-unicode", no_argument, 0, 'u'},
 	    {"version", no_argument, 0, 'v'},
@@ -1039,7 +1040,7 @@ external_arguments(int argc, char **argv)
 	     *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
-		    "+aAb:c:D:efFgGhHiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
+		    "+aAb:c:D:efFgGhHiIk:lLmoOp:P:sStUuvw:xyz:", longopts,
 		    (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -1301,6 +1302,7 @@ RUN:
 			break;
 
 		case 'S': xargs.stealth_mode = 1; break;
+		case 't': xargs.disk_usage_analyzer = 1; break;
 		case 'u': unicode = xargs.unicode = 0; break;
 		case 'U': unicode = xargs.unicode = 1; break;
 
@@ -1590,6 +1592,7 @@ unset_xargs(void)
 	xargs.cwd_in_title = UNSET;
 	xargs.dirmap = UNSET;
 	xargs.disk_usage = UNSET;
+	xargs.disk_usage_analizer = UNSET;
 	xargs.expand_bookmarks = UNSET;
 	xargs.ext = UNSET;
 	xargs.ffirst = UNSET;

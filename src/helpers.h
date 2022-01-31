@@ -626,6 +626,7 @@ struct param {
 	int classify;
 	int color_scheme;
 	int control_d_exits;
+	int disk_usage_analyzer;
 	int expand_bookmarks;
 	int ext;
 	int ffirst;

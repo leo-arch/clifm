@@ -2282,6 +2282,13 @@ read_config(void)
 
 	close_fstream(config_fp, fd);
 
+	if (xargs.disk_usage_analyzer == 1) {
+		long_view = 1;
+		full_dir_size = 1;
+		sort = SSIZE;
+		sort_reverse = 1;
+	}
+
 	if (_filter) {
 		ret = regcomp(&regex_exp, _filter, REG_NOSUB | REG_EXTENDED);
 		if (ret != EXIT_SUCCESS) {
