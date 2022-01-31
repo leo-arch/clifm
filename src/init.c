@@ -1592,7 +1592,7 @@ unset_xargs(void)
 	xargs.cwd_in_title = UNSET;
 	xargs.dirmap = UNSET;
 	xargs.disk_usage = UNSET;
-	xargs.disk_usage_analizer = UNSET;
+	xargs.disk_usage_analyzer = UNSET;
 	xargs.expand_bookmarks = UNSET;
 	xargs.ext = UNSET;
 	xargs.ffirst = UNSET;

@@ -526,8 +526,6 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad)
 			(*counter)++;
 		}
 
-//		set_long_attribs(i, &lattr);
-
 		/* Print ELN. The remaining part of the line will be
 		 * printed by print_entry_props() */
 		if (!no_eln)
@@ -1541,9 +1539,19 @@ list_dir_light(void)
 			file_info[n].icon_color = file_info[n].color;
 #endif
 
+		if (long_view) {
+			struct stat attr;
+			lstat(file_info[n].name, &attr);
+			set_long_attribs((int)n, &attr);
+		}
+
 		n++;
 		count++;
 	}
+
+	if (xargs.disk_usage_analyzer == 1)
+		/* Erase the "Retrieveing file sizes" message */
+		printf("\x1b[2K\x1b[1G");
 
 	file_info[n].name = (char *)NULL;
 	files = (size_t)n;
@@ -1711,6 +1719,11 @@ list_dir(void)
 
 	if (clear_screen)
 		CLEAR;
+
+	if (xargs.disk_usage_analyzer == 1) {
+		printf("Retrieving file sizes. Please wait... ");
+		fflush(stdout);
+	}
 
 	if (!unicode) {
 		trim.state = trim.a = trim.b = 0;
@@ -2065,6 +2078,10 @@ list_dir(void)
 		n++;
 		count++;
 	}
+
+	if (xargs.disk_usage_analyzer == 1)
+		/* Erase the "Retrieveing file sizes" message */
+		printf("\x1b[2K\x1b[1G");
 
 	file_info[n].name = (char *)NULL;
 	files = n;
