@@ -241,6 +241,9 @@ enable the splash screen
 .B \-S \-\-stealth-mode
 leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below).
 .TP
+.B \-t, \-\-disk\-usage\-analyzer
+run in disk usage analyzer mode. Equivalent to --sort=2 --long-view --sort-reverse --full-dir-size
+.TP
 .B \-u, \-\-no\-unicode
 disable unicode
 .TP
