@@ -1821,6 +1821,20 @@ read_config(void)
 			}
 		}
 
+		else if (xargs.full_dir_size == UNSET && *line == 'F'
+		&& strncmp(line, "FullDirSize=", 12) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "FullDirSize=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0) {
+				full_dir_size = 1;
+			} else {
+				if (strncmp(opt_str, "false", 5) == 0)
+					full_dir_size = 0;
+			}
+		}
+
 		else if (xargs.logs == UNSET && *line == 'L'
 		&& strncmp(line, "LogCmds=", 8) == 0) {
 			char opt_str[MAX_BOOL] = "";

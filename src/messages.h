@@ -683,6 +683,8 @@ database (via the 'j' command)\
 \n     --enable-logs\t\t Enable program logs\
 \n     --expand-bookmarks\t\t Expand bookmark names into the corresponding \
 bookmark paths\
+\n     --full-dir-size\t\t Print the size of directories and their contents \
+in long view mode\
 \n     --fzftab\t\t\t Enable FZF mode for TAB completion\
 \n     --icons\t\t\t Enable icons\
 \n     --icons-use-file-color\t Icons color follows file color\
@@ -795,6 +797,7 @@ parameters.\n\n\
  sb, selbox\n\
  splash\n\
  st, sort [METHOD] [rev]\n\
+ stats\n\
  t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]\n\
  te [FILE(s)]\n\
  tips\n\

@@ -1023,6 +1023,7 @@ external_arguments(int argc, char **argv)
 		{"secure-env-full", no_argument, 0, 47},
 		{"secure-cmds", no_argument, 0, 48},
 		{"no-props-color", no_argument, 0, 49},
+		{"full-dir-size", no_argument, 0, 50},
 	    {0, 0, 0, 0}
 	};
 
@@ -1213,6 +1214,7 @@ RUN:
 			break;
 		case 48: xargs.secure_cmds = 1; break;
 		case 49: xargs.props_color = props_color = 0; break;
+		case 50: xargs.full_dir_size = full_dir_size = 1; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1593,6 +1595,7 @@ unset_xargs(void)
 	xargs.ffirst = UNSET;
 	xargs.files_counter = UNSET;
 	xargs.follow_symlinks = UNSET;
+	xargs.full_dir_size = UNSET;
 #ifndef _NO_FZF
 	xargs.fzftab = UNSET;
 #endif
@@ -2296,6 +2299,13 @@ check_options(void)
 			highlight = xargs.highlight;
 	}
 #endif
+
+	if (full_dir_size == UNSET) {
+		if (xargs.full_dir_size == UNSET)
+			full_dir_size = DEF_FULL_DIR_SIZE;
+		else
+			full_dir_size = xargs.full_dir_size;
+	}
 
 	if (props_color == UNSET) {
 		if (xargs.props_color == UNSET)

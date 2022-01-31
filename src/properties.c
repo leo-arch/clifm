@@ -43,6 +43,10 @@
 #include "checks.h"
 #include "colors.h"
 
+#ifndef DT_DIR
+# define DT_DIR 4
+#endif
+
 static int
 get_properties(char *filename, const int dsize)
 {
@@ -417,12 +421,13 @@ get_properties(char *filename, const int dsize)
 int
 print_entry_props(const struct fileinfo *props, size_t max)
 {
-	/* Get file size */
-	char *size_type = get_size_unit(props->size);
+	char *size_type;
+	if (full_dir_size == 1 && props->type == DT_DIR)
+		size_type = get_size_unit(props->size * 1024);
+	else
+		size_type = get_size_unit(props->size);
 
-	/* Get file type indicator */
-	char file_type = 0;
-
+	char file_type = 0;    /* File type indicator */
 	char *ctype = PR_NONE, /* Color for file type */
 		 *cdate = PR_DATE, /* Color for dates */
 		 *cid = PR_ID,     /* Color for UID and GID */

@@ -485,7 +485,11 @@ set_long_attribs(const int n, const struct stat *attr)
 	file_info[n].gid = attr->st_gid;
 	file_info[n].ltime = (time_t)attr->st_mtim.tv_sec;
 	file_info[n].mode = attr->st_mode;
-	file_info[n].size = attr->st_size;
+
+	if (full_dir_size == 1 && file_info[n].type == DT_DIR)
+		file_info[n].size = dir_size(file_info[n].name);
+	else
+		file_info[n].size = attr->st_size;
 }
 
 static inline void
@@ -522,7 +526,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad)
 			(*counter)++;
 		}
 
-		set_long_attribs(i, &lattr);
+//		set_long_attribs(i, &lattr);
 
 		/* Print ELN. The remaining part of the line will be
 		 * printed by print_entry_props() */
@@ -2054,6 +2058,9 @@ list_dir(void)
 		if (xargs.icons_use_file_color == 1 && icons)
 			file_info[n].icon_color = file_info[n].color;
 #endif
+
+		if (long_view)
+			set_long_attribs((int)n, &attr);
 
 		n++;
 		count++;

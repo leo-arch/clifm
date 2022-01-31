@@ -631,6 +631,7 @@ struct param {
 	int ffirst;
 	int files_counter;
 	int follow_symlinks;
+	int full_dir_size;
 #ifndef _NO_FZF
 	int fzftab;
 #endif
@@ -823,6 +824,7 @@ extern int
 	files_counter,
 	filter_rev,
 	follow_symlinks,
+	full_dir_size,
 	fzftab,
 	fzf_height_set,
 	fzf_open_with,

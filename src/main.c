@@ -135,6 +135,7 @@ int
 	files_counter = UNSET,
 	filter_rev = 0,
 	follow_symlinks = UNSET,
+	full_dir_size = UNSET,
 	fzftab = UNSET,
 	fzf_height_set = 0,
 	fzf_open_with = 0,
