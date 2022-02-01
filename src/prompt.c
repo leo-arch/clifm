@@ -51,8 +51,9 @@
 
 #define __WS_STR_LEN sizeof(int) + 6 + (MAX_COLOR + 2) * 2
 
-#define ROOT_IND "\001\x1b[1;31mR\x1b[0m\002"
-#define ROOT_IND_SIZE 15
+#define ROOT_IND "\001\x1b[1;31m\002R\001\x1b[0m\002"
+#define ROOT_IND_NO_COLOR "\001\x1b[1m\002R\001\x1b[0m\002"
+#define ROOT_IND_SIZE 17
 #define STEALTH_IND "S\001\x1b[0m\002"
 #define STEALTH_IND_SIZE MAX_COLOR + 7 + 1
 
@@ -826,7 +827,7 @@ construct_prompt(const char *decoded_prompt)
 	if (prompt_style == DEF_PROMPT_STYLE) {
 		snprintf(the_prompt, prompt_len,
 			"%s%s%s%s%s%s%s%s\001%s\002",
-			(flags & ROOT_USR) ? ROOT_IND : "",
+			(flags & ROOT_USR) ? (colorize ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
 			(msgs_n && pmsg) ? msg_ind : "",
 			(xargs.stealth_mode == 1) ? si_c : "",
 			(xargs.stealth_mode == 1) ? STEALTH_IND : "",

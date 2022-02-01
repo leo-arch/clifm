@@ -1387,8 +1387,8 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 {
 	char *t = get_size_unit(total);
 	char *l = get_size_unit(largest);
-	printf("Total size:   %s%s%s\n"
-		"Largest file: %s%s%s [%s%s%s]\n",
+	printf(_("Total size:   %s%s%s\n"
+		"Largest file: %s%s%s [%s%s%s]\n"),
 		colorize ? "\x1b[1;32m" : "" , t,
 		colorize ? "\x1b[0m" : "",
 		colorize ? "\x1b[1;32m" : "" , l,
@@ -1433,8 +1433,7 @@ list_dir_light(void)
 	register unsigned int n = 0;
 	unsigned int total_dents = 0, count = 0;
 
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
-	    sizeof(struct fileinfo));
+	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
 		char *ename = ent->d_name;
@@ -1573,8 +1572,8 @@ list_dir_light(void)
 
 		if (long_view) {
 			struct stat _attr;
-			lstat(file_info[n].name, &_attr);
-			set_long_attribs((int)n, &_attr);
+			if (lstat(file_info[n].name, &_attr) != -1)
+				set_long_attribs((int)n, &_attr);
 		}
 
 		if (xargs.disk_usage_analyzer == 1)
@@ -2114,7 +2113,7 @@ list_dir(void)
 			file_info[n].icon_color = file_info[n].color;
 #endif
 
-		if (long_view)
+		if (long_view && stat_ok)
 			set_long_attribs((int)n, &attr);
 
 		if (xargs.disk_usage_analyzer == 1)

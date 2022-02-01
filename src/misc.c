@@ -1698,7 +1698,7 @@ void
 splash(void)
 {
 	printf("\n%s%s\n\n%s%s\t\t       %s%s\n           %s\n",
-		D_CYAN, ASCII_LOGO_BIG, df_c,
+		colorize ? D_CYAN : "", ASCII_LOGO_BIG, df_c,
 		BOLD, df_c, PROGRAM_NAME, _(PROGRAM_DESC));
 
 	if (splash_screen) {
