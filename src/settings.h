@@ -160,6 +160,7 @@ hr=00;31:hs=00;32:hv=00;32:ts=04;35:wp=02;31:"
 #define MNT_UDISKS2 1
 
 /* Default options */
+#define DEF_APPARENT_SIZE 0
 #define DEF_AUTOCD 1
 #define DEF_AUTOJUMP 0
 #define DEF_AUTO_OPEN 1

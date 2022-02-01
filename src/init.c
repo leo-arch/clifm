@@ -161,7 +161,7 @@ init_history(void)
 
 	/* Get history */
 	struct stat attr;
-	if (stat(hist_file, &attr) == 0 && attr.st_size != 0) {
+	if (stat(hist_file, &attr) == 0 && FILE_SIZE != 0) {
 		/* If the size condition is not included, and in case of a zero
 		 * size file, read_history() produces malloc errors */
 		/* Recover history from the history file */
@@ -1025,6 +1025,7 @@ external_arguments(int argc, char **argv)
 		{"secure-cmds", no_argument, 0, 48},
 		{"no-props-color", no_argument, 0, 49},
 		{"full-dir-size", no_argument, 0, 50},
+		{"apparent-size", no_argument, 0, 51},
 	    {0, 0, 0, 0}
 	};
 
@@ -1216,6 +1217,7 @@ RUN:
 		case 48: xargs.secure_cmds = 1; break;
 		case 49: xargs.props_color = props_color = 0; break;
 		case 50: xargs.full_dir_size = full_dir_size = 1; break;
+		case 51: xargs.apparent_size = 1; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1574,6 +1576,7 @@ RUN:
 void
 unset_xargs(void)
 {
+	xargs.apparent_size = UNSET;
 	xargs.auto_open = UNSET;
 	xargs.autocd = UNSET;
 	xargs.autojump = UNSET;
@@ -2242,6 +2245,9 @@ check_options(void)
 		wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
 
 	/* Do no override command line options */
+	if (xargs.apparent_size == UNSET)
+		xargs.apparent_size = DEF_APPARENT_SIZE;
+
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
 

@@ -412,6 +412,11 @@ extern int watch;
 
 #define ENTRY_N 64
 
+/* Macros to calculate file sizes */
+#define BLK_SIZE 512
+#define FILE_SIZE_PTR (xargs.apparent_size == 1 ? attr->st_size : attr->st_blocks * BLK_SIZE)
+#define FILE_SIZE (xargs.apparent_size == 1 ? attr.st_size : attr.st_blocks * BLK_SIZE)
+
 #define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define DIGINUM(n) (((n) < 10) ? 1 \
@@ -606,6 +611,7 @@ extern struct opts_t opts;
  * fly (editing the config file) any option not specified in the command
  * line */
 struct param {
+	int apparent_size;
 	int auto_open;
 	int autocd;
 	int autojump;

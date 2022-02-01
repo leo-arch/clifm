@@ -636,17 +636,17 @@ sel_function(char **args)
 	}
 
 	/* Get total size of sel files */
-	struct stat sattr;
+	struct stat attr;
 
 	i = (int)sel_n;
 	while (--i >= 0) {
-		if (lstat(sel_elements[i], &sattr) != -1) {
+		if (lstat(sel_elements[i], &attr) != -1) {
 			/*          if ((sattr.st_mode & S_IFMT) == S_IFDIR) {
 				off_t dsize = dir_size(sel_elements[i]);
 				total_sel_size += dsize;
 			}
 			else */
-			total_sel_size += sattr.st_size;
+			total_sel_size += FILE_SIZE;
 		}
 	}
 
@@ -828,7 +828,7 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 					if (S_ISDIR(attr.st_mode))
 						total_sel_size -= dir_size(sel_elements[k]);
 					else
-						total_sel_size -= attr.st_size;
+						total_sel_size -= FILE_SIZE;
 				}
 
 				desel_index = k;

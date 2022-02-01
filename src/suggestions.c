@@ -342,11 +342,11 @@ get_comp_color(const char *filename, const struct stat *attr, size_t *free_color
 #else
 			if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
-				if (attr->st_size == 0)
+				if (FILE_SIZE_PTR == 0)
 					color = ee_c;
 				else
 					color = ex_c;
-			} else if (attr->st_size == 0)
+			} else if (FILE_SIZE_PTR == 0)
 				color = ef_c;
 			else if (attr->st_nlink > 1)
 				color = mh_c;

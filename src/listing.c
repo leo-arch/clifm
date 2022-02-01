@@ -489,7 +489,7 @@ set_long_attribs(const int n, const struct stat *attr)
 	if (full_dir_size == 1 && file_info[n].type == DT_DIR)
 		file_info[n].size = dir_size(file_info[n].name);
 	else
-		file_info[n].size = attr->st_size;
+		file_info[n].size = FILE_SIZE_PTR;
 }
 
 static inline void
@@ -1891,7 +1891,7 @@ list_dir(void)
 							attr.st_nlink, n);
 			file_info[n].inode = ent->d_ino;
 			file_info[n].linkn = attr.st_nlink;
-			file_info[n].size = attr.st_size;
+			file_info[n].size = FILE_SIZE;
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
 			file_info[n].mode = attr.st_mode;

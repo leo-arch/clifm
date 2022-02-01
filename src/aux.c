@@ -629,8 +629,18 @@ dir_size(char *dir)
 	dup2(fd, STDOUT_FILENO); /* Redirect stdout to the desired file */
 	close(fd);
 
+#ifdef __linux__
+	if (xargs.apparent_size != 1) {
+		char *cmd[] = {"du", "-ks", dir, NULL};
+		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	} else {
+		char *cmd[] = {"du", "-ks", "--apparent-size", dir, NULL};
+		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	}
+#else
 	char *cmd[] = {"du", "-ks", dir, NULL};
 	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+#endif /* __linux__ */
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	close(stdout_bk);

@@ -70,7 +70,7 @@ get_properties(char *filename, const int dsize)
 	}
 
 	/* Get file size */
-	char *size_type = get_size_unit(attr.st_size);
+	char *size_type = get_size_unit(FILE_SIZE);
 
 	/* Get file type (and color) */
 	char file_type = 0;
@@ -108,13 +108,13 @@ get_properties(char *filename, const int dsize)
 #else
 			if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
-				if (attr.st_size == 0)
+				if (FILE_SIZE == 0)
 					color = ee_c;
 				else
 					color = ex_c;
 			}
 
-			else if (attr.st_size == 0)
+			else if (FILE_SIZE == 0)
 				color = ef_c;
 			else if (attr.st_nlink > 1)
 				color = mh_c;

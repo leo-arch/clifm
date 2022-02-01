@@ -463,7 +463,7 @@ print_tips(int all)
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
 
-	if (all) {
+	if (all == 1) {
 		size_t i;
 		for (i = 0; i < tipsn; i++)
 			printf("%sTIP %zu%s: %s\n", BOLD, i, df_c, TIPS[i]);

@@ -88,11 +88,11 @@ get_file_color(const char *filename, const struct stat *attr)
 #endif
 	else if ((attr->st_mode & 00100) /* Exec */
 	|| (attr->st_mode & 00010) || (attr->st_mode & 00001)) {
-		if (attr->st_size == 0)
+		if (FILE_SIZE_PTR == 0)
 			color = ee_c;
 		else
 			color = ex_c;
-	} else if (attr->st_size == 0) {
+	} else if (FILE_SIZE_PTR == 0) {
 		color = ef_c;
 	} else if (attr->st_nlink > 1) { /* Multi-hardlink */
 		color = mh_c;
@@ -1518,7 +1518,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	 * this case, no index should be printed at all */
 		index[0] = '\0';
 
-	struct stat file_attrib;
+	struct stat attr;
 	size_t elen = strlen(ent);
 	int rem_slash = 0;
 	/* Remove the ending slash: lstat() won't take a symlink to dir as
@@ -1527,7 +1527,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 		ent[elen - 1] = '\0';
 		rem_slash = 1;
 	}
-	int ret = lstat(ent, &file_attrib);
+	int ret = lstat(ent, &attr);
 	if (rem_slash)
 		ent[elen - 1] = '/';
 
@@ -1552,14 +1552,14 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	cap_t cap;
 #endif
 
-	switch (file_attrib.st_mode & S_IFMT) {
+	switch (attr.st_mode & S_IFMT) {
 
 	case S_IFREG:
-		if (!check_file_access(&file_attrib)) {
+		if (!check_file_access(&attr)) {
 			color = nf_c;
-		} else if (file_attrib.st_mode & S_ISUID) { /* set uid file */
+		} else if (attr.st_mode & S_ISUID) { /* set uid file */
 			color = su_c;
-		} else if (file_attrib.st_mode & S_ISGID) { /* set gid file */
+		} else if (attr.st_mode & S_ISGID) { /* set gid file */
 			color = sg_c;
 		} else {
 #ifdef _LINUX_CAP
@@ -1567,17 +1567,17 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 			if (cap) {
 				color = ca_c;
 				cap_free(cap);
-			} else if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+			} else if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #else
-			if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+			if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
-				if (file_attrib.st_size == 0)
+				if (FILE_SIZE == 0)
 					color = ee_c;
 				else
 					color = ex_c;
-			} else if (file_attrib.st_size == 0) {
+			} else if (FILE_SIZE == 0) {
 				color = ef_c;
-			} else if (file_attrib.st_nlink > 1) {
+			} else if (attr.st_nlink > 1) {
 				color = mh_c;
 			} else {
 				char *ext = (strrchr(ent, '.'));
@@ -1597,17 +1597,17 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 		break;
 
 	case S_IFDIR:
-		if (!check_file_access(&file_attrib)) {
+		if (!check_file_access(&attr)) {
 			color = nd_c;
 		} else {
 			int is_oth_w = 0;
 
-			if (file_attrib.st_mode & S_IWOTH)
+			if (attr.st_mode & S_IWOTH)
 				is_oth_w = 1;
 
 			int files_dir = count_dir(ent, NO_CPOP);
 
-			color = (file_attrib.st_mode & S_ISVTX) ? (is_oth_w
+			color = (attr.st_mode & S_ISVTX) ? (is_oth_w
 					? tw_c : st_c) : (is_oth_w ? ow_c :
 					/* If folder is empty, it contains only "."
 					 * and ".." (2 elements). If not mounted (ex:
