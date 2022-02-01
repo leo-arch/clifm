@@ -286,7 +286,6 @@ get_properties(char *filename, const int dsize)
 	} else { /* Broken link */
 		char link[PATH_MAX] = "";
 		ssize_t ret = readlinkat(AT_FDCWD, filename, link, PATH_MAX);
-
 		if (ret) {
 			printf(_("\tName: %s%s%s -> %s (broken link)\n"), color, wname ? wname : filename,
 			    df_c, link);
@@ -303,9 +302,9 @@ get_properties(char *filename, const int dsize)
 	localtime_r(&time, &tm);
 	char access_time[128];
 
-	if (time)
+	if (time) {
 		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", &tm);
-	else {
+	} else {
 		*access_time = '-';
 		access_time[1] = '\0';
 	}
@@ -403,26 +402,30 @@ get_properties(char *filename, const int dsize)
 #endif
 
 	/* Print size */
-	if (S_ISDIR(attr.st_mode)) {
-		if (dsize) {
-			fputs(_("Total size: \t"), stdout);
-			off_t total_size = dir_size(filename);
-			if (total_size != -1) {
-				char *human_size = get_size_unit(total_size * 1024);
-				if (human_size) {
-					printf("%s%s%s\n", csize, human_size, cend);
-					free(human_size);
-				} else {
-					puts("?");
-				}
-			} else {
-				puts("?");
-			}
-		}
-	} else {
+	if (!S_ISDIR(attr.st_mode)) {
 		printf(_("Size: \t\t%s%s%s\n"), csize, size_type ? size_type : "?", cend);
+		goto END;
 	}
 
+	if (!dsize)
+		goto END;
+
+	fputs(_("Total size: \t"), stdout);
+	off_t total_size = dir_size(filename);
+	if (total_size == -1) {
+		puts("?");
+		goto END;
+	}
+
+	char *human_size = get_size_unit(total_size * 1024);
+	if (human_size) {
+		printf("%s%s%s\n", csize, human_size, cend);
+		free(human_size);
+	} else {
+		puts("?");
+	}
+
+END:
 	free(size_type);
 	return EXIT_SUCCESS;
 }
