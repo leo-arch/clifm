@@ -2283,10 +2283,9 @@ read_config(void)
 	close_fstream(config_fp, fd);
 
 	if (xargs.disk_usage_analyzer == 1) {
-		long_view = 1;
-		full_dir_size = 1;
 		sort = SSIZE;
-		sort_reverse = 1;
+		long_view = full_dir_size = sort_reverse = 1;
+		list_folders_first = welcome_message = 0;
 	}
 
 	if (_filter) {

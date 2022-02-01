@@ -49,7 +49,7 @@
 
 #ifdef TOURBIN_QSORT
 #include "qsort.h"
-#define ENTLESS(i, j) (entrycmp(file_info + (i), file_indo + (j)) < 0)
+#define ENTLESS(i, j) (entrycmp(file_info + (i), file_info + (j)) < 0)
 #define ENTSWAP(i, j) (swap_ent((i), (j)))
 #define ENTSORT(file_info, n, entrycmp) QSORT((n), ENTLESS, ENTSWAP)
 #else
@@ -1361,13 +1361,41 @@ check_autocmd_file(char *s)
 {
 	if (*s == '.' && s[1] == 'c' && s[2] == 'f' && s[3] == 'm'
 	&& s[4] == '.') {
-		if (s[5] == 'o' && s[6] == 'u' && s[7] == 't' && !s[8])
+		if (s[5] == 'o' && s[6] == 'u' && s[7] == 't' && !s[8]) {
 			dir_out = 1;
-		else {
+		} else {
 			if (s[5] == 'i' && s[6] == 'n' && !s[7])
 				run_dir_cmd(DIR_IN);
 		}
 	}
+}
+
+static inline void
+get_largest(size_t i, off_t *size, char **name, char **color, off_t *total)
+{
+	int d = (file_info[i].type == DT_DIR ? 1024 : 1);
+	if (file_info[i].size * d > *size) {
+		*size = file_info[i].size * d;
+		*name = file_info[i].name;
+		*color = file_info[i].color;
+	}
+	*total += file_info[i].size * d;
+}
+
+static inline void
+print_analysis_stats(off_t total, off_t largest, char *color, char *name)
+{
+	char *t = get_size_unit(total);
+	char *l = get_size_unit(largest);
+	printf("Total size:   %s%s%s\n"
+		"Largest file: %s%s%s [%s%s%s]\n",
+		colorize ? "\x1b[1;32m" : "" , t,
+		colorize ? "\x1b[0m" : "",
+		colorize ? "\x1b[1;32m" : "" , l,
+		colorize ? "\x1b[0m" : "",
+		colorize ? color : "", name, df_c);
+	free(t);
+	free(l);
 }
 
 /* List files in the current working directory (global variable 'path').
@@ -1386,6 +1414,10 @@ list_dir_light(void)
 	int reset_pager = 0;
 	int close_dir = 1;
 	int excluded_files = 0;
+
+	/* A few variables for the disk usage analyzer mode */
+	off_t largest_size = 0, total_size = 0;
+	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
@@ -1545,6 +1577,9 @@ list_dir_light(void)
 			set_long_attribs((int)n, &attr);
 		}
 
+		if (xargs.disk_usage_analyzer == 1)
+			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
+
 		n++;
 		count++;
 	}
@@ -1604,6 +1639,9 @@ END:
 	exit_code = post_listing(dir, close_dir, reset_pager);
 	if (excluded_files > 0)
 		printf(_("Excluded files: %d\n"), excluded_files);
+
+	if (xargs.disk_usage_analyzer == 1 && long_view && full_dir_size)
+		print_analysis_stats(total_size, largest_size, largest_color, largest_name);
 
 #ifdef _LIST_SPEED
 	clock_t end = clock();
@@ -1751,6 +1789,10 @@ list_dir(void)
 	int reset_pager = 0;
 	int close_dir = 1;
 	int excluded_files = 0;
+
+	/* A few variables for the disk usage analyzer mode */
+	off_t largest_size = 0, total_size = 0;
+	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
@@ -2075,6 +2117,9 @@ list_dir(void)
 		if (long_view)
 			set_long_attribs((int)n, &attr);
 
+		if (xargs.disk_usage_analyzer == 1)
+			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
+
 		n++;
 		count++;
 	}
@@ -2146,6 +2191,9 @@ END:
 	exit_code = post_listing(dir, close_dir, reset_pager);
 	if (excluded_files > 0)
 		printf(_("Excluded files: %d\n"), excluded_files);
+
+	if (xargs.disk_usage_analyzer == 1 && long_view && full_dir_size)
+		print_analysis_stats(total_size, largest_size, largest_color, largest_name);
 
 #ifdef _LIST_SPEED
 	clock_t end = clock();

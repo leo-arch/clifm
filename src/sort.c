@@ -154,11 +154,31 @@ namecmp(const char *s1, const char *s2)
 	return strcmp(s1, s2);
 }
 
+static inline int
+cmp_size(struct fileinfo *pa, struct fileinfo *pb)
+{
+	off_t as = pa->size, bs = pb->size;
+	if (long_view && full_dir_size) {
+		if (pa->type == DT_DIR)
+			as = pa->size * 1024;
+		if (pb->type == DT_DIR)
+			bs = pb->size * 1024;
+	}
+
+	if (as > bs)
+		return 1;
+
+	if (as < bs)
+		return (-1);
+
+	return 0;
+}
+
 int
 entrycmp(const void *a, const void *b)
 {
-	const struct fileinfo *pa = (struct fileinfo *)a;
-	const struct fileinfo *pb = (struct fileinfo *)b;
+	struct fileinfo *pa = (struct fileinfo *)a;
+	struct fileinfo *pb = (struct fileinfo *)b;
 
 	if (list_folders_first) {
 		if (pb->dir != pa->dir) {
@@ -174,15 +194,7 @@ entrycmp(const void *a, const void *b)
 		st = SNAME;
 
 	switch (st) {
-
-	case SSIZE:
-		if (pa->size > pb->size) {
-			ret = 1;
-		} else {
-			if (pa->size < pb->size)
-				ret = -1;
-		}
-		break;
+	case SSIZE: ret = cmp_size(pa, pb);	break;
 
 	case SATIME: /* fallthrough */
 	case SBTIME: /* fallthrough */
@@ -196,9 +208,7 @@ entrycmp(const void *a, const void *b)
 		}
 		break;
 
-	case SVER:
-		ret = xstrverscmp(pa->name, pb->name);
-		break;
+	case SVER: ret = xstrverscmp(pa->name, pb->name); break;
 
 	case SEXT: {
 		char *aext = (char *)NULL, *bext = (char *)NULL, *val;
