@@ -34,6 +34,7 @@ args=(
 	{-P+,--profile=}'[use (or create) PROFILE as profile]:profile:->profiles'
 	{-s,--splash}'[print the logo screen at startup]'
 	{-S,--stealth-mode}'[leave no trace on the host system]'
+	{-t,--disk-usage-analyzer}'[run in disk usage analyzer mode]'
 	{-u,--no-unicode}'[disable unicode]'
 	{-U,--unicode}'[enable unicode]'
 	{-v,--version}'[show version details and exit]'

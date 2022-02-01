@@ -60,6 +60,8 @@ _clifm ()
         --splash
         -S
         --stealth-mode
+        -t
+        --disk-usage-analyzer
         -u
         --no-unicode
         -U
@@ -95,7 +97,7 @@ _clifm ()
         --no-cd-auto
         --no-classify
         --no-clear-screen
-        --no-colors
+        --no-color
         --no-columns
         --no-file-cap
         --no-file-ext
