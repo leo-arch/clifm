@@ -431,7 +431,7 @@ END:
 }
 
 int
-print_entry_props(const struct fileinfo *props, size_t max)
+print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 {
 	char *size_type;
 	if (full_dir_size == 1 && props->type == DT_DIR)
@@ -576,16 +576,21 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
+	/* Calculate right pad for UID:GID string */
+	int ug_pad = 0, u = DIGINUM(props->uid), g = DIGINUM(props->gid);
+	if (u + g < (int)ug_max)
+		ug_pad = (int)ug_max - u;
+
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
 		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s  "
-		   "%s%u:%u%s  %s%s%s  %s%s%s\n",
+		   "%s%u:%-*u%s  %s%s%s  %s%s%s\n",
 	    colorize ? props->icon_color : "",
 	    icons ? props->icon : "", icons ? ' ' : 0, df_c,
 #else
 	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
 		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s  "
-	       "%s%u:%u%s  %s%s%s  %s%s%s\n",
+	       "%s%u:%-*u%s  %s%s%s  %s%s%s\n",
 #endif
 	    colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
@@ -595,7 +600,7 @@ print_entry_props(const struct fileinfo *props, size_t max)
 	    cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
 	    co1, read_others, co2, write_others, co3, exec_others, cend,
 	    is_acl(props->name) ? "+" : "",
-	    cid, props->uid, props->gid, cend,
+	    cid, props->uid, ug_pad, props->gid, cend,
 	    cdate, *mod_time ? mod_time : "?", cend,
 	    csize, size_type ? size_type : "?", cend);
 

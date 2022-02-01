@@ -493,7 +493,7 @@ set_long_attribs(const int n, const struct stat *attr)
 }
 
 static inline void
-print_long_mode(size_t *counter, int *reset_pager, const int pad)
+print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max)
 {
 	struct stat lattr;
 	int space_left = (int)term_cols - MAX_PROP_STR;
@@ -532,7 +532,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad)
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
 				li_cb, file_info[i].sel ? '*' : ' ', df_c);
 
-		print_entry_props(&file_info[i], (size_t)space_left);
+		print_entry_props(&file_info[i], (size_t)space_left, ug_max);
 	}
 }
 
@@ -1373,6 +1373,10 @@ check_autocmd_file(char *s)
 static inline void
 get_largest(size_t i, off_t *size, char **name, char **color, off_t *total)
 {
+	/* Only directories and regular files should be counted */
+	if (file_info[i].type != DT_DIR && file_info[i].type != DT_REG)
+		return;
+
 	int d = (file_info[i].type == DT_DIR ? 1024 : 1);
 	if (file_info[i].size * d > *size) {
 		*size = file_info[i].size * d;
@@ -1396,15 +1400,36 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 {
 	char *t = get_size_unit(total);
 	char *l = get_size_unit(largest);
+
 	printf(_("Total size:   %s%s%s\n"
-		"Largest file: %s%s%s [%s%s%s]\n"),
+		"Largest file: %s%s%s %c%s%s%s%c\n"),
 		colorize ? "\x1b[1;32m" : "" , t,
 		colorize ? "\x1b[0m" : "",
 		colorize ? "\x1b[1;32m" : "" , l,
 		colorize ? "\x1b[0m" : "",
-		colorize ? color : "", name, df_c);
+		name ? '[' : 0,
+		(colorize && color) ? color : "",
+		name ? name : "", df_c,
+		name ? ']' : 0);
+
 	free(t);
 	free(l);
+}
+
+/* Get the lenght of the longest UID:GID string in long view mode */
+static inline size_t
+get_max_ug_str(void)
+{
+	size_t ug_max = 0;
+	int i = (int)files;
+
+	while (--i >= 0) {
+		size_t t = DIGINUM(file_info[i].uid) + DIGINUM(file_info[i].gid);
+		if (t > ug_max)
+			ug_max = t;
+	}
+
+	return ug_max;
 }
 
 /* List files in the current working directory (global variable 'path').
@@ -1624,7 +1649,7 @@ list_dir_light(void)
 				 * ######################## */
 
 	if (long_view) {
-		print_long_mode(&counter, &reset_pager, pad);
+		print_long_mode(&counter, &reset_pager, pad, get_max_ug_str());
 		goto END;
 	}
 
@@ -2172,7 +2197,7 @@ list_dir(void)
 				 * ######################## */
 
 	if (long_view) {
-		print_long_mode(&counter, &reset_pager, pad);
+		print_long_mode(&counter, &reset_pager, pad, get_max_ug_str());
 		goto END;
 	}
 
