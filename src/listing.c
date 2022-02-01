@@ -1572,9 +1572,9 @@ list_dir_light(void)
 #endif
 
 		if (long_view) {
-			struct stat attr;
-			lstat(file_info[n].name, &attr);
-			set_long_attribs((int)n, &attr);
+			struct stat _attr;
+			lstat(file_info[n].name, &_attr);
+			set_long_attribs((int)n, &_attr);
 		}
 
 		if (xargs.disk_usage_analyzer == 1)
