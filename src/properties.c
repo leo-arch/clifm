@@ -243,10 +243,12 @@ get_properties(char *filename, const int dsize)
 	localtime_r(&time, &tm);
 	char mod_time[128];
 
-	if (time)
+	if (time) {
 		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", &tm);
-	else
-		mod_time[0] = '-';
+	} else {
+		*mod_time = '-';
+		mod_time[1] = '\0';
+	}
 
 	/* Get owner and group names */
 	uid_t owner_id = attr.st_uid; /* owner ID */
@@ -303,17 +305,21 @@ get_properties(char *filename, const int dsize)
 
 	if (time)
 		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", &tm);
-	else
-		access_time[0] = '-';
+	else {
+		*access_time = '-';
+		access_time[1] = '\0';
+	}
 
 	/* Last properties change time */
 	time = (time_t)attr.st_ctim.tv_sec;
 	localtime_r(&time, &tm);
 	char change_time[128];
-	if (time)
+	if (time) {
 		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", &tm);
-	else
-		change_time[0] = '-';
+	} else {
+		*change_time = '-';
+		change_time[0] = '\0';
+	}
 
 	/* Get creation (birth) time */
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
@@ -324,11 +330,13 @@ get_properties(char *filename, const int dsize)
 #endif
 	localtime_r(&time, &tm);
 	char creation_time[128];
-	if (!time)
-		creation_time[0] = '-';
-	else
+	if (!time) {
+		*creation_time = '-';
+		creation_time[1] = '\0';
+	} else {
 		strftime(creation_time, sizeof(creation_time),
 		    "%b %d %H:%M:%S %Y", &tm);
+	}
 #elif defined(_STATX)
 	struct statx attrx;
 	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
@@ -337,7 +345,8 @@ get_properties(char *filename, const int dsize)
 	char creation_time[128];
 
 	if (!time) {
-		creation_time[0] = '-';
+		*creation_time = '-';
+		creation_time[1] = '\0';
 	} else {
 		strftime(creation_time, sizeof(creation_time),
 		    "%b %d %H:%M:%S %Y", &tm);
