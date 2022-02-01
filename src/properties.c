@@ -583,14 +583,14 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
-		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s  "
-		   "%s%u:%-*u%s  %s%s%s  %s%s%s\n",
+		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
+		   "%s%u:%-*u%s %s%s%s %s%s%s\n",
 	    colorize ? props->icon_color : "",
 	    icons ? props->icon : "", icons ? ' ' : 0, df_c,
 #else
 	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
-		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s  "
-	       "%s%u:%-*u%s  %s%s%s  %s%s%s\n",
+		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
+	       "%s%u:%-*u%s %s%s%s %s%s%s\n",
 #endif
 	    colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
