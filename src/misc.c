@@ -200,8 +200,8 @@ read_kqueue(void)
 	struct kevent event_data[NUM_EVENT_SLOTS];
 	memset((void *)event_data, '\0', sizeof(struct kevent)
 			* NUM_EVENT_SLOTS);
-	int i, refresh = 0;
 
+	int i, refresh = 0;
 	int count = kevent(kq, NULL, 0, event_data, 4096, &timeout);
 
 	for (i = 0; i < count; i++) {
@@ -253,6 +253,39 @@ set_term_title(const char *str)
 	free(tmp);
 }
 
+static int
+unset_filter(void)
+{
+	if (!_filter) {
+		puts(_("No filter set"));
+		return EXIT_SUCCESS;
+	}
+
+	free(_filter);
+	_filter = (char *)NULL;
+	regfree(&regex_exp);
+	puts(_("Filter unset"));
+	filter_rev = 0;
+
+	return EXIT_SUCCESS;
+}
+
+static int
+compile_filter(void)
+{
+	if (regcomp(&regex_exp, _filter, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
+		fprintf(stderr, _("%s: '%s': Invalid regular expression\n"),
+		    PROGRAM_NAME, _filter);
+		free(_filter);
+		_filter = (char *)NULL;
+		regfree(&regex_exp);
+	} else {
+		puts(_("New filter successfully set"));
+	}
+
+	return EXIT_SUCCESS;
+}
+
 int
 filter_function(char *arg)
 {
@@ -267,19 +300,8 @@ filter_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	if (*arg == 'u' && strcmp(arg, "unset") == 0) {
-		if (_filter) {
-			free(_filter);
-			_filter = (char *)NULL;
-			regfree(&regex_exp);
-			puts(_("Filter unset"));
-			filter_rev = 0;
-		} else {
-			puts(_("No filter set"));
-		}
-
-		return EXIT_SUCCESS;
-	}
+	if (*arg == 'u' && strcmp(arg, "unset") == 0)
+		return unset_filter();
 
 	if (_filter)
 		free(_filter);
@@ -296,19 +318,10 @@ filter_function(char *arg)
 	char *p = arg;
 	if (*arg == '\'' || *arg == '"')
 		p = remove_quotes(arg);
+
 	_filter = savestring(p, strlen(p));
 
-	if (regcomp(&regex_exp, _filter, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: '%s': Invalid regular expression\n"),
-		    PROGRAM_NAME, _filter);
-		free(_filter);
-		_filter = (char *)NULL;
-		regfree(&regex_exp);
-	} else {
-		puts(_("New filter successfully set"));
-	}
-
-	return EXIT_SUCCESS;
+	return compile_filter();
 }
 
 /* Print either all tips (if ALL == 1) or just a random one (ALL == 0) */
@@ -459,7 +472,7 @@ print_tips(int all)
 	}
 
 	srand((unsigned int)time(NULL));
-	printf("%sTIP%s: %s\n", BOLD, df_c, TIPS[rand() % (int)tipsn]);
+	printf("%sTIP%s: %s\n", BOLD, NC, TIPS[rand() % (int)tipsn]);
 }
 
 /* Open DIR in a new instance of the program (using TERM, set in the config
