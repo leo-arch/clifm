@@ -1379,6 +1379,15 @@ get_largest(size_t i, off_t *size, char **name, char **color, off_t *total)
 		*name = file_info[i].name;
 		*color = file_info[i].color;
 	}
+
+	/* Do not recount hardlinks */
+	if (file_info[i].linkn > 1) {
+		int j = (int)i - 1;
+		while (--j >= 0)
+			if (file_info[i].inode == file_info[j].inode)
+				return;
+	}
+
 	*total += file_info[i].size * d;
 }
 
