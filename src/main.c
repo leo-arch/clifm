@@ -384,6 +384,7 @@ char *internal_cmds[] = {
 	"sb", "selbox",
 	"splash",
 	"st", "sort",
+	"stats",
 	"t", "tr", "trash",
 	"te",
 	"tips",

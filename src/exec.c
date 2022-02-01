@@ -1542,7 +1542,7 @@ Block devices:               %zu\n\
 Character devices:           %zu\n\
 Symbolic links:              %zu\n\
 Broken symbolic links:       %zu\n\
-Multi-link files:            %zu (%zu are directories)\n\
+Multi-link files:            %zu\n\
 Files w/extended attributes: %zu\n\
 Other-writable files:        %zu\n\
 Sticky files:                %zu\n\
@@ -1552,8 +1552,8 @@ Unstatable files:            %zu\n\
 	files, stats.dir, stats.reg, stats.exec, stats.hidden, stats.suid,
 	stats.sgid, stats.caps, stats.fifo, stats.socket, stats.block_dev,
 	stats.char_dev, stats.link, stats.broken_link, stats.multi_link,
-	stats.dir, stats.extended, stats.other_writable, stats.sticky,
-	stats.unknown, stats.unstat);
+	stats.extended, stats.other_writable, stats.sticky, stats.unknown,
+	stats.unstat);
 
 	return EXIT_SUCCESS;
 }
