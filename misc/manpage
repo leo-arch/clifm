@@ -158,6 +158,7 @@ List of CliFM features:
   48) Secure commands
   49) URI file scheme support (file://)
   50) URL support when running as standalone resource opener (see the \fI--open\fR option)
+  51) Disk usage analyzer
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener). URL's and the URI file scheme (for local file systems) is supported.
@@ -264,6 +265,9 @@ enable the light mode to speed up CliFM. See the \fBNOTE ON SPEED\fR section bel
 .TP
 .B \-z, \-\-sort\fR=METHOD
 sort files by \fIMETHOD\fB, where \fIMETHOD\fR could be one of these numbers: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode, 10 = owner, 11 = group.
+.TP
+.B \-\-apparent\-size
+use apparent sizes instead of actual device usage
 .TP
 .B \-\-case\-sens\-dirjump
 do not ignore case when consulting the jump database (via the \fIj\fRcommand)
