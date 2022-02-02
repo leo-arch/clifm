@@ -125,6 +125,7 @@ sb, selbox@
 shell @
 splash @
 st, sort@
+stats @
 t, tr, trash@
 te @
 tips @

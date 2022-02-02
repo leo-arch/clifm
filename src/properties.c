@@ -497,7 +497,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		cg3 = PR_SPECIAL;
 	}
 	if (props->mode & S_ISVTX) {
-		(val & S_IXOTH) ? (exec_others = 't'): (exec_others = 'T');
+		(val & S_IXOTH) ? (exec_others = 't') : (exec_others = 'T');
 		co3 = PR_SPECIAL;
 	}
 
@@ -543,8 +543,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		plen = wc_xstrlen(wname);
 	}
 
-	size_t cur_len = 0;
-	cur_len = (size_t)DIGINUM(files + 1) + 1 + plen;
+	size_t cur_len = (size_t)DIGINUM(files + 1) + 1 + plen;
 #ifndef _NO_ICONS
 	if (icons) {
 		cur_len += 3;
@@ -568,7 +567,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		cur_len -= (size_t)rest;
 	}
 
-	/* Calculate pad for each file */
+	/* Calculate pad for each file name */
 	int pad;
 	pad = (int)(max - cur_len);
 	if (pad < 0)
