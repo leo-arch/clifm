@@ -1071,7 +1071,7 @@ free_extension_colors(void)
 }
 
 /* Set a pointer to the current color scheme */
-static void
+static int
 get_cur_colorscheme(const char *colorscheme)
 {
 	char *def_cscheme = (char *)NULL;
@@ -1090,12 +1090,14 @@ get_cur_colorscheme(const char *colorscheme)
 
 	if (!cur_cscheme) {
 		_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
-			"Falling back to default\n"),
-			PROGRAM_NAME, colorscheme);
+			"Falling back to default\n"), PROGRAM_NAME, colorscheme);
 
 		if (def_cscheme)
 			cur_cscheme = def_cscheme;
+		return EXIT_FAILURE;
 	}
+
+	return EXIT_SUCCESS;
 }
 
 /* Try to retrieve colors from the environment */
@@ -1449,14 +1451,16 @@ set_colors(const char *colorscheme, const int env)
 	*dir_ico_c = '\0';
 #endif
 
+	int ret = EXIT_SUCCESS;
 	if (colorscheme && *colorscheme && color_schemes)
-		get_cur_colorscheme(colorscheme);
+		ret = get_cur_colorscheme(colorscheme);
 
 	/* env is true only when the function is called from main() */
-	if (env)
+	if (ret == EXIT_SUCCESS && env)
 		get_colors_from_env(&filecolors, &extcolors, &ifacecolors);
 
-	if (xargs.stealth_mode != 1 && (!filecolors || !extcolors || !ifacecolors)) {
+	if (ret == EXIT_SUCCESS && xargs.stealth_mode != 1
+	&& (!filecolors || !extcolors || !ifacecolors)) {
 		/* Get color lines, for both file types and extensions, from
 		 * COLORSCHEME file */
 		if (get_colors_from_file(colorscheme, &filecolors,
