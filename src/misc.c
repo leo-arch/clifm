@@ -466,13 +466,15 @@ print_tips(int all)
 	if (all == 1) {
 		size_t i;
 		for (i = 0; i < tipsn; i++)
-			printf("%sTIP %zu%s: %s\n", BOLD, i, df_c, TIPS[i]);
+			printf("%sTIP %zu%s: %s\n", colorize ? BOLD : "", i,
+				colorize ? NC : "", TIPS[i]);
 
 		return;
 	}
 
 	srand((unsigned int)time(NULL));
-	printf("%sTIP%s: %s\n", BOLD, NC, TIPS[rand() % (int)tipsn]);
+	printf("%sTIP%s: %s\n", colorize ? BOLD : "", colorize ? NC : "",
+		TIPS[rand() % (int)tipsn]);
 }
 
 /* Open DIR in a new instance of the program (using TERM, set in the config
@@ -655,8 +657,6 @@ alias_import(char *file)
 	char rfile[PATH_MAX] = "";
 	rfile[0] = '\0';
 
-	/*  if (*file == '~' && *(file + 1) == '/') { */
-
 	if (*file == '~') {
 		char *file_exp = tilde_expand(file);
 		if (!file_exp) {
@@ -817,21 +817,20 @@ alias_import(char *file)
 }
 
 /* Store last visited directory for the restore last path and the
- * cd on quit functions */
+ * cd on quit functions. Current workspace/path will be marked with an
+ * asterisk. It will be read at startup by get_last_path */
 void
 save_last_path(void)
 {
-	if (!config_ok || !config_dir)
+	if (!config_ok || !config_dir || !config_dir_gral)
 		return;
 
 	char *last_dir = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 	sprintf(last_dir, "%s/.last", config_dir);
 
-	FILE *last_fp;
-	last_fp = fopen(last_dir, "w");
+	FILE *last_fp = fopen(last_dir, "w");
 	if (!last_fp) {
-		fprintf(stderr, _("%s: Error saving last visited directory\n"),
-		    PROGRAM_NAME);
+		fprintf(stderr, _("%s: Error saving last visited directory\n"), PROGRAM_NAME);
 		free(last_dir);
 		return;
 	}
@@ -839,8 +838,6 @@ save_last_path(void)
 	size_t i;
 	for (i = 0; i < MAX_WS; i++) {
 		if (workspaces[i].path) {
-			/* Mark current workspace with an asterisk. It will
-			 * be read at startup by get_last_path */
 			if ((size_t)cur_ws == i)
 				fprintf(last_fp, "*%zu:%s\n", i, workspaces[i].path);
 			else
@@ -853,20 +850,16 @@ save_last_path(void)
 	char *last_dir_tmp = xnmalloc(strlen(config_dir_gral) + 7, sizeof(char *));
 	sprintf(last_dir_tmp, "%s/.last", config_dir_gral);
 
-	if (cd_on_quit) {
-		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp,
-		    NULL};
-
+	if (cd_on_quit == 1) {
+		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	} else {
-		/* If not cd on quit, remove the file */
+	} else { /* If not cd on quit, remove the file */
 		char *cmd[] = {"rm", "-f", last_dir_tmp, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	free(last_dir_tmp);
 	free(last_dir);
-	return;
 }
 
 char *
@@ -876,10 +869,7 @@ parse_usrvar_value(const char *str, const char c)
 		return (char *)NULL;
 
 	/* Get whatever comes after c */
-	char *tmp = (char *)NULL;
-	tmp = strchr(str, c);
-
-	/* If no C or there's nothing after C */
+	char *tmp = strchr(str, c);
 	if (!tmp || !*(++tmp))
 		return (char *)NULL;
 
@@ -888,8 +878,7 @@ parse_usrvar_value(const char *str, const char c)
 		tmp++;
 
 	/* Remove trailing spaces, tabs, new line chars, and quotes */
-	size_t tmp_len = strlen(tmp),
-		   i;
+	size_t tmp_len = strlen(tmp), i;
 
 	for (i = tmp_len - 1; tmp[i] && i > 0; i--) {
 		if (tmp[i] != ' ' && tmp[i] != '\t' && tmp[i] != '"' && tmp[i] != '\''
@@ -902,14 +891,8 @@ parse_usrvar_value(const char *str, const char c)
 	if (!*tmp)
 		return (char *)NULL;
 
-	/* Copy the result string into a buffer and return it */
-	char *buf = (char *)NULL;
-	buf = savestring(tmp, strlen(tmp));
-	tmp = (char *)NULL;
-
-	if (buf)
-		return buf;
-	return (char *)NULL;
+	char *buf = savestring(tmp, strlen(tmp));
+	return buf;
 }
 
 int
@@ -963,11 +946,10 @@ int
 _err(int msg_type, int prompt, const char *format, ...)
 {
 	va_list arglist, tmp_list;
-	int size = 0;
 
 	va_start(arglist, format);
 	va_copy(tmp_list, arglist);
-	size = vsnprintf((char *)NULL, 0, format, tmp_list);
+	int size = vsnprintf((char *)NULL, 0, format, tmp_list);
 	va_end(tmp_list);
 
 	if (size < 0) {
@@ -975,7 +957,7 @@ _err(int msg_type, int prompt, const char *format, ...)
 		return EXIT_FAILURE;
 	}
 
-	char *buf = (char *)xcalloc((size_t)size + 1, sizeof(char));
+	char *buf = (char *)xnmalloc((size_t)size + 1, sizeof(char));
 
 	vsprintf(buf, format, arglist);
 	va_end(arglist);
@@ -996,7 +978,7 @@ _err(int msg_type, int prompt, const char *format, ...)
 			}
 		}
 
-		log_msg(buf, (prompt) ? PRINT_PROMPT : NOPRINT_PROMPT);
+		log_msg(buf, (prompt == 1) ? PRINT_PROMPT : NOPRINT_PROMPT);
 		free(buf);
 		return EXIT_SUCCESS;
 	}
