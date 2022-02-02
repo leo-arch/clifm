@@ -552,6 +552,7 @@ struct fileinfo {
 	nlink_t linkn;
 	time_t ltime; /* For long view mode */
 	time_t time;
+	dev_t rdev; /* To calculate major and minor devs in long view */
 };
 
 extern struct fileinfo *file_info;

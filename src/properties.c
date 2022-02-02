@@ -32,6 +32,7 @@
 #include <unistd.h>
 #ifdef __linux__
 #include <sys/capability.h>
+#include <sys/sysmacros.h>
 #endif
 #include <fcntl.h>
 #include <grp.h>
@@ -42,6 +43,13 @@
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
+
+#ifndef major
+# define major(x) ((x >> 8) & 0x7F)
+#endif
+#ifndef minor
+# define minor(x) (x & 0xFF)
+#endif
 
 #ifndef DT_DIR
 # define DT_DIR 4
@@ -581,16 +589,27 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	if (u + g < (int)ug_max)
 		ug_pad = (int)ug_max - u;
 
+	/* Last field is either file size or "major,minor" IDs in case of special
+	 * files (char and block devs) */
+	char last_field[NAME_MAX];
+	if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
+		snprintf(last_field, NAME_MAX, "%s%s%s", csize, size_type
+			? size_type : "?", cend);
+	} else {
+		snprintf(last_field, NAME_MAX, "%d,%d", major((int)props->rdev),
+			minor((int)props->rdev));
+	}
+
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
 		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
-		   "%s%u:%-*u%s %s%s%s %s%s%s\n",
+		   "%s%u:%-*u%s %s%s%s %s\n",
 	    colorize ? props->icon_color : "",
 	    icons ? props->icon : "", icons ? ' ' : 0, df_c,
 #else
 	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
 		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
-	       "%s%u:%-*u%s %s%s%s %s%s%s\n",
+	       "%s%u:%-*u%s %s%s%s %s\n",
 #endif
 	    colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
@@ -602,7 +621,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	    is_acl(props->name) ? "+" : "",
 	    cid, props->uid, ug_pad, props->gid, cend,
 	    cdate, *mod_time ? mod_time : "?", cend,
-	    csize, size_type ? size_type : "?", cend);
+	    last_field);
 
 	free(size_type);
 
