@@ -306,6 +306,18 @@ reset_iface_colors(void)
 	*ws8_c = '\0';
 }
 
+/* Disable colors for suggestions */
+void
+unset_suggestions_color(void)
+{
+	strcpy(sb_c, SUG_NO_COLOR); /* shell built-ins */
+	strcpy(sc_c, SUG_NO_COLOR); /* external commands */
+	strcpy(sf_c, SUG_NO_COLOR); /* filenames */
+	strcpy(sh_c, SUG_NO_COLOR); /* history */
+	strcpy(sp_c, SUG_NO_COLOR); /* suggestions pointer */
+	strcpy(sx_c, SUG_NO_COLOR); /* internal commands and params */
+}
+
 static int
 print_cur_colorscheme(void)
 {
@@ -912,149 +924,80 @@ set_iface_colors(char **colors, const size_t words)
 static void
 set_default_colors(void)
 {
-	if (!*hb_c)
-		strcpy(hb_c, DEF_HB_C);
-	if (!*hc_c)
-		strcpy(hc_c, DEF_HC_C);
-	if (!*hd_c)
-		strcpy(hd_c, DEF_HD_C);
-	if (!*he_c)
-		strcpy(he_c, DEF_HE_C);
-	if (!*hn_c)
-		strcpy(hn_c, DEF_HN_C);
-	if (!*hp_c)
-		strcpy(hp_c, DEF_HP_C);
-	if (!*hq_c)
-		strcpy(hq_c, DEF_HQ_C);
-	if (!*hr_c)
-		strcpy(hr_c, DEF_HR_C);
-	if (!*hs_c)
-		strcpy(hs_c, DEF_HS_C);
-	if (!*hv_c)
-		strcpy(hv_c, DEF_HV_C);
-	if (!*hw_c)
-		strcpy(hw_c, DEF_HW_C);
-	if (!*tt_c)
-		strcpy(tt_c, DEF_TT_C);
+	if (!*hb_c) strcpy(hb_c, DEF_HB_C);
+	if (!*hc_c)	strcpy(hc_c, DEF_HC_C);
+	if (!*hd_c)	strcpy(hd_c, DEF_HD_C);
+	if (!*he_c)	strcpy(he_c, DEF_HE_C);
+	if (!*hn_c)	strcpy(hn_c, DEF_HN_C);
+	if (!*hp_c)	strcpy(hp_c, DEF_HP_C);
+	if (!*hq_c)	strcpy(hq_c, DEF_HQ_C);
+	if (!*hr_c)	strcpy(hr_c, DEF_HR_C);
+	if (!*hs_c)	strcpy(hs_c, DEF_HS_C);
+	if (!*hv_c)	strcpy(hv_c, DEF_HV_C);
+	if (!*hw_c)	strcpy(hw_c, DEF_HW_C);
+	if (!*tt_c)	strcpy(tt_c, DEF_TT_C);
 
-	if (!*sb_c)
-		strcpy(sb_c, DEF_SB_C);
-	if (!*sc_c)
-		strcpy(sc_c, DEF_SC_C);
-	if (!*sh_c)
-		strcpy(sh_c, DEF_SH_C);
-	if (!*sf_c)
-		strcpy(sf_c, DEF_SF_C);
-	if (!*sx_c)
-		strcpy(sx_c, DEF_SX_C);
-	if (!*sp_c)
-		strcpy(sp_c, DEF_SP_C);
+	if (!*sb_c)	strcpy(sb_c, DEF_SB_C);
+	if (!*sc_c)	strcpy(sc_c, DEF_SC_C);
+	if (!*sh_c)	strcpy(sh_c, DEF_SH_C);
+	if (!*sf_c)	strcpy(sf_c, DEF_SF_C);
+	if (!*sx_c)	strcpy(sx_c, DEF_SX_C);
+	if (!*sp_c)	strcpy(sp_c, DEF_SP_C);
 
-	if (!*el_c)
-		strcpy(el_c, DEF_EL_C);
-	if (!*mi_c)
-		strcpy(mi_c, DEF_MI_C);
-	if (!*dl_c)
-		strcpy(dl_c, DEF_DL_C);
-	if (!*df_c)
-		strcpy(df_c, DEF_DF_C);
-	if (!*dc_c)
-		strcpy(dc_c, DEF_DC_C);
-	if (!*wc_c)
-		strcpy(wc_c, DEF_WC_C);
-	if (!*dh_c)
-		strcpy(dh_c, DEF_DH_C);
-	if (!*tx_c)
-		strcpy(tx_c, DEF_TX_C);
-	if (!*li_c)
-		strcpy(li_c, DEF_LI_C);
-	if (!*li_cb)
-		strcpy(li_cb, DEF_LI_CB);
-	if (!*ti_c)
-		strcpy(ti_c, DEF_TI_C);
-	if (!*em_c)
-		strcpy(em_c, DEF_EM_C);
-	if (!*wm_c)
-		strcpy(wm_c, DEF_WM_C);
-	if (!*nm_c)
-		strcpy(nm_c, DEF_NM_C);
-	if (!*si_c)
-		strcpy(si_c, DEF_SI_C);
-	if (!*bm_c)
-		strcpy(bm_c, DEF_BM_C);
-	if (!*ts_c)
-		strcpy(ts_c, DEF_TS_C);
-	if (!*wp_c)
-		strcpy(wp_c, DEF_WP_C);
+	if (!*el_c)	strcpy(el_c, DEF_EL_C);
+	if (!*mi_c)	strcpy(mi_c, DEF_MI_C);
+	if (!*dl_c)	strcpy(dl_c, DEF_DL_C);
+	if (!*df_c)	strcpy(df_c, DEF_DF_C);
+	if (!*dc_c)	strcpy(dc_c, DEF_DC_C);
+	if (!*wc_c)	strcpy(wc_c, DEF_WC_C);
+	if (!*dh_c)	strcpy(dh_c, DEF_DH_C);
+	if (!*tx_c)	strcpy(tx_c, DEF_TX_C);
+	if (!*li_c)	strcpy(li_c, DEF_LI_C);
+	if (!*li_cb) strcpy(li_cb, DEF_LI_CB);
+	if (!*ti_c)	strcpy(ti_c, DEF_TI_C);
+	if (!*em_c)	strcpy(em_c, DEF_EM_C);
+	if (!*wm_c)	strcpy(wm_c, DEF_WM_C);
+	if (!*nm_c)	strcpy(nm_c, DEF_NM_C);
+	if (!*si_c)	strcpy(si_c, DEF_SI_C);
+	if (!*bm_c)	strcpy(bm_c, DEF_BM_C);
+	if (!*ts_c)	strcpy(ts_c, DEF_TS_C);
+	if (!*wp_c)	strcpy(wp_c, DEF_WP_C);
 
-	if (!*ws1_c)
-		strcpy(ws1_c, DEF_WS1_C);
-	if (!*ws2_c)
-		strcpy(ws2_c, DEF_WS2_C);
-	if (!*ws3_c)
-		strcpy(ws3_c, DEF_WS3_C);
-	if (!*ws4_c)
-		strcpy(ws4_c, DEF_WS4_C);
-	if (!*ws5_c)
-		strcpy(ws5_c, DEF_WS5_C);
-	if (!*ws6_c)
-		strcpy(ws6_c, DEF_WS6_C);
-	if (!*ws7_c)
-		strcpy(ws7_c, DEF_WS7_C);
-	if (!*ws8_c)
-		strcpy(ws8_c, DEF_WS8_C);
+	if (!*ws1_c) strcpy(ws1_c, DEF_WS1_C);
+	if (!*ws2_c) strcpy(ws2_c, DEF_WS2_C);
+	if (!*ws3_c) strcpy(ws3_c, DEF_WS3_C);
+	if (!*ws4_c) strcpy(ws4_c, DEF_WS4_C);
+	if (!*ws5_c) strcpy(ws5_c, DEF_WS5_C);
+	if (!*ws6_c) strcpy(ws6_c, DEF_WS6_C);
+	if (!*ws7_c) strcpy(ws7_c, DEF_WS7_C);
+	if (!*ws8_c) strcpy(ws8_c, DEF_WS8_C);
 
-	if (!*di_c)
-		strcpy(di_c, DEF_DI_C);
-	if (!*nd_c)
-		strcpy(nd_c, DEF_ND_C);
-	if (!*ed_c)
-		strcpy(ed_c, DEF_ED_C);
-	if (!*ne_c)
-		strcpy(ne_c, DEF_NE_C);
-	if (!*fi_c)
-		strcpy(fi_c, DEF_FI_C);
-	if (!*ef_c)
-		strcpy(ef_c, DEF_EF_C);
-	if (!*nf_c)
-		strcpy(nf_c, DEF_NF_C);
-	if (!*ln_c)
-		strcpy(ln_c, DEF_LN_C);
-	if (!*or_c)
-		strcpy(or_c, DEF_OR_C);
-	if (!*pi_c)
-		strcpy(pi_c, DEF_PI_C);
-	if (!*so_c)
-		strcpy(so_c, DEF_SO_C);
-	if (!*bd_c)
-		strcpy(bd_c, DEF_BD_C);
-	if (!*cd_c)
-		strcpy(cd_c, DEF_CD_C);
-	if (!*su_c)
-		strcpy(su_c, DEF_SU_C);
-	if (!*sg_c)
-		strcpy(sg_c, DEF_SG_C);
-	if (!*st_c)
-		strcpy(st_c, DEF_ST_C);
-	if (!*tw_c)
-		strcpy(tw_c, DEF_TW_C);
-	if (!*ow_c)
-		strcpy(ow_c, DEF_OW_C);
-	if (!*ex_c)
-		strcpy(ex_c, DEF_EX_C);
-	if (!*ee_c)
-		strcpy(ee_c, DEF_EE_C);
-	if (!*ca_c)
-		strcpy(ca_c, DEF_CA_C);
-	if (!*no_c)
-		strcpy(no_c, DEF_NO_C);
-	if (!*uf_c)
-		strcpy(uf_c, DEF_UF_C);
-	if (!*mh_c)
-		strcpy(mh_c, DEF_MH_C);
+	if (!*di_c)	strcpy(di_c, DEF_DI_C);
+	if (!*nd_c)	strcpy(nd_c, DEF_ND_C);
+	if (!*ed_c)	strcpy(ed_c, DEF_ED_C);
+	if (!*ne_c)	strcpy(ne_c, DEF_NE_C);
+	if (!*fi_c)	strcpy(fi_c, DEF_FI_C);
+	if (!*ef_c)	strcpy(ef_c, DEF_EF_C);
+	if (!*nf_c)	strcpy(nf_c, DEF_NF_C);
+	if (!*ln_c)	strcpy(ln_c, DEF_LN_C);
+	if (!*or_c)	strcpy(or_c, DEF_OR_C);
+	if (!*pi_c)	strcpy(pi_c, DEF_PI_C);
+	if (!*so_c)	strcpy(so_c, DEF_SO_C);
+	if (!*bd_c)	strcpy(bd_c, DEF_BD_C);
+	if (!*cd_c)	strcpy(cd_c, DEF_CD_C);
+	if (!*su_c)	strcpy(su_c, DEF_SU_C);
+	if (!*sg_c)	strcpy(sg_c, DEF_SG_C);
+	if (!*st_c)	strcpy(st_c, DEF_ST_C);
+	if (!*tw_c)	strcpy(tw_c, DEF_TW_C);
+	if (!*ow_c)	strcpy(ow_c, DEF_OW_C);
+	if (!*ex_c)	strcpy(ex_c, DEF_EX_C);
+	if (!*ee_c)	strcpy(ee_c, DEF_EE_C);
+	if (!*ca_c)	strcpy(ca_c, DEF_CA_C);
+	if (!*no_c)	strcpy(no_c, DEF_NO_C);
+	if (!*uf_c)	strcpy(uf_c, DEF_UF_C);
+	if (!*mh_c)	strcpy(mh_c, DEF_MH_C);
 #ifndef _NO_ICONS
-	if (!*dir_ico_c)
-		strcpy(dir_ico_c, DEF_DIR_ICO_C);
+	if (!*dir_ico_c) strcpy(dir_ico_c, DEF_DIR_ICO_C);
 #endif
 }
 

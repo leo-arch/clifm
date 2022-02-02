@@ -204,7 +204,18 @@ extern int watch;
 #define _GREEN "\x1b[0;32m"
 #define D_CYAN "\x1b[0;36m"
 #define BOLD   "\x1b[1m"
-#define NC     "\x1b[0m"
+#define NC     "\x1b[0m" /* Reset color to terminal defaults */
+
+/* Format to use for suggestions when running colorless
+ * There is no universal solution for this: the Linux console does not
+ * support underline, and uses a cyan color instead. It doesn't support
+ * dimmed colors either, but at least the color is replaced by bold black
+ * (gray), which is fine. However, some terminal emulators, like Aterm
+ * and Eterm, do not support dimmed colors at all, and won't replace this
+ * color by anything else, so that suggestions will be indistinguishable
+ * from bare input text.
+ * The Linux console is more important for us, so let's used dimmed color */
+#define SUG_NO_COLOR "\x1b[0;2m" /* Dimmed color */
 
 /* Colors for file properties */
 #define PR_READ    "\x1b[0;1;32m"
@@ -222,6 +233,7 @@ extern int watch;
  * non-printing chars. This is specially useful for the prompt, i.e.,
  * when passing color codes to readline */
 #define RL_NC    "\001\x1b[0m\002"
+
 #define DLFC     "\x1b[0K"         /* Delete line from cursor */
 #define CNL      "\x1b[1E"         /* Move the cursor to beginning next line*/
 #define DLFC_LEN 4                 /* Length of the above escape codes */

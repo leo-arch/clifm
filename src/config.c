@@ -2302,18 +2302,6 @@ read_config(void)
 	return;
 }
 
-/* Underline suggestions when running colorless */
-static inline void
-set_suggestions_to_underline(void)
-{
-	strcpy(sb_c, "\x1b[4m"); /* shell built-ins */
-	strcpy(sc_c, "\x1b[4m"); /* external commands */
-	strcpy(sf_c, "\x1b[4m"); /* filenames */
-	strcpy(sh_c, "\x1b[4m"); /* history */
-	strcpy(sp_c, "\x1b[4m"); /* suggestions pointer */
-	strcpy(sx_c, "\x1b[4m"); /* internal commands and params */
-}
-
 static void
 check_colors(void)
 {
@@ -2335,7 +2323,7 @@ check_colors(void)
 		setenv("CLIFM_NO_COLOR", "1", 1);
 		reset_filetype_colors();
 		reset_iface_colors();
-		set_suggestions_to_underline();
+		unset_suggestions_color();
 	}
 }
 

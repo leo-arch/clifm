@@ -30,7 +30,8 @@ struct utable_t {
 	char *data;
 };
 
-/* This list is based on https://github.com/dharple/detox and
+/* Let's use a table to convert Unicode chars into ASCII alternatives
+ * This list is based on https://github.com/dharple/detox and
  * https://en.wikipedia.org/wiki/List_of_Unicode_characters */
 struct utable_t unitable[] = {
 	{0x0020, 0, "_" },
