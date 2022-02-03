@@ -37,8 +37,8 @@ DirhistMap=false
 
 # Use a regex expression to filter file names when listing files.
 # Example: !.*~$ to exclude backup files (ending with ~), or ^\. to list 
-# only hidden files. Do not quote the regular expression
-Filter=
+# only hidden files.
+Filter=""
 
 # Set the default copy command. Available options are: 0 = cp,
 # 1 = advcp, and 2 = wcp. Both 1 and 2 add a progress bar to cp.
