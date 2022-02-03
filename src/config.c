@@ -1395,11 +1395,131 @@ get_line_value(char *line)
 	return remove_quotes(opt);
 }
 
+/* Get boolean value from LINE and set VAR accordingly */
+static inline int
+set_config_bool_value(const char *line, int *var)
+{
+	char *p = strchr(line, '=');
+	if (!p || !*(++p))
+		return (-1);
+
+	if (*p == 't' && strncmp(p, "true", 4) == 0) {
+		*var = 1;
+	} else {
+		if (*p == 'f' && strncmp(p, "false", 5) == 0)
+			*var = 0;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static inline int
+_set_colorscheme(const char *line)
+{
+	char *p = strchr(line, '=');
+	if (!p || !*(++p))
+		return (-1);
+
+	size_t l = strlen(p);
+	if (p[l - 1] == '\n') {
+		p[l - 1] = '\0';
+		l--;
+	}
+
+	free(usr_cscheme);
+	usr_cscheme = savestring(p, l);
+
+	return EXIT_SUCCESS;
+}
+
+static inline void
+set_div_line(const char *line)
+{
+	char *opt = strchr(line, '=');
+	if (!opt || !*opt || !*(++opt)) {
+		*div_line_char = '\0';
+		return;
+	}
+
+	char *tmp = remove_quotes(opt);
+	if (!tmp) {
+		*div_line_char = '\0';
+		return;
+	}
+
+	xstrsncpy(div_line_char, tmp, NAME_MAX);
+}
+
+static inline int
+_set_filter(const char *line)
+{
+	char *p = strchr(line, '=');
+	if (!p || !*(++p))
+		return (-1);
+
+	char *q = remove_quotes(p);
+	if (!q)
+		return (-1);
+
+	size_t l = strlen(q);
+	if (q[l - 1] == '\n') {
+		q[l - 1] = '\0';
+		l--;
+	}
+
+	if (*q == '!') {
+		filter_rev = 1;
+		q++;
+		l--;
+	} else {
+		filter_rev = 0;
+	}
+
+	free(_filter);
+	_filter = savestring(q, l);
+
+	return EXIT_SUCCESS;
+}
+
+static inline void
+set_listing_mode(const char *line)
+{
+	char *p = strchr(line, '=');
+	if (!p || !*p || !*(++p))
+		goto END;
+
+	int n = atoi(p);
+	if (n == INT_MIN)
+		goto END;
+
+	switch(n) {
+	case VERTLIST: listing_mode = VERTLIST; return;
+	case HORLIST: listing_mode = HORLIST; return;
+	default: break;
+	}
+
+END:
+	listing_mode = DEF_LISTING_MODE;
+}
+
+static inline int
+set_max_filename_len(const char *line)
+{
+	char *p = strchr(line, '=');
+	if (!p || !*p || !*(++p))
+		return (-1);
+
+	int n = atoi(p);
+	if (n <= 0)
+		return (-1);
+
+	max_name_len = n;
+	return EXIT_SUCCESS;
+}
+
 static void
 read_config(void)
 {
-	int ret = -1;
-
 	int fd;
 	FILE *config_fp = open_fstream_r(config_file, &fd);
 	if (!config_fp) {
@@ -1411,14 +1531,12 @@ read_config(void)
 	if (xargs.rl_vi_mode == 1)
 		rl_vi_editing_mode(1, 0);
 
+	int ret = -1;
 	max_name_len = UNSET;
-
 	*div_line_char = '\0';
-#define MAX_BOOL 6 /* false (5) + 1 */
 	char line[PATH_MAX + 15];
 
 	while (fgets(line, (int)sizeof(line), config_fp)) {
-
 		if (*line == '\n' || *line == '#')
 			continue;
 
@@ -1427,189 +1545,82 @@ read_config(void)
 
 		else if (xargs.autocd == UNSET && *line == 'A'
 		&& strncmp(line, "Autocd=", 7) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "Autocd=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &autocd) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				autocd = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					autocd = 0;
-			}
 		}
 
 		else if (xargs.auto_open == UNSET && *line == 'A'
 		&& strncmp(line, "AutoOpen=", 9) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "AutoOpen=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &auto_open) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				auto_open = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					auto_open = 0;
-			}
 		}
 
 #ifndef _NO_SUGGESTIONS
 		else if (xargs.suggestions == UNSET && *line == 'A'
 		&& strncmp(line, "AutoSuggestions=", 16) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "AutoSuggestions=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &suggestions) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				suggestions = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					suggestions = 0;
-			}
 		}
 #endif
 
 		else if (xargs.case_sens_dirjump == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "CaseSensitiveDirJump=%5s\n", opt_str);
-
-			if (ret == -1)
+			if (set_config_bool_value(line, &case_sens_dirjump) == -1)
 				continue;
-
-			if (strncmp(opt_str, "true", 4) == 0) {
-				case_sens_dirjump = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					case_sens_dirjump = 0;
-			}
 		}
 
 		else if (*line == 'C'
 		&& strncmp(line, "CaseSensitiveSearch=", 20) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "CaseSensitiveSearch=%5s\n", opt_str);
-
-			if (ret == -1)
+			if (set_config_bool_value(line, &case_sens_search) == -1)
 				continue;
-
-			if (strncmp(opt_str, "true", 4) == 0)
-				case_sens_search = 1;
-			else if (strncmp(opt_str, "false", 5) == 0)
-				case_sens_search = 0;
 		}
 
 		else if (xargs.sensitive == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "CaseSensitiveList=%5s\n",
-			    opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &case_sensitive) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0)
-				case_sensitive = 1;
-			else if (strncmp(opt_str, "false", 5) == 0)
-				case_sensitive = 0;
 		}
 
 		else if (xargs.case_sens_path_comp == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitivePathComp=", 22) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "CaseSensitivePathComp=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &case_sens_path_comp) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0)
-				case_sens_path_comp = 1;
-			else if (strncmp(opt_str, "false", 5) == 0)
-				case_sens_path_comp = 0;
 		}
 
 		else if (xargs.autols == UNSET && *line == 'A'
 		&& strncmp(line, "AutoLs=", 7) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "AutoLs=%5s\n",
-			    opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &autols) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				autols = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					autols = 0;
-			}
 		}
 
 		else if (xargs.cd_on_quit == UNSET && *line == 'C'
 		&& strncmp(line, "CdOnQuit=", 9) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "CdOnQuit=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &cd_on_quit) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				cd_on_quit = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					cd_on_quit = 0;
-			}
 		}
 
 		else if (xargs.classify == UNSET && *line == 'C'
 		&& strncmp(line, "Classify=", 9) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "Classify=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &classify) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
- 				classify = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					classify = 0;
-			}
 		}
 
 		else if (xargs.clear_screen == UNSET && *line == 'C'
 		&& strncmp(line, "ClearScreen=", 12) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "ClearScreen=%5s\n",
-			    opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &clear_screen) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				clear_screen = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					clear_screen = 0;
-			}
 		}
 
 		else if (xargs.props_color == UNSET && *line == 'C'
 		&& strncmp(line, "ColorizeProperties=", 19) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "ColorizeProperties=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &props_color) == -1)
 				continue;
-			if (*opt_str == 't' && strncmp(opt_str, "true", 4) == 0) {
-				props_color = 1;
-			} else {
-				if (*opt_str == 'f' && strncmp(opt_str, "false", 5) == 0)
-					props_color = 0;
-			}
 		}
 
-		else if (!usr_cscheme && *line == 'C' && strncmp(line, "ColorScheme=", 12) == 0) {
-			char *opt = strchr(line, '=');
-			if (!opt)
+		else if (!usr_cscheme && *line == 'C'
+		&& strncmp(line, "ColorScheme=", 12) == 0) {
+			if (_set_colorscheme(line) == -1)
 				continue;
-
-			size_t len = strlen(opt);
-			if (opt[len - 1] == '\n')
-				opt[len - 1] = '\0';
-
-			if (!*(++opt))
-				continue;
-
-			free(usr_cscheme);
-			usr_cscheme = savestring(opt, len);
 		}
 
 		else if (*line == 'c' && strncmp(line, "cpCmd=", 6) == 0) {
@@ -1619,235 +1630,98 @@ read_config(void)
 				continue;
 			if (opt_num >= 0 && opt_num <= 2)
 				cp_cmd = opt_num;
-			else /* default (sort by name) */
+			else
 				cp_cmd = DEF_CP_CMD;
 		}
 
 		else if (xargs.dirmap == UNSET && *line == 'D'
 		&& strncmp(line, "DirhistMap=", 11) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "DirhistMap=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &dirhist_map) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				dirhist_map = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					dirhist_map = 0;
-			}
 		}
 
 		else if (xargs.disk_usage == UNSET && *line == 'D'
 		&& strncmp(line, "DiskUsage=", 10) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "DiskUsage=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &disk_usage) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				disk_usage = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					disk_usage = 0;
-			}
 		}
 
 		else if (*line == 'D' && strncmp(line, "DividingLineChar=", 17) == 0) {
-			char *opt = strchr(line, '=');
-			if (!opt || !*opt || !*(++opt)) {
-				div_line_char[0] = '\0';
-			} else {
-				char *tmp = remove_quotes(opt);
-				if (tmp)
-					xstrsncpy(div_line_char, tmp, NAME_MAX);
-				else
-					div_line_char[0] = '\0';
-			}
+			set_div_line(line);
 		}
 
 		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
 		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "ExpandBookmarks=%5s\n",
-			    opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &expand_bookmarks) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				expand_bookmarks = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					expand_bookmarks = 0;
-			}
 		}
 
 		else if (xargs.ext == UNSET && *line == 'E'
 		&& strncmp(line, "ExternalCommands=", 17) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "ExternalCommands=%5s\n",
-			    opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &ext_cmd_ok) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				ext_cmd_ok = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					ext_cmd_ok = 0;
-			}
 		}
 
 		else if (xargs.files_counter == UNSET && *line == 'F'
 		&& strncmp(line, "FilesCounter=", 13) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "FilesCounter=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &files_counter) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				files_counter = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					files_counter = 0;
-			}
 		}
 
 		else if (!_filter && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
-			char *opt_str = strchr(line, '=');
-			if (!opt_str)
+			if (_set_filter(line) == -1)
 				continue;
-			size_t len = strlen(opt_str);
-			if (opt_str[len - 1] == '\n')
-				opt_str[len - 1] = '\0';
-
-			if (!*(++opt_str))
-				continue;
-
-			if (*opt_str == '!') {
-				filter_rev = 1;
-				opt_str++;
-				len--;
-			} else {
-				filter_rev = 0;
-			}
-
-			free(_filter);
-			_filter = savestring(opt_str, len);
 		}
 
 #ifndef _NO_HIGHLIGHT
 		else if (xargs.highlight == UNSET && *line == 'S'
 		&& strncmp(line, "SyntaxHighlighting=", 19) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "SyntaxHighlighting=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &highlight) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				highlight = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					highlight = 0;
-			}
 		}
 #endif /* !_NO_HIGHLIGHT */
 
 #ifndef _NO_ICONS
 		else if (xargs.icons == UNSET && *line == 'I'
 		&& strncmp(line, "Icons=", 6) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "Icons=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &icons) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				icons = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					icons = 0;
-			}
 		}
 #endif /* !_NO_ICONS */
 
 		else if (xargs.light == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "LightMode=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &light_mode) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				light_mode = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					light_mode = 0;
-			}
 		}
 
 		else if (xargs.ffirst == UNSET && *line == 'L'
 		&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "ListFoldersFirst=%5s\n",
-			    opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &list_folders_first) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				list_folders_first = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-				 list_folders_first = 0;
-			}
 		}
 
 		else if (xargs.horizontal_list == UNSET && *line == 'L'
 		&& strncmp(line, "ListingMode=", 12) == 0) {
-			char *opt = strchr(line, '=');
-			if (!opt || !*opt || !*(++opt)) {
-				listing_mode = DEF_LISTING_MODE;
-			} else {
-				int ivalue = atoi(opt);
-				switch(ivalue) {
-				case VERTLIST: listing_mode = VERTLIST; break;
-				case HORLIST: listing_mode = HORLIST; break;
-				default: listing_mode = DEF_LISTING_MODE;
-				}
-			}
+			set_listing_mode(line);
 		}
 
 		else if (xargs.longview == UNSET && *line == 'L'
 		&& strncmp(line, "LongViewMode=", 13) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "LongViewMode=%5s\n",
-			    opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &long_view) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				long_view = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					long_view = 0;
-			}
 		}
 
 		else if (xargs.full_dir_size == UNSET && *line == 'F'
 		&& strncmp(line, "FullDirSize=", 12) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "FullDirSize=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &full_dir_size) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				full_dir_size = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					full_dir_size = 0;
-			}
 		}
 
 		else if (xargs.logs == UNSET && *line == 'L'
 		&& strncmp(line, "LogCmds=", 8) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "LogCmds=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &logs_enabled) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				logs_enabled = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					logs_enabled = 0;
-			}
 		}
 
 		else if (xargs.max_dirhist == UNSET && *line == 'M'
@@ -1863,11 +1737,13 @@ read_config(void)
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxFilenameLen=", 15) == 0) {
-			int opt_num = 0;
+			if (set_max_filename_len(line) == -1)
+				continue;
+/*			int opt_num = 0;
 			sscanf(line, "MaxFilenameLen=%d\n", &opt_num);
 			if (opt_num <= 0)
 				continue;
-			max_name_len = opt_num;
+			max_name_len = opt_num; */
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {
@@ -1951,30 +1827,14 @@ read_config(void)
 
 		else if (xargs.pager == UNSET && *line == 'P'
 		&& strncmp(line, "Pager=", 6) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "Pager=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &pager) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				pager = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					pager = 0;
-			}
 		}
 
 		else if (xargs.printsel == UNSET && *line == 'P'
 		&& strncmp(line, "PrintSelfiles=", 14) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "PrintSelfiles=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &print_selfiles) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				print_selfiles = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					print_selfiles = 0;
-			}
 		}
 
 		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
@@ -2000,50 +1860,24 @@ read_config(void)
 
 		else if (xargs.restore_last_path == UNSET && *line == 'R'
 		&& strncmp(line, "RestoreLastPath=", 16) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "RestoreLastPath=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &restore_last_path) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				restore_last_path = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					restore_last_path = 0;
-			}
 		}
 
 		else if (*line == 'R' && strncmp(line, "RlEditMode=0", 12) == 0) {
-			rl_vi_editing_mode(1, 0);
-			/* By default, readline uses emacs editing mode */
+			rl_vi_editing_mode(1, 0); /* Readline defaults to emacs */
 		}
 
 		else if (xargs.share_selbox == UNSET && *line == 'S'
 		&& strncmp(line, "ShareSelbox=", 12) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "ShareSelbox=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &share_selbox) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				share_selbox = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					share_selbox = 0;
-			}
 		}
 
 		else if (xargs.hidden == UNSET && *line == 'S'
 		&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "ShowHiddenFiles=%5s\n",
-			    opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &show_hidden) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				show_hidden = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					show_hidden = 0;
-			}
 		}
 
 		else if (xargs.sort == UNSET && *line == 'S' && strncmp(line, "Sort=", 5) == 0) {
@@ -2059,37 +1893,14 @@ read_config(void)
 
 		else if (xargs.sort_reverse == UNSET && *line == 'S'
 		&& strncmp(line, "SortReverse=", 12) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "SortReverse=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &sort_reverse) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				sort_reverse = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					sort_reverse = 0;
-			}
 		}
 
-		/* Check for the xargs.splash flag. If -1, it was
-		 * not set via command line, so that it must be
-		 * set here */
 		else if (xargs.splash == UNSET && *line == 'S'
 		&& strncmp(line, "SplashScreen=", 13) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
-			/* According to cppcheck: "sscanf() without field
-			 * width limits can crash with huge input data".
-			 * Field width limits = %5s */
-			if (ret == -1)
+			if (set_config_bool_value(line, &splash_screen) == -1)
 				continue;
-
-			if (strncmp(opt_str, "true", 4) == 0) {
-				splash_screen = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					splash_screen = 0;
-			}
 		}
 
 		else if (xargs.path == UNSET && cur_ws == UNSET && *line == 'S'
@@ -2116,16 +1927,8 @@ read_config(void)
 
 #ifndef _NO_SUGGESTIONS
 		else if (*line == 'S' && strncmp(line, "SuggestFiletypeColor=", 21) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "SuggestFiletypeColor=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &suggest_filetype_color) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				suggest_filetype_color = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					suggest_filetype_color = 0;
-			}
 		}
 
 		else if (*line == 'S'
@@ -2135,8 +1938,8 @@ read_config(void)
 			if (ret == -1)
 				continue;
 			int fail = 0;
-			size_t s = 0;
-			for (; opt_str[s]; s++) {
+			size_t s;
+			for (s = 0; opt_str[s]; s++) {
 				if (opt_str[s] != 'a' && opt_str[s] != 'b'
 				&& opt_str[s] != 'c' && opt_str[s] != 'e'
 				&& opt_str[s] != 'f' && opt_str[s] != 'h'
@@ -2197,60 +2000,28 @@ read_config(void)
 		}
 
 		else if (xargs.tips == UNSET && *line == 'T' && strncmp(line, "Tips=", 5) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "Tips=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &tips) == -1)
 				continue;
-			if (strncmp(opt_str, "false", 5) == 0) {
-				tips = 0;
-			} else {
-				if (strncmp(opt_str, "true", 4) == 0)
-					tips = 1;
-			}
 		}
 
 #ifndef _NO_TRASH
 		else if (xargs.trasrm == UNSET && *line == 'T'
 		&& strncmp(line, "TrashAsRm=", 10) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "TrashAsRm=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &tr_as_rm) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				tr_as_rm = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					tr_as_rm = 0;
-			}
 		}
 #endif
 
 		else if (xargs.unicode == UNSET && *line == 'U'
 		&& strncmp(line, "Unicode=", 8) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "Unicode=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &unicode) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				unicode = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					unicode = 0;
-			}
 		}
 
 		else if (xargs.warning_prompt == UNSET && *line == 'W'
 		&& strncmp(line, "WarningPrompt=", 14) == 0) {
-			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "WarningPrompt=%5s\n", opt_str);
-			if (ret == -1)
+			if (set_config_bool_value(line, &warning_prompt) == -1)
 				continue;
-			if (strncmp(opt_str, "true", 4) == 0) {
-				warning_prompt = 1;
-			} else {
-				if (strncmp(opt_str, "false", 5) == 0)
-					warning_prompt = 0;
-			}
 		}
 
 		else if (*line == 'W'
@@ -2265,17 +2036,8 @@ read_config(void)
 		else {
 			if (xargs.welcome_message == UNSET && *line == 'W'
 			&& strncmp(line, "WelcomeMessage=", 15) == 0) {
-				char opt_str[MAX_BOOL] = "";
-				ret = sscanf(line, "WelcomeMessage=%5s\n",
-					opt_str);
-				if (ret == -1)
-					continue;
-				if (strncmp(opt_str, "true", 4) == 0) {
-					welcome_message = 1;
-				} else {
-					if (strncmp(opt_str, "false", 5) == 0)
-						welcome_message = 0;
-				}
+			if (set_config_bool_value(line, &welcome_message) == -1)
+				continue;
 			}
 		}
 	}
@@ -2553,8 +2315,6 @@ reset_variables(void)
 	selfile_ok = 1;
 
 	pmsg = NOMSG;
-
-	return;
 }
 
 static void
@@ -2684,8 +2444,6 @@ check_cmd_line_options(void)
 
 	if (xargs.welcome_message != UNSET)
 		welcome_message = xargs.welcome_message;
-
-	return;
 }
 
 int
