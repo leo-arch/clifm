@@ -652,7 +652,7 @@ dir_size(char *dir)
 	}
 
 	off_t retval = -1;
-	/* I only need here the first field of the line, which is a
+	/* We only need here the first field of the line, which is a
 	 * file size and could only take a few bytes, so that 32
 	 * bytes is more than enough */
 	char line[32];

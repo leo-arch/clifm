@@ -595,8 +595,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		snprintf(last_field, NAME_MAX, "%s%s%s", csize, size_type
 			? size_type : "?", cend);
 	} else {
-		snprintf(last_field, NAME_MAX, "%d,%d", major((int)props->rdev),
-			minor((int)props->rdev));
+		snprintf(last_field, NAME_MAX, "%d,%d", major(props->rdev),
+			minor(props->rdev));
 	}
 
 #ifndef _NO_ICONS

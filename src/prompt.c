@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
-#include <wordexp.h>
+# include <wordexp.h>
 #endif
 #include <readline/readline.h>
 
@@ -39,12 +39,13 @@
 #include "misc.h"
 #include "navigation.h"
 #include "prompt.h"
-#ifndef _NO_TRASH
-#include "trash.h"
-#else
-#include <time.h>
-#endif
 #include "sanitize.h"
+
+#ifndef _NO_TRASH
+# include "trash.h"
+#else
+# include <time.h>
+#endif
 
 #define CTLESC '\001'
 #define CTLNUL '\177'

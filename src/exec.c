@@ -1348,7 +1348,7 @@ _open_file(char **args, const int i)
 
 	if (auto_open && (file_info[i].type == DT_REG
 	|| file_info[i].type == DT_LNK)) {
-		char *cmd[] = {"open", args[0], args[1] ? args[1] : NULL, NULL};
+		char *cmd[] = {"open", args[0], args[1], NULL};
 		return open_function(cmd);
 	}
 
@@ -1357,41 +1357,49 @@ _open_file(char **args, const int i)
 
 /* Try to autocd or auto-open dir/file
  * Only autocd or auto-open here if not absolute path and if there
- * is no second argument or if second argument is "&" */
+ * is no second argument or if second argument is "&"
+ * If just 'edit', do not try to open a file named 'edit': always run
+ * the 'edit' command */
 static inline int
 check_auto_first(char **args)
 {
-	char *deq_str = (char *)NULL;
+	if (*args[0] == '/' || (!autocd && !auto_open) || (args[1]
+	&& (*args[1] != '&' || args[1][1])))
+		return (-1);
 
+	if (*args[0] == 'e' && strcmp(args[0], "edit") == 0)
+		return (-1);
+
+	char *deq_str = (char *)NULL;
 	if (autocd || auto_open)
 		expand_and_deescape(&args[0], &deq_str);
 
-	if (*args[0] != '/' && (autocd || auto_open) && (!args[1]
-	|| (*args[1] == '&' && !args[1][1]))) {
-		char *tmp = deq_str ? deq_str : args[0];
-		size_t len = strlen(tmp);
-		if (tmp[len - 1] == '/')
-			tmp[len - 1] = '\0';
+/*	if (*args[0] != '/' && (autocd || auto_open) && (!args[1]
+	|| (*args[1] == '&' && !args[1][1]))) { */
+	char *tmp = deq_str ? deq_str : args[0];
+	size_t len = strlen(tmp);
+	if (tmp[len - 1] == '/')
+		tmp[len - 1] = '\0';
 
-		if (autocd && cdpath_n && !args[1]
-		&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
-			free(deq_str);
-			return EXIT_SUCCESS;
-		}
-
-		int i = (int)files;
-		while (--i >= 0) {
-			if (*tmp != *file_info[i].name || strcmp(tmp, file_info[i].name) != 0)
-				continue;
-
-			free(deq_str);
-			deq_str = (char *)NULL;
-
-			int ret = _open_file(args, i);
-			if (ret != -1) return ret;
-			break;
-		}
+	if (autocd && cdpath_n && !args[1]
+	&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
+		free(deq_str);
+		return EXIT_SUCCESS;
 	}
+
+	int i = (int)files;
+	while (--i >= 0) {
+		if (*tmp != *file_info[i].name || strcmp(tmp, file_info[i].name) != 0)
+			continue;
+
+		free(deq_str);
+		deq_str = (char *)NULL;
+		int ret = _open_file(args, i);
+		if (ret != -1)
+			return ret;
+		break;
+	}
+//	}
 
 	free(deq_str);
 	return (-1);
@@ -1651,7 +1659,7 @@ exec_cmd(char **comm)
 		if ((exit_code = launch_shell(comm)) != -1)
 			return exit_code;
 
-	/* #  AUTOCD & AUTO-OPEN (1) # */
+	/* # AUTOCD & AUTO-OPEN (1) # */
 	if ((exit_code = check_auto_first(comm)) != -1)
 		return exit_code;
 

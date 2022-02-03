@@ -553,10 +553,8 @@ static char *
 get_filename(char *file_path)
 {
 	char *f = strrchr(file_path, '/');
-
 	if (f)
 		return (f + 1);
-
 	return (char *)NULL;
 }
 
@@ -1285,6 +1283,268 @@ mime_open_url(char *url)
 	return EXIT_SUCCESS;
 }
 
+static int
+import_mime(void)
+{
+	time_t rawtime = time(NULL);
+	struct tm tm;
+	localtime_r(&rawtime, &tm);
+	char date[64];
+	strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
+
+	char suffix[68];
+	snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
+	    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+	char new[PATH_MAX];
+	snprintf(new, PATH_MAX - 1, "%s.%s", mime_file, suffix);
+	rename(mime_file, new);
+
+	int mime_defs = mime_import(mime_file);
+	if (mime_defs > 0) {
+		printf(_("%s: %d MIME definition(s) imported from the system. "
+			"Old MIME list file stored as %s\n"),
+			PROGRAM_NAME, mime_defs, new);
+		return EXIT_SUCCESS;
+	}
+
+	rename(new, mime_file);
+	return EXIT_FAILURE;
+}
+
+static inline int
+mime_info(char *arg, char **fpath, char **deq)
+{
+	if (!arg) {
+		fprintf(stderr, "%s\n", _(MIME_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	if (strchr(arg, '\\')) {
+		*deq = dequote_str(arg, 0);
+		*fpath = realpath(*deq, NULL);
+		free(*deq);
+		*deq = (char *)NULL;
+	} else {
+		*fpath = realpath(arg, NULL);
+	}
+
+	if (!*fpath) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg,
+		    (is_number(arg) == 1) ? _("No such ELN") : strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (access(*fpath, R_OK) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *fpath, strerror(errno));
+		free(*fpath);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+/* Get the full path of the file to be opened by mime
+ * Returns 1 on success and 0 on error */
+static inline int
+get_open_file_path(char **args, char **fpath, char **deq)
+{
+	char *f = (char *)NULL;
+	if (*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2])
+		f = args[2];
+	else
+		f = args[1];
+
+	/* Only dequote the file name if coming from the mime command */
+	if (*args[0] == 'm' && strchr(f, '\\')) {
+		*deq = dequote_str(f, 0);
+		*fpath = realpath(*deq, NULL);
+		free(*deq);
+		*deq = (char *)NULL;
+	}
+	if (!*fpath)
+		*fpath = realpath(f, NULL);
+
+	if (!*fpath) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, f, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (access(*fpath, R_OK) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *fpath, strerror(errno));
+		free(*fpath);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+/* Handle mime when no opening app has been found */
+static inline int
+handle_no_app(int info, char **fpath, char **mime, char *arg)
+{
+	if (info) {
+		fputs(_("Associated application: None\n"), stderr);
+	} else {
+#ifndef _NO_ARCHIVING
+		/* If an archive/compressed file, run the archiver function */
+		if (is_compressed(*fpath, 1) == 0) {
+			char *tmp_cmd[] = {"ad", *fpath, NULL};
+			int exit_status = archiver(tmp_cmd, 'd');
+
+			free(*fpath);
+			free(*mime);
+
+			return exit_status;
+		} else {
+			fprintf(stderr, _("%s: %s: No associated application "
+					"found\n"), PROGRAM_NAME, arg);
+		}
+#else
+		fprintf(stderr, _("%s: %s: No associated application "
+				"found\n"), PROGRAM_NAME, arg);
+#endif
+	}
+
+	free(*fpath);
+	free(*mime);
+
+	return EXIT_FAILURE;
+}
+
+static inline int
+print_error_no_mime(char **fpath)
+{
+	fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
+	free(*fpath);
+	return EXIT_FAILURE;
+}
+
+static inline void
+print_info_name_mime(char *filename, char *mime)
+{
+	printf(_("Name: %s\n"), filename ? filename : _("None"));
+	printf(_("MIME type: %s\n"), mime);
+}
+
+static inline int
+print_mime_info(char **app, char **fpath, char **mime, int match)
+{
+	if (*(*app) == 'a' && *app[1] == 'd' && !*app[2]) {
+		printf(_("Associated application: ad [built-in] [%s]\n"),
+			match ? "MIME" : "name");
+	} else {
+		printf(_("Associated application: %s [%s]\n"), *app,
+			match ? "MIME" : "name");
+	}
+
+	free(*fpath);
+	free(*mime);
+	free(*app);
+
+	return EXIT_SUCCESS;
+}
+
+static inline int
+run_archiver(char **fpath, char **app)
+{
+	char *cmd[] = {"ad", *fpath, NULL};
+	int exit_status = archiver(cmd, 'd');
+
+	free(*fpath);
+	free(*app);
+
+	return exit_status;
+}
+
+/* Expand %f placeholder and environment variables in opening application
+ * line */
+static inline size_t
+expand_app_fields(char ***cmd, size_t *n, char *fpath)
+{
+	size_t f = 0, i = *n;
+	char **a = *cmd;
+
+	for (i = 0; a[i]; i++) {
+		/* Expand %f pĺaceholder */
+		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
+			a[i] = (char *)xrealloc(a[i], (strlen(fpath) + 1) * sizeof(char));
+			strcpy(a[i], fpath);
+			f = 1;
+			continue;
+		}
+
+		/* Expand environment variable */
+		if (*a[i] == '$' && *(a[i] + 1) >= 'A' && *(a[i] + 1) <= 'Z') {
+			char *p = expand_env(a[i]);
+			if (!p)
+				continue;
+			a[i] = (char *)xrealloc(a[i], (strlen(p) + 1) * sizeof(char *));
+			strcpy(a[i], p);
+			free(p);
+			continue;
+		}
+
+		/* Check if the command needs to be backgrounded */
+		if (*a[i] == '&') {
+			free(a[i]);
+			a[i] = (char *)NULL;
+			bg_proc = 1;
+		}
+	}
+
+	*n = i; 
+	return f;
+}
+
+/* Open the file FPATH via the application APP */
+static inline int
+run_mime_app(char *app, char *fpath)
+{
+	char **cmd = split_str(app, NO_UPDATE_ARGS);
+	if (!cmd)
+		return EXIT_FAILURE;
+
+	size_t i;
+	size_t f = expand_app_fields(&cmd, &i, fpath);
+	size_t n = i;
+
+	/* If no %f placeholder was found, append file name */
+	if (f == 0) {
+		cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
+		cmd[i] = savestring(fpath, strlen(fpath));
+		cmd[i + 1] = (char *)NULL;
+		n++;
+	}
+
+	int ret = launch_execve(cmd, (bg_proc && !open_in_foreground)
+			? BACKGROUND : FOREGROUND, bg_proc ? E_NOSTDERR : E_NOFLAG);
+
+	for (i = 0; i < n; i++)
+		free(cmd[i]);
+	free(cmd);
+
+	if (ret == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+	return EXIT_FAILURE;
+}
+
+#ifdef _NO_MAGIC
+/* Check the existence of the 'file' command */
+static inline int
+check_file_cmd(void)
+{
+	char *p = get_cmd_path("file");
+	if (!p) {
+		fprintf(stderr, _("%s: file: Command not found\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	free(p);
+	return EXIT_SUCCESS;
+}
+#endif /* _NO_MAGIC */
+
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
  * former providing MIME info about the corresponding file and the
@@ -1292,119 +1552,36 @@ mime_open_url(char *url)
 int
 mime_open(char **args)
 {
-	/* Check arguments */
 	if (!args[1] || IS_HELP(args[1])) {
 		puts(_(MIME_USAGE));
 		return EXIT_FAILURE;
 	}
 
-	if (args[1] && *args[1] == 'i' && strcmp(args[1], "import") == 0) {
-		time_t rawtime = time(NULL);
-		struct tm tm;
-		localtime_r(&rawtime, &tm);
-		char date[64];
-		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
-
-		char suffix[68];
-		snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
-		    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min,
-		    tm.tm_sec);
-
-		char new[PATH_MAX];
-		snprintf(new, PATH_MAX - 1, "%s.%s", mime_file, suffix);
-		rename(mime_file, new);
-
-		int mime_defs = mime_import(mime_file);
-		if (mime_defs > 0) {
-			printf(_("%s: %d MIME definition(s) imported from the system. "
-				"Old MIME list file stored as %s\n"),
-				PROGRAM_NAME, mime_defs, new);
-			return EXIT_SUCCESS;
-		} else {
-			rename(new, mime_file);
-			return EXIT_FAILURE;
-		}
-	}
+	if (*args[1] == 'i' && strcmp(args[1], "import") == 0)
+		return import_mime();
 
 #ifdef _NO_MAGIC
-	/* Check the existence of the 'file' command. */
-	char *file_path_tmp = (char *)NULL;
-	if ((file_path_tmp = get_cmd_path("file")) == NULL) {
-		fprintf(stderr, _("%s: file: Command not found\n"), PROGRAM_NAME);
+	if (check_file_cmd() == EXIT_FAILURE)
 		return EXIT_FAILURE;
-	}
-
-	free(file_path_tmp);
 #endif /* _NO_MAGIC */
 
-	char *file_path = (char *)NULL,
-		 *deq_file = (char *)NULL;
+	char *file_path = (char *)NULL, *deq_file = (char *)NULL;
 	int info = 0, file_index = 0;
 
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return mime_edit(args);
 
-	else if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
-		if (!args[2]) {
-			fprintf(stderr, "%s\n", _(MIME_USAGE));
+	if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
+		if (mime_info(args[2], &file_path, &deq_file) == EXIT_FAILURE)
 			return EXIT_FAILURE;
-		}
-
-		if (strchr(args[2], '\\')) {
-			deq_file = dequote_str(args[2], 0);
-			file_path = realpath(deq_file, NULL);
-			free(deq_file);
-			deq_file = (char *)NULL;
-		} else {
-			file_path = realpath(args[2], NULL);
-		}
-
-		if (!file_path) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[2],
-			    (is_number(args[2]) == 1) ? _("No such ELN") : strerror(errno));
-			return EXIT_FAILURE;
-		}
-
-		if (access(file_path, R_OK) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
-			    strerror(errno));
-			free(file_path);
-			return EXIT_FAILURE;
-		}
-
 		info = 1;
 		file_index = 2;
 	}
 
 	else {
-		/* Only dequote the file name if coming from the mime command */
-		if (*args[0] == 'm' && strchr(args[1], '\\')) {
-			deq_file = dequote_str(args[1], 0);
-			file_path = realpath(deq_file, NULL);
-			free(deq_file);
-			deq_file = (char *)NULL;
-		}
-		if (!file_path)
-			file_path = realpath(args[1], NULL);
-
-		if (!file_path) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1],
-			    strerror(errno));
+		if (get_open_file_path(args, &file_path, &deq_file) == EXIT_FAILURE)
+			/* Return -1 to prevent the caller from printing the error message */
 			return (-1);
-		}
-
-		if (access(file_path, R_OK) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
-			    strerror(errno));
-			free(file_path);
-			/* Since this function is called by open_function, and since
-			 * this latter prints an error message itself whenever the
-			 * exit code of mime_open is EXIT_FAILURE, and since we
-			 * don't want that message in this case, return -1 instead
-			 * to prevent that message from being printed */
-			return (-1);
-		}
-
 		file_index = 1;
 	}
 
@@ -1419,66 +1596,22 @@ mime_open(char **args)
 #else
 	char *mime = get_mime(file_path);
 #endif
-	if (!mime) {
-		fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
-		free(file_path);
-		return EXIT_FAILURE;
-	}
+
+	if (!mime)
+		return print_error_no_mime(&file_path);
 
 	char *filename = get_filename(file_path);
 
-	if (info) {
-		printf(_("Name: %s\n"), filename ? filename : _("None"));
-		printf(_("MIME type: %s\n"), mime);
-	}
+	if (info)
+		print_info_name_mime(filename, mime);
 
 	/* Get default application for MIME or filename */
 	char *app = get_app(mime, filename);
-	if (!app) {
-		if (info) {
-			fputs(_("Associated application: None\n"), stderr);
-		} else {
-#ifndef _NO_ARCHIVING
-			/* If an archive/compressed file, run the archiver function */
-			if (is_compressed(file_path, 1) == 0) {
-				char *tmp_cmd[] = {"ad", file_path, NULL};
-				int exit_status = archiver(tmp_cmd, 'd');
+	if (!app)
+		return handle_no_app(info, &file_path, &mime, args[1]);
 
-				free(file_path);
-				free(mime);
-
-				return exit_status;
-			} else {
-				fprintf(stderr, _("%s: %s: No associated application "
-						"found\n"), PROGRAM_NAME, args[1]);
-			}
-#else
-			fprintf(stderr, _("%s: %s: No associated application "
-					"found\n"), PROGRAM_NAME, args[1]);
-#endif
-		}
-
-		free(file_path);
-		free(mime);
-
-		return EXIT_FAILURE;
-	}
-
-	if (info) {
-		if (*app == 'a' && app[1] == 'd' && !app[2]) {
-			printf(_("Associated application: ad [built-in] [%s]\n"),
-				mime_match ? "MIME" : "name");
-		} else {
-			printf(_("Associated application: %s [%s]\n"), app,
-				mime_match ? "MIME" : "name");
-		}
-
-		free(file_path);
-		free(mime);
-		free(app);
-
-		return EXIT_SUCCESS;
-	}
+	if (info)
+		return print_mime_info(&app, &file_path, &mime, mime_match);
 
 	free(mime);
 
@@ -1486,70 +1619,15 @@ mime_open(char **args)
 
 	/* If not info, open the file with the associated application */
 #ifndef _NO_ARCHIVING
-	if (*app == 'a' && app[1] == 'd' && !app[2]) {
-		char *cmd[] = {"ad", file_path, NULL};
-		int exit_status = archiver(cmd, 'd');
-		free(file_path);
-		free(app);
-		return exit_status;
-	}
+	if (*app == 'a' && app[1] == 'd' && !app[2])
+		return run_archiver(&file_path, &app);
 #endif
 
-	int ret = EXIT_FAILURE;
-	char **cmd = split_str(app, NO_UPDATE_ARGS);
-	if (!cmd)
-		goto ERROR;
-
-	size_t i, f = 0, n = 0;
-	for (i = 0; cmd[i]; i++) {
-		/* Expand %f pĺaceholder */
-		if (*cmd[i] == '%' && *(cmd[i] + 1) == 'f') {
-			cmd[i] = (char *)xrealloc(cmd[i], (strlen(file_path) + 1)
-					* sizeof(char *));
-			strcpy(cmd[i], file_path);
-			f = 1;
-		}
-		/* Expand environment variable */
-		else if (*cmd[i] == '$' && *(cmd[i] + 1) >= 'A'
-		&& *(cmd[i] + 1) <= 'Z') {
-			char *p = expand_env(cmd[i]);
-			if (!p)
-				continue;
-			cmd[i] = (char *)xrealloc(cmd[i], (strlen(p) + 1) * sizeof(char *));
-			strcpy(cmd[i], p);
-			free(p);
-		} else {
-			/* Check if the command needs to be backgrounded */
-			if (*cmd[i] == '&') {
-				free(cmd[i]);
-				cmd[i] = (char *)NULL;
-				bg_proc = 1;
-			}
-		}
-	}
-
-	n = i;
-	if (f == 0) {
-		cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
-		cmd[i] = savestring(file_path, strlen(file_path));
-		cmd[i + 1] = (char *)NULL;
-		n++;
-	}
-
-	ret = launch_execve(cmd, (bg_proc && !open_in_foreground)
-			? BACKGROUND : FOREGROUND, bg_proc ? E_NOSTDERR : E_NOFLAG);
-
-	for (i = 0; i < n; i++)
-		free(cmd[i]);
-	free(cmd);
-
-ERROR:
+	int ret = run_mime_app(app, file_path);
 	free(file_path);
 	free(app);
 
-	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
-	return EXIT_SUCCESS;
+	return ret;
 }
 #else
 void *__skip_me_lira;

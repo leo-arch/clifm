@@ -51,6 +51,8 @@
 #include "selection.h"
 #include "messages.h"
 
+#include "config.h"
+
 void
 clear_selbox(void)
 {
@@ -59,6 +61,21 @@ clear_selbox(void)
 		free(sel_elements[i]);
 	sel_n = 0;
 	save_sel();	
+}
+
+static inline int
+run_mime(char *file)
+{
+	char *p = rl_line_buffer;
+	if ( (*p == 'i' && (strncmp(p, "import", 6) == 0
+	|| strncmp(p, "info", 4) == 0))
+	|| (*p == 'o' && (p[1] == ' ' || strncmp(p, "open", 4) == 0)) ) {
+		char *cmd[] = {"mm", "open", file, NULL};
+		return mime_open(cmd);
+	}
+
+	char *cmd[] = {"mm", file, NULL};
+	return mime_open(cmd);
 }
 
 /* Open a file via OPENER, if set, or via LIRA. If not compiled with
@@ -84,8 +101,19 @@ open_file(char *file)
 		}
 	} else {
 #ifndef _NO_LIRA
+		exit_status = run_mime(file);
+/*		char *p = rl_line_buffer;
+		if (*p == 'i' && (strncmp(p, "import", 6) == 0
+		|| strncmp(p, "info", 4) == 0)) {
+			char *cmd[] = {"mm", "open", file, NULL};
+			return exit_status = mime_open(cmd);
+		}
+		if (*p == 'o' && (p[1] == ' ' || strncmp(p, "open", 4) == 0)) {
+			char *cmd[] = {"mm", "open", file, NULL};
+			return exit_status = mime_open(cmd);
+		}
 		char *cmd[] = {"mm", file, NULL};
-		exit_status = mime_open(cmd);
+		exit_status = mime_open(cmd); */
 #else
 		/* Fallback to (xdg-)open */
 #ifdef __HAIKU__
@@ -476,7 +504,7 @@ open_function(char **cmd)
 		return EXIT_FAILURE;
 	}
 
-	/* At this point we know the file to be openend is either a regular
+	/* At this point we know that the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file */
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 		int ret = open_file(file);

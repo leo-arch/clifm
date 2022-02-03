@@ -67,7 +67,7 @@ check_term(void)
 		exit(EXIT_FAILURE);
 	}
 
-	int i;
+	size_t i;
 	for (i = 0; UNSUPPORTED_TERM[i]; i++) {
 		if (*_term == *UNSUPPORTED_TERM[i]
 		&& strcmp(_term, UNSUPPORTED_TERM[i]) == 0) {
