@@ -1499,7 +1499,9 @@ static int
 lira_function(char **args)
 {
 #ifndef _NO_LIRA
-	return mime_open(args);
+	if (mime_open(args) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+	return EXIT_FAILURE;
 #else
 	fprintf(stderr, _("%s: Lira: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
