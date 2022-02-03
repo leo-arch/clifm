@@ -136,14 +136,6 @@ get_app(const char *mime, const char *name)
 	if (!mime || !mime_file || !*mime_file)
 		return (char *)NULL;
 
-	/* Directories are always opened by CliFM itself, except in the case
-	 * of the open-with command (ow) and the --open command line option */
-/*	if (xargs.open != 1 && *mime == 'i' && strcmp(mime, "inode/directory") == 0) {
-		char *p = savestring("clifm", 5);
-		mime_match = 1;
-		return p;
-	} */
-
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
 		fprintf(stderr, _("%s: %s: Error opening file\n"),
@@ -336,8 +328,8 @@ get_mime(char *file)
 	if (!rand_ext)
 		return (char *)NULL;
 
-	char mime_tmp_file[PATH_MAX] = "";
-	sprintf(mime_tmp_file, "%s/mime.%s", tmp_dir, rand_ext);
+	char mime_tmp_file[PATH_MAX];
+	snprintf(mime_tmp_file, PATH_MAX, "%s/mime.%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	if (access(mime_tmp_file, F_OK) == 0)
@@ -553,8 +545,10 @@ static char *
 get_filename(char *file_path)
 {
 	char *f = strrchr(file_path, '/');
+
 	if (f)
 		return (f + 1);
+
 	return (char *)NULL;
 }
 
@@ -1429,14 +1423,14 @@ print_info_name_mime(char *filename, char *mime)
 }
 
 static inline int
-print_mime_info(char **app, char **fpath, char **mime, int match)
+print_mime_info(char **app, char **fpath, char **mime)
 {
 	if (*(*app) == 'a' && *app[1] == 'd' && !*app[2]) {
 		printf(_("Associated application: ad [built-in] [%s]\n"),
-			match ? "MIME" : "name");
+			mime_match ? "MIME" : "FILENAME");
 	} else {
 		printf(_("Associated application: %s [%s]\n"), *app,
-			match ? "MIME" : "name");
+			mime_match ? "MIME" : "FILENAME");
 	}
 
 	free(*fpath);
@@ -1567,11 +1561,6 @@ mime_open(char **args)
 	if (*args[1] == 'i' && strcmp(args[1], "import") == 0)
 		return import_mime();
 
-#ifdef _NO_MAGIC
-	if (check_file_cmd() == EXIT_FAILURE)
-		return EXIT_FAILURE;
-#endif /* _NO_MAGIC */
-
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return mime_edit(args);
 
@@ -1599,6 +1588,10 @@ mime_open(char **args)
 #ifndef _NO_MAGIC
 	char *mime = xmagic(file_path, MIME_TYPE);
 #else
+	if (check_file_cmd() == EXIT_FAILURE) {
+		free(file_path);
+		return EXIT_FAILURE;
+	}
 	char *mime = get_mime(file_path);
 #endif
 
@@ -1616,7 +1609,7 @@ mime_open(char **args)
 		return handle_no_app(info, &file_path, &mime, args[1]);
 
 	if (info)
-		return print_mime_info(&app, &file_path, &mime, mime_match);
+		return print_mime_info(&app, &file_path, &mime);
 
 	free(mime);
 
