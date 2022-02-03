@@ -1362,12 +1362,13 @@ get_open_file_path(char **args, char **fpath, char **deq)
 		free(*deq);
 		*deq = (char *)NULL;
 	}
-	if (!*fpath)
-		*fpath = realpath(f, NULL);
 
 	if (!*fpath) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, f, strerror(errno));
-		return EXIT_FAILURE;
+		*fpath = realpath(f, NULL);
+		if (!*fpath) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, f, strerror(errno));
+			return EXIT_FAILURE;
+		}
 	}
 
 	if (access(*fpath, R_OK) == -1) {
@@ -1499,20 +1500,23 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath)
 
 /* Open the file FPATH via the application APP */
 static inline int
-run_mime_app(char *app, char *fpath)
+run_mime_app(char **app, char **fpath)
 {
-	char **cmd = split_str(app, NO_UPDATE_ARGS);
-	if (!cmd)
+	char **cmd = split_str(*app, NO_UPDATE_ARGS);
+	if (!cmd) {
+		free(*app);
+		free(*fpath);
 		return EXIT_FAILURE;
+	}
 
 	size_t i = 0;
-	size_t f = expand_app_fields(&cmd, &i, fpath);
+	size_t f = expand_app_fields(&cmd, &i, *fpath);
 	size_t n = i;
 
 	/* If no %f placeholder was found, append file name */
 	if (f == 0) {
 		cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
-		cmd[i] = savestring(fpath, strlen(fpath));
+		cmd[i] = savestring(*fpath, strlen(*fpath));
 		cmd[i + 1] = (char *)NULL;
 		n++;
 	}
@@ -1523,6 +1527,9 @@ run_mime_app(char *app, char *fpath)
 	for (i = 0; i < n; i++)
 		free(cmd[i]);
 	free(cmd);
+
+	free(*app);
+	free(*fpath);
 
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
@@ -1565,20 +1572,18 @@ mime_open(char **args)
 		return EXIT_FAILURE;
 #endif /* _NO_MAGIC */
 
-	char *file_path = (char *)NULL, *deq_file = (char *)NULL;
-	int info = 0, file_index = 0;
-
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return mime_edit(args);
+
+	char *file_path = (char *)NULL, *deq_file = (char *)NULL;
+	int info = 0, file_index = 0;
 
 	if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
 		if (mime_info(args[2], &file_path, &deq_file) == EXIT_FAILURE)
 			return EXIT_FAILURE;
 		info = 1;
 		file_index = 2;
-	}
-
-	else {
+	} else {
 		if (get_open_file_path(args, &file_path, &deq_file) == EXIT_FAILURE)
 			/* Return -1 to prevent the caller from printing the error message */
 			return (-1);
@@ -1615,19 +1620,13 @@ mime_open(char **args)
 
 	free(mime);
 
-	/* Construct the command */
-
-	/* If not info, open the file with the associated application */
+	/* Construct and execute the command */
 #ifndef _NO_ARCHIVING
 	if (*app == 'a' && app[1] == 'd' && !app[2])
 		return run_archiver(&file_path, &app);
 #endif
 
-	int ret = run_mime_app(app, file_path);
-	free(file_path);
-	free(app);
-
-	return ret;
+	return run_mime_app(&app, &file_path);
 }
 #else
 void *__skip_me_lira;
