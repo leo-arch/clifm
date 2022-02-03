@@ -1425,7 +1425,7 @@ get_max_ug_str(void)
 	int i = (int)files;
 
 	while (--i >= 0) {
-		size_t t = DIGINUM(file_info[i].uid) + DIGINUM(file_info[i].gid);
+		size_t t = (size_t)DIGINUM(file_info[i].uid) + DIGINUM(file_info[i].gid);
 		if (t > ug_max)
 			ug_max = t;
 	}
