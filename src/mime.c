@@ -1462,7 +1462,7 @@ run_archiver(char **fpath, char **app)
 static inline size_t
 expand_app_fields(char ***cmd, size_t *n, char *fpath)
 {
-	size_t f = 0, i = *n;
+	size_t f = 0, i;
 	char **a = *cmd;
 
 	for (i = 0; a[i]; i++) {
@@ -1505,7 +1505,7 @@ run_mime_app(char *app, char *fpath)
 	if (!cmd)
 		return EXIT_FAILURE;
 
-	size_t i;
+	size_t i = 0;
 	size_t f = expand_app_fields(&cmd, &i, fpath);
 	size_t n = i;
 
