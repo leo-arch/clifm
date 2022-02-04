@@ -42,8 +42,7 @@
 #include "navigation.h"
 #include "sort.h"
 
-static int
-check_glob_char(char *str)
+static int check_glob_char(char *str[])
 {
 	size_t i;
 	for (i = 1; str[i]; i++) {
@@ -59,8 +58,7 @@ check_glob_char(char *str)
 }
 
 /* List matching file names in the specified directory */
-int
-search_glob(char **comm, int invert)
+int search_glob(char **comm, int invert)
 {
 	if (!comm || !comm[0])
 		return EXIT_FAILURE;
