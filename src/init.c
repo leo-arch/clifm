@@ -1908,6 +1908,33 @@ get_path_env(void)
 	return n;
 }
 
+static inline int
+validate_line(char *line, char **p)
+{
+	char *s = line;
+
+	if (!*s || !strchr(s, '/'))
+		return (-1);
+	if (!strchr(s, ':'))
+		return (-1);
+
+	size_t len = strlen(s);
+	if (s[len - 1] == '\n')
+		s[len - 1] = '\0';
+
+	int cur = 0;
+	if (*s == '*') {
+		if (!*(++s)) {
+			*p = s;
+			return (-1);
+		}
+		cur = 1;
+	}
+
+	*p = s;
+	return cur;
+}
+
 /* Set PATH to last visited directory and CUR_WS to last used
  * workspace */
 int
@@ -1928,24 +1955,12 @@ get_last_path(void)
 
 	char line[PATH_MAX] = "";
 	while (fgets(line, (int)sizeof(line), fp)) {
-		char *p = line;
-		if (!*p || !strchr(p, '/'))
+		char *p = (char *)NULL;
+		int cur = validate_line(line, &p);
+		if (cur == -1)
 			continue;
-		if (!strchr(p, ':'))
-			continue;
-
-		size_t len = strlen(p);
-		if (p[len - 1] == '\n')
-			p[len - 1] = '\0';
-
-		int cur = 0;
-		if (*p == '*') {
-			if (!*(++p))
-				continue;
-			cur = 1;
-		}
-
 		int ws_n = *p - '0';
+
 		if (cur && cur_ws == UNSET)
 			cur_ws = ws_n;
 
@@ -2098,6 +2113,53 @@ get_path_programs(void)
 	bin_commands[l] = (char *)NULL;
 }
 
+static inline void
+free_aliases(void)
+{
+	int i = (int)aliases_n;
+
+	while (--i >= 0) {
+		free(aliases[i].name);
+		free(aliases[i].cmd);
+	}
+
+	free(aliases);
+	aliases = (struct alias_t *)xnmalloc(1, sizeof(struct alias_t));
+	aliases_n = 0;
+}
+
+static inline void
+write_alias(char *s, char *p)
+{
+	aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 1)
+				* sizeof(struct alias_t));
+	aliases[aliases_n].name = savestring(s, strlen(s));
+	if (*p == '\'') {
+		aliases[aliases_n].cmd = strbtw(p, '\'', '\'');
+		aliases_n++;
+	} else {
+		if (*p == '"') {
+			aliases[aliases_n].cmd = strbtw(p, '"', '"');
+			aliases_n++;
+		}
+	}
+}
+
+static inline int
+alias_exists(char *s)
+{
+	int i = (int)aliases_n;
+
+	while (--i >= 0) {
+		if (!aliases[i].name)
+			continue;
+		if (*s == *aliases[i].name && strcmp(s, aliases[i].name) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
 void
 get_aliases(void)
 {
@@ -2112,19 +2174,8 @@ get_aliases(void)
 		return;
 	}
 
-
-	/* Free the aliases struct array */
-	if (aliases_n) {
-		int i = (int)aliases_n;
-		while (--i >= 0) {
-			free(aliases[i].name);
-			free(aliases[i].cmd);
-		}
-
-		free(aliases);
-		aliases = (struct alias_t *)xnmalloc(1, sizeof(struct alias_t));
-		aliases_n = 0;
-	}
+	if (aliases_n)
+		free_aliases();
 
 	char *line = (char *)NULL;
 	size_t line_size = 0;
@@ -2140,36 +2191,30 @@ get_aliases(void)
 			*p = '\0';
 			p++;
 
-			/* Skip duplicated aliases names */
-			int i = (int)aliases_n, exists = 0;
-			while (--i >= 0) {
-				if (!aliases[i].name)
-					continue;
-				if (*s == *aliases[i].name && strcmp(s, aliases[i].name) == 0) {
-					exists = 1;
-					break;
-				}
-			}
-			if (exists)
-				continue;
-
-			aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 1)
-						* sizeof(struct alias_t));
-			aliases[aliases_n].name = savestring(s, strlen(s));
-			if (*p == '\'') {
-				aliases[aliases_n].cmd = strbtw(p, '\'', '\'');
-				aliases_n++;
-			} else {
-				if (*p == '"') {
-					aliases[aliases_n].cmd = strbtw(p, '"', '"');
-					aliases_n++;
-				}
-			}
+			if (alias_exists(s) == 1) continue;
+			write_alias(s, p);
 		}
 	}
 
 	free(line);
 	close_fstream(fp, fd);
+}
+
+static inline void
+write_dirhist(char *line, ssize_t len)
+{
+	if (!line || !*line || *line == '\n')
+		return;
+
+	if (line[len - 1] == '\n') {
+		line[len - 1] = '\0';
+		len--;
+	}
+
+	old_pwd[dirhist_total_index] = (char *)xnmalloc((size_t)len + 1,
+									sizeof(char));
+	strcpy(old_pwd[dirhist_total_index], line);
+	dirhist_total_index++;
 }
 
 int
@@ -2201,25 +2246,27 @@ load_dirhist(void)
 	size_t line_size = 0;
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
-
 	dirhist_total_index = 0;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		if (!line || !*line || *line == '\n')
-			continue;
-		if (line[line_len - 1] == '\n')
-			line[line_len - 1] = '\0';
-		old_pwd[dirhist_total_index] = (char *)xnmalloc((size_t)line_len + 1,
-										sizeof(char));
-		strcpy(old_pwd[dirhist_total_index], line);
-		dirhist_total_index++;
-	}
+	while ((line_len = getline(&line, &line_size, fp)) > 0)
+		write_dirhist(line, line_len);
 
 	close_fstream(fp, fd);
 	old_pwd[dirhist_total_index] = (char *)NULL;
 	free(line);
 	dirhist_cur_index = dirhist_total_index - 1;
 	return EXIT_SUCCESS;
+}
+
+static inline void
+free_prompt_cmds(void)
+{
+	size_t i;
+	for (i = 0; i < prompt_cmds_n; i++)
+		free(prompt_cmds[i]);
+	free(prompt_cmds);
+	prompt_cmds = (char **)NULL;
+	prompt_cmds_n = 0;
 }
 
 void
@@ -2236,14 +2283,8 @@ get_prompt_cmds(void)
 		return;
 	}
 
-	if (prompt_cmds_n) {
-		size_t i;
-		for (i = 0; i < prompt_cmds_n; i++)
-			free(prompt_cmds[i]);
-		free(prompt_cmds);
-		prompt_cmds = (char **)NULL;
-		prompt_cmds_n = 0;
-	}
+	if (prompt_cmds_n)
+		free_prompt_cmds();
 
 	char *line = (char *)NULL;
 	size_t line_size = 0;
