@@ -295,71 +295,68 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 	return (ret - (ret * 2));
 }
 
+/* This is a modification of the alphasort function that makes it case
+ * insensitive. It also sorts without taking the initial dot of hidden
+ * files into account. Note that strcasecmp() isn't locale aware. Use
+ * only with C and english locales */
+int
+alphasort_insensitive(const struct dirent **a, const struct dirent **b)
+{
+	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1
+	: (*a)->d_name, ((*b)->d_name[0] == '.') ? (*b)->d_name + 1 : (*b)->d_name);
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
+
+static inline void
+print_owner_group_sort(int mode)
+{
+	if (light_mode) {
+		printf(_("%s (not available: using 'name') %s\n"),
+			(mode == SOWN) ? "owner" : "group",
+			(sort_reverse == 1) ? "[rev]" : "");
+		return;
+	}
+
+	printf(_("%s %s\n"), (mode == SOWN) ? "owner" : "group",
+		(sort_reverse == 1) ? "[rev]" : "");
+}
+
 void
 print_sort_method(void)
 {
 	switch (sort) {
 	case SNONE:	puts(_("none")); break;
-
 	case SNAME:
-		printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-
+		printf(_("name %s\n"), (sort_reverse) ? "[rev]" : ""); break;
 	case SSIZE:
-		printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-
+		printf(_("size %s\n"), (sort_reverse) ? "[rev]" : ""); break;
 	case SATIME:
-		printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-
+		printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");	break;
 	case SBTIME:
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
-		printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
+		printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : ""); break;
 #else
 		printf(_("btime (not available: using 'ctime') %s\n"),
-		    (sort_reverse) ? "[rev]" : "");
+		    (sort_reverse) ? "[rev]" : ""); break;
 #endif
-		break;
-
 	case SCTIME:
-		printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-
+		printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : ""); break;
 	case SMTIME:
-		printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-
+		printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : ""); break;
 	case SVER:
-		printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-
+		printf(_("version %s\n"), (sort_reverse) ? "[rev]" : ""); break;
 	case SEXT:
-		printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-
+		printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");	break;
 	case SINO:
-		printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-
+		printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");	break;
 	case SOWN:
-		if (light_mode) {
-			printf(_("owner (not available: using 'name') %s\n"),
-			    (sort_reverse) ? "[rev]" : "");
-		} else {
-			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
-		}
-		break;
-
+		print_owner_group_sort(SOWN); break;
 	case SGRP:
-		if (light_mode) {
-			printf(_("group (not available: using 'name') %s\n"),
-			    (sort_reverse) ? "[rev]" : "");
-		} else {
-			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
-		}
-		break;
-
+		print_owner_group_sort(SGRP); break;
 	default: fputs("unknown sorting method\n", stdout);
 	}
 }
@@ -459,20 +456,4 @@ sort_function(char **arg)
 	/* If arg1 is a number but is not in the range 0-SORT_TYPES, error */
 	fprintf(stderr, "%s\n", _(SORT_USAGE));
 	return EXIT_FAILURE;
-}
-
-/* This is a modification of the alphasort function that makes it case
- * insensitive. It also sorts without taking the initial dot of hidden
- * files into account. Note that strcasecmp() isn't locale aware. Use
- * only with C and english locales */
-int
-alphasort_insensitive(const struct dirent **a, const struct dirent **b)
-{
-	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1
-	: (*a)->d_name, ((*b)->d_name[0] == '.') ? (*b)->d_name + 1 : (*b)->d_name);
-
-	if (!sort_reverse)
-		return ret;
-
-	return (ret - (ret * 2));
 }
