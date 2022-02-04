@@ -740,11 +740,11 @@ mime_open_with_tab(char *filename, const char *prefix)
 		deq_file = (char *)NULL;
 	}
 
-	if (!name)
+	if (!name) {
 		name = realpath(filename, NULL);
-
-	if (!name)
-		goto FAIL;
+		if (!name)
+			goto FAIL;
+	}
 
 #ifndef _NO_MAGIC
 	mime = xmagic(name, MIME_TYPE);
@@ -1057,11 +1057,11 @@ mime_open_with(char *filename, char **args)
 		name = ename;
 	}
 
-	if (!name)
+	if (!name) {
 		name = realpath(filename, NULL);
-
-	if (!name)
-		return EXIT_FAILURE;
+		if (!name)
+			return EXIT_FAILURE;
+	}
 
 	/* ow FILE APP [ARGS]
 	 * We already have the opening app. Just join the app, option
@@ -1073,7 +1073,7 @@ mime_open_with(char *filename, char **args)
 	}
 
 	/* Find out the appropriate opening application via either mime type
-	 * or file extension */
+	 * or file name */
 #ifndef _NO_MAGIC
 	mime = xmagic(name, MIME_TYPE);
 #else
@@ -1130,8 +1130,7 @@ mime_open_with(char *filename, char **args)
 
 		while (*tmp) {
 			size_t app_len = 0;
-			/* Split the appplications line into substrings, if
-			 * any */
+			/* Split the appplications line into substrings, if any */
 			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
 			&& *tmp != '"') {
 				app[app_len] = *tmp;
@@ -1546,6 +1545,13 @@ check_file_cmd(void)
 }
 #endif /* _NO_MAGIC */
 
+static inline int
+print_mime_help(void)
+{
+	puts(_(MIME_USAGE));
+	return EXIT_FAILURE;
+}
+
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
  * former providing MIME info about the corresponding file and the
@@ -1553,10 +1559,8 @@ check_file_cmd(void)
 int
 mime_open(char **args)
 {
-	if (!args[1] || IS_HELP(args[1])) {
-		puts(_(MIME_USAGE));
-		return EXIT_FAILURE;
-	}
+	if (!args[1] || IS_HELP(args[1]))
+		return print_mime_help();
 
 	if (*args[1] == 'i' && strcmp(args[1], "import") == 0)
 		return import_mime();

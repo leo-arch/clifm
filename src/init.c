@@ -930,6 +930,57 @@ open_reg_exit(char *filename, int url)
 	exit(ret);
 }
 
+static inline int
+set_sort_by_name(const char *name)
+{
+	struct sort_t {
+		const char *name;
+		int num;
+		int pad; /* Used only to properly align the struct */
+	};
+
+	static struct sort_t sorts[] = {
+	    {"none", 0, 0},
+	    {"name", 1, 0},
+	    {"size", 2, 0},
+	    {"atime", 3, 0},
+	    {"btime", 4, 0},
+	    {"ctime", 5, 0},
+	    {"mtime", 6, 0},
+	    {"version", 7, 0},
+	    {"extension", 8, 0},
+	    {"inode", 9, 0},
+	    {"owner", 10, 0},
+	    {"group", 11, 0},
+	};
+
+	size_t i;
+	for (i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
+		if (*name == *sorts[i].name && strcmp(name, sorts[i].name) == 0)
+			return sorts[i].num;
+	}
+
+	return SNAME;
+}
+
+static inline void
+set_sort(char *arg)
+{
+	int n = 0;
+
+	if (!is_number(arg))
+		n = set_sort_by_name(arg);
+	else
+		n = atoi(arg);
+
+	if (n < 0 || n > SORT_TYPES)
+		sort = SNAME;
+	else
+		sort = n;
+
+	xargs.sort = sort;
+}
+
 /* Evaluate external arguments, if any, and change initial variables to
  * its corresponding value */
 void
@@ -1323,16 +1374,7 @@ RUN:
 		case 'x': ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': light_mode = xargs.light = 1; break;
 
-		case 'z': {
-			if (!is_number(optarg))
-				break;
-			int arg = atoi(optarg);
-			if (arg < 0 || arg > SORT_TYPES)
-				sort = 1;
-			else
-				sort = arg;
-			xargs.sort = sort;
-		} break;
+		case 'z': set_sort(optarg); break;
 
 		case '?': /* If some unrecognized option was found... */
 
