@@ -364,11 +364,68 @@ print_sort_method(void)
 	}
 }
 
+static inline void
+toggle_sort_reverse(void)
+{
+	if (sort_reverse)
+		sort_reverse = 0;
+	else
+		sort_reverse = 1;
+}
+
+static inline int
+re_sort_files_list(void)
+{
+	if (autols == 0)
+		return EXIT_SUCCESS;
+
+	/* sort_switch just tells list_dir() to print a line
+	 * with the current sorting method at the end of the
+	 * files list */
+	sort_switch = 1;
+	free_dirlist();
+	int ret = list_dir();
+	sort_switch = 0;
+
+	return ret;
+}
+
+/* If ARG is a string, write the corresponding integer to ARG itself
+ * Return zero if ARG corresponds to a valid sorting method, and one
+ * otherwise */
+static inline int
+_set_sort_by_name(char **arg)
+{
+	static struct sort_t sorts[] = {
+	    {"none", 0, 0},
+	    {"name", 1, 0},
+	    {"size", 2, 0},
+	    {"atime", 3, 0},
+	    {"btime", 4, 0},
+	    {"ctime", 5, 0},
+	    {"mtime", 6, 0},
+	    {"version", 7, 0},
+	    {"extension", 8, 0},
+	    {"inode", 9, 0},
+	    {"owner", 10, 0},
+	    {"group", 11, 0},
+	};
+
+	size_t i;
+	for (i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
+		if (*(*arg) == *sorts[i].name && strcmp(*arg, sorts[i].name) == 0) {
+			sprintf(*arg, "%d", sorts[i].num);
+			return EXIT_SUCCESS;
+		}
+	}
+
+	fprintf(stdout, _("%s: %s: No such sorting method\n"), PROGRAM_NAME, *arg);
+	return EXIT_FAILURE;
+}
+
 int
 sort_function(char **arg)
 {
-	int exit_status = EXIT_FAILURE;
-
 	/* No argument: Just print current sorting method */
 	if (!arg[1]) {
 		fputs(_("Sorting method: "), stdout);
@@ -378,83 +435,28 @@ sort_function(char **arg)
 
 	/* Argument is alphanumerical string */
 	if (!is_number(arg[1])) {
-		struct sort_t {
-			const char *name;
-			int num;
-			int pad; /* Used only to properly align the struct */
-		};
-
-		static struct sort_t sorts[] = {
-		    {"none", 0, 0},
-		    {"name", 1, 0},
-		    {"size", 2, 0},
-		    {"atime", 3, 0},
-		    {"btime", 4, 0},
-		    {"ctime", 5, 0},
-		    {"mtime", 6, 0},
-		    {"version", 7, 0},
-		    {"extension", 8, 0},
-		    {"inode", 9, 0},
-		    {"owner", 10, 0},
-		    {"group", 11, 0},
-		};
-
-		size_t i;
-		for (i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
-			if (strcmp(arg[1], sorts[i].name) == 0) {
-				sprintf(arg[1], "%d", sorts[i].num);
-				break;
-			}
+		if (*arg[1] == 'r' && strcmp(arg[1], "rev") == 0) {
+			toggle_sort_reverse();
+			return re_sort_files_list();
 		}
 
-		if (strcmp(arg[1], "rev") == 0) {
-			if (sort_reverse)
-				sort_reverse = 0;
-			else
-				sort_reverse = 1;
-
-			if (autols) {
-				/* sort_switch just tells list_dir() to print a line
-				 * with the current sorting method at the end of the
-				 * files list */
-				sort_switch = 1;
-				free_dirlist();
-				exit_status = list_dir();
-				sort_switch = 0;
-			}
-
-			return exit_status;
-		}
-
-		/* If arg1 is not a number and is not "rev", the fputs()
-		 * above is executed */
+		if (_set_sort_by_name(&arg[1]) == EXIT_FAILURE)
+			return EXIT_FAILURE;
 	}
 
 	/* Argument is a number */
-	int int_arg = atoi(arg[1]);
+	int n = atoi(arg[1]);
 
-	if (int_arg >= 0 && int_arg <= SORT_TYPES) {
-		sort = int_arg;
+	if (n >= 0 && n <= SORT_TYPES) {
+		sort = n;
 
-		if (arg[2] && strcmp(arg[2], "rev") == 0) {
-			if (sort_reverse)
-				sort_reverse = 0;
-			else
-				sort_reverse = 1;
-		}
+		if (arg[2] && *arg[2] == 'r' && strcmp(arg[2], "rev") == 0)
+			toggle_sort_reverse();
 
-		if (autols) {
-			sort_switch = 1;
-			free_dirlist();
-			exit_status = list_dir();
-			sort_switch = 0;
-		}
-
-		return exit_status;
+		return re_sort_files_list();
 	}
 
-	/* If arg1 is a number but is not in the range 0-SORT_TYPES,
-	 * error */
+	/* If arg1 is a number but is not in the range 0-SORT_TYPES, error */
 	fprintf(stderr, "%s\n", _(SORT_USAGE));
 	return EXIT_FAILURE;
 }

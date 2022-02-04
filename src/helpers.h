@@ -757,6 +757,12 @@ struct stats_t {
 
 extern struct stats_t stats;
 
+struct sort_t {
+	const char *name;
+	int num;
+	int pad;
+};
+
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */

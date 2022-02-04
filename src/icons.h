@@ -4,9 +4,9 @@
 #define ICONS_H
 
 #ifndef _NERD
-#include "icons-in-terminal.h"
+# include "icons-in-terminal.h"
 #else
-#include "icons-nerdfont.h"
+# include "icons-nerdfont.h"
 #endif /* !_NERD */
 
 struct icons_t {

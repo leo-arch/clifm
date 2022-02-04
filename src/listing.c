@@ -30,30 +30,30 @@
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef __linux__
-#include <sys/capability.h>
+# include <sys/capability.h>
 #endif
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #ifdef __OpenBSD__
-#include <strings.h>
+# include <strings.h>
 #endif
 #include <sys/ioctl.h>
 
 #include <glob.h>
 
 #ifdef _LIST_SPEED
-#include <time.h>
+# include <time.h>
 #endif
 
 #ifdef TOURBIN_QSORT
-#include "qsort.h"
-#define ENTLESS(i, j) (entrycmp(file_info + (i), file_info + (j)) < 0)
-#define ENTSWAP(i, j) (swap_ent((i), (j)))
-#define ENTSORT(file_info, n, entrycmp) QSORT((n), ENTLESS, ENTSWAP)
+# include "qsort.h"
+# define ENTLESS(i, j) (entrycmp(file_info + (i), file_info + (j)) < 0)
+# define ENTSWAP(i, j) (swap_ent((i), (j)))
+# define ENTSORT(file_info, n, entrycmp) QSORT((n), ENTLESS, ENTSWAP)
 #else
-#define ENTSORT(file_info, n, entrycmp) qsort((file_info), (n), sizeof(*(file_info)), (entrycmp))
+# define ENTSORT(file_info, n, entrycmp) qsort((file_info), (n), sizeof(*(file_info)), (entrycmp))
 #endif
 
 #include "aux.h"
@@ -66,14 +66,14 @@
 #include "autocmds.h"
 
 #ifndef _NO_ICONS
-#include "icons.h"
+# include "icons.h"
 #endif
 
 #ifdef _PALAND_PRINTF
-#include "printf.h"
+# include "printf.h"
 #define xprintf printf_
 #else
-#define xprintf printf
+# define xprintf printf
 #endif
 
 #include <readline/readline.h>

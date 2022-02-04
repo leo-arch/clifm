@@ -933,12 +933,6 @@ open_reg_exit(char *filename, int url)
 static inline int
 set_sort_by_name(const char *name)
 {
-	struct sort_t {
-		const char *name;
-		int num;
-		int pad; /* Used only to properly align the struct */
-	};
-
 	static struct sort_t sorts[] = {
 	    {"none", 0, 0},
 	    {"name", 1, 0},
