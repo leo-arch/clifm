@@ -37,6 +37,44 @@
 #include "navigation.h"
 #include "messages.h"
 
+static inline void
+free_jump_database(void)
+{
+	int i = (int)jump_n;
+
+	while (--i >= 0)
+		free(jump_db[i].path);
+
+	free(jump_db);
+	jump_db = (struct jump_t *)NULL;
+	jump_n = 0;
+}
+
+static inline int
+write_jump_entry(const char *dir)
+{
+	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2) * sizeof(struct jump_t));
+	jump_db[jump_n].visits = 1;
+	time_t now = time(NULL);
+	jump_db[jump_n].first_visit = now;
+	jump_db[jump_n].last_visit = now;
+	jump_db[jump_n].rank = 0;
+	jump_db[jump_n].keep = 0;
+
+	jump_db[jump_n].path = savestring(dir, strlen(dir));
+	jump_n++;
+
+	jump_db[jump_n].path = (char *)NULL;
+	jump_db[jump_n].visits = 0;
+	jump_db[jump_n].rank = 0;
+	jump_db[jump_n].keep = 0;
+	jump_db[jump_n].first_visit = -1;
+	jump_db[jump_n].last_visit = -1;
+
+	return EXIT_SUCCESS;
+}
+
+/* Add DIR to the jump database */
 int
 add_to_jumpdb(const char *dir)
 {
@@ -61,24 +99,7 @@ add_to_jumpdb(const char *dir)
 	if (!new_entry)
 		return EXIT_SUCCESS;
 
-	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2) * sizeof(struct jump_t));
-	jump_db[jump_n].visits = 1;
-	time_t now = time(NULL);
-	jump_db[jump_n].first_visit = now;
-	jump_db[jump_n].last_visit = now;
-	jump_db[jump_n].rank = 0;
-	jump_db[jump_n].keep = 0;
-
-	jump_db[jump_n++].path = savestring(dir, strlen(dir));
-
-	jump_db[jump_n].path = (char *)NULL;
-	jump_db[jump_n].visits = 0;
-	jump_db[jump_n].rank = 0;
-	jump_db[jump_n].keep = 0;
-	jump_db[jump_n].first_visit = -1;
-	jump_db[jump_n].last_visit = -1;
-
-	return EXIT_SUCCESS;
+	return write_jump_entry(dir);
 }
 
 /* Store the jump database into a file */
@@ -212,8 +233,7 @@ edit_jumpdb(void)
 
 	struct stat attr;
 	if (stat(jump_file, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, jump_file,
-		    strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, jump_file, strerror(errno));
 		free(jump_file);
 		return EXIT_FAILURE;
 	}
@@ -232,16 +252,8 @@ edit_jumpdb(void)
 		return EXIT_SUCCESS;
 	}
 
-	if (jump_db) {
-		int i = (int)jump_n;
-
-		while (--i >= 0)
-			free(jump_db[i].path);
-
-		free(jump_db);
-		jump_db = (struct jump_t *)NULL;
-		jump_n = 0;
-	}
+	if (jump_db)
+		free_jump_database();
 
 	load_jumpdb();
 	free(jump_file);
@@ -678,10 +690,7 @@ dirjump(char **args, int mode)
 int
 run_autojump(char **cmd)
 {
-	if (!cmd || !cmd[0] || !*cmd[0])
-		return -1;
-
-	if (is_internal_c(cmd[0]))
+	if (!cmd || !cmd[0] || !*cmd[0] || is_internal_c(cmd[0]))
 		return -1;
 
 	char *ret = get_cmd_path(cmd[0]);
