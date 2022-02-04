@@ -1374,8 +1374,6 @@ check_auto_first(char **args)
 	if (autocd || auto_open)
 		expand_and_deescape(&args[0], &deq_str);
 
-/*	if (*args[0] != '/' && (autocd || auto_open) && (!args[1]
-	|| (*args[1] == '&' && !args[1][1]))) { */
 	char *tmp = deq_str ? deq_str : args[0];
 	size_t len = strlen(tmp);
 	if (tmp[len - 1] == '/')
@@ -1399,7 +1397,6 @@ check_auto_first(char **args)
 			return ret;
 		break;
 	}
-//	}
 
 	free(deq_str);
 	return (-1);
