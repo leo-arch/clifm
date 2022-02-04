@@ -194,6 +194,21 @@ read_inotify(void)
 	return;
 }
 #elif defined(BSD_KQUEUE)
+/* Insert the following lines in the for loop to debug kqueue:
+if (event_data[i].fflags & NOTE_DELETE)
+	puts("NOTE_DELETE");
+if (event_data[i].fflags & NOTE_WRITE)
+	puts("NOTE_WRITE");
+if (event_data[i].fflags & NOTE_EXTEND)
+	puts("NOTE_EXTEND");
+if (event_data[i].fflags & NOTE_ATTRIB)
+	puts("NOTE_ATTRIB");
+if (event_data[i].fflags & NOTE_LINK)
+	puts("NOTE_LINK");
+if (event_data[i].fflags & NOTE_RENAME)
+	puts("NOTE_RENAME");
+if (event_data[i].fflags & NOTE_REVOKE)
+	puts("NOTE_REVOKE"); */
 void
 read_kqueue(void)
 {
@@ -205,21 +220,6 @@ read_kqueue(void)
 	int count = kevent(kq, NULL, 0, event_data, 4096, &timeout);
 
 	for (i = 0; i < count; i++) {
-/*		if (event_data[i].fflags & NOTE_DELETE)
-			puts("NOTE_DELETE");
-		if (event_data[i].fflags & NOTE_WRITE)
-			puts("NOTE_WRITE");
-		if (event_data[i].fflags & NOTE_EXTEND)
-			puts("NOTE_EXTEND");
-		if (event_data[i].fflags & NOTE_ATTRIB)
-			puts("NOTE_ATTRIB");
-		if (event_data[i].fflags & NOTE_LINK)
-			puts("NOTE_LINK");
-		if (event_data[i].fflags & NOTE_RENAME)
-			puts("NOTE_RENAME");
-		if (event_data[i].fflags & NOTE_REVOKE)
-			puts("NOTE_REVOKE"); */
-
 		if (event_data[i].fflags & KQUEUE_FFLAGS) {
 			refresh = 1;
 			break;
