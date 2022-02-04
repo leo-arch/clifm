@@ -196,8 +196,7 @@ strip_color_line(const char *str, char mode)
 		while (*str) {
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| *str == '=' || *str == ';' || *str == ':') {
-				buf[len] = *str;
-				len++;
+				buf[len] = *str; len++;
 			}
 			str++;
 		}
@@ -208,12 +207,12 @@ strip_color_line(const char *str, char mode)
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z') || *str == '*' || *str == '.'
 			|| *str == '=' || *str == ';' || *str == ':') {
-				buf[len] = *str;
-				len++;
+				buf[len] = *str; len++;
 			}
 			str++;
 		}
 		break;
+	default: break;
 	}
 
 	if (!len || !*buf) {
