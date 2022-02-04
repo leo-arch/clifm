@@ -1376,8 +1376,7 @@ check_auto_first(char **args)
 
 	char *tmp = deq_str ? deq_str : args[0];
 	size_t len = strlen(tmp);
-	if (tmp[len - 1] == '/')
-		tmp[len - 1] = '\0';
+	if (tmp[len - 1] == '/') tmp[len - 1] = '\0';
 
 	if (autocd && cdpath_n && !args[1]
 	&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
