@@ -243,7 +243,7 @@ enable the splash screen
 leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below).
 .TP
 .B \-t, \-\-disk\-usage\-analyzer
-run in disk usage analyzer mode. Equivalent to \fI--sort=2 --long-view --sort-reverse --full-dir-size --no-folders-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch.
+run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --sort-reverse --full-dir-size --no-folders-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch.
 .TP
 .B \-u, \-\-no\-unicode
 disable unicode
@@ -264,7 +264,7 @@ disallow the use of external, shell commands
 enable the light mode to speed up CliFM. See the \fBNOTE ON SPEED\fR section below.
 .TP
 .B \-z, \-\-sort\fR=METHOD
-sort files by \fIMETHOD\fB, where \fIMETHOD\fR could be one of these numbers: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode, 10 = owner, 11 = group.
+sort files by \fIMETHOD\fB, where \fIMETHOD\fR could be one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode, 10 = owner, 11 = group. Both numbers and strings are allowed. E.g: --sort=9, --sort=inode.
 .TP
 .B \-\-apparent\-size
 use apparent sizes instead of actual device usage
