@@ -35,9 +35,9 @@ AutoLs=true
 # history list, showing previous, current, and next entries
 DirhistMap=false
 
-# Use a regex expression to filter file names when listing files.
-# Example: !.*~$ to exclude backup files (ending with ~), or ^\. to list 
-# only hidden files.
+# Use a regular expression to filter files from the files list.
+# Example: "!.*~$" to exclude backup files (ending with ~), or "^\." to
+# list only hidden files.
 Filter=""
 
 # Set the default copy command. Available options are: 0 = cp,
