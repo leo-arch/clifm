@@ -714,7 +714,7 @@ To get information about a device, enter \fIiELN\fR, for example, 'i12', provide
 List only up to NUM files (valid range: >= 0). Use 'unset' to list all files (default). An indicator (listed_files/total_files) will be printed below the list of files whenever some file is excluded from the current list (e.g. 20/310). Note however that though some files are excluded, all of them are loaded anyway, so that you can still perform any valid operation on them. For example, even if only 10 files are listed, you can still search for ALL symbolic links in the corresponding directory using the appropriate command: '/* -l'.
 .TP
 .B mm, mime \fR[info ELN/FILENAME] [edit] [import]
-This is \fILira\fR, CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension.
+This is \fILira\fR, CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, and, if any, the application associated to this file name or to the file's MIME type.
 .sp
 The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running 'mm info FILE'), and then add a value for it to the MIME list file using the 'edit' option ('mm edit' or F6). Check the \fBRESOURCE OPENER\fR section below for information about the mimelist file syntax.
 .sp
