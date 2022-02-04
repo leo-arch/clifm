@@ -155,7 +155,7 @@ namecmp(const char *s1, const char *s2)
 }
 
 static inline int
-cmp_size(struct fileinfo *pa, struct fileinfo *pb)
+sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
 {
 	off_t as = pa->size, bs = pb->size;
 	if (long_view && full_dir_size) {
@@ -174,95 +174,138 @@ cmp_size(struct fileinfo *pa, struct fileinfo *pb)
 	return 0;
 }
 
+static inline int
+sort_by_extension(const char *n1, const char *n2)
+{
+	int ret = 0;
+	char *aext = (char *)NULL, *bext = (char *)NULL, *val;
+
+	val = strrchr(n1, '.');
+	if (val && val != n1)
+		aext = val + 1;
+
+	val = strrchr(n2, '.');
+	if (val && val != n2)
+		bext = val + 1;
+
+	if (aext || bext) {
+		if (!aext)
+			ret = -1;
+		else if (!bext)
+			ret = 1;
+		else
+			ret = strcasecmp(aext, bext);
+	}
+
+	return ret;
+}
+
+static inline int
+sort_by_time(const time_t a, const time_t b)
+{
+	int ret = 0;
+
+	if (a > b) {
+		ret = 1;
+	} else {
+		if (a < b)
+			ret = -1;
+	}
+
+	return ret;
+}
+
+static inline int
+sort_by_inode(const ino_t a, const ino_t b)
+{
+	int ret = 0;
+
+	if (a > b) {
+		ret = 1;
+	} else {
+		if (a < b)
+			ret = -1;
+	}
+
+	return ret;
+}
+
+static inline int
+sort_by_owner(const uid_t a, const uid_t b)
+{
+	int ret = 0;
+
+	if (a > b) {
+		ret = 1;
+	} else {
+		if (a < b)
+			ret = -1;
+	}
+
+	return ret;
+}
+
+static inline int
+sort_by_group(const gid_t a, const gid_t b)
+{
+	int ret = 0;
+
+	if (a > b) {
+		ret = 1;
+	} else {
+		if (a < b)
+			ret = -1;
+	}
+
+	return ret;
+}
+
+static inline int
+sort_dirs(const int a, const int b)
+{
+	if (b != a) {
+		if (b)
+			return 1;
+		return -1;
+	}
+
+	return 0;
+}
+
 int
 entrycmp(const void *a, const void *b)
 {
 	struct fileinfo *pa = (struct fileinfo *)a;
 	struct fileinfo *pb = (struct fileinfo *)b;
+	int ret = 0, st = sort;
 
 	if (list_folders_first) {
-		if (pb->dir != pa->dir) {
-			if (pb->dir)
-				return 1;
-			return -1;
-		}
+		ret = sort_dirs(pa->dir, pb->dir);
+		if (ret != 0)
+			return ret;
 	}
-
-	int ret = 0, st = sort;
 
 	if (light_mode && (st == SOWN || st == SGRP))
 		st = SNAME;
 
 	switch (st) {
-	case SSIZE: ret = cmp_size(pa, pb);	break;
+	case SSIZE: ret = sort_by_size(pa, pb);	break;
 
 	case SATIME: /* fallthrough */
 	case SBTIME: /* fallthrough */
 	case SCTIME: /* fallthrough */
-	case SMTIME:
-		if (pa->time > pb->time) {
-			ret = 1;
-		} else {
-			if (pa->time < pb->time)
-				ret = -1;
-		}
-		break;
+	case SMTIME: ret = sort_by_time(pa->time, pb->time); break;
 
 	case SVER: ret = xstrverscmp(pa->name, pb->name); break;
-
-	case SEXT: {
-		char *aext = (char *)NULL, *bext = (char *)NULL, *val;
-		val = strrchr(pa->name, '.');
-		if (val && val != pa->name)
-			aext = val + 1;
-
-		val = strrchr(pb->name, '.');
-		if (val && val != pb->name)
-			bext = val + 1;
-
-		if (aext || bext) {
-			if (!aext)
-				ret = -1;
-			else if (!bext)
-				ret = 1;
-			else
-				ret = strcasecmp(aext, bext);
-		}
-	} break;
-
-	case SINO:
-		if (pa->inode > pb->inode) {
-			ret = 1;
-		} else {
-			if (pa->inode < pb->inode)
-				ret = -1;
-		}
-		break;
-
-	case SOWN:
-		if (pa->uid > pb->uid) {
-			ret = 1;
-		} else {
-			if (pa->uid < pb->uid)
-				ret = -1;
-		}
-		break;
-
-	case SGRP:
-		if (pa->gid > pb->gid) {
-			ret = 1;
-		} else {
-			if (pa->gid < pb->gid)
-				ret = -1;
-		}
-		break;
-
+	case SEXT: ret = sort_by_extension(pa->name, pb->name); break;
+	case SINO: ret = sort_by_inode(pa->inode, pb->inode); break;
+	case SOWN: ret = sort_by_owner(pa->uid, pb->uid); break;
+	case SGRP: ret = sort_by_group(pa->gid, pb->gid); break;
 	default: break;
 	}
 
 	if (!ret)
 		ret = namecmp(pa->name, pb->name);
-
 	if (!sort_reverse)
 		return ret;
 
@@ -353,11 +396,9 @@ print_sort_method(void)
 		printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");	break;
 	case SINO:
 		printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");	break;
-	case SOWN:
-		print_owner_group_sort(SOWN); break;
-	case SGRP:
-		print_owner_group_sort(SGRP); break;
-	default: fputs("unknown sorting method\n", stdout);
+	case SOWN: print_owner_group_sort(SOWN); break;
+	case SGRP: print_owner_group_sort(SGRP); break;
+	default: fputs("unknown sorting method\n", stdout); break;
 	}
 }
 
