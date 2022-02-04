@@ -505,11 +505,6 @@ Examples:\n\
 - Deselect all selected files\n\
     ds * (or Alt-d)"
 
-/*
-#define SHELL_USAGE "Set the shell used to run external commands\n\
-Usage:\n\
-  shell [SHELL]" */
-
 #define SORT_USAGE "Change sort method for the files list\n\
 Usage:\n\
   st [METHOD] [rev]\nMETHOD: 0 = none, \

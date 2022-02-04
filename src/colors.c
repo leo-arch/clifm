@@ -186,8 +186,7 @@ is_color_code(const char *str)
 static char *
 strip_color_line(const char *str, char mode)
 {
-	if (!str || !*str)
-		return (char *)NULL;
+	if (!str || !*str) return (char *)NULL;
 
 	char *buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
 	size_t len = 0;

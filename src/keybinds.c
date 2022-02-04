@@ -94,8 +94,7 @@ static int
 kbinds_edit(char *app)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: Access to configuration files is not allowed in "
-		       "stealth mode\n", PROGRAM_NAME);
+		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
