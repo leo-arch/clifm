@@ -279,7 +279,6 @@ static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
 	fputs("\x1b[?25h", stdout);	/* Unhide the cursor */
-
 	if (close_dir && closedir(dir) == -1)
 		return EXIT_FAILURE;
 
@@ -287,14 +286,12 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
-
 	if (reset_pager)
 		pager = 1;
 
 	if (max_files != UNSET && (int)files > max_files)
 		printf("%d/%zu\n", max_files, files);
 
-	/* Print a dividing line between the files list and the prompt */
 	print_div_line();
 
 	if (dirhist_map) { /* Print current, previous, and next entries */
@@ -304,7 +301,6 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 
 	if (disk_usage)
 		print_disk_usage();
-
 	if (sort_switch) {
 		printf(_("%s->%s Sorted by: "), mi_c, df_c);
 		print_sort_method();
@@ -516,23 +512,19 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max)
 			int ret = 0;
 			if (*counter > (size_t)(term_rows - 2))
 				ret = run_pager(-1, reset_pager, &i, counter);
-
 			if (ret == -1 || ret == -2) {
 				--i;
 				if (ret == -2)
 					*counter = 0;
 				continue;
 			}
-
 			(*counter)++;
 		}
 
-		/* Print ELN. The remaining part of the line will be
-		 * printed by print_entry_props() */
-		if (!no_eln)
+		if (!no_eln) /* Print ELN */
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
 				li_cb, file_info[i].sel ? '*' : ' ', df_c);
-
+		/* Print the remaining part of the entry */
 		print_entry_props(&file_info[i], (size_t)space_left, ug_max);
 	}
 }
