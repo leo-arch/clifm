@@ -477,38 +477,51 @@ print_tips(int all)
 		TIPS[rand() % (int)tipsn]);
 }
 
-/* Open DIR in a new instance of the program (using TERM, set in the config
- * file, as terminal emulator) */
-int
-new_instance(char *dir, int sudo)
+#if defined(__HAIKU__) || defined(__OpenBSD__)
+static inline int
+new_instance_not_available(const char *dir, const int sudo, const char *s)
+{
+	UNUSED(dir); UNUSED(sudo);
+	fprintf(stderr, _("%s: This function is not available on %s\n"),
+			PROGRAM_NAME, s);
+	return EXIT_FAILURE;
+}
+#endif
+
+/* Check whether the conditions to run the new_instance function are
+ * fulfilled */
+static inline int
+check_new_instance_init_conditions(const char *dir, const int sudo)
 {
 #if defined(__HAIKU__)
-	UNUSED(dir); UNUSED(sudo);
-	fprintf(stderr, _("%s: This function is not available on Haiku\n"),
-			PROGRAM_NAME);
-	return EXIT_FAILURE;
+	return new_instance_not_available(dir, sudo, "Haiku");
 #elif defined(__OpenBSD__)
-	UNUSED(dir); UNUSED(sudo);
-	fprintf(stderr, _("%s: This function is not available on OpenBSD\n"),
-			PROGRAM_NAME);
-	return EXIT_FAILURE;
+	return new_instance_not_available(dir, sudo, "OpenBSD");
 #else
 	if (!term) {
+		UNUSED(dir); UNUSED(sudo);
 		fprintf(stderr, _("%s: Default terminal not set. Use the "
-				"configuration file to set one\n"), PROGRAM_NAME);
+				"configuration file (F10) to set it\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
 	if (!(flags & GUI)) {
+		UNUSED(dir); UNUSED(sudo);
 		fprintf(stderr, _("%s: Function only available for graphical "
 				"environments\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
-	/* Get absolute path of executable name of itself */
+	return EXIT_SUCCESS;
+#endif
+}
+
+/* Get absolute path of executable name of itself */
+static inline char *
+get_self(void)
+{
 #if defined(__linux__)
 	char *self = realpath("/proc/self/exe", NULL);
-
 	if (!self) {
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 	const int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
@@ -518,129 +531,173 @@ new_instance(char *dir, int sudo)
 	if (!self || sysctl(mib, 4, self, &len, NULL, 0) == -1) {
 #endif
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-		return EXIT_FAILURE;
+		return (char *)NULL;
 	}
 
-	if (!dir) {
-		free(self);
-		return EXIT_FAILURE;
-	}
+	return self;
+}
 
-	char *_sudo = (char *)NULL;
-	if (sudo) {
-		_sudo = get_sudo_path();
-		if (!_sudo) {
-			free(self);
-			return EXIT_FAILURE;
-		}
-	}
-
-	char *deq_dir = dequote_str(dir, 0);
-
-	if (!deq_dir) {
-		fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
-		    PROGRAM_NAME, dir);
-		free(self);
-		return EXIT_FAILURE;
-	}
-
+/* Just check that DIR exists and is a directory */
+static inline int
+check_dir(char **dir, char **self, char **_sudo)
+{
 	struct stat attr;
-
-	if (stat(deq_dir, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, deq_dir, strerror(errno));
-		free(self);
-		free(deq_dir);
-		return EXIT_FAILURE;
+	if (stat(*dir, &attr) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *dir, strerror(errno));
+		goto END;
 	}
 
 	if (!S_ISDIR(attr.st_mode)) {
-		fprintf(stderr, _("%s: %s: Not a directory\n"), PROGRAM_NAME, deq_dir);
-		free(self);
-		free(deq_dir);
-		return EXIT_FAILURE;
+		fprintf(stderr, _("%s: %s: Not a directory\n"), PROGRAM_NAME, *dir);
+		goto END;
 	}
 
+	return EXIT_SUCCESS;
+
+END:
+	free(*self);
+	free(*dir);
+	free(*_sudo);
+	return EXIT_FAILURE;
+}
+
+/* Construct absolute path for DIR */
+static inline char *
+get_path_dir(char **dir)
+{
 	char *path_dir = (char *)NULL;
 
-	if (*deq_dir != '/') {
+	if (*(*dir) != '/') {
 		path_dir = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
-					+ strlen(deq_dir) + 2, sizeof(char));
-		sprintf(path_dir, "%s/%s", workspaces[cur_ws].path, deq_dir);
-		free(deq_dir);
+					+ strlen(*dir) + 2, sizeof(char));
+		sprintf(path_dir, "%s/%s", workspaces[cur_ws].path, *dir);
+		free(*dir);
 	} else {
-		path_dir = deq_dir;
+		path_dir = *dir;
 	}
 
-	char **tmp_term = (char **)NULL,
-		 **tmp_cmd = (char **)NULL;
+	return path_dir;
+}
 
-	if (strcntchr(term, ' ') != -1) {
-		tmp_term = get_substr(term, ' ');
+/* Get command to be executed by the new_instance function, only if
+ * TERM (global) contains spaces. Otherwise, new_instance will try
+ * TERM -e */
+static inline char **
+get_cmd(char *dir, char *_sudo, char *self, const int sudo)
+{
+	if (!strchr(term, ' '))	return (char **)NULL;
 
-		if (tmp_term) {
-			int i;
-			for (i = 0; tmp_term[i]; i++);
+	char **tmp_term = get_substr(term, ' ');
+	if (!tmp_term) return (char **)NULL;
 
-			int num = i;
-			tmp_cmd = (char **)xrealloc(tmp_cmd, ((size_t)i + (sudo ? 4 : 3))
-													* sizeof(char *));
-			for (i = 0; tmp_term[i]; i++) {
-				tmp_cmd[i] = savestring(tmp_term[i], strlen(tmp_term[i]));
-				free(tmp_term[i]);
-			}
-			free(tmp_term);
+	int i;
+	for (i = 0; tmp_term[i]; i++);
 
-			i = num - 1;
-			int plus = 1;
+	int num = i;
+	char **cmd = (char **)xnmalloc((size_t)i + (sudo ? 4 : 3), sizeof(char *));
 
-			if (sudo) {
-				tmp_cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1,
-				    sizeof(char));
-				strcpy(tmp_cmd[i + plus], _sudo);
-				plus++;
-			}
+	for (i = 0; tmp_term[i]; i++) {
+		cmd[i] = savestring(tmp_term[i], strlen(tmp_term[i]));
+		free(tmp_term[i]);
+	}
+	free(tmp_term);
 
-			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1, sizeof(char));
-			strcpy(tmp_cmd[i + plus], self);
-			plus++;
-			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(path_dir) + 1, sizeof(char));
-			strcpy(tmp_cmd[i + plus], path_dir);
-			plus++;
-			tmp_cmd[i + plus] = (char *)NULL;
-		}
+	i = num - 1;
+	int plus = 1;
+
+	if (sudo) {
+		cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1, sizeof(char));
+		strcpy(cmd[i + plus], _sudo);
+		plus++;
 	}
 
-	int ret = -1;
+	cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1, sizeof(char));
+	strcpy(cmd[i + plus], self);
+	plus++;
+	cmd[i + plus] = (char *)xnmalloc(strlen(dir) + 1, sizeof(char));
+	strcpy(cmd[i + plus], dir);
+	plus++;
+	cmd[i + plus] = (char *)NULL;
 
-	if (tmp_cmd) {
-		ret = launch_execve(tmp_cmd, BACKGROUND, E_NOFLAG);
+	return cmd;
+}
+
+/* Launch a new instance using CMD. If CMD is NULL, try TERM -e
+ * Returns the exit status of this execution */
+static inline int
+launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int sudo)
+{
+	int ret = 0; 
+
+	if (*cmd) {
+		ret = launch_execve(*cmd, BACKGROUND, E_NOFLAG);
 		size_t i;
-		for (i = 0; tmp_cmd[i]; i++)
-			free(tmp_cmd[i]);
-		free(tmp_cmd);
+		for (i = 0; (*cmd)[i]; i++)
+			free((*cmd)[i]);
+		free(*cmd);
 	} else {
 		fprintf(stderr, _("%s: No option specified for '%s'\n"
 				"Trying '%s -e %s %s'\n"), PROGRAM_NAME, term,
-				term, self, workspaces[cur_ws].path);
+				term, *self, workspaces[cur_ws].path);
 		if (sudo) {
-			char *cmd[] = {term, "-e", _sudo, self, path_dir, NULL};
-			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
+			char *tcmd[] = {term, "-e", *_sudo, *self, *dir, NULL};
+			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
 		} else {
-			char *cmd[] = {term, "-e", self, path_dir, NULL};
-			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
+			char *tcmd[] = {term, "-e", *self, *dir, NULL};
+			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
 		}
 	}
 
-	free(_sudo);
-	free(path_dir);
-	free(self);
+	free(*_sudo);
+	free(*self);
+	free(*dir);
+
+	return ret;
+}
+
+/* After the last line of new_instance */
+// cppcheck-suppress syntaxError
+
+/* Open DIR in a new instance of the program (using TERM, set in the config
+ * file, as terminal emulator) */
+int
+new_instance(char *dir, int sudo)
+{
+	if (check_new_instance_init_conditions(dir, sudo) == EXIT_FAILURE)
+		return EXIT_FAILURE;
+
+	if (!dir)
+		return EXIT_FAILURE;
+
+	char *_sudo = (char *)NULL;
+	if (sudo && !(_sudo = get_sudo_path()))
+		return EXIT_FAILURE;
+
+	char *deq_dir = dequote_str(dir, 0);
+	if (!deq_dir) {
+		fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
+		    PROGRAM_NAME, dir);
+		free(_sudo);
+		return EXIT_FAILURE;
+	}
+
+	char *self = get_self();
+	if (!self) {
+		free(_sudo);
+		return EXIT_FAILURE;
+	}
+
+	if (check_dir(&deq_dir, &self, &_sudo) == EXIT_FAILURE)
+		return EXIT_FAILURE;
+
+	char *path_dir = get_path_dir(&deq_dir);
+	char **cmd = get_cmd(path_dir, _sudo, self, sudo);
+	int ret = launch_new_instance_cmd(&cmd, &self, &_sudo, &path_dir, sudo);
 
 	if (ret != EXIT_SUCCESS)
 		fprintf(stderr, _("%s: Error lauching new instance\n"), PROGRAM_NAME);
 
 	return ret;
-#endif /* !__HAIKU__ */
-// cppcheck-suppress syntaxError
 }
 
 int
@@ -822,8 +879,7 @@ alias_import(char *file)
 void
 save_last_path(void)
 {
-	if (!config_ok || !config_dir || !config_dir_gral)
-		return;
+	if (!config_ok || !config_dir || !config_dir_gral) return;
 
 	char *last_dir = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 	sprintf(last_dir, "%s/.last", config_dir);
@@ -835,8 +891,7 @@ save_last_path(void)
 		return;
 	}
 
-	size_t i;
-	for (i = 0; i < MAX_WS; i++) {
+	for (size_t i = 0; i < MAX_WS; i++) {
 		if (workspaces[i].path) {
 			if ((size_t)cur_ws == i)
 				fprintf(last_fp, "*%zu:%s\n", i, workspaces[i].path);
