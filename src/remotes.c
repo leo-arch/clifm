@@ -128,6 +128,52 @@ get_remote(char *name)
 	return i;
 }
 
+static inline int
+_create_mountpoint(int i)
+{
+	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
+
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+		fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME,
+				remotes[i].mountpoint, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static inline int
+cd_to_mountpoint(int i)
+{
+	free(workspaces[cur_ws].path);
+	workspaces[cur_ws].path = savestring(remotes[i].mountpoint,
+						strlen(remotes[i].mountpoint));
+	add_to_jumpdb(workspaces[cur_ws].path);
+	add_to_dirhist(workspaces[cur_ws].path);
+
+	free_dirlist();
+	if (list_dir() != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+static inline int
+print_cd_error(int i)
+{
+	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+			remotes[i].mountpoint, strerror(errno));
+	return EXIT_FAILURE;
+}
+
+static inline int
+print_no_mount_cmd_error(int i)
+{
+	fprintf(stderr, _("%s: No mount command specified for '%s'\n"),
+		PROGRAM_NAME, remotes[i].name);
+	return EXIT_FAILURE;
+}
+
 static int
 remotes_mount(char *name)
 {
@@ -135,11 +181,8 @@ remotes_mount(char *name)
 	if (i == -1)
 		return EXIT_FAILURE;
 
-	if (!remotes[i].mount_cmd) {
-		fprintf(stderr, _("%s: No mount command specified for '%s'\n"),
-			PROGRAM_NAME, remotes[i].name);
-		return EXIT_FAILURE;
-	}
+	if (!remotes[i].mount_cmd)
+		return print_no_mount_cmd_error(i);
 
 	if (xargs.secure_cmds == 1
 	&& sanitize_cmd(remotes[i].mount_cmd, SNT_NET) != EXIT_SUCCESS)
@@ -147,36 +190,21 @@ remotes_mount(char *name)
 
 	/* If mountpoint doesn't exist, create it */
 	struct stat attr;
-	if (stat(remotes[i].mountpoint, &attr) == -1) {
-		char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME,
-					remotes[i].mountpoint, strerror(errno));
-			return EXIT_FAILURE;
-		}
-	}
+	if (stat(remotes[i].mountpoint, &attr) == -1
+	&& _create_mountpoint(i) == EXIT_FAILURE)
+		return EXIT_FAILURE;
 
 	/* Make sure mountpoint is not populated */
 	if (count_dir(remotes[i].mountpoint, CPOP) <= 2
 	&& launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	if (xchdir(remotes[i].mountpoint, SET_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				remotes[i].mountpoint, strerror(errno));
-		return EXIT_FAILURE;
-	}
+	if (xchdir(remotes[i].mountpoint, SET_TITLE) == -1)
+		return print_cd_error(i);
 
 	int exit_status = EXIT_SUCCESS;
 	if (autols) {
-		free(workspaces[cur_ws].path);
-		workspaces[cur_ws].path = savestring(remotes[i].mountpoint,
-							strlen(remotes[i].mountpoint));
-		add_to_jumpdb(workspaces[cur_ws].path);
-		add_to_dirhist(workspaces[cur_ws].path);
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		exit_status = cd_to_mountpoint(i);
 	} else {
 		printf(_("%s: %s: Remote mounted on %s\n"), PROGRAM_NAME,
 				remotes[i].name, remotes[i].mountpoint);

@@ -412,10 +412,10 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 	free(epath);
 }
 
+/* Get word after last non-escaped slash */
 static inline char *
 get_last_word(char *matches)
 {
-	/* Get word after last non-escaped slash */
 	char *sl = matches;
 	char *d = (char *)NULL;
 	while (*sl) {
@@ -487,8 +487,7 @@ get_fzf_output(const int multi)
 
 	char *buf = (char *)xnmalloc(1, sizeof(char));
 	*buf = '\0';
-	size_t bsize = 0;
-	size_t line_size = 0;
+	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
 	char *line = (char *)NULL;
 
@@ -533,9 +532,7 @@ store_completions(char **matches, FILE *fp)
 		if (!matches[i] || !*matches[i])
 			continue;
 
-		char *cl = df_c;
-		char *color = df_c;
-		char *entry = matches[i];
+		char *cl = df_c, *color = df_c, *entry = matches[i];
 
 		if (cur_comp_type == TCMP_BACKDIR) {
 			color = di_c;
