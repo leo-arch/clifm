@@ -65,10 +65,10 @@ typedef char *rl_cpvfunc_t;
 		putc(c, rl_outstream)
 
 /* Return the character which best describes FILENAME.
-     `@' for symbolic links
-     `/' for directories
-     `*' for executables
-     `=' for sockets */
+`@' for symbolic links
+`/' for directories
+`*' for executables
+`=' for sockets */
 static int
 stat_char(char *filename)
 {
@@ -367,6 +367,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 	char _path[PATH_MAX + NAME_MAX];
 	*_path = '\0';
 	char *tmp = *deq_str ? deq_str : ss;
+
 	size_t dlen = strlen(tmp), is_file_uri = 0;
 	if (*tmp == 'f' && *(tmp + 1) == 'i' && dlen > FILE_URI_PREFIX_LEN
 	&& IS_FILE_URI(tmp))
@@ -522,6 +523,19 @@ get_fzf_output(const int multi)
 	return buf;
 }
 
+static inline void
+write_comp_to_file(const char *entry, const char *color, FILE **fp)
+{
+	if (wc_xstrlen(entry) == 0) {
+		char *wname = truncate_wname(entry);
+		fprintf(*fp, "%s%c", wname ? wname : entry, '\0');
+		free(wname);
+		return;
+	}
+
+	fprintf(*fp, "%s%s%s%c", color, entry, df_c, '\0');
+}
+
 /* Store possible completions (MATCHES) in FZFTABIN to pass them to FZF
  * Return the number of stored matches */
 static inline size_t
@@ -532,13 +546,12 @@ store_completions(char **matches, FILE *fp)
 		if (!matches[i] || !*matches[i])
 			continue;
 
-		char *cl = df_c, *color = df_c, *entry = matches[i];
+		char *color = df_c, *entry = matches[i];
 
 		if (cur_comp_type == TCMP_BACKDIR) {
 			color = di_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
-			cl = get_entry_color(matches, i);
-
+			char *cl = get_entry_color(matches, i);
 			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
 			/* If color does not start with escape, then we have a color
@@ -555,15 +568,8 @@ store_completions(char **matches, FILE *fp)
 			entry = (p && *(++p)) ? p : matches[i];
 		}
 
-		if (*entry && !SELFORPARENT(entry)) {
-			if (wc_xstrlen(entry) == 0) {
-				char *wname = truncate_wname(entry);
-				fprintf(fp, "%s%c", wname ? wname : entry, '\0');
-				free(wname);
-			} else {
-				fprintf(fp, "%s%s%s%c", color, entry, df_c, '\0');
-			}
-		}
+		if (*entry && !SELFORPARENT(entry))
+			write_comp_to_file(entry, color, &fp);
 	}
 
 	return i;
