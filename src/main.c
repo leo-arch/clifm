@@ -830,6 +830,13 @@ get_hostname(void)
 int
 main(int argc, char *argv[])
 {
+	/* Quite unlikely to happen, but one never knows. See
+	 * https://lwn.net/SubscriberLink/882799/cb8f313c57c6d8a6/ */
+	if (argc == 0) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(EINVAL));
+		exit(EINVAL);
+	}
+
 	/* Make sure we are running on supported CPU and operating system */
 	check_cpu_os();
 	/* Make sure we are running on a supported terminal */
@@ -838,7 +845,7 @@ main(int argc, char *argv[])
 	/* If running the program locally, that is, not from a path in PATH,
 	 * remove the leading "./" to get the correct program invocation
 	 * name */
-	if (*argv[0] == '.' && *(argv[0] + 1) == '/')
+	if (*argv[0] == '.' && *(argv[0] + 1) == '/' && *(argv[0] + 2))
 		argv[0] += 2;
 
 	/* Use the locale specified by the environment */
