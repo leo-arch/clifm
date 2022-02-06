@@ -98,14 +98,12 @@ select_file(char *file)
 	if (!file || !*file)
 		return 0;
 
-	/* Check if the selected element is already in the selection
-	 * box */
 	int exists = 0, new_sel = 0, j;
-
 	size_t flen = strlen(file);
 	if (file[flen - 1] == '/')
 		file[flen - 1] = '\0';
 
+	/* Check if the selected element is already in the selection box */
 	j = (int)sel_n;
 	while (--j >= 0) {
 		if (*file == *sel_elements[j] && strcmp(sel_elements[j], file) == 0) {
@@ -414,6 +412,274 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 	return new_sel;
 }
 
+/* Convert file type into a macro that can be decoded by stat().
+ * If file type is specified, matches will be checked against
+ * this value */
+static inline mode_t
+convert_filetype(mode_t *filetype)
+{
+	switch (*filetype) {
+	case 'd': *filetype = DT_DIR; break;
+	case 'r': *filetype = DT_REG; break;
+	case 'l': *filetype = DT_LNK; break;
+	case 's': *filetype = DT_SOCK; break;
+	case 'f': *filetype = DT_FIFO; break;
+	case 'b': *filetype = DT_BLK; break;
+	case 'c': *filetype = DT_CHR; break;
+	default:
+		fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
+		    PROGRAM_NAME, (char)*filetype);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static inline char *
+parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
+{
+	char *sel_path = (char *)NULL;
+	int i;
+	for (i = 1; (*args)[i]; i++) {
+		if (*(*args)[i] == '-') {
+			*ifiletype = i;
+			*filetype = (mode_t)*((*args)[i] + 1);
+		}
+
+		if (*(*args)[i] == ':') {
+			*isel_path = i;
+			sel_path = (*args)[i] + 1;
+		}
+
+		if (*(*args)[i] == '~') {
+			char *exp_path = tilde_expand((*args)[i]);
+			if (!exp_path) {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, (*args)[i],
+				    strerror(errno));
+				return (char *)NULL;
+			}
+
+			free((*args)[i]);
+			(*args)[i] = exp_path;
+		}
+	}
+
+	if (*filetype != 0 && convert_filetype(filetype) == EXIT_FAILURE)
+		return (char *)NULL;
+
+	return sel_path;
+}
+
+static inline char *
+construct_sel_path(char *sel_path)
+{
+	char tmpdir[PATH_MAX];
+	xstrsncpy(tmpdir, sel_path, (size_t)PATH_MAX);
+
+	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, sel_path, strerror(errno));
+		return (char *)NULL;
+	}
+
+	if (*sel_path == '~') {
+		char *exp_path = tilde_expand(sel_path);
+		if (!exp_path) {
+			fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
+			return (char *)NULL;
+		}
+		strcpy(tmpdir, exp_path);
+		free(exp_path);
+	}
+
+	char *dir = (char *)NULL;
+	if (*tmpdir != '/') {
+		dir = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
+				+ strlen(tmpdir) + 2, sizeof(char));
+		sprintf(dir, "%s/%s", workspaces[cur_ws].path, tmpdir);
+	} else {
+		dir = savestring(tmpdir, strlen(tmpdir));
+	}
+
+	return dir;
+}
+
+static inline char *
+check_sel_path(char **sel_path)
+{
+	size_t len = strlen(*sel_path);
+	if ((*sel_path)[len - 1] == '/')
+		(*sel_path)[len - 1] = '\0';
+
+	if (strchr(*sel_path, '\\')) {
+		char *deq = dequote_str(*sel_path, 0);
+		if (deq) {
+			strcpy(*sel_path, deq);
+			free(deq);
+		}
+	}
+
+	char *dir = construct_sel_path(*sel_path);
+	if (!dir)
+		return (char *)NULL;
+
+	if (access(dir, X_OK) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+		free(dir);
+		return (char *)NULL;
+	}
+
+	if (xchdir(dir, NO_TITLE) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+		free(dir);
+		return (char *)NULL;
+	}
+
+	return dir;
+}
+
+static inline void
+print_total_size(void)
+{
+	char *human_size = get_size_unit(total_sel_size);
+	printf(_("%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
+	free(human_size);
+}
+
+static inline void
+print_selected_files(int print_header, int print_total)
+{
+	if (print_header == 1) {
+		printf(_("%sSelection Box%s\n"), BOLD, df_c);
+		putchar('\0');
+	}
+
+	size_t t = tab_offset, i;
+	tab_offset = 0;
+	for (i = 0; i < sel_n; i++)
+		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
+	tab_offset = t;
+
+	if (print_total == 1) {
+		putchar('\n');
+		print_total_size();
+	}
+}
+
+static inline int
+print_sel_results(int new_sel, char *sel_path, char *pattern)
+{
+	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
+	&& save_sel() != EXIT_SUCCESS) {
+		_err('e', PRINT_PROMPT, _("%s: Error writing selected files "
+			"to the selections file\n"), PROGRAM_NAME);
+	}
+
+	if (sel_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
+		    strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (new_sel <= 0) {
+		if (pattern) fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	/* Get total size of sel files */
+	struct stat attr;
+	int i = (int)sel_n;
+	while (--i >= 0) {
+		if (lstat(sel_elements[i], &attr) != -1)
+			total_sel_size += FILE_SIZE;
+	}
+
+	/* Print entries */
+	if (sel_n > 10) {
+		printf(_("%zu files are now in the Selection Box\n"), sel_n);
+	} else if (sel_n > 0) {
+		printf(_("%zu selected file(s):\n\n"), sel_n);
+		print_selected_files(0, 0);
+		putchar('\n');
+	}
+
+	print_total_size();
+	return EXIT_SUCCESS;
+}
+
+static inline char *
+construct_sel_filename(const char *sel_path, const char *dir, const char *name)
+{
+	char *f = (char *)NULL;
+
+	if (!sel_path) {
+		if (*workspaces[cur_ws].path == '/'
+		&& !*(workspaces[cur_ws].path + 1)) {
+			f = (char *)xnmalloc(strlen(name) + 2, sizeof(char));
+			sprintf(f, "/%s", name);
+			return f;
+		}
+
+		f = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
+					+ strlen(name) + 2, sizeof(char));
+		sprintf(f, "%s/%s", workspaces[cur_ws].path, name);
+		return f;
+	}
+
+	f = (char *)xnmalloc(strlen(dir) + strlen(name) + 2, sizeof(char));
+	sprintf(f, "%s/%s", dir, name);
+	return f;
+}
+
+static inline int
+select_filename(char *arg, const char *sel_path, char *dir)
+{
+	int new_sel = 0;
+
+	if (strchr(arg, '\\')) {
+		char *deq_str = dequote_str(arg, 0);
+		if (deq_str) {
+			strcpy(arg, deq_str);
+			free(deq_str);
+		}
+	}
+
+	char *name = arg;
+	if (*name == '.' && *(name + 1) == '/')
+		name += 2;
+
+	if (*arg != '/') {
+		char *tmp = construct_sel_filename(sel_path, dir, name);
+		struct stat attr;
+		if (lstat(tmp, &attr) == -1)
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg, strerror(errno));
+		else
+			new_sel += select_file(tmp);
+		free(tmp);
+		return new_sel;
+	}
+
+	struct stat a;
+	if (lstat(arg, &a) == -1)
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
+	else
+		new_sel += select_file(name);
+
+	return new_sel;
+}
+
+static inline int
+select_pattern(char *arg, char *sel_path, char *dir, mode_t filetype)
+{
+	/* GLOB */
+	int ret = sel_glob(arg, sel_path ? dir : NULL, filetype ? filetype : 0);
+
+	/* If glob failed, try REGEX */
+	if (ret <= 0)
+		return sel_regex(arg, sel_path ? dir : NULL, filetype);
+
+	return ret;
+}
+
 int
 sel_function(char **args)
 {
@@ -425,257 +691,33 @@ sel_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	char *sel_path = (char *)NULL;
 	mode_t filetype = 0;
 	int i, ifiletype = 0, isel_path = 0, new_sel = 0;
 
-	for (i = 1; args[i]; i++) {
-		if (*args[i] == '-') {
-			ifiletype = i;
-			filetype = (mode_t) * (args[i] + 1);
-		}
+	char *dir = (char *)NULL, *pattern = (char *)NULL;
+	char *sel_path = parse_sel_params(&args, &ifiletype, &filetype, &isel_path);
 
-		if (*args[i] == ':') {
-			isel_path = i;
-			sel_path = args[i] + 1;
-		}
-
-		if (*args[i] == '~') {
-			char *exp_path = tilde_expand(args[i]);
-			if (!exp_path) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i],
-				    strerror(errno));
-				return EXIT_FAILURE;
-			}
-
-			args[i] = (char *)xrealloc(args[i], (strlen(exp_path) + 1) *
-								sizeof(char));
-			strcpy(args[i], exp_path);
-			free(exp_path);
-		}
-	}
-
-	if (filetype) {
-		/* Convert file type into a macro that can be decoded by stat().
-		 * If file type is specified, matches will be checked against
-		 * this value */
-		switch (filetype) {
-		case 'd': filetype = DT_DIR; break;
-		case 'r': filetype = DT_REG; break;
-		case 'l': filetype = DT_LNK; break;
-		case 's': filetype = DT_SOCK; break;
-		case 'f': filetype = DT_FIFO; break;
-		case 'b': filetype = DT_BLK; break;
-		case 'c': filetype = DT_CHR; break;
-		default:
-			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
-			    PROGRAM_NAME, (char)filetype);
-			return EXIT_FAILURE;
-		}
-	}
-
-	char dir[PATH_MAX];
-
-	if (sel_path) {
-		size_t sel_path_len = strlen(sel_path);
-		if (sel_path[sel_path_len - 1] == '/')
-			sel_path[sel_path_len - 1] = '\0';
-
-		char *tmpdir = xnmalloc(PATH_MAX + 1, sizeof(char));
-
-		if (strchr(sel_path, '\\')) {
-			char *deq_str = dequote_str(sel_path, 0);
-			if (deq_str) {
-				strcpy(sel_path, deq_str);
-				free(deq_str);
-			}
-		}
-
-		strcpy(tmpdir, sel_path);
-
-		if (*sel_path == '.') {
-			if (realpath(sel_path, tmpdir) == NULL) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, sel_path,
-						strerror(errno));
-				return EXIT_FAILURE;
-			}
-		}
-
-		if (*sel_path == '~') {
-			char *exp_path = tilde_expand(sel_path);
-			if (!exp_path) {
-				fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
-				free(tmpdir);
-				return EXIT_FAILURE;
-			}
-			strcpy(tmpdir, exp_path);
-			free(exp_path);
-		}
-
-		if (*tmpdir != '/') {
-			snprintf(dir, PATH_MAX, "%s/%s", workspaces[cur_ws].path, tmpdir);
-		} else
-			strcpy(dir, tmpdir);
-
-		free(tmpdir);
-
-		if (access(dir, X_OK) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
-			    strerror(errno));
-			return EXIT_FAILURE;
-		}
-
-		if (xchdir(dir, NO_TITLE) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
-			    strerror(errno));
-			return EXIT_FAILURE;
-		}
-	}
-
-	char *pattern = (char *)NULL;
+	if (sel_path)
+		dir = check_sel_path(&sel_path);
 
 	for (i = 1; args[i]; i++) {
 		if (i == ifiletype || i == isel_path)
 			continue;
-		/*      int invert = 0; */
 
 		if (check_regex(args[i]) == EXIT_SUCCESS) {
 			pattern = args[i];
-			if (*pattern == '!') {
+			if (*pattern == '!')
 				pattern++;
-				/*  invert = 1; */
-			}
 		}
 
-		if (!pattern) {
-			if (strchr(args[i], '\\')) {
-				char *deq_str = dequote_str(args[i], 0);
-				if (deq_str) {
-					strcpy(args[i], deq_str);
-					free(deq_str);
-				}
-			}
-
-			char *tmp = (char *)NULL;
-			char *name = args[i];
-			if (*name == '.' && *(name + 1) == '/')
-				name += 2;
-
-			if (*args[i] != '/') {
-				if (!sel_path) {
-					if (*workspaces[cur_ws].path == '/'
-					&& !*(workspaces[cur_ws].path + 1)) {
-						tmp = (char *)xnmalloc(strlen(name) + 2,
-									sizeof(char));
-						sprintf(tmp, "/%s", name);
-					} else {
-						tmp = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
-									+ strlen(name) + 2, sizeof(char));
-						sprintf(tmp, "%s/%s", workspaces[cur_ws].path, name);
-					}
-				} else {
-					tmp = (char *)xnmalloc(strlen(dir) + strlen(name)
-							+ 2, sizeof(char));
-					sprintf(tmp, "%s/%s", dir, name);
-				}
-
-				struct stat fattr;
-				if (lstat(tmp, &fattr) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					    args[i], strerror(errno));
-				} else {
-					new_sel += select_file(tmp);
-				}
-				free(tmp);
-			} else {
-				struct stat fattr;
-				if (lstat(args[i], &fattr) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					    name, strerror(errno));
-				} else {
-					new_sel += select_file(name);
-				}
-			}
-		} else {
-			/* We have a pattern */
-			/* GLOB */
-			int ret = -1;
-			ret = sel_glob(args[i], sel_path ? dir : NULL,
-			    filetype ? filetype : 0);
-
-			/* If glob failed, try REGEX */
-			if (ret <= 0) {
-				ret = sel_regex(args[i], sel_path ? dir : NULL,
-				    filetype);
-				if (ret > 0)
-					new_sel += ret;
-			} else {
-				new_sel += ret;
-			}
-		}
+		if (!pattern)
+			new_sel += select_filename(args[i], sel_path, dir);
+		else
+			new_sel += select_pattern(args[i], sel_path, dir, filetype);
 	}
 
-	if (new_sel > 0 && xargs.stealth_mode != 1) {
-		if (sel_file && save_sel() != EXIT_SUCCESS) {
-			_err('e', PRINT_PROMPT, _("%s: Error writing selected files "
-				"to the selections file\n"), PROGRAM_NAME);
-		}
-	}
-
-	if (sel_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
-		    strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	if (new_sel <= 0) {
-		if (pattern)
-			fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
-
-	/* Get total size of sel files */
-	struct stat attr;
-
-	i = (int)sel_n;
-	while (--i >= 0) {
-		if (lstat(sel_elements[i], &attr) != -1) {
-			/*          if ((sattr.st_mode & S_IFMT) == S_IFDIR) {
-				off_t dsize = dir_size(sel_elements[i]);
-				total_sel_size += dsize;
-			}
-			else */
-			total_sel_size += FILE_SIZE;
-		}
-	}
-
-	/* Print entries */
-	if (sel_n > 10) {
-		printf(_("%zu files are now in the Selection Box\n"), sel_n);
-	} else if (sel_n > 0) {
-		printf(_("%zu selected %s:\n\n"), sel_n, (sel_n == 1) ? _("file")
-				: _("files"));
-
-		size_t t = tab_offset;
-		tab_offset = 0;
-		for (i = 0; i < (int)sel_n; i++)
-			colors_list(sel_elements[i], (int)i + 1, NO_PAD,
-			    PRINT_NEWLINE);
-		tab_offset = t;
-	}
-
-	/* Print total size */
-	char *human_size = get_size_unit(total_sel_size);
-
-	if (sel_n > 10) {
-		printf(_("Total size: %s\n"), human_size);
-	} else {
-		if (sel_n > 0)
-			printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
-	}
-
-	free(human_size);
-	return EXIT_SUCCESS;
+	free(dir);
+	return print_sel_results(new_sel, sel_path, pattern);
 }
 
 void
@@ -783,7 +825,7 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 {
 	/* If a valid ELN and not asterisk... */
 	/* Store the full path of all the elements to be deselected in a new
-	 * array (desel_path). I need to do this because after the first
+	 * array (desel_path). We need to do this because after the first
 	 * rearragement of the sel array, that is, after the removal of the
 	 * first element, the index of the next elements changed, and cannot
 	 * thereby be found by their index. The only way to find them is
@@ -908,7 +950,8 @@ deselect_all(void)
 	while (--i >= 0)
 		free(sel_elements[i]);
 
-	sel_n = total_sel_size = 0;
+	sel_n = 0;
+	total_sel_size = 0;
 
 	return save_sel();
 }
@@ -935,23 +978,6 @@ deselect_from_args(char **args)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
-}
-
-static inline void
-print_selected_files(void)
-{
-	printf(_("%sSelection Box%s\n"), BOLD, df_c);
-	putchar('\0');
-
-	size_t t = tab_offset, i;
-	tab_offset = 0;
-	for (i = 0; i < sel_n; i++)
-		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
-	tab_offset = t;
-
-	char *human_size = get_size_unit(total_sel_size);
-	printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
-	free(human_size);
 }
 
 static inline char **
@@ -1077,7 +1103,7 @@ deselect(char **args)
 		}
 	}
 
-	print_selected_files();
+	print_selected_files(1, 1);
 
 	size_t desel_n = 0;
 	char **desel_elements = get_desel_input(&desel_n);
