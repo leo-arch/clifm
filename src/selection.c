@@ -71,9 +71,8 @@ save_sel(void)
 			fprintf(stderr, "%s: sel: %s: %s\n", PROGRAM_NAME,
 			    sel_file, strerror(errno));
 			return EXIT_FAILURE;
-		} else {
-			return EXIT_SUCCESS;
 		}
+		return EXIT_SUCCESS;
 	}
 
 	FILE *fp = fopen(sel_file, "w");
@@ -901,174 +900,145 @@ FREE:
 	return EXIT_SUCCESS;
 }
 
-int
-deselect(char **comm)
+/* Deselect all selected files */
+static inline int
+deselect_all(void)
 {
-	if (!comm)
+	int i = (int)sel_n;
+	while (--i >= 0)
+		free(sel_elements[i]);
+
+	sel_n = total_sel_size = 0;
+
+	return save_sel();
+}
+
+/* Deselect files passed as parameters to the desel command
+ * Returns zero on success and 1 on error */
+static inline int
+deselect_from_args(char **args)
+{
+	char **ds = (char **)xnmalloc(args_n + 1, sizeof(char *));
+	size_t j, k = 0;
+
+	for (j = 1; j <= args_n; j++) {
+		char *pp = normalize_path(args[j], strlen(args[j]));
+		if (!pp)
+			continue;
+		ds[k] = savestring(pp, strlen(pp));
+		k++;
+		free(pp);
+	}
+	ds[k] = (char *)NULL;
+
+	if (desel_entries(ds, args_n, 1) == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
-	if (sel_n == 0) {
-		puts(_("desel: There are no selected files"));
-		return EXIT_SUCCESS;
-	}
+	return EXIT_SUCCESS;
+}
 
-	register int i = 0;
-	int err = 0;
-
-	if (comm[1] && *comm[1]) {
-		if (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
-		|| strcmp(comm[1], "all") == 0) {
-			if (sel_n > 0) {
-				i = (int)sel_n;
-				while (--i >= 0)
-					free(sel_elements[i]);
-
-				sel_n = 0;
-				total_sel_size = 0;
-
-				if (save_sel() != 0)
-					return EXIT_FAILURE;
-				else
-					return EXIT_SUCCESS;
-			} else {
-				puts(_("desel: There are no selected files"));
-				return EXIT_SUCCESS;
-			}
-		} else {
-			char **ds = (char **)xnmalloc(args_n + 1, sizeof(char *));
-			size_t j = 1, k = 0;
-			for (; j <= args_n; j++) {
-				char *pp = normalize_path(comm[j], strlen(comm[j]));
-				if (!pp)
-					continue;
-				ds[k] = savestring(pp, strlen(pp));
-				k++;
-				free(pp);
-			}
-			ds[k] = (char *)NULL;
-
-			if (desel_entries(ds, args_n, 1) == EXIT_FAILURE)
-				err = 1;
-			goto END;
-		}
-	}
-
-/*	if (clear_screen)
-		CLEAR; */
-
+static inline void
+print_selected_files(void)
+{
 	printf(_("%sSelection Box%s\n"), BOLD, df_c);
-
-	if (sel_n == 0) {
-		puts(_("Empty"));
-		return EXIT_SUCCESS;
-	}
-
 	putchar('\0');
 
-	size_t t = tab_offset;
+	size_t t = tab_offset, i;
 	tab_offset = 0;
-	for (i = 0; i < (int)sel_n; i++)
+	for (i = 0; i < sel_n; i++)
 		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
 	tab_offset = t;
 
 	char *human_size = get_size_unit(total_sel_size);
 	printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
 	free(human_size);
+}
 
+static inline char **
+get_desel_input(size_t *n)
+{
 	printf(_("\n%sEnter 'q' to quit or 'e' to edit the selections file\n"), df_c);
 
-	size_t desel_n = 0;
-	char *line = NULL, **desel_elements = (char **)NULL;
+	char *line = NULL, **entries = (char **)NULL;
 
 	while (!line)
 		line = rl_no_hist(_("File(s) to be deselected (ex: 1 2-6, or *): "));
 
-	desel_elements = get_substr(line, ' ');
+	entries = get_substr(line, ' ');
 	free(line);
 
-	if (!desel_elements)
-		return EXIT_FAILURE;
+	if (!entries)
+		return (char **)NULL;
 
-	for (i = 0; desel_elements[i]; i++)
-		desel_n++;
+	size_t i;
+	for (i = 0; entries[i]; i++)
+		(*n)++;
 
-	i = (int)desel_n;
-	while (--i >= 0) { /* Validation */
-		/* If not a number */
-		if (!is_number(desel_elements[i])) {
-			if (*desel_elements[i] == 'e' && !desel_elements[i][1]) {
-				i = (int)desel_n;
-				while (--i >= 0)
-					free(desel_elements[i]);
-				free(desel_elements);
-				return edit_selfile();
-			} else if (*desel_elements[i] == 'q' && !desel_elements[i][1]) {
-				i = (int)desel_n;
-				while (--i >= 0)
-					free(desel_elements[i]);
-				free(desel_elements);
-				return EXIT_SUCCESS;
-			} else if (*desel_elements[i] == '*' && !desel_elements[i][1]) {
-				/* Clear the sel array */
-				i = (int)sel_n;
-				while (--i >= 0)
-					free(sel_elements[i]);
+	return entries;
+}
 
-				sel_n = 0;
-				total_sel_size = 0;
+static inline void
+free_desel_elements(size_t desel_n, char ***desel_elements)
+{
+	int i = (int)desel_n;
+	while (--i >= 0)
+		free((*desel_elements)[i]);
+	free(*desel_elements);
+}
 
-				i = (int)desel_n;
-				while (--i >= 0)
-					free(desel_elements[i]);
-
-				int exit_status = EXIT_SUCCESS;
-
-				if (save_sel() != 0)
-					exit_status = EXIT_FAILURE;
-
-				free(desel_elements);
-
-				if (autols) {
-					free_dirlist();
-					if (list_dir() != EXIT_SUCCESS)
-						exit_status = EXIT_FAILURE;
-				}
-
-				return exit_status;
-			} else {
-				printf(_("desel: '%s': Invalid entry\n"), desel_elements[i]);
-				int j = (int)desel_n;
-				while (--j >= 0)
-					free(desel_elements[j]);
-				free(desel_elements);
-				return EXIT_FAILURE;
-			}
-		}
-
-		/* If a number, check it's a valid ELN */
-		else {
-			int atoi_desel = atoi(desel_elements[i]);
-			if (atoi_desel <= 0 || (size_t)atoi_desel > sel_n) {
-				printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
-				int j = (int)desel_n;
-				while (--j >= 0)
-					free(desel_elements[j]);
-				free(desel_elements);
-				return EXIT_FAILURE;
-			}
-		}
+static inline int
+handle_alpha_entry(int i, size_t desel_n, char **desel_elements)
+{
+	if (*desel_elements[i] == 'e' && !desel_elements[i][1]) {
+		free_desel_elements(desel_n, &desel_elements);
+		return edit_selfile();
 	}
 
-	desel_entries(desel_elements, desel_n, 0);
+	if (*desel_elements[i] == 'q' && !desel_elements[i][1]) {
+		free_desel_elements(desel_n, &desel_elements);
+		return EXIT_SUCCESS;
+	}
 
-END: {
+	if (*desel_elements[i] == '*' && !desel_elements[i][1]) {
+		free_desel_elements(desel_n, &desel_elements);
+		int exit_status = deselect_all();
+		if (autols) {
+			free_dirlist();
+			if (list_dir() != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+		}
+		return exit_status;
+	}
+
+	printf(_("desel: '%s': Invalid entry\n"), desel_elements[i]);
+	free_desel_elements(desel_n, &desel_elements);
+	return EXIT_FAILURE;
+}
+
+static inline int
+valid_desel_eln(int i, size_t desel_n, char **desel_elements)
+{
+	int n = atoi(desel_elements[i]);
+
+	if (n <= 0 || (size_t)n > sel_n) {
+		printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
+		free_desel_elements(desel_n, &desel_elements);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static inline int
+end_deselect(int err, char ***args)
+{
 	int exit_status = EXIT_SUCCESS;
 
-	size_t argsbk = args_n;
+	size_t argsbk = args_n, i;
 	if (args_n > 0) {
-		for (i = 1; i <= (int)args_n; i++) {
-			free(comm[i]);
-			comm[i] = (char *)NULL;
+		for (i = 1; i <= args_n; i++) {
+			free((*args)[i]);
+			(*args)[i] = (char *)NULL;
 		}
 		args_n = 0;
 	}
@@ -1078,9 +1048,49 @@ END: {
 
 	/* If there is still some selected file, reload the desel screen */
 	if (sel_n && argsbk == 0)
-		if (deselect(comm) != 0)
+		if (deselect(*args) != 0)
 			exit_status = EXIT_FAILURE;
 
 	return exit_status;
+}
+
+int
+deselect(char **args)
+{
+	if (!args)
+		return EXIT_FAILURE;
+
+	if (sel_n == 0) {
+		puts(_("desel: There are no selected files"));
+		return EXIT_SUCCESS;
 	}
+
+	int err = 0;
+
+	if (args[1] && *args[1]) {
+		if (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
+		|| strcmp(args[1], "all") == 0) {
+			return deselect_all();
+		} else {
+			err = deselect_from_args(args);
+			return end_deselect(err, &args);
+		}
+	}
+
+	print_selected_files();
+
+	size_t desel_n = 0;
+	char **desel_elements = get_desel_input(&desel_n);
+
+	int i = (int)desel_n;
+	while (--i >= 0) {
+		if (!is_number(desel_elements[i]))
+			return handle_alpha_entry(i, desel_n, desel_elements);
+
+		if (valid_desel_eln(i, desel_n, desel_elements) == EXIT_FAILURE)
+			return EXIT_FAILURE;
+	}
+
+	desel_entries(desel_elements, desel_n, 0);
+	return end_deselect(err, &args);
 }
