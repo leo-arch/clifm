@@ -52,16 +52,13 @@
 #include "misc.h"
 #include "sanitize.h"
 
-#include "strings.h"
-
 /* Expand all environment variables in the string S
  * Returns the expanded string or NULL on error */
 static char *
 expand_env(char *s)
 {
 	char *p = strchr(s, '$');
-	if (!p)
-		return (char *)NULL;
+	if (!p) return (char *)NULL;
 
 	int buf_size = PATH_MAX;
 	p = (char *)xnmalloc((size_t)buf_size, sizeof(char));
@@ -70,18 +67,15 @@ expand_env(char *s)
 	while (*s) {
 		if (*s != '$') {
 			*p = *s;
-			p++;
-			s++;
+			p++; s++;
 			continue;
 		}
 
 		char *env = (char *)NULL;
 		char *r = strchr(s, ' ');
-		if (r)
-			*r = '\0';
+		if (r) *r = '\0';
 		env = getenv(s + 1);
-		if (r)
-			*r = ' ';
+		if (r) *r = ' ';
 		if (!env) {
 			free(ret);
 			return (char *)NULL;
@@ -96,27 +90,25 @@ expand_env(char *s)
 			break;
 		}
 
-		if (r)
-			*r = '\0';
+		if (r) *r = '\0';
 		s += strlen(s);
-		if (r)
-			*r = ' ';
+		if (r) *r = ' ';
 	}
 
 	*p = '\0';
 	return ret;
 }
 
-/* Move the pointer in LINE immediately after !X or X */
+/* Move the pointer in LINE immediately after X or !X */
 static char *
 skip_line_prefix(char *line)
 {
 	char *p = line;
+
 	if (!(flags & GUI)) {
 		if (*p != '!' || *(p + 1) != 'X' || *(p + 2) != ':')
 			return (char *)NULL;
-		else
-			p += 3;
+		p += 3;
 	} else {
 		if (*p == '!' && *(p + 1) == 'X')
 			return (char *)NULL;
@@ -127,11 +119,160 @@ skip_line_prefix(char *line)
 	return p;
 }
 
-/* Get application associated to a given MIME file type or file extension.
+/* Should we skip the line LINE?
+ * Returns 1 if true and 0 otherwise
+ * If true, the pointer PATTERN will point to the beginning of the
+ * null terminated pattern, and the pointer CMDS will point to the
+ * beginnning of the list of opening applications */
+static inline int
+skip_line(char *line, char **pattern, char **cmds)
+{
+	if (*line == '#' || *line == '[' || *line == '\n')
+		return 1;
+
+	*pattern = skip_line_prefix(line);
+	if (!*pattern)
+		return 1;
+	/* PATTERN points now to the beginning of the pattern */
+
+	*cmds = strchr(*pattern, '=');
+	if (!*cmds || !*(*cmds + 1))
+		return 1;
+
+	/* Truncate line in '=' to get only the name/mimetype pattern */
+	*(*cmds) = '\0';
+	(*cmds)++;
+	/* CMDS points now to the beginning of the list of opening cmds */
+	return 0;
+}
+
+/* Test PATTERN against either FILENAME or the mime-type MIME
+ * Returns zero in case of a match, and 1 otherwise */
+static inline int
+test_pattern(const char *pattern, const char *filename, const char *mime)
+{
+	int ret = EXIT_FAILURE;
+	regex_t regex;
+
+	if (filename && (*pattern == 'N' || *pattern == 'E')
+	&& *(pattern + 1) == ':') {
+		if (regcomp(&regex, pattern + 2, REG_NOSUB | REG_EXTENDED) == 0
+		&& regexec(&regex, filename, 0, NULL, 0) == 0)
+			ret = EXIT_SUCCESS;
+	} else {
+		if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) == 0
+		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
+			mime_match = 1;
+			ret = EXIT_SUCCESS;
+		}
+	}
+
+	regfree(&regex);
+	return ret;
+}
+
+/* Return 1 if APP is a valid and existent application. Zero otherwise */
+static inline int
+check_app_existence(char **app)
+{
+	if (*(*app) == 'a' && *(*app + 1) == 'd' && !*(*app + 2))
+		/* No need to check: 'ad' is an internal command */
+		return 1;
+
+	/* Expand tilde */
+	if (*(*app) == '~' && *(*app + 1) == '/' && *(*app + 2)) {
+		size_t len = strlen(user.home) + strlen(*app);
+		char *_path = (char *)xnmalloc(len, sizeof(char));
+		sprintf(_path, "%s/%s", user.home, *app + 2);
+		if (access(_path, X_OK) == -1) {
+			free(_path);
+			return 0;
+		}
+
+		*app = (char *)xrealloc(*app, (len + 2) * sizeof(char));
+		strcpy(*app, _path);
+		free(_path);
+		return 1;
+	}
+
+	/* Either a command name or an absolute path */
+	char *_path = get_cmd_path(*app);
+	if (_path) {
+		free(_path);
+		return 1;
+	}
+
+	return 0;
+}
+
+/* Return the first NULL terminated cmd in LINE or NULL */
+static inline char *
+get_cmd_from_line(char **line)
+{
+	char *l = *line;
+	char tmp[PATH_MAX];
+	size_t len = 0;
+
+	/* Get the first field in LINE */
+	while (*l != '\0' && *l != ';' && *l != '\n'
+	&& *l != '\'' && *l != '"' && len < PATH_MAX) {
+		tmp[len] = *l;
+		len++;
+		l++;
+	}
+
+	tmp[len] = '\0';
+	*line = l;
+
+	if (len == 0)
+		return (char *)NULL;
+
+	return savestring(tmp, len);
+}
+
+/* Return the first valid and existent opening application in LINE or NULL */
+static inline char *
+retrieve_app(char *line)
+{
+	while (*line) {
+		char *app = get_cmd_from_line(&line);
+		if (!app) { line++; continue; }
+
+		if (strchr(app, '$')) { /* Environment variable */
+			char *t = expand_env(app);
+			if (t) { free(app);	app = t; }
+		}
+
+		if (xargs.secure_cmds == 1
+		&& sanitize_cmd(app, SNT_MIME) != EXIT_SUCCESS) {
+			free(app);
+			continue;
+		}
+
+		/* If app contains spaces, the command to check is the string
+		 * before the first space */
+		char *ret = strchr(app, ' ');
+		if (ret) *ret = '\0';
+
+		int exists = check_app_existence(&app);
+
+		if (ret) *ret = ' ';
+		if (exists == 0) {
+			free(app);
+			continue;
+		}
+
+		return app; /* Valid app. Return it */
+	}
+
+	return (char *)NULL; /* No app was found */
+}
+
+/* Get application associated to a given MIME type or file name.
  * Returns the first matching line in the MIME file or NULL if none is
  * found */
 static char *
-get_app(const char *mime, const char *name)
+get_app(const char *mime, const char *filename)
 {
 	if (!mime || !mime_file || !*mime_file)
 		return (char *)NULL;
@@ -143,149 +284,29 @@ get_app(const char *mime, const char *name)
 		return (char *)NULL;
 	}
 
-	int found = 0, cmd_ok = 0;
 	size_t line_size = 0;
-	char *line = (char *)NULL,
-		 *app = (char *)NULL;
+	char *line = (char *)NULL, *app = (char *)NULL;
 
+	/* Each line has this form: prefix:pattern=cmd;cmd;cmd... */
 	while (getline(&line, &line_size, defs_fp) > 0) {
-		found = mime_match = 0; /* Global variable to tell mime_open()
-		if the application is associated to the file's extension or MIME
-		type */
-		if (*line == '#' || *line == '[' || *line == '\n')
+		char *pattern = (char *)NULL, *cmds = (char *)NULL;
+		if (skip_line(line, &pattern, &cmds) == 1)
+			continue;
+		/* PATTERN points now to the beginning of the null terminated pattern,
+		 * while CMDS points to the beginning of the list of opening cmds */
+
+		mime_match = 0;
+		/* Global. Are we matching a MIME type? It will be set by test_pattern */
+		if (test_pattern(pattern, filename, mime) == EXIT_FAILURE)
 			continue;
 
-		char *p = skip_line_prefix(line);
-		if (!p)
-			continue;
-
-		char *tmp = strchr(p, '=');
-		if (!tmp || !*(tmp + 1))
-			continue;
-
-		/* Truncate line in '=' to get only the ext/mimetype pattern/string */
-		*tmp = '\0';
-		regex_t regex;
-
-		if (name && (*p == 'N' || *p == 'E') && *(p + 1) == ':') {
-			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
-			&& regexec(&regex, name, 0, NULL, 0) == 0)
-				found = 1;
-		} else {
-			if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
-			&& regexec(&regex, mime, 0, NULL, 0) == 0)
-				found = mime_match = 1;
-		}
-
-		regfree(&regex);
-
-		if (!found)
-			continue;
-
-		tmp++; /* We don't want the '=' char */
-
-		size_t tmp_len = strlen(tmp);
-		app = (char *)xrealloc(app, (tmp_len + 1) * sizeof(char));
-
-		while (*tmp) {
-			size_t app_len = 0;
-			/* Split the appplications line into substrings, if
-			 * any */
-			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
-			&& *tmp != '"') {
-				app[app_len] = *tmp;
-				app_len++;
-				tmp++;
-			}
-
-			while (*tmp == ' ') /* Remove leading spaces */
-				tmp++;
-
-			if (app_len == 0) {
-				tmp++;
-				continue;
-			}
-
-			app[app_len] = '\0';
-
-			/* Check each application existence */
-			char *file_path = (char *)NULL;
-
-			/* Expand environment variables */
-			if (strchr(app, '$')) {
-				char *t = expand_env(app);
-				if (t) {
-					app = (char *)xrealloc(app, (strlen(t) + 1) * sizeof(char));
-					strcpy(app, t);
-					free(t);
-				}
-			}
-
-			if (xargs.secure_cmds == 1
-			&& sanitize_cmd(app, SNT_MIME) != EXIT_SUCCESS)
-				continue;
-
-			/* If app contains spaces, the command to check is
-			 * the string before the first space */
-			char *ret = strchr(app, ' ');
-			if (ret)
-				*ret = '\0';
-
-			if (*app == 'a' && app[1] == 'd' && !app[2]) {
-				/* No need to check: ad is an internal command */
-				cmd_ok = 1;
-				if (ret)
-					*ret = ' ';
-				break;
-			} else {
-				/* Expand tilde */
-				if (*app == '~' && *(app + 1) == '/' && *(app + 2)) {
-					file_path = (char *)xnmalloc(strlen(user.home)
-								+ strlen(app), sizeof(char));
-					sprintf(file_path, "%s/%s", user.home, app + 2);
-					if (access(file_path, X_OK) == -1) {
-						free(file_path);
-						file_path = (char *)NULL;
-					} else {
-						app = (char *)xrealloc(app, (strlen(file_path) + 1)
-							* sizeof(char));
-						strcpy(app, file_path);
-					}
-				} else {
-					/* Either a command name or an absolute path */
-					file_path = get_cmd_path(app);
-				}
-			}
-
-			if (ret)
-				*ret = ' ';
-
-			if (file_path) {
-				/* If the app exists, break the loops and return it */
-				free(file_path);
-				file_path = (char *)NULL;
-				cmd_ok = 1;
-				break;
-			} else {
-				continue;
-			}
-
-			tmp++;
-		}
-
-		if (cmd_ok)
+		if ((app = retrieve_app(cmds)))
 			break;
 	}
 
 	free(line);
 	fclose(defs_fp);
-
-	if (found)
-		return app;
-	else
-		free(app);
-
-	return (char *)NULL;
+	return app;
 }
 
 #ifndef _NO_MAGIC

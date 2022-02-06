@@ -831,7 +831,9 @@ int
 main(int argc, char *argv[])
 {
 	/* Quite unlikely to happen, but one never knows. See
-	 * https://lwn.net/SubscriberLink/882799/cb8f313c57c6d8a6/ */
+	 * https://lwn.net/SubscriberLink/882799/cb8f313c57c6d8a6/
+	 * and
+	 * https://stackoverflow.com/questions/49817316/can-argc-be-zero-on-a-posix-system*/
 	if (argc == 0) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(EINVAL));
 		exit(EINVAL);
@@ -842,6 +844,7 @@ main(int argc, char *argv[])
 	/* Make sure we are running on a supported terminal */
 	check_term();
 
+	/* # 1. INITIALIZE VERYTHING WE NEED # */
 	/* If running the program locally, that is, not from a path in PATH,
 	 * remove the leading "./" to get the correct program invocation
 	 * name */
