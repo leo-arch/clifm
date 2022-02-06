@@ -609,6 +609,9 @@ check_filenames(char *str, size_t len, const unsigned char c,
 			continue;
 		}
 
+		if (dot_slash && file_info[i].exec == 0)
+			continue;
+
 		if (len && (case_sens_path_comp ? strncmp(str, file_info[i].name, len)
 		: strncasecmp(str, file_info[i].name, len)) == 0) {
 			if (file_info[i].len == len)
