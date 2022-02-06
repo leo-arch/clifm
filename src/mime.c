@@ -215,7 +215,7 @@ get_cmd_from_line(char **line)
 
 	/* Get the first field in LINE */
 	while (*l != '\0' && *l != ';' && *l != '\n'
-	&& *l != '\'' && *l != '"' && len < PATH_MAX) {
+	&& *l != '\'' && *l != '"' && len < PATH_MAX - 1) {
 		tmp[len] = *l;
 		len++;
 		l++;
@@ -1445,7 +1445,7 @@ print_info_name_mime(char *filename, char *mime)
 static inline int
 print_mime_info(char **app, char **fpath, char **mime)
 {
-	if (*(*app) == 'a' && *app[1] == 'd' && !*app[2]) {
+	if (*(*app) == 'a' && (*app)[1] == 'd' && !(*app)[2]) {
 		printf(_("Associated application: ad [built-in] [%s]\n"),
 			mime_match ? "MIME" : "FILENAME");
 	} else {
