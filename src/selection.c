@@ -959,12 +959,11 @@ get_desel_input(size_t *n)
 {
 	printf(_("\n%sEnter 'q' to quit or 'e' to edit the selections file\n"), df_c);
 
-	char *line = NULL, **entries = (char **)NULL;
-
+	char *line = NULL;
 	while (!line)
 		line = rl_no_hist(_("File(s) to be deselected (ex: 1 2-6, or *): "));
 
-	entries = get_substr(line, ' ');
+	char **entries = get_substr(line, ' ');
 	free(line);
 
 	if (!entries)
@@ -1034,8 +1033,9 @@ end_deselect(int err, char ***args)
 {
 	int exit_status = EXIT_SUCCESS;
 
-	size_t argsbk = args_n, i;
+	size_t argsbk = args_n;
 	if (args_n > 0) {
+		size_t i;
 		for (i = 1; i <= args_n; i++) {
 			free((*args)[i]);
 			(*args)[i] = (char *)NULL;
