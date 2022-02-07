@@ -361,12 +361,11 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 
 		if (filesn == -1) {
 			fprintf(stderr, "sel: %s: %s\n", sel_path, strerror(errno));
-			return -1;
+			return (-1);
 		}
 
 		mode_t t = 0;
 		if (filetype) {
-
 			switch (filetype) {
 			case DT_DIR: t = S_IFDIR; break;
 			case DT_REG: t = S_IFREG; break;

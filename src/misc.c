@@ -367,7 +367,7 @@ print_tips(int all)
 		"Import aliases from file using 'alias import FILE'",
 		"List available aliases by running 'alias'",
 		"Create aliases to easily run your preferred commands",
-		"Open and edit the configuration file with 'edit'",
+		"Open and edit the configuration file with 'edit' or F10",
 		"Find a description for each CliFM command by running 'cmd'",
 		"Print the currently used color codes list by entering 'cc'",
 		"Press 'Alt-i' or 'Alt-.' to toggle hidden files on/off",
@@ -380,7 +380,8 @@ print_tips(int all)
 		"Press 'F10' to open and edit the configuration file",
 		"Press 'F11' to open and edit the bookmarks file",
 		"Set the starting path: 'clifm PATH'",
-		"Use the 'o' command to open files and directories: '12'",
+		"Use the 'o' command to open files and directories: 'o 12'",
+		"Open a file or directory by just typing its ELN of file name",
 		"Bypass the resource opener specifying an application: '12 "
 		"leafpad'",
 		"Open a file and send it to the background running '24&'",
@@ -459,21 +460,30 @@ print_tips(int all)
 		"Running in an untrusted environment? Try the --secure-env and "
 		"--secure-cmds options",
 		"Get help for any internal command via the -h or --help parameters",
+		"Run in disk usage analyzer mode using the -t command line option",
+		"Enable icons with 'icons on'",
+		"Quickly change to a parent directory using the 'bd' command",
+		"Use 'stats' to print satistics of files in the current directory",
+		"Customize the warning prompt via the WarningPromptStr in the config file",
+		"Enter '-' to run the fzfnav plugin (includes files preview)",
+		"Create multiple links at once using the 'bl' command",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
 
 	if (all == 1) {
 		size_t i;
-		for (i = 0; i < tipsn; i++)
-			printf("%sTIP %zu%s: %s\n", colorize ? BOLD : "", i,
-				colorize ? NC : "", TIPS[i]);
-
+		for (i = 0; i < tipsn; i++) {
+			printf("%s%sTIP %zu%s: %s\n",
+				colorize ? df_c : "", colorize ? BOLD : "",
+				i, colorize ? df_c : "", TIPS[i]);
+		}
 		return;
 	}
 
 	srand((unsigned int)time(NULL));
-	printf("%sTIP%s: %s\n", colorize ? BOLD : "", colorize ? NC : "",
+	printf("%s%sTIP%s: %s\n", colorize ? df_c : "",
+		colorize ? BOLD : "", colorize ? df_c : "",
 		TIPS[rand() % (int)tipsn]);
 }
 
