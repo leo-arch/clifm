@@ -62,9 +62,9 @@ typedef char *rl_cpvfunc_t;
 #include "highlight.h"
 #endif
 
-#define NO_MATCH 0
+#define NO_MATCH      0
 #define PARTIAL_MATCH 1
-#define FULL_MATCH 2
+#define FULL_MATCH    2
 
 #define CHECK_MATCH 0
 #define PRINT_MATCH 1
@@ -306,297 +306,333 @@ print_suggestion(const char *str, size_t offset, char *color)
 	return;
 }
 
+static inline char *
+get_reg_file_color(const char *filename, const struct stat *attr, int *free_color)
+{
+	if (light_mode)	return fi_c;
+	if (access(filename, R_OK) == -1) return nf_c;
+	if (attr->st_mode & S_ISUID) return su_c;
+	if (attr->st_mode & S_ISGID) return sg_c;
+
+#ifdef _LINUX_CAP
+	cap_t cap = cap_get_file(filename);
+	if (cap) {
+		cap_free(cap);
+		return ca_c;
+	}
+#endif
+	if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+		if (FILE_SIZE_PTR == 0)
+			return ee_c;
+		return ex_c;
+	}
+
+	if (FILE_SIZE_PTR == 0)	return ef_c;
+	if (attr->st_nlink > 1)	return mh_c;
+
+	char *ext = strrchr(filename, '.');
+	if (ext && ext != filename) {
+		char *extcolor = get_ext_color(ext);
+		if (!extcolor)
+			return fi_c;
+		char *ext_color = (char *)xnmalloc(strlen(extcolor) + 4, sizeof(char));
+		sprintf(ext_color, "\x1b[%sm", extcolor);
+		*free_color = 1;
+		return ext_color;
+	}
+
+	return fi_c;
+}
+
 /* Used by the check_completions function to get file names color
  * according to file type */
 static char *
-get_comp_color(const char *filename, const struct stat *attr, size_t *free_color)
+get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 {
 	char *color = no_c; 
 
 	switch(attr->st_mode & S_IFMT) {
 	case S_IFDIR:
-		if (light_mode)
-			return di_c;
+		if (light_mode) return di_c;
 		if (access(filename, R_OK | X_OK) != 0)
-			color = nd_c;
-		else
-			color = get_dir_color(filename, attr->st_mode);
+			return nd_c;
+		color = get_dir_color(filename, attr->st_mode);
 		break;
 
 	case S_IFREG:
-		if (light_mode)
-			return fi_c;
-		if (access(filename, R_OK) == -1)
-			color = nf_c;
-		else if (attr->st_mode & S_ISUID)
-			color = su_c;
-		else if (attr->st_mode & S_ISGID)
-			color = sg_c;
-		else {
-#ifdef _LINUX_CAP
-			cap_t cap = cap_get_file(filename);
-			if (cap) {
-				color = ca_c;
-				cap_free(cap);
-			} else if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-#else
-			if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-#endif
-				if (FILE_SIZE_PTR == 0)
-					color = ee_c;
-				else
-					color = ex_c;
-			} else if (FILE_SIZE_PTR == 0)
-				color = ef_c;
-			else if (attr->st_nlink > 1)
-				color = mh_c;
-			else {
-				char *ext = strrchr(filename, '.');
-				if (ext && ext != filename) {
-					char *extcolor = get_ext_color(ext);
-					if (extcolor) {
-						char *ext_color = (char *)xnmalloc(strlen(extcolor)
-										+ 4, sizeof(char));
-						sprintf(ext_color, "\x1b[%sm", extcolor);
-						color = ext_color;
-						*free_color = 1;
-						extcolor = (char *)NULL;
-					} else  {
-						color = fi_c;
-					}
-				} else {
-					color = fi_c;
-				}
-			}
-		}
+		color = get_reg_file_color(filename, attr, free_color);
 		break;
 
 	case S_IFLNK: {
-		if (light_mode)
-			return ln_c;
+		if (light_mode)	return ln_c;
 		char *linkname = realpath(filename, (char *)NULL);
 		if (linkname)
-			color = ln_c;
-		else
-			color = or_c;
+			return ln_c;
+		return or_c;
 		}
 		break;
 
-	case S_IFSOCK: color = so_c; break;
-	case S_IFBLK: color = bd_c; break;
-	case S_IFCHR: color = cd_c; break;
-	case S_IFIFO: color = pi_c; break;
-	default: color = no_c; break;
+	case S_IFSOCK: return so_c;
+	case S_IFBLK: return bd_c;
+	case S_IFCHR: return cd_c;
+	case S_IFIFO: return pi_c;
+	default: return no_c;
 	}
 
 	return color;
 }
 
+static inline int
+skip_leading_dot_slash(char **str, size_t *len)
+{
+	int dot_slash = 0;
+
+	if (*len >= 2 && *(*str) == '.' && *(*str + 1) == '/') {
+		dot_slash = 1;
+		(*str) += 2;
+		(*len) -= 2;
+	}
+
+	return dot_slash;
+}
+
+static inline void
+remove_trailing_slash(char **str, size_t *len)
+{
+	if (*len == 0)
+		return;
+
+	if ((*str)[*len - 1] == '/') {
+		(*len)--;
+		(*str)[*len] = '\0';
+	}
+}
+
+static inline void
+skip_leading_spaces(char **str, size_t *len)
+{
+	if (*len == 0)
+		return;
+
+	while ((*str)[*len - 1] == ' ') {
+		(*len)--;
+		(*str)[*len] = '\0';
+	}
+}
+
+static inline void
+skip_leading_backslashes(char **str, size_t *len)
+{
+	if (*len == 0)
+		return;
+
+	while (*(*str) == '\\') {
+		++(*str);
+		--(*len);
+	}
+}
+
+static void
+match_print(char *match, size_t len, char *color, int append_slash)
+{
+	char t[NAME_MAX + 2];
+	*t = '\0';
+
+	if (append_slash == 1)
+		snprintf(t, NAME_MAX + 2, "%s/", match);
+
+	char *tmp = escape_str(*t ? t : match);
+	if (!tmp || !*tmp) {
+		print_suggestion(match, len, color);
+		return;
+	}
+
+	char *q;
+	if (cur_comp_type == TCMP_PATH && *tmp == '\\'
+	&& *(tmp + 1) == '~')
+		q = tmp + 1;
+	else
+		q = tmp;
+
+	print_suggestion(q, len, color);
+	free(tmp);
+}
+
+static inline int
+print_match(char *match, const size_t len, const unsigned char c)
+{
+	int append_slash = 0, free_color = 0;
+
+	char *p = (char *)NULL, *_color = (char *)NULL;
+	char *color = (suggest_filetype_color == 1) ? no_c : sf_c;
+
+	if (*match == '~')
+		p = tilde_expand(match);
+
+	struct stat attr;
+	if (lstat(p ? p : match, &attr) != -1) {
+		if (S_ISDIR(attr.st_mode)) {
+			append_slash = 1;
+			suggestion.filetype = DT_DIR;
+		}
+
+		if (suggest_filetype_color) {
+			_color = get_comp_color(p ? p : match, &attr, &free_color);
+			if (_color)
+				color = _color;
+		}
+	} else {
+		suggestion.filetype = DT_DIR;
+	}
+
+	free(p);
+
+	if (c != BS)
+		suggestion.type = COMP_SUG;
+
+	match_print(match, len, color, append_slash);
+
+	if (free_color)
+		free(color);
+
+	return PARTIAL_MATCH;
+}
+
+static inline int
+get_print_status(const char *str, const char *match, const size_t len)
+{
+	if (suggestion.printed && suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+
+	if (strlen(match) == len || str[len - 1] == '/')
+		return FULL_MATCH;
+
+	return PARTIAL_MATCH;
+}
+
+static inline void
+free_matches(char ***matches)
+{
+	size_t i;
+	for (i = 0; (*matches)[i]; i++)
+		free((*matches)[i]);
+	free(*matches);
+}
+
 static int
-check_completions(char *str, size_t len, const unsigned char c,
-				const int print)
+check_completions(char *str, size_t len, const unsigned char c, const int print)
 {
 	if (!str || !*str)
 		return NO_MATCH;
 
-	if (len) {
-		while (str[len - 1] == ' ') {
-			len--;
-			str[len] = '\0';
-		}
-	}
+	skip_leading_spaces(&str, &len);
+	skip_leading_backslashes(&str, &len);
 
-	while (*str == '\\') {
-		++str;
-		--len;
-	}
-
-	int printed = NO_MATCH;
-	size_t i;
-	struct stat attr;
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
-
-	suggestion.filetype = DT_REG;
-	size_t free_color = 0;
-
-	char *color = (char *)NULL, *_color = (char *)NULL;
-	if (suggest_filetype_color)
-		color = no_c;
-	else
-		color = sf_c;
-
 	if (!_matches)
 		return NO_MATCH;
 
-	if (!len)
+	int printed = NO_MATCH;
+	suggestion.filetype = DT_REG;
+
+	if (len == 0)
 		goto FREE;
 
 	/* If only one match */
-/*	if (_matches[0] && *_matches[0] && strlen(_matches[0]) > len) */
 	if (!_matches[1] || !*_matches[1]) {
 		if (!print) {
-			if (suggestion.printed && suggestion_buf)
-				clear_suggestion(CS_FREEBUF);
-			if (strlen(_matches[0]) == len)
-				printed = FULL_MATCH;
-			else
-				printed = PARTIAL_MATCH;
+			printed = get_print_status(str, _matches[0], len);
 			goto FREE;
 		}
-
-		int append_slash = 0;
-
-		char *p = (char *)NULL;
-		if (*_matches[0] == '~')
-			p = tilde_expand(_matches[0]);
-
-		if (lstat(p ? p : _matches[0], &attr) != -1) {
-			if (S_ISDIR(attr.st_mode)) {
-				append_slash = 1;
-				suggestion.filetype = DT_DIR;
-			}
-			if (suggest_filetype_color)
-				color = get_comp_color(p ? p : _matches[0], &attr, &free_color);
-		} else {
-			/* We have a partial completion. Set filetype to DT_DIR
-			 * so that the rl_accept_suggestion function won't append
-			 * a space after the file name */
-			suggestion.filetype = DT_DIR;
-		}
-
-		free(p);
-
-		char t[NAME_MAX + 2];
-		*t = '\0';
-		if (append_slash)
-			snprintf(t, NAME_MAX + 2, "%s/", _matches[0]);
-		char *tmp = escape_str(*t ? t : _matches[0]);
-
-		if (c != BS)
-			suggestion.type = COMP_SUG;
-
-		if (tmp) {
-			char *q;
-			if (cur_comp_type == TCMP_PATH && *tmp == '\\'
-			&& *(tmp + 1) == '~')
-				q = tmp + 1;
-			else
-				q = tmp;
-			print_suggestion(q, len, color);
-			free(tmp);
-		} else {
-			print_suggestion(_matches[0], len, color);
-		}
-
-		printed = PARTIAL_MATCH;
-	} else {
-		/* If multiple matches, suggest the first one */
-		if (_matches[1] && *_matches[1]) {
-
-			if (!print) {
-				if (suggestion.printed && suggestion_buf)
-					clear_suggestion(CS_FREEBUF);
-				if (strlen(_matches[1]) == len || str[len - 1] == '/')
-					printed = FULL_MATCH;
-				else
-					printed = PARTIAL_MATCH;
-				goto FREE;
-			}
-
-			int append_slash = 0;
-
-			char *p = (char *)NULL;
-			if (*_matches[1] == '~')
-				p = tilde_expand(_matches[1]);
-
-			if (lstat(p ? p : _matches[1], &attr) != -1) {
-				if (S_ISDIR(attr.st_mode)) {
-					append_slash = 1;
-					suggestion.filetype = DT_DIR;
-				}
-
-				if (suggest_filetype_color) {
-					_color = get_comp_color(p ? p : _matches[1], &attr,
-							&free_color);
-					if (_color)
-						color = _color;
-				}
-			} else {
-				suggestion.filetype = DT_DIR;
-			}
-
-			free(p);
-
-			char _tmp[NAME_MAX + 2];
-			*_tmp = '\0';
-			if (append_slash)
-				snprintf(_tmp, NAME_MAX + 2, "%s/", _matches[1]);
-			char *tmp = escape_str(*_tmp ? _tmp : _matches[1]);
-
-			if (c != BS)
-				suggestion.type = COMP_SUG;
-
-			if (tmp) {
-				char *q;
-				if (cur_comp_type == TCMP_PATH && *tmp == '\\'
-				&& *(tmp + 1) == '~')
-					q = tmp + 1;
-				else
-					q = tmp;
-				print_suggestion(q, len, color);
-				free(tmp);
-			} else {
-				print_suggestion(_matches[1], len, color);
-			}
-
-			printed = PARTIAL_MATCH;
-		}
+		printed = print_match(_matches[0], len, c);
+		goto FREE;
 	}
 
+	/* If multiple matches, suggest the first one */
+	if (!print) {
+		printed = get_print_status(str, _matches[1], len);
+		goto FREE;
+	}
+	printed = print_match(_matches[1], len, c);
+
 FREE:
-	for (i = 0; _matches[i]; i++)
-		free(_matches[i]);
-	free(_matches);
-
-	if (free_color)
-		free(_color);
-
+	free_matches(&_matches);
 	return printed;
+}
+
+static inline void
+print_directory_suggestion(const int i, const size_t len, char *color)
+{
+	if (suggest_filetype_color == 1)
+		color = file_info[i].color;
+
+	suggestion.filetype = DT_DIR;
+
+	char tmp[NAME_MAX + 2];
+	snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
+
+	char *_tmp = escape_str(tmp);
+	if (_tmp) {
+		print_suggestion(_tmp, len, color);
+		free(_tmp);
+		return;
+	}
+
+	print_suggestion(tmp, len, color);
+}
+
+static inline void
+print_reg_file_suggestion(char *str, const int i, size_t len,
+                          char *color, const int dot_slash)
+{
+	if (suggest_filetype_color)
+		color = file_info[i].color;
+
+	suggestion.filetype = DT_REG;
+
+	char *tmp = escape_str(file_info[i].name);
+	if (tmp) {
+		char *s = str;
+		while(*s) {
+			if (is_quote_char(*s))
+				len++;
+			s++;
+		}
+
+		if (dot_slash) {
+			/* Reinsert './', removed to check file name*/
+			char t[NAME_MAX + 2];
+			snprintf(t, NAME_MAX + 1, "./%s", tmp);
+			print_suggestion(t, len + 2, color);
+		} else {
+			print_suggestion(tmp, len, color);
+		}
+
+		free(tmp);
+		return;
+	}
+
+	if (dot_slash) {
+		char t[NAME_MAX + 2];
+		snprintf(t, NAME_MAX + 1, "./%s", file_info[i].name);
+		print_suggestion(t, len + 2, color);
+		return;
+	}
+
+	print_suggestion(file_info[i].name, len, color);
 }
 
 static int
 check_filenames(char *str, size_t len, const unsigned char c,
 				const int first_word, const size_t full_word)
 {
-	int i = (int)files, dot_slash = 0;
-	char *color = (char *)NULL;
+	int i = (int)files;
+	char *color = (suggest_filetype_color == 1) ? no_c : sf_c;
 
-	while (*str == '\\') {
-		++str;
-		--len;
-	}
-
-	if (len >= 2 && *str == '.' && *(str + 1) == '/') {
-		dot_slash = 1;
-		str += 2;
-		len -= 2;
-	}
-
-	if (len) {
-		while (str[len - 1] == ' ') {
-			len--;
-			str[len] = '\0';
-		}
-		if (str[len - 1] == '/') {
-			len--;
-			str[len] = '\0';
-		}
-	}
-
-	if (suggest_filetype_color)
-		color = no_c;
-	else
-		color = sf_c;
+	skip_leading_backslashes(&str, &len);
+	int dot_slash = skip_leading_dot_slash(&str, &len);
+	skip_leading_spaces(&str, &len);
+	remove_trailing_slash(&str, &len);
 
 	while (--i >= 0) {
 		if (!file_info[i].name || TOUPPER(*str) != TOUPPER(*file_info[i].name))
@@ -609,71 +645,17 @@ check_filenames(char *str, size_t len, const unsigned char c,
 			continue;
 		}
 
-/*		if (dot_slash && file_info[i].exec == 0)
-			continue; */
-
-		if (len && (case_sens_path_comp ? strncmp(str, file_info[i].name, len)
+		if (len > 0 && (case_sens_path_comp ? strncmp(str, file_info[i].name, len)
 		: strncasecmp(str, file_info[i].name, len)) == 0) {
-			if (file_info[i].len == len)
-				return FULL_MATCH;
+			if (file_info[i].len == len) return FULL_MATCH;
+			if (first_word && !auto_open) continue;
+			if (c != BS) suggestion.type = FILE_SUG;
 
-			if (suggest_filetype_color)
-				color = file_info[i].color;
+			if (file_info[i].dir)
+				print_directory_suggestion(i, len, color);
+			else
+				print_reg_file_suggestion(str, i, len, color, dot_slash);
 
-			if (file_info[i].dir) {
-				if (first_word && !autocd)
-					continue;
-
-				suggestion.filetype = DT_DIR;
-
-				char tmp[NAME_MAX + 2];
-				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
-
-				if (c != BS)
-					suggestion.type = FILE_SUG;
-
-				char *_tmp = escape_str(tmp);
-				if (_tmp) {
-					print_suggestion(_tmp, len, color);
-					free(_tmp);
-				} else {
-					print_suggestion(tmp, len, color);
-				}
-			} else {
-				if (first_word && !auto_open)
-					continue;
-
-				if (c != BS)
-					suggestion.type = FILE_SUG;
-				suggestion.filetype = DT_REG;
-
-				char *tmp = escape_str(file_info[i].name);
-				if (tmp) {
-					char *s = str;
-					while(*s) {
-						if (is_quote_char(*s))
-							len++;
-						s++;
-					}
-					if (dot_slash) {
-						/* Reinsert './', removed to check file name*/
-						char t[NAME_MAX + 2];
-						snprintf(t, NAME_MAX + 1, "./%s", tmp);
-						print_suggestion(t, len + 2, color);
-					} else {
-						print_suggestion(tmp, len, color);
-					}
-					free(tmp);
-				} else {
-					if (dot_slash) {
-						char t[NAME_MAX + 2];
-						snprintf(t, NAME_MAX + 1, "./%s", file_info[i].name);
-						print_suggestion(t, len + 2, color);
-					} else {
-						print_suggestion(file_info[i].name, len, color);
-					}
-				}
-			}
 			return PARTIAL_MATCH;
 		}
 	}
@@ -740,55 +722,40 @@ check_builtins(const char *str, const size_t len, const int print)
 			suggestion.type = CMD_SUG;
 			print_suggestion(b[i], len, sb_c);
 			return PARTIAL_MATCH;
-		} else {
-			return FULL_MATCH;
 		}
+		return FULL_MATCH;
 	}
 
 	return NO_MATCH;
 }
 
-int
-check_cmds(char *str, const size_t len, const int print)
+static inline int
+print_cmd_suggestion(int i, size_t len)
 {
-	if (!len)
-		return NO_MATCH;
-
-	int i = (int)path_progsn;
-	while (--i >= 0) {
-		if (!bin_commands[i] || *str != *bin_commands[i])
-			continue;
-
-		if (!print) {
-			if (strcmp(str, bin_commands[i]) == 0)
-				return FULL_MATCH;
-			continue;
+	if (is_internal_c(bin_commands[i])) {
+		if (strlen(bin_commands[i]) > len) {
+			suggestion.type = CMD_SUG;
+			print_suggestion(bin_commands[i], len, sx_c);
+			return PARTIAL_MATCH;
 		}
-		
-		if (strncmp(str, bin_commands[i], len) != 0)
-			continue;
-
-		if (is_internal_c(bin_commands[i])) {
-			if (strlen(bin_commands[i]) > len) {
-				suggestion.type = CMD_SUG;
-				print_suggestion(bin_commands[i], len, sx_c);
-				return PARTIAL_MATCH;
-			} else {
-				return FULL_MATCH;
-			}
-		} else if (ext_cmd_ok) {
-			if (strlen(bin_commands[i]) > len) {
-				suggestion.type = CMD_SUG;
-				print_suggestion(bin_commands[i], len, sc_c);
-				return PARTIAL_MATCH;
-			} else {
-				return FULL_MATCH;
-			}
-		} else {
-			continue;
-		}
+		return FULL_MATCH;
 	}
 
+	if (ext_cmd_ok) {
+		if (strlen(bin_commands[i]) > len) {
+			suggestion.type = CMD_SUG;
+			print_suggestion(bin_commands[i], len, sc_c);
+			return PARTIAL_MATCH;
+		}
+		return FULL_MATCH;
+	}
+
+	return (-1);
+}
+
+static inline int
+print_internal_cmd_suggestion(char *str, size_t len, const int print)
+{
 	/* Check internal command with fused parameter */
 	char *p = (char *)NULL;
 	size_t j;
@@ -809,15 +776,39 @@ check_cmds(char *str, const size_t len, const int print)
 	return FULL_MATCH;
 }
 
+int
+check_cmds(char *str, const size_t len, const int print)
+{
+	if (len == 0)
+		return NO_MATCH;
+
+	int i = (int)path_progsn;
+	while (--i >= 0) {
+		if (!bin_commands[i] || *str != *bin_commands[i])
+			continue;
+
+		if (!print) {
+			if (strcmp(str, bin_commands[i]) == 0)
+				return FULL_MATCH;
+			continue;
+		}
+
+		if (strncmp(str, bin_commands[i], len) != 0)
+			continue;
+
+		int ret = print_cmd_suggestion(i, len);
+		if (ret == -1)
+			continue;
+		return ret;
+	}
+
+	return print_internal_cmd_suggestion(str, len, print);
+}
+
 static int
 check_jumpdb(const char *str, const size_t len, const int print)
 {
-	char *color = (char *)NULL;
-
-	if (suggest_filetype_color)
-		color = di_c;
-	else
-		color = sf_c;
+	char *color = (suggest_filetype_color == 1) ? di_c : sf_c;
 
 	int i = (int)jump_n;
 	while (--i >= 0) {
@@ -831,39 +822,73 @@ check_jumpdb(const char *str, const size_t len, const int print)
 			continue;
 		}
 
-		size_t db_len = strlen(jump_db[i].path);
-	
 		if (len && (case_sens_path_comp ? strncmp(str, jump_db[i].path, len)
 		: strncasecmp(str, jump_db[i].path, len)) == 0) {
-			if (db_len > len) {
-				suggestion.type = FILE_SUG;
-				suggestion.filetype = DT_DIR;
-				char tmp[PATH_MAX + 2];
-				*tmp = '\0';
-				if (jump_db[i].path[db_len - 1] != '/')
-					snprintf(tmp, PATH_MAX + 2, "%s/", jump_db[i].path);
-				print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
-				return PARTIAL_MATCH;
-			}
-			return FULL_MATCH;
+			size_t db_len = strlen(jump_db[i].path);
+			if (db_len <= len)
+				return FULL_MATCH;
+
+			suggestion.type = FILE_SUG;
+			suggestion.filetype = DT_DIR;
+			char tmp[PATH_MAX + 2];
+			*tmp = '\0';
+
+			if (jump_db[i].path[db_len - 1] != '/')
+				snprintf(tmp, PATH_MAX + 2, "%s/", jump_db[i].path);
+
+			print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
+			return PARTIAL_MATCH;
 		}
 	}
 
 	return NO_MATCH;
 }
 
+static inline void
+print_bookmark_dir_suggestion(const int i)
+{
+	suggestion.type = BOOKMARK_SUG;
+	suggestion.filetype = DT_DIR;
+
+	char tmp[PATH_MAX + 2];
+	size_t path_len = strlen(bookmarks[i].path);
+	if (bookmarks[i].path[path_len - 1] != '/')
+		snprintf(tmp, PATH_MAX + 2, "%s/", bookmarks[i].path);
+	else
+		xstrsncpy(tmp, bookmarks[i].path, PATH_MAX + 2);
+
+	char *color = suggest_filetype_color == 1 ? di_c : sf_c;
+
+	char *_tmp = escape_str(tmp);
+	print_suggestion(_tmp ? _tmp : tmp, 1, color);
+	free(_tmp);
+}
+
+static inline void
+print_bookmark_file_suggestion(const int i, struct stat *attr)
+{
+	suggestion.type = BOOKMARK_SUG;
+	suggestion.filetype = DT_REG;
+
+	int free_color = 0;
+	char *color = (!suggest_filetype_color) ? sf_c : (char *)NULL;
+
+	if (suggest_filetype_color)
+		color = get_comp_color(bookmarks[i].path, attr, &free_color);
+
+	char *_tmp = escape_str(bookmarks[i].path);
+	print_suggestion(_tmp ? _tmp : bookmarks[i].path, 1, color);
+	free(_tmp);
+
+	if (free_color == 1)
+		free(color);
+}
+
 static int
 check_bookmarks(const char *str, const size_t len, const int print)
 {
-	if (!bm_n)
+	if (bm_n == 0)
 		return NO_MATCH;
-
-	size_t free_color = 0;
-	char *color = (char *)NULL;
-	struct stat attr;
-
-	if (!suggest_filetype_color)
-		color = sf_c;
 
 	int i = (int)bm_n;
 	while (--i >= 0) {
@@ -879,39 +904,14 @@ check_bookmarks(const char *str, const size_t len, const int print)
 
 		if (len && (case_sens_path_comp ? strncmp(str, bookmarks[i].name, len)
 		: strncasecmp(str, bookmarks[i].name, len)) == 0) {
-			if (lstat(bookmarks[i].path, &attr) == -1) {
+			struct stat attr;
+			if (lstat(bookmarks[i].path, &attr) == -1)
 				continue;
-			} else if ((attr.st_mode & S_IFMT) == S_IFDIR) {
-				suggestion.type = BOOKMARK_SUG;
-				suggestion.filetype = DT_DIR;
+			else if ((attr.st_mode & S_IFMT) == S_IFDIR)
+				print_bookmark_dir_suggestion(i);
+			else
+				print_bookmark_file_suggestion(i, &attr);
 
-				char tmp[PATH_MAX + 2];
-				size_t path_len = strlen(bookmarks[i].path);
-				if (bookmarks[i].path[path_len - 1] != '/')
-					snprintf(tmp, PATH_MAX + 2, "%s/", bookmarks[i].path);
-				else
-					xstrsncpy(tmp, bookmarks[i].path, PATH_MAX + 2);
-
-				if (suggest_filetype_color)
-					color = di_c;
-
-				char *_tmp = escape_str(tmp);
-				print_suggestion(_tmp ? _tmp : tmp, 1, color);
-				free(_tmp);
-			} else {
-				suggestion.type = BOOKMARK_SUG;
-				suggestion.filetype = DT_REG;
-
-				if (suggest_filetype_color)
-					color = get_comp_color(bookmarks[i].path, &attr, &free_color);
-
-				char *_tmp = escape_str(bookmarks[i].path);
-				print_suggestion(_tmp ? _tmp : bookmarks[i].path, 1, color);
-				free(_tmp);
-
-				if (free_color == 1)
-					free(color);
-			}
 			return PARTIAL_MATCH;
 		}
 	}
@@ -1040,9 +1040,10 @@ check_jcmd(char *line)
 		suggestion.type = JCMD_SUG_NOACD;
 		free(tmp);
 	} else {
-		print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c
-					: sf_c);
+		print_suggestion(jump_suggestion, 1,
+			suggest_filetype_color ? di_c : sf_c);
 	}
+
 	free(jump_suggestion);
 	jump_suggestion = (char *)NULL;
 	return PARTIAL_MATCH;
@@ -1075,43 +1076,37 @@ check_help(char *full_line, const char *_last_word)
 static int
 check_variables(const char *str, const size_t len)
 {
-	int printed = NO_MATCH;
 	size_t i;
+
 	for (i = 0; environ[i]; i++) {
-		if (TOUPPER(*environ[i]) == TOUPPER(*str)
-		&& strncasecmp(str, environ[i], len) == 0) {
-			char *ret = strchr(environ[i], '=');
-			*ret = '\0';
-			suggestion.type = VAR_SUG;
-			char t[NAME_MAX + 1];
-			snprintf(t, NAME_MAX + 1, "$%s", environ[i]);
-			print_suggestion(t, len + 1, sh_c);
-			printed = PARTIAL_MATCH;
-			*ret = '=';
-			break;
-		}
+		if (TOUPPER(*environ[i]) != TOUPPER(*str)
+		|| strncasecmp(str, environ[i], len) != 0)
+			continue;
+
+		char *ret = strchr(environ[i], '=');
+		*ret = '\0';
+		suggestion.type = VAR_SUG;
+		char t[NAME_MAX + 1];
+		snprintf(t, NAME_MAX + 1, "$%s", environ[i]);
+		print_suggestion(t, len + 1, sh_c);
+		*ret = '=';
+		return PARTIAL_MATCH;
 	}
 
-	if (printed)
-		return PARTIAL_MATCH;
-
-	if (!usrvar_n)
+	if (usrvar_n == 0)
 		return NO_MATCH;
 
 	for (i = 0; usr_var[i].name; i++) {
-		if (TOUPPER(*str) == TOUPPER(*usr_var[i].name)
-		&& strncasecmp(str, usr_var[i].name, len) == 0) {
-			suggestion.type = CMD_SUG;
-			char t[NAME_MAX + 1];
-			snprintf(t, NAME_MAX + 1, "$%s", usr_var[i].name);
-			print_suggestion(t, len + 1, sh_c);
-			printed = 1;
-			break;
-		}
-	}
+		if (TOUPPER(*str) != TOUPPER(*usr_var[i].name)
+		|| strncasecmp(str, usr_var[i].name, len) != 0)
+			continue;
 
-	if (printed)
+		suggestion.type = CMD_SUG;
+		char t[NAME_MAX + 1];
+		snprintf(t, NAME_MAX + 1, "$%s", usr_var[i].name);
+		print_suggestion(t, len + 1, sh_c);
 		return PARTIAL_MATCH;
+	}
 
 	return NO_MATCH;
 }
@@ -1220,9 +1215,6 @@ print_warning_prompt(const char c)
 
 		char *decoded_prompt = decode_prompt(wprompt_str);
 		/* Print the warning prompt */
-/*		char tprompt[PATH_MAX];
-		snprintf(tprompt, PATH_MAX, "\1%s\2%s", wp_c, wprompt_str);
-		rl_set_prompt(tprompt); */
 		rl_set_prompt(decoded_prompt);
 		free(decoded_prompt);
 	}
