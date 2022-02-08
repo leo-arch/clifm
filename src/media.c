@@ -649,6 +649,7 @@ media_menu(int mode)
 		if (exit_status == EXIT_SUCCESS) {
 			printf("\nPress any key to continue... ");
 			xgetchar();
+			putchar('\n');
 		}
 		free(input);
 		free_media();
