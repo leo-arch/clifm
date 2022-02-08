@@ -317,6 +317,9 @@ print_suggestion(const char *str, size_t offset, char *color)
 	if (!str || !*str)
 		return;
 
+	/* Store current cursor position in CURROW and CURCOL (globals) */
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+
 	correct_offset(&offset);
 
 	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump */
@@ -324,9 +327,6 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	if (check_conditions(str, offset, str_len, &baej, &slines) == EXIT_FAILURE)
 		return;
-
-	/* Store current cursor position in CURROW and CURCOL (globals) */
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
 	/* In some cases (accepting first suggested word), we might want to
 	 * reprint the suggestion buffer, in which case it is already stored */

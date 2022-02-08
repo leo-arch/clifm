@@ -416,7 +416,7 @@ print_tips(int all)
 		"'br *.txt'",
 		"Need no more tips? Disable this feature in the configuration "
 		"file",
-		"Need root privileges? Launch a new instance of CLifM as root "
+		"Need root privileges? Launch a new instance of CliFM as root "
 		"running the 'X' command",
 		"Create custom commands and features using the 'actions' command",
 		"Create a fresh configuration file by running 'edit reset'",
