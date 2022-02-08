@@ -254,7 +254,7 @@ truncate_name(const char *str)
 }
 
 static inline void
-positionate_cursor(const int baej)
+set_cursor_position(const int baej)
 {
 	/* If not at the end of the line, move the cursor there */
 	if (rl_end > rl_point) {
@@ -298,6 +298,15 @@ check_conditions(const char *str, const size_t offset, const size_t str_len,
 	return EXIT_SUCCESS;
 }
 
+static inline void
+_print_suggestion(const char *str, const size_t offset, const char *color)
+{
+	char *wname = truncate_name(str);
+	printf("%s%s", color, (wname ? wname : str) + offset - (offset ? 1 : 0));
+	fflush(stdout);
+	free(wname);
+}
+
 /* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
  * move the cursor back to the original position.
  * OFFSET marks the point in STR that is already typed: the suggestion
@@ -305,10 +314,8 @@ check_conditions(const char *str, const size_t offset, const size_t str_len,
 void
 print_suggestion(const char *str, size_t offset, char *color)
 {
-	if (!str || !*str) return;
-
-	/* Store cursor position into two global variables: currow and curcol */
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+	if (!str || !*str)
+		return;
 
 	correct_offset(&offset);
 
@@ -318,20 +325,17 @@ print_suggestion(const char *str, size_t offset, char *color)
 	if (check_conditions(str, offset, str_len, &baej, &slines) == EXIT_FAILURE)
 		return;
 
+	/* Store current cursor position in CURROW and CURCOL (globals) */
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+
 	/* In some cases (accepting first suggested word), we might want to
 	 * reprint the suggestion buffer, in which case it is already stored */
 	if (str != suggestion_buf)
 		/* Store the suggestion (used later by rl_accept_suggestion (keybinds.c) */
 		suggestion_buf = savestring(str, str_len);
 
-	positionate_cursor(baej);
-
-	char *wname = truncate_name(str);
-	/* Print the suggestion */
-	printf("%s%s", color, (wname ? wname : str) + offset - (offset ? 1 : 0));
-	fflush(stdout);
-	free(wname);
-
+	set_cursor_position(baej);
+	_print_suggestion(str, offset, color);
 	restore_cursor_position(slines);
 
 	/* Store the amount of lines taken by the current command line
