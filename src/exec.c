@@ -392,127 +392,37 @@ launch_execve(char **cmd, int bg, int xflags)
 	return EXIT_FAILURE;
 }
 
-static int
-run_shell_cmd(char **comm)
+/* Prevent the user from killing the program via the 'kill',
+ * 'pkill' or 'killall' commands, from within CliFM itself.
+ * Otherwise, the program will be forcefully terminated without
+ * freeing allocated memory */
+static inline int
+graceful_quit(char **args)
 {
-	/* Log external commands
-	* 'no_log' will be true when running profile or prompt commands */
-	if (!no_log)
-		log_function(comm);
-
-	/* Prevent ungraceful exit */
-	/* Prevent the user from killing the program via the 'kill',
-	 * 'pkill' or 'killall' commands, from within CliFM itself.
-	 * Otherwise, the program will be forcefully terminated without
-	 * freeing allocated memory */
-	if ((*comm[0] == 'k' || *comm[0] == 'p') && (strcmp(comm[0], "kill") == 0
-	|| strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0)) {
-		size_t i;
-		for (i = 1; i <= args_n; i++) {
-			if ((strcmp(comm[0], "kill") == 0 && atoi(comm[i]) == (int)own_pid)
-			|| ((strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0)
-			&& strcmp(comm[i], argv_bk[0]) == 0)) {
-				fprintf(stderr, _("%s: To gracefully quit enter 'quit'\n"),
-						PROGRAM_NAME);
-				return EXIT_FAILURE;
-			}
-		}
-	}
-
-	/* Check whether shell commands are allowed */
-	if (!ext_cmd_ok) {
-		fprintf(stderr, _("%s: External commands are not allowed. "
-				  "Run 'ext on' to enable them.\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
-
-	if (*comm[0] == *argv_bk[0] && strcmp(comm[0], argv_bk[0]) == 0) {
-		fprintf(stderr, "%s: Nested instances are not allowed\n",
-		    PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
-
-	/* Little export implementation. What it lacks? Command substitution */
-	if (*comm[0] == 'e' && strcmp(comm[0], "export") == 0 && comm[1]) {
-		char *p = strchr(comm[1], '=');
-		if (p && *(p + 1)) {
-			*p = '\0';
-			int ret = setenv(comm[1], p + 1, 1);
-			if (ret == -1) {
-				fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-				exit_code = EXIT_FAILURE;
-			} else {
-				exit_code = EXIT_SUCCESS;
-			}
-			*p = '=';
-			return exit_code;
-		}
-	}
-
-	/* By making precede the command by a colon or a semicolon, the
-	 * user can BYPASS CliFM parsing, expansions, and checks to be
-	 * executed DIRECTLY by the system shell (execle) */
-	char *first = comm[0]; 
-	if (*comm[0] == ':' || *comm[0] == ';')
-		first++;
-
-	/* #### RUN THE SHELL COMMAND #### */
-
-	/* Store the command and each argument into a single array to be
-	 * executed by execle() using the system shell (/bin/sh -c) */
-	char *cmd = (char *)NULL;
-	size_t len = strlen(first) + 3;
-	cmd = (char *)xnmalloc(len + (bg_proc ? 2 : 0) + (fzf_open_with ? 12 : 0),
-			sizeof(char));
-	strcpy(cmd, first);
-	cmd[len - 3] = ' ';
-	cmd[len - 2] = '\0';
-
 	size_t i;
-	for (i = 1; comm[i]; i++) {
-		/* Dest string (cmd) is NULL terminated, just as the source
-		 * string (comm[i]) */
-		if (i > 1) {
-			cmd[len - 3] = ' ';
-			cmd[len - 2] = '\0';
+	for (i = 1; i <= args_n; i++) {
+		if ((strcmp(args[0], "kill") == 0 && atoi(args[i]) == (int)own_pid)
+		|| ((strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)
+		&& strcmp(args[i], argv_bk[0]) == 0)) {
+			fprintf(stderr, _("%s: To gracefully quit enter 'q'\n"),
+					PROGRAM_NAME);
+			return EXIT_FAILURE;
 		}
-		len += strlen(comm[i]) + 1;
-		/* LEN holds the previous size of the buffer, plus space, the
-		 * ampersand character, and the new src string. The buffer is
-		 * thus big enough */
-		cmd = (char *)xrealloc(cmd, (len + 3 + (bg_proc ? 2 : 0)
-				+ (fzf_open_with ? 12 : 0)) * sizeof(char));
-		strcat(cmd, comm[i]);
 	}
 
-	/* Append final ampersand if backgrounded */
-	if (bg_proc) {
-		if (fzf_open_with == 1) {
-			fzf_open_with = 0;
-			strcat(cmd, " &>/dev/null");
-			len += 12;
-		}
-		cmd[len - 3] = ' ';
-		cmd[len - 2] = '&';
-		cmd[len - 1] = '\0';
-	} else {
-		cmd[len - 3] = '\0';
-	}
+	return (-1);
+}
 
-	/* Calling the system shell is vulnerable to command injection, true.
-	 * But it is the user here who is directly running the command: this
-	 * is not an untrusted source */
-	int exit_status = launch_execle(cmd); /* lgtm [cpp/command-line-injection] */
-	free(cmd);
-
-	/* Reload the list of available commands in PATH for TAB completion.
-	 * Why? If this list is not updated, whenever some new program is
-	 * installed, renamed, or removed from some of the paths in PATH
-	 * while in CliFM, this latter needs to be restarted in order
-	 * to be able to recognize the new program for TAB completion */
-	int j;
+/* Reload the list of available commands in PATH for TAB completion.
+ * Why? If this list is not updated, whenever some new program is
+ * installed, renamed, or removed from some of the paths in PATH
+ * while in CliFM, this latter needs to be restarted in order
+ * to be able to recognize the new program for TAB completion */
+static inline void
+reload_binaries(void)
+{
 	if (bin_commands) {
-		j = (int)path_progsn;
+		int j = (int)path_progsn;
 		while (--j >= 0)
 			free(bin_commands[j]);
 		free(bin_commands);
@@ -520,13 +430,141 @@ run_shell_cmd(char **comm)
 	}
 
 	if (paths) {
-		j = (int)path_n;
+		int j = (int)path_n;
 		while (--j >= 0)
 			free(paths[j]);
 	}
 
 	path_n = (size_t)get_path_env();
 	get_path_programs();
+}
+
+static inline int
+__export(char *arg)
+{
+	char *p = strchr(arg, '=');
+	if (!p || !*(p + 1))
+		return (-1);
+
+	errno = 0;
+
+	*p = '\0';
+	int ret = setenv(arg, p + 1, 1);
+	if (ret == -1)
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+	*p = '=';
+
+	return errno;
+}
+
+static inline void
+append_ampersand(char **cmd, size_t *len)
+{
+	if (fzf_open_with == 1) {
+		fzf_open_with = 0;
+		strcat(*cmd, " &>/dev/null");
+		*len += 12;
+	}
+
+	(*cmd)[*len - 3] = ' ';
+	(*cmd)[*len - 2] = '&';
+	(*cmd)[*len - 1] = '\0';
+}
+
+static inline char *
+construct_shell_cmd(char **args)
+{
+	/* Bypass CliFM's parsing, expansions, and checks to be executed
+	 * DIRECTLY by the system shell (execle) */
+	char *first = args[0];
+	if (*args[0] == ':' || *args[0] == ';')
+		first++;
+
+	size_t len = strlen(first) + 3;
+	char *cmd = (char *)xnmalloc(len + (bg_proc ? 2 : 0)
+			+ (fzf_open_with ? 12 : 0), sizeof(char));
+	strcpy(cmd, first);
+	cmd[len - 3] = ' ';
+	cmd[len - 2] = '\0';
+
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		/* Dest string (cmd) is NULL terminated, just as the source
+		 * string (comm[i]) */
+		if (i > 1) {
+			cmd[len - 3] = ' ';
+			cmd[len - 2] = '\0';
+		}
+		len += strlen(args[i]) + 1;
+		/* LEN holds the previous size of the buffer, plus space, the
+		 * ampersand character, and the new src string. The buffer is
+		 * thus big enough */
+		cmd = (char *)xrealloc(cmd, (len + 3 + (bg_proc ? 2 : 0)
+				+ (fzf_open_with ? 12 : 0)) * sizeof(char));
+		strcat(cmd, args[i]);
+	}
+
+	if (bg_proc) /* If backgrounded */
+		append_ampersand(&cmd, &len);
+	else
+		cmd[len - 3] = '\0';
+
+	return cmd;
+}
+
+static inline int
+check_shell_cmd_condtions(char **args)
+{
+	/* Prevent ungraceful exit */
+	if ((*args[0] == 'k' || *args[0] == 'p') && (strcmp(args[0], "kill") == 0
+	|| strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)) {
+		if (graceful_quit(args) != -1)
+			return EXIT_FAILURE;
+	}
+
+	/* Check whether shell commands are allowed */
+	if (!ext_cmd_ok) {
+		fprintf(stderr, _("%s: External commands are not allowed. "
+			"Run 'ext on' to enable them.\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	if (*args[0] == *argv_bk[0] && strcmp(args[0], argv_bk[0]) == 0) {
+		fprintf(stderr, "%s: Nested instances are not allowed\n",
+		    PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+
+}
+
+static int
+run_shell_cmd(char **args)
+{
+	/* 'no_log' will be true when running profile or prompt commands */
+	if (!no_log)
+		log_function(args);
+
+	if (check_shell_cmd_condtions(args) == EXIT_FAILURE)
+		return EXIT_FAILURE;
+
+	/* Little export implementation. What it lacks? Command substitution */
+	if (*args[0] == 'e' && strcmp(args[0], "export") == 0 && args[1]) {
+		int exit_status = __export(args[0]);
+		if (exit_status != -1)
+			return exit_status;
+	}
+
+	char *cmd = construct_shell_cmd(args);
+
+	/* Calling the system shell is vulnerable to command injection, true.
+	 * But it is the user here who is directly running the command: this
+	 * is not an untrusted source */
+	int exit_status = launch_execle(cmd); /* lgtm [cpp/command-line-injection] */
+	free(cmd);
+
+	reload_binaries();
 
 	return exit_status;
 }
@@ -583,6 +621,7 @@ set_max_files(char **args)
 
 	max_files = (int)inum;
 	printf(_("Max files set to %d\n"), max_files);
+
 	return EXIT_SUCCESS;
 }
 
@@ -623,10 +662,12 @@ folders_first_function(char *arg)
 {
 	if (autols == 0)
 		return EXIT_SUCCESS;
+
 	if (!arg) {
 		fprintf(stderr, "%s\n", _(FF_USAGE));
 		return (exit_code = EXIT_FAILURE);
 	}
+
 	if (IS_HELP(arg)) {
 		puts(_(FF_USAGE));
 		return EXIT_SUCCESS;
@@ -891,14 +932,15 @@ msgs_function(char *arg)
 
 		msgs_n = 0;
 		pmsg = NOMSG;
+		return EXIT_SUCCESS;
+	}
+
+	if (msgs_n) {
+		size_t i;
+		for (i = 0; i < (size_t)msgs_n; i++)
+			printf("%s", messages[i]);
 	} else {
-		if (msgs_n) {
-			size_t i;
-			for (i = 0; i < (size_t)msgs_n; i++)
-				printf("%s", messages[i]);
-		} else {
-			printf(_("%s: There are no messages\n"), PROGRAM_NAME);
-		}
+		printf(_("%s: There are no messages\n"), PROGRAM_NAME);
 	}
 
 	return EXIT_SUCCESS;
