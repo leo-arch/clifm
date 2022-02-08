@@ -245,7 +245,7 @@ left:abort --inline-info --layout=reverse-list"
 
 #define MAX_WS 8
 
-#define DEFAULT_PROMPT "\\[\\e[0m\\][\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \
+#define DEFAULT_PROMPT "\\[\\e[0m\\][\\S\\[\\e[0m\\]]\\l \
 \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
 >\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 

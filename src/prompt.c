@@ -190,7 +190,6 @@ gen_pwd(int c)
 static inline char *
 gen_workspace(void)
 {
-	char *temp = (char *)NULL;
 	char s[__WS_STR_LEN];
 	char *cl = (char *)NULL;
 
@@ -205,10 +204,9 @@ gen_workspace(void)
 	case 8: cl = ws8_c; break;
 	default: break;
 	}
-	snprintf(s, __WS_STR_LEN, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
-	temp = savestring(s, strlen(s));
 
-	return temp;
+	snprintf(s, __WS_STR_LEN, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
+	return savestring(s, strlen(s));
 }
 
 static inline char *
