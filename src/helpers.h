@@ -1056,10 +1056,10 @@ extern char
 	bd_c[MAX_COLOR],	/* Block device */
 	ca_c[MAX_COLOR],	/* Cap file */
 	cd_c[MAX_COLOR],	/* Char device */
+	ed_c[MAX_COLOR],	/* Empty dir */
 	ee_c[MAX_COLOR],	/* Empty executable */
 	ex_c[MAX_COLOR],	/* Executable */
 	ef_c[MAX_COLOR],	/* Empty reg file */
-	ed_c[MAX_COLOR],	/* Empty dir */
 	fi_c[MAX_COLOR],	/* Reg file */
 	di_c[MAX_COLOR],	/* Directory */
 	ln_c[MAX_COLOR],	/* Symlink */
@@ -1087,9 +1087,9 @@ extern char
 	el_c[MAX_COLOR],	/* ELN color */
 	mi_c[MAX_COLOR],	/* Misc indicators */
 	ts_c[MAX_COLOR],	/* TAB completion suffix */
+	tt_c[MAX_COLOR],	/* Tilde for trimmed files */
 	wc_c[MAX_COLOR],	/* Welcome message */
 	wp_c[MAX_COLOR],	/* Warning prompt */
-	tt_c[MAX_COLOR],	/* Tilde for trimmed files */
 
 	/* Suggestions */
 	sb_c[MAX_COLOR],	/* Auto-suggestions: shell builtins */
@@ -1114,7 +1114,7 @@ extern char
 	hr_c[MAX_COLOR],	/* Redirection > */
 	hs_c[MAX_COLOR],	/* Process separators | & ; */
 	hv_c[MAX_COLOR],	/* Variables $ */
-	hw_c[MAX_COLOR],	/* Wrong, non-existent command name $ */
+	hw_c[MAX_COLOR],	/* Wrong, non-existent command name */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
