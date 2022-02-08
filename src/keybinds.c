@@ -1483,7 +1483,7 @@ print_highlight_string(char *s)
 {
 	if (!s || !*s)
 		return;
-	
+
 	size_t i, l = 0;
 	rl_delete_text(0, rl_end);
 	rl_point = rl_end = 0;
@@ -1511,6 +1511,92 @@ print_highlight_string(char *s)
 #endif
 
 static int
+print_cmdhist_line(int n, int beg_line)
+{
+	curhistindex = (size_t)n;
+
+	fputs("\x1b[?25l", stdout);
+	int rl_point_bk = rl_point;
+
+#ifndef _NO_HIGHLIGHT
+	if (highlight)
+		print_highlight_string(history[n]);
+	else
+#endif
+	{
+		rl_replace_line(history[n], 1);
+	}
+
+	fputs("\x1b[?25h", stdout);
+	rl_point = (beg_line == 1) ? rl_end : rl_point_bk;
+	cur_color = df_c;
+	fputs(df_c, stdout);
+
+	return EXIT_SUCCESS;
+}
+
+static inline int
+handle_cmdhist_beginning(int key)
+{
+	int p = (int)curhistindex;
+	cmdhist_flag = 1;
+
+	if (key == 65) { /* Up arrow key */
+		if (--p < 0)
+			return EXIT_FAILURE;
+	} else { /* Down arrow key */
+		if (rl_end == 0) return EXIT_SUCCESS;
+		if (++p >= (int)current_hist_n) {
+			rl_replace_line("", 1);
+			curhistindex++;
+			return EXIT_SUCCESS;
+		}
+	}
+
+	if (!history[p]) return EXIT_FAILURE;
+
+	curhistindex = (size_t)p;
+
+	return print_cmdhist_line(p, 1);
+}
+
+static inline int
+handle_cmdhist_middle(int key)
+{
+	int found = 0, p = (int)curhistindex;
+
+	if (key == 65) { /* Up arrow key */
+		if (--p < 0) return EXIT_FAILURE;
+
+		while (p >= 0 && history[p]) {
+			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
+			&& strcmp(rl_line_buffer, history[p]) != 0) {
+				found = 1; break;
+			}
+			p--;
+		}
+	} else { /* Down arrow key */
+		if (++p >= (int)current_hist_n)	return EXIT_FAILURE;
+
+		while (history[p]) {
+			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
+			&& strcmp(rl_line_buffer, history[p]) != 0) {
+				found = 1; break;
+			}
+			p++;
+		}
+	}
+
+	if (!found) {
+		rl_ring_bell();
+		return EXIT_FAILURE;
+	}
+
+	return print_cmdhist_line(p, 0);
+}
+
+/* Handle keybinds for the cmds history: UP and DOWN */
+static int
 rl_cmdhist(int count, int key)
 {
 	UNUSED(count);
@@ -1524,100 +1610,15 @@ rl_cmdhist(int count, int key)
 	}
 #endif
 
-	int p = (int)curhistindex;
+	if (key != 65 && key != 66)
+		return EXIT_FAILURE;
 
 	/* If the cursor is at the beginning of the line */
-	if (rl_point == 0 || cmdhist_flag == 1) {
-		cmdhist_flag = 1;
-		if (key == 65) {
-			if (--p < 0)
-				return EXIT_FAILURE;
-		} else if (key == 66) {
-			if (rl_end == 0)
-				return EXIT_SUCCESS;
-			if (++p >= (int)current_hist_n) {
-				rl_replace_line("", 1);
-				curhistindex++;
-				return EXIT_SUCCESS;
-			}
-		} else {
-			return EXIT_FAILURE;
-		}
-
-		if (!history[p])
-			return EXIT_FAILURE;
-
-		curhistindex = (size_t)p;
-
-		fputs("\x1b[?25l", stdout);
-#ifndef _NO_HIGHLIGHT
-		if (highlight)
-			print_highlight_string(history[p]);
-		else
-#endif
-		{
-			rl_replace_line(history[p], 1);
-		}
-
-		fputs("\x1b[?25h", stdout);
-		rl_point = rl_end;
-		cur_color = df_c;
-		fputs(df_c, stdout);
-		return EXIT_SUCCESS;
-	}
+	if (rl_point == 0 || cmdhist_flag == 1)
+		return handle_cmdhist_beginning(key);
 
 	/* If cursor is not at the beginning of the line */
-	int found = 0;
-	if (key == 65) {
-		if (--p < 0)
-			return EXIT_FAILURE;
-
-		while (p >= 0 && history[p]) {
-			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
-			&& strcmp(rl_line_buffer, history[p]) != 0) {
-				found = 1;
-				break;
-			}
-			p--;
-		}
-	} else if (key == 66) {
-		if (++p >= (int)current_hist_n)
-			return EXIT_FAILURE;
-
-		while (history[p]) {
-			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
-			&& strcmp(rl_line_buffer, history[p]) != 0) {
-				found = 1;
-				break;
-			}
-			p++;
-		}
-	} else {
-		return EXIT_FAILURE;
-	}
-
-	if (!found) {
-		rl_ring_bell();
-		return EXIT_FAILURE;
-	}
-
-	fputs("\x1b[?25l", stdout);
-	curhistindex = (size_t)p;
-	int bk = rl_point;
-#ifndef _NO_HIGHLIGHT
-	if (highlight)
-		print_highlight_string(history[p]);
-	else
-#endif
-	{
-		rl_replace_line(history[p], 1);
-	}
-
-	fputs("\x1b[?25h", stdout);
-	rl_point = bk;
-	cur_color = tx_c;
-	fputs(tx_c, stdout);
-	return EXIT_SUCCESS;
+	return handle_cmdhist_middle(key);
 }
 
 static int
