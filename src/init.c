@@ -2728,8 +2728,13 @@ check_options(void)
 	if (!term)
 		term = savestring(DEFAULT_TERM_CMD, strlen(DEFAULT_TERM_CMD));
 
-	if (!encoded_prompt)
-		encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+	if (!encoded_prompt) {
+		if (colorize == 1)
+			encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+		else
+			encoded_prompt = savestring(DEFAULT_PROMPT_NO_COLOR,
+							strlen(DEFAULT_PROMPT_NO_COLOR));
+	}
 
 	if (xargs.stealth_mode == 1) {
 		if (!opener)

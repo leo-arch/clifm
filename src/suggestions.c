@@ -69,6 +69,8 @@ typedef char *rl_cpvfunc_t;
 #define CHECK_MATCH 0
 #define PRINT_MATCH 1
 
+#define BAEJ_OFFSET 2
+
 char *last_word = (char *)NULL;
 int last_word_offset = 0;
 
@@ -165,120 +167,9 @@ remove_suggestion_not_end(void)
 	fflush(stdout);
 }
 
-/* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
- * move the cursor back to the original position.
- * OFFSET marks the point in STR that is already typed: the suggestion
- * will be printed starting from this point */
-void
-print_suggestion(const char *str, size_t offset, char *color)
+static inline void
+restore_cursor_position(const size_t slines)
 {
-	if (!str || !*str)
-		return;
-
-	int baej_offset = 2;
-
-	if (wrong_cmd && !recover_from_wrong_cmd()
-#ifndef _NO_HIGHLIGHT
-	&& (rl_point == rl_end || !highlight))
-#else
-	&& rl_point == rl_end)
-#endif
-		offset++;
-
-	if (suggestion.printed && str != suggestion_buf)
-		clear_suggestion(CS_FREEBUF);
-
-	/* Store cursor position into two global variables: currow and curcol */
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
-#ifndef _NO_HIGHLIGHT
-	/* The highlight function modifies the terminal's idea of the current
-	 * cursor position: let's correct it */
-	if (highlight && rl_point != rl_end) {
-		printf("\x1b[%dD", rl_end - rl_point);
-		fflush(stdout);
-		offset++;
-	}
-#endif
-
-	if (offset > strlen(str))
-		return;
-
-	/* Do not print suggestions bigger than what the current terminal
-	 * window size can hold */
-	size_t suggestion_len = wc_xstrlen(str + offset);
-
-	if ((int)suggestion_len > (term_cols * term_rows) - curcol)
-		return;
-
-	size_t cuc = (size_t)curcol; /* Current cursor column position*/
-	int baej = 0; /* Bookmark, alias, ELN, or jump */
-
-	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
-	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
-	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG) {
-		/* 3 = 1 (one char forward) + 2 (" >") */
-//		cuc += 4;
-		cuc += suggestion.type == ELN_SUG ? 3 : 4;
-		baej = 1;
-	}
-
-	size_t cucs = cuc + suggestion_len;
-	/* slines: amount of lines we need to print the suggestion, including
-	 * the current line */
-	size_t slines = 1;
-
-	if (cucs > term_cols) {
-		slines = cucs / (size_t)term_cols;
-		fflush(stdout);
-		int cucs_rem = (int)cucs % term_cols;
-		if (cucs_rem > 0)
-			slines++;
-	}
-
-	if (slines > (size_t)term_rows)
-		return;
-
-	/* In some cases (accepting first suggested word), we might want to
-	 * reprint the suggestion buffer, in which case it is already stored */
-	if (str != suggestion_buf) {
-		/* Store the suggestion in a buffer to be used later by the
-		 * rl_accept_suggestion function (keybinds.c) */
-		suggestion_buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
-		strcpy(suggestion_buf, str);
-	}
-
-	/* If not at the end of the line, move the cursor there */
-	if (rl_end > rl_point) {
-		printf("\x1b[%dC", rl_end - rl_point);
-		fflush(stdout);
-	}
-
-	char *wname = (char *)NULL;
-	if (suggestion.type == ELN_SUG || suggestion.type == COMP_SUG
-	|| suggestion.type == FILE_SUG) {
-		size_t wlen = wc_xstrlen(str);
-		if (wlen == 0)
-			wname = truncate_wname(str);
-	}
-
-	/* rl_end and rl_point are not updated: they do not include
-	 * the last typed char. However, since we only care here about
-	 * the difference between them, it doesn't matter: the result
-	 * is the same (7 - 4 == 6 - 3 == 1) */
-
-	/* Erase everything after the current cursor position */
-	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
-
-	if (baej) {
-		/* Move the cursor %d columns to the right and print "> " */
-		printf("\x1b[%dC%s> \x1b[0m", baej_offset, sp_c);
-	}
-
-	/* Print the suggestion */
-	printf("%s%s", color, (wname ? wname : str) + offset - (offset ? 1 : 0));
-	fflush(stdout);
-	free(wname);
-
 	/* Update the row number, if needed */
 	/* If the cursor is in the last row, printing a multi-line suggestion
 	 * will move the beginning of the current line up the number of
@@ -294,16 +185,161 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
+}
+
+static inline void
+correct_offset(size_t *offset)
+{
+	if (wrong_cmd && !recover_from_wrong_cmd()
+#ifndef _NO_HIGHLIGHT
+	&& (rl_point == rl_end || !highlight))
+#else
+	&& rl_point == rl_end)
+#endif
+		(*offset)++;
+
+#ifndef _NO_HIGHLIGHT
+	/* The highlight function modifies the terminal's idea of the current
+	 * cursor position: let's correct it */
+	if (highlight && rl_point != rl_end) {
+		printf("\x1b[%dD", rl_end - rl_point);
+		fflush(stdout);
+		(*offset)++;
+	}
+#endif
+}
+
+static inline size_t
+calculate_suggestion_lines(int *baej, const size_t suggestion_len)
+{
+	size_t cuc = (size_t)curcol; /* Current cursor column position*/
+
+	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
+	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
+	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG) {
+		/* 3 = 1 (one char forward) + 2 (" >") */
+		cuc += suggestion.type == ELN_SUG ? 3 : 4;
+		*baej = 1;
+	}
+
+	size_t cucs = cuc + suggestion_len;
+	/* slines: amount of lines we need to print the suggestion, including
+	 * the current line */
+	size_t slines = 1;
+
+	if (cucs > term_cols) {
+		slines = cucs / (size_t)term_cols;
+		fflush(stdout);
+		int cucs_rem = (int)cucs % term_cols;
+		if (cucs_rem > 0)
+			slines++;
+	}
+
+	return slines;
+}
+
+static inline char *
+truncate_name(const char *str)
+{
+	char *wname = (char *)NULL;
+
+	if (suggestion.type == ELN_SUG || suggestion.type == COMP_SUG
+	|| suggestion.type == FILE_SUG) {
+		size_t wlen = wc_xstrlen(str);
+		if (wlen == 0)
+			wname = truncate_wname(str);
+	}
+
+	return wname;
+}
+
+static inline void
+positionate_cursor(const int baej)
+{
+	/* If not at the end of the line, move the cursor there */
+	if (rl_end > rl_point) {
+		printf("\x1b[%dC", rl_end - rl_point);
+		fflush(stdout);
+	}
+
+	/* rl_end and rl_point are not updated: they do not include
+	 * the last typed char. However, since we only care here about
+	 * the difference between them, it doesn't matter: the result
+	 * is the same (7 - 4 == 6 - 3 == 1) */
+
+	/* Erase everything after the current cursor position */
+	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
+
+	if (baej == 1)
+		/* Move the cursor %d columns to the right and print "> " */
+		printf("\x1b[%dC%s> \x1b[0m", BAEJ_OFFSET, sp_c);
+}
+
+static inline int
+check_conditions(const char *str, const size_t offset, const size_t str_len,
+		int *baej, size_t *slines)
+{
+	if (suggestion.printed && str != suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
+
+	if (offset > str_len)
+		return EXIT_FAILURE;
+
+	/* Do not print suggestions bigger than what the current terminal
+	 * window size can hold */
+	size_t suggestion_len = wc_xstrlen(str + offset);
+	if ((int)suggestion_len > (term_cols * term_rows) - curcol)
+		return EXIT_FAILURE;
+
+	*slines = calculate_suggestion_lines(baej, suggestion_len);
+	if (*slines > (size_t)term_rows)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+/* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
+ * move the cursor back to the original position.
+ * OFFSET marks the point in STR that is already typed: the suggestion
+ * will be printed starting from this point */
+void
+print_suggestion(const char *str, size_t offset, char *color)
+{
+	if (!str || !*str) return;
+
+	/* Store cursor position into two global variables: currow and curcol */
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+
+	correct_offset(&offset);
+
+	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump */
+	size_t str_len = strlen(str), slines = 0;
+
+	if (check_conditions(str, offset, str_len, &baej, &slines) == EXIT_FAILURE)
+		return;
+
+	/* In some cases (accepting first suggested word), we might want to
+	 * reprint the suggestion buffer, in which case it is already stored */
+	if (str != suggestion_buf)
+		/* Store the suggestion (used later by rl_accept_suggestion (keybinds.c) */
+		suggestion_buf = savestring(str, str_len);
+
+	positionate_cursor(baej);
+
+	char *wname = truncate_name(str);
+	/* Print the suggestion */
+	printf("%s%s", color, (wname ? wname : str) + offset - (offset ? 1 : 0));
+	fflush(stdout);
+	free(wname);
+
+	restore_cursor_position(slines);
 
 	/* Store the amount of lines taken by the current command line
 	 * (plus the suggestion's length) to be able to correctly
 	 * remove it later (via the clear_suggestion function) */
 	suggestion.nlines = slines;
-	/* Let's keep a record of the suggestion color in case we need to
-	 * reprint it */
+	/* Store the suggestion color, in case we need to reprint it */
 	suggestion.color = color;
-
-	return;
 }
 
 static inline char *
@@ -335,6 +371,7 @@ get_reg_file_color(const char *filename, const struct stat *attr, int *free_colo
 		char *extcolor = get_ext_color(ext);
 		if (!extcolor)
 			return fi_c;
+
 		char *ext_color = (char *)xnmalloc(strlen(extcolor) + 4, sizeof(char));
 		sprintf(ext_color, "\x1b[%sm", extcolor);
 		*free_color = 1;
