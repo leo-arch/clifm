@@ -46,6 +46,10 @@
 #include "checks.h"
 #include "history.h"
 
+#ifdef __linux__
+# define DISK_LABELS_PATH "/dev/disk/by-label"
+#endif
+
 /* Information about devices */
 struct mnt_t {
 	char *mnt; /* Mountpoint */
@@ -217,8 +221,6 @@ unmount_dev(size_t i, const int n)
 static char *
 get_dev_label(void)
 {
-#define DISK_LABELS_PATH "/dev/disk/by-label"
-
 	size_t n = mp_n;
 	struct dirent **labels = (struct dirent **)NULL;
 	int ln = scandir(DISK_LABELS_PATH, &labels, NULL, alphasort);
