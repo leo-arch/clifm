@@ -102,18 +102,6 @@ open_file(char *file)
 	} else {
 #ifndef _NO_LIRA
 		exit_status = run_mime(file);
-/*		char *p = rl_line_buffer;
-		if (*p == 'i' && (strncmp(p, "import", 6) == 0
-		|| strncmp(p, "info", 4) == 0)) {
-			char *cmd[] = {"mm", "open", file, NULL};
-			return exit_status = mime_open(cmd);
-		}
-		if (*p == 'o' && (p[1] == ' ' || strncmp(p, "open", 4) == 0)) {
-			char *cmd[] = {"mm", "open", file, NULL};
-			return exit_status = mime_open(cmd);
-		}
-		char *cmd[] = {"mm", file, NULL};
-		exit_status = mime_open(cmd); */
 #else
 		/* Fallback to (xdg-)open */
 #ifdef __HAIKU__
