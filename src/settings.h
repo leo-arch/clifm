@@ -162,6 +162,8 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define PR_DATE     "\x1b[0;34m"
 #define PR_ID       "\x1b[1;33m"
 #define PR_SIZE     "\x1b[1;32m"
+#define PR_SIZE_DIR "\x1b[1;32m"
+#define PR_SIZE_REG "\x1b[1;36m"
 #define PR_NUM_VAL  "\x1b[1;36m" /* Properties in octal */
 
 #define MNT_UDEVIL 	0

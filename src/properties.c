@@ -461,7 +461,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	char *ctype = PR_NONE, /* Color for file type */
 		 *cdate = PR_DATE, /* Color for dates */
 		 *cid = PR_ID,     /* Color for UID and GID */
-		 *csize = PR_SIZE, /* Color for file size */
+		 *csize = (props->dir ? PR_SIZE_DIR : PR_SIZE_REG), /* Color for file size */
 		 *cend = NC;       /* Ending Color */
 
 	switch (props->mode & S_IFMT) {
