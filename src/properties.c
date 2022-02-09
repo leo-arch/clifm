@@ -461,8 +461,14 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	char *ctype = PR_NONE, /* Color for file type */
 		 *cdate = PR_DATE, /* Color for dates */
 		 *cid = PR_ID,     /* Color for UID and GID */
-		 *csize = (props->dir ? PR_SIZE_DIR : PR_SIZE_REG), /* Color for file size */
+		/* Color for file size */
+		 *csize = (props->dir ? PR_SIZE_DIR : PR_SIZE_REG),
 		 *cend = NC;       /* Ending Color */
+
+	if (props->uid == user.uid || props->gid == user.gid)
+		cid = PR_ID;
+	else
+		cid = df_c;
 
 	switch (props->mode & S_IFMT) {
 	case S_IFREG: file_type = '-'; break;
