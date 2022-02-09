@@ -279,9 +279,6 @@ static inline int
 check_conditions(const char *str, const size_t offset, const size_t str_len,
 		int *baej, size_t *slines)
 {
-	if (suggestion.printed && str != suggestion_buf)
-		clear_suggestion(CS_FREEBUF);
-
 	if (offset > str_len)
 		return EXIT_FAILURE;
 
@@ -317,10 +314,13 @@ print_suggestion(const char *str, size_t offset, char *color)
 	if (!str || !*str)
 		return;
 
-	/* Store current cursor position in CURROW and CURCOL (globals) */
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+	if (suggestion.printed && str != suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
 
 	correct_offset(&offset);
+
+	/* Store current cursor position in CURROW and CURCOL (globals) */
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
 	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump */
 	size_t str_len = strlen(str), slines = 0;
