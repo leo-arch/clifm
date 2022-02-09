@@ -376,7 +376,7 @@ char *internal_cmds[] = {
 	"pf", "prof", "profile",
 	"pg", "pager",
 	"pin", "unpin",
-	"quit",
+	"quit", "exit",
 	"r", "rm",
 	"rf", "refresh",
 	"rl", "reload",
