@@ -50,12 +50,12 @@
 /* Setting GLOB_BRACE to ZERO disables support for GLOB_BRACE if not
  * available on current platform */
 #if !defined(__TINYC__) && !defined(GLOB_BRACE)
-#define GLOB_BRACE 0
+# define GLOB_BRACE 0
 #endif
 
 /* Support large files on ARM or 32-bit machines */
 #if defined(__arm__) || defined(__i386__)
-#define _FILE_OFFSET_BITS 64
+# define _FILE_OFFSET_BITS 64
 //#define _TIME_BITS 64 /* Address Y2038 problem for 32 bits machines */
 #endif
 
@@ -70,15 +70,15 @@
 #include <stdlib.h>
 
 #if defined(__linux__)
-#include <linux/version.h>
-#include <sys/inotify.h>
-#include <sys/types.h>
-#define LINUX_INOTIFY
+# include <linux/version.h>
+# include <sys/inotify.h>
+# include <sys/types.h>
+# define LINUX_INOTIFY
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-#include <sys/types.h>
-#include <sys/event.h>
-#include <sys/time.h>
-#define BSD_KQUEUE
+# include <sys/types.h>
+# include <sys/event.h>
+# include <sys/time.h>
+# define BSD_KQUEUE
 #endif /* __linux__ */
 
 #include "init.h"
@@ -94,32 +94,32 @@ void *__dso_handle;
 #define EXIT_FAILURE 1
 
 #ifndef PATH_MAX
-#define PATH_MAX 4096
+# define PATH_MAX 4096
 #endif
 
 #ifndef HOST_NAME_MAX
-#define HOST_NAME_MAX 64
+# define HOST_NAME_MAX 64
 #endif
 
 #ifndef NAME_MAX
-#define NAME_MAX 255
+# define NAME_MAX 255
 #endif
 
 /* _GNU_SOURCE is only defined if __linux__ is defined and _BE_POSIX
  * is not defined */
 #ifdef _GNU_SOURCE
-#if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
-#define _STATX
-#endif /* LINUX_VERSION (4.11) */
-#endif /* __GLIBC__ */
+# if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
+#  if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#   define _STATX
+#  endif /* LINUX_VERSION (4.11) */
+# endif /* __GLIBC__ */
 #endif /* _GNU_SOURCE */
 
 /* Because capability.h is deprecated in BSD */
 #if __linux__
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24)
-#define _LINUX_CAP
-#endif /* LINUX_VERSION (2.6.24)*/
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24)
+#  define _LINUX_CAP
+# endif /* LINUX_VERSION (2.6.24)*/
 #endif /* __linux__ */
 
 /* Define our own boolean type
@@ -132,14 +132,14 @@ void *__dso_handle;
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
-#define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
-#define EVENT_SIZE (sizeof(struct inotify_event))
-#define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
+# define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
+# define EVENT_SIZE (sizeof(struct inotify_event))
+# define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
 extern int inotify_fd, inotify_wd;
 extern unsigned int INOTIFY_MASK;
 #elif defined(BSD_KQUEUE)
-#define NUM_EVENT_SLOTS 10
-#define NUM_EVENT_FDS 10
+# define NUM_EVENT_SLOTS 10
+# define NUM_EVENT_FDS 10
 extern int kq, event_fd;
 extern struct kevent events_to_monitor[];
 extern unsigned int KQUEUE_FFLAGS;
@@ -198,7 +198,7 @@ extern int watch;
 
 #define EMPTY_STR ""
 
-/* A few colors */
+/* A few fixed colors */
 #define GRAY   "\x1b[1;30m"
 #define _RED   "\x1b[1;31m"
 #define _GREEN "\x1b[0;32m"
@@ -337,7 +337,7 @@ extern int watch;
 #define TMP_FILENAME ".clifmXXXXXX"
 
 #ifndef P_tmpdir
-#define P_tmpdir "/tmp"
+# define P_tmpdir "/tmp"
 #endif
 
 /* Dirjump macros for calculating directories rank extra points */
@@ -400,15 +400,15 @@ extern int watch;
 #define atoi xatoi /* xatoi is just a secure atoi */
 
 #ifndef _NO_GETTEXT
-#define _(String) gettext(String)
+# define _(String) gettext(String)
 #else
-#define _(String) String
+# define _(String) String
 #endif /* _GETTEXT */
 
 #define strlen(s) xstrnlen(s)
 
 #if defined(__linux) && defined(_BE_POSIX)
-#define strcasestr xstrcasestr
+# define strcasestr xstrcasestr
 #endif /* __linux && _BE_POSIX */
 
 #define ENTRY_N 64
@@ -444,9 +444,9 @@ extern int watch;
 				|| strcmp((s), "--help") == 0))
 
 #ifndef __HAIKU__
-#define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
+# define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
 #else
-#define CLEAR fputs("\x1b[H\x1b[2J", stdout);
+# define CLEAR fputs("\x1b[H\x1b[2J", stdout);
 #endif
 
 				/** #########################
@@ -1042,68 +1042,68 @@ extern char **environ;
 /* Colors */
 extern char
 	/* File types */
-	bd_c[MAX_COLOR],	/* Block device */
-	ca_c[MAX_COLOR],	/* Cap file */
-	cd_c[MAX_COLOR],	/* Char device */
-	ed_c[MAX_COLOR],	/* Empty dir */
-	ee_c[MAX_COLOR],	/* Empty executable */
-	ex_c[MAX_COLOR],	/* Executable */
-	ef_c[MAX_COLOR],	/* Empty reg file */
-	fi_c[MAX_COLOR],	/* Reg file */
-	di_c[MAX_COLOR],	/* Directory */
-	ln_c[MAX_COLOR],	/* Symlink */
-	mh_c[MAX_COLOR],	/* Multi-hardlink file */
-	nd_c[MAX_COLOR],	/* No read directory */
-	ne_c[MAX_COLOR],	/* No read empty dir */
-	nf_c[MAX_COLOR],	/* No read file */
-	no_c[MAX_COLOR],	/* Unknown */
-	or_c[MAX_COLOR],	/* Broken symlink */
-	ow_c[MAX_COLOR],	/* Other writable */
-	pi_c[MAX_COLOR],	/* FIFO, pipe */
-	sg_c[MAX_COLOR],	/* SGID file */
-	so_c[MAX_COLOR],	/* Socket */
-	st_c[MAX_COLOR],	/* Sticky (not ow)*/
-	su_c[MAX_COLOR],	/* SUID file */
-	tw_c[MAX_COLOR],	/* Sticky other writable */
-	uf_c[MAX_COLOR],	/* Non-'stat'able file */
+	bd_c[MAX_COLOR], /* Block device */
+	ca_c[MAX_COLOR], /* Cap file */
+	cd_c[MAX_COLOR], /* Char device */
+	ed_c[MAX_COLOR], /* Empty dir */
+	ee_c[MAX_COLOR], /* Empty executable */
+	ex_c[MAX_COLOR], /* Executable */
+	ef_c[MAX_COLOR], /* Empty reg file */
+	fi_c[MAX_COLOR], /* Reg file */
+	di_c[MAX_COLOR], /* Directory */
+	ln_c[MAX_COLOR], /* Symlink */
+	mh_c[MAX_COLOR], /* Multi-hardlink file */
+	nd_c[MAX_COLOR], /* No read directory */
+	ne_c[MAX_COLOR], /* No read empty dir */
+	nf_c[MAX_COLOR], /* No read file */
+	no_c[MAX_COLOR], /* Unknown */
+	or_c[MAX_COLOR], /* Broken symlink */
+	ow_c[MAX_COLOR], /* Other writable */
+	pi_c[MAX_COLOR], /* FIFO, pipe */
+	sg_c[MAX_COLOR], /* SGID file */
+	so_c[MAX_COLOR], /* Socket */
+	st_c[MAX_COLOR], /* Sticky (not ow)*/
+	su_c[MAX_COLOR], /* SUID file */
+	tw_c[MAX_COLOR], /* Sticky other writable */
+	uf_c[MAX_COLOR], /* Non-'stat'able file */
 
 	/* Interface */
-	bm_c[MAX_COLOR],	/* Bookmarked directory */
-	dc_c[MAX_COLOR],	/* Files counter */
-	df_c[MAX_COLOR],	/* Default color */
-	dh_c[MAX_COLOR],	/* Dirhist index */
-	dl_c[MAX_COLOR],	/* Dividing line */
-	el_c[MAX_COLOR],	/* ELN color */
-	mi_c[MAX_COLOR],	/* Misc indicators */
-	ts_c[MAX_COLOR],	/* TAB completion suffix */
-	tt_c[MAX_COLOR],	/* Tilde for trimmed files */
-	wc_c[MAX_COLOR],	/* Welcome message */
-	wp_c[MAX_COLOR],	/* Warning prompt */
+	bm_c[MAX_COLOR], /* Bookmarked directory */
+	dc_c[MAX_COLOR], /* Files counter */
+	df_c[MAX_COLOR], /* Default color */
+	dh_c[MAX_COLOR], /* Dirhist index */
+	dl_c[MAX_COLOR], /* Dividing line */
+	el_c[MAX_COLOR], /* ELN color */
+	mi_c[MAX_COLOR], /* Misc indicators */
+	ts_c[MAX_COLOR], /* TAB completion suffix */
+	tt_c[MAX_COLOR], /* Tilde for trimmed files */
+	wc_c[MAX_COLOR], /* Welcome message */
+	wp_c[MAX_COLOR], /* Warning prompt */
 
 	/* Suggestions */
-	sb_c[MAX_COLOR],	/* Auto-suggestions: shell builtins */
-	sc_c[MAX_COLOR],	/* Auto-suggestions: external commands */
-	sf_c[MAX_COLOR],	/* Auto-suggestions: filenames */
-	sh_c[MAX_COLOR],	/* Auto-suggestions: history */
-	sx_c[MAX_COLOR],	/* Auto-suggestions: internal commands and params */
-	sp_c[MAX_COLOR],	/* Auto-suggestions: suggestions pointer */
+	sb_c[MAX_COLOR], /* Auto-suggestions: shell builtins */
+	sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
+	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
+	sh_c[MAX_COLOR], /* Auto-suggestions: history */
+	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
+	sp_c[MAX_COLOR], /* Auto-suggestions: suggestions pointer */
 
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */
 #endif
 
 	/* Syntax highlighting */
-	hb_c[MAX_COLOR],	/* Brackets () [] {} */
-	hc_c[MAX_COLOR],	/* Comments */
-	hd_c[MAX_COLOR],	/* Paths (slashes) */
-	he_c[MAX_COLOR],	/* Expansion operators: * ~ */
-	hn_c[MAX_COLOR],	/* Numbers */
-	hp_c[MAX_COLOR],	/* Parameters: - */
-	hq_c[MAX_COLOR],	/* Quoted strings */
-	hr_c[MAX_COLOR],	/* Redirection > */
-	hs_c[MAX_COLOR],	/* Process separators | & ; */
-	hv_c[MAX_COLOR],	/* Variables $ */
-	hw_c[MAX_COLOR],	/* Wrong, non-existent command name */
+	hb_c[MAX_COLOR], /* Brackets () [] {} */
+	hc_c[MAX_COLOR], /* Comments */
+	hd_c[MAX_COLOR], /* Paths (slashes) */
+	he_c[MAX_COLOR], /* Expansion operators: * ~ */
+	hn_c[MAX_COLOR], /* Numbers */
+	hp_c[MAX_COLOR], /* Parameters: - */
+	hq_c[MAX_COLOR], /* Quoted strings */
+	hr_c[MAX_COLOR], /* Redirection > */
+	hs_c[MAX_COLOR], /* Process separators | & ; */
+	hv_c[MAX_COLOR], /* Variables $ */
+	hw_c[MAX_COLOR], /* Wrong, non-existent command name */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
@@ -1117,13 +1117,13 @@ extern char
 	ws7_c[MAX_COLOR + 2],
 	ws8_c[MAX_COLOR + 2],
 
-	em_c[MAX_COLOR + 2], /* Error msg color */
-	li_c[MAX_COLOR + 2], /* Sel indicator color */
-	li_cb[MAX_COLOR],    /* Sel indicator color (for the files list) */
-	nm_c[MAX_COLOR + 2], /* Notice msg color */
-	ti_c[MAX_COLOR + 2], /* Trash indicator color */
-	tx_c[MAX_COLOR + 2], /* Text color */
-	si_c[MAX_COLOR + 2], /* stealth indicator color */
-	wm_c[MAX_COLOR + 2]; /* Warning msg color */
+	em_c[MAX_COLOR + 2], /* Error msg */
+	li_c[MAX_COLOR + 2], /* Sel indicator */
+	li_cb[MAX_COLOR],    /* Sel indicator (for the files list) */
+	nm_c[MAX_COLOR + 2], /* Notice msg */
+	ti_c[MAX_COLOR + 2], /* Trash indicator */
+	tx_c[MAX_COLOR + 2], /* Text */
+	si_c[MAX_COLOR + 2], /* Stealth indicator */
+	wm_c[MAX_COLOR + 2]; /* Warning msg */
 
 #endif /* HELPERS_H */
