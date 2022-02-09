@@ -975,65 +975,77 @@ FAIL:
 	return (char **)NULL;
 }
 
-static int
-join_and_run(char **args, char *name)
+static inline int
+run_cmd_noargs(char *arg, char *name)
 {
-	if (!args || !args[0])
-		return EXIT_FAILURE;
+	errno = 0;
+	char *cmd[] = {arg, name, NULL};
+	int ret = EXIT_SUCCESS;
 
-	/* Just an aplication name */
-	if (!args[1]) {
-		errno = 0;
-		char *cmd[] = {args[0], name, NULL};
-		int ret = EXIT_SUCCESS;
 #ifndef _NO_ARCHIVING
-		if (*args[0] == 'a' && args[0][1] == 'd' && !args[0][2]) {
-			ret = archiver(cmd, 'd');
-		} else {
-			ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-				E_NOSTDERR);
-		}
-#else
+	if (*arg == 'a' && arg[1] == 'd' && !arg[2])
+		ret = archiver(cmd, 'd');
+	else
 		ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+#else
+	ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 #endif
-		if (ret == EXIT_SUCCESS)
-			return EXIT_SUCCESS;
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[0], strerror(ret));
-		return EXIT_FAILURE;
-	}
 
+	if (ret == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+
+	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg, strerror(ret));
+	return EXIT_FAILURE;
+}
+
+static inline void
+append_params(char **args, char *name, char ***cmd)
+{
 	size_t i, n = 1, f = 0;
-	for (i = 0; args[i]; i++);
-
-	char **cmd = (char **)xnmalloc(i + 2, sizeof(char *));
-	cmd[0] = savestring(args[0], strlen(args[0]));
-
 	for (i = 1; args[i]; i++) {
 		if (*args[i] == '%' && *(args[i] + 1) == 'f' && !*(args[i] + 2)) {
 			f = 1;
-			cmd[n] = savestring(name, strlen(name));
+			(*cmd)[n] = savestring(name, strlen(name));
 			n++;
-		} else if (*args[i] == '$' && *(args[i] + 1) >= 'A'
+			continue;
+		}
+
+		if (*args[i] == '$' && *(args[i] + 1) >= 'A'
 		&& *(args[i] + 1) <= 'Z') {
 			char *env = expand_env(args[i]);
 			if (env) {
-				cmd[n] = savestring(env, strlen(env));
+				(*cmd)[n] = savestring(env, strlen(env));
 				n++;
 			}
-		} else if (*args[i] == '&') {
+			continue;
+		}
+
+		if (*args[i] == '&') {
 			bg_proc = 1;
 		} else {
-			cmd[n] = savestring(args[i], strlen(args[i]));
+			(*cmd)[n] = savestring(args[i], strlen(args[i]));
 			n++;
 		}
 	}
 
 	if (f == 0) {
-		cmd[n] = savestring(name, strlen(name));
+		(*cmd)[n] = savestring(name, strlen(name));
 		n++;
 	}
 
-	cmd[n] = (char *)NULL;
+	(*cmd)[n] = (char *)NULL;
+}
+
+static inline int
+run_cmd_plus_args(char **args, char *name)
+{
+	size_t i;
+	for (i = 0; args[i]; i++);
+
+	char **cmd = (char **)xnmalloc(i + 2, sizeof(char *));
+	cmd[0] = savestring(args[0], strlen(args[0]));
+
+	append_params(args, name, &cmd);
 
 	int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
 			bg_proc ? E_NOSTDERR : E_NOFLAG);
@@ -1045,6 +1057,20 @@ join_and_run(char **args, char *name)
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 	return EXIT_FAILURE;
+}
+
+static int
+join_and_run(char **args, char *name)
+{
+	if (!args || !args[0])
+		return EXIT_FAILURE;
+
+	/* Just an application name */
+	if (!args[1])
+		return run_cmd_noargs(args[0], name);
+
+	/* Application name plus paramters */
+	return run_cmd_plus_args(args, name);
 }
 
 /* Display available opening applications for FILENAME, get user input,
