@@ -192,6 +192,7 @@ get_properties(char *filename, const int dsize)
 	     read_grp = '-', write_grp = '-', exec_grp = '-',
 	     read_others = '-', write_others = '-', exec_others = '-';
 
+	/* Colors for permissions bits */
 	char *cu1 = PR_NONE, *cu2 = PR_NONE, *cu3 = PR_NONE,
 		 *cg1 = PR_NONE, *cg2 = PR_NONE, *cg3 = PR_NONE,
 		 *co1 = PR_NONE, *co2 = PR_NONE, *co3 = PR_NONE;
@@ -199,15 +200,24 @@ get_properties(char *filename, const int dsize)
 	mode_t val = (attr.st_mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) { read_usr = 'r'; cu1 = PR_READ; }
 	if (val & S_IWUSR) { write_usr = 'w'; cu2 = PR_WRITE; }
-	if (val & S_IXUSR) { exec_usr = 'x'; cu3 = PR_EXEC; }
+	if (val & S_IXUSR) {
+		exec_usr = 'x';
+		cu3 = S_ISDIR(attr.st_mode) ? PR_EXEC_DIR : PR_EXEC_REG;
+	}
 
 	if (val & S_IRGRP) { read_grp = 'r'; cg1 = PR_READ; }
 	if (val & S_IWGRP) { write_grp = 'w'; cg2 = PR_WRITE; }
-	if (val & S_IXGRP) { exec_grp = 'x'; cg3 = PR_EXEC; }
+	if (val & S_IXGRP) {
+		exec_grp = 'x';
+		cg3 = S_ISDIR(attr.st_mode) ? PR_EXEC_DIR : PR_EXEC_REG;
+	}
 
 	if (val & S_IROTH) { read_others = 'r'; co1 = PR_READ; }
 	if (val & S_IWOTH) { write_others = 'w'; co2 = PR_WRITE; }
-	if (val & S_IXOTH) { exec_others = 'x'; co3 = PR_EXEC; }
+	if (val & S_IXOTH) {
+		exec_others = 'x';
+		co3 = S_ISDIR(attr.st_mode) ? PR_EXEC_DIR : PR_EXEC_REG;
+	}
 
 	if (attr.st_mode & S_ISUID) {
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
@@ -478,15 +488,24 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	mode_t val = (props->mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) { read_usr = 'r'; cu1 = PR_READ; }
 	if (val & S_IWUSR) { write_usr = 'w'; cu2 = PR_WRITE; }
-	if (val & S_IXUSR) { exec_usr = 'x'; cu3 = PR_EXEC; }
+	if (val & S_IXUSR) {
+		exec_usr = 'x';
+		cu3 = props->dir ? PR_EXEC_DIR : PR_EXEC_REG;
+	}
 
 	if (val & S_IRGRP) { read_grp = 'r'; cg1 = PR_READ; }
 	if (val & S_IWGRP) { write_grp = 'w'; cg2 = PR_WRITE; }
-	if (val & S_IXGRP) { exec_grp = 'x'; cg3 = PR_EXEC; }
+	if (val & S_IXGRP) {
+		exec_grp = 'x';
+		cg3 = props->dir ? PR_EXEC_DIR : PR_EXEC_REG;
+	}
 
 	if (val & S_IROTH) { read_others = 'r'; co1 = PR_READ; }
 	if (val & S_IWOTH) { write_others = 'w'; co2 = PR_WRITE; }
-	if (val & S_IXOTH) { exec_others = 'x'; co3 = PR_EXEC; }
+	if (val & S_IXOTH) {
+		exec_others = 'x';
+		co3 = props->dir ? PR_EXEC_DIR : PR_EXEC_REG;
+	}
 
 	if (props->mode & S_ISUID) {
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');

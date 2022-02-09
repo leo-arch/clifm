@@ -217,17 +217,6 @@ extern int watch;
  * The Linux console is more important for us, so let's used dimmed color */
 #define SUG_NO_COLOR "\x1b[0;2m" /* Dimmed color */
 
-/* Colors for file properties */
-#define PR_READ    "\x1b[0;1;32m"
-#define PR_WRITE   "\x1b[0;1;31m"
-#define PR_EXEC    "\x1b[0;1;33m"
-#define PR_NONE    "\x1b[0;2;37m"
-#define PR_SPECIAL "\x1b[0;1;35m" /* SUID, GUID, ISVTX */
-#define PR_DATE    "\x1b[0;34m"
-#define PR_ID      "\x1b[1;33m"
-#define PR_SIZE    "\x1b[1;32m"
-#define PR_NUM_VAL "\x1b[1;36m" /* Properties in octal */
-
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are
  * non-printing chars. This is specially useful for the prompt, i.e.,
