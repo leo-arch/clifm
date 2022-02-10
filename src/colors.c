@@ -693,7 +693,7 @@ set_iface_colors(char **colors, const size_t words)
 			set_color(colors[i], 3, ts_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 'w' && strncmp(colors[i], "wp=", 3) == 0)
-			set_color(colors[i], 3, wp_c, RL_PRINTABLE);
+			set_color(colors[i], 3, wp_c, RL_NO_PRINTABLE);
 
 		free(colors[i]);
 	}

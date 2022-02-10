@@ -387,11 +387,12 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 
 	*len += strlen(*tmp);
 
+	size_t l = *len + 2	+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
 	if (!*res) {
-		*res = (char *)xnmalloc(*len + 1, sizeof(char));
+		*res = (char *)xnmalloc(l + 1, sizeof(char));
 		*(*res) = '\0';
 	} else {
-		*res = (char *)xrealloc(*res, (*len + 1) * sizeof(char));
+		*res = (char *)xrealloc(*res, (l + 1) * sizeof(char));
 	}
 
 	strcat(*res, *tmp);
@@ -644,12 +645,17 @@ ADD_STRING:
 #endif /* __HAIKU__ && __OpenBSD__ */
 
 /*			write_result(&result, &result_len, c); */
-			result = (char *)xrealloc(result, (result_len + 2) * sizeof(char));
+			size_t new_len = result_len + 2
+							+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
+			result = (char *)xrealloc(result, new_len * sizeof(char));
 			result[result_len] = (char)c;
 			result_len++;
 			result[result_len] = '\0';
 		}
 	}
+
+	if (wrong_cmd == 1)
+		sprintf(result + result_len, "\001\x1b[0m\002%s", wp_c);
 
 	/* Remove trailing new line char, if any */
 	if (result && result[result_len - 1] == '\n')

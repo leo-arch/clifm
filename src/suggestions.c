@@ -1338,8 +1338,8 @@ rl_suggestions(const unsigned char c)
 	switch(*lb) {
 	case 'b': /* Bookmarks names */
 		if (lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
-			size_t i = 0;
-			for (; bookmark_names[i]; i++) {
+			size_t i;
+			for (i = 0; bookmark_names[i]; i++) {
 				if (*word == *bookmark_names[i]
 				&& strncmp(bookmark_names[i], word, wlen) == 0) {
 					suggestion.type = CMD_SUG;
@@ -1385,8 +1385,8 @@ rl_suggestions(const unsigned char c)
 
 	case 'c': /* Color schemes */
 		if (lb[1] == 's' && lb[2] == ' ') {
-			size_t i = 0;
-			for (; color_schemes[i]; i++) {
+			size_t i;
+			for (i = 0; color_schemes[i]; i++) {
 				if (*last_word == *color_schemes[i]
 				&& strncmp(color_schemes[i], word, wlen) == 0) {
 					suggestion.type = CMD_SUG;
@@ -1418,8 +1418,8 @@ rl_suggestions(const unsigned char c)
 
 	case 'n': /* Remotes */
 		if (lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
-			size_t i = 0;
-			for (; remotes[i].name; i++) {
+			size_t i;
+			for (i = 0; remotes[i].name; i++) {
 				if (*word == *remotes[i].name
 				&& strncmp(remotes[i].name, word, wlen) == 0) {
 					suggestion.type = CMD_SUG;
@@ -1436,8 +1436,8 @@ rl_suggestions(const unsigned char c)
 	case 'p': /* Profiles */
 		if (lb[1] == 'f' && lb[2] == ' ' && (strncmp(lb + 3, "set", 3) == 0
 		|| strncmp(lb + 3, "del", 3) == 0)) {
-			size_t i = 0;
-			for (; profile_names[i]; i++) {
+			size_t i;
+			for (i = 0; profile_names[i]; i++) {
 				if (*word == *profile_names[i]
 				&& strncmp(profile_names[i], word, wlen) == 0) {
 					suggestion.type = CMD_SUG;
@@ -1737,14 +1737,14 @@ SUCCESS:
 		/* Restore color */
 		if (!wrong_cmd) {
 			fputs(cur_color ? cur_color : tx_c, stdout);
-		} /*else {
+		} else {
 			fputs(wp_c, stdout);
-		} */
+		}
 	} else {
-/*		if (wrong_cmd) {
+		if (wrong_cmd) {
 			fputs("\x1b[0m", stdout);
 			fputs(wp_c, stdout);
-		} */
+		}
 		suggestion.printed = 0;
 	}
 	free(first_word);
