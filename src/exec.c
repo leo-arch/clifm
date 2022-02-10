@@ -153,7 +153,7 @@ run_and_refresh(char **cmd)
 		n++;
 	}
 
-	if (!cmd[2] && cmd[1] && *cmd[0] == 'c' && *(cmd[0] + 1) == 'p'
+	if (cmd[1] && !cmd[2] && *cmd[0] == 'c' && *(cmd[0] + 1) == 'p'
 	&& *(cmd[0] + 2) == ' ') {
 		tcmd[n][0] = '.';
 		tcmd[n][1] = '\0';
