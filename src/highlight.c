@@ -32,8 +32,6 @@ typedef char *rl_cpvfunc_t;
 #include <readline/readline.h>
 #endif
 
-#include <unistd.h> // DELETE: ONLY TESTING
-
 #include "strings.h"
 #include "checks.h"
 #include "aux.h"
@@ -148,31 +146,31 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		if (cur_color != hq_c && cur_color != hc_c)
 			cl = tx_c;
 		break;
-	case '/': cl = cur_color != hq_c ? hd_c : (char *)NULL; break;
+	case '/': cl = (cur_color != hq_c) ? hd_c : (char *)NULL; break;
 	case '\'': /* fallthrough */
 	case '"': cl = hq_c; break;
 	case '\\': /* fallthrough */
 	case ENTER: cl = tx_c; break;
 	case '~': /* fallthrough */
-	case '*': cl = cur_color != hq_c ? he_c : (char *)NULL; break;
+	case '*': cl = (cur_color != hq_c) ? he_c : (char *)NULL; break;
 	case '=': /* fallthrough */
 	case '(': /* fallthrough */
 	case ')': /* fallthrough */
 	case '[': /* fallthrough */
 	case ']': /* fallthrough */
 	case '{': /* fallthrough */
-	case '}': cl = cur_color != hq_c ? hb_c : (char *)NULL; break;
+	case '}': cl = (cur_color != hq_c) ? hb_c : (char *)NULL; break;
 	case '|': /* fallthrough */
 	case '&': /* fallthrough */
-	case ';': cl = cur_color != hq_c ? hs_c : (char *)NULL; break;
+	case ';': cl = (cur_color != hq_c) ? hs_c : (char *)NULL; break;
 	case '<': /* fallthrough */
-	case '>': cl = cur_color != hq_c ? hr_c : (char *)NULL; break;
-	case '$': cl = cur_color != hq_c ? hv_c : (char *)NULL; break;
+	case '>': cl = (cur_color != hq_c) ? hr_c : (char *)NULL; break;
+	case '$': cl = (cur_color != hq_c) ? hv_c : (char *)NULL; break;
 	case '-':
 		if (prev == ' ' || prev == 0)
-			cl = cur_color != hq_c ? hp_c : (char *)NULL;
+			cl = (cur_color != hq_c) ? hp_c : (char *)NULL;
 		break;
-	case '#': cl = cur_color != hq_c ? hc_c : (char *)NULL; break;
+	case '#': cl = (cur_color != hq_c) ? hc_c : (char *)NULL; break;
 	default:
 		if (cur_color != hq_c && cur_color != hc_c
 		&& cur_color != hv_c && cur_color != hp_c)

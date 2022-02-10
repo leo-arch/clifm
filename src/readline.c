@@ -80,7 +80,7 @@ size_t wcn = 0; */
 
 /* Delete key implementation */
 static void
-xdelete()
+xdelete(void)
 {
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -103,7 +103,7 @@ xdelete()
 
 /* Backspace implementation */
 static void
-xbackspace()
+xbackspace(void)
 {
 	if (rl_point != rl_end) {
 		if (rl_point) {
