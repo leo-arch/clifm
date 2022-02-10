@@ -2318,8 +2318,13 @@ check_options(void)
 	if (!fzftab_options)
 		fzftab_options = savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
 
-	if (!wprompt_str)
-		wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
+	if (!wprompt_str) {
+		if (colorize == 1)
+			wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
+		else
+			wprompt_str = savestring(DEF_WPROMPT_STR_NO_COLOR,
+						strlen(DEF_WPROMPT_STR_NO_COLOR));
+	}
 
 	/* Do no override command line options */
 	if (xargs.apparent_size == UNSET)
