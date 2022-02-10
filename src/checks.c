@@ -60,7 +60,8 @@ is_url(char *url)
 }
 
 /* Check whether current terminal (_TERM) supports colors and requesting
- * cursor position (needed to print suggestions) */
+ * cursor position (needed to print suggestions). If not, disable the
+ * feature accordingly */
 static void
 check_term_support(const char *_term)
 {
@@ -83,6 +84,8 @@ check_term_support(const char *_term)
 	xargs.colorize = (cs == 0) ? 0 : UNSET;
 #ifndef _NO_SUGGESTIONS
 	xargs.suggestions = (cprs == 0) ? 0 : UNSET;
+#else
+	UNUSED(cprs);
 #endif /* _NO_SUGGESTIONS */
 }
 
