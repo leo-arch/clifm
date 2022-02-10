@@ -97,7 +97,7 @@ recover_from_wrong_cmd(void)
 {
 	/* Check rl_dispathing to know whether we are called from a keybind,
 	 * in which case we should skip this check */
-	if (rl_line_buffer && !rl_dispatching) {
+	if (rl_line_buffer && (rl_dispatching == 0 || nwords > 1)) {
 		char *p = (strrchr(rl_line_buffer, ' '));
 		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
 			return EXIT_FAILURE;
