@@ -34,19 +34,19 @@
 //for i in /usr/share/terminfo/*/*; do
 //	name="$(echo "$i" | cut -d/ -f6)"
 //	num_colors="$(tput -T "$name" colors 2>/dev/null)"
+//	# CURPOS: Request current cursor position
 //	curpos="$(tput -T "$name" u7 2>/dev/null)"
+//	# CUP: Set cursor to specified COLUMN and LINE 
+//	cup="$(tput -T "$name" cup 2>/dev/null | tr -d '\0')"
 //
 //	[ -z "$num_colors" ] && num_colors=-1
 //
-//	if [ "$num_colors" = -1 ] && [ -z "$curpos" ]; then
+//	if [ "$num_colors" = -1 ] && { [ -z "$curpos" ] || [ -z "$cup" ]; }; then
 //		continue
 //	fi
 //
-//	if [ -n "$curpos" ]; then
-//		req_curpos=1
-//	else
-//		req_curpos=0
-//	fi
+//	req_curpos=0
+//	[ -n "$curpos" ] && [ -n "$cup" ] && req_curpos=1
 //
 //	echo "{\"$name\", ${#name}, $num_colors, $req_curpos}," >> "$file"
 //done
@@ -86,7 +86,6 @@ const struct terms_t TERM_INFO[] = {
 	{"ansi-color-2-emx", 16, 8, 1},
 	{"ansi-color-3-emx", 16, 8, 1},
 	{"ansi-emx", 8, 8, 1},
-	{"ansi+enq", 8, -1, 1},
 	{"ansil", 5, 8, 0},
 	{"ansis", 5, 8, 0},
 	{"ansi.sys", 8, 8, 1},
@@ -303,7 +302,6 @@ const struct terms_t TERM_INFO[] = {
 	{"linux-basic", 11, 8, 1},
 	{"linux-c", 7, 8, 1},
 	{"linux-c-nc", 10, 8, 1},
-	{"linux+decid", 11, -1, 1},
 	{"linux-koi8", 10, 8, 1},
 	{"linux-koi8r", 11, 8, 1},
 	{"linux-lat", 9, 8, 1},
@@ -622,7 +620,6 @@ const struct terms_t TERM_INFO[] = {
 	{"tvi912c-2p-mc", 13, -1, 1},
 	{"tvi912c-2p-p", 12, -1, 1},
 	{"tvi912c-2p-unk", 14, -1, 1},
-	{"tvi912cc", 8, -1, 1},
 	{"tvi912c-mc", 10, -1, 1},
 	{"tvi912c-mc-2p", 13, -1, 1},
 	{"tvi912c-mc-vb", 13, -1, 1},
@@ -685,8 +682,6 @@ const struct terms_t TERM_INFO[] = {
 	{"vscode", 6, 256, 1},
 	{"vscode-direct", 13, 16777216, 1},
 	{"vt100+", 6, 8, 1},
-	{"vt100+enq", 9, -1, 1},
-	{"vt102+enq", 9, -1, 1},
 	{"vt200", 5, -1, 1},
 	{"vt200-w", 7, -1, 1},
 	{"vt220", 5, -1, 1},
