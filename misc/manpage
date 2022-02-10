@@ -1172,27 +1172,28 @@ The following codes are used for different interface elements (in the \fIInterfa
  hs = process separators (; & |)
  hv = variable names (starting with '$')
 
- \fBDefault Prompt\fR
+ \fBPrompt elements\fR
  li = selected files
  ti = trash indicator
  em = error message indicator
  wm = warning message indicator
  nm = notice message indicator
  si = stealth mode indicator
+ tx = command line text (regular prompt)
+ wp = command line text (warning prompt)
 
  \fBMiscellaneous interface elements\fR
  bm  = bookmarked directory in the bookmarks screen
- el  = ELN color
- mi  = misc indicators (disk usage, sort method, bulk rename, jump database list)
- tx  = command line text
- df  = default color
  dc  = files counter
- wc  = welcome message
+ df  = default color
  dh  = directory history index
  dl  = dividing line
+ el  = ELN color
+ mi  = misc indicators (disk usage, sort method, bulk rename, jump database list)
  ts  = matching suffix for possible TAB completed entries
- wsN = color for workspace N (1-8)
  tt  = tilde for trimmed file names
+ wc  = welcome message
+ wsN = color for workspace N (1-8)
 .TP
 Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the corresponding color scheme file: \fBdi=01;34\fR. If you want ELN's to be red, add this code to the \fIInterfaceColors\fR line: \fBel=00;31\fR
 .TP
@@ -1387,19 +1388,11 @@ The wrong command name check is omitted if the input string:
 .TP
 The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt just modify the \fIWarningPromptStr\fR line in the configuration file. It defaults to 
 
- \fB"\\[\\e[00;02;31m\\](!) > "\fR
+ \fB"\\[\\e[0m\\]\\[\\e[00;02;31m\\](!) > "\fR
 .TP
 the last line of the regular prompt will become "\fB(!) > \fR", printed in a dimmed red color, including the input string.
 .TP
-To change the color of the input string while in the warning prompt add the corresponding color code to the end of the warning prompt string. For example: 
-
- \fB\\[\\e[00;02;31m\\](!) > \\[\\e[01;36m\\]\fR
-.TP
-makes the input text bold magenta, while
-
- \fB\\[\\e[00;02;31m\\](!) > \\[\\e[0m\\]\fR
-.TP
-disables color (the input string uses the current foreground color of the running terminal).
+To change the color of the input text while in the warning prompt use the \fBwp\fR color code (see the \fBCOLOR CODES\fR section above). It defaults to dimmed red, just as the warning prompt itself.
 .TP
 To disable this feature use the \fI--no-warning-prompt\fR command line option or set the \fIWarningPrompt\fR option to \fBfalse\fR in the configuration file.
 .TP
