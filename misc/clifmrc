@@ -104,7 +104,7 @@ WarningPrompt=true
 
 # String to be used by the warning prompt. It can be customized by means of
 # the same rules used by the regular prompt (see above).
-WarningPromptStr="\[\e[00;02;31m\](!) > "
+WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
 
 # TAB completion mode: either 'standard' (default) or 'fzf'
 TabCompletionMode=
