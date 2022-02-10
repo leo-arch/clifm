@@ -59,6 +59,23 @@ is_url(char *url)
 	return EXIT_FAILURE;
 }
 
+static void
+check_color_support(const char *_term)
+{
+	size_t i, len = strlen(_term);
+	int f = 0;
+	for (i = 0; COLOR_TERMS[i].name; i++) {
+		if (*_term != *COLOR_TERMS[i].name || len != COLOR_TERMS[i].len)
+			continue;
+		if (strcmp(_term, COLOR_TERMS[i].name) != 0)
+			continue;
+		f = 1;
+		break;
+	}
+
+	xargs.colorize = (f == 0) ? 0 : UNSET;
+}
+
 void
 check_term(void)
 {
@@ -79,18 +96,7 @@ check_term(void)
 		}
 	}
 
-	size_t l = strlen(_term);
-	int f = 0;
-	for (i = 0; COLOR_TERMS[i].name; i++) {
-		if (*_term != *COLOR_TERMS[i].name || l != COLOR_TERMS[i].len)
-			continue;
-		if (strcmp(_term, COLOR_TERMS[i].name) != 0)
-			continue;
-		f = 1;
-		break;
-	}
-
-	xargs.colorize = (f == 0) ? 0 : UNSET;
+	check_color_support(_term);
 
 	return;
 }

@@ -22,6 +22,22 @@
  * MA 02110-1301, USA.
 */
 
+/* Shell script used to create this list */
+//#!/bin/sh
+//file="/tmp/color_terms"
+//
+//rm -- "$file"
+//
+//for i in /usr/share/terminfo/*/*; do
+//	name="$(echo "$i" | cut -d/ -f6)"
+//	value="$(tput -T "$name" colors)"
+//	if [ "$value" -ne -1 ]; then
+//		echo "{\"$name\", ${#name}}" >> "$file"
+//	fi
+//done
+//
+//exit 1
+
 #ifndef COLORTERMS_H
 #define COLORTERMS_H
 
