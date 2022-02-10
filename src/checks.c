@@ -45,7 +45,7 @@
 
 #include "aux.h"
 #include "misc.h"
-#include "colorterms.h"
+#include "term_info.h"
 
 /* Terminals known not to be able to handle escape sequences */
 static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
@@ -59,21 +59,31 @@ is_url(char *url)
 	return EXIT_FAILURE;
 }
 
+/* Check whether current terminal (_TERM) supports colors and requesting
+ * cursor position (needed to print suggestions) */
 static void
-check_color_support(const char *_term)
+check_term_support(const char *_term)
 {
 	size_t i, len = strlen(_term);
-	int f = 0;
-	for (i = 0; COLOR_TERMS[i].name; i++) {
-		if (*_term != *COLOR_TERMS[i].name || len != COLOR_TERMS[i].len)
+	/* Color and cursor position request support */
+	int cs = 0, cprs = 0;
+
+	for (i = 0; TERM_INFO[i].name; i++) {
+		if (*_term != *TERM_INFO[i].name || len != TERM_INFO[i].len)
 			continue;
-		if (strcmp(_term, COLOR_TERMS[i].name) != 0)
+		if (strcmp(_term, TERM_INFO[i].name) != 0)
 			continue;
-		f = 1;
+		if (TERM_INFO[i].req_curpos == 1)
+			cprs = 1;
+		if (TERM_INFO[i].color != -1)
+			cs = 1;
 		break;
 	}
 
-	xargs.colorize = (f == 0) ? 0 : UNSET;
+	xargs.colorize = (cs == 0) ? 0 : UNSET;
+#ifndef _NO_SUGGESTIONS
+	xargs.suggestions = (cprs == 0) ? 0 : UNSET;
+#endif /* _NO_SUGGESTIONS */
 }
 
 void
@@ -96,7 +106,7 @@ check_term(void)
 		}
 	}
 
-	check_color_support(_term);
+	check_term_support(_term);
 
 	return;
 }
