@@ -1626,6 +1626,8 @@ unset_xargs(void)
 	xargs.classify = UNSET;
 	xargs.clear_screen = UNSET;
 	xargs.color_scheme = UNSET;
+/*	xargs.colorize = UNSET; */
+	xargs.columns = UNSET;
 	xargs.config = UNSET;
 	xargs.control_d_exits = UNSET;
 	xargs.cwd_in_title = UNSET;
@@ -1658,8 +1660,6 @@ unset_xargs(void)
 	xargs.max_dirhist = UNSET;
 	xargs.max_path = UNSET;
 	xargs.mount_cmd = UNSET;
-	xargs.colorize = UNSET;
-	xargs.columns = UNSET;
 	xargs.no_dirjump = UNSET;
 	xargs.noeln = UNSET;
 	xargs.only_dirs = UNSET;

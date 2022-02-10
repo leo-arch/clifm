@@ -45,6 +45,7 @@
 
 #include "aux.h"
 #include "misc.h"
+#include "colorterms.h"
 
 /* Terminals known not to be able to handle escape sequences */
 static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
@@ -62,8 +63,8 @@ void
 check_term(void)
 {
 	char *_term = getenv("TERM");
-	if (!_term) {
-		fprintf(stderr, _("%s: Error getting terminal type\n"), PROGRAM_NAME);
+	if (!_term || !*_term) {
+		fprintf(stderr, _("%s: Error opening terminal: unknown\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -77,6 +78,19 @@ check_term(void)
 			exit(EXIT_FAILURE);
 		}
 	}
+
+	size_t l = strlen(_term);
+	int f = 0;
+	for (i = 0; COLOR_TERMS[i].name; i++) {
+		if (*_term != *COLOR_TERMS[i].name || l != COLOR_TERMS[i].len)
+			continue;
+		if (strcmp(_term, COLOR_TERMS[i].name) != 0)
+			continue;
+		f = 1;
+		break;
+	}
+
+	xargs.colorize = (f == 0) ? 0 : UNSET;
 
 	return;
 }
