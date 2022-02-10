@@ -61,10 +61,10 @@ struct terms_t {
 
 	/* Let's hardcode the length of each terminal name to prevent unnecessary
 	 * calls to strlen(3): comparing the first byte and this length to those
-	 * of the current terminal is 90% of the time enough */
+	 * of the current terminal is 99% of the time enough */
 	size_t len;
 	int color; /* -1 means no color support */
-	int req_curpos; /* is terminal able to inform current cursor position? */
+	int req_curpos; /* is terminal able to get/set cursor position? */
 };
 
 const struct terms_t TERM_INFO[] = {

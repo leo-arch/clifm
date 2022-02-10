@@ -73,6 +73,7 @@ typedef char *rl_cpvfunc_t;
 
 char *last_word = (char *)NULL;
 int last_word_offset = 0;
+int point_is_first_word = 0;
 
 #ifndef _NO_HIGHLIGHT
 /* Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
@@ -97,7 +98,7 @@ recover_from_wrong_cmd(void)
 {
 	/* Check rl_dispathing to know whether we are called from a keybind,
 	 * in which case we should skip this check */
-	if (rl_line_buffer && (rl_dispatching == 0 || nwords > 1)) {
+	if (rl_line_buffer && (rl_dispatching == 0 || (nwords > 1 && point_is_first_word == 0))) {
 		char *p = (strrchr(rl_line_buffer, ' '));
 		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
 			return EXIT_FAILURE;
@@ -1316,7 +1317,7 @@ rl_suggestions(const unsigned char c)
 
 	/* If more than one word and the cursor is on the first word,
 	 * jump to the check command name section */
-	int point_is_first_word = 0;
+	point_is_first_word = 0;
 	if (nwords >= 2 && rl_point <= (int)full_word + 1) {
 		point_is_first_word = 1;
 		goto CHECK_CMD;
