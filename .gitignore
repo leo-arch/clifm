@@ -12,6 +12,7 @@ clifm-debian/
 test/
 .obs/
 images/
+src/term_info.sh
 
 # Object files
 *.o
