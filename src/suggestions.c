@@ -603,7 +603,7 @@ FREE:
 }
 
 static inline void
-print_directory_suggestion(const int i, const size_t len, char *color)
+print_directory_suggestion(const size_t i, const size_t len, char *color)
 {
 	if (suggest_filetype_color == 1)
 		color = file_info[i].color;
@@ -624,7 +624,7 @@ print_directory_suggestion(const int i, const size_t len, char *color)
 }
 
 static inline void
-print_reg_file_suggestion(char *str, const int i, size_t len,
+print_reg_file_suggestion(char *str, const size_t i, size_t len,
                           char *color, const int dot_slash)
 {
 	if (suggest_filetype_color)
@@ -668,7 +668,7 @@ static int
 check_filenames(char *str, size_t len, const unsigned char c,
 				const int first_word, const size_t full_word)
 {
-	int i = (int)files;
+//	int i = (int)files;
 	char *color = (suggest_filetype_color == 1) ? no_c : sf_c;
 
 	skip_leading_backslashes(&str, &len);
@@ -676,7 +676,9 @@ check_filenames(char *str, size_t len, const unsigned char c,
 	skip_leading_spaces(&str, &len);
 	remove_trailing_slash(&str, &len);
 
-	while (--i >= 0) {
+	size_t i;
+	for (i = 0; i < files; i++) {
+//	while (--i >= 0) {
 		if (!file_info[i].name || TOUPPER(*str) != TOUPPER(*file_info[i].name))
 			continue;
 
