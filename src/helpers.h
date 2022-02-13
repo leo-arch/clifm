@@ -287,7 +287,9 @@ extern int watch;
 #define VAR_SUG	       12
 #define SEL_SUG	       13
 #define BACKDIR_SUG	   14
-#define TAG_SUG        15
+#define TAGT_SUG       15 /* t:TAG (expand tag TAG) */
+#define TAGC_SUG       16 /* :TAG (param to tag command) */
+#define TAGS_SUG       17 /* TAG  (param to tag command) */
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR

@@ -72,52 +72,52 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 *.go=00;01:*.java=00;01:*.js=00;01:*.lua=00;01:*.rb=00;01:*.rs=00;01:"
 
 /* Filetypes */
-#define DEF_DI_C "\x1b[01;34m"
-#define DEF_ND_C "\x1b[01;31m"
-#define DEF_ED_C "\x1b[02;34m"
-#define DEF_NE_C "\x1b[02;31m"
-#define DEF_FI_C "\x1b[0m"
-#define DEF_EF_C "\x1b[02;33m"
-#define DEF_NF_C "\x1b[02;31m"
-#define DEF_LN_C "\x1b[01;36m"
-#define DEF_MH_C "\x1b[30;46m"
-#define DEF_OR_C "\x1b[02;36m"
-#define DEF_PI_C "\x1b[00;35m"
-#define DEF_SO_C "\x1b[01;35m"
-#define DEF_BD_C "\x1b[01;33m"
-#define DEF_CD_C "\x1b[1m"
-#define DEF_SU_C "\x1b[37;41m"
-#define DEF_SG_C "\x1b[30;43m"
-#define DEF_CA_C "\x1b[30;41m"
-#define DEF_TW_C "\x1b[30;42m"
-#define DEF_OW_C "\x1b[34;42m"
-#define DEF_ST_C "\x1b[37;44m"
-#define DEF_EX_C "\x1b[01;32m"
-#define DEF_EE_C "\x1b[00;32m"
-#define DEF_NO_C "\x1b[00;31;47m"
-#define DEF_UF_C "\x1b[34;47m"
+#define DEF_DI_C "\x1b[01;34m" /* Dir */
+#define DEF_ND_C "\x1b[01;31m" /* Unaccessible dir */
+#define DEF_ED_C "\x1b[02;34m" /* Empty dir */
+#define DEF_NE_C "\x1b[02;31m" /* Empty dir no read permission */
+#define DEF_FI_C "\x1b[0m"     /* Regular file */
+#define DEF_EF_C "\x1b[02;33m" /* Empty regular file */
+#define DEF_NF_C "\x1b[02;31m" /* Unaccessible file */
+#define DEF_LN_C "\x1b[01;36m" /* Symbolic link */
+#define DEF_MH_C "\x1b[30;46m" /* Multi-link */
+#define DEF_OR_C "\x1b[02;36m" /* Orphaned/broken symlink */
+#define DEF_PI_C "\x1b[00;35m" /* FIFO/pipe */
+#define DEF_SO_C "\x1b[01;35m" /* Socket */
+#define DEF_BD_C "\x1b[01;33m" /* Block device */
+#define DEF_CD_C "\x1b[1m"     /* Character device */
+#define DEF_SU_C "\x1b[37;41m" /* SUID file */
+#define DEF_SG_C "\x1b[30;43m" /* SGID file */
+#define DEF_CA_C "\x1b[30;41m" /* File with capabilities */
+#define DEF_TW_C "\x1b[30;42m" /* Sticky and other-writable */
+#define DEF_OW_C "\x1b[34;42m" /* Other-writable */
+#define DEF_ST_C "\x1b[37;44m" /* Sticky bit set */
+#define DEF_EX_C "\x1b[01;32m" /* Executable file */
+#define DEF_EE_C "\x1b[00;32m" /* Empty executable file */
+#define DEF_NO_C "\x1b[00;31;47m" /* Unknown file type */
+#define DEF_UF_C "\x1b[34;47m" /* Un'stat'able file */
 
 /* Interface */
-#define DEF_EL_C "\x1b[01;33m"
-#define DEF_MI_C "\x1b[01;36m"
-#define DEF_DL_C "\x1b[00;34m"
-#define DEF_TX_C "\x1b[0m"
-#define DEF_DF_C "\x1b[0m"
+#define DEF_BM_C "\x1b[01;36m" /* Bookmarked dirs in bookmarks screen */
 #define DEF_DC_C "\x1b[00;02;34m"
-#define DEF_WC_C "\x1b[01;36m"
-#define DEF_DH_C "\x1b[00;36m"
-#define DEF_LI_C "\001\x1b[01;32m\002"
-#define DEF_LI_CB "\x1b[01;32m"
-#define DEF_SI_C "\001\x1b[01;34m\002"
-#define DEF_TI_C "\001\x1b[01;36m\002"
-#define DEF_EM_C "\001\x1b[01;31m\002"
-#define DEF_WM_C "\001\x1b[01;33m\002"
-#define DEF_NM_C "\001\x1b[01;32m\002"
-#define DEF_BM_C "\x1b[01;36m"
+#define DEF_DF_C "\x1b[0m" /* Default color */
+#define DEF_DH_C "\x1b[00;36m" /* Directory history indicator */
+#define DEF_DL_C "\x1b[00;34m" /* Block device */
+#define DEF_EL_C "\x1b[01;33m" /* ELN's */
+#define DEF_EM_C "\001\x1b[01;31m\002" /* Error msg indicator */
+#define DEF_LI_C "\001\x1b[01;32m\002" /* Sel files indicator (prompt) */
+#define DEF_LI_CB "\x1b[01;32m" /* Sel files indicator (files list) */
+#define DEF_MI_C "\x1b[01;36m" /* Misc */
+#define DEF_NM_C "\001\x1b[01;32m\002" /* Notice msg indicator */
+#define DEF_SI_C "\001\x1b[01;34m\002" /* Stealth mode indicator */
+#define DEF_TI_C "\001\x1b[01;36m\002" /* Trash indicator */
+#define DEF_TX_C "\x1b[0m" /* Input text */
+#define DEF_WC_C "\x1b[01;36m" /* Welcome message */
+#define DEF_WM_C "\001\x1b[01;33m\002" /* Warning msg indicator */
 
-#define DEF_TS_C "\x1b[04;35m"
-#define DEF_TT_C "\x1b[01;02;36m"
-#define DEF_WP_C "\x1b[02;31m"
+#define DEF_TS_C "\x1b[04;35m" /* Matching prefix for TAB completed possible entries */
+#define DEF_TT_C "\x1b[01;02;36m" /* Tilde for trimmed file names */
+#define DEF_WP_C "\x1b[02;31m" /* Warning prompt input text */
 
 /* Workspaces */
 #define DEF_WS1_C "\001\x1b[0;34m\002"
@@ -130,24 +130,27 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_WS8_C "\001\x1b[0;36m\002"
 
 /* Suggestions */
-#define DEF_SB_C "\x1b[02;33m"
-#define DEF_SH_C "\x1b[02;35m"
-#define DEF_SF_C "\x1b[02;04;36m"
-#define DEF_SC_C "\x1b[02;31m"
-#define DEF_SX_C "\x1b[02;32m"
-#define DEF_SP_C "\x1b[02;31m"
+#define DEF_SB_C "\x1b[02;33m" /* Shell built-ins */
+#define DEF_SH_C "\x1b[02;35m" /* Commands history */
+#define DEF_SF_C "\x1b[02;04;36m"  /* ELN's, bookmark, file, and directory names */
+#define DEF_SC_C "\x1b[02;31m" /* Aliases and binaries in PATH */
+#define DEF_SX_C "\x1b[02;32m" /* CliFM internal commands and parameters */
+#define DEF_SP_C "\x1b[02;31m" /* Suggestions pointer (12 > filename) */
 
 /* Highlight */
-#define DEF_HB_C "\x1b[00;36m"
-#define DEF_HC_C "\x1b[02;31m"
-#define DEF_HD_C "\x1b[00;36m"
-#define DEF_HE_C "\x1b[00;36m"
-#define DEF_HN_C "\x1b[00;35m"
-#define DEF_HP_C "\x1b[00;36m"
-#define DEF_HQ_C "\x1b[00;33m"
-#define DEF_HR_C "\x1b[00;31m"
-#define DEF_HS_C "\x1b[00;32m"
-#define DEF_HV_C "\x1b[00;32m"
+#define DEF_HB_C "\x1b[00;36m" /* Parenthesis, Brackets ( {[()]} ) */
+#define DEF_HC_C "\x1b[02;31m" /* Comments (#comment) */
+#define DEF_HD_C "\x1b[00;36m" /* Slashes (for paths) */
+#define DEF_HE_C "\x1b[00;36m" /* Expansion operators (* ~) */
+#define DEF_HN_C "\x1b[00;35m" /* Numbers (including ELN's) */
+#define DEF_HP_C "\x1b[00;36m" /* Parameters (e.g. -h --help) */
+#define DEF_HQ_C "\x1b[00;33m" /* Quotes (single and double) */
+#define DEF_HR_C "\x1b[00;31m" /* Redirection operator (>) */
+#define DEF_HS_C "\x1b[00;32m" /* Commands separator (; & |)*/
+#define DEF_HV_C "\x1b[00;32m" /* Variables ($VAR) */
+/* This one is purely internal: cur_color is set to this value when
+ * entering the warning prompt, so that that we can check cur_color
+ * anytime to know whether we are in the warning prompt or not */
 #define DEF_HW_C "\x1b[00;31m"
 
 #define DEF_DIR_ICO_C "\x1b[00;33m"
@@ -160,7 +163,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define PR_NONE     "\x1b[0;2;37m"
 #define PR_SPECIAL  "\x1b[0;1;35m" /* SUID, GUID, ISVTX */
 #define PR_DATE     "\x1b[0;34m"
-#define PR_ID       "\x1b[1;33m"
+#define PR_ID       "\x1b[1;33m" /* UID, GID */
 #define PR_SIZE     "\x1b[1;32m"
 #define PR_SIZE_DIR "\x1b[1;32m"
 #define PR_SIZE_REG "\x1b[1;36m"
@@ -180,8 +183,8 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_CASE_SENS_PATH_COMP 0
 #define DEF_CASE_SENS_SEARCH 0
 #define DEF_CD_ON_QUIT 0
-#define DEF_CHECK_CAP 1
-#define DEF_CHECK_EXT 1
+#define DEF_CHECK_CAP 1 /* Check files capabilities */
+#define DEF_CHECK_EXT 1 /* Check file names extension (for color) */
 #define DEF_CLASSIFY 1
 #define DEF_CLEAR_SCREEN 1
 #define DEF_COLOR_SCHEME "default"

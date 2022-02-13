@@ -392,22 +392,22 @@ set_colorscheme(char *arg)
 {
 	size_t i, cs_found = 0;
 	for (i = 0; color_schemes[i]; i++) {
-		if (*arg == *color_schemes[i]
-		&& strcmp(arg, color_schemes[i]) == 0) {
-			cs_found = 1;
-			if (set_colors(arg, 0) == EXIT_SUCCESS) {
-				cur_cscheme = color_schemes[i];
-				switch_cscheme = 1;
+		if (*arg != *color_schemes[i]
+		|| strcmp(arg, color_schemes[i]) != 0)
+			continue;
+		cs_found = 1;
+		if (set_colors(arg, 0) != EXIT_SUCCESS)
+			continue;
+		cur_cscheme = color_schemes[i];
+		switch_cscheme = 1;
 
-				if (autols) {
-					free_dirlist();
-					list_dir();
-				}
-
-				switch_cscheme = 0;
-				return EXIT_SUCCESS;
-			}
+		if (autols) {
+			free_dirlist();
+			list_dir();
 		}
+
+		switch_cscheme = 0;
+		return EXIT_SUCCESS;
 	}
 
 	if (!cs_found)
@@ -619,8 +619,8 @@ set_iface_colors(char **colors, const size_t words)
 		else if (*colors[i] == 'h' && strncmp(colors[i], "hv=", 3) == 0)
 			set_color(colors[i], 3, hv_c, RL_PRINTABLE);
 
-		else if (*colors[i] == 'h' && strncmp(colors[i], "hw=", 3) == 0)
-			set_color(colors[i], 3, hw_c, RL_PRINTABLE);
+/*		else if (*colors[i] == 'h' && strncmp(colors[i], "hw=", 3) == 0)
+			set_color(colors[i], 3, hw_c, RL_PRINTABLE); */
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "sb=", 3) == 0)
 			set_color(colors[i], 3, sb_c, RL_PRINTABLE);

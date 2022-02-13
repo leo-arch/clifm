@@ -1262,6 +1262,24 @@ print_warning_prompt(const char c)
 	}
 }
 
+static inline int
+check_tags(const char *str, const size_t len, int type)
+{
+	if (!str || !*str || len == 0 || tags_n == 0 || !tags)
+		return 0;
+
+	size_t i;
+	for (i = 0; tags[i]; i++) {
+		if (*str != *tags[i] || strncmp(str, tags[i], len) != 0)
+			continue;
+		suggestion.type = type;
+		print_suggestion(tags[i], len, sf_c);
+		return 1;
+	}
+
+	return 0;
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -1455,6 +1473,16 @@ rl_suggestions(const unsigned char c)
 		}
 		break;
 
+	case 't': /* Tags */
+		if ((lb[1] == 'a' || lb[1] == 'u') && lb[2] == ' ') {
+			if (*word == ':' && *(word + 1)
+			&& (printed = check_tags(word + 1, wlen -1, TAGC_SUG)) == 1)
+				goto SUCCESS;
+		} else if ((lb[1] == 'l' || lb[1] == 'r') && lb[2] == ' ')
+			if (*word && (printed = check_tags(word, wlen, TAGS_SUG)) == 1)
+				goto SUCCESS;
+		break;
+
 	default: break;
 	}
 
@@ -1491,7 +1519,7 @@ rl_suggestions(const unsigned char c)
 			goto SUCCESS;
 	}
 
-	/* 3.d) Execute the following check in the order specified by
+	/* 3.d) Execute the following checks in the order specified by
 	 * suggestion_strategy (the value is taken form the configuration
 	 * file) */
 	size_t st;
@@ -1649,6 +1677,11 @@ rl_suggestions(const unsigned char c)
 	if (*word == '$') {
 		printed = check_variables(word + 1, wlen - 1);
 		if (printed)
+			goto SUCCESS;
+	}
+
+	if (*word == 't' && *(word + 1) == ':' && *(word + 2)) {
+		if ((printed = check_tags(word + 2, wlen - 2, TAGT_SUG)) == 1)
 			goto SUCCESS;
 	}
 

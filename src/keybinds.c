@@ -607,10 +607,28 @@ rl_accept_suggestion(int count, int key)
 	case HIST_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
-	case VAR_SUG:
+	case TAGC_SUG: /* fallthrough */
+	case TAGS_SUG: /* fallthrough */
+	case TAGT_SUG: {
+		char prefix[3];
+		if (suggestion.type == TAGC_SUG) {
+			prefix[0] = ':'; prefix[1] = '\0';
+			rl_insert_text(prefix);
+		} else if (suggestion.type == TAGT_SUG) {
+			prefix[0] = 't'; prefix[1] = ':'; prefix[2] = '\0';
+			rl_insert_text(prefix);
+		}
+		char *p = escape_str(suggestion_buf);
+		my_insert_text(p ? p : suggestion_buf, NULL, 0);
+		rl_stuff_char(' ');
+		free(p);
+		}
+		break;
+
+/*	case VAR_SUG:
 		my_insert_text(suggestion_buf, NULL, 0);
 		rl_stuff_char(' ');
-		break;
+		break; */
 
 	default:
 		my_insert_text(suggestion_buf, NULL, 0);
