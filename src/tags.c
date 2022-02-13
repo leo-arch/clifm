@@ -306,7 +306,7 @@ remove_tags(char **args)
 }
 
 /* Check whether NAME is a valid and existent tag name
- * Returns 1 if true and zero otherwise */
+ * Returns 1 if true or zero otherwise */
 int
 is_tag(char *name)
 {
@@ -314,8 +314,8 @@ is_tag(char *name)
 	if (p) {
 		char *deq = dequote_str(name, 0);
 		if (deq) {
-			free(name);
-			name = deq;
+			strcpy(name, deq);
+			free(deq);
 		}
 	}
 

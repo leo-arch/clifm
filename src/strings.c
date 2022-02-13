@@ -1015,7 +1015,7 @@ expand_tag(char ***args, const int tag_index)
 
 	size_t i, j = 0;
 	if (n <= 2) { /* Empty dir: only self and parent */
-		for (i = 0; i < (size_t)n; n++)
+		for (i = 0; i < (size_t)n; i++)
 			free(t[i]);
 		free(t);
 		return 0;
