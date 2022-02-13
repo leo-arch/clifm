@@ -325,8 +325,7 @@ remove_tags(char **args)
 int
 is_tag(char *name)
 {
-	char *p = strchr(name, '\\');
-	if (p) {
+	if (strchr(name, '\\')) {
 		char *deq = dequote_str(name, 0);
 		if (deq) {
 			strcpy(name, deq);
@@ -598,14 +597,16 @@ tags_function(char **args)
 	int exit_status = EXIT_SUCCESS, free_args = 0;
 	char **a = args, c = *(a[0] + 1);
 
+	if ((a[1] && IS_HELP(a[1]))
+	|| (a[2] && IS_HELP(a[2])))
+		{ puts(_(TAG_USAGE)); goto END; }
+
 	if (c == 'a' || c == 'l' || c == 'd' || c == 'n' || c == 'u')
 		{ a = reconstruct_input(args); free_args = 1; }
 
 	if (!a[1] || (*a[1] == 'l' && (strcmp(a[1], "ls") == 0
 	|| strcmp(a[1], "list") == 0)))
 		{ exit_status = list_tags(a); goto END; }
-
-	if (IS_HELP(a[1])) { puts(_(TAG_USAGE)); goto END; }
 
 	if (*a[1] == 'n' && strcmp(a[1], "new") == 0)
 		{ exit_status = create_tags(a); goto END; }
