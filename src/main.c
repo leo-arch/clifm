@@ -244,6 +244,7 @@ size_t
 	remotes_n = 0,
 	sel_n = 0,
 	tab_offset = 0,
+	tags_n = 0,
 	user_home_len = 0,
 	usrvar_n = 0,
 	nwords = 0;
@@ -291,6 +292,7 @@ char
 	*suggestion_strategy = (char *)NULL,
 #endif
 	*sys_shell = (char *)NULL,
+	*tags_dir = (char *)NULL,
 	*term = (char *)NULL,
 	*tmp_dir = (char *)NULL,
 #ifndef _NO_TRASH
@@ -314,7 +316,8 @@ char
 	**paths = (char **)NULL,
 	**profile_names = (char **)NULL,
 	**prompt_cmds = (char **)NULL,
-	**sel_elements = (char **)NULL;
+	**sel_elements = (char **)NULL,
+	**tags = (char **)NULL;
 
 /* A list of internal commands, with short and long formats. We use two
  * more lists of commands: one of commands dealing with file names
@@ -386,6 +389,7 @@ char *internal_cmds[] = {
 	"st", "sort",
 	"stats",
 	"t", "tr", "trash",
+	"tag", "ta", "td", "tl", "tn", "tu",
 	"te",
 	"tips",
 	"touch",
@@ -531,6 +535,13 @@ const char *param_str[] = {
 	"trash list",
 	"trash clear",
 	"trash del",
+	"tag del",
+	"tag rm",
+	"tag new",
+	"tag merge",
+	"tag rename",
+	"tag mv",
+	"tag untag",
 	"u all",
 	"undel all",
 	"untrash all",
@@ -947,6 +958,7 @@ main(int argc, char *argv[])
 	create_kbinds_file();
 	load_bookmarks();
 	load_keybinds();
+	load_tags();
 	load_jumpdb();
 	if (!jump_db || xargs.path == 1)
 		add_to_jumpdb(workspaces[cur_ws].path);

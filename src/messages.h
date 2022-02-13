@@ -518,6 +518,8 @@ Examples:\n\
 - Revert the current sorting method (i.e. z-a instead of a-z):\n\
     st rev"
 
+#define TAG_USAGE "Coming soon"
+
 #define TE_USAGE "Toggle the executable bit on files\n\
 Usage:\n\
   te FILE(s)\n\n\

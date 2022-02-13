@@ -550,6 +550,14 @@ store_completions(char **matches, FILE *fp)
 
 		if (cur_comp_type == TCMP_BACKDIR) {
 			color = di_c;
+		} else if (cur_comp_type == TCMP_TAGS_T) {
+			color = mi_c;
+			if (entry + 2)
+				entry += 2;
+		} else if (cur_comp_type == TCMP_TAGS_C) {
+			color = mi_c;
+			if (entry + 1)
+				entry += 1;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
 			char *cl = get_entry_color(matches, i);
 			char ext_cl[MAX_COLOR + 5];
@@ -649,6 +657,10 @@ calculate_prefix_len(char *str)
 					c++;
 			}
 			prefix_len = len + c;
+		} else if (cur_comp_type == TCMP_TAGS_T && len >= 2) {
+			prefix_len = len - 2;
+		} else if (cur_comp_type == TCMP_TAGS_C && len >= 1) {
+			prefix_len = len - 1;
 		} else {
 			prefix_len = len;
 		}
@@ -753,8 +765,14 @@ fzftabcomp(char **matches)
 	/* In case of a range or the sel keyword, the query string is just empty */
 	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL) {
 		query = get_query_str(&fzf_offset);
-		if (!query)
-			query = lw ? lw : (char *)NULL;
+		if (!query) {
+			if (cur_comp_type == TCMP_TAGS_T)
+				query = lw ? lw + 2 : (char *)NULL;
+			else if (cur_comp_type == TCMP_TAGS_C) {
+				query = lw ? lw + 1 : (char *)NULL;
+			} else
+				query = lw ? lw : (char *)NULL;
+		}
 	}
 
 	if (fzf_offset < 0)

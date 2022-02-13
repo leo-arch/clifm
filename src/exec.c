@@ -73,6 +73,7 @@
 #include "name_cleaner.h"
 #endif
 #include "sanitize.h"
+#include "tags.h"
 
 char **_comm = (char **)NULL;
 
@@ -1755,6 +1756,13 @@ exec_cmd(char **comm)
 	&& comm[0][1] == 'h' && !comm[0][2]) {
 		print_dirhist(); return EXIT_SUCCESS;
 	}
+
+	/*     ################# TAGS ##################     */
+	else if (*comm[0] == 't'
+	&& (((comm[0][1] == 'a' || comm[0][1] == 'd' || comm[0][1] == 'l'
+	|| comm[0][1] == 'n' || comm[0][1] == 'u') && !comm[0][2])
+	|| strcmp(comm[0], "tag") == 0))
+		exit_code = tags_function(comm);
 
 	/*     ################# NEW FILE ##################     */
 	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "new") == 0))

@@ -393,6 +393,7 @@ is_internal(char *restrict cmd)
 		"r",
 		"s", "sel",
 		"t", "tr", "trash",
+		"tag", "ta",
 		"te",
 		"v", "vv",
 		NULL};

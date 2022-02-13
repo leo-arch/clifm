@@ -668,7 +668,6 @@ static int
 check_filenames(char *str, size_t len, const unsigned char c,
 				const int first_word, const size_t full_word)
 {
-//	int i = (int)files;
 	char *color = (suggest_filetype_color == 1) ? no_c : sf_c;
 
 	skip_leading_backslashes(&str, &len);
@@ -678,7 +677,6 @@ check_filenames(char *str, size_t len, const unsigned char c,
 
 	size_t i;
 	for (i = 0; i < files; i++) {
-//	while (--i >= 0) {
 		if (!file_info[i].name || TOUPPER(*str) != TOUPPER(*file_info[i].name))
 			continue;
 

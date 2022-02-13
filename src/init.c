@@ -405,6 +405,67 @@ get_user(void)
 	return tmp_user;
 }
 
+#ifndef _DIRENT_HAVE_D_TYPE
+static int
+check_tag(char *name)
+{
+	if (!name || !*name)
+		return EXIT_FAILURE;
+
+	char dir[PATH_MAX];
+	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, name);
+
+	struct stat a;
+	if (stat(dir, &a) == -1 || !S_ISDIR(a.st_mode))
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+#endif /* _DIRENT_HAVE_D_TYPE */
+
+void
+load_tags(void)
+{
+	if (!tags_dir || !*tags_dir)
+		return;
+
+	struct dirent **t = (struct dirent **)NULL;
+	int i, n = scandir(tags_dir, &t, NULL, alphasort);
+	if (n == -1)
+		return;
+
+	if (n <= 2) {
+		for (i = 0; i < n; i++)
+			free(t[i]);
+		free(t);
+		return;
+	}
+
+	tags_n = 0;
+	tags = (char **)xnmalloc((size_t)n + 2, sizeof(char **));
+	for (i = 0; i < n; i++) {
+#ifdef _DIRENT_HAVE_D_TYPE
+		if (t[i]->d_type != DT_DIR) {
+			free(t[i]);
+			continue;
+		}
+#else
+		if (check_tag(t[i]->d_name) == EXIT_FAILURE)
+			continue;
+#endif /* _DIRENT_HAVE_D_TYPE */
+		if (SELFORPARENT(t[i]->d_name)) {
+			free(t[i]);
+			continue;
+		}
+		tags[tags_n] = savestring(t[i]->d_name, strlen(t[i]->d_name));
+		tags_n++;
+		free(t[i]);
+	}
+	free(t);
+
+	tags[tags_n] = (char *)NULL;
+}
+
 /* Reconstruct the jump database from database file */
 void
 load_jumpdb(void)

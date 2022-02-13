@@ -287,6 +287,7 @@ extern int watch;
 #define VAR_SUG	       12
 #define SEL_SUG	       13
 #define BACKDIR_SUG	   14
+#define TAG_SUG        15
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -775,25 +776,28 @@ enum jump {
 };
 
 enum comp_type {
-	TCMP_BOOKMARK =	0,
-	TCMP_CMD =		1,
-	TCMP_CSCHEME = 	2,
-	TCMP_DESEL = 	3,
-	TCMP_ELN =		4,
-	TCMP_HIST = 	5,
-	TCMP_JUMP = 	6,
-	TCMP_NET =		7,
-	TCMP_NONE = 	8,
-	TCMP_OPENWITH = 9,
-	TCMP_PATH = 	10,
-	TCMP_PROF = 	11,
-	TCMP_RANGES = 	12,
-	TCMP_SEL =		13,
-	TCMP_SORT = 	14,
-	TCMP_TRASHDEL =	15,
-	TCMP_UNTRASH =	16,
-	TCMP_BACKDIR =  17,
-	TCMP_ENVIRON =  18
+	TCMP_BOOKMARK =	  0,
+	TCMP_CMD =		  1,
+	TCMP_CSCHEME = 	  2,
+	TCMP_DESEL = 	  3,
+	TCMP_ELN =		  4,
+	TCMP_HIST = 	  5,
+	TCMP_JUMP = 	  6,
+	TCMP_NET =		  7,
+	TCMP_NONE = 	  8,
+	TCMP_OPENWITH =   9,
+	TCMP_PATH = 	  10,
+	TCMP_PROF = 	  11,
+	TCMP_RANGES = 	  12,
+	TCMP_SEL =		  13,
+	TCMP_SORT = 	  14,
+	TCMP_TRASHDEL =	  15,
+	TCMP_UNTRASH =	  16,
+	TCMP_BACKDIR =    17,
+	TCMP_ENVIRON =    18,
+	TCMP_TAGS_T =     19, /* T keyword: 't:TAG' */
+	TCMP_TAGS_C =     20, /* Colon: 'tag file :TAG' */
+	TCMP_TAGS_S =     21  /* Simple completion: 'tag rm TAG' */
 };
 
 extern enum comp_type cur_comp_type;
@@ -952,6 +956,7 @@ extern size_t
 	remotes_n,
 	sel_n,
 	tab_offset,
+	tags_n,
 	user_home_len,
 	usrvar_n,
 	nwords;
@@ -1002,6 +1007,7 @@ extern char
 	*suggestion_buf,
 	*suggestion_strategy,
 #endif
+	*tags_dir,
 	*term,
 	*tmp_dir,
 #ifndef _NO_TRASH
@@ -1025,7 +1031,8 @@ extern char
 	**paths,
 	**profile_names,
 	**prompt_cmds,
-	**sel_elements;
+	**sel_elements,
+	**tags;
 
 extern char *internal_cmds[];
 extern const char *param_str[];

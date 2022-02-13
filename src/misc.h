@@ -33,6 +33,7 @@ int filter_function(char *arg);
 void free_software(void);
 void free_stuff(void);
 void free_remotes(int exit);
+void free_tags(void);
 void handle_stdin(void);
 void help_function(void);
 int quick_help(void);

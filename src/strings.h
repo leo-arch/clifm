@@ -29,30 +29,33 @@
 #define UPDATE_ARGS    1
 #define NO_UPDATE_ARGS 0
 
-char **parse_input_str(char *str);
-char *savestring(const char *restrict str, size_t size);
-char **get_substr(char *str, const char ifs);
 char *dequote_str(char *text, int mt);
 char *escape_str(const char *str);
 int *expand_range(char *str, int listdir);
+char *gen_rand_str(size_t len);
+char **get_substr(char *str, const char ifs);
 char *home_tilde(const char *new_path);
-int strcntchr(const char *str, const char c);
-int strcntchrlst(const char *str, const char c);
+int is_internal_f(const char *restrict cmd);
+char **parse_input_str(char *str);
+char *remove_quotes(char *str);
+char *replace_substr(char *haystack, char *needle, char *rep);
+char *savestring(const char *restrict str, size_t size);
+char **split_str(const char *str, const int update_args);
 char *straftlst(char *str, const char c);
 char *strbfrlst(char *str, const char c);
 char *strbtw(char *str, const char a, const char b);
-char *gen_rand_str(size_t len);
-size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
-size_t wc_xstrlen(const char *restrict str);
-int u8truncstr(char *restrict str, size_t n);
-char *remove_quotes(char *str);
-char *replace_substr(char *haystack, char *needle, char *rep);
-size_t xstrnlen(const char *restrict s);
-int is_internal_f(const char *restrict cmd);
-int xstrverscmp(const char *s1, const char *s2);
+int strcntchr(const char *str, const char c);
+int strcntchrlst(const char *str, const char c);
 char *truncate_wname(const char *name);
-char **split_str(const char *str, const int update_args);
+int u8truncstr(char *restrict str, size_t n);
+size_t wc_xstrlen(const char *restrict str);
+
 #if defined(__linux__) && defined(_BE_POSIX)
 char *xstrcasestr(char *a, const char *b);
 #endif /* __linux && _BE_POSIX */
+
+size_t xstrnlen(const char *restrict s);
+size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
+int xstrverscmp(const char *s1, const char *s2);
+
 #endif /* STRINGS_H */

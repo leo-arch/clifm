@@ -585,6 +585,9 @@ define_config_file_names(void)
 
 	config_dir_len = strlen(config_dir);
 
+	tags_dir = (char *)xnmalloc(config_dir_len + 6, sizeof(char));
+	sprintf(tags_dir, "%s/tags", config_dir);
+
 	if (alt_kbinds_file) {
 		kbinds_file = savestring(alt_kbinds_file, strlen(alt_kbinds_file));
 		free(alt_kbinds_file);
@@ -1283,15 +1286,19 @@ create_config_files(void)
 	}
 
 				/* #####################
+				 * #     TAGS DIR      #
+				 * #####################*/
+
+	if (stat(tags_dir, &attr) == -1 && xmkdir(tags_dir, S_IRWXU) == EXIT_FAILURE)
+		_err('w', PRINT_PROMPT, _("%s: %s: Error creating tags directory. "
+			"Tag function disabled\n"),	PROGRAM_NAME, tags_dir);
+
+				/* #####################
 				 * #    CONFIG FILE    #
 				 * #####################*/
 
-	if (stat(config_file, &attr) == -1) {
-		if (create_config(config_file) == EXIT_SUCCESS)
-			config_ok = 1;
-		else
-			config_ok = 0;
-	}
+	if (stat(config_file, &attr) == -1)
+		config_ok = create_config(config_file) == EXIT_SUCCESS ? 1 : 0;
 
 	if (!config_ok)
 		return;
@@ -1318,15 +1325,10 @@ create_config_files(void)
 				 * #    COLORS DIR     #
 				 * ##################### */
 
-	if (stat(colors_dir, &attr) == -1) {
-/*		char *cmd[] = {"mkdir", colors_dir, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) { */
-		if (xmkdir(colors_dir, S_IRWXU) == EXIT_FAILURE) {
-			_err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
-				"directory. Using the default color scheme\n"),
-			    PROGRAM_NAME);
-		}
-	}
+	if (stat(colors_dir, &attr) == -1
+	&& xmkdir(colors_dir, S_IRWXU) == EXIT_FAILURE)
+		_err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
+			"directory. Using the default color scheme\n"), PROGRAM_NAME);
 
 	/* Generate the default color scheme file */
 	create_def_cscheme();
@@ -1335,15 +1337,10 @@ create_config_files(void)
 				 * #      PLUGINS      #
 				 * #####################*/
 
-	if (stat(plugins_dir, &attr) == -1) {
-/*		char *cmd[] = {"mkdir", plugins_dir, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) { */
-		if (xmkdir(plugins_dir, S_IRWXU) == EXIT_FAILURE) {
-			_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
-				"directory. The actions function is disabled\n"),
-			    PROGRAM_NAME);
-		}
-	}
+	if (stat(plugins_dir, &attr) == -1
+	&& xmkdir(plugins_dir, S_IRWXU) == EXIT_FAILURE)
+		_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
+			"directory. The actions function is disabled\n"), PROGRAM_NAME);
 
 	import_rl_file();
 	create_actions_file(actions_file);
@@ -2213,21 +2210,20 @@ reset_variables(void)
 
 #ifndef _NO_SUGGESTIONS
 	free(suggestion_buf);
-	suggestion_buf = (char *)NULL;
-
 	free(suggestion_strategy);
-	suggestion_strategy = (char *)NULL;
+	suggestion_buf = suggestion_strategy = (char *)NULL;
 #endif
 
 	free(fzftab_options);
-	fzftab_options = (char *)NULL;
-
+	free(tags_dir);
 	free(wprompt_str);
-	wprompt_str = (char *)NULL;
+	fzftab_options = tags_dir = wprompt_str = (char *)NULL;
 
 #ifdef AUTOCMDS_TEST
 	free_autocmds();
 #endif
+
+	free_tags();
 
 	free_remotes(0);
 
@@ -2238,13 +2234,9 @@ reset_variables(void)
 	}
 
 	free(opener);
-	opener = (char *)NULL;
-
 	free(encoded_prompt);
-	encoded_prompt = (char *)NULL;
-
 	free(term);
-	term = (char *)NULL;
+	opener = encoded_prompt = term = (char *)NULL;
 
 	int i = (int)cschemes_n;
 	while (--i >= 0)
@@ -2527,6 +2519,7 @@ reload_config(void)
 	get_prompt_cmds();
 	load_dirhist();
 	load_jumpdb();
+	load_tags();
 	load_remotes();
 
 	/* Set the current poistion of the dirhist index to the last

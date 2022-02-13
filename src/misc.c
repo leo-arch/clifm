@@ -1089,6 +1089,17 @@ set_shell(char *str)
 	return EXIT_SUCCESS;
 } */
 
+void
+free_tags(void)
+{
+	int i = (int)tags_n;
+	while (--i >= 0)
+		free(tags[i]);
+	free(tags);
+	tags = (char **)NULL;
+	tags_n = 0;
+}
+
 int
 free_remotes(int exit)
 {
@@ -1135,6 +1146,8 @@ free_stuff(void)
 		free(autocmds[i].cmd);
 	}
 	free(autocmds);
+
+	free_tags();
 
 	free_remotes(1);
 
@@ -1331,6 +1344,7 @@ free_stuff(void)
 	free(trash_files_dir);
 	free(trash_info_dir);
 #endif
+	free(tags_dir);
 
 	/* Restore the color of the running terminal */
 	fputs("\x1b[0;39;49m", stdout);

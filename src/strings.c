@@ -37,12 +37,15 @@
 #include <wordexp.h>
 #endif
 #include <limits.h>
+#include <dirent.h>
 
 #include "aux.h"
 #include "checks.h"
 #include "exec.h"
 #include "navigation.h"
 #include "readline.h"
+#include "sort.h"
+#include "tags.h"
 
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
 char len_buf[CMD_LEN_MAX] __attribute__((aligned));
@@ -818,6 +821,7 @@ is_internal_f(const char *restrict cmd)
 	    "s", "sel",
 	    "st", "sort",
 	    "t", "tr", "trash",
+		"tag", "ta",
 	    "te",
 	    "unlink",
 	    "ws",
@@ -886,9 +890,7 @@ split_fused_param(char *str)
 			}
 		}
 		*b = *p;
-		b++;
-		p++;
-		c++;
+		b++; p++; c++;
 	}
 
 	*b = '\0';
@@ -953,7 +955,7 @@ check_shell_functions(char *str)
 }
 
 /* Check whether STRINGDIGIT expression is an internal command with a
- * fused parameter. Returns 1 if true and 0 if false */
+ * fused parameter. Returns 1 if true and 0 otherwise */
 static int
 is_fused_param(char *str)
 {
@@ -963,7 +965,7 @@ is_fused_param(char *str)
 	char *p = str, *q = (char *)NULL;
 	int d = 0;
 
-	while (*p) {
+	while (*p && *p != ' ') {
 		if (d == 0 && p != str && _ISDIGIT(*p) && _ISALPHA(*(p - 1))) {
 			q = p;
 			d = 1;
@@ -990,7 +992,89 @@ is_fused_param(char *str)
 	return EXIT_SUCCESS;
 }
 
-/*
+/* Expand "t:TAG" into the corresponding tagged files.
+ * ARGS is an array with the current input substrings, and TAG_INDEX
+ * is the index of the tag expresion (t:) in this array.
+ * The expansion is performed in ARGS array itself.
+ * Returns the number of files tagged as ARGS[TAG_INDEX] or zero on error */
+static size_t
+expand_tag(char ***args, const int tag_index)
+{
+	char **s = *args;
+	char *tag = s[tag_index] ? s[tag_index] + 2 : (char *)NULL;
+	if (!tag || !*tag || !is_tag(tag))
+		return 0;
+
+	char dir[PATH_MAX];
+	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, tag);
+
+	struct dirent **t = (struct dirent **)NULL;
+	int n = scandir(dir, &t, NULL, case_sensitive ? xalphasort : alphasort_insensitive);
+	if (n == -1)
+		return 0;
+
+	size_t i, j = 0;
+	if (n <= 2) { /* Empty dir: only self and parent */
+		for (i = 0; i < (size_t)n; n++)
+			free(t[i]);
+		free(t);
+		return 0;
+	}
+
+	size_t len = args_n + 1 + ((size_t)n - 2) + 1;
+	char **p = (char **)xnmalloc(len, sizeof(char *));
+
+	/* Copy whatever is before the tag expression */
+	for (i = 0; i < (size_t)tag_index; i++) {
+		p[j] = savestring(s[i], strlen(s[i]));
+		j++;
+	}
+
+	/* Append the file names pointed to by the tag expression */
+	for (i = 0; i < (size_t)n; i++) {
+		if (SELFORPARENT(t[i]->d_name))
+			continue;
+		char filename[PATH_MAX + NAME_MAX + 1];
+		snprintf(filename, sizeof(filename), "%s/%s", dir, t[i]->d_name);
+		char rpath[PATH_MAX];
+		*rpath = '\0';
+		realpath(filename, rpath);
+		if (!*rpath)
+			continue;
+		char *esc_str = escape_str(rpath);
+		char *q = esc_str ? esc_str : rpath;
+		p[j] = savestring(q, strlen(q));
+		j++;
+		free(esc_str);
+	}
+
+	/* Append whatever is after the tag expression */
+	for (i = (size_t)tag_index + 1; i <= args_n; i++) {
+		p[j] = savestring(s[i], strlen(s[i]));
+		j++;
+	}
+
+	p[j] = (char *)NULL;
+
+	/* Free the dirent struct */
+	for (i = 0; i < (size_t)n; i++)
+		free(t[i]);
+	free(t);
+
+	/* Free the original array (ARGS) and make it point to the new
+	 * array with the expanded tag expression */
+	for (i = 0; i <= args_n; i++)
+		free(s[i]);
+	free(s);
+	*args = p;
+
+	args_n = (j >= 1) ? j - 1 : 0;
+	/* Do not count self and parent dirs */
+	return (size_t)n - 2;
+}
+
+/* THIS IS QUITE SHITTY FUNCTION, I KNOW. PLEASE REFACTOR IT!!!
+ *
  * This function is one of the keys of CliFM. It will perform a series of
  * actions:
  * 1) Take the string stored by readline and get its substrings without
@@ -1026,8 +1110,8 @@ is_fused_param(char *str)
 char **
 parse_input_str(char *str)
 {
-	register size_t i = 0;
-	int fusedcmd_ok = 0;
+	register size_t i = 0, ntags = 0;
+	int fusedcmd_ok = 0, *tag_index = (int *)NULL;
 
 	/* If internal command plus fused parameter, split it */
 	if (is_fused_param(str) == EXIT_SUCCESS) {
@@ -1252,6 +1336,14 @@ parse_input_str(char *str)
 		if (!substr[i])
 			continue;
 
+		/* Store the indices of tag expressions (t:TAG)*/
+		if (*substr[i] == 't' && *(substr[i] + 1) == ':') {
+			tag_index = (int *)xrealloc(tag_index, (ntags + 2) * sizeof(int));
+			tag_index[ntags] = (int)i;
+			ntags++;
+			tag_index[ntags] = -1;
+		}
+
 		register size_t j = 0;
 
 		/* Normalize URI file scheme
@@ -1463,7 +1555,7 @@ parse_input_str(char *str)
 				} else {
 					fprintf(stderr, _("%s: %s: Error quoting file name\n"),
 					    PROGRAM_NAME, sel_elements[j]);
-					/* Free elements selected thus far and and all the
+					/* Free elements selected thus far and all the
 					 * input substrings */
 					register size_t k = 0;
 					for (k = 0; k < j; k++)
@@ -1645,7 +1737,7 @@ parse_input_str(char *str)
 		}
 
 				/* ###############################
-				 * #    ENVIRONEMNT VARIABLES    #
+				 * #  2.h) ENVIRONEMNT VARIABLES  #
 				 * ###############################*/
 
 		if (*substr[i] == '$') {
@@ -1666,6 +1758,26 @@ parse_input_str(char *str)
 				free(real_path);
 			}
 		}
+	}
+
+				/* ###############################
+				 * #     2.i) TAGS EXPANSION      #
+				 * ###############################*/
+
+	if (ntags > 0) {
+		for(i = 0; i < ntags; i++) {
+			size_t tn = expand_tag(&substr, tag_index[i]);
+			/* TN is the amount of files tagged as SUBSTR[TAG_INDEX[I]]
+			 * Let's update the index of the next tag expression using this
+			 * value: if the next tag expression was at index 2, and if
+			 * the current tag expression was expanded to 3 files,
+			 * the new index of the next tag expression is 4 (the space
+			 * occupied by the first expanded file is the same used
+			 * by the current tag expression, so that it doesn't count) */
+			if (tn > 0 && tag_index[i + 1] != -1)
+				tag_index[i + 1] += ((int)tn - 1);
+		}
+		free(tag_index);
 	}
 
 	/* #### 3) NULL TERMINATE THE INPUT STRING ARRAY #### */

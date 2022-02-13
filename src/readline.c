@@ -1209,6 +1209,47 @@ jump_generator(const char *text, int state)
 }
 
 static char *
+tags_generator(const char *text, int state)
+{
+	if (tags_n == 0 || !tags)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len, p = 0;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		if (cur_comp_type == TCMP_TAGS_T)
+			p = 2;
+		else if (cur_comp_type == TCMP_TAGS_C)
+			p = 1;
+		else
+			p = 0;
+
+		len = *(text + p) ? strlen(text + p) : 0;
+	}
+
+	while ((name = tags[i++]) != NULL) {
+		if (strncmp(name, text + p, len) != 0)
+			continue;
+		if (cur_comp_type == TCMP_TAGS_C) {
+			char tmp[NAME_MAX];
+			snprintf(tmp, NAME_MAX, ":%s", name);
+			return strdup(tmp);
+		} else if (cur_comp_type == TCMP_TAGS_T) {
+			char tmp[NAME_MAX];
+			snprintf(tmp, NAME_MAX, "t:%s", name);
+			return strdup(tmp);
+		} else {
+			return strdup(name);
+		}
+	}
+
+	return (char *)NULL;
+}
+
+static char *
 cschemes_generator(const char *text, int state)
 {
 	if (!color_schemes)
@@ -1665,6 +1706,38 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		/* Tags completion */
+		if (*text == 't' && *(text + 1) == ':') {
+			cur_comp_type = TCMP_TAGS_T;
+			matches = rl_completion_matches(text, &tags_generator);
+			if (matches)
+				return matches;
+			cur_comp_type = TCMP_NONE;
+		}
+
+		char *lb = rl_line_buffer;
+		if (*lb == 't') {
+			int comp = 0;
+			switch(*(lb + 1)) {
+			case 'a': /* fallthough */
+			case 'u':
+				if (*text == ':') {
+					comp = 1;
+					cur_comp_type = TCMP_TAGS_C;
+				}
+				break;
+			case 'l': /* fallthough */
+			case 'd': comp = 1; cur_comp_type = TCMP_TAGS_S; break;
+			default: break;
+			}
+			if (comp == 1) {
+				matches = rl_completion_matches(text, &tags_generator);
+				if (matches)
+					return matches;
+				cur_comp_type = TCMP_NONE;
+			}
+		}
+
 		/* Complete environment variables */
 		if (*text == '$' && *(text + 1) != '(') {
 			matches = rl_completion_matches(text, &environ_generator);
@@ -1676,9 +1749,8 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* Backdir completion */
 		if (*text != '/' && nwords <= 2 && rl_end >= 3
-		&& *rl_line_buffer == 'b' && rl_line_buffer[1] == 'd'
-		&& rl_line_buffer[2] == ' ') {
-			if (nwords < 2 || (rl_end && rl_line_buffer[rl_end - 1] != ' ')) {
+		&& *lb == 'b' && lb[1] == 'd' && lb[2] == ' ') {
+			if (nwords < 2 || (rl_end && lb[rl_end - 1] != ' ')) {
 				int n = 0;
 				matches = get_bd_matches(text, &n, BD_TAB);
 				if (matches) {
@@ -1690,9 +1762,8 @@ my_rl_completion(const char *text, int start, int end)
 
 #ifndef _NO_LIRA
 		/* #### OPEN WITH #### */
-		if (rl_end > 4 && *rl_line_buffer == 'o' && rl_line_buffer[1] == 'w'
-		&& rl_line_buffer[2] == ' ' && rl_line_buffer[3]
-		&& rl_line_buffer[3] != ' ') {
+		if (rl_end > 4 && *lb == 'o' && lb[1] == 'w' && lb[2] == ' '
+		&& lb[3] && lb[3] != ' ') {
 			char *p = rl_line_buffer + 3;
 			char *s = strrchr(p, ' ');
 			if (s)
@@ -1708,10 +1779,8 @@ my_rl_completion(const char *text, int start, int end)
 #endif /* _NO_LIRA */
 
 		/* ### UNTRASH ### */
-		if (*rl_line_buffer == 'u' && (rl_line_buffer[1] == ' '
-		|| (rl_line_buffer[1] == 'n'
-		&& (strncmp(rl_line_buffer, "untrash ", 8) == 0
-		|| strncmp(rl_line_buffer, "undel ", 6) == 0)))) {
+		if (*lb == 'u' && (lb[1] == ' ' || (lb[1] == 'n'
+		&& (strncmp(lb, "untrash ", 8) == 0 || strncmp(lb, "undel ", 6) == 0)))) {
 			matches = rl_trashed_files(text);
 			if (matches) {
 				cur_comp_type = TCMP_UNTRASH;
@@ -1720,11 +1789,10 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### TRASH DEL ### */
-		if (*rl_line_buffer == 't' && (rl_line_buffer[1] == ' '
-		|| rl_line_buffer[1] == 'r')
-		&& (strncmp(rl_line_buffer, "t del ", 6) == 0
-		|| strncmp(rl_line_buffer, "tr del ", 7) == 0
-		|| strncmp(rl_line_buffer, "trash del ", 10) == 0)) {
+		if (*lb == 't' && (lb[1] == ' ' || lb[1] == 'r')
+		&& (strncmp(lb, "t del ", 6) == 0
+		|| strncmp(lb, "tr del ", 7) == 0
+		|| strncmp(lb, "trash del ", 10) == 0)) {
 			matches = rl_trashed_files(text);
 			if (matches) {
 				cur_comp_type = TCMP_TRASHDEL;
@@ -1759,8 +1827,7 @@ my_rl_completion(const char *text, int start, int end)
 				return (char **)NULL;
 
 			/* Dirjump: jo command */
-			if (*rl_line_buffer == 'j' && rl_line_buffer[1] == 'o'
-			&& rl_line_buffer[2] == ' ') {
+			if (*lb == 'j' && lb[1] == 'o' && lb[2] == ' ') {
 				if (is_number(text) && n > 0 && n <= (int)jump_n
 				&& jump_db[n - 1].path) {
 					char *p = jump_db[n - 1].path;
@@ -1774,9 +1841,8 @@ my_rl_completion(const char *text, int start, int end)
 			}
 
 			/* Sort number expansion */
-			if (*rl_line_buffer == 's'
-			&& (strncmp(rl_line_buffer, "st ", 3) == 0
-			|| strncmp(rl_line_buffer, "sort ", 5) == 0)
+			if (*lb == 's' && (strncmp(lb, "st ", 3) == 0
+			|| strncmp(lb, "sort ", 5) == 0)
 			&& is_number(text) && n >= 0 && n <= SORT_TYPES) {
 				matches = rl_completion_matches(text, &sort_num_generator);
 				if (matches) {
@@ -1806,9 +1872,9 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### DESELECT COMPLETION ### */
-		if (sel_n && *rl_line_buffer == 'd'
-		&& (strncmp(rl_line_buffer, "ds ", 3) == 0
-		|| strncmp(rl_line_buffer, "desel ", 6) == 0)) {
+		if (sel_n && *lb == 'd'
+		&& (strncmp(lb, "ds ", 3) == 0
+		|| strncmp(lb, "desel ", 6) == 0)) {
 			matches = rl_completion_matches(text, &sel_entries_generator);
 			if (matches) {
 				cur_comp_type = TCMP_DESEL;
@@ -1818,10 +1884,8 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* ### DIRJUMP COMPLETION ### */
 		/* j, jc, jp commands */
-		if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
-		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
-		&& rl_line_buffer[2] == ' ')
-		|| strncmp(rl_line_buffer, "jump ", 5) == 0)) {
+		if (*lb == 'j' && (lb[1] == ' '	|| ((lb[1] == 'c' || lb[1] == 'p')
+		&& lb[2] == ' ') || strncmp(lb, "jump ", 5) == 0)) {
 			matches = rl_completion_matches(text, &jump_generator);
 			if (matches) {
 				cur_comp_type = TCMP_JUMP;
@@ -1830,10 +1894,9 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### BOOKMARKS COMPLETION ### */
-		if (*rl_line_buffer == 'b' && (rl_line_buffer[1] == 'm'
-		|| rl_line_buffer[1] == 'o')
-		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
-		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
+		if (*lb == 'b' && (lb[1] == 'm' || lb[1] == 'o')
+		&& (strncmp(lb, "bm ", 3) == 0
+		|| strncmp(lb, "bookmarks ", 10) == 0)) {
 #ifndef _NO_SUGGESTIONS
 			if (suggestion.type != FILE_SUG)
 				rl_attempted_completion_over = 1;
@@ -1846,9 +1909,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### COLOR SCHEMES COMPLETION ### */
-		if (*rl_line_buffer == 'c' && ((rl_line_buffer[1] == 's'
-		&& rl_line_buffer[2] == ' ')
-		|| strncmp(rl_line_buffer, "colorschemes ", 13) == 0)) {
+		if (*lb == 'c' && ((lb[1] == 's' && lb[2] == ' ')
+		|| strncmp(lb, "colorschemes ", 13) == 0)) {
 			matches = rl_completion_matches(text, &cschemes_generator);
 			if (matches) {
 				cur_comp_type = TCMP_CSCHEME;
@@ -1857,12 +1919,11 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### PROFILES COMPLETION ### */
-		if (*rl_line_buffer == 'p' && (rl_line_buffer[1] == 'r'
-		|| rl_line_buffer[1] == 'f')
-		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0
-		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
-		|| strncmp(rl_line_buffer, "pf del ", 7) == 0
-		|| strncmp(rl_line_buffer, "profile del ", 12) == 0)) {
+		if (*lb == 'p' && (lb[1] == 'r'	|| lb[1] == 'f')
+		&& (strncmp(lb, "pf set ", 7) == 0
+		|| strncmp(lb, "profile set ", 12) == 0
+		|| strncmp(lb, "pf del ", 7) == 0
+		|| strncmp(lb, "profile del ", 12) == 0)) {
 #ifndef _NO_SUGGESTIONS
 			if (suggestion.type != FILE_SUG)
 				rl_attempted_completion_over = 1;
@@ -1883,9 +1944,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* sort command completion */
-		if (*rl_line_buffer == 's'
-		&& (strncmp(rl_line_buffer, "st ", 3) == 0
-		|| strncmp(rl_line_buffer, "sort ", 5) == 0)) {
+		if (*lb == 's' && (strncmp(lb, "st ", 3) == 0
+		|| strncmp(lb, "sort ", 5) == 0)) {
 			matches = rl_completion_matches(text, &sort_name_generator);
 			if (matches) {
 				cur_comp_type = TCMP_SORT;
@@ -1894,8 +1954,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* net command completion */
-		if (*rl_line_buffer == 'n'
-		&& strncmp(rl_line_buffer, "net ", 4) == 0) {
+		if (*lb == 'n' && strncmp(lb, "net ", 4) == 0) {
 			matches = rl_completion_matches(text, &nets_generator);
 			if (matches) {
 				cur_comp_type = TCMP_NET;
