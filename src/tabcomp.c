@@ -552,11 +552,11 @@ store_completions(char **matches, FILE *fp)
 			color = di_c;
 		} else if (cur_comp_type == TCMP_TAGS_T) {
 			color = mi_c;
-			if (entry + 2)
+			if (*(entry + 2))
 				entry += 2;
 		} else if (cur_comp_type == TCMP_TAGS_C) {
 			color = mi_c;
-			if (entry + 1)
+			if (*(entry + 1))
 				entry += 1;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
 			char *cl = get_entry_color(matches, i);

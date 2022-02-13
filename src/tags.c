@@ -118,7 +118,7 @@ print_tagged_file(char *name, const char *tag)
 		if (p && p != q)
 			*p = '\0';
 		printf("%s%s%s [%s]\n", mi_c, name, df_c, q);
-		*p = '/';
+//		*p = '/';
 		if (free_name)
 			free(q);
 	} else {

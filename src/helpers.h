@@ -757,10 +757,10 @@ struct sort_t {
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */
 enum prog_msg {
-	NOMSG = 	0,
-	ERROR = 	1,
-	WARNING = 	2,
-	NOTICE = 	4
+	NOMSG =   0,
+	ERROR =   1,
+	WARNING = 2,
+	NOTICE =  4
 };
 
 /* pmsg holds the current program message type */
@@ -768,11 +768,11 @@ extern enum prog_msg pmsg;
 
 /* Enumeration for the dirjump function options */
 enum jump {
-	NONE = 		0,
-	JPARENT =	1,
-	JCHILD =	2,
-	JORDER =	4,
-	JLIST =		8
+	NONE = 	  0,
+	JPARENT = 1,
+	JCHILD =  2,
+	JORDER =  4,
+	JLIST =	  8
 };
 
 enum comp_type {
@@ -781,18 +781,18 @@ enum comp_type {
 	TCMP_CSCHEME = 	  2,
 	TCMP_DESEL = 	  3,
 	TCMP_ELN =		  4,
-	TCMP_HIST = 	  5,
-	TCMP_JUMP = 	  6,
-	TCMP_NET =		  7,
-	TCMP_NONE = 	  8,
+	TCMP_HIST =       5,
+	TCMP_JUMP =       6,
+	TCMP_NET =	      7,
+	TCMP_NONE =       8,
 	TCMP_OPENWITH =   9,
-	TCMP_PATH = 	  10,
-	TCMP_PROF = 	  11,
+	TCMP_PATH =       10,
+	TCMP_PROF =       11,
 	TCMP_RANGES = 	  12,
-	TCMP_SEL =		  13,
-	TCMP_SORT = 	  14,
+	TCMP_SEL =	      13,
+	TCMP_SORT =       14,
 	TCMP_TRASHDEL =	  15,
-	TCMP_UNTRASH =	  16,
+	TCMP_UNTRASH =    16,
 	TCMP_BACKDIR =    17,
 	TCMP_ENVIRON =    18,
 	TCMP_TAGS_T =     19, /* T keyword: 't:TAG' */
