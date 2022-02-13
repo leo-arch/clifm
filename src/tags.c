@@ -114,6 +114,14 @@ print_tagged_file(char *name, const char *tag)
 			free_name = 1;
 		}
 
+		if (strchr(name, '\\')) {
+			char *d = dequote_str(name, 0);
+			if (d) {
+				strcpy(name, d);
+				free(d);
+			}
+		}
+
 		char *p = strrchr(q, '/');
 		if (p && p != q)
 			*p = '\0';
@@ -128,8 +136,15 @@ print_tagged_file(char *name, const char *tag)
 
 /* Print the list of all files tagged as NAME */
 static int
-list_files_in_tag(const char *name)
+list_files_in_tag(char *name)
 {
+	if (strchr(name, '\\')) {
+		char *p = dequote_str(name, 0);
+		if (p) {
+			strcpy(name, p);
+			free(p);
+		}
+	}
 	char tmp[PATH_MAX];
 	snprintf(tmp, PATH_MAX, "%s/%s", tags_dir, name);
 
@@ -333,17 +348,22 @@ static int
 tag_file(char *name, char *tag)
 {
 	int new_tag = 0;
+	char *p = (char *)NULL;
+	if (strchr(tag, '\\'))
+		p = dequote_str(tag, 0);
 	char dir[PATH_MAX];
-	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, tag);
+	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, p ? p : tag);
 
 	struct stat a;
 	if (stat(dir, &a) == -1) {
 		if (xmkdir(dir, S_IRWXU) != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: %s: Cannot create tag\n"), PROGRAM_NAME, tag);
+			fprintf(stderr, _("%s: %s: Cannot create tag\n"), PROGRAM_NAME, p ? p : tag);
+			free(p);
 			return EXIT_FAILURE;
 		}
 		new_tag = 1;	
 	}
+	free(p);
 
 	if (new_tag) {
 		printf(_("Created new tag %s%s%s\n"), BOLD, tag, df_c);
@@ -353,7 +373,7 @@ tag_file(char *name, char *tag)
 	char link[PATH_MAX], *q = (char *)NULL;
 	if (*name == '/')
 		q = strrchr(name, '/');
-	snprintf(link, PATH_MAX, "%s/%s/%s", tags_dir, tag, (q && *(++q)) ? q : name);
+	snprintf(link, PATH_MAX, "%s/%s", dir, (q && *(++q)) ? q : name);
 
 	if (lstat(link, &a) != -1)
 		return print_tag_creation_error((q && *(++q)) ? q : name, a.st_mode);
@@ -364,7 +384,7 @@ tag_file(char *name, char *tag)
 		snprintf(name_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, name);
 
 	if (symlink(*name_path ? name_path : name, link) == -1)
-		print_symlink_error(name);
+		return print_symlink_error(name);
 
 	return EXIT_SUCCESS;
 }

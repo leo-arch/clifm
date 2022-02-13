@@ -558,6 +558,8 @@ store_completions(char **matches, FILE *fp)
 			color = mi_c;
 			if (*(entry + 1))
 				entry += 1;
+		} else if (cur_comp_type == TCMP_TAGS_S) {
+			color = mi_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
 			char *cl = get_entry_color(matches, i);
 			char ext_cl[MAX_COLOR + 5];
@@ -1176,8 +1178,10 @@ AFTER_USUAL_COMPLETION:
 		if (replacement && cur_comp_type != TCMP_HIST
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
 		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)) {
-			if ((cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL
-			|| cur_comp_type == TCMP_NET) && !strchr(replacement, '\\')) {
+			enum comp_type c = cur_comp_type;
+			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
+			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T)
+			&& !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
 					if (replacement != matches[0])
