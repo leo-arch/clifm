@@ -41,21 +41,23 @@ CLIFM \- The Command Line File Manager
 .sp
 \fB16.\fR Autocommands
 .sp
-\fB17.\fR Standard input
+\fB17.\fR File tags
 .sp
-\fB18.\fR Note on speed
+\fB18.\fR Standard input
 .sp
-\fB19.\fR Kangaroo frecency algorithm
+\fB19.\fR Note on speed
 .sp
-\fB20.\fR Environment
+\fB20.\fR Kangaroo frecency algorithm
 .sp
-\fB21.\fR Security
+\fB21.\fR Environment
 .sp
-\fB22.\fR Miscellaneous notes
+\fB22.\fR Security
 .sp
-\fB23.\fR Files
+\fB23.\fR Miscellaneous notes
 .sp
-\fB24.\fR Examples
+\fB24.\fR Files
+.sp
+\fB25.\fR Examples
 
 .SH 1. GETTING HELP
 There are several ways of getting help in CliFM. Once in the program, enter '\fB?\fR' to see some basic usage examples, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section.
@@ -159,6 +161,7 @@ List of CliFM features:
   49) URI file scheme support (file://)
   50) URL support when running as standalone resource opener (see the \fI--open\fR option)
   51) Disk usage analyzer
+  52) \fIEtiqueta\fR, a files tagging system
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener). URL's and the URI file scheme (for local file systems) is supported.
@@ -890,6 +893,9 @@ The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Tra
 .sp
 To undelete/untrash trashed files see the \fIundel\fR command below.
 .TP
+.B tag \fR[ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE(s)] [[:]TAG]
+\fItag\fR is the main \fIEtiqueta\fR command, CliFM's built-in files tagging system. See the \fBFILE TAGS\fR section for a complete description of this command.
+.TP
 .B te \fRFILE(s)
 toggle executable bit (on user, group, and others) on FILE(s). It is equivalent to the -x and +x options for the shell \fBchmod\fR(1) command.
 .TP
@@ -1155,7 +1161,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  \fBSuggestions\fR
  sb = shell built-ins
  sc = aliases and shell command names
- sf = ELN's, bookmarks, file and directory names
+ sf = ELN's plus bookmarks, file, tag, and directory names
  sh = commands history entries
  sx = suggestions for CliFM's internal commands and parameters
  sp = suggestions pointer (ex: 56 > filename, where '>' is the suggestion pointer)
@@ -1442,7 +1448,7 @@ Since ranges could be a bit tricky, TAB completion is available to make sure thi
 .TP
 If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
 .TP
-TAB completion for commands, paths, environment variables, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, ranges\fB*\fR, the 'sel' keyword\fB*\fR, trashed files\fB*\fR, plus the deselect\fB*\fR and the open-with commands (\fIow\fR) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function.
+TAB completion for commands, paths, environment variables, bookmarks, profiles, color schemes, file tags, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, ranges\fB*\fR, the 'sel' keyword\fB*\fR, trashed files\fB*\fR, plus the deselect\fB*\fR and the open-with commands (\fIow\fR) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function.
 .TP
 \fB*\fR When using FZF mode for TAB completion, multi-selection is available: Press TAB to expand possible selections, then press TAB again to mark desired entries. Once desired entries are marked, press Enter or the Right arrow key: marked entries will be inserted into the command line. Multi-selection is also available for the following commands, provided there is no slash in the query string: \fIac\fR, \fIad\fR, \fIbb\fR, \fIbr\fR, \fId/dup\fR, \fIp/pr/prop\fR, \fIr\fR, \fIs\fR, \fIt/tr/trash\fR, and \fIte\fR. 
 .TP
@@ -1753,7 +1759,90 @@ For \fI.cfm.in\fR:
 For \fI.cfm.out\fR:
    printf "Leaving %s ...\\n" "$OLDPWD"
 
-.SH 17. STANDARD INPUT (STDIN)
+.SH 17. FILE TAGS
+.sp
+\fIEtiqueta\fR is CliFM's built-in files tagging system
+.sp
+\fB1. How Etiqueta works?\fR
+.sp
+File tags are created via symlinks using an specific directory under the user's profile: \fI${XDG_CONFIG_DIR:-/home/USER/.config}/clifm/profiles/USER/tags\fR
+.sp
+Every time a new tag is created, a new directory named as the tag itself is created in the tags directory. Tagged files are just symbolic links to the actual files created in the appropriate directory. For example, if you tag \fI~/myfile.txt\fR as \fIwork\fR, a symbolic link to \fI~/myfile.txt\fR, named \fImyfile.txt\fR will be created in \fItags/work\fR.
+.sp
+\fB2. Handling file tags\fR
+.sp
+\fItag\fR is the main \fBEtiqueta\fR command and is used to handle file tags. Its syntax is as follows:
+
+ tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE(s)] [[:]TAG]
+
+NOTE: the \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag FILES(s) :TAG ...', to tag files, and 'tag untag file1 file2 :TAG', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag remove png', to delete the tag named \fIpng\fR.
+.sp
+The following command shortcuts are available:
+ \fBta\fR    Tag files
+ \fBtd\fR    Delete tag(s)
+ \fBtl\fR    List tags or tagged files
+ \fBtm\fR    Rename (mv) tag
+ \fBtn\fR    Create new tag(s)
+ \fBtu\fR    Untag file(s)
+ \fBty\fR    Merge two tags
+.sp
+\fB3. Usage examples\fR
+.sp
+- List available tags:
+
+ \fBtl\fR
+.sp
+- Tag all .PNG files in the current directory as both \fIimages\fR and \fIpng\fR:
+
+ \fBta *.png :images :png\fR
+.sp
+\fBNOTE\fR: Tags are created if they do not exist
+.sp
+- Tag all selected files as \fIspecial\fR:
+
+ \fBta sel :special\fR
+.sp
+- List all files tagged as work and all files tagged as \fIdocuments\fR:
+
+ \fBtl work documents\fR
+.sp
+- Rename the tag \fIdocuments\fR as \fIdocs\fR:
+
+ \fBtm documents docs\fR
+.sp
+- Merge the tag \fIpng\fR into \fIimages\fR:
+
+ \fBty png images\fR
+.sp
+\fBNOTE\fR: All files tagged as \fIpng\fR will be now tagged as \fIimage\fRs, and the \fIpng\fR tag will be removed.
+.sp
+- Remove the tag \fIimages\fR (untag all files tagged as \fIimages\fR):
+
+ \fBtd images\fR
+.sp
+- Untag a few files:
+
+ \fBtu file1 image.png dir2 :work\fR
+.sp
+\fBNOTE\fR: These files won't be tagged as \fIwork\fR anymore
+.sp
+\fB4. Operating on tagged files\fR
+.sp
+The \fIt:TAG\fR construct is used to operate on tagged files via any command, be it internal or external. A few examples:
+.sp
+- Print the file properties of all files tagged as \fIdocs\fR:
+
+ \fBp t:docs\fR
+.sp
+- Remove all files tagged as \fIimages\fR:
+
+ \fBr t:images\fR
+.sp
+- Run \fBstat\fR(1) over all files tagged as \fIwork\fR and all files tagged as \fIdocs\fR:
+
+ \fBstat t:work t:docs\fR
+
+.SH 18. STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
 .sp
 Each file passed via standard input will be stored as a symbolic link pointing to the original file in a temporary directory (which will be deleted at program exit) and listed on startup. Bear in mind that the restore last path function is disabled when listing in this way. Examples:
@@ -1775,7 +1864,7 @@ You can also use stream redirection:
 .sp
 All operations performed on these symbolic links (provided the current working directory is the temporary directory where all these files are stored) will be performed on the target files and NOT on the symbolic links themselves.
 
-.SH 18. NOTE ON SPEED
+.SH 19. NOTE ON SPEED
 CliFM is by itself quite fast by default, but if speed is still an issue, it is possible to get some extra performance.
 .sp
 The two most time consuming features are:
@@ -1788,7 +1877,7 @@ Besides these two features, a few more things can be disabled to get some extra 
 .sp
 Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel built-in console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 
-.SH 19. KANGAROO FRECENCY ALGORITHM
+.SH 20. KANGAROO FRECENCY ALGORITHM
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
@@ -1829,7 +1918,7 @@ NOTE: Directories visited in the last 24 hours will not be removed from the data
 .sp
 The idea of 'frecency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
-.SH 20. ENVIRONMENT
+.SH 21. ENVIRONMENT
 The following variables are read at initialization time:
 .TP
 .B CLIFM_FILE_COLORS
@@ -1893,7 +1982,7 @@ Exit code of the last executed command
 .B CLIFM_STAT_STEALTH
 1 if running in stealth mode, 0 otherwise
 
-.SH 21. SECURITY
+.SH 22. SECURITY
 Since CliFM executes OS commands, it needs to provide a way to securely run these commands, specially when it comes to untrusted environments. Two features are provided to achieve this aim: \fBsecure environment\fR and \fBsecure commands\fR.
 .TP
 Both features are aimed to protect the program and the system as such from malicious input, either coming from environment variables or from indirect input, that is to say, input coming not from the command line (in which is assumed that it is the user herself who is executing the given command), but from files: this is the case of default associated applications (the \fImime\fR command), autocommands, (un)mount commands (via the \fInet\fR command), just as profile and prompt commands.
@@ -1944,7 +2033,7 @@ Commands containing \fIat least one\fR unsafe character will be rejected. Of cou
  \fBDISPLAY\fR, \fBTZ\fR, \fBLANG\fR, \fBTERM\fR Imported from the environment and sanitized
  \fBLC_ALL\fR             Same as \fBLANG\fR
 
-.SH 22. MISCELLANEOUS NOTES
+.SH 23. MISCELLANEOUS NOTES
 .sp
 \fBSequential and conditional execution of commands\fR:
 
@@ -1984,7 +2073,7 @@ By default, CliFM starts in the current working directory. However, you can alwa
 
 CliFM's default profile is "default". To create alternative profiles use the \-P command line option or the 'pf add' command (see above).
 
-.SH 23. FILES
+.SH 24. FILES
 .TP
 .B CONFIGURATION FILE
 The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
@@ -2032,7 +2121,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .TP
 \fBNOTE\fR: If \fI$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config/\fR is used instead.
 
-.SH 24. EXAMPLES
+.SH 25. EXAMPLES
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
 
 \fBNOTE2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press Left (or Alt-f to accept onlt the first suggested word). Otherwise, the suggestion is just ignored
