@@ -548,9 +548,8 @@ Examples:\n\
 and the 'png' tag will be removed\n\
 - Remove the tag 'images' (untag all files tagged as 'images'):\n\
     td images\n\
-- Untag a few files:\n\
-    tu file1 image.png dir2 :work\n\
-    NOTE: These files won't be tagged as 'work' anymore\n\n\
+- Untag a few files from the 'work' tag:\n\
+    tu :work file1 image.png dir2\n\
 Operating on tagged files (t:TAG)\n\
 - Print the file properties of all files tagged as 'docs':\n\
     p t:docs\n\
