@@ -809,10 +809,6 @@ fzftabcomp(char **matches)
 	if (cur_comp_type == TCMP_TAGS_F)
 		fzf_offset++;
 
-	int e = DIGINUM(exit_code);
-	if (e > 1)
-		fzf_offset += (e - 1);
-
 	/* TAB completion cases allowing multiple selection */
 	int multi = decide_multi();
 

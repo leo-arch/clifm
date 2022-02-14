@@ -905,6 +905,11 @@ prompt(void)
 	char *the_prompt = construct_prompt(decoded_prompt);
 	free(decoded_prompt);
 
+	/* Tell my_rl_getc() (readline.c) to recalculate the length
+	 * of the last prompt line, needed to calculate FZF offset. This
+	 * length might vary if the prompt contains dynamic values */
+	prompt_offset = UNSET;
+
 	/* Print the prompt and get user input */
 	char *input = (char *)NULL;
 	input = readline(the_prompt);
