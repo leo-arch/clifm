@@ -557,7 +557,10 @@ Operating on tagged files (t:TAG)\n\
 - Remove all files tagged as 'images':\n\
     r t:images\n\
 - Run stat(1) over all files tagged as 'work' and all files tagged as 'docs':\n\
-    stat t:work t:docs"
+    stat t:work t:docs\n\n\
+To operate only on some tagged files use TAB as follows:\n\
+    t:TAG<TAB>\n\
+Mark the files you need, and then press Enter or right"
 
 #define TE_USAGE "Toggle the executable bit on files\n\
 Usage:\n\
