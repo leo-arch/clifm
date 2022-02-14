@@ -1820,11 +1820,9 @@ The following command shortcuts are available:
 
  \fBtd images\fR
 .sp
-- Untag a few files:
+- Untag a few files from the \fIwork\fR:
 
- \fBtu file1 image.png dir2 :work\fR
-.sp
-\fBNOTE\fR: These files won't be tagged as \fIwork\fR anymore
+ \fBtu :work file1 image.png dir2\fR
 .sp
 \fB4. Operating on tagged files\fR
 .sp
