@@ -1675,6 +1675,29 @@ check_tagged_files(char *tag)
 	return _matches;
 }
 
+static char *
+get_cur_tag(void)
+{
+	char *p = strrchr(rl_line_buffer, ':');
+	if (!p || !*(++p))
+		return (char *)NULL;
+
+	char *q = p;
+	while (*q) {
+		if (*q == ' ' && (q != p || *(q - 1) != '\\')) {
+			*q = '\0';
+			char *tag = savestring(p, strlen(p));
+			*q = ' ';
+			if (is_tag(tag))
+				return tag;
+			free(tag);
+		}
+		q++;
+	}
+
+	return (char *)NULL;
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -1771,6 +1794,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* Tags completion */
+
+		/* Expand tag expressions (t:TAG) into tagged files */
 		if (fzftab == 1 && tags_n > 0 && *text == 't'
 		&& *(text + 1) == ':' && *(text + 2)) {
 			free(cur_tag);
@@ -1784,6 +1809,7 @@ my_rl_completion(const char *text, int start, int end)
 			cur_tag = (char *)NULL;
 		}
 
+		/* Tag expressions (t:TAG)*/
 		if (tags_n > 0 && *text == 't' && *(text + 1) == ':') {
 			cur_comp_type = TCMP_TAGS_T;
 			matches = rl_completion_matches(text, &tags_generator);
@@ -1792,6 +1818,7 @@ my_rl_completion(const char *text, int start, int end)
 			cur_comp_type = TCMP_NONE;
 		}
 
+		/* 't? TAG' and 't? :tag' */
 		char *lb = rl_line_buffer;
 		if (tags_n > 0 && *lb == 't') {
 			int comp = 0;
@@ -1799,8 +1826,12 @@ my_rl_completion(const char *text, int start, int end)
 			case 'a': /* fallthough */
 			case 'u':
 				if (*text == ':') {
+					/* We have a tag name */
 					comp = 1;
 					cur_comp_type = TCMP_TAGS_C;
+				} else if (*(lb + 1) == 'u') {
+					/* We're not matching a tag, but a tagged file */
+					comp = 2;
 				}
 				break;
 			case 'd': /* fallthough */
@@ -1815,6 +1846,15 @@ my_rl_completion(const char *text, int start, int end)
 				if (matches)
 					return matches;
 				cur_comp_type = TCMP_NONE;
+			} else if (comp == 2) {
+				/* Let's match tagged files for the untag function */
+				char *_tag = get_cur_tag();
+				matches = check_tagged_files(_tag);
+				free(_tag);
+				if (matches) {
+					cur_comp_type = TCMP_TAGS_U;
+					return matches;
+				}
 			}
 		}
 

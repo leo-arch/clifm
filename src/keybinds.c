@@ -626,11 +626,6 @@ rl_accept_suggestion(int count, int key)
 		}
 		break;
 
-/*	case VAR_SUG:
-		my_insert_text(suggestion_buf, NULL, 0);
-		rl_stuff_char(' ');
-		break; */
-
 	default:
 		my_insert_text(suggestion_buf, NULL, 0);
 		rl_stuff_char(' ');

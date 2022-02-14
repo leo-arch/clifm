@@ -586,7 +586,7 @@ store_completions(char **matches, FILE *fp)
 			color = mi_c;
 			if (*(entry + 1))
 				entry += 1;
-		} else if (cur_comp_type == TCMP_TAGS_S) {
+		} else if (cur_comp_type == TCMP_TAGS_S || cur_comp_type == TCMP_TAGS_U) {
 			color = mi_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
 			char *cl = get_entry_color(matches, i);
@@ -707,7 +707,8 @@ decide_multi(void)
 	char *l = rl_line_buffer;
 
 	if (t == TCMP_SEL || t == TCMP_DESEL || t == TCMP_RANGES
-	|| t == TCMP_TRASHDEL || t == TCMP_UNTRASH || t == TCMP_TAGS_F) {
+	|| t == TCMP_TRASHDEL || t == TCMP_UNTRASH || t == TCMP_TAGS_F
+	|| t == TCMP_TAGS_U) {
 		multi = 1;
 	/* Do not allow multi-sel if we have a path, only file names */
 	} else if (t == TCMP_PATH && *l != '/' && !strchr(l, '/')) {
@@ -1222,7 +1223,8 @@ AFTER_USUAL_COMPLETION:
 		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)) {
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
-			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T)
+			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
+			|| c == TCMP_TAGS_U)
 			&& !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
