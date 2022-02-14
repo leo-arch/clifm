@@ -518,7 +518,46 @@ Examples:\n\
 - Revert the current sorting method (i.e. z-a instead of a-z):\n\
     st rev"
 
-#define TAG_USAGE "Coming soon"
+#define TAG_USAGE "(Un)tag files and/or directories\n\
+Usage:\n\
+  tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE(s)] [[:]TAG]\n\n\
+Instead of the long format described above, you can use any of the \
+following shortcuts as well:\n\
+  ta: Tag files\n\
+  td: Delete tag(s)\n\
+  tl: List tags or tagged files\n\
+  tm: Rename (mv) tag\n\
+  tn: Create new tag(s)\n\
+  tu: Untag file(s)\n\
+  ty: Merge two tags\n\n\
+Examples:\n\
+- List available tags:\n\
+    tl\n\
+- Tag all .PNG files in the current directory as both 'images' and 'png':\n\
+    ta *.png :images :png\n\
+    NOTE: Tags are created if they do not exist\n\
+- Tag all selected files as 'special':\n\
+    ta sel :special\n\
+- List all files tagged as 'work' and all files tagged as 'documents':\n\
+    tl work documents\n\
+- Rename tag 'documents' as 'docs':\n\
+    tm documents docs\n\
+- Merge tag 'png' into 'images':\n\
+    ty png images\n\
+    NOTE: All files tagged as 'png' will be now tagged as 'images', \
+and the 'png' tag will be removed\n\
+- Remove the tag 'images' (untag all files tagged as 'images'):\n\
+    td images\n\
+- Untag a few files:\n\
+    tu file1 image.png dir2 :work\n\
+    NOTE: These files won't be tagged as 'work' anymore\n\n\
+Operating on tagged files (t:TAG)\n\
+- Print the file properties of all files tagged as 'docs':\n\
+    p t:docs\n\
+- Remove all files tagged as 'images':\n\
+    r t:images\n\
+- Run stat(1) over all files tagged as 'work' and all files tagged as 'docs':\n\
+    stat t:work t:docs"
 
 #define TE_USAGE "Toggle the executable bit on files\n\
 Usage:\n\

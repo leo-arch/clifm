@@ -1478,7 +1478,8 @@ rl_suggestions(const unsigned char c)
 			if (*word == ':' && *(word + 1)
 			&& (printed = check_tags(word + 1, wlen -1, TAGC_SUG)) == 1)
 				goto SUCCESS;
-		} else if ((lb[1] == 'l' || lb[1] == 'r') && lb[2] == ' ')
+		} else if ((lb[1] == 'l' || lb[1] == 'm' || lb[1] == 'n'
+		|| lb[1] == 'r' || lb[1] == 'y') && lb[2] == ' ')
 			if (*word && (printed = check_tags(word, wlen, TAGS_SUG)) == 1)
 				goto SUCCESS;
 		break;

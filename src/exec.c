@@ -1760,8 +1760,8 @@ exec_cmd(char **comm)
 	/*     ################# TAGS ##################     */
 	else if (*comm[0] == 't'
 	&& (((comm[0][1] == 'a' || comm[0][1] == 'd' || comm[0][1] == 'l'
-	|| comm[0][1] == 'n' || comm[0][1] == 'u') && !comm[0][2])
-	|| strcmp(comm[0], "tag") == 0))
+	|| comm[0][1] == 'm' || comm[0][1] == 'n' || comm[0][1] == 'u'
+	|| comm[0][1] == 'y') && !comm[0][2]) || strcmp(comm[0], "tag") == 0))
 		exit_code = tags_function(comm);
 
 	/*     ################# NEW FILE ##################     */

@@ -389,7 +389,7 @@ char *internal_cmds[] = {
 	"st", "sort",
 	"stats",
 	"t", "tr", "trash",
-	"tag", "ta", "td", "tl", "tn", "tu",
+	"tag", "ta", "td", "tl", "tm", "tn", "tu", "ty",
 	"te",
 	"tips",
 	"touch",

@@ -365,14 +365,14 @@ tag_file(char *name, char *tag)
 	free(p);
 
 	if (new_tag) {
-		printf(_("Created new tag %s%s%s\n"), BOLD, tag, df_c);
+		printf(_("Created new tag %s%s%s\n"), colorize ? BOLD : "", tag, df_c);
 		reload_tags();
 	}
 
-	char link[PATH_MAX], *q = (char *)NULL;
+	char link[PATH_MAX + NAME_MAX], *q = (char *)NULL;
 	if (*name == '/')
 		q = strrchr(name, '/');
-	snprintf(link, PATH_MAX, "%s/%s", dir, (q && *(++q)) ? q : name);
+	snprintf(link, sizeof(link), "%s/%s", dir, (q && *(++q)) ? q : name);
 
 	if (lstat(link, &a) != -1)
 		return print_tag_creation_error((q && *(++q)) ? q : name, a.st_mode);
@@ -476,7 +476,7 @@ untag(char **args, const size_t n, size_t *t)
 
 		if (lstat(f, &a) == -1 || !S_ISLNK(a.st_mode)) {
 			fprintf(stderr, _("%s: %s: File not tagged as %s%s%s\n"),
-				PROGRAM_NAME, args[i], BOLD, args[n] + 1, df_c);
+				PROGRAM_NAME, args[i], colorize ? BOLD : "", args[n] + 1, df_c);
 			continue;
 		}
 
@@ -542,12 +542,86 @@ rename_tag(char **args)
 	return EXIT_SUCCESS;
 }
 
+/* Move all (tagged) files (symlinks) in SRC into DST
+ * Returns zero if success or the appropriate ERRNO in case of error */
+static int
+recursive_mv_tags(const char *src, const char *dst)
+{
+	int i, n, exit_status = EXIT_SUCCESS, ret;
+	char src_dir[PATH_MAX], dst_dir[PATH_MAX];
+	struct dirent **a = (struct dirent **)NULL;
+
+	snprintf(src_dir, PATH_MAX, "%s/%s", tags_dir, src);
+
+	n = scandir(src_dir, &a, NULL, alphasort);
+	if (n == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, src_dir, strerror(errno));
+		return errno;
+	}
+
+	snprintf(dst_dir, PATH_MAX, "%s/%s", tags_dir, dst);
+
+	for (i = 0; i < n; i++) {
+		if (SELFORPARENT(a[i]->d_name)) {
+			free(a[i]);
+			continue;
+		}
+		char src_file[PATH_MAX + NAME_MAX];
+		snprintf(src_file, sizeof(src_file), "%s/%s", src_dir, a[i]->d_name);
+		char *cmd[] = {"mv", src_file, dst_dir, NULL};
+		if ((ret = launch_execve(cmd, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS)
+			exit_status = ret;
+		free(a[i]);
+	}
+
+	free(a);
+	return exit_status;
+}
+
+static int
+merge_tags(char **args)
+{
+	if (!args || !args[1] || !args[2] || !args[3])
+		return print_usage(EXIT_FAILURE);
+
+	if (!is_tag(args[2]))
+		return print_no_such_tag(args[2]);
+	if (!is_tag(args[3]))
+		return print_no_such_tag(args[3]);
+
+	char *src = args[2], *dst = args[3];
+
+	errno = 0;
+	int exit_status = recursive_mv_tags(src, dst);
+	if (exit_status != EXIT_SUCCESS) {
+		fprintf(stderr, _("%s: Cannot merge tags: error moving tagged files\n"),
+			PROGRAM_NAME);
+		return exit_status;
+	}
+
+	char src_dir[PATH_MAX];
+	snprintf(src_dir, PATH_MAX, "%s/%s", tags_dir, src);
+	if (rmdir(src_dir) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, src_dir, strerror(errno));
+		return errno;
+	}
+
+	reload_tags();
+	printf(_("Successfully merged %s%s%s into %s%s%s\n"),
+		colorize ? BOLD : "", src, df_c,
+		colorize ? BOLD : "", dst, df_c);
+
+	return EXIT_SUCCESS;
+}
+
 /* Perform the following expansions:
  * ta -> tag
  * td -> tag rm
  * tl -> tag list
+ * tm -> tag rename (mv)
  * tn -> tag new
  * tu -> tag untag
+ * ty -> tag merge
  * The first string in ARGS must always be one of the left values
  * Returns an array with the expanded values */
 static char **
@@ -563,8 +637,10 @@ reconstruct_input(char **args)
 	case 'a': c = 1; break;
 	case 'd': a[1] = savestring("rm", 2); c = 2; break;
 	case 'l': a[1] = savestring("ls", 2); c = 2; break;
+	case 'm': a[1] = savestring("mv", 2); c = 2; break;
 	case 'n': a[1] = savestring("new", 3); c = 2; break;
 	case 'u': a[1] = savestring("untag", 5); c = 2; break;
+	case 'y': a[1] = savestring("merge", 5); c = 2; break;
 	default: a[1] = savestring("-h", 2); c = 2; break;
 	}
 
@@ -595,18 +671,21 @@ int
 tags_function(char **args)
 {
 	int exit_status = EXIT_SUCCESS, free_args = 0;
-	char **a = args, c = *(a[0] + 1);
+	char **a = args;
 
-	if ((a[1] && IS_HELP(a[1]))
-	|| (a[2] && IS_HELP(a[2])))
+	if ((a[1] && IS_HELP(a[1]))	|| (a[1] && a[2] && IS_HELP(a[2])))
 		{ puts(_(TAG_USAGE)); goto END; }
 
-	if (c == 'a' || c == 'l' || c == 'd' || c == 'n' || c == 'u')
+	char b[] = "adlmnuy";
+	if (strspn(a[0] + 1, b))
 		{ a = reconstruct_input(args); free_args = 1; }
 
 	if (!a[1] || (*a[1] == 'l' && (strcmp(a[1], "ls") == 0
 	|| strcmp(a[1], "list") == 0)))
 		{ exit_status = list_tags(a); goto END; }
+
+	if (*a[1] == 'm' && strcmp(a[1], "merge") == 0)
+		{ exit_status = merge_tags(a); goto END; }
 
 	if (*a[1] == 'n' && strcmp(a[1], "new") == 0)
 		{ exit_status = create_tags(a); goto END; }

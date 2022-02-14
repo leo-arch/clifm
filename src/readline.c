@@ -1726,8 +1726,11 @@ my_rl_completion(const char *text, int start, int end)
 					cur_comp_type = TCMP_TAGS_C;
 				}
 				break;
+			case 'd': /* fallthough */
 			case 'l': /* fallthough */
-			case 'd': comp = 1; cur_comp_type = TCMP_TAGS_S; break;
+			case 'm': /* fallthough */
+			case 'n': /* fallthough */
+			case 'y': comp = 1; cur_comp_type = TCMP_TAGS_S; break;
 			default: break;
 			}
 			if (comp == 1) {
