@@ -620,7 +620,8 @@ rl_accept_suggestion(int count, int key)
 		}
 		char *p = escape_str(suggestion_buf);
 		my_insert_text(p ? p : suggestion_buf, NULL, 0);
-		rl_stuff_char(' ');
+		if (fzftab != 1 || suggestion.type != TAGT_SUG)
+			rl_stuff_char(' ');
 		free(p);
 		}
 		break;

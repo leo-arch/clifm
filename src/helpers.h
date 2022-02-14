@@ -799,7 +799,8 @@ enum comp_type {
 	TCMP_ENVIRON =    18,
 	TCMP_TAGS_T =     19, /* T keyword: 't:TAG' */
 	TCMP_TAGS_C =     20, /* Colon: 'tag file :TAG' */
-	TCMP_TAGS_S =     21  /* Simple completion: 'tag rm TAG' */
+	TCMP_TAGS_S =     21,  /* Simple completion: 'tag rm TAG' */
+	TCMP_TAGS_F =     22  /* Tagged files completion: 't:FULL_TAG_NAME' */
 };
 
 extern enum comp_type cur_comp_type;
@@ -983,6 +984,7 @@ extern char
 	*config_dir_gral,
 	*config_file,
 	*cur_color,
+	*cur_tag,
 	*data_dir,
 	*cur_cscheme,
 	*dirhist_file,

@@ -57,6 +57,7 @@ typedef char *rl_cpvfunc_t;
 #include "readline.h"
 #include "tabcomp.h"
 #include "mime.h"
+#include "tags.h"
 
 #ifndef _NO_SUGGESTIONS
 #include "suggestions.h"
@@ -77,6 +78,9 @@ int freebsd_sc_console = 0;
 /* Wide chars */
 /*char wc[12];
 size_t wcn = 0; */
+
+struct dirent **tagged_files = (struct dirent **)NULL;
+int tagged_files_n = 0;
 
 /* Delete key implementation */
 static void
@@ -1542,6 +1546,25 @@ sel_entries_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+static char *
+tag_entries_generator(const char *text, int state)
+{
+	UNUSED(text);
+	static int i;
+	char *name;
+
+	if (!state)
+		i = 0;
+
+	if (!tagged_files)
+		return (char *)NULL;
+
+	while (i < tagged_files_n && (name = tagged_files[i++]->d_name) != NULL)
+		return strdup(name);
+
+	return (char *)NULL;
+}
+
 /* Return the list of currently trashed files matching TEXT or NULL */
 static char **
 rl_trashed_files(const char *text)
@@ -1609,6 +1632,39 @@ rl_trashed_files(const char *text)
 
 	return tfiles;
 #endif /* _NO_TRASH */
+}
+
+static char **
+check_tagged_files(char *tag)
+{
+	if (!is_tag(tag))
+		return (char **)NULL;
+
+	tagged_files_n = 0;
+
+	char dir[PATH_MAX];
+	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, tag);
+	int n = scandir(dir, &tagged_files, NULL, alphasort);
+	if (n == -1)
+		return (char **)NULL;
+
+	if (n == 2) {
+		free(tagged_files[0]);
+		free(tagged_files[1]);
+		free(tagged_files);
+		tagged_files = (struct dirent **)NULL;
+		return (char **)NULL;
+	}
+
+	tagged_files_n = n;
+	char **_matches = rl_completion_matches("", &tag_entries_generator);
+	while (--n >= 0)
+		free(tagged_files[n]);
+	free(tagged_files);
+	tagged_files_n = 0;
+	tagged_files = (struct dirent **)NULL;
+
+	return _matches;
 }
 
 char **
@@ -1707,7 +1763,20 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* Tags completion */
-		if (*text == 't' && *(text + 1) == ':') {
+		if (fzftab == 1 && tags_n > 0 && *text == 't'
+		&& *(text + 1) == ':' && *(text + 2)) {
+			free(cur_tag);
+			cur_tag = savestring(text + 2, strlen(text + 2));
+			matches = check_tagged_files(cur_tag);
+			if (matches) {
+				cur_comp_type = TCMP_TAGS_F;
+				return matches;
+			}
+			free(cur_tag);
+			cur_tag = (char *)NULL;
+		}
+
+		if (tags_n > 0 && *text == 't' && *(text + 1) == ':') {
 			cur_comp_type = TCMP_TAGS_T;
 			matches = rl_completion_matches(text, &tags_generator);
 			if (matches)
@@ -1716,7 +1785,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		char *lb = rl_line_buffer;
-		if (*lb == 't') {
+		if (tags_n > 0 && *lb == 't') {
 			int comp = 0;
 			switch(*(lb + 1)) {
 			case 'a': /* fallthough */

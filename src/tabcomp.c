@@ -474,23 +474,40 @@ set_fzf_max_win_height(void)
 	return (size_t)(DEF_FZF_WIN_HEIGHT * term_rows / 100);
 }
 
+/* FILENAME is just a symlink name from the tags dir.
+ * Let's get the target path */
+static char *
+get_tagged_file_target(char *filename)
+{
+	char dir[PATH_MAX];
+	snprintf(dir, PATH_MAX, "%s/%s/%s", tags_dir, cur_tag, filename);
+	char *rpath = realpath(dir, NULL);
+	return rpath ? rpath : filename;
+}
+
+static char *
+print_no_fzf_file(void)
+{
+	_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+		FZFTABOUT, strerror(errno));
+//	free(cur_tag);
+//	cur_tag = (char *)NULL;
+	return (char *)NULL;
+}
+
 /* Recover FZF output from FZFTABOUT file
  * Return this output or NULL in case of error */
 static inline char *
 get_fzf_output(const int multi)
 {
 	FILE *fp = fopen(FZFTABOUT, "r");
-	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			FZFTABOUT, strerror(errno));
-		return (char *)NULL;
-	}
+	if (!fp)
+		return print_no_fzf_file();
 
-	char *buf = (char *)xnmalloc(1, sizeof(char));
+	char *buf = (char *)xnmalloc(1, sizeof(char)), *line = (char *)NULL;
 	*buf = '\0';
 	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
-	char *line = (char *)NULL;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n')
@@ -498,7 +515,12 @@ get_fzf_output(const int multi)
 
 		char *q = line;
 		if (multi == 1) {
-			q = escape_str(line);
+			char *s = line;
+			if (cur_comp_type == TCMP_TAGS_F && tags_dir && cur_tag)
+				s = get_tagged_file_target(line);
+			q = escape_str(s);
+			if (s != line)
+				free(s);
 			if (!q)
 				continue;
 		}
@@ -517,9 +539,11 @@ get_fzf_output(const int multi)
 	}
 
 	free(line);
-
 	fclose(fp);
 	unlink(FZFTABOUT);
+
+//	free(cur_tag);
+//	cur_tag = (char *)NULL;
 	return buf;
 }
 
@@ -679,7 +703,7 @@ decide_multi(void)
 	char *l = rl_line_buffer;
 
 	if (t == TCMP_SEL || t == TCMP_DESEL || t == TCMP_RANGES
-	|| t == TCMP_TRASHDEL || t == TCMP_UNTRASH) {
+	|| t == TCMP_TRASHDEL || t == TCMP_UNTRASH || t == TCMP_TAGS_F) {
 		multi = 1;
 	/* Do not allow multi-sel if we have a path, only file names */
 	} else if (t == TCMP_PATH && *l != '/' && !strchr(l, '/')) {
@@ -701,12 +725,14 @@ decide_multi(void)
 		|| (*l == 'p' && (l[1] == ' ' || ((l[1] == 'r' && l[2] == ' ')
 		|| strncmp (l, "prop ", 5) == 0)))
 		/* te */
-		|| (*l == 't' && l[1] == 'e' && l[2] == ' ') )
+		|| (*l == 't' && l[1] == 'e' && l[2] == ' ') ) {
 			multi = 1;
-		else
+		} else {
 			multi = 0;
-	} else
+		}
+	} else {
 		multi = 0;
+	}
 
 	return multi;
 }
@@ -780,6 +806,9 @@ fzftabcomp(char **matches)
 	if (fzf_offset < 0)
 		fzf_offset = 0;
 
+	if (cur_comp_type == TCMP_TAGS_F)
+		fzf_offset++;
+
 	/* TAB completion cases allowing multiple selection */
 	int multi = decide_multi();
 
@@ -805,8 +834,16 @@ fzftabcomp(char **matches)
 	printf("\x1b[%dA", lines);
 
 	/* No results */
-	if (ret != EXIT_SUCCESS)
+	if (ret != EXIT_SUCCESS) {
+		if (cur_comp_type == TCMP_TAGS_F) {
+			char p[NAME_MAX];
+			snprintf(p, NAME_MAX, "t:%s", cur_tag);
+			rl_insert_text(p);
+//			free(cur_tag);
+//			cur_tag = (char *)NULL;
+		}
 		return EXIT_FAILURE;
+	}
 
 	char *buf = get_fzf_output(multi);
 	if (!buf)
@@ -1004,8 +1041,8 @@ tab_complete(int what_to_do)
 				scan = rl_line_buffer[rl_point];
 
 				if (strchr(rl_completer_word_break_characters, scan) == 0
-				|| (scan == ' '
-				&& rl_point && rl_line_buffer[rl_point - 1] == '\\'))
+				|| (scan == ' '	&& rl_point
+				&& rl_line_buffer[rl_point - 1] == '\\'))
 					continue;
 
 				/* Convoluted code, but it avoids an n^2 algorithm with
@@ -1177,6 +1214,7 @@ AFTER_USUAL_COMPLETION:
 
 		if (replacement && cur_comp_type != TCMP_HIST
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
+//		&& cur_comp_type != TCMP_TAGS_F
 		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)) {
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
@@ -1192,10 +1230,13 @@ AFTER_USUAL_COMPLETION:
 					free(replacement);
 				replacement = r;
 			}
-
+//			if (cur_comp_type == TCMP_TAGS_F)
+//				printf("A'%s'\n", rl_line_buffer);
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;
+//			if (cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_SEL)
+//				printf("B'%s'\n", rl_line_buffer);
 #ifndef _NO_HIGHLIGHT
 			if (highlight && !wrong_cmd) {
 				size_t k, l = 0;
@@ -1235,7 +1276,8 @@ AFTER_USUAL_COMPLETION:
 
 		if (replacement != matches[0])
 			free(replacement);
-
+//		if (cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_SEL)
+//			printf("B'%s'\n", rl_line_buffer);
 		/* If there are more matches, ring the bell to indicate.
 		 If this was the only match, and we are hacking files,
 		 check the file to see if it was a directory. If so,
@@ -1257,8 +1299,12 @@ AFTER_USUAL_COMPLETION:
 				temp_string_index++;
 			}
 
-			temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
-			temp_string_index++;
+
+			if (fzftab != 1 || cur_comp_type != TCMP_TAGS_T) {
+				temp_string[temp_string_index] = (char)(delimiter
+						? delimiter : ' ');
+				temp_string_index++;
+			}
 			temp_string[temp_string_index] = '\0';
 
 			if (rl_filename_completion_desired) {
@@ -1561,6 +1607,9 @@ RESTART:
 	for (i = 0; matches[i]; i++)
 		free(matches[i]);
 	free(matches);
+
+//	free(cur_tag);
+//	cur_tag = (char *)NULL;
 
 	return EXIT_SUCCESS;
 }
