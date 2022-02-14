@@ -1559,8 +1559,16 @@ tag_entries_generator(const char *text, int state)
 	if (!tagged_files)
 		return (char *)NULL;
 
-	while (i < tagged_files_n && (name = tagged_files[i++]->d_name) != NULL)
-		return strdup(name);
+	while (i < tagged_files_n && (name = tagged_files[i++]->d_name) != NULL) {
+		if (SELFORPARENT(name))
+			continue;
+		char *p = (char *)NULL;
+		if (strchr(name, '\\'))
+			p = dequote_str(name, 0);
+		char *q = strdup(p ? p : name);
+		free(p);
+		return q;
+	}
 
 	return (char *)NULL;
 }
@@ -1661,8 +1669,8 @@ check_tagged_files(char *tag)
 	while (--n >= 0)
 		free(tagged_files[n]);
 	free(tagged_files);
-	tagged_files_n = 0;
 	tagged_files = (struct dirent **)NULL;
+	tagged_files_n = 0;
 
 	return _matches;
 }

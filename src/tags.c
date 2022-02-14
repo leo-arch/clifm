@@ -370,6 +370,7 @@ tag_file(char *name, char *tag)
 	}
 
 	char link[PATH_MAX + NAME_MAX], *q = (char *)NULL;
+
 	if (*name == '/')
 		q = strrchr(name, '/');
 	snprintf(link, sizeof(link), "%s/%s", dir, (q && *(++q)) ? q : name);
@@ -439,8 +440,13 @@ tag_files(char **args)
 			if (*args[j] == ':')
 				continue;
 
-			if (tag_file(args[j], args[tag_names[i]] + 1) != EXIT_SUCCESS)
+			char *p = (char *)NULL;
+			if (strchr(args[j], '\\'))
+				p = dequote_str(args[j], 0);
+
+			if (tag_file(p ? p : args[j], args[tag_names[i]] + 1) != EXIT_SUCCESS)
 				if (n > 0) --n;
+			free(p);
 		}
 	}
 
@@ -472,7 +478,9 @@ untag(char **args, const size_t n, size_t *t)
 			return print_no_such_tag(args[n] + 1);
 
 		char f[PATH_MAX + NAME_MAX];
-		snprintf(f, PATH_MAX + NAME_MAX, "%s/%s", dir, args[i]);
+		char *deq = dequote_str(args[i], 0);
+		snprintf(f, PATH_MAX + NAME_MAX, "%s/%s", dir, deq ? deq : args[i]);
+		free(deq);
 
 		if (lstat(f, &a) == -1 || !S_ISLNK(a.st_mode)) {
 			fprintf(stderr, _("%s: %s: File not tagged as %s%s%s\n"),

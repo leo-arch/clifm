@@ -480,7 +480,11 @@ static char *
 get_tagged_file_target(char *filename)
 {
 	char dir[PATH_MAX];
-	snprintf(dir, PATH_MAX, "%s/%s/%s", tags_dir, cur_tag, filename);
+	char *p = (char *)NULL;
+	if (strchr(filename, '\\'))
+		p = dequote_str(filename, 0);
+	snprintf(dir, PATH_MAX, "%s/%s/%s", tags_dir, cur_tag, p ? p : filename);
+	free(p);
 	char *rpath = realpath(dir, NULL);
 	return rpath ? rpath : filename;
 }
@@ -567,7 +571,7 @@ store_completions(char **matches, FILE *fp)
 {
 	size_t i;
 	for (i = 1; matches[i]; i++) {
-		if (!matches[i] || !*matches[i])
+		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
 			continue;
 
 		char *color = df_c, *entry = matches[i];
@@ -602,7 +606,7 @@ store_completions(char **matches, FILE *fp)
 			entry = (p && *(++p)) ? p : matches[i];
 		}
 
-		if (*entry && !SELFORPARENT(entry))
+		if (*entry)
 			write_comp_to_file(entry, color, &fp);
 	}
 
