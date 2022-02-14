@@ -1841,6 +1841,18 @@ The \fIt:TAG\fR construct is used to operate on tagged files via any command, be
 - Run \fBstat\fR(1) over all files tagged as \fIwork\fR and all files tagged as \fIdocs\fR:
 
  \fBstat t:work t:docs\fR
+.sp
+\fB4.1 Operating on \fIspecific\fB tagged files\fR
+.sp
+\fBNOTE\fR: This feature, as always when multi-selection is involved, is only available when TAB completion mode is set to FZF. See the \fBTAB completion\fR subsection of the \fBBUILT-IN-EXPANSIONS\fR section above.
+.sp
+You might not want to operate on \fBall\fR files tagged as some specific tag, say \fIwork\fR, but rather on \fBsome\fR files tagged as \fIwork\fR. TAB completion is used to achieve this aim.
+.sp
+Let's suppose you have a tag named \fIwork\fR which contains ten tagged files, but you need to operate (say, print the file properties) only on two of them, say, \fIwork1.odt\fR and \fIwork2.odt\fR:
+.sp
+ \fBp t:work<TAB>\fR
+
+The list of files tagged as \fIwork\fR will be displayed via FZF. Now just mark the two files you need using \fBTAB\fR, press \fBEnter\fR or \fBRight\fR, and the full path of both files will be inserted into the command line. So, '\fBp t:work\fR' will be replaced by '\fBp /path/to/work1.odt /path/to/work2.odt\fR'.
 
 .SH 18. STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
