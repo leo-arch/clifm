@@ -44,11 +44,11 @@ fi
 CMDS="
 1. GETTING HELP@
 2. DESCRIPTION@
-3. RATIONALE@
+3. FEATURES@
 4. POSITIONAL PARAMETERS@
 5. OPTIONS@
 6. COMMANDS@
-7. FILES FILTERS@
+7. FILE FILTERS@
 8. KEYBOARD SHORTCUTS@
 9. COLOR CODES@
 10. THE PROMPT@
@@ -90,7 +90,7 @@ cs, colorscheme@
 d, dup@
 ds, desel@
 edit @
-exp, export@
+exp @
 ext @
 f, forth@
 fc, filescounter@
@@ -100,7 +100,7 @@ fs @
 hf, hidden@
 history @
 icons @
-j, jc, @
+j, @
 kb, keybinds@
 log @
 lm @
@@ -123,7 +123,6 @@ rl, reload@
 rf, refresh@
 s, sel@
 sb, selbox@
-shell @
 splash @
 st, sort@
 stats @
