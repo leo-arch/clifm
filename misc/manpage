@@ -1824,13 +1824,17 @@ The following command shortcuts are available:
 
  \fBtu :work file1 image.png dir2\fR
 .sp
+\fBNOTE\fR: TAB completion is available to complete tagged files. If using the FZF mode, multi-selection is also available via the TAB key.
+.sp
 \fB4. Operating on tagged files\fR
 .sp
-The \fIt:TAG\fR construct is used to operate on tagged files via any command, be it internal or external. A few examples:
+The \fIt:TAG\fR construct (or tag expression) is used to operate on tagged files via any command, be it internal or external. A few examples:
 .sp
 - Print the file properties of all files tagged as \fIdocs\fR:
 
  \fBp t:docs\fR
+.sp
+\fBNOTE\fR: TAB completion is available to expand tag expressions into one or more of the corresponding tagged files. If using the FZF mode, multi-selection is also available via the TAB key.
 .sp
 - Remove all files tagged as \fIimages\fR:
 
