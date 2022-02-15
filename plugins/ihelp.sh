@@ -143,7 +143,7 @@ a="-"
 # shellcheck disable=SC2046
 while [ -n "$a" ]; do
 	if [ "$filter" = "fzf" ]; then
-		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | fzf --prompt "CliFM> " --reverse --height=15 --info=inline --color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold)"
+		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | fzf --prompt "CliFM> " --header "Browse CliFM's manpage" --reverse --height=15 --info=inline --color=fg+:reverse,bg+:236,prompt:6,pointer:2,marker:2:bold,spinner:6:bold)"
 	else
 		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | rofi -dmenu -p "CliFM")"
 	fi
