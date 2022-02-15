@@ -1775,7 +1775,7 @@ Every time a new tag is created, a new directory named as the tag itself is crea
 
  tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE(s)] [[:]TAG]
 
-NOTE: the \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag FILES(s) :TAG ...', to tag files, and 'tag untag file1 file2 :TAG', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag remove png', to delete the tag named \fIpng\fR.
+NOTE: the \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag FILES(s) :TAG ...', to tag files, and 'tag untag :TAG file1 file2', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag remove png', to delete the tag named \fIpng\fR.
 .sp
 The following command shortcuts are available:
  \fBta\fR    Tag files

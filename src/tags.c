@@ -703,7 +703,7 @@ tags_function(char **args)
 		{ exit_status = remove_tags(a); goto END; }
 
 	if ((*a[1] == 'r' && strcmp(a[1], "rename") == 0)
-	|| (*args[1] == 'm' && strcmp(a[1], "mv") == 0))
+	|| (*a[1] == 'm' && strcmp(a[1], "mv") == 0))
 		{ exit_status = rename_tag(a); goto END; }
 
 	if (*a[1] == 'u' && strcmp(a[1], "untag") == 0)
