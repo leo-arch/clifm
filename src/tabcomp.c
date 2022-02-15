@@ -483,10 +483,20 @@ get_tagged_file_target(char *filename)
 	char *p = (char *)NULL;
 	if (strchr(filename, '\\'))
 		p = dequote_str(filename, 0);
+
 	snprintf(dir, PATH_MAX, "%s/%s/%s", tags_dir, cur_tag, p ? p : filename);
 	free(p);
+
 	char *rpath = realpath(dir, NULL);
-	return rpath ? rpath : filename;
+	char *s = rpath ? rpath : filename;
+	char *q = (char *)NULL;
+
+	if (user.home[1] == s[1] && strncmp(user.home, s, user_home_len) == 0) {
+		if ((q = home_tilde(s)))
+			free(s);
+	}
+
+	return q ? q : s;
 }
 
 static char *
@@ -529,10 +539,15 @@ get_fzf_output(const int multi)
 				continue;
 		}
 
-		size_t qlen = q != line ? strlen(q) : (size_t)line_len;
+		/* We don't want to quote the initial tilde */
+		char *r = q;
+		if (*r == '\\' && *(r + 1) == '~')
+			r++;
+
+		size_t qlen = (r != line) ? strlen(r) : (size_t)line_len;
 		bsize += qlen + 3;
 		buf = (char *)xrealloc(buf, bsize * sizeof(char));
-		strcat(buf, q);
+		strcat(buf, r);
 
 		if (multi == 1) {
 			size_t l = strlen(buf);
@@ -742,6 +757,48 @@ decide_multi(void)
 	return multi;
 }
 
+/* Clean the input buffer in case the user cancelled the completion via ESC */
+static int
+clean_rl_buffer(void)
+{
+	if (cur_comp_type != TCMP_TAGS_F)
+		return EXIT_FAILURE;
+
+	/* If all possible completions share a common prefix, this prefix is
+	 * automatically appended to the input buffer. However, the user
+	 * cancelled here the completion (pressing ESC), so that we need to
+	 * removed this prefix, if there */
+
+	/* If the previous char is not space, then a common prefix was appended:
+	 * remove it */
+	if (rl_end && rl_line_buffer[rl_end - 1] != ' ') {
+		/* Find the last non-escaped space */
+		int i = rl_end, sp = -1;
+		while (--i >= 0) {
+			if (rl_line_buffer[i] == ' ' && i > 0
+			&& rl_line_buffer[i - 1] != '\\') {
+				sp = i;
+				break;
+			}
+		}
+
+		if (sp != -1) {
+			/* If found, remove the content of the input line starting
+			 * exactely one char after the last space */
+			rl_delete_text(sp + 1, rl_end);
+			rl_point = rl_end = sp + 1;
+			printf("\x1b[0K");
+		}
+	}
+
+	/* Reinsert the corresponding tag expression (t:TAG) */
+	char p[NAME_MAX];
+	snprintf(p, NAME_MAX, "t:%s", cur_tag);
+	rl_insert_text(p);
+
+	return EXIT_FAILURE;
+}
+
 /* Display possible completions using FZF. If one of these possible
  * completions is selected, insert it into the current line buffer */
 static int
@@ -801,9 +858,9 @@ fzftabcomp(char **matches)
 		if (!query) {
 			if (cur_comp_type == TCMP_TAGS_T)
 				query = lw ? lw + 2 : (char *)NULL;
-			else if (cur_comp_type == TCMP_TAGS_C) {
+			else if (cur_comp_type == TCMP_TAGS_C)
 				query = lw ? lw + 1 : (char *)NULL;
-			} else
+			else
 				query = lw ? lw : (char *)NULL;
 		}
 	}
@@ -836,19 +893,13 @@ fzftabcomp(char **matches)
 			lines++;
 	}
 
-	printf("\x1b[%dA", lines);
+	printf("\x1b[%dA", lines); /* Move up %d lines */
 
-	/* No results */
-	if (ret != EXIT_SUCCESS) {
-		if (cur_comp_type == TCMP_TAGS_F) {
-			char p[NAME_MAX];
-			snprintf(p, NAME_MAX, "t:%s", cur_tag);
-			rl_insert_text(p);
-//			free(cur_tag);
-//			cur_tag = (char *)NULL;
-		}
-		return EXIT_FAILURE;
-	}
+	/* No results (the user pressed ESC) */
+	if (ret != EXIT_SUCCESS)
+/*		free(cur_tag);
+		cur_tag = (char *)NULL; */
+		return clean_rl_buffer();
 
 	char *buf = get_fzf_output(multi);
 	if (!buf)
@@ -1219,13 +1270,11 @@ AFTER_USUAL_COMPLETION:
 
 		if (replacement && cur_comp_type != TCMP_HIST
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
-//		&& cur_comp_type != TCMP_TAGS_F
 		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)) {
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
-			|| c == TCMP_TAGS_U)
-			&& !strchr(replacement, '\\')) {
+			|| c == TCMP_TAGS_U) && !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
 					if (replacement != matches[0])
@@ -1236,13 +1285,11 @@ AFTER_USUAL_COMPLETION:
 					free(replacement);
 				replacement = r;
 			}
-//			if (cur_comp_type == TCMP_TAGS_F)
-//				printf("A'%s'\n", rl_line_buffer);
+
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;
-//			if (cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_SEL)
-//				printf("B'%s'\n", rl_line_buffer);
+
 #ifndef _NO_HIGHLIGHT
 			if (highlight && !wrong_cmd) {
 				size_t k, l = 0;
@@ -1282,8 +1329,7 @@ AFTER_USUAL_COMPLETION:
 
 		if (replacement != matches[0])
 			free(replacement);
-//		if (cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_SEL)
-//			printf("B'%s'\n", rl_line_buffer);
+
 		/* If there are more matches, ring the bell to indicate.
 		 If this was the only match, and we are hacking files,
 		 check the file to see if it was a directory. If so,
