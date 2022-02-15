@@ -654,8 +654,8 @@ ADD_STRING:
 		}
 	}
 
-	if (wrong_cmd == 1)
-		sprintf(result + result_len, "\001\x1b[0m\002%s", wp_c);
+/*	if (wrong_cmd == 1)
+		sprintf(result + result_len, "\001\x1b[0m\002%s", wp_c); */
 
 	/* Remove trailing new line char, if any */
 	if (result && result[result_len - 1] == '\n')

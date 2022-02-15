@@ -574,7 +574,7 @@ recursive_mv_tags(const char *src, const char *dst)
 			free(a[i]);
 			continue;
 		}
-		char src_file[PATH_MAX + NAME_MAX];
+		char src_file[PATH_MAX + NAME_MAX + 2];
 		snprintf(src_file, sizeof(src_file), "%s/%s", src_dir, a[i]->d_name);
 		char *cmd[] = {"mv", src_file, dst_dir, NULL};
 		if ((ret = launch_execve(cmd, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS)
