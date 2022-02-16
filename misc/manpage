@@ -2162,7 +2162,7 @@ Get help:
 
     \fB5\fR
 
-TIP: Press TAB to make sure 5 is the file you want. If the suggestions system is enabled, just pay attention to the suggestion. Press Left to accept the given suggestion
+\fBTIP\fR: Press TAB to make sure 5 is the file you want. If the suggestions system is enabled, just pay attention to the suggestion. Press Left to accept the given suggestion
 
 - Open \fImyfile.txt\fR (with the default associated application):
 
@@ -2180,19 +2180,19 @@ TIP: Press TAB to make sure 5 is the file you want. If the suggestions system is
 
     \fBj xproj\fR
 
-NOTE: This depends however on the database ranking. For more accuracy: 'j mike xproj'
+\fBNOTE\fR: This depends however on the database ranking. For more accuracy: 'j mike xproj'
 
 - Go back to the directory you came from:
 
     \fBb\fR (or \fBShift+left\fR or \fBAlt+j\fR)
 
-NOTE: Enter \fBf\fR, or press \fBShift+right\fR or \fBAlt+k\fR to go back to the first directory
+\fBNOTE\fR: Enter \fBf\fR, or press \fBShift+right\fR or \fBAlt+k\fR to go back to the first directory
 
-- Create a new file named 'myfile' and a new directory named 'mydir':
+- Create a new file named \fImyfile\fR and a new directory named \fImydir\fR:
 
     \fBn myfile mydir/\fR
 
-NOTE: Since CliFM is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: 'touch myfile' or 'nano myfile'
+\fBNOTE\fR: Since CliFM is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: 'touch myfile' or 'nano myfile'
 
 - Change to detail/long view mode:
 
@@ -2222,7 +2222,15 @@ NOTE: Since CliFM is integrated to the system shell, you can also use any of the
 
     \fBds\fR
 
-- Search for all PDF file in the current dirctory:
+- Tag all PDF files in the current directory as \fImypdfs\fR:
+
+    \fBta *.pdf :mypdfs\fR
+
+- Print the file properties of all files tagged as \fImypdfs\fR:
+
+    \fBp t:mypdfs\fR
+
+- Search for all PDF files in the current dirctory:
 
     \fB/*.pdf\fR
 
@@ -2237,6 +2245,8 @@ NOTE: Since CliFM is integrated to the system shell, you can also use any of the
 - Remove all selected files:
 
     \fBr sel\fR
+
+\fBNOTE\fR: To remove files in bulk via a text editor use the \fIrr\fR command.
 
 - Rename the file whose ELN is 12:
 
@@ -2274,13 +2284,13 @@ List available actions/plugins:
     
     \fB-\fR (yes, just a dash)
 
-NOTE: This runs the plugin fzfnav.sh. Take a look at the manpage for needed dependencies
+\fBNOTE\fR: This runs the plugin \fIfzfnav.sh\fR. Take a look at the manpage for needed dependencies
 
 - Want icons?
 
     \fBicons on\fR
 
-NOTE: Recall to install \fBicons-in-terminal\fR before
+\fBNOTE\fR: Recall to install \fBicons-in-terminal\fR before
 
 - I'm tired, quit:
 

@@ -450,10 +450,8 @@ nothing_to_do(char **tmp_file, struct dirent ***a, int n)
 int
 bulk_remove(char *s1, char *s2)
 {
-	if (s1 && IS_HELP(s1)) {
-		puts(_(RR_USAGE));
-		return EXIT_SUCCESS;
-	}
+	if (s1 && IS_HELP(s1))
+		{ puts(_(RR_USAGE)); return EXIT_SUCCESS; }
 
 	char *app = (char *)NULL, *target = (char *)NULL;
 	int fd = 0, n = 0, ret = 0, i = 0;
