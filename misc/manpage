@@ -131,7 +131,7 @@ List of CliFM features:
   19) Commands sequential and conditional execution
   20) \fILira\fR, a built-in resource opener
   21) Eleven sorting methods and reverse sorting
-  22) Bulk rename
+  22) Bulk rename and bulk remove
   23) Archiving and compression support
   24) Auto\-cd and auto\-open
   25) Plugins support via custom actions linked to executable files
@@ -851,6 +851,13 @@ refresh the screen, that is, reprint files in the current directory and update t
 .TP
 .B rl, reload
 Reload all settings, except those passed as command line arguments, from the configuration file.
+.TP
+.B rr [DIR] [EDITOR]
+Remove files and/or directories in bulk using a text editor.
+.sp
+\fIrr\fR sends all files in \fIDIR\fR (or in the current directory if \fIDIR\fR is omitted) to a temporary file and opens it using \fIEDITOR\fR (or the default associated application for \fItext/plain\fR MIME type, if \fIEDITOR\fR is omitted).
+.sp
+Once in the editor, remove the lines corresponding to the files you want to delete. Save changes and close the editor. Removed files will be listed and the user asked for confirmation.
 .TP
 .B s, sel \fRELN/FILE ... n [[!]PATTERN] [-filetype] [:PATH]
 send one or multiple elements (either files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: 's 1 4\-10 ^r file* file name /path/to/filename'. To deselect selected files, use the \fIds\fR command (see above), or the M-d keyboard shortcut.
