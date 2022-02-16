@@ -993,6 +993,7 @@ is_fused_param(char *str)
 	return EXIT_SUCCESS;
 }
 
+#ifndef _NO_TAGS
 /* Expand "t:TAG" into the corresponding tagged files.
  * ARGS is an array with the current input substrings, and TAG_INDEX
  * is the index of the tag expresion (t:) in this array.
@@ -1073,6 +1074,7 @@ expand_tag(char ***args, const int tag_index)
 	/* Do not count self and parent dirs */
 	return (size_t)n - 2;
 }
+#endif /* NO_TAGS */
 
 /* THIS IS QUITE SHITTY FUNCTION, I KNOW. PLEASE REFACTOR IT!!!
  *
@@ -1111,8 +1113,12 @@ expand_tag(char ***args, const int tag_index)
 char **
 parse_input_str(char *str)
 {
-	register size_t i = 0, ntags = 0;
-	int fusedcmd_ok = 0, *tag_index = (int *)NULL;
+	register size_t i = 0;
+	int fusedcmd_ok = 0;
+#ifndef _NO_TAGS
+	size_t ntags = 0;
+	int *tag_index = (int *)NULL;
+#endif /* NO_TAGS */
 
 	/* If internal command plus fused parameter, split it */
 	if (is_fused_param(str) == EXIT_SUCCESS) {
@@ -1337,6 +1343,7 @@ parse_input_str(char *str)
 		if (!substr[i])
 			continue;
 
+#ifndef _NO_TAGS
 		/* Store the indices of tag expressions (t:TAG)*/
 		if (*substr[i] == 't' && *(substr[i] + 1) == ':') {
 			tag_index = (int *)xrealloc(tag_index, (ntags + 2) * sizeof(int));
@@ -1344,6 +1351,7 @@ parse_input_str(char *str)
 			ntags++;
 			tag_index[ntags] = -1;
 		}
+#endif
 
 		register size_t j = 0;
 
@@ -1765,6 +1773,7 @@ parse_input_str(char *str)
 				 * #     2.i) TAGS EXPANSION      #
 				 * ###############################*/
 
+#ifndef _NO_TAGS
 	if (ntags > 0) {
 		for(i = 0; i < ntags; i++) {
 			size_t tn = expand_tag(&substr, tag_index[i]);
@@ -1780,6 +1789,7 @@ parse_input_str(char *str)
 		}
 		free(tag_index);
 	}
+#endif /* _NO_TAGS */
 
 	/* #### 3) NULL TERMINATE THE INPUT STRING ARRAY #### */
 	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));

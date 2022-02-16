@@ -1213,47 +1213,6 @@ jump_generator(const char *text, int state)
 }
 
 static char *
-tags_generator(const char *text, int state)
-{
-	if (tags_n == 0 || !tags)
-		return (char *)NULL;
-
-	static int i;
-	static size_t len, p = 0;
-	char *name;
-
-	if (!state) {
-		i = 0;
-		if (cur_comp_type == TCMP_TAGS_T)
-			p = 2;
-		else if (cur_comp_type == TCMP_TAGS_C)
-			p = 1;
-		else
-			p = 0;
-
-		len = *(text + p) ? strlen(text + p) : 0;
-	}
-
-	while ((name = tags[i++]) != NULL) {
-		if (strncmp(name, text + p, len) != 0)
-			continue;
-		if (cur_comp_type == TCMP_TAGS_C) {
-			char tmp[NAME_MAX];
-			snprintf(tmp, NAME_MAX, ":%s", name);
-			return strdup(tmp);
-		} else if (cur_comp_type == TCMP_TAGS_T) {
-			char tmp[NAME_MAX];
-			snprintf(tmp, NAME_MAX, "t:%s", name);
-			return strdup(tmp);
-		} else {
-			return strdup(name);
-		}
-	}
-
-	return (char *)NULL;
-}
-
-static char *
 cschemes_generator(const char *text, int state)
 {
 	if (!color_schemes)
@@ -1546,33 +1505,6 @@ sel_entries_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-static char *
-tag_entries_generator(const char *text, int state)
-{
-	UNUSED(text);
-	static int i;
-	char *name;
-
-	if (!state)
-		i = 0;
-
-	if (!tagged_files)
-		return (char *)NULL;
-
-	while (i < tagged_files_n && (name = tagged_files[i++]->d_name) != NULL) {
-		if (SELFORPARENT(name))
-			continue;
-		char *p = (char *)NULL;
-		if (strchr(name, '\\'))
-			p = dequote_str(name, 0);
-		char *q = strdup(p ? p : name);
-		free(p);
-		return q;
-	}
-
-	return (char *)NULL;
-}
-
 /* Return the list of currently trashed files matching TEXT or NULL */
 static char **
 rl_trashed_files(const char *text)
@@ -1642,6 +1574,75 @@ rl_trashed_files(const char *text)
 #endif /* _NO_TRASH */
 }
 
+#ifndef _NO_TAGS
+static char *
+tags_generator(const char *text, int state)
+{
+	if (tags_n == 0 || !tags)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len, p = 0;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		if (cur_comp_type == TCMP_TAGS_T)
+			p = 2;
+		else if (cur_comp_type == TCMP_TAGS_C)
+			p = 1;
+		else
+			p = 0;
+
+		len = *(text + p) ? strlen(text + p) : 0;
+	}
+
+	while ((name = tags[i++]) != NULL) {
+		if (strncmp(name, text + p, len) != 0)
+			continue;
+		if (cur_comp_type == TCMP_TAGS_C) {
+			char tmp[NAME_MAX];
+			snprintf(tmp, NAME_MAX, ":%s", name);
+			return strdup(tmp);
+		} else if (cur_comp_type == TCMP_TAGS_T) {
+			char tmp[NAME_MAX];
+			snprintf(tmp, NAME_MAX, "t:%s", name);
+			return strdup(tmp);
+		} else {
+			return strdup(name);
+		}
+	}
+
+	return (char *)NULL;
+}
+
+static char *
+tag_entries_generator(const char *text, int state)
+{
+	UNUSED(text);
+	static int i;
+	char *name;
+
+	if (!state)
+		i = 0;
+
+	if (!tagged_files)
+		return (char *)NULL;
+
+	while (i < tagged_files_n && (name = tagged_files[i++]->d_name) != NULL) {
+		if (SELFORPARENT(name))
+			continue;
+		char *p = (char *)NULL;
+		if (strchr(name, '\\'))
+			p = dequote_str(name, 0);
+		char *q = strdup(p ? p : name);
+		free(p);
+		return q;
+	}
+
+	return (char *)NULL;
+}
+
 static char **
 check_tagged_files(char *tag)
 {
@@ -1697,6 +1698,7 @@ get_cur_tag(void)
 
 	return (char *)NULL;
 }
+#endif /* _NO_TAGS */
 
 char **
 my_rl_completion(const char *text, int start, int end)
@@ -1793,6 +1795,8 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		char *lb = rl_line_buffer;
+#ifndef _NO_TAGS
 		/* Tags completion */
 
 		/* Expand tag expressions (t:TAG) into tagged files */
@@ -1819,7 +1823,6 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* 't? TAG' and 't? :tag' */
-		char *lb = rl_line_buffer;
 		if (tags_n > 0 && *lb == 't') {
 			int comp = 0;
 			switch(*(lb + 1)) {
@@ -1857,6 +1860,7 @@ my_rl_completion(const char *text, int start, int end)
 				}
 			}
 		}
+#endif
 
 		/* Complete environment variables */
 		if (*text == '$' && *(text + 1) != '(') {

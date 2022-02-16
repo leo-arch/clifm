@@ -1262,6 +1262,7 @@ print_warning_prompt(const char c)
 	}
 }
 
+#ifndef _NO_TAGS
 static inline int
 check_tags(const char *str, const size_t len, int type)
 {
@@ -1279,6 +1280,7 @@ check_tags(const char *str, const size_t len, int type)
 
 	return 0;
 }
+#endif /* _NO_TAGS */
 
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
@@ -1473,6 +1475,7 @@ rl_suggestions(const unsigned char c)
 		}
 		break;
 
+#ifndef _NO_TAGS
 	case 't': /* Tags */
 		if ((lb[1] == 'a' || lb[1] == 'u') && lb[2] == ' ') {
 			if (*word == ':' && *(word + 1)
@@ -1483,7 +1486,7 @@ rl_suggestions(const unsigned char c)
 			if (*word && (printed = check_tags(word, wlen, TAGS_SUG)) == 1)
 				goto SUCCESS;
 		break;
-
+#endif /* _NO_TAGS */
 	default: break;
 	}
 
@@ -1681,10 +1684,12 @@ rl_suggestions(const unsigned char c)
 			goto SUCCESS;
 	}
 
+#ifndef _NO_TAGS
 	if (*word == 't' && *(word + 1) == ':' && *(word + 2)) {
 		if ((printed = check_tags(word + 2, wlen - 2, TAGT_SUG)) == 1)
 			goto SUCCESS;
 	}
+#endif /* _NO_TAGS */
 
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */

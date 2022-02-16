@@ -607,6 +607,7 @@ rl_accept_suggestion(int count, int key)
 	case HIST_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
+	#ifndef _NO_TAGS
 	case TAGC_SUG: /* fallthrough */
 	case TAGS_SUG: /* fallthrough */
 	case TAGT_SUG: {
@@ -625,6 +626,7 @@ rl_accept_suggestion(int count, int key)
 		free(p);
 		}
 		break;
+#endif /* _NO_TAGS */
 
 	default:
 		my_insert_text(suggestion_buf, NULL, 0);

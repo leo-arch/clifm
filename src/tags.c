@@ -22,6 +22,8 @@
  * MA 02110-1301, USA.
 */
 
+#ifndef _NO_TAGS
+
 #include "helpers.h"
 
 #include <stdio.h>
@@ -714,3 +716,7 @@ tags_function(char **args)
 END:
 	return end_tag_function(exit_status, a, free_args);
 }
+
+#else
+void *__skip_me_tags;
+#endif /* !_NO_TAGS */

@@ -1766,7 +1766,14 @@ exec_cmd(char **comm)
 	&& (((comm[0][1] == 'a' || comm[0][1] == 'd' || comm[0][1] == 'l'
 	|| comm[0][1] == 'm' || comm[0][1] == 'n' || comm[0][1] == 'u'
 	|| comm[0][1] == 'y') && !comm[0][2]) || strcmp(comm[0], "tag") == 0))
+#ifndef _NO_TAGS
 		exit_code = tags_function(comm);
+#else
+	{
+		fprintf(stderr, "%s: tag: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
+		return EXIT_FAILURE;
+	}
+#endif
 
 	/*     ################# NEW FILE ##################     */
 	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "new") == 0))
