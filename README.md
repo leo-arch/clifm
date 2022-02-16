@@ -172,7 +172,7 @@ For a detailed explanation of each of these features, follow the corresponding l
   - **NEW**: [Remove files in bulk using a text editor](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
   - **NEW**: [_Etiqueta_, a files tagging system](https://github.com/leo-arch/clifm/wiki/Specifics#file-tags)
   - **NEW**: Disk usage analyzer mode (via `-t, --disk-usage-analyzer`)
-  - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is not supported anymore.
+  - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is used now only for the _input text color_ of the warning prompt.
 * `verion 1.4`:
   - In order to make _Lira_ more powerful<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
