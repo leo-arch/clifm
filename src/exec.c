@@ -1757,6 +1757,10 @@ exec_cmd(char **comm)
 		print_dirhist(); return EXIT_SUCCESS;
 	}
 
+	else if (*comm[0] == 'r' && comm[0][1] == 'r' && !comm[0][2])
+		exit_code = bulk_remove(comm[1] ? comm[1] : NULL,
+					(comm[1] && comm[2]) ? comm[2] : NULL);
+
 	/*     ################# TAGS ##################     */
 	else if (*comm[0] == 't'
 	&& (((comm[0][1] == 'a' || comm[0][1] == 'd' || comm[0][1] == 'l'

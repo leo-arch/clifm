@@ -34,6 +34,8 @@
 #include <limits.h>
 #include <fcntl.h>
 
+#include <dirent.h>
+
 #ifndef _NO_ARCHIVING
 #include "archives.h"
 #endif
@@ -51,7 +53,440 @@
 #include "selection.h"
 #include "messages.h"
 
-#include "config.h"
+static char
+ask_user_y_or_n(const char *msg, char default_answer)
+{
+	char *answer = (char *)NULL;
+	while (!answer) {
+		answer = rl_no_hist(msg);
+		if (answer && *answer && *(answer + 1)) {
+			free(answer);
+			answer = (char *)NULL;
+			continue;
+		}
+
+		if (!answer) /* Defaults to DEFAULT_ANSWER*/
+			return default_answer;
+
+		switch (*answer) {
+		case 'y': /* fallthrough */
+		case 'Y': free(answer); return 'y';
+
+		case 'n': /* fallthrough */
+		case 'N': free(answer); return 'n';
+		case '\0': free(answer); return default_answer;
+
+		default:
+			free(answer);
+			answer = (char *)NULL;
+			break;
+		}
+	}
+
+	free(answer);
+	return default_answer;
+}
+
+static int
+parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
+{
+	if (!s1 || !*s1) { /* No parameters */
+		/* TARGET defaults to CWD and APP to default associated app */
+		*target = workspaces[cur_ws].path;
+		return EXIT_SUCCESS;
+	}
+
+	int stat_ret = 0;
+	struct stat a;
+	if ((stat_ret = stat(s1, &a)) == -1 || !S_ISDIR(a.st_mode)) {
+		char *p = get_cmd_path(s1);
+		if (!p) { /* S1 is neither a directory nor a valid application */
+			int ec = stat_ret != -1 ? ENOTDIR : ENOENT;
+			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME, s1, strerror(ec));
+			return ec;
+		}
+		/* S1 is an application name. TARGET defaults to CWD */
+		*target = workspaces[cur_ws].path;
+		*app = s1;
+		free(p);
+		return EXIT_SUCCESS;
+	}
+
+	/* S1 is a valid directory */
+	size_t tlen = strlen(s1);
+	if (tlen > 2 && s1[tlen - 1] == '/')
+		s1[tlen - 1] = '\0';
+	*target = s1;
+
+	if (!s2 || !*s2) /* No S2. APP defaults to default associated app */
+		return EXIT_SUCCESS;
+
+	char *p = get_cmd_path(s2);
+	if (p) { /* S2 is a valid application name */
+		*app = s2;
+		free(p);
+		return EXIT_SUCCESS;
+	}
+	/* S2 is not a valid application name */
+	fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME, s2, strerror(ENOENT));
+	return ENOENT;
+}
+
+static int
+create_tmp_file(char **file, int *fd)
+{
+	if (xargs.stealth_mode == 1) {
+		*file = (char *)xnmalloc(strlen(P_tmpdir) + strlen(TMP_FILENAME)
+		        + 2, sizeof(char));
+		sprintf(*file, "%s/%s", P_tmpdir, TMP_FILENAME);
+	} else {
+		*file = (char *)xnmalloc(strlen(tmp_dir) + strlen(TMP_FILENAME)
+		        + 2, sizeof(char));
+		sprintf(*file, "%s/%s", tmp_dir, TMP_FILENAME);
+	}
+
+	errno = 0;
+	*fd = mkstemp(*file);
+	if (*fd == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *file, strerror(errno));
+		free(*file);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *tmp_file)
+{
+	FILE *fp = fopen(tmp_file, "w");
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", tmp_file, strerror(errno));
+		return errno;
+	}
+
+	fprintf(fp, _("# Remove the files you want to be deleted. Close the "
+		"editor\n# to cancel the operation\n\n"));
+
+	size_t i;
+	if (target == workspaces[cur_ws].path) {
+		for (i = 0; i < files; i++)
+			fprintf(fp, "%s\n", file_info[i].name);
+	} else {
+		if (count_dir(target, CPOP) <= 2) {
+			fprintf(stderr, _("%s: %s: Directory empty\n"), PROGRAM_NAME, target);
+			fclose(fp);
+			unlink(tmp_file);
+			return EXIT_FAILURE;
+		}
+		*n = scandir(target, a, NULL, alphasort);
+		if (*n == -1) {
+			fclose(fp);
+			unlink(tmp_file);
+			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, target, strerror(errno));
+			return errno;
+		}
+		for (i = 0; i < (size_t)*n; i++) {
+			if (SELFORPARENT((*a)[i]->d_name))
+				continue;
+			fprintf(fp, "%s\n", (*a)[i]->d_name);
+		}
+	}
+
+	fclose(fp);
+	return EXIT_SUCCESS;
+}
+
+static int
+open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
+{
+	if (!app || !*app) {
+		open_in_foreground = 1;
+		int exit_status = open_file(tmp_file);
+		open_in_foreground = 0;
+
+		if (exit_status == EXIT_SUCCESS)
+			return EXIT_SUCCESS;
+
+		fprintf(stderr, _("%s: %s: Cannot open file\n"), PROGRAM_NAME, tmp_file);
+		if (unlink(tmp_file) == -1) {
+			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+				tmp_file, strerror(errno));
+		}
+
+		size_t i;
+		for (i = 0; i < (size_t)n; i++)
+			free((*a)[i]);
+		free(*a);
+		return errno;
+	}
+
+	char *cmd[] = {app, tmp_file, NULL};
+	int exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+
+	if (exit_status == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+
+	if (unlink(tmp_file) == -1) {
+		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			tmp_file, strerror(errno));
+	}
+
+	size_t i;
+	for (i = 0; i < (size_t)n; i++)
+		free((*a)[i]);
+	free(*a);
+	return exit_status;
+}
+
+static char **
+get_files_from_tmp_file(const char *tmp_file, const char *target, const int n)
+{
+	size_t nfiles = (target == workspaces[cur_ws].path) ? files : (size_t)n;
+	char **tmp_files = (char **)xnmalloc(nfiles + 2, sizeof(char *));
+
+	FILE *fp = fopen(tmp_file, "r");
+
+	size_t size = 0, i;
+	char *line = (char *)NULL;
+	ssize_t len = 0;
+
+	i = 0;
+	while ((len = getline(&line, &size, fp)) > 0) {
+		if (*line == '#' || *line == '\n')
+			continue;
+		if (line[len - 1] == '\n') {
+			line[len - 1] = '\0';
+			len--;
+		}
+		tmp_files[i] = savestring(line, (size_t)len);
+		i++;
+	}
+	tmp_files[i] = (char *)NULL;
+
+	free(line);
+	fclose(fp);
+
+	return tmp_files;
+}
+
+/* If FILE is not found in LIST, returns one; zero otherwise */
+static int
+remove_this_file(char *file, char **list)
+{
+	if (SELFORPARENT(file))
+		return 0;
+
+	size_t i;
+	for (i = 0; list[i]; i++) {
+		if (*file == *list[i] && strcmp(file, list[i]) == 0)
+			return 0;
+	}
+
+	return 1;
+}
+
+static char **
+get_remove_files(const char *target, char **tmp_files, struct dirent ***a, const int n)
+{
+	size_t i, j = 0, l = (target == workspaces[cur_ws].path) ? files : (size_t)n;
+	char **rem_files = (char **)xnmalloc(l + 2, sizeof(char *));
+
+	if (target == workspaces[cur_ws].path) {
+		for (i = 0; i < files; i++) {
+			if (remove_this_file(file_info[i].name, tmp_files) == 1) {
+				rem_files[j] = savestring(file_info[i].name, strlen(file_info[i].name));
+				j++;
+			}
+		}
+		rem_files[j] = (char *)NULL;
+		return rem_files;
+	}
+
+	for (i = 0; i < (size_t)n; i++) {
+		if (remove_this_file((*a)[i]->d_name, tmp_files) == 1) {
+			char p[PATH_MAX];
+			if (*target == '/') {
+				snprintf(p, PATH_MAX, "%s/%s", target, (*a)[i]->d_name);
+			} else {
+				snprintf(p, PATH_MAX, "%s/%s/%s", workspaces[cur_ws].path,
+				         target, (*a)[i]->d_name);
+			}
+			rem_files[j] = savestring(p, strlen(p));
+			j++;
+		}
+		free((*a)[i]);
+	}
+
+	free(*a);
+	rem_files[j] = (char *)NULL;
+
+	return rem_files;
+}
+
+static char *
+get_rm_param(char ***rfiles, int n)
+{
+	char *_param = (char *)NULL;
+	struct stat attr;
+	int i = n;
+
+	while (--i >= 0) {
+		if (lstat((*rfiles)[i], &attr) == -1)
+			continue;
+
+		if (S_ISDIR(attr.st_mode)) {
+#if defined(__NetBSD__) || defined(__OpenBSD__)
+			_param = savestring("-r", 2);
+#else
+			_param = savestring("-dIr", 4);
+#endif
+			break;
+		}
+	}
+
+	if (!_param) {
+#if defined(__NetBSD__) || defined(__OpenBSD__)
+		_param = savestring("-f", 2);
+#else
+		_param = savestring("-I", 2);
+#endif
+	}
+
+	return _param;
+}
+
+static char **
+construct_rm_cmd(char ***rfiles, char *_param, size_t n)
+{
+	char **cmd = (char **)xnmalloc(n + 4, sizeof(char *));
+
+	cmd[0] = savestring("rm", 2);
+	cmd[1] = savestring(_param, strlen(_param));
+	cmd[2] = savestring("--", 2);
+	free(_param);
+
+	int cmd_n = 3;
+	size_t i;
+	for (i = 0; i < n; i++) {
+		cmd[cmd_n] = savestring((*rfiles)[i], strlen((*rfiles)[i]));
+		cmd_n++;
+	}
+	cmd[cmd_n] = (char *)NULL;
+
+	return cmd;
+}
+
+static int
+bulk_remove_files(char ***rfiles)
+{
+	int n;
+	for (n = 0; (*rfiles)[n]; n++)
+		printf("%s\n", (*rfiles)[n]);
+
+	if (n == 0)
+		return EXIT_FAILURE;
+
+	char a = ask_user_y_or_n("Continue? [y/N] ", 'n');
+
+	int i = n;
+	if (a == 'n') {
+		while (--i >= 0)
+			free((*rfiles)[i]);
+		free(*rfiles);
+		return 0;
+	}
+
+	char *_param = get_rm_param(rfiles, n);
+	char **cmd = construct_rm_cmd(rfiles, _param, (size_t)n);
+
+	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+
+	i = n;
+	while (--i >= 0)
+		free((*rfiles)[i]);
+	free(*rfiles);
+
+	for (i = 0; cmd[i]; i++)
+		free(cmd[i]);
+	free(cmd);
+
+	return ret;
+}
+
+static int
+diff_files(char *tmp_file, int n)
+{
+	FILE *fp = fopen(tmp_file, "r");
+	char line[PATH_MAX + 6];
+	memset(line, '\0', sizeof(line));
+
+	int c = 0;
+	while (fgets(line, (int)sizeof(line), fp)) {
+		if (*line != '#' && *line != '\n')
+			c++;
+	}
+
+	if (c == n)
+		return 0;
+
+	return 1;
+}
+
+static int
+nothing_to_do(char **tmp_file, struct dirent ***a, int n)
+{
+	printf(_("%s: Nothing to do\n"), PROGRAM_NAME);
+	free(*tmp_file);
+
+	int i = n;
+	while (--i >= 0)
+		free((*a)[i]);
+	free(*a);
+
+	return EXIT_SUCCESS;
+}
+
+int
+bulk_remove(char *s1, char *s2)
+{
+	char *app = (char *)NULL, *target = (char *)NULL;
+	int fd = 0, n = 0, ret = 0, i = 0;
+
+	if ((ret = parse_bulk_remove_params(s1, s2, &app, &target)) != EXIT_SUCCESS)
+		return ret;
+
+	char *tmp_file = (char *)NULL;
+	if ((ret = create_tmp_file(&tmp_file, &fd)) != EXIT_SUCCESS)
+		return ret;
+
+	struct dirent **a = (struct dirent **)NULL;
+	if ((ret = write_files_to_tmp(&a, &n, target, tmp_file)) != EXIT_SUCCESS)
+		{ free(tmp_file); return ret; }
+
+	struct stat attr;
+	stat(tmp_file, &attr);
+	time_t old_t = attr.st_mtime;
+
+	if ((ret = open_tmp_file(&a, n, tmp_file, app)) != EXIT_SUCCESS)
+		{ free(tmp_file); return ret; }
+
+	stat(tmp_file, &attr);
+	int num = (target == workspaces[cur_ws].path) ? (int)files : n - 2;
+	if (old_t == attr.st_mtime || diff_files(tmp_file, num) == 0)
+		return nothing_to_do(&tmp_file, &a, n);
+
+	char **__files = get_files_from_tmp_file(tmp_file, target, n);
+	char **rem_files = get_remove_files(target, __files, &a, n);
+
+	ret = bulk_remove_files(&rem_files);
+
+	for (i = 0; __files[i]; i++) free(__files[i]);
+	free(__files);
+
+	free(tmp_file);
+	return ret;
+}
 
 void
 clear_selbox(void)

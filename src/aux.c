@@ -520,7 +520,7 @@ get_hex_num(const char *str)
 
 /* Count files in DIR_PATH, including self and parent. If POP is set to 1,
  * the function will just check if the directory is populated (it has at
- * least 3 files, including self and parent)*/
+ * least 3 files, including self and parent) */
 int
 count_dir(const char *dir, int pop)
 {
@@ -530,9 +530,8 @@ count_dir(const char *dir, int pop)
 	DIR *p;
 	if ((p = opendir(dir)) == NULL) {
 		if (errno == ENOMEM)
-			exit(EXIT_FAILURE);
-		else
-			return (-1);
+			exit(ENOMEM);
+		return (-1);
 	}
 
 	int c = 0;
@@ -747,7 +746,7 @@ xrealloc(void *ptr, size_t size)
 	if (!p) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 				PROGRAM_NAME, __func__, size);
-		exit(EXIT_FAILURE);
+		exit(ENOMEM);
 	}
 
 	return p;
@@ -761,7 +760,7 @@ xcalloc(size_t nmemb, size_t size)
 	if (!p) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 				PROGRAM_NAME, __func__, nmemb * size);
-		exit(EXIT_FAILURE);
+		exit(ENOMEM);
 	}
 
 	return p;
@@ -775,7 +774,7 @@ xnmalloc(size_t nmemb, size_t size)
 	if (!p) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 				PROGRAM_NAME, __func__, nmemb * size);
-		exit(EXIT_FAILURE);
+		exit(ENOMEM);
 	}
 
 	return p;

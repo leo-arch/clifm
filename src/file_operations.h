@@ -36,6 +36,7 @@
 int batch_link(char **args);
 char *export(char **filenames, int open);
 int bulk_rename(char **args);
+int bulk_remove(char *s1, char *s2);
 int remove_file(char **args);
 int copy_function(char **comm);
 int edit_link(char *link);
