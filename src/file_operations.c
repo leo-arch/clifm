@@ -53,6 +53,9 @@
 #include "selection.h"
 #include "messages.h"
 
+#define BULK_RM_TMP_FILE_HEADER "# Remove the files you want to be \
+deleted, save and exit\n# Close the editor to cancel the operation\n\n"
+
 static char
 ask_user_y_or_n(const char *msg, char default_answer)
 {
@@ -156,6 +159,37 @@ create_tmp_file(char **file, int *fd)
 	return EXIT_SUCCESS;
 }
 
+static char
+get_file_suffix(mode_t type)
+{
+	switch(type) {
+	case DT_DIR: return '/';
+	case DT_REG: return 0;
+	case DT_LNK: return '@';
+	case DT_SOCK: return '=';
+	case DT_FIFO: return '|';
+	case DT_UNKNOWN: return '?';
+	default: return 0;
+	}
+}
+
+static void
+print_file(FILE *fp, char *name, mode_t type)
+{
+#ifndef _DIRENT_HAVE_D_TYPE
+	char s = 0;
+	struct stat a;
+	if (lstat(name, &a) != -1)
+		s = get_file_suffix(a.st_mode));
+#else
+	char s = get_file_suffix(type);
+#endif
+	if (s)
+		fprintf(fp, "%s%c\n", name, s);
+	else
+		fprintf(fp, "%s\n", name);
+}
+
 static int
 write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *tmp_file)
 {
@@ -165,13 +199,12 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 		return errno;
 	}
 
-	fprintf(fp, _("# Remove the files you want to be deleted. Close the "
-		"editor\n# to cancel the operation\n\n"));
+	fprintf(fp, _(BULK_RM_TMP_FILE_HEADER));
 
 	size_t i;
 	if (target == workspaces[cur_ws].path) {
 		for (i = 0; i < files; i++)
-			fprintf(fp, "%s\n", file_info[i].name);
+			print_file(fp, file_info[i].name, file_info[i].type);
 	} else {
 		if (count_dir(target, CPOP) <= 2) {
 			fprintf(stderr, _("%s: %s: Directory empty\n"), PROGRAM_NAME, target);
@@ -189,7 +222,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 		for (i = 0; i < (size_t)*n; i++) {
 			if (SELFORPARENT((*a)[i]->d_name))
 				continue;
-			fprintf(fp, "%s\n", (*a)[i]->d_name);
+			print_file(fp, (*a)[i]->d_name, (*a)[i]->d_type);
 		}
 	}
 
@@ -259,6 +292,12 @@ get_files_from_tmp_file(const char *tmp_file, const char *target, const int n)
 			line[len - 1] = '\0';
 			len--;
 		}
+		if (line[len - 1] == '/' || line[len - 1] == '@' || line[len - 1] == '='
+		|| line[len - 1] == '|' || line[len - 1] == '?') {
+			line[len - 1] = '\0';
+			len--;
+		}
+
 		tmp_files[i] = savestring(line, (size_t)len);
 		i++;
 	}
@@ -437,6 +476,7 @@ static int
 nothing_to_do(char **tmp_file, struct dirent ***a, int n)
 {
 	printf(_("%s: Nothing to do\n"), PROGRAM_NAME);
+	unlink(*tmp_file);
 	free(*tmp_file);
 
 	int i = n;
