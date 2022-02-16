@@ -173,7 +173,8 @@ For a detailed explanation of each of these features, follow the corresponding l
   - **NEW**: [_Etiqueta_, a files tagging system](https://github.com/leo-arch/clifm/wiki/Specifics#file-tags)
   - **NEW**: Disk usage analyzer mode (via `-t, --disk-usage-analyzer`)
   - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is not supported anymore.
-* `verion 1.4`: In order to make _Lira_ more powerful<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
+* `verion 1.4`:
+  - In order to make _Lira_ more powerful<sup>1</sup> it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
 <sup>1</sup> _It can now match entire file names instead of just file extensions_
 
