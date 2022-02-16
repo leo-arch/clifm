@@ -527,6 +527,7 @@ bulk_remove(char *s1, char *s2)
 	for (i = 0; __files[i]; i++) free(__files[i]);
 	free(__files);
 
+	unlink(tmp_file);
 	free(tmp_file);
 	return ret;
 }
