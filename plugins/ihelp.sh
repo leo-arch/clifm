@@ -121,6 +121,7 @@ p, pr, prop@
 q, quit, exit, Q@
 rl, reload@
 rf, refresh@
+rr @
 s, sel@
 sb, selbox@
 splash @
