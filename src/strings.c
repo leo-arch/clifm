@@ -818,6 +818,7 @@ is_internal_f(const char *restrict cmd)
 		"paste",
 	    "pin",
 	    "r", "rm",
+	    "rr",
 	    "s", "sel",
 	    "st", "sort",
 	    "t", "tr", "trash",

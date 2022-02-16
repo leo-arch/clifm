@@ -384,6 +384,7 @@ char *internal_cmds[] = {
 	"r", "rm",
 	"rf", "refresh",
 	"rl", "reload",
+	"rr",
 	"s", "sel",
 	"sb", "selbox",
 	"splash",

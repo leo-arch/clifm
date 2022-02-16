@@ -482,6 +482,20 @@ Examples:\n\
 - Print the properties of the directory 'dir' (including its total size):\n\
     pp dir"
 
+#define RR_USAGE "Remove files in bulk using a text editor\n\
+Usage:\n\
+  rr [DIR] [EDITOR]\n\n\
+The list of files in DIR (current directory if omitted) is opened via \
+EDITOR (default associated application if omitted). Remove the lines \
+corresponding to the files you want to delete, save, and exit the editor.\n\n\
+Examples:\n\
+- Bulk remove files/dirs in the current directory using the default editor:\n\
+    rr\n\
+- Bulk remove files/dirs in the current directory using nano:\n\
+    rr nano\n\
+- Bulk remove files/dirs in mydir/ using vi:\n\
+    rr mydir vi"
+
 #define SEL_USAGE "Select one or multiple files\n\
 Usage:\n\
   s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\

@@ -467,6 +467,8 @@ print_tips(int all)
 		"Customize the warning prompt via the WarningPromptStr in the config file",
 		"Enter '-' to run the fzfnav plugin (includes files preview)",
 		"Create multiple links at once using the 'bl' command",
+		"Oragnize your files using tags. Try 'tag --help'",
+		"Remove files in bulk using a text editor with 'rr'",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
