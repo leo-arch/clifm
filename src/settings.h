@@ -156,18 +156,27 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_DIR_ICO_C "\x1b[00;33m"
 
 /* Colors for file properties */
-#define PR_READ     "\x1b[0;1;33m"
-#define PR_WRITE    "\x1b[0;1;31m"
-#define PR_EXEC_DIR "\x1b[0;1;32m"
-#define PR_EXEC_REG "\x1b[0;1;36m"
+#define PR_READ     "\x1b[0;33m"
+#define PR_WRITE    "\x1b[0;31m"
+#define PR_EXEC_DIR "\x1b[0;32m"
+#define PR_EXEC_REG "\x1b[0;36m"
 #define PR_NONE     "\x1b[0;2;37m"
-#define PR_SPECIAL  "\x1b[0;1;35m" /* SUID, GUID, ISVTX */
+#define PR_SPECIAL  "\x1b[0;0;35m" /* SUID, GUID, ISVTX */
 #define PR_DATE     "\x1b[0;34m"
-#define PR_ID       "\x1b[1;33m" /* UID, GID */
-#define PR_SIZE     "\x1b[1;32m"
-#define PR_SIZE_DIR "\x1b[1;32m"
-#define PR_SIZE_REG "\x1b[1;36m"
-#define PR_NUM_VAL  "\x1b[1;36m" /* Properties in octal */
+#define PR_ID       "\x1b[0;33m" /* UID, GID */
+#define PR_SIZE     "\x1b[0;32m"
+#define PR_SIZE_DIR "\x1b[0;32m"
+#define PR_SIZE_REG "\x1b[0m"
+#define PR_NUM_VAL  "\x1b[0;36m" /* Properties in octal */
+
+/* Colors for the file type bit of the properties string */
+#define PR_DIR  "\x1b[0;34m"
+#define PR_REG  "\x1b[0m"
+#define PR_LNK  "\x1b[0;36m"
+#define PR_CHR  "\x1b[0;32m"
+#define PR_BLK  "\x1b[0;32m"
+#define PR_FIFO "\x1b[0;35m"
+#define PR_SOCK "\x1b[0;35m"
 
 #define MNT_UDEVIL 	0
 #define MNT_UDISKS2 1

@@ -86,11 +86,14 @@ get_properties(char *filename, const int dsize)
 
 	char *cnum_val = PR_NUM_VAL, /* Color for properties octal value */
 		 *ctype = PR_NONE,       /* Color for file type */
-		 *cid = PR_ID,           /* Color for UID and GID */
+		 *cid = BOLD,              /* Color for UID and GID */
 		 *csize = PR_SIZE,       /* Color for file size */
 		 *cdate = PR_DATE,       /* Color for dates */
 		 *cbold = BOLD,          /* Just bold */
 		 *cend = NC;             /* Ending olor */
+
+	if (attr.st_uid == user.uid || attr.st_gid == user.gid)
+		cid = PR_ID;
 
 	char ext_color[MAX_COLOR];
 
@@ -145,7 +148,8 @@ get_properties(char *filename, const int dsize)
 	} break;
 	case S_IFDIR:
 		file_type = 'd';
-		ctype = di_c;
+//		ctype = di_c;
+		ctype = PR_DIR;
 		if (light_mode)
 			color = di_c;
 		else if (check_file_access(&attr) == 0)
@@ -155,7 +159,8 @@ get_properties(char *filename, const int dsize)
 		break;
 	case S_IFLNK:
 		file_type = 'l';
-		ctype = ln_c;
+		ctype = PR_LNK;
+//		ctype = ln_c;
 		if (light_mode) {
 			color = ln_c;
 		} else {
@@ -167,19 +172,23 @@ get_properties(char *filename, const int dsize)
 		}
 		break;
 	case S_IFSOCK: file_type = 's';
-		color = ctype = so_c;
+		color = so_c;
+		ctype = PR_SOCK;
 		break;
 	case S_IFBLK:
 		file_type = 'b';
-		color = ctype = bd_c;
+		color = bd_c;
+		ctype = PR_BLK;
 		break;
 	case S_IFCHR:
 		file_type = 'c';
-		color = ctype = cd_c;
+		color = cd_c;
+		ctype = PR_CHR;
 		break;
 	case S_IFIFO:
 		file_type = 'p';
-		color = ctype = pi_c;
+		color = pi_c;
+		ctype = PR_FIFO;
 		break;
 	default:
 		file_type = '?';
@@ -460,24 +469,22 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	char file_type = 0;    /* File type indicator */
 	char *ctype = PR_NONE, /* Color for file type */
 		 *cdate = PR_DATE, /* Color for dates */
-		 *cid = PR_ID,     /* Color for UID and GID */
+		 *cid = NC,     /* Color for UID and GID */
 		/* Color for file size */
 		 *csize = (props->dir ? PR_SIZE_DIR : PR_SIZE_REG),
 		 *cend = NC;       /* Ending Color */
 
 	if (props->uid == user.uid || props->gid == user.gid)
 		cid = PR_ID;
-	else
-		cid = df_c;
 
 	switch (props->mode & S_IFMT) {
 	case S_IFREG: file_type = '-'; break;
-	case S_IFDIR: file_type = 'd'; ctype = di_c; break;
-	case S_IFLNK: file_type = 'l'; ctype = ln_c; break;
-	case S_IFSOCK: file_type = 's'; ctype = so_c; break;
-	case S_IFBLK: file_type = 'b'; ctype = bd_c; break;
-	case S_IFCHR: file_type = 'c'; ctype = cd_c; break;
-	case S_IFIFO: file_type = 'p'; ctype = pi_c; break;
+	case S_IFDIR: file_type = 'd'; ctype = PR_DIR; break;
+	case S_IFLNK: file_type = 'l'; ctype = PR_LNK; break;
+	case S_IFSOCK: file_type = 's'; ctype = PR_SOCK; break;
+	case S_IFBLK: file_type = 'b'; ctype = PR_BLK; break;
+	case S_IFCHR: file_type = 'c'; ctype = PR_CHR; break;
+	case S_IFIFO: file_type = 'p'; ctype = PR_FIFO; break;
 	default: file_type = '?'; break;
 	}
 
