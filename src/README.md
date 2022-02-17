@@ -188,6 +188,8 @@ This is the basic structure of CliFM: generally speaking, it is just a shell. In
 
 * Improve my security: `sanitize.c`
 
+* The tags system: `tags.c`
+
 ## 5) Compilation
 
 **Note**: For the list of dependencies, see the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
@@ -253,6 +255,7 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support. Implies `_NO_MAGIC` |
 | `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
 | `_NO_SUGGESTIONS` | Disable suggestions support |
+| `_NO_TAGS` | Disable support for `Etiqueta`, the tags system |
 | `_NO_TRASH` | Disable trash support |
 
 <sup>1</sup> Only one features is lost:
