@@ -56,7 +56,7 @@ static int
 print_symlink_error(const char *name)
 {
 	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
-	return EXIT_FAILURE;
+	return errno;
 }
 
 static int
@@ -124,10 +124,11 @@ print_tagged_file(char *name, const char *tag)
 			}
 		}
 
-		char *p = strrchr(q, '/');
+/*		char *p = strrchr(q, '/');
 		if (p && p != q)
-			*p = '\0';
-		printf("%s%s%s [%s]\n", mi_c, name, df_c, q);
+			*p = '\0'; */
+//		printf("%s%s%s [%s]\n", mi_c, name, df_c, q);
+		printf("%s%s%s\n", mi_c, name, df_c);
 //		*p = '/';
 		if (free_name)
 			free(q);
@@ -327,6 +328,9 @@ remove_tags(char **args)
 int
 is_tag(char *name)
 {
+	if (!name || !*name)
+		return 0;
+
 	if (strchr(name, '\\')) {
 		char *deq = dequote_str(name, 0);
 		if (deq) {
@@ -342,6 +346,24 @@ is_tag(char *name)
 	}
 
 	return 0;
+}
+
+static char *
+replace_slashes(char *str)
+{
+	if (*str == '/')
+		str++;
+
+	char *p = savestring(str, strlen(str));
+	char *q = p;
+
+	while (*q) {
+		if (*q == '/' && (q == p || *(q - 1) != '\\'))
+			*q = ':';
+		q++;
+	}
+
+	return p;
 }
 
 /* Tag the file named NAME as TAG */
@@ -371,19 +393,22 @@ tag_file(char *name, char *tag)
 		reload_tags();
 	}
 
-	char link[PATH_MAX + NAME_MAX], *q = (char *)NULL;
-
-	if (*name == '/')
-		q = strrchr(name, '/');
-	snprintf(link, sizeof(link), "%s/%s", dir, (q && *(++q)) ? q : name);
-
-	if (lstat(link, &a) != -1)
-		return print_tag_creation_error((q && *(++q)) ? q : name, a.st_mode);
-
 	char name_path[PATH_MAX];
 	*name_path = '\0';
 	if (*name != '/')
 		snprintf(name_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, name);
+
+	char link[PATH_MAX + NAME_MAX], *q = (char *)NULL;
+	char *link_path = replace_slashes(*name_path ? name_path : name);
+
+//	if (*name == '/')
+//		q = strrchr(name, '/');
+//	snprintf(link, sizeof(link), "%s/%s", dir, (q && *(++q)) ? q : link_path);
+	snprintf(link, sizeof(link), "%s/%s", dir, link_path);
+	free(link_path);
+
+	if (lstat(link, &a) != -1)
+		return print_tag_creation_error((q && *(++q)) ? q : name, a.st_mode);
 
 	if (symlink(*name_path ? name_path : name, link) == -1)
 		return print_symlink_error(name);
