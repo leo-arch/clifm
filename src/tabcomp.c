@@ -576,7 +576,7 @@ write_comp_to_file(const char *entry, const char *color, FILE **fp)
 		return;
 	}
 
-	fprintf(*fp, "%s%s%s%c", color, entry, df_c, '\0');
+	fprintf(*fp, "%s%s%s%c", color, entry, NC, '\0');
 }
 
 /* Store possible completions (MATCHES) in FZFTABIN to pass them to FZF
@@ -704,7 +704,7 @@ calculate_prefix_len(char *str)
 			prefix_len = len + c;
 		} else if (cur_comp_type == TCMP_TAGS_T && len >= 2) {
 			prefix_len = len - 2;
-		} else if (cur_comp_type == TCMP_TAGS_C && len >= 1) {
+		} else if (cur_comp_type == TCMP_TAGS_C) {
 			prefix_len = len - 1;
 		} else {
 			prefix_len = len;

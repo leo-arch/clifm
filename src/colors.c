@@ -882,18 +882,47 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	char *line = (char *)NULL;
 	size_t line_size = 0;
 	ssize_t line_len = 0;
-	int file_type_found = 0,
-		ext_type_found = 0,
-#ifndef _NO_ICONS
-	    dir_icon_found = 0,
-#endif
-	    iface_found = 0;
 
 	while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
+		if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
+			char *p = strchr(line, '=');
+			if (!p || !*p || !*(++p))
+				continue;
+			free(encoded_prompt);
+			encoded_prompt = (char *)NULL;
+			encoded_prompt = savestring(p, strlen(p));
+		}
+
+		if (*line == 'W'
+		&& strncmp(line, "WarningPromptStr=", 17) == 0) {
+			char *p = strchr(line, '=');
+			if (!p || !*p || !*(++p))
+				continue;
+			char *q = remove_quotes(p);
+			if (!q)
+				continue;
+			free(wprompt_str);
+			wprompt_str = savestring(q, strlen(q));
+		}
+#ifndef _NO_FZF
+		if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
+			char *p = strchr(line, '=');
+			if (!p || !*p || !*(++p))
+				continue;
+			char *q = remove_quotes(p);
+			if (!q)
+				continue;
+			free(fzftab_options);
+			fzftab_options = savestring(q, strlen(q));
+			fzf_height_set = 0;
+			if (strstr(fzftab_options, "--height"))
+				fzf_height_set = 1;
+		}
+#endif /* _NO_FZF */
+
 		/* Interface colors */
 		if (!*ifacecolors && *line == 'I'
 		&& strncmp(line, "InterfaceColors=", 16) == 0) {
-			iface_found = 1;
 			char *opt_str = strchr(line, '=');
 			if (!opt_str)
 				continue;
@@ -910,7 +939,6 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		/* Filetype colors */
 		if (!*filecolors && *line == 'F'
 		&& strncmp(line, "FiletypeColors=", 15) == 0) {
-			file_type_found = 1;
 			char *opt_str = strchr(line, '=');
 			if (!opt_str)
 				continue;
@@ -927,7 +955,6 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 		/* File extension colors */
 		if (!*extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
-			ext_type_found = 1;
 			char *opt_str = strchr(line, '=');
 			if (!opt_str)
 				continue;
@@ -938,7 +965,6 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 #ifndef _NO_ICONS
 		/* Directory icon color */
 		if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
-			dir_icon_found = 1;
 			char *opt_str = strchr(line, '=');
 			if (!opt_str)
 				continue;
@@ -967,14 +993,15 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			sprintf(dir_ico_c, "\x1b[%sm", opt_str);
 		}
 #endif /* !_NO_ICONS */
-
-		if (file_type_found && ext_type_found
+/*
+		if (prompt_found && wprompt_found && file_type_found && ext_type_found
+//		if (file_type_found && ext_type_found
 #ifndef _NO_ICONS
 		&& iface_found && dir_icon_found)
 #else
 		&& iface_found)
 #endif
-			break;
+			break; */
 	}
 
 	free(line);

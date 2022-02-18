@@ -484,17 +484,17 @@ untag(char **args, const size_t n, size_t *t)
 		snprintf(f, PATH_MAX + NAME_MAX, "%s/%s", dir, deq ? deq : args[i]);
 		free(deq);
 
-		if (lstat(f, &a) == -1 || !S_ISLNK(a.st_mode)) {
+		if (lstat(f, &a) != -1 && S_ISLNK(a.st_mode)) {
+			if (unlink(f) == -1) {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
+				exit_status = EXIT_FAILURE;
+			} else {
+				(*t)++;
+			}
+		} else {
 			fprintf(stderr, _("%s: %s: File not tagged as %s%s%s\n"),
 				PROGRAM_NAME, args[i], colorize ? BOLD : "", args[n] + 1, df_c);
 			continue;
-		}
-
-		if (unlink(f) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
-			exit_status = EXIT_FAILURE;
-		} else {
-			(*t)++;
 		}
 	}
 

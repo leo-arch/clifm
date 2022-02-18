@@ -242,23 +242,23 @@ get_properties(char *filename, const int dsize)
 	}
 
 	if (colorize == 0 || props_color == 0) {
-		cdate = EMPTY_STR;
-		csize = EMPTY_STR;
-		cid = EMPTY_STR;
-		cnum_val = EMPTY_STR;
-		color = EMPTY_STR;
-		ctype = EMPTY_STR;
-		cend = EMPTY_STR;
-		cbold = EMPTY_STR;
-		cu1 = EMPTY_STR;
-		cu2 = EMPTY_STR;
-		cu3 = EMPTY_STR;
-		cg1 = EMPTY_STR;
-		cg2 = EMPTY_STR;
-		cg3 = EMPTY_STR;
-		co1 = EMPTY_STR;
-		co2 = EMPTY_STR;
-		co3 = EMPTY_STR;
+		cdate = df_c;
+		csize = df_c;
+		cid = df_c;
+		cnum_val = df_c;
+		color = df_c;
+		ctype = df_c;
+		cend = df_c;
+		cbold = df_c;
+		cu1 = df_c;
+		cu2 = df_c;
+		cu3 = df_c;
+		cg1 = df_c;
+		cg2 = df_c;
+		cg3 = df_c;
+		co1 = df_c;
+		co2 = df_c;
+		co3 = df_c;
 	}
 
 	/* Get number of links to the file */
@@ -469,7 +469,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	char file_type = 0;    /* File type indicator */
 	char *ctype = PR_NONE, /* Color for file type */
 		 *cdate = PR_DATE, /* Color for dates */
-		 *cid = NC,     /* Color for UID and GID */
+		 *cid = df_c,     /* Color for UID and GID */
 		/* Color for file size */
 		 *csize = (props->dir ? PR_SIZE_DIR : PR_SIZE_REG),
 		 *cend = NC;       /* Ending Color */
@@ -534,20 +534,20 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	}
 
 	if (colorize == 0 || props_color == 0) {
-		cdate = EMPTY_STR;
-		csize = EMPTY_STR;
-		cid = EMPTY_STR;
-		ctype = EMPTY_STR;
-		cend = EMPTY_STR;
-		cu1 = EMPTY_STR;
-		cu2 = EMPTY_STR;
-		cu3 = EMPTY_STR;
-		cg1 = EMPTY_STR;
-		cg2 = EMPTY_STR;
-		cg3 = EMPTY_STR;
-		co1 = EMPTY_STR;
-		co2 = EMPTY_STR;
-		co3 = EMPTY_STR;
+		cdate = df_c;
+		csize = df_c;
+		cid = df_c;
+		ctype = df_c;
+		cend = df_c;
+		cu1 = df_c;
+		cu2 = df_c;
+		cu3 = df_c;
+		cg1 = df_c;
+		cg2 = df_c;
+		cg3 = df_c;
+		co1 = df_c;
+		co2 = df_c;
+		co3 = df_c;
 	}
 
 	/* Get modification time */

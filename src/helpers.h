@@ -196,8 +196,6 @@ extern int watch;
 #define BACKGROUND 1
 #define FOREGROUND 0
 
-#define EMPTY_STR ""
-
 /* A few fixed colors */
 #define GRAY   "\x1b[1;30m"
 #define _RED   "\x1b[1;31m"

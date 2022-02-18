@@ -195,7 +195,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 {
 	FILE *fp = fopen(tmp_file, "w");
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", tmp_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		return errno;
 	}
 
@@ -527,7 +527,7 @@ bulk_remove(char *s1, char *s2)
 	for (i = 0; __files[i]; i++) free(__files[i]);
 	free(__files);
 
-	unlink(tmp_file);
+	unlinkat(fd, tmp_file, 0);
 	free(tmp_file);
 	return ret;
 }
