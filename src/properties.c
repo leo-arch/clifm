@@ -85,7 +85,7 @@ get_properties(char *filename, const int dsize)
 	char *linkname = (char *)NULL, *color = (char *)NULL;
 
 	char *cnum_val = do_c, /* Color for properties octal value */
-		 *ctype = PR_NONE,       /* Color for file type */
+		 *ctype = dn_c,       /* Color for file type */
 		 *cid = BOLD,              /* Color for UID and GID */
 		 *csize = dz_c,       /* Color for file size */
 		 *cdate = dd_c,       /* Color for dates */
@@ -202,9 +202,9 @@ get_properties(char *filename, const int dsize)
 	     read_others = '-', write_others = '-', exec_others = '-';
 
 	/* Colors for permissions bits */
-	char *cu1 = PR_NONE, *cu2 = PR_NONE, *cu3 = PR_NONE,
-		 *cg1 = PR_NONE, *cg2 = PR_NONE, *cg3 = PR_NONE,
-		 *co1 = PR_NONE, *co2 = PR_NONE, *co3 = PR_NONE;
+	char *cu1 = dn_c, *cu2 = dn_c, *cu3 = dn_c,
+		 *cg1 = dn_c, *cg2 = dn_c, *cg3 = dn_c,
+		 *co1 = dn_c, *co2 = dn_c, *co3 = dn_c;
 
 	mode_t val = (attr.st_mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) { read_usr = 'r'; cu1 = dr_c; }
@@ -472,7 +472,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		size_type = get_size_unit(props->size);
 
 	char file_type = 0;    /* File type indicator */
-	char *ctype = PR_NONE, /* Color for file type */
+	char *ctype = dn_c, /* Color for file type */
 		 *cdate = dd_c, /* Color for dates */
 		 *cid = df_c,     /* Color for UID and GID */
 		/* Color for file size */
@@ -499,9 +499,9 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	     read_others = '-', write_others = '-', exec_others = '-';
 
 	/* Colors for each field of the properties string */
-	char *cu1 = PR_NONE, *cu2 = PR_NONE, *cu3 = PR_NONE,
-		 *cg1 = PR_NONE, *cg2 = PR_NONE, *cg3 = PR_NONE,
-		 *co1 = PR_NONE, *co2 = PR_NONE, *co3 = PR_NONE;
+	char *cu1 = dn_c, *cu2 = dn_c, *cu3 = dn_c,
+		 *cg1 = dn_c, *cg2 = dn_c, *cg3 = dn_c,
+		 *co1 = dn_c, *co2 = dn_c, *co3 = dn_c;
 
 	mode_t val = (props->mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) { read_usr = 'r'; cu1 = dr_c; }

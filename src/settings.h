@@ -158,6 +158,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_DZ_C "\x1b[00;32m" /* Size (only for dirs) */
 #define DEF_DO_C "\x1b[00;36m" /* Perms in octal */
 #define DEF_DP_C "\x1b[00;36m" /* SUID, SGID, Sticky */
+#define DEF_DN_C "\x1b[00;02;37m" /* Dash (no attribute) */
 
 /* This one is purely internal: cur_color is set to this value when
  * entering the warning prompt, so that that we can check cur_color
@@ -167,7 +168,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_DIR_ICO_C "\x1b[00;33m"
 
 /* Color for file properties */
-#define PR_NONE "\x1b[0;2;37m"
+//#define PR_NONE "\x1b[00;02;37m"
 
 #define MNT_UDEVIL 	0
 #define MNT_UDISKS2 1

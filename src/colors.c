@@ -314,6 +314,7 @@ reset_iface_colors(void)
 	*dz_c = '\0';
 	*do_c = '\0';
 	*dp_c = '\0';
+	*dn_c = '\0';
 }
 
 /* Disable colors for suggestions */
@@ -728,6 +729,9 @@ set_iface_colors(char **colors, const size_t words)
 		else if (*colors[i] == 'd' && strncmp(colors[i], "dp=", 3) == 0)
 			set_color(colors[i], 3, dp_c, RL_PRINTABLE);
 
+		else if (*colors[i] == 'd' && strncmp(colors[i], "dn=", 3) == 0)
+			set_color(colors[i], 3, dn_c, RL_PRINTABLE);
+
 		free(colors[i]);
 	}
 }
@@ -819,6 +823,7 @@ set_default_colors(void)
 	if (!*dz_c) strcpy(dz_c, DEF_DZ_C);
 	if (!*do_c) strcpy(do_c, DEF_DO_C);
 	if (!*dp_c) strcpy(dp_c, DEF_DP_C);
+	if (!*dn_c) strcpy(dn_c, DEF_DN_C);
 }
 
 static void

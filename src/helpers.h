@@ -1123,6 +1123,7 @@ extern char
 	dz_c[MAX_COLOR], /* Size (dirs) > */
 	do_c[MAX_COLOR], /* Octal representation > */
 	dp_c[MAX_COLOR], /* Special files (SUID, SGID, etc) */
+	dn_c[MAX_COLOR], /* dash (none) */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
