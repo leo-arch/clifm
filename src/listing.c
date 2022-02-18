@@ -195,7 +195,7 @@ print_dirhist_map(void)
 		if (i > 0 && old_pwd[i - 1])
 			printf("%zu %s\n", i, old_pwd[i - 1]);
 
-		printf("%zu %s%s%s\n", i + 1, dh_c,
+		printf("%zu %s%s%s\n", i + 1, mi_c,
 		    old_pwd[i], df_c);
 
 		if (i + 1 < (size_t)dirhist_total_index && old_pwd[i + 1])
@@ -551,7 +551,7 @@ print_entry_color(int *ind_char, const int i, const int pad)
 	*ind_char = 0;
 	char *end_color = df_c;
 	if (file_info[i].dir)
-		end_color = dc_c;
+		end_color = fc_c;
 
 	char *wname = (char *)NULL;
 	/* wc_xstrlen returns 0 if a non-printable char was found in the file name */
@@ -674,7 +674,7 @@ print_entry_color(int *ind_char, const int i, const int pad)
 		}
 	}
 
-	if (end_color == dc_c)
+	if (end_color == fc_c)
 		fputs(df_c, stdout);
 
 	free(wname);
@@ -834,7 +834,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 	*ind_char = 0;
 	char *end_color = df_c;
 	if (file_info[i].dir)
-		end_color = dc_c;
+		end_color = fc_c;
 
 	char *wname = (char *)NULL;
 	/* wc_strlen returns 0 if a non-printable char was found in the file name */
@@ -935,7 +935,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 			fputs(xitoa(file_info[i].filesn), stdout);
 	}
 
-	if (end_color == dc_c)
+	if (end_color == fc_c)
 		fputs(df_c, stdout);
 
 	free(wname);

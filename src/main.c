@@ -590,9 +590,8 @@ char
 
 	/* Interface */
 	bm_c[MAX_COLOR], /* Bookmarked directory */
-	dc_c[MAX_COLOR], /* Files counter */
+	fc_c[MAX_COLOR], /* Files counter */
 	df_c[MAX_COLOR], /* Default color */
-	dh_c[MAX_COLOR], /* Dirhist index */
 	dl_c[MAX_COLOR], /* Dividing line index */
 	el_c[MAX_COLOR], /* ELN */
 	mi_c[MAX_COLOR], /* Misc indicators */
@@ -625,6 +624,16 @@ char
 	hs_c[MAX_COLOR],		/* Process separators: | & ; */
 	hv_c[MAX_COLOR],		/* Variables: $ */
 	hw_c[MAX_COLOR],		/* Wrong, non-existent command name */
+
+	dr_c[MAX_COLOR], /* Read */
+	dw_c[MAX_COLOR], /* Write */
+	dxd_c[MAX_COLOR], /* Execute (dirs) */
+	dxr_c[MAX_COLOR], /* Execute (reg files) */
+	dg_c[MAX_COLOR], /* UID, GID */
+	dd_c[MAX_COLOR], /* Date */
+	dz_c[MAX_COLOR], /* Size (dirs) > */
+	do_c[MAX_COLOR], /* Octal representation > */
+	dp_c[MAX_COLOR], /* Special files (SUID, SGID, etc) */
 
 	/* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

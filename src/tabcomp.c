@@ -1571,7 +1571,7 @@ CALC_OFFSET:
 						/* Print the matching part of the match */
 						printf("\x1b[0m%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
 						(cur_comp_type == TCMP_CMD) ? (colorize
-						? ex_c : "") : dc_c);
+						? ex_c : "") : fc_c);
 					}
 
 					/* Now print the non-matching part of the match */

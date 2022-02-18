@@ -283,9 +283,8 @@ reset_iface_colors(void)
 	*mi_c = '\0';
 	*tx_c = '\0';
 	*df_c = '\0';
-	*dc_c = '\0';
+	*fc_c = '\0';
 	*wc_c = '\0';
-	*dh_c = '\0';
 	*li_c = '\0';
 	*li_cb = '\0';
 	*ti_c = '\0';
@@ -305,6 +304,16 @@ reset_iface_colors(void)
 	*ws6_c = '\0';
 	*ws7_c = '\0';
 	*ws8_c = '\0';
+
+	*dr_c = '\0';
+	*dw_c = '\0';
+	*dxd_c = '\0';
+	*dxr_c = '\0';
+	*dg_c = '\0';
+	*dd_c = '\0';
+	*dz_c = '\0';
+	*do_c = '\0';
+	*dp_c = '\0';
 }
 
 /* Disable colors for suggestions */
@@ -680,20 +689,44 @@ set_iface_colors(char **colors, const size_t words)
 		else if (*colors[i] == 'd' && strncmp(colors[i], "df=", 3) == 0)
 			set_color(colors[i], 3, df_c, RL_PRINTABLE);
 
-		else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0)
-			set_color(colors[i], 3, dc_c, RL_PRINTABLE);
+		else if (*colors[i] == 'f' && strncmp(colors[i], "fc=", 3) == 0)
+			set_color(colors[i], 3, fc_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 'w' && strncmp(colors[i], "wc=", 3) == 0)
 			set_color(colors[i], 3, wc_c, RL_PRINTABLE);
-
-		else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0)
-			set_color(colors[i], 3, dh_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 't' && strncmp(colors[i], "ts=", 3) == 0)
 			set_color(colors[i], 3, ts_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 'w' && strncmp(colors[i], "wp=", 3) == 0)
 			set_color(colors[i], 3, wp_c, RL_NO_PRINTABLE);
+
+		else if (*colors[i] == 'd' && strncmp(colors[i], "dr=", 3) == 0)
+			set_color(colors[i], 3, dr_c, RL_PRINTABLE);
+
+		else if (*colors[i] == 'd' && strncmp(colors[i], "dw=", 3) == 0)
+			set_color(colors[i], 3, dw_c, RL_PRINTABLE);
+
+		else if (*colors[i] == 'd' && strncmp(colors[i], "dxd=", 4) == 0)
+			set_color(colors[i], 4, dxd_c, RL_PRINTABLE);
+
+		else if (*colors[i] == 'd' && strncmp(colors[i], "dxr=", 4) == 0)
+			set_color(colors[i], 4, dxr_c, RL_PRINTABLE);
+
+		else if (*colors[i] == 'd' && strncmp(colors[i], "dg=", 3) == 0)
+			set_color(colors[i], 3, dg_c, RL_PRINTABLE);
+
+		else if (*colors[i] == 'd' && strncmp(colors[i], "dd=", 3) == 0)
+			set_color(colors[i], 3, dd_c, RL_PRINTABLE);
+
+		else if (*colors[i] == 'd' && strncmp(colors[i], "dz=", 3) == 0)
+			set_color(colors[i], 3, dz_c, RL_PRINTABLE);
+
+		else if (*colors[i] == 'd' && strncmp(colors[i], "do=", 3) == 0)
+			set_color(colors[i], 3, do_c, RL_PRINTABLE);
+
+		else if (*colors[i] == 'd' && strncmp(colors[i], "dp=", 3) == 0)
+			set_color(colors[i], 3, dp_c, RL_PRINTABLE);
 
 		free(colors[i]);
 	}
@@ -726,9 +759,8 @@ set_default_colors(void)
 	if (!*mi_c)	strcpy(mi_c, DEF_MI_C);
 	if (!*dl_c)	strcpy(dl_c, DEF_DL_C);
 	if (!*df_c)	strcpy(df_c, DEF_DF_C);
-	if (!*dc_c)	strcpy(dc_c, DEF_DC_C);
+	if (!*fc_c)	strcpy(fc_c, DEF_FC_C);
 	if (!*wc_c)	strcpy(wc_c, DEF_WC_C);
-	if (!*dh_c)	strcpy(dh_c, DEF_DH_C);
 	if (!*tx_c)	strcpy(tx_c, DEF_TX_C);
 	if (!*li_c)	strcpy(li_c, DEF_LI_C);
 	if (!*li_cb) strcpy(li_cb, DEF_LI_CB);
@@ -777,6 +809,16 @@ set_default_colors(void)
 #ifndef _NO_ICONS
 	if (!*dir_ico_c) strcpy(dir_ico_c, DEF_DIR_ICO_C);
 #endif
+
+	if (!*dr_c) strcpy(dr_c, DEF_DR_C);
+	if (!*dw_c) strcpy(dw_c, DEF_DW_C);
+	if (!*dxd_c) strcpy(dxd_c, DEF_DXD_C);
+	if (!*dxr_c) strcpy(dxr_c, DEF_DXR_C);
+	if (!*dg_c) strcpy(dg_c, DEF_DG_C);
+	if (!*dd_c) strcpy(dd_c, DEF_DD_C);
+	if (!*dz_c) strcpy(dz_c, DEF_DZ_C);
+	if (!*do_c) strcpy(do_c, DEF_DO_C);
+	if (!*dp_c) strcpy(dp_c, DEF_DP_C);
 }
 
 static void

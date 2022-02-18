@@ -56,5 +56,6 @@ int get_cursor_position(const int ifd, const int ofd);
 //int get_term_bgcolor(const int ifd, const int ofd);
 void rl_ring_bell(void);
 char *normalize_path(char *src, size_t src_len);
+void remove_bold_attr(char **str);
 
 #endif /* AUX_H */

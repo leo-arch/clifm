@@ -84,16 +84,16 @@ get_properties(char *filename, const int dsize)
 	char file_type = 0;
 	char *linkname = (char *)NULL, *color = (char *)NULL;
 
-	char *cnum_val = PR_NUM_VAL, /* Color for properties octal value */
+	char *cnum_val = do_c, /* Color for properties octal value */
 		 *ctype = PR_NONE,       /* Color for file type */
 		 *cid = BOLD,              /* Color for UID and GID */
-		 *csize = PR_SIZE,       /* Color for file size */
-		 *cdate = PR_DATE,       /* Color for dates */
+		 *csize = dz_c,       /* Color for file size */
+		 *cdate = dd_c,       /* Color for dates */
 		 *cbold = BOLD,          /* Just bold */
 		 *cend = NC;             /* Ending olor */
 
 	if (attr.st_uid == user.uid || attr.st_gid == user.gid)
-		cid = PR_ID;
+		cid = dg_c;
 
 	char ext_color[MAX_COLOR];
 
@@ -148,8 +148,8 @@ get_properties(char *filename, const int dsize)
 	} break;
 	case S_IFDIR:
 		file_type = 'd';
-//		ctype = di_c;
-		ctype = PR_DIR;
+		ctype = di_c;
+//		ctype = PR_DIR;
 		if (light_mode)
 			color = di_c;
 		else if (check_file_access(&attr) == 0)
@@ -159,8 +159,8 @@ get_properties(char *filename, const int dsize)
 		break;
 	case S_IFLNK:
 		file_type = 'l';
-		ctype = PR_LNK;
-//		ctype = ln_c;
+//		ctype = PR_LNK;
+		ctype = ln_c;
 		if (light_mode) {
 			color = ln_c;
 		} else {
@@ -172,23 +172,23 @@ get_properties(char *filename, const int dsize)
 		}
 		break;
 	case S_IFSOCK: file_type = 's';
-		color = so_c;
-		ctype = PR_SOCK;
+		color = ctype = so_c;
+//		ctype = PR_SOCK;
 		break;
 	case S_IFBLK:
 		file_type = 'b';
-		color = bd_c;
-		ctype = PR_BLK;
+		color = ctype = bd_c;
+//		ctype = PR_BLK;
 		break;
 	case S_IFCHR:
 		file_type = 'c';
-		color = cd_c;
-		ctype = PR_CHR;
+		color = ctype = cd_c;
+//		ctype = PR_CHR;
 		break;
 	case S_IFIFO:
 		file_type = 'p';
-		color = pi_c;
-		ctype = PR_FIFO;
+		color = ctype = pi_c;
+//		ctype = PR_FIFO;
 		break;
 	default:
 		file_type = '?';
@@ -207,38 +207,38 @@ get_properties(char *filename, const int dsize)
 		 *co1 = PR_NONE, *co2 = PR_NONE, *co3 = PR_NONE;
 
 	mode_t val = (attr.st_mode & (mode_t)~S_IFMT);
-	if (val & S_IRUSR) { read_usr = 'r'; cu1 = PR_READ; }
-	if (val & S_IWUSR) { write_usr = 'w'; cu2 = PR_WRITE; }
+	if (val & S_IRUSR) { read_usr = 'r'; cu1 = dr_c; }
+	if (val & S_IWUSR) { write_usr = 'w'; cu2 = dw_c; }
 	if (val & S_IXUSR) {
 		exec_usr = 'x';
-		cu3 = S_ISDIR(attr.st_mode) ? PR_EXEC_DIR : PR_EXEC_REG;
+		cu3 = S_ISDIR(attr.st_mode) ? dxd_c : dxr_c;
 	}
 
-	if (val & S_IRGRP) { read_grp = 'r'; cg1 = PR_READ; }
-	if (val & S_IWGRP) { write_grp = 'w'; cg2 = PR_WRITE; }
+	if (val & S_IRGRP) { read_grp = 'r'; cg1 = dr_c; }
+	if (val & S_IWGRP) { write_grp = 'w'; cg2 = dw_c; }
 	if (val & S_IXGRP) {
 		exec_grp = 'x';
-		cg3 = S_ISDIR(attr.st_mode) ? PR_EXEC_DIR : PR_EXEC_REG;
+		cg3 = S_ISDIR(attr.st_mode) ? dxd_c : dxr_c;
 	}
 
-	if (val & S_IROTH) { read_others = 'r'; co1 = PR_READ; }
-	if (val & S_IWOTH) { write_others = 'w'; co2 = PR_WRITE; }
+	if (val & S_IROTH) { read_others = 'r'; co1 = dr_c; }
+	if (val & S_IWOTH) { write_others = 'w'; co2 = dw_c; }
 	if (val & S_IXOTH) {
 		exec_others = 'x';
-		co3 = S_ISDIR(attr.st_mode) ? PR_EXEC_DIR : PR_EXEC_REG;
+		co3 = S_ISDIR(attr.st_mode) ? dxd_c : dxr_c;
 	}
 
 	if (attr.st_mode & S_ISUID) {
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
-		cu3 = PR_SPECIAL;
+		cu3 = dp_c;
 	}
 	if (attr.st_mode & S_ISGID) {
 		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
-		cg3 = PR_SPECIAL;
+		cg3 = dp_c;
 	}
 	if (attr.st_mode & S_ISVTX) {
 		(val & S_IXOTH) ? (exec_others = 't'): (exec_others = 'T');
-		co3 = PR_SPECIAL;
+		co3 = dp_c;
 	}
 
 	if (colorize == 0 || props_color == 0) {
@@ -290,12 +290,15 @@ get_properties(char *filename, const int dsize)
 	if (wlen == 0)
 		wname = truncate_wname(filename);
 
+	char *t_ctype = savestring(ctype, strlen(ctype));
+	remove_bold_attr(&t_ctype);
+
 	/* Print file properties */
 	printf("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
 //		   "%zu %s%s %s%s %s%s%s %s%s%s ",
 		   "Links: %s%zu%s ",
 	    cnum_val, attr.st_mode & 07777, cend,
-	    ctype, file_type, cend,
+	    t_ctype, file_type, cend,
 	    cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
 	    cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
 	    co1, read_others, co2, write_others, co3, exec_others, cend,
@@ -304,6 +307,8 @@ get_properties(char *filename, const int dsize)
 	    !group ? _("unknown") : group->gr_name, cend,
 	    csize, size_type ? size_type : "?", cend,
 	    cdate, mod_time[0] != '\0' ? mod_time : "?", cend); */
+
+	free(t_ctype);
 
 	if (file_type && file_type != 'l') {
 		printf("\tName: %s%s%s\n", color, wname ? wname : filename, df_c);
@@ -468,23 +473,23 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 
 	char file_type = 0;    /* File type indicator */
 	char *ctype = PR_NONE, /* Color for file type */
-		 *cdate = PR_DATE, /* Color for dates */
+		 *cdate = dd_c, /* Color for dates */
 		 *cid = df_c,     /* Color for UID and GID */
 		/* Color for file size */
-		 *csize = (props->dir ? PR_SIZE_DIR : PR_SIZE_REG),
+		 *csize = (props->dir ? dz_c : df_c),
 		 *cend = NC;       /* Ending Color */
 
 	if (props->uid == user.uid || props->gid == user.gid)
-		cid = PR_ID;
+		cid = dg_c;
 
 	switch (props->mode & S_IFMT) {
 	case S_IFREG: file_type = '-'; break;
-	case S_IFDIR: file_type = 'd'; ctype = PR_DIR; break;
-	case S_IFLNK: file_type = 'l'; ctype = PR_LNK; break;
-	case S_IFSOCK: file_type = 's'; ctype = PR_SOCK; break;
-	case S_IFBLK: file_type = 'b'; ctype = PR_BLK; break;
-	case S_IFCHR: file_type = 'c'; ctype = PR_CHR; break;
-	case S_IFIFO: file_type = 'p'; ctype = PR_FIFO; break;
+	case S_IFDIR: file_type = 'd'; ctype = di_c; break;
+	case S_IFLNK: file_type = 'l'; ctype = ln_c; break;
+	case S_IFSOCK: file_type = 's'; ctype = so_c; break;
+	case S_IFBLK: file_type = 'b'; ctype = bd_c; break;
+	case S_IFCHR: file_type = 'c'; ctype = cd_c; break;
+	case S_IFIFO: file_type = 'p'; ctype = pi_c; break;
 	default: file_type = '?'; break;
 	}
 
@@ -499,38 +504,38 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		 *co1 = PR_NONE, *co2 = PR_NONE, *co3 = PR_NONE;
 
 	mode_t val = (props->mode & (mode_t)~S_IFMT);
-	if (val & S_IRUSR) { read_usr = 'r'; cu1 = PR_READ; }
-	if (val & S_IWUSR) { write_usr = 'w'; cu2 = PR_WRITE; }
+	if (val & S_IRUSR) { read_usr = 'r'; cu1 = dr_c; }
+	if (val & S_IWUSR) { write_usr = 'w'; cu2 = dw_c; }
 	if (val & S_IXUSR) {
 		exec_usr = 'x';
-		cu3 = props->dir ? PR_EXEC_DIR : PR_EXEC_REG;
+		cu3 = props->dir ? dxd_c : dxr_c;
 	}
 
-	if (val & S_IRGRP) { read_grp = 'r'; cg1 = PR_READ; }
-	if (val & S_IWGRP) { write_grp = 'w'; cg2 = PR_WRITE; }
+	if (val & S_IRGRP) { read_grp = 'r'; cg1 = dr_c; }
+	if (val & S_IWGRP) { write_grp = 'w'; cg2 = dw_c; }
 	if (val & S_IXGRP) {
 		exec_grp = 'x';
-		cg3 = props->dir ? PR_EXEC_DIR : PR_EXEC_REG;
+		cg3 = props->dir ? dxd_c : dxr_c;
 	}
 
-	if (val & S_IROTH) { read_others = 'r'; co1 = PR_READ; }
-	if (val & S_IWOTH) { write_others = 'w'; co2 = PR_WRITE; }
+	if (val & S_IROTH) { read_others = 'r'; co1 = dr_c; }
+	if (val & S_IWOTH) { write_others = 'w'; co2 = dw_c; }
 	if (val & S_IXOTH) {
 		exec_others = 'x';
-		co3 = props->dir ? PR_EXEC_DIR : PR_EXEC_REG;
+		co3 = props->dir ? dxd_c : dxr_c;
 	}
 
 	if (props->mode & S_ISUID) {
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
-		cu3 = PR_SPECIAL;
+		cu3 = dp_c;
 	}
 	if (props->mode & S_ISGID) {
 		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
-		cg3 = PR_SPECIAL;
+		cg3 = dp_c;
 	}
 	if (props->mode & S_ISVTX) {
 		(val & S_IXOTH) ? (exec_others = 't') : (exec_others = 'T');
-		co3 = PR_SPECIAL;
+		co3 = dp_c;
 	}
 
 	if (colorize == 0 || props_color == 0) {
@@ -631,6 +636,9 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 			minor(props->rdev));
 	}
 
+	char *t_ctype = savestring(ctype, strlen(ctype));
+	remove_bold_attr(&t_ctype);
+
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
 		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
@@ -645,7 +653,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	    colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
 	    light_mode ? "" : df_c, pad, "", df_c,
-	    trim ? tt_c : "", trim ? '~' : 0, ctype, file_type, cend,
+	    trim ? tt_c : "", trim ? '~' : 0, t_ctype, file_type, cend,
 	    cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
 	    cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
 	    co1, read_others, co2, write_others, co3, exec_others, cend,
@@ -654,6 +662,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	    cdate, *mod_time ? mod_time : "?", cend,
 	    last_field);
 
+	free(t_ctype);
 	free(size_type);
 
 	return EXIT_SUCCESS;
