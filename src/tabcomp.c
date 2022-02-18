@@ -406,7 +406,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 		if (*d != '/' || *(d + 1))
 			rl_insert_text("/");
 	} else {
-		if (cur_comp_type != TCMP_OPENWITH)
+		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_TAGS_T)
 			rl_stuff_char(' ');
 	}
 
@@ -566,9 +566,28 @@ get_fzf_output(const int multi)
 	return buf;
 }
 
-static inline void
-write_comp_to_file(const char *entry, const char *color, FILE **fp)
+static void
+reinsert_slashes(char *str)
 {
+	if (!str || !*str)
+		return;
+
+	char *p = str;
+	while (*p) {
+		if (*p == ':')
+			*p = '/';
+		p++;
+	}
+}
+
+static inline void
+write_comp_to_file(char *entry, const char *color, FILE **fp)
+{
+	if (cur_comp_type == TCMP_TAGS_F) {
+		reinsert_slashes(entry);
+		fputc('/', *fp);
+	}
+
 	if (wc_xstrlen(entry) == 0) {
 		char *wname = truncate_wname(entry);
 		fprintf(*fp, "%s%c", wname ? wname : entry, '\0');

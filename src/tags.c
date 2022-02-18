@@ -102,39 +102,39 @@ check_tagged_file(const char *tag, const char *name)
 static void
 print_tagged_file(char *name, const char *tag)
 {
-	char tmp[PATH_MAX];
+	char dir[PATH_MAX], tmp[PATH_MAX];
 	*tmp = '\0';
-	char dir[PATH_MAX];
 	snprintf(dir, PATH_MAX, "%s/%s/%s", tags_dir, tag, name);
 	realpath(dir, tmp);
 
 	if (*tmp) {
-		int free_name = 0;
-		char *q = tmp;
-		if (strncmp(tmp, user.home, strlen(user.home)) == 0) {
-			q = home_tilde(tmp);
-			free_name = 1;
-		}
-
-		if (strchr(name, '\\')) {
-			char *d = dequote_str(name, 0);
-			if (d) {
-				strcpy(name, d);
-				free(d);
-			}
-		}
-
-/*		char *p = strrchr(q, '/');
-		if (p && p != q)
-			*p = '\0'; */
-//		printf("%s%s%s [%s]\n", mi_c, name, df_c, q);
-		printf("%s%s%s\n", mi_c, name, df_c);
-//		*p = '/';
-		if (free_name)
-			free(q);
-	} else {
 		printf(_("%s (error resolving link target)\n"), name);
+		return;
 	}
+
+	int free_name = 0;
+	char *q = tmp;
+	if (strncmp(tmp, user.home, strlen(user.home)) == 0) {
+		q = home_tilde(tmp);
+		free_name = 1;
+	}
+
+	if (strchr(name, '\\')) {
+		char *d = dequote_str(name, 0);
+		if (d) {
+			strcpy(name, d);
+			free(d);
+		}
+	}
+
+	char *p = strrchr(tmp, '/');
+	if (p && p != q)
+		*p = '\0';
+	printf("%s%s%s [%s]\n", mi_c, *(p + 1) ? p + 1 : tmp, df_c, tmp);
+//		printf("%s%s%s\n", mi_c, name, df_c);
+//		*p = '/';
+	if (free_name)
+		free(q);
 }
 
 /* Print the list of all files tagged as NAME */
