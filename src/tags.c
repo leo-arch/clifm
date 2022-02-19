@@ -32,6 +32,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "aux.h"
 #include "misc.h"
@@ -510,9 +511,10 @@ untag(char **args, const size_t n, size_t *t)
 		free(deq);
 
 		if (lstat(f, &a) != -1 && S_ISLNK(a.st_mode)) {
-			if (unlink(f) == -1) {
+			errno = 0;
+			if (unlinkat(AT_FDCWD, f, AT_SYMLINK_NOFOLLOW) == -1) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
-				exit_status = EXIT_FAILURE;
+				exit_status = errno;
 			} else {
 				(*t)++;
 			}
