@@ -48,77 +48,22 @@ cpCmd=0
 # and 1 = advmv. 1 adds a progress bar to mv.
 mvCmd=0
 
-# The prompt line (both regular and warning ones) is built using string
-# literals and/or one or more of the following escape sequences:
-#
-# \xnn: The character whose hexadecimal code is nn.
-# \e: Escape character
-# \h: The hostname, up to the first dot
-# \u: The username
-# \H: The full hostname
-# \n: A newline character
-# \r: A carriage return
-# \a: A bell character
-# \d: The date, in abbrevieted form (ex: 'Tue May 26')
-# \s: The name of the shell (everything after the last slash) currently
-#     used by CliFM
-# \S: The number of the current workspace
-# \l: Print an 'L' if running in light mode
-# \P: Current profile name
-# \t: The time, in 24-hour HH:MM:SS format
-# \T: The time, in 12-hour HH:MM:SS format
-# \@: The time, in 12-hour am/pm format
-# \A: The time, in 24-hour HH:MM format
-# \w: The full current working directory, with $HOME abbreviated with a
-#     tilde
-# \W: The basename of $PWD, with $HOME abbreviated with a tilde
-# \p: A mix of the two above, it abbreviates the current working
-#     directory only if longer than PathMax (a value defined in the
-#     configuration file).
-# \z: Exit code of the last executed command. :) if success and :( in case
-#     of error
-# \$ '#', if the effective user ID is 0, and '$' otherwise
-# \nnn: The character whose ASCII code is the octal value nnn
-# \\: A backslash
-# \[: Begin a sequence of non-printing characters. This is mostly used to
-# add color to the prompt line
-# \]: End a sequence of non-printing characters
-
-Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
-
-# Default prompt, but colorless
-#Prompt="\[\e[0m\][\S]\l \A \u:\H \w\n<\z\[\e[0m\]> \$ "
-
-# NOTE: More prompts can be found in 'DATADIR/clifm/prompts.cfm' (usually
-# '/usr/share/clifm/prompts.cfm' or '/usr/local/share/clifm/prompts.cfm')
-
 # If set to 'default', CliFM state information (selected files,
 # trashed files, current workspace, messages, and stealth mode) will be
 # printed to the left of the prompt. Otherwise, if set to 'custom', this
 # information will be stored in environment variables to be handled by the
 # prompt string itself. Consult the manpage for more information.
 PromptStyle=default
+# The main prompt is defined via the Prompt line in the color scheme
+# file
 
-# A warning prompt to warn the user about invalid command names
+# A warning prompt to warn the user about invalid command names.
+# This prompt is defined via the WarningPromptStr option in the color
+# scheme file
 WarningPrompt=true
-
-# String to be used by the warning prompt. It can be customized by means of
-# the same rules used by the regular prompt (see above).
-WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
 
 # TAB completion mode: either 'standard' (default) or 'fzf'
 TabCompletionMode=
-
-# If FZF TAB completion mode is enabled, pass these options to fzf.
-# --height, --margin, +i/-i,--read0, --query, and --ansi will be appended
-# to set up the completions interface. Set this value to 'none' to pass
-# no option, to the empty string to load the default values (same as those
-# specified below), or to any other custom value. Unless set to 'none',
-# values set here will override FZF_DEFAULT_OPTS.
-FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
-
-# Should we colorize files properties (long mode and pr command)?
-ColorizeProperties=true
 
 # MaxPath is only used for the /p option of the prompt: the current
 # working directory will be abbreviated to its basename (everything after
