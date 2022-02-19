@@ -245,6 +245,7 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | Option | Description |
 | --- | --- |
 | `_BE_POSIX` | Build a fully `POSIX.1-2008` compliant executable<sup>1</sup> |
+| `CLIFM_SUCKLESS` | Remove all code aimed at parsing config files. Configuration is done either via `settings.h` (and recompilation) or via environment variables |
 | `_NERD` | Enable Nerdfont support for icons |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 | `_NO_ARCHIVING` | Disable archiving support |
