@@ -741,7 +741,7 @@ FilesCounter=%s\n\n"
 # is printed reapeatedly to fulfill the screen; if 3 or more chars, only these\n\
 # chars (no more) will be printed. Finally, if unset, print a special line\n\
 # drawn with bow-drawing characters (not supported by all terminals/consoles)\n\
-DividingLineChar='%c'\n\n"
+DividingLineChar=\"%s\"\n\n"
 
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
 ListingMode=%d\n\n"
@@ -1410,6 +1410,7 @@ create_bm_file(void)
 	return EXIT_SUCCESS;
 }
 
+#ifndef CLIFM_SUCKLESS
 static char *
 get_line_value(char *line)
 {
@@ -2088,6 +2089,7 @@ read_config(void)
 
 	return;
 }
+#endif /* CLIFM_SUCKLESS */
 
 static void
 check_colors(void)
@@ -2152,8 +2154,12 @@ init_config(void)
 	create_config_files();
 	cschemes_n = get_colorschemes();
 
+#ifndef CLIFM_SUCKLESS
 	if (config_ok)
 		read_config();
+#else
+	strncpy(div_line_char, DEF_DIV_LINE_CHAR, sizeof(div_line_char));
+#endif /* CLIFM_SUCKLESS */
 
 	check_colors();
 

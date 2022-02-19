@@ -2809,10 +2809,8 @@ check_options(void)
 			 * Set it thus to xdg-open, if not already set via command
 			 * line */
 			opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
-		if (!*div_line_char) {
-			*div_line_char = DEF_DIV_LINE_CHAR;
-			div_line_char[1] = '\0';
-		}
+		if (!*div_line_char)
+			strncpy(div_line_char, DEF_DIV_LINE_CHAR, sizeof(div_line_char));
 	}
 
 	reset_opts();
