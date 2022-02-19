@@ -25,39 +25,37 @@ CLIFM \- The Command Line File Manager
 .sp
 \fB8.\fR Keyboard shortcuts
 .sp
-\fB9.\fR Color codes
+\fB9.\fR Theming
 .sp
-\fB10.\fR The prompt
+\fB10.\fR Built-in expansions
 .sp
-\fB11.\fR Built-in expansions
+\fB11.\fR Resource opener
 .sp
-\fB12.\fR Resource opener
+\fB12.\fR Auto-suggestions (including a warning prompt for invalid command names)
 .sp
-\fB13.\fR Auto-suggestions (including a warning prompt for invalid command names)
+\fB13.\fR Shell functions
 .sp
-\fB14.\fR Shell functions
+\fB14.\fR Plugins
 .sp
-\fB15.\fR Plugins
+\fB15.\fR Autocommands
 .sp
-\fB16.\fR Autocommands
+\fB16.\fR File tags
 .sp
-\fB17.\fR File tags
+\fB17.\fR Standard input
 .sp
-\fB18.\fR Standard input
+\fB18.\fR Note on speed
 .sp
-\fB19.\fR Note on speed
+\fB19.\fR Kangaroo frecency algorithm
 .sp
-\fB20.\fR Kangaroo frecency algorithm
+\fB20.\fR Environment
 .sp
-\fB21.\fR Environment
+\fB21.\fR Security
 .sp
-\fB22.\fR Security
+\fB22.\fR Miscellaneous notes
 .sp
-\fB23.\fR Miscellaneous notes
+\fB23.\fR Files
 .sp
-\fB24.\fR Files
-.sp
-\fB25.\fR Examples
+\fB24.\fR Examples
 
 .SH 1. GETTING HELP
 There are several ways of getting help in CliFM. Once in the program, enter '\fB?\fR' to see some basic usage examples, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section.
@@ -123,7 +121,7 @@ List of CliFM features:
   11) Bookmarks auto\-expansion
   12) Bash\-like quoting system
   13) Custom aliases and variables
-  14) Full theming support via a single configuration file (the color scheme file): colors, prompt, warning prompt, and options for FZF TAB completion are all included here
+  14) Full theming support via a single configuration file
   15) Shell commands execution
   16) Startup and prompt commands
   17) User profiles
@@ -137,30 +135,29 @@ List of CliFM features:
   25) Symbolic links editor
   26) Regular expressions, file type filter, and inverse matching support for both search and selection functions
   27) Command substitution and regular expressions for all internal commands
-  28) Theming support via color schemes
-  29) Privacy oriented
-  30) \fIKangaroo\fR, a built\-in directory jumper function
-  31) Icons support (depends on icons\-in\-terminal: \fIhttps://github.com/sebastiencs/icons\-in\-terminal\fR)
-  32) Batch symbolic links
-  33) Files filter via regular expressions for the files list
-  34) Up to eight workspaces
-  35) Fused parameters support for ELN's
-  36) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
-  37) Fastback function
-  38) Remote file systems management via the \fInet\fR command
-  39) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
-  40) Syntax highlighting
-  41) Interactive rename functionality for the \fIm\fR command
-  42) Easily mount/unmount storage devices via the \fImedia\fR command
-  43) Control settings on a per directory basis via the \fIautocommands\fR function
-  44) \fIBleach\fR, a built-in file names cleaner
-  45) Backdir: quickly change to a parent directory
-  46) Secure environment
-  47) Secure commands
-  48) URI file scheme support (file://)
-  49) URL support when running as standalone resource opener (see the \fI--open\fR option)
-  50) Disk usage analyzer
-  51) \fIEtiqueta\fR, a files tagging system
+  28) Privacy oriented
+  29) \fIKangaroo\fR, a built\-in directory jumper function
+  30) Icons support (depends on icons\-in\-terminal: \fIhttps://github.com/sebastiencs/icons\-in\-terminal\fR)
+  31) Batch symbolic links
+  32) Files filter via regular expressions for the files list
+  33) Up to eight workspaces
+  34) Fused parameters support for ELN's
+  35) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
+  36) Fastback function
+  37) Remote file systems management via the \fInet\fR command
+  38) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
+  39) Syntax highlighting
+  40) Interactive rename functionality for the \fIm\fR command
+  41) Easily mount/unmount storage devices via the \fImedia\fR command
+  42) Control settings on a per directory basis via the \fIautocommands\fR function
+  43) \fIBleach\fR, a built-in file names cleaner
+  44) Backdir: quickly change to a parent directory
+  45) Secure environment
+  46) Secure commands
+  47) URI file scheme support (file://)
+  48) URL support when running as standalone resource opener (see the \fI--open\fR option)
+  49) Disk usage analyzer
+  50) \fIEtiqueta\fR, a files tagging system
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener). URL's and the URI file scheme (for local file systems) is supported.
@@ -1130,8 +1127,29 @@ CliFM provides four customizable keybindings for custom plugins. The procedure f
  2) Link pluginx (where 'x' is the plugin number [1-4]) to your plugin using the 'actions edit' command. Ex: "plugin1=myplugin.sh"
  3) Set a keybinding for pluginx using the 'kb edit' command. Ex: "plugin1:\\M\-7"
 
-.SH 9. COLOR CODES
+.SH 9. THEMING
 .TP
+All customization settings (theming) are made from a single configuration file (the color scheme file). Multiple color scheme files are allowed, each specifying a full theme for CliFM. This file includes:
+.TP
+ \fIFiletypeColors\fR = Colors for different file types, such as directory, regular files, and so on. See the \fBCOLORS\fR section below.
+.TP
+ \fIInterfaceColors\fR = Colors for CliFM's interface, such as ELN's, file properties bits, suggestions, syntax highlighting, etc. See the \fBCOLORS\fR section below.
+.TP
+ \fIExtColors\fR = Colors for files based of file name's extension. See the \fBCOLORS\fR section below.
+.TP
+ \fIDirIconColor\fR = Color for the directory icon (when icons are enabled). See the \fBCOLORS\fR section below.
+.TP
+ \fIPrompt\fR = Main prompt string. See the \fBTHE PROMPT\fR section below.
+.TP
+ \fIWarningPromptStr\fR = Warning prompt string. See the \fBTHE PROMPT\fR section below.
+.TP
+  \fIFzfTabOptions\fR = Options to be passed to fzf when using the fzf mode for TAB completion, including colors. See the \fBBUILT-IN EXPANSIONS\fR section below.
+.TP
+The color scheme (or just theme) can be set either via the command line (\fI--color-scheme=NAME\fR), via the \fIColorScheme\fR option in the main configuration file, or using the \fIcs\fR command, for instance, 'cs mytheme'.
+.TP
+By default, CliFM includes two themes: default (dark) and light.
+.TP
+.B COLORS
 All color codes are specified in the corresponding color scheme file (by default \fI~/.config/clifm/colors/default.cfm\fR). You can edit this file pressing \fBF8\fR or entering \fIcs edit\fR.
 .TP
 Colors are specified using the same format used by \fBdircolors(1)\fR and the \fBLS_COLORS\fR environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of \fBfile type codes\fR (you'll find them in the \fIFiletypeColors\fR section of the current color scheme file):
@@ -1223,15 +1241,15 @@ Color codes can be used for file extensions as well using this format: *.ext=col
 .TP
 Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: \fBfi=04;38;2;245;76;00;48;2;00;00;255\fR will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal emulator supporting RGB colors. To test your terminal color capabilities use the \fIcolors.sh\fR script (in the plugins directory).
 .TP
-File types and file name (or extension) colors, just as interface colors, are specified by the current color scheme and can be modified as you wish (see the \fIcs\fR command above).
+File types and file extension colors, just as interface colors, both the main and the warning prompt, and options for FZF, are specified by the current color scheme and can be modified as you wish (see the \fIcs\fR command above).
 .TP
 To see a colored list of the currently used file color codes run \fIcc\fR or \fIcolors\fR in CliFM.
 .TP
 To run colorless use the \fI--no-color\fR command line option or set \fBNO_COLOR\fR environment variable to any value. For more information about the no-color initiative see \fIhttps://no-color.org/\fR
 .TP
 For a full no-color experience recall to edit your prompt removing all color codes.
-
-.SH 10. THE PROMPT
+.TP
+.B THE PROMPT
 .TP
 CliFM's prompt (regular and warning ones) is built from the \fIPrompt\fR line in the color scheme file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
@@ -1429,7 +1447,7 @@ Though not strictly part of the prompt, the line dividing the current list of fi
 .TP
 The color of this line is set via the \fIdl\fR color code in the color scheme file. Consult the \fBCOLOR CODE\fR section above for more information.
 
-.SH 11. BUILT\-IN EXPANSIONS
+.SH 10. BUILT\-IN EXPANSIONS
 .TP
 \fBThe SEL keyword\fR
 .TP
@@ -1447,7 +1465,7 @@ If using the FZF mode for TAB completion (see below), you can operate only on \f
 .TP
 There are two modes for TAB completion: \fIstandard\fR (interface provided by readline), and \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.17.5 or later). To enable the \fIfzf\fR mode (the standard mode is used by default), you can either use the \fI--fzftab\fR command line option, set \fITabCompletionMode\fR to \fIfzf\fR in the configuration file, or set \fBCLIFM_USE_FZF\fR environment variable to either \fI1\fR or \fItrue\fR. Example: 'export CLIFM_USE_FZF=true'.
 .TP
-If using the \fIfzf\fR mode, the completions interface could be customized using the \fIFzfTabOptions\fR option in the configuration file. --height, --margin, +i/-i, --read0, --query, and --ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
+If using the \fIfzf\fR mode, the completions interface could be customized using the \fIFzfTabOptions\fR option in the color scheme file. --height, --margin, +i/-i, --read0, --query, and --ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
 .TP
 Default values for this option are:
  --color=16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list
@@ -1472,7 +1490,7 @@ Of course, combinations of all these features is also possible. Example: 'cp sel
 .TP
 In addition to completions and expansions, an \fIauto-suggestions system\fR is also available. See the \fBAUTO-SUGGESTIONS\fR section below.
 
-.SH 12. RESOURCE OPENER
+.SH 11. RESOURCE OPENER
 As CliFM's built-in resource opener, \fILira\fR takes care of opening files when no opening application has been specified in the command line. It does this by automatically parsing a MIME list file (see the \fBFILES\fR section below): it looks first for a matching pattern (either a MIME type or a file name), then checks the existence of the command associated to this pattern, and finally executes it.
 .TP
 \fILira\fR is controlled via the \fImime\fR command. File associations are stored in the MIME list file.
@@ -1572,7 +1590,7 @@ Positional parameters could be used as well, provided the parameter does not poi
  clifm /path/to/my_file.jpg
  clifm https://some_domain
 
-.SH 13. AUTO-SUGGESTIONS
+.SH 12. AUTO-SUGGESTIONS
 \fIGemini\fR is a built-in suggestions system (similar to that provided by the Fish shell). As you type, \fIGemini\fR will suggest possible completions right after the current cursor position.
 
 The following checks are availabe (the order can be customized, see below):
@@ -1632,10 +1650,10 @@ Suggestions will be printed using one of the following color codes (see the \fBC
 You can set \fBSuggestFiletypeColor\fR to "true" in the configuration file to use the color of the file type of the current file name (as set in the color scheme file) instead of the value of
 \fIsf\fR. For example, if a suggestion is printed for a file that is a symbolic link, \fIln\fR or \fIor\fR (if a broken link) will be used instead of \fIsf\fR.
 
-.SH 14. SHELL FUNCTIONS
+.SH 13. SHELL FUNCTIONS
 CliFM includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
 
-.SH 15. PLUGINS
+.SH 14. PLUGINS
 Plugins are just scripts or programs (written in any language) able to add, extend or improve CliFM functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
 
 A convenient helper script is provided to get a consistent look across all plugins, specially those running FZF. This helper script is located in \fIDATADIR/clifm/plugins/plugins-helper\fR, but it will be overridden by \fIXDG_CONFIG_HOME/clifm/plugins/plugins-helper\fR if found. The location of this file is set by CliFM itself in the \fBCLIFM_PLUGINS_HELPER\fR environment variable to be used by plugins. Source the file and use any of the functions and variables provided by it to write a new FZF plugin:
@@ -1709,7 +1727,7 @@ Whereas this plugin provides basic Git integration, it could be easily modified 
 .TP
 Take a look at the Wiki for more information: \fIhttps://github.com/clifm/wiki/Advanced#plugins\fR
 
-.SH 16. AUTOCOMMANDS
+.SH 15. AUTOCOMMANDS
 Heavily inspired by \fBVifm\fR, the \fIautocommands\fR function allows the user a fine-grained control over CliFM settings. It is mostly devised as a way to improve performance for remote file systems (usually slower than local ones) by allowing you to turn off some features (like the files counter) that might greatly affect performance under some circumstances (like remote connections). However, this function is not restricted to this use: use it for whatever purpose you find useful.
 .sp
 Add a line preceded by the \fIautocmd\fR keyword to the config file. The general syntax is: \fBautocmd PATTERN cmd,cmd,cmd\fR
@@ -1775,7 +1793,7 @@ For \fI.cfm.in\fR:
 For \fI.cfm.out\fR:
    printf "Leaving %s ...\\n" "$OLDPWD"
 
-.SH 17. FILE TAGS
+.SH 16. FILE TAGS
 .sp
 \fIEtiqueta\fR is CliFM's built-in files tagging system
 .sp
@@ -1872,7 +1890,7 @@ Let's suppose you have a tag named \fIwork\fR which contains ten tagged files, b
 
 The list of files tagged as \fIwork\fR will be displayed via FZF. Now just mark the two files you need using \fBTAB\fR, press \fBEnter\fR or \fBRight\fR, and the full path of both files will be inserted into the command line. So, '\fBp t:work\fR' will be replaced by '\fBp /path/to/work1.odt /path/to/work2.odt\fR'.
 
-.SH 18. STANDARD INPUT (STDIN)
+.SH 17. STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
 .sp
 Each file passed via standard input will be stored as a symbolic link pointing to the original file in a temporary directory (which will be deleted at program exit) and listed on startup. Bear in mind that the restore last path function is disabled when listing in this way. Examples:
@@ -1894,7 +1912,7 @@ You can also use stream redirection:
 .sp
 All operations performed on these symbolic links (provided the current working directory is the temporary directory where all these files are stored) will be performed on the target files and NOT on the symbolic links themselves.
 
-.SH 19. NOTE ON SPEED
+.SH 18. NOTE ON SPEED
 CliFM is by itself quite fast by default, but if speed is still an issue, it is possible to get some extra performance.
 .sp
 The two most time consuming features are:
@@ -1909,7 +1927,7 @@ Despite the above, however, it is important to bear in mind that listing speed d
 .sp
 If using Xterm, a nice speed boost is provided by the fast scroll option: set \fIfastScroll\fR to true in your \fI~/.Xresources\fR file. See \fBxterm\fR(1).
 
-.SH 20. KANGAROO FRECENCY ALGORITHM
+.SH 19. KANGAROO FRECENCY ALGORITHM
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
@@ -1950,7 +1968,7 @@ NOTE: Directories visited in the last 24 hours will not be removed from the data
 .sp
 The idea of 'frecency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
-.SH 21. ENVIRONMENT
+.SH 20. ENVIRONMENT
 The following variables are read at initialization time:
 .TP
 .B CLIFM_FILE_COLORS
@@ -2014,7 +2032,7 @@ Exit code of the last executed command
 .B CLIFM_STAT_STEALTH
 1 if running in stealth mode, 0 otherwise
 
-.SH 22. SECURITY
+.SH 21. SECURITY
 Since CliFM executes OS commands, it needs to provide a way to securely run these commands, specially when it comes to untrusted environments. Two features are provided to achieve this aim: \fBsecure environment\fR and \fBsecure commands\fR.
 .TP
 Both features are aimed to protect the program and the system as such from malicious input, either coming from environment variables or from indirect input, that is to say, input coming not from the command line (in which is assumed that it is the user herself who is executing the given command), but from files: this is the case of default associated applications (the \fImime\fR command), autocommands, (un)mount commands (via the \fInet\fR command), just as profile and prompt commands.
@@ -2065,7 +2083,7 @@ Commands containing \fIat least one\fR unsafe character will be rejected. Of cou
  \fBDISPLAY\fR, \fBTZ\fR, \fBLANG\fR, \fBTERM\fR Imported from the environment and sanitized
  \fBLC_ALL\fR             Same as \fBLANG\fR
 
-.SH 23. MISCELLANEOUS NOTES
+.SH 22. MISCELLANEOUS NOTES
 .sp
 \fBSequential and conditional execution of commands\fR:
 
@@ -2105,7 +2123,7 @@ By default, CliFM starts in the current working directory. However, you can alwa
 
 CliFM's default profile is "default". To create alternative profiles use the \-P command line option or the 'pf add' command (see above).
 
-.SH 24. FILES
+.SH 23. FILES
 .TP
 .B CONFIGURATION FILE
 The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
@@ -2153,7 +2171,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .TP
 \fBNOTE\fR: If \fI$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config/\fR is used instead.
 
-.SH 25. EXAMPLES
+.SH 24. EXAMPLES
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
 
 \fBNOTE2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press Left (or Alt-f to accept onlt the first suggested word). Otherwise, the suggestion is just ignored
