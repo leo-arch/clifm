@@ -123,45 +123,44 @@ List of CliFM features:
   11) Bookmarks auto\-expansion
   12) Bash\-like quoting system
   13) Custom aliases and variables
-  14) Customizable color schemes (themes), including file types and extensions
-  15) Customizable prompt
-  16) Shell commands execution
-  17) Startup and prompt commands
-  18) User profiles
-  19) Commands sequential and conditional execution
-  20) \fILira\fR, a built-in resource opener
-  21) Eleven sorting methods and reverse sorting
-  22) Bulk rename and bulk remove
-  23) Archiving and compression support
-  24) Auto\-cd and auto\-open
-  25) Plugins support via custom actions linked to executable files
-  26) Symbolic links editor
-  27) Regular expressions, file type filter, and inverse matching support for both search and selection functions
-  28) Command substitution and regular expressions for all internal commands
-  29) Theming support via color schemes
-  30) Privacy oriented
-  31) \fIKangaroo\fR, a built\-in directory jumper function
-  32) Icons support (depends on icons\-in\-terminal: \fIhttps://github.com/sebastiencs/icons\-in\-terminal\fR)
-  33) Batch symbolic links
-  34) Files filter via regular expressions for the files list
-  35) Up to eight workspaces
-  36) Fused parameters support for ELN's
-  37) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
-  38) Fastback function
-  39) Remote file systems management via the \fInet\fR command
-  40) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
-  41) Syntax highlighting
-  42) Interactive rename functionality for the \fIm\fR command
-  43) Easily mount/unmount storage devices via the \fImedia\fR command
-  44) Control settings on a per directory basis via the \fIautocommands\fR function
-  45) \fIBleach\fR, a built-in file names cleaner
-  46) Backdir: quickly change to a parent directory
-  47) Secure environment
-  48) Secure commands
-  49) URI file scheme support (file://)
-  50) URL support when running as standalone resource opener (see the \fI--open\fR option)
-  51) Disk usage analyzer
-  52) \fIEtiqueta\fR, a files tagging system
+  14) Full theming support via a single configuration file (the color scheme file): colors, prompt, warning prompt, and options for FZF TAB completion are all included here
+  15) Shell commands execution
+  16) Startup and prompt commands
+  17) User profiles
+  18) Commands sequential and conditional execution
+  19) \fILira\fR, a built-in resource opener
+  20) Eleven sorting methods and reverse sorting
+  21) Bulk rename and bulk remove
+  22) Archiving and compression support
+  23) Auto\-cd and auto\-open
+  24) Plugins support via custom actions linked to executable files
+  25) Symbolic links editor
+  26) Regular expressions, file type filter, and inverse matching support for both search and selection functions
+  27) Command substitution and regular expressions for all internal commands
+  28) Theming support via color schemes
+  29) Privacy oriented
+  30) \fIKangaroo\fR, a built\-in directory jumper function
+  31) Icons support (depends on icons\-in\-terminal: \fIhttps://github.com/sebastiencs/icons\-in\-terminal\fR)
+  32) Batch symbolic links
+  33) Files filter via regular expressions for the files list
+  34) Up to eight workspaces
+  35) Fused parameters support for ELN's
+  36) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
+  37) Fastback function
+  38) Remote file systems management via the \fInet\fR command
+  39) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
+  40) Syntax highlighting
+  41) Interactive rename functionality for the \fIm\fR command
+  42) Easily mount/unmount storage devices via the \fImedia\fR command
+  43) Control settings on a per directory basis via the \fIautocommands\fR function
+  44) \fIBleach\fR, a built-in file names cleaner
+  45) Backdir: quickly change to a parent directory
+  46) Secure environment
+  47) Secure commands
+  48) URI file scheme support (file://)
+  49) URL support when running as standalone resource opener (see the \fI--open\fR option)
+  50) Disk usage analyzer
+  51) \fIEtiqueta\fR, a files tagging system
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener). URL's and the URI file scheme (for local file systems) is supported.
@@ -1195,11 +1194,21 @@ The following codes are used for different interface elements (in the \fIInterfa
  tx = command line text (regular prompt)
  wp = command line text (warning prompt)
 
+ \fBFile properties\fR
+ dn = Dash (unset property)
+ dr = Read permission bit
+ dw = Write permission bit
+ dx = Executable permission bit
+ dp = SUID, SGID, sticky bit
+ dg = File ID (UID, GID) whenever the current user owns the file or is in the file's group
+ dd = Last modification time
+ dz = Directories size
+ do = Octal value for file properties
+
  \fBMiscellaneous interface elements\fR
  bm  = bookmarked directory in the bookmarks screen
- dc  = files counter
+ fc  = files counter
  df  = default color
- dh  = directory history index
  dl  = dividing line
  el  = ELN color
  mi  = misc indicators (disk usage, sort method, bulk rename, jump database list)
@@ -1224,7 +1233,7 @@ For a full no-color experience recall to edit your prompt removing all color cod
 
 .SH 10. THE PROMPT
 .TP
-CliFM's prompt (regular and warning ones) is built from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
+CliFM's prompt (regular and warning ones) is built from the \fIPrompt\fR line in the color scheme file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
 \fB\\e\fR: Escape character
 .TP
@@ -1399,7 +1408,7 @@ The wrong command name check is omitted if the input string:
  Is an assignment (ex: foo=var)
  It is escaped (ex: \\string)
 .TP
-The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt just modify the \fIWarningPromptStr\fR line in the configuration file. It defaults to 
+The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt just modify the \fIWarningPromptStr\fR line in the color scheme file. It defaults to 
 
  \fB"\\[\\e[0m\\]\\[\\e[00;02;31m\\](!) > "\fR
 .TP
@@ -1416,7 +1425,7 @@ To disable this feature use the \fI--no-warning-prompt\fR command line option or
 .TP
 Though not strictly part of the prompt, the line dividing the current list of files and the prompt could be customized, via the \fIDividingLineChar\fR option in the configuration file, to fit your prompt design and/or color scheme.
 .TP
-\fIDividingLineChar\fR accepts one or more ASCII or Unicode characters (in both cases you only need to type/paste here the chosen character(s)). If only one character is specified (by default, '-'), it will be repeatedly printed to fulfill the current line up to the edge of the screen or terminal window. If you don't want to cover the whole line, just specify three or more characters, in which case only these characters (and no more) will be used as dividing line. For example: ------->. To use an empty line, set \fIDividingLineChar\fR to '0' (that is, as a character, not as a number). Finally, is this value is not set, a special line drawn with box-drawing characters will be used (box-drawing characters are not supported by all terminal-emulators).
+\fIDividingLineChar\fR accepts one or more ASCII or Unicode characters (in both cases you only need to type/paste here the chosen character(s)). If only one character is specified (by default, "-"), it will be repeatedly printed to fulfill the current line up to the edge of the screen or terminal window. If you don't want to cover the whole line, just specify three or more characters, in which case only these characters (and no more) will be used as dividing line. For example: ------->. To use an empty line, set \fIDividingLineChar\fR to "0" (that is, as a character, not as a number). Finally, is this value is not set, a special line drawn with box-drawing characters will be used (box-drawing characters are not supported by all terminal-emulators).
 .TP
 The color of this line is set via the \fIdl\fR color code in the color scheme file. Consult the \fBCOLOR CODE\fR section above for more information.
 
