@@ -26,5 +26,6 @@
 #define TABCOMP_H
 
 int tab_complete(int what_to_do);
+void reinsert_slashes(char *str);
 
 #endif /* TABCOMP_H */

@@ -75,7 +75,11 @@ msleep(long msec)
  * It returns no value: the change is made in place via a pointer
  * STR must be a color code with this form: \x1b[xx;xx;xx...
  * It cannot handle the bold attribute beyond the second field
- * Though this is usually enough, it's far from ideal */
+ * Though this is usually enough, it's far from ideal
+ *
+ * This function is used to print properties strings ('p' command
+ * and long view mode). It takes the user defined color of the
+ * corresponding file type (e.g. dirs) and removes the bold attribute */
 void
 remove_bold_attr(char **str)
 {

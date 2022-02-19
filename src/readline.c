@@ -1632,11 +1632,19 @@ tag_entries_generator(const char *text, int state)
 	while (i < tagged_files_n && (name = tagged_files[i++]->d_name) != NULL) {
 		if (SELFORPARENT(name))
 			continue;
-		char *p = (char *)NULL;
-		if (strchr(name, '\\'))
+		char *p = (char *)NULL, *q = name;
+		if (strchr(name, '\\')) {
 			p = dequote_str(name, 0);
-		char *q = strdup(p ? p : name);
+			q = p;
+		}
+		reinsert_slashes(q);
+		char tmp[PATH_MAX], *r = (char *)NULL;
+		snprintf(tmp, PATH_MAX, "/%s", q);
+		if (strncmp(tmp, user.home, user.home_len) == 0)
+			r = home_tilde(tmp);
+		q = strdup(r ? r : tmp);
 		free(p);
+		free(r);
 		return q;
 	}
 

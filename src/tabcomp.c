@@ -479,6 +479,9 @@ set_fzf_max_win_height(void)
 static char *
 get_tagged_file_target(char *filename)
 {
+	if (!filename || !*filename)
+		return (char *)NULL;
+
 	char dir[PATH_MAX];
 	char *p = (char *)NULL;
 	if (strchr(filename, '\\'))
@@ -566,7 +569,7 @@ get_fzf_output(const int multi)
 	return buf;
 }
 
-static void
+void
 reinsert_slashes(char *str)
 {
 	if (!str || !*str)
@@ -583,9 +586,23 @@ reinsert_slashes(char *str)
 static inline void
 write_comp_to_file(char *entry, const char *color, FILE **fp)
 {
+	char *c = (char *)NULL, tmp[MAX_COLOR];
 	if (cur_comp_type == TCMP_TAGS_F) {
-		reinsert_slashes(entry);
-		fputc('/', *fp);
+		size_t len = strlen(entry);
+		if (entry[len - 1] == '/')
+			entry[len - 1] = '\0';
+		char *p = (char *)NULL;
+		if (*entry == '~')
+			p = tilde_expand(entry);
+		struct stat a;
+		if (lstat(p ? p : entry, &a) != -1) {
+			c = fzftab_color(entry, &a);
+			if (*c != _ESC) {
+				snprintf(tmp, MAX_COLOR, "\x1b[%sm", c);
+				c = tmp;
+			}
+		}
+		free(p);
 	}
 
 	if (wc_xstrlen(entry) == 0) {
@@ -595,7 +612,7 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 		return;
 	}
 
-	fprintf(*fp, "%s%s%s%c", color, entry, NC, '\0');
+	fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\0');
 }
 
 /* Store possible completions (MATCHES) in FZFTABIN to pass them to FZF
@@ -622,7 +639,8 @@ store_completions(char **matches, FILE *fp)
 				entry += 1;
 		} else if (cur_comp_type == TCMP_TAGS_S || cur_comp_type == TCMP_TAGS_U) {
 			color = mi_c;
-		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP) {
+		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
+		&& cur_comp_type != TCMP_TAGS_F) {
 			char *cl = get_entry_color(matches, i);
 			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
@@ -780,7 +798,7 @@ decide_multi(void)
 static int
 clean_rl_buffer(void)
 {
-	if (cur_comp_type != TCMP_TAGS_F)
+//	if (cur_comp_type != TCMP_TAGS_F)
 		return EXIT_FAILURE;
 
 	/* If all possible completions share a common prefix, this prefix is
@@ -803,7 +821,7 @@ clean_rl_buffer(void)
 
 		if (sp != -1) {
 			/* If found, remove the content of the input line starting
-			 * exactely one char after the last space */
+			 * exactly one char after the last space */
 			rl_delete_text(sp + 1, rl_end);
 			rl_point = rl_end = sp + 1;
 			printf("\x1b[0K");
@@ -872,7 +890,8 @@ fzftabcomp(char **matches)
 
 	char *query = (char *)NULL;
 	/* In case of a range or the sel keyword, the query string is just empty */
-	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL) {
+	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL
+	&& cur_comp_type != TCMP_TAGS_F) {
 		query = get_query_str(&fzf_offset);
 		if (!query) {
 			if (cur_comp_type == TCMP_TAGS_T)
@@ -887,8 +906,11 @@ fzftabcomp(char **matches)
 	if (fzf_offset < 0)
 		fzf_offset = 0;
 
-	if (cur_comp_type == TCMP_TAGS_F)
-		fzf_offset++;
+	if (cur_comp_type == TCMP_TAGS_F) {
+//		fzf_offset++;
+//		printf("'%d'\n", fzf_offset);
+		fzf_offset = rl_point ? rl_point - 1 : 0;
+	}
 
 	/* TAB completion cases allowing multiple selection */
 	int multi = decide_multi();
@@ -992,7 +1014,8 @@ fzftabcomp(char **matches)
 		rl_point = rl_end = 0;
 		prefix_len = 0;
 
-	} else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL) {
+	} else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL
+	|| cur_comp_type == TCMP_TAGS_F) {
 		char *s = strrchr(rl_line_buffer, ' ');
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
@@ -1289,7 +1312,8 @@ AFTER_USUAL_COMPLETION:
 
 		if (replacement && cur_comp_type != TCMP_HIST
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
-		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)) {
+		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)
+		&& cur_comp_type != TCMP_TAGS_F) {
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T

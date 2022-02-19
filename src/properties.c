@@ -159,7 +159,6 @@ get_properties(char *filename, const int dsize)
 		break;
 	case S_IFLNK:
 		file_type = 'l';
-//		ctype = PR_LNK;
 		ctype = ln_c;
 		if (light_mode) {
 			color = ln_c;
@@ -173,22 +172,18 @@ get_properties(char *filename, const int dsize)
 		break;
 	case S_IFSOCK: file_type = 's';
 		color = ctype = so_c;
-//		ctype = PR_SOCK;
 		break;
 	case S_IFBLK:
 		file_type = 'b';
 		color = ctype = bd_c;
-//		ctype = PR_BLK;
 		break;
 	case S_IFCHR:
 		file_type = 'c';
 		color = ctype = cd_c;
-//		ctype = PR_CHR;
 		break;
 	case S_IFIFO:
 		file_type = 'p';
 		color = ctype = pi_c;
-//		ctype = PR_FIFO;
 		break;
 	default:
 		file_type = '?';

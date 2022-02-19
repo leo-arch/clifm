@@ -107,7 +107,7 @@ print_tagged_file(char *name, const char *tag)
 	snprintf(dir, PATH_MAX, "%s/%s/%s", tags_dir, tag, name);
 	realpath(dir, tmp);
 
-	if (*tmp) {
+	if (!*tmp) {
 		printf(_("%s (error resolving link target)\n"), name);
 		return;
 	}
@@ -348,7 +348,7 @@ is_tag(char *name)
 	return 0;
 }
 
-static char *
+char *
 replace_slashes(char *str)
 {
 	if (*str == '/')
