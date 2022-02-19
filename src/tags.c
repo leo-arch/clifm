@@ -130,7 +130,7 @@ print_tagged_file(char *name, const char *tag)
 	char *p = strrchr(tmp, '/');
 	if (p && p != q)
 		*p = '\0';
-	printf("%s%s%s [%s]\n", mi_c, *(p + 1) ? p + 1 : tmp, df_c, tmp);
+	printf("%s%s%s [%s]\n", mi_c, (p && *p && *(p + 1)) ? p + 1 : tmp, df_c, tmp);
 //		printf("%s%s%s\n", mi_c, name, df_c);
 //		*p = '/';
 	if (free_name)
