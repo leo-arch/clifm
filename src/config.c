@@ -766,41 +766,6 @@ cpCmd=%d\n\n"
 # and 1 = advmv. 1 adds a progress bar to mv.\n\
 mvCmd=%d\n\n"
 
-	    "# The prompt line (for both regular and warning prompts) is built \n\
-# using command substitution ($(cmd)), string literals, and/or one or more \n\
-# of the following escape sequences:\n"
-	    "# \\e: Escape character\n\
-# \\u: The username\n\
-# \\H: The full hostname\n\
-# \\h: The hostname, up to the first dot\n\
-# \\s: The name of the shell (everything after the last slash) currently used\n\
-# by CliFM\n\
-# \\S: The number of the current workspace\n\
-# \\l: Print an 'L' if running in light mode\n\
-# \\P: Current profile name\n\
-# \\n: A newline character\n\
-# \\r: A carriage return\n\
-# \\a: A bell character\n\
-# \\d: The date, in abbrevieted form (ex: 'Tue May 26')\n\
-# \\t: The time, in 24-hour HH:MM:SS format\n\
-# \\T: The time, in 12-hour HH:MM:SS format\n\
-# \\@: The time, in 12-hour am/pm format\n\
-# \\A: The time, in 24-hour HH:MM format\n\
-# \\w: The full current working directory, with $HOME abbreviated with a tilde\n\
-# \\W: The basename of $PWD, with $HOME abbreviated with a tilde\n\
-# \\p: A mix of the two above, it abbreviates the current working directory \n\
-# only if longer than PathMax (a value defined in the configuration file).\n\
-# \\z: Exit code of the last executed command. :) if success and :( in case of\n\
-# error\n\
-# \\$ '#', if the effective user ID is 0, and '$' otherwise\n\
-# \\nnn: The character whose ASCII code is the octal value nnn\n\
-# \\\\: A backslash\n\
-# \\[: Begin a sequence of non-printing characters. This is mostly used to\n\
-# add color to the prompt line\n\
-# \\]: End a sequence of non-printing characters\n\n"
-
-	    "Prompt=\"%s\"\n\n"
-
 	    "# If set to 'default', CliFM state information (selected files,\n\
 # trashed files, current workspace, messages, and stealth mode) will be printed\n\
 # to the left of the prompt. Otherwise, if set to 'custom', this information\n\
@@ -809,11 +774,7 @@ mvCmd=%d\n\n"
 PromptStyle=default\n\n"
 
 		"# A prompt to warn the user about invalid command names\n\
-WarningPrompt=%s\n\n"
-
-		"# String to be used by the warning prompt. It can be customized by \n\
-means of the same rules using by the regular prompt (see above)\n\
-WarningPromptStr=\"%s\"\n\n",
+WarningPrompt=%s\n\n",
 
 	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
@@ -824,21 +785,11 @@ WarningPromptStr=\"%s\"\n\n",
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,
 		DEF_MV_CMD,
-	    DEFAULT_PROMPT,
-		DEF_WARNING_PROMPT == 1 ? "true" : "false",
-	    DEF_WPROMPT_STR);
+		DEF_WARNING_PROMPT == 1 ? "true" : "false");
 
 	fprintf(config_fp,
 		"# TAB completion mode: either 'standard' (default) or 'fzf'\n\
 TabCompletionMode=%s\n\n"
-
-		"# If FZF TAB completion mode is enabled, pass these options to fzf.\n\
-# --height, --margin, +i/-i, and --query will be appended to set up the \n\
-# completions interface.\n\
-FzfTabOptions=%s\n\n"
-
-	    "# Should we colorize files properties (long mode and pr command)?\n\
-ColorizeProperties=%s\n\n"
 
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
@@ -922,8 +873,6 @@ ExpandBookmarks=%s\n\n"
 LightMode=%s\n\n",
 
 		DEF_FZFTAB == 1 ? "fzf" : "standard",
-		DEF_FZFTAB_OPTIONS,
-		DEF_PROPS_COLOR == 1 ? "true" : "false",
 		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
 		PROGRAM_NAME,

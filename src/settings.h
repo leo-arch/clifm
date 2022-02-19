@@ -148,7 +148,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_HS_C "\x1b[00;32m" /* Commands separator (; & |)*/
 #define DEF_HV_C "\x1b[00;32m" /* Variables ($VAR) */
 
-/* Colors for the properties and long view function */
+/* Colors for the properties and long view functions */
 #define DEF_DR_C "\x1b[00;33m" /* Read perm */
 #define DEF_DW_C "\x1b[00;31m" /* Write perm */
 #define DEF_DXD_C "\x1b[00;32m" /* Execute perm (dirs) */
@@ -166,9 +166,6 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_HW_C "\x1b[00;31m"
 
 #define DEF_DIR_ICO_C "\x1b[00;33m"
-
-/* Color for file properties */
-//#define PR_NONE "\x1b[00;02;37m"
 
 #define MNT_UDEVIL 	0
 #define MNT_UDISKS2 1
