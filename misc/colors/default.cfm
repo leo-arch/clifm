@@ -78,6 +78,18 @@ DirIconsColor="0;33"
 
 Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 
+# The string to be used for the warning prompt (invalid typed command)
 WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
 
+# The string used to construct the line dividing the list of files and
+# the prompt. Possible values:
+# "0": Print just an empty line
+# "C": C is a single char. This char is printed reapeatedly to fulfill the
+#      screen
+# "CCC": 3 or more chars. Only these chars (no more) will be printed
+# "": Print a special line drawn with bow-drawing characters (not supported
+#     by all terminals/consoles)
+DividingLine="-"
+
+# If FZF TAB completion mode is enabled, pass these options to fzf
 FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2:bold' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"

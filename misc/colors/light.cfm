@@ -15,4 +15,6 @@ Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;34m\]\w\n\[\e[0m\]<\z\[\e[0m\]>
 
 WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
 
+DividingLine="-"
+
 FzfTabOptions="--color='16,prompt:4,bg+:248,fg+:-1,pointer:4,hl:5:dim:underline,hl+:5:dim:underline,gutter:-1,marker:2,info:248' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
