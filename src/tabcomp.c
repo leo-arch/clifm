@@ -752,7 +752,7 @@ calculate_prefix_len(char *str)
 }
 
 static inline int
-decide_multi(void)
+is_multi_sel(void)
 {
 	int multi;
 	enum comp_type t = cur_comp_type;
@@ -907,13 +907,15 @@ fzftabcomp(char **matches)
 		fzf_offset = 0;
 
 	if (cur_comp_type == TCMP_TAGS_F) {
-//		fzf_offset++;
-//		printf("'%d'\n", fzf_offset);
-		fzf_offset = rl_point ? rl_point - 1 : 0;
+		if (rl_end && rl_line_buffer[rl_end - 1] == ' ')
+			/* Coming from untag ('tu :TAG ') */
+			fzf_offset++;
+		else /* Coming from tag expression (t:TAG) */
+			fzf_offset = rl_point ? rl_point - 1 : 0;
 	}
 
 	/* TAB completion cases allowing multiple selection */
-	int multi = decide_multi();
+	int multi = is_multi_sel();
 
 	/* Run FZF and store the ouput into the FZFTABOUT file */
 	int ret = run_fzf(&height, &fzf_offset, query, multi);
