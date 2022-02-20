@@ -1313,7 +1313,7 @@ AFTER_USUAL_COMPLETION:
 		if (replacement && cur_comp_type != TCMP_HIST
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
 		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)
-		&& cur_comp_type != TCMP_TAGS_F) {
+		&& (cur_comp_type != TCMP_TAGS_F || !matches[1])) {
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
@@ -1393,7 +1393,6 @@ AFTER_USUAL_COMPLETION:
 				temp_string[temp_string_index] = quote_char;
 				temp_string_index++;
 			}
-
 
 			if (fzftab != 1 || cur_comp_type != TCMP_TAGS_T) {
 				temp_string[temp_string_index] = (char)(delimiter
@@ -1478,8 +1477,8 @@ DISPLAY_MATCHES:
 
 			len = (int)i - 1;
 
-			/* If there are many items, then ask the user if she
-			   really wants to see them all. */
+			/* If there are multiple items, ask the user if she
+			   really wants to see them all */
 			if (len >= rl_completion_query_items) {
 				putchar('\n');
 #ifndef _NO_HIGHLIGHT
