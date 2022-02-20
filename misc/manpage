@@ -1143,13 +1143,16 @@ All customization settings (theming) are made from a single configuration file (
 .TP
  \fIWarningPromptStr\fR = Warning prompt string. See the \fBTHE PROMPT\fR section below.
 .TP
-  \fIFzfTabOptions\fR = Options to be passed to fzf when using the fzf mode for TAB completion, including colors. See the \fBBUILT-IN EXPANSIONS\fR section below.
+ \fIDividingLine\fR = The line dividing the current list of files and the prompt. See the \fBTHE DIVIDING LINE\fR below.
+.TP
+ \fIFzfTabOptions\fR = Options to be passed to fzf when using the fzf mode for TAB completion, including colors. See the \fBBUILT-IN EXPANSIONS\fR section below.
 .TP
 The color scheme (or just theme) can be set either via the command line (\fI--color-scheme=NAME\fR), via the \fIColorScheme\fR option in the main configuration file, or using the \fIcs\fR command, for instance, 'cs mytheme'.
 .TP
-By default, CliFM includes two themes: default (dark) and light.
+By default, CliFM includes two themes: \fIdefault\fR (dark) and \fIlight\fR.
 .TP
-.B COLORS
+.B 1. COLORS
+.TP
 All color codes are specified in the corresponding color scheme file (by default \fI~/.config/clifm/colors/default.cfm\fR). You can edit this file pressing \fBF8\fR or entering \fIcs edit\fR.
 .TP
 Colors are specified using the same format used by \fBdircolors(1)\fR and the \fBLS_COLORS\fR environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of \fBfile type codes\fR (you'll find them in the \fIFiletypeColors\fR section of the current color scheme file):
@@ -1247,11 +1250,11 @@ File types and file extension colors, just as interface colors, both the main an
 .TP
 To see a colored list of the currently used file color codes run \fIcc\fR or \fIcolors\fR in CliFM.
 .TP
-To run colorless use the \fI--no-color\fR command line option or set \fBNO_COLOR\fR environment variable to any value. For more information about the no-color initiative see \fIhttps://no-color.org/\fR
+To run colorless use the \fI--no-color\fR command line option or set either \fBCLIFM_NO_COLOR\fR or \fBNO_COLOR\fR environment variables to any value. For more information about the no-color initiative see \fIhttps://no-color.org/\fR
 .TP
 For a full no-color experience recall to edit your prompt removing all color codes.
 .TP
-.B THE PROMPT
+.B 2. THE PROMPT
 .TP
 CliFM's prompt (regular and warning ones) is built from the \fIPrompt\fR line in the color scheme file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
@@ -1441,13 +1444,17 @@ To disable this feature use the \fI--no-warning-prompt\fR command line option or
 \fBNOTE\fR: Bear in mind that the warning prompt depends on the suggestions system, so that it won't be available if this system is disabled.
 .TP
 
-\fBThe dividing line\fR
+\fB3. THE DIVIDING LINE\fR
 .TP
-Though not strictly part of the prompt, the line dividing the current list of files and the prompt could be customized, via the \fIDividingLineChar\fR option in the configuration file, to fit your prompt design and/or color scheme.
+The line dividing the current list of files and the prompt. It could be customized via the \fIDividingLine\fR option in the color scheme file to fit your prompt design and/or color scheme.
 .TP
-\fIDividingLineChar\fR accepts one or more ASCII or Unicode characters (in both cases you only need to type/paste here the chosen character(s)). If only one character is specified (by default, "-"), it will be repeatedly printed to fulfill the current line up to the edge of the screen or terminal window. If you don't want to cover the whole line, just specify three or more characters, in which case only these characters (and no more) will be used as dividing line. For example: ------->. To use an empty line, set \fIDividingLineChar\fR to "0" (that is, as a character, not as a number). Finally, is this value is not set, a special line drawn with box-drawing characters will be used (box-drawing characters are not supported by all terminal-emulators).
+\fIDividingLine\fR accepts one or more ASCII or Unicode characters (in both cases you only need to type/paste here the chosen character(s)). If only one character is specified (by default, "-"), it will be repeatedly printed to fulfill the current line up to the right edge of the screen or terminal window. If you don't want to cover the whole line, just specify three or more characters, in which case only these characters (and no more) will be used as dividing line. For example: "------->". To use an empty line, set \fIDividingLineChar\fR to "0" (that is, as a character, not as a number). Finally, is this value is not set, a special line drawn with box-drawing characters will be used (box-drawing characters are not supported by all terminal-emulators).
 .TP
 The color of this line is set via the \fIdl\fR color code in the color scheme file. Consult the \fBCOLOR CODE\fR section above for more information.
+.TP
+\fB4. FZF WINDOW\fR
+Refer to the \fBTAB completion\fR section below.
+.TP
 
 .SH 10. BUILT\-IN EXPANSIONS
 .TP
@@ -1471,6 +1478,8 @@ If using the \fIfzf\fR mode, the completions interface could be customized using
 .TP
 Default values for this option are:
  --color=16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list
+.TP
+Consult \fBfzf\fR(1) for more information.
 .TP
 If set neither in \fIFzfTabOptions\fR nor in \fBFZF_DEAFULT_OPTS\fR (in this order), the height of the FZF window is set to the default value: 40% of the current terminal amount of line/rows.
 .TP
