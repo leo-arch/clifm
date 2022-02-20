@@ -33,6 +33,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "misc.h"
@@ -507,14 +508,23 @@ untag(char **args, const size_t n, size_t *t)
 
 		char f[PATH_MAX + NAME_MAX];
 		char *deq = dequote_str(args[i], 0);
-		snprintf(f, PATH_MAX + NAME_MAX, "%s/%s", dir, deq ? deq : args[i]);
+		char *p = deq ? deq : args[i];
+		char *exp = (char *)NULL;
+		if (*p == '~')
+			exp = tilde_expand(p);
+		char *q = exp ? exp : p;
+		char *r = replace_slashes(q);
+
+		snprintf(f, PATH_MAX + NAME_MAX, "%s/%s", dir, r ? r : q);
 		free(deq);
+		free(exp);
+		free(r);
 
 		if (lstat(f, &a) != -1 && S_ISLNK(a.st_mode)) {
 			errno = 0;
-			if (unlinkat(AT_FDCWD, f, AT_SYMLINK_NOFOLLOW) == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
+			if (unlinkat(AT_FDCWD, f, 0) == -1) {
 				exit_status = errno;
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
 			} else {
 				(*t)++;
 			}

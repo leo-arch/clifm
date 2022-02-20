@@ -1863,7 +1863,7 @@ my_rl_completion(const char *text, int start, int end)
 				matches = check_tagged_files(_tag);
 				free(_tag);
 				if (matches) {
-					cur_comp_type = TCMP_TAGS_U;
+					cur_comp_type = TCMP_TAGS_F;
 					return matches;
 				}
 			}
