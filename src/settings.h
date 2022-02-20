@@ -117,6 +117,8 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_TS_C "\x1b[04;35m" /* Matching prefix for TAB completed possible entries */
 #define DEF_TT_C "\x1b[01;02;36m" /* Tilde for trimmed file names */
 #define DEF_WP_C "\x1b[02;31m" /* Warning prompt input text */
+#define DEF_XS_C "\001\x1b[00;32m\002" /* Exit code: success */
+#define DEF_XF_C "\001\x1b[01;31m\002" /* Exit code: failure */
 
 /* Workspaces */
 #define DEF_WS1_C "\001\x1b[0;34m\002"
@@ -148,7 +150,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_HS_C "\x1b[00;32m" /* Commands separator (; & |)*/
 #define DEF_HV_C "\x1b[00;32m" /* Variables ($VAR) */
 
-/* Colors for the properties and long view functions */
+/* Colors for the properties and long/detail view functions */
 #define DEF_DR_C "\x1b[00;33m" /* Read perm */
 #define DEF_DW_C "\x1b[00;31m" /* Write perm */
 #define DEF_DXD_C "\x1b[00;32m" /* Execute perm (dirs) */

@@ -655,7 +655,9 @@ char
 	wm_c[MAX_COLOR + 2], /* Warning msg color */
 	si_c[MAX_COLOR + 2], /* stealth indicator color */
 	ti_c[MAX_COLOR + 2], /* Trash indicator color */
-	tx_c[MAX_COLOR + 2]; /* Text color */
+	tx_c[MAX_COLOR + 2], /* Text color */
+	xs_c[MAX_COLOR + 2], /* Exit code: success */
+	xf_c[MAX_COLOR + 2]; /* Exit code: failure */
 
 #ifdef LINUX_INOTIFY
 int inotify_fd = UNSET, inotify_wd = UNSET;

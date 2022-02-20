@@ -297,6 +297,8 @@ reset_iface_colors(void)
 	*ts_c = '\0';
 	*wp_c = '\0';
 	*tt_c = '\0';
+	*xs_c = '\0';
+	*xf_c = '\0';
 
 	*ws1_c = '\0';
 	*ws2_c = '\0';
@@ -740,6 +742,12 @@ set_iface_colors(char **colors, const size_t words)
 		else if (*colors[i] == 'd' && strncmp(colors[i], "dn=", 3) == 0)
 			set_color(colors[i], 3, dn_c, RL_PRINTABLE);
 
+		else if (*colors[i] == 'x' && strncmp(colors[i], "xs=", 3) == 0)
+			set_color(colors[i], 3, xs_c, RL_NO_PRINTABLE);
+
+		else if (*colors[i] == 'x' && strncmp(colors[i], "xf=", 3) == 0)
+			set_color(colors[i], 3, xf_c, RL_NO_PRINTABLE);
+
 		free(colors[i]);
 	}
 }
@@ -784,6 +792,8 @@ set_default_colors(void)
 	if (!*bm_c) strcpy(bm_c, DEF_BM_C);
 	if (!*ts_c) strcpy(ts_c, DEF_TS_C);
 	if (!*wp_c) strcpy(wp_c, DEF_WP_C);
+	if (!*xs_c) strcpy(xs_c, DEF_XS_C);
+	if (!*xf_c) strcpy(xf_c, DEF_XF_C);
 
 	if (!*ws1_c) strcpy(ws1_c, DEF_WS1_C);
 	if (!*ws2_c) strcpy(ws2_c, DEF_WS2_C);

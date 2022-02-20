@@ -1144,6 +1144,8 @@ extern char
 	ti_c[MAX_COLOR + 2], /* Trash indicator */
 	tx_c[MAX_COLOR + 2], /* Text */
 	si_c[MAX_COLOR + 2], /* Stealth indicator */
-	wm_c[MAX_COLOR + 2]; /* Warning msg */
+	wm_c[MAX_COLOR + 2], /* Warning msg */
+	xs_c[MAX_COLOR + 2], /* Exit code: success */
+	xf_c[MAX_COLOR + 2]; /* Exit code: failure */
 
 #endif /* HELPERS_H */
