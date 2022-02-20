@@ -1613,7 +1613,7 @@ read_config(void)
 				continue;
 		}
 
-		else if (*line == 'D' && strncmp(line, "DividingLineChar=", 17) == 0) {
+		else if (*line == 'D' && strncmp(line, "DividingLine", 12) == 0) {
 			set_div_line(line);
 		}
 
