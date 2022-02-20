@@ -1234,6 +1234,8 @@ The following codes are used for different interface elements (in the \fIInterfa
  tt  = tilde for trimmed file names
  wc  = welcome message
  wsN = color for workspace N (1-8)
+ xs  = exit code: success
+ xf  = exit code: failure
 .TP
 Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the corresponding color scheme file: \fBdi=01;34\fR. If you want ELN's to be red, add this code to the \fIInterfaceColors\fR line: \fBel=00;31\fR
 .TP
