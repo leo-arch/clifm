@@ -85,12 +85,12 @@ get_properties(char *filename, const int dsize)
 	char *linkname = (char *)NULL, *color = (char *)NULL;
 
 	char *cnum_val = do_c, /* Color for properties octal value */
-		 *ctype = dn_c,       /* Color for file type */
-		 *cid = BOLD,              /* Color for UID and GID */
-		 *csize = dz_c,       /* Color for file size */
-		 *cdate = dd_c,       /* Color for dates */
-		 *cbold = BOLD,          /* Just bold */
-		 *cend = NC;             /* Ending olor */
+		 *ctype = dn_c,    /* Color for file type */
+		 *cid = BOLD,      /* Color for UID and GID */
+		 *csize = dz_c,    /* Color for file size */
+		 *cdate = dd_c,    /* Color for dates */
+		 *cbold = BOLD,    /* Just bold */
+		 *cend = df_c;     /* Ending olor */
 
 	if (attr.st_uid == user.uid || attr.st_gid == user.gid)
 		cid = dg_c;
@@ -392,7 +392,7 @@ get_properties(char *filename, const int dsize)
 	default: break;
 	}
 	if (colorize == 1 && props_color == 1)
-		printf("%s", NC);
+		printf("%s", cend);
 
 #ifdef __OpenBSD__
 	printf(_("\tBlocks: %s%lld%s"), cbold, attr.st_blocks, cend);
@@ -466,13 +466,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	else
 		size_type = get_size_unit(props->size);
 
-	char file_type = 0;    /* File type indicator */
+	char file_type = 0; /* File type indicator */
 	char *ctype = dn_c, /* Color for file type */
 		 *cdate = dd_c, /* Color for dates */
-		 *cid = df_c,     /* Color for UID and GID */
-		/* Color for file size */
-		 *csize = (props->dir ? dz_c : df_c),
-		 *cend = NC;       /* Ending Color */
+		 *cid = df_c,   /* Color for UID and GID */
+		 *csize = props->dir ? dz_c : df_c, /* Directories size */
+		 *cend = df_c;  /* Ending Color */
 
 	if (props->uid == user.uid || props->gid == user.gid)
 		cid = dg_c;
