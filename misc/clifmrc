@@ -3,11 +3,16 @@
 		#      The command line file manager      #
 		###########################################
 
-# This is the configuration file for CliFM
+# This is CliFM's main configuration file
 
-# Color schemes are stored in the colors directory. By default,
-# the 'default' color scheme is used. Visit
+# Color schemes (or just themes) are stored in the colors directory. By
+# default, the 'default' color scheme is used. Visit
 # 'https://github.com/leo-arch/clifm-colors' to get a few more
+# Use the 'cs' command or the '--color-scheme' command line option to set
+# a theme
+# Run 'cs edit' to edit the current theme
+# Each theme includes color definitions, just as definitions for the
+# prompt, the warning prompt, the dividing line, and the FZF window
 ColorScheme=default
 
 # The amount of files contained by a directory is informed next
@@ -16,14 +21,6 @@ ColorScheme=default
 # can be disabled here, via the --no-files-counter option, or using the
 # 'fc' command while in the program itself.
 FilesCounter=true
-
-# The character(s) used to construct the line dividing the list of files
-# and the prompt. If '0', print just an empty line; if only one char, this
-# char is printed reapeatedly to fulfill the screen; if 3 or more chars,
-# only these chars (no more) will be printed. Finally, if unset, print a
-# special line drawn with box-drawing characters (not supported by all
-# terminals/consoles)
-DividingLineChar='-'
 
 # How to list files: 0 = vertically (like ls(1) would), 1 = horizontally
 ListingMode=0
