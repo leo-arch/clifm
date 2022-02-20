@@ -78,8 +78,14 @@ DirIconsColor="0;33"
 
 Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 
+# The deafult prompt, but colorless
+#Prompt="[\S]\l \A \u:\H \w\n<\z> \$ "
+
 # The string to be used for the warning prompt (invalid typed command)
 WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
+
+# The warning prompt, but colorless
+WarningPromptStr="(!) > "
 
 # The string used to construct the line dividing the list of files and
 # the prompt. Possible values:
