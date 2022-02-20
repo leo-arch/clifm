@@ -215,7 +215,7 @@ gen_exit_status(void)
 	size_t code_len = (size_t)DIGINUM(exit_code);
 
 	char *temp = (char *)xnmalloc(code_len + 12 + MAX_COLOR, sizeof(char));
-	sprintf(temp, "%s%d%s",
+	sprintf(temp, "%s%d\001%s\002",
 			(exit_code == 0) ? (colorize ? xs_c : "")
 			: (colorize ? xf_c : ""), exit_code, df_c);
 

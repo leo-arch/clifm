@@ -1561,7 +1561,8 @@ handle_cmdhist_beginning(int key)
 		if (--p < 0)
 			return EXIT_FAILURE;
 	} else { /* Down arrow key */
-		if (rl_end == 0) return EXIT_SUCCESS;
+		if (rl_end == 0)
+			return EXIT_SUCCESS;
 		if (++p >= (int)current_hist_n) {
 			rl_replace_line("", 1);
 			curhistindex++;
@@ -1569,7 +1570,8 @@ handle_cmdhist_beginning(int key)
 		}
 	}
 
-	if (!history[p]) return EXIT_FAILURE;
+	if (!history[p])
+		return EXIT_FAILURE;
 
 	curhistindex = (size_t)p;
 
