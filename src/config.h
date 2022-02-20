@@ -35,5 +35,6 @@ int reload_config(void);
 void create_tmp_files(void);
 void set_sel_file(void);
 void set_env(void);
+void set_div_line(const char *line);
 
 #endif /* CONFIG_H */

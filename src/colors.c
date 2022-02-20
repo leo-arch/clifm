@@ -45,6 +45,7 @@
 #include "messages.h"
 #include "file_operations.h"
 #include "exec.h"
+#include "config.h" /* set_div_line() */
 
 #define RL_PRINTABLE    1
 #define RL_NO_PRINTABLE 0 /* Add non-printing flags (\001 and \002)*/
@@ -957,9 +958,10 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			free(encoded_prompt);
 			encoded_prompt = (char *)NULL;
 			encoded_prompt = savestring(p, strlen(p));
+			continue;
 		}
 
-		if (*line == 'W'
+		else if (*line == 'W'
 		&& strncmp(line, "WarningPromptStr=", 17) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*p || !*(++p))
@@ -971,7 +973,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			wprompt_str = savestring(q, strlen(q));
 		}
 #ifndef _NO_FZF
-		if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
+		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*p || !*(++p))
 				continue;
@@ -986,8 +988,12 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		}
 #endif /* _NO_FZF */
 
+		else if (*line == 'D' && strncmp(line, "DividingLine", 12) == 0) {
+			set_div_line(line);
+		}
+
 		/* Interface colors */
-		if (!*ifacecolors && *line == 'I'
+		else if (!*ifacecolors && *line == 'I'
 		&& strncmp(line, "InterfaceColors=", 16) == 0) {
 			char *opt_str = strchr(line, '=');
 			if (!opt_str)
@@ -1003,7 +1009,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		}
 
 		/* Filetype colors */
-		if (!*filecolors && *line == 'F'
+		else if (!*filecolors && *line == 'F'
 		&& strncmp(line, "FiletypeColors=", 15) == 0) {
 			char *opt_str = strchr(line, '=');
 			if (!opt_str)
@@ -1020,7 +1026,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		}
 
 		/* File extension colors */
-		if (!*extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
+		else if (!*extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
 			char *opt_str = strchr(line, '=');
 			if (!opt_str)
 				continue;
@@ -1030,7 +1036,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 #ifndef _NO_ICONS
 		/* Directory icon color */
-		if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
+		else if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
 			char *opt_str = strchr(line, '=');
 			if (!opt_str)
 				continue;

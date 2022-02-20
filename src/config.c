@@ -736,13 +736,6 @@ ColorScheme=%s\n\n"
 # command while in the program itself.\n\
 FilesCounter=%s\n\n"
 
-		"# The character(s) used to construct the line dividing the list of files and\n\
-# the prompt. if '0', print just an empty line; if only one char, this char\n\
-# is printed reapeatedly to fulfill the screen; if 3 or more chars, only these\n\
-# chars (no more) will be printed. Finally, if unset, print a special line\n\
-# drawn with bow-drawing characters (not supported by all terminals/consoles)\n\
-DividingLineChar=\"%s\"\n\n"
-
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
 ListingMode=%d\n\n"
 
@@ -779,7 +772,6 @@ WarningPrompt=%s\n\n",
 	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
 		DEF_FILES_COUNTER == 1 ? "true" : "false",
-		DEF_DIV_LINE_CHAR,
 		DEF_LISTING_MODE,
 		DEF_AUTOLS == 1 ? "true" : "false",
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
@@ -1407,7 +1399,7 @@ _set_colorscheme(const char *line)
 	return EXIT_SUCCESS;
 }
 
-static inline void
+void
 set_div_line(const char *line)
 {
 	char *opt = strchr(line, '=');
@@ -2043,8 +2035,7 @@ read_config(void)
 static void
 check_colors(void)
 {
-	char *p = (getenv("NO_COLOR"));
-	if (p) {
+	if (getenv("CLIFM_NO_COLOR") || getenv("NO_COLOR")) {
 		colorize = 0;
 	} else {
 		if (colorize == UNSET) {
@@ -2057,12 +2048,12 @@ check_colors(void)
 
 	if (colorize == 1) {
 		set_colors(usr_cscheme ? usr_cscheme : "default", 1);
-	} else {
-		setenv("CLIFM_NO_COLOR", "1", 1);
-		reset_filetype_colors();
-		reset_iface_colors();
-		unset_suggestions_color();
+		return;
 	}
+
+	reset_filetype_colors();
+	reset_iface_colors();
+	unset_suggestions_color();
 }
 
 #ifndef _NO_FZF
