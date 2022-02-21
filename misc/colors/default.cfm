@@ -1,23 +1,85 @@
 # Theme file for CliFM
+# Theme name: clifm
 # Author: L. Abramovich
 # License: GPL3
 
-# FiletypeColors defines the color used for filetypes when listing files, 
-# just as InterfaceColors defines colors for CliFM interface. Both make
-# use of the same format used by the LS_COLORS environment variable. Thus, 
-# "di=01;34" means that (non-empty) directories will be listed in bold blue.
-# Color codes are traditional ANSI escape sequences less the escape char
-# and the final 'm'. 8 bit, 256 colors, and RGB colors are supported.
-# For more information consult the manpage.
+# FiletypeColors, InterfaceColors, and ExtColors use the same format used
+# by the LS_COLORS environment variable. Thus, "di=01;34" means that (non-empty)
+# directories will be printed in bold blue.
+# Color codes are just traditional ANSI escape sequences less the escape char
+# and the final 'm'.
+# 4-bit, 8-bit (256 colors), and 24-bit (RGB) colors are supported.
+# Example:
+# 00;31            4-bit
+# 00;38;5;160      8-bit
+# 00;38;2;255;0;0  24-bit
+# For more information consult https://en.wikipedia.org/wiki/ANSI_escape_code
 
-# Theme name: Default
-FiletypeColors="di=01;34:nd=01;31:ed=02;34:ne=02;31:fi=0:ef=02;33:nf=02;31:ln=01;36:mh=30;46:or=02;36:pi=00;35:so=01;35:bd=01;33:cd=01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=34;47:"
+# Definitions
+# Define here up to 64 custom color variables. They can be used by:
+# FiletypeColors
+# InterfaceColors
+# ExtColors
+# DirIconColor
 
-InterfaceColors="el=01;33:mi=01;36:dl=00;34:tx=0:df=0:fc=00;02;34:wc=01;36:dh=00;36:li=01;32:si=01;34:ti=01;36:em=01;31:wm=01;33:nm=01;32:bm=01;36:dn=00;02;37:dr=00;33:dw=00;31:dxd=00;32:dxr=00;36:dg=00;33:dd=00;34:dz=00;32:do=00;36:dp=0;35:sb=02;33:sc=02;31:sf=04;02;36:sh=02;35:sp=02;31:sx=02;32:hb=00;36:hc=02;31:hd=00;36:he=00;36:hn=00;35:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:tt=01;02;36:ts=04;35:wp=00;02;31:ws1=00;34:ws2=00;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36:ws8=00;36:xs=00;32:xf=01;31:"
+define D=00 # Default terminal foreground color
+#define BD=01 # Bold (keep current color)
+define BD=00;01 # Bold (reset foreground color)
 
-ExtColors="*.tar=01;31:*.tgz=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.rar=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=01;35:*.JPG=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.GIF=01;35:*.bmp=01;35:*.xbm=01;35:*.xpm=01;35:*.png=01;35:*.PNG=01;35:*.svg=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.MP4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.wmv=01;35:*.flc=01;35:*.avi=01;35:*.flv=01;35:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mp3=00;36:*.MP3=00;36:*.ogg=00;36:*.wav=00;36:*.pdf=01;31:*.PDF=01;31:*.doc=35:*.docx=35:*.xls=35:*.xlsx=35:*.ppt=35:*.pptx=35:*.odt=35:*.ods=35:*.odp=35:*.cache=02;37:*.tmp=02;37:*.temp=02;37:*.log=02;37:*.bak=02;37:*.bk=02;37:*.in=02;37:*.out=02;37:*.part=02;37:*.aux=02;37:*.c=00;01:*.c++=00;01:*.h=00;01:*.cc=00;01:*.cpp=00;01:*.h=00;01:*.h++=00;01:*.hh=00;01:*.go=00;01:*.java=00;01:*.js=00;01:*.lua=00;01:*.rb=00;01:*.rs=00;01:"
+define R=00;31 # Red
+define BR=01;31 # Bold red
+define DR=00;02;31 # Dimmed red
 
-DirIconsColor="0;33"
+define G=00;32 # Green
+define BG=01;32 # Bold green
+define DG=00;02;32 # Dimmed green
+
+define Y=00;33 # Yellow
+define BY=01;33 # Bold yellow
+define DY=00;02;33 # Dimmed yellow
+
+define B=00;34 # Blue
+define BB=01;34 # Bold blue
+define DB=00;02;34 # Dimmed blue
+
+define M=00;35 # Magenta
+define BM=01;35 # Bold Magenta
+define DM=00;02;35 # Dimmed magenta
+define UM=04;35 # Underlined magenta
+
+define C=00;36 # Cyan
+define BC=01;36 # Bold cyan
+define DC=00;02;36 # Dimmed cyan
+define RC=07;36 # Reverse cyan
+define UDC=04;02;36 # Underlined dimmed cyan
+define BDC=01;02;36 # Bold dimmed cyan
+
+define DW=00;02;37 # Dimmed white
+
+# Foreground-background combinations
+define RW=00;31;47 # Red foreground, white background
+define BW=00;34;47 # Blue foreground, white background
+define WR=00;37;41 # White foreground, red background
+# K stands for black (B is used for Blue)
+define KY=00;30;43 # Black foreground, yellow background
+define KR=00;30;41 # Black foreground, red background
+define KG=00;30;42 # Black foreground, green background
+# BG is already used for bold green
+define BlGr=00;34;42 # Blue foreground, green background
+define WB=00;37;44 # white foreground, blue background
+
+# FiletypeColors defines the color used for file names when listing files, 
+# just as InterfaceColors defines colors for CliFM's interface.
+# Consult the manpage for information about these codes.
+FiletypeColors="di=BB:nd=BR:ed=DB:ne=DR:fi=D:ef=DY:nf=DR:ln=BC:mh=RC:or=DC:pi=M:so=BM:bd=BY:cd=BD:su=WR:sg=KY:ca=KR:tw=KG:ow=BlGr:st=WB:ex=BG:ee=G:no=:uf=BW:"
+
+InterfaceColors="el=BY:mi=BC:dl=B:tx=D:df=D:fc=DB:wc=BC:li=BG:si=BB:ti=BC:em=BR:wm=BY:nm=BG:bm=BC:dn=DW:dr=Y:dw=R:dxd=G:dxr=C:dg=Y:dd=B:dz=G:do=C:dp=M:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:tt=BDC:ts=UM:wp=DR:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
+
+# Colors for specific file extensions
+ExtColors="*.tar=BR:*.tgz=BR:*.taz=BR:*.lha=BR:*.lz4=BR:*.lzh=BR:*.lzma=BR:*.tlz=BR:*.txz=BR:*.tzo=BR:*.t7z=BR:*.zip=BR:*.z=BR:*.dz=BR:*.gz=BR:*.lrz=BR:*.lz=BR:*.lzo=BR:*.xz=BR:*.zst=BR:*.tzst=BR:*.bz2=BR:*.bz=BR:*.tbz=BR:*.tbz2=BR:*.tz=BR:*.deb=BR:*.rpm=BR:*.rar=BR:*.cpio=BR:*.7z=BR:*.rz=BR:*.cab=BR:*.jpg=BM:*.JPG=BM:*.jpeg=BM:*.mjpg=BM:*.mjpeg=BM:*.gif=BM:*.GIF=BM:*.bmp=BM:*.xbm=BM:*.xpm=BM:*.png=BM:*.PNG=BM:*.svg=BM:*.pcx=BM:*.mov=BM:*.mpg=BM:*.mpeg=BM:*.m2v=BM:*.mkv=BM:*.webm=BM:*.webp=BM:*.ogm=BM:*.mp4=BM:*.MP4=BM:*.m4v=BM:*.mp4v=BM:*.vob=BM:*.wmv=BM:*.flc=BM:*.avi=BM:*.flv=BM:*.m4a=C:*.mid=C:*.midi=C:*.mp3=C:*.MP3=C:*.ogg=C:*.wav=C:*.pdf=BR:*.PDF=BR:*.doc=M:*.docx=M:*.xls=M:*.xlsx=M:*.ppt=M:*.pptx=M:*.odt=M:*.ods=M:*.odp=M:*.cache=DW:*.tmp=DW:*.temp=DW:*.log=DW:*.bak=DW:*.bk=DW:*.in=DW:*.out=DW:*.part=DW:*.aux=DW:*.c=BD:*.c++=BD:*.h=BD:*.cc=BD:*.cpp=BD:*.h=BD:*.h++=BD:*.hh=BD:*.go=BD:*.java=BD:*.js=BD:*.lua=BD:*.rb=BD:*.rs=BD:"
+
+# If icons are enabled, use this color for the directories icon
+DirIconColor="Y"
 
 # The prompt line is build using command substitution ($(cmd)), string
 # literals and/or the following escape sequences:
@@ -51,7 +113,7 @@ DirIconsColor="0;33"
 # \nnn: The character whose ASCII code is the octal value nnn
 # \\: A literal backslash
 # \[: Begin a sequence of non-printing characters. This is mostly used to
-#     add color to the prompt line
+#     add color to the prompt line (using full ANSI escape sequences)
 # \]: End a sequence of non-printing characters
 #
 # The following files statistics escape sequences are available as well:
@@ -81,11 +143,13 @@ Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]>
 # The deafult prompt, but colorless
 #Prompt="[\S]\l \A \u:\H \w\n<\z> \$ "
 
-# The string to be used for the warning prompt (invalid typed command)
+# The string to be used for the warning prompt (invalid typed commands). Prompt
+# escape codes are allowed. The input text color is defined by the 'wp' color code
+# in InterfaceColors
 WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
 
 # The warning prompt, but colorless
-WarningPromptStr="(!) > "
+#WarningPromptStr="(!) > "
 
 # The string used to construct the line dividing the list of files and
 # the prompt. Possible values:
@@ -97,5 +161,6 @@ WarningPromptStr="(!) > "
 #     by all terminals/consoles)
 DividingLine="-"
 
-# If FZF TAB completion mode is enabled, pass these options to fzf
+# If FZF TAB completion mode is enabled, pass these options to fzf:
 FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2:bold' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
+# For more information consult fzf(1)
