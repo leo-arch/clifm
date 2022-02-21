@@ -1026,7 +1026,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
                      char **extcolors, char **ifacecolors, const int env)
 {
 	/* Allocate some memory for custom color variables */
-	defs = (struct defs_t *)xnmalloc(MAX_DEFS, sizeof(struct defs_t));
+	defs = (struct defs_t *)xnmalloc(MAX_DEFS + 1, sizeof(struct defs_t));
 	defs_n = 0;
 	init_defs();
 
