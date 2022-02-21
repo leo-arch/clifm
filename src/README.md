@@ -172,9 +172,9 @@ This is the basic structure of CliFM: generally speaking, it is just a shell. In
 
 * Icons: `icons.h` and `listing.c`. Consult the [customizing icons](https://github.com/leo-arch/clifm/wiki/Advanced#customizing-icons) section
 
-* TAB completion: `readline.c`, `tabcomp.c`
+* TAB completion (including the FZF mode): `readline.c`, `tabcomp.c`
 
-* Interface: `listing.c`
+* Interface: `listing.c` and `colors.c`
 
 * Directory jumper: `jump.c`
 
@@ -245,7 +245,7 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | Option | Description |
 | --- | --- |
 | `_BE_POSIX` | Build a fully `POSIX.1-2008` compliant executable<sup>1</sup> |
-| `CLIFM_SUCKLESS` | Remove all code aimed at parsing config files. Configuration is done either via `settings.h` (and recompilation) or via environment variables |
+| `CLIFM_SUCKLESS` | Remove all code aimed at parsing config files. Configuration is done either via `settings.h` (and recompilation) or via [environment variables](https://github.com/leo-arch/clifm/wiki/Specifics#environment)<sup>2</sup> |
 | `_NERD` | Enable Nerdfont support for icons |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 | `_NO_ARCHIVING` | Disable archiving support |
@@ -254,15 +254,16 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | `_NO_HIGHLIGHT`| Disable syntax highlighting support |
 | `_NO_ICONS` | Disable icons support |
 | `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support. Implies `_NO_MAGIC` |
-| `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
+| `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>3</sup> |
 | `_NO_SUGGESTIONS` | Disable suggestions support |
 | `_NO_TAGS` | Disable support for `Etiqueta`, the tags system |
 | `_NO_TRASH` | Disable trash support |
 
-<sup>1</sup> Only one features is lost:
-1)  Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
+<sup>1</sup> Only one feature is lost (Linux): Files birth time. We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
 
-<sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is not as optimal as directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
+<sup>2</sup> The [stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode) achieves basically the same functionality: disabling access to config files. However, there is an important difference: if compiled with `CLIFM_SUCKLESS`, functions handling configuration files are directly removed from the source code, resulting in a smaller binary.
+
+<sup>3</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is not as optimal as directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
 
 ## 6) Plugins
 
