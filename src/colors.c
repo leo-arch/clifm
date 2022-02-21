@@ -976,7 +976,7 @@ get_colors_from_env(char **file, char **ext, char **iface)
 static void
 store_definition(char *str)
 {
-	if (!str || !*str)
+	if (!str || !*str || defs_n > MAX_DEFS)
 		return;
 
 	char *name = strchr(str, ' ');
