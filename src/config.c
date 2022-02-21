@@ -1092,7 +1092,7 @@ create_def_cscheme(void)
 #ifndef _NO_ICONS
 		    "ExtColors=\"%s\"\n\n"
 
-		    "DirIconsColor=\"00;33\"\n",
+		    "DirIconColor=\"00;33\"\n",
 #else
 		    "ExtColors=\"%s\"\n\n",
 #endif

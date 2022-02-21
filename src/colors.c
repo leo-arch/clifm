@@ -50,6 +50,18 @@
 #define RL_PRINTABLE    1
 #define RL_NO_PRINTABLE 0 /* Add non-printing flags (\001 and \002)*/
 
+/* Max amount of custom color variables in the color scheme file */
+#define MAX_DEFS 64
+
+/* A struct to hold color variables */
+struct defs_t {
+	char *name;
+	char *value;
+};
+
+struct defs_t *defs;
+size_t defs_n = 0;
+
 /* Retrieve the color corresponding to dir FILENAME with mode MODE */
 char *
 get_dir_color(const char *filename, const mode_t mode)
@@ -107,44 +119,6 @@ get_file_color(const char *filename, const struct stat *attr)
 	return color;
 }
 
-/* Returns a pointer to the corresponding color code for EXT, if some
- * color was defined */
-char *
-get_ext_color(char *ext)
-{
-	if (!ext || !ext_colors_n)
-		return (char *)NULL;
-
-	ext++;
-
-	int i = (int)ext_colors_n;
-	while (--i >= 0) {
-		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
-			continue;
-
-		char *p = ext,
-			 *q = ext_colors[i];
-		/* +2 because stored extensions have this form: *.ext */
-		q += 2;
-
-		size_t match = 1;
-		while (*p) {
-			if (*p != *q) {
-				match = 0;
-				break;
-			}
-			p++;
-			q++;
-		}
-
-		if (!match || *q != '=')
-			continue;
-		return ++q;
-	}
-
-	return (char *)NULL;
-}
-
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 12 fields) of numbers of at most 3 digits each).
  * Returns 1 if true and 0 if false. */
@@ -184,6 +158,93 @@ is_color_code(const char *str)
 	return 1;
 }
 
+/* If STR is a valid color variable name, return the value of this variable */
+static char *
+check_defs(char *str)
+{
+	if (defs_n == 0 || !str || !*str)
+		return (char *)NULL;
+
+	char *val = (char *)NULL;
+	int i = (int)defs_n;
+
+	while (--i >= 0) {
+		if (!defs[i].name || !defs[i].value || !*defs[i].name || !*defs[i].value)
+			continue;
+		if (*defs[i].name == *str && strcmp(defs[i].name, str) == 0
+		&& is_color_code(defs[i].value) == 1) {
+			val = defs[i].value;
+			return val;
+		}
+	}
+
+	return val;
+}
+
+/* Free custom color variables set from the color scheme file */
+static void
+clear_defs(void)
+{
+	if (defs_n == 0)
+		goto END;
+
+	int i = (int)defs_n;
+	while (--i >= 0) {
+		free(defs[i].name);
+		free(defs[i].value);
+	}
+
+	defs_n = 0;
+END:
+	free(defs);
+	defs = (struct defs_t *)NULL;
+}
+
+/* Returns a pointer to the corresponding color code for EXT, if some
+ * color was defined */
+char *
+get_ext_color(char *ext)
+{
+	if (!ext || !ext_colors_n)
+		return (char *)NULL;
+
+	ext++;
+
+	int i = (int)ext_colors_n;
+	while (--i >= 0) {
+		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
+			continue;
+
+		char *p = ext,
+			 *q = ext_colors[i];
+		/* +2 because stored extensions have this form: *.ext */
+		q += 2;
+
+		size_t match = 1;
+		while (*p) {
+			if (*p != *q) {
+				match = 0;
+				break;
+			}
+			p++;
+			q++;
+		}
+
+		if (!match || *q != '=')
+			continue;
+
+/*		char *c = (char *)NULL;
+		printf("Q:'%s'\n", q + 1);
+		if (is_color_code(q + 1) != 1 && check_defs(q + 1) == NULL)
+			continue;
+
+		return c ? c : ++q; */
+		return ++q;
+	}
+
+	return (char *)NULL;
+}
+
 #ifndef CLIFM_SUCKLESS
 /* Strip color lines from the config file (FiletypeColors, if mode is
  * 't', and ExtColors, if mode is 'x') returning the same string
@@ -200,6 +261,7 @@ strip_color_line(const char *str, char mode)
 	case 't': /* di=01;31: */
 		while (*str) {
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
+			|| (*str >= 'A' && *str <= 'Z')
 			|| *str == '=' || *str == ';' || *str == ':') {
 				buf[len] = *str; len++;
 			}
@@ -481,17 +543,20 @@ cschemes_function(char **args)
 static void
 set_color(char *_color, int offset, char var[], int flag)
 {
-	if (!is_color_code(_color + offset)) {
+	char *color_code = (char *)NULL;
+	if (is_color_code(_color + offset) == 0
+	&& (color_code = check_defs(_color + offset)) == NULL) {
 		/* A null color string will be set to the default value by
 		 * set_default_colors function */
 		*var = '\0';
 		return;
 	}
 
+	char *p = color_code ? color_code : (_color + offset);
 	if (flag == RL_NO_PRINTABLE)
-		snprintf(var, MAX_COLOR + 2, "\001\x1b[%sm\002", _color + offset); /* NOLINT */
+		snprintf(var, MAX_COLOR + 2, "\001\x1b[%sm\002", p); /* NOLINT */
 	else
-		snprintf(var, MAX_COLOR - 1, "\x1b[%sm", _color + offset); /* NOLINT */
+		snprintf(var, MAX_COLOR - 1, "\x1b[%sm", p); /* NOLINT */
 }
 
 static void
@@ -906,11 +971,65 @@ get_colors_from_env(char **file, char **ext, char **iface)
 }
 
 #ifndef CLIFM_SUCKLESS
+
+/* Store color variable defined in STR into the global defs struct */
+static void
+store_definition(char *str)
+{
+	if (!str || !*str)
+		return;
+
+	char *name = strchr(str, ' ');
+	if (!name || !*(++name))
+		return;
+
+	char *value = strchr(name, '=');
+	if (!value || !*(value + 1) || value == name)
+		return;
+
+	*value = '\0';
+	value++;
+
+	defs[defs_n].name = savestring(name, (size_t)(value - name - 1));
+
+	size_t val_len;
+	char *s = strchr(value, ' ');
+	if (s) {
+		*s = '\0';
+		val_len = (size_t)(s - value);
+	} else {
+		val_len = strlen(value);
+		if (val_len > 0 && value[val_len - 1] == '\n') {
+			value[val_len - 1] = '\0';
+			val_len--;
+		}
+	}
+
+	defs[defs_n].value = savestring(value, val_len);
+	defs_n++;
+}
+
+/* Initialize the defs_t struct */
+static void
+init_defs(void)
+{
+	int n = MAX_DEFS;
+	while(--n >= 0) {
+		defs[n].name = (char *)NULL;
+		defs[n].value = (char *)NULL;
+	}
+}
+
 /* Get color lines from the configuration file */
 static int
 get_colors_from_file(const char *colorscheme, char **filecolors,
                      char **extcolors, char **ifacecolors, const int env)
 {
+	/* Allocate some memory for custom color variables */
+	defs = (struct defs_t *)xnmalloc(MAX_DEFS, sizeof(struct defs_t));
+	defs_n = 0;
+	init_defs();
+
 	char colorscheme_file[PATH_MAX];
 	*colorscheme_file = '\0';
 	if (config_ok) {
@@ -951,7 +1070,13 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
-		if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
+		if (*line == '#' || *line == '\n')
+			continue;
+
+		if (*line == 'd' && strncmp(line, "define ", 7) == 0) {
+			store_definition(line);
+
+		} else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*p || !*(++p))
 				continue;
@@ -1028,7 +1153,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		/* File extension colors */
 		else if (!*extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
 			char *opt_str = strchr(line, '=');
-			if (!opt_str)
+			if (!opt_str || !*(opt_str + 1))
 				continue;
 
 			*extcolors = savestring(opt_str, strlen(opt_str));
@@ -1036,44 +1161,29 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 #ifndef _NO_ICONS
 		/* Directory icon color */
-		else if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
+		else if (*line == 'D' && strncmp(line, "DirIconColor=", 13) == 0) {
 			char *opt_str = strchr(line, '=');
-			if (!opt_str)
-				continue;
-			if (!*(++opt_str))
+			if (!opt_str || !*(++opt_str))
 				continue;
 
-			if (*opt_str == '\'' || *opt_str == '"')
-				opt_str++;
-			if (!*opt_str)
+			if ((*opt_str == '\'' || *opt_str == '"') && !*(++opt_str))
 				continue;
 
-			int nl_removed = 0;
 			if (line[line_len - 1] == '\n') {
 				line[line_len - 1] = '\0';
-				nl_removed = 1;
+				--line_len;
 			}
 
-			int end_char = (int)line_len - 1;
+			if (line[line_len - 1] == '\'' || line[line_len - 1] == '"')
+				line[line_len - 1] = '\0';
 
-			if (nl_removed)
-				end_char--;
+			char *c = (char *)NULL;
+			if (!is_color_code(opt_str) && (c = check_defs(opt_str)) == NULL)
+				continue;
 
-			if (line[end_char] == '\'' || line[end_char] == '"')
-				line[end_char] = '\0';
-
-			sprintf(dir_ico_c, "\x1b[%sm", opt_str);
+			sprintf(dir_ico_c, "\x1b[%sm", c ? c : opt_str);
 		}
 #endif /* !_NO_ICONS */
-/*
-		if (prompt_found && wprompt_found && file_type_found && ext_type_found
-//		if (file_type_found && ext_type_found
-#ifndef _NO_ICONS
-		&& iface_found && dir_icon_found)
-#else
-		&& iface_found)
-#endif
-			break; */
 	}
 
 	free(line);
@@ -1082,6 +1192,37 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	return EXIT_SUCCESS;
 }
 #endif /* CLIFM_SUCKLESS */
+
+/* Check if LINE contains a valid color code, and store it into the
+ * ext_colors global array
+ * If LINE contains a color variable, expand it, check it, and store it */
+static int
+store_extension_line(char *line, size_t len)
+{
+	char *q = strchr(line, '=');
+	if (!q || !*(q + 1) || q == line)
+		return EXIT_FAILURE;
+
+	*q = '\0';
+	char *c = (char *)NULL;
+	if (is_color_code(q + 1) != 1 && (c = check_defs(q + 1)) == NULL)
+		return EXIT_FAILURE;
+
+	ext_colors = (char **)xrealloc(ext_colors,
+	             (ext_colors_n + 1) * sizeof(char *));
+	if (c) {
+		size_t clen = (size_t)(q - line) + strlen(c) + 1;
+		ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
+		sprintf(ext_colors[ext_colors_n], "%s=%s", line, c);
+	} else {
+		*q = '=';
+		ext_colors[ext_colors_n] = savestring(line, len);
+	}
+
+	ext_colors_n++;
+
+	return EXIT_SUCCESS;
+}
 
 static void
 split_extensions_colors(char *extcolors)
@@ -1102,17 +1243,14 @@ split_extensions_colors(char *extcolors)
 			if (!buf)
 				break;
 			buf[len] = '\0';
-			ext_colors = (char **)xrealloc(ext_colors,
-			    (ext_colors_n + 1) * sizeof(char *));
-			ext_colors[ext_colors_n] = savestring(buf, len);
-			ext_colors_n++;
-			*buf = '\0';
-
+			if (store_extension_line(buf, len) == EXIT_SUCCESS)
+				*buf = '\0';
+//			else {
 			if (!*p)
 				eol = 1;
-
 			len = 0;
 			p++;
+//			}
 			break;
 
 		default:
@@ -1150,7 +1288,6 @@ split_extensions_colors(char *extcolors)
 		size_t j, ext_len = 0;
 		for (j = 2; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
 			ext_len++;
-
 		ext_colors_len[i] = ext_len;
 	}
 }
@@ -1286,8 +1423,10 @@ set_colors(const char *colorscheme, const int env)
 		/* Get color lines, for both file types and extensions, from
 		 * COLORSCHEME file */
 		if (get_colors_from_file(colorscheme, &filecolors,
-		&extcolors, &ifacecolors, env) == EXIT_FAILURE)
+		&extcolors, &ifacecolors, env) == EXIT_FAILURE) {
+			clear_defs();
 			return EXIT_FAILURE;
+		}
 	}
 #endif /* CLIFM_SUCKLESS */
 	/* Split the color lines into substrings (one per color) */
@@ -1314,6 +1453,8 @@ set_colors(const char *colorscheme, const int env)
 		split_filetype_colors(filecolors);
 		free(filecolors);
 	}
+
+	clear_defs();
 
 	/* If some color was not set or it was a wrong color code, set the
 	 * default */

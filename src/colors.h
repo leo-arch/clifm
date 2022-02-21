@@ -38,4 +38,5 @@ char *get_file_color(const char *filename, const struct stat *attr);
 void reset_filetype_colors(void);
 void reset_iface_colors(void);
 void unset_suggestions_color(void);
+
 #endif /* COLORS_H */
