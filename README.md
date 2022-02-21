@@ -169,6 +169,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ✔️ **Changelog**
 * `version 1.4.1`:
+  - **NEW**: [Color variables support](https://github.com/leo-arch/clifm/wiki/Customization#color-variables)
   - **NEW**: [Remove files in bulk using a text editor](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
   - **NEW**: [_Etiqueta_, a files tagging system](https://github.com/leo-arch/clifm/wiki/Specifics#file-tags)
   - **NEW**: Disk usage analyzer mode (via `-t, --disk-usage-analyzer`)
