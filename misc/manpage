@@ -1155,7 +1155,9 @@ By default, CliFM includes two themes: \fIdefault\fR (dark) and \fIlight\fR.
 .TP
 All color codes are specified in the corresponding color scheme file (by default \fI~/.config/clifm/colors/default.cfm\fR). You can edit this file pressing \fBF8\fR or entering \fIcs edit\fR.
 .TP
-Colors are specified using the same format used by \fBdircolors(1)\fR and the \fBLS_COLORS\fR environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of \fBfile type codes\fR (you'll find them in the \fIFiletypeColors\fR section of the current color scheme file):
+\fBColor codes\fR
+.TP
+Colors are specified using the same format used by \fBdircolors(1)\fR and the \fBLS_COLORS\fR environment variable, namely, a colon separated list of codes with this general format: \fIfiletype=color\fR. This is the list of \fBfile type codes\fR (you'll find them in the \fIFiletypeColors\fR section of the current color scheme file):
 .sp
  di = directory
  ed = empty directory
@@ -1244,9 +1246,23 @@ Color codes are just traditional ANSI color codes less the escape character and 
 .TP
 Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the \fIExtColors\fR line in the corresponding color scheme file: \fB*.c=01;32\fR
 .TP
-Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: \fBfi=04;38;2;245;76;00;48;2;00;00;255\fR will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal emulator supporting RGB colors. To test your terminal color capabilities use the \fIcolors.sh\fR script (in the plugins directory).
+\fBColor variables\fR
 .TP
-File types and file extension colors, just as interface colors, both the main and the warning prompt, and options for FZF, are specified by the current color scheme and can be modified as you wish (see the \fIcs\fR command above).
+Up to 64 custom color variables can be used via the \fIdefine\fR keyword to make it easier to build and read theme files. Example:
+
+ define RED=00;31
+ define MY_SPECIAL_COLOR=04;38;2;255;255;0;48;2;0;14;191
+
+ FiletpeColors="di=RED:"
+ InterfaceColors="el=MY_SPECIAL_COLOR:"
+.TP
+These variables can only be used for \fIFiletypeColors\fR, \fIInterfaceColors\fR, \fIExtColors\fR, and \fIDirIconColor\fR. The \fIPrompt\fR and \fIWarningPromptStr\fR lines use full ANSI escape sequences instead.
+.TP
+Though by default CliFM uses only 8 colors (16 with the high intensity variant), you can use 256 and RGB colors as well. Example:
+
+ \fBfi=04;38;2;245;76;00;48;2;00;00;255\fR
+.TP
+will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal emulator supporting RGB colors. To test your terminal color capabilities use the \fIcolors.sh\fR script (in the plugins directory).
 .TP
 To see a colored list of the currently used file color codes run \fIcc\fR or \fIcolors\fR in CliFM.
 .TP
