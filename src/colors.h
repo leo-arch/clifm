@@ -29,7 +29,9 @@
 
 int set_colors(const char *colorscheme, const int env);
 void color_codes(void);
+#ifndef CLIFM_SUCKLESS
 size_t get_colorschemes(void);
+#endif /* CLIFM_SUCKLESS */
 int cschemes_function(char **args);
 void colors_list(char *ent, const int i, const int pad, const int new_line);
 char *get_ext_color(char *ext);

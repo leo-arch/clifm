@@ -2092,9 +2092,9 @@ init_config(void)
 
 	define_config_file_names();
 	create_config_files();
+#ifndef CLIFM_SUCKLESS
 	cschemes_n = get_colorschemes();
 
-#ifndef CLIFM_SUCKLESS
 	if (config_ok)
 		read_config();
 #else

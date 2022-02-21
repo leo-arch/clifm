@@ -53,6 +53,7 @@
 /* Max amount of custom color variables in the color scheme file */
 #define MAX_DEFS 64
 
+#ifndef CLIFM_SUCKLESS
 /* A struct to hold color variables */
 struct defs_t {
 	char *name;
@@ -61,6 +62,7 @@ struct defs_t {
 
 struct defs_t *defs;
 size_t defs_n = 0;
+#endif /* CLIFM_SUCKLESS */
 
 /* Retrieve the color corresponding to dir FILENAME with mode MODE */
 char *
@@ -158,6 +160,7 @@ is_color_code(const char *str)
 	return 1;
 }
 
+#ifndef CLIFM_SUCKLESS
 /* If STR is a valid color variable name, return the value of this variable */
 static char *
 check_defs(char *str)
@@ -199,6 +202,7 @@ END:
 	free(defs);
 	defs = (struct defs_t *)NULL;
 }
+#endif /* CLIFM_SUCKLESS */
 
 /* Returns a pointer to the corresponding color code for EXT, if some
  * color was defined */
@@ -396,6 +400,7 @@ unset_suggestions_color(void)
 	strcpy(sx_c, SUG_NO_COLOR); /* internal commands and params */
 }
 
+#ifndef CLIFM_SUCKLESS
 static int
 print_cur_colorscheme(void)
 {
@@ -492,16 +497,17 @@ set_colorscheme(char *arg)
 
 	return EXIT_FAILURE;
 }
+#endif /* CLIFM_SUCKLESS */
 
 int
 cschemes_function(char **args)
 {
 #ifdef CLIFM_SUCKLESS
+	UNUSED(args);
 	printf("%s: color schemes: %s. Edit settings.h in the source code "
 		"and recompile\n", PROGRAM_NAME, NOT_AVAILABLE);
 	return EXIT_FAILURE;
-#endif
-
+#else
 	if (xargs.stealth_mode == 1) {
 		fprintf(stderr, _("%s: color schemes: %s\nTIP: To change the "
 			"current color scheme use the following environment "
@@ -536,6 +542,7 @@ cschemes_function(char **args)
 	}
 
 	return set_colorscheme(args[1]);
+#endif /* CLIFM_SUCKLESS */
 }
 
 /* Set color variable VAR (static global) to _COLOR + OFFSET
@@ -544,8 +551,13 @@ static void
 set_color(char *_color, int offset, char var[], int flag)
 {
 	char *color_code = (char *)NULL;
+#ifndef CLIFM_SUCKLESS
 	if (is_color_code(_color + offset) == 0
-	&& (color_code = check_defs(_color + offset)) == NULL) {
+	&& (color_code = check_defs(_color + offset)) == NULL)
+#else
+	if (is_color_code(_color + offset) == 0)
+#endif
+	{
 		/* A null color string will be set to the default value by
 		 * set_default_colors function */
 		*var = '\0';
@@ -971,7 +983,6 @@ get_colors_from_env(char **file, char **ext, char **iface)
 }
 
 #ifndef CLIFM_SUCKLESS
-
 /* Store color variable defined in STR into the global defs struct */
 static void
 store_definition(char *str)
@@ -1075,8 +1086,9 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 		if (*line == 'd' && strncmp(line, "define ", 7) == 0) {
 			store_definition(line);
+		}
 
-		} else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
+		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*p || !*(++p))
 				continue;
@@ -1178,7 +1190,8 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 				line[line_len - 1] = '\0';
 
 			char *c = (char *)NULL;
-			if (!is_color_code(opt_str) && (c = check_defs(opt_str)) == NULL)
+
+			if (is_color_code(opt_str) == 0 && (c = check_defs(opt_str)) == NULL)
 				continue;
 
 			sprintf(dir_ico_c, "\x1b[%sm", c ? c : opt_str);
@@ -1205,7 +1218,11 @@ store_extension_line(char *line, size_t len)
 
 	*q = '\0';
 	char *c = (char *)NULL;
+#ifndef CLIFM_SUCKLESS
 	if (is_color_code(q + 1) != 1 && (c = check_defs(q + 1)) == NULL)
+#else
+	if (is_color_code(q + 1) != 1)
+#endif
 		return EXIT_FAILURE;
 
 	ext_colors = (char **)xrealloc(ext_colors,
@@ -1453,11 +1470,11 @@ set_colors(const char *colorscheme, const int env)
 		split_filetype_colors(filecolors);
 		free(filecolors);
 	}
-
+#ifndef CLIFM_SUCKLESS
 	clear_defs();
+#endif
 
-	/* If some color was not set or it was a wrong color code, set the
-	 * default */
+	/* If some color is unset or it's a wrong color code, set the default */
 	set_default_colors();
 
 	return EXIT_SUCCESS;
@@ -1607,6 +1624,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	free(wname);
 }
 
+#ifndef CLIFM_SUCKLESS
 size_t
 get_colorschemes(void)
 {
@@ -1702,6 +1720,7 @@ get_colorschemes(void)
 	color_schemes[i] = (char *)NULL;
 	return i;
 }
+#endif /* CLIFM_SUCKLESS */
 
 /* List color codes for file types used by the program */
 void
