@@ -1165,10 +1165,23 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		/* File extension colors */
 		else if (!*extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
 			char *opt_str = strchr(line, '=');
-			if (!opt_str || !*(opt_str + 1))
+			if (!opt_str || !*(++opt_str))
 				continue;
 
-			*extcolors = savestring(opt_str, strlen(opt_str));
+			if (*opt_str == '\'' || *opt_str == '"')
+				if (!*(++opt_str))
+					continue;
+
+			ssize_t len = line_len - (opt_str - line);
+			if (len && opt_str[len - 1] == '\n') {
+				opt_str[len - 1] = '\0';
+				--len;
+			}
+			if (len && (opt_str[len - 1] == '\'' || opt_str[len - 1] == '"')) {
+				opt_str[len - 1] = '\0';
+				--len;
+			}
+			*extcolors = savestring(opt_str, (size_t)len);
 		}
 
 #ifndef _NO_ICONS
@@ -1257,8 +1270,10 @@ split_extensions_colors(char *extcolors)
 		case '\0': /* fallthrough */
 		case '\n': /* fallthrough */
 		case ':':
-			if (!buf)
+			if (!buf || !*buf) {
+				eol = 1;
 				break;
+			}
 			buf[len] = '\0';
 			if (store_extension_line(buf, len) == EXIT_SUCCESS)
 				*buf = '\0';
