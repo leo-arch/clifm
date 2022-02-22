@@ -71,7 +71,7 @@ define WB=00;37;44 # white foreground, blue background
 # FiletypeColors defines the color used for file names when listing files, 
 # just as InterfaceColors defines colors for CliFM's interface.
 # Consult the manpage for information about these codes.
-FiletypeColors="di=BB:nd=BR:ed=DB:ne=DR:fi=D:ef=DY:nf=DR:ln=BC:mh=RC:or=DC:pi=M:so=BM:bd=BY:cd=BD:su=WR:sg=KY:ca=KR:tw=KG:ow=BlGr:st=WB:ex=BG:ee=G:no=:uf=BW:"
+FiletypeColors="di=BB:nd=BR:ed=DB:ne=DR:fi=D:ef=DY:nf=DR:ln=BC:mh=RC:or=DC:pi=M:so=BM:bd=BY:cd=BD:su=WR:sg=KY:ca=KR:tw=KG:ow=BlGr:st=WB:ex=BG:ee=G:no=RW:uf=BW:"
 
 InterfaceColors="el=BY:mi=BC:dl=B:tx=D:df=D:fc=DB:wc=BC:li=BG:si=BB:ti=BC:em=BR:wm=BY:nm=BG:bm=BC:dn=DW:dr=Y:dw=R:dxd=G:dxr=C:dg=Y:dd=B:dz=G:do=C:dp=M:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:tt=BDC:ts=UM:wp=DR:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
 
