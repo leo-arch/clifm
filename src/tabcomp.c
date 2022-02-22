@@ -295,7 +295,7 @@ get_entry_color(char **matches, const size_t i)
 	if (cur_comp_type == TCMP_CMD && is_internal_c(dir))
 		return hv_c;
 
-	return (char *)NULL;
+	return df_c;
 }
 
 static inline void
@@ -620,6 +620,13 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 static inline size_t
 store_completions(char **matches, FILE *fp)
 {
+	int no_file_comp = 0;
+	if (cur_comp_type == TCMP_TAGS_S || cur_comp_type == TCMP_TAGS_U
+	|| cur_comp_type == TCMP_SORT || cur_comp_type == TCMP_BOOKMARK
+	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_NET
+	|| cur_comp_type == TCMP_PROF)
+		no_file_comp = 1;
+
 	size_t i;
 	for (i = 1; matches[i]; i++) {
 		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
@@ -637,7 +644,7 @@ store_completions(char **matches, FILE *fp)
 			color = mi_c;
 			if (*(entry + 1))
 				entry += 1;
-		} else if (cur_comp_type == TCMP_TAGS_S || cur_comp_type == TCMP_TAGS_U) {
+		} else if (no_file_comp == 1) {
 			color = mi_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
 		&& cur_comp_type != TCMP_TAGS_F) {
