@@ -101,7 +101,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_BM_C "\x1b[01;36m" /* Bookmarked dirs in bookmarks screen */
 #define DEF_FC_C "\x1b[00;02;34m"
 #define DEF_DF_C "\x1b[0m" /* Default color */
-#define DEF_DL_C "\x1b[00;34m" /* Block device */
+#define DEF_DL_C "\x1b[00;34m" /* Dividing line */
 #define DEF_EL_C "\x1b[01;33m" /* ELN's */
 #define DEF_EM_C "\001\x1b[01;31m\002" /* Error msg indicator */
 #define DEF_LI_C "\001\x1b[01;32m\002" /* Sel files indicator (prompt) */
@@ -254,11 +254,6 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_WARNING_PROMPT 1
 #define SUG_STRATS 7
 
-/* These options should work with FZF 0.17.5 or later */
-#define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:4,\
-hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,\
-left:abort --inline-info --layout=reverse-list"
-
 #define MAX_WS 8
 
 #define DEFAULT_PROMPT "\\[\\e[0m\\][\\S\\[\\e[0m\\]]\\l \
@@ -268,6 +263,14 @@ left:abort --inline-info --layout=reverse-list"
 
 #define DEF_WPROMPT_STR "\\[\\e[0m\\]\\[\\e[00;02;31m\\](!) > "
 #define DEF_WPROMPT_STR_NO_COLOR "(!) > "
+
+/* These options should work with FZF 0.17.5 or later */
+#define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:4,\
+hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,\
+left:abort --inline-info --layout=reverse-list"
+
+#define DEF_FZFTAB_OPTIONS_NO_COLOR "--color=bw --bind tab:accept,\
+right:accept,left:abort --inline-info --layout=reverse-list"
 
 #define DEFAULT_TERM_CMD "xterm -e"
 #define FALLBACK_SHELL "/bin/sh"
