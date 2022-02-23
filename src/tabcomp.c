@@ -910,6 +910,9 @@ fzftabcomp(char **matches)
 		}
 	}
 
+	if (!query || !*query) /* Last char is space */
+		fzf_offset++;
+
 	if (fzf_offset < 0)
 		fzf_offset = 0;
 
