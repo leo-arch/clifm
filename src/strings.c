@@ -47,8 +47,7 @@
 #include "sort.h"
 #include "tags.h"
 
-#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
-char len_buf[CMD_LEN_MAX] __attribute__((aligned));
+char len_buf[ARG_MAX] __attribute__((aligned));
 
 /* states: S_N: normal, S_I: comparing integral part, S_F: comparing
            fractionnal parts, S_Z: idem but with leading Zeroes only */
@@ -241,7 +240,8 @@ wc_xstrlen(const char *restrict str)
 	wchar_t *const wbuf = (wchar_t *)len_buf;
 
 	/* Convert multi-byte to wide char */
-	_len = mbstowcs(wbuf, str, NAME_MAX);
+/*	_len = mbstowcs(wbuf, str, CMD_LEN_MAX); */
+	_len = mbstowcs(wbuf, str, ARG_MAX);
 	int p = wcswidth(wbuf, _len);
 	if (p != -1)
 		len = (size_t)p;

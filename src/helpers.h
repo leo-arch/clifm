@@ -105,6 +105,11 @@ void *__dso_handle;
 # define NAME_MAX 255
 #endif
 
+/*#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1)) */
+#ifndef ARG_MAX
+# define ARG_MAX PATH_MAX + ((NAME_MAX + 1) << 1)
+#endif
+
 /* _GNU_SOURCE is only defined if __linux__ is defined and _BE_POSIX
  * is not defined */
 #ifdef _GNU_SOURCE

@@ -230,7 +230,6 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 
 	if (cucs > term_cols) {
 		slines = cucs / (size_t)term_cols;
-		fflush(stdout);
 		int cucs_rem = (int)cucs % term_cols;
 		if (cucs_rem > 0)
 			slines++;
@@ -284,9 +283,12 @@ check_conditions(const char *str, const size_t offset, const size_t str_len,
 		return EXIT_FAILURE;
 
 	/* Do not print suggestions bigger than what the current terminal
-	 * window size can hold */
+	 * window size can hold. If length is zero (invalid wide char), or if
+	 * it equals ARG_MAX, in which case we most probably have a truncated
+	 * suggestion (mbstowcs will convert only up to ARG_MAX chars), exit */
 	size_t suggestion_len = wc_xstrlen(str + offset);
-	if ((int)suggestion_len > (term_cols * term_rows) - curcol)
+	if (suggestion_len == 0 || suggestion_len == ARG_MAX
+	|| (int)suggestion_len > (term_cols * term_rows) - curcol)
 		return EXIT_FAILURE;
 
 	*slines = calculate_suggestion_lines(baej, suggestion_len);
