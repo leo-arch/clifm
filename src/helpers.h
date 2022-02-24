@@ -100,7 +100,8 @@ void *__dso_handle;
 #  define PATH_MAX 4096
 # else
 #  define PATH_MAX 1024
-#endif
+# endif /* __linux */
+#endif /* PATH_MAX */
 
 #ifndef HOST_NAME_MAX
 # define HOST_NAME_MAX 64
