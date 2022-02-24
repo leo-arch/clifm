@@ -71,6 +71,7 @@
 
 #if defined(__linux__)
 # include <linux/version.h>
+# include <linux/limits.h>
 # include <sys/inotify.h>
 # include <sys/types.h>
 # define LINUX_INOTIFY
@@ -78,6 +79,7 @@
 # include <sys/types.h>
 # include <sys/event.h>
 # include <sys/time.h>
+# include <sys/syslimits.h>
 # define BSD_KQUEUE
 #endif /* __linux__ */
 
@@ -107,8 +109,12 @@ void *__dso_handle;
 
 /*#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1)) */
 #ifndef ARG_MAX
-# define ARG_MAX PATH_MAX + ((NAME_MAX + 1) << 1)
-#endif
+# ifdef __linux__
+#  define ARG_MAX 128 * 1024
+# else
+#  define ARG_MAX 512 *1024
+# endif /* __linux__ */
+#endif /* ARG_MAX */
 
 /* _GNU_SOURCE is only defined if __linux__ is defined and _BE_POSIX
  * is not defined */
