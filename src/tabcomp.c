@@ -627,7 +627,8 @@ store_completions(char **matches, FILE *fp)
 	|| cur_comp_type == TCMP_PROF)
 		no_file_comp = 1;
 
-	size_t i;
+	size_t i, free_path = 0;
+	char *_path = (char *)NULL;
 	for (i = 1; matches[i]; i++) {
 		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
 			continue;
@@ -657,16 +658,23 @@ store_completions(char **matches, FILE *fp)
 			if (cl && *cl != _ESC)
 				snprintf(ext_cl, MAX_COLOR + 4, "\x1b[%sm", cl);
 
-			char *p = (char *)NULL;
-			if (cur_comp_type != TCMP_SEL && cur_comp_type != TCMP_DESEL
-			&& cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_BACKDIR)
-				p = strrchr(matches[i], '/');
 			color = *ext_cl ? ext_cl : (cl ? cl : "");
-			entry = (p && *(++p)) ? p : matches[i];
+
+			if (cur_comp_type != TCMP_SEL && cur_comp_type != TCMP_DESEL
+			&& cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_BACKDIR) {
+				_path = strrchr(matches[i], '/');
+				entry = (_path && *(++_path)) ? _path : matches[i];
+			} else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) {
+				_path = home_tilde(matches[i]);
+				entry = _path ? _path : matches[i];
+				free_path = 1;
+			}
 		}
 
 		if (*entry)
 			write_comp_to_file(entry, color, &fp);
+		if (free_path)
+			free(_path);
 	}
 
 	return i;
@@ -681,6 +689,7 @@ get_query_str(int *fzf_offset)
 	case TCMP_DESEL: {
 		char *sp = strrchr(rl_line_buffer, ' ');
 		query = (sp && *(++sp)) ? sp : rl_line_buffer;
+		*fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 3;
 		}
 		break;
 
@@ -896,7 +905,8 @@ fzftabcomp(char **matches)
 	}
 
 	char *query = (char *)NULL;
-	/* In case of a range or the sel keyword, the query string is just empty */
+	/* In case of a range, the sel keyword, or a full tag expression,
+	 * the query string is just empty */
 	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL
 	&& cur_comp_type != TCMP_TAGS_F) {
 		query = get_query_str(&fzf_offset);
@@ -908,21 +918,31 @@ fzftabcomp(char **matches)
 			else
 				query = lw ? lw : (char *)NULL;
 		}
+		if (!query || !*query) /* Last char is space */
+			fzf_offset++;
 	}
-
-	if (!query || !*query) /* Last char is space */
-		fzf_offset++;
-
-	if (fzf_offset < 0)
-		fzf_offset = 0;
 
 	if (cur_comp_type == TCMP_TAGS_F) {
 		if (rl_end && rl_line_buffer[rl_end - 1] == ' ')
 			/* Coming from untag ('tu :TAG ') */
 			fzf_offset++;
-		else /* Coming from tag expression (t:TAG) */
-			fzf_offset = rl_point ? rl_point - 1 : 0;
+		else { /* Coming from tag expression ('t:FULL_TAG') */
+			char *sp = strrchr(rl_line_buffer,  ' ');
+			fzf_offset = prompt_offset + (int)(sp - rl_line_buffer);
+		}
+	} else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES) {
+		char *sp = strrchr(rl_line_buffer, ' ');
+		fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
+	} else if (cur_comp_type == TCMP_TAGS_C) {
+		char *sp = strrchr(rl_line_buffer,  ' ');
+		fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 1;
+	} else if (cur_comp_type == TCMP_TAGS_T) {
+		char *sp = strrchr(rl_line_buffer,  ' ');
+		fzf_offset = prompt_offset + (int)(sp - rl_line_buffer);
 	}
+
+	if (fzf_offset < 0)
+		fzf_offset = 0;
 
 	/* TAB completion cases allowing multiple selection */
 	int multi = is_multi_sel();
