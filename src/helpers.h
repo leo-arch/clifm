@@ -96,7 +96,10 @@ void *__dso_handle;
 #define EXIT_FAILURE 1
 
 #ifndef PATH_MAX
-# define PATH_MAX 4096
+# ifdef __linux__
+#  define PATH_MAX 4096
+# else
+#  define PATH_MAX 1024
 #endif
 
 #ifndef HOST_NAME_MAX
@@ -112,7 +115,7 @@ void *__dso_handle;
 # ifdef __linux__
 #  define ARG_MAX 128 * 1024
 # else
-#  define ARG_MAX 512 *1024
+#  define ARG_MAX 512 * 1024
 # endif /* __linux__ */
 #endif /* ARG_MAX */
 
