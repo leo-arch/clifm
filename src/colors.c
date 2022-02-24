@@ -550,13 +550,13 @@ cschemes_function(char **args)
 static void
 set_color(char *_color, int offset, char var[], int flag)
 {
-	char *color_code = (char *)NULL;
 #ifndef CLIFM_SUCKLESS
+	char *color_code = (char *)NULL;
 	if (is_color_code(_color + offset) == 0
 	&& (color_code = check_defs(_color + offset)) == NULL)
 #else
 	if (is_color_code(_color + offset) == 0)
-#endif
+#endif /* CLIFM_SUCKLESS */
 	{
 		/* A null color string will be set to the default value by
 		 * set_default_colors function */
@@ -564,7 +564,11 @@ set_color(char *_color, int offset, char var[], int flag)
 		return;
 	}
 
+#ifndef CLIFM_SUCKLESS
 	char *p = color_code ? color_code : (_color + offset);
+#else
+	char *p = _color + offset;
+#endif /* CLIFM_SUCKLESS */
 	if (flag == RL_NO_PRINTABLE)
 		snprintf(var, MAX_COLOR + 2, "\001\x1b[%sm\002", p); /* NOLINT */
 	else
@@ -1230,21 +1234,24 @@ store_extension_line(char *line, size_t len)
 		return EXIT_FAILURE;
 
 	*q = '\0';
-	char *c = (char *)NULL;
 #ifndef CLIFM_SUCKLESS
+	char *c = (char *)NULL;
 	if (is_color_code(q + 1) != 1 && (c = check_defs(q + 1)) == NULL)
 #else
 	if (is_color_code(q + 1) != 1)
-#endif
+#endif /* CLIFM_SUCKLESS */
 		return EXIT_FAILURE;
 
 	ext_colors = (char **)xrealloc(ext_colors,
 	             (ext_colors_n + 1) * sizeof(char *));
+#ifndef CLIFM_SUCKLESS
 	if (c) {
 		size_t clen = (size_t)(q - line) + strlen(c) + 1;
 		ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
 		sprintf(ext_colors[ext_colors_n], "%s=%s", line, c);
-	} else {
+	} else
+#endif /* CLIFM_SUCKLESS */
+	{
 		*q = '=';
 		ext_colors[ext_colors_n] = savestring(line, len);
 	}
