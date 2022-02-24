@@ -242,15 +242,17 @@ read_kqueue(void)
 #endif
 
 void
-set_term_title(const char *str)
+set_term_title(char *str)
 {
+	int free_tmp = 0;
 	char *tmp = (char *)NULL;
-	tmp = home_tilde(str);
+	tmp = home_tilde(str, &free_tmp);
 
 	printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : str);
 	fflush(stdout);
 
-	free(tmp);
+	if (free_tmp == 1)
+		free(tmp);
 }
 
 static int

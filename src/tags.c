@@ -116,10 +116,8 @@ print_tagged_file(char *name, const char *tag)
 
 	int free_name = 0;
 	char *q = tmp;
-	if (strncmp(tmp, user.home, strlen(user.home)) == 0) {
-		q = home_tilde(tmp);
-		free_name = 1;
-	}
+	if (strncmp(tmp, user.home, strlen(user.home)) == 0)
+		q = home_tilde(tmp, &free_name);
 
 	if (strchr(name, '\\')) {
 		char *d = dequote_str(name, 0);
@@ -133,9 +131,8 @@ print_tagged_file(char *name, const char *tag)
 	if (p && p != q)
 		*p = '\0';
 	printf("%s%s%s [%s]\n", mi_c, (p && *(p + 1)) ? p + 1 : tmp, df_c, tmp);
-//		printf("%s%s%s\n", mi_c, name, df_c);
-//		*p = '/';
-	if (free_name)
+
+	if (free_name == 1)
 		free(q);
 }
 

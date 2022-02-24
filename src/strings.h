@@ -34,7 +34,7 @@ char *escape_str(const char *str);
 int *expand_range(char *str, int listdir);
 char *gen_rand_str(size_t len);
 char **get_substr(char *str, const char ifs);
-char *home_tilde(const char *new_path);
+char *home_tilde(char *new_path, int *_free);
 int is_internal_f(const char *restrict cmd);
 char **parse_input_str(char *str);
 char *remove_quotes(char *str);

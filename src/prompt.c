@@ -166,12 +166,10 @@ gen_pwd(int c)
 	char *tmp_path = (char *)NULL;
 
 	if (strncmp(workspaces[cur_ws].path, user.home, user.home_len) == 0)
-		tmp_path = home_tilde(workspaces[cur_ws].path);
+		tmp_path = home_tilde(workspaces[cur_ws].path, &free_tmp_path);
 
 	if (!tmp_path)
 		tmp_path = workspaces[cur_ws].path;
-	else
-		free_tmp_path = 1;
 
 	if (c == 'W') {
 		temp = get_dir_basename(tmp_path);
@@ -181,7 +179,7 @@ gen_pwd(int c)
 		temp = savestring(tmp_path, strlen(tmp_path));
 	}
 
-	if (free_tmp_path)
+	if (free_tmp_path == 1)
 		free(tmp_path);
 
 	return temp;

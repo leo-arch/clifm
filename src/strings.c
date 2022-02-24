@@ -2174,10 +2174,13 @@ parse_input_str(char *str)
 
 /* Reduce "$HOME" to tilde ("~"). The new_path variable is always either
  * "$HOME" or "$HOME/file", that's why there's no need to check for
- * "/file" */
+ * "/file"
+ * If NEW_PATH isn't home, NEW_PATH is returned without allocating new
+ * memory, in which case _FREE is set to zero */
 char *
-home_tilde(const char *new_path)
+home_tilde(char *new_path, int *_free)
 {
+	*_free = 0;
 	if (!home_ok || !new_path || !*new_path || !user.home)
 		return (char *)NULL;
 
@@ -2188,18 +2191,23 @@ home_tilde(const char *new_path)
 		path_tilde = (char *)xnmalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 		path_tilde[1] = '\0';
-	} else if (new_path[1] == user.home[1]
+		*_free = 1;
+		return path_tilde;
+	}
+
+	if (new_path[1] == user.home[1]
 	&& strncmp(new_path, user.home, user.home_len) == 0) {
 		/* If path == HOME/file */
 		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3,
 					sizeof(char));
 		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);
-	} else {
-		path_tilde = (char *)xnmalloc(strlen(new_path) + 1, sizeof(char));
-		strcpy(path_tilde, new_path);
+		*_free = 1;
+		return path_tilde;
 	}
 
-	return path_tilde;
+//	path_tilde = (char *)xnmalloc(strlen(new_path) + 1, sizeof(char));
+//	strcpy(path_tilde, new_path);
+	return new_path;
 }
 
 /* Expand a range of numbers given by str. It will expand the range

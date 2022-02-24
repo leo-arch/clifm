@@ -1640,11 +1640,12 @@ tag_entries_generator(const char *text, int state)
 		reinsert_slashes(q);
 		char tmp[PATH_MAX], *r = (char *)NULL;
 		snprintf(tmp, PATH_MAX, "/%s", q);
-		if (strncmp(tmp, user.home, user.home_len) == 0)
-			r = home_tilde(tmp);
+		int free_tmp = 0;
+		r = home_tilde(tmp, &free_tmp);
 		q = strdup(r ? r : tmp);
 		free(p);
-		free(r);
+		if (free_tmp == 1)
+			free(r);
 		return q;
 	}
 

@@ -27,12 +27,12 @@
 
 int back_function(char **comm);
 int forth_function(char **comm);
-int xchdir(const char *dir, const int set_title);
+int xchdir(char *dir, const int set_title);
 int cd_function(char *new_path, const int print_error);
 char *fastback(char *str);
 int handle_workspaces(char *str);
 void print_dirhist(void);
-int backdir(char* str);
+int backdir(char *str);
 char **get_bd_matches(const char *str, int *n, int mode);
 
 #endif /* NAVIGATION_H */

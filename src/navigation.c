@@ -387,7 +387,7 @@ backdir(char* str)
 /* Make sure DIR exists, it is actually a directory and is readable.
  * Only then change directory */
 int
-xchdir(const char *dir, const int set_title)
+xchdir(char *dir, const int set_title)
 {
 	if (!dir || !*dir)
 		return (-1);

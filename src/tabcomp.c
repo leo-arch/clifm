@@ -492,12 +492,15 @@ get_tagged_file_target(char *filename)
 
 	char *rpath = realpath(dir, NULL);
 	char *s = rpath ? rpath : filename;
-	char *q = (char *)NULL;
-
-	if (user.home[1] == s[1] && strncmp(user.home, s, user_home_len) == 0) {
+//	char *q = (char *)NULL;
+	int free_tmp = 0;
+	char *q = home_tilde(s, &free_tmp);
+	if (q && free_tmp == 1)
+		free(s);
+/*	if (user.home[1] == s[1] && strncmp(user.home, s, user_home_len) == 0) {
 		if ((q = home_tilde(s)))
 			free(s);
-	}
+	} */
 
 	return q ? q : s;
 }
@@ -620,14 +623,14 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 static inline size_t
 store_completions(char **matches, FILE *fp)
 {
-	int no_file_comp = 0;
+	int no_file_comp = 0, free_path = 0;
 	if (cur_comp_type == TCMP_TAGS_S || cur_comp_type == TCMP_TAGS_U
 	|| cur_comp_type == TCMP_SORT || cur_comp_type == TCMP_BOOKMARK
 	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_NET
 	|| cur_comp_type == TCMP_PROF)
 		no_file_comp = 1;
 
-	size_t i, free_path = 0;
+	size_t i;
 	char *_path = (char *)NULL;
 	for (i = 1; matches[i]; i++) {
 		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
@@ -665,15 +668,14 @@ store_completions(char **matches, FILE *fp)
 				_path = strrchr(matches[i], '/');
 				entry = (_path && *(++_path)) ? _path : matches[i];
 			} else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) {
-				_path = home_tilde(matches[i]);
+				_path = home_tilde(matches[i], &free_path);
 				entry = _path ? _path : matches[i];
-				free_path = 1;
 			}
 		}
 
 		if (*entry)
 			write_comp_to_file(entry, color, &fp);
-		if (free_path)
+		if (free_path == 1)
 			free(_path);
 	}
 
