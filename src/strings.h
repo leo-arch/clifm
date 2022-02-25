@@ -49,6 +49,7 @@ int strcntchrlst(const char *str, const char c);
 char *truncate_wname(const char *name);
 int u8truncstr(char *restrict str, size_t n);
 size_t wc_xstrlen(const char *restrict str);
+char *xstrrpbrk(char *s, const char *accept);
 
 #if defined(__linux__) && defined(_BE_POSIX)
 char *xstrcasestr(char *a, const char *b);

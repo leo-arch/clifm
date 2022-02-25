@@ -62,6 +62,27 @@ char len_buf[ARG_MAX] __attribute__((aligned));
 
 #define MAX_STR_SZ 4096
 
+/* A reverse strpbrk(3): returns a pointer to the LAST char in S matching
+ * a char in ACCEPT, or NULL if no match is found */
+char *
+xstrrpbrk(char *s, const char *accept)
+{
+	if (!s || !*s || !accept || !*accept)
+		return (char *)NULL;
+
+	size_t l = strlen(s);
+
+	int i = (int)l, j;
+	while (--i >= 0) {
+		for (j = 0; accept[j]; j++) {
+			if (s[i] == accept[j])
+				return s + i;
+		}
+	}
+
+	return (char *)NULL;
+}
+
 #if defined(__linux__) && defined(_BE_POSIX)
 /* strcasestr(3) is a GNU extension on Linux. If GNU extensions are not
  * available, let's use this as replacement */

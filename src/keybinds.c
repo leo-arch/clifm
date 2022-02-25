@@ -1658,23 +1658,19 @@ rl_del_last_word(int count, int key)
 		--rl_end;
 	}
 
-	int p = 0;
-	char *s = strrchr(b, '/');
-	char *a = strrchr(b, ' ');
-	if (!a) {
-		if (s)
-			p = (int)(s - b) + 1;
-	} else if (!s) {
-		p = (int)(a - b) + 1;
-	} else if (a > s) {
-		p = (int)(a - b) + 1;
-	} else {
-		p = (int)(s - b) + 1;
-	}
+	int n = 0;
+	char *p = xstrrpbrk(b, WORD_DELIMITERS);
+	if (p)
+		n = (int)(p - b) + (*(p + 1) ? 1 : 0);
 
-	rl_delete_text(p, rl_end);
-	rl_point = rl_end = p;
+	rl_delete_text(n, rl_end);
+	rl_point = rl_end = n;
 	rl_redisplay();
+
+#ifndef _NO_SUGGESTIONS
+	if (suggestions == 1 && n == 0 && wrong_cmd)
+		recover_from_wrong_cmd();
+#endif
 
 	return EXIT_SUCCESS;
 }
