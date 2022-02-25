@@ -930,7 +930,7 @@ fzftabcomp(char **matches)
 			fzf_offset++;
 		else { /* Coming from tag expression ('t:FULL_TAG') */
 			char *sp = strrchr(rl_line_buffer,  ' ');
-			fzf_offset = prompt_offset + (int)(sp - rl_line_buffer);
+			fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
 		}
 	} else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES) {
 		char *sp = strrchr(rl_line_buffer, ' ');

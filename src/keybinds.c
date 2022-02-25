@@ -65,6 +65,9 @@ typedef char *rl_cpvfunc_t;
 #include "highlight.h"
 #endif
 
+/* Let's use these word delimiters to print first suggested word */
+#define WORD_DELIMITERS " /.-_=,:;@+*&|({[]})?!"
+
 int accept_first_word = 0;
 
 int
@@ -497,45 +500,26 @@ rl_accept_suggestion(int count, int key)
 	}
 
 	/* If accepting the first suggested word, accept only up to next
-	 * slash or space */
+	 * word delimiter */
 	char *s = (char *)NULL, _s = 0;
-	int slash = 0;
+	int trimmed = 0;
 	if (accept_first_word) {
-		size_t i = 0;
 		char *p = suggestion_buf + (rl_point - suggestion.offset);
 		/* Skip leading spaces */
-		while (*(p + i) == ' ')
-			i++;
+		while (*p == ' ')
+			p++;
 
-		/* Trim the suggestion up to first slash or space */
-		s = strchr(p + i, '/');
-		/* If the slash is immediately preceded by a space, move to
-		 * the next slash */
-		if (s && s != p && *(s - 1) == ' ') {
-			char *ss = strchr(s + 1, '/');
-			if (ss)
-				s = ss;
-		}
-		char *sp = strchr(p + i, ' ');
-		if (s) {
-			/* If there is a space somewhere before the slash */
-			if (sp && sp < s) {
-				s = sp;
-			} else {
-				/* In case of slash, keep a copy of the next char, if any:
-				 * we cannot know in advance what comes after the slash */
-				s++;
-				if (*s)
-					_s = *s;
-				slash = 1;
-			}
-		} else {
-			if (sp)
-				s = sp;
-		}
+		while ((s = strpbrk(p, WORD_DELIMITERS)) == p)
+			p++;
+		if (s && s != p && *(s - 1) == ' ')
+			s = strpbrk(p, WORD_DELIMITERS);
 
-		if (s && (slash ? *s : *(s + 1)) && s != p) {
+		if (s && *(s + 1)) {
+			if (*s == '/')
+				++s;
+			_s = *s;
 			*s = '\0';
+			trimmed = 1;
 		} else {
 			/* Last word: neither space nor slash */
 			size_t len = strlen(suggestion_buf);
@@ -643,10 +627,12 @@ rl_accept_suggestion(int count, int key)
 	} else {
 		if (s) {
 			/* Reinsert the char we removed to print only the first word */
-			if (slash)
+			if (trimmed == 1)
+				*s = _s;
+/*			if (slash)
 				*s = _s;
 			else
-				*s = ' ';
+				*s = ' '; */
 		}
 		accept_first_word = 0;
 	}
