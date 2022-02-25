@@ -65,8 +65,9 @@ typedef char *rl_cpvfunc_t;
 #include "highlight.h"
 #endif
 
-/* Let's use these word delimiters to print first suggested word */
-#define WORD_DELIMITERS " /.-_=,:;@+*&|({[]})?!"
+/* Let's use these word delimiters to print first suggested word
+ * and to delete last typed word */
+#define WORD_DELIMITERS " /.-_=,:;@+*&$#<>%~|({[]})¿?¡!"
 
 int accept_first_word = 0;
 
@@ -1663,7 +1664,9 @@ rl_del_last_word(int count, int key)
 	if (p)
 		n = (int)(p - b) + (*(p + 1) ? 1 : 0);
 
+	rl_begin_undo_group();
 	rl_delete_text(n, rl_end);
+	rl_end_undo_group();
 	rl_point = rl_end = n;
 	rl_redisplay();
 
