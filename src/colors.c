@@ -1756,53 +1756,51 @@ color_codes(void)
 
 	if (ext_colors_n)
 		printf(_("%sFile type colors%s\n\n"), BOLD, df_c);
-	printf(_(" %sfile name%s: Directory with no read permission (nd)\n"),
+	printf(_(" %sfile name%s: nd: Directory with no read permission\n"),
 	    nd_c, df_c);
-	printf(_(" %sfile name%s: File with no read permission (nf)\n"),
+	printf(_(" %sfile name%s: nf: File with no read permission\n"),
 	    nf_c, df_c);
-	printf(_(" %sfile name%s: Directory* (di)\n"), di_c, df_c);
-	printf(_(" %sfile name%s: EMPTY directory (ed)\n"), ed_c, df_c);
-	printf(_(" %sfile name%s: EMPTY directory with no read "
-		 "permission (ne)\n"),
+	printf(_(" %sfile name%s: di: Directory*\n"), di_c, df_c);
+	printf(_(" %sfile name%s: ed: EMPTY directory\n"), ed_c, df_c);
+	printf(_(" %sfile name%s: ne: EMPTY directory with no read "
+		 "permission\n"),
 	    ne_c, df_c);
-	printf(_(" %sfile name%s: Executable file (ex)\n"), ex_c, df_c);
-	printf(_(" %sfile name%s: Empty executable file (ee)\n"), ee_c, df_c);
-	printf(_(" %sfile name%s: Block special file (bd)\n"), bd_c, df_c);
-	printf(_(" %sfile name%s: Symbolic link* (ln)\n"), ln_c, df_c);
-	printf(_(" %sfile name%s: Broken symbolic link (or)\n"), or_c, df_c);
-	printf(_(" %sfile name%s: Multi-hardlink (mh)\n"), mh_c, df_c);
-	printf(_(" %sfile name%s: Socket file (so)\n"), so_c, df_c);
-	printf(_(" %sfile name%s: Pipe or FIFO special file (pi)\n"), pi_c, df_c);
-	printf(_(" %sfile name%s: Character special file (cd)\n"), cd_c, df_c);
-	printf(_(" %sfile name%s: Regular file (fi)\n"), fi_c, df_c);
-	printf(_(" %sfile name%s: Empty (zero-lenght) file (ef)\n"), ef_c, df_c);
-	printf(_(" %sfile name%s: SUID file (su)\n"), su_c, df_c);
-	printf(_(" %sfile name%s: SGID file (sg)\n"), sg_c, df_c);
-	printf(_(" %sfile name%s: File with capabilities (ca)\n"), ca_c, df_c);
-	printf(_(" %sfile name%s: Sticky and NOT other-writable "
-		 "directory* (st)\n"),
+	printf(_(" %sfile name%s: ex: Executable file\n"), ex_c, df_c);
+	printf(_(" %sfile name%s: ee: Empty executable file\n"), ee_c, df_c);
+	printf(_(" %sfile name%s: bd: Block special file\n"), bd_c, df_c);
+	printf(_(" %sfile name%s: ln: Symbolic link*\n"), ln_c, df_c);
+	printf(_(" %sfile name%s: or: Broken symbolic link\n"), or_c, df_c);
+	printf(_(" %sfile name%s: mh: Multi-hardlink\n"), mh_c, df_c);
+	printf(_(" %sfile name%s: so: Socket file\n"), so_c, df_c);
+	printf(_(" %sfile name%s: pi: Pipe or FIFO special file\n"), pi_c, df_c);
+	printf(_(" %sfile name%s: cd: Character special file\n"), cd_c, df_c);
+	printf(_(" %sfile name%s: fi: Regular file\n"), fi_c, df_c);
+	printf(_(" %sfile name%s: ef: Empty (zero-lenght) file\n"), ef_c, df_c);
+	printf(_(" %sfile name%s: su: SUID file\n"), su_c, df_c);
+	printf(_(" %sfile name%s: sg: SGID file\n"), sg_c, df_c);
+	printf(_(" %sfile name%s: ca: File with capabilities\n"), ca_c, df_c);
+	printf(_(" %sfile name%s: st: Sticky and NOT other-writable "
+		 "directory*\n"),
 	    st_c, df_c);
-	printf(_(" %sfile name%s: Sticky and other-writable "
-		 "directory* (tw)\n"),
+	printf(_(" %sfile name%s: tw: Sticky and other-writable "
+		 "directory*\n"),
 	    tw_c, df_c);
-	printf(_(" %sfile name%s: Other-writable and NOT sticky "
-		 "directory* (ow)\n"),
+	printf(_(" %sfile name%s: ow: Other-writable and NOT sticky "
+		 "directory*\n"),
 	    ow_c, df_c);
-	printf(_(" %sfile name%s: Unknown file type (no)\n"), no_c, df_c);
-	printf(_(" %sfile name%s: Unaccessible (non-stat'able) file "
-		 "(uf)\n"),
-	    uf_c, df_c);
+	printf(_(" %sfile name%s: no: Unknown file type\n"), no_c, df_c);
+	printf(_(" %sfile name%s: uf: Unaccessible (non-stat'able) file\n"), uf_c, df_c);
 
 	printf(_("\n*The slash followed by a number (/xx) after directories "
 		 "or symbolic links to directories indicates the amount of "
 		 "files contained by the corresponding directory, excluding "
 		 "self (.) and parent (..) directories.\n"));
-	printf(_("\nThe value in parentheses is the code that is to be used "
+	printf(_("\nThe second field in this list is the code that is to be used "
 		 "to modify the color of the corresponding file type in the "
 		 "color scheme file (in the \"FiletypeColors\" line), "
 		 "using the same ANSI style color format used by dircolors. "
-		 "By default, %s uses only 8 colors, but you can use 256 "
-		 "and RGB colors as well.\n\n"), PROGRAM_NAME);
+		 "By default, %s uses only 8/16 colors, but you can use 256 "
+		 "and RGB/true colors as well.\n\n"), PROGRAM_NAME);
 
 	if (ext_colors_n) {
 		size_t i, j;
