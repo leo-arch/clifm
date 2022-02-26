@@ -33,8 +33,8 @@
 #include <sys/stat.h>
 
 #if defined(__NetBSD__) || defined(__FreeBSD__)
-#include <sys/param.h>
-#include <sys/sysctl.h>
+# include <sys/param.h>
+# include <sys/sysctl.h>
 #endif
 
 /*
@@ -46,7 +46,7 @@
 #include <unistd.h>
 #include <readline/readline.h>
 #ifdef LINUX_INOTIFY
-#include <sys/inotify.h>
+# include <sys/inotify.h>
 #endif
 
 /*
@@ -101,7 +101,7 @@ read_inotify(void)
 	if (i <= 0) {
 #ifdef INOTIFY_DEBUG
 		puts("INOTIFY_RETURN");
-#endif
+#endif /* INOTIFY_DEBUG */
 		return;
 	}
 
@@ -113,19 +113,19 @@ read_inotify(void)
 
 #ifdef INOTIFY_DEBUG
 		printf("%s (%u): ", *event->name ? event->name : NULL, event->len);
-#endif
+#endif /* INOTIFY_DEBUG */
 
 		if (!event->wd) {
 #ifdef INOTIFY_DEBUG
 			puts("INOTIFY_BREAK");
-#endif
+#endif /* INOTIFY_DEBUG */
 			break;
 		}
 
 		if (event->mask & IN_CREATE) {
 #ifdef INOTIFY_DEBUG
 			puts("IN_CREATE");
-#endif
+#endif /* INOTIFY_DEBUG */
 			struct stat a;
 			if (event->len && lstat(event->name, &a) != 0) {
 				/* The file was created, but doesn't exist anymore */
@@ -153,7 +153,7 @@ read_inotify(void)
 		if (event->mask & IN_DELETE) {
 #ifdef INOTIFY_DEBUG
 			puts("IN_DELETE");
-#endif
+#endif /* INOTIFY_DEBUG */
 			struct stat a;
 			if (event->len && lstat(event->name, &a) == 0)
 				/* The file was removed, but is still there (recreated) */
@@ -171,7 +171,7 @@ read_inotify(void)
 			puts("IN_MOVED_TO");
 		if (event->mask & IN_IGNORED)
 			puts("IN_IGNORED");
-#endif
+#endif /* INOTIFY_DEBUG */
 
 		if (!ignore_event && (event->mask & INOTIFY_MASK))
 			refresh = 1;
@@ -180,13 +180,13 @@ read_inotify(void)
 	if (refresh) {
 #ifdef INOTIFY_DEBUG
 		puts("INOTIFY_REFRESH");
-#endif
+#endif /* INOTIFY_DEBUG */
 		free_dirlist();
 		list_dir();
 	} else {
 #ifdef INOTIFY_DEBUG
 		puts("INOTIFY_RESET");
-#endif
+#endif /* INOTIFY_DEBUG */
 		/* Reset the inotify watch list */
 		reset_inotify();
 	}
@@ -239,7 +239,7 @@ read_kqueue(void)
 		watch = 0;
 	}
 }
-#endif
+#endif /* LINUX_INOTIFY */
 
 void
 set_term_title(char *str)
@@ -418,8 +418,13 @@ print_tips(int all)
 		"'br *.txt'",
 		"Need no more tips? Disable this feature in the configuration "
 		"file",
+#ifndef __OpenBSD__
 		"Need root privileges? Launch a new instance of CliFM as root "
 		"running the 'X' command",
+#endif
+#ifdef __linux__
+		"Manage removable devices via the 'media' command",
+#endif
 		"Create custom commands and features using the 'actions' command",
 		"Create a fresh configuration file by running 'edit reset'",
 		"Use 'ln edit' (or 'le') to edit symbolic links",
@@ -530,6 +535,7 @@ check_new_instance_init_conditions(const char *dir, const int sudo)
 #endif
 }
 
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
 /* Get absolute path of executable name of itself */
 static inline char *
 get_self(void)
@@ -537,7 +543,7 @@ get_self(void)
 #if defined(__linux__)
 	char *self = realpath("/proc/self/exe", NULL);
 	if (!self) {
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
 	const int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
 	char *self = malloc(PATH_MAX);
 	size_t len = PATH_MAX;
@@ -550,6 +556,7 @@ get_self(void)
 
 	return self;
 }
+#endif
 
 /* Just check that DIR exists and is a directory */
 static inline int
@@ -695,7 +702,10 @@ new_instance(char *dir, int sudo)
 		return EXIT_FAILURE;
 	}
 
-	char *self = get_self();
+	char *self = (char *)NULL;
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
+	self = get_self();
+#endif
 	if (!self) {
 		free(_sudo);
 		return EXIT_FAILURE;

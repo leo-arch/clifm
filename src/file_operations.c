@@ -180,7 +180,7 @@ print_file(FILE *fp, char *name, mode_t type)
 	char s = 0;
 	struct stat a;
 	if (lstat(name, &a) != -1)
-		s = get_file_suffix(a.st_mode));
+		s = get_file_suffix(a.st_mode);
 #else
 	char s = get_file_suffix(type);
 #endif

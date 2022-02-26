@@ -406,6 +406,7 @@ reset_ifs(const char *value)
 		unsetenv("IFS");
 }
 
+#if !defined(__HAIKU__) && !defined(__OpenBSD__)
 static inline void
 substitute_cmd(char **line, char **res, size_t *len)
 {
@@ -446,6 +447,7 @@ substitute_cmd(char **line, char **res, size_t *len)
 	wordfree(&wordbuf);
 	return;
 }
+#endif /* !__HAIKU__ && !__OpenBSD__*/
 
 static inline char *
 gen_emergency_prompt(void)
