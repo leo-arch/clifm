@@ -1,19 +1,69 @@
 # Theme file for CliFM
+# Theme name: light
 # Author: L. Abramovich
 # License: GPL3
 
-# Theme name: Light
-FiletypeColors="di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;30:ef=01;02;33:nf=00;31:ln=01;02;36:mh=30;46:or=00;02;36:pi=00;02;35:so=00;35:bd=01;02;33:cd=01;02;30:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=00;91:ee=00;02;91:no=00;31;47:uf=31;40:"
+define D=0
+define BD=1
 
-InterfaceColors="el=00;02;32:mi=01;02;35:dl=00;02;34:tx=0:df=0;30:fc=00;02;34:wc=01:dh=00;36:li=00;32:si=00;34:ti=00;36:em=00;31:wm=00;33:nm=00;32:bm=00;02;36:dn=00;02;37:dr=00;33:dw=00;31:dxd=00;32:dxr=00;36:dg=00;33:dd=00;34:dz=00;32:do=00;36:dp=0;35:sb=02;33:sc=02;31:sf=04;02;36:sh=02;35:sp=02;31:sx=02;32:hb=00;36:hc=02;31:hd=00;36:he=00;36:hn=00;35:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:tt=01;02;36:ts=04;35:wp=00;02;31:ws1=00;34:ws2=00;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36:ws8=00;36:xs=00;02;32:xf=00;31"
+define K=30
+define BDK=1;2;30
 
-ExtColors="*.tar=01;31:*.tgz=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.rar=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=00;35:*.JPG=00;35:*.jpeg=00;35:*.mjpg=00;35:*.mjpeg=00;35:*.gif=00;35:*.GIF=00;35:*.bmp=00;35:*.xbm=00;35:*.xpm=00;35:*.png=00;35:*.PNG=00;35:*.svg=00;35:*.pcx=00;35:*.mov=00;35:*.mpg=00;35:*.mpeg=00;35:*.m2v=00;35:*.mkv=00;35:*.webm=00;35:*.webp=00;35:*.ogm=00;35:*.mp4=00;35:*.MP4=00;35:*.m4v=00;35:*.mp4v=00;35:*.vob=00;35:*.wmv=00;35:*.flc=00;35:*.avi=00;35:*.flv=00;35:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mp3=00;36:*.MP3=00;36:*.ogg=00;36:*.wav=00;36:*.pdf=01;31:*.PDF=01;31:*.doc=35:*.docx=35:*.xls=35:*.xlsx=35:*.ppt=35:*.pptx=35:*.odt=35:*.ods=35:*.odp=35:*.cache=02;37:*.tmp=02;37:*.temp=02;37:*.log=02;37:*.bak=02;37:*.bk=02;37:*.in=02;37:*.out=02;37:*.part=02;37:*.aux=02;37:*.c=00;01:*.c++=00;01:*.h=00;01:*.cc=00;01:*.cpp=00;01:*.h=00;01:*.h++=00;01:*.hh=00;01:*.go=00;01:*.java=00;01:*.js=00;01:*.lua=00;01:*.rb=00;01:*.rs=00;01:"
+define R=31
+define BR=1;31
+define DR=2;31
+define UR=4;31
+define UBR=1;4;31
+define R2=91
+define DR2=2;91
 
-DirIconsColor="0;33"
+define G=32
+define BG=1;32
+define DG=2;32
+
+define Y=33
+define BY=1;33
+define DY=2;33
+define BDY=1;2;33
+
+define B=34
+define BB=1;34
+define DB=2;34
+
+define M=35
+define BM=1;35
+define DM=2;35
+define BDM=1;2;35
+
+define C=36
+define BC=1;36
+define DC=2;36
+define BDC=1;2;36
+define UDC=4;2;36
+
+define DW=2;37
+
+define WR=37;41
+define KY=30;43
+define KR;30;41
+define KG;30;42
+define KC=30;46
+define BlGr=34;42
+define WB=37;44
+define URW=4;31;47
+define URK=4;31;40
+
+FiletypeColors="di=BB:nd=UBR:ed=B:ne=UR:fi=K:ef=BDY:nf=R:ln=BDC:mh=KC:or=UDC:pi=DM:so=M:bd=BDY:cd=BDK:su=WR:sg=KY:ca=KR:tw=KG:ow=BlGr:st=WB:ex=R2:ee=DR2:no=URW:uf=URK:"
+
+InterfaceColors="el=DG:mi=BDM:dl=DB:tx=D:df=K:fc=DB:wc=BD:li=G:si=B:ti=C:em=R:wm=Y:nm=G:bm=DC:dn=DW:dr=Y:dw=R:dxd=G:dxr=C:dg=G:dd=B:dz=G:do=C:dp=M:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:hb=C:hc=DR:hd=C:he=c:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:tt=BDC:ts=UR:wp=DR:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=DG:xf=R"
+
+ExtColors="*.tar=BR:*.tgz=BR:*.taz=BR:*.lha=BR:*.lz4=BR:*.lzh=BR:*.lzma=BR:*.tlz=BR:*.txz=BR:*.tzo=BR:*.t7z=BR:*.zip=BR:*.z=BR:*.dz=BR:*.gz=BR:*.lrz=BR:*.lz=BR:*.lzo=BR:*.xz=BR:*.zst=BR:*.tzst=BR:*.bz2=BR:*.bz=BR:*.tbz=BR:*.tbz2=BR:*.tz=BR:*.deb=BR:*.rpm=BR:*.rar=BR:*.cpio=BR:*.7z=BR:*.rz=BR:*.cab=BR:*.jpg=M:*.JPG=M:*.jpeg=M:*.mjpg=M:*.mjpeg=M:*.gif=M:*.GIF=M:*.bmp=M:*.xbm=M:*.xpm=M:*.png=M:*.PNG=M:*.svg=M:*.pcx=M:*.mov=M:*.mpg=M:*.mpeg=M:*.m2v=M:*.mkv=M:*.webm=M:*.webp=M:*.ogm=M:*.mp4=M:*.MP4=M:*.m4v=M:*.mp4v=M:*.vob=M:*.wmv=M:*.flc=M:*.avi=M:*.flv=M:*.m4a=C:*.mid=C:*.midi=C:*.mp3=C:*.MP3=C:*.ogg=C:*.wav=C:*.pdf=BR:*.PDF=BR:*.doc=M:*.docx=M:*.xls=M:*.xlsx=M:*.ppt=M:*.pptx=M:*.odt=M:*.ods=M:*.odp=M:*.cache=DW:*.tmp=DW:*.temp=DW:*.log=DW:*.bak=DW:*.bk=DW:*.in=DW:*.out=DW:*.part=DW:*.aux=DW:*.c=BD:*.c++=BD:*.h=BD:*.cc=BD:*.cpp=BD:*.h=BD:*.h++=BD:*.hh=BD:*.go=BD:*.java=BD:*.js=BD:*.lua=BD:*.rb=BD:*.rs=BD:"
+
+DirIconColor="Y"
 
 Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;34m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 
-WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
+WarningPromptStr="\[\e[0m\]\[\e[0;2;31m\](!) > "
 
 DividingLine="-"
 
