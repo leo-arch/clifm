@@ -251,7 +251,7 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 		for (i = 0; i < (size_t)n; i++)
 			free((*a)[i]);
 		free(*a);
-		return errno;
+		return exit_status;
 	}
 
 	char *cmd[] = {app, tmp_file, NULL};
