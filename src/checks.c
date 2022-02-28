@@ -82,6 +82,8 @@ check_term_support(const char *_term)
 	}
 
 	xargs.colorize = (cs == 0) ? 0 : UNSET;
+	if (getenv("CLIFM_FORCE_COLOR"))
+		xargs.colorize = 1;
 #ifndef _NO_SUGGESTIONS
 	xargs.suggestions = (cprs == 0) ? 0 : UNSET;
 #else
