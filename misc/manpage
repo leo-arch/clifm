@@ -1264,6 +1264,8 @@ Though by default CliFM uses only 8 colors (16 with the high intensity variant),
 .TP
 will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal emulator supporting RGB colors. To test your terminal color capabilities use the \fIcolors.sh\fR script (in the plugins directory).
 .TP
+\fBNOTE\fR: It might happen that, for some reason, you need to force CliFM to use colors despite the value of the \fBTERM\fR variable. The OpenBSD console, for example, sets \fBTERM\fR to \fIvt220\fR by default, which, according to the \fIterminfo\fR database, does not support color. However, the OpenBSD console does actually support color. In this case, you can set the \fBCLIFM_FORCE_COLOR\fR to either \fItrue\fR or  \fI1\fR to use color even if the value of \fBTERM\fR says otherwise.
+.TP
 To see a colored list of the currently used file color codes run \fIcc\fR or \fIcolors\fR in CliFM.
 .TP
 To run colorless use the \fI--no-color\fR command line option or set either \fBCLIFM_NO_COLOR\fR or \fBNO_COLOR\fR environment variables to any value. For more information about the no-color initiative see \fIhttps://no-color.org/\fR
