@@ -434,8 +434,17 @@ my_rl_getc(FILE *stream)
 	if (warning_prompt == 1) {
 #endif /* !_NO_FZF */
 		if (prompt_offset == UNSET) {
+#ifndef __FreeBSD__
 			get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 			prompt_offset = curcol;
+#else
+			if ((flags & GUI) || freebsd_sc_console == 1) {
+				get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+				prompt_offset = curcol;
+			} else {
+				prompt_offset = 6;
+			}
+#endif /* __FreeBSD__ */
 		}
 	}
 
