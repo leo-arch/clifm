@@ -2450,7 +2450,11 @@ check_options(void)
 		else
 			highlight = xargs.highlight;
 	}
-#endif
+# ifdef __NetBSD__
+	if (!(flags & GUI))
+		xargs.highlight = highlight = 0;
+# endif /* __NetBSD__ */
+#endif /* !_NO_HIGHLIGHT */
 
 	if (full_dir_size == UNSET) {
 		if (xargs.full_dir_size == UNSET)

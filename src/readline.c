@@ -488,7 +488,7 @@ my_rl_getc(FILE *stream)
 				 * the end of the current line, in which case we don't
 				 * want to return it here (otherwise, it would be added
 				 * to rl_line_buffer) */
-#ifdef __FreeBSD__
+# ifdef __FreeBSD__
 			/* For the time being, suggestions do not work on the FreeBSD
 			 * console (vt). The escape code to retrieve the current cursor
 			 * position doesn't seem to work. Switching the console to 'sc'
@@ -499,9 +499,9 @@ my_rl_getc(FILE *stream)
 					if (freebsd_sc_console)
 						rl_suggestions(c);
 				}
-#else
+# else
 				rl_suggestions(c);
-#endif /* __FreeBSD__ */
+# endif /* __FreeBSD__ */
 			}
 #endif /* !_NO_SUGGESTIONS */
 			if (ret != -2)
