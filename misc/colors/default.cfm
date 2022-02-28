@@ -140,8 +140,6 @@ DirIconColor="Y"
 # \?: Amount of files of unknown file type in the current directory
 # \!: Amount of unstatable files in the current directory
 
-#Prompt="\[\e[00;48;5;12m\] \S \[\e[0m\]\[\e[00;48;5;11m\]  \[\e[00;48;5;12m\] \A \[\e[0;36m\] \u:\H \[\e[0;36m\]\w\[\e[39;49m\]\n<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
-
 Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\[\e[0m\]\n<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 
 # The deafult prompt, but colorless
