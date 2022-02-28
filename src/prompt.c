@@ -757,7 +757,7 @@ setenv_prompt(void)
 	sprintf(t, "%d", (int)sel_n);
 	setenv("CLIFM_STAT_SEL", t, 1);
 #ifndef _NO_TRASH
-	sprintf(t, "%d", (int)trash_n);
+	sprintf(t, "%d", trash_n > 2 ? (int)trash_n - 2 : 0);
 	setenv("CLIFM_STAT_TRASH", t, 1);
 #endif
 	sprintf(t, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
