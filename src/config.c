@@ -1096,6 +1096,7 @@ create_def_cscheme(void)
 #else
 		    "ExtColors=\"%s\"\n\n"
 #endif
+			"DividingLine=\"%s\"\n\n"
 		    "Prompt=\"%s\"\n\n"
 		    "WarningPromptStr=\"%s\"\n\n"
 		    "FzfTabOption=\"%s\"\n\n",
@@ -1104,6 +1105,7 @@ create_def_cscheme(void)
 	    DEF_FILE_COLORS,
 	    DEF_IFACE_COLORS,
 	    DEF_EXT_COLORS,
+		DEF_DIV_LINE_CHAR,
 	    DEFAULT_PROMPT,
 	    DEF_WPROMPT_STR,
 	    DEF_FZFTAB_OPTIONS);
