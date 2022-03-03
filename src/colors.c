@@ -1745,6 +1745,23 @@ get_colorschemes(void)
 }
 #endif /* CLIFM_SUCKLESS */
 
+static void
+print_color_blocks(void)
+{
+	printf("\x1b[?7l"); /* Disable line wrap */
+
+	int pad = (term_cols - 24) / 2;
+	printf("\x1b[%dC\x1b[0;40m   \x1b[0m\x1b[0;41m   \x1b[0m\x1b[0;42m   "
+		"\x1b[0m\x1b[0;43m   \x1b[0m\x1b[0;44m   \x1b[0m\x1b[0;45m   "
+		"\x1b[0m\x1b[0;46m   \x1b[0m\x1b[0;47m   \x1b[0m\n"
+		"\x1b[%dC\x1b[0m\x1b[0;100m   \x1b[0m\x1b[0;101m   "
+		"\x1b[0m\x1b[0;102m   \x1b[0m\x1b[0;103m   \x1b[0m\x1b[0;104m   "
+		"\x1b[0m\x1b[0;105m   \x1b[0m\x1b[0;106m   \x1b[0m\x1b[0;107m   "
+		"\x1b[0m\n", pad, pad);
+
+	printf("\x1b[?7h"); /* Reenable line wrap */
+}
+
 /* List color codes for file types used by the program */
 void
 color_codes(void)
@@ -1817,4 +1834,6 @@ color_codes(void)
 		}
 		putchar('\n');
 	}
+
+	print_color_blocks();
 }
