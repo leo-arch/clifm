@@ -79,6 +79,7 @@
 # include <sys/types.h>
 # include <sys/event.h>
 # include <sys/time.h>
+# include <sys/param.h>
 # include <sys/syslimits.h>
 # define BSD_KQUEUE
 #endif /* __linux__ */
