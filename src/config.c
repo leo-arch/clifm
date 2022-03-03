@@ -1413,13 +1413,13 @@ set_div_line(const char *line)
 {
 	char *opt = strchr(line, '=');
 	if (!opt || !*opt || !*(++opt)) {
-		*div_line_char = '\0';
+		*div_line_char = *DEF_DIV_LINE_CHAR;
 		return;
 	}
 
 	char *tmp = remove_quotes(opt);
 	if (!tmp) {
-		*div_line_char = '\0';
+		*div_line_char = *DEF_DIV_LINE_CHAR;
 		return;
 	}
 
@@ -1509,7 +1509,7 @@ read_config(void)
 
 	int ret = -1;
 	max_name_len = UNSET;
-	*div_line_char = '\0';
+	*div_line_char = *DEF_DIV_LINE_CHAR;
 	char line[PATH_MAX + 15];
 
 	while (fgets(line, (int)sizeof(line), config_fp)) {
