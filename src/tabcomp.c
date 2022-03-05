@@ -690,7 +690,9 @@ get_query_str(int *fzf_offset)
 	switch(cur_comp_type) {
 	case TCMP_DESEL: {
 		char *sp = strrchr(rl_line_buffer, ' ');
-		query = (sp && *(++sp)) ? sp : rl_line_buffer;
+		if (!sp || !*(sp++))
+			return (char *)NULL;
+		query = sp;
 		*fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 3;
 		}
 		break;
@@ -1534,8 +1536,6 @@ DISPLAY_MATCHES:
 			if (limit != 1 && (limit * max == term_cols))
 				limit--;
 
-			/* Avoid a possible floating exception. If max > screenwidth,
-			   limit will be 0 and a divide-by-zero fault will result. */
 			if (limit == 0)
 			  limit = 1;
 

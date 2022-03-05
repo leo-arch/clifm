@@ -1525,17 +1525,29 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 		index[0] = '\0';
 
 	struct stat attr;
-	size_t elen = strlen(ent);
+	char *p = ent, *q = ent, t[PATH_MAX];
+
+	if (*q == '~') {
+		if (!*(q + 1) || (*(q + 1) == '/' && !*(q + 2)))
+			strncpy(t, workspaces[cur_ws].path, PATH_MAX);
+		else
+			snprintf(t, PATH_MAX, "%s/%s", workspaces[cur_ws].path, q + 2);
+		p = t;
+	}
+
+	size_t elen = strlen(p);
 	int rem_slash = 0;
 	/* Remove the ending slash: lstat() won't take a symlink to dir as
 	 * a symlink (but as a dir), if the file name ends with a slash */
-	if (ent[elen - 1] == '/') {
-		ent[elen - 1] = '\0';
+	if (p[elen - 1] == '/') {
+		p[elen - 1] = '\0';
 		rem_slash = 1;
 	}
-	int ret = lstat(ent, &attr);
+
+	int ret = lstat(p, &attr);
+//	int ret = lstat(ent, &attr);
 	if (rem_slash)
-		ent[elen - 1] = '/';
+		p[elen - 1] = '/';
 
 	char *wname = (char *)NULL;
 	size_t wlen = wc_xstrlen(ent);

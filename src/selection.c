@@ -84,8 +84,14 @@ save_sel(void)
 
 	size_t i;
 	for (i = 0; i < sel_n; i++) {
-		fputs(sel_elements[i], fp);
+		int __free = 0;
+		char *p = home_tilde(sel_elements[i], &__free);
+		if (!p)
+			continue;
+		fputs(p, fp);
 		fputc('\n', fp);
+		if (__free == 1)
+			free(p);
 	}
 
 	fclose(fp);
@@ -554,8 +560,13 @@ print_selected_files(int print_header, int print_total)
 
 	size_t t = tab_offset, i;
 	tab_offset = 0;
-	for (i = 0; i < sel_n; i++)
-		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
+	for (i = 0; i < sel_n; i++) {
+		int __free = 0;
+		char *p = home_tilde(sel_elements[i], &__free);
+		colors_list(p ? p : sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
+		if (__free == 1)
+			free(p);
+	}
 	tab_offset = t;
 
 	if (print_total == 1) {
