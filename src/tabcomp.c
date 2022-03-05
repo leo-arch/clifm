@@ -1372,10 +1372,11 @@ AFTER_USUAL_COMPLETION:
 #ifndef _NO_HIGHLIGHT
 			if (highlight && !wrong_cmd) {
 				size_t k, l = 0;
+				size_t _start = (*replacement == '\\' && *(replacement + 1) == '~') ? 1 : 0;
 				char *cc = cur_color;
 				fputs("\x1b[?25l", stdout);
 				char t[PATH_MAX];
-				for (k = 0; replacement[k]; k++) {
+				for (k = _start; replacement[k]; k++) {
 					rl_highlight(replacement, k, SET_COLOR);
 					if (replacement[k] < 0) {
 						t[l] = replacement[k];
@@ -1398,10 +1399,16 @@ AFTER_USUAL_COMPLETION:
 				if (cur_color)
 					fputs(cur_color, stdout);
 			} else {
-				rl_insert_text(replacement);
+				char *q = (*replacement == '\\' && *(replacement + 1) == '~')
+						? replacement + 1 : replacement;
+				rl_insert_text(q);
+				rl_redisplay();
 			}
 #else
-			rl_insert_text(replacement);
+			char *q = (*replacement == '\\' && *(replacement + 1) == '~')
+					? replacement + 1 : replacement;
+			rl_insert_text(q);
+			rl_redisplay();
 #endif /* !_NO_HIGHLIGHT */
 			rl_end_undo_group();
 		}

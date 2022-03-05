@@ -84,14 +84,8 @@ save_sel(void)
 
 	size_t i;
 	for (i = 0; i < sel_n; i++) {
-		int __free = 0;
-		char *p = home_tilde(sel_elements[i], &__free);
-		if (!p)
-			continue;
-		fputs(p, fp);
+		fputs(sel_elements[i], fp);
 		fputc('\n', fp);
-		if (__free == 1)
-			free(p);
 	}
 
 	fclose(fp);
@@ -109,10 +103,13 @@ select_file(char *file)
 	if (file[flen - 1] == '/')
 		file[flen - 1] = '\0';
 
+	int __free = 0;
+	char *p = home_tilde(file, &__free);
+
 	/* Check if the selected element is already in the selection box */
 	j = (int)sel_n;
 	while (--j >= 0) {
-		if (*file == *sel_elements[j] && strcmp(sel_elements[j], file) == 0) {
+		if (*p == *sel_elements[j] && strcmp(sel_elements[j], p) == 0) {
 			exists = 1;
 			break;
 		}
@@ -121,7 +118,7 @@ select_file(char *file)
 	if (!exists) {
 		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2)
 											* sizeof(char *));
-		sel_elements[sel_n] = savestring(file, strlen(file));
+		sel_elements[sel_n] = savestring(p, strlen(p));
 		sel_n++;
 		sel_elements[sel_n] = (char *)NULL;
 		new_sel++;
@@ -130,6 +127,8 @@ select_file(char *file)
 		    PROGRAM_NAME, file);
 	}
 
+	if (__free == 1)
+		free(p);
 	return new_sel;
 }
 
@@ -560,13 +559,8 @@ print_selected_files(int print_header, int print_total)
 
 	size_t t = tab_offset, i;
 	tab_offset = 0;
-	for (i = 0; i < sel_n; i++) {
-		int __free = 0;
-		char *p = home_tilde(sel_elements[i], &__free);
-		colors_list(p ? p : sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
-		if (__free == 1)
-			free(p);
-	}
+	for (i = 0; i < sel_n; i++)
+		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
 	tab_offset = t;
 
 	if (print_total == 1) {
