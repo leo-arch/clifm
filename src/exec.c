@@ -161,8 +161,13 @@ run_and_refresh(char **cmd)
 		n++;
 	} else {
 		if (new_name) {
-			tcmd[n] = savestring(new_name, strlen(new_name));
+			p = (char *)NULL;
+			if (*new_name == '~')
+				p = tilde_expand(new_name);
+			char *q = p ? p : new_name;
+			tcmd[n] = savestring(q, strlen(q));
 			free(new_name);
+			free(p);
 			n++;
 		}
 	}
@@ -175,7 +180,7 @@ run_and_refresh(char **cmd)
 	free(tcmd);
 
 	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+		return ret;
 
 	/* Error messages are printed by launch_execve() itself */
 
@@ -214,18 +219,19 @@ run_in_foreground(pid_t pid)
 		} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
 			/* Program terminated normally, but returned a
 			 * non-zero status. Error codes should be printed by the
-			 * program itself */
+			 * child process */
 			return WEXITSTATUS(status);
 		} else {
 			/* The program didn't terminate normally. In this case too,
-			 * error codes should be printed by the program */
+			 * error codes should be printed by the child process */
 			return EXCRASHERR;
 		}
 	} else {
 		/* waitpid() failed */
+		int ret = errno;
 		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
 		    strerror(errno));
-		return errno;
+		return ret;
 	}
 
 	return EXIT_FAILURE; /* Never reached */
@@ -345,8 +351,9 @@ launch_execve(char **cmd, int bg, int xflags)
 
 	pid_t pid = fork();
 	if (pid < 0) {
+		int ret = errno;
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
-		return errno;
+		return ret;
 	} else if (pid == 0) {
 		if (!bg) {
 			/* If the program runs in the foreground, reenable signals

@@ -1574,8 +1574,7 @@ parse_input_str(char *str)
 			}
 
 			for (i = 0; i < sel_n; i++) {
-				/* Escape selected file names and copy them into tmp
-				 * array */
+				/* Escape selected file names and copy them into tmp array */
 				char *esc_str = escape_str(sel_elements[i]);
 				if (esc_str) {
 					sel_array[j] = savestring(esc_str, strlen(esc_str));
@@ -1952,9 +1951,7 @@ parse_input_str(char *str)
 				}
 
 				for (i = 0; i < globbuf.gl_pathc; i++) {
-					/* Do not match "." or ".." */
-					if (strcmp(globbuf.gl_pathv[i], ".") == 0
-					|| strcmp(globbuf.gl_pathv[i], "..") == 0)
+					if (SELFORPARENT(globbuf.gl_pathv[i]))
 						continue;
 
 					/* Escape the globbed file name and copy it */

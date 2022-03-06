@@ -1212,7 +1212,7 @@ copy_function(char **args)
 	free(tcmd);
 
 	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+		return ret;
 
 	if (copy_n_rename) { /* vv */
 		char **tmp = (char **)xnmalloc(sel_n + 3, sizeof(char *));
