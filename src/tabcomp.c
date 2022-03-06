@@ -623,7 +623,7 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 static inline size_t
 store_completions(char **matches, FILE *fp)
 {
-	int no_file_comp = 0, free_path = 0;
+	int no_file_comp = 0;/* free_path = 0; */
 	if (cur_comp_type == TCMP_TAGS_S || cur_comp_type == TCMP_TAGS_U
 	|| cur_comp_type == TCMP_SORT || cur_comp_type == TCMP_BOOKMARK
 	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_NET
@@ -674,8 +674,8 @@ store_completions(char **matches, FILE *fp)
 
 		if (*entry)
 			write_comp_to_file(entry, color, &fp);
-		if (free_path == 1)
-			free(_path);
+/*		if (free_path == 1)
+			free(_path); */
 	}
 
 	return i;
