@@ -418,10 +418,8 @@ print_tips(int all)
 		"'br *.txt'",
 		"Need no more tips? Disable this feature in the configuration "
 		"file",
-#ifndef __OpenBSD__
 		"Need root privileges? Launch a new instance of CliFM as root "
 		"running the 'X' command",
-#endif
 #ifdef __linux__
 		"Manage removable devices via the 'media' command",
 #endif
