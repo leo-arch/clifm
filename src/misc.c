@@ -496,27 +496,11 @@ print_tips(int all)
 		TIPS[rand() % (int)tipsn]);
 }
 
-#if defined(__HAIKU__) || defined(__OpenBSD__)
-static inline int
-new_instance_not_available(const char *dir, const int sudo, const char *s)
-{
-	UNUSED(dir); UNUSED(sudo);
-	fprintf(stderr, _("%s: This function is not available on %s\n"),
-			PROGRAM_NAME, s);
-	return EXIT_FAILURE;
-}
-#endif
-
 /* Check whether the conditions to run the new_instance function are
  * fulfilled */
 static inline int
 check_new_instance_init_conditions(const char *dir, const int sudo)
 {
-#if defined(__HAIKU__)
-	return new_instance_not_available(dir, sudo, "Haiku");
-#elif defined(__OpenBSD__)
-	return new_instance_not_available(dir, sudo, "OpenBSD");
-#else
 	if (!term) {
 		UNUSED(dir); UNUSED(sudo);
 		fprintf(stderr, _("%s: Default terminal not set. Use the "
@@ -532,54 +516,33 @@ check_new_instance_init_conditions(const char *dir, const int sudo)
 	}
 
 	return EXIT_SUCCESS;
-#endif
 }
-
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
-/* Get absolute path of executable name of itself */
-static inline char *
-get_self(void)
-{
-#if defined(__linux__)
-	char *self = realpath("/proc/self/exe", NULL);
-	if (!self) {
-#elif defined(__FreeBSD__) || defined(__NetBSD__)
-	const int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
-	char *self = malloc(PATH_MAX);
-	size_t len = PATH_MAX;
-
-	if (!self || sysctl(mib, 4, self, &len, NULL, 0) == -1) {
-#endif
-		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-		return (char *)NULL;
-	}
-
-	return self;
-}
-#endif
 
 /* Just check that DIR exists and is a directory */
 static inline int
 check_dir(char **dir, char **self, char **_sudo)
 {
+	int ret = EXIT_SUCCESS;
 	struct stat attr;
 	if (stat(*dir, &attr) == -1) {
+		ret = errno;
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *dir, strerror(errno));
 		goto END;
 	}
 
 	if (!S_ISDIR(attr.st_mode)) {
 		fprintf(stderr, _("%s: %s: Not a directory\n"), PROGRAM_NAME, *dir);
+		ret = ENOTDIR;
 		goto END;
 	}
 
-	return EXIT_SUCCESS;
+	return ret;
 
 END:
 	free(*self);
 	free(*dir);
 	free(*_sudo);
-	return EXIT_FAILURE;
+	return ret;
 }
 
 /* Construct absolute path for DIR */
@@ -603,7 +566,7 @@ get_path_dir(char **dir)
 /* Get command to be executed by the new_instance function, only if
  * TERM (global) contains spaces. Otherwise, new_instance will try
  * TERM -e */
-static inline char **
+static char **
 get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 {
 	if (!strchr(term, ' '))	return (char **)NULL;
@@ -645,7 +608,7 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 
 /* Launch a new instance using CMD. If CMD is NULL, try TERM -e
  * Returns the exit status of this execution */
-static inline int
+static int
 launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int sudo)
 {
 	int ret = 0; 
@@ -688,11 +651,11 @@ new_instance(char *dir, int sudo)
 		return EXIT_FAILURE;
 
 	if (!dir)
-		return EXIT_FAILURE;
+		return EINVAL;
 
 	char *_sudo = (char *)NULL;
 	if (sudo && !(_sudo = get_sudo_path()))
-		return EXIT_FAILURE;
+		return errno;
 
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
@@ -702,21 +665,22 @@ new_instance(char *dir, int sudo)
 		return EXIT_FAILURE;
 	}
 
-	char *self = (char *)NULL;
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
-	self = get_self();
-#endif
+	char *self = get_cmd_path(PNL);
 	if (!self) {
 		free(_sudo);
-		return EXIT_FAILURE;
+		free(deq_dir);
+		int ret = errno;
+		fprintf(stderr, _("%s: %s: Not in PATH\n"), PROGRAM_NAME, PNL);
+		return ret;
 	}
 
-	if (check_dir(&deq_dir, &self, &_sudo) == EXIT_FAILURE)
-		return EXIT_FAILURE;
+	int ret = check_dir(&deq_dir, &self, &_sudo);
+	if (ret != EXIT_SUCCESS)
+		return ret;
 
 	char *path_dir = get_path_dir(&deq_dir);
 	char **cmd = get_cmd(path_dir, _sudo, self, sudo);
-	int ret = launch_new_instance_cmd(&cmd, &self, &_sudo, &path_dir, sudo);
+	ret = launch_new_instance_cmd(&cmd, &self, &_sudo, &path_dir, sudo);
 
 	if (ret != EXIT_SUCCESS)
 		fprintf(stderr, _("%s: Error lauching new instance\n"), PROGRAM_NAME);

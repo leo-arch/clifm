@@ -666,7 +666,10 @@ store_completions(char **matches, FILE *fp)
 			&& cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_BACKDIR) {
 				_path = strrchr(matches[i], '/');
 				entry = (_path && *(++_path)) ? _path : matches[i];
-			}
+			} /*else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) {
+				_path = home_tilde(matches[i], &free_path);
+				entry = _path ? _path : matches[i];
+			} */
 		}
 
 		if (*entry)

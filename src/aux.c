@@ -609,8 +609,11 @@ count_dir(const char *dir, int pop)
 char *
 get_cmd_path(const char *cmd)
 {
-	if (!cmd || !*cmd)
+	errno = 0;
+	if (!cmd || !*cmd) {
+		errno = EINVAL;
 		return (char *)NULL;
+	}
 
 	char *cmd_path = (char *)NULL;
 
@@ -631,13 +634,13 @@ get_cmd_path(const char *cmd)
 
 	size_t i = 0;
 	for (; i < path_n; i++) { /* Check each path in PATH */
-		/* Append cmd to each path and check if it exists and is
-		 * executable */
+	/* Append cmd to each path and check if it exists and is executable */
 		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i], cmd); /* NOLINT */
 		if (access(cmd_path, X_OK) == 0)
 			return cmd_path;
 	}
 
+	errno = ENOENT;
 	free(cmd_path);
 	return (char *)NULL;
 }

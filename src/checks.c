@@ -206,10 +206,12 @@ get_sudo_path(void)
 {
 	char *p = getenv("CLIFM_SUDO_CMD");
 	char *sudo = get_cmd_path(p ? p : DEF_SUDO_CMD);
+	int ret = errno;
 
 	if (!sudo) {
-		fprintf(stderr, _("%s: %s: No such file or directory\n"),
-				PROGRAM_NAME, p ? p : DEF_SUDO_CMD);
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, p ? p : DEF_SUDO_CMD,
+				strerror(ENOENT));
+		errno = ret;
 		return (char *)NULL;
 	}
 
