@@ -25,7 +25,7 @@
 #include "helpers.h"
 
 #ifdef __HAIKU__
-#include <stdint.h>
+# include <stdint.h>
 #endif
 #include <glob.h>
 #include <stdio.h>
@@ -34,7 +34,7 @@
 #include <time.h>
 #include <wchar.h>
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
-#include <wordexp.h>
+# include <wordexp.h>
 #endif
 #include <limits.h>
 #include <dirent.h>

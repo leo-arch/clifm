@@ -103,13 +103,10 @@ select_file(char *file)
 	if (file[flen - 1] == '/')
 		file[flen - 1] = '\0';
 
-	int __free = 0;
-	char *p = home_tilde(file, &__free);
-
 	/* Check if the selected element is already in the selection box */
 	j = (int)sel_n;
 	while (--j >= 0) {
-		if (*p == *sel_elements[j] && strcmp(sel_elements[j], p) == 0) {
+		if (*file == *sel_elements[j] && strcmp(sel_elements[j], file) == 0) {
 			exists = 1;
 			break;
 		}
@@ -118,7 +115,7 @@ select_file(char *file)
 	if (!exists) {
 		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2)
 											* sizeof(char *));
-		sel_elements[sel_n] = savestring(p, strlen(p));
+		sel_elements[sel_n] = savestring(file, strlen(file));
 		sel_n++;
 		sel_elements[sel_n] = (char *)NULL;
 		new_sel++;
@@ -127,8 +124,6 @@ select_file(char *file)
 		    PROGRAM_NAME, file);
 	}
 
-	if (__free == 1)
-		free(p);
 	return new_sel;
 }
 

@@ -42,7 +42,7 @@
 #include "exec.h"
 #include "misc.h"
 #ifndef _NO_HIGHLIGHT
-#include "highlight.h"
+# include "highlight.h"
 #endif
 
 #ifdef RL81
