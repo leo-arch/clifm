@@ -479,7 +479,7 @@ set_long_attribs(const int n, const struct stat *attr)
 {
 	file_info[n].uid = attr->st_uid;
 	file_info[n].gid = attr->st_gid;
-	file_info[n].ltime = (time_t)attr->st_mtim.tv_sec;
+	file_info[n].ltime = (time_t)attr->st_mtime;
 	file_info[n].mode = attr->st_mode;
 	file_info[n].rdev = attr->st_rdev;
 
@@ -1924,7 +1924,7 @@ list_dir(void)
 			file_info[n].mode = attr.st_mode;
 
 			if (long_view) {
-				file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
+				file_info[n].ltime = (time_t)attr.st_mtime;
 			}
 		} else {
 			file_info[n].type = DT_UNKNOWN;
