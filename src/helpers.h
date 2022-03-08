@@ -45,6 +45,9 @@
 # ifdef __OpenBSD__
 #  define _BSD_SOURCE
 # endif
+# ifdef __APPLE__
+#  define _DARWIN_C_SOURCE
+# endif
 #endif
 
 /* Setting GLOB_BRACE to ZERO disables support for GLOB_BRACE if not
@@ -82,6 +85,8 @@
 # include <sys/param.h>
 # include <sys/syslimits.h>
 # define BSD_KQUEUE
+#elif defined(__APPLE__)
+# include <sys/types.h>
 #endif /* __linux__ */
 
 #include "init.h"
