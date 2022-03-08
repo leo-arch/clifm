@@ -1526,6 +1526,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 
 	struct stat attr;
 	char *p = ent, *q = ent, t[PATH_MAX];
+	char *eln_color = *index == '?' ? mi_c : el_c;
 
 	if (*q == '~') {
 		if (!*(q + 1) || (*(q + 1) == '/' && !*(q + 2)))
@@ -1555,7 +1556,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 		wname = truncate_wname(ent);
 
 	if (ret == -1) {
-		fprintf(stderr, "%s%s%s%s%-*s%s%s", el_c, index, df_c,
+		fprintf(stderr, "%s%s%s%s%-*s%s%s", eln_color, index, df_c,
 		    uf_c, pad, wname ? wname : ent, df_c, new_line ? "\n" : "");
 		free(index);
 		free(wname);
@@ -1652,7 +1653,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	default: color = no_c; break;
 	}
 
-	printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, color,
+	printf("%s%s%s%s%s%s%s%-*s", eln_color, index, df_c, color,
 	    (wname ? wname : ent) + tab_offset, df_c,
 	    new_line ? "\n" : "", pad, "");
 	free(index);
