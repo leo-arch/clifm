@@ -260,7 +260,6 @@ search_glob(char **comm, int invert)
 
 	/* We have matches */
 	int sfiles = 0, found = 0;
-
 	size_t flongest = 0;
 
 	/* We need to store pointers to matching file names in array of
@@ -307,12 +306,9 @@ search_glob(char **comm, int invert)
 			if (sfiles == -1)
 				goto SCANDIR_ERROR;
 
-			pfiles = (char **)xnmalloc((size_t)sfiles + 1,
-			    sizeof(char *));
-			eln = (int *)xnmalloc((size_t)sfiles + 1,
-			    sizeof(int));
-			files_len = (size_t *)xnmalloc((size_t)sfiles + 1,
-			    sizeof(size_t));
+			pfiles = (char **)xnmalloc((size_t)sfiles + 1, sizeof(char *));
+			eln = (int *)xnmalloc((size_t)sfiles + 1, sizeof(int));
+			files_len = (size_t *)xnmalloc((size_t)sfiles + 1, sizeof(size_t));
 
 			int k, l;
 			for (k = 0; k < sfiles; k++) {
@@ -392,19 +388,25 @@ search_glob(char **comm, int invert)
 			/* If no search_path */
 			/* If searching in CWD, take into account the file's ELN
 			 * when calculating its legnth */
-			size_t j;
+			size_t j, f = 0;
 			for (j = 0; file_info[j].name; j++) {
 
 				if (*pfiles[found] != *file_info[j].name
 				|| strcmp(pfiles[found], file_info[j].name) != 0)
 					continue;
 
+				f = 1;
 				eln[found] = (int)(j + 1);
 				files_len[found] = strlen(file_info[j].name)
 						+ (size_t)file_info[j].eln_n + 1;
 
 				if (files_len[found] > flongest)
 					flongest = files_len[found];
+			}
+
+			if (f == 0) {
+				eln[found] = -1;
+				files_len[found] = 0;
 			}
 
 			found++;
@@ -441,7 +443,7 @@ SCANDIR_ERROR:
 		else
 			last_column = 0;
 
-		colors_list(pfiles[i], (eln[i] && eln[i] != -1) ? eln[i] : 0,
+		colors_list(pfiles[i], eln[i] ? eln[i] : 0,
 		    (last_column || i == (found - 1)) ? 0 :
 		    (int)(flongest - files_len[i]) + 1,
 		    (last_column || i == found - 1) ? 1 : 0);
