@@ -394,22 +394,23 @@ get_properties(char *filename, const int dsize)
 	if (colorize == 1 && props_color == 1)
 		printf("%s", cend);
 
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__) || defined(__APPLE__)
 	printf(_("\tBlocks: %s%lld%s"), cbold, attr.st_blocks, cend);
 #else
 	printf(_("\tBlocks: %s%ld%s"), cbold, attr.st_blocks, cend);
 #endif
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+|| defined(__APPLE__)
 	printf(_("\tIO Block: %s%d%s"), cbold, attr.st_blksize, cend);
 #else
 	printf(_("\tIO Block: %s%ld%s"), cbold, attr.st_blksize, cend);
 #endif
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__) || defined(__APPLE__)
 	printf(_("\tInode: %s%llu%s\n"), cbold, attr.st_ino, cend);
 #else
 	printf(_("\tInode: %s%zu%s\n"), cbold, attr.st_ino, cend);
 #endif
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__) || defined(__APPLE__)
 	printf(_("Device: %s%d%s"), cbold, attr.st_dev, cend);
 #else
 	printf(_("Device: %s%zu%s"), cbold, attr.st_dev, cend);
