@@ -546,7 +546,7 @@ media_menu(int mode)
 	if (mode == MEDIA_MOUNT)
 		list_unmounted_devs();
 
-#elif defined(__FreeBSD__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 	struct statfs *fslist;
 	mp_n = (size_t)getmntinfo(&fslist, MNT_NOWAIT);
 #elif defined(__NetBSD__)
@@ -567,7 +567,8 @@ media_menu(int mode)
 		return EXIT_SUCCESS;
 	}
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+|| defined(__APPLE__)
 	int i, j;
 	for (i = j = 0; i < (int)mp_n; i++) {
 		/* Do not list all mountpoints, but only those corresponding

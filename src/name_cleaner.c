@@ -43,7 +43,7 @@
 #include "file_operations.h"
 #include "history.h"
 #ifdef __HAIKU__
-#include "listing.h"
+# include "listing.h"
 #endif
 #include "misc.h"
 #include "cleaner_table.h"
@@ -652,9 +652,7 @@ CONFIRM:
 			FUNC_NAME, total_rename);
 	}
 
-#ifndef __HAIKU__
-	return exit_status;
-#else
+#if defined(__HAIKU__) || defined(__APPLE__)
 	if (exit_status == EXIT_FAILURE)
 		return EXIT_FAILURE;
 	if (autols) {
@@ -662,7 +660,9 @@ CONFIRM:
 		return list_dir();
 	}
 	return EXIT_SUCCESS;
-#endif /* __HAIKU__ */
+#else
+	return exit_status;
+#endif /* __HAIKU__ || __APPLE__ */
 }
 
 #else

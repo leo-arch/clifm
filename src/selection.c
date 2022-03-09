@@ -34,11 +34,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #if defined(__linux__) || defined(__HAIKU__) || defined(__APPLE__)
-#ifdef __TINYC__
+# ifdef __TINYC__
 /* Silence a tcc warning. We don't use CTRL anyway */
-#undef CTRL
-#endif
-#include <sys/ioctl.h>
+#  undef CTRL
+# endif
+# include <sys/ioctl.h>
 #endif
 #include <limits.h>
 

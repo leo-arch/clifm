@@ -445,7 +445,7 @@ mime_import(char *file)
 			PROGRAM_NAME);
 	return (-1);
 #endif
-	/* If not in X, exit) */
+	/* If not in X, exit */
 	if (!(flags & GUI)) {
 		fprintf(stderr, _("%s: Nothing was imported. No graphical "
 				"environment found\n"), PROGRAM_NAME);

@@ -583,8 +583,10 @@ open_file(char *file)
 		exit_status = run_mime(file);
 #else
 		/* Fallback to (xdg-)open */
-#ifdef __HAIKU__
+#if defined(__HAIKU__)
 		char *cmd[] = {"open", file, NULL};
+#elif defined(__APPLE__)
+		char *cmd[] = {"/usr/bin/open", file, NULL};
 #else
 		char *cmd[] = {"xdg-open", file, NULL};
 #endif /* __HAIKU__ */
@@ -860,7 +862,7 @@ create_file(char **cmd)
 		free(cmd);
 	}
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__APPLE__)
 	if (exit_status == EXIT_SUCCESS && autols && file_in_cwd) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
@@ -1267,7 +1269,7 @@ copy_function(char **args)
 	&& (!args[0][2] || args[0][2] == ' '))
 		clear_selbox();
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__APPLE__)
 	if (autols) {
 		free_dirlist();
 		list_dir();
@@ -1341,7 +1343,7 @@ remove_file(char **args)
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__APPLE__)
 	else {
 		if (cwd && autols && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0) {
@@ -1612,7 +1614,7 @@ bulk_rename(char **args)
 	}
 	close_fstream(fp, fd);
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__APPLE__)
 	if (autols) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
@@ -1728,7 +1730,7 @@ batch_link(char **args)
 		}
 	}
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__APPLE__)
 	if (exit_status == EXIT_SUCCESS && autols) {
 		free_dirlist();
 
