@@ -203,7 +203,7 @@ normalize_path(char *src, size_t src_len)
 
 		case 2:
 			if (ptr[0] == '.' && ptr[1] == '.') {
-#if !defined(__HAIKU__) && !defined(_BE_POSIX)
+#if !defined(__HAIKU__) && !defined(_BE_POSIX) && !defined(__APPLE__)
 				const char *slash = memrchr(res, '/', res_len);
 #else
 				const char *slash = strrchr(res, '/');
