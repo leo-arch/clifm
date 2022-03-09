@@ -739,8 +739,8 @@ check_cpu_os(void)
 	exit(EXIT_FAILURE);
 #endif
 
-#if !defined(__linux__) && !defined(__FreeBSD__) \
-&& !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__HAIKU__)
+#if !defined(__linux__) && !defined(__FreeBSD__) && !defined(__NetBSD__) \
+&& !defined(__OpenBSD__) && !defined(__HAIKU__) && !defined(__APPLE__)
 	fprintf(stderr, _("%s: Unsupported operating system\n"), PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #endif

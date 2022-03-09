@@ -260,7 +260,7 @@ get_properties(char *filename, const int dsize)
 	nlink_t link_n = attr.st_nlink;
 
 	/* Get modification time */
-	time_t time = (time_t)attr.st_mtim.tv_sec;
+	time_t time = (time_t)attr.st_mtime;
 	struct tm tm;
 	localtime_r(&time, &tm);
 	char mod_time[128];
@@ -325,7 +325,7 @@ get_properties(char *filename, const int dsize)
 
 	/* Stat information */
 	/* Last access time */
-	time = (time_t)attr.st_atim.tv_sec;
+	time = (time_t)attr.st_atime;
 	localtime_r(&time, &tm);
 	char access_time[128];
 
@@ -337,7 +337,7 @@ get_properties(char *filename, const int dsize)
 	}
 
 	/* Last properties change time */
-	time = (time_t)attr.st_ctim.tv_sec;
+	time = (time_t)attr.st_ctime;
 	localtime_r(&time, &tm);
 	char change_time[128];
 	if (time) {
