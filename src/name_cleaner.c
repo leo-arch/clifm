@@ -652,7 +652,7 @@ CONFIRM:
 			FUNC_NAME, total_rename);
 	}
 
-#if defined(__HAIKU__) || defined(__APPLE__)
+#if defined(__HAIKU__)// || defined(__APPLE__)
 	if (exit_status == EXIT_FAILURE)
 		return EXIT_FAILURE;
 	if (autols) {

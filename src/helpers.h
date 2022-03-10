@@ -87,6 +87,9 @@
 # define BSD_KQUEUE
 #elif defined(__APPLE__)
 # include <sys/types.h>
+# include <sys/event.h>
+# include <sys/time.h>
+# define BSD_KQUEUE
 #endif /* __linux__ */
 
 #include "init.h"

@@ -862,7 +862,7 @@ create_file(char **cmd)
 		free(cmd);
 	}
 
-#if defined(__HAIKU__) || defined(__APPLE__)
+#if defined(__HAIKU__)// || defined(__APPLE__)
 	if (exit_status == EXIT_SUCCESS && autols && file_in_cwd) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
@@ -1269,7 +1269,7 @@ copy_function(char **args)
 	&& (!args[0][2] || args[0][2] == ' '))
 		clear_selbox();
 
-#if defined(__HAIKU__) || defined(__APPLE__)
+#if defined(__HAIKU__)// || defined(__APPLE__)
 	if (autols) {
 		free_dirlist();
 		list_dir();
@@ -1343,7 +1343,7 @@ remove_file(char **args)
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
-#if defined(__HAIKU__) || defined(__APPLE__)
+#if defined(__HAIKU__)// || defined(__APPLE__)
 	else {
 		if (cwd && autols && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0) {
@@ -1730,7 +1730,7 @@ batch_link(char **args)
 		}
 	}
 
-#if defined(__HAIKU__) || defined(__APPLE__)
+#if defined(__HAIKU__)// || defined(__APPLE__)
 	if (exit_status == EXIT_SUCCESS && autols) {
 		free_dirlist();
 

@@ -1790,7 +1790,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'd' && (!comm[0][1] || strcmp(comm[0], "dup") == 0))
 		exit_code = dup_file(comm);
 
-#if defined(__HAIKU__) || defined(__APPLE__)
+#if defined(__HAIKU__)// || defined(__APPLE__)
 	else if ((*comm[0] == 'c' || *comm[0] == 'r' || *comm[0] == 'm'
 	|| *comm[0] == 't' || *comm[0] == 'u' || *comm[0] == 'l')
 	&& (strcmp(comm[0], "cp") == 0 || strcmp(comm[0], "rm") == 0
