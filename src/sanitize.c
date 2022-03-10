@@ -115,7 +115,11 @@ xsecure_env(const int mode)
 	fprintf(stderr, "%s: secure-env: This feature is not available "
 		"on NetBSD\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
-#endif /* __NetBSD__ */
+#elif __APPLE__
+	fprintf(stderr, "%s: secure-env: This feature is not available "
+		"on MacOS\n", PROGRAM_NAME);
+	exit(EXIT_FAILURE);
+#endif /* __APPLE__ */
 
 	char *display = (char *)NULL,
 		 *wayland_display = (char *)NULL,

@@ -440,8 +440,12 @@ get_mime(char *file)
 static int
 mime_import(char *file)
 {
-#ifdef __HAIKU__
+#if defined(__HAIKU__)
 	fprintf(stderr, "%s: Importing MIME definitions is not supported on Haiku\n",
+			PROGRAM_NAME);
+	return (-1);
+#elif defined(__APPLE__)
+	fprintf(stderr, "%s: Importing MIME definitions is not supported on MacOS\n",
 			PROGRAM_NAME);
 	return (-1);
 #endif
