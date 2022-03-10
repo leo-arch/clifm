@@ -30,8 +30,12 @@
 #include <errno.h>
 #include <sys/stat.h>
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-#include <sys/mount.h>
-#include <sys/sysctl.h>
+# include <sys/mount.h>
+# include <sys/sysctl.h>
+#elif defined(__APPLE__)
+# include <sys/param.h>
+# include <sys/ucred.h>
+# include <sys/mount.h>
 #endif
 #include <dirent.h>
 

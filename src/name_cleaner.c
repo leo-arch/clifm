@@ -42,7 +42,7 @@
 #include "exec.h"
 #include "file_operations.h"
 #include "history.h"
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__APPLE__)
 # include "listing.h"
 #endif
 #include "misc.h"

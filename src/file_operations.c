@@ -707,7 +707,7 @@ create_file(char **cmd)
 	log_function(NULL);
 
 	int exit_status = EXIT_SUCCESS;
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__APPLE__)
 	int file_in_cwd = 0;
 #endif
 	int free_cmd = 0;
@@ -795,7 +795,7 @@ create_file(char **cmd)
 			"Trying with '%s' instead\n"), PROGRAM_NAME, old_name, cmd[i]);
 		}
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__APPLE__)
 		/* If at least one filename lacks a slash (or it is the only and
 		 * last char, in which case we have a directory in CWD), we are
 		 * creating a file in CWD, and thereby we need to update the screen */
