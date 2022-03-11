@@ -262,11 +262,11 @@ set_start_path(void)
 	return EXIT_SUCCESS;
 }
 
-/* Get the system data directory (usually /usr/share) */
+/* Get the system data directory (usually /usr/share), first from
+ * CLIFM_DATADIR, defined in the Makefile, and then from standard paths */
 void
 get_data_dir(void)
 {
-	/* Let's try to get DATADIR from CLIFM_DATADIR, defined in the Makefile */
 #ifdef CLIFM_DATADIR
 	struct stat a;
 	char q[PATH_MAX];
@@ -302,36 +302,7 @@ get_data_dir(void)
 		}
 	}
 
-/*	if (data_dir)
-		return; */
 	return;
-
-	/* If not found, try to get DATADIR from executable's path */
-/*	data_dir = get_cmd_path(PNL);
-
-	if (!data_dir)
-		return;
-
-	size_t j = strlen(data_dir),
-		   count = 0;
-
-	while (--j >= 0) {
-		if (data_dir[j] == '/')
-			count++;
-		if (count == 2) {
-			data_dir[j] = '\0';
-			break;
-		}
-	}
-
-	char tmp[PATH_MAX];
-	snprintf(tmp, PATH_MAX - 1, "%s/share/%s", data_dir, PNL);
-	if (stat(tmp, &attr) == EXIT_SUCCESS) {
-		snprintf(tmp, PATH_MAX - 1, "%s/share", data_dir);
-		data_dir = (char *)xrealloc(data_dir, (strlen(tmp) + 1) * sizeof(char));
-		strcpy(data_dir, tmp);
-		return;
-	} */
 }
 
 void
