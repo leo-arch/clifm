@@ -1530,7 +1530,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 
 	if (*q == '~') {
 		if (!*(q + 1) || (*(q + 1) == '/' && !*(q + 2)))
-			strncpy(t, user.home, PATH_MAX);
+			strncpy(t, user.home, PATH_MAX - 1);
 		else
 			snprintf(t, PATH_MAX, "%s/%s", user.home, q + 2);
 		p = t;

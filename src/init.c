@@ -58,6 +58,10 @@
 #include "autocmds.h"
 #include "sanitize.h"
 
+/* Macros to be able to consult the value of a macro string */
+#define STRINGIZE_(x) #x
+#define STRINGIZE(x) STRINGIZE_(x)
+
 int
 get_sys_shell(void)
 {
@@ -262,7 +266,19 @@ set_start_path(void)
 void
 get_data_dir(void)
 {
-	/* First try standard values for DATADIR */
+	/* Let's try to get DATADIR from CLIFM_DATADIR, defined in the Makefile */
+#ifdef CLIFM_DATADIR
+	struct stat a;
+	char q[PATH_MAX];
+	snprintf(q, PATH_MAX, "%s/%s", STRINGIZE(CLIFM_DATADIR), PNL);
+	if (stat(q, &a) != -1) {
+		data_dir = (char *)xnmalloc(strlen(q) + 1, sizeof(char));
+		strcpy(data_dir, q);
+		return;
+	}
+#endif
+
+	/* Alternatively, try standard values for DATADIR */
 	char *data_dirs[] = {
 		"/usr/share",
 		"/usr/local/share",
