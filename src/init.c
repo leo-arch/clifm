@@ -262,7 +262,7 @@ set_start_path(void)
 	return EXIT_SUCCESS;
 }
 
-/* Get the system data directory (usually /usr/share), first from
+/* Get the system data directory (usually /usr/local/share), first from
  * CLIFM_DATADIR, defined in the Makefile, and then from standard paths */
 void
 get_data_dir(void)
