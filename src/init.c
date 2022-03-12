@@ -270,9 +270,9 @@ get_data_dir(void)
 #ifdef CLIFM_DATADIR
 	struct stat a;
 	char p[PATH_MAX];
-	snprintf(p, "%s/%s", STRINGIZE(CLIFM_DATADIR), PNL);
+	snprintf(p, PATH_MAX, "%s/%s", STRINGIZE(CLIFM_DATADIR), PNL);
 	if (stat(p, &a) != -1) {
-		data_dir = (char *)xnmalloc(strlen(STRINGIZE(CLIFM_DATADIR)), sizeof(char));
+		data_dir = (char *)xnmalloc(strlen(STRINGIZE(CLIFM_DATADIR)) + 1, sizeof(char));
 		strcpy(data_dir, STRINGIZE(CLIFM_DATADIR));
 	}
 #endif
