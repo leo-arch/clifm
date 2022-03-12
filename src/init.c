@@ -269,13 +269,12 @@ get_data_dir(void)
 {
 #ifdef CLIFM_DATADIR
 	struct stat a;
-	size_t len = strlen(STRINGIZE(CLIFM_DATADIR) + strlen(PNL) + 2);
-	data_dir = (char *)xnmalloc(len, sizeof(char));
-	sprintf(data_dir, "%s/%s", STRINGIZE(CLIFM_DATADIR), PNL);
-	if (stat(data_dir, &a) != -1)
-		return;
-	free(data_dir);
-	data_dir = (char *)NULL;
+	char p[PATH_MAX];
+	snprintf(p, "%s/%s", STRINGIZE(CLIFM_DATADIR), PNL);
+	if (stat(p, &a) != -1) {
+		data_dir = (char *)xnmalloc(strlen(STRINGIZE(CLIFM_DATADIR)), sizeof(char));
+		strcpy(data_dir, STRINGIZE(CLIFM_DATADIR));
+	}
 #endif
 
 	/* Alternatively, try standard values for DATADIR */
