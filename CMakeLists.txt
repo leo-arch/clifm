@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(CLIFM)
 
-add_compile_defintions(CLIFM_DATADIR=${CMAKE_INSTALL_PREFIX})
+add_compile_defintions(CLIFM_DATADIR=${CMAKE_INSTALL_PREFIX}/share)
 
 file(GLOB SRC_FILES src/*.c)
 file(GLOB HDR_FILES src/*.h)
