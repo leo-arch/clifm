@@ -257,19 +257,18 @@ xstrverscmp(const char *s1, const char *s2)
 size_t
 wc_xstrlen(const char *restrict str)
 {
-	size_t len, _len;
+	size_t len;
 	wchar_t *const wbuf = (wchar_t *)len_buf;
 
 	/* Convert multi-byte to wide char */
-/*	_len = mbstowcs(wbuf, str, CMD_LEN_MAX); */
-	_len = mbstowcs(wbuf, str, ARG_MAX);
-	int p = wcswidth(wbuf, _len);
-	if (p != -1)
-		len = (size_t)p;
-	else /* A non-printable character was found */
-		len = 0;
-
-	return len;
+	len = mbstowcs(wbuf, str, ARG_MAX);
+	if (len == (size_t)-1) /* A non-printable character was found */
+		return 0;
+	int w = wcswidth(wbuf, len);
+	if (w != -1)
+		return (size_t)w;
+	/* A non-printable character was found */
+	return 0;
 }
 
 /* Truncate an UTF-8 string at width N. Returns the difference beetween
@@ -1709,7 +1708,8 @@ parse_input_str(char *str)
 
 					if (esc_str) {
 						if (file_info[j].dir &&
-						    file_info[j].name[file_info[j].len - 1] != '/') {
+						file_info[j].name[file_info[j].len
+						? file_info[j].len - 1 : 0] != '/') {
 							substr[i] = (char *)xrealloc(substr[i],
 							    (strlen(esc_str) + 2) * sizeof(char));
 							sprintf(substr[i], "%s/", esc_str);
