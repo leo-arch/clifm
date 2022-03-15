@@ -262,12 +262,12 @@ wc_xstrlen(const char *restrict str)
 
 	/* Convert multi-byte to wide char */
 	len = mbstowcs(wbuf, str, ARG_MAX);
-	if (len == (size_t)-1) /* A non-printable character was found */
+	if (len == (size_t)-1) /* Invalid multi-byte sequence found */
 		return 0;
 	int w = wcswidth(wbuf, len);
 	if (w != -1)
 		return (size_t)w;
-	/* A non-printable character was found */
+	/* A non-printable wide char was found */
 	return 0;
 }
 
