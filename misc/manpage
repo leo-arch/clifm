@@ -2362,7 +2362,7 @@ CliFM returns the exit status of the last executed command:
 \fB1\fR		Error
 
 .SH CONFORMING TO
-CliFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 compliant as well. If not, only two non-POSIX functions are used: \fBstatx\fR(2) (Linux specific), to get files birth time, and \fBstrverscmp\fR(3) (a GNU extension), to list files by version.
+CliFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 compliant as well. If not, just a single non-POSIX function is used: \fBstatx\fR(2) (Linux specific), to get files birth time.
 
 .SH BUGS AND FEATURE REQUESTS
 Report at <https://github.com/leo\-arch/clifm/issues>
