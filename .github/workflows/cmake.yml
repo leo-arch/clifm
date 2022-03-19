@@ -19,10 +19,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: l2dy/setup-macports@v1
 
     - name: Install dependencies
-      run: sudo port -N install cmake pkgconfig readline gettext libmagic
+      run: |
+        curl -fsSLO "https://github.com/l2dy/clifm-ci-files/releases/download/v0.0.2/clifm-bootstrap.mpkg"
+        sudo installer -pkg clifm-bootstrap.mpkg -target /
+        echo "/opt/local/bin" >> $GITHUB_PATH
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
