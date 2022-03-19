@@ -169,6 +169,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ✔️ **Changelog**
 * `version 1.4.1`:
+  - **NEW**: New keybinding: `Ctrl-Alt-l` to toggle max file name length on/off
   - **NEW**: [MacOS port](https://github.com/leo-arch/clifm/wiki/Introduction#d-macos). Thanks to [l2dy](https://github.com/l2dy) for this!
   - **NEW**: [Color variables support](https://github.com/leo-arch/clifm/wiki/Customization#color-variables)
   - **NEW**: [Remove files in bulk using a text editor](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
