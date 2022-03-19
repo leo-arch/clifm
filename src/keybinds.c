@@ -302,6 +302,35 @@ find_key(char *function)
 	return (char *)NULL;
 }
 
+int rl_toggle_max_filename_len(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	static int mnl_bk = 0, flag = 0;
+	if (flag == 0) {
+		mnl_bk = max_name_len;
+		flag = 1;
+	}
+
+	if (mnl_bk != max_name_len)
+		max_name_len = mnl_bk;
+	else
+		max_name_len = UNSET;
+
+	if (autols) {
+		if (clear_screen)
+			CLEAR;
+		free_dirlist();
+//		putchar('\n');
+		list_dir();
+	}
+
+	rl_reset_line_state();
+	return EXIT_SUCCESS;
+}
+
 /* Prepend sudo/doas to the current input string */
 static int
 rl_prepend_sudo(int count, int key)
@@ -1795,6 +1824,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("plugin3"), rl_plugin3);
 		rl_bind_keyseq(find_key("plugin4"), rl_plugin4);
 
+		rl_bind_keyseq(find_key("toggle-max-name-len"), rl_toggle_max_filename_len);
 		rl_bind_keyseq(find_key("quit"), rl_quit);
 	}
 

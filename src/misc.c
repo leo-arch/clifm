@@ -474,6 +474,7 @@ print_tips(int all)
 		"Create multiple links at once using the 'bl' command",
 		"Oragnize your files using tags. Try 'tag --help'",
 		"Remove files in bulk using a text editor with 'rr'",
+		"Press 'Ctrl-Alt-l' to toggle max file name length on/off",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
