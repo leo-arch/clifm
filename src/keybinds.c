@@ -1911,6 +1911,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-m", rl_mountpoints);
 		rl_bind_keyseq("\\M-s", rl_selbox);
 
+		rl_bind_keyseq("\\C-\\M-l", rl_toggle_max_filename_len);
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
