@@ -953,6 +953,8 @@ CliFM offers three kinds of file filters:
 .TP
 \fBM\-,:\fR Toggle list only directories on/off
 .TP
+\fBC-M-l:\fR Toggle max file name length on/off
+.TP
 \fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
 \fBM\-t:\fR Clear program messages
