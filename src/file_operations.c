@@ -539,6 +539,7 @@ clear_selbox(void)
 	for (i = 0; i < sel_n; i++)
 		free(sel_elements[i]);
 	sel_n = 0;
+	total_sel_size = 0;
 	save_sel();	
 }
 
