@@ -357,7 +357,7 @@ extern int watch;
 #define SET_COLOR    1
 #define INFORM_COLOR 0
 
-#define MB_LEN_MAX 16
+#define __MB_LEN_MAX 16
 
 #define TMP_FILENAME ".clifmXXXXXX"
 

@@ -523,7 +523,7 @@ rl_accept_suggestion(int count, int key)
 	if (!suggestions || rl_point != rl_end || !suggestion_buf) {
 		if (rl_point < rl_end) {
 			/* Just move the cursor forward one column */
-			int mlen = mblen(rl_line_buffer + rl_point, MB_LEN_MAX);
+			int mlen = mblen(rl_line_buffer + rl_point, __MB_LEN_MAX);
 			rl_point += mlen;
 		}
 		return EXIT_SUCCESS;

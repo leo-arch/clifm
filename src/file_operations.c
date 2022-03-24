@@ -37,7 +37,7 @@
 #include <dirent.h>
 
 #ifndef _NO_ARCHIVING
-#include "archives.h"
+# include "archives.h"
 #endif
 #include "aux.h"
 #include "checks.h"

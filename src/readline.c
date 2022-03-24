@@ -95,7 +95,7 @@ xdelete(void)
 		return;
 
 	int bk = rl_point;
-	int mlen = mblen(rl_line_buffer + rl_point, MB_LEN_MAX);
+	int mlen = mblen(rl_line_buffer + rl_point, __MB_LEN_MAX);
 
 	rl_point = bk;
 	char *s = rl_copy_text(rl_point + mlen, rl_end);
