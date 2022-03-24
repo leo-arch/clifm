@@ -387,12 +387,12 @@ print_tips(int all)
 		"Bypass the resource opener specifying an application: '12 "
 		"leafpad'",
 		"Open a file and send it to the background running '24&'",
-		"Create a custom prompt editing the configuration file",
+		"Create a custom prompt editing the color scheme file ('cs edit')",
 		"Customize color codes via 'cs edit' command (F6)",
 		"Open the bookmarks manager by just pressing 'Alt-b'",
 		"Chain commands using ; and &&: 's 2 7-10; r sel'",
 		"Add emojis to the prompt by copying them to the Prompt line "
-		"in the configuration file",
+		"in the color scheme file ('cs edit')",
 		"Create a new profile running 'pf add PROFILE' or 'clifm -P "
 		"PROFILE'",
 		"Switch profiles using 'pf set PROFILE'",
