@@ -158,25 +158,28 @@ xstrverscmp(const char *s1, const char *s2)
 	const unsigned char *p1 = (const unsigned char *)s1;
 	const unsigned char *p2 = (const unsigned char *)s2;
 
-	if (*p1 == '.') {
-		if (*(p1 + 1) == '#')
-			p1 += 2;
-		else
+	/* Jump to first alphanumeric character in both strings */
+	while (*p1) {
+		if (!_ISDIGIT(*p1) && !_ISALPHA(*p1) && (*p1 < 'A' || *p1 > 'Z')) {
 			p1++;
-	} else {
-		if (*p1 == '#' || *p1 == '~')
-			p1++;
+			continue;
+		}
+		break;
 	}
 
-	if (*p2 == '.') {
-		if (*(p2 + 1) == '#')
-			p2 += 2;
-		else
+	if (!*p1)
+		p1 = (const unsigned char *)s1;
+
+	while (*p2) {
+		if (!_ISDIGIT(*p2) && !_ISALPHA(*p2) && (*p2 < 'A' || *p2 > 'Z')) {
 			p2++;
-	} else {
-		if (*p2 == '#' || *p2 == '~')
-			p2++;
+			continue;
+		}
+		break;
 	}
+
+	if (!*p2)
+		p2 = (const unsigned char *)s2;
 
 	/* Symbol(s)    0       [1-9]   others
 	 Transition   (10) 0  (01) d  (00) x   */
@@ -214,7 +217,7 @@ xstrverscmp(const char *s1, const char *s2)
 		p2++;
 	}
 
-	/* Hint: '0' is a digit too. */
+	/* Hint: '0' is a digit too */
 	state = S_N + ((c1 == '0') + (_ISDIGIT(c1) != 0));
 
 	while ((diff = c1 - c2) == 0) {
