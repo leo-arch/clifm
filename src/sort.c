@@ -290,7 +290,7 @@ entrycmp(const void *a, const void *b)
 		st = SNAME;
 
 	switch (st) {
-	case SSIZE: ret = sort_by_size(pa, pb);	break;
+	case STSIZE: ret = sort_by_size(pa, pb);	break;
 
 	case SATIME: /* fallthrough */
 	case SBTIME: /* fallthrough */
@@ -376,7 +376,7 @@ print_sort_method(void)
 	case SNONE:	puts(_("none")); break;
 	case SNAME:
 		printf(_("name %s\n"), (sort_reverse) ? "[rev]" : ""); break;
-	case SSIZE:
+	case STSIZE:
 		printf(_("size %s\n"), (sort_reverse) ? "[rev]" : ""); break;
 	case SATIME:
 		printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");	break;

@@ -265,7 +265,7 @@ extern int watch;
 /* Sort macros */
 #define SNONE      0
 #define SNAME      1
-#define SSIZE      2
+#define STSIZE     2
 #define SATIME     3
 #define SBTIME     4
 #define SCTIME     5
