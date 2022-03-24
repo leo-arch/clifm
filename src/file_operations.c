@@ -222,7 +222,14 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 		for (i = 0; i < (size_t)*n; i++) {
 			if (SELFORPARENT((*a)[i]->d_name))
 				continue;
+#ifndef _DIRENT_HAVE_D_TYPE
+			struct stat a;
+			if (stat((*a)[i]->d_name, &a) == -1)
+				continue;
+			print_file(fp, (*a)[i]->d_name, get_dt(a.st_mode));
+#else
 			print_file(fp, (*a)[i]->d_name, (*a)[i]->d_type);
+#endif /* !_DIRENT_HAVE_D_TYPE */
 		}
 	}
 
