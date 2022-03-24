@@ -264,7 +264,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_WPROMPT_STR "\\[\\e[0m\\]\\[\\e[00;02;31m\\](!) > "
 #define DEF_WPROMPT_STR_NO_COLOR "(!) > "
 
-/* These options should work with FZF 0.17.5 or later */
+/* These options should work with FZF 0.18.0 or later */
 #define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:4,\
 hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,\
 left:abort --inline-info --layout=reverse-list"

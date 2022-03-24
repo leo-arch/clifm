@@ -1492,7 +1492,7 @@ If using the FZF mode for TAB completion (see below), you can operate only on \f
 .TP
 \fBTAB completion\fR
 .TP
-There are two modes for TAB completion: \fIstandard\fR (interface provided by readline), and \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.17.5 or later). To enable the \fIfzf\fR mode (the standard mode is used by default), you can either use the \fI--fzftab\fR command line option, set \fITabCompletionMode\fR to \fIfzf\fR in the configuration file, or set \fBCLIFM_USE_FZF\fR environment variable to either \fI1\fR or \fItrue\fR. Example: 'export CLIFM_USE_FZF=true'.
+There are two modes for TAB completion: \fIstandard\fR (interface provided by readline), and \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later). To enable the \fIfzf\fR mode (the standard mode is used by default), you can either use the \fI--fzftab\fR command line option, set \fITabCompletionMode\fR to \fIfzf\fR in the configuration file, or set \fBCLIFM_USE_FZF\fR environment variable to either \fI1\fR or \fItrue\fR. Example: 'export CLIFM_USE_FZF=true'.
 .TP
 If using the \fIfzf\fR mode, the completions interface could be customized using the \fIFzfTabOptions\fR option in the color scheme file. --height, --margin, +i/-i, --read0, --query, and --ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
 .TP
