@@ -1,3 +1,68 @@
+1.5.1
+* Fix crash when built via makepkg on Archlinux
+
+1.5 - Willy
+* Better handle non-alphanumeric chars when sorting
+* `Crtl-Alt-q`: Toggle max file name len on/off
+* Define `DATADIR` at compile time via the Makefile
+* MacOS port!
+* New instance function is available to all supported platforms
+* Force the use of colors via `CLIFM_FORCE_COLOR` environment variable
+* Accept more word delimiters for accept first suggested word and delete last word functions
+* `DirIconsColor` renamed `DirIconColor`in the color scheme file
+* Color variables support for the color scheme file
+* Light theme included
+* Suckless mode compilation via `CLIFM_SUCKLESS`
+* Improved theming support: interface stuff (including colors, prompt, warning prompt, dividing line, and FZF options) is defined now in the color scheme file.
+* Customizable color codes for files properties
+* Remove files in bulk via a text editor
+* `Etiqueta`, a files tagging system
+* `--sort` accepts strings as well as numeric values
+* Improved format for the properties string in long mode
+* Command line switch (`--apparent-size`) to use apparent sizes intead of actual device usage
+* Disk usage analyzer mode via `-t, --disk-usage-analyzer`
+* New command: `stats`, to print files statistics
+* New prompt: Security scanner
+* New escape codes for the prompt (files statistics)
+* Allow the warning prompt to understand escape sequences
+* Colorize command history ELN's
+* Add color and correctly PAD ELN's in directory history screen
+* Correctly pad ELN's in bookmarks screen
+* Replace the plugins-helper check in all plugins by a simple environment variable check: `CLIFM_PLUGINS_HELPER`
+* `--version` just prints the version number
+
+* Wrong size for selected files after moving previous selected files
+* Error when getting length of file name containing invalid multi-byte sequence
+* The interactive rename function fails with ~/ file names
+* `CLIFM_STAT_TRASH` reporting wrong number of trashed files
+* Wrong cursor position when suggestion is longer than `NAME_MAX`
+* Crash when `ExtColors` holds a really long string
+* Some entries not working in the interactive help plugin.
+* Wrong FZF offset with dynamic prompt changes (e.g. exit code)
+* When suggesting file names, the last matching one is suggested instead of the first one, as expected
+* Attempting to use suggestions in terminals that do not support it
+* Attempting to use colors in terminals that do not support color
+* Wrongly restoring regular after switching workspaces
+* `exit` internal command triggers the warning prompt
+* Color for all workspaces in the prompt is cyan when `--no-color` is passed 
+* Missing new line char after getting media info
+* Invalid value passed to the `st` function results in sorting by `none`
+* Conflict between mime parameters(`edit`, `info`, and `import`) if there are files in CWD named likewise
+* Suggestions are colored in the Linux console even with `--no-color`
+* Double error message when invalid color scheme is passed via command line
+* Suggestions for shell built-in are colored even with `--no-color`
+* Gibberish when no date info in properties function
+* Inconsistently using apparent and real sizes
+* Root indicator printed in color even with `--no-color`
+* Fix mem leak when unrecognized escape code in prompt lines
+* Fix mem leak if duplicated entries in the config file
+* Conditional execution fails with fused parameters
+* Deletion time for trashed files cannot be read by other trash implementations
+* Wrong mountpoint for mounted archives
+* Wrong completions in FZF tab when no parameter is passed to the jump command
+* Wrong completion/suggestion offset for strings starting with chars that need to be quoted
+* Hidden files wrongly sort in version sort
+
 1.4 - Alma
 * Little descriptive message for the temp file of the bulk rename function
 * Colorize files properties (long view and 'pr' command)
