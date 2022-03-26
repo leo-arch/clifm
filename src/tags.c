@@ -107,7 +107,9 @@ print_tagged_file(char *name, const char *tag)
 	char dir[PATH_MAX], tmp[PATH_MAX];
 	*tmp = '\0';
 	snprintf(dir, PATH_MAX, "%s/%s/%s", tags_dir, tag, name);
-	realpath(dir, tmp);
+	char *ret = realpath(dir, tmp);
+	if (!ret)
+		return;
 
 	if (!*tmp) {
 		printf(_("%s (error resolving link target)\n"), name);

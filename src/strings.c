@@ -47,7 +47,7 @@
 #include "sort.h"
 #include "tags.h"
 
-char len_buf[ARG_MAX] __attribute__((aligned));
+char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 
 /* states: S_N: normal, S_I: comparing integral part, S_F: comparing
            fractionnal parts, S_Z: idem but with leading Zeroes only */
@@ -1063,8 +1063,8 @@ expand_tag(char ***args, const int tag_index)
 		snprintf(filename, sizeof(filename), "%s/%s", dir, t[i]->d_name);
 		char rpath[PATH_MAX];
 		*rpath = '\0';
-		realpath(filename, rpath);
-		if (!*rpath)
+		char *ret = realpath(filename, rpath);
+		if (!ret || !*rpath)
 			continue;
 		char *esc_str = escape_str(rpath);
 		char *q = esc_str ? esc_str : rpath;

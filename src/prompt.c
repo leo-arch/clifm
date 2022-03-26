@@ -891,6 +891,17 @@ log_and_record(char *input)
 	if (record_cmd(input))
 		add_to_cmdhist(input);
 }
+/*
+void
+print_right_prompt(void)
+{
+//	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+	get_cursor_position(0, 1);
+	char *p = decode_prompt(right_prompt);
+	printf("%*s", term_cols, p);
+	printf("\x1b[%d;%dH", currow, curcol);
+	free(p);
+} */
 
 /* Print the prompt and return the string entered by the user (to be
  * parsed later by parse_input_str()) */
@@ -909,6 +920,9 @@ prompt(void)
 	 * of the last prompt line, needed to calculate FZF offset. This
 	 * length might vary if the prompt contains dynamic values */
 	prompt_offset = UNSET;
+
+/*	if (right_prompt && *right_prompt)
+		print_right_prompt(); */
 
 	/* Print the prompt and get user input */
 	char *input = (char *)NULL;

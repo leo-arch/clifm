@@ -2191,8 +2191,9 @@ reset_variables(void)
 
 	free(opener);
 	free(encoded_prompt);
+/*	free(right_prompt); */
 	free(term);
-	opener = encoded_prompt = term = (char *)NULL;
+	opener = encoded_prompt /*= right_prompt*/ = term = (char *)NULL;
 
 	int i = (int)cschemes_n;
 	while (--i >= 0)

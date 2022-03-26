@@ -1028,6 +1028,7 @@ extern char
 	*profile_file,
 	*quote_chars,
 	*remotes_file,
+/*	*right_prompt, */
 	*sel_file,
 	*stdin_tmp_dir,
 #ifndef _NO_SUGGESTIONS

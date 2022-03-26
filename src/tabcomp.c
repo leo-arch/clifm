@@ -589,7 +589,7 @@ reinsert_slashes(char *str)
 static inline void
 write_comp_to_file(char *entry, const char *color, FILE **fp)
 {
-	char *c = (char *)NULL, tmp[MAX_COLOR];
+	char *c = (char *)NULL, tmp[MAX_COLOR + 4];
 	if (cur_comp_type == TCMP_TAGS_F) {
 		size_t len = strlen(entry);
 		if (entry[len - 1] == '/')
@@ -601,7 +601,7 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 		if (lstat(p ? p : entry, &a) != -1) {
 			c = fzftab_color(entry, &a);
 			if (*c != _ESC) {
-				snprintf(tmp, MAX_COLOR, "\x1b[%sm", c);
+				snprintf(tmp, sizeof(tmp), "\x1b[%sm", c);
 				c = tmp;
 			}
 		}

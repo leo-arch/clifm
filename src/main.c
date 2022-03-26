@@ -286,6 +286,7 @@ char
 	*profile_file = (char *)NULL,
 	*quote_chars = (char *)NULL,
 	*remotes_file = (char *)NULL,
+/*	*right_prompt = (char *)NULL, */
 	*sel_file = (char *)NULL,
 	*stdin_tmp_dir = (char *)NULL,
 #ifndef _NO_SUGGESTIONS

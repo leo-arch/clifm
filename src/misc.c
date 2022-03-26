@@ -1139,6 +1139,7 @@ free_stuff(void)
 	free(alt_profile);
 	free_bookmarks();
 	free(encoded_prompt);
+/*	free(right_prompt); */
 	free_dirlist();
 	free(opener);
 	free(wprompt_str);

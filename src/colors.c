@@ -1102,6 +1102,17 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			continue;
 		}
 
+/*		else if (*line == 'R' && strncmp(line, "RightPrompt=", 12) == 0) {
+			char *p = strchr(line, '=');
+			if (!p || !*p || !*(++p))
+				continue;
+			char *q = remove_quotes(p);
+			if (!q)
+				continue;
+			free(right_prompt);
+			right_prompt = savestring(q, strlen(q));
+		} */
+
 		else if (*line == 'W'
 		&& strncmp(line, "WarningPromptStr=", 17) == 0) {
 			char *p = strchr(line, '=');

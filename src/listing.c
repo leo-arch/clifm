@@ -1336,7 +1336,11 @@ run_dir_cmd(const int mode)
 
 	char buf[PATH_MAX];
 	*buf = '\0';
-	fgets(buf, sizeof(buf), fp);
+	char *ret = fgets(buf, sizeof(buf), fp);
+	if (!ret) {
+		fclose(fp);
+		return;
+	}
 
 	fclose(fp);
 
