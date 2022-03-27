@@ -1,7 +1,7 @@
-1.5.1
+1.5.1 - Willy
 * Fix crash when built via makepkg on Archlinux
 
-1.5 - Willy
+1.5 - Nano
 * Better handle non-alphanumeric chars when sorting
 * `Crtl-Alt-q`: Toggle max file name len on/off
 * Define `DATADIR` at compile time via the Makefile
