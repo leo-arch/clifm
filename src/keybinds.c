@@ -1157,6 +1157,7 @@ rl_quit(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
+	puts("\n");
 	/* Reset terminal attributes before exiting. Without this line, the program
 	 * quits, but terminal input is not printed to STDOUT */
 	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
