@@ -31,25 +31,47 @@
 #only if longer than PathMax (a value defined in the configuration file).
 # \z: Exit code of the last executed command. :) if success and :( in case
 #of error
-# \$ '#', if the effective user ID is 0, and '$' otherwise
+# \$: '#', if the effective user ID is 0, and '$' otherwise
 # \nnn: The character whose ASCII code is the octal value nnn
 # \\: A backslash
 # \[: Begin a sequence of non-printing characters. This is mostly used to 
 #add color to the prompt line
 # \]: End a sequence of non-printing characters
 
+# The following files statistics escape sequences are available as well:
+
+# \D: Amount of sub-directories in the current directory
+# \R: Amount of regular files in the current directory
+# \X: Amount of executable files in the current directory
+# \.: Amount of hidden files in the current directory
+# \U: Amount of SUID files in the current directory
+# \G: Amount of SGID files in the current directory
+# \F: Amount of FIFO/pipe files in the current directory
+# \K: Amount of socket files in the current directory
+# \B: Amount of block device files in the current directory
+# \C: Amount of character device files in the current directory
+# \x: Amount of files with capabilities in the current directory
+# \L: Amount of symbolic links in the current directory
+# \o: Amount of broken symbolic links in the current directory
+# \M: Amount of multi-link files in the current directory
+# \E: Amount of files with extended attributes in the current directory
+# \O: Amount of other-writable files in the current directory
+# \*: Amount of files with the sticky bit set in the current directory
+# \?: Amount of files of unknown file type in the current directory
+# \!: Amount of unstatable files in the current directory
+
 # Unicode characters could be inserted by directly pasting the
 # corresponding char, or by inserting its hex code
 # ('echo -ne "paste_your_char" | hexdump -C')
 
 # To use any of the below prompts just copy the corresponding lines to the
-# configuration file
+# color scheme file ('cs edit')
 
 # If using a non-default prompt, you might want to set 'PromptStyle' in the
 # configuration file to 'custom' to prevent the automatic insertion of
-# workspace number, last exit code, stealth mode, trash, and selected files
+# workspace number, last exit code, stealth mode, trash, selected files
 # indicators, etc.
-# This information however is available as environment variables. Constult
+# This information however is available as environment variables. Consult
 # the manpage for more information
 
 ### Default ###
@@ -73,8 +95,8 @@
 #WarningPromptStr="\[\e[00;02;31m\]\$(!) > "
 
 ### Curves ###
-#Prompt="\[\e[01;32m\]╭─\[\e[0m\][\S]\[\e[01;32m\]─\[\e[0m\](\u:\H)\[\e[01;32m\]─\[\e[0m\][\[\e[00;36m\]\w\[\e[0m\]]\n\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;34m\]\λ\[\e[0m\] "
-#WarningPromptStr="\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;31m\]\x\[\e[00;02;31m\] "
+#Prompt="\[\e[01;32m\]╭─\[\e[0m\][\S]\[\e[01;32m\]─\[\e[0m\](\u:\H)\[\e[01;32m\]─\[\e[0m\][\[\e[00;36m\]\w\[\e[0m\]]\n\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;34m\]λ\[\e[0m\] "
+#WarningPromptStr="\[\e[0m\]\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;31m\]\x\[\e[00;02;31m\] "
 
 ### Fireplace ###
 #Prompt="\[\e[01;38;5;124m\]╭─\[\e[00;38;5;124m\]\[\e[00;37;48;5;124m\]\A \[\e[00;38;5;124;43m\]\[\e[00;30;43m\] \u:\H \[\e[00;33;48;5;124m\]\[\e[00;37;48;5;124m\] \w \[\e[00;38;5;124m\]\[\e[0m\]\n\[\e[01;38;5;124m\]╰─\[\e[0m\] "
