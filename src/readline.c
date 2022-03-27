@@ -457,8 +457,8 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char));
 		if (result > 0 && result == sizeof(unsigned char)) {
-			if (control_d_exits && c == 4) /* Ctrl-d */
-				rl_quit(0, 0);
+			if (c == 4 && control_d_exits == 1) /* Ctrl-d */
+					rl_quit(0, 0);
 
 			if (rl_end == 0)
 				fzf_open_with = 0;

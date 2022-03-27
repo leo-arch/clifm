@@ -730,7 +730,6 @@ database (via the 'j' command)\
 \n     --case-sens-path-comp\t Enable case sensitive path completion\
 \n     --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
 \n     --color-scheme=NAME\t Use color scheme NAME\
-\n     --control-d-exits\t\t Use Control-d to exit from CliFM\
 \n     --cwd-in-title\t\t Print current directory in terminal window title\
 \n     --disk-usage\t\t Show disk usage (free/total)\
 \n     --enable-logs\t\t Enable program logs\
@@ -754,6 +753,7 @@ directory base name (if \\z is used in the prompt)\
 \n     --no-clear-screen\t\t Do not clear the screen when listing directories\
 \n     --no-color\t\t\t Disable colors \
 \n     --no-columns\t\t Disable columned files listing\
+\n     --no-control-d-exit\t\t Do not allow exit on EOF (Control-d)\
 \n     --no-file-cap\t\t Do not check files capabilities when listing files\
 \n     --no-file-ext\t\t Do not check files extension when listing files\
 \n     --no-files-counter\t\t Disable the files counter for directories\

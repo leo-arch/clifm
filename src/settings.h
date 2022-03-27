@@ -189,7 +189,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_CLEAR_SCREEN 1
 #define DEF_COLOR_SCHEME "default"
 #define DEF_COLORS 1
-#define DEF_CONTROL_D_EXITS 0
+#define DEF_CONTROL_D_EXITS 1
 #define DEF_CP_CMD CP_CP
 #define DEF_CUR_WS 0
 #define DEF_CWD_IN_TITLE 0

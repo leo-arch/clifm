@@ -1108,7 +1108,7 @@ external_arguments(int argc, char **argv)
 	    {"no-file-cap", no_argument, 0, 38},
 	    {"no-file-ext", no_argument, 0, 39},
 	    {"no-follow-symlink", no_argument, 0, 40},
-		{"control-d-exits", no_argument, 0, 41},
+		{"no-control-d-exit", no_argument, 0, 41},
 		{"int-vars", no_argument, 0, 42},
 		{"fzftab", no_argument, 0, 43},
 		{"no-warning-prompt", no_argument, 0, 44},
@@ -1277,7 +1277,7 @@ RUN:
 		case 38: xargs.check_cap = check_cap = 0; break;
 		case 39: xargs.check_ext = check_ext = 0; break;
 		case 40: xargs.follow_symlinks = follow_symlinks = 0; break;
-		case 41: xargs.control_d_exits = control_d_exits = 1; break;
+		case 41: xargs.control_d_exits = control_d_exits = 0; break;
 		case 42: xargs.int_vars = int_vars = 1; break;
 #ifndef _NO_FZF
 		case 43: {
