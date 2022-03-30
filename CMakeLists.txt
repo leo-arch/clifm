@@ -71,16 +71,16 @@ install(FILES plugins/BFG.cfg plugins/kbgen.c plugins/plugins-helper DESTINATION
 
 install(FILES misc/actions.cfm misc/keybindings.cfm misc/mimelist.cfm misc/nets.cfm misc/prompts.cfm misc/readline.cfm misc/clifmrc DESTINATION "${_PROG_DATADIR}")
 
-install (DIRECTORY misc/colors functions DESTINATION "${_PROG_DATADIR}")
+install(DIRECTORY misc/colors functions DESTINATION "${_PROG_DATADIR}")
 
-install (FILES "misc/${BIN}.desktop" DESTINATION "${_DESKTOPPREFIX}")
-install (FILES "misc/logo/${BIN}.svg" DESTINATION "${_DESKTOPICONPREFIX}")
+install(FILES "misc/${BIN}.desktop" DESTINATION "${_DESKTOPPREFIX}")
+install(FILES "misc/logo/${BIN}.svg" DESTINATION "${_DESKTOPICONPREFIX}")
 
-install (FILES misc/manpage DESTINATION "${_MANDIR}" RENAME "${BIN}.1"
+install(FILES misc/manpage DESTINATION "${_MANDIR}" RENAME "${BIN}.1"
 	PERMISSIONS
 		OWNER_READ OWNER_WRITE
 		GROUP_READ
 		WORLD_READ)
 
-install (FILES misc/completions.bash DESTINATION "${_BASHDIR}" RENAME "${BIN}")
-install (FILES misc/completions.zsh DESTINATION "${_ZSHDIR}" RENAME "_${BIN}")
+install(FILES misc/completions.bash DESTINATION "${_BASHDIR}" RENAME "${BIN}")
+install(FILES misc/completions.zsh DESTINATION "${_ZSHDIR}" RENAME "_${BIN}")
