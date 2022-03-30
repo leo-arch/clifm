@@ -35,37 +35,52 @@ elseif(UNIX)
   )
 endif()
 
+set(BIN "clifm")
+set(_MANDIR "man/man1")
+set(_BASHDIR "share/bash-completion/completions")
+set(_ZSHDIR "share/zsh/site-functions")
+set(_DESKTOPPREFIX "share/applications")
+set(_DESKTOPICONPREFIX "share/icons/hicolor/scalable/apps")
+set(_PROG_DATADIR "share/${BIN}")
+
 install(DIRECTORY DESTINATION bin)
-install(DIRECTORY DESTINATION man/man1)
-install(DIRECTORY DESTINATION applications)
-install(DIRECTORY DESTINATION share/clifm)
-install(DIRECTORY DESTINATION share/icons/hicolor/scalable/apps)
-install(DIRECTORY DESTINATION share/zsh/site-functions)
-install(DIRECTORY DESTINATION share/bash-completion/completions)
+install(DIRECTORY DESTINATION share/man)
+install(DIRECTORY DESTINATION "${_MANDIR}")
+install(DIRECTORY DESTINATION "${_DESKTOPPREFIX}")
+install(DIRECTORY DESTINATION "${_PROG_DATADIR}")
+install(DIRECTORY DESTINATION share/icons)
+install(DIRECTORY DESTINATION share/icons/hicolor)
+install(DIRECTORY DESTINATION share/icons/scalable)
+install(DIRECTORY DESTINATION "${_DESKTOPICONPREFIX}")
+install(DIRECTORY DESTINATION "${_ZSHDIR}")
+install(DIRECTORY DESTINATION share/bash-completion)
+install(DIRECTORY DESTINATION share/zsh)
+install(DIRECTORY DESTINATION "${_ZSHDIR}")
+install(DIRECTORY DESTINATION "${_BASHDIR}")
 
-install(TARGETS clifm DESTINATION bin)
+install(TARGETS "${BIN}" DESTINATION bin)
 
-install(DIRECTORY plugins DESTINATION share/clifm
+install(DIRECTORY plugins DESTINATION "${_PROG_DATADIR}"
 	PATTERN "*.sh"
 		PERMISSIONS
 			OWNER_READ OWNER_WRITE OWNER_EXECUTE
 			GROUP_READ GROUP_EXECUTE
 			WORLD_READ WORLD_EXECUTE)
 
-install(FILES plugins/BFG.cfg plugins/kbgen.c plugins/plugins-helper DESTINATION share/clifm/plugins)
+install(FILES plugins/BFG.cfg plugins/kbgen.c plugins/plugins-helper DESTINATION "share/${BIN}/plugins")
 
-install(FILES misc/actions.cfm misc/keybindings.cfm misc/mimelist.cfm misc/nets.cfm misc/prompts.cfm misc/readline.cfm misc/clifmrc DESTINATION share/clifm)
+install(FILES misc/actions.cfm misc/keybindings.cfm misc/mimelist.cfm misc/nets.cfm misc/prompts.cfm misc/readline.cfm misc/clifmrc DESTINATION "${_PROG_DATADIR}")
 
-install (DIRECTORY misc/colors functions DESTINATION share/clifm)
+install (DIRECTORY misc/colors functions DESTINATION "${_PROG_DATADIR}")
 
-install (FILES misc/clifm.desktop DESTINATION share/applications)
-install (FILES misc/logo/clifm.svg DESTINATION share/icons/hicolor/scalable/apps)
+install (FILES "misc/${BIN}.desktop" DESTINATION "${_DESKTOPPREFIX}")
+install (FILES "misc/logo/${BIN}.svg" DESTINATION "${_DESKTOPICONPREFIX}")
 
-install (FILES misc/manpage DESTINATION share/man/man1 RENAME clifm.1
+install (FILES misc/manpage DESTINATION "${_MANDIR}" RENAME "${BIN}.1"
 	PERMISSIONS
 		OWNER_READ OWNER_WRITE
 		GROUP_READ
 		WORLD_READ)
 
-install (FILES misc/completions.bash DESTINATION share/bash-completion/completions RENAME clifm)
-install (FILES misc/completions.zsh DESTINATION share/zsh/site-functions RENAME _clifm)
+install (FILES misc/completions.bash DESTINATION "${_BASHDIR}" RENAME "${BIN}")
+install (FILES misc/completions.zsh DESTINATION "${_ZSHDIR}" RENAME "_${BIN}")
