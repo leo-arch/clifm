@@ -34,3 +34,38 @@ elseif(UNIX)
     magic
   )
 endif()
+
+install(DIRECTORY DESTINATION bin)
+install(DIRECTORY DESTINATION man/man1)
+install(DIRECTORY DESTINATION applications)
+install(DIRECTORY DESTINATION share/clifm)
+install(DIRECTORY DESTINATION share/icons/hicolor/scalable/apps)
+install(DIRECTORY DESTINATION share/zsh/site-functions)
+install(DIRECTORY DESTINATION share/bash-completion/completions)
+
+install(TARGETS clifm DESTINATION bin)
+
+install(DIRECTORY plugins DESTINATION share/clifm
+	PATTERN "*.sh"
+		PERMISSIONS
+			OWNER_READ OWNER_WRITE OWNER_EXECUTE
+			GROUP_READ GROUP_EXECUTE
+			WORLD_READ WORLD_EXECUTE)
+
+install(FILES plugins/BFG.cfg plugins/kbgen.c plugins/plugins-helper DESTINATION share/clifm/plugins)
+
+install(FILES misc/actions.cfm misc/keybindings.cfm misc/mimelist.cfm misc/nets.cfm misc/prompts.cfm misc/readline.cfm misc/clifmrc DESTINATION share/clifm)
+
+install (DIRECTORY misc/colors functions DESTINATION share/clifm)
+
+install (FILES misc/clifm.desktop DESTINATION share/applications)
+install (FILES misc/logo/clifm.svg DESTINATION share/icons/hicolor/scalable/apps)
+
+install (FILES misc/manpage DESTINATION share/man/man1 RENAME clifm.1
+	PERMISSIONS
+		OWNER_READ OWNER_WRITE
+		GROUP_READ
+		WORLD_READ)
+
+install (FILES misc/completions.bash DESTINATION share/bash-completion/completions RENAME clifm)
+install (FILES misc/completions.zsh DESTINATION share/zsh/site-functions RENAME _clifm)
