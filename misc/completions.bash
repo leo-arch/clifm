@@ -80,7 +80,6 @@ _clifm ()
         --case-sens-path-comp
         --cd-on-quit
         --color-scheme
-        --control-d-exits
         --cwd-in-title
         --disk-usage
         --enable-logs
@@ -99,6 +98,7 @@ _clifm ()
         --no-clear-screen
         --no-color
         --no-columns
+        --no-control-d-exit
         --no-file-cap
         --no-file-ext
         --no-files-counter
