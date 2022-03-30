@@ -42,6 +42,7 @@ set(_ZSHDIR "share/zsh/site-functions")
 set(_DESKTOPPREFIX "share/applications")
 set(_DESKTOPICONPREFIX "share/icons/hicolor/scalable/apps")
 set(_PROG_DATADIR "share/${BIN}")
+set(_PLUGINSDIR "${_PROG_DATADIR}/plugins")
 
 install(DIRECTORY DESTINATION bin)
 install(DIRECTORY DESTINATION share/man)
@@ -67,7 +68,7 @@ install(DIRECTORY plugins DESTINATION "${_PROG_DATADIR}"
 			GROUP_READ GROUP_EXECUTE
 			WORLD_READ WORLD_EXECUTE)
 
-install(FILES plugins/BFG.cfg plugins/kbgen.c plugins/plugins-helper DESTINATION "share/${BIN}/plugins")
+install(FILES plugins/BFG.cfg plugins/kbgen.c plugins/plugins-helper DESTINATION "${_PLUGINSDIR}")
 
 install(FILES misc/actions.cfm misc/keybindings.cfm misc/mimelist.cfm misc/nets.cfm misc/prompts.cfm misc/readline.cfm misc/clifmrc DESTINATION "${_PROG_DATADIR}")
 
