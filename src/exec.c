@@ -1347,8 +1347,12 @@ check_actions(char **args)
 	int i = (int)actions_n;
 	while (--i >= 0) {
 		if (*args[0] == *usr_actions[i].name
-		&& strcmp(args[0], usr_actions[i].name) == 0)
-			return run_action(usr_actions[i].value, args);
+		&& strcmp(args[0], usr_actions[i].name) == 0) {
+			setenv("CLIFM_PLUGIN_NAME", usr_actions[i].name, 1);
+			int ret = run_action(usr_actions[i].value, args);
+			unsetenv("CLIFM_PLUGIN_NAME");
+			return ret;
+		}
 	}
 
 	return (-1);
