@@ -435,6 +435,7 @@ create_actions_file(char *file)
 		"update=update.sh\n"
 		"wall=wallpaper_setter.sh\n"
 		"dragon=dragondrop.sh\n"
+		"fdups=fdups.sh\n"
 		"bn=batch_create.sh\n"
 		"+=finder.sh\n"
 		"++=jumper.sh\n"
