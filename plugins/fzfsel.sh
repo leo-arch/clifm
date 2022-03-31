@@ -92,7 +92,7 @@ if [ -n "$cmd" ]; then
 
 	if [ "$is_int" -eq 0 ] && ! [ "$(which "$cmd" 2>/dev/null)" ]; then
 		printf "CliFM: %s: Command not found\n" "$cmd" >&2
-		exit 1
+		exit 127
 	fi
 
 	marksel_mode=1

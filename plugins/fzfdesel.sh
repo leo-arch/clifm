@@ -20,7 +20,7 @@ fi
 
 if ! type fzf > /dev/null 2>&1; then
 	printf "CliFM: fzf: Command not found\n" >&2
-	exit 1
+	exit 127
 fi
 
 # Source our plugins helper

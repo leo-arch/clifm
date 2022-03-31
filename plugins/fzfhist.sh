@@ -13,7 +13,7 @@ fi
 
 if ! type fzf > /dev/null 2>&1; then
 	printf "CliFM: fzf: Command not found" >&2
-	exit 1
+	exit 127
 fi
 
 FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/history.cfm"
@@ -28,7 +28,7 @@ fi
 
 # shellcheck disable=SC2154
 fzf --prompt="$fzf_prompt" \
---reverse --height 15 --info=inline \
+--reverse --height "$fzf_height" --info=inline \
 --bind "tab:accept" --header "Run a command from history" \
 --color="$(get_fzf_colors)" \
  < "$FILE" > "$CLIFM_BUS"

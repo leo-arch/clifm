@@ -8,14 +8,14 @@
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Find and change directory using find and fzf\n"
+	printf "Find and change the current working directory via FZF\n"
 	printf "Usage: %s\n" "$name"
 	exit 0
 fi
 
 if ! type fzf > /dev/null 2>&1; then
 	printf "%s" "CliFM: fzf: Command not found\n" >&2
-	exit 1
+	exit 127
 fi
 
 # Source our plugins helper
@@ -29,7 +29,7 @@ fi
 # shellcheck disable=SC2154
 DIR="$(find / -type d -print0 2> /dev/null | \
 fzf --read0 --prompt "$fzf_prompt" \
---reverse --height 15 --header "Fuzzy directory changer" \
+--reverse --height "$fzf_height" --header "Fuzzy directory changer" \
 --bind "tab:accept" --info=inline \
 --color="$(get_fzf_colors)")"
 

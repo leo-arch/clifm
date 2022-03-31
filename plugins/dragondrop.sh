@@ -31,19 +31,15 @@ DRAGON=""
 
 if [ "$(which dragon-drag-and-drop 2>/dev/null)" ]; then
 	DRAGON="dragon-drag-and-drop"
-
 elif [ "$(which dragon 2>/dev/null)" ]; then
 	DRAGON="dragon"
-
 else
 	printf "CliFM: Neither dragon nor dragon-drag-and-drop were found. Exiting...\n" >&2
 	exit $ERROR
 fi
 
 if [ -z "$1" ]; then
-
 	ret=$($DRAGON --print-path --target | while read -r r; do
-
 		if printf "%s\n" "$r" \
 		| grep -q '^\(https\?\|ftps\?\|s\?ftp\):\/\/'; then
 			curl -LJO "$r"
@@ -54,10 +50,7 @@ if [ -z "$1" ]; then
 
 	done)
 
-	if [ "$ret" = 0 ]; then
-		exit $SUCCESS
-	fi
-
+	[ "$ret" = 0 ] && exit $SUCCESS
 else
 	if $DRAGON "$@"; then
 		exit $SUCCESS

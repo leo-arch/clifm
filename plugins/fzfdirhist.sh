@@ -13,7 +13,7 @@ fi
 
 if ! type fzf > /dev/null 2>&1; then
 	printf "CliFM: fzf: Command not found" >&2
-	exit 1
+	exit 127
 fi
 
 FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/dirhist.cfm"

@@ -25,21 +25,20 @@
 me="CliFM"
 no_dep=0
 
-> /dev/null 2>&1
 if ! type find > /dev/null 2>&1; then
-	printf "%s: find: command not found\n" "$me"; no_dep=1
+	printf "%s: find: command not found\n" "$me" >&2; no_dep=1
 elif ! type md5sum > /dev/null 2>&1; then
-	printf "%s: md5sum: command not found\n" "$me"; no_dep=1
+	printf "%s: md5sum: command not found\n" "$me" >&2; no_dep=1
 elif ! type sort > /dev/null 2>&1; then
-	printf "%s: sort: command not found\n" "$me"; no_dep=1
+	printf "%s: sort: command not found\n" "$me" >&2; no_dep=1
 elif ! type uniq > /dev/null 2>&1; then
-	printf "%s: uniq: command not found\n" "$me"; no_dep=1
+	printf "%s: uniq: command not found\n" "$me" >&2; no_dep=1
 elif ! type xargs > /dev/null 2>&1; then
-	printf "%s: xargs: command not found\n" "$me"; no_dep=1
+	printf "%s: xargs: command not found\n" "$me" >&2; no_dep=1
 elif ! type sed > /dev/null 2>&1; then
-	printf "%s: sed: command not found\n" "$me"; no_dep=1
+	printf "%s: sed: command not found\n" "$me" >&2; no_dep=1
 elif ! type stat > /dev/null 2>&1; then
-	printf "%s: stat: command not found\n" "$me"; no_dep=1
+	printf "%s: stat: command not found\n" "$me" >&2; no_dep=1
 fi
 
 [ "$no_dep" = 1 ] && exit 127
@@ -53,7 +52,7 @@ if omitted) and allow the user to delete one or more of them\n"
 fi
 
 if [ -n "$1" ] && ! [ -d "$1" ]; then
-	printf "%s: %s: Not a directory\n" "$me" "$1"
+	printf "%s: %s: Not a directory\n" "$me" "$1" >&2
 	exit 1
 fi
 
