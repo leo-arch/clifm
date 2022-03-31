@@ -63,10 +63,11 @@ size_digits=12
 
 printf "\
 ## This is a list of all duplicates found.
-## Comment out the files you want to remove. You will be given the
-## chance to cancel the operation.
-## Lines with double comments (##) are ignored.
-## Files can be removed forcefully or interactively.\n
+## Comment out the files you want to remove (lines starting with double number
+## sign (##) are ignored.
+## Save and close this file to remove commented files (deletion approval will
+## be asked before removing files)
+## Files can be removed either forcefully or interactively.\n
 " > "$tmp_file"
 
 # shellcheck disable=SC2016
