@@ -2024,7 +2024,7 @@ read_config(void)
 
 	if (xargs.disk_usage_analyzer == 1) {
 		sort = STSIZE;
-		long_view = full_dir_size = sort_reverse = 1;
+		long_view = full_dir_size = 1;
 		list_folders_first = welcome_message = 0;
 	}
 
