@@ -82,19 +82,13 @@ if [ -n "$cmd" ]; then
 		exit 1
 	fi
 
-	int_cmds=" cd o open p pr prop r t tr trash mm mime bm bookmarks br bulk ac ad exp export pin jc jp bl le te "
+	int_cmds=" cd o open p pr prop r t tr trash mm mime bm bookmarks br bulk ac ad exp pin jc jp bl l le te tag ta v vv paste bb bleach d dup c cp m mv"
 
 	is_int=0
 
 	if echo "$int_cmds" | grep -q " $cmd "; then
 		is_int=1
 	fi
-#	for x in $int_cmds; do
-#		if [ "$cmd" == "$x" ]; then
-#			is_int=1
-#			break
-#		fi
-#	done
 
 	if [ "$is_int" -eq 0 ] && ! [ "$(which "$cmd" 2>/dev/null)" ]; then
 		printf "CliFM: %s: Command not found\n" "$cmd" >&2
