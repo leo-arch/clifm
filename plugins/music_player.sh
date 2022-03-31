@@ -9,7 +9,7 @@ OPTS="-playlist"
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Play music files\n"
+	printf "Create a playlist using FILE(s) and play it\n"
 	printf "Usage: %s FILE(s)\n" "$name"
 	exit 0
 fi
