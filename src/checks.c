@@ -379,7 +379,7 @@ is_internal(char *restrict cmd)
 		"ac", "ad",
 		"bb", "bleach",
 		"bm", "bookmarks",
-		"bl", "le",
+		"bl",
 		"br", "bulk",
 		"c", "cp",
 		"cd",
