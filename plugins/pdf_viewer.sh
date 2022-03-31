@@ -8,7 +8,7 @@ SUCCESS=0
 ERROR=1
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
-	name="$(basename "$0")"
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "View PDF files in the terminal\n"
 	printf "Usage: %s FILE\n" "$name"
 	exit $SUCCESS

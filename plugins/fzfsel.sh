@@ -6,7 +6,7 @@
 
 if [ -n "$1" ]; then
 	if [ "$1" = "--help" ] || [ "$1" = "help" ]; then
-		name="$(basename "$0")"
+		name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 		printf "Usage: %s [CMD [ARGS]] [--help, help]
 Without arguments, it prints the list of files in the current directory allowing \
 the user to select one or more of them. At exit, selected files are send to CliFM's \

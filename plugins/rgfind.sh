@@ -6,7 +6,7 @@
 # License: GPL3
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
-	name="$(basename "$0")"
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Search files by content via Ripgrep and FZF\n"
 	printf "Usage: %s STRING|REGEXP\n" "$name"
 	exit 0

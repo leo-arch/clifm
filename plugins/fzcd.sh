@@ -6,6 +6,13 @@
 # Author: Docbroke
 # License: GPL3
 
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
+	printf "Find and change directory using find and fzf\n"
+	printf "Usage: %s\n" "$name"
+	exit 0
+fi
+
 if ! type fzf > /dev/null 2>&1; then
 	printf "%s" "CliFM: fzf: Command not found\n" >&2
 	exit 1

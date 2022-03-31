@@ -5,7 +5,7 @@
 # License: GPL3
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
-	name="$(basename "$0")"
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Display thumbails of FILE(s) or of files in DIR. Use '*' to preview \
 all image files in the current directory.
 Usage: %s [FILE... n] [DIR]\n" "$name"

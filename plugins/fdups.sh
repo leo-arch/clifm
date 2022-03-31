@@ -22,31 +22,33 @@
 # Authors: syssyphus, KlzXS, leo-arch
 # License: GPL3
 
-me="clifm"
+me="CliFM"
 no_dep=0
 
-if ! [ "$(type -P find 2>/dev/null)" ]; then
+> /dev/null 2>&1
+if ! type find > /dev/null 2>&1; then
 	printf "%s: find: command not found\n" "$me"; no_dep=1
-elif ! [ "$(type -P md5sum 2>/dev/null)" ]; then
+elif ! type md5sum > /dev/null 2>&1; then
 	printf "%s: md5sum: command not found\n" "$me"; no_dep=1
-elif ! [ "$(type -P sort 2>/dev/null)" ]; then
+elif ! type sort > /dev/null 2>&1; then
 	printf "%s: sort: command not found\n" "$me"; no_dep=1
-elif ! [ "$(type -P uniq 2>/dev/null)" ]; then
+elif ! type uniq > /dev/null 2>&1; then
 	printf "%s: uniq: command not found\n" "$me"; no_dep=1
-elif ! [ "$(type -P xargs 2>/dev/null)" ]; then
+elif ! type xargs > /dev/null 2>&1; then
 	printf "%s: xargs: command not found\n" "$me"; no_dep=1
-elif ! [ "$(type -P sed 2>/dev/null)" ]; then
+elif ! type sed > /dev/null 2>&1; then
 	printf "%s: sed: command not found\n" "$me"; no_dep=1
-elif ! [ "$(type -P stat 2>/dev/null)" ]; then
+elif ! type stat > /dev/null 2>&1; then
 	printf "%s: stat: command not found\n" "$me"; no_dep=1
 fi
 
 [ "$no_dep" = 1 ] && exit 127
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-	printf "Usage: fdups.sh [DIR]\n"
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "List non-empty duplicated files in DIR (current directory \
 if omitted) and allow the user to delete one or more of them\n"
+	printf "Usage: %s [DIR]\n" "$name"
 	exit 0
 fi
 

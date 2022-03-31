@@ -8,9 +8,10 @@
 # a text editor
 
 if [ -z "$1" ] || [ "$1" = "--help" ]; then
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Copy one or more files/directories passed as arguments to \
 one or more files/directories specified via a text editor\n"
-	printf "Usage: %s FILE(s)\n" "$(basename "$0")"
+	printf "Usage: %s FILE(s)\n" "$name"
 	exit 0
 fi
 

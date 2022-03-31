@@ -5,8 +5,8 @@
 # Lincese GPL3
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
-	name="$(basename "$0")"
-	printf "Navigate CLiFM jump database via FZF or Rofi. Press Enter to cd into the selected directory\n"
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
+	printf "Navigate CliFM's jump database via FZF or Rofi. Press Enter to cd into the selected directory\n"
 	printf "Usage: %s\n" "$name"
 	exit 0
 fi

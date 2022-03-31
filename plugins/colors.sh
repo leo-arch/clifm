@@ -4,7 +4,7 @@
 # Written by L. Abramovich
 # License GPL3
 
-name="$(basename "$0")"
+name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 
 USAGE="Usage: $name [16, 256, test]"
 

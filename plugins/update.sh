@@ -5,7 +5,7 @@
 # License GPL3
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
-	name="$(basename "$0")"
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Check for CliFM updates\n"
 	printf "Usage: %s\n" "$name"
 	exit 0

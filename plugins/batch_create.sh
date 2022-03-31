@@ -5,8 +5,9 @@
 # License: GPL3
 
 if [ -n "$1" ] && [ "$1" = "--help" ]; then
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Open a text editor to add files and/or directories to be created (file names endig with a slash will be taken as directory names). After saving the file and closing the editor, files will be created."
-	printf "%s\n" "Usage: $0"
+	printf "Usage: %s\n" "$name"
 	exit 0
 fi
 

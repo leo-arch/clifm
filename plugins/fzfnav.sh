@@ -23,7 +23,7 @@
 # Press Esc to cancel and exit.
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
-	name="$(basename "$0")"
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Navigate/preview files via FZF\n"
 	printf "Usage: %s\n" "$name"
 	exit 0

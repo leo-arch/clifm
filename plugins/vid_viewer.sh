@@ -13,7 +13,7 @@ if ! [ "$(which ffmpegthumbnailer 2>/dev/null)" ]; then
 fi
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
-	name="$(basename "$0")"
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Display thumbnails of VIDEO(s) or of videos contained in DIR\n"
 	printf "Usage: %s [VIDEO... n] [DIR]\n" "$name"
 	exit $SUCCESS

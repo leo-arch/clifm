@@ -10,7 +10,7 @@ SUCCESS=0
 ERROR=1
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
-	name="$(basename "$0")"
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Set IMAGE as wallpaper\n"
 	printf "Usage: %s IMAGE\n" "$name"
 	exit $SUCCESS
