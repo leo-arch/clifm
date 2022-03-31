@@ -559,7 +559,7 @@ run_shell_cmd(char **args)
 
 	/* Little export implementation. What it lacks? Command substitution */
 	if (*args[0] == 'e' && strcmp(args[0], "export") == 0 && args[1]) {
-		int exit_status = __export(args[0]);
+		int exit_status = __export(args[1]);
 		if (exit_status != -1)
 			return exit_status;
 	}
