@@ -44,7 +44,7 @@ fi
 [ "$no_dep" = 1 ] && exit 127
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-	printf "Usage: dups.sh [DIR]\n"
+	printf "Usage: fdups.sh [DIR]\n"
 	printf "List non-empty duplicated files in DIR (current directory \
 if omitted) and allow the user to delete one or more of them\n"
 	exit 0
