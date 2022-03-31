@@ -5,9 +5,9 @@
 # License: GPL3
 
 if [ -n "$1" ]; then
-	if [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+	if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 		name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-		printf "Usage: %s [CMD [ARGS]] [--help, help]
+		printf "Usage: %s [CMD [ARGS]] [-h,--help]
 Without arguments, it prints the list of files in the current directory allowing \
 the user to select one or more of them. At exit, selected files are send to CliFM's \
 Selection Box.

@@ -712,9 +712,9 @@ dir_size(char *dir)
 	}
 
 	off_t retval = -1;
-	/* We only need here the first field of the line, which is a
-	 * file size and could only take a few bytes, so that 32
-	 * bytes is more than enough */
+	/* We only need here the first field of the line, which is a file
+	 * size and usually takes only a few digits: since a yottabyte takes 26
+	 * digits, 32 is more than enough */
 	char line[32];
 	if (fgets(line, (int)sizeof(line), fp) == NULL) {
 		close_fstream(fp, fd);
