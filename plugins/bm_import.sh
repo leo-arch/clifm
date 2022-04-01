@@ -50,7 +50,7 @@ while read -r line; do
 done < "$file"
 
 if [ "$bmn" -gt 0 ]; then
-	printf "CliFM: %d bookmark(s) succesfully imported\n" "$bmn"
+	printf "CliFM: %d bookmark(s) successfully imported\n" "$bmn"
 	if [ -n "$CLIFM_BUS" ]; then
 		echo "bm reload" > "$CLIFM_BUS"
 	else
