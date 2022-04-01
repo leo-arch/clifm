@@ -1,13 +1,13 @@
 #!/bin/sh
 
-# CliFM plugin to import bookmarks from Ranger
+# CliFM plugin to import bookmarks from either Ranger or Midnight Commander
 # Description: Import Ranger bookmarks from FILE
 # Author: L. Abramovich
 # License: GPL3
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Import Ranger bookmarks from FILE
+	printf "Import Ranger or Midnight Commander bookmarks from FILE
 Usage: %s FILE\n" "$name"
 	exit 0
 fi
@@ -26,9 +26,21 @@ fi
 clifm_bm="${CLIFM}/bookmarks.cfm"
 bmn=0
 
+if grep -q ^"ENTRY " "$file"; then
+	fm="mc"
+else
+	fm="ranger"
+fi
+
 while read -r line; do
-	name="$(echo "$line" | cut -d':' -f1 2>/dev/null)"
-	path="$(echo "$line" | cut -d':' -f2 2>/dev/null)"
+	if [ "$fm" = "mc" ]; then
+		name="$(echo "$line" | awk '{print $2}' | sed 's/\"//g')"
+		path="$(echo "$line" | awk '{print $4}' | sed 's/\"//g')"
+	else
+		name="$(echo "$line" | cut -d':' -f1 2>/dev/null)"
+		path="$(echo "$line" | cut -d':' -f2 2>/dev/null)"
+	fi
+
 	if [ -z "$name" ] || [ -z "$path" ]; then
 		printf "CliFM: %s: Bookmark cannot be imported\n" "$line" >&2
 		continue
@@ -38,7 +50,7 @@ while read -r line; do
 done < "$file"
 
 if [ "$bmn" -gt 0 ]; then
-	printf "CliFM: %d bookmarks succesfully imported\n" "$bmn"
+	printf "CliFM: %d bookmark(s) succesfully imported\n" "$bmn"
 	if [ -n "$CLIFM_BUS" ]; then
 		echo "bm reload" > "$CLIFM_BUS"
 	else
