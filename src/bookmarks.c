@@ -67,6 +67,13 @@ free_bookmarks(void)
 	return;
 }
 
+void
+reload_bookmarks(void)
+{
+	free_bookmarks();
+	load_bookmarks();
+}
+
 static char **
 bm_prompt(void)
 {
@@ -270,8 +277,7 @@ bookmark_del(char *name)
 			fclose(bm_fp);
 			/* Update bookmark names for TAB completion */
 			/*          get_bm_names(); */
-			free_bookmarks();
-			load_bookmarks();
+			reload_bookmarks();
 
 			/* If the argument "*" was specified in command line */
 			if (cmd_line != -1)
@@ -344,8 +350,7 @@ bookmark_del(char *name)
 
 	/* Update bookmark names for TAB completion */
 	/*  get_bm_names(); */
-	free_bookmarks();
-	load_bookmarks();
+	reload_bookmarks();
 
 	/* If the bookmark to be removed was specified in command line */
 	if (cmd_line != -1)
@@ -560,8 +565,8 @@ bookmark_add(char *file)
 	free(tmp);
 	/* Update bookmark names for TAB completion */
 	/*  get_bm_names();  */
-	free_bookmarks();
-	load_bookmarks();
+	reload_bookmarks();
+
 	return EXIT_SUCCESS;
 }
 
@@ -580,8 +585,12 @@ edit_bookmarks(char *cmd)
 			exit_status = EXIT_FAILURE;
 	}
 
-	if (exit_status == EXIT_FAILURE)
+	if (exit_status == EXIT_FAILURE) {
 		fprintf(stderr, _("%s: Cannot open the bookmarks file\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	reload_bookmarks();
 
 	return exit_status;
 }
@@ -809,6 +818,11 @@ bookmarks_function(char **cmd)
 	/* Edit */
 	if (*cmd[1] == 'e' && (!cmd[1][1] || strcmp(cmd[1], "edit") == 0))
 		return edit_bookmarks(cmd[2]);
+
+	if (*cmd[1] == 'r' && (!cmd[1][1] || strcmp(cmd[1], "reload") == 0)) {
+		reload_bookmarks();
+		return EXIT_SUCCESS;
+	}
 
 	/* Shortcut, bm name, or (if expand_bookmarks) bm path */
 	return bm_open(cmd);
