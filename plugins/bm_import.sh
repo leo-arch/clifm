@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# CliFM plugin to import bookmarks from Ranger
+# Description: Import Ranger bookmarks from FILE
+# Author: L. Abramovich
+# License: GPL3
+
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
+	printf "Import Ranger bookmarks from FILE
+Usage: %s FILE\n" "$name"
+	exit 0
+fi
+
+file="$1"
+if ! [ -f "$file" ]; then
+	printf "CliFM: %s: No such file or directory\n" "$file" >&2
+	exit 1
+fi
+
+if [ -z "$CLIFM" ] || ! [ -f "${CLIFM}/bookmarks.cfm" ]; then
+	printf "Bookmarks file for CliFM not found\n" >&2
+	exit 1
+fi
+
+clifm_bm="${CLIFM}/bookmarks.cfm"
+bmn=0
+
+while read -r line; do
+	name="$(echo "$line" | cut -d':' -f1 2>/dev/null)"
+	path="$(echo "$line" | cut -d':' -f2 2>/dev/null)"
+	if [ -z "$name" ] || [ -z "$path" ]; then
+		printf "CliFM: %s: Bookmark cannot be imported\n" "$line" >&2
+		continue
+	fi
+	bmn=$((bmn + 1))
+	printf "[%s]%s\n" "$name" "$path" >> "$clifm_bm"
+done < "$file"
+
+if [ "$bmn" -gt 0 ]; then
+	printf "CliFM: %d bookmarks succesfully imported\n" "$bmn"
+	if [ -n "$CLIFM_BUS" ]; then
+		echo "bm reload" > "$CLIFM_BUS"
+	else
+		printf "Restart CliFM for changes to take effect\n"
+	fi
+else
+	printf "CliFM: No bookmarks imported\n"
+fi
+
+exit 0
