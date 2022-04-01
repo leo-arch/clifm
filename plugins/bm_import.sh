@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # CliFM plugin to import bookmarks from either Ranger or Midnight Commander
-# Description: Import Ranger bookmarks from FILE
+# Description: Import Ranger/MC bookmarks from FILE
 # Author: L. Abramovich
 # License: GPL3
 
