@@ -23,6 +23,14 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	exit 0
 fi
 
+if ! type fzf 2>/dev/null; then
+	printf "CliFM: fzf: Command not found\n" 2>&1
+	exit 127
+elif ! type du 2>/dev/null; then
+	printf "CliFM: du: Command not found\n" 2>&1
+	exit 127
+fi
+
 HELP="Usage:
 Type in the prompt to filter the current list of files. Regular expressions are \
 allowed.
