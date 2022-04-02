@@ -1710,6 +1710,8 @@ A convenient helper script is provided to get a consistent look across all plugi
  +-------------------+-------------------------------+
  | colors            |                               |
  +-------------------+-------------------------------+
+ | disk_analyzer     | du, fzf                       |
+ +-------------------+-------------------------------+
  | dragondrop        | dragon or dragon-drag-and-drop|
  +-------------------+-------------------------------+
  | fdups             | find, md5sum, sort, uniq,     |
