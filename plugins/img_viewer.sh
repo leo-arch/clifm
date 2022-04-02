@@ -2,7 +2,7 @@
 
 # Image thumbnails plugin for CliFM
 # Written by L. Abramovich
-# Dependencies: sxiv | feh | lsix | img2sixel
+# Dependencies: sxiv | feh | pqiv | gthumb | ristretto | gwenview | lsix | img2sixel
 # License: GPL3
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
@@ -13,13 +13,33 @@ Usage: %s [FILE... n] [DIR]\n" "$name"
 	exit 0
 fi
 
+VIEWER=""
+VIEWER_OPTS=""
+
 found=0
 args="${*:-.}"
+
+if [ -n "$VIEWER" ] && [ "$(type "$VIEWER" 2>/dev/null)" ]; then
+	if [ -n "$VIEWER_OPTS" ]; then
+		"$VIEWER" "$VIEWER_OPTS" "$args"
+	else
+		"$VIEWER" "$args"
+	fi
+	exit 0
+fi
 
 if type sxiv > /dev/null 2>&1; then
 	sxiv -aqt -- "$args" && exit 0 || found=1
 elif type feh > /dev/null 2>&1; then
 	feh -tZ -- "$args" && exit 0 || found=1
+elif type pqiv > /dev/null 2>&1; then
+	pqiv --auto-montage-mode --max-depth=1 --disable-backends="archive,poppler,spectre,wand,webp,libav,archive_cbx" -- "$args" && exit 0 || found=1
+elif type gthumb > /dev/null 2>&1; then
+	gthumb -- "$args" && exit 0 || found=1
+elif type ristretto > /dev/null 2>&1; then
+	ristretto -- "$args" && exit 0 || found=1
+elif type gwenview > /dev/null 2>&1; then
+	gwenview -- "$args" && exit 0 || found=1
 elif type lsix > /dev/null 2>&1; then
 	if [ -d "$1" ] || [ -h "$1" ]; then
 		lsix "$1"/*.png "$1"/*.jpg && exit 0 || found=1
