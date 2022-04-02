@@ -60,6 +60,7 @@ fcd() {
 	# Keep FZF running until the user presses Esc or C-q
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; ls --color=always --group-directories-first --indicator-style=none -A .)
+		# shellcheck disable=SC2154
 		file="$(printf "%s\n" "$lsd" | fzf \
 			--color="$_colors" --height "$fzf_height" \
 			--bind "right:accept,left:first+accept" \
@@ -77,7 +78,7 @@ fcd() {
 			--no-info --keep-right --multi --header="Press 'Alt-h' for help
 $PWD
 $FZF_HEADER" --marker="*" --preview-window=:wrap "$_borders" \
---preview='printf "Total: "; du "$DU_OPTS1" {} 2>/dev/null | cut -f1; du "$DU_OPTS2" {}/* 2>/dev/null | sort "$SORT_OPTS"')"
+--preview="printf \"Total: \"; du $DU_OPTS1 {} 2>/dev/null | cut -f1; du $DU_OPTS2 {}/* 2>/dev/null | sort $SORT_OPTS")"
 
 		# If FZF returned no file, exit
 		[ ${#file} -eq 0 ] && return 0
