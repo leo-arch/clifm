@@ -2,8 +2,14 @@
 
 # Image thumbnails plugin for CliFM
 # Written by L. Abramovich
-# Dependencies: sxiv | feh | pqiv | gthumb | ristretto | gwenview | lsix | img2sixel
+# Dependencies (any of the following):
+#     sxiv feh pqiv gthumb ristretto gwenview lsix img2sixel
+#     or just your preferred image viewer
 # License: GPL3
+
+# Specify here your preferred image viewer and command line options for it
+VIEWER=""
+VIEWER_OPTS=""
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
@@ -12,9 +18,6 @@ working directory if omitted).
 Usage: %s [FILE... n] [DIR]\n" "$name"
 	exit 0
 fi
-
-VIEWER=""
-VIEWER_OPTS=""
 
 found=0
 args="${*:-.}"
