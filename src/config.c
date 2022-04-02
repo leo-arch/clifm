@@ -434,6 +434,7 @@ create_actions_file(char *file)
 		"music=music_player.sh\n"
 		"update=update.sh\n"
 		"wall=wallpaper_setter.sh\n"
+		"da=disk_analyzer.sh"
 		"dr=dragondrop.sh\n"
 		"fdups=fdups.sh\n"
 		"bn=batch_create.sh\n"
