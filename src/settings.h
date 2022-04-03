@@ -252,6 +252,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
 #define DEF_WARNING_PROMPT 1
+
 #define SUG_STRATS 7
 
 #define MAX_WS 8
