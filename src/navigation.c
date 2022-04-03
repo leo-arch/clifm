@@ -175,7 +175,7 @@ get_bd_matches(const char *str, int *n, int mode)
 	while(1) {
 		char *p = (char *)NULL;
 		if (str && *str) { /* Non-empty query string */
-			p = case_sens_path_comp ? strstr(cwd, str) : strcasestr(cwd, str);
+			p = case_sens_path_comp ? strstr(cwd, str) : strcasestr(cwd, (char *)str);
 			if (!p)
 				break;
 		}

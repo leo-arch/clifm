@@ -87,6 +87,36 @@ xstrrpbrk(char *s, const char *accept)
 /* strcasestr(3) is a GNU extension on Linux. If GNU extensions are not
  * available, let's use this as replacement */
 char *
+xstrcasestr(char *a, char *b)
+{
+	if (!a || !b)
+		return (char *)NULL;
+
+	size_t f = 0;
+	char *p = (char *)NULL, *bb = b;
+	while (*a) {
+		if (TOUPPER(*a) != TOUPPER(*b)) {
+			if (f == 1)
+				b = bb;
+			++a;
+			continue;
+		}
+
+		p = a;
+		f = 1;
+		++a;
+
+		if (!*(++b))
+			break;
+	}
+
+	if (!*b && f == 1)
+		return p;
+
+	return (char *)NULL;
+}
+/*
+char *
 xstrcasestr(char *a, const char *b)
 {
 	if (!a || !b)
@@ -113,7 +143,7 @@ xstrcasestr(char *a, const char *b)
 		return p;
 
 	return (char *)NULL;
-}
+} */
 #endif /* __linux && _BE_POSIX */
 
 /* Just a strlen that sets a read limit in case of non-null terminated

@@ -1217,7 +1217,7 @@ jump_generator(const char *text, int state)
 		}
 
 		if ((case_sens_dirjump == 1 ? strstr(name, text)
-		: strcasestr(name, text)) != NULL)
+		: strcasestr(name, (char *)text)) != NULL)
 			return strdup(name);
 	}
 
