@@ -115,35 +115,6 @@ xstrcasestr(char *a, char *b)
 
 	return (char *)NULL;
 }
-/*
-char *
-xstrcasestr(char *a, const char *b)
-{
-	if (!a || !b)
-		return (char *)NULL;
-
-	size_t f = 0;
-	char *p = (char *)NULL;
-	while (*a) {
-		if (!*b)
-			break;
-		if (TOUPPER(*a) != TOUPPER(*b)) {
-			++a;
-			f = 0;
-			continue;
-		}
-		if (f == 0)
-			p = a;
-		f = 1;
-		++a;
-		++b;
-	}
-
-	if (!*b && f == 1)
-		return p;
-
-	return (char *)NULL;
-} */
 #endif /* __linux && _BE_POSIX */
 
 /* Just a strlen that sets a read limit in case of non-null terminated
