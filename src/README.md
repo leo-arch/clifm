@@ -162,33 +162,23 @@ This is the basic structure of CliFM: generally speaking, it is just a shell. In
 
 ## 4) Hacking
 
-* Default settings: `settings.h`
-
-* Add a new command: `exec.c`
-
-* Add a new prompt feature: `prompt.c`
-
-* Modify/add keybindings: `keybindings.c`
-
-* Icons: `icons.h` and `listing.c`. Consult the [customizing icons](https://github.com/leo-arch/clifm/wiki/Advanced#customizing-icons) section
-
-* TAB completion (including the FZF mode): `readline.c`, `tabcomp.c`
-
-* Interface: `listing.c` and `colors.c`
-
-* Directory jumper: `jump.c`
-
-* Suggestions: `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` function)
-
-* Syntax highlighting: `highlight.c` (see also `readline.c` and `keybinds.c`)
-
-* Autocommands: `autocmds.c`
-
-* File names cleaner(`bleach`): `name_cleaner.c` and `cleaner_table.h`
-
-* Improve my security: `sanitize.c`
-
-* The tags system: `tags.c`
+| Target | File(s) | Main function | Observation |
+| --- | --- | --- | --- |
+| Initialization | `main.c` | `main` | |
+| Default settings | `settings.h` | | |
+| Add a new command | `exec.c` | `exec_cmd` | Most of the times you want to your command avaialable for TAB completion and suggestions. See below. |
+| Add a new prompt feature | `prompt.c` (specially `decode_prompt`) | `prompt` | |
+| Modify/add keybindings | `keybindings.c` | `readline_kbinds` |
+| Icons | `icons.h`, `listing.c` | `list_dir` | Consult the [customizing icons](https://github.com/leo-arch/clifm/wiki/Advanced#customizing-icons) section |
+| TAB completion (including the FZF mode) | `readline.c` (`my_rl_completion`), `tabcomp.c` | |
+| Interface | `listing.c` (particularly `list_dir`) and `colors.c` | | |
+| Directory jumper | `jump.c` | `run_autojump` | |
+| Suggestions | `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` function) | | |
+| Syntax highlighting | `highlight.c` | `rl_highlight` | See also `readline.c` and `keybinds.c` |
+| Autocommands | `autocmds.c` | `check_autocmds` | |
+| File names cleaner(`bleach`) | `name_cleaner.c` and `cleaner_table.h` | `bleach_files` | |
+| Improve my security | `sanitize.c` | `sanitize_cmd`, `sanitize_cmd_environ`, and `xsecure_env` | |
+| The tags system | `tags.c` | `tags_function` | |
 
 ## 5) Compilation
 
