@@ -1205,16 +1205,19 @@ jump_generator(const char *text, int state)
 			continue;
 		/* Filter by parent */
 		if (rl_line_buffer[1] == 'p') {
-			if (!strstr(workspaces[cur_ws].path, name))
+			if ((case_sens_dirjump == 1 ? strstr(workspaces[cur_ws].path, name)
+			: strcasestr(workspaces[cur_ws].path, name)) == NULL)
 				continue;
 		}
 		/* Filter by child */
 		else if (rl_line_buffer[1] == 'c') {
-			if (!strstr(name, workspaces[cur_ws].path))
+			if ((case_sens_dirjump == 1 ? strstr(name, workspaces[cur_ws].path)
+			: strcasestr(name, workspaces[cur_ws].path)) == NULL)
 				continue;
 		}
 
-		if (strstr(name, text))
+		if ((case_sens_dirjump == 1 ? strstr(name, text)
+		: strcasestr(name, text)) != NULL)
 			return strdup(name);
 	}
 
