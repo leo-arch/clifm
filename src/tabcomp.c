@@ -320,6 +320,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 			rl_insert_text(buf + *offset);
 		}
 	} else {
+		if (cur_comp_type == TCMP_JUMP && autocd == 0)
+			rl_insert_text("cd ");
 		rl_insert_text(buf + *offset);
 	}
 
