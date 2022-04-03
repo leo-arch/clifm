@@ -487,13 +487,10 @@ dirjump(char **args, int mode)
 				 * jump entry. Used to search for subsequent search
 				 * strings starting from this position in the entry
 				 * and not before */
-#ifndef _BE_POSIX
 				char *needle = case_sens_dirjump
 							? strstr(jump_db[j].path, args[i])
 							: strcasestr(jump_db[j].path, args[i]);
-#else
-				char *needle = strstr(jump_db[j].path, args[i]);
-#endif
+
 				if (!needle || (last_segment && strchr(needle, '/')))
 					continue;
 
@@ -550,13 +547,11 @@ dirjump(char **args, int mode)
 					matches[j] = (char *)NULL;
 					continue;
 				}
-#ifndef _BE_POSIX
+
 				char *_needle = case_sens_dirjump
 						? strstr(needles[j] + 1, args[i])
 						: strcasestr(needles[j] + 1, args[i]);
-#else
-				char *_needle = strstr(needles[j] + 1, args[i]);
-#endif
+
 				if (!_needle || (last_segment && strchr(_needle, '/'))){
 					matches[j] = (char *)NULL;
 					continue;
