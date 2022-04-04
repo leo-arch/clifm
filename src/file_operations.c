@@ -557,6 +557,14 @@ run_mime(char *file)
 		return EXIT_FAILURE;
 
 	char *p = rl_line_buffer ? rl_line_buffer : (char *)NULL;
+
+	/* Convert ELN into file name (rl_line_buffer) */
+	if (p && *p >= '1' && *p <= '9') {
+		int a = atoi(p);
+		if (a > 0 && (size_t)a <= files && file_info[a - 1].name)
+			p = file_info[a - 1].name;
+	}
+
 	if (p && ( (*p == 'i' && (strncmp(p, "import", 6) == 0
 	|| strncmp(p, "info", 4) == 0))
 	|| (*p == 'o' && (p[1] == ' ' || strncmp(p, "open", 4) == 0)) ) ) {
