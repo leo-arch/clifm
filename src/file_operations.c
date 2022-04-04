@@ -553,10 +553,13 @@ clear_selbox(void)
 static inline int
 run_mime(char *file)
 {
-	char *p = rl_line_buffer;
-	if ( (*p == 'i' && (strncmp(p, "import", 6) == 0
+	if (!file || !*file)
+		return EXIT_FAILURE;
+
+	char *p = rl_line_buffer ? rl_line_buffer : (char *)NULL;
+	if (p && ( (*p == 'i' && (strncmp(p, "import", 6) == 0
 	|| strncmp(p, "info", 4) == 0))
-	|| (*p == 'o' && (p[1] == ' ' || strncmp(p, "open", 4) == 0)) ) {
+	|| (*p == 'o' && (p[1] == ' ' || strncmp(p, "open", 4) == 0)) ) ) {
 		char *cmd[] = {"mm", "open", file, NULL};
 		return mime_open(cmd);
 	}
