@@ -118,7 +118,7 @@ fcd() {
 			--bind "esc:execute(rm $TMP)+abort" \
 			--bind "ctrl-q:abort" \
 			--ansi --prompt="${fzf_prompt}" --reverse --no-clear \
-			--no-info --keep-right --multi --header="Press 'Alt-h' for help
+			--inline-info --keep-right --multi --header-first --header="Press 'Alt-h' for help
 $PWD
 $FZF_HEADER" --marker="*" --preview-window=:wrap "$(fzf_borders)" \
 			--preview "printf \"\033[2J\"; $BFG_FILE {}")"
