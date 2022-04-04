@@ -80,10 +80,10 @@ preview_image() {
 		;;
 		w3m)
 			calculate_position
-			WIDTH=200
-			HEIGHT=200
-			X=360
-			Y=15
+#			WIDTH=200
+#			HEIGHT=200
+#			X=360
+#			Y=15
 			W3IMG_PATH="/usr/lib/w3m/w3mimgdisplay"
 			# Clear image
 			printf '6;%s;%s;%s;%s\n3;' "$X" "$Y" "$WIDTH" "$HEIGHT" | "$W3IMG_PATH"
@@ -225,17 +225,17 @@ handle_mime() {
 		*officedocument*|*msword|*ms-excel|text/rtf|*.opendocument.*)
 
 			if [ -n "$IMG_VIEWER" ] && [ -z "$DOCASTEXT" ]; then
-
-				if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
-					preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
+				_type="png"
+				if [ -f "$PREVIEWDIR/${entryhash}.$_type" ]; then
+					preview_image "$PREVIEWDIR/${entryhash}.$_type" && exit 0
 				fi
 
 				if [ "$LIBREOFFICE_OK" = 1 ]; then
-					libreoffice --headless --convert-to jpg "$entry" \
+					libreoffice --headless --convert-to "$_type" "$entry" \
 					--outdir "$PREVIEWDIR" > /dev/null 2>&1 && \
 
-					mv "$PREVIEWDIR/${entry%.*}.jpg" "$PREVIEWDIR/${entryhash}.jpg" && \
-					preview_image "${PREVIEWDIR}/${entryhash}.jpg" && exit 0
+					mv "$PREVIEWDIR/${entry%.*}.$_type" "$PREVIEWDIR/${entryhash}.$_type" && \
+					preview_image "${PREVIEWDIR}/${entryhash}.$_type" && exit 0
 				fi
 			fi
 
