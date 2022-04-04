@@ -1470,7 +1470,18 @@ RUN:
 		struct stat attr;
 		int url = 0;
 		char *_path = argv[i];
-		char *_exp_path = tilde_expand(argv[i]);
+		char *_exp_path = (char *)NULL;
+		if (*argv[i] == '.' && !argv[i][1]) {
+			char cwd[PATH_MAX] = "";
+			if (getcwd(cwd, sizeof(cwd)) == NULL || !*cwd) {
+				_err('e', PRINT_PROMPT, "%s: Error retrieving current working "
+					"directory\n", PROGRAM_NAME);
+			} else {
+				_exp_path = savestring(cwd, strlen(cwd));
+			}
+		} else {
+			_exp_path = tilde_expand(argv[i]);
+		}
 		if (_exp_path) {
 			if (IS_FILE_URI(_path)) {
 				_path = argv[i] + 7;
@@ -1492,7 +1503,7 @@ RUN:
 			}
 			free(_exp_path);
 		} else {
-			fprintf(stderr, _("%s: Error expanding tilde\n"), PROGRAM_NAME);
+			fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 		}
 
@@ -1623,7 +1634,11 @@ RUN:
 			path_exp = tilde_expand(path_value);
 			xstrsncpy(path_tmp, path_exp, PATH_MAX);
 		} else if (*path_value != '/') {
-			snprintf(path_tmp, PATH_MAX - 1, "%s/%s", getenv("PWD"), path_value);
+			if (*path_value == '.' && !*(path_value + 1))
+				xstrsncpy(path_tmp, getenv("PWD"), PATH_MAX);
+			else
+				snprintf(path_tmp, PATH_MAX - 1, "%s/%s", getenv("PWD"),
+					path_value);
 		} else {
 			xstrsncpy(path_tmp, path_value, PATH_MAX);
 		}
