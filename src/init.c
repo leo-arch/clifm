@@ -962,8 +962,6 @@ open_reg_exit(char *filename, int url)
 	sprintf(mime_file, "%s/.config/clifm/profiles/%s/mimelist.cfm",
 			homedir, alt_profile ? alt_profile : "default");
 
-	/* This should be the case when using CliFM as a resource opener
-	 * via --open */
 	if (path_n == 0)
 		path_n = get_path_env();
 
@@ -1471,14 +1469,12 @@ RUN:
 		int url = 0;
 		char *_path = argv[i];
 		char *_exp_path = (char *)NULL;
-		if (*argv[i] == '.' && !argv[i][1]) {
-			char cwd[PATH_MAX] = "";
-			if (getcwd(cwd, sizeof(cwd)) == NULL || !*cwd) {
-				_err('e', PRINT_PROMPT, "%s: Error retrieving current working "
-					"directory\n", PROGRAM_NAME);
-			} else {
-				_exp_path = savestring(cwd, strlen(cwd));
-			}
+		if (*argv[i] == '.') {
+			char _tmp[PATH_MAX];
+			if (realpath(argv[i], _tmp) == NULL || !*_tmp)
+				_err('e', PRINT_PROMPT, "%s: Error expanding path\n", PROGRAM_NAME);
+			else
+				_exp_path = savestring(_tmp, strlen(_tmp));
 		} else {
 			_exp_path = tilde_expand(argv[i]);
 		}
@@ -1499,6 +1495,13 @@ RUN:
 						strerror(errno));
 					free(_exp_path);
 					exit(EXIT_FAILURE);
+				} else {
+					if (!S_ISDIR(attr.st_mode)) {
+						fprintf(stderr, "%s: %s: Not a directory\n",
+							PROGRAM_NAME, _exp_path);
+						free(_exp_path);
+						exit(EXIT_FAILURE);
+					}
 				}
 			}
 			free(_exp_path);
@@ -1634,11 +1637,20 @@ RUN:
 			path_exp = tilde_expand(path_value);
 			xstrsncpy(path_tmp, path_exp, PATH_MAX);
 		} else if (*path_value != '/') {
-			if (*path_value == '.' && !*(path_value + 1))
-				xstrsncpy(path_tmp, getenv("PWD"), PATH_MAX);
-			else
+			if (*path_value == '.') {
+				char _tmp[PATH_MAX];
+				*_tmp = '\0';
+				char *p = realpath(path_value, _tmp);
+				if (!p) {
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+						path_value, strerror(errno));
+					exit(errno);
+				}
+				xstrsncpy(path_tmp, p, PATH_MAX);
+			} else {
 				snprintf(path_tmp, PATH_MAX - 1, "%s/%s", getenv("PWD"),
 					path_value);
+			}
 		} else {
 			xstrsncpy(path_tmp, path_value, PATH_MAX);
 		}
