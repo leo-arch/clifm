@@ -1021,6 +1021,64 @@ set_sort(char *arg)
 	xargs.sort = sort;
 }
 
+static char *
+resolve_positional_param(char *file)
+{
+	struct stat attr;
+	int url = 0;
+	char *_path = file, *_exp_path = (char *)NULL;
+
+	if (*file == '.') {
+		char _tmp[PATH_MAX];
+		if (realpath(file, _tmp) == NULL || !*_tmp)
+			_err('e', PRINT_PROMPT, _("%s: Error expanding path\n"), PROGRAM_NAME);
+		else
+			_exp_path = savestring(_tmp, strlen(_tmp));
+	} else {
+		_exp_path = tilde_expand(file);
+	}
+
+	if (!_exp_path) {
+		fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+
+	if (IS_FILE_URI(_path)) {
+		_path = file + 7;
+		if (stat(_path, &attr) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
+				strerror(errno));
+			free(_exp_path);
+			exit(EXIT_FAILURE);
+		}
+	} else if (is_url(_exp_path) == EXIT_SUCCESS) {
+		url = 1;
+	} else {
+		if (stat(_exp_path, &attr) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
+				strerror(errno));
+			free(_exp_path);
+			exit(errno);
+		}
+
+		if (!S_ISDIR(attr.st_mode)) {
+			fprintf(stderr, "%s: %s: %s\n",	PROGRAM_NAME, _exp_path,
+				strerror(ENOTDIR));
+			free(_exp_path);
+			exit(ENOTDIR);
+		}
+	}
+
+	free(_exp_path);
+
+	if (url == 1 || !S_ISDIR(attr.st_mode))
+		open_reg_exit(_path, url);
+
+	flags |= START_PATH;
+	xargs.path = 1;
+	return _path;
+}
+
 /* Evaluate external arguments, if any, and change initial variables to
  * its corresponding value */
 void
@@ -1464,8 +1522,9 @@ RUN:
 	 * path. Otherwise, open the file with the associated application
 	 * and exit */
 	int i = optind;
-	if (argv[i]) {
-		struct stat attr;
+	if (argv[i])
+		path_value = resolve_positional_param(argv[i]);
+/*		struct stat attr;
 		int url = 0;
 		char *_path = argv[i];
 		char *_exp_path = (char *)NULL;
@@ -1478,6 +1537,7 @@ RUN:
 		} else {
 			_exp_path = tilde_expand(argv[i]);
 		}
+
 		if (_exp_path) {
 			if (IS_FILE_URI(_path)) {
 				_path = argv[i] + 7;
@@ -1516,7 +1576,7 @@ RUN:
 		flags |= START_PATH;
 		path_value = _path;
 		xargs.path = 1;
-	}
+	} */
 
 	if (bm_value) {
 		char *bm_exp = (char *)NULL;
