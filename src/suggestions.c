@@ -1711,12 +1711,18 @@ CHECK_CMD:
 		goto SUCCESS;
 	}
 
+	wlen = strlen(word);
 	/* If absolute path */
 	if (point_is_first_word && *word == '/' && access(word, X_OK) == 0) {
 		printed = 1;
+	} else if (point_is_first_word && *word >= '1' && *word <= '9'
+	&& is_number(word)) {
+		int a = atoi(word);
+		if (a > 0 && a <= (int)files)
+			printed = 1;
+	} else if (point_is_first_word && check_completions(word, wlen, c, CHECK_MATCH)) {
+		printed = 1;
 	} else {
-		wlen = strlen(word);
-
 		if (wlen && word[wlen - 1] == ' ')
 			word[wlen - 1] = '\0';
 
