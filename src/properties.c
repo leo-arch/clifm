@@ -445,7 +445,7 @@ get_properties(char *filename, const int dsize)
 		goto END;
 	}
 
-	char *human_size = get_size_unit(total_size * 1024);
+	char *human_size = get_size_unit(total_size * (xargs.si == 1 ? 1000 : 1024));
 	if (human_size) {
 		printf("%s%s%s\n", csize, human_size, cend);
 		free(human_size);
@@ -463,7 +463,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 {
 	char *size_type;
 	if (full_dir_size == 1 && props->type == DT_DIR)
-		size_type = get_size_unit(props->size * 1024);
+		size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
 	else
 		size_type = get_size_unit(props->size);
 

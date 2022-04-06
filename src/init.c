@@ -1175,6 +1175,9 @@ external_arguments(int argc, char **argv)
 		{"no-props-color", no_argument, 0, 49},
 		{"full-dir-size", no_argument, 0, 50},
 		{"apparent-size", no_argument, 0, 51},
+#ifdef __linux__
+		{"si", no_argument, 0, 52},
+#endif
 	    {0, 0, 0, 0}
 	};
 
@@ -1367,7 +1370,9 @@ RUN:
 		case 49: xargs.props_color = props_color = 0; break;
 		case 50: xargs.full_dir_size = full_dir_size = 1; break;
 		case 51: xargs.apparent_size = 1; break;
-
+#ifdef __linux__
+		case 52: xargs.si = 1; break;
+#endif
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
 			show_hidden = xargs.hidden = 0;
@@ -1810,6 +1815,7 @@ unset_xargs(void)
 	xargs.secure_cmds = UNSET;
 	xargs.sensitive = UNSET;
 	xargs.share_selbox = UNSET;
+	xargs.si = UNSET;
 	xargs.sort = UNSET;
 	xargs.sort_reverse = UNSET;
 	xargs.splash = UNSET;
@@ -2447,6 +2453,9 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (xargs.si == UNSET)
+		xargs.si = DEF_SI;
+
 	if (!usr_cscheme)
 		usr_cscheme = savestring("default", 7);
 

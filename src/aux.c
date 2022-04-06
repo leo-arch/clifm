@@ -649,15 +649,19 @@ get_cmd_path(const char *cmd)
 char *
 get_size_unit(off_t size)
 {
-#define MAX_UNIT_SIZE 9
-	/* Max size type length == 9 == "1023.99K\0" */
+#define MAX_UNIT_SIZE 10
+	/* Max size type length == 10 == "1023.99KB\0" */
 	char *str = xnmalloc(MAX_UNIT_SIZE, sizeof(char));
+
+	float base = 1024;
+	if (xargs.si == 1)
+		base = 1000;
 
 	size_t n = 0;
 	float s = (float)size;
 
-	while (s > 1024) {
-		s = s / 1024;
+	while (s > base) {
+		s = s / base;
 		++n;
 	}
 
@@ -666,8 +670,8 @@ get_size_unit(off_t size)
 	 * We don't want to print the reminder when it is zero */
 
 	const char *const u = "BKMGTPEZY";
-	snprintf(str, MAX_UNIT_SIZE, "%.*f%c", (s == 0 || s - (float)x == 0) /* NOLINT */
-			? 0 : 2, (double)s, u[n]);
+	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c", (s == 0 || s - (float)x == 0) /* NOLINT */
+			? 0 : 2, (double)s, u[n], (u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
 
 	return str;
 }
@@ -690,11 +694,16 @@ dir_size(char *dir)
 	close(fd);
 
 #ifdef __linux__
+	char block_size[16];
+	if (xargs.si == 1)
+		strcpy(block_size, "--block-size=KB");
+	else
+		strcpy(block_size, "--block-size=K");
 	if (xargs.apparent_size != 1) {
-		char *cmd[] = {"du", "-ks", dir, NULL};
+		char *cmd[] = {"du", "-s", block_size, dir, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
-		char *cmd[] = {"du", "-ks", "--apparent-size", dir, NULL};
+		char *cmd[] = {"du", "-s", "--apparent-size", block_size, dir, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	}
 #else

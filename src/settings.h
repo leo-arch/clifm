@@ -236,6 +236,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_SHARE_SELBOX 0
 #define DEF_SHOW_HIDDEN 0
 #define DEF_SHOW_BACKUP_FILES 1
+#define DEF_SI 0 /* If 1, sizes in powers of 1000 instead of 1024 */
 #define DEF_SORT SNAME
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0

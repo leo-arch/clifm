@@ -777,6 +777,8 @@ CliFM's built-in opener\
 \n     --secure-env\t\t Run in a sanitized environment (regular mode)\
 \n     --secure-env-full\t\t Run in a sanitized environment (full mode)\
 \n     --share-selbox\t\t Make the Selection Box common to different profiles\
+\n     --si\t\t\t Print sizes in powers of 1000, as defined in the \
+International System of Units (SI), instead of 1024 (Linux only)\
 \n     --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z \
 (default order)\
 \n     --trash-as-rm\t\t The 'r' command executes 'trash' instead of \

@@ -702,6 +702,7 @@ struct param {
 	int secure_env_full;
 	int sensitive;
 	int share_selbox;
+	int si; /* Sizes in powers of 1000 instead of 1024 */
 	int sort;
 	int sort_reverse;
 	int splash;
