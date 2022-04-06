@@ -410,6 +410,9 @@ run CliFM in a secure environment (full mode). Consult the \fBSECURITY\fR sectio
 .B \-\-share\-selbox
 make the Selection Box common (that is, accessible) to different profiles. By default, each profile has a private Selection Box.
 .TP
+.B \-\-si
+print sizes in powers of 1000, as defined in the International System of Units (SI), instead of 1024 (Linux only)
+.TP
 .B \-\-sort\-reverse
 sort in reverse order, for example: z-a instead of a-z, which is the default order
 .TP
