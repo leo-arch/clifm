@@ -1342,7 +1342,7 @@ rl_suggestions(const unsigned char c)
 	point_is_first_word = 0;
 	if (nwords >= 2 && rl_point <= (int)full_word + 1) {
 		point_is_first_word = 1;
-		goto CHECK_CMD;
+		goto CHECK_FIRST_WORD;
 	}
 
 	/* If not on the first word and not at the end of the last word,
@@ -1699,7 +1699,7 @@ rl_suggestions(const unsigned char c)
 	if (nwords >= 2)
 		goto NO_SUGGESTION;
 
-CHECK_CMD:
+CHECK_FIRST_WORD:
 	word = first_word ? first_word : last_word;
 	if (!word || !*word || (c == ' ' && (*word == '\''
 	|| *word == '"' || *word == '$' || *word == '#')) || *word == '<'
