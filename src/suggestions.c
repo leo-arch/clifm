@@ -1715,12 +1715,13 @@ CHECK_CMD:
 	/* If absolute path */
 	if (point_is_first_word && *word == '/' && access(word, X_OK) == 0) {
 		printed = 1;
-	} else if (point_is_first_word && *word >= '1' && *word <= '9'
-	&& is_number(word)) {
+	} else if (point_is_first_word && rl_point < rl_end
+	&& *word >= '1' && *word <= '9' && is_number(word)) {
 		int a = atoi(word);
 		if (a > 0 && a <= (int)files)
 			printed = 1;
-	} else if (point_is_first_word && check_completions(word, wlen, c, CHECK_MATCH)) {
+	} else if (point_is_first_word && rl_point < rl_end
+	&& check_completions(word, wlen, c, CHECK_MATCH)) {
 		printed = 1;
 	} else {
 		if (wlen && word[wlen - 1] == ' ')
