@@ -584,12 +584,16 @@ print_sel_results(int new_sel, char *sel_path, char *pattern)
 		return EXIT_FAILURE;
 	}
 
-	/* Get total size of sel files */
+	/* Append size of new sel files to TOTAL_SEL_SIZE */
 	struct stat attr;
-	int i = (int)sel_n;
-	while (--i >= 0) {
-		if (lstat(sel_elements[i], &attr) != -1)
-			total_sel_size += FILE_SIZE;
+	int i, base = xargs.si == 1 ? 1000 : 1024;
+	for (i = (int)sel_n - new_sel; i < (int)sel_n; i++) {
+		if (lstat(sel_elements[i], &attr) != -1) {
+			if (S_ISDIR(attr.st_mode))
+				total_sel_size += (dir_size(sel_elements[i]) * base);
+			else
+				total_sel_size += FILE_SIZE;
+		}
 	}
 
 	/* Print entries */
@@ -861,12 +865,13 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 			continue;
 
 		k = (int)sel_n;
+		int base = xargs.si == 1 ? 1000 : 1024;
 		while (--k >= 0) {
 			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
 				/* Sustract size from total size */
 				if (lstat(sel_elements[k], &attr) != -1) {
 					if (S_ISDIR(attr.st_mode))
-						total_sel_size -= dir_size(sel_elements[k]);
+						total_sel_size -= (dir_size(sel_elements[k]) * base);
 					else
 						total_sel_size -= FILE_SIZE;
 				}
