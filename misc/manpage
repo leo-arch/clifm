@@ -290,7 +290,7 @@ print current working directory in terminal window title. Otherwise, only the pr
 show disk usage (free/total) for the file system the current directory belongs to
 .TP
 .B \-\-enable\-logs
-enable program logs
+enable program logs. See the \fIlog\fR command for more information
 .TP
 .B \-\-expand\-bookmarks
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path"
