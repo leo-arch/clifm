@@ -68,6 +68,60 @@
 #include "remotes.h"
 #include "messages.h"
 
+/* Custom POSIX implementation of GNU asprintf() modified to log program
+ * messages. MSG_TYPE is one of: 'e', 'w', 'n', or zero (meaning this
+ * latter that no message mark (E, W, or N) will be added to the prompt).
+ * PROMPT tells whether to print the message immediately before the
+ * prompt or rather in place. Based on littlstar's xasprintf
+ * implementation:
+ * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
+__attribute__((__format__(__printf__, 3, 0)))
+/* We use __attribute__ here to silence clang warning: "format string is
+ * not a string literal" */
+int
+_err(int msg_type, int prompt, const char *format, ...)
+{
+	va_list arglist, tmp_list;
+
+	va_start(arglist, format);
+	va_copy(tmp_list, arglist);
+	int size = vsnprintf((char *)NULL, 0, format, tmp_list);
+	va_end(tmp_list);
+
+	if (size < 0) {
+		va_end(arglist);
+		return EXIT_FAILURE;
+	}
+
+	char *buf = (char *)xnmalloc((size_t)size + 1, sizeof(char));
+
+	vsprintf(buf, format, arglist);
+	va_end(arglist);
+
+	/* If the new message is the same as the last message, skip it */
+	if (msgs_n && strcmp(messages[msgs_n - 1], buf) == 0) {
+		free(buf);
+		return EXIT_SUCCESS;
+	}
+
+	if (buf) {
+		if (msg_type) {
+			switch (msg_type) {
+			case 'e': pmsg = ERROR; break;
+			case 'w': pmsg = WARNING; break;
+			case 'n': pmsg = NOTICE; break;
+			default: pmsg = NOMSG;
+			}
+		}
+
+		log_msg(buf, (prompt == 1) ? PRINT_PROMPT : NOPRINT_PROMPT);
+		free(buf);
+		return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
 #ifdef LINUX_INOTIFY
 void
 reset_inotify(void)
@@ -77,6 +131,14 @@ reset_inotify(void)
 	if (inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
 		inotify_wd = -1;
+	}
+
+	close(inotify_fd);
+	inotify_fd = inotify_init1(IN_NONBLOCK);
+	if (inotify_fd < 0) {
+		_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME,
+			strerror(errno));
+		return;
 	}
 
 	inotify_wd = inotify_add_watch(inotify_fd, workspaces[cur_ws].path,
@@ -112,7 +174,7 @@ read_inotify(void)
 		event = (struct inotify_event *)ptr;
 
 #ifdef INOTIFY_DEBUG
-		printf("%s (%u): ", *event->name ? event->name : NULL, event->len);
+		printf("%s (%u:%d): ", *event->name ? event->name : NULL, event->len, event->wd);
 #endif /* INOTIFY_DEBUG */
 
 		if (!event->wd) {
@@ -972,60 +1034,6 @@ create_usr_var(char *str)
 	free(name);
 	free(value);
 	return EXIT_SUCCESS;
-}
-
-/* Custom POSIX implementation of GNU asprintf() modified to log program
- * messages. MSG_TYPE is one of: 'e', 'w', 'n', or zero (meaning this
- * latter that no message mark (E, W, or N) will be added to the prompt).
- * PROMPT tells whether to print the message immediately before the
- * prompt or rather in place. Based on littlstar's xasprintf
- * implementation:
- * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
-__attribute__((__format__(__printf__, 3, 0)))
-/* We use __attribute__ here to silence clang warning: "format string is
- * not a string literal" */
-int
-_err(int msg_type, int prompt, const char *format, ...)
-{
-	va_list arglist, tmp_list;
-
-	va_start(arglist, format);
-	va_copy(tmp_list, arglist);
-	int size = vsnprintf((char *)NULL, 0, format, tmp_list);
-	va_end(tmp_list);
-
-	if (size < 0) {
-		va_end(arglist);
-		return EXIT_FAILURE;
-	}
-
-	char *buf = (char *)xnmalloc((size_t)size + 1, sizeof(char));
-
-	vsprintf(buf, format, arglist);
-	va_end(arglist);
-
-	/* If the new message is the same as the last message, skip it */
-	if (msgs_n && strcmp(messages[msgs_n - 1], buf) == 0) {
-		free(buf);
-		return EXIT_SUCCESS;
-	}
-
-	if (buf) {
-		if (msg_type) {
-			switch (msg_type) {
-			case 'e': pmsg = ERROR; break;
-			case 'w': pmsg = WARNING; break;
-			case 'n': pmsg = NOTICE; break;
-			default: pmsg = NOMSG;
-			}
-		}
-
-		log_msg(buf, (prompt == 1) ? PRINT_PROMPT : NOPRINT_PROMPT);
-		free(buf);
-		return EXIT_SUCCESS;
-	}
-
-	return EXIT_FAILURE;
 }
 
 /* Set STR as the program current shell */
