@@ -645,6 +645,9 @@ with no argument, print the current filter. To remove the current filter use the
 .sp
 The filter will be lost at program exit. To permanently set a files filter use the \fIFilter\fR option (in the configuration file). You can also use the \fBCLIFM_FILTER\fR environment variable (see below), though the value of this variable will be lost at system shutdown or reboot.
 .TP
+.B fz \fR[on, off]
+Toggle full directory size on/off (only for long view mode).
+.TP
 .B hf, hidden \fR[on, off, status]
 toggle hidden files on/off.
 .TP
