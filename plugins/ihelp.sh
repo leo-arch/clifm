@@ -101,6 +101,7 @@ fc, filescounter@
 ff, folders-first@
 ft, filter@
 fs @
+fz @
 hf, hidden@
 history @
 icons @
