@@ -1590,12 +1590,6 @@ read_config(void)
 				continue;
 		}
 
-		else if (xargs.props_color == UNSET && *line == 'C'
-		&& strncmp(line, "ColorizeProperties=", 19) == 0) {
-			if (set_config_bool_value(line, &props_color) == -1)
-				continue;
-		}
-
 		else if (!usr_cscheme && *line == 'C'
 		&& strncmp(line, "ColorScheme=", 12) == 0) {
 			if (_set_colorscheme(line) == -1)

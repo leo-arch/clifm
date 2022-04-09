@@ -694,7 +694,6 @@ struct param {
 	int pager;
 	int path;
 	int printsel;
-	int props_color;
 	int restore_last_path;
 	int rl_vi_mode;
 	int secure_cmds;
@@ -902,7 +901,6 @@ extern int
 	pager,
 	print_msg,
 	print_selfiles,
-	props_color,
 	prompt_offset,
 	prompt_style,
 	recur_perm_error_flag,

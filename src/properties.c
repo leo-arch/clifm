@@ -236,7 +236,7 @@ get_properties(char *filename, const int dsize)
 		co3 = dp_c;
 	}
 
-	if (colorize == 0 || props_color == 0) {
+	if (colorize == 0) {
 		cdate = df_c;
 		csize = df_c;
 		cid = df_c;
@@ -379,7 +379,7 @@ get_properties(char *filename, const int dsize)
 	}
 #endif /* _STATX */
 
-	if (colorize == 1 && props_color == 1)
+	if (colorize == 1)
 		printf("%s", BOLD);
 	switch (file_type) {
 	case 'd': printf(_("Directory")); break;
@@ -391,7 +391,7 @@ get_properties(char *filename, const int dsize)
 	case '-': printf(_("Regular file")); break;
 	default: break;
 	}
-	if (colorize == 1 && props_color == 1)
+	if (colorize == 1)
 		printf("%s", cend);
 
 #if defined(__OpenBSD__) || defined(__APPLE__)
@@ -533,7 +533,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		co3 = dp_c;
 	}
 
-	if (colorize == 0 || props_color == 0) {
+	if (colorize == 0) {
 		cdate = df_c;
 		csize = df_c;
 		cid = df_c;
