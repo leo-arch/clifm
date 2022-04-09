@@ -1671,6 +1671,46 @@ _untrash_function(char **args, int *_cont)
 #endif /* !_NO_TRASH */
 }
 
+static int
+toggle_full_dir_size(const char *arg)
+{
+	if (!arg || !*arg || IS_HELP(arg)) {
+		puts(_(FZ_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if (*arg != 'o') {
+		fprintf(stderr, _("%s: %s: Invalid argument. Try 'fz -h'\n"),
+			PROGRAM_NAME, arg);
+		return EXIT_FAILURE;
+	}
+
+	if (*(arg + 1) == 'n' && !*(arg + 2)) {
+		if (full_dir_size == 1) {
+			puts(_("Full directory size is already enabled"));
+		} else {
+			full_dir_size = 1;
+			free_dirlist();	list_dir();
+		}
+		return EXIT_SUCCESS;
+	}
+
+	if (*(arg + 1) == 'f' && *(arg + 2) == 'f' && !*(arg + 3)) {
+		if (full_dir_size == 0) {
+			puts(_("Full directory size is already disabled"));
+		} else {
+			full_dir_size = 0;
+			free_dirlist();	list_dir();
+		}
+		return EXIT_SUCCESS;
+	}
+
+	fprintf(stderr, _("%s: %s: Invalid argument. Try 'fz -h'\n"),
+		PROGRAM_NAME, arg);
+	return EXIT_FAILURE;
+}
+
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2045,6 +2085,9 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'f' && ((comm[0][1] == 't' && !comm[0][2])
 	|| strcmp(comm[0], "filter") == 0))
 		return (exit_code = filter_function(comm[1]));
+
+	else if (*comm[0] == 'f' && comm[0][1] == 'z' && !comm[0][2])
+		return (exit_code = toggle_full_dir_size(comm[1]));
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'l' && !comm[0][2])
 	|| strcmp(comm[0], "columns") == 0))

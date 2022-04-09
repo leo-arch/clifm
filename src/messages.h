@@ -241,6 +241,10 @@ Examples:\n\
 - Change to the directory whose ELN in the list is 24:\n\
     f !24"
 
+#define FZ_USAGE "Toggle full directory size on/off (only for long view mode)\n\
+Usage:\n\
+  fz [on, off]"
+
 #define HF_USAGE "Set hidden files on-off\n\
 Usage:\n\
   hf, hidden [on, off, status]\n\
@@ -822,6 +826,7 @@ parameters.\n\n\
  ff, folders-first [on, off, status]\n\
  fs\n\
  ft, filter [unset] [REGEX]\n\
+ fz\n\
  hf, hidden [on, off, status]\n\
  history [edit [APP]] [clear] [-n]\n\
  icons [on, off]\n\
