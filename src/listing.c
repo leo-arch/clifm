@@ -1788,7 +1788,8 @@ list_dir(void)
 	if (clear_screen)
 		CLEAR;
 
-	if (xargs.disk_usage_analyzer == 1) {
+	if (xargs.disk_usage_analyzer == 1
+	|| (long_view == 1 && full_dir_size == 1)) {
 		printf("Retrieving file sizes. Please wait... ");
 		fflush(stdout);
 	}
@@ -2155,7 +2156,8 @@ list_dir(void)
 		count++;
 	}
 
-	if (xargs.disk_usage_analyzer == 1)
+	if (xargs.disk_usage_analyzer == 1
+	|| (long_view == 1 && full_dir_size == 1))
 		/* Erase the "Retrieveing file sizes" message */
 		printf("\x1b[2K\x1b[1G");
 
