@@ -47,7 +47,7 @@
 #X:N:some_filename=cmd
 
 # Match all file names starting with 'str'
-#X:N:^str.*:cmd
+#X:N:^str.*=cmd
 
 ########################
 #    File extensions   #
@@ -64,8 +64,9 @@ X:N:.*\.cfm$=$EDITOR;$VISUAL;nano;nvim;vim;vis;vi;mg;emacs;ed;micro;kak;mili;lea
 #   MIME types   #
 ##################
 
-# Directories - only for the open-with command (ow)
-# In graphical environment directories will be opened in a new window
+# Directories - only for the open-with command (ow) and the --open command
+# line option
+# In graphical environments directories will be opened in a new window
 X:inode/directory=xterm -e clifm %f &;xterm -e vifm %f &;pcmanfm %f &;thunar %f &;xterm -e ncdu %f &
 !X:inode/directory=vifm;ranger;nnn;ncdu
 
