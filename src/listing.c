@@ -150,7 +150,7 @@ print_disk_usage(void)
 
 	char *free_space = get_size_unit((off_t)(stat.f_frsize * stat.f_bavail));
 	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
-	printf("%s->%s %s/%s\n", mi_c, df_c, free_space ? free_space : "?",
+	printf("%s->%s %s/%s free\n", mi_c, df_c, free_space ? free_space : "?",
 	    size ? size : "?");
 
 	free(free_space);
