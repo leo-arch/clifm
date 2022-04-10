@@ -174,7 +174,7 @@ For a detailed explanation of each of these features, follow the corresponding l
   - **NEW**: [Color variables support](https://github.com/leo-arch/clifm/wiki/Customization#color-variables)
   - **NEW**: [Remove files in bulk using a text editor](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
   - **NEW**: [_Etiqueta_, a files tagging system](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files)
-  - **NEW**: Disk usage analyzer mode (via `-t, --disk-usage-analyzer`)
+  - **NEW**: [Disk usage analyzer mode](https://github.com/leo-arch/clifm/wiki/Specifics#disk-usage-analyzer)
   - `Prompt`, `WarningPromptStr`, `DividingLine`, and `FfzTabOptions` options were moved from the config file to the color scheme file to get a **centralized and single theming file**. However, to keep backwards compatibility, the old location is still recognized. If any of these options is found in the color scheme file, values taken from the main configuration file will be overriden.
   - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is used now only for the _input text color_ of the warning prompt.
 * `verion 1.4`:
