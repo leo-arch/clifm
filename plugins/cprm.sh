@@ -10,9 +10,14 @@ if ! type scp >/dev/null 2>&1; then
 	exit 127
 fi
 
+if ! type fzf >/dev/null 2>&1; then
+	printf "fzf: Command not found\n" >&2
+	exit 127
+fi
+
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Copy a regular file or a directory to a remote machine
+	printf "Copy a regular file or directory to a remote machine
 Usage: %s [-e,--edit] [FILE/DIR]\n" "$name"
 	exit 0
 fi
@@ -37,6 +42,13 @@ if [ "$1" = "-e" ] || [ "$1" = "--edit" ]; then
 	exit 1
 fi
 
+if [ -n "$2" ]; then
+	printf "Multiple files are not allowed.
+To copy more than one file, either archive them (via 'ac') or move them \
+to a single directory (then use that directory here).\n"
+	exit 1
+fi
+
 file="$1"
 is_dir=0
 
@@ -47,6 +59,14 @@ else
 	exit 2
 fi
 
+# Source our plugins helper
+if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
+	printf "CliFM: Unable to find plugins-helper file\n" >&2
+	exit 1
+fi
+# shellcheck source=/dev/null
+. "$CLIFM_PLUGINS_HELPER"
+
 remotes="$(grep "^\[" "$CONFIG_FILE" | tr -d '[]')"
 if [ -z "$remotes" ]; then
 	printf "No remotes found. Use the -e option to edit the configuration \
@@ -54,7 +74,16 @@ file\n" >&2
 	exit 1
 fi
 
-remote="$(printf "%s" "$remotes" | fzf)"
+remotes_num="$(echo "$remotes" | grep -c '^')"
+remotes_num="$((remotes_num + 2))"
+# shellcheck disable=SC2154
+remote="$(printf "%s" "$remotes" | fzf \
+	--ansi --prompt "$fzf_prompt" \
+	--reverse --height "$remotes_num" --info=inline \
+	--header "Choose a remote" \
+	--bind "tab:accept" --info=inline --color="$(get_fzf_colors)")"
+
+[ -z "$remote" ] && exit 0
 
 opts="$(grep -A2 "$remote" "$CONFIG_FILE" | grep ^"Options" \
 | cut -d= -f2-10 | sed 's/\"//g')"
