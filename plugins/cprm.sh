@@ -17,14 +17,14 @@ fi
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Copy a regular file or directory to a remote machine
+	printf "Copy a regular file or directory to a remote machine via scp
 Usage: %s [-e,--edit] [FILE/DIR]\n" "$name"
 	exit 0
 fi
 
-CONFIG_FILE="${XDG_CONFIG_HOME:-${HOME}/.config}/clifm/plugins/cp2rm.cfg"
+CONFIG_FILE="${XDG_CONFIG_HOME:-${HOME}/.config}/clifm/plugins/cprm.cfg"
 if ! [ -f "$CONFIG_FILE" ]; then
-	echo "### cp2rm configuration file ####
+	echo "### cprm configuration file ####
 # Ex:
 # [Desktop machine]
 # Options=\"-P 1046\" # See scp(1)

@@ -438,7 +438,7 @@ create_actions_file(char *file)
 		"dr=dragondrop.sh\n"
 		"fdups=fdups.sh\n"
 		"bn=batch_create.sh\n"
-		"cr=cp2rm.sh\n"
+		"cr=cprm.sh\n"
 		"+=finder.sh\n"
 		"++=jumper.sh\n"
 		"-=fzfnav.sh\n"
