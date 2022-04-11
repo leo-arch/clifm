@@ -84,8 +84,6 @@ run_action(char *action, char **args)
 	if (!action)
 		return EXIT_FAILURE;
 
-	int exit_status = EXIT_SUCCESS;
-
 		/* #####################################
 		 * #    1) CREATE CMD TO BE EXECUTED   #
 		 * ##################################### */
@@ -178,9 +176,10 @@ run_action(char *action, char **args)
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
 
-		launch_execve(args, FOREGROUND, E_NOFLAG);
+		int ret = launch_execve(args, FOREGROUND, E_NOFLAG);
+		/* RET will be read later by waitpid(3) to get plugin exit status */
 		close(wfd);
-		_exit(EXIT_SUCCESS);
+		_exit(ret);
 	}
 
 		/* ########################################
@@ -204,9 +203,20 @@ run_action(char *action, char **args)
 	close(rfd);
 
 	/* Wait for the child to finish. Otherwise, the child is left as
-	 * zombie process */
-	int status = 0;
-	waitpid(pid, &status, 0);
+	 * zombie process. Store plugin exit status in EXIT_STATUS */
+	int status = 0, exit_status = 0;
+	if (waitpid(pid, &status, 0) > 0) {
+			if (WIFEXITED(status) && !WEXITSTATUS(status)) {
+			exit_status = EXIT_SUCCESS;
+		} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
+			exit_status = WEXITSTATUS(status);
+		} else {
+			exit_status = EXCRASHERR;
+		}
+	} else {
+		exit_status = errno;
+		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+	}
 
 	/* If the pipe is empty */
 	if (!*buf) {
@@ -214,7 +224,7 @@ run_action(char *action, char **args)
 		if (xargs.cwd_in_title == 1)
 			set_term_title(workspaces[cur_ws].path);
 		unsetenv("CLIFM_BUS");
-		return EXIT_SUCCESS;
+		return exit_status;
 	}
 
 	if (buf[buf_len - 1] == '\n')
@@ -222,7 +232,6 @@ run_action(char *action, char **args)
 
 	/* If a valid file */
 	struct stat attr;
-
 	if (lstat(buf, &attr) != -1) {
 		char *o_cmd[] = {"o", buf, NULL};
 		exit_status = open_function(o_cmd);

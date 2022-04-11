@@ -381,9 +381,10 @@ launch_execve(char **cmd, int bg, int xflags)
 		}
 
 		execvp(cmd[0], cmd);
+		int ret = errno;
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0],
 		    strerror(errno));
-		_exit(errno);
+		_exit(ret);
 	}
 
 	/* Get command status (pid > 0) */
