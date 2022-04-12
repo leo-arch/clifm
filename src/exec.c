@@ -1534,7 +1534,7 @@ check_auto_second(char **args)
 		return (-1);
 	}
 
-	if (S_ISDIR(attr.st_mode))
+	if (autocd == 1 && S_ISDIR(attr.st_mode) && !args[1])
 		return autocd_dir(tmp);
 
 	/* Regular, non-executable file, or exec file not in PATH
