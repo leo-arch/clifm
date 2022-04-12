@@ -2269,17 +2269,25 @@ free_aliases(void)
 static inline void
 write_alias(char *s, char *p)
 {
-	aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 1)
+	aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 2)
 				* sizeof(struct alias_t));
 	aliases[aliases_n].name = savestring(s, strlen(s));
+	int add = 0;
 	if (*p == '\'') {
 		aliases[aliases_n].cmd = strbtw(p, '\'', '\'');
 		aliases_n++;
+		add = 1;
 	} else {
 		if (*p == '"') {
 			aliases[aliases_n].cmd = strbtw(p, '"', '"');
 			aliases_n++;
+			add = 1;
 		}
+	}
+
+	if (add == 1) {
+		aliases[aliases_n].name = (char *)NULL;
+		aliases[aliases_n].cmd = (char *)NULL;
 	}
 }
 

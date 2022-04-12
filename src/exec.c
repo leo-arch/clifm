@@ -1016,6 +1016,48 @@ get_largest_alias_name(void)
 }
 
 static int
+list_aliases(void)
+{
+	if (aliases_n <= 0) {
+		printf(_("%s: No aliases found\n"), PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
+	size_t i, largest = get_largest_alias_name();
+	for (i = 0; i < aliases_n; i++) {
+		printf("%-*s %s->%s %s\n", (int)largest,
+			aliases[i].name, mi_c, df_c, aliases[i].cmd);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+print_alias(char *name)
+{
+	if (!name || !*name)
+		return EXIT_FAILURE;
+
+	if (aliases_n <= 0) {
+		printf(_("%s: No aliases found\n"), PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
+	int i = (int)aliases_n;
+	while (--i >= 0) {
+		if (aliases[i].name && *name == *aliases[i].name
+		&& strcmp(name, aliases[i].name) == 0) {
+			printf("alias %s='%s'\n", aliases[i].name,
+				aliases[i].cmd ? aliases[i].cmd : 0);
+			return EXIT_SUCCESS;
+		}
+	}
+
+	fprintf(stderr, _("%s: %s: No such alias\n"), PROGRAM_NAME, name);
+	return EXIT_FAILURE;
+}
+
+static int
 alias_function(char **args)
 {
 	if (args[1]) {
@@ -1031,17 +1073,15 @@ alias_function(char **args)
 			}
 			return alias_import(args[2]);
 		}
+
+		if (*args[1] == 'l' && (strcmp(args[1], "ls") == 0
+		|| strcmp(args[1], "list") == 0))
+			return list_aliases();
+
+		return print_alias(args[1]);
 	}
 
-	if (aliases_n) {
-		size_t i, largest = get_largest_alias_name();
-		for (i = 0; i < aliases_n; i++)
-			printf("%-*s %s->%s %s\n", (int)largest,
-				aliases[i].name, mi_c, df_c, aliases[i].cmd);
-	} else {
-		printf("%s: No aliases found\n", PROGRAM_NAME);
-	}
-
+	list_aliases();
 	return EXIT_SUCCESS;
 }
 

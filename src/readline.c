@@ -1439,6 +1439,29 @@ sort_num_generator(const char *text, int state)
 }
 
 static char *
+aliases_generator(const char *text, int state)
+{
+	if (aliases_n <= 0)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while ((name = aliases[i++].name) != NULL) {
+		if (strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
+
+static char *
 nets_generator(const char *text, int state)
 {
 	if (!remotes)
@@ -2049,6 +2072,15 @@ my_rl_completion(const char *text, int start, int end)
 			matches = rl_completion_matches(text, &bookmarks_generator);
 			if (matches) {
 				cur_comp_type = TCMP_BOOKMARK;
+				return matches;
+			}
+		}
+
+		/* ### ALIASES COMPLETION ### */
+		if (aliases_n > 0 && *lb == 'a' && strncmp(lb, "alias ", 6) == 0) {
+			matches = rl_completion_matches(text, &aliases_generator);
+			if (matches) {
+				cur_comp_type = TCMP_ALIAS;
 				return matches;
 			}
 		}
