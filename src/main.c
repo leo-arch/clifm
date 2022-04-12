@@ -417,6 +417,8 @@ const char *param_str[] = {
 	"autocd status",
 	"acd status",
 	"alias import",
+	"alias ls",
+	"alias list",
 	"ao on",
 	"auto-open on",
 	"ao off",

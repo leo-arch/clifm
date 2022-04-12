@@ -40,10 +40,16 @@ Examples:\n\
 - Open/edit the configuration file with the default associated application:\n\
     actions edit"
 
-#define ALIAS_USAGE "List or import aliases\n\
+#define ALIAS_USAGE "List, print, or import aliases\n\
 Usage:\n\
-  alias [import FILE]\n\n\
+  alias [import FILE] [ls, list] [NAME]\n\n\
 Example:\n\
+- List available aliases:\n\
+    alias\n\
+  or\n\
+    alias ls\n\
+- Print a specific alias:\n\
+    alias my_alias\n\
 - Import aliases from ~/.bashrc:\n\
     alias import ~/.bashrc"
 
@@ -802,7 +808,7 @@ parameters.\n\n\
  ac, ad ELN/FILE ... (archiving functions)\n\
  acd, autocd [on, off, status]\n\
  actions [edit [APP]]\n\
- alias [import FILE]\n\
+ alias [import FILE] [ls, list] [NAME]\n\
  ao, auto-open [on, off, status]\n\
  b, back [h, hist] [clear] [!ELN]\n\
  bb, bleach ELN/FILE ... (file names cleaner)\n\
