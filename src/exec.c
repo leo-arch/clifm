@@ -1537,11 +1537,15 @@ check_auto_second(char **args)
 	if (S_ISDIR(attr.st_mode))
 		return autocd_dir(tmp);
 
-	/* Regular, non-executable file */
+	/* Regular, non-executable file, or exec file not in PATH
+	 * not ./file and not /path/to/file */
 	if (auto_open && S_ISREG(attr.st_mode)
-	&& !(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
+	&& (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
+	|| (!is_bin_cmd(tmp) && !(*tmp == '.' && *(tmp + 1) == '/') && *tmp != '/' ) ) )
 		return auto_open_file(args, tmp);
-
+/*	if (auto_open && S_ISREG(attr.st_mode)
+	&& !(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
+		return auto_open_file(args, tmp); */
 	free(tmp);
 	return (-1);
 }
