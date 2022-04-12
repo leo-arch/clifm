@@ -471,12 +471,12 @@ All arguments passed to the action command are passed to the script or program a
 .sp
 The plugins provided with CliFM (take a look at the plugins directory) could be used as a starting point to create custom plugins.
 .TP
-.B alias \fR[import FILE]
-with no argument, it prints the list of available aliases, if any. To write a new alias simply enter 'edit' to open the configuration file and add a line like this one: "alias name='command args...'" or "alias name='directory'".
+.B alias \fR[import FILE] [ls,list] [NAME]
+with no argument (or with \fIls,list\fR parameters), it prints the list of available aliases, if any. To get the description of a specific alias just enter \fIalias\fR followed by the alias name. To write a new alias simply enter \fIedit\fR (or press F10) to open the configuration file and add a line like this: "alias name='command args...'" or "alias name='directory'".
 .sp
-To import aliases from a file, provided it contains aliases in the specified form, use the 'import' option. Aliases conflicting with some of the internal commands won't be imported.
+To import aliases from a file, provided it contains aliases in the specified form, use the \fIimport\fR parameter. Aliases conflicting with some of the internal commands won't be imported.
 .sp
-However, a neat usage for the alias function is not so much to bind short keys to commands, but to files and directories visited regularly. In this way, it is possible to bind as many files or directories, no matter how deep they are in the file system, to very short strings, even single characters. For example, "alias w='/some/file/deep/in/the/filesystem'. Now, no matter where we are, we can just enter 'w', provided \fIautocd\fR and/or \fIauto-open\fR function are enabled, to access the file or directory we want. Theoretically at least, this procedure could be repeated until the system memory is exhausted.
+However, a neat usage for the alias function is not so much to bind short keys to commands, but to files and directories visited regularly. In this way, it is possible to bind as many files or directories, no matter how deep they are in the file system, to very short strings, even single characters. For example, "alias w='/some/file/deep/in/the/filesystem'. Now, no matter where we are, we can just enter 'w', provided \fIautocd\fR and/or \fIauto-open\fR function is enabled, to access the file or directory we want. Theoretically at least, this procedure could be repeated until the system memory is exhausted.
 .sp
 To create multiple aliases for files at once, this is the recommended procedure: 1) Select all files you want to alias with the \fIsel\fR function: 's file1 file2 file3 ...'. 2) Export the selected files into a temporary file running 'exp sel'; 3) Edit this file to contain only valid alias lines:
 
@@ -484,7 +484,7 @@ To create multiple aliases for files at once, this is the recommended procedure:
  alias b1='file2'
  alias c1='file3'
 
-NOTE: Make sure alias names do not conflict with other commands, either internal or external. To bypass the conflicts check, performed automatically by the 'alias import' command, you can just edit the aliases file manually.
+NOTE: Make sure alias names do not conflict with other commands, either internal or external. To bypass the conflicts check, performed automatically by the 'alias import' command, you can just edit the aliases file manually (F10).
 
 4) Finally, import this file with the \fIalias\fR function: 'alias import tmp_file'. Now, you can access any of these files by entering just a few characters: a1, b1, and c1.
 .TP
