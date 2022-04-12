@@ -487,12 +487,10 @@ check_for_alias(char **args)
 	register int i;
 	if (autocd == 1 || auto_open == 1) {
 		/* Do not expand alias is first word is a file name in CWD */
-		i = (int)files;
-		while (--i >= 0) {
-			if (*args[0] == *file_info[i].name && strcmp(args[0],
-			file_info[i].name) == 0)
-				return (char **)NULL;
-		}
+		struct stat a;
+		if (stat(args[0], &a) == 0 && ((S_ISDIR(a.st_mode) && autocd == 1)
+		|| (!S_ISDIR(a.st_mode) && auto_open == 1)))
+			return (char **)NULL;
 	}
 
 	i = (int)aliases_n;
