@@ -480,10 +480,22 @@ check_regex(char *str)
 char **
 check_for_alias(char **args)
 {
+	/* Do not expand alias is first word is an ELN */
 	if (!aliases_n || !aliases || !args || first_word_is_eln == 1)
 		return (char **)NULL;
 
-	register int i = (int)aliases_n;
+	register int i;
+	if (autocd == 1 || auto_open == 1) {
+		/* Do not expand alias is first word is a file name in CWD */
+		i = (int)files;
+		while (--i >= 0) {
+			if (*args[0] == *file_info[i].name && strcmp(args[0],
+			file_info[i].name) == 0)
+				return (char **)NULL;
+		}
+	}
+
+	i = (int)aliases_n;
 
 	while (--i >= 0) {
 		if (!aliases[i].name || !aliases[i].cmd || !*aliases[i].name
