@@ -565,7 +565,7 @@ print_selected_files(int print_header, int print_total)
 }
 
 static inline int
-print_sel_results(int new_sel, char *sel_path, char *pattern)
+print_sel_results(int new_sel, const char *sel_path, const char *pattern)
 {
 	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
 	&& save_sel() != EXIT_SUCCESS) {

@@ -197,6 +197,7 @@ revert_autocmd_opts(void)
 	autocmd_set = 0;
 }
 
+#ifdef AUTOCMDS_TEST
 void
 free_autocmds(void)
 {
@@ -212,6 +213,7 @@ free_autocmds(void)
 
 	opts.color_scheme = (char *)NULL;
 }
+#endif /* AUTOCMDS_TEST */
 
 /* Store each autocommand option in the corresponding field of the
  * autocmds struct */

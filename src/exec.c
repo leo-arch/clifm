@@ -1547,7 +1547,7 @@ autocd_dir(char *tmp)
 static inline int
 check_auto_second(char **args)
 {
-	if (args && args[1] && *args[1] == '-')
+	if (args[1] && *args[1] == '-')
 		return (-1);
 
 	char *tmp = savestring(args[0], strlen(args[0]));
@@ -2453,7 +2453,7 @@ exec_profile(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		if (line_len == 0 || !*line || *line == '\n' || *line == '#')
+		if (!*line || *line == '\n' || *line == '#')
 			continue;
 
 		if (line[line_len - 1] == '\n')

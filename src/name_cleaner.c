@@ -215,7 +215,7 @@ clean_file_name(char *restrict name)
 				q += 5;
 				cur_len += 5;
 			} else {
-				sprintf((q == p) ? q : q - 1, "_and_");
+				sprintf(q - 1, "_and_");
 				q += 4;
 				cur_len += 4;
 			}
@@ -235,7 +235,7 @@ clean_file_name(char *restrict name)
 					cur_len++;
 				}
 				else {
-					if (q != p && *(q - 1) == DEFAULT_TRANSLATION) {
+					if (*(q - 1) == DEFAULT_TRANSLATION) {
 						q--;
 						*q = (char)ret;
 					}
@@ -290,7 +290,7 @@ clean_file_name(char *restrict name)
 			q += tlen;
 			cur_len += tlen;
 		} else {
-			sprintf((q == p) ? q : q - 1, "%s", t);
+			sprintf(q - 1, "%s", t);
 			q += tlen - 1;
 			cur_len += tlen - 1;
 		}

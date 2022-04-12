@@ -1354,7 +1354,7 @@ run_dir_cmd(const int mode)
 
 /* Check if S is either .cfm.in or .cfm.out */
 static inline void
-check_autocmd_file(char *s)
+check_autocmd_file(const char *s)
 {
 	if (*s == '.' && s[1] == 'c' && s[2] == 'f' && s[3] == 'm'
 	&& s[4] == '.') {

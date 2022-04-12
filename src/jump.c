@@ -682,6 +682,7 @@ dirjump(char **args, int mode)
 /* This function is called if the autojump option is enabled. If the
  * first word in CMD is not a program in PATH, append the j command to
  * the current command line and run the dirjump function */
+/*
 int
 run_autojump(char **cmd)
 {
@@ -719,4 +720,4 @@ run_autojump(char **cmd)
 	free(__cmd);
 
 	return exit_code;
-}
+} */

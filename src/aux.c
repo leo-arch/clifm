@@ -178,7 +178,7 @@ normalize_path(char *src, size_t src_len)
 		memcpy(res, workspaces[cur_ws].path, pwd_len);
 		res_len = pwd_len;
 	} else {
-		res = (char *)xnmalloc((src_len > 0 ? src_len : 1) + 1, sizeof(char));
+		res = (char *)xnmalloc(src_len + 1, sizeof(char));
 		res_len = 0;
 	}
 
@@ -885,7 +885,7 @@ from_hex(char c)
 static char
 to_hex(char c)
 {
-	static char hex[] = "0123456789ABCDEF";
+	static const char hex[] = "0123456789ABCDEF";
 	return hex[c & 15];
 }
 
