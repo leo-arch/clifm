@@ -723,7 +723,7 @@ open_bookmark(void)
 
 	int exit_status = EXIT_SUCCESS;
 	if (*arg[0] == 'q' && (!arg[0][1] || strcmp(arg[0], "quit") == 0)) {
-		free_dirlist(); list_dir();
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		goto FREE_AND_EXIT;
 	}
 

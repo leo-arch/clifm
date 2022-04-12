@@ -1001,6 +1001,20 @@ lightmode_function(char *arg)
 	return EXIT_SUCCESS;
 }
 
+static size_t
+get_largest_alias_name(void)
+{
+	int i = (int)aliases_n;
+	size_t len = 0, largest = 0;
+	while (--i >= 0) {
+		len = strlen(aliases[i].name);
+		if (len > largest)
+			largest = len;
+	}
+
+	return largest;
+}
+
 static int
 alias_function(char **args)
 {
@@ -1020,9 +1034,10 @@ alias_function(char **args)
 	}
 
 	if (aliases_n) {
-		size_t i;
+		size_t i, largest = get_largest_alias_name();
 		for (i = 0; i < aliases_n; i++)
-			printf("%s %s->%s %s\n", aliases[i].name, mi_c, df_c, aliases[i].cmd);
+			printf("%-*s %s->%s %s\n", (int)largest,
+				aliases[i].name, mi_c, df_c, aliases[i].cmd);
 	} else {
 		printf("%s: No aliases found\n", PROGRAM_NAME);
 	}

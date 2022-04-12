@@ -341,15 +341,29 @@ edit_actions(char *app)
 	return EXIT_SUCCESS;
 }
 
+static size_t
+get_largest_action_name(void)
+{
+	int i = (int)actions_n;
+	size_t largest = 0;
+	while (--i >= 0) {
+		size_t len = strlen(usr_actions[i].name);
+		if (len > largest)
+			largest = len;
+	}
+
+	return largest;
+}
+
 int
 actions_function(char **args)
 {
 	if (!args[1]) {
 		if (actions_n) {
 			/* Just list available actions */
-			size_t i;
+			size_t i, largest = get_largest_action_name();
 			for (i = 0; i < actions_n; i++) {
-				printf("%s %s->%s %s\n", usr_actions[i].name,
+				printf("%-*s %s->%s %s\n", (int)largest, usr_actions[i].name,
 				    mi_c, df_c, usr_actions[i].value);
 			}
 			return EXIT_SUCCESS;
