@@ -172,7 +172,7 @@ This is the basic structure of CliFM: generally speaking, it is just a shell. In
 | Icons | `icons.h`, `listing.c` | `list_dir` | Consult the [customizing icons](https://github.com/leo-arch/clifm/wiki/Advanced#customizing-icons) section |
 | TAB completion (including the FZF mode) | `readline.c` (`my_rl_completion`), `tabcomp.c` | |
 | Interface | `listing.c` (particularly `list_dir`) and `colors.c` | | |
-| Directory jumper | `jump.c` | `run_autojump` | |
+| Directory jumper | `jump.c` | `dirjump` | |
 | Suggestions | `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` function) | | |
 | Syntax highlighting | `highlight.c` | `rl_highlight` | See also `readline.c` and `keybinds.c` |
 | Autocommands | `autocmds.c` | `check_autocmds` | |
