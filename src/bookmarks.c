@@ -781,12 +781,21 @@ add_bookmark(char *cmd)
 		return EXIT_SUCCESS;
 	}
 
-	if (access(cmd, F_OK) != 0) {
-		fprintf(stderr, _("Bookmarks: %s: %s\n"), cmd, strerror(errno));
+	char *p = dequote_str(cmd, 0);
+	if (!p) {
+		fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, cmd);
 		return EXIT_FAILURE;
 	}
 
-	return bookmark_add(cmd);
+	if (access(p, F_OK) != 0) {
+		fprintf(stderr, _("aaaBookmarks: %s: %s\n"), p, strerror(errno));
+		free(p);
+		return EXIT_FAILURE;
+	}
+
+	int ret = bookmark_add(p);
+	free(p);
+	return ret;
 }
 
 /* Handle bookmarks: run the corresponding function according to CMD */
