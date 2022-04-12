@@ -788,7 +788,7 @@ add_bookmark(char *cmd)
 	}
 
 	if (access(p, F_OK) != 0) {
-		fprintf(stderr, _("aaaBookmarks: %s: %s\n"), p, strerror(errno));
+		fprintf(stderr, _("Bookmarks: %s: %s\n"), p, strerror(errno));
 		free(p);
 		return EXIT_FAILURE;
 	}
