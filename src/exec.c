@@ -1005,9 +1005,9 @@ static size_t
 get_largest_alias_name(void)
 {
 	int i = (int)aliases_n;
-	size_t len = 0, largest = 0;
+	size_t largest = 0;
 	while (--i >= 0) {
-		len = strlen(aliases[i].name);
+		size_t len = strlen(aliases[i].name);
 		if (len > largest)
 			largest = len;
 	}
@@ -1018,7 +1018,7 @@ get_largest_alias_name(void)
 static int
 list_aliases(void)
 {
-	if (aliases_n <= 0) {
+	if (aliases_n == 0) {
 		printf(_("%s: No aliases found\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
@@ -1038,7 +1038,7 @@ print_alias(char *name)
 	if (!name || !*name)
 		return EXIT_FAILURE;
 
-	if (aliases_n <= 0) {
+	if (aliases_n == 0) {
 		printf(_("%s: No aliases found\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}

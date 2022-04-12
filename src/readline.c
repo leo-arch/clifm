@@ -1441,7 +1441,7 @@ sort_num_generator(const char *text, int state)
 static char *
 aliases_generator(const char *text, int state)
 {
-	if (aliases_n <= 0)
+	if (aliases_n == 0)
 		return (char *)NULL;
 
 	static int i;
