@@ -40,6 +40,7 @@
 #include "mime.h"
 #include "readline.h"
 #include "messages.h"
+#include "listing.h"
 
 void
 free_bookmarks(void)
@@ -723,8 +724,10 @@ open_bookmark(void)
 		return _edit_bookmarks(arg);
 
 	int exit_status = EXIT_SUCCESS;
-	if (*arg[0] == 'q' && (!arg[0][1] || strcmp(arg[0], "quit") == 0))
+	if (*arg[0] == 'q' && (!arg[0][1] || strcmp(arg[0], "quit") == 0)) {
+		free_dirlist(); list_dir();
 		goto FREE_AND_EXIT;
+	}
 
 	char *tmp_path = get_bm_path(arg, &exit_status);
 	if (!tmp_path)
