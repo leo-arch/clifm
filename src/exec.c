@@ -1486,9 +1486,15 @@ autocd_dir(char *tmp)
 }
 
 /* Try to autocd or auto-open */
+/* If there is a second word (parameter, ARGS[1]) and this word starts
+ * with a dash, do not take the first word (ARGS[0]) as a file to be
+ * opened, but as a command to be executed */
 static inline int
 check_auto_second(char **args)
 {
+	if (args && args[1] && *args[1] == '-')
+		return (-1);
+
 	char *tmp = savestring(args[0], strlen(args[0]));
 
 	if (strchr(tmp, '\\')) {

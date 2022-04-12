@@ -929,7 +929,6 @@ open_function(char **cmd)
 
 	/* Check file type: only directories, symlinks, and regular files
 	 * will be opened */
-
 	char no_open_file = 1;
 	char *file_type = (char *)NULL;
 	char *types[] = {
@@ -941,8 +940,7 @@ open_function(char **cmd)
 		NULL};
 
 	switch ((attr.st_mode & S_IFMT)) {
-		/* Store file type to compose and print the error message, if
-		 * necessary */
+	/* Store file type to compose and print the error message, if necessary */
 	case S_IFBLK: file_type = types[OPEN_BLK]; break;
 	case S_IFCHR: file_type = types[OPEN_CHR]; break;
 	case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
@@ -966,21 +964,8 @@ open_function(char **cmd)
 			}
 		}
 		}
-		/* fallthrough */
-	case S_IFREG:
-/*#ifndef _NO_ARCHIVING
-		// If an archive/compressed file, call archiver()
-		if (is_compressed(file, 1) == 0) {
-			char *tmp_cmd[] = {"ad", file, NULL};
-			return archiver(tmp_cmd, 'd');
-		}
-#endif */
-		no_open_file = 0;
-		break;
-
-	default:
-		file_type = types[OPEN_UNK];
-		break;
+	case S_IFREG: no_open_file = 0;	break;
+	default: file_type = types[OPEN_UNK]; break;
 	}
 
 	/* If neither directory nor regular file nor symlink (to directory
@@ -1007,10 +992,16 @@ open_function(char **cmd)
 	/* If some application was specified to open the file */
 	char *tmp_cmd[] = {cmd[2], file, NULL};
 	int ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
-	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	if (ret == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
 
-	return EXIT_SUCCESS;
+	if (ret == ENOENT) { /* 2: No such file or directory */
+		fprintf(stderr, "%s: %s: Command not found\n", PROGRAM_NAME, cmd[2]);
+		return 127;
+	}
+
+	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[2], strerror(ret));
+	return ret;
 }
 
 /* Relink symlink to new path */

@@ -1143,6 +1143,7 @@ parse_input_str(char *str)
 	size_t ntags = 0;
 	int *tag_index = (int *)NULL;
 #endif /* NO_TAGS */
+	first_word_is_eln = 0;
 
 	/* If internal command plus fused parameter, split it */
 	if (is_fused_param(str) == EXIT_SUCCESS) {
@@ -1711,6 +1712,8 @@ parse_input_str(char *str)
 					char *esc_str = escape_str(file_info[j].name);
 
 					if (esc_str) {
+						if (i == 0)
+							first_word_is_eln = 1;
 						if (file_info[j].dir &&
 						file_info[j].name[file_info[j].len
 						? file_info[j].len - 1 : 0] != '/') {

@@ -868,6 +868,7 @@ extern int
 	ext_cmd_ok,
 	files_counter,
 	filter_rev,
+	first_word_is_eln,
 	follow_symlinks,
 	full_dir_size,
 	fzftab,

@@ -480,7 +480,7 @@ check_regex(char *str)
 char **
 check_for_alias(char **args)
 {
-	if (!aliases_n || !aliases || !args)
+	if (!aliases_n || !aliases || !args || first_word_is_eln == 1)
 		return (char **)NULL;
 
 	register int i = (int)aliases_n;

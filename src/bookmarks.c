@@ -713,12 +713,10 @@ open_bookmark(void)
 		return EXIT_SUCCESS;
 	}
 
-	if (clear_screen)
-		CLEAR;
+	if (clear_screen) CLEAR;
 
 	char **arg = print_bookmarks();
-	if (!arg || !*arg)
-		return EXIT_FAILURE;
+	if (!arg || !*arg) return EXIT_FAILURE;
 
 	if (*arg[0] == 'e' && (!arg[0][1] || strcmp(arg[0], "edit") == 0))
 		return _edit_bookmarks(arg);
@@ -730,8 +728,7 @@ open_bookmark(void)
 	}
 
 	char *tmp_path = get_bm_path(arg, &exit_status);
-	if (!tmp_path)
-		goto FREE_AND_EXIT;
+	if (!tmp_path) goto FREE_AND_EXIT;
 
 	char *tmp_cmd[] = {"o", tmp_path, arg[1], NULL};
 	exit_status = open_function(tmp_cmd);

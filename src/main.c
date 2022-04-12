@@ -134,6 +134,7 @@ int
 	ext_cmd_ok = UNSET,
 	files_counter = UNSET,
 	filter_rev = 0,
+	first_word_is_eln = 0,
 	follow_symlinks = UNSET,
 	full_dir_size = UNSET,
 	fzftab = UNSET,
