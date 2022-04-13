@@ -14,7 +14,7 @@ Once this is done, you might want to check and modify a few things from the resu
 
 ### C source
 
-BSD compatibility: We try to keep _CliFM_ working on BSD systems (at the very least). So, when calling a function make sure it exists on BSD systems, and, if possible, make sure it is POSIX. Check its syntax as well: GNU functions are not always identical to BSD ones.
+Portability: Though mostly developed in Linux (and this always means better support), we try to keep _CliFM_ working on \*BSD, MacOS, and Haiku. So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBsd, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
 
 Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
