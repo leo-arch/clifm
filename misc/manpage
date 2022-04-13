@@ -239,7 +239,7 @@ use \fIPROFILE\fR as profile. If \fIPROFILE\fR does not exist, it will be create
 enable the splash screen
 .TP
 .B \-S \-\-stealth-mode
-leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below).
+leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
 .TP
 .B \-t, \-\-disk\-usage\-analyzer
 run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --sort-reverse --full-dir-size --no-folders-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch.
