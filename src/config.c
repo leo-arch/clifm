@@ -2232,6 +2232,7 @@ reset_variables(void)
 #ifndef _NO_HIGHLIGHT
 	highlight = UNSET;
 #endif
+	hist_status = UNSET;
 #ifndef _NO_ICONS
 	icons = UNSET;
 #endif

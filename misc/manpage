@@ -362,6 +362,9 @@ do not follow symbolic links when listing files
 .B \-\-no\-highlight
 disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below
 .TP
+.B \-\-no\-history
+do not write commands into the history file
+.TP
 .B \-\-no\-open\-auto
 same as no-cd-auto, but for files instead of directories
 .TP
@@ -803,6 +806,8 @@ Use the \fIedit\fR option to edit the remotes configuration file. If no further 
 If not already mounted, the \fIm\fR, \fImount\fR option mounts the specified remote using the mount command and the mounpoint specified in the confifuration file and automatically cd into the corresponding mountpoint. Example: \fInet m smb_work\fR. \fIm\fR, \fImount\fR could be omitted, so that \fInet smb_work\fR amounts to \fInet m smb_work\fR. TAB completion is available for this function.
 .sp
 The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmount command specified in the configuration file. For example: \fInet u smb_work\fR. TAB completion is also available for this function.
+.sp
+\fBNOTE\fR: If you only need to copy some files to a remote location (including mobile phones) without the need to mount the resource, you can make use of the cprm.sh plugin, bound by default to the \fIcr\fR action. Just set up your remotes (\fIcr edit\fR) and then simply send the file you want (\fIcr FILE\fR). That's all.
 .TP
 .B o, open \fRELN/FILE [APPLICATION]
 open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see above), a regular file, or a symbolic link to either of the two. For example: 'o 12', 'o filename', 'o /path/to/filename'.

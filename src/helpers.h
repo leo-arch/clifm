@@ -673,6 +673,7 @@ struct param {
 #ifndef _NO_HIGHLIGHT
 	int highlight;
 #endif
+	int history;
 	int horizontal_list;
 #ifndef _NO_ICONS
 	int icons;

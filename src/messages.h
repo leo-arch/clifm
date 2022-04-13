@@ -771,6 +771,7 @@ directory base name (if \\z is used in the prompt)\
 \n     --no-files-counter\t\t Disable the files counter for directories\
 \n     --no-follow-symlink\t Do not follow symbolic links when listing files\
 \n     --no-highlight\t\t Disable syntax highlighting\
+\n     --no-history\t\t Do not write commands into the history file\
 \n     --no-open-auto\t\t Same as no-cd-auto, but for files\
 \n     --no-restore-last-path\t Save last visited directory to be restored \
 in the next session\

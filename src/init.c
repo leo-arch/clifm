@@ -1175,8 +1175,9 @@ external_arguments(int argc, char **argv)
 		{"secure-cmds", no_argument, 0, 48},
 		{"full-dir-size", no_argument, 0, 49},
 		{"apparent-size", no_argument, 0, 50},
+		{"no-history", no_argument, 0, 51},
 #ifdef __linux__
-		{"si", no_argument, 0, 51},
+		{"si", no_argument, 0, 52},
 #endif
 	    {0, 0, 0, 0}
 	};
@@ -1369,8 +1370,9 @@ RUN:
 		case 48: xargs.secure_cmds = 1; break;
 		case 49: xargs.full_dir_size = full_dir_size = 1; break;
 		case 50: xargs.apparent_size = 1; break;
+		case 51: xargs.history = 0; break;
 #ifdef __linux__
-		case 51: xargs.si = 1; break;
+		case 52: xargs.si = 1; break;
 #endif
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1786,6 +1788,7 @@ unset_xargs(void)
 #ifndef _NO_HIGHLIGHT
 	xargs.highlight = UNSET;
 #endif
+	xargs.history = UNSET;
 	xargs.horizontal_list = UNSET;
 #ifndef _NO_ICONS
 	xargs.icons = UNSET;
@@ -2465,6 +2468,13 @@ check_options(void)
 {
 	if (xargs.si == UNSET)
 		xargs.si = DEF_SI;
+
+	if (hist_status == UNSET) {
+		if (xargs.history == UNSET)
+			hist_status = DEF_HIST_STATUS;
+		else
+			hist_status = xargs.history;
+	}
 
 	if (!usr_cscheme)
 		usr_cscheme = savestring("default", 7);

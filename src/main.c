@@ -141,7 +141,7 @@ int
 	fzf_height_set = 0,
 	fzf_open_with = 0,
 	highlight = UNSET,
-	hist_status = DEF_HIST_STATUS,
+	hist_status = UNSET,
 	home_ok = 1,
 #ifndef _NO_ICONS
 	icons = UNSET,
