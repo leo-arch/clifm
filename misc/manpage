@@ -651,8 +651,8 @@ Toggle full directory size on/off (only for long view mode).
 .B hf, hidden \fR[on, off, status]
 toggle hidden files on/off.
 .TP
-.B history \fR[edit [APP]] [clear] [\-n]
-with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all entries in the history file. Use 'edit' to open the history file and modify it if needed (the file will be opened with APP, if specified, or with the default associated application otherwise). Finally, '\-n' tells the \fIhistory\fR command to list only the last 'n' commands in the history list.
+.B history \fR[edit [APP]] [clear] [\-n] [on, off, status]
+with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all entries in the history file. Use 'edit' to open the history file and modify it if needed (the file will be opened with APP, if specified, or with the default associated application otherwise). '\-n' tells the \fIhistory\fR command to list only the last 'n' commands in the history list. Finally, you can disable history (subsequent entries won't be written to the history file) via 'history off'.
 .sp
 You can use the exclamation mark (!) to perform some history commands:
   !!: Execute the last command.
