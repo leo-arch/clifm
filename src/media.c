@@ -320,8 +320,8 @@ list_unmounted_devs(void)
 static int
 list_mounted_devs(int mode)
 {
-	FILE *mp_fp = fopen("/proc/mounts", "r");
-	if (!mp_fp) {
+	FILE *fp = fopen("/proc/mounts", "r");
+	if (!fp) {
 		fprintf(stderr, "%s: mp: fopen: /proc/mounts: %s\n",
 				PROGRAM_NAME, strerror(errno));
 		return EXIT_FAILURE;
@@ -330,68 +330,60 @@ list_mounted_devs(int mode)
 	size_t line_size = 0;
 	char *line = (char *)NULL;
 
-	while (getline(&line, &line_size, mp_fp) > 0) {
-		/* Do not list all mountpoints, but only those corresponding
-		 * to a block device (/dev) */
-		if (strncmp(line, "/dev/", 5) == 0) {
-			char *str = (char *)NULL;
-			size_t counter = 0;
+	while (getline(&line, &line_size, fp) > 0) {
+		/* List only mountpoints corresponding to a block device (/dev) */
+		if (strncmp(line, "/dev/", 5) != 0)
+			continue;
 
-			/* use strtok() to split LINE into tokens using space as
-			 * IFS */
-			str = strtok(line, " ");
-			size_t dev_len = strlen(str);
+		/* Use strtok() to split LINE into tokens using space as IFS */
+		char *str = strtok(line, " ");
+		size_t counter = 0, dev_len = strlen(str);
 
-			media = (struct mnt_t *)xrealloc(media,
-				    (mp_n + 2) * sizeof(struct mnt_t));
-			media[mp_n].dev = savestring(str, dev_len);
-			media[mp_n].label = (char *)NULL;
-			/* Print only the first two fileds of each /proc/mounts
-			 * line */
-			while (str && counter < 2) {
-				if (counter == 1) { /* 1 == second field */
-					/* /proc/mounts encode special chars as octal.
-					 * Let's decode it */
-					char *p = strchr(str, '\\');
-					if (p && *(p + 1)) {
-						char *q = p;
-						p++;
-						char pp = 0;
-						p += 3;
-						pp = *p;
-						*p = '\0';
-						int d = read_octal(q + 1);
-						*p = pp;
-						*q = (char)d;
-						strcpy(q + 1, q + 4);
-					}
-
-					if (mode == MEDIA_LIST) {
-						printf("%s%zu%s %s%s%s [%s]\n", el_c, mp_n + 1,
-							df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c,
-							str, df_c, media[mp_n].dev);
-					} else {
-						printf("%s%zu%s %s [%s%s%s]\n", el_c, mp_n + 1,
-							df_c, media[mp_n].dev,
-							(access(str, R_OK | X_OK) == 0) ? di_c
-							: nd_c, str, df_c);
-					}
-
-					/* Store the second field (mountpoint) into an
-					 * array */
-					media[mp_n].mnt = savestring(str, strlen(str));
-					mp_n++;
+		media = (struct mnt_t *)xrealloc(media, (mp_n + 2) * sizeof(struct mnt_t));
+		media[mp_n].dev = savestring(str, dev_len);
+		media[mp_n].label = (char *)NULL;
+		/* Print only the first two fields of each /proc/mounts line */
+		while (str && counter < 2) {
+			if (counter == 1) { /* 1 == second field */
+				/* /proc/mounts encode special chars as octal.
+				 * Let's decode it */
+				char *p = strchr(str, '\\');
+				if (p && *(p + 1)) {
+					char *q = p;
+					p++;
+					char pp = 0;
+					p += 3;
+					pp = *p;
+					*p = '\0';
+					int d = read_octal(q + 1);
+					*p = pp;
+					*q = (char)d;
+					strcpy(q + 1, q + 4);
 				}
 
-				str = strtok(NULL, " ,");
-				counter++;
+				if (mode == MEDIA_LIST) {
+					printf("%s%zu%s %s%s%s [%s]\n", el_c, mp_n + 1,
+						df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c,
+						str, df_c, media[mp_n].dev);
+				} else {
+					printf("%s%zu%s %s [%s%s%s]\n", el_c, mp_n + 1,
+						df_c, media[mp_n].dev,
+						(access(str, R_OK | X_OK) == 0) ? di_c
+						: nd_c, str, df_c);
+				}
+
+				/* Store the second field (mountpoint) into an array */
+				media[mp_n].mnt = savestring(str, strlen(str));
+				mp_n++;
 			}
+
+			str = strtok(NULL, " ,");
+			counter++;
 		}
 	}
 
 	free(line);
-	line = (char *)NULL;
-	fclose(mp_fp);
+	fclose(fp);
 
 	media[mp_n].dev = (char *)NULL;
 	media[mp_n].mnt = (char *)NULL;
@@ -629,8 +621,10 @@ media_menu(int mode)
 			continue;
 		}
 
-		if (*input == 'q' && *(input + 1) == '\0')
+		if (*input == 'q' && *(input + 1) == '\0') {
+			free_dirlist(); list_dir();
 			goto EXIT;
+		}
 
 		char *p = input;
 		if (*p == 'i') {
