@@ -103,7 +103,6 @@ recover_from_wrong_cmd(void)
 		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
 			return EXIT_FAILURE;
 	}
-
 	fputs(NC, stdout);
 	rl_restore_prompt();
 	rl_clear_message();
@@ -1249,7 +1248,7 @@ count_words(size_t *start_word, size_t *full_word)
 static void
 print_warning_prompt(const char c)
 {
-	if (warning_prompt == 1 && !wrong_cmd
+	if (warning_prompt == 1 && wrong_cmd == 0
 	&& c != ';' && c != ':' && c != '#'
 	&& c != '$' && c != '\'' && c != '"') {
 		if (suggestion.printed)
@@ -1772,11 +1771,10 @@ SUCCESS:
 	if (printed) {
 		suggestion.offset = zero_offset ? 0 : last_word_offset;
 
-		if (printed == FULL_MATCH && suggestion_buf) {
+		if (printed == FULL_MATCH && suggestion_buf)
 			clear_suggestion(CS_FREEBUF);
-		}
 
-		if (wrong_cmd && nwords == 1) {
+		if (wrong_cmd == 1 && nwords == 1) {
 			rl_dispatching = 1;
 			recover_from_wrong_cmd();
 			rl_dispatching = 0;

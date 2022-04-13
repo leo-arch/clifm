@@ -41,6 +41,10 @@
 #include "prompt.h"
 #include "sanitize.h"
 
+#ifndef _NO_SUGGESTIONS
+# include "suggestions.h"
+#endif
+
 #ifndef _NO_TRASH
 # include "trash.h"
 #else
@@ -868,6 +872,10 @@ initialize_prompt_data(void)
 
 	args_n = 0;
 	curhistindex = current_hist_n;
+#ifndef _NO_SUGGESTIONS
+	if (wrong_cmd == 1)
+		recover_from_wrong_cmd();
+#endif
 
 	/* Print error messages */
 	if (print_msg && msgs_n) {
