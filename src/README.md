@@ -124,14 +124,16 @@ These are just a few examples. There are plenty of resources out there on how to
 
 **2)** Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you don't need it any more. As a plus, compile with `clang` using the following flags to detect undefined behavior and integer overflow at run-time: `-fsanitize=integer -fsanitize=undefined`.
 
-**3)** Static analysis tools are an invaluable resource: use them! **Always** check your code via tools like `cppcheck`, `scan-build`, `flawfinder`, or `splint`. Use them all if necessary. Once done, fix all warnings and errors (provided they are not false positives, of course). This said, we use three online platforms to check our code quality: [Codacy](https://app.codacy.com/gh/leo-arch/clifm/dashboard), [Codiga](https://app.codiga.io/project/30518/dashboard), and [LGTM](https://lgtm.com/projects/g/leo-arch/clifm).
+**3)** Static analysis tools are an invaluable resource: use them! **Always** check your code via tools like `cppcheck`, GCC's analyzer (`-fanalyzer`),<sup>1</sup> Clang's `scan-build`, `flawfinder`, or `splint`. Use them all if necessary. Once done, fix all warnings and errors (provided they are not false positives, of course). This said, we use three online platforms to check our code quality: [Codacy](https://app.codacy.com/gh/leo-arch/clifm/dashboard), [Codiga](https://app.codiga.io/project/30518/dashboard), and [LGTM](https://lgtm.com/projects/g/leo-arch/clifm).
+
+<sup>1</sup> On the state of the built-in static analyzer provided by GCC see https://www.reddit.com/r/C_Programming/comments/u1ylub/static_analysis_of_c_code_in_gcc_12/
 
 When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
 
 **4**) Submitted code must be compiled without any warning/error using the following compiler flags:
 
 ```sh
--Wall -Wextra -Werror -Wpedantic -Wshadow -Wformat=2 -Wformat-security -Wconversion -Wsign-conversion -fstack-protector-strong -fstack-clash-protection -fcf-protection -Wvla -std=c99
+-Wall -Wextra -Werror -Wpedantic -Wshadow -Wformat=2 -Wformat-security -Wconversion -Wsign-conversion -Wunused -Wnull-dereference -fstack-protector-strong -fstack-clash-protection -fcf-protection -Wvla -std=c99
 ```
 
 To make sure your structs are properly aligned, add `-Wpadded` to detect misalignments and correct them by adding some padding if necessary. 
