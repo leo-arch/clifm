@@ -1693,7 +1693,7 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t
 	while (--j >= 0) {
 		if (sel_devino[j].dev != dev || sel_devino[j].ino != ino)
 			continue;
-		/* Only check file names for hardlinks */
+		/* Only check regular files for hardlinks */
 		if (file_info[index].type != DT_DIR && links > 1) {
 			char *p = strrchr(sel_elements[j], '/');
 			if (!p || !*(++p))

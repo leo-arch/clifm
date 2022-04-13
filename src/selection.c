@@ -1059,7 +1059,7 @@ valid_desel_eln(int i, size_t desel_n, char **desel_elements)
 }
 
 static inline int
-end_deselect(int err, char ***args)
+end_deselect(const int err, char ***args)
 {
 	int exit_status = EXIT_SUCCESS;
 

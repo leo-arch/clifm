@@ -57,6 +57,7 @@
 #include "file_operations.h"
 #include "autocmds.h"
 #include "sanitize.h"
+#include "selection.h"
 
 /* Macros to be able to consult the value of a macro string */
 #define STRINGIZE_(x) #x
@@ -1877,15 +1878,13 @@ get_sel_files(void)
 	if (!selfile_ok || !config_ok || !sel_file)
 		return EXIT_FAILURE;
 
+	size_t selnbk = sel_n;
 	/* First, clear the sel array, in case it was already used */
 	if (sel_n > 0) {
 		int i = (int)sel_n;
 		while (--i >= 0)
 			free(sel_elements[i]);
 	}
-
-	/*  free(sel_elements); */
-
 	sel_n = 0;
 
 	/* Open the tmp sel file and load its contents into the sel array */
@@ -1899,8 +1898,9 @@ get_sel_files(void)
 	/* Since this file contains only paths, we can be sure no line
 	 * length will be larger than PATH_MAX */
 	char line[PATH_MAX];
-	while (fgets(line, (int)sizeof(line), fp)) {
+	while (fgets(line, (int)sizeof(line), fp) != NULL) {
 		size_t len = strlen(line);
+		if (len == 0) continue;
 
 		if (line[len - 1] == '\n') {
 			len--;
@@ -1909,30 +1909,35 @@ get_sel_files(void)
 
 		/* Remove the ending slash: fstatat() won't take a symlink to dir as
 		 * a symlink (but as a dir), if the file name ends with a slash */
-		if (line[len - 1] == '/') {
+		if (len > 1 && line[len - 1] == '/') {
 			len--;
 			line[len] = '\0';
 		}
 
-		if (!*line || *line == '#')
+		if (!*line || *line == '#' || len == 0)
 			continue;
 
-		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1) * sizeof(char *));
-		sel_elements[sel_n] = savestring(line, len);
+		if (fstatat(AT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
+			continue;
+
 		/* Store device and inode number to identify later selected files
 		 * and mark them in the files list */
+		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2) * sizeof(char *));
+		sel_elements[sel_n] = savestring(line, len);
 		sel_devino = (struct devino_t *)xrealloc(sel_devino, (sel_n + 1) * sizeof(struct devino_t));
-		if (fstatat(AT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) != -1) {
-			sel_devino[sel_n].ino = a.st_ino;
-			sel_devino[sel_n].dev = a.st_dev;
-		} else {
-			sel_devino[sel_n].ino = 0;
-			sel_devino[sel_n].dev = 0;
-		}
+		sel_devino[sel_n].ino = a.st_ino;
+		sel_devino[sel_n].dev = a.st_dev;
 		sel_n++;
+		sel_elements[sel_n] = (char *)NULL;
 	}
 
 	close_fstream(fp, fd);
+	/* If previous and current amount of sel files don't match (mostly
+	 * because some selected files were removed), recreate the selections
+	 * file to reflect current state */
+	if (selnbk != sel_n)
+		save_sel();
+
 	return EXIT_SUCCESS;
 }
 
