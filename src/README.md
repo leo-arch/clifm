@@ -14,7 +14,7 @@ Once this is done, you might want to check and modify a few things from the resu
 
 ### C source
 
-BSD compatibility: We try to keep CliFM working on BSD systems (at the very least). So, when calling a function make sure it exists on BSD systems, and, if possible, make sure it is POSIX. Check its syntax as well: GNU functions are not always identical to BSD ones.
+BSD compatibility: We try to keep _CliFM_ working on BSD systems (at the very least). So, when calling a function make sure it exists on BSD systems, and, if possible, make sure it is POSIX. Check its syntax as well: GNU functions are not always identical to BSD ones.
 
 Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
@@ -142,7 +142,7 @@ To make sure your structs are properly aligned, add `-Wpadded` to detect misalig
 
 ## 3) CliFM's general code structure
 
-CliFM source code consists of multiple C source files, being `main.c` the starting point and `helpers.h` the main header file. In `main.c` you'll find:
+CliFM's source code consists of multiple C source files, being `main.c` the starting point and `helpers.h` the main header file. In `main.c` you'll find:
 
 **A)** Initialization stuff, like loading config files (see `config.c`), command line options (parsed by the `external_arguments()` function, in `init.c`), readline and keybindings initialization (see `readline.c` and `keybindings.c`), bookmarks, workspaces, history, and the like.
 
@@ -158,7 +158,7 @@ CliFM source code consists of multiple C source files, being `main.c` the starti
 
 **D)** Listing
 
-This is the basic structure of CliFM: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
+This is the basic structure of _CliFM_: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
 
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), operating on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
 
@@ -186,7 +186,7 @@ This is the basic structure of CliFM: generally speaking, it is just a shell. In
 
 **Note**: For the list of dependencies, see the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
 
-CliFM is compiled using `(g)cc` (`clang` and `tcc` work as well) as follows:
+_CliFM_ is compiled using `(g)cc` (`clang` and `tcc` work as well) as follows:
 
 1)  _Linux_:
 ```sh
@@ -229,7 +229,7 @@ upx clifm
 
 ### Compiling features in/out
 
-CliFM allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a POSIX compliant executable without icons support:
+_CliFM_ allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a POSIX compliant executable without icons support:
 ```sh
 clang ... -D_BE_POSIX -D_NO_ICONS ...
 ```
@@ -259,4 +259,4 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 
 ## 6) Plugins
 
-CliFM plugins, that is, commands or set of commands executed by CliFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
+CliFM's plugins, that is, commands or set of commands executed by _CliFM_, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
