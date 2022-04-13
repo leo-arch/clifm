@@ -601,7 +601,7 @@ check_dir(char **dir, char **self, char **_sudo)
 
 END:
 	free(*self);
-	free(*dir);
+/*	free(*dir); */
 	free(*_sudo);
 	return ret;
 }
@@ -617,6 +617,7 @@ get_path_dir(char **dir)
 					+ strlen(*dir) + 2, sizeof(char));
 		sprintf(path_dir, "%s/%s", workspaces[cur_ws].path, *dir);
 		free(*dir);
+		*dir = (char *)NULL;
 	} else {
 		path_dir = *dir;
 	}
@@ -736,8 +737,7 @@ new_instance(char *dir, int sudo)
 	}
 
 	int ret = check_dir(&deq_dir, &self, &_sudo);
-	if (ret != EXIT_SUCCESS)
-		return ret;
+	if (ret != EXIT_SUCCESS) { free(deq_dir); return ret; }
 
 	char *path_dir = get_path_dir(&deq_dir);
 	char **cmd = get_cmd(path_dir, _sudo, self, sudo);
@@ -1675,7 +1675,7 @@ quick_help(void)
 	return EXIT_SUCCESS;
 #else
 	char *_pager = get_pager();
-	if (!*_pager) {
+	if (!_pager) {
 		fprintf(stderr, _("%s: Unable to find any pager\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}

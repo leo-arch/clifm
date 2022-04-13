@@ -473,6 +473,7 @@ diff_files(char *tmp_file, int n)
 			c++;
 	}
 
+	fclose(fp);
 	if (c == n)
 		return 0;
 
@@ -964,6 +965,7 @@ open_function(char **cmd)
 			}
 		}
 		}
+		break;
 	case S_IFREG: no_open_file = 0;	break;
 	default: file_type = types[OPEN_UNK]; break;
 	}
