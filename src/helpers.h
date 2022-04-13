@@ -878,6 +878,7 @@ extern int
 #ifndef _NO_HIGHLIGHT
 	highlight,
 #endif
+	hist_status,
 	home_ok,
 #ifndef _NO_ICONS
 	icons,

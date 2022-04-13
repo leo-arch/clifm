@@ -267,7 +267,7 @@ Usage: \
 
 #define HISTORY_USAGE "List or access commands history entries\n\
 Usage:\n\
-  history [edit [APP]] [clear] [-n]\n\n\
+  history [edit [APP]] [clear] [-n] [on, off, status]\n\n\
 Examples:\n\
 - Edit the commands history list:\n\
     history edit\n\
@@ -285,7 +285,9 @@ You can also access the commands history via the exclamation mark (!):\n\
 - Execute the command number 'n' in the history list:\n\
     !n\n\
 - Execute the last - n command in the history list:\n\
-    !-n\n\n\
+    !-n\n\
+- Prevent subsequent entries from being written to the history file:\n\
+    history off\n\n\
 Note: If FZF TAB completion mode is enabled, you can easily navigate the \
 commands history list by typing '!' and then pressing TAB"
 
@@ -834,7 +836,7 @@ parameters.\n\n\
  ft, filter [unset] [REGEX]\n\
  fz\n\
  hf, hidden [on, off, status]\n\
- history [edit [APP]] [clear] [-n]\n\
+ history [edit [APP]] [clear] [-n] [on, off, status]\n\
  icons [on, off]\n\
  j, jc, jp, jl [STRING ...] jo [NUM], je (directory jumper function)\n\
  kb, keybinds [edit [APP]] [reset] [readline]\n\
@@ -914,6 +916,7 @@ parameters.\n\n\
  C-M-g: Open/change-into last selected file/directory\n\
  C-M-n: Move selected files into the current working directory\n\
  C-M-v: Copy selected files into the current working directory\n\
+ C-M-l: Toggle max name length on/off\n\
  M-y: Toggle light mode on/off\n\
  M-z: Switch to previous sorting method\n\
  M-x: Switch to next sorting method\n\

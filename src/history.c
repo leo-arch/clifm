@@ -399,6 +399,28 @@ print_last_items(char *str)
 	return EXIT_SUCCESS;
 }
 
+static int
+print_hist_status(void)
+{
+	printf(_("History is %s\n"), hist_status == 1 ? "enabled" : "disabled");
+	return EXIT_SUCCESS;
+}
+
+static int
+toggle_history(const char *arg)
+{
+	if (!arg || !*arg)
+		return EXIT_FAILURE;
+
+	switch(*arg) {
+	case 'o':
+		hist_status = (*(arg + 1) == 'n' ? 1 : 0);
+		return print_hist_status();
+	case 's': return print_hist_status();
+	default: puts(_(HISTORY_USAGE)); return EXIT_FAILURE;
+	}
+}
+
 int
 history_function(char **comm)
 {
@@ -411,15 +433,19 @@ history_function(char **comm)
 	if (!comm[1])
 		return print_history_list();
 
-	if (comm[1] && *comm[1] == 'e' && strcmp(comm[1], "edit") == 0)
+	if (*comm[1] == 'e' && strcmp(comm[1], "edit") == 0)
 		return edit_history(comm);
 
-	if (comm[1] && *comm[1] == 'c' && strcmp(comm[1], "clear") == 0)
+	if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0)
 		return __clear_history(comm);
 
 	/* If 'history -n', print the last -n elements */
-	if (comm[1] && *comm[1] == '-' && is_number(comm[1] + 1))
+	if (*comm[1] == '-' && is_number(comm[1] + 1))
 		return print_last_items(comm[1] + 1);
+
+	if ((*comm[1] == 'o' || *comm[1] == 's') && (strcmp(comm[1], "on") == 0
+	|| strcmp(comm[1], "off") == 0 || strcmp(comm[1], "status") == 0))
+		return toggle_history(comm[1]);
 
 	/* None of the above */
 	puts(_(HISTORY_USAGE));
@@ -629,7 +655,7 @@ add_to_cmdhist(const char *cmd)
 	/* For readline */
 	add_history(cmd);
 
-	if (config_ok)
+	if (config_ok == 1 && hist_status == 1 && hist_file)
 		append_history(1, hist_file);
 
 	/* For us */

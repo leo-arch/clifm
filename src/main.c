@@ -141,6 +141,7 @@ int
 	fzf_height_set = 0,
 	fzf_open_with = 0,
 	highlight = UNSET,
+	hist_status = DEF_HIST_STATUS,
 	home_ok = 1,
 #ifndef _NO_ICONS
 	icons = UNSET,
@@ -470,6 +471,9 @@ const char *param_str[] = {
 	"hidden status",
 	"history clear",
 	"history edit",
+	"history on",
+	"history off",
+	"history status",
 	"icons on",
 	"icons off",
 	"kb edit",
