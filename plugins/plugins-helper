@@ -23,7 +23,8 @@ term_colors()
 # directives
 get_fzf_colors()
 {
-	if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ]; then
+	if [ -n "$CLIFM_NO_COLOR" ] || [ -n "$NO_COLOR" ] \
+	|| [ -n "$CLIFM_COLORLESS" ]; then
 		echo "bw"
 	else
 		echo "16,prompt:6,fg+:-1,pointer:2,marker:2,hl:5,hl+:5,gutter:-1"
@@ -44,3 +45,5 @@ fzf_borders()
 # A few fixed values to construct the FZF interface
 fzf_height="${CLIFM_FZF_HEIGHT:-80}%"
 fzf_prompt="CliFM > "
+colorize=1
+[ -n "$CLIFM_COLORLESS" ] && colorize=0
