@@ -42,6 +42,10 @@
 #include "messages.h"
 #include "listing.h"
 
+#define NO_BOOKMARKS "Bookmarks: There are no bookmarks\nEnter 'bm edit' \
+or press F11 to edit the bookmarks file. You can also enter 'bm add PATH' \
+to add a new bookmark\n"
+
 void
 free_bookmarks(void)
 {
@@ -662,16 +666,16 @@ _edit_bookmarks(char **arg)
 	return EXIT_SUCCESS;
 }
 
-/* Get the corresponding bookmark path */
+/* Return the bookmark path corresponding to ARG (either an ELN or a string).
+ * Otherwise return NULL */
 static char *
-get_bm_path(char **arg, int *exit_status)
+get_bm_path(char *arg)
 {
 	/* If an ELN */
-	if (is_number(arg[0])) {
-		int num = atoi(arg[0]);
+	if (is_number(arg)) {
+		int num = atoi(arg);
 		if (num <= 0 || (size_t)num > bm_n) {
-			fprintf(stderr, _("Bookmarks: %s: No such ELN\n"), arg[0]);
-			*exit_status = EXIT_FAILURE;
+			fprintf(stderr, _("Bookmarks: %s: No such ELN\n"), arg);
 			return (char *)NULL;
 		}
 		return bookmarks[num - 1].path;
@@ -680,38 +684,35 @@ get_bm_path(char **arg, int *exit_status)
 	/* If string, check shortcuts and names */
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
-		if ((bookmarks[i].shortcut && *arg[0] == *bookmarks[i].shortcut
-		&& strcmp(arg[0], bookmarks[i].shortcut) == 0)
-		|| (bookmarks[i].name && *arg[0] == *bookmarks[i].name
-		&& strcmp(arg[0], bookmarks[i].name) == 0)) {
+		if ((bookmarks[i].shortcut && *arg == *bookmarks[i].shortcut
+		&& strcmp(arg, bookmarks[i].shortcut) == 0)
+		|| (bookmarks[i].name && *arg == *bookmarks[i].name
+		&& strcmp(arg, bookmarks[i].name) == 0)) {
+			if (bookmarks[i].path)
+				return bookmarks[i].path;
 
-			if (bookmarks[i].path) {
-				char *tmp_cmd[] = {"o", bookmarks[i].path, arg[1], NULL};
-				*exit_status = open_function(tmp_cmd);
-				return (char *)NULL;
-			}
-
-			fprintf(stderr, _("%s: %s: Invalid bookmark\n"), PROGRAM_NAME, arg[0]);
-			*exit_status = EXIT_FAILURE;
+			fprintf(stderr, _("%s: %s: Invalid bookmark\n"), PROGRAM_NAME, arg);
 			return (char *)NULL;
 		}
 	}
 
-	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), arg[0]);
-	*exit_status = EXIT_FAILURE;
-
+	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), arg);
 	return (char *)NULL;
+}
+
+static int
+reload_bookmarks_screen(void)
+{
+	printf(_("Press any key to continue... "));
+	xgetchar();
+	puts("\n");
+	return open_bookmark();
 }
 
 int
 open_bookmark(void)
 {
-	if (bm_n == 0) {
-		printf(_("Bookmarks: There are no bookmarks\nEnter 'bm edit' "
-			 "or press F11 to edit the bookmarks file. You can "
-			 "also enter 'bm add PATH' to add a new bookmark\n"));
-		return EXIT_SUCCESS;
-	}
+	if (bm_n == 0) { printf(_(NO_BOOKMARKS)); return EXIT_SUCCESS; }
 
 	if (clear_screen) CLEAR;
 
@@ -721,14 +722,18 @@ open_bookmark(void)
 	if (*arg[0] == 'e' && (!arg[0][1] || strcmp(arg[0], "edit") == 0))
 		return _edit_bookmarks(arg);
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = EXIT_SUCCESS, reload = 0;
 	if (*arg[0] == 'q' && (!arg[0][1] || strcmp(arg[0], "quit") == 0)) {
 		if (autols == 1) { free_dirlist(); list_dir(); }
 		goto FREE_AND_EXIT;
 	}
 
-	char *tmp_path = get_bm_path(arg, &exit_status);
-	if (!tmp_path) goto FREE_AND_EXIT;
+	char *tmp_path = get_bm_path(arg[0]);
+	if (!tmp_path) {
+		exit_status = EXIT_FAILURE;
+		reload = 1;
+		goto FREE_AND_EXIT;
+	}
 
 	char *tmp_cmd[] = {"o", tmp_path, arg[1], NULL};
 	exit_status = open_function(tmp_cmd);
@@ -739,8 +744,10 @@ FREE_AND_EXIT : {
 		free(arg[i]);
 	free(arg);
 
+	if (reload == 1)
+		exit_status = reload_bookmarks_screen();
 	return exit_status;
-}
+	}
 }
 
 /* Open a bookmark by shortcut, bm name, or (if expand_bookmarks) bm path */
