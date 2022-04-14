@@ -2056,10 +2056,10 @@ check_colors(void)
 	if (colorize == 1) {
 		set_colors(usr_cscheme ? usr_cscheme : "default", 1);
 		return;
-	} else {
-		if (xargs.stealth_mode == 0)
-			setenv("CLIFM_COLORLESS", "1", 1);
 	}
+
+	if (xargs.stealth_mode == 0)
+		setenv("CLIFM_COLORLESS", "1", 1);
 
 	reset_filetype_colors();
 	reset_iface_colors();
