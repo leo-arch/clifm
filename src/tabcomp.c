@@ -1695,19 +1695,20 @@ RESTART:
 			rl_delete_text(0, rl_end);
 			rl_redisplay();
 			rl_point = rl_end = 0;
-			int wc = wrong_cmd_line;
+/*			int wc = wrong_cmd_line;
 			if (wc) {
 				cur_color = hw_c;
 				fputs(cur_color, stdout);
-			}
+			} */
 			l = 0;
 			char t[PATH_MAX];
 			for (k = 0; ss[k]; k++) {
-				if (ss[k] == ' ')
+/*				if (ss[k] == ' ')
 					wc = 0;
 
 				if (!wc)
-					rl_highlight(ss, (size_t)k, SET_COLOR);
+					rl_highlight(ss, (size_t)k, SET_COLOR); */
+				rl_highlight(ss, (size_t)k, SET_COLOR);
 
 				if (ss[k] < 0) {
 					t[l] = ss[k];

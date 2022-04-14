@@ -937,7 +937,7 @@ extern int
 	xrename; /* We're running a secondary prompt for the rename function */
 
 extern int wrong_cmd;
-extern int wrong_cmd_line;
+/*extern int wrong_cmd_line; */
 
 extern int
 	argc_bk, /* A copy of argc taken from main() */

@@ -85,8 +85,8 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	if (cur_color == hw_c && !sp)
 		goto END;
 
-	if (!sp)
-		wrong_cmd_line = 0;
+/*	if (!sp)
+		wrong_cmd_line = 0; */
 
 	if (cur_color != hq_c && c >= '0' && c <= '9') {
 		if (prev == ' ' || cur_color == hn_c || rl_end == 1) {

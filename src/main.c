@@ -199,7 +199,7 @@ int
 	xrename = 0;
 
 int wrong_cmd = 0;
-int wrong_cmd_line = 0;
+/*int wrong_cmd_line = 0; */
 
 int
 	argc_bk = 0,
@@ -565,38 +565,33 @@ const char *param_str[] = {
 	"unicode status",
 	NULL};
 
-/* To store all the 68 color variables I use, with 46 bytes each, I need
- * a total of 3,1Kb. It's not much but it could be less if I'd use
- * dynamically allocated arrays for them (which, on the other side,
- * would make the whole thing slower and more tedious) */
-
 /* Colors */
 char
 	/* File types */
-	bd_c[MAX_COLOR],  /* Block device */
-	ca_c[MAX_COLOR],  /* Cap file */
-	cd_c[MAX_COLOR],  /* Char device */
-	di_c[MAX_COLOR],  /* Directory */
-	ed_c[MAX_COLOR],  /* Empty dir */
-	ee_c[MAX_COLOR],  /* Empty executable */
-	ef_c[MAX_COLOR],  /* Empty reg file */
-	ex_c[MAX_COLOR],  /* Executable */
-	fi_c[MAX_COLOR],  /* Reg file */
-	ln_c[MAX_COLOR],  /* Symlink */
-	mh_c[MAX_COLOR],  /* Multi-hardlink file */
-	nd_c[MAX_COLOR],  /* No read directory */
-	ne_c[MAX_COLOR],  /* No read empty dir */
-	nf_c[MAX_COLOR],  /* No read file */
-	no_c[MAX_COLOR],  /* Unknown */
-	or_c[MAX_COLOR],  /* Broken symlink */
-	ow_c[MAX_COLOR],  /* Other writable */
-	pi_c[MAX_COLOR],  /* FIFO, pipe */
-	sg_c[MAX_COLOR],  /* SGID file */
-	so_c[MAX_COLOR],  /* Socket */
-	st_c[MAX_COLOR],  /* Sticky (not ow)*/
-	su_c[MAX_COLOR],  /* SUID file */
-	tw_c[MAX_COLOR],  /* Sticky other writable */
-	uf_c[MAX_COLOR],  /* Non-'stat'able file */
+	bd_c[MAX_COLOR], /* Block device */
+	ca_c[MAX_COLOR], /* Cap file */
+	cd_c[MAX_COLOR], /* Char device */
+	di_c[MAX_COLOR], /* Directory */
+	ed_c[MAX_COLOR], /* Empty dir */
+	ee_c[MAX_COLOR], /* Empty executable */
+	ef_c[MAX_COLOR], /* Empty reg file */
+	ex_c[MAX_COLOR], /* Executable */
+	fi_c[MAX_COLOR], /* Reg file */
+	ln_c[MAX_COLOR], /* Symlink */
+	mh_c[MAX_COLOR], /* Multi-hardlink file */
+	nd_c[MAX_COLOR], /* No read directory */
+	ne_c[MAX_COLOR], /* No read empty dir */
+	nf_c[MAX_COLOR], /* No read file */
+	no_c[MAX_COLOR], /* Unknown */
+	or_c[MAX_COLOR], /* Broken symlink */
+	ow_c[MAX_COLOR], /* Other writable */
+	pi_c[MAX_COLOR], /* FIFO, pipe */
+	sg_c[MAX_COLOR], /* SGID file */
+	so_c[MAX_COLOR], /* Socket */
+	st_c[MAX_COLOR], /* Sticky (not ow)*/
+	su_c[MAX_COLOR], /* SUID file */
+	tw_c[MAX_COLOR], /* Sticky other writable */
+	uf_c[MAX_COLOR], /* Non-'stat'able file */
 
 	/* Interface */
 	bm_c[MAX_COLOR], /* Bookmarked directory */
@@ -623,28 +618,28 @@ char
 #endif
 
 	/* Syntax highlighting */
-	hb_c[MAX_COLOR],		/* Brackets: () [] {} */
-	hc_c[MAX_COLOR],		/* Comments */
-	hd_c[MAX_COLOR],		/* Paths (slashes) */
-	he_c[MAX_COLOR],		/* Expansion operators: * ~ */
-	hn_c[MAX_COLOR],		/* Numbers */
-	hp_c[MAX_COLOR],		/* Parameters: - */
-	hq_c[MAX_COLOR],		/* Quoted strings */
-	hr_c[MAX_COLOR],		/* Redirection: > */
-	hs_c[MAX_COLOR],		/* Process separators: | & ; */
-	hv_c[MAX_COLOR],		/* Variables: $ */
-	hw_c[MAX_COLOR],		/* Wrong, non-existent command name */
+	hb_c[MAX_COLOR], /* Brackets: () [] {} */
+	hc_c[MAX_COLOR], /* Comments */
+	hd_c[MAX_COLOR], /* Paths (slashes) */
+	he_c[MAX_COLOR], /* Expansion operators: * ~ */
+	hn_c[MAX_COLOR], /* Numbers */
+	hp_c[MAX_COLOR], /* Parameters: - */
+	hq_c[MAX_COLOR], /* Quoted strings */
+	hr_c[MAX_COLOR], /* Redirection: > */
+	hs_c[MAX_COLOR], /* Process separators: | & ; */
+	hv_c[MAX_COLOR], /* Variables: $ */
+	hw_c[MAX_COLOR], /* Wrong, non-existent command name */
 
-	dr_c[MAX_COLOR], /* Read */
-	dw_c[MAX_COLOR], /* Write */
+	dr_c[MAX_COLOR],  /* Read */
+	dw_c[MAX_COLOR],  /* Write */
 	dxd_c[MAX_COLOR], /* Execute (dirs) */
 	dxr_c[MAX_COLOR], /* Execute (reg files) */
-	dg_c[MAX_COLOR], /* UID, GID */
-	dd_c[MAX_COLOR], /* Date */
-	dz_c[MAX_COLOR], /* Size (dirs) > */
-	do_c[MAX_COLOR], /* Octal representation > */
-	dp_c[MAX_COLOR], /* Special files (SUID, SGID, etc) */
-	dn_c[MAX_COLOR], /* Dash (none) */
+	dg_c[MAX_COLOR],  /* UID, GID */
+	dd_c[MAX_COLOR],  /* Date */
+	dz_c[MAX_COLOR],  /* Size (dirs) > */
+	do_c[MAX_COLOR],  /* Octal representation > */
+	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */
+	dn_c[MAX_COLOR],  /* Dash (none) */
 
 	/* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

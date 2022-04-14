@@ -1312,7 +1312,7 @@ rl_suggestions(const unsigned char c)
 	if (rl_end == 0 || c == '\n') {
 		if (wrong_cmd)
 			recover_from_wrong_cmd();
-		wrong_cmd_line = 0;
+/*		wrong_cmd_line = 0; */
 	}
 
 	/* We need a copy of the complete line */
