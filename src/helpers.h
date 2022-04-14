@@ -474,6 +474,9 @@ extern int watch;
 # define CLEAR fputs("\x1b[H\x1b[2J", stdout);
 #endif
 
+#define HIDE_CURSOR "\x1b[?25l"
+#define UNHIDE_CURSOR "\x1b[?25h"
+
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */

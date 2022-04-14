@@ -408,7 +408,7 @@ my_insert_text(char *text, char *s, const char _s)
 #ifndef _NO_HIGHLIGHT
 	if (highlight) {
 		/* Hide the cursor to minimize flickering */
-		fputs("\x1b[?25l", stdout);
+		fputs(HIDE_CURSOR, stdout);
 		/* Set text color to default */
 		fputs(tx_c, stdout);
 		cur_color = tx_c;
@@ -491,7 +491,7 @@ my_insert_text(char *text, char *s, const char _s)
 			*s = '\0';
 		}
 
-		fputs("\x1b[?25h", stdout);		
+		fputs(UNHIDE_CURSOR, stdout);
 	} else
 #endif
 INSERT_TEXT:
@@ -1548,7 +1548,7 @@ print_cmdhist_line(int n, int beg_line)
 {
 	curhistindex = (size_t)n;
 
-	fputs("\x1b[?25l", stdout);
+	fputs(HIDE_CURSOR, stdout);
 	int rl_point_bk = rl_point;
 
 #ifndef _NO_HIGHLIGHT
@@ -1560,7 +1560,7 @@ print_cmdhist_line(int n, int beg_line)
 		rl_replace_line(history[n], 1);
 	}
 
-	fputs("\x1b[?25h", stdout);
+	fputs(UNHIDE_CURSOR, stdout);
 	rl_point = (beg_line == 1) ? rl_end : rl_point_bk;
 	cur_color = df_c;
 	fputs(df_c, stdout);

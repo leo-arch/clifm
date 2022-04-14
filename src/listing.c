@@ -278,7 +278,7 @@ get_ext_icon(const char *restrict ext, int n)
 static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
-	fputs("\x1b[?25h", stdout);	/* Unhide the cursor */
+	fputs(UNHIDE_CURSOR, stdout);	/* Unhide the cursor */
 	if (close_dir && closedir(dir) == -1)
 		return EXIT_FAILURE;
 
@@ -1807,7 +1807,7 @@ list_dir(void)
 	term_rows = w.ws_row;
 
 	/* Hide the cursor while listing */
-	fputs("\x1b[?25l", stdout);
+	fputs(HIDE_CURSOR, stdout);
 
 	reset_stats();
 

@@ -1375,7 +1375,7 @@ AFTER_USUAL_COMPLETION:
 				size_t k, l = 0;
 				size_t _start = (*replacement == '\\' && *(replacement + 1) == '~') ? 1 : 0;
 				char *cc = cur_color;
-				fputs("\x1b[?25l", stdout);
+				fputs(HIDE_CURSOR, stdout);
 				char t[PATH_MAX];
 				for (k = _start; replacement[k]; k++) {
 					rl_highlight(replacement, k, SET_COLOR);
@@ -1395,7 +1395,7 @@ AFTER_USUAL_COMPLETION:
 					rl_insert_text(t);
 					rl_redisplay();
 				}
-				fputs("\x1b[?25h", stdout);
+				fputs(UNHIDE_CURSOR, stdout);
 				cur_color = cc;
 				if (cur_color)
 					fputs(cur_color, stdout);
@@ -1690,7 +1690,7 @@ RESTART:
 #ifndef _NO_HIGHLIGHT
 		if (highlight && !wrong_cmd) {
 			int bk = rl_point;
-			fputs("\x1b[?25l", stdout);
+			fputs(HIDE_CURSOR, stdout);
 			char *ss = rl_copy_text(0, rl_end);
 			rl_delete_text(0, rl_end);
 			rl_redisplay();
@@ -1727,7 +1727,7 @@ RESTART:
 				rl_insert_text(t);
 				rl_redisplay();
 			}
-			fputs("\x1b[?25h", stdout);
+			fputs(UNHIDE_CURSOR, stdout);
 			rl_point = rl_end = bk;
 			free(ss);
 		}

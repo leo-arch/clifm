@@ -204,7 +204,7 @@ void
 recolorize_line(void)
 {
 	/* Hide the cursor to minimize flickering */
-	fputs("\x1b[?25l", stdout);
+	fputs(HIDE_CURSOR, stdout);
 
 	/* Set text color to default */
 	if (cur_color != tx_c && cur_color != hw_c && cur_color != hn_c) {
@@ -229,7 +229,7 @@ recolorize_line(void)
 		fputs(cl, stdout);
 
 	if (rl_point == 0 && rl_end == 0) {
-		fputs("\x1b[?25h", stdout);
+		fputs(UNHIDE_CURSOR, stdout);
 		return;
 	}
 
@@ -268,8 +268,7 @@ recolorize_line(void)
 	}
 
 EXIT:
-	/* Unhide the cursor */
-	fputs("\x1b[?25h", stdout);
+	fputs(UNHIDE_CURSOR, stdout);
 	free(ss);
 	rl_point = bk;
 }
