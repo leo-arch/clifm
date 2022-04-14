@@ -581,28 +581,20 @@ check_new_instance_init_conditions(const char *dir, const int sudo)
 
 /* Just check that DIR exists and is a directory */
 static inline int
-check_dir(char **dir, char **self, char **_sudo)
+check_dir(char **dir)
 {
 	int ret = EXIT_SUCCESS;
 	struct stat attr;
 	if (stat(*dir, &attr) == -1) {
-		ret = errno;
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *dir, strerror(errno));
-		goto END;
+		return errno;
 	}
 
 	if (!S_ISDIR(attr.st_mode)) {
 		fprintf(stderr, _("%s: %s: Not a directory\n"), PROGRAM_NAME, *dir);
-		ret = ENOTDIR;
-		goto END;
+		return ENOTDIR;
 	}
 
-	return ret;
-
-END:
-	free(*self);
-/*	free(*dir); */
-	free(*_sudo);
 	return ret;
 }
 
@@ -707,37 +699,35 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int 
 /* Open DIR in a new instance of the program (using TERM, set in the config
  * file, as terminal emulator) */
 int
-new_instance(char *dir, int sudo)
+new_instance(char *dir, const int sudo)
 {
 	if (check_new_instance_init_conditions(dir, sudo) == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
-	if (!dir)
-		return EINVAL;
+	if (!dir) return EINVAL;
 
 	char *_sudo = (char *)NULL;
-	if (sudo && !(_sudo = get_sudo_path()))
-		return errno;
+	if (sudo && !(_sudo = get_sudo_path()))	return errno;
 
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
-		fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
-		    PROGRAM_NAME, dir);
+		fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, dir);
 		free(_sudo);
 		return EXIT_FAILURE;
 	}
 
 	char *self = get_cmd_path(PNL);
 	if (!self) {
-		free(_sudo);
-		free(deq_dir);
-		int ret = errno;
-		fprintf(stderr, _("%s: %s: Not in PATH\n"), PROGRAM_NAME, PNL);
-		return ret;
+		free(_sudo); free(deq_dir);
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, PNL, strerror(errno));
+		return errno;
 	}
 
-	int ret = check_dir(&deq_dir, &self, &_sudo);
-	if (ret != EXIT_SUCCESS) { free(deq_dir); return ret; }
+	int ret = check_dir(&deq_dir);
+	if (ret != EXIT_SUCCESS) {
+		free(deq_dir); free(self), free(_sudo);
+		return ret;
+	}
 
 	char *path_dir = get_path_dir(&deq_dir);
 	char **cmd = get_cmd(path_dir, _sudo, self, sudo);

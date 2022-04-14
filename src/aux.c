@@ -632,8 +632,8 @@ get_cmd_path(const char *cmd)
 
 	cmd_path = (char *)xnmalloc(PATH_MAX + 1, sizeof(char));
 
-	size_t i = 0;
-	for (; i < path_n; i++) { /* Check each path in PATH */
+	size_t i;
+	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
 	/* Append cmd to each path and check if it exists and is executable */
 		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i], cmd); /* NOLINT */
 		if (access(cmd_path, X_OK) == 0)
