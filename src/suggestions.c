@@ -184,6 +184,14 @@ restore_cursor_position(const size_t slines)
 		currow -= extra_rows - (term_rows - old_currow);
 
 	/* Restore cursor position */
+
+	/* THIS BLOCK IS UNDER TEST: It corrects the cursor position whenver
+	 * a suggestion is printed and the cursor is not at the end of the line
+	 * We do this because we modified the cursor position in correct_offset()
+	 * to correctly print the suggestions. Now we need to undo that change */
+	if (highlight && rl_point != rl_end)
+		curcol += (rl_end - rl_point);
+
 	printf("\x1b[%d;%dH", currow, curcol);
 }
 

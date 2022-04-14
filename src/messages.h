@@ -1,4 +1,4 @@
-/* help.h - Usage messages for CliFM */
+/* messages.h - Usage messages for CliFM */
 
 /*
  * This file is part of CliFM

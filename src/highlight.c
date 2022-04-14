@@ -217,9 +217,9 @@ recolorize_line(void)
 		rl_point--;
 
 	/* Get the current color up to the current cursor position */
-	size_t i = 0;
+	size_t i;
 	char *cl = (char *)NULL;
-	for (; i < (size_t)rl_point; i++) {
+	for (i = 0; i < (size_t)rl_point; i++) {
 		cl = rl_highlight(rl_line_buffer, i, INFORM_COLOR);
 		if (cl)
 			cur_color = cl;
