@@ -984,7 +984,7 @@ ow myfile.txt      Choose opening application for 'myfile.txt' from a menu\n\
 n myfile           Create a new file named 'myfile'\n\
 n mydir/           Create a new directory named 'mydir'\n\
 p4                 Print the properties of the file whose ELN is 4\n\
-/*.png             Search for files ending with .png in the current directory\n\
+/*.png             Search for files ending with .png in the current dir\n\
 s *.c              Select all C files\n\
 s 1-4 8 19-26      Select multiple files by ELN\n\
 sb                 List currently selected files\n\
@@ -1005,7 +1005,7 @@ te *.sh            Toggle the executable bit on all .sh files\n\
 t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
 t del              Select trashed files and remove them permanently\n\
 u                  Undelete trashed files\n\
-bm a mydir         Bookmark the directory named mydir\n\
+bm a mydir         Bookmark the directory named 'mydir'\n\
 bm d mybm          Remove the bookmark named 'mybm'\n\
 ac sel             Compress/archive selected files\n\
 \n\
@@ -1090,6 +1090,6 @@ for this. \n\
 \nA program is free software if it gives users adequately all of these \
 freedoms. Otherwise, it is nonfree. While we can distinguish various \
 nonfree distribution schemes in terms of how far they fall short of \
-being free, we consider them all equally unethical (...)\""
+being free, we consider them all equally unethical [...]\""
 
 #endif /* MESSAGES_H */
