@@ -26,21 +26,26 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
+
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
-#include <ereadline/readline/readline.h>
+# include <ereadline/readline/readline.h>
 #else
-#include <readline/readline.h>
+# include <readline/readline.h>
 #endif
+
 #ifdef __TINYC__
 /* Silence a tcc warning. We don't use CTRL anyway */
-#undef CTRL
+# undef CTRL
 #endif
+
 #include <termios.h>
 #include <unistd.h>
+
 #ifdef __NetBSD__
-#include <string.h>
+# include <string.h>
 #endif
+
 #include <dirent.h>
 
 #include "aux.h"
@@ -58,11 +63,11 @@ typedef char *rl_cpvfunc_t;
 #include "file_operations.h"
 
 #ifndef _NO_SUGGESTIONS
-#include "suggestions.h"
+# include "suggestions.h"
 #endif
 
 #ifndef _NO_HIGHLIGHT
-#include "highlight.h"
+# include "highlight.h"
 #endif
 
 /* Let's use these word delimiters to print first suggested word
