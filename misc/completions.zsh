@@ -71,6 +71,7 @@ args=(
 	'--no-files-counter[disable the files counter for directories]'
 	'--no-follow-symlink[do not follow symbolic links when listing files]'
 	'--no-highlight[disable syntax highlighting]'
+	'--no-history[do not write commands into the history file]'
 	'--no-open-auto[same as no-cd-auto, but for files]'
     '--no-props-color[do not colorize files properties]'
     '--no-restore-last-path[do not restore last visited directory at startup]'

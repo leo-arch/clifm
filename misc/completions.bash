@@ -104,6 +104,7 @@ _clifm ()
         --no-files-counter
         --no-follow-symlink
         --no-highlight
+        --no-history
         --no-open-auto
         --no-props-color
         --no-restore-last-path
