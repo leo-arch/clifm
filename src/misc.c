@@ -537,6 +537,7 @@ print_tips(int all)
 		"Oragnize your files using tags. Try 'tag --help'",
 		"Remove files in bulk using a text editor with 'rr'",
 		"Press 'Ctrl-Alt-l' to toggle max file name length on/off",
+		"Easily send files to a remote location with the 'cr' command",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
