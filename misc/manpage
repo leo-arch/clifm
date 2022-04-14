@@ -2042,6 +2042,12 @@ The idea of 'frecency' was, as far as I know, first devised and designed by Mozi
 .SH 20. ENVIRONMENT
 The following variables are read at initialization time:
 .TP
+.B NO_COLOR
+If set to any value, CliFM will run colorless
+.TP
+.B CLIFM_NO_COLOR
+Same as \fBNO_COLOR\fR, but specific to CliFM
+.TP
 .B CLIFM_FILE_COLORS
 A colon separated list of file type color codes in the same form specified above in the \fBCOLOR CODES\fR section
 .TP
@@ -2068,8 +2074,8 @@ This variable is set to the current profile of CliFM (if using two or more insta
 .B CLIFM_SELFILE
 The path to the current selection file.
 .TP
-.B CLIFM_NO_COLOR
-Set to 1 if running colorless (via the \fBNO_COLOR\fR environment variable or the \fI--no-color\fR command line option).
+.B CLIFM_COLORLESS
+Set to 1 if running colorless (via the \fBNO_COLOR\fR or \fBCLIFM_NO_COLOR\fR environment variables, or the \fI--no-color\fR command line option).
 .TP
 .B CLIFM_BUS
 This variable contains the path of a pipe by means of which plugins can talk to CliFM. Just write to the pipe and CliFM will hear and handle the message immediately after the plugin's execution. If the message is a path, CliFM will run the open function, changing the current directory to the new path, if a directory, or opening it with the resource opener, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
