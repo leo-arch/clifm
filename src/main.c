@@ -436,6 +436,8 @@ const char *param_str[] = {
 	"bookmarks add",
 	"bookmarks del",
 	"bookmarks edit",
+	"desel all",
+	"ds all",
 	"cs edit",
 	"colorscheme edit",
 	"edit",
