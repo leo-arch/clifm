@@ -35,10 +35,12 @@ fzf_colors="$(get_fzf_colors)"
 rg_colors="ansi"
 [ "$fzf_colors" = "bw" ] && rg_colors="never"
 
+args="$(echo "$@" | sed 's/\\//g')"
+
 while true; do
 	# shellcheck disable=SC2154
 	file="$(rg --color="$rg_colors" --hidden --heading --line-number \
-		--trim -- "$1" 2>/dev/null | \
+		--trim --ignore-case -- "$args" 2>/dev/null | \
 		fzf --ansi --reverse --prompt="$fzf_prompt" \
 		--height="$fzf_height" --color="$fzf_colors" \
 		--no-clear --bind "right:accept" --no-info \
