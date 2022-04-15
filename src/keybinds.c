@@ -332,6 +332,11 @@ int rl_toggle_max_filename_len(int count, int key)
 		list_dir();
 	}
 
+	if (max_name_len == UNSET)
+		printf("%s->%s Max name length unset\n", mi_c, df_c);
+	else
+		printf("%s->%s Max name length set back to %d\n", mi_c, df_c, max_name_len);
+
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -824,6 +829,8 @@ rl_folders_first(int count, int key)
 		list_dir();
 	}
 
+	printf(_("%s->%s Folders first %s\n"), mi_c, df_c,
+		list_folders_first ? "enabled" : "disabled");
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -837,9 +844,21 @@ rl_light(int count, int key)
 
 	light_mode = light_mode ? 0 : 1;
 
-	if (clear_screen)
-		CLEAR;
-	keybind_exec_cmd("rf");
+	if (autols) {
+		if (clear_screen)
+			CLEAR;
+		free_dirlist();
+		/* Without this putchar(), the first entries of the directories
+		 * list are printed in the prompt line */
+		putchar('\n');
+		list_dir();
+	}
+
+	if (light_mode == 1)
+		printf(_("%s->%s Switched to light mode\n"), mi_c, df_c);
+	else
+		printf(_("%s->%s Switched back to normal mode\n"), mi_c, df_c);
+
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -864,6 +883,8 @@ rl_hidden(int count, int key)
 		list_dir();
 	}
 
+	printf(_("%s->%s Hidden files %s\n"), mi_c, df_c,
+		show_hidden ? "enabled" : "disabled");
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1506,11 +1527,10 @@ rl_onlydirs(int count, int key)
 		free_dirlist();
 		putchar('\n');
 		exit_status = list_dir();
-	} else {
-		printf(_("%s: List only directories set to %s\n"),
-			PROGRAM_NAME, only_dirs ? _("true"): _("false"));
 	}
 
+	printf(_("%s->%s Only directories %s\n"), mi_c, df_c,
+		only_dirs ? "enabled" : "disabled");
 	rl_reset_line_state();
 	return exit_status;
 }

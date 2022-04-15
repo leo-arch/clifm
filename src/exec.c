@@ -610,15 +610,18 @@ set_max_files(char **args)
 		return EXIT_SUCCESS;
 	}
 
+	int status = max_files;
 	if (*args[1] == 'u' && strcmp(args[1], "unset") == 0) {
 		max_files = -1;
-		puts(_("Max files: unset"));
+		if (autols && status != max_files) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Max files unset\n"), mi_c, df_c);
 		return EXIT_SUCCESS;
 	}
 
 	if (*args[1] == '0' && !args[1][1]) {
 		max_files = 0;
-		printf(_("Max files set to %d\n"), max_files);
+		if (autols && status != max_files) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Max files set to %d\n"), mi_c, df_c, max_files);
 		return EXIT_SUCCESS;
 	}
 
@@ -629,7 +632,8 @@ set_max_files(char **args)
 	}
 
 	max_files = (int)inum;
-	printf(_("Max files set to %d\n"), max_files);
+	if (autols && status != max_files) { free_dirlist(); list_dir(); }
+	printf(_("%s->%s Max files set to %d\n"), mi_c, df_c, max_files);
 
 	return EXIT_SUCCESS;
 }
@@ -650,14 +654,13 @@ unicode_function(char *arg)
 	int exit_status = EXIT_SUCCESS;
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		printf(_("%s: Unicode %s\n"), PROGRAM_NAME,
-		    (unicode) ? _("enabled") : _("disabled"));
+		printf(_("Unicode is %s\n"), unicode == 1 ? _("enabled") : _("disabled"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		unicode = 1;
-		printf(_("%s: Unicode enabled\n"), PROGRAM_NAME);
+		puts(_("Unicode enabled"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		unicode = 0;
-		printf(_("%s: Unicode disabled\n"), PROGRAM_NAME);
+		puts(_("Unicode disabled"));
 	} else {
 		fprintf(stderr, "%s\n", _(UNICODE_USAGE));
 		exit_status = EXIT_FAILURE;
@@ -685,22 +688,19 @@ folders_first_function(char *arg)
 	int status = list_folders_first, exit_status = EXIT_SUCCESS;
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		printf(_("%s: Folders first %s\n"), PROGRAM_NAME,
-		    (list_folders_first) ? _("enabled") : _("disabled"));
+		printf(_("Folders first is %s\n"),
+			list_folders_first == 1 ? _("enabled") : _("disabled"));
 	}  else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		list_folders_first = 1;
+		if (autols && status != list_folders_first) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Folders first enabled\n"), mi_c, df_c);
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		list_folders_first = 0;
+		if (autols && status != list_folders_first) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Folders first disabled\n"), mi_c, df_c);
 	} else {
 		fprintf(stderr, "%s\n", _(FF_USAGE));
 		return EXIT_FAILURE;
-	}
-
-	if (list_folders_first != status) {
-		if (autols) {
-			free_dirlist();
-			exit_status = list_dir();
-		}
 	}
 
 	return exit_status;
@@ -714,23 +714,26 @@ filescounter_function(char *arg)
 		return EXIT_FAILURE;
 	}
 
+	int status = files_counter;
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		files_counter = 1;
-		puts(_("Filescounter is enabled"));
+		if (autols && status != files_counter) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Files counter enabled\n"), mi_c, df_c);
 		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		files_counter = 0;
-		puts(_("Filescounter is disabled"));
+		if (autols && status != files_counter) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Files counter disabled\n"), mi_c, df_c);
 		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		if (files_counter)
-			puts(_("Filescounter is enabled"));
+		if (files_counter == 1)
+			puts(_("The files counter is enabled"));
 		else
-			puts(_("Filescounter is disabled"));
+			puts(_("The files counter is disabled"));
 		return EXIT_SUCCESS;
 	}
 
@@ -751,16 +754,18 @@ pager_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = EXIT_SUCCESS, status = pager;
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		printf(_("%s: Pager %s\n"), PROGRAM_NAME,
-		    (pager) ? _("enabled") : _("disabled"));
+		printf(_("The files pager is %s\n"),
+			pager == 1 ? _("enabled") : _("disabled"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		pager = 1;
-		printf(_("%s: Pager enabled\n"), PROGRAM_NAME);
+		if (autols && status != pager) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Pager enabled\n"), mi_c, df_c);
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		pager = 0;
-		printf(_("%s: Pager disabled\n"), PROGRAM_NAME);
+		if (autols && status != pager) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Pager disabled\n"), mi_c, df_c);
 	} else {
 		fprintf(stderr, "%s\n", _(PAGER_USAGE));
 		exit_status = EXIT_FAILURE;
@@ -784,14 +789,14 @@ ext_args_function(char *arg)
 
 	int exit_status = EXIT_SUCCESS;
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		printf(_("%s: External commands %s\n"), PROGRAM_NAME,
-		    (ext_cmd_ok) ? _("enabled") : _("disabled"));
+		printf(_("External commands are %s\n"),
+			ext_cmd_ok ? _("allowed") : _("not allowed"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		ext_cmd_ok = 1;
-		printf(_("%s: External commands enabled\n"), PROGRAM_NAME);
+		printf(_("External commands allowed\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		ext_cmd_ok = 0;
-		printf(_("%s: External commands disabled\n"), PROGRAM_NAME);
+		printf(_("External commands disallowed\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(EXT_USAGE));
 		exit_status = EXIT_FAILURE;
@@ -810,15 +815,12 @@ autocd_function(char *arg)
 
 	if (strcmp(arg, "on") == 0) {
 		autocd = 1;
-		printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
+		printf(_("Autocd enabled\n"));
 	} else if (strcmp(arg, "off") == 0) {
 		autocd = 0;
-		printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
+		printf(_("Autocd disabled\n"));
 	} else if (strcmp(arg, "status") == 0) {
-		if (autocd)
-			printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
-		else
-			printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
+		printf(_("Autocd is %s\n"), autocd == 1 ? _("enabled") : _("disabled"));
 	} else if (IS_HELP(arg)) {
 		puts(_(AUTOCD_USAGE));
 	} else {
@@ -839,15 +841,12 @@ auto_open_function(char *arg)
 
 	if (strcmp(arg, "on") == 0) {
 		auto_open = 1;
-		printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
+		printf(_("Auto-open enabled\n"));
 	} else if (strcmp(arg, "off") == 0) {
 		auto_open = 0;
-		printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
+		printf(_("Auto-open disabled\n"));
 	} else if (strcmp(arg, "status") == 0) {
-		if (auto_open)
-			printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
-		else
-			printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
+		printf(_("Auto-open is %s\n"), auto_open == 1 ? _("enabled") : _("disabled"));
 	} else if (IS_HELP(arg)) {
 		puts(_(AUTO_OPEN_USAGE));
 	} else {
@@ -865,20 +864,22 @@ columns_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = EXIT_SUCCESS, status = columned;
 
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
 		columned = 1;
-		if (autols) {
+		if (autols == 1 && status != columned) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
+		printf(_("%s->%s Columns enabled\n"), mi_c, df_c);
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		columned = 0;
-		if (autols) {
+		if (autols == 1 && status != columned) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
+		printf(_("%s->%s Columns disabled\n"), mi_c, df_c);
 	} else {
 		fprintf(stderr, "%s\n", _(COLUMNS_USAGE));
 		return EXIT_FAILURE;
@@ -900,18 +901,19 @@ icons_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
+	int status = icons;
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
 		icons = 1;
-		if (autols) {
-			free_dirlist();
-			return list_dir();
-		}
+		int ret = EXIT_SUCCESS;
+		if (autols && status != icons) { free_dirlist(); ret = list_dir(); }
+		printf("%s->%s Icons enabled\n", mi_c, df_c);
+		return ret;
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		icons = 0;
-		if (autols) {
-			free_dirlist();
-			return list_dir();
-		}
+		int ret = EXIT_SUCCESS;
+		if (autols && status != icons) { free_dirlist(); ret = list_dir(); }
+		printf("%s->%s Icons disabled\n", mi_c, df_c);
+		return ret;
 	} else {
 		fprintf(stderr, "%s\n", _(ICONS_USAGE));
 		return EXIT_FAILURE;
@@ -974,7 +976,7 @@ opener_function(char *arg)
 
 	if (strcmp(arg, "default") != 0 && strcmp(arg, "lira") != 0)
 		opener = savestring(arg, strlen(arg));
-	printf(_("opener: Opener set to '%s'\n"), opener ? opener : "lira (built-in)");
+	printf(_("Opener set to '%s'\n"), opener ? opener : "lira (built-in)");
 
 	return EXIT_SUCCESS;
 }
@@ -987,12 +989,15 @@ lightmode_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
+	int status = light_mode;
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		light_mode = 1;
-		puts(_("Light mode is on"));
+		if (autols && status != light_mode) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Switched back to normal mode\n"), mi_c, df_c);
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		light_mode = 0;
-		puts(_("Light mode is off"));
+		if (autols && status != light_mode) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Switched back to normal mode\n"), mi_c, df_c);
 	} else {
 		puts(_(LM_USAGE));
 		return EXIT_FAILURE;
@@ -1131,7 +1136,7 @@ toggle_exec(char **args)
 	}
 
 	int exit_status = EXIT_SUCCESS;
-	size_t i;
+	size_t i, n = 0;
 	for (i = 1; args[i]; i++) {
 		struct stat attr;
 		if (strchr(args[i], '\\')) {
@@ -1150,11 +1155,16 @@ toggle_exec(char **args)
 
 		if (xchmod(args[i], attr.st_mode) == -1)
 			exit_status = EXIT_FAILURE;
+		else
+			n++;
 	}
 
-	if (exit_status == EXIT_SUCCESS) {
-		printf(_("%s: Toggled executable bit on %zu file(s)\n"),
-		    PROGRAM_NAME, args_n);
+	if (n > 0) {
+//		_err('f', PRINT_PROMPT, _("Toggled executable bit on %zu %s\n"),
+//		    n, n > 1 ? _("files") : _("file"));
+		if (autols) { free_dirlist(); list_dir(); }
+		printf(_("%s->%s Toggled executable bit on %zu %s\n"),
+			mi_c, df_c, n, n > 1 ? _("files") : _("file"));
 	}
 
 	return exit_status;
@@ -1172,7 +1182,7 @@ pin_function(char *arg)
 			exit_status = pin_directory(arg);
 	} else {
 		if (pinned_dir)
-			printf(_("pinned file: %s\n"), pinned_dir);
+			printf(_("Pinned file: %s\n"), pinned_dir);
 		else
 			puts(_("No pinned file"));
 	}
@@ -1649,7 +1659,7 @@ check_comments(const char *name)
 static int
 print_stats(void)
 {
-	if (light_mode) {
+	if (light_mode == 1) {
 		puts("Running in light mode: files statistics are not available");
 		return EXIT_SUCCESS;
 	}

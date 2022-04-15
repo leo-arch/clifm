@@ -69,8 +69,10 @@
 #include "messages.h"
 
 /* Custom POSIX implementation of GNU asprintf() modified to log program
- * messages. MSG_TYPE is one of: 'e', 'w', 'n', or zero (meaning this
+ * messages. MSG_TYPE is one of: 'e', 'f', 'w', 'n', or zero (meaning this
  * latter that no message mark (E, W, or N) will be added to the prompt).
+ * 'f' means that the message must be printed forcefully, even if identical
+ * to the previous one.
  * PROMPT tells whether to print the message immediately before the
  * prompt or rather in place. Based on littlstar's xasprintf
  * implementation:
@@ -99,7 +101,7 @@ _err(int msg_type, int prompt, const char *format, ...)
 	va_end(arglist);
 
 	/* If the new message is the same as the last message, skip it */
-	if (msgs_n && strcmp(messages[msgs_n - 1], buf) == 0) {
+	if (msgs_n && msg_type != 'f' && strcmp(messages[msgs_n - 1], buf) == 0) {
 		free(buf);
 		return EXIT_SUCCESS;
 	}
@@ -1587,25 +1589,24 @@ hidden_function(char **comm)
 	int exit_status = EXIT_SUCCESS;
 
 	if (strcmp(comm[1], "status") == 0) {
-		printf(_("%s: Hidden files %s\n"), PROGRAM_NAME,
-		    (show_hidden) ? _("enabled") : _("disabled"));
+		printf(_("Hidden files is %s\n"), show_hidden ? _("enabled") : _("disabled"));
 	} else if (strcmp(comm[1], "off") == 0) {
 		if (show_hidden == 1) {
 			show_hidden = 0;
-
 			if (autols) {
 				free_dirlist();
 				exit_status = list_dir();
 			}
+			printf(_("%s->%s Hidden files disabled\n"), mi_c, df_c);
 		}
 	} else if (strcmp(comm[1], "on") == 0) {
 		if (show_hidden == 0) {
 			show_hidden = 1;
-
 			if (autols) {
 				free_dirlist();
 				exit_status = list_dir();
 			}
+			printf(_("%s->%s Hidden files disabled\n"), mi_c, df_c);
 		}
 	} else {
 		fprintf(stderr, "%s\n", _(HF_USAGE));
