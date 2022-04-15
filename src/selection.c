@@ -1100,7 +1100,11 @@ deselect(char **args)
 	if (args[1] && *args[1]) {
 		if (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
 		|| strcmp(args[1], "all") == 0) {
-			return deselect_all();
+			int ret = deselect_all();
+			if (autols == 1) { free_dirlist(); list_dir(); }
+			if (ret == EXIT_SUCCESS)
+				printf(_("%s->%s All files deselected\n"), mi_c, df_c);
+			return ret;
 		} else {
 			err = deselect_from_args(args);
 			return end_deselect(err, &args);

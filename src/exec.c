@@ -1065,29 +1065,29 @@ print_alias(char *name)
 static int
 alias_function(char **args)
 {
-	if (args[1]) {
-		if (IS_HELP(args[1])) {
-			puts(_(ALIAS_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		if (*args[1] == 'i' && strcmp(args[1], "import") == 0) {
-			if (!args[2]) {
-				fprintf(stderr, "%s\n", _(ALIAS_USAGE));
-				return EXIT_FAILURE;
-			}
-			return alias_import(args[2]);
-		}
-
-		if (*args[1] == 'l' && (strcmp(args[1], "ls") == 0
-		|| strcmp(args[1], "list") == 0))
-			return list_aliases();
-
-		return print_alias(args[1]);
+	if (!args[1]) {
+		list_aliases();
+		return EXIT_SUCCESS;
 	}
 
-	list_aliases();
-	return EXIT_SUCCESS;
+	if (IS_HELP(args[1])) {
+		puts(_(ALIAS_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if (*args[1] == 'i' && strcmp(args[1], "import") == 0) {
+		if (!args[2]) {
+			fprintf(stderr, "%s\n", _(ALIAS_USAGE));
+			return EXIT_FAILURE;
+		}
+		return alias_import(args[2]);
+	}
+
+	if (*args[1] == 'l' && (strcmp(args[1], "ls") == 0
+	|| strcmp(args[1], "list") == 0))
+		return list_aliases();
+
+	return print_alias(args[1]);
 }
 
 static int
@@ -1160,8 +1160,6 @@ toggle_exec(char **args)
 	}
 
 	if (n > 0) {
-//		_err('f', PRINT_PROMPT, _("Toggled executable bit on %zu %s\n"),
-//		    n, n > 1 ? _("files") : _("file"));
 		if (autols) { free_dirlist(); list_dir(); }
 		printf(_("%s->%s Toggled executable bit on %zu %s\n"),
 			mi_c, df_c, n, n > 1 ? _("files") : _("file"));
@@ -1174,20 +1172,20 @@ static int
 pin_function(char *arg)
 {
 	int exit_status = EXIT_SUCCESS;
-
 	if (arg) {
 		if (IS_HELP(arg))
 			puts(PIN_USAGE);
 		else
 			exit_status = pin_directory(arg);
-	} else {
-		if (pinned_dir)
-			printf(_("Pinned file: %s\n"), pinned_dir);
-		else
-			puts(_("No pinned file"));
+		return exit_status;
 	}
 
-	return exit_status;
+	if (pinned_dir)
+		printf(_("Pinned file: %s\n"), pinned_dir);
+	else
+		puts(_("No pinned file"));
+
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -1196,11 +1194,11 @@ props_function(char **args)
 	if (!args[1]) {
 		fprintf(stderr, "%s\n", _(PROP_USAGE));
 		return EXIT_FAILURE;
-	} else {
-		if (IS_HELP(args[1])) {
-			puts(_(PROP_USAGE));
-			return EXIT_SUCCESS;
-		}
+	}
+
+	if (IS_HELP(args[1])) {
+		puts(_(PROP_USAGE));
+		return EXIT_SUCCESS;
 	}
 
 	return properties_function(args);
@@ -1543,7 +1541,7 @@ autocd_dir(char *tmp)
 		ret = cd_function(tmp, CD_PRINT_ERROR);
 	} else {
 		fprintf(stderr, _("%s: %s: Is a directory\n"), PROGRAM_NAME, tmp);
-		ret = EXIT_FAILURE;
+		ret = EISDIR;
 	}
 	free(tmp);
 
@@ -1766,7 +1764,8 @@ toggle_full_dir_size(const char *arg)
 			puts(_("Full directory size is already enabled"));
 		} else {
 			full_dir_size = 1;
-			free_dirlist();	list_dir();
+			if (autols == 1) { free_dirlist(); list_dir(); }
+			printf(_("%s->%s Full directory size enabled\n"), mi_c, df_c);
 		}
 		return EXIT_SUCCESS;
 	}
@@ -1776,7 +1775,8 @@ toggle_full_dir_size(const char *arg)
 			puts(_("Full directory size is already disabled"));
 		} else {
 			full_dir_size = 0;
-			free_dirlist();	list_dir();
+			if (autols == 1) { free_dirlist(); list_dir(); }
+			printf(_("%s->%s Full directory size disabled\n"), mi_c, df_c);
 		}
 		return EXIT_SUCCESS;
 	}
