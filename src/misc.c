@@ -72,10 +72,10 @@
  * messages. MSG_TYPE is one of: 'e', 'f', 'w', 'n', or zero (meaning this
  * latter that no message mark (E, W, or N) will be added to the prompt).
  * 'f' means that the message must be printed forcefully, even if identical
- * to the previous one.
+ * to the previous one, without printing any message mark.
  * PROMPT tells whether to print the message immediately before the
- * prompt or rather in place. Based on littlstar's xasprintf
- * implementation:
+ * prompt or rather in place.
+ * Based on littlstar's xasprintf implementation:
  * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
 __attribute__((__format__(__printf__, 3, 0)))
 /* We use __attribute__ here to silence clang warning: "format string is
@@ -330,6 +330,7 @@ unset_filter(void)
 	free(_filter);
 	_filter = (char *)NULL;
 	regfree(&regex_exp);
+	if (autols == 1) { free_dirlist(); list_dir(); }
 	puts(_("Filter unset"));
 	filter_rev = 0;
 
@@ -346,7 +347,8 @@ compile_filter(void)
 		_filter = (char *)NULL;
 		regfree(&regex_exp);
 	} else {
-		puts(_("New filter successfully set"));
+		if (autols) { free_dirlist(); list_dir(); }
+		printf(_("%s: New filter successfully set\n"), _filter);
 	}
 
 	return EXIT_SUCCESS;
