@@ -124,6 +124,40 @@ _err(int msg_type, int prompt, const char *format, ...)
 	return EXIT_FAILURE;
 }
 
+/* Print format string MSG, as "> MSG" (colored), if autols is on, or just
+ * as "MSG" if off.
+ * This function is used to inform the user about changes that require a
+ * a files list reload (either upon files or interface modifications) */
+__attribute__((__format__(__printf__, 1, 0)))
+int
+print_reload_msg(const char *msg, ...)
+{
+	va_list arglist, tmp_list;
+
+	va_start(arglist, msg);
+	va_copy(tmp_list, arglist);
+	int size = vsnprintf((char *)NULL, 0, msg, tmp_list);
+	va_end(tmp_list);
+
+	if (size < 0) {
+		va_end(arglist);
+		return EXIT_FAILURE;
+	}
+
+	if (autols == 1)
+		printf("%s->%s ", mi_c, df_c);
+
+	char *buf = (char *)xnmalloc((size_t)size + 1, sizeof(char));
+
+	vsprintf(buf, msg, arglist);
+	va_end(arglist);
+
+	fputs(buf, stdout);
+	free(buf);
+
+	return EXIT_SUCCESS;
+}
+
 #ifdef LINUX_INOTIFY
 void
 reset_inotify(void)
@@ -348,7 +382,7 @@ compile_filter(void)
 		regfree(&regex_exp);
 	} else {
 		if (autols) { free_dirlist(); list_dir(); }
-		printf(_("%s: New filter successfully set\n"), _filter);
+		print_reload_msg(_("%s: New filter successfully set\n"), _filter);
 	}
 
 	return EXIT_SUCCESS;
@@ -1591,7 +1625,8 @@ hidden_function(char **comm)
 	int exit_status = EXIT_SUCCESS;
 
 	if (strcmp(comm[1], "status") == 0) {
-		printf(_("Hidden files is %s\n"), show_hidden ? _("enabled") : _("disabled"));
+		printf(_("Hidden files is %s\n"), show_hidden
+			? _("enabled") : _("disabled"));
 	} else if (strcmp(comm[1], "off") == 0) {
 		if (show_hidden == 1) {
 			show_hidden = 0;
@@ -1599,7 +1634,7 @@ hidden_function(char **comm)
 				free_dirlist();
 				exit_status = list_dir();
 			}
-			printf(_("%s->%s Hidden files disabled\n"), mi_c, df_c);
+			print_reload_msg(_("Hidden files disabled\n"));
 		}
 	} else if (strcmp(comm[1], "on") == 0) {
 		if (show_hidden == 0) {
@@ -1608,7 +1643,7 @@ hidden_function(char **comm)
 				free_dirlist();
 				exit_status = list_dir();
 			}
-			printf(_("%s->%s Hidden files disabled\n"), mi_c, df_c);
+			print_reload_msg(_("Hidden files enabled\n"));
 		}
 	} else {
 		fprintf(stderr, "%s\n", _(HF_USAGE));

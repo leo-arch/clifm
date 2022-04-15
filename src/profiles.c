@@ -281,9 +281,7 @@ profile_set(char *prof)
 		exit_status = list_dir();
 	}
 
-	printf("%s->%s Switched to profile %s%s%s\n", mi_c, df_c, "\x1b[1m",
-			prof, "\x1b[0m");
-
+	print_reload_msg("Switched to profile %s%s%s\n", "\x1b[1m",	prof, "\x1b[0m");
 	return exit_status;
 }
 

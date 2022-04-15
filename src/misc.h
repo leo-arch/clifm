@@ -26,6 +26,7 @@
 #define MISC_H
 
 int _err(int, int, const char *, ...);
+int print_reload_msg(const char *, ...);
 int alias_import(char *file);
 void bonus_function(void);
 int create_usr_var(char *str);

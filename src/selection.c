@@ -1103,7 +1103,7 @@ deselect(char **args)
 			int ret = deselect_all();
 			if (autols == 1) { free_dirlist(); list_dir(); }
 			if (ret == EXIT_SUCCESS)
-				printf(_("%s->%s All files deselected\n"), mi_c, df_c);
+				print_reload_msg(_("All files deselected\n"));
 			return ret;
 		} else {
 			err = deselect_from_args(args);

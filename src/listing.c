@@ -150,8 +150,8 @@ print_disk_usage(void)
 
 	char *free_space = get_size_unit((off_t)(stat.f_frsize * stat.f_bavail));
 	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
-	printf("%s->%s %s/%s free\n", mi_c, df_c, free_space ? free_space : "?",
-	    size ? size : "?");
+	print_reload_msg("%s/%s free\n",
+		free_space ? free_space : "?", size ? size : "?");
 
 	free(free_space);
 	free(size);
@@ -302,7 +302,7 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (disk_usage)
 		print_disk_usage();
 	if (sort_switch) {
-		printf(_("%s->%s Sorted by: "), mi_c, df_c);
+		print_reload_msg(_("Sorted by: "));
 		print_sort_method();
 	}
 
