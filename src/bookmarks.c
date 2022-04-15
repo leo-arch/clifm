@@ -638,10 +638,6 @@ print_bookmarks(void)
 		    : (!is_dir ? fi_c : (name_ok ? bm_c : di_c)),
 		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
 	}
-
-/*	char **arg = bm_prompt(); // User selection. Display the prompt
-	if (!arg || !*arg) return (char **)NULL;
-	return arg; */
 }
 
 static int
@@ -679,7 +675,7 @@ get_bm_path(char *arg)
 	if (is_number(arg)) {
 		int num = atoi(arg);
 		if (num <= 0 || (size_t)num > bm_n) {
-			fprintf(stderr, _("Bookmarks: %s: No such ELN\n"), arg);
+			fprintf(stderr, _("%s: No such ELN\n"), arg);
 			return (char *)NULL;
 		}
 		return bookmarks[num - 1].path;
@@ -695,12 +691,12 @@ get_bm_path(char *arg)
 			if (bookmarks[i].path)
 				return bookmarks[i].path;
 
-			fprintf(stderr, _("%s: %s: Invalid bookmark\n"), PROGRAM_NAME, arg);
+			fprintf(stderr, _("%s: Invalid bookmark\n"), arg);
 			return (char *)NULL;
 		}
 	}
 
-	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), arg);
+	fprintf(stderr, _("%s: No such bookmark\n"), arg);
 	return (char *)NULL;
 }
 
@@ -714,6 +710,7 @@ free_bm_input(char ***p)
 	*p = (char **)NULL;
 }
 
+/* This function takes care of the bookmarks screen */
 int
 open_bookmark(void)
 {
@@ -779,12 +776,12 @@ bm_open(char **cmd)
 				return open_function(tmp_cmd);
 			}
 
-			fprintf(stderr, _("Bookmarks: %s: Invalid bookmark\n"), cmd[1]);
+			fprintf(stderr, _("%s: Invalid bookmark\n"), cmd[1]);
 			return EXIT_FAILURE;
 		}
 	}
 
-	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), cmd[1]);
+	fprintf(stderr, _("%s: No such bookmark\n"), cmd[1]);
 	return EXIT_FAILURE;
 }
 
@@ -827,7 +824,7 @@ bookmarks_function(char **cmd)
 		return EXIT_FAILURE;
 	}
 
-	/* If no arguments */
+	/* If no arguments, load the bookmarks screen */
 	if (!cmd[1])
 		return open_bookmark();
 
