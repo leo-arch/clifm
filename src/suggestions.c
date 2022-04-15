@@ -171,13 +171,13 @@ static inline void
 restore_cursor_position(const size_t slines)
 {
 	/* Update the row number, if needed */
-	/* If the cursor is in the last row, printing a multi-line suggestion
-	 * will move the beginning of the current line up the number of
-	 * lines taken by the suggestion, so that we need to update the
+	/* If the cursor is on the last terminal line, printing a multi-line
+	 * suggestion will move the beginning of the current line up the number
+	 * of lines taken by the suggestion, so that we need to update the
 	 * value to move the cursor back to the correct row (the beginning
 	 * of the line) */
 	int old_currow = currow;
-	/* extra_rows: amount of extra rows we need to print the suggestion
+	/* extra_rows: amount of extra rows needed to print the suggestion
 	 * (excluding the current row) */
 	int extra_rows = (int)slines - 1;
 	if (extra_rows && old_currow + extra_rows >= term_rows)
@@ -185,10 +185,10 @@ restore_cursor_position(const size_t slines)
 
 	/* Restore cursor position */
 
-	/* THIS BLOCK IS UNDER TEST: It corrects the cursor position whenver
-	 * a suggestion is printed and the cursor is not at the end of the line
+	/* THIS BLOCK IS UNDER TEST: It corrects the cursor position whenever
+	 * a suggestion is printed and the cursor is not at the end of the line.
 	 * We do this because we modified the cursor position in correct_offset()
-	 * to correctly print the suggestions. Now we need to undo that change */
+	 * to correctly print the suggestion. Now we need to undo this change */
 	if (highlight && rl_point != rl_end)
 		curcol += (rl_end - rl_point);
 

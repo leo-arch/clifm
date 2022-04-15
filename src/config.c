@@ -2054,6 +2054,7 @@ check_colors(void)
 	}
 
 	if (colorize == 1) {
+		unsetenv("CLIFM_COLORLESS");
 		set_colors(usr_cscheme ? usr_cscheme : "default", 1);
 		return;
 	}
