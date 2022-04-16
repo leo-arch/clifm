@@ -799,11 +799,24 @@ rl_long(int count, int key)
 
 	long_view = long_view ? 0 : 1;
 
-	if (clear_screen)
+	if (autols == 1) {
+		free_dirlist();
+		/* Without this putchar(), the first entries of the directories
+		 * list are printed in the prompt line */
+		putchar('\n');
+		list_dir();
+	}
+
+	print_reload_msg(_("Long view mode %s\n"),
+		long_view == 1 ? "enabled" : "disabled");
+	rl_reset_line_state();
+	return EXIT_SUCCESS;
+
+/*	if (clear_screen)
 		CLEAR;
 	keybind_exec_cmd("rf");
 	rl_reset_line_state();
-	return EXIT_SUCCESS;
+	return EXIT_SUCCESS; */
 }
 
 static int
@@ -821,11 +834,7 @@ rl_folders_first(int count, int key)
 	list_folders_first = list_folders_first ? 0 : 1;
 
 	if (autols == 1) {
-		if (clear_screen)
-			CLEAR;
 		free_dirlist();
-		/* Without this putchar(), the first entries of the directories
-		 * list are printed in the prompt line */
 		putchar('\n');
 		list_dir();
 	}
