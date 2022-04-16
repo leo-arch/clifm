@@ -715,43 +715,39 @@ int
 open_bookmark(void)
 {
 	if (bm_n == 0) { printf(_(NO_BOOKMARKS)); return EXIT_SUCCESS; }
-
 	if (clear_screen) CLEAR;
 
-	int exit_status = EXIT_SUCCESS, header_printed = 0;
+	int exit_status = EXIT_SUCCESS, header_printed = 0,	is_dir = 0;
 
 	print_bookmarks();
 	char **arg = (char **)NULL;
 	while (!arg) {
 		arg = bm_prompt(header_printed == 1 ? NO_BM_HEADER : PRINT_BM_HEADER);
 		header_printed = 1;
-		if (!arg)
-			continue;
+		if (!arg) continue;
 
 		if (*arg[0] == 'e' && (!arg[0][1] || strcmp(arg[0], "edit") == 0))
 			return _edit_bookmarks(arg);
 
-		if (*arg[0] == 'q' && (!arg[0][1] || strcmp(arg[0], "quit") == 0)) {
-			if (autols == 1) { free_dirlist(); list_dir(); }
+		if (*arg[0] == 'q' && (!arg[0][1] || strcmp(arg[0], "quit") == 0))
 			break;
-		}
 
 		char *tmp_path = get_bm_path(arg[0]);
-		if (!tmp_path) {
-			free_bm_input(&arg);
-			continue;
-		}
+		if (!tmp_path) { free_bm_input(&arg); continue;	}
+
+		struct stat a; /* If not a dir, refresh files list */
+		if (stat(tmp_path, &a) != -1 && S_ISDIR(a.st_mode))
+			is_dir = 1;
 
 		char *tmp_cmd[] = {"o", tmp_path, arg[1] ? arg[1] : NULL, NULL};
 		exit_status = open_function(tmp_cmd);
-		if (exit_status != EXIT_SUCCESS) {
-			free_bm_input(&arg);
-			continue;
-		}
+		if (exit_status != EXIT_SUCCESS)
+			{ free_bm_input(&arg); continue; }
 		break;
 	}
 
 	free_bm_input(&arg);
+	if (autols == 1 && is_dir == 0) { free_dirlist(); list_dir(); }
 	return EXIT_SUCCESS;
 }
 
