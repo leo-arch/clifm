@@ -957,23 +957,25 @@ CliFM offers three kinds of file filters:
 .TP
 \fBM\-q:\fR Delete last word (up to last slash or space)
 .TP
+\fBM\-i, M\-.:\fR Toggle hidden files on/off
+.TP
+\fBM\-l:\fR Toggle long view mode on/off
+.TP
 \fBM\-g:\fR Toggle list\-folders\-first on/off
 .TP
 \fBM\-,:\fR Toggle list only directories on/off
 .TP
 \fBC-M-l:\fR Toggle max file name length on/off
 .TP
+\fBC-M-i:\fR Toggle disk usage analyzer on/off
+.TP
 \fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
 \fBM\-t:\fR Clear program messages
 .TP
-\fBM\-l:\fR Toggle long view mode on/off
-.TP
 \fBM\-m:\fR List mountpoints
 .TP
 \fBM\-b:\fR Launch the Bookmarks Manager
-.TP
-\fBM\-i, M\-.:\fR Toggle hidden files on/off
 .TP
 \fBM\-h:\fR Show directory history
 .TP
