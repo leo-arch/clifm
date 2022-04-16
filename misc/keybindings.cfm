@@ -110,6 +110,7 @@ toggle-hidden2:\M-.
 toggle-light:\M-y
 toggle-long:\M-l
 toggle-max-name-len:\C-\M-l
+toggle-disk-usage:\C-\M-i
 trash-sel:\C-\M-t
 untrash-all:\C-\M-u
 
