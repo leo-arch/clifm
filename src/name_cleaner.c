@@ -655,7 +655,7 @@ CONFIRM:
 #if defined(__HAIKU__)// || defined(__APPLE__)
 	if (exit_status == EXIT_FAILURE)
 		return EXIT_FAILURE;
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		return list_dir();
 	}

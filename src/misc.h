@@ -38,7 +38,6 @@ void free_tags(void);
 void handle_stdin(void);
 void help_function(void);
 int quick_help(void);
-int hidden_function(char **comm);
 int list_commands(void);
 int list_mountpoints(void);
 int new_instance(char *dir, int sudo);

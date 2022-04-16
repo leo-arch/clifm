@@ -113,7 +113,7 @@ switch_workspace(int tmp_ws)
 	int exit_status = EXIT_SUCCESS;
 
 	dir_changed = 1;
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		exit_status = list_dir();
 	}
@@ -517,7 +517,7 @@ cd_function(char *new_path, const int print_error)
 	add_to_dirhist(workspaces[cur_ws].path);
 
 	dir_changed = 1;
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
@@ -639,7 +639,7 @@ change_to_num(int n)
 	dirhist_cur_index = n;
 	ret = EXIT_SUCCESS;
 
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		ret = list_dir();
 	}
@@ -680,7 +680,7 @@ set_path(const char *new_path)
 	int exit_status = EXIT_SUCCESS;
 
 	dir_changed = 1;
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		exit_status = list_dir();
 	}

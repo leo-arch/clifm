@@ -195,7 +195,7 @@ run_and_refresh(char **cmd)
 	}
 
 #ifdef __HAIKU__
-	if (autols && cmd[1] && strcmp(cmd[1], "--help") != 0
+	if (autols == 1 && cmd[1] && strcmp(cmd[1], "--help") != 0
 	&& strcmp(cmd[1], "--version") != 0) {
 		free_dirlist();
 		list_dir();
@@ -610,17 +610,16 @@ set_max_files(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	int status = max_files;
 	if (*args[1] == 'u' && strcmp(args[1], "unset") == 0) {
 		max_files = -1;
-		if (autols && status != max_files) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Max files unset\n"));
 		return EXIT_SUCCESS;
 	}
 
 	if (*args[1] == '0' && !args[1][1]) {
 		max_files = 0;
-		if (autols && status != max_files) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Max files set to %d\n"), max_files);
 		return EXIT_SUCCESS;
 	}
@@ -632,7 +631,7 @@ set_max_files(char **args)
 	}
 
 	max_files = (int)inum;
-	if (autols && status != max_files) { free_dirlist(); list_dir(); }
+	if (autols == 1) { free_dirlist(); list_dir(); }
 	print_reload_msg(_("Max files set to %d\n"), max_files);
 
 	return EXIT_SUCCESS;
@@ -685,18 +684,18 @@ folders_first_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int status = list_folders_first, exit_status = EXIT_SUCCESS;
+	int exit_status = EXIT_SUCCESS;
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		printf(_("Folders first is %s\n"),
 			list_folders_first == 1 ? _("enabled") : _("disabled"));
 	}  else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		list_folders_first = 1;
-		if (autols && status != list_folders_first) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Folders first enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		list_folders_first = 0;
-		if (autols && status != list_folders_first) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Folders first disabled\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(FF_USAGE));
@@ -714,17 +713,16 @@ filescounter_function(char *arg)
 		return EXIT_FAILURE;
 	}
 
-	int status = files_counter;
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		files_counter = 1;
-		if (autols && status != files_counter) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Files counter enabled\n"));
 		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		files_counter = 0;
-		if (autols && status != files_counter) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Files counter disabled\n"));
 		return EXIT_SUCCESS;
 	}
@@ -754,17 +752,17 @@ pager_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS, status = pager;
+	int exit_status = EXIT_SUCCESS;
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		printf(_("The files pager is %s\n"),
 			pager == 1 ? _("enabled") : _("disabled"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		pager = 1;
-		if (autols && status != pager) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Pager enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		pager = 0;
-		if (autols && status != pager) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Pager disabled\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(PAGER_USAGE));
@@ -864,18 +862,18 @@ columns_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS, status = columned;
+	int exit_status = EXIT_SUCCESS;
 
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
 		columned = 1;
-		if (autols == 1 && status != columned) {
+		if (autols == 1) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
 		print_reload_msg(_("Columns enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		columned = 0;
-		if (autols == 1 && status != columned) {
+		if (autols == 1) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
@@ -901,17 +899,16 @@ icons_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int status = icons;
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
 		icons = 1;
 		int ret = EXIT_SUCCESS;
-		if (autols && status != icons) { free_dirlist(); ret = list_dir(); }
+		if (autols == 1) { free_dirlist(); ret = list_dir(); }
 		print_reload_msg("Icons enabled\n");
 		return ret;
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		icons = 0;
 		int ret = EXIT_SUCCESS;
-		if (autols && status != icons) { free_dirlist(); ret = list_dir(); }
+		if (autols == 1) { free_dirlist(); ret = list_dir(); }
 		print_reload_msg("Icons disabled\n");
 		return ret;
 	} else {
@@ -989,14 +986,13 @@ lightmode_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int status = light_mode;
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		light_mode = 1;
-		if (autols && status != light_mode) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Switched back to normal mode\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		light_mode = 0;
-		if (autols && status != light_mode) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Switched back to normal mode\n"));
 	} else {
 		puts(_(LM_USAGE));
@@ -1110,6 +1106,35 @@ _log_function(char **args)
 }
 
 static int
+hidden_function(char **comm)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	if (strcmp(comm[1], "status") == 0) {
+		printf(_("Hidden files is %s\n"), show_hidden
+			? _("enabled") : _("disabled"));
+	} else if (strcmp(comm[1], "off") == 0) {
+		show_hidden = 0;
+		if (autols == 1) {
+			free_dirlist();
+			exit_status = list_dir();
+		}
+		print_reload_msg(_("Hidden files disabled\n"));
+	} else if (strcmp(comm[1], "on") == 0) {
+		show_hidden = 1;
+		if (autols == 1) {
+			free_dirlist();
+			exit_status = list_dir();
+		}
+		print_reload_msg(_("Hidden files enabled\n"));
+	} else {
+		fprintf(stderr, "%s\n", _(HF_USAGE));
+	}
+
+	return exit_status;
+}
+
+static int
 _hidden_function(char **args)
 {
 	if (!args[1]) {
@@ -1160,7 +1185,7 @@ toggle_exec(char **args)
 	}
 
 	if (n > 0) {
-		if (autols) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("Toggled executable bit on %zu %s\n"),
 			n, n > 1 ? _("files") : _("file"));
 	}
@@ -1227,7 +1252,7 @@ ow_function(char **args)
 static int
 refresh_function(int old_exit_code)
 {
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		list_dir();
 	}
@@ -1336,7 +1361,7 @@ reload_function(void)
 	int exit_status = reload_config();
 	welcome_message = 0;
 
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;

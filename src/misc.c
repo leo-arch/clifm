@@ -381,7 +381,7 @@ compile_filter(void)
 		_filter = (char *)NULL;
 		regfree(&regex_exp);
 	} else {
-		if (autols) { free_dirlist(); list_dir(); }
+		if (autols == 1) { free_dirlist(); list_dir(); }
 		print_reload_msg(_("%s: New filter successfully set\n"), _filter);
 	}
 
@@ -1514,7 +1514,7 @@ FREE_N_EXIT:
 	/* Go back to tty */
 	dup2(STDOUT_FILENO, STDIN_FILENO);
 
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		list_dir();
 		add_to_dirhist(workspaces[cur_ws].path);
@@ -1617,39 +1617,6 @@ unpin_dir(void)
 	free(pinned_dir);
 	pinned_dir = (char *)NULL;
 	return EXIT_SUCCESS;
-}
-
-int
-hidden_function(char **comm)
-{
-	int exit_status = EXIT_SUCCESS;
-
-	if (strcmp(comm[1], "status") == 0) {
-		printf(_("Hidden files is %s\n"), show_hidden
-			? _("enabled") : _("disabled"));
-	} else if (strcmp(comm[1], "off") == 0) {
-		if (show_hidden == 1) {
-			show_hidden = 0;
-			if (autols) {
-				free_dirlist();
-				exit_status = list_dir();
-			}
-			print_reload_msg(_("Hidden files disabled\n"));
-		}
-	} else if (strcmp(comm[1], "on") == 0) {
-		if (show_hidden == 0) {
-			show_hidden = 1;
-			if (autols) {
-				free_dirlist();
-				exit_status = list_dir();
-			}
-			print_reload_msg(_("Hidden files enabled\n"));
-		}
-	} else {
-		fprintf(stderr, "%s\n", _(HF_USAGE));
-	}
-
-	return exit_status;
 }
 
 /* Instead of recreating here the commands description, just jump to the

@@ -483,7 +483,7 @@ set_colorscheme(char *arg)
 		cur_cscheme = color_schemes[i];
 		switch_cscheme = 1;
 
-		if (autols) {
+		if (autols == 1) {
 			free_dirlist();
 			list_dir();
 		}

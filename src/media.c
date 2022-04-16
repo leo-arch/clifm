@@ -685,7 +685,7 @@ media_menu(int mode)
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(media[n].mnt, strlen(media[n].mnt));
 
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;

@@ -319,14 +319,15 @@ int rl_toggle_max_filename_len(int count, int key)
 		flag = 1;
 	}
 
-	if (mnl_bk != max_name_len)
+	if (max_name_len == UNSET) {
 		max_name_len = mnl_bk;
-	else
+		mnl_bk = UNSET;
+	} else {
+		mnl_bk = max_name_len;
 		max_name_len = UNSET;
+	}
 
-	if (autols) {
-		if (clear_screen)
-			CLEAR;
+	if (autols == 1) {
 		free_dirlist();
 		putchar('\n');
 		list_dir();
@@ -819,7 +820,7 @@ rl_folders_first(int count, int key)
 
 	list_folders_first = list_folders_first ? 0 : 1;
 
-	if (autols) {
+	if (autols == 1) {
 		if (clear_screen)
 			CLEAR;
 		free_dirlist();
@@ -844,7 +845,7 @@ rl_light(int count, int key)
 
 	light_mode = light_mode ? 0 : 1;
 
-	if (autols) {
+	if (autols == 1) {
 		if (clear_screen)
 			CLEAR;
 		free_dirlist();
@@ -875,9 +876,7 @@ rl_hidden(int count, int key)
 #endif
 	show_hidden = show_hidden ? 0 : 1;
 
-	if (autols) {
-		if (clear_screen)
-			CLEAR;
+	if (autols == 1) {
 		free_dirlist();
 		putchar('\n');
 		list_dir();
@@ -1029,9 +1028,7 @@ rl_sort_next(int count, int key)
 	if (sort > SORT_TYPES)
 		sort = 0;
 
-	if (autols) {
-		if (clear_screen)
-			CLEAR;
+	if (autols == 1) {
 		sort_switch = 1;
 		free_dirlist();
 		putchar('\n');
@@ -1057,9 +1054,7 @@ rl_sort_previous(int count, int key)
 	if (sort < 0)
 		sort = SORT_TYPES;
 
-	if (autols) {
-		if (clear_screen)
-			CLEAR;
+	if (autols == 1) {
 		sort_switch = 1;
 		free_dirlist();
 		putchar('\n');
@@ -1520,9 +1515,7 @@ rl_onlydirs(int count, int key)
 	only_dirs = only_dirs ? 0 : 1;
 
 	int exit_status = EXIT_SUCCESS;
-	if (autols) {
-		if (clear_screen)
-			CLEAR;
+	if (autols == 1) {
 		free_dirlist();
 		putchar('\n');
 		exit_status = list_dir();
