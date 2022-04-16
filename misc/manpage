@@ -1818,7 +1818,7 @@ The following codes are used to control CliFM's files list:
  \fBfc\fR     Files counter         fc=0
  \fBhf\fR     Hidden files          hf=0
  \fBlm\fR     Light mode            lm=1
- \fBlv\fR     Long/detail view      lm=0
+ \fBlv\fR     Long/detail view      lv=0
  \fBmf\fR     Max files             mf=100
  \fBmn\fR     Max file name length  mn=20
  \fBpg\fR     Pager                 pg=0
