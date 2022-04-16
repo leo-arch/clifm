@@ -327,6 +327,7 @@ move-sel:\\C-\\M-n\n\
 export-sel:\\C-\\M-e\n\
 open-sel:\\C-\\M-g\n\
 bookmark-sel:\\C-\\M-b\n\
+toggle-disk-usage:\\C-\\M-i\n\
 toggle-max-name-len:\\C-\\M-l\n\
 refresh-screen:\\C-r\n\
 clear-line:\\M-c\n\
