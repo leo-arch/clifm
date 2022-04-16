@@ -1683,6 +1683,45 @@ rl_cmdhist(int count, int key)
 }
 
 static int
+rl_toggle_disk_usage(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+
+	/* Default values: however, THEY SHOULD BE THE VALUES SET BY THE USER! */
+	static int tsort = SNAME, tlong = 0, tdirsize = 0, tff = 1;
+
+	if (xargs.disk_usage_analyzer == 1) {
+		xargs.disk_usage_analyzer = 0;
+		sort = tsort;
+		long_view = tlong;
+		full_dir_size = tdirsize;
+		list_folders_first = tff;
+	} else {
+		xargs.disk_usage_analyzer = 1;
+		tsort = sort;
+		tlong = long_view;
+		tdirsize = full_dir_size;
+		tff = list_folders_first;
+
+		sort = STSIZE;
+		long_view = full_dir_size = 1;
+		list_folders_first = 0;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+	if (autols == 1) {
+		free_dirlist();
+		putchar('\n');
+		exit_status = list_dir();
+	}
+
+	print_reload_msg("Disk usage analyzer %s\n",
+		xargs.disk_usage_analyzer == 1 ? "enabled" : "disabled");
+	rl_reset_line_state();
+	return exit_status;
+}
+
+static int
 rl_tab_comp(int count, int key)
 {
 #ifndef _NO_SUGGESTIONS
@@ -1838,21 +1877,22 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
 		rl_bind_keyseq(find_key("only-dirs"), rl_onlydirs);
 
+		/* Misc */
 		rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
 		rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
 		rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
 		rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
 		rl_bind_keyseq(find_key("selbox"), rl_selbox);
 		rl_bind_keyseq(find_key("prepend-sudo"), rl_prepend_sudo);
+		rl_bind_keyseq(find_key("toggle-disk-usage"), rl_toggle_disk_usage);
+		rl_bind_keyseq(find_key("toggle-max-name-len"), rl_toggle_max_filename_len);
+		rl_bind_keyseq(find_key("quit"), rl_quit);
 
 		/* Plugins */
 		rl_bind_keyseq(find_key("plugin1"), rl_plugin1);
 		rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
 		rl_bind_keyseq(find_key("plugin3"), rl_plugin3);
 		rl_bind_keyseq(find_key("plugin4"), rl_plugin4);
-
-		rl_bind_keyseq(find_key("toggle-max-name-len"), rl_toggle_max_filename_len);
-		rl_bind_keyseq(find_key("quit"), rl_quit);
 	}
 
 	/* If no kbinds file is found, set the defaults */
@@ -1939,6 +1979,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-s", rl_selbox);
 
 		rl_bind_keyseq("\\C-\\M-l", rl_toggle_max_filename_len);
+		rl_bind_keyseq("\\C-\\M-i", rl_toggle_disk_usage);
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
