@@ -692,22 +692,11 @@ import_rl_file(void)
 int
 create_config(char *file)
 {
-//	struct stat attr;
-
 	/* First, try to import it from DATADIR */
 	char src_filename[NAME_MAX];
 	snprintf(src_filename, NAME_MAX, "%src", PNL);
 	if (import_from_data_dir(src_filename, file) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
-/*	if (data_dir) {
-		char sys_file[PATH_MAX];
-		snprintf(sys_file, PATH_MAX - 1, "%s/%s/%src", data_dir, PNL, PNL);
-		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
-			char *cmd[] = {"cp", sys_file, file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
-				return EXIT_SUCCESS;
-		}
-	} */
 
 	/* If not found, create it */
 	int fd;
@@ -942,8 +931,9 @@ Pager=%s\n\n"
 
 	"# Maximum file name length for listed files. Names larger than\n\
 # MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde.\n\
+# Set it to -1 (or empty) to remove this limit.\n\
 # When running in long mode, this setting is overriden by MinFilenameTrim\n\
-MaxFilenameLen=\n\n"
+MaxFilenameLen=%d\n\n"
 
 	"MaxHistory=%d\n\
 MaxDirhist=%d\n\
@@ -989,6 +979,7 @@ RlEditMode=%d\n\n",
 		DEF_CASE_SENS_SEARCH == 1 ? "true" : "false",
 		DEF_UNICODE == 1 ? "true" : "false",
 		DEF_PAGER == 1 ? "true" : "false",
+		DEF_MAX_NAME_LEN,
 		DEF_MAX_HIST,
 		DEF_MAX_DIRHIST,
 		DEF_MAX_LOG,
@@ -1487,11 +1478,11 @@ set_max_filename_len(const char *line)
 {
 	char *p = strchr(line, '=');
 	if (!p || !*p || !*(++p))
-		return (-1);
+		return (max_name_len = UNSET);
 
 	int n = atoi(p);
 	if (n <= 0)
-		return (-1);
+		return (max_name_len = UNSET);
 
 	max_name_len = n;
 	return EXIT_SUCCESS;
@@ -1512,7 +1503,7 @@ read_config(void)
 		rl_vi_editing_mode(1, 0);
 
 	int ret = -1;
-	max_name_len = UNSET;
+	max_name_len = DEF_MAX_NAME_LEN;
 	*div_line_char = *DEF_DIV_LINE_CHAR;
 	char line[PATH_MAX + 15];
 

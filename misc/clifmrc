@@ -211,8 +211,9 @@ Pager=false
 
 # Maximum file name length for listed files. Names larger than
 # MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde
+# Set it to -1 (or empty) to remove this limit
 # When running in long mode, this setting is overriden by MinFilenameTrim
-MaxFilenameLen=
+MaxFilenameLen=20
 
 MaxHistory=1000
 MaxDirhist=100

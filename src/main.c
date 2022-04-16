@@ -156,7 +156,7 @@ int
 	listing_mode = UNSET,
 	logs_enabled = UNSET,
 	long_view = UNSET,
-	max_name_len = UNSET,
+	max_name_len = DEF_MAX_NAME_LEN,
 	mime_match = 0,
 	min_name_trim = UNSET,
 	mv_cmd = UNSET,
