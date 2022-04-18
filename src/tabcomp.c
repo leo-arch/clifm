@@ -218,9 +218,23 @@ rl_strpbrk(char *s1, char *s2)
 	return (char *)NULL;
 }
 
+void
+reinsert_slashes(char *str)
+{
+	if (!str || !*str)
+		return;
+
+	char *p = str;
+	while (*p) {
+		if (*p == ':')
+			*p = '/';
+		p++;
+	}
+}
+
 #ifndef _NO_FZF
-#define FZFTABIN "/tmp/clifm.fzf.in"
-#define FZFTABOUT "/tmp/clifm.fzf.out"
+#define FINDER_IN "/tmp/clifm.finder.in"
+#define FINDER_OUT "/tmp/clifm.finder.out"
 
 static char *
 fzftab_color(char *filename, const struct stat *attr)
@@ -453,17 +467,26 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 		snprintf(height_str, sizeof(height_str), "--height=%zu", *height);
 
 	char cmd[PATH_MAX];
-	snprintf(cmd, PATH_MAX, "$(fzf %s "
-			"%s --margin=0,0,0,%d "
-			"%s --read0 --ansi "
-			"--query=\"%s\" %s %s "
-			"< %s > %s)",
-			fzftab_options,
-			*height_str ? height_str : "", *offset,
-			case_sens_path_comp ? "+i" : "-i",
-			lw ? lw : "", colorize == 0 ? "--no-color" : "",
-			multi ? "--multi --bind tab:toggle+down" : "",
-			FZFTABIN, FZFTABOUT);
+	if (xargs.fzytab != 1) {
+		snprintf(cmd, PATH_MAX, "$(fzf %s "
+				"%s --margin=0,0,0,%d "
+				"%s --read0 --ansi "
+				"--query=\"%s\" %s %s "
+				"< %s > %s)",
+				fzftab_options,
+				*height_str ? height_str : "", *offset,
+				case_sens_path_comp ? "+i" : "-i",
+				lw ? lw : "", colorize == 0 ? "--no-color" : "",
+				multi ? "--multi --bind tab:toggle+down" : "",
+				FINDER_IN, FINDER_OUT);
+	} else {
+		snprintf(cmd, PATH_MAX, "(fzy "
+			"--read-null --pad=%d --query=\"%s\" "
+			"--tab-accepts --right-accepts --left-aborts "
+			"%s < %s > %s)",
+			*offset, lw ? lw : "", multi ? "--multi" : "",
+			FINDER_IN, FINDER_OUT);
+	}
 
 	return launch_execle(cmd);
 }
@@ -511,18 +534,18 @@ static char *
 print_no_fzf_file(void)
 {
 	_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-		FZFTABOUT, strerror(errno));
+		FINDER_OUT, strerror(errno));
 //	free(cur_tag);
 //	cur_tag = (char *)NULL;
 	return (char *)NULL;
 }
 
-/* Recover FZF output from FZFTABOUT file
+/* Recover finder (fzf/fzy) output from FINDER_OUT file
  * Return this output or NULL in case of error */
 static inline char *
 get_fzf_output(const int multi)
 {
-	FILE *fp = fopen(FZFTABOUT, "r");
+	FILE *fp = fopen(FINDER_OUT, "r");
 	if (!fp)
 		return print_no_fzf_file();
 
@@ -567,25 +590,11 @@ get_fzf_output(const int multi)
 
 	free(line);
 	fclose(fp);
-	unlink(FZFTABOUT);
+	unlink(FINDER_OUT);
 
 //	free(cur_tag);
 //	cur_tag = (char *)NULL;
 	return buf;
-}
-
-void
-reinsert_slashes(char *str)
-{
-	if (!str || !*str)
-		return;
-
-	char *p = str;
-	while (*p) {
-		if (*p == ':')
-			*p = '/';
-		p++;
-	}
 }
 
 static inline void
@@ -617,10 +626,16 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 		return;
 	}
 
-	fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\0');
+	if (xargs.fzytab != 1) {
+		fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\0');
+	} else {
+		UNUSED(color);
+		fprintf(*fp, "%s%c", entry, '\0');
+	}
 }
 
-/* Store possible completions (MATCHES) in FZFTABIN to pass them to FZF
+/* Store possible completions (MATCHES) in FINDER_IN to pass them to the finder,
+ * either FZF or FZY
  * Return the number of stored matches */
 static inline size_t
 store_completions(char **matches, FILE *fp)
@@ -862,16 +877,16 @@ clean_rl_buffer(void)
 static int
 fzftabcomp(char **matches)
 {
-	FILE *fp = fopen(FZFTABIN, "w");
+	FILE *fp = fopen(FINDER_IN, "w");
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			FZFTABIN, strerror(errno));
+			FINDER_IN, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	int exit_status = EXIT_SUCCESS;
 
-	/* Store possible completions in FZFTABIN to pass them to FZF */
+	/* Store possible completions in FINDER_IN to pass them to FZF */
 	size_t i = store_completions(matches, fp);
 
 	fclose(fp);
@@ -952,9 +967,9 @@ fzftabcomp(char **matches)
 	/* TAB completion cases allowing multiple selection */
 	int multi = is_multi_sel();
 
-	/* Run FZF and store the ouput into the FZFTABOUT file */
+	/* Run FZF and store the ouput into the FINDER_OUT file */
 	int ret = run_fzf(&height, &fzf_offset, query, multi);
-	unlink(FZFTABIN);
+	unlink(FINDER_IN);
 
 	/* Calculate currently used lines to go back to the correct cursor
 	 * position after quitting FZF */
