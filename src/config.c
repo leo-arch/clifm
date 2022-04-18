@@ -1922,7 +1922,7 @@ read_config(void)
 #endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_FZF
-		else if (xargs.fzftab == UNSET && *line == 'T'
+		else if (xargs.fzftab == UNSET && xargs.fzytab == UNSET && *line == 'T'
 		&& strncmp(line, "TabCompletionMode=", 18) == 0) {
 			char opt_str[9] = "";
 			ret = sscanf(line, "TabCompletionMode=%8s\n", opt_str);

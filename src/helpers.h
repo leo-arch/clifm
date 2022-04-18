@@ -671,6 +671,7 @@ struct param {
 	int full_dir_size;
 #ifndef _NO_FZF
 	int fzftab;
+	int fzytab;
 #endif
 	int hidden;
 #ifndef _NO_HIGHLIGHT

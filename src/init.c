@@ -1176,8 +1176,9 @@ external_arguments(int argc, char **argv)
 		{"full-dir-size", no_argument, 0, 49},
 		{"apparent-size", no_argument, 0, 50},
 		{"no-history", no_argument, 0, 51},
+		{"fzytab", no_argument, 0, 52},
 #ifdef __linux__
-		{"si", no_argument, 0, 52},
+		{"si", no_argument, 0, 53},
 #endif
 	    {0, 0, 0, 0}
 	};
@@ -1371,8 +1372,15 @@ RUN:
 		case 49: xargs.full_dir_size = full_dir_size = 1; break;
 		case 50: xargs.apparent_size = 1; break;
 		case 51: xargs.history = 0; break;
+#ifndef _NO_FZF
+		case 52: xargs.fzytab = 1; fzftab = 1; break;
+#else
+		case 52:
+			fprintf(stderr, _("%s: fzytab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#endif
 #ifdef __linux__
-		case 52: xargs.si = 1; break;
+		case 53: xargs.si = 1; break;
 #endif
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1783,6 +1791,7 @@ unset_xargs(void)
 	xargs.full_dir_size = UNSET;
 #ifndef _NO_FZF
 	xargs.fzftab = UNSET;
+	xargs.fzytab = UNSET;
 #endif
 	xargs.hidden = UNSET;
 #ifndef _NO_HIGHLIGHT
