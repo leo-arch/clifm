@@ -483,8 +483,10 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 		snprintf(cmd, PATH_MAX, "(fzy "
 			"--read-null --pad=%d --query=\"%s\" "
 			"--tab-accepts --right-accepts --left-aborts "
-			"%s < %s > %s)",
-			*offset, lw ? lw : "", multi ? "--multi" : "",
+			"%s %s < %s > %s)",
+			*offset, lw ? lw : "",
+			colorize == 0 ? "--no-color" : "",
+			multi ? "--multi" : "",
 			FINDER_IN, FINDER_OUT);
 	}
 
