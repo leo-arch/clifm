@@ -1394,10 +1394,12 @@ parse_input_str(char *str)
 		&& !substr[i][2]))) {
 			char *tmp = (char *)NULL;
 			tmp = realpath(substr[i], NULL);
-			substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
-						* sizeof(char));
-			strcpy(substr[i], tmp);
-			free(tmp);
+			if (tmp) {
+				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
+							* sizeof(char));
+				strcpy(substr[i], tmp);
+				free(tmp);
+			}
 		}
 
 			/* ######################################
