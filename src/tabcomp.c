@@ -481,13 +481,13 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 				FINDER_IN, FINDER_OUT);
 	} else {
 		snprintf(cmd, PATH_MAX, "(fzy "
-			"--read-null --pad=%d --query=\"%s\" "
-			"--tab-accepts --right-accepts --left-aborts "
-			"%s %s < %s > %s)",
-			*offset, lw ? lw : "",
-			colorize == 0 ? "--no-color" : "",
-			multi ? "--multi" : "",
-			FINDER_IN, FINDER_OUT);
+				"--read-null --pad=%d --query=\"%s\" "
+				"--tab-accepts --right-accepts --left-aborts "
+				"--lines=%zu %s %s < %s > %s)",
+				*offset, lw ? lw : "", *height,
+				colorize == 0 ? "--no-color" : "",
+				multi ? "--multi" : "",
+				FINDER_IN, FINDER_OUT);
 	}
 
 	return launch_execle(cmd);
