@@ -313,12 +313,12 @@ static int
 trash_element(const char *suffix, struct tm *tm, char *file)
 {
 	/* Check file's existence */
-	struct stat file_attrib;
+	struct stat attr;
 
-	if (lstat(file, &file_attrib) == -1) {
+	if (lstat(file, &attr) == -1) {
 		fprintf(stderr, "%s: trash: %s: %s\n", PROGRAM_NAME, file,
 		    strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	/* Check whether the user has enough permissions to remove file */
@@ -378,10 +378,11 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	/* Copy the original file into the trash files directory */
 	char *dest = (char *)NULL;
 	dest = (char *)xnmalloc(strlen(trash_files_dir) + strlen(file_suffix) + 2,
-							sizeof(char));
+			sizeof(char));
 	sprintf(dest, "%s/%s", trash_files_dir, file_suffix);
 
-	char *tmp_cmd[] = {"cp", "-a", file, dest, NULL};
+/*	char *tmp_cmd[] = {"cp", "-a", file, dest, NULL}; */
+	char *tmp_cmd[] = {"mv", file, dest, NULL};
 
 	free(filename);
 
@@ -393,7 +394,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		fprintf(stderr, _("%s: trash: %s: Failed copying file to "
 			"Trash\n"), PROGRAM_NAME, file);
 		free(file_suffix);
-		return EXIT_FAILURE;
+		return ret;
 	}
 
 	/* Generate the info file */
@@ -404,8 +405,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 	FILE *info_fp = fopen(info_file, "w");
 	if (!info_fp) { /* If error creating the info file */
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, info_file,
-		    strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, info_file, strerror(errno));
 		/* Remove the trash file */
 		char *trash_file = (char *)NULL;
 		trash_file = (char *)xnmalloc(strlen(trash_files_dir)
@@ -414,18 +414,17 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 		char *tmp_cmd2[] = {"rm", "-r", trash_file, NULL};
 		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
-
 		free(trash_file);
-
-		if (ret != EXIT_SUCCESS)
+		if (ret != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: trash: %s/%s: Failed removing trash "
 				"file\nTry removing it manually\n"), PROGRAM_NAME,
 			    trash_files_dir, file_suffix);
+		}
 
 		free(file_suffix);
 		free(info_file);
 
-		return EXIT_FAILURE;
+		return ret;
 	}
 
 	else { /* If info file was generated successfully */
@@ -457,10 +456,10 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	}
 
 	/* Remove the file to be trashed */
-	char *tmp_cmd3[] = {"rm", "-r", file, NULL};
+/*	char *tmp_cmd3[] = {"rm", "-r", file, NULL};
 	ret = launch_execve(tmp_cmd3, FOREGROUND, E_NOFLAG);
 
-	/* If remove fails, remove trash and info files */
+	// If remove fails, remove trash and info files
 	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: trash: %s: Failed removing file\n"),
 		    PROGRAM_NAME, file);
@@ -481,7 +480,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 			free(info_file);
 			return EXIT_FAILURE;
 		}
-	}
+	} */
 
 	free(info_file);
 	free(file_suffix);
@@ -669,15 +668,14 @@ untrash_element(char *file)
 
 	char undel_file[PATH_MAX], undel_info[PATH_MAX];
 	snprintf(undel_file, PATH_MAX, "%s/%s", trash_files_dir, file);
-	snprintf(undel_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir,
-	    file);
+	snprintf(undel_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir, file);
 
 	FILE *info_fp;
 	info_fp = fopen(undel_info, "r");
 	if (!info_fp) {
 		fprintf(stderr, _("%s: undel: Info file for '%s' not found. "
 				"Try restoring the file manually\n"), PROGRAM_NAME, file);
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	char *orig_path = (char *)NULL;
@@ -712,9 +710,8 @@ untrash_element(char *file)
 
 	/* Decode original path's URL format */
 	char *url_decoded = url_decode(orig_path);
-
 	if (!url_decoded) {
-		fprintf(stderr, _("%s: undel: %s: Failed decoding path\n"),
+		fprintf(stderr, _("%s: undel: %s: Error decoding original path\n"),
 		    PROGRAM_NAME, orig_path);
 		free(orig_path);
 		return EXIT_FAILURE;
@@ -741,44 +738,45 @@ untrash_element(char *file)
 		}
 	}
 
-	if (access(parent, F_OK) != 0) {
-		fprintf(stderr, _("%s: undel: %s: No such file or directory\n"),
-				PROGRAM_NAME, parent);
+	if (access(parent, F_OK | X_OK | W_OK) != 0) {
+		fprintf(stderr, "%s: undel: %s: %s\n", PROGRAM_NAME, parent, strerror(errno));
 		free(parent);
 		free(url_decoded);
-		return EXIT_FAILURE;
+		return errno;
 	}
 
-	if (access(parent, X_OK | W_OK) != 0) {
+/*	if (access(parent, X_OK | W_OK) != 0) {
 		fprintf(stderr, _("%s: undel: %s: Permission denied\n"),
 				PROGRAM_NAME, parent);
 		free(parent);
 		free(url_decoded);
 		return EXIT_FAILURE;
-	}
+	} */
 
 	free(parent);
 
-	char *tmp_cmd[] = {"cp", "-a", undel_file, url_decoded, NULL};
+//	char *tmp_cmd[] = {"cp", "-a", undel_file, url_decoded, NULL};
+	char *tmp_cmd[] = {"mv", undel_file, url_decoded, NULL};
 	int ret = -1;
 	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 	free(url_decoded);
 
 	if (ret == EXIT_SUCCESS) {
-		char *tmp_cmd2[] = {"rm", "-r", undel_file, undel_info, NULL};
+//		char *tmp_cmd2[] = {"rm", "-r", undel_file, undel_info, NULL};
+		char *tmp_cmd2[] = {"rm", "-r", undel_info, NULL};
 		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
 
 		if (ret != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: undel: %s: Failed removing info file\n"),
+			fprintf(stderr, _("%s: undel: %s: Error removing info file\n"),
 					PROGRAM_NAME, undel_info);
-			return EXIT_FAILURE;
+			return ret;
 		} else {
 			return EXIT_SUCCESS;
 		}
 	} else {
-		fprintf(stderr, _("%s: undel: %s: Failed restoring trashed file\n"),
+		fprintf(stderr, _("%s: undel: %s: Error restoring trashed file\n"),
 				PROGRAM_NAME, undel_file);
-		return EXIT_FAILURE;
+		return ret;
 	}
 
 	return EXIT_FAILURE; /* Never reached */
