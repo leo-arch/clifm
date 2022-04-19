@@ -479,6 +479,15 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 				lw ? lw : "", colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down" : "",
 				FINDER_IN, FINDER_OUT);
+/*		snprintf(cmd, PATH_MAX, "$(sk " // skim
+				"%s --margin=0,0,0,%d --color=16 "
+				"--read0 --ansi --inline-info "
+				"--layout=reverse-list --query=\"%s\" %s %s "
+				"< %s > %s)",
+				*height_str ? height_str : "", *offset,
+				lw ? lw : "", colorize == 0 ? "--no-color" : "",
+				multi ? "--multi --bind tab:toggle+down" : "",
+				FINDER_IN, FINDER_OUT); */
 	} else {
 		snprintf(cmd, PATH_MAX, "(fzy "
 				"--read-null --pad=%d --query=\"%s\" "
@@ -1138,6 +1147,13 @@ tab_complete(int what_to_do)
 {
 	if (rl_notab)
 		return EXIT_SUCCESS;
+
+	if (*rl_line_buffer == '#' || cur_color == hc_c) {
+		/* No completion at all if comment */
+		if (suggestion.printed)
+			clear_suggestion(CS_FREEBUF);
+		return EXIT_SUCCESS;
+	}
 
 	rl_compentry_func_t *our_func = rl_completion_entry_function;
 

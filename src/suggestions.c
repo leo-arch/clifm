@@ -1298,6 +1298,13 @@ check_tags(const char *str, const size_t len, int type)
 int
 rl_suggestions(const unsigned char c)
 {
+	if (*rl_line_buffer == '#' || cur_color == hc_c) {
+		/* No suggestion at all if comment */
+		if (suggestion.printed)
+			clear_suggestion(CS_FREEBUF);
+		return EXIT_SUCCESS;
+	}
+
 	int printed = 0, zero_offset = 0;
 	last_word_offset = 0;
 
