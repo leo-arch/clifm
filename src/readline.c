@@ -1858,7 +1858,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* Tag expressions (t:TAG)*/
-		if (tags_n > 0 && *text == 't' && *(text + 1) == ':') {
+		if (*lb != ';' && *lb != ':' && tags_n > 0 && *text == 't' && *(text + 1) == ':') {
 			cur_comp_type = TCMP_TAGS_T;
 			matches = rl_completion_matches(text, &tags_generator);
 			if (matches)
@@ -1973,7 +1973,7 @@ my_rl_completion(const char *text, int start, int end)
 		/* Perform this check only if the first char of the string to be
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
-		if (*text >= '0' && *text <= '9') {
+		if (*lb != ';' && *lb != ':' && *text >= '0' && *text <= '9') {
 			/* Check ranges */
 			char *r = strchr(text, '-');
 			if (r && *(r + 1) >= '0' && *(r + 1) <= '9') {
@@ -2030,7 +2030,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### SEL KEYWORD EXPANSION ### */
-		if (sel_n && *text == 's'
+		if (*lb != ';' && *lb != ':' && sel_n && *text == 's'
 		&& strncmp(text, "sel", 3) == 0) {
 			matches = rl_completion_matches("", &sel_entries_generator);
 			if (matches) {
@@ -2112,7 +2112,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		if (expand_bookmarks) {
+		if (*lb != ';' && *lb != ':' && expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 			if (matches) {
 				cur_comp_type = TCMP_BOOKMARK;

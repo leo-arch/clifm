@@ -1620,7 +1620,7 @@ rl_suggestions(const unsigned char c)
 			if (flag == CHECK_MATCH && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
 
-			if (*word >= '1' && *word <= '9' && is_number(word)) {
+			if (*lb != ';' && *lb != ':' && *word >= '1' && *word <= '9' && is_number(word)) {
 				printed = check_eln(word, flag);
 
 				if (printed)
@@ -1695,7 +1695,7 @@ rl_suggestions(const unsigned char c)
 	}
 
 #ifndef _NO_TAGS
-	if (*word == 't' && *(word + 1) == ':' && *(word + 2)) {
+	if (*lb != ';' && *lb != ':' && *word == 't' && *(word + 1) == ':' && *(word + 2)) {
 		if ((printed = check_tags(word + 2, wlen - 2, TAGT_SUG)) == 1)
 			goto SUCCESS;
 	}
