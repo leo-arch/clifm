@@ -1532,13 +1532,16 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath)
 
 		/* Check if the command needs to be backgrounded */
 		if (*a[i] == '&') {
+			if (*(a[i] + 1) == '&')
+				bg_proc = 2; /* Silence both STDERR and STDOUT */
+			else
+				bg_proc = 1; /* Silence only STDERR */
 			free(a[i]);
 			a[i] = (char *)NULL;
-			bg_proc = 1;
 		}
 	}
 
-	*n = i; 
+	*n = i;
 	return f;
 }
 
@@ -1565,8 +1568,9 @@ run_mime_app(char **app, char **fpath)
 		n++;
 	}
 
+	int exec_flag = bg_proc == 1 ? E_NOSTDERR : bg_proc == 2 ? E_MUTE : E_NOFLAG;
 	int ret = launch_execve(cmd, (bg_proc && !open_in_foreground)
-			? BACKGROUND : FOREGROUND, bg_proc ? E_NOSTDERR : E_NOFLAG);
+			? BACKGROUND : FOREGROUND, exec_flag);
 
 	for (i = 0; i < n; i++)
 		free(cmd[i]);

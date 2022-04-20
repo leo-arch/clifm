@@ -1383,6 +1383,16 @@ sigwinch_handler(int sig)
 	UNUSED(sig);
 	get_term_size();
 }
+/*
+static void
+sigusr_handler(int sig)
+{
+	if (sig == SIGUSR1)
+		puts("This is the second biggest signal I've ever seen!");
+	else
+		puts("The signals are very strong tonight");
+	fflush(stdout);
+} */
 
 void
 set_signals_to_ignore(void)
@@ -1391,6 +1401,8 @@ set_signals_to_ignore(void)
 	signal(SIGQUIT, SIG_IGN); /* C-\ */
 	signal(SIGTSTP, SIG_IGN); /* C-z */
 	signal(SIGWINCH, sigwinch_handler);
+/*	signal(SIGUSR1, sigusr_handler);
+	signal(SIGUSR2, sigusr_handler); */
 }
 
 void
@@ -1822,6 +1834,7 @@ bonus_function(void)
 	    "\"Given enough eyeballs, all bugs are shallow.\" (Linus's law)",
 	    "\"We're gonna need a bigger boat.\" (Caleb)",
 	    "\"Ein Verletzter, Alarm, Alarm!\"",
+	    "\"There is not knowledge that is not power\"",
 	    NULL};
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
