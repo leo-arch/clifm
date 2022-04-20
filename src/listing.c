@@ -39,7 +39,6 @@
 #ifdef __OpenBSD__
 # include <strings.h>
 #endif
-#include <sys/ioctl.h>
 
 #include <glob.h>
 
@@ -1798,13 +1797,6 @@ list_dir(void)
 		trim.state = trim.a = trim.b = 0;
 		trim.len = 0;
 	}
-
-	/* Get terminal current amount of rows and columns */
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	/* These two are global */
-	term_cols = w.ws_col;
-	term_rows = w.ws_row;
 
 	/* Hide the cursor while listing */
 	fputs(HIDE_CURSOR, stdout);

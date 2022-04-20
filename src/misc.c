@@ -1366,27 +1366,31 @@ free_stuff(void)
 	fputs("\x1b[0;39;49m", stdout);
 }
 
+/* Get current terminal dimensions and store them in TERM_COLS and
+ * TERM_ROWS (globals). These values will be updated upon SIGWINCH */
 void
-sigwinch_handler(int a)
+get_term_size(void)
 {
-	UNUSED(a);
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	term_cols = w.ws_col;
 	term_rows = w.ws_row;
 }
 
+static void
+sigwinch_handler(int sig)
+{
+	UNUSED(sig);
+	get_term_size();
+}
+
 void
 set_signals_to_ignore(void)
 {
-	/* signal(SIGINT, signal_handler); C-c */
 	signal(SIGINT, SIG_IGN);  /* C-c */
 	signal(SIGQUIT, SIG_IGN); /* C-\ */
 	signal(SIGTSTP, SIG_IGN); /* C-z */
 	signal(SIGWINCH, sigwinch_handler);
-	/* signal(SIGTERM, SIG_IGN);
-	signal(SIGTTIN, SIG_IGN);
-	signal(SIGTTOU, SIG_IGN); */
 }
 
 void

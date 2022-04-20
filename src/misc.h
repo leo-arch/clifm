@@ -59,5 +59,5 @@ void reset_inotify(void);
 void read_kqueue(void);
 #endif
 int sanitize_cmd(char *cmd, int type);
-
+void get_term_size(void);
 #endif /* MISC_H */

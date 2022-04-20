@@ -875,6 +875,7 @@ main(int argc, char *argv[])
 	check_cpu_os();
 	/* Make sure we are running on a supported terminal */
 	check_term();
+	get_term_size();
 
 	/* # 1. INITIALIZE VERYTHING WE NEED # */
 	/* If running the program locally, that is, not from a path in PATH,
