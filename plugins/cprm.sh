@@ -49,7 +49,7 @@ to a single directory (then use that directory here).\n"
 	exit 1
 fi
 
-file="$1"
+file="$(echo "$1" | sed 's/\\//g')"
 is_dir=0
 
 if [ -e "$file" ]; then
