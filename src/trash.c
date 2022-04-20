@@ -290,7 +290,7 @@ trash_clear(void)
 		if (ret != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: trash: %s: Error removing "
 				"trashed file\n"), PROGRAM_NAME, trash_files[i]->d_name);
-			exit_status = EXIT_FAILURE;
+			exit_status = ret;
 			/* If there is at least one error, return error */
 		}
 

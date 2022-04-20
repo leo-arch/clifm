@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 
 #if defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
@@ -1366,12 +1367,23 @@ free_stuff(void)
 }
 
 void
+sigwinch_handler(int a)
+{
+	UNUSED(a);
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	term_cols = w.ws_col;
+	term_rows = w.ws_row;
+}
+
+void
 set_signals_to_ignore(void)
 {
 	/* signal(SIGINT, signal_handler); C-c */
 	signal(SIGINT, SIG_IGN);  /* C-c */
 	signal(SIGQUIT, SIG_IGN); /* C-\ */
 	signal(SIGTSTP, SIG_IGN); /* C-z */
+	signal(SIGWINCH, sigwinch_handler);
 	/* signal(SIGTERM, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN); */
