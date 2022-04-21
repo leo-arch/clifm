@@ -671,15 +671,12 @@ add_to_cmdhist(const char *cmd)
 int
 record_cmd(char *input)
 {
-	/* NULL input */
-	if (!input || !*input)
-		return 0;
-
-	if (SELFORPARENT(input))
+	/* NULL input, self or parent (. ..) and commands starting with space */
+	if (!input || !*input || SELFORPARENT(input) || *input == ' ')
 		return 0;
 
 	/* Blank lines */
-	unsigned int blank = 1;
+	size_t blank = 1;
 	char *p = input;
 
 	while (*p) {
@@ -690,15 +687,11 @@ record_cmd(char *input)
 		p++;
 	}
 
-	if (blank)
+	if (blank == 1)
 		return 0;
 
 	/* Rewind the pointer to the beginning of the input line */
 	p = input;
-
-	/* Commands starting with space */
-	if (*p == ' ')
-		return 0;
 
 	size_t len = strlen(p), amp_rm = 0;
 	if (len > 0 && p[len - 1] == '&') {
@@ -707,8 +700,11 @@ record_cmd(char *input)
 	}
 
 	/* Do not record single ELN's */
-	if (*p > '0' && *p <= '9' && is_number(p))
+	if (*p > '0' && *p <= '9' && is_number(p)) {
+		if (amp_rm == 1)
+			p[len - 1] = '&';
 		return 0;
+	}
 
 	if (amp_rm == 1)
 		p[len - 1] = '&';
