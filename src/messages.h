@@ -799,8 +799,8 @@ International System of Units (SI), instead of 1024 (Linux only)\
 #define CLIFM_COMMANDS "\
 \nBUILT-IN COMMANDS:\n\nFor a complete description of each of these \
 commands run 'cmd' (or press F2) or consult the manpage (F1).\n\n\
-You can also try the 'ih' action to run the interactive help plugin (it \
-depends on FZF). Just enter 'ih', that's it.\n\n\
+You can also try the interactive help plugin (it depends on FZF): just \
+enter 'ih', that's it.\n\n\
 It is also recommended to consult the project's wiki \
 (https://github.com/leo-arch/clifm/wiki)\n\n\
 The following is just a brief list of available commands and possible \
