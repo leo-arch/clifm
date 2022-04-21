@@ -1502,13 +1502,28 @@ run_archiver(char **fpath, char **app)
 	return exit_status;
 }
 
-/* Expand %f placeholder and environment variables in opening application
- * line */
+static void
+set_exec_flags(char *s, int *f)
+{
+	if (*s == 'E') {
+		*f |= E_NOSTDERR;
+		if (*(s + 1) == 'O')
+			*f |= E_NOSTDOUT;
+	} else if (*s == 'O') {
+		*f |= E_NOSTDOUT;
+		if (*(s + 1) == 'E')
+			*f |= E_NOSTDERR;
+	}
+}
+
+/* Expand %f placeholder, stderr/stdout flags, and environment variables
+ * in the opening application line */
 static inline size_t
-expand_app_fields(char ***cmd, size_t *n, char *fpath)
+expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 {
 	size_t f = 0, i;
 	char **a = *cmd;
+	*exec_flags = E_NOFLAG;
 
 	for (i = 0; a[i]; i++) {
 		/* Expand %f pĺaceholder */
@@ -1516,6 +1531,13 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath)
 			a[i] = (char *)xrealloc(a[i], (strlen(fpath) + 1) * sizeof(char));
 			strcpy(a[i], fpath);
 			f = 1;
+			continue;
+		}
+
+		if (*a[i] == '!') {
+			set_exec_flags(a[i] + 1, exec_flags);
+			free(a[i]);
+			a[i] = (char *)NULL;
 			continue;
 		}
 
@@ -1532,10 +1554,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath)
 
 		/* Check if the command needs to be backgrounded */
 		if (*a[i] == '&') {
-			if (*(a[i] + 1) == '&')
-				bg_proc = 2; /* Silence both STDERR and STDOUT */
-			else
-				bg_proc = 1; /* Silence only STDERR */
+			bg_proc = 1;
 			free(a[i]);
 			a[i] = (char *)NULL;
 		}
@@ -1556,8 +1575,9 @@ run_mime_app(char **app, char **fpath)
 		return EXIT_FAILURE;
 	}
 
+	int exec_flags = 0;
 	size_t i = 0;
-	size_t f = expand_app_fields(&cmd, &i, *fpath);
+	size_t f = expand_app_fields(&cmd, &i, *fpath, &exec_flags);
 	size_t n = i;
 
 	/* If no %f placeholder was found, append file name */
@@ -1568,9 +1588,8 @@ run_mime_app(char **app, char **fpath)
 		n++;
 	}
 
-	int exec_flag = bg_proc == 1 ? E_NOSTDERR : bg_proc == 2 ? E_MUTE : E_NOFLAG;
 	int ret = launch_execve(cmd, (bg_proc && !open_in_foreground)
-			? BACKGROUND : FOREGROUND, exec_flag);
+			? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; i < n; i++)
 		free(cmd[i]);
