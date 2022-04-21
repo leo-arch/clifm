@@ -36,9 +36,14 @@
 # Replace 'TERM' and 'APP' by the corresponding values. The -e option
 # might vary depending on the terminal emulator used (TERM)
 
-# When backgrounding applications, STDERR will be silenced
-# Use a double ampersand (&&) to run the application in the background
-# silencing both STDERR and STDOUT. Ex: APP %f &&
+# To silence STDERR and/or STDOUT use !E and !O respectivelly (they could
+# be used together). Examples:
+# Silence STDERR only and run in the foreground:
+#    mpv %f !E
+# Silence both (STDERR and STDOUT) and run in the background:
+#    mpv %f !EO &
+# or
+#    mpv %f !E !O &
 
 # Environment variables could be used as well. Example:
 # X:text/plain=$TERM -e $EDITOR %f &;$VISUAL;nano;vi
