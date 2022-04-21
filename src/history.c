@@ -700,22 +700,20 @@ record_cmd(char *input)
 	if (*p == ' ')
 		return 0;
 
-	switch (*p) {
-	/* Do not record single ELN's */
-	case '0': /* fallthrough */
-	case '1': /* fallthrough */
-	case '2': /* fallthrough */
-	case '3': /* fallthrough */
-	case '4': /* fallthrough */
-	case '5': /* fallthrough */
-	case '6': /* fallthrough */
-	case '7': /* fallthrough */
-	case '8': /* fallthrough */
-	case '9':
-		if (is_number(p))
-			return 0;
-		break;
+	size_t len = strlen(p), amp_rm = 0;
+	if (len > 0 && p[len - 1] == '&') {
+		p[len - 1] = '\0';
+		amp_rm = 1;
+	}
 
+	/* Do not record single ELN's */
+	if (*p > '0' && *p <= '9' && is_number(p))
+		return 0;
+
+	if (amp_rm == 1)
+		p[len - 1] = '&';
+
+	switch(*p) {
 	case '.': /* . */
 		if (!*(p + 1))
 			return 0;
