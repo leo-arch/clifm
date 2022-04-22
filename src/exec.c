@@ -1814,11 +1814,11 @@ static void
 set_cp_cmd(char **cmd)
 {
 	switch(cp_cmd) {
-	case CP_CP: strcpy(*cmd, __DEF_CP_CMD); break;
-	case CP_ADVCP: strcpy(*cmd, __DEF_ADVCP_CMD); break;
-	case CP_WCP: strcpy(*cmd, __DEF_WCP_CMD); break;
-	case CP_RSYNC: strcpy(*cmd, __DEF_RSYNC_CMD); break;
-	default: strcpy(*cmd, "cp"); break;
+	case CP_ADVCP: xstrsncpy(*cmd, __DEF_ADVCP_CMD, MAX_CPMV_CMD_LEN); break;
+	case CP_WCP: xstrsncpy(*cmd, __DEF_WCP_CMD, MAX_CPMV_CMD_LEN); break;
+	case CP_RSYNC: xstrsncpy(*cmd, __DEF_RSYNC_CMD, MAX_CPMV_CMD_LEN); break;
+	case CP_CP: /* fallthrough */
+	default: xstrsncpy(*cmd, __DEF_CP_CMD, MAX_CPMV_CMD_LEN); break;
 	}
 }
 
@@ -1982,7 +1982,7 @@ exec_cmd(char **comm)
 			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
 				copy_n_rename = 1;
 
-			comm[0] = (char *)xrealloc(comm[0], 12 * sizeof(char));
+			comm[0] = (char *)xrealloc(comm[0], (MAX_CPMV_CMD_LEN + 1) * sizeof(char));
 			if (!copy_n_rename) {
 				set_cp_cmd(&comm[0]);
 			} else {
@@ -1996,11 +1996,11 @@ exec_cmd(char **comm)
 			if (!sel_is_last && comm[1] && !comm[2])
 				xrename = 1;
 
-			comm[0] = (char *)xrealloc(comm[0], 10 * sizeof(char));
+			comm[0] = (char *)xrealloc(comm[0], (MAX_CPMV_CMD_LEN + 1) * sizeof(char));
 			if (mv_cmd == MV_MV)
-				strcpy(comm[0], "mv -i");
+				xstrsncpy(comm[0], __DEF_MV_CMD, MAX_CPMV_CMD_LEN);
 			else
-				strcpy(comm[0], "advmv -gi");
+				xstrsncpy(comm[0], __DEF_ADVMV_CMD, MAX_CPMV_CMD_LEN);
 		}
 
 		kbind_busy = 1;
