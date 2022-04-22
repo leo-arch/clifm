@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 26, 2022" "CliFM 1.5.1" "CliFM Manual"
+.TH "CLIFM" "1" "Apr 22, 2022" "CliFM 1.6" "CliFM Manual"
 .nh
 .ad l
 
@@ -1707,85 +1707,87 @@ A convenient helper script is provided to get a consistent look across all plugi
     # shellcheck source=/dev/null
     . "$CLIFM_PLUGINS_HELPER"
 
- +-------------------+-------------------------------+
- | Plugin            | Dependencies                  |
- +-------------------+-------------------------------+
- | batch_create      |                               |
- +-------------------+-------------------------------+
- | batch_copy        |                               |
- +-------------------+-------------------------------+
- | bm_import         |                               |
- +-------------------+-------------------------------+
- | clip              | xclip                         |
- +-------------------+-------------------------------+
- | colors            |                               |
- +-------------------+-------------------------------+
- | cprm              | scp, fzf                      |
- +-------------------+-------------------------------+
- | disk_analyzer     | du, fzf                       |
- +-------------------+-------------------------------+
- | dragondrop        | dragon or dragon-drag-and-drop|
- +-------------------+-------------------------------+
- | fdups             | find, md5sum, sort, uniq,     |
- |                   | xargs, sed, stat              |
- +-------------------+-------------------------------+
- | finder            | fzf or rofi                   |
- +-------------------+-------------------------------+
- | fzcd              | fzf                           |
- +-------------------+-------------------------------+
- | fzfdirhist        | fzf                           |
- +-------------------+-------------------------------+
- | fzfhist           | fzf                           |
- +-------------------+-------------------------------+
- | fzfnav            | fzf                           |
- |   -archives       | atool, bsdtar or tar          |
- |   -images         | kitty terminal, imagemagick,  | 
- |                   | and ueberzug or viu or catimg |
- |                   | or img2txt or pixterm         |
- |   -fonts          | fontpreview or fontforge      |
- |   -docs           | libreoffice, catdoc, odt2txt, |
- |                   | pandoc                        |
- |   -PDF            | pdftoppm, pdftotext or mutool |
- |   -epub           | epub-thumbnailer              |
- |   -DjVu           | djvulibre or djvutxt          |
- |   -Postscript     | ghostscript                   |
- |   -videos         | ffmpegthumbnailer             |
- |   -audio          | ffmpeg, mplayer or mpv        |
- |   -web            | w3m, linx, elinks or pandoc   |
- |   -markdown       | glow                          |
- |   -highlight      | bat, highlight or pygmentize  |
- |   -torrent        | transmission-cli              |
- |   -json           | python or pq                  |
- |   -file info      | exiftool, mediainfo or file   |
- +-------------------+-------------------------------+
- | fzfsel            | fzf                           |
- +-------------------+-------------------------------+
- | fzfdesel          | fzf                           |
- +-------------------+-------------------------------+
- | git_status        | git                           |
- +-------------------+-------------------------------+
- | ihelp             | fzf or rofi                   |
- +-------------------+-------------------------------+
- | img_viewer        | sxiv, feh or lsix             |
- +-------------------+-------------------------------+
- | jumper            | fzf or rofi                   |
- +-------------------+-------------------------------+
- | kbgen             | (C source file)               |
- +-------------------+-------------------------------+
- | mime_list         | file, fzf                     |
- +-------------------+-------------------------------+
- | music_player      | mplayer                       |
- +-------------------+-------------------------------+
- | pdf_viewer        | pdftotext                     |
- +-------------------+-------------------------------+
- | rgfind            | fzf and ripgrep               |
- +-------------------+-------------------------------+
- | update            |                               |
- +-------------------+-------------------------------+
- | vid_viewer        | ffmpegthumbnailer             |
- +-------------------+-------------------------------+
- | wallpapper_setter | feh, xloadimage or hsetroot   |
- +-------------------+-------------------------------+
+ +-------------------+-------------------------------+-------------+
+ | Plugin            | Dependencies                  | Action name |
+ +-------------------+-------------------------------+-------------+
+ | batch_create      |                               | bn          |
+ +-------------------+-------------------------------+-------------+
+ | batch_copy        |                               | bcp         |
+ +-------------------+-------------------------------+-------------+
+ | bm_import         |                               | bi          |
+ +-------------------+-------------------------------+-------------+
+ | clip              | xclip                         | clip        |
+ +-------------------+-------------------------------+-------------+
+ | colors            |                               |             |
+ +-------------------+-------------------------------+-------------+
+ | cprm              | scp, fzf                      | cr          |
+ +-------------------+-------------------------------+-------------+
+ | disk_analyzer     | du, fzf                       | da          |
+ +-------------------+-------------------------------+-------------+
+ | dragondrop        | dragon or dragon-drag-and-drop| dr          |
+ +-------------------+-------------------------------+-------------+
+ | fdups             | find, md5sum, sort, uniq,     | fdups       |
+ |                   | xargs, sed, stat              |             |
+ +-------------------+-------------------------------+-------------+
+ | finder            | fzf or rofi                   | +           |
+ +-------------------+-------------------------------+-------------+
+ | fzcd              | fzf                           | _           |
+ +-------------------+-------------------------------+-------------+
+ | fzfdirhist        | fzf                           | dh          |
+ +-------------------+-------------------------------+-------------+
+ | fzfhist           | fzf                           | h           |
+ +-------------------+-------------------------------+-------------+
+ | fzfnav            | fzf                           | -           |
+ |   -archives       | atool, bsdtar or tar          |             |
+ |   -images         | kitty terminal, imagemagick,  |             |
+ |                   | and ueberzug or viu or catimg |             |
+ |                   | or img2txt or pixterm         |             |
+ |   -fonts          | fontpreview or fontforge      |             |
+ |   -docs           | libreoffice, catdoc, odt2txt, |             |
+ |                   | pandoc                        |             |
+ |   -PDF            | pdftoppm, pdftotext or mutool |             |
+ |   -epub           | epub-thumbnailer              |             |
+ |   -DjVu           | djvulibre or djvutxt          |             |
+ |   -Postscript     | ghostscript                   |             |
+ |   -videos         | ffmpegthumbnailer             |             |
+ |   -audio          | ffmpeg, mplayer or mpv        |             |
+ |   -web            | w3m, linx, elinks or pandoc   |             |
+ |   -markdown       | glow                          |             |
+ |   -highlight      | bat, highlight or pygmentize  |             |
+ |   -torrent        | transmission-cli              |             |
+ |   -json           | python or pq                  |             |
+ |   -file info      | exiftool, mediainfo or file   |             |
+ +-------------------+-------------------------------+-------------+
+ | fzfsel            | fzf                           | *           |
+ +-------------------+-------------------------------+-------------+
+ | fzfdesel          | fzf                           | **          |
+ +-------------------+-------------------------------+-------------+
+ | git_status        | git                           |             |
+ +-------------------+-------------------------------+-------------+
+ | ihelp             | fzf or rofi                   | ih          |
+ +-------------------+-------------------------------+-------------+
+ | img_viewer        | sxiv, feh or lsix             | i           |
+ +-------------------+-------------------------------+-------------+
+ | jumper            | fzf or rofi                   | ++          |
+ +-------------------+-------------------------------+-------------+
+ | kbgen             | (C source file)               | kben        |
+ +-------------------+-------------------------------+-------------+
+ | mime_list         | file, fzf                     | ml          |
+ +-------------------+-------------------------------+-------------+
+ | music_player      | mplayer                       | music       |
+ +-------------------+-------------------------------+-------------+
+ | pdf_viewer        | pdftotext                     | ptot        |
+ +-------------------+-------------------------------+-------------+
+ | recur_rm          | find, fzf                     | rrm         |
+ +-------------------+-------------------------------+-------------+
+ | rgfind            | fzf and ripgrep               | //          |
+ +-------------------+-------------------------------+-------------+
+ | update            |                               |             |
+ +-------------------+-------------------------------+-------------+
+ | vid_viewer        | ffmpegthumbnailer             | vid         |
+ +-------------------+-------------------------------+-------------+
+ | wallpapper_setter | feh, xloadimage or hsetroot   | wall        |
+ +-------------------+-------------------------------+-------------+
 
 .TP
 NOTE: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to show files preview \fIBFG\fR requires \fBueberzug\fR to be installed or the Kitty protocol via the Kitty terminal). A configuration file (BFG.cfg, in the plugins directory itlsef) is provided to customize the previewer's behavior. 
