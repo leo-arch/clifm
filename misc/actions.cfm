@@ -22,6 +22,7 @@ dr=dragondrop.sh
 fdups=fdups.sh
 bn=batch_create.sh
 cr=cprm.sh
+rrm=recur_rm.sh
 +=finder.sh
 ++=jumper.sh
 -=fzfnav.sh
