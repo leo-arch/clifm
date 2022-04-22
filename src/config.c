@@ -440,6 +440,7 @@ create_actions_file(char *file)
 		"fdups=fdups.sh\n"
 		"bn=batch_create.sh\n"
 		"cr=cprm.sh\n"
+		"rrm=recur_rm.sh\n"
 		"+=finder.sh\n"
 		"++=jumper.sh\n"
 		"-=fzfnav.sh\n"
