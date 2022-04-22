@@ -571,7 +571,7 @@ The \fIm\fR command is just like 'mv -i', but with the following differences: Wh
 .sp
 NOTE: On POSIX compliant systems, like NetBSD, the \fIr\fR command amounts to \fIrm -r\fR for directories and \fIrm -f\fR for files, since the \fI-I\fR option is not available and \fI-i\fR is too instrusive.
 .sp
-CliFM supports \fIadvcp\fR and \fIwcp\fR to copy files (to add a progress bar to \fIcp\fR). To use them instead of \fIcp\fR set the corresponding option (cpCmd) in the configuration file. If \fIadvcp\fR is selected, the command used is 'advcp -giRp'. \fIwcp\fR takes no argument.
+CliFM supports \fIadvcp\fR, \fIwcp\fR, and \fIrsync\fR to copy files (they include a progress bar). To use them instead of \fIcp\fR set the corresponding option (\fIcpCmd\fR) in the configuration file. If \fIadvcp\fR is selected, the command used is 'advcp -giRp'. If \fIrsync\fR, the command is 'rsync -avP'. \fIwcp\fR takes no argument.
 .sp
 \fIadvmv\fR is also supported to move files (to add a progress bar to \fImv\fR). Use the 'mvCmd' option in the configuration file to choose this alternative implementation of \fImv\fR. In this case, the command used is 'advmv -gi'.
 
