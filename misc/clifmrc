@@ -38,7 +38,7 @@ DirhistMap=false
 Filter=""
 
 # Set the default copy command. Available options are: 0 = cp,
-# 1 = advcp, and 2 = wcp. Both 1 and 2 add a progress bar to cp.
+# 1 = advcp, 2 = wcp, 3 = rsync. 1-3 include a progress bar.
 cpCmd=0
 
 # Set the default move command. Available options are: 0 = mv,
