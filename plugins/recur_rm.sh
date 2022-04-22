@@ -58,7 +58,7 @@ fi
 cat -- "$TMP_FILE"
 printf "\n"
 while [ "$answer" != "y" ] && [ "$answer" != "n" ]; do
-	printf "Delete %d files? [y/N] " "$num_files"
+	printf "Delete %d file(s)? [y/N] " "$num_files"
 	read -r answer
 	if [ -z "$answer" ]; then
 		answer="n"
@@ -68,7 +68,7 @@ done
 
 if [ "$answer" = "y" ]; then
 	xargs -d'\n' rm -r < "$TMP_FILE"
-	printf "CliFM: %s files removed\n" "$num_files"
+	printf "CliFM: %d file(s) removed\n" "$num_files"
 #	echo "rf" > "$CLIFM_BUS"
 fi
 
