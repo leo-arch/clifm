@@ -1595,7 +1595,7 @@ read_config(void)
 			ret = sscanf(line, "cpCmd=%d\n", &opt_num);
 			if (ret == -1)
 				continue;
-			if (opt_num >= 0 && opt_num <= 2)
+			if (opt_num >= 0 && opt_num <= CP_CMD_AVAILABLE)
 				cp_cmd = opt_num;
 			else
 				cp_cmd = DEF_CP_CMD;

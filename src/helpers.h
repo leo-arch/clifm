@@ -255,6 +255,8 @@ extern int watch;
 #define CP_CP    0
 #define CP_ADVCP 1
 #define CP_WCP   2
+#define CP_RSYNC 3
+#define CP_CMD_AVAILABLE 4
 #define MV_MV    0
 #define MV_ADVMV 1
 

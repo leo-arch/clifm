@@ -1973,12 +1973,20 @@ exec_cmd(char **comm)
 
 			comm[0] = (char *)xrealloc(comm[0], 12 * sizeof(char));
 			if (!copy_n_rename) {
-				if (cp_cmd == CP_CP)
+				switch(cp_cmd) {
+				case CP_CP: strcpy(comm[0], "cp -iRp"); break;
+				case CP_ADVCP: strcpy(comm[0], "advcp -giRp"); break;
+				case CP_WCP: strcpy(comm[0], "wcp"); break;
+				case CP_RSYNC: strcpy(comm[0], "rsync -avP"); break;
+				default: strcpy(comm[0], "cp"); break;
+				}
+
+/*				if (cp_cmd == CP_CP)
 					strcpy(comm[0], "cp -iRp");
 				else if (cp_cmd == CP_ADVCP)
 					strcpy(comm[0], "advcp -giRp");
 				else
-					strcpy(comm[0], "wcp");
+					strcpy(comm[0], "wcp"); */
 			} else {
 				strcpy(comm[0], "cp");
 			}
