@@ -22,10 +22,27 @@
 # with FZF or open the last accepted file (Enter).
 # Press Esc to cancel and exit.
 
+HELP="Usage:
+  Type in the prompt to filter the current list of files. Regular expressions are \
+allowed.
+
+  At exit (Ctrl-q) CliFM will change to the last directory visited or \
+open the last accepted file (Enter). Press Esc to cancel and exit.
+
+Keybindings:
+
+  * Left: Change to parent directory
+  * Right or Enter: Change to the highlighted directory or open the highlighted file and exit
+  * Home/end: Change to first/last file in the files list
+  * TAB: Select currently highlighted file
+  * Ctrl-s: Confirm selection (send files to CliFM's Selection Box)
+  * Shift-up/down: Move one line up/down in the preview window
+  * Alt-up/down: Move to the beginning/end in the preview window"
+
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Navigate/preview files via FZF\n"
-	printf "Usage: %s\n" "$name"
+	printf "Navigate/preview/select files via FZF\n"
+	printf "Usage: %s\n" "$HELP"
 	exit 0
 fi
 
@@ -70,23 +87,6 @@ start_ueberzug() {
 	tail -f "$FIFO_UEBERZUG" \
 	| ueberzug layer --silent --parser json > /dev/null 2>&1 &
 }
-
-HELP="Usage:
-  Type in the prompt to filter the current list of files. Regular expressions are \
-allowed.
-
-  At exit (Ctrl-q) CliFM will change to the last directory visited or \
-open the last accepted file (Enter). Press Esc to cancel and exit.
-
-Keybindings:
-
-  * Left: Change to parent directory
-  * Right or Enter: Change to the highlighted directory or open the highlighted file and exit
-  * Home/end: Change to first/last file in the files list
-  * TAB: Select currently highlighted file
-  * Ctrl-s: Confirm selection (send files to CliFM's Selection Box)
-  * Shift-up/down: Move one line up/down in the preview window
-  * Alt-up/down: Move to the beginning/end in the preview window"
 
 fcd() {
 	if [ "$#" -ne 0 ]; then
