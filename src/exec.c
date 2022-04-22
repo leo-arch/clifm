@@ -1810,6 +1810,17 @@ toggle_full_dir_size(const char *arg)
 	return EXIT_FAILURE;
 }
 
+static void
+set_cp_cmd(char **cmd)
+{
+	switch(cp_cmd) {
+	case CP_CP: strcpy(*cmd, __DEF_CP_CMD); break;
+	case CP_ADVCP: strcpy(*cmd, __DEF_ADVCP_CMD); break;
+	case CP_WCP: strcpy(*cmd, __DEF_WCP_CMD); break;
+	case CP_RSYNC: strcpy(*cmd, __DEF_RSYNC_CMD); break;
+	default: strcpy(*cmd, "cp"); break;
+	}
+}
 
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -1973,20 +1984,7 @@ exec_cmd(char **comm)
 
 			comm[0] = (char *)xrealloc(comm[0], 12 * sizeof(char));
 			if (!copy_n_rename) {
-				switch(cp_cmd) {
-				case CP_CP: strcpy(comm[0], "cp -iRp"); break;
-				case CP_ADVCP: strcpy(comm[0], "advcp -giRp"); break;
-				case CP_WCP: strcpy(comm[0], "wcp"); break;
-				case CP_RSYNC: strcpy(comm[0], "rsync -avP"); break;
-				default: strcpy(comm[0], "cp"); break;
-				}
-
-/*				if (cp_cmd == CP_CP)
-					strcpy(comm[0], "cp -iRp");
-				else if (cp_cmd == CP_ADVCP)
-					strcpy(comm[0], "advcp -giRp");
-				else
-					strcpy(comm[0], "wcp"); */
+				set_cp_cmd(&comm[0]);
 			} else {
 				strcpy(comm[0], "cp");
 			}
