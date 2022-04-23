@@ -1511,7 +1511,7 @@ bulk_rename(char **args)
 	}
 
 	if (arg_total != file_total) {
-		fputs(_("bulk: Line mismatch in rename file\n"), stderr);
+		fputs(_("bulk: Line mismatch in renaming file\n"), stderr);
 		if (unlinkat(fd, bulk_file, 0) == -1)
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			    bulk_file, strerror(errno));
