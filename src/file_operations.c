@@ -1174,6 +1174,8 @@ edit_link(char *link)
 	return EXIT_SUCCESS;
 }
 
+/* Launch the command associated to 'c' (also 'v' and 'vv') or 'm'
+ * internal commands */
 int
 copy_function(char **args)
 {

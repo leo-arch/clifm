@@ -1781,13 +1781,6 @@ add_func_to_rl(void)
 	rl_add_defun("my-test", rl_test, -1);
 } */
 
-/* To get the keyseq value for a given key:
- * A) Run the kbgen plugin, or
- * B) Do this in an Xterm terminal:
- * C-v and then press the key (or the key combination). So, for example,
- * C-v, C-right arrow gives "[[1;5C", which here should be written like
- * this:
- * "\\x1b[1;5C" */
 void
 readline_kbinds(void)
 {

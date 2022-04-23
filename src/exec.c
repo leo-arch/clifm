@@ -1814,11 +1814,39 @@ static void
 set_cp_cmd(char **cmd)
 {
 	switch(cp_cmd) {
-	case CP_ADVCP: xstrsncpy(*cmd, __DEF_ADVCP_CMD, MAX_CPMV_CMD_LEN); break;
-	case CP_WCP: xstrsncpy(*cmd, __DEF_WCP_CMD, MAX_CPMV_CMD_LEN); break;
-	case CP_RSYNC: xstrsncpy(*cmd, __DEF_RSYNC_CMD, MAX_CPMV_CMD_LEN); break;
+	case CP_ADVCP:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVCP_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_ADVCP_CMD);
+		break;
+	case CP_WCP:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_WCP_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_WCP_CMD);
+		break;
+	case CP_RSYNC:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_RSYNC_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_RSYNC_CMD);
+		break;
 	case CP_CP: /* fallthrough */
-	default: xstrsncpy(*cmd, __DEF_CP_CMD, MAX_CPMV_CMD_LEN); break;
+	default:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_CP_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_CP_CMD);
+		break;
+	}
+}
+
+static void
+set_mv_cmd(char **cmd)
+{
+	switch(mv_cmd) {
+	case MV_ADVMV:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVMV_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_ADVMV_CMD);
+		break;
+	case MV_MV: /* fallthrough */
+	default:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_MV_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_MV_CMD);
+		break;
 	}
 }
 
@@ -1982,12 +2010,12 @@ exec_cmd(char **comm)
 			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
 				copy_n_rename = 1;
 
-			comm[0] = (char *)xrealloc(comm[0], (MAX_CPMV_CMD_LEN + 1) * sizeof(char));
-			if (!copy_n_rename) {
-				set_cp_cmd(&comm[0]);
-			} else {
-				strcpy(comm[0], "cp");
-			}
+//			comm[0] = (char *)xrealloc(comm[0], (MAX_CPMV_CMD_LEN + 1) * sizeof(char));
+//			if (!copy_n_rename) {
+			set_cp_cmd(&comm[0]);
+/*			} else {
+				xstrsncpy(comm[0], "cp", MAX_CPMV_CMD_LEN);
+			} */
 		} else if (*comm[0] == 'm' && !comm[0][1]) {
 			if (comm[1] && IS_HELP(comm[1])) {
 				puts(_(WRAPPERS_USAGE));
@@ -1995,12 +2023,12 @@ exec_cmd(char **comm)
 			}
 			if (!sel_is_last && comm[1] && !comm[2])
 				xrename = 1;
-
-			comm[0] = (char *)xrealloc(comm[0], (MAX_CPMV_CMD_LEN + 1) * sizeof(char));
+			set_mv_cmd(&comm[0]);
+/*			comm[0] = (char *)xrealloc(comm[0], (MAX_CPMV_CMD_LEN + 1) * sizeof(char));
 			if (mv_cmd == MV_MV)
 				xstrsncpy(comm[0], __DEF_MV_CMD, MAX_CPMV_CMD_LEN);
 			else
-				xstrsncpy(comm[0], __DEF_ADVMV_CMD, MAX_CPMV_CMD_LEN);
+				xstrsncpy(comm[0], __DEF_ADVMV_CMD, MAX_CPMV_CMD_LEN); */
 		}
 
 		kbind_busy = 1;

@@ -261,9 +261,6 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define __DEF_RSYNC_CMD "rsync -avP"
 #define __DEF_MV_CMD "mv -i"
 #define __DEF_ADVMV_CMD "advmv -gi"
-/* Lenght of the larger cmd above. If this length is less than the larger
- * command, the command will be truncated */
-#define MAX_CPMV_CMD_LEN 11
 
 #define SUG_STRATS 7
 
