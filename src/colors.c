@@ -746,13 +746,8 @@ set_iface_colors(char **colors, const size_t words)
 			set_color(colors[i], 3, bm_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 'l' && strncmp(colors[i], "li=", 3) == 0) {
-			if (!is_color_code(colors[i] + 3)) {
-				*li_c = '\0';
-				*li_cb = '\0';
-			} else {
-				snprintf(li_c, MAX_COLOR + 2, "\001\x1b[%sm\002", colors[i] + 3); /* NOLINT */
-				snprintf(li_cb, MAX_COLOR, "\x1b[%sm", colors[i] + 3); /* NOLINT */
-			}
+			set_color(colors[i], 3, li_c, RL_NO_PRINTABLE);
+			set_color(colors[i], 3, li_cb, RL_PRINTABLE);
 		}
 
 		else if (*colors[i] == 't' && strncmp(colors[i], "ti=", 3) == 0)
