@@ -103,7 +103,7 @@ get_new_name(void)
 	return input;
 }
 
-/* Run a command via execle() and refresh the screen in case of success */
+/* Run CMD via execve() and refresh the screen in case of success */
 int
 run_and_refresh(char **cmd)
 {
@@ -1994,7 +1994,7 @@ exec_cmd(char **comm)
 	&& !comm[0][2])))
 
 	|| (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
-
+		int copy_and_rename = 0;
 		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
 		|| (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
 		|| strcmp(comm[0], "paste") == 0) {
@@ -2008,14 +2008,9 @@ exec_cmd(char **comm)
 			}
 
 			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
-				copy_n_rename = 1;
+				copy_and_rename = 1;
 
-//			comm[0] = (char *)xrealloc(comm[0], (MAX_CPMV_CMD_LEN + 1) * sizeof(char));
-//			if (!copy_n_rename) {
 			set_cp_cmd(&comm[0]);
-/*			} else {
-				xstrsncpy(comm[0], "cp", MAX_CPMV_CMD_LEN);
-			} */
 		} else if (*comm[0] == 'm' && !comm[0][1]) {
 			if (comm[1] && IS_HELP(comm[1])) {
 				puts(_(WRAPPERS_USAGE));
@@ -2024,15 +2019,10 @@ exec_cmd(char **comm)
 			if (!sel_is_last && comm[1] && !comm[2])
 				xrename = 1;
 			set_mv_cmd(&comm[0]);
-/*			comm[0] = (char *)xrealloc(comm[0], (MAX_CPMV_CMD_LEN + 1) * sizeof(char));
-			if (mv_cmd == MV_MV)
-				xstrsncpy(comm[0], __DEF_MV_CMD, MAX_CPMV_CMD_LEN);
-			else
-				xstrsncpy(comm[0], __DEF_ADVMV_CMD, MAX_CPMV_CMD_LEN); */
 		}
 
 		kbind_busy = 1;
-		exit_code = copy_function(comm);
+		exit_code = copy_function(comm, copy_and_rename);
 		kbind_busy = 0;
 	}
 

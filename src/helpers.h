@@ -865,7 +865,6 @@ extern int
 	columned,
 	config_ok,
 	control_d_exits,
-	copy_n_rename,
 	cp_cmd,
 	cur_ws,
 	dequoted,

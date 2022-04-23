@@ -123,7 +123,6 @@ int
 	columned = UNSET,
 	config_ok = 1,
 	control_d_exits = 0,
-	copy_n_rename = 0,
 	cp_cmd = UNSET,
 	cur_ws = UNSET,
 	dequoted = 0,

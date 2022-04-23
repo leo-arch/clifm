@@ -1177,7 +1177,7 @@ edit_link(char *link)
 /* Launch the command associated to 'c' (also 'v' and 'vv') or 'm'
  * internal commands */
 int
-copy_function(char **args)
+copy_function(char **args, int copy_and_rename)
 {
 	log_function(NULL);
 
@@ -1230,7 +1230,7 @@ copy_function(char **args)
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	if (copy_n_rename) { /* vv */
+	if (copy_and_rename) { /* vv */
 		char **tmp = (char **)xnmalloc(sel_n + 3, sizeof(char *));
 		tmp[0] = savestring("br", 2);
 
@@ -1273,7 +1273,6 @@ copy_function(char **args)
 		for (i = 0; tmp[i]; i++)
 			free(tmp[i]);
 		free(tmp);
-		copy_n_rename = 0;
 		return EXIT_SUCCESS;
 	}
 

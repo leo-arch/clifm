@@ -38,7 +38,7 @@ char *export(char **filenames, int open);
 int bulk_rename(char **args);
 int bulk_remove(char *s1, char *s2);
 int remove_file(char **args);
-int copy_function(char **comm);
+int copy_function(char **cmd, int copy_and_rename);
 int edit_link(char *link);
 int open_function(char **cmd);
 int xchmod(const char *file, mode_t mode);

@@ -468,31 +468,31 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 
 	char cmd[PATH_MAX];
 	if (xargs.fzytab != 1) {
-		snprintf(cmd, PATH_MAX, "$(fzf %s "
+		snprintf(cmd, PATH_MAX, "fzf %s "
 				"%s --margin=0,0,0,%d "
 				"%s --read0 --ansi "
 				"--query=\"%s\" %s %s "
-				"< %s > %s)",
+				"< %s > %s",
 				fzftab_options,
 				*height_str ? height_str : "", *offset,
 				case_sens_path_comp ? "+i" : "-i",
 				lw ? lw : "", colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down" : "",
 				FINDER_IN, FINDER_OUT);
-/*		snprintf(cmd, PATH_MAX, "$(sk " // skim
+/*		snprintf(cmd, PATH_MAX, "sk " // skim
 				"%s --margin=0,0,0,%d --color=16 "
 				"--read0 --ansi --inline-info "
 				"--layout=reverse-list --query=\"%s\" %s %s "
-				"< %s > %s)",
+				"< %s > %s",
 				*height_str ? height_str : "", *offset,
 				lw ? lw : "", colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down" : "",
 				FINDER_IN, FINDER_OUT); */
 	} else {
-		snprintf(cmd, PATH_MAX, "(fzy "
+		snprintf(cmd, PATH_MAX, "fzy "
 				"--read-null --pad=%d --query=\"%s\" "
 				"--tab-accepts --right-accepts --left-aborts "
-				"--lines=%zu %s %s < %s > %s)",
+				"--lines=%zu %s %s < %s > %s",
 				*offset, lw ? lw : "", *height,
 				colorize == 0 ? "--no-color" : "",
 				multi ? "--multi" : "",
@@ -637,12 +637,12 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 		return;
 	}
 
-	if (xargs.fzytab != 1) {
+//	if (xargs.fzytab != 1) {
 		fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\0');
-	} else {
+/*	} else {
 		UNUSED(color);
 		fprintf(*fp, "%s%c", entry, '\0');
-	}
+	} */
 }
 
 /* Store possible completions (MATCHES) in FINDER_IN to pass them to the finder,
@@ -1108,7 +1108,7 @@ fzftabcomp(char **matches)
 			j--;
 			buf[j] = '\0';
 		}
-		while (buf[--j] == ' ')
+		while (--j >= 0 && buf[j] == ' ')
 			buf[j] = '\0';
 
 		char *q = (char *)NULL;
