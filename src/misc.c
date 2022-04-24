@@ -1413,6 +1413,8 @@ sigwinch_handler(int sig)
 
 	if (state == 1)
 		state = unset_alt_screen_buf();
+	if (pager == 1)
+		return;
 	if (autols) {
 		putchar('\n');
 		free_dirlist();
