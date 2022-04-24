@@ -113,7 +113,7 @@ search_glob(char **comm, int invert)
 		default:
 			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
 			    PROGRAM_NAME, (char)file_type);
-			return EXIT_FAILURE;
+			return 2; /* Return 2 to avoid trying the regex approach */
 		}
 	}
 
@@ -534,7 +534,7 @@ search_regex(char **comm, int invert, int case_sens)
 		default:
 			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
 			    PROGRAM_NAME, (char)file_type);
-			return EXIT_FAILURE;
+			return 2;
 		}
 	}
 

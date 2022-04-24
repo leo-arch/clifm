@@ -1321,12 +1321,12 @@ static int
 search_function(char **args)
 {
 	/* Try first globbing, and if no result, try regex */
-	if (search_glob(args, (args[0][1] == '!') ? 1 : 0) == EXIT_FAILURE) {
-		return search_regex(args, (args[0][1] == '!') ? 1 : 0,
-		case_sens_search ? 1 : 0);
-	}
+	int ret = search_glob(args, (args[0][1] == '!') ? 1 : 0);
+	if (ret != EXIT_FAILURE)
+		return ret;
 
-	return EXIT_SUCCESS;
+	return search_regex(args, (args[0][1] == '!') ? 1 : 0,
+		case_sens_search ? 1 : 0);
 }
 
 static int
