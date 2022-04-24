@@ -1391,11 +1391,14 @@ unset_alt_screen_buf(void)
 	return 0;
 }
 
+/* Get new window size and update the screen accordingly */
 static void
 sigwinch_handler(int sig)
 {
 	UNUSED(sig);
 	get_term_size();
+	if (xargs.refresh_on_resize == 0)
+		return;
 
 	static int state = 0;
 	if (term_cols < MIN_SCREEN_WIDTH || term_rows < MIN_SCREEN_HEIGHT) {
@@ -1414,6 +1417,7 @@ sigwinch_handler(int sig)
 		putchar('\n');
 		free_dirlist();
 		list_dir();
+		print_div_line();
 	}
 	rl_redisplay();
 }

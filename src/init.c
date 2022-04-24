@@ -1177,8 +1177,9 @@ external_arguments(int argc, char **argv)
 		{"apparent-size", no_argument, 0, 50},
 		{"no-history", no_argument, 0, 51},
 		{"fzytab", no_argument, 0, 52},
+		{"no-refresh-on-resize", no_argument, 0, 53},
 #ifdef __linux__
-		{"si", no_argument, 0, 53},
+		{"si", no_argument, 0, 54},
 #endif
 	    {0, 0, 0, 0}
 	};
@@ -1379,8 +1380,9 @@ RUN:
 			fprintf(stderr, _("%s: fzytab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif
+		case 53: xargs.refresh_on_resize = 0; break;
 #ifdef __linux__
-		case 53: xargs.si = 1; break;
+		case 54: xargs.si = 1; break;
 #endif
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1818,6 +1820,7 @@ unset_xargs(void)
 	xargs.pager = UNSET;
 	xargs.path = UNSET;
 	xargs.printsel = UNSET;
+	xargs.refresh_on_resize = UNSET;
 	xargs.restore_last_path = UNSET;
 	xargs.rl_vi_mode = UNSET;
 	xargs.secure_env_full = UNSET;
@@ -2475,6 +2478,9 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (xargs.refresh_on_resize == UNSET)
+		xargs.refresh_on_resize = DEF_REFRESH_ON_RESIZE;
+
 	if (xargs.si == UNSET)
 		xargs.si = DEF_SI;
 
