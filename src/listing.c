@@ -100,7 +100,7 @@ struct trim_t trim;
  * take only one, but unicode chars could take two), print exactly the
  * content of DIV_LINE_CHAR. Otherwise, repeat DIV_LINE_CHAR to fulfill
  * all terminal columns. If DIV_LINE_CHAR is '0', print no line at all */
-void
+static void
 print_div_line(void)
 {
 	fputs(dl_c, stdout);

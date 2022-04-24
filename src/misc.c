@@ -1417,8 +1417,8 @@ sigwinch_handler(int sig)
 		putchar('\n');
 		free_dirlist();
 		list_dir();
-		print_div_line();
 	}
+	rl_reset_line_state();
 	rl_redisplay();
 }
 /*

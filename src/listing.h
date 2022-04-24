@@ -27,6 +27,5 @@
 
 void free_dirlist(void);
 int list_dir(void);
-void print_div_line(void);
 
 #endif /* LISTING_H */
