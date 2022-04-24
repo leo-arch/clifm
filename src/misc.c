@@ -1397,10 +1397,8 @@ sigwinch_handler(int sig)
 {
 	UNUSED(sig);
 	get_term_size();
-	if (xargs.refresh_on_resize == 0)
-		return;
-	/* Do not refresh if some command is currently running in the foreground */
-	if (flags & RUNNING_CMD_FG)
+	if (xargs.refresh_on_resize == 0 || (flags & RUNNING_CMD_FG)
+	|| pager == 1 || kbind_busy == 1)
 		return;
 
 	static int state = 0;
@@ -1416,8 +1414,7 @@ sigwinch_handler(int sig)
 
 	if (state == 1)
 		state = unset_alt_screen_buf();
-	if (pager == 1)
-		return;
+
 	if (autols) {
 		putchar('\n');
 		free_dirlist();
