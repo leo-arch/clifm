@@ -368,6 +368,9 @@ do not write commands into the history file
 .B \-\-no\-open\-auto
 same as no-cd-auto, but for files instead of directories
 .TP
+.B \-\-no-refresh\-on\-resize
+do not attempt to refresh the list of files upon window's resize
+.TP
 .B \-\-no-restore\-last\-path
 by default, CliFM saves the last visited directory for each workspace to be restored in the next session. Use this option to disable this behavior.
 .TP
