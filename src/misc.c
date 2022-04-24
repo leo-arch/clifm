@@ -1399,6 +1399,9 @@ sigwinch_handler(int sig)
 	get_term_size();
 	if (xargs.refresh_on_resize == 0)
 		return;
+	/* Do not refresh if some command is currently running in the foreground */
+	if (flags & RUNNING_CMD_FG)
+		return;
 
 	static int state = 0;
 	if (term_cols < MIN_SCREEN_WIDTH || term_rows < MIN_SCREEN_HEIGHT) {

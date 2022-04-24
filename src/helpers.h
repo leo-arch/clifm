@@ -190,9 +190,10 @@ extern int watch;
 #define X_OTH (1 << 6)
 
 /* Internal flags */
-#define ROOT_USR      (1 << 10)
-#define GUI           (1 << 11)
-#define IS_USRVAR_DEF (1 << 12)
+#define ROOT_USR       (1 << 10)
+#define GUI            (1 << 11)
+#define IS_USRVAR_DEF  (1 << 12)
+#define RUNNING_CMD_FG (1 << 13)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or
  * not */

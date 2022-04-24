@@ -217,17 +217,15 @@ run_in_foreground(pid_t pid)
 			 * (WEXITSTATUS(status) == 0) */
 			return EXIT_SUCCESS;
 		} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-			/* Program terminated normally, but returned a
-			 * non-zero status. Error codes should be printed by the
-			 * child process */
+			/* Program terminated normally, but returned a non-zero status.
+			 * Error codes should be printed by the child process */
 			return WEXITSTATUS(status);
 		} else {
 			/* The program didn't terminate normally. In this case too,
 			 * error codes should be printed by the child process */
 			return EXCRASHERR;
 		}
-	} else {
-		/* waitpid() failed */
+	} else { /* waitpid() failed */
 		int ret = errno;
 		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
 		    strerror(errno));
@@ -263,7 +261,9 @@ launch_execle(const char *cmd)
 	&& xargs.secure_env == 0)
 		sanitize_cmd_environ();
 
+	flags |= RUNNING_CMD_FG;
 	int ret = system(cmd);
+	flags &= ~RUNNING_CMD_FG;
 
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
 	&& xargs.secure_env == 0)
@@ -370,10 +370,8 @@ launch_execve(char **cmd, int bg, int xflags)
 
 			if (xflags & E_NOSTDIN)
 				dup2(fd, STDIN_FILENO);
-
 			if (xflags & E_NOSTDOUT)
 				dup2(fd, STDOUT_FILENO);
-
 			if (xflags & E_NOSTDERR)
 				dup2(fd, STDERR_FILENO);
 
@@ -392,7 +390,10 @@ launch_execve(char **cmd, int bg, int xflags)
 			run_in_background(pid);
 			return EXIT_SUCCESS;
 		} else {
-			return run_in_foreground(pid);
+			flags |= RUNNING_CMD_FG;
+			int ret = run_in_foreground(pid);
+			flags &= ~RUNNING_CMD_FG;
+			return ret;
 		}
 	}
 
