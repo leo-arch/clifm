@@ -1377,11 +1377,45 @@ get_term_size(void)
 	term_rows = w.ws_row;
 }
 
+static int
+set_alt_screen_buf(void)
+{
+	puts("\x1b[?1047h");
+	return 1;
+}
+
+static int
+unset_alt_screen_buf(void)
+{
+	printf("\x1b[?1047l");
+	return 0;
+}
+
 static void
 sigwinch_handler(int sig)
 {
 	UNUSED(sig);
 	get_term_size();
+
+	static int state = 0;
+	if (term_cols < MIN_SCREEN_WIDTH || term_rows < MIN_SCREEN_HEIGHT) {
+		if (state == 0)
+			state = set_alt_screen_buf();
+		CLEAR;
+		puts("\x1b[H");
+		printf("%s: Minimum screen size is %dx%d\n", PROGRAM_NAME,
+			MIN_SCREEN_WIDTH, MIN_SCREEN_HEIGHT);
+		return;
+	}
+
+	if (state == 1)
+		state = unset_alt_screen_buf();
+	if (autols) {
+		putchar('\n');
+		free_dirlist();
+		list_dir();
+	}
+	rl_redisplay();
 }
 /*
 static void

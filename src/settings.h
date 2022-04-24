@@ -266,6 +266,9 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 
 #define MAX_WS 8
 
+#define MIN_SCREEN_WIDTH 20
+#define MIN_SCREEN_HEIGHT 3
+
 #define DEFAULT_PROMPT "\\[\\e[0m\\][\\S\\[\\e[0m\\]]\\l \
 \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
 >\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
