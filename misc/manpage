@@ -967,7 +967,7 @@ CliFM offers three kinds of file filters:
 .TP
 \fBC-M-l:\fR Toggle max file name length on/off
 .TP
-\fBC-M-i:\fR Toggle disk usage analyzer on/off
+\fBC-M-i:\fR, \fBA-TAB:\fR Toggle disk usage analyzer on/off
 .TP
 \fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
