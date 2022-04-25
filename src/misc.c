@@ -1407,7 +1407,7 @@ sigwinch_handler(int sig)
 			state = set_alt_screen_buf();
 		CLEAR;
 		puts("\x1b[H");
-		printf("%s: Minimum screen size is %dx%d\n", PROGRAM_NAME,
+		printf(_("%s: Minimum screen size is %dx%d\n"), PROGRAM_NAME,
 			MIN_SCREEN_WIDTH, MIN_SCREEN_HEIGHT);
 		return;
 	}

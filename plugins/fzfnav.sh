@@ -40,7 +40,7 @@ Keybindings:
   * Alt-up/down: Move to the beginning/end in the preview window"
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
-	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
+#	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Navigate/preview/select files via FZF\n"
 	printf "Usage: %s\n" "$HELP"
 	exit 0

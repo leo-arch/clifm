@@ -1196,13 +1196,12 @@ toggle_exec(char **args)
 static int
 pin_function(char *arg)
 {
-	int exit_status = EXIT_SUCCESS;
 	if (arg) {
-		if (IS_HELP(arg))
+		if (IS_HELP(arg)) {
 			puts(PIN_USAGE);
-		else
-			exit_status = pin_directory(arg);
-		return exit_status;
+			return EXIT_SUCCESS;
+		}
+		return pin_directory(arg);
 	}
 
 	if (pinned_dir)
