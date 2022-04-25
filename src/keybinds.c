@@ -808,7 +808,7 @@ rl_long(int count, int key)
 	}
 
 	print_reload_msg(_("Long view mode %s\n"),
-		long_view == 1 ? "enabled" : "disabled");
+		long_view == 1 ? _("enabled") : _("disabled"));
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 
@@ -1273,8 +1273,9 @@ rl_next_profile(int count, int key)
 
 	if (clear_screen) {
 		CLEAR;
-	} else
+	} else {
 		putchar('\n');
+	}
 
 	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
 		char *input = prompt();
@@ -1531,7 +1532,7 @@ rl_onlydirs(int count, int key)
 	}
 
 	print_reload_msg(_("Only directories %s\n"), only_dirs
-		? "enabled" : "disabled");
+		? _("enabled") : _("disabled"));
 	rl_reset_line_state();
 	return exit_status;
 }

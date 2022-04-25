@@ -2114,7 +2114,7 @@ init_config(void)
 		fzf_height_set = get_fzf_win_height();
 #endif
 
-	if ((flags & GUI) && getenv("XTERM_VERSION"))
+	if ((flags & GUI) && strncmp(getenv("TERM"), "xterm", 5) == 0)
 		/* If running Xterm, instruct it to send an escape code (27) for
 		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work */
 		printf("\x1b[?1036h"); /* metaSendsEscape = true */
