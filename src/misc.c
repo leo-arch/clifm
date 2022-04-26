@@ -1407,7 +1407,8 @@ refresh_files_list(const int redisplay)
 		state = unset_alt_screen_buf();
 
 	if (autols) {
-		putchar('\n');
+		if (redisplay == 1)
+			putchar('\n');
 		free_dirlist();
 		list_dir();
 	}
