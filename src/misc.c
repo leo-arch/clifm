@@ -744,10 +744,12 @@ new_instance(char *dir, const int sudo)
 	if (check_new_instance_init_conditions(dir, sudo) == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
-	if (!dir) return EINVAL;
+	if (!dir)
+		return EINVAL;
 
 	char *_sudo = (char *)NULL;
-	if (sudo && !(_sudo = get_sudo_path()))	return errno;
+	if (sudo && !(_sudo = get_sudo_path()))
+		return errno;
 
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
@@ -758,7 +760,8 @@ new_instance(char *dir, const int sudo)
 
 	char *self = get_cmd_path(PNL);
 	if (!self) {
-		free(_sudo); free(deq_dir);
+		free(_sudo);
+		free(deq_dir);
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, PNL, strerror(errno));
 		return errno;
 	}
@@ -771,12 +774,7 @@ new_instance(char *dir, const int sudo)
 
 	char *path_dir = get_path_dir(&deq_dir);
 	char **cmd = get_cmd(path_dir, _sudo, self, sudo);
-	ret = launch_new_instance_cmd(&cmd, &self, &_sudo, &path_dir, sudo);
-
-	if (ret != EXIT_SUCCESS)
-		fprintf(stderr, _("%s: Error lauching new instance\n"), PROGRAM_NAME);
-
-	return ret;
+	return launch_new_instance_cmd(&cmd, &self, &_sudo, &path_dir, sudo);
 }
 
 int

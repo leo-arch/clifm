@@ -212,9 +212,8 @@ run_in_foreground(pid_t pid)
 
 	/* The parent process calls waitpid() on the child */
 	if (waitpid(pid, &status, 0) > 0) {
-		if (WIFEXITED(status) && !WEXITSTATUS(status)) {
-			/* The program terminated normally and executed successfully
-			 * (WEXITSTATUS(status) == 0) */
+		if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+			/* The program terminated normally and executed successfully */
 			return EXIT_SUCCESS;
 		} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
 			/* Program terminated normally, but returned a non-zero status.
@@ -227,24 +226,31 @@ run_in_foreground(pid_t pid)
 		}
 	} else { /* waitpid() failed */
 		int ret = errno;
-		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
-		    strerror(errno));
+		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		return ret;
 	}
 
 	return EXIT_FAILURE; /* Never reached */
 }
 
-static void
+static int
 run_in_background(pid_t pid)
 {
 	int status = 0;
-	/* Keep it in the background */
-	waitpid(pid, &status, WNOHANG); /* or: kill(pid, SIGCONT); */
+	pid_t wpid = waitpid(pid, &status, WNOHANG);
+	if (wpid == -1) {
+		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+		return errno;
+	}
+
+	if (WIFEXITED(status))
+		return WEXITSTATUS(status);
+
+	return EXIT_SUCCESS;
 }
 
 /* Execute a command using the system shell (/bin/sh), which takes care
- * of special functions such as pipes and stream redirection, and special
+ * of special functions such as pipes and stream redirection, special
  * chars like wildcards, quotes, and escape sequences. Use only when the
  * shell is needed; otherwise, launch_execve() should be used instead. */
 int
@@ -271,7 +277,7 @@ launch_execle(const char *cmd)
 
 	set_signals_to_ignore();
 
-	if (WIFEXITED(ret) && !WEXITSTATUS(ret))
+	if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0)
 		return EXIT_SUCCESS;
 	if (WIFEXITED(ret) && WEXITSTATUS(ret))
 		return WEXITSTATUS(ret);
@@ -340,7 +346,7 @@ launch_execle(const char *cmd)
  * (cmd), an integer (bg) specifying if the command should be
  * backgrounded (1) or not (0), and a flag to control file descriptors */
 int
-launch_execve(char **cmd, int bg, int xflags)
+launch_execve(char **cmd, const int bg, const int xflags)
 {
 	if (!cmd)
 		return EXNULLERR;
@@ -355,7 +361,7 @@ launch_execve(char **cmd, int bg, int xflags)
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		return ret;
 	} else if (pid == 0) {
-		if (!bg) {
+		if (bg == 0) {
 			/* If the program runs in the foreground, reenable signals
 			 * only for the child, in case they were disabled for the
 			 * parent */
@@ -386,19 +392,14 @@ launch_execve(char **cmd, int bg, int xflags)
 
 	/* Get command status (pid > 0) */
 	else {
-		if (bg) {
-			run_in_background(pid);
-			return EXIT_SUCCESS;
-		} else {
-			flags |= RUNNING_CMD_FG;
-			int ret = run_in_foreground(pid);
-			flags &= ~RUNNING_CMD_FG;
-			return ret;
-		}
-	}
+		if (bg)
+			return run_in_background(pid);
 
-	/* Never reached */
-	return EXIT_FAILURE;
+		flags |= RUNNING_CMD_FG;
+		int ret = run_in_foreground(pid);
+		flags &= ~RUNNING_CMD_FG;
+		return ret;
+	}
 }
 
 /* Prevent the user from killing the program via the 'kill',

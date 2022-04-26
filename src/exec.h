@@ -32,7 +32,7 @@
 int exec_cmd(char **comm);
 void exec_chained_cmds(char *cmd);
 void exec_profile(void);
-int launch_execve(char **cmd, int bg, int xflags);
+int launch_execve(char **cmd, const int bg, const int xflags);
 int launch_execle(const char *cmd);
 int run_and_refresh(char **comm);
 
