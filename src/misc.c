@@ -1389,16 +1389,9 @@ unset_alt_screen_buf(void)
 	return 0;
 }
 
-/* Get new window size and update the screen accordingly */
-static void
-sigwinch_handler(int sig)
+void
+refresh_files_list(const int redisplay)
 {
-	UNUSED(sig);
-	get_term_size();
-	if (xargs.refresh_on_resize == 0 || (flags & RUNNING_CMD_FG)
-	|| pager == 1 || kbind_busy == 1)
-		return;
-
 	static int state = 0;
 	if (term_cols < MIN_SCREEN_WIDTH || term_rows < MIN_SCREEN_HEIGHT) {
 		if (state == 0)
@@ -1418,8 +1411,30 @@ sigwinch_handler(int sig)
 		free_dirlist();
 		list_dir();
 	}
+
 	rl_reset_line_state();
-	rl_redisplay();
+	if (redisplay == 1)
+		rl_redisplay();
+}
+
+/* Get new window size and update/refresh the screen accordingly */
+static void
+sigwinch_handler(int sig)
+{
+	UNUSED(sig);
+	get_term_size();
+
+	if (xargs.refresh_on_resize == 0 || pager == 1 || kbind_busy == 1)
+		return;
+
+	if (flags & RUNNING_CMD_FG) {
+		/* Let's redisplay the files list after the command execution to
+		 * avoid messing up the command's screen while it is running */
+		flags |= DELAYED_REFRESH;
+		return;
+	}
+
+	refresh_files_list(1);
 }
 /*
 static void

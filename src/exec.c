@@ -277,6 +277,11 @@ launch_execle(const char *cmd)
 
 	set_signals_to_ignore();
 
+	if (flags & DELAYED_REFRESH) {
+		flags &= ~DELAYED_REFRESH;
+		refresh_files_list(0);
+	}
+
 	if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0)
 		return EXIT_SUCCESS;
 	if (WIFEXITED(ret) && WEXITSTATUS(ret))
@@ -398,6 +403,10 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		flags |= RUNNING_CMD_FG;
 		int ret = run_in_foreground(pid);
 		flags &= ~RUNNING_CMD_FG;
+		if (flags & DELAYED_REFRESH) {
+			flags &= ~DELAYED_REFRESH;
+			refresh_files_list(0);
+		}
 		return ret;
 	}
 }
