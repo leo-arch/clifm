@@ -661,7 +661,7 @@ mime_list_open(char **apps, char *file)
 		free(input);
 		free(n);
 		if (!input && a == -1 && autols == 1) {
-			free_dirlist(); list_dir();
+			reload_dirlist();
 			return 0;
 		}
 		return ret;

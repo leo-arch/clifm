@@ -196,10 +196,8 @@ run_and_refresh(char **cmd)
 
 #ifdef __HAIKU__
 	if (autols == 1 && cmd[1] && strcmp(cmd[1], "--help") != 0
-	&& strcmp(cmd[1], "--version") != 0) {
-		free_dirlist();
-		list_dir();
-	}
+	&& strcmp(cmd[1], "--version") != 0)
+		reload_dirlist();
 #endif
 
 	return EXIT_SUCCESS;
@@ -632,14 +630,14 @@ set_max_files(char **args)
 
 	if (*args[1] == 'u' && strcmp(args[1], "unset") == 0) {
 		max_files = -1;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Max files unset\n"));
 		return EXIT_SUCCESS;
 	}
 
 	if (*args[1] == '0' && !args[1][1]) {
 		max_files = 0;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Max files set to %d\n"), max_files);
 		return EXIT_SUCCESS;
 	}
@@ -651,7 +649,7 @@ set_max_files(char **args)
 	}
 
 	max_files = (int)inum;
-	if (autols == 1) { free_dirlist(); list_dir(); }
+	if (autols == 1) { reload_dirlist(); }
 	print_reload_msg(_("Max files set to %d\n"), max_files);
 
 	return EXIT_SUCCESS;
@@ -711,11 +709,11 @@ folders_first_function(char *arg)
 			list_folders_first == 1 ? _("enabled") : _("disabled"));
 	}  else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		list_folders_first = 1;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Folders first enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		list_folders_first = 0;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Folders first disabled\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(FF_USAGE));
@@ -735,14 +733,14 @@ filescounter_function(char *arg)
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		files_counter = 1;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Files counter enabled\n"));
 		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		files_counter = 0;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Files counter disabled\n"));
 		return EXIT_SUCCESS;
 	}
@@ -778,11 +776,11 @@ pager_function(char *arg)
 			pager == 1 ? _("enabled") : _("disabled"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		pager = 1;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Pager enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		pager = 0;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Pager disabled\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(PAGER_USAGE));
@@ -1008,11 +1006,11 @@ lightmode_function(char *arg)
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		light_mode = 1;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Switched back to normal mode\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		light_mode = 0;
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Switched back to normal mode\n"));
 	} else {
 		puts(_(LM_USAGE));
@@ -1205,7 +1203,7 @@ toggle_exec(char **args)
 	}
 
 	if (n > 0) {
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("Toggled executable bit on %zu %s\n"),
 			n, n > 1 ? _("files") : _("file"));
 	}
@@ -1271,10 +1269,8 @@ ow_function(char **args)
 static int
 refresh_function(int old_exit_code)
 {
-	if (autols == 1) {
-		free_dirlist();
-		list_dir();
-	}
+	if (autols == 1)
+		reload_dirlist();
 
 	return old_exit_code;
 }
@@ -1808,7 +1804,7 @@ toggle_full_dir_size(const char *arg)
 			puts(_("Full directory size is already enabled"));
 		} else {
 			full_dir_size = 1;
-			if (autols == 1) { free_dirlist(); list_dir(); }
+			if (autols == 1) { reload_dirlist(); }
 			print_reload_msg(_("Full directory size enabled\n"));
 		}
 		return EXIT_SUCCESS;
@@ -1819,7 +1815,7 @@ toggle_full_dir_size(const char *arg)
 			puts(_("Full directory size is already disabled"));
 		} else {
 			full_dir_size = 0;
-			if (autols == 1) { free_dirlist(); list_dir(); }
+			if (autols == 1) { reload_dirlist(); }
 			print_reload_msg(_("Full directory size disabled\n"));
 		}
 		return EXIT_SUCCESS;

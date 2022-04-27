@@ -622,7 +622,7 @@ media_menu(int mode)
 		}
 
 		if (*input == 'q' && *(input + 1) == '\0') {
-			if (autols == 1) { free_dirlist(); list_dir(); }
+			if (autols == 1) { reload_dirlist(); }
 			goto EXIT;
 		}
 

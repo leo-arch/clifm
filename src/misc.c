@@ -280,8 +280,7 @@ read_inotify(void)
 #ifdef INOTIFY_DEBUG
 		puts("INOTIFY_REFRESH");
 #endif /* INOTIFY_DEBUG */
-		free_dirlist();
-		list_dir();
+		reload_dirlist();
 	} else {
 #ifdef INOTIFY_DEBUG
 		puts("INOTIFY_RESET");
@@ -365,7 +364,7 @@ unset_filter(void)
 	free(_filter);
 	_filter = (char *)NULL;
 	regfree(&regex_exp);
-	if (autols == 1) { free_dirlist(); list_dir(); }
+	if (autols == 1) { reload_dirlist(); }
 	puts(_("Filter unset"));
 	filter_rev = 0;
 
@@ -382,7 +381,7 @@ compile_filter(void)
 		_filter = (char *)NULL;
 		regfree(&regex_exp);
 	} else {
-		if (autols == 1) { free_dirlist(); list_dir(); }
+		if (autols == 1) { reload_dirlist(); }
 		print_reload_msg(_("%s: New filter successfully set\n"), _filter);
 	}
 
@@ -1416,8 +1415,7 @@ refresh_files_list(void)
 				chdir(workspaces[cur_ws].path);
 		}
 		putchar('\n');
-		free_dirlist();
-		list_dir();
+		reload_dirlist();
 	}
 
 	if (flags & RUNNING_CMD_FG) {
@@ -1603,8 +1601,7 @@ FREE_N_EXIT:
 	dup2(STDOUT_FILENO, STDIN_FILENO);
 
 	if (autols == 1) {
-		free_dirlist();
-		list_dir();
+		reload_dirlist();
 		add_to_dirhist(workspaces[cur_ws].path);
 	}
 

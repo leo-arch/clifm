@@ -2244,3 +2244,10 @@ free_dirlist(void)
 	free(file_info);
 	file_info = (struct fileinfo *)NULL;
 }
+
+void
+reload_dirlist(void)
+{
+	free_dirlist();
+	list_dir();
+}

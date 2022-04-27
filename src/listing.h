@@ -27,5 +27,6 @@
 
 void free_dirlist(void);
 int list_dir(void);
+void reload_dirlist(void);
 
 #endif /* LISTING_H */

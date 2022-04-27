@@ -1101,7 +1101,7 @@ deselect(char **args)
 		if (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
 		|| strcmp(args[1], "all") == 0) {
 			int ret = deselect_all();
-			if (autols == 1) { free_dirlist(); list_dir(); }
+			if (autols == 1) { reload_dirlist(); }
 			if (ret == EXIT_SUCCESS)
 				print_reload_msg(_("All files deselected\n"));
 			return ret;
