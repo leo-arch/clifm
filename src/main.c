@@ -874,9 +874,10 @@ main(int argc, char *argv[])
 	check_cpu_os();
 	/* Make sure we are running on a supported terminal */
 	check_term();
+
+	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 	get_term_size();
 
-	/* # 1. INITIALIZE VERYTHING WE NEED # */
 	/* If running the program locally, that is, not from a path in PATH,
 	 * remove the leading "./" to get the correct program invocation
 	 * name */
@@ -941,8 +942,8 @@ main(int argc, char *argv[])
 	load_actions();
 	get_aliases();
 
-	/* Get the list of available applications in PATH to be used by my
-	 * custom TAB-completion function */
+	/* Get the list of available applications in PATH to be used by the
+	 * custom TAB-completion function (tab_complete, in tabcomp.c) */
 	get_path_programs();
 
 	/* Check third-party programs availability: FZF, udevil, and udisks2 */
