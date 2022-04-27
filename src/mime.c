@@ -51,6 +51,7 @@
 #include "readline.h"
 #include "misc.h"
 #include "sanitize.h"
+#include "listing.h"
 
 /* Expand all environment variables in the string S
  * Returns the expanded string or NULL on error */
@@ -594,6 +595,7 @@ get_user_input(int *a, const size_t *nn)
 		if (*input == 'q' && !*(input + 1)) {
 			free(input);
 			input = (char *)NULL;
+			*a = -1;
 			break;
 		}
 
@@ -658,6 +660,10 @@ mime_list_open(char **apps, char *file)
 	if (!input || a <= 0) {
 		free(input);
 		free(n);
+		if (!input && a == -1 && autols == 1) {
+			free_dirlist(); list_dir();
+			return 0;
+		}
 		return ret;
 	}
 
