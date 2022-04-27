@@ -589,7 +589,7 @@ run_shell_cmd(char **args)
 	}
 
 	char *cmd = construct_shell_cmd(args);
-
+	flags &= ~RUNNING_SHELL_CMD;
 	/* Calling the system shell is vulnerable to command injection, true.
 	 * But it is the user here who is directly running the command: this
 	 * is not an untrusted source */
@@ -2508,6 +2508,7 @@ run_profile_line(char *cmd)
 	no_log = 1;
 	exec_cmd(cmds);
 	no_log = 0;
+	flags &= ~RUNNING_SHELL_CMD;
 
 	int i = (int)args_n + 1;
 	while (--i >= 0)

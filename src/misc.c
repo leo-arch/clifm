@@ -1426,11 +1426,9 @@ refresh_files_list(void)
 		return;
 	}
 
-	if (flags & RUNNING_SHELL_CMD) {
-		if (bg_proc == 1)
-			rl_reset_line_state();
-		rl_redisplay();
-	}
+	if (!(flags & RUNNING_SHELL_CMD) || bg_proc == 1)
+		rl_reset_line_state();
+	rl_redisplay();
 }
 
 /* Get new window size and update/refresh the screen accordingly */

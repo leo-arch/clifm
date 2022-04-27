@@ -734,6 +734,7 @@ run_prompt_cmds(void)
 		|| sanitize_cmd(prompt_cmds[i], SNT_PROMPT) == EXIT_SUCCESS)
 			launch_execle(prompt_cmds[i]);
 	}
+	flags &= ~RUNNING_SHELL_CMD;
 }
 
 #ifndef _NO_TRASH
