@@ -729,7 +729,7 @@ mime_list_open(char **apps, char *file)
 		}
 	}
 
-	bg_proc = 0;
+/*	bg_proc = 0; */
 
 	free(input);
 	free(n);
