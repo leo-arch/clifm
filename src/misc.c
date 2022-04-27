@@ -1125,7 +1125,7 @@ free_remotes(int exit)
 		free(remotes[i].desc);
 		free(remotes[i].mountpoint);
 		free(remotes[i].mount_cmd);
-		free(remotes[i].unmount_cmd);		
+		free(remotes[i].unmount_cmd);
 	}
 	free(remotes);
 	remotes_n = 0;
@@ -1389,8 +1389,8 @@ unset_alt_screen_buf(void)
 	return 0;
 }
 
-void
-refresh_files_list(const int redisplay)
+static void
+refresh_files_list(void)
 {
 	static int state = 0;
 	if (term_cols < MIN_SCREEN_WIDTH || term_rows < MIN_SCREEN_HEIGHT) {
@@ -1407,14 +1407,26 @@ refresh_files_list(const int redisplay)
 		state = unset_alt_screen_buf();
 
 	if (autols) {
-		if (redisplay == 1)
-			putchar('\n');
+		if (flags & RELOADING_BINARIES) {
+			char p[PATH_MAX];
+			*p = '\0';
+			getcwd(p, PATH_MAX);
+			if (*workspaces[cur_ws].path != *p
+			|| strcmp(p, workspaces[cur_ws].path) != 0)
+				chdir(workspaces[cur_ws].path);
+		}
+		putchar('\n');
 		free_dirlist();
 		list_dir();
 	}
 
-	rl_reset_line_state();
-	if (redisplay == 1)
+	if (flags & RUNNING_CMD_FG) {
+		printf(" ...\x1b[4D");
+		fflush(stdout);
+		return;
+	}
+
+	if (flags & RUNNING_SHELL_CMD)
 		rl_redisplay();
 }
 
@@ -1428,14 +1440,7 @@ sigwinch_handler(int sig)
 	if (xargs.refresh_on_resize == 0 || pager == 1 || kbind_busy == 1)
 		return;
 
-	if (flags & RUNNING_CMD_FG) {
-		/* Let's redisplay the files list after the command execution to
-		 * avoid messing up the command's screen while it is running */
-		flags |= DELAYED_REFRESH;
-		return;
-	}
-
-	refresh_files_list(1);
+	refresh_files_list();
 }
 /*
 static void

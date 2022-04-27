@@ -267,6 +267,7 @@ launch_execle(const char *cmd)
 	&& xargs.secure_env == 0)
 		sanitize_cmd_environ();
 
+	flags |= RUNNING_SHELL_CMD;
 	flags |= RUNNING_CMD_FG;
 	int ret = system(cmd);
 	flags &= ~RUNNING_CMD_FG;
@@ -277,11 +278,10 @@ launch_execle(const char *cmd)
 
 	set_signals_to_ignore();
 
-	if (flags & DELAYED_REFRESH) {
+/*	if (flags & DELAYED_REFRESH) {
 		flags &= ~DELAYED_REFRESH;
 		refresh_files_list(0);
-	}
-
+	} */
 	if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0)
 		return EXIT_SUCCESS;
 	if (WIFEXITED(ret) && WEXITSTATUS(ret))
@@ -403,10 +403,10 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		flags |= RUNNING_CMD_FG;
 		int ret = run_in_foreground(pid);
 		flags &= ~RUNNING_CMD_FG;
-		if (flags & DELAYED_REFRESH) {
+/*		if (flags & DELAYED_REFRESH) {
 			flags &= ~DELAYED_REFRESH;
 			refresh_files_list(0);
-		}
+		} */
 		return ret;
 	}
 }
@@ -423,8 +423,7 @@ graceful_quit(char **args)
 		if ((strcmp(args[0], "kill") == 0 && atoi(args[i]) == (int)own_pid)
 		|| ((strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)
 		&& strcmp(args[i], argv_bk[0]) == 0)) {
-			fprintf(stderr, _("%s: To gracefully quit enter 'q'\n"),
-					PROGRAM_NAME);
+			fprintf(stderr, _("%s: To gracefully quit enter 'q'\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 	}
@@ -436,10 +435,22 @@ graceful_quit(char **args)
  * Why? If this list is not updated, whenever some new program is
  * installed, renamed, or removed from some of the paths in PATH
  * while in CliFM, this latter needs to be restarted in order
- * to be able to recognize the new program for TAB completion */
+ * to be able to recognize the new program for TAB completion
+ *
+ * Why the RELOADING_BINARIES flag? While reloading binaries we need
+ * to momentarilly change the current directory to those dirs in PATH.
+ * Now, it might happen that we get a SIGWINCH signal when doing this.
+ * The problem is that, upon SIGWICH, CliFM attempts to reload
+ * the current list of files, and in order to succesfully do so
+ * we need to be in the current directory informed by CliFM
+ * So, the RELOADING_BINARIES flag just informs the SIGWHINCH handler
+ * (sigwich_handler()) that we are reloading binaries so that it can
+ * handle the case appropriately */
 static inline void
 reload_binaries(void)
 {
+	flags |= RELOADING_BINARIES;
+
 	if (bin_commands) {
 		int j = (int)path_progsn;
 		while (--j >= 0)
@@ -456,6 +467,8 @@ reload_binaries(void)
 
 	path_n = (size_t)get_path_env();
 	get_path_programs();
+
+	flags &= ~RELOADING_BINARIES;
 }
 
 static inline int
@@ -494,7 +507,7 @@ static inline char *
 construct_shell_cmd(char **args)
 {
 	/* Bypass CliFM's parsing, expansions, and checks to be executed
-	 * DIRECTLY by the system shell (execle) */
+	 * DIRECTLY by the system shell (launch_execle()) */
 	char *first = args[0];
 	if (*args[0] == ':' || *args[0] == ';')
 		first++;
@@ -615,10 +628,7 @@ set_max_files(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	if (IS_HELP(args[1])) {
-		puts(_(MF_USAGE));
-		return EXIT_SUCCESS;
-	}
+	if (IS_HELP(args[1])) { puts(_(MF_USAGE)); return EXIT_SUCCESS;	}
 
 	if (*args[1] == 'u' && strcmp(args[1], "unset") == 0) {
 		max_files = -1;
@@ -1872,6 +1882,7 @@ set_mv_cmd(char **cmd)
 int
 exec_cmd(char **comm)
 {
+	flags &= ~RUNNING_SHELL_CMD;
 	fputs(df_c, stdout);
 
 	int old_exit_code = exit_code;

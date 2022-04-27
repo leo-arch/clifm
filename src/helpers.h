@@ -182,19 +182,21 @@ extern int watch;
 #define ALT_PROFILE   (1 << 8)
 
 /* File ownership flags */
-#define R_USR (1 << 1)
-#define X_USR (1 << 2)
-#define R_GRP (1 << 3)
-#define X_GRP (1 << 4)
-#define R_OTH (1 << 5)
-#define X_OTH (1 << 6)
+#define R_USR (1 << 9)
+#define X_USR (1 << 10)
+#define R_GRP (1 << 11)
+#define X_GRP (1 << 12)
+#define R_OTH (1 << 13)
+#define X_OTH (1 << 14)
 
 /* Internal flags */
-#define ROOT_USR        (1 << 10)
-#define GUI             (1 << 11)
-#define IS_USRVAR_DEF   (1 << 12)
-#define RUNNING_CMD_FG  (1 << 13)
-#define DELAYED_REFRESH (1 << 14)
+#define ROOT_USR           (1 << 15)
+#define GUI                (1 << 16)
+#define IS_USRVAR_DEF      (1 << 17)
+#define RUNNING_CMD_FG     (1 << 18)
+#define RUNNING_SHELL_CMD  (1 << 19)
+#define DELAYED_REFRESH    (1 << 20) /* UNUSED */
+#define RELOADING_BINARIES (1 << 21)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or
  * not */
