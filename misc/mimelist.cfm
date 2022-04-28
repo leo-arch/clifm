@@ -48,9 +48,9 @@
 # Environment variables could be used as well. Example:
 # X:text/plain=$TERM -e $EDITOR %f &;$VISUAL;nano;vi
 
-########################
-#      File Names      #
-########################
+###########################
+#  File names/extensions  #
+###########################
 
 # Match a full file name
 #X:N:some_filename=cmd
@@ -58,9 +58,8 @@
 # Match all file names starting with 'str'
 #X:N:^str.*=cmd
 
-########################
-#    File extensions   #
-########################
+# Match files with extension 'ext'
+#X:N:.*\.ext$=cmd
 
 X:N:.*\.djvu$=djview;zathura;evince;atril
 X:N:.*\.epub$=mupdf;zathura;ebook-viewer
