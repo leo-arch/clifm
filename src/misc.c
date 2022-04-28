@@ -1434,11 +1434,10 @@ static void
 sigwinch_handler(int sig)
 {
 	UNUSED(sig);
-	get_term_size();
-
 	if (xargs.refresh_on_resize == 0 || pager == 1 || kbind_busy == 1)
 		return;
 
+	get_term_size();
 	refresh_files_list();
 }
 /*
