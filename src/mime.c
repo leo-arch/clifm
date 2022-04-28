@@ -548,6 +548,14 @@ static int
 mime_edit(char **args)
 {
 	int exit_status = EXIT_SUCCESS;
+	struct stat a;
+	if (!mime_file || stat(mime_file, &a) == -1) {
+		fprintf(stderr, "%s: Cannot access the mimelist file. %s\n", PROGRAM_NAME,
+			strerror(ENOENT));
+		return ENOENT;
+	}
+
+	time_t prev = a.st_mtime;
 
 	if (!args[2]) {
 		char *cmd[] = {"mime", mime_file, NULL};
@@ -562,6 +570,12 @@ mime_edit(char **args)
 		char *cmd[] = {args[2], mime_file, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
+	}
+
+	stat(mime_file, &a);
+	if (a.st_mtime != prev) {
+		reload_dirlist();
+		print_reload_msg(_(CONFIG_FILE_UPDATED));
 	}
 
 	return exit_status;

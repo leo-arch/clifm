@@ -694,6 +694,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 #define PAGER_LABEL "\x1b[7;97m--Mas--\x1b[0;49m"
 #define NOT_AVAILABLE "This feature has been disabled at compile time"
 #define STEALTH_DISABLED "This function is disabled in stealth mode"
+#define CONFIG_FILE_UPDATED "File modified. Configuration file updated\n"
 
 #ifndef __HAIKU__
 #define HELP_MESSAGE "Enter '?' or press F1-F3 for instructions"

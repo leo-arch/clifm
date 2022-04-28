@@ -116,18 +116,18 @@ edit_function(char **comm)
 	}
 
 	/* Get modification time of the config file before opening it */
-	struct stat file_attrib;
+	struct stat attr;
 
 	/* If, for some reason (like someone erasing the file while the
 	 * program is running) clifmrc doesn't exist, recreate the
 	 * configuration file. Then run 'stat' again to reread the attributes
 	 * of the file */
-	if (stat(config_file, &file_attrib) == -1) {
+	if (stat(config_file, &attr) == -1) {
 		create_config(config_file);
-		stat(config_file, &file_attrib);
+		stat(config_file, &attr);
 	}
 
-	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+	time_t mtime_bfr = (time_t)attr.st_mtime;
 	int ret = EXIT_SUCCESS;
 
 	/* If there is an argument... */
@@ -145,11 +145,11 @@ edit_function(char **comm)
 		return EXIT_FAILURE;
 
 	/* Get modification time after opening the config file */
-	stat(config_file, &file_attrib);
+	stat(config_file, &attr);
 	/* If modification times differ, the file was modified after being
 	 * opened */
 
-	if (mtime_bfr != (time_t)file_attrib.st_mtime) {
+	if (mtime_bfr != (time_t)attr.st_mtime) {
 		/* Reload configuration only if the config file was modified */
 		reload_config();
 		welcome_message = 0;
@@ -158,6 +158,7 @@ edit_function(char **comm)
 			free_dirlist();
 			ret = list_dir();
 		}
+		print_reload_msg(_(CONFIG_FILE_UPDATED));
 	}
 
 	return ret;
