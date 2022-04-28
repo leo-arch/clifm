@@ -1,14 +1,40 @@
 #!/bin/sh
 
-# FZF navigation/previewing plugin for CliFM
+# FZF navigation/previewing/selection plugin for CliFM
 # Written by L. Abramovich
 # License: GPL3
 
-# Description: Navigate the filesystem (including file previews) with FZF.
-# Previews are shown by just hovering on the file. Each generated preview
-# is cached in $HOME/.cache/clifm/previews to speed up the previewing
-# process. A separate script is used for file previewing:
+# Description: Navigate the filesystem (including files preview and
+# selection) with FZF.
+
+# Previews are shown by just hovering on the file. Each generated preview,
+# provided it needs to be converted before (e.g. .gif, .pdf and .docx files),
+# is cached as image file(s) (using hashes as names) in
+# $HOME/.cache/clifm/previews to avoid subsequent convertions and speed up
+# thus the whole process.
+
+# A separate script is used for file previewing:
 # $HOME/.config/clifm/plugins/BFG.sh
+
+# A configuration file is available:
+# $HOME/.config/clifm/plugins/BFG.cfm
+# or
+# $XDG_DATA_DIRS/clifm/plugins/BFG.cfm
+
+# How the files previewer works?
+# 1. The config file is read looking for predefined options and previewing
+#     applications.
+# 2. Options not defined in the config file are set to the default value.
+#     If no opening application for a given file type was defined in the
+#     config file, the system is scanned for available applications.
+#    NOTE: Determining previewing applications is done only once, when
+#     when the fzfnav.sh script starts, instead of each time a file is
+#     hovered, which saves a significant amount of time.
+# 3. Export this info as environment variables.
+# 4. Launch FZF using the BFG.sh script to generate files preview using
+#     the information previosuly gathered. This script only takes care of
+#     determining file types and executing the corresponding previewing
+#     application.
 
 # Usage:
 # Left: go to parent directory
@@ -21,6 +47,12 @@
 # At exit (pressing C-q) CliFM will change to the last directory visited
 # with FZF or open the last accepted file (Enter).
 # Press Esc to cancel and exit.
+
+# NOTE:
+# If using the GNU version of ls(1), it is recommended to set the LS option
+# (in BGH.cfm) to "gnu" (defaults to "posix") to get a list of files colored
+# according to file types
+
 
 HELP="Usage:
   Type in the prompt to filter the current list of files. Regular expressions are \
@@ -42,7 +74,7 @@ Keybindings:
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 #	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Navigate/preview/select files via FZF\n"
-	printf "Usage: %s\n" "$HELP"
+	printf "%s\n" "$HELP"
 	exit 0
 fi
 
@@ -87,6 +119,23 @@ start_ueberzug() {
 	tail -f "$FIFO_UEBERZUG" \
 	| ueberzug layer --silent --parser json > /dev/null 2>&1 &
 }
+
+HELP="Usage:
+  Type in the prompt to filter the current list of files. Regular expressions are \
+allowed.
+
+  At exit (Ctrl-q) CliFM will change to the last directory visited or \
+open the last accepted file (Enter). Press Esc to cancel and exit.
+
+Keybindings:
+
+  * Left: Change to parent directory
+  * Right or Enter: Change to the highlighted directory or open the highlighted file and exit
+  * Home/end: Change to first/last file in the files list
+  * TAB: Select currently highlighted file
+  * Ctrl-s: Confirm selection (send files to CliFM's Selection Box)
+  * Shift-up/down: Move one line up/down in the preview window
+  * Alt-up/down: Move to the beginning/end in the preview window"
 
 fcd() {
 	if [ "$#" -ne 0 ]; then
@@ -155,18 +204,16 @@ $FZF_HEADER" --marker="*" --preview-window=:wrap "$(fzf_borders)" \
 	done
 }
 
+					######################
+					#   MAIN FUNCTION    #
+					######################
+
 main() {
 
 	if ! type fzf > /dev/null 2>&1; then
 		printf "CliFM: fzf: Command not found\n" >&2
-		exit 1
+		exit 127
 	fi
-
-	# The variables below are exported to the environment so that the
-	# previewer script, BFG.sh, executed from within FZF, can make use of
-	# them. Here we define cmd_exists application should be used for different
-	# file types. The implementation for each application is defined in
-	# the BFG file.
 
 	export TMP_SEL="/tmp/fzfnav.sel"
 	rm -rf -- "$TMP_SEL"
@@ -452,7 +499,6 @@ main() {
 	# don't need to do it once and again each time a file is hovered
 
 	# Directories
-
 	if [ -z "$DIR_CMD" ]; then
 		if type lsd > /dev/null 2>&1; then
 			export DIR_CMD="lsd-tree"
@@ -656,7 +702,7 @@ main() {
 	TMP="$(mktemp /tmp/clifm.XXXXXX)"
 
 				#####################################
-				#	 3. RUN FZF, which CALLS BFG	#
+				#	 3. RUN FZF, WHICH CALLS BFG	#
 				#####################################
 
 	fcd "$@"
@@ -664,6 +710,12 @@ main() {
 	[ -n "$CLIFM" ] && cat "$TMP" 2>/dev/null > "$CLIFM_BUS"
 	rm -f -- "$TMP" 2>/dev/null
 }
+
+
+					#####################
+					#       MAIN        #
+					#####################
+
 
 # Source our plugins helper
 if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
