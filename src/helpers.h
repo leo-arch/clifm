@@ -129,8 +129,7 @@ void *__dso_handle;
 # endif /* __linux__ */
 #endif /* ARG_MAX */
 
-/* _GNU_SOURCE is only defined if __linux__ is defined and _BE_POSIX
- * is not defined */
+/* _GNU_SOURCE is only defined if __linux__ is defined and _BE_POSIX is not defined */
 #ifdef _GNU_SOURCE
 # if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
@@ -146,14 +145,6 @@ void *__dso_handle;
 # endif /* LINUX_VERSION (2.6.24)*/
 #endif /* __linux__ */
 
-/* Define our own boolean type
-#undef bool
-#define bool signed char
-#undef TRUE
-#undef FALSE
-#define TRUE 1
-#define FALSE 0 */
-
 /* Event handling */
 #ifdef LINUX_INOTIFY
 # define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
@@ -163,7 +154,7 @@ extern int inotify_fd, inotify_wd;
 extern unsigned int INOTIFY_MASK;
 #elif defined(BSD_KQUEUE)
 # define NUM_EVENT_SLOTS 10
-# define NUM_EVENT_FDS 10
+# define NUM_EVENT_FDS   10
 extern int kq, event_fd;
 extern struct kevent events_to_monitor[];
 extern unsigned int KQUEUE_FFLAGS;
@@ -190,16 +181,17 @@ extern int watch;
 #define X_OTH (1 << 14)
 
 /* Internal flags */
-#define ROOT_USR           (1 << 15)
-#define GUI                (1 << 16)
-#define IS_USRVAR_DEF      (1 << 17)
+#define ROOT_USR      (1 << 15)
+#define GUI           (1 << 16)
+#define IS_USRVAR_DEF (1 << 17)
+
+/* Used by the refresh on resize feature */
 #define RUNNING_CMD_FG     (1 << 18)
 #define RUNNING_SHELL_CMD  (1 << 19)
-#define DELAYED_REFRESH    (1 << 20) /* UNUSED */
+#define DELAYED_REFRESH    (1 << 20)
 #define RELOADING_BINARIES (1 << 21)
 
-/* Used by log_msg() to know wether to tell prompt() to print messages or
- * not */
+/* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
 

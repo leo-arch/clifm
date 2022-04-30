@@ -1359,8 +1359,8 @@ free_stuff(void)
 #endif
 	free(tags_dir);
 
-	/* Restore the color of the running terminal */
-	fputs("\x1b[0;39;49m", stdout);
+	/* Restore the color of the running terminal
+	fputs("\x1b[0;39;49m", stdout); */
 }
 
 /* Get current terminal dimensions and store them in TERM_COLS and
@@ -1388,7 +1388,7 @@ unset_alt_screen_buf(void)
 	return 0;
 }
 
-static void
+void
 refresh_files_list(void)
 {
 	static int state = 0;
@@ -1419,7 +1419,7 @@ refresh_files_list(void)
 	}
 
 	if (flags & RUNNING_CMD_FG) {
-		printf(" ...\x1b[4D");
+		fputs(" ...\x1b[4D", stdout);
 		fflush(stdout);
 		return;
 	}
@@ -1427,6 +1427,30 @@ refresh_files_list(void)
 	if (!(flags & RUNNING_SHELL_CMD) || bg_proc == 1)
 		rl_reset_line_state();
 	rl_redisplay();
+}
+
+/* BE READY FOR THE UGLIEST WORKAROUND EVER!
+ * This code is aimed to check whether some terminal program has taken
+ * control over our screen. How it does this? Immediately before running
+ * commands (launch_exec functions) we store the current cursor position.
+ * Then, upon SIGWINCH, we check this position again: if not the same,
+ * some external program is controlling the screen, in which case we
+ * should not attempt to refresh the files list. Instead, set a flag to
+ * refresh the screen only after the currently controlliong program exits.
+ * This thing basically works, but is still BAD, BAD, BAD. */
+static int
+screen_is_ours(void)
+{
+	int c = 0, r = 0;
+	fputs("\x1b[?1047l", stdout);
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &c, &r);
+	if (c != curcol || r != currow) {
+		fputs("\x1b[?1047h", stdout);
+		flags |= DELAYED_REFRESH;
+		return 0;
+	}
+
+	return 1;
 }
 
 /* Get new window size and update/refresh the screen accordingly */
@@ -1438,6 +1462,10 @@ sigwinch_handler(int sig)
 		return;
 
 	get_term_size();
+
+	if (screen_is_ours() == 0)
+		return;
+
 	refresh_files_list();
 }
 /*

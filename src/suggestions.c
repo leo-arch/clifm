@@ -135,7 +135,7 @@ clear_suggestion(const int free_sug)
 
 	if (suggestion.nlines > 1) {
 		/* Save cursor position */
-		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+		get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
 
 		int i = (int)suggestion.nlines;
 		while (--i > 0) {
@@ -330,7 +330,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	correct_offset(&offset);
 
 	/* Store current cursor position in CURROW and CURCOL (globals) */
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
 
 	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump */
 	size_t str_len = strlen(str), slines = 0;

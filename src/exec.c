@@ -257,6 +257,8 @@ launch_execle(const char *cmd)
 	if (!cmd || !*cmd)
 		return EXNULLERR;
 
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
+
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
 	signal(SIGTSTP, SIG_DFL);
@@ -276,25 +278,29 @@ launch_execle(const char *cmd)
 
 	set_signals_to_ignore();
 
-/*	if (flags & DELAYED_REFRESH) {
+	if (flags & DELAYED_REFRESH) {
 		flags &= ~DELAYED_REFRESH;
-		refresh_files_list(0);
-	} */
+		refresh_files_list();
+	}
+
 	if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0)
 		return EXIT_SUCCESS;
 	if (WIFEXITED(ret) && WEXITSTATUS(ret))
 		return WEXITSTATUS(ret);
 	return EXCRASHERR;
-/*
-	// Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid won't
+
+/*	// Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid won't
 	// be able to catch error codes coming from the child
 	signal(SIGCHLD, SIG_DFL);
 
-	int status;
+	flags |= RUNNING_SHELL_CMD;
+	flags |= RUNNING_CMD_FG;
+
+	int status, ret = 0;
 	pid_t pid = fork();
 	if (pid < 0) {
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
-		return EXFORKERR;
+		return errno;
 	} else if (pid == 0) {
 		// Reenable signals only for the child, in case they were
 		// disabled for the parent
@@ -315,31 +321,33 @@ launch_execle(const char *cmd)
 	else {
 		// The parent process calls waitpid() on the child
 		if (waitpid(pid, &status, 0) > 0) {
-			if (WIFEXITED(status) && !WEXITSTATUS(status)) {
-				// The program terminated normally and executed
-				// successfully
-				return EXIT_SUCCESS;
+			if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+				// The program terminated normally and executed successfully
+				ret = EXIT_SUCCESS;
 			} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
 				// Either "command not found" (WEXITSTATUS(status) == 127),
 				// "permission denied" (not executable) (WEXITSTATUS(status) ==
 				// 126) or the program terminated normally, but returned a
 				// non-zero status. These exit codes will be handled by the
 				// system shell itself, since we're using here execle()
-				return WEXITSTATUS(status);
-			} else {
-				// The program didn't terminate normally
-				return EXCRASHERR;
+				ret = WEXITSTATUS(status);
+			} else { // The program didn't terminate normally
+				ret = EXCRASHERR;
 			}
-		} else {
-			// Waitpid() failed
+		} else { // Waitpid() failed
 			fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
 			    strerror(errno));
-			return errno;
+			ret = errno;
 		}
 	}
 
-	// Never reached
-	return EXIT_FAILURE; */
+	flags &= ~RUNNING_CMD_FG;
+	if (flags & DELAYED_REFRESH) {
+		flags &= ~DELAYED_REFRESH;
+		refresh_files_list(0);
+	}
+
+	return ret;*/
 }
 
 /* Execute a command and return the corresponding exit status. The exit
@@ -358,11 +366,13 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	 * won't be able to catch error codes coming from the child. */
 	signal(SIGCHLD, SIG_DFL);
 
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
+
+	int ret = 0;
 	pid_t pid = fork();
 	if (pid < 0) {
-		int ret = errno;
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
-		return ret;
+		return errno;
 	} else if (pid == 0) {
 		if (bg == 0) {
 			/* If the program runs in the foreground, reenable signals
@@ -388,25 +398,26 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		}
 
 		execvp(cmd[0], cmd);
-		int ret = errno;
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
-		_exit(ret);
+		_exit(errno);
 	}
 
 	/* Get command status (pid > 0) */
 	else {
-		if (bg)
-			return run_in_background(pid);
-
-		flags |= RUNNING_CMD_FG;
-		int ret = run_in_foreground(pid);
-		flags &= ~RUNNING_CMD_FG;
-/*		if (flags & DELAYED_REFRESH) {
-			flags &= ~DELAYED_REFRESH;
-			refresh_files_list(0);
-		} */
-		return ret;
+		if (bg) {
+			ret = run_in_background(pid);
+		} else {
+			flags |= RUNNING_CMD_FG;
+			ret = run_in_foreground(pid);
+			flags &= ~RUNNING_CMD_FG;
+			if (flags & DELAYED_REFRESH) {
+				flags &= ~DELAYED_REFRESH;
+				refresh_files_list();
+			}
+		}
 	}
+
+	return ret;
 }
 
 /* Prevent the user from killing the program via the 'kill',
@@ -588,6 +599,7 @@ run_shell_cmd(char **args)
 
 	char *cmd = construct_shell_cmd(args);
 	flags &= ~RUNNING_SHELL_CMD;
+
 	/* Calling the system shell is vulnerable to command injection, true.
 	 * But it is the user here who is directly running the command: this
 	 * is not an untrusted source */

@@ -325,13 +325,12 @@ disable_raw_mode(const int fd)
 }
 
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
- * vertical and horizontal) and store both values into global variables.
+ * vertical and horizontal) and store both values into C (columns) and R (rows).
  * Return 0 on success and 1 on error */
 int
-get_cursor_position(const int ifd, const int ofd)
+get_cursor_position(const int ifd, const int ofd, int *c, int *r)
 {
 	char buf[32];
-	int cols, rows;
 	unsigned int i = 0;
 
 	if (enable_raw_mode(ifd) == -1)
@@ -354,11 +353,8 @@ get_cursor_position(const int ifd, const int ofd)
 	/* Parse it */
 	if (buf[0] != _ESC || buf[1] != '[')
 		goto FAIL;
-	if (sscanf(buf + 2, "%d;%d", &rows, &cols) != 2)
+	if (sscanf(buf + 2, "%d;%d", r, c) != 2)
 		goto FAIL;
-
-	currow = rows;
-	curcol = cols;
 
 	disable_raw_mode(ifd);
 	return EXIT_SUCCESS;

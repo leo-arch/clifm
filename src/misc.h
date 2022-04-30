@@ -60,5 +60,6 @@ void read_kqueue(void);
 #endif
 int sanitize_cmd(char *cmd, int type);
 void get_term_size(void);
+void refresh_files_list(void);
 
 #endif /* MISC_H */
