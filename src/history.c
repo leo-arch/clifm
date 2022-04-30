@@ -323,7 +323,7 @@ edit_history(char **args)
 	if (stat(hist_file, &attr) == -1) {
 		fprintf(stderr, "%s: history: %s: %s\n", PROGRAM_NAME, hist_file,
 				strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
@@ -332,8 +332,7 @@ edit_history(char **args)
 	/* If we have an opening application (2nd argument) */
 	if (args[2]) {
 		char *cmd[] = {args[2], hist_file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-			ret = EXIT_FAILURE;
+		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(hist_file);
@@ -341,14 +340,17 @@ edit_history(char **args)
 	}
 
 	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+		return ret;
 
 	/* Get modification time after opening the config file */
-	stat(config_file, &attr);
+	stat(hist_file, &attr);
 	/* If modification times differ, the file was modified after being
 	 * opened */
-	if (mtime_bfr != (time_t)attr.st_mtime)
-		return reload_history(args);
+	if (mtime_bfr != (time_t)attr.st_mtime) {
+		ret = reload_history(args);
+		print_reload_msg("File modified. History entries reloaded\n");
+		return ret;
+	}
 
 	return EXIT_SUCCESS;
 }

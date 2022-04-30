@@ -41,6 +41,7 @@
 #include "readline.h"
 #include "messages.h"
 #include "listing.h"
+#include "misc.h"
 
 #define NO_BOOKMARKS "Bookmarks: There are no bookmarks\nEnter 'bm edit' \
 or press F11 to edit the bookmarks file. You can also enter 'bm add PATH' \
@@ -582,6 +583,12 @@ int
 edit_bookmarks(char *cmd)
 {
 	int exit_status = EXIT_SUCCESS;
+	struct stat a;
+	if (stat(bm_file, &a) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, bm_file, strerror(errno));
+		return errno;
+	}
+	time_t prev = a.st_mtime;
 
 	if (!cmd) {
 		open_in_foreground = 1;
@@ -589,16 +596,19 @@ edit_bookmarks(char *cmd)
 		open_in_foreground = 0;
 	} else {
 		char *tmp_cmd[] = {cmd, bm_file, NULL};
-		if (launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		exit_status = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
 	}
 
-	if (exit_status == EXIT_FAILURE) {
+	if (exit_status != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: Cannot open the bookmarks file\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
-	reload_bookmarks();
+	stat(bm_file, &a);
+	if (prev != a.st_mtime) {
+		reload_bookmarks();
+		print_reload_msg("File modified. Bookmarks reloaded\n");
+	}
 
 	return exit_status;
 }

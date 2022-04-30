@@ -296,8 +296,7 @@ remotes_edit(char *app)
 	int ret = EXIT_SUCCESS;
 	if (app) {
 		char *cmd[] = {app, remotes_file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-			ret = EXIT_FAILURE;
+		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(remotes_file);
@@ -305,16 +304,17 @@ remotes_edit(char *app)
 	}
 
 	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+		return ret;
 
 	if (stat(remotes_file, &attr) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	if (mtime_bfr != (time_t)attr.st_mtime) {
 		free_remotes(0);
 		load_remotes();
+		print_reload_msg("File modified. Remotes reloaded\n");
 	}
 
 	return EXIT_SUCCESS;

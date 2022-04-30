@@ -296,8 +296,7 @@ edit_actions(char *app)
 
 	if (app && *app) {
 		char *cmd[] = {app, actions_file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-			ret = EXIT_FAILURE;
+		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(actions_file);
@@ -305,7 +304,7 @@ edit_actions(char *app)
 	}
 
 	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+		return ret;
 
 	/* Get modification time after opening the file */
 	stat(actions_file, &attr);
@@ -338,6 +337,7 @@ edit_actions(char *app)
 	path_n = (size_t)get_path_env();
 	get_path_programs();
 
+	print_reload_msg("File modified. Actions reloaded\n");
 	return EXIT_SUCCESS;
 }
 
