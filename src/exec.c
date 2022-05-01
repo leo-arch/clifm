@@ -372,8 +372,6 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	 * won't be able to catch error codes coming from the child. */
 	signal(SIGCHLD, SIG_DFL);
 
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
-
 	int ret = 0;
 	pid_t pid = fork();
 	if (pid < 0) {

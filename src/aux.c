@@ -679,15 +679,19 @@ dir_size(char *dir)
 		return (-1);
 
 	char file[PATH_MAX];
-	snprintf(file, PATH_MAX, "%s/duXXXXXX", P_tmpdir); /* NOLINT */
+	snprintf(file, PATH_MAX, "%s/duXXXXXX", (xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir); /* NOLINT */
 
 	int fd = mkstemp(file);
 	if (fd == -1)
 		return (-1);
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
-	dup2(fd, STDOUT_FILENO); /* Redirect stdout to the desired file */
+
+	/* Redirect stdout to the desired file */
+	int r = dup2(fd, STDOUT_FILENO);
 	close(fd);
+	if (r == -1)
+		return (-1);
 
 #ifdef __linux__
 	char block_size[16];
@@ -695,6 +699,7 @@ dir_size(char *dir)
 		strcpy(block_size, "--block-size=KB");
 	else
 		strcpy(block_size, "--block-size=K");
+
 	if (xargs.apparent_size != 1) {
 		char *cmd[] = {"du", "-s", block_size, dir, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOSTDERR);

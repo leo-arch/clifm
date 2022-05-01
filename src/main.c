@@ -877,7 +877,7 @@ main(int argc, char *argv[])
 	check_term();
 
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
-	get_term_size();
+//	get_term_size();
 
 	/* If running the program locally, that is, not from a path in PATH,
 	 * remove the leading "./" to get the correct program invocation

@@ -1789,19 +1789,16 @@ list_dir(void)
 
 	if (xargs.disk_usage_analyzer == 1
 	|| (long_view == 1 && full_dir_size == 1)) {
-		printf("Retrieving file sizes. Please wait... ");
+		fputs(_("Retrieving file sizes. Please wait... "), stdout);
 		fflush(stdout);
 	}
 
-	if (!unicode) {
-		trim.state = trim.a = trim.b = 0;
-		trim.len = 0;
-	}
+	if (!unicode)
+		trim.state = trim.a = trim.b = trim.len = 0;
 
-	/* Hide the cursor while listing */
 	fputs(HIDE_CURSOR, stdout);
-
 	reset_stats();
+	get_term_size();
 
 	if (light_mode)
 		return list_dir_light();
@@ -1936,11 +1933,11 @@ list_dir(void)
 			break;
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
 		case SBTIME:
-#ifdef __OpenBSD__
+# ifdef __OpenBSD__
 			file_info[n].time = stat_ok ? (time_t)attr.__st_birthtim.tv_sec : 0;
-#else
+# else
 			file_info[n].time = stat_ok ? (time_t)attr.st_birthtime : 0;
-#endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
+# endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
 			break;
 #elif defined(_STATX)
 		case SBTIME: {
@@ -2040,8 +2037,7 @@ list_dir(void)
 			cap_t cap;
 #endif
 			/* Do not perform the access check if the user is root */
-			if (!(flags & ROOT_USR)
-			&& stat_ok && check_file_access(&attr) == 0) {
+			if (!(flags & ROOT_USR)	&& stat_ok && check_file_access(&attr) == 0) {
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
@@ -2107,9 +2103,8 @@ list_dir(void)
 
 					if (extcolor) {
 						file_info[n].ext_color = (char *)xnmalloc(
-									strlen(extcolor) + 4, sizeof(char));
-						sprintf(file_info[n].ext_color, "\x1b[%sm",
-								extcolor);
+							strlen(extcolor) + 4, sizeof(char));
+						sprintf(file_info[n].ext_color, "\x1b[%sm", extcolor);
 						file_info[n].color = file_info[n].ext_color;
 						extcolor = (char *)NULL;
 					}
@@ -2137,7 +2132,6 @@ list_dir(void)
 		if (xargs.icons_use_file_color == 1 && icons)
 			file_info[n].icon_color = file_info[n].color;
 #endif
-
 		if (long_view && stat_ok)
 			set_long_attribs((int)n, &attr);
 
@@ -2148,10 +2142,9 @@ list_dir(void)
 		count++;
 	}
 
-	if (xargs.disk_usage_analyzer == 1
-	|| (long_view == 1 && full_dir_size == 1))
+	if (xargs.disk_usage_analyzer == 1 || (long_view == 1 && full_dir_size == 1))
 		/* Erase the "Retrieveing file sizes" message */
-		printf("\x1b[2K\x1b[1G");
+		fputs("\x1b[2K\x1b[1G", stdout);
 
 	file_info[n].name = (char *)NULL;
 	files = n;
@@ -2222,7 +2215,7 @@ END:
 
 #ifdef _LIST_SPEED
 	clock_t end = clock();
-	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
+	printf("list_dir time: %f\n", (double)(end-start) / CLOCKS_PER_SEC);
 #endif
 
 	return exit_code;
