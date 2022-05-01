@@ -241,6 +241,7 @@ run_in_background(pid_t pid)
 		return errno;
 	}
 
+	zombies++;
 	if (WIFEXITED(status))
 		return WEXITSTATUS(status);
 
@@ -267,10 +268,10 @@ launch_execle(const char *cmd)
 	&& xargs.secure_env == 0)
 		sanitize_cmd_environ();
 
-	flags |= RUNNING_SHELL_CMD;
-	flags |= RUNNING_CMD_FG;
+//	flags |= RUNNING_SHELL_CMD;
+//	flags |= RUNNING_CMD_FG;
 	int ret = system(cmd);
-	flags &= ~RUNNING_CMD_FG;
+//	flags &= ~RUNNING_CMD_FG;
 
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
 	&& xargs.secure_env == 0)
@@ -278,16 +279,21 @@ launch_execle(const char *cmd)
 
 	set_signals_to_ignore();
 
+	int exit_status = 0;
+	if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0)
+		exit_status = EXIT_SUCCESS;
+	else if (WIFEXITED(ret) && WEXITSTATUS(ret))
+		exit_status = WEXITSTATUS(ret);
+	else
+		exit_status = EXCRASHERR;
+
 	if (flags & DELAYED_REFRESH) {
 		flags &= ~DELAYED_REFRESH;
-		refresh_files_list();
+		get_term_size();
+		reload_dirlist();
 	}
 
-	if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0)
-		return EXIT_SUCCESS;
-	if (WIFEXITED(ret) && WEXITSTATUS(ret))
-		return WEXITSTATUS(ret);
-	return EXCRASHERR;
+	return exit_status;
 
 /*	// Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid won't
 	// be able to catch error codes coming from the child
@@ -375,9 +381,8 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		return errno;
 	} else if (pid == 0) {
 		if (bg == 0) {
-			/* If the program runs in the foreground, reenable signals
-			 * only for the child, in case they were disabled for the
-			 * parent */
+			/* If the program runs in the foreground, reenable signals only
+			 * for the child, in case they were disabled for the parent */
 			signal(SIGHUP, SIG_DFL);
 			signal(SIGINT, SIG_DFL);
 			signal(SIGQUIT, SIG_DFL);
@@ -407,16 +412,21 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		if (bg) {
 			ret = run_in_background(pid);
 		} else {
-			flags |= RUNNING_CMD_FG;
+//			flags |= RUNNING_CMD_FG;
 			ret = run_in_foreground(pid);
-			flags &= ~RUNNING_CMD_FG;
+//			flags &= ~RUNNING_CMD_FG;
 			if (flags & DELAYED_REFRESH) {
 				flags &= ~DELAYED_REFRESH;
-				refresh_files_list();
+				get_term_size();
+				reload_dirlist();
 			}
 		}
 	}
 
+	if (bg == 1 && ret == EXIT_SUCCESS) {
+		get_term_size();
+		reload_dirlist();
+	}
 	return ret;
 }
 
@@ -458,7 +468,7 @@ graceful_quit(char **args)
 static inline void
 reload_binaries(void)
 {
-	flags |= RELOADING_BINARIES;
+//	flags |= RELOADING_BINARIES;
 
 	if (bin_commands) {
 		int j = (int)path_progsn;
@@ -477,7 +487,7 @@ reload_binaries(void)
 	path_n = (size_t)get_path_env();
 	get_path_programs();
 
-	flags &= ~RELOADING_BINARIES;
+//	flags &= ~RELOADING_BINARIES;
 }
 
 static inline int
@@ -598,7 +608,7 @@ run_shell_cmd(char **args)
 	}
 
 	char *cmd = construct_shell_cmd(args);
-	flags &= ~RUNNING_SHELL_CMD;
+//	flags &= ~RUNNING_SHELL_CMD;
 
 	/* Calling the system shell is vulnerable to command injection, true.
 	 * But it is the user here who is directly running the command: this
@@ -1279,7 +1289,7 @@ ow_function(char **args)
 }
 
 static int
-refresh_function(int old_exit_code)
+refresh_function(const int old_exit_code)
 {
 	if (autols == 1)
 		reload_dirlist();
@@ -1878,6 +1888,16 @@ set_mv_cmd(char **cmd)
 	}
 }
 
+/* Let's check we have not left any zombie process behind. This happens
+ * whenever we run a process in the background via launch_execve */
+static void
+check_zombies(void)
+{
+	int status = 0;
+	if (waitpid(-1, &status, WNOHANG) > 0)
+		zombies--;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -1890,7 +1910,10 @@ set_mv_cmd(char **cmd)
 int
 exec_cmd(char **comm)
 {
-	flags &= ~RUNNING_SHELL_CMD;
+//	flags &= ~RUNNING_SHELL_CMD;
+//	flags &= ~RUNNING_CMD_FG;
+	if (zombies > 0)
+		check_zombies();
 	fputs(df_c, stdout);
 
 	int old_exit_code = exit_code;
@@ -2516,7 +2539,7 @@ run_profile_line(char *cmd)
 	no_log = 1;
 	exec_cmd(cmds);
 	no_log = 0;
-	flags &= ~RUNNING_SHELL_CMD;
+//	flags &= ~RUNNING_SHELL_CMD;
 
 	int i = (int)args_n + 1;
 	while (--i >= 0)

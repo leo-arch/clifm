@@ -186,10 +186,11 @@ extern int watch;
 #define IS_USRVAR_DEF (1 << 17)
 
 /* Used by the refresh on resize feature */
-#define RUNNING_CMD_FG     (1 << 18)
+#define DELAYED_REFRESH    (1 << 18)
+/*#define RUNNING_CMD_FG     (1 << 18)
 #define RUNNING_SHELL_CMD  (1 << 19)
 #define DELAYED_REFRESH    (1 << 20)
-#define RELOADING_BINARIES (1 << 21)
+#define RELOADING_BINARIES (1 << 21) */
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
@@ -980,6 +981,7 @@ extern size_t
 	kbinds_n,
 	longest,
 	msgs_n,
+	nwords,
 	P_tmpdir_len,
 	path_n,
 	path_progsn,
@@ -990,7 +992,7 @@ extern size_t
 	tags_n,
 	user_home_len,
 	usrvar_n,
-	nwords;
+	zombies;
 
 extern struct termios shell_tmodes;
 extern off_t total_sel_size;

@@ -1373,7 +1373,7 @@ get_term_size(void)
 	term_cols = w.ws_col;
 	term_rows = w.ws_row;
 }
-
+/*
 static int
 set_alt_screen_buf(void)
 {
@@ -1414,20 +1414,22 @@ refresh_files_list(void)
 			|| strcmp(p, workspaces[cur_ws].path) != 0)
 				chdir(workspaces[cur_ws].path);
 		}
-		putchar('\n');
+		write(STDOUT_FILENO, "\n", 1);
 		reload_dirlist();
 	}
 
 	if (flags & RUNNING_CMD_FG) {
-		fputs(" ...\x1b[4D", stdout);
+		write(STDOUT_FILENO, " ...\x1b[4D", 8);
 		fflush(stdout);
 		return;
 	}
 
-	if (!(flags & RUNNING_SHELL_CMD) || bg_proc == 1)
+//	if (!(flags & RUNNING_SHELL_CMD) || bg_proc == 1)
+	if ((!(flags & RUNNING_SHELL_CMD) && bg_proc == 0) || bg_proc == 1)
 		rl_reset_line_state();
-	rl_redisplay();
-}
+	if (bg_proc == 1 || !(flags & RUNNING_CMD_FG))
+		rl_redisplay();
+} */
 
 /* BE READY FOR THE UGLIEST WORKAROUND EVER!
  * This code is aimed to check whether some terminal program has taken
@@ -1437,21 +1439,24 @@ refresh_files_list(void)
  * some external program is controlling the screen, in which case we
  * should not attempt to refresh the files list. Instead, set a flag to
  * refresh the screen only after the currently controlliong program exits.
- * This thing basically works, but is still BAD, BAD, BAD. */
-static int
+ * This thing basically works, but is still BAD, BAD, BAD.
+ * The get_cursor_position function calls isatty(3) and sscanf(3), which
+ * are not async-signal-safe functions and should not thereby be called
+ * from a signal handler. See signal-safety(7) */
+/*static int
 screen_is_ours(void)
 {
 	int c = 0, r = 0;
-	fputs("\x1b[?1047l", stdout);
+	write(STDOUT_FILENO, "\x1b[?1047l", 8);
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &c, &r);
 	if (c != curcol || r != currow) {
-		fputs("\x1b[?1047h", stdout);
+		write(STDOUT_FILENO, "\x1b[?1047h", 8);
 		flags |= DELAYED_REFRESH;
 		return 0;
 	}
 
 	return 1;
-}
+} */
 
 /* Get new window size and update/refresh the screen accordingly */
 static void
@@ -1461,12 +1466,28 @@ sigwinch_handler(int sig)
 	if (xargs.refresh_on_resize == 0 || pager == 1 || kbind_busy == 1)
 		return;
 
-	get_term_size();
+//	get_term_size();
 
-	if (screen_is_ours() == 0)
-		return;
+/*	if (bg_proc == 0 && screen_is_ours() == 0)
+		return; */
 
-	refresh_files_list();
+//	if ((!(flags & RUNNING_SHELL_CMD) && bg_proc == 0) || bg_proc == 1) {
+//		return;
+/*		reload_dirlist();
+		rl_reset_line_state();
+		rl_redisplay(); */
+//	} else {
+	flags |= DELAYED_REFRESH;
+//	}
+/*	if (bg_proc == 1 || !(flags & RUNNING_CMD_FG)) {
+		reload_dirlist();
+		rl_reset_line_state();
+		rl_redisplay();
+	} else {
+		flags |= DELAYED_REFRESH;
+	} */
+	/* THIS SHOULDN'T BE CALLED FROM HERE: THE WHOLE THING IS NOT ASYNC-SIGNAL-SAFE! */
+//	refresh_files_list();
 }
 /*
 static void

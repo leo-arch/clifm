@@ -237,6 +237,7 @@ size_t
 	kbinds_n = 0,
 	longest = 0,
 	msgs_n = 0,
+	nwords = 0,
 	P_tmpdir_len = 0,
 	path_n = 0,
 	path_progsn = 0,
@@ -247,7 +248,7 @@ size_t
 	tags_n = 0,
 	user_home_len = 0,
 	usrvar_n = 0,
-	nwords = 0;
+	zombies = 0;
 
 char
 	div_line_char[NAME_MAX],
