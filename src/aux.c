@@ -550,7 +550,10 @@ hex2int(const char *str)
  * Example: ffaff00-4 -> 4;38;2;250;255;0
  *
  * At this point we know HEX is a valid hex color code (see is_hex_color() in colors.c).
- * If using this function outside CliFM, make sure to validate HEX yourself */
+ * If using this function outside CliFM, make sure to validate HEX yourself
+ *
+ * Taken from https://mprog.wordpress.com/c/miscellaneous/convert-hexcolor-to-rgb-decimal
+ * and modified to fir our needs */
 char *
 hex2rgb(char *hex)
 {

@@ -8,15 +8,30 @@
 # directories will be printed in bold blue.
 # Color codes are just traditional ANSI escape sequences less the escape char
 # and the final 'm'.
-# 4-bit, 8-bit (256 colors), and 24-bit (RGB) colors are supported.
+# 4-bit, 8-bit (256 colors), and 24-bit (RGB/HEX) colors are supported.
 # Example:
 # 31            4-bit
 # 38;5;160      8-bit
-# 38;2;255;0;0  24-bit
-# For more information consult https://en.wikipedia.org/wiki/ANSI_escape_code
+# 38;2;255;0;0  24-bit (RGB)
+# #ff0000       24-bit (HEX)
+#
+# One attribute can be used for hex colors using a dash and an attribute
+# number (RRGGBB-[1-9]), where 1-9 is:
+#
+# 1: Bold or increased intensity
+# 2: Faint, decreased intensity or dim
+# 3: Italic (Not widely supported)
+# 4: Underline
+# 5: Slow blink
+# 6: Rapid blink
+# 7: Reverse video or invert
+# 8: Conceal or hide (Not widely supported)
+# 9: Crossed-out or strike
+#
+# For example, to print bold red color, the hex code is #ff0000-1
 
 # Definitions
-# Define here up to 64 custom color variables. They can be used by:
+# Define here up to 64 custom color variables. They can be used for:
 # FiletypeColors
 # InterfaceColors
 # ExtColors
