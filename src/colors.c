@@ -121,7 +121,7 @@ get_file_color(const char *filename, const struct stat *attr)
 	return color;
 }
 
-/* Validate hex color string of this format: RRGGBB-[1-9] */
+/* Validate a hex color code string with this format: RRGGBB-[1-9] */
 static int
 is_hex_color(const char *str)
 {
@@ -148,7 +148,8 @@ is_hex_color(const char *str)
 
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 12 fields) of numbers of at most 3 digits each).
- * Returns 1 if true and 0 if false. Hex colors (#ffffff) are also checked */
+ * Hex color codes (#RRGGBB) are also validated
+ * Returns 1 if true and 0 if false. */
 static int
 is_color_code(const char *str)
 {
