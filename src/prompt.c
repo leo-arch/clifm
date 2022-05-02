@@ -940,6 +940,10 @@ prompt(void)
 
 	if (!input || !*input) {
 		free(input);
+		if (flags & DELAYED_REFRESH) {
+			flags &= ~DELAYED_REFRESH;
+			reload_dirlist();
+		}
 		return (char *)NULL;
 	}
 
