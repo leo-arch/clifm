@@ -851,24 +851,16 @@ rl_light(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	light_mode = light_mode ? 0 : 1;
-
-	if (autols == 1) {
-		if (clear_screen)
-			CLEAR;
-		free_dirlist();
-		/* Without this putchar(), the first entries of the directories
-		 * list are printed in the prompt line */
-		putchar('\n');
-		list_dir();
-	}
+	light_mode = light_mode == 1 ? 0 : 1;
 
 	if (light_mode == 1)
-		print_reload_msg(_("Switched to light mode\n"));
+		_err(0, PRINT_PROMPT, _("%s->%s Switched to light mode\n"), mi_c, df_c);
 	else
-		print_reload_msg(_("Switched back to normal mode\n"));
+		_err(0, PRINT_PROMPT, _("%s->%s Switched back to normal mode\n"), mi_c, df_c);
 
-	rl_reset_line_state();
+	if (autols == 1)
+		run_kb_cmd("rf");
+
 	return EXIT_SUCCESS;
 }
 
