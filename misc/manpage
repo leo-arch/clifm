@@ -1261,6 +1261,8 @@ Color codes are just traditional ANSI color codes less the escape character and 
 .TP
 Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the \fIExtColors\fR line in the corresponding color scheme file: \fB*.c=01;32\fR
 .TP
+Six digits \fIhexadecimal\fR color codes are supported as well using this general format: \fB#RRGGBB[-[1-9]]\fR, where 1-9 is a display attribute. For example, if you want directories to be bold Spring Green: \fBdi=#00ff7f-1\fR.
+.TP
 \fBColor variables\fR
 .TP
 Up to 64 custom color variables can be used via the \fIdefine\fR keyword to make it easier to build and read theme files. Example:
