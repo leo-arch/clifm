@@ -1178,6 +1178,7 @@ extern char
 	si_c[MAX_COLOR + 2], /* Stealth indicator */
 	wm_c[MAX_COLOR + 2], /* Warning msg */
 	xs_c[MAX_COLOR + 2], /* Exit code: success */
-	xf_c[MAX_COLOR + 2]; /* Exit code: failure */
+	xf_c[MAX_COLOR + 2], /* Exit code: failure */
+	tmp_color[MAX_COLOR + 2]; /* A temp buffer to store color codes */
 
 #endif /* HELPERS_H */

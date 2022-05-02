@@ -492,9 +492,8 @@ get_dt(const mode_t mode)
 	}
 }
 
-/*
 static int
-hex2int(char *str)
+hex2int(const char *str)
 {
 	int i, n[2] = { 0 };
 	for (i = 1; i >= 0; i--) {
@@ -533,7 +532,59 @@ hex2int(char *str)
 	}
 
 	return ((n[0] * 16) + n[1]);
-} */
+}
+
+/* Convert hex color HEX into RGB format (as a color code)
+ * One color attribute can be added to the hex color as follows:
+ * RRGGBB-[1-9], where 1-9 could be:
+ * 1: Bold or increased intensity
+ * 2: Faint, decreased intensity or dim
+ * 3: Italic (Not widely supported)
+ * 4: Underline
+ * 5: Slow blink
+ * 6: Rapid blink
+ * 7: Reverse video or invert
+ * 8: Conceal or hide (Not widely supported)
+ * 9: Crossed-out or strike
+ *
+ * Example: ffaff00-4 -> 4;38;2;250;255;0
+ *
+ * At this point we know HEX is a valid hex color code (see is_hex_color() in colors.c).
+ * If using this function outside CliFM, make sure to validate HEX yourself */
+char *
+hex2rgb(char *hex)
+{
+	if (!hex || !*hex)
+		return (char *)NULL;
+
+	if (*hex == '#') {
+		if (!*(hex + 1))
+			return (char *)NULL;
+		hex++;
+	}
+
+	char tmp[3];
+	int r = 0, g = 0, b = 0;
+
+	tmp[2] = '\0';
+
+	tmp[0] = *hex, tmp[1] = *(hex + 1);
+	r = hex2int(tmp);
+
+	tmp[0] = *(hex + 2), tmp[1] = *(hex + 3);
+	g = hex2int(tmp);
+
+	tmp[0] = *(hex + 4), tmp[1] = *(hex + 5);
+	b = hex2int(tmp);
+
+	int attr = 0;
+	if (*(hex + 6) == '-' && *(hex + 7) && *(hex + 7) >= '1' && *(hex + 7) <= '9')
+		attr = atoi(hex + 7);
+
+	snprintf(tmp_color, MAX_COLOR, "%d;38;2;%d;%d;%d", attr, r, g, b);
+
+	return tmp_color;
+}
 
 /* Given this value: \xA0\xA1\xA2, return an array of integers with
  * the integer values for A0, A1, and A2 respectivelly */

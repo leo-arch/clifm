@@ -664,7 +664,8 @@ char
 	ti_c[MAX_COLOR + 2], /* Trash indicator color */
 	tx_c[MAX_COLOR + 2], /* Text color */
 	xs_c[MAX_COLOR + 2], /* Exit code: success */
-	xf_c[MAX_COLOR + 2]; /* Exit code: failure */
+	xf_c[MAX_COLOR + 2], /* Exit code: failure */
+	tmp_color[MAX_COLOR + 2]; /* A temp buffer to store color codes */
 
 #ifdef LINUX_INOTIFY
 int inotify_fd = UNSET, inotify_wd = UNSET;

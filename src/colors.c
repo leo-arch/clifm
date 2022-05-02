@@ -121,14 +121,42 @@ get_file_color(const char *filename, const struct stat *attr)
 	return color;
 }
 
+/* Validate hex color string of this format: RRGGBB-[1-9] */
+static int
+is_hex_color(const char *str)
+{
+	size_t c = 0;
+
+	while (*str) {
+		c++;
+		if (c == 7 && *str == '-') {
+			if (!*(str + 1))
+				return 0;
+			return (*(str + 1) >= '0' && *(str + 1) <= '9');
+		}
+		if ( !( (*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'f')
+		|| (*str >= 'A' && *str <= 'F') ) )
+			return 0;
+		str++;
+	}
+
+	if (c != 6)
+		return 0;
+
+	return 1;
+}
+
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 12 fields) of numbers of at most 3 digits each).
- * Returns 1 if true and 0 if false. */
+ * Returns 1 if true and 0 if false. Hex colors (#ffffff) are also checked */
 static int
 is_color_code(const char *str)
 {
 	if (!str || !*str)
 		return 0;
+
+	if (*str == '#')
+		return is_hex_color(str + 1);
 
 	size_t digits = 0, semicolon = 0;
 
@@ -266,7 +294,8 @@ strip_color_line(const char *str, char mode)
 		while (*str) {
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z')
-			|| *str == '=' || *str == ';' || *str == ':') {
+			|| *str == '=' || *str == ';' || *str == ':'
+			|| *str == '#' || *str == '-') {
 				buf[len] = *str; len++;
 			}
 			str++;
@@ -277,7 +306,8 @@ strip_color_line(const char *str, char mode)
 		while (*str) {
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z') || *str == '*' || *str == '.'
-			|| *str == '=' || *str == ';' || *str == ':') {
+			|| *str == '=' || *str == ';' || *str == ':'
+			|| *str == '#' || *str == '-') {
 				buf[len] = *str; len++;
 			}
 			str++;
@@ -569,10 +599,19 @@ set_color(char *_color, int offset, char var[], int flag)
 #else
 	char *p = _color + offset;
 #endif /* CLIFM_SUCKLESS */
+
+	char *s = (char *)NULL;
+	if (*p == '#') {
+		if (!(s = hex2rgb(p))) {
+			*var = '\0';
+			return;
+		}
+	}
+
 	if (flag == RL_NO_PRINTABLE)
-		snprintf(var, MAX_COLOR + 2, "\001\x1b[0;%sm\002", p); /* NOLINT */
+		snprintf(var, MAX_COLOR + 2, "\001\x1b[0;%sm\002", s ? s : p); /* NOLINT */
 	else
-		snprintf(var, MAX_COLOR - 1, "\x1b[0;%sm", p); /* NOLINT */
+		snprintf(var, MAX_COLOR - 1, "\x1b[0;%sm", s ? s : p); /* NOLINT */
 }
 
 static void

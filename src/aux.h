@@ -33,6 +33,7 @@ void *xcalloc(size_t nmemb, size_t size);
 void *xnmalloc(size_t nmemb, size_t size);
 
 char xgetchar(void);
+char *hex2rgb(char *hex);
 /*int *get_hex_num(const char *str); */
 char *url_encode(char *str);
 char *url_decode(char *str);
