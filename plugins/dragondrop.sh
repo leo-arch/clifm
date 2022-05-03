@@ -15,7 +15,7 @@
 # then send to the SelBox, whereas files dropped locally are directly
 # send to the SelBox
 
-if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
+if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Drag and drop files\n"
 	printf "\nUsage: %s [FILE... n]\n" "$name"

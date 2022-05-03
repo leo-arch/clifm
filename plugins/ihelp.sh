@@ -4,7 +4,7 @@
 # Written by L. Abramovich
 # License: GPL3
 
-if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
+if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Interactively browse the CliFM manpage via FZF or Rofi\n"
 	printf "Usage: %s\n" "$name"
@@ -101,7 +101,6 @@ fc, filescounter@
 ff, folders-first@
 ft, filter@
 fs @
-fz @
 hf, hidden@
 history @
 icons @

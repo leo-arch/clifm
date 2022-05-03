@@ -4,7 +4,7 @@
 # Written by L. Abramovich
 # License GPL3
 
-if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
+if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Navigate and execute CliFM commands history via FZF\n"
 	printf "Usage: %s\n" "$name"
@@ -13,7 +13,7 @@ fi
 
 if ! type fzf > /dev/null 2>&1; then
 	printf "CliFM: fzf: Command not found" >&2
-	exit 127
+	exit 1
 fi
 
 FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/history.cfm"
@@ -28,7 +28,7 @@ fi
 
 # shellcheck disable=SC2154
 fzf --prompt="$fzf_prompt" \
---reverse --height "$fzf_height" --info=inline \
+--reverse --height 15 --info=inline \
 --bind "tab:accept" --header "Run a command from history" \
 --color="$(get_fzf_colors)" \
  < "$FILE" > "$CLIFM_BUS"

@@ -4,7 +4,7 @@
 # Written by L. Abramovich
 # License GPL2+
 
-if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
+if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Navigate and execute CliFM directory history via FZF\n"
 	printf "Usage: %s\n" "$name"

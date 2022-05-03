@@ -3,41 +3,45 @@
 # Wallpaper setter plugin for CliFM
 # Written by L. Abramovich
 # License: GPL3
+
 # Dependencies: file, and feh, xsetbg (xloadimage), or hsetroot
+
+SUCCESS=0
+ERROR=1
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Set IMAGE as wallpaper\n"
 	printf "Usage: %s IMAGE\n" "$name"
-	exit 0
+	exit $SUCCESS
 fi
 
-if ! type file >/dev/null 2>&1; then
+if ! [ "$(which file 2>/dev/null)" ]; then
 	printf "CliFM: file: Command not found\n" >&2
-	exit 127
+	exit $ERROR
 fi
 
 if ! file -bi "$1" | grep -q "image/"; then
 	printf "CliFM: %s: Not an image file\n" "$1" >&2
-	exit 1
+	exit $ERROR
 fi
 
-if type feh >/dev/null 2>&1; then
+if [ "$(which feh 2>/dev/null)" ]; then
 	if feh --no-fehbg --bg-fill "$1"; then
-		exit 0
+		exit $SUCCESS
 	fi
-elif type xsetbg >/dev/null 2>&1; then
+elif [ "$(which xsetbg 2>/dev/null)" ]; then
 	if xsetbg -center "$1"; then
-		exit 0
+		exit $SUCCESS
 	fi
-elif type hsetroot >/dev/null 2>&1; then
+elif [ "$(which hsetroot 2>/dev/null)" ]; then
 	if hsetroot -center "$1"; then
-		exit 0
+		exit $SUCCESS
 	fi
 else
 	printf "CliFM: No wallpaper setter found. Install either feh, \
 xloadimage, or hsetroot\n" >&2
-	exit 1
+	exit $ERROR
 fi
 
-exit 1
+exit $ERROR
