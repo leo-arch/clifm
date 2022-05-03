@@ -6,14 +6,15 @@
 # Commented and blank lines are omitted
 
 # The below settings cover the most common filetypes
-# It is recommended to edit this file keeping only applications you need
-# to speed up the opening process
+# It is recommended to edit this file placing your prefered applications
+# at the beginning of the apps list to speed up the opening process
 
 # The file is read top to bottom and left to right; the first existent
 # application found will be used
 
 # Applications defined here are NOT desktop files, but commands (arguments
-# could be used as well)
+# could be used as well). Write you own handmade scripts to open specific
+# files if necessary. Ex: X:^text/.*:~/scripts/my_cool_script.sh
 
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments,
 # like the kernel built-in console or a remote SSH session.
@@ -91,6 +92,8 @@ X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;v
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
 
 # Archives
+# Note: 'ad' is CliFM's built-in archives utility (based on atool). Remove it if you
+# prefer another application
 X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %f &;lxqt-archiver %f &;ark %f &
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
 
