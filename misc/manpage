@@ -1712,87 +1712,119 @@ A convenient helper script is provided to get a consistent look across all plugi
     # shellcheck source=/dev/null
     . "$CLIFM_PLUGINS_HELPER"
 
- +-------------------+-------------------------------+-------------+
- | Plugin            | Dependencies                  | Action name |
- +-------------------+-------------------------------+-------------+
- | batch_create      |                               | bn          |
- +-------------------+-------------------------------+-------------+
- | batch_copy        |                               | bcp         |
- +-------------------+-------------------------------+-------------+
- | bm_import         |                               | bi          |
- +-------------------+-------------------------------+-------------+
- | clip              | xclip                         | clip        |
- +-------------------+-------------------------------+-------------+
- | colors            |                               |             |
- +-------------------+-------------------------------+-------------+
- | cprm              | scp, fzf                      | cr          |
- +-------------------+-------------------------------+-------------+
- | disk_analyzer     | du, fzf                       | da          |
- +-------------------+-------------------------------+-------------+
- | dragondrop        | dragon or dragon-drag-and-drop| dr          |
- +-------------------+-------------------------------+-------------+
- | fdups             | find, md5sum, sort, uniq,     | fdups       |
- |                   | xargs, sed, stat              |             |
- +-------------------+-------------------------------+-------------+
- | finder            | fzf or rofi                   | +           |
- +-------------------+-------------------------------+-------------+
- | fzcd              | fzf                           | _           |
- +-------------------+-------------------------------+-------------+
- | fzfdirhist        | fzf                           | dh          |
- +-------------------+-------------------------------+-------------+
- | fzfhist           | fzf                           | h           |
- +-------------------+-------------------------------+-------------+
- | fzfnav            | fzf                           | -           |
- |   -archives       | atool, bsdtar or tar          |             |
- |   -images         | kitty terminal, imagemagick,  |             |
- |                   | and ueberzug or viu or catimg |             |
- |                   | or img2txt or pixterm         |             |
- |   -fonts          | fontpreview or fontforge      |             |
- |   -docs           | libreoffice, catdoc, odt2txt, |             |
- |                   | pandoc                        |             |
- |   -PDF            | pdftoppm, pdftotext or mutool |             |
- |   -epub           | epub-thumbnailer              |             |
- |   -DjVu           | djvulibre or djvutxt          |             |
- |   -Postscript     | ghostscript                   |             |
- |   -videos         | ffmpegthumbnailer             |             |
- |   -audio          | ffmpeg, mplayer or mpv        |             |
- |   -web            | w3m, linx, elinks or pandoc   |             |
- |   -markdown       | glow                          |             |
- |   -highlight      | bat, highlight or pygmentize  |             |
- |   -torrent        | transmission-cli              |             |
- |   -json           | python or pq                  |             |
- |   -file info      | exiftool, mediainfo or file   |             |
- +-------------------+-------------------------------+-------------+
- | fzfsel            | fzf                           | *           |
- +-------------------+-------------------------------+-------------+
- | fzfdesel          | fzf                           | **          |
- +-------------------+-------------------------------+-------------+
- | git_status        | git                           |             |
- +-------------------+-------------------------------+-------------+
- | ihelp             | fzf or rofi                   | ih          |
- +-------------------+-------------------------------+-------------+
- | img_viewer        | sxiv, feh or lsix             | i           |
- +-------------------+-------------------------------+-------------+
- | jumper            | fzf or rofi                   | ++          |
- +-------------------+-------------------------------+-------------+
- | kbgen             | (C source file)               | kben        |
- +-------------------+-------------------------------+-------------+
- | mime_list         | file, fzf                     | ml          |
- +-------------------+-------------------------------+-------------+
- | music_player      | mplayer                       | music       |
- +-------------------+-------------------------------+-------------+
- | pdf_viewer        | pdftotext                     | ptot        |
- +-------------------+-------------------------------+-------------+
- | recur_rm          | find, fzf                     | rrm         |
- +-------------------+-------------------------------+-------------+
- | rgfind            | fzf and ripgrep               | //          |
- +-------------------+-------------------------------+-------------+
- | update            |                               |             |
- +-------------------+-------------------------------+-------------+
- | vid_viewer        | ffmpegthumbnailer             | vid         |
- +-------------------+-------------------------------+-------------+
- | wallpapper_setter | feh, xloadimage or hsetroot   | wall        |
- +-------------------+-------------------------------+-------------+
+.TS
+allbox;
+lbx lb lb lb
+l l l l.
+Action name	Description	Plugin	Dependencies
+T{
+.BR bn
+T}	Create files in batch	batch_create.sh	-	
+T{
+.BR bcp
+T}	Copy files in batch	batch_copy.sh	-
+T{
+.BR bi
+T}	Import bookmarks	bm_import.sh	-
+T{
+.BR clip
+T}	Interact with the primary clipboard	clip.sh	xlip
+T{
+.BR
+T}	Test you terminal colors capability	colors.sh	-
+T{
+.BR cr
+T}	Copy files to remote location	cprm.sh	scp, fzf
+T{
+.BR da
+T}	Disk usage analyzer	disk_analyzer.sh	du, fzf
+T{
+.BR dr
+T}	Drag and drop files	dragondrop.sh	dragon or dragon-drag-and-drop
+T{
+.BR	fdups
+T}	Find and remove file duplicates	fdups.sh	find, md5sum, sort, uniq, xargs, sed, stat
+T{
+.BR +
+T}	Find files in the current directory	finder.sh	fzf or rofi
+T{
+_ (underscore)
+T}	Quickly change directory	fzcd.sh	fzf
+T{
+.BR dh
+T}	Browse the directory history	fzfdirhist.sh	fzf
+T{
+.BR h
+T}	Browse the commands history	fzfhist.h	fzf
+T{
+\- (yes, just a dash)
+T}	Navigate/select/preview files	fzfnav.sh/BFG.sh	See the section below
+T{
+.BR *
+T}	Select files	fzfsel.sh	fzf
+T{
+.BR **
+T}	Deselect files	fzfdesel.sh	fzf
+T{
+.BR
+T}	Show git repo status	git.sh	git
+T{
+.BR ih
+T}	Browse CliFM's manpage	ihelp.sh	fzf
+T{
+.BR i
+T}	Image thumbnails previewer	img_viewer.sh	sxiv, feh or lsix
+T{
+.BR ++
+T}	Jump to a directory in the jump database	jumper.sh	fzf or rofi
+T{
+.BR kbgen
+T}	Get escape codes for keybindings	kbgen.c	Needs to be compiled first (gcc -o kbgen kbgen.c -lcurses)
+T{
+.BR ml
+T}	List files by a given MIME type	mime_list.sh	fzf, file
+T{
+.BR music
+T}	Create a music playlist	music_player.sh	mplayer
+T{
+.BR ptot
+T}	Preview PDF files as text	pdf_viewer.sh	pdftotext 
+T{
+.BR	rrm
+T}	Recursively remove files	recur_rm.sh	find, fzf
+T{
+.BR //
+T}	Search files by content	rgfind.sh	fzf, ripgrep
+T{
+.BR
+T}	Update plugins	update.sh	-
+T{
+.BR vid
+T}	Preview video files thumbnails	vid_viewer.sh	ffmpegthumbnailer
+T{
+.BR wall
+T}	Set image as wallpaper	wallpaper_setter.sh	feh, xloadimage, or hsetroot
+.TE
+
+.sp
+.B Dependencies of the previewer plugin (fzfnav.sh)
+
+  \fBarchives\fR: atool, bsdtar, or tar 
+  \fBimages\fR: kitty terminal, imagemagick, and ueberzug or viu or catimg or img2txt or pixterm
+  \fBfonts\fR: fontpreview or fontforge
+  \fBdocs\fR: libreoffice, catdoc, odt2txt, pandoc
+  \fBPDF\fR: pdftoppm, pdftotext or mutool
+  \fBepub\fR: epub-thumbnailer 
+  \fBDjVu\fR: djvulibre or djvutxt
+  \fBpostscript\fR: ghostscript
+  \fBvideos\fR: ffmpegthumbnailer
+  \fBaudio\fR: ffmpeg, mplayer, or mpv
+  \fBweb\fR: w3m, links, elinks, or pandoc
+  \fBmarkdown\fR: glow
+  \fBhighlight\fR: bat, highlight, or pygmentize
+  \fBtorrent\fR: transmission-cli
+  \fBjson\fR: python or pq
+  \fBfile info\fR: exiftool, mediainfo, or file
 
 .TP
 NOTE: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to show files preview \fIBFG\fR requires \fBueberzug\fR to be installed or the Kitty protocol via the Kitty terminal). A configuration file (BFG.cfg, in the plugins directory itlsef) is provided to customize the previewer's behavior. 
