@@ -15,7 +15,7 @@
 # When importing files from the clipboard, files should be absolute
 # paths.
 
-if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ] ; then
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ] ; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Interact with the primary clipboard via xclip\n"
 	printf "\nUsage: %s [s, i] FILE... n\n" "$name"
