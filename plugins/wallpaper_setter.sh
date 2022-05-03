@@ -6,42 +6,40 @@
 
 # Dependencies: file, and feh, xsetbg (xloadimage), or hsetroot
 
-SUCCESS=0
-ERROR=1
-
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Set IMAGE as wallpaper\n"
 	printf "Usage: %s IMAGE\n" "$name"
-	exit $SUCCESS
+	exit 0
 fi
 
-if ! [ "$(which file 2>/dev/null)" ]; then
+
+if ! type file >/dev/null 2>&1; then
 	printf "CliFM: file: Command not found\n" >&2
-	exit $ERROR
+	exit 127
 fi
 
 if ! file -bi "$1" | grep -q "image/"; then
 	printf "CliFM: %s: Not an image file\n" "$1" >&2
-	exit $ERROR
+	exit 1
 fi
 
-if [ "$(which feh 2>/dev/null)" ]; then
+if type feh >/dev/null 2>&1; then
 	if feh --no-fehbg --bg-fill "$1"; then
-		exit $SUCCESS
+		exit 0
 	fi
-elif [ "$(which xsetbg 2>/dev/null)" ]; then
+elif type xsetbg >/dev/null 2>&1; then
 	if xsetbg -center "$1"; then
-		exit $SUCCESS
+		exit 0
 	fi
-elif [ "$(which hsetroot 2>/dev/null)" ]; then
+elif type hsetroot >/dev/null 2>&1; then
 	if hsetroot -center "$1"; then
-		exit $SUCCESS
+		exit 0
 	fi
 else
 	printf "CliFM: No wallpaper setter found. Install either feh, \
 xloadimage, or hsetroot\n" >&2
-	exit $ERROR
+	exit 1
 fi
 
-exit $ERROR
+exit 1

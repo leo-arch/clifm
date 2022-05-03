@@ -4,7 +4,7 @@
 # Written by L. Abramovich
 # License GPL3
 
-mime=""
+# Dependencies: find, file, fzf
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
@@ -15,8 +15,10 @@ fi
 
 if ! type fzf > /dev/null 2>&1; then
 	printf "CliFM: fzf: Command not found\n" >&2
-	exit 1
+	exit 127
 fi
+
+mime=""
 
 printf "Enter a MIME type or part of it ('q' to quit). Ex: image\n"
 while [ -z "$mime" ]; do
@@ -38,7 +40,7 @@ fi
 find . -maxdepth 1 -mindepth 1 | \
 file -F'@' -N -n --mime-type -if- | \
 grep "@\ .*${mime}" | cut -d"@" -f1 | cut -d"/" -f2-10 | sort | \
-fzf --reverse --height=15 --exit-0 --header "Choose a file" \
+fzf --reverse --height="$fzf_height" --exit-0 --header "Choose a file" \
 --info=inline --color="$(get_fzf_colors)"
 
 exit 0
