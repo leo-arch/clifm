@@ -1466,7 +1466,7 @@ sigwinch_handler(int sig)
 	if (xargs.refresh_on_resize == 0 || pager == 1 || kbind_busy == 1)
 		return;
 
-//	get_term_size();
+	get_term_size();
 
 /*	if (bg_proc == 0 && screen_is_ours() == 0)
 		return; */

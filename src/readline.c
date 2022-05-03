@@ -58,6 +58,7 @@ typedef char *rl_cpvfunc_t;
 #include "tabcomp.h"
 #include "mime.h"
 #include "tags.h"
+//#include "listing.h"
 
 #ifndef _NO_SUGGESTIONS
 #include "suggestions.h"
@@ -2172,6 +2173,20 @@ set_rl_init_file(void)
 	rl_read_init_file(rl_file);
 	free(rl_file);
 }
+/*
+int
+rl_signals(void)
+{
+	if (flags & DELAYED_REFRESH) {
+		flags &= ~DELAYED_REFRESH;
+		puts("PRE INPUT HOOK DELAYED!");
+		fflush(stdout);
+		sleep(2);
+//		get_term_size();
+//		reload_dirlist();
+	}
+	return EXIT_SUCCESS;
+} */
 
 int
 initialize_readline(void)
@@ -2254,6 +2269,8 @@ initialize_readline(void)
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
+
+//	rl_pre_input_hook = rl_signals;
 
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 	if (!(flags & GUI) && getenv("CLIFM_FREEBSD_CONSOLE_SC"))

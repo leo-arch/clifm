@@ -289,7 +289,7 @@ launch_execle(const char *cmd)
 
 	if (flags & DELAYED_REFRESH) {
 		flags &= ~DELAYED_REFRESH;
-		get_term_size();
+//		get_term_size();
 		reload_dirlist();
 	}
 
@@ -415,14 +415,14 @@ launch_execve(char **cmd, const int bg, const int xflags)
 //			flags &= ~RUNNING_CMD_FG;
 			if (flags & DELAYED_REFRESH) {
 				flags &= ~DELAYED_REFRESH;
-				get_term_size();
+//				get_term_size();
 				reload_dirlist();
 			}
 		}
 	}
 
 	if (bg == 1 && ret == EXIT_SUCCESS) {
-		get_term_size();
+//		get_term_size();
 		reload_dirlist();
 	}
 	return ret;
@@ -1896,6 +1896,35 @@ check_zombies(void)
 		zombies--;
 }
 
+/*
+static int
+bring_to_foreground(char *str)
+{
+	if (!str || !*str || IS_HELP(str)) {
+		puts("Usage: fg PID");
+		return EXIT_SUCCESS;
+	}
+
+	if (!is_number(str)) {
+		fprintf(stderr, "%s: %s: Not a valid PID\n", PROGRAM_NAME, str);
+		return EXIT_FAILURE;
+	}
+
+	int pid = atoi(str);
+	if (kill((pid_t)pid, SIGCONT) == -1) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		return errno;
+	}
+
+	int status = 0;
+	if (waitpid(pid, &status, 0) <= 0) {
+		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+		return errno;
+	}
+
+	return EXIT_SUCCESS;
+} */
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2206,6 +2235,10 @@ exec_cmd(char **comm)
 		}
 		exit_code = bulk_rename(comm);
 	}
+
+/*	else if (*comm[0] == 'f' && comm[0][1] == 'g' && !comm[0][2]) {
+		return (exit_code = bring_to_foreground(comm[1] ? comm[1] : NULL));
+	} */
 
 	/*      ################ SORT ##################     */
 	else if (*comm[0] == 's' && ((comm[0][1] == 't' && !comm[0][2])

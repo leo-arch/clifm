@@ -728,13 +728,15 @@ run_prompt_cmds(void)
 	if (ext_cmd_ok == 0 || prompt_cmds_n == 0)
 		return;
 
+	int tflags = flags;
+	flags &= ~DELAYED_REFRESH;
 	size_t i;
 	for (i = 0; i < prompt_cmds_n; i++) {
 		if (xargs.secure_cmds == 0
 		|| sanitize_cmd(prompt_cmds[i], SNT_PROMPT) == EXIT_SUCCESS)
 			launch_execle(prompt_cmds[i]);
 	}
-//	flags &= ~RUNNING_SHELL_CMD;
+	flags = tflags;
 }
 
 #ifndef _NO_TRASH
@@ -946,6 +948,7 @@ prompt(void)
 		}
 		return (char *)NULL;
 	}
+	flags &= ~DELAYED_REFRESH;
 
 	log_and_record(input);
 
