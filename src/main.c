@@ -107,7 +107,7 @@ int
 	autocmd_set = 0,
 	autojump = UNSET,
 	autols = UNSET,
-	bell = DEF_BELL_STYLE,
+	bell = UNSET,
 	bg_proc = 0,
 	case_sens_dirjump = UNSET,
 	case_sens_path_comp = UNSET,

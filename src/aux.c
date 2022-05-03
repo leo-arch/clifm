@@ -45,7 +45,7 @@
 # include "highlight.h"
 #endif
 
-#ifdef RL81
+//#ifdef RL81
 /* Sleep for MSEC milliseconds */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
 static int
@@ -68,7 +68,7 @@ msleep(long msec)
 
 	return res;
 }
-#endif
+//#endif
 
 /* Turn the first or second field of a color code sequence, provided
  * it is either 1 or 01 (bold attribute), into 0 (regular)
@@ -244,10 +244,11 @@ rl_ring_bell(void)
 		fflush(stderr);
 		return;
 
-/* rl_activate_mark and rl_deactivate mark are available only since
- * readline 8.1 */
-#ifdef RL81
-	case BELL_VISIBLE: {
+	case BELL_VISIBLE:
+		/* rl_activate_mark and rl_deactivate mark are available only since readline 8.1 */
+		if (rl_readline_version < 0x0801)
+			break;
+		{
 		int point = rl_point;
 		rl_mark = rl_last_word_start;
 		if (rl_end > 1 && rl_line_buffer[rl_end - 1] == ' ')
@@ -265,7 +266,6 @@ rl_ring_bell(void)
 		rl_point = point;
 		return;
 		}
-#endif /* RL81 */
 
 	default: return;
 	}

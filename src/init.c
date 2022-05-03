@@ -1178,8 +1178,9 @@ external_arguments(int argc, char **argv)
 		{"no-history", no_argument, 0, 51},
 		{"fzytab", no_argument, 0, 52},
 		{"no-refresh-on-resize", no_argument, 0, 53},
+		{"bell", required_argument, 0, 54},
 #ifdef __linux__
-		{"si", no_argument, 0, 54},
+		{"si", no_argument, 0, 55},
 #endif
 	    {0, 0, 0, 0}
 	};
@@ -1381,8 +1382,17 @@ RUN:
 			exit(EXIT_FAILURE);
 #endif
 		case 53: xargs.refresh_on_resize = 0; break;
+		case 54: {
+			int a = atoi(optarg);
+			if (!is_number(optarg) || a < 0 || a > 2) {
+				fprintf(stderr, "%s: bell: valid options are 0:none, 1:audible, "
+					"2:visible (default)\n", PROGRAM_NAME);
+				exit(EXIT_FAILURE);
+			}
+			xargs.bell_style = a; break;
+			}
 #ifdef __linux__
-		case 54: xargs.si = 1; break;
+		case 55: xargs.si = 1; break;
 #endif
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1768,6 +1778,7 @@ unset_xargs(void)
 	xargs.autocd = UNSET;
 	xargs.autojump = UNSET;
 	xargs.autols= UNSET;
+	xargs.bell_style = UNSET;
 	xargs.bm_file = UNSET;
 	xargs.case_sens_dirjump = UNSET;
 	xargs.case_sens_path_comp = UNSET;
@@ -2478,6 +2489,11 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (xargs.bell_style == UNSET)
+		bell = DEF_BELL_STYLE;
+	else
+		bell = xargs.bell_style;
+
 	if (xargs.refresh_on_resize == UNSET)
 		xargs.refresh_on_resize = DEF_REFRESH_ON_RESIZE;
 

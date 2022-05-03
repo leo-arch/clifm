@@ -645,6 +645,7 @@ struct param {
 	int autocd;
 	int autojump;
 	int autols;
+	int bell_style;
 	int bm_file;
 	int case_sens_dirjump;
 	int case_sens_path_comp;
