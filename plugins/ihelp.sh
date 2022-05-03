@@ -118,6 +118,7 @@ n, new@
 net \[@
 o, open@
 opener @
+ow @
 path, cwd@
 pin @
 pf, prof, profile@
