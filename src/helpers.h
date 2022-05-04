@@ -400,6 +400,7 @@ extern int watch;
 #define BELL_NONE          0
 #define BELL_AUDIBLE       1
 #define BELL_VISIBLE       2
+#define BELL_FLASH         3
 
 #define SECURE_ENV_FULL   1
 #define SECURE_ENV_IMPORT 0

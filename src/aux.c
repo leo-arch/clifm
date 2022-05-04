@@ -242,6 +242,14 @@ rl_ring_bell(void)
 		fflush(stderr);
 		return;
 
+	case BELL_FLASH:
+		fputs("\x1b[?5h", stderr);
+		fflush(stderr);
+		msleep(VISIBLE_BELL_DELAY);
+		fputs("\x1b[?5l", stderr);
+		fflush(stderr);
+		break;
+
 	case BELL_VISIBLE:
 		/* rl_activate_mark and rl_deactivate mark are available only since readline 8.1 */
 		if (rl_readline_version < 0x0801)

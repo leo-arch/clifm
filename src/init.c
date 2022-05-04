@@ -1384,9 +1384,9 @@ RUN:
 		case 53: xargs.refresh_on_resize = 0; break;
 		case 54: {
 			int a = atoi(optarg);
-			if (!is_number(optarg) || a < 0 || a > 2) {
+			if (!is_number(optarg) || a < 0 || a > 3) {
 				fprintf(stderr, "%s: bell: valid options are 0:none, 1:audible, "
-					"2:visible (default)\n", PROGRAM_NAME);
+					"2:visible (default), 3:flash\n", PROGRAM_NAME);
 				exit(EXIT_FAILURE);
 			}
 			xargs.bell_style = a; break;
