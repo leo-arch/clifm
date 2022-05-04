@@ -42,7 +42,7 @@ args=(
 	{-x,--no-ext-cmds}'[disallow the use of external commands]'
 	{-y,--light-mode}'[enable the light mode]'
 	{-z+,--sort=}'[sort files by METHOD]:method:->methods'
-	'--bell[set terminal bell style: 0=none; 1=audible; 2=viusal (default)]:bell:->bells'
+	'--bell[set terminal bell style: 0=none; 1=audible; 2=viusal (default); 3=flash]:bell:->bells'
 	'--case-sens-dirjump[do not ignore case when consulting the jump database]'
 	'--case-sens-path-comp[do not ignore case when completing file names]'
 	'--cd-on-quit[write last visited path to $XDG_CONFIG_HOME/clifm/.last to be accessed later by a shell funtion]'
@@ -104,7 +104,7 @@ case "$state" in
 		_multi_parts / prof_files
 	;;
 	bells)
-		_values -s , 'bells' 0 1 2
+		_values -s , 'bells' 0 1 2 3
 	;;
 	colorschemes)
 		local -a color_schemes

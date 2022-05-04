@@ -143,7 +143,7 @@ _clifm ()
         COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "--bell" ]]; then
-	    local args=(echo -e "0\n1\n2")
+	    local args=(echo -e "0\n1\n2\n3")
 	    COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "--opener" ]]; then
