@@ -1344,6 +1344,9 @@ RUN:
 		case 42: xargs.int_vars = int_vars = 1; break;
 #ifndef _NO_FZF
 		case 43: {
+			path_n = get_path_env();
+			get_path_programs();
+			flags |= PATH_PROGRAMS_ALREADY_LOADED;
 			char *p = get_cmd_path("fzf");
 			if (p) {
 				xargs.fzftab = 1;
@@ -2194,11 +2197,10 @@ get_path_programs(void)
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
 	if (ext_cmd_ok) {
-		char cwd[PATH_MAX] = "";
+		char cwd[PATH_MAX];
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 
-		commands_bin = (struct dirent ***)xnmalloc(
-						path_n, sizeof(struct dirent));
+		commands_bin = (struct dirent ***)xnmalloc(path_n, sizeof(struct dirent));
 		cmd_n = (int *)xnmalloc(path_n, sizeof(int));
 
 		i = (int)path_n;
@@ -2227,12 +2229,11 @@ get_path_programs(void)
 		internal_cmd_n++;
 
 	bin_commands = (char **)xnmalloc((size_t)total_cmd + internal_cmd_n +
-					     aliases_n + actions_n + 2, sizeof(char *));
+			     aliases_n + actions_n + 2, sizeof(char *));
 
 	i = (int)internal_cmd_n;
 	while (--i >= 0) {
-		bin_commands[l] = savestring(internal_cmds[i],
-		    strlen(internal_cmds[i]));
+		bin_commands[l] = savestring(internal_cmds[i], strlen(internal_cmds[i]));
 		l++;
 	}
 
@@ -2240,8 +2241,7 @@ get_path_programs(void)
 	if (aliases_n) {
 		i = (int)aliases_n;
 		while (--i >= 0) {
-			bin_commands[l] = savestring(aliases[i].name,
-				strlen(aliases[i].name));
+			bin_commands[l] = savestring(aliases[i].name, strlen(aliases[i].name));
 			l++;
 		}
 	}
@@ -2250,8 +2250,7 @@ get_path_programs(void)
 	if (actions_n) {
 		i = (int)actions_n;
 		while (--i >= 0) {
-			bin_commands[l] = savestring(usr_actions[i].name,
-			    strlen(usr_actions[i].name));
+			bin_commands[l] = savestring(usr_actions[i].name, strlen(usr_actions[i].name));
 			l++;
 		}
 	}

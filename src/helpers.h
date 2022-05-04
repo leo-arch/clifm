@@ -192,6 +192,8 @@ extern int watch;
 #define DELAYED_REFRESH    (1 << 20)
 #define RELOADING_BINARIES (1 << 21) */
 
+#define PATH_PROGRAMS_ALREADY_LOADED (1 << 19)
+
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
