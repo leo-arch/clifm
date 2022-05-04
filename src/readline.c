@@ -58,7 +58,6 @@ typedef char *rl_cpvfunc_t;
 #include "tabcomp.h"
 #include "mime.h"
 #include "tags.h"
-//#include "listing.h"
 
 #ifndef _NO_SUGGESTIONS
 #include "suggestions.h"
@@ -75,6 +74,9 @@ typedef char *rl_cpvfunc_t;
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 int freebsd_sc_console = 0;
 #endif /* __FreeBSD__ */
+
+#define DEL_EMPTY_LINE     1
+#define DEL_NON_EMPTY_LINE 2
 
 /* Wide chars */
 /*char wc[12];
@@ -205,7 +207,7 @@ rl_exclude_input(unsigned char c)
 
 		else if (c == '3' && rl_point != rl_end) {
 			xdelete();
-			_del = 1;
+			_del = DEL_NON_EMPTY_LINE;
 			goto END;
 		}
 
@@ -247,12 +249,12 @@ rl_exclude_input(unsigned char c)
 			goto FAIL; */
 
 		case BS:
+			_del = (rl_point == 0 && rl_end == 0) ? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
 			xbackspace();
 			if (rl_end == 0 && cur_color != tx_c) {
 				cur_color = tx_c;
 				fputs(tx_c, stdout);
 			}
-			_del = 1;
 			goto END;
 
 		case ENTER:
@@ -325,7 +327,7 @@ END:
 
 #ifndef _NO_HIGHLIGHT
 	if (!highlight) {
-		if (_del) {
+		if (_del > 0) {
 #ifndef _NO_SUGGESTIONS
 			/* Since we have removed a char, let's check if there is
 			 * a suggestion available using the modified input line */
@@ -338,7 +340,8 @@ END:
 			if (rl_point == 0 && rl_end == 0) {
 				if (wrong_cmd)
 					recover_from_wrong_cmd();
-				leftmost_bell();
+				if (_del == DEL_EMPTY_LINE)
+					leftmost_bell();
 			}
 #endif /* !_NO_SUGGESTIONS */
 			return 2;
@@ -350,7 +353,7 @@ END:
 		recolorize_line();
 #endif /* !_NO_HIGHLIGHT */
 
-	if (_del) {
+	if (_del > 0) {
 #ifndef _NO_SUGGESTIONS
 		if (wrong_cmd && s == -1 && rl_end) {
 			rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
@@ -359,7 +362,8 @@ END:
 		if (rl_point == 0 && rl_end == 0) {
 			if (wrong_cmd)
 				recover_from_wrong_cmd();
-			leftmost_bell();
+			if (_del == DEL_EMPTY_LINE)
+				leftmost_bell();
 		}
 #endif /* !_NO_SUGGESTIONS */
 		return 2;
@@ -2179,9 +2183,9 @@ rl_signals(void)
 {
 	if (flags & DELAYED_REFRESH) {
 		flags &= ~DELAYED_REFRESH;
-		puts("PRE INPUT HOOK DELAYED!");
-		fflush(stdout);
-		sleep(2);
+		puts("EVENT HOOK DELAYED!");
+//		fflush(stdout);
+//		sleep(2);
 //		get_term_size();
 //		reload_dirlist();
 	}
@@ -2191,8 +2195,6 @@ rl_signals(void)
 int
 initialize_readline(void)
 {
-	/* #### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
-
 	/* Set the name of the program using readline. Mostly used for
 	 * conditional constructs in the inputrc file */
 	rl_readline_name = argv_bk[0];
@@ -2270,7 +2272,7 @@ initialize_readline(void)
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
 
-//	rl_pre_input_hook = rl_signals;
+//	rl_event_hook = rl_signals;
 
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 	if (!(flags & GUI) && getenv("CLIFM_FREEBSD_CONSOLE_SC"))
