@@ -76,6 +76,7 @@ _clifm ()
         --light-mode
         -z
         --sort
+		--bell
         --case-sens-dirjump
         --case-sens-path-comp
         --cd-on-quit
@@ -126,14 +127,14 @@ _clifm ()
         --trash-as-rm
     )
 
-    if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then
+    if [[ $prev == "-b" || $prev == "-c" || $prev == "-k" || $prev == "-p" ]]; then
         COMPREPLY=( $(compgen -f -d -- "$cur") )
 
-    elif [[ $prev == -P ]]; then
+    elif [[ $prev == "-P" ]]; then
         local profiles=$(basename -a $(ls -Ad ~/.config/clifm/profiles/*))
         COMPREPLY=( $(compgen -W "$profiles" -- "$cur") )
 
-    elif [[ $prev == --color-scheme ]]; then
+    elif [[ $prev == "--color-scheme" ]]; then
         local schemes=$(basename -a $(ls -Ad ~/.config/clifm/colors/*) | cut -d"." -f1)
         COMPREPLY=( $(compgen -W "$schemes" -- "$cur") )
 
@@ -141,8 +142,12 @@ _clifm ()
         local args=$(echo -e "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\m11")
         COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
-    elif [[ $prev == --opener ]]; then
-	local apps=$(ls -AG $(echo $PATH | awk -F':' '{ for (i=1; i<NF; i++) print $i}') | grep -v "/\|^$")
+    elif [[ $prev == "--bell" ]]; then
+	    local args=(echo -e "0\n1\n2")
+	    COMPREPLY=( $(compgen -W "$args" -- "$cur") )
+
+    elif [[ $prev == "--opener" ]]; then
+	    local apps=$(ls -AG $(echo $PATH | awk -F':' '{ for (i=1; i<NF; i++) print $i}') | grep -v "/\|^$")
         COMPREPLY=( $(compgen -W "$apps" -- "$cur") )
 
     elif [[ $cur == -* ]]; then
