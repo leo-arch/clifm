@@ -45,7 +45,6 @@
 # include "highlight.h"
 #endif
 
-//#ifdef RL81
 /* Sleep for MSEC milliseconds */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
 static int
@@ -68,7 +67,6 @@ msleep(long msec)
 
 	return res;
 }
-//#endif
 
 /* Turn the first or second field of a color code sequence, provided
  * it is either 1 or 01 (bold attribute), into 0 (regular)

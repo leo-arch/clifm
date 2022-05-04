@@ -256,6 +256,9 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_WELCOME_MESSAGE 1
 #define DEF_WARNING_PROMPT 1
 
+#define DEF_BELL_STYLE     BELL_VISIBLE /* BELL_NONE, BELL_AUDIBLE, BELL_VISIBLE */
+#define VISIBLE_BELL_DELAY 30 /* Milliseconds */
+
 #define __DEF_CP_CMD "cp -iRp"
 #define __DEF_ADVCP_CMD "advcp -giRp"
 #define __DEF_WCP_CMD "wcp"
