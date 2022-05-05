@@ -1301,10 +1301,16 @@ filenames_gen_text(const char *text, int state)
 	}
 
 	/* Check list of currently displayed files for a match */
-	while (i < files && (name = file_info[i++].name) != NULL)
+	while (i < files && (name = file_info[i].name) != NULL) {
+		/* If cd, list only directories */
+		if (*rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
+			return (char *)NULL;
+		i++;
 		if (case_sens_path_comp ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
+	}
 
 	return (char *)NULL;
 }
@@ -1763,7 +1769,7 @@ my_rl_completion(const char *text, int start, int end)
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
 
-		/* History cmd completion */
+		/* HISTORY CMD COMPLETION */
 		if (!_xrename && *text == '!') {
 			matches = rl_completion_matches(text + 1, &hist_generator);
 			if (matches) {
@@ -1772,7 +1778,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		/* Environment variables completion */
+		/* ENVIRONMENT VARIABLES */
 		if (!_xrename && *text == '$' && *(text + 1) != '(') {
 			matches = rl_completion_matches(text, &environ_generator);
 			if (matches) {
@@ -1803,21 +1809,16 @@ my_rl_completion(const char *text, int start, int end)
 					return matches;
 				}
 			}
-
-			/* Complete with entries in the jump database */
-/*			if (autocd && !matches)
-				matches = rl_completion_matches(text, &jump_gen); */
 		}
 
-		/* Bookmarks completion */
+		/* BOOKMARKS COMPLETION */
 		if (!_xrename && (autocd || auto_open) && expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 			if (matches)
 				return matches;
 		}
 
-		/* If neither autocd nor auto-open, try to complete with
-		 * command names */
+		/* If neither autocd nor auto-open, try to complete with command names */
 		if (!_xrename) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 			if (matches) {
@@ -1827,8 +1828,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 	}
 
-	/* Second word or more */
-	else {
+	else { /* Second word or more */
 		if (_xrename)
 			return (char **)NULL;
 
@@ -1846,9 +1846,8 @@ my_rl_completion(const char *text, int start, int end)
 
 		char *lb = rl_line_buffer;
 #ifndef _NO_TAGS
-		/* Tags completion */
-
-		/* Expand tag expressions (t:TAG) into tagged files */
+		/* #### TAGS COMPLETION #### */
+		/* 1. Expand tag expressions (t:TAG) into tagged files */
 		if (fzftab == 1 && tags_n > 0 && *text == 't'
 		&& *(text + 1) == ':' && *(text + 2)) {
 			free(cur_tag);
@@ -1862,7 +1861,7 @@ my_rl_completion(const char *text, int start, int end)
 			cur_tag = (char *)NULL;
 		}
 
-		/* Tag expressions (t:TAG)*/
+		/* 2. tag expressions (t:TAG)*/
 		if (*lb != ';' && *lb != ':' && tags_n > 0 && *text == 't' && *(text + 1) == ':') {
 			cur_comp_type = TCMP_TAGS_T;
 			matches = rl_completion_matches(text, &tags_generator);
@@ -1871,7 +1870,7 @@ my_rl_completion(const char *text, int start, int end)
 			cur_comp_type = TCMP_NONE;
 		}
 
-		/* 't? TAG' and 't? :tag' */
+		/* 3. 't? TAG' and 't? :tag' */
 		if (tags_n > 0 && *lb == 't') {
 			int comp = 0;
 			switch(*(lb + 1)) {
@@ -1911,7 +1910,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 #endif
 
-		/* Complete environment variables */
+		/* ##### ENVIRONMENT VARIABLES ##### */
 		if (*text == '$' && *(text + 1) != '(') {
 			matches = rl_completion_matches(text, &environ_generator);
 			if (matches) {
@@ -1920,7 +1919,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		/* Backdir completion */
+		/* #### BACKDIR COMPLETION #### */
 		if (*text != '/' && nwords <= 2 && rl_end >= 3
 		&& *lb == 'b' && lb[1] == 'd' && lb[2] == ' ') {
 			if (nwords < 2 || (rl_end && lb[rl_end - 1] != ' ')) {
@@ -1974,7 +1973,6 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* #### ELN AND JUMP ORDER EXPANSION ### */
-
 		/* Perform this check only if the first char of the string to be
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
@@ -2125,7 +2123,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		/* sort command completion */
+		/* ### SORT COMMAND COMPLETION ### */
 		if (*lb == 's' && (strncmp(lb, "st ", 3) == 0
 		|| strncmp(lb, "sort ", 5) == 0)) {
 			matches = rl_completion_matches(text, &sort_name_generator);
@@ -2135,11 +2133,20 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		/* net command completion */
+		/* ### NET COMMAND COMPLETION ### */
 		if (*lb == 'n' && strncmp(lb, "net ", 4) == 0) {
 			matches = rl_completion_matches(text, &nets_generator);
 			if (matches) {
 				cur_comp_type = TCMP_NET;
+				return matches;
+			}
+		}
+
+		/* Try to complete with filenames in CWD */
+		if (!text || *text != '/') {
+			matches = rl_completion_matches(text, &filenames_gen_text);
+			if (matches) {
+				cur_comp_type = TCMP_PATH;
 				return matches;
 			}
 		}
@@ -2148,21 +2155,20 @@ my_rl_completion(const char *text, int start, int end)
 	/* ### PATH COMPLETION ### */
 
 	/* If none of the above, readline will attempt path completion
-	 * instead via my custom my_rl_path_completion() */
+	 * instead via my_rl_path_completion() */
 	return matches;
 }
 
-/* Load readline initialization file (inputrc) */
+/* Load readline initialization file (inputrc)
+ * Check order:
+ * 1) INPUTRC environment variable
+ * 2) ~/.config/clifm/readline.cfm
+ * 3) ~/.inputrc
+ * 4) /etc/inputrc
+ * If neither 1 nor 2 exist, readline will try to read 3 and 4 by default) */
 static inline void
 set_rl_init_file(void)
 {
-	/* Check order:
-	 * 1) INPUTRC environment variable
-	 * 2) ~/.config/clifm/readline.cfm
-	 * 3) ~/.inputrc
-	 * 4) /etc/inputrc
-	 * If neither 1 nor 2 exist, readline will try to read 3 and 4
-	 * by default) */
 	char *p = getenv("INPUTRC");
 	if (p) {
 		rl_read_init_file(p);

@@ -490,7 +490,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 				FINDER_IN, FINDER_OUT); */
 	} else {
 		snprintf(cmd, PATH_MAX, "fzy "
-				"--read-null --pad=%d --query=\"%s\" "
+				"--read-null --pad=%d --query=\"%s\" --reverse "
 				"--tab-accepts --right-accepts --left-aborts "
 				"--lines=%zu %s %s < %s > %s",
 				*offset, lw ? lw : "", *height,
@@ -798,22 +798,26 @@ calculate_prefix_len(char *str)
 	return prefix_len;
 }
 
+/* Let's define whether we have a case which allows multi-selection
+ * Returns 1 if true or zero if false */
 static inline int
 is_multi_sel(void)
 {
-	int multi;
 	enum comp_type t = cur_comp_type;
-	char *l = rl_line_buffer;
 
 	if (t == TCMP_SEL || t == TCMP_DESEL || t == TCMP_RANGES
 	|| t == TCMP_TRASHDEL || t == TCMP_UNTRASH || t == TCMP_TAGS_F
-	|| t == TCMP_TAGS_U) {
-		multi = 1;
+	|| t == TCMP_TAGS_U)
+		return 1;
+
+	char *l = rl_line_buffer;
+	char *lws = strrchr(rl_line_buffer, ' ');
+
 	/* Do not allow multi-sel if we have a path, only file names */
-	} else if (t == TCMP_PATH && *l != '/' && !strchr(l, '/')) {
+	if (t == TCMP_PATH && *l != '/' && (!lws || !strchr(lws, '/'))) {
 		if (
 		/* Select */
-		(*l == 's' && l[1] == ' ')
+		(*l == 's' && (l[1] == ' ' || strncmp(l, "sel ", 4) == 0))
 		/* Trash */
 		|| (*l == 't' && (l[1] == ' ' || (l[1] == 't' && l[2] == ' ')
 		|| strncmp(l, "trash ", 6) == 0))
@@ -830,15 +834,13 @@ is_multi_sel(void)
 		|| strncmp (l, "prop ", 5) == 0)))
 		/* te */
 		|| (*l == 't' && l[1] == 'e' && l[2] == ' ') ) {
-			multi = 1;
+			return 1;
 		} else {
-			multi = 0;
+			return 0;
 		}
 	} else {
-		multi = 0;
+		return 0;
 	}
-
-	return multi;
 }
 
 /* Clean the input buffer in case the user cancelled the completion via ESC */
