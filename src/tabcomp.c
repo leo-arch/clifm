@@ -843,17 +843,17 @@ is_multi_sel(void)
 	}
 }
 
-/* Clean the input buffer in case the user cancelled the completion via ESC */
+/* Clean the input buffer in case the user cancelled the completion pressing ESC */
 static int
-clean_rl_buffer(void)
+clean_rl_buffer(const char *text)
 {
-//	if (cur_comp_type != TCMP_TAGS_F)
+	if (!text || !*text)
 		return EXIT_FAILURE;
 
 	/* If all possible completions share a common prefix, this prefix is
 	 * automatically appended to the input buffer. However, the user
 	 * cancelled here the completion (pressing ESC), so that we need to
-	 * removed this prefix, if there */
+	 * removed this prefix, if any */
 
 	/* If the previous char is not space, then a common prefix was appended:
 	 * remove it */
@@ -873,14 +873,14 @@ clean_rl_buffer(void)
 			 * exactly one char after the last space */
 			rl_delete_text(sp + 1, rl_end);
 			rl_point = rl_end = sp + 1;
-			printf("\x1b[0K");
+		} else { /* No space: delete the entire line */
+			rl_delete_text(0, rl_end);
+			rl_point = rl_end = 0;
 		}
+		printf("\x1b[0K");
 	}
 
-	/* Reinsert the corresponding tag expression (t:TAG) */
-	char p[NAME_MAX];
-	snprintf(p, NAME_MAX, "t:%s", cur_tag);
-	rl_insert_text(p);
+	rl_insert_text(text);
 
 	return EXIT_FAILURE;
 }
@@ -888,7 +888,7 @@ clean_rl_buffer(void)
 /* Display possible completions using FZF. If one of these possible
  * completions is selected, insert it into the current line buffer */
 static int
-fzftabcomp(char **matches)
+fzftabcomp(char **matches, const char *text)
 {
 	FILE *fp = fopen(FINDER_IN, "w");
 	if (!fp) {
@@ -1005,7 +1005,7 @@ fzftabcomp(char **matches)
 	if (ret != EXIT_SUCCESS)
 /*		free(cur_tag);
 		cur_tag = (char *)NULL; */
-		return clean_rl_buffer();
+		return clean_rl_buffer(text);
 
 	char *buf = get_fzf_output(multi);
 	if (!buf)
@@ -1258,12 +1258,19 @@ tab_complete(int what_to_do)
 	matches = rl_completion_matches(text, our_func);
 
 AFTER_USUAL_COMPLETION:
-	free(text);
 
 	if (!matches || !matches[0]) {
 		rl_ring_bell();
+		free(text);
 		return EXIT_FAILURE;
 	}
+
+	/* Common prefix for multiple matches is appended to the input query.
+	 * Let's rise a flag to know if we should reinsert the original query
+	 * in case the user cancels the completion (pressing ESC) */
+	int common_prefix_added = 0;
+	if (fzftab == 1 && matches[1] && strcmp(matches[0], text) != 0)
+		common_prefix_added = 1;
 
 	register size_t i;
 	int should_quote;
@@ -1331,6 +1338,7 @@ AFTER_USUAL_COMPLETION:
 			if (matches == 0 || matches[0] == 0) {
 				if (matches)
 					free(matches);
+				free(text);
 				rl_ding();
 				return 0;
 			}
@@ -1636,7 +1644,7 @@ DISPLAY_MATCHES:
 CALC_OFFSET:
 #ifndef _NO_FZF
 		if (fzftab == 1) {
-			if (fzftabcomp(matches) == -1)
+			if (fzftabcomp(matches, common_prefix_added == 1 ? text : NULL) == -1)
 				goto RESTART;
 			goto RESET_PATH;
 		}
@@ -1779,7 +1787,7 @@ RESTART:
 	for (i = 0; matches[i]; i++)
 		free(matches[i]);
 	free(matches);
-
+	free(text);
 //	free(cur_tag);
 //	cur_tag = (char *)NULL;
 
