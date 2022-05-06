@@ -1793,8 +1793,10 @@ list_dir(void)
 		fflush(stdout);
 	}
 
-	if (!unicode)
-		trim.state = trim.a = trim.b = trim.len = 0;
+	if (!unicode) {
+		trim.state = trim.a = trim.b = 0;
+		trim.len = 0;
+	}
 
 	fputs(HIDE_CURSOR, stdout);
 	reset_stats();

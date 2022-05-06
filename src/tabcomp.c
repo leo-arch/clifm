@@ -233,6 +233,7 @@ reinsert_slashes(char *str)
 }
 
 #ifndef _NO_FZF
+/* FIXME: These shouldn't be fixed paths */
 #define FINDER_IN "/tmp/clifm.finder.in"
 #define FINDER_OUT "/tmp/clifm.finder.out"
 
@@ -844,16 +845,15 @@ is_multi_sel(void)
 }
 
 /* Clean the input buffer in case the user cancelled the completion pressing ESC */
+/* If all possible completions share a common prefix, this prefix is
+ * automatically appended to the query string. However, the user
+ * cancelled here the completion (pressing ESC), so that we need to
+ * remove this prefix by reinserting the original query string */
 static int
 clean_rl_buffer(const char *text)
 {
 	if (!text || !*text)
 		return EXIT_FAILURE;
-
-	/* If all possible completions share a common prefix, this prefix is
-	 * automatically appended to the input buffer. However, the user
-	 * cancelled here the completion (pressing ESC), so that we need to
-	 * removed this prefix, if any */
 
 	/* If the previous char is not space, then a common prefix was appended:
 	 * remove it */
