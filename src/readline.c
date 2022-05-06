@@ -460,7 +460,7 @@ my_rl_getc(FILE *stream)
 	}
 
 	while(1) {
-		result = (int)read(fileno(stream), &c, sizeof(unsigned char));
+		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result > 0 && result == sizeof(unsigned char)) {
 			if (c == 4 && control_d_exits == 1) /* Ctrl-d */
 				rl_quit(0, 0);

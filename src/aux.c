@@ -348,7 +348,7 @@ get_cursor_position(const int ifd, const int ofd, int *c, int *r)
 
 	/* Read the response: "ESC [ rows ; cols R" */
 	while (i < sizeof(buf) - 1) {
-		if (read(ifd, buf + i, 1) != 1)
+		if (read(ifd, buf + i, 1) != 1) /* flawfinder: ignore */
 			break;
 		if (buf[i] == 'R')
 			break;
@@ -924,7 +924,7 @@ xgetchar(void)
 	newt = oldt;
 	newt.c_lflag &= (tcflag_t)~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-	c = (char)getchar();
+	c = (char)getchar(); /* flawfinder: ignore */
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
 	return c;

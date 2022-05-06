@@ -42,7 +42,7 @@
 
 /* Find the plugins-helper file and set CLIFM_PLUGINS_HELPER accordingly
  * This envionment variable will be used by plugins. Returns zero on
- * success and one on error */
+ * success or one on error */
 static int
 setenv_plugins_helper(void)
 {
@@ -119,12 +119,12 @@ run_action(char *action, char **args)
 			if (access(cmd, X_OK) == -1) {
 				fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
 				free(cmd);
-				return EXIT_FAILURE;
+				return errno;
 			}
 		} else {
 			fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
 			free(cmd);
-			return EXIT_FAILURE;
+			return errno;
 		}
 	}
 
@@ -193,13 +193,15 @@ run_action(char *action, char **args)
 		rfd = open(fifo_path, O_RDONLY);
 	while (rfd == -1 && errno == EINTR);
 
-	char buf[PATH_MAX] = "";
+	char buf[PATH_MAX];
+	*buf = '\0';
 	ssize_t buf_len = 0;
 
-	do
-		buf_len = read(rfd, buf, sizeof(buf));
-	while (buf_len == -1 && errno == EINTR);
+	do {
+		buf_len = read(rfd, buf, sizeof(buf)); /* flawfinder: ignore */
+	} while (buf_len == -1 && errno == EINTR);
 
+	buf[buf_len] = '\0';
 	close(rfd);
 
 	/* Wait for the child to finish. Otherwise, the child is left as

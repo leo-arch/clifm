@@ -120,7 +120,7 @@ get_y_or_n(void)
 			putchar('\n');
 			return (0);
 		}
-		if (c == ABORT_CHAR)
+		if (c == ABORT_CHAR) /* defined by readline as CTRL('G') */
 			rl_abort(0, 0);
 		rl_ding();
 	}
