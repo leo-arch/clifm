@@ -45,6 +45,12 @@
 # include "highlight.h"
 #endif
 
+#ifdef RL_READLINE_VERSION
+# if RL_READLINE_VERSION >= 0x0801
+#  define _READLINE_HAS_ACTIVATE_MARK
+# endif /* RL_READLINE_VERSION >= 0x0801 */
+#endif /* RL_READLINE_VERSION */
+
 /* Sleep for MSEC milliseconds */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */
 static int
@@ -235,8 +241,6 @@ void
 rl_ring_bell(void)
 {
 	switch(bell) {
-	case BELL_NONE: return;
-
 	case BELL_AUDIBLE:
 		fputs("\007", stderr);
 		fflush(stderr);
@@ -248,13 +252,10 @@ rl_ring_bell(void)
 		msleep(VISIBLE_BELL_DELAY);
 		fputs("\x1b[?5l", stderr);
 		fflush(stderr);
-		break;
+		return;
 
-	case BELL_VISIBLE:
-		/* rl_activate_mark and rl_deactivate mark are available only since readline 8.1 */
-		if (rl_readline_version < 0x0801)
-			break;
-		{
+#ifdef _READLINE_HAS_ACTIVATE_MARK
+	case BELL_VISIBLE: {
 		int point = rl_point;
 		rl_mark = rl_last_word_start;
 		if (rl_end > 1 && rl_line_buffer[rl_end - 1] == ' ')
@@ -271,8 +272,10 @@ rl_ring_bell(void)
 #endif /* !_NO_HIGHLIGHT */
 		rl_point = point;
 		return;
-		}
+	}
+#endif /* _READLINE_HAS_ACTIVATE_MARK */
 
+	case BELL_NONE: /* fallthrough */
 	default: return;
 	}
 
