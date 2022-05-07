@@ -213,7 +213,7 @@ extern int watch;
 
 /* Error codes, used by the launch_exec functions */
 #define EXNULLERR  79
-#define EXFORKERR  81
+//#define EXFORKERR  81
 #define EXCRASHERR 82
 
 #define BACKGROUND 1

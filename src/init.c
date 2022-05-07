@@ -66,11 +66,14 @@
 int
 get_sys_shell(void)
 {
-	char l[PATH_MAX] = "";
+	char l[PATH_MAX];
+	*l = '\0';
 	ssize_t ret = readlinkat(AT_FDCWD, "/bin/sh", l, PATH_MAX);
 
 	if (!*l || ret == -1)
 		return SHELL_NONE;
+
+	l[ret] = '\0';
 
 	char *s = (char *)NULL;
 	char *p = strrchr(l, '/');
@@ -1050,7 +1053,7 @@ resolve_positional_param(char *file)
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
 				strerror(errno));
 			free(_exp_path);
-			exit(EXIT_FAILURE);
+			exit(errno);
 		}
 	} else if (is_url(_exp_path) == EXIT_SUCCESS) {
 		url = 1;
@@ -1305,7 +1308,7 @@ external_arguments(int argc, char **argv)
 				if (stat(_path, &attr) == -1) {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg,
 						strerror(errno));
-					exit(EXIT_FAILURE);
+					exit(errno);
 				}
 				url = 0;
 				goto RUN;
@@ -1316,7 +1319,7 @@ external_arguments(int argc, char **argv)
 				if (stat(_path, &attr) == -1) {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _path,
 						strerror(errno));
-					exit(EXIT_FAILURE);
+					exit(errno);
 				}
 			}
 
@@ -1389,7 +1392,8 @@ RUN:
 			int a = atoi(optarg);
 			if (!is_number(optarg) || a < 0 || a > 3) {
 				fprintf(stderr, "%s: bell: valid options are 0:none, 1:audible, "
-					"2:visible (default), 3:flash\n", PROGRAM_NAME);
+					"2:visible (requires readline >= 8.1), 3:flash. Defaults to 'visible', "
+					"and, if not possible, 'none'.\n", PROGRAM_NAME);
 				exit(EXIT_FAILURE);
 			}
 			xargs.bell_style = a; break;
@@ -1553,59 +1557,6 @@ RUN:
 	int i = optind;
 	if (argv[i])
 		path_value = resolve_positional_param(argv[i]);
-/*		struct stat attr;
-		int url = 0;
-		char *_path = argv[i];
-		char *_exp_path = (char *)NULL;
-		if (*argv[i] == '.') {
-			char _tmp[PATH_MAX];
-			if (realpath(argv[i], _tmp) == NULL || !*_tmp)
-				_err('e', PRINT_PROMPT, "%s: Error expanding path\n", PROGRAM_NAME);
-			else
-				_exp_path = savestring(_tmp, strlen(_tmp));
-		} else {
-			_exp_path = tilde_expand(argv[i]);
-		}
-
-		if (_exp_path) {
-			if (IS_FILE_URI(_path)) {
-				_path = argv[i] + 7;
-				if (stat(_path, &attr) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
-						strerror(errno));
-					free(_exp_path);
-					exit(EXIT_FAILURE);
-				}
-			} else if (is_url(_exp_path) == EXIT_SUCCESS) {
-				url = 1;
-			} else {
-				if (stat(_exp_path, &attr) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
-						strerror(errno));
-					free(_exp_path);
-					exit(EXIT_FAILURE);
-				} else {
-					if (!S_ISDIR(attr.st_mode)) {
-						fprintf(stderr, "%s: %s: Not a directory\n",
-							PROGRAM_NAME, _exp_path);
-						free(_exp_path);
-						exit(EXIT_FAILURE);
-					}
-				}
-			}
-			free(_exp_path);
-		} else {
-			fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
-			exit(EXIT_FAILURE);
-		}
-
-		if (url == 1 || !S_ISDIR(attr.st_mode))
-			open_reg_exit(_path, url);
-
-		flags |= START_PATH;
-		path_value = _path;
-		xargs.path = 1;
-	} */
 
 	if (bm_value) {
 		char *bm_exp = (char *)NULL;
@@ -1867,35 +1818,14 @@ unset_xargs(void)
 void
 init_shell(void)
 {
-	/* If shell is not interactive */
-	if (!isatty(STDIN_FILENO)) {
+	if (!isatty(STDIN_FILENO)) { /* Shell is not interactive */
 		handle_stdin();
 		return;
 	}
 
-	/* Loop until we are in the foreground */
-/*	while (tcgetpgrp(STDIN_FILENO) != (own_pid = getpgrp()))
-		kill(-own_pid, SIGTTIN); */
-
-	/* Ignore interactive and job-control signals */
 	set_signals_to_ignore();
-	/* Put ourselves in our own process group */
 	own_pid = get_own_pid();
 
-/*	if (flags & ROOT_USR) {
-		// Make the shell pgid (process group id) equal to its pid 
-		// Without the setpgid line below, the program cannot be run
-		// with sudo, but it can be run nonetheless by the root user
-		if (setpgid(own_pid, own_pid) < 0) {
-			_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME,
-			    strerror(errno));
-			exit(EXIT_FAILURE);
-		}
-	} */
-
-	/* Grab control of the terminal */
-//	tcsetpgrp(STDIN_FILENO, own_pid);
-	/* Save default terminal attributes for shell */
 	tcgetattr(STDIN_FILENO, &shell_tmodes);
 	return;
 }
