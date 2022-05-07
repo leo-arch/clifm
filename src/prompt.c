@@ -870,7 +870,7 @@ initialize_prompt_data(void)
 #ifndef _NO_TRASH
 	update_trash_indicator();
 #endif
-	get_sel_files();
+/*	get_sel_files(); */
 	setenv_prompt();
 
 	args_n = 0;

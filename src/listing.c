@@ -1704,7 +1704,7 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t
 	while (--j >= 0) {
 		if (sel_devino[j].dev != dev || sel_devino[j].ino != ino)
 			continue;
-		/* Only check regular files for hardlinks */
+		/* Only check hardlinks in case of regular files */
 		if (file_info[index].type != DT_DIR && links > 1) {
 			char *p = strrchr(sel_elements[j], '/');
 			if (!p || !*(++p))
@@ -1749,6 +1749,8 @@ init_fileinfo(const size_t n)
 	file_info[n].linkn = 1;
 	file_info[n].ltime = 0; /* For long view mode */
 	file_info[n].time = 0;
+/*	file_info[n].dev = 0;
+	file_info[n].ino = 0; */
 }
 
 /* Initialize the stats struct */
@@ -1930,6 +1932,8 @@ list_dir(void)
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
 			file_info[n].mode = attr.st_mode;
+/*			file_info[n].dev = attr.st_dev;
+			file_info[n].ino = attr.st_ino; */
 
 			if (long_view) {
 				file_info[n].ltime = (time_t)attr.st_mtime;

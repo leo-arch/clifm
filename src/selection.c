@@ -113,11 +113,11 @@ select_file(char *file)
 	}
 
 	if (!exists) {
-		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2)
-											* sizeof(char *));
+		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2) * sizeof(char *));
 		sel_elements[sel_n] = savestring(file, strlen(file));
 		sel_n++;
 		sel_elements[sel_n] = (char *)NULL;
+
 		new_sel++;
 	} else {
 		fprintf(stderr, _("%s: sel: %s: Already selected\n"),
@@ -434,7 +434,7 @@ convert_filetype(mode_t *filetype)
 	return EXIT_SUCCESS;
 }
 
-static inline char *
+static char *
 parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 {
 	char *sel_path = (char *)NULL;
@@ -469,7 +469,7 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 	return sel_path;
 }
 
-static inline char *
+static char *
 construct_sel_path(char *sel_path)
 {
 	char tmpdir[PATH_MAX];
@@ -502,7 +502,7 @@ construct_sel_path(char *sel_path)
 	return dir;
 }
 
-static inline char *
+static char *
 check_sel_path(char **sel_path)
 {
 	size_t len = strlen(*sel_path);
@@ -544,7 +544,7 @@ print_total_size(void)
 	free(human_size);
 }
 
-static inline void
+static void
 print_selected_files(int print_header, int print_total)
 {
 	if (print_header == 1) {
@@ -564,8 +564,40 @@ print_selected_files(int print_header, int print_total)
 	}
 }
 
-static inline int
-print_sel_results(int new_sel, const char *sel_path, const char *pattern)
+/* IMPROVE ME: This check is performed twice: once here and then when reloading the
+ * list of files (check_sel_tag()) */
+/* Check if selected file at index INDEX is a file in the current directory
+ * Returns one if true or zero otherwise */
+/*
+static int
+is_sel_file_in_cwd(const int index)
+{
+	if (!sel_devino || !sel_elements)
+		return 0;
+
+	int f = (int)files;
+
+	while (--f >= 0) {
+		if (sel_devino[index].dev == file_info[f].ino
+		|| sel_devino[index].ino == file_info[f].ino)
+			return 1;
+
+		if (file_info[f].type == DT_DIR || file_info[f].linkn < 2)
+			continue;
+
+		char *p = strrchr(sel_elements[index], '/');
+		if (!p || !*(++p))
+			continue;
+
+		if (*p == *file_info[f].name && strcmp(p, file_info[f].name) == 0)
+			return 1;
+	}
+
+	return 0;
+} */
+
+static int
+print_sel_results(const int new_sel, const char *sel_path, const char *pattern)
 {
 	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
 	&& save_sel() != EXIT_SUCCESS) {
@@ -580,13 +612,17 @@ print_sel_results(int new_sel, const char *sel_path, const char *pattern)
 	}
 
 	if (new_sel <= 0) {
-		if (pattern) fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
+		if (pattern)
+			fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
+
+	get_sel_files();
 
 	/* Append size of new sel files to TOTAL_SEL_SIZE */
 	struct stat attr;
 	int i, base = xargs.si == 1 ? 1000 : 1024;
+/*	int sel_file_in_cwd = 0; */
 	for (i = (int)sel_n - new_sel; i < (int)sel_n; i++) {
 		if (lstat(sel_elements[i], &attr) != -1) {
 			if (S_ISDIR(attr.st_mode))
@@ -594,10 +630,26 @@ print_sel_results(int new_sel, const char *sel_path, const char *pattern)
 			else
 				total_sel_size += FILE_SIZE;
 		}
+
+		/* If at least one new file in the current directory gets selected,
+		 * let's update the list of files */
+/*		if (autols == 1 && light_mode == 0 && sel_file_in_cwd == 0)
+			sel_file_in_cwd = is_sel_file_in_cwd(i); */
 	}
 
+/*	if (sel_file_in_cwd == 1) {
+		reload_dirlist();
+		print_reload_msg(_("%zu file(s) selected\n"), sel_n);
+		return EXIT_SUCCESS;
+	} */
+
+	if (autols == 1)
+		reload_dirlist();
+	print_reload_msg(_("%zu file(s) selected\n"), sel_n);
+	return EXIT_SUCCESS;
+
 	/* Print entries */
-	if (sel_n > 10) {
+/*	if (sel_n > 10) {
 		printf(_("%zu files are now in the Selection Box\n"), sel_n);
 	} else if (sel_n > 0) {
 		printf(_("%zu selected file(s):\n\n"), sel_n);
@@ -606,10 +658,10 @@ print_sel_results(int new_sel, const char *sel_path, const char *pattern)
 	}
 
 	print_total_size();
-	return EXIT_SUCCESS;
+	return EXIT_SUCCESS; */
 }
 
-static inline char *
+static char *
 construct_sel_filename(const char *sel_path, const char *dir, const char *name)
 {
 	char *f = (char *)NULL;
@@ -633,7 +685,7 @@ construct_sel_filename(const char *sel_path, const char *dir, const char *name)
 	return f;
 }
 
-static inline int
+static int
 select_filename(char *arg, const char *sel_path, char *dir)
 {
 	int new_sel = 0;
@@ -670,7 +722,7 @@ select_filename(char *arg, const char *sel_path, char *dir)
 	return new_sel;
 }
 
-static inline int
+static int
 select_pattern(char *arg, char *sel_path, char *dir, mode_t filetype)
 {
 	/* GLOB */
@@ -816,7 +868,11 @@ edit_selfile(void)
 	if (mtime_bfr == (time_t)attr.st_mtime)
 		return EXIT_SUCCESS;
 
-	return get_sel_files();
+	int ret = get_sel_files();
+	if (autols == 1)
+		reload_dirlist();
+	print_reload_msg("%d file(s) selected\n");
+	return ret;
 
 ERROR:
 	fprintf(stderr, "sel: %s: %s\n", sel_file, strerror(errno));
@@ -1025,6 +1081,8 @@ handle_alpha_entry(int i, size_t desel_n, char **desel_elements)
 
 	if (*desel_elements[i] == 'q' && !desel_elements[i][1]) {
 		free_desel_elements(desel_n, &desel_elements);
+		if (autols == 1)
+			reload_dirlist();
 		return EXIT_SUCCESS;
 	}
 
@@ -1076,10 +1134,18 @@ end_deselect(const int err, char ***args)
 	if (!err && save_sel() != 0)
 		exit_status = EXIT_FAILURE;
 
-	/* If there is still some selected file, reload the desel screen */
-	if (sel_n && argsbk == 0)
+	get_sel_files();
+
+	/* There is still some selected file and we are in the desel
+	 * screen: reload this screen */
+	if (sel_n && argsbk == 0) {
 		if (deselect(*args) != 0)
 			exit_status = EXIT_FAILURE;
+	}
+
+	if (autols == 1)
+		reload_dirlist();
+	print_reload_msg("%d file(s) selected\n", sel_n);
 
 	return exit_status;
 }
@@ -1091,7 +1157,7 @@ deselect(char **args)
 		return EXIT_FAILURE;
 
 	if (sel_n == 0) {
-		puts(_("desel: There are no selected files"));
+		puts(_("desel: No selected files"));
 		return EXIT_SUCCESS;
 	}
 
@@ -1101,9 +1167,10 @@ deselect(char **args)
 		if (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
 		|| strcmp(args[1], "all") == 0) {
 			int ret = deselect_all();
-			if (autols == 1) { reload_dirlist(); }
+			if (autols == 1)
+				reload_dirlist();
 			if (ret == EXIT_SUCCESS)
-				print_reload_msg(_("All files deselected\n"));
+				print_reload_msg(_("0 file(s) selected\n"));
 			return ret;
 		} else {
 			err = deselect_from_args(args);
@@ -1118,7 +1185,7 @@ deselect(char **args)
 
 	int i = (int)desel_n;
 	while (--i >= 0) {
-		if (!is_number(desel_elements[i]))
+		if (!is_number(desel_elements[i])) /* Only for 'q', 'e', and '*' */
 			return handle_alpha_entry(i, desel_n, desel_elements);
 
 		if (valid_desel_eln(i, desel_n, desel_elements) == EXIT_FAILURE)
