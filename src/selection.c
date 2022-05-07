@@ -871,7 +871,7 @@ edit_selfile(void)
 	int ret = get_sel_files();
 	if (autols == 1)
 		reload_dirlist();
-	print_reload_msg("%d file(s) selected\n");
+	print_reload_msg("%zu file(s) selected\n", sel_n);
 	return ret;
 
 ERROR:
@@ -1143,9 +1143,12 @@ end_deselect(const int err, char ***args)
 			exit_status = EXIT_FAILURE;
 	}
 
+	if (err)
+		return EXIT_FAILURE;
+
 	if (autols == 1)
 		reload_dirlist();
-	print_reload_msg("%d file(s) selected\n", sel_n);
+	print_reload_msg("%zu selected file(s)\n", sel_n);
 
 	return exit_status;
 }
@@ -1170,7 +1173,7 @@ deselect(char **args)
 			if (autols == 1)
 				reload_dirlist();
 			if (ret == EXIT_SUCCESS)
-				print_reload_msg(_("0 file(s) selected\n"));
+				print_reload_msg(_("0 selected file(s)\n"));
 			return ret;
 		} else {
 			err = deselect_from_args(args);
