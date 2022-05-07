@@ -1879,7 +1879,7 @@ void
 version_function(void)
 {
 	printf(_("%s %s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
-		VERSION, DATE, WEBSITE, LICENSE, AUTHOR);
+		VERSION, DATE, CONTACT, LICENSE, AUTHOR);
 }
 
 void
