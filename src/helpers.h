@@ -97,6 +97,16 @@
 #include "messages.h"
 #include "settings.h"
 
+#define PROGRAM_NAME "CliFM"
+#define PNL "clifm" /* Program name lowercase */
+#define PROGRAM_DESC "The command line file manager"
+#define VERSION "1.6"
+#define AUTHOR "L. Abramovich"
+#define CONTACT "https://github.com/leo-arch/clifm"
+#define DATE "Apr 20, 2022"
+#define LICENSE "GPL2+"
+#define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
+
 #if __TINYC__
 void *__dso_handle;
 #endif
