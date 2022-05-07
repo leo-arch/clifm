@@ -258,7 +258,7 @@ launch_execle(const char *cmd)
 	if (!cmd || !*cmd)
 		return EXNULLERR;
 
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
+//	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
 
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
