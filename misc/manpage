@@ -269,7 +269,7 @@ sort files by \fIMETHOD\fB, where \fIMETHOD\fR could be one of: 0 = none, 1 = na
 use apparent sizes instead of actual device usage
 .TP
 .B \-\-bell=TYPE
-Choose the terminal bell type, where TYPE could be: 0 = none, 1 = audible, 2 = visual (default), 3 = flash
+Choose the terminal bell type, where TYPE could be: 0 = none, 1 = audible, 2 = visual (requires readline >= 8.1), 3 = flash. Defaults to 'visible', and, if not possible, 'none'.
 .TP
 .B \-\-case\-sens\-dirjump
 do not ignore case when consulting the jump database (via the \fIj\fRcommand)
