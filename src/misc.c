@@ -1878,9 +1878,8 @@ free_software(void)
 void
 version_function(void)
 {
-	printf(_("%s %s (%s), by %s\nContact: %s\nWebsite: "
-		 "%s\nLicense: %s\n"), PROGRAM_NAME, VERSION, DATE,
-	    AUTHOR, CONTACT, WEBSITE, LICENSE);
+	printf(_("%s %s (%s)\n%s\nLicense %s\nWritten by %s\n"), PROGRAM_NAME,
+		VERSION, DATE, WEBSITE, LICENSE, AUTHOR);
 }
 
 void
