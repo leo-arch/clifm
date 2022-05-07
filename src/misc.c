@@ -364,7 +364,7 @@ unset_filter(void)
 	free(_filter);
 	_filter = (char *)NULL;
 	regfree(&regex_exp);
-	if (autols == 1) { reload_dirlist(); }
+	if (autols == 1) reload_dirlist();
 	puts(_("Filter unset"));
 	filter_rev = 0;
 
@@ -381,7 +381,7 @@ compile_filter(void)
 		_filter = (char *)NULL;
 		regfree(&regex_exp);
 	} else {
-		if (autols == 1) { reload_dirlist(); }
+		if (autols == 1) reload_dirlist();
 		print_reload_msg(_("%s: New filter successfully set\n"), _filter);
 	}
 

@@ -757,7 +757,7 @@ open_bookmark(void)
 	}
 
 	free_bm_input(&arg);
-	if (autols == 1 && is_dir == 0) { reload_dirlist(); }
+	if (autols == 1 && is_dir == 0) reload_dirlist();
 	return EXIT_SUCCESS;
 }
 
