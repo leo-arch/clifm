@@ -112,7 +112,7 @@ file_info() {
 
 	entry="$1"
 
-	if [ "$FILE_OK" = 1 ] && [ "$(file -bL --mime-encoding "$entry")" = "binary" ]; then
+	if [ "$FILE_OK" = 1 ] && [ "$FILE_HAS_MIME_ENCODING" = 1 ] && [ "$(file -bL --mime-encoding "$entry")" = "binary" ]; then
 		printf -- "--- \e[0;30;47mBinary file\e[0m ---\n"
 	fi
 

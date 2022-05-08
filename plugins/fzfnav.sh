@@ -233,6 +233,9 @@ main() {
 		POSIX_LS=1
 	fi
 
+	# OpenBSD file(1) version has no --mime-encoding option
+	[ "$(uname)" != "OpenBSD" ] && export FILE_HAS_MIME_ENCODING=1
+
 			#################################################
 			#	1. GET VALUES FROM THE CONFIGURATION FILE	#
 			#################################################
