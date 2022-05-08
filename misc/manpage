@@ -67,7 +67,7 @@ A convenient way of getting full information about CliFM commands is via the '\f
 For a quick introduction jump to the \fBEXAMPLES\fR section at the bottom of this document.
 
 .SH 2. DESCRIPTION
-CliFM is a \fBC\fRommand \fBL\fRine \fBI\fRnterface \fBF\fRile \fBM\fRanager. This is its main feature and strength: all input and interacion is performed via commands typed in a prompt. In other words, CliFM is a REPL, since it's basic structure is simply this: \fBR\fRead (user input via a command line), \fBE\fRvaluate/Execute the command, \fBP\fRrint the results, \fBL\fRoop (start all over again).
+CliFM is a \fBC\fRommand \fBL\fRine \fBI\fRnterface \fBF\fRile \fBM\fRanager. This is its main feature and strength: all input and interacion is performed via commands typed in a prompt. In other words, CliFM is a REPL, since it's basic structure is simply this: \fBR\fRead (user input via a command line), \fBE\fRvaluate/\fBE\fRxecute the command, \fBP\fRrint the results, \fBL\fRoop (start all over again).
 .sp
 Unlike most terminal file managers out there, indeed, CliFM replaces the traditional TUI interface (also known as curses or text-menu based interface) by a simple command-line interface (REPL). In this sense, it is a file manager, but also \fBa shell extension\fR: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 .sp
@@ -598,7 +598,7 @@ You can use either ELN's or a string to indicate the directory you want. Ex: 'cd
 .sp
 Unlike the shell \fBcd\fR(1) command, CliFM's built\-in \fIcd\fR function not only changes the current directory, but also lists its content (provided the option \fICdListsAutomatically\fR is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: cd DIR && ls \-\-color=auto \-\-group\-directories\-first.
 .sp
-Automatic files listing can be disabled either setting \fICdListsAutomatically\fR to "false" in the configuration file or running CliFM with the \fI-o\fR or \fI--no-list-on-the-fly\fR option.
+Automatic files listing can be disabled by either setting \fIAutoLs\fR to "false" in the configuration file or running CliFM with the \fI-o\fR or \fI--no-autols\fR option.
 .TP
 .B cl, columns \fR[on, off]
 toggle columns on/off.
