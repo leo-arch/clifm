@@ -249,8 +249,8 @@ wx_parent_check(char *file)
 	default:
 		fprintf(stderr, _("%s: trash: %s (%s): Unsupported file type\n"),
 		    PROGRAM_NAME, file, S_ISBLK(attr.st_mode) ? "Block device"
-		    : (S_ISCHR(attr.st_mode) ? "Character device"
-		    : "Unknown file type"));
+		    : (S_ISCHR(attr.st_mode) ? _("Character device")
+		    : _("Unknown file type")));
 		exit_status = EXIT_FAILURE;
 		break;
 	}
@@ -276,7 +276,7 @@ trash_clear(void)
 	files_n = scandir(trash_files_dir, &trash_files, skip_files, xalphasort);
 
 	if (!files_n) {
-		puts(_("trash: There are no trashed files"));
+		puts(_("trash: No trashed files"));
 		return EXIT_SUCCESS;
 	}
 
@@ -326,7 +326,7 @@ trash_clear(void)
 	if (ret == EXIT_SUCCESS) {
 		if (autols == 1)
 			reload_dirlist();
-		print_reload_msg("Trash can cleared\n");
+		print_reload_msg(_("Trash can cleared\n"));
 	}
 
 	return exit_status;
@@ -403,8 +403,6 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	dest = (char *)xnmalloc(strlen(trash_files_dir) + strlen(file_suffix) + 2,
 			sizeof(char));
 	sprintf(dest, "%s/%s", trash_files_dir, file_suffix);
-
-/*	char *tmp_cmd[] = {"cp", "-a", file, dest, NULL}; */
 	char *tmp_cmd[] = {"mv", file, dest, NULL};
 
 	free(filename);
@@ -647,7 +645,8 @@ remove_from_trash(char **args)
 
 			if (autols == 1)
 				reload_dirlist();
-			print_reload_msg("%zu file(s) removed from the trash can\n", removed_files);
+			print_reload_msg(_("%zu file(s) removed from the trash can\n"),
+				removed_files);
 
 			return exit_status;
 		}
@@ -854,8 +853,8 @@ untrash_function(char **comm)
 			size_t n = count_trashed_files();
 			if (autols == 1)
 				reload_dirlist();
-			print_reload_msg("%zu file(s) untrashed\n", untrashed_files);
-			print_reload_msg("%zu trashed file(s)\n", n);
+			print_reload_msg(_("%zu file(s) untrashed\n"), untrashed_files);
+			print_reload_msg(_("%zu trashed file(s)\n"), n);
 		}
 
 		return exit_status;
@@ -904,7 +903,7 @@ untrash_function(char **comm)
 
 		if (autols == 1)
 			reload_dirlist();
-		print_reload_msg("0 trashed files\n");
+		print_reload_msg(_("0 trashed files\n"));
 
 		return exit_status;
 	}
@@ -1086,7 +1085,7 @@ check_trash_file(char *deq_file)
 	/* Do not trash block or character devices */
 	if (S_ISBLK(a.st_mode) || S_ISCHR(a.st_mode)) {
 		fprintf(stderr, _("trash: %s: Cannot trash a %s device\n"), deq_file,
-			S_ISCHR(a.st_mode) ? "character" : "block");
+			S_ISCHR(a.st_mode) ? _("character") : _("block"));
 		return EXIT_FAILURE;
 	}
 
@@ -1129,19 +1128,19 @@ trash_files_args(char **args)
 	if (exit_status == EXIT_SUCCESS) {
 		if (autols == 1)
 			reload_dirlist();
-		print_reload_msg("%zu file(s) trashed\n", trashed_files);
-		print_reload_msg("%zu total trashed file(s)\n", trash_n + trashed_files);
+		print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
+		print_reload_msg(_("%zu total trashed file(s)\n"), trash_n + trashed_files);
 	} else if (trashed_files > 0 && autols == 1) {
-		/* It was an error, but some file was trashed as well.
+		/* An error occured, but at least one file was trashed as well.
 		 * If this file was in the current dir, the screen will be refreshed
 		 * after this function (by inotify/kqueue), hidding the error message.
 		 * So let's pause here to prevent the error from being hidden, and
-		 * the refresh the list of files ourselves */
-		fputs("Press any key to continue... \n", stderr);
+		 * then refresh the list of files ourselves */
+		fputs(_("Press any key to continue... \n"), stderr);
 		xgetchar();
 		reload_dirlist();
-		print_reload_msg("%zu file(s) trashed\n", trashed_files);
-		print_reload_msg("%zu total trashed file(s)\n", trash_n + trashed_files);
+		print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
+		print_reload_msg(_("%zu total trashed file(s)\n"), trash_n + trashed_files);
 	}
 
 	return exit_status;
