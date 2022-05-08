@@ -971,7 +971,6 @@ extern int
 	max_path,
 	max_printselfiles,
 	min_jump_rank,
-	trash_n,
 	shell_is_interactive,
 	*eln_as_file;
 
@@ -1004,6 +1003,7 @@ extern size_t
 	sel_n,
 	tab_offset,
 	tags_n,
+	trash_n,
 	user_home_len,
 	usrvar_n,
 	zombies;

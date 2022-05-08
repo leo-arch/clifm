@@ -216,7 +216,6 @@ int
 	max_path = UNSET,
 	max_printselfiles = UNSET,
 	shell_is_interactive = 0,
-	trash_n = 0,
 	*eln_as_file = (int *)0;
 
 size_t
@@ -246,6 +245,7 @@ size_t
 	sel_n = 0,
 	tab_offset = 0,
 	tags_n = 0,
+	trash_n = 0,
 	user_home_len = 0,
 	usrvar_n = 0,
 	zombies = 0;
@@ -835,7 +835,7 @@ static inline void
 init_trash(void)
 {
 	if (trash_ok) {
-		trash_n = count_dir(trash_files_dir, NO_CPOP);
+		trash_n = (size_t)count_dir(trash_files_dir, NO_CPOP);
 		if (trash_n <= 2)
 			trash_n = 0;
 	}

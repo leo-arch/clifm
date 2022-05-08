@@ -744,9 +744,11 @@ static inline void
 update_trash_indicator(void)
 {
 	if (trash_ok) {
-		trash_n = count_dir(trash_files_dir, NO_CPOP);
-		if (trash_n <= 2)
+		int n = count_dir(trash_files_dir, NO_CPOP);
+		if (n <= 2)
 			trash_n = 0;
+		else
+			trash_n = (size_t)n;
 	}
 }
 #endif
@@ -870,7 +872,7 @@ initialize_prompt_data(void)
 #ifndef _NO_TRASH
 	update_trash_indicator();
 #endif
-/*	get_sel_files(); */
+	get_sel_files();
 	setenv_prompt();
 
 	args_n = 0;

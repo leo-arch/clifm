@@ -44,6 +44,22 @@
 #include "readline.h"
 #include "sort.h"
 #include "trash.h"
+#include "listing.h"
+
+static size_t
+count_trashed_files(void)
+{
+	size_t n = 0;
+	if (trash_ok && trash_files_dir) {
+		n = (size_t)count_dir(trash_files_dir, NO_CPOP);
+		if (n <= 2)
+			n = 0;
+		else
+			n -= 2;
+	}
+
+	return n;
+}
 
 /* Recursively check directory permissions (write and execute). Returns
  * zero if OK, and one if at least one subdirectory does not have
@@ -264,6 +280,7 @@ trash_clear(void)
 		return EXIT_SUCCESS;
 	}
 
+	int ret = EXIT_SUCCESS;
 	size_t i;
 	for (i = 0; i < (size_t)files_n; i++) {
 		size_t info_file_len = strlen(trash_files[i]->d_name) + 11;
@@ -282,7 +299,7 @@ trash_clear(void)
 		sprintf(file2, "%s/%s", trash_info_dir, info_file);
 
 		char *tmp_cmd[] = {"rm", "-r", file1, file2, NULL};
-		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 
 		free(file1);
 		free(file2);
@@ -304,6 +321,12 @@ trash_clear(void)
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 		    workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
+	}
+
+	if (ret == EXIT_SUCCESS) {
+		if (autols == 1)
+			reload_dirlist();
+		print_reload_msg("Trash can cleared\n");
 	}
 
 	return exit_status;
@@ -505,14 +528,24 @@ remove_from_trash(char **args)
 	/* Remove from trash files passed as parameters */
 	size_t i = 2;
 	if (args[2]) {
+		size_t removed_files = 0;
 		for (; args[i]; i++) {
+			if (*args[i] == '*' && !args[i][1])
+				return trash_clear();
 			char *d = (char *)NULL;
 			if (strchr(args[i], '\\'))
 				d = dequote_str(args[i], 0);
 			if (remove_file_from_trash(d ? d : args[i]) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
+			else
+				removed_files++;
 			free(d);
 		}
+
+		if (autols == 1)
+			reload_dirlist();
+		print_reload_msg(_("%zu file(s) removed from the trash can\n"), removed_files);
+		print_reload_msg(_("%zu trashed file(s)\n"), trash_n - removed_files);
 		return exit_status;
 	}
 
@@ -584,18 +617,23 @@ remove_from_trash(char **args)
 				free(trash_files[j]);
 			free(trash_files);
 
+			if (autols == 1)
+				reload_dirlist();
+
 			return exit_status;
 		}
 
 		/* Asterisk */
 		else if (strcmp(rm_elements[i], "*") == 0) {
-			size_t j;
+			size_t j, removed_files = 0;
 			for (j = 0; j < (size_t)files_n; j++) {
 				ret = remove_file_from_trash(trash_files[j]->d_name);
 				if (ret != EXIT_SUCCESS) {
-					fprintf(stderr, _("%s: trash: Error trashing %s\n"),
+					fprintf(stderr, _("%s: %s: Cannot remove file from the trash can\n"),
 					    PROGRAM_NAME, trash_files[j]->d_name);
 					exit_status = EXIT_FAILURE;
+				} else {
+					removed_files++;
 				}
 
 				free(trash_files[j]);
@@ -607,11 +645,14 @@ remove_from_trash(char **args)
 				free(rm_elements[j]);
 			free(rm_elements);
 
+			if (autols == 1)
+				reload_dirlist();
+			print_reload_msg("%zu file(s) removed from the trash can\n", removed_files);
+
 			return exit_status;
 		}
 
 		else if (!is_number(rm_elements[i])) {
-
 			fprintf(stderr, _("%s: trash: %s: Invalid ELN\n"),
 			    PROGRAM_NAME, rm_elements[i]);
 			exit_status = EXIT_FAILURE;
@@ -629,10 +670,10 @@ remove_from_trash(char **args)
 		}
 	}
 
+	size_t removed_files = 0;
 	/* If all args are numbers, and neither 'q' nor wildcard */
 	for (i = 0; rm_elements[i]; i++) {
 		int rm_num = atoi(rm_elements[i]);
-
 		if (rm_num <= 0 || rm_num > files_n) {
 			fprintf(stderr, _("%s: trash: %d: Invalid ELN\n"),
 			    PROGRAM_NAME, rm_num);
@@ -643,9 +684,11 @@ remove_from_trash(char **args)
 
 		ret = remove_file_from_trash(trash_files[rm_num - 1]->d_name);
 		if (ret != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: trash: Error trashing %s\n"),
+			fprintf(stderr, _("%s: %s: Cannot remove file from the trash can\n"),
 			    PROGRAM_NAME, trash_files[rm_num - 1]->d_name);
 			exit_status = EXIT_FAILURE;
+		} else {
+			removed_files++;
 		}
 
 		free(rm_elements[i]);
@@ -656,6 +699,10 @@ remove_from_trash(char **args)
 	for (i = 0; i < (size_t)files_n; i++)
 		free(trash_files[i]);
 	free(trash_files);
+
+	if (autols == 1)
+		reload_dirlist();
+	print_reload_msg(_("%zu file(s) removed from the trash can\n"), removed_files);
 
 	return exit_status;
 }
@@ -745,24 +792,14 @@ untrash_element(char *file)
 		return errno;
 	}
 
-/*	if (access(parent, X_OK | W_OK) != 0) {
-		fprintf(stderr, _("%s: undel: %s: Permission denied\n"),
-				PROGRAM_NAME, parent);
-		free(parent);
-		free(url_decoded);
-		return EXIT_FAILURE;
-	} */
-
 	free(parent);
 
-//	char *tmp_cmd[] = {"cp", "-a", undel_file, url_decoded, NULL};
 	char *tmp_cmd[] = {"mv", undel_file, url_decoded, NULL};
 	int ret = -1;
 	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 	free(url_decoded);
 
 	if (ret == EXIT_SUCCESS) {
-//		char *tmp_cmd2[] = {"rm", "-r", undel_file, undel_info, NULL};
 		char *tmp_cmd2[] = {"rm", "-r", undel_info, NULL};
 		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
 
@@ -802,15 +839,25 @@ untrash_function(char **comm)
 
 	if (comm[1] && *comm[1] != '*' && strcmp(comm[1], "a") != 0
 	&& strcmp(comm[1], "all") != 0) {
-		size_t j;
+		size_t j, untrashed_files = 0;
 		for (j = 1; comm[j]; j++) {
 			char *d = (char *)NULL;
 			if (strchr(comm[j], '\\'))
 				d = dequote_str(comm[j], 0);
-			if (untrash_element(d ? d : comm[j]) != 0)
+			if (untrash_element(d ? d : comm[j]) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
+			else
+				untrashed_files++;
 			free(d);
 		}
+		if (exit_status == EXIT_SUCCESS) {
+			size_t n = count_trashed_files();
+			if (autols == 1)
+				reload_dirlist();
+			print_reload_msg("%zu file(s) untrashed\n", untrashed_files);
+			print_reload_msg("%zu trashed file(s)\n", n);
+		}
+
 		return exit_status;
 	}
 
@@ -855,6 +902,10 @@ untrash_function(char **comm)
 			return EXIT_FAILURE;
 		}
 
+		if (autols == 1)
+			reload_dirlist();
+		print_reload_msg("0 trashed files\n");
+
 		return exit_status;
 	}
 
@@ -891,14 +942,13 @@ untrash_function(char **comm)
 	}
 
 	/* First check for quit, *, and non-number args */
-	int free_and_return = 0;
+	int free_and_return = 0, reload_files = 0;
 
 	for (i = 0; i < (size_t)undel_n; i++) {
 		if (strcmp(undel_elements[i], "q") == 0) {
-			free_and_return = 1;
+			free_and_return = reload_files = 1;
 		} else if (strcmp(undel_elements[i], "*") == 0) {
 			size_t j;
-
 			for (j = 0; j < (size_t)trash_files_n; j++)
 				if (untrash_element(trash_files[j]->d_name) != 0)
 					exit_status = EXIT_FAILURE;
@@ -922,6 +972,9 @@ untrash_function(char **comm)
 			free(trash_files[j]);
 		free(trash_files);
 
+		if (autols == 1 && reload_files == 1)
+			reload_dirlist();
+
 		return exit_status;
 	}
 
@@ -937,8 +990,9 @@ untrash_function(char **comm)
 		}
 
 		/* If valid ELN */
-		if (untrash_element(trash_files[undel_num - 1]->d_name) != 0)
+		if (untrash_element(trash_files[undel_num - 1]->d_name) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
+
 		free(undel_elements[i]);
 	}
 
@@ -950,7 +1004,7 @@ untrash_function(char **comm)
 	free(trash_files);
 
 	/* If some trashed file still remains, reload the undel screen */
-	trash_n = count_dir(trash_files_dir, NO_CPOP);
+	trash_n = (size_t)count_dir(trash_files_dir, NO_CPOP);
 
 	if (trash_n <= 2)
 		trash_n = 0;
@@ -1051,7 +1105,7 @@ trash_files_args(char **args)
 		return EXIT_FAILURE;
 
 	int exit_status = EXIT_SUCCESS;
-	size_t i;
+	size_t i, trashed_files = 0;
 	for (i = 1; args[i]; i++) {
 		char *deq_file = dequote_str(args[i], 0);
 		/* Make sure we are trashing a valid file */
@@ -1062,11 +1116,20 @@ trash_files_args(char **args)
 		}
 
 		/* Once here, everything is fine: trash the file */
-		exit_status = trash_element(suffix, &tm, deq_file);
+		if ((exit_status = trash_element(suffix, &tm, deq_file)) == EXIT_SUCCESS)
+			trashed_files++;
 		free(deq_file);
 	}
 
 	free(suffix);
+
+	if (exit_status == EXIT_SUCCESS) {
+		if (autols == 1)
+			reload_dirlist();
+		print_reload_msg("%zu file(s) trashed\n", trashed_files);
+		print_reload_msg("%zu total trashed file(s)\n", trash_n + trashed_files);
+	}
+
 	return exit_status;
 }
 
@@ -1094,6 +1157,8 @@ trash_function(char **args)
 			return EXIT_SUCCESS;
 		return EXIT_FAILURE;
 	}
+
+	trash_n = count_trashed_files();
 
 	if (*args[1] == 'd' && strcmp(args[1], "del") == 0)
 		return remove_from_trash(args);
