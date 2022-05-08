@@ -149,6 +149,7 @@ fcd() {
 
 	# Keep FZF running until the user presses Esc or C-q
 	# shellcheck disable=SC2154
+	# --header-first is only available after version 0.27 (at least)
 	while true; do
 		lsd=$(printf "\033[0;%sm..\033[0m\n" "$dir_color"; $ls_cmd)
 		file="$(printf "%s\n" "$lsd" | fzf \
@@ -167,7 +168,7 @@ fcd() {
 			--bind "esc:execute(rm $TMP)+abort" \
 			--bind "ctrl-q:abort" \
 			--ansi --prompt="${fzf_prompt}" --reverse --no-clear \
-			--inline-info --keep-right --multi --header-first --header="Press 'Alt-h' for help
+			--inline-info --keep-right --multi --header="Press 'Alt-h' for help
 $PWD
 $FZF_HEADER" --marker="*" --preview-window=:wrap "$(fzf_borders)" \
 			--preview "printf \"\033[2J\"; $BFG_FILE {}")"
