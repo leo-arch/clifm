@@ -117,7 +117,7 @@ List of CliFM features:
   7) Braces auto\-expansion
   8) ELN's auto\-expansion
   9) ELN ranges auto\-expansion
-  10) 'sel' keyword auto\-expansion
+  10) \fIsel\fR keyword auto\-expansion
   11) Bookmarks auto\-expansion
   12) Bash\-like quoting system
   13) Custom aliases and variables
@@ -126,7 +126,7 @@ List of CliFM features:
   16) Startup and prompt commands
   17) User profiles
   18) Commands sequential and conditional execution
-  19) \fILira\fR, a built-in resource opener
+  19) \fILira\fR, a built\-in resource opener
   20) Eleven sorting methods and reverse sorting
   21) Bulk rename and bulk remove
   22) Archiving and compression support
@@ -145,22 +145,22 @@ List of CliFM features:
   35) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   36) Fastback function
   37) Remote file systems management via the \fInet\fR command
-  38) \fIGemini\fR, a Fish-like auto-suggestions system (including a warning prompt to highlight invalid command names)
+  38) \fIGemini\fR, a Fish\-like auto\-suggestions system (including a warning prompt to highlight invalid command names)
   39) Syntax highlighting
   40) Interactive rename functionality for the \fIm\fR command
   41) Easily mount/unmount storage devices via the \fImedia\fR command
   42) Control settings on a per directory basis via the \fIautocommands\fR function
-  43) \fIBleach\fR, a built-in file names cleaner
+  43) \fIBleach\fR, a built\-in file names cleaner
   44) Backdir: quickly change to a parent directory
-  45) Secure environment
-  46) Secure commands
+  45) Secure environment (see \fI\-\-secure\-env\fR and \fI\-\-secure\-env\-full\fR options)
+  46) Secure commands (see the \fI\-\-secure\-cmds\fR option)
   47) URI file scheme support (file://)
-  48) URL support when running as standalone resource opener (see the \fI--open\fR option)
-  49) Disk usage analyzer
+  48) URL support when running as standalone resource opener (see the \fI\-\-open\fR option)
+  49) Disk usage analyzer (see the \fI\-t\fR option)
   50) \fIEtiqueta\fR, a files tagging system
 
 .SH 4. POSITIONAL PARAMETERS
-If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener). URL's and the URI file scheme (for local file systems) is supported.
+If the first non\-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener). URL's and the URI file scheme (for local file systems) is supported.
 .sp
 For example, by running 'clifm /etc/hosts', the \fIhosts\fR file will be opened and CliFM will immediately exit. In the same way 'clifm https://some_domain' will open this web resource with the application associated to the \fItext/html\fR MIME type.
 .sp
@@ -242,7 +242,7 @@ enable the splash screen
 leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
 .TP
 .B \-t, \-\-disk\-usage\-analyzer
-run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --sort-reverse --full-dir-size --no-folders-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch.
+run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-folders-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press Ctrl-Alt-i (or Alt-TAB) to toggle this mode in-place.
 .TP
 .B \-u, \-\-no\-unicode
 disable unicode
@@ -320,7 +320,7 @@ use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
 maximum number of visited directories to remember
 .TP
 .B \-\-max\-files\fR=NUM
-list only up to \fINUM\fR files. Use -1 to remove the files limit (default). See the \fImf\fR command for a more detailed description
+list only up to \fINUM\fR files. Use -1 or 'unset' to remove the files limit (default). See the \fImf\fR command for a more detailed description
 .TP
 .B \-\-max\-path\fR=NUM
 set the maximum number of characters after which the current directory in the prompt line will be abbreviated to the directory base name (if \\z is used in the prompt)
@@ -2034,7 +2034,15 @@ The two most time consuming features are:
 
  \fB1)\fR The files counter, used to print the amount of files contained by listed directories. Disabling this option produces a nice performance boost.
 
- \fB2)\fR In normal mode, \fBfstatat\fR(3) is used to gather information about listed files. Since this function, especially when executed hundreds (and even thousands) of times, is quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to it. When running in light mode, however, only basic file classification is performed, namely, that provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)). Bear in mind, nonetheless, that whenever _DIRENT_HAVE_D_TYPE was not set at compile time, or in case of a DT_UNKNOWN value for a given entry (we might be facing a file system not returning the \fId_type\fR value, for example, loop devices), CliFM will fall back to \fBstat\fR(3) to get basic files classification.
+ \fB2)\fR In normal mode, \fBfstatat\fR(3) is used to gather information about listed files. Since this function, especially when executed hundreds (and even thousands) of times, is quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to it.
+.sp
+When running in light mode, however, a few features are lost:
+.sp
+ 1. Only basic file classification is performed, namely, that provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)). Bear in mind, nonetheless, that whenever _DIRENT_HAVE_D_TYPE was not set at compile time, or in case of a DT_UNKNOWN value for a given entry (we might be facing a file system not returning the \fId_type\fR value, for example, loop devices), CliFM will fall back to \fBstat\fR(3) to get basic files classification.
+.sp
+ 2. Color per file extension is disabled for performance reasons.
+.sp
+ 3. The marker for selected files (*) is lost as well: to keep track of selected files and thus recognize them in the current list of files, we make use of files device and inode number, which is provided by \fBfstatat(3)\fR.
 .sp
 Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticeable): icons (if enabled), columns, colors, and, if already running without colors, file type indicators. Because listing lots of files could be expensive and time consuming, you can also try to limit the amount of files printed for each visited directory (see the \fImf\fR command above).
 .sp
@@ -2295,7 +2303,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .SH 24. EXAMPLES
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
 
-\fBNOTE2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press Left (or Alt-f to accept onlt the first suggested word). Otherwise, the suggestion is just ignored
+\fBNOTE2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press Right (or Alt-f to accept only the first suggested word). Otherwise, the suggestion is just ignored
 
 Get help:
 \fBF1\fR: manpage
