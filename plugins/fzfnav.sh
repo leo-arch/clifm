@@ -149,7 +149,7 @@ fcd() {
 
 	# Keep FZF running until the user presses Esc or C-q
 	# shellcheck disable=SC2154
-	# --header-first is only available after version 0.27 (at least)
+	# --header-first isn't available in fzf 0.27
 	while true; do
 		lsd=$(printf "\033[0;%sm..\033[0m\n" "$dir_color"; $ls_cmd)
 		file="$(printf "%s\n" "$lsd" | fzf \
@@ -224,6 +224,15 @@ main() {
 		exit 1
 	fi
 
+	# Do we have GNU ls?
+	if ls --version >/dev/null 2>&1; then
+		export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
+		export POSIX_LS=0
+	else
+		ls_cmd="ls -Ap"
+		POSIX_LS=1
+	fi
+
 			#################################################
 			#	1. GET VALUES FROM THE CONFIGURATION FILE	#
 			#################################################
@@ -245,14 +254,6 @@ main() {
 			FZFHEIGHT)
 				if echo "$value" | grep -qE "[0-9]+"; then
 					export fzfheight="$value"
-				fi ;;
-			LS)
-				if [ "${value:-posix}" = posix ]; then
-					export ls_cmd="ls -Ap"
-					export POSIX_LS=1
-				else
-					export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
-					export POSIX_LS=0
 				fi ;;
 			BFG_FILE)
 				if [ -z "$value" ]; then
