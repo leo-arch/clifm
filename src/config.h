@@ -36,5 +36,6 @@ void create_tmp_files(void);
 void set_sel_file(void);
 void set_env(void);
 void set_div_line(const char *line);
+void set_finder_paths(void);
 
 #endif /* CONFIG_H */

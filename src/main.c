@@ -856,16 +856,6 @@ get_hostname(void)
 	}
 }
 
-#ifndef _NO_FZF
-/* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)*/
-static inline void
-set_finder_paths(void)
-{
-	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.finder.in", P_tmpdir, PNL);
-	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.finder.out", P_tmpdir, PNL);
-}
-#endif /* _NO_FZF */
-
 				/**
 				 * #############################
 				 * #           MAIN            #

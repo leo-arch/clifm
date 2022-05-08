@@ -46,6 +46,22 @@
 #include "file_operations.h"
 #include "autocmds.h"
 
+#ifndef _NO_FZF
+/* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)*/
+void
+set_finder_paths(void)
+{
+	if (fzftab == 0) {
+		*finder_in_file = *finder_out_file = '\0';
+		return;
+	}
+
+	char *p = xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir;
+	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.finder.in", p, PNL);
+	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.finder.out", p, PNL);
+}
+#endif /* _NO_FZF */
+
 /* Regenerate the configuration file and create a back up of the old
  * one */
 static int
