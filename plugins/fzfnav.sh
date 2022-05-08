@@ -150,7 +150,7 @@ fcd() {
 	# Keep FZF running until the user presses Esc or C-q
 	# shellcheck disable=SC2154
 	while true; do
-		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; $ls_cmd)
+		lsd=$(printf "\033[0;%sm..\033[0m\n" "$dir_color"; $ls_cmd)
 		file="$(printf "%s\n" "$lsd" | fzf \
 			--height="${fzfheight:-$fzf_height}" \
 			--color="$(get_fzf_colors)" \
