@@ -2480,7 +2480,7 @@ exec_cmd(char **comm)
 	}
 
 CHECK_EVENTS:
-	if (!autols)
+	if (autols == 0)
 		return exit_code;
 #ifdef LINUX_INOTIFY
 	if (watch)

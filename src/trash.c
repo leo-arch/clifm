@@ -1116,8 +1116,11 @@ trash_files_args(char **args)
 		}
 
 		/* Once here, everything is fine: trash the file */
-		if ((exit_status = trash_element(suffix, &tm, deq_file)) == EXIT_SUCCESS)
+		if (trash_element(suffix, &tm, deq_file) == EXIT_SUCCESS)
 			trashed_files++;
+		else
+			exit_status = EXIT_FAILURE;
+
 		free(deq_file);
 	}
 
@@ -1126,6 +1129,17 @@ trash_files_args(char **args)
 	if (exit_status == EXIT_SUCCESS) {
 		if (autols == 1)
 			reload_dirlist();
+		print_reload_msg("%zu file(s) trashed\n", trashed_files);
+		print_reload_msg("%zu total trashed file(s)\n", trash_n + trashed_files);
+	} else if (trashed_files > 0 && autols == 1) {
+		/* It was an error, but some file was trashed as well.
+		 * If this file was in the current dir, the screen will be refreshed
+		 * after this function (by inotify/kqueue), hidding the error message.
+		 * So let's pause here to prevent the error from being hidden, and
+		 * the refresh the list of files ourselves */
+		fputs("Press any key to continue... \n", stderr);
+		xgetchar();
+		reload_dirlist();
 		print_reload_msg("%zu file(s) trashed\n", trashed_files);
 		print_reload_msg("%zu total trashed file(s)\n", trash_n + trashed_files);
 	}
@@ -1165,8 +1179,9 @@ trash_function(char **args)
 
 	if (*args[1] == 'c' && strcmp(args[1], "clear") == 0)
 		return trash_clear();
-	else
+	else {
 		return trash_files_args(args);
+	}
 }
 #else
 void *__skip_me_trash;
