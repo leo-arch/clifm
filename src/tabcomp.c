@@ -467,9 +467,9 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 	if (fzf_height_set == 0)
 		snprintf(height_str, sizeof(height_str), "--height=%zu", *height);
 
-	char cmd[PATH_MAX];
+	char cmd[(PATH_MAX * 2) + NAME_MAX];
 	if (xargs.fzytab != 1) {
-		snprintf(cmd, PATH_MAX, "fzf %s "
+		snprintf(cmd, sizeof(cmd), "fzf %s "
 				"%s --margin=0,0,0,%d "
 				"%s --read0 --ansi "
 				"--query=\"%s\" %s %s "
@@ -480,7 +480,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 				lw ? lw : "", colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down" : "",
 				finder_in_file, finder_out_file);
-/*		snprintf(cmd, PATH_MAX, "sk " // skim
+/*		snprintf(cmd, sizeof(cmd), "sk " // skim
 				"%s --margin=0,0,0,%d --color=16 "
 				"--read0 --ansi --inline-info "
 				"--layout=reverse-list --query=\"%s\" %s %s "
@@ -490,7 +490,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 				multi ? "--multi --bind tab:toggle+down" : "",
 				finder_in_file, finder_out_file); */
 	} else {
-		snprintf(cmd, PATH_MAX, "fzy "
+		snprintf(cmd, sizeof(cmd), "fzy "
 				"--read-null --pad=%d --query=\"%s\" --reverse "
 				"--tab-accepts --right-accepts --left-aborts "
 				"--lines=%zu %s %s < %s > %s",
