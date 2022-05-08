@@ -514,6 +514,21 @@ remove_file_from_trash(char *name)
 	char rm_file[PATH_MAX], rm_info[PATH_MAX];
 	snprintf(rm_file, PATH_MAX, "%s/%s", trash_files_dir, name);
 	snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir, name);
+
+	int err = 0, err_file = 0, err_info = 0;
+	struct stat a;
+	if (stat(rm_file, &a) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rm_file, strerror(errno));
+		err_file = err = errno;
+	}
+	if (stat(rm_info, &a) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rm_info, strerror(errno));
+		err_info = err = errno;
+	}
+
+	if (err_file != EXIT_SUCCESS || err_info != EXIT_SUCCESS)
+		return err;
+
 	char *cmd[] = {"rm", "-r", rm_file, rm_info, NULL};
 	return launch_execve(cmd, FOREGROUND, E_NOFLAG);
 }
@@ -540,7 +555,7 @@ remove_from_trash(char **args)
 			free(d);
 		}
 
-		if (autols == 1)
+		if (autols == 1 && exit_status == EXIT_SUCCESS)
 			reload_dirlist();
 		print_reload_msg(_("%zu file(s) removed from the trash can\n"), removed_files);
 		print_reload_msg(_("%zu trashed file(s)\n"), trash_n - removed_files);

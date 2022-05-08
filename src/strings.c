@@ -38,7 +38,6 @@
 #endif
 #include <limits.h>
 #include <dirent.h>
-#include <readline/readline.h>
 
 #include "aux.h"
 #include "checks.h"
@@ -1917,12 +1916,9 @@ parse_input_str(char *str)
 	&& strcmp(substr[0], "ds") != 0 && strcmp(substr[0], "desel") != 0
 	&& strcmp(substr[0], "u") != 0 && strcmp(substr[0], "undel") != 0
 	&& strcmp(substr[0], "untrash") != 0
-	&& strncmp(rl_line_buffer, "t rm ", 5) != 0
-	&& strncmp(rl_line_buffer, "t del ", 6) != 0
-	&& strncmp(rl_line_buffer, "tr del ", 7) != 0
-	&& strncmp(rl_line_buffer, "tr rm ", 6) != 0
-	&& strncmp(rl_line_buffer, "trash del ", 10) != 0
-	&& strncmp(rl_line_buffer, "trash rm ", 9) != 0) {
+	&& !( *substr[0] == 't' && (!substr[0][1] || strcmp(substr[0], "tr") == 0
+	|| strcmp(substr[0], "trash") == 0) && *substr[1] == 'd'
+	&& strcmp(substr[1], "del") == 0 ) ) {
 		/* 1) Expand glob
 		2) Create a new array, say comm_array_glob, large enough to store
 		   the expanded glob and the remaining (non-glob) arguments
