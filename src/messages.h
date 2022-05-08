@@ -598,7 +598,7 @@ Examples:\n\
 
 #define TRASH_USAGE "Send one or multiple files to the trash can\n\
 Usage:\n\
-  t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]\n\n\
+  t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del]\n\n\
 Examples:\n\
 - Trash the file whose ELN is 12:\n\
     t 12\n\
@@ -867,7 +867,7 @@ parameters.\n\n\
  splash\n\
  st, sort [METHOD] [rev]\n\
  stats\n\
- t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]\n\
+ t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del]\n\
  te [FILE(s)]\n\
  tips\n\
  u, undel, untrash [*, a, all]\n\
