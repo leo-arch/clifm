@@ -598,7 +598,7 @@ Examples:\n\
 
 #define TRASH_USAGE "Send one or multiple files to the trash can\n\
 Usage:\n\
-  t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del]\n\n\
+  t, tr, trash [ELN/FILE ... n] [ls, list] [clear, empty] [del]\n\n\
 Examples:\n\
 - Trash the file whose ELN is 12:\n\
     t 12\n\
@@ -608,6 +608,8 @@ Examples:\n\
     t (or 't ls' or 't list')\n\
 - Remove/delete trashed files using a menu:\n\
     t del\n\
+- Remove all files from the trash can:\n\
+    t empty\n\
 - Untrash all trashed files (restore them to their original location):\n\
     u *\n\
 - Untrash files using a menu:\n\
@@ -867,7 +869,7 @@ parameters.\n\n\
  splash\n\
  st, sort [METHOD] [rev]\n\
  stats\n\
- t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del]\n\
+ t, tr, trash [ELN/FILE ... n] [ls, list] [clear, empty] [del]\n\
  te [FILE(s)]\n\
  tips\n\
  u, undel, untrash [*, a, all]\n\
@@ -1005,6 +1007,7 @@ bl sel             Create symbolic links for all selected files\n\
 te *.sh            Toggle the executable bit on all .sh files\n\
 t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
 t del              Select trashed files and remove them permanently\n\
+t empty            Empty the trash can\n\
 u                  Undelete trashed files\n\
 bm a mydir         Bookmark the directory named 'mydir'\n\
 bm d mybm          Remove the bookmark named 'mybm'\n\

@@ -1137,6 +1137,9 @@ expand_tag(char ***args, const int tag_index)
 char **
 parse_input_str(char *str)
 {
+	if (!str)
+		return (char **)NULL;
+
 	register size_t i = 0;
 	int fusedcmd_ok = 0;
 #ifndef _NO_TAGS

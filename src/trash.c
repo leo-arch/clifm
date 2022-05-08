@@ -326,7 +326,7 @@ trash_clear(void)
 	if (ret == EXIT_SUCCESS) {
 		if (autols == 1)
 			reload_dirlist();
-		print_reload_msg(_("Trash can cleared\n"));
+		print_reload_msg(_("Trash can emptied\n"));
 	}
 
 	return exit_status;
@@ -508,6 +508,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	return EXIT_SUCCESS;
 }
 
+/* Remove NAME file and the corresponding .trashinfo file from the trash can */
 static int
 remove_file_from_trash(char *name)
 {
@@ -1191,7 +1192,8 @@ trash_function(char **args)
 	if (*args[1] == 'd' && strcmp(args[1], "del") == 0)
 		return remove_from_trash(args);
 
-	if (*args[1] == 'c' && strcmp(args[1], "clear") == 0)
+	if ((*args[1] == 'c' && strcmp(args[1], "clear") == 0)
+	|| (*args[1] == 'e' && strcmp(args[1], "empty") == 0))
 		return trash_clear();
 	else {
 		return trash_files_args(args);
