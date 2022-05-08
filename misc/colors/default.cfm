@@ -180,7 +180,7 @@ WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
 DividingLine="-"
 
 # If FZF TAB completion mode is enabled, pass these options to fzf:
-FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2:bold' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
+FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
 
 # Same options, but colorless
 #FzfTabOptions="--color='bw' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
