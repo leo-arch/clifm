@@ -120,8 +120,7 @@ select_file(char *file)
 
 		new_sel++;
 	} else {
-		fprintf(stderr, _("%s: sel: %s: Already selected\n"),
-		    PROGRAM_NAME, file);
+		fprintf(stderr, _("%s: sel: %s: Already selected\n"), PROGRAM_NAME, file);
 	}
 
 	return new_sel;
@@ -131,7 +130,7 @@ static int
 sel_glob(char *str, const char *sel_path, mode_t filetype)
 {
 	if (!str || !*str)
-		return -1;
+		return (-1);
 
 	glob_t gbuf;
 	char *pattern = str;
@@ -146,7 +145,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 
 	if (ret == GLOB_NOSPACE || ret == GLOB_ABORTED) {
 		globfree(&gbuf);
-		return -1;
+		return (-1);
 	}
 
 	if (ret == GLOB_NOMATCH) {
@@ -188,7 +187,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				    sel_path, strerror(errno));
 				globfree(&gbuf);
-				return -1;
+				return (-1);
 			}
 
 			matches = (char **)xnmalloc((size_t)ret + 2, sizeof(char *));
@@ -312,7 +311,7 @@ static int
 sel_regex(char *str, const char *sel_path, mode_t filetype)
 {
 	if (!str || !*str)
-		return -1;
+		return (-1);
 
 	char *pattern = str;
 
@@ -328,7 +327,7 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 				"expression\n"), PROGRAM_NAME, str);
 
 		regfree(&regex);
-		return -1;
+		return (-1);
 	}
 
 	int new_sel = 0, i;
@@ -597,7 +596,7 @@ is_sel_file_in_cwd(const int index)
 } */
 
 static int
-print_sel_results(const int new_sel, const char *sel_path, const char *pattern)
+print_sel_results(const int new_sel, const char *sel_path, const char *pattern, const int err)
 {
 	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
 	&& save_sel() != EXIT_SUCCESS) {
@@ -643,9 +642,10 @@ print_sel_results(const int new_sel, const char *sel_path, const char *pattern)
 		return EXIT_SUCCESS;
 	} */
 
-	if (autols == 1)
+	if (autols == 1 && err == 0)
 		reload_dirlist();
-	print_reload_msg(_("%zu file(s) selected\n"), sel_n);
+	print_reload_msg(_("%zu file(s) selected\n"), new_sel);
+	print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
 	return EXIT_SUCCESS;
 
 	/* Print entries */
@@ -686,7 +686,7 @@ construct_sel_filename(const char *sel_path, const char *dir, const char *name)
 }
 
 static int
-select_filename(char *arg, const char *sel_path, char *dir)
+select_filename(char *arg, const char *sel_path, char *dir, int *err)
 {
 	int new_sel = 0;
 
@@ -705,33 +705,45 @@ select_filename(char *arg, const char *sel_path, char *dir)
 	if (*arg != '/') {
 		char *tmp = construct_sel_filename(sel_path, dir, name);
 		struct stat attr;
-		if (lstat(tmp, &attr) == -1)
+		if (lstat(tmp, &attr) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg, strerror(errno));
-		else
-			new_sel += select_file(tmp);
+			(*err)++;
+		} else {
+			int r = select_file(tmp);
+			new_sel += r;
+			if (r == 0)
+				(*err)++;
+		}
 		free(tmp);
 		return new_sel;
 	}
 
 	struct stat a;
-	if (lstat(arg, &a) == -1)
+	if (lstat(arg, &a) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
-	else
-		new_sel += select_file(name);
+		(*err)++;
+	} else {
+		int r = select_file(name);
+		new_sel += r;
+		if (r == 0)
+			(*err)++;
+	}
 
 	return new_sel;
 }
 
 static int
-select_pattern(char *arg, char *sel_path, char *dir, mode_t filetype)
+select_pattern(char *arg, char *sel_path, char *dir, mode_t filetype, int *err)
 {
 	/* GLOB */
 	int ret = sel_glob(arg, sel_path ? dir : NULL, filetype ? filetype : 0);
 
 	/* If glob failed, try REGEX */
 	if (ret <= 0)
-		return sel_regex(arg, sel_path ? dir : NULL, filetype);
+		ret = sel_regex(arg, sel_path ? dir : NULL, filetype);
 
+	if (ret == -1)
+		(*err)++;
 	return ret;
 }
 
@@ -747,7 +759,7 @@ sel_function(char **args)
 	}
 
 	mode_t filetype = 0;
-	int i, ifiletype = 0, isel_path = 0, new_sel = 0;
+	int i, ifiletype = 0, isel_path = 0, new_sel = 0, err = 0;
 
 	char *dir = (char *)NULL, *pattern = (char *)NULL;
 	char *sel_path = parse_sel_params(&args, &ifiletype, &filetype, &isel_path);
@@ -766,13 +778,13 @@ sel_function(char **args)
 		}
 
 		if (!pattern)
-			new_sel += select_filename(args[i], sel_path, dir);
+			new_sel += select_filename(args[i], sel_path, dir, &err);
 		else
-			new_sel += select_pattern(args[i], sel_path, dir, filetype);
+			new_sel += select_pattern(args[i], sel_path, dir, filetype, &err);
 	}
 
 	free(dir);
-	return print_sel_results(new_sel, sel_path, pattern);
+	return print_sel_results(new_sel, sel_path, pattern, err);
 }
 
 void
@@ -1121,12 +1133,13 @@ end_deselect(const int err, char ***args)
 {
 	int exit_status = EXIT_SUCCESS;
 
-	size_t argsbk = args_n;
+	size_t argsbk = args_n, desel_files = 0;
 	if (args_n > 0) {
 		size_t i;
 		for (i = 1; i <= args_n; i++) {
 			free((*args)[i]);
 			(*args)[i] = (char *)NULL;
+			desel_files++;
 		}
 		args_n = 0;
 	}
@@ -1146,9 +1159,14 @@ end_deselect(const int err, char ***args)
 	if (err)
 		return EXIT_FAILURE;
 
-	if (autols == 1)
+	if (autols == 1 && exit_status == EXIT_SUCCESS)
 		reload_dirlist();
-	print_reload_msg("%zu selected file(s)\n", sel_n);
+	if (argsbk > 0) {
+		print_reload_msg(_("%zu file(s) deselected\n"), desel_files);
+		print_reload_msg("%zu total selected file(s)\n", sel_n);
+	} else {
+		print_reload_msg("%zu selected file(s)\n", sel_n);
+	}
 
 	return exit_status;
 }
