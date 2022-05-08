@@ -478,6 +478,7 @@ extern int watch;
 #define IS_HELP(s) (*(s) == '-' && (((s)[1] == 'h' && !(s)[2]) \
 				|| strcmp((s), "--help") == 0))
 
+/* Terminal escape codes */
 #ifndef __HAIKU__
 # define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
 #else
@@ -1015,6 +1016,10 @@ extern pid_t own_pid;
 extern char
 	div_line_char[NAME_MAX],
 	hostname[HOST_NAME_MAX],
+#ifndef _NO_FZF
+	finder_in_file[PATH_MAX],
+	finder_out_file[PATH_MAX],
+#endif /* _NO_FZF */
 
 	*actions_file,
 	*alt_config_dir,

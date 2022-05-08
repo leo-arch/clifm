@@ -253,6 +253,10 @@ size_t
 char
 	div_line_char[NAME_MAX],
 	hostname[HOST_NAME_MAX],
+#ifndef _NO_FZF
+	finder_in_file[PATH_MAX],
+	finder_out_file[PATH_MAX],
+#endif /* _NO_FZF */
 
 	*actions_file = (char *)NULL,
 	*alt_bm_file = (char *)NULL,
@@ -852,6 +856,16 @@ get_hostname(void)
 	}
 }
 
+#ifndef _NO_FZF
+/* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)*/
+static inline void
+set_finder_paths(void)
+{
+	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.finder.in", P_tmpdir, PNL);
+	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.finder.out", P_tmpdir, PNL);
+}
+#endif /* _NO_FZF */
+
 				/**
 				 * #############################
 				 * #           MAIN            #
@@ -941,6 +955,9 @@ main(int argc, char *argv[])
 	check_options();
 	set_sel_file();
 	create_tmp_files();
+#ifndef _NO_FZF
+	set_finder_paths();
+#endif /* _NO_FZF */
 	load_actions();
 	get_aliases();
 

@@ -234,8 +234,8 @@ reinsert_slashes(char *str)
 
 #ifndef _NO_FZF
 /* FIXME: These shouldn't be fixed paths */
-#define FINDER_IN "/tmp/clifm.finder.in"
-#define FINDER_OUT "/tmp/clifm.finder.out"
+//#define FINDER_IN "/tmp/clifm.finder.in"
+//#define FINDER_OUT "/tmp/clifm.finder.out"
 
 static char *
 fzftab_color(char *filename, const struct stat *attr)
@@ -479,7 +479,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 				case_sens_path_comp ? "+i" : "-i",
 				lw ? lw : "", colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down" : "",
-				FINDER_IN, FINDER_OUT);
+				finder_in_file, finder_out_file);
 /*		snprintf(cmd, PATH_MAX, "sk " // skim
 				"%s --margin=0,0,0,%d --color=16 "
 				"--read0 --ansi --inline-info "
@@ -488,7 +488,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 				*height_str ? height_str : "", *offset,
 				lw ? lw : "", colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down" : "",
-				FINDER_IN, FINDER_OUT); */
+				finder_in_file, finder_out_file); */
 	} else {
 		snprintf(cmd, PATH_MAX, "fzy "
 				"--read-null --pad=%d --query=\"%s\" --reverse "
@@ -497,7 +497,7 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 				*offset, lw ? lw : "", *height,
 				colorize == 0 ? "--no-color" : "",
 				multi ? "--multi" : "",
-				FINDER_IN, FINDER_OUT);
+				finder_in_file, finder_out_file);
 	}
 
 	return launch_execle(cmd);
@@ -529,15 +529,10 @@ get_tagged_file_target(char *filename)
 
 	char *rpath = realpath(dir, NULL);
 	char *s = rpath ? rpath : filename;
-//	char *q = (char *)NULL;
 	int free_tmp = 0;
 	char *q = home_tilde(s, &free_tmp);
 	if (q && free_tmp == 1)
 		free(s);
-/*	if (user.home[1] == s[1] && strncmp(user.home, s, user_home_len) == 0) {
-		if ((q = home_tilde(s)))
-			free(s);
-	} */
 
 	return q ? q : s;
 }
@@ -546,18 +541,16 @@ static char *
 print_no_fzf_file(void)
 {
 	_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-		FINDER_OUT, strerror(errno));
-//	free(cur_tag);
-//	cur_tag = (char *)NULL;
+		finder_out_file, strerror(errno));
 	return (char *)NULL;
 }
 
-/* Recover finder (fzf/fzy) output from FINDER_OUT file
+/* Recover finder (fzf/fzy) output from FINDER_OUT_FILE file
  * Return this output or NULL in case of error */
 static inline char *
 get_fzf_output(const int multi)
 {
-	FILE *fp = fopen(FINDER_OUT, "r");
+	FILE *fp = fopen(finder_out_file, "r");
 	if (!fp)
 		return print_no_fzf_file();
 
@@ -602,10 +595,8 @@ get_fzf_output(const int multi)
 
 	free(line);
 	fclose(fp);
-	unlink(FINDER_OUT);
+	unlink(finder_out_file);
 
-//	free(cur_tag);
-//	cur_tag = (char *)NULL;
 	return buf;
 }
 
@@ -638,15 +629,10 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 		return;
 	}
 
-//	if (xargs.fzytab != 1) {
-		fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\0');
-/*	} else {
-		UNUSED(color);
-		fprintf(*fp, "%s%c", entry, '\0');
-	} */
+	fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\0');
 }
 
-/* Store possible completions (MATCHES) in FINDER_IN to pass them to the finder,
+/* Store possible completions (MATCHES) in FINDER_IN_FILE to pass them to the finder,
  * either FZF or FZY
  * Return the number of stored matches */
 static inline size_t
@@ -695,16 +681,11 @@ store_completions(char **matches, FILE *fp)
 			&& cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_BACKDIR) {
 				_path = strrchr(matches[i], '/');
 				entry = (_path && *(++_path)) ? _path : matches[i];
-			} /*else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) {
-				_path = home_tilde(matches[i], &free_path);
-				entry = _path ? _path : matches[i];
-			} */
+			}
 		}
 
 		if (*entry)
 			write_comp_to_file(entry, color, &fp);
-/*		if (free_path == 1)
-			free(_path); */
 	}
 
 	return i;
@@ -890,16 +871,16 @@ clean_rl_buffer(const char *text)
 static int
 fzftabcomp(char **matches, const char *text)
 {
-	FILE *fp = fopen(FINDER_IN, "w");
+	FILE *fp = fopen(finder_in_file, "w");
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			FINDER_IN, strerror(errno));
+			finder_in_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	int exit_status = EXIT_SUCCESS;
 
-	/* Store possible completions in FINDER_IN to pass them to FZF */
+	/* Store possible completions in FINDER_IN_FILE to pass them to FZF */
 	size_t i = store_completions(matches, fp);
 
 	fclose(fp);
@@ -980,9 +961,9 @@ fzftabcomp(char **matches, const char *text)
 	/* TAB completion cases allowing multiple selection */
 	int multi = is_multi_sel();
 
-	/* Run FZF and store the ouput into the FINDER_OUT file */
+	/* Run FZF and store the ouput into the FINDER_OUT_FILE file */
 	int ret = run_fzf(&height, &fzf_offset, query, multi);
-	unlink(FINDER_IN);
+	unlink(finder_in_file);
 
 	/* Calculate currently used lines to go back to the correct cursor
 	 * position after quitting FZF */
@@ -1002,10 +983,10 @@ fzftabcomp(char **matches, const char *text)
 	printf("\x1b[%dA", lines); /* Move up %d lines */
 
 	/* No results (the user pressed ESC) */
-	if (ret != EXIT_SUCCESS)
-/*		free(cur_tag);
-		cur_tag = (char *)NULL; */
+	if (ret != EXIT_SUCCESS) {
+		unlink(finder_out_file);
 		return clean_rl_buffer(text);
+	}
 
 	char *buf = get_fzf_output(multi);
 	if (!buf)
@@ -1265,12 +1246,14 @@ AFTER_USUAL_COMPLETION:
 		return EXIT_FAILURE;
 	}
 
+#ifndef _NO_FZF
 	/* Common prefix for multiple matches is appended to the input query.
 	 * Let's rise a flag to know if we should reinsert the original query
 	 * in case the user cancels the completion (pressing ESC) */
 	int common_prefix_added = 0;
 	if (fzftab == 1 && matches[1] && strcmp(matches[0], text) != 0)
 		common_prefix_added = 1;
+#endif /* _NO_FZF */
 
 	register size_t i;
 	int should_quote;
@@ -1788,8 +1771,6 @@ RESTART:
 		free(matches[i]);
 	free(matches);
 	free(text);
-//	free(cur_tag);
-//	cur_tag = (char *)NULL;
 
 	return EXIT_SUCCESS;
 }
