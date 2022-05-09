@@ -194,15 +194,11 @@ extern int watch;
 #define ROOT_USR      (1 << 15)
 #define GUI           (1 << 16)
 #define IS_USRVAR_DEF (1 << 17)
+#define FZF_BIN_OK    (1 << 18)
 
 /* Used by the refresh on resize feature */
-#define DELAYED_REFRESH    (1 << 18)
-/*#define RUNNING_CMD_FG     (1 << 18)
-#define RUNNING_SHELL_CMD  (1 << 19)
-#define DELAYED_REFRESH    (1 << 20)
-#define RELOADING_BINARIES (1 << 21) */
-
-#define PATH_PROGRAMS_ALREADY_LOADED (1 << 19)
+#define DELAYED_REFRESH    (1 << 19)
+#define PATH_PROGRAMS_ALREADY_LOADED (1 << 20)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1

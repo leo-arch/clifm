@@ -1170,7 +1170,7 @@ external_arguments(int argc, char **argv)
 	    {"no-follow-symlink", no_argument, 0, 40},
 		{"no-control-d-exit", no_argument, 0, 41},
 		{"int-vars", no_argument, 0, 42},
-		{"fzftab", no_argument, 0, 43},
+		{"std-tab-comp", no_argument, 0, 43},
 		{"no-warning-prompt", no_argument, 0, 44},
 		{"mnt-udisks2", no_argument, 0, 45},
 		{"secure-env", no_argument, 0, 46},
@@ -1345,6 +1345,7 @@ RUN:
 		case 40: xargs.follow_symlinks = follow_symlinks = 0; break;
 		case 41: xargs.control_d_exits = control_d_exits = 0; break;
 		case 42: xargs.int_vars = int_vars = 1; break;
+/*
 #ifndef _NO_FZF
 		case 43: {
 			path_n = get_path_env();
@@ -1360,11 +1361,16 @@ RUN:
 			}
 			}
 			break;
-#else
+#else */
 		case 43:
-			fprintf(stderr, _("%s: fzftab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
+#ifndef _NO_FZF
+			xargs.fzftab = 0;
 #endif /* !_NO_FZF */
+			fzftab = 0;
+			break;
+/*			fprintf(stderr, _("%s: fzftab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE); */
+//#endif /* !_NO_FZF */
 
 		case 44: xargs.warning_prompt = warning_prompt = 0; break;
 		case 45: xargs.mount_cmd = MNT_UDISKS2; break;
@@ -2544,10 +2550,17 @@ check_options(void)
 	if (fzftab == UNSET) {
 		if (xargs.fzftab == UNSET) {
 			char *val = getenv("CLIFM_USE_FZF");
-			if (val && (*val == '1' || (*val == 't' && strcmp(val, "true") == 0)))
+			if (val && (*val == '1' || (*val == 't' && strcmp(val, "true") == 0))) {
 				fzftab = 1;
-			else
-				fzftab = DEF_FZFTAB;
+			} else {
+				/* This flag will be true only when reloading the config file,
+				 * because the check for the fzf binary is made at startup after
+				 * reading the config file */
+				if (flags & FZF_BIN_OK)
+					fzftab = 1;
+			}
+/*			else
+				fzftab = DEF_FZFTAB; */
 		} else {
 			fzftab = xargs.fzftab;
 		}

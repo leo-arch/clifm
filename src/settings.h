@@ -190,7 +190,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_FILES_COUNTER 1
 #define DEF_FOLLOW_SYMLINKS 1
 #define DEF_FULL_DIR_SIZE 0
-#define DEF_FZFTAB 0
+//#define DEF_FZFTAB 0
 #define DEF_FZF_WIN_HEIGHT 40 /* Max win percentage taken by FZF */
 #define DEF_HIGHLIGHT 1
 #define DEF_HIST_STATUS 1

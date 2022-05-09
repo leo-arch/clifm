@@ -146,6 +146,9 @@ check_third_party_cmds(void)
 
 		if (strcmp(bin_commands[i], "fzf") == 0) {
 			fzfok = 1;
+			flags |= FZF_BIN_OK;
+			if (fzftab == UNSET)
+				fzftab = 1;
 		} else if (strcmp(bin_commands[i], "udisksctl") == 0) {
 			udisks2ok = 1;
 		} else {

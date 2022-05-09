@@ -47,15 +47,12 @@
 #include "autocmds.h"
 
 #ifndef _NO_FZF
-/* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)*/
+/* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)
+ * Let's do this even if fzftab is not enabled at startup, because this feature
+ * can be enabled in place editing the config file */
 void
 set_finder_paths(void)
 {
-	if (fzftab == 0) {
-		*finder_in_file = *finder_out_file = '\0';
-		return;
-	}
-
 	char *p = xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir;
 	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.finder.in", p, PNL);
 	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.finder.out", p, PNL);
@@ -792,8 +789,9 @@ WarningPrompt=%s\n\n",
 		DEF_WARNING_PROMPT == 1 ? "true" : "false");
 
 	fprintf(config_fp,
-		"# TAB completion mode: either 'standard' (default) or 'fzf'\n\
-TabCompletionMode=%s\n\n"
+		"# TAB completion mode: either 'standard' or 'fzf'. Defaults to 'fzf' if\n\
+# the binary is found in PATH. Otherwise the 'standard' mode is used\n\
+TabCompletionMode=\n\n"
 
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
@@ -876,7 +874,7 @@ ExpandBookmarks=%s\n\n"
 # well, so that the color per extension feature is disabled.\n\
 LightMode=%s\n\n",
 
-		DEF_FZFTAB == 1 ? "fzf" : "standard",
+//		DEF_FZFTAB == 1 ? "fzf" : "standard",
 		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
 		PROGRAM_NAME,
