@@ -59,7 +59,8 @@ PromptStyle=default
 # scheme file
 WarningPrompt=true
 
-# TAB completion mode: either 'standard' (default) or 'fzf'
+# TAB completion mode: either 'standard' or 'fzf'. Defaults to 'fzf' if
+# the binary is found in PATH. Othwerwise, the standard mode is used
 TabCompletionMode=
 
 # MaxPath is only used for the /p option of the prompt: the current
