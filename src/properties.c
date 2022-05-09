@@ -640,11 +640,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		   "%s%u:%-*u%s %s%s%s %s\n",
 	    colorize ? props->icon_color : "",
 	    icons ? props->icon : "", icons ? ' ' : 0, df_c,
-#else
-	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
-		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
-	       "%s%u:%-*u%s %s%s%s %s\n",
-#endif
+
 	    colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
 	    light_mode ? "" : df_c, pad, "", df_c,
@@ -656,6 +652,22 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	    cid, props->uid, ug_pad, props->gid, cend,
 	    cdate, *mod_time ? mod_time : "?", cend,
 	    last_field);
+#else
+	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
+		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
+	       "%s%u:%-*u%s %s%s%s %s\n",
+	    colorize ? props->color : "",
+		(wchar_t *)tname, trim_diff,
+	    light_mode ? "" : df_c, pad, "", df_c,
+	    trim ? tt_c : "", trim ? '~' : 0, t_ctype, file_type, cend,
+	    cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
+	    cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
+	    co1, read_others, co2, write_others, co3, exec_others, cend,
+	    is_acl(props->name) ? "+" : "",
+	    cid, props->uid, ug_pad, props->gid, cend,
+	    cdate, *mod_time ? mod_time : "?", cend,
+	    last_field);
+#endif
 
 	free(t_ctype);
 	free(size_type);

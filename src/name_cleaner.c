@@ -378,10 +378,11 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 	for (i = 0; i < *n; i++) {
 #ifndef __HAIKU__
 		dprintf(fd, "original: %s\nreplacement: %s\n\n",
+			bfiles[i].original, bfiles[i].replacement);
 #else
 		fprintf(fp, "original: %s\nreplacement: %s\n\n",
-#endif
 			bfiles[i].original, bfiles[i].replacement);
+#endif
 	}
 	size_t total_files = i;
 

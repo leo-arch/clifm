@@ -874,7 +874,6 @@ ExpandBookmarks=%s\n\n"
 # well, so that the color per extension feature is disabled.\n\
 LightMode=%s\n\n",
 
-//		DEF_FZFTAB == 1 ? "fzf" : "standard",
 		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
 		PROGRAM_NAME,
@@ -1101,13 +1100,9 @@ create_def_cscheme(void)
 
 		    "# Same as FiletypeColors, but for file extensions. The format is always\n\
 # *.EXT=COLOR\n"
-#ifndef _NO_ICONS
-		    "ExtColors=\"%s\"\n\n"
 
-		    "DirIconColor=\"00;33\"\n\n"
-#else
 		    "ExtColors=\"%s\"\n\n"
-#endif
+		    "DirIconColor=\"00;33\"\n\n"
 			"DividingLine=\"%s\"\n\n"
 		    "Prompt=\"%s\"\n\n"
 		    "WarningPromptStr=\"%s\"\n\n"
