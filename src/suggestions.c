@@ -1710,8 +1710,7 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
-
-	if (nwords >= 2)
+	if (nwords > 1)
 		goto NO_SUGGESTION;
 
 CHECK_FIRST_WORD:

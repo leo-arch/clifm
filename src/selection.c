@@ -141,7 +141,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 		invert = 1;
 	}
 
-	ret = glob(pattern, 0, NULL, &gbuf);
+	ret = glob(pattern, GLOB_BRACE, NULL, &gbuf);
 
 	if (ret == GLOB_NOSPACE || ret == GLOB_ABORTED) {
 		globfree(&gbuf);
