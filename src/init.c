@@ -2549,18 +2549,11 @@ check_options(void)
 #ifndef _NO_FZF
 	if (fzftab == UNSET) {
 		if (xargs.fzftab == UNSET) {
-			char *val = getenv("CLIFM_USE_FZF");
-			if (val && (*val == '1' || (*val == 't' && strcmp(val, "true") == 0))) {
+			/* This flag will be true only when reloading the config file,
+			 * because the check for the fzf binary is made at startup AFTER
+			 * reading the config file (check_third_party_cmds() in checks.c) */
+			if (flags & FZF_BIN_OK)
 				fzftab = 1;
-			} else {
-				/* This flag will be true only when reloading the config file,
-				 * because the check for the fzf binary is made at startup after
-				 * reading the config file */
-				if (flags & FZF_BIN_OK)
-					fzftab = 1;
-			}
-/*			else
-				fzftab = DEF_FZFTAB; */
 		} else {
 			fzftab = xargs.fzftab;
 		}

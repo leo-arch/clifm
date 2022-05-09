@@ -1848,6 +1848,9 @@ quick_help(void)
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
+
+	if (autols == 1)
+		reload_dirlist();
 	return EXIT_SUCCESS;
 #endif
 }
