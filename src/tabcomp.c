@@ -1704,6 +1704,7 @@ CALC_OFFSET:
 
 		if (!wrong_cmd && colorize && cur_comp_type == TCMP_CMD)
 			fputs(tx_c, stdout);
+		rl_reset_line_state();
 
 #ifndef _NO_FZF
 RESET_PATH:
