@@ -662,11 +662,11 @@ print_sel_results(const int new_sel, const char *sel_path, const char *pattern, 
 }
 
 static char *
-construct_sel_filename(const char *sel_path, const char *dir, const char *name)
+construct_sel_filename(const char *dir, const char *name)
 {
 	char *f = (char *)NULL;
 
-	if (!sel_path) {
+	if (!dir) {
 		if (*workspaces[cur_ws].path == '/'
 		&& !*(workspaces[cur_ws].path + 1)) {
 			f = (char *)xnmalloc(strlen(name) + 2, sizeof(char));
@@ -686,7 +686,7 @@ construct_sel_filename(const char *sel_path, const char *dir, const char *name)
 }
 
 static int
-select_filename(char *arg, const char *sel_path, char *dir, int *err)
+select_filename(char *arg, char *dir, int *err)
 {
 	int new_sel = 0;
 
@@ -703,7 +703,7 @@ select_filename(char *arg, const char *sel_path, char *dir, int *err)
 		name += 2;
 
 	if (*arg != '/') {
-		char *tmp = construct_sel_filename(sel_path, dir, name);
+		char *tmp = construct_sel_filename(dir, name);
 		struct stat attr;
 		if (lstat(tmp, &attr) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg, strerror(errno));
@@ -733,14 +733,14 @@ select_filename(char *arg, const char *sel_path, char *dir, int *err)
 }
 
 static int
-select_pattern(char *arg, char *sel_path, char *dir, mode_t filetype, int *err)
+select_pattern(char *arg, char *dir, mode_t filetype, int *err)
 {
 	/* GLOB */
-	int ret = sel_glob(arg, sel_path ? dir : NULL, filetype ? filetype : 0);
+	int ret = sel_glob(arg, dir ? dir : NULL, filetype ? filetype : 0);
 
 	/* If glob failed, try REGEX */
 	if (ret <= 0)
-		ret = sel_regex(arg, sel_path ? dir : NULL, filetype);
+		ret = sel_regex(arg, dir ? dir : NULL, filetype);
 
 	if (ret == -1)
 		(*err)++;
@@ -778,9 +778,9 @@ sel_function(char **args)
 		}
 
 		if (!pattern)
-			new_sel += select_filename(args[i], sel_path, dir, &err);
+			new_sel += select_filename(args[i], dir, &err);
 		else
-			new_sel += select_pattern(args[i], sel_path, dir, filetype, &err);
+			new_sel += select_pattern(args[i], dir, filetype, &err);
 	}
 
 	free(dir);
