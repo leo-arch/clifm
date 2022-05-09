@@ -52,7 +52,6 @@ args=(
 	'--enable-logs[enable program logs]'
 	'--expand-bookmarks[expand bookmark names into the corresponding bookmark paths]'
 	'--full-dir-size[print size of directories and their contents in long view mode]'
-	'--fzftab[enable FZF TAB completion mode]'
 	'--icons[enable icons]'
 	'--icons-use-file-color[icons color follows file color]'
 	'--int-vars[enable internal variables]'
@@ -91,6 +90,7 @@ args=(
 	'--secure-env-full[run in a sanitized environment (full mode)]'
 	'--share-selbox[make the Selection Box common to different profiles]'
 	'--sort-reverse[sort in reverse order]'
+	'--std-tab-comp[use standard TAB completion]'
 	'--trash-as-rm[the 'r' command executes 'trash' instead of 'rm']'
 	'*:filename:_files'
 )

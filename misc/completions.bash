@@ -86,7 +86,6 @@ _clifm ()
         --enable-logs
         --expand-bookmarks
         --full-dir-size
-        --fzftab
         --icons
         --icons-use-file-color
         --list-and-quit
@@ -124,6 +123,7 @@ _clifm ()
         --secure-env-full
         --share-selbox
         --sort-reverse
+        --std-tab-comp
         --trash-as-rm
     )
 
