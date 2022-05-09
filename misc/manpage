@@ -301,9 +301,6 @@ expand bookmark names into the corresponding bookmark paths and enable TAB compl
 .B \-\-full\-dir\-size
 if running in long view, print directories size and their contents
 .TP
-.B \-\-fzftab
-enable the FZF mode for TAB completion (See the \fBBUILT\-IN EXPANSIONS\fR section below)
-.TP
 .B \-\-icons
 enable icons. Depends on the \fBicons-in-terminal\fR project.
 .TP
@@ -421,6 +418,9 @@ print sizes in powers of 1000, as defined in the International System of Units (
 .TP
 .B \-\-sort\-reverse
 sort in reverse order, for example: z-a instead of a-z, which is the default order
+.TP
+.B \-\-std\-tab\-comp
+use the standard mode (readline) for TAB completion
 .TP
 .B \-\-trash\-as\-rm
 the \fIr\fR command executes the built-in 'trash' (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
