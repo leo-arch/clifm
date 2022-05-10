@@ -135,14 +135,14 @@ clear_suggestion(const int free_sug)
 
 	if (suggestion.nlines > 1) {
 		/* Save cursor position */
-		get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
+		get_cursor_position(&curcol, &currow);
 
 		int i = (int)suggestion.nlines;
 		while (--i > 0) {
 			/* Move the cursor to the beginning of the next line */
-			if (write(STDOUT_FILENO, "\x1b[1E", 4) <= 0) {/* Avoid compiler warning */}
+			if (write(STDOUT_FILENO, CNL, CNL_LEN) <= 0) {/* Avoid compiler warning */}
 			/* Delete the line */
-			if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {/* Avoid compiler warning */}
+			if (write(STDOUT_FILENO, DEL_LINE, DEL_LINE_LEN) <= 0) {/* Avoid compiler warning */}
 		}
 		/* Restore cursor position */
 		printf("\x1b[%d;%dH", currow, curcol);
@@ -309,7 +309,9 @@ static inline void
 _print_suggestion(const char *str, const size_t offset, const char *color)
 {
 	char *wname = truncate_name(str);
-	printf("%s%s", color, (wname ? wname : str) + offset - (offset ? 1 : 0));
+	fputs(color, stdout);
+	fputs((wname ? wname : str) + offset - (offset ? 1 : 0), stdout);
+/*	printf("%s%s", color, (wname ? wname : str) + offset - (offset ? 1 : 0)); */
 	fflush(stdout);
 	free(wname);
 }
@@ -330,7 +332,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	correct_offset(&offset);
 
 	/* Store current cursor position in CURROW and CURCOL (globals) */
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
+	get_cursor_position(&curcol, &currow);
 
 	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump */
 	size_t str_len = strlen(str), slines = 0;
@@ -1266,7 +1268,6 @@ print_warning_prompt(const char c)
 		rl_save_prompt();
 
 		char *decoded_prompt = decode_prompt(wprompt_str);
-		/* Print the warning prompt */
 		rl_set_prompt(decoded_prompt);
 		free(decoded_prompt);
 	}
@@ -1327,7 +1328,6 @@ rl_suggestions(const unsigned char c)
 	if (rl_end == 0 || c == '\n') {
 		if (wrong_cmd)
 			recover_from_wrong_cmd();
-/*		wrong_cmd_line = 0; */
 	}
 
 	/* We need a copy of the complete line */
@@ -1440,7 +1440,8 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'j': /* j command */
-		if (lb[1] == ' ' && lb[2] == '-' && (lb[3] == 'h' || strncmp(lb + 2, "--help", strlen(lb + 2)) == 0))
+		if (lb[1] == ' ' && lb[2] == '-' && (lb[3] == 'h'
+		|| strncmp(lb + 2, "--help", strlen(lb + 2)) == 0))
 			break;
 		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'o'
 		|| lb[1] == 'p') && lb[2] == ' ')) {
@@ -1771,7 +1772,7 @@ NO_SUGGESTION:
 	 * in the current input sequence. This is mainly to avoid erasing
 	 * the suggestion if moving thought the text via the arrow keys */
 	if (suggestion.printed) {
-		if (!strchr(word, '\x1b')) {
+		if (!strchr(word, _ESC)) {
 			clear_suggestion(CS_FREEBUF);
 			goto FAIL;
 		} else {
@@ -1794,7 +1795,7 @@ SUCCESS:
 			rl_dispatching = 0;
 		}
 
-		fputs("\x1b[0m", stdout);
+		fputs(NC, stdout);
 		suggestion.printed = 1;
 		/* Restore color */
 		if (!wrong_cmd) {
@@ -1804,7 +1805,7 @@ SUCCESS:
 		}
 	} else {
 		if (wrong_cmd) {
-			fputs("\x1b[0m", stdout);
+			fputs(NC, stdout);
 			fputs(wp_c, stdout);
 		}
 		suggestion.printed = 0;

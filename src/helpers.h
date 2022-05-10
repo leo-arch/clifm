@@ -226,12 +226,13 @@ extern int watch;
 #define FOREGROUND 0
 
 /* A few fixed colors */
-#define GRAY   "\x1b[1;30m"
-#define _RED   "\x1b[1;31m"
-#define _GREEN "\x1b[0;32m"
-#define D_CYAN "\x1b[0;36m"
-#define BOLD   "\x1b[1m"
-#define NC     "\x1b[0m" /* Reset color to terminal defaults */
+#define GRAY    "\x1b[1;30m"
+#define _RED    "\x1b[1;31m"
+#define _GREEN  "\x1b[0;32m"
+#define _BGREEN "\x1b[1;32m"
+#define D_CYAN  "\x1b[0;36m"
+#define BOLD    "\x1b[1m"
+#define NC      "\x1b[0m"    /* Reset color to terminal defaults */
 
 /* Format to use for suggestions when running colorless
  * There is no universal solution for this: the Linux console does not
@@ -249,10 +250,6 @@ extern int watch;
  * non-printing chars. This is specially useful for the prompt, i.e.,
  * when passing color codes to readline */
 #define RL_NC    "\001\x1b[0m\002"
-
-#define DLFC     "\x1b[0K"         /* Delete line from cursor */
-#define CNL      "\x1b[1E"         /* Move the cursor to beginning next line*/
-#define DLFC_LEN 4                 /* Length of the above escape codes */
 
 #define UNSET -1
 
@@ -481,8 +478,21 @@ extern int watch;
 # define CLEAR fputs("\x1b[H\x1b[2J", stdout);
 #endif
 
-#define HIDE_CURSOR "\x1b[?25l"
-#define UNHIDE_CURSOR "\x1b[?25h"
+#define DLFC           "\x1b[0K"     /* Delete line from cursor */
+#define DLFC_LEN       4
+#define CNL            "\x1b[1E"     /* Move the cursor to beginning next line*/
+#define CNL_LEN        4
+#define DEL_LINE       "\x1b[0K"
+#define DEL_LINE_LEN   4
+#define HIDE_CURSOR    "\x1b[?25l"
+#define UNHIDE_CURSOR  "\x1b[?25h"
+#define CPR            "\x1b[6n"     /* Cursor position report */
+#define CPR_LEN        4
+#define SET_RVIDEO     "\x1b[?5h"    /* Enable reverse video */
+#define UNSET_RVIDEO   "\x1b[?5l"
+#define LINE_WRAP      "\x1b[?7h"
+#define NO_LINE_WRAP   "\x1b[?7l"
+#define META_SENDS_ESC "\x1b[?1036h"
 
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #

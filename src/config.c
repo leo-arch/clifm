@@ -2127,7 +2127,7 @@ init_config(void)
 	if ((flags & GUI) && strncmp(getenv("TERM"), "xterm", 5) == 0)
 		/* If running Xterm, instruct it to send an escape code (27) for
 		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work */
-		printf("\x1b[?1036h"); /* metaSendsEscape = true */
+		fputs(META_SENDS_ESC, stdout); /* metaSendsEscape = true */
 }
 
 static void

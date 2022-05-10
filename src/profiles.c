@@ -281,7 +281,7 @@ profile_set(char *prof)
 		exit_status = list_dir();
 	}
 
-	print_reload_msg("Switched to profile %s%s%s\n", "\x1b[1m",	prof, "\x1b[0m");
+	print_reload_msg("Switched to profile %s%s%s\n", BOLD,	prof, NC);
 	return exit_status;
 }
 

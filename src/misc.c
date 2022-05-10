@@ -1359,8 +1359,8 @@ free_stuff(void)
 #endif
 	free(tags_dir);
 
-	/* Restore the color of the running terminal
-	fputs("\x1b[0;39;49m", stdout); */
+	/* Restore the color of the running terminal */
+	fputs("\x1b[0;39;49m", stdout);
 }
 
 /* Get current terminal dimensions and store them in TERM_COLS and
@@ -1858,7 +1858,7 @@ quick_help(void)
 void
 help_function(void)
 {
-	fputs("\x1b[0m", stdout);
+	fputs(NC, stdout);
 
 	printf("%s\n", ASCII_LOGO);
 

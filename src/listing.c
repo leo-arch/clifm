@@ -1411,10 +1411,10 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 
 	printf(_("Total size:   %s%s%s\n"
 		"Largest file: %s%s%s %c%s%s%s%c\n"),
-		colorize ? "\x1b[1;32m" : "" , t,
-		colorize ? "\x1b[0m" : "",
-		colorize ? "\x1b[1;32m" : "" , l,
-		colorize ? "\x1b[0m" : "",
+		colorize ? _BGREEN : "" , t,
+		colorize ? NC : "",
+		colorize ? _BGREEN : "" , l,
+		colorize ? NC : "",
 		name ? '[' : 0,
 		(colorize && color) ? color : "",
 		name ? name : "", df_c,

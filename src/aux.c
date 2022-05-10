@@ -247,10 +247,10 @@ rl_ring_bell(void)
 		return;
 
 	case BELL_FLASH:
-		fputs("\x1b[?5h", stderr);
+		fputs(SET_RVIDEO, stderr);
 		fflush(stderr);
 		msleep(VISIBLE_BELL_DELAY);
-		fputs("\x1b[?5l", stderr);
+		fputs(UNSET_RVIDEO, stderr);
 		fflush(stderr);
 		return;
 
@@ -335,7 +335,48 @@ disable_raw_mode(const int fd)
 
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
  * vertical and horizontal) and store both values into C (columns) and R (rows).
- * Return 0 on success and 1 on error */
+ * Returns 0 on success and 1 on error */
+int
+get_cursor_position(int *c, int *r)
+{
+	char buf[32];
+	unsigned int i = 0;
+
+	if (enable_raw_mode(STDIN_FILENO) == -1) return EXIT_FAILURE;
+
+	/* 1. Ask the terminal about cursor position */
+	if (write(STDOUT_FILENO, CPR, CPR_LEN) != CPR_LEN)
+		{ disable_raw_mode(STDIN_FILENO); return EXIT_FAILURE; }
+
+	/* 2. Read the response: "ESC [ rows ; cols R" */
+	int read_err = 0;
+	while (i < sizeof(buf) - 1) {
+		if (read(STDIN_FILENO, buf + i, 1) != 1) /* flawfinder: ignore */
+			{ read_err = 1; break; }
+		if (buf[i] == 'R')
+			break;
+		i++;
+	}
+	buf[i] = '\0';
+
+	if (disable_raw_mode(STDIN_FILENO) == -1 || read_err == 1)
+		return EXIT_FAILURE;
+
+	/* 3. Parse the response */
+	if (*buf != _ESC || *(buf + 1) != '[' || !*(buf + 2))
+		return EXIT_FAILURE;
+
+	char *p = strchr(buf + 2, ';');
+	if (!p || !*(p + 1)) return EXIT_FAILURE;
+
+	*p = '\0';
+	*r = atoi(buf + 2);	*c = atoi(p + 1);
+	if (*r == INT_MIN || *c == INT_MIN)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+/*
 int
 get_cursor_position(const int ifd, const int ofd, int *c, int *r)
 {
@@ -345,13 +386,13 @@ get_cursor_position(const int ifd, const int ofd, int *c, int *r)
 	if (enable_raw_mode(ifd) == -1)
 		return EXIT_FAILURE;
 
-	/* Report cursor location */
+	// Report cursor location
 	if (write(ofd, "\x1b[6n", 4) != 4)
 		goto FAIL;
 
-	/* Read the response: "ESC [ rows ; cols R" */
+	// Read the response: "ESC [ rows ; cols R"
 	while (i < sizeof(buf) - 1) {
-		if (read(ifd, buf + i, 1) != 1) /* flawfinder: ignore */
+		if (read(ifd, buf + i, 1) != 1) // flawfinder: ignore
 			break;
 		if (buf[i] == 'R')
 			break;
@@ -359,7 +400,7 @@ get_cursor_position(const int ifd, const int ofd, int *c, int *r)
 	}
 	buf[i] = '\0';
 
-	/* Parse it */
+	// Parse it
 	if (buf[0] != _ESC || buf[1] != '[')
 		goto FAIL;
 	if (sscanf(buf + 2, "%d;%d", r, c) != 2)
@@ -371,7 +412,8 @@ get_cursor_position(const int ifd, const int ofd, int *c, int *r)
 FAIL:
 	disable_raw_mode(ifd);
 	return EXIT_FAILURE;
-}
+} */
+
 /*
 int
 get_term_bgcolor(const int ifd, const int ofd)
@@ -855,7 +897,7 @@ xitoa(int n)
 	return &buf[++i];
 }
 
-/* A secure atoi implementation to prevent integer under- and overflow.
+/* A secure atoi implementation to prevent integer under- and over-flow.
  * Returns the corresponding integer, if valid, or INT_MIN if invalid,
  * setting errno to ERANGE */
 int
