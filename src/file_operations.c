@@ -540,20 +540,6 @@ bulk_remove(char *s1, char *s2)
 	return ret;
 }
 
-void
-clear_selbox(void)
-{
-	size_t i;
-	for (i = 0; i < sel_n; i++) {
-		free(sel_elements[i].name);
-		sel_elements[i].name = (char *)NULL;
-		sel_elements[i].size = (off_t)UNSET;
-	}
-
-	sel_n = 0;
-	save_sel();	
-}
-
 static inline int
 run_mime(char *file)
 {
@@ -1283,7 +1269,7 @@ copy_function(char **args, int copy_and_rename)
 	 * since sel files are note there anymore */
 	if (*args[0] == 'm' && args[0][1] == 'v'
 	&& (!args[0][2] || args[0][2] == ' '))
-		clear_selbox();
+		deselect_all();
 
 #if defined(__HAIKU__)// || defined(__APPLE__)
 	if (autols) {
@@ -1370,7 +1356,7 @@ remove_file(char **args)
 #endif
 
 	if (is_sel && exit_status == EXIT_SUCCESS)
-		clear_selbox();
+		deselect_all();
 
 	for (i = 0; rm_cmd[i]; i++)
 		free(rm_cmd[i]);

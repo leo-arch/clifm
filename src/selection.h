@@ -34,5 +34,6 @@ int deselect(char **comm);
 int sel_function(char **args);
 void show_sel_files(void);
 int save_sel(void);
+int deselect_all(void);
 
 #endif /* _SELECTION_H */

@@ -917,7 +917,7 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 
 	/* Search the sel array for the path of the element to deselect and
 	 * store its index */
-	struct stat attr;
+//	struct stat attr;
 
 	int desel_index = -1, err = 0, err_printed = 0, dn = (int)desel_n;
 	i = (int)desel_n;
@@ -931,9 +931,9 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 		while (--k >= 0) {
 			if (strcmp(sel_elements[k].name, desel_path[i]) == 0) {
 				/* Unset the corresponding file size from the selections struct */
-				if (lstat(sel_elements[k].name, &attr) != -1
+/*				if (lstat(sel_elements[k].name, &attr) != -1
 				&& !S_ISDIR(attr.st_mode))
-					sel_elements[k].size = (off_t)UNSET;
+					sel_elements[k].size = (off_t)UNSET; */
 
 				desel_index = k;
 				break;
@@ -979,9 +979,8 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 	/* Reallocate the sel array according to the new size */
 	sel_n = (sel_n - desel_n);
 
-	if ((int)sel_n < 0) {
+	if ((int)sel_n < 0)
 		sel_n = 0;
-	}
 
 	if (sel_n)
 		sel_elements = (struct sel_t *)xrealloc(sel_elements, sel_n * sizeof(struct sel_t));
@@ -1009,7 +1008,7 @@ FREE:
 }
 
 /* Deselect all selected files */
-static inline int
+int
 deselect_all(void)
 {
 	int i = (int)sel_n;

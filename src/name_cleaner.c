@@ -48,6 +48,7 @@
 #include "misc.h"
 #include "cleaner_table.h"
 #include "readline.h"
+#include "selection.h"
 
 #define FUNC_NAME "bleach"
 #define DEFAULT_TRANSLATION  '_'
@@ -615,7 +616,7 @@ CONFIRM:
 
 	/* If renaming all selected files, deselect them */
 	if (rename && is_sel)
-		clear_selbox();
+		deselect_all();
 
 	int total_rename = rename ? (int)f : 0;
 	size_t rep_suffix = 1;
