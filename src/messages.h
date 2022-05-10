@@ -606,7 +606,7 @@ Examples:\n\
     t *.sh\n\
 - List currently trashed files:\n\
     t (or 't ls' or 't list')\n\
-- Remove/delete trashed files using a menu:\n\
+- Remove/delete trashed files using a menu (permanent removal):\n\
     t del\n\
 - Remove all files from the trash can:\n\
     t empty\n\

@@ -917,8 +917,6 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 
 	/* Search the sel array for the path of the element to deselect and
 	 * store its index */
-//	struct stat attr;
-
 	int desel_index = -1, err = 0, err_printed = 0, dn = (int)desel_n;
 	i = (int)desel_n;
 	while (--i >= 0) {
@@ -930,11 +928,6 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 		k = (int)sel_n;
 		while (--k >= 0) {
 			if (strcmp(sel_elements[k].name, desel_path[i]) == 0) {
-				/* Unset the corresponding file size from the selections struct */
-/*				if (lstat(sel_elements[k].name, &attr) != -1
-				&& !S_ISDIR(attr.st_mode))
-					sel_elements[k].size = (off_t)UNSET; */
-
 				desel_index = k;
 				break;
 			}
