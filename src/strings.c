@@ -1584,7 +1584,7 @@ parse_input_str(char *str)
 
 			for (i = 0; i < sel_n; i++) {
 				/* Escape selected file names and copy them into tmp array */
-				char *esc_str = escape_str(sel_elements[i]);
+				char *esc_str = escape_str(sel_elements[i].name);
 				if (esc_str) {
 					sel_array[j] = savestring(esc_str, strlen(esc_str));
 					j++;
@@ -1592,7 +1592,7 @@ parse_input_str(char *str)
 					esc_str = (char *)NULL;
 				} else {
 					fprintf(stderr, _("%s: %s: Error quoting file name\n"),
-					    PROGRAM_NAME, sel_elements[j]);
+					    PROGRAM_NAME, sel_elements[j].name);
 					/* Free elements selected thus far and all the
 					 * input substrings */
 					register size_t k = 0;

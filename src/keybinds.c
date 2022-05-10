@@ -1326,8 +1326,8 @@ rl_open_sel(int count, int key)
 		return EXIT_SUCCESS;
 
 	char cmd[PATH_MAX + 3];
-	sprintf(cmd, "o %s", (sel_n && sel_elements[sel_n - 1])
-			? sel_elements[sel_n - 1] : "sel");
+	sprintf(cmd, "o %s", (sel_n && sel_elements[sel_n - 1].name)
+			? sel_elements[sel_n - 1].name : "sel");
 
 	kb_shortcut = 1;
 	keybind_exec_cmd(cmd);
@@ -1344,8 +1344,8 @@ rl_bm_sel(int count, int key)
 		return EXIT_SUCCESS;
 
 	char cmd[PATH_MAX + 6];
-	sprintf(cmd, "bm a %s", (sel_n && sel_elements[sel_n - 1] )
-			? sel_elements[sel_n - 1] : "sel");
+	sprintf(cmd, "bm a %s", (sel_n && sel_elements[sel_n - 1].name)
+			? sel_elements[sel_n - 1].name : "sel");
 
 	kb_shortcut = 1;
 	keybind_exec_cmd(cmd);

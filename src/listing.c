@@ -175,7 +175,7 @@ _print_selfiles(unsigned short t_rows)
 
 	int i;
 	for (i = 0; i < (max_printselfiles != UNSET ? limit : (int)sel_n); i++)
-		colors_list(sel_elements[i], 0, NO_PAD, PRINT_NEWLINE);
+		colors_list(sel_elements[i].name, 0, NO_PAD, PRINT_NEWLINE);
 
 	if (max_printselfiles != UNSET && limit < (int)sel_n)
 		printf("%d/%zu\n", i, sel_n);
@@ -1706,7 +1706,7 @@ check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t
 			continue;
 		/* Only check hardlinks in case of regular files */
 		if (file_info[index].type != DT_DIR && links > 1) {
-			char *p = strrchr(sel_elements[j], '/');
+			char *p = strrchr(sel_elements[j].name, '/');
 			if (!p || !*(++p))
 				continue;
 			if (*p == *file_info[index].name

@@ -76,6 +76,7 @@ struct suggestions_t suggestion;
 struct stats_t stats;
 struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
 struct opts_t opts;
+struct sel_t *sel_elements = (struct sel_t *)NULL;
 
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = NOMSG;
@@ -91,7 +92,6 @@ struct termios
 	orig_termios,
 	shell_tmodes;
 
-off_t total_sel_size = 0;
 pid_t own_pid = 0;
 
 unsigned short
@@ -323,7 +323,6 @@ char
 	**paths = (char **)NULL,
 	**profile_names = (char **)NULL,
 	**prompt_cmds = (char **)NULL,
-	**sel_elements = (char **)NULL,
 	**tags = (char **)NULL;
 
 /* A list of internal commands, with short and long formats. We use two

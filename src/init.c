@@ -1848,7 +1848,7 @@ get_sel_files(void)
 	if (sel_n > 0) {
 		int i = (int)sel_n;
 		while (--i >= 0)
-			free(sel_elements[i]);
+			free(sel_elements[i].name);
 	}
 	sel_n = 0;
 
@@ -1885,15 +1885,17 @@ get_sel_files(void)
 		if (fstatat(AT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
 			continue;
 
+		sel_elements = (struct sel_t *)xrealloc(sel_elements, (sel_n + 2) * sizeof(struct sel_t));
+		sel_elements[sel_n].name = savestring(line, len);
+		sel_elements[sel_n].size = (off_t)UNSET;
 		/* Store device and inode number to identify later selected files
 		 * and mark them in the files list */
-		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2) * sizeof(char *));
-		sel_elements[sel_n] = savestring(line, len);
 		sel_devino = (struct devino_t *)xrealloc(sel_devino, (sel_n + 1) * sizeof(struct devino_t));
 		sel_devino[sel_n].ino = a.st_ino;
 		sel_devino[sel_n].dev = a.st_dev;
 		sel_n++;
-		sel_elements[sel_n] = (char *)NULL;
+		sel_elements[sel_n].name = (char *)NULL;
+		sel_elements[sel_n].size = (off_t)UNSET;
 	}
 
 	close_fstream(fp, fd);

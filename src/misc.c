@@ -1223,7 +1223,7 @@ free_stuff(void)
 	if (sel_n > 0) {
 		i = (int)sel_n;
 		while (--i >= 0)
-			free(sel_elements[i]);
+			free(sel_elements[i].name);
 		free(sel_elements);
 	}
 	free(sel_devino);

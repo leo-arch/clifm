@@ -763,6 +763,14 @@ struct suggestions_t {
 
 extern struct suggestions_t suggestion;
 
+/* Hold information about selected files */
+struct sel_t {
+	char *name;
+	off_t size;
+};
+
+extern struct sel_t *sel_elements;
+
 struct stats_t {
 	size_t dir;
 	size_t reg;
@@ -1006,7 +1014,6 @@ extern size_t
 	zombies;
 
 extern struct termios shell_tmodes;
-extern off_t total_sel_size;
 extern pid_t own_pid;
 
 extern char
@@ -1081,7 +1088,6 @@ extern char
 	**paths,
 	**profile_names,
 	**prompt_cmds,
-	**sel_elements,
 	**tags;
 
 extern char *internal_cmds[];

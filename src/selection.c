@@ -84,7 +84,7 @@ save_sel(void)
 
 	size_t i;
 	for (i = 0; i < sel_n; i++) {
-		fputs(sel_elements[i], fp);
+		fputs(sel_elements[i].name, fp);
 		fputc('\n', fp);
 	}
 
@@ -106,17 +106,19 @@ select_file(char *file)
 	/* Check if the selected element is already in the selection box */
 	j = (int)sel_n;
 	while (--j >= 0) {
-		if (*file == *sel_elements[j] && strcmp(sel_elements[j], file) == 0) {
+		if (*file == *sel_elements[j].name && strcmp(sel_elements[j].name, file) == 0) {
 			exists = 1;
 			break;
 		}
 	}
 
 	if (!exists) {
-		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2) * sizeof(char *));
-		sel_elements[sel_n] = savestring(file, strlen(file));
+		sel_elements = (struct sel_t *)xrealloc(sel_elements, (sel_n + 2) * sizeof(struct sel_t));
+		sel_elements[sel_n].name = savestring(file, strlen(file));
+		sel_elements[sel_n].size = (off_t)UNSET;
 		sel_n++;
-		sel_elements[sel_n] = (char *)NULL;
+		sel_elements[sel_n].name = (char *)NULL;
+		sel_elements[sel_n].size = (off_t)UNSET;
 
 		new_sel++;
 	} else {
@@ -535,32 +537,55 @@ check_sel_path(char **sel_path)
 	return dir;
 }
 
-static inline void
-print_total_size(void)
+static off_t
+get_sel_file_size(size_t i)
 {
-	char *human_size = get_size_unit(total_sel_size);
+	if (sel_elements[i].size != (off_t)UNSET)
+		return sel_elements[i].size;
+
+	struct stat attr;
+	if (lstat(sel_elements[i].name, &attr) == -1)
+		return (off_t)-1;
+
+	int base = xargs.si == 1 ? 1000 : 1024;
+	if (S_ISDIR(attr.st_mode))
+		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name) * base);
+	else
+		sel_elements[i].size = (off_t)FILE_SIZE;
+
+	return sel_elements[i].size;
+}
+
+static inline void
+print_total_size(off_t total)
+{
+	char *human_size = get_size_unit(total);
 	printf(_("%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
 	free(human_size);
 }
 
 static void
-print_selected_files(int print_header, int print_total)
+print_selected_files(void)
 {
-	if (print_header == 1) {
-		printf(_("%sSelection Box%s\n"), BOLD, df_c);
-		putchar('\0');
-	}
+	if (clear_screen)
+		CLEAR;
+
+	printf(_("%sSelection Box%s\n"), BOLD, df_c);
+	putchar('\0');
 
 	size_t t = tab_offset, i;
+	off_t total = 0;
 	tab_offset = 0;
-	for (i = 0; i < sel_n; i++)
-		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
+	for (i = 0; i < sel_n; i++) {
+		colors_list(sel_elements[i].name, (int)i + 1, NO_PAD, PRINT_NEWLINE);
+		off_t s = get_sel_file_size(i);
+		if (s != (off_t)-1)
+			total += s;
+	}
 	tab_offset = t;
 
-	if (print_total == 1) {
-		putchar('\n');
-		print_total_size();
-	}
+	putchar('\n');
+	print_total_size(total);
 }
 
 /* IMPROVE ME: This check is performed twice: once here and then when reloading the
@@ -601,7 +626,7 @@ print_sel_results(const int new_sel, const char *sel_path, const char *pattern, 
 	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
 	&& save_sel() != EXIT_SUCCESS) {
 		_err('e', PRINT_PROMPT, _("%s: Error writing selected files "
-			"to the selections file\n"), PROGRAM_NAME);
+			"into the selections file\n"), PROGRAM_NAME);
 	}
 
 	if (sel_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
@@ -618,47 +643,12 @@ print_sel_results(const int new_sel, const char *sel_path, const char *pattern, 
 
 	get_sel_files();
 
-	/* Append size of new sel files to TOTAL_SEL_SIZE */
-	struct stat attr;
-	int i, base = xargs.si == 1 ? 1000 : 1024;
-/*	int sel_file_in_cwd = 0; */
-	for (i = (int)sel_n - new_sel; i < (int)sel_n; i++) {
-		if (lstat(sel_elements[i], &attr) != -1) {
-			if (S_ISDIR(attr.st_mode))
-				total_sel_size += (dir_size(sel_elements[i]) * base);
-			else
-				total_sel_size += FILE_SIZE;
-		}
-
-		/* If at least one new file in the current directory gets selected,
-		 * let's update the list of files */
-/*		if (autols == 1 && light_mode == 0 && sel_file_in_cwd == 0)
-			sel_file_in_cwd = is_sel_file_in_cwd(i); */
-	}
-
-/*	if (sel_file_in_cwd == 1) {
-		reload_dirlist();
-		print_reload_msg(_("%zu file(s) selected\n"), sel_n);
-		return EXIT_SUCCESS;
-	} */
-
 	if (autols == 1 && err == 0)
 		reload_dirlist();
-	print_reload_msg(_("%zu file(s) selected\n"), new_sel);
+	print_reload_msg(_("%d file(s) selected\n"), new_sel);
 	print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
+
 	return EXIT_SUCCESS;
-
-	/* Print entries */
-/*	if (sel_n > 10) {
-		printf(_("%zu files are now in the Selection Box\n"), sel_n);
-	} else if (sel_n > 0) {
-		printf(_("%zu selected file(s):\n\n"), sel_n);
-		print_selected_files(0, 0);
-		putchar('\n');
-	}
-
-	print_total_size();
-	return EXIT_SUCCESS; */
 }
 
 static char *
@@ -790,6 +780,11 @@ sel_function(char **args)
 void
 show_sel_files(void)
 {
+	if (sel_n == 0) {
+		puts(_("sel: No selected files"));
+		return;
+	}
+
 	if (clear_screen)
 		CLEAR;
 
@@ -797,59 +792,59 @@ show_sel_files(void)
 
 	int reset_pager = 0;
 
-	if (sel_n == 0) {
-		puts(_("Empty"));
-	} else {
-		putchar('\n');
-		struct winsize w;
-		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-		size_t counter = 0;
-		int t_rows = (int)w.ws_row;
-		t_rows -= 2;
-		size_t i;
+	putchar('\n');
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	size_t counter = 0;
+	int t_rows = (int)w.ws_row;
+	t_rows -= 2;
+	size_t i;
+	off_t total = 0;
 
-		size_t t = tab_offset;
-		tab_offset = 0;
+	size_t t = tab_offset;
+	tab_offset = 0;
 
-		for (i = 0; i < sel_n; i++) {
-			/* if (pager && counter > (term_rows-2)) { */
-			if (pager && counter > (size_t)t_rows) {
-				switch (xgetchar()) {
-				/* Advance one line at a time */
-				case 66: /* fallthrough */ /* Down arrow */
-				case 10: /* fallthrough */ /* Enter */
-				case 32: /* Space */
-					break;
-				/* Advance one page at a time */
-				case 126:
-					counter = 0; /* Page Down */
-					break;
-				/* Stop paging (and set a flag to reenable the pager
-				 * later) */
-				case 99: /* fallthrough */  /* 'c' */
-				case 112: /* fallthrough */ /* 'p' */
-				case 113:
-					pager = 0, reset_pager = 1; /* 'q' */
-					break;
-				/* If another key is pressed, go back one position.
-				 * Otherwise, some file names won't be listed.*/
-				default:
-					i--;
-					continue;
-					break;
-				}
+	for (i = 0; i < sel_n; i++) {
+		/* if (pager && counter > (term_rows-2)) { */
+		if (pager && counter > (size_t)t_rows) {
+			switch (xgetchar()) {
+			/* Advance one line at a time */
+			case 66: /* fallthrough */ /* Down arrow */
+			case 10: /* fallthrough */ /* Enter */
+			case 32: /* Space */
+				break;
+			/* Advance one page at a time */
+			case 126:
+				counter = 0; /* Page Down */
+				break;
+			/* Stop paging (and set a flag to reenable the pager
+			 * later) */
+			case 99: /* fallthrough */  /* 'c' */
+			case 112: /* fallthrough */ /* 'p' */
+			case 113:
+				pager = 0, reset_pager = 1; /* 'q' */
+				break;
+			/* If another key is pressed, go back one position.
+			 * Otherwise, some file names won't be listed.*/
+			default:
+				i--;
+				continue;
+				break;
 			}
-
-			counter++;
-			colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
 		}
 
-		tab_offset = t;
-
-		char *human_size = get_size_unit(total_sel_size);
-		printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
-		free(human_size);
+		counter++;
+		colors_list(sel_elements[i].name, (int)i + 1, NO_PAD, PRINT_NEWLINE);
+		off_t s = get_sel_file_size(i);
+		if (s != (off_t)-1)
+			total += s;
 	}
+
+	tab_offset = t;
+
+	char *human_size = get_size_unit(total);
+	printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
+	free(human_size);
 
 	if (reset_pager)
 		pager = 1;
@@ -913,8 +908,8 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 				desel_path[i] = (char *)NULL;
 				continue;
 			}
-			desel_path[i] = savestring(sel_elements[desel_int - 1],
-				strlen(sel_elements[desel_int - 1]));
+			desel_path[i] = savestring(sel_elements[desel_int - 1].name,
+				strlen(sel_elements[desel_int - 1].name));
 		}
 	} else { /* Deselect all selected files */
 		desel_path = desel_elements;
@@ -933,16 +928,12 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 			continue;
 
 		k = (int)sel_n;
-		int base = xargs.si == 1 ? 1000 : 1024;
 		while (--k >= 0) {
-			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
-				/* Sustract size from total size */
-				if (lstat(sel_elements[k], &attr) != -1) {
-					if (S_ISDIR(attr.st_mode))
-						total_sel_size -= (dir_size(sel_elements[k]) * base);
-					else
-						total_sel_size -= FILE_SIZE;
-				}
+			if (strcmp(sel_elements[k].name, desel_path[i]) == 0) {
+				/* Unset the corresponding file size from the selections struct */
+				if (lstat(sel_elements[k].name, &attr) != -1
+				&& !S_ISDIR(attr.st_mode))
+					sel_elements[k].size = (off_t)UNSET;
 
 				desel_index = k;
 				break;
@@ -963,9 +954,10 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 		 * deselected element (actually, moving each string after it to
 		 * the previous position) */
 		for (j = desel_index; j < (int)(sel_n - 1); j++) {
-			sel_elements[j] = (char *)xrealloc(sel_elements[j],
-			    (strlen(sel_elements[j + 1]) + 1) * sizeof(char));
-			strcpy(sel_elements[j], sel_elements[j + 1]);
+			sel_elements[j].name = (char *)xrealloc(sel_elements[j].name,
+			    (strlen(sel_elements[j + 1].name) + 1) * sizeof(char));
+			strcpy(sel_elements[j].name, sel_elements[j + 1].name);
+			sel_elements[j].size = sel_elements[j + 1].size;
 		}
 	}
 
@@ -977,20 +969,22 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 	/* Free the last DESEL_N elements from the old sel array. They won't
 	 * be used anymore, for they contain the same value as the last
 	 * non-deselected element due to the above array rearrangement */
-	for (i = 1; i <= (int)desel_n; i++)
-		if (((int)sel_n - i) >= 0 && sel_elements[(int)sel_n - i])
-			free(sel_elements[(int)sel_n - i]);
+	for (i = 1; i <= (int)desel_n; i++) {
+		if (((int)sel_n - i) >= 0 && sel_elements[(int)sel_n - i].name) {
+			free(sel_elements[(int)sel_n - i].name);
+			sel_elements[(int)sel_n - i].size = (off_t)UNSET;
+		}
+	}
 
 	/* Reallocate the sel array according to the new size */
 	sel_n = (sel_n - desel_n);
 
 	if ((int)sel_n < 0) {
 		sel_n = 0;
-		total_sel_size = 0;
 	}
 
 	if (sel_n)
-		sel_elements = (char **)xrealloc(sel_elements, sel_n * sizeof(char *));
+		sel_elements = (struct sel_t *)xrealloc(sel_elements, sel_n * sizeof(struct sel_t));
 
 FREE:
 	/* Deallocate local arrays */
@@ -1019,11 +1013,13 @@ static inline int
 deselect_all(void)
 {
 	int i = (int)sel_n;
-	while (--i >= 0)
-		free(sel_elements[i]);
+	while (--i >= 0) {
+		free(sel_elements[i].name);
+		sel_elements[i].name = (char *)NULL;
+		sel_elements[i].size = (off_t)UNSET;
+	}
 
 	sel_n = 0;
-	total_sel_size = 0;
 
 	return save_sel();
 }
@@ -1199,7 +1195,7 @@ deselect(char **args)
 		}
 	}
 
-	print_selected_files(1, 1);
+	print_selected_files();
 
 	size_t desel_n = 0;
 	char **desel_elements = get_desel_input(&desel_n);

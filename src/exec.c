@@ -189,7 +189,7 @@ run_and_refresh(char **cmd)
 	|| cmd[0][2] == ' ')) {
 		int j = (int)sel_n;
 		while (--j >= 0)
-			free(sel_elements[j]);
+			free(sel_elements[j].name);
 		sel_n = 0;
 		save_sel();
 	}
@@ -1767,7 +1767,7 @@ _trash_function(char **args, int *_cont)
 	if (is_sel) { /* If 'tr sel', deselect everything */
 		int i = (int)sel_n;
 		while (--i >= 0)
-			free(sel_elements[i]);
+			free(sel_elements[i].name);
 		sel_n = 0;
 		if (save_sel() != 0)
 			exit_status = EXIT_FAILURE;

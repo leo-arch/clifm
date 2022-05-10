@@ -544,10 +544,13 @@ void
 clear_selbox(void)
 {
 	size_t i;
-	for (i = 0; i < sel_n; i++)
-		free(sel_elements[i]);
+	for (i = 0; i < sel_n; i++) {
+		free(sel_elements[i].name);
+		sel_elements[i].name = (char *)NULL;
+		sel_elements[i].size = (off_t)UNSET;
+	}
+
 	sel_n = 0;
-	total_sel_size = 0;
 	save_sel();	
 }
 
@@ -1236,10 +1239,10 @@ copy_function(char **args, int copy_and_rename)
 
 		size_t j;
 		for (j = 0; j < sel_n; j++) {
-			size_t arg_len = strlen(sel_elements[j]);
+			size_t arg_len = strlen(sel_elements[j].name);
 
-			if (sel_elements[j][arg_len - 1] == '/')
-				sel_elements[j][arg_len - 1] = '\0';
+			if (sel_elements[j].name[arg_len - 1] == '/')
+				sel_elements[j].name[arg_len - 1] = '\0';
 
 			if (*args[args_n] == '~') {
 				char *exp_dest = tilde_expand(args[args_n]);
@@ -1257,7 +1260,7 @@ copy_function(char **args, int copy_and_rename)
 			strcpy(dest, (sel_is_last || strcmp(args[args_n], ".") == 0)
 					 ? workspaces[cur_ws].path : args[args_n]);
 
-			char *ret_val = strrchr(sel_elements[j], '/');
+			char *ret_val = strrchr(sel_elements[j].name, '/');
 			char *tmp_str = (char *)xnmalloc(strlen(dest)
 					+ strlen(ret_val + 1) + 2, sizeof(char));
 

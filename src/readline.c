@@ -1543,7 +1543,7 @@ sel_entries_generator(const char *text, int state)
 		len = strlen(text);
 	}
 
-	while (i < (int)sel_n && (name = sel_elements[i++]) != NULL) {
+	while (i < (int)sel_n && (name = sel_elements[i++].name) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
