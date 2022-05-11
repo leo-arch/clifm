@@ -200,6 +200,8 @@ extern int watch;
 #define DELAYED_REFRESH    (1 << 19)
 #define PATH_PROGRAMS_ALREADY_LOADED (1 << 20)
 
+#define FIRST_WORD_IS_ELN (1 << 21)
+
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
@@ -317,6 +319,7 @@ extern int watch;
 #define TAGC_SUG       16 /* :TAG (param to tag command) */
 #define TAGS_SUG       17 /* TAG  (param to tag command) */
 #define BM_NAME_SUG    18 /* Bookmarks names */
+#define SORT_SUG       19
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -812,6 +815,8 @@ struct sort_t {
 	int pad;
 };
 
+extern struct sort_t __sorts[];
+
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */
@@ -903,7 +908,6 @@ extern int
 	ext_cmd_ok,
 	files_counter,
 	filter_rev,
-	first_word_is_eln,
 	follow_symlinks,
 	full_dir_size,
 	fzftab,
@@ -970,7 +974,6 @@ extern int
 	xrename; /* We're running a secondary prompt for the rename function */
 
 extern int wrong_cmd;
-/*extern int wrong_cmd_line; */
 
 extern int
 	argc_bk, /* A copy of argc taken from main() */
@@ -987,8 +990,7 @@ extern int
 	max_path,
 	max_printselfiles,
 	min_jump_rank,
-	shell_is_interactive,
-	*eln_as_file;
+	shell_is_interactive;
 
 extern unsigned short term_cols, term_rows;
 
@@ -1003,7 +1005,6 @@ extern size_t
 	cschemes_n,
 	current_hist_n,
 	curhistindex,
-	eln_as_file_n,
 	ext_colors_n,
 	files,
 	jump_n,

@@ -983,25 +983,10 @@ open_reg_exit(char *filename, int url)
 static inline int
 set_sort_by_name(const char *name)
 {
-	static struct sort_t sorts[] = {
-	    {"none", 0, 0},
-	    {"name", 1, 0},
-	    {"size", 2, 0},
-	    {"atime", 3, 0},
-	    {"btime", 4, 0},
-	    {"ctime", 5, 0},
-	    {"mtime", 6, 0},
-	    {"version", 7, 0},
-	    {"extension", 8, 0},
-	    {"inode", 9, 0},
-	    {"owner", 10, 0},
-	    {"group", 11, 0},
-	};
-
 	size_t i;
-	for (i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
-		if (*name == *sorts[i].name && strcmp(name, sorts[i].name) == 0)
-			return sorts[i].num;
+	for (i = 0; i <= SORT_TYPES; i++) {
+		if (*name == *__sorts[i].name && strcmp(name, __sorts[i].name) == 0)
+			return __sorts[i].num;
 	}
 
 	return SNAME;

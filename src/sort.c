@@ -431,25 +431,10 @@ re_sort_files_list(void)
 static inline int
 _set_sort_by_name(char **arg)
 {
-	static struct sort_t sorts[] = {
-	    {"none", 0, 0},
-	    {"name", 1, 0},
-	    {"size", 2, 0},
-	    {"atime", 3, 0},
-	    {"btime", 4, 0},
-	    {"ctime", 5, 0},
-	    {"mtime", 6, 0},
-	    {"version", 7, 0},
-	    {"extension", 8, 0},
-	    {"inode", 9, 0},
-	    {"owner", 10, 0},
-	    {"group", 11, 0},
-	};
-
 	size_t i;
-	for (i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
-		if (*(*arg) == *sorts[i].name && strcmp(*arg, sorts[i].name) == 0) {
-			sprintf(*arg, "%d", sorts[i].num);
+	for (i = 0; i <= SORT_TYPES; i++) {
+		if (*(*arg) == *__sorts[i].name && strcmp(*arg, __sorts[i].name) == 0) {
+			sprintf(*arg, "%d", __sorts[i].num);
 			return EXIT_SUCCESS;
 		}
 	}

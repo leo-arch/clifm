@@ -1502,14 +1502,14 @@ sort_name_generator(const char *text, int state)
 {
 	static int i;
 	static size_t len;
-	char *name;
+	const char *name;
 
 	if (!state) {
 		i = 0;
 		len = strlen(text);
 	}
 
-	static char *sorts[] = {
+/*	static char *sorts[] = {
 	    "none",
 	    "name",
 	    "size",
@@ -1522,9 +1522,9 @@ sort_name_generator(const char *text, int state)
 	    "inode",
 	    "owner",
 	    "group",
-	    NULL};
+	    NULL}; */
 
-	while ((name = sorts[i++]) != NULL) {
+	while ((name = __sorts[i++].name) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}

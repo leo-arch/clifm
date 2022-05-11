@@ -78,6 +78,22 @@ struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
 struct opts_t opts;
 struct sel_t *sel_elements = (struct sel_t *)NULL;
 
+struct sort_t __sorts[] = {
+    {"none", 0, 0},
+    {"name", 1, 0},
+    {"size", 2, 0},
+    {"atime", 3, 0},
+    {"btime", 4, 0},
+    {"ctime", 5, 0},
+    {"mtime", 6, 0},
+    {"version", 7, 0},
+    {"extension", 8, 0},
+    {"inode", 9, 0},
+    {"owner", 10, 0},
+    {"group", 11, 0},
+    {NULL, 12, 0},
+};
+
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = NOMSG;
 enum comp_type cur_comp_type = TCMP_NONE;
@@ -133,7 +149,6 @@ int
 	ext_cmd_ok = UNSET,
 	files_counter = UNSET,
 	filter_rev = 0,
-	first_word_is_eln = 0,
 	follow_symlinks = UNSET,
 	full_dir_size = UNSET,
 	fzftab = UNSET,
@@ -215,8 +230,7 @@ int
 	max_log = UNSET,
 	max_path = UNSET,
 	max_printselfiles = UNSET,
-	shell_is_interactive = 0,
-	*eln_as_file = (int *)0;
+	shell_is_interactive = 0;
 
 size_t
 	actions_n = 0,
@@ -229,7 +243,6 @@ size_t
 	cschemes_n = 0,
 	current_hist_n = 0,
 	curhistindex = 0,
-	eln_as_file_n = 0,
 	ext_colors_n = 0,
 	files = 0,
 	jump_n = 0,
