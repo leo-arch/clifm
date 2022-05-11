@@ -233,9 +233,6 @@ reinsert_slashes(char *str)
 }
 
 #ifndef _NO_FZF
-/* FIXME: These shouldn't be fixed paths */
-//#define FINDER_IN "/tmp/clifm.finder.in"
-//#define FINDER_OUT "/tmp/clifm.finder.out"
 
 static char *
 fzftab_color(char *filename, const struct stat *attr)
