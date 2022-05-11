@@ -316,6 +316,7 @@ extern int watch;
 #define TAGT_SUG       15 /* t:TAG (expand tag TAG) */
 #define TAGC_SUG       16 /* :TAG (param to tag command) */
 #define TAGS_SUG       17 /* TAG  (param to tag command) */
+#define BM_NAME_SUG    18 /* Bookmarks names */
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR

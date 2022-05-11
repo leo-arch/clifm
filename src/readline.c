@@ -1121,7 +1121,8 @@ bookmarks_generator(const char *text, int state)
 
 	/* Look for bookmarks in bookmark names for a match */
 	while ((name = bookmark_names[i++]) != NULL) {
-		if (strncmp(name, text, len) == 0)
+		if ((case_sensitive ? strncmp(name, text, len)
+		: strncasecmp(name, text, len)) == 0)
 			return strdup(name);
 	}
 
@@ -2068,14 +2069,19 @@ my_rl_completion(const char *text, int start, int end)
 		if (*lb == 'b' && (lb[1] == 'm' || lb[1] == 'o')
 		&& (strncmp(lb, "bm ", 3) == 0
 		|| strncmp(lb, "bookmarks ", 10) == 0)) {
+			char *q = strchr(lb, ' ');
+			/* If 'bm add' do path completion instead */
+			if (!(q && *(q + 1) == 'a' && (*(q + 2) == ' '
+			|| strncmp(q + 1, "add ", 4) == 0)) ) {
 #ifndef _NO_SUGGESTIONS
-			if (suggestion.type != FILE_SUG)
-				rl_attempted_completion_over = 1;
+				if (suggestion.type != FILE_SUG)
+					rl_attempted_completion_over = 1;
 #endif
-			matches = rl_completion_matches(text, &bookmarks_generator);
-			if (matches) {
-				cur_comp_type = TCMP_BOOKMARK;
-				return matches;
+				matches = rl_completion_matches(text, &bookmarks_generator);
+				if (matches) {
+					cur_comp_type = TCMP_BOOKMARK;
+					return matches;
+				}
 			}
 		}
 

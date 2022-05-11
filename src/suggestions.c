@@ -1378,10 +1378,14 @@ rl_suggestions(const unsigned char c)
 		if (lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
 			size_t i;
 			for (i = 0; bookmark_names[i]; i++) {
-				if (*word == *bookmark_names[i]
-				&& strncmp(bookmark_names[i], word, wlen) == 0) {
-					suggestion.type = CMD_SUG;
-					print_suggestion(bookmark_names[i], wlen, sx_c);
+				if (case_sensitive == 0 ? (TOUPPER(*word) == TOUPPER(*bookmark_names[i])
+				&& strncasecmp(word, bookmark_names[i], wlen) == 0)
+				: (*word == *bookmark_names[i]
+				&& strncmp(word, bookmark_names[i], wlen) == 0)) {
+					suggestion.type = BM_NAME_SUG;
+					char *p = escape_str(bookmark_names[i]);
+					print_suggestion(p ? p : bookmark_names[i], wlen, sx_c);
+					free(p);
 					printed = 1;
 					break;
 				}

@@ -277,7 +277,7 @@ get_ext_icon(const char *restrict ext, int n)
 static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
-	fputs(UNHIDE_CURSOR, stdout);	/* Unhide the cursor */
+	fputs(UNHIDE_CURSOR, stdout); /* Unhide the cursor */
 	if (close_dir && closedir(dir) == -1)
 		return EXIT_FAILURE;
 
@@ -1932,8 +1932,6 @@ list_dir(void)
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
 			file_info[n].mode = attr.st_mode;
-/*			file_info[n].dev = attr.st_dev;
-			file_info[n].ino = attr.st_ino; */
 
 			if (long_view) {
 				file_info[n].ltime = (time_t)attr.st_mtime;

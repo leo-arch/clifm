@@ -173,11 +173,16 @@ bookmark_del(char *name)
 	 * could be zero */
 
 	if (name) {
+		char *p = dequote_str(name, 0);
+		if (p) {
+			strcpy(name, p);
+			free(p);
+		}
 		for (i = 0; i < bmn; i++) {
 			char *bm_name = strbtw(bms[i], ']', ':');
 			if (!bm_name)
 				continue;
-			if (strcmp(name, bm_name) == 0) {
+			if (*name == *bm_name && strcmp(name, bm_name) == 0) {
 				free(bm_name);
 				cmd_line = (int)i;
 				break;
@@ -765,28 +770,36 @@ open_bookmark(void)
 static int
 bm_open(char **cmd)
 {
+	char *p = dequote_str(cmd[1], 0);
+	if (!p)
+		p = cmd[1];
+
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
-		if ((bookmarks[i].shortcut && *cmd[1] == *bookmarks[i].shortcut
-			&& strcmp(cmd[1], bookmarks[i].shortcut) == 0)
+		if ((bookmarks[i].shortcut && *p == *bookmarks[i].shortcut
+			&& strcmp(p, bookmarks[i].shortcut) == 0)
 
-			|| (bookmarks[i].name && *cmd[1] == *bookmarks[i].name
-			&& strcmp(cmd[1], bookmarks[i].name) == 0)
+			|| (bookmarks[i].name && *p == *bookmarks[i].name
+			&& strcmp(p, bookmarks[i].name) == 0)
 
 			|| (expand_bookmarks && bookmarks[i].path
-			&& *cmd[1] == *bookmarks[i].path
-			&& strcmp(cmd[1], bookmarks[i].path) == 0)) {
+			&& *p == *bookmarks[i].path
+			&& strcmp(p, bookmarks[i].path) == 0)) {
 
+			if (p != cmd[1])
+				free(p);
 			if (bookmarks[i].path) {
 				char *tmp_cmd[] = {"o", bookmarks[i].path, cmd[2], NULL};
 				return open_function(tmp_cmd);
 			}
 
-			fprintf(stderr, _("%s: Invalid bookmark\n"), cmd[1]);
+			fprintf(stderr, _("%s: Invalid bookmark\n"), p);
 			return EXIT_FAILURE;
 		}
 	}
 
+	if (p != cmd[1])
+		free(p);
 	fprintf(stderr, _("%s: No such bookmark\n"), cmd[1]);
 	return EXIT_FAILURE;
 }

@@ -792,6 +792,10 @@ is_multi_sel(void)
 	|| t == TCMP_TAGS_U)
 		return 1;
 
+/*	if (t == TCMP_BOOKMARK && (strncmp(rl_line_buffer, "bm del ", 7) == 0
+	|| strncmp(rl_line_buffer, "bookmarks del ", 14) == 0))
+		return 1; */
+
 	char *l = rl_line_buffer;
 	char *lws = strrchr(rl_line_buffer, ' ');
 
@@ -838,7 +842,8 @@ clean_rl_buffer(const char *text)
 
 	/* If the previous char is not space, then a common prefix was appended:
 	 * remove it */
-	if (rl_end && rl_line_buffer[rl_end - 1] != ' ') {
+	if ((rl_end && rl_line_buffer[rl_end - 1] != ' ')
+	|| (rl_end >= 2 && rl_line_buffer[rl_end - 2] == '\\')) {
 		/* Find the last non-escaped space */
 		int i = rl_end, sp = -1;
 		while (--i >= 0) {
@@ -1380,7 +1385,7 @@ AFTER_USUAL_COMPLETION:
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
-			|| c == TCMP_TAGS_U) && !strchr(replacement, '\\')) {
+			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK) && !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
 					if (replacement != matches[0])
