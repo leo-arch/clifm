@@ -224,7 +224,8 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 
 	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
 	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
-	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG) {
+	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG
+	|| suggestion.type == SORT_SUG) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 		cuc += suggestion.type == ELN_SUG ? 3 : 4;
 		*baej = 1;
@@ -1293,6 +1294,27 @@ check_tags(const char *str, const size_t len, int type)
 }
 #endif /* _NO_TAGS */
 
+static int
+check_sort_methods(char *str, const size_t len)
+{
+	if (len == 0) {
+		if (suggestion.printed)
+			clear_suggestion(CS_FREEBUF);
+		return 0;
+	}
+
+	int a = atoi(str);
+	if (a < 0 || a > SORT_TYPES) {
+		if (suggestion.printed)
+			clear_suggestion(CS_FREEBUF);
+		return 0;
+	}
+
+	suggestion.type = SORT_SUG;
+	print_suggestion(__sorts[a].name, 0, sf_c);
+	return 1;
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -1494,6 +1516,18 @@ rl_suggestions(const unsigned char c)
 			} else {
 				goto FAIL;
 			}
+		}
+		break;
+
+	case 's': /* Sort */
+		if (nwords > 2)
+			goto FAIL;
+		if (((lb[1] == 't' && lb[2] == ' ') || strncmp(lb, "sort ", 5) == 0)
+		&& is_number(word)) {
+			printed = check_sort_methods(word, wlen);
+			if (printed)
+				goto SUCCESS;
+			goto FAIL;
 		}
 		break;
 
