@@ -114,12 +114,22 @@ run_and_refresh(char **cmd)
 
 	char *new_name = (char *)NULL;
 	if (xrename) {
-		/* If we have a number here, it was not expanded by parse_input_str,
-		 * and thereby, we have an invalid ELN */
+		/* If we have a number, either it was not expanded by parse_input_str(),
+		 * in which case it is an invalid ELN, or it was expanded to a file named
+		 * as a number. Let's check if we have such file name in the files list */
 		if (is_number(cmd[1])) {
-			fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, cmd[1]);
-			xrename = 0;
-			return EXIT_FAILURE;
+			int i = (int)files;
+			while (--i >= 0) {
+				if (*cmd[1] != *file_info[i].name)
+					continue;
+				if (strcmp(cmd[1], file_info[i].name) == 0)
+					break;
+			}
+			if (i == -1) {
+				fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, cmd[1]);
+				xrename = 0;
+				return EXIT_FAILURE;
+			}
 		}
 		_xrename = 1;
 		new_name = get_new_name();
@@ -1937,8 +1947,6 @@ bring_to_foreground(char *str)
 int
 exec_cmd(char **comm)
 {
-//	flags &= ~RUNNING_SHELL_CMD;
-//	flags &= ~RUNNING_CMD_FG;
 	if (zombies > 0)
 		check_zombies();
 	fputs(df_c, stdout);
