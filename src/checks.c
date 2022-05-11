@@ -484,7 +484,7 @@ char **
 check_for_alias(char **args)
 {
 	/* Do not expand alias is first word is an ELN */
-	if (!aliases_n || !aliases || !args || first_word_is_eln == 1)
+	if (!aliases_n || !aliases || !args || flags & FIRST_WORD_IS_ELN)
 		return (char **)NULL;
 
 	register int i;

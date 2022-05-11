@@ -1207,12 +1207,8 @@ free_stuff(void)
 		free(_filter);
 	}
 
-	if (eln_as_file_n)
-		free(eln_as_file);
-
 	if (ext_colors_n)
 		free(ext_colors_len);
-
 
 	if (profile_names) {
 		for (i = 0; profile_names[i]; i++)

@@ -577,7 +577,7 @@ rl_accept_suggestion(int count, int key)
 	if (!accept_first_word && (suggestion.type == BOOKMARK_SUG
 	|| suggestion.type == ALIAS_SUG || suggestion.type == ELN_SUG
 	|| suggestion.type == JCMD_SUG || suggestion.type == JCMD_SUG_NOACD
-	|| suggestion.type == BACKDIR_SUG))
+	|| suggestion.type == BACKDIR_SUG || suggestion.type == SORT_SUG))
 		clear_suggestion(CS_KEEPBUF);
 
 	/* Complete according to the suggestion type */
