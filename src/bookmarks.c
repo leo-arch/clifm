@@ -48,6 +48,8 @@ or press F11 to edit the bookmarks file. You can also enter 'bm add PATH' \
 to add a new bookmark\n"
 #define PRINT_BM_HEADER 1
 #define NO_BM_HEADER    0
+#define BM_SCREEN       1 /* The edit function is called from the bookmarks screen */
+#define NO_BM_SCREEN    0
 
 void
 free_bookmarks(void)
@@ -289,8 +291,7 @@ bookmark_del(char *name)
 			free_bms(bms, bmn);
 			free_del_elements(del_elements);
 			fclose(bm_fp);
-			/* Update bookmark names for TAB completion */
-			/*          get_bm_names(); */
+
 			reload_bookmarks();
 
 			/* If the argument "*" was specified in command line */
@@ -362,8 +363,6 @@ bookmark_del(char *name)
 	rename(tmp_file, bm_file);
 	free(tmp_file);
 
-	/* Update bookmark names for TAB completion */
-	/*  get_bm_names(); */
 	reload_bookmarks();
 
 	/* If the bookmark to be removed was specified in command line */
@@ -577,15 +576,13 @@ bookmark_add(char *file)
 	fclose(bm_fp);
 	printf(_("File succesfully bookmarked\n"));
 	free(tmp);
-	/* Update bookmark names for TAB completion */
-	/*  get_bm_names();  */
-	reload_bookmarks();
+	reload_bookmarks(); /* Update bookmarks for TAB completion */
 
 	return EXIT_SUCCESS;
 }
 
-int
-edit_bookmarks(char *cmd)
+static int
+edit_bookmarks(char *cmd, const int flag)
 {
 	int exit_status = EXIT_SUCCESS;
 	struct stat a;
@@ -606,16 +603,19 @@ edit_bookmarks(char *cmd)
 
 	if (exit_status != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: Cannot open the bookmarks file\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return exit_status;
 	}
 
 	stat(bm_file, &a);
 	if (prev != a.st_mtime) {
 		reload_bookmarks();
-		print_reload_msg("File modified. Bookmarks reloaded\n");
+		if (flag == NO_BM_SCREEN) {
+			reload_dirlist();
+			print_reload_msg("File modified. Bookmarks reloaded\n");
+		}
 	}
 
-	return exit_status;
+	return EXIT_SUCCESS;
 }
 
 static void
@@ -658,17 +658,7 @@ print_bookmarks(void)
 static int
 _edit_bookmarks(char **arg)
 {
-	struct stat attr;
-	stat(bm_file, &attr);
-	time_t mtime_bfr = (time_t)attr.st_mtime;
-
-	edit_bookmarks(arg[1]);
-
-	stat(bm_file, &attr);
-	if (mtime_bfr != (time_t)attr.st_mtime) {
-		free_bookmarks();
-		load_bookmarks();
-	}
+	edit_bookmarks(arg[1], BM_SCREEN);
 
 	size_t i;
 	for (i = 0; arg[i]; i++)
@@ -786,21 +776,22 @@ bm_open(char **cmd)
 			&& *p == *bookmarks[i].path
 			&& strcmp(p, bookmarks[i].path) == 0)) {
 
+			if (!bookmarks[i].path) {
+				fprintf(stderr, _("%s: Invalid bookmark\n"), p);
+				if (p != cmd[1])
+					free(p);
+				return EXIT_FAILURE;
+			}
 			if (p != cmd[1])
 				free(p);
-			if (bookmarks[i].path) {
-				char *tmp_cmd[] = {"o", bookmarks[i].path, cmd[2], NULL};
-				return open_function(tmp_cmd);
-			}
-
-			fprintf(stderr, _("%s: Invalid bookmark\n"), p);
-			return EXIT_FAILURE;
+			char *tmp_cmd[] = {"o", bookmarks[i].path, cmd[2], NULL};
+			return open_function(tmp_cmd);
 		}
 	}
 
+	fprintf(stderr, _("%s: No such bookmark\n"), p);
 	if (p != cmd[1])
 		free(p);
-	fprintf(stderr, _("%s: No such bookmark\n"), cmd[1]);
 	return EXIT_FAILURE;
 }
 
@@ -857,7 +848,7 @@ bookmarks_function(char **cmd)
 
 	/* Edit */
 	if (*cmd[1] == 'e' && (!cmd[1][1] || strcmp(cmd[1], "edit") == 0))
-		return edit_bookmarks(cmd[2]);
+		return edit_bookmarks(cmd[2], NO_BM_SCREEN);
 
 	if (*cmd[1] == 'r' && (!cmd[1][1] || strcmp(cmd[1], "reload") == 0)) {
 		reload_bookmarks();
