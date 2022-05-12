@@ -200,7 +200,8 @@ extern int watch;
 #define DELAYED_REFRESH    (1 << 19)
 #define PATH_PROGRAMS_ALREADY_LOADED (1 << 20)
 
-#define FIRST_WORD_IS_ELN (1 << 21)
+#define FIRST_WORD_IS_ELN   (1 << 21)
+#define IN_BOOKMARKS_SCREEN (1 << 22)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1

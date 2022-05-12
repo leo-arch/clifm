@@ -574,7 +574,7 @@ remove_quotes(char *str)
  * they are preceded by a quote char (single or double quotes) or in
  * case of command substitution ($(cmd) or `cmd`), in which case
  * eveything after the corresponding closing char is taken as one single
- * string. It also escapes spaecial chars. It returns an array of
+ * string. It also escapes special chars. It returns an array of
  * splitted strings (without leading and terminating spaces) or NULL if
  * str is NULL or if no substring was found, i.e., if str contains
  * only spaces. */
@@ -592,8 +592,8 @@ split_str(const char *str, const int update_args)
 
 	/* Do not dequote expressions for the filter command */
 	int ft_cmd = 0;
-	if (*str == 'f' && ((*(str + 1) == 't' && *(str + 2) == ' ')
-	|| strncmp(str, "filter ", 7) == 0))
+	if (!(flags & IN_BOOKMARKS_SCREEN) && *str == 'f' && ((*(str + 1) == 't'
+	&& *(str + 2) == ' ') || strncmp(str, "filter ", 7) == 0))
 		ft_cmd = 1;
 
 	while (*str) {
@@ -642,9 +642,7 @@ split_str(const char *str, const int update_args)
 			/* If the while loop stopped with a null byte, there was
 			 * no ending close (either ')' or '`')*/
 			if (!*str) {
-				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME,
-				    close);
-
+				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, close);
 				free(buf);
 				buf = (char *)NULL;
 				int i = (int)words;
@@ -684,7 +682,7 @@ split_str(const char *str, const int update_args)
 			 * up to the last quote or NULL */
 			while (*str && *str != quote) {
 				/* If char has special meaning, escape it */
-				if (is_quote_char(*str)) {
+				if (!(flags & IN_BOOKMARKS_SCREEN) && is_quote_char(*str)) {
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 					buf[buf_len] = '\\';
 					buf_len++;
@@ -697,7 +695,7 @@ split_str(const char *str, const int update_args)
 			}
 
 			/* The above while breaks with NULL or quote, so that if
-			 * *str is a null byte there was not ending quote */
+			 * *STR is a null byte there was not ending quote */
 			if (!*str) {
 				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, quote);
 				/* Free the current buffer and whatever was already
@@ -713,10 +711,9 @@ split_str(const char *str, const int update_args)
 			}
 			break;
 
-		/* TAB, new line char, and space are taken as word breaking
-		 * characters */
-		case '\t':
-		case '\n':
+		/* TAB, new line char, and space are taken as word breaking characters */
+		case '\t': /* fallthrough */
+		case '\n': /* fallthrough */
 		case ' ':
 			/* If escaped, just copy it into the buffer */
 			if (str_len && *(str - 1) == '\\') {
@@ -725,9 +722,8 @@ split_str(const char *str, const int update_args)
 				buf_len++;
 			} else {
 				/* If not escaped, break the string */
-				/* Add a terminating null byte to the buffer, and, if
-				 * not empty, dump the buffer into the substrings
-				 * array */
+				/* Add a terminating null byte to the buffer, and, if not empty,
+				 * dump the buffer into the substrings array */
 				buf[buf_len] = '\0';
 
 				if (buf_len > 0) {
@@ -742,9 +738,11 @@ split_str(const char *str, const int update_args)
 			}
 			break;
 
-		/* If neither a quote nor a breaking word char nor command
-		 * substitution, just dump it into the buffer */
+		/* If neither a quote nor a breaking word char nor command substitution,
+		 * just dump it into the buffer */
 		default:
+			if (*str == '\\' && (flags & IN_BOOKMARKS_SCREEN))
+				break;
 			buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 			buf[buf_len] = *str;
 			buf_len++;
@@ -755,10 +753,9 @@ split_str(const char *str, const int update_args)
 		str_len++;
 	}
 
-	/* The while loop stops when the null byte is reached, so that the
-	 * last substring is not printed, but still stored in the buffer.
-	 * Therefore, we need to add it, if not empty, to our subtrings
-	 * array */
+	/* The while loop stops when the null byte is reached, so that the last
+	 * substring is not printed, but still stored in the buffer. Therefore,
+	 * we need to add it, if not empty, to our subtrings array */
 	buf[buf_len] = '\0';
 
 	if (buf_len > 0) {
@@ -789,8 +786,7 @@ split_str(const char *str, const int update_args)
 	}
 }
 
-/* Return 1 if STR contains only numbers of a range of numbers, and zero
- * if not */
+/* Return 1 if STR contains only numbers of a range of numbers, and zero if not */
 static int
 check_fused_param(const char *str)
 {

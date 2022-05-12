@@ -95,10 +95,12 @@ bm_prompt(const int print_header)
 	while (!bm)
 		bm = rl_no_hist(_("Choose a bookmark: "));
 
-	char **bm_cmd = get_substr(bm, ' ');
+	flags |= IN_BOOKMARKS_SCREEN;
+	char **cmd = split_str(bm, NO_UPDATE_ARGS);
+	flags &= ~IN_BOOKMARKS_SCREEN;
 	free(bm);
 
-	return bm_cmd;
+	return cmd;
 }
 
 static void

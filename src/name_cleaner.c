@@ -668,5 +668,5 @@ CONFIRM:
 }
 
 #else
-void *__skip_me_bleach;
+;
 #endif /* !_NO_BLEACH */
