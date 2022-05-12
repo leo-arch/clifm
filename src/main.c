@@ -516,6 +516,7 @@ const char *param_str[] = {
 	"net edit",
 	"net mount",
 	"net unmount",
+	"opener default",
 	"pg on",
 	"pager on",
 	"pg off",
