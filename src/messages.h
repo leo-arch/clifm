@@ -870,6 +870,7 @@ parameters.\n\n\
  st, sort [METHOD] [rev]\n\
  stats\n\
  t, tr, trash [ELN/FILE ... n] [ls, list] [clear, empty] [del]\n\
+ tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE(s)] [[:]TAG]\n\
  te [FILE(s)]\n\
  tips\n\
  u, undel, untrash [*, a, all]\n\
