@@ -1509,21 +1509,6 @@ sort_name_generator(const char *text, int state)
 		len = strlen(text);
 	}
 
-/*	static char *sorts[] = {
-	    "none",
-	    "name",
-	    "size",
-	    "atime",
-	    "btime",
-	    "ctime",
-	    "mtime",
-	    "version",
-	    "extension",
-	    "inode",
-	    "owner",
-	    "group",
-	    NULL}; */
-
 	while ((name = __sorts[i++].name) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
@@ -1791,9 +1776,11 @@ my_rl_completion(const char *text, int start, int end)
 		/* If autocd or auto-open, try to expand ELN's first */
 		if (autocd || auto_open) {
 			if (*text >= '1' && *text <= '9') {
-				int num_text = atoi(text);
+				int n = atoi(text);
 
-				if (is_number(text) && num_text > 0 && num_text <= (int)files) {
+				if (is_number(text) && n > 0 && n <= (int)files
+				&& ( (file_info[n - 1].dir == 1 && autocd == 1)
+				|| (file_info[n - 1].dir == 0 && auto_open == 1) ) ) {
 					matches = rl_completion_matches(text, &filenames_gen_eln);
 					if (matches) {
 						cur_comp_type = TCMP_ELN;
@@ -2024,7 +2011,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 
 			/* ELN expansion */
-			if (is_number(text) && n > 0 && n <= (int)files) {
+			if (is_number(text) && n > 0 && n <= (int)files && __expand_eln(text) == 1) {
 				matches = rl_completion_matches(text, &filenames_gen_eln);
 				if (matches) {
 					cur_comp_type = TCMP_ELN;

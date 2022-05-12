@@ -999,7 +999,9 @@ check_eln(const char *str, const int print)
 		return NO_MATCH;
 
 	int n = atoi(str);
-	if (n < 1 || n > (int)files || !file_info[n - 1].name)
+	if ( n < 1 || n > (int)files || !file_info[n - 1].name
+	|| ( nwords == 1 && ( (file_info[n - 1].dir == 1 && autocd == 0)
+	|| (file_info[n - 1].dir == 0 && auto_open == 0) ) ) )
 		return NO_MATCH;
 
 	if (!print)
@@ -1666,10 +1668,13 @@ rl_suggestions(const unsigned char c)
 			if (flag == CHECK_MATCH && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
 
-			if (*lb != ';' && *lb != ':' && *word >= '1' && *word <= '9' && is_number(word)) {
-				printed = check_eln(word, flag);
-
-				if (printed)
+			if (*lb != ';' && *lb != ':' && *word >= '1' && *word <= '9') {
+				if (__expand_eln(word) == 0) {
+					if (suggestion.printed)
+						clear_suggestion(CS_FREEBUF);
+					goto FAIL;
+				}
+				if ((printed = check_eln(word, flag)) == 1)
 					goto SUCCESS;
 			}
 			break;

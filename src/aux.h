@@ -58,5 +58,6 @@ int get_cursor_position(int *c, int *r);
 void rl_ring_bell(void);
 char *normalize_path(char *src, size_t src_len);
 void remove_bold_attr(char **str);
+int __expand_eln(const char *text);
 
 #endif /* AUX_H */

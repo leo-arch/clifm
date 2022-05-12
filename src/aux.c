@@ -41,6 +41,7 @@
 #include "aux.h"
 #include "exec.h"
 #include "misc.h"
+#include "checks.h"
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
 #endif
@@ -50,6 +51,77 @@
 #  define _READLINE_HAS_ACTIVATE_MARK
 # endif /* RL_READLINE_VERSION >= 0x0801 */
 #endif /* RL_READLINE_VERSION */
+
+/* Check whether a given command needs ELN's to be expanded/completed/suggested
+ * Returns 1 if yes or 0 if not */
+int
+__expand_eln(const char *text)
+{
+	char *l = rl_line_buffer;
+	if (!l || !*l)
+		return 0;
+
+	if (!is_number(text))
+		return 0;
+
+	int a = atoi(text); /* Only expand numbers matching ELN's */
+	if (a <= 0 || a > (int)files)
+		return 0;
+
+	if (nwords == 1) { /* First word */
+		if (file_info[a - 1].dir && autocd == 0)
+			return 0;
+		if (file_info[a - 1].dir == 0 && auto_open == 0)
+			return 0;
+	}
+
+	switch(*l) {
+		case 'b': /* bookmarks (only expand ELN's for 'add') */
+			if (l[1] == 'm' && l[2] == ' ') {
+				if (strncmp(l + 3, "add ", 4) == 0 || strncmp(l + 3, "a ", 2) == 0)
+					return 1;
+				return 0;
+			}
+			if (strncmp(l, "bookmarks ", 10) == 0) {
+				if (strncmp(l + 10, "add ", 4) == 0 || strncmp(l + 10, "a ", 2) == 0)
+					return 1;
+				return 0;
+			}
+			break;
+		case 'c': /* cs (color schemes) */
+			if (l[1] == 's' && l[2] == ' ')
+				return 0;
+			break;
+		case 'm': /* mf (max files) */
+			if (l[1] == 'f' && l[2] == ' ')
+				return 0;
+			break;
+		case 'j': /* jo */
+			if (l[1] == 'o' && l[2] == ' ')
+				return 0;
+			break;
+		case 'n':
+			if (strncmp(l, "net ", 4) == 0)
+				return 0;
+			break;
+		case 'p': /* profiles */
+			if ((l[1] == 'f' && l[2] == ' ') || strncmp(l, "prof ", 5) == 0
+			|| strncmp(l, "profile ", 8) == 0)
+				return 0;
+			break;
+		case 's': /* sort */
+			if ((l[1] == 't' && l[2] == ' ') || strncmp(l, "sort ", 5) == 0)
+				return 0;
+			break;
+		case 'w': /* workspaces */
+			if (l[1] == 's' && l[2] == ' ')
+				return 0;
+			break;
+		default: break;
+	}
+
+	return 1;
+}
 
 /* Sleep for MSEC milliseconds */
 /* Taken from https://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds */

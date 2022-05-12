@@ -1100,65 +1100,6 @@ expand_tag(char ***args, const int tag_index)
 }
 #endif /* NO_TAGS */
 
-/* Decide whether a command needs ELN's to be expanded
- * Returns 1 if yes or 0 if not */
-static int
-_expand_eln(char **args, const size_t index)
-{
-	if (!args || !args[0] || !args[index] || !is_number(args[index]))
-		return 0;
-
-	int a = atoi(args[index]); /* Only expand numbers matching ELN's */
-	if (a <= 0 || a > (int)files)
-		return 0;
-
-	if (index == 0) { /* First word */
-		if (file_info[a - 1].dir && autocd == 0)
-			return 0;
-		if (file_info[a - 1].dir == 0 && auto_open == 0)
-			return 0;
-	}
-
-	char *s = args[0];
-	switch(*s) {
-	case 'b': /* bookmarks */
-		if ((s[1] == 'm' && !s[2]) || strcmp(s, "bookmarks") == 0) {
-			if (args[1] && (strcmp(args[1], "a") == 0 || strcmp(args[1], "add") == 0))
-				return 1;
-			return 0;
-		}
-		break;
-	case 'j':
-		if (s[1] == 'o' && !s[2]) /* jo */
-			return 0;
-		break;
-	case 'm':
-		if (s[1] == 'f' && !s[2]) /* mf */
-			return 0;
-		break;
-	case 'n':
-		if (s[1] == 'e' && s[2] == 't' && !s[3]) /* net */
-			return 0;
-		break;
-	case 'p': /* profiles function */
-		if ((s[1] == 'f' && !s[2]) || strcmp(s, "prof") == 0
-		|| strcmp(s, "profile") == 0)
-			return 0;
-		break;
-	case 's':
-		if ((s[1] == 't' && !s[2]) || strcmp(s, "sort") == 0) /* st, sort */
-			return 0;
-		break;
-	case 'w': /* workspaces function */
-		if (s[1] == 's' && !s[2])
-			return 0;
-		break;
-	default: break;
-	}
-
-	return 1;
-}
-
 /* THIS IS A QUITE SHITTY FUNCTION, I KNOW. PLEASE REFACTOR IT!!!
  *
  * This function is one of the keys of CliFM. It will perform a series of
@@ -1715,7 +1656,7 @@ parse_input_str(char *str)
 				 * #   2.f) ELN EXPANSION   #
 				 * ########################## */
 
-		if (_expand_eln(substr, i) == 1) {
+		if (__expand_eln(substr[i]) == 1) {
 			int num = atoi(substr[i]);
 			int j = num - 1;
 			char *esc_str = escape_str(file_info[j].name);
