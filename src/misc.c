@@ -568,7 +568,7 @@ print_tips(int all)
 		"Run in disk usage analyzer mode using the -t command line option",
 		"Enable icons with 'icons on'",
 		"Quickly change to a parent directory using the 'bd' command",
-		"Use 'stats' to print satistics of files in the current directory",
+		"Use 'stats' to print statistics on files in the current directory",
 		"Customize the warning prompt via the WarningPromptStr in the config file",
 		"Enter '-' to run the fzfnav plugin (includes files preview)",
 		"Create multiple links at once using the 'bl' command",
