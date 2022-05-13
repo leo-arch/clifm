@@ -1346,23 +1346,23 @@ create_bm_file(void)
 	if (!bm_file)
 		return EXIT_FAILURE;
 
-	struct stat file_attrib;
-	if (stat(bm_file, &file_attrib) == -1) {
-		FILE *fp = fopen(bm_file, "w+");
-		if (!fp) {
-			_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file,
-			    strerror(errno));
-			return EXIT_FAILURE;
-		} else {
-			fprintf(fp, "### This is the bookmarks file for %s ###\n\n"
-				    "# Empty and commented lines are ommited\n"
-				    "# The bookmarks syntax is: [shortcut]name:path\n"
-				    "# Example:\n"
-				    "[c]clifm:%s\n",
-			    PROGRAM_NAME, config_dir ? config_dir : "path/to/file");
-			fclose(fp);
-		}
+	struct stat attr;
+	if (stat(bm_file, &attr) != -1)
+		return EXIT_SUCCESS;
+
+	FILE *fp = fopen(bm_file, "w+");
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file, strerror(errno));
+		return EXIT_FAILURE;
 	}
+
+	fprintf(fp, "### This is the bookmarks file for %s ###\n\n"
+		    "# Empty and commented lines are ommited\n"
+		    "# The bookmarks syntax is: [shortcut]name:path\n"
+		    "# Example:\n"
+		    "[c]clifm:%s\n",
+	    PROGRAM_NAME, config_dir ? config_dir : "path/to/file");
+	fclose(fp);
 
 	return EXIT_SUCCESS;
 }

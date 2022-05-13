@@ -153,7 +153,7 @@ save_jumpdb(void)
 		/* Add bonus points */
 		int j = (int)bm_n;
 		while (--j >= 0) {
-			if (bookmarks[j].path[1] == jump_db[i].path[1]
+			if (bookmarks[j].path && bookmarks[j].path[1] == jump_db[i].path[1]
 			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
 				jump_db[i].rank += BOOKMARK_BONUS;
 				jump_db[i].keep = 1;
@@ -341,7 +341,7 @@ dirjump(char **args, int mode)
 
 			int j = (int)bm_n, bpw = 0; /* Bookmarked, pinned or workspace */
 			while (--j >= 0) {
-				if (bookmarks[j].path[1] == jump_db[i].path[1]
+				if (bookmarks[j].path && bookmarks[j].path[1] == jump_db[i].path[1]
 				&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
 					rank += BOOKMARK_BONUS;
 					bpw = 1;
@@ -373,7 +373,7 @@ dirjump(char **args, int mode)
 			ranks_sum += rank;
 			visits_sum += (int)jump_db[i].visits;
 
-			if (workspaces[cur_ws].path[1] == jump_db[i].path[1]
+			if (workspaces[cur_ws].path && workspaces[cur_ws].path[1] == jump_db[i].path[1]
 			&& strcmp(workspaces[cur_ws].path, jump_db[i].path) == 0) {
 				printf("  %s%zu\t %zu\t %d\t %d\t%d%c\t%s%s \n", mi_c,
 				    i + 1, jump_db[i].visits, days_since_first,
@@ -506,7 +506,7 @@ dirjump(char **args, int mode)
 				}
 
 				/* Exclue CWD */
-				if (jump_db[j].path[1] == workspaces[cur_ws].path[1]
+				if (workspaces[cur_ws].path && jump_db[j].path[1] == workspaces[cur_ws].path[1]
 				&& strcmp(jump_db[j].path, workspaces[cur_ws].path) == 0)
 					continue;
 
@@ -627,7 +627,7 @@ dirjump(char **args, int mode)
 			/* Bookmarked directories have extra credit */
 			k = (int)bm_n;
 			while (--k >= 0) {
-				if (bookmarks[k].path[1] == matches[j][1]
+				if (bookmarks[k].path && bookmarks[k].path[1] == matches[j][1]
 				&& strcmp(bookmarks[k].path, matches[j]) == 0) {
 					rank += BOOKMARK_BONUS;
 					break;
