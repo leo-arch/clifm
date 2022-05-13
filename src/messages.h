@@ -838,7 +838,7 @@ parameters.\n\n\
  ff, folders-first [on, off, status]\n\
  fs\n\
  ft, filter [unset] [REGEX]\n\
- fz\n\
+ fz [on, off]\n\
  hf, hidden [on, off, status]\n\
  history [edit [APP]] [clear] [-n] [on, off, status]\n\
  icons [on, off]\n\
