@@ -137,7 +137,7 @@ List of CliFM features:
   27) Command substitution and regular expressions for all internal commands
   28) Privacy oriented
   29) \fIKangaroo\fR, a built\-in directory jumper function
-  30) Icons support (depends on icons\-in\-terminal: \fIhttps://github.com/sebastiencs/icons\-in\-terminal\fR)
+  30) Icons support
   31) Batch symbolic links
   32) Files filter via regular expressions for the files list
   33) Up to eight workspaces
@@ -302,10 +302,10 @@ expand bookmark names into the corresponding bookmark paths and enable TAB compl
 if running in long view, print directories size and their contents
 .TP
 .B \-\-icons
-enable icons. Depends on the \fBicons-in-terminal\fR project.
+enable icons
 .TP
 .B \-\-icons\-use\-file\-color
-instead of an specific color, icons take the color of the corresponding file name (specified either via file type or via file extension). Useful when building custom color schemes. This option implies \fB--icons\fR.
+instead of an specific color, icons take the color of the corresponding file name (specified either via file type or via file extension). Useful when building custom color schemes. This option implies \fB--icons\fR. Only if compiled with support for either icons-in-terminal or Nerdfonts. The default build is compiled with emoji-icons support, in which case this option is ignored (Unicode icons has their own color built-in)
 .TP
 .B \-\-list\-and\-quit
 list files and quit. It may be used in conjunction parameter substitution. Ex: 'clifm --list-and-quit /etc'
@@ -1155,7 +1155,7 @@ All customization settings (theming) are made from a single configuration file (
 .TP
  \fIExtColors\fR = Colors for files based of file name's extension. See the \fBCOLORS\fR section below.
 .TP
- \fIDirIconColor\fR = Color for the directory icon (when icons are enabled). See the \fBCOLORS\fR section below.
+ \fIDirIconColor\fR = Color for the directory icon (when icons are enabled). See the \fBCOLORS\fR section below. Only when using icons-in-terminal or Nerfonts. If using rather emoji-icons (default build), this option is ignored.
 .TP
  \fIPrompt\fR = Main prompt string. See the \fBTHE PROMPT\fR section below.
 .TP
@@ -2461,8 +2461,6 @@ List available actions/plugins:
 - Want icons?
 
     \fBicons on\fR
-
-\fBNOTE\fR: Recall to install \fBicons-in-terminal\fR before
 
 - I'm tired, quit:
 
