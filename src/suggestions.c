@@ -1240,6 +1240,7 @@ count_words(size_t *start_word, size_t *full_word)
 		if (w && b[w] == ' ' && b[w - 1] != '\\') {
 			if (b[w + 1] && b[w + 1] != ' ')
 				rl_last_word_start = (int)w + (b + 1 ? 1 : 0);
+//				rl_last_word_start = (int)w + 1;
 			if (!*full_word && b[w - 1] != '|'
 			&& b[w - 1] != ';' && b[w - 1] != '&')
 				*full_word = w; /* Index of the end of the first full word (cmd) */

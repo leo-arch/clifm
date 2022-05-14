@@ -78,12 +78,9 @@ int freebsd_sc_console = 0;
 #define DEL_EMPTY_LINE     1
 #define DEL_NON_EMPTY_LINE 2
 
-/* Wide chars */
-/*char wc[12];
-size_t wcn = 0; */
-
 struct dirent **tagged_files = (struct dirent **)NULL;
 int tagged_files_n = 0;
+//int rl_file_in_cwd_completion_desired = 1;
 
 /* Delete key implementation */
 static void
@@ -92,7 +89,7 @@ xdelete(void)
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		remove_suggestion_not_end();
-#endif // !_NO_SUGGESTIONS
+#endif /* !_NO_SUGGESTIONS */
 
 	if (rl_point == rl_end)
 		return;
@@ -1647,6 +1644,104 @@ tags_generator(const char *text, int state)
 
 	return (char *)NULL;
 }
+/*
+static size_t
+rl_count_words(void)
+{
+	char *l = rl_line_buffer;
+	if (!l || !*l)
+		return 0;
+
+	size_t c = 1;
+	while (*l) {
+		if (l != rl_line_buffer && *l == ' '
+		&& *(l - 1) != '\\') //&& *(l + 1) != ' '
+			c++;
+		l++;
+	}
+
+	return c;
+} */
+
+/* THIS IS AWFUL! WRITE A BETTER IMPLEMENTATION */
+/* Complete with options for specific commands */
+static char *
+options_generator(const char *text, int state)
+{
+	char *l = rl_line_buffer;
+	if (!l || !*l)
+		return (char *)NULL;
+
+	static size_t len = 0;
+//	static size_t w = 0;
+	static int i;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+//		w = rl_count_words();
+	}
+
+#define MAX_OPTS 10
+	char *_opts[MAX_OPTS] = {0};
+
+	/* acd, ao, ext, ff, hf, pf, uc */
+	if ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ') || strncmp(l, "acd ", 4) == 0) )
+	|| (*l == 'e' && strncmp(l, "ext ", 4) == 0)
+	|| (*l == 'f' && l[1] == 'f' && l[2] == ' ')
+	|| (*l == 'h' && l[1] == 'f' && l[2] == ' ')
+	|| (*l == 'u' && l[1] == 'c' && l[2] == ' ') ) {
+		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
+	/* cl, icons */
+	} else if ( (*l == 'c' && l[1] == 'l' && l[2] == ' ')
+	|| (*l == 'i' && strncmp(l, "icons ", 6) == 0) ) {
+		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = NULL;
+	/* pf */
+	} else if (*l == 'p' && l[1] == 'f' && l[2] == ' ') {
+		_opts[0] = "list"; _opts[1] = "set"; _opts[2] = "add"; _opts[3] = "del"; _opts[4] = NULL;
+	/* tag */
+	} else if (*l == 't' && l[1] == 'a' && l[2] == 'g' && l[3] == ' ') {
+		_opts[0] = "list"; _opts[1] = "new"; _opts[2] = "remove";
+		_opts[3] = "rename"; _opts[4] = "untag"; _opts[5] = "merge"; _opts[6] = NULL;
+	/* mm */
+	} else if (*l == 'm' && l[1] == 'm' && l[2] == ' ') {
+		_opts[0] = "info"; _opts[1] = "edit"; _opts[2] = "import"; _opts[3] = NULL;
+	/* history */
+	} else if (*l == 'h' && strncmp(l, "history ", 8) == 0) {
+		_opts[0] = "edit"; _opts[1] = "clear"; _opts[2] = "on";
+		_opts[3] = "off"; _opts[4] = "status"; _opts[5] = NULL;
+	/* b, f */
+	} else if ((*l == 'b' && l[1] == ' ') || (*l == 'f' && l[1] == ' ')) {
+		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;
+	/* fz */
+	} else if (*l == 'f' && l[1] == 'z' && l[2] == ' ') {
+		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = NULL;
+	} else {
+		/* kb */
+		if (*l == 'k' && l[1] == 'b' && l[2] == ' ') {
+			_opts[0] = "edit"; _opts[1] = "reset"; _opts[2] = NULL;
+		}
+	}
+
+/*	if ((*l == '?' && l[1] == ' ') || (*l == 'h' && strncmp(l, "help ", 5) == 0))
+		rl_file_in_cwd_completion_desired = 0; */
+
+	if (!_opts[0])
+		return (char *)NULL;
+
+/*	if (w > 2) { // Do not complete options after the second word
+		rl_file_in_cwd_completion_desired = 0;
+		return (char *)NULL;
+	} */
+
+	while ((name = _opts[i++]) != NULL) {
+		if (strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
 
 static char *
 tag_entries_generator(const char *text, int state)
@@ -1747,6 +1842,8 @@ my_rl_completion(const char *text, int start, int end)
 	char **matches = (char **)NULL;
 	cur_comp_type = TCMP_NONE;
 	UNUSED(end);
+	rl_sort_completion_matches = 1;
+//	rl_file_in_cwd_completion_desired = 1;
 
 	while (*text == '\\')
 		++text;
@@ -2137,8 +2234,13 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* Try to complete with filenames in CWD */
 		if (!text || *text != '/') {
-			matches = rl_completion_matches(text, &filenames_gen_text);
-			if (matches) {
+			rl_sort_completion_matches = 0;
+			if ((matches = rl_completion_matches(text, &options_generator)))
+				return matches;
+			rl_sort_completion_matches = 1;
+//			if (rl_file_in_cwd_completion_desired
+//			&& (matches = rl_completion_matches(text, &filenames_gen_text)) ) {
+			if ((matches = rl_completion_matches(text, &filenames_gen_text))) {
 				cur_comp_type = TCMP_PATH;
 				return matches;
 			}
