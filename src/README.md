@@ -238,8 +238,8 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | --- | --- |
 | `_BE_POSIX` | Build a fully `POSIX.1-2008` compliant executable<sup>1</sup> |
 | `CLIFM_SUCKLESS` | Remove all code aimed at parsing config files. Configuration is done either via `settings.h` (and recompilation) or via [environment variables](https://github.com/leo-arch/clifm/wiki/Specifics#environment)<sup>2</sup> |
-| `_NERD` | Enable Nerdfont support for icons |
-| `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
+| `_ICONS_IN_TERMINAL` | Use icons-in-terminal for icons instead of the default (emoji-icons) |
+| `_NERD` | Use Nerdfonts for icons instead of the default (emoji-icons) |
 | `_NO_ARCHIVING` | Disable archiving support |
 | `_NO_BLEACH` | Disable support for `Bleach`, the built-in file names cleaner |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
@@ -250,6 +250,7 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | `_NO_SUGGESTIONS` | Disable suggestions support |
 | `_NO_TAGS` | Disable support for `Etiqueta`, the tags system |
 | `_NO_TRASH` | Disable trash support |
+| `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 
 <sup>1</sup> Only one feature is lost (Linux): Files birth time. We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
 
