@@ -1,7 +1,9 @@
-#ifndef ICONS_NERDFONT
-#define ICONS_NERDFONT
+/* icons-nerdfont.h Icons defintions for CliFM */
 
 /* For more codepoints see https://www.nerdfonts.com/cheat-sheet */
+
+#ifndef ICONS_NERDFONT
+#define ICONS_NERDFONT
 
 /* Arrows */
 #define MD_ARROW_UPWARD    "\uf55c"
@@ -24,6 +26,7 @@
 #define NERD_DESKTOP       "\ufcbe"
 #define NERD_BRIEFCASE     "\uf5d5"
 #define NERD_DOCUMENT      "\uf718"
+#define NERD_DOCKER        "\uf308"
 #define NERD_DOWNLOADS     "\uf5d7"
 #define NERD_MUSIC         "\uf832"
 #define NERD_MUSICFILE     "\uf886"

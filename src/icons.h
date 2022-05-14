@@ -3,11 +3,13 @@
 #ifndef ICONS_H
 #define ICONS_H
 
-#ifndef _NERD
+#if defined(_NERD)
+# include "icons-nerdfont.h"
+#elif defined(_ICONS_IN_TERMINAL)
 # include "icons-in-terminal.h"
 #else
-# include "icons-nerdfont.h"
-#endif /* !_NERD */
+# include "icons-emoji.h"
+#endif /* _NERD */
 
 struct icons_t {
 	char *name;
@@ -15,107 +17,10 @@ struct icons_t {
 	char *color;
 };
 
-/* Icon macros are defined in icons-in-terminal.h, provided by the
- * 'icons-in-terminal' project, and icons-nerdfont.h */
+/* Icon macros are defined in icons-in-terminal.h (provided by the
+ * 'icons-in-terminal' project), icons-nerdfont.h, and icons-emoji.h */
 char
-#ifndef _NERD
-    /* File types */
-    ICON_DIR[] = FA_FOLDER,
-    ICON_LOCK[] = FA_UNLOCK_ALT,
-    ICON_REG[] = FA_FILE_O,
-    ICON_EXEC[] = FA_COG,
-    ICON_LINK[] = FA_CHAIN,
-
-    /* Extensions */
-    ICON_BINARY[] = OCT_FILE_BINARY,
-
-    ICON_MANPAGE[] = FILE_MANPAGE,
-    ICON_MAKEFILE[] = FILE_CMAKE,
-    ICON_MARKDOWN[] = DEV_MARKDOWN,
-    ICON_DATABASE[] = MFIZZ_DATABASE_ALT2,
-    ICON_CONF[] = FA_COGS,
-    ICON_DIFF[] = FILE_DIFF,
-    ICON_CODE[] = FA_FILE_CODE_O,
-    ICON_VIM[] = DEV_VIM,
-    ICON_NASM[] = FILE_NASM,
-    ICON_JAVA[] = MFIZZ_JAVA,
-    ICON_JAVASCRIPT[] = MFIZZ_JAVASCRIPT,
-    ICON_SQLITE[] = FILE_SQLITE,
-    ICON_ELF[] = FA_LINUX,
-    ICON_HTML[] = FA_FILE_CODE_O,
-    ICON_GO[] = FILE_GO,
-    ICON_PHP[] = MFIZZ_PHP,
-    ICON_PERL[] = MFIZZ_PERL,
-    ICON_SCALA[] = MFIZZ_SHELL,
-    ICON_MYSQL[] = MFIZZ_MYSQL,
-    ICON_FSHARP[] = DEV_FSHARP,
-    ICON_LUA[] = FILE_LUA,
-    ICON_RUBY[] = MFIZZ_RUBY,
-    ICON_CLOJURE[] = DEV_CLOJURE_ALT,
-    ICON_JULIA[] = FILE_JULIA,
-    ICON_HASKELL[] = DEV_HASKELL,
-    ICON_ELIXIR[] = MFIZZ_ELIXIR,
-    ICON_ELECTRON[] = FILE_ELECTRON,
-    ICON_CSS[] = DEV_CSS3,
-    ICON_ELM[] = MFIZZ_ELM,
-    ICON_ERLANG[] = DEV_ERLANG,
-    ICON_PATCH[] = FILE_PATCH,
-    ICON_IMG[] = FA_FILE_IMAGE_O,
-    ICON_VID[] = FA_FILE_MOVIE_O,
-    ICON_AUDIO[] = FA_FILE_AUDIO_O,
-    ICON_PDF[] = FA_FILE_PDF_O,
-    ICON_ARCHIVE[] = FA_FILE_ARCHIVE_O,
-    ICON_CD[] = LINEA_MUSIC_CD,
-    ICON_SCRIPT[] = MFIZZ_SCRIPT,
-    ICON_TXT[] = FA_FILE_TEXT_O,
-    ICON_C[] = MFIZZ_C,
-    ICON_CPP[] = MFIZZ_CPLUSPLUS,
-    ICON_CSHARP[] = MFIZZ_CSHARP,
-    ICON_PYTHON[] = MFIZZ_PYTHON,
-    ICON_SWIFT[] = DEV_SWIFT,
-    ICON_COFFEE[] = DEV_COFFEESCRIPT,
-    ICON_RUST[] = MFIZZ_RUST,
-
-    ICON_OPENOFFICE[] = FILE_OPENOFFICE,
-
-    ICON_WINDOWS[] = DEV_WINDOWS,
-    ICON_WORD[] = FILE_WORD,
-    ICON_EXCEL[] = FILE_EXCEL,
-    ICON_ACCESS[] = FILE_ACCESS,
-    ICON_POWERPOINT[] = FILE_POWERPOINT,
-    ICON_PHOTOSHOP[] = DEV_PHOTOSHOP,
-    ICON_COPYRIGHT[] = FA_COPYRIGHT,
-    ICON_CONFIGURE[] = FILE_CONFIG,
-    ICON_HISTORY[] = FA_HISTORY,
-    ICON_KEY[] = MD_VPN_KEY,
-    ICON_FONT[] = FILE_FONT,
-    ICON_README[] = OCT_BOOK,
-    ICON_LIST[] = OCT_CHECKLIST,
-    ICON_COMMENTS[] = FA_COMMENTS,
-    ICON_VISUALSTUDIO[] = DEV_VISUALSTUDIO,
-    ICON_POSTSCRIPT[] = FILE_POSTSCRIPT,
-
-    ICON_ARCH[] = MFIZZ_ARCHLINUX,
-    ICON_REDHAT[] = LINUX_REDHAT,
-    ICON_DEBIAN[] = MFIZZ_DEBIAN,
-
-    /* Dir names */
-    ICON_DESKTOP[] = FA_DESKTOP,
-    ICON_DOCUMETS[] = FA_BRIEFCASE,
-    ICON_DOWNLOADS[] = FA_DOWNLOAD,
-    ICON_HOME[] = FA_HOME,
-    ICON_TRASH[] = FA_TRASH,
-    ICON_FAV[] = FA_STAR_O,
-    ICON_MUSIC[] = FA_MUSIC,
-    ICON_PICTURES[] = MD_CAMERA_ALT,
-    ICON_VIDEOS[] = FA_FILM,
-    ICON_PUBLIC[] = FA_INBOX,
-    ICON_TEMPLATES[] = FA_PAPERCLIP,
-    ICON_DOTGIT[] = FA_GIT,
-    ICON_GAMES[] = FA_GAMEPAD,
-    ICON_DROPBOX[] = FA_DROPBOX,
-    ICON_STEAM[] = FA_STEAM;
-#else
+#if defined(_NERD)
     /* File types */
     ICON_DIR[] = NERD_DIRECTORY,
     ICON_LOCK[] = NERD_LOCK,
@@ -172,6 +77,7 @@ char
     ICON_SWIFT[] = NERD_SWIFT,
     ICON_COFFEE[] = NERD_COFFEE,
     ICON_RUST[] = NERD_RUST,
+	ICON_DOCKER[] = NERD_DOCKER,
 
     ICON_OPENOFFICE[] = NERD_FILE, /* */
 
@@ -198,7 +104,7 @@ char
 
     /* Dir names */
     ICON_DESKTOP[] = NERD_DESKTOP,
-    ICON_DOCUMETS[] = NERD_BRIEFCASE,
+    ICON_DOCUMENTS[] = NERD_BRIEFCASE,
     ICON_DOWNLOADS[] = NERD_DOWNLOADS,
     ICON_HOME[] = NERD_HOME,
     ICON_TRASH[] = NERD_TRASH,
@@ -212,24 +118,240 @@ char
     ICON_GAMES[] = NERD_GAMES,
     ICON_DROPBOX[] = NERD_DROPBOX,
     ICON_STEAM[] = NERD_STEAM;
-#endif /* !_NERD */
 
-#define BLUE "\x1b[0;34m"
-#define B_BLUE "\x1b[1;34m"
-#define WHITE "\x1b[0;37m"
-#define B_WHITE "\x1b[1;37m"
-#define YELLOW "\x1b[0;33m"
-#define B_YELLOW "\x1b[1;33m"
-#define GREEN "\x1b[0;32m"
-#define B_GREEN "\x1b[1;32m"
-#define CYAN "\x1b[0;36m"
-#define B_CYAN "\x1b[1;36m"
-#define MAGENTA "\x1b[0;35m"
-#define B_MAGENTA "\x1b[1;35m"
-#define RED "\x1b[0;31m"
-#define B_RED "\x1b[1;31m"
-#define BLACK "\x1b[0;30m"
-#define B_BLACK "\x1b[1;30m"
+#elif defined(_ICONS_IN_TERMINAL)
+    /* File types */
+    ICON_DIR[] = FA_FOLDER,
+    ICON_LOCK[] = FA_UNLOCK_ALT,
+    ICON_REG[] = FA_FILE_O,
+    ICON_EXEC[] = FA_COG,
+    ICON_LINK[] = FA_CHAIN,
+
+    /* Extensions */
+    ICON_BINARY[] = OCT_FILE_BINARY,
+
+    ICON_MANPAGE[] = FILE_MANPAGE,
+    ICON_MAKEFILE[] = FILE_CMAKE,
+    ICON_MARKDOWN[] = DEV_MARKDOWN,
+    ICON_DATABASE[] = MFIZZ_DATABASE_ALT2,
+    ICON_CONF[] = FA_COGS,
+    ICON_DIFF[] = FILE_DIFF,
+    ICON_CODE[] = FA_FILE_CODE_O,
+    ICON_VIM[] = DEV_VIM,
+    ICON_NASM[] = FILE_NASM,
+    ICON_JAVA[] = MFIZZ_JAVA,
+    ICON_JAVASCRIPT[] = MFIZZ_JAVASCRIPT,
+    ICON_SQLITE[] = FILE_SQLITE,
+    ICON_ELF[] = FA_LINUX,
+    ICON_HTML[] = FA_FILE_CODE_O,
+    ICON_GO[] = FILE_GO,
+    ICON_PHP[] = MFIZZ_PHP,
+    ICON_PERL[] = MFIZZ_PERL,
+    ICON_SCALA[] = MFIZZ_SHELL,
+    ICON_MYSQL[] = MFIZZ_MYSQL,
+    ICON_FSHARP[] = DEV_FSHARP,
+    ICON_LUA[] = FILE_LUA,
+    ICON_RUBY[] = MFIZZ_RUBY,
+    ICON_CLOJURE[] = DEV_CLOJURE_ALT,
+    ICON_JULIA[] = FILE_JULIA,
+    ICON_HASKELL[] = DEV_HASKELL,
+    ICON_ELIXIR[] = MFIZZ_ELIXIR,
+    ICON_ELECTRON[] = FILE_ELECTRON,
+    ICON_CSS[] = DEV_CSS3,
+    ICON_ELM[] = MFIZZ_ELM,
+    ICON_ERLANG[] = DEV_ERLANG,
+    ICON_PATCH[] = FILE_PATCH,
+    ICON_IMG[] = FA_FILE_IMAGE_O,
+    ICON_VID[] = FA_FILE_MOVIE_O,
+    ICON_AUDIO[] = FA_FILE_AUDIO_O,
+    ICON_PDF[] = FA_FILE_PDF_O,
+    ICON_ARCHIVE[] = FA_FILE_ARCHIVE_O,
+    ICON_CD[] = LINEA_MUSIC_CD,
+    ICON_SCRIPT[] = MFIZZ_SCRIPT,
+    ICON_TXT[] = FA_FILE_TEXT_O,
+    ICON_C[] = MFIZZ_C,
+    ICON_CPP[] = MFIZZ_CPLUSPLUS,
+    ICON_CSHARP[] = MFIZZ_CSHARP,
+    ICON_PYTHON[] = MFIZZ_PYTHON,
+    ICON_SWIFT[] = DEV_SWIFT,
+    ICON_COFFEE[] = DEV_COFFEESCRIPT,
+    ICON_RUST[] = MFIZZ_RUST,
+	ICON_DOCKER[] = MFIZZ_DOCKER,
+
+    ICON_OPENOFFICE[] = FILE_OPENOFFICE,
+
+    ICON_WINDOWS[] = DEV_WINDOWS,
+    ICON_WORD[] = FILE_WORD,
+    ICON_EXCEL[] = FILE_EXCEL,
+    ICON_ACCESS[] = FILE_ACCESS,
+    ICON_POWERPOINT[] = FILE_POWERPOINT,
+    ICON_PHOTOSHOP[] = DEV_PHOTOSHOP,
+    ICON_COPYRIGHT[] = FA_COPYRIGHT,
+    ICON_CONFIGURE[] = FILE_CONFIG,
+    ICON_HISTORY[] = FA_HISTORY,
+    ICON_KEY[] = MD_VPN_KEY,
+    ICON_FONT[] = FILE_FONT,
+    ICON_README[] = OCT_BOOK,
+    ICON_LIST[] = OCT_CHECKLIST,
+    ICON_COMMENTS[] = FA_COMMENTS,
+    ICON_VISUALSTUDIO[] = DEV_VISUALSTUDIO,
+    ICON_POSTSCRIPT[] = FILE_POSTSCRIPT,
+
+    ICON_ARCH[] = MFIZZ_ARCHLINUX,
+    ICON_REDHAT[] = LINUX_REDHAT,
+    ICON_DEBIAN[] = MFIZZ_DEBIAN,
+
+    /* Dir names */
+    ICON_DESKTOP[] = FA_DESKTOP,
+    ICON_DOCUMENTS[] = FA_BRIEFCASE,
+    ICON_DOWNLOADS[] = FA_DOWNLOAD,
+    ICON_HOME[] = FA_HOME,
+    ICON_TRASH[] = FA_TRASH,
+    ICON_FAV[] = FA_STAR_O,
+    ICON_MUSIC[] = FA_MUSIC,
+    ICON_PICTURES[] = MD_CAMERA_ALT,
+    ICON_VIDEOS[] = FA_FILM,
+    ICON_PUBLIC[] = FA_INBOX,
+    ICON_TEMPLATES[] = FA_PAPERCLIP,
+    ICON_DOTGIT[] = FA_GIT,
+    ICON_GAMES[] = FA_GAMEPAD,
+    ICON_DROPBOX[] = FA_DROPBOX,
+    ICON_STEAM[] = FA_STEAM;
+
+#else /* emoji-icons */
+    /* File types */
+    ICON_DIR[] = EMOJI_FOLDER,
+    ICON_LOCK[] = EMOJI_LOCK,
+    ICON_REG[] = EMOJI_FILE,
+    ICON_EXEC[] = EMOJI_EXEC,
+    ICON_LINK[] = EMOJI_LINK,
+
+    /* Extensions */
+    ICON_BINARY[] = EMOJI_BINARY,
+    ICON_MANPAGE[] = EMOJI_MANUAL,
+    ICON_MAKEFILE[] = EMOJI_MAKE,
+    ICON_MARKDOWN[] = EMOJI_MARKDOWN,
+    ICON_DATABASE[] = EMOJI_DATABASE,
+    ICON_CONF[] = EMOJI_CONF,
+    ICON_DIFF[] = EMOJI_DIFF, /* */
+    ICON_CODE[] = EMOJI_SCRIPT, /* */
+    ICON_VIM[] = EMOJI_VIM,
+    ICON_NASM[] = EMOJI_NASM, /* */
+    ICON_JAVA[] = EMOJI_JAVA,
+    ICON_JAVASCRIPT[] = EMOJI_JAVASCRIPT,
+    ICON_SQLITE[] = EMOJI_DATABASE, /* */
+    ICON_ELF[] = EMOJI_LINUX,
+    ICON_HTML[] = EMOJI_WEB,
+    ICON_GO[] = EMOJI_GO,
+    ICON_PHP[] = EMOJI_WEB,
+    ICON_PERL[] = EMOJI_PERL, /* */
+    ICON_SCALA[] = EMOJI_FILE,
+    ICON_MYSQL[] = EMOJI_DATABASE,
+    ICON_FSHARP[] = EMOJI_FILE,
+    ICON_LUA[] = EMOJI_LUA,
+    ICON_RUBY[] = EMOJI_RUBY,
+    ICON_CLOJURE[] = EMOJI_FILE,
+    ICON_JULIA[] = EMOJI_FILE,
+    ICON_HASKELL[] = EMOJI_FILE,
+    ICON_ELIXIR[] = EMOJI_FILE,
+    ICON_ELECTRON[] = EMOJI_ELECTRON,
+    ICON_CSS[] = EMOJI_FILE,
+    ICON_ELM[] = EMOJI_FILE,
+    ICON_ERLANG[] = EMOJI_ERLANG,
+    ICON_PATCH[] = EMOJI_PATCH, /* */
+    ICON_IMG[] = EMOJI_IMAGE,
+    ICON_VID[] = EMOJI_MOVIE,
+    ICON_AUDIO[] = EMOJI_AUDIO,
+    ICON_PDF[] = EMOJI_PDF,
+    ICON_ARCHIVE[] = EMOJI_ARCHIVE,
+    ICON_CD[] = EMOJI_DISK,
+    ICON_SCRIPT[] = EMOJI_SCRIPT,
+    ICON_TXT[] = EMOJI_NOTE,
+    ICON_C[] = EMOJI_C,
+    ICON_CPP[] = EMOJI_CPP,
+    ICON_CSHARP[] = EMOJI_CSHARP,
+    ICON_PYTHON[] = EMOJI_PYTHON,
+    ICON_SWIFT[] = EMOJI_SWIFT,
+    ICON_COFFEE[] = EMOJI_COFFEE,
+    ICON_RUST[] = EMOJI_RUST,
+	ICON_DOCKER[] = EMOJI_DOCKER,
+    ICON_OPENOFFICE[] = EMOJI_WORD, /* */
+
+    ICON_WINDOWS[] = EMOJI_WINDOWS,
+    ICON_WORD[] = EMOJI_WORD,
+    ICON_EXCEL[] = EMOJI_STYLESHEET,
+    ICON_ACCESS[] = EMOJI_PRESENTATION, /* */
+    ICON_POWERPOINT[] = EMOJI_PRESENTATION,
+    ICON_PHOTOSHOP[] = EMOJI_PHOTO,
+    ICON_COPYRIGHT[] = EMOJI_LICENSE,
+    ICON_CONFIGURE[] = EMOJI_CONF,
+    ICON_HISTORY[] = EMOJI_CHANGELOG,
+    ICON_KEY[] = EMOJI_KEY,
+    ICON_FONT[] = EMOJI_FONT,
+    ICON_README[] = EMOJI_TEXT,
+    ICON_LIST[] = EMOJI_LIST,
+    ICON_COMMENTS[] = EMOJI_SUBTITLES,
+    ICON_VISUALSTUDIO[] = EMOJI_FILE,
+    ICON_POSTSCRIPT[] = EMOJI_FILE, /* */
+
+    ICON_ARCH[] = EMOJI_MAKE,
+    ICON_REDHAT[] = EMOJI_ARCHIVE,
+    ICON_DEBIAN[] = EMOJI_ARCHIVE,
+
+    /* Dir names */
+    ICON_DESKTOP[] = EMOJI_DESKTOP,
+    ICON_DOCUMENTS[] = EMOJI_BRIEFCASE,
+    ICON_DOWNLOADS[] = EMOJI_DOWNLOAD,
+    ICON_HOME[] = EMOJI_HOME,
+    ICON_TRASH[] = EMOJI_TRASH,
+    ICON_FAV[] = EMOJI_FOLDER,
+    ICON_MUSIC[] = EMOJI_MUSIC,
+    ICON_PICTURES[] = EMOJI_PICTURE,
+    ICON_VIDEOS[] = EMOJI_VIDEOS,
+    ICON_PUBLIC[] = EMOJI_PUBLIC,
+    ICON_TEMPLATES[] = EMOJI_TEMPLATE,
+    ICON_DOTGIT[] = EMOJI_GIT,
+    ICON_GAMES[] = EMOJI_FOLDER,
+    ICON_DROPBOX[] = EMOJI_FILE,
+    ICON_STEAM[] = EMOJI_FILE;
+#endif /* _NERD */
+
+#if defined(_NERD) || defined(_ICONS_IN_TERMINAL)
+# define BLUE "\x1b[0;34m"
+# define B_BLUE "\x1b[1;34m"
+# define WHITE "\x1b[0;37m"
+# define B_WHITE "\x1b[1;37m"
+# define YELLOW "\x1b[0;33m"
+# define B_YELLOW "\x1b[1;33m"
+# define GREEN "\x1b[0;32m"
+# define B_GREEN "\x1b[1;32m"
+# define CYAN "\x1b[0;36m"
+# define B_CYAN "\x1b[1;36m"
+# define MAGENTA "\x1b[0;35m"
+# define B_MAGENTA "\x1b[1;35m"
+# define RED "\x1b[0;31m"
+# define B_RED "\x1b[1;31m"
+# define BLACK "\x1b[0;30m"
+# define B_BLACK "\x1b[1;30m"
+#else
+# define EMPTY_STR ""
+# define BLUE EMPTY_STR
+# define B_BLUE EMPTY_STR
+# define WHITE EMPTY_STR
+# define B_WHITE EMPTY_STR
+# define YELLOW EMPTY_STR
+# define B_YELLOW EMPTY_STR
+# define GREEN EMPTY_STR
+# define B_GREEN EMPTY_STR
+# define CYAN EMPTY_STR
+# define B_CYAN EMPTY_STR
+# define MAGENTA EMPTY_STR
+# define B_MAGENTA EMPTY_STR
+# define RED EMPTY_STR
+# define B_RED EMPTY_STR
+# define BLACK EMPTY_STR
+# define B_BLACK EMPTY_STR
+#endif /* _NERD || _ICONS_IN_TERMINAL */
 
 /* Default icons and colors for directories and files */
 #define DEF_DIR_ICON ICON_DIR
@@ -276,6 +398,7 @@ struct icons_t icon_ext[] = {
     {"db", ICON_DATABASE, WHITE},
     {"deb", ICON_DEBIAN, RED},
     {"diff", ICON_DIFF, WHITE},
+    {"djvu", ICON_PDF, B_RED},
     {"dll", ICON_MANPAGE, WHITE},
     {"doc", ICON_WORD, BLUE},
     {"docx", ICON_WORD, BLUE},
@@ -357,6 +480,7 @@ struct icons_t icon_ext[] = {
     {"odt", ICON_OPENOFFICE, BLUE},
     {"ods", ICON_OPENOFFICE, BLUE},
     {"ogg", ICON_AUDIO, YELLOW},
+    {"ogv", ICON_VID, BLUE},
     {"opdownload", ICON_DOWNLOADS, WHITE},
     {"otf", ICON_FONT, WHITE},
     {"out", ICON_ELF, WHITE},
@@ -405,6 +529,8 @@ struct icons_t icon_ext[] = {
     {"tar", ICON_ARCHIVE, YELLOW},
     {"tbz2", ICON_ARCHIVE, YELLOW},
     {"tgz", ICON_ARCHIVE, YELLOW},
+	{"tiff", ICON_IMG, GREEN},
+	{"torrent", ICON_DOWNLOADS, WHITE},
     {"ttf", ICON_FONT, WHITE},
     {"txt", ICON_TXT, WHITE},
     {"txz", ICON_ARCHIVE, YELLOW},
@@ -415,6 +541,7 @@ struct icons_t icon_ext[] = {
 
     {"wav", ICON_AUDIO, YELLOW},
     {"webm", ICON_VID, BLUE},
+	{"webp", ICON_IMG, GREEN},
     {"wma", ICON_AUDIO, YELLOW},
     {"wmv", ICON_VID, BLUE},
 
@@ -437,12 +564,13 @@ struct icons_t icon_ext[] = {
 struct icons_t icon_dirnames[] = {
     {".git", ICON_DOTGIT, DEF_DIR_ICON_COLOR},
     {"Desktop", ICON_DESKTOP, DEF_DIR_ICON_COLOR},
-    {"Documents", ICON_DOCUMETS, DEF_DIR_ICON_COLOR},
+    {"Documents", ICON_DOCUMENTS, DEF_DIR_ICON_COLOR},
     {"Downloads", ICON_DOWNLOADS, DEF_DIR_ICON_COLOR},
     {"Music", ICON_MUSIC, DEF_DIR_ICON_COLOR},
     {"Public", ICON_PUBLIC, DEF_DIR_ICON_COLOR},
     {"Pictures", ICON_PICTURES, DEF_DIR_ICON_COLOR},
     {"Templates", ICON_TEMPLATES, DEF_DIR_ICON_COLOR},
+	{"Trash", ICON_TRASH, DEF_DIR_ICON_COLOR},
     {"Videos", ICON_VIDEOS, DEF_DIR_ICON_COLOR},
 };
 
@@ -455,6 +583,7 @@ struct icons_t icon_filenames[] = {
     {"PKGBUILD", ICON_ARCH, CYAN},
     {"README", ICON_README, YELLOW},
     {"TODO", ICON_LIST, WHITE},
+    {"Dockerfile", ICON_DOCKER, BLUE},
 };
 
 #endif /* ICONS_H */
