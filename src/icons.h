@@ -371,7 +371,9 @@ struct icons_t icon_ext[] = {
     {"asm", ICON_NASM, WHITE},
     {"aup", ICON_AUDIO, YELLOW},
     {"avi", ICON_VID, BLUE},
+    {"awk", ICON_SCRIPT, WHITE},
 
+    {"bash", ICON_SCRIPT, WHITE},
     {"bat", ICON_SCRIPT, WHITE},
     {"bin", ICON_EXEC, WHITE},
     {"bmp", ICON_IMG, GREEN},
@@ -383,6 +385,8 @@ struct icons_t icon_ext[] = {
     {"cbr", ICON_ARCHIVE, YELLOW},
     {"cbz", ICON_ARCHIVE, YELLOW},
     {"cc", ICON_CPP, WHITE},
+	{"cfg", ICON_CONF, WHITE},
+	{"cfm", ICON_CONF, WHITE},
     {"class", ICON_JAVA, WHITE},
     {"clj", ICON_CLOJURE, BLUE},
     {"cljc", ICON_CLOJURE, BLUE},
@@ -392,6 +396,7 @@ struct icons_t icon_ext[] = {
     {"conf", ICON_CONF, WHITE},
     {"cpio", ICON_ARCHIVE, YELLOW},
     {"cpp", ICON_CPP, WHITE},
+    {"csh", ICON_SCRIPT, WHITE},
     {"css", ICON_CSS, BLUE},
     {"cue", ICON_AUDIO, YELLOW},
     {"cvs", ICON_CONF, WHITE},
@@ -417,6 +422,7 @@ struct icons_t icon_ext[] = {
     {"exs", ICON_ELIXIR, BLUE},
 
     {"f#", ICON_FSHARP, WHITE},
+    {"fish", ICON_SCRIPT, WHITE},
     {"flac", ICON_AUDIO, YELLOW},
     {"flv", ICON_VID, BLUE},
     {"fs", ICON_FSHARP, WHITE},
@@ -513,11 +519,12 @@ struct icons_t icon_ext[] = {
     {"rlib", ICON_RUST, WHITE},
     {"rpm", ICON_REDHAT, RED},
     {"rs", ICON_RUST, WHITE},
-    {"rtf", ICON_PDF, RED},
     {"rss", ICON_RSS, BLUE},
+    {"rtf", ICON_PDF, RED},
 
     {"so", ICON_MANPAGE, WHITE},
     {"scala", ICON_SCALA, WHITE},
+    {"service", ICON_SCRIPT, WHITE},
     {"sh", ICON_SCRIPT, WHITE},
     {"slim", ICON_CODE, WHITE},
     {"sln", ICON_VISUALSTUDIO, BLUE},
@@ -560,11 +567,14 @@ struct icons_t icon_ext[] = {
     {"yml", ICON_CONF, WHITE},
 
     {"zip", ICON_ARCHIVE, YELLOW},
+    {"zsh", ICON_SCRIPT, WHITE},
     {"zst", ICON_ARCHIVE, YELLOW},
 };
 
 /* Icons for some specific dir names */
 struct icons_t icon_dirnames[] = {
+/* Translated version for these dirs should be added here
+ * See https://github.com/alexanderjeurissen/ranger_devicons/blob/main/devicons.py*/
     {".git", ICON_DOTGIT, DEF_DIR_ICON_COLOR},
     {"Desktop", ICON_DESKTOP, DEF_DIR_ICON_COLOR},
     {"Documents", ICON_DOCUMENTS, DEF_DIR_ICON_COLOR},
@@ -579,6 +589,7 @@ struct icons_t icon_dirnames[] = {
 
 /* Icons for some specific file names */
 struct icons_t icon_filenames[] = {
+/* More specific filenames from here https://github.com/alexanderjeurissen/ranger_devicons/blob/main/devicons.py */
     {"CHANGELOG", ICON_HISTORY, DEF_FILE_ICON_COLOR},
     {"configure", ICON_CONFIGURE, DEF_FILE_ICON_COLOR},
     {"License", ICON_COPYRIGHT, DEF_FILE_ICON_COLOR},
@@ -587,6 +598,19 @@ struct icons_t icon_filenames[] = {
     {"README", ICON_README, YELLOW},
     {"TODO", ICON_LIST, WHITE},
     {"Dockerfile", ICON_DOCKER, BLUE},
+    {"clifmrc", ICON_CONF, WHITE },
+    {".bash_history", ICON_CONF, WHITE },
+    {".bash_logout", ICON_CONF, WHITE },
+    {".bash_profile", ICON_CONF, WHITE },
+    {".bashrc", ICON_CONF, WHITE },
+    {".gitconfig", ICON_CONF, WHITE },
+    {".gitignore", ICON_CONF, WHITE },
+    {".inputrc", ICON_CONF, WHITE },
+    {".vimrc", ICON_CONF, WHITE },
+    {".xinitrc", ICON_CONF, WHITE },
+    {".Xdefaults", ICON_CONF, WHITE },
+    {".Xresources", ICON_CONF, WHITE },
+    {".zshrc", ICON_CONF, WHITE },
 };
 
 #endif /* ICONS_H */
