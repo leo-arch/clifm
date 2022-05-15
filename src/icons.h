@@ -36,6 +36,7 @@ char
     ICON_MARKDOWN[] = NERD_MARKDOWN,
     ICON_DATABASE[] = NERD_DATABASE,
     ICON_CONF[] = NERD_CONFIGURE,
+    ICON_DART[] = NERD_DART, /* */
     ICON_DIFF[] = NERD_FILE, /* */
     ICON_CODE[] = NERD_FILE, /* */
     ICON_VIM[] = NERD_VIM,
@@ -46,6 +47,7 @@ char
     ICON_ELF[] = NERD_LINUX,
     ICON_HTML[] = NERD_HTML,
     ICON_GO[] = NERD_GO,
+    ICON_OCAML[] = NERD_OCAML,
     ICON_PHP[] = NERD_PHP,
     ICON_PERL[] = NERD_FILE, /* */
     ICON_SCALA[] = NERD_SCALA,
@@ -135,6 +137,7 @@ char
     ICON_MARKDOWN[] = DEV_MARKDOWN,
     ICON_DATABASE[] = MFIZZ_DATABASE_ALT2,
     ICON_CONF[] = FA_COGS,
+    ICON_DART[] = DEV_DART, /* */
     ICON_DIFF[] = FILE_DIFF,
     ICON_CODE[] = FA_FILE_CODE_O,
     ICON_VIM[] = DEV_VIM,
@@ -145,6 +148,7 @@ char
     ICON_ELF[] = FA_LINUX,
     ICON_HTML[] = FA_FILE_CODE_O,
     ICON_GO[] = FILE_GO,
+    ICON_OCAML[] = FILE_OCAML,
     ICON_PHP[] = MFIZZ_PHP,
     ICON_PERL[] = MFIZZ_PERL,
     ICON_SCALA[] = MFIZZ_SHELL,
@@ -234,6 +238,7 @@ char
     ICON_MARKDOWN[] = EMOJI_MARKDOWN,
     ICON_DATABASE[] = EMOJI_DATABASE,
     ICON_CONF[] = EMOJI_CONF,
+    ICON_DART[] = EMOJI_DART, /* */
     ICON_DIFF[] = EMOJI_DIFF, /* */
     ICON_CODE[] = EMOJI_SCRIPT, /* */
     ICON_VIM[] = EMOJI_VIM,
@@ -244,6 +249,7 @@ char
     ICON_ELF[] = EMOJI_LINUX,
     ICON_HTML[] = EMOJI_WEB,
     ICON_GO[] = EMOJI_GO,
+    ICON_OCAML[] = EMOJI_OCAML,
     ICON_PHP[] = EMOJI_WEB,
     ICON_PERL[] = EMOJI_PERL, /* */
     ICON_SCALA[] = EMOJI_FILE,
@@ -402,6 +408,7 @@ struct icons_t icon_ext[] = {
     {"cvs", ICON_CONF, WHITE},
     {"cxx", ICON_CPP, WHITE},
 
+    {"dart", ICON_DART, BLUE},
     {"db", ICON_DATABASE, WHITE},
     {"deb", ICON_DEBIAN, RED},
     {"diff", ICON_DIFF, WHITE},
@@ -476,6 +483,8 @@ struct icons_t icon_ext[] = {
     {"md", ICON_MARKDOWN, WHITE},
     {"mk", ICON_MAKEFILE, WHITE},
     {"mkv", ICON_VID, BLUE},
+    {"ml", ICON_OCAML, WHITE},
+    {"mli", ICON_OCAML, WHITE},
     {"mov", ICON_VID, BLUE},
     {"mp3", ICON_AUDIO, YELLOW},
     {"mp4", ICON_VID, BLUE},

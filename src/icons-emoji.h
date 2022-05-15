@@ -29,6 +29,7 @@
 #define EMOJI_CSHARP EMOJI_C
 #define EMOJI_DATABASE "🗃️ "
 #define EMOJI_DESKTOP "🖥️ "
+#define EMOJI_DART EMOJI_C
 #define EMOJI_DIFF "📋"
 #define EMOJI_DISK "💿"
 #define EMOJI_DOCKER "🐋"
@@ -60,6 +61,7 @@
 #define EMOJI_MUSIC "🎶"
 #define EMOJI_NASM EMOJI_C
 #define EMOJI_NOTE "📝"
+#define EMOJI_OCAML "🐫"
 #define EMOJI_PATCH "🩹"
 #define EMOJI_PDF "🔖"
 #define EMOJI_PERL "🐪"

@@ -25,6 +25,7 @@
 #define NERD_GIT           "\ue5fb"
 #define NERD_DESKTOP       "\ufcbe"
 #define NERD_BRIEFCASE     "\uf5d5"
+#define NERD_DART          "\ue798"
 #define NERD_DOCUMENT      "\uf718"
 #define NERD_DOCKER        "\uf308"
 #define NERD_DOWNLOADS     "\uf5d7"
@@ -74,6 +75,7 @@
 #define NERD_ELM           "\ue62c"
 #define NERD_MARKDOWN      "\uf48e"
 #define NERD_COFFEE        "\ue751"
+#define NERD_OCAML         "\ufb26"
 #define NERD_PDF           "\uf724"
 #define NERD_RSS           "\uf09e"
 
