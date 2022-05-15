@@ -1686,11 +1686,12 @@ options_generator(const char *text, int state)
 #define MAX_OPTS 10
 	char *_opts[MAX_OPTS] = {0};
 
-	/* acd, ao, ext, ff, hf, pf, uc */
+	/* acd, ao, ext, ff, hf, pg, uc */
 	if ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ') || strncmp(l, "acd ", 4) == 0) )
 	|| (*l == 'e' && strncmp(l, "ext ", 4) == 0)
 	|| (*l == 'f' && l[1] == 'f' && l[2] == ' ')
 	|| (*l == 'h' && l[1] == 'f' && l[2] == ' ')
+	|| (*l == 'p' && l[1] == 'g' && l[2] == ' ')
 	|| (*l == 'u' && l[1] == 'c' && l[2] == ' ') ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
 	/* cl, icons */
