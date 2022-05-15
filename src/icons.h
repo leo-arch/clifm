@@ -79,8 +79,9 @@ char
     ICON_SWIFT[] = NERD_SWIFT,
     ICON_COFFEE[] = NERD_COFFEE,
     ICON_RUST[] = NERD_RUST,
-	ICON_DOCKER[] = NERD_DOCKER,
-	ICON_RSS[] = NERD_RSS,
+    ICON_DOCKER[] = NERD_DOCKER,
+    ICON_RSS[] = NERD_RSS,
+    ICON_SHARE[] = NERD_SHARE,
     ICON_OPENOFFICE[] = NERD_FILE, /* */
 
     ICON_WINDOWS[] = NERD_WINDOWS,
@@ -180,8 +181,9 @@ char
     ICON_SWIFT[] = DEV_SWIFT,
     ICON_COFFEE[] = DEV_COFFEESCRIPT,
     ICON_RUST[] = MFIZZ_RUST,
-	ICON_DOCKER[] = MFIZZ_DOCKER,
-	ICON_RSS[] = MD_RSS_FEED,
+    ICON_DOCKER[] = MFIZZ_DOCKER,
+    ICON_RSS[] = MD_RSS_FEED,
+    ICON_SHARE[] = MD_SHARE,
 
     ICON_OPENOFFICE[] = FILE_OPENOFFICE,
 
@@ -281,8 +283,9 @@ char
     ICON_SWIFT[] = EMOJI_SWIFT,
     ICON_COFFEE[] = EMOJI_COFFEE,
     ICON_RUST[] = EMOJI_RUST,
-	ICON_RSS[] = EMOJI_RSS,
-	ICON_DOCKER[] = EMOJI_DOCKER,
+    ICON_RSS[] = EMOJI_RSS,
+    ICON_SHARE[] = EMOJI_SHARE,
+    ICON_DOCKER[] = EMOJI_DOCKER,
     ICON_OPENOFFICE[] = EMOJI_WORD, /* */
 
     ICON_WINDOWS[] = EMOJI_WINDOWS,
@@ -369,10 +372,10 @@ char
 
 /* Per file extension icons */
 struct icons_t icon_ext[] = {
-    {"1", ICON_MANPAGE, WHITE},
+//    {"1", ICON_MANPAGE, WHITE},
     {"7z", ICON_ARCHIVE, YELLOW},
 
-    {"a", ICON_MANPAGE, WHITE},
+    {"a", ICON_ARCHIVE, YELLOW},
     {"apk", ICON_ARCHIVE, YELLOW},
     {"asm", ICON_NASM, WHITE},
     {"aup", ICON_AUDIO, YELLOW},
@@ -391,8 +394,8 @@ struct icons_t icon_ext[] = {
     {"cbr", ICON_ARCHIVE, YELLOW},
     {"cbz", ICON_ARCHIVE, YELLOW},
     {"cc", ICON_CPP, WHITE},
-	{"cfg", ICON_CONF, WHITE},
-	{"cfm", ICON_CONF, WHITE},
+    {"cfg", ICON_CONF, WHITE},
+    {"cfm", ICON_CONF, WHITE},
     {"class", ICON_JAVA, WHITE},
     {"clj", ICON_CLOJURE, BLUE},
     {"cljc", ICON_CLOJURE, BLUE},
@@ -413,7 +416,7 @@ struct icons_t icon_ext[] = {
     {"deb", ICON_DEBIAN, RED},
     {"diff", ICON_DIFF, WHITE},
     {"djvu", ICON_PDF, B_RED},
-    {"dll", ICON_MANPAGE, WHITE},
+    {"dll", ICON_SHARE, BLUE},
     {"doc", ICON_WORD, BLUE},
     {"docx", ICON_WORD, BLUE},
 
@@ -492,7 +495,7 @@ struct icons_t icon_ext[] = {
     {"mpg", ICON_VID, BLUE},
     {"msi", ICON_WINDOWS, BLUE},
 
-    {"o", ICON_MANPAGE, WHITE},
+    {"o", ICON_BINARY, WHITE},
     {"odp", ICON_OPENOFFICE, BLUE},
     {"odt", ICON_OPENOFFICE, BLUE},
     {"ods", ICON_OPENOFFICE, BLUE},
@@ -531,7 +534,7 @@ struct icons_t icon_ext[] = {
     {"rss", ICON_RSS, BLUE},
     {"rtf", ICON_PDF, RED},
 
-    {"so", ICON_MANPAGE, WHITE},
+//    {"so", ICON_SHARE, BLUE},
     {"scala", ICON_SCALA, WHITE},
     {"service", ICON_SCRIPT, WHITE},
     {"sh", ICON_SCRIPT, WHITE},
@@ -548,8 +551,8 @@ struct icons_t icon_ext[] = {
     {"tar", ICON_ARCHIVE, YELLOW},
     {"tbz2", ICON_ARCHIVE, YELLOW},
     {"tgz", ICON_ARCHIVE, YELLOW},
-	{"tiff", ICON_IMG, GREEN},
-	{"torrent", ICON_DOWNLOADS, WHITE},
+    {"tiff", ICON_IMG, GREEN},
+    {"torrent", ICON_DOWNLOADS, WHITE},
     {"ttf", ICON_FONT, WHITE},
     {"txt", ICON_TXT, WHITE},
     {"txz", ICON_ARCHIVE, YELLOW},
@@ -560,7 +563,7 @@ struct icons_t icon_ext[] = {
 
     {"wav", ICON_AUDIO, YELLOW},
     {"webm", ICON_VID, BLUE},
-	{"webp", ICON_IMG, GREEN},
+    {"webp", ICON_IMG, GREEN},
     {"wma", ICON_AUDIO, YELLOW},
     {"wmv", ICON_VID, BLUE},
 
@@ -592,7 +595,7 @@ struct icons_t icon_dirnames[] = {
     {"Public", ICON_PUBLIC, DEF_DIR_ICON_COLOR},
     {"Pictures", ICON_PICTURES, DEF_DIR_ICON_COLOR},
     {"Templates", ICON_TEMPLATES, DEF_DIR_ICON_COLOR},
-	{"Trash", ICON_TRASH, DEF_DIR_ICON_COLOR},
+    {"Trash", ICON_TRASH, DEF_DIR_ICON_COLOR},
     {"Videos", ICON_VIDEOS, DEF_DIR_ICON_COLOR},
 };
 
@@ -607,19 +610,19 @@ struct icons_t icon_filenames[] = {
     {"README", ICON_README, YELLOW},
     {"TODO", ICON_LIST, WHITE},
     {"Dockerfile", ICON_DOCKER, BLUE},
-    {"clifmrc", ICON_CONF, WHITE },
-    {".bash_history", ICON_CONF, WHITE },
-    {".bash_logout", ICON_CONF, WHITE },
-    {".bash_profile", ICON_CONF, WHITE },
-    {".bashrc", ICON_CONF, WHITE },
-    {".gitconfig", ICON_CONF, WHITE },
-    {".gitignore", ICON_CONF, WHITE },
-    {".inputrc", ICON_CONF, WHITE },
-    {".vimrc", ICON_CONF, WHITE },
-    {".xinitrc", ICON_CONF, WHITE },
-    {".Xdefaults", ICON_CONF, WHITE },
-    {".Xresources", ICON_CONF, WHITE },
-    {".zshrc", ICON_CONF, WHITE },
+    {"clifmrc", ICON_CONF, WHITE},
+    {".bash_history", ICON_CONF, WHITE},
+    {".bash_logout", ICON_CONF, WHITE},
+    {".bash_profile", ICON_CONF, WHITE},
+    {".bashrc", ICON_CONF, WHITE},
+    {".gitconfig", ICON_CONF, WHITE},
+    {".gitignore", ICON_CONF, WHITE},
+    {".inputrc", ICON_CONF, WHITE},
+    {".vimrc", ICON_CONF, WHITE},
+    {".xinitrc", ICON_CONF, WHITE},
+    {".Xdefaults", ICON_CONF, WHITE},
+    {".Xresources", ICON_CONF, WHITE},
+    {".zshrc", ICON_CONF, WHITE},
 };
 
 #endif /* ICONS_H */

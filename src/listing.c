@@ -205,13 +205,12 @@ print_dirhist_map(void)
 }
 
 #ifndef _NO_ICONS
-/* Set the icon field to the corresponding icon for FILE. If not found,
- * set the default icon */
-static void
-get_file_icon(const char *file, int n)
+/* Set the icon field to the corresponding icon for FILE */
+static int
+get_name_icon(const char *file, int n)
 {
 	if (!file)
-		return;
+		return 0;
 
 	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
 	while (--i >= 0) {
@@ -219,9 +218,11 @@ get_file_icon(const char *file, int n)
 		&& strcasecmp(file, icon_filenames[i].name) == 0) {
 			file_info[n].icon = icon_filenames[i].icon;
 			file_info[n].icon_color = icon_filenames[i].color;
-			break;
+			return 1;
 		}
 	}
+
+	return 0;
 }
 
 /* Set the icon field to the corresponding icon for DIR. If not found,
@@ -252,8 +253,10 @@ get_dir_icon(const char *dir, int n)
 static void
 get_ext_icon(const char *restrict ext, int n)
 {
-	file_info[n].icon = DEF_FILE_ICON;
-	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+	if (!file_info[n].icon) {
+		file_info[n].icon = DEF_FILE_ICON;
+		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+	}
 
 	if (!ext)
 		return;
@@ -2109,6 +2112,17 @@ list_dir(void)
 				file_info[n].color = fi_c;
 			}
 
+#ifndef _NO_ICONS
+			/* The icons check precedence order is this:
+			 * 1. filename or filename.extension
+			 * 2. extension
+			 * 3. file type */
+			/* Check icons for specific file names */
+			int name_icon_found = 0;
+			if (icons == 1)
+				name_icon_found = get_name_icon(file_info[n].name, (int)n);
+#endif
+
 			/* Check file extension */
 			char *ext = (char *)NULL;
 			if (check_ext)
@@ -2116,13 +2130,12 @@ list_dir(void)
 			/* Make sure not to take a hidden file for a file extension */
 			if (ext && ext != file_info[n].name) {
 #ifndef _NO_ICONS
-				if (icons)
+				if (icons == 1 && name_icon_found == 0)
 					get_ext_icon(ext, (int)n);
 #endif
 				/* Check extension color only if some is defined */
 				if (ext_colors_n) {
 					char *extcolor = get_ext_color(ext);
-
 					if (extcolor) {
 						file_info[n].ext_color = (char *)xnmalloc(
 							strlen(extcolor) + 4, sizeof(char));
@@ -2132,13 +2145,6 @@ list_dir(void)
 					}
 				}
 			}
-
-#ifndef _NO_ICONS
-			/* No extension. Check icons for specific file names */
-			else if (icons)
-				get_file_icon(file_info[n].name, (int)n);
-#endif
-
 		} /* End of DT_REG block */
 		break;
 

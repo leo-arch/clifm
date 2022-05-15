@@ -245,11 +245,10 @@ get_ext_color(char *ext)
 
 	int i = (int)ext_colors_n;
 	while (--i >= 0) {
-		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
+		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][1] || !ext_colors[i][2])
 			continue;
 
-		char *p = ext,
-			 *q = ext_colors[i];
+		char *p = ext, *q = ext_colors[i];
 		/* +2 because stored extensions have this form: *.ext */
 		q += 2;
 
@@ -272,7 +271,8 @@ get_ext_color(char *ext)
 			continue;
 
 		return c ? c : ++q; */
-		return ++q;
+		q++;
+		return q ? q : (char *)NULL;
 	}
 
 	return (char *)NULL;

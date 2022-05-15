@@ -60,6 +60,7 @@
 #define NERD_DATABASE      "\uf6b7"
 #define NERD_PLAYLIST      "\uf910"
 #define NERD_OPTICALDISK   "\ue271"
+#define NERD_SHARE         "\uf1e0"
 #define NERD_SWIFT         "\ufbe3"
 #define NERD_RUST          "\ue7a8"
 #define NERD_PHP           "\uf81e"

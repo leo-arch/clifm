@@ -74,6 +74,7 @@
 #define EMOJI_RUBY "💎"
 #define EMOJI_RUST "🦀"
 #define EMOJI_SCRIPT "📜"
+#define EMOJI_SHARE "🖇 "
 #define EMOJI_STYLESHEET "📗"
 #define EMOJI_SUBTITLES "💬"
 #define EMOJI_SWIFT EMOJI_C
