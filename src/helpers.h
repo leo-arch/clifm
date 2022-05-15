@@ -483,6 +483,15 @@ extern int watch;
 # define CLEAR fputs("\x1b[H\x1b[2J", stdout);
 #endif
 
+#define SET_CURSOR(y,x)            printf("\x1b[%d;%dH", (y), (x))
+#define MOVE_CURSOR_UP(n)          printf("\x1b[%dA", (n))
+#define MOVE_CURSOR_DOWN(n)        printf("\x1b[%dB", (n))
+#define MOVE_CURSOR_RIGHT(n)       printf("\x1b[%dC", (n))
+#define MOVE_CURSOR_LEFT(n)        printf("\x1b[%dD", (n))
+#define ERASE_FULL_LINE            fputs("\x1b[2K", stdout)
+#define ERASE_TO_RIGHT             fputs("\x1b[0K", stdout)
+#define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s> %s", (offset), (color), NC)
+
 #define DLFC           "\x1b[0K"     /* Delete line from cursor */
 #define DLFC_LEN       4
 #define CNL            "\x1b[1E"     /* Move the cursor to beginning next line*/

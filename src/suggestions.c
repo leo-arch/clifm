@@ -145,7 +145,8 @@ clear_suggestion(const int free_sug)
 			if (write(STDOUT_FILENO, DEL_LINE, DEL_LINE_LEN) <= 0) {/* Avoid compiler warning */}
 		}
 		/* Restore cursor position */
-		printf("\x1b[%d;%dH", currow, curcol);
+//		printf("\x1b[%d;%dH", currow, curcol);
+		SET_CURSOR(currow, curcol);
 		fflush(stdout);
 		suggestion.nlines = 0;
 	}
@@ -160,10 +161,12 @@ clear_suggestion(const int free_sug)
 void
 remove_suggestion_not_end(void)
 {
-	printf("\x1b[%dC", rl_end - rl_point);
+	MOVE_CURSOR_RIGHT(rl_end - rl_point);
+//	printf("\x1b[%dC", rl_end - rl_point);
 	fflush(stdout);
 	clear_suggestion(CS_FREEBUF);
-	printf("\x1b[%dD", rl_end - rl_point);
+	MOVE_CURSOR_LEFT(rl_end - rl_point);
+//	printf("\x1b[%dD", rl_end - rl_point);
 	fflush(stdout);
 }
 
@@ -192,7 +195,8 @@ restore_cursor_position(const size_t slines)
 	if (highlight && rl_point != rl_end)
 		curcol += (rl_end - rl_point);
 
-	printf("\x1b[%d;%dH", currow, curcol);
+	SET_CURSOR(currow, curcol);
+//	printf("\x1b[%d;%dH", currow, curcol);
 }
 
 static inline void
@@ -210,7 +214,8 @@ correct_offset(size_t *offset)
 	/* The highlight function modifies the terminal's idea of the current
 	 * cursor position: let's correct it */
 	if (highlight && rl_point != rl_end) {
-		printf("\x1b[%dD", rl_end - rl_point);
+		MOVE_CURSOR_LEFT(rl_end - rl_point);
+//		printf("\x1b[%dD", rl_end - rl_point);
 		fflush(stdout);
 		(*offset)++;
 	}
@@ -266,7 +271,8 @@ set_cursor_position(const int baej)
 {
 	/* If not at the end of the line, move the cursor there */
 	if (rl_end > rl_point) {
-		printf("\x1b[%dC", rl_end - rl_point);
+		MOVE_CURSOR_RIGHT(rl_end - rl_point);
+//		printf("\x1b[%dC", rl_end - rl_point);
 		fflush(stdout);
 	}
 
@@ -278,9 +284,13 @@ set_cursor_position(const int baej)
 	/* Erase everything after the current cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
 
-	if (baej == 1)
+	if (baej == 1) {
 		/* Move the cursor %d columns to the right and print "> " */
-		printf("\x1b[%dC%s> \x1b[0m", BAEJ_OFFSET, sp_c);
+//		printf("\x1b[%dC%s> \x1b[0m", BAEJ_OFFSET, sp_c);
+		SUGGEST_BAEJ(BAEJ_OFFSET, sp_c);
+//		MOVE_CURSOR_RIGHT(BAEJ_OFFSET);
+//		printf("%s> %s", sp_c, NC);
+	}
 }
 
 static inline int

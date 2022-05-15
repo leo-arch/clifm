@@ -136,7 +136,7 @@ kbinds_edit(char *app)
 		return EXIT_SUCCESS;
 
 	_err('n', PRINT_PROMPT, _("%s: Restart the program for changes to "
-				  "take effect\n"), PROGRAM_NAME);
+			"take effect\n"), PROGRAM_NAME);
 	return EXIT_SUCCESS;
 }
 

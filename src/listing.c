@@ -342,7 +342,8 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 
 		fputs(_(PAGER_HELP), stdout);
 		int l = (int)term_rows - 5;
-		printf("\x1b[%dB", l);
+		MOVE_CURSOR_DOWN(l);
+//		printf("\x1b[%dB", l);
 		fputs(PAGER_LABEL, stdout);
 
 		xgetchar();
@@ -830,7 +831,8 @@ pad_filename(int *ind_char, const int i, const int pad)
 
 	int diff = (int)longest - cur_len;
 	/* Move the cursor %d columns to the right */
-	xprintf("\x1b[%dC", diff + 1);
+	MOVE_CURSOR_RIGHT(diff + 1);
+//	xprintf("\x1b[%dC", diff + 1);
 }
 
 static inline void
@@ -1074,7 +1076,8 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 	}
 
 	int diff = (int)longest - cur_len;
-	xprintf("\x1b[%dC", diff + 1);
+	MOVE_CURSOR_RIGHT(diff + 1);
+//	xprintf("\x1b[%dC", diff + 1);
 }
 
 /* Trim and untrim file names when current file name length exceeds
@@ -1625,9 +1628,12 @@ list_dir_light(void)
 		count++;
 	}
 
-	if (xargs.disk_usage_analyzer == 1)
+	if (xargs.disk_usage_analyzer == 1) {
 		/* Erase the "Retrieveing file sizes" message */
-		printf("\x1b[2K\x1b[1G");
+		ERASE_FULL_LINE;
+		SET_CURSOR(1, 1);
+//		fputs("\x1b[2K\x1b[1G", stdout);
+	}
 
 	file_info[n].name = (char *)NULL;
 	files = (size_t)n;
