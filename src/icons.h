@@ -78,7 +78,7 @@ char
     ICON_COFFEE[] = NERD_COFFEE,
     ICON_RUST[] = NERD_RUST,
 	ICON_DOCKER[] = NERD_DOCKER,
-
+	ICON_RSS[] = NERD_RSS,
     ICON_OPENOFFICE[] = NERD_FILE, /* */
 
     ICON_WINDOWS[] = NERD_WINDOWS,
@@ -177,6 +177,7 @@ char
     ICON_COFFEE[] = DEV_COFFEESCRIPT,
     ICON_RUST[] = MFIZZ_RUST,
 	ICON_DOCKER[] = MFIZZ_DOCKER,
+	ICON_RSS[] = MD_RSS_FEED,
 
     ICON_OPENOFFICE[] = FILE_OPENOFFICE,
 
@@ -274,6 +275,7 @@ char
     ICON_SWIFT[] = EMOJI_SWIFT,
     ICON_COFFEE[] = EMOJI_COFFEE,
     ICON_RUST[] = EMOJI_RUST,
+	ICON_RSS[] = EMOJI_RSS,
 	ICON_DOCKER[] = EMOJI_DOCKER,
     ICON_OPENOFFICE[] = EMOJI_WORD, /* */
 
@@ -512,6 +514,7 @@ struct icons_t icon_ext[] = {
     {"rpm", ICON_REDHAT, RED},
     {"rs", ICON_RUST, WHITE},
     {"rtf", ICON_PDF, RED},
+    {"rss", ICON_RSS, BLUE},
 
     {"so", ICON_MANPAGE, WHITE},
     {"scala", ICON_SCALA, WHITE},

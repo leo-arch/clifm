@@ -75,6 +75,7 @@
 #define NERD_MARKDOWN      "\uf48e"
 #define NERD_COFFEE        "\ue751"
 #define NERD_PDF           "\uf724"
+#define NERD_RSS           "\uf09e"
 
 #define NERD_TXT           "\uf0f6"
 #define NERD_VIM           "\ue7c5"
