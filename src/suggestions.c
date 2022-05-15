@@ -1239,8 +1239,8 @@ count_words(size_t *start_word, size_t *full_word)
 		}
 		if (w && b[w] == ' ' && b[w - 1] != '\\') {
 			if (b[w + 1] && b[w + 1] != ' ')
-				rl_last_word_start = (int)w + (b + 1 ? 1 : 0);
-//				rl_last_word_start = (int)w + 1;
+//				rl_last_word_start = (int)w + (b + 1 ? 1 : 0);
+				rl_last_word_start = (int)w + 1;
 			if (!*full_word && b[w - 1] != '|'
 			&& b[w - 1] != ';' && b[w - 1] != '&')
 				*full_word = w; /* Index of the end of the first full word (cmd) */
@@ -1523,10 +1523,10 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 's': /* Sort */
-		if (nwords > 2)
-			goto FAIL;
 		if (((lb[1] == 't' && lb[2] == ' ') || strncmp(lb, "sort ", 5) == 0)
 		&& is_number(word)) {
+			if (nwords > 2)
+				goto FAIL;
 			printed = check_sort_methods(word, wlen);
 			if (printed)
 				goto SUCCESS;
