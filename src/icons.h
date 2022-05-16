@@ -587,8 +587,8 @@ struct icons_t icon_dirnames[] = {
     {"Downloads", ICON_DOWNLOADS, DEF_DIR_ICON_COLOR},
     {"games", ICON_GAMES, DEF_DIR_ICON_COLOR},
     {"Music", ICON_MUSIC, DEF_DIR_ICON_COLOR},
-    {"Public", ICON_PUBLIC, DEF_DIR_ICON_COLOR},
     {"Pictures", ICON_PICTURES, DEF_DIR_ICON_COLOR},
+    {"Public", ICON_PUBLIC, DEF_DIR_ICON_COLOR},
     {"Steam", ICON_STEAM, DEF_DIR_ICON_COLOR},
     {"Templates", ICON_TEMPLATES, DEF_DIR_ICON_COLOR},
     {"Trash", ICON_TRASH, DEF_DIR_ICON_COLOR},
@@ -598,15 +598,6 @@ struct icons_t icon_dirnames[] = {
 /* Icons for some specific file names */
 struct icons_t icon_filenames[] = {
 /* More specific filenames from here https://github.com/alexanderjeurissen/ranger_devicons/blob/main/devicons.py */
-    {"CHANGELOG", ICON_HISTORY, DEF_FILE_ICON_COLOR},
-    {"configure", ICON_CONFIGURE, DEF_FILE_ICON_COLOR},
-    {"License", ICON_COPYRIGHT, DEF_FILE_ICON_COLOR},
-    {"Makefile", ICON_MAKEFILE, DEF_FILE_ICON_COLOR},
-    {"PKGBUILD", ICON_ARCH, CYAN},
-    {"README", ICON_README, YELLOW},
-    {"TODO", ICON_LIST, WHITE},
-    {"Dockerfile", ICON_DOCKER, BLUE},
-    {"clifmrc", ICON_CONF, WHITE},
     {".bash_history", ICON_CONF, WHITE},
     {".bash_logout", ICON_CONF, WHITE},
     {".bash_profile", ICON_CONF, WHITE},
@@ -615,10 +606,19 @@ struct icons_t icon_filenames[] = {
     {".gitignore", ICON_CONF, WHITE},
     {".inputrc", ICON_CONF, WHITE},
     {".vimrc", ICON_CONF, WHITE},
-    {".xinitrc", ICON_CONF, WHITE},
     {".Xdefaults", ICON_CONF, WHITE},
+    {".xinitrc", ICON_CONF, WHITE},
     {".Xresources", ICON_CONF, WHITE},
     {".zshrc", ICON_CONF, WHITE},
+    {"CHANGELOG", ICON_HISTORY, DEF_FILE_ICON_COLOR},
+    {"clifmrc", ICON_CONF, WHITE},
+    {"configure", ICON_CONFIGURE, DEF_FILE_ICON_COLOR},
+    {"Dockerfile", ICON_DOCKER, BLUE},
+    {"License", ICON_COPYRIGHT, DEF_FILE_ICON_COLOR},
+    {"Makefile", ICON_MAKEFILE, DEF_FILE_ICON_COLOR},
+    {"PKGBUILD", ICON_ARCH, CYAN},
+    {"README", ICON_README, YELLOW},
+    {"TODO", ICON_LIST, WHITE},
 };
 
 #endif /* ICONS_H */
