@@ -240,6 +240,9 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 static int
 open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 {
+	if (!*a)
+		return EXIT_FAILURE;
+
 	if (!app || !*app) {
 		open_in_foreground = 1;
 		int exit_status = open_file(tmp_file);

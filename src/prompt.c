@@ -926,8 +926,9 @@ prompt(void)
 	/* Generate the prompt string using the prompt line in the config
 	 * file (stored in encoded_prompt at startup) */
 	char *decoded_prompt = decode_prompt(encoded_prompt);
-	char *the_prompt = construct_prompt(decoded_prompt);
-	free(decoded_prompt);
+	char *the_prompt = construct_prompt(decoded_prompt ? decoded_prompt : EMERGENCY_PROMPT);
+	if (decoded_prompt)
+		free(decoded_prompt);
 
 	/* Tell my_rl_getc() (readline.c) to recalculate the length
 	 * of the last prompt line, needed to calculate FZF offset. This
