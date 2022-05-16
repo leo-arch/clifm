@@ -1571,7 +1571,9 @@ list_dir_light(void)
 		case DT_DIR:
 #ifndef _NO_ICONS
 			if (icons) {
-				get_dir_icon(file_info[n].name, (int)n);
+				file_info[n].icon = DEF_DIR_ICON;
+				file_info[n].icon_color = DEF_DIR_ICON_COLOR;
+//				get_dir_icon(file_info[n].name, (int)n);
 				/* If set from the color scheme file */
 				if (*dir_ico_c)
 					file_info[n].icon_color = dir_ico_c;
