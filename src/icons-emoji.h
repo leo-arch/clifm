@@ -70,7 +70,6 @@
 #define EMOJI_PHOTO "📸"
 #define EMOJI_PICTURE "📷"
 #define EMOJI_PRESENTATION "📙"
-//#define EMOJI_PUBLIC "👀"
 #define EMOJI_PUBLIC "👁 "
 #define EMOJI_PYTHON "🐍"
 #define EMOJI_RSS "📡"
