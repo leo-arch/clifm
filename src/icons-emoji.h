@@ -27,6 +27,7 @@
 #define EMOJI_COFFEE EMOJI_JAVA
 #define EMOJI_CPP EMOJI_C
 #define EMOJI_CSHARP EMOJI_C
+#define EMOJI_CSS "🛡️ "
 #define EMOJI_DATABASE "🗃️ "
 #define EMOJI_DESKTOP "🖥️ "
 #define EMOJI_DART EMOJI_C
@@ -41,6 +42,7 @@
 #define EMOJI_FILE "📄"
 #define EMOJI_FOLDER "📂"
 #define EMOJI_FONT "🔤"
+#define EMOJI_GAMES "🕹️ "
 #define EMOJI_GIT "🌱"
 #define EMOJI_GO "🐹"
 #define EMOJI_HOME "🏠"
@@ -68,13 +70,15 @@
 #define EMOJI_PHOTO "📸"
 #define EMOJI_PICTURE "📷"
 #define EMOJI_PRESENTATION "📙"
-#define EMOJI_PUBLIC "👀"
+//#define EMOJI_PUBLIC "👀"
+#define EMOJI_PUBLIC "👁 "
 #define EMOJI_PYTHON "🐍"
 #define EMOJI_RSS "📡"
 #define EMOJI_RUBY "💎"
 #define EMOJI_RUST "🦀"
 #define EMOJI_SCRIPT "📜"
 #define EMOJI_SHARE "🖇 "
+#define EMOJI_STEAM "🎮"
 #define EMOJI_STYLESHEET "📗"
 #define EMOJI_SUBTITLES "💬"
 #define EMOJI_SWIFT EMOJI_C

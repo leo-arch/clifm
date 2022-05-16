@@ -23,6 +23,7 @@
 #define NERD_FAV           "\uf461"
 #define NERD_GAMES         "\uf11b"
 #define NERD_GIT           "\ue5fb"
+#define NERD_CSS           "\ue749"
 #define NERD_DESKTOP       "\ufcbe"
 #define NERD_BRIEFCASE     "\uf5d5"
 #define NERD_DART          "\ue798"
