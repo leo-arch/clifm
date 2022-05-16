@@ -171,10 +171,9 @@ WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
 # The string used to construct the line dividing the list of files and
 # the prompt. Possible values:
 # "0": Print just an empty line
-# "C": C is a single char. This char is printed reapeatedly to fulfill the
-#      screen
+# "C": C is a single char. This char is printed up to the end of the screen
 # "CCC": 3 or more chars. Only these chars (no more) will be printed
-# "": Print a special line drawn with bow-drawing characters (not
+# "": Print a special line drawn with box-drawing characters (not
 #     supported by all terminals/consoles)
 # The color of this line is controlled by the 'dl' code in InterfaceColors
 DividingLine="-"

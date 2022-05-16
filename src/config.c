@@ -1426,7 +1426,7 @@ set_div_line(const char *line)
 
 	char *tmp = remove_quotes(opt);
 	if (!tmp) {
-		*div_line_char = *DEF_DIV_LINE_CHAR;
+		*div_line_char = '\0';
 		return;
 	}
 
