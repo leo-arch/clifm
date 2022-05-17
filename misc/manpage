@@ -2271,7 +2271,7 @@ The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings,cfm\fR. It will be
 The directory used to store programs or scripts pointed to by actions (in other words, plugins) is \fIDATADIR/clifm/plugins\fR (usually \fI/usr/share/clifm/plugins\fR). To edit these plugins copy them to \fI$XDG_CONFIG_HOME/clifm/plugins\fR and edit them to your liking. Plugins in this local directory take precedence over those in the system one.
 .TP
 .B COLORS DIRECTORY
-This directory, \fI$DATADIR/clifm/colors\fR, contains available color schemes as files with a \fI.cfm\fR extension. You can create as many color schemes as you want by just dropping them in this directory. The default color scheme file (default.cfm) could be used as a guide. You can copy these color schemes to the local colors directory (\fI$XDG_CONFIG_HOME/clifm/colors\fR) and edit them to your liking. Color schemes in the local colors directory take precedence over those in the system directory.
+This directory, \fI$DATADIR/clifm/colors\fR, contains available color schemes (or just themes) as files with a \fI.cfm\fR extension. You can create as many themes as you want by just dropping them into this directory. The default color scheme file (default.cfm) could be used as a guide. You can copy these themes to the local colors directory (\fI$XDG_CONFIG_HOME/clifm/colors\fR) and edit them to your liking. Themes in the local colors directory take precedence over those in the system directory.
 .TP
 .B ACTIONS FILE
 The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.cfm\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
