@@ -1109,13 +1109,13 @@ create_def_cscheme(void)
 		    "FzfTabOption=\"%s\"\n\n",
 
 		PROGRAM_NAME,
-	    DEF_FILE_COLORS,
-	    DEF_IFACE_COLORS,
-	    DEF_EXT_COLORS,
-		DEF_DIV_LINE_CHAR,
-	    DEFAULT_PROMPT,
-	    DEF_WPROMPT_STR,
-	    DEF_FZFTAB_OPTIONS);
+		DEF_FILE_COLORS,
+		DEF_IFACE_COLORS,
+		DEF_EXT_COLORS,
+		DEF_DIV_LINE,
+		DEFAULT_PROMPT,
+		DEF_WPROMPT_STR,
+		DEF_FZFTAB_OPTIONS);
 
 	close_fstream(fp, fd);
 	free(cscheme_file);
@@ -1420,17 +1420,17 @@ set_div_line(const char *line)
 {
 	char *opt = strchr(line, '=');
 	if (!opt || !*opt || !*(++opt)) {
-		*div_line_char = *DEF_DIV_LINE_CHAR;
+		*div_line = *DEF_DIV_LINE;
 		return;
 	}
 
 	char *tmp = remove_quotes(opt);
 	if (!tmp) {
-		*div_line_char = '\0';
+		*div_line = '\0';
 		return;
 	}
 
-	xstrsncpy(div_line_char, tmp, NAME_MAX);
+	xstrsncpy(div_line, tmp, NAME_MAX);
 }
 
 static inline int
@@ -1516,7 +1516,7 @@ read_config(void)
 
 	int ret = -1;
 	max_name_len = DEF_MAX_NAME_LEN;
-	*div_line_char = *DEF_DIV_LINE_CHAR;
+	*div_line = *DEF_DIV_LINE;
 	char line[PATH_MAX + 15];
 
 	while (fgets(line, (int)sizeof(line), config_fp)) {
@@ -2112,7 +2112,7 @@ init_config(void)
 	if (config_ok)
 		read_config();
 #else
-	strncpy(div_line_char, DEF_DIV_LINE_CHAR, sizeof(div_line_char));
+	strncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 #endif /* CLIFM_SUCKLESS */
 
 	check_colors();

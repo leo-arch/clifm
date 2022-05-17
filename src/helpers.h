@@ -1039,7 +1039,7 @@ extern struct termios shell_tmodes;
 extern pid_t own_pid;
 
 extern char
-	div_line_char[NAME_MAX],
+	div_line[NAME_MAX],
 	hostname[HOST_NAME_MAX],
 #ifndef _NO_FZF
 	finder_in_file[PATH_MAX],

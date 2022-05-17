@@ -95,37 +95,36 @@ struct trim_t {
 
 struct trim_t trim;
 
-/* Print the line divinding files and prompt using DIV_LINE_CHAR. If
- * DIV_LINE_CHAR takes more than two columns to be printed (ASCII chars
+/* Print the line divinding files and prompt using DIV_LINE. If
+ * DIV_LINE takes more than two columns to be printed (ASCII chars
  * take only one, but unicode chars could take two), print exactly the
- * content of DIV_LINE_CHAR. Otherwise, repeat DIV_LINE_CHAR to fulfill
- * all terminal columns. If DIV_LINE_CHAR is '0', print no line at all */
+ * content of DIV_LINE. Otherwise, repeat DIV_LINE to fulfill
+ * all terminal columns. If DIV_LINE is '0', print no line at all */
 static void
 print_div_line(void)
 {
 	fputs(dl_c, stdout);
 
-	if (!*div_line_char) {
-		/* Default line */
+	if (!*div_line) { /* Let's draw the line with bow drawing chars */
 		fputs("\x1b(0m", stdout);
 		int k = 0;
 		for (; k < (int)term_cols - 2; k++)
 			putchar('q');
 		fputs("\x1b(0j\x1b(B", stdout);
-	} else if (*div_line_char == '0' && !div_line_char[1]) {
+	} else if (*div_line == '0' && !div_line[1]) {
 		/* No line */
 		putchar('\n');
 	} else {
 		/* Custom line */
-		size_t len = wc_xstrlen(div_line_char);
+		size_t len = wc_xstrlen(div_line);
 		if (len <= 2) {
-			/* Extend DIV_LINE_CHAR to the end of the screen */
+			/* Extend DIV_LINE to the end of the screen */
 			int i;
 			for (i = (int)(term_cols / len); i; i--)
-				fputs(div_line_char, stdout);
+				fputs(div_line, stdout);
 		} else {
-			/* Print DIV_LINE_CHAR exactly */
-			puts(div_line_char);
+			/* Print DIV_LINE exactly */
+			puts(div_line);
 		}
 	}
 

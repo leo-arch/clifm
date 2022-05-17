@@ -184,7 +184,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 #define DEF_CWD_IN_TITLE 0
 #define DEF_DIRHIST_MAP 0
 #define DEF_DISK_USAGE 0
-#define DEF_DIV_LINE_CHAR "-"
+#define DEF_DIV_LINE "-"
 #define DEF_EXPAND_BOOKMARKS 0
 #define DEF_EXT_CMD_OK 1
 #define DEF_FILES_COUNTER 1
