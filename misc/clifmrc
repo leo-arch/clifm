@@ -5,14 +5,24 @@
 
 # This is CliFM's main configuration file
 
-# Color schemes (or just themes) are stored in the colors directory. By
-# default, the 'default' color scheme is used. Visit
-# 'https://github.com/leo-arch/clifm-colors' to get a few more
+# Commented and empty lines are ignored
+
+# Color schemes (or just themes) are stored in the colors directory
+# ($HOME/.config/clifm/colors)
+#
 # Use the 'cs' command or the '--color-scheme' command line option to set
 # a theme
+#
 # Run 'cs edit' to edit the current theme
+#
 # Each theme includes color definitions, just as definitions for the
 # prompt, the warning prompt, the dividing line, and the FZF window
+#
+# Available themes: base16, default, dracula, dracula-vivid, gruvbox,
+# jellybeans-vivid, light, molokai, nocolor, nord, one-dark, solarized,
+# zenburn
+#
+# Visit https://github.com/leo-arch/clifm-colors to get some extra themes
 ColorScheme=default
 
 # The amount of files contained by a directory is informed next
