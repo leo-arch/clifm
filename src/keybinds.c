@@ -588,6 +588,7 @@ rl_accept_suggestion(int count, int key)
 	case BOOKMARK_SUG: /* fallthrough */
 	case COMP_SUG:     /* fallthrough */
 	case ELN_SUG:      /* fallthrough */
+	case PROMPT_SUG:   /* fallthrough */
 	case FILE_SUG: {
 		char *tmp = (char *)NULL;
 		size_t i, isquote = 0, backslash = 0;

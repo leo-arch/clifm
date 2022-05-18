@@ -1328,6 +1328,23 @@ check_sort_methods(char *str, const size_t len)
 	return 1;
 }
 
+static int
+check_prompts(const char *word, const size_t len)
+{
+	int i = (int)prompts_n;
+	while (--i >= 0) {
+		if (TOUPPER(*word) == TOUPPER(*prompts[i].name)
+		&& (case_sensitive ? strncmp(prompts[i].name, word, len)
+		: strncasecmp(prompts[i].name, word, len)) == 0) {
+			suggestion.type = PROMPT_SUG;
+			print_suggestion(prompts[i].name, len, sx_c);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -1529,6 +1546,11 @@ rl_suggestions(const unsigned char c)
 			} else {
 				goto FAIL;
 			}
+		}
+
+		if (lb[1] == 'r' && strncmp(lb, "prompt ", 7) == 0) {
+			if (prompts_n > 0 && (printed = check_prompts(word, wlen)) == 1)
+				goto SUCCESS;
 		}
 		break;
 

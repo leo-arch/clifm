@@ -494,6 +494,21 @@ Examples:\n\
 - Print the properties of the directory 'dir' (including its total size):\n\
     pp dir"
 
+#define PROMPT_USAGE "Change current prompt\n\
+Usage:\n\
+  prompt [NAME, edit, list, reload, unset]\n\
+Example:\n\
+- List available prompts:\n\
+    prompt list\n\
+- Change prompt to prompt named MYPROMPT:\n\
+    prompt MYPROMPT\n\
+- Edit the prompts file:\n\
+    prompt edit\n\
+- Set the default prompt:\n\
+    prompt unset\n\
+- Reload available prompts:\n\
+    prompt reload"
+
 #define RR_USAGE "Remove files in bulk using a text editor\n\
 Usage:\n\
   rr [DIR] [EDITOR]\n\n\
@@ -860,6 +875,7 @@ parameters.\n\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  pg, pager [on, off, status]\n\
  pin [FILE/DIR]\n\
+ prompt [NAME, edit, reload, unset]\n\
  q, quit, exit\n\
  Q\n\
  rf, refresh\n\

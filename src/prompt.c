@@ -30,9 +30,12 @@
 # include <wordexp.h>
 #endif
 #include <readline/readline.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 #include "aux.h"
 #include "exec.h"
+#include "file_operations.h"
 #include "history.h"
 #include "init.h"
 #include "listing.h"
@@ -91,6 +94,8 @@ emergency prompt"
 /* Size of the indicator for msgs, trash, and sel */
 #define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
 /* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
+
+char cur_prompt_name[NAME_MAX] = "";
 
 static inline char *
 gen_time(const int c)
@@ -955,4 +960,146 @@ prompt(void)
 	log_and_record(input);
 
 	return input;
+}
+
+static int
+list_prompts(void)
+{
+	if (prompts_n == 0) {
+		printf(_("%s: No extra prompts found. Using the default prompt\n"), PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
+	size_t i;
+	for (i = 0; i < prompts_n; i++) {
+		if (!prompts[i].name)
+			continue;
+		if (*cur_prompt_name == *prompts[i].name
+		&& strcmp(cur_prompt_name, prompts[i].name) == 0)
+			printf("%s%s%s\n", mi_c, prompts[i].name, df_c);
+		else
+			printf("%s\n", prompts[i].name);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+change_prompt(const size_t n)
+{
+	if (prompts[n].regular) {
+		free(encoded_prompt);
+		encoded_prompt = savestring(prompts[n].regular, strlen(prompts[n].regular));
+	}
+
+	if (prompts[n].warning) {
+		free(wprompt_str);
+		wprompt_str = savestring(prompts[n].warning, strlen(prompts[n].warning));
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+set_prompt(char *name)
+{
+	if (!name || !*name)
+		return EXIT_FAILURE;
+
+	if (prompts_n == 0) {
+		fprintf(stderr, _("%s: No extra prompts defined. Using the default prompt\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	char *p = dequote_str(name, 0);
+	if (!p) {
+		fprintf(stderr, "%s: %s: Error dequoting string\n", PROGRAM_NAME, name);
+		return EXIT_FAILURE;
+	}
+
+	int i = (int)prompts_n;
+	while(--i >= 0) {
+		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
+			continue;
+		free(p);
+		strncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name));
+		return change_prompt((size_t)i);
+	}
+
+	free(p);
+	fprintf(stderr, _("%s: %s: No such prompt\n"), PROGRAM_NAME, p);
+	return EXIT_FAILURE;
+}
+
+static int
+set_default_prompt(void)
+{
+	free(encoded_prompt);
+	encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+	*cur_prompt_name = '\0';
+	return EXIT_SUCCESS;
+}
+
+static int
+edit_prompts_file(void)
+{
+	if (!prompts_file || !*prompts_file) {
+		fprintf(stderr, "%s: No prompts file found\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	struct stat a;
+	if (stat(prompts_file, &a) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, prompts_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	time_t old_time = a.st_mtime;
+
+	open_in_foreground = 1;
+	int ret = open_file(prompts_file);
+	open_in_foreground = 0;
+	if (ret != EXIT_SUCCESS)
+		return ret;
+
+	stat(prompts_file, &a);
+	if (autols == 1)
+		reload_dirlist();
+	if (old_time == a.st_mtime)
+		return EXIT_SUCCESS;
+
+	ret = load_prompts();
+	print_reload_msg("File modified. Prompts reloaded\n");
+	if (*cur_prompt_name)
+		set_prompt(cur_prompt_name);
+	return ret;
+}
+
+int
+prompt_function(char *arg)
+{
+	if (!arg || !*arg || (*arg == 'l' && strcmp(arg, "list") == 0))
+		return list_prompts();
+
+	if (IS_HELP(arg)) {
+		puts(PROMPT_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	if (*arg == 'u' && strcmp(arg, "unset") == 0)
+		return set_default_prompt();
+
+	if (*arg == 'e' && strcmp(arg, "edit") == 0)
+		return edit_prompts_file();
+
+	if (*arg == 'r' && strcmp(arg, "reload") == 0) {
+		int ret = load_prompts();
+		if (ret == EXIT_SUCCESS) {
+			printf(_("%s: Prompts successfully reloaded\n"), PROGRAM_NAME);
+			return EXIT_SUCCESS;
+		}
+		return ret;
+	}
+
+	return set_prompt(arg);
 }

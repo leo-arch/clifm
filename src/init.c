@@ -947,6 +947,144 @@ load_remotes(void)
 	return EXIT_SUCCESS;
 }
 
+static void
+unset_prompt_values(const size_t n)
+{
+	prompts[n].name = (char *)NULL;
+	prompts[n].regular = (char *)NULL;
+	prompts[n].warning = (char *)NULL;
+}
+
+static char *
+set_prompts_file(void)
+{
+	if (!config_dir_gral || !*config_dir_gral)
+		return (char *)NULL;
+
+	struct stat a;
+	char *f = (char *)xnmalloc(strlen(config_dir_gral) + 13, sizeof(char));
+	sprintf(f, "%s/prompts.cfm", config_dir_gral);
+
+	if (stat(f, &a) != -1 && S_ISREG(a.st_mode))
+		return f;
+
+	if (!data_dir || !*data_dir)
+		goto ERROR;
+
+	char t[PATH_MAX];
+	snprintf(t, sizeof(t), "%s/%s/prompts.cfm", data_dir, PNL);
+	if (stat(t, &a) == -1 || !S_ISREG(a.st_mode))
+		goto ERROR;
+
+	char *cmd[] = {"cp", t, f, NULL};
+	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	if (ret != EXIT_SUCCESS) {
+		free(f);
+		return (char *)NULL;
+	}
+	return f;
+
+ERROR:
+	free(f);
+	return (char *)NULL;
+}
+
+/* Load prompts from PROMPTS_FILE */
+int
+load_prompts(void)
+{
+	free_prompts();
+	free(prompts_file);
+	prompts_file = set_prompts_file();
+	if (!prompts_file || !*prompts_file)
+		return EXIT_FAILURE;
+
+	int fd;
+	FILE *fp = open_fstream_r(prompts_file, &fd);
+	if (!fp) {
+		fprintf(stderr, "%s: %s\n", prompts_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	size_t n = 0;
+	prompts = (struct prompts_t *)xnmalloc(n + 1, sizeof(struct prompts_t));
+	unset_prompt_values(n);
+
+	size_t line_sz = 0;
+	char *line = (char *)NULL;
+
+	while (getline(&line, &line_sz, fp) > 0) {
+		if (!*line || *line == '#' || *line == '\n')
+			continue;
+		if (*line == '[') {
+			if (prompts[n].name)
+				n++;
+			prompts = (struct prompts_t *)xrealloc(
+					prompts, (n + 2) * sizeof(struct prompts_t));
+			unset_prompt_values(n);
+
+			char *name = strbtw(line, '[', ']');
+			if (!name)
+				continue;
+			if (!*name) {
+				free(name);
+				name = (char *)NULL;
+				continue;
+			}
+			prompts[n].name = (char *)xrealloc(prompts[n].name,
+							(strlen(name) + 1) * sizeof(char));
+			strcpy(prompts[n].name, name);
+			free(name);
+			name = (char *)NULL;
+		}
+
+		if (!prompts[n].name)
+			continue;
+
+		char *ret = strchr(line, '=');
+		if (!ret)
+			continue;
+		if (!*(++ret))
+			continue;
+
+		size_t ret_len = strlen(ret);
+		if (ret[ret_len - 1] == '\n') {
+			ret_len--;
+			ret[ret_len] = '\0';
+		}
+
+		char *deq_str = remove_quotes(ret);
+		if (deq_str)
+			ret = deq_str;
+
+		if (strncmp(line, "RegularPrompt=", 14) == 0) {
+			prompts[n].regular = (char *)xrealloc(prompts[n].regular,
+							(ret_len + 1) * sizeof(char));
+			strcpy(prompts[n].regular, ret);
+			continue;
+		}
+
+		if (strncmp(line, "WarningPrompt=", 14) == 0) {
+			prompts[n].warning = (char *)xrealloc(prompts[n].warning,
+								(ret_len + 1) * sizeof(char));
+			strcpy(prompts[n].warning, ret);
+		}
+	}
+
+	free(line);
+	close_fstream(fp, fd);
+
+	if (prompts[n].name) {
+		++n;
+		prompts[n].name = (char *)NULL;
+	}
+
+	prompts_n = n;
+	if (encoded_prompt)
+		expand_prompt_name(encoded_prompt);
+	return EXIT_SUCCESS;
+}
+
 /* Opener function: open FILENAME and exit */
 static void
 open_reg_exit(char *filename, int url)

@@ -1132,6 +1132,49 @@ free_remotes(int exit)
 	return EXIT_SUCCESS;
 }
 
+int
+expand_prompt_name(char *name)
+{
+	if (!name || !*name || prompts_n == 0)
+		return EXIT_FAILURE;
+
+	char *p = remove_quotes(name);
+	if (!p || !*p || strchr(p, '\\'))
+		return EXIT_FAILURE;
+
+	int i = (int)prompts_n;
+	while (--i >= 0) {
+		if (*p != *prompts[i].name
+		|| strcmp(p, prompts[i].name) != 0)
+			continue;
+		if (prompts[i].regular) {
+			free(encoded_prompt);
+			encoded_prompt = savestring(prompts[i].regular, strlen(prompts[i].regular));
+		}
+		if (prompts[i].warning) {
+			free(wprompt_str);
+			wprompt_str = savestring(prompts[i].warning, strlen(prompts[i].warning));
+		}
+		return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
+void
+free_prompts(void)
+{
+	int i = (int)prompts_n;
+	while (--i >= 0) {
+		free(prompts[i].name);
+		free(prompts[i].regular);
+		free(prompts[i].warning);
+	}
+	free(prompts);
+	prompts = (struct prompts_t *)NULL;
+	prompts_n = 0;
+}
+
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 void
@@ -1151,6 +1194,9 @@ free_stuff(void)
 	if (kq != UNSET)
 		close(kq);
 #endif
+
+	free_prompts();
+	free(prompts_file);
 
 	i = (int)autocmds_n;
 	while (--i >= 0) {

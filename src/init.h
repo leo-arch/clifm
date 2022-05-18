@@ -40,6 +40,7 @@ void load_jumpdb(void);
 int load_bookmarks(void);
 int load_actions(void);
 int load_pinned_dir(void);
+int load_prompts(void);
 int load_remotes(void);
 void load_tags(void);
 void get_path_programs(void);

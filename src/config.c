@@ -733,9 +733,10 @@ create_config(char *file)
 
 	    "# This is the configuration file for CliFM\n\n"
 
-	    "# Color schemes are stored in the colors directory. By default,\n\
-# the 'default' color scheme is used. Visit %s\n\
-# to get a few more\n\
+	    "# Color schemes (or just themes) are stored in the colors directory.\n\
+# Available themes: base16, default, dracula, dracula-vivid, gruvbox,\n\
+# jellybeans-vivid, light, molokai, nocolor, nord, one-dark, solarized, zenburn\n\
+# Visit %s to get some extra themes\n\
 ColorScheme=%s\n\n"
 
 	    "# The amount of files contained by a directory is informed next\n\

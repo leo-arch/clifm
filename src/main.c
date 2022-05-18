@@ -77,6 +77,7 @@ struct stats_t stats;
 struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
 struct opts_t opts;
 struct sel_t *sel_elements = (struct sel_t *)NULL;
+struct prompts_t *prompts;
 
 struct sort_t __sorts[] = {
     {"none", 0, 0},
@@ -254,6 +255,7 @@ size_t
 	path_n = 0,
 	path_progsn = 0,
 	prompt_cmds_n = 0,
+	prompts_n = 0,
 	remotes_n = 0,
 	sel_n = 0,
 	tab_offset = 0,
@@ -302,6 +304,7 @@ char
 	*pinned_dir = (char *)NULL,
 	*plugins_dir = (char *)NULL,
 	*profile_file = (char *)NULL,
+	*prompts_file = (char *)NULL,
 	*quote_chars = (char *)NULL,
 	*remotes_file = (char *)NULL,
 /*	*right_prompt = (char *)NULL, */
@@ -399,6 +402,7 @@ char *internal_cmds[] = {
 	"pf", "prof", "profile",
 	"pg", "pager",
 	"pin", "unpin",
+	"prompt",
 	"quit", "exit",
 	"r", "rm",
 	"rf", "refresh",
@@ -531,6 +535,10 @@ const char *param_str[] = {
 	"profile add",
 	"profile del",
 	"profile list",
+	"prompt edit",
+	"prompt list",
+	"prompt reload",
+	"prompt unset",
 	"st none",
 	"st name",
 	"st size",
@@ -1030,6 +1038,7 @@ main(int argc, char *argv[])
 
 	get_profile_names();
 	load_pinned_dir();
+	load_prompts();
 	set_env();
 
 	/* # 2. MAIN PROGRAM LOOP # */

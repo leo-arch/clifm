@@ -635,11 +635,11 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 static inline size_t
 store_completions(char **matches, FILE *fp)
 {
-	int no_file_comp = 0;/* free_path = 0; */
+	int no_file_comp = 0;
 	if (cur_comp_type == TCMP_TAGS_S || cur_comp_type == TCMP_TAGS_U
 	|| cur_comp_type == TCMP_SORT || cur_comp_type == TCMP_BOOKMARK
 	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_NET
-	|| cur_comp_type == TCMP_PROF)
+	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_PROMPTS)
 		no_file_comp = 1;
 
 	size_t i;
@@ -1384,7 +1384,8 @@ AFTER_USUAL_COMPLETION:
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
-			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK) && !strchr(replacement, '\\')) {
+			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK
+			|| c == TCMP_PROMPTS) && !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
 					if (replacement != matches[0])

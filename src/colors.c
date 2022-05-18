@@ -512,14 +512,12 @@ set_colorscheme(char *arg)
 		if (set_colors(arg, 0) != EXIT_SUCCESS)
 			continue;
 		cur_cscheme = color_schemes[i];
+
 		switch_cscheme = 1;
-
-		if (autols == 1) {
-			free_dirlist();
-			list_dir();
-		}
-
+		if (autols == 1)
+			reload_dirlist();
 		switch_cscheme = 0;
+
 		return EXIT_SUCCESS;
 	}
 
@@ -1131,9 +1129,10 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			char *p = strchr(line, '=');
 			if (!p || !*p || !*(++p))
 				continue;
-			free(encoded_prompt);
-			encoded_prompt = (char *)NULL;
-			encoded_prompt = savestring(p, strlen(p));
+			if (expand_prompt_name(p) != EXIT_SUCCESS) {
+				free(encoded_prompt);
+				encoded_prompt = savestring(p, strlen(p));
+			}
 			continue;
 		}
 

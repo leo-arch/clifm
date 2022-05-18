@@ -1534,6 +1534,30 @@ sel_entries_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+static char *
+prompts_generator(const char *text, int state)
+{
+	if (prompts_n == 0)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while (i < (int)prompts_n && (name = prompts[i++].name) != NULL) {
+		if ((case_sensitive ? strncmp(name, text, len)
+		: strncasecmp(name, text, len)) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
+
 /* Return the list of currently trashed files matching TEXT or NULL */
 static char **
 rl_trashed_files(const char *text)
@@ -2035,6 +2059,14 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 #endif /* _NO_LIRA */
+
+		if (*lb == 'p' && lb[1] == 'r' && strncmp(lb, "prompt " , 7) == 0) {
+			matches = rl_completion_matches(text, &prompts_generator);
+			if (matches) {
+				cur_comp_type = TCMP_PROMPTS;
+				return matches;
+			}
+		}
 
 		/* ### UNTRASH ### */
 		if (*lb == 'u' && (lb[1] == ' ' || (lb[1] == 'n'

@@ -57,6 +57,7 @@
 #include "misc.h"
 #include "navigation.h"
 #include "profiles.h"
+#include "prompt.h"
 #include "properties.h"
 #include "readline.h"
 #include "remotes.h"
@@ -2209,6 +2210,9 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 'u' && strcmp(comm[0], "unpin") == 0)
 		return (exit_code = unpin_dir());
+
+	else if (*comm[0] == 'p' && strcmp(comm[0], "prompt") == 0)
+		return (exit_code = prompt_function(comm[1] ? comm[1] : NULL));
 
 	/*    ############### PROPERTIES ##################     */
 	else if (*comm[0] == 'p' && (!comm[0][1] || strcmp(comm[0], "pr") == 0
