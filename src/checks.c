@@ -543,7 +543,7 @@ check_for_alias(char **args)
 void
 check_file_size(char *file, int max)
 {
-	if (!config_ok)
+	if (!config_ok || !file)
 		return;
 
 	/* Create the file, if it doesn't exist */

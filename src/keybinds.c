@@ -179,7 +179,7 @@ kbinds_function(char **args)
 int
 load_keybinds(void)
 {
-	if (!config_ok)
+	if (!config_ok || !kbinds_file)
 		return EXIT_FAILURE;
 
 	/* Free the keybinds struct array */

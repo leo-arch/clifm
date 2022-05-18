@@ -163,9 +163,14 @@ get_home(void)
 int
 init_history(void)
 {
+	if (!hist_file)
+		return EXIT_FAILURE;
+
 	/* Limit the log files size */
-	check_file_size(log_file, max_log);
-	check_file_size(msg_log_file, max_log);
+	if (log_file)
+		check_file_size(log_file, max_log);
+	if (msg_log_file)
+		check_file_size(msg_log_file, max_log);
 
 	/* Get history */
 	struct stat attr;
@@ -741,7 +746,7 @@ load_bookmarks(void)
 int
 load_actions(void)
 {
-	if (!config_ok)
+	if (!config_ok || !actions_file)
 		return EXIT_FAILURE;
 
 	/* Free the actions struct array */
@@ -2210,7 +2215,7 @@ get_last_path(void)
 int
 load_pinned_dir(void)
 {
-	if (!config_ok)
+	if (!config_ok || !config_dir)
 		return EXIT_FAILURE;
 
 	char *pin_file = (char *)xnmalloc(config_dir_len + 6, sizeof(char));
@@ -2400,7 +2405,7 @@ alias_exists(char *s)
 void
 get_aliases(void)
 {
-	if (!config_ok)
+	if (!config_ok || !config_file)
 		return;
 
 	int fd;
@@ -2457,7 +2462,7 @@ write_dirhist(char *line, ssize_t len)
 int
 load_dirhist(void)
 {
-	if (!config_ok)
+	if (!config_ok || !dirhist_file)
 		return EXIT_FAILURE;
 
 	int fd;
@@ -2509,7 +2514,7 @@ free_prompt_cmds(void)
 void
 get_prompt_cmds(void)
 {
-	if (!config_ok)
+	if (!config_ok || !config_file)
 		return;
 
 	int fd;
@@ -2993,6 +2998,9 @@ check_options(void)
 							strlen(DEFAULT_PROMPT_NO_COLOR));
 	}
 
+	if ((home_ok == 0 || !config_file) && !*div_line)
+		strncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
+
 	if (xargs.stealth_mode == 1) {
 		if (!opener)
 			/* Since in stealth mode we have no access to the config
@@ -3000,8 +3008,8 @@ check_options(void)
 			 * Set it thus to xdg-open, if not already set via command
 			 * line */
 			opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
-		if (!*div_line)
-			strncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
+/*		if (!*div_line)
+			strncpy(div_line, DEF_DIV_LINE, sizeof(div_line)); */
 	}
 
 	reset_opts();

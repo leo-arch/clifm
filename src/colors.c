@@ -867,7 +867,7 @@ set_iface_colors(char **colors, const size_t words)
 	}
 }
 
-static void
+void
 set_default_colors(void)
 {
 	if (!*hb_c) strcpy(hb_c, DEF_HB_C);

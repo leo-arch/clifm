@@ -103,7 +103,7 @@ unsigned short term_cols;
 
 int curcol = 0,
 	currow = 0,
-	flags;
+	flags = 0;
 
 struct termios
 	orig_termios,
@@ -877,6 +877,15 @@ get_hostname(void)
 			PROGRAM_NAME);
 	}
 }
+/*
+static void
+init_file_flags(void)
+{
+	flags |= CONFIG_OK;
+	flags |= HOME_OK;
+	flags |= SELFILE_OK;
+	flags |= TRASH_OK;
+} */
 
 				/**
 				 * #############################
@@ -889,6 +898,11 @@ get_hostname(void)
 int
 main(int argc, char *argv[])
 {
+/*
+//	config_ok = 0;
+	home_ok = 0;
+	selfile_ok = 0;
+	trash_ok = 0; */
 	/* Quite unlikely to happen, but one never knows. See
 	 * https://lwn.net/SubscriberLink/882799/cb8f313c57c6d8a6/
 	 * and
@@ -898,6 +912,7 @@ main(int argc, char *argv[])
 		exit(EINVAL);
 	}
 
+/*	init_file_flags(); */
 	/* Make sure we are running on supported CPU and operating system */
 	check_cpu_os();
 	/* Make sure we are running on a supported terminal */

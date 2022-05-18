@@ -224,7 +224,7 @@ set_sel_file(void)
 int
 create_kbinds_file(void)
 {
-	if (!config_ok)
+	if (!config_ok || !kbinds_file)
 		return EXIT_FAILURE;
 
 	struct stat attr;
@@ -563,7 +563,7 @@ create_tmp_files(void)
 
 	_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary directory for "
 		"the Selection Box. Selected files won't be persistent across "
-		"reboots"), PROGRAM_NAME, tmp_dir);
+		"reboots\n"), PROGRAM_NAME, tmp_dir);
 }
 
 static void
@@ -2102,8 +2102,10 @@ init_config(void)
 		return;
 	}
 
-	if (!home_ok)
+	if (!home_ok) {
+		set_default_colors();
 		return;
+	}
 
 	define_config_file_names();
 	create_config_files();

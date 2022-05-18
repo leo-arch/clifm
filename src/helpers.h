@@ -182,26 +182,26 @@ extern int watch;
 #define START_PATH    (1 << 7)
 #define ALT_PROFILE   (1 << 8)
 
-/* File ownership flags */
-#define R_USR (1 << 9)
-#define X_USR (1 << 10)
-#define R_GRP (1 << 11)
-#define X_GRP (1 << 12)
-#define R_OTH (1 << 13)
-#define X_OTH (1 << 14)
-
 /* Internal flags */
-#define ROOT_USR      (1 << 15)
-#define GUI           (1 << 16)
-#define IS_USRVAR_DEF (1 << 17)
-#define FZF_BIN_OK    (1 << 18)
+#define ROOT_USR      (1 << 9)
+#define GUI           (1 << 10)
+#define IS_USRVAR_DEF (1 << 11)
+#define FZF_BIN_OK    (1 << 12)
 
 /* Used by the refresh on resize feature */
-#define DELAYED_REFRESH    (1 << 19)
-#define PATH_PROGRAMS_ALREADY_LOADED (1 << 20)
+#define DELAYED_REFRESH    (1 << 13)
+#define PATH_PROGRAMS_ALREADY_LOADED (1 << 14)
 
-#define FIRST_WORD_IS_ELN   (1 << 21)
-#define IN_BOOKMARKS_SCREEN (1 << 22)
+#define FIRST_WORD_IS_ELN   (1 << 15)
+#define IN_BOOKMARKS_SCREEN (1 << 16)
+
+/* File ownership flags (used by check_file_access() in checks.c) */
+#define R_USR (1 << 1)
+#define X_USR (1 << 2)
+#define R_GRP (1 << 3)
+#define X_GRP (1 << 4)
+#define R_OTH (1 << 5)
+#define X_OTH (1 << 6)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
