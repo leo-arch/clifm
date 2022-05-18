@@ -168,6 +168,16 @@ For a detailed explanation of each of these features, follow the corresponding l
 </details>
 
 ✔️ **Changelog**
+* `version 1.6 - Guybrush`:
+  - **NEW**: More tilling window manager friendly
+  - **NEW**: emoji-icons
+  - **NEW**: Smarter TAB completion
+  - **NEW**: Improved interface for trash and selection functions
+  - **NEW**: Easily manage your prompts via the `prompt` command
+  - **NEW**: Easily copy files to your smart phone (as plugin)
+  - **NEW**: Hex color codes support (#rrggbb)
+  - **NEW**: FZF is now the default completer
+  - **NEW**: Extra color schemes
 * `version 1.5`:
   - **NEW**: New keybinding: `Ctrl-Alt-l` to toggle max file name length on/off
   - **NEW**: [MacOS port](https://github.com/leo-arch/clifm/wiki/Introduction#d-macos). Thanks to [l2dy](https://github.com/l2dy) for this!
