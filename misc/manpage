@@ -853,6 +853,9 @@ An easy alternative to create as many pins or shortcuts as you want, and how you
 .sp
 At program exit, the pinned file is written to a file in the configuration directory (as .pin) to be loaded in the next session.
 .TP
+.B prompt \fR[NAME, list, edit, reload]
+Temporarily change the current prompt to the prompt named NAME. Available prompts are defined in the prompts file (\fI$HOME/.config/clifm/prompts.cfm\fR). To permanently set a prompt, edit your color scheme file (via the \fIcs edit\fR command): both prompt codes and prompt names (as defined in the prompts file) are supported. 
+.TP
 .B q, quit, exit, Q
 Gracefully quit CliFM. Use 'Q' to gracefully quit and enable the CD on quit functionality (write last visited directory to \fI$XDG_CONFIG/clifm/.last\fR to be later read by a shell function. See the \fBSHELL FUNCTIONS\fR section below).
 .TP
