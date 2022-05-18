@@ -99,6 +99,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories.
 - Navigation and file operations
   - [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
+  - [_Etiqueta_, a files tagging system](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files)
   - [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
   - [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions).
   - [copy(-as), move(-as)](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), [interactive rename](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), and [open-with](https://github.com/leo-arch/clifm/wiki/Introduction#ow-elnfilename-application) functions.
@@ -138,6 +139,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
   - [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#light-mode) (just in case it is not fast enough for you).
   - [Resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#using-clifm-as-a-standalone-resource-opener)
+  - [Disk usage analyzer mode](https://github.com/leo-arch/clifm/wiki/Specifics#disk-usage-analyzer)
   - [Files lister (ls-mode)](https://github.com/leo-arch/clifm/wiki/Advanced#files-lister-ls-mode)
 - Customization
   - [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
@@ -153,6 +155,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
   - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
   - [Easily mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
+  - [Remove files in bulk using a text editor](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
   - Unicode suppport.
   - Disk usage.
   - [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions.
@@ -168,13 +171,17 @@ For a detailed explanation of each of these features, follow the corresponding l
 </details>
 
 ✔️ **Changelog**
+* `version 1.6 - Guybrush`:
+  - **NEW**: More tilling window manager friendly
+  - **NEW**: emoji-icons
+  - **NEW**: Smarter TAB completion
+  - **NEW**: Improved interface for trash and selection functions
+  - **NEW**: Easily manage your prompts via the `prompt` command
+  - **NEW**: Easily copy files to your smart phone (as plugin)
+  - **NEW**: Hex color codes support (#rrggbb)
+  - **NEW**: FZF is now the default completer
+  - **NEW**: Extra color schemes
 * `version 1.5`:
-  - **NEW**: New keybinding: `Ctrl-Alt-l` to toggle max file name length on/off
-  - **NEW**: [MacOS port](https://github.com/leo-arch/clifm/wiki/Introduction#d-macos). Thanks to [l2dy](https://github.com/l2dy) for this!
-  - **NEW**: [Color variables support](https://github.com/leo-arch/clifm/wiki/Customization#color-variables)
-  - **NEW**: [Remove files in bulk using a text editor](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
-  - **NEW**: [_Etiqueta_, a files tagging system](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files)
-  - **NEW**: [Disk usage analyzer mode](https://github.com/leo-arch/clifm/wiki/Specifics#disk-usage-analyzer)
   - `Prompt`, `WarningPromptStr`, `DividingLine`, and `FfzTabOptions` options were moved from the config file to the color scheme file to get a **centralized and single theming file**. However, to keep backwards compatibility, the old location is still recognized. If any of these options is found in the color scheme file, values taken from the main configuration file will be overriden.
   - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is used now only for the _input text color_ of the warning prompt.
 * `verion 1.4`:
