@@ -84,11 +84,12 @@
 RegularPrompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 WarningPrompt="\[\e[00;02;31m\](!) > "
 
-[default-colorless]
-RegularPrompt="\[\e[0m\][\S]\l \A \u:\H \w\n<\z\[\e[0m\]> \$ "
-WarningPrompt="(!) > "
+#[default-colorless]
+#RegularPrompt="\[\e[0m\][\S]\l \A \u:\H \w\n<\z\[\e[0m\]> \$ "
+#WarningPrompt="(!) > "
 
 [default-box-drawing]
+# The box drawing set isn't supported by all terminals
 RegularPrompt="\[\e[0m\]\[\e[0;36m\]\[\e(0\]lq\[\e(B\]\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0;36m\]\[\e(0\]mq\[\e(B\]\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 WarningPrompt="\[\e[0;36m\]\[\e(0\]mq\[\e(B\]\[\e[0m\]<\z\[\e[0m\]> \[\e[1;31m\]\! \[\e[00;02;31m\]"
 
@@ -97,6 +98,8 @@ RegularPrompt="\[\e[1;32m\][\u@\H] \[\e[1;34m\]\w \[\e[0m\]\$ "
 WarningPrompt="\[\e[1;32m\][\u@\H] \[\e[1;34m\]\w \[\e[1;31m\]! \[\e[00;02;31m\]"
 
 [security-scanner]
+# Print file statistics about the current directory (-:-:-:-) in this order:
+# SUID, SGID, other-writable, and executable files
 RegularPrompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \[\e[0m\]\[\e[1;31m\]\U\[\e[0m\]:\[\e[1;33m\]\G\[\e[0m\]:\[\e[1;32m\]\O\[\e[0m\]:\[\e[1;34m\]\X\[\e[0m\] \A \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 WarningPrompt="\[\e[00;02;31m\](!) > "
 
@@ -104,6 +107,7 @@ WarningPrompt="\[\e[00;02;31m\](!) > "
 RegularPrompt="\[\e[01;32m\]╭─\[\e[0m\][\S]\[\e[01;32m\]─\[\e[0m\](\u:\H)\[\e[01;32m\]─\[\e[0m\][\[\e[00;36m\]\w\[\e[0m\]]\n\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;34m\]λ\[\e[0m\] "
 WarningPrompt="\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;31m\]\x\[\e[00;02;31m\] "
 
+# The prompts below require a patched Nerfont
 [firestarter]
 RegularPrompt="\[\e[01;38;5;124m\]╭─\[\e[00;38;5;124m\]\[\e[00;37;48;5;124m\]\A \[\e[00;38;5;124;43m\]\[\e[00;30;43m\] \u:\H \[\e[00;33;48;5;124m\]\[\e[00;37;48;5;124m\] \w \[\e[00;38;5;124m\]\[\e[0m\]\n\[\e[01;38;5;124m\]╰─ \[\e[0m\] "
 WarningPrompt="\[\e[01;38;5;124m\]╰──\[\e[0;38;5;124m\] \[\e[00;02;31m\]"
