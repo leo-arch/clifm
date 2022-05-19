@@ -266,6 +266,7 @@ size_t
 	zombies = 0;
 
 char
+	cur_prompt_name[NAME_MAX] = "",
 	div_line[NAME_MAX],
 	hostname[HOST_NAME_MAX],
 #ifndef _NO_FZF

@@ -95,8 +95,6 @@ emergency prompt"
 #define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
 /* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
 
-char cur_prompt_name[NAME_MAX] = "";
-
 static inline char *
 gen_time(const int c)
 {

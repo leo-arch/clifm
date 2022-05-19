@@ -2979,7 +2979,7 @@ check_options(void)
 		struct user_t tmp_user = get_user();
 		user.shell = tmp_user.shell;
 
-		/* We don't need these values of the user struct: free(d) them */
+		/* We don't need these values of the user struct: free them */
 		free(tmp_user.name);
 		free(tmp_user.home);
 
@@ -2998,18 +2998,15 @@ check_options(void)
 							strlen(DEFAULT_PROMPT_NO_COLOR));
 	}
 
-	if ((home_ok == 0 || !config_file) && !*div_line)
+	if ((xargs.stealth_mode == 1 || home_ok == 0 ||
+	config_ok == 0 || !config_file) && !*div_line)
 		strncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 
-	if (xargs.stealth_mode == 1) {
-		if (!opener)
-			/* Since in stealth mode we have no access to the config
-			 * file, we cannot use 'lira', since it relays on a file.
-			 * Set it thus to xdg-open, if not already set via command
-			 * line */
-			opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
-/*		if (!*div_line)
-			strncpy(div_line, DEF_DIV_LINE, sizeof(div_line)); */
+	if (xargs.stealth_mode == 1 && !opener) {
+		/* Since in stealth mode we have no access to the config file, we cannot
+		 * use 'lira', since it relays on a file. Set it thus to FALLBACK_OPENER,
+		 * if not already set via command line */
+		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
 	}
 
 	reset_opts();
