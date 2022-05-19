@@ -1023,8 +1023,10 @@ static size_t
 expand_tag(char ***args, const int tag_index)
 {
 	char **s = *args;
-	char *tag = s[tag_index] ? s[tag_index] + 2 : (char *)NULL;
-	if (!tag || !*tag || !is_tag(tag))
+	if (!s)
+		return 0;
+	char *tag = (s[tag_index] && *(s[tag_index] + 2)) ? s[tag_index] + 2 : (char *)NULL;
+	if (!tag || !*tag || !tags_dir || is_tag(tag) == 0)
 		return 0;
 
 	char dir[PATH_MAX];
@@ -1051,6 +1053,7 @@ expand_tag(char ***args, const int tag_index)
 		p[j] = savestring(s[i], strlen(s[i]));
 		j++;
 	}
+	p[j] = (char *)NULL;
 
 	/* Append the file names pointed to by the tag expression */
 	for (i = 0; i < (size_t)n; i++) {
@@ -1069,13 +1072,13 @@ expand_tag(char ***args, const int tag_index)
 		j++;
 		free(esc_str);
 	}
+	p[j] = (char *)NULL;
 
 	/* Append whatever is after the tag expression */
 	for (i = (size_t)tag_index + 1; i <= args_n; i++) {
 		p[j] = savestring(s[i], strlen(s[i]));
 		j++;
 	}
-
 	p[j] = (char *)NULL;
 
 	/* Free the dirent struct */
@@ -1088,6 +1091,8 @@ expand_tag(char ***args, const int tag_index)
 	for (i = 0; i <= args_n; i++)
 		free(s[i]);
 	free(s);
+	/* ARGS will be later free'd by run_main_loop(). This is why the leak
+	 * warning emitted by GCC(12.1) analyzer is a false positive */
 	*args = p;
 
 	args_n = (j >= 1) ? j - 1 : 0;

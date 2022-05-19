@@ -746,8 +746,8 @@ run_main_loop(void)
 		/* 4) Execute input string */
 		char **alias_cmd = check_for_alias(cmd);
 		if (alias_cmd) {
-			/* If an alias is found, check_for_alias() frees cmd
-			 * and returns alias_cmd in its place to be executed by
+			/* If an alias is found, check_for_alias() frees CMD
+			 * and returns ALIAS_CMD in its place to be executed by
 			 * exec_cmd() */
 			exec_cmd(alias_cmd);
 
