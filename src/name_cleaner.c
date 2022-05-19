@@ -553,13 +553,12 @@ bleach_files(char **names)
 		} else {
 			bfiles[f].replacement = savestring(p, strlen(p));
 		}
-		printf("%s %s->%s %s\n", bfiles[f].original, mi_c, df_c,
-				bfiles[f].replacement);
+		printf("%s %s->%s %s\n", bfiles[f].original, mi_c, df_c, bfiles[f].replacement);
 		f++;
 		free(p);
 	}
 
-	if (f == 0) {
+	if (f == 0 || !bfiles) {
 		printf(_("%s: Nothing to do\n"), FUNC_NAME);
 		return EXIT_SUCCESS;
 	}
@@ -622,8 +621,8 @@ CONFIRM:
 	size_t rep_suffix = 1;
 	int exit_status = EXIT_SUCCESS;
 	for (i = 0; i < f; i++) {
-		char *o = bfiles[i].original;
-		char *r = bfiles[i].replacement;
+		char *o = bfiles[i].original ? bfiles[i].original : (char *)NULL;
+		char *r = bfiles[i].replacement ? bfiles[i].replacement : (char *)NULL;
 		if (o && *o && r && *r && rename) {
 			/* Make sure the replacement file name does not exist. If
 			 * it does, append REP_SUFFIX and try again */
