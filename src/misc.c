@@ -1156,7 +1156,7 @@ expand_prompt_name(char *name)
 			wprompt_str = savestring(prompts[i].warning, strlen(prompts[i].warning));
 		}
 
-		strncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name) - 1);
+		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name));
 		return EXIT_SUCCESS;
 	}
 
