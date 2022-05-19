@@ -81,7 +81,6 @@
 # the manpage and/or the Wiki for more information
 
 [clifm]
-# This is the default prompt
 RegularPrompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 WarningPrompt="\[\e[00;02;31m\](!) > "
 
@@ -101,12 +100,12 @@ WarningPrompt="\[\e[1;32m\][\u@\H] \[\e[1;34m\]\w \[\e[1;31m\]! \[\e[00;02;31m\]
 [security-scanner]
 # Print file statistics about the current directory (-:-:-:-) in this order:
 # SUID, SGID, other-writable, and executable files
-RegularPrompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \[\e[0m\]\[\e[1;31m\]\U\[\e[0m\]:\[\e[1;33m\]\G\[\e[0m\]:\[\e[1;32m\]\O\[\e[0m\]:\[\e[1;34m\]\X\[\e[0m\] \A \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
+RegularPrompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \[\e[0m\]\[\e[1;31m\]\U\[\e[0m\]:\[\e[1;33m\]\G\[\e[0m\]:\[\e[1;34m\]\O\[\e[0m\]:\[\e[1;32m\]\X\[\e[0m\] \A \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 WarningPrompt="\[\e[00;02;31m\](!) > "
 
 [curves]
 RegularPrompt="\[\e[01;32m\]╭─\[\e[0m\][\S]\[\e[01;32m\]─\[\e[0m\](\u:\H)\[\e[01;32m\]─\[\e[0m\][\[\e[00;36m\]\w\[\e[0m\]]\n\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;34m\]λ\[\e[0m\] "
-WarningPrompt="\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;31m\]\x\[\e[00;02;31m\] "
+WarningPrompt="\[\e[0m\]\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;31m\]λ\[\e[00;02;31m\] "
 
 # The prompts below require a patched Nerdfont
 [firestarter]
@@ -115,7 +114,7 @@ WarningPrompt="\[\e[01;38;5;124m\]╰──\[\e[0;38;5;124m\] \[\e[00;02;31m\
 
 [cold-winter]
 RegularPrompt="\[\e[00;37;100m\] \A \[\e[00;90;46m\]  \[\e[0;30;46m\]\u:\H \[\e[0;36;100m\]  \[\e[00;37;100m\]\w \[\e[00;90;40m\] \n \[\e[1;90m\]\[\e[0m\] "
-WarningPrompt=" \[\e[0;36m\] \[\e[00;02;31m\]"
+WarningPrompt=" \[\e[0m\]\[\e[1;2;31m\] \[\e[00;02;31m\]"
 
 [spot]
 RegularPrompt="\[\e[00;38;5;0;48;5;178m\] \A \u:\H \w \[\e[00;38;5;178;48;5;0m\]\[\e[0;40m\]\n\[\e[0;38;5;254;48;5;53m\] \$ \[\e[0;38;5;53;48;5;0m\] \[\e[0m\] "
