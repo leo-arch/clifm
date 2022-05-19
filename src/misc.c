@@ -442,10 +442,8 @@ print_tips(int all)
 		"'s *.c' or 's .*\\.c$'",
 		"ELN's and the 'sel' keyword work for shell commands as well: "
 		"'file 1 sel'",
-		"Press TAB to automatically expand an ELN: 's 2' -> TAB -> "
-		"'s FILENAME'",
-		"Easily copy everything in CWD into another directory: 's * "
-		"&& c sel ELN/DIR'",
+		"Press TAB to automatically expand an ELN: 's 2' -> TAB -> 's FILENAME'",
+		"Easily copy everything in CWD into another directory: 's * && c sel ELN/DIR'",
 		"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 "
 		"ELN/DIR'",
 		"Trash files with a simple 't ELN'",
@@ -493,8 +491,7 @@ print_tips(int all)
 		"Chain commands using ; and &&: 's 2 7-10; r sel'",
 		"Add emojis to the prompt by copying them to the Prompt line "
 		"in the color scheme file ('cs edit')",
-		"Create a new profile running 'pf add PROFILE' or 'clifm -P "
-		"PROFILE'",
+		"Create a new profile running 'pf add PROFILE' or 'clifm -P PROFILE'",
 		"Switch profiles using 'pf set PROFILE'",
 		"Delete a profile using 'pf del PROFILE'",
 		"Copy selected files into CWD by just running 'v sel' or "
@@ -516,8 +513,7 @@ print_tips(int all)
 		"commands respectively",
 		"Rename multiple files at once with the bulk rename function: "
 		"'br *.txt'",
-		"Need no more tips? Disable this feature in the configuration "
-		"file",
+		"Need no more tips? Disable this feature in the configuration file",
 		"Need root privileges? Launch a new instance of CliFM as root "
 		"running the 'X' command",
 #ifdef __linux__
@@ -533,8 +529,7 @@ print_tips(int all)
 		"Pin a file via the 'pin' command and then use it with the "
 		"period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
 		"Switch between color schemes using the 'cs' command",
-		"Try the 'j' command to quickly navigate through visited "
-		"directories",
+		"Try the 'j' command to quickly navigate through visited directories",
 		"Switch workspaces by pressing Alt-[1-4]",
 		"Use the 'ws' command to list available workspaces",
 		"Take a look at available plugins using the 'actions' command",
@@ -544,14 +539,12 @@ print_tips(int all)
 		"Enable the TrashAsRm option to prevent accidental deletions",
 		"Don't like ELN's? Disable them using the -e option",
 		"Use the 'n' command to create multiple files and/or directories",
-		"Customize your prompt by adding prompt commands via the 'edit' "
-		"command (F10)",
+		"Customize your prompt by adding prompt commands via the 'edit' command (F10)",
 		"Need git integration? Consult the manpage",
 		"Accept a given suggestion by pressing the Right arrow key",
 		"Accept only the first suggested word by pressing Alt-f or Alt-Right",
 		"Enter 'c sel' to copy selected files into the current directory",
 		"Take a look at available plugins via the 'actions' command",
-		"Enable the FZF mode for a better TAB completion experience",
 		"Press Alt-q to delete the last typed word",
 		"Check ELN ranges by pressing TAB",
 		"Operate on specific selected files by typing 'sel' and then TAB",
@@ -569,13 +562,16 @@ print_tips(int all)
 		"Enable icons with 'icons on'",
 		"Quickly change to a parent directory using the 'bd' command",
 		"Use 'stats' to print statistics on files in the current directory",
-		"Customize the warning prompt via the WarningPromptStr in the config file",
+		"Customize the warning prompt by setting WarningPromptStr in the color scheme file",
 		"Enter '-' to run the fzfnav plugin (includes files preview)",
 		"Create multiple links at once using the 'bl' command",
-		"Oragnize your files using tags. Try 'tag --help'",
+		"Organize your files using tags. Try 'tag --help'",
 		"Remove files in bulk using a text editor with 'rr'",
 		"Press 'Ctrl-Alt-l' to toggle max file name length on/off",
 		"Easily send files to a remote location with the 'cr' command",
+		"Quickly change your prompt via 'prompt NAME'",
+		"Press Ctrl-Alt-i to toggle the disk usage analyzer mode",
+		"Press Ctrl-Alt-l to toggle max file name length on/off",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
