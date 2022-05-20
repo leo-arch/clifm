@@ -4,7 +4,7 @@
 # License: GPL3
 
 define D=0;38;2;248;248;242
-define BD=01 # Bold (keep current color)
+define BD=0;1;38;2;248;248;242
 
 define R=0;38;2;255;85;85
 define BR=1;38;2;255;85;85

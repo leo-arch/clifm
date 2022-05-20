@@ -4,7 +4,7 @@
 # License: GPL3
 
 define D=0;38;2;171;178;191
-define BD=01
+define BD=0;1;38;2;171;178;191
 
 define R=0;38;2;224;108;117
 define BR=1;38;2;224;108;117

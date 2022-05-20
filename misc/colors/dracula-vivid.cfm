@@ -63,7 +63,7 @@ DirIconColor="Y"
 
 Prompt="\[\e[0;38;5;253m\][\S\[\e[0;38;5;253m\]]\l \A \u:\H \[\e[0;38;5;117m\]\w\n\[\e[0;38;5;253m\]<\z\[\e[0;38;5;253m\]> \[\e[0;38;5;141m\]\$ \[\e[0;38;5;253m\]"
 
-WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
+WarningPromptStr="\[\e[00;02;38;5;203m\](!) > "
 
 DividingLine="-"
 
