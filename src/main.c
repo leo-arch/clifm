@@ -185,7 +185,6 @@ int
 	print_msg = 0,
 	print_selfiles = UNSET,
 	prompt_offset = UNSET,
-//	prompt_style = UNSET,
 	prompt_notif = UNSET,
 	recur_perm_error_flag = 0,
 	restore_last_path = UNSET,

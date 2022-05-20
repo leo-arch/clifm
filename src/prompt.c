@@ -482,23 +482,23 @@ gen_stats_str(int flag)
 	size_t val = 0;
 
 	switch(flag) {
-	case STATS_DIR: val = stats.dir; break;
-	case STATS_REG: val = stats.reg; break;
-	case STATS_EXE: val = stats.exec; break;
-	case STATS_HIDDEN: val = stats.hidden; break;
-	case STATS_SUID: val = stats.suid; break;
-	case STATS_SGID: val = stats.sgid; break;
-	case STATS_FIFO: val = stats.fifo; break;
-	case STATS_SOCK: val = stats.socket; break;
 	case STATS_BLK: val = stats.block_dev; break;
-	case STATS_CHR: val = stats.char_dev; break;
-	case STATS_CAP: val = stats.caps; break;
-	case STATS_LNK: val = stats.link; break;
 	case STATS_BROKEN_L: val = stats.broken_link; break;
+	case STATS_CAP: val = stats.caps; break;
+	case STATS_CHR: val = stats.char_dev; break;
+	case STATS_DIR: val = stats.dir; break;
+	case STATS_EXE: val = stats.exec; break;
+	case STATS_EXTENDED: val = stats.extended; break;
+	case STATS_FIFO: val = stats.fifo; break;
+	case STATS_HIDDEN: val = stats.hidden; break;
+	case STATS_LNK: val = stats.link; break;
 	case STATS_MULTI_L: val = stats.multi_link; break;
 	case STATS_OTHER_W: val = stats.other_writable; break;
+	case STATS_REG: val = stats.reg; break;
+	case STATS_SUID: val = stats.suid; break;
+	case STATS_SGID: val = stats.sgid; break;
+	case STATS_SOCK: val = stats.socket; break;
 	case STATS_STICKY: val = stats.sticky; break;
-	case STATS_EXTENDED: val = stats.extended; break;
 	case STATS_UNKNOWN: val = stats.unknown; break;
 	case STATS_UNSTAT: val = stats.unstat; break;
 	default: break;
@@ -540,6 +540,9 @@ gen_notification(int flag)
 		if (msgs.warning > 0)
 			sprintf(p, "W%zu", msgs.warning);
 		break;
+	case NOTIF_ROOT:
+		if (flags & ROOT_USR)
+			{ *p = 'R'; p[1] = '\0'; }
 	case NOTIF_SEL:
 		if (sel_n > 0)
 			sprintf(p, "*%zu", sel_n);
@@ -548,24 +551,11 @@ gen_notification(int flag)
 		if (trash_n > 2)
 			sprintf(p, "T%zu", trash_n - 2);
 		break;
-	case NOTIF_ROOT:
-		if (flags & ROOT_USR)
-			{ *p = 'R'; p[1] = '\0'; }
 	default: break;
 	}
 
 	return p;
 }
-
-/*
-static inline void
-write_result(char **res, size_t *len, const int c)
-{
-	*res = (char *)xrealloc(*res, (*len + 2) * sizeof(char));
-	*res[*len] = (char)c;
-	(*len)++;
-	*res[*len] = '\0';
-} */
 
 /* Decode the prompt string (encoded_prompt global variable) taken from
  * the configuration file. Based on the decode_prompt_string function
@@ -706,7 +696,6 @@ ADD_STRING:
 			}
 #endif /* __HAIKU__ && __OpenBSD__ */
 
-/*			write_result(&result, &result_len, c); */
 			size_t new_len = result_len + 2
 							+ (wrong_cmd ? (MAX_COLOR + 6) : 0);
 			result = (char *)xrealloc(result, new_len * sizeof(char));
@@ -715,9 +704,6 @@ ADD_STRING:
 			result[result_len] = '\0';
 		}
 	}
-
-/*	if (wrong_cmd == 1)
-		sprintf(result + result_len, "\001\x1b[0m\002%s", wp_c); */
 
 	/* Remove trailing new line char, if any */
 	if (result && result[result_len - 1] == '\n')
@@ -814,7 +800,6 @@ update_trash_indicator(void)
 static inline void
 setenv_prompt(void)
 {
-//	if (prompt_style != CUSTOM_PROMPT_STYLE)
 	if (prompt_notif == 1)
 		return;
 
@@ -843,7 +828,6 @@ set_prompt_length(size_t decoded_prompt_len)
 {
 	size_t len = 0;
 
-//	if (prompt_style == DEF_PROMPT_STYLE) {
 	if (prompt_notif == 1) {
 		len = (size_t)(decoded_prompt_len
 		+ (xargs.stealth_mode == 1 ? STEALTH_IND_SIZE : 0)
@@ -871,8 +855,6 @@ construct_prompt(const char *decoded_prompt)
 	char msg_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND];
 	*msg_ind = *trash_ind = *sel_ind = '\0';
 
-//	char msg_ind[N_IND];
-//	*msg_ind = '\0';
 	if (prompt_notif == 1) {
 		if (msgs_n) {
 			/* Errors take precedence over warnings, and warnings over
@@ -888,13 +870,9 @@ construct_prompt(const char *decoded_prompt)
 			}
 		}
 
-	//	char trash_ind[N_IND];
-	//	*trash_ind = '\0';
 		if (trash_n > 2)
 			snprintf(trash_ind, N_IND, "%sT%zu%s", ti_c, (size_t)trash_n - 2, RL_NC);
 
-	//	char sel_ind[N_IND];
-	//	*sel_ind = '\0';
 		if (sel_n > 0)
 			snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
 	}
@@ -902,7 +880,6 @@ construct_prompt(const char *decoded_prompt)
 	size_t prompt_len = set_prompt_length(strlen(decoded_prompt));
 	char *the_prompt = (char *)xnmalloc(prompt_len, sizeof(char));
 
-//	if (prompt_style == DEF_PROMPT_STYLE) {
 	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,
 			"%s%s%s%s%s%s%s%s\001%s\002",
@@ -1098,6 +1075,8 @@ set_default_prompt(void)
 {
 	free(encoded_prompt);
 	encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+	free(wprompt_str);
+	wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
 	*cur_prompt_name = '\0';
 	prompt_notif = DEF_PROMPT_NOTIF;
 	return EXIT_SUCCESS;

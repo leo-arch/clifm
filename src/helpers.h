@@ -351,11 +351,6 @@ extern int watch;
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
 
-/* Macros for the prompt style */
-//#define DEF_PROMPT_STYLE    0
-//#define CUSTOM_PROMPT_STYLE 1
-#define DEF_PROMPT_NOTIF 1
-
 /* Macros for the dirjump function */
 #define SUG_JUMP    0
 #define NO_SUG_JUMP 1
@@ -972,7 +967,6 @@ extern int
 	print_msg,
 	print_selfiles,
 	prompt_offset,
-//	prompt_style,
 	prompt_notif,
 	recur_perm_error_flag,
 	restore_last_path,

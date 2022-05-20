@@ -1830,13 +1830,10 @@ read_config(void)
 				continue;
 			if (strncmp(opt_str, "default", 7) == 0)
 				prompt_notif = 1;
-//				prompt_style = DEF_PROMPT_STYLE;
 			else if (strncmp(opt_str, "custom", 6) == 0)
 				prompt_notif = 0;
-//				prompt_style = CUSTOM_PROMPT_STYLE;
 			else
 				prompt_notif = DEF_PROMPT_NOTIF;
-//				prompt_style = DEF_PROMPT_STYLE;
 		}
 
 		else if (xargs.restore_last_path == UNSET && *line == 'R'
@@ -2265,7 +2262,6 @@ reset_variables(void)
 	pager = UNSET;
 	print_selfiles = UNSET;
 	prompt_offset = UNSET;
-//	prompt_style = UNSET;
 	prompt_notif = UNSET;
 	restore_last_path = UNSET;
 	share_selbox = UNSET;

@@ -2650,8 +2650,6 @@ check_options(void)
 			no_eln = xargs.noeln;
 	}
 
-//	if (prompt_style == UNSET)
-//		prompt_style = DEF_PROMPT_STYLE;
 	if (prompt_notif == UNSET)
 		prompt_notif = DEF_PROMPT_NOTIF;
 
