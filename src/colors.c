@@ -608,9 +608,11 @@ set_color(char *_color, int offset, char var[], int flag)
 	}
 
 	if (flag == RL_NO_PRINTABLE)
-		snprintf(var, MAX_COLOR + 2, "\001\x1b[0;%sm\002", s ? s : p); /* NOLINT */
+//		snprintf(var, MAX_COLOR + 2, "\001\x1b[0;%sm\002", s ? s : p); /* NOLINT */
+		snprintf(var, MAX_COLOR + 2, "\001\x1b[%sm\002", s ? s : p); /* NOLINT */
 	else
-		snprintf(var, MAX_COLOR - 1, "\x1b[0;%sm", s ? s : p); /* NOLINT */
+//		snprintf(var, MAX_COLOR - 1, "\x1b[0;%sm", s ? s : p); /* NOLINT */
+		snprintf(var, MAX_COLOR - 1, "\x1b[%sm", s ? s : p); /* NOLINT */
 }
 
 static void
@@ -1136,6 +1138,21 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			continue;
 		}
 
+		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {
+			char *p = strchr(line, '=');
+			if (!p || !*(++p))
+				continue;
+			if (*p == 'd' && strncmp(p, "default", 7) == 0)
+//				prompt_style = DEF_PROMPT_STYLE;
+				prompt_notif = 1;
+			else if (*p == 'c' && strncmp(p, "custom", 6) == 0)
+//				prompt_style = CUSTOM_PROMPT_STYLE;
+				prompt_notif = 0;
+			else
+//				prompt_style = DEF_PROMPT_STYLE;
+				prompt_notif = DEF_PROMPT_NOTIF;
+		}
+
 /*		else if (*line == 'R' && strncmp(line, "RightPrompt=", 12) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*p || !*(++p))
@@ -1147,8 +1164,20 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			right_prompt = savestring(q, strlen(q));
 		} */
 
-		else if (*line == 'W'
-		&& strncmp(line, "WarningPromptStr=", 17) == 0) {
+		else if (xargs.warning_prompt == UNSET && *line == 'W'
+		&& strncmp(line, "WarningPrompt=", 14) == 0) {
+			char *p = strchr(line, '=');
+			if (!p || !*(++p))
+				continue;
+			if (*p == 't' && strncmp(p, "true", 4) == 0)
+				warning_prompt = 1;
+			else if (*p == 'f' && strncmp(p, "false", 5) == 0)
+				warning_prompt = 0;
+			else
+				warning_prompt = DEF_WARNING_PROMPT;
+		}
+
+		else if (*line == 'W' && strncmp(line, "WarningPromptStr=", 17) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*p || !*(++p))
 				continue;

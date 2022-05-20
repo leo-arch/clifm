@@ -78,6 +78,7 @@ struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
 struct opts_t opts;
 struct sel_t *sel_elements = (struct sel_t *)NULL;
 struct prompts_t *prompts;
+struct msgs_t msgs;
 
 struct sort_t __sorts[] = {
     {"none", 0, 0},
@@ -184,7 +185,8 @@ int
 	print_msg = 0,
 	print_selfiles = UNSET,
 	prompt_offset = UNSET,
-	prompt_style = UNSET,
+//	prompt_style = UNSET,
+	prompt_notif = UNSET,
 	recur_perm_error_flag = 0,
 	restore_last_path = UNSET,
 	rl_last_word_start = 0,

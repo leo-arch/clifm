@@ -110,9 +110,9 @@ _err(int msg_type, int prompt, const char *format, ...)
 	if (buf) {
 		if (msg_type) {
 			switch (msg_type) {
-			case 'e': pmsg = ERROR; break;
-			case 'w': pmsg = WARNING; break;
-			case 'n': pmsg = NOTICE; break;
+			case 'e': pmsg = ERROR; msgs.error++; break;
+			case 'w': pmsg = WARNING; msgs.warning++; break;
+			case 'n': pmsg = NOTICE; msgs.notice++; break;
 			default: pmsg = NOMSG;
 			}
 		}

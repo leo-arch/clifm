@@ -352,8 +352,9 @@ extern int watch;
 #define MAX_PROP_STR 55
 
 /* Macros for the prompt style */
-#define DEF_PROMPT_STYLE    0
-#define CUSTOM_PROMPT_STYLE 1
+//#define DEF_PROMPT_STYLE    0
+//#define CUSTOM_PROMPT_STYLE 1
+#define DEF_PROMPT_NOTIF 1
 
 /* Macros for the dirjump function */
 #define SUG_JUMP    0
@@ -832,9 +833,17 @@ struct prompts_t {
 	char *name;
 	char *regular;
 	char *warning;
+	int notifications;
 };
 
 extern struct prompts_t *prompts;
+
+struct msgs_t {
+	size_t error;
+	size_t warning;
+	size_t notice;
+};
+extern struct msgs_t msgs;
 
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
@@ -963,7 +972,8 @@ extern int
 	print_msg,
 	print_selfiles,
 	prompt_offset,
-	prompt_style,
+//	prompt_style,
+	prompt_notif,
 	recur_perm_error_flag,
 	restore_last_path,
 	rl_last_word_start,

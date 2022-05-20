@@ -958,6 +958,7 @@ unset_prompt_values(const size_t n)
 	prompts[n].name = (char *)NULL;
 	prompts[n].regular = (char *)NULL;
 	prompts[n].warning = (char *)NULL;
+	prompts[n].notifications = DEF_PROMPT_NOTIF;
 }
 
 static char *
@@ -1056,6 +1057,16 @@ load_prompts(void)
 		if (ret[ret_len - 1] == '\n') {
 			ret_len--;
 			ret[ret_len] = '\0';
+		}
+
+		if (*line == 'N' && strncmp(line, "Notifications=", 14) == 0) {
+			if (*ret == 't' && strcmp(ret, "true") == 0)
+				prompts[n].notifications = 1;
+			else if (*ret == 'f' && strcmp(ret, "false") == 0)
+				prompts[n].notifications = 0;
+			else
+				prompts[n].notifications = DEF_PROMPT_NOTIF;
+			continue;
 		}
 
 		char *deq_str = remove_quotes(ret);
@@ -2639,8 +2650,10 @@ check_options(void)
 			no_eln = xargs.noeln;
 	}
 
-	if (prompt_style == UNSET)
-		prompt_style = DEF_PROMPT_STYLE;
+//	if (prompt_style == UNSET)
+//		prompt_style = DEF_PROMPT_STYLE;
+	if (prompt_notif == UNSET)
+		prompt_notif = DEF_PROMPT_NOTIF;
 
 #ifndef _NO_HIGHLIGHT
 	if (highlight == UNSET) {

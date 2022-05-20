@@ -195,7 +195,7 @@ profile_set(char *prof)
 		while (--i >= 0)
 			free(messages[i]);
 	}
-	msgs_n = 0;
+	msgs_n = msgs.error = msgs.warning = msgs.notice = 0;
 
 	if (config_ok) {
 		/* Limit the log files size */

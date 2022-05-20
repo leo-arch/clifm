@@ -987,7 +987,7 @@ msgs_function(char *arg)
 		for (i = 0; i < (size_t)msgs_n; i++)
 			free(messages[i]);
 
-		msgs_n = 0;
+		msgs_n = msgs.error = msgs.warning = msgs.notice = 0;
 		pmsg = NOMSG;
 		return EXIT_SUCCESS;
 	}

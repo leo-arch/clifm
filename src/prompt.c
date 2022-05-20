@@ -91,6 +91,13 @@ emergency prompt"
 #define STATS_UNKNOWN  17
 #define STATS_UNSTAT   18
 
+#define NOTIF_SEL     0
+#define NOTIF_TRASH   1
+#define NOTIF_WARNING 2
+#define NOTIF_ERROR   3
+#define NOTIF_NOTICE  4
+#define NOTIF_ROOT    5
+
 /* Size of the indicator for msgs, trash, and sel */
 #define N_IND MAX_COLOR + 1 + sizeof(size_t) + 6 + 1 + 13
 /* Color + 1 letter + plus unsigned integer + RL_NC size + nul char */
@@ -210,7 +217,8 @@ gen_workspace(void)
 	default: break;
 	}
 
-	snprintf(s, __WS_STR_LEN, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
+//	snprintf(s, __WS_STR_LEN, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
+	snprintf(s, __WS_STR_LEN, "%s%d", cl, cur_ws + 1);
 	return savestring(s, strlen(s));
 }
 
@@ -509,6 +517,46 @@ gen_stats_str(int flag)
 	return p;
 }
 
+static inline char *
+gen_notification(int flag)
+{
+	char *p;
+	if (flags & ROOT_USR)
+		p = (char *)xnmalloc(2, sizeof(char));
+	else
+		p = (char *)xnmalloc(sizeof(size_t) + 2, sizeof(char));
+	*p = '\0';
+
+	switch(flag) {
+	case NOTIF_ERROR:
+		if (msgs.error > 0)
+			sprintf(p, "E%zu", msgs.error);
+		break;
+	case NOTIF_NOTICE:
+		if (msgs.notice > 0)
+			sprintf(p, "N%zu", msgs.notice);
+		break;
+	case NOTIF_WARNING:
+		if (msgs.warning > 0)
+			sprintf(p, "W%zu", msgs.warning);
+		break;
+	case NOTIF_SEL:
+		if (sel_n > 0)
+			sprintf(p, "*%zu", sel_n);
+		break;
+	case NOTIF_TRASH:
+		if (trash_n > 2)
+			sprintf(p, "T%zu", trash_n - 2);
+		break;
+	case NOTIF_ROOT:
+		if (flags & ROOT_USR)
+			{ *p = 'R'; p[1] = '\0'; }
+	default: break;
+	}
+
+	return p;
+}
+
 /*
 static inline void
 write_result(char **res, size_t *len, const int c)
@@ -539,25 +587,32 @@ decode_prompt(char *line)
 			c = *line;
 			switch (c) {
 			/* Files statistics */
-			case 'D': temp = gen_stats_str(STATS_DIR); goto ADD_STRING;
-			case 'R': temp = gen_stats_str(STATS_REG); goto ADD_STRING;
-			case '.': temp = gen_stats_str(STATS_HIDDEN); goto ADD_STRING;
-			case 'X': temp = gen_stats_str(STATS_EXE); goto ADD_STRING;
-			case 'U': temp = gen_stats_str(STATS_SUID); goto ADD_STRING;
-			case 'G': temp = gen_stats_str(STATS_SGID); goto ADD_STRING;
-			case 'F': temp = gen_stats_str(STATS_FIFO); goto ADD_STRING;
-			case 'K': temp = gen_stats_str(STATS_SOCK); goto ADD_STRING;
 			case 'B': temp = gen_stats_str(STATS_BLK); goto ADD_STRING;
 			case 'C': temp = gen_stats_str(STATS_CHR); goto ADD_STRING;
-			case 'x': temp = gen_stats_str(STATS_CAP); goto ADD_STRING;
-			case 'L': temp = gen_stats_str(STATS_LNK); goto ADD_STRING;
-			case 'o': temp = gen_stats_str(STATS_BROKEN_L); goto ADD_STRING;
-			case 'M': temp = gen_stats_str(STATS_MULTI_L); goto ADD_STRING;
+			case 'D': temp = gen_stats_str(STATS_DIR); goto ADD_STRING;
 			case 'E': temp = gen_stats_str(STATS_EXTENDED); goto ADD_STRING;
+			case 'F': temp = gen_stats_str(STATS_FIFO); goto ADD_STRING;
+			case 'G': temp = gen_stats_str(STATS_SGID); goto ADD_STRING;
+			case 'K': temp = gen_stats_str(STATS_SOCK); goto ADD_STRING;
+			case 'L': temp = gen_stats_str(STATS_LNK); goto ADD_STRING;
+			case 'M': temp = gen_stats_str(STATS_MULTI_L); goto ADD_STRING;
+			case 'o': temp = gen_stats_str(STATS_BROKEN_L); goto ADD_STRING;
 			case 'O': temp = gen_stats_str(STATS_OTHER_W); goto ADD_STRING;
-			case '*': temp = gen_stats_str(STATS_STICKY); goto ADD_STRING;
+			case 'R': temp = gen_stats_str(STATS_REG); goto ADD_STRING;
+			case 'U': temp = gen_stats_str(STATS_SUID); goto ADD_STRING;
+			case 'x': temp = gen_stats_str(STATS_CAP); goto ADD_STRING;
+			case 'X': temp = gen_stats_str(STATS_EXE); goto ADD_STRING;
+			case '.': temp = gen_stats_str(STATS_HIDDEN); goto ADD_STRING;
+			case '"': temp = gen_stats_str(STATS_STICKY); goto ADD_STRING;
 			case '?': temp = gen_stats_str(STATS_UNKNOWN); goto ADD_STRING;
 			case '!': temp = gen_stats_str(STATS_UNSTAT); goto ADD_STRING;
+
+			case '*': temp = gen_notification(NOTIF_SEL); goto ADD_STRING;
+			case '%': temp = gen_notification(NOTIF_TRASH); goto ADD_STRING;
+			case '#': temp = gen_notification(NOTIF_ROOT); goto ADD_STRING;
+			case ')': temp = gen_notification(NOTIF_WARNING); goto ADD_STRING;
+			case '(': temp = gen_notification(NOTIF_ERROR); goto ADD_STRING;
+			case '=': temp = gen_notification(NOTIF_NOTICE); goto ADD_STRING;
 
 			case 'z': /* Exit status of last executed command */
 				temp = gen_exit_status(); goto ADD_STRING;
@@ -759,7 +814,8 @@ update_trash_indicator(void)
 static inline void
 setenv_prompt(void)
 {
-	if (prompt_style != CUSTOM_PROMPT_STYLE)
+//	if (prompt_style != CUSTOM_PROMPT_STYLE)
+	if (prompt_notif == 1)
 		return;
 
 	/* Set environment variables with CliFM state information
@@ -787,7 +843,8 @@ set_prompt_length(size_t decoded_prompt_len)
 {
 	size_t len = 0;
 
-	if (prompt_style == DEF_PROMPT_STYLE) {
+//	if (prompt_style == DEF_PROMPT_STYLE) {
+	if (prompt_notif == 1) {
 		len = (size_t)(decoded_prompt_len
 		+ (xargs.stealth_mode == 1 ? STEALTH_IND_SIZE : 0)
 		+ ((flags & ROOT_USR) ? ROOT_IND_SIZE : 0)
@@ -811,37 +868,42 @@ construct_prompt(const char *decoded_prompt)
 	 * notices. The kind of message should be specified by the function
 	 * printing the message itself via a global enum: pmsg, with the
 	 * following values: NOMSG, ERROR, WARNING, and NOTICE. */
-	char msg_ind[N_IND];
-	*msg_ind = '\0';
+	char msg_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND];
+	*msg_ind = *trash_ind = *sel_ind = '\0';
 
-	if (msgs_n) {
-		/* Errors take precedence over warnings, and warnings over
-		 * notices. That is to say, if there is an error message AND a
-		 * warning message, the prompt will always display the error
-		 * message sign: a red 'E'. */
-		switch (pmsg) {
-		case NOMSG:	break;
-		case ERROR:	snprintf(msg_ind, N_IND, "%sE%zu%s", em_c, msgs_n, RL_NC); break;
-		case WARNING: snprintf(msg_ind, N_IND, "%sW%zu%s", wm_c, msgs_n, RL_NC); break;
-		case NOTICE: snprintf(msg_ind, N_IND, "%sN%zu%s", nm_c, msgs_n, RL_NC); break;
-		default: break;
+//	char msg_ind[N_IND];
+//	*msg_ind = '\0';
+	if (prompt_notif == 1) {
+		if (msgs_n) {
+			/* Errors take precedence over warnings, and warnings over
+			 * notices. That is to say, if there is an error message AND a
+			 * warning message, the prompt will always display the error
+			 * message sign: a red 'E'. */
+			switch (pmsg) {
+			case NOMSG:	break;
+			case ERROR:	snprintf(msg_ind, N_IND, "%sE%zu%s", em_c, msgs_n, RL_NC); break;
+			case WARNING: snprintf(msg_ind, N_IND, "%sW%zu%s", wm_c, msgs_n, RL_NC); break;
+			case NOTICE: snprintf(msg_ind, N_IND, "%sN%zu%s", nm_c, msgs_n, RL_NC); break;
+			default: break;
+			}
 		}
+
+	//	char trash_ind[N_IND];
+	//	*trash_ind = '\0';
+		if (trash_n > 2)
+			snprintf(trash_ind, N_IND, "%sT%zu%s", ti_c, (size_t)trash_n - 2, RL_NC);
+
+	//	char sel_ind[N_IND];
+	//	*sel_ind = '\0';
+		if (sel_n > 0)
+			snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
 	}
-
-	char trash_ind[N_IND];
-	*trash_ind = '\0';
-	if (trash_n > 2)
-		snprintf(trash_ind, N_IND, "%sT%zu%s", ti_c, (size_t)trash_n - 2, RL_NC);
-
-	char sel_ind[N_IND];
-	*sel_ind = '\0';
-	if (sel_n > 0)
-		snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
 
 	size_t prompt_len = set_prompt_length(strlen(decoded_prompt));
 	char *the_prompt = (char *)xnmalloc(prompt_len, sizeof(char));
 
-	if (prompt_style == DEF_PROMPT_STYLE) {
+//	if (prompt_style == DEF_PROMPT_STYLE) {
+	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,
 			"%s%s%s%s%s%s%s%s\001%s\002",
 			(flags & ROOT_USR) ? (colorize ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
@@ -995,6 +1057,8 @@ change_prompt(const size_t n)
 		wprompt_str = savestring(prompts[n].warning, strlen(prompts[n].warning));
 	}
 
+	prompt_notif = prompts[n].notifications;
+
 	return EXIT_SUCCESS;
 }
 
@@ -1035,6 +1099,7 @@ set_default_prompt(void)
 	free(encoded_prompt);
 	encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
 	*cur_prompt_name = '\0';
+	prompt_notif = DEF_PROMPT_NOTIF;
 	return EXIT_SUCCESS;
 }
 
