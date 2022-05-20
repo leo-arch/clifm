@@ -17,7 +17,8 @@
 # \h: The hostname, up to the first dot (.)
 # \s: The name of the shell (everything after the last slash) currently
 #     used by CliFM
-# \S: Current workspace number
+# \S: Current workspace number (colored according to wsx code in the color
+#     scheme file)
 # \l: Print an L if running in light mode
 # \P: The current profile name
 # \n: A newline character
@@ -61,69 +62,90 @@
 # \M: Amount of multi-link files in the current directory
 # \E: Amount of files with extended attributes in the current directory
 # \O: Amount of other-writable files in the current directory
-# \*: Amount of files with the sticky bit set in the current directory
+# \": Amount of files with the sticky bit set in the current directory
 # \?: Amount of files of unknown file type in the current directory
 # \!: Amount of unstatable files in the current directory
+
+# Escape codes to control prompt notifications:
+#
+# \*: An asterisk + amount of selected files (e.g. *12)
+# \%: An 'T' + amount of trashed files (e.g. T3)
+# \#: Print an 'R' if running as root
+# \(: An 'E' + amount of error messages (e.g. E2)
+# \): An 'W' + amount of warning messages (e.g. W2)
+# \=: An 'N' + amount of notice messages (e.g. N1)
+#
+# NOTE: Except in the case of \#, nothing is printed if the corresponding
+# number is zero (no selected files, no trashed files, and so on)
 
 # Unicode characters could be inserted by directly pasting the
 # corresponding char, or by inserting its hex code:
 # echo -ne "paste_your_char" | hexdump -C
 
+# Set Notifications to false to prevent the automatic insertion of
+# root, trash, messages (error, warning, and notice), and selected files
+# indicators at the left of the prompt, in which case the prompt code
+# should handle itself this data using the appropriate escape codes
+
 # To permanetly set any of the below prompts edit your color scheme file
 # (via the 'cs edit' command) and set Prompt to either the prompt code
-# or the prompt name you want (e.g. Prompt="classic")
-
-# If using a non-default prompt, you might want to set 'PromptStyle' in the
-# configuration file to 'custom' to prevent the automatic insertion of
-# workspace number, last exit code, stealth mode, trash, and selected files
-# indicators, etc.
-# This information however is available as environment variables. Consult
-# the manpage and/or the Wiki for more information
+# or the prompt name you want (e.g. Prompt="curves")
 
 [clifm]
+Notifications=true
 RegularPrompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 WarningPrompt="\[\e[00;02;31m\](!) > "
 
 #[default-colorless]
+#Notifications=true
 #RegularPrompt="\[\e[0m\][\S]\l \A \u:\H \w\n<\z\[\e[0m\]> \$ "
 #WarningPrompt="(!) > "
 
 [clifm-box-drawing]
 # The box drawing set isn't supported by all terminals
-RegularPrompt="\[\e[0m\]\[\e[0;36m\]\[\e(0\]lq\[\e(B\]\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0;36m\]\[\e(0\]mq\[\e(B\]\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
+Notifications=false
+RegularPrompt="\[\e[0m\]\[\e[0;36m\]\[\e(0\]lq\[\e(B\]\[\e[0;31m\]\#\[\e[32m\]\*\[\e[36m\]\%\[\e[31m\]\(\[\e[33m\]\)\[\e[32m\]\=\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\n\[\e[0;36m\]\[\e(0\]mq\[\e(B\]\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 WarningPrompt="\[\e[0;36m\]\[\e(0\]mq\[\e(B\]\[\e[0m\]<\z\[\e[0m\]> \[\e[1;31m\]\! \[\e[00;02;31m\]"
 
 [classic]
+Notifications=true
 RegularPrompt="\[\e[1;32m\][\u@\H] \[\e[1;34m\]\w \[\e[0m\]\$ "
 WarningPrompt="\[\e[1;32m\][\u@\H] \[\e[1;34m\]\w \[\e[1;31m\]! \[\e[00;02;31m\]"
 
 [security-scanner]
 # Print file statistics about the current directory (-:-:-:-) in this order:
 # SUID, SGID, other-writable, and executable files
+Notifications=true
 RegularPrompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \[\e[0m\]\[\e[1;31m\]\U\[\e[0m\]:\[\e[1;33m\]\G\[\e[0m\]:\[\e[1;34m\]\O\[\e[0m\]:\[\e[1;32m\]\X\[\e[0m\] \A \[\e[0;36m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 WarningPrompt="\[\e[00;02;31m\](!) > "
 
 [curves]
-RegularPrompt="\[\e[01;32m\]╭─\[\e[0m\][\S]\[\e[01;32m\]─\[\e[0m\](\u:\H)\[\e[01;32m\]─\[\e[0m\][\[\e[00;36m\]\w\[\e[0m\]]\n\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;34m\]λ\[\e[0m\] "
-WarningPrompt="\[\e[0m\]\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[01;31m\]λ\[\e[00;02;31m\] "
+Notifications=false
+RegularPrompt="\[\e[00;01;32m\]╭─\[\e[0m\]\[\e[1;32m\]\*\[\e[1;36m\]\%\[\e[1;31m\]\(\[\e[1;33m\]\)\[\e[1;32m\]\=\[\e[0m\][\S\[\e[0m\]]\[\e[01;32m\]─\[\e[0m\](\u:\H)\[\e[01;32m\]─\[\e[0m\][\[\e[00;36m\]\w\[\e[0m\]]\n\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[34m\]λ\[\e[0m\] "
+WarningPrompt="\[\e[0m\]\[\e[01;32m\]╰─\[\e[1;0m\]<\z\[\e[0m\]> \[\e[31m\]λ\[\e[00;02;31m\] "
 
 # The prompts below require a patched Nerdfont
 [firestarter]
-RegularPrompt="\[\e[01;38;5;124m\]╭─\[\e[00;38;5;124m\]\[\e[00;37;48;5;124m\]\A \[\e[00;38;5;124;43m\]\[\e[00;30;43m\] \u:\H \[\e[00;33;48;5;124m\]\[\e[00;37;48;5;124m\] \w \[\e[00;38;5;124m\]\[\e[0m\]\n\[\e[01;38;5;124m\]╰─ \[\e[0m\] "
-WarningPrompt="\[\e[01;38;5;124m\]╰──\[\e[0;38;5;124m\] \[\e[00;02;31m\]"
+Notifications=false
+RegularPrompt="\[\e[01;38;5;124m\]╭─\[\e[38;5;124m\]\[\e[37;48;5;124m\]\[\e[1;37m\]\#\[\e[32m\]\*\[\e[36m\]\%\[\e[37m\]\(\[\e[33m\]\)\[\e[32m\]\=\[\e[00;37;48;5;124m\][\S\[\e[37;48;5;124m\]] \[\e[0;48;5;124m\]\A \[\e[00;38;5;124;43m\]\[\e[00;30;43m\] \u:\H \[\e[00;33;48;5;124m\]\[\e[00;37;48;5;124m\] \w \[\e[00;38;5;124m\]\[\e[0m\]\n\[\e[01;38;5;124m\]╰─▶ \[\e[0m\]"
+WarningPrompt="\[\e[00;01;38;5;124m\]╰─\[\e[0;38;5;124m\]▶ \[\e[00;02;31m\]"
 
 [cold-winter]
-RegularPrompt="\[\e[00;37;100m\] \A \[\e[00;90;46m\]  \[\e[0;30;46m\]\u:\H \[\e[0;36;100m\]  \[\e[00;37;100m\]\w \[\e[00;90;40m\] \n \[\e[1;90m\]\[\e[0m\] "
+Notifications=false
+RegularPrompt="\[\e[00;37;100m\]\[\e[1;31m\]\#\[\e[32m\]\*\[\e[36m\]\%\[\e[31m\]\(\[\e[33m\]\)\[\e[32m\]\=\[\e[0;37;100m\][\S\[\e[00;37;100m\]] \A \[\e[00;90;46m\]  \[\e[0;30;46m\]\u:\H \[\e[0;36;100m\]  \[\e[00;37;100m\]\w \[\e[00;90;40m\] \n \[\e[1;90m\]\[\e[0m\] "
 WarningPrompt=" \[\e[0m\]\[\e[1;2;31m\] \[\e[00;02;31m\]"
 
 [spot]
-RegularPrompt="\[\e[00;38;5;0;48;5;178m\] \A \u:\H \w \[\e[00;38;5;178;48;5;0m\]\[\e[0;40m\]\n\[\e[0;38;5;254;48;5;53m\] \$ \[\e[0;38;5;53;48;5;0m\] \[\e[0m\] "
+Notifications=false
+RegularPrompt="\[\e[00;38;5;0;48;5;53m\] \[\e[31m\]\#\[\e[32m\]\*\[\e[36m\]\%\[\e[31m\]\(\[\e[34m\]\)\[\e[32m\]\=\[\e[00;37;48;5;53m\][\S\[\e[37m\]] \[\e[38;5;53;48;5;178m\] \[\e[00;38;5;0;48;5;178m\]\A \u:\H \w \[\e[00;38;5;178;48;5;0m\]\[\e[0;40m\]\n\[\e[0;38;5;254;48;5;53m\] \$ \[\e[0;38;5;53;48;5;0m\] \[\e[0m\] "
 WarningPrompt="\n\[\e[0;37;48;5;124m\] \x \[\e[0;38;5;124;48;5;0m\] \[\e[00;02;31m\] "
 
 [artic-particles]
+Notifications=false
 RegularPrompt="\[\e[00;37;48;5;18m\] \A \[\e[00;38;5;18;47m\]  \u:\H \[\e[00;37;48;5;18m\] \w \[\e[00;38;5;18;40m\] \n\[\e[00;37;48;5;18m\] \$ \[\e[00;38;5;18;40m\] "
 WarningPrompt="\[\e[00;02;31;47m\] \$ \[\e[00;37;0m\] \[\e[00;02;31m\]"
 
 [green-beret]
-RegularPrompt=" ╭─\[\e[0;38;5;239;48;5;0m\]\[\e[0;38;5;15;48;5;239m\]  \A \[\e[0;38;5;239;48;5;70m\]\[\e[0;38;5;0;48;5;70m\] \w \[\e[0;38;5;70;48;5;0m\]\n \[\e[0;40m\]╰──\[\e[0;38;5;70;48;5;0m\]▸\[\e[0;40m\] "
-WarningPrompt="\[\e[0;40m\] ╰──\[\e[0;38;5;9;48;5;0m\]▸\[\e[00;02;31m\] "
+Notifications=false
+RegularPrompt="╭─\[\e[0;38;5;239;48;5;0m\]\[\e[0;38;5;15;48;5;239m\]\[\e[31m\]\#\[\e[38;5;76m\]\*\[\e[36m\]\%\[\e[31m\]\(\[\e[33m\]\)\[\e[32m\]\=\[\e[38;5;15m\][\S\[\e[38;5;15m\]]  \A \[\e[0;38;5;239;48;5;70m\]\[\e[0;38;5;0;48;5;70m\] \w \[\e[0;38;5;70;48;5;0m\]\n\[\e[0;40m\]╰─\[\e[0;38;5;70;48;5;0m\]▶\[\e[0;40m\] "
+WarningPrompt="\[\e[0;40m\]╰─\[\e[0;38;5;9;48;5;0m\]▶ \[\e[00;02;31m\]"
