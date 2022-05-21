@@ -1242,7 +1242,8 @@ The following codes are used for different interface elements (in the \fIInterfa
  dn = Dash (unset property)
  dr = Read permission bit
  dw = Write permission bit
- dx = Executable permission bit
+ dxd = Executable permission bit (directories)
+ dxr = Executable permission bit (regular files)
  dp = SUID, SGID, sticky bit
  dg = File ID (UID, GID) whenever the current user owns the file or is in the file's group
  dd = Last modification time
