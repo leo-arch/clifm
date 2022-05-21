@@ -979,7 +979,7 @@ msgs_function(char *arg)
 
 	if (arg && strcmp(arg, "clear") == 0) {
 		if (!msgs_n) {
-			printf(_("%s: There are no messages\n"), PROGRAM_NAME);
+			printf(_("%s: No messages\n"), PROGRAM_NAME);
 			return EXIT_SUCCESS;
 		}
 
@@ -987,6 +987,9 @@ msgs_function(char *arg)
 		for (i = 0; i < (size_t)msgs_n; i++)
 			free(messages[i]);
 
+		if (autols == 1)
+			reload_dirlist();
+		print_reload_msg(_("Messages cleared\n"));
 		msgs_n = msgs.error = msgs.warning = msgs.notice = 0;
 		pmsg = NOMSG;
 		return EXIT_SUCCESS;

@@ -105,7 +105,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 
 #define DEF_TS_C "\x1b[04;35m" /* Matching prefix for TAB completed possible entries */
 #define DEF_TT_C "\x1b[01;02;36m" /* Tilde for trimmed file names */
-#define DEF_WP_C "\x1b[02;31m" /* Warning prompt input text */
+#define DEF_WP_C "\x1b[00;02;31m" /* Warning prompt input text */
 #define DEF_XS_C "\001\x1b[00;32m\002" /* Exit code: success */
 #define DEF_XF_C "\001\x1b[01;31m\002" /* Exit code: failure */
 
@@ -267,7 +267,7 @@ ws1=00;34:ws2=0;31:ws3=00;33:ws4=00;32:ws5=00;36:ws6=00;36:ws7=00;36\
 >\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 #define DEFAULT_PROMPT_NO_COLOR "[\\S]\\l \\A \\u:\\H \\w\\n<\\z> \\$ "
 
-#define DEF_WPROMPT_STR "\\[\\e[0m\\]\\[\\e[00;02;31m\\](!) > "
+#define DEF_WPROMPT_STR "\\[\\e[00;02;31m\\](!) > "
 #define DEF_WPROMPT_STR_NO_COLOR "(!) > "
 
 /* These options should work with FZF 0.18.0 or later */
