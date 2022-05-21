@@ -113,7 +113,8 @@ PromptStyle=default
 # \h: The hostname, up to the first dot (.)
 # \s: The name of the shell (everything after the last slash) currently
 #    used by CliFM
-# \S: Current workspace number
+# \S: Current workspace number (colored according to the wsN code in
+#     InterfaceColors above)
 # \l: Print an L if running in light mode
 # \P: The current profile name
 # \n: A newline character
