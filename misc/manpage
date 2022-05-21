@@ -1304,7 +1304,7 @@ CliFM's prompt (regular and warning ones) is built from the \fIPrompt\fR line in
 .TP
 \fB\\s\fR: The name of the shell (everything after the last slash) currently used by CliFM
 .TP
-\fB\\S\fR: Current workspace number
+\fB\\S\fR: Current workspace number (colored according to \fIwsN\fR code in the \fIInterfaceColors\fR section in the color scheme file)
 .TP
 \fB\\l\fR: Print an 'L' if in light mode
 .TP
@@ -1338,7 +1338,7 @@ CliFM's prompt (regular and warning ones) is built from the \fIPrompt\fR line in
 .TP
 \fB\\p\fR: A mix of the two above, it abbreviates the current working directory only if longer than PathMax (a value defined in the configuration file).
 .TP
-\fB\\z\fR: Exit code of the last executed command. Green in case of success and bold red in case of error
+\fB\\z\fR: Exit code of the last executed command (colored according to the \fIxs\fR (success) and \fIxf\fR (failure) codes in \fIInterfaceColors\fR in the color scheme file)
 .TP
 \fB\\$\fR '#', if the effective user ID is 0, and '$' otherwise
 .TP
@@ -1350,7 +1350,7 @@ CliFM's prompt (regular and warning ones) is built from the \fIPrompt\fR line in
 .TP
 \fB\\]\fR: End a sequence of non\-printing characters
 .TP
-The following files statistics escape codes are also recognized (not available in light mode)
+The following files statistics escape codes are also recognized (not available in light mode):
 .TP
 \fB\\D\fR: Amount of sub-directories in the current directory
 .TP
@@ -1384,11 +1384,27 @@ The following files statistics escape codes are also recognized (not available i
 .TP
 \fB\\O\fR: Amount of other-writable files in the current directory
 .TP
-\fB\\*\fR: Amount of files with the sticky bit set in the current directory
+\fB\\"\fR: Amount of files with the sticky bit set in the current directory
 .TP
 \fB\\?\fR: Amount of files of unknown file type in the current directory
 .TP
 \fB\\!\fR: Amount of unstatable files in the current directory
+.TP
+Escape codes for prompt notifications (mostly used for custom prompts which need to handle notifications themselves, in which case \fIPromptStyle\fR should be set to \fIcustom\fR in the color scheme file to prevent automatic insertion of notifications at the left of the prompt):
+.TP
+\fB\\*\fR: An '*' + amount of selected files
+.TP
+\fB\\%\fR: An 'T' + amount of trashed files
+.TP
+\fB\\#\fR: 'R' if root user
+.TP
+\fB\\)\fR: An 'W' + amount of warning messages
+.TP
+\fB\\(\fR: An 'E' + amount of error messages
+.TP
+\fB\\=\fR: An 'N' + amount of notice messages
+.TP
+\fBNote\fR: Except for '\\#', nothing is printed if the number is zero.
 .TP
 By default, for example, CliFM's prompt line is this: 
 
