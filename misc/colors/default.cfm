@@ -181,7 +181,7 @@ WarningPrompt=true
 # The string to be used for the warning prompt (invalid typed commands). Prompt
 # escape codes are allowed. The input text color is defined by the 'wp' color code
 # in InterfaceColors
-WarningPromptStr="\[\e[0m\]\[\e[00;02;31m\](!) > "
+WarningPromptStr="\[\e[00;02;31m\](!) > "
 
 # The warning prompt, but colorless
 #WarningPromptStr="(!) > "
