@@ -61,8 +61,10 @@ ExtColors="*.r=0;38;5;215:*.h=0;38;5;215:*.d=0;38;5;215:*.z=1;38;5;141:*.a=0;38;
 
 DirIconColor="Y"
 
+PromptStyle=default
 Prompt="\[\e[0;38;5;253m\][\S\[\e[0;38;5;253m\]]\l \A \u:\H \[\e[0;38;5;117m\]\w\n\[\e[0;38;5;253m\]<\z\[\e[0;38;5;253m\]> \[\e[0;38;5;141m\]\$ \[\e[0;38;5;253m\]"
 
+WarningPrompt=true
 WarningPromptStr="\[\e[00;02;38;5;203m\](!) > "
 
 DividingLine="-"

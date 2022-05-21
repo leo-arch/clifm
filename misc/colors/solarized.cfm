@@ -51,8 +51,10 @@ ExtColors="*.tar=R:*.tgz=R:*.taz=R:*.lha=R:*.lz4=R:*.lzh=R:*.lzma=R:*.tlz=R:*.tx
 
 DirIconColor=1;38;2;181;137;00
 
+PromptStyle=default
 Prompt="\[\e[0;38;2;238;232;213m\][\S\[\e[0;38;2;238;232;213m\]]\l \A \u:\H \[\e[38;2;42;161;152m\]\w\[\e[0;38;2;238;232;213m\]\n<\z\[\e[0;38;2;238;232;213m\]> \[\e[38;2;38;139;210m\]\$ \[\e[0m\]"
 
+WarningPrompt=true
 WarningPromptStr="\[\e[0m\]\[\e[0;2;38;2;220;50;47m\](!) > "
 
 DividingLine="-"

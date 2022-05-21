@@ -55,20 +55,6 @@ cpCmd=0
 # and 1 = advmv. 1 adds a progress bar to mv.
 mvCmd=0
 
-# If set to 'default', CliFM state information (selected files,
-# trashed files, current workspace, messages, and stealth mode) will be
-# printed to the left of the prompt. Otherwise, if set to 'custom', this
-# information will be stored in environment variables to be handled by the
-# prompt string itself. Consult the manpage for more information.
-PromptStyle=default
-# The main prompt is defined via the Prompt line in the color scheme
-# file
-
-# A warning prompt to warn the user about invalid command names.
-# This prompt is defined via the WarningPromptStr option in the color
-# scheme file
-WarningPrompt=true
-
 # TAB completion mode: either 'standard' or 'fzf'. Defaults to 'fzf' if
 # the binary is found in PATH. Othwerwise, the standard mode is used
 TabCompletionMode=

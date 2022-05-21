@@ -98,6 +98,12 @@ ExtColors="*.tar=BR:*.tgz=BR:*.taz=BR:*.lha=BR:*.lz4=BR:*.lzh=BR:*.lzma=BR:*.tlz
 # If icons are enabled, use this color for the directories icon
 DirIconColor="Y"
 
+# If set to 'default', CliFM notifications (selected and trashed files,
+# root or normal user, current workspace, messages) will be printed to the
+# left of the prompt. Otherwise, if set to 'custom', the  prompt code
+# should handle this information itself via escape codes. See below
+PromptStyle=default
+
 # The prompt line is build using command substitution ($(cmd)), string
 # literals and/or the following escape sequences:
 #
@@ -155,11 +161,22 @@ DirIconColor="Y"
 # \?: Amount of files of unknown file type in the current directory
 # \!: Amount of unstatable files in the current directory
 
+# Escape codes to control prompt notifications:
+#
+# \*: An asterisk + amount of selected files (e.g. *12)
+# \%: An 'T' + amount of trashed files (e.g. T3)
+# \#: Print an 'R' if running as root
+# \(: An 'E' + amount of error messages (e.g. E2)
+# \): An 'W' + amount of warning messages (e.g. W2)
+# \=: An 'N' + amount of notice messages (e.g. N1)
+#
+# NOTE: Except in the case of \#, nothing is printed if the corresponding
+# number is zero (no selected files, no trashed files, and so on)
+
 Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\[\e[0m\]\n<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
 
-# The deafult prompt, but colorless
-#Prompt="[\S]\l \A \u:\H \w\n<\z> \$ "
-
+# A secondary prompt to warn the user about invalid command names
+WarningPrompt=true
 # The string to be used for the warning prompt (invalid typed commands). Prompt
 # escape codes are allowed. The input text color is defined by the 'wp' color code
 # in InterfaceColors
