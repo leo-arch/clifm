@@ -610,7 +610,7 @@ set_color(char *_color, int offset, char var[], int flag)
 	if (flag == RL_NO_PRINTABLE)
 		snprintf(var, MAX_COLOR + 2, "\001\x1b[%sm\002", s ? s : p); /* NOLINT */
 	else
-		snprintf(var, MAX_COLOR - 1, "\x1b[%sm", s ? s : p); /* NOLINT */
+		snprintf(var, MAX_COLOR - 1, "\x1b[0;%sm", s ? s : p); /* NOLINT */
 }
 
 static void

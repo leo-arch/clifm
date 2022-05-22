@@ -827,13 +827,14 @@ _splash(void)
 static inline void
 _set_term_title(void)
 {
-	if (flags & GUI) {
-		if (xargs.cwd_in_title == 0) {
-			printf("\033]2;%s\007", PROGRAM_NAME);
-			fflush(stdout);
-		} else {
-			set_term_title(workspaces[cur_ws].path);
-		}
+	if (!(flags & GUI))
+		return;
+
+	if (xargs.cwd_in_title == 0) {
+		printf("\033]2;%s\007", PROGRAM_NAME);
+		fflush(stdout);
+	} else {
+		set_term_title(workspaces[cur_ws].path);
 	}
 }
 
@@ -900,11 +901,6 @@ init_file_flags(void)
 int
 main(int argc, char *argv[])
 {
-/*
-//	config_ok = 0;
-	home_ok = 0;
-	selfile_ok = 0;
-	trash_ok = 0; */
 	/* Quite unlikely to happen, but one never knows. See
 	 * https://lwn.net/SubscriberLink/882799/cb8f313c57c6d8a6/
 	 * and

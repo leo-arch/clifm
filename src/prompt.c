@@ -543,6 +543,7 @@ gen_notification(int flag)
 	case NOTIF_ROOT:
 		if (flags & ROOT_USR)
 			{ *p = 'R'; p[1] = '\0'; }
+		break;
 	case NOTIF_SEL:
 		if (sel_n > 0)
 			sprintf(p, "*%zu", sel_n);
