@@ -45,8 +45,8 @@ define DW=2;37
 
 define WR=37;41
 define KY=30;43
-define KR;30;41
-define KG;30;42
+define KR=30;41
+define KG=30;42
 define KC=30;46
 define BlGr=34;42
 define WB=37;44

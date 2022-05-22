@@ -6,60 +6,60 @@
 define D=00
 define BD=00;01
 
-define R=0;38;2;249;38;114
+define R=38;2;249;38;114
 define BR=1;38;2;249;38;114
-define DR=0;2;38;2;249;38;114
+define DR=2;38;2;249;38;114
 define UR=4;38;2;249;38;114
 define UBR=4;1;38;2;249;38;114
 define RR=7;38;2;249;38;114
 
-define G=0;38;2;0;255;135
+define G=38;2;0;255;135
 define BG=1;38;2;0;255;135
-define DG=0;2;38;2;0;255;135
-define G2=0;38;2;166;226;46
+define DG=2;38;2;0;255;135
+define G2=38;2;166;226;46
 
-define Y=0;38;2;230;219;116
+define Y=38;2;230;219;116
 define BY=1;38;2;230;219;116
-define DY=0;2;38;2;230;219;116
-define Y2=0;38;2;226;209;57
+define DY=2;38;2;230;219;116
+define Y2=38;2;226;209;57
 
-define B=0;38;2;102;217;239
+define B=38;2;102;217;239
 define BB=1;38;2;102;217;239
-define DB=0;2;38;2;102;217;239
+define DB=2;38;2;102;217;239
 define UDB=4;2;38;2;102;217;239
 
-define M=00;35 # Magenta
-define BM=01;35 # Bold Magenta
-define DM=00;02;35 # Dimmed magenta
-define UM=04;35 # Underlined magenta
+define M=35 # Magenta
+define BM=1;35 # Bold Magenta
+define DM=2;35 # Dimmed magenta
+define UM=4;35 # Underlined magenta
 
-define C=00;36 # Cyan
-define BC=01;36 # Bold cyan
-define DC=00;02;36 # Dimmed cyan
-define RC=07;36 # Reverse cyan
-define UDC=04;02;36 # Underlined dimmed cyan
-define BDC=01;02;36 # Bold dimmed cyan
+define C=36 # Cyan
+define BC=1;36 # Bold cyan
+define DC=2;36 # Dimmed cyan
+define RC=7;36 # Reverse cyan
+define UDC=4;02;36 # Underlined dimmed cyan
+define BDC=1;02;36 # Bold dimmed cyan
 
-define O=0;38;2;253;151;31
+define O=38;2;253;151;31
 define BO=1;38;2;253;151;31
-define DO=0;2;38;2;253;151;31
+define DO=2;38;2;253;151;31
 
-define Gy=0;38;2;122;112;112
-define DW=00;02;37 # Dimmed white
+define Gy=38;2;122;112;112
+define DW=2;37 # Dimmed white
 
-define KR=0;38;2;0;0;0;48;2;255;74;68
-define RK=0;38;2;255;74;68;48;2;51;51;51
-define KB=0;38;2;0;0;0;48;2;102;217;239
-define BK=0;38;2;102;217;239;48;2;51;51;51
-define KM=0;38;2;0;0;0;48;2;249;38;114
+define KR=38;2;0;0;0;48;2;255;74;68
+define RK=38;2;255;74;68;48;2;51;51;51
+define KB=38;2;0;0;0;48;2;102;217;239
+define BK=38;2;102;217;239;48;2;51;51;51
+define KM=38;2;0;0;0;48;2;249;38;114
 define UKM=4;38;2;0;0;0;48;2;249;38;114
-define MK=0;38;2;249;38;114;48;2;51;51;51
-define WR=0;38;2;230;230;230;48;2;255;74;68
-define KY=0;38;2;0;0;0;48;2;230;219;116
-define BlGr=0;38;2;102;217;239;48;2;0;255;135
-define KG=0;38;2;0;0;0;48;2;0;255;135
+define MK=38;2;249;38;114;48;2;51;51;51
+define WR=38;2;230;230;230;48;2;255;74;68
+define KY=38;2;0;0;0;48;2;230;219;116
+define BlGr=38;2;102;217;239;48;2;0;255;135
+define KG=38;2;0;0;0;48;2;0;255;135
 define UBlR=4;38;2;102;217;239;48;2;255;74;68
-define RBl=0;38;2;255;74;68;48;2;102;217;239
+define RBl=38;2;255;74;68;48;2;102;217;239
 
 FiletypeColors="sg=KY:su=WR:cd=BD:uf=UBlR:pi=KB:tw=RBl:di=B:ed=DB:nd=UBR:ne=UDB:ex=BR:ln=R:no=UBlR:ow=BlGr:or=UKM:ca=KR:st=KG:mh=RC:bd=BK:so=KM:fi=0:ef=2:nf=UR"
 
@@ -73,7 +73,7 @@ PromptStyle=default
 Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;38;2;102;217;239m\]\w\n\[\e[0m\]<\z\[\e[0m\]> \[\e[0;38;2;0;255;135m\]\$ \[\e[0m\]"
 
 WarningPrompt=true
-WarningPromptStr="\[\e[0;2;38;2;249;38;114m\](!) > "
+WarningPromptStr="\[\e[0m\]\[\e[0;2;38;2;249;38;114m\](!) > "
 
 DividingLine="-"
 

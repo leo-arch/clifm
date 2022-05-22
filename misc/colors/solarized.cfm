@@ -3,45 +3,45 @@
 # Author: L. Abramovich
 # License: GPL3
 
-define R=0;38;2;220;50;47
+define R=38;2;220;50;47
 define BR=1;38;2;220;50;47
 define DR=2;38;2;220;50;47
 define UBR=4;1;38;2;220;50;47
 define UDR=4;2;38;2;220;50;47
 
-define G=0;38;2;133;153;0
+define G=38;2;133;153;0
 define BG=1;38;2;133;153;0
 define DG=2;38;2;133;153;0
 
-define Y=0;38;2;181;137;0
-define BY=0;1;38;2;181;137;0
+define Y=38;2;181;137;0
+define BY=1;38;2;181;137;0
 define DY=2;38;2;181;137;0
 
-define B=0;38;2;38;139;210
+define B=38;2;38;139;210
 define BB=1;38;2;38;139;210
-define DB=0;2;38;2;38;139;210
+define DB=2;38;2;38;139;210
 
-define M=0;38;2;211;54;130
+define M=38;2;211;54;130
 define BM=1;38;2;211;54;130
 define UM=1;38;2;211;54;130
 
-define C=0;38;2;42;161;152
+define C=38;2;42;161;152
 define BC=1;38;2;42;161;152
 define DC=2;38;2;42;161;152
 define RC=7;38;2;42;161;152
 define UDC=4;2;38;2;42;161;152
 define BDC=1;2;38;2;42;161;152
 
-define W=0;38;2;238;232;213
+define W=38;2;238;232;213
 define DW=2;38;2;238;232;213
 define UBW=4;1;38;2;238;232;213
 
-define KR=0;38;2;7;54;66;48;2;220;50;47
-define KY=0;38;2;7;54;66;48;2;181;137;0
-define KG=0;38;2;7;54;66;48;2;133;153;0
+define KR=38;2;7;54;66;48;2;220;50;47
+define KY=38;2;7;54;66;48;2;181;137;0
+define KG=38;2;7;54;66;48;2;133;153;0
 define URW=4;38;2;220;50;47;48;2;238;232;213
-define BlGr=0;38;2;38;139;210;48;2;133;153;0
-define WB=0;38;2;238;232;213;48;2;38;139;210
+define BlGr=38;2;38;139;210;48;2;133;153;0
+define WB=38;2;238;232;213;48;2;38;139;210
 
 FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DY:ex=BG:fi=W:ln=BC:mh=RC:nd=UBR:ne=UDR:nf=UDR:no=URW:or=UDC:ow=BlGr:pi=M:so=BM:su=WR:sg=KY:st=WB:tw=KG:uf=UBW:"
 

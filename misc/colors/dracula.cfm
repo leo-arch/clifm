@@ -6,50 +6,50 @@
 define D=0;38;2;248;248;242
 define BD=0;1;38;2;248;248;242
 
-define R=0;38;2;255;85;85
+define R=38;2;255;85;85
 define BR=1;38;2;255;85;85
-define DR=0;2;38;2;255;85;85
+define DR=2;38;2;255;85;85
 
-define G=0;38;2;80;250;123
+define G=38;2;80;250;123
 define BG=1;38;2;80;250;123
-define DG=0;2;38;2;80;250;123
+define DG=2;38;2;80;250;123
 
-define Y=0;38;2;241;250;140
+define Y=38;2;241;250;140
 define BY=1;38;2;241;250;140
-define DY=0;2;38;2;241;250;140
+define DY=2;38;2;241;250;140
 
-define B=0;38;2;98;114;164
+define B=38;2;98;114;164
 define BB=1;38;2;98;114;164
-define DB=0;2;38;2;98;114;164
+define DB=2;38;2;98;114;164
 
-define M=0;38;2;255;121;198 #pink
+define M=38;2;255;121;198 #pink
 define BM=1;38;2;255;121;198
-define DM=0;2;38;2;255;121;198
+define DM=2;38;2;255;121;198
 define UM=4;38;2;255;121;198
 
-define M2=0;38;2;189;147;249 #purple
+define M2=38;2;189;147;249 #purple
 define BM2=1;38;2;189;147;249
-define DM2=0;2;38;2;189;147;249
+define DM2=2;38;2;189;147;249
 define UM2=4;38;2;189;147;249
 
-define C=0;38;2;139;233;253
+define C=38;2;139;233;253
 define BC=1;38;2;139;233;253
-define DC=0;2;38;2;139;233;253
+define DC=2;38;2;139;233;253
 define RC=7;38;2;139;233;253
 define UDC=4;2;38;2;139;233;253
 define BDC=1;2;38;2;139;233;253
 
-define DW=0;2;38;2;248;248;242
+define DW=2;38;2;248;248;242
 
 # Foreground-background combinations
-define RW=0;38;2;255;85;85;48;2;248;248;242
-define BW=0;38;2;98;114;164;48;2;248;248;242
-define WR=0;38;2;248;248;242;48;2;255;85;85 
-define KY=0;38;2;40;42;54;48;2;241;250;140
-define KR=0;38;2;40;42;54;48;2;255;85;85
-define KG=0;38;2;40;42;54;48;2;80;250;123
-define BlGr=0;38;2;98;114;164;48;2;80;250;123
-define WB=0;38;2;248;248;242;48;2;98;114;164
+define RW=38;2;255;85;85;48;2;248;248;242
+define BW=38;2;98;114;164;48;2;248;248;242
+define WR=38;2;248;248;242;48;2;255;85;85 
+define KY=38;2;40;42;54;48;2;241;250;140
+define KR=38;2;40;42;54;48;2;255;85;85
+define KG=38;2;40;42;54;48;2;80;250;123
+define BlGr=38;2;98;114;164;48;2;80;250;123
+define WB=38;2;248;248;242;48;2;98;114;164
 
 FiletypeColors="di=BB:nd=BR:ed=DB:ne=DR:fi=D:ef=DY:nf=DR:ln=BC:mh=RC:or=DC:pi=M:so=BM2:bd=BY:cd=BD:su=WR:sg=KY:ca=KR:tw=KG:ow=BlGr:st=WB:ex=BG:ee=G:no=RW:uf=BW:"
 
@@ -63,7 +63,7 @@ PromptStyle=default
 Prompt="\[\e[0;38;2;248;248;242m\][\S\[\e[0;38;2;248;248;242m\]]\l \A \u:\H \[\e[0;38;2;139;233;253m\]\w\n\[\e[0;38;2;248;248;242m\]<\z\[\e[0;38;2;248;248;242m\]> \[\e[0;38;2;98;114;164m\]\$ \[\e[0m\]"
 
 WarningPrompt=true
-WarningPromptStr="\[\e[0;2;38;2;255;85;85m\](!) > "
+WarningPromptStr="\[\e[0m\]\[\e[0;2;38;2;255;85;85m\](!) > "
 
 DividingLine="-"
 

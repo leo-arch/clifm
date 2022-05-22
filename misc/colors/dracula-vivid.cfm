@@ -6,52 +6,52 @@
 define D=00;38;5;253
 define BD=00;01 # Bold (reset foreground color)
 
-define R=00;38;5;203 # Red
-define BR=01;38;5;203 # Bold red
-define DR=00;02;38;5;203 # Dimmed red
+define R=38;5;203 # Red
+define BR=1;38;5;203 # Bold red
+define DR=2;38;5;203 # Dimmed red
 
-define G=00;38;5;84 # Green
-define BG=01;38;5;84 # Bold green
-define DG=00;02;38;5;84 # Dimmed green
+define G=38;5;84 # Green
+define BG=1;38;5;84 # Bold green
+define DG=2;38;5;84 # Dimmed green
 
-define Y=00;38;5;228 # Yellow
-define BY=01;38;5;228 # Bold yellow
-define DY=00;02;38;5;228 # Dimmed yellow
+define Y=38;5;228 # Yellow
+define BY=1;38;5;228 # Bold yellow
+define DY=2;38;5;228 # Dimmed yellow
 
-define B=00;38;5;141 # Blue
-define BB=01;38;5;141 # Bold blue
-define DB=00;02;38;5;141 # Dimmed blue
+define B=38;5;141 # Blue
+define BB=1;38;5;141 # Bold blue
+define DB=2;38;5;141 # Dimmed blue
 
-define M=00;38;5;212 # Magenta
-define BM=01;38;5;212 # Bold Magenta
-define DM=00;02;38;5;212 # Dimmed magenta
-define UM=04;38;5;212 # Underlined magenta
+define M=38;5;212 # Magenta
+define BM=1;38;5;212 # Bold Magenta
+define DM=2;38;5;212 # Dimmed magenta
+define UM=4;38;5;212 # Underlined magenta
 
-define C=00;38;5;117 # Cyan
-define BC=01;38;5;117 # Bold cyan
-define DC=00;02;38;5;117 # Dimmed cyan
-define RC=07;38;5;117 # Reverse cyan
-define UDC=04;02;38;5;117 # Underlined dimmed cyan
-define BDC=01;02;38;5;117 # Bold dimmed cyan
+define C=;38;5;117 # Cyan
+define BC=1;38;5;117 # Bold cyan
+define DC=2;38;5;117 # Dimmed cyan
+define RC=7;38;5;117 # Reverse cyan
+define UDC=4;02;38;5;117 # Underlined dimmed cyan
+define BDC=1;02;38;5;117 # Bold dimmed cyan
 
-define O=0;38;5;215
+define O=38;5;215
 define BO=1;38;5;215
-define DO=0;2;38;5;215
+define DO=2;38;5;215
 
-define W=00;38;5;253
-define DW=00;2;38;5;253 # Dimmed white
+define W=38;5;253
+define DW=2;38;5;253 # Dimmed white
 
 # Foreground-background combinations
-define RW=00;31;47 # Red foreground, white background
-define BW=00;34;47 # Blue foreground, white background
-define WR=00;37;41 # White foreground, red background
+define RW=31;47 # Red foreground, white background
+define BW=34;47 # Blue foreground, white background
+define WR=37;41 # White foreground, red background
 # K stands for black (B is used for Blue)
-define KY=00;30;43 # Black foreground, yellow background
-define KR=00;30;41 # Black foreground, red background
-define KG=00;30;42 # Black foreground, green background
+define KY=30;43 # Black foreground, yellow background
+define KR=30;41 # Black foreground, red background
+define KG=30;42 # Black foreground, green background
 # BG is already used for bold green
-define BlGr=00;34;42 # Blue foreground, green background
-define WB=00;37;44 # white foreground, blue background
+define BlGr=34;42 # Blue foreground, green background
+define WB=37;44 # white foreground, blue background
 
 FiletypeColors="pi=1;38;5;228;48;5;235:ln=0;38;5;117:ca=0:st=0;38;5;228;48;5;117:sg=0;38;5;228;48;5;212:su=0;38;5;228;48;5;212:tw=0;38;5;228;48;5;84:ow=0;38;5;117;48;5;235:do=1;38;5;228;48;5;235:or=0;38;5;203;48;5;235:cd=1;38;5;215;48;5;235:bd=1;38;5;215;48;5;235:mh=0:di=B:ed=DB:fi=W:ef=DW:ex=0;38;5;84:ee=0;2;38;5;84:so=1;38;5;228;48;5;235:no=0;38;5;231:"
 
