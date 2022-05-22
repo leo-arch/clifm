@@ -1092,29 +1092,39 @@ create_def_cscheme(void)
 # LS_COLORS environment variable. Thus, \"di=01;34\" means that (non-empty)\n\
 # directories will be listed in bold blue.\n\
 # Color codes are traditional ANSI escape sequences less the escape char and\n\
-# the final 'm'. 8 bit, 256 colors, and RGB colors are supported.\n\
+# the final 'm'. 8 bit, 256 colors, RGB, and hex (#rrggbb) colors are supported.\n\
 # A detailed explanation of all these codes can be found in the manpage.\n\n"
 
-		    "FiletypeColors=\"%s\"\n\n"
+			"FiletypeColors=\"%s\"\n\n"
 
-		    "InterfaceColors=\"%s\"\n\n"
+			"InterfaceColors=\"%s\"\n\n"
 
-		    "# Same as FiletypeColors, but for file extensions. The format is always\n\
+			"# Same as FiletypeColors, but for file extensions. The format is always\n\
 # *.EXT=COLOR\n"
 
-		    "ExtColors=\"%s\"\n\n"
-		    "DirIconColor=\"00;33\"\n\n"
+			"ExtColors=\"%s\"\n\n"
+			"DirIconColor=\"00;33\"\n\n"
 			"DividingLine=\"%s\"\n\n"
-		    "Prompt=\"%s\"\n\n"
-		    "WarningPromptStr=\"%s\"\n\n"
-		    "FzfTabOption=\"%s\"\n\n",
+
+			"If set to 'default', automatically print notifications at the left\n\
+of the prompt. If set to 'custom', let the prompt string handle these notifications\n\
+itself via escape codes. See the manpage for more information\n"
+			"PromptStyle=\"%s\"\n\n"
+			"Prompt=\"%s\"\n\n"
+
+			"An alternative prompt to warn the user about invalid command names\n"
+			"WarningPrompt=\"%s\"\n\n"
+			"WarningPromptStr=\"%s\"\n\n"
+			"FzfTabOptions=\"%s\"\n\n",
 
 		PROGRAM_NAME,
 		DEF_FILE_COLORS,
 		DEF_IFACE_COLORS,
 		DEF_EXT_COLORS,
 		DEF_DIV_LINE,
+		DEF_PROMPT_NOTIF == 1 ? "default" : "custom",
 		DEFAULT_PROMPT,
+		DEF_WARNING_PROMPT == 1 ? "true" : "false",
 		DEF_WPROMPT_STR,
 		DEF_FZFTAB_OPTIONS);
 

@@ -216,7 +216,6 @@ wc=01;36:wm=01;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:"
 #define DEF_ONLY_DIRS 0
 #define DEF_PAGER 0
 #define DEF_PRINTSEL 0
-#define DEF_PROMPT_NOTIF 1
 #define DEF_PROPS_COLOR 1
 #define DEF_REFRESH_ON_RESIZE 1
 #define DEF_RESTORE_LAST_PATH 1
@@ -243,7 +242,6 @@ wc=01;36:wm=01;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:"
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
-#define DEF_WARNING_PROMPT 1
 
 #define DEF_BELL_STYLE     BELL_VISIBLE /* BELL_NONE, BELL_AUDIBLE, BELL_VISIBLE, BELL_FLASH */
 #define VISIBLE_BELL_DELAY 30 /* Milliseconds */
@@ -262,11 +260,13 @@ wc=01;36:wm=01;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:"
 #define MIN_SCREEN_WIDTH 20
 #define MIN_SCREEN_HEIGHT 5
 
+#define DEF_PROMPT_NOTIF 1
 #define DEFAULT_PROMPT "\\[\\e[0m\\][\\S\\[\\e[0m\\]]\\l \
 \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
 >\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 #define DEFAULT_PROMPT_NO_COLOR "[\\S]\\l \\A \\u:\\H \\w\\n<\\z> \\$ "
 
+#define DEF_WARNING_PROMPT 1
 #define DEF_WPROMPT_STR "\\[\\e[00;02;31m\\](!) > "
 #define DEF_WPROMPT_STR_NO_COLOR "(!) > "
 
