@@ -36,6 +36,7 @@ int check_immutable_bit(char *file);
 int is_bin_cmd(char *str);
 int is_internal(const char *cmd);
 int is_internal_c(const char *restrict cmd);
+int is_internal_f(const char *restrict cmd);
 int is_number(const char *restrict str);
 int is_acl(char *file);
 char *get_sudo_path(void);

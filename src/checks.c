@@ -327,7 +327,7 @@ contains_digit(char *str)
 
 /* Returns 1 if CMD is found in CMDS_LIST and zero otherwise */
 static inline int
-find_cmd(char **cmds_list, int list_size, char *cmd)
+find_cmd(char **cmds_list, const int list_size, char *cmd)
 {
 	int found = 0, i = list_size;
 	int c = -1, d = contains_digit(cmd);
@@ -373,7 +373,7 @@ is_internal_c(char *restrict cmd)
 
 /* Check cmd against a list of internal commands. Used by parse_input_str()
  * to know if it should perform additional expansions, like glob, regex,
- * tilde, and so on. Only internal commands dealing with file names
+ * tilde, and so on. Only internal commands dealing with ELN/filenames
  * should be checked here */
 int
 is_internal(char *restrict cmd)
@@ -412,6 +412,58 @@ is_internal(char *restrict cmd)
 	/* Check for the search function as well */
 	if (*cmd == '/' && access(cmd, F_OK) != 0)
 		return 1;
+
+	return 0;
+}
+
+/* Check CMD against a list of internal commands taking ELN's or numbers
+ * as parameters. Used by split_fusedcmd() */
+int
+is_internal_f(const char *restrict cmd)
+{
+	/* If we are completing/suggesting, do not take 'ws' and 'mf' commands
+	 * into account: they do not take ELN/filenames as parameters, but just
+	 * numbers, in which case no ELN-filename completion should be made */
+	if (flags & STATE_COMPLETING
+	&& (*cmd == 'w' || (*cmd == 'm' && *(cmd + 1) == 'f')))
+		return 0;
+
+	const char *int_cmds[] = {
+		"ac", "ad",
+		"bb", "bleach",
+		"bm", "bookmarks",
+		"br", "bulk",
+		"c", "cp",
+		"cd",
+		"d", "dup",
+		"ds", "desel",
+		"exp",
+		"l", "ln", "le",
+		"m", "mv",
+		"md", "mkdir",
+		"mf",
+		"n", "new",
+		"o", "open", "ow",
+		"p", "pp", "pr", "prop",
+		"paste",
+		"pin",
+		"r", "rm",
+		"rr",
+		"s", "sel",
+		"st", "sort",
+		"t", "tr", "trash",
+		"tag", "ta",
+		"te",
+		"unlink",
+		"ws",
+		NULL};
+
+	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
+
+	while (--i >= 0) {
+		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0)
+			return 1;
+	}
 
 	return 0;
 }

@@ -813,51 +813,6 @@ check_fused_param(const char *str)
 	return 0;
 }
 
-/* Check CMD against a list of internal commands taking ELN's or numbers
- * as parameters. Used by split_fusedcmd() */
-int
-is_internal_f(const char *restrict cmd)
-{
-	const char *int_cmds[] = {
-	    "ac", "ad",
-		"bb", "bleach",
-	    "bm", "bookmarks",
-	    "br", "bulk",
-	    "c", "cp",
-	    "cd",
-		"d", "dup",
-		"ds", "desel",
-	    "exp",
-	    "l", "ln", "le",
-	    "m", "mv",
-	    "md", "mkdir",
-	    "mf",
-	    "n", "new",
-	    "o", "open", "ow",
-	    "p", "pp", "pr", "prop",
-		"paste",
-	    "pin",
-	    "r", "rm",
-	    "rr",
-	    "s", "sel",
-	    "st", "sort",
-	    "t", "tr", "trash",
-		"tag", "ta",
-	    "te",
-	    "unlink",
-	    "ws",
-	    NULL};
-
-	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
-
-	while (--i >= 0) {
-		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0)
-			return 1;
-	}
-
-	return 0;
-}
-
 static char *
 split_fused_param(char *str)
 {
