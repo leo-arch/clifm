@@ -1734,8 +1734,7 @@ rl_suggestions(const unsigned char c)
 					flags &= ~STATE_COMPLETING;
 					*p = ' ';
 				}
-/*				if (word && is_internal_c(word) && !is_internal_f(word))
-					break; */
+
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
 

@@ -75,49 +75,17 @@ __expand_eln(const char *text)
 			return 0;
 	}
 
-	switch(*l) {
-		case 'b': /* bookmarks (only expand ELN's for 'add') */
-			if (l[1] == 'm' && l[2] == ' ') {
-				if (strncmp(l + 3, "add ", 4) == 0 || strncmp(l + 3, "a ", 2) == 0)
-					return 1;
-				return 0;
-			}
-			if (strncmp(l, "bookmarks ", 10) == 0) {
-				if (strncmp(l + 10, "add ", 4) == 0 || strncmp(l + 10, "a ", 2) == 0)
-					return 1;
-				return 0;
-			}
-			break;
-		case 'c': /* cs (color schemes) */
-			if (l[1] == 's' && l[2] == ' ')
-				return 0;
-			break;
-		case 'm': /* mf (max files) */
-			if (l[1] == 'f' && l[2] == ' ')
-				return 0;
-			break;
-		case 'j': /* jo */
-			if (l[1] == 'o' && l[2] == ' ')
-				return 0;
-			break;
-		case 'n':
-			if (strncmp(l, "net ", 4) == 0)
-				return 0;
-			break;
-		case 'p': /* profiles */
-			if ((l[1] == 'f' && l[2] == ' ') || strncmp(l, "prof ", 5) == 0
-			|| strncmp(l, "profile ", 8) == 0)
-				return 0;
-			break;
-		case 's': /* sort */
-			if ((l[1] == 't' && l[2] == ' ') || strncmp(l, "sort ", 5) == 0)
-				return 0;
-			break;
-		case 'w': /* workspaces */
-			if (l[1] == 's' && l[2] == ' ')
-				return 0;
-			break;
-		default: break;
+	char *p = strchr(l, ' ');
+	if (p) {
+		*p = '\0';
+		flags |= STATE_COMPLETING;
+		if (is_internal_c(l) && !is_internal_f(l)) {
+			*p = ' ';
+			flags &= ~STATE_COMPLETING;
+			return 0;
+		}
+		flags &= ~STATE_COMPLETING;
+		*p = ' ';
 	}
 
 	return 1;
