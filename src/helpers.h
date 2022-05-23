@@ -194,6 +194,7 @@ extern int watch;
 
 #define FIRST_WORD_IS_ELN   (1 << 15)
 #define IN_BOOKMARKS_SCREEN (1 << 16)
+#define STATE_COMPLETING    (1 << 17)
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)

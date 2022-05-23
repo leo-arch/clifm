@@ -1720,6 +1720,22 @@ rl_suggestions(const unsigned char c)
 					word = (first_word && *first_word) ? first_word : last_word;
 					wlen = strlen(word);
 				}
+				/* Skip internal commands not dealing with file names */
+				char *p;
+				p = strchr(lb, ' ' );
+				if (p) {
+					flags |= STATE_COMPLETING;
+					*p = '\0';
+					if (is_internal_c(lb) && !is_internal_f(lb)) {
+						*p = ' ';
+						flags &= ~STATE_COMPLETING;
+						goto FAIL;
+					}
+					flags &= ~STATE_COMPLETING;
+					*p = ' ';
+				}
+/*				if (word && is_internal_c(word) && !is_internal_f(word))
+					break; */
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
 

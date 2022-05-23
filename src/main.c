@@ -345,8 +345,8 @@ char
 
 /* A list of internal commands, with short and long formats. We use two
  * more lists of commands: one of commands dealing with file names
- * (is_internal(), in checks.c), and another one listing commands
- * taking ELN's as parameters (is_internal_f() in strings.c) */
+ * (is_internal()), and another one listing commands taking ELN's/numbers
+ * as parameters (is_internal_f()), both in checks.c */
 char *internal_cmds[] = {
 	",",
 	"?", "help",
@@ -419,7 +419,7 @@ char *internal_cmds[] = {
 	"tag", "ta", "td", "tl", "tm", "tn", "tu", "ty",
 	"te",
 	"tips",
-	"touch",
+//	"touch",
 	"u", "undel", "untrash",
 	"uc", "unicode",
 	"unlink",

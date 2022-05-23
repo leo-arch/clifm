@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #ifdef __OpenBSD__
-#include <strings.h>
+# include <strings.h>
 #endif
 #include <unistd.h>
 #include <errno.h>
@@ -42,11 +42,11 @@
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
-#include <ereadline/readline/readline.h>
-#include <ereadline/readline/history.h>
+# include <ereadline/readline/readline.h>
+# include <ereadline/readline/history.h>
 #else
-#include <readline/readline.h>
-#include <readline/history.h>
+# include <readline/readline.h>
+# include <readline/history.h>
 #endif
 
 #include "misc.h"
@@ -60,15 +60,15 @@ typedef char *rl_cpvfunc_t;
 #include "tags.h"
 
 #ifndef _NO_SUGGESTIONS
-#include "suggestions.h"
+# include "suggestions.h"
 #endif
 
 #ifndef _NO_HIGHLIGHT
-#include "highlight.h"
+# include "highlight.h"
 #endif
 
 #if !defined(S_IFREG) || !defined(S_IFDIR)
-#include <sys/stat.h>
+# include <sys/stat.h>
 #endif
 
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
@@ -80,7 +80,6 @@ int freebsd_sc_console = 0;
 
 struct dirent **tagged_files = (struct dirent **)NULL;
 int tagged_files_n = 0;
-//int rl_file_in_cwd_completion_desired = 1;
 
 /* Delete key implementation */
 static void
@@ -1868,7 +1867,6 @@ my_rl_completion(const char *text, int start, int end)
 	cur_comp_type = TCMP_NONE;
 	UNUSED(end);
 	rl_sort_completion_matches = 1;
-//	rl_file_in_cwd_completion_desired = 1;
 
 	while (*text == '\\')
 		++text;
@@ -2265,23 +2263,38 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		/* Try to complete with filenames in CWD */
-		if (!text || *text != '/') {
-			rl_sort_completion_matches = 0;
-			if ((matches = rl_completion_matches(text, &options_generator)))
-				return matches;
-			rl_sort_completion_matches = 1;
-//			if (rl_file_in_cwd_completion_desired
-//			&& (matches = rl_completion_matches(text, &filenames_gen_text)) ) {
-			if ((matches = rl_completion_matches(text, &filenames_gen_text))) {
-				cur_comp_type = TCMP_PATH;
-				return matches;
+//		if (!text || *text != '/') {
+		rl_sort_completion_matches = 0;
+		/* Complete with specific options for internal commands */
+		if ((matches = rl_completion_matches(text, &options_generator)))
+			return matches;
+		rl_sort_completion_matches = 1;
+
+		/* If we have an internal command not dealing with file names,
+		 * do not perform completion */
+		char *p = strchr(lb, ' ');
+		if (p) {
+			*p = '\0';
+			flags |= STATE_COMPLETING;
+			if (is_internal_c(lb) && !is_internal_f(lb)) {
+				rl_attempted_completion_over = 1;
+				*p = ' ';
+				flags &= ~STATE_COMPLETING;
+				return (char **)NULL;
 			}
+			flags &= ~STATE_COMPLETING;
+			*p = ' ';
 		}
+
+		/* Finally, try to complete with filenames in CWD */
+		if ((matches = rl_completion_matches(text, &filenames_gen_text))) {
+			cur_comp_type = TCMP_PATH;
+			return matches;
+		}
+//		}
 	}
 
 	/* ### PATH COMPLETION ### */
-
 	/* If none of the above, readline will attempt path completion
 	 * instead via my_rl_path_completion() */
 	return matches;

@@ -330,7 +330,7 @@ check_env_filter(void)
 	} else {
 		filter_rev = 0;
 	}
-	
+
 	_filter = savestring(p, strlen(p));
 }
 
@@ -383,7 +383,7 @@ get_user(void)
 
 	tmp_user.uid = pw->pw_uid;
 	tmp_user.gid = pw->pw_gid;
-/*	char *p = getenv("HOME"); 
+/*	char *p = getenv("HOME");
 	if (!p) */
 		tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
 /*	else
@@ -881,7 +881,7 @@ load_remotes(void)
 							(ret_len + 1) * sizeof(char));
 			strcpy(remotes[n].desc, ret);
 		} else if (strncmp(line, "Mountpoint=", 11) == 0) {
-			char *tmp = (char *)NULL; 
+			char *tmp = (char *)NULL;
 			if (*ret == '~')
 				tmp = tilde_expand(ret);
 			remotes[n].mountpoint = (char *)xrealloc(remotes[n].mountpoint,
