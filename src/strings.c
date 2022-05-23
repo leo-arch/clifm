@@ -62,6 +62,52 @@ char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 
 #define MAX_STR_SZ 4096
 
+/* Find the character C in the string S ignoring case
+ * Returns a pointer to the matching char in S if C was found, or zero otherwise */
+static char *
+xstrcasechr(char *s, char c)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	char uc = TOUPPER(c);
+	while(*s) {
+		if (TOUPPER(*s) != uc) {
+			s++;
+			continue;
+		}
+		return s;
+	}
+
+	return (char *)NULL;
+}
+
+/* A very basic fuzzy strings matcher
+ * Returns 1 if match (S1 is contained in S2) or zero otherwise */
+int
+fuzzy_match(char *s1, char *s2, const int case_sens)
+{
+	if (!s1 || !*s1 || !s2 || !*s2)
+		return 0;
+
+	if (case_sens ? strstr(s2, s1) : strcasestr(s2, s1))
+		return 1;
+
+	char *hs = s2;
+	while(*s1) {
+		char *m = case_sens ? strchr(hs, *s1) : xstrcasechr(hs, *s1);
+		if (!m)
+			break;
+		hs = m;
+		s1++;
+	}
+
+	if (!*s1)
+		return 1;
+
+	return 0;
+}
+
 /* A reverse strpbrk(3): returns a pointer to the LAST char in S matching
  * a char in ACCEPT, or NULL if no match is found */
 char *

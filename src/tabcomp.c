@@ -1116,6 +1116,16 @@ fzftabcomp(char **matches, const char *text)
 	}
 
 	free(buf);
+
+#ifndef _NO_SUGGESTIONS
+	if (suggestions && nwords == 1 && wrong_cmd == 1) {
+		fputs(NC, stdout);
+		fflush(stdout);
+		rl_restore_prompt();
+		wrong_cmd = 0;
+	}
+#endif
+
 	return exit_status;
 }
 #endif /* !_NO_FZF */
