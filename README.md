@@ -174,7 +174,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 * `version 1.6 - Guybrush`:
   - **NEW**: More tilling window manager friendly
   - **NEW**: [emoji-icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk)
-  - **NEW**: [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions)
+  - **NEW**: [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
   - **NEW**: Smarter TAB completion
   - **NEW**: Improved interface for trash and selection functions
   - **NEW**: [Easily manage your prompts via the `prompt` command](https://github.com/leo-arch/clifm/wiki/Introduction#prompt-name-list-edit-reload)
