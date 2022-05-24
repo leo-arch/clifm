@@ -943,8 +943,7 @@ my_rl_path_completion(const char *text, int state)
 
 		/* If there is at least one char to complete (ex: "cd .[TAB]") */
 		else {
-			/* Check if possible completion match up to the length of
-			 * filename. */
+			/* Check if possible completion match up to the length of filename. */
 			if (xargs.fuzzy_match != 0) {
 				if (fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
 					continue;
@@ -1312,7 +1311,7 @@ filenames_gen_text(const char *text, int state)
 		if (*rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
 			return (char *)NULL;
-		if (xargs.fuzzy_match != 0) {
+		if (xargs.fuzzy_match != 0 && !(*text == '.' && text[1] == '.')) {
 			if (len == 0)
 				return strdup(name);
 			if (fuzzy_match((char *)text, name, case_sens_path_comp) == 1)

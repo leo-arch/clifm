@@ -1329,7 +1329,11 @@ external_arguments(int argc, char **argv)
 	};
 
 	/* Increment whenever a new (only) long option is added */
-	int long_opts = 45;
+#ifdef __linux__
+	int long_opts = 56;
+#else
+	int long_opts = 55;
+#endif
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
 	char *path_value = (char *)NULL,
