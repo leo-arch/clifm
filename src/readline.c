@@ -1298,18 +1298,23 @@ filenames_gen_text(const char *text, int state)
 	if (!state) { /* state is zero only the first time readline is
 	executed */
 		i = 0;
-		if (xargs.fuzzy_match == 0)
-			len = strlen(text);
+		len = strlen(text);
 	}
 
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = file_info[i].name) != NULL) {
+		i++;
+/*		if (nwords == 1 && autocd == 0 && file_info[i].dir == 1)
+			return (char *)NULL;
+		if (nwords == 1 && auto_open == 0 && file_info[i].dir == 0)
+			return (char *)NULL; */
 		/* If cd, list only directories */
 		if (*rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
 			return (char *)NULL;
-		i++;
 		if (xargs.fuzzy_match != 0) {
+			if (len == 0)
+				return strdup(name);
 			if (fuzzy_match((char *)text, name, case_sens_path_comp) == 1)
 				return strdup(name);
 		} else {

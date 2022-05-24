@@ -870,9 +870,23 @@ clean_rl_buffer(const char *text)
 }
 
 /* Display possible completions using FZF. If one of these possible
- * completions is selected, insert it into the current line buffer */
+ * completions is selected, insert it into the current line buffer.
+ * What is ORIGINAL_QUERY and why we need it?
+ * MATCHES[0] is supposed to hold the common prefix among all possible
+ * completions. This common prefix should be the same as the query string when
+ * performing regular matches. But it might not be the same as the
+ * original query string when performing fuzzy match: then, we need a copy of
+ * this original query string (ORIGINAL_QUERY) to later be passed to FZF
+ * Example:
+ * Query string: '.f'
+ * Returned matches (fuzzy):
+ *   .file
+ *   .this_file
+ *   .beef
+ * Common suffix: '.' (not '.f')
+ * */
 static int
-fzftabcomp(char **matches, const char *text)
+fzftabcomp(char **matches, const char *text, char *original_query)
 {
 	FILE *fp = fopen(finder_in_file, "w");
 	if (!fp) {
@@ -890,7 +904,7 @@ fzftabcomp(char **matches, const char *text)
 
 	/* Set a pointer to the last word (either space or slash) in the
 	 * input buffer. We use this to highlight the matching prefix in FZF */
-	char *lw = get_last_word(matches[0]);
+	char *lw = get_last_word(original_query ? original_query : matches[0]);
 
 	/* If not already defined (environment or config file), calculate the
 	 * height of the FZF window based on the amount of entries. This
@@ -1642,7 +1656,9 @@ DISPLAY_MATCHES:
 CALC_OFFSET:
 #ifndef _NO_FZF
 		if (fzftab == 1) {
-			if (fzftabcomp(matches, common_prefix_added == 1 ? text : NULL) == -1)
+			char *t = text ? text : (char *)NULL;
+			if (fzftabcomp(matches, common_prefix_added == 1 ? t : NULL,
+			xargs.fuzzy_match == 1 ? t : NULL) == -1)
 				goto RESTART;
 			goto RESET_PATH;
 		}
