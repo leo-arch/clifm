@@ -351,7 +351,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	/* Let's check for baej suggestions, mostly in case of fuzzy matches */
 	size_t wlen = strlen(last_word);
-	if (suggestion.type == FILE_SUG && (case_sens_path_comp ? strncmp(last_word, str, wlen)
+	if (cur_comp_type == TCMP_PATH && (case_sens_path_comp ? strncmp(last_word, str, wlen)
 	: strncasecmp(last_word, str, wlen)) != 0) {
 		flags |= BAEJ_SUGGESTION;
 		baej = 1;
@@ -607,6 +607,7 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 	if (xargs.fuzzy_match != 0 && nwords == 1 && *str != '/' && is_internal_c(str))
 		return NO_MATCH;
 
+	cur_comp_type = TCMP_NONE;
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
 	if (!_matches)
 		return NO_MATCH;
@@ -636,6 +637,8 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 
 FREE:
 	free_matches(&_matches);
+	if (printed == 0)
+		cur_comp_type = TCMP_NONE;
 	return printed;
 }
 
@@ -1375,6 +1378,7 @@ rl_suggestions(const unsigned char c)
 
 	int printed = 0, zero_offset = 0;
 	last_word_offset = 0;
+	cur_comp_type = TCMP_NONE;
 
 	if (rl_end == 0 && rl_point == 0) {
 		free(suggestion_buf);
