@@ -943,18 +943,20 @@ my_rl_path_completion(const char *text, int state)
 
 		/* If there is at least one char to complete (ex: "cd .[TAB]") */
 		else {
-			/* Check if possible completion match up to the length of filename. */
-			if (xargs.fuzzy_match != 0) {
-				if (fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
-					continue;
-			} else {
-				if (case_sens_path_comp) {
-					if (*ent->d_name != *filename
-					|| (strncmp(filename, ent->d_name, filename_len) != 0))
+			/* Check for possible matches, first using regular matching and
+			 * then, if no match, try fuzzy matching (if enabled) */
+			if (case_sens_path_comp == 1) {
+				if (*ent->d_name != *filename
+				|| (strncmp(filename, ent->d_name, filename_len) != 0)) {
+					if (xargs.fuzzy_match == 0
+					|| fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
 						continue;
-				} else {
-					if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
-					|| (strncasecmp(filename, ent->d_name, filename_len) != 0))
+				}
+			} else {
+				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
+				|| (strncasecmp(filename, ent->d_name, filename_len) != 0)) {
+					if (xargs.fuzzy_match == 0
+					|| fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
 						continue;
 				}
 			}
@@ -1282,7 +1284,6 @@ profiles_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-/* Used by ELN expansion */
 static char *
 filenames_gen_text(const char *text, int state)
 {
@@ -1311,16 +1312,14 @@ filenames_gen_text(const char *text, int state)
 		if (*rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
 			return (char *)NULL;
-		if (xargs.fuzzy_match != 0 && !(*text == '.' && text[1] == '.')) {
-			if (len == 0)
-				return strdup(name);
-			if (fuzzy_match((char *)text, name, case_sens_path_comp) == 1)
-				return strdup(name);
-		} else {
-			if (case_sens_path_comp ? strncmp(name, text, len) == 0
-			: strncasecmp(name, text, len) == 0)
-				return strdup(name);
-		}
+
+		if (case_sens_path_comp ? strncmp(name, text, len) == 0
+		: strncasecmp(name, text, len) == 0)
+			return strdup(name);
+		if (xargs.fuzzy_match == 0 || (*text == '.' && text[1] == '.'))
+			return (char *)NULL;
+		if (len == 0 || fuzzy_match((char *)text, name, case_sens_path_comp) == 1)
+			return strdup(name);
 	}
 
 	return (char *)NULL;
