@@ -359,6 +359,9 @@ disable the files counter for directories. This option is especially useful to s
 .B \-\-no\-follow\-symlink
 do not follow symbolic links when listing files
 .TP
+.B \-\-no\-fuzzy\-match
+disable fuzzy match for completions and suggestions
+.TP
 .B \-\-no\-highlight
 disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below
 .TP
@@ -1530,7 +1533,7 @@ If using the FZF mode for TAB completion (see below), you can operate only on \f
 .TP
 \fBTAB completion\fR
 .TP
-There are two modes for TAB completion: \fIstandard\fR (interface provided by readline), and \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later). To enable the \fIfzf\fR mode (the standard mode is used by default), you can either use the \fI--fzftab\fR command line option, set \fITabCompletionMode\fR to \fIfzf\fR in the configuration file, or set \fBCLIFM_USE_FZF\fR environment variable to either \fI1\fR or \fItrue\fR. Example: 'export CLIFM_USE_FZF=true'.
+There are two modes for TAB completion: \fIstandard\fR (interface provided by readline), and \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later). If the \fIfzf\fR binary is found in \fBPATH\fR, CliFM will attempt to use \fIfzf\fR to display completions. You can force the use of the standard mode via the \fI\-\-std\-tab\-comp\fR command line switch. The \fITabCompletionMode\fR option in the configuration file could also be used to set the TAB completion mode (either 'standard' or 'fzf').
 .TP
 If using the \fIfzf\fR mode, the completions interface could be customized using the \fIFzfTabOptions\fR option in the color scheme file. --height, --margin, +i/-i, --read0, --query, and --ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
 .TP
@@ -1542,6 +1545,8 @@ Consult \fBfzf\fR(1) for more information.
 If set neither in \fIFzfTabOptions\fR nor in \fBFZF_DEAFULT_OPTS\fR (in this order), the height of the FZF window is set to the default value: 40% of the current terminal amount of line/rows.
 .TP
 To use FZF global values (defined in \fBFZF_DEFAULT_OPTS\fR), just set \fIFzfTabOptions\fR to \fInone\fR.
+.TP
+By default, fuzzy TAB completion (just as suggestions, if enabled) is performed (e.g. 'dwn<TAB>' is completed as 'Downloads'). To disable fuzzy completion (perform only non\-fuzzy, regular matching) use the \fI\-\-no\-fuzzy\-match switch.
 .TP
 Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
