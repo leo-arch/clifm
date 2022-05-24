@@ -103,6 +103,7 @@ _clifm ()
         --no-file-ext
         --no-files-counter
         --no-follow-symlink
+        --no-fuzzy-match
         --no-highlight
         --no-history
         --no-open-auto
