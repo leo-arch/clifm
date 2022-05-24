@@ -98,6 +98,7 @@ fuzzy_match(char *s1, char *s2, const int case_sens)
 		char *m = case_sens ? strchr(hs, *s1) : xstrcasechr(hs, *s1);
 		if (!m)
 			break;
+		m++;
 		hs = m;
 		s1++;
 	}

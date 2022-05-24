@@ -233,6 +233,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	|| suggestion.type == SORT_SUG) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 		cuc += suggestion.type == ELN_SUG ? 3 : 4;
+		flags |= BAEJ_SUGGESTION;
 		*baej = 1;
 	}
 
@@ -346,6 +347,17 @@ print_suggestion(const char *str, size_t offset, char *color)
 	get_cursor_position(&curcol, &currow);
 
 	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump */
+	flags &= ~BAEJ_SUGGESTION;
+
+	/* Let's check for baej suggestions, mostly in case of fuzzy matches */
+	size_t wlen = strlen(last_word);
+	if (suggestion.type != HIST_SUG && (case_sens_path_comp ? strncmp(last_word, str, wlen)
+	: strncasecmp(last_word, str, wlen)) != 0) {
+		flags |= BAEJ_SUGGESTION;
+		baej = 1;
+		offset = 0;
+	}
+
 	size_t str_len = strlen(str), slines = 0;
 
 	if (check_conditions(str, offset, str_len, &baej, &slines) == EXIT_FAILURE)

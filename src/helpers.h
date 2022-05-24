@@ -195,6 +195,9 @@ extern int watch;
 #define FIRST_WORD_IS_ELN   (1 << 15)
 #define IN_BOOKMARKS_SCREEN (1 << 16)
 #define STATE_COMPLETING    (1 << 17)
+/* Instead of completion the current word, a BAEJ suggestion points to
+ * a possible completion as follows: WORD > COMPLETION */
+#define BAEJ_SUGGESTION     (1 << 18)
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)
