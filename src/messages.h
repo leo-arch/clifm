@@ -767,7 +767,6 @@ database (via the 'j' command)\
 bookmark paths\
 \n     --full-dir-size\t\t Print the size of directories and their contents \
 in long view mode\
-\n     --fzftab\t\t\t Enable FZF mode for TAB completion\
 \n     --icons\t\t\t Enable icons\
 \n     --icons-use-file-color\t Icons color follows file color\
 \n     --int-vars\t\t\t Enable internal variables\
@@ -783,11 +782,12 @@ directory base name (if \\z is used in the prompt)\
 \n     --no-clear-screen\t\t Do not clear the screen when listing directories\
 \n     --no-color\t\t\t Disable colors \
 \n     --no-columns\t\t Disable columned files listing\
-\n     --no-control-d-exit\t\t Do not allow exit on EOF (Control-d)\
+\n     --no-control-d-exit\t Do not allow exit on EOF (Control-d)\
 \n     --no-file-cap\t\t Do not check files capabilities when listing files\
 \n     --no-file-ext\t\t Do not check files extension when listing files\
 \n     --no-files-counter\t\t Disable the files counter for directories\
 \n     --no-follow-symlink\t Do not follow symbolic links when listing files\
+\n     --no-fuzzy-match\t\t Disable fuzzy TAB completion\
 \n     --no-highlight\t\t Disable syntax highlighting\
 \n     --no-history\t\t Do not write commands into the history file\
 \n     --no-open-auto\t\t Same as no-cd-auto, but for files\
@@ -811,6 +811,7 @@ CliFM's built-in opener\
 International System of Units (SI), instead of 1024 (Linux only)\
 \n     --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z \
 (default order)\
+\n     --std-tab-comp\t\t Force the use of standard TAB completion\
 \n     --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 'rm' to prevent accidental deletions\n"
 

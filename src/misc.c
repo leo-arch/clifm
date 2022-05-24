@@ -572,6 +572,7 @@ print_tips(int all)
 		"Quickly change your prompt via 'prompt NAME'",
 		"Press Ctrl-Alt-i to toggle the disk usage analyzer mode",
 		"Press Ctrl-Alt-l to toggle max file name length on/off",
+		"Fuzzy completion is supported: 'dwn<TAB> -> Downloads'",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
