@@ -359,8 +359,8 @@ disable the files counter for directories. This option is especially useful to s
 .B \-\-no\-follow\-symlink
 do not follow symbolic links when listing files
 .TP
-.B \-\-no\-fuzzy\-match
-disable fuzzy match for completions and suggestions
+.B \-\-fuzzy\-match
+enable fuzzy matches for completions and suggestions (only file names and paths)
 .TP
 .B \-\-no\-highlight
 disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below
@@ -1546,7 +1546,7 @@ If set neither in \fIFzfTabOptions\fR nor in \fBFZF_DEAFULT_OPTS\fR (in this ord
 .TP
 To use FZF global values (defined in \fBFZF_DEFAULT_OPTS\fR), just set \fIFzfTabOptions\fR to \fInone\fR.
 .TP
-By default, fuzzy TAB completion (just as suggestions, if enabled) is performed (e.g. 'dwn<TAB>' is completed as 'Downloads'). To disable fuzzy completion (perform only non\-fuzzy, regular matching) use the \fI\-\-no\-fuzzy\-match switch.
+CliFM can perform fuzzy TAB completion (just as suggestions, if enabled) for file names and paths (e.g. 'dwn<TAB>' is completed as 'Downloads'). To enable this feature use the \fI\-\-fuzzy\-match command line switch.
 .TP
 Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP

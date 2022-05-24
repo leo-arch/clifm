@@ -1321,10 +1321,9 @@ external_arguments(int argc, char **argv)
 		{"fzytab", no_argument, 0, 52},
 		{"no-refresh-on-resize", no_argument, 0, 53},
 		{"bell", required_argument, 0, 54},
-		{"no-fuzzy-match", no_argument, 0, 55},
-		{"fuzzy-match", no_argument, 0, 56},
+		{"fuzzy-match", no_argument, 0, 55},
 #ifdef __linux__
-		{"si", no_argument, 0, 57},
+		{"si", no_argument, 0, 56},
 #endif
 	    {0, 0, 0, 0}
 	};
@@ -1545,10 +1544,9 @@ RUN:
 			}
 			xargs.bell_style = a; break;
 			}
-		case 55: xargs.fuzzy_match = 0; break;
-		case 56: xargs.fuzzy_match = 1; break;
+		case 55: xargs.fuzzy_match = 1; break;
 #ifdef __linux__
-		case 57: xargs.si = 1; break;
+		case 56: xargs.si = 1; break;
 #endif
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */

@@ -767,6 +767,8 @@ database (via the 'j' command)\
 bookmark paths\
 \n     --full-dir-size\t\t Print the size of directories and their contents \
 in long view mode\
+\n     --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
+and paths\
 \n     --icons\t\t\t Enable icons\
 \n     --icons-use-file-color\t Icons color follows file color\
 \n     --int-vars\t\t\t Enable internal variables\
@@ -787,7 +789,6 @@ directory base name (if \\z is used in the prompt)\
 \n     --no-file-ext\t\t Do not check files extension when listing files\
 \n     --no-files-counter\t\t Disable the files counter for directories\
 \n     --no-follow-symlink\t Do not follow symbolic links when listing files\
-\n     --no-fuzzy-match\t\t Disable fuzzy TAB completion\
 \n     --no-highlight\t\t Disable syntax highlighting\
 \n     --no-history\t\t Do not write commands into the history file\
 \n     --no-open-auto\t\t Same as no-cd-auto, but for files\
