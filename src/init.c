@@ -1322,8 +1322,9 @@ external_arguments(int argc, char **argv)
 		{"no-refresh-on-resize", no_argument, 0, 53},
 		{"bell", required_argument, 0, 54},
 		{"no-fuzzy-match", no_argument, 0, 55},
+		{"fuzzy-match", no_argument, 0, 56},
 #ifdef __linux__
-		{"si", no_argument, 0, 56},
+		{"si", no_argument, 0, 57},
 #endif
 	    {0, 0, 0, 0}
 	};
@@ -1545,8 +1546,9 @@ RUN:
 			xargs.bell_style = a; break;
 			}
 		case 55: xargs.fuzzy_match = 0; break;
+		case 56: xargs.fuzzy_match = 1; break;
 #ifdef __linux__
-		case 56: xargs.si = 1; break;
+		case 57: xargs.si = 1; break;
 #endif
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -2568,6 +2570,9 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (xargs.fuzzy_match == UNSET)
+		xargs.fuzzy_match = DEF_FUZZY_MATCH;
+
 	if (xargs.bell_style == UNSET)
 		bell = DEF_BELL_STYLE;
 	else
