@@ -704,6 +704,7 @@ struct param {
 	int files_counter;
 	int follow_symlinks;
 	int full_dir_size;
+	int fuzzy_match;
 #ifndef _NO_FZF
 	int fzftab;
 	int fzytab;

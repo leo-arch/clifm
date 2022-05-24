@@ -945,17 +945,20 @@ my_rl_path_completion(const char *text, int state)
 		else {
 			/* Check if possible completion match up to the length of
 			 * filename. */
-			if (fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
-				continue;
-/*			if (case_sens_path_comp) {
-				if (*ent->d_name != *filename
-				|| (strncmp(filename, ent->d_name, filename_len) != 0))
+			if (xargs.fuzzy_match != 0) {
+				if (fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
 					continue;
 			} else {
-				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
-				|| (strncasecmp(filename, ent->d_name, filename_len) != 0))
-					continue;
-			} */
+				if (case_sens_path_comp) {
+					if (*ent->d_name != *filename
+					|| (strncmp(filename, ent->d_name, filename_len) != 0))
+						continue;
+				} else {
+					if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
+					|| (strncasecmp(filename, ent->d_name, filename_len) != 0))
+						continue;
+				}
+			}
 
 			if (*rl_line_buffer == 'c'
 			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
@@ -1284,7 +1287,7 @@ profiles_generator(const char *text, int state)
 static char *
 filenames_gen_text(const char *text, int state)
 {
-	static size_t i;//, len = 0;
+	static size_t i, len = 0;
 	char *name;
 	rl_filename_completion_desired = 1;
 	/* According to the GNU readline documention: "If it is set to a
@@ -1295,7 +1298,8 @@ filenames_gen_text(const char *text, int state)
 	if (!state) { /* state is zero only the first time readline is
 	executed */
 		i = 0;
-//		len = strlen(text);
+		if (xargs.fuzzy_match == 0)
+			len = strlen(text);
 	}
 
 	/* Check list of currently displayed files for a match */
@@ -1305,11 +1309,14 @@ filenames_gen_text(const char *text, int state)
 		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
 			return (char *)NULL;
 		i++;
-//		UNUSED(len);
-		if (fuzzy_match((char *)text, name, case_sens_path_comp) == 1)
-/*		if (case_sens_path_comp ? strncmp(name, text, len) == 0
-		: strncasecmp(name, text, len) == 0) */
-			return strdup(name);
+		if (xargs.fuzzy_match != 0) {
+			if (fuzzy_match((char *)text, name, case_sens_path_comp) == 1)
+				return strdup(name);
+		} else {
+			if (case_sens_path_comp ? strncmp(name, text, len) == 0
+			: strncasecmp(name, text, len) == 0)
+				return strdup(name);
+		}
 	}
 
 	return (char *)NULL;

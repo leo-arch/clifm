@@ -1321,8 +1321,9 @@ external_arguments(int argc, char **argv)
 		{"fzytab", no_argument, 0, 52},
 		{"no-refresh-on-resize", no_argument, 0, 53},
 		{"bell", required_argument, 0, 54},
+		{"no-fuzzy-match", no_argument, 0, 55},
 #ifdef __linux__
-		{"si", no_argument, 0, 55},
+		{"si", no_argument, 0, 56},
 #endif
 	    {0, 0, 0, 0}
 	};
@@ -1543,8 +1544,9 @@ RUN:
 			}
 			xargs.bell_style = a; break;
 			}
+		case 55: xargs.fuzzy_match = 0; break;
 #ifdef __linux__
-		case 55: xargs.si = 1; break;
+		case 56: xargs.si = 1; break;
 #endif
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1901,6 +1903,7 @@ unset_xargs(void)
 	xargs.files_counter = UNSET;
 	xargs.follow_symlinks = UNSET;
 	xargs.full_dir_size = UNSET;
+	xargs.fuzzy_match = UNSET;
 #ifndef _NO_FZF
 	xargs.fzftab = UNSET;
 	xargs.fzytab = UNSET;
