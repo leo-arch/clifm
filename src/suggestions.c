@@ -604,7 +604,7 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 	skip_leading_spaces(&str, &len);
 	skip_leading_backslashes(&str, &len);
 
-	if (nwords == 1 && is_internal_c(str))
+	if (nwords == 1 && *str != '/' && is_internal_c(str))
 		return NO_MATCH;
 
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
