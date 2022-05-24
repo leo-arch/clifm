@@ -173,14 +173,15 @@ For a detailed explanation of each of these features, follow the corresponding l
 ✔️ **Changelog**
 * `version 1.6 - Guybrush`:
   - **NEW**: More tilling window manager friendly
-  - **NEW**: emoji-icons
+  - **NEW**: [emoji-icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk)
+  - **NEW**: [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions)
   - **NEW**: Smarter TAB completion
   - **NEW**: Improved interface for trash and selection functions
-  - **NEW**: Easily manage your prompts via the `prompt` command
-  - **NEW**: Easily copy files to your smart phone (as plugin)
-  - **NEW**: Hex color codes support (#rrggbb)
+  - **NEW**: [Easily manage your prompts via the `prompt` command](https://github.com/leo-arch/clifm/wiki/Introduction#prompt-name-list-edit-reload)
+  - **NEW**: [Easily copy files to your smart phone via the `cr` action (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
+  - **NEW**: [Hex color codes support (#rrggbb)](https://github.com/leo-arch/clifm/wiki/Customization#hex-color-codes)
   - **NEW**: FZF is now the default completer
-  - **NEW**: Extra color schemes
+  - **NEW**: [Extra color schemes](https://github.com/leo-arch/clifm/tree/master/misc/colors)
 * `version 1.5`:
   - `Prompt`, `WarningPromptStr`, `DividingLine`, and `FfzTabOptions` options were moved from the config file to the color scheme file to get a **centralized and single theming file**. However, to keep backwards compatibility, the old location is still recognized. If any of these options is found in the color scheme file, values taken from the main configuration file will be overriden.
   - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is used now only for the _input text color_ of the warning prompt.
