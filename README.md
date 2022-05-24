@@ -177,8 +177,8 @@ For a detailed explanation of each of these features, follow the corresponding l
   - **NEW**: [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
   - **NEW**: Smarter TAB completion
   - **NEW**: Improved interface for trash and selection functions
-  - **NEW**: [Easily manage your prompts via the `prompt` command](https://github.com/leo-arch/clifm/wiki/Introduction#prompt-name-list-edit-reload)
-  - **NEW**: [Easily copy files to your smart phone via the `cr` action (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
+  - **NEW**: [Manage your prompts via the `prompt` command](https://github.com/leo-arch/clifm/wiki/Introduction#prompt-name-list-edit-reload)
+  - **NEW**: [Copy files to your smart phone via the `cr` action (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - **NEW**: [Hex color codes support (#rrggbb)](https://github.com/leo-arch/clifm/wiki/Customization#hex-color-codes)
   - **NEW**: FZF is now the default completer
   - **NEW**: [Extra color schemes](https://github.com/leo-arch/clifm/tree/master/misc/colors)
