@@ -948,14 +948,14 @@ my_rl_path_completion(const char *text, int state)
 			if (case_sens_path_comp == 1) {
 				if (*ent->d_name != *filename
 				|| (strncmp(filename, ent->d_name, filename_len) != 0)) {
-					if (xargs.fuzzy_match == 0
+					if (xargs.fuzzy_match == 0 || *filename == '-'
 					|| fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
 						continue;
 				}
 			} else {
 				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
 				|| (strncasecmp(filename, ent->d_name, filename_len) != 0)) {
-					if (xargs.fuzzy_match == 0
+					if (xargs.fuzzy_match == 0 || *filename == '-'
 					|| fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
 						continue;
 				}
@@ -1316,7 +1316,7 @@ filenames_gen_text(const char *text, int state)
 		if (case_sens_path_comp ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
-		if (xargs.fuzzy_match == 0 || (*text == '.' && text[1] == '.'))
+		if (xargs.fuzzy_match == 0 || (*text == '.' && text[1] == '.') || *text == '-')
 			return (char *)NULL;
 		if (len == 0 || fuzzy_match((char *)text, name, case_sens_path_comp) == 1)
 			return strdup(name);
