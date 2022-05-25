@@ -749,7 +749,7 @@ sel_function(char **args)
 	}
 
 	mode_t filetype = 0;
-	int i, ifiletype = 0, isel_path = 0, new_sel = 0, err = 0;
+	int i, ifiletype = 0, isel_path = 0, new_sel = 0, err = 0, f = 0;
 
 	char *dir = (char *)NULL, *pattern = (char *)NULL;
 	char *sel_path = parse_sel_params(&args, &ifiletype, &filetype, &isel_path);
@@ -760,7 +760,7 @@ sel_function(char **args)
 	for (i = 1; args[i]; i++) {
 		if (i == ifiletype || i == isel_path)
 			continue;
-
+		f++;
 		if (check_regex(args[i]) == EXIT_SUCCESS) {
 			pattern = args[i];
 			if (*pattern == '!')
@@ -772,6 +772,9 @@ sel_function(char **args)
 		else
 			new_sel += select_pattern(args[i], dir, filetype, &err);
 	}
+
+	if (f == 0)
+		fprintf(stderr, "Missing parameter. Try 's --help'\n");
 
 	free(dir);
 	return print_sel_results(new_sel, sel_path, pattern, err);

@@ -526,6 +526,8 @@ Examples:\n\
 #define SEL_USAGE "Select one or multiple files\n\
 Usage:\n\
   s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\
+Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink, (s)ocket, \
+(f)ifo/pipe, (b)lock device, (c)haracter device\n\n\
 Examples:\n\
 - Select the file whose ELN is 12:\n\
     s 12\n\
