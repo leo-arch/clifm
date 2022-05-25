@@ -722,100 +722,100 @@ Page Down: Advance one page\nq: Stop pagging\n"
 #endif
 
 #define SHORT_OPTIONS "\
-\n -a, --no-hidden\t\t Do not show hidden files (default)\
-\n -A, --show-hidden\t\t Show hidden files\
-\n -b, --bookmarks-file=FILE\t Specify an alternative bookmarks file\
-\n -c, --config-file=FILE\t\t Specify an alternative configuration file\
-\n -D, --config-dir=DIR\t\t Specify an alternative configuration directory\
-\n -e, --no-eln\t\t\t Do not print ELN's (entry list number) \
-\n -f, --no-folders-first\t\t Do not list folders first\
-\n -F, --folders-first\t\t List folders first (default)\
-\n -g, --pager\t\t\t Enable the pager\
-\n -G, --no-pager\t\t\t Disable the pager (default)\
-\n -h, --help\t\t\t Show this help and exit\
-\n -H, --horizontal-list\t\t List files horizontally\
-\n -i, --no-case-sensitive\t No case-sensitive files listing (default)\
-\n -I, --case-sensitive\t\t Case-sensitive files listing\
-\n -k, --keybindings-file=FILE\t Specify an alternative keybindings file\
-\n -l, --no-long-view\t\t Disable long view mode (default)\
-\n -L, --long-view\t\t Enable long view mode\
-\n -m, --dihist-map\t\t Enable the directory history map\
-\n -o, --no-autols\t\t Do not list files automatically\
-\n -O, --autols\t\t\t List files automatically (default)\
-\n -p, --path=PATH\t\t Use PATH as CliFM's starting path (deprecated: use positional \
+\n  -a, --no-hidden\t\t Do not show hidden files (default)\
+\n  -A, --show-hidden\t\t Show hidden files\
+\n  -b, --bookmarks-file=FILE\t Specify an alternative bookmarks file\
+\n  -c, --config-file=FILE\t Specify an alternative configuration file\
+\n  -D, --config-dir=DIR\t\t Specify an alternative configuration directory\
+\n  -e, --no-eln\t\t\t Do not print ELN's (entry list number) \
+\n  -f, --no-folders-first\t Do not list folders first\
+\n  -F, --folders-first\t\t List folders first (default)\
+\n  -g, --pager\t\t\t Enable the pager\
+\n  -G, --no-pager\t\t Disable the pager (default)\
+\n  -h, --help\t\t\t Show this help and exit\
+\n  -H, --horizontal-list\t\t List files horizontally\
+\n  -i, --no-case-sensitive\t No case-sensitive files listing (default)\
+\n  -I, --case-sensitive\t\t Case-sensitive files listing\
+\n  -k, --keybindings-file=FILE\t Specify an alternative keybindings file\
+\n  -l, --no-long-view\t\t Disable long view mode (default)\
+\n  -L, --long-view\t\t Enable long view mode\
+\n  -m, --dihist-map\t\t Enable the directory history map\
+\n  -o, --no-autols\t\t Do not list files automatically\
+\n  -O, --autols\t\t\t List files automatically (default)\
+\n  -p, --path=PATH\t\t Use PATH as CliFM's starting path (deprecated: use positional \
 parameters instead)\
-\n -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
-\n -s, --splash \t\t\t Enable the splash screen\
-\n -S, --stealth-mode \t\t Leave no trace on the host system (see the manpage)\
-\n -t, --disk-usage-analyzer \t Run in disk usage analyzer mode\
-\n -u, --no-unicode \t\t Disable Unicode\
-\n -U, --unicode \t\t\t Enable Unicode support (default)\
-\n -v, --version\t\t\t Show version details and exit\
-\n -w, --workspace=NUM\t\t Start in workspace NUM\
-\n -x, --no-ext-cmds\t\t Disallow the use of external commands\
-\n -y, --light-mode\t\t Enable the light mode\
-\n -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
+\n  -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
+\n  -s, --splash\t\t\t Enable the splash screen\
+\n  -S, --stealth-mode\t\t Leave no trace on the host system (see the manpage)\
+\n  -t, --disk-usage-analyzer \t Run in disk usage analyzer mode\
+\n  -u, --no-unicode\t\t Disable Unicode\
+\n  -U, --unicode \t\t Enable Unicode support (default)\
+\n  -v, --version\t\t\t Show version details and exit\
+\n  -w, --workspace=NUM\t\t Start in workspace NUM\
+\n  -x, --no-ext-cmds\t\t Disallow the use of external commands\
+\n  -y, --light-mode\t\t Enable the light mode\
+\n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
 
 #define LONG_OPTIONS "\
-\n     --case-sens-dirjump\t Do not ignore case when consulting the jump \
+\n      --case-sens-dirjump\t Do not ignore case when consulting the jump \
 database (via the 'j' command)\
-\n     --case-sens-path-comp\t Enable case sensitive path completion\
-\n     --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
-\n     --color-scheme=NAME\t Use color scheme NAME\
-\n     --cwd-in-title\t\t Print current directory in terminal window title\
-\n     --disk-usage\t\t Show disk usage (free/total)\
-\n     --enable-logs\t\t Enable program logs\
-\n     --expand-bookmarks\t\t Expand bookmark names into the corresponding \
+\n      --case-sens-path-comp\t Enable case sensitive path completion\
+\n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
+\n      --color-scheme=NAME\t Use color scheme NAME\
+\n      --cwd-in-title\t\t Print current directory in terminal window title\
+\n      --disk-usage\t\t Show disk usage (free/total)\
+\n      --enable-logs\t\t Enable program logs\
+\n      --expand-bookmarks\t Expand bookmark names into the corresponding \
 bookmark paths\
-\n     --full-dir-size\t\t Print the size of directories and their contents \
+\n      --full-dir-size\t\t Print the size of directories and their contents \
 in long view mode\
-\n     --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
+\n      --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
-\n     --icons\t\t\t Enable icons\
-\n     --icons-use-file-color\t Icons color follows file color\
-\n     --int-vars\t\t\t Enable internal variables\
-\n     --list-and-quit\t\t List files and quit. It may be used in conjunction with -p\
-\n     --max-dirhist\t\t Maximum number of visited directories to recall\
-\n     --max-files=NUM\t\t List only up to NUM files\
-\n     --max-path=NUM\t\t Set the maximun number of characters \
+\n      --icons\t\t\t Enable icons\
+\n      --icons-use-file-color\t Icons color follows file color\
+\n      --int-vars\t\t Enable internal variables\
+\n      --list-and-quit\t\t List files and quit. It may be used in conjunction with -p\
+\n      --max-dirhist\t\t Maximum number of visited directories to recall\
+\n      --max-files=NUM\t\t List only up to NUM files\
+\n      --max-path=NUM\t\t Set the maximun number of characters \
 after which the current directory in the prompt line will be abreviated to the \
 directory base name (if \\z is used in the prompt)\
-\n     --no-dir-jumper\t\t Disable the directory jumper function\
-\n     --no-cd-auto\t\t Disable the autocd function\
-\n     --no-classify\t\t Do not append file type indicators\
-\n     --no-clear-screen\t\t Do not clear the screen when listing directories\
-\n     --no-color\t\t\t Disable colors \
-\n     --no-columns\t\t Disable columned files listing\
-\n     --no-control-d-exit\t Do not allow exit on EOF (Control-d)\
-\n     --no-file-cap\t\t Do not check files capabilities when listing files\
-\n     --no-file-ext\t\t Do not check files extension when listing files\
-\n     --no-files-counter\t\t Disable the files counter for directories\
-\n     --no-follow-symlink\t Do not follow symbolic links when listing files\
-\n     --no-highlight\t\t Disable syntax highlighting\
-\n     --no-history\t\t Do not write commands into the history file\
-\n     --no-open-auto\t\t Same as no-cd-auto, but for files\
-\n     --no-restore-last-path\t Save last visited directory to be restored \
+\n      --no-dir-jumper\t\t Disable the directory jumper function\
+\n      --no-cd-auto\t\t Disable the autocd function\
+\n      --no-classify\t\t Do not append file type indicators\
+\n      --no-clear-screen\t\t Do not clear the screen when listing directories\
+\n      --no-color\t\t Disable colors \
+\n      --no-columns\t\t Disable columned files listing\
+\n      --no-control-d-exit\t Do not allow exit on EOF (Control-d)\
+\n      --no-file-cap\t\t Do not check files capabilities when listing files\
+\n      --no-file-ext\t\t Do not check files extension when listing files\
+\n      --no-files-counter\t Disable the files counter for directories\
+\n      --no-follow-symlink\t Do not follow symbolic links when listing files\
+\n      --no-highlight\t\t Disable syntax highlighting\
+\n      --no-history\t\t Do not write commands into the history file\
+\n      --no-open-auto\t\t Same as no-cd-auto, but for files\
+\n      --no-restore-last-path\t Save last visited directory to be restored \
 in the next session\
-\n     --no-suggestions\t\t Disable auto-suggestions\
-\n     --no-tips\t\t\t Disable startup tips\
-\n     --no-warning-prompt\t Disable the warning prompt\
-\n     --no-welcome-message\t Disable the welcome message\
-\n     --only-dirs\t\t List only directories and symbolic links to directories\
-\n     --open=FILE\t\t Run as a stand-alone resource opener: open FILE and exit\
-\n     --opener=APPLICATION\t Resource opener to use instead of 'lira',\
+\n      --no-suggestions\t\t Disable auto-suggestions\
+\n      --no-tips\t\t\t Disable startup tips\
+\n      --no-warning-prompt\t Disable the warning prompt\
+\n      --no-welcome-message\t Disable the welcome message\
+\n      --only-dirs\t\t List only directories and symbolic links to directories\
+\n      --open=FILE\t\t Run as a stand-alone resource opener: open FILE and exit\
+\n      --opener=APPLICATION\t Resource opener to use instead of 'lira',\
 CliFM's built-in opener\
-\n     --print-sel\t\t Keep the list of selected files in sight\
-\n     --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
-\n     --secure-cmds\t\t Filter commands to prevent command injection\
-\n     --secure-env\t\t Run in a sanitized environment (regular mode)\
-\n     --secure-env-full\t\t Run in a sanitized environment (full mode)\
-\n     --share-selbox\t\t Make the Selection Box common to different profiles\
-\n     --si\t\t\t Print sizes in powers of 1000, as defined in the \
+\n      --print-sel\t\t Keep the list of selected files in sight\
+\n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
+\n      --secure-cmds\t\t Filter commands to prevent command injection\
+\n      --secure-env\t\t Run in a sanitized environment (regular mode)\
+\n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
+\n      --share-selbox\t\t Make the Selection Box common to different profiles\
+\n      --si\t\t\t Print sizes in powers of 1000, as defined in the \
 International System of Units (SI), instead of 1024 (Linux only)\
-\n     --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z \
+\n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z \
 (default order)\
-\n     --std-tab-comp\t\t Force the use of standard TAB completion\
-\n     --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
+\n      --std-tab-comp\t\t Force the use of standard TAB completion\
+\n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 'rm' to prevent accidental deletions\n"
 
 #define CLIFM_COMMANDS "\
