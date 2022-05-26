@@ -556,6 +556,8 @@ print_match(char *match, const size_t len, const unsigned char c)
 			_color = get_comp_color(p ? p : match, &attr, &free_color);
 			if (_color)
 				color = _color;
+			else
+				free_color = 0;
 		}
 	} else {
 		suggestion.filetype = DT_DIR;

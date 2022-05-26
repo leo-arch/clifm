@@ -122,7 +122,7 @@ get_ext_opts_fish(char *cmd)
 
 		/* Get short option */
 		char *q = strstr(line, "-s "), *qq = (char *)NULL;
-		if (q && q + 1 && q + 2 && q + 3) {
+		if (q && *(q + 1) && *(q + 2) && *(q + 3)) {
 			qq = strchr(q + 3, ' ');
 			if (qq) *qq = '\0';
 			snprintf(ext_opts[n], MAX_EXT_OPTS_LEN, "-%s", q + 3);
@@ -131,10 +131,10 @@ get_ext_opts_fish(char *cmd)
 		}
 
 		/* Get long option (-OPT or --OPT) */
-		q = strstr((qq && (qq + 1)) ? qq + 1 : line, "-l ");
+		q = strstr((qq && *(qq + 1)) ? qq + 1 : line, "-l ");
 		if (!q)
-			q = strstr((qq && (qq + 1)) ? qq + 1 : line, "-o ");
-		if (q && q + 1 && q + 2 && q + 3) {
+			q = strstr((qq && *(qq + 1)) ? qq + 1 : line, "-o ");
+		if (q && *(q + 1) && *(q + 2) && *(q + 3)) {
 			qq = strchr(q + 3, ' ');
 			if (qq)	*qq = '\0';
 
@@ -2390,7 +2390,7 @@ my_rl_completion(const char *text, int start, int end)
 			if (a) {
 				*a = '\0';
 				char *b = strrchr(rl_line_buffer, ' ');
-				xstrsncpy(lw, (b && b + 1) ? b + 1 : rl_line_buffer, sizeof(lw));
+				xstrsncpy(lw, (b && *(b + 1)) ? b + 1 : rl_line_buffer, sizeof(lw));
 				*a = ' ';
 			}
 			if (*lw && get_ext_opts_fish(lw) > 0
