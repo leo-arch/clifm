@@ -429,12 +429,12 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 
 /* Get word after last non-escaped slash */
 static inline char *
-get_last_word(char *matches)
+get_last_word(char *str)
 {
-	char *sl = matches;
+	char *sl = str;
 	char *d = (char *)NULL;
 	while (*sl) {
-		if (sl == matches) {
+		if (sl == str) {
 			if (*sl == '/')
 				d = sl;
 		} else {
@@ -445,7 +445,7 @@ get_last_word(char *matches)
 	}
 
 	if (!d) {
-		return matches;
+		return str;
 	} else {
 		if (*d == '/')
 			return d + 1;
