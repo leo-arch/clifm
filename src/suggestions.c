@@ -1196,7 +1196,7 @@ check_variables(const char *str, const size_t len)
 	return NO_MATCH;
 }
 
-static char*
+static char *
 get_last_word(const char *last_space, size_t buflen)
 {
 	if (last_space) {
@@ -1601,10 +1601,21 @@ rl_suggestions(const unsigned char c)
 	}
 
 	/* 3.b) Check already suggested string */
-	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)
+/*	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)
 	&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
 		printed = zero_offset = 1;
 		goto SUCCESS;
+	} */
+	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)) {
+		if (suggestion.type == HIST_SUG
+		&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
+			printed = zero_offset = 1;
+			goto SUCCESS;
+		}
+		if (c != ' ' && word && strncmp(word, suggestion_buf, wlen) == 0) {
+			printed = 1;
+			goto SUCCESS;
+		}
 	}
 
 	/* 3.c) Check CliFM internal parameters */
