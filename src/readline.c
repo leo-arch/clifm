@@ -102,7 +102,8 @@ get_ext_opts_fish(char *cmd)
 	if (stat(p, &a) == -1)
 		return EXIT_FAILURE;
 
-	FILE *fp = fopen(p, "r");
+	int fd;
+	FILE *fp = open_fstream_r(p, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -158,7 +159,7 @@ get_ext_opts_fish(char *cmd)
 	}
 
 	*ext_opts[n] = '\0'; /* Mark the end of the options array */
-	fclose(fp);
+	close_fstream(fp, fd);
 	return n;
 }
 
