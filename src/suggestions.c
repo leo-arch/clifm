@@ -515,7 +515,7 @@ match_print(char *match, size_t len, char *color, int append_slash)
 	*t = '\0';
 
 	if (append_slash == 1)
-		snprintf(t, NAME_MAX + 2, "%s/", match);
+		snprintf(t, sizeof(t), "%s/", match);
 
 	char *tmp = escape_str(*t ? t : match);
 	if (!tmp || !*tmp) {

@@ -1036,7 +1036,7 @@ my_rl_path_completion(const char *text, int state)
 					/* Keep a copy of the first regular match: it should take
 					 * precedences over fuzzy matches when suggesting */
 					if (suggestions && xargs.fuzzy_match == 1 && !*_fmatch)
-						xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
+						xstrsncpy(_fmatch, tmp, sizeof(_fmatch));
 				}
 			} else {
 				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
@@ -1046,7 +1046,7 @@ my_rl_path_completion(const char *text, int state)
 						continue;
 				} else {
 					if (suggestions && xargs.fuzzy_match == 1 && !*_fmatch)
-						xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
+						xstrsncpy(_fmatch, tmp, sizeof(_fmatch));
 				}
 			}
 
