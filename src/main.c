@@ -274,6 +274,7 @@ char
 	finder_in_file[PATH_MAX],
 	finder_out_file[PATH_MAX],
 #endif /* _NO_FZF */
+	_fmatch[NAME_MAX],
 
 	*actions_file = (char *)NULL,
 	*alt_bm_file = (char *)NULL,

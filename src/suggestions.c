@@ -610,7 +610,9 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 		return NO_MATCH;
 
 	cur_comp_type = TCMP_NONE;
+	*_fmatch = '\0';
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
+/*	char **_matches = my_rl_completion(str, nwords == 1 ? 0 : 1, rl_end); */
 	if (!_matches)
 		return NO_MATCH;
 
@@ -635,7 +637,8 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 		printed = get_print_status(str, _matches[1], len);
 		goto FREE;
 	}
-	printed = print_match(_matches[1], len, c);
+	printed = print_match(*_fmatch ? _fmatch : _matches[1], len, c);
+	*_fmatch = '\0';
 
 FREE:
 	free_matches(&_matches);
@@ -1603,18 +1606,14 @@ rl_suggestions(const unsigned char c)
 	}
 
 	/* 3.b) Check already suggested string */
-/*	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)
-	&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
-		printed = zero_offset = 1;
-		goto SUCCESS;
-	} */
 	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)) {
 		if (suggestion.type == HIST_SUG
 		&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
 			printed = zero_offset = 1;
 			goto SUCCESS;
 		}
-		if (c != ' ' && word && strncmp(word, suggestion_buf, wlen) == 0) {
+		if (c != ' ' && word && (case_sens_path_comp ? strncmp(word, suggestion_buf, wlen)
+		: strncasecmp(word, suggestion_buf, wlen)) == 0) {
 			printed = 1;
 			goto SUCCESS;
 		}
@@ -1773,9 +1772,8 @@ rl_suggestions(const unsigned char c)
 				if (c == ' ' && suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
 
-				printed = check_filenames(word, wlen,
-							c, last_space ? 0 : 1, full_word);
-
+/*				printed = check_filenames(word, wlen, c, last_space ? 0 : 1, full_word); */
+				printed = check_filenames(word, wlen, c, last_space ? 0 : 1, c == ' ' ? 1 : 0);
 				if (printed)
 					goto SUCCESS;
 			}

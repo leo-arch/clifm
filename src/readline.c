@@ -1032,6 +1032,11 @@ my_rl_path_completion(const char *text, int state)
 					if (xargs.fuzzy_match == 0 || *filename == '-'
 					|| fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
 						continue;
+				} else {
+					/* Keep a copy of the first regular match: it should take
+					 * precedences over fuzzy matches when suggesting */
+					if (suggestions && xargs.fuzzy_match == 1 && !*_fmatch)
+						xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
 				}
 			} else {
 				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
@@ -1039,6 +1044,9 @@ my_rl_path_completion(const char *text, int state)
 					if (xargs.fuzzy_match == 0 || *filename == '-'
 					|| fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
 						continue;
+				} else {
+					if (suggestions && xargs.fuzzy_match == 1 && !*_fmatch)
+						xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
 				}
 			}
 
@@ -2037,7 +2045,6 @@ my_rl_completion(const char *text, int start, int end)
 	else { /* Second word or more */
 		if (_xrename)
 			return (char **)NULL;
-
 		/* Command names completion for words after process separator:
 		 * ; | && */
 		if (nwords == 1 && rl_line_buffer[rl_end - 1] != ' '
