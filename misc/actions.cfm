@@ -10,25 +10,27 @@
 # instead. All parameters passed to the action command will be passed
 # to the corresponding plugin as well.
 
-i=img_viewer.sh
-kbgen=kbgen
-vid=vid_viewer.sh
-ptot=pdf_viewer.sh
-music=music_player.sh
-update=update.sh
-wall=wallpaper_setter.sh
-da=disk_analyzer.sh
-dr=dragondrop.sh
-fdups=fdups.sh
-bn=batch_create.sh
-cr=cprm.sh
-rrm=recur_rm.sh
 +=finder.sh
 ++=jumper.sh
 -=fzfnav.sh
 *=fzfsel.sh
 **=fzfdesel.sh
-h=fzfhist.sh
 //=rgfind.sh
 _=fzcd.sh
+bn=batch_create.sh
+cr=cprm.sh
+da=disk_analyzer.sh
+dh=fzfdirhist.sh
+dr=dragondrop.sh
+fdups=fdups.sh
+gg=pager.sh
+h=fzfhist.sh
+i=img_viewer.sh
 ih=ihelp.sh
+kbgen=kbgen
+music=music_player.sh
+ptot=pdf_viewer.sh
+rrm=recur_rm.sh
+update=update.sh
+vid=vid_viewer.sh
+wall=wallpaper_setter.sh
