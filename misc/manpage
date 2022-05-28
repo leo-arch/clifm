@@ -1815,6 +1815,9 @@ T{
 .BR music
 T}	Create a music playlist	music_player.sh	mplayer
 T{
+.BR gg
+T}	Pipe files in CWD through a pager	pager.sh	less, column 
+T{
 .BR ptot
 T}	Preview PDF files as text	pdf_viewer.sh	pdftotext 
 T{
