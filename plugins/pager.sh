@@ -30,12 +30,26 @@ fi
 
 TMP_DIR="${TMPDIR:-/tmp}"
 TMP_FILE=$(mktemp "$TMP_DIR/clifm_pager.XXXXXX")
-clifm -y --no-color --no-columns --list-and-quit --no-clear-screen "$PWD" > "$TMP_FILE"
+
+# This produces a columned but uncolored list of files
+$HOME/build/git_repos/clifm/src/clifm --no-color --no-columns --list-and-quit --no-clear-screen "$PWD" > "$TMP_FILE"
 
 # shellcheck disable=SC2086
 while read -r entry; do
 	printf "%s\n" "$entry"
 done < "$TMP_FILE" | column | "$_pager" $_pager_opts
+
+# To get a colored but uncolumned list of files, uncomment these lines and comment out the above ones
+# We use here most instead of less, since it supports color
+
+#$HOME/build/git_repos/clifm/src/clifm --no-columns --list-and-quit --no-clear-screen "$PWD" > "$TMP_FILE"
+#
+## shellcheck disable=SC2086
+#while read -r entry; do
+#	printf "%s \n" "$entry"
+#done < "$TMP_FILE" | most
+
+# Ideally, we want a columned AND colored list, I know, but this isn't working right now
 
 rm -- "$TMP_FILE"
 
