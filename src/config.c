@@ -2141,7 +2141,7 @@ init_config(void)
 #endif
 
 	char *t = getenv("TERM");
-	if (*t == 'x' && strncmp(t, "xterm", 5) == 0)
+	if (xargs.list_and_quit != 1 && *t == 'x' && strncmp(t, "xterm", 5) == 0)
 		/* If running Xterm, instruct it to send an escape code (27) for
 		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work */
 		fputs(META_SENDS_ESC, stdout); /* metaSendsEscape = true */

@@ -1401,7 +1401,8 @@ free_stuff(void)
 	free(tags_dir);
 
 	/* Restore the color of the running terminal */
-	fputs("\x1b[0;39;49m", stdout);
+	if (colorize == 1)
+		fputs("\x1b[0;39;49m", stdout);
 }
 
 /* Get current terminal dimensions and store them in TERM_COLS and

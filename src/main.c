@@ -828,7 +828,7 @@ _splash(void)
 static inline void
 _set_term_title(void)
 {
-	if (!(flags & GUI))
+	if (!(flags & GUI) || xargs.list_and_quit == 1)
 		return;
 
 	if (xargs.cwd_in_title == 0) {

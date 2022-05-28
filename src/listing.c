@@ -279,7 +279,8 @@ get_ext_icon(const char *restrict ext, int n)
 static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
-	fputs(UNHIDE_CURSOR, stdout); /* Unhide the cursor */
+	if (xargs.list_and_quit != 1)
+		fputs(UNHIDE_CURSOR, stdout);
 	if (close_dir && closedir(dir) == -1)
 		return EXIT_FAILURE;
 
@@ -1808,7 +1809,7 @@ list_dir(void)
 		dir_out = 0;
 	}
 
-	if (clear_screen)
+	if (clear_screen == 1)
 		CLEAR;
 
 	if (xargs.disk_usage_analyzer == 1
@@ -1822,7 +1823,8 @@ list_dir(void)
 		trim.len = 0;
 	}
 
-	fputs(HIDE_CURSOR, stdout);
+	if (xargs.list_and_quit != 1)
+		fputs(HIDE_CURSOR, stdout);
 	reset_stats();
 	get_term_size();
 
