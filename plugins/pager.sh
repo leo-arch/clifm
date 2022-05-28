@@ -28,12 +28,16 @@ if [ "$_pager" = "less" ]; then
 	_pager_opts="-ncs -PCliFM --tilde"
 fi
 
-eln=1
+#eln=1
 
 # shellcheck disable=SC2086
-for entry in *; do
-	printf "%d %s\n" "$eln" "$entry"
-	eln=$((eln+1))
+for entry in * .*; do
+	if [ "$entry" = "." ] || [ "$entry" = ".." ]; then
+		continue
+	fi
+	printf "%s\n" "$entry"
+#	printf "%d %s\n" "$eln" "$entry"
+#	eln=$((eln+1))
 done | column | "$_pager" $_pager_opts
 
 exit 0

@@ -563,8 +563,7 @@ rl_accept_suggestion(int count, int key)
 		} else {
 			/* Last word: neither space nor slash */
 			size_t len = strlen(suggestion_buf);
-			if (suggestion_buf[len - 1] != '/'
-			&& suggestion_buf[len - 1] != ' ')
+			if (suggestion_buf[len - 1] != '/' && suggestion_buf[len - 1] != ' ')
 				suggestion.type = NO_SUG;
 			accept_first_word = 0;
 			s = (char *)NULL;
