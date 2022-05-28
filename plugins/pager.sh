@@ -32,7 +32,7 @@ TMP_DIR="${TMPDIR:-/tmp}"
 TMP_FILE=$(mktemp "$TMP_DIR/clifm_pager.XXXXXX")
 
 # This produces a columned but uncolored list of files
-$HOME/build/git_repos/clifm/src/clifm --no-color --no-columns --list-and-quit --no-clear-screen "$PWD" > "$TMP_FILE"
+clifm --no-color --no-columns --list-and-quit --no-clear-screen "$PWD" > "$TMP_FILE"
 
 # shellcheck disable=SC2086
 while read -r entry; do
@@ -42,7 +42,7 @@ done < "$TMP_FILE" | column | "$_pager" $_pager_opts
 # To get a colored but uncolumned list of files, uncomment these lines and comment out the above ones
 # We use here most instead of less, since it supports color
 
-#$HOME/build/git_repos/clifm/src/clifm --no-columns --list-and-quit --no-clear-screen "$PWD" > "$TMP_FILE"
+#clifm --no-columns --list-and-quit --no-clear-screen "$PWD" > "$TMP_FILE"
 #
 ## shellcheck disable=SC2086
 #while read -r entry; do
