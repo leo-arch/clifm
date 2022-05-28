@@ -28,16 +28,15 @@ if [ "$_pager" = "less" ]; then
 	_pager_opts="-ncs -PCliFM --tilde"
 fi
 
-#eln=1
+TMP_DIR="${TMPDIR:-/tmp}"
+TMP_FILE=$(mktemp "$TMP_DIR/clifm_pager.XXXXXX")
+clifm -y --no-color --no-columns --list-and-quit --no-clear-screen "$PWD" > "$TMP_FILE"
 
 # shellcheck disable=SC2086
-for entry in * .*; do
-	if [ "$entry" = "." ] || [ "$entry" = ".." ]; then
-		continue
-	fi
+while read -r entry; do
 	printf "%s\n" "$entry"
-#	printf "%d %s\n" "$eln" "$entry"
-#	eln=$((eln+1))
-done | column | "$_pager" $_pager_opts
+done < "$TMP_FILE" | column | "$_pager" $_pager_opts
+
+rm -- "$TMP_FILE"
 
 exit 0
