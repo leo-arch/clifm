@@ -311,8 +311,7 @@ get_entry_color(char **matches, const size_t i)
 }
 
 static inline void
-write_completion(char *buf, const size_t *offset, int *exit_status,
-				const int multi)
+write_completion(char *buf, const size_t *offset, int *exit_status, const int multi)
 {
 	/* Remove ending new line char */
 	char *n = strchr(buf, '\n');
@@ -361,9 +360,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 
 	char deq_str[PATH_MAX];
 	*deq_str = '\0';
-	/* Clang static analysis complains that tmp[4] (deq_str[4]) is a
-	 * garbage value. Initialize only this exact value to get rid of the
-	 * warning */
+	/* Clang static analysis complains that tmp[4] (deq_str[4]) is a garbage
+	 * value. Initialize only this exact value to get rid of the warning */
 	deq_str[4] = '\0';
 	if (strchr(ss, '\\')) {
 		size_t i = 0;
@@ -535,7 +533,7 @@ get_tagged_file_target(char *filename)
 }
 
 static char *
-print_no_fzf_file(void)
+print_no_finder_file(void)
 {
 	_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
 		finder_out_file, strerror(errno));
@@ -549,7 +547,7 @@ get_fzf_output(const int multi)
 {
 	FILE *fp = fopen(finder_out_file, "r");
 	if (!fp)
-		return print_no_fzf_file();
+		return print_no_finder_file();
 
 	char *buf = (char *)xnmalloc(1, sizeof(char)), *line = (char *)NULL;
 	*buf = '\0';
@@ -1011,8 +1009,7 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 		return EXIT_FAILURE;
 
 	/* Calculate the length of the matching prefix to insert into the
-	 * line buffer only the non-matched part of the string returned
-	 * by FZF */
+	 * line buffer only the non-matched part of the string returned by FZF */
 	size_t prefix_len = calculate_prefix_len(matches[0]);
 
 	if (cur_comp_type == TCMP_OPENWITH) {
@@ -1089,13 +1086,12 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 		}
 
 	} else {
-		if (!case_sens_path_comp && query) {
-			/* Honor case insensitive completion */
-			size_t query_len = strlen(query);
-			if (strncmp(query, buf, query_len) != 0) {
+		if ((case_sens_path_comp == 0 || xargs.fuzzy_match == 1) && query) {
+			/* Honor case insensitive completion/fuzzy matches */
+			if (strncmp(matches[0], buf, prefix_len) != 0) {
 				int bk = rl_point;
-				rl_delete_text(bk - (int)query_len, rl_end);
-				rl_point = rl_end = bk - (int)query_len;
+				rl_delete_text(bk - (int)prefix_len, rl_end);
+				rl_point = rl_end = bk - (int)prefix_len;
 				prefix_len = 0;
 			}
 		}
