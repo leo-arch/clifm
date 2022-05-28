@@ -350,7 +350,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	flags &= ~BAEJ_SUGGESTION;
 
 	/* Let's check for baej suggestions, mostly in case of fuzzy matches */
-	size_t wlen = strlen(last_word);
+	size_t wlen = last_word ? strlen(last_word) : 0;
 	if (cur_comp_type == TCMP_PATH && (case_sens_path_comp ? strncmp(last_word, str, wlen)
 	: strncasecmp(last_word, str, wlen)) != 0) {
 		flags |= BAEJ_SUGGESTION;
