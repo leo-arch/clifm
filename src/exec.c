@@ -718,7 +718,7 @@ unicode_function(char *arg)
 }
 
 static int
-folders_first_function(char *arg)
+dirs_first_function(char *arg)
 {
 	if (autols == 0)
 		return EXIT_SUCCESS;
@@ -736,16 +736,16 @@ folders_first_function(char *arg)
 	int exit_status = EXIT_SUCCESS;
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		printf(_("Folders first is %s\n"),
-			list_folders_first == 1 ? _("enabled") : _("disabled"));
+		printf(_("Directories first is %s\n"),
+			list_dirs_first == 1 ? _("enabled") : _("disabled"));
 	}  else if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		list_folders_first = 1;
+		list_dirs_first = 1;
 		if (autols == 1) reload_dirlist();
-		print_reload_msg(_("Folders first enabled\n"));
+		print_reload_msg(_("Directories first enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		list_folders_first = 0;
+		list_dirs_first = 0;
 		if (autols == 1) reload_dirlist();
-		print_reload_msg(_("Folders first disabled\n"));
+		print_reload_msg(_("Directories first disabled\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(FF_USAGE));
 		return EXIT_FAILURE;
@@ -2400,10 +2400,10 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "unicode") == 0))
 		return (exit_code = unicode_function(comm[1]));
 
-	/* #### FOLDERS FIRST #### */
-	else if (*comm[0] == 'f' && ((comm[0][1] == 'f' && !comm[0][2])
-	|| strcmp(comm[0], "folders-first") == 0))
-		return (exit_code = folders_first_function(comm[1]));
+	/* #### DIRECTORIES FIRST #### */
+	else if ((*comm[0] == 'f' && comm[0][1] == 'f' && !comm[0][2])
+	|| (*comm[0] == 'd' && strcmp(comm[0], "dirs-first") == 0))
+		return (exit_code = dirs_first_function(comm[1]));
 
 	/* #### LOG #### */
 	else if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0)

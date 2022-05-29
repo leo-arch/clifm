@@ -225,8 +225,8 @@ search_glob(char **comm, int invert)
 	size_t g = 0;
 	char **gfiles = (char **)NULL;
 
-	/* glob(3) doesn't sort folders first. Let's do it ourselves */
-	if (list_folders_first == 1) {
+	/* glob(3) doesn't sort directories first. Let's do it ourselves */
+	if (list_dirs_first == 1) {
 		int *dirs = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
 		gfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, sizeof(char *));
 		for (i = 0; globbed_files.gl_pathv[i]; i++) {
@@ -468,7 +468,7 @@ END:
 	free(eln);
 	free(files_len);
 	free(pfiles);
-	if (list_folders_first == 1)
+	if (list_dirs_first == 1)
 		free(gfiles);
 	globfree(&globbed_files);
 

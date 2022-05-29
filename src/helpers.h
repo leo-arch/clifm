@@ -173,7 +173,7 @@ extern struct timespec timeout;
 extern int watch;
 
 /* Options flags */
-#define FOLDERS_FIRST (1 << 1)
+#define DIRS_FIRST    (1 << 1)
 #define HELP          (1 << 2)
 #define HIDDEN        (1 << 3)
 #define AUTOLS        (1 << 4)
@@ -700,7 +700,7 @@ struct param {
 	int disk_usage_analyzer;
 	int expand_bookmarks;
 	int ext;
-	int ffirst;
+	int dirs_first;
 	int files_counter;
 	int follow_symlinks;
 	int full_dir_size;
@@ -956,7 +956,7 @@ extern int
 	kb_shortcut,
 	kbind_busy,
 	light_mode,
-	list_folders_first,
+	list_dirs_first,
 	listing_mode,
 	logs_enabled,
 	long_view,

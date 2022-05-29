@@ -357,7 +357,7 @@ bookmarks:\\M-b\n\
 select-all:\\M-a\n\
 deselect-all:\\M-d\n\
 mountpoints:\\M-m\n\
-folders-first:\\M-g\n\
+dirs-first:\\M-g\n\
 selbox:\\M-s\n\
 lock:\\M-o\n\
 # F6-12\n\
@@ -932,7 +932,7 @@ SortReverse=%s\n\n"
 
 	    "# Print a usage tip at startup\n\
 Tips=%s\n\n\
-ListFoldersFirst=%s\n\n\
+ListDirsFirst=%s\n\n\
 # Enable case sensitive listing for files in the current directory\n\
 CaseSensitiveList=%s\n\n\
 # Enable case sensitive lookup for the directory jumper function (via \n\
@@ -990,7 +990,7 @@ RlEditMode=%d\n\n",
 		DEF_SORT,
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
 		DEF_TIPS == 1 ? "true" : "false",
-		DEF_LIST_FOLDERS_FIRST == 1 ? "true" : "false",
+		DEF_LIST_DIRS_FIRST == 1 ? "true" : "false",
 		DEF_CASE_SENS_LIST == 1 ? "true" : "false",
 		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
 		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
@@ -1684,9 +1684,9 @@ read_config(void)
 				continue;
 		}
 
-		else if (xargs.ffirst == UNSET && *line == 'L'
-		&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
-			if (set_config_bool_value(line, &list_folders_first) == -1)
+		else if (xargs.dirs_first == UNSET && *line == 'L'
+		&& strncmp(line, "ListDirsFirst=", 17) == 0) {
+			if (set_config_bool_value(line, &list_dirs_first) == -1)
 				continue;
 		}
 
@@ -2036,7 +2036,7 @@ read_config(void)
 	if (xargs.disk_usage_analyzer == 1) {
 		sort = STSIZE;
 		long_view = full_dir_size = 1;
-		list_folders_first = welcome_message = 0;
+		list_dirs_first = welcome_message = 0;
 	}
 
 	if (_filter) {
@@ -2262,7 +2262,7 @@ reset_variables(void)
 #endif
 	int_vars = UNSET;
 	light_mode = UNSET;
-	list_folders_first = UNSET;
+	list_dirs_first = UNSET;
 	listing_mode = UNSET;
 	logs_enabled = UNSET;
 	long_view = UNSET;
@@ -2375,8 +2375,8 @@ check_cmd_line_options(void)
 	if (xargs.ext != UNSET)
 		ext_cmd_ok = xargs.ext;
 
-	if (xargs.ffirst != UNSET)
-		list_folders_first = xargs.ffirst;
+	if (xargs.dirs_first != UNSET)
+		list_dirs_first = xargs.dirs_first;
 
 	if (xargs.files_counter != UNSET)
 		files_counter = xargs.files_counter;

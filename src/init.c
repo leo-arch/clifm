@@ -1240,8 +1240,8 @@ external_arguments(int argc, char **argv)
 	    {"config-file", required_argument, 0, 'c'},
 	    {"config-dir", required_argument, 0, 'D'},
 	    {"no-eln", no_argument, 0, 'e'},
-	    {"no-folders-first", no_argument, 0, 'f'},
-	    {"folders-first", no_argument, 0, 'F'},
+	    {"no-dirs-first", no_argument, 0, 'f'},
+	    {"dirs-first", no_argument, 0, 'F'},
 	    {"pager", no_argument, 0, 'g'},
 	    {"no-pager", no_argument, 0, 'G'},
 	    {"help", no_argument, 0, 'h'},
@@ -1576,13 +1576,13 @@ RUN:
 		case 'e': xargs.noeln = no_eln = 1;	break;
 
 		case 'f':
-			flags &= ~FOLDERS_FIRST;
-			list_folders_first = xargs.ffirst = 0;
+			flags &= ~DIRS_FIRST;
+			list_dirs_first = xargs.dirs_first = 0;
 			break;
 
 		case 'F':
-			flags |= FOLDERS_FIRST;
-			list_folders_first = xargs.ffirst = 1;
+			flags |= DIRS_FIRST;
+			list_dirs_first = xargs.dirs_first = 1;
 			break;
 
 		case 'g': pager = xargs.pager = 1; break;
@@ -1903,7 +1903,7 @@ unset_xargs(void)
 	xargs.disk_usage_analyzer = UNSET;
 	xargs.expand_bookmarks = UNSET;
 	xargs.ext = UNSET;
-	xargs.ffirst = UNSET;
+	xargs.dirs_first = UNSET;
 	xargs.files_counter = UNSET;
 	xargs.follow_symlinks = UNSET;
 	xargs.full_dir_size = UNSET;
@@ -2862,11 +2862,11 @@ check_options(void)
 			clear_screen = xargs.clear_screen;
 	}
 
-	if (list_folders_first == UNSET) {
-		if (xargs.ffirst == UNSET)
-			list_folders_first = DEF_LIST_FOLDERS_FIRST;
+	if (list_dirs_first == UNSET) {
+		if (xargs.dirs_first == UNSET)
+			list_dirs_first = DEF_LIST_DIRS_FIRST;
 		else
-			list_folders_first = xargs.ffirst;
+			list_dirs_first = xargs.dirs_first;
 	}
 
 	if (autols == UNSET) {

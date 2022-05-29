@@ -502,7 +502,7 @@ print_tips(int all)
 		"Jump to the Selection Box by pressing 'Alt-s'",
 		"Restore trashed files using the 'u' command",
 		"Empty the trash bin running 't clear'",
-		"Press Alt-f to toggle list-folders-first on/off",
+		"Press Alt-g to toggle list-directories-first on/off",
 		"Use the 'fc' command to disable the files counter",
 		"Take a look at the splash screen with the 'splash' command",
 		"Have some fun trying the 'bonus' command",

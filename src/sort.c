@@ -278,7 +278,7 @@ entrycmp(const void *a, const void *b)
 	struct fileinfo *pb = (struct fileinfo *)b;
 	int ret = 0, st = sort;
 
-	if (list_folders_first) {
+	if (list_dirs_first) {
 		ret = sort_dirs(pa->dir, pb->dir);
 		if (ret != 0)
 			return ret;

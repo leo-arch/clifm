@@ -820,7 +820,7 @@ rl_long(int count, int key)
 }
 
 static int
-rl_folders_first(int count, int key)
+rl_dirs_first(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
@@ -831,7 +831,7 @@ rl_folders_first(int count, int key)
 		free_suggestion();
 #endif
 
-	list_folders_first = list_folders_first ? 0 : 1;
+	list_dirs_first = list_dirs_first ? 0 : 1;
 
 	if (autols == 1) {
 		free_dirlist();
@@ -839,8 +839,8 @@ rl_folders_first(int count, int key)
 		list_dir();
 	}
 
-	print_reload_msg(_("Folders first %s\n"),
-		list_folders_first ? "enabled" : "disabled");
+	print_reload_msg(_("Directories first %s\n"),
+		list_dirs_first ? "enabled" : "disabled");
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1688,17 +1688,17 @@ rl_toggle_disk_usage(int count, int key)
 		sort = tsort;
 		long_view = tlong;
 		full_dir_size = tdirsize;
-		list_folders_first = tff;
+		list_dirs_first = tff;
 	} else {
 		xargs.disk_usage_analyzer = 1;
 		tsort = sort;
 		tlong = long_view;
 		tdirsize = full_dir_size;
-		tff = list_folders_first;
+		tff = list_dirs_first;
 
 		sort = STSIZE;
 		long_view = full_dir_size = 1;
-		list_folders_first = 0;
+		list_dirs_first = 0;
 	}
 
 	int exit_status = EXIT_SUCCESS;
@@ -1858,7 +1858,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("toggle-hidden2"), rl_hidden);
 		rl_bind_keyseq(find_key("toggle-long"), rl_long);
 		rl_bind_keyseq(find_key("toggle-light"), rl_light);
-		rl_bind_keyseq(find_key("folders-first"), rl_folders_first);
+		rl_bind_keyseq(find_key("dirs-first"), rl_dirs_first);
 		rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
 		rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
 		rl_bind_keyseq(find_key("only-dirs"), rl_onlydirs);
@@ -1953,7 +1953,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-.", rl_hidden);
 		rl_bind_keyseq("\\M-l", rl_long);
 		rl_bind_keyseq("\\M-y", rl_light);
-		rl_bind_keyseq("\\M-g", rl_folders_first);
+		rl_bind_keyseq("\\M-g", rl_dirs_first);
 		rl_bind_keyseq("\\M-z", rl_sort_previous);
 		rl_bind_keyseq("\\M-x", rl_sort_next);
 		rl_bind_keyseq("\\M-,", rl_onlydirs);

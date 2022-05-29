@@ -209,7 +209,7 @@ wc=01;36:wm=01;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:"
 #define DEF_ICONS 0
 #define DEF_INT_VARS 0
 #define DEF_LIGHT_MODE 0
-#define DEF_LIST_FOLDERS_FIRST 1
+#define DEF_LIST_DIRS_FIRST 1
 #define DEF_LISTING_MODE VERTLIST
 #define DEF_LOGS_ENABLED 0
 #define DEF_LONG_VIEW 0

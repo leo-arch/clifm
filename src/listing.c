@@ -1123,8 +1123,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	if (nn % (int)columns_n > 0)
 		rows++;
 
-	/* The previous value of LAST_COLUMN. We need this value to run the
-	 * pager */
+	/* The previous value of LAST_COLUMN. We need this value to run the pager */
 	int last_column = 0;
 	int blc = last_column;
 

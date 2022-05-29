@@ -89,7 +89,7 @@ NAME is not specified, print the list of all parent directories\n\
 Usage:\n\
   bd [NAME]\n\n\
 Example:\n\
-- Supposing you are in ~/Documents/misc/some/deep/folder, change to ~/Documents/misc:\n\
+- Supposing you are in ~/Documents/misc/some/deep/dir, change to ~/Documents/misc:\n\
     bd mi"
 
 #define BL_USAGE "Create multiple symbolic links at once\n\
@@ -215,13 +215,13 @@ Examples:\n\
 Usage:\n\
   fc, filescounter [on, off, status]"
 
-#define FF_USAGE "Set list folders first on-off\n\
+#define FF_USAGE "Set list directories first on-off\n\
 Usage:\n\
-  ff, folders-first [on, off, status]\n\
+  ff, dirs-first [on, off, status]\n\
 Example:\n\
-- Disable list folders-first:\n\
+- Disable list directories-first:\n\
     ff off\n\
-  Note: Toggle folders-first on/off pressing Alt-g"
+  Note: Toggle directories-first on/off pressing Alt-g"
 
 #define FILTER_USAGE "Set a filter for the files list\n\
 Usage:\n\
@@ -728,8 +728,8 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -c, --config-file=FILE\t Specify an alternative configuration file\
 \n  -D, --config-dir=DIR\t\t Specify an alternative configuration directory\
 \n  -e, --no-eln\t\t\t Do not print ELN's (entry list number) \
-\n  -f, --no-folders-first\t Do not list folders first\
-\n  -F, --folders-first\t\t List folders first (default)\
+\n  -f, --no-dirs-first\t\t Do not list directories first\
+\n  -F, --dirs-first\t\t List directories first (default)\
 \n  -g, --pager\t\t\t Enable the pager\
 \n  -G, --no-pager\t\t Disable the pager (default)\
 \n  -h, --help\t\t\t Show this help and exit\
@@ -854,7 +854,7 @@ parameters.\n\n\
  ext [on, off, status]\n\
  f, forth [h, hist] [clear] [!ELN]\n\
  fc, filescounter [on, off, status]\n\
- ff, folders-first [on, off, status]\n\
+ ff, dirs-first [on, off, status]\n\
  fs\n\
  ft, filter [unset] [REGEX]\n\
  fz [on, off]\n\
@@ -905,7 +905,7 @@ parameters.\n\n\
  Right, C-f: Accept the entire suggestion\n\
  M-Right, M-f: Accept the first suggested word\n\
  M-c: Clear the current command line buffer\n\
- M-g: Toggle list-folders-first on/off\n\
+ M-g: Toggle list-dirs-first on/off\n\
  C-r: Refresh the screen\n\
  M-l: Toggle long view mode on/off\n\
  M-m: List mountpoints\n\
