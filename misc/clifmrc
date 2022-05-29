@@ -185,7 +185,7 @@ SortReverse=false
 # Print a usage tip at startup
 Tips=true
 
-ListFoldersFirst=true
+ListDirsFirst=true
 
 # Enable case sensitive listing for files in the current directory
 CaseSensitiveList=false
