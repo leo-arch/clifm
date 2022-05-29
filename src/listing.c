@@ -265,8 +265,7 @@ get_ext_icon(const char *restrict ext, int n)
 	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
 	while (--i >= 0) {
 		/* Tolower */
-		char c = (*ext >= 'A' && *ext <= 'Z')
-			     ? (char)(*ext - 'A' + 'a') : *ext;
+		char c = (*ext >= 'A' && *ext <= 'Z') ? (char)(*ext - 'A' + 'a') : *ext;
 		if (c == *icon_ext[i].name && strcasecmp(ext, icon_ext[i].name) == 0) {
 			file_info[n].icon = icon_ext[i].icon;
 			file_info[n].icon_color = icon_ext[i].color;
@@ -526,7 +525,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max)
 
 		if (!no_eln) /* Print ELN */
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
-				li_cb, file_info[i].sel ? '*' : ' ', df_c);
+				li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c);
 		/* Print the remaining part of the entry */
 		print_entry_props(&file_info[i], (size_t)space_left, ug_max);
 	}
@@ -586,26 +585,26 @@ print_entry_color(int *ind_char, const int i, const int pad)
 		if (no_eln) {
 			if (_trim) {
 				xprintf("%s%c%s%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
+					li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, (wchar_t *)n, trim_diff,
-					tt_c, '~', end_color);
+					tt_c, TRIMFILE_CHR, end_color);
 			} else {
 				xprintf("%s%c%s%s%s %s%s%s",
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
+					li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, n, end_color);
 			}
 		} else {
 			if (_trim) {
 				xprintf("%s%*d%s%s%c%s%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
-					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? '*' : ' ',
+					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? SELFILE_CHR : ' ',
 					df_c, file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, (wchar_t *)n, trim_diff,
-					tt_c, '~', end_color);
+					tt_c, TRIMFILE_CHR, end_color);
 			} else {
 				xprintf("%s%*d%s%s%c%s%s%s %s%s%s", el_c, pad, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
+					li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, n, end_color);
 			}
@@ -616,64 +615,40 @@ print_entry_color(int *ind_char, const int i, const int pad)
 		if (no_eln) {
 			if (_trim) {
 				xprintf("%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s",
-					li_cb, sel_n ? (file_info[i].sel ? '*' : ' ') : 0, df_c,
+					li_cb, sel_n ? (file_info[i].sel ? SELFILE_CHR : ' ') : 0, df_c,
 					file_info[i].color, (wchar_t *)n, trim_diff,
-					tt_c, '~', end_color);
+					tt_c, TRIMFILE_CHR, end_color);
 			} else {
 				xprintf("%s%c%s%s%s%s",
-					li_cb, sel_n ? (file_info[i].sel ? '*' : ' ') : 0, df_c,
+					li_cb, sel_n ? (file_info[i].sel ? SELFILE_CHR : ' ') : 0, df_c,
 					file_info[i].color, n, end_color);
 			}
 		} else {
 			if (_trim) {
 				xprintf("%s%*d%s%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s",
-					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? '*' : ' ',
+					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? SELFILE_CHR : ' ',
 					df_c, file_info[i].color, (wchar_t *)n,
-					trim_diff, tt_c, '~', end_color);
+					trim_diff, tt_c, TRIMFILE_CHR, end_color);
 			} else {
 				xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
-					li_cb, file_info[i].sel ? '*' : ' ', df_c,
+					li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c,
 					file_info[i].color, n, end_color);
 			}
 		}
 	}
-/*
-#else
-	if (no_eln) {
-		if (_trim) {
-			xprintf("%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s", li_cb,
-				file_info[i].sel ? '*' : ' ', df_c, file_info[i].color,
-				(wchar_t *)n, trim_diff, tt_c, '~', end_color);
-		} else {
-			xprintf("%s%c%s%s%s%s", li_cb, file_info[i].sel ? '*' : ' ',
-				df_c, file_info[i].color, n, end_color);
-		}
-	} else {
-		if (_trim) {
-			xprintf("%s%*d%s%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s",
-				el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? '*' : ' ',
-				df_c, file_info[i].color, (wchar_t *)n,
-				trim_diff, tt_c, '~', end_color);
-		} else {
-			xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
-				li_cb, file_info[i].sel ? '*' : ' ', df_c,
-				file_info[i].color, n, end_color);
-		}
-	}
-#endif *//* !_NO_ICONS */
 
 	if (classify) {
 		/* Append directory indicator and files counter */
 		switch (file_info[i].type) {
 		case DT_DIR:
-			putchar('/');
+			putchar(DIR_CHR);
 			if (file_info[i].filesn > 0 && files_counter)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
 
 		case DT_LNK:
 			if (file_info[i].dir)
-				putchar('/');
+				putchar(DIR_CHR);
 			if (file_info[i].filesn > 0 && files_counter)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
@@ -718,20 +693,20 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 	if (icons) {
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%c%s %ls%s%c", file_info[i].sel ? '*' : ' ',
-					file_info[i].icon, (wchar_t *)n, trim_diff, '~');
+				xprintf("%c%s %ls%s%c", file_info[i].sel ? SELFILE_CHR : ' ',
+					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR);
 			} else {
-				xprintf("%c%s %s", file_info[i].sel ? '*' : ' ',
+				xprintf("%c%s %s", file_info[i].sel ? SELFILE_CHR : ' ',
 				file_info[i].icon, n);
 			}
 		} else {
 			if (_trim) {
 				xprintf("%s%*d%s%c%s %ls%s%c", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ', file_info[i].icon,
-					(wchar_t *)n, trim_diff, '~');
+					file_info[i].sel ? SELFILE_CHR : ' ', file_info[i].icon,
+					(wchar_t *)n, trim_diff, TRIMFILE_CHR);
 			} else {
 				xprintf("%s%*d%s%c%s %s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ', file_info[i].icon, n);
+					file_info[i].sel ? SELFILE_CHR : ' ', file_info[i].icon, n);
 			}
 		}
 	} else
@@ -739,49 +714,29 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 	{
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%c%ls%s%c", file_info[i].sel ? '*' : ' ',
-					(wchar_t *)n, trim_diff, '~');
+				xprintf("%c%ls%s%c", file_info[i].sel ? SELFILE_CHR : ' ',
+					(wchar_t *)n, trim_diff, TRIMFILE_CHR);
 			} else {
-				xprintf("%c%s", file_info[i].sel ? '*' : ' ', n);
+				xprintf("%c%s", file_info[i].sel ? SELFILE_CHR : ' ', n);
 			}
 		} else {
 			if (_trim) {
 				xprintf("%s%*d%s%c%ls%s%c", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ', (wchar_t *)n,
-					trim_diff, '~');
+					file_info[i].sel ? SELFILE_CHR : ' ', (wchar_t *)n,
+					trim_diff, TRIMFILE_CHR);
 			} else {
 				xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
-					file_info[i].sel ? '*' : ' ', n);
+					file_info[i].sel ? SELFILE_CHR : ' ', n);
 			}
 		}
 	}
-/*
-#else
-	if (no_eln) {
-		if (_trim) {
-			xprintf("%c%ls%s%c", file_info[i].sel ? '*' : ' ',
-				(wchar_t *)n, trim_diff, '~');
-		} else {
-			xprintf("%c%s", file_info[i].sel ? '*' : ' ', n);
-		}
-	} else {
-		if (_trim) {
-			xprintf("%s%*d%s%c%ls%s%c", el_c, pad, i + 1, df_c,
-				file_info[i].sel ? '*' : ' ', (wchar_t *)n,
-				trim_diff, '~');
-		} else {
-			xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
-				file_info[i].sel ? '*' : ' ', n);
-		}
-	}
-#endif */ /* !_NO_ICONS */
 
 	if (classify) {
 		/* Append file type indicator */
 		switch (file_info[i].type) {
 		case DT_DIR:
 			*ind_char = 0;
-			putchar('/');
+			putchar(DIR_CHR);
 			if (file_info[i].filesn > 0 && files_counter)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
@@ -789,24 +744,24 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 		case DT_LNK:
 			if (file_info[i].dir) {
 				*ind_char = 0;
-				putchar('/');
+				putchar(DIR_CHR);
 				if (file_info[i].filesn > 0 && files_counter)
 					fputs(xitoa(file_info[i].filesn), stdout);
 			} else {
-				putchar('@');
+				putchar(LINK_CHR);
 			}
 			break;
 
 		case DT_REG:
 			if (file_info[i].exec)
-				putchar('*');
+				putchar(EXEC_CHR);
 			else
 				*ind_char = 0;
 			break;
 
-		case DT_FIFO: putchar('|'); break;
-		case DT_SOCK: putchar('='); break;
-		case DT_UNKNOWN: putchar('?'); break;
+		case DT_FIFO: putchar(FIFO_CHR); break;
+		case DT_SOCK: putchar(SOCK_CHR); break;
+		case DT_UNKNOWN: putchar(UNKNOWN_CHR); break;
 		default: *ind_char = 0;
 		}
 	}
@@ -833,9 +788,7 @@ pad_filename(int *ind_char, const int i, const int pad)
 	}
 
 	int diff = (int)longest - cur_len;
-	/* Move the cursor %d columns to the right */
 	MOVE_CURSOR_RIGHT(diff + 1);
-//	xprintf("\x1b[%dC", diff + 1);
 }
 
 static inline void
@@ -882,7 +835,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 				xprintf("%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, (wchar_t *)n, trim_diff,
-					tt_c, '~', end_color);
+					tt_c, TRIMFILE_CHR, end_color);
 			} else {
 				xprintf("%s%s %s%s%s", file_info[i].icon_color,
 					file_info[i].icon, file_info[i].color, n, end_color);
@@ -892,7 +845,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 				xprintf("%s%*d%s %s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
 					el_c, pad, i + 1, df_c,	file_info[i].icon_color,
 					file_info[i].icon, file_info[i].color, (wchar_t *)n,
-					trim_diff, tt_c, '~', end_color);
+					trim_diff, tt_c, TRIMFILE_CHR, end_color);
 			} else {
 				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
 					file_info[i].icon_color, file_info[i].icon,
@@ -906,7 +859,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 			if (_trim) {
 				xprintf("%s%ls%s\x1b[0m%s%c\x1b[0m%s",
 					file_info[i].color, (wchar_t *)n,
-					trim_diff, tt_c, '~', end_color);
+					trim_diff, tt_c, TRIMFILE_CHR, end_color);
 			} else {
 				xprintf("%s%s%s", file_info[i].color, n, end_color);
 			}
@@ -914,36 +867,16 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 			if (_trim) {
 				xprintf("%s%*d%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
 					el_c, pad, i + 1, df_c,	file_info[i].color, (wchar_t *)n,
-					trim_diff, tt_c, '~', end_color);
+					trim_diff, tt_c, TRIMFILE_CHR, end_color);
 			} else {
 				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
 					file_info[i].color, n, end_color);
 			}
 		}
 	}
-/*
-#else
-	if (no_eln) {
-		if (_trim) {
-			xprintf("%s%ls%s\x1b[0m%s%c\x1b[0m%s", file_info[i].color,
-				(wchar_t *)n, trim_diff, tt_c, '~',	end_color);
-		} else {
-			xprintf("%s%s%s", file_info[i].color, n, end_color);
-		}
-	} else {
-		if (_trim) {
-			xprintf("%s%*d%s %s%ls%s\x1b[0m%s%c\x1b[0m%s", el_c,
-				pad, i + 1, df_c, file_info[i].color, (wchar_t *)n,
-				trim_diff, tt_c, '~', end_color);
-		} else {
-			xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
-				file_info[i].color, n, end_color);
-		}
-	}
-#endif*/ /* !_NO_ICONS */
 
 	if (file_info[i].dir && classify) {
-		putchar('/');
+		putchar(DIR_CHR);
 		if (file_info[i].filesn > 0 && files_counter)
 			fputs(xitoa(file_info[i].filesn), stdout);
 	}
@@ -987,14 +920,14 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 		if (no_eln)
 			if (_trim) {
 				xprintf("%s %ls%s%c", file_info[i].icon, (wchar_t *)n,
-					trim_diff, '~');
+					trim_diff, TRIMFILE_CHR);
 			} else {
 				xprintf("%s %s", file_info[i].icon, n);
 			}
 		else {
 			if (_trim) {
 				xprintf("%s%*d%s %s %ls%s%c", el_c, pad, i + 1, df_c,
-					file_info[i].icon, (wchar_t *)n, trim_diff, '~');
+					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR);
 			} else {
 				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
 					file_info[i].icon, n);
@@ -1006,51 +939,33 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 		if (no_eln)
 			if (_trim) {
 				printf("%ls%s%c", (wchar_t *)file_info[i].name,
-					trim_diff, '~');
+					trim_diff, TRIMFILE_CHR);
 			} else {
 				fputs(file_info[i].name, stdout);
 			}
 		else {
 			if (_trim) {
 				xprintf("%s%*d%s %ls%s%c", el_c, pad, i + 1, df_c,
-					(wchar_t *)n, trim_diff, '~');
+					(wchar_t *)n, trim_diff, TRIMFILE_CHR);
 			} else {
 				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, n);
 			}
 		}
 	}
-/*
-#else
-	if (no_eln) {
-		if (_trim) {
-			printf("%ls%s%c", (wchar_t *)file_info[i].name,
-				trim_diff, '~');
-		} else {
-			fputs(file_info[i].name, stdout);
-		}
-	} else {
-		if (_trim) {
-			xprintf("%s%*d%s %ls%s%c", el_c, pad, i + 1, df_c,
-				(wchar_t *)n, trim_diff, '~');
-		} else {
-			xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, n);
-		}
-	}
-#endif */ /* !_NO_ICONS */
 
 	if (classify) {
 		switch (file_info[i].type) {
 		case DT_DIR:
 			*ind_char = 0;
-			putchar('/');
+			putchar(DIR_CHR);
 			if (file_info[i].filesn > 0 && files_counter)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
 
-		case DT_FIFO: putchar('|'); break;
-		case DT_LNK: putchar('@'); break;
-		case DT_SOCK: putchar('='); break;
-		case DT_UNKNOWN: putchar('?'); break;
+		case DT_FIFO: putchar(FIFO_CHR); break;
+		case DT_LNK: putchar(LINK_CHR); break;
+		case DT_SOCK: putchar(SOCK_CHR); break;
+		case DT_UNKNOWN: putchar(UNKNOWN_CHR); break;
 		default: *ind_char = 0; break;
 		}
 	}
@@ -1064,8 +979,7 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 {
 	int cur_len = 0;
 #ifndef _NO_ICONS
-	cur_len = pad + 1 + (icons ? 3 : 0)	+ (int)file_info[i].len
-			+ (*ind_char ? 1 : 0);
+	cur_len = pad + 1 + (icons ? 3 : 0)	+ (int)file_info[i].len + (*ind_char ? 1 : 0);
 #else
 	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
@@ -1080,7 +994,6 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 
 	int diff = (int)longest - cur_len;
 	MOVE_CURSOR_RIGHT(diff + 1);
-//	xprintf("\x1b[%dC", diff + 1);
 }
 
 /* Trim and untrim file names when current file name length exceeds

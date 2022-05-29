@@ -158,6 +158,18 @@ wc=01;36:wm=01;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:"
 
 #define DEF_DIR_ICO_C "\x1b[00;33m"
 
+/* Characters used to classify files when running colorless and classify
+ * is enabled */
+#define EXEC_CHR    '*'
+#define FIFO_CHR    '|'
+#define DIR_CHR     '/'
+#define LINK_CHR    '@'
+#define SOCK_CHR    '='
+#define UNKNOWN_CHR '?'
+
+#define SELFILE_CHR  '*'
+#define TRIMFILE_CHR '~'
+
 #define MNT_UDEVIL 	0
 #define MNT_UDISKS2 1
 
