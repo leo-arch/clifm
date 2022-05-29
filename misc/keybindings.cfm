@@ -86,7 +86,7 @@ clear-msgs:\M-t
 create-file:\M-n
 deselect-all:\M-d
 export-sel:\C-\M-e
-folders-first:\M-g
+dirs-first:\M-g
 lock:\M-o
 mountpoints:\M-m
 move-sel:\C-\M-n
