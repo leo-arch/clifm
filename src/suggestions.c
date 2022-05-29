@@ -1760,7 +1760,7 @@ rl_suggestions(const unsigned char c)
 					if (is_internal_c(lb) && !is_internal_f(lb)) {
 						*p = ' ';
 						flags &= ~STATE_COMPLETING;
-						goto FAIL;
+						goto NO_SUGGESTION;
 					}
 					flags &= ~STATE_COMPLETING;
 					*p = ' ';
