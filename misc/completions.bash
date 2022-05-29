@@ -25,9 +25,9 @@ _clifm ()
         -e
         --no-eln
         -f
-        --no-folders-first
+        --no-dirs-first
         -F
-        --folders-first
+        --dirs-first
         -g
         --pager
         -G
