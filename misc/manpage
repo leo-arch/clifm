@@ -187,11 +187,11 @@ use \fIDIR\fR as an alternative configuration directory. If configuration files 
 .B \-e, \-\-no\-eln
 do not print ELN's (entry list number) at the left of file names. Bear in mind, however, that though ELN's are not printed, they are still there and can be used as always
 .TP
-.B \-f, \-\-no\-folders\-first
-do not list folders first
+.B \-f, \-\-no\-dirs\-first
+do not list directories first
 .TP
-.B \-F, \-\-folders\-first
-list folders first (default)
+.B \-F, \-\-dirs\-first
+list directories first (default)
 .TP
 .B \-g, \-\-pager
 enable \fIMas\fR, the built-in pager for files listing
@@ -242,7 +242,7 @@ enable the splash screen
 leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
 .TP
 .B \-t, \-\-disk\-usage\-analyzer
-run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-folders-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press Ctrl-Alt-i (or Alt-TAB) to toggle this mode in-place.
+run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-dirs-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press Ctrl-Alt-i (or Alt-TAB) to toggle this mode in-place.
 .TP
 .B \-u, \-\-no\-unicode
 disable unicode
@@ -646,8 +646,8 @@ it works just like the \fIback\fR function, but it goes forward in the history r
 .B  fc, filescounter [on, off, status]
 By default, CliFM prints the amount of files contained by listed directories next to directories name. However, since this is an expensive feature, It might be desirable, for example, when listing files in a remote machine, to disable this feature. Use the 'off' option to disable it. To permanently disable it, use the FilesCounter option in the configuration file.
 .TP
-.B ff, folders-first \fR[on, off, status]
-toggle list folders first on/off.
+.B ff, dirs-first \fR[on, off, status]
+toggle list directories first on/off.
 .TP
 .B fs
 Print an extract from 'What is Free Software?', written by Richard Stallman.
@@ -973,7 +973,7 @@ CliFM offers three kinds of file filters:
 .TP
 \fBM\-l:\fR Toggle long view mode on/off
 .TP
-\fBM\-g:\fR Toggle list\-folders\-first on/off
+\fBM\-g:\fR Toggle list\-directories\-first on/off
 .TP
 \fBM\-,:\fR Toggle list only directories on/off
 .TP
@@ -1897,7 +1897,7 @@ The following codes are used to control CliFM's files list:
 .sp
 A few example lines:
 .sp
- \fB1.\fR Run in light mode and disable the files counter for the remotes folder:
+ \fB1.\fR Run in light mode and disable the files counter for the remotes directory:
     autocmd /media/remotes/** lm=1,fc=0
 
  \fB2.\fR Just a friendly reminder:
@@ -2290,7 +2290,7 @@ A description for each option in the configuration file can be found in the conf
 .TP
 .B PROFILE FILE
 The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.cfm\fR.
-In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/folder"'. This variable may be used as a shortcut to that folder, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
+In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/dir"'. This variable may be used as a shortcut to that directory, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
 .TP
 .B KEYBINDINGS FILE
 The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings,cfm\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values. This file is used to specify the keyboard shortcuts used for some ClifM's functions. The format for each keybinding is always "keyseq:function", where 'keyseq' is an escape sequence in GNU emacs style. A more detailed explanation can be found in the keybindings file itself.
