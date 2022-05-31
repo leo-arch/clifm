@@ -59,7 +59,9 @@ install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/colors
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/tools
 	$(INSTALL) -m 0755 plugins/* $(DESTDIR)$(PROG_DATADIR)/plugins
+	$(INSTALL) -m 0755 misc/tools/*.py $(DESTDIR)$(PROG_DATADIR)/tools
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/BFG.cfg
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/kbgen.c
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/plugins-helper
