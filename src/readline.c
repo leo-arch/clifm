@@ -96,7 +96,7 @@ gen_shell_cmd_comp(char *cmd)
 
 	char manpage_parser_file[PATH_MAX];
 	snprintf(manpage_parser_file, PATH_MAX - 1,
-		"%s/%s/tools/manpages_comp_gen.py", data_dir, PNL, src_filename);
+		"%s/%s/tools/manpages_comp_gen.py", data_dir, PNL);
 /*	snprintf(manpage_parser_file, PATH_MAX - 1,
 		"/home/_leo08/scripts/python/manpages_comp_gen.py"); */
 
