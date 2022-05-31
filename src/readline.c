@@ -97,8 +97,6 @@ gen_shell_cmd_comp(char *cmd)
 	char manpage_parser_file[PATH_MAX];
 	snprintf(manpage_parser_file, PATH_MAX - 1,
 		"%s/%s/tools/manpages_comp_gen.py", data_dir, PNL);
-/*	snprintf(manpage_parser_file, PATH_MAX - 1,
-		"/home/_leo08/scripts/python/manpages_comp_gen.py"); */
 
 	char *c[] = {manpage_parser_file, "-k", cmd, NULL};
 	return launch_execve(c, FOREGROUND, E_MUTE);
@@ -114,7 +112,6 @@ get_shell_cmd_opts(char *cmd)
 		return EXIT_FAILURE;
 
 	char p[PATH_MAX];
-/*	snprintf(p, PATH_MAX, "%s/.local/share/fish/generated_completions/%s.fish", user.home, cmd); */
 	snprintf(p, PATH_MAX, "%s/.local/share/%s/completions/%s.cfm", user.home, PNL, cmd);
 
 	struct stat a;
