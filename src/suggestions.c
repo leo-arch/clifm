@@ -405,7 +405,7 @@ get_reg_file_color(const char *filename, const struct stat *attr, int *free_colo
 	if (FILE_SIZE_PTR == 0)	return ef_c;
 	if (attr->st_nlink > 1)	return mh_c;
 
-	char *ext = strrchr(filename, '.');
+	char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
 	if (ext && ext != filename) {
 		char *extcolor = get_ext_color(ext);
 		if (!extcolor)

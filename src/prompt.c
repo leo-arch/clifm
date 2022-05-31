@@ -748,7 +748,7 @@ static inline void
 print_welcome_msg(void)
 {
 	if (welcome_message) {
-		printf("%s%s > %s\n%s%s\n", wc_c, PROGRAM_NAME, _(PROGRAM_DESC),
+		printf("%s%s > %s\n%s%s\n", wc_c, _PROGRAM_NAME, _(PROGRAM_DESC),
 				df_c, _(HELP_MESSAGE));
 		welcome_message = 0;
 	}

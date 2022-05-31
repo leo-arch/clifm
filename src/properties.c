@@ -130,7 +130,7 @@ get_properties(char *filename, const int dsize)
 			else if (attr.st_nlink > 1)
 				color = mh_c;
 			else {
-				ext = strrchr(filename, '.');
+				ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
 				if (ext) {
 					char *extcolor = get_ext_color(ext);
 					if (extcolor) {
@@ -149,7 +149,6 @@ get_properties(char *filename, const int dsize)
 	case S_IFDIR:
 		file_type = 'd';
 		ctype = di_c;
-//		ctype = PR_DIR;
 		if (light_mode)
 			color = di_c;
 		else if (check_file_access(&attr) == 0)
@@ -290,7 +289,6 @@ get_properties(char *filename, const int dsize)
 
 	/* Print file properties */
 	printf("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
-//		   "%zu %s%s %s%s %s%s%s %s%s%s ",
 		   "Links: %s%zu%s ",
 	    cnum_val, attr.st_mode & 07777, cend,
 	    t_ctype, file_type, cend,
@@ -298,10 +296,6 @@ get_properties(char *filename, const int dsize)
 	    cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
 	    co1, read_others, co2, write_others, co3, exec_others, cend,
 	    is_acl(filename) ? "+" : "", cbold, (size_t)link_n, cend);
-/*	    cid, !owner ? _("unknown") : owner->pw_name,
-	    !group ? _("unknown") : group->gr_name, cend,
-	    csize, size_type ? size_type : "?", cend,
-	    cdate, mod_time[0] != '\0' ? mod_time : "?", cend); */
 
 	free(t_ctype);
 

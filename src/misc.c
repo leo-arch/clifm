@@ -1401,7 +1401,7 @@ free_stuff(void)
 	free(tags_dir);
 
 	/* Restore the color of the running terminal */
-	if (colorize == 1)
+	if (colorize == 1 && xargs.list_and_quit != 1)
 		fputs("\x1b[0;39;49m", stdout);
 }
 
@@ -1840,7 +1840,7 @@ quick_help(void)
 {
 #ifdef __HAIKU__
 	printf("%s                                %s\n\n%s",
-		ASCII_LOGO, PROGRAM_NAME, QUICK_HELP);
+		ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP);
 	puts(_("\nNOTE: Some keybindings on Haiku might differ. Take a look "
 		"at your current keybindings via the 'kb' command"));
 	return EXIT_SUCCESS;
@@ -1873,7 +1873,7 @@ quick_help(void)
 	}
 
 	dprintf(fd, "%s                                %s\n\n%s",
-			ASCII_LOGO, PROGRAM_NAME, QUICK_HELP);
+			ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP);
 
 	int ret;
 	if (*_pager == 'l' && strcmp(_pager, "less") == 0) {
@@ -1932,7 +1932,7 @@ splash(void)
 {
 	printf("\n%s%s\n\n%s%s\t\t       %s%s\n           %s\n",
 		colorize ? D_CYAN : "", ASCII_LOGO_BIG, df_c,
-		BOLD, df_c, PROGRAM_NAME, _(PROGRAM_DESC));
+		BOLD, df_c, _PROGRAM_NAME, _(PROGRAM_DESC));
 
 	if (splash_screen) {
 		printf(_("\n            Press any key to continue... "));

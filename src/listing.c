@@ -788,7 +788,13 @@ pad_filename(int *ind_char, const int i, const int pad)
 	}
 
 	int diff = (int)longest - cur_len;
-	MOVE_CURSOR_RIGHT(diff + 1);
+	if (xargs.list_and_quit == 1) {
+		int j = diff + 1;
+		while(--j >= 0)
+			putchar(' ');
+	} else {
+		MOVE_CURSOR_RIGHT(diff + 1);
+	}
 }
 
 static inline void
@@ -993,7 +999,13 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 	}
 
 	int diff = (int)longest - cur_len;
-	MOVE_CURSOR_RIGHT(diff + 1);
+	if (xargs.list_and_quit == 1) {
+		int j = diff + 1;
+		while(--j >= 0)
+			putchar(' ');
+	} else {
+		MOVE_CURSOR_RIGHT(diff + 1);
+	}
 }
 
 /* Trim and untrim file names when current file name length exceeds
@@ -1005,7 +1017,7 @@ trim_filename(int i)
 	trim.a = file_info[i].name[max_name_len - 1];
 	trim.b = file_info[i].name[max_name_len];
 	trim.len = file_info[i].len;
-	file_info[i].name[max_name_len - 1] = '~';
+	file_info[i].name[max_name_len - 1] = TRIMFILE_CHR;
 	file_info[i].name[max_name_len] = '\0';
 	file_info[i].len = (size_t)max_name_len;
 }
@@ -1027,15 +1039,13 @@ static void
 list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
-	//int nn = (int)files;
 	int nn = (max_files != UNSET && max_files < (int)files) ? max_files : (int)files;
 
 	size_t cur_cols = 0;
 	int i, last_column = 0;
 	int blc = last_column;
 	for (i = 0; i < nn; i++) {
-		/* If current entry is in the last column, we need to print
-		 * a new line char */
+		/* If current entry is in the last column, we need to print a new line char */
 		size_t bcur_cols = cur_cols;
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
@@ -1123,8 +1133,8 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	if (nn % (int)columns_n > 0)
 		rows++;
 
-	/* The previous value of LAST_COLUMN. We need this value to run the pager */
 	int last_column = 0;
+	/* The previous value of LAST_COLUMN. We need this value to run the pager */
 	int blc = last_column;
 
 	size_t cur_cols = 0, cc = columns_n;
@@ -1147,8 +1157,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			break;
 
 		size_t bcur_cols = cur_cols;
-		/* If current entry is in the last column, we need to print a
-		 * a new line char */
+		/* If current entry is in the last column, print a new line char */
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			last_column = 1;
@@ -1162,6 +1171,10 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 
 		if (x >= nn || !file_info[x].name) {
 			if (last_column)
+				/* Last column is empty. Ex:
+				 * 1 file  3 file3  5 file5
+				 * 2 file2 4 file4  HERE
+				 * ... */
 				putchar('\n');
 			continue;
 		}
@@ -1227,6 +1240,10 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			else
 				pad_filename(&ind_char, x, pad);
 		} else {
+			/* Last column is populated. Ex:
+			 * 1 file  3 file3  5 file5HERE
+			 * 2 file2 4 file4  6 file6HERE
+			 * ... */
 			putchar('\n');
 		}
 
@@ -1848,8 +1865,7 @@ list_dir(void)
 			default: file_info[n].type = DT_UNKNOWN; stats.unknown++; break;
 			}
 
-			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino,
-							attr.st_nlink, n);
+			file_info[n].sel = check_seltag(attr.st_dev, attr.st_ino, attr.st_nlink, n);
 			file_info[n].inode = ent->d_ino;
 			file_info[n].linkn = attr.st_nlink;
 			file_info[n].size = FILE_SIZE;
@@ -1882,8 +1898,7 @@ list_dir(void)
 #elif defined(_STATX)
 		case SBTIME: {
 			struct statx attx;
-			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW,
-			STATX_BTIME, &attx) == -1)
+			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attx) == -1)
 				file_info[n].time = 0;
 			else
 				file_info[n].time = (time_t)attx.stx_btime.tv_sec;
@@ -1918,15 +1933,15 @@ list_dir(void)
 			}
 			if (file_info[n].filesn > 0) { /* S_ISVTX*/
 				file_info[n].color = stat_ok ? ((attr.st_mode & 01000)
-							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
-							 : ((attr.st_mode & 00002) ? ow_c : di_c))
-							 : df_c;
+						? ((attr.st_mode & 00002) ? tw_c : st_c)
+						: ((attr.st_mode & 00002) ? ow_c : di_c))
+						: df_c;
 				/* S_ISWOTH*/
 			} else if (file_info[n].filesn == 0) {
 				file_info[n].color = stat_ok ? ((attr.st_mode & 01000)
-							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
-							 : ((attr.st_mode & 00002) ? ow_c : ed_c))
-							 : df_c;
+						? ((attr.st_mode & 00002) ? tw_c : st_c)
+						: ((attr.st_mode & 00002) ? ow_c : ed_c))
+						: df_c;
 			} else {
 				file_info[n].color = nd_c;
 #ifndef _NO_ICONS
@@ -1935,8 +1950,7 @@ list_dir(void)
 #endif
 			}
 
-			/* Let's gather some file statistics based on the
-			 * corresponding file type color */
+			/* Let's gather some file statistics based on the file type color */
 			if (file_info[n].color == tw_c) {
 				stats.other_writable++; stats.sticky++;
 			} else if (file_info[n].color == ow_c) {
@@ -2040,26 +2054,23 @@ list_dir(void)
 
 			/* Check file extension */
 			char *ext = (char *)NULL;
-			if (check_ext)
+			if (check_ext == 1)
 				ext = strrchr(file_info[n].name, '.');
 			/* Make sure not to take a hidden file for a file extension */
-			if (ext && ext != file_info[n].name) {
+			if (!ext || ext == file_info[n].name)
+				break;
 #ifndef _NO_ICONS
-				if (icons == 1 && name_icon_found == 0)
-					get_ext_icon(ext, (int)n);
+			if (icons == 1 && name_icon_found == 0)
+				get_ext_icon(ext, (int)n);
 #endif
-				/* Check extension color only if some is defined */
-				if (ext_colors_n) {
-					char *extcolor = get_ext_color(ext);
-					if (extcolor) {
-						file_info[n].ext_color = (char *)xnmalloc(
-							strlen(extcolor) + 4, sizeof(char));
-						sprintf(file_info[n].ext_color, "\x1b[%sm", extcolor);
-						file_info[n].color = file_info[n].ext_color;
-						extcolor = (char *)NULL;
-					}
-				}
-			}
+			char *extcolor = get_ext_color(ext);
+			if (!extcolor)
+				break;
+
+			file_info[n].ext_color = (char *)xnmalloc(strlen(extcolor) + 4, sizeof(char));
+			sprintf(file_info[n].ext_color, "\x1b[%sm", extcolor);
+			file_info[n].color = file_info[n].ext_color;
+			extcolor = (char *)NULL;
 		} /* End of DT_REG block */
 		break;
 

@@ -97,7 +97,8 @@
 #include "messages.h"
 #include "settings.h"
 
-#define PROGRAM_NAME "CliFM"
+#define _PROGRAM_NAME "CliFM"
+#define PROGRAM_NAME "clifm"
 #define PNL "clifm" /* Program name lowercase */
 #define PROGRAM_DESC "The command line file manager"
 #define VERSION "1.6-Guybrush"

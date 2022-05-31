@@ -249,7 +249,7 @@ fzftab_color(char *filename, const struct stat *attr)
 		if (!check_file_access(attr))
 			return nf_c;
 		char *ext_cl = (char *)NULL;
-		char *ext = strrchr(filename, '.');
+		char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
 		if (ext && ext != filename)
 			ext_cl = get_ext_color(ext);
 		if (ext_cl)

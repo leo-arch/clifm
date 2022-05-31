@@ -233,12 +233,11 @@ END:
 }
 #endif /* CLIFM_SUCKLESS */
 
-/* Returns a pointer to the corresponding color code for EXT, if some
- * color was defined */
+/* Returns a pointer to the corresponding color code for EXT, if any */
 char *
 get_ext_color(char *ext)
 {
-	if (!ext || !ext_colors_n)
+	if (!ext || !*ext || !*(ext + 1) || ext_colors_n == 0)
 		return (char *)NULL;
 
 	ext++;
@@ -1615,7 +1614,6 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	}
 
 	int ret = lstat(p, &attr);
-//	int ret = lstat(ent, &attr);
 	if (rem_slash)
 		p[elen - 1] = '/';
 
@@ -1668,7 +1666,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 			} else if (attr.st_nlink > 1) {
 				color = mh_c;
 			} else {
-				char *ext = (strrchr(ent, '.'));
+				char *ext = check_ext == 1 ? strrchr(ent, '.') : (char *)NULL;
 				if (ext) {
 					char *extcolor = get_ext_color(ext);
 					if (extcolor) {
