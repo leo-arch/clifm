@@ -421,11 +421,12 @@ is_internal(char *restrict cmd)
 int
 is_internal_f(const char *restrict cmd)
 {
-	/* If we are completing/suggesting, do not take 'ws' and 'mf' commands
+	/* If we are completing/suggesting, do not take 'ws', 'mf', and 'st' commands
 	 * into account: they do not take ELN/filenames as parameters, but just
 	 * numbers, in which case no ELN-filename completion should be made */
 	if (flags & STATE_COMPLETING
-	&& (*cmd == 'w' || (*cmd == 'm' && *(cmd + 1) == 'f')))
+	&& (*cmd == 'w' || (*cmd == 'm' && *(cmd + 1) == 'f')
+	|| (*cmd == 's' && (*(cmd + 1) == 't' || *(cmd + 1) == 'o')) ) )
 		return 0;
 
 	const char *int_cmds[] = {

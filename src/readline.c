@@ -2371,6 +2371,7 @@ my_rl_completion(const char *text, int start, int end)
 		/* ### SORT COMMAND COMPLETION ### */
 		if (*lb == 's' && (strncmp(lb, "st ", 3) == 0
 		|| strncmp(lb, "sort ", 5) == 0)) {
+			rl_attempted_completion_over = 1;
 			matches = rl_completion_matches(text, &sort_name_generator);
 			if (matches) {
 				cur_comp_type = TCMP_SORT;

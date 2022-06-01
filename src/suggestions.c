@@ -1446,8 +1446,22 @@ rl_suggestions(const unsigned char c)
 		 * #	    Search for suggestions		#
 		 * ######################################*/
 
+	/* 3.a) Check already suggested string */
+	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)) {
+		if ((suggestion.type == HIST_SUG || suggestion.type == INT_CMD)
+		&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
+			printed = zero_offset = 1;
+			goto SUCCESS;
+		}
+		if (c != ' ' && word && (case_sens_path_comp ? strncmp(word, suggestion_buf, wlen)
+		: strncasecmp(word, suggestion_buf, wlen)) == 0) {
+			printed = 1;
+			goto SUCCESS;
+		}
+	}
+
 	char *lb = rl_line_buffer;
-	/* 3.a) Let's suggest non-fixed parameters for internal commands */
+	/* 3.b) Let's suggest non-fixed parameters for internal commands */
 
 	switch(*lb) {
 	case 'b': /* Bookmarks names */
@@ -1606,7 +1620,7 @@ rl_suggestions(const unsigned char c)
 	}
 
 	/* 3.b) Check already suggested string */
-	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)) {
+/*	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)) {
 		if (suggestion.type == HIST_SUG
 		&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
 			printed = zero_offset = 1;
@@ -1617,7 +1631,7 @@ rl_suggestions(const unsigned char c)
 			printed = 1;
 			goto SUCCESS;
 		}
-	}
+	} */
 
 	/* 3.c) Check CliFM internal parameters */
 	char *ret = strchr(full_line, ' ');
