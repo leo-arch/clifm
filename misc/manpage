@@ -870,7 +870,7 @@ Remove files and/or directories in bulk using a text editor.
 Once in the editor, remove the lines corresponding to the files you want to delete. Save changes and close the editor. Removed files will be listed and the user asked for confirmation.
 .TP
 .B s, sel \fIELN/FILE\fR ... [[\fI!\fR]\fIPATTERN\fR] [\fI\-filetype\fR] [\fI:PATH\fR]
-send one or multiple elements (either files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: \fIs\ 1\ 4\-10\ \^r\ file* \file\ name /path/to/filename\fR. To deselect selected files, use the \fIds\fR command (see above), or the M-d keyboard shortcut.
+send one or multiple elements (either files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: \fIs\ 1\ 4\-10\ \^r\ file*\ file\ name /path/to/filename\fR. To deselect selected files, use the \fIds\fR command (see above), or the M-d keyboard shortcut.
 .sp
 If not in light mode, once a file is selected, and if the file is in the current working directory, the corresponding file name will be marked with an asterisk (colored according to the value of \fIli\fR in the color scheme file (by default bold green)), at the left of the file name (and at the right of its ELN).
 .sp
@@ -1410,7 +1410,7 @@ which once decoded should look something like this:
  \fB[1] 13:45 user:hostname /my/path
  <0> $\fR
 .TP
-with the workspace number and the path printed in cyan, the last exit status in green, and the dollar sign in blue.
+with the workspace number printed in blue, the path in cyan, the last exit status in green, and the dollar sign in blue.
 .TP
 A more "classic" prompt could be construed as follows:
 
@@ -1449,8 +1449,8 @@ A few advanced prompt examples can be found in the prompts file in our Github si
 .TP
 We all want to keep our systems safe. One of the many ways to get a bit of safety is by checking that there is not file in our file system that could somehow endanger our machines. SUID, SGID, executable, and other-writable files are to be count among these dangers. This is why it could be useful to build a little files scanner for our prompt using the above mentioned files statistics escape codes. This is the code for our scanner:
 
-\fB"\\[\\e[0m\\]\\[\\e[1;31m\\]\\U\\[\\e[0m\\]:\\[\\e[1;33m\\]\\G\\[\\e[0m\\]:
-\\[\\e[1;32m\\]\\O\\[\\e[0m\\]:\\[\\e[1;34m\\]\\X\\[\\e[0m\\]"\fR
+ \fB\\[\\e[0m\\]\\[\\e[1;31m\\]\\U\\[\\e[0m\\]:\\[\\e[1;33m\\]\\G\\[\\e[0m\\]:
+ \\[\\e[1;32m\\]\\O\\[\\e[0m\\]:\\[\\e[1;34m\\]\\X\\[\\e[0m\\]"\fR
 .TP
 By adding this code to our prompt line, we get something like this:
 
