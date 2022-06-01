@@ -173,6 +173,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 ✔️ **Changelog**
 * `version 1.6 - Guybrush`:
   - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectivelly. In the same way, the `folders-first` command is renamed as `dirs-first`.
+  - **NEW**: TAB completion for shell commands arguments. Try `ls -TAB`
   - **NEW**: More tilling window manager friendly
   - **NEW**: [emoji-icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk)
   - **NEW**: [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
