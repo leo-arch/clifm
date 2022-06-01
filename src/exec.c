@@ -632,7 +632,7 @@ run_shell_cmd(char **args)
 
 /* Free everything and exit the program */
 static void
-_quit(char **args)
+_quit(char **args, int exit_status)
 {
 	if (!args || !args[0])
 		return;
@@ -643,7 +643,7 @@ _quit(char **args)
 	while (--i >= 0)
 		free(args[i]);
 	free(args);
-	exit(exit_code);
+	exit(exit_status);
 }
 
 static int
@@ -2482,7 +2482,7 @@ exec_cmd(char **comm)
 	else if ((*comm[0] == 'q' && (!comm[0][1] || strcmp(comm[0], "quit") == 0))
 	|| (*comm[0] == 'e' && strcmp(comm[0], "exit") == 0)
 	|| (*comm[0] == 'Q' && !comm[0][1]))
-		_quit(comm);
+		_quit(comm, old_exit_code);
 
 	else {
 		/* #  AUTOCD & AUTO-OPEN (2) # */
