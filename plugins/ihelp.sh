@@ -51,7 +51,7 @@ CMDS="1. GETTING HELP@
 2. DESCRIPTION@
 3. FEATURES@
 4. POSITIONAL PARAMETERS@
-5. OPTIONS@
+OPTIONS@
 6. COMMANDS@
 7. FILE FILTERS@
 8. KEYBOARD SHORTCUTS@
@@ -158,7 +158,7 @@ while [ -n "$a" ]; do
 	fi
 
 	if [ -n "$a" ]; then
-		if echo "$a" | grep -q '^[1-9].*'; then
+		if echo "$a" | grep -q '^[1-9,A-Z].*'; then
 			# shellcheck disable=SC2089
 			export PAGER="less -gp \"$a\""
 		else
