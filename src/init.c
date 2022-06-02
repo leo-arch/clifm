@@ -1552,15 +1552,8 @@ RUN:
 #ifdef __linux__
 		case 56: xargs.si = 1; break;
 #endif
-		case 'a':
-			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
-			show_hidden = xargs.hidden = 0;
-			break;
-
-		case 'A':
-			flags |= HIDDEN; /* Add HIDDEN to 'flags' */
-			show_hidden = xargs.hidden = 1;
-			break;
+		case 'a': show_hidden = xargs.hidden = 0; break;
+		case 'A': show_hidden = xargs.hidden = 1; break;
 
 		case 'b':
 			xargs.bm_file = 1;
@@ -1574,51 +1567,25 @@ RUN:
 
 		case 'D': alt_dir_value = optarg; break;
 		case 'e': xargs.noeln = no_eln = 1;	break;
-
-		case 'f':
-			flags &= ~DIRS_FIRST;
-			list_dirs_first = xargs.dirs_first = 0;
-			break;
-
-		case 'F':
-			flags |= DIRS_FIRST;
-			list_dirs_first = xargs.dirs_first = 1;
-			break;
-
+		case 'f': list_dirs_first = xargs.dirs_first = 0; break;
+		case 'F': list_dirs_first = xargs.dirs_first = 1; break;
 		case 'g': pager = xargs.pager = 1; break;
 		case 'G': pager = xargs.pager = 0; break;
 
 		case 'h':
-			flags |= HELP;
 			help_function();
 			exit(EXIT_SUCCESS);
 
 		case 'H': xargs.horizontal_list = 1; listing_mode = HORLIST; break;
 
-		case 'i':
-			flags &= ~CASE_SENS;
-			case_sensitive = xargs.sensitive = 0;
-			break;
-
-		case 'I':
-			flags |= CASE_SENS;
-			case_sensitive = xargs.sensitive = 1;
-			break;
-
+		case 'i': case_sensitive = xargs.sensitive = 0; break;
+		case 'I': case_sensitive = xargs.sensitive = 1; break;
 		case 'k': kbinds_value = optarg; break;
 		case 'l': long_view = xargs.longview = 0; break;
 		case 'L': long_view = xargs.longview = 1; break;
 		case 'm': dirhist_map = xargs.dirmap = 1; break;
-
-		case 'o':
-			flags &= ~AUTOLS;
-			autols = xargs.autols = 0;
-			break;
-
-		case 'O':
-			flags |= AUTOLS;
-			autols = xargs.autols = 1;
-			break;
+		case 'o': autols = xargs.autols = 0; break;
+		case 'O': autols = xargs.autols = 1; break;
 
 		case 'p':
 			flags |= START_PATH;
@@ -1631,11 +1598,7 @@ RUN:
 			alt_profile_value = optarg;
 			break;
 
-		case 's':
-			flags |= SPLASH;
-			splash_screen = xargs.splash = 1;
-			break;
-
+		case 's': splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
 		case 'u': unicode = xargs.unicode = 0; break;

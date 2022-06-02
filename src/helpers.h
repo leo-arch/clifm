@@ -176,34 +176,31 @@ extern int watch;
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
  * 4 * 8 == 32 bits == (1 << 31)
- * NOTE: setting (1 << 31) gives a negative value: DON'T USE */
+ * NOTE: setting (1 << 31) gives a negative value: DON'T USE
+ * NOTE 2: What if int size isn't 4 bytes or more, but 2 (16 bits)? In this
+ * case, if we want to support old 16 bit machines, we shouldn't use more than
+ * 16 bits per flag, that is (1 << 15) */
 
 /* Options flags */
-#define DIRS_FIRST    (1 << 1)
-#define HELP          (1 << 2)
-#define HIDDEN        (1 << 3)
-#define AUTOLS        (1 << 4)
-#define SPLASH        (1 << 5)
-#define CASE_SENS     (1 << 6)
-#define START_PATH    (1 << 7)
-#define ALT_PROFILE   (1 << 8)
+#define START_PATH    (1 << 0)
+#define ALT_PROFILE   (1 << 1)
 
 /* Internal flags */
-#define ROOT_USR      (1 << 9)
-#define GUI           (1 << 10)
-#define IS_USRVAR_DEF (1 << 11)
-#define FZF_BIN_OK    (1 << 12)
+#define ROOT_USR      (1 << 2)
+#define GUI           (1 << 3)
+#define IS_USRVAR_DEF (1 << 4)
+#define FZF_BIN_OK    (1 << 5)
 
 /* Used by the refresh on resize feature */
-#define DELAYED_REFRESH    (1 << 13)
-#define PATH_PROGRAMS_ALREADY_LOADED (1 << 14)
+#define DELAYED_REFRESH    (1 << 6)
+#define PATH_PROGRAMS_ALREADY_LOADED (1 << 7)
 
-#define FIRST_WORD_IS_ELN   (1 << 15)
-#define IN_BOOKMARKS_SCREEN (1 << 16)
-#define STATE_COMPLETING    (1 << 17)
+#define FIRST_WORD_IS_ELN   (1 << 8)
+#define IN_BOOKMARKS_SCREEN (1 << 9)
+#define STATE_COMPLETING    (1 << 10)
 /* Instead of completion the current word, a BAEJ suggestion points to
  * a possible completion as follows: WORD > COMPLETION */
-#define BAEJ_SUGGESTION     (1 << 18)
+#define BAEJ_SUGGESTION     (1 << 11)
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)
