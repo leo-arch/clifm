@@ -27,22 +27,22 @@
 
 #include <sys/stat.h>
 
-/* checks.c */
-void file_cmd_check(void);
 void check_file_size(char *log_file, int max);
-char **check_for_alias(char **args);
-int check_regex(char *str);
+int check_file_access(const struct stat *file);
+char **check_for_alias(char **cmd);
 int check_immutable_bit(char *file);
+int check_regex(char *str);
+void check_term(void);
+void check_third_party_cmds(void);
+void file_cmd_check(void);
+char *get_sudo_path(void);
 int is_bin_cmd(char *str);
+int is_file_in_cwd(char *name);
 int is_internal(const char *cmd);
 int is_internal_c(const char *restrict cmd);
 int is_internal_f(const char *restrict cmd);
 int is_number(const char *restrict str);
 int is_acl(char *file);
-char *get_sudo_path(void);
-void check_term(void);
-int check_file_access(const struct stat *file);
-void check_third_party_cmds(void);
 int is_url(char *url);
 
 #endif /* CHECKS_H */

@@ -926,7 +926,7 @@ initialize_prompt_data(void)
 #endif
 
 	/* Print error messages */
-	if (print_msg && msgs_n) {
+	if (print_msg == 1 && msgs_n > 0) {
 		fputs(messages[msgs_n - 1], stderr);
 		print_msg = 0; /* Print messages only once */
 	}

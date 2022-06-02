@@ -1286,7 +1286,7 @@ copy_function(char **args, int copy_and_rename)
 
 /* Print the list of files removed via the most recent call to the 'r' command */
 static void
-list_removed_files(char **cmd, const size_t start)
+list_removed_files(char **cmd, const size_t start, const int cwd)
 {
 	size_t i, c = 0;
 	for (i = start; cmd[i]; i++);
@@ -1306,7 +1306,7 @@ list_removed_files(char **cmd, const size_t start)
 		return;
 	}
 
-	if (autols == 1)
+	if (autols == 1 && cwd == 1)
 		reload_dirlist();
 	for (i = 0; i < c; i++) {
 		if (!removed_files[i] || !*removed_files[i])
@@ -1321,10 +1321,7 @@ list_removed_files(char **cmd, const size_t start)
 int
 remove_file(char **args)
 {
-#if defined(__HAIKU__)
-	int cwd = 0;
-#endif /* __HAIKU__ */
-	int exit_status = EXIT_SUCCESS;
+	int cwd = 0, exit_status = EXIT_SUCCESS, errs = 0;
 
 	log_function(NULL);
 
@@ -1333,17 +1330,11 @@ remove_file(char **args)
 	int i, j = 3, dirs = 0;
 
 	for (i = 1; args[i]; i++) {
-#if defined(__HAIKU__)
 		/* Check if at least one file is in the current directory. If not,
 		 * there is no need to refresh the screen */
-		if (cwd == 0) {
-			char *ret = strchr(args[i], '/');
-			/* If there's no slash, or if slash is the last char and
-			 * the file is not root "/", we have a file in CWD */
-			if (!ret || (!*(ret + 1) && ret != args[i]))
-				cwd = 1;
-		}
-#endif /* __HAIKU__ */
+		if (cwd == 0)
+			cwd = is_file_in_cwd(args[i]);
+
 		char *tmp = (char *)NULL;
 		if (strchr(args[i], '\\')) {
 			tmp = dequote_str(args[i], 0);
@@ -1357,6 +1348,7 @@ remove_file(char **args)
 						dirs = 1;
 				} else {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp, strerror(errno));
+					errs++;
 				}
 				free(tmp);
 			} else {
@@ -1372,11 +1364,17 @@ remove_file(char **args)
 					dirs = 1;
 			} else {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
+				errs++;
 			}
 		}
 	}
 
 	rm_cmd[j] = (char *)NULL;
+
+	if (errs > 0 && j > 3) { /* If errors but at least one file was deleted */
+		fputs("Press any key to continue... ", stdout);
+		xgetchar();
+	}
 
 	if (j == 3) { /* No file to be deleted */
 		free(rm_cmd);
@@ -1402,11 +1400,9 @@ remove_file(char **args)
 		exit_status = EXIT_FAILURE;
 #if defined(__HAIKU__)
 	else {
-		if (cwd == 1 && autols && strcmp(args[1], "--help") != 0
-		&& strcmp(args[1], "--version") != 0) {
-			free_dirlist();
-			exit_status = list_dir();
-		}
+		if (cwd == 1 && autols == 1 && strcmp(args[1], "--help") != 0
+		&& strcmp(args[1], "--version") != 0)
+			reload_dirlist();
 	}
 #endif /* __HAIKU__ */
 
@@ -1414,7 +1410,7 @@ remove_file(char **args)
 		deselect_all();
 
 	if (print_removed_files == 1)
-		list_removed_files(rm_cmd, 3);
+		list_removed_files(rm_cmd, 3, cwd);
 
 	for (i = 0; rm_cmd[i]; i++)
 		free(rm_cmd[i]);

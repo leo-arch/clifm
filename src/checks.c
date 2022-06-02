@@ -51,6 +51,37 @@
 static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
 
 int
+is_file_in_cwd(char *name)
+{
+	if (!name || !*name || !workspaces[cur_ws].path)
+		return 0;
+
+	char *s = strchr(name, '/');
+	if (!s || !*(s + 1)) /* 'name' or 'name/' */
+		return 1;
+
+	char rpath[PATH_MAX];
+	*rpath = '\0';
+	realpath(name, rpath);
+	if (!*rpath)
+		return 0;
+
+	char *cwd = workspaces[cur_ws].path;
+	size_t cwd_len = strlen(cwd);
+	size_t rpath_len = strlen(rpath);
+	if (rpath_len < cwd_len)
+		return 0;
+
+	if (strncmp(rpath, cwd, cwd_len) != 0)
+		return 0;
+
+	if (strchr(rpath + cwd_len + 1, '/'))
+		return 0;
+
+	return 1;
+}
+
+int
 is_url(char *url)
 {
 	if ((*url == 'w' && url[1] == 'w' && url[2] == 'w' && url[3] == '.'

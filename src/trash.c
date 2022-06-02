@@ -1120,7 +1120,7 @@ trash_files_args(char **args)
 	if (!suffix)
 		return EXIT_FAILURE;
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = EXIT_SUCCESS, cwd = 0;
 	size_t i, trashed_files = 0, n = 0;
 	for (i = 1; args[i]; i++);
 	int *successfully_trashed = (int *)xnmalloc(i + 1, sizeof(int));
@@ -1137,6 +1137,8 @@ trash_files_args(char **args)
 			free(deq_file);
 			continue;
 		}
+		if (cwd == 0)
+			cwd = is_file_in_cwd(deq_file);
 		/* Once here, everything is fine: trash the file */
 		if (trash_element(suffix, &tm, deq_file) == EXIT_SUCCESS) {
 			trashed_files++;
@@ -1146,6 +1148,7 @@ trash_files_args(char **args)
 				n++;
 			}
 		} else {
+			cwd = 0;
 			exit_status = EXIT_FAILURE;
 		}
 
@@ -1155,7 +1158,7 @@ trash_files_args(char **args)
 	free(suffix);
 
 	if (exit_status == EXIT_SUCCESS) {
-		if (autols == 1)
+		if (autols == 1 && cwd == 1)
 			reload_dirlist();
 		print_trashed_files(args, successfully_trashed, n);
 		print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
