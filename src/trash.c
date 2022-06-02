@@ -756,7 +756,6 @@ untrash_element(char *file)
 	/* Check existence and permissions of parent directory */
 	char *parent = (char *)NULL;
 	parent = strbfrlst(url_decoded, '/');
-
 	if (!parent) {
 		/* strbfrlst() returns NULL is file's parent is root (simply
 		 * because there's nothing before last slash in this case).
@@ -780,15 +779,27 @@ untrash_element(char *file)
 
 	free(parent);
 
-	char *tmp_cmd[] = {"mv", undel_file, url_decoded, NULL};
+	struct stat a;
+	if (stat(url_decoded, &a) != -1) {
+		fprintf(stderr, _("%s: undel: %s: Destination file exists\n"), PROGRAM_NAME, url_decoded);
+		free(url_decoded);
+		return EEXIST;
+	}
+
+	int ret = rename(undel_file, url_decoded);
+	if (ret == -1) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		free(url_decoded);
+		return errno;
+	}
+/*	char *tmp_cmd[] = {"mv", "-i", undel_file, url_decoded, NULL};
 	int ret = -1;
-	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG); */
 	free(url_decoded);
 
 	if (ret == EXIT_SUCCESS) {
-		char *tmp_cmd2[] = {"rm", "-r", undel_info, NULL};
-		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
-
+		char *cmd[] = {"rm", "-r", undel_info, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 		if (ret != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: undel: %s: Error removing info file\n"),
 					PROGRAM_NAME, undel_info);
