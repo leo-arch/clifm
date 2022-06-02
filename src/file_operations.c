@@ -1385,13 +1385,13 @@ remove_file(char **args)
 
 	rm_cmd[0] = savestring("rm", 2);
 	if (dirs == 1)
-#if defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(_BE_POSIX)
 		rm_cmd[1] = savestring("-r", 2);
 #else
 		rm_cmd[1] = savestring("-dIr", 4);
 #endif /* __NetBSD__ || __OpenBSD__ */
 	else
-#if defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(_BE_POSIX)
 		rm_cmd[1] = savestring("-f", 2);
 #else
 		rm_cmd[1] = savestring("-I", 2);
