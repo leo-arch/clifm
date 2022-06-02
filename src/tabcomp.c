@@ -1389,11 +1389,11 @@ AFTER_USUAL_COMPLETION:
 
 				/* escape_str escapes the leading tilde, but we don't
 				 * want it here. Remove it */
-				if (cur_comp_type == TCMP_PATH && *matches[0] == '~') {
+/*				if (cur_comp_type == TCMP_PATH && *matches[0] == '~') {
 					char *tmp = strdup(replacement + 1);
 					free(replacement);
 					replacement = tmp;
-				}
+				} */
 			}
 		}
 
