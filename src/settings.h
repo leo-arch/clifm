@@ -229,6 +229,7 @@ wc=01;36:wm=01;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:"
 #define DEF_ONLY_DIRS 0
 #define DEF_PAGER 0
 #define DEF_PRINTSEL 0
+#define DEF_PRINT_REMOVED_FILES 1
 #define DEF_PROPS_COLOR 1
 #define DEF_REFRESH_ON_RESIZE 1
 #define DEF_RESTORE_LAST_PATH 1

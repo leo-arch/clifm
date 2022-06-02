@@ -987,6 +987,7 @@ prompt(void)
 
 	if (!input || !*input) {
 		free(input);
+//		reload_dirlist();
 		if (flags & DELAYED_REFRESH) {
 			flags &= ~DELAYED_REFRESH;
 			reload_dirlist();

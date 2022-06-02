@@ -173,6 +173,11 @@ extern struct timespec timeout;
 #endif /* LINUX_INOTIFY */
 extern int watch;
 
+/* The following flags are used via an integer (FLAGS). If an integer has
+ * 4 bytes, then we can use a total of 32 flags (0-31)
+ * 4 * 8 == 32 bits == (1 << 31)
+ * NOTE: setting (1 << 31) gives a negative value: DON'T USE */
+
 /* Options flags */
 #define DIRS_FIRST    (1 << 1)
 #define HELP          (1 << 2)
@@ -972,6 +977,7 @@ extern int
 	pager,
 	print_msg,
 	print_selfiles,
+	print_removed_files,
 	prompt_offset,
 	prompt_notif,
 	recur_perm_error_flag,

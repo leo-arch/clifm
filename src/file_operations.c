@@ -1284,35 +1284,80 @@ copy_function(char **args, int copy_and_rename)
 	return EXIT_SUCCESS;
 }
 
+/* Print the list of files removed via the most recent call to the 'r' command */
+static void
+list_removed_files(char **cmd, const size_t start)
+{
+	size_t i, c = 0;
+	for (i = start; cmd[i]; i++);
+	char **removed_files = (char **)xnmalloc(i + 1, sizeof(char *));
+
+	struct stat a;
+	for (i = start; cmd[i]; i++) {
+		if (lstat(cmd[i], &a) == -1 && errno == ENOENT) {
+			removed_files[c] = cmd[i];
+			c++;
+		}
+	}
+	removed_files[c] = (char *)NULL;
+
+	if (c == 0) { /* No file was removed */
+		free(removed_files);
+		return;
+	}
+
+	if (autols == 1)
+		reload_dirlist();
+	for (i = 0; i < c; i++) {
+		if (!removed_files[i] || !*removed_files[i])
+			continue;
+		printf("%s\n", removed_files[i]);
+	}
+	print_reload_msg(_("%zu file(s) removed\n"), c);
+
+	free(removed_files);
+}
+
 int
 remove_file(char **args)
 {
-	int cwd = 0, exit_status = EXIT_SUCCESS;
+#if defined(__HAIKU__)
+	int cwd = 0;
+#endif /* __HAIKU__ */
+	int exit_status = EXIT_SUCCESS;
 
 	log_function(NULL);
 
+	struct stat a;
 	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
 	int i, j = 3, dirs = 0;
 
 	for (i = 1; args[i]; i++) {
+#if defined(__HAIKU__)
 		/* Check if at least one file is in the current directory. If not,
 		 * there is no need to refresh the screen */
-		if (!cwd) {
+		if (cwd == 0) {
 			char *ret = strchr(args[i], '/');
 			/* If there's no slash, or if slash is the last char and
 			 * the file is not root "/", we have a file in CWD */
 			if (!ret || (!*(ret + 1) && ret != args[i]))
 				cwd = 1;
 		}
-
+#endif /* __HAIKU__ */
 		char *tmp = (char *)NULL;
 		if (strchr(args[i], '\\')) {
 			tmp = dequote_str(args[i], 0);
 			if (tmp) {
 				/* Start storing file names in 3: 0 is for 'rm', and 1
 				 * and 2 for parameters, including end of parameters (--) */
-				rm_cmd[j] = savestring(tmp, strlen(tmp));
-				j++;
+				if (lstat(tmp, &a) != -1) {
+					rm_cmd[j] = savestring(tmp, strlen(tmp));
+					j++;
+					if (S_ISDIR(a.st_mode))
+						dirs = 1;
+				} else {
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp, strerror(errno));
+				}
 				free(tmp);
 			} else {
 				fprintf(stderr, "%s: %s: Error dequoting file name\n",
@@ -1320,50 +1365,61 @@ remove_file(char **args)
 				continue;
 			}
 		} else {
-			rm_cmd[j] = savestring(args[i], strlen(args[i]));
-			j++;
+			if (lstat(args[i], &a) != -1) {
+				rm_cmd[j] = savestring(args[i], strlen(args[i]));
+				j++;
+				if (S_ISDIR(a.st_mode))
+					dirs = 1;
+			} else {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
+			}
 		}
-
-		struct stat attr;
-		if (!dirs && lstat(rm_cmd[j - 1], &attr) != -1 && S_ISDIR(attr.st_mode))
-			dirs = 1;
 	}
 
 	rm_cmd[j] = (char *)NULL;
 
+	if (j == 3) { /* No file to be deleted */
+		free(rm_cmd);
+		return EXIT_FAILURE;
+	}
+
 	rm_cmd[0] = savestring("rm", 2);
-	if (dirs)
+	if (dirs == 1)
 #if defined(__NetBSD__) || defined(__OpenBSD__)
 		rm_cmd[1] = savestring("-r", 2);
 #else
 		rm_cmd[1] = savestring("-dIr", 4);
-#endif
+#endif /* __NetBSD__ || __OpenBSD__ */
 	else
 #if defined(__NetBSD__) || defined(__OpenBSD__)
 		rm_cmd[1] = savestring("-f", 2);
 #else
 		rm_cmd[1] = savestring("-I", 2);
-#endif
+#endif /* __NetBSD__ || __OpenBSD__ */
 	rm_cmd[2] = savestring("--", 2);
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
-#if defined(__HAIKU__)// || defined(__APPLE__)
+#if defined(__HAIKU__)
 	else {
-		if (cwd && autols && strcmp(args[1], "--help") != 0
+		if (cwd == 1 && autols && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
 	}
-#endif
+#endif /* __HAIKU__ */
 
 	if (is_sel && exit_status == EXIT_SUCCESS)
 		deselect_all();
 
+	if (print_removed_files == 1)
+		list_removed_files(rm_cmd, 3);
+
 	for (i = 0; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
 	free(rm_cmd);
+
 	return exit_status;
 }
 

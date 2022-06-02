@@ -2572,6 +2572,9 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (print_removed_files == UNSET)
+		print_removed_files = DEF_PRINT_REMOVED_FILES;
+
 	if (xargs.fuzzy_match == UNSET)
 		xargs.fuzzy_match = DEF_FUZZY_MATCH;
 

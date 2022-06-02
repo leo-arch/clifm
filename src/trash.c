@@ -337,10 +337,8 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 {
 	/* Check file's existence */
 	struct stat attr;
-
 	if (lstat(file, &attr) == -1) {
-		fprintf(stderr, "%s: trash: %s: %s\n", PROGRAM_NAME, file,
-		    strerror(errno));
+		fprintf(stderr, "%s: trash: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		return errno;
 	}
 
@@ -475,33 +473,6 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		free(url_str);
 		url_str = (char *)NULL;
 	}
-
-	/* Remove the file to be trashed */
-/*	char *tmp_cmd3[] = {"rm", "-r", file, NULL};
-	ret = launch_execve(tmp_cmd3, FOREGROUND, E_NOFLAG);
-
-	// If remove fails, remove trash and info files
-	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: trash: %s: Failed removing file\n"),
-		    PROGRAM_NAME, file);
-		char *trash_file = (char *)NULL;
-		trash_file = (char *)xnmalloc(strlen(trash_files_dir)
-						+ strlen(file_suffix) + 2, sizeof(char));
-		sprintf(trash_file, "%s/%s", trash_files_dir, file_suffix);
-
-		char *tmp_cmd4[] = {"rm", "-r", trash_file, info_file, NULL};
-		ret = launch_execve(tmp_cmd4, FOREGROUND, E_NOFLAG);
-		free(trash_file);
-
-		if (ret != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: trash: Failed removing temporary "
-					"files from Trash.\nTry removing them manually\n"),
-					PROGRAM_NAME);
-			free(file_suffix);
-			free(info_file);
-			return EXIT_FAILURE;
-		}
-	} */
 
 	free(info_file);
 	free(file_suffix);
@@ -1108,6 +1079,25 @@ check_trash_file(char *deq_file)
 	return EXIT_SUCCESS;
 }
 
+/* Print the list of successfully trashed files */
+static void
+print_trashed_files(char **args, const int *trashed, const size_t trashed_n)
+{
+	if (print_removed_files == 0)
+		return;
+
+	size_t i;
+	for (i = 0; i < trashed_n; i++) {
+		if (!args[trashed[i]] || !*args[trashed[i]])
+			continue;
+		char *p = (char *)NULL;
+		if (strchr(args[trashed[i]], '\\'))
+			p = dequote_str(args[trashed[i]], 0);
+		printf("%s\n", p ? p : args[trashed[i]]);
+		free(p);
+	}
+}
+
 /* Trash files passed as arguments to the trash command */
 static int
 trash_files_args(char **args)
@@ -1120,21 +1110,33 @@ trash_files_args(char **args)
 		return EXIT_FAILURE;
 
 	int exit_status = EXIT_SUCCESS;
-	size_t i, trashed_files = 0;
+	size_t i, trashed_files = 0, n = 0;
+	for (i = 1; args[i]; i++);
+	int *successfully_trashed = (int *)xnmalloc(i + 1, sizeof(int));
+
 	for (i = 1; args[i]; i++) {
 		char *deq_file = dequote_str(args[i], 0);
+		if (!deq_file) {
+			fprintf(stderr, "%s: %s: Error dequoting file\n", PROGRAM_NAME, args[i]);
+			continue;
+		}
 		/* Make sure we are trashing a valid file */
 		if (check_trash_file(deq_file) == EXIT_FAILURE) {
 			exit_status = EXIT_FAILURE;
 			free(deq_file);
 			continue;
 		}
-
 		/* Once here, everything is fine: trash the file */
-		if (trash_element(suffix, &tm, deq_file) == EXIT_SUCCESS)
+		if (trash_element(suffix, &tm, deq_file) == EXIT_SUCCESS) {
 			trashed_files++;
-		else
+			if (print_removed_files == 1) {
+				/* Store indices of successfully trashed files */
+				successfully_trashed[n] = (int)i;
+				n++;
+			}
+		} else {
 			exit_status = EXIT_FAILURE;
+		}
 
 		free(deq_file);
 	}
@@ -1144,21 +1146,26 @@ trash_files_args(char **args)
 	if (exit_status == EXIT_SUCCESS) {
 		if (autols == 1)
 			reload_dirlist();
+		print_trashed_files(args, successfully_trashed, n);
 		print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
 		print_reload_msg(_("%zu total trashed file(s)\n"), trash_n + trashed_files);
-	} else if (trashed_files > 0 && autols == 1) {
+	} else if (trashed_files > 0) {
 		/* An error occured, but at least one file was trashed as well.
 		 * If this file was in the current dir, the screen will be refreshed
 		 * after this function (by inotify/kqueue), hidding the error message.
 		 * So let's pause here to prevent the error from being hidden, and
 		 * then refresh the list of files ourselves */
-		fputs(_("Press any key to continue... \n"), stderr);
-		xgetchar();
-		reload_dirlist();
+		if (autols == 1) {
+			fputs(_("Press any key to continue... \n"), stderr);
+			xgetchar();
+			reload_dirlist();
+		}
+		print_trashed_files(args, successfully_trashed, n);
 		print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
 		print_reload_msg(_("%zu total trashed file(s)\n"), trash_n + trashed_files);
 	}
 
+	free(successfully_trashed);
 	return exit_status;
 }
 

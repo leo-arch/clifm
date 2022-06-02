@@ -184,6 +184,7 @@ int
 	tips = UNSET,
 	print_msg = 0,
 	print_selfiles = UNSET,
+	print_removed_files = UNSET,
 	prompt_offset = UNSET,
 	prompt_notif = UNSET,
 	recur_perm_error_flag = 0,
