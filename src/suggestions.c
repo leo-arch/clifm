@@ -811,6 +811,9 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		}
 
 		if (len == 0) continue;
+		if ((file_info[i].dir == 1 && nwords == 1 && autocd == 0)
+		|| (file_info[i].dir == 0 && nwords == 1 && auto_open == 0))
+			continue;
 
 		if (case_sens_path_comp ? (*str == *file_info[i].name
 		&& strncmp(str, file_info[i].name, len) == 0)
