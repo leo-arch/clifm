@@ -786,34 +786,24 @@ untrash_element(char *file)
 		return EEXIST;
 	}
 
-	int ret = rename(undel_file, url_decoded);
+	int ret = renameat(AT_FDCWD, undel_file, AT_FDCWD, url_decoded);
 	if (ret == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		free(url_decoded);
 		return errno;
 	}
-/*	char *tmp_cmd[] = {"mv", "-i", undel_file, url_decoded, NULL};
-	int ret = -1;
-	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG); */
+
 	free(url_decoded);
 
-	if (ret == EXIT_SUCCESS) {
-		char *cmd[] = {"rm", "-r", undel_info, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-		if (ret != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: undel: %s: Error removing info file\n"),
-					PROGRAM_NAME, undel_info);
-			return ret;
-		} else {
-			return EXIT_SUCCESS;
-		}
-	} else {
-		fprintf(stderr, _("%s: undel: %s: Error restoring trashed file\n"),
-				PROGRAM_NAME, undel_file);
+	char *cmd[] = {"rm", "-r", undel_info, NULL};
+	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	if (ret != EXIT_SUCCESS) {
+		fprintf(stderr, _("%s: undel: %s: Error removing info file\n"),
+				PROGRAM_NAME, undel_info);
 		return ret;
 	}
 
-	return EXIT_FAILURE; /* Never reached */
+	return EXIT_SUCCESS;
 }
 
 int
