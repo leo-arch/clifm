@@ -917,7 +917,7 @@ check_builtins(const char *str, const size_t len, const int print)
 }
 
 static inline int
-print_cmd_suggestion(int i, size_t len)
+print_cmd_suggestion(size_t i, size_t len)
 {
 	if (is_internal_c(bin_commands[i])) {
 		if (strlen(bin_commands[i]) > len) {
@@ -970,8 +970,8 @@ check_cmds(char *str, const size_t len, const int print)
 	if (len == 0)
 		return NO_MATCH;
 
-	int i = (int)path_progsn;
-	while (--i >= 0) {
+	size_t i;
+	for (i = 0; bin_commands[i]; i++) {
 		if (!bin_commands[i] || *str != *bin_commands[i])
 			continue;
 
