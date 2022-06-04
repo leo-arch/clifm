@@ -62,8 +62,8 @@ is_file_in_cwd(char *name)
 
 	char rpath[PATH_MAX];
 	*rpath = '\0';
-	realpath(name, rpath);
-	if (!*rpath)
+	char *ret = realpath(name, rpath);
+	if (!ret || !*rpath)
 		return 0;
 
 	char *cwd = workspaces[cur_ws].path;
