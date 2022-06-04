@@ -1572,11 +1572,11 @@ print_cmdhist_line(int n, int beg_line)
 
 #ifndef _NO_HIGHLIGHT
 	if (highlight)
-		print_highlight_string(history[n]);
+		print_highlight_string(history[n].cmd);
 	else
 #endif
 	{
-		rl_replace_line(history[n], 1);
+		rl_replace_line(history[n].cmd, 1);
 	}
 
 	fputs(UNHIDE_CURSOR, stdout);
@@ -1606,7 +1606,7 @@ handle_cmdhist_beginning(int key)
 		}
 	}
 
-	if (!history[p])
+	if (!history[p].cmd)
 		return EXIT_FAILURE;
 
 	curhistindex = (size_t)p;
@@ -1622,9 +1622,9 @@ handle_cmdhist_middle(int key)
 	if (key == 65) { /* Up arrow key */
 		if (--p < 0) return EXIT_FAILURE;
 
-		while (p >= 0 && history[p]) {
-			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
-			&& strcmp(rl_line_buffer, history[p]) != 0) {
+		while (p >= 0 && history[p].cmd) {
+			if (strncmp(rl_line_buffer, history[p].cmd, (size_t)rl_point) == 0
+			&& strcmp(rl_line_buffer, history[p].cmd) != 0) {
 				found = 1; break;
 			}
 			p--;
@@ -1632,9 +1632,9 @@ handle_cmdhist_middle(int key)
 	} else { /* Down arrow key */
 		if (++p >= (int)current_hist_n)	return EXIT_FAILURE;
 
-		while (history[p]) {
-			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0
-			&& strcmp(rl_line_buffer, history[p]) != 0) {
+		while (history[p].cmd) {
+			if (strncmp(rl_line_buffer, history[p].cmd, (size_t)rl_point) == 0
+			&& strcmp(rl_line_buffer, history[p].cmd) != 0) {
 				found = 1; break;
 			}
 			p++;

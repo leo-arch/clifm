@@ -358,9 +358,9 @@ contains_digit(char *str)
 
 /* Returns 1 if CMD is found in CMDS_LIST and zero otherwise */
 static inline int
-find_cmd(char **cmds_list, const int list_size, char *cmd)
+find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 {
-	int found = 0, i = list_size;
+	int found = 0, i = (int)list_size;
 	int c = -1, d = contains_digit(cmd);
 
 	if (d != -1) {
@@ -368,8 +368,10 @@ find_cmd(char **cmds_list, const int list_size, char *cmd)
 		cmd[d] = '\0';
 	}
 
+	size_t cmd_len = strlen(cmd);
 	while (--i >= 0) {
-		if (*cmd == *cmds_list[i] && strcmp(cmd, cmds_list[i]) == 0) {
+		if (*cmd == *cmds_list[i].name && cmd_len == cmds_list[i].len
+		&& strcmp(cmd, cmds_list[i].name) == 0) {
 			found = 1;
 			break;
 		}
@@ -383,14 +385,10 @@ find_cmd(char **cmds_list, const int list_size, char *cmd)
 	return 0;
 }
 
-/* Check CMD against a list of internal commands */
 int
 is_internal_c(char *restrict cmd)
 {
-	int i;
-	for (i = 0; internal_cmds[i]; i++);
-
-	if (find_cmd(internal_cmds, i, cmd))
+	if (find_cmd(internal_cmds, internal_cmds_n, cmd))
 		return 1;
 
 	/* Check for the search and history functions as well */
@@ -409,34 +407,59 @@ is_internal_c(char *restrict cmd)
 int
 is_internal(char *restrict cmd)
 {
-	char *int_cmds[] = {
-		"ac", "ad",
-		"bb", "bleach",
-		"bm", "bookmarks",
-		"bl",
-		"br", "bulk",
-		"c", "cp",
-		"cd",
-		"d", "dup",
-		"exp", "export",
-		"jc", "jp",
-		"l", "le",
-		"m", "mv",
-		"mm", "mime",
-		"n", "new",
-		"o", "open",
-		"paste",
-		"p", "pr", "prop",
-		"pin",
-		"r",
-		"s", "sel",
-		"t", "tr", "trash",
-		"tag", "ta",
-		"te",
-		"v", "vv",
-		NULL};
+	const struct cmdslist_t int_cmds[] = {
+		{"ac", 2},
+		{"ad", 2},
+		{"bb", 2},
+		{"bleach", 6},
+		{"bm", 2},
+		{"bookmarks", 9},
+		{"bl", 2},
+		{"br", 2},
+		{"bulk", 4},
+		{"c", 1},
+		{"cp", 2},
+		{"cd", 2},
+		{"d", 1},
+		{"dup", 3},
+		{"exp", 3},
+		{"export", 6},
+		{"jc", 2},
+		{"jp", 2},
+		{"l", 1},
+		{"le", 2},
+		{"m", 1},
+		{"mv", 2},
+		{"mm", 2},
+		{"mime", 4},
+		{"n", 1},
+		{"new", 3},
+		{"o", 1},
+		{"open", 4},
+		{"paste", 5},
+		{"p", 1},
+		{"pp", 2},
+		{"pr", 2},
+		{"prop", 4},
+		{"pin", 3},
+		{"r", 1},
+		{"s", 1},
+		{"sel", 3},
+		{"t", 1},
+		{"tr", 2},
+		{"trash", 5},
+		{"tag", 3},
+		{"ta", 2},
+		{"te", 2},
+		{"v", 1},
+		{"vv", 2},
+		{NULL, 0}
+	};
 
-	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
+	static size_t i = 0;
+	if (i == 0)
+		i = (sizeof(int_cmds) / sizeof(struct cmdslist_t)) - 1;
+
 	if (find_cmd(int_cmds, i, cmd))
 		return 1;
 
@@ -460,41 +483,71 @@ is_internal_f(const char *restrict cmd)
 	|| (*cmd == 's' && (*(cmd + 1) == 't' || *(cmd + 1) == 'o')) ) )
 		return 0;
 
-	const char *int_cmds[] = {
-		"ac", "ad",
-		"bb", "bleach",
-		"bm", "bookmarks",
-		"br", "bulk",
-		"c", "cp",
-		"cd",
-		"d", "dup",
-		"ds", "desel",
-		"exp",
-		"l", "ln", "le",
-		"m", "mv",
-		"md", "mkdir",
-		"mf",
-		"n", "new",
-		"o", "open", "ow",
-		"p", "pp", "pr", "prop",
-		"paste",
-		"pin",
-		"r", "rm",
-		"rr",
-		"s", "sel",
-		"st", "sort",
-		"t", "tr", "trash",
-		"tag", "ta",
-		"te",
-		"unlink",
-		"ws",
-		NULL};
+	const struct cmdslist_t int_cmds[] = {
+		{"ac", 2},
+		{"ad", 2},
+		{"bb", 2},
+		{"bleach", 6},
+		{"bm", 2},
+		{"bookmarks", 9},
+		{"br", 2},
+		{"bulk", 4},
+		{"c", 1},
+		{"cp", 2},
+		{"cd", 2},
+		{"d", 1},
+		{"dup", 3},
+		{"ds", 2},
+		{"desel", 5},
+		{"exp", 3},
+		{"l", 1},
+		{"ln", 2},
+		{"le", 2},
+		{"m", 1},
+		{"mv", 2},
+		{"md", 2},
+		{"mkdir", 5},
+		{"mf", 2},
+		{"n", 1},
+		{"new", 3},
+		{"o", 1},
+		{"open", 4},
+		{"ow", 2},
+		{"p", 1},
+		{"pp", 2},
+		{"pr", 2},
+		{"prop", 4},
+		{"paste", 5},
+		{"pin", 3},
+		{"r", 1},
+		{"rm", 2},
+		{"rr", 2},
+		{"s", 1},
+		{"sel", 3},
+		{"st", 2},
+		{"sort", 4},
+		{"t", 1},
+		{"tr", 2},
+		{"trash", 5},
+		{"tag", 3},
+		{"ta", 2},
+		{"te", 2},
+		{"unlink", 6},
+		{"ws", 2},
+		{NULL, 0}
+	};
 
-	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
+	static int n = 0;
+	if (n == 0)
+		n = (int)(sizeof(int_cmds) / sizeof(struct cmdslist_t)) - 1;
+	size_t cmd_len = strlen(cmd);
 
+	int i = n;
 	while (--i >= 0) {
-		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0)
+		if (*cmd == *int_cmds[i].name && cmd_len == int_cmds[i].len
+		&& strcmp(cmd, int_cmds[i].name) == 0) {
 			return 1;
+		}
 	}
 
 	return 0;

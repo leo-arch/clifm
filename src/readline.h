@@ -26,9 +26,10 @@
 #define __READLINE_H
 
 int initialize_readline(void);
-char **my_rl_completion(const char *text, int start, int end);
-char *rl_no_hist(const char *prompt);
 int is_quote_char(const char c);
+char **my_rl_completion(const char *text, int start, int end);
+char *my_rl_path_completion(const char *text, int state);
+char *rl_no_hist(const char *prompt);
 int tab_complete(int mode);
 
 #endif /* __READLINE_H */

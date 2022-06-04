@@ -201,6 +201,7 @@ extern int watch;
 /* Instead of completion the current word, a BAEJ suggestion points to
  * a possible completion as follows: WORD > COMPLETION */
 #define BAEJ_SUGGESTION     (1 << 11)
+#define STATE_SUGGESTING    (1 << 12)
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)
@@ -848,6 +849,20 @@ struct msgs_t {
 };
 extern struct msgs_t msgs;
 
+struct cmdslist_t {
+	char *name;
+	size_t len;
+};
+extern const struct cmdslist_t param_str[];
+extern const struct cmdslist_t internal_cmds[];
+extern size_t internal_cmds_n;
+
+struct history_t {
+	char *cmd;
+	size_t len;
+};
+extern struct history_t *history;
+
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */
@@ -1131,16 +1146,12 @@ extern char
 	**cdpaths,
 	**color_schemes,
 	**ext_colors,
-	**history,
 	**messages,
 	**old_pwd,
 	**paths,
 	**profile_names,
 	**prompt_cmds,
 	**tags;
-
-extern char *internal_cmds[];
-extern const char *param_str[];
 
 extern regex_t regex_exp;
 extern size_t *ext_colors_len;

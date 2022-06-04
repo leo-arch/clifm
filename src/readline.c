@@ -773,7 +773,7 @@ my_rl_quote(char *text, int mt, char *qp)
 
 /* This is the filename_completion_function() function of an old Bash
  * release (1.14.7) modified to fit CliFM needs */
-static char *
+char *
 my_rl_path_completion(const char *text, int state)
 {
 	if (!text || !*text)
@@ -865,12 +865,11 @@ my_rl_path_completion(const char *text, int state)
 		}
 
 		/* We aren't done yet.  We also support the "~user" syntax. */
-
 		/* Save the version of the directory that the user typed. */
 		size_t dirname_len = strlen(dirname);
 
 		users_dirname = savestring(dirname, dirname_len);
-		/*      { */
+
 		char *temp_dirname;
 		int replace_dirname;
 
@@ -887,7 +886,6 @@ my_rl_path_completion(const char *text, int state)
 			free(users_dirname);
 			users_dirname = savestring(dirname, dirname_len);
 		}
-		/*      } */
 
 		char *d = dirname;
 		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(text))
@@ -906,16 +904,14 @@ my_rl_path_completion(const char *text, int state)
 
 	/* Now that we have some state, we can read the directory. If we found
 	 * a match among files in dir, break the loop and print the match */
-
 	match = 0;
 
 	size_t dirname_len = 0;
 	if (dirname)
 		dirname_len = strlen(dirname);
 
-	/* This block is used only in case of "/path/./" to remove the
-	 * ending "./" from dirname and to be able to perform thus the
-	 * executable check via access() */
+	/* This block is used only in case of "/path/./" to remove the ending "./"
+	 * from dirname and to be able to perform thus the executable check via access() */
 	exec_path = 0;
 
 	if (dirname_len > 2 && dirname[dirname_len - 3] == '/'
@@ -1046,26 +1042,54 @@ my_rl_path_completion(const char *text, int state)
 			/* Check for possible matches, first using regular matching and
 			 * then, if no match, try fuzzy matching (if enabled) */
 			if (case_sens_path_comp == 1) {
+
 				if (*ent->d_name != *filename
-				|| (strncmp(filename, ent->d_name, filename_len) != 0)) {
-					if (xargs.fuzzy_match == 0 || *filename == '-'
-					|| fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
+				/* Check 2nd char as well before calling strncasecmp() */
+				|| (filename_len > 1 && *(ent->d_name + 1)
+				&& *(ent->d_name + 1) != *(filename + 1))
+
+				|| (strncmp(filename, ent->d_name, filename_len) != 0) ) {
+					if (xargs.fuzzy_match == 0 || *filename == '-')
 						continue;
-				} else {
-					/* Keep a copy of the first regular match: it should take
-					 * precedences over fuzzy matches when suggesting */
-					if (suggestions && xargs.fuzzy_match == 1 && !*_fmatch)
-						xstrsncpy(_fmatch, tmp, sizeof(_fmatch));
+					if (flags & STATE_SUGGESTING) {
+						if (!*_fmatch && fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 1) {
+							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
+								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
+							else
+								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
+							continue;
+						} else {
+							continue;
+						}
+					} else {
+						if (fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
+							continue;
+					}
 				}
+
 			} else {
 				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
+				/* Check 2nd char as well before calling strncasecmp() */
+				|| (filename_len > 1 && *(ent->d_name + 1)
+				&& TOUPPER(*(ent->d_name + 1)) != TOUPPER(*(filename + 1)))
+
 				|| (strncasecmp(filename, ent->d_name, filename_len) != 0)) {
-					if (xargs.fuzzy_match == 0 || *filename == '-'
-					|| fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
+					if (xargs.fuzzy_match == 0 || *filename == '-')
 						continue;
-				} else {
-					if (suggestions && xargs.fuzzy_match == 1 && !*_fmatch)
-						xstrsncpy(_fmatch, tmp, sizeof(_fmatch));
+					if (flags & STATE_SUGGESTING) {
+						if (!*_fmatch && fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 1) {
+							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
+								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
+							else
+								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
+							continue;
+						} else {
+							continue;
+						}
+					} else {
+						if (fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
+							continue;
+					}
 				}
 			}
 
@@ -1154,27 +1178,20 @@ my_rl_path_completion(const char *text, int state)
 
 	/* readdir() returns NULL on reaching the end of directory stream.
 	 * So that if entry is NULL, we have no matches */
-
 	if (!ent) { /* == !match */
 		if (directory) {
 			closedir(directory);
 			directory = (DIR *)NULL;
 		}
 
-		if (dirname) {
-			free(dirname);
-			dirname = (char *)NULL;
-		}
+		free(dirname);
+		dirname = (char *)NULL;
 
-		if (filename) {
-			free(filename);
-			filename = (char *)NULL;
-		}
+		free(filename);
+		filename = (char *)NULL;
 
-		if (users_dirname) {
-			free(users_dirname);
-			users_dirname = (char *)NULL;
-		}
+		free(users_dirname);
+		users_dirname = (char *)NULL;
 
 		return (char *)NULL;
 	}
@@ -1184,7 +1201,6 @@ my_rl_path_completion(const char *text, int state)
 		cur_comp_type = TCMP_PATH;
 		char *temp = (char *)NULL;
 
-		/* dirname && (strcmp(dirname, ".") != 0) */
 		if (dirname && (dirname[0] != '.' || dirname[1])) {
 /*			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
 				size_t dirlen = strlen(dirname);
@@ -1202,10 +1218,25 @@ my_rl_path_completion(const char *text, int state)
 			temp = (char *)xnmalloc(strlen(users_dirname) +
 					strlen(ent->d_name) + 1, sizeof(char));
 			strcpy(temp, users_dirname);
-/*			} */
 			strcat(temp, ent->d_name);
 		} else {
 			temp = savestring(ent->d_name, strlen(ent->d_name));
+		}
+
+		if (flags & STATE_SUGGESTING) {
+			if (directory) {
+				closedir(directory);
+				directory = (DIR *)NULL;
+			}
+
+			free(dirname);
+			dirname = (char *)NULL;
+
+			free(filename);
+			filename = (char *)NULL;
+
+			free(users_dirname);
+			users_dirname = (char *)NULL;
 		}
 
 		return (temp);
@@ -1255,7 +1286,7 @@ hist_generator(const char *text, int state)
 	}
 
 	/* Look for cmd history entries for a match */
-	while ((name = history[i++]) != NULL) {
+	while ((name = history[i++].cmd) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}

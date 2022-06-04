@@ -2259,7 +2259,6 @@ get_path_programs(void)
 
 			cmd_n[i] = scandir(paths[i], &commands_bin[i],
 						light_mode ? NULL : skip_nonexec, xalphasort);
-//						NULL, xalphasort);
 			/* If paths[i] directory does not exist, scandir returns -1.
 			 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
 			 * PATH disregarding if they exist or not. If paths[i] dir is
@@ -2271,16 +2270,14 @@ get_path_programs(void)
 	}
 
 	/* Add internal commands */
-	size_t internal_cmd_n = 0;
-	while (internal_cmds[internal_cmd_n])
-		internal_cmd_n++;
+	for (internal_cmds_n = 0; internal_cmds[internal_cmds_n].name; internal_cmds_n++);
 
-	bin_commands = (char **)xnmalloc((size_t)total_cmd + internal_cmd_n +
+	bin_commands = (char **)xnmalloc((size_t)total_cmd + internal_cmds_n +
 			     aliases_n + actions_n + 2, sizeof(char *));
 
-	i = (int)internal_cmd_n;
+	i = (int)internal_cmds_n;
 	while (--i >= 0) {
-		bin_commands[l] = savestring(internal_cmds[i], strlen(internal_cmds[i]));
+		bin_commands[l] = savestring(internal_cmds[i].name, internal_cmds[i].len);
 		l++;
 	}
 

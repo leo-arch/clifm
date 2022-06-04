@@ -1821,14 +1821,12 @@ parse_input_str(char *str)
 
 		register size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
-			/* Brace and wildcard expansion is made by glob()
-			 * as well */
+			/* Brace and wildcard expansion is made by glob() as well */
 			if ((substr[i][j] == '*' || substr[i][j] == '?'
 			|| substr[i][j] == '[' || substr[i][j] == '{')
 			&& substr[i][j + 1] != ' ') {
-				/* Strings containing these characters are taken as
-			 * wildacard patterns and are expanded by the glob
-			 * function. See man (7) glob */
+				/* Strings containing these characters are taken as wildacard
+				 * patterns and are expanded by the glob function. See man (7) glob */
 				if (glob_n < int_array_max) {
 					glob_array[glob_n] = (int)i;
 					glob_n++;
@@ -1900,8 +1898,7 @@ parse_input_str(char *str)
 			if (globbuf.gl_pathc) {
 				register size_t j = 0;
 				char **glob_cmd = (char **)NULL;
-				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1,
-											sizeof(char *));
+				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1, sizeof(char *));
 
 				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
 					glob_cmd[j] = savestring(substr[i], strlen(substr[i]));

@@ -1293,7 +1293,7 @@ free_stuff(void)
 	if (history) {
 		i = (int)current_hist_n;
 		while (--i >= 0)
-			free(history[i]);
+			free(history[i].cmd);
 		free(history);
 	}
 

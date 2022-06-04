@@ -175,8 +175,7 @@ write_msg_into_logfile(const char *_msg)
 	if (!msg_fp) {
 		/* Do not log this error: We might incur in an infinite loop
 		 * trying to access a file that cannot be accessed */
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, msg_log_file,
-		    strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, msg_log_file, strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
 		putchar('\n');
@@ -380,7 +379,7 @@ print_history_list(void)
 	int n = DIGINUM(current_hist_n);
 	size_t i;
 	for (i = 0; i < current_hist_n; i++)
-		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i]);
+		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i].cmd);
 
 	return EXIT_SUCCESS;
 }
@@ -396,7 +395,7 @@ print_last_items(char *str)
 	int n = DIGINUM(current_hist_n);
 	size_t i;
 	for (i = current_hist_n - (size_t)num; i < current_hist_n; i++)
-		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i]);
+		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i].cmd);
 
 	return EXIT_SUCCESS;
 }
@@ -457,15 +456,12 @@ history_function(char **comm)
 static int
 exec_hist_cmd(char **cmd)
 {
-	int i;
-	int exit_status = EXIT_SUCCESS;
+	int i, exit_status = EXIT_SUCCESS;
 
 	char **alias_cmd = check_for_alias(cmd);
 	if (alias_cmd) {
-		/* If an alias is found, check_for_alias frees CMD and
-		 * returns alias_cmd in its place to be executed by
-		 * exec_cmd() */
-
+		/* If an alias is found, check_for_alias frees CMD and returns
+		 * alias_cmd in its place to be executed by exec_cmd() */
 		if (exec_cmd(alias_cmd) != 0)
 			exit_status = EXIT_FAILURE;
 
@@ -497,10 +493,10 @@ run_hist_num(const char *cmd)
 		return EXIT_FAILURE;
 	}
 
-	if (record_cmd(history[num - 1]))
-		add_to_cmdhist(history[num - 1]);
+	if (record_cmd(history[num - 1].cmd))
+		add_to_cmdhist(history[num - 1].cmd);
 
-	char **cmd_hist = parse_input_str(history[num - 1]);
+	char **cmd_hist = parse_input_str(history[num - 1].cmd);
 	if (!cmd_hist) {
 		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
@@ -516,13 +512,12 @@ static int
 run_last_hist_cmd(void)
 {
 	size_t old_args = args_n;
-	if (record_cmd(history[current_hist_n - 1]))
-		add_to_cmdhist(history[current_hist_n - 1]);
+	if (record_cmd(history[current_hist_n - 1].cmd))
+		add_to_cmdhist(history[current_hist_n - 1].cmd);
 
-	char **cmd_hist = parse_input_str(history[current_hist_n - 1]);
+	char **cmd_hist = parse_input_str(history[current_hist_n - 1].cmd);
 	if (!cmd_hist) {
-		fprintf(stderr, _("%s: Error parsing history command\n"),
-			PROGRAM_NAME);
+		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -545,10 +540,10 @@ run_last_lessn_hist_cmd(const char *cmd)
 
 	size_t n = current_hist_n - (size_t)acmd - 1;
 
-	if (record_cmd(history[n]))
-		add_to_cmdhist(history[n]);
+	if (record_cmd(history[n].cmd))
+		add_to_cmdhist(history[n].cmd);
 
-	char **cmd_hist = parse_input_str(history[n]);
+	char **cmd_hist = parse_input_str(history[n].cmd);
 	if (cmd_hist) {
 		int exit_status = exec_hist_cmd(cmd_hist);
 		args_n = old_args;
@@ -565,11 +560,11 @@ run_hist_string(const char *cmd)
 {
 	size_t i, len = strlen(cmd), old_args = args_n;
 
-	for (i = 0; history[i]; i++) {
-		if (*cmd != *history[i] || strncmp(cmd, history[i], len) != 0)
+	for (i = 0; history[i].cmd; i++) {
+		if (*cmd != *history[i].cmd || strncmp(cmd, history[i].cmd, len) != 0)
 			continue;
 
-		char **cmd_hist = parse_input_str(history[i]);
+		char **cmd_hist = parse_input_str(history[i].cmd);
 		if (!cmd_hist)
 			continue;
 
@@ -615,12 +610,12 @@ get_history(void)
 		return EXIT_FAILURE;
 
 	if (current_hist_n == 0) { /* Coming from main() */
-		history = (char **)xcalloc(1, sizeof(char *));
+		history = (struct history_t *)xcalloc(1, sizeof(struct history_t));
 	} else { /* Only true when comming from 'history clear' */
 		size_t i;
-		for (i = 0; history[i]; i++)
-			free(history[i]);
-		history = (char **)xrealloc(history, 1 * sizeof(char *));
+		for (i = 0; history[i].cmd; i++)
+			free(history[i].cmd);
+		history = (struct history_t *)xrealloc(history, 1 * sizeof(struct history_t));
 		current_hist_n = 0;
 	}
 
@@ -637,12 +632,15 @@ get_history(void)
 
 	while ((line_len = getline(&line_buff, &line_size, hist_fp)) > 0) {
 		line_buff[line_len - 1] = '\0';
-		history = (char **)xrealloc(history, (current_hist_n + 2) * sizeof(char *));
-		history[current_hist_n++] = savestring(line_buff, (size_t)line_len);
+		history = (struct history_t *)xrealloc(history, (current_hist_n + 2) * sizeof(struct history_t));
+		history[current_hist_n].cmd = savestring(line_buff, (size_t)line_len);
+		history[current_hist_n].len = (size_t)line_len;
+		current_hist_n++;
 	}
 
 	curhistindex = current_hist_n ? current_hist_n - 1 : 0;
-	history[current_hist_n] = (char *)NULL;
+	history[current_hist_n].cmd = (char *)NULL;
+	history[current_hist_n].len = 0;
 	free(line_buff);
 	fclose(hist_fp);
 	return EXIT_SUCCESS;
@@ -663,10 +661,12 @@ add_to_cmdhist(const char *cmd)
 	/* For us */
 	/* Add the new input to the history array */
 	size_t cmd_len = strlen(cmd);
-	history = (char **)xrealloc(history, (size_t)(current_hist_n + 2) * sizeof(char *));
-	history[current_hist_n] = savestring(cmd, cmd_len);
+	history = (struct history_t *)xrealloc(history, (size_t)(current_hist_n + 2) * sizeof(struct history_t));
+	history[current_hist_n].cmd = savestring(cmd, cmd_len);
+	history[current_hist_n].len = cmd_len;
 	current_hist_n++;
-	history[current_hist_n] = (char *)NULL;
+	history[current_hist_n].cmd = (char *)NULL;
+	history[current_hist_n].len = 0;
 }
 
 /* Returns 1 if INPUT should be stored in history and 0 if not */
@@ -768,9 +768,9 @@ record_cmd(char *input)
 		return 0;
 
 	/* Consequtively equal commands in history */
-	if (history && history[current_hist_n - 1]
-	&& *p == *history[current_hist_n - 1]
-	&& strcmp(p, history[current_hist_n - 1]) == 0)
+	if (history && history[current_hist_n - 1].cmd
+	&& *p == *history[current_hist_n - 1].cmd
+	&& strcmp(p, history[current_hist_n - 1].cmd) == 0)
 		return 0;
 
 	return 1;
