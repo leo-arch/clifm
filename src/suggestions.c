@@ -458,7 +458,6 @@ get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 	return color;
 }
 
-/*
 static inline int
 skip_leading_dot_slash(char **str, size_t *len)
 {
@@ -483,7 +482,7 @@ remove_trailing_slash(char **str, size_t *len)
 		(*len)--;
 		(*str)[*len] = '\0';
 	}
-} */
+}
 
 static inline void
 skip_leading_spaces(char **str, size_t *len)
@@ -587,16 +586,6 @@ get_print_status(const char *str, const char *match, const size_t len)
 
 	return PARTIAL_MATCH;
 }
-/*
-static inline void
-free_matches(char ***matches)
-{
-	size_t i;
-	for (i = 0; (*matches)[i]; i++)
-		free((*matches)[i]);
-	free(*matches);
-} */
-
 static int
 check_completions(char *str, size_t len, const unsigned char c, const int print)
 {
@@ -636,6 +625,15 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 }
 
 /*
+static inline void
+free_matches(char ***matches)
+{
+	size_t i;
+	for (i = 0; (*matches)[i]; i++)
+		free((*matches)[i]);
+	free(*matches);
+}
+
 static int
 check_completions(char *str, size_t len, const unsigned char c, const int print)
 {
@@ -687,7 +685,6 @@ FREE:
 	return printed;
 } */
 
-/*
 static inline void
 print_directory_suggestion(const size_t i, const size_t len, char *color)
 {
@@ -749,7 +746,7 @@ print_reg_file_suggestion(char *str, const size_t i, size_t len,
 
 	print_suggestion(file_info[i].name, len, color);
 }
-
+/*
 static int
 check_filenames(char *str, size_t len, const unsigned char c,
 				const int first_word, const size_t full_word)
@@ -790,6 +787,63 @@ check_filenames(char *str, size_t len, const unsigned char c,
 
 	return NO_MATCH;
 } */
+
+static int
+check_filenames(char *str, size_t len, const unsigned char c,
+				const int first_word, const size_t full_word)
+{
+	char *color = (suggest_filetype_color == 1) ? no_c : sf_c;
+
+	skip_leading_backslashes(&str, &len);
+	int dot_slash = skip_leading_dot_slash(&str, &len), fuzzy_index = -1;
+	skip_leading_spaces(&str, &len);
+	remove_trailing_slash(&str, &len);
+
+	size_t i;
+	for (i = 0; i < files; i++) {
+		if (!file_info[i].name)	continue;
+
+		if (full_word) {
+			if ((case_sens_path_comp ? strcmp(str, file_info[i].name)
+			: strcasecmp(str, file_info[i].name)) == 0)
+				return FULL_MATCH;
+			continue;
+		}
+
+		if (len == 0) continue;
+
+		if (case_sens_path_comp ? (*str == *file_info[i].name
+		&& strncmp(str, file_info[i].name, len) == 0)
+		: (TOUPPER(*str) == TOUPPER(*file_info[i].name)
+		&& strncasecmp(str, file_info[i].name, len) == 0)) {
+			if (file_info[i].len == len) return FULL_MATCH;
+			if (first_word && !auto_open) continue;
+			if (c != BS) suggestion.type = FILE_SUG;
+
+			if (file_info[i].dir)
+				print_directory_suggestion(i, len, color);
+			else
+				print_reg_file_suggestion(str, i, len, color, dot_slash);
+
+			return PARTIAL_MATCH;
+		} else {
+			if (xargs.fuzzy_match == 1 && fuzzy_index == -1
+			&& fuzzy_match(str, file_info[i].name, case_sens_path_comp) == 1)
+				fuzzy_index = (int)i;
+		}
+	}
+
+	if (fuzzy_index > -1) { /* No regular match, just a fuzzy one */
+		cur_comp_type = TCMP_PATH;
+		if (file_info[fuzzy_index].dir)
+			print_directory_suggestion((size_t)fuzzy_index, len, color);
+		else
+			print_reg_file_suggestion(str, (size_t)fuzzy_index, len, color, dot_slash);
+		return PARTIAL_MATCH;
+	}
+
+	return NO_MATCH;
+}
 
 static int
 check_history(const char *str, const size_t len)
@@ -1837,16 +1891,26 @@ rl_suggestions(const unsigned char c)
 			}
 			break;
 
-/*		case 'f': // 3.d.5) File names in CWD
-			// Do not check dirs and filenames if first word and
-			// neither autocd nor auto-open are enabled
+		case 'f': // 3.d.5) File names in CWD
+			/* Do not check dirs and filenames if first word and
+			 * neither autocd nor auto-open are enabled */
 			if (last_space || autocd || auto_open) {
 				if (nwords == 1) {
 					word = (first_word && *first_word) ? first_word : last_word;
 					wlen = strlen(word);
 				}
-				// Skip internal commands not dealing with file names
-				char *p;
+
+				/* Skip internal commands not dealing with file names */
+				if (first_word) {
+					flags |= STATE_COMPLETING;
+					if (is_internal_c(first_word) && !is_internal_f(first_word)) {
+						flags &= ~STATE_COMPLETING;
+						goto NO_SUGGESTION;
+					}
+					flags &= ~STATE_COMPLETING;
+				}
+
+/*				char *p;
 				p = strchr(lb, ' ' );
 				if (p) {
 					flags |= STATE_COMPLETING;
@@ -1858,7 +1922,7 @@ rl_suggestions(const unsigned char c)
 					}
 					flags &= ~STATE_COMPLETING;
 					*p = ' ';
-				}
+				} */
 
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
@@ -1866,12 +1930,12 @@ rl_suggestions(const unsigned char c)
 				if (c == ' ' && suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
 
-//				printed = check_filenames(word, wlen, c, last_space ? 0 : 1, full_word);
+/*				printed = check_filenames(word, wlen, c, last_space ? 0 : 1, full_word); */
 				printed = check_filenames(word, wlen, c, last_space ? 0 : 1, c == ' ' ? 1 : 0);
 				if (printed)
 					goto SUCCESS;
 			}
-			break; */
+			break;
 
 		case 'h': /* 3.d.6) Commands history */
 			printed = check_history(full_line, (size_t)rl_end);
