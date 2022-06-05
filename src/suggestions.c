@@ -360,8 +360,15 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	size_t str_len = strlen(str), slines = 0;
 
-	if (check_conditions(str, offset, str_len, &baej, &slines) == EXIT_FAILURE)
+	if (check_conditions(str, offset, str_len, &baej, &slines) == EXIT_FAILURE) {
+// TESTING!
+		/* The highlight function modified the terminal idea of the cursor position,
+		 * so that we need to correct it before exiting */
+		if (highlight == 1)// && str_len == offset)
+			set_cursor_position(baej);
+// TESTING!
 		return;
+	}
 
 	/* In some cases (accepting first suggested word), we might want to
 	 * reprint the suggestion buffer, in which case it is already stored */
@@ -1817,6 +1824,9 @@ rl_suggestions(const unsigned char c)
 			break;
 
 		case 'c': /* 3.d.3) Possible completions (only path completion!) */
+// TESTING!
+			if (rl_point < rl_end && c == '/') goto NO_SUGGESTION;
+// TESTING!
 			if (last_space || autocd || auto_open) {
 
 				/* Skip internal commands not dealing with file names */
@@ -1912,20 +1922,6 @@ rl_suggestions(const unsigned char c)
 					}
 					flags &= ~STATE_COMPLETING;
 				}
-
-/*				char *p;
-				p = strchr(lb, ' ' );
-				if (p) {
-					flags |= STATE_COMPLETING;
-					*p = '\0';
-					if (is_internal_c(lb) && !is_internal_f(lb)) {
-						*p = ' ';
-						flags &= ~STATE_COMPLETING;
-						goto NO_SUGGESTION;
-					}
-					flags &= ~STATE_COMPLETING;
-					*p = ' ';
-				} */
 
 				if (wlen && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
