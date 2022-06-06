@@ -574,10 +574,6 @@ rl_accept_suggestion(int count, int key)
 	rl_point = suggestion.offset;
 
 	if (!accept_first_word && (flags & BAEJ_SUGGESTION))
-/*	if (!accept_first_word && (suggestion.type == BOOKMARK_SUG
-	|| suggestion.type == ALIAS_SUG || suggestion.type == ELN_SUG
-	|| suggestion.type == JCMD_SUG || suggestion.type == JCMD_SUG_NOACD
-	|| suggestion.type == BACKDIR_SUG || suggestion.type == SORT_SUG)) */
 		clear_suggestion(CS_KEEPBUF);
 
 	/* Complete according to the suggestion type */
@@ -652,6 +648,14 @@ rl_accept_suggestion(int count, int key)
 		}
 		break;
 #endif /* _NO_TAGS */
+
+	case USER_SUG: {
+		char *p = escape_str(suggestion_buf);
+		my_insert_text(p ? p : suggestion_buf, NULL, 0);
+		rl_stuff_char('/');
+		free(p);
+		break;
+	}
 
 	default:
 		my_insert_text(suggestion_buf, NULL, 0);

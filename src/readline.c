@@ -39,6 +39,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
+#include <pwd.h>
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
@@ -1820,6 +1821,27 @@ tags_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+static char *
+users_generator(const char *text, int state)
+{
+	static size_t len;
+	const struct passwd *p;
+
+	if (!state)
+		len = strlen(text);
+
+	while ((p = getpwent())) {
+		if (!p->pw_name) break;
+		if (len == 0 || strncmp(p->pw_name, text, len) == 0) {
+			char t[NAME_MAX];
+			snprintf(t, sizeof(t), "~%s", p->pw_name);
+			return strdup(t);
+		}
+	}
+
+	return (char *)NULL;
+}
+
 /* Generate possible arguments for a shell command. Arguments should have
  * been previously loaded by get_ext_options() and stored in ext_opts array */
 static char *
@@ -2031,6 +2053,15 @@ my_rl_completion(const char *text, int start, int end)
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
 
+		if (!_xrename && *text == '~' && *(text + 1) != '/') {
+			matches = rl_completion_matches(text + 1, &users_generator);
+			endpwent();
+			if (matches) {
+				cur_comp_type = TCMP_USERS;
+				return matches;
+			}
+		}
+
 		/* HISTORY CMD COMPLETION */
 		if (!_xrename && *text == '!') {
 			matches = rl_completion_matches(text + 1, &hist_generator);
@@ -2178,6 +2209,16 @@ my_rl_completion(const char *text, int start, int end)
 			matches = rl_completion_matches(text, &environ_generator);
 			if (matches) {
 				cur_comp_type = TCMP_ENVIRON;
+				return matches;
+			}
+		}
+
+		/* ##### ~USERS ##### */
+		if (*text == '~' && *(text + 1) != '/') {
+			matches = rl_completion_matches(text + 1, &users_generator);
+			endpwent();
+			if (matches) {
+				cur_comp_type = TCMP_USERS;
 				return matches;
 			}
 		}

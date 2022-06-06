@@ -330,6 +330,7 @@ extern int watch;
 #define BM_NAME_SUG    18 /* Bookmarks names */
 #define SORT_SUG       19
 #define PROMPT_SUG     20
+#define USER_SUG       21
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -911,7 +912,8 @@ enum comp_type {
 	TCMP_TAGS_F =     22,  /* Tagged files completion: 't:FULL_TAG_NAME' */
 	TCMP_TAGS_U =     23,  /* Tagged files for the untag function */
 	TCMP_ALIAS =      24,
-	TCMP_PROMPTS=     25
+	TCMP_PROMPTS =    25,
+	TCMP_USERS =      26
 };
 
 extern enum comp_type cur_comp_type;

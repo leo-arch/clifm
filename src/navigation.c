@@ -485,8 +485,7 @@ change_to_path(char *new_path, const int print_error)
 
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
 		if (print_error) {
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-				q, strerror(errno));
+			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME, q, strerror(errno));
 		}
 		free(q);
 		return EXIT_FAILURE;

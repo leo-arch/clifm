@@ -36,7 +36,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <termios.h>
-
+#include <pwd.h>
 #include <wchar.h>
 
 #ifdef __linux__
@@ -1282,10 +1282,29 @@ check_help(char *full_line, const char *_last_word)
 }
 
 static int
+check_users(const char *str, const size_t len)
+{
+	struct passwd *p;
+	while ((p = getpwent())) {
+		if (!p->pw_name) break;
+		if (len == 0 || (*str == *p->pw_name && strncmp(str, p->pw_name, len) == 0)) {
+			suggestion.type = USER_SUG;
+			char t[NAME_MAX + 1];
+			snprintf(t, NAME_MAX + 1, "~%s", p->pw_name);
+			print_suggestion(t, len + 1, sf_c);
+			endpwent();
+			return PARTIAL_MATCH;
+		}
+	}
+
+	endpwent();
+	return NO_MATCH;
+}
+
+static int
 check_variables(const char *str, const size_t len)
 {
 	size_t i;
-
 	for (i = 0; environ[i]; i++) {
 		if (TOUPPER(*environ[i]) != TOUPPER(*str)
 		|| strncasecmp(str, environ[i], len) != 0)
@@ -1789,6 +1808,13 @@ rl_suggestions(const unsigned char c)
 	/* 3.c.4) Variable names, both environment and internal */
 	if (*word == '$') {
 		printed = check_variables(word + 1, wlen - 1);
+		if (printed)
+			goto SUCCESS;
+	}
+
+	/* 3.c.5) ~usernames */
+	if (*word == '~' && *(word + 1) != '/') {
+		printed = check_users(word + 1, wlen - 1);
 		if (printed)
 			goto SUCCESS;
 	}

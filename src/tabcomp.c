@@ -318,8 +318,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	if (n)
 		*n = '\0';
 
-	if (cur_comp_type == TCMP_ENVIRON)
-		/* Skip the leading dollar sign ($) */
+	if (cur_comp_type == TCMP_ENVIRON || cur_comp_type == TCMP_USERS)
+		/* Skip the leading dollar sign (env vars) and tilde (users) */
 		buf++;
 
 	if (cur_comp_type == TCMP_PATH && multi == 0) {
@@ -415,7 +415,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	struct stat attr;
 	if (stat(d, &attr) != -1 && S_ISDIR(attr.st_mode)) {
 		/* If not the root directory, append a slash */
-		if (*d != '/' || *(d + 1))
+		if (*d != '/' || *(d + 1) || cur_comp_type == TCMP_USERS)
 			rl_insert_text("/");
 	} else {
 		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_TAGS_T)
@@ -1085,6 +1085,12 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 			prefix_len = 0;
 		}
 
+	} else if (cur_comp_type == TCMP_USERS) {
+		size_t l = strlen(buf);
+		char *p = savestring(buf, l);
+		buf = (char *)xrealloc(buf, (l + 2) * sizeof(char));
+		sprintf(buf, "~%s", p);
+		free(p);
 	} else {
 		if ((case_sens_path_comp == 0 || xargs.fuzzy_match == 1) && query) {
 			/* Honor case insensitive completion/fuzzy matches */

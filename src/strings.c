@@ -39,6 +39,13 @@
 #include <limits.h>
 #include <dirent.h>
 
+#if defined(__OpenBSD__)
+typedef char *rl_cpvfunc_t;
+# include <ereadline/readline/readline.h>
+#else
+# include <readline/readline.h>
+#endif /* __OpenBSD__ */
+
 #include "aux.h"
 #include "checks.h"
 #include "exec.h"
@@ -1764,6 +1771,20 @@ parse_input_str(char *str)
 		free(tag_index);
 	}
 #endif /* _NO_TAGS */
+
+				/* ###############################
+				 * #     2.j) ~USERNAME          #
+				 * ###############################*/
+
+	if (*substr[0] == '~' && substr[0][1] != '/') {
+		char *p = tilde_expand(substr[0]);
+		if (p) {
+			size_t l = strlen(p);
+			substr[0] = (char *)xrealloc(substr[0], (l + 1) * sizeof(char));
+			strcpy(substr[0], p);
+			free(p);
+		}
+	}
 
 	/* #### 3) NULL TERMINATE THE INPUT STRING ARRAY #### */
 	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
