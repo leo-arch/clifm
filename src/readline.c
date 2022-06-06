@@ -1457,7 +1457,7 @@ filenames_gen_text(const char *text, int state)
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
 		if (xargs.fuzzy_match == 0 || (*text == '.' && text[1] == '.') || *text == '-')
-			return (char *)NULL;
+			continue;
 		if (len == 0 || fuzzy_match((char *)text, name, case_sens_path_comp) == 1)
 			return strdup(name);
 	}
