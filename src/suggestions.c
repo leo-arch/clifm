@@ -479,16 +479,19 @@ skip_leading_dot_slash(char **str, size_t *len)
 	return dot_slash;
 }
 
-static inline void
+static inline int
 remove_trailing_slash(char **str, size_t *len)
 {
 	if (*len == 0)
-		return;
+		return 0;
 
 	if ((*str)[*len - 1] == '/') {
 		(*len)--;
 		(*str)[*len] = '\0';
+		return 1;
 	}
+
+	return 0;
 }
 
 static inline void
@@ -804,7 +807,7 @@ check_filenames(char *str, size_t len, const unsigned char c,
 	skip_leading_backslashes(&str, &len);
 	int dot_slash = skip_leading_dot_slash(&str, &len), fuzzy_index = -1;
 	skip_leading_spaces(&str, &len);
-	remove_trailing_slash(&str, &len);
+	int removed_slash = remove_trailing_slash(&str, &len);
 
 	size_t i;
 	for (i = 0; i < files; i++) {
@@ -852,6 +855,10 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		return PARTIAL_MATCH;
 	}
 
+	if (removed_slash == 1) { /* We removed the final slash: reinsert it */
+		str[len] = '/';
+		len++;
+	}
 	return NO_MATCH;
 }
 
@@ -1880,8 +1887,8 @@ rl_suggestions(const unsigned char c)
 					wlen -= FILE_URI_PREFIX_LEN;
 					last_word_offset += FILE_URI_PREFIX_LEN;
 				}
-				printed = check_completions(d, wlen, c, flag);
 
+				printed = check_completions(d, wlen, c, flag);
 				if (printed) {
 					if (flag == CHECK_MATCH) {
 						if (printed == FULL_MATCH)
