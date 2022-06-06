@@ -1927,12 +1927,7 @@ rl_suggestions(const unsigned char c)
 				clear_suggestion(CS_FREEBUF);
 
 			if (*lb != ';' && *lb != ':' && *word >= '1' && *word <= '9') {
-				if (__expand_eln(word) == 0) {
-					if (suggestion.printed)
-						clear_suggestion(CS_FREEBUF);
-					goto FAIL;
-				}
-				if ((printed = check_eln(word, flag)) == 1)
+				if (__expand_eln(word) == 1 && (printed = check_eln(word, flag)) == 1)
 					goto SUCCESS;
 			}
 			break;
