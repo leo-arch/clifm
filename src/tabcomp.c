@@ -1750,24 +1750,18 @@ RESTART:
 #ifndef _NO_HIGHLIGHT
 		if (highlight && !wrong_cmd) {
 			int bk = rl_point;
+/*			rl_point = 0;
+			recolorize_line();
+			rl_point = bk; */
 			fputs(HIDE_CURSOR, stdout);
 			char *ss = rl_copy_text(0, rl_end);
 			rl_delete_text(0, rl_end);
 			rl_redisplay();
 			rl_point = rl_end = 0;
-/*			int wc = wrong_cmd_line;
-			if (wc) {
-				cur_color = hw_c;
-				fputs(cur_color, stdout);
-			} */
+
 			l = 0;
 			char t[PATH_MAX];
 			for (k = 0; ss[k]; k++) {
-/*				if (ss[k] == ' ')
-					wc = 0;
-
-				if (!wc)
-					rl_highlight(ss, (size_t)k, SET_COLOR); */
 				rl_highlight(ss, (size_t)k, SET_COLOR);
 
 				if (ss[k] < 0) {

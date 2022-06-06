@@ -67,7 +67,7 @@ char *
 rl_highlight(char *str, const size_t pos, const int flag)
 {
 	char *cl = (char *)NULL;
-	/* PREV is -1 when there is no previous char (STR[POS] is the first) */
+	/* PREV is 0 when there is no previous char (STR[POS] is the first) */
 	char prev = pos ? str[pos - 1] : 0;
 	char c = *(str + pos);
 
@@ -85,13 +85,22 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	if (cur_color == hw_c && !sp)
 		goto END;
 
-/*	if (!sp)
-		wrong_cmd_line = 0; */
-
 	if (*rl_line_buffer != ';' && *rl_line_buffer != ':'
 	&& cur_color != hq_c && c >= '0' && c <= '9') {
-		if (prev == ' ' || cur_color == hn_c || rl_end == 1) {
+/*		if (prev == ' ' || cur_color == hn_c || rl_end == 1) {
 			cl = hn_c;
+			goto END;
+		} */
+		if (prev == ' ' || prev == 0 || cur_color == hn_c || rl_end == 1) {
+			char *a = strchr(str + pos, ' ');
+			if (a) {
+				*a = '\0';
+				if (is_number(str + pos))
+					cl = hn_c;
+				*a = ' ';
+			} else {
+				cl = hn_c;
+			}
 			goto END;
 		} else {
 			char cc = c;
