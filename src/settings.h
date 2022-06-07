@@ -35,7 +35,7 @@ ex=01;32:ee=00;32:no=00;31;47:uf=34;47:"
 
 #define DEF_IFACE_COLORS "bm=01;36:dc=00;02;34:dd=00;34:df=0:dg=00;33:\
 dh=00;36:dl=:dn=00;02;37:dr=00;33:do=00;36:dp=00;36:dw=00;31:\
-dxd=00;32:dxr=00;32:dz=00;32:el=01;33:em=01;31:hb=00;36:hc=02;31:\
+dxd=00;32:dxr=00;32:dz=00;32:el=00;36:em=01;31:hb=00;36:hc=02;31:\
 hd=00;36:he=00;36:hn=00;35:hp=00;36:hq=00;33:hr=00;31:hs=00;32:\
 hv=00;32:li=01;32:mi=01;36:nm=01;32:si=01;34:ti=01;36:tx=0:sb=02;33:\
 sh=02;35:sf=04;02;36:sc=02;31:sx=02;32:sp=02;31:tt=02;01;36:ts=04;35:\
@@ -90,7 +90,7 @@ wc=01;36:wm=01;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:"
 #define DEF_BM_C  "\x1b[01;36m" /* Bookmarked dirs in bookmarks screen */
 #define DEF_DF_C  "\x1b[0m" /* Default color */
 #define DEF_DL_C  "\x1b[00;34m" /* Dividing line */
-#define DEF_EL_C  "\x1b[01;33m" /* ELN's */
+#define DEF_EL_C  "\x1b[00;36m" /* ELN's */
 #define DEF_EM_C  "\001\x1b[01;31m\002" /* Error msg indicator */
 #define DEF_FC_C  "\x1b[00;02;34m"
 #define DEF_LI_C  "\001\x1b[01;32m\002" /* Sel files indicator (prompt) */
