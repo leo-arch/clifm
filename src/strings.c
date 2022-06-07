@@ -175,7 +175,8 @@ xstrcasestr(char *a, char *b)
 size_t
 xstrnlen(const char *restrict s)
 {
-	return (size_t)((char *)memchr(s, '\0', MAX_STR_SZ) - s); // cppcheck-suppress nullPointer
+	// cppcheck-suppress nullPointer
+	return (size_t)((char *)memchr(s, '\0', MAX_STR_SZ) - s);
 }
 
 /* Taken from NNN's source code: very clever. Copy SRC into DST

@@ -422,13 +422,11 @@ check_tag(char *name)
 void
 load_tags(void)
 {
-	if (!tags_dir || !*tags_dir)
-		return;
+	if (!tags_dir || !*tags_dir) return;
 
 	struct dirent **t = (struct dirent **)NULL;
 	int i, n = scandir(tags_dir, &t, NULL, alphasort);
-	if (n == -1)
-		return;
+	if (n == -1) return;
 
 	if (n <= 2) {
 		for (i = 0; i < n; i++)
