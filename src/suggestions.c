@@ -1292,7 +1292,7 @@ check_users(const char *str, const size_t len)
 		if (len == 0 || (*str == *p->pw_name && strncmp(str, p->pw_name, len) == 0)) {
 			suggestion.type = USER_SUG;
 			char t[NAME_MAX + 1];
-			snprintf(t, NAME_MAX + 1, "~%s", p->pw_name);
+			snprintf(t, sizeof(t), "~%s", p->pw_name);
 			print_suggestion(t, len + 1, sf_c);
 			endpwent();
 			return PARTIAL_MATCH;
@@ -1316,7 +1316,7 @@ check_variables(const char *str, const size_t len)
 		*ret = '\0';
 		suggestion.type = VAR_SUG;
 		char t[NAME_MAX + 1];
-		snprintf(t, NAME_MAX + 1, "$%s", environ[i]);
+		snprintf(t, sizeof(t), "$%s", environ[i]);
 		print_suggestion(t, len + 1, sh_c);
 		*ret = '=';
 		return PARTIAL_MATCH;
@@ -1332,7 +1332,7 @@ check_variables(const char *str, const size_t len)
 
 		suggestion.type = CMD_SUG;
 		char t[NAME_MAX + 1];
-		snprintf(t, NAME_MAX + 1, "$%s", usr_var[i].name);
+		snprintf(t, sizeof(t), "$%s", usr_var[i].name);
 		print_suggestion(t, len + 1, sh_c);
 		return PARTIAL_MATCH;
 	}
@@ -1527,21 +1527,25 @@ get_last_space(char *str, const int len)
 	return (char *)NULL;
 }
 
+/* Get the word after LAST_SPACE (last non-escaped space in rl_line_buffer,
+ * returned by get_last_space()), store it in LAST_WORD (global), and
+ * set LAST_WORD_OFFSET (global) to the index of the beginning of this last
+ * word in rl_line_buffer */
 static void
 get_last_word(const char *last_space)
 {
 	const char *tmp = (last_space && *(last_space + 1)) ? last_space + 1
 			: (rl_line_buffer ? rl_line_buffer : (char *)NULL);
 	if (tmp) {
-		last_word = (char *)xrealloc(last_word,
-			(tmp == rl_line_buffer ? (size_t)rl_end + 1 : (strlen(tmp) + 1)) * sizeof(char));
+		size_t len = tmp == rl_line_buffer ? ((size_t)rl_end + 1) : (strlen(tmp) + 1);
+		last_word = (char *)xrealloc(last_word, len * sizeof(char));
 		strcpy(last_word, tmp);
 	} else {
 		last_word = (char *)xrealloc(last_word, 1 * sizeof(char));
 		*last_word = '\0';
 	}
 
-	last_word_offset = (last_space && *(last_space + 1))
+	last_word_offset = (last_space && *(last_space + 1) && rl_line_buffer)
 			? (int)((last_space + 1) - rl_line_buffer) : 0;
 }
 // TESTING!!
@@ -2109,8 +2113,6 @@ CHECK_FIRST_WORD:
 	}
 
 NO_SUGGESTION:
-	/* No suggestion found */
-
 	/* Clear current suggestion, if any, only if no escape char is contained
 	 * in the current input sequence. This is mainly to avoid erasing
 	 * the suggestion if moving thought the text via the arrow keys */

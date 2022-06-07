@@ -1,4 +1,4 @@
-﻿/* strings.c -- misc string manipulation function */
+﻿/* strings.c -- misc string manipulation functions */
 
 /*
  * This file is part of CliFM
@@ -56,6 +56,7 @@ typedef char *rl_cpvfunc_t;
 
 char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 
+/* Macros for xstrverscmp() */
 /* states: S_N: normal, S_I: comparing integral part, S_F: comparing
            fractionnal parts, S_Z: idem but with leading Zeroes only */
 #define S_N 0x0
@@ -67,10 +68,13 @@ char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 #define VCMP 2
 #define VLEN 3
 
-#define MAX_STR_SZ 4096
+/* Max string length for strings passed to xstrnlen()
+ * Minimize the danger of non-null terminated strings
+ * However, nothing beyond MAX_STR_LEN length will be correctly measured */
+#define MAX_STR_LEN 4096
 
 /* Find the character C in the string S ignoring case
- * Returns a pointer to the matching char in S if C was found, or zero otherwise */
+ * Returns a pointer to the matching char in S if C was found, or NULL otherwise */
 static char *
 xstrcasechr(char *s, char c)
 {
@@ -176,7 +180,7 @@ size_t
 xstrnlen(const char *restrict s)
 {
 	// cppcheck-suppress nullPointer
-	return (size_t)((char *)memchr(s, '\0', MAX_STR_SZ) - s);
+	return (size_t)((char *)memchr(s, '\0', MAX_STR_LEN) - s);
 }
 
 /* Taken from NNN's source code: very clever. Copy SRC into DST
@@ -202,8 +206,7 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 
 /* Compare S1 and S2 as strings holding indices/version numbers,
    returning less than, equal to or greater than zero if S1 is less than,
-   equal to or greater than S2 (for more info, see the texinfo doc).
-*/
+   equal to or greater than S2 (for more info, see the texinfo doc) */
 int
 xstrverscmp(const char *s1, const char *s2)
 {
