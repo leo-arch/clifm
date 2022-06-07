@@ -774,7 +774,7 @@ and paths\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icons color follows file color\
 \n      --int-vars\t\t Enable internal variables\
-\n      --list-and-quit\t\t List files and quit. It may be used in conjunction with -p\
+\n      --list-and-quit\t\t List files and quit\
 \n      --max-dirhist\t\t Maximum number of visited directories to recall\
 \n      --max-files=NUM\t\t List only up to NUM files\
 \n      --max-path=NUM\t\t Set the maximun number of characters \
@@ -794,8 +794,7 @@ directory base name (if \\z is used in the prompt)\
 \n      --no-highlight\t\t Disable syntax highlighting\
 \n      --no-history\t\t Do not write commands into the history file\
 \n      --no-open-auto\t\t Same as no-cd-auto, but for files\
-\n      --no-restore-last-path\t Save last visited directory to be restored \
-in the next session\
+\n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
 \n      --no-warning-prompt\t Disable the warning prompt\
