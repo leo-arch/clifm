@@ -857,7 +857,7 @@ check_filenames(char *str, size_t len, const unsigned char c,
 
 	if (removed_slash == 1) { /* We removed the final slash: reinsert it */
 		str[len] = '/';
-		len++;
+//		len++;
 	}
 	return NO_MATCH;
 }
