@@ -885,7 +885,7 @@ set_default_colors(void)
 
 	if (!*el_c) strcpy(el_c, DEF_EL_C);
 	if (!*mi_c) strcpy(mi_c, DEF_MI_C);
-	if (!*dl_c) strcpy(dl_c, DEF_DL_C);
+/*	if (!*dl_c) strcpy(dl_c, DEF_DL_C); If unset, use current workspace color */
 	if (!*df_c) strcpy(df_c, DEF_DF_C);
 	if (!*fc_c) strcpy(fc_c, DEF_FC_C);
 	if (!*wc_c) strcpy(wc_c, DEF_WC_C);

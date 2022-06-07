@@ -95,6 +95,28 @@ struct trim_t {
 
 struct trim_t trim;
 
+static void
+set_div_line_color(void)
+{
+	if (*dl_c) {
+		fputs(dl_c, stdout);
+		return;
+	}
+
+	/* If div line color isn't set, use the current workspace color */
+	switch(cur_ws) {
+	case 0: fputs(*ws1_c ? ws1_c : DEF_DL_C, stdout); break;
+	case 1: fputs(*ws2_c ? ws2_c : DEF_DL_C, stdout); break;
+	case 2: fputs(*ws3_c ? ws3_c : DEF_DL_C, stdout); break;
+	case 3: fputs(*ws4_c ? ws4_c : DEF_DL_C, stdout); break;
+	case 4: fputs(*ws5_c ? ws5_c : DEF_DL_C, stdout); break;
+	case 5: fputs(*ws6_c ? ws6_c : DEF_DL_C, stdout); break;
+	case 6: fputs(*ws7_c ? ws7_c : DEF_DL_C, stdout); break;
+	case 7: fputs(*ws8_c ? ws8_c : DEF_DL_C, stdout); break;
+	default: fputs(DEF_DL_C, stdout); break;
+	}
+}
+
 /* Print the line divinding files and prompt using DIV_LINE. If
  * DIV_LINE takes more than two columns to be printed (ASCII chars
  * take only one, but unicode chars could take two), print exactly the
@@ -103,7 +125,7 @@ struct trim_t trim;
 static void
 print_div_line(void)
 {
-	fputs(dl_c, stdout);
+	set_div_line_color();
 
 	if (!*div_line) { /* Let's draw the line with bow drawing chars */
 		fputs("\x1b(0m", stdout);
