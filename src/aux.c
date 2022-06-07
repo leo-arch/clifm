@@ -592,32 +592,19 @@ hex2int(const char *str)
 			n[i] = str[i] - '0';
 		} else {
 			switch (str[i]) {
-			case 'A':
-			case 'a':
-				n[i] = 10;
-				break;
-			case 'B':
-			case 'b':
-				n[i] = 11;
-				break;
-			case 'C':
-			case 'c':
-				n[i] = 12;
-				break;
-			case 'D':
-			case 'd':
-				n[i] = 13;
-				break;
-			case 'E':
-			case 'e':
-				n[i] = 14;
-				break;
-			case 'F':
-			case 'f':
-				n[i] = 15;
-				break;
-			default:
-				break;
+			case 'A': /* fallthrough */
+			case 'a': n[i] = 10; break;
+			case 'B': /* fallthrough */
+			case 'b': n[i] = 11; break;
+			case 'C': /* fallthrough */
+			case 'c': n[i] = 12; break;
+			case 'D': /* fallthrough */
+			case 'd': n[i] = 13; break;
+			case 'E': /* fallthrough */
+			case 'e': n[i] = 14; break;
+			case 'F': /* fallthrough */
+			case 'f': n[i] = 15; break;
+			default: break;
 			}
 		}
 	}

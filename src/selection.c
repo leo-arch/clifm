@@ -740,8 +740,7 @@ select_pattern(char *arg, char *dir, mode_t filetype, int *err)
 int
 sel_function(char **args)
 {
-	if (!args)
-		return EXIT_FAILURE;
+	if (!args) return EXIT_FAILURE;
 
 	if (!args[1] || IS_HELP(args[1])) {
 		puts(_(SEL_USAGE));
@@ -775,7 +774,6 @@ sel_function(char **args)
 
 	if (f == 0)
 		fprintf(stderr, "Missing parameter. Try 's --help'\n");
-
 	free(dir);
 	return print_sel_results(new_sel, sel_path, pattern, err);
 }
@@ -1142,10 +1140,8 @@ end_deselect(const int err, char ***args)
 
 	/* There is still some selected file and we are in the desel
 	 * screen: reload this screen */
-	if (sel_n && argsbk == 0) {
-		if (deselect(*args) != 0)
-			exit_status = EXIT_FAILURE;
-	}
+	if (sel_n && argsbk == 0 && deselect(*args) != 0)
+		exit_status = EXIT_FAILURE;
 
 	if (err)
 		return EXIT_FAILURE;

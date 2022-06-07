@@ -581,7 +581,6 @@ print_match(char *match, const size_t len, const unsigned char c)
 
 	if (free_color)
 		free(color);
-
 	return PARTIAL_MATCH;
 }
 
@@ -857,7 +856,7 @@ check_filenames(char *str, size_t len, const unsigned char c,
 
 	if (removed_slash == 1) { /* We removed the final slash: reinsert it */
 		str[len] = '/';
-//		len++;
+/*		len++; */
 	}
 	return NO_MATCH;
 }
@@ -913,8 +912,7 @@ check_builtins(const char *str, const size_t len, const int print)
 			continue;
 
 		if (!print) {
-			if (strcmp(str, b[i]) == 0)
-				return FULL_MATCH;
+			if (strcmp(str, b[i]) == 0)	return FULL_MATCH;
 			continue;
 		}
 
@@ -1023,11 +1021,9 @@ check_jumpdb(const char *str, const size_t len, const int print)
 	while (--i >= 0) {
 		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
 			continue;
-
 		if (len > 1 && *(jump_db[i].path + 1)
 		&& TOUPPER(*(str + 1)) != TOUPPER(*(jump_db[i].path + 1)))
 			continue;
-
 		if (!print) {
 			if ((case_sens_path_comp ? strcmp(str, jump_db[i].path)
 			: strcasecmp(str, jump_db[i].path)) == 0)
@@ -1038,8 +1034,7 @@ check_jumpdb(const char *str, const size_t len, const int print)
 		if (len && (case_sens_path_comp ? strncmp(str, jump_db[i].path, len)
 		: strncasecmp(str, jump_db[i].path, len)) == 0) {
 			size_t db_len = strlen(jump_db[i].path);
-			if (db_len <= len)
-				return FULL_MATCH;
+			if (db_len <= len) return FULL_MATCH;
 
 			suggestion.type = FILE_SUG;
 			suggestion.filetype = DT_DIR;

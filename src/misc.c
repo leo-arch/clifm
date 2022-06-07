@@ -97,15 +97,12 @@ _err(int msg_type, int prompt, const char *format, ...)
 	}
 
 	char *buf = (char *)xnmalloc((size_t)size + 1, sizeof(char));
-
 	vsprintf(buf, format, arglist);
 	va_end(arglist);
 
 	/* If the new message is the same as the last message, skip it */
-	if (msgs_n && msg_type != 'f' && strcmp(messages[msgs_n - 1], buf) == 0) {
-		free(buf);
-		return EXIT_SUCCESS;
-	}
+	if (msgs_n && msg_type != 'f' && strcmp(messages[msgs_n - 1], buf) == 0)
+		{free(buf); return EXIT_SUCCESS;}
 
 	if (buf) {
 		if (msg_type) {
@@ -1724,8 +1721,7 @@ save_pinned_dir(void)
 int
 pin_directory(char *dir)
 {
-	if (!dir || !*dir)
-		return EXIT_FAILURE;
+	if (!dir || !*dir) return EXIT_FAILURE;
 
 	struct stat attr;
 	if (lstat(dir, &attr) == -1) {
@@ -1733,10 +1729,8 @@ pin_directory(char *dir)
 		return EXIT_FAILURE;
 	}
 
-	if (pinned_dir) {
-		free(pinned_dir);
-		pinned_dir = (char *)NULL;
-	}
+	if (pinned_dir)
+		{free(pinned_dir); pinned_dir = (char *)NULL;}
 
 	/* If absolute path */
 	if (*dir == '/') {

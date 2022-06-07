@@ -248,8 +248,7 @@ get_ext_color(char *ext)
 			continue;
 
 		char *p = ext, *q = ext_colors[i];
-		/* +2 because stored extensions have this form: *.ext */
-		q += 2;
+		q += 2; /* +2 because stored extensions have this form: *.ext */
 
 		size_t match = 1;
 		while (*p) {
@@ -268,7 +267,6 @@ get_ext_color(char *ext)
 		printf("Q:'%s'\n", q + 1);
 		if (is_color_code(q + 1) != 1 && check_defs(q + 1) == NULL)
 			continue;
-
 		return c ? c : ++q; */
 		q++;
 		return q ? q : (char *)NULL;
@@ -295,9 +293,8 @@ strip_color_line(const char *str, char mode)
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z')
 			|| *str == '=' || *str == ';' || *str == ':'
-			|| *str == '#' || *str == '-') {
-				buf[len] = *str; len++;
-			}
+			|| *str == '#' || *str == '-')
+				{buf[len] = *str; len++;}
 			str++;
 		}
 		break;
@@ -307,19 +304,16 @@ strip_color_line(const char *str, char mode)
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z') || *str == '*' || *str == '.'
 			|| *str == '=' || *str == ';' || *str == ':'
-			|| *str == '#' || *str == '-') {
-				buf[len] = *str; len++;
-			}
+			|| *str == '#' || *str == '-')
+				{buf[len] = *str; len++;}
 			str++;
 		}
 		break;
 	default: break;
 	}
 
-	if (!len || !*buf) {
-		free(buf);
-		return (char *)NULL;
-	}
+	if (!len || !*buf)
+		{free(buf); return (char *)NULL;}
 
 	buf[len] = '\0';
 	return buf;

@@ -606,8 +606,7 @@ run_history_cmd(const char *cmd)
 int
 get_history(void)
 {
-	if (!config_ok || !hist_file)
-		return EXIT_FAILURE;
+	if (!config_ok || !hist_file) return EXIT_FAILURE;
 
 	if (current_hist_n == 0) { /* Coming from main() */
 		history = (struct history_t *)xcalloc(1, sizeof(struct history_t));
@@ -621,8 +620,7 @@ get_history(void)
 
 	FILE *hist_fp = fopen(hist_file, "r");
 	if (!hist_fp) {
-		_err('e', PRINT_PROMPT, "%s: history: '%s': %s\n",
-		    PROGRAM_NAME, hist_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: history: '%s': %s\n", PROGRAM_NAME, hist_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
