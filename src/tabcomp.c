@@ -1170,9 +1170,10 @@ tab_complete(int what_to_do)
 
 	rl_compentry_func_t *our_func = rl_completion_entry_function;
 
-	/* Only the completion entry function can change these. */
+	/* Only the completion entry function can change these */
 	rl_filename_completion_desired = 0;
 	rl_filename_quoting_desired = 1;
+	rl_sort_completion_matches = 1;
 
 	int end = rl_point, delimiter = 0;
 	char quote_char = '\0';

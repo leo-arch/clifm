@@ -91,6 +91,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 			cl = hn_c;
 			goto END;
 		} */
+// TESTING! HIGHLIGHT
 		if (prev == ' ' || prev == 0 || cur_color == hn_c || rl_end == 1) {
 			char *a = strchr(str + pos, ' ');
 			if (a) {
@@ -102,6 +103,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 				cl = hn_c;
 			}
 			goto END;
+// TESTING! HIGHLIGHT
 		} else {
 			char cc = c;
 			*(str + pos) = '\0';
@@ -274,6 +276,10 @@ recolorize_line(void)
 		t[0] = (char)ss[i];
 		t[1] = '\0';
 		rl_insert_text(t);
+// TESTING! HIGHLIGHT
+//		if (i == 0)
+//			fputs(df_c, stdout);
+// TESTING! HIGHLIGHT
 		rl_redisplay();
 	}
 

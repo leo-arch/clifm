@@ -1345,6 +1345,7 @@ check_variables(const char *str, const size_t len)
 	return NO_MATCH;
 }
 
+/*
 static char *
 get_last_word(const char *last_space, size_t buflen)
 {
@@ -1352,7 +1353,8 @@ get_last_word(const char *last_space, size_t buflen)
 		char *rl = rl_line_buffer;
 		int j = rl_end;
 		while (--j >= 0) {
-			if (j + 1 && rl[j] == ' ' && rl[j + 1] && rl[j + 1] != ' ')
+			if (j + 1 && rl[j] == ' ' && rl[j + 1] && rl[j + 1] != ' '
+			&& (!rl[j - 1] || rl[j - 1] != '\\'))
 				break;
 		}
 		last_word_offset = j + 1;
@@ -1372,7 +1374,7 @@ get_last_word(const char *last_space, size_t buflen)
 	}
 
 	return last_word;
-}
+} */
 
 static int
 is_last_word(void)
@@ -1511,6 +1513,44 @@ check_prompts(const char *word, const size_t len)
 	return 0;
 }
 
+// TESTING!!
+/* Get the last non-escaped space in STR (whose length is LEN)
+ * Return a pointer to it if found or NULL if not */
+static char *
+get_last_space(char *str, const int len)
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	int i = len;
+	while (--i >= 0) {
+		if ((i > 0 && str[i] == ' ' && str[i - 1] != '\\')
+		|| (i == 0 && str[i] == ' '))
+			return str + i;
+	}
+
+	return (char *)NULL;
+}
+
+static void
+get_last_word(const char *last_space)
+{
+	const char *tmp = (last_space && *(last_space + 1)) ? last_space + 1
+			: (rl_line_buffer ? rl_line_buffer : (char *)NULL);
+	if (tmp) {
+		last_word = (char *)xrealloc(last_word,
+			(tmp == rl_line_buffer ? (size_t)rl_end + 1 : (strlen(tmp) + 1)) * sizeof(char));
+		strcpy(last_word, tmp);
+	} else {
+		last_word = (char *)xrealloc(last_word, 1 * sizeof(char));
+		*last_word = '\0';
+	}
+
+	last_word_offset = (last_space && *(last_space + 1))
+			? (int)((last_space + 1) - rl_line_buffer) : 0;
+}
+// TESTING!!
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -1538,10 +1578,13 @@ rl_suggestions(const unsigned char c)
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
-	char *last_space = strrchr(rl_line_buffer, ' ');
+// TESTING!!
+	char *last_space = get_last_space(rl_line_buffer, rl_end);
+// TESTING!!
+/*	char *last_space = strrchr(rl_line_buffer, ' ');
 	if (last_space && last_space != rl_line_buffer
 	&& *(last_space - 1) == '\\')
-		last_space = (char *)NULL;
+		last_space = (char *)NULL; */
 
 	/* Reset the wrong cmd flag whenever we have a new word or a new line */
 	if (rl_end == 0 || c == '\n') {
@@ -1553,7 +1596,10 @@ rl_suggestions(const unsigned char c)
 	char *full_line = rl_line_buffer;
 
 	/* A copy of the last entered word */
-	last_word = get_last_word(last_space, buflen);
+//	last_word = get_last_word(last_space, buflen);
+// TESTING!!
+	get_last_word(last_space);
+// TESTING!!
 
 	/* Count words */
 	size_t full_word = 0, start_word = 0;
@@ -1861,7 +1907,6 @@ rl_suggestions(const unsigned char c)
 			if (rl_point < rl_end && c == '/') goto NO_SUGGESTION;
 // TESTING!
 			if (last_space || autocd || auto_open) {
-
 				/* Skip internal commands not dealing with file names */
 				if (first_word) {
 					flags |= STATE_COMPLETING;

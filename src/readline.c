@@ -2045,7 +2045,7 @@ my_rl_completion(const char *text, int start, int end)
 	char **matches = (char **)NULL;
 	cur_comp_type = TCMP_NONE;
 	UNUSED(end);
-	rl_sort_completion_matches = 1;
+//	rl_sort_completion_matches = 1;
 
 	while (*text == '\\')
 		++text;
