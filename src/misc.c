@@ -69,6 +69,23 @@
 #include "remotes.h"
 #include "messages.h"
 
+/* Set ELN color according to the current workspace */
+void
+set_eln_color(void)
+{
+	switch(cur_ws) {
+	case 0: strcpy(el_c, *ws1_c ? ws1_c : DEF_EL_C); break;
+	case 1: strcpy(el_c, *ws2_c ? ws2_c : DEF_EL_C); break;
+	case 2: strcpy(el_c, *ws3_c ? ws3_c : DEF_EL_C); break;
+	case 3: strcpy(el_c, *ws4_c ? ws4_c : DEF_EL_C); break;
+	case 4: strcpy(el_c, *ws5_c ? ws5_c : DEF_EL_C); break;
+	case 5: strcpy(el_c, *ws6_c ? ws6_c : DEF_EL_C); break;
+	case 6: strcpy(el_c, *ws7_c ? ws7_c : DEF_EL_C); break;
+	case 7: strcpy(el_c, *ws8_c ? ws8_c : DEF_EL_C); break;
+	default: strcpy(el_c, DEF_EL_C); break;
+	}
+}
+
 /* Custom POSIX implementation of GNU asprintf() modified to log program
  * messages. MSG_TYPE is one of: 'e', 'f', 'w', 'n', or zero (meaning this
  * latter that no message mark (E, W, or N) will be added to the prompt).

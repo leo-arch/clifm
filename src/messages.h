@@ -26,7 +26,7 @@
 #define MESSAGES_H
 
 /* Usage messages*/
-#define GRAL_USAGE "[-aAefFgGhHiIlLmoOsStuUvxy] [-b FILE] [-c FILE] [-D DIR] \
+#define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOsStuUvxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define ACTIONS_USAGE "List or edit actions/plugins\n\
@@ -727,7 +727,8 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -b, --bookmarks-file=FILE\t Specify an alternative bookmarks file\
 \n  -c, --config-file=FILE\t Specify an alternative configuration file\
 \n  -D, --config-dir=DIR\t\t Specify an alternative configuration directory\
-\n  -e, --no-eln\t\t\t Do not print ELN's (entry list number) \
+\n  -e, --no-eln\t\t\t Do not print ELN's (entry list number)\
+\n  -E, --eln-use-workspace-color\t ELN's use the current workspace color\
 \n  -f, --no-dirs-first\t\t Do not list directories first\
 \n  -F, --dirs-first\t\t List directories first (default)\
 \n  -g, --pager\t\t\t Enable the pager\

@@ -197,6 +197,7 @@ wc=01;36:wm=01;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:"
 #define DEF_DIRHIST_MAP 0
 #define DEF_DISK_USAGE 0
 #define DEF_DIV_LINE "-"
+#define DEF_ELN_USE_WORKSPACE_COLOR 0
 #define DEF_EXPAND_BOOKMARKS 0
 #define DEF_EXT_CMD_OK 1
 #define DEF_FILES_COUNTER 1
@@ -240,7 +241,7 @@ wc=01;36:wm=01;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:"
 #define DEF_SHARE_SELBOX 0
 #define DEF_SHOW_HIDDEN 0
 #define DEF_SHOW_BACKUP_FILES 1
-#define DEF_SI 0 /* If 1, sizes in powers of 1000 instead of 1024 */
+#define DEF_SI 0 /* If 1, use sizes in powers of 1000 instead of 1024 */
 #define DEF_SORT SNAME
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0

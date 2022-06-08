@@ -1238,6 +1238,7 @@ external_arguments(int argc, char **argv)
 	    {"config-file", required_argument, 0, 'c'},
 	    {"config-dir", required_argument, 0, 'D'},
 	    {"no-eln", no_argument, 0, 'e'},
+	    {"eln-use-workspace-color", no_argument, 0, 'E'},
 	    {"no-dirs-first", no_argument, 0, 'f'},
 	    {"dirs-first", no_argument, 0, 'F'},
 	    {"pager", no_argument, 0, 'g'},
@@ -1342,7 +1343,7 @@ external_arguments(int argc, char **argv)
 	     *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
-		    "+aAb:c:D:efFgGhHiIk:lLmoOp:P:sStUuvw:xyz:", longopts,
+		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:sStUuvw:xyz:", longopts,
 		    (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -1564,7 +1565,8 @@ RUN:
 			break;
 
 		case 'D': alt_dir_value = optarg; break;
-		case 'e': xargs.noeln = no_eln = 1;	break;
+		case 'e': xargs.noeln = no_eln = 1; break;
+		case 'E': xargs.eln_use_workspace_color = 1; break;
 		case 'f': list_dirs_first = xargs.dirs_first = 0; break;
 		case 'F': list_dirs_first = xargs.dirs_first = 1; break;
 		case 'g': pager = xargs.pager = 1; break;
@@ -1862,6 +1864,7 @@ unset_xargs(void)
 	xargs.dirmap = UNSET;
 	xargs.disk_usage = UNSET;
 	xargs.disk_usage_analyzer = UNSET;
+	xargs.eln_use_workspace_color = UNSET;
 	xargs.expand_bookmarks = UNSET;
 	xargs.ext = UNSET;
 	xargs.dirs_first = UNSET;
@@ -2530,6 +2533,9 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (xargs.eln_use_workspace_color == UNSET)
+		xargs.eln_use_workspace_color = DEF_ELN_USE_WORKSPACE_COLOR;
+
 	if (print_removed_files == UNSET)
 		print_removed_files = DEF_PRINT_REMOVED_FILES;
 

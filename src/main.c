@@ -862,7 +862,7 @@ set_root_indicator(void)
 static inline void
 __list()
 {
-	if (autols && isatty(STDIN_FILENO)) {
+	if (autols == 1 && isatty(STDIN_FILENO)) {
 #ifdef LINUX_INOTIFY
 		/* Initialize inotify */
 		inotify_fd = inotify_init1(IN_NONBLOCK);
@@ -877,6 +877,10 @@ __list()
 				strerror(errno));
 		}
 #endif
+
+		if (colorize && xargs.eln_use_workspace_color == 1)
+			set_eln_color();
+
 		list_dir();
 	}
 }

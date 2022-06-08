@@ -703,6 +703,7 @@ struct param {
 	int color_scheme;
 	int control_d_exits;
 	int disk_usage_analyzer;
+	int eln_use_workspace_color;
 	int expand_bookmarks;
 	int ext;
 	int dirs_first;

@@ -88,8 +88,7 @@ check_workspace_num(char *str, int *tmp_ws)
 static int
 switch_workspace(int tmp_ws)
 {
-	/* If new workspace has no path yet, copy the path of the current
-	 * workspace */
+	/* If new workspace has no path yet, copy the path of the current workspace */
 	if (!workspaces[tmp_ws].path) {
 		workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
 		    strlen(workspaces[cur_ws].path));
@@ -113,6 +112,10 @@ switch_workspace(int tmp_ws)
 	int exit_status = EXIT_SUCCESS;
 
 	dir_changed = 1;
+
+	if (colorize == 1 && xargs.eln_use_workspace_color == 1)
+		set_eln_color();
+
 	if (autols == 1) {
 		free_dirlist();
 		exit_status = list_dir();
