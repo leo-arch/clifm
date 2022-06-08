@@ -95,6 +95,8 @@ struct trim_t {
 
 struct trim_t trim;
 
+/* Set the color of the dividing line: DL, is the color code is set,
+ * or the color of the current workspace if not */
 static void
 set_div_line_color(void)
 {
