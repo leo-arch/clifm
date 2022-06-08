@@ -185,6 +185,9 @@ use \fIDIR\fR as an alternative configuration directory. If configuration files 
 \fB\-e\fR, \fB\-\-no\-eln\fR
 do not print ELN's (entry list number) at the left of file names. Bear in mind, however, that though ELN's are not printed, they are still there and can be used as always
 .TP
+\fB\-E\fR, \fB\-\-eln\-use\-workspace\-color\fR
+ELN's use the current workspace color
+.TP
 \fB\-f\fR, \fB\-\-no\-dirs\-first\fR
 do not list directories first
 .TP
