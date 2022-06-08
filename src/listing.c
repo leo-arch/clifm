@@ -125,7 +125,8 @@ set_div_line_color(void)
 static void
 print_div_line(void)
 {
-	set_div_line_color();
+	if (colorize == 1)
+		set_div_line_color();
 
 	if (!*div_line) { /* Let's draw the line with bow drawing chars */
 		fputs("\x1b(0m", stdout);
