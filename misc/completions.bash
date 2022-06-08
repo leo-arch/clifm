@@ -58,6 +58,8 @@ _clifm ()
         --path
         -P
         --profile
+        -r
+        --refresh-on-empty-line
         -s
         --splash
         -S
