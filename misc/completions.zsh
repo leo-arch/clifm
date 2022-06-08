@@ -1,9 +1,7 @@
 #compdef clifm
 #
-# Completion definition for CliFM
-#
-# Author:
-#   L. Abramovich
+# Completion definition for clifm
+# Author: L. Abramovich
 #
 
 setopt localoptions noshwordsplit noksharrays
@@ -16,6 +14,7 @@ args=(
 	{-c+,--config-file=}'[specify an alternative configuration file]:filename:_files'
 	{-D+,--config-dir=}'[specify an alternative configuration directory]:directory:_directories'
 	{-e,--no-eln}'[do not print ELN (entry list number) at the left of each filename]'
+	{-E,--eln-use-workspace-color}'[ELN's use the color of the current workspace]'
 	{-f,--no-dirs-first}'[do not list directories first]'
 	{-F,--dirs-first}'[list directories first (default)]'
 	{-g,--pager}'[enable the pager]'

@@ -24,6 +24,8 @@ _clifm ()
         --config-dir
         -e
         --no-eln
+        -E
+        --eln-use-workspace-color
         -f
         --no-dirs-first
         -F
