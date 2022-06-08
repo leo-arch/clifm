@@ -1255,6 +1255,7 @@ external_arguments(int argc, char **argv)
 	    {"autols", no_argument, 0, 'O'},
 	    {"path", required_argument, 0, 'p'},
 	    {"profile", required_argument, 0, 'P'},
+	    {"refresh-on-emtpy-line", no_argument, 0, 'r'},
 	    {"splash", no_argument, 0, 's'},
 	    {"stealth-mode", no_argument, 0, 'S'},
 	    {"disk-usage-analyzer", no_argument, 0, 't'},
@@ -1343,7 +1344,7 @@ external_arguments(int argc, char **argv)
 	     *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
-		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:sStUuvw:xyz:", longopts,
+		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:xyz:", longopts,
 		    (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -1598,6 +1599,7 @@ RUN:
 			alt_profile_value = optarg;
 			break;
 
+		case 'r': xargs.refresh_on_empty_line = 1; break;
 		case 's': splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
@@ -1901,6 +1903,7 @@ unset_xargs(void)
 	xargs.pager = UNSET;
 	xargs.path = UNSET;
 	xargs.printsel = UNSET;
+	xargs.refresh_on_empty_line = UNSET;
 	xargs.refresh_on_resize = UNSET;
 	xargs.restore_last_path = UNSET;
 	xargs.rl_vi_mode = UNSET;
@@ -2535,6 +2538,9 @@ check_options(void)
 {
 	if (xargs.eln_use_workspace_color == UNSET)
 		xargs.eln_use_workspace_color = DEF_ELN_USE_WORKSPACE_COLOR;
+
+	if (xargs.refresh_on_empty_line == UNSET)
+		xargs.refresh_on_empty_line = DEF_REFRESH_ON_EMPTY_LINE;
 
 	if (print_removed_files == UNSET)
 		print_removed_files = DEF_PRINT_REMOVED_FILES;

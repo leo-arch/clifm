@@ -741,6 +741,7 @@ struct param {
 	int pager;
 	int path;
 	int printsel;
+	int refresh_on_empty_line;
 	int refresh_on_resize;
 	int restore_last_path;
 	int rl_vi_mode;

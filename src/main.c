@@ -878,7 +878,7 @@ __list()
 		}
 #endif
 
-		if (colorize && xargs.eln_use_workspace_color == 1)
+		if (colorize == 1 && xargs.eln_use_workspace_color == 1)
 			set_eln_color();
 
 		list_dir();
@@ -948,8 +948,7 @@ get_hostname(void)
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		hostname[0] = '?';
 		hostname[1] = '\0';
-		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"),
-			PROGRAM_NAME);
+		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"), PROGRAM_NAME);
 	}
 }
 /*

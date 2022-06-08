@@ -26,7 +26,7 @@
 #define MESSAGES_H
 
 /* Usage messages*/
-#define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOsStuUvxy] [-b FILE] [-c FILE] [-D DIR] \
+#define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOrsStuUvxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define ACTIONS_USAGE "List or edit actions/plugins\n\
@@ -746,10 +746,11 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -p, --path=PATH\t\t Use PATH as CliFM's starting path (deprecated: use positional \
 parameters instead)\
 \n  -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
+\n  -r, --refresh-on-empty-line\t Refresh the list of files when pressing Enter on an empty line\
 \n  -s, --splash\t\t\t Enable the splash screen\
 \n  -S, --stealth-mode\t\t Leave no trace on the host system (see the manpage)\
-\n  -t, --disk-usage-analyzer \t Run in disk usage analyzer mode\
-\n  -u, --no-unicode\t\t Disable Unicode\
+\n  -t, --disk-usage-analyzer\t Run in disk usage analyzer mode\
+\n  -u, --no-unicode\t\t Disable Unicode support\
 \n  -U, --unicode \t\t Enable Unicode support (default)\
 \n  -v, --version\t\t\t Show version details and exit\
 \n  -w, --workspace=NUM\t\t Start in workspace NUM\

@@ -987,8 +987,7 @@ prompt(void)
 
 	if (!input || !*input) {
 		free(input);
-//		reload_dirlist();
-		if (flags & DELAYED_REFRESH) {
+		if ((flags & DELAYED_REFRESH) || xargs.refresh_on_empty_line == 1) {
 			flags &= ~DELAYED_REFRESH;
 			reload_dirlist();
 		}
