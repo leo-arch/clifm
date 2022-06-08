@@ -52,16 +52,28 @@
 # endif /* RL_READLINE_VERSION >= 0x0801 */
 #endif /* RL_READLINE_VERSION */
 
+static char *
+find_digit(char *str)
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	while (*str) {
+		if (*str >= '1' && *str <= '9')
+			return str;
+		str++;
+	}
+
+	return (char *)NULL;
+}
+
 /* Check whether a given command needs ELN's to be expanded/completed/suggested
  * Returns 1 if yes or 0 if not */
 int
 __expand_eln(const char *text)
 {
 	char *l = rl_line_buffer;
-	if (!l || !*l)
-		return 0;
-
-	if (!is_number(text))
+	if (!l || !*l || !is_number(text))
 		return 0;
 
 	int a = atoi(text); /* Only expand numbers matching ELN's */
@@ -76,17 +88,22 @@ __expand_eln(const char *text)
 	}
 
 	char *p = strchr(l, ' ');
-	if (p) {
-		*p = '\0';
-		flags |= STATE_COMPLETING;
-		if (is_internal_c(l) && !is_internal_f(l)) {
-			*p = ' ';
-			flags &= ~STATE_COMPLETING;
-			return 0;
-		}
+	char t = ' ';
+	if (!p && (p = find_digit(l)) )
+		t = *p;
+
+	if (!p)
+		return 1;
+
+	*p = '\0';
+	flags |= STATE_COMPLETING;
+	if (is_internal_c(l) && !is_internal_f(l)) {
+		*p = t;
 		flags &= ~STATE_COMPLETING;
-		*p = ' ';
+		return 0;
 	}
+	flags &= ~STATE_COMPLETING;
+	*p = t;
 
 	return 1;
 }
