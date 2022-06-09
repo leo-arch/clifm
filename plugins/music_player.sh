@@ -15,7 +15,7 @@ if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 fi
 
 if ! type "$PLAYER" >/dev/null 2>&1; then
-	printf "CliFM: %s: Command not found\n" "$PLAYER" >&2
+	printf "clifm: %s: Command not found\n" "$PLAYER" >&2
 	exit 127;
 fi
 

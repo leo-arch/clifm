@@ -15,7 +15,7 @@ is_vid()
 }
 
 if ! type ffmpegthumbnailer >/dev/null 2>&1; then
-	printf "CliFM: ffmpegthumbnailer: Command not found\n" >&2
+	printf "clifm: ffmpegthumbnailer: Command not found\n" >&2
 	exit 127
 fi
 

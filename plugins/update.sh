@@ -14,7 +14,7 @@ fi
 upstream="$(curl -s "https://github.com/leo-arch/clifm/releases/latest" | grep -Eo "[0-9]+\.[0-9]+.*" | cut -d'"' -f1)"
 
 if [ -z "$upstream" ]; then
-	printf "Error getting upstream version"
+	printf "clifm: Error getting upstream version"
 	exit 1
 fi
 

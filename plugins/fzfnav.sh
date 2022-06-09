@@ -212,7 +212,7 @@ $FZF_HEADER" --marker="*" --preview-window=:wrap "$(fzf_borders)" \
 main() {
 
 	if ! type fzf > /dev/null 2>&1; then
-		printf "CliFM: fzf: Command not found\n" >&2
+		printf "clifm: fzf: Command not found\n" >&2
 		exit 127
 	fi
 
@@ -220,8 +220,8 @@ main() {
 	rm -rf -- "$TMP_SEL"
 	BFG_CFG_FILE="$(get_bfg_cfg_file)"
 	if [ -z "$BFG_CFG_FILE" ]; then
-		printf "CliFM: BFG.cfg: No such file or directory\n" >&2
-		exit 1
+		printf "clifm: BFG.cfg: No such file or directory\n" >&2
+		exit 127
 	fi
 
 	# Do we have GNU ls?
@@ -724,7 +724,7 @@ main() {
 
 # Source our plugins helper
 if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
-	printf "CliFM: Unable to find plugins-helper file\n" >&2
+	printf "clifm: Unable to find plugins-helper file\n" >&2
 	exit 1
 fi
 # shellcheck source=/dev/null

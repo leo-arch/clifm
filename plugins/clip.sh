@@ -24,8 +24,8 @@ if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ] ; then
 fi
 
 if ! [ "$(which xclip 2>/dev/null)" ]; then
-	printf "CliFM: xclip: Command not found" >&2
-	exit 1
+	printf "clifm: xclip: Command not found" >&2
+	exit 127
 fi
 
 case $1 in

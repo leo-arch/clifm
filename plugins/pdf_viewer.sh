@@ -12,12 +12,12 @@ if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 fi
 
 if ! type pdftotext >/dev/null 2>&1; then
-	printf "CliFM: pdftotext: Command not found\n" >&2
+	printf "clifm: pdftotext: Command not found\n" >&2
 	exit 127
 fi
 
 if [ "$(head -c4 "$1")" != "%PDF" ]; then
-	printf "CLiFM: Not a PDF file\n" >&2
+	printf "clifm: Not a PDF file\n" >&2
 	exit 1
 fi
 

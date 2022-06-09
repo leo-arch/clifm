@@ -13,14 +13,14 @@ Usage: %s\n" "$name"
 fi
 
 if ! type column >/dev/null 2>&1; then
-	printf "column: command not found\n" >&2
+	printf "clifm: column: command not found\n" >&2
 	exit 127
 fi
 
 _pager="${PAGER:-less}"
 
 if ! type "$_pager" >/dev/null 2>&1; then
-	printf "%s: command not found\n" "$_pager" >&2
+	printf "clifm: %s: command not found\n" "$_pager" >&2
 	exit 127
 fi
 

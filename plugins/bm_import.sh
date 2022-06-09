@@ -14,7 +14,7 @@ fi
 
 file="$1"
 if ! [ -f "$file" ]; then
-	printf "CliFM: %s: No such file or directory\n" "$file" >&2
+	printf "clifm: %s: No such file or directory\n" "$file" >&2
 	exit 1
 fi
 

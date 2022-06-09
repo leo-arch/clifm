@@ -54,6 +54,6 @@ elif type img2sixel > /dev/null 2>&1; then
 fi
 
 if [ "$found" -eq 0 ]; then
-	printf "CliFM: No image viewer found\n" >&2
+	printf "clifm: No image viewer found\n" >&2
 fi
 exit 1

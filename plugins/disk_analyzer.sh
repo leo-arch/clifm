@@ -24,10 +24,10 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 fi
 
 if ! type fzf 2>/dev/null; then
-	printf "CliFM: fzf: Command not found\n" 2>&1
+	printf "clifm: fzf: Command not found\n" 2>&1
 	exit 127
 elif ! type du 2>/dev/null; then
-	printf "CliFM: du: Command not found\n" 2>&1
+	printf "clifm: du: Command not found\n" 2>&1
 	exit 127
 fi
 
@@ -55,7 +55,7 @@ fcd() {
 
 	# Source our plugins helper
 	if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
-		printf "CliFM: Unable to find plugins-helper file\n" >&2
+		printf "clifm: Unable to find plugins-helper file\n" >&2
 		exit 1
 	fi
 
@@ -100,7 +100,7 @@ $FZF_HEADER" --marker="*" --preview-window=:wrap "$_borders" \
 
 main() {
 	if ! type fzf > /dev/null 2>&1; then
-		printf "CliFM: fzf: Command not found\n" >&2
+		printf "clifm: fzf: Command not found\n" >&2
 		exit 127
 	fi
 

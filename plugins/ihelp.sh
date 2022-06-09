@@ -12,14 +12,14 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 fi
 
 if ! type man > /dev/null 2>&1; then
-	printf "CliFM: man: Command not found\n" >&2
-	exit 1
+	printf "clifm: man: Command not found\n" >&2
+	exit 127
 fi
 
 manpage="$(man -w clifm)"
 
 if ! [ -f "$manpage" ]; then
-	printf "CliFM: no manpage found\n" >&2
+	printf "clifm: no manpage found\n" >&2
 	exit 1
 fi
 
@@ -29,7 +29,7 @@ if type fzf >/dev/null 2>&1; then
 elif type rofi >/dev/null 2>&1; then
 	filter="rofi"
 else
-	printf "CliFM: No finder found. Install either fzf or rofi\n" >&2
+	printf "clifm: No finder found. Install either fzf or rofi\n" >&2
 	exit 1
 fi
 

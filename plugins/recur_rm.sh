@@ -8,12 +8,12 @@
 # License: GPL3
 
 if ! type fzf >/dev/null 2>&1; then
-	printf "fzf: Command not found\n" >&2
+	printf "clifm: fzf: Command not found\n" >&2
 	exit 127
 fi
 
 if ! type find >/dev/null 2>&1; then
-	printf "find: Command not found\n" >&2
+	printf "clifm: find: Command not found\n" >&2
 	exit 127
 fi
 
@@ -26,13 +26,13 @@ fi
 
 pattern="$1"
 if [ -z "$pattern" ]; then
-	printf "CliFM: A pattern must be specified as first argument\n" >&2
+	printf "clifm: A pattern must be specified as first argument\n" >&2
 	exit 1
 fi
 
 # Source our plugins helper
 if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
-	printf "CliFM: Unable to find plugins-helper file\n" >&2
+	printf "clifm: Unable to find plugins-helper file\n" >&2
 	exit 1
 fi
 # shellcheck source=/dev/null

@@ -31,7 +31,7 @@ if type dragon-drag-and-drop >/dev/null 2>&1; then
 elif type dragon >/dev/null 2>&1; then
 	DRAGON="dragon"
 else
-	printf "CliFM: Neither dragon nor dragon-drag-and-drop were found. Exiting...\n" >&2
+	printf "clifm: Neither dragon nor dragon-drag-and-drop were found. Exiting...\n" >&2
 	exit 1
 fi
 

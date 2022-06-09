@@ -19,20 +19,20 @@ if type fzf > /dev/null 2>&1; then
 elif type rofi > /dev/null 2>&1; then
 	finder="rofi"
 else
-	printf "CliFM: No finder found. Install either FZF or Rofi\n" >&2
+	printf "clifm: No finder found. Install either FZF or Rofi\n" >&2
 	exit $ERROR
 fi
 
 OS="$(uname -s)"
 
 if [ -z "$OS" ]; then
-	printf "CliFM: Unable to detect operating system\n" >&2
+	printf "clifm: Unable to detect operating system\n" >&2
 	exit $ERROR
 fi
 
 # Source our plugins helper
 if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
-	printf "CliFM: Unable to find plugins-helper file\n" >&2
+	printf "clifm: Unable to find plugins-helper file\n" >&2
 	exit 1
 fi
 # shellcheck source=/dev/null

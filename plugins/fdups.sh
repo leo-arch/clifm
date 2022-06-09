@@ -22,7 +22,7 @@
 # Authors: syssyphus, KlzXS, leo-arch
 # License: GPL3
 
-me="CliFM"
+me="clifm"
 no_dep=0
 
 if ! type find > /dev/null 2>&1; then

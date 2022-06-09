@@ -25,8 +25,8 @@ the end of CMD.\n" "$name" "$name"
 fi
 
 if ! type fzf > /dev/null 2>&1; then
-	printf "CLiFM: fzf: Command not found\n" >&2
-	exit 1
+	printf "clifm: fzf: Command not found\n" >&2
+	exit 127
 fi
 
 TMPDIR="/tmp/clifm/$CLIFM_PROFILE"
@@ -34,7 +34,7 @@ TMPFILE="$TMPDIR/${CLIFM_PROFILE}.fzfsel"
 
 # Source our plugins helper
 if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
-	printf "CliFM: Unable to find plugins-helper file\n" >&2
+	printf "clifm: Unable to find plugins-helper file\n" >&2
 	exit 1
 fi
 # shellcheck source=/dev/null
@@ -65,7 +65,7 @@ cmd="$1"
 
 OS="$(uname -s)"
 if [ -z "$OS" ]; then
-	printf "CLiFM: Unable to detect operating system\n" >&2
+	printf "clifm: Unable to detect operating system\n" >&2
 	exit 1
 fi
 
@@ -78,7 +78,7 @@ if [ -n "$cmd" ]; then
 	esac
 
 	if ! [ -f "$CLIFM_SELFILE" ]; then
-		printf "CliFM: There are no selected files\n" >&2
+		printf "clifm: No selected files\n" >&2
 		exit 1
 	fi
 
@@ -91,7 +91,7 @@ if [ -n "$cmd" ]; then
 	fi
 
 	if [ "$is_int" -eq 0 ] && ! [ "$(which "$cmd" 2>/dev/null)" ]; then
-		printf "CliFM: %s: Command not found\n" "$cmd" >&2
+		printf "clifm: %s: Command not found\n" "$cmd" >&2
 		exit 127
 	fi
 

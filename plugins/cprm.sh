@@ -6,12 +6,12 @@
 # License: GPL3
 
 if ! type scp >/dev/null 2>&1; then
-	printf "scp: Command not found\n" >&2
+	printf "clifm: scp: Command not found\n" >&2
 	exit 127
 fi
 
 if ! type fzf >/dev/null 2>&1; then
-	printf "fzf: Command not found\n" >&2
+	printf "clifm: fzf: Command not found\n" >&2
 	exit 127
 fi
 

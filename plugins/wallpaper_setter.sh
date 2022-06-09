@@ -15,12 +15,12 @@ fi
 
 
 if ! type file >/dev/null 2>&1; then
-	printf "CliFM: file: Command not found\n" >&2
+	printf "clifm: file: Command not found\n" >&2
 	exit 127
 fi
 
 if ! file -bi "$1" | grep -q "image/"; then
-	printf "CliFM: %s: Not an image file\n" "$1" >&2
+	printf "clifm: %s: Not an image file\n" "$1" >&2
 	exit 1
 fi
 
