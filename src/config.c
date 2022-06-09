@@ -65,14 +65,14 @@ static int
 regen_config(void)
 {
 	int config_found = 1;
-	struct stat config_attrib;
+	struct stat attr;
 
-	if (stat(config_file, &config_attrib) == -1) {
+	if (stat(config_file, &attr) == -1) {
 		puts(_("No configuration file found"));
 		config_found = 0;
 	}
 
-	if (config_found) {
+	if (config_found == 1) {
 		time_t rawtime = time(NULL);
 		struct tm t;
 		localtime_r(&rawtime, &t);
@@ -104,7 +104,7 @@ regen_config(void)
 
 /* Edit the config file, either via the mime function or via the first
  * passed argument (Ex: 'edit nano'). The 'gen' option regenerates
- * the configuration file and creates a back up of the old one. */
+ * the configuration file and creates a back up of the old one */
 int
 edit_function(char **comm)
 {
@@ -122,19 +122,17 @@ edit_function(char **comm)
 	if (comm[1] && *comm[1] == 'r' && strcmp(comm[1], "reset") == 0)
 		return regen_config();
 
-	if (!config_ok) {
-		fprintf(stderr, _("%s: Cannot access the configuration file\n"),
-		    PROGRAM_NAME);
+	if (config_ok == 0) {
+		fprintf(stderr, _("%s: Cannot access the configuration file\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
 	/* Get modification time of the config file before opening it */
 	struct stat attr;
 
-	/* If, for some reason (like someone erasing the file while the
-	 * program is running) clifmrc doesn't exist, recreate the
-	 * configuration file. Then run 'stat' again to reread the attributes
-	 * of the file */
+	/* If, for some reason (like someone erasing the file while the program
+	 * is running) clifmrc doesn't exist, recreate the configuration file.
+	 * Then run 'stat' again to reread the attributes of the file */
 	if (stat(config_file, &attr) == -1) {
 		create_config(config_file);
 		stat(config_file, &attr);
@@ -159,15 +157,13 @@ edit_function(char **comm)
 
 	/* Get modification time after opening the config file */
 	stat(config_file, &attr);
-	/* If modification times differ, the file was modified after being
-	 * opened */
-
+	/* If modification times differ, the file was modified after being opened */
 	if (mtime_bfr != (time_t)attr.st_mtime) {
 		/* Reload configuration only if the config file was modified */
 		reload_config();
 		welcome_message = 0;
 
-		if (autols) {
+		if (autols == 1) {
 			free_dirlist();
 			ret = list_dir();
 		}
@@ -207,13 +203,11 @@ set_sel_file(void)
 		return;
 
 	if (!share_selbox) {
-		/* Private selection box is stored in the profile
-		 * directory */
+		/* Private selection box is stored in the profile directory */
 		sel_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 		sprintf(sel_file, "%s/selbox.cfm", config_dir);
 	} else {
-		/* Common selection box is stored in the general
-		 * configuration directory */
+		/* Common selection box is stored in the general configuration directory */
 		sel_file = (char *)xnmalloc(config_dir_len + 21, sizeof(char));
 		sprintf(sel_file, "%s/.config/%s/selbox.cfm", user.home, PNL);
 	}
@@ -475,21 +469,17 @@ create_actions_file(char *file)
 void
 create_tmp_files(void)
 {
-	if (xargs.stealth_mode == 1)
-		return;
-
-	if (!user.name)
+	if (xargs.stealth_mode == 1 || !user.name)
 		return;
 
 	size_t pnl_len = strlen(PNL);
 
 	/* #### CHECK THE TMP DIR #### */
 
-	/* If the temporary directory doesn't exist, create it. I create
-	 * the parent directory (/tmp/clifm) with 1777 permissions (world
-	 * writable with the sticky bit set), so that every user is able
-	 * to create files in here, but only the file's owner can remove
-	 * or modify them */
+	/* If the temporary directory doesn't exist, create it. Let's create the
+	 * parent directory (/tmp/clifm) with 1777 permissions (world writable
+	 * with the sticky bit set), so that every user is able to create files
+	 * in here, but only the file's owner can remove or modify them */
 	size_t user_len = strlen(user.name);
 	tmp_dir = (char *)xnmalloc(P_tmpdir_len + pnl_len + user_len + 3, sizeof(char));
 	sprintf(tmp_dir, "%s/%s", P_tmpdir, PNL);
@@ -506,10 +496,9 @@ create_tmp_files(void)
 		xmkdir(tmp_dir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX);
 
 	/* Once the parent directory exists, create the user's directory to
-	 * store the list of selected files:
-	 * TMP_DIR/clifm/username/.selbox_PROFILE. I use here very
-	 * restrictive permissions (700), since only the corresponding user
-	 * must be able to read and/or modify this list */
+	 * store the list of selected files: TMP_DIR/clifm/username/.selbox_PROFILE.
+	 * We use here very restrictive permissions (700), since only the corresponding
+	 * user must be able to read and/or modify this list */
 	sprintf(tmp_dir, "%s/%s/%s", P_tmpdir, PNL, user.name);
 	if (stat(tmp_dir, &attr) == -1) {
 		if (xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
@@ -524,8 +513,7 @@ create_tmp_files(void)
 		if (!sel_file) {
 			selfile_ok = 0;
 			_err('w', PRINT_PROMPT, "%s: %s: Directory not writable. Selected "
-				"files will be lost after program exit\n",
-			    PROGRAM_NAME, tmp_dir);
+				"files will be lost after program exit\n", PROGRAM_NAME, tmp_dir);
 		}
 	}
 
@@ -534,8 +522,7 @@ create_tmp_files(void)
 	if (sel_file)
 		return;
 
-	/*"We will write a temporary selfile in /tmp. Check if this latter is
-	 * available */
+	/*"We will write a temporary selfile in /tmp. Check if this latter is available */
 	if (!tmp_root_ok) {
 		_err('w', PRINT_PROMPT, "%s: Could not create the selections file.\n"
 			"Selected files will be lost after program exit\n",
@@ -553,8 +540,7 @@ create_tmp_files(void)
 		else
 			prof_len = 7; /* Lenght of "default" */
 
-		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 13,
-		    sizeof(char));
+		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 13, sizeof(char));
 		sprintf(sel_file, "%s/selbox_%s.cfm", P_tmpdir,
 		    (alt_profile) ? alt_profile : "default");
 	} else {
@@ -575,6 +561,7 @@ define_config_file_names(void)
 	if (alt_config_dir) {
 		config_dir_gral = savestring(alt_config_dir, strlen(alt_config_dir));
 		free(alt_config_dir);
+		alt_config_dir = (char *)NULL;
 	} else {
 		/* If $XDG_CONFIG_HOME is set, use it for the config file.
 		 * Else, fall back to $HOME/.config */
@@ -586,8 +573,7 @@ define_config_file_names(void)
 			sprintf(config_dir_gral, "%s/%s", xdg_config_home, PNL);
 			xdg_config_home = (char *)NULL;
 		} else {
-			config_dir_gral = (char *)xnmalloc(user.home_len + pnl_len + 11,
-							sizeof(char));
+			config_dir_gral = (char *)xnmalloc(user.home_len + pnl_len + 11, sizeof(char));
 			sprintf(config_dir_gral, "%s/.config/%s", user.home, PNL);
 		}
 	}
@@ -624,7 +610,7 @@ define_config_file_names(void)
 
 	plugins_dir = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
 	sprintf(plugins_dir, "%s/plugins", config_dir_gral);
-
+/*
 #ifndef _NO_TRASH
 	trash_dir = (char *)xnmalloc(user.home_len + 20, sizeof(char));
 	sprintf(trash_dir, "%s/.local/share/Trash", user.home);
@@ -636,7 +622,7 @@ define_config_file_names(void)
 
 	trash_info_dir = (char *)xnmalloc(trash_len + 6, sizeof(char));
 	sprintf(trash_info_dir, "%s/info", trash_dir);
-#endif
+#endif */
 
 	dirhist_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
 	sprintf(dirhist_file, "%s/dirhist.cfm", config_dir);
@@ -1196,6 +1182,7 @@ create_config_files(void)
 			/* #############################
 			 * #        TRASH DIRS         #
 			 * ############################# */
+/*
 #ifndef _NO_TRASH
 	if (stat(trash_dir, &attr) == -1) {
 		char *trash_files = (char *)NULL;
@@ -1219,13 +1206,13 @@ create_config_files(void)
 		}
 	}
 
-	/* If it exists, check it is writable */
+	// If it exists, check it is writable
 	else if (access(trash_dir, W_OK) == -1) {
 		trash_ok = 0;
 		_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
 				"Trash function disabled\n"), PROGRAM_NAME, trash_dir);
 	}
-#endif
+#endif */
 				/* ####################
 				 * #    CONFIG DIR    #
 				 * #################### */
@@ -1270,7 +1257,7 @@ create_config_files(void)
 	if (stat(config_file, &attr) == -1)
 		config_ok = create_config(config_file) == EXIT_SUCCESS ? 1 : 0;
 
-	if (!config_ok)
+	if (config_ok == 0)
 		return;
 
 				/* ######################
@@ -1339,7 +1326,7 @@ create_mime_file(char *file, int new_prof)
 
 	char *cmd[] = {"cp", "-f", sys_mimelist, file, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS) {
-		if (!new_prof) {
+		if (new_prof == 0) {
 			_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s) "
 				"It is recommended to edit this file (entering 'mm edit' or "
 				"pressing F6) to add the programs you use and remove those "
@@ -2100,15 +2087,76 @@ get_fzf_win_height()
 }
 #endif /* !_NO_FZF */
 
+#ifndef _NO_TRASH
+static void
+create_trash_dirs(void)
+{
+	struct stat attr;
+	if (stat(trash_dir, &attr) == -1) {
+		char *trash_files = (char *)NULL;
+		trash_files = (char *)xnmalloc(strlen(trash_dir) + 7, sizeof(char));
+
+		sprintf(trash_files, "%s/files", trash_dir);
+		char *trash_info = (char *)NULL;
+		trash_info = (char *)xnmalloc(strlen(trash_dir) + 6, sizeof(char));
+
+		sprintf(trash_info, "%s/info", trash_dir);
+		char *cmd[] = {"mkdir", "-p", trash_files, trash_info, NULL};
+
+		int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		free(trash_files);
+		free(trash_info);
+
+		if (ret != EXIT_SUCCESS) {
+			trash_ok = 0;
+			_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating trash "
+				"directory. Trash function disabled\n"), PROGRAM_NAME, trash_dir);
+		}
+	}
+
+	/* If it exists, check it is writable */
+	else if (access(trash_dir, W_OK) == -1) {
+		trash_ok = 0;
+		_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
+				"Trash function disabled\n"), PROGRAM_NAME, trash_dir);
+	}
+}
+
+static void
+set_trash_dirs(void)
+{
+	if (!user.home) {
+		trash_ok = 0;
+		return;
+	}
+
+	trash_dir = (char *)xnmalloc(user.home_len + 20, sizeof(char));
+	sprintf(trash_dir, "%s/.local/share/Trash", user.home);
+
+	size_t trash_len = strlen(trash_dir);
+
+	trash_files_dir = (char *)xnmalloc(trash_len + 7, sizeof(char));
+	sprintf(trash_files_dir, "%s/files", trash_dir);
+
+	trash_info_dir = (char *)xnmalloc(trash_len + 6, sizeof(char));
+	sprintf(trash_info_dir, "%s/info", trash_dir);
+
+	create_trash_dirs();
+}
+#endif /* _NO_TRASH */
+
 /* Set up CliFM directories and config files. Load the user's
  * configuration from clifmrc */
 void
 init_config(void)
 {
+#ifndef _NO_TRASH
+	set_trash_dirs();
+#endif /* _NO_TRASH */
 	if (xargs.stealth_mode == 1) {
 		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
-			"persistent selection and directory history, just as bookmarks, "
-			"logs, and configuration files, are disabled.\n"), PROGRAM_NAME);
+			"persistent selection, bookmarks, jump database and directory history, "
+			"just as logs and configuration files, are disabled.\n"), PROGRAM_NAME);
 		config_ok = 0;
 		check_colors();
 		return;
@@ -2116,7 +2164,7 @@ init_config(void)
 
 	msgs.error = msgs.notice = msgs.warning = 0;
 
-	if (!home_ok) {
+	if (home_ok == 0) {
 		set_default_colors();
 		return;
 	}
@@ -2126,7 +2174,7 @@ init_config(void)
 #ifndef CLIFM_SUCKLESS
 	cschemes_n = get_colorschemes();
 
-	if (config_ok)
+	if (config_ok == 1)
 		read_config();
 #else
 	strncpy(div_line, DEF_DIV_LINE, sizeof(div_line));

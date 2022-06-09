@@ -139,20 +139,19 @@ get_home(void)
 {
 	if (access(user.home, W_OK) == -1) {
 		/* If no user's home, or if it's not writable, there won't be
-		 * any config nor trash directory. These flags are used to
-		 * prevent functions from trying to access any of these
-		 * directories */
+		 * any config directory. These flags are used to prevent functions
+		 * from trying to access any of these directories */
 		home_ok = 0;
 		config_ok = 0;
+/*
 #ifndef _NO_TRASH
 		trash_ok = 0;
-#endif
-		/* Print message: trash, bookmarks, command logs, commands
-		 * history and program messages won't be stored */
+#endif */
+
 		_err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
-				  "Trash, bookmarks, commands logs, and commands history are "
-				  "disabled. Program messages and selected files won't be "
-				  "persistent. Using default options\n"), PROGRAM_NAME);
+				  "Bookmarks, commands logs, and commands history are "
+				  "disabled. Program messages, selected files, and the jump database "
+				  "won't be persistent. Using default options\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -221,11 +220,7 @@ set_start_path(void)
 	 * line nor via the RestoreLastPath option), set the default (CWD),
 	 * and if CWD is not set, use the user's home directory, and if the
 	 * home cannot be found either, try the root directory, and if
-	 * there's no access to the root dir either, exit.
-	 * Bear in mind that if you launch CliFM through a terminal emulator,
-	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and
-	 * the shell will read its config file. Now, if this config file
-	 * changes the CWD, this will be the CWD for CliFM */
+	 * there's no access to the root dir either, exit */
 	if (!workspaces[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
@@ -248,7 +243,7 @@ set_start_path(void)
 	}
 
 	/* Make path the CWD */
-	/* If chdir(path) fails, set path to cwd, list files and print the
+	/* If chdir() fails, set path to CWD, list files and print the
 	 * error message. If no access to CWD either, exit */
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
 		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
@@ -281,9 +276,9 @@ get_data_dir(void)
 	char p[PATH_MAX];
 	snprintf(p, PATH_MAX, "%s/%s", STRINGIZE(CLIFM_DATADIR), PNL);
 	if (stat(p, &a) != -1) {
-		data_dir = (char *)xnmalloc(strlen(STRINGIZE(CLIFM_DATADIR)) + 1,
-		           sizeof(char));
+		data_dir = (char *)xnmalloc(strlen(STRINGIZE(CLIFM_DATADIR)) + 1, sizeof(char));
 		strcpy(data_dir, STRINGIZE(CLIFM_DATADIR));
+		return;
 	}
 #endif
 
@@ -383,17 +378,12 @@ get_user(void)
 
 	tmp_user.uid = pw->pw_uid;
 	tmp_user.gid = pw->pw_gid;
-/*	char *p = getenv("HOME");
-	if (!p) */
-		tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
-/*	else
-		tmp_user.home = savestring(p, strlen(p)); */
+	tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
 	if (!tmp_user.home || !tmp_user.name || !tmp_user.shell) {
-		_err('e', NOPRINT_PROMPT, _("%s: Error retrieving user data\n"),
-			PROGRAM_NAME);
+		_err('e', NOPRINT_PROMPT, _("%s: Error retrieving user data\n"), PROGRAM_NAME);
 		exit(-1);
 	}
 
@@ -1949,7 +1939,7 @@ init_shell(void)
 	return;
 }
 
-/* Get current entries in the Selection Box, if any. */
+/* Get current entries in the Selection Box, if any */
 int
 get_sel_files(void)
 {

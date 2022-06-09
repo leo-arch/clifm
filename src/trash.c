@@ -809,15 +809,10 @@ untrash_element(char *file)
 int
 untrash_function(char **comm)
 {
-	if (xargs.stealth_mode == 1) {
-		printf("%s: trash: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
-	}
-
 	if (!comm)
 		return EXIT_FAILURE;
 
-	if (!trash_ok) {
+	if (trash_ok == 0 || !trash_dir || !trash_files_dir || !trash_info_dir) {
 		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -1176,15 +1171,10 @@ trash_files_args(char **args)
 int
 trash_function(char **args)
 {
-	if (xargs.stealth_mode == 1) {
-		printf("%s: trash: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
-		return EXIT_SUCCESS;
-	}
-
 	if (!args)
 		return EXIT_FAILURE;
 
-	if (!trash_ok || !config_ok) {
+	if (trash_ok == 0 || !trash_dir || !trash_info_dir || !trash_files_dir) {
 		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
