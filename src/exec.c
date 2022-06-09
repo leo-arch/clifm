@@ -1700,6 +1700,7 @@ lira_function(char **args)
 		return EXIT_SUCCESS;
 	return EXIT_FAILURE;
 #else
+	UNUSED(args);
 	fprintf(stderr, _("%s: Lira: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
 #endif
@@ -1788,6 +1789,7 @@ _trash_function(char **args, int *_cont)
 
 	return exit_status;
 #else
+	UNUSED(args);
 	fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 	*_cont = 0;
 	return EXIT_FAILURE;
@@ -1812,6 +1814,7 @@ _untrash_function(char **args, int *_cont)
 
 	return exit_status;
 #else
+	UNUSED(args);
 	fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 	*_cont = 0;
 	return EXIT_FAILURE;

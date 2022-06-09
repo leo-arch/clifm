@@ -932,6 +932,7 @@ check_working_shell(void)
 	}
 }
 
+#ifndef _NO_TRASH
 static inline void
 init_trash(void)
 {
@@ -941,6 +942,7 @@ init_trash(void)
 			trash_n = 0;
 	}
 }
+#endif /* _NO_TRASH */
 
 static inline void
 get_hostname(void)

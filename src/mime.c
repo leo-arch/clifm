@@ -1510,6 +1510,7 @@ print_mime_info(char **app, char **fpath, char **mime)
 	return EXIT_SUCCESS;
 }
 
+#ifndef _NO_ARCHIVING
 static inline int
 run_archiver(char **fpath, char **app)
 {
@@ -1521,6 +1522,7 @@ run_archiver(char **fpath, char **app)
 
 	return exit_status;
 }
+#endif /* _NO_ARCHIVING */
 
 static void
 set_exec_flags(char *s, int *f)
@@ -1720,5 +1722,5 @@ mime_open(char **args)
 	return run_mime_app(&app, &file_path);
 }
 #else
-;
+void *__skip_me_lira;
 #endif /* !_NO_LIRA */

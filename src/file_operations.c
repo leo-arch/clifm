@@ -543,6 +543,7 @@ bulk_remove(char *s1, char *s2)
 	return ret;
 }
 
+#ifndef _NO_LIRA
 static inline int
 run_mime(char *file)
 {
@@ -568,6 +569,7 @@ run_mime(char *file)
 	char *cmd[] = {"mm", file, NULL};
 	return mime_open(cmd);
 }
+#endif /* _NO_LIRA */
 
 /* Open a file via OPENER, if set, or via LIRA. If not compiled with
  * Lira support, fallback to open (Haiku), or xdg-open. Returns zero

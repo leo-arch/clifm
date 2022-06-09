@@ -1163,8 +1163,10 @@ tab_complete(int what_to_do)
 
 	if (*rl_line_buffer == '#' || cur_color == hc_c) {
 		/* No completion at all if comment */
+#ifndef _NO_SUGGESTIONS
 		if (suggestion.printed)
 			clear_suggestion(CS_FREEBUF);
+#endif /* _NO_SUGGESTIONS */
 		return EXIT_SUCCESS;
 	}
 

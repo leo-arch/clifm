@@ -1201,5 +1201,5 @@ trash_function(char **args)
 	}
 }
 #else
-;
+void *__skip_me_trash;
 #endif /* !_NO_TRASH */

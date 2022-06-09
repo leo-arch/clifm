@@ -1822,26 +1822,97 @@ tags_generator(const char *text, int state)
 }
 
 static char *
-users_generator(const char *text, int state)
+tag_entries_generator(const char *text, int state)
 {
-	static size_t len;
-	const struct passwd *p;
-	rl_filename_completion_desired = 1;
+	UNUSED(text);
+	static int i;
+	char *name;
 
 	if (!state)
-		len = strlen(text);
+		i = 0;
 
-	while ((p = getpwent())) {
-		if (!p->pw_name) break;
-		if (len == 0 || strncmp(p->pw_name, text, len) == 0) {
-			char t[NAME_MAX];
-			snprintf(t, sizeof(t), "~%s", p->pw_name);
-			return strdup(t);
+	if (!tagged_files)
+		return (char *)NULL;
+
+	while (i < tagged_files_n && (name = tagged_files[i++]->d_name) != NULL) {
+		if (SELFORPARENT(name))
+			continue;
+		char *p = (char *)NULL, *q = name;
+		if (strchr(name, '\\')) {
+			p = dequote_str(name, 0);
+			q = p;
 		}
+		reinsert_slashes(q);
+		char tmp[PATH_MAX], *r = (char *)NULL;
+		snprintf(tmp, PATH_MAX, "/%s", q);
+		int free_tmp = 0;
+		r = home_tilde(tmp, &free_tmp);
+		q = strdup(r ? r : tmp);
+		free(p);
+		if (free_tmp == 1)
+			free(r);
+		return q;
 	}
 
 	return (char *)NULL;
 }
+
+static char **
+check_tagged_files(char *tag)
+{
+	if (!is_tag(tag))
+		return (char **)NULL;
+
+	tagged_files_n = 0;
+
+	char dir[PATH_MAX];
+	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, tag);
+	int n = scandir(dir, &tagged_files, NULL, alphasort);
+	if (n == -1)
+		return (char **)NULL;
+
+	if (n == 2) {
+		free(tagged_files[0]);
+		free(tagged_files[1]);
+		free(tagged_files);
+		tagged_files = (struct dirent **)NULL;
+		return (char **)NULL;
+	}
+
+	tagged_files_n = n;
+	char **_matches = rl_completion_matches("", &tag_entries_generator);
+	while (--n >= 0)
+		free(tagged_files[n]);
+	free(tagged_files);
+	tagged_files = (struct dirent **)NULL;
+	tagged_files_n = 0;
+
+	return _matches;
+}
+
+static char *
+get_cur_tag(void)
+{
+	char *p = strrchr(rl_line_buffer, ':');
+	if (!p || !*(++p))
+		return (char *)NULL;
+
+	char *q = p;
+	while (*q) {
+		if (*q == ' ' && (q != p || *(q - 1) != '\\')) {
+			*q = '\0';
+			char *tag = savestring(p, strlen(p));
+			*q = ' ';
+			if (is_tag(tag))
+				return tag;
+			free(tag);
+		}
+		q++;
+	}
+
+	return (char *)NULL;
+}
+#endif /* _NO_TAGS */
 
 /* Generate possible arguments for a shell command. Arguments should have
  * been previously loaded by get_ext_options() and stored in ext_opts array */
@@ -1947,97 +2018,26 @@ options_generator(const char *text, int state)
 }
 
 static char *
-tag_entries_generator(const char *text, int state)
+users_generator(const char *text, int state)
 {
-	UNUSED(text);
-	static int i;
-	char *name;
+	static size_t len;
+	const struct passwd *p;
+	rl_filename_completion_desired = 1;
 
 	if (!state)
-		i = 0;
+		len = strlen(text);
 
-	if (!tagged_files)
-		return (char *)NULL;
-
-	while (i < tagged_files_n && (name = tagged_files[i++]->d_name) != NULL) {
-		if (SELFORPARENT(name))
-			continue;
-		char *p = (char *)NULL, *q = name;
-		if (strchr(name, '\\')) {
-			p = dequote_str(name, 0);
-			q = p;
+	while ((p = getpwent())) {
+		if (!p->pw_name) break;
+		if (len == 0 || strncmp(p->pw_name, text, len) == 0) {
+			char t[NAME_MAX];
+			snprintf(t, sizeof(t), "~%s", p->pw_name);
+			return strdup(t);
 		}
-		reinsert_slashes(q);
-		char tmp[PATH_MAX], *r = (char *)NULL;
-		snprintf(tmp, PATH_MAX, "/%s", q);
-		int free_tmp = 0;
-		r = home_tilde(tmp, &free_tmp);
-		q = strdup(r ? r : tmp);
-		free(p);
-		if (free_tmp == 1)
-			free(r);
-		return q;
 	}
 
 	return (char *)NULL;
 }
-
-static char **
-check_tagged_files(char *tag)
-{
-	if (!is_tag(tag))
-		return (char **)NULL;
-
-	tagged_files_n = 0;
-
-	char dir[PATH_MAX];
-	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, tag);
-	int n = scandir(dir, &tagged_files, NULL, alphasort);
-	if (n == -1)
-		return (char **)NULL;
-
-	if (n == 2) {
-		free(tagged_files[0]);
-		free(tagged_files[1]);
-		free(tagged_files);
-		tagged_files = (struct dirent **)NULL;
-		return (char **)NULL;
-	}
-
-	tagged_files_n = n;
-	char **_matches = rl_completion_matches("", &tag_entries_generator);
-	while (--n >= 0)
-		free(tagged_files[n]);
-	free(tagged_files);
-	tagged_files = (struct dirent **)NULL;
-	tagged_files_n = 0;
-
-	return _matches;
-}
-
-static char *
-get_cur_tag(void)
-{
-	char *p = strrchr(rl_line_buffer, ':');
-	if (!p || !*(++p))
-		return (char *)NULL;
-
-	char *q = p;
-	while (*q) {
-		if (*q == ' ' && (q != p || *(q - 1) != '\\')) {
-			*q = '\0';
-			char *tag = savestring(p, strlen(p));
-			*q = ' ';
-			if (is_tag(tag))
-				return tag;
-			free(tag);
-		}
-		q++;
-	}
-
-	return (char *)NULL;
-}
-#endif /* _NO_TAGS */
 
 char **
 my_rl_completion(const char *text, int start, int end)
