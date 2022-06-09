@@ -896,19 +896,18 @@ edit_selfile(void)
 	if (stat(sel_file, &attr) == -1)
 		goto ERROR;
 
-	time_t mtime_bfr = (time_t)attr.st_mtime;
+	time_t mtime_old = (time_t)attr.st_mtime;
 
 	if (open_file(sel_file) != EXIT_SUCCESS) {
 		fprintf(stderr, "%s: Could not open the selections file\n", PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
-	/* Compare the new modification time to the stored one: if they
-	 * match, nothing was modified */
+	/* Compare new and old modification times: if they match, nothing was modified */
 	if (stat(sel_file, &attr) == -1)
 		goto ERROR;
 
-	if (mtime_bfr == (time_t)attr.st_mtime)
+	if (mtime_old == (time_t)attr.st_mtime)
 		return EXIT_SUCCESS;
 
 	int ret = get_sel_files();
@@ -923,20 +922,12 @@ ERROR:
 }
 
 static int
-desel_entries(char **desel_elements, size_t desel_n, int all)
+desel_entries(char **desel_elements, size_t desel_n, int desel_screen)
 {
-	/* If a valid ELN and not asterisk... */
-	/* Store the full path of all the elements to be deselected in a new
-	 * array (desel_path). We need to do this because after the first
-	 * rearragement of the sel array, that is, after the removal of the
-	 * first element, the index of the next elements changed, and cannot
-	 * thereby be found by their index. The only way to find them is
-	 * comparing string by string */
 	char **desel_path = (char **)NULL;
-
 	int i = (int)desel_n;
 
-	if (all == 0) {
+	if (desel_screen == 1) { /* Coming from the deselect screen */
 		desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
 		while (--i >= 0) {
 			int desel_int = atoi(desel_elements[i]);
@@ -947,7 +938,7 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 			desel_path[i] = savestring(sel_elements[desel_int - 1].name,
 				strlen(sel_elements[desel_int - 1].name));
 		}
-	} else { /* Deselect all selected files */
+	} else {
 		desel_path = desel_elements;
 	}
 
@@ -958,10 +949,10 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 
 	/* Search the sel array for the path of the element to deselect and
 	 * store its index */
-	int desel_index = -1, err = 0, err_printed = 0, dn = (int)desel_n;
+	int err = 0, dn = (int)desel_n;
 	i = (int)desel_n;
 	while (--i >= 0) {
-		int j, k;
+		int j, k, desel_index = -1;
 
 		if (!desel_path[i])
 			continue;
@@ -976,8 +967,8 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 
 		if (desel_index == -1) {
 			dn--;
-			if (all) {
-				err_printed = 1;
+			err = 1;
+			if (desel_screen == 0) {
 				fprintf(stderr, _("%s: %s: No such selected file\n"),
 					PROGRAM_NAME, desel_path[i]);
 			}
@@ -995,15 +986,10 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 		}
 	}
 
-	if (desel_index == -1) {
-		err = 1;
-		goto FREE;
-	}
-
-	/* Free the last DESEL_N elements from the old sel array. They won't
+	/* Free the last DN elements from the old sel array. They won't
 	 * be used anymore, for they contain the same value as the last
 	 * non-deselected element due to the above array rearrangement */
-	for (i = 1; i <= (int)desel_n; i++) {
+	for (i = 1; i <= (int)dn; i++) {
 		if (((int)sel_n - i) >= 0 && sel_elements[(int)sel_n - i].name) {
 			free(sel_elements[(int)sel_n - i].name);
 			sel_elements[(int)sel_n - i].size = (off_t)UNSET;
@@ -1011,34 +997,34 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 	}
 
 	/* Reallocate the sel array according to the new size */
-	sel_n = (sel_n - desel_n);
+	sel_n = (sel_n - (size_t)dn);
 
 	if ((int)sel_n < 0)
 		sel_n = 0;
 
-	if (sel_n)
+	if (sel_n > 0)
 		sel_elements = (struct sel_t *)xrealloc(sel_elements, sel_n * sizeof(struct sel_t));
 
-FREE:
 	/* Deallocate local arrays */
 	i = (int)desel_n;
 	while (--i >= 0) {
-		if (all == 0)
+		if (desel_screen == 1)
 			free(desel_path[i]);
 		free(desel_elements[i]);
 	}
 
-	if (all == 0)
+	if (desel_screen == 1) {
 		free(desel_path);
-	else if (err_printed)
-		printf(_("%d file(s) deselected. "), dn);
-	else
-		printf(_("%s: %d file(s) deselected. "), PROGRAM_NAME, dn);
-	printf(_("%zu file(s) currently selected\n"), sel_n);
+	} else if (err == 1) {
+		print_reload_msg(_("%d file(s) deselected\n"), dn);
+		print_reload_msg("%zu total selected file(s)\n", sel_n);
+	}
 	free(desel_elements);
 
-	if (err)
+	if (err == 1) {
+		save_sel();
 		return EXIT_FAILURE;
+	}
 	return EXIT_SUCCESS;
 }
 
@@ -1076,7 +1062,7 @@ deselect_from_args(char **args)
 	}
 	ds[k] = (char *)NULL;
 
-	if (desel_entries(ds, args_n, 1) == EXIT_FAILURE)
+	if (desel_entries(ds, args_n, 0) == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -1131,11 +1117,8 @@ handle_alpha_entry(int i, size_t desel_n, char **desel_elements)
 	if (*desel_elements[i] == '*' && !desel_elements[i][1]) {
 		free_desel_elements(desel_n, &desel_elements);
 		int exit_status = deselect_all();
-		if (autols) {
-			free_dirlist();
-			if (list_dir() != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
-		}
+		if (autols == 1)
+			reload_dirlist();
 		return exit_status;
 	}
 
@@ -1242,6 +1225,6 @@ deselect(char **args)
 			return EXIT_FAILURE;
 	}
 
-	desel_entries(desel_elements, desel_n, 0);
+	desel_entries(desel_elements, desel_n, 1);
 	return end_deselect(err, &args);
 }
