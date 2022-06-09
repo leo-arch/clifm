@@ -247,6 +247,8 @@ RlEditMode=1
 #alias ?='ih'
 # Bind 'b' to the directory history navigation plugin
 #alias b='dh'
+# Replace the standard deselect command (ds) by the fzfdesel plugin
+#alias ds='**'
 
 # PROMPT COMMANDS
 # Write below the commands you want to be executed before each prompt. Ex:

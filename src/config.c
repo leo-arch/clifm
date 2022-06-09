@@ -1077,6 +1077,7 @@ create_def_cscheme(void)
 		return;
 	}
 
+	/* If cannot be imported either, create it with default values */
 	int fd;
 	FILE *fp = open_fstream_w(cscheme_file, &fd);
 	if (!fp) {
@@ -2107,7 +2108,7 @@ init_config(void)
 	if (xargs.stealth_mode == 1) {
 		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
 			"persistent selection and directory history, just as bookmarks, "
-			"logs and configuration files, are disabled.\n"), PROGRAM_NAME);
+			"logs, and configuration files, are disabled.\n"), PROGRAM_NAME);
 		config_ok = 0;
 		check_colors();
 		return;
