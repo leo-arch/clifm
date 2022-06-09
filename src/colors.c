@@ -1602,7 +1602,7 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	int rem_slash = 0;
 	/* Remove the ending slash: lstat() won't take a symlink to dir as
 	 * a symlink (but as a dir), if the file name ends with a slash */
-	if (p[elen - 1] == '/') {
+	if (elen > 1 && p[elen - 1] == '/') {
 		p[elen - 1] = '\0';
 		rem_slash = 1;
 	}

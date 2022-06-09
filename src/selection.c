@@ -54,6 +54,9 @@
 #include "messages.h"
 #include "file_operations.h"
 #include "init.h"
+/*
+char **new_selections = (char **)NULL;
+size_t new_seln = 0; */
 
 /* Save selected elements into a tmp file. Returns 1 if success and 0
  * if error. This function allows the user to work with multiple
@@ -100,10 +103,10 @@ select_file(char *file)
 
 	int exists = 0, new_sel = 0, j;
 	size_t flen = strlen(file);
-	if (file[flen - 1] == '/')
+	if (flen > 1 && file[flen - 1] == '/')
 		file[flen - 1] = '\0';
 
-	/* Check if the selected element is already in the selection box */
+	/* Check if FILE is already in the selection box */
 	j = (int)sel_n;
 	while (--j >= 0) {
 		if (*file == *sel_elements[j].name && strcmp(sel_elements[j].name, file) == 0) {
@@ -112,13 +115,18 @@ select_file(char *file)
 		}
 	}
 
-	if (!exists) {
+	if (exists == 0) {
 		sel_elements = (struct sel_t *)xrealloc(sel_elements, (sel_n + 2) * sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(file, strlen(file));
 		sel_elements[sel_n].size = (off_t)UNSET;
 		sel_n++;
 		sel_elements[sel_n].name = (char *)NULL;
 		sel_elements[sel_n].size = (off_t)UNSET;
+
+/*		new_selections = (char **)xrealloc(new_selections, (new_seln + 2) * sizeof(char *));
+		new_selections[new_seln] = savestring(file, strlen(file));
+		new_seln++;
+		new_selections[new_seln] = (char *)NULL; */
 
 		new_sel++;
 	} else {
@@ -620,6 +628,32 @@ is_sel_file_in_cwd(const int index)
 	return 0;
 } */
 
+/*
+static void
+print_new_selections(void)
+{
+	size_t i, wlen = workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 0;
+	size_t max = 10;
+
+	for (i = 0; new_selections[i]; i++) {
+		if (i == max)
+			printf("... (and %zu more)\n", new_seln - max);
+		else if (i < max) {
+			if (wlen > 0 && strlen(new_selections[i]) > wlen
+			&& strncmp(new_selections[i], workspaces[cur_ws].path, wlen) == 0
+			&& *(new_selections[i] + wlen + 1))
+				printf("%s\n", new_selections[i] + wlen + 1);
+			else
+				printf("%s\n", new_selections[i]);
+		}
+		free(new_selections[i]);
+	}
+
+	free(new_selections);
+	new_selections = (char **)NULL;
+	new_seln = 0;
+} */
+
 static int
 print_sel_results(const int new_sel, const char *sel_path, const char *pattern, const int err)
 {
@@ -645,6 +679,7 @@ print_sel_results(const int new_sel, const char *sel_path, const char *pattern, 
 
 	if (autols == 1 && err == 0)
 		reload_dirlist();
+//	print_new_selections();
 	print_reload_msg(_("%d file(s) selected\n"), new_sel);
 	print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
 
@@ -916,6 +951,11 @@ desel_entries(char **desel_elements, size_t desel_n, int all)
 		desel_path = desel_elements;
 	}
 
+/*	new_selections = (char **)xrealloc(new_selections, (desel_n + 2) * sizeof(char *));
+	for (new_seln = 0; new_seln < desel_n; new_seln++)
+		new_selections[new_seln] = savestring(desel_path[new_seln], strlen(desel_path[new_seln]));
+	new_selections[new_seln] = (char *)NULL; */
+
 	/* Search the sel array for the path of the element to deselect and
 	 * store its index */
 	int desel_index = -1, err = 0, err_printed = 0, dn = (int)desel_n;
@@ -987,6 +1027,7 @@ FREE:
 			free(desel_path[i]);
 		free(desel_elements[i]);
 	}
+
 	if (all == 0)
 		free(desel_path);
 	else if (err_printed)
@@ -1149,6 +1190,7 @@ end_deselect(const int err, char ***args)
 	if (autols == 1 && exit_status == EXIT_SUCCESS)
 		reload_dirlist();
 	if (argsbk > 0) {
+//		print_new_selections();
 		print_reload_msg(_("%zu file(s) deselected\n"), desel_files);
 		print_reload_msg("%zu total selected file(s)\n", sel_n);
 	} else {
