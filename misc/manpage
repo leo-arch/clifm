@@ -246,7 +246,7 @@ enable the splash screen
 leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
-run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-dirs-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press Ctrl-Alt-i (or Alt-TAB) to toggle this mode in-place.
+run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-dirs-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press Ctrl-Alt-i (or Alt-TAB) to toggle this mode on/off in-place.
 .TP
 \fB\-u\fR, \fB\-\-no\-unicode\fR
 disable unicode
@@ -2136,8 +2136,17 @@ Same as above, but for file extensions
 .B CLIFM_IFACE_COLORS
 Same as above, but for different element of ClIFM's interface
 .TP
+.B CLIFM_FORCE_COLOR
+Force the use of colors, even if the terminal informs that it does not support colors
+.TP
 .B CLIFM_FILTER
 Define a file filter. If set, this variable overrides the \fIFilter\fR option in the configuration file
+.TP
+.B CLIFM_SUDO_CMD
+Name of the authenticator program (used by the \fIX\fR command, to launch a new instance of CliFM as root, and the Alt-v keybinding, to prepend the authenticator program name (by default "sudo", or "doas" if compiled on OpenBSD) to the current command line
+.TP
+.B FZF_DEFAULT_OPTS
+A quoted list of options to be passed to FZF (if used for TAB completion)
 .TP
 Except when running in stealth mode, \fBclifm\fR sets the following environment variables:
 .TP
