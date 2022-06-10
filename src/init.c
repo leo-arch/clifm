@@ -99,11 +99,14 @@ get_sys_shell(void)
 int
 init_gettext(void)
 {
+	if (!data_dir)
+		return EXIT_FAILURE;
+
 	char locale_dir[PATH_MAX];
-	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", data_dir
-			? data_dir : "/usr/share");
+	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", data_dir ? data_dir : "/usr/share");
 	bindtextdomain(PNL, locale_dir);
 	textdomain(PNL);
+
 	return EXIT_SUCCESS;
 
 }
@@ -137,25 +140,19 @@ init_workspaces(void)
 int
 get_home(void)
 {
-	if (access(user.home, W_OK) == -1) {
+	if (!user.home || access(user.home, W_OK) == -1) {
 		/* If no user's home, or if it's not writable, there won't be
 		 * any config directory. These flags are used to prevent functions
 		 * from trying to access any of these directories */
-		home_ok = 0;
-		config_ok = 0;
-/*
-#ifndef _NO_TRASH
-		trash_ok = 0;
-#endif */
+		home_ok = config_ok = 0;
 
 		_err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
-				  "Bookmarks, commands logs, and commands history are "
-				  "disabled. Program messages, selected files, and the jump database "
-				  "won't be persistent. Using default options\n"), PROGRAM_NAME);
+			"Bookmarks, commands logs, and commands history are "
+			"disabled. Program messages, selected files, and the jump database "
+			"won't be persistent. Using default options\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
-	user_home_len = strlen(user.home);
 	return EXIT_SUCCESS;
 }
 
@@ -199,11 +196,39 @@ init_history(void)
 	return EXIT_SUCCESS;
 }
 
+/* If path was not set (neither in the config file nor via command line nor
+ * via the RestoreLastPath option), set the default (CWD), and if CWD is not
+ * set, use the user's home directory, and if the home cannot be found either,
+ * try the root directory, and if there's no access to the root dir either, exit */
+static void
+set_cur_workspace(void)
+{
+	if (workspaces[cur_ws].path)
+		return;
+
+	char cwd[PATH_MAX] = "";
+	if (getcwd(cwd, sizeof(cwd)) == NULL) { /* avoid compiler warning */ }
+	if (!*cwd || strlen(cwd) == 0) {
+		if (user.home) {
+			workspaces[cur_ws].path = savestring(user.home, user.home_len);
+		} else {
+			if (access("/", R_OK | X_OK) == -1) {
+				fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME, strerror(errno));
+				exit(EXIT_FAILURE);
+			} else {
+				workspaces[cur_ws].path = savestring("/", 1);
+			}
+		}
+	} else {
+		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
+	}
+}
+
 int
 set_start_path(void)
 {
 	/* Last path is overriden by positional parameters in the command line */
-	if (restore_last_path)
+	if (restore_last_path == 1)
 		get_last_path();
 
 	if (cur_ws == UNSET)
@@ -212,35 +237,10 @@ set_start_path(void)
 	if (cur_ws > MAX_WS - 1) {
 		cur_ws = DEF_CUR_WS;
 		_err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
-			"\nFalling back to workspace %zu\n"), PROGRAM_NAME,
-		    cur_ws, cur_ws + 1);
+			"\nFalling back to workspace %zu\n"), PROGRAM_NAME, cur_ws, cur_ws + 1);
 	}
 
-	/* If path was not set (neither in the config file nor via command
-	 * line nor via the RestoreLastPath option), set the default (CWD),
-	 * and if CWD is not set, use the user's home directory, and if the
-	 * home cannot be found either, try the root directory, and if
-	 * there's no access to the root dir either, exit */
-	if (!workspaces[cur_ws].path) {
-		char cwd[PATH_MAX] = "";
-		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
-
-		if (!*cwd || strlen(cwd) == 0) {
-			if (user_home) {
-				workspaces[cur_ws].path = savestring(user_home, strlen(user_home));
-			} else {
-				if (access("/", R_OK | X_OK) == -1) {
-					fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME,
-					    strerror(errno));
-					exit(EXIT_FAILURE);
-				} else {
-					workspaces[cur_ws].path = savestring("/", 1);
-				}
-			}
-		} else {
-			workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
-		}
-	}
+	set_cur_workspace();
 
 	/* Make path the CWD */
 	/* If chdir() fails, set path to CWD, list files and print the
@@ -262,7 +262,6 @@ set_start_path(void)
 	}
 
 	dir_changed = 1;
-
 	return EXIT_SUCCESS;
 }
 
@@ -298,12 +297,11 @@ get_data_dir(void)
 	for (i = 0; data_dirs[i]; i++) {
 		char tmp[PATH_MAX];
 		snprintf(tmp, PATH_MAX - 1, "%s/%s", data_dirs[i], PNL);
-		if (stat(tmp, &attr) == EXIT_SUCCESS) {
-			data_dir = (char *)xrealloc(data_dir, (strlen(data_dirs[i]) + 1)
-						* sizeof(char));
-			strcpy(data_dir, data_dirs[i]);
-			break;
-		}
+		if (stat(tmp, &attr) == -1)
+			continue;
+		data_dir = (char *)xrealloc(data_dir, (strlen(data_dirs[i]) + 1) * sizeof(char));
+		strcpy(data_dir, data_dirs[i]);
+		break;
 	}
 
 	return;
@@ -362,19 +360,99 @@ get_own_pid(void)
 	return pid;
 }
 
+/* Return 1 is secure-env is enabled. Otherwise, return 0
+ * Used only at an early stage, where command line options haven't been
+ * parsed yet */
+static int
+is_secure_env(void)
+{
+	if (!argv_bk)
+		return 0;
+
+	size_t i;
+	for(i = 0; argv_bk[i]; i++) {
+		if (*argv_bk[i] == '-' && (strncmp(argv_bk[i], "--secure-env", 12) == 0))
+			return 1;
+	}
+
+	return 0;
+}
+
+/* Get user ID using id(1) shell command: GID if GROUP is one and UID otherwise */
+static int
+get_user_id(const int group)
+{
+	char file[PATH_MAX];
+	snprintf(file, PATH_MAX, "%s/idXXXXXX", *P_tmpdir ? P_tmpdir : "/tmp"); /* NOLINT */
+
+	int fd = mkstemp(file);
+	if (fd == -1) return (-1);
+
+	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
+
+	int r = dup2(fd, STDOUT_FILENO); /* Redirect stdout to the desired file */
+	close(fd);
+	if (r == -1) { unlink(file); return (-1); }
+
+	char *cmd[] = {"id", group == 1 ? "-g" : "-u", NULL};
+	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+
+	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+	close(stdout_bk);
+
+	FILE *fp = open_fstream_r(file, &fd);
+	if (!fp) { unlink(file); return (-1); }
+
+	char line[32];
+	if (fgets(line, (int)sizeof(line), fp) == NULL) {
+		close_fstream(fp, fd);
+		unlink(file);
+		return (-1);
+	}
+
+	close_fstream(fp, fd);
+	unlink(file);
+	return atoi(line);
+}
+
+/* Get user data from environment variables. Used only in case getpwuid() failed */
+static struct user_t
+get_user_env(void)
+{
+	struct user_t tmp_user;
+
+	/* If secure-env, do not fallback to environment variables */
+	int sec_env = is_secure_env();
+	_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n", PROGRAM_NAME, strerror(errno));
+
+	tmp_user.uid = sec_env == 0 ? (uid_t)get_user_id(0) : (uid_t)-1;
+	tmp_user.gid = sec_env == 0 ? (gid_t)get_user_id(1) : (gid_t)-1;
+
+	char *t = sec_env == 0 ? getenv("HOME") : (char *)NULL;
+	size_t tlen = t ? strlen(t) : 0;
+	tmp_user.home = t ? savestring(t, strlen(t)) : (char *)NULL;
+	tmp_user.home_len = tlen;
+
+	t = sec_env == 0 ? getenv("USER") : (char *)NULL;;
+	tmp_user.name = t ? savestring(t, strlen(t)) : (char *)NULL;
+
+	t = sec_env == 0 ? getenv("SHELL") : (char *)NULL;
+	tmp_user.shell = t ? savestring(t, strlen(t)) : (char *)NULL;
+
+	return tmp_user;
+}
+
 /* Retrieve user information and store in a user_t struct for later access */
 struct user_t
 get_user(void)
 {
-	struct passwd *pw;
+	struct passwd *pw = (struct passwd *)NULL;
 	struct user_t tmp_user;
 
 	errno = 0;
 	pw = getpwuid(geteuid());
-	if (!pw) {
-		fprintf(stderr, "%s: getpwuid: %s\n", PROGRAM_NAME, strerror(errno));
-		exit(-1);
-	}
+	if (!pw) /* Fallback to environment variables (if not secure-env) */
+		return get_user_env();
 
 	tmp_user.uid = pw->pw_uid;
 	tmp_user.gid = pw->pw_gid;
@@ -382,12 +460,7 @@ get_user(void)
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
-	if (!tmp_user.home || !tmp_user.name || !tmp_user.shell) {
-		_err('e', NOPRINT_PROMPT, _("%s: Error retrieving user data\n"), PROGRAM_NAME);
-		exit(-1);
-	}
-
-	tmp_user.home_len = strlen(tmp_user.home);
+	tmp_user.home_len = tmp_user.home ? strlen(tmp_user.home) : 0;
 	return tmp_user;
 }
 
@@ -450,7 +523,7 @@ load_tags(void)
 	tags[tags_n] = (char *)NULL;
 }
 
-/* Reconstruct the jump database from database file */
+/* Reconstruct the jump database from the database file */
 void
 load_jumpdb(void)
 {
@@ -771,10 +844,9 @@ load_actions(void)
 		if (!tmp)
 			continue;
 
-		/* Now copy left and right value of each action into the
-		 * actions struct */
+		/* Now copy left and right value of each action into the actions struct */
 		usr_actions = xrealloc(usr_actions, (size_t)(actions_n + 1)
-								* sizeof(struct actions_t));
+					* sizeof(struct actions_t));
 		usr_actions[actions_n].value = savestring(tmp + 1, strlen(tmp + 1));
 		*tmp = '\0';
 		usr_actions[actions_n].name = savestring(line, strlen(line));
@@ -799,7 +871,7 @@ reset_remotes_values(const size_t i)
 	remotes[i].mounted = 0;
 }
 
-/* Load remotes information from FILE */
+/* Load remotes information from REMOTES_FILE */
 int
 load_remotes(void)
 {
@@ -1177,8 +1249,7 @@ resolve_positional_param(char *file)
 	if (IS_FILE_URI(_path)) {
 		_path = file + 7;
 		if (stat(_path, &attr) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
-				strerror(errno));
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
 			free(_exp_path);
 			exit(errno);
 		}
@@ -1186,15 +1257,13 @@ resolve_positional_param(char *file)
 		url = 1;
 	} else {
 		if (stat(_exp_path, &attr) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path,
-				strerror(errno));
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
 			free(_exp_path);
 			exit(errno);
 		}
 
 		if (!S_ISDIR(attr.st_mode)) {
-			fprintf(stderr, "%s: %s: %s\n",	PROGRAM_NAME, _exp_path,
-				strerror(ENOTDIR));
+			fprintf(stderr, "%s: %s: %s\n",	PROGRAM_NAME, _exp_path, strerror(ENOTDIR));
 			free(_exp_path);
 			exit(ENOTDIR);
 		}
@@ -1215,12 +1284,11 @@ resolve_positional_param(char *file)
 void
 external_arguments(int argc, char **argv)
 {
-	/* Disable automatic error messages to be able to handle them
-	 * myself via the '?' case in the switch */
+	/* Disable automatic error messages to be able to handle them ourselves
+	 * via the '?' case in the switch */
 	opterr = optind = 0;
 
-	/* Link long (--option) and short options (-o) for the getopt_long
-	 * function */
+	/* Link long (--option) and short options (-o) for the getopt_long function */
 	static struct option longopts[] = {
 	    {"no-hidden", no_argument, 0, 'a'},
 	    {"show-hidden", no_argument, 0, 'A'},
@@ -1334,8 +1402,7 @@ external_arguments(int argc, char **argv)
 	     *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
-		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:xyz:", longopts,
-		    (int *)0)) != EOF) {
+		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:xyz:", longopts, (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
 		 * an argument here. The plus char (+) tells getopt to stop
@@ -1610,7 +1677,6 @@ RUN:
 
 		case 'x': ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': light_mode = xargs.light = 1; break;
-
 		case 'z': set_sort(optarg); break;
 
 		case '?': /* If some unrecognized option was found... */
@@ -1627,7 +1693,7 @@ RUN:
 			case 'w': /* fallthrough */
 			case 'z':
 				fprintf(stderr, _("%s: option requires an argument -- "
-						  "'%c'\nTry '%s --help' for more information.\n"),
+					"'%c'\nTry '%s --help' for more information.\n"),
 				    PROGRAM_NAME, optopt, PNL);
 				exit(EXIT_FAILURE);
 			default: break;
@@ -1674,12 +1740,12 @@ RUN:
 
 		if (access(bm_value, R_OK) == -1) {
 			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
-						  "Falling back to the default bookmarks file\n"),
+				"Falling back to the default bookmarks file\n"),
 			    PROGRAM_NAME, bm_value, strerror(errno));
 		} else {
 			alt_bm_file = savestring(bm_value, strlen(bm_value));
 			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
-						  "bookmarks file\n"), PROGRAM_NAME);
+				"bookmarks file\n"), PROGRAM_NAME);
 		}
 	}
 
@@ -1698,7 +1764,7 @@ RUN:
 			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
 			if (ret != EXIT_SUCCESS) {
 				_err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory "
-				"(error %d)\nFalling back to default configuration directory\n"),
+					"(error %d)\nFalling back to default configuration directory\n"),
 					PROGRAM_NAME, alt_dir_value, ret);
 				dir_ok = 0;
 			}
@@ -1761,9 +1827,8 @@ RUN:
 		} */
 
 		if (access(config_value, R_OK) == -1) {
-			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
-				"Falling back to default\n"), PROGRAM_NAME,
-			    config_value, strerror(errno));
+			_err('e', PRINT_PROMPT, _("%s: %s: %s\nFalling back to default\n"),
+				PROGRAM_NAME, config_value, strerror(errno));
 			xargs.config = -1;
 		} else {
 			alt_config_file = savestring(config_value, strlen(config_value));
@@ -1788,14 +1853,12 @@ RUN:
 				*_tmp = '\0';
 				char *p = realpath(path_value, _tmp);
 				if (!p) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-						path_value, strerror(errno));
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, path_value, strerror(errno));
 					exit(errno);
 				}
 				xstrsncpy(path_tmp, p, PATH_MAX);
 			} else {
-				snprintf(path_tmp, PATH_MAX - 1, "%s/%s", getenv("PWD"),
-					path_value);
+				snprintf(path_tmp, PATH_MAX - 1, "%s/%s", getenv("PWD"), path_value);
 			}
 		} else {
 			xstrsncpy(path_tmp, path_value, PATH_MAX);
@@ -1963,8 +2026,7 @@ get_sel_files(void)
 		return EXIT_FAILURE;
 
 	struct stat a;
-	/* Since this file contains only paths, we can be sure no line
-	 * length will be larger than PATH_MAX */
+	/* Since this file contains only paths, PATH_MAX should be enough */
 	char line[PATH_MAX];
 	while (fgets(line, (int)sizeof(line), fp) != NULL) {
 		size_t len = strlen(line);
@@ -2011,6 +2073,8 @@ get_sel_files(void)
 	return EXIT_SUCCESS;
 }
 
+/* Store each path in CDPATH env variable into an array (CDPATHS)
+ * Returns the number of paths found or zero if none */
 size_t
 get_cdpath(void)
 {
@@ -2082,12 +2146,12 @@ get_path_env(void)
 		return 0;
 
 	if (!*ptr) {
-		if (malloced_ptr)
+		if (malloced_ptr == 1)
 			free(ptr);
 		return 0;
 	}
 
-	if (malloced_ptr)
+	if (malloced_ptr == 1)
 		path_tmp = ptr;
 	else
 		path_tmp = savestring(ptr, strlen(ptr));
@@ -2237,7 +2301,7 @@ get_path_programs(void)
 	int *cmd_n = (int *)0;
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
-	if (ext_cmd_ok) {
+	if (ext_cmd_ok == 1) {
 		char cwd[PATH_MAX];
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 
@@ -2252,7 +2316,7 @@ get_path_programs(void)
 			}
 
 			cmd_n[i] = scandir(paths[i], &commands_bin[i],
-						light_mode ? NULL : skip_nonexec, xalphasort);
+					light_mode ? NULL : skip_nonexec, xalphasort);
 			/* If paths[i] directory does not exist, scandir returns -1.
 			 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
 			 * PATH disregarding if they exist or not. If paths[i] dir is
@@ -2276,7 +2340,7 @@ get_path_programs(void)
 	}
 
 	/* Now add aliases, if any */
-	if (aliases_n) {
+	if (aliases_n > 0) {
 		i = (int)aliases_n;
 		while (--i >= 0) {
 			bin_commands[l] = savestring(aliases[i].name, strlen(aliases[i].name));
@@ -2285,7 +2349,7 @@ get_path_programs(void)
 	}
 
 	/* And user defined actions too, if any */
-	if (actions_n) {
+	if (actions_n > 0) {
 		i = (int)actions_n;
 		while (--i >= 0) {
 			bin_commands[l] = savestring(usr_actions[i].name, strlen(usr_actions[i].name));
@@ -2293,7 +2357,7 @@ get_path_programs(void)
 		}
 	}
 
-	if (ext_cmd_ok && total_cmd) {
+	if (ext_cmd_ok == 1 && total_cmd > 0) {
 		/* And finally, add commands in PATH */
 		i = (int)path_n;
 		while (--i >= 0) {
@@ -2975,11 +3039,8 @@ check_options(void)
 		term = savestring(DEFAULT_TERM_CMD, strlen(DEFAULT_TERM_CMD));
 
 	if (!encoded_prompt) {
-		if (colorize == 1)
-			encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
-		else
-			encoded_prompt = savestring(DEFAULT_PROMPT_NO_COLOR,
-							strlen(DEFAULT_PROMPT_NO_COLOR));
+		char *t = colorize == 1 ? DEFAULT_PROMPT : DEFAULT_PROMPT_NO_COLOR;
+		encoded_prompt = savestring(t, strlen(t));
 	}
 
 	if ((xargs.stealth_mode == 1 || home_ok == 0 ||

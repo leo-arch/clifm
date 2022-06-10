@@ -1074,7 +1074,6 @@ extern size_t
 	tab_offset,
 	tags_n,
 	trash_n,
-	user_home_len,
 	usrvar_n,
 	zombies;
 
@@ -1141,7 +1140,6 @@ extern char
 	*trash_info_dir,
 #endif
 	*usr_cscheme,
-	*user_home,
 	*wprompt_str,
 
 	**argv_bk,

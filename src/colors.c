@@ -446,6 +446,11 @@ print_cur_colorscheme(void)
 static int
 edit_colorscheme(char *app)
 {
+	if (!colors_dir) {
+		fprintf(stderr, "%s: No color scheme found\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
 	char file[PATH_MAX];
 	snprintf(file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, cur_cscheme); /* NOLINT */
 	struct stat attr;
@@ -454,13 +459,11 @@ edit_colorscheme(char *app)
 			snprintf(file, PATH_MAX - 1, "%s/%s/colors/%s.cfm", /* NOLINT */
 					data_dir, PNL, cur_cscheme);
 			if (access(file, W_OK) == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-						file, strerror(errno));
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 				return EXIT_FAILURE;
 			}
 		} else {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					file, strerror(errno));
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
@@ -484,10 +487,8 @@ edit_colorscheme(char *app)
 	if (ret != EXIT_FAILURE) {
 		stat(file, &attr);
 		if (mtime_bfr != (time_t)attr.st_mtime
-		&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && autols) {
-			free_dirlist();
-			list_dir();
-		}
+		&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && autols == 1)
+			reload_dirlist();
 	}
 
 	return ret;
@@ -514,7 +515,7 @@ set_colorscheme(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	if (!cs_found)
+	if (cs_found == 0)
 		fprintf(stderr, _("%s: No such color scheme\n"), PROGRAM_NAME);
 
 	return EXIT_FAILURE;

@@ -87,8 +87,7 @@ set_path_env(void)
 #endif /* _PATH_STDPATH */
 
 	if (ret == -1) {
-		fprintf(stderr, "%s: setenv: PATH: %s\n", PROGRAM_NAME,
-			strerror(errno));
+		fprintf(stderr, "%s: setenv: PATH: %s\n", PROGRAM_NAME, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 }
@@ -96,10 +95,8 @@ set_path_env(void)
 static inline void
 xsetenv(const char *name, const char *value)
 {
-	if (setenv(name, value, 1) == -1) {
-		fprintf(stderr, "%s: setenv: %s: %s\n", PROGRAM_NAME, name,
-			strerror(errno));
-	}
+	if (setenv(name, value, 1) == -1)
+		fprintf(stderr, "%s: setenv: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
 }
 
 /* Sanitize the environment: set environ to NULL and then set a few

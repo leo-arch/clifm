@@ -1662,7 +1662,7 @@ rl_suggestions(const unsigned char c)
 
 	switch(*lb) {
 	case 'b': /* Bookmarks names */
-		if (lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
+		if (bookmark_names && lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
 			size_t i;
 			for (i = 0; bookmark_names[i]; i++) {
 				if (case_sensitive == 0 ? (TOUPPER(*word) == TOUPPER(*bookmark_names[i])
@@ -1713,7 +1713,7 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'c': /* Color schemes */
-		if (lb[1] == 's' && lb[2] == ' ') {
+		if (color_schemes && lb[1] == 's' && lb[2] == ' ') {
 			size_t i;
 			for (i = 0; color_schemes[i]; i++) {
 				if (*last_word == *color_schemes[i]
@@ -1747,7 +1747,7 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'n': /* Remotes */
-		if (lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
+		if (remotes && lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
 			size_t i;
 			for (i = 0; remotes[i].name; i++) {
 				if (*word == *remotes[i].name
@@ -1764,7 +1764,7 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'p': /* Profiles */
-		if (lb[1] == 'f' && lb[2] == ' ' && (strncmp(lb + 3, "set", 3) == 0
+		if (profile_names && lb[1] == 'f' && lb[2] == ' ' && (strncmp(lb + 3, "set", 3) == 0
 		|| strncmp(lb + 3, "del", 3) == 0)) {
 			size_t i;
 			for (i = 0; profile_names[i]; i++) {

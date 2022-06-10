@@ -264,7 +264,6 @@ size_t
 	tab_offset = 0,
 	tags_n = 0,
 	trash_n = 0,
-	user_home_len = 0,
 	usrvar_n = 0,
 	zombies = 0;
 
@@ -329,7 +328,6 @@ char
 	*trash_info_dir = (char *)NULL,
 #endif
 	*usr_cscheme = (char *)NULL,
-	*user_home = (char *)NULL,
 	*wprompt_str = (char *)NULL,
 
 	**argv_bk = (char **)NULL,
@@ -1116,7 +1114,7 @@ main(int argc, char *argv[])
 	get_hostname();
 	init_shell();
 
-	if (config_ok)
+	if (config_ok == 1)
 		init_history();
 
 	/* Store history into an array to be able to manipulate it */

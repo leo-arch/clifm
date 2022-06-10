@@ -174,24 +174,21 @@ reduce_path(char *_path)
 static inline char *
 gen_pwd(int c)
 {
-	char *temp = (char *)NULL;
-	/* Reduce HOME to "~" */
+	char *temp = (char *)NULL, *tmp_path = (char *)NULL;
 	int free_tmp_path = 0;
-	char *tmp_path = (char *)NULL;
 
-	if (strncmp(workspaces[cur_ws].path, user.home, user.home_len) == 0)
+	if (user.home && strncmp(workspaces[cur_ws].path, user.home, user.home_len) == 0)
 		tmp_path = home_tilde(workspaces[cur_ws].path, &free_tmp_path);
 
 	if (!tmp_path)
 		tmp_path = workspaces[cur_ws].path;
 
-	if (c == 'W') {
+	if (c == 'W')
 		temp = get_dir_basename(tmp_path);
-	} else if (c == 'p') {
+	else if (c == 'p')
 		temp = reduce_path(tmp_path);
-	} else { /* If c == 'w' */
+	else /* If c == 'w' */
 		temp = savestring(tmp_path, strlen(tmp_path));
-	}
 
 	if (free_tmp_path == 1)
 		free(tmp_path);
@@ -206,14 +203,14 @@ gen_workspace(void)
 	char *cl = (char *)NULL;
 
 	switch(cur_ws + 1) {
-	case 1: cl = ws1_c; break;
-	case 2: cl = ws2_c; break;
-	case 3: cl = ws3_c; break;
-	case 4: cl = ws4_c; break;
-	case 5: cl = ws5_c; break;
-	case 6: cl = ws6_c; break;
-	case 7: cl = ws7_c; break;
-	case 8: cl = ws8_c; break;
+	case 1: cl = *ws1_c ? ws1_c : DEF_WS1_C; break;
+	case 2: cl = *ws2_c ? ws2_c : DEF_WS2_C; break;
+	case 3: cl = *ws3_c ? ws3_c : DEF_WS3_C; break;
+	case 4: cl = *ws4_c ? ws4_c : DEF_WS4_C; break;
+	case 5: cl = *ws5_c ? ws5_c : DEF_WS5_C; break;
+	case 6: cl = *ws6_c ? ws6_c : DEF_WS6_C; break;
+	case 7: cl = *ws7_c ? ws7_c : DEF_WS7_C; break;
+	case 8: cl = *ws8_c ? ws8_c : DEF_WS8_C; break;
 	default: break;
 	}
 

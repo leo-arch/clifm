@@ -227,7 +227,7 @@ log_msg(char *_msg, int print)
 	/* If the config dir cannot be found or if msg log file isn't set
 	 * yet... This will happen if an error occurs before running
 	 * init_config(), for example, if the user's home cannot be found */
-	if (!config_ok || !msg_log_file || !*msg_log_file)
+	if (config_ok == 0 || !msg_log_file || !*msg_log_file)
 		return;
 
 	write_msg_into_logfile(_msg);

@@ -469,7 +469,7 @@ create_actions_file(char *file)
 void
 create_tmp_files(void)
 {
-	if (xargs.stealth_mode == 1 || !user.name)
+	if (xargs.stealth_mode == 1)
 		return;
 
 	size_t pnl_len = strlen(PNL);
@@ -480,7 +480,7 @@ create_tmp_files(void)
 	 * parent directory (/tmp/clifm) with 1777 permissions (world writable
 	 * with the sticky bit set), so that every user is able to create files
 	 * in here, but only the file's owner can remove or modify them */
-	size_t user_len = strlen(user.name);
+	size_t user_len = user.name ? strlen(user.name) : 7; /* 7: length of "unknown" */
 	tmp_dir = (char *)xnmalloc(P_tmpdir_len + pnl_len + user_len + 3, sizeof(char));
 	sprintf(tmp_dir, "%s/%s", P_tmpdir, PNL);
 	/* P_tmpdir is defined in stdio.h and it's value is usually /tmp */
@@ -499,7 +499,7 @@ create_tmp_files(void)
 	 * store the list of selected files: TMP_DIR/clifm/username/.selbox_PROFILE.
 	 * We use here very restrictive permissions (700), since only the corresponding
 	 * user must be able to read and/or modify this list */
-	sprintf(tmp_dir, "%s/%s/%s", P_tmpdir, PNL, user.name);
+	sprintf(tmp_dir, "%s/%s/%s", P_tmpdir, PNL, user.name ? user.name : "unknown");
 	if (stat(tmp_dir, &attr) == -1) {
 		if (xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
 			selfile_ok = 0;
@@ -2165,7 +2165,8 @@ init_config(void)
 	msgs.error = msgs.notice = msgs.warning = 0;
 
 	if (home_ok == 0) {
-		set_default_colors();
+//		set_default_colors();
+		check_colors();
 		return;
 	}
 
