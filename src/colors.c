@@ -106,10 +106,7 @@ get_file_color(const char *filename, const struct stat *attr)
 #endif
 	else if ((attr->st_mode & 00100) /* Exec */
 	|| (attr->st_mode & 00010) || (attr->st_mode & 00001)) {
-		if (FILE_SIZE_PTR == 0)
-			color = ee_c;
-		else
-			color = ex_c;
+		color = FILE_SIZE_PTR == 0 ? ee_c : ex_c;
 	} else if (FILE_SIZE_PTR == 0) {
 		color = ef_c;
 	} else if (attr->st_nlink > 1) { /* Multi-hardlink */
@@ -170,10 +167,8 @@ is_color_code(const char *str)
 			digits = 0;
 			semicolon++;
 		} else {
-			if (*str != '\n') {
-			/* Neither digit nor semicolon */
+			if (*str != '\n') /* Neither digit nor semicolon */
 				return 0;
-			}
 		}
 		str++;
 	}
@@ -263,11 +258,6 @@ get_ext_color(char *ext)
 		if (!match || *q != '=')
 			continue;
 
-/*		char *c = (char *)NULL;
-		printf("Q:'%s'\n", q + 1);
-		if (is_color_code(q + 1) != 1 && check_defs(q + 1) == NULL)
-			continue;
-		return c ? c : ++q; */
 		q++;
 		return q ? q : (char *)NULL;
 	}
@@ -1568,23 +1558,22 @@ set_colors(const char *colorscheme, const int env)
 
 /* Print ENTRY using color codes and I as ELN, right padding PAD
  * chars and terminating ENTRY with or without a new line char (NEW_LINE
- * 1 or 0 respectivelly) */
+ * 1 or 0 respectivelly)
+ * ELN could be:
+ * > 0: The ELN of a file in CWD
+ * -1: Error getting ELN
+ * 0: ELN should not be printed, for example, when listing files not in CWD */
 void
-colors_list(char *ent, const int i, const int pad, const int new_line)
+colors_list(char *ent, const int eln, const int pad, const int new_line)
 {
-	size_t i_digits = (size_t)DIGINUM(i);
+	char index[sizeof(int) + 2];
+	*index = '\0';
 
-	/* Num (i) + space + null byte */
-	char *index = (char *)xnmalloc(i_digits + 2, sizeof(char));
-
-	if (i > 0) /* When listing files in CWD */
-		sprintf(index, "%d ", i); /* NOLINT */
-	else if (i == -1) /* ELN for entry could not be found */
+	if (eln > 0)
+		sprintf(index, "%d ", eln); /* NOLINT */
+	else if (eln == -1)
 		sprintf(index, "? "); /* NOLINT */
 	else
-	/* When listing files NOT in CWD (called from search function and
-	 * first argument is a path: "/search_str /path") 'i' is zero. In
-	 * this case, no index should be printed at all */
 		index[0] = '\0';
 
 	struct stat attr;
@@ -1593,24 +1582,24 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 
 	if (*q == '~') {
 		if (!*(q + 1) || (*(q + 1) == '/' && !*(q + 2)))
-			strncpy(t, user.home, PATH_MAX - 1);
+			xstrsncpy(t, user.home, PATH_MAX - 1);
 		else
 			snprintf(t, PATH_MAX, "%s/%s", user.home, q + 2);
 		p = t;
 	}
 
-	size_t elen = strlen(p);
+	size_t len = strlen(p);
 	int rem_slash = 0;
 	/* Remove the ending slash: lstat() won't take a symlink to dir as
 	 * a symlink (but as a dir), if the file name ends with a slash */
-	if (elen > 1 && p[elen - 1] == '/') {
-		p[elen - 1] = '\0';
+	if (len > 1 && p[len - 1] == '/') {
+		p[len - 1] = '\0';
 		rem_slash = 1;
 	}
 
 	int ret = lstat(p, &attr);
 	if (rem_slash)
-		p[elen - 1] = '/';
+		p[len - 1] = '/';
 
 	char *wname = (char *)NULL;
 	size_t wlen = wc_xstrlen(ent);
@@ -1620,90 +1609,47 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	if (ret == -1) {
 		fprintf(stderr, "%s%s%s%s%-*s%s%s", eln_color, index, df_c,
 		    uf_c, pad, wname ? wname : ent, df_c, new_line ? "\n" : "");
-		free(index);
 		free(wname);
 		return;
 	}
 
-	char *linkname = (char *)NULL;
-	char ext_color[MAX_COLOR];
-	char *color = fi_c;
-
-#ifdef _LINUX_CAP
-	cap_t cap;
-#endif
+	char *color = fi_c, ext_color[MAX_COLOR];
 
 	switch (attr.st_mode & S_IFMT) {
-
 	case S_IFREG:
-		if (!check_file_access(&attr)) {
+		if (light_mode == 1 || colorize == 0) {
+			color = fi_c;
+		} else if (check_file_access(&attr) == 0) {
 			color = nf_c;
-		} else if (attr.st_mode & S_ISUID) { /* set uid file */
-			color = su_c;
-		} else if (attr.st_mode & S_ISGID) { /* set gid file */
-			color = sg_c;
 		} else {
-#ifdef _LINUX_CAP
-			cap = cap_get_file(ent);
-			if (cap) {
-				color = ca_c;
-				cap_free(cap);
-			} else if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-#else
-			if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-#endif
-				if (FILE_SIZE == 0)
-					color = ee_c;
-				else
-					color = ex_c;
-			} else if (FILE_SIZE == 0) {
-				color = ef_c;
-			} else if (attr.st_nlink > 1) {
-				color = mh_c;
-			} else {
-				char *ext = check_ext == 1 ? strrchr(ent, '.') : (char *)NULL;
-				if (ext) {
-					char *extcolor = get_ext_color(ext);
-					if (extcolor) {
-						snprintf(ext_color, MAX_COLOR, "\x1b[%sm", /* NOLINT */
-						    extcolor);
-						color = ext_color;
-						extcolor = (char *)NULL;
-					}
-					ext = (char *)NULL;
-				}
-			}
-		}
+			color = get_file_color(ent, &attr);
+			if (light_mode == 1 || color != fi_c)
+				break;
+			char *ext = check_ext == 1 ? strrchr(ent, '.') : (char *)NULL;
+			if (!ext) break;
+			char *extcolor = get_ext_color(ext);
+			ext = (char *)NULL;
+			if (!extcolor) break;
 
+			snprintf(ext_color, MAX_COLOR, "\x1b[%sm", extcolor); // NOLINT
+			color = ext_color;
+			extcolor = (char *)NULL;
+		}
 		break;
 
 	case S_IFDIR:
-		if (!check_file_access(&attr)) {
+		if (light_mode == 1 || colorize == 0)
+			color = di_c;
+		else if (check_file_access(&attr) == 0)
 			color = nd_c;
-		} else {
-			int is_oth_w = 0;
-
-			if (attr.st_mode & S_IWOTH)
-				is_oth_w = 1;
-
-			int files_dir = count_dir(ent, NO_CPOP);
-
-			color = (attr.st_mode & S_ISVTX) ? (is_oth_w
-					? tw_c : st_c) : (is_oth_w ? ow_c :
-					/* If folder is empty, it contains only "."
-					 * and ".." (2 elements). If not mounted (ex:
-					 * /media/usb) the result will be zero. */
-					(files_dir == 2 || files_dir == 0) ? ed_c : di_c);
-		}
+		else
+			color = get_dir_color(ent, attr.st_mode);
 		break;
 
-	case S_IFLNK:
-		linkname = realpath(ent, NULL);
-		if (linkname) {
-			color = ln_c;
-			free(linkname);
-		} else {
-			color = or_c;
+	case S_IFLNK: {
+		char *linkname = realpath(ent, NULL);
+		color = linkname ? ln_c : or_c;
+		free(linkname);
 		}
 		break;
 
@@ -1711,14 +1657,11 @@ colors_list(char *ent, const int i, const int pad, const int new_line)
 	case S_IFBLK: color = bd_c; break;
 	case S_IFCHR: color = cd_c; break;
 	case S_IFSOCK: color = so_c; break;
-	/* In case all the above conditions are false... */
 	default: color = no_c; break;
 	}
 
 	printf("%s%s%s%s%s%s%s%-*s", eln_color, index, df_c, color,
-	    (wname ? wname : ent) + tab_offset, df_c,
-	    new_line ? "\n" : "", pad, "");
-	free(index);
+	    (wname ? wname : ent) + tab_offset, df_c, new_line ? "\n" : "", pad, "");
 	free(wname);
 }
 
@@ -1807,7 +1750,7 @@ get_colorschemes(void)
 			}
 		}
 
-		if (dup)
+		if (dup == 1)
 			continue;
 
 		color_schemes[i] = savestring(name, strlen(name));
@@ -1841,13 +1784,12 @@ print_color_blocks(void)
 void
 color_codes(void)
 {
-	if (!colorize) {
-		printf(_("%s: Currently running without colors\n"),
-		    PROGRAM_NAME);
+	if (colorize == 0) {
+		printf(_("%s: Currently running without colors\n"), PROGRAM_NAME);
 		return;
 	}
 
-	if (ext_colors_n)
+	if (ext_colors_n > 0)
 		printf(_("%sFile type colors%s\n\n"), BOLD, df_c);
 	printf(_(" %sfile name%s: nd: Directory with no read permission\n"),
 	    nd_c, df_c);
@@ -1895,7 +1837,7 @@ color_codes(void)
 		 "By default, %s uses only 8/16 colors, but you can use 256 "
 		 "and RGB/true colors as well.\n\n"), PROGRAM_NAME);
 
-	if (ext_colors_n) {
+	if (ext_colors_n > 0) {
 		size_t i, j;
 		printf(_("%sExtension colors%s\n\n"), BOLD, df_c);
 		for (i = 0; i < ext_colors_n; i++) {

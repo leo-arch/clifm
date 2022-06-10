@@ -391,7 +391,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 static inline char *
 get_reg_file_color(const char *filename, const struct stat *attr, int *free_color)
 {
-	if (light_mode)	return fi_c;
+	if (light_mode == 1) return fi_c;
 	if (access(filename, R_OK) == -1) return nf_c;
 	if (attr->st_mode & S_ISUID) return su_c;
 	if (attr->st_mode & S_ISGID) return sg_c;
@@ -403,28 +403,24 @@ get_reg_file_color(const char *filename, const struct stat *attr, int *free_colo
 		return ca_c;
 	}
 #endif
-	if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-		if (FILE_SIZE_PTR == 0)
-			return ee_c;
-		return ex_c;
-	}
+	if (attr->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
+		return (FILE_SIZE_PTR == 0) ? ee_c : ex_c;
 
 	if (FILE_SIZE_PTR == 0)	return ef_c;
 	if (attr->st_nlink > 1)	return mh_c;
 
 	char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
-	if (ext && ext != filename) {
-		char *extcolor = get_ext_color(ext);
-		if (!extcolor)
-			return fi_c;
+	if (!ext || ext == filename)
+		return fi_c;
 
-		char *ext_color = (char *)xnmalloc(strlen(extcolor) + 4, sizeof(char));
-		sprintf(ext_color, "\x1b[%sm", extcolor);
-		*free_color = 1;
-		return ext_color;
-	}
+	char *extcolor = get_ext_color(ext);
+	if (!extcolor)
+		return fi_c;
 
-	return fi_c;
+	char *ext_color = (char *)xnmalloc(strlen(extcolor) + 4, sizeof(char));
+	sprintf(ext_color, "\x1b[%sm", extcolor);
+	*free_color = 1;
+	return ext_color;
 }
 
 /* Used by the check_completions function to get file names color
@@ -436,7 +432,7 @@ get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 
 	switch(attr->st_mode & S_IFMT) {
 	case S_IFDIR:
-		if (light_mode) return di_c;
+		if (light_mode == 1) return di_c;
 		if (access(filename, R_OK | X_OK) != 0)
 			return nd_c;
 		color = get_dir_color(filename, attr->st_mode);
@@ -449,8 +445,10 @@ get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 	case S_IFLNK: {
 		if (light_mode)	return ln_c;
 		char *linkname = realpath(filename, (char *)NULL);
-		if (linkname)
+		if (linkname) {
+			free(linkname);
 			return ln_c;
+		}
 		return or_c;
 		}
 		break;

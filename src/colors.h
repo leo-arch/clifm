@@ -27,18 +27,18 @@
 
 #include <sys/stat.h>
 
-int set_colors(const char *colorscheme, const int env);
 void color_codes(void);
+void colors_list(char *ent, const int eln, const int pad, const int new_line);
+int cschemes_function(char **args);
 #ifndef CLIFM_SUCKLESS
 size_t get_colorschemes(void);
 #endif /* CLIFM_SUCKLESS */
-int cschemes_function(char **args);
-void colors_list(char *ent, const int i, const int pad, const int new_line);
-char *get_ext_color(char *ext);
 char *get_dir_color(const char *filename, const mode_t mode);
+char *get_ext_color(char *ext);
 char *get_file_color(const char *filename, const struct stat *attr);
 void reset_filetype_colors(void);
 void reset_iface_colors(void);
+int set_colors(const char *colorscheme, const int env);
 void set_default_colors(void);
 void unset_suggestions_color(void);
 
