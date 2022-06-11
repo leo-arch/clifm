@@ -1064,7 +1064,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 	char colorscheme_file[PATH_MAX];
 	*colorscheme_file = '\0';
-	if (config_ok) {
+	if (config_ok == 1 && colors_dir) {
 		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, /* NOLINT */
 			colorscheme ? colorscheme : "default");
 	}
@@ -1084,14 +1084,12 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			return EXIT_FAILURE;
 		} else {
 			_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
-				"Falling back to the default one\n"), PROGRAM_NAME,
-				colorscheme);
+				"Falling back to the default one\n"), PROGRAM_NAME, colorscheme);
 			return EXIT_SUCCESS;
 		}
 	}
 
-	/* If called from the color scheme function, reset all
-	 * color values before proceeding */
+	/* If called from the color scheme function, reset all color values before proceeding */
 	if (!env) {
 		reset_filetype_colors();
 		reset_iface_colors();
@@ -1556,6 +1554,44 @@ set_colors(const char *colorscheme, const int env)
 	return EXIT_SUCCESS;
 }
 
+/* Let's print selected file names in a more friendly format
+ * Change absolute paths into:
+ * "./" if file is in CWD
+ * "~" if file is in HOME
+ * The reformated file name is returned if actually reformated, in which case
+ * the returned value should be freed by the caller
+ * Otherwise, a pointer to the original string is returned and must not be
+ * freed by the caller */
+static char *
+format_sel_name(char *str)
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	char *name = (char *)NULL;
+	size_t len = strlen(str);
+	size_t wlen = workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 0;
+
+	/* If STR is in CWD -> ./STR */
+	if (workspaces && workspaces[cur_ws].path && wlen > 1 && len > wlen
+	&& strncmp(str, workspaces[cur_ws].path, wlen) == 0) {
+		name = (char *)xnmalloc(strlen(str + wlen + 1) + 3, sizeof(char));
+		sprintf(name, "./%s", str + wlen + 1);
+		return name;
+	}
+
+	/* If STR is in HOME, reduce HOME to tilde (~) */
+	int _free = 0;
+	char *tmp = home_tilde(str, &_free);
+	if (tmp && tmp != str) {
+		name = savestring(tmp, strlen(tmp));
+		if (_free == 1) free(tmp);
+		return name;
+	}
+
+	return str;
+}
+
 /* Print ENTRY using color codes and ELN as ELN, right padding PAD
  * chars and terminating ENTRY with or without a new line char (NEW_LINE
  * 1 or 0 respectivelly)
@@ -1660,9 +1696,15 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	default: color = no_c; break;
 	}
 
+	char *name = wname ? wname : ent;
+	char *tmp = (flags & IN_SELBOX_SCREEN) ? format_sel_name(name) : name;
+
 	printf("%s%s%s%s%s%s%s%-*s", eln_color, index, df_c, color,
-	    (wname ? wname : ent) + tab_offset, df_c, new_line ? "\n" : "", pad, "");
+		tmp + tab_offset, df_c, new_line ? "\n" : "", pad, "");
 	free(wname);
+
+	if ((flags & IN_SELBOX_SCREEN) && tmp != name)
+		free(tmp);
 }
 
 #ifndef CLIFM_SUCKLESS

@@ -584,12 +584,15 @@ print_selected_files(void)
 	size_t t = tab_offset, i;
 	off_t total = 0;
 	tab_offset = 0;
+
+	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {
 		colors_list(sel_elements[i].name, (int)i + 1, NO_PAD, PRINT_NEWLINE);
 		off_t s = get_sel_file_size(i);
 		if (s != (off_t)-1)
 			total += s;
 	}
+	flags &= ~IN_SELBOX_SCREEN;
 	tab_offset = t;
 
 	putchar('\n');
@@ -840,6 +843,7 @@ show_sel_files(void)
 	size_t t = tab_offset;
 	tab_offset = 0;
 
+	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {
 		/* if (pager && counter > (term_rows-2)) { */
 		if (pager && counter > (size_t)t_rows) {
@@ -875,7 +879,7 @@ show_sel_files(void)
 		if (s != (off_t)-1)
 			total += s;
 	}
-
+	flags &= ~IN_SELBOX_SCREEN;
 	tab_offset = t;
 
 	char *human_size = get_size_unit(total);

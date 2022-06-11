@@ -2180,7 +2180,7 @@ char *
 home_tilde(char *new_path, int *_free)
 {
 	*_free = 0;
-	if (!home_ok || !new_path || !*new_path || !user.home)
+	if (home_ok == 0 || !new_path || !*new_path || !user.home)
 		return (char *)NULL;
 
 	char *path_tilde = (char *)NULL;
@@ -2197,15 +2197,12 @@ home_tilde(char *new_path, int *_free)
 	if (new_path[1] == user.home[1]
 	&& strncmp(new_path, user.home, user.home_len) == 0) {
 		/* If path == HOME/file */
-		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3,
-					sizeof(char));
+		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3, sizeof(char));
 		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);
 		*_free = 1;
 		return path_tilde;
 	}
 
-//	path_tilde = (char *)xnmalloc(strlen(new_path) + 1, sizeof(char));
-//	strcpy(path_tilde, new_path);
 	return new_path;
 }
 
