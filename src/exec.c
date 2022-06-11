@@ -1941,6 +1941,28 @@ bring_to_foreground(char *str)
 	return EXIT_SUCCESS;
 } */
 
+/* Return 1 if STR is a path, zero otherwise */
+static int
+is_path(char *str)
+{
+	if (!str || !*str)
+		return 0;
+	if (strchr(str, '\\')) {
+		char *p = dequote_str(str, 0);
+		if (!p)
+			return 0;
+		int ret = access(p, F_OK);
+		free(p);
+		if (ret != 0)
+			return 0;
+	} else {
+		if (access(str, F_OK) != 0)
+			return 0;
+	}
+
+	return 1;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2225,8 +2247,8 @@ exec_cmd(char **comm)
 		return (exit_code = props_function(comm));
 
 	/*     ############### SEARCH ##################     */
-	else if (*comm[0] == '/' && !strchr(comm[0], '\\')
-	&& access(comm[0], F_OK) != 0)
+	else if (*comm[0] == '/' && check_glob_char(comm[0]) == 1
+	&& is_path(comm[0]) == 0)
 		return (exit_code = search_function(comm));
 
 	/*      ############## HISTORY ##################     */
@@ -2252,10 +2274,6 @@ exec_cmd(char **comm)
 		}
 		exit_code = bulk_rename(comm);
 	}
-
-/*	else if (*comm[0] == 'f' && comm[0][1] == 'g' && !comm[0][2]) {
-		return (exit_code = bring_to_foreground(comm[1] ? comm[1] : NULL));
-	} */
 
 	/*      ################ SORT ##################     */
 	else if (*comm[0] == 's' && ((comm[0][1] == 't' && !comm[0][2])

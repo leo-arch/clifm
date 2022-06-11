@@ -42,14 +42,13 @@
 #include "navigation.h"
 #include "sort.h"
 
-static int
-check_glob_char(char *str)
+int
+check_glob_char(const char *str)
 {
 	size_t i;
 	for (i = 1; str[i]; i++) {
 		if (str[i] == '*' || str[i] == '?' || str[i] == '[' || str[i] == '{'
-		    /* Consider regex chars as well: we don't want this "r$"
-		    * to become this "*r$*" */
+		/* Consider regex chars as well: we don't want this "r$" to become this "*r$*" */
 		|| str[i] == '|' || str[i] == '^' || str[i] == '+' || str[i] == '$'
 		|| str[i] == '.')
 			return 1;
@@ -60,7 +59,7 @@ check_glob_char(char *str)
 
 /* List matching file names in the specified directory */
 int
-search_glob(char **args, int invert)
+search_glob(char **args, const int invert)
 {
 	if (!args || !args[0])
 		return EXIT_FAILURE;
@@ -428,7 +427,7 @@ SCANDIR_ERROR:
 		else
 			last_column = 0;
 
-		colors_list(pfiles[i], eln[i] != -1 ? eln[i] : NO_ELN,
+		colors_list(pfiles[i], !search_path ? eln[i] : NO_ELN,
 		    (last_column == 1 || i == (found - 1)) ? NO_PAD :
 		    (int)(flongest - files_len[i]) + 1,
 		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE);
@@ -466,7 +465,7 @@ END:
 /* List matching (or not marching, if inverse is set to 1) file names
  * in the specified directory */
 int
-search_regex(char **args, int invert, int case_sens)
+search_regex(char **args, const int invert, const int case_sens)
 {
 	if (!args || !args[0])
 		return EXIT_FAILURE;
