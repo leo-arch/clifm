@@ -67,7 +67,7 @@ else
 fi
 
 if [ -n "$FILE" ]; then
-	printf "%s/%s\n" "$DIR" "$FILE" > "$CLIFM_BUS"
+	printf "open %s/%s\n" "$DIR" "$FILE" > "$CLIFM_BUS"
 fi
 
 exit $SUCCESS
