@@ -1556,7 +1556,7 @@ set_colors(const char *colorscheme, const int env)
 	return EXIT_SUCCESS;
 }
 
-/* Print ENTRY using color codes and I as ELN, right padding PAD
+/* Print ENTRY using color codes and ELN as ELN, right padding PAD
  * chars and terminating ENTRY with or without a new line char (NEW_LINE
  * 1 or 0 respectivelly)
  * ELN could be:

@@ -131,16 +131,16 @@ print_filename(char *to_print, char *full_pathname)
 {
 	char *s;
 
-	if (colorize && (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_SEL
+	if (colorize == 1 && (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_SEL
 	|| cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_RANGES)) {
-		colors_list(to_print, 0, 0, 0);
+		colors_list(to_print, NO_ELN, NO_PAD, NO_NEWLINE);
 	} else {
 		for (s = to_print + tab_offset; *s; s++) {
 			PUTX(*s);
 		}
 	}
 
-	if (rl_filename_completion_desired && !colorize) {
+	if (rl_filename_completion_desired && colorize == 0) {
 		if (cur_comp_type == TCMP_CMD) {
 			putc('*', rl_outstream);
 			return 1;
