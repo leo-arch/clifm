@@ -94,11 +94,13 @@ xstrcasechr(char *s, char c)
 }
 
 /* A very basic fuzzy strings matcher
- * Returns 1 if match (S1 is contained in S2) or zero otherwise */
+ * Returns 1 if match (S1 is contained in S2) or zero otherwise
+ * For the time being, fuzzy match does not work with standard completion
+ * (fzftab == 0) */
 int
 fuzzy_match(char *s1, char *s2, const int case_sens)
 {
-	if (!s1 || !*s1 || !s2 || !*s2)
+	if (!s1 || !*s1 || !s2 || !*s2 || fzftab == 0)
 		return 0;
 
 	if (case_sens ? strstr(s2, s1) : strcasestr(s2, s1))
