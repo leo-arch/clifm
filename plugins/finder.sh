@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# CliFM plugin to find/open/cd files in CWD using FZF/Rofi
+# CliFM plugin to find/open/cd files using FZF/Rofi
 # Written by L. Abramovich
 # License GPL3
 
@@ -9,8 +9,9 @@ ERROR=1
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Find/open/cd files in the current directory using FZF/Rofi. Once found, press Enter to cd/open the desired file.\n"
-	printf "Usage: %s\n" "$name"
+	printf "Find/open/cd files using FZF/Rofi. Once found, press Enter to cd/open the desired file.\n"
+	printf "Usage: %s [DIR]\n" "$name"
+	printf "If DIR is not specified, the current directory is used instead\n"
 	exit $SUCCESS
 fi
 
@@ -38,9 +39,19 @@ fi
 # shellcheck source=/dev/null
 . "$CLIFM_PLUGINS_HELPER"
 
+DIR="."
+if [ -n "$1" ]; then
+	if [ -d "$1" ]; then
+		DIR="$1";
+	else
+		printf "clifm: %s: Not a directory\n" "$1" >&2
+		exit 1
+	fi
+fi
+
 case "$OS" in
-	Linux) ls_cmd="ls -A --group-directories-first --color=always" ;;
-	*) ls_cmd="ls -A" ;;
+	Linux) ls_cmd="ls -A --group-directories-first --color=always $DIR" ;;
+	*) ls_cmd="ls -A $DIR" ;;
 esac
 
 if [ "$finder" = "fzf" ]; then
@@ -56,7 +67,7 @@ else
 fi
 
 if [ -n "$FILE" ]; then
-	printf "%s\n" "$FILE" > "$CLIFM_BUS"
+	printf "%s/%s\n" "$DIR" "$FILE" > "$CLIFM_BUS"
 fi
 
 exit $SUCCESS
