@@ -67,7 +67,8 @@ else
 fi
 
 if [ -n "$FILE" ]; then
-	printf "open %s/%s\n" "$DIR" "$FILE" > "$CLIFM_BUS"
+	f="$(echo "$FILE" | sed 's/ /\\ /g')"
+	printf "open %s/%s\n" "$DIR" "$f" > "$CLIFM_BUS"
 fi
 
 exit $SUCCESS
