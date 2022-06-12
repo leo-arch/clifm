@@ -925,8 +925,8 @@ open_function(char **cmd)
 	/* Check file type: only directories, symlinks, and regular files
 	 * will be opened */
 	char no_open_file = 1;
-	char *file_type = (char *)NULL;
-	char *types[] = {
+	const char *file_type = (char *)NULL;
+	const char *types[] = {
 		"block device",
 		"character device",
 		"socket",
@@ -944,8 +944,7 @@ open_function(char **cmd)
 	case S_IFLNK: {
 		int ret = get_link_ref(file);
 		if (ret == -1) {
-			fprintf(stderr, _("%s: %s: Broken symbolic link\n"),
-					PROGRAM_NAME, file);
+			fprintf(stderr, _("%s: %s: Broken symbolic link\n"), PROGRAM_NAME, file);
 			return EXIT_FAILURE;
 		} else if (ret == S_IFDIR) {
 			return cd_function(file, CD_PRINT_ERROR);

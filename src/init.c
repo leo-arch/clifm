@@ -99,9 +99,6 @@ get_sys_shell(void)
 int
 init_gettext(void)
 {
-	if (!data_dir)
-		return EXIT_FAILURE;
-
 	char locale_dir[PATH_MAX];
 	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", data_dir ? data_dir : "/usr/share");
 	bindtextdomain(PNL, locale_dir);

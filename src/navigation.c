@@ -390,7 +390,7 @@ backdir(char* str)
 /* Make sure DIR exists, it is actually a directory and is readable.
  * Only then change directory */
 int
-xchdir(char *dir, const int set_title)
+xchdir(char *dir, const int cd_flag)
 {
 	if (!dir || !*dir)
 		return (-1);
@@ -403,7 +403,7 @@ xchdir(char *dir, const int set_title)
 
 	int ret = chdir(dir);
 
-	if (set_title && ret == 0 && xargs.cwd_in_title == 1)
+	if (cd_flag == SET_TITLE && ret == 0 && xargs.cwd_in_title == 1)
 		set_term_title(dir);
 
 	return ret;
@@ -440,20 +440,18 @@ check_cdpath(char *name)
 
 /* Change the current directory to the home directory */
 static int
-go_home(const int print_error)
+go_home(const int cd_flag)
 {
 	if (!user.home) {
-		if (print_error)
+		if (cd_flag == CD_PRINT_ERROR)
 			fprintf(stderr, _("%s: cd: Home directory not found\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
+		return ENOENT;
 	}
 
 	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
-		if (print_error) {
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-				user.home, strerror(errno));
-		}
-		return EXIT_FAILURE;
+		if (cd_flag == CD_PRINT_ERROR)
+			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME, user.home, strerror(errno));
+		return errno;
 	}
 
 	free(workspaces[cur_ws].path);
@@ -464,7 +462,7 @@ go_home(const int print_error)
 
 /* Change current directory to NEW_PATH */
 static int
-change_to_path(char *new_path, const int print_error)
+change_to_path(char *new_path, const int cd_flag)
 {
 	if (strchr(new_path, '\\')) {
 		char *deq_path = dequote_str(new_path, 0);
@@ -475,23 +473,23 @@ change_to_path(char *new_path, const int print_error)
 	}
 
 	char *p = check_cdpath(new_path);
+	errno = 0;
 	char *q = realpath(p ? p : new_path, NULL);
 	if (!q) {
-		if (print_error) {
+		if (cd_flag == CD_PRINT_ERROR) {
 			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
 				p ? p : new_path, strerror(errno));
 		}
 		free(p);
-		return EXIT_FAILURE;
+		return errno;
 	}
 	free(p);
 
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
-		if (print_error) {
+		if (cd_flag == CD_PRINT_ERROR)
 			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME, q, strerror(errno));
-		}
 		free(q);
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	free(workspaces[cur_ws].path);
@@ -502,31 +500,31 @@ change_to_path(char *new_path, const int print_error)
 }
 
 /* Change current directory to NEW_PATH, or to HOME if new_path is NULL.
- * Errors are printed only if PRINT_ERROR is set to one */
+ * Errors are printed only if CD_FLAG is set to CD_PRINT_ERROR (1) */
 int
-cd_function(char *new_path, const int print_error)
+cd_function(char *new_path, const int cd_flag)
 {
 	/* If no argument, change to home */
+	int ret = EXIT_SUCCESS;
 	if (!new_path || !*new_path) {
-		if (go_home(print_error) == EXIT_FAILURE)
-			return EXIT_FAILURE;
+		if ((ret = go_home(cd_flag)) != EXIT_SUCCESS)
+			return ret;
 	} else {
-		if (change_to_path(new_path, print_error) == EXIT_FAILURE)
-			return EXIT_FAILURE;
+		if ((ret = change_to_path(new_path, cd_flag)) != EXIT_SUCCESS)
+			return ret;
 	}
 
-	int exit_status = EXIT_SUCCESS;
 	add_to_dirhist(workspaces[cur_ws].path);
 
 	dir_changed = 1;
 	if (autols == 1) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+			ret = EXIT_FAILURE;
 	}
 
 	add_to_jumpdb(workspaces[cur_ws].path);
-	return exit_status;
+	return ret;
 }
 
 /* Convert ... n into ../.. n */
@@ -751,8 +749,9 @@ forth_function(char **comm)
 	dirhist_cur_index++;
 
 	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
-		if (dirhist_cur_index >= dirhist_total_index
-		|| !old_pwd[dirhist_cur_index + 1])
+/*		if (dirhist_cur_index >= dirhist_total_index
+		|| !old_pwd[dirhist_cur_index + 1]) */
+		if (!old_pwd[dirhist_cur_index + 1])
 			return EXIT_FAILURE;
 		dirhist_cur_index++;
 	}

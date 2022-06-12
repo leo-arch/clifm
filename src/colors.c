@@ -1573,7 +1573,7 @@ format_sel_name(char *str)
 
 	char *name = (char *)NULL;
 	size_t len = strlen(str);
-	size_t wlen = workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 0;
+	size_t wlen = (workspaces && workspaces[cur_ws].path) ? strlen(workspaces[cur_ws].path) : 0;
 
 	/* If STR is in CWD -> ./STR */
 	if (workspaces && workspaces[cur_ws].path && wlen > 1 && len > wlen
