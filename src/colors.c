@@ -1561,7 +1561,10 @@ set_colors(const char *colorscheme, const int env)
  * The reformated file name is returned if actually reformated, in which case
  * the returned value should be freed by the caller
  * Otherwise, a pointer to the original string is returned and must not be
- * freed by the caller */
+ * freed by the caller
+ * ret = format_sel_name(str)
+ * if (ret && ret != str)
+ *     free(ret); */
 static char *
 format_sel_name(char *str)
 {
