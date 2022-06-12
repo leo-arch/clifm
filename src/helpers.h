@@ -212,6 +212,13 @@ extern int watch;
 #define R_OTH (1 << 5)
 #define X_OTH (1 << 6)
 
+/* Flag to control the search function behavior */
+#define NO_GLOB_CHAR (1 << 0)
+/* Search strategy */
+#define GLOB_ONLY  0
+#define REGEX_ONLY 1
+#define GLOB_REGEX 2
+
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
@@ -926,7 +933,8 @@ extern struct termios orig_termios;
 extern int
 	curcol,
 	currow,
-	flags;
+	flags,
+	search_flags;
 
 extern int
 	auto_open,
@@ -1002,6 +1010,7 @@ extern int
 	rl_last_word_start,
 	rl_nohist,
 	rl_notab,
+	search_strategy,
 	sel_is_last,
 	selfile_ok,
 	share_selbox,

@@ -8,7 +8,9 @@
 # Commented and empty lines are ignored
 
 # Color schemes (or just themes) are stored in the colors directory
-# ($HOME/.config/clifm/colors)
+# ($XDG_DATA_DIRS/clifm/colors, usually /usr/local/share/clifm/colors
+# or /usr/share/clifm/colors). You can place your custom themes in
+# $HOME/.config/clifm/colors
 #
 # Use the 'cs' command or the '--color-scheme' command line option to set
 # a theme
@@ -18,9 +20,7 @@
 # Each theme includes color definitions, just as definitions for the
 # prompt, the warning prompt, the dividing line, and the FZF window
 #
-# Available themes: base16, default, dracula, dracula-vivid, gruvbox,
-# jellybeans-vivid, light, molokai, nocolor, nord, one-dark, solarized,
-# zenburn
+# Use TAB to list available themes: 'cs TAB'
 #
 # Visit https://github.com/leo-arch/clifm-colors to get some extra themes
 ColorScheme=default
@@ -130,6 +130,10 @@ SuggestionStrategy=ehfjbac
 SuggestFiletypeColor=false
 
 SyntaxHighlighting=true
+
+# We have three search strategies: 0 = glob-only, 1 = regex-only,
+# and 2 = glob-regex
+#SearchStrategy=2
 
 # If set to true, expand bookmark names into the corresponding bookmark
 # path: if the bookmark is "name=/path", "name" will be interpreted

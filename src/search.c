@@ -42,7 +42,7 @@
 #include "navigation.h"
 #include "sort.h"
 
-int
+static int
 check_glob_char(const char *str)
 {
 	size_t i;
@@ -170,7 +170,8 @@ search_glob(char **args, const int invert)
 	/* Search for globbing char */
 	int glob_char_found = check_glob_char(tmp);
 
-	/* If search string is just "STR" (no glob chars), change it to ".*STR.*" */
+	/* If search string is just "STR" (no glob chars), change it to either "*STR*"
+	 * (if search strategy is GLOB_ONLY), or ".*STR.*" */
 	if (glob_char_found == 0) {
 		size_t search_str_len = strlen(args[0]);
 
@@ -182,15 +183,28 @@ search_glob(char **args, const int invert)
 		size_t slen = strlen(tmp);
 		char *s = savestring(tmp, slen);
 
-		*(tmp + 1) = '.';
-		*(tmp + 2) = '*';
-		strcpy(tmp + 3, s + 1);
-		slen += 2;
-		tmp[slen] = '.';
-		tmp[slen + 1] = '*';
-		tmp[slen + 2] = '\0';
-		free(s);
-		return EXIT_FAILURE;
+		if (search_strategy != GLOB_ONLY) {
+			*(tmp + 1) = '.';
+			*(tmp + 2) = '*';
+			strcpy(tmp + 3, s + 1);
+			slen += 2;
+			tmp[slen] = '.';
+			tmp[slen + 1] = '*';
+			tmp[slen + 2] = '\0';
+			free(s);
+			search_flags |= NO_GLOB_CHAR;
+			/* Let's return here to perform a regex search (if called from
+			 * search_function(), in search.c) */
+			return EXIT_FAILURE;
+		} else {
+			*(tmp + 1) = '*';
+			strcpy(tmp + 2, s + 1);
+			slen++;
+			tmp[slen] = '*';
+			tmp[slen + 1] = '\0';
+			free(s);
+			search_str = tmp + 1;
+		}
 	} else {
 		search_str = tmp + 1;
 	}
@@ -199,7 +213,7 @@ search_glob(char **args, const int invert)
 	glob_t globbed_files;
 	int ret = glob(search_str, GLOB_BRACE, NULL, &globbed_files);
 	if (ret != 0) {
-		puts(_("Glob: No matches found. Trying regex..."));
+/*		puts(_("Glob: No matches found. Trying regex...")); */
 		globfree(&globbed_files);
 
 		if (search_path) {
@@ -434,7 +448,7 @@ SCANDIR_ERROR:
 	}
 	tab_offset = t;
 
-	printf(_("Matches found: %d\n"), found);
+	printf(_("Matches found: %d%s\n"), found, search_strategy != GLOB_ONLY ? " (glob)" : "");
 
 END:
 	/* Free stuff */
@@ -645,7 +659,12 @@ search_regex(char **args, const int invert, const int case_sens)
 	regfree(&regex_files);
 
 	if (found == 0) {
-		fprintf(stderr, _("No matches found\n"));
+		if (search_flags & NO_GLOB_CHAR) {
+			search_flags &= ~NO_GLOB_CHAR;
+			fprintf(stderr, _("%s: search: No matches found\n"), PROGRAM_NAME);
+		} else {
+			fprintf(stderr, _("No matches found\n"));
+		}
 		free(regex_index);
 
 		if (search_path) {
@@ -805,4 +824,27 @@ search_regex(char **args, const int invert, const int case_sens)
 	}
 
 	return type_ok != 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+/* We have three search strategies:
+ * 1 - Only glob
+ * 2 - Only regex
+ * 3 - Glob-regex */
+int
+search_function(char **args)
+{
+	if (search_strategy != REGEX_ONLY) {
+		int ret = search_glob(args, (args[0][1] == '!') ? 1 : 0);
+		if (ret != EXIT_FAILURE)
+			return ret;
+		if (search_strategy == GLOB_ONLY) {
+			puts(_("search: No matches found"));
+			return EXIT_FAILURE;
+		}
+		if (!(search_flags & NO_GLOB_CHAR))
+			puts(_("Glob: No matches found. Trying regex..."));
+	}
+
+	return search_regex(args, (args[0][1] == '!') ? 1 : 0,
+		case_sens_search == 1 ? 1 : 0);
 }

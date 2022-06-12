@@ -105,7 +105,8 @@ unsigned short term_cols;
 
 int curcol = 0,
 	currow = 0,
-	flags = 0;
+	flags = 0,
+	search_flags = 0;
 
 struct termios
 	orig_termios,
@@ -193,6 +194,7 @@ int
 	rl_last_word_start = 0,
 	rl_nohist = 0,
 	rl_notab = 0,
+	search_strategy = UNSET,
 	sel_is_last = 0,
 	selfile_ok = 1,
 	share_selbox = UNSET,

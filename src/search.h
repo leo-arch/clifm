@@ -25,7 +25,7 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-int check_glob_char(const char *str);
+int search_function(char **args);
 int search_glob(char **args, const int invert);
 int search_regex(char **args, const int invert, const int case_sens);
 

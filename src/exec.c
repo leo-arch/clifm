@@ -1367,18 +1367,6 @@ desel_function(char **args)
 }
 
 static int
-search_function(char **args)
-{
-	/* Try first globbing, and if no result, try regex */
-	int ret = search_glob(args, (args[0][1] == '!') ? 1 : 0);
-	if (ret != EXIT_FAILURE)
-		return ret;
-
-	return search_regex(args, (args[0][1] == '!') ? 1 : 0,
-		case_sens_search ? 1 : 0);
-}
-
-static int
 new_instance_function(char **args)
 {
 	int exit_status = EXIT_SUCCESS;

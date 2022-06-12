@@ -261,7 +261,11 @@ xf=01;31:xs=00;32:"
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
 
-#define DEF_BELL_STYLE     BELL_VISIBLE /* BELL_NONE, BELL_AUDIBLE, BELL_VISIBLE, BELL_FLASH */
+/* We have three search strategies: GLOB_ONLY, REGEX_ONLY, GLOB_REGEX */
+#define DEF_SEARCH_STRATEGY GLOB_REGEX
+
+/* Four bell styles: BELL_NONE, BELL_AUDIBLE, BELL_VISIBLE, BELL_FLASH */
+#define DEF_BELL_STYLE     BELL_VISIBLE
 #define VISIBLE_BELL_DELAY 30 /* Milliseconds */
 
 #define __DEF_CP_CMD "cp -iRp"

@@ -848,6 +848,10 @@ SuggestFiletypeColor=%s\n\n"
 
 "SyntaxHighlighting=%s\n\n"
 
+		"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
+# and 2 = glob-regex\n\
+SearchStrategy=%d\n\n"
+
 	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
 # path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
 # as /path. TAB completion is also available for bookmark names.\n\
@@ -880,6 +884,7 @@ LightMode=%s\n\n",
 		DEF_SUG_STRATEGY,
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
 		DEF_HIGHLIGHT == 1 ? "true" : "false",
+		DEF_SEARCH_STRATEGY,
 		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
 		DEF_LIGHT_MODE == 1 ? "true" : "false"
 		);
@@ -1485,6 +1490,20 @@ END:
 	listing_mode = DEF_LISTING_MODE;
 }
 
+static void
+set_search_strategy(char *line)
+{
+	char *p = strchr(line, '=');
+	if (!p || !*p || !*(++p))
+		return;
+	switch(*p) {
+	case '0': search_strategy = GLOB_ONLY; break;
+	case '1': search_strategy = REGEX_ONLY; break;
+	case '2': search_strategy = GLOB_REGEX; break;
+	default: break;
+	}
+}
+
 static inline int
 set_max_filename_len(const char *line)
 {
@@ -1843,6 +1862,10 @@ read_config(void)
 
 		else if (*line == 'R' && strncmp(line, "RlEditMode=0", 12) == 0) {
 			rl_vi_editing_mode(1, 0); /* Readline defaults to emacs */
+		}
+
+		else if (*line == 'S' && strncmp(line, "SearchStrategy=", 15) == 0) {
+			set_search_strategy(line);
 		}
 
 		else if (xargs.share_selbox == UNSET && *line == 'S'

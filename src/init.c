@@ -2590,6 +2590,9 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (search_strategy == UNSET)
+		search_strategy = DEF_SEARCH_STRATEGY;
+
 	if (xargs.eln_use_workspace_color == UNSET)
 		xargs.eln_use_workspace_color = DEF_ELN_USE_WORKSPACE_COLOR;
 
