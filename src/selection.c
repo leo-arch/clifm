@@ -1171,8 +1171,7 @@ end_deselect(const int err, char ***args)
 	if (sel_n && argsbk == 0 && deselect(*args) != 0)
 		exit_status = EXIT_FAILURE;
 
-	if (err)
-		return EXIT_FAILURE;
+	if (err) return EXIT_FAILURE;
 
 	if (autols == 1 && exit_status == EXIT_SUCCESS)
 		reload_dirlist();

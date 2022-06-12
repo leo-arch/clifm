@@ -299,9 +299,7 @@ rl_ring_bell(void)
 {
 	switch(bell) {
 	case BELL_AUDIBLE:
-		fputs("\007", stderr);
-		fflush(stderr);
-		return;
+		fputs("\007", stderr); fflush(stderr); return;
 
 	case BELL_FLASH:
 		fputs(SET_RVIDEO, stderr);
@@ -335,8 +333,6 @@ rl_ring_bell(void)
 	case BELL_NONE: /* fallthrough */
 	default: return;
 	}
-
-	return;
 }
 
 /* The following three functions were taken from

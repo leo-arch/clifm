@@ -452,8 +452,7 @@ get_last_word(char *str)
 }
 
 static inline int
-run_fzf(const size_t *height, const int *offset, const char *lw,
-		const int multi)
+run_fzf(const size_t *height, const int *offset, const char *lw, const int multi)
 {
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
 	 * file, let's define it ourselves */
@@ -495,7 +494,11 @@ run_fzf(const size_t *height, const int *offset, const char *lw,
 				finder_in_file, finder_out_file);
 	}
 
-	return launch_execle(cmd);
+	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
+	flags &= ~DELAYED_REFRESH;
+	int ret = launch_execle(cmd);
+	if (dr == 1) flags |= DELAYED_REFRESH;
+	return ret;
 }
 
 /* Set FZF window's max height. No more than MAX HEIGHT entries will

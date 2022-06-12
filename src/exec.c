@@ -418,7 +418,7 @@ launch_execve(char **cmd, const int bg, const int xflags)
 
 	/* Get command status (pid > 0) */
 	else {
-		if (bg) {
+		if (bg == 1) {
 			ret = run_in_background(pid);
 		} else {
 //			flags |= RUNNING_CMD_FG;
@@ -1629,7 +1629,7 @@ check_auto_second(char **args)
 		}
 	}
 
-	if (autocd && cdpath_n && !args[1]) {
+	if (autocd == 1 && cdpath_n > 0 && !args[1]) {
 		int ret = cd_function(tmp, CD_NO_PRINT_ERROR);
 		if (ret == EXIT_SUCCESS) {
 			free(tmp);
@@ -1648,13 +1648,11 @@ check_auto_second(char **args)
 
 	/* Regular, non-executable file, or exec file not in PATH
 	 * not ./file and not /path/to/file */
-	if (auto_open && S_ISREG(attr.st_mode)
+	if (auto_open == 1 && S_ISREG(attr.st_mode)
 	&& (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
 	|| (!is_bin_cmd(tmp) && !(*tmp == '.' && *(tmp + 1) == '/') && *tmp != '/' ) ) )
 		return auto_open_file(args, tmp);
-/*	if (auto_open && S_ISREG(attr.st_mode)
-	&& !(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)))
-		return auto_open_file(args, tmp); */
+
 	free(tmp);
 	return (-1);
 }

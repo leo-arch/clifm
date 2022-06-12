@@ -534,16 +534,11 @@ cschemes_function(char **args)
 		return EXIT_FAILURE;
 	}
 
-	if (!args)
-		return EXIT_FAILURE;
+	if (!args) return EXIT_FAILURE;
 
-	if (!args[1])
-		return print_cur_colorscheme();
+	if (!args[1]) return print_cur_colorscheme();
 
-	if (IS_HELP(args[1])) {
-		puts(_(CS_USAGE));
-		return EXIT_SUCCESS;
-	}
+	if (IS_HELP(args[1])) { puts(_(CS_USAGE)); return EXIT_SUCCESS;	}
 
 	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0))
 		return edit_colorscheme(args[2]);
