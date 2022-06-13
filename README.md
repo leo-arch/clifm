@@ -174,6 +174,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 * `version 1.6 - Guybrush`:
   - ELN's color defaults now to cyan
   - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectivelly. In the same way, the `folders-first` command was renamed to `dirs-first`.
+  - **NEW**: [Search strategies](https://github.com/leo-arch/clifm/wiki/Introduction#pattern--filetype--x-dir)
   - **NEW**: `-E`: ELN's use workspace color, `-r`: refresh the screen on empty line
   - **NEW**: TAB completion for users home directory (`~user`)
   - **NEW**: TAB completion for shell commands arguments. Try `ls -TAB`
