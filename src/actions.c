@@ -361,8 +361,10 @@ int
 actions_function(char **args)
 {
 	if (!args[1]) {
-		if (actions_n) {
+		if (actions_n > 0) {
 			/* Just list available actions */
+			printf(_("To run a plugin just enter its action name\n"
+				"Example: enter '-' to run the fzfnav plugin\n"));
 			size_t i, largest = get_largest_action_name();
 			for (i = 0; i < actions_n; i++) {
 				printf("%-*s %s->%s %s\n", (int)largest, usr_actions[i].name,
@@ -371,7 +373,7 @@ actions_function(char **args)
 			return EXIT_SUCCESS;
 		} else {
 			puts(_("actions: No actions defined. Use the 'actions "
-			       "edit' command to add some"));
+			       "edit' command to add new actions"));
 			return EXIT_FAILURE;
 		}
 
