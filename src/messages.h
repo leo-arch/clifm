@@ -266,10 +266,11 @@ Example:\n\
   Note: Press Alt-. to toggle hidden files on/off"
 
 #define HISTEXEC_USAGE "Access commands history entries\n\
-Usage: \
-!!: Execute the last command. \
-!n: Execute the command number 'n' in the history list. \
-!-n: Execute the last - n command in the history list."
+Usage:\n\
+history or !<TAB>: List available commands\n\
+!!: Execute the last command\n\
+!n: Execute the command number 'n' in the history list\n\
+!-n: Execute the last - n command in the history list"
 
 #define HISTORY_USAGE "List or access commands history entries\n\
 Usage:\n\
@@ -286,8 +287,8 @@ Examples:\n\
 - Print the last 4 commands in history:\n\
     history -4\n\n\
 You can also access the commands history via the exclamation mark (!):\n\
-- List/select available commands: \n\
-    !<TAB>\n\
+- List available commands: \n\
+    history\n\
 - Execute the last command: \n\
     !!\n\
 - Execute the command number 'n' in the history list:\n\

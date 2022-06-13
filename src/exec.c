@@ -1927,6 +1927,28 @@ bring_to_foreground(char *str)
 	return EXIT_SUCCESS;
 } */
 
+/* Print the current working directory. Try first our own internal representation
+ * (workspaces array). If something went wrong, fallback to getcwd(3) */
+static int
+print_cwd(void)
+{
+	if (workspaces && workspaces[cur_ws].path) {
+		printf("%s\n", workspaces[cur_ws].path);
+		return EXIT_SUCCESS;
+	}
+
+	char p[PATH_MAX];
+	*p = '\0';
+	char *buf = getcwd(p, sizeof(p));
+	if (!buf) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		return errno;
+	}
+
+	printf("%s\n", p);
+	return EXIT_SUCCESS;
+}
+
 /* Return 1 if STR is a path, zero otherwise */
 static int
 is_path(char *str)
@@ -2238,8 +2260,13 @@ exec_cmd(char **comm)
 
 	/*      ############## HISTORY ##################     */
 	else if (*comm[0] == '!' && comm[0][1] != ' ' && comm[0][1] != '\t'
-	&& comm[0][1] != '\n' && comm[0][1] != '=' && comm[0][1] != '(')
+	&& comm[0][1] != '\n' && comm[0][1] != '=' && comm[0][1] != '(') {
+		if (comm[1] && IS_HELP(comm[1])) {
+			printf("%s\n", HISTEXEC_USAGE);
+			return EXIT_SUCCESS;
+		}
 		exit_code = run_history_cmd(comm[0] + 1);
+	}
 
 	/*    ############### BATCH LINK ##################     */
 	else if (*comm[0] == 'b' && comm[0][1] == 'l' && !comm[0][2])
@@ -2451,16 +2478,16 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "commands") == 0))
 		return (exit_code = list_commands());
 
-	/* These functions just print stuff, so that the value of exit_code
-	 * is always zero, that is to say, success */
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) {
-		printf("%s\n", workspaces[cur_ws].path); return EXIT_SUCCESS;
+		return (exit_code = print_cwd());
 	}
 
 	else if ((*comm[0] == '?' && !comm[0][1]) || strcmp(comm[0], "help") == 0) {
-		quick_help(); return EXIT_SUCCESS;
+		return (exit_code = quick_help());
 	}
 
+	/* These functions just print stuff, so that the value of exit_code
+	 * is always zero, that is to say, success */
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "colors") == 0)) {
 		colors_function(comm[1]); return EXIT_SUCCESS;

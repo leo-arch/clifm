@@ -592,7 +592,7 @@ run_history_cmd(const char *cmd)
 		return run_last_hist_cmd();
 
 	/* If "!-n" */
-	if (*cmd == '-')
+	if (*cmd == '-' && *(cmd + 1) && is_number(cmd + 1))
 		return run_last_lessn_hist_cmd(cmd);
 
 	/* If !STRING */

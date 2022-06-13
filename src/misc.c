@@ -1859,10 +1859,8 @@ quick_help(void)
 	}
 
 	char tmp_file[PATH_MAX];
-	if (xargs.stealth_mode == 1)
-		snprintf(tmp_file, PATH_MAX - 1, "%s/%s", P_tmpdir, TMP_FILENAME);
-	else
-		snprintf(tmp_file, PATH_MAX - 1, "%s/%s", tmp_dir, TMP_FILENAME);
+	snprintf(tmp_file, PATH_MAX - 1, "%s/%s", xargs.stealth_mode == 1
+		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {
@@ -1896,7 +1894,7 @@ quick_help(void)
 	free(_pager);
 
 	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+		return ret;
 
 	if (autols == 1)
 		reload_dirlist();
