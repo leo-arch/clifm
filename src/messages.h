@@ -47,7 +47,7 @@ Example:\n\
 - List available aliases:\n\
     alias\n\
   or\n\
-    alias ls\n\
+    alias ls (or 'alias <TAB>')\n\
 - Print a specific alias:\n\
     alias my_alias\n\
 - Import aliases from ~/.bashrc:\n\
@@ -60,7 +60,7 @@ Examples:\n\
 - Compress/archive all selected files:\n\
     ac sel\n\
 - Compress/archive a range of files:\n\
-    ac 12-24\n\
+    ac 12-24 (or 'ac <TAB>' to choose from a list; multi-selection is allowed)\n\
 - Decompress/dearchive a file:\n\
     ad file.tar.gz"
 
@@ -82,7 +82,9 @@ Examples:\n\
 - Print the directory history list:\n\
     bh\n\
 - Change to the directory whose ELN in the list is 24:\n\
-    b !24"
+    b !24\n\
+- Use the 'f' command to go forward:\n\
+    f (Alt-k or Shift-Right also work)"
 
 #define BD_USAGE "Quickly change to a parent directory matching NAME. If \
 NAME is not specified, print the list of all parent directories\n\
@@ -90,7 +92,7 @@ Usage:\n\
   bd [NAME]\n\n\
 Example:\n\
 - Supposing you are in ~/Documents/misc/some/deep/dir, change to ~/Documents/misc:\n\
-    bd mi"
+    bd mi (or 'bd <TAB>' to choose from a list)"
 
 #define BL_USAGE "Create multiple symbolic links at once\n\
 Usage:\n\
@@ -115,7 +117,7 @@ Examples:\n\
 - Bookmark the directory /media/mount:\n\
     bm a /media/mount\n\
   Note: Make sure to create a simple shortcut, like 'mnt'. Then you can change to it as follows:\n\
-    bm mnt\n\
+    bm mnt (or 'bm <TAB>' to choose from a list)\n\
 - Remove a bookmark:\n\
     bm d mnt\n\
 - Edit the bookmarks file manually:\n\
@@ -128,7 +130,7 @@ Usage:\n\
   br, bulk ELN/FILE ...\n\n\
 Examples:\n\
 - Bulk rename all files ending with .pdf in the current directory:\n\
-    br *.pdf\n\
+    br *.pdf (or 'br <TAB> to choose from a list; mutli-selection is allowed')\n\
 - Bulk rename all selected files:\n\
     br sel"
 
@@ -153,6 +155,8 @@ Usage:\n\
 Usage:\n\
   cs, colorschemes [edit [APP]] [COLORSCHEME]\n\n\
 Examples:\n\
+- List available color schemes:\n\
+    cs (or 'cs <TAB>')\n\
 - Edit the current color scheme:\n\
     cs edit\n\
 - Edit the current color scheme using vi:\n\
@@ -167,7 +171,7 @@ Examples:\n\
 - Deselect all selected files:\n\
     ds * (or Alt-d)\n\
 - Deselect files from a menu:\n\
-    ds"
+    ds (or 'ds <TAB>' to choose from a list; multi-selection is allowed)"
 
 #define DIRHIST_USAGE "List or access entries in the directory history list\n\
 Usage:\n\
@@ -245,7 +249,9 @@ Examples:\n\
 - Print the directory history list:\n\
     fh\n\
 - Change to the directory whose ELN in the list is 24:\n\
-    f !24"
+    f !24\n\
+- Use the 'b' command to go backwards:\n\
+    b (Alt-j or Shift-Left also work)""
 
 #define FZ_USAGE "Toggle full directory size on/off (only for long view mode)\n\
 Usage:\n\
@@ -280,6 +286,8 @@ Examples:\n\
 - Print the last 4 commands in history:\n\
     history -4\n\n\
 You can also access the commands history via the exclamation mark (!):\n\
+- List/select available commands: \n\
+    !<TAB>\n\
 - Execute the last command: \n\
     !!\n\
 - Execute the command number 'n' in the history list:\n\
@@ -307,6 +315,7 @@ Examples:\n\
 - If not enough, use multiple query strings:\n\
     j ho bui\n\
     Note: Most likey, this will take you to /home/build\n\
+    Note 2: Try TAB to get a list of possible matches: 'j bui<TAB>'\n\
 - Change to any visited directory that is PARENT of the current directory and contains the string 'str':\n\
     jp str\n\
 - Change to any visited directory that is CHILD of the current directory and contains the string 'str':\n\
@@ -400,17 +409,19 @@ Usage:\n\
   net [NAME] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\n\
 Examples:\n\
 - List available remote resources (like SSHFS or samba):\n\
-    net\n\
+    net (or 'net <TAB>')\n\
 - Mount the remote resource named 'work'\n\
-    net work (or 'net m work' or 'net mount work')\n\
+    net work (or 'net m work', 'net mount work', or 'net m <TAB>')\n\
 - Unmount the remote resource named 'work'\n\
-    net u work (or 'net unmount work')\n\
+    net u work (or 'net unmount work' or 'net u <TAB>')\n\
 - Open/edit the net configuration file:\n\
     net edit\n\
 - Open/edit the net configuration file using nano:\n\
-    net edit nano"
+    net edit nano\n\
+- Copy a file to a remote location via the cprm plugin:\n\
+    cr FILE"
 
-#define NEW_USAGE "Create a new file or directory\n\
+#define NEW_USAGE "Create a new file and/or directory\n\
 Usage:\n\
   n, new [FILE DIR/ ...n]\n\n\
 Examples:\n\
@@ -439,7 +450,7 @@ Usage:\n\
   ow ELN/FILE\n\n\
 Example:\n\
 - Choose opening application for test.c from a menu:\n\
-    ow test.c\n\
+    ow test.c (or 'ow test.c <TAB>')\n\
 - Open the file test.c with geany:\n\
     ow test.c geany\n\
    Note: Type 'ow test.c' and then press TAB to get a list of applications able to open this file"
@@ -455,7 +466,8 @@ Example:\n\
 
 #define PAGER_USAGE "Set the files list pager on-off\n\
 Usage:\n\
-  pg, pager [on, off, status]"
+  pg, pager [on, off, status]\n\
+Note: You can also try the 'pager' plugin running 'gg'"
 
 #define PIN_USAGE "Pin a file or directory\n\
 Usage:\n\
@@ -477,18 +489,18 @@ Examples:\n\
 - List available profiles:\n\
     pf ls\n\
 - Set profile to the profile named myprofile:\n\
-    pf set myprofile\n\
+    pf set myprofile (or 'pf set <TAB>' to choose from a list)\n\
 - Add a new profile named new_profile:\n\
     pf add new_profile\n\
 - Remove the profile named myprofile:\n\
-    pf del myprofile"
+    pf del myprofile (or 'pf del <TAB>' to choose from a list)"
 
 #define PROP_USAGE "Print files properties\n\
 Usage:\n\
   p, pr, pp, prop [ELN/FILE ... n]\n\n\
 Examples:\n\
 - Print the properties of the file whose ELN is 12:\n\
-    p 12\n\
+    p 12 (or 'p <TAB>' to choose from a list)\n\
 - Print the properties of all selected files:\n\
     p sel\n\
 - Print the properties of the directory 'dir' (including its total size):\n\
@@ -499,7 +511,7 @@ Usage:\n\
   prompt [NAME, edit, list, reload, unset]\n\
 Example:\n\
 - List available prompts:\n\
-    prompt list\n\
+    prompt list (or 'prompt <TAB>' to choose from a list)\n\
 - Change prompt to prompt named MYPROMPT:\n\
     prompt MYPROMPT\n\
 - Edit the prompts file:\n\
@@ -520,7 +532,7 @@ Examples:\n\
     rr\n\
 - Bulk remove files/dirs in the current directory using nano:\n\
     rr nano\n\
-- Bulk remove files/dirs in mydir/ using vi:\n\
+- Bulk remove files/dirs in the directory 'mydir' using vi:\n\
     rr mydir vi"
 
 #define SEL_USAGE "Select one or multiple files\n\
@@ -530,7 +542,7 @@ Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink, (s)ocket, \
 (f)ifo/pipe, (b)lock device, (c)haracter device\n\n\
 Examples:\n\
 - Select the file whose ELN is 12:\n\
-    s 12\n\
+    s 12 (or 's <TAB>' to choose from a list; multi-selection is allowed)\n\
 - Select all files ending with .odt:\n\
     s *.odt\n\
 - Select multiple files at once:\n\
@@ -545,8 +557,10 @@ Examples:\n\
     c sel\n\
 - Move selected files into the directory whose ELN is 24:\n\
     m sel 24\n\
-- Deselect all selected files\n\
-    ds * (or Alt-d)"
+- Deselect all selected files:\n\
+    ds * (or Alt-d)\n\
+- Deselect files selectively:\n\
+    ds <TAB> (multi-selection is allowed)"
 
 #define SORT_USAGE "Change sort method for the files list\n\
 Usage:\n\
@@ -557,7 +571,7 @@ Usage:\n\
 Note: Both numbers and names are allowed\n\n\
 Examples:\n\
 - List files by size:\n\
-    st size\n\
+    st size (or 'st <TAB>' to choose from a list)\n\
 - Revert the current sorting method (i.e. z-a instead of a-z):\n\
     st rev"
 
@@ -582,7 +596,7 @@ Examples:\n\
 - Tag all selected files as 'special':\n\
     ta sel :special\n\
 - List all files tagged as 'work' and all files tagged as 'documents':\n\
-    tl work documents\n\
+    tl work documents (or 'tl <TAB>' to choose from a list)\n\
 - Rename tag 'documents' as 'docs':\n\
     tm documents docs\n\
 - Merge tag 'png' into 'images':\n\
@@ -593,20 +607,22 @@ and the 'png' tag will be removed\n\
     td images\n\
 - Untag a few files from the 'work' tag:\n\
     tu :work file1 image.png dir2\n\
+    or\n\
+    tu :<TAB> (and then TAB again to select tagged files)\n\
 Operating on tagged files (t:TAG)\n\
 - Print the file properties of all files tagged as 'docs':\n\
-    p t:docs\n\
+    p t:docs (or 'p t:<TAB>' to choose from a list)\n\
 - Remove all files tagged as 'images':\n\
     r t:images\n\
 - Run stat(1) over all files tagged as 'work' and all files tagged as 'docs':\n\
     stat t:work t:docs\n\n\
 To operate only on some tagged files use TAB as follows:\n\
-    t:TAG<TAB>\n\
+    t:TAG<TAB> (multi-selection is allowed)\n\
 Mark the files you need, and then press Enter or right"
 
 #define TE_USAGE "Toggle the executable bit on files\n\
 Usage:\n\
-  te FILE(s)\n\n\
+  te FILE(s) (or 'te <TAB>' to choose from a list; multi-selection is allowed)\n\n\
 Examples:\n\
 - Set the executable bit on all shell scripts in the current directory:\n\
     te *.sh\n\
@@ -618,7 +634,7 @@ Usage:\n\
   t, tr, trash [ELN/FILE ... n] [ls, list] [clear, empty] [del]\n\n\
 Examples:\n\
 - Trash the file whose ELN is 12:\n\
-    t 12\n\
+    t 12 (or 't <TAB>' to choose from a list; multi-selection is allowed)\n\
 - Trash all files ending with .sh\n\
     t *.sh\n\
 - List currently trashed files:\n\
@@ -630,7 +646,7 @@ Examples:\n\
 - Untrash all trashed files (restore them to their original location):\n\
     u *\n\
 - Untrash files using a menu:\n\
-    u"
+    u (or 'u <TAB>' to choose from a list; multi-selection is allowed)"
 
 #define UNICODE_USAGE "Set unicode on-off\n\
 Usage:\n\
@@ -643,7 +659,7 @@ Examples:\n\
 - Untrash all trashed files (restore them to their original location):\n\
     u *\n\
 - Untrash files using a menu:\n\
-    u"
+    u (or 'u <TAB>' to choose from a list; multi-selection is allowed)"
 
 #define VV_USAGE "Copy selected files into a directory and rename them at once\n\
 Usage:\n\

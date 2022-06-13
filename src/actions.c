@@ -172,7 +172,6 @@ run_action(char *action, char **args)
 	if (pid == 0) {
 		/* Child: write-only end of the pipe */
 		int wfd = open(fifo_path, O_WRONLY | O_CLOEXEC);
-
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
 
@@ -245,7 +244,6 @@ run_action(char *action, char **args)
 		if (_cmd) {
 			size_t i;
 			char **alias_cmd = check_for_alias(_cmd);
-
 			if (alias_cmd) {
 				exit_status = exec_cmd(alias_cmd);
 				for (i = 0; alias_cmd[i]; i++)
@@ -286,7 +284,6 @@ edit_actions(char *app)
 
 	/* Get actions file's current modification time */
 	struct stat attr;
-
 	if (stat(actions_file, &attr) == -1) {
 		fprintf(stderr, "actions: %s: %s\n", actions_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -314,8 +311,7 @@ edit_actions(char *app)
 	if (mtime_bfr == (time_t)attr.st_mtime)
 		return EXIT_SUCCESS;
 
-	/* If modification times differ, the file was modified after being
-	 * opened */
+	/* If modification times differ, the file was modified after being opened */
 	/* Reload the array of available actions */
 	if (load_actions() != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -325,7 +321,6 @@ edit_actions(char *app)
 		size_t i;
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
-
 		free(bin_commands);
 		bin_commands = (char **)NULL;
 	}
