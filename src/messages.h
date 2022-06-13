@@ -99,7 +99,7 @@ Usage:\n\
   bl FILE(s)\n\n\
 Example:\n\
 - Symlink files file1 file2 file3 and file4 at once:\n\
-    bl file*"
+    bl file* (or 'bl <TAB>' to choose from a list; multi-selection is allowed)"
 
 #define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\
 Usage:\n\

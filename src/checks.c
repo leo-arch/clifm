@@ -487,6 +487,7 @@ is_internal_f(const char *restrict cmd)
 		{"ac", 2},
 		{"ad", 2},
 		{"bb", 2},
+		{"bl", 2},
 		{"bleach", 6},
 		{"bm", 2},
 		{"bookmarks", 9},
