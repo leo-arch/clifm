@@ -251,7 +251,7 @@ Examples:\n\
 - Change to the directory whose ELN in the list is 24:\n\
     f !24\n\
 - Use the 'b' command to go backwards:\n\
-    b (Alt-j or Shift-Left also work)""
+    b (Alt-j or Shift-Left also work)"
 
 #define FZ_USAGE "Toggle full directory size on/off (only for long view mode)\n\
 Usage:\n\
