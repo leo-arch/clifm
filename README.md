@@ -209,7 +209,7 @@ Consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduct
 
 To start using _CliFM_ **you don't need to learn anything new**: the usual shell commands will just work. However, there is much more that just shell commands... \
 The `help` command gives you a quick introduction to _CliFM_: once in the _CliFM_ prompt, type `help` or `?`. \
-Type `help` and then press <kbd>TAB</kbd> to get a list of help topics. Select the one you want and press <kbd>Enter</kbd> \
+Type `help` and then press <kbd>TAB</kbd> to get a list of _help topics_. Select the one you want and press <kbd>Enter</kbd>. \
 To jump into the **COMMANDS** section in the manpage, simply enter `cmd` or press <kbd>F2</kbd>. \
 Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page. \
 To get help about some specific command just type `CMD -h`. For instance, `s -h`.
