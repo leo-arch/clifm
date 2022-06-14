@@ -458,11 +458,11 @@ By default, regular expressions (and thereby expressions containing no metachara
 .sp
 To search for files in any directory other than the current one, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter \fI/^A\ 7\fR to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
-The result of the search could be further filtered by specifying a filter type: \-d, \-r, \-l, \-s, \-f, \-b, and \-c (directory, regular file, symbolic link, socket, FIFO/pipe, block device, and character device respectively. For example, \fI/[.-].*d$\ \-d Documents/\fR will list all directories containing a dot or a dash and ending with 'd' in the directory named "Documents".
+The result of the search could be further filtered by specifying a filter type: \-b, \-c, \-d, \-f, \-l, \-p, and \-s (block device, character device, directory, regular file, symbolic link, FIFO/pipe, and socket respectively. For example, \fI/[.-].*d$\ \-d Documents/\fR will list all directories containing a dot or a dash and ending with 'd' in the directory named \fIDocuments\fR.
 .sp
 The quick search function also supports invert search: prepend the exclamation mark (!) to negate a given search pattern. For example: \fI!.*s$\ -d\ /etc\fR will match all directories in \fI/etc\fR NOT ending with 's', just as \fI!D*\fR will match all files in the current directory NOT starting with 'D'.
 .sp
-To perform a recursive search use the -x parameter, and, optionally, a search path (DIR). The search will be performed using \fIfind\fR as follows: \fIfind\ DIR\ -name\ PATTERN\fR. If no search path is provided, the search is executed starting in the current directory. Otherwise, the search starts in DIR.
+To perform a recursive search use the -x parameter, and, optionally, a search path (DIR) (file type filter is not allowed). The search will be performed using \fIfind\fR as follows: \fIfind\ DIR\ -name\ PATTERN\fR. If no search path is provided, the search is executed starting in the current directory. Otherwise, the search starts in DIR.
 .TP
 .B ;\fR[\fICMD\fR], \fB:\fR[\fICMD\fR]
 If no CMD, run the system shell in the current working directory. If CMD is specified, skip all \fBclifm\fR expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (CMD) as is via the default system shell.
@@ -687,7 +687,7 @@ With no argument, \fIj\fR just lists the entries in the jump database, printing 
 .sp
 Multiple query strings could be passed to the function. For example, \fIj\ et\ mo\fR will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the best ranked match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
 .sp
-The backslash (\\) and the slash (/) could be used to instruct \fBKangaroo\fR to search for the string query only in the first or last path segment of each entry in the database respectivelly. Let's suppose we have two entries matching \fBsrc\fR in the database: \fI/media/src/images\fR and \fI/home/user/Downloads/clifm/src\fR. If the first entry is better ranked than the second, \fIj src\fR will match this first entry. However, if what we really want is the second entry, appending a slash to the query string instructs \fBKangaroo\fR to only match entries having src in the last path segment, here \fI/home/user/Downloads/clifm/src\fR.
+The backslash (\\) and the slash (/) could be used to instruct \fBKangaroo\fR to search for the string query only in the first or last path segment of each entry in the database respectively. Let's suppose we have two entries matching \fBsrc\fR in the database: \fI/media/src/images\fR and \fI/home/user/Downloads/clifm/src\fR. If the first entry is better ranked than the second, \fIj src\fR will match this first entry. However, if what we really want is the second entry, appending a slash to the query string instructs \fBKangaroo\fR to only match entries having src in the last path segment, here \fI/home/user/Downloads/clifm/src\fR.
 .sp
 Since it is not always obvious or easy to know where exactly a query string will take you, \fBclifm\fR (if the suggestions system is enabled) will print, at the right of the cursor, the path matched by \fBKangaroo\fR. If that is the actually intended path, just press the Right arrow key to accept the suggestion. Otherwise, it will be ignored. You can also use TAB completion to print the list of matches for the current query string. For example: \fIj - c<TAB>\fR to list all entries in the directory history list containing a dash (-) and a 'c'.
 .sp
@@ -1580,7 +1580,7 @@ This MIME list file follows a few simple syntax rules:
 .TP
 Each line in the MIME list file consists of:
 .TP
-\fBa)\fR 'X' or '!X' to specify GUI and non-GUI environments respectivelly;
+\fBa)\fR 'X' or '!X' to specify GUI and non-GUI environments respectively;
 .TP
 \fBb)\fR 'N' to instruct \fILira\fR to match a file name instead of a MIME type;
 .TP
