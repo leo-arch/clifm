@@ -29,6 +29,14 @@
 #define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOrsStuUvxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
+#define FILE_ATTRIBUTES "List file attributes\n\
+- Toggle long/detail view mode:\n\
+    Alt-l\n\
+- Print properties of the file whose ELN is 4:\n\
+    p4\n\
+- Print file properties, including directory full size:\n\
+    pp DIR"
+
 #define ACTIONS_USAGE "List or edit actions/plugins\n\
 Usage:\n\
   actions [edit [APP]]\n\n\
@@ -62,7 +70,9 @@ Examples:\n\
 - Compress/archive a range of files:\n\
     ac 12-24 (or 'ac <TAB>' to choose from a list; multi-selection is allowed)\n\
 - Decompress/dearchive a file:\n\
-    ad file.tar.gz"
+    ad file.tar.gz\n\
+  Or just open the file and CliFM will prompt the appropriate menu:\n\
+    o file.tar.gz (or just 'file.tar.gz')"
 
 #define AUTOCD_USAGE "Turn autocd on-off\n\
 Usage:\n\
@@ -779,7 +789,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -i, --no-case-sensitive\t No case-sensitive files listing (default)\
 \n  -I, --case-sensitive\t\t Case-sensitive files listing\
 \n  -k, --keybindings-file=FILE\t Specify an alternative keybindings file\
-\n  -l, --no-long-view\t\t Disable long view mode (default)\
+\n  -l, --no-long-view\t\t Disable long/detail view mode (default)\
 \n  -L, --long-view\t\t Enable long view mode\
 \n  -m, --dihist-map\t\t Enable the directory history map\
 \n  -o, --no-autols\t\t Do not list files automatically\
@@ -949,7 +959,7 @@ parameters.\n\n\
  M-c: Clear the current command line buffer\n\
  M-g: Toggle list-dirs-first on/off\n\
  C-r: Refresh the screen\n\
- M-l: Toggle long view mode on/off\n\
+ M-l: Toggle long/detail view mode on/off\n\
  M-m: List mountpoints\n\
  M-t: Clear messages\n\
  M-h: Show directory history\n\

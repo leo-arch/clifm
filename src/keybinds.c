@@ -801,7 +801,7 @@ rl_long(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	long_view = long_view ? 0 : 1;
+	long_view = long_view == 1 ? 0 : 1;
 
 	if (autols == 1) {
 		free_dirlist();

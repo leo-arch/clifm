@@ -46,7 +46,7 @@ int new_instance(char *dir, int sudo);
 int print_reload_msg(const char *, ...);
 int pin_directory(char *dir);
 void print_tips(int all);
-int quick_help(void);
+int quick_help(char *topic);
 void save_last_path(void);
 /* void save_pinned_dir(void); */
 /*int set_shell(char *str); */

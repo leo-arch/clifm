@@ -1986,23 +1986,22 @@ options_generator(const char *text, int state)
 		_opts[0] = "edit"; _opts[1] = "clear"; _opts[2] = "on";
 		_opts[3] = "off"; _opts[4] = "status"; _opts[5] = NULL;
 	/* help topics */
-/*	} else if (*l == 'h' && l[1] == 'e' && strncmp(l, "help ", 5) == 0) {
-		_opts[0] = "archives"; // ac, ad
-		_opts[1] = "basics"; // Run ? and consult BASIC FILE OPERATIONS
-		_opts[2] = "bookmarks"; // bm
-		_opts[3] = "file-tags"; // tag --help
-		_opts[4] = "modes"; // WRITE IT!
-		_opts[5] = "navigation"; // Run ? and consult NAVIGATION
-		_opts[6] = "plugins"; // actions
-		_opts[7] = "profiles"; // pf
-		_opts[8] = "remotes"; // net
+	} else if (*l == 'h' && l[1] == 'e' && strncmp(l, "help ", 5) == 0) {
+		_opts[0] = "archives";
+		_opts[1] = "basics";
+		_opts[2] = "bookmarks";
+		_opts[3] = "file-attributes";
+		_opts[4] = "file-tags";
+		_opts[5] = "navigation";
+		_opts[6] = "plugins";
+		_opts[7] = "profiles";
+		_opts[8] = "remotes";
 		_opts[9] = "resource-opener";
-		_opts[10] = "selection"; // run sel --help
-		_opts[11] = "search"; // WRITE IT!
-		_opts[12] = "theming"; // cs, prompt, edit
-		_opts[13] = "trash"; // trash
-		_opts[14] = "workspaces"; // ws
-		_opts[15] = NULL; */
+		_opts[10] = "selection";
+		_opts[11] = "search";
+		_opts[12] = "theming";
+		_opts[13] = "trash";
+		_opts[14] = NULL;
 	/* b, f */
 	} else if ((*l == 'b' && l[1] == ' ') || (*l == 'f' && l[1] == ' ')) {
 		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;

@@ -2484,7 +2484,7 @@ exec_cmd(char **comm)
 	}
 
 	else if ((*comm[0] == '?' && !comm[0][1]) || strcmp(comm[0], "help") == 0) {
-		return (exit_code = quick_help());
+		return (exit_code = quick_help(comm[1] ? comm[1] : NULL));
 	}
 
 	/* These functions just print stuff, so that the value of exit_code

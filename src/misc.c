@@ -1842,9 +1842,147 @@ get_pager(void)
 	return _pager;
 }
 
-int
-quick_help(void)
+/* Help topics */
+static void
+print_more_info(void)
 {
+	puts(_("For more information consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)"));
+}
+
+static int
+print_archives_topic(void)
+{
+	puts(ARCHIVE_USAGE); return EXIT_SUCCESS;
+}
+
+static int
+print_basics_topic(void)
+{
+	puts(_("Run '?' and consult the BASIC FILE OPERATIONS section"));
+	return EXIT_SUCCESS;
+}
+
+static int
+print_bookmarks_topic(void)
+{
+	puts(BOOKMARKS_USAGE); return EXIT_SUCCESS;
+}
+
+static int
+print_file_tags_topic(void)
+{
+	puts(TAG_USAGE); return EXIT_SUCCESS;
+}
+
+static int
+print_file_attributes_topic(void)
+{
+	puts(FILE_ATTRIBUTES);
+	return EXIT_SUCCESS;
+}
+
+static int
+print_navigation_topic(void)
+{
+	puts(_("Run '?' and consult the NAVIGATION section"));
+	return EXIT_SUCCESS;
+}
+
+static int
+print_plugins_topic(void)
+{
+	puts(ACTIONS_USAGE);
+	putchar('\n');
+	print_more_info();
+	return EXIT_SUCCESS;
+}
+
+static int
+print_profiles_topic(void)
+{
+	puts(PROFILES_USAGE); return EXIT_SUCCESS;
+}
+
+static int
+print_remotes_topic(void)
+{
+	puts(NET_USAGE); return EXIT_SUCCESS;
+}
+
+static int
+print_resource_opener_topic(void)
+{
+	puts(MIME_USAGE); return EXIT_SUCCESS;
+}
+
+static int
+print_selection_topic(void)
+{
+	puts(SEL_USAGE); return EXIT_SUCCESS;
+}
+
+static int
+print_search_topic(void)
+{
+	puts(SEARCH_USAGE); return EXIT_SUCCESS;
+}
+
+static int
+print_theming_topic(void)
+{
+	puts(_("Take a look at the colorscheme, prompt, and edit commands"));
+	print_more_info();
+	return EXIT_SUCCESS;
+}
+
+static int
+print_trash_topic(void)
+{
+	puts(TRASH_USAGE); return EXIT_SUCCESS;
+}
+
+static int
+run_help_topic(char *topic)
+{
+	if (*topic == 'a' && strcmp(topic, "archives") == 0)
+		return print_archives_topic();
+	if (*topic == 'b' && strcmp(topic, "basics") == 0)
+		return print_basics_topic();
+	if (*topic == 'b' && strcmp(topic, "bookmarks") == 0)
+		return print_bookmarks_topic();
+	if (*topic == 'f' && strcmp(topic, "file-attributes") == 0)
+		return print_file_attributes_topic();
+	if (*topic == 'f' && strcmp(topic, "file-tags") == 0)
+		return print_file_tags_topic();
+	if (*topic == 'n' && strcmp(topic, "navigation") == 0)
+		return print_navigation_topic();
+	if (*topic == 'p' && strcmp(topic, "plugins") == 0)
+		return print_plugins_topic();
+	if (*topic == 'p' && strcmp(topic, "profiles") == 0)
+		return print_profiles_topic();
+	if (*topic == 'r' && strcmp(topic, "remotes") == 0)
+		return print_remotes_topic();
+	if (*topic == 'r' && strcmp(topic, "resource-opener") == 0)
+		return print_resource_opener_topic();
+	if (*topic == 's' && strcmp(topic, "selection") == 0)
+		return print_selection_topic();
+	if (*topic == 's' && strcmp(topic, "search") == 0)
+		return print_search_topic();
+	if (*topic == 't' && strcmp(topic, "theming") == 0)
+		return print_theming_topic();
+	if (*topic == 't' && strcmp(topic, "trash") == 0)
+		return print_trash_topic();
+
+	fprintf(stderr, "%s: help: %s: No such help topic\n", PROGRAM_NAME, topic);
+	return EXIT_FAILURE;
+}
+
+int
+quick_help(char *topic)
+{
+	if (topic && *topic)
+		return run_help_topic(topic);
+
 #ifdef __HAIKU__
 	printf("%s                                %s\n\n%s",
 		ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP);
