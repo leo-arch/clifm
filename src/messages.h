@@ -510,7 +510,7 @@ Examples:\n\
 #define PROMPT_USAGE "Change current prompt\n\
 Usage:\n\
   prompt [NAME, edit, list, reload, unset]\n\
-Example:\n\
+Examples:\n\
 - List available prompts:\n\
     prompt list (or 'prompt <TAB>' to choose from a list)\n\
 - Change prompt to prompt named MYPROMPT:\n\
@@ -535,6 +535,30 @@ Examples:\n\
     rr nano\n\
 - Bulk remove files/dirs in the directory 'mydir' using vi:\n\
     rr mydir vi"
+
+#define SEARCH_USAGE "Search for files using either glob or regular expressions\n\
+Usage:\n\
+  /PATTERN [-filetype] [-x] [DIR]\n\n\
+Examples:\n\
+- List all PDF files in the current working directory:\n\
+    /*.pdf (or, as a regular expression, '/.*\\.pdf$')\n\
+- List all files starting with 'A' in the directory whose ELN is 7:\n\
+    /A* 7\n\
+- List all .conf files in /etc\n\
+    /*.conf /etc\n\n\
+You can further filter the search using a file type filter:\n\
+  -b	block device\n\
+  -c	character device\n\
+  -d	directory\n\
+  -f	regular file\n\
+  -l	symlink\n\
+  -p	FIFO/pipe\n\
+  -s	socket\n\
+- For example, to list all directories containing a dot or a dash and ending \
+with 'd' in the directory named Documents:\n\
+    /[.-].*d$ -d Documents/\n\n\
+To perform a recursive search, use the -x modifier (file types not allowed):\n\
+    /str -x /boot"
 
 #define SEL_USAGE "Select one or multiple files\n\
 Usage:\n\

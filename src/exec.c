@@ -2255,7 +2255,8 @@ exec_cmd(char **comm)
 		return (exit_code = props_function(comm));
 
 	/*     ############### SEARCH ##################     */
-	else if (*comm[0] == '/' && is_path(comm[0]) == 0)
+	else if ( (*comm[0] == '/' && is_path(comm[0]) == 0)
+	|| (*comm[0] == '/' && !comm[0][1] && comm[1] && *comm[1] == '-' && IS_HELP(comm[1])) )
 		return (exit_code = search_function(comm));
 
 	/*      ############## HISTORY ##################     */

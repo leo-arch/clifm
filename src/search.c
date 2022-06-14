@@ -57,6 +57,32 @@ check_glob_char(const char *str)
 	return 0;
 }
 
+static int
+run_find(char *search_path, char *arg)
+{
+	char *_path = (search_path && *search_path) ? search_path : ".";
+	char *method = search_strategy == REGEX_ONLY ? "-regex" : "-name";
+
+	int glob_char = check_glob_char(arg + 1);
+	if (glob_char == 1) {
+		char *cmd[] = {"find", _path, method, arg + 1, NULL};
+		return launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	}
+
+	int ret = EXIT_SUCCESS;
+	char *ss = (char *)xnmalloc(strlen(arg + 1) + 5, sizeof(char));
+	if (search_strategy == REGEX_ONLY)
+		sprintf(ss, ".*%s.*", arg + 1);
+	else
+		sprintf(ss, "*%s*", arg + 1);
+
+	char *cmd[] = {"find", _path, method, ss, NULL};
+	ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	free(ss);
+
+	return ret;
+}
+
 /* List matching file names in the specified directory */
 int
 search_glob(char **args, const int invert)
@@ -81,8 +107,7 @@ search_glob(char **args, const int invert)
 			search_path = args[1];
 		}
 	} else {
-		/* If just one argument, '-' indicates file type. Else, we have a
-		 * path */
+		/* If just one argument, '-' indicates file type. Else, we have a path */
 		if (args[1]) {
 			if (*args[1] == '-')
 				file_type = (mode_t)args[1][1];
@@ -92,42 +117,23 @@ search_glob(char **args, const int invert)
 	}
 
 	/* If no arguments, search_path will be NULL and file_type zero */
-	int recursive = 0;
-
 	if (file_type != 0) {
 		/* Convert file type into a macro that can be decoded by stat(). If
 		 * file type is specified, matches will be checked against this value */
 		switch (file_type) {
-		case 'd': file_type = invert == 1 ? DT_DIR : S_IFDIR; break;
-		case 'r': file_type = invert == 1 ? DT_REG : S_IFREG; break;
-		case 'l': file_type = invert == 1 ? DT_LNK : S_IFLNK; break;
-		case 's': file_type = invert == 1 ? DT_SOCK : S_IFSOCK; break;
-		case 'f': file_type = invert == 1 ? DT_FIFO : S_IFIFO; break;
 		case 'b': file_type = invert == 1 ? DT_BLK : S_IFBLK; break;
 		case 'c': file_type = invert == 1 ? DT_CHR : S_IFCHR; break;
-		case 'x': recursive = 1; break;
+		case 'd': file_type = invert == 1 ? DT_DIR : S_IFDIR; break;
+		case 'f': file_type = invert == 1 ? DT_REG : S_IFREG; break;
+		case 'l': file_type = invert == 1 ? DT_LNK : S_IFLNK; break;
+		case 'p': file_type = invert == 1 ? DT_FIFO : S_IFIFO; break;
+		case 's': file_type = invert == 1 ? DT_SOCK : S_IFSOCK; break;
+		case 'x': run_find(search_path, args[0]); return EXIT_SUCCESS;
 		default:
-			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
+			fprintf(stderr, _("%s: search: '%c': Unrecognized file type\n"),
 			    PROGRAM_NAME, (char)file_type);
 			return 2; /* Return 2 to avoid trying the regex approach */
 		}
-	}
-
-	if (recursive == 1) {
-		int glob_char = check_glob_char(args[0] + 1);
-		if (glob_char) {
-			char *cmd[] = {"find", (search_path && *search_path) ? search_path
-						: ".", "-name", args[0] + 1, NULL};
-			launch_execve(cmd, FOREGROUND, E_NOSTDERR);
-		} else {
-			char *ss = (char *)xnmalloc(strlen(args[0] + 1) + 3, sizeof(char));
-			sprintf(ss, "*%s*", args[0] + 1);
-			char *cmd[] = {"find", (search_path && *search_path) ? search_path
-						: ".", "-name", ss, NULL};
-			launch_execve(cmd, FOREGROUND, E_NOSTDERR);
-			free(ss);
-		}
-		return EXIT_SUCCESS;
 	}
 
 	/* If we have a path ("/str /path"), chdir into it, since glob() works on CWD */
@@ -468,8 +474,7 @@ END:
 
 	/* If needed, go back to the directory we came from */
 	if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			workspaces[cur_ws].path, strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -500,8 +505,7 @@ search_regex(char **args, const int invert, const int case_sens)
 			search_path = args[1];
 		}
 	} else {
-		/* If just one argument, '-' indicates file type. Else, we have a
-		 * path */
+		/* If just one argument, '-' indicates file type. Else, we have a path */
 		if (args[1]) {
 			if (*args[1] == '-')
 				file_type = (mode_t) * (args[1] + 1);
@@ -511,21 +515,21 @@ search_regex(char **args, const int invert, const int case_sens)
 	}
 
 	/* If no arguments, search_path will be NULL and file_type zero */
-
 	if (file_type != 0) {
 		/* If file type is specified, matches will be checked against this value */
 		switch (file_type) {
-		case 'd': file_type = DT_DIR; break;
-		case 'r': file_type = DT_REG; break;
-		case 'l': file_type = DT_LNK; break;
-		case 's': file_type = DT_SOCK; break;
-		case 'f': file_type = DT_FIFO; break;
 		case 'b': file_type = DT_BLK; break;
 		case 'c': file_type = DT_CHR; break;
+		case 'd': file_type = DT_DIR; break;
+		case 'f': file_type = DT_REG; break;
+		case 'l': file_type = DT_LNK; break;
+		case 'p': file_type = DT_FIFO; break;
+		case 's': file_type = DT_SOCK; break;
+		case 'x': run_find(search_path, args[0]); return EXIT_SUCCESS;
 		default:
-			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
+			fprintf(stderr, _("%s: search: '%c': Unrecognized file type\n"),
 				PROGRAM_NAME, (char)file_type);
-			return 2;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -566,14 +570,6 @@ search_regex(char **args, const int invert, const int case_sens)
 			}
 
 			tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
-			/*      tmp_files = scandir(".", &reg_dirlist, skip_files,
-							sort == 0 ? NULL : sort == 1 ? m_alphasort
-							: sort == 2 ? size_sort : sort == 3
-							? atime_sort : sort == 4 ? btime_sort
-							: sort == 5 ? ctime_sort : sort == 6
-							? mtime_sort : sort == 7 ? m_versionsort
-							: sort == 8 ? ext_sort : inode_sort); */
-
 			if (tmp_files == -1) {
 				fprintf(stderr, "scandir: %s: %s\n", search_path, strerror(errno));
 
@@ -833,10 +829,15 @@ search_regex(char **args, const int invert, const int case_sens)
 int
 search_function(char **args)
 {
+	if (args[1] && IS_HELP(args[1])) {
+		puts(SEARCH_USAGE);
+		return EXIT_SUCCESS;
+	}
+
 	if (search_strategy != REGEX_ONLY) {
 		int ret = search_glob(args, (args[0][1] == '!') ? 1 : 0);
 		if (ret != EXIT_FAILURE)
-			return ret;
+			return (ret == 2 ? 1 : ret);
 		if (search_strategy == GLOB_ONLY) {
 			puts(_("search: No matches found"));
 			return EXIT_FAILURE;
