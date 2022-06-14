@@ -946,6 +946,15 @@ my_rl_path_completion(const char *text, int state)
 		type = ent->d_type;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
+		if (nwords == 1 && ((type == DT_DIR && autocd == 0)
+		|| (type != DT_DIR && auto_open == 0)))
+			continue;
+
+		/* Only dir names for cd */
+		if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+		&& rl_line_buffer[2] == ' ' && type != DT_DIR)
+			continue;
+
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
 		if (!filename_len) {
 			/* Exclude "." and ".." as possible completions */
@@ -1430,28 +1439,27 @@ filenames_gen_text(const char *text, int state)
 	static size_t i, len = 0;
 	char *name;
 	rl_filename_completion_desired = 1;
-	/* According to the GNU readline documention: "If it is set to a
-	 * non-zero value, directory names have a slash appended and
-	 * Readline attempts to quote completed file names if they contain
-	 * any embedded word break characters." To make the quoting part
-	 * work I had to specify a custom quoting function (my_rl_quote) */
-	if (!state) { /* state is zero only the first time readline is
-	executed */
+	if (!state) { /* state is zero only the first time readline is executed */
 		i = 0;
 		len = strlen(text);
 	}
 
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = file_info[i].name) != NULL) {
-		i++;
-/*		if (nwords == 1 && autocd == 0 && file_info[i].dir == 1)
-			return (char *)NULL;
-		if (nwords == 1 && auto_open == 0 && file_info[i].dir == 0)
-			return (char *)NULL; */
+		if (nwords == 1 && ( (file_info[i].dir == 1 && autocd == 0)
+		|| (file_info[i].dir == 0 && auto_open == 0) )) {
+			i++;
+			continue;
+		}
 		/* If cd, list only directories */
-		if (*rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
-		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
-			return (char *)NULL;
+		if ((nwords > 1 || (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
+		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0) {
+			i++;
+			continue;
+//			return (char *)NULL;
+		}
+		i++;
 
 		if (case_sens_path_comp ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
@@ -1484,6 +1492,9 @@ filenames_gen_eln(const char *text, int state)
 	while (i < files && (name = file_info[i++].name) != NULL) {
 		if (*name == *file_info[num_text - 1].name
 		&& strcmp(name, file_info[num_text - 1].name) == 0) {
+			if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+			&& rl_line_buffer[2] == ' ' && file_info[num_text - 1].dir == 0)
+				continue;
 #ifndef _NO_SUGGESTIONS
 			if (suggestion_buf)
 				clear_suggestion(CS_FREEBUF);

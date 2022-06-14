@@ -731,8 +731,7 @@ print_reg_file_suggestion(char *str, const size_t i, size_t len,
 			s++;
 		}
 
-		if (dot_slash) {
-			// Reinsert './', removed to check file name
+		if (dot_slash) { /* Reinsert './', removed to check file name */
 			char t[NAME_MAX + 2];
 			snprintf(t, NAME_MAX + 1, "./%s", tmp);
 			print_suggestion(t, len + 2, color);
@@ -818,8 +817,12 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		}
 
 		if (len == 0) continue;
-		if ((file_info[i].dir == 1 && nwords == 1 && autocd == 0)
-		|| (file_info[i].dir == 0 && nwords == 1 && auto_open == 0))
+		if (first_word == 1 && ( (file_info[i].dir == 1 && autocd == 0)
+		|| (file_info[i].dir == 0 && auto_open == 0) ) )
+			continue;
+
+		if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
 			continue;
 
 		if (case_sens_path_comp ? (*str == *file_info[i].name
@@ -827,7 +830,14 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		: (TOUPPER(*str) == TOUPPER(*file_info[i].name)
 		&& strncasecmp(str, file_info[i].name, len) == 0)) {
 			if (file_info[i].len == len) return FULL_MATCH;
-			if (first_word && !auto_open) continue;
+/*			if (first_word) {
+				if ( (file_info[i].dir == 1 && autocd == 0)
+				|| (file_info[i].dir == 0 && auto_open == 0) ) {
+					printf("UUUU"); fflush(stdout); sleep(1);
+					continue;
+				}
+			} */
+
 			if (c != BS) suggestion.type = FILE_SUG;
 
 			if (file_info[i].dir)
@@ -845,6 +855,7 @@ check_filenames(char *str, size_t len, const unsigned char c,
 
 	if (fuzzy_index > -1) { /* No regular match, just a fuzzy one */
 		cur_comp_type = TCMP_PATH;
+		if (c != BS) suggestion.type = FILE_SUG;
 		if (file_info[fuzzy_index].dir)
 			print_directory_suggestion((size_t)fuzzy_index, len, color);
 		else
@@ -852,10 +863,9 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		return PARTIAL_MATCH;
 	}
 
-	if (removed_slash == 1) { /* We removed the final slash: reinsert it */
+	if (removed_slash == 1) /* We removed the final slash: reinsert it */
 		str[len] = '/';
-/*		len++; */
-	}
+
 	return NO_MATCH;
 }
 

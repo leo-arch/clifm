@@ -1600,7 +1600,7 @@ format_sel_name(char *str)
 void
 colors_list(char *ent, const int eln, const int pad, const int new_line)
 {
-	char index[sizeof(int) + 2];
+	char index[sizeof(int) + 8];
 	*index = '\0';
 
 	if (eln > 0)

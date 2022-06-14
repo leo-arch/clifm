@@ -628,7 +628,7 @@ rl_accept_suggestion(int count, int key)
 	case HIST_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
-	#ifndef _NO_TAGS
+#ifndef _NO_TAGS
 	case TAGC_SUG: /* fallthrough */
 	case TAGS_SUG: /* fallthrough */
 	case TAGT_SUG: {
@@ -815,12 +815,6 @@ rl_long(int count, int key)
 		long_view == 1 ? _("enabled") : _("disabled"));
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
-
-/*	if (clear_screen)
-		CLEAR;
-	keybind_exec_cmd("rf");
-	rl_reset_line_state();
-	return EXIT_SUCCESS; */
 }
 
 static int
