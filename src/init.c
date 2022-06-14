@@ -100,7 +100,7 @@ int
 init_gettext(void)
 {
 	char locale_dir[PATH_MAX];
-	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", data_dir ? data_dir : "/usr/share");
+	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", data_dir ? data_dir : "/usr/local/share");
 	bindtextdomain(PNL, locale_dir);
 	textdomain(PNL);
 
@@ -1310,7 +1310,7 @@ external_arguments(int argc, char **argv)
 	    {"autols", no_argument, 0, 'O'},
 	    {"path", required_argument, 0, 'p'},
 	    {"profile", required_argument, 0, 'P'},
-	    {"refresh-on-emtpy-line", no_argument, 0, 'r'},
+	    {"no-refresh-on-emtpy-line", no_argument, 0, 'r'},
 	    {"splash", no_argument, 0, 's'},
 	    {"stealth-mode", no_argument, 0, 'S'},
 	    {"disk-usage-analyzer", no_argument, 0, 't'},
@@ -1653,7 +1653,7 @@ RUN:
 			alt_profile_value = optarg;
 			break;
 
-		case 'r': xargs.refresh_on_empty_line = 1; break;
+		case 'r': xargs.refresh_on_empty_line = 0; break;
 		case 's': splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;

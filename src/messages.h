@@ -797,7 +797,8 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -p, --path=PATH\t\t Use PATH as CliFM's starting path (deprecated: use positional \
 parameters instead)\
 \n  -P, --profile=PROFILE\t\t Use (or create) PROFILE as profile\
-\n  -r, --refresh-on-empty-line\t Refresh the list of files when pressing Enter on an empty line\
+\n  -r, --no-refresh-on-empty-line Do not refresh the list of files when pressing Enter \
+on an empty line\
 \n  -s, --splash\t\t\t Enable the splash screen\
 \n  -S, --stealth-mode\t\t Leave no trace on the host system (see the manpage)\
 \n  -t, --disk-usage-analyzer\t Run in disk usage analyzer mode\
@@ -830,9 +831,9 @@ and paths\
 \n      --list-and-quit\t\t List files and quit\
 \n      --max-dirhist\t\t Maximum number of visited directories to recall\
 \n      --max-files=NUM\t\t List only up to NUM files\
-\n      --max-path=NUM\t\t Set the maximun number of characters \
-after which the current directory in the prompt line will be abreviated to the \
-directory base name (if \\z is used in the prompt)\
+\n      --max-path=NUM\t\t Number of characters \
+after which the current directory in the prompt will be abreviated to its \
+base name (if \\z is used in the prompt)\
 \n      --no-dir-jumper\t\t Disable the directory jumper function\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
