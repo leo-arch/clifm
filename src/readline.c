@@ -1990,18 +1990,19 @@ options_generator(const char *text, int state)
 		_opts[0] = "archives";
 		_opts[1] = "basics";
 		_opts[2] = "bookmarks";
-		_opts[3] = "file-attributes";
-		_opts[4] = "file-tags";
-		_opts[5] = "navigation";
-		_opts[6] = "plugins";
-		_opts[7] = "profiles";
-		_opts[8] = "remotes";
-		_opts[9] = "resource-opener";
-		_opts[10] = "selection";
-		_opts[11] = "search";
-		_opts[12] = "theming";
-		_opts[13] = "trash";
-		_opts[14] = NULL;
+		_opts[3] = "dir-jumper";
+		_opts[4] = "file-attributes";
+		_opts[5] = "file-tags";
+		_opts[6] = "navigation";
+		_opts[7] = "plugins";
+		_opts[8] = "profiles";
+		_opts[9] = "remotes";
+		_opts[10] = "resource-opener";
+		_opts[11] = "selection";
+		_opts[12] = "search";
+		_opts[13] = "theming";
+		_opts[14] = "trash";
+		_opts[15] = NULL;
 	/* b, f */
 	} else if ((*l == 'b' && l[1] == ' ') || (*l == 'f' && l[1] == ' ')) {
 		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;

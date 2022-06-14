@@ -1869,6 +1869,12 @@ print_bookmarks_topic(void)
 }
 
 static int
+print_dir_jumper_topic(void)
+{
+	puts(JUMP_USAGE); return EXIT_SUCCESS;
+}
+
+static int
 print_file_tags_topic(void)
 {
 	puts(TAG_USAGE); return EXIT_SUCCESS;
@@ -1950,6 +1956,8 @@ run_help_topic(char *topic)
 		return print_basics_topic();
 	if (*topic == 'b' && strcmp(topic, "bookmarks") == 0)
 		return print_bookmarks_topic();
+	if (*topic == 'd' && strcmp(topic, "dir-jumper") == 0)
+		return print_dir_jumper_topic();
 	if (*topic == 'f' && strcmp(topic, "file-attributes") == 0)
 		return print_file_attributes_topic();
 	if (*topic == 'f' && strcmp(topic, "file-tags") == 0)
