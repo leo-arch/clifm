@@ -238,8 +238,8 @@ use \fIPATH\fR as \fBclifm\fR starting path. Default starting path is the curren
 \fB\-P\fR, \fB\-\-profile\fR=\fI\,PROFILE\/\fR
 use \fIPROFILE\fR as profile. If \fIPROFILE\fR does not exist, it will be created. Default profile is 'default'
 .TP
-\fB\-r\fR, \fB\-\-refresh\-on\-empty\-line\fR
-refresh the current list of files when pressing the Enter key on an empty line
+\fB\-r\fR, \fB\-\-no\-refresh\-on\-empty\-line\fR
+do not refresh the current list of files when pressing the Enter key on an empty line
 .TP
 \fB\-s\fR, \fB\-\-splash\fR
 enable the splash screen

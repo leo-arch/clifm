@@ -59,7 +59,7 @@ _clifm ()
         -P
         --profile
         -r
-        --refresh-on-empty-line
+        --no-refresh-on-empty-line
         -s
         --splash
         -S

@@ -31,7 +31,7 @@ args=(
 	{-O,--autols}'['cd' lists files on the fly (default)]'
 	{-p+,--path=}'[use PATH as CliFM starting path]:directory:_directories'
 	{-P+,--profile=}'[use (or create) PROFILE as profile]:profile:->profiles'
-	{-r,--refresh-on-empty-line}'[refresh screen when pressing Enter on empty line]'
+	{-r,--no-refresh-on-empty-line}'[do not refresh the screen when pressing Enter on empty line]'
 	{-s,--splash}'[print the logo screen at startup]'
 	{-S,--stealth-mode}'[leave no trace on the host system]'
 	{-t,--disk-usage-analyzer}'[run in disk usage analyzer mode]'
