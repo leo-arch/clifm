@@ -805,8 +805,7 @@ alias_import(char *file)
 		}
 
 		if (realpath(file_exp, rfile) == NULL) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_exp,
-					strerror(errno));
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_exp, strerror(errno));
 			free(file_exp);
 			return EXIT_FAILURE;
 		}
@@ -834,8 +833,7 @@ alias_import(char *file)
 	/* Open CliFM's config file as well */
 	FILE *config_fp = fopen(config_file, "a");
 	if (!config_fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, config_file,
-		    strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, config_file, strerror(errno));
 		close_fstream(fp, fd);
 		return EXIT_FAILURE;
 	}
@@ -856,8 +854,7 @@ alias_import(char *file)
 				continue;
 
 			if (is_internal_c(alias_name)) {
-				fprintf(stderr, _("%s: Alias conflicts with "
-						"internal command\n"), alias_name);
+				fprintf(stderr, _("%s: Alias conflicts with internal command\n"), alias_name);
 				free(alias_name);
 				continue;
 			}
@@ -882,7 +879,6 @@ alias_import(char *file)
 			*(tmp - 1) = '\0';
 			/* If alias already exists, skip it too */
 			int exists = 0;
-
 			for (i = 0; i < aliases_n; i++) {
 				if (*p == *aliases[i].name && strcmp(aliases[i].name, p) == 0) {
 					exists = 1;
@@ -892,8 +888,8 @@ alias_import(char *file)
 
 			*(tmp - 1) = '=';
 
-			if (!exists) {
-				if (first) {
+			if (exists == 0) {
+				if (first == 1) {
 					first = 0;
 					fputs("\n\n", config_fp);
 				}
@@ -917,8 +913,7 @@ alias_import(char *file)
 
 	/* No alias was found in FILE */
 	if (alias_found == 0) {
-		fprintf(stderr, _("%s: %s: No alias found\n"), PROGRAM_NAME,
-		    rfile);
+		fprintf(stderr, _("%s: %s: No alias found\n"), PROGRAM_NAME, rfile);
 		return EXIT_FAILURE;
 	}
 
@@ -962,7 +957,7 @@ alias_import(char *file)
 void
 save_last_path(void)
 {
-	if (!config_ok || !config_dir || !config_dir_gral) return;
+	if (config_ok == 0 || !config_dir || !config_dir_gral) return;
 
 	char *last_dir = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 	sprintf(last_dir, "%s/.last", config_dir);
@@ -1052,8 +1047,7 @@ create_usr_var(char *str)
 
 	if (!value) {
 		free(name);
-		fprintf(stderr, _("%s: Error getting variable value\n"),
-		    PROGRAM_NAME);
+		fprintf(stderr, _("%s: Error getting variable value\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -1712,7 +1706,7 @@ FREE_N_EXIT:
 static int
 save_pinned_dir(void)
 {
-	if (!pinned_dir || !config_ok)
+	if (!pinned_dir || config_ok == 0)
 		return EXIT_FAILURE;
 
 	char *pin_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
@@ -1790,7 +1784,7 @@ unpin_dir(void)
 		}
 
 		free(pin_file);
-		if (cmd_error)
+		if (cmd_error == 1)
 			return EXIT_FAILURE;
 	}
 
@@ -1821,7 +1815,6 @@ static char *
 get_pager(void)
 {
 	char *_pager = (char *)NULL;
-
 	char *p = getenv("PAGER");
 	if (p)
 		_pager = savestring(p, strlen(p));
@@ -2052,13 +2045,9 @@ void
 help_function(void)
 {
 	fputs(NC, stdout);
-
 	printf("%s\n", ASCII_LOGO);
-
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
-
-	printf("\nUSAGE: %s %s\n%s%s", PNL, GRAL_USAGE, _(SHORT_OPTIONS),
-			_(LONG_OPTIONS));
+	printf("\nUSAGE: %s %s\n%s%s", PNL, GRAL_USAGE, _(SHORT_OPTIONS), _(LONG_OPTIONS));
 
 	puts(_(CLIFM_COMMANDS));
 	puts(_(CLIFM_KEYBOARD_SHORTCUTS));
