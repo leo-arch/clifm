@@ -1410,7 +1410,18 @@ X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk
 # Fallback to another resource opener as last resource\n\
 .*=xdg-open;mimeo;mimeopen -n;whippet -m;open;linopen;\n");
 	close_fstream(fp, fd);
+
 	return EXIT_SUCCESS;
+}
+
+static void
+print_mime_file_msg(const char *file)
+{
+	_err('n', PRINT_PROMPT, _("%sNOTE%s: %s created a new MIME list file (%s) "
+		"It is recommended to edit this file (entering 'mm edit' or "
+		"pressing F6) to add the programs you use and remove those "
+		"you don't. This will make the process of opening files "
+		"faster and smoother\n"), BOLD, NC, PROGRAM_NAME, file);
 }
 
 int
@@ -1424,17 +1435,13 @@ create_mime_file(char *file, int new_prof)
 		return EXIT_SUCCESS;
 
 	if (import_from_data_dir("mimelist.cfm", file) == EXIT_SUCCESS) {
-		if (new_prof == 0) {
-			_err('n', PRINT_PROMPT, _("%sNOTE%s: %s created a new MIME list file (%s) "
-				"It is recommended to edit this file (entering 'mm edit' or "
-				"pressing F6) to add the programs you use and remove those "
-				"you don't. This will make the process of opening files "
-				"faster and smoother\n"), BOLD, NC, PROGRAM_NAME, file);
-		}
+		if (new_prof == 0) print_mime_file_msg(file);
 		return EXIT_SUCCESS;
 	}
 
-	return create_mime_file_anew(file);
+	int ret = create_mime_file_anew(file);
+	if (new_prof == 0 && ret == EXIT_SUCCESS) print_mime_file_msg(file);
+	return ret;
 }
 
 int
