@@ -1365,14 +1365,14 @@ X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vis;vi;mg;emacs;ed;na
 #   MIME types   #\n\
 ##################\n\
 \n\
-# Directories - only for the open-with command (ow) and the --open command\n\
+# Directories - only for the open-with (ow) and the --open commands\n\
 # line option\n\
 # In graphical environments directories will be opened in a new window\n\
 X:inode/directory=xterm -e clifm %%f &;xterm -e vifm %%f &;pcmanfm %%f &;thunar %%f &;xterm -e ncdu %%f &\n\
 !X:inode/directory=vifm;ranger;nnn;ncdu\n\
 \n\
 # Web content\n\
-X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m\n\
+X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;brave;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m\n\
 !X:^text/html$=$BROWSER;elinks;links2;links;lynx;w3m\n\
 \n\
 # Text\n\
@@ -1434,13 +1434,12 @@ create_mime_file(char *file, int new_prof)
 	if (stat(file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	if (import_from_data_dir("mimelist.cfm", file) == EXIT_SUCCESS) {
-		if (new_prof == 0) print_mime_file_msg(file);
-		return EXIT_SUCCESS;
-	}
+	int ret = import_from_data_dir("mimelist.cfm", file);
+	if (ret != EXIT_SUCCESS)
+		ret = create_mime_file_anew(file);
 
-	int ret = create_mime_file_anew(file);
-	if (new_prof == 0 && ret == EXIT_SUCCESS) print_mime_file_msg(file);
+	if (new_prof == 0 && ret == EXIT_SUCCESS)
+		print_mime_file_msg(file);
 	return ret;
 }
 
