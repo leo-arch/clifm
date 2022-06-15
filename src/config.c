@@ -1365,8 +1365,8 @@ X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vis;vi;mg;emacs;ed;na
 #   MIME types   #\n\
 ##################\n\
 \n\
-# Directories - only for the open-with (ow) and the --open commands\n\
-# line option\n\
+# Directories - only for the open-with (ow) command and the --open command\n\
+# line switch\n\
 # In graphical environments directories will be opened in a new window\n\
 X:inode/directory=xterm -e clifm %%f &;xterm -e vifm %%f &;pcmanfm %%f &;thunar %%f &;xterm -e ncdu %%f &\n\
 !X:inode/directory=vifm;ranger;nnn;ncdu\n\
@@ -1415,13 +1415,19 @@ X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk
 }
 
 static void
-print_mime_file_msg(const char *file)
+print_mime_file_msg(char *file)
 {
-	_err('n', PRINT_PROMPT, _("%sNOTE%s: %s created a new MIME list file (%s) "
+	int _free = 0;
+	char *f = home_tilde(file, &_free);
+
+	_err('n', PRINT_PROMPT, _("%sNOTE%s: %s created a new MIME list file (%s). "
 		"It is recommended to edit this file (entering 'mm edit' or "
 		"pressing F6) to add the programs you use and remove those "
 		"you don't. This will make the process of opening files "
-		"faster and smoother\n"), BOLD, NC, PROGRAM_NAME, file);
+		"faster and smoother\n"), BOLD, NC, PROGRAM_NAME, f ? f : file);
+
+	if (f != file)
+		free(f);
 }
 
 int
