@@ -954,6 +954,9 @@ free_extension_colors(void)
 static int
 get_cur_colorscheme(const char *colorscheme)
 {
+	if (!colorscheme)
+		return EXIT_FAILURE;
+
 	char *def_cscheme = (char *)NULL;
 	int i = (int)cschemes_n;
 	while (--i >= 0) {

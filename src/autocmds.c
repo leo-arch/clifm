@@ -101,8 +101,7 @@ check_autocmds(void)
 
 		/* Glob expression or plain text for PATTERN */
 		glob_t g;
-		int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK
-				| GLOB_TILDE | GLOB_BRACE, NULL, &g);
+		int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK | GLOB_TILDE | GLOB_BRACE, NULL, &g);
 
 		if (ret != EXIT_SUCCESS) {
 			globfree(&g);
@@ -128,8 +127,7 @@ check_autocmds(void)
 
 RUN_AUTOCMD:
 		if (!autocmd_set) {
-			/* Backup current options, only if there was no autocmd for
-			 * this directory */
+			/* Backup current options, only if there was no autocmd for this directory */
 			opts.light_mode = light_mode;
 			opts.files_counter = files_counter;
 			opts.long_view = long_view;

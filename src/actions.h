@@ -27,4 +27,5 @@
 
 int actions_function(char **args);
 int run_action(char *action, char **args);
+
 #endif /* ACTIONS_H */

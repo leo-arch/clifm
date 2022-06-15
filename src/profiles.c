@@ -128,7 +128,7 @@ profile_set(char *prof)
 
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
-	if (!found) {
+	if (found == 0) {
 		fprintf(stderr, _("%s: %s: No such profile\nTo add a new "
 			"profile enter 'pf add PROFILE'\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
@@ -137,10 +137,7 @@ profile_set(char *prof)
 	/* If changing to the current profile, do nothing */
 	if ((!alt_profile && *prof == 'd' && strcmp(prof, "default") == 0)
 	|| (alt_profile && *prof == *alt_profile && strcmp(prof, alt_profile) == 0)) {
-
-		printf(_("%s: '%s' is the current profile\n"), PROGRAM_NAME,
-		    prof);
-
+		printf(_("%s: '%s' is the current profile\n"), PROGRAM_NAME, prof);
 		return EXIT_SUCCESS;
 	}
 
@@ -163,8 +160,8 @@ profile_set(char *prof)
 	/* Check whether we have a working shell */
 	if (access(user.shell, X_OK) == -1) {
 		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. Please "
-				  "edit the configuration file to specify a working shell.\n"),
-				PROGRAM_NAME, user.shell);
+			"edit the configuration file to specify a working shell.\n"),
+			PROGRAM_NAME, user.shell);
 	}
 
 	int i = (int)usrvar_n;
@@ -209,13 +206,12 @@ profile_set(char *prof)
 			history_truncate_file(hist_file, max_hist);
 		} else {
 			FILE *hist_fp = fopen(hist_file, "w");
-
 			if (hist_fp) {
 				fputs("edit\n", hist_fp);
 				fclose(hist_fp);
 			} else {
 				_err('w', PRINT_PROMPT, _("%s: Error opening the "
-						"history file\n"), PROGRAM_NAME);
+					"history file\n"), PROGRAM_NAME);
 			}
 		}
 
@@ -230,7 +226,6 @@ profile_set(char *prof)
 	if (bin_commands) {
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
-
 		free(bin_commands);
 		bin_commands = (char **)NULL;
 	}
@@ -269,14 +264,13 @@ profile_set(char *prof)
 	}
 
 	if (xchdir(workspaces[cur_ws].path, SET_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
-		    strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	int exit_status = EXIT_SUCCESS;
 
-	if (autols) {
+	if (autols == 1) {
 		free_dirlist();
 		exit_status = list_dir();
 	}

@@ -173,21 +173,60 @@ edit_function(char **comm)
 	return ret;
 }
 
+/* Find the plugins-helper file and set CLIFM_PLUGINS_HELPER accordingly
+ * This envionment variable will be used by plugins. Returns zero on
+ * success or one on error */
+static int
+setenv_plugins_helper(void)
+{
+	if (getenv("CLIFM_PLUGINS_HELPER"))
+		return EXIT_SUCCESS;
+
+	struct stat attr;
+	if (plugins_dir && *plugins_dir) {
+		char _path[PATH_MAX];
+		snprintf(_path, sizeof(_path), "%s/plugins-helper", plugins_dir);
+
+	//	struct stat attr;
+		if (stat(_path, &attr) != -1 && setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
+			return EXIT_SUCCESS;
+	}
+
+	const char *_paths[] = {
+#ifndef __HAIKU__
+		"/usr/share/clifm/plugins/plugins-helper",
+		"/usr/local/share/clifm/plugins/plugins-helper",
+#else
+		"/boot/system/non-packaged/data/clifm/plugins/plugins-helper",
+		"/boot/system/data/clifm/plugins/plugins-helper",
+#endif
+		NULL};
+
+	size_t i;
+	for (i = 0; _paths[i]; i++) {
+		if (stat(_paths[i], &attr) != -1
+		&& setenv("CLIFM_PLUGINS_HELPER", _paths[i], 1) == 0)
+			return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
+/* Set a few environment variables, mostly useful to run custom scripts
+ * via the actions function */
 void
 set_env(void)
 {
 	if (xargs.stealth_mode == 1)
 		return;
 
-	/* Set a few environment variables, mostly useful to run custom
-	 * scripts via the actions function */
-	/* CLIFM env variable is set to one when CliFM is running, so that
-	 * external programs can determine if they were spawned by CliFM */
 	setenv("CLIFM", config_dir ? config_dir : "1", 1);
 	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
 
 	if (sel_file)
 		setenv("CLIFM_SELFILE", sel_file, 1);
+
+	setenv_plugins_helper();
 }
 
 /* Define the file for the Selection Box */

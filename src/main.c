@@ -1066,6 +1066,7 @@ main(int argc, char *argv[])
 	init_config();
 	check_options();
 	set_sel_file();
+	set_env();
 	create_tmp_files();
 #ifndef _NO_FZF
 	set_finder_paths();
@@ -1139,7 +1140,6 @@ main(int argc, char *argv[])
 	get_profile_names();
 	load_pinned_dir();
 	load_prompts();
-	set_env();
 
 	/* # 2. MAIN PROGRAM LOOP # */
 	run_main_loop();
