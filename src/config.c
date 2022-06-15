@@ -392,11 +392,13 @@ import_from_data_dir(char *src_filename, char *dest)
 	struct stat attr;
 	char sys_file[PATH_MAX];
 	snprintf(sys_file, PATH_MAX - 1, "%s/%s/%s", data_dir, PNL, src_filename);
-	if (stat(sys_file, &attr) == EXIT_SUCCESS) {
-		char *cmd[] = {"cp", sys_file, dest, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
-			return EXIT_SUCCESS;
-	}
+	if (stat(sys_file, &attr) == -1)
+		return EXIT_FAILURE;
+
+	char *cmd[] = {"cp", sys_file, dest, NULL};
+	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	if (ret == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
 
 	return EXIT_FAILURE;
 }
@@ -417,8 +419,7 @@ create_actions_file(char *file)
 	int fd;
 	FILE *fp = open_fstream_w(file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-		    file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1186,40 +1187,6 @@ create_config_files(void)
 {
 	struct stat attr;
 
-			/* #############################
-			 * #        TRASH DIRS         #
-			 * ############################# */
-/*
-#ifndef _NO_TRASH
-	if (stat(trash_dir, &attr) == -1) {
-		char *trash_files = (char *)NULL;
-		trash_files = (char *)xnmalloc(strlen(trash_dir) + 7, sizeof(char));
-
-		sprintf(trash_files, "%s/files", trash_dir);
-		char *trash_info = (char *)NULL;
-		trash_info = (char *)xnmalloc(strlen(trash_dir) + 6, sizeof(char));
-
-		sprintf(trash_info, "%s/info", trash_dir);
-		char *cmd[] = {"mkdir", "-p", trash_files, trash_info, NULL};
-
-		int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-		free(trash_files);
-		free(trash_info);
-
-		if (ret != EXIT_SUCCESS) {
-			trash_ok = 0;
-			_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating trash "
-				"directory. Trash function disabled\n"), PROGRAM_NAME, trash_dir);
-		}
-	}
-
-	// If it exists, check it is writable
-	else if (access(trash_dir, W_OK) == -1) {
-		trash_ok = 0;
-		_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
-				"Trash function disabled\n"), PROGRAM_NAME, trash_dir);
-	}
-#endif */
 				/* ####################
 				 * #    CONFIG DIR    #
 				 * #################### */
@@ -1312,39 +1279,162 @@ create_config_files(void)
 	create_remotes_file();
 }
 
+static int
+create_mime_file_anew(char *file)
+{
+	int fd;
+	FILE *fp = open_fstream_w(file, &fd);
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	fprintf(fp, "                  ###################################\n\
+                  #   Configuration file for Lira   #\n\
+                  #     CliFM's resource opener     #\n\
+                  ###################################\n\
+\n\
+# Commented and blank lines are omitted\n\
+\n\
+# The below settings cover the most common filetypes\n\
+# It is recommended to edit this file placing your prefered applications\n\
+# at the beginning of the apps list to speed up the opening process\n\
+\n\
+# The file is read top to bottom and left to right; the first existent\n\
+# application found will be used\n\
+\n\
+# Applications defined here are NOT desktop files, but commands (arguments\n\
+# could be used as well). Write you own handmade scripts to open specific\n\
+# files if necessary. Ex: X:^text/.*:~/scripts/my_cool_script.sh\n\
+\n\
+# Use 'X' to specify a GUI environment and '!X' for non-GUI environments,\n\
+# like the kernel built-in console or a remote SSH session.\n\
+\n\
+# Use 'N' to match file names instead of MIME types.\n\
+\n\
+# Regular expressions are allowed for both file types and file names.\n\
+\n\
+# Use the %%f placeholder to specify the position of the file name to be\n\
+# opened in the command. Example:\n\
+# 'mpv %%f --terminal=no' -> 'mpv FILE --terminal=no'\n\
+# If %%f is not specified, the file name will be added to the end of the\n\
+# command. Ex: 'mpv --terminal=no' -> 'mpv --terminal=no FILE'\n\
+\n\
+# Running the opening application in the background:\n\
+# For GUI applications:\n\
+#    APP %%f &\n\
+# For terminal applications:\n\
+#    TERM -e APP %%f &\n\
+# Replace 'TERM' and 'APP' by the corresponding values. The -e option\n\
+# might vary depending on the terminal emulator used (TERM)\n\
+\n\
+# To silence STDERR and/or STDOUT use !E and !O respectivelly (they could\n\
+# be used together). Examples:\n\
+# Silence STDERR only and run in the foreground:\n\
+#    mpv %%f !E\n\
+# Silence both (STDERR and STDOUT) and run in the background:\n\
+#    mpv %%f !EO &\n\
+# or\n\
+#    mpv %%f !E !O &\n\
+\n\
+# Environment variables could be used as well. Example:\n\
+# X:text/plain=$TERM -e $EDITOR %%f &;$VISUAL;nano;vi\n\
+\n\
+###########################\n\
+#  File names/extensions  #\n\
+###########################\n\
+\n\
+# Match a full file name\n\
+#X:N:some_filename=cmd\n\
+\n\
+# Match all file names starting with 'str'\n\
+#X:N:^str.*=cmd\n\
+\n\
+# Match files with extension 'ext'\n\
+#X:N:.*\\.ext$=cmd\n\
+\n\
+X:N:.*\\.djvu$=djview;zathura;evince;atril\n\
+X:N:.*\\.epub$=mupdf;zathura;ebook-viewer\n\
+X:N:.*\\.mobi$=ebook-viewer\n\
+X:N:.*\\.(cbr|cbz)$=zathura\n\
+X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vis;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
+!X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vis;vi;mg;emacs;ed;nano\n\
+\n\n");
+
+	fprintf(fp, "##################\n\
+#   MIME types   #\n\
+##################\n\
+\n\
+# Directories - only for the open-with command (ow) and the --open command\n\
+# line option\n\
+# In graphical environments directories will be opened in a new window\n\
+X:inode/directory=xterm -e clifm %%f &;xterm -e vifm %%f &;pcmanfm %%f &;thunar %%f &;xterm -e ncdu %%f &\n\
+!X:inode/directory=vifm;ranger;nnn;ncdu\n\
+\n\
+# Web content\n\
+X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m\n\
+!X:^text/html$=$BROWSER;elinks;links2;links;lynx;w3m\n\
+\n\
+# Text\n\
+#X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany\n\
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vis;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit\n\
+!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vis;vi;mg;emacs;ed;nano\n\
+\n\
+# Office documents\n\
+X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice\n\
+\n\
+# Archives\n\
+# Note: 'ad' is CliFM's built-in archives utility (based on atool). Remove it if you\n\
+# prefer another application\n\
+X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad;xarchiver %%f &;lxqt-archiver %%f &;ark %%f &\n\
+!X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad\n\
+\n\
+# PDF\n\
+X:.*/pdf$=mupdf;sioyek;llpp;lpdf;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;qpdfview\n\
+\n\
+# Images\n\
+X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a\n\
+X:^image/.*=fim;display;sxiv;nsxiv;pqiv;gpicview;qview;qimgv;inkscape;mirage;ristretto;eog;eom;xviewer;viewnior;nomacs;geeqie;gwenview;gthumb;gimp\n\
+!X:^image/*=fim;img2txt;cacaview;fbi;fbv\n\
+\n\
+# Video and audio\n\
+X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;celluloid;qmplayer2;haruna;totem\n\
+X:^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem\n\
+\n\
+# Fonts\n\
+X:^font/.*=fontforge;fontpreview\n\
+\n\
+# Torrent:\n\
+X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent\n\
+\n\
+# Fallback to another resource opener as last resource\n\
+.*=xdg-open;mimeo;mimeopen -n;whippet -m;open;linopen;\n");
+	close_fstream(fp, fd);
+	return EXIT_SUCCESS;
+}
+
 int
 create_mime_file(char *file, int new_prof)
 {
+	if (!file || !*file)
+		return EXIT_FAILURE;
+
 	struct stat attr;
 	if (stat(file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	if (!data_dir)
-		return EXIT_FAILURE;
-
-	char sys_mimelist[PATH_MAX];
-	snprintf(sys_mimelist, PATH_MAX - 1, "%s/%s/mimelist.cfm", data_dir, PNL);
-
-	if (stat(sys_mimelist, &attr) == -1) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			sys_mimelist, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	char *cmd[] = {"cp", "-f", sys_mimelist, file, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS) {
+	if (import_from_data_dir("mimelist.cfm", file) == EXIT_SUCCESS) {
 		if (new_prof == 0) {
-			_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s) "
+			_err('n', PRINT_PROMPT, _("%sNOTE%s: %s created a new MIME list file (%s) "
 				"It is recommended to edit this file (entering 'mm edit' or "
 				"pressing F6) to add the programs you use and remove those "
 				"you don't. This will make the process of opening files "
-				"faster and smoother\n"),
-				PROGRAM_NAME, file, sys_mimelist);
+				"faster and smoother\n"), BOLD, NC, PROGRAM_NAME, file);
 		}
 		return EXIT_SUCCESS;
 	}
 
-	return EXIT_FAILURE;
+	return create_mime_file_anew(file);
 }
 
 int
@@ -2190,7 +2280,6 @@ init_config(void)
 	msgs.error = msgs.notice = msgs.warning = 0;
 
 	if (home_ok == 0) {
-//		set_default_colors();
 		check_colors();
 		return;
 	}
@@ -2533,8 +2622,7 @@ reload_config(void)
 	set_sel_file();
 	create_tmp_files();
 
-	/* If some option was set via command line, keep that value
-	 * for any profile */
+	/* If some option was set via command line, keep that value for any profile */
 	check_cmd_line_options();
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
@@ -2576,8 +2664,7 @@ reload_config(void)
 	load_tags();
 	load_remotes();
 
-	/* Set the current poistion of the dirhist index to the last
-	 * entry */
+	/* Set the current poistion of the dirhist index to the last entry */
 	dirhist_cur_index = dirhist_total_index - 1;
 
 	dir_changed = 1;
