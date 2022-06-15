@@ -958,13 +958,15 @@ parameters.\n\n\
  Right, C-f: Accept the entire suggestion\n\
  M-Right, M-f: Accept the first suggested word\n\
  M-c: Clear the current command line buffer\n\
- M-g: Toggle list-dirs-first on/off\n\
- C-r: Refresh the screen\n\
+ M-q: Delete the last entered word\n\
+ M-g: Toggle list directories first on/off\n\
  M-l: Toggle long/detail view mode on/off\n\
+ M-.: Toggle hidden files on/off\n\
+ M-,: Toggle list only directories on/off\n\
  M-m: List mountpoints\n\
- M-t: Clear messages\n\
  M-h: Show directory history\n\
- M-i, M-.: Toggle hidden files on/off\n\
+ M-t: Clear messages\n\
+ C-r: Refresh the screen\n\
  M-s: Open the Selection Box\n\
  M-a: Select all files in the current working directory\n\
  M-d: Deselect all selected files\n\
