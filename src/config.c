@@ -218,7 +218,7 @@ set_sel_file(void)
 int
 create_kbinds_file(void)
 {
-	if (!config_ok || !kbinds_file)
+	if (config_ok == 0 || !kbinds_file)
 		return EXIT_FAILURE;
 
 	struct stat attr;
@@ -240,8 +240,7 @@ create_kbinds_file(void)
 	/* Else, create it */
 	FILE *fp = fopen(kbinds_file, "w");
 	if (!fp) {
-		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
-		    strerror(errno));
+		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -267,40 +266,41 @@ create_kbinds_file(void)
 \n\
 # Alt-j\n\
 previous-dir:\\M-j\n\
-# Shift-Left (rxvt)\n\
+# Shift-left (rxvt)\n\
 previous-dir2:\\e[d\n\
-# Shift-Left (xterm)\n\
+# Shift-left (xterm)\n\
 previous-dir3:\\e[2D\n\
-# Shift-Left (others)\n\
+# Shift-left (others)\n\
 previous-dir4:\\e[1;2D\n\
 \n\
 # Alt-k\n\
 next-dir:\\M-k\n\
 # Shift-right (rxvt)\n\
 next-dir2:\\e[c\n\
-# Shift-Right (xterm)\n\
+# Shift-right (xterm)\n\
 next-dir3:\\e[2C\n\
-# Shift-Right (others)\n\
+# Shift-right (others)\n\
 next-dir4:\\e[1;2C\n\
 first-dir:\\C-\\M-j\n\
 last-dir:\\C-\\M-k\n\
 \n\
 # Alt-u\n\
 parent-dir:\\M-u\n\
-# Shift-Up (rxvt)\n\
+# Shift-up (rxvt)\n\
 parent-dir2:\\e[a\n\
-# Shift-Up (xterm)\n\
+# Shift-up (xterm)\n\
 parent-dir3:\\e[2A\n\
-# Shift-Up (others)\n\
+# Shift-up (others)\n\
 parent-dir4:\\e[1;2A\n\
 \n\
 # Alt-e\n\
 home-dir:\\M-e\n\
 # Home key (rxvt)\n\
-home-dir2:\\e[7~\n\
+#home-dir2:\\e[7~\n\
 # Home key (xterm)\n\
-home-dir3:\\e[H\n\
-home-dir4:\n\
+#home-dir3:\\e[H\n\
+# Home key (Emacs term)\n\
+#home-dir4:\\e[1~\n\
 \n\
 # Alt-r\n\
 root-dir:\\M-r\n\
@@ -317,43 +317,46 @@ workspace4:\\M-4\n\
 # Help\n\
 # F1-3\n\
 show-manpage:\\eOP\n\
+show-manpage2:\\e[11~\n\
 show-cmds:\\eOQ\n\
+show-cmds2:\\e[12~\n\
 show-kbinds:\\eOR\n\
-\n\
-prepend-sudo:\\M-v\n\
-create-file:\\M-n\n\
-new-instance:\\C-x\n\
-previous-profile:\\C-\\M-o\n\
-next-profile:\\C-\\M-p\n\
+show-kbinds2:\\e[13~\n\n\
 archive-sel:\\C-\\M-a\n\
-rename-sel:\\C-\\M-r\n\
-remove-sel:\\C-\\M-d\n\
-trash-sel:\\C-\\M-t\n\
-untrash-all:\\C-\\M-u\n\
-paste-sel:\\C-\\M-v\n\
-move-sel:\\C-\\M-n\n\
-export-sel:\\C-\\M-e\n\
-open-sel:\\C-\\M-g\n\
 bookmark-sel:\\C-\\M-b\n\
-toggle-disk-usage:\\C-\\M-i\n\
-toggle-max-name-len:\\C-\\M-l\n\
-refresh-screen:\\C-r\n\
+bookmarks:\\M-b\n\
 clear-line:\\M-c\n\
 clear-msgs:\\M-t\n\
+create-file:\\M-n\n\
+deselect-all:\\M-d\n\
+export-sel:\\C-\\M-e\n\
+dirs-first:\\M-g\n\
+lock:\\M-o\n\
+mountpoints:\\M-m\n\
+move-sel:\\C-\\M-n\n\
+new-instance:\\C-x\n\
+next-profile:\\C-\\M-p\n\
+only-dirs:\\M-,\n\
+open-sel:\\C-\\M-g\n\
+paste-sel:\\C-\\M-v\n\
+prepend-sudo:\\M-v\n\
+previous-profile:\\C-\\M-o\n\
+rename-sel:\\C-\\M-r\n\
+remove-sel:\\C-\\M-d\n\
+refresh-screen:\\C-r\n\
+selbox:\\M-s\n\
+select-all:\\M-a\n\
 show-dirhist:\\M-h\n\
+sort-previous:\\M-z\n\
+sort-next:\\M-x\n\
 toggle-hidden:\\M-i\n\
 toggle-hidden2:\\M-.\n\
 toggle-light:\\M-y\n\
 toggle-long:\\M-l\n\
-sort-previous:\\M-z\n\
-sort-next:\\M-x\n\
-bookmarks:\\M-b\n\
-select-all:\\M-a\n\
-deselect-all:\\M-d\n\
-mountpoints:\\M-m\n\
-dirs-first:\\M-g\n\
-selbox:\\M-s\n\
-lock:\\M-o\n\
+toggle-max-name-len:\\C-\\M-l\n\
+toggle-disk-usage:\\C-\\M-i\n\
+trash-sel:\\C-\\M-t\n\
+untrash-all:\\C-\\M-u\n\n\
 # F6-12\n\
 open-mime:\\e[17~\n\
 open-jump-db:\\e[18~\n\
@@ -361,7 +364,8 @@ edit-color-scheme:\\e[19~\n\
 open-keybinds:\\e[20~\n\
 open-config:\\e[21~\n\
 open-bookmarks:\\e[23~\n\
-quit:\\e[24~\n\n\
+quit:\\e[24~\n\
+\n\
 # Plugins\n\
 # 1) Make sure your plugin is in the plugins directory (or use any of the\n\
 # plugins in there)\n\
@@ -381,10 +385,8 @@ quit:\\e[24~\n\n\
 static int
 import_from_data_dir(char *src_filename, char *dest)
 {
-	if (!data_dir || !src_filename || !dest)
-		return EXIT_FAILURE;
-
-	if (!*data_dir || !*src_filename || !*dest)
+	if (!data_dir || !src_filename || !dest
+	|| !*data_dir || !*src_filename || !*dest)
 		return EXIT_FAILURE;
 
 	struct stat attr;
