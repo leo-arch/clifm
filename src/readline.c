@@ -946,12 +946,13 @@ my_rl_path_completion(const char *text, int state)
 		type = ent->d_type;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
-		if (nwords == 1 && ((type == DT_DIR && autocd == 0)
-		|| (type != DT_DIR && auto_open == 0)))
+		if (((suggestions == 1 && nwords == 1) || !strchr(rl_line_buffer, ' '))
+		&& ((type == DT_DIR && autocd == 0) || (type != DT_DIR && auto_open == 0)))
 			continue;
 
 		/* Only dir names for cd */
-		if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+		if ((suggestions == 0 || nwords > 1) && xargs.fuzzy_match == 1
+		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && type != DT_DIR)
 			continue;
 
@@ -980,7 +981,6 @@ my_rl_path_completion(const char *text, int state)
 					break;
 
 				case DT_DIR: match = 1; break;
-
 				default: break;
 				}
 			}
@@ -1446,20 +1446,18 @@ filenames_gen_text(const char *text, int state)
 
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = file_info[i].name) != NULL) {
-		if (nwords == 1 && ( (file_info[i].dir == 1 && autocd == 0)
-		|| (file_info[i].dir == 0 && auto_open == 0) )) {
-			i++;
-			continue;
-		}
-		/* If cd, list only directories */
-		if ((nwords > 1 || (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
-		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
-		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0) {
-			i++;
-			continue;
-//			return (char *)NULL;
-		}
 		i++;
+		/* If first word, filter files according to autocd and auto-open values */
+		if (((suggestions == 1 && nwords == 1) || !strchr(rl_line_buffer, ' '))
+		&& ( (file_info[i - 1].dir == 1 && autocd == 0)
+		|| (file_info[i - 1].dir == 0 && auto_open == 0) ))
+			continue;
+
+		/* If cd, list only directories */
+		if ((suggestions == 0 || nwords > 1 || (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
+		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+		&& rl_line_buffer[2] == ' ' && file_info[i - 1].dir == 0)
+			continue;
 
 		if (case_sens_path_comp ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
