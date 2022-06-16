@@ -28,6 +28,5 @@ void parse_autocmd_line(char *cmd);
 void reset_opts(void);
 int check_autocmds(void);
 void revert_autocmd_opts(void);
-void free_autocmds(void);
 
 #endif /* AUTOCMDS_H */

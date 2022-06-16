@@ -1064,43 +1064,20 @@ create_usr_var(char *str)
 	return EXIT_SUCCESS;
 }
 
-/* Set STR as the program current shell */
-/*int
-set_shell(char *str)
+void
+free_autocmds(void)
 {
-	if (!str || !*str)
-		return EXIT_FAILURE;
-
-	// IF no slash in STR, check PATH env variable for a file named STR
-	// and get its full path
-	char *full_path = (char *)NULL;
-
-	if (strcntchr(str, '/') == -1)
-		full_path = get_cmd_path(str);
-
-	char *tmp = (char *)NULL;
-
-	if (full_path)
-		tmp = full_path;
-	else
-		tmp = str;
-
-	if (access(tmp, X_OK) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp, strerror(errno));
-		return EXIT_FAILURE;
+	int i = (int)autocmds_n;
+	while (--i >= 0) {
+		free(autocmds[i].pattern);
+		free(autocmds[i].cmd);
+		autocmds[i].color_scheme = (char *)NULL;
 	}
-
-	if (user.shell)
-		free(user.shell);
-
-	user.shell = savestring(tmp, strlen(tmp));
-	printf(_("Successfully set '%s' as %s default shell\n"), user.shell,
-	    PROGRAM_NAME);
-
-	if (full_path)
-		free(full_path);
-	return EXIT_SUCCESS;
-} */
+	free(autocmds);
+	autocmds = (struct autocmds_t *)NULL;
+	autocmds_n = 0;
+	autocmd_set = 0;
+}
 
 void
 free_tags(void)
@@ -1200,16 +1177,8 @@ free_stuff(void)
 
 	free_prompts();
 	free(prompts_file);
-
-	i = (int)autocmds_n;
-	while (--i >= 0) {
-		free(autocmds[i].pattern);
-		free(autocmds[i].cmd);
-	}
-	free(autocmds);
-
+	free_autocmds();
 	free_tags();
-
 	free_remotes(1);
 
 	if (xargs.stealth_mode != 1)
@@ -1419,90 +1388,6 @@ get_term_size(void)
 	term_cols = w.ws_col;
 	term_rows = w.ws_row;
 }
-/*
-static int
-set_alt_screen_buf(void)
-{
-	puts("\x1b[?1047h");
-	return 1;
-}
-
-static int
-unset_alt_screen_buf(void)
-{
-	printf("\x1b[?1047l");
-	return 0;
-}
-
-void
-refresh_files_list(void)
-{
-	static int state = 0;
-	if (term_cols < MIN_SCREEN_WIDTH || term_rows < MIN_SCREEN_HEIGHT) {
-		if (state == 0)
-			state = set_alt_screen_buf();
-		CLEAR;
-		puts("\x1b[H");
-		printf(_("%s: Minimum screen size is %dx%d\n"), PROGRAM_NAME,
-			MIN_SCREEN_WIDTH, MIN_SCREEN_HEIGHT);
-		return;
-	}
-
-	if (state == 1)
-		state = unset_alt_screen_buf();
-
-	if (autols) {
-		if (flags & RELOADING_BINARIES) {
-			char p[PATH_MAX];
-			*p = '\0';
-			getcwd(p, PATH_MAX);
-			if (*workspaces[cur_ws].path != *p
-			|| strcmp(p, workspaces[cur_ws].path) != 0)
-				chdir(workspaces[cur_ws].path);
-		}
-		write(STDOUT_FILENO, "\n", 1);
-		reload_dirlist();
-	}
-
-	if (flags & RUNNING_CMD_FG) {
-		write(STDOUT_FILENO, " ...\x1b[4D", 8);
-		fflush(stdout);
-		return;
-	}
-
-//	if (!(flags & RUNNING_SHELL_CMD) || bg_proc == 1)
-	if ((!(flags & RUNNING_SHELL_CMD) && bg_proc == 0) || bg_proc == 1)
-		rl_reset_line_state();
-	if (bg_proc == 1 || !(flags & RUNNING_CMD_FG))
-		rl_redisplay();
-} */
-
-/* BE READY FOR THE UGLIEST WORKAROUND EVER!
- * This code is aimed to check whether some terminal program has taken
- * control over our screen. How it does this? Immediately before running
- * commands (launch_exec functions) we store the current cursor position.
- * Then, upon SIGWINCH, we check this position again: if not the same,
- * some external program is controlling the screen, in which case we
- * should not attempt to refresh the files list. Instead, set a flag to
- * refresh the screen only after the currently controlliong program exits.
- * This thing basically works, but is still BAD, BAD, BAD.
- * The get_cursor_position function calls isatty(3) and sscanf(3), which
- * are not async-signal-safe functions and should not thereby be called
- * from a signal handler. See signal-safety(7) */
-/*static int
-screen_is_ours(void)
-{
-	int c = 0, r = 0;
-	write(STDOUT_FILENO, "\x1b[?1047l", 8);
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &c, &r);
-	if (c != curcol || r != currow) {
-		write(STDOUT_FILENO, "\x1b[?1047h", 8);
-		flags |= DELAYED_REFRESH;
-		return 0;
-	}
-
-	return 1;
-} */
 
 /* Get new window size and update/refresh the screen accordingly */
 static void
@@ -1513,38 +1398,8 @@ sigwinch_handler(int sig)
 		return;
 
 	get_term_size();
-
-/*	if (bg_proc == 0 && screen_is_ours() == 0)
-		return; */
-
-//	if ((!(flags & RUNNING_SHELL_CMD) && bg_proc == 0) || bg_proc == 1) {
-//		return;
-/*		reload_dirlist();
-		rl_reset_line_state();
-		rl_redisplay(); */
-//	} else {
 	flags |= DELAYED_REFRESH;
-//	}
-/*	if (bg_proc == 1 || !(flags & RUNNING_CMD_FG)) {
-		reload_dirlist();
-		rl_reset_line_state();
-		rl_redisplay();
-	} else {
-		flags |= DELAYED_REFRESH;
-	} */
-	/* THIS SHOULDN'T BE CALLED FROM HERE: THE WHOLE THING IS NOT ASYNC-SIGNAL-SAFE! */
-//	refresh_files_list();
 }
-/*
-static void
-sigusr_handler(int sig)
-{
-	if (sig == SIGUSR1)
-		puts("This is the second biggest signal I've ever seen!");
-	else
-		puts("The signals are very strong tonight");
-	fflush(stdout);
-} */
 
 void
 set_signals_to_ignore(void)

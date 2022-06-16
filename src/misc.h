@@ -31,6 +31,7 @@ void bonus_function(void);
 int create_usr_var(char *str);
 int expand_prompt_name(char *name);
 int filter_function(char *arg);
+void free_autocmds(void);
 void free_prompts(void);
 void free_software(void);
 void free_stuff(void);

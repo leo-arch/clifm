@@ -38,8 +38,7 @@
 #include "strings.h"
 #include "sanitize.h"
 
-/* The opts struct contains option values previous to any autocommand
- * call */
+/* The opts struct contains option values previous to any autocommand call */
 void
 reset_opts(void)
 {
@@ -59,6 +58,9 @@ reset_opts(void)
 int
 check_autocmds(void)
 {
+	if (!autocmds || autocmds_n == 0)
+		return EXIT_SUCCESS;
+
 	int i = (int)autocmds_n, found = 0;
 	while (--i >= 0) {
 		if (!autocmds[i].pattern)
@@ -108,8 +110,8 @@ check_autocmds(void)
 			continue;
 		}
 
-		size_t j = 0;
-		for (; j < g.gl_pathc; j++) {
+		size_t j;
+		for (j = 0; j < g.gl_pathc; j++) {
 			if (*workspaces[cur_ws].path == *g.gl_pathv[j]
 			&& strcmp(workspaces[cur_ws].path, g.gl_pathv[j]) == 0) {
 				found = 1;
@@ -118,15 +120,15 @@ check_autocmds(void)
 		}
 		globfree(&g);
 
-		if (!rev) {
-			if (!found)
+		if (rev == 0) {
+			if (found == 0)
 				continue;
-		} else if (found) {
+		} else if (found == 1) {
 			continue;
 		}
 
 RUN_AUTOCMD:
-		if (!autocmd_set) {
+		if (autocmd_set == 0) {
 			/* Backup current options, only if there was no autocmd for this directory */
 			opts.light_mode = light_mode;
 			opts.files_counter = files_counter;
@@ -194,24 +196,6 @@ revert_autocmd_opts(void)
 		set_colors(opts.color_scheme, 0);
 	autocmd_set = 0;
 }
-
-#ifdef AUTOCMDS_TEST
-void
-free_autocmds(void)
-{
-	int i = (int)autocmds_n;
-	while (--i >= 0) {
-		free(autocmds[i].pattern);
-		free(autocmds[i].cmd);
-	}
-	free(autocmds);
-	autocmds = (struct autocmds_t *)NULL;
-	autocmds_n = 0;
-	autocmd_set = 0;
-
-	opts.color_scheme = (char *)NULL;
-}
-#endif /* AUTOCMDS_TEST */
 
 /* Store each autocommand option in the corresponding field of the
  * autocmds struct */

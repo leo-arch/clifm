@@ -2411,12 +2411,8 @@ reset_variables(void)
 	free(wprompt_str);
 	fzftab_options = tags_dir = wprompt_str = (char *)NULL;
 
-#ifdef AUTOCMDS_TEST
 	free_autocmds();
-#endif
-
 	free_tags();
-
 	free_remotes(0);
 
 	if (_filter) {
@@ -2460,11 +2456,13 @@ reset_variables(void)
 	clear_screen = UNSET;
 	colorize = UNSET;
 	columned = UNSET;
+	cp_cmd = UNSET;
 	dirhist_map = UNSET;
 	disk_usage = UNSET;
 	ext_cmd_ok = UNSET;
 	files_counter = UNSET;
 	follow_symlinks = UNSET;
+	full_dir_size = UNSET;
 #ifndef _NO_FZF
 	fzftab = UNSET;
 #endif
@@ -2481,16 +2479,25 @@ reset_variables(void)
 	listing_mode = UNSET;
 	logs_enabled = UNSET;
 	long_view = UNSET;
+
+	max_dirhist = UNSET;
+	max_files = UNSET;
+	max_hist = UNSET;
+	max_name_len = DEF_MAX_NAME_LEN;
 	max_jump_total_rank = UNSET;
+	max_log = UNSET;
+	max_path = UNSET;
 	max_printselfiles = UNSET;
-	min_name_trim = UNSET;
-	min_jump_rank = UNSET;
+
+	mv_cmd = UNSET;
 	no_eln = UNSET;
 	pager = UNSET;
+	print_removed_files = UNSET;
 	print_selfiles = UNSET;
 	prompt_offset = UNSET;
 	prompt_notif = UNSET;
 	restore_last_path = UNSET;
+	search_strategy = UNSET;
 	share_selbox = UNSET;
 	show_hidden = UNSET;
 	sort = UNSET;

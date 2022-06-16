@@ -493,6 +493,7 @@ set_colorscheme(char *arg)
 		|| strcmp(arg, color_schemes[i]) != 0)
 			continue;
 		cs_found = 1;
+
 		if (set_colors(arg, 0) != EXIT_SUCCESS)
 			continue;
 		cur_cscheme = color_schemes[i];
