@@ -1962,13 +1962,13 @@ rl_suggestions(const unsigned char c)
 				break;
 
 			int nlen = (int)wlen;
-			while (word[nlen - 1] == ' ') {
+			while (nlen > 0 && word[nlen - 1] == ' ') {
 				nlen--;
 				word[nlen] = '\0';
 			}
 
 			/* If ELN&, remove ending '&' to check the ELN */
-			if (word[nlen - 1] == '&') {
+			if (nlen > 0 && word[nlen - 1] == '&') {
 				nlen--;
 				word[nlen] = '\0';
 			}
