@@ -312,7 +312,7 @@ remove_tags(char **args)
 		if (stat(dir, &a) == -1 || !S_ISDIR(a.st_mode))
 			return print_no_such_tag(args[i]);
 
-		char *cmd[] = {"rm", "-r", dir, NULL};
+		char *cmd[] = {"rm", "-r", "--", dir, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS) {
 			printf(_("%s: %s: Successfully removed tag\n"), PROGRAM_NAME, args[i]);
 			reload_tags();
@@ -736,7 +736,7 @@ tags_function(char **args)
 	if (*a[1] == 'n' && strcmp(a[1], "new") == 0)
 		{ exit_status = create_tags(a); goto END; }
 
-	if ((*a[1] == 'r' && strcmp(a[1], "rm") == 0)
+	if ((*a[1] == 'r' && (strcmp(a[1], "rm") == 0 || strcmp(a[1], "remove") == 0))
 	|| (*a[1] == 'd' && strcmp(a[1], "del") == 0))
 		{ exit_status = remove_tags(a); goto END; }
 
