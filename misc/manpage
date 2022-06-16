@@ -1894,6 +1894,7 @@ The following codes are used to control \fBclifm\fR's files list:
  \fBlv\fR     Long/detail view      lv=0
  \fBmf\fR     Max files             mf=100
  \fBmn\fR     Max file name length  mn=20
+ \fBod\fR     Only directories      od=1
  \fBpg\fR     Pager                 pg=0
  \fBst\fR     Sort method           st=5
  \fBsr\fR     Reverse sort          sr=1
