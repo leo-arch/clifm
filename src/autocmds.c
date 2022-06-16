@@ -49,6 +49,7 @@ reset_opts(void)
 	opts.long_view = long_view;
 	opts.show_hidden = show_hidden;
 	opts.max_name_len = max_name_len;
+	opts.only_dirs = only_dirs;
 	opts.pager = pager;
 	opts.sort = sort;
 	opts.sort_reverse = sort_reverse;
@@ -139,6 +140,7 @@ RUN_AUTOCMD:
 			opts.sort_reverse = sort_reverse;
 			opts.max_name_len = max_name_len;
 			opts.pager = pager;
+			opts.only_dirs = only_dirs;
 			if (autocmds[i].color_scheme && cur_cscheme)
 				opts.color_scheme = cur_cscheme;
 			else
@@ -155,6 +157,8 @@ RUN_AUTOCMD:
 			long_view = autocmds[i].long_view;
 		if (autocmds[i].show_hidden != -1)
 			show_hidden = autocmds[i].show_hidden;
+		if (autocmds[i].only_dirs != -1)
+			only_dirs = autocmds[i].only_dirs;
 		if (autocmds[i].pager != -1)
 			pager = autocmds[i].pager;
 		if (autocmds[i].sort != -1)
@@ -191,6 +195,7 @@ revert_autocmd_opts(void)
 	max_name_len = opts.max_name_len;
 	pager = opts.pager;
 	sort = opts.sort;
+	only_dirs = opts.only_dirs;
 	sort_reverse = opts.sort_reverse;
 	if (opts.color_scheme && opts.color_scheme != cur_cscheme)
 		set_colors(opts.color_scheme, 0);
@@ -242,6 +247,8 @@ set_autocmd_opt(char *opt)
 			autocmds[autocmds_n].max_files = a;
 		else if (*opt == 'm' && opt[1] == 'n')
 			autocmds[autocmds_n].max_name_len = a;
+		else if (*opt == 'o' && opt[1] == 'd')
+			autocmds[autocmds_n].only_dirs = a;
 		else if (*opt == 'p' && opt[1] == 'g')
 			autocmds[autocmds_n].pager = a;
 		else if (*opt == 's' && opt[1] == 't')
@@ -263,10 +270,12 @@ init_autocmd_opts()
 	autocmds[autocmds_n].long_view = opts.long_view;
 	autocmds[autocmds_n].max_files = max_files;
 	autocmds[autocmds_n].max_name_len = max_name_len;
+	autocmds[autocmds_n].only_dirs = only_dirs;
 	autocmds[autocmds_n].pager = opts.pager;
 	autocmds[autocmds_n].show_hidden = opts.show_hidden;
 	autocmds[autocmds_n].sort = sort;
 	autocmds[autocmds_n].sort_reverse = sort_reverse;
+
 }
 
 /* Take an autocmd line (from the config file) and store parameters

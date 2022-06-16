@@ -661,7 +661,7 @@ struct autocmds_t {
 	int sort;
 	int sort_reverse;
 	int pager;
-	int pad;
+	int only_dirs;
 };
 
 extern struct autocmds_t *autocmds;
@@ -677,7 +677,7 @@ struct opts_t {
 	int sort;
 	int sort_reverse;
 	int pager;
-	int pad;
+	int only_dirs;
 };
 
 extern struct opts_t opts;

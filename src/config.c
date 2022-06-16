@@ -2491,6 +2491,7 @@ reset_variables(void)
 
 	mv_cmd = UNSET;
 	no_eln = UNSET;
+	only_dirs = UNSET;
 	pager = UNSET;
 	print_removed_files = UNSET;
 	print_selfiles = UNSET;
