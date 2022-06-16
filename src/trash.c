@@ -298,7 +298,7 @@ trash_clear(void)
 					strlen(info_file) + 2, sizeof(char));
 		sprintf(file2, "%s/%s", trash_info_dir, info_file);
 
-		char *tmp_cmd[] = {"rm", "-r", file1, file2, NULL};
+		char *tmp_cmd[] = {"rm", "-r", "--", file1, file2, NULL};
 		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 
 		free(file1);
@@ -431,7 +431,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 						+ strlen(file_suffix) + 2, sizeof(char));
 		sprintf(trash_file, "%s/%s", trash_files_dir, file_suffix);
 
-		char *tmp_cmd2[] = {"rm", "-r", trash_file, NULL};
+		char *tmp_cmd2[] = {"rm", "-r", "--", trash_file, NULL};
 		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
 		free(trash_file);
 		if (ret != EXIT_SUCCESS) {
@@ -501,7 +501,7 @@ remove_file_from_trash(char *name)
 	if (err_file != EXIT_SUCCESS || err_info != EXIT_SUCCESS)
 		return err;
 
-	char *cmd[] = {"rm", "-r", rm_file, rm_info, NULL};
+	char *cmd[] = {"rm", "-r", "--", rm_file, rm_info, NULL};
 	return launch_execve(cmd, FOREGROUND, E_NOFLAG);
 }
 
@@ -795,7 +795,7 @@ untrash_element(char *file)
 
 	free(url_decoded);
 
-	char *cmd[] = {"rm", "-r", undel_info, NULL};
+	char *cmd[] = {"rm", "-r", "--", undel_info, NULL};
 	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: undel: %s: Error removing info file\n"),

@@ -987,7 +987,7 @@ save_last_path(void)
 		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else { /* If not cd on quit, remove the file */
-		char *cmd[] = {"rm", "-f", last_dir_tmp, NULL};
+		char *cmd[] = {"rm", "-f", "--", last_dir_tmp, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
@@ -1528,7 +1528,7 @@ handle_stdin()
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, stdin_tmp_dir,
 		    strerror(errno));
 
-		char *rm_cmd[] = {"rm", "-drf", stdin_tmp_dir, NULL};
+		char *rm_cmd[] = {"rm", "-drf", "--", stdin_tmp_dir, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
 
 		free(cwd);

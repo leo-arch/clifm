@@ -287,7 +287,7 @@ profile_add(char *prof)
 		return EXIT_FAILURE;
 
 	int found = check_profile(prof);
-	if (found) {
+	if (found == 1) {
 		fprintf(stderr, _("%s: %s: Profile already exists\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
@@ -383,31 +383,30 @@ profile_del(char *prof)
 
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
-	if (!found) {
+	if (found == 0) {
 		fprintf(stderr, _("%s: %s: No such profile\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
 
-	char *tmp = (char *)xnmalloc(strlen(config_dir_gral) + strlen(prof) + 11,
-				sizeof(char));
+	char *tmp = (char *)xnmalloc(strlen(config_dir_gral) + strlen(prof) + 11, sizeof(char));
 	sprintf(tmp, "%s/profiles/%s", config_dir_gral, prof);
 
-	char *cmd[] = {"rm", "-r", tmp, NULL};
+	char *cmd[] = {"rm", "-r", "--", tmp, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	free(tmp);
 
-	if (ret == EXIT_SUCCESS) {
-		printf(_("%s: '%s': Profile successfully removed\n"), PROGRAM_NAME, prof);
-		size_t i;
-		for (i = 0; profile_names[i]; i++)
-			free(profile_names[i]);
-
-		get_profile_names();
-		return EXIT_SUCCESS;
+	if (ret != EXIT_SUCCESS) {
+		fprintf(stderr, _("%s: %s: Error removing profile\n"), PROGRAM_NAME, prof);
+		return ret;
 	}
 
-	fprintf(stderr, _("%s: %s: Error removing profile\n"), PROGRAM_NAME, prof);
-	return EXIT_FAILURE;
+	printf(_("%s: '%s': Profile successfully removed\n"), PROGRAM_NAME, prof);
+	size_t i;
+	for (i = 0; profile_names[i]; i++)
+		free(profile_names[i]);
+
+	get_profile_names();
+	return EXIT_SUCCESS;
 }
 
 static int

@@ -85,7 +85,7 @@ kbinds_reset(void)
 	if (stat(kbinds_file, &file_attrib) == -1) {
 		exit_status = create_kbinds_file();
 	} else {
-		char *cmd[] = {"rm", kbinds_file, NULL};
+		char *cmd[] = {"rm", "--", kbinds_file, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 			exit_status = create_kbinds_file();
 		else
