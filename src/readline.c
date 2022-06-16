@@ -1945,6 +1945,28 @@ ext_options_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+static size_t
+rl_count_words(void)
+{
+	if (!rl_line_buffer)
+		return 0;
+
+	char *p = rl_line_buffer;
+	while (*p == ' ')
+		++p;
+	if (!*p)
+		return 0;
+
+	size_t c = 1;
+	while (*p) {
+		if (*p == ' ' && p > rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
+			c++;
+		p++;
+	}
+
+	return c;
+}
+
 /* THIS IS AWFUL! WRITE A BETTER IMPLEMENTATION */
 /* Complete with options for specific commands */
 static char *
@@ -1954,16 +1976,18 @@ options_generator(const char *text, int state)
 	if (!l || !*l)
 		return (char *)NULL;
 
-	static size_t len = 0;
-//	static size_t w = 0;
+	static size_t len = 0, w = 0;
 	static int i;
 	char *name;
 
-	if (!state) {
+	if (state == 0) {
 		i = 0;
 		len = strlen(text);
-//		w = rl_count_words();
+		w = rl_count_words();
 	}
+
+	if (w != 2) /* Complete internal options only for the second word */
+		return (char *)NULL;
 
 #define MAX_OPTS 16
 	char *_opts[MAX_OPTS] = {0};
@@ -2025,16 +2049,8 @@ options_generator(const char *text, int state)
 		}
 	}
 
-/*	if ((*l == '?' && l[1] == ' ') || (*l == 'h' && strncmp(l, "help ", 5) == 0))
-		rl_file_in_cwd_completion_desired = 0; */
-
 	if (!_opts[0])
 		return (char *)NULL;
-
-/*	if (w > 2) { // Do not complete options after the second word
-		rl_file_in_cwd_completion_desired = 0;
-		return (char *)NULL;
-	} */
 
 	while ((name = _opts[i++]) != NULL) {
 		if (strncmp(name, text, len) == 0)
@@ -2066,11 +2082,57 @@ users_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+static int
+tag_complete(const char *text)
+{
+	char *l = rl_line_buffer;
+	int comp = 0;
+	if (*(l + 1) && *(l + 2) == ' ') {
+		switch(*(l + 1)) {
+		case 'a': /* fallthough */
+		case 'u':
+			if (text && *text == ':') { /* We have a tag name */
+				comp = 1; cur_comp_type = TCMP_TAGS_C;
+			} else if (*(l + 1) == 'u') { /* We have a tagged file */
+				comp = 2;
+			}
+			break;
+		case 'd': /* fallthough */
+		case 'l': /* fallthough */
+		case 'm': /* fallthough */
+//		case 'n': /* fallthough */
+		case 'y':
+			if (*(l + 1) == 'd' || *(l + 1) == 'l') flags |= MULTI_SEL;
+			comp = 1; cur_comp_type = TCMP_TAGS_S; break;
+		default: break;
+		}
+	} else { /* MATCH LONG OPTIONS */
+		if (strncmp(l, "tag ", 4) != 0)
+			return comp;
+		char *p = l + 4;
+		if (!*p || strncmp(p, "untag ", 6) == 0) {
+			if (text && *text == ':') { /* We have a tag name */
+				comp = 1; cur_comp_type = TCMP_TAGS_C;
+			} else if (*p == 'u') { /* We have a tagged file */
+				comp = 2;
+			}
+		} else if (strncmp(p, "remove ", 7) == 0 || strncmp(p, "list ", 5) == 0
+		/*|| strncmp(p, "new ", 4) == 0 */ || strncmp(p, "rename ", 7) == 0
+		|| strncmp(p, "merge ", 6) == 0) {
+			if (*p == 'r' || *p == 'l') flags |= MULTI_SEL;
+			comp = 1; cur_comp_type = TCMP_TAGS_S;
+		}
+	}
+
+	return comp;
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
 	char **matches = (char **)NULL;
 	cur_comp_type = TCMP_NONE;
+	flags &= ~MULTI_SEL;
 	UNUSED(end);
 //	rl_sort_completion_matches = 1;
 
@@ -2193,27 +2255,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* 3. 't? TAG' and 't? :tag' */
-		if (tags_n > 0 && *lb == 't') {
-			int comp = 0;
-			switch(*(lb + 1)) {
-			case 'a': /* fallthough */
-			case 'u':
-				if (*text == ':') {
-					/* We have a tag name */
-					comp = 1;
-					cur_comp_type = TCMP_TAGS_C;
-				} else if (*(lb + 1) == 'u') {
-					/* We're not matching a tag, but a tagged file */
-					comp = 2;
-				}
-				break;
-			case 'd': /* fallthough */
-			case 'l': /* fallthough */
-			case 'm': /* fallthough */
-			case 'n': /* fallthough */
-			case 'y': comp = 1; cur_comp_type = TCMP_TAGS_S; break;
-			default: break;
-			}
+		if (tags_n > 0 && *lb == 't' && rl_end > 2) {
+			int comp = tag_complete(text);
 			if (comp == 1) {
 				matches = rl_completion_matches(text, &tags_generator);
 				if (matches)

@@ -787,7 +787,7 @@ is_multi_sel(void)
 
 	if (t == TCMP_SEL || t == TCMP_DESEL || t == TCMP_RANGES
 	|| t == TCMP_TRASHDEL || t == TCMP_UNTRASH || t == TCMP_TAGS_F
-	|| t == TCMP_TAGS_U)
+	|| t == TCMP_TAGS_U || (flags & MULTI_SEL))
 		return 1;
 
 /*	if (t == TCMP_BOOKMARK && (strncmp(rl_line_buffer, "bm del ", 7) == 0
