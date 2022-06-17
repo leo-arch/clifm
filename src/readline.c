@@ -310,8 +310,7 @@ rl_exclude_input(unsigned char c)
 
 		/* Handle history events. If a suggestion has been printed and
 		 * a history event is triggered (usually via the Up and Down arrow
-		 * keys), the suggestion buffer won't be freed. Let's do it
-		 * here */
+		 * keys), the suggestion buffer won't be freed. Let's do it here */
 #ifndef _NO_SUGGESTIONS
 		else if ((c == 'A' || c == 'B') && suggestion_buf)
 			clear_suggestion(CS_FREEBUF);
@@ -2134,7 +2133,6 @@ my_rl_completion(const char *text, int start, int end)
 	cur_comp_type = TCMP_NONE;
 	flags &= ~MULTI_SEL;
 	UNUSED(end);
-//	rl_sort_completion_matches = 1;
 
 	while (*text == '\\')
 		++text;

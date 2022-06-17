@@ -862,7 +862,6 @@ clean_rl_buffer(const char *text)
 			rl_point = rl_end = 0;
 		}
 		ERASE_TO_RIGHT;
-//		printf("\x1b[0K");
 	}
 
 	rl_insert_text(text);
@@ -999,7 +998,6 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	MOVE_CURSOR_UP(lines);
-//	printf("\x1b[%dA", lines); /* Move up %d lines */
 
 	/* No results (the user pressed ESC) */
 	if (ret != EXIT_SUCCESS) {

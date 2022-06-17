@@ -24,7 +24,7 @@
 
 #include "helpers.h"
 #ifdef __OpenBSD__
-#include <sys/dirent.h>
+# include <sys/dirent.h>
 #endif
 #include <dirent.h>
 #include <errno.h>
@@ -39,7 +39,7 @@
 
 #include "actions.h"
 #ifndef _NO_ARCHIVING
-#include "archives.h"
+# include "archives.h"
 #endif
 #include "aux.h"
 #include "bookmarks.h"
@@ -66,12 +66,12 @@
 #include "sort.h"
 #include "strings.h"
 #ifndef _NO_TRASH
-#include "trash.h"
+# include "trash.h"
 #endif
 #include "messages.h"
 #include "media.h"
 #ifndef _NO_BLEACH
-#include "name_cleaner.h"
+# include "name_cleaner.h"
 #endif
 #include "sanitize.h"
 #include "tags.h"
@@ -269,8 +269,6 @@ launch_execle(const char *cmd)
 	if (!cmd || !*cmd)
 		return EXNULLERR;
 
-//	get_cursor_position(STDIN_FILENO, STDOUT_FILENO, &curcol, &currow);
-
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
 	signal(SIGTSTP, SIG_DFL);
@@ -279,10 +277,7 @@ launch_execle(const char *cmd)
 	&& xargs.secure_env == 0)
 		sanitize_cmd_environ();
 
-//	flags |= RUNNING_SHELL_CMD;
-//	flags |= RUNNING_CMD_FG;
 	int ret = system(cmd);
-//	flags &= ~RUNNING_CMD_FG;
 
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
 	&& xargs.secure_env == 0)
@@ -300,7 +295,6 @@ launch_execle(const char *cmd)
 
 	if (flags & DELAYED_REFRESH) {
 		flags &= ~DELAYED_REFRESH;
-//		get_term_size();
 		reload_dirlist();
 	}
 
@@ -421,21 +415,17 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		if (bg == 1) {
 			ret = run_in_background(pid);
 		} else {
-//			flags |= RUNNING_CMD_FG;
 			ret = run_in_foreground(pid);
-//			flags &= ~RUNNING_CMD_FG;
 			if (flags & DELAYED_REFRESH) {
 				flags &= ~DELAYED_REFRESH;
-//				get_term_size();
 				reload_dirlist();
 			}
 		}
 	}
 
-	if (bg == 1 && ret == EXIT_SUCCESS) {
-//		get_term_size();
+	if (bg == 1 && ret == EXIT_SUCCESS)
 		reload_dirlist();
-	}
+
 	return ret;
 }
 
@@ -477,8 +467,6 @@ graceful_quit(char **args)
 static inline void
 reload_binaries(void)
 {
-//	flags |= RELOADING_BINARIES;
-
 	if (bin_commands) {
 		int j = (int)path_progsn;
 		while (--j >= 0)
@@ -495,8 +483,6 @@ reload_binaries(void)
 
 	path_n = (size_t)get_path_env();
 	get_path_programs();
-
-//	flags &= ~RELOADING_BINARIES;
 }
 
 static inline int
@@ -582,21 +568,13 @@ check_shell_cmd_condtions(char **args)
 			return EXIT_FAILURE;
 	}
 
-	/* Check whether shell commands are allowed */
-	if (!ext_cmd_ok) {
+	if (ext_cmd_ok == 0) {
 		fprintf(stderr, _("%s: External commands are not allowed. "
 			"Run 'ext on' to enable them.\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
-	if (*args[0] == *argv_bk[0] && strcmp(args[0], argv_bk[0]) == 0) {
-		fprintf(stderr, "%s: Nested instances are not allowed\n",
-		    PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
-
 	return EXIT_SUCCESS;
-
 }
 
 static int
@@ -620,7 +598,7 @@ run_shell_cmd(char **args)
 
 	/* Calling the system shell is vulnerable to command injection, true.
 	 * But it is the user here who is directly running the command: this
-	 * is not an untrusted source */
+	 * should not be taken as an untrusted source */
 	int exit_status = launch_execle(cmd); /* lgtm [cpp/command-line-injection] */
 	free(cmd);
 

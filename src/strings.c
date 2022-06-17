@@ -628,13 +628,13 @@ remove_quotes(char *str)
 	return (char *)NULL;
 }
 
-/* This function takes a string as argument and split it into substrings
+/* This function takes a string as argument and splits it into substrings
  * taking tab, new line char, and space as word delimiters, except when
  * they are preceded by a quote char (single or double quotes) or in
  * case of command substitution ($(cmd) or `cmd`), in which case
- * eveything after the corresponding closing char is taken as one single
+ * eveything before the corresponding closing char is taken as one single
  * string. It also escapes special chars. It returns an array of
- * splitted strings (without leading and terminating spaces) or NULL if
+ * split strings (without leading and terminating spaces) or NULL if
  * str is NULL or if no substring was found, i.e., if str contains
  * only spaces. */
 char **
@@ -737,8 +737,8 @@ split_str(const char *str, const int update_args)
 			quote = *str;
 			str++;
 
-			/* Copy into the buffer whatever is after the first quote
-			 * up to the last quote or NULL */
+			/* Copy into the buffer whatever is after the first quote up to
+			 * the last quote or NULL */
 			while (*str && *str != quote) {
 				/* If char has special meaning, escape it */
 				if (!(flags & IN_BOOKMARKS_SCREEN) && is_quote_char(*str)) {
@@ -757,8 +757,7 @@ split_str(const char *str, const int update_args)
 			 * *STR is a null byte there was not ending quote */
 			if (!*str) {
 				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, quote);
-				/* Free the current buffer and whatever was already
-				 * allocated */
+				/* Free the current buffer and whatever was already allocated */
 				free(buf);
 				buf = (char *)NULL;
 				int i = (int)words;
@@ -814,7 +813,7 @@ split_str(const char *str, const int update_args)
 
 	/* The while loop stops when the null byte is reached, so that the last
 	 * substring is not printed, but still stored in the buffer. Therefore,
-	 * we need to add it, if not empty, to our subtrings array */
+	 * we need to add it, if not empty, to our substrings array */
 	buf[buf_len] = '\0';
 
 	if (buf_len > 0) {

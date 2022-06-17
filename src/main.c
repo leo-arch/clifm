@@ -1118,6 +1118,8 @@ main(int argc, char *argv[])
 	if (!jump_db || xargs.path == 1)
 		add_to_jumpdb(workspaces[cur_ws].path);
 
+//	int vanilla_readline = 1;
+//	if (vanilla_readline != 1)
 	initialize_readline();
 	/*Trim the directory history file if necessary */
 	check_file_size(dirhist_file, max_dirhist);
