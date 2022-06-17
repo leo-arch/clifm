@@ -416,14 +416,14 @@ launch_execve(char **cmd, const int bg, const int xflags)
 			ret = run_in_background(pid);
 		} else {
 			ret = run_in_foreground(pid);
-			if (flags & DELAYED_REFRESH) {
+			if ((flags & DELAYED_REFRESH) && xargs.open != 1) {
 				flags &= ~DELAYED_REFRESH;
 				reload_dirlist();
 			}
 		}
 	}
 
-	if (bg == 1 && ret == EXIT_SUCCESS)
+	if (bg == 1 && ret == EXIT_SUCCESS && xargs.open != 1)
 		reload_dirlist();
 
 	return ret;

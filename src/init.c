@@ -1504,8 +1504,7 @@ external_arguments(int argc, char **argv)
 			if (IS_FILE_URI(_path)) {
 				_path = optarg + 7;
 				if (stat(_path, &attr) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg,
-						strerror(errno));
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg, strerror(errno));
 					exit(errno);
 				}
 				url = 0;
@@ -1515,8 +1514,7 @@ external_arguments(int argc, char **argv)
 			if (is_url(_path) == EXIT_FAILURE) {
 				url = 0;
 				if (stat(_path, &attr) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _path,
-						strerror(errno));
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _path, strerror(errno));
 					exit(errno);
 				}
 			}
