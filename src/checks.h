@@ -30,6 +30,7 @@
 void check_file_size(char *log_file, int max);
 int check_file_access(const struct stat *file);
 char **check_for_alias(char **cmd);
+int check_glob_char(const char *str, const int only_glob);
 int check_immutable_bit(char *file);
 int check_regex(char *str);
 void check_term(void);

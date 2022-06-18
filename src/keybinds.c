@@ -346,6 +346,13 @@ static int
 rl_prepend_sudo(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+#ifndef _NO_SUGGESTIONS
+	if (suggestion.printed && suggestion_buf) {
+		clear_suggestion(CS_FREEBUF);
+		fputs(df_c, stdout);
+	}
+#endif
+
 	int free_s = 1;
 	size_t len = 0;
 	char *t = getenv("CLIFM_SUDO_CMD"),

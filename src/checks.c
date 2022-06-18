@@ -51,6 +51,13 @@
 static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
 
 int
+check_glob_char(const char *str, const int gflag)
+{
+	if (!str || !*str) return 0;
+	return strpbrk(str, (gflag == GLOB_ONLY) ? GLOB_CHARS : GLOB_REGEX_CHARS) ? 1 : 0;
+}
+
+int
 is_file_in_cwd(char *name)
 {
 	if (!name || !*name || !workspaces[cur_ws].path)

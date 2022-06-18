@@ -220,6 +220,9 @@ extern int watch;
 #define REGEX_ONLY 1
 #define GLOB_REGEX 2
 
+#define GLOB_CHARS "*?[{"
+#define GLOB_REGEX_CHARS "*?[{|^+$."
+
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
@@ -919,12 +922,13 @@ enum comp_type {
 	TCMP_ENVIRON =    18,
 	TCMP_TAGS_T =     19, /* T keyword: 't:TAG' */
 	TCMP_TAGS_C =     20, /* Colon: 'tag file :TAG' */
-	TCMP_TAGS_S =     21,  /* Simple completion: 'tag rm TAG' */
-	TCMP_TAGS_F =     22,  /* Tagged files completion: 't:FULL_TAG_NAME' */
-	TCMP_TAGS_U =     23,  /* Tagged files for the untag function */
+	TCMP_TAGS_S =     21, /* Simple completion: 'tag rm TAG' */
+	TCMP_TAGS_F =     22, /* Tagged files completion: 't:FULL_TAG_NAME' */
+	TCMP_TAGS_U =     23, /* Tagged files for the untag function */
 	TCMP_ALIAS =      24,
 	TCMP_PROMPTS =    25,
-	TCMP_USERS =      26
+	TCMP_USERS =      26,
+	TCMP_GLOB =       27
 };
 
 extern enum comp_type cur_comp_type;

@@ -43,27 +43,12 @@
 #include "sort.h"
 
 static int
-check_glob_char(const char *str)
-{
-	size_t i;
-	for (i = 1; str[i]; i++) {
-		if (str[i] == '*' || str[i] == '?' || str[i] == '[' || str[i] == '{'
-		/* Consider regex chars as well: we don't want this "r$" to become this "*r$*" */
-		|| str[i] == '|' || str[i] == '^' || str[i] == '+' || str[i] == '$'
-		|| str[i] == '.')
-			return 1;
-	}
-
-	return 0;
-}
-
-static int
 run_find(char *search_path, char *arg)
 {
 	char *_path = (search_path && *search_path) ? search_path : ".";
 	char *method = search_strategy == REGEX_ONLY ? "-regex" : "-name";
 
-	int glob_char = check_glob_char(arg + 1);
+	int glob_char = check_glob_char(arg + 1, GLOB_REGEX);
 	if (glob_char == 1) {
 		char *cmd[] = {"find", _path, method, arg + 1, NULL};
 		return launch_execve(cmd, FOREGROUND, E_NOSTDERR);
@@ -174,7 +159,7 @@ search_glob(char **args, const int invert)
 		tmp++;
 
 	/* Search for globbing char */
-	int glob_char_found = check_glob_char(tmp);
+	int glob_char_found = check_glob_char(tmp, GLOB_REGEX);
 
 	/* If search string is just "STR" (no glob chars), change it to either "*STR*"
 	 * (if search strategy is GLOB_ONLY), or ".*STR.*" */

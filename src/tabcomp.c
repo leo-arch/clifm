@@ -318,6 +318,12 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	if (n)
 		*n = '\0';
 
+	if (cur_comp_type == TCMP_GLOB) {
+		size_t blen = strlen(buf);
+		if (blen > 0 && buf[blen - 1] == '/')
+			buf[blen - 1] = '\0';
+	}
+
 	if (cur_comp_type == TCMP_ENVIRON || cur_comp_type == TCMP_USERS)
 		/* Skip the leading dollar sign (env vars) and tilde (users) */
 		buf++;
@@ -415,7 +421,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	struct stat attr;
 	if (stat(d, &attr) != -1 && S_ISDIR(attr.st_mode)) {
 		/* If not the root directory, append a slash */
-		if (*d != '/' || *(d + 1) || cur_comp_type == TCMP_USERS)
+		if ((*d != '/' || *(d + 1) || cur_comp_type == TCMP_USERS))
 			rl_insert_text("/");
 	} else {
 		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_TAGS_T)
@@ -472,7 +478,8 @@ run_fzf(const size_t *height, const int *offset, const char *lw, const int multi
 				*height_str ? height_str : "", *offset,
 				case_sens_path_comp ? "+i" : "-i",
 				lw ? lw : "", colorize == 0 ? "--no-color" : "",
-				multi ? "--multi --bind tab:toggle+down" : "",
+				multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
+ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				finder_in_file, finder_out_file);
 /*		snprintf(cmd, sizeof(cmd), "sk " // skim
 				"%s --margin=0,0,0,%d --color=16 "
@@ -543,8 +550,55 @@ print_no_finder_file(void)
 	return (char *)NULL;
 }
 
+/* If we are completing a path whose last component is a glob expression,
+ * return the selected match for this expression (STR) preceded by
+ * the initial portion of the path (everything before the glob expression):
+ * INITIAL_PATH. We need to do this because, in case of PATH/GLOB, glob(3)
+ * does not return the full path, but only the expanded glob expression
+ * Ex (underscore is an asterisk):
+ * downloads/_.pdf<TAB> -> downloads/file.pdf
+ * _.pdf<TAB> -> file.pdf */
+static char *
+get_glob_file_target(char *str, char *initial_path)
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	if (*str == '/' || !initial_path)
+		return str;
+
+	char *p = (char *)xnmalloc(strlen(initial_path) + strlen(str) + 1, sizeof(char));
+	sprintf(p, "%s%s", initial_path, str);
+
+	return p;
+}
+
+/* Given PATH/GLOB (last word of the line buffer) return PATH/, in which case
+ * the return value should be freed by the caller. If not PATH/GLOB, return NULL
+ * Ex (underscore is an asterisk):
+ * documents/misc/_.c -> documents/misc/ */
+static char *
+get_initial_path(void)
+{
+	char *lp = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
+	char *ls = (lp && *(++lp)) ? strrchr(lp, '/') : (char *)NULL;
+
+	if (!ls || !*(ls + 1) || check_glob_char(ls, GLOB_ONLY) == 0)
+		ls = (char *)NULL;
+
+	if (!ls)
+		return (char *)NULL;
+
+	++ls;
+	char bk = *ls;
+	*ls = '\0';
+	char *p = savestring(lp, strlen(lp));
+	*ls = bk;
+	return p;
+}
+
 /* Recover finder (fzf/fzy) output from FINDER_OUT_FILE file
- * Return this output or NULL in case of error */
+ * Return this output (reformated if needed) or NULL in case of error */
 static inline char *
 get_fzf_output(const int multi)
 {
@@ -556,6 +610,7 @@ get_fzf_output(const int multi)
 	*buf = '\0';
 	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
+	char *initial_path = (cur_comp_type == TCMP_GLOB) ? get_initial_path() : (char *)NULL;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n')
@@ -564,7 +619,9 @@ get_fzf_output(const int multi)
 		char *q = line;
 		if (multi == 1) {
 			char *s = line;
-			if (cur_comp_type == TCMP_TAGS_F && tags_dir && cur_tag)
+			if (cur_comp_type == TCMP_GLOB)
+				s = get_glob_file_target(line, initial_path);
+			else if (cur_comp_type == TCMP_TAGS_F && tags_dir && cur_tag)
 				s = get_tagged_file_target(line);
 			q = escape_str(s);
 			if (s != line)
@@ -591,6 +648,7 @@ get_fzf_output(const int multi)
 		}
 	}
 
+	free(initial_path);
 	free(line);
 	fclose(fp);
 	unlink(finder_out_file);
@@ -939,7 +997,7 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 	/* In case of a range, the sel keyword, or a full tag expression,
 	 * the query string is just empty */
 	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL
-	&& cur_comp_type != TCMP_TAGS_F) {
+	&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_GLOB) {
 		query = get_query_str(&fzf_offset);
 		if (!query) {
 			if (cur_comp_type == TCMP_TAGS_T)
@@ -1077,7 +1135,7 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 		prefix_len = 0;
 
 	} else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL
-	|| cur_comp_type == TCMP_TAGS_F) {
+	|| cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB) {
 		char *s = strrchr(rl_line_buffer, ' ');
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
@@ -1370,7 +1428,6 @@ AFTER_USUAL_COMPLETION:
 		 * such as if we change the string we are completing on and the new
 		 * set of matches don't require a quoted substring. */
 		char *replacement = matches[0];
-
 		should_quote = matches[0] && rl_completer_quote_characters &&
 		rl_filename_completion_desired && rl_filename_quoting_desired;
 
@@ -1408,13 +1465,14 @@ AFTER_USUAL_COMPLETION:
 		}
 
 		if (replacement && cur_comp_type != TCMP_HIST
+		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
 		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)
 		&& (cur_comp_type != TCMP_TAGS_F || !matches[1])) {
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
-			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK
+			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK || c == TCMP_GLOB
 			|| c == TCMP_PROMPTS) && !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
@@ -1430,7 +1488,6 @@ AFTER_USUAL_COMPLETION:
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;
-
 #ifndef _NO_HIGHLIGHT
 			if (highlight && !wrong_cmd) {
 				size_t k, l = 0;
@@ -1500,8 +1557,7 @@ AFTER_USUAL_COMPLETION:
 			}
 
 			if (fzftab != 1 || cur_comp_type != TCMP_TAGS_T) {
-				temp_string[temp_string_index] = (char)(delimiter
-						? delimiter : ' ');
+				temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
 				temp_string_index++;
 			}
 			temp_string[temp_string_index] = '\0';
@@ -1592,8 +1648,7 @@ DISPLAY_MATCHES:
 					fputs(tx_c, stdout);
 				}
 #endif /* !_NO_HIGHLIGHT */
-				fprintf(rl_outstream,
-					 "Display all %d possibilities? (y or n) ", len);
+				fprintf(rl_outstream, "Display all %d possibilities? (y or n) ", len);
 				fflush(rl_outstream);
 				if (!get_y_or_n())
 					goto RESTART;

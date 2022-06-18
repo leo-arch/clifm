@@ -31,6 +31,7 @@
 //#endif
 #include <dirent.h>
 #include <fcntl.h>
+#include <glob.h>
 #include <stdio.h>
 #include <string.h>
 #ifdef __OpenBSD__
@@ -1718,7 +1719,43 @@ prompts_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-/* Return the list of currently trashed files matching TEXT or NULL */
+/* Return the list of matches for the glob expression TEXT or NULL if no matches */
+static char **
+rl_glob(const char *text)
+{
+	glob_t globbuf;
+
+	if (glob(text, 0, NULL, &globbuf) != EXIT_SUCCESS) {
+		globfree(&globbuf);
+		return (char **)NULL;
+	}
+
+	if (globbuf.gl_pathc == 1) {
+		char **t = (char **)xnmalloc(globbuf.gl_pathc + 1, sizeof(char *));
+		t[0] = savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
+		t[1] = (char *)NULL;
+		globfree(&globbuf);
+		return t;
+	}
+
+	size_t i, j = 1;
+	char **t = (char **)xnmalloc(globbuf.gl_pathc + 3, sizeof(char *));
+	t[0] = xnmalloc(1, sizeof(char));
+	*t[0] = '\0';
+
+	for (i = 0; i < globbuf.gl_pathc; i++) {
+		if (SELFORPARENT(globbuf.gl_pathv[i]))
+			continue;
+		t[j] = savestring(globbuf.gl_pathv[i], strlen(globbuf.gl_pathv[i]));
+		j++;
+	}
+	t[j] = (char *)NULL;
+
+	globfree(&globbuf);
+	return t;
+}
+
+/* Return the list of currently trashed files matching TEXT, or NULL */
 static char **
 rl_trashed_files(const char *text)
 {
@@ -2169,7 +2206,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* If autocd or auto-open, try to expand ELN's first */
-		if (autocd || auto_open) {
+		if (autocd == 1 || auto_open == 1) {
 			if (*text >= '1' && *text <= '9') {
 				int n = atoi(text);
 
@@ -2192,6 +2229,15 @@ my_rl_completion(const char *text, int start, int end)
 					return matches;
 				}
 			}
+
+			/* #### WILDCARDS EXPANSION #### */
+/*			char *g = strpbrk(text, GLOB_CHARS);
+			if (g && !strchr(g, '/') && (matches = rl_glob(text))) {
+				cur_comp_type = TCMP_GLOB;
+				rl_filename_completion_desired = 1;
+				flags |= MULTI_SEL;
+				return matches;
+			} */
 		}
 
 		/* BOOKMARKS COMPLETION */
@@ -2290,6 +2336,17 @@ my_rl_completion(const char *text, int start, int end)
 				cur_comp_type = TCMP_USERS;
 				return matches;
 			}
+		}
+
+		/* #### WILDCARDS EXPANSION #### */
+		char *g = strpbrk(text, GLOB_CHARS);
+		/* Expand only glob expressions in the last path component */
+		if (g && !strchr(g, '/') && access(text, F_OK) != 0
+		&& (matches = rl_glob(text))) {
+			cur_comp_type = TCMP_GLOB;
+			rl_filename_completion_desired = 1;
+			flags |= MULTI_SEL;
+			return matches;
 		}
 
 		/* #### BACKDIR COMPLETION #### */
