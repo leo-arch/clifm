@@ -35,17 +35,17 @@ HELP="Usage:
 
 Alt-h: Toggle this help screen
 
-TAB, Alt-down: Mark + down
+TAB, Alt-down: Select + down
 
-Alt-up: Mark + up
+Alt-up: Select + up
 
-Alt-right: Mark all files
+Ctrl-s: Select all files
 
-Alt-left: Unmark all files
+Ctrl-d: Deselect all files
 
-Alt-Enter: Invert marked files
+Ctrl-t: Toggle selection
 
-Enter: Confirm and deselect all marked files
+Enter: Confirm and deselect all selected files
 
 Esc: Cancel and exit"
 
@@ -55,9 +55,9 @@ fzf --multi --marker='*' --info=inline \
 	--height="$fzf_height" --keep-right \
 	--bind "alt-down:toggle+down" \
 	--bind "alt-up:toggle+up" \
-	--bind "alt-right:select-all,alt-left:deselect-all" \
+	--bind "ctrl-s:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all" \
 	--bind "alt-h:toggle-preview" --preview-window=:wrap \
-	--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
+	--preview "printf %s \"$HELP\"" \
 	--color="$(get_fzf_colors)" \
 	--header "Deselect selected files" \
 	--reverse "$(fzf_borders)" --no-sort --ansi --prompt "$fzf_prompt" > "$TMPFILE" \

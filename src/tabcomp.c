@@ -662,7 +662,7 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 	char *c = (char *)NULL, tmp[MAX_COLOR + 4];
 	if (cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB) {
 		size_t len = strlen(entry);
-		if (entry[len - 1] == '/')
+		if (len > 1 && entry[len - 1] == '/')
 			entry[len - 1] = '\0';
 		char *p = (char *)NULL;
 		if (*entry == '~')

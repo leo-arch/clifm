@@ -7,7 +7,7 @@
 if [ -n "$1" ]; then
 	if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 		name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-		printf "Usage: %s [CMD [ARGS]] [-h,--help]
+		printf "Usage: %s [CMD [ARGS]] [-h, --help]
 Without arguments, it prints the list of files in the current directory allowing \
 the user to select one or more of them. At exit, selected files are send to CliFM's \
 Selection Box.
@@ -50,11 +50,11 @@ TAB, Alt-down: Toggle select down
 
 Alt-up: Toggle select up
 
-Alt-right: Select all files
+Ctrl-s: Select all files
 
-Alt-left: Deselect all files
+Ctrl-d: Deselect all files
 
-Alt-Enter: Invert selection
+Ctrl-t: Invert selection
 
 Enter: Confirm selection, exit, and send selected files to CliFM
 
@@ -97,12 +97,12 @@ if [ -n "$cmd" ]; then
 
 	marksel_mode=1
 	# shellcheck disable=SC2154
-	$ls_cmd "$(cat "$CLIFM_SELFILE")" | \
+	$ls_cmd $(cat "$CLIFM_SELFILE") | \
 	fzf --multi --marker='*' --info=inline --keep-right \
 		--color="$(get_fzf_colors)" --header "Select files in the current directory" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
-		--bind "alt-right:select-all,alt-left:deselect-all" \
+		--bind "ctrl-s:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all" \
 		--bind "alt-h:toggle-preview" --preview-window=:wrap \
 		--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
 		--reverse "$(fzf_borders)" --ansi --prompt "$fzf_prompt" > "$TMPFILE"
@@ -110,8 +110,8 @@ if [ -n "$cmd" ]; then
 
 else
 	case "$OS" in
-		Linux) ls_cmd="ls -A --group-directories-first --color=always" ;;
-		*) ls_cmd="ls -A"
+		Linux) ls_cmd="ls -Ap --group-directories-first --color=always" ;;
+		*) ls_cmd="ls -Ap"
 	esac
 	# shellcheck disable=SC2012
 	# shellcheck disable=SC2154
@@ -120,7 +120,7 @@ else
 		--color "$(get_fzf_colors)" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
-		--bind "alt-right:select-all,alt-left:deselect-all" \
+		--bind "ctrl-s:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all" \
 		--bind "alt-h:toggle-preview" --preview-window=:wrap \
 		--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
 		--reverse "$(fzf_borders)" --no-sort --ansi --prompt "$fzf_prompt" > "$TMPFILE"
