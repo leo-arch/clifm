@@ -143,8 +143,8 @@ check_term(void)
 		if (*_term == *UNSUPPORTED_TERM[i]
 		&& strcmp(_term, UNSUPPORTED_TERM[i]) == 0) {
 			fprintf(stderr, _("%s: '%s': Unsupported terminal. This "
-					"terminal cannot understand escape sequences\n"),
-					PROGRAM_NAME, UNSUPPORTED_TERM[i]);
+				"terminal cannot understand escape sequences\n"),
+				PROGRAM_NAME, UNSUPPORTED_TERM[i]);
 			exit(EXIT_FAILURE);
 		}
 	}
