@@ -29,6 +29,7 @@ if [ "$_pager" = "less" ]; then
 fi
 
 # This produces a columned but uncolored list of files
+# shellcheck disable=SC2086
 clifm --no-color --no-columns --list-and-quit --no-clear-screen "$PWD" | column | "$_pager" $_pager_opts
 
 # To get a colored but uncolumned list of files, uncomment this line and comment out the one above
