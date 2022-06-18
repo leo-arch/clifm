@@ -58,7 +58,6 @@
 
 struct terms_t {
 	char *name; /* Terminal name as found in $TERM and the terminfo database */
-
 	/* Let's hardcode the length of each terminal name to prevent unnecessary
 	 * calls to strlen(3): comparing the first byte and this length to those
 	 * of the current terminal is 99% of the time enough */

@@ -559,10 +559,10 @@ main() {
 			elif [ "$DIR_CMD" = "exa-tree" ]; then
 				exa -G --group-directories-first --color=always --tree --level=1 "$path" && exit 0
 			else
-				if [ "$POSIX_LS" =  0 ]; then
-					ls -p --color=always "$path" && exit 0
+				if [ "$POSIX_LS" = 0 ]; then
+					ls -Ap --color=always --indicator-style=none "$path" && exit 0
 				else
-					ls -p "$path" && exit 0
+					ls -Ap "$path" && exit 0
 				fi
 			fi
 		fi
