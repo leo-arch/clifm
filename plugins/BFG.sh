@@ -577,7 +577,7 @@ main() {
 	elif type md5 > /dev/null 2>&1; then
 		entryhash="$(md5 -q "$entry")"
 	else
-		printf "CliFM: No hashing application found. Either md5sum or md5 \
+		printf "clifm: No hashing application found. Either md5sum or md5 \
 are required\n" >&2
 		exit 1
 	fi
