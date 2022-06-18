@@ -96,6 +96,7 @@ if [ -n "$cmd" ]; then
 	fi
 
 	marksel_mode=1
+	# shellcheck disable=SC2046
 	# shellcheck disable=SC2154
 	$ls_cmd $(cat "$CLIFM_SELFILE") | \
 	fzf --multi --marker='*' --info=inline --keep-right \
