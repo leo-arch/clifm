@@ -456,7 +456,7 @@ print_tips(int all)
 		"'s *.c' or 's .*\\.c$'",
 		"ELN's and the 'sel' keyword work for shell commands as well: "
 		"'file 1 sel'",
-		"Press TAB to automatically expand an ELN: 's 2' -> TAB -> 's FILENAME'",
+		"Press TAB to automatically expand an ELN: 's 2<TAB>' -> 's FILENAME'",
 		"Easily copy everything in CWD into another directory: 's * && c sel ELN/DIR'",
 		"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 ELN/DIR'",
 		"Trash files with a simple 't ELN'",
@@ -483,7 +483,7 @@ print_tips(int all)
 		"Open and edit the configuration: 'edit' or F10",
 		"Find a description for each CliFM command by running 'cmd'",
 		"Print the currently used color codes list by entering 'cc'",
-		"Press 'Alt-i' or 'Alt-.' to toggle hidden files on/off",
+		"Press 'Alt-.' to toggle hidden files on/off",
 		"List mountpoints by pressing 'Alt-m'",
 		"Disallow the use of shell commands with the -x option: 'clifm -x'",
 		"Go to the root directory by just pressing 'Alt-r'",
@@ -513,7 +513,7 @@ print_tips(int all)
 		"Select all files in CWD by pressing 'Alt-a'",
 		"Jump to the Selection Box by pressing 'Alt-s'",
 		"Restore trashed files using the 'u' command",
-		"Empty the trash: 't empty'",
+		"Empty the trash can: 't empty'",
 		"Press Alt-g to toggle list-directories-first on/off",
 		"Use the 'fc' command to toggle the files counter on/off",
 		"Take a look at the splash screen with the 'splash' command",
@@ -526,11 +526,10 @@ print_tips(int all)
 		"Rename multiple files at once: 'br *.txt'",
 		"Need no more tips? Disable this feature in the configuration file",
 		"Need root privileges? Launch a new instance of CliFM as root "
-		"running the 'X' command",
+		"running the 'X' command (note the uppercase)",
 #ifdef __linux__
 		"Manage removable devices via the 'media' command",
 #endif
-		"Create custom commands and features using the 'actions' command",
 		"Create a fresh configuration file: 'edit reset'",
 		"Use 'ln edit' (or 'le') to edit symbolic links",
 		"Change default keyboard shortcuts by editing the keybindings file (F9)",
@@ -556,13 +555,13 @@ print_tips(int all)
 		"Accept only the first suggested word by pressing Alt-f or Alt-Right",
 		"Enter 'c sel' to copy selected files into the current directory",
 		"Press Alt-q to delete the last typed word",
-		"Check ELN ranges by pressing TAB",
-		"Operate on specific selected files by typing 'sel' and then TAB",
+		"Check ELN ranges by pressing TAB: '1-12<TAB>'",
+		"Operate on specific selected files: 'sel<TAB>'",
 		"Use the 'ow' command to open a file with an specific application",
-		"Use the 'mf' command to limit the amount of files listed on the screen",
+		"Limit the amount of files listed on the screen via the 'mf' command",
 		"Set a maximum file name length for listed files via the MaxFilenameLen "
 		"option in the configuration file (F10)",
-		"Use the 'm' command to interactively rename a file",
+		"Use the 'm' command to interactively rename a file: m 12",
 		"Set options on a per directory basis via the autocommands function",
 		"Clean up non-ASCII file names using the 'bleach' command",
 		"Running in an untrusted environment? Try the --secure-env and "
@@ -583,6 +582,8 @@ print_tips(int all)
 		"Press Ctrl-Alt-i to toggle the disk usage analyzer mode",
 		"Press Ctrl-Alt-l to toggle max file name length on/off",
 		"Fuzzy completion is supported: 'dwn<TAB> -> Downloads'. Enable it via '--fuzzy-match'",
+		"Wildcards can be expanded via TAB: 's *.c<TAB>'",
+		"Try the help topics: 'help <TAB>'",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
@@ -1633,8 +1634,7 @@ unpin_dir(void)
 		char *pin_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 		sprintf(pin_file, "%s/.pin", config_dir);
 		if (unlink(pin_file) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, pin_file,
-			    strerror(errno));
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, pin_file, strerror(errno));
 			cmd_error = 1;
 		}
 
