@@ -1545,6 +1545,7 @@ print_highlight_string(char *s)
 	rl_delete_text(0, rl_end);
 	rl_point = rl_end = 0;
 	fputs(tx_c, stdout);
+	cur_color = tx_c;
 	char q[PATH_MAX];
 	for (i = 0; s[i]; i++) {
 		rl_highlight(s, i, SET_COLOR);
@@ -1576,7 +1577,7 @@ print_cmdhist_line(int n, int beg_line)
 	int rl_point_bk = rl_point;
 
 #ifndef _NO_HIGHLIGHT
-	if (highlight)
+	if (highlight == 1)
 		print_highlight_string(history[n].cmd);
 	else
 #endif
@@ -1646,7 +1647,7 @@ handle_cmdhist_middle(int key)
 		}
 	}
 
-	if (!found) {
+	if (found == 0) {
 		rl_ring_bell();
 		return EXIT_FAILURE;
 	}
