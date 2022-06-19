@@ -160,7 +160,9 @@ get_shell_cmd_opts(char *cmd)
 			if (qq)	*qq = '\0';
 
 			/* Some long opts are written as optOPT: remove OPT */
-			char *t = q + 3;
+			/* q + 3 is the beginning of the option name, so that OPT could
+			 * begin at q + 4, but not before */
+			char *t = *(q + 4) ? q + 4 : (char *)NULL;
 			while (*t) {
 				if (*t >= 'A' && *t <= 'Z') {
 					*t = '\0';
