@@ -271,26 +271,25 @@ static inline void
 set_cursor_position(const int baej)
 {
 	/* If not at the end of the line, move the cursor there */
-	if (rl_end > rl_point) {
-		MOVE_CURSOR_RIGHT(rl_end - rl_point);
-//		printf("\x1b[%dC", rl_end - rl_point);
-		fflush(stdout);
-	}
-
 	/* rl_end and rl_point are not updated: they do not include
 	 * the last typed char. However, since we only care here about
 	 * the difference between them, it doesn't matter: the result
 	 * is the same (7 - 4 == 6 - 3 == 1) */
+	if (rl_end > rl_point) {
+		MOVE_CURSOR_RIGHT(rl_end - rl_point);
+		fflush(stdout);
+	}
 
 	/* Erase everything after the current cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
 
 	if (baej == 1) {
 		/* Move the cursor %d columns to the right and print "> " */
-//		printf("\x1b[%dC%s> \x1b[0m", BAEJ_OFFSET, sp_c);
-		SUGGEST_BAEJ(BAEJ_OFFSET, sp_c);
-//		MOVE_CURSOR_RIGHT(BAEJ_OFFSET);
-//		printf("%s> %s", sp_c, NC);
+// TESTING!
+		int off = (rl_end > rl_point) ? BAEJ_OFFSET - 1 : BAEJ_OFFSET;
+		SUGGEST_BAEJ(off, sp_c);
+// TESTING!
+/*		SUGGEST_BAEJ(BAEJ_OFFSET, sp_c); */
 	}
 }
 
