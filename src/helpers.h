@@ -108,7 +108,7 @@
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
-#if __TINYC__
+#if defined(__TINYC__)
 void *__dso_handle;
 #endif
 

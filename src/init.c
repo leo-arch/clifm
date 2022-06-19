@@ -765,10 +765,12 @@ load_bookmarks(void)
 		bookmarks[bm_n].name = savestring(line, strlen(line));
 
 		if (!*(++tmp)) {
-			bookmarks[bm_n++].path = (char *)NULL;
+			bookmarks[bm_n].path = (char *)NULL;
+			bm_n++;
 			continue;
 		} else {
-			bookmarks[bm_n++].path = savestring(tmp, strlen(tmp));
+			bookmarks[bm_n].path = savestring(tmp, strlen(tmp));
+			bm_n++;
 		}
 	}
 
@@ -1691,6 +1693,7 @@ RUN:
 					"'%c'\nTry '%s --help' for more information.\n"),
 				    PROGRAM_NAME, optopt, PNL);
 				exit(EXIT_FAILURE);
+				break;
 			default: break;
 			}
 

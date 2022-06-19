@@ -497,7 +497,7 @@ profile_function(char **comm)
 		return delete_profile(comm[2]);
 
 	/* Switch to another profile */
-	else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0)
+	if (*comm[1] == 's' && strcmp(comm[1], "set") == 0)
 		return switch_profile(comm[2]);
 
 	fprintf(stderr, "%s\n", PROFILES_USAGE);

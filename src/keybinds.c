@@ -224,7 +224,8 @@ load_keybinds(void)
 
 		*tmp = '\0';
 
-		kbinds[kbinds_n++].function = savestring(line, strlen(line));
+		kbinds[kbinds_n].function = savestring(line, strlen(line));
+		kbinds_n++;
 	}
 
 	free(line);
