@@ -3043,7 +3043,7 @@ check_options(void)
 
 	if ((xargs.stealth_mode == 1 || home_ok == 0 ||
 	config_ok == 0 || !config_file) && !*div_line)
-		strncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
+		xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 
 	if (xargs.stealth_mode == 1 && !opener) {
 		/* Since in stealth mode we have no access to the config file, we cannot

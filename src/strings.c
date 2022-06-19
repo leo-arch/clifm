@@ -186,7 +186,10 @@ xstrnlen(const char *restrict s)
 }
 
 /* Taken from NNN's source code: very clever. Copy SRC into DST
- * and return the string size all at once */
+ * and return the string size all at once
+ * Besides, it's safer than strncpy(3): it always NULL terminates the
+ * destination string (DST), even if no NUL char if found in the first
+ * N characters of SRC */
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
@@ -1402,7 +1405,7 @@ parse_input_str(char *str)
 		size_t slen = strlen(substr[i]);
 		if (slen > FILE_URI_PREFIX_LEN && IS_FILE_URI(substr[i])) {
 			char tmp[PATH_MAX];
-			strncpy(tmp, substr[i], PATH_MAX - 1);
+			xstrsncpy(tmp, substr[i], sizeof(tmp) - 1);
 			strcpy(substr[i], tmp + FILE_URI_PREFIX_LEN);
 		}
 
@@ -1412,8 +1415,7 @@ parse_input_str(char *str)
 			char *tmp = (char *)NULL;
 			tmp = realpath(substr[i], NULL);
 			if (tmp) {
-				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
-							* sizeof(char));
+				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1) * sizeof(char));
 				strcpy(substr[i], tmp);
 				free(tmp);
 			}

@@ -1704,6 +1704,15 @@ print_archives_topic(void)
 }
 
 static int
+print_autocmds_topic(void)
+{
+	puts(AUTOCMDS_USAGE);
+	putchar('\n');
+	print_more_info();
+	return EXIT_SUCCESS;
+}
+
+static int
 print_basics_topic(void)
 {
 	puts(_("Run '?' and consult the BASIC FILE OPERATIONS section"));
@@ -1800,6 +1809,8 @@ run_help_topic(char *topic)
 {
 	if (*topic == 'a' && strcmp(topic, "archives") == 0)
 		return print_archives_topic();
+	if (*topic == 'a' && strcmp(topic, "autocommands") == 0)
+		return print_autocmds_topic();
 	if (*topic == 'b' && strcmp(topic, "basics") == 0)
 		return print_basics_topic();
 	if (*topic == 'b' && strcmp(topic, "bookmarks") == 0)

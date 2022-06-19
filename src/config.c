@@ -2344,7 +2344,7 @@ init_config(void)
 	if (config_ok == 1)
 		read_config();
 #else
-	strncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
+	xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
 #endif /* CLIFM_SUCKLESS */
 
 	check_colors();

@@ -78,6 +78,11 @@ Examples:\n\
 Usage:\n\
   acd, autocd [on, off, status]"
 
+#define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
+There are two ways to set autocommands:\n\
+  1) Via the 'autocmd' keyword in the configuration file\n\
+  2) By placing a '.cfm.in' and/or a '.cfm.out' file in the corresponding directory"
+
 #define AUTO_OPEN_USAGE "Turn auto-open on-off\n\
 Usage:\n\
   ao, auto-open [on, off, status]"

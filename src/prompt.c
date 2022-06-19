@@ -1058,7 +1058,7 @@ set_prompt(char *name)
 		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
 			continue;
 		free(p);
-		strncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name) - 1);
+		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name) - 1);
 		return change_prompt((size_t)i);
 	}
 

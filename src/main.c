@@ -553,6 +553,7 @@ const struct cmdslist_t param_str[] = {
 	{"fz on", 5},
 	{"fz off", 6},
 	{"help archives", 13},
+	{"help autocommands", 17},
 	{"help basics", 11},
 	{"help bookmarks", 14},
 	{"help dir-jumper", 15},

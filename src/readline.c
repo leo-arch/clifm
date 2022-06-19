@@ -163,7 +163,7 @@ get_shell_cmd_opts(char *cmd)
 			/* q + 3 is the beginning of the option name, so that OPT could
 			 * begin at q + 4, but not before */
 			char *t = *(q + 4) ? q + 4 : (char *)NULL;
-			while (*t) {
+			while (t && *t) {
 				if (*t >= 'A' && *t <= 'Z') {
 					*t = '\0';
 					break;
@@ -2027,7 +2027,7 @@ options_generator(const char *text, int state)
 	if (w != 2) /* Complete internal options only for the second word */
 		return (char *)NULL;
 
-#define MAX_OPTS 16
+#define MAX_OPTS 17
 	char *_opts[MAX_OPTS] = {0};
 
 	/* acd, ao, ext, ff, hf, pg, uc */
@@ -2059,21 +2059,22 @@ options_generator(const char *text, int state)
 	/* help topics */
 	} else if (*l == 'h' && l[1] == 'e' && strncmp(l, "help ", 5) == 0) {
 		_opts[0] = "archives";
-		_opts[1] = "basics";
-		_opts[2] = "bookmarks";
-		_opts[3] = "dir-jumper";
-		_opts[4] = "file-attributes";
-		_opts[5] = "file-tags";
-		_opts[6] = "navigation";
-		_opts[7] = "plugins";
-		_opts[8] = "profiles";
-		_opts[9] = "remotes";
-		_opts[10] = "resource-opener";
-		_opts[11] = "selection";
-		_opts[12] = "search";
-		_opts[13] = "theming";
-		_opts[14] = "trash";
-		_opts[15] = NULL;
+		_opts[1] = "autocommands";
+		_opts[2] = "basics";
+		_opts[3] = "bookmarks";
+		_opts[4] = "dir-jumper";
+		_opts[5] = "file-attributes";
+		_opts[6] = "file-tags";
+		_opts[7] = "navigation";
+		_opts[8] = "plugins";
+		_opts[9] = "profiles";
+		_opts[10] = "remotes";
+		_opts[11] = "resource-opener";
+		_opts[12] = "selection";
+		_opts[13] = "search";
+		_opts[14] = "theming";
+		_opts[15] = "trash";
+		_opts[16] = NULL;
 	/* b, f */
 	} else if ((*l == 'b' && l[1] == ' ') || (*l == 'f' && l[1] == ' ')) {
 		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;
