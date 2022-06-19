@@ -1283,10 +1283,13 @@ create_config_files(void)
 			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
 			    profile_file, strerror(errno));
 		} else {
-			fprintf(profile_fp, _("# %s profile\n"
+			fprintf(profile_fp, _("# This is %s's profile file\n#\n"
 				"# Write here the commands you want to be executed at startup\n"
-				"# Ex:\n#echo -e \"%s, the command line file manager\"\n"),
-				PROGRAM_NAME, PROGRAM_NAME);
+				"# Ex:\n#echo \"%s, the command line file manager\"; read -r\n#\n"
+				"# Uncommented, non-empty lines are executed line by line. If you\n"
+				"# want a multi-line command, just write a script for it:\n"
+				"#sh /path/to/my/script.sh\n"),
+				_PROGRAM_NAME, _PROGRAM_NAME);
 			fclose(profile_fp);
 		}
 	}
