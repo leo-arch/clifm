@@ -997,11 +997,10 @@ main(int argc, char *argv[])
 		exit(EINVAL);
 	}
 
+	msgs.error = msgs.notice = msgs.warning = 0;
 /*	init_file_flags(); */
-	/* Make sure we are running on supported CPU and operating system */
-	check_cpu_os();
-	/* Make sure we are running on a supported terminal */
-	check_term();
+	check_cpu_os(); /* Running on supported CPU and operating system? */
+	check_term(); /* Running on a supported terminal */
 
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 

@@ -758,7 +758,7 @@ _print_tips(void)
 		return;
 
 	static int first_run = 1;
-	if (first_run) {
+	if (first_run == 1) {
 		print_tips(0);
 		first_run = 0;
 	}
@@ -854,18 +854,17 @@ construct_prompt(const char *decoded_prompt)
 	*msg_ind = *trash_ind = *sel_ind = '\0';
 
 	if (prompt_notif == 1) {
-		if (msgs_n) {
+		if (msgs_n > 0) {
 			/* Errors take precedence over warnings, and warnings over
 			 * notices. That is to say, if there is an error message AND a
 			 * warning message, the prompt will always display the error
 			 * message sign: a red 'E'. */
-			switch (pmsg) {
-			case NOMSG:	break;
-			case ERROR:	snprintf(msg_ind, N_IND, "%sE%zu%s", em_c, msgs_n, RL_NC); break;
-			case WARNING: snprintf(msg_ind, N_IND, "%sW%zu%s", wm_c, msgs_n, RL_NC); break;
-			case NOTICE: snprintf(msg_ind, N_IND, "%sN%zu%s", nm_c, msgs_n, RL_NC); break;
-			default: break;
-			}
+			if (msgs.error > 0)
+				snprintf(msg_ind, N_IND, "%sE%zu%s", em_c, msgs_n, RL_NC);
+			else if (msgs.warning > 0)
+				snprintf(msg_ind, N_IND, "%sW%zu%s", wm_c, msgs_n, RL_NC);
+			else if (msgs.notice > 0)
+				snprintf(msg_ind, N_IND, "%sN%zu%s", nm_c, msgs_n, RL_NC);
 		}
 
 		if (trash_n > 2)
@@ -881,12 +880,12 @@ construct_prompt(const char *decoded_prompt)
 	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,
 			"%s%s%s%s%s%s%s%s\001%s\002",
-			(flags & ROOT_USR) ? (colorize ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
-			(msgs_n && pmsg) ? msg_ind : "",
+			(flags & ROOT_USR) ? (colorize == 1 ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
+			(msgs_n > 0) ? msg_ind : "",
 			(xargs.stealth_mode == 1) ? si_c : "",
 			(xargs.stealth_mode == 1) ? STEALTH_IND : "",
-			(trash_n) ? trash_ind : "",
-			(sel_n) ? sel_ind : "",
+			(trash_n > 0) ? trash_ind : "",
+			(sel_n > 0) ? sel_ind : "",
 			decoded_prompt, RL_NC, tx_c);
 	} else {
 		snprintf(the_prompt, prompt_len, "%s%s\001%s\002", decoded_prompt,

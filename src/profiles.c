@@ -141,6 +141,14 @@ profile_set(char *prof)
 		return EXIT_SUCCESS;
 	}
 
+	int i;
+/*	if (msgs_n) {
+		i = (int)msgs_n;
+		while (--i >= 0)
+			free(messages[i]);
+	}
+	msgs_n = msgs.error = msgs.warning = msgs.notice = 0; */
+
 	if (restore_last_path)
 		save_last_path();
 
@@ -164,7 +172,7 @@ profile_set(char *prof)
 			PROGRAM_NAME, user.shell);
 	}
 
-	int i = (int)usrvar_n;
+	i = (int)usrvar_n;
 	while (--i >= 0) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
@@ -187,12 +195,12 @@ profile_set(char *prof)
 
 	exec_profile();
 
-	if (msgs_n) {
+/*	if (msgs_n) {
 		i = (int)msgs_n;
 		while (--i >= 0)
 			free(messages[i]);
 	}
-	msgs_n = msgs.error = msgs.warning = msgs.notice = 0;
+	msgs_n = msgs.error = msgs.warning = msgs.notice = 0; */
 
 	if (config_ok) {
 		/* Limit the log files size */

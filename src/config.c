@@ -2331,8 +2331,6 @@ init_config(void)
 		return;
 	}
 
-	msgs.error = msgs.notice = msgs.warning = 0;
-
 	if (home_ok == 0) {
 		check_colors();
 		return;
