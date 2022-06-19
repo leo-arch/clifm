@@ -827,12 +827,12 @@ int
 bookmarks_function(char **cmd)
 {
 	if (xargs.stealth_mode == 1) {
-		printf(_("%s: bookmarks: %s\n"), PROGRAM_NAME, STEALTH_DISABLED);
+		printf(_("%s: %s\n"), PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
-	if (!config_ok) {
-		fprintf(stderr, _("Bookmarks function disabled\n"));
+	if (config_ok == 0) {
+		fprintf(stderr, _("%s: Bookmarks function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 

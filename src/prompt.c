@@ -1075,6 +1075,11 @@ set_default_prompt(void)
 static int
 edit_prompts_file(void)
 {
+	if (xargs.stealth_mode == 1) {
+		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		return EXIT_SUCCESS;
+	}
+
 	if (!prompts_file || !*prompts_file) {
 		fprintf(stderr, "%s: No prompts file found\n", PROGRAM_NAME);
 		return EXIT_FAILURE;

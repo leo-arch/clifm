@@ -320,8 +320,7 @@ edit_history(char **args)
 {
 	struct stat attr;
 	if (stat(hist_file, &attr) == -1) {
-		fprintf(stderr, "%s: history: %s: %s\n", PROGRAM_NAME, hist_file,
-				strerror(errno));
+		fprintf(stderr, "%s: history: %s: %s\n", PROGRAM_NAME, hist_file, strerror(errno));
 		return errno;
 	}
 	time_t mtime_bfr = (time_t)attr.st_mtime;
@@ -425,7 +424,12 @@ toggle_history(const char *arg)
 int
 history_function(char **comm)
 {
-	if (!config_ok) {
+	if (xargs.stealth_mode == 1) {
+		printf(_("%s: %s\n"), PROGRAM_NAME, STEALTH_DISABLED);
+		return EXIT_SUCCESS;
+	}
+
+	if (config_ok == 0) {
 		fprintf(stderr, _("%s: History function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}

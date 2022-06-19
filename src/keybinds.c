@@ -147,10 +147,13 @@ kbinds_function(char **args)
 		return EXIT_FAILURE;
 
 	if (!args[1]) {
-		size_t i;
-		for (i = 0; i < kbinds_n; i++) {
-			printf("%s: %s\n", kbinds[i].key, kbinds[i].function);
+		if (kbinds_n == 0) {
+			printf("%s: No keybindings defined\n", PROGRAM_NAME);
+			return EXIT_SUCCESS;
 		}
+		size_t i;
+		for (i = 0; i < kbinds_n; i++)
+			printf("%s: %s\n", kbinds[i].key, kbinds[i].function);
 
 		return EXIT_SUCCESS;
 	}

@@ -1857,6 +1857,13 @@ quick_help(char *topic)
 		"at your current keybindings via the 'kb' command"));
 	return EXIT_SUCCESS;
 #else
+
+	if (xargs.stealth_mode == 1) {
+		printf("%s                                %s\n\n%s",
+			ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP);
+		return EXIT_SUCCESS;
+	}
+
 	char *_pager = get_pager();
 	if (!_pager) {
 		fprintf(stderr, _("%s: Unable to find any pager\n"), PROGRAM_NAME);

@@ -547,6 +547,11 @@ mime_import(char *file)
 static int
 mime_edit(char **args)
 {
+	if (xargs.stealth_mode == 1) {
+		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		return EXIT_SUCCESS;
+	}
+
 	int exit_status = EXIT_SUCCESS;
 	struct stat a;
 	if (!mime_file || stat(mime_file, &a) == -1) {

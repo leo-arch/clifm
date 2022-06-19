@@ -326,8 +326,8 @@ actions_function(char **args)
 			}
 			return EXIT_SUCCESS;
 		} else {
-			puts(_("actions: No actions defined. Use the 'actions "
-			       "edit' command to add new actions"));
+			printf(_("%s: No actions defined. Use the 'actions edit' "
+				"command to add new actions\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 
