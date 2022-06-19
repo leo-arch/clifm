@@ -1858,16 +1858,11 @@ quick_help(char *topic)
 	return EXIT_SUCCESS;
 #else
 
-	if (xargs.stealth_mode == 1) {
+	char *_pager = (char *)NULL;
+	if (xargs.stealth_mode == 1 || !(_pager = get_pager())) {
 		printf("%s                                %s\n\n%s",
 			ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP);
 		return EXIT_SUCCESS;
-	}
-
-	char *_pager = get_pager();
-	if (!_pager) {
-		fprintf(stderr, _("%s: Unable to find any pager\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
 	}
 
 	char tmp_file[PATH_MAX];
