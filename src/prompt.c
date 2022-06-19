@@ -830,9 +830,11 @@ set_prompt_length(size_t decoded_prompt_len)
 		len = (size_t)(decoded_prompt_len
 		+ (xargs.stealth_mode == 1 ? STEALTH_IND_SIZE : 0)
 		+ ((flags & ROOT_USR) ? ROOT_IND_SIZE : 0)
-		+ (sel_n ? N_IND : 0)
-		+ (trash_n ? N_IND : 0)
-		+ ((msgs_n && pmsg) ? N_IND : 0)
+		+ ((sel_n > 0) ? N_IND : 0)
+		+ ((trash_n > 0) ? N_IND : 0)
+		+ ((msgs.error > 0) ? N_IND : 0)
+		+ ((msgs.warning > 0) ? N_IND : 0)
+		+ ((msgs.notice > 0) ? N_IND : 0)
 		+ 6 + sizeof(tx_c) + 1 + 2);
 	} else {
 		len = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
@@ -844,28 +846,18 @@ set_prompt_length(size_t decoded_prompt_len)
 static inline char *
 construct_prompt(const char *decoded_prompt)
 {
-	/* Construct indicators: MSGS, SEL, and TRASH */
-
-	/* Messages are categorized in three groups: errors, warnings, and
-	 * notices. The kind of message should be specified by the function
-	 * printing the message itself via a global enum: pmsg, with the
-	 * following values: NOMSG, ERROR, WARNING, and NOTICE. */
-	char msg_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND];
-	*msg_ind = *trash_ind = *sel_ind = '\0';
+	/* Construct indicators: MSGS (ERR, WARN, and NOTICE), SEL, and TRASH */
+	/* Messages are categorized in three groups: errors, warnings, and notices */
+	char err_ind[N_IND], warn_ind[N_IND], notice_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND];
+	*err_ind = *warn_ind = *notice_ind = *trash_ind = *sel_ind = '\0';
 
 	if (prompt_notif == 1) {
-		if (msgs_n > 0) {
-			/* Errors take precedence over warnings, and warnings over
-			 * notices. That is to say, if there is an error message AND a
-			 * warning message, the prompt will always display the error
-			 * message sign: a red 'E'. */
-			if (msgs.error > 0)
-				snprintf(msg_ind, N_IND, "%sE%zu%s", em_c, msgs_n, RL_NC);
-			else if (msgs.warning > 0)
-				snprintf(msg_ind, N_IND, "%sW%zu%s", wm_c, msgs_n, RL_NC);
-			else if (msgs.notice > 0)
-				snprintf(msg_ind, N_IND, "%sN%zu%s", nm_c, msgs_n, RL_NC);
-		}
+		if (msgs.error > 0)
+			snprintf(err_ind, N_IND, "%sE%zu%s", em_c, msgs.error, RL_NC);
+		if (msgs.warning > 0)
+			snprintf(warn_ind, N_IND, "%sW%zu%s", wm_c, msgs.warning, RL_NC);
+		if (msgs.notice > 0)
+			snprintf(notice_ind, N_IND, "%sN%zu%s", nm_c, msgs.notice, RL_NC);
 
 		if (trash_n > 2)
 			snprintf(trash_ind, N_IND, "%sT%zu%s", ti_c, (size_t)trash_n - 2, RL_NC);
@@ -879,17 +871,18 @@ construct_prompt(const char *decoded_prompt)
 
 	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,
-			"%s%s%s%s%s%s%s%s\001%s\002",
+			"%s%s%s%s%s%s%s%s%s%s\001%s\002",
 			(flags & ROOT_USR) ? (colorize == 1 ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
-			(msgs_n > 0) ? msg_ind : "",
+			(msgs.error > 0) ? err_ind : "",
+			(msgs.warning > 0) ? warn_ind : "",
+			(msgs.notice > 0) ? notice_ind : "",
 			(xargs.stealth_mode == 1) ? si_c : "",
 			(xargs.stealth_mode == 1) ? STEALTH_IND : "",
 			(trash_n > 0) ? trash_ind : "",
 			(sel_n > 0) ? sel_ind : "",
 			decoded_prompt, RL_NC, tx_c);
 	} else {
-		snprintf(the_prompt, prompt_len, "%s%s\001%s\002", decoded_prompt,
-			RL_NC, tx_c);
+		snprintf(the_prompt, prompt_len, "%s%s\001%s\002", decoded_prompt, RL_NC, tx_c);
 	}
 
 	return the_prompt;
