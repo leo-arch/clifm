@@ -1749,6 +1749,12 @@ rl_del_last_word(int count, int key)
 	if (rl_point == 0)
 		return EXIT_SUCCESS;
 
+	char *end_buf = (char *)NULL;
+	if (rl_point < rl_end) {
+		end_buf = rl_copy_text(rl_point, rl_end);
+		rl_delete_text(rl_point, rl_end);
+	}
+
 	char *b = rl_line_buffer;
 
 	if (b[rl_point - 1] == '/' || b[rl_point - 1] == ' ') {
@@ -1766,6 +1772,11 @@ rl_del_last_word(int count, int key)
 	rl_delete_text(n, rl_end);
 	rl_end_undo_group();
 	rl_point = rl_end = n;
+	if (end_buf) {
+		rl_insert_text(end_buf);
+		rl_point = n;
+		free(end_buf);
+	}
 	rl_redisplay();
 
 #ifndef _NO_SUGGESTIONS
