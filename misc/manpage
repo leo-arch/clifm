@@ -1765,7 +1765,7 @@ T{
 T}	Test you terminal colors capability	colors.sh	-
 T{
 .BR cr
-T}	Copy files to remote location	cprm.sh	scp, fzf
+T}	Copy files to remote location	cprm.sh	fzf, and scp, ffsend, or croc
 T{
 .BR da
 T}	Disk usage analyzer	disk_analyzer.sh	du, fzf
