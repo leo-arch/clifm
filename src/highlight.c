@@ -182,7 +182,12 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		if (prev == ' ' || prev == 0)
 			cl = (cur_color != hq_c) ? hp_c : (char *)NULL;
 		break;
-	case '#': cl = (cur_color != hq_c) ? hc_c : (char *)NULL; break;
+	case '#':
+		if (prev == ' ' || prev == 0)
+			cl = (cur_color != hq_c) ? hc_c : (char *)NULL;
+		else
+			cl = tx_c;
+		break;
 	default:
 		if (cur_color != hq_c && cur_color != hc_c
 		&& cur_color != hv_c && cur_color != hp_c)
