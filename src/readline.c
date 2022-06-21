@@ -419,6 +419,11 @@ END:
 			if (suggestion.printed)
 				remove_suggestion_not_end();
 		}
+		if (wrong_cmd == 1) { /* Wrong cmd and we are on the first word */
+			char *fs = strchr(rl_line_buffer, ' ');
+			if (fs && rl_line_buffer + rl_point <= fs)
+				s = -1;
+		}
 	}
 #else
 	UNUSED(s);

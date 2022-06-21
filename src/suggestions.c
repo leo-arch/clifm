@@ -70,6 +70,7 @@ typedef char *rl_cpvfunc_t;
 #define PRINT_MATCH 1
 
 #define BAEJ_OFFSET 2
+//#define BAEJ_OFFSET 1
 
 char *last_word = (char *)NULL;
 int last_word_offset = 0;
@@ -211,8 +212,8 @@ correct_offset(size_t *offset)
 		(*offset)++;
 
 #ifndef _NO_HIGHLIGHT
-	/* The highlight function modifies the terminal's idea of the current
-	 * cursor position: let's correct it */
+	/// The highlight function modifies the terminal's idea of the current
+	// cursor position: let's correct it
 	if (highlight && rl_point != rl_end) {
 		MOVE_CURSOR_LEFT(rl_end - rl_point);
 //		printf("\x1b[%dD", rl_end - rl_point);
@@ -233,6 +234,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	|| suggestion.type == SORT_SUG) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 		cuc += suggestion.type == ELN_SUG ? 3 : 4;
+//		cuc += 3;
 		flags |= BAEJ_SUGGESTION;
 		*baej = 1;
 	}
@@ -286,7 +288,7 @@ set_cursor_position(const int baej)
 	if (baej == 1) {
 		/* Move the cursor %d columns to the right and print "> " */
 // TESTING!
-		int off = (rl_end > rl_point) ? BAEJ_OFFSET - 1 : BAEJ_OFFSET;
+		int off = (rl_end > rl_point && highlight == 1) ? BAEJ_OFFSET - 1 : BAEJ_OFFSET;
 		SUGGEST_BAEJ(off, sp_c);
 // TESTING!
 /*		SUGGEST_BAEJ(BAEJ_OFFSET, sp_c); */
@@ -322,6 +324,7 @@ _print_suggestion(const char *str, const size_t offset, const char *color)
 	char *wname = truncate_name(str);
 	fputs(color, stdout);
 	fputs((wname ? wname : str) + offset - (offset ? 1 : 0), stdout);
+//	fputs((wname ? wname : str) + offset, stdout);
 /*	printf("%s%s", color, (wname ? wname : str) + offset - (offset ? 1 : 0)); */
 	fflush(stdout);
 	free(wname);
@@ -1440,6 +1443,29 @@ count_words(size_t *start_word, size_t *full_word)
 }
 
 static void
+turn_it_wrong(void)
+{
+	char *b = rl_copy_text(0, rl_end);
+	if (!b) return;
+
+	fputs(HIDE_CURSOR, stdout);
+	fputs(hw_c, stdout);
+	fflush(stdout);
+	cur_color = hw_c;
+	int bk = rl_point;
+
+	rl_delete_text(0, rl_end);
+	rl_point = rl_end = 0;
+	rl_redisplay();
+	rl_insert_text(b);
+
+	free(b);
+	rl_point = bk;
+
+	fputs(UNHIDE_CURSOR, stdout);
+}
+
+static void
 print_warning_prompt(const char c)
 {
 	if (warning_prompt == 1 && wrong_cmd == 0
@@ -1454,6 +1480,9 @@ print_warning_prompt(const char c)
 		char *decoded_prompt = decode_prompt(wprompt_str);
 		rl_set_prompt(decoded_prompt);
 		free(decoded_prompt);
+
+		if (rl_point < rl_end && nwords > 1)
+			turn_it_wrong();
 	}
 }
 

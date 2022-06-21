@@ -59,17 +59,22 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 	fputs("\x1b[?25h", stdout);
 } */
 
-/* Get the appropriate color for C and print the color (returning a null
- * pointer) if SET_COLOR is set to 1; otherwise, just return a pointer
- * to the corresponding color. This function is used to colorize input,
- * history entries, and accepted suggestions */
+/* Get the appropriate color for the character at position POS in the string STR
+ * and print the color if SET_COLOR is set to 1 (in which case NULL is returned);
+ * otherwise, just return a pointer to the corresponding color.
+ * This function is used to colorize input, history entries, and accepted suggestions */
 char *
 rl_highlight(char *str, const size_t pos, const int flag)
 {
 	char *cl = (char *)NULL;
-	/* PREV is 0 when there is no previous char (STR[POS] is the first) */
+	/* PREV is 0 when there is no previous char (STR[POS] is the first one) */
 	char prev = pos ? str[pos - 1] : 0;
 	char c = *(str + pos);
+
+	if (wrong_cmd == 1 && cur_color == hw_c && rl_end == 0) {
+		fputs(tx_c, stdout); fflush(stdout);
+		rl_redisplay();
+	}
 
 	if ((rl_end == 0 && c == BS) || prev == '\\') {
 		if (prev == '\\')
@@ -229,7 +234,7 @@ recolorize_line(void)
 		fputs(tx_c, stdout);
 	}
 
-	int bk = rl_point;
+	int bk_point = rl_point;
 	if (rl_point && rl_point != rl_end)
 		rl_point--;
 
@@ -250,19 +255,26 @@ recolorize_line(void)
 		return;
 	}
 
+/*	int start = rl_point > 0 ? rl_point - 1 : 0;
+	char *ss = rl_copy_text(start, rl_end);
+	rl_delete_text(start, rl_end);
+	rl_point = rl_end = start;
+	i = 0; */
+
 	int point = rl_point;
-	int copy_start = point ? point - 1 : 0;
+	int copy_start = point > 0 ? point - 1 : 0;
 	int start = point;
 	char *ss = rl_copy_text(copy_start, rl_end);
 	rl_delete_text(start, rl_end);
 	rl_point = rl_end = start;
-	/* Loop through each char from cursor position onward and colorize it */
 	i = point ? 1 : 0;
+
 	size_t l = 0;
 
 	if (!ss || !*ss)
 		goto EXIT;
 
+	// Loop through each char from cursor position onward and colorize it
 	char t[PATH_MAX];
 	for (;ss[i]; i++) {
 		rl_highlight(ss, i, SET_COLOR);
@@ -291,5 +303,5 @@ recolorize_line(void)
 EXIT:
 	fputs(UNHIDE_CURSOR, stdout);
 	free(ss);
-	rl_point = bk;
+	rl_point = bk_point;
 }

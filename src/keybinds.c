@@ -1750,7 +1750,7 @@ rl_del_last_word(int count, int key)
 		return EXIT_SUCCESS;
 
 	char *end_buf = (char *)NULL;
-	if (rl_point < rl_end) {
+	if (rl_point < rl_end) { /* Somewhere before the end of the line */
 		end_buf = rl_copy_text(rl_point, rl_end);
 		rl_delete_text(rl_point, rl_end);
 	}
