@@ -2221,5 +2221,7 @@ void
 reload_dirlist(void)
 {
 	free_dirlist();
+	int bk = exit_code;
 	list_dir();
+	exit_code = bk;
 }
