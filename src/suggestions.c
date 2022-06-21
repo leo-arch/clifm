@@ -69,8 +69,8 @@ typedef char *rl_cpvfunc_t;
 #define CHECK_MATCH 0
 #define PRINT_MATCH 1
 
-#define BAEJ_OFFSET 2
-//#define BAEJ_OFFSET 1
+//#define BAEJ_OFFSET 2
+#define BAEJ_OFFSET 1
 
 char *last_word = (char *)NULL;
 int last_word_offset = 0;
@@ -109,7 +109,7 @@ recover_from_wrong_cmd(void)
 	rl_clear_message();
 
 #ifndef _NO_HIGHLIGHT
-	if (highlight)
+	if (highlight == 1)
 		recolorize_line();
 #endif
 	wrong_cmd = 0;
@@ -130,9 +130,18 @@ free_suggestion(void)
 void
 clear_suggestion(const int free_sug)
 {
-	/* Delete everything in the current line starting from the current
-	 * cursor position */
+	if (rl_end > rl_point && highlight == 0) {
+		MOVE_CURSOR_RIGHT(rl_end - rl_point);
+		fflush(stdout);
+	}
+
+	/* Delete everything in the current line starting from the current cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
+
+	if (rl_end > rl_point && highlight == 0) {
+		MOVE_CURSOR_LEFT(rl_end - rl_point);
+		fflush(stdout);
+	}
 
 	if (suggestion.nlines > 1) {
 		/* Save cursor position */
@@ -146,7 +155,6 @@ clear_suggestion(const int free_sug)
 			if (write(STDOUT_FILENO, DEL_LINE, DEL_LINE_LEN) <= 0) {/* Avoid compiler warning */}
 		}
 		/* Restore cursor position */
-//		printf("\x1b[%d;%dH", currow, curcol);
 		SET_CURSOR(currow, curcol);
 		fflush(stdout);
 		suggestion.nlines = 0;
@@ -163,11 +171,9 @@ void
 remove_suggestion_not_end(void)
 {
 	MOVE_CURSOR_RIGHT(rl_end - rl_point);
-//	printf("\x1b[%dC", rl_end - rl_point);
 	fflush(stdout);
 	clear_suggestion(CS_FREEBUF);
 	MOVE_CURSOR_LEFT(rl_end - rl_point);
-//	printf("\x1b[%dD", rl_end - rl_point);
 	fflush(stdout);
 }
 
@@ -193,13 +199,12 @@ restore_cursor_position(const size_t slines)
 	 * a suggestion is printed and the cursor is not at the end of the line.
 	 * We do this because we modified the cursor position in correct_offset()
 	 * to correctly print the suggestion. Now we need to undo this change */
-	if (highlight && rl_point != rl_end)
-		curcol += (rl_end - rl_point);
+//	if (highlight && rl_point != rl_end)
+//		curcol += (rl_end - rl_point);
 
 	SET_CURSOR(currow, curcol);
-//	printf("\x1b[%d;%dH", currow, curcol);
 }
-
+/*
 static inline void
 correct_offset(size_t *offset)
 {
@@ -221,7 +226,7 @@ correct_offset(size_t *offset)
 		(*offset)++;
 	}
 #endif
-}
+} */
 
 static inline size_t
 calculate_suggestion_lines(int *baej, const size_t suggestion_len)
@@ -233,8 +238,8 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG
 	|| suggestion.type == SORT_SUG) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
-		cuc += suggestion.type == ELN_SUG ? 3 : 4;
-//		cuc += 3;
+//		cuc += suggestion.type == ELN_SUG ? 3 : 4;
+		cuc += 3;
 		flags |= BAEJ_SUGGESTION;
 		*baej = 1;
 	}
@@ -277,7 +282,7 @@ set_cursor_position(const int baej)
 	 * the last typed char. However, since we only care here about
 	 * the difference between them, it doesn't matter: the result
 	 * is the same (7 - 4 == 6 - 3 == 1) */
-	if (rl_end > rl_point) {
+	if (rl_end > rl_point && highlight == 0) {
 		MOVE_CURSOR_RIGHT(rl_end - rl_point);
 		fflush(stdout);
 	}
@@ -288,11 +293,21 @@ set_cursor_position(const int baej)
 	if (baej == 1) {
 		/* Move the cursor %d columns to the right and print "> " */
 // TESTING!
-		int off = (rl_end > rl_point && highlight == 1) ? BAEJ_OFFSET - 1 : BAEJ_OFFSET;
-		SUGGEST_BAEJ(off, sp_c);
+/*		int off = (rl_end > rl_point && highlight == 1) ? BAEJ_OFFSET - 1 : BAEJ_OFFSET;
+		SUGGEST_BAEJ(off, sp_c); */
 // TESTING!
-/*		SUGGEST_BAEJ(BAEJ_OFFSET, sp_c); */
+		int off = BAEJ_OFFSET + (highlight == 0 ? 1 : 0);
+/*		if (highlight == 0)
+			off = BAEJ_OFFSET + 1;
+		else
+			off = BAEJ_OFFSET; */
+		SUGGEST_BAEJ(off, sp_c);
 	}
+
+/*	if (rl_end > rl_point) {
+		MOVE_CURSOR_LEFT(rl_end - rl_point);
+		fflush(stdout);
+	} */
 }
 
 static inline int
@@ -323,9 +338,8 @@ _print_suggestion(const char *str, const size_t offset, const char *color)
 {
 	char *wname = truncate_name(str);
 	fputs(color, stdout);
-	fputs((wname ? wname : str) + offset - (offset ? 1 : 0), stdout);
-//	fputs((wname ? wname : str) + offset, stdout);
-/*	printf("%s%s", color, (wname ? wname : str) + offset - (offset ? 1 : 0)); */
+//	fputs((wname ? wname : str) + offset - (offset ? 1 : 0), stdout);
+	fputs((wname ? wname : str) + offset, stdout);
 	fflush(stdout);
 	free(wname);
 }
@@ -340,10 +354,12 @@ print_suggestion(const char *str, size_t offset, char *color)
 	if (!str || !*str)
 		return;
 
+	fputs(HIDE_CURSOR, stdout);
+
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 
-	correct_offset(&offset);
+//	correct_offset(&offset);
 
 	/* Store current cursor position in CURROW and CURCOL (globals) */
 	get_cursor_position(&curcol, &currow);
@@ -366,9 +382,10 @@ print_suggestion(const char *str, size_t offset, char *color)
 // TESTING!
 		/* The highlight function modified the terminal idea of the cursor position,
 		 * so that we need to correct it before exiting */
-		if (highlight == 1)// && str_len == offset)
-			set_cursor_position(baej);
+//		if (highlight == 1)// && str_len == offset)
+//			set_cursor_position(baej);
 // TESTING!
+		fputs(UNHIDE_CURSOR, stdout);
 		return;
 	}
 
@@ -388,6 +405,8 @@ print_suggestion(const char *str, size_t offset, char *color)
 	suggestion.nlines = slines;
 	/* Store the suggestion color, in case we need to reprint it */
 	suggestion.color = color;
+
+	fputs(UNHIDE_CURSOR, stdout);
 }
 
 static inline char *
@@ -1448,7 +1467,7 @@ turn_it_wrong(void)
 	char *b = rl_copy_text(0, rl_end);
 	if (!b) return;
 
-	fputs(HIDE_CURSOR, stdout);
+//	fputs(HIDE_CURSOR, stdout);
 	fputs(hw_c, stdout);
 	fflush(stdout);
 	cur_color = hw_c;
@@ -1462,7 +1481,7 @@ turn_it_wrong(void)
 	free(b);
 	rl_point = bk;
 
-	fputs(UNHIDE_CURSOR, stdout);
+//	fputs(UNHIDE_CURSOR, stdout);
 }
 
 static void
@@ -1481,7 +1500,7 @@ print_warning_prompt(const char c)
 		rl_set_prompt(decoded_prompt);
 		free(decoded_prompt);
 
-		if (rl_point < rl_end && nwords > 1)
+		if (highlight == 1 && rl_point < rl_end && nwords > 1)
 			turn_it_wrong();
 	}
 }
@@ -2179,13 +2198,13 @@ SUCCESS:
 		fputs(NC, stdout);
 		suggestion.printed = 1;
 		/* Restore color */
-		if (!wrong_cmd) {
+		if (wrong_cmd == 0) {
 			fputs(cur_color ? cur_color : tx_c, stdout);
 		} else {
 			fputs(wp_c, stdout);
 		}
 	} else {
-		if (wrong_cmd) {
+		if (wrong_cmd == 1) {
 			fputs(NC, stdout);
 			fputs(wp_c, stdout);
 		}

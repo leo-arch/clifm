@@ -435,14 +435,14 @@ END:
 #ifndef _NO_SUGGESTIONS
 			/* Since we have removed a char, let's check if there is
 			 * a suggestion available using the modified input line */
-			if (wrong_cmd && s == -1 && rl_end) {
+			if (wrong_cmd == 1 && s == -1 && rl_end > 0) {
 				/* If a suggestion is found, the normal prompt will be
 				 * restored and wrong_cmd will be set to zero */
 				rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
 				return 2;
 			}
 			if (rl_point == 0 && rl_end == 0) {
-				if (wrong_cmd)
+				if (wrong_cmd == 1)
 					recover_from_wrong_cmd();
 				if (_del == DEL_EMPTY_LINE)
 					leftmost_bell();
@@ -453,18 +453,18 @@ END:
 		return 0;
 	}
 
-	if (!wrong_cmd)
+	if (wrong_cmd == 0)
 		recolorize_line();
 #endif /* !_NO_HIGHLIGHT */
 
 	if (_del > 0) {
 #ifndef _NO_SUGGESTIONS
-		if (wrong_cmd && s == -1 && rl_end) {
+		if (wrong_cmd == 1 && s == -1 && rl_end > 0) {
 			rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
 			return 2;
 		}
 		if (rl_point == 0 && rl_end == 0) {
-			if (wrong_cmd)
+			if (wrong_cmd == 1)
 				recover_from_wrong_cmd();
 			if (_del == DEL_EMPTY_LINE)
 				leftmost_bell();

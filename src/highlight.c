@@ -235,7 +235,7 @@ recolorize_line(void)
 	}
 
 	int bk_point = rl_point;
-	if (rl_point && rl_point != rl_end)
+	if (rl_point > 0 && rl_point != rl_end)
 		rl_point--;
 
 	/* Get the current color up to the current cursor position */
@@ -255,19 +255,19 @@ recolorize_line(void)
 		return;
 	}
 
-/*	int start = rl_point > 0 ? rl_point - 1 : 0;
+	int start = rl_point > 0 ? rl_point - 1 : 0;
 	char *ss = rl_copy_text(start, rl_end);
 	rl_delete_text(start, rl_end);
 	rl_point = rl_end = start;
-	i = 0; */
+	i = 0;
 
-	int point = rl_point;
+/*	int point = rl_point;
 	int copy_start = point > 0 ? point - 1 : 0;
 	int start = point;
 	char *ss = rl_copy_text(copy_start, rl_end);
 	rl_delete_text(start, rl_end);
 	rl_point = rl_end = start;
-	i = point ? 1 : 0;
+	i = point ? 1 : 0; */
 
 	size_t l = 0;
 
@@ -293,15 +293,11 @@ recolorize_line(void)
 		t[0] = (char)ss[i];
 		t[1] = '\0';
 		rl_insert_text(t);
-// TESTING! HIGHLIGHT
-//		if (i == 0)
-//			fputs(df_c, stdout);
-// TESTING! HIGHLIGHT
 		rl_redisplay();
 	}
 
 EXIT:
-	fputs(UNHIDE_CURSOR, stdout);
 	free(ss);
 	rl_point = bk_point;
+	fputs(UNHIDE_CURSOR, stdout);
 }
