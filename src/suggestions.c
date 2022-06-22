@@ -291,13 +291,13 @@ set_cursor_position(const int baej)
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
 
 	if (baej == 1) {
-		int off = BAEJ_OFFSET + ((highlight == 0 || rl_point == rl_end) ? 1 : 0);
+		int off = BAEJ_OFFSET + ((highlight == 0) ? 1 : 0);
 		SUGGEST_BAEJ(off, sp_c);
 	} else {
 		if (highlight == 0) {// || (flags & NO_RECOLOR_LINE)) {
 			MOVE_CURSOR_RIGHT(1);
 			fflush(stdout);
-			flags &= ~NO_RECOLOR_LINE;
+//			flags &= ~NO_RECOLOR_LINE;
 		}
 	}
 }

@@ -442,7 +442,7 @@ my_insert_text(char *text, char *s, const char _s)
 		if (accept_first_word == 1) {
 			for (i = 0; t[i]; i++) {
 				if (t[i] >= '0' && t[i] <= '9') {
-					if (!i || t[i - 1] != ' ') {
+					if (i > 0 || t[i - 1] != ' ') {
 						redisplay = 1;
 						break;
 					}
@@ -466,7 +466,7 @@ my_insert_text(char *text, char *s, const char _s)
 				case '~': /* fallthrough */
 				case '*': /* fallthrough */
 				case '#':
-					if (!i || t[i - 1] != ' ')
+					if (i > 0 || t[i - 1] != ' ')
 						redisplay = 1;
 					break;
 				default: break;
