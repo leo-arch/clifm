@@ -328,7 +328,7 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (disk_usage)
 		print_disk_usage();
 	if (sort_switch) {
-		print_reload_msg(_("Sorted by: "));
+		print_reload_msg(_("Sorted by "));
 		print_sort_method();
 	}
 

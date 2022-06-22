@@ -567,12 +567,13 @@ print_match(char *match, const size_t len, const unsigned char c)
 
 	struct stat attr;
 	if (lstat(p ? p : match, &attr) != -1) {
-		if (S_ISDIR(attr.st_mode)) {
+		if (S_ISDIR(attr.st_mode)
+		|| (S_ISLNK(attr.st_mode) && get_link_ref(p ? p : match) == S_IFDIR)) {
 			append_slash = 1;
 			suggestion.filetype = DT_DIR;
 		}
 
-		if (suggest_filetype_color) {
+		if (suggest_filetype_color == 1) {
 			_color = get_comp_color(p ? p : match, &attr, &free_color);
 			if (_color)
 				color = _color;

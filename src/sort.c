@@ -368,6 +368,7 @@ print_owner_group_sort(int mode)
 void
 print_sort_method(void)
 {
+	fputs(BOLD, stdout);
 	switch (sort) {
 	case SNONE:	puts(_("none")); break;
 	case SNAME:
@@ -397,6 +398,7 @@ print_sort_method(void)
 	case SGRP: print_owner_group_sort(SGRP); break;
 	default: fputs("unknown sorting method\n", stdout); break;
 	}
+	fputs(NC, stdout);
 }
 
 static inline void
