@@ -291,24 +291,14 @@ set_cursor_position(const int baej)
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
 
 	if (baej == 1) {
-		/* Move the cursor %d columns to the right and print "> " */
-// TESTING!
-/*		int off = (rl_end > rl_point && highlight == 1) ? BAEJ_OFFSET - 1 : BAEJ_OFFSET;
-		SUGGEST_BAEJ(off, sp_c); */
-// TESTING!
 		int off = BAEJ_OFFSET + ((highlight == 0 || rl_point == rl_end) ? 1 : 0);
-//		int off = BAEJ_OFFSET + (highlight == 0 ? 1 : 0);
-/*		if (highlight == 0)
-			off = BAEJ_OFFSET + 1;
-		else
-			off = BAEJ_OFFSET; */
 		SUGGEST_BAEJ(off, sp_c);
-	}
-
-	if (highlight == 1 && baej == 0 && rl_end == rl_point) {
-//		MOVE_CURSOR_LEFT(rl_end - rl_point);
-		MOVE_CURSOR_RIGHT(1);
-		fflush(stdout);
+	} else {
+		if (highlight == 0) {// || (flags & NO_RECOLOR_LINE)) {
+			MOVE_CURSOR_RIGHT(1);
+			fflush(stdout);
+			flags &= ~NO_RECOLOR_LINE;
+		}
 	}
 }
 

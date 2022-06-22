@@ -423,11 +423,11 @@ my_insert_text(char *text, char *s, const char _s)
 	if (!text || !*text)
 		return;
 	{
-	if (wrong_cmd || cur_color == hq_c)
+	if (wrong_cmd == 1 || cur_color == hq_c)
 		goto INSERT_TEXT;
 
 #ifndef _NO_HIGHLIGHT
-	if (highlight) {
+	if (highlight == 1) {
 		/* Hide the cursor to minimize flickering */
 		fputs(HIDE_CURSOR, stdout);
 		/* Set text color to default */
@@ -439,7 +439,7 @@ my_insert_text(char *text, char *s, const char _s)
 		/* We only need to redisplay first suggested word if it contains
 		 * a highlighting char and it is not preceded by a space */
 		int redisplay = 0;
-		if (accept_first_word) {
+		if (accept_first_word == 1) {
 			for (i = 0; t[i]; i++) {
 				if (t[i] >= '0' && t[i] <= '9') {
 					if (!i || t[i - 1] != ' ') {
@@ -471,7 +471,7 @@ my_insert_text(char *text, char *s, const char _s)
 					break;
 				default: break;
 				}
-				if (redisplay)
+				if (redisplay == 1)
 					break;
 			}
 		}
@@ -494,11 +494,11 @@ my_insert_text(char *text, char *s, const char _s)
 			q[0] = t[i];
 			q[1] = '\0';
 			rl_insert_text(q);
-			if (!accept_first_word || redisplay)
+			if (accept_first_word == 0 || redisplay == 1)
 				rl_redisplay();
 		}
 
-		if (s && redisplay) {
+		if (s && redisplay == 1) {
 			/* 1) rl_redisplay removes the suggestion from the current line
 			 * 2) We need rl_redisplay to correctly print highlighting colors
 			 * 3) We need to keep the suggestion when accepting only
@@ -508,7 +508,8 @@ my_insert_text(char *text, char *s, const char _s)
 			 * As a workaround, let's reprint the suggestion */
 			size_t slen = strlen(suggestion_buf);
 			*s = _s ? _s : ' ';
-			print_suggestion(suggestion_buf, slen + 1, suggestion.color);
+//			print_suggestion(suggestion_buf, slen + 1, suggestion.color);
+			print_suggestion(suggestion_buf, slen, suggestion.color);
 			*s = '\0';
 		}
 
@@ -554,7 +555,7 @@ rl_accept_suggestion(int count, int key)
 	 * word delimiter */
 	char *s = (char *)NULL, _s = 0;
 	int trimmed = 0;
-	if (accept_first_word) {
+	if (accept_first_word == 1) {
 		char *p = suggestion_buf + (rl_point - suggestion.offset);
 		/* Skip leading spaces */
 		while (*p == ' ')
@@ -584,7 +585,7 @@ rl_accept_suggestion(int count, int key)
 	rl_delete_text(suggestion.offset, rl_end);
 	rl_point = suggestion.offset;
 
-	if (!accept_first_word && (flags & BAEJ_SUGGESTION))
+	if (accept_first_word == 0 && (flags & BAEJ_SUGGESTION))
 		clear_suggestion(CS_KEEPBUF);
 
 	/* Complete according to the suggestion type */
@@ -608,15 +609,14 @@ rl_accept_suggestion(int count, int key)
 				break;
 			}
 		}
-		if (isquote && !backslash)
+		if (isquote == 1 && backslash == 0)
 			tmp = escape_str(suggestion_buf);
 
 		if (tmp) {
 			/* escape_str escapes leading tilde. But we don't want it
 			 * here. Remove it */
 			char *q;
-			if (cur_comp_type == TCMP_PATH && *tmp == '\\'
-			&& *(tmp + 1) == '~')
+			if (cur_comp_type == TCMP_PATH && *tmp == '\\' && *(tmp + 1) == '~')
 				q = tmp + 1;
 			else
 				q = tmp;
@@ -676,7 +676,7 @@ rl_accept_suggestion(int count, int key)
 
 	/* Move the cursor to the end of the line */
 	rl_point = rl_end;
-	if (!accept_first_word) {
+	if (accept_first_word == 0) {
 		suggestion.printed = 0;
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;

@@ -454,10 +454,13 @@ END:
 	}
 
 	if (wrong_cmd == 0) {
-		if (rl_point < rl_end)
-			recolorize_line();
-		else
+//		if (rl_point < rl_end) {
+//		if (rl_point < rl_end || _del > 0) {
+		recolorize_line();
+/*		} else {
+			flags |= NO_RECOLOR_LINE;
 			rl_highlight(rl_line_buffer, rl_point ? (size_t)rl_point - 1 : 0, SET_COLOR);
+		} */
 	}
 #endif /* !_NO_HIGHLIGHT */
 

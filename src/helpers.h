@@ -204,6 +204,7 @@ extern int watch;
 #define STATE_SUGGESTING    (1 << 12)
 #define IN_SELBOX_SCREEN    (1 << 13)
 #define MULTI_SEL           (1 << 14)
+//#define NO_RECOLOR_LINE     (1 << 15)
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)
