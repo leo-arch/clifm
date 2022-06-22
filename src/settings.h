@@ -91,7 +91,7 @@ xf=01;31:xs=00;32:"
 /* Interface */
 #define DEF_BM_C  "\x1b[01;36m" /* Bookmarked dirs in bookmarks screen */
 #define DEF_DF_C  "\x1b[0m" /* Reset attributes: default terminal color */
-#define DEF_DL_C  "\x1b[00;34m" /* Dividing line */
+#define DEF_DL_C  "\x1b[02;37m" /* Dividing line */
 #define DEF_EL_C  "\x1b[00;36m" /* ELN's */
 #define DEF_EM_C  "\001\x1b[01;31m\002" /* Error msg indicator */
 #define DEF_FC_C  "\x1b[00;02;34m"

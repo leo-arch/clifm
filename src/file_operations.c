@@ -1276,10 +1276,8 @@ copy_function(char **args, int copy_and_rename)
 		deselect_all();
 
 #if defined(__HAIKU__)// || defined(__APPLE__)
-	if (autols) {
-		free_dirlist();
-		list_dir();
-	}
+	if (autols == 1)
+		reload_dirlist();
 #endif
 
 	return EXIT_SUCCESS;

@@ -356,7 +356,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	/* Store current cursor position in CURROW and CURCOL (globals) */
 	get_cursor_position(&curcol, &currow);
 
-	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump */
+	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump (and fuzzy matches) */
 	flags &= ~BAEJ_SUGGESTION;
 
 	/* Let's check for baej suggestions, mostly in case of fuzzy matches */
@@ -391,9 +391,9 @@ print_suggestion(const char *str, size_t offset, char *color)
 	_print_suggestion(str, offset, color);
 	restore_cursor_position(slines);
 
-	/* Store the amount of lines taken by the current command line
-	 * (plus the suggestion's length) to be able to correctly
-	 * remove it later (via the clear_suggestion function) */
+	/* Store the amount of lines taken by the current command line (plus the
+	 * suggestion's length) to be able to correctly remove it later (via the
+	 * clear_suggestion function) */
 	suggestion.nlines = slines;
 	/* Store the suggestion color, in case we need to reprint it */
 	suggestion.color = color;
@@ -456,7 +456,7 @@ get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 		break;
 
 	case S_IFLNK: {
-		if (light_mode)	return ln_c;
+		if (light_mode == 1) return ln_c;
 		char *linkname = realpath(filename, (char *)NULL);
 		if (linkname) {
 			free(linkname);
