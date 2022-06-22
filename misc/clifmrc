@@ -35,7 +35,7 @@ FilesCounter=true
 # How to list files: 0 = vertically (like ls(1) would), 1 = horizontally
 ListingMode=0
 
-# List files automatically after changinh current directory
+# List files automatically after changing current directory
 AutoLs=true
 
 # If set to true, print a map of the current position in the directory
