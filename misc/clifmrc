@@ -73,13 +73,13 @@ ShowHiddenFiles=false
 
 # List files properties next to file names instead of just file names
 LongViewMode=false
-# Print files apparent size instead of actual device usage (blocks)
+# Print files apparent size instead of actual device usage (Linux only)
 ApparentSize=false
 # If running in long view, print directories full size (including contents)
 FullDirSize=false
 
-# Keep a record of both external commands and internal commands able to
-# modify the files system (e.g. 'r', 'c', 'm', and so on)
+# Keep a record of both external and internal commands able to modify the 
+# files system (e.g. 'r', 'c', 'm', and so on)
 LogCmds=false
 
 # Minimum length at which a file name can be trimmed in long view mode

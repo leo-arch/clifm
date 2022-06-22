@@ -833,11 +833,11 @@ SplashScreen=%s\n\n\
 ShowHiddenFiles=%s\n\n\
 # List files properties next to file names instead of just file names\n\
 LongViewMode=%s\n\
-# Print files apparent size instead of actual device usage (blocks)\n\
+# Print files apparent size instead of actual device usage (Linux only)\n\
 ApparentSize=%s\n\
 # If running in long view, print directories full size (including contents)\n\
 FullDirSize=%s\n\n\
-# Keep a record of both external commands and internal commands able to\n\
+# Keep a record of both external and internal commands able to\n\
 # modify the files system (e.g. 'r', 'c', 'm', and so on)\n\
 LogCmds=%s\n\n"
 

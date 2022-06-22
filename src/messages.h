@@ -239,9 +239,9 @@ Usage:\n\
     fz on (or --full-dir-size)\n\
 - Toggle the disk usage analyzer mode on/off:\n\
     Alt-TAB (or -t, --disk-usage-analyzer)\n\
-- Print apparent sizes instead of actual device usage (blocks):\n\
+- Print apparent sizes instead of actual device usage (Linux only):\n\
     Run with --apparent-size or set ApparentSize to true in the configuration file\n\
-- Use powers of 1000 instead of 1024 for file sizes:\n\
+- Use powers of 1000 instead of 1024 for file sizes (Linux only):\n\
     Run with --si"
 
 #define FF_USAGE "Set list directories first on-off\n\
