@@ -467,8 +467,8 @@ extern int watch;
 
 /* Macros to calculate file sizes */
 #define BLK_SIZE 512
-#define FILE_SIZE_PTR (xargs.apparent_size == 1 ? attr->st_size : attr->st_blocks * BLK_SIZE)
-#define FILE_SIZE (xargs.apparent_size == 1 ? attr.st_size : attr.st_blocks * BLK_SIZE)
+#define FILE_SIZE_PTR (apparent_size == 1 ? attr->st_size : attr->st_blocks * BLK_SIZE)
+#define FILE_SIZE (apparent_size == 1 ? attr.st_size : attr.st_blocks * BLK_SIZE)
 
 #define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
@@ -943,6 +943,7 @@ extern int
 	search_flags;
 
 extern int
+	apparent_size,
 	auto_open,
 	autocd,
 	autocmd_set,

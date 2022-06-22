@@ -833,8 +833,10 @@ SplashScreen=%s\n\n\
 ShowHiddenFiles=%s\n\n\
 # List files properties next to file names instead of just file names\n\
 LongViewMode=%s\n\
+# Print files apparent size instead of actual device usage (blocks)\n\
+ApparentSize=%s\n\
 # If running in long view, print directories full size (including contents)\n\
-FullDirSize=false\n\n\
+FullDirSize=%s\n\n\
 # Keep a record of both external commands and internal commands able to\n\
 # modify the files system (e.g. 'r', 'c', 'm', and so on)\n\
 LogCmds=%s\n\n"
@@ -913,6 +915,8 @@ LightMode=%s\n\n",
 		DEF_SPLASH_SCREEN == 1 ? "true" : "false",
 		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
 		DEF_LONG_VIEW == 1 ? "true" : "false",
+		DEF_APPARENT_SIZE == 1 ? "true" : "false",
+		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
 		DEF_LOGS_ENABLED == 1 ? "true" : "false",
 		DEF_MIN_NAME_TRIM,
 		DEF_MIN_JUMP_RANK,
@@ -1687,6 +1691,12 @@ read_config(void)
 		if (*line == '\n' || *line == '#')
 			continue;
 
+		else if (xargs.apparent_size == UNSET && *line == 'A'
+		&& strncmp(line, "ApparentSize=", 13) == 0) {
+			if (set_config_bool_value(line, &apparent_size) == -1)
+				continue;
+		}
+
 		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0)
 			parse_autocmd_line(line + 8);
 
@@ -2441,6 +2451,7 @@ reset_variables(void)
 	user.shell = (char *)NULL;
 
 	/* Reset all variables */
+	apparent_size = UNSET;
 	auto_open = UNSET;
 	autocd = UNSET;
 	autojump = UNSET;

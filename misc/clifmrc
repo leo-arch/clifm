@@ -73,6 +73,8 @@ ShowHiddenFiles=false
 
 # List files properties next to file names instead of just file names
 LongViewMode=false
+# Print files apparent size instead of actual device usage (blocks)
+ApparentSize=false
 # If running in long view, print directories full size (including contents)
 FullDirSize=false
 

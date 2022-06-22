@@ -1582,7 +1582,7 @@ RUN:
 			break;
 		case 48: xargs.secure_cmds = 1; break;
 		case 49: xargs.full_dir_size = full_dir_size = 1; break;
-		case 50: xargs.apparent_size = 1; break;
+		case 50: xargs.apparent_size = apparent_size = 1; break;
 		case 51: xargs.history = 0; break;
 #ifndef _NO_FZF
 		case 52: xargs.fzytab = 1; fzftab = 1; break;
@@ -2636,9 +2636,6 @@ check_options(void)
 	}
 
 	/* Do no override command line options */
-	if (xargs.apparent_size == UNSET)
-		xargs.apparent_size = DEF_APPARENT_SIZE;
-
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
 
@@ -2703,6 +2700,13 @@ check_options(void)
 		xargs.highlight = highlight = 0;
 # endif /* __NetBSD__ */
 #endif /* !_NO_HIGHLIGHT */
+
+	if (apparent_size == UNSET) {
+		if (xargs.apparent_size == UNSET)
+			apparent_size = DEF_APPARENT_SIZE;
+		else
+			apparent_size = xargs.apparent_size;
+	}
 
 	if (full_dir_size == UNSET) {
 		if (xargs.full_dir_size == UNSET)

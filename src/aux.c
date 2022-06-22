@@ -845,7 +845,7 @@ dir_size(char *dir)
 	else
 		strcpy(block_size, "--block-size=K");
 
-	if (xargs.apparent_size != 1) {
+	if (apparent_size != 1) {
 		char *cmd[] = {"du", "-s", block_size, dir, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
