@@ -63,7 +63,7 @@ get_properties(char *filename, const int dsize)
 
 	/* Remove ending slash and leading dot-slash (./) */
 	size_t len = strlen(filename);
-	if (filename[len - 1] == '/')
+	if (len > 1 && filename[len - 1] == '/')
 		filename[len - 1] = '\0';
 
 	if (*filename == '.' && *(filename + 1) == '/' && *(filename + 2))
