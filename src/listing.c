@@ -1863,9 +1863,11 @@ list_dir(void)
 		}
 
 #ifdef _DIRENT_HAVE_D_TYPE
-		if (only_dirs && ent->d_type != DT_DIR)
+		if (only_dirs == 1 && ent->d_type != DT_DIR
+		&& (ent->d_type != DT_LNK || get_link_ref(ename) != S_IFDIR))
 #else
-		if (stat_ok && only_dirs && !S_ISDIR(attr.st_mode))
+		if (stat_ok == 1 && only_dirs == 1 && !S_ISDIR(attr.st_mode)
+		&& (!S_ISLNK(attr.st_mode) || get_link_ref(ename) != S_IFDIR))
 #endif
 			continue;
 
