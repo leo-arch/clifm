@@ -838,7 +838,7 @@ dir_size(char *dir)
 	if (r == -1)
 		return (-1);
 
-#ifdef __linux__
+#if defined(__linux__) && !defined(_BE_POSIX)
 	char block_size[16];
 	if (xargs.si == 1)
 		strcpy(block_size, "--block-size=KB");

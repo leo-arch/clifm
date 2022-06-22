@@ -510,10 +510,16 @@ set_long_attribs(const int n, const struct stat *attr)
 	file_info[n].mode = attr->st_mode;
 	file_info[n].rdev = attr->st_rdev;
 
-	if (full_dir_size == 1 && file_info[n].type == DT_DIR)
-		file_info[n].size = dir_size(file_info[n].name);
-	else
+	if (full_dir_size == 1 && file_info[n].dir == 1) {
+		char name[PATH_MAX]; *name = '\0';
+		if (file_info[n].type == DT_LNK) /* Symlink to directory */
+			snprintf(name, sizeof(name), "%s/", file_info[n].name);
+		file_info[n].size = dir_size(*name ? name : file_info[n].name);
+		if (file_info[n].type == DT_DIR && attr->st_nlink == 2 && file_info[n].size == 4)
+			file_info[n].size = 0; /* Empty directory */
+	} else {
 		file_info[n].size = FILE_SIZE_PTR;
+	}
 }
 
 static inline void

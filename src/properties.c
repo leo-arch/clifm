@@ -456,7 +456,7 @@ int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 {
 	char *size_type;
-	if (full_dir_size == 1 && props->type == DT_DIR)
+	if (full_dir_size == 1 && props->dir == 1)
 		size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
 	else
 		size_type = get_size_unit(props->size);
