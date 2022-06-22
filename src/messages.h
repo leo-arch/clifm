@@ -234,6 +234,16 @@ Examples:\n\
 Usage:\n\
   fc, filescounter [on, off, status]"
 
+#define FILE_SIZE_USAGE "File sizes/disk usage\n\
+- Enable full directory size (long view):\n\
+    fz on (or --full-dir-size)\n\
+- Toggle the disk usage analyzer mode on/off:\n\
+    Alt-TAB (or -t, --disk-usage-analyzer)\n\
+- Print apparent sizes instead of actual device usage (blocks):\n\
+    Run with --apparent-size or set ApparentSize to true in the configuration file\n\
+- Use powers of 1000 instead of 1024 for file sizes:\n\
+    Run with --si"
+
 #define FF_USAGE "Set list directories first on-off\n\
 Usage:\n\
   ff, dirs-first [on, off, status]\n\

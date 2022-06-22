@@ -154,7 +154,7 @@ get_properties(char *filename, const int dsize)
 		else if (check_file_access(&attr) == 0)
 			color = nd_c;
 		else
-			color = get_dir_color(filename, attr.st_mode);
+			color = get_dir_color(filename, attr.st_mode, attr.st_nlink);
 		break;
 	case S_IFLNK:
 		file_type = 'l';

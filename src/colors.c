@@ -64,9 +64,11 @@ struct defs_t *defs;
 size_t defs_n = 0;
 #endif /* CLIFM_SUCKLESS */
 
-/* Retrieve the color corresponding to dir FILENAME with mode MODE */
+/* Retrieve the color corresponding to dir FILENAME with mode MODE
+ * If LINKS > 2, we know the directory is populated, so that we don't need
+ * to run count_dir() */
 char *
-get_dir_color(const char *filename, const mode_t mode)
+get_dir_color(const char *filename, const mode_t mode, const nlink_t links)
 {
 	char *color = (char *)NULL;
 	int sticky = 0;
@@ -77,7 +79,7 @@ get_dir_color(const char *filename, const mode_t mode)
 	if (mode & S_IWOTH)
 		is_oth_w = 1;
 
-	int files_dir = count_dir(filename, CPOP);
+	int files_dir = links > 2 ? (int)links : count_dir(filename, CPOP);
 
 	color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
 		   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
@@ -1681,7 +1683,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		else if (check_file_access(&attr) == 0)
 			color = nd_c;
 		else
-			color = get_dir_color(ent, attr.st_mode);
+			color = get_dir_color(ent, attr.st_mode, attr.st_nlink);
 		break;
 
 	case S_IFLNK: {

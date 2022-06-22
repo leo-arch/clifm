@@ -244,7 +244,7 @@ fzftab_color(char *filename, const struct stat *attr)
 	case S_IFDIR:
 		if (!check_file_access(attr))
 			return nd_c;
-		return get_dir_color(filename, attr->st_mode);
+		return get_dir_color(filename, attr->st_mode, attr->st_nlink);
 	case S_IFREG:
 		if (!check_file_access(attr))
 			return nf_c;

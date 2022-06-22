@@ -1741,6 +1741,8 @@ static int
 print_file_attributes_topic(void)
 {
 	puts(FILE_ATTRIBUTES);
+	putchar('\n');
+	puts(FILE_SIZE_USAGE);
 	return EXIT_SUCCESS;
 }
 

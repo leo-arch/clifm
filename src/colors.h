@@ -33,7 +33,7 @@ int cschemes_function(char **args);
 #ifndef CLIFM_SUCKLESS
 size_t get_colorschemes(void);
 #endif /* CLIFM_SUCKLESS */
-char *get_dir_color(const char *filename, const mode_t mode);
+char *get_dir_color(const char *filename, const mode_t mode, const nlink_t links);
 char *get_ext_color(char *ext);
 char *get_file_color(const char *filename, const struct stat *attr);
 void reset_filetype_colors(void);
