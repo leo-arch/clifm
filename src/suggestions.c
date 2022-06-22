@@ -296,7 +296,8 @@ set_cursor_position(const int baej)
 /*		int off = (rl_end > rl_point && highlight == 1) ? BAEJ_OFFSET - 1 : BAEJ_OFFSET;
 		SUGGEST_BAEJ(off, sp_c); */
 // TESTING!
-		int off = BAEJ_OFFSET + (highlight == 0 ? 1 : 0);
+		int off = BAEJ_OFFSET + ((highlight == 0 || rl_point == rl_end) ? 1 : 0);
+//		int off = BAEJ_OFFSET + (highlight == 0 ? 1 : 0);
 /*		if (highlight == 0)
 			off = BAEJ_OFFSET + 1;
 		else
@@ -304,10 +305,11 @@ set_cursor_position(const int baej)
 		SUGGEST_BAEJ(off, sp_c);
 	}
 
-/*	if (rl_end > rl_point) {
-		MOVE_CURSOR_LEFT(rl_end - rl_point);
+	if (highlight == 1 && baej == 0 && rl_end == rl_point) {
+//		MOVE_CURSOR_LEFT(rl_end - rl_point);
+		MOVE_CURSOR_RIGHT(1);
 		fflush(stdout);
-	} */
+	}
 }
 
 static inline int

@@ -430,7 +430,7 @@ END:
 #endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_HIGHLIGHT
-	if (!highlight) {
+	if (highlight == 0) {
 		if (_del > 0) {
 #ifndef _NO_SUGGESTIONS
 			/* Since we have removed a char, let's check if there is
@@ -453,8 +453,12 @@ END:
 		return 0;
 	}
 
-	if (wrong_cmd == 0)
-		recolorize_line();
+	if (wrong_cmd == 0) {
+		if (rl_point < rl_end)
+			recolorize_line();
+		else
+			rl_highlight(rl_line_buffer, rl_point ? (size_t)rl_point - 1 : 0, SET_COLOR);
+	}
 #endif /* !_NO_HIGHLIGHT */
 
 	if (_del > 0) {

@@ -424,7 +424,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		if ((*d != '/' || *(d + 1) || cur_comp_type == TCMP_USERS))
 			rl_insert_text("/");
 	} else {
-		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_TAGS_T)
+		if (rl_end == rl_point && cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_TAGS_T)
 			rl_stuff_char(' ');
 	}
 
@@ -1807,7 +1807,7 @@ RESET_PATH:
 RESTART:
 		rl_on_new_line();
 #ifndef _NO_HIGHLIGHT
-		if (highlight && !wrong_cmd) {
+		if (highlight == 1 && wrong_cmd == 0) {
 			int bk = rl_point;
 /*			rl_point = 0;
 			recolorize_line();
@@ -1841,7 +1841,8 @@ RESTART:
 				rl_redisplay();
 			}
 			fputs(UNHIDE_CURSOR, stdout);
-			rl_point = rl_end = bk;
+//			rl_point = rl_end = bk;
+			rl_point = bk;
 			free(ss);
 		}
 #endif /* !_NO_HIGHLIGHT */
