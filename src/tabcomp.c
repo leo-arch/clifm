@@ -1205,6 +1205,20 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 }
 #endif /* !_NO_FZF */
 
+/* Simple comparison routine for qsort()ing strings */
+static int
+compare_strings (s1, s2)
+  char **s1, **s2;
+{
+	int ret;
+
+	ret = **s1 - **s2;
+	if (ret == 0)
+		ret = strcmp(*s1, *s2);
+
+	return ret;
+}
+
 /* Complete the word at or before point.
    WHAT_TO_DO says what to do with the completion.
    `?' means list the possible completions.
@@ -1360,7 +1374,15 @@ AFTER_USUAL_COMPLETION:
 		char dead_slot;
 		char **temp_array;
 
-		/* Remember the lowest common denominator for it may be unique. */
+		if (cur_comp_type == TCMP_HIST) {
+			/* Sort the array without matches[0]: we need it to stay in
+			 * place no matter what */
+			for (i = 0; matches[i]; i++);
+			if (i)
+				qsort(matches + 1, i - 1, sizeof(char *), compare_strings);
+		}
+
+		/* Remember the lowest common denominator, for it may be unique */
 		lowest_common = savestring(matches[0], strlen(matches[0]));
 
 		for (i = 0; matches[i + 1]; i++) {
@@ -1372,8 +1394,8 @@ AFTER_USUAL_COMPLETION:
 			}
 		}
 
-		/* We have marked all the dead slots with (char *)&dead_slot.
-		 * Copy all the non-dead entries into a new array. */
+		/* We have marked all the dead slots with (char *)&dead_slot
+		 * Copy all the non-dead entries into a new array */
 		temp_array = (char **)xnmalloc(3 + newlen, sizeof (char *));
 		for (i = j = 1; matches[i]; i++) {
 			if (matches[i] != (char *)&dead_slot) {
@@ -1392,9 +1414,8 @@ AFTER_USUAL_COMPLETION:
 		/* Place the lowest common denominator back in [0]. */
 		matches[0] = lowest_common;
 
-		/* If there is one string left, and it is identical to the
-		 * lowest common denominator (LCD), then the LCD is the string to
-		 * insert. */
+		/* If there is one string left, and it is identical to the lowest
+		 * common denominator (LCD), then the LCD is the string to insert */
 		if (j == 2 && strcmp(matches[0], matches[1]) == 0) {
 			free(matches[1]);
 			matches[1] = (char *)NULL;
@@ -1535,11 +1556,10 @@ AFTER_USUAL_COMPLETION:
 		if (replacement != matches[0])
 			free(replacement);
 
-		/* If there are more matches, ring the bell to indicate.
-		 If this was the only match, and we are hacking files,
-		 check the file to see if it was a directory. If so,
-		 add a '/' to the name.  If not, and we are at the end
-		 of the line, then add a space. */
+		/* If there are more matches, ring the bell to indicate. If this was
+		 * the only match, and we are hacking files, check the file to see if
+		 * it was a directory. If so, add a '/' to the name.  If not, and we
+		 * are at the end of the line, then add a space. */
 		if (matches[1]) {
 			if (what_to_do == '!') {
 				goto DISPLAY_MATCHES;		/* XXX */

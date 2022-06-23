@@ -649,9 +649,19 @@ get_history(void)
 }
 
 void
-add_to_cmdhist(const char *cmd)
+add_to_cmdhist(char *cmd)
 {
 	if (!cmd)
+		return;
+
+	/* Remove trailing spaces from CMD */
+	size_t cmd_len = strlen(cmd);
+	int i = (int)cmd_len;
+	while (--i >= 0 && cmd[i] == ' ') {
+		cmd[i] = '\0';
+		cmd_len--;
+	}
+	if (cmd_len == 0)
 		return;
 
 	/* For readline */
@@ -662,7 +672,6 @@ add_to_cmdhist(const char *cmd)
 
 	/* For us */
 	/* Add the new input to the history array */
-	size_t cmd_len = strlen(cmd);
 	history = (struct history_t *)xrealloc(history, (size_t)(current_hist_n + 2) * sizeof(struct history_t));
 	history[current_hist_n].cmd = savestring(cmd, cmd_len);
 	history[current_hist_n].len = cmd_len;

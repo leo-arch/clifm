@@ -1293,7 +1293,7 @@ bookmarks_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-/* Used by history completion */
+/* Used for history and search pattern completion */
 static char *
 hist_generator(const char *text, int state)
 {
@@ -1306,13 +1306,29 @@ hist_generator(const char *text, int state)
 
 	if (!state) {
 		i = 0;
-		len = strlen(text);
+		len = strlen(*text == '!' ? text + 1 : text);
 	}
 
-	/* Look for cmd history entries for a match */
 	while ((name = history[i++].cmd) != NULL) {
-		if (strncmp(name, text, len) == 0)
-			return strdup(name);
+		if (*text == '!') {
+			if (len == 0 || (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
+			|| (xargs.fuzzy_match == 1
+			&& fuzzy_match((char *)(text + 1), name, case_sens_path_comp) == 1))
+				return strdup(name);
+		} else {
+			/* Restrict the search to what seems to be a pattern:
+			 * The string before the first slash or space (not counting the initial
+			 * slash, used to fire up the search function) must contain a pattern
+			 * metacharacter */
+			if (!*(name + 1))
+				continue;
+			char *ret = strpbrk(name + 1, search_strategy == GLOB_ONLY
+					? " /*?[{" : " /*?[{|^+$.");
+			if (!ret || *ret == ' ' || *ret == '/')
+				continue;
+			if (len == 0 || (*text == *name && strncmp(name, text, len) == 0))
+				return strdup(name);
+		}
 	}
 
 	return (char *)NULL;
@@ -2202,9 +2218,9 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		/* HISTORY CMD COMPLETION */
-		if (!_xrename && *text == '!') {
-			matches = rl_completion_matches(text + 1, &hist_generator);
+		/* HISTORY CMD AND SEARCH PATTERNS COMPLETION */
+		if (!_xrename && (*text == '!' || *text == '/')) {
+			matches = rl_completion_matches(text, &hist_generator);
 			if (matches) {
 				cur_comp_type = TCMP_HIST;
 				return matches;

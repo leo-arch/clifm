@@ -484,8 +484,8 @@ static int
 remove_file_from_trash(char *name)
 {
 	char rm_file[PATH_MAX], rm_info[PATH_MAX];
-	snprintf(rm_file, PATH_MAX, "%s/%s", trash_files_dir, name);
-	snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir, name);
+	snprintf(rm_file, sizeof(rm_file), "%s/%s", trash_files_dir, name);
+	snprintf(rm_info, sizeof(rm_info), "%s/%s.trashinfo", trash_info_dir, name);
 
 	int err = 0, err_file = 0, err_info = 0;
 	struct stat a;
@@ -494,7 +494,8 @@ remove_file_from_trash(char *name)
 		err_file = err = errno;
 	}
 	if (stat(rm_info, &a) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rm_info, strerror(errno));
+		if (err_file == EXIT_SUCCESS)
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rm_info, strerror(errno));
 		err_info = err = errno;
 	}
 
