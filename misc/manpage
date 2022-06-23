@@ -248,7 +248,7 @@ enable the splash screen
 leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
-run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-dirs-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press Ctrl-Alt-i (or Alt-TAB) to toggle this mode on/off in-place.
+run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-dirs-first --apparent-size\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press Ctrl-Alt-i (or Alt-TAB) to toggle this mode on/off in-place.
 .TP
 \fB\-u\fR, \fB\-\-no\-unicode\fR
 disable unicode

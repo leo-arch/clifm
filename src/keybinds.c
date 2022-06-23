@@ -809,17 +809,17 @@ static int
 rl_long(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy || xargs.disk_usage_analyzer == 1)
 		return EXIT_SUCCESS;
 
 	long_view = long_view == 1 ? 0 : 1;
 
 	if (autols == 1) {
-		free_dirlist();
+		if (clear_screen == 0)
 		/* Without this putchar(), the first entries of the directories
 		 * list are printed in the prompt line */
-		putchar('\n');
-		list_dir();
+			putchar('\n');
+		reload_dirlist();
 	}
 
 	print_reload_msg(_("Long view mode %s\n"),
@@ -843,9 +843,9 @@ rl_dirs_first(int count, int key)
 	list_dirs_first = list_dirs_first ? 0 : 1;
 
 	if (autols == 1) {
-		free_dirlist();
-		putchar('\n');
-		list_dir();
+		if (clear_screen == 0)
+			putchar('\n');
+		reload_dirlist();
 	}
 
 	print_reload_msg(_("Directories first %s\n"),
@@ -887,9 +887,9 @@ rl_hidden(int count, int key)
 	show_hidden = show_hidden ? 0 : 1;
 
 	if (autols == 1) {
-		free_dirlist();
-		putchar('\n');
-		list_dir();
+		if (clear_screen == 0)
+			putchar('\n');
+		reload_dirlist();
 	}
 
 	print_reload_msg(_("Hidden files %s\n"), show_hidden ? "enabled" : "disabled");
@@ -1040,9 +1040,9 @@ rl_sort_next(int count, int key)
 
 	if (autols == 1) {
 		sort_switch = 1;
-		free_dirlist();
-		putchar('\n');
-		list_dir();
+		if (clear_screen == 0)
+			putchar('\n');
+		reload_dirlist();
 		sort_switch = 0;
 	}
 
@@ -1066,9 +1066,9 @@ rl_sort_previous(int count, int key)
 
 	if (autols == 1) {
 		sort_switch = 1;
-		free_dirlist();
-		putchar('\n');
-		list_dir();
+		if (clear_screen == 0)
+			putchar('\n');
+		reload_dirlist();
 		sort_switch = 0;
 	}
 
@@ -1239,8 +1239,9 @@ rl_previous_profile(int count, int key)
 
 	if (clear_screen) {
 		CLEAR;
-	} else
+	} else {
 		putchar('\n');
+	}
 
 	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
 		char *input = prompt();
@@ -1415,10 +1416,8 @@ rl_cmds_help(int count, int key)
 
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX - 1,
-		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n",
-		PNL);
+		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n", PNL);
 	int ret = run_man_cmd(cmd);
-
 	if (!ret)
 		return EXIT_FAILURE;
 	return EXIT_SUCCESS;
@@ -1525,11 +1524,11 @@ rl_onlydirs(int count, int key)
 
 	only_dirs = only_dirs ? 0 : 1;
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = exit_code;
 	if (autols == 1) {
-		free_dirlist();
-		putchar('\n');
-		exit_status = list_dir();
+		if (clear_screen == 0)
+			putchar('\n');
+		reload_dirlist();
 	}
 
 	print_reload_msg(_("Only directories %s\n"), only_dirs
@@ -1690,32 +1689,35 @@ rl_toggle_disk_usage(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 
-	/* Default values: however, THEY SHOULD BE THE VALUES SET BY THE USER! */
-	static int tsort = SNAME, tlong = 0, tdirsize = 0, tff = 1;
+	/* Default values */
+	static int dsort = DEF_SORT, dlong = DEF_LONG_VIEW, ddirsize = DEF_FULL_DIR_SIZE,
+		ddf = DEF_LIST_DIRS_FIRST, dapparent = DEF_APPARENT_SIZE;
 
 	if (xargs.disk_usage_analyzer == 1) {
 		xargs.disk_usage_analyzer = 0;
-		sort = tsort;
-		long_view = tlong;
-		full_dir_size = tdirsize;
-		list_dirs_first = tff;
+		sort = dsort;
+		long_view = dlong;
+		full_dir_size = ddirsize;
+		list_dirs_first = ddf;
+		apparent_size = dapparent;
 	} else {
 		xargs.disk_usage_analyzer = 1;
-		tsort = sort;
-		tlong = long_view;
-		tdirsize = full_dir_size;
-		tff = list_dirs_first;
+		dsort = sort;
+		dlong = long_view;
+		ddirsize = full_dir_size;
+		ddf = list_dirs_first;
+		dapparent = apparent_size;
 
 		sort = STSIZE;
-		long_view = full_dir_size = 1;
+		long_view = full_dir_size = apparent_size = 1;
 		list_dirs_first = 0;
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	int exit_status = exit_code;
 	if (autols == 1) {
-		free_dirlist();
-		putchar('\n');
-		exit_status = list_dir();
+		if (clear_screen == 0)
+			putchar('\n');
+		reload_dirlist();
 	}
 
 	print_reload_msg("Disk usage analyzer %s\n",
