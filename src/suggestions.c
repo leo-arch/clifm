@@ -1477,12 +1477,14 @@ turn_it_wrong(void)
 //	fputs(UNHIDE_CURSOR, stdout);
 }
 
+/* Switch to the warning prompt
+ * FC is first char and LC last char */
 static void
-print_warning_prompt(const char c)
+print_warning_prompt(const char fc, unsigned char lc)
 {
 	if (warning_prompt == 1 && wrong_cmd == 0
-	&& c != ';' && c != ':' && c != '#'
-	&& c != '$' && c != '\'' && c != '"') {
+	&& fc != ';' && fc != ':' && fc != '#'
+	&& fc != '$' && fc != '\'' && fc != '"') {
 		if (suggestion.printed)
 			clear_suggestion(CS_FREEBUF);
 		wrong_cmd = 1;
@@ -1493,7 +1495,9 @@ print_warning_prompt(const char c)
 		rl_set_prompt(decoded_prompt);
 		free(decoded_prompt);
 
-		if (highlight == 1 && rl_point < rl_end && nwords > 1)
+		if (highlight == 1
+		&& ( (rl_point < rl_end && nwords > 1)
+		|| (lc == ' ' && nwords == 1) ) )
 			turn_it_wrong();
 	}
 }
@@ -2157,7 +2161,7 @@ CHECK_FIRST_WORD:
 	 * word. So, we assume we have an invalid command name. Switch to the warning
 	 * prompt to warn the user */
 		if (*word != '/' || strchr(word + 1, '/'))
-			print_warning_prompt(*word);
+			print_warning_prompt(*word, c);
 	}
 
 NO_SUGGESTION:
