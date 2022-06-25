@@ -177,11 +177,11 @@ For a detailed explanation of each of these features, follow the corresponding l
   - **NEW**: Help topics: type `help` and then press <kbd>TAB</kbd>. Choose a topic and press <kbd>Enter</kbd>
   - **NEW**: [Search strategies](https://github.com/leo-arch/clifm/wiki/Introduction#pattern--filetype--x-dir)
   - **NEW**: `-E`: ELN's use workspace color, `-r`: do not refresh the screen on empty line
-  - **NEW**: Wildcards expansion via <kbd>TAB</kbd> (`s *.[ch]<TAB>`)
+  - **NEW**: [Wildcards expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`s *.[ch]<TAB>`)
   - **NEW**: [File types expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`=l<TAB>` to list all symlinks in the current dir)
-  - **NEW**: TAB completion for search patterns (`/<TAB>`)
-  - **NEW**: TAB completion for users home directory (`~<TAB>`)
-  - **NEW**: TAB completion for shell commands arguments. Try `ls -<TAB>`
+  - **NEW**: [TAB completion for search patterns](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (`/<TAB>`)
+  - **NEW**: [TAB completion for users home directory](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (`~<TAB>`)
+  - **NEW**: [TAB completion for shell commands arguments](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion). Try `ls -<TAB>`
   - **NEW**: More tilling window manager friendly
   - **NEW**: [emoji-icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk)
   - **NEW**: [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
