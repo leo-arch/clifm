@@ -178,6 +178,7 @@ For a detailed explanation of each of these features, follow the corresponding l
   - **NEW**: [Search strategies](https://github.com/leo-arch/clifm/wiki/Introduction#pattern--filetype--x-dir)
   - **NEW**: `-E`: ELN's use workspace color, `-r`: do not refresh the screen on empty line
   - **NEW**: Wildcards expansion via <kbd>TAB</kbd> (`s *.[ch]<TAB>`)
+  - **NEW**: [File types expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`=l<TAB>` to list all symlinks in the current dir)
   - **NEW**: TAB completion for search patterns (`/<TAB>`)
   - **NEW**: TAB completion for users home directory (`~<TAB>`)
   - **NEW**: TAB completion for shell commands arguments. Try `ls -<TAB>`
