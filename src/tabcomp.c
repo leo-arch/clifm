@@ -264,7 +264,7 @@ fzftab_color(char *filename, const struct stat *attr)
 	}
 }
 
-static inline char *
+static char *
 get_entry_color(char **matches, const size_t i)
 {
 	if (colorize == 0)
@@ -310,7 +310,7 @@ get_entry_color(char **matches, const size_t i)
 	return df_c;
 }
 
-static inline void
+static void
 write_completion(char *buf, const size_t *offset, int *exit_status, const int multi)
 {
 	/* Remove ending new line char */
@@ -336,6 +336,9 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		} else {
 			rl_insert_text(buf + *offset);
 		}
+	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS) {
+		rl_insert_text(buf);
+		return;
 	} else {
 		if (autocd == 0 && cur_comp_type == TCMP_JUMP)
 			rl_insert_text("cd ");
@@ -424,7 +427,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		if ((*d != '/' || *(d + 1) || cur_comp_type == TCMP_USERS))
 			rl_insert_text("/");
 	} else {
-		if (rl_end == rl_point && cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_TAGS_T)
+		if (rl_end == rl_point && cur_comp_type != TCMP_OPENWITH
+		&& cur_comp_type != TCMP_TAGS_T && cur_comp_type != TCMP_FILE_TYPES_OPTS)
 			rl_stuff_char(' ');
 	}
 
@@ -432,7 +436,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 }
 
 /* Get word after last non-escaped slash */
-static inline char *
+static char *
 get_last_word(char *str)
 {
 	char *sl = str;
@@ -457,7 +461,7 @@ get_last_word(char *str)
 	}
 }
 
-static inline int
+static int
 run_fzf(const size_t *height, const int *offset, const char *lw, const int multi)
 {
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
@@ -599,7 +603,7 @@ get_initial_path(void)
 
 /* Recover finder (fzf/fzy) output from FINDER_OUT_FILE file
  * Return this output (reformated if needed) or NULL in case of error */
-static inline char *
+static char *
 get_fzf_output(const int multi)
 {
 	FILE *fp = fopen(finder_out_file, "r");
@@ -656,11 +660,12 @@ get_fzf_output(const int multi)
 	return buf;
 }
 
-static inline void
+static void
 write_comp_to_file(char *entry, const char *color, FILE **fp)
 {
 	char *c = (char *)NULL, tmp[MAX_COLOR + 4];
-	if (cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB) {
+	if (cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
+	|| cur_comp_type == TCMP_FILE_TYPES_FILES) {
 		size_t len = strlen(entry);
 		if (len > 1 && entry[len - 1] == '/')
 			entry[len - 1] = '\0';
@@ -691,7 +696,7 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 /* Store possible completions (MATCHES) in FINDER_IN_FILE to pass them to the finder,
  * either FZF or FZY
  * Return the number of stored matches */
-static inline size_t
+static size_t
 store_completions(char **matches, FILE *fp)
 {
 	int no_file_comp = 0;
@@ -721,7 +726,7 @@ store_completions(char **matches, FILE *fp)
 		} else if (no_file_comp == 1) {
 			color = mi_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
-		&& cur_comp_type != TCMP_TAGS_F) {
+		&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_FILE_TYPES_OPTS) {
 			char *cl = get_entry_color(matches, i);
 			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
@@ -747,7 +752,7 @@ store_completions(char **matches, FILE *fp)
 	return i;
 }
 
-static inline char *
+static char *
 get_query_str(int *fzf_offset)
 {
 	char *query = (char *)NULL;
@@ -790,7 +795,7 @@ get_query_str(int *fzf_offset)
 
 /* Calculate the length of the matching prefix to insert into the line
  * buffer only the non-matched part of the string returned by FZF */
-static inline size_t
+static size_t
 calculate_prefix_len(char *str)
 {
 	size_t prefix_len = 0, len = strlen(str);
@@ -838,7 +843,7 @@ calculate_prefix_len(char *str)
 
 /* Let's define whether we have a case which allows multi-selection
  * Returns 1 if true or zero if false */
-static inline int
+static int
 is_multi_sel(void)
 {
 	enum comp_type t = cur_comp_type;
@@ -997,7 +1002,8 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 	/* In case of a range, the sel keyword, or a full tag expression,
 	 * the query string is just empty */
 	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL
-	&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_GLOB) {
+	&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_GLOB
+	&& cur_comp_type != TCMP_FILE_TYPES_OPTS && cur_comp_type != TCMP_FILE_TYPES_FILES) {
 		query = get_query_str(&fzf_offset);
 		if (!query) {
 			if (cur_comp_type == TCMP_TAGS_T)
@@ -1019,6 +1025,14 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 			char *sp = strrchr(rl_line_buffer,  ' ');
 			fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
 		}
+	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS) {
+		fzf_offset++;
+	} else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
+		char *sp = strrchr(rl_line_buffer,  ' ');
+		if (sp) /* Expression is second or more word: "text =FILE_TYPE" */
+			fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 1;
+		else /* Expression is first word: "=FILE_TYPE" */
+			fzf_offset = prompt_offset - 2;
 	} else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES) {
 		char *sp = strrchr(rl_line_buffer, ' ');
 		fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
@@ -1143,6 +1157,13 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 			rl_end = rl_point;
 			prefix_len = 0;
 		}
+
+	} else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
+		char *s = strrchr(rl_line_buffer, ' ');
+		rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
+		rl_delete_text(rl_point, rl_end);
+		rl_end = rl_point;
+		prefix_len = 0;
 
 	} else if (cur_comp_type == TCMP_USERS) {
 		size_t l = strlen(buf);
@@ -1367,18 +1388,18 @@ AFTER_USUAL_COMPLETION:
 	/* It seems to me that in all the cases we handle we would like
 	 * to ignore duplicate possiblilities. Scan for the text to
 	 * insert being identical to the other completions. */
-	if (rl_ignore_completion_duplicates) {
+	if (rl_ignore_completion_duplicates == 1) {
 		char *lowest_common;
 		size_t j;
 		size_t newlen = 0;
 		char dead_slot;
 		char **temp_array;
 
-		if (cur_comp_type == TCMP_HIST) {
+		if (cur_comp_type == TCMP_HIST) {// || cur_comp_type == TCMP_EXT_OPTS) {
 			/* Sort the array without matches[0]: we need it to stay in
 			 * place no matter what */
 			for (i = 0; matches[i]; i++);
-			if (i)
+			if (i > 0)
 				qsort(matches + 1, i - 1, sizeof(char *), compare_strings);
 		}
 
@@ -1486,6 +1507,8 @@ AFTER_USUAL_COMPLETION:
 		}
 
 		if (replacement && cur_comp_type != TCMP_HIST
+		&& cur_comp_type != TCMP_FILE_TYPES_OPTS
+		&& (cur_comp_type != TCMP_FILE_TYPES_FILES || !matches[1])
 		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
 		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)
@@ -1555,6 +1578,14 @@ AFTER_USUAL_COMPLETION:
 
 		if (replacement != matches[0])
 			free(replacement);
+
+/*		if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
+			char *s = strrchr(rl_line_buffer, ' ');
+			rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
+			rl_delete_text(rl_point, rl_end);
+			rl_end = rl_point;
+			rl_redisplay();
+		} */
 
 		/* If there are more matches, ring the bell to indicate. If this was
 		 * the only match, and we are hacking files, check the file to see if
@@ -1767,7 +1798,8 @@ CALC_OFFSET:
 			tab_offset = strlen(ptr);
 		}
 
-		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR)
+		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR
+		|| cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_FILE_TYPES_OPTS)
 			tab_offset = 0;
 
 		for (i = 1; i <= (size_t)count; i++) {

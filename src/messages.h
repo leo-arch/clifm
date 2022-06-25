@@ -263,7 +263,28 @@ Examples:\n\
 - Do not list backup files (ending with tilde):\n\
     ft .*~$\n\
 - Unset the current filter:\n\
-    ft unset"
+    ft unset\n\n\
+You can also filter files in the current directory using TAB completion via wildcards and the file types filter:\n\
+- List PDF files:\n\
+    *.pdf<TAB> (second word or more)\n\
+- List executable files:\n\
+    =x<TAB>\n\n\
+This is the list of available file types for the file types filter:\n\
+  b: Block devices\n\
+  c: Character devices\n\
+  d: Directories\n\
+  f: Regular files\n\
+  h: Multi-hardlink files\n\
+  l: Symbolic links\n\
+  p: FIFO/pipes\n\
+  s: Sockets\n\
+  C: Files with capabilities\n\
+  o: Other-writable files\n\
+  t: Files with the sticky bit set\n\
+  u: SUID files\n\
+  g: SGID files\n\
+  x: Executable files\n\n\
+Type '=' and then hit TAB to get the list of file types filters"
 
 #define FORTH_USAGE "Change to the next directory in the directory history list\n\
 Usage:\n\

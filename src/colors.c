@@ -65,7 +65,7 @@ size_t defs_n = 0;
 #endif /* CLIFM_SUCKLESS */
 
 /* Retrieve the color corresponding to dir FILENAME with mode MODE
- * If LINKS > 2, we know the directory is populated, so that we don't need
+ * If LINKS > 2, we know the directory is populated, so that there's no need
  * to run count_dir() */
 char *
 get_dir_color(const char *filename, const mode_t mode, const nlink_t links)

@@ -348,7 +348,7 @@ is_number(const char *restrict str)
 static inline int
 contains_digit(char *str)
 {
-	if (!str || !*(++str))
+	if (!str || !*str || !*(++str))
 		return (-1);
 
 	int i = 1;

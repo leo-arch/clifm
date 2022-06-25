@@ -2194,6 +2194,121 @@ tag_complete(const char *text)
 	return comp;
 }
 
+static char *
+file_types_opts_generator(const char *text, int state)
+{
+	UNUSED(text); UNUSED(state);
+	static int i;
+
+	if (!state)
+		i = 0;
+
+	static char *opts[] = {
+		"b", /* Block device */
+		"c", /* Character device */
+		"d", /* Directory */
+		"f", /* Regular file */
+		"h", /* Multi-hardlink files */
+		"l", /* Symbolic link */
+		"p", /* FIFO/Pipe */
+		"s", /* Socket */
+		"x", /* Executable file */
+		"o", /* Other-writable file */
+		"t", /* File with the sticky bit set */
+		"u", /* SUID file */
+		"g", /* SGID file */
+		"C", /* File with capabilities */
+		NULL
+	};
+
+	char *name;
+	while ((name = opts[i++]))
+		return strdup(name);
+
+	return (char *)NULL;
+}
+
+static char *
+file_types_generator(const char *text, int state)
+{
+	static size_t i;
+	const char *name;
+
+	if (!state)
+		i = 0;
+
+	char *ret = (char *)NULL;
+	while (i < files && (name = file_info[i].name)) {
+		switch(*text) {
+		case 'b':
+			if (file_info[i].type == DT_BLK)
+				ret = strdup(name);
+			break;
+		case 'c':
+			if (file_info[i].type == DT_CHR)
+				ret = strdup(name);
+			break;
+		case 'C':
+			if (file_info[i].color == ca_c)
+				ret = strdup(name);
+			break;
+		case 'd':
+			if (file_info[i].dir == 1)
+				ret = strdup(name);
+			break;
+		case 'f':
+			if (file_info[i].dir == 0)
+				ret = strdup(name);
+			break;
+		case 'h':
+			if (file_info[i].dir == 0 && file_info[i].linkn > 2)
+				ret = strdup(name);
+			break;
+		case 'l':
+			if (file_info[i].type == DT_LNK)
+				ret = strdup(name);
+			break;
+
+		case 'o':
+			if (file_info[i].color == tw_c || file_info[i].color == ow_c)
+				ret = strdup(name);
+			break;
+		case 't':
+			if (file_info[i].color == tw_c || file_info[i].color == st_c)
+				ret = strdup(name);
+			break;
+
+		case 'p':
+			if (file_info[i].type == DT_FIFO)
+				ret = strdup(name);
+			break;
+		case 's':
+			if (file_info[i].type == DT_SOCK)
+				ret = strdup(name);
+			break;
+		case 'x':
+			if (file_info[i].exec == 1)
+				ret = strdup(name);
+			break;
+		case 'u':
+			if (file_info[i].color == su_c)
+				ret = strdup(name);
+			break;
+		case 'g':
+			if (file_info[i].color == sg_c)
+				ret = strdup(name);
+			break;
+		default: break;
+		}
+
+		i++;
+		if (ret)
+			return ret;
+	}
+
+	return (char *)NULL;
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -2204,6 +2319,23 @@ my_rl_completion(const char *text, int start, int end)
 
 	while (*text == '\\')
 		++text;
+
+	if (!_xrename && *text == '=') {
+		if (!*(text + 1)) {
+			matches = rl_completion_matches(text, &file_types_opts_generator);
+			if (matches) {
+				cur_comp_type = TCMP_FILE_TYPES_OPTS;
+				return matches;
+			}
+		} else if (!*(text + 2)) {
+			matches = rl_completion_matches(text + 1, &file_types_generator);
+			if (matches) {
+				flags |= MULTI_SEL;
+				cur_comp_type = TCMP_FILE_TYPES_FILES;
+				return matches;
+			}
+		}
+	}
 
 	if (start == 0) { /* Only for the first entered word */
 		/* If the xrename function (for the m command) is running
@@ -2650,8 +2782,10 @@ my_rl_completion(const char *text, int start, int end)
 				*a = ' ';
 			}
 			if (*lw && get_shell_cmd_opts(lw) > 0
-			&& (matches = rl_completion_matches(text, &ext_options_generator)) )
+			&& (matches = rl_completion_matches(text, &ext_options_generator)) ) {
+//				cur_comp_type = TCMP_EXT_OPTS;
 				return matches;
+			}
 		}
 
 		/* Finally, try to complete with filenames in CWD */

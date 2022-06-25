@@ -204,7 +204,6 @@ extern int watch;
 #define STATE_SUGGESTING    (1 << 12)
 #define IN_SELBOX_SCREEN    (1 << 13)
 #define MULTI_SEL           (1 << 14)
-//#define NO_RECOLOR_LINE     (1 << 15)
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)
@@ -929,7 +928,11 @@ enum comp_type {
 	TCMP_ALIAS =      24,
 	TCMP_PROMPTS =    25,
 	TCMP_USERS =      26,
-	TCMP_GLOB =       27
+	TCMP_GLOB =       27,
+	TCMP_FILE_TYPES_OPTS = 28,
+	TCMP_FILE_TYPES_FILES = 29
+/*	TCMP_FILE_TYPES_FILES = 29,
+	TCMP_EXT_OPTS =   30 */
 };
 
 extern enum comp_type cur_comp_type;
