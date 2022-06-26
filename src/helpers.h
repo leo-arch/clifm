@@ -853,6 +853,7 @@ struct prompts_t {
 	char *regular;
 	char *warning;
 	int notifications;
+	int warning_prompt_enabled;
 };
 
 extern struct prompts_t *prompts;

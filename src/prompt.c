@@ -1012,7 +1012,7 @@ list_prompts(void)
 }
 
 static int
-change_prompt(const size_t n)
+switch_prompt(const size_t n)
 {
 	if (prompts[n].regular) {
 		free(encoded_prompt);
@@ -1025,6 +1025,7 @@ change_prompt(const size_t n)
 	}
 
 	prompt_notif = prompts[n].notifications;
+	warning_prompt = prompts[n].warning_prompt_enabled;
 
 	return EXIT_SUCCESS;
 }
@@ -1052,7 +1053,7 @@ set_prompt(char *name)
 			continue;
 		free(p);
 		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name) - 1);
-		return change_prompt((size_t)i);
+		return switch_prompt((size_t)i);
 	}
 
 	fprintf(stderr, _("%s: %s: No such prompt\n"), PROGRAM_NAME, p);

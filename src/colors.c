@@ -1119,6 +1119,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			continue;
 		}
 
+		/* THIS OPTION IS DEPRECATED */
 		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*(++p))
@@ -1131,6 +1132,8 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 				prompt_notif = DEF_PROMPT_NOTIF;
 		}
 
+		/* The following values override those set via the Prompt line
+		 * (provided it was set to a valid prompt name )*/
 		else if (*line == 'N' && strncmp(line, "Notifications=", 14) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*(++p))
@@ -1154,8 +1157,8 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			right_prompt = savestring(q, strlen(q));
 		} */
 
-		else if (xargs.warning_prompt == UNSET && *line == 'W'
-		&& strncmp(line, "WarningPrompt=", 14) == 0) {
+		else if (xargs.warning_prompt == UNSET && *line == 'E'
+		&& strncmp(line, "EnableWarningPrompt=", 20) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*(++p))
 				continue;
@@ -1167,7 +1170,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 				warning_prompt = DEF_WARNING_PROMPT;
 		}
 
-		else if (*line == 'W' && strncmp(line, "WarningPromptStr=", 17) == 0) {
+		else if (*line == 'W' && strncmp(line, "WarningPrompt=", 14) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*p || !*(++p))
 				continue;

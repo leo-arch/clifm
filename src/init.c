@@ -1018,6 +1018,7 @@ unset_prompt_values(const size_t n)
 	prompts[n].regular = (char *)NULL;
 	prompts[n].warning = (char *)NULL;
 	prompts[n].notifications = DEF_PROMPT_NOTIF;
+	prompts[n].warning_prompt_enabled = DEF_WARNING_PROMPT;
 }
 
 static char *
@@ -1136,6 +1137,16 @@ load_prompts(void)
 			prompts[n].regular = (char *)xrealloc(prompts[n].regular,
 							(ret_len + 1) * sizeof(char));
 			strcpy(prompts[n].regular, ret);
+			continue;
+		}
+
+		if (strncmp(line, "EnableWarningPrompt=", 20) == 0) {
+			if (*ret == 't' && strcmp(ret, "true") == 0)
+				prompts[n].warning_prompt_enabled = 1;
+			else if (*ret == 'f' && strcmp(ret, "false") == 0)
+				prompts[n].warning_prompt_enabled = 0;
+			else
+				prompts[n].warning_prompt_enabled = DEF_WARNING_PROMPT;
 			continue;
 		}
 

@@ -1135,6 +1135,7 @@ expand_prompt_name(char *name)
 			wprompt_str = savestring(prompts[i].warning, strlen(prompts[i].warning));
 		}
 		prompt_notif = prompts[i].notifications;
+		warning_prompt = prompts[i].warning_prompt_enabled;
 
 		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name));
 		return EXIT_SUCCESS;
