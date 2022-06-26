@@ -264,6 +264,10 @@ RlEditMode=1
 # AUTOCOMMANDS
 # Control CliFM's settings on a per directory basis. For more information
 # consult the manpage
+# Remote file systems are slow: let's speed this up by enabling the light
+# mode and disabling the files counter
 #autocmd /media/remotes/** lm=1,fc=0
+# Just a friendly reminder
 #autocmd ~/important !printf "Keep your fingers outta here!\n" && read -n1
-#autocmd ~/Downloads !/usr/share/clifm/plugins/fzfnav.sh
+# Plenty of images and vids? Launch the files previewer plugin
+#autocmd ~/Downloads !/usr/local/share/clifm/plugins/fzfnav.sh

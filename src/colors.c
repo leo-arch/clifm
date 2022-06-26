@@ -1080,8 +1080,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	FILE *fp_colors = fopen(colorscheme_file, "r");
 	if (!fp_colors) {
 		if (!env) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			    colorscheme_file, strerror(errno));
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, colorscheme_file, strerror(errno));
 			return EXIT_FAILURE;
 		} else {
 			_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
@@ -1133,7 +1132,8 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		}
 
 		/* The following values override those set via the Prompt line
-		 * (provided it was set to a valid prompt name )*/
+		 * (provided it was set to a valid prompt name, as defined in the
+		 * prompts file)*/
 		else if (*line == 'N' && strncmp(line, "Notifications=", 14) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*(++p))

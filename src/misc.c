@@ -1125,8 +1125,7 @@ expand_prompt_name(char *name)
 
 	int i = (int)prompts_n;
 	while (--i >= 0) {
-		if (*p != *prompts[i].name
-		|| strcmp(p, prompts[i].name) != 0)
+		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
 			continue;
 		if (prompts[i].regular) {
 			free(encoded_prompt);

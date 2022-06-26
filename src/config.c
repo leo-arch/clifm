@@ -1069,12 +1069,12 @@ RlEditMode=%d\n\n",
 	return EXIT_SUCCESS;
 }
 
-/* Import the default color scheme from DATADIR (usually /usr/share)
+/* Import the default color scheme from DATADIR (usually /usr/local/share)
  * Return zero on success or one on failure */
 static int
 import_color_scheme(void)
 {
-	if (!data_dir || !*data_dir)
+	if (!data_dir || !*data_dir || !colors_dir || !*colors_dir)
 		return EXIT_FAILURE;
 
 	char dfile[PATH_MAX];
@@ -1144,15 +1144,15 @@ create_def_cscheme(void)
 			"DirIconColor=\"00;33\"\n\n"
 			"DividingLine=\"%s\"\n\n"
 
-			"If set to 'default', automatically print notifications at the left\n\
-of the prompt. If set to 'custom', let the prompt string handle these notifications\n\
+			"If set to 'true', automatically print notifications at the left\n\
+of the prompt. If set to 'false', let the prompt string handle these notifications\n\
 itself via escape codes. See the manpage for more information\n"
-			"PromptStyle=\"%s\"\n\n"
+			"Notifications=\"%s\"\n\n"
 			"Prompt=\"%s\"\n\n"
 
 			"An alternative prompt to warn the user about invalid command names\n"
+			"EnableWarningPrompt=\"%s\"\n\n"
 			"WarningPrompt=\"%s\"\n\n"
-			"WarningPromptStr=\"%s\"\n\n"
 			"FzfTabOptions=\"%s\"\n\n",
 
 		PROGRAM_NAME,
@@ -1160,7 +1160,7 @@ itself via escape codes. See the manpage for more information\n"
 		DEF_IFACE_COLORS,
 		DEF_EXT_COLORS,
 		DEF_DIV_LINE,
-		DEF_PROMPT_NOTIF == 1 ? "default" : "custom",
+		DEF_PROMPT_NOTIF == 1 ? "true" : "false",
 		DEFAULT_PROMPT,
 		DEF_WARNING_PROMPT == 1 ? "true" : "false",
 		DEF_WPROMPT_STR,
