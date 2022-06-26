@@ -1131,6 +1131,18 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 				prompt_notif = DEF_PROMPT_NOTIF;
 		}
 
+		else if (*line == 'N' && strncmp(line, "Notifications=", 14) == 0) {
+			char *p = strchr(line, '=');
+			if (!p || !*(++p))
+				continue;
+			if (*p == 't' && strncmp(p, "true", 4) == 0)
+				prompt_notif = 1;
+			else if (*p == 'f' && strncmp(p, "false", 5) == 0)
+				prompt_notif = 0;
+			else
+				prompt_notif = DEF_PROMPT_NOTIF;
+		}
+
 /*		else if (*line == 'R' && strncmp(line, "RightPrompt=", 12) == 0) {
 			char *p = strchr(line, '=');
 			if (!p || !*p || !*(++p))
