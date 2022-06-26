@@ -56,11 +56,9 @@ ExtColors="*.a=R:*.d=G:*.p=G:*.h=G:*.m=G:*.t=G:*.r=G:*.o=B2:*.z=BC:*.c=G:*.gv=G:
 DirIconColor="Y"
 
 Prompt="\[\e[0;38;2;216;222;233m\][\S\[\e[0;38;2;216;222;233m\]]\l \A \u:\H \[\e[1;38;2;143;188;187m\]\w\n\[\e[0;38;2;216;222;233m\]<\z\[\e[0;38;2;216;222;233m\]> \[\e[0;38;2;163;190;140m\]\$ \[\e[0m\]"
-
 Notifications=true
-
-WarningPrompt=true
-WarningPromptStr="\[\e[0m\]\[\e[00;02;38;2;191;97;106m\](!) > "
+EnableWarningPrompt=true
+WarningPrompt="\[\e[0m\]\[\e[00;02;38;2;191;97;106m\](!) > "
 
 DividingLine="-"
 

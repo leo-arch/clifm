@@ -98,90 +98,15 @@ ExtColors="*.tar=BR:*.tgz=BR:*.taz=BR:*.lha=BR:*.lz4=BR:*.lzh=BR:*.lzma=BR:*.tlz
 # If icons are enabled, use this color for the directories icon
 DirIconColor="Y"
 
-# The prompt line is build using command substitution ($(cmd)), string
-# literals and/or the following escape sequences:
-#
-# \e: Escape character
-# \u: The username
-# \H: The full hostname
-# \h: The hostname, up to the first dot (.)
-# \s: The name of the shell (everything after the last slash) currently
-#    used by CliFM
-# \S: Current workspace number (colored according to the wsN code in
-#     InterfaceColors above)
-# \l: Print an L if running in light mode
-# \P: The current profile name
-# \n: A newline character
-# \r: A carriage return
-# \a: A bell character
-# \d: The date, in abbreviated form (ex: Tue May 26)
-# \t: The time, in 24-hour HH:MM:SS format
-# \T: The time, in 12-hour HH:MM:SS format
-# \@: The time, in 12-hour am/pm format
-# \A: The time, in 24-hour HH:MM format
-# \w: The full current working directory, with $HOME abbreviated with a
-#     tilde
-# \W: The basename of $PWD, with $HOME abbreviated with a tilde
-# \p: A mix of the two above, it abbreviates the current working directory
-#     only if longer than PathMax (a value defined in the configuration
-#     file).
-# \z: Exit code of the last executed command (printed in green in case of
-#     success and in bold red in case of error)
-# \$: #, if the effective user ID is 0 (root), and $ otherwise
-# \nnn: The character whose ASCII code is the octal value nnn
-# \\: A literal backslash
-# \[: Begin a sequence of non-printing characters. This is mostly used to
-#     add color to the prompt line (using full ANSI escape sequences)
-# \]: End a sequence of non-printing characters
-#
-# The following files statistics escape sequences are available as well:
-#
-# \D: Amount of sub-directories in the current directory
-# \R: Amount of regular files in the current directory
-# \X: Amount of executable files in the current directory
-# \.: Amount of hidden files in the current directory
-# \U: Amount of SUID files in the current directory
-# \G: Amount of SGID files in the current directory
-# \F: Amount of FIFO/pipe files in the current directory
-# \K: Amount of socket files in the current directory
-# \B: Amount of block device files in the current directory
-# \C: Amount of character device files in the current directory
-# \x: Amount of files with capabilities in the current directory
-# \L: Amount of symbolic links in the current directory
-# \o: Amount of broken symbolic links in the current directory
-# \M: Amount of multi-link files in the current directory
-# \E: Amount of files with extended attributes in the current directory
-# \O: Amount of other-writable files in the current directory
-# \*: Amount of files with the sticky bit set in the current directory
-# \?: Amount of files of unknown file type in the current directory
-# \!: Amount of unstatable files in the current directory
+# The prompt used by CliFM. Use the 'prompt' command to check for available
+# prompts. Enter 'prompt --help' for more information
+Prompt="clifm"
 
-# Escape codes to control prompt notifications:
-#
-# \*: An asterisk + amount of selected files (e.g. *12)
-# \%: An 'T' + amount of trashed files (e.g. T3)
-# \#: Print an 'R' if running as root
-# \(: An 'E' + amount of error messages (e.g. E2)
-# \): An 'W' + amount of warning messages (e.g. W2)
-# \=: An 'N' + amount of notice messages (e.g. N1)
-#
-# NOTE: Except in the case of \#, nothing is printed if the corresponding
-# number is zero (no selected files, no trashed files, and so on)
-
-Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\[\e[0m\]\n<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
-
-# If set to 'true', CliFM notifications (selected and trashed files,
-# root or normal user, current workspace, messages) will be printed to the
-# left of the prompt. Otherwise, if set to 'false, the  prompt code
-# should handle this information itself via escape codes. See below
-Notifications=true
-
-# A secondary prompt to warn the user about invalid command names
-WarningPrompt=true
-# The string to be used for the warning prompt (invalid typed commands). Prompt
-# escape codes are allowed. The input text color is defined by the 'wp' color code
-# in InterfaceColors
-WarningPromptStr="\[\e[00;02;31m\](!) > "
+# Override prompt values
+#Prompt=""
+#Notifications=
+#EnableWarningPrompt=
+#WarningPrompt=""
 
 # The string used to construct the line dividing the list of files and
 # the prompt (Unicode is supported). Possible values:

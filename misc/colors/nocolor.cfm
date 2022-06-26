@@ -12,11 +12,9 @@ ExtColors="*.tar=0"
 DirIconColor=0
 
 Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \w\n<\z> \$ \[\e[0m\]"
-
 Notifications=true
-
-WarningPrompt=true
-WarningPromptStr="\[\e[0m\](!) > "
+EnableWarningPrompt=true
+WarningPrompt="\[\e[0m\](!) > "
 
 DividingLine="-"
 
