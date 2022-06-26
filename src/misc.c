@@ -584,6 +584,7 @@ print_tips(int all)
 		"Fuzzy completion is supported: 'dwn<TAB> -> Downloads'. Enable it via '--fuzzy-match'",
 		"Wildcards can be expanded via TAB: 's *.c<TAB>'",
 		"Try the help topics: 'help <TAB>'",
+		"List symlinks in the current directory: '=l<TAB>'. Enter 'help file-attributes' for more information",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
