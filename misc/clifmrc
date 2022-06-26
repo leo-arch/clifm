@@ -258,7 +258,7 @@ RlEditMode=1
 
 # PROMPT COMMANDS
 # Write below the commands you want to be executed before each prompt. Ex:
-#promptcmd /usr/share/clifm/plugins/git_status.sh
+#promptcmd /usr/local/share/clifm/plugins/git_status.sh
 #promptcmd date | awk '{print $1", "$2,$3", "$4}'
 
 # AUTOCOMMANDS
