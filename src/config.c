@@ -1069,28 +1069,6 @@ RlEditMode=%d\n\n",
 	return EXIT_SUCCESS;
 }
 
-/* Import the default color scheme from DATADIR (usually /usr/local/share)
- * Return zero on success or one on failure */
-static int
-import_color_scheme(void)
-{
-	if (!data_dir || !*data_dir || !colors_dir || !*colors_dir)
-		return EXIT_FAILURE;
-
-	char dfile[PATH_MAX];
-	snprintf(dfile, PATH_MAX - 1, "%s/%s/colors/default.cfm", data_dir, PNL);
-
-	struct stat attr;
-	if (stat(dfile, &attr) == -1)
-		return EXIT_FAILURE;
-
-	char *cmd[] = {"cp", dfile, colors_dir, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
-
-	return EXIT_FAILURE;
-}
-
 static void
 create_def_cscheme(void)
 {
@@ -1108,7 +1086,7 @@ create_def_cscheme(void)
 	}
 
 	/* Try to import it from data dir */
-	if (import_color_scheme() == EXIT_SUCCESS) {
+	if (import_color_scheme("default") == EXIT_SUCCESS) {
 		free(cscheme_file);
 		return;
 	}

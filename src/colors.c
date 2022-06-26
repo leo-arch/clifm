@@ -435,29 +435,49 @@ print_cur_colorscheme(void)
 	return EXIT_SUCCESS;
 }
 
+/* Import the color scheme NAME from DATADIR (usually /usr/local/share)
+ * Return zero on success or one on failure */
+int
+import_color_scheme(const char *name)
+{
+	if (!data_dir || !*data_dir || !colors_dir || !*colors_dir
+	|| !name || !*name)
+		return EXIT_FAILURE;
+
+	char dfile[PATH_MAX];
+	snprintf(dfile, PATH_MAX - 1, "%s/%s/colors/%s.cfm", data_dir, PNL, name);
+
+	struct stat attr;
+	if (stat(dfile, &attr) == -1)
+		return EXIT_FAILURE;
+
+	char *cmd[] = {"cp", dfile, colors_dir, NULL};
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+
+	return EXIT_FAILURE;
+}
+
 static int
 edit_colorscheme(char *app)
 {
 	if (!colors_dir) {
-		fprintf(stderr, "%s: No color scheme found\n", PROGRAM_NAME);
+		fprintf(stderr, _("%s: No color scheme found\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
-	char file[PATH_MAX];
-	snprintf(file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, cur_cscheme); /* NOLINT */
+	if (!cur_cscheme) {
+		fprintf(stderr, _("%s: Current color scheme is unknown\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
 	struct stat attr;
-	if (stat(file, &attr) == -1) {
-		if (data_dir) {
-			snprintf(file, PATH_MAX - 1, "%s/%s/colors/%s.cfm", /* NOLINT */
-					data_dir, PNL, cur_cscheme);
-			if (access(file, W_OK) == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
-				return EXIT_FAILURE;
-			}
-		} else {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
-			return EXIT_FAILURE;
-		}
+	char file[PATH_MAX];
+
+	snprintf(file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, cur_cscheme); /* NOLINT */
+	if (stat(file, &attr) == -1 && import_color_scheme(cur_cscheme) != EXIT_SUCCESS) {
+		fprintf(stderr, _("%s: %s: No such color scheme\n"), PROGRAM_NAME, cur_cscheme);
+		return EXIT_FAILURE;
 	}
 
 	stat(file, &attr);
