@@ -1396,7 +1396,7 @@ The following files statistics escape codes are also recognized (not available i
 .TP
 \fB\\!\fR: Amount of unstatable files in the current directory
 .TP
-Escape codes for prompt notifications (mostly used for custom prompts which need to handle notifications themselves, in which case \fIPromptStyle\fR should be set to \fIcustom\fR in the color scheme file to prevent automatic insertion of notifications at the left of the prompt):
+Escape codes for prompt notifications (mostly used for custom prompts which need to handle notifications themselves, in which case \fINotifications\fR should be set to \fIfalse\fR in the color scheme file to prevent automatic insertion of notifications at the left of the prompt):
 .TP
 \fB\\*\fR: An '*' + amount of selected files
 .TP
