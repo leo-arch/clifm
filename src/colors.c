@@ -416,25 +416,6 @@ unset_suggestions_color(void)
 	strcpy(sx_c, SUG_NO_COLOR); /* internal commands and params */
 }
 
-#ifndef CLIFM_SUCKLESS
-static int
-print_cur_colorscheme(void)
-{
-	if (!cschemes_n) {
-		printf(_("%s: No color schemes found\n"), PROGRAM_NAME);
-		return EXIT_SUCCESS;
-	}
-	size_t i;
-	for (i = 0; color_schemes[i]; i++) {
-		if (cur_cscheme == color_schemes[i])
-			printf("%s%s%s\n", mi_c, color_schemes[i], df_c);
-		else
-			printf("%s\n", color_schemes[i]);
-	}
-
-	return EXIT_SUCCESS;
-}
-
 /* Import the color scheme NAME from DATADIR (usually /usr/local/share)
  * Return zero on success or one on failure */
 int
@@ -458,6 +439,28 @@ import_color_scheme(const char *name)
 	return EXIT_FAILURE;
 }
 
+#ifndef CLIFM_SUCKLESS
+static int
+print_cur_colorscheme(void)
+{
+	if (!cschemes_n) {
+		printf(_("%s: No color schemes found\n"), PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+	size_t i;
+	for (i = 0; color_schemes[i]; i++) {
+		if (cur_cscheme == color_schemes[i])
+			printf("%s%s%s\n", mi_c, color_schemes[i], df_c);
+		else
+			printf("%s\n", color_schemes[i]);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+/* Edit the current color scheme file
+ * If the file is not in the local colors dir, try to copy it from DATADIR
+ * into the local dir to avoid permission issues */
 static int
 edit_colorscheme(char *app)
 {
