@@ -174,6 +174,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 * `version 1.6 - Guybrush`:
   - ELN's color defaults now to cyan
   - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectivelly. In the same way, the `folders-first` command was renamed to `dirs-first`.
+  - `PromptStyle` option renamed as `Notifications` (taking `true` and `false` as values)
   - **NEW**: Help topics: type `help` and then press <kbd>TAB</kbd>. Choose a topic and press <kbd>Enter</kbd>
   - **NEW**: [Search strategies](https://github.com/leo-arch/clifm/wiki/Introduction#pattern--filetype--x-dir)
   - **NEW**: `-E`: ELN's use workspace color, `-r`: do not refresh the screen on empty line
