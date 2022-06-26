@@ -561,19 +561,20 @@ rl_accept_suggestion(int count, int key)
 		while (*p == ' ')
 			p++;
 
-		while ((s = strpbrk(p, WORD_DELIMITERS)) == p)
+		/* Skip all consecutive word delimiters from the beginning of the
+		 * suggestion (P), except for slash and space */
+		while ((s = strpbrk(p, WORD_DELIMITERS)) == p && *s != '/' && *s != ' ')
 			p++;
 		if (s && s != p && *(s - 1) == ' ')
 			s = strpbrk(p, WORD_DELIMITERS);
 
-		if (s && *(s + 1)) {
+		if (s && *(s + 1)) { /* Trim suggestion after word delimiter */
 			if (*s == '/')
 				++s;
 			_s = *s;
 			*s = '\0';
 			trimmed = 1;
-		} else {
-			/* Last word: neither space nor slash */
+		} else { /* Last word: No word delimiter */
 			size_t len = strlen(suggestion_buf);
 			if (suggestion_buf[len - 1] != '/' && suggestion_buf[len - 1] != ' ')
 				suggestion.type = NO_SUG;
