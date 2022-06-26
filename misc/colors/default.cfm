@@ -98,12 +98,6 @@ ExtColors="*.tar=BR:*.tgz=BR:*.taz=BR:*.lha=BR:*.lz4=BR:*.lzh=BR:*.lzma=BR:*.tlz
 # If icons are enabled, use this color for the directories icon
 DirIconColor="Y"
 
-# If set to 'default', CliFM notifications (selected and trashed files,
-# root or normal user, current workspace, messages) will be printed to the
-# left of the prompt. Otherwise, if set to 'custom', the  prompt code
-# should handle this information itself via escape codes. See below
-PromptStyle=default
-
 # The prompt line is build using command substitution ($(cmd)), string
 # literals and/or the following escape sequences:
 #
@@ -175,6 +169,12 @@ PromptStyle=default
 # number is zero (no selected files, no trashed files, and so on)
 
 Prompt="\[\e[0m\][\S\[\e[0m\]]\l \A \u:\H \[\e[0;36m\]\w\[\e[0m\]\n<\z\[\e[0m\]> \[\e[0;34m\]\$ \[\e[0m\]"
+
+# If set to 'true', CliFM notifications (selected and trashed files,
+# root or normal user, current workspace, messages) will be printed to the
+# left of the prompt. Otherwise, if set to 'false, the  prompt code
+# should handle this information itself via escape codes. See below
+Notifications=true
 
 # A secondary prompt to warn the user about invalid command names
 WarningPrompt=true
