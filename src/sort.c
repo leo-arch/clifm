@@ -157,11 +157,12 @@ static inline int
 sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
 {
 	off_t as = pa->size, bs = pb->size;
-	if (long_view && full_dir_size) {
-		if (pa->type == DT_DIR)
-			as = pa->size * 1024;
-		if (pb->type == DT_DIR)
-			bs = pb->size * 1024;
+	if (long_view == 1 && full_dir_size == 1) {
+		int base = xargs.si == 1 ? 1000 : 1024;
+		if (pa->dir == 1)
+			as = pa->size * base;
+		if (pb->dir == 1)
+			bs = pb->size * base;
 	}
 
 	if (as > bs)

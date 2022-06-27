@@ -55,6 +55,25 @@
 # define DT_DIR 4
 #endif
 
+static char *
+get_link_color(char *name, int *link_dir, const int dsize)
+{
+	struct stat a;
+	char *color = no_c;
+
+	if (stat(name, &a) == -1)
+		return color;
+
+	if (S_ISDIR(a.st_mode)) {
+		*link_dir = (follow_symlinks == 1 && dsize == 1) ? 1 : 0;
+		color = get_dir_color(name, a.st_mode, a.st_nlink);
+	} else {
+		color = get_file_color(name, &a);
+	}
+
+	return color;
+}
+
 static int
 get_properties(char *filename, const int dsize)
 {
@@ -72,8 +91,7 @@ get_properties(char *filename, const int dsize)
 	/* Check file existence */
 	struct stat attr;
 	if (lstat(filename, &attr) == -1) {
-		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename,
-		    strerror(errno));
+		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -101,7 +119,7 @@ get_properties(char *filename, const int dsize)
 	case S_IFREG: {
 		char *ext = (char *)NULL;
 		file_type = '-';
-		if (light_mode)
+		if (light_mode == 1)
 			color = fi_c;
 		else if (check_file_access(&attr) == 0)
 			color = nf_c;
@@ -119,10 +137,7 @@ get_properties(char *filename, const int dsize)
 #else
 			if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
-				if (FILE_SIZE == 0)
-					color = ee_c;
-				else
-					color = ex_c;
+				color = FILE_SIZE == 0 ? ee_c : ex_c;
 			}
 
 			else if (FILE_SIZE == 0)
@@ -149,7 +164,7 @@ get_properties(char *filename, const int dsize)
 	case S_IFDIR:
 		file_type = 'd';
 		ctype = di_c;
-		if (light_mode)
+		if (light_mode == 1)
 			color = di_c;
 		else if (check_file_access(&attr) == 0)
 			color = nd_c;
@@ -159,14 +174,11 @@ get_properties(char *filename, const int dsize)
 	case S_IFLNK:
 		file_type = 'l';
 		ctype = ln_c;
-		if (light_mode) {
+		if (light_mode == 1) {
 			color = ln_c;
 		} else {
 			linkname = realpath(filename, (char *)NULL);
-			if (linkname)
-				color = ln_c;
-			else
-				color = or_c;
+			color = linkname ? ln_c : or_c;
 		}
 		break;
 	case S_IFSOCK: file_type = 's';
@@ -299,10 +311,16 @@ get_properties(char *filename, const int dsize)
 
 	free(t_ctype);
 
-	if (file_type && file_type != 'l') {
+	int link_to_dir = 0;
+
+	if (file_type == 0) {
+		printf("\tName: %s%s%s\n", no_c, wname ? wname : filename, df_c);
+	} else if (file_type != 'l') {
 		printf("\tName: %s%s%s\n", color, wname ? wname : filename, df_c);
 	} else if (linkname) {
-		printf("\tName: %s%s%s -> %s\n", color, wname ? wname : filename, df_c, linkname);
+		char *link_color = get_link_color(linkname, &link_to_dir, dsize);
+		printf("\tName: %s%s%s -> %s%s%s\n", color, wname ? wname : filename, df_c,
+			link_color, linkname, NC);
 		free(linkname);
 	} else { /* Broken link */
 		char link[PATH_MAX] = "";
@@ -424,16 +442,21 @@ get_properties(char *filename, const int dsize)
 #endif
 
 	/* Print size */
-	if (!S_ISDIR(attr.st_mode)) {
+	if (!S_ISDIR(attr.st_mode) && link_to_dir == 0) {
 		printf(_("Size: \t\t%s%s%s\n"), csize, size_type ? size_type : "?", cend);
 		goto END;
 	}
 
-	if (!dsize)
+	if (dsize == 0)
 		goto END;
 
 	fputs(_("Total size: \t"), stdout);
-	off_t total_size = dir_size(filename);
+	char _path[PATH_MAX]; *_path = '\0';
+	if (link_to_dir == 1)
+		snprintf(_path, sizeof(_path), "%s/", filename);
+	off_t total_size = dir_size(*_path ? _path : filename);
+	if (S_ISDIR(attr.st_mode) && attr.st_nlink == 2 && total_size == 4)
+		total_size = 0; /* Empty directory */
 	if (total_size == -1) {
 		puts("?");
 		goto END;

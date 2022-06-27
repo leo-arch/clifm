@@ -786,7 +786,7 @@ get_cmd_path(const char *cmd)
 	return (char *)NULL;
 }
 
-/* Convert FILE_SIZE to human readeable form */
+/* Convert SIZE to human readeable form */
 char *
 get_size_unit(off_t size)
 {
@@ -794,9 +794,7 @@ get_size_unit(off_t size)
 	/* Max size type length == 10 == "1023.99KB\0" */
 	char *str = xnmalloc(MAX_UNIT_SIZE, sizeof(char));
 
-	float base = 1024;
-	if (xargs.si == 1)
-		base = 1000;
+	float base = xargs.si == 1 ? 1000 : 1024;
 
 	size_t n = 0;
 	float s = (float)size;
@@ -812,7 +810,7 @@ get_size_unit(off_t size)
 
 	const char *const u = "BKMGTPEZY";
 	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c", (s == 0 || s - (float)x == 0) /* NOLINT */
-			? 0 : 2, (double)s, u[n], (u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
+		? 0 : 2, (double)s, u[n], (u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
 
 	return str;
 }
