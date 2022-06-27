@@ -811,8 +811,13 @@ setenv_prompt(void)
 	sprintf(t, "%d", trash_n > 2 ? (int)trash_n - 2 : 0);
 	setenv("CLIFM_STAT_TRASH", t, 1);
 #endif
-	sprintf(t, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
-	setenv("CLIFM_STAT_MSG", t, 1);
+	sprintf(t, "%d", (int)msgs.error);
+	setenv("CLIFM_STAT_ERROR_MSGS", t, 1);
+	sprintf(t, "%d", (int)msgs.warning);
+	setenv("CLIFM_STAT_WARNING_MSGS", t, 1);
+	sprintf(t, "%d", (int)msgs.notice);
+	setenv("CLIFM_STAT_NOTICE_MSGS", t, 1);
+
 	sprintf(t, "%d", cur_ws + 1);
 	setenv("CLIFM_STAT_WS", t, 1);
 	sprintf(t, "%d", exit_code);
