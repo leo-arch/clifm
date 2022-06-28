@@ -202,16 +202,20 @@ gen_workspace(void)
 	char s[__WS_STR_LEN];
 	char *cl = (char *)NULL;
 
-	switch(cur_ws + 1) {
-	case 1: cl = *ws1_c ? ws1_c : DEF_WS1_C; break;
-	case 2: cl = *ws2_c ? ws2_c : DEF_WS2_C; break;
-	case 3: cl = *ws3_c ? ws3_c : DEF_WS3_C; break;
-	case 4: cl = *ws4_c ? ws4_c : DEF_WS4_C; break;
-	case 5: cl = *ws5_c ? ws5_c : DEF_WS5_C; break;
-	case 6: cl = *ws6_c ? ws6_c : DEF_WS6_C; break;
-	case 7: cl = *ws7_c ? ws7_c : DEF_WS7_C; break;
-	case 8: cl = *ws8_c ? ws8_c : DEF_WS8_C; break;
-	default: break;
+	if (colorize == 1) {
+		switch(cur_ws + 1) {
+		case 1: cl = *ws1_c ? ws1_c : DEF_WS1_C; break;
+		case 2: cl = *ws2_c ? ws2_c : DEF_WS2_C; break;
+		case 3: cl = *ws3_c ? ws3_c : DEF_WS3_C; break;
+		case 4: cl = *ws4_c ? ws4_c : DEF_WS4_C; break;
+		case 5: cl = *ws5_c ? ws5_c : DEF_WS5_C; break;
+		case 6: cl = *ws6_c ? ws6_c : DEF_WS6_C; break;
+		case 7: cl = *ws7_c ? ws7_c : DEF_WS7_C; break;
+		case 8: cl = *ws8_c ? ws8_c : DEF_WS8_C; break;
+		default: break;
+		}
+	} else {
+		cl = df_c;
 	}
 
 //	snprintf(s, __WS_STR_LEN, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
