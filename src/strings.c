@@ -1688,8 +1688,8 @@ parse_input_str(char *str)
 			/* Replace the ELN by the corresponding escaped file name */
 			if (i == 0)
 				flags |= FIRST_WORD_IS_ELN;
-			if (file_info[j].dir &&
-			file_info[j].name[file_info[j].len
+			if (file_info[j].type == DT_DIR &&
+			file_info[j].name[file_info[j].len > 0
 			? file_info[j].len - 1 : 0] != '/') {
 				substr[i] = (char *)xrealloc(substr[i],
 				    (strlen(esc_str) + 2) * sizeof(char));
