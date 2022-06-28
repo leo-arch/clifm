@@ -1,3 +1,136 @@
+1.6 - Guybrush
+Additions/improvements:
+* Rename PromptStyle option in the color scheme file  to Notifications=true/false
+* File type expansion via TAB: '=d<TAB>'
+* Search pattern completion: '/<TAB>'
+* Apparent size is enabled by default in disk usage analyzer
+* Make ApparentSize an option in the config file
+* Use separate indicators for error, warning, and notice messages 
+* Prompt msgs indicators should be kept across profiles 
+* Add wildcards (glob) TAB expansion
+* Select all (C-s), deselect all (C-a), and toggle select (C-t) keybinds for TAB completion (fzf mode)
+* Add only-dirs option to autocommands
+* Help topics
+* File type modifiers for the search function are now the same used by find(1)
+* Usage message for the search function
+* Search strategies
+* More friendly file names in the selection box
+* Trash is now enabled in stealth mode
+* ELN's color is now regular cyan
+* New option: -r, --refresh-on-empty-line
+* New option: -E, --eln-use-workspace-color
+* Current workspace color for dividing line if 'dl' is unset
+* TAB completion for users home directory
+* List removed/trashed files 
+* Replace references to "folders" by "directories"
+* Fuzzy TAB completion for file names and paths
+* 'prompt' command to quiclky switch prompts
+* More color schemes by default
+* Support for emojis as icons
+* Suggestions for sort numbers
+* Complete with file names instead of bookmark names when adding a new bookmark ('bm add')
+* Improve algorithm to calculate total sel files size
+* Default to FZF TAB completion if fzf is found
+* Reload files when (de)selecting or (un)trashing files with descriptive messages
+* Better TAB completion for selection and other functions
+* Visual bell style (readline >= 8.1)
+* Hex color codes support
+* Notice message if config files are reloaded
+* Built-in support for rsync to copy files
+* New plugin (rrm): recursively remove files via FZF
+* Do not record ELN& into history
+* Allow controling STDERR and STDOUT when opening files via Lira
+* Move instead of cp/rm when trashing files
+* Do not suggest/autocomplete/expand CliFM internals if command starts with a semicolon or a colon, or if we're in a comment (#).
+* Add keybind (C-A-i) to toggle disk usage analyzer mode on/off
+* MaxNameLen defaults to 20
+* Improved bookmarks interface
+* Consistently reload the list of files either upon files or interface modifications
+* Reload files list after exiting the bookmarks screen
+* Reload the bookmarks screen when entering invalid bookmark
+* Temporarily disable cmds history via 'history [on, off, status]'. '--no-history' is also available
+* TAB completion for the alias command 
+* Properly align list of aliases and actions
+* New command: 'fz', to toggle full dir size on/off in place
+* Removed colorizeProperties option from the config file
+* Total size for selected files calculates full directories size 
+* Allow sizes in powers of 1000 instead of 1024 (--si)
+* Prepend 'cd' to jump completion when autocd is disabled
+* Improve img_viewer plugin
+* New plugin, cr, to copy files to remotes
+* New plugin, da, to inspect files and directories sizes
+* New plugin, bmi, to import bookmarks from either Ranger or MC
+* Add install rules for cmake
+* Do not sort reverse by default in disk usage analyzer mode
+* New plugin, fdups, to find and remove duplicate files
+* Enable exit on EOF (Ctrl-D) by default
+* A new line should be printed before quitting via keybind (Ctrl-d, F12)
+
+Bug fixes:
+* Symlinks to dir wrongly sorted in disk usage analyzer mode
+* 'pp' command displays wrong size for symlinks to dir
+* Garbage first entry when toggling disk usaga analyzer
+* Only-dirs not showing symlinks to dir
+* Cannot get properties of the root dir (p /)
+* Wrong size for empty dirs and symlinks to dir in long view mode
+* Slash not appended to suggested symlinks to dir
+* TAB completion of first word (if multiple matches) removes second word
+* Del last word deletes from end of line instead of current cursor position
+* Switch to comment color if file name contains a hash char
+* Error inidicator in the prompt not honored when there are multiple messages 
+* No history line color when pressing UP for the first time
+* Wrong baej suggestion offset when editing line
+* Prepend sudo function messed up with current completion color
+* Autocmds not playing nice with profiles
+* Some plugins not working from autocommands
+* Cannot use backslash in search expression
+* '?' ELN in search list when not searching in CWD 
+* Inconsistent color for search files in light mode
+* No deselection message on error
+* Unable to select root dir
+* Wrong cursor position while editing line
+* 'pp' cmd does not work with tilde
+* File overwritten when untrashing file with same name
+* 'st' does not suggest 'mtime' but a file name instead
+* Wrong exit code at exit
+* File extension color in TAB completion even if --no-file-ext
+* Alt keybinds not working on SSH
+* Box drawing dividing line not working
+* Segfault when not path is defined for a bookmark
+* The rename function cannot rename files named as numbers
+* Bookmarks names and shortcuts do not work with spaces
+* Sel doesn't expand braces correctly
+* Incomplete prompt when using standard TAB completion
+* Wrong color for regular files when using GNU ls in fzfnav plugin
+* Leading space in file names when running with --no-eln
+* Wrong "FZF not found message" when running with --fzftab
+* Keybinds not working when running new instance as root (X)
+* Double error message if invalid filetype in quick search
+* 'li' color code not respected
+* Wrong cursor line for suggestions after resizing terminal
+* Segfault when removing current dir from outside
+* rgfind plugin not working with multi-word strings
+* Wrong cursor position after editing line (first word)
+* Plugins cannot know we're running colorless when using --no-color only
+* Wrong exit code after suggestion
+* Sel indicator not updated when sel file is (re)moved
+* Suggestions do not recognize fish builtins
+* No error msg when 2nd param is opening app and it fails (or does not exist)
+* ELN expanded to alias if file name is an alias name
+* Cannot bookmarks files containing spaces in their names
+* Plugins return wrong exit status (always zero)
+* Total size indicator for selected files is broken
+* Correcting a wrong file name as first word do not recover the normal prompt
+* ELN runs mime-import if it refers to a file named 'import'
+* Starting path does not work when the path contains references to self or parent dirs (dot or double dot)
+* --open crashes CliFM
+* Completions/suggestions for jump produces wrong values when compiled with _BE_POSIX on Linux
+* TAB completion for jump does not honor case insensitive
+* Bookmarks not reloaded after 'bm edit'
+* Some plugins not working: img_viewer, vid_viewer, and music_player
+* Built-in 'export' command not working
+* --control-d-exits is not a valid command line option anymore
+
 1.5.1 - Willy
 * Fix crash when built via makepkg on Archlinux
 
