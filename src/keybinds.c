@@ -270,8 +270,13 @@ keybind_exec_cmd(char *str)
 		/* This call to prompt() just updates the prompt in case it was
 		 * modified, for example, in case of chdir, files selection, and
 		 * so on */
+		int rel = xargs.refresh_on_empty_line;
+		xargs.refresh_on_empty_line = 0;
+
 		char *buf = prompt();
 		free(buf);
+
+		xargs.refresh_on_empty_line = rel;
 	}
 
 	args_n = old_args;
