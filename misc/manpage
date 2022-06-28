@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jun 14, 2022" "clifm 1.6" "CLIFM Manual"
+.TH "CLIFM" "1" "Jun 28, 2022" "clifm 1.6" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -57,7 +57,7 @@ clifm \- The Command Line File Manager
 .SH 1. GETTING HELP
 There are several ways of getting help in \fBclifm\fR. Once in the program, enter '\fB?\fR' to see some basic usage examples, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section.
 .sp
-To get help about some specific topic, type \fIhelp\fR and then press TAB to get a list of help topics. Choose the topic you want and then just press Enter.
+To get help about some specific topic, type \fIhelp\fR and then press TAB to get a list of available help topics. Choose the topic you want and then just press Enter.
 .sp
 Help for all internal commands can be accessed via the \fI-h\fR or \fI--help\fR options. For example, \fIs -h\fR or \fIs --help\fR.
 .sp
@@ -110,7 +110,7 @@ List of \fBclifm\fR features:
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Commands and directory history function
-  4) TAB completion/expansion for ELN's, ELN ranges, commands, paths, bookmarks, profiles, color schemes, command history, directory history (via the \fIjump\fR command), remote resources, sort methods, selected files, the \fIsel\fR keyword, trashed files, plus the deselect and the open-with commands (\fIow\fR). There are two available modes: standard and FZF (see the \fBBUILT\-IN EXPANSIONS\fR section below)
+  4) A powerfull TAB completion/expansion system (see the \fBBUILT\-IN EXPANSIONS\fR section below)
   5) More than 40 customizable keyboard shortcuts
   6) Wildcards and regex auto\-expansion
   7) Braces auto\-expansion
@@ -227,10 +227,10 @@ enable long view mode to list files and their properties. For each file, the fol
 enable the directory history map to keep in view previous, current and next entries in the directory history list
 .TP
 \fB\-o\fR, \fB\-\-no\-autols\fR
-\'cd\' works like the shell 'cd' command: change directory but do not list files automatically
+\fIcd\fR works like the shell \fIcd\fR command: change directory but do not list files automatically
 .TP
 \fB\-O\fR, \fB\-\-autols\fR
-\'cd\' changes directory and lists files automatically (default)
+\fIcd\fR changes directory and lists files automatically (default)
 .TP
 \fB\-p\fR, \fB\-\-path\fR=\fI\,PATH\/\fR
 use \fIPATH\fR as \fBclifm\fR starting path. Default starting path is the current working directory. If no workspace is specified via the \fB--workspace\fR option (see below), the first workspace (1) is used. This option is deprecated: use positional parameters instead.
@@ -278,7 +278,7 @@ use apparent sizes instead of actual device usage
 Choose the terminal bell type, where TYPE could be: 0 = none, 1 = audible, 2 = visual (requires readline >= 8.1), 3 = flash. Defaults to 'visible', and, if not possible, 'none'.
 .TP
 \fB\-\-case\-sens\-dirjump\fR
-do not ignore case when consulting the jump database (via the \fIj\fRcommand)
+do not ignore case when consulting the jump database (via the \fIj\fR command)
 .TP
 \fB\-\-case\-sens\-path\-comp\fR
 enable case sensitive path completion
@@ -288,9 +288,6 @@ write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later a
 .TP
 \fB\-\-color\-scheme\fR=\fI\,NAME\/\fR
 set \fINAME\fR as color scheme
-.TP
-\fB\-\-no-control\-d\-exit\fR
-do not allow exit on EOF (Control-d)
 .TP
 \fB\-\-cwd\-in\-title\fR
 print current working directory in terminal window title. Otherwise, only the program name is printed
@@ -306,6 +303,9 @@ expand bookmark names into the corresponding bookmark paths and enable TAB compl
 .TP
 \fB\-\-full\-dir\-size\fR
 if running in long view, print directories size and their contents
+.TP
+\fB\-\-fuzzy\-match\fR
+enable fuzzy matches for completions and suggestions (only file names and paths)
 .TP
 \fB\-\-icons\fR
 enable icons
@@ -330,6 +330,9 @@ set the maximum number of characters after which the current directory in the pr
 .TP
 \fB\-\-no\-cd\-auto\fR
 by default, \fBclifm\fR changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of \fIcd\fR
+.TP
+\fB\-\-no-control\-d\-exit\fR
+do not allow exit on EOF (Control-d)
 .TP
 \fB\-\-no\-dir\-jumper\fR
 disable the directory jumper function
@@ -364,9 +367,6 @@ disable the files counter for directories. This option is especially useful to s
 .TP
 \fB\-\-no\-follow\-symlink\fR
 do not follow symbolic links when listing files
-.TP
-\fB\-\-fuzzy\-match\fR
-enable fuzzy matches for completions and suggestions (only file names and paths)
 .TP
 \fB\-\-no\-highlight\fR
 disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below
@@ -1181,6 +1181,8 @@ System readline keybindings for command line editing, such as \fICtrl-a\fR, to m
 .TP
 All customization settings (theming) are made from a single configuration file (the color scheme file), installed by default in \fIXDG_DATA_DIRS/clifm/colors\fR (usuallly \fI/usr/local/share/clifm/colors\fR or \fI/usr/share/clifm/colors\fR), though color scheme files found in \fIXDG_CONFIG_HOME/clifm/colors\fR (usually \fIHOME/.config/clifm/colors\fR) take precedence.
 .TP
+\fBNote\fR: Color scheme files are copied automatically into the local colors directory when running the \fIcs edit\fR command.
+.TP
 Each color scheme file includes:
 .TP
  \fIFiletypeColors\fR = Colors for different file types, such as directory, regular files, and so on. See the \fBCOLORS\fR section below.
@@ -1480,7 +1482,7 @@ In this case, the octal code is: "256 234 356". So, to insert this Unicode chara
 .TP
 \fBNote\fR: Make sure you have installed a font able to display Unicode characters.
 .TP
-A few advanced prompt examples can be found in the prompts file in our Github site. Take a look at <https://github.com/leo-arch/clifm/wiki/Customization#the-prompt>
+A few advanced prompt examples can be found in the prompts file.
 .TP
 \fBA simple use case for the files statistics escape codes\fR
 .TP
@@ -1504,7 +1506,7 @@ This tells us that in the current directory we have 24 SUID files (printed in bo
 .TP
 A bold red 'R' at the left of the prompt reminds the user that the program is running as root. A bold green asterisk indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, \fBclifm\fR makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 .TP
-If \fINotifications\fR is set to "false" in the prompts file, the above notifications won't be printed by the prompt, but is still available to the user as escape codes (see above) to build custom prompts.
+If \fINotifications\fR is set to "false" in the prompts file, the above notifications won't be printed by the prompt, but is still available to the user as escape codes (see above) and environment variables (see the \fBENVIRONMENT\fR section below) to build custom prompts.
 .TP
 \fBThe Warning Prompt\fR
 .TP
@@ -1768,6 +1770,15 @@ A convenient helper script is provided to get a consistent look across all plugi
     # shellcheck source=/dev/null
     . "$CLIFM_PLUGINS_HELPER"
 
+Plugins can talk to CliFM via a dedicated pipe created for this purpose and exposed via an environment variable (\fBCLIFM_BUS\fR). Just write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the open function, changing the current directory to the new path, if a directory, or opening it with the resource opener, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
+
+    \'echo "/tmp" > "$CLIFM_BUS"\' tells \fBclifm\fR to change the current directory to /tmp
+
+    \'echo "s *.png" > "$CLIFM_BUS"\' makes \fBclifm\fR select all files in the current directory ending with ".png"
+
+The pipe (CLIFM_BUS) is deleted immediately after the execution of its content and recreated before running any other plugin.
+.sp
+This is a list of available plugins:
 .TS
 allbox;
 lbx lb lb lb
@@ -1912,7 +1923,7 @@ Add a line preceded by the \fIautocmd\fR keyword to the config file. The general
 The following codes are used to control \fBclifm\fR's files list:
 .sp
  \fBCode   Description           Example\fR
- \fBcs\fR     Color scheme          cs=amber-256
+ \fBcs\fR     Color scheme          cs=zenburn
  \fBfc\fR     Files counter         fc=0
  \fBhf\fR     Hidden files          hf=0
  \fBlm\fR     Light mode            lm=1
@@ -1939,7 +1950,7 @@ A few example lines:
     autocmd ~/Downloads mn=20,!~/.config/clifm/plugins/fzfnav.sh
 
  \fB5.\fR Mmm, just because I can. Be creative!
-    autocmd /home/user hf=0,cs=amber-256,lv=1
+    autocmd /home/user hf=0,cs=nord,lv=1
     autocmd / lv=1,fc=0,cs=solarized,st=5
 
 .sp
@@ -2196,13 +2207,7 @@ The path to the current selection file.
 Set to 1 if running colorless (via the \fBNO_COLOR\fR or \fBCLIFM_NO_COLOR\fR environment variables, or the \fI--no-color\fR command line option).
 .TP
 .B CLIFM_BUS
-This variable contains the path of a pipe by means of which plugins can talk to \fBclifm\fR. Just write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the open function, changing the current directory to the new path, if a directory, or opening it with the resource opener, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
-.sp
-\'echo "/tmp" > "$CLIFM_BUS"\' tells \fBclifm\fR to change the current directory to /tmp
-.sp
-\'echo "s *.png" > "$CLIFM_BUS"\' makes \fBclifm\fR select all files in the current directory ending with ".png"
-.sp
-The pipe (CLIFM_BUS) is deleted immediately after the execution of its content and recreated before running any other plugin.
+This variable contains the path of a pipe by means of which plugins can talk to \fBclifm\fR. See the \fBPLUGINS\fR section for more information.
 .TP
 If \fIPromptStyle\fR is set to "custom" in the configuration file, the following variables are exported to the environment to be used, if needed, by your custom prompt:
 .TP
@@ -2212,8 +2217,14 @@ Current amount of selected files
 .B CLIFM_STAT_TRASH
 Current amount of trashed files
 .TP
-.B CLIFM_STAT_MSG
-Current amount of system messages
+.B CLIFM_STAT_ERROR_MSGS
+Current amount of error messages
+.TP
+.B CLIFM_STAT_WARNING_MSGS
+Current amount of warning messages
+.TP
+.B CLIFM_STAT_NOTICE_MSGS
+Current amount of notice messages
 .TP
 .B CLIFM_STAT_WS
 Current workspace number
@@ -2321,14 +2332,16 @@ By default, \fBclifm\fR starts in the current working directory. However, you ca
 .SH 22. FILES
 .TP
 .B CONFIGURATION FILE
-The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
-Here you can permanently set up \fBclifm\fR options, add aliases and some prompt commands (which will be executed immediately before each new prompt line). Just recall that in order to use prompt commands you must allow the use of external commands. See the \-x option and the 'ext' command above.
+The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/local/share/clifm\fR), and if not found, it will be created anew with default values. Here you can permanently set up \fBclifm\fR options, define aliases, prompt commands, and autocommands.
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
 .TP
 .B PROFILE FILE
 The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.cfm\fR.
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/dir"'. This variable may be used as a shortcut to that directory, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
+.TP
+.B PROMPTS FILE
+This file contains prompts definitions and is located in \fIDATADIR/clifm/prompts.cfm\fR. It will be copied automatically into \fI$XDG_CONFIG_HOME/clifm/prompts.cfm\fR if it doesn't exist. The \fIPrompt\fR line in the color scheme file should point to one of the prompt names defined in this file. See the \fBPROMPT\fR section for more information.
 .TP
 .B KEYBINDINGS FILE
 The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings,cfm\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values. This file is used to specify the keyboard shortcuts used for some ClifM's functions. The format for each keybinding is always "keyseq:function", where 'keyseq' is an escape sequence in GNU emacs style. A more detailed explanation can be found in the keybindings file itself.
@@ -2337,7 +2350,7 @@ The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings,cfm\fR. It will be
 The directory used to store programs or scripts pointed to by actions (in other words, plugins) is \fIDATADIR/clifm/plugins\fR (usually \fI/usr/share/clifm/plugins\fR). To edit these plugins copy them to \fI$XDG_CONFIG_HOME/clifm/plugins\fR and edit them to your liking. Plugins in this local directory take precedence over those in the system one.
 .TP
 .B COLORS DIRECTORY
-This directory, \fI$DATADIR/clifm/colors\fR, contains available color schemes (or just themes) as files with a \fI.cfm\fR extension. You can create as many themes as you want by just dropping them into this directory. The default color scheme file (default.cfm) could be used as a guide. You can copy these themes to the local colors directory (\fI$XDG_CONFIG_HOME/clifm/colors\fR) and edit them to your liking. Themes in the local colors directory take precedence over those in the system directory.
+This directory, \fI$DATADIR/clifm/colors\fR, contains available color schemes (or just themes) as files with a \fI.cfm\fR extension. You can copy these themes to the local colors directory (\fI$XDG_CONFIG_HOME/clifm/colors\fR) and edit them to your liking (or just create new themes from the ground up). Themes in the local colors directory take precedence over those in the system directory. You can create as many themes as you want by just dropping them into the local colors directory. The default color scheme file (\fIdefault.cfm\fR) can be used as a guide.
 .TP
 .B ACTIONS FILE
 The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.cfm\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
