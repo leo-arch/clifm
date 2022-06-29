@@ -32,7 +32,10 @@ struct utable_t {
 
 /* Let's use a table to convert Unicode chars into ASCII alternatives
  * This list is based on https://github.com/dharple/detox and
- * https://en.wikipedia.org/wiki/List_of_Unicode_characters */
+ * https://en.wikipedia.org/wiki/List_of_Unicode_characters
+ * To get the glyph corresponding to any of the below codepoints use
+ * printf(1) as folows:
+ * $ printf "\UXXXX" # no leading 0x */
 struct utable_t unitable[] = {
 	{0x0020, 0, "_" },
 	{0x0021, 0, "_" },

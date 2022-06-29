@@ -2203,7 +2203,7 @@ file_types_opts_generator(const char *text, int state)
 	if (!state)
 		i = 0;
 
-	static char *opts[] = {
+	static char *ft_opts[] = {
 		"b", /* Block device */
 		"c", /* Character device */
 		"d", /* Directory */
@@ -2222,7 +2222,7 @@ file_types_opts_generator(const char *text, int state)
 	};
 
 	char *name;
-	while ((name = opts[i++]))
+	while ((name = ft_opts[i++]))
 		return strdup(name);
 
 	return (char *)NULL;

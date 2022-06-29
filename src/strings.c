@@ -569,7 +569,7 @@ replace_substr(char *haystack, char *needle, char *rep)
 char *
 gen_rand_str(size_t len)
 {
-	char charset[] = "0123456789#%-_"
+	const char charset[] = "0123456789#%-_"
 			 "abcdefghijklmnopqrstuvwxyz"
 			 "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
