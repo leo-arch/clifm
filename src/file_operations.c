@@ -807,6 +807,7 @@ create_file(char **cmd)
 			}
 			*ls = '/';
 		}
+	}
 
 	/* Construct commands */
 	size_t files_num = i - 1;
