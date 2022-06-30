@@ -721,9 +721,6 @@ create_file(char **cmd)
 	log_function(NULL);
 
 	int exit_status = EXIT_SUCCESS;
-#if defined(__HAIKU__) || defined(__APPLE__)
-	int file_in_cwd = 0;
-#endif
 	int free_cmd = 0;
 
 	/* If no argument provided, ask the user for a filename */
@@ -779,7 +776,7 @@ create_file(char **cmd)
 			int ret = strncmp(cmd[i], workspaces[cur_ws].path, hlen);
 			char *name = (ret == 0 && *(cmd[i] + hlen) && *(cmd[i] + hlen + 1))
 				? cmd[i] + hlen + 1 : cmd[i];
-			fprintf(stderr, "%s: File already exists\n", name);
+			fprintf(stderr, "%s: File exists\n", name);
 			if (cmd[i + 1]) {
 				printf("Press any key to continue ...");
 				xgetchar();
@@ -810,16 +807,6 @@ create_file(char **cmd)
 			}
 			*ls = '/';
 		}
-
-#if defined(__HAIKU__) || defined(__APPLE__)
-		/* If at least one filename lacks a slash (or it is the only and
-		 * last char, in which case we have a directory in CWD), we are
-		 * creating a file in CWD, and thereby we need to update the screen */
-		char *ret = strrchr(cmd[i], '/');
-		if (!ret || !*(ret + 1))
-			file_in_cwd = 1;
-#endif
-	}
 
 	/* Construct commands */
 	size_t files_num = i - 1;
