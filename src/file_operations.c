@@ -949,8 +949,7 @@ open_function(char **cmd)
 		if (strchr(cmd[1], '\\')) {
 			char *deq_path = dequote_str(cmd[1], 0);
 			if (!deq_path) {
-				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
-					PROGRAM_NAME, cmd[1]);
+				fprintf(stderr, _("%s: %s: Error dequoting filename\n"), PROGRAM_NAME, cmd[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -964,8 +963,7 @@ open_function(char **cmd)
 	/* Check file existence */
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
-		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1],
-		    strerror(errno));
+		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1], strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1025,7 +1023,7 @@ open_function(char **cmd)
 		int ret = open_file(file);
 		if (!opener && ret == EXIT_FAILURE) {
 			fputs("Add a new entry to the mimelist file ('mime "
-			      "edit' or F6) or run 'open FILE APPLICATION'\n", stderr);
+				"edit' or F6) or run 'open FILE APPLICATION'\n", stderr);
 			return EXIT_FAILURE;
 		}
 		return ret;

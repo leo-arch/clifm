@@ -1520,6 +1520,9 @@ _open_file(char **args, const int i)
 static inline int
 check_auto_first(char **args)
 {
+	if (!args || !args[0] || !*args[0])
+		return (-1);
+
 	if (*args[0] == '/' || (!autocd && !auto_open) || (args[1]
 	&& (*args[1] != '&' || args[1][1])))
 		return (-1);

@@ -66,7 +66,7 @@ run_action(char *action, char **args)
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
-			fprintf(stderr, "%s: Plugins directory not defined\n", PROGRAM_NAME);
+			fprintf(stderr, _("%s: Plugins directory not defined\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2, sizeof(char));
