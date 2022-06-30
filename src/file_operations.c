@@ -766,8 +766,14 @@ create_file(char **cmd)
 			*cmd[i] = '\0'; /* Invalidate this entry */
 			continue;
 		}
-		cmd[i] = (char *)xrealloc(cmd[i], (strlen(npath) + 1) * sizeof(char));
-		strcpy(cmd[i], npath);
+
+		int is_dir = 0;
+		size_t flen = strlen(cmd[i]);
+		if (flen > 1 && cmd[i][flen - 1] == '/')
+			is_dir = 1;
+
+		cmd[i] = (char *)xrealloc(cmd[i], (strlen(npath) + 2) * sizeof(char));
+		sprintf(cmd[i], "%s%c", npath, is_dir == 1 ? '/' : 0);
 		free(npath);
 
 		/* If the file already exists, skip it */
@@ -789,7 +795,6 @@ create_file(char **cmd)
 		}
 
 		/* If we have DIR/FILE and DIR doesn't exit, create DIR */
-		size_t flen = strlen(cmd[i]);
 		char *ls = strrchr(cmd[i], '/');
 		if (ls && *(ls + 1) && ls != cmd[i] && flen > 1 && cmd[i][flen - 1] != '/') {
 			*ls = '\0';
