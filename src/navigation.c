@@ -420,19 +420,27 @@ check_cdpath(char *name)
 		return (char *)NULL;
 
 	size_t i;
-	char t[PATH_MAX];
+	char tmp[PATH_MAX];
 	char *p = (char *)NULL;
 	struct stat a;
 	for (i = 0; cdpaths[i]; i++) {
 		size_t len = strlen(cdpaths[i]);
 		if (cdpaths[i][len - 1] == '/')
-			snprintf(t, PATH_MAX, "%s%s", cdpaths[i], name);
+			snprintf(tmp, sizeof(tmp), "%s%s", cdpaths[i], name);
 		else
-			snprintf(t, PATH_MAX, "%s/%s", cdpaths[i], name);
-		if (stat(t, &a) != -1 && S_ISDIR(a.st_mode)) {
-			p = savestring(t, strlen(t));
+			snprintf(tmp, sizeof(tmp), "%s/%s", cdpaths[i], name);
+
+		char *exp_path = (char *)NULL;
+		if (*tmp == '~')
+			exp_path = tilde_expand(tmp);
+
+		char *dir = exp_path ? exp_path : tmp;
+		if (stat(dir, &a) != -1 && S_ISDIR(a.st_mode)) {
+			p = savestring(dir, strlen(dir));
+			free(exp_path);
 			break;
 		}
+		free(exp_path);
 	}
 
 	return p;

@@ -2197,7 +2197,7 @@ tag_complete(const char *text)
 static char *
 file_types_opts_generator(const char *text, int state)
 {
-	UNUSED(text); UNUSED(state);
+	UNUSED(text);
 	static int i;
 
 	if (!state)
