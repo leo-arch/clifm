@@ -454,11 +454,13 @@ if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the defa
 .B /\fIPATTERN\fR [\fI\-filetype\fR] [\fI-x\fR] [\fIDIR\fR]
 this is the quick search function. Just type \fI/\fR followed by a glob or regular (or extended regular) expression, and \fBclifm\fR will list all matches in the current working directory. For example, both \fI/*.pdf\fR and \fI/.pdf$\fR expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression.
 .sp
-Bear in mind that search patterns (if contain no metacharacter) are evaluated first as glob expressions, and then, if no matches are found, as regular expressions. Expressions containing no pattern metacharacter are automatically transformed into a regular expression: \fI/.*EXP.*\fR. For example \fI/test\fR becomes \fI/.*test.*\fR.
+\fBNote\fR: By default, the search function attempts to resolve a pattern first as glob, and if no matches, as regular expression. This behavior can be customizad in the configuration file, via the \fISearchStrategy\fR option.
 .sp
-By default, regular expressions (and thereby expressions containing no metacharacter) are case insensitive (glob expressions, by contrast, are always case sensitive). However, you can enable case sensitive search by setting the \fICaseSensitiveSearch\fR option to true in the configuration file.
+Expressions containing no pattern metacharacter are automatically transformed into a glob/regular expression (depending on the value of the \fISearchStrategy\fR option). For example, \fI/test\fR becomes \fI*test*\fR or \fI/.*test.*\fR.
 .sp
-To search for files in any directory other than the current one, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter \fI/^A\ 7\fR to search for all files starting with 'A' in the directory corresponding to the ELN 7.
+By default, regular expressions are case insensitive (glob expressions, by contrast, are always case sensitive). However, you can enable case sensitive search by setting the \fICaseSensitiveSearch\fR option to true in the configuration file.
+.sp
+To search for files in any directory other than the current directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter \fI/^A\ 7\fR to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
 The result of the search could be further filtered by specifying a filter type: \-b, \-c, \-d, \-f, \-l, \-p, and \-s (block device, character device, directory, regular file, symbolic link, FIFO/pipe, and socket respectively. For example, \fI/[.-].*d$\ \-d Documents/\fR will list all directories containing a dot or a dash and ending with 'd' in the directory named \fIDocuments\fR.
 .sp
@@ -469,7 +471,7 @@ To perform a recursive search use the -x parameter, and, optionally, a search pa
 .B ;\fR[\fICMD\fR], \fB:\fR[\fICMD\fR]
 If no CMD, run the system shell in the current working directory. If CMD is specified, skip all \fBclifm\fR expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (CMD) as is via the default system shell.
 .TP
-.B ac, ad \fIELN/FILE\fR ...
+.B ac, ad \fIELN/FILE\fR...
 archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fIac\fR, to generate archives or compressed files, and \fIad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR.
 .sp
 The function accepts single and multiple file names, wildcards, ELN ranges, and the 'sel' keyword. For example: \fIac\ sel\fR, \fIac\ 4\-25\ myfile\fR, or \fIad\ *.tar.gz\fR. Multiple archive/compression formats are supported, including Zstandard. When it comes to ISO 9660 files only single files are supported.
@@ -525,7 +527,7 @@ Finally, you can also clear this history list by typing \fIb\ clear\fR.
 .sp
 The best way of navigating the directory history list, however, is via the \fIdirectory jumper\fR function. See the \fIj\fR command below.
 .TP
-.B bb, bleach \fIELN/FILE\fR ...
+.B bb, bleach \fIELN/FILE\fR...
 \fIBleach\fR is a built-in file names cleaner (based on detox [\fIhttps://github.com/dharple/detox\fR]), whose main aim is to rename file names using only safe characters.
 Bleach cleans file names up either by removing unsafe (extended-ASCII/Unicode) characters without an ASCII alternative/similar character, or by translating these unsafe characters into an alternative ASCII character based on familiarity/similarity.
 .sp
@@ -559,7 +561,7 @@ Note that there is no need to type the entire directory name; if the query is un
 .sp
 The query string could match any part of a directory name: \fIbd er\fR, for instance, will take you to \fI/home/user\fR, since it is an unambiguous query.
 .TP
-.B bl \fIELN/FILE\fR ...
+.B bl \fIELN/FILE\fR...
 Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
 .TP
 .B bm, bookmarks \fR[\fIa\fR, \fIadd PATH\fI] [\fId\fR, \fIdel\fR] [\fIedit\fR] [\fISHORTCUT\fR, \fINAME\fR]
@@ -569,7 +571,7 @@ If you want to add or remove a bookmark directly from the command line, use the 
 .sp
 A handy use for the bookmarks function, provided the expand-bookmarks option is enabled, is to create bookmarks using short names, which will be later easily accessible via TAB completion.
 .TP
-.B br, bulk \fIELN/FILE\fR ...
+.B br, bulk \fIELN/FILE\fR...
 rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the 'sel' keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
 .sp
 Each file name will be copied into a temporary file, which will be opened with the default text editor (via the \fImime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked whether to proceed with the actual bulk renaming or not.
@@ -617,7 +619,7 @@ show this list of commands. A more convenient way of getting information about \
 .B cs, colorschemes \fR[\fIedit\fR [\fIAPP\fR]] [\fINAME\fR]
 with no arguments, list available color schemes. Use the \fIedit\fR option to open/edit the configuration file of the current color scheme (open with APP if specified or via the default associated application). Otherwise, just switch to the color scheme NAME. TAB completion is available.
 .TP
-.B d, dup \fIFILE\fR ...
+.B d, dup \fIFILE\fR...
 Create a duplicate of FILE, where FILE could be either a directory or a regular file. The duplicated file name is generated by appending ".copy" to the basename of FILE. For example: \fId\ /my/file\fR will copy \fI/my/file\fR into the current directory as \fIfile.copy\fR. If \fIfile.copy\fR already exists, an extra suffix will be added as follows: \fIfile.copy\-N\fR, where N is an integer value greater than zero.
 .sp
 If \fBrsync\fR(1) is found, it will be used as follows: \fIrsync\ \-aczvAXHS\ \-\-progress\fR. Else, \fBcp\fR(1) will be used: \fIcp\ \-a\fR.
@@ -625,7 +627,7 @@ If \fBrsync\fR(1) is found, it will be used as follows: \fIrsync\ \-aczvAXHS\ \-
 .B dc \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
 toggle the files counter function on/off.
 .TP
-.B ds, desel \fR[\fI*\fR, \fIa\fR, \fIall\fR] [\fIFILE\fR ...]
+.B ds, desel \fR[\fI*\fR, \fIa\fR, \fIall\fR] [\fIFILE\fR]...
 deselect one or more selected files.
 .sp
 If no parameter is passed, the user is prompted to either mark selected files to be deselected or to edit the selections file (entering 'e') via a text editor to manually deselect files.
@@ -639,7 +641,7 @@ TAB completion is available for this command.
 .B edit \fR[\fIreset\fR] [\fIAPPLICATION\fR]
 edit the main configuration file (F10 key is also available). If an application is specified, it will be used to open the configuration file. Use the 'reset' option to generate a fresh configuration file and create a backup copy of the old one (named clifmrc.YYYYMMDD@HH:MM:SS).
 .TP
-.B exp \fR[\fIFILE\fR ...]
+.B exp \fR[\fIFILE\fR]...
 with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they could be directories, file names, ELN's or some search expression like "*.c".
 .TP
 .B ext \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
@@ -682,7 +684,7 @@ TAB completion is available: just type \fI!\fR and then TAB to see the complete 
 .B icons \fR[\fIon\fR, \fIoff\fR]
 toggle icons on/off
 .TP
-.B j, jc, jl, jp \fR[\fISTR\fR ...], \fBjo\fR [\fINUM\fR], \fBje\fR
+.B j, jc, jl, jp \fR[\fISTR\fR]..., \fBjo\fR [\fINUM\fR], \fBje\fR
 \fIj\fR is the fastest way of using \fBKangaroo\fR, a \fBdirectory jumper\fR function to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
 With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself (an asterisk next to the rank value means that the corresponding directory is bookmarked, the current directory in some workspace or pinned). Otherwise, it searches for STR in the database and cd into the best ranked matching entry. Example: \fIj\ D\fR will probably take you to \fI/home/user/Downloads\fR, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FREQUENCY ALGORITHM\fR section below.
@@ -744,7 +746,7 @@ list available mountpoints and change the current working directory to the selec
 .B msg, messages \fR[\fIclear\fR]
 with no arguments, prints the list of messages in the current session. The \fIclear\fR option tells \fBclifm\fR to empty the messages list.
 .TP
-.B n, new \fR[\fIFILE DIR/\fR ...]
+.B n, new \fR[\fIFILE\fR]... [\fIDIR/\fR]...
 create new empty files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name and created via the shell command \fImkdir\ \-p\fR. Else, it will be created via \fBtouch\fR(1). Ex: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is specified, the user will be asked for one. If one or more of the specified file names already exist, ".new" will be appended to the file name.
 .TP
 .B net \fR[\fINAME\fR] [\fIedit\fR] [\fIm\fR, \fImount NAME\fR] [\fIu\fR, \fIunmount NAME\fR]
@@ -837,7 +839,7 @@ Print a list of available applications associated to _ELN/FILENAME (either via i
 .B opener \fR[\fIdefault\fR] [\fIAPPLICATION\fR]
 with no argument, prints the currently used resource opener (by default, \fILira\fR, \fBclifm\fR's built\-in opener). Otherwise, set APPLICATION as opener or, if \fIdefault\fR is passed instead, use \fILira\fR.
 .TP
-.B p, pr, prop \fIELN/FILE\fR ...
+.B p, pr, prop \fIELN/FILE\fR...
 print file properties for ELN/FILE. The output of this function is much like the combined output of \fIls\ \-l\fR and \fIstat\fR. By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content).
 .TP
 .B path, cwd
@@ -879,7 +881,7 @@ Remove files and/or directories in bulk using a text editor.
 .sp
 Once in the editor, remove the lines corresponding to the files you want to delete. Save changes and close the editor. Removed files will be listed and the user asked for confirmation.
 .TP
-.B s, sel \fIELN/FILE\fR ... [[\fI!\fR]\fIPATTERN\fR] [\fI\-filetype\fR] [\fI:PATH\fR]
+.B s, sel \fIELN/FILE\fR... [[\fI!\fR]\fIPATTERN\fR] [\fI\-filetype\fR] [\fI:PATH\fR]
 send one or multiple elements (either files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: \fIs\ 1\ 4\-10\ \^r\ file*\ file\ name /path/to/filename\fR. To deselect selected files, use the \fIds\fR command (see above), or the M-d keyboard shortcut.
 .sp
 If not in light mode, once a file is selected, and if the file is in the current working directory, the corresponding file name will be marked with an asterisk (colored according to the value of \fIli\fR in the color scheme file (by default bold green)), at the left of the file name (and at the right of its ELN).
@@ -913,23 +915,23 @@ By default, files are sorted from less to more (ex: from 'a' to 'z' if using the
 .B stats
 print statistics about files in the current directory (not available in light mode).
 .TP
-.B t, tr, trash \fR[\fIELN/FILE\fR ...] [\fIls\fR, \fIlist\fR] [\fIclear\fR, \fIempty\fR] [\fIdel\fR [\fIFILE\fR ...]]
+.B t, tr, trash \fR[\fIELN/FILE\fR]... [\fIls\fR, \fIlist\fR] [\fIclear\fR, \fIempty\fR] [\fIdel\fR [\fIFILE\fR]...]]
 with no argument (or by passing the \fIls\fR option), it prints the list of currently trashed files. The \fIclear\fR or \fIempty\fR parameter removes all files from the trash can, while the \fIdel\fR parameter lists trashed files allowing the user to remove one or more of them. If using \fIdel\fR, TAB completion to list/select currently trashed files is available.
 .sp
 The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the Freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .sp
 To undelete/untrash trashed files see the \fIundel\fR command below.
 .TP
-.B tag \fR[\fIls\fR, \fIlist\fR] [\fInew\fR] [\fIrm\fR, \fIremove\fR] [\fImv\fR, \fIrename\fR] [\fIuntag\fR] [\fImerge\fR] [\fIFILE\fR ...] [[\fI:\fR]\fITAG\fR]
+.B tag \fR[\fIls\fR, \fIlist\fR] [\fInew\fR] [\fIrm\fR, \fIremove\fR] [\fImv\fR, \fIrename\fR] [\fIuntag\fR] [\fImerge\fR] [\fIFILE\fR]... [[\fI:\fR]\fITAG\fR]
 \fItag\fR is the main \fIEtiqueta\fR command, \fBclifm\fR's built-in files tagging system. See the \fBFILE TAGS\fR section for a complete description of this command.
 .TP
-.B te \fIFILE\fR ...
+.B te \fIFILE\fR...
 toggle executable bit (on user, group, and others) on FILE(s). It is equivalent to the \fB-x\fR and \fB+x\fR options for the \fBchmod\fR(1) command.
 .TP
 .B tips
 print the list of \fBclifm\fR tips
 .TP
-.B u, undel, untrash \fR[\fI*\fR, \fIa\fR, \fIall\fR] [\fIFILE\fR ...]
+.B u, undel, untrash \fR[\fI*\fR, \fIa\fR, \fIall\fR] [\fIFILE\fR]...
 If file names are passed as parameters, undelete these files, that is, restore them to their original location. Otherwise, this function prints a list of currently trashed files allowing you to choose one or more of these files to be undeleted. Use the \fI*\fR, \fIa\fR or \fIall\fR parameters to undelete all trashed files at once. TAB completion to list/select currently trashed files is available.
 .TP
 .B uc, unicode \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
@@ -987,97 +989,97 @@ If using FZF for TAB completion, multi-selection is allowed.
 
 .SH 7. KEYBOARD SHORTCUTS
 .TP
-\fBRight\fR, \fBC-f:\fR Accept the entire current suggestion
+\fBRight\fR, \fBC\-f:\fR Accept the entire current suggestion
 .TP
-\fBAlt-Right\fR, \fBM-f:\fR Accept only the first word of the current suggestion (up to first slash or space)
+\fBAlt-Right\fR, \fBAlt\-f:\fR Accept only the first word of the current suggestion (up to first slash or space)
 .TP
-\fBM\-c:\fR Clear the current command line buffer
+\fBAlt\-c:\fR Clear the current command line buffer
 .TP
-\fBM\-q:\fR Delete last word (up to last slash or space)
+\fBAlt\-q:\fR Delete last word (up to last slash or space)
 .TP
-\fBM\-i, M\-.:\fR Toggle hidden files on/off
+\fBAlt\-i, Alt\-.:\fR Toggle hidden files on/off
 .TP
-\fBM\-l:\fR Toggle long view mode on/off
+\fBAlt\-l:\fR Toggle long view mode on/off
 .TP
-\fBM\-g:\fR Toggle list\-directories\-first on/off
+\fBAlt\-g:\fR Toggle list\-directories\-first on/off
 .TP
-\fBM\-,:\fR Toggle list only directories on/off
+\fBAlt\-,:\fR Toggle list only directories on/off
 .TP
-\fBC-M-l:\fR Toggle max file name length on/off
+\fBC\-Alt\-l:\fR Toggle max file name length on/off
 .TP
-\fBC-M-i:\fR, \fBA-TAB:\fR Toggle disk usage analyzer on/off
+\fBC\-Alt\-i:\fR, \fBAlt\-TAB:\fR Toggle disk usage analyzer on/off
 .TP
 \fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
-\fBM\-t:\fR Clear program messages
+\fBAlt\-t:\fR Clear program messages
 .TP
-\fBM\-m:\fR List mountpoints
+\fBAlt\-m:\fR List mountpoints
 .TP
-\fBM\-b:\fR Launch the Bookmarks Manager
+\fBAlt\-b:\fR Launch the Bookmarks Manager
 .TP
-\fBM\-h:\fR Show directory history
+\fBAlt\-h:\fR Show directory history
 .TP
-\fBM\-n:\fR Create new file or directory
+\fBAlt\-n:\fR Create new file or directory
 .TP
-\fBM\-s:\fR Open the Selection Box
+\fBAlt\-s:\fR Open the Selection Box
 .TP
-\fBM\-a:\fR Select all files in the current working directory
+\fBAlt\-a:\fR Select all files in the current working directory
 .TP
-\fBM\-d:\fR Deselect all selected files
+\fBAlt\-d:\fR Deselect all selected files
 .TP
-\fBM\-p:\fR Change to pinned directory
+\fBAlt\-p:\fR Change to pinned directory
 .TP
-\fBM\-1:\fR Switch to workspace 1
+\fBAlt\-1:\fR Switch to workspace 1
 .TP
-\fBM\-2:\fR Switch to workspace 2
+\fBAlt\-2:\fR Switch to workspace 2
 .TP
-\fBM\-3:\fR Switch to workspace 3
+\fBAlt\-3:\fR Switch to workspace 3
 .TP
-\fBM\-4:\fR Switch to workspace 4
+\fBAlt\-4:\fR Switch to workspace 4
 .TP
-\fBM\-r:\fR Change to root directory
+\fBAlt\-r:\fR Change to root directory
 .TP
-\fBM\-e, Home:\fR Change to home directory
+\fBAlt\-e, Home:\fR Change to home directory
 .TP
-\fBM\-u, S-Up:\fR Change to parent directory
+\fBAlt\-u, S\-Up:\fR Change to parent directory
 .TP
-\fBM\-j, S-Left:\fR Change to previous visited directory
+\fBAlt\-j, S\-Left:\fR Change to previous visited directory
 .TP
-\fBM\-k, S-Right:\fR Change to next visited directory
+\fBAlt\-k, S\-Right:\fR Change to next visited directory
 .TP
-\fBC\-M\-j:\fR Change to first visited directory
+\fBC\-Alt\-j:\fR Change to first visited directory
 .TP
-\fBC\-M\-k:\fR Change to last visited directory
+\fBC\-Alt\-k:\fR Change to last visited directory
 .TP
-\fBC\-M\-o:\fR Switch to previous profile
+\fBC\-Alt\-o:\fR Switch to previous profile
 .TP
-\fBC\-M\-p:\fR Switch to next profile
+\fBC\-Alt\-p:\fR Switch to next profile
 .TP
-\fBC\-M\-a:\fR Archive selected files
+\fBC\-Alt\-a:\fR Archive selected files
 .TP
-\fBC\-M\-e:\fR Export selected files
+\fBC\-Alt\-e:\fR Export selected files
 .TP
-\fBC\-M\-r:\fR Rename selected files
+\fBC\-Alt\-r:\fR Rename selected files
 .TP
-\fBC\-M\-d:\fR Remove selected files
+\fBC\-Alt\-d:\fR Remove selected files
 .TP
-\fBC\-M\-t:\fR Trash selected files
+\fBC\-Alt\-t:\fR Trash selected files
 .TP
-\fBC\-M\-u:\fR Restore trashed files
+\fBC\-Alt\-u:\fR Restore trashed files
 .TP
-\fBC\-M\-b:\fR Bookmark last selected file/directory
+\fBC\-Alt\-b:\fR Bookmark last selected file/directory
 .TP
-\fBC\-M\-g:\fR Open/change-to last selected file/directory
+\fBC\-Alt\-g:\fR Open/change-to last selected file/directory
 .TP
-\fBC\-M\-n:\fR Move selected files into the current directory
+\fBC\-Alt\-n:\fR Move selected files into the current directory
 .TP
-\fBC\-M\-v:\fR Copy selected files into the current directory
+\fBC\-Alt\-v:\fR Copy selected files into the current directory
 .TP
-\fBM\-y:\fR Toggle light mode on/off
+\fBAlt\-y:\fR Toggle light mode on/off
 .TP
-\fBM\-z:\fR Switch to previous sorting method
+\fBAlt\-z:\fR Switch to previous sorting method
 .TP
-\fBM\-x:\fR Switch to next sorting method
+\fBAlt\-x:\fR Switch to next sorting method
 .TP
 \fBC\-x:\fR Launch new instance of the program
 .TP
@@ -1101,7 +1103,7 @@ If using FZF for TAB completion, multi-selection is allowed.
 .TP
 \fBF12:\fR Quit
 .TP
-NOTE: C stands for Control, S for Shift, and M for the Meta key (the Alt key in most keyboards).
+NOTE: C stands for Control and S for Shift.
 .TP
 NOTE 2: Some of these keybindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
 .TP
@@ -1584,7 +1586,7 @@ ELN's and \fBELN ranges\fR will be also automatically expanded, provided the cor
 .TP
 Since ranges could be a bit tricky, TAB completion is available to make sure this range actually includes the desired file names.
 .TP
-If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case \fBclifm\fR will expand that number), then you can simply run the command as external: ';chmod 644...'
+If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case \fBclifm\fR will expand that number), then you can simply run the command as external: ';chmod 644 ...'
 .TP
 TAB completion for commands, paths, users home directory, wildcards\fB*\fR, file types\fB*\fR, environment variables, bookmarks, profiles, color schemes, file tags, search patterns, commands history, directory history (via the \fIjump\fR command), remote resources, sort methods, ranges\fB*\fR, the 'sel' keyword\fB*\fR, trashed files\fB*\fR, plus the deselect\fB*\fR and the open-with commands (\fIow\fR) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function.
 .TP
@@ -1990,7 +1992,7 @@ Every time a new tag is created, a new directory named as the tag itself is crea
 .sp
 \fItag\fR is the main \fBEtiqueta\fR command and is used to handle file tags. Its syntax is as follows:
 
- tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE ...] [[:]TAG]
+ tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE]... [[:]TAG]
 
 NOTE: the \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag FILES(s) :TAG ...', to tag files, and 'tag untag :TAG file1 file2', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag remove png', to delete the tag named \fIpng\fR.
 .sp
@@ -2382,14 +2384,14 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .SH 23. EXAMPLES
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
 
-\fBNOTE2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press Right (or Alt-f to accept only the first suggested word). Otherwise, the suggestion is just ignored
+\fBNOTE 2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press Right (or Alt-f to accept only the first suggested word). Otherwise, the suggestion is just ignored
 
 Get help:
 \fBF1\fR: manpage
 \fBF2\fR: keybindings
 \fBF3\fR: commands
 
-- Change directory to \fI/etc\fR
+- Change directory to \fI/etc\fR:
 
     \fB/etc\fR
 
@@ -2419,9 +2421,9 @@ Get help:
 
 - Go back to the directory you came from:
 
-    \fBb\fR (or \fBShift+left\fR or \fBAlt+j\fR)
+    \fBb\fR (or \fBShift-Left\fR or \fBAlt-j\fR)
 
-\fBNOTE\fR: Enter \fBf\fR, or press \fBShift+right\fR or \fBAlt+k\fR to go back to the first directory
+\fBNOTE\fR: Enter \fBf\fR, or press \fBShift-Right\fR or \fBAlt-k\fR to go back to the first directory
 
 - Create a new file named \fImyfile\fR and a new directory named \fImydir\fR:
 
@@ -2431,7 +2433,7 @@ Get help:
 
 - Change to detail/long view mode:
 
-    \fBAlt+l\fR
+    \fBAlt-l\fR
 
 - Print the properties of the file whose ELN is 4:
 
@@ -2509,11 +2511,11 @@ Get help:
 
 - Open the bookmarks screen. Once there, enter the bookmark ELN (1 ...) or its hotkey ([xx]) to open it:
 
-    \fBbm\fR (or \fBCtrl+b\fR)
+    \fBbm\fR (or \fBCtrl-b\fR)
 
 - Switch to workspace 2:
 
-    \fBws2\fR (or \fBAlt+2\fR)
+    \fBws2\fR (or \fBAlt-2\fR)
 
 - View and/or edit the configuration file:
 
@@ -2525,7 +2527,7 @@ Get help:
 
 - Show hidden files:
 
-    \fBhf on\fB (or \fBAlt+.\fR)
+    \fBhf on\fB (or \fBAlt-.\fR)
 
 List available actions/plugins:
 
