@@ -796,22 +796,26 @@ create_file(char **cmd)
 
 		/* If we have DIR/FILE and DIR doesn't exit, create DIR */
 		char *ls = strrchr(cmd[i], '/');
-		if (ls && *(ls + 1) && ls != cmd[i] && flen > 1 && cmd[i][flen - 1] != '/') {
-			*ls = '\0';
-			if (stat(cmd[i], &a) == -1) {
-				char *md_cmd[] = {"mkdir", "-p", cmd[i], NULL};
-				if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-					*cmd[i] = '\0'; /* Invalidate this entry */
-					if (cmd[i + 1]) {
-						printf("Press any key to continue ...");
-						xgetchar();
-						putchar('\n');
-					}
-					exit_status = EXIT_FAILURE;
-				}
-			}
+		if (!ls || !*(ls + 1) || ls == cmd[i])
+			continue; /* Last slash is either the first or the last char */
+
+		*ls = '\0';
+		if (stat(cmd[i], &a) != -1) { /* Parent dir exists */
 			*ls = '/';
+			continue;
 		}
+
+		char *md_cmd[] = {"mkdir", "-p", cmd[i], NULL};
+		if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+			*cmd[i] = '\0'; /* Invalidate this entry */
+			if (cmd[i + 1]) {
+				printf("Press any key to continue ...");
+				xgetchar();
+				putchar('\n');
+			}
+			exit_status = EXIT_FAILURE;
+		}
+		*ls = '/';
 	}
 
 	/* Construct commands */
@@ -851,21 +855,26 @@ create_file(char **cmd)
 	ndirs[cndirs] = (char *)NULL;
 	nfiles[cnfiles] = (char *)NULL;
 
+	size_t total = (cndirs - 2) + (cnfiles - 1);
 	/* Execute commands */
 	if (cnfiles > 1) {
 		if (launch_execve(nfiles, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			printf("Press any key to continue ...");
-			xgetchar();
-			putchar('\n');
+			if (total > 1) {
+				printf("Press any key to continue ...");
+				xgetchar();
+				putchar('\n');
+			}
 			exit_status = EXIT_FAILURE;
 		}
 	}
 
 	if (cndirs > 2) {
 		if (launch_execve(ndirs, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			printf("Press any key to continue ...");
-			xgetchar();
-			putchar('\n');
+			if (total > 1) {
+				printf("Press any key to continue ...");
+				xgetchar();
+				putchar('\n');
+			}
 			exit_status = EXIT_FAILURE;
 		}
 	}
@@ -881,7 +890,6 @@ create_file(char **cmd)
 	if (n > 0 && (size_t)n > files)
 		file_in_cwd = 1;
 
-	size_t total = (cndirs - 2) + (cnfiles - 1);
 	if (total > 0) {
 		if (autols == 1 && file_in_cwd == 1)
 			reload_dirlist();
