@@ -1755,6 +1755,8 @@ Suggestions will be printed using one of the following color codes (see the \fBC
 
 You can set \fBSuggestFiletypeColor\fR to "true" in the configuration file to use the color of the file type of the current file name (as set in the color scheme file) instead of the value of
 \fIsf\fR. For example, if a suggestion is printed for a file that is a symbolic link, \fIln\fR or \fIor\fR (if a broken link) will be used instead of \fIsf\fR.
+.sp
+\fBNote\fR: Suggestions are disabled for the FreeBSD and the NetBSD default consoles. Take a look at the Wiki for more information.
 
 .SH 12. SHELL FUNCTIONS
 \fBclifm\fR includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
