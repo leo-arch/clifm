@@ -762,51 +762,53 @@ create_file(char **cmd)
 	}
 
 	/* Properly format filenames */
-	size_t i;
+	size_t i, hlen = strlen(workspaces[cur_ws].path);
 	for (i = 1; cmd[i]; i++) {
-		if (strchr(cmd[i], '\\')) {
-			char *deq_str = dequote_str(cmd[i], 0);
-			if (!deq_str) {
-				_err('w', PRINT_PROMPT, _("%s: %s: Error dequoting filename\n"),
-					PROGRAM_NAME, cmd[i]);
-				continue;
-			}
-
-			strcpy(cmd[i], deq_str);
-			free(deq_str);
+		char *npath = normalize_path(cmd[i], strlen(cmd[i]));
+		if (!npath) {
+			*cmd[i] = '\0'; /* Invalidate this entry */
+			continue;
 		}
+		cmd[i] = (char *)xrealloc(cmd[i], (strlen(npath) + 1) * sizeof(char));
+		strcpy(cmd[i], npath);
+		free(npath);
 
-		if (*cmd[i] == '~') {
-			char *exp_path = tilde_expand(cmd[i]);
-			if (exp_path) {
-				cmd[i] = (char *)xrealloc(cmd[i], (strlen(exp_path) + 1)
-											* sizeof(char));
-				strcpy(cmd[i], exp_path);
-				free(exp_path);
-			}
-		}
-
-		/* If the file already exists, create it as file.new */
+		/* If the file already exists, skip it */
 		struct stat a;
 		if (lstat(cmd[i], &a) == 0) {
-			int dir = 0;
-			char old_name[PATH_MAX];
-			strcpy(old_name, cmd[i]); 
-
-			size_t len = strlen(cmd[i]);
-			if (cmd[i][len - 1] == '/') {
-				cmd[i][len - 1] = '\0';
-				dir = 1;
+			int ret = strncmp(cmd[i], workspaces[cur_ws].path, hlen);
+			char *name = (ret == 0 && *(cmd[i] + hlen) && *(cmd[i] + hlen + 1))
+				? cmd[i] + hlen + 1 : cmd[i];
+			fprintf(stderr, "%s: File already exists\n", name);
+			if (cmd[i + 1]) {
+				printf("Press any key to continue ...");
+				xgetchar();
+				putchar('\n');
 			}
+			exit_status = EXIT_FAILURE;
+			*cmd[i] = '\0'; /* Invalidate entry */
 
-			cmd[i] = (char *)xrealloc(cmd[i], (len + 5) * sizeof(char));
-			if (dir)
-				strcat(cmd[i], ".new/");
-			else
-				strcat(cmd[i], ".new");
+			continue;
+		}
 
-			_err(0, PRINT_PROMPT, _("%s: %s: File already exists. "
-			"Trying with '%s' instead\n"), PROGRAM_NAME, old_name, cmd[i]);
+		/* If we have DIR/FILE and DIR doesn't exit, create DIR */
+		size_t flen = strlen(cmd[i]);
+		char *ls = strrchr(cmd[i], '/');
+		if (ls && *(ls + 1) && ls != cmd[i] && flen > 1 && cmd[i][flen - 1] != '/') {
+			*ls = '\0';
+			if (stat(cmd[i], &a) == -1) {
+				char *md_cmd[] = {"mkdir", "-p", cmd[i], NULL};
+				if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+					*cmd[i] = '\0'; /* Invalidate this entry */
+					if (cmd[i + 1]) {
+						printf("Press any key to continue ...");
+						xgetchar();
+						putchar('\n');
+					}
+					exit_status = EXIT_FAILURE;
+				}
+			}
+			*ls = '/';
 		}
 
 #if defined(__HAIKU__) || defined(__APPLE__)
@@ -840,8 +842,10 @@ create_file(char **cmd)
 	size_t cnfiles = 1, cndirs = 2;
 
 	for (i = 1; cmd[i]; i++) {
+		if (!*cmd[i])
+			continue;
 		size_t cmd_len = strlen(cmd[i]);
-		/* Filenames ending with a slash are taken as dir names */
+		/* File names ending with a slash are taken as directory names */
 		if (cmd[i][cmd_len - 1] == '/') {
 			ndirs[cndirs] = cmd[i];
 			cndirs++;
@@ -856,13 +860,21 @@ create_file(char **cmd)
 
 	/* Execute commands */
 	if (cnfiles > 1) {
-		if (launch_execve(nfiles, FOREGROUND, 0) != EXIT_SUCCESS)
+		if (launch_execve(nfiles, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+			printf("Press any key to continue ...");
+			xgetchar();
+			putchar('\n');
 			exit_status = EXIT_FAILURE;
+		}
 	}
 
 	if (cndirs > 2) {
-		if (launch_execve(ndirs, FOREGROUND, 0) != EXIT_SUCCESS)
+		if (launch_execve(ndirs, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+			printf("Press any key to continue ...");
+			xgetchar();
+			putchar('\n');
 			exit_status = EXIT_FAILURE;
+		}
 	}
 
 	free(nfiles[0]);
@@ -870,19 +882,53 @@ create_file(char **cmd)
 	free(ndirs[1]);
 	free(nfiles);
 	free(ndirs);
-	if (free_cmd) {
+
+	int file_in_cwd = 0;
+	int n = workspaces[cur_ws].path ? count_dir(workspaces[cur_ws].path, NO_CPOP) - 2 : 0;
+	if (n > 0 && (size_t)n > files)
+		file_in_cwd = 1;
+
+	size_t total = (cndirs - 2) + (cnfiles - 1);
+	if (total > 0) {
+		if (autols == 1 && file_in_cwd == 1)
+			reload_dirlist();
+
+		for (i = 1; cmd[i]; i++) {
+			if (!*cmd[i])
+				continue;
+
+			int dup = 0;
+			for (size_t j = i + 1; cmd[j]; j++) {
+				if (*cmd[i] == *cmd[j] && strcmp(cmd[i], cmd[j]) == 0) {
+					dup = 1;
+					break;
+				}
+			}
+			if (dup == 1) {
+				total--;
+				continue;
+			}
+
+			struct stat a;
+			if (stat(cmd[i], &a) != -1) {
+				int ret = strncmp(cmd[i], workspaces[cur_ws].path, hlen);
+				char *name = (ret == 0 && *(cmd[i] + hlen) && *(cmd[i] + hlen + 1))
+					? cmd[i] + hlen + 1 : cmd[i];
+				printf("%s\n", name);
+			}
+			else {
+				total--;
+			}
+		}
+		if (total > 0)
+			print_reload_msg("%d file(s) created\n", total);
+	}
+
+	if (free_cmd == 1) {
 		for (i = 0; cmd[i]; i++)
 			free(cmd[i]);
 		free(cmd);
 	}
-
-#if defined(__HAIKU__)// || defined(__APPLE__)
-	if (exit_status == EXIT_SUCCESS && autols && file_in_cwd) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-	}
-#endif
 
 	return exit_status;
 }
