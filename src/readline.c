@@ -615,9 +615,12 @@ my_rl_getc(FILE *stream)
 					if (freebsd_sc_console)
 						rl_suggestions(c);
 				}
+# elif defined(__NetBSD__)  /* __FreeBSD__ */
+				if (flags & GUI)
+					rl_suggestions(c);
 # else
 				rl_suggestions(c);
-# endif /* __FreeBSD__ */
+# endif /* __NetBSD__ */
 			}
 #endif /* !_NO_SUGGESTIONS */
 			if (ret != -2)

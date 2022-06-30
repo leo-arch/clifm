@@ -1346,7 +1346,6 @@ parse_input_str(char *str)
 	/* Handle background/foreground process */
 	bg_proc = 0;
 
-//	if (*substr[args_n] == '&' && !*(substr[args_n] + 1)) {
 	if (args_n > 0 && *substr[args_n] == '&' && !*(substr[args_n] + 1)) {
 		bg_proc = 1;
 		free(substr[args_n]);
@@ -1355,7 +1354,6 @@ parse_input_str(char *str)
 	} else {
 		size_t len = strlen(substr[args_n]);
 		if (len > 0 && substr[args_n][len - 1] == '&' && !substr[args_n][len]) {
-//		if (substr[args_n][len - 1] == '&' && !substr[args_n][len]) {
 			substr[args_n][len - 1] = '\0';
 			bg_proc = 1;
 		}
