@@ -715,7 +715,7 @@ create_file(char **cmd)
 {
 	if (cmd[1] && IS_HELP(cmd[1])) {
 		puts(_(NEW_USAGE));
-		return EXIT_FAILURE;
+		return EXIT_SUCCESS;
 	}
 
 	log_function(NULL);
