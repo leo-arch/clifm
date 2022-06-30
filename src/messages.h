@@ -63,7 +63,7 @@ Example:\n\
 
 #define ARCHIVE_USAGE "Compress/archive files\n\
 Usage:\n\
-  ac, ad ELN/FILE ...\n\n\
+  ac, ad ELN/FILE...\n\n\
 Examples:\n\
 - Compress/archive all selected files:\n\
     ac sel\n\
@@ -142,7 +142,7 @@ Examples:\n\
 
 #define BULK_USAGE "Bulk rename files\n\
 Usage:\n\
-  br, bulk ELN/FILE ...\n\n\
+  br, bulk ELN/FILE...\n\n\
 Examples:\n\
 - Bulk rename all files ending with .pdf in the current directory:\n\
     br *.pdf (or 'br <TAB> to choose from a list; mutli-selection is allowed')\n\
@@ -352,7 +352,7 @@ Usage:\n\
 
 #define JUMP_USAGE "Change to a directory in the jump database\n\
 Usage:\n\
-  j, jc, jp, jl [STRING ...], jo [NUM], je\n\
+  j, jc, jp, jl [STRING]..., jo [NUM], je\n\
 Note: Consult the manpage to know how Kangaroo, this directory jumper, works.\n\n\
 Examples:\n\
 - Print the list of entries in the jump database (visited directories):\n\
@@ -468,9 +468,9 @@ Examples:\n\
 - Copy a file to a remote location via the cprm plugin:\n\
     cr FILE"
 
-#define NEW_USAGE "Create a new file and/or directory\n\
+#define NEW_USAGE "Create new files and/or directories\n\
 Usage:\n\
-  n, new [FILE DIR/ ...n]\n\n\
+  n, new [FILE]... [DIR/]...\n\n\
 Examples:\n\
 - Create two files named file1 and file2:\n\
     n file1 file2\n\
@@ -544,7 +544,7 @@ Examples:\n\
 
 #define PROP_USAGE "Print files properties\n\
 Usage:\n\
-  p, pr, pp, prop [ELN/FILE ... n]\n\n\
+  p, pr, pp, prop [ELN/FILE]...\n\n\
 Examples:\n\
 - Print the properties of the file whose ELN is 12:\n\
     p 12 (or 'p <TAB>' to choose from a list)\n\
@@ -702,7 +702,7 @@ Examples:\n\
 
 #define TRASH_USAGE "Send one or multiple files to the trash can\n\
 Usage:\n\
-  t, tr, trash [ELN/FILE ... n] [ls, list] [clear, empty] [del]\n\n\
+  t, tr, trash [ELN/FILE]... [ls, list] [clear, empty] [del]\n\n\
 Examples:\n\
 - Trash the file whose ELN is 12:\n\
     t 12 (or 't <TAB>' to choose from a list; multi-selection is allowed)\n\
@@ -919,17 +919,17 @@ parameters.\n\n\
  ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
  ;[CMD], :[CMD] (run CMD via the system shell)\n\
- ac, ad ELN/FILE ... (archiving functions)\n\
+ ac, ad ELN/FILE... (archiving functions)\n\
  acd, autocd [on, off, status]\n\
  actions [edit [APP]]\n\
  alias [import FILE] [ls, list] [NAME]\n\
  ao, auto-open [on, off, status]\n\
  b, back [h, hist] [clear] [!ELN]\n\
- bb, bleach ELN/FILE ... (file names cleaner)\n\
- bd [NAME] ... (backdir function)\n\
- bl ELN/FILE ... (batch links)\n\
+ bb, bleach ELN/FILE... (file names cleaner)\n\
+ bd [NAME]... (backdir function)\n\
+ bl ELN/FILE... (batch links)\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
- br, bulk ELN/FILE ...\n\
+ br, bulk ELN/FILE...\n\
  c, l [e, edit], m, md, r (copy, link, move, makedir, and remove)\n\
  cc, colors\n\
  cd [ELN/DIR]\n\
@@ -939,7 +939,7 @@ parameters.\n\n\
  d, dup FILE(s)\n\
  ds, desel [*, a, all]\n\
  edit [APPLICATION] [reset]\n\
- exp [ELN/FILE ...]\n\
+ exp [ELN/FILE]...\n\
  ext [on, off, status]\n\
  f, forth [h, hist] [clear] [!ELN]\n\
  fc, filescounter [on, off, status]\n\
@@ -950,7 +950,7 @@ parameters.\n\n\
  hf, hidden [on, off, status]\n\
  history [edit [APP]] [clear] [-n] [on, off, status]\n\
  icons [on, off]\n\
- j, jc, jp, jl [STRING ...] jo [NUM], je (directory jumper function)\n\
+ j, jc, jp, jl [STRING]... jo [NUM], je (directory jumper function)\n\
  kb, keybinds [edit [APP]] [reset] [readline]\n\
  lm [on, off] (lightmode)\n\
  log [clear]\n\
@@ -958,12 +958,12 @@ parameters.\n\n\
  mm, mime [info ELN/FILE] [edit] [import] (resource opener)\n\
  mp, mountpoints\n\
  msg, messages [clear]\n\
- n, new FILE DIR/ ...n\n\
+ n, new [FILE]... [DIR/]...n\n\
  net [NAME] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  ow [ELN/FILE] [APPLICATION] (open with ...)\n\
  opener [default] [APPLICATION]\n\
- p, pr, pp, prop [ELN/FILE ... n]\n\
+ p, pr, pp, prop [ELN/FILE]...\n\
  path, cwd\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  pg, pager [on, off, status]\n\
@@ -978,7 +978,7 @@ parameters.\n\n\
  splash\n\
  st, sort [METHOD] [rev]\n\
  stats\n\
- t, tr, trash [ELN/FILE ... n] [ls, list] [clear, empty] [del]\n\
+ t, tr, trash [ELN/FILE]... [ls, list] [clear, empty] [del]\n\
  tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE(s)] [[:]TAG]\n\
  te [FILE(s)]\n\
  tips\n\
