@@ -62,7 +62,7 @@ size_t new_seln = 0; */
  * if error. This function allows the user to work with multiple
  * instances of the program: he/she can select some files in the
  * first instance and then execute a second one to operate on those
- * files as he/she whises. */
+ * files as he/she wishes. */
 int
 save_sel(void)
 {
