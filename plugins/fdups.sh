@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Plugin to find/remove duplicate files for CliFM
 #
@@ -23,6 +23,13 @@
 # License: GPL3
 
 me="clifm"
+
+OS="$(uname)"
+if [ "$OS" != "Linux" ]; then
+	printf "%s: This plugin is for Linux only\n" "$me" >&2
+	exit 1
+fi
+
 no_dep=0
 
 if ! type find > /dev/null 2>&1; then
