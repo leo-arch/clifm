@@ -987,6 +987,13 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 	int fzf_offset = (rl_point + prompt_offset < max_fzf_offset)
 			? (rl_point + prompt_offset - 4) : 0;
 
+// TESTING FZF OFFSET!
+	if (text && xargs.fuzzy_match == 1)
+		/* text is not NULL whenever a common prefix was added, replacing
+		 * the original query string */
+		fzf_offset -= (int)(strlen(matches[0]) - strlen(text));
+// TESTING FZF OFFSET!
+
 	if (!lw) {
 		fzf_offset++;
 	} else {
