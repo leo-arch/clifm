@@ -426,9 +426,20 @@ get_user_env(void)
 	tmp_user.gid = sec_env == 0 ? (gid_t)get_user_id(1) : (gid_t)-1;
 
 	char *t = sec_env == 0 ? getenv("HOME") : (char *)NULL;
-	size_t tlen = t ? strlen(t) : 0;
+/*	size_t tlen = t ? strlen(t) : 0;
 	tmp_user.home = t ? savestring(t, strlen(t)) : (char *)NULL;
-	tmp_user.home_len = tlen;
+	tmp_user.home_len = tlen; */
+
+	if (t) {
+		char *p = realpath(t, NULL);
+		char *h = p ? p : t;
+		tmp_user.home = savestring(h, strlen(h));
+		free(p);
+	} else {
+		tmp_user.home = (char *)NULL;
+	}
+
+	tmp_user.home_len = tmp_user.home ? strlen(tmp_user.home) : 0;
 
 	t = sec_env == 0 ? getenv("USER") : (char *)NULL;;
 	tmp_user.name = t ? savestring(t, strlen(t)) : (char *)NULL;
@@ -453,9 +464,19 @@ get_user(void)
 
 	tmp_user.uid = pw->pw_uid;
 	tmp_user.gid = pw->pw_gid;
-	tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
+
+	/* Sometimes (FreeBSD for example) the home directory, as returned by the
+	 * passwd struct, might be a symlink, in which case we want to resolve it
+	 * See https://lists.freebsd.org/pipermail/freebsd-arm/2016-July/014404.html */
+	char *p = realpath(pw->pw_dir, NULL);
+	if (p) {
+		tmp_user.home = savestring(p, strlen(p));
+		free(p);
+	} else {
+		tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
+	}
 
 	tmp_user.home_len = tmp_user.home ? strlen(tmp_user.home) : 0;
 	return tmp_user;
