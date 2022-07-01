@@ -795,17 +795,7 @@ cpCmd=%d\n\n"
 
 	    "# Set the default move command. Available options are: 0 = mv,\n\
 # and 1 = advmv. 1 adds a progress bar to mv.\n\
-mvCmd=%d\n\n"
-
-	    "# If set to 'default', CliFM state information (selected files,\n\
-# trashed files, current workspace, messages, and stealth mode) will be printed\n\
-# to the left of the prompt. Otherwise, if set to 'custom', this information\n\
-# will be stored in environment variables to be handled by the prompt string\n\
-# itself. Consult the manpage for more information.\n\
-PromptStyle=default\n\n"
-
-		"# A prompt to warn the user about invalid command names\n\
-WarningPrompt=%s\n\n",
+mvCmd=%d\n\n",
 
 	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
@@ -814,8 +804,7 @@ WarningPrompt=%s\n\n",
 		DEF_AUTOLS == 1 ? "true" : "false",
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,
-		DEF_MV_CMD,
-		DEF_WARNING_PROMPT == 1 ? "true" : "false");
+		DEF_MV_CMD);
 
 	fprintf(config_fp,
 		"# TAB completion mode: either 'standard' or 'fzf'. Defaults to 'fzf' if\n\
@@ -831,7 +820,7 @@ MaxPath=%d\n\n"
 # Print %s's logo screen at startup\n\
 SplashScreen=%s\n\n\
 ShowHiddenFiles=%s\n\n\
-# List files properties next to file names instead of just file names\n\
+# List file properties next to file names instead of just file names\n\
 LongViewMode=%s\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
 ApparentSize=%s\n\
