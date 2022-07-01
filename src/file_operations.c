@@ -922,7 +922,7 @@ create_file(char **cmd)
 			}
 		}
 		if (total > 0)
-			print_reload_msg("%d file(s) created\n", total);
+			print_reload_msg("%zu file(s) created\n", total);
 	}
 
 	if (free_cmd == 1) {
