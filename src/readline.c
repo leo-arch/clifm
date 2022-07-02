@@ -581,12 +581,21 @@ my_rl_getc(FILE *stream)
 
 			/* 24 == Ctrl-x */
 			if (_xrename) {
-				if (c == _ESC && !RL_ISSTATE(RL_STATE_MOREINPUT))
-					continue; /* Skip single ESC key presses */
-				if ((!control_d_exits && c == 4) || c == 24) {
+/*				if (RL_ISSTATE(RL_STATE_MOREINPUT)) {
+					if (c == 'A' || c == 'B' || c == 'C' || c == 'D')
+						return c;
+				} */
+
+/*				if (c == _ESC && !RL_ISSTATE(RL_STATE_MOREINPUT)
+				&& !RL_ISSTATE(RL_STATE_METANEXT))
+					continue; */ /* Skip single ESC key presses */
+
+				if ((control_d_exits == 0 && c == 4) || c == 24) {
 					xrename = _xrename = 0;
 					return (EOF);
 				}
+
+				return c;
 			}
 
 			/* Syntax highlighting is made from here */
