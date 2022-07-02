@@ -471,7 +471,7 @@ Examples:\n\
 - Open/edit the net configuration file using nano:\n\
     net edit nano\n\
 - Copy a file to a remote location via the cprm plugin:\n\
-    cr FILE"
+    cr FILE (run 'cr --edit' to set up your remotes)"
 
 #define NEW_USAGE "Create new files and/or directories\n\
 Usage:\n\

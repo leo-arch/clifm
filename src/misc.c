@@ -1376,6 +1376,10 @@ free_stuff(void)
 	free(trash_info_dir);
 #endif
 	free(tags_dir);
+	free(term);
+	free(quote_chars);
+	rl_clear_history();
+	rl_clear_visible_line();
 
 	/* Restore the color of the running terminal */
 	if (colorize == 1 && xargs.list_and_quit != 1)

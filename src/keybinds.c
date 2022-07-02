@@ -231,6 +231,7 @@ load_keybinds(void)
 		kbinds_n++;
 	}
 
+	fclose(fp);
 	free(line);
 	return EXIT_SUCCESS;
 }
