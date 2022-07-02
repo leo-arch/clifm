@@ -581,12 +581,8 @@ my_rl_getc(FILE *stream)
 
 			/* 24 == Ctrl-x */
 			if (_xrename) {
-/*				if (RL_ISSTATE(RL_STATE_MOREINPUT))
-					puts("MOREINPUT");
-				if (RL_ISSTATE(RL_STATE_MULTIKEY))
-					puts("MULTIKEY");
-				if (RL_ISSTATE(RL_STATE_METANEXT))
-					puts("METANEXT"); */
+				if (c == _ESC && !RL_ISSTATE(RL_STATE_MOREINPUT))
+					continue; /* Skip single ESC key presses */
 				if ((!control_d_exits && c == 4) || c == 24) {
 					xrename = _xrename = 0;
 					return (EOF);

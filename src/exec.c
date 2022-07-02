@@ -89,6 +89,15 @@ get_new_name(void)
 	snprintf(m, NAME_MAX, "Enter new name ('Ctrl-x' to quit)\n"
 		"\001%s\002>\001%s\002 ", mi_c, tx_c);
 
+	int bk_wp = warning_prompt;
+	int bk_sug = suggestions;
+	int bk_hl = highlight;
+	int bk_prompt_offset = prompt_offset;
+	highlight = 0;
+	suggestions = 0;
+	warning_prompt = 0;
+	prompt_offset = 2;
+
 	while (!input && _xrename) {
 		input = readline(m);
 		if (!input)
@@ -100,7 +109,12 @@ get_new_name(void)
 		}
 	}
 
+	highlight = bk_hl;
+	suggestions = bk_sug;
+	warning_prompt = bk_wp;
+	prompt_offset = bk_prompt_offset;
 	rl_nohist = 0;
+
 	return input;
 }
 
