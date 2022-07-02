@@ -898,7 +898,11 @@ It is important to note that glob expressions are evaluated before regular expre
 .sp
 The Selection Box is accessible to different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behavior via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox.cfm\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename.cfm\fR is used (this is the default).
 .sp
-To operate on selected files, use the \fIsel\fR keyword. Consult the \fBBUILT-IN EXPANSIONS\fR section below.
+To operate on selected files, use the \fIsel\fR keyword. 
+.sp
+\fBNote\fR:  If there is a file named \fIsel\fR in the current directory, use \fI./sel\fR to distinguish it from the \fIsel\fR keyword. For example, enter \fIp ./sel\fR to tell CliFM that you want to get the properties of the file named sel rather than the properties of the currently selected files.
+.sp
+For more information consult the \fBBUILT-IN EXPANSIONS\fR section below.
 
 .TP
 .B sb, selbox
