@@ -205,8 +205,9 @@ Usage:\n\
 Example:\n\
 - Duplicate files whose ELN's are 12 through 20:\n\
     d 12-20\n\n\
-Duplicated files are created in the current directory as SRC.copy, and, \n\
-if SRC.copy exists, as SRC.copy-n, where n is an positive integer (starting at 1)\n\n\
+You will be asked for a destiny directory\n\
+Duplicated files are created as SRC.copy, and, if SRC.copy exists, as \n\
+SRC.copy-n, where n is an positive integer (starting at 1)\n\n\
 Parameters passed to rsync: --aczvAXHS --progress\n\n\
 Parameters passed to cp: -a"
 
