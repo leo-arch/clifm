@@ -638,12 +638,52 @@ xchmod(const char *file, mode_t mode)
 	return EXIT_SUCCESS;
 }
 
+static char *
+get_dup_file_dest_dir(void)
+{
+	char *dir = (char *)NULL;
+
+	puts("Enter '.' for current directory ('q' to quit)");
+	while (!dir) {
+		dir = rl_no_hist("Destiny directory: ");
+		if (!dir)
+			continue;
+		if (!*dir) {
+			free(dir);
+			dir = (char *)NULL;
+			continue;
+		}
+		if (*dir == 'q' && !*(dir + 1)) {
+			free(dir);
+			return (char *)NULL;
+		}
+		if (access(dir , R_OK | W_OK | X_OK) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+			free(dir);
+			dir = (char *)NULL;
+			continue;
+		}
+	}
+
+	return dir;
+}
+
 int
 dup_file(char **cmd)
 {
 	if (!cmd[1] || IS_HELP(cmd[1])) {
 		puts(_(DUP_USAGE));
 		return EXIT_SUCCESS;
+	}
+
+	char *dest_dir = get_dup_file_dest_dir();
+	if (!dest_dir)
+		return EXIT_SUCCESS;
+
+	size_t dlen = strlen(dest_dir);
+	if (dlen > 1 && dest_dir[dlen - 1] == '/') {
+		dest_dir[dlen - 1] = '\0';
+		dlen--;
 	}
 
 	log_function(NULL);
@@ -659,19 +699,21 @@ dup_file(char **cmd)
 		if (strchr(source, '\\')) {
 			char *deq_str = dequote_str(source, 0);
 			if (!deq_str) {
-				fprintf(stderr, "%s: %s: Error dequoting file name\n",
-					PROGRAM_NAME, source);
+				fprintf(stderr, "%s: %s: Error dequoting file name\n", PROGRAM_NAME, source);
 				continue;
 			}
 			strcpy(source, deq_str);
 			free(deq_str);
 		}
 
-		// Use source as destiny file name: source.copy, and, if already
-		// exists, source.copy-n, where N is an integer greater than zero
+		/* Use source as destiny file name: source.copy, and, if already
+		 * exists, source.copy-n, where N is an integer greater than zero */
 		size_t source_len = strlen(source);
-		if (strcmp(source, "/") != 0 && source[source_len - 1] == '/')
+		int rem_slash = 0;
+		if (strcmp(source, "/") != 0 && source_len > 0 && source[source_len - 1] == '/') {
 			source[source_len - 1] = '\0';
+			rem_slash = 1;
+		}
 
 		char *tmp = strrchr(source, '/');
 		char *source_name;
@@ -682,16 +724,23 @@ dup_file(char **cmd)
 			source_name = source;
 
 		char tmp_dest[PATH_MAX];
-		snprintf(tmp_dest, PATH_MAX - 1, "%s.copy", source_name);
+		if (strcmp(dest_dir, "/") != 0)
+			snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy", dest_dir, source_name);
+		else
+			snprintf(tmp_dest, sizeof(tmp_dest), "%s%s.copy", dest_dir, source_name);
+
 		char bk[PATH_MAX + 11];
 		xstrsncpy(bk, tmp_dest, PATH_MAX);
 		struct stat attr;
-		int suffix = 1;
+		size_t suffix = 1;
 		while (stat(bk, &attr) == EXIT_SUCCESS) {
-			snprintf(bk, sizeof(bk), "%s-%d", tmp_dest, suffix);
+			snprintf(bk, sizeof(bk), "%s-%zu", tmp_dest, suffix);
 			suffix++;
 		}
 		char *dest = savestring(bk, strlen(bk));
+
+		if (rem_slash == 1)
+			source[source_len - 1] = '/';
 
 		if (rsync_path) {
 			char *_cmd[] = {"rsync", "-aczvAXHS", "--progress", source, dest, NULL};
@@ -706,6 +755,7 @@ dup_file(char **cmd)
 		free(dest);
 	}
 
+	free(dest_dir);
 	free(rsync_path);
 	return exit_status;
 } 

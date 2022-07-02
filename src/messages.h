@@ -199,12 +199,16 @@ Examples:\n\
 - Remove all entries from the directory history list:\n\
     b clear\n"
 
-#define DUP_USAGE "Duplicate files\n\
+#define DUP_USAGE "Duplicate files via rsync(1) (cp(1) if rsync is not found)\n\
 Usage:\n\
   d, dup FILE(s)\n\n\
 Example:\n\
 - Duplicate files whose ELN's are 12 through 20:\n\
-    d 12-20\n"
+    d 12-20\n\n\
+Duplicated files are created in the current directory as SRC.copy, and, \n\
+if SRC.copy exists, as SRC.copy-n, where n is an positive integer (starting at 1)\n\n\
+Parameters passed to rsync: --aczvAXHS --progress\n\n\
+Parameters passed to cp: -a"
 
 #define EDIT_USAGE "Edit the main configuration file\n\
 Usage:\n\

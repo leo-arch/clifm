@@ -495,9 +495,9 @@ prompt_xrename(void)
 
 	size_t plen = strlen(p);
 	char pp[NAME_MAX];
-	strcpy(pp, p);
+	xstrsncpy(pp, p, sizeof(pp));
 
-	if (plen) {
+	if (plen > 0) {
 		while (pp[--plen] == ' ')
 			pp[plen] = '\0';
 	}
@@ -514,8 +514,7 @@ prompt_xrename(void)
 	} else {
 		char *dstr = dequote_str(pp, 0);
 		if (!dstr) {
-			fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
-					PROGRAM_NAME, pp);
+			fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, pp);
 			xrename = 0;
 			return EXIT_FAILURE;
 		}
@@ -581,9 +580,14 @@ my_rl_getc(FILE *stream)
 
 			/* 24 == Ctrl-x */
 			if (_xrename) {
-/*				if (RL_ISSTATE(RL_STATE_MOREINPUT)) {
+/*				if (RL_ISSTATE(RL_STATE_METANEXT)) {
 					if (c == 'A' || c == 'B' || c == 'C' || c == 'D')
 						return c;
+					if ((control_d_exits == 0 && c == 4) || c == 24) {
+						xrename = _xrename = 0;
+						return (EOF);
+					}
+					return 0;
 				} */
 
 /*				if (c == _ESC && !RL_ISSTATE(RL_STATE_MOREINPUT)
