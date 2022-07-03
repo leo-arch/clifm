@@ -162,6 +162,15 @@ profile_set(char *prof)
 	if (*prof != 'd' || strcmp(prof, "default") != 0)
 		alt_profile = savestring(prof, strlen(prof));
 
+	i = MAX_WS;
+	while (--i >= 0) {
+		free(workspaces[i].path);
+		workspaces[i].path = (char *)NULL;
+		free(workspaces[i].name);
+		workspaces[i].name = (char *)NULL;
+	}
+	cur_ws = UNSET;
+
 	/* Reset everything */
 	reload_config();
 
@@ -247,14 +256,6 @@ profile_set(char *prof)
 	path_n = (size_t)get_path_env();
 	get_path_programs();
 
-	i = MAX_WS;
-	while (--i >= 0) {
-		free(workspaces[i].path);
-		workspaces[i].path = (char *)NULL;
-	}
-
-	cur_ws = UNSET;
-
 	if (restore_last_path)
 		get_last_path();
 
@@ -278,10 +279,8 @@ profile_set(char *prof)
 
 	int exit_status = EXIT_SUCCESS;
 
-	if (autols == 1) {
-		free_dirlist();
-		exit_status = list_dir();
-	}
+	if (autols == 1)
+		reload_dirlist();
 
 	print_reload_msg("Switched to profile %s%s%s\n", BOLD,	prof, NC);
 	return exit_status;

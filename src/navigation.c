@@ -42,7 +42,7 @@
 #include "messages.h"
 #include "readline.h"
 #if defined(__linux__) && defined(_BE_POSIX)
-#include "strings.h"
+# include "strings.h"
 #endif /* __linux__ && _BE_POSIX */
 
 #define BD_CONTINUE 2
@@ -54,10 +54,11 @@ list_workspaces(void)
 
 	for (i = 0; i < MAX_WS; i++) {
 		if (i == cur_ws) {
-			printf("%s%d: %s%s\n", mi_c, i + 1, workspaces[i].path, df_c);
+			printf("%s%d: %s%s\n", mi_c, i + 1, workspaces[i].path
+				? workspaces[i].path : "unknown", df_c);
 		} else {
 			printf("%d: %s\n", i + 1, workspaces[i].path
-			? workspaces[i].path : "none");
+				? workspaces[i].path : "none");
 		}
 	}
 
@@ -69,8 +70,8 @@ check_workspace_num(char *str, int *tmp_ws)
 {
 	int istr = atoi(str);
 	if (istr <= 0 || istr > MAX_WS) {
-		fprintf(stderr, _("%s: %d: Invalid workspace number\n"),
-		    PROGRAM_NAME, istr);
+		fprintf(stderr, _("%s: %d: No such workspace (valid workspace numbers: 1-%d)\n"),
+			PROGRAM_NAME, istr, MAX_WS);
 		return EXIT_FAILURE;
 	}
 
@@ -78,7 +79,7 @@ check_workspace_num(char *str, int *tmp_ws)
 
 	if (*tmp_ws == cur_ws) {
 		fprintf(stderr, _("%s: %d is already the current workspace\n"),
-				PROGRAM_NAME, *tmp_ws + 1);
+			PROGRAM_NAME, *tmp_ws + 1);
 		return EXIT_SUCCESS;
 	}
 

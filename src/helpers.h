@@ -561,6 +561,7 @@ extern struct actions_t *usr_actions;
 /* Workspaces information */
 struct ws_t {
 	char *path;
+	char *name;
 	int num;
 	int pad;
 };

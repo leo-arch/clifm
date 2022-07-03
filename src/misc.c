@@ -1343,9 +1343,12 @@ free_stuff(void)
 
 	if (workspaces && workspaces[0].path) {
 		i = MAX_WS;
-		while (--i >= 0)
+		while (--i >= 0) {
 			if (workspaces[i].path)
 				free(workspaces[i].path);
+			if (workspaces[i].name)
+				free(workspaces[i].name);
+		}
 		free(workspaces);
 	}
 

@@ -955,6 +955,10 @@ Sort=%d\n\
 # true (you can also use the --sort-reverse option or the 'st' command)\n\
 SortReverse=%s\n\n"
 
+		"# A comma separated list of workspaces names in the form NUM=NAME\n\
+# Example: \"1=MAIN,2=EXTRA,3=GIT,4=WORK\" or \"1=α,2=β,3=γ,4=δ\"\n\
+WorkspacesNames=\"\"\n\n"
+
 	    "# Print a usage tip at startup\n\
 Tips=%s\n\n\
 ListDirsFirst=%s\n\n\
@@ -1636,6 +1640,67 @@ set_max_filename_len(const char *line)
 }
 
 static void
+free_workspaces_names(void)
+{
+	if (workspaces) {
+		int i = MAX_WS;
+		while (--i >= 0) {
+			free(workspaces[i].name);
+			workspaces[i].name = (char *)NULL;
+		}
+	}
+
+	return;
+}
+
+/* Get workspaces names from the WorkspacesNames line in the configuration
+ * file and store them in the workspaces array */
+void
+set_workspaces_names(char *line)
+{
+	if (!line || !*line)
+		return;
+
+	char *e = strchr(line, '=');
+	if (!e || !*(++e))
+		return;
+
+	char *t = remove_quotes(e);
+	if (!t || !*t)
+		return;
+
+	char *p = t;
+	while (*t) {
+		p = strchr(t, ',');
+		if (p)
+			*p = '\0';
+		else
+			p = t;
+
+		e = strchr(t, '=');
+		if (!e || !*(e + 1))
+			goto CONT;
+
+		*e = '\0';
+		if (!is_number(t))
+			goto CONT;
+
+		int a = atoi(t);
+		if (a <= 0 || a > MAX_WS)
+			goto CONT;
+
+		free(workspaces[a - 1].name);
+		workspaces[a - 1].name = savestring(e + 1, strlen(e + 1));
+
+CONT:
+		t = p + 1;
+		continue;
+	}
+
+	return;
+}
+
+static void
 read_config(void)
 {
 	int fd;
@@ -1645,6 +1710,8 @@ read_config(void)
 		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
+
+	free_workspaces_names();
 
 	if (xargs.rl_vi_mode == 1)
 		rl_vi_editing_mode(1, 0);
@@ -2155,12 +2222,15 @@ read_config(void)
 			wprompt_str = savestring(tmp, strlen(tmp));
 		}
 
-		else {
-			if (xargs.welcome_message == UNSET && *line == 'W'
+		else if (xargs.welcome_message == UNSET && *line == 'W'
 			&& strncmp(line, "WelcomeMessage=", 15) == 0) {
 			if (set_config_bool_value(line, &welcome_message) == -1)
 				continue;
-			}
+		}
+
+		else {
+			if (*line == 'W' && strncmp(line, "WorkspacesNames=", 16) == 0)
+				set_workspaces_names(line);
 		}
 	}
 

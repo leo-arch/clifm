@@ -219,7 +219,10 @@ gen_workspace(void)
 	}
 
 //	snprintf(s, __WS_STR_LEN, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
-	snprintf(s, __WS_STR_LEN, "%s%d", cl, cur_ws + 1);
+	if (workspaces[cur_ws].name)
+		snprintf(s, __WS_STR_LEN, "%s%s", cl, workspaces[cur_ws].name);
+	else
+		snprintf(s, __WS_STR_LEN, "%s%d", cl, cur_ws + 1);
 	return savestring(s, strlen(s));
 }
 

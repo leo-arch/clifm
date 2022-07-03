@@ -188,6 +188,10 @@ Sort=1
 # true (you can also use the --sort-reverse option or the 'st' command)
 SortReverse=false
 
+# A comma separated list of workspaces names in the form NUM=NAME
+# Example: "1=MAIN,2=EXTRA,3=GIT" or "1=α,2=β,3=γ"
+WorkspacesNames=""
+
 # Print a usage tip at startup
 Tips=true
 
