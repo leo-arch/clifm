@@ -786,7 +786,8 @@ Examples:\n\
 - Switch to the next workspace:\n\
     ws +\n\
 - Switch to the previous workspace:\n\
-    ws -"
+    ws -\n\n\
+Note: Use the WorkspacesNames option in the configuration file to name your workspaces"
 
 #define X_USAGE "Launch a new instance of CliFM on a new terminal window\n\
 Usage:\n\
