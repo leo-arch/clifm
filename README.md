@@ -171,28 +171,30 @@ For a detailed explanation of each of these features, follow the corresponding l
 </details>
 
 ✔️ **Changelog**
+* Forthcoming:
+  - **NEW**: Workspaces names
 * `version 1.6 - Guybrush`:
   - ELN's color defaults now to cyan
   - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectivelly. In the same way, the `folders-first` command was renamed to `dirs-first`.
   - `PromptStyle` option renamed as `Notifications` (taking `true` and `false` as values)
-  - **NEW**: Help topics: type `help` and then press <kbd>TAB</kbd>. Choose a topic and press <kbd>Enter</kbd>
-  - **NEW**: [Search strategies](https://github.com/leo-arch/clifm/wiki/Introduction#pattern--filetype--x-dir)
-  - **NEW**: `-E`: ELN's use workspace color, `-r`: do not refresh the screen on empty line
-  - **NEW**: [Wildcards expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`s *.[ch]<TAB>`)
-  - **NEW**: [File types expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`=l<TAB>` to list all symlinks in the current dir)
-  - **NEW**: [TAB completion for search patterns](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (`/<TAB>`)
-  - **NEW**: [TAB completion for users home directory](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (`~<TAB>`)
-  - **NEW**: [TAB completion for shell commands arguments](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion). Try `ls -<TAB>`
-  - **NEW**: More tilling window manager friendly
-  - **NEW**: [emoji-icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk)
-  - **NEW**: [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
-  - **NEW**: Smarter TAB completion
-  - **NEW**: Improved interface for trash and selection functions
-  - **NEW**: [Manage your prompts via the `prompt` command](https://github.com/leo-arch/clifm/wiki/Introduction#prompt-name-list-edit-reload)
-  - **NEW**: [Copy files to your smart phone via the `cr` action (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-  - **NEW**: [Hex color codes support (#rrggbb)](https://github.com/leo-arch/clifm/wiki/Customization#hex-color-codes)
-  - **NEW**: FZF is now the default completer
-  - **NEW**: [Extra color schemes](https://github.com/leo-arch/clifm/tree/master/misc/colors)
+  - Help topics: type `help` and then press <kbd>TAB</kbd>. Choose a topic and press <kbd>Enter</kbd>
+  - [Search strategies](https://github.com/leo-arch/clifm/wiki/Introduction#pattern--filetype--x-dir)
+  - `-E`: ELN's use workspace color, `-r`: do not refresh the screen on empty line
+  - [Wildcards expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`s *.[ch]<TAB>`)
+  - [File types expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`=l<TAB>` to list all symlinks in the current dir)
+  - [TAB completion for search patterns](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (`/<TAB>`)
+  - [TAB completion for users home directory](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (`~<TAB>`)
+  - [TAB completion for shell commands arguments](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion). Try `ls -<TAB>`
+  - More tilling window manager friendly
+  - [emoji-icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk)
+  - [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
+  - Smarter TAB completion
+  - Improved interface for trash and selection functions
+  - [Manage your prompts via the `prompt` command](https://github.com/leo-arch/clifm/wiki/Introduction#prompt-name-list-edit-reload)
+  - [Copy files to your smart phone via the `cr` action (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
+  - [Hex color codes support (#rrggbb)](https://github.com/leo-arch/clifm/wiki/Customization#hex-color-codes)
+  - FZF is now the default completer
+  - [Extra color schemes](https://github.com/leo-arch/clifm/tree/master/misc/colors)
 * `version 1.5`:
   - `Prompt`, `WarningPromptStr`, `DividingLine`, and `FfzTabOptions` options were moved from the config file to the color scheme file to get a **centralized and single theming file**. However, to keep backwards compatibility, the old location is still recognized. If any of these options is found in the color scheme file, values taken from the main configuration file will be overriden.
   - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is used now only for the _input text color_ of the warning prompt.
