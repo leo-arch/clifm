@@ -809,7 +809,7 @@ create_file(char **cmd)
 	}
 
 	/* Properly format filenames */
-	size_t i, hlen = strlen(workspaces[cur_ws].path);
+	size_t i, hlen = workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 0;
 	for (i = 1; cmd[i]; i++) {
 		char *npath = normalize_path(cmd[i], strlen(cmd[i]));
 		if (!npath) {
@@ -962,12 +962,12 @@ create_file(char **cmd)
 
 			struct stat a;
 			if (stat(cmd[i], &a) != -1) {
-				int ret = strncmp(cmd[i], workspaces[cur_ws].path, hlen);
+				int ret = workspaces[cur_ws].path
+					? strncmp(cmd[i], workspaces[cur_ws].path, hlen) : -1;
 				char *name = (ret == 0 && *(cmd[i] + hlen) && *(cmd[i] + hlen + 1))
 					? cmd[i] + hlen + 1 : cmd[i];
 				printf("%s\n", name);
-			}
-			else {
+			} else {
 				total--;
 			}
 		}
