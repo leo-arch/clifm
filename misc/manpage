@@ -955,6 +955,8 @@ show \fBclifm\fR version details.
 With no argument, the \fIws\fR command prints the list of workspaces and its corresponding paths, highlighting the current workspace. Use NUM to switch to workspace NUM, the plus sign (+) to switch to the next workspace, and the minus sign (-) to switch to the previous workspace. Four keyboard shortcuts are available to easily switch to any of the first four workspaces: \fBAlt-[1-4]\fR.
 .sp
 Every time an empty workspace is created, it starts in the path of the workspace from which it was invoked (in other words, in the current working directory).
+.sp
+Though by default workspaces are unnamed, you can name them wathever you like using the \fIWorkspacesNames\fR option in the configuration file.
 .TP
 .B x, X \fR[\fIDIR\fR]
 open DIR, or the current working directory if DIR is not specified, in a new instance of \fBclifm\fR (as root if \fIX\fR, as the current unprivileged user if \fIx\fR) using the value of \fITerminalCmd\fR (from the configuration file) as terminal emulator. If this value is not set, \fIxterm\fR will be used as fallback terminal emulator. This function is only available for graphical environments.
@@ -1343,7 +1345,7 @@ Each prompt is built following almost the same escape codes and rules used by th
 .TP
 \fB\\s\fR: The name of the shell (everything after the last slash) currently used by \fBclifm\fR
 .TP
-\fB\\S\fR: Current workspace number (colored according to \fIwsN\fR code in the \fIInterfaceColors\fR section in the color scheme file)
+\fB\\S\fR: Current workspace number (or name, if named), colored according to \fIwsN\fR code in the \fIInterfaceColors\fR section in the color scheme file
 .TP
 \fB\\l\fR: Print an 'L' if in light mode
 .TP
