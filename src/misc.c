@@ -38,6 +38,13 @@
 # include <sys/sysctl.h>
 #endif
 
+#ifdef __OpenBSD__
+typedef char *rl_cpvfunc_t;
+# include <ereadline/readline/readline.h>
+#else
+# include <readline/readline.h>
+#endif
+
 /*
 #if defined(__HAIKU__)
 #include <private/libs/compat/freebsd_network/compat/sys/mount.h>
@@ -45,7 +52,6 @@
 #endif */
 #include <time.h>
 #include <unistd.h>
-#include <readline/readline.h>
 #ifdef LINUX_INOTIFY
 # include <sys/inotify.h>
 #endif
