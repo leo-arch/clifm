@@ -1718,6 +1718,42 @@ sort_name_generator(const char *text, int state)
 }
 
 static char *
+workspaces_generator(const char *text, int state)
+{
+	static int i;
+	static size_t len;
+
+	if (!state) {
+		i = 0;
+		len = text ? strlen(text) : 0;
+	}
+
+	if (text && *text >= '1' && *text <= MAX_WS + '0' && !*(text + 1))
+		return (char *)NULL;
+
+	while (i < MAX_WS) {
+		if (!workspaces[i].name) {
+			if (len == 0) {
+				char t[12];
+				snprintf(t, sizeof(t), "%d", i + 1);
+				i++;
+				return strdup(t);
+			}
+		} else {
+			if (len == 0 || (TOUPPER(*workspaces[i].name) == TOUPPER(*text)
+			&& strncasecmp(workspaces[i].name, text, len) == 0)) {
+				char *ret = strdup(workspaces[i].name);
+				i++;
+				return ret;
+			}
+		}
+		i++;
+	}
+
+	return (char *)NULL;
+}
+
+static char *
 sel_entries_generator(const char *text, int state)
 {
 	static int i;
@@ -2750,6 +2786,18 @@ my_rl_completion(const char *text, int start, int end)
 				cur_comp_type = TCMP_SORT;
 				return matches;
 			}
+		}
+
+		/* ### WORKSPACES COMPLETION ### */
+		if (*lb == 'w' && strncmp(lb, "ws ", 3) == 0 && nwords <= 2) {
+			rl_sort_completion_matches = 0;
+			rl_attempted_completion_over = 1;
+			matches = rl_completion_matches(text, &workspaces_generator);
+			if (matches) {
+				cur_comp_type = TCMP_WORKSPACES;
+				return matches;
+			}
+			rl_sort_completion_matches = 1;
 		}
 
 		/* ### NET COMMAND COMPLETION ### */

@@ -236,7 +236,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
 	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
 	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG
-	|| suggestion.type == SORT_SUG) {
+	|| suggestion.type == SORT_SUG || suggestion.type == WS_NUM_SUG) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 //		cuc += suggestion.type == ELN_SUG ? 3 : 4;
 		cuc += 3;
@@ -1602,6 +1602,37 @@ get_last_word(const char *last_space)
 }
 // TESTING!!
 
+static int
+check_workspaces(char *word, size_t wlen)
+{
+	if (!word || !*word || !workspaces)
+		return 0;
+
+	if (*word >= '1' && *word <= MAX_WS + '0' && !*(word + 1)) {
+		int a = atoi(word);
+		if (workspaces[a - 1].name) {
+			suggestion.type = WS_NUM_SUG;
+			print_suggestion(workspaces[a - 1].name, 0, sf_c);
+			return 1;
+		}
+		return 0;
+	}
+
+	int i = MAX_WS;
+	while (--i >= 0) {
+		if (!workspaces[i].name)
+			continue;
+		if (TOUPPER(*word) == TOUPPER(*workspaces[i].name)
+		&& strncasecmp(word, workspaces[i].name, wlen) == 0) {
+			suggestion.type = WS_NAME_SUG;
+			print_suggestion(workspaces[i].name, wlen, sf_c);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -1865,6 +1896,17 @@ rl_suggestions(const unsigned char c)
 				goto SUCCESS;
 		break;
 #endif /* _NO_TAGS */
+
+	case 'w': /* Workspaces */
+		if (lb[1] == 's' && lb[2] == ' ') {
+			if (nwords > 2)
+				goto FAIL;
+			printed = check_workspaces(word, wlen);
+			if (printed)
+				goto SUCCESS;
+		}
+	break;
+
 	default: break;
 	}
 

@@ -779,10 +779,14 @@ Note: To create files and directories you can use the 'n' command as well\n\
 
 #define WS_USAGE "Switch workspaces\n\
 Usage:\n\
-  ws [NUM, +, -]\n\n\
+  ws [NUM/NAME, +, -]\n\n\
 Examples:\n\
-- Switch to the first worksapce\n\
+- List available workspaces\n\
+    ws (or 'ws <TAB>')\n\
+- Switch to the first workspace\n\
     ws 1 (or Alt-1)\n\
+- Switch to worksapce named 'main'\n\
+    ws main\n\
 - Switch to the next workspace:\n\
     ws +\n\
 - Switch to the previous workspace:\n\

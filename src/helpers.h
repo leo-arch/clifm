@@ -343,6 +343,8 @@ extern int watch;
 #define SORT_SUG       19
 #define PROMPT_SUG     20
 #define USER_SUG       21
+#define WS_NUM_SUG     22 /* Workspace number */
+#define WS_NAME_SUG    23 /* Workspace name */
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -932,9 +934,8 @@ enum comp_type {
 	TCMP_USERS =      26,
 	TCMP_GLOB =       27,
 	TCMP_FILE_TYPES_OPTS = 28,
-	TCMP_FILE_TYPES_FILES = 29
-/*	TCMP_FILE_TYPES_FILES = 29,
-	TCMP_EXT_OPTS =   30 */
+	TCMP_FILE_TYPES_FILES = 29,
+	TCMP_WORKSPACES = 30
 };
 
 extern enum comp_type cur_comp_type;

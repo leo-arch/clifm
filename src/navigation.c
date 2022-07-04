@@ -47,19 +47,46 @@
 
 #define BD_CONTINUE 2
 
+static size_t
+get_longest_workspace_name(void)
+{
+	if (!workspaces)
+		return 0;
+
+	size_t longest_ws = 0;
+	int i = MAX_WS;
+
+	while (--i >= 0) {
+		if (!workspaces[i].name)
+			continue;
+		size_t l = wc_xstrlen(workspaces[i].name);
+		if (l > longest_ws)
+			longest_ws = l;
+	}
+
+	return longest_ws;
+}
+
 static int
 list_workspaces(void)
 {
 	int i;
+	int pad = (int)get_longest_workspace_name();
 
 	for (i = 0; i < MAX_WS; i++) {
-		if (i == cur_ws) {
-			printf("%s%d: %s%s\n", mi_c, i + 1, workspaces[i].path
-				? workspaces[i].path : "unknown", df_c);
+		if (i == cur_ws)
+			fputs(mi_c, stdout);
+		if (workspaces[i].name) {
+			printf("%d [%s]: %*s%s", i + 1, workspaces[i].name,
+				pad - (int)wc_xstrlen(workspaces[i].name), "", workspaces[i].path
+				? workspaces[i].path : "none");
 		} else {
-			printf("%d: %s\n", i + 1, workspaces[i].path
+			printf("%d: %*s%s", i + 1, pad > 0 ? pad + 3 : 0, "", workspaces[i].path
 				? workspaces[i].path : "none");
 		}
+		if (i == cur_ws)
+			fputs(df_c, stdout);
+		putchar('\n');
 	}
 
 	return EXIT_SUCCESS;
@@ -110,20 +137,42 @@ switch_workspace(int tmp_ws)
 	}
 
 	cur_ws = tmp_ws;
-	int exit_status = EXIT_SUCCESS;
-
 	dir_changed = 1;
 
 	if (colorize == 1 && xargs.eln_use_workspace_color == 1)
 		set_eln_color();
 
-	if (autols == 1) {
-		free_dirlist();
-		exit_status = list_dir();
-	}
+	if (autols == 1)
+		reload_dirlist();
 
 	add_to_dirhist(workspaces[cur_ws].path);
-	return exit_status;
+	return EXIT_SUCCESS;
+}
+
+/* Return the workspace number corresponding to the workspace name NAME,
+ * or -1 if no workspace is named NAME, if error, or if NAME is already
+ * the current workspace */
+static int
+get_workspace_by_name(char *name)
+{
+	if (!workspaces || !name || !*name)
+		return (-1);
+
+	int n = MAX_WS;
+	while (--n >= 0) {
+		if (!workspaces[n].name || *workspaces[n].name != *name
+		|| strcmp(workspaces[n].name, name) != 0)
+			continue;
+		if (n == cur_ws) {
+			fprintf(stderr, _("%s: %s is already the current workspace\n"),
+				PROGRAM_NAME, name);
+			return (-1);
+		}
+		return n;
+	}
+
+	fprintf(stderr, _("%s: %s: No such workspace\n"), PROGRAM_NAME, name);
+	return (-1);
 }
 
 int
@@ -147,12 +196,14 @@ handle_workspaces(char *str)
 		if ((cur_ws + 1) >= MAX_WS)
 			return EXIT_FAILURE;
 		tmp_ws = cur_ws + 1;
-	} else {
-		if (*str == '-' && !str[1]) {
+	} else if (*str == '-' && !str[1]) {
 			if ((cur_ws - 1) < 0)
 				return EXIT_FAILURE;
 			tmp_ws = cur_ws - 1;
-		}
+	} else {
+		tmp_ws = get_workspace_by_name(str);
+		if (tmp_ws == -1)
+			return EXIT_FAILURE;
 	}
 
 	return switch_workspace(tmp_ws);
