@@ -955,9 +955,9 @@ Sort=%d\n\
 # true (you can also use the --sort-reverse option or the 'st' command)\n\
 SortReverse=%s\n\n"
 
-		"# A comma separated list of workspaces names in the form NUM=NAME\n\
+		"# A comma separated list of workspace names in the form NUM=NAME\n\
 # Example: \"1=MAIN,2=EXTRA,3=GIT,4=WORK\" or \"1=α,2=β,3=γ,4=δ\"\n\
-WorkspacesNames=\"\"\n\n"
+WorkspaceNames=\"\"\n\n"
 
 	    "# Print a usage tip at startup\n\
 Tips=%s\n\n\
@@ -2229,7 +2229,7 @@ read_config(void)
 		}
 
 		else {
-			if (*line == 'W' && strncmp(line, "WorkspacesNames=", 16) == 0)
+			if (*line == 'W' && strncmp(line, "WorkspaceNames=", 15) == 0)
 				set_workspaces_names(line);
 		}
 	}
