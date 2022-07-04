@@ -172,7 +172,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ✔️ **Changelog**
 * Forthcoming:
-  - **NEW**: [Workspaces names](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
+  - **NEW**: [Named workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
 * `version 1.6 - Guybrush`:
   - ELN's color defaults now to cyan
   - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectivelly. In the same way, the `folders-first` command was renamed to `dirs-first`.
@@ -216,11 +216,12 @@ Consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduct
 To start using _CliFM_ **you don't need to learn anything new**: the usual shell commands will just work. However, there is much more that just shell commands... \
 ✓ The `help` command gives you a quick introduction to _CliFM_: once in the _CliFM_ prompt, type `help` or `?`. \
 ✓ Type `help` and then press <kbd>TAB</kbd> to get a list of _help topics_. Select the one you want and press <kbd>Enter</kbd>. \
-✓ To jump into the **COMMANDS** section in the manpage, simply enter `cmd` or press <kbd>F2</kbd>. \
+✓ To jump into the **COMMANDS** section in the [manpage](https://github.com/leo-arch/clifm/blob/master/misc/clifm.1.pdf), simply enter `cmd` or press <kbd>F2</kbd>. \
 ✓ Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page. \
 ✓ To get help about some specific command just type `CMD -h`. For instance, `s -h`.
 
-You can also take a look at some of these [basic usage-examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started.
+You can also take a look at some of these [basic usage-examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started. \
+For a complete description please consult our [Wiki](https://github.com/leo-arch/clifm/wiki).
 
 ---
 
