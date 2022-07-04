@@ -956,7 +956,7 @@ With no argument, the \fIws\fR command prints the list of workspaces and its cor
 .sp
 Every time an empty workspace is created, it starts in the path of the workspace from which it was invoked (in other words, in the current working directory).
 .sp
-Though by default workspaces are unnamed, you can name them wathever you like using the \fIWorkspacesNames\fR option in the configuration file.
+Though by default workspaces are unnamed, you can name them wathever you like using the \fIWorkspaceNames\fR option in the configuration file.
 .TP
 .B x, X \fR[\fIDIR\fR]
 open DIR, or the current working directory if DIR is not specified, in a new instance of \fBclifm\fR (as root if \fIX\fR, as the current unprivileged user if \fIx\fR) using the value of \fITerminalCmd\fR (from the configuration file) as terminal emulator. If this value is not set, \fIxterm\fR will be used as fallback terminal emulator. This function is only available for graphical environments.
