@@ -1766,8 +1766,14 @@ sel_entries_generator(const char *text, int state)
 	}
 
 	while (i < (int)sel_n && (name = sel_elements[i++].name) != NULL) {
-		if (strncmp(name, text, len) == 0)
-			return strdup(name);
+		if (strncmp(name, text, len) == 0) {
+			char *p = abbreviate_file_name(name);
+			char *ret = strdup(p ? p : name);
+			if (p && p != name)
+				free(p);
+			return ret;
+//			return strdup(name);
+		}
 	}
 
 	return (char *)NULL;

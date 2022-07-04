@@ -189,6 +189,48 @@ remove_bold_attr(char **str)
 	}
 }
 
+/* Convert the file named STR (as absolute path) into a more friendly format
+ * Change absolute paths into:
+ * "./" if file is in CWD
+ * "~" if file is in HOME
+ * The reformated file name is returned if actually reformated, in which case
+ * the returned value should be freed by the caller
+ * Otherwise, a pointer to the original string is returned and must not be
+ * freed by the caller
+ * char *ret = abbreviate_file_name(str)
+ * ...
+ * if (ret && ret != str)
+ *     free(ret); */
+char *
+abbreviate_file_name(char *str)
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	char *name = (char *)NULL;
+	size_t len = strlen(str);
+	size_t wlen = (workspaces && workspaces[cur_ws].path) ? strlen(workspaces[cur_ws].path) : 0;
+
+	/* If STR is in CWD -> ./STR */
+	if (workspaces && workspaces[cur_ws].path && wlen > 1 && len > wlen
+	&& strncmp(str, workspaces[cur_ws].path, wlen) == 0) {
+		name = (char *)xnmalloc(strlen(str + wlen + 1) + 3, sizeof(char));
+		sprintf(name, "./%s", str + wlen + 1);
+		return name;
+	}
+
+	/* If STR is in HOME, reduce HOME to tilde (~) */
+	int _free = 0;
+	char *tmp = home_tilde(str, &_free);
+	if (tmp && tmp != str) {
+		name = savestring(tmp, strlen(tmp));
+		if (_free == 1) free(tmp);
+		return name;
+	}
+
+	return str;
+}
+
 char *
 normalize_path(char *src, size_t src_len)
 {

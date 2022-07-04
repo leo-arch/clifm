@@ -1405,7 +1405,10 @@ list_removed_files(char **cmd, const size_t start, const int cwd)
 	for (i = 0; i < c; i++) {
 		if (!removed_files[i] || !*removed_files[i])
 			continue;
-		printf("%s\n", removed_files[i]);
+		char *p = abbreviate_file_name(removed_files[i]);
+		printf("%s\n", p ? p : removed_files[i]);
+		if (p && p != removed_files[i])
+			free(p);
 	}
 	print_reload_msg(_("%zu file(s) removed\n"), c);
 
@@ -1519,14 +1522,14 @@ remove_file(char **args)
  * a temporary file, which is opened via the mime function and shown
  * to the user to modify it. Once the file names have been modified and
  * saved, modifications are printed on the screen and the user is
- * asked whether to perform the actual bulk renaming (via mv) or not.
- * I took this bulk rename method, just because it is quite simple and
- * KISS, from the fff filemanager. So, thanks fff! BTW, this method
+ * asked whether to perform the actual bulk renaming or not.
+ * This bulk rename method, just because it is quite simple and
+ * KISS, was taken from the fff filemanager. So, thanks fff! BTW, this method
  * is also implemented by ranger and nnn */
 int
 bulk_rename(char **args)
 {
-	if (!args[1])
+	if (!args || !args[0] || !args[1])
 		return EXIT_FAILURE;
 
 	log_function(NULL);
@@ -1571,8 +1574,7 @@ bulk_rename(char **args)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
-				fprintf(stderr, _("bulk: %s: Error dequoting "
-						"file name\n"), args[i]);
+				fprintf(stderr, _("bulk: %s: Error dequoting file name\n"), args[i]);
 				continue;
 			}
 			strcpy(args[i], deq_file);
@@ -1766,11 +1768,8 @@ bulk_rename(char **args)
 	close_fstream(fp, fd);
 
 #if defined(__HAIKU__) || defined(__APPLE__)
-	if (autols) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-	}
+	if (autols == 1)
+		reload_dirlist();
 #endif
 
 	return exit_status;

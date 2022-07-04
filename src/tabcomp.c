@@ -278,15 +278,16 @@ get_entry_color(char **matches, const size_t i)
 	if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
 		dir += FILE_URI_PREFIX_LEN;
 
-	/* Absolute path */
-	if (*dir == '/'  && (cur_comp_type == TCMP_PATH
-	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL)) {
+	/* Absolute path (/FILE) or file in CWD (./FILE) */
+	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') ) && (cur_comp_type == TCMP_PATH
+	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) ) {
 		if (lstat(dir, &attr) != -1)
 			return fzftab_color(dir, &attr);
 	}
 
 	/* Tilde */
-	if (*dir == '~' && cur_comp_type == TCMP_PATH) {
+	if (*dir == '~' && (cur_comp_type == TCMP_PATH
+	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) ) {
 		char *exp_path = tilde_expand(matches[i]);
 		if (exp_path) {
 			char tmp_path[PATH_MAX + 1];
@@ -704,7 +705,7 @@ store_completions(char **matches, FILE *fp)
 	|| cur_comp_type == TCMP_SORT || cur_comp_type == TCMP_BOOKMARK
 	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_NET
 	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_PROMPTS)
-		no_file_comp = 1;
+		no_file_comp = 1; /* We're not completing file names */
 
 	size_t i;
 	char *_path = (char *)NULL;

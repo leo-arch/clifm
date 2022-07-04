@@ -32,6 +32,7 @@ void *xrealloc(void *ptr, size_t size);
 void *xcalloc(size_t nmemb, size_t size);
 void *xnmalloc(size_t nmemb, size_t size);
 
+char *abbreviate_file_name(char *str);
 char xgetchar(void);
 char *hex2rgb(char *hex);
 /*int *get_hex_num(const char *str); */
