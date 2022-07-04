@@ -1792,8 +1792,11 @@ CALC_OFFSET:
 			ptr++;
 		}
 
-		qq = strrchr(ptr, '/');
-		if (qq) {
+/*		qq = strrchr(ptr, '/');
+		if (qq) { */
+		qq = (cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_SEL)
+			? ptr : strrchr(ptr, '/');
+		if (qq && qq != ptr) {
 			if (*(++qq)) {
 				tab_offset = strlen(qq);
 			} else {
