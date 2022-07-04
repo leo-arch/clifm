@@ -197,7 +197,7 @@ remove_bold_attr(char **str)
  * the returned value should be freed by the caller
  * Otherwise, a pointer to the original string is returned and must not be
  * freed by the caller
- * char *ret = abbreviate_file_name(str)
+ * char *ret = abbreviate_file_name(str);
  * ...
  * if (ret && ret != str)
  *     free(ret); */
@@ -220,11 +220,12 @@ abbreviate_file_name(char *str)
 	}
 
 	/* If STR is in HOME, reduce HOME to tilde (~) */
-	int _free = 0;
-	char *tmp = home_tilde(str, &_free);
+	int free_ptr = 0;
+	char *tmp = home_tilde(str, &free_ptr);
 	if (tmp && tmp != str) {
 		name = savestring(tmp, strlen(tmp));
-		if (_free == 1) free(tmp);
+		if (free_ptr == 1)
+			free(tmp);
 		return name;
 	}
 

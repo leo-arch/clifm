@@ -300,7 +300,7 @@ get_entry_color(char **matches, const size_t i)
 
 	if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_RANGES) {
 		char tmp_path[PATH_MAX];
-		snprintf(tmp_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, dir);
+		snprintf(tmp_path, sizeof(tmp_path), "%s/%s", workspaces[cur_ws].path, dir);
 		if (lstat(tmp_path, &attr) != -1)
 			return fzftab_color(tmp_path, &attr);
 	}

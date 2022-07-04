@@ -876,7 +876,7 @@ my_rl_path_completion(const char *text, int state)
 		else
 			dirname = savestring("", 1);
 
-		if (dirname[0] == '.' && dirname[1] == '/')
+		if (dirname[0] == '.' && dirname[1] == '/' && !strchr(dirname + 2, '/'))
 			exec = 1;
 		else
 			exec = 0;
@@ -966,7 +966,6 @@ my_rl_path_completion(const char *text, int state)
 
 		if (lstat(tmp, &attr) == -1)
 			continue;
-
 		type = get_dt(attr.st_mode);
 #else
 		type = ent->d_type;
@@ -1069,8 +1068,9 @@ my_rl_path_completion(const char *text, int state)
 			}
 
 			/* No filter for everything else. Just print whatever is there */
-			else
+			else {
 				match = 1;
+			}
 		}
 
 		/* If there is at least one char to complete (ex: "cd .[TAB]") */
@@ -1078,7 +1078,6 @@ my_rl_path_completion(const char *text, int state)
 			/* Check for possible matches, first using regular matching and
 			 * then, if no match, try fuzzy matching (if enabled) */
 			if (case_sens_path_comp == 1) {
-
 				if (*ent->d_name != *filename
 				/* Check 2nd char as well before calling strncasecmp() */
 				|| (filename_len > 1 && *(ent->d_name + 1)
