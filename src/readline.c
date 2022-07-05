@@ -1331,7 +1331,7 @@ hist_generator(const char *text, int state)
 			 * The string before the first slash or space (not counting the initial
 			 * slash, used to fire up the search function) must contain a pattern
 			 * metacharacter */
-			if (!*(name + 1))
+			if (!*name || !*(name + 1))
 				continue;
 			char *ret = strpbrk(name + 1, search_strategy == GLOB_ONLY
 					? " /*?[{" : " /*?[{|^+$.");
