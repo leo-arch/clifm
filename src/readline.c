@@ -1057,12 +1057,12 @@ my_rl_path_completion(const char *text, int state)
 
 			/* If "/path/./", list only executable regular files */
 			else if (exec_path) {
-				if (type == DT_REG) {
+				if (type == DT_REG || type == DT_DIR) {
 					/* dir_tmp is dirname less "./", already allocated before
 					 * the while loop */
 					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
 
-					if (access(tmp, X_OK) == 0)
+					if (type == DT_DIR || access(tmp, X_OK) == 0)
 						match = 1;
 				}
 			}
@@ -1190,9 +1190,9 @@ my_rl_path_completion(const char *text, int state)
 			}
 
 			else if (exec_path) {
-				if (type == DT_REG) {
+				if (type == DT_REG || type == DT_DIR) {
 					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
-					if (access(tmp, X_OK) == 0)
+					if (type == DT_DIR || access(tmp, X_OK) == 0)
 						match = 1;
 				}
 			}
