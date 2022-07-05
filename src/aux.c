@@ -73,7 +73,8 @@ int
 __expand_eln(const char *text)
 {
 	char *l = rl_line_buffer;
-	if (!l || !*l || !is_number(text))
+	/* If rl_dispatching equals 1, we're coming from a keybind. Do nothing */
+	if (!l || !*l || !is_number(text) || rl_dispatching == 1)
 		return 0;
 
 	int a = atoi(text); /* Only expand numbers matching ELN's */
