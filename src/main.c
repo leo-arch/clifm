@@ -185,6 +185,7 @@ int
 	open_in_foreground = 0,
 	pager = UNSET,
 	tips = UNSET,
+	prev_ws = UNSET,
 	print_msg = 0,
 	print_selfiles = UNSET,
 	print_removed_files = UNSET,

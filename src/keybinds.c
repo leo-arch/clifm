@@ -1461,8 +1461,16 @@ static int
 rl_ws1(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (cur_ws == 0)
+	if (cur_ws == 0) {
+		/* If the user attempts to switch to the same workspace she's
+		 * currently in, switch rather to the previous workspace */
+		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+			char t[16];
+			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
+			return run_kb_cmd(t);
+		}
 		return EXIT_SUCCESS;
+	}
 	return run_kb_cmd("ws 1");
 }
 
@@ -1470,8 +1478,14 @@ static int
 rl_ws2(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (cur_ws == 1)
+	if (cur_ws == 1) {
+		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+			char t[16];
+			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
+			return run_kb_cmd(t);
+		}
 		return EXIT_SUCCESS;
+	}
 	return run_kb_cmd("ws 2");
 }
 
@@ -1479,8 +1493,14 @@ static int
 rl_ws3(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (cur_ws == 2)
+	if (cur_ws == 2) {
+		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+			char t[16];
+			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
+			return run_kb_cmd(t);
+		}
 		return EXIT_SUCCESS;
+	}
 	return run_kb_cmd("ws 3");
 }
 
@@ -1488,8 +1508,14 @@ static int
 rl_ws4(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (cur_ws == 3)
+	if (cur_ws == 3) {
+		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+			char t[16];
+			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
+			return run_kb_cmd(t);
+		}
 		return EXIT_SUCCESS;
+	}
 	return run_kb_cmd("ws 4");
 }
 

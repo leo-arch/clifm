@@ -239,6 +239,7 @@ set_start_path(void)
 			"\nFalling back to workspace %zu\n"), PROGRAM_NAME, cur_ws, cur_ws + 1);
 	}
 
+	prev_ws = cur_ws;
 	set_cur_workspace();
 
 	/* Make path the CWD */
@@ -1354,6 +1355,7 @@ external_arguments(int argc, char **argv)
 	    {"no-unicode", no_argument, 0, 'u'},
 	    {"version", no_argument, 0, 'v'},
 	    {"workspace", required_argument, 0, 'w'},
+	    {"no-toggle-workspaces", no_argument, 0, 'W'},
 	    {"no-ext-cmds", no_argument, 0, 'x'},
 	    {"light-mode", no_argument, 0, 'y'},
 	    {"sort", required_argument, 0, 'z'},
@@ -1435,7 +1437,7 @@ external_arguments(int argc, char **argv)
 	     *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
-		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:xyz:", longopts, (int *)0)) != EOF) {
+		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:Wxyz:", longopts, (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
 		 * an argument here. The plus char (+) tells getopt to stop
@@ -1706,6 +1708,7 @@ RUN:
 				cur_ws = iopt - 1;
 		} break;
 
+		case 'W': xargs.toggle_workspaces = 0; break;
 		case 'x': ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': light_mode = xargs.light = 1; break;
 		case 'z': set_sort(optarg); break;
@@ -2006,6 +2009,7 @@ unset_xargs(void)
 	xargs.suggestions = UNSET;
 #endif */
 	xargs.tips = UNSET;
+	xargs.toggle_workspaces = UNSET;
 #ifndef _NO_TRASH
 	xargs.trasrm = UNSET;
 #endif
@@ -2622,6 +2626,9 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (xargs.toggle_workspaces == UNSET)
+		xargs.toggle_workspaces = DEF_TOGGLE_WORKSPACES;
+
 	if (search_strategy == UNSET)
 		search_strategy = DEF_SEARCH_STRATEGY;
 

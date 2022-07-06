@@ -26,7 +26,7 @@
 #define MESSAGES_H
 
 /* Usage messages*/
-#define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOrsStuUvxy] [-b FILE] [-c FILE] [-D DIR] \
+#define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOprsStuUvwWxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define FILE_ATTRIBUTES "List file attributes\n\
@@ -852,6 +852,7 @@ on an empty line\
 \n  -U, --unicode \t\t Enable Unicode support (default)\
 \n  -v, --version\t\t\t Show version details and exit\
 \n  -w, --workspace=NUM\t\t Start in workspace NUM\
+\n  -W, --no-toggle-workspaces\t Workspace keybindings do not toggle previous and current workspaces\
 \n  -x, --no-ext-cmds\t\t Disallow the use of external commands\
 \n  -y, --light-mode\t\t Enable the light mode\
 \n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"

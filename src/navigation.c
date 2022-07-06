@@ -136,6 +136,7 @@ switch_workspace(int tmp_ws)
 		return EXIT_FAILURE;
 	}
 
+	prev_ws = cur_ws;
 	cur_ws = tmp_ws;
 	dir_changed = 1;
 

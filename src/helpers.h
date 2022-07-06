@@ -774,6 +774,7 @@ struct param {
 	int suggestions;
 #endif
 	int tips;
+	int toggle_workspaces;
 #ifndef _NO_TRASH
 	int trasrm;
 #endif
@@ -1013,6 +1014,7 @@ extern int
 	only_dirs,
 	open_in_foreground, /* Override mimelist file: used by mime_open */
 	pager,
+	prev_ws,
 	print_msg,
 	print_selfiles,
 	print_removed_files,
