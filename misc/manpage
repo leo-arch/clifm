@@ -263,7 +263,7 @@ show version details and exit
 start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. However, you can override this behaviour using positional parameters, as described above, to start in workspace \fINUM\fR and in path \fIPATH\fR.
 .TP
 \fB\-W\fR, \fB\-\-no\-toggle\-workspaces\fR
-Workspace keybindings (by default Alt\-[1\-4]) do not toggle current and previous workspaces
+workspace keybindings (by default Alt\-[1\-4]) do not toggle current and previous workspaces
 .TP
 \fB\-x\fR, \fB\-\-no\-ext\-cmds\fR
 disallow the use of external, shell commands
