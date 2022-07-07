@@ -1669,7 +1669,7 @@ set_workspaces_names(char *line)
 	if (!t || !*t)
 		return;
 
-	char *p = t;
+	char *p = (char *)NULL;
 	while (*t) {
 		p = strchr(t, ',');
 		if (p)

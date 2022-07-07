@@ -573,6 +573,8 @@ with no argument, open the bookmarks menu. Here you can cd into the desired book
 If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectively. Example: \fIbm\ a\ /media/misc\fR or \fIbm\ d\fR. You can also open a bookmark by typing 'bm shortcut' or \fIbm\ name\fR (in which latter case TAB completion is available).
 .sp
 A handy use for the bookmarks function, provided the expand-bookmarks option is enabled, is to create bookmarks using short names, which will be later easily accessible via TAB completion.
+.sp
+To operate on specific bookmark paths, you can use the \fIb:\fR construct (mostly useful if using the FZF mode for TAB completion). For example, type \fIp b:<TAB>\fR, select the bookmarks you want and press Enter, to print the file properties of the selected bookmarks (multi-selection is available).
 .TP
 .B br, bulk \fIELN/FILE\fR...
 rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the 'sel' keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.

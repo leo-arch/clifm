@@ -138,7 +138,9 @@ Examples:\n\
 - Edit the bookmarks file manually:\n\
     bm edit (or F11)\n\
 - Edit the bookmarks file using vi:\n\
-    bm edit vi"
+    bm edit vi\n\
+- Print file properties of specific bookmarks using the 'b:' construct:\n\
+    p b:<TAB> (multi-selection is available)"
 
 #define BULK_USAGE "Bulk rename files\n\
 Usage:\n\
