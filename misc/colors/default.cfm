@@ -72,10 +72,10 @@ define UDC=4;2;36 # Underlined dimmed cyan
 define BDC=1;2;36 # Bold dimmed cyan
 
 define DW=2;37 # Dimmed white
+define UDW=4;2;37 # Underlined dimmed white
 
 # Foreground-background combinations
 define URW=4;31;47 # Red foreground, white background
-define UBW=4;34;47 # Blue foreground, white background
 define WR=37;41 # White foreground, red background
 # K stands for black (B is used for Blue)
 define KY=30;43 # Black foreground, yellow background
@@ -88,7 +88,7 @@ define WB=37;44 # white foreground, blue background
 # FiletypeColors defines the color used for file names when listing files, 
 # just as InterfaceColors defines colors for CliFM's interface.
 # Consult the manpage for information about these codes.
-FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DY:ex=BG:fi=D:ln=BC:mh=RC:nd=UBR:ne=UDR:nf=UDR:no=URW:or=UDC:ow=BlGr:pi=M:sg=KY:so=BM:st=WB:su=WR:tw=KG:uf=UBW:"
+FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DY:ex=BG:fi=D:ln=BC:mh=RC:nd=UBR:ne=UDR:nf=UDR:no=URW:or=UDC:ow=BlGr:pi=M:sg=KY:so=BM:st=WB:su=WR:tw=KG:uf=UDW:"
 
 InterfaceColors="bm=BG:dd=B:df=D:dg=Y:dl=DW:dn=DW:dr=Y:do=C:dp=M:dw=R:dxd=G:dxr=C:dz=G:el=C:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:li=BG:mi=BC:nm=BG:si=BB:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:wp=DR:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
