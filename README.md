@@ -172,6 +172,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ✔️ **Changelog**
 * Forthcoming:
+  - **NEW**: [Operate on specific bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#operating-on-specific-bookmarks)
   - **NEW**: [Named workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
 * `version 1.6 - Guybrush`:
   - ELN's color defaults now to cyan
