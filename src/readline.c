@@ -1345,6 +1345,39 @@ hist_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+static char *
+bm_paths_generator(const char *text, int state)
+{
+	if (!bookmarks || bm_n == 0)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = (text && *text + 1 && *text + 2) ? strlen(text + 2) : 0;
+	}
+
+	while (i < (int)bm_n && (name = bookmarks[i++].path) != NULL) {
+		if (len == 0 || (*name == *(text + 2) && strncmp(name, text + 2, len) == 0)
+		|| (xargs.fuzzy_match == 1
+		&& fuzzy_match((char *)(text + 2), name, case_sens_path_comp) == 1)) {
+			size_t nlen = strlen(name);
+			if (nlen > 1 && name[nlen - 1] == '/')
+				name[nlen - 1] = '\0';
+			char *p = abbreviate_file_name(name);
+			char *ret = strdup(p ? p : name);
+			if (p != name)
+				free(p);
+			return ret;
+		}
+	}
+
+	return (char *)NULL;
+}
+
 /* Used by environment variables completion */
 static char *
 environ_generator(const char *text, int state)
@@ -2478,12 +2511,22 @@ my_rl_completion(const char *text, int start, int end)
 			return (char **)NULL;
 		/* Command names completion for words after process separator:
 		 * ; | && */
-		if (nwords == 1 && rl_line_buffer[rl_end - 1] != ' '
+		if (nwords == 1 && rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '
 		/* No command name contains slashes */
 		&& (*text != '/' || !strchr(text, '/'))) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 			if (matches) {
 				cur_comp_type = TCMP_CMD;
+				return matches;
+			}
+		}
+
+		if (*text == 'b' && *(text + 1) == ':') {
+			matches = rl_completion_matches(text, &bm_paths_generator);
+			if (matches) {
+				flags |= MULTI_SEL;
+				rl_filename_completion_desired = 1;
+				cur_comp_type = TCMP_BM_PATHS;
 				return matches;
 			}
 		}

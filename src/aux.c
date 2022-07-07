@@ -214,7 +214,8 @@ abbreviate_file_name(char *str)
 
 	/* If STR is in CWD -> ./STR */
 	if (workspaces && workspaces[cur_ws].path && wlen > 1 && len > wlen
-	&& strncmp(str, workspaces[cur_ws].path, wlen) == 0) {
+	&& strncmp(str, workspaces[cur_ws].path, wlen) == 0
+	&& *(str + wlen) == '/') {
 		name = (char *)xnmalloc(strlen(str + wlen + 1) + 3, sizeof(char));
 		sprintf(name, "./%s", str + wlen + 1);
 		return name;

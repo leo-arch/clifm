@@ -1428,7 +1428,7 @@ external_arguments(int argc, char **argv)
 	int long_opts = 55;
 #endif
 	int optc;
-	/* Variables to store arguments to options (-c, -p and -P) */
+	/* Variables to store arguments to options */
 	char *path_value = (char *)NULL,
 		 *alt_profile_value = (char *)NULL,
 	     *alt_dir_value = (char *)NULL,

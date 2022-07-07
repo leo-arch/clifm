@@ -29,9 +29,9 @@
 
 /* Default color definitions */
 #define DEF_FILE_COLORS "bd=01;33:ca=30;41:cd=01:di=01;34:ed=02;34:\
-ee=00;32:ef=02;33:ex=01;32:fi=0:ln=01;36:mh=30;46:nd=01;31:ne=02;31:nf=02;31:\
-no=00;31;47:or=02;36:ow=34;42:pi=00;35:so=01;35:su=37;41:sg=30;43:st=37;44:\
-tw=30;42:uf=34;47:"
+ee=00;32:ef=02;33:ex=01;32:fi=0:ln=01;36:mh=30;46:nd=04;01;31:ne=02;04;31:nf=02;04;31:\
+no=00;31;47:or=02;04;36:ow=34;42:pi=00;35:so=01;35:su=37;41:sg=30;43:st=37;44:\
+tw=30;42:uf=02;04;37:"
 
 #define DEF_IFACE_COLORS "bm=01;36:dd=00;34:df=0:dg=00;33:\
 dl=00;34:dn=00;02;37:dr=00;33:do=00;36:dp=00;36:dw=00;31:\
@@ -86,7 +86,7 @@ xf=01;31:xs=00;32:"
 #define DEF_ST_C  "\x1b[37;44m" /* Sticky bit set */
 #define DEF_SU_C  "\x1b[37;41m" /* SUID file */
 #define DEF_TW_C  "\x1b[30;42m" /* Sticky and other-writable */
-#define DEF_UF_C  "\x1b[34;47m" /* Un'stat'able file */
+#define DEF_UF_C  "\x1b[02;04;37m" /* Un'stat'able file */
 
 /* Interface */
 #define DEF_BM_C  "\x1b[01;36m" /* Bookmarked dirs in bookmarks screen */

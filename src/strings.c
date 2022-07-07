@@ -2187,7 +2187,8 @@ home_tilde(char *new_path, int *_free)
 	char *path_tilde = (char *)NULL;
 
 	/* If path == HOME */
-	if (new_path[1] == user.home[1] && strcmp(new_path, user.home) == 0) {
+	if (new_path[1] && user.home[1] && new_path[1] == user.home[1]
+	&& strcmp(new_path, user.home) == 0) {
 		path_tilde = (char *)xnmalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 		path_tilde[1] = '\0';
@@ -2195,8 +2196,10 @@ home_tilde(char *new_path, int *_free)
 		return path_tilde;
 	}
 
-	if (new_path[1] == user.home[1]
-	&& strncmp(new_path, user.home, user.home_len) == 0) {
+	if (new_path[1] && user.home[1] && new_path[1] == user.home[1]
+	&& strncmp(new_path, user.home, user.home_len) == 0
+	/* Avoid names like these: "HOMEfile". It should always be rather "HOME/file" */
+	&& (user.home[user.home_len - 1] == '/' || *(new_path + user.home_len) == '/') ) {
 		/* If path == HOME/file */
 		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3, sizeof(char));
 		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);

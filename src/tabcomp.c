@@ -280,13 +280,15 @@ get_entry_color(char **matches, const size_t i)
 
 	/* Absolute path (/FILE) or file in CWD (./FILE) */
 	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') ) && (cur_comp_type == TCMP_PATH
-	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) ) {
+	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL
+	|| cur_comp_type == TCMP_BM_PATHS) ) {
 		if (lstat(dir, &attr) != -1)
 			return fzftab_color(dir, &attr);
+		return uf_c;
 	}
 
 	/* Tilde */
-	if (*dir == '~' && (cur_comp_type == TCMP_PATH
+	if (*dir == '~' && (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_BM_PATHS
 	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) ) {
 		char *exp_path = tilde_expand(matches[i]);
 		if (exp_path) {
@@ -295,6 +297,7 @@ get_entry_color(char **matches, const size_t i)
 			free(exp_path);
 			if (lstat(tmp_path, &attr) != -1)
 				return fzftab_color(tmp_path, &attr);
+			return uf_c;
 		}
 	}
 
@@ -303,6 +306,7 @@ get_entry_color(char **matches, const size_t i)
 		snprintf(tmp_path, sizeof(tmp_path), "%s/%s", workspaces[cur_ws].path, dir);
 		if (lstat(tmp_path, &attr) != -1)
 			return fzftab_color(tmp_path, &attr);
+		return uf_c;
 	}
 
 	if (cur_comp_type == TCMP_CMD && is_internal_c(dir))
@@ -740,6 +744,7 @@ store_completions(char **matches, FILE *fp)
 			color = *ext_cl ? ext_cl : (cl ? cl : "");
 
 			if (cur_comp_type != TCMP_SEL && cur_comp_type != TCMP_DESEL
+			&& cur_comp_type != TCMP_BM_PATHS
 			&& cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_BACKDIR) {
 				_path = strrchr(matches[i], '/');
 				entry = (_path && *(++_path)) ? _path : matches[i];
@@ -1010,6 +1015,7 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 	/* In case of a range, the sel keyword, or a full tag expression,
 	 * the query string is just empty */
 	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL
+	&& cur_comp_type != TCMP_BM_PATHS
 	&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_GLOB
 	&& cur_comp_type != TCMP_FILE_TYPES_OPTS && cur_comp_type != TCMP_FILE_TYPES_FILES) {
 		query = get_query_str(&fzf_offset);
@@ -1041,7 +1047,8 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 			fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 1;
 		else /* Expression is first word: "=FILE_TYPE" */
 			fzf_offset = prompt_offset - 2;
-	} else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES) {
+	} else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES
+	|| cur_comp_type == TCMP_BM_PATHS) {
 		char *sp = strrchr(rl_line_buffer, ' ');
 		fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
 	} else if (cur_comp_type == TCMP_TAGS_C) {
@@ -1157,7 +1164,8 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 		prefix_len = 0;
 
 	} else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL
-	|| cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB) {
+	|| cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
+	|| cur_comp_type == TCMP_BM_PATHS) {
 		char *s = strrchr(rl_line_buffer, ' ');
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
@@ -1520,9 +1528,15 @@ AFTER_USUAL_COMPLETION:
 		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
 		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)
+
+		&& (cur_comp_type != TCMP_BM_PATHS || !matches[1])
+
 		&& (cur_comp_type != TCMP_TAGS_F || !matches[1])) {
 			enum comp_type c = cur_comp_type;
 			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
+
+			|| c == TCMP_BM_PATHS
+
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
 			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK || c == TCMP_GLOB
 			|| c == TCMP_PROMPTS) && !strchr(replacement, '\\')) {
@@ -1810,7 +1824,8 @@ CALC_OFFSET:
 		}
 
 		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR
-		|| cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_FILE_TYPES_OPTS)
+		|| cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_FILE_TYPES_OPTS
+		|| cur_comp_type == TCMP_BM_PATHS)
 			tab_offset = 0;
 
 		for (i = 1; i <= (size_t)count; i++) {

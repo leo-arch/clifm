@@ -249,7 +249,6 @@ extern int watch;
 #define FOREGROUND 0
 
 /* A few fixed colors */
-#define GRAY    "\x1b[1;30m"
 #define _RED    "\x1b[1;31m"
 #define _GREEN  "\x1b[0;32m"
 #define _BGREEN "\x1b[1;32m"
@@ -936,7 +935,8 @@ enum comp_type {
 	TCMP_GLOB =       27,
 	TCMP_FILE_TYPES_OPTS = 28,
 	TCMP_FILE_TYPES_FILES = 29,
-	TCMP_WORKSPACES = 30
+	TCMP_WORKSPACES = 30,
+	TCMP_BM_PATHS =   31 /* 'b:' keyword expansion (second word or more) */
 };
 
 extern enum comp_type cur_comp_type;
