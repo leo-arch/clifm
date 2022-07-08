@@ -58,14 +58,15 @@ href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-r
 
 _CliFM_ is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
 
-Unlike most terminal file managers out there, indeed, _CliFM_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface, also known as REPL.<sup>1</sup>
+Unlike most terminal file managers out there, indeed, _CliFM_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface (CLI),<sup>1</sup> also known as REPL.<sup>2</sup>
 
-If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, directory jumper, directory history, auto-cd and auto-open, bulk rename, and a trash system, among [other features](#features). In this sense, _CliFM_ is certainly a file manager, but also a shell extension.
+If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, tags, directory jumper, directory and commands history, auto-cd and auto-open, bulk rename, TAB completion, autosuggestions, and a trash system, among [other features](#features). In this sense, _CliFM_ is certainly a file manager, but also a shell extension.
 
 Briefly put, with _CliFM_ the command-line is always already there, never hidden :godmode: :muscle:
 
 ---
-<sup>1</sup> <i>For a detailed explanation consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki. For more information about these concepts (CLI and TUI) see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>.
+<sup>1</sup> <i>For more information about these concepts (CLI and TUI) see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>. \
+<sup>2</sup> <i>For a detailed explanation consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki</i>. 
 
 ---
 
