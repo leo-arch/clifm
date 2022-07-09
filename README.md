@@ -115,10 +115,14 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters).
   - [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces).
   - [Eleven sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev).
-  - [Bulk rename](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename).
+  - [Bulk rename](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename) and [bulk remove](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor).
   - [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n).
+  - [Copy files to your smart phone via the `cr` action (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660).
   - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r).
+  - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
+  - [Easily mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
+  - [Advanced Copy](https://github.com/leo-arch/clifm/wiki/Advanced#cpmv-with-a-progress-bar) support (just `cp` and `mv` with a nice progress bar).
   - Directory history map to keep in sight previous, current, and next entries in the directory history list.
 - Shell
   - _[Gemini](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)_, a Fish-like auto-suggestions system.
@@ -127,6 +131,9 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting)
   - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt)
   - [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
+  - [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
+  - [Wildcards expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`s *.[ch]<TAB>`)
+  - [File types expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`=l<TAB>` to list all symlinks in the current dir)
   - Bash-like quoting system.
   - Shell commands execution.
   - Sequential and conditional commands execution .
@@ -145,22 +152,18 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
 - Customization
   - [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
   - [Customizable keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
-  - [Theming](https://github.com/leo-arch/clifm/wiki/Customization#theming).
-  - [Bash-like prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt).
+  - [Theming](https://github.com/leo-arch/clifm/wiki/Customization#theming) (more than a dozen color schemes).
+  - [Prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt).
   - [Four customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
   - [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout).
 - Misc
   - [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
   - [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well).
-  - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) :smirk:.
+  - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk), including emoji-icons :smirk:.
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
-  - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
-  - [Easily mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
-  - [Remove files in bulk using a text editor](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
   - Unicode suppport.
   - Disk usage.
   - [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions.
-  - [Advanced Copy](https://github.com/leo-arch/clifm/wiki/Advanced#cpmv-with-a-progress-bar) support (just `cp` and `mv` with a nice progress bar).
   - [_Mas_, a built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status) for files listing.
   - Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input).
   - [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security) and [secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security).
@@ -179,24 +182,6 @@ For a detailed explanation of each of these features, follow the corresponding l
   - ELN's color defaults now to cyan
   - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectivelly. In the same way, the `folders-first` command was renamed to `dirs-first`.
   - `PromptStyle` option renamed as `Notifications` (taking `true` and `false` as values)
-  - Help topics: type `help` and then press <kbd>TAB</kbd>. Choose a topic and press <kbd>Enter</kbd>
-  - [Search strategies](https://github.com/leo-arch/clifm/wiki/Introduction#pattern--filetype--x-dir)
-  - `-E`: ELN's use workspace color, `-r`: do not refresh the screen on empty line
-  - [Wildcards expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`s *.[ch]<TAB>`)
-  - [File types expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`=l<TAB>` to list all symlinks in the current dir)
-  - [TAB completion for search patterns](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (`/<TAB>`)
-  - [TAB completion for users home directory](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (`~<TAB>`)
-  - [TAB completion for shell commands arguments](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion). Try `ls -<TAB>`
-  - More tilling window manager friendly
-  - [emoji-icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk)
-  - [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
-  - Smarter TAB completion
-  - Improved interface for trash and selection functions
-  - [Manage your prompts via the `prompt` command](https://github.com/leo-arch/clifm/wiki/Introduction#prompt-name-list-edit-reload)
-  - [Copy files to your smart phone via the `cr` action (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-  - [Hex color codes support (#rrggbb)](https://github.com/leo-arch/clifm/wiki/Customization#hex-color-codes)
-  - FZF is now the default completer
-  - [Extra color schemes](https://github.com/leo-arch/clifm/tree/master/misc/colors)
 * `version 1.5`:
   - `Prompt`, `WarningPromptStr`, `DividingLine`, and `FfzTabOptions` options were moved from the config file to the color scheme file to get a **centralized and single theming file**. However, to keep backwards compatibility, the old location is still recognized. If any of these options is found in the color scheme file, values taken from the main configuration file will be overriden.
   - The [warning prompt](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt) color is set now via escape codes (exactly as the regular prompt). The `wp` color code is used now only for the _input text color_ of the warning prompt.
