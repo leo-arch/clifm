@@ -165,7 +165,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [A built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status) for files listing
   - Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
   - [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security) and [secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security)
-<h4 align="center"><br><i>Gemini in action</i></h4>
+<h4 align="center"><br><i>Auto-suggestions in action</i></h4>
 <p align="center"><img src="https://i.postimg.cc/1XSKBRh8/suggestions.gif"></a></p>
 
 ---
