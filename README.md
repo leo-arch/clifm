@@ -126,8 +126,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - Directory history map to keep in sight previous, current, and next entries in the directory history list
 - Shell
   - [Auto-suggestions](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
-  - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions)
-  - [FZF mode for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion)
+  - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions) (including an FZF mode)
   - [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting)
   - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt)
   - [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters)
@@ -143,7 +142,6 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status)
   - [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup)
 - Modes
-  - Standard mode
   - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
   - [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#light-mode) (just in case it is not fast enough for you)
   - [Resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#using-clifm-as-a-standalone-resource-opener)
@@ -152,7 +150,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
 - Customization
   - [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles)
   - [Customizable keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
-  - [Theming](https://github.com/leo-arch/clifm/wiki/Customization#theming) (more than a dozen color schemes)
+  - [Theming support](https://github.com/leo-arch/clifm/wiki/Customization#theming) (more than a dozen color schemes)
   - [Prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt)
   - [Four customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
   - [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout)
