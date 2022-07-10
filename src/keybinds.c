@@ -1461,6 +1461,8 @@ static int
 rl_ws1(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+	if (rl_end > 0)
+		rl_delete_text(0, rl_end);
 	if (cur_ws == 0) {
 		/* If the user attempts to switch to the same workspace she's
 		 * currently in, switch rather to the previous workspace */
@@ -1478,6 +1480,8 @@ static int
 rl_ws2(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+	if (rl_end > 0)
+		rl_delete_text(0, rl_end);
 	if (cur_ws == 1) {
 		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
 			char t[16];
@@ -1493,6 +1497,8 @@ static int
 rl_ws3(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+	if (rl_end > 0)
+		rl_delete_text(0, rl_end);
 	if (cur_ws == 2) {
 		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
 			char t[16];
@@ -1508,6 +1514,8 @@ static int
 rl_ws4(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+	if (rl_end > 0)
+		rl_delete_text(0, rl_end);
 	if (cur_ws == 3) {
 		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
 			char t[16];
