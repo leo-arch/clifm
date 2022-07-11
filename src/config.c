@@ -807,8 +807,8 @@ mvCmd=%d\n\n",
 		DEF_MV_CMD);
 
 	fprintf(config_fp,
-		"# TAB completion mode: either 'standard' or 'fzf'. Defaults to 'fzf' if\n\
-# the binary is found in PATH. Otherwise the 'standard' mode is used\n\
+		"# TAB completion mode: 'standard', 'fzf', 'fzy', or 'smenu'. Defaults to\n\
+# 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used\n\
 TabCompletionMode=\n\n"
 
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
