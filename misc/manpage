@@ -304,6 +304,9 @@ enable program logs. See the \fIlog\fR command for more information
 \fB\-\-expand\-bookmarks\fR
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path"
 .TP
+\fB\-\-fzytab\fR
+use \fIfzy\fR to display completion matches
+.TP
 \fB\-\-full\-dir\-size\fR
 if running in long view, print directories size and their contents
 .TP
@@ -428,11 +431,14 @@ make the Selection Box common (that is, accessible) to different profiles. By de
 \fB\-\-si\fR
 print sizes in powers of 1000, as defined in the International System of Units (SI), instead of 1024 (Linux only)
 .TP
+\fB\-\-smenutab\fR
+use \fIsmenu\fR to display completion matches
+.TP
 \fB\-\-sort\-reverse\fR
 sort in reverse order, for example: z-a instead of a-z, which is the default order
 .TP
-\fB\-\-std\-tab\-comp\fR
-use the standard mode (readline) for TAB completion
+\fB\-\-stdtab\fR
+use the standard mode (readline's built-in) for TAB completion
 .TP
 \fB\-\-trash\-as\-rm\fR
 the \fIr\fR command executes the built-in 'trash' (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
