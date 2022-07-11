@@ -176,6 +176,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ✔️ **Changelog**
 * Forthcoming:
+  - `--std-tab-comp` option renamed to `--stdtab` (to match `--fzytab` and `--smenutab` options)
   - **NEW**: [smenu support for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#a-different-alternative-smenu)
   - **NEW**: [FZY support for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#no-fzf-try-with-fzy)
   - **NEW**: [Operate on specific bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#operating-on-specific-bookmarks)
