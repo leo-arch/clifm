@@ -1402,7 +1402,7 @@ external_arguments(int argc, char **argv)
 	    {"no-follow-symlink", no_argument, 0, 40},
 		{"no-control-d-exit", no_argument, 0, 41},
 		{"int-vars", no_argument, 0, 42},
-		{"std-tab-comp", no_argument, 0, 43},
+		{"stdtab", no_argument, 0, 43},
 		{"no-warning-prompt", no_argument, 0, 44},
 		{"mnt-udisks2", no_argument, 0, 45},
 		{"secure-env", no_argument, 0, 46},

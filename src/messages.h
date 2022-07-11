@@ -874,6 +874,7 @@ bookmark paths\
 in long view mode\
 \n      --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
+\n      --fzytab\t\t\t Use fzy to display completion matches\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icons color follows file color\
 \n      --int-vars\t\t Enable internal variables\
@@ -915,8 +916,9 @@ CliFM's built-in opener\
 \n      --si\t\t\t Print sizes in powers of 1000, as defined in the \
 International System of Units (SI), instead of 1024 (Linux only)\
 \n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z \
+\n      --smenutab\t\t Use smenu to display completion matches\
 (default order)\
-\n      --std-tab-comp\t\t Force the use of standard TAB completion\
+\n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 'rm' to prevent accidental deletions\n"
 
