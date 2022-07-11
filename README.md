@@ -95,9 +95,12 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - It can run on the kernel built-in console and even on a SSH or any other remote session
   - Highly compatible with old VT102-only terminal emulators (8-colors only and no Unicode support) like Rxvt and Rxvt-based ones
   - [High performance](https://github.com/leo-arch/clifm/wiki/Performance). Incredibly lightweight and fast even on really old hardware
-  - [Short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and [entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names
+  - [Short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary)
+  - [Entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names
   - [Extended color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions
   - [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories
+  - Privacy: Zero data collection and no connection to the outside world at all
+  - Security: [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security) and [secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security). See also the [stealth mode section](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode)
 - Navigation and file operations
   - [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks)
   - [Files tagging](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files)
@@ -164,7 +167,6 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions
   - [A built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status) for files listing
   - Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
-  - [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security) and [secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security)
 <h4 align="center"><br><i>Auto-suggestions in action</i></h4>
 <p align="center"><img src="https://i.postimg.cc/1XSKBRh8/suggestions.gif"></a></p>
 
