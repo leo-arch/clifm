@@ -176,7 +176,8 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ✔️ **Changelog**
 * Forthcoming:
-  - **NEW**: [fzy support](https://github.com/leo-arch/clifm/wiki/Specifics#no-fzf-try-with-fzy)
+  - **NEW**: [smenu support for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#smenu-a-different-alternative)
+  - **NEW**: [FZY support for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#no-fzf-try-with-fzy)
   - **NEW**: [Operate on specific bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#operating-on-specific-bookmarks)
   - **NEW**: [Named workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
 * `version 1.6 - Guybrush`:
