@@ -55,8 +55,9 @@ cpCmd=0
 # and 1 = advmv. 1 adds a progress bar to mv.
 mvCmd=0
 
-# TAB completion mode: either 'standard' or 'fzf'. Defaults to 'fzf' if
-# the binary is found in PATH. Othwerwise, the standard mode is used
+# TAB completion mode: 'standard', 'fzf', 'fzy' or 'smenu'. Defaults
+# to 'fzf' if the binary is found in PATH. Othwerwise, the standard
+# mode is used
 TabCompletionMode=
 
 # MaxPath is only used for the /p option of the prompt: the current
