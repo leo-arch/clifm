@@ -467,7 +467,7 @@ get_last_word(char *str)
 }
 
 static int
-run_fzf(const size_t *height, const int *offset, const char *lw, const int multi)
+run_finder(const size_t *height, const int *offset, const char *lw, const int multi)
 {
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
 	 * file, let's define it ourselves */
@@ -477,7 +477,21 @@ run_fzf(const size_t *height, const int *offset, const char *lw, const int multi
 		snprintf(height_str, sizeof(height_str), "--height=%zu", *height);
 
 	char cmd[(PATH_MAX * 2) + NAME_MAX];
-	if (xargs.fzytab != 1) {
+	if (tabmode == FZY_TAB) {
+		snprintf(cmd, sizeof(cmd), "fzy "
+				"--read-null --pad=%d --query=\"%s\" --reverse "
+				"--tab-accepts --right-accepts --left-aborts "
+				"--lines=%zu %s %s < %s > %s",
+				*offset, lw ? lw : "", *height,
+				colorize == 0 ? "--no-color" : "",
+				multi ? "--multi" : "",
+				finder_in_file, finder_out_file);
+	} else if (tabmode == SMENU_TAB) {
+		snprintf(cmd, sizeof(cmd), "smenu "
+				"-t -d -n%zu %s < %s > %s",
+				*height, multi ? "-P$'\n'" : "",
+				finder_in_file, finder_out_file);
+	} else {
 		snprintf(cmd, sizeof(cmd), "fzf %s "
 				"%s --margin=0,0,0,%d "
 				"%s --read0 --ansi "
@@ -490,6 +504,8 @@ run_fzf(const size_t *height, const int *offset, const char *lw, const int multi
 				multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				finder_in_file, finder_out_file);
+	}
+
 /*		snprintf(cmd, sizeof(cmd), "sk " // skim
 				"%s --margin=0,0,0,%d --color=16 "
 				"--read0 --ansi --inline-info "
@@ -499,16 +515,6 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				lw ? lw : "", colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down" : "",
 				finder_in_file, finder_out_file); */
-	} else {
-		snprintf(cmd, sizeof(cmd), "fzy "
-				"--read-null --pad=%d --query=\"%s\" --reverse "
-				"--tab-accepts --right-accepts --left-aborts "
-				"--lines=%zu %s %s < %s > %s",
-				*offset, lw ? lw : "", *height,
-				colorize == 0 ? "--no-color" : "",
-				multi ? "--multi" : "",
-				finder_in_file, finder_out_file);
-	}
 
 	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;
@@ -609,7 +615,7 @@ get_initial_path(void)
 /* Recover finder (fzf/fzy) output from FINDER_OUT_FILE file
  * Return this output (reformated if needed) or NULL in case of error */
 static char *
-get_fzf_output(const int multi)
+get_finder_output(const int multi)
 {
 	FILE *fp = fopen(finder_out_file, "r");
 	if (!fp)
@@ -662,6 +668,11 @@ get_fzf_output(const int multi)
 	fclose(fp);
 	unlink(finder_out_file);
 
+	if (*buf == '\0') {
+		free(buf);
+		buf = (char *)NULL;
+	}
+
 	return buf;
 }
 
@@ -690,12 +701,18 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 
 	if (wc_xstrlen(entry) == 0) {
 		char *wname = truncate_wname(entry);
-		fprintf(*fp, "%s%c", wname ? wname : entry, '\0');
+		if (tabmode == SMENU_TAB)
+			fprintf(*fp, "%s%c", wname ? wname : entry, '\n');
+		else
+			fprintf(*fp, "%s%c", wname ? wname : entry, '\0');
 		free(wname);
 		return;
 	}
 
-	fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\0');
+	if (tabmode == SMENU_TAB)
+		fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\n');
+	else
+		fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\0');
 }
 
 /* Store possible completions (MATCHES) in FINDER_IN_FILE to pass them to the finder,
@@ -938,8 +955,9 @@ clean_rl_buffer(const char *text)
 	return EXIT_FAILURE;
 }
 
-/* Display possible completions using FZF. If one of these possible
- * completions is selected, insert it into the current line buffer.
+/* Display possible completions using the corresponding finder. If one of these
+ * possible completions is selected, insert it into the current line buffer.
+ *
  * What is ORIGINAL_QUERY and why we need it?
  * MATCHES[0] is supposed to hold the common prefix among all possible
  * completions. This common prefix should be the same as the query string when
@@ -955,7 +973,7 @@ clean_rl_buffer(const char *text)
  * Common suffix: '.' (not '.f')
  * */
 static int
-fzftabcomp(char **matches, const char *text, char *original_query)
+finder_tabcomp(char **matches, const char *text, char *original_query)
 {
 	FILE *fp = fopen(finder_in_file, "w");
 	if (!fp) {
@@ -989,25 +1007,25 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 
 	/* Calculate the offset (left padding) of the FZF window based on
 	 * cursor position and current query string */
-	int max_fzf_offset = term_cols > 20 ? term_cols - 20 : 0;
-	int fzf_offset = (rl_point + prompt_offset < max_fzf_offset)
+	int max_finder_offset = term_cols > 20 ? term_cols - 20 : 0;
+	int finder_offset = (rl_point + prompt_offset < max_finder_offset)
 			? (rl_point + prompt_offset - 4) : 0;
 
 // TESTING FZF OFFSET!
 	if (text && xargs.fuzzy_match == 1)
 		/* text is not NULL whenever a common prefix was added, replacing
 		 * the original query string */
-		fzf_offset -= (int)(strlen(matches[0]) - strlen(text));
+		finder_offset -= (int)(strlen(matches[0]) - strlen(text));
 // TESTING FZF OFFSET!
 
 	if (!lw) {
-		fzf_offset++;
+		finder_offset++;
 	} else {
 		size_t lw_len = strlen(lw);
 		if (lw_len > 1) {
-			fzf_offset -= (int)(lw_len - 1);
-			if (fzf_offset < 0)
-				fzf_offset = 0;
+			finder_offset -= (int)(lw_len - 1);
+			if (finder_offset < 0)
+				finder_offset = 0;
 		}
 	}
 
@@ -1018,7 +1036,7 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 	&& cur_comp_type != TCMP_BM_PATHS
 	&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_GLOB
 	&& cur_comp_type != TCMP_FILE_TYPES_OPTS && cur_comp_type != TCMP_FILE_TYPES_FILES) {
-		query = get_query_str(&fzf_offset);
+		query = get_query_str(&finder_offset);
 		if (!query) {
 			if (cur_comp_type == TCMP_TAGS_T)
 				query = lw ? lw + 2 : (char *)NULL;
@@ -1028,45 +1046,45 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 				query = lw ? lw : (char *)NULL;
 		}
 		if (!query || !*query) /* Last char is space */
-			fzf_offset++;
+			finder_offset++;
 	}
 
 	if (cur_comp_type == TCMP_TAGS_F) {
 		if (rl_end && rl_line_buffer[rl_end - 1] == ' ')
 			/* Coming from untag ('tu :TAG ') */
-			fzf_offset++;
+			finder_offset++;
 		else { /* Coming from tag expression ('t:FULL_TAG') */
 			char *sp = strrchr(rl_line_buffer,  ' ');
-			fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
+			finder_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
 		}
 	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS) {
-		fzf_offset++;
+		finder_offset++;
 	} else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
 		char *sp = strrchr(rl_line_buffer,  ' ');
 		if (sp) /* Expression is second or more word: "text =FILE_TYPE" */
-			fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 1;
+			finder_offset = prompt_offset + (int)(sp - rl_line_buffer) - 1;
 		else /* Expression is first word: "=FILE_TYPE" */
-			fzf_offset = prompt_offset - 2;
+			finder_offset = prompt_offset - 2;
 	} else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES
 	|| cur_comp_type == TCMP_BM_PATHS) {
 		char *sp = strrchr(rl_line_buffer, ' ');
-		fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
+		finder_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
 	} else if (cur_comp_type == TCMP_TAGS_C) {
 		char *sp = strrchr(rl_line_buffer,  ' ');
-		fzf_offset = prompt_offset + (int)(sp - rl_line_buffer) - 1;
+		finder_offset = prompt_offset + (int)(sp - rl_line_buffer) - 1;
 	} else if (cur_comp_type == TCMP_TAGS_T) {
 		char *sp = strrchr(rl_line_buffer,  ' ');
-		fzf_offset = prompt_offset + (int)(sp - rl_line_buffer);
+		finder_offset = prompt_offset + (int)(sp - rl_line_buffer);
 	}
 
-	if (fzf_offset < 0)
-		fzf_offset = 0;
+	if (finder_offset < 0)
+		finder_offset = 0;
 
 	/* TAB completion cases allowing multiple selection */
 	int multi = is_multi_sel();
 
 	/* Run FZF and store the ouput into the FINDER_OUT_FILE file */
-	int ret = run_fzf(&height, &fzf_offset, query, multi);
+	int ret = run_finder(&height, &finder_offset, query, multi);
 	unlink(finder_in_file);
 
 	/* Calculate currently used lines to go back to the correct cursor
@@ -1092,7 +1110,7 @@ fzftabcomp(char **matches, const char *text, char *original_query)
 		return clean_rl_buffer(text);
 	}
 
-	char *buf = get_fzf_output(multi);
+	char *buf = get_finder_output(multi);
 	if (!buf)
 		return EXIT_FAILURE;
 
@@ -1791,7 +1809,7 @@ CALC_OFFSET:
 #ifndef _NO_FZF
 		if (fzftab == 1) {
 			char *t = text ? text : (char *)NULL;
-			if (fzftabcomp(matches, common_prefix_added == 1 ? t : NULL,
+			if (finder_tabcomp(matches, common_prefix_added == 1 ? t : NULL,
 			xargs.fuzzy_match == 1 ? t : NULL) == -1)
 				goto RESTART;
 			goto RESET_PATH;

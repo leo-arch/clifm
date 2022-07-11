@@ -173,36 +173,72 @@ set_mount_cmd(const int udisks2ok, const int udevilok)
 		xargs.mount_cmd = UNSET;
 }
 
+/* Let's check for third-party programs
+ * fzf, fzy, and smenu are used as alternative TAB completion mechanisms
+ * fzy and smenu fallback to default if not found
+ * the default value is fzf, if found, or standard (readline) */
 void
 check_third_party_cmds(void)
 {
-	int udisks2ok = 0, udevilok = 0, fzfok = 0;
+	int udisks2ok = 0, udevilok = 0, fzfok = 0, fzyok = 0, smenuok = 0;
 	int i = (int)path_progsn;
 
 	while (--i >= 0) {
-		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f')
+		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f' && *bin_commands[i] != 's')
 			continue;
 
-		if (strcmp(bin_commands[i], "fzf") == 0) {
+		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzf") == 0) {
 			fzfok = 1;
 			flags |= FZF_BIN_OK;
 			if (fzftab == UNSET)
 				fzftab = 1;
-		} else if (strcmp(bin_commands[i], "udisksctl") == 0) {
-			udisks2ok = 1;
-		} else {
-			if (strcmp(bin_commands[i], "udevil") == 0)
-				udevilok = 1;
 		}
 
-		if (udevilok && udisks2ok && fzfok)
+		switch(tabmode) {
+		case FZY_TAB:
+			if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzy") == 0) {
+				fzyok = 1;
+				if (fzftab == UNSET)
+					fzftab = 1;
+			}
+			break;
+		case SMENU_TAB:
+			if (*bin_commands[i] == 's' && strcmp(bin_commands[i], "smenu") == 0) {
+				smenuok = 1;
+				if (fzftab == UNSET)
+					fzftab = 1;
+			}
+			break;
+		default: break;
+		}
+
+		if (*bin_commands[i] == 'u' && strcmp(bin_commands[i], "udisksctl") == 0)
+			udisks2ok = 1;
+		if (*bin_commands[i] == 'u' && strcmp(bin_commands[i], "udevil") == 0)
+			udevilok = 1;
+
+		if (udevilok == 1 && udisks2ok == 1 && fzfok == 1 && fzyok == 1 && smenuok == 1)
 			break;
 	}
 
-	if (fzftab && !fzfok) {
-		_err('w', PRINT_PROMPT, _("%s: fzf not found. Falling back to "
-			"standard TAB completion\n"), PROGRAM_NAME);
-		fzftab = 0;
+	if (fzftab == 1) {
+		if (fzfok == 0) {
+			if (tabmode == FZF_TAB) {
+				_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling back to "
+					"standard TAB completion\n"), PROGRAM_NAME);
+				tabmode = STD_TAB;
+			}
+			fzftab = 0;
+		}
+		if (tabmode == FZY_TAB && fzyok == 0) {
+			_err('w', PRINT_PROMPT, _("%s: fzy: Command not found. Falling back to "
+				"default (fzf, if found, or standard)\n"), PROGRAM_NAME);
+			tabmode = fzfok == 1 ? FZF_TAB : STD_TAB;
+		} else if (tabmode == SMENU_TAB && smenuok == 0) {
+			_err('w', PRINT_PROMPT, _("%s: smenu: Command not found. Falling back to "
+				"default (fzf, if found, or standard)\n"), PROGRAM_NAME);
+			tabmode = fzfok == 1 ? FZF_TAB : STD_TAB;
+		}
 	}
 
 	set_mount_cmd(udisks2ok, udevilok);

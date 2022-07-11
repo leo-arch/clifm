@@ -100,6 +100,8 @@ struct sort_t __sorts[] = {
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = NOMSG;
 enum comp_type cur_comp_type = TCMP_NONE;
+enum tab_mode tabmode = STD_TAB;
+
 struct param xargs;
 unsigned short term_cols;
 

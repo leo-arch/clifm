@@ -1415,17 +1415,18 @@ external_arguments(int argc, char **argv)
 		{"no-refresh-on-resize", no_argument, 0, 53},
 		{"bell", required_argument, 0, 54},
 		{"fuzzy-match", no_argument, 0, 55},
+		{"smenutab", no_argument, 0, 56},
 #ifdef __linux__
-		{"si", no_argument, 0, 56},
+		{"si", no_argument, 0, 57},
 #endif
 	    {0, 0, 0, 0}
 	};
 
 	/* Increment whenever a new (only) long option is added */
 #ifdef __linux__
-	int long_opts = 56;
+	int long_opts = 57;
 #else
-	int long_opts = 55;
+	int long_opts = 56;
 #endif
 	int optc;
 	/* Variables to store arguments to options */
@@ -1598,9 +1599,9 @@ RUN:
 #else */
 		case 43:
 #ifndef _NO_FZF
-			xargs.fzftab = 0;
+			xargs.fzftab = 0; tabmode = STD_TAB;
 #endif /* !_NO_FZF */
-			fzftab = 0;
+			fzftab = 0; tabmode = STD_TAB;
 			break;
 /*			fprintf(stderr, _("%s: fzftab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE); */
@@ -1621,7 +1622,8 @@ RUN:
 		case 50: xargs.apparent_size = apparent_size = 1; break;
 		case 51: xargs.history = 0; break;
 #ifndef _NO_FZF
-		case 52: xargs.fzytab = 1; fzftab = 1; break;
+		case 52:
+			xargs.fzytab = 1; fzftab = 1; tabmode = FZY_TAB; break;
 #else
 		case 52:
 			fprintf(stderr, _("%s: fzytab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
@@ -1639,8 +1641,16 @@ RUN:
 			xargs.bell_style = a; break;
 			}
 		case 55: xargs.fuzzy_match = 1; break;
+#ifndef _NO_FZF
+		case 56: xargs.smenutab = 1; fzftab = 1; tabmode = SMENU_TAB; break;
+#else
+		case 56:
+			fprintf(stderr, _("%s: smenu: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#endif
+
 #ifdef __linux__
-		case 56: xargs.si = 1; break;
+		case 57: xargs.si = 1; break;
 #endif
 		case 'a': show_hidden = xargs.hidden = 0; break;
 		case 'A': show_hidden = xargs.hidden = 1; break;
@@ -1965,6 +1975,7 @@ unset_xargs(void)
 #ifndef _NO_FZF
 	xargs.fzftab = UNSET;
 	xargs.fzytab = UNSET;
+	xargs.smenutab = UNSET;
 #endif
 	xargs.hidden = UNSET;
 #ifndef _NO_HIGHLIGHT
@@ -2781,7 +2792,18 @@ check_options(void)
 		} else {
 			fzftab = xargs.fzftab;
 		}
+
+		if (xargs.fzytab == 1)
+			tabmode = FZY_TAB;
+		else if (xargs.fzftab == 1)
+			tabmode = FZF_TAB;
+		else if (xargs.smenutab == 1)
+			tabmode = SMENU_TAB;
+		else
+			tabmode = STD_TAB;
 	}
+#else
+	tabmode = STD_TAB;
 #endif
 
 #ifndef _NO_ICONS

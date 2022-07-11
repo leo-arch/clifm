@@ -728,6 +728,7 @@ struct param {
 #ifndef _NO_FZF
 	int fzftab;
 	int fzytab;
+	int smenutab;
 #endif
 	int hidden;
 #ifndef _NO_HIGHLIGHT
@@ -881,6 +882,15 @@ struct history_t {
 	size_t len;
 };
 extern struct history_t *history;
+
+enum tab_mode {
+	STD_TAB =   0,
+	FZF_TAB =   1,
+	FZY_TAB =   2,
+	SMENU_TAB = 3
+};
+
+extern enum tab_mode tabmode;
 
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the

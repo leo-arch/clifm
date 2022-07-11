@@ -2145,17 +2145,22 @@ read_config(void)
 #endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_FZF
-		else if (xargs.fzftab == UNSET && xargs.fzytab == UNSET && *line == 'T'
-		&& strncmp(line, "TabCompletionMode=", 18) == 0) {
+		else if (xargs.fzftab == UNSET && xargs.fzytab == UNSET && xargs.smenutab == UNSET
+		&& *line == 'T' && strncmp(line, "TabCompletionMode=", 18) == 0) {
 			char opt_str[9] = "";
 			ret = sscanf(line, "TabCompletionMode=%8s\n", opt_str);
 			if (ret == -1)
 				continue;
-			if (strncmp(opt_str, "standard", 8) == 0)
+			if (strncmp(opt_str, "standard", 8) == 0) {
 				fzftab = 0;
-			else {
-				if (strncmp(opt_str, "fzf", 3) == 0)
-					fzftab = 1;
+			} else if (strncmp(opt_str, "fzf", 3) == 0) {
+				fzftab = 1; tabmode = FZF_TAB;
+			} else if (strncmp(opt_str, "fzy", 3) == 0) {
+				fzftab = 1; tabmode = FZY_TAB;
+			} else {
+				if (strncmp(opt_str, "smenu", 5) == 0) {
+					fzftab = 1; tabmode = SMENU_TAB;
+				}
 			}
 		}
 #endif /* !_NO_FZF */
