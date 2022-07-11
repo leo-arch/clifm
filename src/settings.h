@@ -301,6 +301,8 @@ left:abort --inline-info --layout=reverse-list"
 #define DEF_FZFTAB_OPTIONS_NO_COLOR "--color=bw --bind tab:accept,\
 right:accept,left:abort --inline-info --layout=reverse-list"
 
+#define DEF_SMENU_OPTIONS "-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
+
 #define DEFAULT_TERM_CMD "xterm -e"
 #define FALLBACK_SHELL "/bin/sh"
 

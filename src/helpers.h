@@ -1161,6 +1161,7 @@ extern char
 	*remotes_file,
 /*	*right_prompt, */
 	*sel_file,
+	*smenutab_options_env,
 	*stdin_tmp_dir,
 #ifndef _NO_SUGGESTIONS
 	*suggestion_buf,
