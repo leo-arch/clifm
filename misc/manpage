@@ -1578,16 +1578,24 @@ If using the FZF mode for TAB completion (see below), you can operate only on \f
 .TP
 There are four modes for TAB completion: \fIstandard\fR (interface provided by readline), \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later), \fIfzy\fR (\fIhttps://github.com/leo-arch/fzy\fR), and \fIsmenu\fR (\fIhttps://github.com/p-gen/smenu\fR). By default, if the \fIfzf\fR binary is found in \fBPATH\fR, \fBclifm\fR will attempt to use \fIfzf\fR to display completions. You can force the use of the remaining modes via the \fI\-\-std\-tab\-comp\fR, \fI\-\-fzytab\fR, and \fI\-\-smenutab\fR command line switches. The \fITabCompletionMode\fR option in the configuration file can be used to permanently set the TAB completion mode.
 .TP
-If using the \fIfzf\fR mode, the completions interface could be customized using the \fIFzfTabOptions\fR option in the color scheme file. --height, --margin, +i/-i, --read0, --query, and --ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
+If using the \fIfzf\fR mode, the completions interface can be customized using the \fIFzfTabOptions\fR option in the color scheme file. --height, --margin, +i/-i, --read0, --query, and --ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
 .TP
 Default values for this option are:
  --color=16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list
 .TP
 Consult \fBfzf\fR(1) for more information.
 .TP
-If set neither in \fIFzfTabOptions\fR nor in \fBFZF_DEAFULT_OPTS\fR (in this order), the height of the FZF window is set to the default value: 40% of the current terminal amount of line/rows.
+If set neither in \fIFzfTabOptions\fR nor in \fBFZF_DEFAULT_OPTS\fR (in this order), the height of the FZF window is set to the default value: 40% of the current terminal amount of line/rows.
 .TP
 To use FZF global values (defined in \fBFZF_DEFAULT_OPTS\fR), just set \fIFzfTabOptions\fR to \fInone\fR.
+.TP
+If using the \fIsmenu\fR mode, the interface can be customized using the \fBCLIFM_SMENU_OPTIONS\fR environment variable. For example:
+.sp
+ export CLIFM_SMENU_OPTIONS="\-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
+.TP
+Consult \fBsmenu\fR(1) for more information.
+.TP
+For information about how to customize \fIfzy\fR consult \fBfzy\fR(1).
 .TP
 \fBclifm\fR can perform fuzzy TAB completion (just as suggestions, if enabled) for file names and paths (e.g. 'dwn<TAB>' is completed as 'Downloads'). To enable this feature use the \fI\-\-fuzzy\-match command line switch.
 .TP
