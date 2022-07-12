@@ -65,8 +65,8 @@ If working with the command-line, your workflow is not affected at all, but just
 Briefly put, with _CliFM_ the command-line is always already there, never hidden :godmode: :muscle:
 
 ---
-<sup>1</sup> <i>For more information about these concepts (CLI and TUI) see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>. \
-<sup>2</sup> <i>For a detailed explanation consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki</i>. 
+<sup>1</sup> <i>For more information about these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>. \
+<sup>2</sup> <i>For a detailed explanation consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki</i>.
 
 ---
 
