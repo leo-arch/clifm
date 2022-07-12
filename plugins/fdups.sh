@@ -11,11 +11,9 @@
 # Dependencies: find md5sum sort uniq xargs sed stat
 #
 # Notes:
-# 1. If the file size exceeds SIZE_DIGITS digits the file will be misplaced.
-#    (12 digits amount to sizes up to 931GiB)
-# 2. Bash compatible shell required for mktemp(1)
+# If the file size exceeds SIZE_DIGITS digits the file will be misplaced.
+# (12 digits amount to sizes up to 931GiB)
 #
-# Shell: Bash
 # Based on https://github.com/jarun/nnn/blob/master/plugins/dups and modified
 # to fit our needs
 #
@@ -24,11 +22,11 @@
 
 me="clifm"
 
-OS="$(uname)"
-if [ "$OS" != "Linux" ]; then
-	printf "%s: This plugin is for Linux only\n" "$me" >&2
-	exit 1
-fi
+#OS="$(uname)"
+#if [ "$OS" != "Linux" ]; then
+#	printf "%s: This plugin is for Linux only\n" "$me" >&2
+#	exit 1
+#fi
 
 no_dep=0
 
@@ -53,7 +51,7 @@ fi
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "List non-empty duplicated files in DIR (current directory \
-if omitted) and allow the user to delete one or more of them\n"
+if omitted) and allow the user to selectively delete them\n"
 	printf "Usage: %s [DIR]\n" "$name"
 	exit 0
 fi
@@ -79,14 +77,17 @@ printf "\
 " > "$tmp_file"
 
 # shellcheck disable=SC2016
-find "$dir" -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | uniq -w"${size_digits}" -D | sed -e '                                s/^ \{0,12\}\([0-9]\{0,12\}\) \(.*\)$/printf "%s %s\\n" "$(md5sum "\2")" "d\1"/                                                                       ' | tr '\n' '\0' | xargs -0 -n1 -r sh -c | sort | { uniq -w32 --all-repeated=separate; echo; } | sed -ne '
-h                                                           
+find "$dir" -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | uniq -w"${size_digits}" -D \
+| sed -e 's/^ \{0,12\}\([0-9]\{0,12\}\) \(.*\)$/printf "%s %s\\n" "$(md5sum "\2")" "d\1"/' \
+| tr '\n' '\0' | xargs -0 -n1 -r sh -c | sort | { uniq -w32 --all-repeated=separate; echo; } \
+| sed -ne 'h
 s/^\(.\{32\}\).* d\([0-9]*\)$/## md5sum: \1 size: \2 bytes/p
-g    
+g
 :loop
-N             
-/.*\n$/!b loop                               
-p' | sed -e 's/^.\{32\}  \(.*\) d[0-9]*$/\1/' >> "$tmp_file"
+N
+/.*\n$/!b loop
+p' \
+| sed -e 's/^.\{32\}  \(.*\) d[0-9]*$/\1/' >> "$tmp_file"
 
 time_pre="$(stat -c '%Y' "$tmp_file")"
 
