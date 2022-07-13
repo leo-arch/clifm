@@ -31,15 +31,17 @@ LIBS_Darwin ?= -I/opt/local/include -L/opt/local/lib -lreadline -lintl -lmagic
 
 CFLAGS += -DCLIFM_DATADIR=$(DATADIR)
 
-build: $(SRC) $(HEADERS)
+$(BIN): $(SRC) $(HEADERS)
 	@printf "Detected operating system: %s\n" "$(OS)"
 	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(LDFLAGS) $(LIBS_$(OS))
+
+build: $(BIN)
 
 clean:
 	$(RM) -- $(BIN)
 	$(RM) -f -- $(SRCDIR)/*.o
 
-install: build
+install: $(BIN)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)
