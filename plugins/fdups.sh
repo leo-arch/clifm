@@ -9,7 +9,7 @@
 # one or more of them
 #
 # Dependencies:
-#	find md5sum sort uniq xargs sed stat (on GNU/Linux)
+#	find md5sum sort uniq xargs sed stat (on Linux/Haiku)
 #	gfind md5 sort guniq xargs sed stat (on FreeBSD/NetBSD/OpenBSD/MacOS)
 #
 # On FreeBSD/NetBSD/OpenBSD/MacOS you need to install both coreutils (for guniq)
@@ -30,7 +30,7 @@ me="clifm"
 OS="$(uname)"
 
 case "$OS" in
-Linux)
+Linux|Haiku)
 	FIND="find"
 	MD5="md5sum"
 	UNIQ="uniq"
