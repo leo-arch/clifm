@@ -59,6 +59,8 @@ ifdef _NO_TRASH
 LIBS += -D_NO_TRASH
 endif
 
+CFLAGS += -DCLIFM_DATADIR=$(DATADIR)
+
 build: ${OBJS}
 	@printf "Detected operating system: ";
 	@echo "$(OS)"
@@ -85,6 +87,7 @@ install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/colors
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/tools
 	$(INSTALL) -m 0755 plugins/* $(DESTDIR)$(PROG_DATADIR)/plugins
 	$(INSTALL) -m 0755 misc/tools/*.py $(DESTDIR)$(PROG_DATADIR)/tools
 	chmod 644 -- $(DESTDIR)$(PROG_DATADIR)/plugins/BFG.cfg
