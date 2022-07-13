@@ -2423,6 +2423,20 @@ my_rl_completion(const char *text, int start, int end)
 		}
 	}
 
+	char *g = strpbrk(text, GLOB_CHARS);
+	// Expand only glob expressions in the last path component
+	if (!_xrename && g && !strchr(g, '/') && access(text, F_OK) != 0) {
+		char *p = (*rl_line_buffer == '/' && rl_end > 1 && !strchr(rl_line_buffer + 1, ' ')
+			&& !strchr(rl_line_buffer + 1, '/'))
+			? (char *)(text + 1) : (char *)text;
+		if ((matches = rl_glob(p)) != NULL) {
+			cur_comp_type = TCMP_GLOB;
+			rl_filename_completion_desired = 1;
+			flags |= MULTI_SEL;
+			return matches;
+		}
+	}
+
 	if (start == 0) { /* Only for the first entered word */
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
@@ -2598,15 +2612,15 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* #### WILDCARDS EXPANSION #### */
-		char *g = strpbrk(text, GLOB_CHARS);
-		/* Expand only glob expressions in the last path component */
+/*		char *g = strpbrk(text, GLOB_CHARS);
+		// Expand only glob expressions in the last path component
 		if (g && !strchr(g, '/') && access(text, F_OK) != 0
 		&& (matches = rl_glob(text))) {
 			cur_comp_type = TCMP_GLOB;
 			rl_filename_completion_desired = 1;
 			flags |= MULTI_SEL;
 			return matches;
-		}
+		} */
 
 		/* #### BACKDIR COMPLETION #### */
 		if (*text != '/' && nwords <= 2 && rl_end >= 3
