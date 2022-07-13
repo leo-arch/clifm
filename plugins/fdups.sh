@@ -8,7 +8,8 @@
 # by MD5) in DIR (current directory if omitted) and allow the user to remove
 # one or more of them
 #
-# Dependencies:	find md5sum sort uniq xargs sed stat (on GNU/Linux)
+# Dependencies:
+#       find md5sum sort uniq xargs sed stat (on GNU/Linux)
 #		gfind md5 sort guniq xargs sed stat (on FreeBSD)
 #
 # Notes:
@@ -18,23 +19,24 @@
 # Based on https://github.com/jarun/nnn/blob/master/plugins/dups and modified
 # to fit our needs
 #
-# Authors: syssyphus, KlzXS, leo-arch
+# Authors: syssyphus, KlzXS, leo-arch, danfe
 # License: GPL3
 
 me="clifm"
 
 OS="$(uname)"
+
 case "$OS" in
 Linux)
-	FIND=find
-	MD5=md5sum
-	UNIQ=uniq
+	FIND="find"
+	MD5="md5sum"
+	UNIQ="uniq"
 	STAT="stat -c %Y"
 	;;
 FreeBSD)
-	FIND=gfind
+	FIND="gfind"
 	MD5="md5 -r"
-	UNIQ=guniq
+	UNIQ="guniq"
 	STAT="stat -f %m"
 	;;
 *)
@@ -44,19 +46,19 @@ esac
 
 no_dep=0
 
-if ! type $FIND > /dev/null 2>&1; then
+if ! type "$FIND" > /dev/null 2>&1; then
 	printf "%s: $FIND: command not found\n" "$me" >&2; no_dep=1
-elif ! type ${MD5%% *} > /dev/null 2>&1; then
+elif ! type "${MD5%% *}" > /dev/null 2>&1; then
 	printf "%s: ${MD5%% *}: command not found\n" "$me" >&2; no_dep=1
 elif ! type sort > /dev/null 2>&1; then
 	printf "%s: sort: command not found\n" "$me" >&2; no_dep=1
-elif ! type $UNIQ > /dev/null 2>&1; then
+elif ! type "$UNIQ" > /dev/null 2>&1; then
 	printf "%s: $UNIQ: command not found\n" "$me" >&2; no_dep=1
 elif ! type xargs > /dev/null 2>&1; then
 	printf "%s: xargs: command not found\n" "$me" >&2; no_dep=1
 elif ! type sed > /dev/null 2>&1; then
 	printf "%s: sed: command not found\n" "$me" >&2; no_dep=1
-elif ! type ${STAT%% *} > /dev/null 2>&1; then
+elif ! type "${STAT%% *}" > /dev/null 2>&1; then
 	printf "%s: ${STAT%% *}: command not found\n" "$me" >&2; no_dep=1
 fi
 
