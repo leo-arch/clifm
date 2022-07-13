@@ -8,7 +8,8 @@
 # by MD5) in DIR (current directory if omitted) and allow the user to remove
 # one or more of them
 #
-# Dependencies: find md5sum sort uniq xargs sed stat
+# Dependencies:	find md5sum sort uniq xargs sed stat (on GNU/Linux)
+#		gfind md5 sort guniq xargs sed stat (on FreeBSD)
 #
 # Notes:
 # If the file size exceeds SIZE_DIGITS digits the file will be misplaced.
@@ -22,28 +23,41 @@
 
 me="clifm"
 
-#OS="$(uname)"
-#if [ "$OS" != "Linux" ]; then
-#	printf "%s: This plugin is for Linux only\n" "$me" >&2
-#	exit 1
-#fi
+OS="$(uname)"
+case "$OS" in
+Linux)
+	FIND=find
+	MD5=md5sum
+	UNIQ=uniq
+	STAT="stat -c %Y"
+	;;
+FreeBSD)
+	FIND=gfind
+	MD5="md5 -r"
+	UNIQ=guniq
+	STAT="stat -f %m"
+	;;
+*)
+	printf "%s: This plugin is not supported on $OS\n" "$me" >&2
+	exit 1
+esac
 
 no_dep=0
 
-if ! type find > /dev/null 2>&1; then
-	printf "%s: find: command not found\n" "$me" >&2; no_dep=1
-elif ! type md5sum > /dev/null 2>&1; then
-	printf "%s: md5sum: command not found\n" "$me" >&2; no_dep=1
+if ! type $FIND > /dev/null 2>&1; then
+	printf "%s: $FIND: command not found\n" "$me" >&2; no_dep=1
+elif ! type ${MD5%% *} > /dev/null 2>&1; then
+	printf "%s: ${MD5%% *}: command not found\n" "$me" >&2; no_dep=1
 elif ! type sort > /dev/null 2>&1; then
 	printf "%s: sort: command not found\n" "$me" >&2; no_dep=1
-elif ! type uniq > /dev/null 2>&1; then
-	printf "%s: uniq: command not found\n" "$me" >&2; no_dep=1
+elif ! type $UNIQ > /dev/null 2>&1; then
+	printf "%s: $UNIQ: command not found\n" "$me" >&2; no_dep=1
 elif ! type xargs > /dev/null 2>&1; then
 	printf "%s: xargs: command not found\n" "$me" >&2; no_dep=1
 elif ! type sed > /dev/null 2>&1; then
 	printf "%s: sed: command not found\n" "$me" >&2; no_dep=1
-elif ! type stat > /dev/null 2>&1; then
-	printf "%s: stat: command not found\n" "$me" >&2; no_dep=1
+elif ! type ${STAT%% *} > /dev/null 2>&1; then
+	printf "%s: ${STAT%% *}: command not found\n" "$me" >&2; no_dep=1
 fi
 
 [ "$no_dep" = 1 ] && exit 127
@@ -77,9 +91,9 @@ printf "\
 " > "$tmp_file"
 
 # shellcheck disable=SC2016
-find "$dir" -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | uniq -w"${size_digits}" -D \
-| sed -e 's/^ \{0,12\}\([0-9]\{0,12\}\) \(.*\)$/printf "%s %s\\n" "$(md5sum "\2")" "d\1"/' \
-| tr '\n' '\0' | xargs -0 -n1 -r sh -c | sort | { uniq -w32 --all-repeated=separate; echo; } \
+$FIND "$dir" -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | $UNIQ -w"${size_digits}" -D \
+| sed -e "s/^ \{0,12\}\([0-9]\{0,12\}\) \(.*\)\$/printf '%s %s\\\n' \"\$($MD5 '\2')\" 'd\1'/" \
+| tr '\n' '\0' | xargs -0 -n1 -r sh -c | sort | { $UNIQ -w32 --all-repeated=separate; echo; } \
 | sed -ne 'h
 s/^\(.\{32\}\).* d\([0-9]*\)$/## md5sum: \1 size: \2 bytes/p
 g
@@ -87,13 +101,13 @@ g
 N
 /.*\n$/!b loop
 p' \
-| sed -e 's/^.\{32\}  \(.*\) d[0-9]*$/\1/' >> "$tmp_file"
+| sed -e 's/^.\{32\} *\(.*\) d[0-9]*$/\1/' >> "$tmp_file"
 
-time_pre="$(stat -c '%Y' "$tmp_file")"
+time_pre="$($STAT "$tmp_file")"
 
 "$EDITOR" "$tmp_file"
 
-time_post="$(stat -c '%Y' "$tmp_file")"
+time_post="$($STAT "$tmp_file")"
 
 if [ "$time_pre" = "$time_post" ]; then
 	printf "%s: Nothing to do\n" "$me"
