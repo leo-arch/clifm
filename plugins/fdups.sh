@@ -9,8 +9,11 @@
 # one or more of them
 #
 # Dependencies:
-#       find md5sum sort uniq xargs sed stat (on GNU/Linux)
-#		gfind md5 sort guniq xargs sed stat (on FreeBSD)
+#	find md5sum sort uniq xargs sed stat (on GNU/Linux)
+#	gfind md5 sort guniq xargs sed stat (on FreeBSD/NetBSD/OpenBSD)
+#
+# On FreeBSD/NetBSD/OpenBSD you need to install both coreutils and findutils
+# packages (for guniq(1) and gfind(1) respectively)
 #
 # Notes:
 # If the file size exceeds SIZE_DIGITS digits the file will be misplaced.
@@ -33,9 +36,13 @@ Linux)
 	UNIQ="uniq"
 	STAT="stat -c %Y"
 	;;
-FreeBSD)
+FreeBSD|NetBSD|OpenBSD)
 	FIND="gfind"
-	MD5="md5 -r"
+	if [ "$OS" = "NetBSD" ]; then
+		MD5="md5 -n"
+	else
+		MD5="md5 -r"
+	fi
 	UNIQ="guniq"
 	STAT="stat -f %m"
 	;;
