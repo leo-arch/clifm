@@ -1076,6 +1076,18 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	} else if (cur_comp_type == TCMP_TAGS_T) {
 		char *sp = strrchr(rl_line_buffer,  ' ');
 		finder_offset = prompt_offset + (int)(sp - rl_line_buffer);
+	} else if (cur_comp_type == TCMP_GLOB) {
+		char *sl = strrchr(rl_line_buffer, '/');
+		char *sp = strrchr(rl_line_buffer, ' ');
+		if (!sl) {
+			if (sp)
+				finder_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
+		} else {
+			if (sp && sp > sl)
+				finder_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
+			else
+				finder_offset = prompt_offset + (int)(sl - rl_line_buffer) - 2;
+		}
 	}
 
 	if (finder_offset < 0)
