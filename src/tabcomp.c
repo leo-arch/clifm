@@ -327,6 +327,11 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		size_t blen = strlen(buf);
 		if (blen > 0 && buf[blen - 1] == '/')
 			buf[blen - 1] = '\0';
+		if (*rl_line_buffer == '/' && rl_end > 0
+		&& !strchr(rl_line_buffer + 1, '/') && !strchr(rl_line_buffer + 1, ' ')) {
+			rl_delete_text(0, rl_end);
+			rl_end = rl_point = 0;
+		}
 	}
 
 	if (cur_comp_type == TCMP_ENVIRON || cur_comp_type == TCMP_USERS)
