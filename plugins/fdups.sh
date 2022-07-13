@@ -10,10 +10,10 @@
 #
 # Dependencies:
 #	find md5sum sort uniq xargs sed stat (on GNU/Linux)
-#	gfind md5 sort guniq xargs sed stat (on FreeBSD/NetBSD/OpenBSD)
+#	gfind md5 sort guniq xargs sed stat (on FreeBSD/NetBSD/OpenBSD/MacOS)
 #
-# On FreeBSD/NetBSD/OpenBSD you need to install both coreutils and findutils
-# packages (for guniq(1) and gfind(1) respectively)
+# On FreeBSD/NetBSD/OpenBSD/MacOS you need to install both coreutils (for guniq)
+# and findutils (for gfind)
 #
 # Notes:
 # If the file size exceeds SIZE_DIGITS digits the file will be misplaced.
@@ -36,7 +36,7 @@ Linux)
 	UNIQ="uniq"
 	STAT="stat -c %Y"
 	;;
-FreeBSD|NetBSD|OpenBSD)
+FreeBSD|NetBSD|OpenBSD|Darwin)
 	FIND="gfind"
 	if [ "$OS" = "NetBSD" ]; then
 		MD5="md5 -n"
@@ -54,19 +54,19 @@ esac
 no_dep=0
 
 if ! type "$FIND" > /dev/null 2>&1; then
-	printf "%s: $FIND: command not found\n" "$me" >&2; no_dep=1
+	printf "%s: %s: command not found\n" "$me" "$FIND" >&2; no_dep=1
 elif ! type "${MD5%% *}" > /dev/null 2>&1; then
-	printf "%s: ${MD5%% *}: command not found\n" "$me" >&2; no_dep=1
+	printf "%s: %s: command not found\n" "$me" "${MD5%% *}" >&2; no_dep=1
 elif ! type sort > /dev/null 2>&1; then
 	printf "%s: sort: command not found\n" "$me" >&2; no_dep=1
 elif ! type "$UNIQ" > /dev/null 2>&1; then
-	printf "%s: $UNIQ: command not found\n" "$me" >&2; no_dep=1
+	printf "%s: %s: command not found\n" "$me" "$UNIQ" >&2; no_dep=1
 elif ! type xargs > /dev/null 2>&1; then
 	printf "%s: xargs: command not found\n" "$me" >&2; no_dep=1
 elif ! type sed > /dev/null 2>&1; then
 	printf "%s: sed: command not found\n" "$me" >&2; no_dep=1
 elif ! type "${STAT%% *}" > /dev/null 2>&1; then
-	printf "%s: ${STAT%% *}: command not found\n" "$me" >&2; no_dep=1
+	printf "%s: %s: command not found\n" "$me" "${STAT%% *}" >&2; no_dep=1
 fi
 
 [ "$no_dep" = 1 ] && exit 127
