@@ -1563,7 +1563,7 @@ AFTER_USUAL_COMPLETION:
 		&& (cur_comp_type != TCMP_FILE_TYPES_FILES || !matches[1])
 		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
-		&& (cur_comp_type != TCMP_SEL || !fzftab || sel_n == 1)
+		&& (cur_comp_type != TCMP_SEL || fzftab != 1 || sel_n == 1)
 
 		&& (cur_comp_type != TCMP_BM_PATHS || !matches[1])
 
@@ -1730,7 +1730,7 @@ AFTER_USUAL_COMPLETION:
 
 DISPLAY_MATCHES:
 #ifndef _NO_FZF
-		if (!fzftab) {
+		if (fzftab != 1) {
 #endif /* !_NO_FZF */
 		{
 			max = 0;
