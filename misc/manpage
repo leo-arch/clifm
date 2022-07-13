@@ -465,11 +465,13 @@ this is the quick search function. Just type \fI/\fR followed by a glob or regul
 .sp
 \fBNote\fR: By default, the search function attempts to resolve a pattern first as glob, and if no matches, as regular expression. This behavior can be customizad in the configuration file, via the \fISearchStrategy\fR option.
 .sp
+\fBNote 2\fR: If no further parameter is provided, but only a glob pattern (wildcards), you can expand the pattern into the corresponding matches via the TAB key. For example, to list all C files in the current directory: \fI/*.c\fR<TAB>.
+.sp
 Expressions containing no pattern metacharacter are automatically transformed into a glob/regular expression (depending on the value of the \fISearchStrategy\fR option). For example, \fI/test\fR becomes \fI*test*\fR or \fI/.*test.*\fR.
 .sp
 By default, regular expressions are case insensitive (glob expressions, by contrast, are always case sensitive). However, you can enable case sensitive search by setting the \fICaseSensitiveSearch\fR option to true in the configuration file.
 .sp
-To search for files in any directory other than the current directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter \fI/^A\ 7\fR to search for all files starting with 'A' in the directory corresponding to the ELN 7.
+To search for files in any directory other than the current directory, specify the directory name as a further parameter. This parameter (DIR) could be an absolute path, a relative path, or an ELN. For example, enter \fI/^A\ 7\fR to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
 The result of the search could be further filtered by specifying a filter type: \-b, \-c, \-d, \-f, \-l, \-p, and \-s (block device, character device, directory, regular file, symbolic link, FIFO/pipe, and socket respectively. For example, \fI/[.-].*d$\ \-d Documents/\fR will list all directories containing a dot or a dash and ending with 'd' in the directory named \fIDocuments\fR.
 .sp
