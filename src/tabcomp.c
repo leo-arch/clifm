@@ -493,9 +493,9 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				finder_in_file, finder_out_file);
 	} else if (tabmode == SMENU_TAB) {
 		snprintf(cmd, sizeof(cmd), "smenu %s "
-				"-t -d -n%zu %s < %s > %s",
+				"-t -d -n%zu -limits l:%d -W$'\n' %s < %s > %s",
 				smenutab_options_env ? smenutab_options_env : DEF_SMENU_OPTIONS,
-				*height, multi ? "-P$'\n'" : "",
+				*height, PATH_MAX, multi ? "-P$'\n'" : "",
 				finder_in_file, finder_out_file);
 	} else {
 		snprintf(cmd, sizeof(cmd), "fzf %s "
