@@ -206,7 +206,7 @@ write_msg_into_logfile(const char *_msg)
  * have the following format:
  * "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
 void
-log_msg(char *_msg, int print_prompt, int logme)
+log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 {
 	if (!_msg)
 		return;
@@ -215,18 +215,18 @@ log_msg(char *_msg, int print_prompt, int logme)
 	if (msg_len == 0)
 		return;
 
-	/* Store messages (for current session only) in an array, so that
-	 * the user can check them via the 'msg' command */
-	msgs_n++;
-	messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1) * sizeof(char *));
-	messages[msgs_n - 1] = savestring(_msg, msg_len);
-	messages[msgs_n] = (char *)NULL;
+	if (add_to_msgs_list == 1) {
+		/* Store messages (for current session only) in an array, so that
+		 * the user can check them via the 'msg' command */
+		msgs_n++;
+		messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1) * sizeof(char *));
+		messages[msgs_n - 1] = savestring(_msg, msg_len);
+		messages[msgs_n] = (char *)NULL;
+	}
 
-	if (print_prompt) /* PRINT_PROMPT */
-		/* The next prompt will take care of printing the message */
+	if (print_prompt) /* The next prompt will take care of printing the message */
 		print_msg = 1;
-	else /* NOPRINT_PROMPT */
-		/* Print the message directly here */
+	else /* Print the message directly here */
 		fputs(_msg, stderr);
 
 	/* If the config dir cannot be found or if msg log file isn't set

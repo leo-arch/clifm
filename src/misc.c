@@ -151,7 +151,7 @@ send_desktop_notification(char *msg)
  * latter that no message mark (E, W, or N) will be added to the prompt).
  * 'f' means that the message must be printed forcefully, even if identical
  * to the previous one, without printing any message mark.
- * PROMPT tells whether to print the message immediately before the
+ * PROMPT tells whether to print the message immediately before the next
  * prompt or rather in place.
  * Based on littlstar's xasprintf implementation:
  * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
@@ -159,7 +159,7 @@ __attribute__((__format__(__printf__, 3, 0)))
 /* We use __attribute__ here to silence clang warning: "format string is
  * not a string literal" */
 int
-_err(int msg_type, int prompt, const char *format, ...)
+_err(int msg_type, int prompt_flag, const char *format, ...)
 {
 	va_list arglist, tmp_list;
 
@@ -192,7 +192,13 @@ _err(int msg_type, int prompt, const char *format, ...)
 		}
 
 		int logme = (msg_type == -1 || msg_type == 'n') ? 0 : 1;
-		log_msg(buf, (prompt == 1) ? PRINT_PROMPT : NOPRINT_PROMPT, logme);
+		int add_to_msgs_list = 1;
+		if (msg_type == -2) {
+			add_to_msgs_list = 0;
+			logme = 1;
+//			prompt_flag = NOPRINT_PROMPT;
+		}
+		log_msg(buf, prompt_flag, logme, add_to_msgs_list);
 /*		if (prompt == 1)
 			send_desktop_notification(buf); */
 		free(buf);

@@ -163,7 +163,7 @@ bookmark_del(char *name)
 	free(line);
 	line = (char *)NULL;
 
-	if (!bmn) {
+	if (bmn == 0) {
 		puts(_("bookmarks: There are no bookmarks"));
 		fclose(bm_fp);
 		return EXIT_SUCCESS;
@@ -224,8 +224,7 @@ bookmark_del(char *name)
 		printf(_("\n%sEnter '%c' to quit.\n"), df_c, 'q');
 		char *input = (char *)NULL;
 		while (!input)
-			input = rl_no_hist(_("Bookmark(s) to be deleted "
-								"(ex: 1 2-6, or *): "));
+			input = rl_no_hist(_("Bookmark(s) to be deleted (ex: 1 2-6, or *): "));
 		del_elements = get_substr(input, ' ');
 		free(input);
 		input = (char *)NULL;
@@ -420,8 +419,7 @@ bookmark_add(char *file)
 				tmp_line[tmp_line_len - 1] = '\0';
 
 			if (strcmp(tmp_line, file) == 0) {
-				fprintf(stderr, _("bookmarks: %s: Path already "
-						  "bookmarked\n"), file);
+				fprintf(stderr, _("bookmarks: %s: Path already bookmarked\n"), file);
 				dup = 1;
 				break;
 			}
@@ -466,7 +464,7 @@ bookmark_add(char *file)
 			if (tmp_line) {
 				if (strcmp(hk, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: %s: This shortcut is "
-							  "already in use\n"), hk);
+						"already in use\n"), hk);
 					dup = 1;
 					free(tmp_line);
 					break;
@@ -498,7 +496,7 @@ bookmark_add(char *file)
 			if (tmp_line) {
 				if (strcmp(name, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: %s: This name is "
-							"already in use\n"), name);
+						"already in use\n"), name);
 					dup = 1;
 					free(tmp_line);
 					break;
@@ -604,7 +602,10 @@ edit_bookmarks(char *cmd, const int flag)
 	}
 
 	if (exit_status != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: Cannot open the bookmarks file\n"), PROGRAM_NAME);
+		if (cmd)
+			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME, cmd, strerror(errno));
+		else
+			fprintf(stderr, _("%s: Error opening the bookmarks file\n"), PROGRAM_NAME);
 		return exit_status;
 	}
 
