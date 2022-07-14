@@ -92,6 +92,59 @@ set_eln_color(void)
 	}
 }
 
+/* Let's send a desktop notification via notify-send(1) */
+/*
+static void
+send_desktop_noti(char *msg)
+{
+#if defined(__APPLE__)
+	UNUSED(msg);
+	return;
+#endif
+
+	if (!msg || !*msg || !(flags & GUI))
+		return;
+
+	char type[12];
+	switch(pmsg) {
+#if defined(__HAIKU__)
+	case ERROR: snprintf(type, sizeof(type), "error"); break;
+	case WARNING: snprintf(type, sizeof(type), "important"); break;
+	case NOTICE: snprintf(type, sizeof(type), "information"); break;
+	default: snprintf(type, sizeof(type), "information"); break;
+#else
+	case ERROR: snprintf(type, sizeof(type), "critical"); break;
+	case WARNING: snprintf(type, sizeof(type), "normal"); break;
+	case NOTICE: snprintf(type, sizeof(type), "low"); break;
+	default: snprintf(type, sizeof(type), "low"); break;
+#endif
+	}
+
+	size_t mlen = strlen(msg);
+	if (mlen > 0 && msg[mlen - 1] == '\n') {
+		msg[mlen - 1] = '\0';
+		mlen--;
+	}
+
+	// Most messages are written in the form PROGRA_NAME: MSG. We only
+	// want the MSG part
+	char name[NAME_MAX];
+	snprintf(name, sizeof(name), "%s: ", PROGRAM_NAME);
+	char *p = msg;
+	char *q = strstr(msg, name);
+	size_t nlen = q ? strlen(name) : 0;
+	if (q && mlen > nlen)
+		p = msg + nlen;
+
+#if defined(__HAIKU__)
+	char *cmd[] = {"notify", "--type", type, "--title", PROGRAM_NAME, p, NULL};
+	launch_execve(cmd, FOREGROUND, E_MUTE);
+#else
+	char *cmd[] = {"notify-send", "-u", type, PROGRAM_NAME, p, NULL};
+	launch_execve(cmd, FOREGROUND, E_MUTE);
+#endif
+} */
+
 /* Custom POSIX implementation of GNU asprintf() modified to log program
  * messages. MSG_TYPE is one of: 'e', 'f', 'w', 'n', or zero (meaning this
  * latter that no message mark (E, W, or N) will be added to the prompt).
@@ -138,6 +191,7 @@ _err(int msg_type, int prompt, const char *format, ...)
 		}
 
 		log_msg(buf, (prompt == 1) ? PRINT_PROMPT : NOPRINT_PROMPT);
+/*		send_desktop_noti(buf); */
 		free(buf);
 		return EXIT_SUCCESS;
 	}

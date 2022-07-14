@@ -27,6 +27,9 @@
 
 #include <sys/stat.h>
 
+#ifndef _NO_FZF
+void check_completion_mode(void);
+#endif
 void check_file_size(char *log_file, int max);
 int check_file_access(const struct stat *file);
 char **check_for_alias(char **cmd);

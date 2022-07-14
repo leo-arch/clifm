@@ -173,14 +173,53 @@ set_mount_cmd(const int udisks2ok, const int udevilok)
 		xargs.mount_cmd = UNSET;
 }
 
-/* Let's check for third-party programs
- * fzf, fzy, and smenu are used as alternative TAB completion mechanisms
+#ifndef _NO_FZF
+/* fzf, fzy, and smenu are used as alternative TAB completion mechanisms
  * fzy and smenu fallback to default if not found
  * the default value is fzf, if found, or standard (readline) */
 void
+check_completion_mode(void)
+{
+	if (fzftab == 1) { // fzftab is zero only if running with --stdtab
+		if (!(finder_flags & FZF_BIN_OK) && tabmode == FZF_TAB) {
+			_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling back to "
+				"standard TAB completion\n"), PROGRAM_NAME);
+			tabmode = STD_TAB;
+			fzftab = 0;
+		}
+
+		if (!(finder_flags & FZY_BIN_OK) && tabmode == FZY_TAB) {
+			_err('w', PRINT_PROMPT, _("%s: fzy: Command not found. Falling back to the "
+				"default value (fzf, if found, or standard)\n"), PROGRAM_NAME);
+			tabmode = (finder_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
+		} else if (!(finder_flags & SMENU_BIN_OK) && tabmode == SMENU_TAB) {
+			_err('w', PRINT_PROMPT, _("%s: smenu: Command not found. Falling back to the "
+				"default value (fzf, if found, or standard)\n"), PROGRAM_NAME);
+			tabmode = (finder_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
+		}
+
+		if (tabmode == STD_TAB) {
+			if (finder_flags & FZF_BIN_OK) /* We have the fzf binary, let's run in FZF mode */
+				tabmode = FZF_TAB;
+			else /* Either specified mode was not found or no mode was specified */
+				fzftab = 0;
+		}
+	} else {
+/*		_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling back to "
+			"standard TAB completion.\nTo remove this warning set "
+			"TabCompletionMode to the appropriate value in the configuration "
+			"file (F10 or 'edit')\n"), PROGRAM_NAME); */
+		tabmode = STD_TAB;
+		fzftab = 0;
+	}
+}
+#endif /* !_NO_FZF */
+
+/* Let's check for third-party programs */
+void
 check_third_party_cmds(void)
 {
-	int udisks2ok = 0, udevilok = 0, fzfok = 0, fzyok = 0, smenuok = 0;
+	int udisks2ok = 0, udevilok = 0;
 	int i = (int)path_progsn;
 
 	while (--i >= 0) {
@@ -188,28 +227,21 @@ check_third_party_cmds(void)
 			continue;
 
 		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzf") == 0) {
-			fzfok = 1;
-			flags |= FZF_BIN_OK;
+			finder_flags |= FZF_BIN_OK;
 			if (fzftab == UNSET)
 				fzftab = 1;
 		}
 
-		switch(tabmode) {
-		case FZY_TAB:
-			if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzy") == 0) {
-				fzyok = 1;
-				if (fzftab == UNSET)
-					fzftab = 1;
-			}
-			break;
-		case SMENU_TAB:
-			if (*bin_commands[i] == 's' && strcmp(bin_commands[i], "smenu") == 0) {
-				smenuok = 1;
-				if (fzftab == UNSET)
-					fzftab = 1;
-			}
-			break;
-		default: break;
+		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzy") == 0) {
+			finder_flags |= FZY_BIN_OK;
+			if (fzftab == UNSET)
+				fzftab = 1;
+		}
+
+		if (*bin_commands[i] == 's' && strcmp(bin_commands[i], "smenu") == 0) {
+			finder_flags |= SMENU_BIN_OK;
+			if (fzftab == UNSET)
+				fzftab = 1;
 		}
 
 		if (*bin_commands[i] == 'u' && strcmp(bin_commands[i], "udisksctl") == 0)
@@ -217,28 +249,9 @@ check_third_party_cmds(void)
 		if (*bin_commands[i] == 'u' && strcmp(bin_commands[i], "udevil") == 0)
 			udevilok = 1;
 
-		if (udevilok == 1 && udisks2ok == 1 && fzfok == 1 && fzyok == 1 && smenuok == 1)
+		if (udevilok == 1 && udisks2ok == 1
+		&& (finder_flags & (FZF_BIN_OK | FZY_BIN_OK | SMENU_BIN_OK)))
 			break;
-	}
-
-	if (fzftab == 1) {
-		if (fzfok == 0) {
-			if (tabmode == FZF_TAB) {
-				_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling back to "
-					"standard TAB completion\n"), PROGRAM_NAME);
-				tabmode = STD_TAB;
-			}
-			fzftab = 0;
-		}
-		if (tabmode == FZY_TAB && fzyok == 0) {
-			_err('w', PRINT_PROMPT, _("%s: fzy: Command not found. Falling back to "
-				"default (fzf, if found, or standard)\n"), PROGRAM_NAME);
-			tabmode = fzfok == 1 ? FZF_TAB : STD_TAB;
-		} else if (tabmode == SMENU_TAB && smenuok == 0) {
-			_err('w', PRINT_PROMPT, _("%s: smenu: Command not found. Falling back to "
-				"default (fzf, if found, or standard)\n"), PROGRAM_NAME);
-			tabmode = fzfok == 1 ? FZF_TAB : STD_TAB;
-		}
 	}
 
 	set_mount_cmd(udisks2ok, udevilok);

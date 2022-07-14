@@ -189,21 +189,25 @@ extern int watch;
 #define ROOT_USR      (1 << 2)
 #define GUI           (1 << 3)
 #define IS_USRVAR_DEF (1 << 4)
-#define FZF_BIN_OK    (1 << 5)
 
 /* Used by the refresh on resize feature */
-#define DELAYED_REFRESH    (1 << 6)
-#define PATH_PROGRAMS_ALREADY_LOADED (1 << 7)
+#define DELAYED_REFRESH    (1 << 5)
+#define PATH_PROGRAMS_ALREADY_LOADED (1 << 6)
 
-#define FIRST_WORD_IS_ELN   (1 << 8)
-#define IN_BOOKMARKS_SCREEN (1 << 9)
-#define STATE_COMPLETING    (1 << 10)
+#define FIRST_WORD_IS_ELN   (1 << 7)
+#define IN_BOOKMARKS_SCREEN (1 << 8)
+#define STATE_COMPLETING    (1 << 9)
 /* Instead of completion the current word, a BAEJ suggestion points to
  * a possible completion as follows: WORD > COMPLETION */
-#define BAEJ_SUGGESTION     (1 << 11)
-#define STATE_SUGGESTING    (1 << 12)
-#define IN_SELBOX_SCREEN    (1 << 13)
-#define MULTI_SEL           (1 << 14)
+#define BAEJ_SUGGESTION     (1 << 10)
+#define STATE_SUGGESTING    (1 << 11)
+#define IN_SELBOX_SCREEN    (1 << 12)
+#define MULTI_SEL           (1 << 13)
+
+/* Flags for finder binaries */
+#define FZF_BIN_OK    (1 << 0)
+#define FZY_BIN_OK    (1 << 1)
+#define SMENU_BIN_OK  (1 << 2)
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)
@@ -957,6 +961,7 @@ extern int
 	curcol,
 	currow,
 	flags,
+	finder_flags,
 	search_flags;
 
 extern int

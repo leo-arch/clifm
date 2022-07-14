@@ -108,6 +108,7 @@ unsigned short term_cols;
 int curcol = 0,
 	currow = 0,
 	flags = 0,
+	finder_flags = 0,
 	search_flags = 0;
 
 struct termios
@@ -1008,6 +1009,10 @@ main(int argc, char *argv[])
 	check_cpu_os(); /* Running on supported CPU and operating system? */
 	check_term(); /* Running on a supported terminal */
 
+/*	_err('e', PRINT_PROMPT, "%s\n", PROGRAM_NAME);
+	_err('w', PRINT_PROMPT, "%s:\n", PROGRAM_NAME);
+	_err('n', PRINT_PROMPT, "%s: caca\n", PROGRAM_NAME);
+	_err('n', PRINT_PROMPT, "caca\n"); */
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
 	/* If running the program locally, that is, not from a path in PATH,
@@ -1084,8 +1089,11 @@ main(int argc, char *argv[])
 	if (!(flags & PATH_PROGRAMS_ALREADY_LOADED))
 		get_path_programs();
 
-	/* Check third-party programs availability: FZF, udevil, and udisks2 */
+	/* Check third-party programs availability: finders (fzf, fzy, smenu), udevil, and udisks2 */
 	check_third_party_cmds();
+#ifndef _NO_FZF
+	check_completion_mode();
+#endif /* _NO_FZF */
 
 	/* Initialize gettext() for translations */
 #ifndef _NO_GETTEXT

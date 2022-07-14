@@ -2152,15 +2152,13 @@ read_config(void)
 			if (ret == -1)
 				continue;
 			if (strncmp(opt_str, "standard", 8) == 0) {
-				fzftab = 0;
+				fzftab = 0; tabmode = STD_TAB;
 			} else if (strncmp(opt_str, "fzf", 3) == 0) {
 				fzftab = 1; tabmode = FZF_TAB;
 			} else if (strncmp(opt_str, "fzy", 3) == 0) {
 				fzftab = 1; tabmode = FZY_TAB;
-			} else {
-				if (strncmp(opt_str, "smenu", 5) == 0) {
-					fzftab = 1; tabmode = SMENU_TAB;
-				}
+			} else if (strncmp(opt_str, "smenu", 5) == 0) {
+				fzftab = 1; tabmode = SMENU_TAB;
 			}
 		}
 #endif /* !_NO_FZF */
@@ -2721,9 +2719,40 @@ check_cmd_line_options(void)
 		welcome_message = xargs.welcome_message;
 }
 
+#ifndef _NO_FZF
+static void
+update_finder_binaries_status(void)
+{
+	char *p = (char *)NULL;
+	if (!(finder_flags & FZF_BIN_OK)) {
+		if ((p = get_cmd_path("fzf"))) {
+			free(p);
+			finder_flags |= FZF_BIN_OK;
+		}
+	}
+
+	if (!(finder_flags & FZY_BIN_OK)) {
+		if ((p = get_cmd_path("fzy"))) {
+			free(p);
+			finder_flags |= FZY_BIN_OK;
+		}
+	}
+
+	if (!(finder_flags & SMENU_BIN_OK)) {
+		if ((p = get_cmd_path("smenu"))) {
+			free(p);
+			finder_flags |= SMENU_BIN_OK;
+		}
+	}
+}
+#endif /* !_NO_FZF */
+
 int
 reload_config(void)
 {
+#ifndef _NO_FZF
+	enum tab_mode tabmode_bk = tabmode;
+#endif /* !_NO_FZF */
 	reset_variables();
 
 	/* Set up config files and options */
@@ -2736,6 +2765,12 @@ reload_config(void)
 
 	/* If some option was set via command line, keep that value for any profile */
 	check_cmd_line_options();
+
+#ifndef _NO_FZF
+	if (tabmode_bk != tabmode)
+		update_finder_binaries_status();
+	check_completion_mode();
+#endif /* !_NO_FZF */
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
 	int i = dirhist_total_index;
