@@ -1599,7 +1599,7 @@ RUN:
 #else */
 		case 43:
 #ifndef _NO_FZF
-			xargs.fzftab = 0; tabmode = STD_TAB;
+			xargs.fzftab = 0;
 #endif /* !_NO_FZF */
 			fzftab = 0; tabmode = STD_TAB;
 			break;
