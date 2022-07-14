@@ -372,8 +372,7 @@ static inline char *
 gen_non_print_sequence(const int c)
 {
 	char *temp = (char *)xnmalloc(2, sizeof(char));
-	*temp = (c == '[') ? RL_PROMPT_START_IGNORE
-			: RL_PROMPT_END_IGNORE;
+	*temp = (c == '[') ? RL_PROMPT_START_IGNORE : RL_PROMPT_END_IGNORE;
 	temp[1] = '\0';
 
 	return temp;
@@ -927,6 +926,7 @@ initialize_prompt_data(void)
 #endif
 
 	/* Print error messages */
+//	if ((!(flags & GUI) || desktop_notis != 1) && print_msg == 1 && msgs_n > 0) {
 	if (print_msg == 1 && msgs_n > 0) {
 		fputs(messages[msgs_n - 1], stderr);
 		print_msg = 0; /* Print messages only once */

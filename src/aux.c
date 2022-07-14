@@ -1002,7 +1002,7 @@ xrealloc(void *ptr, size_t size)
 
 	if (!p) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-				PROGRAM_NAME, __func__, size);
+			PROGRAM_NAME, __func__, size);
 		exit(ENOMEM);
 	}
 
@@ -1016,7 +1016,7 @@ xcalloc(size_t nmemb, size_t size)
 
 	if (!p) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-				PROGRAM_NAME, __func__, nmemb * size);
+			PROGRAM_NAME, __func__, nmemb * size);
 		exit(ENOMEM);
 	}
 
@@ -1030,7 +1030,7 @@ xnmalloc(size_t nmemb, size_t size)
 
 	if (!p) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-				PROGRAM_NAME, __func__, nmemb * size);
+			PROGRAM_NAME, __func__, nmemb * size);
 		exit(ENOMEM);
 	}
 

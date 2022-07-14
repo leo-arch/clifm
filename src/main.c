@@ -150,6 +150,9 @@ int
 	cp_cmd = UNSET,
 	cur_ws = UNSET,
 	dequoted = 0,
+
+//	desktop_notis = 1,
+
 	dir_changed = 0,
 	dirhist_map = UNSET,
 	disk_usage = UNSET,
@@ -875,7 +878,7 @@ static inline void
 set_root_indicator(void)
 {
 	if (flags & ROOT_USR) {
-		_err(0, PRINT_PROMPT, _("%s->%s Running as root%s\n"),
+		_err(-1, PRINT_PROMPT, _("%s->%s Running as root%s\n"),
 			colorize ? mi_c : "", colorize ? _RED : "", colorize ? df_c : "");
 	}
 }
@@ -936,7 +939,7 @@ check_working_directory(void)
 {
 	if (workspaces == (struct ws_t *)NULL || !workspaces[cur_ws].path
 	|| !*workspaces[cur_ws].path) {
-		_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
+		_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
 			"retrieving current working directory\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
@@ -1009,10 +1012,6 @@ main(int argc, char *argv[])
 	check_cpu_os(); /* Running on supported CPU and operating system? */
 	check_term(); /* Running on a supported terminal */
 
-/*	_err('e', PRINT_PROMPT, "%s\n", PROGRAM_NAME);
-	_err('w', PRINT_PROMPT, "%s:\n", PROGRAM_NAME);
-	_err('n', PRINT_PROMPT, "%s: caca\n", PROGRAM_NAME);
-	_err('n', PRINT_PROMPT, "caca\n"); */
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
 	/* If running the program locally, that is, not from a path in PATH,

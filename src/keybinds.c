@@ -871,9 +871,9 @@ rl_light(int count, int key)
 	light_mode = light_mode == 1 ? 0 : 1;
 
 	if (light_mode == 1)
-		_err(0, PRINT_PROMPT, _("%s->%s Switched to light mode\n"), mi_c, df_c);
+		_err(-1, PRINT_PROMPT, _("%s->%s Switched to light mode\n"), mi_c, df_c);
 	else
-		_err(0, PRINT_PROMPT, _("%s->%s Switched back to normal mode\n"), mi_c, df_c);
+		_err(-1, PRINT_PROMPT, _("%s->%s Switched back to normal mode\n"), mi_c, df_c);
 
 	if (autols == 1)
 		run_kb_cmd("rf");

@@ -95,14 +95,15 @@ set_eln_color(void)
 /* Let's send a desktop notification via notify-send(1) */
 /*
 static void
-send_desktop_noti(char *msg)
+send_desktop_notification(char *msg)
 {
 #if defined(__APPLE__)
 	UNUSED(msg);
 	return;
 #endif
 
-	if (!msg || !*msg || !(flags & GUI))
+//	if (!msg || !*msg || !(flags & GUI) || desktop_notis != 1)
+	if (!msg || !*msg || desktop_notis != 1)
 		return;
 
 	char type[12];
@@ -126,7 +127,7 @@ send_desktop_noti(char *msg)
 		mlen--;
 	}
 
-	// Most messages are written in the form PROGRA_NAME: MSG. We only
+	// Most messages are written in the form PROGRAM_NAME: MSG. We only
 	// want the MSG part
 	char name[NAME_MAX];
 	snprintf(name, sizeof(name), "%s: ", PROGRAM_NAME);
@@ -177,21 +178,23 @@ _err(int msg_type, int prompt, const char *format, ...)
 	va_end(arglist);
 
 	/* If the new message is the same as the last message, skip it */
-	if (msgs_n && msg_type != 'f' && strcmp(messages[msgs_n - 1], buf) == 0)
+	if (msgs_n > 0 && msg_type != 'f' && strcmp(messages[msgs_n - 1], buf) == 0)
 		{free(buf); return EXIT_SUCCESS;}
 
 	if (buf) {
-		if (msg_type) {
+		if (msg_type > 0) {
 			switch (msg_type) {
 			case 'e': pmsg = ERROR; msgs.error++; break;
 			case 'w': pmsg = WARNING; msgs.warning++; break;
 			case 'n': pmsg = NOTICE; msgs.notice++; break;
-			default: pmsg = NOMSG;
+			default: pmsg = NOMSG; break;
 			}
 		}
 
-		log_msg(buf, (prompt == 1) ? PRINT_PROMPT : NOPRINT_PROMPT);
-/*		send_desktop_noti(buf); */
+		int logme = (msg_type == -1 || msg_type == 'n') ? 0 : 1;
+		log_msg(buf, (prompt == 1) ? PRINT_PROMPT : NOPRINT_PROMPT, logme);
+/*		if (prompt == 1)
+			send_desktop_notification(buf); */
 		free(buf);
 		return EXIT_SUCCESS;
 	}

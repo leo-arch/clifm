@@ -61,45 +61,47 @@ print_logs(void)
 	return EXIT_SUCCESS;
 }
 
-/* Log COMM into LOG_FILE (global) */
+/* Log CMD into LOG_FILE (global) */
 int
-log_function(char **comm)
+log_function(char **cmd)
 {
+	if (xargs.stealth_mode == 1)
+		return EXIT_SUCCESS;
+
 	/* If cmd logs are disabled, allow only "log" commands */
-	if (!logs_enabled) {
-		if (comm && comm[0] && strcmp(comm[0], "log") != 0)
+	if (logs_enabled == 0) {
+		if (cmd && cmd[0] && strcmp(cmd[0], "log") != 0)
 			return EXIT_SUCCESS;
 	}
 
-	if (!config_ok)
+	if (config_ok == 0 || !log_file)
 		return EXIT_FAILURE;
 
 	int clear_log = 0;
 
 	/* If the command was just 'log' */
-	if (comm && comm[0] && *comm[0] == 'l' && strcmp(comm[0], "log") == 0 && !comm[1])
+	if (cmd && cmd[0] && *cmd[0] == 'l' && strcmp(cmd[0], "log") == 0 && !cmd[1])
 		return print_logs();
 
-	else if (comm && comm[0] && *comm[0] == 'l' && strcmp(comm[0], "log") == 0
-	&& comm[1]) {
-		if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0)
+	else if (cmd && cmd[0] && *cmd[0] == 'l' && strcmp(cmd[0], "log") == 0
+	&& cmd[1]) {
+		if (*cmd[1] == 'c' && strcmp(cmd[1], "clear") == 0) {
 			clear_log = 1;
-		else if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
-			printf(_("Logs %s\n"), (logs_enabled) ? _("enabled")
-							      : _("disabled"));
+		} else if (*cmd[1] == 's' && strcmp(cmd[1], "status") == 0) {
+			printf(_("Logs %s\n"), (logs_enabled) ? _("enabled") : _("disabled"));
 			return EXIT_SUCCESS;
-		} else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
-			if (logs_enabled) {
+		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "on") == 0) {
+			if (logs_enabled == 1) {
 				puts(_("Logs already enabled"));
 			} else {
 				logs_enabled = 1;
 				puts(_("Logs successfully enabled"));
 			}
 			return EXIT_SUCCESS;
-		} else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "off") == 0) {
 			/* If logs were already disabled, just exit. Otherwise, log
 			 * the "log off" command */
-			if (!logs_enabled) {
+			if (logs_enabled == 0) {
 				puts(_("Logs already disabled"));
 				return EXIT_SUCCESS;
 			} else {
@@ -111,10 +113,10 @@ log_function(char **comm)
 
 	/* Construct the log line */
 	if (!last_cmd) {
-		if (!logs_enabled) {
+		if (logs_enabled == 0) {
 			/* When cmd logs are disabled, "log clear" and "log off" are
 			 * the only commands that can reach this code */
-			if (clear_log) {
+			if (clear_log == 1) {
 				last_cmd = (char *)xnmalloc(10, sizeof(char));
 				strcpy(last_cmd, "log clear");
 			} else {
@@ -131,12 +133,14 @@ log_function(char **comm)
 	}
 
 	char *date = get_date();
-	size_t log_len = strlen(date) + strlen(workspaces[cur_ws].path)
-					+ strlen(last_cmd) + 6;
-	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
 
-	snprintf(full_log, log_len, "[%s] %s:%s\n", date,
-			workspaces[cur_ws].path, last_cmd);
+	size_t log_len = strlen(date)
+		+ (workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 2)
+		+ strlen(last_cmd) + 8;
+
+	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
+	snprintf(full_log, log_len, "C:[%s] %s:%s\n", date,
+		workspaces[cur_ws].path ? workspaces[cur_ws].path : "?", last_cmd);
 
 	free(date);
 	free(last_cmd);
@@ -146,16 +150,14 @@ log_function(char **comm)
 	FILE *log_fp;
 	/* If not 'log clear', append the log to the existing logs */
 
-	if (!clear_log)
+	if (clear_log == 0)
 		log_fp = fopen(log_file, "a");
-	else
-	/* Else, overwrite the log file leaving only the 'log clear'
-	 * command */
+	else /* Else, overwrite the log file leaving only the 'log clear' command */
 		log_fp = fopen(log_file, "w+");
 
 	if (!log_fp) {
 		_err('e', PRINT_PROMPT, "%s: log: '%s': %s\n", PROGRAM_NAME,
-		    log_file, strerror(errno));
+			log_file, strerror(errno));
 		free(full_log);
 		return EXIT_FAILURE;
 	} else { /* If LOG_FILE was correctly opened, write the log */
@@ -174,8 +176,11 @@ write_msg_into_logfile(const char *_msg)
 	FILE *msg_fp = fopen(msg_log_file, "a");
 	if (!msg_fp) {
 		/* Do not log this error: We might incur in an infinite loop
-		 * trying to access a file that cannot be accessed */
+		 * trying to access a file that cannot be accessed. Warn the user
+		 * and print the error to STDERR */
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, msg_log_file, strerror(errno));
+		if (_msg)
+			fprintf(stderr, "%s", _msg);
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
 		putchar('\n');
@@ -201,7 +206,7 @@ write_msg_into_logfile(const char *_msg)
  * have the following format:
  * "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
 void
-log_msg(char *_msg, int print)
+log_msg(char *_msg, int print_prompt, int logme)
 {
 	if (!_msg)
 		return;
@@ -217,7 +222,7 @@ log_msg(char *_msg, int print)
 	messages[msgs_n - 1] = savestring(_msg, msg_len);
 	messages[msgs_n] = (char *)NULL;
 
-	if (print) /* PRINT_PROMPT */
+	if (print_prompt) /* PRINT_PROMPT */
 		/* The next prompt will take care of printing the message */
 		print_msg = 1;
 	else /* NOPRINT_PROMPT */
@@ -227,7 +232,7 @@ log_msg(char *_msg, int print)
 	/* If the config dir cannot be found or if msg log file isn't set
 	 * yet... This will happen if an error occurs before running
 	 * init_config(), for example, if the user's home cannot be found */
-	if (config_ok == 0 || !msg_log_file || !*msg_log_file)
+	if (config_ok == 0 || !msg_log_file || !*msg_log_file || logme == 0)
 		return;
 
 	write_msg_into_logfile(_msg);

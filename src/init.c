@@ -251,8 +251,8 @@ set_start_path(void)
 
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {
-			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
-					"retrieving current working directory\n"), PROGRAM_NAME);
+			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
+				"retrieving current working directory\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 		}
 
@@ -1823,7 +1823,7 @@ RUN:
 			}
 		} else {
 			alt_config_dir = savestring(alt_dir_value, strlen(alt_dir_value));
-			_err(0, PRINT_PROMPT, _("%s: %s: Using alternative "
+			_err(-1, PRINT_PROMPT, _("%s: %s: Using alternative "
 				"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
 		}
 

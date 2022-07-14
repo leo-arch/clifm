@@ -1031,11 +1031,13 @@ lightmode_function(char *arg)
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
 		light_mode = 1;
-		if (autols == 1) reload_dirlist();
+		if (autols == 1)
+			reload_dirlist();
 		print_reload_msg(_("Switched to light mode\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		light_mode = 0;
-		if (autols == 1) reload_dirlist();
+		if (autols == 1)
+			reload_dirlist();
 		print_reload_msg(_("Switched back to normal mode\n"));
 	} else {
 		puts(_(LM_USAGE));
