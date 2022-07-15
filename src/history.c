@@ -185,16 +185,10 @@ write_msg_into_logfile(const char *_msg)
 		return;
 	}
 
-	time_t rawtime = time(NULL);
-	struct tm tm;
-	localtime_r(&rawtime, &tm);
-	char date[64] = "";
-
-	strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
-	fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm.tm_year + 1900,
-	    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
-	fputs(_msg, msg_fp);
+	char *date = get_date();
+	fprintf(msg_fp, "[%s] %s", date, _msg);
 	fclose(msg_fp);
+	free(date);
 }
 
 /* Handle the error message MSG. Store MSG in an array of error
