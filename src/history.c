@@ -139,7 +139,7 @@ log_function(char **cmd)
 		+ strlen(last_cmd) + 8;
 
 	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
-	snprintf(full_log, log_len, "C:[%s] %s:%s\n", date,
+	snprintf(full_log, log_len, "c:[%s] %s:%s\n", date,
 		workspaces[cur_ws].path ? workspaces[cur_ws].path : "?", last_cmd);
 
 	free(date);
@@ -175,8 +175,8 @@ write_msg_into_logfile(const char *_msg)
 {
 	FILE *msg_fp = fopen(log_file, "a");
 	if (!msg_fp) {
-		/* Do not log this error: We might incur in an infinite loop
-		 * trying to access a file that cannot be accessed. Warn the user
+		/* Do not log this error: We might enter into an infinite loop
+		 * trying to access a file that cannot be accessed. Just warn the user
 		 * and print the error to STDERR */
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, log_file, strerror(errno));
 		fputs("Press any key to continue... ", stdout);
@@ -186,7 +186,7 @@ write_msg_into_logfile(const char *_msg)
 	}
 
 	char *date = get_date();
-	fprintf(msg_fp, "[%s] %s", date, _msg);
+	fprintf(msg_fp, "m:[%s] %s", date, _msg);
 	fclose(msg_fp);
 	free(date);
 }
