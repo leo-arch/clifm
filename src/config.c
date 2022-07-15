@@ -2369,7 +2369,7 @@ init_config(void)
 	set_trash_dirs();
 #endif /* _NO_TRASH */
 	if (xargs.stealth_mode == 1) {
-		_err(-1, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
 			"persistent selection, bookmarks, jump database and directory history, "
 			"just as logs and configuration files, are disabled.\n"), PROGRAM_NAME);
 		config_ok = 0;

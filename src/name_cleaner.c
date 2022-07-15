@@ -649,7 +649,7 @@ CONFIRM:
 	if (exit_status == EXIT_FAILURE || total_rename == 0) {
 		printf(_("%s: %d file(s) bleached\n"), FUNC_NAME, total_rename);
 	} else {
-		_err(-1, PRINT_PROMPT, ("%s: %d file(s) bleached\n"),
+		_err(ERR_NO_LOG, PRINT_PROMPT, ("%s: %d file(s) bleached\n"),
 			FUNC_NAME, total_rename);
 	}
 

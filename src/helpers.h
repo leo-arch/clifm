@@ -231,6 +231,10 @@ extern int watch;
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
 
+/* A few macros for the _err function */
+#define ERR_NO_LOG   -1 /* _err prints but do not log */
+#define ERR_NO_STORE -2 /* _err prints and logs, but don't store the msg into the messages array */
+
 /* Macros for xchdir (for setting term title or not) */
 #define SET_TITLE 1
 #define NO_TITLE  0

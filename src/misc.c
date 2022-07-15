@@ -187,7 +187,7 @@ _err(int msg_type, int prompt_flag, const char *format, ...)
 		{free(buf); return EXIT_SUCCESS;}
 
 	if (buf) {
-		if (msg_type > 0) {
+		if (msg_type >= 'e') {
 			switch (msg_type) {
 			case 'e': pmsg = ERROR; msgs.error++; break;
 			case 'w': pmsg = WARNING; msgs.warning++; break;
@@ -196,9 +196,9 @@ _err(int msg_type, int prompt_flag, const char *format, ...)
 			}
 		}
 
-		int logme = (msg_type == -1 || msg_type == 'n') ? 0 : 1;
+		int logme = (msg_type == ERR_NO_LOG || msg_type == 'n') ? 0 : 1;
 		int add_to_msgs_list = 1;
-		if (msg_type == -2) {
+		if (msg_type == ERR_NO_STORE) {
 			add_to_msgs_list = 0;
 			logme = 1;
 //			prompt_flag = NOPRINT_PROMPT;

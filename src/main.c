@@ -877,7 +877,7 @@ static inline void
 set_root_indicator(void)
 {
 	if (flags & ROOT_USR) {
-		_err(-1, PRINT_PROMPT, _("%s->%s Running as root%s\n"),
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Running as root%s\n"),
 			colorize ? mi_c : "", colorize ? _RED : "", colorize ? df_c : "");
 	}
 }

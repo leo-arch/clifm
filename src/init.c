@@ -1821,7 +1821,7 @@ RUN:
 			}
 		} else {
 			alt_config_dir = savestring(alt_dir_value, strlen(alt_dir_value));
-			_err(-1, PRINT_PROMPT, _("%s: %s: Using alternative "
+			_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: %s: Using alternative "
 				"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
 		}
 
