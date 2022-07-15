@@ -212,9 +212,8 @@ profile_set(char *prof)
 	msgs_n = msgs.error = msgs.warning = msgs.notice = 0; */
 
 	if (config_ok) {
-		/* Limit the log files size */
+		/* Shrink the log file if needed */
 		check_file_size(log_file, max_log);
-//		check_file_size(msg_log_file, max_log);
 
 		/* Reset history */
 		if (access(hist_file, F_OK | W_OK) == 0) {

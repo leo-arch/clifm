@@ -173,13 +173,11 @@ log_function(char **cmd)
 static void
 write_msg_into_logfile(const char *_msg)
 {
-//	FILE *msg_fp = fopen(msg_log_file, "a");
 	FILE *msg_fp = fopen(log_file, "a");
 	if (!msg_fp) {
 		/* Do not log this error: We might incur in an infinite loop
 		 * trying to access a file that cannot be accessed. Warn the user
 		 * and print the error to STDERR */
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, msg_log_file, strerror(errno));
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, log_file, strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
@@ -232,7 +230,6 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 	/* If the config dir cannot be found or if msg log file isn't set
 	 * yet... This will happen if an error occurs before running
 	 * init_config(), for example, if the user's home cannot be found */
-//	if (config_ok == 0 || !msg_log_file || !*msg_log_file || logme == 0)
 	if (xargs.stealth_mode == 1 || config_ok == 0 || !log_file || !*log_file || logme == 0)
 		return;
 

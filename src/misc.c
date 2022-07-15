@@ -1432,7 +1432,6 @@ free_stuff(void)
 	free(kbinds_file);
 	free(log_file);
 	free(mime_file);
-//	free(msg_log_file);
 	free(plugins_dir);
 	free(profile_file);
 	free(remotes_file);

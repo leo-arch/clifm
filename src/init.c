@@ -161,11 +161,9 @@ init_history(void)
 	if (!hist_file)
 		return EXIT_FAILURE;
 
-	/* Limit the log files size */
+	/* Shrink the log file size */
 	if (log_file)
 		check_file_size(log_file, max_log);
-/*	if (msg_log_file)
-		check_file_size(msg_log_file, max_log); */
 
 	/* Get history */
 	struct stat attr;
