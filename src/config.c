@@ -695,8 +695,8 @@ define_config_file_names(void)
 	profile_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
 	sprintf(profile_file, "%s/profile.cfm", config_dir);
 
-	msg_log_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
-	sprintf(msg_log_file, "%s/messages.cfm", config_dir);
+/*	msg_log_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
+	sprintf(msg_log_file, "%s/messages.cfm", config_dir); */
 
 	mime_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
 	sprintf(mime_file, "%s/mimelist.cfm", config_dir);
@@ -2435,8 +2435,9 @@ reset_variables(void)
 
 	free(config_file);
 	free(profile_file);
-	free(msg_log_file);
-	config_file = profile_file = msg_log_file = (char *)NULL;
+//	free(msg_log_file);
+//	config_file = profile_file = msg_log_file = (char *)NULL;
+	config_file = profile_file = (char *)NULL;
 
 	free(mime_file);
 	free(plugins_dir);

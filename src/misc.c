@@ -147,11 +147,16 @@ send_desktop_notification(char *msg)
 } */
 
 /* Custom POSIX implementation of GNU asprintf() modified to log program
- * messages. MSG_TYPE is one of: 'e', 'f', 'w', 'n', or zero (meaning this
+ * messages.
+ * MSG_TYPE is one of: 'e', 'f', 'w', 'n', zero (meaning this
  * latter that no message mark (E, W, or N) will be added to the prompt).
+ * Messages with a msg_type on 'n' (or -1) are not logged
  * 'f' means that the message must be printed forcefully, even if identical
  * to the previous one, without printing any message mark.
- * PROMPT tells whether to print the message immediately before the next
+ * MSG_TYPE also accepts -1 and -2 as values:
+ * -1: Print the message but do not log it
+ * -2: Log but do not store the message into the messages array
+ * PROMPT_FLAG tells whether to print the message immediately before the next
  * prompt or rather in place.
  * Based on littlstar's xasprintf implementation:
  * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
@@ -1427,7 +1432,7 @@ free_stuff(void)
 	free(kbinds_file);
 	free(log_file);
 	free(mime_file);
-	free(msg_log_file);
+//	free(msg_log_file);
 	free(plugins_dir);
 	free(profile_file);
 	free(remotes_file);

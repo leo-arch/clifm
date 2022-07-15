@@ -313,7 +313,7 @@ char
 	*last_cmd = (char *)NULL,
 	*log_file = (char *)NULL,
 	*mime_file = (char *)NULL,
-	*msg_log_file = (char *)NULL,
+//	*msg_log_file = (char *)NULL,
 	*opener = (char *)NULL,
 	*pinned_dir = (char *)NULL,
 	*plugins_dir = (char *)NULL,

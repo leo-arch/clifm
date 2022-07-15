@@ -214,7 +214,7 @@ profile_set(char *prof)
 	if (config_ok) {
 		/* Limit the log files size */
 		check_file_size(log_file, max_log);
-		check_file_size(msg_log_file, max_log);
+//		check_file_size(msg_log_file, max_log);
 
 		/* Reset history */
 		if (access(hist_file, F_OK | W_OK) == 0) {

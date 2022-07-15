@@ -1159,7 +1159,7 @@ extern char
 	*last_cmd,
 	*log_file,
 	*mime_file,
-	*msg_log_file,
+//	*msg_log_file,
 	*opener,
 	*pinned_dir,
 	*plugins_dir,
