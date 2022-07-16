@@ -830,7 +830,7 @@ FullDirSize=%s\n\n\
 # Log errors and warnings\n\
 Logs=%s\n\
 # Keep a record of external commands and internal commands able to\n\
-# modify the files system (e.g. 'r', 'c', 'm', and so on)\n\
+# modify the files system (e.g. 'r', 'c', 'm', and so on). Logs must be set to true\n\
 LogCmds=%s\n\n"
 
 	    "# Minimum length at which a file name can be trimmed in long view mode\n\

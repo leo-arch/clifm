@@ -71,7 +71,7 @@ Examples:\n\
     ac 12-24 (or 'ac <TAB>' to choose from a list; multi-selection is allowed)\n\
 - Decompress/dearchive a file:\n\
     ad file.tar.gz\n\
-  Or just open the file and CliFM will prompt the appropriate menu:\n\
+  or just open the file and CliFM will prompt the appropriate menu:\n\
     o file.tar.gz (or just 'file.tar.gz')"
 
 #define AUTOCD_USAGE "Turn autocd on-off\n\
@@ -157,7 +157,7 @@ Usage:\n\
 Examples:\n\
 - Change to /var:\n\
     cd /var\n\
-  Or, if autocd is enabled (default):\n\
+  or, if autocd is enabled (default):\n\
     /var"
 
 #define COLORS_USAGE "Print the list of currently used color codes\n\
@@ -1069,8 +1069,8 @@ most keyboards)\n"
 of currently used color codes.\n\n\
 The color schemes file, just as the configuration and profile \
 files, allow you to customize colors, the prompt string, define \
-some prompt and profile commands, aliases, autocommands, and more.\n\
-For a full description consult the manpage."
+some prompt and profile commands, aliases, autocommands, and more.\n\n\
+For a full description consult the manpage and/or our Wiki (https://github.com/leo-arch/clifm/wiki)."
 
 #define ASCII_LOGO "\
                             _______     _ \n\
@@ -1083,7 +1083,7 @@ For a full description consult the manpage."
 
 #define QUICK_HELP "\
 This is only a quick help. For more information and advanced tricks \n\
-consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)\n\
+consult the manpage and/or our Wiki (https://github.com/leo-arch/clifm/wiki)\n\
 \n\
 NAVIGATION\n\
 ----------\n\
