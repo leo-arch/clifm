@@ -2397,13 +2397,13 @@ Just the list of the user's bookmarks used by the bookmarks function.
 The history file is \fI~/.config/clifm/profiles/PROFILE/history.cfm\fR.
 A list of commands entered by the user and used by the history function.
 .TP
-.B COMMANDS LOG FILE
-The commands log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/log.cfm\fR.
-The file contains a series of fields separated by a colon in the following way: 'date:user:current_dir:command. All commands executed as external will be logged.
-.TP
-.B MESSAGES LOG FILE
-The messages log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/messages.cfm\fR.
-A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: "[date] message".
+.B LOG FILE
+The log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/log.cfm\fR.
+This file contains CliFM's logs. There are two kinds of logs: 1. messages, and 2. commands.
+.sp
+Message logs are a record of errors and warnings and have the following form: "m:[date] msg". Enable these logs using the \fILogs\fR option in the configuration file, the \fI\-\-enable\-logs\fR flag, or the \fIlog\fR command.
+.sp
+Command logs keep track of external commands and internal commands able to modify the filesystem. These logs have this form: "c:[date] current_working_directory:cmd". Enable these logs via the \fICmdLogs\fR option in the configuration file.
 .TP
 .B KANGAROO DATABASE
 The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/jump.cfm\fR.
