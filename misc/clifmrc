@@ -81,7 +81,7 @@ FullDirSize=false
 
 # Keep track of errors and warnings
 Logs=false
-# Keep a record of external command and internal commands able to modify the 
+# Keep a record of external commands and internal commands able to modify the 
 # files system (e.g. 'r', 'c', 'm', and so on). Logs should be set to true
 LogCmds=false
 
