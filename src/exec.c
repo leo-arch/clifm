@@ -249,7 +249,8 @@ run_in_foreground(pid_t pid)
 		}
 	} else { /* waitpid() failed */
 		int ret = errno;
-		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+//		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		return ret;
 	}
 
@@ -262,7 +263,8 @@ run_in_background(pid_t pid)
 	int status = 0;
 	pid_t wpid = waitpid(pid, &status, WNOHANG);
 	if (wpid == -1) {
-		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+//		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		return errno;
 	}
 
@@ -394,7 +396,8 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	int ret = 0;
 	pid_t pid = fork();
 	if (pid < 0) {
-		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
+//		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		return errno;
 	} else if (pid == 0) {
 		if (bg == 0) {
@@ -421,6 +424,7 @@ launch_execve(char **cmd, const int bg, const int xflags)
 
 		execvp(cmd[0], cmd);
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
+//		_err(ERR_NO_STORE, NOPRINT_PROMPT, "A%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
 		_exit(errno);
 	}
 
@@ -502,6 +506,8 @@ reload_binaries(void)
 static inline int
 __export(char *arg)
 {
+	if (!arg || !*arg)
+		return (-1);
 	char *p = strchr(arg, '=');
 	if (!p || !*(p + 1))
 		return (-1);
@@ -511,7 +517,8 @@ __export(char *arg)
 	*p = '\0';
 	int ret = setenv(arg, p + 1, 1);
 	if (ret == -1)
-		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 	*p = '=';
 
 	return errno;
@@ -1598,7 +1605,7 @@ autocd_dir(char *tmp)
 	if (autocd) {
 		ret = cd_function(tmp, CD_PRINT_ERROR);
 	} else {
-		fprintf(stderr, _("%s: %s: Is a directory\n"), PROGRAM_NAME, tmp);
+		fprintf(stderr, _("%s: cd: %s: Is a directory\n"), PROGRAM_NAME, tmp);
 		ret = EISDIR;
 	}
 	free(tmp);
@@ -1680,7 +1687,7 @@ lira_function(char **args)
 	return EXIT_FAILURE;
 #else
 	UNUSED(args);
-	fprintf(stderr, _("%s: Lira: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	fprintf(stderr, _("%s: lira: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
 #endif
 }
@@ -1934,8 +1941,10 @@ print_cwd(void)
 	*p = '\0';
 	char *buf = getcwd(p, sizeof(p));
 	if (!buf) {
-		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-		return errno;
+//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		int err = errno;
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: getcwd: %s\n", PROGRAM_NAME, strerror(err));
+		return err;
 	}
 
 	printf("%s\n", p);
@@ -2315,7 +2324,7 @@ exec_cmd(char **comm)
 		else
 			exit_code = archiver(comm, 'd');
 #else
-		fprintf(stderr, _("%s: archiving: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+		fprintf(stderr, _("%s: archiver: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
 #endif
 	}
@@ -2624,7 +2633,7 @@ run_profile_line(char *cmd)
 void
 exec_profile(void)
 {
-	if (!config_ok || !profile_file)
+	if (config_ok == 0 || !profile_file)
 		return;
 
 	FILE *fp = fopen(profile_file, "r");

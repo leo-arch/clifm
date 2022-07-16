@@ -49,6 +49,7 @@ typedef char *rl_cpvfunc_t;
 #include "aux.h"
 #include "checks.h"
 #include "exec.h"
+#include "misc.h"
 #include "navigation.h"
 #include "readline.h"
 #include "sort.h"
@@ -1607,8 +1608,10 @@ parse_input_str(char *str)
 					free(esc_str);
 					esc_str = (char *)NULL;
 				} else {
-					fprintf(stderr, _("%s: %s: Error quoting file name\n"),
-					    PROGRAM_NAME, sel_elements[j].name);
+/*					fprintf(stderr, _("%s: %s: Error quoting file name\n"),
+					    PROGRAM_NAME, sel_elements[j].name); */
+					_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting file name\n"),
+					    PROGRAM_NAME, sel_elements[j].name); 
 					/* Free elements selected thus far and all the
 					 * input substrings */
 					register size_t k = 0;
@@ -1677,7 +1680,9 @@ parse_input_str(char *str)
 			int j = num - 1;
 			char *esc_str = escape_str(file_info[j].name);
 			if (!esc_str) {
-				fprintf(stderr, _("%s: %s: Error quoting file name\n"),
+/*				fprintf(stderr, _("%s: %s: Error quoting file name\n"),
+					PROGRAM_NAME, file_info[num - 1].name); */
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting file name\n"),
 					PROGRAM_NAME, file_info[num - 1].name);
 				/* Free whatever was allocated thus far */
 				for (j = 0; j <= (int)args_n; j++)
@@ -1722,7 +1727,9 @@ parse_input_str(char *str)
 						}
 					}
 				} else {
-					fprintf(stderr, _("%s: %s: Error getting variable name\n"),
+/*					fprintf(stderr, _("%s: %s: Error getting variable name\n"),
+							PROGRAM_NAME, substr[i]); */
+					_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error getting variable name\n"),
 							PROGRAM_NAME, substr[i]);
 					size_t j;
 					for (j = 0; j <= args_n; j++)
@@ -1943,7 +1950,9 @@ parse_input_str(char *str)
 						j++;
 						free(esc_str);
 					} else {
-						fprintf(stderr, _("%s: %s: Error quoting "
+/*						fprintf(stderr, _("%s: %s: Error quoting "
+							"file name\n"), PROGRAM_NAME, globbuf.gl_pathv[i]); */
+						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
 							"file name\n"), PROGRAM_NAME, globbuf.gl_pathv[i]);
 						register size_t k = 0;
 						for (k = 0; k < j; k++)
@@ -2017,7 +2026,9 @@ parse_input_str(char *str)
 						j++;
 						free(esc_str);
 					} else {
-						fprintf(stderr, _("%s: %s: Error quoting "
+/*						fprintf(stderr, _("%s: %s: Error quoting "
+							"file name\n"), PROGRAM_NAME, wordbuf.we_wordv[i]); */
+						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
 							"file name\n"), PROGRAM_NAME, wordbuf.we_wordv[i]);
 
 						register size_t k = 0;

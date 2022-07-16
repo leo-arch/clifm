@@ -179,6 +179,7 @@ int
 	light_mode = UNSET,
 	list_dirs_first = UNSET,
 	listing_mode = UNSET,
+	log_cmds = UNSET,
 	logs_enabled = UNSET,
 	long_view = UNSET,
 	max_name_len = DEF_MAX_NAME_LEN,

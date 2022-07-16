@@ -1302,8 +1302,7 @@ run_dir_cmd(const int mode)
 		if (mode == DIR_OUT) {
 			if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
 				return;
-			snprintf(path, PATH_MAX - 1, "%s/%s", old_pwd[dirhist_cur_index - 1],
-					DIR_OUT_NAME);
+			snprintf(path, PATH_MAX - 1, "%s/%s", old_pwd[dirhist_cur_index - 1], DIR_OUT_NAME);
 		}
 	}
 
@@ -1428,7 +1427,9 @@ list_dir_light(void)
 	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
+/*		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
+		    strerror(errno)); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
 		    strerror(errno));
 		close_dir = 0;
 		goto END;
@@ -1803,7 +1804,9 @@ list_dir(void)
 	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
+/*		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
+		    strerror(errno)); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
 		    strerror(errno));
 		close_dir = 0;
 		goto END;

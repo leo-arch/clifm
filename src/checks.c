@@ -135,7 +135,9 @@ check_term(void)
 {
 	char *_term = getenv("TERM");
 	if (!_term || !*_term) {
-		fprintf(stderr, _("%s: Error opening terminal: unknown\n"), PROGRAM_NAME);
+//		fprintf(stderr, _("%s: Error opening terminal: unknown\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error opening terminal: unknown\n"),
+			PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -143,7 +145,10 @@ check_term(void)
 	for (i = 0; UNSUPPORTED_TERM[i]; i++) {
 		if (*_term == *UNSUPPORTED_TERM[i]
 		&& strcmp(_term, UNSUPPORTED_TERM[i]) == 0) {
-			fprintf(stderr, _("%s: '%s': Unsupported terminal. This "
+/*			fprintf(stderr, _("%s: '%s': Unsupported terminal. This "
+				"terminal cannot understand escape sequences\n"),
+				PROGRAM_NAME, UNSUPPORTED_TERM[i]); */
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Unsupported terminal. This "
 				"terminal cannot understand escape sequences\n"),
 				PROGRAM_NAME, UNSUPPORTED_TERM[i]);
 			exit(EXIT_FAILURE);
@@ -300,8 +305,9 @@ get_sudo_path(void)
 	int ret = errno;
 
 	if (!sudo) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, p ? p : DEF_SUDO_CMD,
-				strerror(ENOENT));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, p ? p : DEF_SUDO_CMD, strerror(ENOENT));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			p ? p : DEF_SUDO_CMD, strerror(ENOENT));
 		errno = ret;
 		return (char *)NULL;
 	}
@@ -322,7 +328,8 @@ check_immutable_bit(char *file)
 
 	fd = open(file, O_RDONLY);
 	if (fd == -1) {
-		fprintf(stderr, "'%s': %s\n", file, strerror(errno));
+//		fprintf(stderr, "'%s': %s\n", file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		return -1;
 	}
 
@@ -707,7 +714,9 @@ check_for_alias(char **args)
 		char **alias_comm = parse_input_str(aliases[i].cmd);
 		if (!alias_comm) {
 			args_n = 0;
-			fprintf(stderr, _("%s: Error parsing aliased command\n"), PROGRAM_NAME);
+//			fprintf(stderr, _("%s: Error parsing aliased command\n"), PROGRAM_NAME);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error parsing aliased command\n"),
+				PROGRAM_NAME);
 			return (char **)NULL;
 		}
 
@@ -749,8 +758,7 @@ check_file_size(char *file, int max)
 	if (stat(file, &attr) == -1) {
 		fp = open_fstream_w(file, &fd);
 		if (!fp) {
-			_err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			    file, strerror(errno));
+			_err(0, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		} else {
 			close_fstream(fp, fd);
 		}
@@ -788,7 +796,8 @@ check_file_size(char *file, int max)
 
 	int fdd = mkstemp(tmp);
 	if (fdd == -1) {
-		fprintf(stderr, "log: %s: %s", tmp, strerror(errno));
+//		fprintf(stderr, "log: %s: %s", tmp, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: log: %s: %s", PROGRAM_NAME, tmp, strerror(errno));
 		close_fstream(fp, fd);
 		free(tmp);
 		return;

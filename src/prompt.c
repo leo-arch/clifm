@@ -233,8 +233,8 @@ gen_exit_status(void)
 
 	char *temp = (char *)xnmalloc(code_len + 12 + MAX_COLOR, sizeof(char));
 	sprintf(temp, "%s%d\001%s\002",
-			(exit_code == 0) ? (colorize ? xs_c : "")
-			: (colorize ? xf_c : ""), exit_code, df_c);
+			(exit_code == 0) ? (colorize == 1 ? xs_c : "")
+			: (colorize == 1 ? xf_c : ""), exit_code, df_c);
 
 	return temp;
 }
@@ -1005,7 +1005,7 @@ static int
 list_prompts(void)
 {
 	if (prompts_n == 0) {
-		printf(_("%s: No extra prompts found. Using the default prompt\n"), PROGRAM_NAME);
+		printf(_("prompt: No extra prompts found. Using the default prompt\n"));
 		return EXIT_SUCCESS;
 	}
 
@@ -1049,13 +1049,14 @@ set_prompt(char *name)
 		return EXIT_FAILURE;
 
 	if (prompts_n == 0) {
-		fprintf(stderr, _("%s: No extra prompts defined. Using the default prompt\n"), PROGRAM_NAME);
+		fprintf(stderr, _("prompt: No extra prompts defined. Using the default prompt\n"));
 		return EXIT_FAILURE;
 	}
 
 	char *p = dequote_str(name, 0);
 	if (!p) {
-		fprintf(stderr, "%s: %s: Error dequoting string\n", PROGRAM_NAME, name);
+//		fprintf(stderr, "%s: %s: Error dequoting string\n", PROGRAM_NAME, name);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: Error dequoting string\n", name);
 		return EXIT_FAILURE;
 	}
 
@@ -1068,7 +1069,7 @@ set_prompt(char *name)
 		return switch_prompt((size_t)i);
 	}
 
-	fprintf(stderr, _("%s: %s: No such prompt\n"), PROGRAM_NAME, p);
+	fprintf(stderr, _("prompt: %s: No such prompt\n"), p);
 	free(p);
 	return EXIT_FAILURE;
 }
@@ -1089,18 +1090,19 @@ static int
 edit_prompts_file(void)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		printf("%s: prompt: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
 	if (!prompts_file || !*prompts_file) {
-		fprintf(stderr, "%s: No prompts file found\n", PROGRAM_NAME);
+		fprintf(stderr, "prompt: No prompts file found\n");
 		return EXIT_FAILURE;
 	}
 
 	struct stat a;
 	if (stat(prompts_file, &a) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, prompts_file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, prompts_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: %s\n", prompts_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

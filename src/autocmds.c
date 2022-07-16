@@ -297,7 +297,7 @@ parse_autocmd_line(char *cmd)
 	*p = '\0';
 
 	autocmds = (struct autocmds_t *)xrealloc(autocmds,
-				(autocmds_n + 1) * sizeof(struct autocmds_t));
+			(autocmds_n + 1) * sizeof(struct autocmds_t));
 	autocmds[autocmds_n].pattern = savestring(cmd, strlen(cmd));
 
 	init_autocmd_opts();

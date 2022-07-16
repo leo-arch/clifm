@@ -45,10 +45,9 @@ static int
 print_tag_creation_error(const char *link, mode_t mode)
 {
 	if (S_ISLNK(mode)) {
-		fprintf(stderr, _("%s: %s: File already tagged\n"), PROGRAM_NAME, link);
+		fprintf(stderr, _("tag: %s: File already tagged\n"), link);
 	} else {
-		fprintf(stderr, _("%s: %s: Cannot create tag: file already "
-			"exists\n"), PROGRAM_NAME, link);
+		fprintf(stderr, _("tag: %s: Cannot create tag: file already exists\n"), link);
 	}
 
 	return EXIT_FAILURE;
@@ -57,22 +56,22 @@ print_tag_creation_error(const char *link, mode_t mode)
 static int
 print_symlink_error(const char *name)
 {
-	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
+//	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", name, strerror(errno));
 	return errno;
 }
 
 static int
 print_no_tags(void)
 {
-	printf(_("%s: No tags found, Use 'tag new' to create new tags\n"),
-		PROGRAM_NAME);
+	printf(_("%s: No tags found, Use 'tag new' to create new tags\n"), PROGRAM_NAME);
 	return EXIT_SUCCESS;
 }
 
 static int
 print_no_such_tag(const char *name)
 {
-	fprintf(stderr, _("%s: %s: No such tag\n"), PROGRAM_NAME, name);
+	fprintf(stderr, _("tag: %s: No such tag\n"), name);
 	return EXIT_FAILURE;
 }
 
@@ -155,7 +154,7 @@ list_files_in_tag(char *name)
 	struct dirent **t = (struct dirent **)NULL;
 	int n = scandir(tmp, &t, NULL, case_sensitive ? xalphasort : alphasort_insensitive);
 	if (n == -1) {
-		fprintf(stderr, _("%s: %s: No such tag\n"), PROGRAM_NAME, name);
+		fprintf(stderr, _("tag: %s: No such tag\n"), name);
 		return EXIT_FAILURE;
 	}
 
@@ -268,13 +267,15 @@ create_tags(char **args)
 
 		struct stat a;
 		if (lstat(dir, &a) != -1) {
-			fprintf(stderr, _("%s: %s: Tag already exists\n"), PROGRAM_NAME, args[i]);
+			fprintf(stderr, _("tag: %s: Tag already exists\n"), args[i]);
 			exit_status = EXIT_FAILURE;
 			continue;
 		}
 
 		if (xmkdir(dir, S_IRWXU) == EXIT_FAILURE) {
-			fprintf(stderr, _("%s: %s: Error creating tag\n"), PROGRAM_NAME, args[i]);
+//			fprintf(stderr, _("%s: %s: Error creating tag\n"), PROGRAM_NAME, args[i]);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("tag: %s: Error creating tag: %s\n"),
+				args[i], strerror(errno));
 			exit_status = EXIT_FAILURE;
 			continue;
 		}
@@ -381,7 +382,10 @@ tag_file(char *name, char *tag)
 	struct stat a;
 	if (stat(dir, &a) == -1) {
 		if (xmkdir(dir, S_IRWXU) != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: %s: Cannot create tag\n"), PROGRAM_NAME, p ? p : tag);
+/*			fprintf(stderr, _("%s: %s: Cannot create tag: %s\n"), PROGRAM_NAME,
+				p ? p : tag, strerror(errno)); */
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("tag: %s: Cannot create tag: %s\n"),
+				p ? p : tag, strerror(errno));
 			free(p);
 			return EXIT_FAILURE;
 		}
@@ -452,8 +456,8 @@ tag_files(char **args)
 	int *tag_names = get_tags(args);
 	if (!tag_names || tag_names[0] == -1) {
 		free(tag_names);
-		fprintf(stderr, _("%s: No tag specified. Specify a tag via :TAG. "
-			"E.g. tag FILE1 FILE2 :TAG\n"), PROGRAM_NAME);
+		fprintf(stderr, _("tag: No tag specified. Specify a tag via :TAG. "
+			"E.g. tag FILE1 FILE2 :TAG\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -523,13 +527,14 @@ untag(char **args, const size_t n, size_t *t)
 			errno = 0;
 			if (unlinkat(AT_FDCWD, f, 0) == -1) {
 				exit_status = errno;
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
+//				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", args[i], strerror(errno));
 			} else {
 				(*t)++;
 			}
 		} else {
-			fprintf(stderr, _("%s: %s: File not tagged as %s%s%s\n"),
-				PROGRAM_NAME, args[i], colorize ? BOLD : "", args[n] + 1, df_c);
+			fprintf(stderr, _("tag: %s: File not tagged as %s%s%s\n"),
+				args[i], colorize ? BOLD : "", args[n] + 1, df_c);
 			continue;
 		}
 	}
@@ -568,7 +573,7 @@ rename_tag(char **args)
 		return print_no_such_tag(old);
 
 	if (*old == *new && strcmp(old, new) == 0) {
-		fprintf(stderr, "%s: New and old file names are the same\n", PROGRAM_NAME);
+		fprintf(stderr, "tag: New and old file names are the same\n");
 		return EXIT_FAILURE;
 	}
 
@@ -579,7 +584,8 @@ rename_tag(char **args)
 	snprintf(new_dir, PATH_MAX, "%s/%s", tags_dir, new);
 
 	if (rename(old_dir, new_dir) == -1) {
-		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s\n", strerror(errno));
 		return errno;
 	}
 
@@ -601,7 +607,8 @@ recursive_mv_tags(const char *src, const char *dst)
 
 	n = scandir(src_dir, &a, NULL, alphasort);
 	if (n == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, src_dir, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, src_dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", src_dir, strerror(errno));
 		return errno;
 	}
 
@@ -640,15 +647,15 @@ merge_tags(char **args)
 	errno = 0;
 	int exit_status = recursive_mv_tags(src, dst);
 	if (exit_status != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: Cannot merge tags: error moving tagged files\n"),
-			PROGRAM_NAME);
+		fprintf(stderr, _("tag: Cannot merge tags: error moving tagged files\n"));
 		return exit_status;
 	}
 
 	char src_dir[PATH_MAX];
 	snprintf(src_dir, PATH_MAX, "%s/%s", tags_dir, src);
 	if (rmdir(src_dir) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, src_dir, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, src_dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", src_dir, strerror(errno));
 		return errno;
 	}
 

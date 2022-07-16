@@ -71,8 +71,8 @@ save_sel(void)
 
 	if (sel_n == 0) {
 		if (unlink(sel_file) == -1) {
-			fprintf(stderr, "%s: sel: %s: %s\n", PROGRAM_NAME,
-			    sel_file, strerror(errno));
+//			fprintf(stderr, "%s: sel: %s: %s\n", PROGRAM_NAME, sel_file, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",	sel_file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 		return EXIT_SUCCESS;
@@ -80,8 +80,7 @@ save_sel(void)
 
 	FILE *fp = fopen(sel_file, "w");
 	if (!fp) {
-		_err(0, NOPRINT_PROMPT, "%s: sel: %s: %s\n", PROGRAM_NAME,
-		    sel_file, strerror(errno));
+		_err(0, NOPRINT_PROMPT, "sel: %s: %s\n", sel_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -130,7 +129,7 @@ select_file(char *file)
 
 		new_sel++;
 	} else {
-		fprintf(stderr, _("%s: sel: %s: Already selected\n"), PROGRAM_NAME, file);
+		fprintf(stderr, _("sel: %s: Already selected\n"), file);
 	}
 
 	return new_sel;
@@ -194,8 +193,9 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 		} else {
 			ret = scandir(sel_path, &ent, skip_files, xalphasort);
 			if (ret == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    sel_path, strerror(errno));
+/*				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+				    sel_path, strerror(errno)); */
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", sel_path, strerror(errno));
 				globfree(&gbuf);
 				return (-1);
 			}
@@ -333,8 +333,7 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 
 	regex_t regex;
 	if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: sel: %s: Invalid regular "
-				"expression\n"), PROGRAM_NAME, str);
+		fprintf(stderr, _("sel: %s: Invalid regular expression\n"), str);
 
 		regfree(&regex);
 		return (-1);
@@ -369,7 +368,8 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 		int filesn = scandir(sel_path, &list, skip_files, xalphasort);
 
 		if (filesn == -1) {
-			fprintf(stderr, "sel: %s: %s\n", sel_path, strerror(errno));
+//			fprintf(stderr, "sel: %s: %s\n", sel_path, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", sel_path, strerror(errno));
 			return (-1);
 		}
 
@@ -462,8 +462,8 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 		if (*(*args)[i] == '~') {
 			char *exp_path = tilde_expand((*args)[i]);
 			if (!exp_path) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, (*args)[i],
-				    strerror(errno));
+//				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, (*args)[i], strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", (*args)[i], strerror(errno));
 				return (char *)NULL;
 			}
 
@@ -485,14 +485,16 @@ construct_sel_path(char *sel_path)
 	xstrsncpy(tmpdir, sel_path, (size_t)PATH_MAX);
 
 	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, sel_path, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, sel_path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",	sel_path, strerror(errno));
 		return (char *)NULL;
 	}
 
 	if (*sel_path == '~') {
 		char *exp_path = tilde_expand(sel_path);
 		if (!exp_path) {
-			fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
+//			fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("sel: Error expanding path\n"));
 			return (char *)NULL;
 		}
 		strcpy(tmpdir, exp_path);
@@ -531,13 +533,15 @@ check_sel_path(char **sel_path)
 		return (char *)NULL;
 
 	if (access(dir, X_OK) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", dir, strerror(errno));
 		free(dir);
 		return (char *)NULL;
 	}
 
 	if (xchdir(dir, NO_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", dir, strerror(errno));
 		free(dir);
 		return (char *)NULL;
 	}
@@ -662,13 +666,14 @@ print_sel_results(const int new_sel, const char *sel_path, const char *pattern, 
 {
 	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
 	&& save_sel() != EXIT_SUCCESS) {
-		_err('e', PRINT_PROMPT, _("%s: Error writing selected files "
-			"into the selections file\n"), PROGRAM_NAME);
+		_err('e', PRINT_PROMPT, _("sel: Error writing selected files "
+			"into the selections file\n"));
 	}
 
 	if (sel_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
-		    strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
+			workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -734,7 +739,8 @@ select_filename(char *arg, char *dir, int *err)
 		char *tmp = construct_sel_filename(dir, name);
 		struct stat attr;
 		if (lstat(tmp, &attr) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", arg, strerror(errno));
 			(*err)++;
 		} else {
 			int r = select_file(tmp);
@@ -748,7 +754,8 @@ select_filename(char *arg, char *dir, int *err)
 
 	struct stat a;
 	if (lstat(arg, &a) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",	name, strerror(errno));
 		(*err)++;
 	} else {
 		int r = select_file(name);
@@ -903,7 +910,8 @@ edit_selfile(void)
 	time_t mtime_old = (time_t)attr.st_mtime;
 
 	if (open_file(sel_file) != EXIT_SUCCESS) {
-		fprintf(stderr, "%s: Could not open the selections file\n", PROGRAM_NAME);
+//		fprintf(stderr, "%s: Could not open the selections file\n", PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: Could not open the selections file\n");
 		return EXIT_FAILURE;
 	}
 
@@ -921,7 +929,8 @@ edit_selfile(void)
 	return ret;
 
 ERROR:
-	fprintf(stderr, "sel: %s: %s\n", sel_file, strerror(errno));
+	//fprintf(stderr, "sel: %s: %s\n", sel_file, strerror(errno));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", sel_file, strerror(errno));
 	return EXIT_FAILURE;
 }
 
@@ -1126,7 +1135,7 @@ handle_alpha_entry(int i, size_t desel_n, char **desel_elements)
 		return exit_status;
 	}
 
-	printf(_("desel: '%s': Invalid entry\n"), desel_elements[i]);
+	printf(_("desel: %s: Invalid entry\n"), desel_elements[i]);
 	free_desel_elements(desel_n, &desel_elements);
 	return EXIT_FAILURE;
 }
@@ -1137,7 +1146,7 @@ valid_desel_eln(int i, size_t desel_n, char **desel_elements)
 	int n = atoi(desel_elements[i]);
 
 	if (n <= 0 || (size_t)n > sel_n) {
-		printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
+		printf(_("desel: %s: Invalid ELN\n"), desel_elements[i]);
 		free_desel_elements(desel_n, &desel_elements);
 		return EXIT_FAILURE;
 	}

@@ -97,7 +97,7 @@ check_workspace_num(char *str, int *tmp_ws)
 {
 	int istr = atoi(str);
 	if (istr <= 0 || istr > MAX_WS) {
-		fprintf(stderr, _("%s: %d: No such workspace (valid workspace numbers: 1-%d)\n"),
+		fprintf(stderr, _("%s: ws: %d: No such workspace (valid workspace numbers: 1-%d)\n"),
 			PROGRAM_NAME, istr, MAX_WS);
 		return EXIT_FAILURE;
 	}
@@ -105,8 +105,7 @@ check_workspace_num(char *str, int *tmp_ws)
 	*tmp_ws = istr - 1;
 
 	if (*tmp_ws == cur_ws) {
-		fprintf(stderr, _("%s: %d is already the current workspace\n"),
-			PROGRAM_NAME, *tmp_ws + 1);
+		fprintf(stderr, _("ws: %d is already the current workspace\n"), *tmp_ws + 1);
 		return EXIT_SUCCESS;
 	}
 
@@ -122,7 +121,9 @@ switch_workspace(int tmp_ws)
 		    strlen(workspaces[cur_ws].path));
 	} else {
 		if (access(workspaces[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+/*			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+				workspaces[tmp_ws].path, strerror(errno)); */
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "ws: %s: %s\n",
 				workspaces[tmp_ws].path, strerror(errno));
 			free(workspaces[tmp_ws].path);
 			workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
@@ -131,8 +132,8 @@ switch_workspace(int tmp_ws)
 	}
 
 	if (xchdir(workspaces[tmp_ws].path, SET_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[tmp_ws].path,
-		    strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[tmp_ws].path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "ws: %s: %s\n", workspaces[tmp_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -165,14 +166,13 @@ get_workspace_by_name(char *name)
 		|| strcmp(workspaces[n].name, name) != 0)
 			continue;
 		if (n == cur_ws) {
-			fprintf(stderr, _("%s: %s is already the current workspace\n"),
-				PROGRAM_NAME, name);
+			fprintf(stderr, _("ws: %s is already the current workspace\n"), name);
 			return (-1);
 		}
 		return n;
 	}
 
-	fprintf(stderr, _("%s: %s: No such workspace\n"), PROGRAM_NAME, name);
+	fprintf(stderr, _("ws: %s: No such workspace\n"), name);
 	return (-1);
 }
 
@@ -334,14 +334,16 @@ static int
 backdir_directory(char *dir, const char *str)
 {
 	if (!dir) {
-		fprintf(stderr, _("%s: %s: Error dequoting string\n"), PROGRAM_NAME, str);
+//		fprintf(stderr, _("%s: %s: Error dequoting string\n"), PROGRAM_NAME, str);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bd: %s: Error dequoting string\n"), str);
 		return EXIT_FAILURE;
 	}
 
 	if (*dir == '~') {
 		char *exp_path = tilde_expand(dir);
 		if (!exp_path) {
-			fprintf(stderr, _("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, dir);
+//			fprintf(stderr, _("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, dir);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bd: %s: Error expanding tilde\n"), dir);
 			return EXIT_FAILURE;
 		}
 		dir = exp_path;
@@ -391,7 +393,7 @@ help_or_root(char *str)
 	}
 
 	if (*workspaces[cur_ws].path == '/' && !workspaces[cur_ws].path[1]) {
-		printf(_("%s: /: No parent directory\n"), PROGRAM_NAME);
+		printf(_("bd: /: No parent directory\n"));
 		return EXIT_SUCCESS;
 	}
 
@@ -424,7 +426,7 @@ backdir(char* str)
 	free(deq_str);
 
 	if (n == 0) {
-		fprintf(stderr, _("%s: %s: No matches found\n"), PROGRAM_NAME, str);
+		fprintf(stderr, _("bd: %s: No matches found\n"), str);
 		return EXIT_FAILURE;
 	}
 
@@ -505,13 +507,15 @@ go_home(const int cd_flag)
 {
 	if (!user.home) {
 		if (cd_flag == CD_PRINT_ERROR)
-			fprintf(stderr, _("%s: cd: Home directory not found\n"), PROGRAM_NAME);
+//			fprintf(stderr, _("%s: cd: Home directory not found\n"), PROGRAM_NAME);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("cd: Home directory not found\n"));
 		return ENOENT;
 	}
 
 	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
 		if (cd_flag == CD_PRINT_ERROR)
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME, user.home, strerror(errno));
+//			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME, user.home, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", user.home, strerror(errno));
 		return errno;
 	}
 
@@ -538,8 +542,9 @@ change_to_path(char *new_path, const int cd_flag)
 	char *q = realpath(p ? p : new_path, NULL);
 	if (!q) {
 		if (cd_flag == CD_PRINT_ERROR) {
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-				p ? p : new_path, strerror(errno));
+/*			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+				p ? p : new_path, strerror(errno)); */
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", p ? p : new_path, strerror(errno));
 		}
 		free(p);
 		return errno;
@@ -548,7 +553,8 @@ change_to_path(char *new_path, const int cd_flag)
 
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
 		if (cd_flag == CD_PRINT_ERROR)
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME, q, strerror(errno));
+//			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME, q, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", q, strerror(errno));
 		free(q);
 		return errno;
 	}
@@ -683,14 +689,14 @@ change_to_num(int n)
 
 	n--;
 	if (!old_pwd[n] || *old_pwd[n] == _ESC) {
-		fprintf(stderr, _("%s: Invalid history entry\n"), PROGRAM_NAME);
+		fprintf(stderr, _("history: Invalid history entry\n"));
 		return EXIT_FAILURE;
 	}
 
 	int ret = xchdir(old_pwd[n], SET_TITLE);
 	if (ret != 0) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-		    old_pwd[n], strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, old_pwd[n], strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "history: %s: %s\n",	old_pwd[n], strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -778,7 +784,9 @@ back_function(char **comm)
 
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
-	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+/*	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+	    old_pwd[dirhist_cur_index], strerror(errno)); */
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n",
 	    old_pwd[dirhist_cur_index], strerror(errno));
 
 	/* Invalidate this entry */
@@ -819,8 +827,9 @@ forth_function(char **comm)
 
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
-	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-	    old_pwd[dirhist_cur_index], strerror(errno));
+/*	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+	    old_pwd[dirhist_cur_index], strerror(errno)); */
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", old_pwd[dirhist_cur_index], strerror(errno));
 
 	/* Invalidate this entry */
 	*old_pwd[dirhist_cur_index] = _ESC;

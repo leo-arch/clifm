@@ -105,7 +105,9 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		char *p = get_cmd_path(s1);
 		if (!p) { /* S1 is neither a directory nor a valid application */
 			int ec = stat_ret != -1 ? ENOTDIR : ENOENT;
-			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME, s1, strerror(ec));
+//			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME, s1, strerror(ec));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: rr: %s: %s\n"),
+				PROGRAM_NAME, s1, strerror(ec));
 			return ec;
 		}
 		/* S1 is an application name. TARGET defaults to CWD */
@@ -131,7 +133,9 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		return EXIT_SUCCESS;
 	}
 	/* S2 is not a valid application name */
-	fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME, s2, strerror(ENOENT));
+//	fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME, s2, strerror(ENOENT));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: rr: %s: %s\n"),
+		PROGRAM_NAME, s2, strerror(ENOENT));
 	return ENOENT;
 }
 
@@ -151,7 +155,9 @@ create_tmp_file(char **file, int *fd)
 	errno = 0;
 	*fd = mkstemp(*file);
 	if (*fd == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: rr: mkstemp: %s: %s\n",
+			PROGRAM_NAME, *file, strerror(errno));
 		free(*file);
 		return EXIT_FAILURE;
 	}
@@ -195,7 +201,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 {
 	FILE *fp = fopen(tmp_file, "w");
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: rr: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		return errno;
 	}
 
@@ -216,7 +222,9 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 		if (*n == -1) {
 			fclose(fp);
 			unlink(tmp_file);
-			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, target, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, target, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: rr: %s: %s", PROGRAM_NAME,
+				target, strerror(errno));
 			return errno;
 		}
 		for (i = 0; i < (size_t)*n; i++) {
@@ -251,9 +259,11 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 		if (exit_status == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
 
-		fprintf(stderr, _("%s: %s: Cannot open file\n"), PROGRAM_NAME, tmp_file);
+//		fprintf(stderr, _("%s: %s: Cannot open file\n"), PROGRAM_NAME, tmp_file);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: rr: %s: Cannot open file\n"),
+			PROGRAM_NAME, tmp_file);
 		if (unlink(tmp_file) == -1) {
-			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			_err('e', PRINT_PROMPT, "%s: rr: unlink: %s: %s\n", PROGRAM_NAME,
 				tmp_file, strerror(errno));
 		}
 
@@ -271,7 +281,7 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 		return EXIT_SUCCESS;
 
 	if (unlink(tmp_file) == -1) {
-		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+		_err('e', PRINT_PROMPT, "%s: rr: unlink: %s: %s\n", PROGRAM_NAME,
 			tmp_file, strerror(errno));
 	}
 
@@ -623,13 +633,17 @@ xchmod(const char *file, mode_t mode)
 
 	int fd = open(file, O_WRONLY);
 	if (fd == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: xchmod: %s: %s\n", PROGRAM_NAME,
+			file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (fchmod(fd, mode) == -1) {
 		close(fd);
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: xchmod: %s: %s\n", PROGRAM_NAME,
+			file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -658,7 +672,9 @@ get_dup_file_dest_dir(void)
 			return (char *)NULL;
 		}
 		if (access(dir , R_OK | W_OK | X_OK) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: dup: %s: %s\n", PROGRAM_NAME,
+				dir, strerror(errno));
 			free(dir);
 			dir = (char *)NULL;
 			continue;
@@ -699,7 +715,9 @@ dup_file(char **cmd)
 		if (strchr(source, '\\')) {
 			char *deq_str = dequote_str(source, 0);
 			if (!deq_str) {
-				fprintf(stderr, "%s: %s: Error dequoting file name\n", PROGRAM_NAME, source);
+//				fprintf(stderr, "%s: %s: Error dequoting file name\n", PROGRAM_NAME, source);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: dup: %s: Error dequoting file name\n",
+					PROGRAM_NAME, source);
 				continue;
 			}
 			strcpy(source, deq_str);
@@ -999,7 +1017,9 @@ open_function(char **cmd)
 		if (strchr(cmd[1], '\\')) {
 			char *deq_path = dequote_str(cmd[1], 0);
 			if (!deq_path) {
-				fprintf(stderr, _("%s: %s: Error dequoting filename\n"), PROGRAM_NAME, cmd[1]);
+//				fprintf(stderr, _("%s: %s: Error dequoting filename\n"), PROGRAM_NAME, cmd[1]);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: open: %s: Error dequoting filename\n"),
+					PROGRAM_NAME, cmd[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -1013,7 +1033,9 @@ open_function(char **cmd)
 	/* Check file existence */
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
-		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1], strerror(errno));
+//		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1], strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1],
+			strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1039,7 +1061,7 @@ open_function(char **cmd)
 	case S_IFLNK: {
 		int ret = get_link_ref(file);
 		if (ret == -1) {
-			fprintf(stderr, _("%s: %s: Broken symbolic link\n"), PROGRAM_NAME, file);
+			fprintf(stderr, _("%s: open: %s: Broken symbolic link\n"), PROGRAM_NAME, file);
 			return EXIT_FAILURE;
 		} else if (ret == S_IFDIR) {
 			return cd_function(file, CD_PRINT_ERROR);
@@ -1062,7 +1084,7 @@ open_function(char **cmd)
 	 * or regular file), print the corresponding error message and
 	 * exit */
 	if (no_open_file) {
-		fprintf(stderr, _("%s: %s (%s): Cannot open file\nTry "
+		fprintf(stderr, _("%s: open: %s (%s): Cannot open file\nTry "
 			"'APPLICATION FILENAME'\n"), PROGRAM_NAME, cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
@@ -1086,11 +1108,11 @@ open_function(char **cmd)
 		return EXIT_SUCCESS;
 
 	if (ret == ENOENT) { /* 2: No such file or directory */
-		fprintf(stderr, "%s: %s: Command not found\n", PROGRAM_NAME, cmd[2]);
+		fprintf(stderr, "%s: open: %s: Command not found\n", PROGRAM_NAME, cmd[2]);
 		return 127;
 	}
 
-	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[2], strerror(ret));
+	fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[2], strerror(ret));
 	return ret;
 }
 
@@ -1107,8 +1129,9 @@ edit_link(char *link)
 	if (strchr(link, '\\')) {
 		char *tmp = dequote_str(link, 0);
 		if (!tmp) {
-			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
-			    PROGRAM_NAME, link);
+//			fprintf(stderr, _("%s: %s: Error dequoting file\n"), PROGRAM_NAME, link);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: le: %s: Error dequoting file\n"),
+				PROGRAM_NAME, link);
 			return EXIT_FAILURE;
 		}
 
@@ -1123,22 +1146,20 @@ edit_link(char *link)
 	/* Check we have a valid symbolic link */
 	struct stat attr;
 	if (lstat(link, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, link,
-		    strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, link, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: le: %s: %s\n", PROGRAM_NAME, link, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (!S_ISLNK(attr.st_mode)) {
-		fprintf(stderr, _("%s: %s: Not a symbolic link\n"),
-		    PROGRAM_NAME, link);
+		fprintf(stderr, _("%s: le: %s: Not a symbolic link\n"), PROGRAM_NAME, link);
 		return EXIT_FAILURE;
 	}
 
 	/* Get file pointed to by symlink and report to the user */
 	char *real_path = realpath(link, NULL);
 	if (!real_path) {
-		printf(_("%s%s%s currently pointing to nowhere (broken link)\n"),
-		    or_c, link, df_c);
+		printf(_("%s%s%s currently pointing to nowhere (broken link)\n"), or_c, link, df_c);
 	} else {
 		printf(_("%s%s%s currently pointing to "), ln_c, link, df_c);
 		colors_list(real_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
@@ -1180,7 +1201,7 @@ edit_link(char *link)
 			if (file_info[a].name)
 				new_path = savestring(file_info[a].name, strlen(file_info[a].name));
 		} else {
-			fprintf(stderr, _("%s: %s: Invalid ELN\n"), PROGRAM_NAME, new_path);
+			fprintf(stderr, _("%s: le: %s: Invalid ELN\n"), PROGRAM_NAME, new_path);
 			free(new_path);
 			return EXIT_FAILURE;
 		}
@@ -1196,8 +1217,9 @@ edit_link(char *link)
 	if (strchr(new_path, '\\')) {
 		char *tmp = dequote_str(new_path, 0);
 		if (!tmp) {
-			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
-			    PROGRAM_NAME, new_path);
+//			fprintf(stderr, _("%s: %s: Error dequoting file\n"), PROGRAM_NAME, new_path);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: le: %s: Error dequoting file\n"),
+				PROGRAM_NAME, new_path);
 			free(new_path);
 			return EXIT_FAILURE;
 		}
@@ -1444,13 +1466,16 @@ remove_file(char **args)
 					if (S_ISDIR(a.st_mode))
 						dirs = 1;
 				} else {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp, strerror(errno));
+//					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp, strerror(errno));
+					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: r: %s: %s\n", PROGRAM_NAME,
+						tmp, strerror(errno));
 					errs++;
 				}
 				free(tmp);
 			} else {
-				fprintf(stderr, "%s: %s: Error dequoting file name\n",
-				    PROGRAM_NAME, args[i]);
+//				fprintf(stderr, "%s: %s: Error dequoting file name\n", PROGRAM_NAME, args[i]);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: r: %s: Error dequoting file name\n",
+					PROGRAM_NAME, args[i]);
 				continue;
 			}
 		} else {
@@ -1460,7 +1485,9 @@ remove_file(char **args)
 				if (S_ISDIR(a.st_mode))
 					dirs = 1;
 			} else {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
+//				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: r: %s: %s\n", PROGRAM_NAME,
+					args[i], strerror(errno));
 				errs++;
 			}
 		}
@@ -1544,7 +1571,7 @@ bulk_rename(char **args)
 
 	int fd = mkstemp(bulk_file);
 	if (fd == -1) {
-		_err('e', PRINT_PROMPT, "bulk: %s: %s\n", bulk_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: br: %s: %s\n", PROGRAM_NAME, bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1554,7 +1581,7 @@ bulk_rename(char **args)
 #ifdef __HAIKU__
 	fp = fopen(bulk_file, "w");
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "bulk: %s: %s\n", bulk_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: br: %s: %s\n", PROGRAM_NAME, bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 #endif
@@ -1574,7 +1601,9 @@ bulk_rename(char **args)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
-				fprintf(stderr, _("bulk: %s: Error dequoting file name\n"), args[i]);
+//				fprintf(stderr, _("bulk: %s: Error dequoting file name\n"), args[i]);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: br: %s: Error "
+					"dequoting file name\n"), PROGRAM_NAME, args[i]);
 				continue;
 			}
 			strcpy(args[i], deq_file);
@@ -1594,7 +1623,7 @@ bulk_rename(char **args)
 
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: br: %s: %s\n", PROGRAM_NAME, bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1610,9 +1639,10 @@ bulk_rename(char **args)
 	exit_status = open_file(bulk_file);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
-		fprintf(stderr, _("bulk: %s\n"), strerror(errno));
+//		fprintf(stderr, _("bulk: %s\n"), strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: br: %s\n"), PROGRAM_NAME, strerror(errno));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
-			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			_err('e', PRINT_PROMPT, "%s: br: unlinkat: %s: %s\n", PROGRAM_NAME,
 			    bulk_file, strerror(errno));
 		}
 		close_fstream(fp, fd);
@@ -1622,7 +1652,7 @@ bulk_rename(char **args)
 	close_fstream(fp, fd);
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: br: %s: %s\n", PROGRAM_NAME, bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1632,7 +1662,7 @@ bulk_rename(char **args)
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		puts(_("bulk: Nothing to do"));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
-			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			_err('e', PRINT_PROMPT, "%s: br: unlinkat: %s: %s\n", PROGRAM_NAME,
 			    bulk_file, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
@@ -1653,7 +1683,7 @@ bulk_rename(char **args)
 	if (arg_total != file_total) {
 		fputs(_("bulk: Line mismatch in renaming file\n"), stderr);
 		if (unlinkat(fd, bulk_file, 0) == -1)
-			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			_err('e', PRINT_PROMPT, "%s: br: unlinkat: %s: %s\n", PROGRAM_NAME,
 			    bulk_file, strerror(errno));
 		close_fstream(fp, fd);
 		return EXIT_FAILURE;
@@ -1685,9 +1715,9 @@ bulk_rename(char **args)
 
 	/* If no file name was modified */
 	if (!modified) {
-		puts(_("bulk: Nothing to do"));
+		puts(_("br: Nothing to do"));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
-			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			_err('e', PRINT_PROMPT, "%s: br: %s: %s\n", PROGRAM_NAME,
 			    bulk_file, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
@@ -1761,7 +1791,7 @@ bulk_rename(char **args)
 	free(line);
 
 	if (unlinkat(fd, bulk_file, 0) == -1) {
-		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+		_err('e', PRINT_PROMPT, "%s: br: unlinkat: %s: %s\n", PROGRAM_NAME,
 		    bulk_file, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	}
@@ -1785,7 +1815,9 @@ char *export(char **filenames, int open)
 
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: exp: %s: %s\n", PROGRAM_NAME,
+			tmp_file, strerror(errno));
 		free(tmp_file);
 		return (char *)NULL;
 	}
@@ -1794,7 +1826,9 @@ char *export(char **filenames, int open)
 #ifdef __HAIKU__
 	FILE *fp = fopen(tmp_file, "w");
 	if (!fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: exp: %s: %s\n", PROGRAM_NAME,
+			tmp_file, strerror(errno));
 		free(tmp_file);
 		return (char *)NULL;
 	}
@@ -1875,8 +1909,10 @@ batch_link(char **args)
 		char *ptr = strrchr(linkname, '/');
 		if (symlinkat(args[i], AT_FDCWD, ptr ? ++ptr : linkname) == -1) {
 			exit_status = EXIT_FAILURE;
-			fprintf(stderr, _("%s: %s: Cannot create symlink: %s\n"),
-			    PROGRAM_NAME, ptr ? ptr : linkname, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: bl: symlinkat: %s: Cannot create "
+				"symlink: %s\n"), PROGRAM_NAME, ptr ? ptr : linkname, strerror(errno));
+/*			fprintf(stderr, _("%s: %s: Cannot create symlink: %s\n"),
+			    PROGRAM_NAME, ptr ? ptr : linkname, strerror(errno)); */
 		}
 	}
 

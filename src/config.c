@@ -122,7 +122,9 @@ edit_function(char **comm)
 		return regen_config();
 
 	if (config_ok == 0) {
-		fprintf(stderr, _("%s: Cannot access the configuration file\n"), PROGRAM_NAME);
+//		fprintf(stderr, _("%s: Cannot access the configuration file\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Cannot access the configuration file\n"),
+			PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -589,7 +591,7 @@ create_tmp_files(void)
 		sprintf(sel_file, "%s/selbox.cfm", P_tmpdir);
 	}
 
-	_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary directory for "
+	_err('w', PRINT_PROMPT, _("%s: %s: Using a temporary directory for "
 		"the Selection Box. Selected files won't be persistent across "
 		"reboots\n"), PROGRAM_NAME, tmp_dir);
 }
@@ -744,7 +746,9 @@ create_config(char *file)
 	FILE *config_fp = open_fstream_w(file, &fd);
 
 	if (!config_fp) {
-		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+//		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n", PROGRAM_NAME,
+			file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -823,7 +827,9 @@ LongViewMode=%s\n\
 ApparentSize=%s\n\
 # If running in long view, print directories full size (including contents)\n\
 FullDirSize=%s\n\n\
-# Keep a record of both external and internal commands able to\n\
+# Log errors and warnings\n\
+Logs=%s\n\
+# Keep a record of external commands and internal commands able to\n\
 # modify the files system (e.g. 'r', 'c', 'm', and so on)\n\
 LogCmds=%s\n\n"
 
@@ -904,6 +910,7 @@ LightMode=%s\n\n",
 		DEF_APPARENT_SIZE == 1 ? "true" : "false",
 		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
 		DEF_LOGS_ENABLED == 1 ? "true" : "false",
+		DEF_LOG_CMDS == 1 ? "true" : "false",
 		DEF_MIN_NAME_TRIM,
 		DEF_MIN_JUMP_RANK,
 		DEF_MAX_JUMP_TOTAL_RANK,
@@ -1901,8 +1908,13 @@ read_config(void)
 		}
 
 		else if (xargs.logs == UNSET && *line == 'L'
-		&& strncmp(line, "LogCmds=", 8) == 0) {
+		&& strncmp(line, "Logs=", 5) == 0) {
 			if (set_config_bool_value(line, &logs_enabled) == -1)
+				continue;
+		}
+
+		else if (*line == 'L' && strncmp(line, "LogCmds=", 8) == 0) {
+			if (set_config_bool_value(line, &log_cmds) == -1)
 				continue;
 		}
 
@@ -2105,7 +2117,7 @@ read_config(void)
 				free(workspaces[cur_ws].path);
 				workspaces[cur_ws].path = savestring(tmp, strlen(tmp));
 			} else {
-				_err('w', PRINT_PROMPT, _("%s: '%s': %s. Using the "
+				_err('w', PRINT_PROMPT, _("%s: chdir: %s: %s. Using the "
 					"current working directory as starting path\n"),
 					PROGRAM_NAME, tmp, strerror(errno));
 			}
@@ -2324,7 +2336,7 @@ create_trash_dirs(void)
 
 		if (ret != EXIT_SUCCESS) {
 			trash_ok = 0;
-			_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating trash "
+			_err('w', PRINT_PROMPT, _("%s: mkdir: %s: Error creating trash "
 				"directory. Trash function disabled\n"), PROGRAM_NAME, trash_dir);
 		}
 	}
@@ -2332,7 +2344,7 @@ create_trash_dirs(void)
 	/* If it exists, check it is writable */
 	else if (access(trash_dir, W_OK) == -1) {
 		trash_ok = 0;
-		_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
+		_err('w', PRINT_PROMPT, _("%s: %s: Directory not writable. "
 				"Trash function disabled\n"), PROGRAM_NAME, trash_dir);
 	}
 }
@@ -2369,7 +2381,7 @@ init_config(void)
 	set_trash_dirs();
 #endif /* _NO_TRASH */
 	if (xargs.stealth_mode == 1) {
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Running in stealth mode: "
 			"persistent selection, bookmarks, jump database and directory history, "
 			"just as logs and configuration files, are disabled.\n"), PROGRAM_NAME);
 		config_ok = 0;
@@ -2524,6 +2536,7 @@ reset_variables(void)
 	light_mode = UNSET;
 	list_dirs_first = UNSET;
 	listing_mode = UNSET;
+	log_cmds = UNSET;
 	logs_enabled = UNSET;
 	long_view = UNSET;
 

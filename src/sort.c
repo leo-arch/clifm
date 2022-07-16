@@ -442,7 +442,7 @@ _set_sort_by_name(char **arg)
 		}
 	}
 
-	fprintf(stdout, _("%s: %s: No such sorting method\n"), PROGRAM_NAME, *arg);
+	fprintf(stdout, _("st: %s: No such sorting method\n"), *arg);
 	return EXIT_FAILURE;
 }
 

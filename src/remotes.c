@@ -84,8 +84,8 @@ dequote_remote_name(char *name)
 			strcpy(name, deq);
 			free(deq);
 		} else {
-			fprintf(stderr, "%s: %s: Error dequoting resource name\n",
-					PROGRAM_NAME, name);
+//			fprintf(stderr, "%s: %s: Error dequoting resource name\n", PROGRAM_NAME, name);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: Error dequoting resource name\n", name);
 			return EXIT_FAILURE;
 		}
 	}
@@ -115,13 +115,12 @@ get_remote(char *name)
 	}
 
 	if (!found) {
-		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME, name);
+		fprintf(stderr, _("net: %s: No such remote\n"), name);
 		return (-1);
 	}
 
 	if (!remotes[i].mountpoint) {
-		fprintf(stderr, _("%s: No mountpoint specified for '%s'\n"), PROGRAM_NAME,
-				remotes[i].name);
+		fprintf(stderr, _("net: No mountpoint specified for '%s'\n"), remotes[i].name);
 		return (-1);
 	}
 
@@ -134,7 +133,9 @@ _create_mountpoint(int i)
 	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME,
+/*		fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME,
+				remotes[i].mountpoint, strerror(errno)); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n",
 				remotes[i].mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -146,8 +147,7 @@ static inline int
 cd_to_mountpoint(int i)
 {
 	free(workspaces[cur_ws].path);
-	workspaces[cur_ws].path = savestring(remotes[i].mountpoint,
-						strlen(remotes[i].mountpoint));
+	workspaces[cur_ws].path = savestring(remotes[i].mountpoint, strlen(remotes[i].mountpoint));
 	add_to_jumpdb(workspaces[cur_ws].path);
 	add_to_dirhist(workspaces[cur_ws].path);
 
@@ -161,16 +161,15 @@ cd_to_mountpoint(int i)
 static inline int
 print_cd_error(int i)
 {
-	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			remotes[i].mountpoint, strerror(errno));
+//	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes[i].mountpoint, strerror(errno));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
 	return EXIT_FAILURE;
 }
 
 static inline int
 print_no_mount_cmd_error(int i)
 {
-	fprintf(stderr, _("%s: No mount command specified for '%s'\n"),
-		PROGRAM_NAME, remotes[i].name);
+	fprintf(stderr, _("net: No mount command specified for '%s'\n"), remotes[i].name);
 	return EXIT_FAILURE;
 }
 
@@ -222,19 +221,24 @@ remotes_unmount(char *name)
 		return EXIT_FAILURE;
 
 	if (remotes[i].mounted == 0) {
-		fprintf(stderr, _("%s: %s: Not mounted\n"), PROGRAM_NAME, remotes[i].name);
+//		fprintf(stderr, _("%s: %s: Not mounted\n"), PROGRAM_NAME, remotes[i].name);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Not mounted\n"), remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
 	if (!remotes[i].mountpoint) {
-		fprintf(stderr, _("%s: Error getting mountpoint for '%s'\n"), PROGRAM_NAME,
-				remotes[i].name);
+/*		fprintf(stderr, _("%s: Error getting mountpoint for '%s'\n"), PROGRAM_NAME,
+				remotes[i].name); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: Error getting mountpoint for '%s'\n"),
+			remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
 	if (!remotes[i].unmount_cmd) {
-		fprintf(stderr, _("%s: No unmount command found for '%s'\n"),
-			PROGRAM_NAME, remotes[i].name);
+/*		fprintf(stderr, _("%s: No unmount command found for '%s'\n"),
+			PROGRAM_NAME, remotes[i].name); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: No unmount command found for '%s'\n"),
+			remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
@@ -252,8 +256,10 @@ remotes_unmount(char *name)
 
 		char *p = strrchr(remotes[i].mountpoint, '/');
 		if (!p) {
-			fprintf(stderr, _("%s: %s: Error getting parent directory\n"),
-					PROGRAM_NAME, remotes[i].mountpoint);
+/*			fprintf(stderr, _("%s: %s: Error getting parent directory\n"),
+					PROGRAM_NAME, remotes[i].mountpoint); */
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Error getting parent directory\n"),
+					remotes[i].mountpoint);
 			return EXIT_FAILURE;
 		}
 
@@ -261,14 +267,16 @@ remotes_unmount(char *name)
 		errno = 0;
 		if (xchdir(remotes[i].mountpoint, SET_TITLE) == EXIT_FAILURE) {
 			*p = '/';
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+/*			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+					remotes[i].mountpoint, strerror(errno)); */
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n",
 					remotes[i].mountpoint, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
 		free(workspaces[cur_ws].path);
 		workspaces[cur_ws].path = savestring(remotes[i].mountpoint,
-						strlen(remotes[i].mountpoint));
+			strlen(remotes[i].mountpoint));
 		*p = '/';
 	}
 
@@ -287,7 +295,8 @@ remotes_edit(char *app)
 
 	struct stat attr;
 	if (stat(remotes_file, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -307,7 +316,8 @@ remotes_edit(char *app)
 		return ret;
 
 	if (stat(remotes_file, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file, strerror(errno));
 		return errno;
 	}
 
@@ -324,7 +334,7 @@ int
 remotes_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		printf("%s: net: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 

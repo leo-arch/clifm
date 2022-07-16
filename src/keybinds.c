@@ -93,7 +93,7 @@ kbinds_reset(void)
 	}
 
 	if (exit_status == EXIT_SUCCESS)
-		_err('n', PRINT_PROMPT, _("%s: Restart the program for changes "
+		_err('n', PRINT_PROMPT, _("%s: kb: Restart the program for changes "
 			"to take effect\n"), PROGRAM_NAME);
 
 	return exit_status;
@@ -103,7 +103,7 @@ static int
 kbinds_edit(char *app)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		printf("%s: kb: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
@@ -135,7 +135,7 @@ kbinds_edit(char *app)
 	if (mtime_bfr == (time_t)attr.st_mtime)
 		return EXIT_SUCCESS;
 
-	_err('n', PRINT_PROMPT, _("%s: Restart the program for changes to "
+	_err('n', PRINT_PROMPT, _("%s: kb: Restart the program for changes to "
 			"take effect\n"), PROGRAM_NAME);
 	return EXIT_SUCCESS;
 }
@@ -148,7 +148,7 @@ kbinds_function(char **args)
 
 	if (!args[1]) {
 		if (kbinds_n == 0) {
-			printf("%s: No keybindings defined\n", PROGRAM_NAME);
+			printf("%s: kb: No keybindings defined\n", PROGRAM_NAME);
 			return EXIT_SUCCESS;
 		}
 		size_t i;

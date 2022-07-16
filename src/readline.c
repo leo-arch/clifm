@@ -514,7 +514,9 @@ prompt_xrename(void)
 	} else {
 		char *dstr = dequote_str(pp, 0);
 		if (!dstr) {
-			fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, pp);
+//			fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, pp);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error dequoting file name\n"),
+				PROGRAM_NAME, pp);
 			xrename = 0;
 			return EXIT_FAILURE;
 		}

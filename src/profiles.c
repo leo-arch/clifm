@@ -119,7 +119,7 @@ int
 profile_set(char *prof)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: profile: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		printf("%s: profiles: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
@@ -129,15 +129,15 @@ profile_set(char *prof)
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
 	if (found == 0) {
-		fprintf(stderr, _("%s: %s: No such profile\nTo add a new "
-			"profile enter 'pf add PROFILE'\n"), PROGRAM_NAME, prof);
+		fprintf(stderr, _("pf: %s: No such profile\nTo add a new "
+			"profile enter 'pf add PROFILE'\n"), prof);
 		return EXIT_FAILURE;
 	}
 
 	/* If changing to the current profile, do nothing */
 	if ((!alt_profile && *prof == 'd' && strcmp(prof, "default") == 0)
 	|| (alt_profile && *prof == *alt_profile && strcmp(prof, alt_profile) == 0)) {
-		printf(_("%s: '%s' is the current profile\n"), PROGRAM_NAME, prof);
+		printf(_("pf: '%s' is the current profile\n"), prof);
 		return EXIT_SUCCESS;
 	}
 
@@ -176,9 +176,8 @@ profile_set(char *prof)
 
 	/* Check whether we have a working shell */
 	if (access(user.shell, X_OK) == -1) {
-		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. Please "
-			"edit the configuration file to specify a working shell.\n"),
-			PROGRAM_NAME, user.shell);
+		_err('w', PRINT_PROMPT, _("pf: %s: System shell not found. Please "
+			"edit the configuration file to specify a working shell.\n"), user.shell);
 	}
 
 	i = (int)usrvar_n;
@@ -226,8 +225,7 @@ profile_set(char *prof)
 				fputs("edit\n", hist_fp);
 				fclose(hist_fp);
 			} else {
-				_err('w', PRINT_PROMPT, _("%s: Error opening the "
-					"history file\n"), PROGRAM_NAME);
+				_err('w', PRINT_PROMPT, _("pf: Error opening the history file\n"));
 			}
 		}
 
@@ -265,14 +263,16 @@ profile_set(char *prof)
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 		if (!*cwd) {
-			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+//			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: %s\n", strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
 	if (xchdir(workspaces[cur_ws].path, SET_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -294,13 +294,15 @@ profile_add(char *prof)
 
 	int found = check_profile(prof);
 	if (found == 1) {
-		fprintf(stderr, _("%s: %s: Profile already exists\n"), PROGRAM_NAME, prof);
+		fprintf(stderr, _("pf: %s: Profile already exists\n"), prof);
 		return EXIT_FAILURE;
 	}
 
 	if (!home_ok) {
-		fprintf(stderr, _("%s: %s: Cannot create profile: Home "
-			"directory not found\n"), PROGRAM_NAME, prof);
+/*		fprintf(stderr, _("%s: %s: Cannot create profile: Home "
+			"directory not found\n"), PROGRAM_NAME, prof); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pf: %s: Cannot create profile: Home "
+			"directory not found\n"), prof);
 		return EXIT_FAILURE;
 	}
 
@@ -312,8 +314,10 @@ profile_add(char *prof)
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
 	if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: mkdir: %s: Error creating "
-			"configuration directory\n"), PROGRAM_NAME, nconfig_dir);
+/*		fprintf(stderr, _("%s: mkdir: %s: Error creating "
+			"configuration directory\n"), PROGRAM_NAME, nconfig_dir); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pf: mkdir: %s: Error creating "
+			"configuration directory\n"), nconfig_dir);
 		free(nconfig_dir);
 		return EXIT_FAILURE;
 	}
@@ -335,8 +339,8 @@ profile_add(char *prof)
 	FILE *hist_fp = fopen(nhist_file, "w+");
 
 	if (!hist_fp) {
-		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-		    nhist_file, strerror(errno));
+//		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, nhist_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: fopen: %s: %s\n", nhist_file, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	} else {
 		/* To avoid malloc errors in read_history(), do not create
@@ -368,8 +372,7 @@ profile_add(char *prof)
 
 		get_profile_names();
 	} else {
-		fprintf(stderr, _("%s: %s: Error creating profile\n"),
-		    PROGRAM_NAME, prof);
+		fprintf(stderr, _("pf: %s: Error creating profile\n"), prof);
 	}
 
 	return exit_status;
@@ -380,7 +383,7 @@ static int
 profile_del(char *prof)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: profile: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		printf("%s: profiles: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
@@ -390,7 +393,7 @@ profile_del(char *prof)
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
 	if (found == 0) {
-		fprintf(stderr, _("%s: %s: No such profile\n"), PROGRAM_NAME, prof);
+		fprintf(stderr, _("pf: %s: No such profile\n"), prof);
 		return EXIT_FAILURE;
 	}
 
@@ -402,7 +405,7 @@ profile_del(char *prof)
 	free(tmp);
 
 	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: %s: Error removing profile\n"), PROGRAM_NAME, prof);
+		fprintf(stderr, _("pf: %s: Error removing profile\n"), prof);
 		return ret;
 	}
 
@@ -469,7 +472,7 @@ int
 profile_function(char **comm)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		printf("%s: profiles: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 

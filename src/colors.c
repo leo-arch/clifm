@@ -543,12 +543,12 @@ cschemes_function(char **args)
 {
 #ifdef CLIFM_SUCKLESS
 	UNUSED(args);
-	printf("%s: color schemes: %s. Edit settings.h in the source code "
+	printf("%s: colors: %s. Edit settings.h in the source code "
 		"and recompile\n", PROGRAM_NAME, NOT_AVAILABLE);
 	return EXIT_FAILURE;
 #else
 	if (xargs.stealth_mode == 1) {
-		fprintf(stderr, _("%s: color schemes: %s\nTIP: To change the "
+		fprintf(stderr, _("%s: colors: %s\nTIP: To change the "
 			"current color scheme use the following environment "
 			"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
 			"and CLIFM_EXT_COLORS\n"), PROGRAM_NAME, STEALTH_DISABLED);
@@ -998,7 +998,7 @@ get_cur_colorscheme(const char *colorscheme)
 	}
 
 	if (!cur_cscheme) {
-		_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
+		_err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "
 			"Falling back to default\n"), PROGRAM_NAME, colorscheme);
 
 		if (def_cscheme)
@@ -1103,10 +1103,12 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	FILE *fp_colors = fopen(colorscheme_file, "r");
 	if (!fp_colors) {
 		if (!env) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, colorscheme_file, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, colorscheme_file, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: colors: %s: %s\n", PROGRAM_NAME,
+				colorscheme_file, strerror(errno));
 			return EXIT_FAILURE;
 		} else {
-			_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
+			_err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "
 				"Falling back to the default one\n"), PROGRAM_NAME, colorscheme);
 			return EXIT_SUCCESS;
 		}

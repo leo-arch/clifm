@@ -1025,6 +1025,7 @@ extern int
 	light_mode,
 	list_dirs_first,
 	listing_mode,
+	log_cmds,
 	logs_enabled,
 	long_view,
 	max_name_len,

@@ -280,8 +280,8 @@ get_app(const char *mime, const char *filename)
 
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
-		fprintf(stderr, _("%s: %s: Error opening file\n"),
-		    PROGRAM_NAME, mime_file);
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, mime_file);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", mime_file);
 		return (char *)NULL;
 	}
 
@@ -359,14 +359,16 @@ get_mime(char *file)
 
 	FILE *file_fp = fopen(mime_tmp_file, "w");
 	if (!file_fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, mime_tmp_file,
-		    strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, mime_tmp_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: fopen: %s: %s\n",
+			mime_tmp_file, strerror(errno));
 		return (char *)NULL;
 	}
 
 	FILE *file_fp_err = fopen("/dev/null", "w");
 	if (!file_fp_err) {
-		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
+//		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: /dev/null: %s\n", strerror(errno));
 		fclose(file_fp);
 		return (char *)NULL;
 	}
@@ -376,7 +378,8 @@ get_mime(char *file)
 
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
-		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s\n", strerror(errno));
 		fclose(file_fp);
 		fclose(file_fp_err);
 		return (char *)NULL;
@@ -384,7 +387,8 @@ get_mime(char *file)
 
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
-		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s\n", strerror(errno));
 		fclose(file_fp);
 		fclose(file_fp_err);
 		return (char *)NULL;
@@ -442,30 +446,29 @@ static int
 mime_import(char *file)
 {
 #if defined(__HAIKU__)
-	fprintf(stderr, "%s: Importing MIME definitions is not supported on Haiku\n",
-			PROGRAM_NAME);
+	fprintf(stderr, "mime: Importing MIME definitions is not supported on Haiku\n");
 	return (-1);
 #elif defined(__APPLE__)
-	fprintf(stderr, "%s: Importing MIME definitions is not supported on MacOS\n",
-			PROGRAM_NAME);
+	fprintf(stderr, "mime: Importing MIME definitions is not supported on MacOS\n");
 	return (-1);
 #endif
 	/* If not in X, exit */
 	if (!(flags & GUI)) {
-		fprintf(stderr, _("%s: Nothing was imported. No graphical "
-				"environment found\n"), PROGRAM_NAME);
+		fprintf(stderr, _("mime: Nothing was imported. No graphical environment found\n"));
 		return (-1);
 	}
 
 	if (!user.home) {
-		fprintf(stderr, _("%s: Error getting home directory\n"), PROGRAM_NAME);
+//		fprintf(stderr, _("%s: Error getting home directory\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("mime: Error getting home directory\n"));
 		return (-1);
 	}
 
 	/* Open the local MIME file */
 	FILE *mime_fp = fopen(file, "w");
 	if (!mime_fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: fopen: %s: %s\n", file, strerror(errno));
 		return (-1);
 	}
 
@@ -529,8 +532,7 @@ mime_import(char *file)
 	free(local_path);
 
 	if (mime_defs == 0) {
-		fprintf(stderr, _("%s: Nothing was imported. No MIME definitions "
-			"found\n"), PROGRAM_NAME);
+		fprintf(stderr, _("mime: Nothing was imported. No MIME definitions found\n"));
 	}
 
 	/* Make sure there is an entry for text/plain files, so that at least
@@ -548,14 +550,16 @@ static int
 mime_edit(char **args)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
+		printf("%s: mime: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
 	int exit_status = EXIT_SUCCESS;
 	struct stat a;
 	if (!mime_file || stat(mime_file, &a) == -1) {
-		fprintf(stderr, "%s: Cannot access the mimelist file. %s\n", PROGRAM_NAME,
+/*		fprintf(stderr, "%s: Cannot access the mimelist file. %s\n", PROGRAM_NAME,
+			strerror(ENOENT)); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: Cannot access the mimelist file. %s\n",
 			strerror(ENOENT));
 		return ENOENT;
 	}
@@ -914,8 +918,7 @@ mime_open_with_tab(char *filename, const char *prefix)
 					 * value */
 					appb = savestring(app, strlen(app));
 					/* app: the expanded value */
-					app = (char *)xrealloc(app, (app_len + strlen(t) + 1)
-							* sizeof(char));
+					app = (char *)xrealloc(app, (app_len + strlen(t) + 1) * sizeof(char));
 					strcpy(app, t);
 					free(t);
 				} else {
@@ -1023,7 +1026,8 @@ run_cmd_noargs(char *arg, char *name)
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg, strerror(ret));
+//	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg, strerror(ret));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", arg, strerror(ret));
 	return EXIT_FAILURE;
 }
 
@@ -1399,13 +1403,16 @@ mime_info(char *arg, char **fpath, char **deq)
 	}
 
 	if (!*fpath) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg,
+/*		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, arg,
+		    (is_number(arg) == 1) ? _("No such ELN") : strerror(errno)); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", arg,
 		    (is_number(arg) == 1) ? _("No such ELN") : strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (access(*fpath, R_OK) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *fpath, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *fpath, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", *fpath, strerror(errno));
 		free(*fpath);
 		return EXIT_FAILURE;
 	}
@@ -1435,13 +1442,15 @@ get_open_file_path(char **args, char **fpath, char **deq)
 	if (!*fpath) {
 		*fpath = realpath(f, NULL);
 		if (!*fpath) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, f, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, f, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", f, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
 
 	if (access(*fpath, R_OK) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *fpath, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *fpath, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", *fpath, strerror(errno));
 		free(*fpath);
 		return EXIT_FAILURE;
 	}
@@ -1467,12 +1476,10 @@ handle_no_app(int info, char **fpath, char **mime, char *arg)
 
 			return exit_status;
 		} else {
-			fprintf(stderr, _("%s: %s: No associated application "
-					"found\n"), PROGRAM_NAME, arg);
+			fprintf(stderr, _("mime: %s: No associated application found\n"), arg);
 		}
 #else
-		fprintf(stderr, _("%s: %s: No associated application "
-				"found\n"), PROGRAM_NAME, arg);
+		fprintf(stderr, _("mime: %s: No associated application found\n"), arg);
 #endif
 	}
 
@@ -1485,7 +1492,8 @@ handle_no_app(int info, char **fpath, char **mime, char *arg)
 static inline int
 print_error_no_mime(char **fpath)
 {
-	fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
+//	fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("mime: Error getting mime-type\n"));
 	free(*fpath);
 	return EXIT_FAILURE;
 }
@@ -1637,7 +1645,8 @@ check_file_cmd(void)
 {
 	char *p = get_cmd_path("file");
 	if (!p) {
-		fprintf(stderr, _("%s: file: Command not found\n"), PROGRAM_NAME);
+//		fprintf(stderr, _("%s: file: Command not found\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("mime: file: Command not found\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -1685,7 +1694,8 @@ mime_open(char **args)
 	}
 
 	if (!file_path) {
-		fprintf(stderr, "%s: %s\n", args[file_index], strerror(errno));
+//		fprintf(stderr, "%s: %s\n", args[file_index], strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", args[file_index], strerror(errno));
 		return EXIT_FAILURE;
 	}
 

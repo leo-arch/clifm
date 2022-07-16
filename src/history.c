@@ -45,8 +45,7 @@ print_logs(void)
 {
 	FILE *log_fp = fopen(log_file, "r");
 	if (!log_fp) {
-		_err(0, NOPRINT_PROMPT, "%s: log: '%s': %s\n",
-		    PROGRAM_NAME, log_file, strerror(errno));
+		_err(0, NOPRINT_PROMPT, "log: %s: %s\n", log_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -69,7 +68,7 @@ log_function(char **cmd)
 		return EXIT_SUCCESS;
 
 	/* If cmd logs are disabled, allow only "log" commands */
-	if (logs_enabled == 0) {
+	if (log_cmds == 0) {
 		if (cmd && cmd[0] && strcmp(cmd[0], "log") != 0)
 			return EXIT_SUCCESS;
 	}
@@ -88,7 +87,7 @@ log_function(char **cmd)
 		if (*cmd[1] == 'c' && strcmp(cmd[1], "clear") == 0) {
 			clear_log = 1;
 		} else if (*cmd[1] == 's' && strcmp(cmd[1], "status") == 0) {
-			printf(_("Logs %s\n"), (logs_enabled) ? _("enabled") : _("disabled"));
+			printf(_("Logs %s\n"), (logs_enabled == 1) ? _("enabled") : _("disabled"));
 			return EXIT_SUCCESS;
 		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "on") == 0) {
 			if (logs_enabled == 1) {
@@ -113,7 +112,7 @@ log_function(char **cmd)
 
 	/* Construct the log line */
 	if (!last_cmd) {
-		if (logs_enabled == 0) {
+		if (log_cmds == 0) {
 			/* When cmd logs are disabled, "log clear" and "log off" are
 			 * the only commands that can reach this code */
 			if (clear_log == 1) {
@@ -148,25 +147,23 @@ log_function(char **cmd)
 
 	/* Write the log into LOG_FILE */
 	FILE *log_fp;
-	/* If not 'log clear', append the log to the existing logs */
 
-	if (clear_log == 0)
+	if (clear_log == 0) /* Append the log to the existing logs */
 		log_fp = fopen(log_file, "a");
-	else /* Else, overwrite the log file leaving only the 'log clear' command */
+	else /* Overwrite the log file leaving only the 'log clear' command */
 		log_fp = fopen(log_file, "w+");
 
 	if (!log_fp) {
-		_err('e', PRINT_PROMPT, "%s: log: '%s': %s\n", PROGRAM_NAME,
-			log_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "log: '%s': %s\n", log_file, strerror(errno));
 		free(full_log);
 		return EXIT_FAILURE;
-	} else { /* If LOG_FILE was correctly opened, write the log */
-		fputs(full_log, log_fp);
-		free(full_log);
-		fclose(log_fp);
-
-		return EXIT_SUCCESS;
 	}
+
+	fputs(full_log, log_fp);
+	free(full_log);
+	fclose(log_fp);
+
+	return EXIT_SUCCESS;
 }
 
 /* Write _MSG into the log file: [date] _MSG */
@@ -208,7 +205,7 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 		return;
 
 	if (add_to_msgs_list == 1) {
-		/* Store messages (for current session only) in an array, so that
+		/* Store messages (for current session only) into an array, so that
 		 * the user can check them via the 'msg' command */
 		msgs_n++;
 		messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1) * sizeof(char *));
@@ -221,10 +218,8 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 	else /* Print the message directly here */
 		fputs(_msg, stderr);
 
-	/* If the config dir cannot be found or if msg log file isn't set
-	 * yet... This will happen if an error occurs before running
-	 * init_config(), for example, if the user's home cannot be found */
-	if (xargs.stealth_mode == 1 || config_ok == 0 || !log_file || !*log_file || logme == 0)
+	if (xargs.stealth_mode == 1 || config_ok == 0 || !log_file || !*log_file
+	|| logme == 0 || logs_enabled == 0)
 		return;
 
 	write_msg_into_logfile(_msg);
@@ -241,8 +236,10 @@ save_dirhist(void)
 
 	FILE *fp = fopen(dirhist_file, "w");
 	if (!fp) {
-		fprintf(stderr, _("%s: Could not save directory history: %s\n"),
-		    PROGRAM_NAME, strerror(errno));
+/*		fprintf(stderr, _("%s: Could not save directory history: %s\n"),
+		    PROGRAM_NAME, strerror(errno)); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Could not save directory history: %s\n"),
+		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -317,8 +314,10 @@ edit_history(char **args)
 {
 	struct stat attr;
 	if (stat(hist_file, &attr) == -1) {
-		fprintf(stderr, "%s: history: %s: %s\n", PROGRAM_NAME, hist_file, strerror(errno));
-		return errno;
+//		fprintf(stderr, "%s: history: %s: %s\n", PROGRAM_NAME, hist_file, strerror(errno));
+		int err = errno;
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
+		return err;
 	}
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
@@ -356,8 +355,7 @@ __clear_history(char **args)
 	/* Let's overwrite whatever was there */
 	FILE *hist_fp = fopen(hist_file, "w+");
 	if (!hist_fp) {
-		_err(0, NOPRINT_PROMPT, "%s: history: %s: %s\n",
-		    PROGRAM_NAME, hist_file, strerror(errno));
+		_err(0, NOPRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -422,7 +420,7 @@ int
 history_function(char **comm)
 {
 	if (xargs.stealth_mode == 1) {
-		printf(_("%s: %s\n"), PROGRAM_NAME, STEALTH_DISABLED);
+		printf(_("%s: history: %s\n"), PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
@@ -490,7 +488,7 @@ run_hist_num(const char *cmd)
 	int num = atoi(cmd);
 
 	if (num <= 0 || num > (int)current_hist_n) {
-		fprintf(stderr, _("%s: !%s: event not found\n"), PROGRAM_NAME, cmd);
+		fprintf(stderr, _("history: !%s: event not found\n"), cmd);
 		return EXIT_FAILURE;
 	}
 
@@ -499,7 +497,8 @@ run_hist_num(const char *cmd)
 
 	char **cmd_hist = parse_input_str(history[num - 1].cmd);
 	if (!cmd_hist) {
-		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
+//		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing history command\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -518,7 +517,8 @@ run_last_hist_cmd(void)
 
 	char **cmd_hist = parse_input_str(history[current_hist_n - 1].cmd);
 	if (!cmd_hist) {
-		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
+//		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing history command\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -535,7 +535,7 @@ run_last_lessn_hist_cmd(const char *cmd)
 	int acmd = atoi(cmd + 1);
 
 	if (!is_number(cmd + 1) || acmd <= 0 || acmd > (int)current_hist_n - 1) {
-		fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
+		fprintf(stderr, _("history: !%s: Event not found\n"), cmd);
 		return EXIT_FAILURE;
 	}
 
@@ -551,7 +551,8 @@ run_last_lessn_hist_cmd(const char *cmd)
 		return exit_status;
 	}
 
-	fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
+//	fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing history command\n"));
 	return EXIT_FAILURE;
 }
 
@@ -574,7 +575,7 @@ run_hist_string(const char *cmd)
 		return exit_status;
 	}
 
-	fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
+	fprintf(stderr, _("history: !%s: Event not found\n"), cmd);
 	return EXIT_FAILURE;
 }
 
@@ -621,7 +622,7 @@ get_history(void)
 
 	FILE *hist_fp = fopen(hist_file, "r");
 	if (!hist_fp) {
-		_err('e', PRINT_PROMPT, "%s: history: '%s': %s\n", PROGRAM_NAME, hist_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

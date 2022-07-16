@@ -709,7 +709,8 @@ check_dir(char **dir)
 	int ret = EXIT_SUCCESS;
 	struct stat attr;
 	if (stat(*dir, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *dir, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, *dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, *dir, strerror(errno));
 		return errno;
 	}
 
@@ -836,7 +837,9 @@ new_instance(char *dir, const int sudo)
 
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
-		fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, dir);
+//		fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, dir);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error dequoting file name\n"),
+			PROGRAM_NAME, dir);
 		free(_sudo);
 		return EXIT_FAILURE;
 	}
@@ -845,7 +848,8 @@ new_instance(char *dir, const int sudo)
 	if (!self) {
 		free(_sudo);
 		free(deq_dir);
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, PNL, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, PNL, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, PNL, strerror(errno));
 		return errno;
 	}
 
@@ -877,25 +881,31 @@ alias_import(char *file)
 	if (*file == '~') {
 		char *file_exp = tilde_expand(file);
 		if (!file_exp) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
 		if (realpath(file_exp, rfile) == NULL) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_exp, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_exp, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+				file_exp, strerror(errno));
 			free(file_exp);
 			return EXIT_FAILURE;
 		}
 		free(file_exp);
 	} else {
 		if (realpath(file, rfile) == NULL) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+				file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
 
 	if (rfile[0] == '\0') {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -903,14 +913,17 @@ alias_import(char *file)
 	int fd;
 	FILE *fp = open_fstream_r(rfile, &fd);
 	if (!fp) {
-		fprintf(stderr, "b%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
+//		fprintf(stderr, "b%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* Open CliFM's config file as well */
 	FILE *config_fp = fopen(config_file, "a");
 	if (!config_fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, config_file, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, config_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			config_file, strerror(errno));
 		close_fstream(fp, fd);
 		return EXIT_FAILURE;
 	}
@@ -1041,7 +1054,9 @@ save_last_path(void)
 
 	FILE *last_fp = fopen(last_dir, "w");
 	if (!last_fp) {
-		fprintf(stderr, _("%s: Error saving last visited directory\n"), PROGRAM_NAME);
+//		fprintf(stderr, _("%s: Error saving last visited directory\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error saving last visited directory: %s\n"),
+			PROGRAM_NAME, strerror(errno));
 		free(last_dir);
 		return;
 	}
@@ -1124,7 +1139,8 @@ create_usr_var(char *str)
 
 	if (!value) {
 		free(name);
-		fprintf(stderr, _("%s: Error getting variable value\n"), PROGRAM_NAME);
+//		fprintf(stderr, _("%s: Error getting variable value\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error getting variable value\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -1609,8 +1625,9 @@ handle_stdin()
 
 	/* chdir to tmp dir and update path var */
 	if (xchdir(stdin_tmp_dir, SET_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, stdin_tmp_dir,
-		    strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, stdin_tmp_dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			stdin_tmp_dir, strerror(errno));
 
 		char *rm_cmd[] = {"rm", "-drf", "--", stdin_tmp_dir, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
@@ -1653,7 +1670,9 @@ save_pinned_dir(void)
 
 	FILE *fp = fopen(pin_file, "w");
 	if (!fp) {
-		fprintf(stderr, _("%s: Error storing pinned directory\n"), PROGRAM_NAME);
+//		fprintf(stderr, _("%s: Error storing pinned directory\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error storing pinned directory: %s\n"),
+			PROGRAM_NAME, strerror(errno));
 	} else {
 		fprintf(fp, "%s", pinned_dir);
 		fclose(fp);
@@ -1671,7 +1690,8 @@ pin_directory(char *dir)
 
 	struct stat attr;
 	if (lstat(dir, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1717,7 +1737,9 @@ unpin_dir(void)
 		char *pin_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 		sprintf(pin_file, "%s/.pin", config_dir);
 		if (unlink(pin_file) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, pin_file, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, pin_file, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+				pin_file, strerror(errno));
 			cmd_error = 1;
 		}
 
@@ -1958,7 +1980,9 @@ quick_help(char *topic)
 
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {
-		fprintf(stderr, "%s: Error creating temporary file\n", PROGRAM_NAME);
+//		fprintf(stderr, "%s: Error creating temporary file\n", PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: Error creating temporary file: %s\n",
+			PROGRAM_NAME, tmp_file, strerror(errno));
 		free(_pager);
 		return EXIT_FAILURE;
 	}
@@ -1966,7 +1990,9 @@ quick_help(char *topic)
 	FILE *fp;
 	fp = open_fstream_w(tmp_file, &fd);
 	if (!fp) {
-		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+//		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n", PROGRAM_NAME,
+			tmp_file, strerror(errno));
 		free(_pager);
 		return EXIT_FAILURE;
 	}

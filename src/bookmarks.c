@@ -232,7 +232,8 @@ bookmark_del(char *name)
 		if (!del_elements) {
 			free_bms(bms, bmn);
 			fclose(bm_fp);
-			fprintf(stderr, _("bookmarks: Error parsing input\n"));
+//			fprintf(stderr, _("bookmarks: Error parsing input\n"));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: Error parsing input\n"));
 			return EXIT_FAILURE;
 		}
 	}
@@ -313,8 +314,10 @@ bookmark_del(char *name)
 		free_bms(bms, bmn);
 		free_del_elements(del_elements);
 		fclose(bm_fp);
-		fprintf(stderr, _("bookmarks: Error creating temporary file: %s: %s\n"),
-			tmp_file, strerror(errno));
+/*		fprintf(stderr, _("bookmarks: Error creating temporary file: %s: %s\n"),
+			tmp_file, strerror(errno)); */
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: Error creating temporary "
+			"file: %s: %s\n"), tmp_file, strerror(errno));
 		return errno;
 	}
 
@@ -394,7 +397,9 @@ bookmark_add(char *file)
 
 	FILE *bm_fp = fopen(bm_file, "r");
 	if (!bm_fp) {
-		fprintf(stderr, "bookmarks: fopen: %s: %s\n", bm_file, strerror(errno));
+//		fprintf(stderr, "bookmarks: fopen: %s: %s\n", bm_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "bookmarks: fopen: %s: %s\n",
+			bm_file, strerror(errno));
 		if (mod_file)
 			free(file);
 		return errno;
@@ -546,14 +551,18 @@ bookmark_add(char *file)
 	bms = (char **)NULL;
 
 	if (!tmp) {
-		fprintf(stderr, _("bookmarks: Error generating the bookmark line\n"));
+//		fprintf(stderr, _("bookmarks: Error generating the bookmark line\n"));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: Error generating the "
+			"bookmark line\n"));
 		return EXIT_FAILURE;
 	}
 
 	/* Once we have the bookmark line, write it to the bookmarks file */
 	bm_fp = fopen(bm_file, "a+");
 	if (!bm_fp) {
-		fprintf(stderr, "bookmarks: fopen: %s: %s\n", bm_file, strerror(errno));
+//		fprintf(stderr, "bookmarks: fopen: %s: %s\n", bm_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "bookmarks: fopen: %s: %s\n",
+			bm_file, strerror(errno));
 		free(tmp);
 		return errno;
 	}
@@ -562,7 +571,9 @@ bookmark_add(char *file)
 		free(file);
 
 	if (fseek(bm_fp, 0L, SEEK_END) == -1) {
-		fprintf(stderr, "bookmarks: fseek: %s: %s\n", bm_file, strerror(errno));
+//		fprintf(stderr, "bookmarks: fseek: %s: %s\n", bm_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "bookmarks: fseek: %s: %s\n",
+			bm_file, strerror(errno));
 		int err = errno;
 		free(tmp);
 		fclose(bm_fp);
@@ -585,7 +596,7 @@ edit_bookmarks(char *cmd, const int flag)
 	int exit_status = EXIT_SUCCESS;
 	struct stat a;
 	if (stat(bm_file, &a) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, bm_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "bookmarks: %s: %s\n", bm_file, strerror(errno));
 		return errno;
 	}
 	time_t prev = a.st_mtime;
@@ -601,10 +612,12 @@ edit_bookmarks(char *cmd, const int flag)
 
 	if (exit_status != EXIT_SUCCESS) {
 		if (cmd) {
-			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME, cmd, strerror(errno));
+//			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME, cmd, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: %s: %s\n"), cmd, strerror(errno));
 			exit_status = errno;
 		} else {
-			fprintf(stderr, _("%s: Error opening the bookmarks file\n"), PROGRAM_NAME);
+//			fprintf(stderr, _("%s: Error opening the bookmarks file\n"), PROGRAM_NAME);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: Error opening the bookmarks file\n"));
 		}
 		return exit_status;
 	}
@@ -808,12 +821,14 @@ add_bookmark(char *cmd)
 
 	char *p = dequote_str(cmd, 0);
 	if (!p) {
-		fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, cmd);
+//		fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, cmd);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: %s: Error dequoting file name\n"), cmd);
 		return EXIT_FAILURE;
 	}
 
 	if (access(p, F_OK) != 0) {
-		fprintf(stderr, _("bookmarks: %s: %s\n"), p, strerror(errno));
+//		fprintf(stderr, _("bookmarks: %s: %s\n"), p, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: %s: %s\n"), p, strerror(errno));
 		free(p);
 		return errno;
 	}
@@ -828,7 +843,7 @@ int
 bookmarks_function(char **cmd)
 {
 	if (xargs.stealth_mode == 1) {
-		printf(_("%s: %s\n"), PROGRAM_NAME, STEALTH_DISABLED);
+		printf(_("%s: bookamrks: %s\n"), PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 

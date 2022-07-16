@@ -45,7 +45,7 @@
 int
 run_action(char *action, char **args)
 {
-	if (!action)
+	if (!action || !*action)
 		return EXIT_FAILURE;
 
 		/* #####################################
@@ -56,7 +56,7 @@ run_action(char *action, char **args)
 	size_t action_len = strlen(action);
 
 	/* Remove terminating new line char */
-	if (action[action_len - 1] == '\n')
+	if (action_len > 0 && action[action_len - 1] == '\n')
 		action[action_len - 1] = '\0';
 
 	int dir_path = 0;
@@ -66,7 +66,9 @@ run_action(char *action, char **args)
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
-			fprintf(stderr, _("%s: Plugins directory not defined\n"), PROGRAM_NAME);
+//			fprintf(stderr, _("%s: Plugins directory not defined\n"), PROGRAM_NAME);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("actions: Plugins directory not "
+				"defined\n"));
 			return EXIT_FAILURE;
 		}
 		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2, sizeof(char));
@@ -78,15 +80,17 @@ run_action(char *action, char **args)
 		/* If not in local dir, check system data dir as well */
 		if (data_dir && !dir_path) {
 			cmd = (char *)xrealloc(cmd, (action_len + strlen(data_dir)
-						+ strlen(PNL) + 11) * sizeof(char));
+				+ strlen(PNL) + 11) * sizeof(char));
 			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action); /* NOLINT */
 			if (access(cmd, X_OK) == -1) {
-				fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
+//				fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
 				free(cmd);
 				return errno;
 			}
 		} else {
-			fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
+//			fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
 			free(cmd);
 			return errno;
 		}
@@ -107,13 +111,14 @@ run_action(char *action, char **args)
 		return EXIT_FAILURE;
 
 	char fifo_path[PATH_MAX];
-	snprintf(fifo_path, PATH_MAX -1, "%s/.pipe.%s", tmp_dir, rand_ext); /* NOLINT */
+	snprintf(fifo_path, sizeof(fifo_path), "%s/.pipe.%s", tmp_dir, rand_ext); /* NOLINT */
 	free(rand_ext);
 
 	setenv("CLIFM_BUS", fifo_path, 1);
 
 	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
-		printf("%s: %s\n", fifo_path, strerror(errno));
+//		fprintf(stderr, "%s: %s\n", fifo_path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	fifo_path, strerror(errno));
 		unsetenv("CLIFM_BUS");
 		return EXIT_FAILURE;
 	}
@@ -175,7 +180,8 @@ run_action(char *action, char **args)
 		}
 	} else {
 		exit_status = errno;
-		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+//		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: waitpid: %s\n", strerror(errno));
 	}
 
 	/* If the pipe is empty */
@@ -233,8 +239,7 @@ static int
 edit_actions(char *app)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: Access to configuration files is not allowed in "
-		       "stealth mode\n", PROGRAM_NAME);
+		printf("actions: Access to configuration files is not allowed in stealth mode\n");
 		return EXIT_SUCCESS;
 	}
 
@@ -244,7 +249,8 @@ edit_actions(char *app)
 	/* Get actions file's current modification time */
 	struct stat attr;
 	if (stat(actions_file, &attr) == -1) {
-		fprintf(stderr, "actions: %s: %s\n", actions_file, strerror(errno));
+//		fprintf(stderr, "actions: %s: %s\n", actions_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	actions_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -326,8 +332,8 @@ actions_function(char **args)
 			}
 			return EXIT_SUCCESS;
 		} else {
-			printf(_("%s: No actions defined. Use the 'actions edit' "
-				"command to add new actions\n"), PROGRAM_NAME);
+			printf(_("actions: No actions defined. Use the 'actions edit' "
+				"command to add new actions\n"));
 			return EXIT_FAILURE;
 		}
 

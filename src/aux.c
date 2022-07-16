@@ -245,7 +245,9 @@ normalize_path(char *src, size_t src_len)
 	if (strchr(src, '\\')) {
 		tmp = dequote_str(src, 0);
 		if (!tmp) {
-			fprintf(stderr, _("%s: %s: Error deescaping string\n"), PROGRAM_NAME, src);
+//			fprintf(stderr, _("%s: %s: Error deescaping string\n"), PROGRAM_NAME, src);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error deescaping string\n"),
+				PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
 		size_t tlen = strlen(tmp);
@@ -260,8 +262,9 @@ normalize_path(char *src, size_t src_len)
 	if (*src == '~') {
 		tmp = tilde_expand(src);
 		if (!tmp) {
-			fprintf(stderr, _("%s: %s: Error expanding tilde\n"),
-					PROGRAM_NAME, src);
+//			fprintf(stderr, _("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, src);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error expanding tilde\n"),
+				PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
 		size_t tlen = strlen(tmp);

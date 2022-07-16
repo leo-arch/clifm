@@ -39,6 +39,7 @@
 #include "checks.h"
 #include "colors.h"
 #include "exec.h"
+#include "misc.h"
 #include "navigation.h"
 #include "sort.h"
 
@@ -115,8 +116,7 @@ search_glob(char **args, const int invert)
 		case 's': file_type = invert == 1 ? DT_SOCK : S_IFSOCK; break;
 		case 'x': run_find(search_path, args[0]); return EXIT_SUCCESS;
 		default:
-			fprintf(stderr, _("%s: search: '%c': Unrecognized file type\n"),
-			    PROGRAM_NAME, (char)file_type);
+			fprintf(stderr, _("search: '%c': Unrecognized file type\n"), (char)file_type);
 			return 2; /* Return 2 to avoid trying the regex approach */
 		}
 	}
@@ -127,7 +127,9 @@ search_glob(char **args, const int invert)
 		if (strchr(search_path, '\\')) {
 			char *deq_dir = dequote_str(search_path, 0);
 			if (!deq_dir) {
-				fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, args[1]);
+//				fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, args[1]);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("search: %s: Error dequoting file name\n"),
+					args[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -146,7 +148,9 @@ search_glob(char **args, const int invert)
 				search_path = (char *)NULL;
 		} else {
 			if (xchdir(search_path, NO_TITLE) == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path, strerror(errno));
+//				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n",
+					search_path, strerror(errno));
 				return EXIT_FAILURE;
 			}
 		}
@@ -210,7 +214,9 @@ search_glob(char **args, const int invert)
 		if (search_path) {
 			/* Go back to the directory we came from */
 			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+/*				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+					workspaces[cur_ws].path, strerror(errno)); */
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n",
 					workspaces[cur_ws].path, strerror(errno));
 		}
 
@@ -459,7 +465,9 @@ END:
 
 	/* If needed, go back to the directory we came from */
 	if (search_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
+//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n",
+			workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -512,8 +520,7 @@ search_regex(char **args, const int invert, const int case_sens)
 		case 's': file_type = DT_SOCK; break;
 		case 'x': run_find(search_path, args[0]); return EXIT_SUCCESS;
 		default:
-			fprintf(stderr, _("%s: search: '%c': Unrecognized file type\n"),
-				PROGRAM_NAME, (char)file_type);
+			fprintf(stderr, _("search: '%c': Unrecognized file type\n"), (char)file_type);
 			return EXIT_FAILURE;
 		}
 	}
@@ -529,8 +536,9 @@ search_regex(char **args, const int invert, const int case_sens)
 			char *deq_dir = dequote_str(search_path, 0);
 
 			if (!deq_dir) {
-				fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
-					PROGRAM_NAME, args[1]);
+//				fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, args[1]);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("search: %s: Error dequoting file name\n"),
+					args[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -549,17 +557,22 @@ search_regex(char **args, const int invert, const int case_sens)
 
 		if (search_path && *search_path) {
 			if (xchdir(search_path, NO_TITLE) == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					search_path, strerror(errno));
+/*				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+					search_path, strerror(errno)); */
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n", search_path, strerror(errno));
 				return EXIT_FAILURE;
 			}
 
 			tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
 			if (tmp_files == -1) {
-				fprintf(stderr, "scandir: %s: %s\n", search_path, strerror(errno));
+//				fprintf(stderr, "scandir: %s: %s\n", search_path, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n",
+					search_path, strerror(errno));
 
 				if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+/*					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+						workspaces[cur_ws].path, strerror(errno)); */
+					_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n",
 						workspaces[cur_ws].path, strerror(errno));
 				}
 
@@ -610,7 +623,9 @@ search_regex(char **args, const int invert, const int case_sens)
 			free(reg_dirlist);
 
 			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+/*				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+					workspaces[cur_ws].path, strerror(errno)); */
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n",
 					workspaces[cur_ws].path, strerror(errno));
 			}
 		}
@@ -642,7 +657,7 @@ search_regex(char **args, const int invert, const int case_sens)
 	if (found == 0) {
 		if (search_flags & NO_GLOB_CHAR) {
 			search_flags &= ~NO_GLOB_CHAR;
-			fprintf(stderr, _("%s: search: No matches found\n"), PROGRAM_NAME);
+			fprintf(stderr, _("search: No matches found\n"));
 		} else {
 			fprintf(stderr, _("No matches found\n"));
 		}
@@ -655,7 +670,9 @@ search_regex(char **args, const int invert, const int case_sens)
 			free(reg_dirlist);
 
 			if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1)
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+/*				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+					workspaces[cur_ws].path, strerror(errno)); */
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n",
 					workspaces[cur_ws].path, strerror(errno));
 		}
 
@@ -798,7 +815,9 @@ search_regex(char **args, const int invert, const int case_sens)
 		free(reg_dirlist);
 
 		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+/*			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+			    workspaces[cur_ws].path, strerror(errno)); */
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n",
 			    workspaces[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}

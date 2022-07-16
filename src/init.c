@@ -210,7 +210,8 @@ set_cur_workspace(void)
 			workspaces[cur_ws].path = savestring(user.home, user.home_len);
 		} else {
 			if (access("/", R_OK | X_OK) == -1) {
-				fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME, strerror(errno));
+//				fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: /: %s\n", PROGRAM_NAME, strerror(errno));
 				exit(EXIT_FAILURE);
 			} else {
 				workspaces[cur_ws].path = savestring("/", 1);
@@ -902,7 +903,8 @@ load_remotes(void)
 	int fd;
 	FILE *fp = open_fstream_r(remotes_file, &fd);
 	if (!fp) {
-		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
+//		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1090,7 +1092,8 @@ load_prompts(void)
 	int fd;
 	FILE *fp = open_fstream_r(prompts_file, &fd);
 	if (!fp) {
-		fprintf(stderr, "%s: %s\n", prompts_file, strerror(errno));
+//		fprintf(stderr, "%s: %s\n", prompts_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", prompts_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1199,8 +1202,8 @@ open_reg_exit(char *filename, int url)
 {
 	char *homedir = getenv("HOME");
 	if (!homedir) {
-		fprintf(stderr, "%s: Could not retrieve the home directory\n",
-				PROGRAM_NAME);
+//		fprintf(stderr, "%s: Could not retrieve the home directory\n", PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: Could not retrieve the home directory\n", PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -1281,7 +1284,9 @@ resolve_positional_param(char *file)
 	if (IS_FILE_URI(_path)) {
 		_path = file + 7;
 		if (stat(_path, &attr) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+				_exp_path, strerror(errno));
 			free(_exp_path);
 			exit(errno);
 		}
@@ -1289,13 +1294,17 @@ resolve_positional_param(char *file)
 		url = 1;
 	} else {
 		if (stat(_exp_path, &attr) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
+//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+				_exp_path, strerror(errno));
 			free(_exp_path);
 			exit(errno);
 		}
 
 		if (!S_ISDIR(attr.st_mode)) {
-			fprintf(stderr, "%s: %s: %s\n",	PROGRAM_NAME, _exp_path, strerror(ENOTDIR));
+//			fprintf(stderr, "%s: %s: %s\n",	PROGRAM_NAME, _exp_path, strerror(ENOTDIR));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+				_exp_path, strerror(ENOTDIR));
 			free(_exp_path);
 			exit(ENOTDIR);
 		}
@@ -1541,7 +1550,9 @@ external_arguments(int argc, char **argv)
 			if (IS_FILE_URI(_path)) {
 				_path = optarg + 7;
 				if (stat(_path, &attr) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg, strerror(errno));
+//					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, optarg, strerror(errno));
+					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+						optarg, strerror(errno));
 					exit(errno);
 				}
 				url = 0;
@@ -1551,7 +1562,9 @@ external_arguments(int argc, char **argv)
 			if (is_url(_path) == EXIT_FAILURE) {
 				url = 0;
 				if (stat(_path, &attr) == -1) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _path, strerror(errno));
+//					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, _path, strerror(errno));
+					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+						_path, strerror(errno));
 					exit(errno);
 				}
 			}
@@ -1896,7 +1909,9 @@ RUN:
 				*_tmp = '\0';
 				char *p = realpath(path_value, _tmp);
 				if (!p) {
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, path_value, strerror(errno));
+//					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, path_value, strerror(errno));
+					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+						path_value, strerror(errno));
 					exit(errno);
 				}
 				xstrsncpy(path_tmp, p, PATH_MAX);
@@ -1916,8 +1931,9 @@ RUN:
 			workspaces[cur_ws].path = savestring(path_tmp, strlen(path_tmp));
 		} else { /* Error changing directory */
 			if (xargs.list_and_quit == 1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    path_tmp, strerror(errno));
+//				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, path_tmp, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+					path_tmp, strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 
@@ -2992,6 +3008,9 @@ check_options(void)
 		else
 			logs_enabled = xargs.logs;
 	}
+
+	if (log_cmds == UNSET)
+		log_cmds = DEF_LOG_CMDS;
 
 	if (light_mode == UNSET) {
 		if (xargs.light == UNSET)
