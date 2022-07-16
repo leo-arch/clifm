@@ -154,7 +154,7 @@ log_function(char **cmd)
 		log_fp = fopen(log_file, "w+");
 
 	if (!log_fp) {
-		_err('e', PRINT_PROMPT, "log: '%s': %s\n", log_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "log: %s: %s\n", log_file, strerror(errno));
 		free(full_log);
 		return EXIT_FAILURE;
 	}
@@ -236,8 +236,6 @@ save_dirhist(void)
 
 	FILE *fp = fopen(dirhist_file, "w");
 	if (!fp) {
-/*		fprintf(stderr, _("%s: Could not save directory history: %s\n"),
-		    PROGRAM_NAME, strerror(errno)); */
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Could not save directory history: %s\n"),
 		    strerror(errno));
 		return EXIT_FAILURE;
@@ -263,7 +261,9 @@ add_to_dirhist(const char *dir_path)
 	if (dirhist_cur_index + 1 >= dirhist_total_index) {
 		/* Do not add anything if new path equals last entry in
 		 * directory history */
-		if ((dirhist_total_index - 1) >= 0 && old_pwd[dirhist_total_index - 1] && *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1) && strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
+		if ((dirhist_total_index - 1) >= 0 && old_pwd[dirhist_total_index - 1]
+		&& *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1)
+		&& strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
 			return;
 
 		old_pwd = (char **)xrealloc(old_pwd,
@@ -314,7 +314,6 @@ edit_history(char **args)
 {
 	struct stat attr;
 	if (stat(hist_file, &attr) == -1) {
-//		fprintf(stderr, "%s: history: %s: %s\n", PROGRAM_NAME, hist_file, strerror(errno));
 		int err = errno;
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
 		return err;
@@ -497,7 +496,6 @@ run_hist_num(const char *cmd)
 
 	char **cmd_hist = parse_input_str(history[num - 1].cmd);
 	if (!cmd_hist) {
-//		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing history command\n"));
 		return EXIT_FAILURE;
 	}
@@ -517,7 +515,6 @@ run_last_hist_cmd(void)
 
 	char **cmd_hist = parse_input_str(history[current_hist_n - 1].cmd);
 	if (!cmd_hist) {
-//		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing history command\n"));
 		return EXIT_FAILURE;
 	}
@@ -551,7 +548,6 @@ run_last_lessn_hist_cmd(const char *cmd)
 		return exit_status;
 	}
 
-//	fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
 	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing history command\n"));
 	return EXIT_FAILURE;
 }
@@ -752,21 +748,6 @@ record_cmd(char *input)
 		if (*(p + 1) == 'x' && strcmp(p, "exit") == 0)
 			return 0;
 		break;
-
-/*	case 'z':
-		if (*(p + 1) == 'z' && *(p + 2) == '\0')
-			return 0;
-		break;
-
-	case 's':
-		if (*(p + 1) == 'a' && strcmp(p, "salir") == 0)
-			return 0;
-		break;
-
-	case 'c':
-		if (*(p + 1) == 'h' && strcmp(p, "chau") == 0)
-			return 0;
-		break; */
 
 	default: break;
 	}

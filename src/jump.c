@@ -235,7 +235,6 @@ edit_jumpdb(void)
 
 	struct stat attr;
 	if (stat(jump_file, &attr) == -1) {
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, jump_file, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "jump: %s: %s\n", jump_file, strerror(errno));
 		free(jump_file);
 		return EXIT_FAILURE;

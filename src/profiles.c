@@ -263,7 +263,6 @@ profile_set(char *prof)
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 		if (!*cwd) {
-//			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: %s\n", strerror(errno));
 			exit(EXIT_FAILURE);
 		}
@@ -271,7 +270,6 @@ profile_set(char *prof)
 	}
 
 	if (xchdir(workspaces[cur_ws].path, SET_TITLE) == -1) {
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -299,8 +297,6 @@ profile_add(char *prof)
 	}
 
 	if (!home_ok) {
-/*		fprintf(stderr, _("%s: %s: Cannot create profile: Home "
-			"directory not found\n"), PROGRAM_NAME, prof); */
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pf: %s: Cannot create profile: Home "
 			"directory not found\n"), prof);
 		return EXIT_FAILURE;
@@ -314,8 +310,6 @@ profile_add(char *prof)
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
 	if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-/*		fprintf(stderr, _("%s: mkdir: %s: Error creating "
-			"configuration directory\n"), PROGRAM_NAME, nconfig_dir); */
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pf: mkdir: %s: Error creating "
 			"configuration directory\n"), nconfig_dir);
 		free(nconfig_dir);
@@ -339,7 +333,6 @@ profile_add(char *prof)
 	FILE *hist_fp = fopen(nhist_file, "w+");
 
 	if (!hist_fp) {
-//		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, nhist_file, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: fopen: %s: %s\n", nhist_file, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	} else {

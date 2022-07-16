@@ -92,7 +92,6 @@ get_properties(char *filename, const int dsize)
 	/* Check file existence */
 	struct stat attr;
 	if (lstat(filename, &attr) == -1) {
-//		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pr: %s: %s\n", filename, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -712,8 +711,6 @@ properties_function(char **args)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
-/*				fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
-				    PROGRAM_NAME, args[i]); */
 				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pr: %s: Error dequoting file name\n"), args[i]);
 				exit_status = EXIT_FAILURE;
 				continue;

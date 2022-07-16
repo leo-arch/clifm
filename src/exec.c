@@ -249,7 +249,6 @@ run_in_foreground(pid_t pid)
 		}
 	} else { /* waitpid() failed */
 		int ret = errno;
-//		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		return ret;
 	}
@@ -263,7 +262,6 @@ run_in_background(pid_t pid)
 	int status = 0;
 	pid_t wpid = waitpid(pid, &status, WNOHANG);
 	if (wpid == -1) {
-//		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		return errno;
 	}
@@ -396,7 +394,6 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	int ret = 0;
 	pid_t pid = fork();
 	if (pid < 0) {
-//		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		return errno;
 	} else if (pid == 0) {
@@ -424,7 +421,6 @@ launch_execve(char **cmd, const int bg, const int xflags)
 
 		execvp(cmd[0], cmd);
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
-//		_err(ERR_NO_STORE, NOPRINT_PROMPT, "A%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
 		_exit(errno);
 	}
 
@@ -517,7 +513,6 @@ __export(char *arg)
 	*p = '\0';
 	int ret = setenv(arg, p + 1, 1);
 	if (ret == -1)
-//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 	*p = '=';
 
@@ -1941,7 +1936,6 @@ print_cwd(void)
 	*p = '\0';
 	char *buf = getcwd(p, sizeof(p));
 	if (!buf) {
-//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		int err = errno;
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: getcwd: %s\n", PROGRAM_NAME, strerror(err));
 		return err;

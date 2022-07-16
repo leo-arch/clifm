@@ -263,7 +263,6 @@ static int
 cd_to_mountpoint(char *file, char *mountpoint)
 {
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
-//		fprintf(stderr, "archiver: %s: %s\n", mountpoint, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n", mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -380,7 +379,6 @@ create_iso(char *in_file, char *out_file)
 {
 	struct stat attr;
 	if (lstat(in_file, &attr) == -1) {
-//		fprintf(stderr, "archiver: %s: %s\n", in_file, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n", in_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -398,8 +396,6 @@ create_iso(char *in_file, char *out_file)
 		return create_iso_from_block_dev(in_file, out_file);
 
 	/* If any other file format */
-/*	fprintf(stderr, "archiver: %s: Invalid file format. File should "
-			"be either a directory or a block device\n", in_file); */
 	_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: Invalid file format. File should "
 			"be either a directory or a block device\n", in_file);
 	return EXIT_FAILURE;
@@ -445,14 +441,12 @@ check_iso(char *file)
 	int fd;
 	FILE *fp = open_fstream_w(iso_tmp_file, &fd);
 	if (!fp) {
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, iso_tmp_file, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n", iso_tmp_file, strerror(errno));
 		return (-1);
 	}
 
 	FILE *fpp = fopen("/dev/null", "w");
 	if (!fpp) {
-//		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: /dev/null: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		return (-1);
@@ -463,7 +457,6 @@ check_iso(char *file)
 
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
-//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		fclose(fpp);
@@ -472,7 +465,6 @@ check_iso(char *file)
 
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
-//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		fclose(fpp);
@@ -919,7 +911,6 @@ check_not_compressed(char **args)
 		}
 
 		if (is_compressed(args[i], 1) != 0) {
-//			fprintf(stderr, _("archiver: %s: Not an archive/compressed file\n"), args[i]);
 			_err(ERR_NO_STORE, NOPRINT_PROMPT,
 				_("archiver: %s: Not an archive/compressed file\n"), args[i]);
 			return 1;

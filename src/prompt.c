@@ -1055,7 +1055,6 @@ set_prompt(char *name)
 
 	char *p = dequote_str(name, 0);
 	if (!p) {
-//		fprintf(stderr, "%s: %s: Error dequoting string\n", PROGRAM_NAME, name);
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: Error dequoting string\n", name);
 		return EXIT_FAILURE;
 	}
@@ -1101,7 +1100,6 @@ edit_prompts_file(void)
 
 	struct stat a;
 	if (stat(prompts_file, &a) == -1) {
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, prompts_file, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: %s\n", prompts_file, strerror(errno));
 		return EXIT_FAILURE;
 	}

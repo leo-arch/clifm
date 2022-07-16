@@ -84,7 +84,6 @@ dequote_remote_name(char *name)
 			strcpy(name, deq);
 			free(deq);
 		} else {
-//			fprintf(stderr, "%s: %s: Error dequoting resource name\n", PROGRAM_NAME, name);
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: Error dequoting resource name\n", name);
 			return EXIT_FAILURE;
 		}
@@ -133,8 +132,6 @@ _create_mountpoint(int i)
 	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-/*		fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME,
-				remotes[i].mountpoint, strerror(errno)); */
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n",
 				remotes[i].mountpoint, strerror(errno));
 		return EXIT_FAILURE;
@@ -161,7 +158,6 @@ cd_to_mountpoint(int i)
 static inline int
 print_cd_error(int i)
 {
-//	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes[i].mountpoint, strerror(errno));
 	_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
 	return EXIT_FAILURE;
 }
@@ -221,22 +217,17 @@ remotes_unmount(char *name)
 		return EXIT_FAILURE;
 
 	if (remotes[i].mounted == 0) {
-//		fprintf(stderr, _("%s: %s: Not mounted\n"), PROGRAM_NAME, remotes[i].name);
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Not mounted\n"), remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
 	if (!remotes[i].mountpoint) {
-/*		fprintf(stderr, _("%s: Error getting mountpoint for '%s'\n"), PROGRAM_NAME,
-				remotes[i].name); */
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: Error getting mountpoint for '%s'\n"),
 			remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
 	if (!remotes[i].unmount_cmd) {
-/*		fprintf(stderr, _("%s: No unmount command found for '%s'\n"),
-			PROGRAM_NAME, remotes[i].name); */
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: No unmount command found for '%s'\n"),
 			remotes[i].name);
 		return EXIT_FAILURE;
@@ -256,8 +247,6 @@ remotes_unmount(char *name)
 
 		char *p = strrchr(remotes[i].mountpoint, '/');
 		if (!p) {
-/*			fprintf(stderr, _("%s: %s: Error getting parent directory\n"),
-					PROGRAM_NAME, remotes[i].mountpoint); */
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Error getting parent directory\n"),
 					remotes[i].mountpoint);
 			return EXIT_FAILURE;
@@ -267,8 +256,6 @@ remotes_unmount(char *name)
 		errno = 0;
 		if (xchdir(remotes[i].mountpoint, SET_TITLE) == EXIT_FAILURE) {
 			*p = '/';
-/*			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					remotes[i].mountpoint, strerror(errno)); */
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n",
 					remotes[i].mountpoint, strerror(errno));
 			return EXIT_FAILURE;
@@ -295,7 +282,6 @@ remotes_edit(char *app)
 
 	struct stat attr;
 	if (stat(remotes_file, &attr) == -1) {
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -316,7 +302,6 @@ remotes_edit(char *app)
 		return ret;
 
 	if (stat(remotes_file, &attr) == -1) {
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file, strerror(errno));
 		return errno;
 	}

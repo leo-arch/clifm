@@ -56,7 +56,6 @@ print_tag_creation_error(const char *link, mode_t mode)
 static int
 print_symlink_error(const char *name)
 {
-//	fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
 	_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", name, strerror(errno));
 	return errno;
 }
@@ -273,7 +272,6 @@ create_tags(char **args)
 		}
 
 		if (xmkdir(dir, S_IRWXU) == EXIT_FAILURE) {
-//			fprintf(stderr, _("%s: %s: Error creating tag\n"), PROGRAM_NAME, args[i]);
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("tag: %s: Error creating tag: %s\n"),
 				args[i], strerror(errno));
 			exit_status = EXIT_FAILURE;
@@ -382,8 +380,6 @@ tag_file(char *name, char *tag)
 	struct stat a;
 	if (stat(dir, &a) == -1) {
 		if (xmkdir(dir, S_IRWXU) != EXIT_SUCCESS) {
-/*			fprintf(stderr, _("%s: %s: Cannot create tag: %s\n"), PROGRAM_NAME,
-				p ? p : tag, strerror(errno)); */
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("tag: %s: Cannot create tag: %s\n"),
 				p ? p : tag, strerror(errno));
 			free(p);
@@ -527,7 +523,6 @@ untag(char **args, const size_t n, size_t *t)
 			errno = 0;
 			if (unlinkat(AT_FDCWD, f, 0) == -1) {
 				exit_status = errno;
-//				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i], strerror(errno));
 				_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", args[i], strerror(errno));
 			} else {
 				(*t)++;
@@ -584,7 +579,6 @@ rename_tag(char **args)
 	snprintf(new_dir, PATH_MAX, "%s/%s", tags_dir, new);
 
 	if (rename(old_dir, new_dir) == -1) {
-//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s\n", strerror(errno));
 		return errno;
 	}
@@ -607,7 +601,6 @@ recursive_mv_tags(const char *src, const char *dst)
 
 	n = scandir(src_dir, &a, NULL, alphasort);
 	if (n == -1) {
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, src_dir, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", src_dir, strerror(errno));
 		return errno;
 	}
@@ -654,7 +647,6 @@ merge_tags(char **args)
 	char src_dir[PATH_MAX];
 	snprintf(src_dir, PATH_MAX, "%s/%s", tags_dir, src);
 	if (rmdir(src_dir) == -1) {
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, src_dir, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", src_dir, strerror(errno));
 		return errno;
 	}

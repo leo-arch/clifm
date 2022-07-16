@@ -122,7 +122,6 @@ edit_function(char **comm)
 		return regen_config();
 
 	if (config_ok == 0) {
-//		fprintf(stderr, _("%s: Cannot access the configuration file\n"), PROGRAM_NAME);
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Cannot access the configuration file\n"),
 			PROGRAM_NAME);
 		return EXIT_FAILURE;
@@ -746,7 +745,6 @@ create_config(char *file)
 	FILE *config_fp = open_fstream_w(file, &fd);
 
 	if (!config_fp) {
-//		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n", PROGRAM_NAME,
 			file, strerror(errno));
 		return EXIT_FAILURE;

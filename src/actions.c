@@ -66,9 +66,7 @@ run_action(char *action, char **args)
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
-//			fprintf(stderr, _("%s: Plugins directory not defined\n"), PROGRAM_NAME);
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("actions: Plugins directory not "
-				"defined\n"));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("actions: Plugins directory not defined\n"));
 			return EXIT_FAILURE;
 		}
 		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2, sizeof(char));
@@ -83,13 +81,11 @@ run_action(char *action, char **args)
 				+ strlen(PNL) + 11) * sizeof(char));
 			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action); /* NOLINT */
 			if (access(cmd, X_OK) == -1) {
-//				fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
 				_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
 				free(cmd);
 				return errno;
 			}
 		} else {
-//			fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
 			free(cmd);
 			return errno;
@@ -117,7 +113,6 @@ run_action(char *action, char **args)
 	setenv("CLIFM_BUS", fifo_path, 1);
 
 	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
-//		fprintf(stderr, "%s: %s\n", fifo_path, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	fifo_path, strerror(errno));
 		unsetenv("CLIFM_BUS");
 		return EXIT_FAILURE;
@@ -180,7 +175,6 @@ run_action(char *action, char **args)
 		}
 	} else {
 		exit_status = errno;
-//		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: waitpid: %s\n", strerror(errno));
 	}
 
@@ -249,7 +243,6 @@ edit_actions(char *app)
 	/* Get actions file's current modification time */
 	struct stat attr;
 	if (stat(actions_file, &attr) == -1) {
-//		fprintf(stderr, "actions: %s: %s\n", actions_file, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	actions_file, strerror(errno));
 		return EXIT_FAILURE;
 	}

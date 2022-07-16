@@ -1103,7 +1103,6 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	FILE *fp_colors = fopen(colorscheme_file, "r");
 	if (!fp_colors) {
 		if (!env) {
-//			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, colorscheme_file, strerror(errno));
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: colors: %s: %s\n", PROGRAM_NAME,
 				colorscheme_file, strerror(errno));
 			return EXIT_FAILURE;
