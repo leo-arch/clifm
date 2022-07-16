@@ -1376,9 +1376,9 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 
 	printf(_("Total size:   %s%s%s\n"
 		"Largest file: %s%s%s %c%s%s%s%c\n"),
-		colorize ? _BGREEN : "" , t,
+		colorize ? _BGREEN : "" , t ? t : "?",
 		colorize ? NC : "",
-		colorize ? _BGREEN : "" , l,
+		colorize ? _BGREEN : "" , l ? l : "?",
 		colorize ? NC : "",
 		name ? '[' : 0,
 		(colorize && color) ? color : "",

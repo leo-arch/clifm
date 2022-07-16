@@ -1,4 +1,4 @@
-/* icons-emoji.h Icon definitions for CliFM */
+/* icons-emoji.h - Icons definitions for CliFM */
 
 /* Taken from https://github.com/jarun/nnn/blob/master/src/icons-emoji.h
  * and modified to fir our needs */

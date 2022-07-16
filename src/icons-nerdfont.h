@@ -1,4 +1,4 @@
-/* icons-nerdfont.h Icons defintions for CliFM */
+/* icons-nerdfont.h - Icons defintions for CliFM */
 
 /* For more codepoints see https://www.nerdfonts.com/cheat-sheet */
 
