@@ -246,6 +246,9 @@ xf=01;31:xs=00;32:"
 #define DEF_SHOW_HIDDEN 0
 #define DEF_SHOW_BACKUP_FILES 1
 #define DEF_SI 0 /* If 1, use sizes in powers of 1000 instead of 1024 */
+/* Available sort options:
+ * SNONE, SNAME, STSIZE, SATIME, SBTIME, SCTIME, SMTIME
+ * SVER, SEXT, SINO, SOWN, SGRP */
 #define DEF_SORT SNAME
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0
