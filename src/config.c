@@ -1356,7 +1356,7 @@ create_mime_file_anew(char *file)
 #    mpv %%f !E !O &\n\
 \n\
 # Environment variables could be used as well. Example:\n\
-# X:text/plain=$TERM -e $EDITOR %%f &;$VISUAL;nano;vi\n\
+# X:text/plain=$EDITOR %%f &;$VISUAL;nano;vi\n\
 \n\
 ###########################\n\
 #  File names/extensions  #\n\
@@ -1375,8 +1375,8 @@ X:N:.*\\.djvu$=djview;zathura;evince;atril\n\
 X:N:.*\\.epub$=mupdf;zathura;ebook-viewer\n\
 X:N:.*\\.mobi$=ebook-viewer\n\
 X:N:.*\\.(cbr|cbz)$=zathura\n\
-X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vis;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
-!X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vis;vi;mg;emacs;ed;nano\n\
+X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
+!X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano\n\
 \n\n");
 
 	fprintf(fp, "##################\n\
@@ -1395,8 +1395,8 @@ X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;lua
 \n\
 # Text\n\
 #X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany\n\
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vis;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit\n\
-!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vis;vi;mg;emacs;ed;nano\n\
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit\n\
+!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano\n\
 \n\
 # Office documents\n\
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice\n\

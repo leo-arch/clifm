@@ -47,7 +47,7 @@
 #    mpv %f !E !O &
 
 # Environment variables could be used as well. Example:
-# X:text/plain=$TERM -e $EDITOR %f &;$VISUAL;nano;vi
+# X:text/plain=$EDITOR %f &;$VISUAL;nano;vi
 
 ###########################
 #  File names/extensions  #
@@ -66,8 +66,8 @@ X:N:.*\.djvu$=djview;zathura;evince;atril
 X:N:.*\.epub$=mupdf;zathura;ebook-viewer
 X:N:.*\.mobi$=ebook-viewer
 X:N:.*\.(cbr|cbz)$=zathura
-X:N:(.*\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vis;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma
-!X:N:(.*\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vis;vi;mg;emacs;ed;nano
+X:N:(.*\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma
+!X:N:(.*\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano
 
 ##################
 #   MIME types   #
@@ -85,8 +85,8 @@ X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;lua
 
 # Text
 #X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
-X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vis;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit
-!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vis;vi;mg;emacs;ed;nano
+X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit
+!X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano
 
 # Office documents
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
