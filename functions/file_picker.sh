@@ -1,21 +1,18 @@
 # shellcheck shell=sh
 
-# CLiFM file picker function
+# CliFM file picker function
 
-# Usage: p CMD [ARGS ...], where CMD (plus its corresponding parameters)# is the command that should pick selected files. Example: p ls -l.
-# CliFM will be executed: select the files you need and quit. Selected
-# files will be passed to CMD
+# Usage: p
 
-# Customize this function as you need and add it to your .bashrc file.
+# 1. CliFM will be executed: select the files you need and quit.
+# 2. You will be asked for a command to execute over selected files,
+# for example: ls -l
+
+# Customize this function as you need and add it to your shell rc file.
 # Recall to restart your shell for changes to take effect.
 
 p() {
-
-	if [ -z "$1" ]; then
-		printf "Usage: p CMD [ARGS ...]\n" >&2
-		return
-	fi
-
+	# Options to be passed to clifm
 	CLIFM_OPTIONS=""
 
 	# shellcheck disable=SC2086
@@ -26,7 +23,13 @@ p() {
 	fi
 
 	if [ -f "$file" ]; then
-		"$@" "$(cat "$file")"
+		cmd=""
+		while [ -z "$cmd" ]; do
+			printf "Enter command ('q' to quit): "
+			read -r cmd
+		done
+		# shellcheck disable=SC2046
+		[ "$cmd" != "q" ] && $cmd $(sed 's/ /\\ /g' "$file")
 		rm -- "$file"
 	else
 		printf "No selected files\n" >&2
