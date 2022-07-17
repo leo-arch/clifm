@@ -9,7 +9,6 @@
 # 2) Restart your shell (for changes to take effect)
 # 3) Run clifm using the name of the function below: c [ARGS ...]
 
-# CliFM CD on quit function
 c() {
 	clifm "--cd-on-quit" "$@"
 	dir="$(grep "^\*" "${XDG_CONFIG_HOME:=${HOME}/.config}/clifm/.last" 2>/dev/null | cut -d':' -f2)";
