@@ -214,6 +214,15 @@ TerminalCmd="xterm -e"
 # and 2 = glob-regex. Used by the quick search function
 SearchStrategy=2
 
+# When a directory rank in the jump database is below MinJumpRank, it
+# will be forgotten
+MinJumpRank=10
+
+# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,
+# all ranks will be reduced 10%, and those falling below MinJumpRank will
+# be deleted
+MaxJumpTotalRank=100000
+
 
 #=====================================#
 #        4. LOGS AND HISTORY          #
@@ -232,22 +241,9 @@ MaxHistory=1000
 # Limit the size of the directory history file to N entries
 MaxDirhist=100
 
-#=====================================#
-#        5. DIRECTORY JUMPER          #
-#=====================================#
-
-# When a directory rank in the jump database is below MinJumpRank, it
-# will be forgotten
-MinJumpRank=10
-
-# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,
-# all ranks will be reduced 10%, and those falling below MinJumpRank will
-# be deleted
-MaxJumpTotalRank=100000
-
 
 #=====================================#
-#        6. CASE SENSITIVITY          #
+#             5. MISC                 #
 #=====================================#
 
 # Enable case sensitive listing for files in the current directory
@@ -262,11 +258,6 @@ CaseSensitivePathComp=false
 
 # Enable case sensitive search
 CaseSensitiveSearch=false
-
-
-#=====================================#
-#             7. MISC                 #
-#=====================================#
 
 # Whether to be Unicode aware or not. If using a 100% ASCII setup
 # (e.g. English), you can turn this off
@@ -307,7 +298,7 @@ SplashScreen=false
 
 
 #=====================================#
-#            8. ALIASES               #
+#            6. ALIASES               #
 #=====================================#
 
 # Bind '?' to the interactive help plugin. Run 'actions' to print the # list of available plugins
@@ -319,7 +310,7 @@ SplashScreen=false
 
 
 #=====================================#
-#         9. PROMPT COMMANDS          #
+#         7. PROMPT COMMANDS          #
 #=====================================#
 
 # Write below the commands you want to be executed before each prompt. Ex:
@@ -327,7 +318,7 @@ SplashScreen=false
 #promptcmd date | awk '{print $1", "$2,$3", "$4}'
 
 #=====================================#
-#         10. AUTOCOMMANDS            #
+#         8. AUTOCOMMANDS             #
 #=====================================#
 
 # Control CliFM's settings on a per directory basis. For more information
