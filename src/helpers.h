@@ -787,6 +787,7 @@ struct param {
 	int trasrm;
 #endif
 	int unicode;
+	int virtual_dir_full_paths;
 	int welcome_message;
 	int warning_prompt;
 };

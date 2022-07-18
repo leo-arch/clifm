@@ -706,7 +706,7 @@ properties_function(char **args)
 	if (*args[0] == 'p' && args[0][1] == 'p' && !args[0][2])
 		_dir_size = 1;
 
-	/* If "pr file file..." */
+	/* If "pr file..." */
 	for (i = 1; i <= args_n; i++) {
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);

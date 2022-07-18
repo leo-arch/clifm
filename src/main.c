@@ -879,7 +879,7 @@ set_root_indicator(void)
 {
 	if (flags & ROOT_USR) {
 		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Running as root%s\n"),
-			colorize ? mi_c : "", colorize ? _RED : "", colorize ? df_c : "");
+			colorize == 1 ? mi_c : "", colorize == 1 ? _RED : "", colorize == 1 ? df_c : "");
 	}
 }
 
@@ -891,14 +891,12 @@ __list()
 		/* Initialize inotify */
 		inotify_fd = inotify_init1(IN_NONBLOCK);
 		if (inotify_fd < 0) {
-			_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME,
-				strerror(errno));
+			_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME, strerror(errno));
 		}
 #elif defined(BSD_KQUEUE)
 		kq = kqueue();
 		if (kq < 0) {
-			_err('w', PRINT_PROMPT, "%s: kqueue: %s\n", PROGRAM_NAME,
-				strerror(errno));
+			_err('w', PRINT_PROMPT, "%s: kqueue: %s\n", PROGRAM_NAME, strerror(errno));
 		}
 #endif
 

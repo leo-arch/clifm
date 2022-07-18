@@ -349,7 +349,7 @@ is_tag(char *name)
 }
 
 char *
-replace_slashes(char *str)
+replace_slashes(char *str, const char c)
 {
 	if (*str == '/')
 		str++;
@@ -359,7 +359,7 @@ replace_slashes(char *str)
 
 	while (*q) {
 		if (*q == '/' && (q == p || *(q - 1) != '\\'))
-			*q = ':';
+			*q = c;
 		q++;
 	}
 
@@ -400,7 +400,7 @@ tag_file(char *name, char *tag)
 		snprintf(name_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, name);
 
 	char link[PATH_MAX + NAME_MAX], *q = (char *)NULL;
-	char *link_path = replace_slashes(*name_path ? name_path : name);
+	char *link_path = replace_slashes(*name_path ? name_path : name, ':');
 
 //	if (*name == '/')
 //		q = strrchr(name, '/');
@@ -512,7 +512,7 @@ untag(char **args, const size_t n, size_t *t)
 		if (*p == '~')
 			exp = tilde_expand(p);
 		char *q = exp ? exp : p;
-		char *r = replace_slashes(q);
+		char *r = replace_slashes(q, ':');
 
 		snprintf(f, PATH_MAX + NAME_MAX, "%s/%s", dir, r ? r : q);
 		free(deq);
@@ -545,8 +545,7 @@ untag_files(char **args)
 	size_t i, n = 0;
 
 	for (i = 1; args[i]; i++) {
-		if (*args[i] == ':' && *(args[i] + 1)
-		&& untag(args, i, &n) == EXIT_FAILURE)
+		if (*args[i] == ':' && *(args[i] + 1) && untag(args, i, &n) == EXIT_FAILURE)
 			exit_status = EXIT_FAILURE;
 	}
 

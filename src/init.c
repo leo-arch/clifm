@@ -1416,17 +1416,18 @@ external_arguments(int argc, char **argv)
 		{"bell", required_argument, 0, 54},
 		{"fuzzy-match", no_argument, 0, 55},
 		{"smenutab", no_argument, 0, 56},
+		{"virtual-dir-full-paths", no_argument, 0, 57},
 #ifdef __linux__
-		{"si", no_argument, 0, 57},
+		{"si", no_argument, 0, 58},
 #endif
 	    {0, 0, 0, 0}
 	};
 
 	/* Increment whenever a new (only) long option is added */
 #ifdef __linux__
-	int long_opts = 57;
+	int long_opts = 58;
 #else
-	int long_opts = 56;
+	int long_opts = 57;
 #endif
 	int optc;
 	/* Variables to store arguments to options */
@@ -1650,9 +1651,10 @@ RUN:
 			fprintf(stderr, _("%s: smenu: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif
+		case 57: xargs.virtual_dir_full_paths = 1; break;
 
 #ifdef __linux__
-		case 57: xargs.si = 1; break;
+		case 58: xargs.si = 1; break;
 #endif
 		case 'a': show_hidden = xargs.hidden = 0; break;
 		case 'A': show_hidden = xargs.hidden = 1; break;
@@ -2028,6 +2030,7 @@ unset_xargs(void)
 	xargs.trasrm = UNSET;
 #endif
 	xargs.unicode = UNSET;
+	xargs.virtual_dir_full_paths = UNSET;
 	xargs.welcome_message = UNSET;
 	xargs.warning_prompt = UNSET;
 }

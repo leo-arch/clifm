@@ -75,6 +75,8 @@ typedef char *rl_cpvfunc_t;
 #include "remotes.h"
 #include "messages.h"
 
+#include "tags.h"
+
 /* Set ELN color according to the current workspace */
 void
 set_eln_color(void)
@@ -258,16 +260,15 @@ reset_inotify(void)
 		inotify_wd = -1;
 	}
 
-	close(inotify_fd);
+	if (inotify_fd != UNSET)
+		close(inotify_fd);
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
-		_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME,
-			strerror(errno));
+		_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME, strerror(errno));
 		return;
 	}
 
-	inotify_wd = inotify_add_watch(inotify_fd, workspaces[cur_ws].path,
-				INOTIFY_MASK);
+	inotify_wd = inotify_add_watch(inotify_fd, workspaces[cur_ws].path, INOTIFY_MASK);
 	if (inotify_wd > 0)
 		watch = 1;
 }
@@ -328,9 +329,10 @@ read_inotify(void)
 				&& strcmp(file_info[j].name, event->name) == 0)
 					break;
 			}
-			if (j < 0)
+
+			if (j < 0) {
 				ignore_event = 0;
-			else {
+			} else {
 				/* If destiny file name is already in the files list,
 				 * ignore this event */
 				ignore_event = 1;
@@ -399,8 +401,7 @@ void
 read_kqueue(void)
 {
 	struct kevent event_data[NUM_EVENT_SLOTS];
-	memset((void *)event_data, '\0', sizeof(struct kevent)
-			* NUM_EVENT_SLOTS);
+	memset((void *)event_data, '\0', sizeof(struct kevent) * NUM_EVENT_SLOTS);
 
 	int i, refresh = 0;
 	int count = kevent(kq, NULL, 0, event_data, 4096, &timeout);
@@ -412,10 +413,8 @@ read_kqueue(void)
 		}
 	}
 
-	if (refresh) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			exit_code = EXIT_FAILURE;
+	if (refresh == 1) {
+		reload_dirlist();
 		return;
 	}
 
@@ -452,7 +451,8 @@ unset_filter(void)
 	free(_filter);
 	_filter = (char *)NULL;
 	regfree(&regex_exp);
-	if (autols == 1) reload_dirlist();
+	if (autols == 1)
+		reload_dirlist();
 	puts(_("Filter unset"));
 	filter_rev = 0;
 
@@ -469,7 +469,8 @@ compile_filter(void)
 		_filter = (char *)NULL;
 		regfree(&regex_exp);
 	} else {
-		if (autols == 1) reload_dirlist();
+		if (autols == 1)
+			reload_dirlist();
 		print_reload_msg(_("%s: New filter successfully set\n"), _filter);
 	}
 
@@ -1502,7 +1503,7 @@ set_signals_to_ignore(void)
 }
 
 void
-handle_stdin()
+handle_stdin(void)
 {
 	/* If files are passed via stdin, we need to disable restore
 	 * last path in order to correctly understand relative paths */
@@ -1586,13 +1587,27 @@ handle_stdin()
 
 			/* If file does not exist */
 			struct stat attr;
-			if (lstat(q, &attr) == -1)
+			if (lstat(q, &attr) == -1) {
+				_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, q, strerror(errno));
 				continue;
-
+			}
 			/* Construct source and destiny files */
-			char *tmp_file = strrchr(q, '/');
-			if (!tmp_file || !*(++tmp_file))
-				tmp_file = q;
+
+			/* Should we construct destiny file as full path or using only the
+			 * last path component (the file's basename)? */
+			char *tmp_file = (char *)NULL;
+			if (xargs.virtual_dir_full_paths != 1) {
+				tmp_file = strrchr(q, '/');
+				if (!tmp_file || !*(++tmp_file))
+					tmp_file = q;
+			} else {
+				tmp_file = replace_slashes(q, ':');
+				if (!tmp_file) {
+					_err('w', PRINT_PROMPT, "%s: %s: Error formatting file name\n",
+						PROGRAM_NAME, q);
+					continue;
+				}
+			}
 
 			char source[PATH_MAX];
 			if (*q != '/' || !q[1])
@@ -1603,8 +1618,27 @@ handle_stdin()
 			char dest[PATH_MAX + 1];
 			snprintf(dest, PATH_MAX, "%s/%s", stdin_tmp_dir, tmp_file);
 
-			if (symlink(source, dest) == -1)
-				_err('w', PRINT_PROMPT, "ln: '%s': %s\n", q, strerror(errno));
+			if (xargs.virtual_dir_full_paths == 1)
+				free(tmp_file);
+
+			if (symlink(source, dest) == -1) {
+				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
+					/* File already exists: append a random six digits suffix */
+					rand_ext = gen_rand_str(6);
+					if (rand_ext) {
+						char tmp[PATH_MAX + 3];
+						snprintf(tmp, sizeof(tmp), "%s.%s", dest, rand_ext);
+						if (symlink(source, tmp) == -1)
+							_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
+						else
+							_err('w', PRINT_PROMPT, "symlink: %s: Destiny exists. Created "
+								"as %s\n", q, tmp);
+						free(rand_ext);
+					}
+				} else {
+					_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
+				}
+			}
 
 			q = p + 1;
 		}
@@ -1614,8 +1648,7 @@ handle_stdin()
 
 	/* chdir to tmp dir and update path var */
 	if (xchdir(stdin_tmp_dir, SET_TITLE) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			stdin_tmp_dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", stdin_tmp_dir, strerror(errno));
 
 		char *rm_cmd[] = {"rm", "-drf", "--", stdin_tmp_dir, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);

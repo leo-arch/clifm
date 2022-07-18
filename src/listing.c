@@ -408,7 +408,7 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 	return 0;
 }
 
-static inline void
+static void
 set_events_checker(void)
 {
 #ifdef LINUX_INOTIFY
@@ -431,14 +431,13 @@ set_events_checker(void)
 				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, workspaces[cur_ws].path);
 		watch = 1;
 		/* Register events */
-		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
-				NULL, 0, NULL);
+		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, NULL, 0, NULL);
 
 	}
 #endif /* LINUX_INOTIFY */
 }
 
-static inline void
+static void
 get_longest_filename(const int n, const int pad)
 {
 	int i = (max_files != UNSET && max_files < n) ? max_files : n;
@@ -501,7 +500,7 @@ get_longest_filename(const int n, const int pad)
 }
 
 /* Set a few extra attributes needed for long view mode */
-static inline void
+static void
 set_long_attribs(const int n, const struct stat *attr)
 {
 	file_info[n].uid = attr->st_uid;
@@ -522,7 +521,7 @@ set_long_attribs(const int n, const struct stat *attr)
 	}
 }
 
-static inline void
+static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max)
 {
 	struct stat lattr;
@@ -562,7 +561,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max)
 	}
 }
 
-static inline void
+static void
 get_columns(size_t *n)
 {
 	*n = (size_t)term_cols / (longest + 1); /* +1 for the
@@ -578,7 +577,7 @@ get_columns(size_t *n)
 		*n = files;
 }
 
-static inline void
+static void
 print_entry_color(int *ind_char, const int i, const int pad)
 {
 	*ind_char = 0;
@@ -692,7 +691,7 @@ print_entry_color(int *ind_char, const int i, const int pad)
 	free(wname);
 }
 
-static inline void
+static void
 print_entry_nocolor(int *ind_char, const int i, const int pad)
 {
 	char *wname = (char *)NULL;
@@ -709,7 +708,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 	&& (int)file_info[i].len > max_name_len) {
 		_trim = 1;
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
-				(NAME_MAX * sizeof(wchar_t)) - 1);
+			(NAME_MAX * sizeof(wchar_t)) - 1);
 		diff = u8truncstr(tname, (size_t)max_name_len - 1);
 		file_info[i].len = (size_t)max_name_len;
 		n = tname;
@@ -801,7 +800,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 }
 
 /* Pad the current file name to equate the longest file name length */
-static inline void
+static void
 pad_filename(int *ind_char, const int i, const int pad)
 {
 	int cur_len = 0;
@@ -828,7 +827,7 @@ pad_filename(int *ind_char, const int i, const int pad)
 	}
 }
 
-static inline void
+static void
 print_entry_color_light(int *ind_char, const int i, const int pad)
 {
 	*ind_char = 0;
@@ -924,7 +923,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 	free(wname);
 }
 
-static inline void
+static void
 print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 {
 	char *wname = (char *)NULL;
@@ -1011,7 +1010,7 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 }
 
 /* Add spaces needed to equate the longest file name length */
-static inline void
+static void
 pad_filename_light(int *ind_char, const int i, const int pad)
 {
 	int cur_len = 0;
@@ -1041,7 +1040,7 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 
 /* Trim and untrim file names when current file name length exceeds
  * man file name length. Only used when Unicode is disabled */
-static inline void
+static void
 trim_filename(int i)
 {
 	trim.state = 1;
@@ -1053,7 +1052,7 @@ trim_filename(int i)
 	file_info[i].len = (size_t)max_name_len;
 }
 
-static inline void
+static void
 untrim_filename(int i)
 {
 	file_info[i].len = trim.len;
@@ -1290,7 +1289,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
  * MODE (either DIR_IN or DIR_OUT) tells the function whether to check
  * for DIR_IN_NAME or DIR_OUT_NAME files
  * Used by the autocommands function */
-static inline void
+static void
 run_dir_cmd(const int mode)
 {
 	FILE *fp = (FILE *)NULL;
@@ -1329,7 +1328,7 @@ run_dir_cmd(const int mode)
 }
 
 /* Check if S is either .cfm.in or .cfm.out */
-static inline void
+static void
 check_autocmd_file(const char *s)
 {
 	if (*s == '.' && s[1] == 'c' && s[2] == 'f' && s[3] == 'm'
@@ -1343,7 +1342,7 @@ check_autocmd_file(const char *s)
 	}
 }
 
-static inline void
+static void
 get_largest(size_t i, off_t *size, char **name, char **color, off_t *total)
 {
 	/* Only directories and regular files should be counted */
@@ -1368,7 +1367,7 @@ get_largest(size_t i, off_t *size, char **name, char **color, off_t *total)
 	*total += file_info[i].size * d;
 }
 
-static inline void
+static void
 print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 {
 	char *t = get_size_unit(total);
@@ -1390,7 +1389,7 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 }
 
 /* Get the lenght of the longest UID:GID string in long view mode */
-static inline size_t
+static size_t
 get_max_ug_str(void)
 {
 	size_t ug_max = 0;
@@ -1790,6 +1789,10 @@ list_dir(void)
 	if (light_mode)
 		return list_dir_light();
 
+	int virtual_dir = 0;
+	if (stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0)
+		virtual_dir = 1;
+
 	DIR *dir;
 	struct dirent *ent;
 	struct stat attr;
@@ -1821,8 +1824,7 @@ list_dir(void)
 	register unsigned int n = 0;
 	unsigned int total_dents = 0, count = 0;
 
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
-	    sizeof(struct fileinfo));
+	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
 		char *ename = ent->d_name;
@@ -1856,7 +1858,8 @@ list_dir(void)
 		init_fileinfo(n);
 
 		int stat_ok = 1;
-		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1) {
+//		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1) {
+		if (fstatat(fd, ename, &attr, virtual_dir == 1 ? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
 			stat_ok = 0;
 			stats.unstat++;
 		}
@@ -2193,6 +2196,8 @@ list_dir(void)
 
 END:
 	exit_code = post_listing(dir, close_dir, reset_pager);
+	if (virtual_dir == 1)
+		print_reload_msg("Virtual directory\n");
 	if (excluded_files > 0)
 		printf(_("Excluded files: %d\n"), excluded_files);
 
