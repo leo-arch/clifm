@@ -22,7 +22,12 @@ if [ "$1" = "-f" ] || [ "$1" = "--full-paths" ]; then
 	shift
 fi
 
-cmd="$term_cmd 'echo \"$*\" | sed \"s/ /\n/g\" | $clifm $clifm_opts'"
+# 1. Replace escaped spaces by tabs
+# 2. Replace non-escaped spaces by new line chars
+# 3. Replace tabs (first step) by spaces
+# 4. Remove remaining escape chars
+files="$(echo "$*" | sed 's/\\ /\t/g' | sed 's/ /\n/g' | sed 's/\t/ /g' | sed 's/\\//g')"
+cmd="$term_cmd 'echo \"$files\" | $clifm $clifm_opts'"
 
 eval "$cmd"
 
