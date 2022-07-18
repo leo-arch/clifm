@@ -501,6 +501,7 @@ create_actions_file(char *file)
 		"rrm=recur_rm.sh\n"
 		"update=update.sh\n"
 		"vid=vid_viewer.sh\n"
+		"vt=virtualize.sh\n"
 		"wall=wallpaper_setter.sh\n",
 	    PROGRAM_NAME, PROGRAM_NAME);
 

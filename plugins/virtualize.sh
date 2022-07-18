@@ -14,7 +14,7 @@ fi
 
 term_cmd="xterm -e"
 
-clifm="/home/_leo08/build/git_repos/clifm/src/clifm"
+clifm="clifm"
 clifm_opts=""
 
 if [ "$1" = "-f" ] || [ "$1" = "--full-paths" ]; then
