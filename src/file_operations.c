@@ -934,26 +934,27 @@ create_file(char **cmd)
 	nfiles[cnfiles] = (char *)NULL;
 
 	size_t total = (cndirs - 2) + (cnfiles - 1);
+	int ret = 0;
 	/* Execute commands */
 	if (cnfiles > 1) {
-		if (launch_execve(nfiles, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+		if ((ret = launch_execve(nfiles, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS) {
 			if (total > 1) {
 				printf("Press any key to continue ...");
 				xgetchar();
 				putchar('\n');
 			}
-			exit_status = EXIT_FAILURE;
+			exit_status = ret;
 		}
 	}
 
 	if (cndirs > 2) {
-		if (launch_execve(ndirs, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+		if ((ret = launch_execve(ndirs, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS) {
 			if (total > 1) {
 				printf("Press any key to continue ...");
 				xgetchar();
 				putchar('\n');
 			}
-			exit_status = EXIT_FAILURE;
+			exit_status = ret;
 		}
 	}
 
@@ -990,7 +991,7 @@ create_file(char **cmd)
 
 			struct stat a;
 			if (stat(cmd[i], &a) != -1) {
-				int ret = workspaces[cur_ws].path
+				ret = workspaces[cur_ws].path
 					? strncmp(cmd[i], workspaces[cur_ws].path, hlen) : -1;
 				char *name = (ret == 0 && *(cmd[i] + hlen) && *(cmd[i] + hlen + 1))
 					? cmd[i] + hlen + 1 : cmd[i];
