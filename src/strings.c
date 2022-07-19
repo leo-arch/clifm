@@ -38,6 +38,7 @@
 #endif
 #include <limits.h>
 #include <dirent.h>
+#include <errno.h>
 
 #if defined(__OpenBSD__)
 typedef char *rl_cpvfunc_t;
@@ -1196,7 +1197,7 @@ parse_input_str(char *str)
 	else if (check_shell_functions(str))
 		send_shell = 1;
 
-	if (!send_shell) {
+	if (send_shell == 0) {
 		for (i = 0; str[i]; i++) {
 
 				/* ##################################
@@ -1724,7 +1725,7 @@ parse_input_str(char *str)
 					}
 				} else {
 					_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error getting variable name\n"),
-							PROGRAM_NAME, substr[i]);
+						PROGRAM_NAME, substr[i]);
 					size_t j;
 					for (j = 0; j <= args_n; j++)
 						free(substr[j]);
@@ -1747,13 +1748,24 @@ parse_input_str(char *str)
 		}
 	
 		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
-		if (stdin_dir_ok) {
-			char *real_path = realpath(substr[i], NULL);
+		if (stdin_dir_ok == 1) {
+			struct stat a;
+			int ret = lstat(substr[i], &a);
+			int link_ok = (ret != -1 && S_ISLNK(a.st_mode)) ? 1 : 0;
+			char *real_path = link_ok == 1 ? realpath(substr[i], NULL) : (char *)NULL;
 			if (real_path) {
 				substr[i] = (char *)xrealloc(substr[i],
 				    (strlen(real_path) + 1) * sizeof(char));
 				strcpy(substr[i], real_path);
 				free(real_path);
+			} else if (link_ok == 1) {
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("realpath: %s: %s\n"),
+					substr[i], strerror(errno));
+				size_t j;
+				for (j = 0; j <= args_n; j++)
+					free(substr[j]);
+				free(substr);
+				return (char **)NULL;
 			}
 		}
 	}
