@@ -1554,19 +1554,19 @@ handle_stdin(void)
 	buf[total_len] = '\0';
 
 	/* Create tmp dir to store links to files */
-	char *rand_ext = gen_rand_str(6);
-	if (!rand_ext)
+	char *suffix = gen_rand_str(6);
+	if (!suffix)
 		goto FREE_N_EXIT;
 
 	if (tmp_dir) {
 		stdin_tmp_dir = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
-		sprintf(stdin_tmp_dir, "%s/.clifm%s", tmp_dir, rand_ext);
+		sprintf(stdin_tmp_dir, "%s/.clifm%s", tmp_dir, suffix);
 	} else {
 		stdin_tmp_dir = (char *)xnmalloc(P_tmpdir_len + 14, sizeof(char));
-		sprintf(stdin_tmp_dir, "%s/.clifm%s", P_tmpdir, rand_ext);
+		sprintf(stdin_tmp_dir, "%s/.clifm%s", P_tmpdir, suffix);
 	}
 
-	free(rand_ext);
+	free(suffix);
 
 	char *cmd[] = {"mkdir", "-p", stdin_tmp_dir, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -1628,14 +1628,14 @@ handle_stdin(void)
 				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
 					/* File already exists: append a random six digits suffix */
 					suffix = gen_rand_str(6);
-					char tmp[PATH_MAX + 3];
+					char tmp[PATH_MAX + 6];
 					snprintf(tmp, sizeof(tmp), "%s.%s", dest, suffix ? suffix : "copy");
 					if (symlink(source, tmp) == -1)
 						_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
 					else
 						_err('w', PRINT_PROMPT, "symlink: %s: Destiny exists. Created "
 							"as %s\n", q, tmp);
-					free(rand_ext);
+					free(suffix);
 				} else {
 					_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
 				}
