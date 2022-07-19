@@ -1627,17 +1627,15 @@ handle_stdin(void)
 			if (symlink(source, dest) == -1) {
 				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
 					/* File already exists: append a random six digits suffix */
-					rand_ext = gen_rand_str(6);
-					if (rand_ext) {
-						char tmp[PATH_MAX + 3];
-						snprintf(tmp, sizeof(tmp), "%s.%s", dest, rand_ext);
-						if (symlink(source, tmp) == -1)
-							_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
-						else
-							_err('w', PRINT_PROMPT, "symlink: %s: Destiny exists. Created "
-								"as %s\n", q, tmp);
-						free(rand_ext);
-					}
+					suffix = gen_rand_str(6);
+					char tmp[PATH_MAX + 3];
+					snprintf(tmp, sizeof(tmp), "%s.%s", dest, suffix ? suffix : "copy");
+					if (symlink(source, tmp) == -1)
+						_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
+					else
+						_err('w', PRINT_PROMPT, "symlink: %s: Destiny exists. Created "
+							"as %s\n", q, tmp);
+					free(rand_ext);
 				} else {
 					_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
 				}
@@ -1658,6 +1656,8 @@ handle_stdin(void)
 
 		xchmod(stdin_tmp_dir, "0700");
 
+		/* the -d parameter to rm(1) isn't POSIX, but is available for
+		 * BSD systems and MacOS */
 		char *rm_cmd[] = {"rm", "-drf", "--", stdin_tmp_dir, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
 
