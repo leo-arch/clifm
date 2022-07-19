@@ -611,9 +611,37 @@ open_file(char *file)
 	return exit_status;
 }
 
+int
+xchmod(const char *file, const char *mode_str)
+{
+	struct stat a;
+	if (lstat(file, &a) == -1) {
+		_err('e', PRINT_PROMPT, "stat: %s: %s\n", file, strerror(errno));
+		return errno;
+	}
+
+	int file_flags = S_ISDIR(a.st_mode) ? O_DIRECTORY | O_RDONLY : O_RDONLY;
+
+	int fd = open(file, file_flags);
+	if (fd == -1) {
+		_err('e', PRINT_PROMPT, "xchmod: %s: %s\n", file, strerror(errno));
+		return errno;
+	}
+
+	mode_t mode = (mode_t)strtol(mode_str, 0, 8);
+	if (fchmod(fd, mode) == -1) {
+		close(fd);
+		_err('e', PRINT_PROMPT, "xchmod: %s: %s\n", file, strerror(errno));
+		return errno;
+	}
+
+	close(fd);
+	return EXIT_SUCCESS;
+}
+
 /* Toggle executable bit on file */
 int
-xchmod(const char *file, mode_t mode)
+toggle_exec(const char *file, mode_t mode)
 {
 	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
 	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0111);

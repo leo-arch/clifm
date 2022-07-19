@@ -1200,7 +1200,7 @@ _hidden_function(char **args)
 }
 
 static int
-toggle_exec(char **args)
+_toggle_exec(char **args)
 {
 	if (!args[1] || IS_HELP(args[1])) {
 		puts(_(TE_USAGE));
@@ -1225,7 +1225,7 @@ toggle_exec(char **args)
 			continue;
 		}
 
-		if (xchmod(args[i], attr.st_mode) == -1)
+		if (toggle_exec(args[i], attr.st_mode) == -1)
 			exit_status = EXIT_FAILURE;
 		else
 			n++;
@@ -2233,7 +2233,7 @@ exec_cmd(char **comm)
 
 	/*    ############### TOGGLE EXEC ##################     */
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])
-		return (exit_code = toggle_exec(comm));
+		return (exit_code = _toggle_exec(comm));
 
 	/*    ############### (UN)PIN FILE ##################     */
 	else if (*comm[0] == 'p' && strcmp(comm[0], "pin") == 0)

@@ -26,25 +26,26 @@
 #define FILE_OPERATIONS_H
 
 /* Macros for open_function */
-#define OPEN_BLK 0
-#define OPEN_CHR 1
+#define OPEN_BLK  0
+#define OPEN_CHR  1
 #define OPEN_SOCK 2
 #define OPEN_FIFO 3
-#define OPEN_UNK 4
+#define OPEN_UNK  4
 
 /* file_operations.c */
 int batch_link(char **args);
-char *export(char **filenames, int open);
 int bulk_rename(char **args);
 int bulk_remove(char *s1, char *s2);
-int remove_file(char **args);
+void clear_selbox(void);
 int copy_function(char **cmd, int copy_and_rename);
-int edit_link(char *link);
-int open_function(char **cmd);
-int xchmod(const char *file, mode_t mode);
 int create_file(char **cmd);
 int dup_file(char **cmd);
+int edit_link(char *link);
+char *export(char **filenames, int open);
 int open_file(char *file);
-void clear_selbox(void);
+int open_function(char **cmd);
+int remove_file(char **args);
+int xchmod(const char *file, const char *mode_str);
+int toggle_exec(const char *file, mode_t mode);
 
 #endif /* FILE_OPERATIONS_H */

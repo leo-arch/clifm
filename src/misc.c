@@ -76,6 +76,7 @@ typedef char *rl_cpvfunc_t;
 #include "messages.h"
 
 #include "tags.h"
+#include "file_operations.h"
 
 /* Set ELN color according to the current workspace */
 void
@@ -1283,6 +1284,8 @@ free_stuff(void)
 	free(fzftab_options);
 
 	if (stdin_tmp_dir) {
+		xchmod(stdin_tmp_dir, "0700");
+
 		char *rm_cmd[] = {"rm", "-rd", "--", stdin_tmp_dir, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
 		free(stdin_tmp_dir);
@@ -1646,9 +1649,14 @@ handle_stdin(void)
 		p++;
 	}
 
+	/* Make the virtual dir read only */
+	xchmod(stdin_tmp_dir, "0500");
+
 	/* chdir to tmp dir and update path var */
 	if (xchdir(stdin_tmp_dir, SET_TITLE) == -1) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", stdin_tmp_dir, strerror(errno));
+
+		xchmod(stdin_tmp_dir, "0700");
 
 		char *rm_cmd[] = {"rm", "-drf", "--", stdin_tmp_dir, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
