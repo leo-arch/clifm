@@ -130,6 +130,7 @@ _clifm ()
         --sort-reverse
         --std-tab-comp
         --trash-as-rm
+        --virtual-dir
         --virtual-dir-full-paths
     )
 
