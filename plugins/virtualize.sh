@@ -17,6 +17,11 @@ Usage: %s FILE... \n" "$name" >&2
 	exit 0
 fi
 
+if [ -n "$CLIFM_VIRTUAL_DIR" ]; then
+	printf "clifm: Nested virtual directories are not allowed\n" >&2
+	exit 1
+fi
+
 if ! type sed > /dev/null 2>&1; then
 	printf "clifm: sed: Command not found\n" >&2
 	exit 127
