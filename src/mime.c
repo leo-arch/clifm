@@ -280,7 +280,7 @@ get_app(const char *mime, const char *filename)
 
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", mime_file);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", mime_file, strerror(errno));
 		return (char *)NULL;
 	}
 
