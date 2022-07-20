@@ -1504,6 +1504,36 @@ set_signals_to_ignore(void)
 	signal(SIGUSR2, sigusr_handler); */
 }
 
+static int
+create_virtual_dir(const int user_provided)
+{
+	if (!stdin_tmp_dir || !*stdin_tmp_dir) {
+		if (user_provided == 1) {
+			_err('e', PRINT_PROMPT, "%s: Empty buffer for virtual "
+				"directory name. Trying with default value\n", PROGRAM_NAME);
+		} else {
+			_err('e', PRINT_PROMPT, "%s: Empty buffer for virtual "
+				"directory name\n", PROGRAM_NAME);
+		}
+		return EXIT_FAILURE;
+	}
+
+	char *cmd[] = {"mkdir", "-p", stdin_tmp_dir, NULL};
+	int ret = 0;
+	if ((ret = launch_execve(cmd, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS) {
+		if (user_provided == 1) {
+			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s. Trying with default value\n",
+				PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
+		} else {
+			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s\n",
+				PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
+		}
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 void
 handle_stdin(void)
 {
@@ -1553,19 +1583,22 @@ handle_stdin(void)
 	buf[total_len] = '\0';
 
 	/* Create tmp dir to store links to files */
-	char *suffix = gen_rand_str(6);
-	if (!suffix)
-		goto FREE_N_EXIT;
+	char *suffix = (char *)NULL;
 
-	char *temp = tmp_dir ? tmp_dir : P_tmpdir;
-	stdin_tmp_dir = (char *)xnmalloc(strlen(temp) + 13, sizeof(char));
-	sprintf(stdin_tmp_dir, "%s/vdir.%s", temp, suffix);
+	if (!stdin_tmp_dir || create_virtual_dir(1) != EXIT_SUCCESS) {
+		free(stdin_tmp_dir);
+		if (!(suffix = gen_rand_str(6)))
+			goto FREE_N_EXIT;
 
-	free(suffix);
+		char *temp = tmp_dir ? tmp_dir : P_tmpdir;
+		stdin_tmp_dir = (char *)xnmalloc(strlen(temp) + 13, sizeof(char));
+		sprintf(stdin_tmp_dir, "%s/vdir.%s", temp, suffix);
 
-	char *cmd[] = {"mkdir", "-p", stdin_tmp_dir, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		goto FREE_N_EXIT;
+		free(suffix);
+
+		if (create_virtual_dir(0) != EXIT_SUCCESS)
+			goto FREE_N_EXIT;
+	}
 
 	setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
 

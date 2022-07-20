@@ -1417,17 +1417,18 @@ external_arguments(int argc, char **argv)
 		{"fuzzy-match", no_argument, 0, 55},
 		{"smenutab", no_argument, 0, 56},
 		{"virtual-dir-full-paths", no_argument, 0, 57},
+		{"virtual-dir", required_argument, 0, 58},
 #ifdef __linux__
-		{"si", no_argument, 0, 58},
+		{"si", no_argument, 0, 59},
 #endif
 	    {0, 0, 0, 0}
 	};
 
 	/* Increment whenever a new (only) long option is added */
 #ifdef __linux__
-	int long_opts = 58;
+	int long_opts = 59;
 #else
-	int long_opts = 57;
+	int long_opts = 58;
 #endif
 	int optc;
 	/* Variables to store arguments to options */
@@ -1436,6 +1437,7 @@ external_arguments(int argc, char **argv)
 	     *alt_dir_value = (char *)NULL,
 	     *config_value = (char *)NULL,
 	     *kbinds_value = (char *)NULL,
+		 *virtual_dir_value = (char *)NULL,
 	     *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
@@ -1652,9 +1654,18 @@ RUN:
 			exit(EXIT_FAILURE);
 #endif
 		case 57: xargs.virtual_dir_full_paths = 1; break;
+		case 58:
+			if (optarg && *optarg && *optarg == '/')
+				virtual_dir_value = optarg;
+			else {
+				fprintf(stderr, "%s: --virtual-dir: Absolute path "
+					"is required as parameter\n", PROGRAM_NAME);
+				exit(EXIT_FAILURE);
+			}
+			break;
 
 #ifdef __linux__
-		case 58: xargs.si = 1; break;
+		case 59: xargs.si = 1; break;
 #endif
 		case 'a': show_hidden = xargs.hidden = 0; break;
 		case 'A': show_hidden = xargs.hidden = 1; break;
@@ -1797,6 +1808,9 @@ RUN:
 				"bookmarks file\n"), PROGRAM_NAME);
 		}
 	}
+
+	if (virtual_dir_value)
+		stdin_tmp_dir = savestring(virtual_dir_value, strlen(virtual_dir_value));
 
 	if (alt_dir_value) {
 		char *dir_exp = (char *)NULL;

@@ -920,7 +920,9 @@ International System of Units (SI), instead of 1024 (Linux only)\
 (default order)\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
-'rm' to prevent accidental deletions\n"
+'rm' to prevent accidental deletions\
+\n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instad of target base names\
+\n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\n"
 
 #define CLIFM_COMMANDS "\
 \nBUILT-IN COMMANDS:\n\nFor a complete description of each of these \

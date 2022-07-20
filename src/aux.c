@@ -1045,9 +1045,13 @@ char
 xgetchar(void)
 {
 	struct termios oldt, newt;
-	char c;
+	char c = 0;
 
-	tcgetattr(STDIN_FILENO, &oldt);
+	if (tcgetattr(STDIN_FILENO, &oldt) == -1) {
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: tcgetattr: %s\n",
+			PROGRAM_NAME, strerror(errno));
+		return 0;
+	}
 	newt = oldt;
 	newt.c_lflag &= (tcflag_t)~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
