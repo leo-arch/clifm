@@ -74,7 +74,6 @@ typedef char *rl_cpvfunc_t;
 #include "strings.h"
 #include "remotes.h"
 #include "messages.h"
-
 #include "file_operations.h"
 
 /* Set ELN color according to the current workspace */
@@ -1558,13 +1557,9 @@ handle_stdin(void)
 	if (!suffix)
 		goto FREE_N_EXIT;
 
-	if (tmp_dir) {
-		stdin_tmp_dir = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
-		sprintf(stdin_tmp_dir, "%s/.clifm%s", tmp_dir, suffix);
-	} else {
-		stdin_tmp_dir = (char *)xnmalloc(P_tmpdir_len + 14, sizeof(char));
-		sprintf(stdin_tmp_dir, "%s/.clifm%s", P_tmpdir, suffix);
-	}
+	char *temp = tmp_dir ? tmp_dir : P_tmpdir;
+	stdin_tmp_dir = (char *)xnmalloc(strlen(temp) + 13, sizeof(char));
+	sprintf(stdin_tmp_dir, "%s/vdir.%s", temp, suffix);
 
 	free(suffix);
 
@@ -1590,6 +1585,9 @@ handle_stdin(void)
 			/* Create symlinks (in tmp dir) to each valid file in
 			 * the buffer */
 
+			if (SELFORPARENT(q))
+				continue;
+
 			/* If file does not exist */
 			struct stat attr;
 			if (lstat(q, &attr) == -1) {
@@ -1601,6 +1599,7 @@ handle_stdin(void)
 			/* Should we construct destiny file as full path or using only the
 			 * last path component (the file's basename)? */
 			char *tmp_file = (char *)NULL;
+			int free_tmp_file = 0;
 			if (xargs.virtual_dir_full_paths != 1) {
 				tmp_file = strrchr(q, '/');
 				if (!tmp_file || !*(++tmp_file))
@@ -1612,6 +1611,7 @@ handle_stdin(void)
 						PROGRAM_NAME, q);
 					continue;
 				}
+				free_tmp_file = 1;
 			}
 
 			char source[PATH_MAX];
@@ -1622,9 +1622,6 @@ handle_stdin(void)
 
 			char dest[PATH_MAX + 1];
 			snprintf(dest, PATH_MAX, "%s/%s", stdin_tmp_dir, tmp_file);
-
-			if (xargs.virtual_dir_full_paths == 1)
-				free(tmp_file);
 
 			if (symlink(source, dest) == -1) {
 				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
@@ -1642,6 +1639,9 @@ handle_stdin(void)
 					_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
 				}
 			}
+
+			if (free_tmp_file == 1)
+				free(tmp_file);
 
 			q = p + 1;
 		}
