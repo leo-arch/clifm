@@ -614,15 +614,17 @@ open_file(char *file)
 int
 xchmod(const char *file, const char *mode_str)
 {
-	struct stat a;
-	if (lstat(file, &a) == -1) {
-		_err('e', PRINT_PROMPT, "lstat: %s: %s\n", file, strerror(errno));
-		return errno;
+	if (!file || !*file) {
+		_err('e', PRINT_PROMPT, "xchmod: Empty buffer for file name\n");
+		return EXIT_FAILURE;
 	}
 
-	int file_flags = S_ISDIR(a.st_mode) ? O_DIRECTORY | O_RDONLY : O_RDONLY;
+	if (!mode_str || !*mode_str) {
+		_err('e', PRINT_PROMPT, "xchmod: Empty buffer for mode\n");
+		return EXIT_FAILURE;
+	}
 
-	int fd = open(file, file_flags);
+	int fd = open(file, O_RDONLY);
 	if (fd == -1) {
 		_err('e', PRINT_PROMPT, "xchmod: %s: %s\n", file, strerror(errno));
 		return errno;
