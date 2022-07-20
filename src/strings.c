@@ -75,6 +75,24 @@ char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
  * However, nothing beyond MAX_STR_LEN length will be correctly measured */
 #define MAX_STR_LEN 4096
 
+char *
+replace_slashes(char *str, const char c)
+{
+	if (*str == '/')
+		str++;
+
+	char *p = savestring(str, strlen(str));
+	char *q = p;
+
+	while (*q) {
+		if (*q == '/' && (q == p || *(q - 1) != '\\'))
+			*q = c;
+		q++;
+	}
+
+	return p;
+}
+
 /* Find the character C in the string S ignoring case
  * Returns a pointer to the matching char in S if C was found, or NULL otherwise */
 static char *

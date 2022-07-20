@@ -60,6 +60,7 @@
 #include "misc.h"
 #include "properties.h"
 #include "sort.h"
+#include "strings.h"
 #include "checks.h"
 #include "exec.h"
 #include "autocmds.h"
@@ -1415,6 +1416,10 @@ list_dir_light(void)
 	clock_t start = clock();
 #endif
 
+	int virtual_dir = 0;
+	if (stdin_tmp_dir && strcmp(stdin_tmp_dir, workspaces[cur_ws].path) == 0)
+		virtual_dir = 1;
+
 	DIR *dir;
 	struct dirent *ent;
 	int reset_pager = 0;
@@ -1483,7 +1488,6 @@ list_dir_light(void)
 		}
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-
 		if (!unicode) {
 			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
 		} else {
@@ -1595,7 +1599,6 @@ list_dir_light(void)
 		/* Erase the "Retrieveing file sizes" message */
 		ERASE_FULL_LINE;
 		SET_CURSOR(1, 1);
-//		fputs("\x1b[2K\x1b[1G", stdout);
 	}
 
 	file_info[n].name = (char *)NULL;
@@ -1647,6 +1650,8 @@ list_dir_light(void)
 
 END:
 	exit_code = post_listing(dir, close_dir, reset_pager);
+	if (virtual_dir == 1)
+		print_reload_msg("Virtual directory\n");
 	if (excluded_files > 0)
 		printf(_("Excluded files: %d\n"), excluded_files);
 
@@ -1746,6 +1751,8 @@ reset_stats(void)
 	stats.unknown = 0;
 	stats.unstat = 0;
 }
+
+
 
 /* List files in the current working directory. Uses file type colors
  * and columns. Return zero on success or one on error */
@@ -1858,7 +1865,6 @@ list_dir(void)
 		init_fileinfo(n);
 
 		int stat_ok = 1;
-//		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1) {
 		if (fstatat(fd, ename, &attr, virtual_dir == 1 ? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
 			stat_ok = 0;
 			stats.unstat++;
@@ -1880,7 +1886,6 @@ list_dir(void)
 		}
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-
 		if (!unicode) {
 			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
 		} else {

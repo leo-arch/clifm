@@ -394,6 +394,7 @@ toggle-light:\\M-y\n\
 toggle-long:\\M-l\n\
 toggle-max-name-len:\\C-\\M-l\n\
 toggle-disk-usage:\\C-\\M-i\n\
+toggle-virtualdir-full-paths:\\M-w\n\
 trash-sel:\\C-\\M-t\n\
 untrash-all:\\C-\\M-u\n\n\
 # F6-12\n\

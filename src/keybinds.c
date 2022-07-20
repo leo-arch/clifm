@@ -47,6 +47,8 @@ typedef char *rl_cpvfunc_t;
 #endif
 
 #include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
 
 #include "aux.h"
 #include "config.h"
@@ -1838,6 +1840,47 @@ add_func_to_rl(void)
 	rl_add_defun("my-test", rl_test, -1);
 } */
 
+static int
+rl_toggle_virtualdir_full_paths(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	if (!stdin_tmp_dir || strcmp(stdin_tmp_dir, workspaces[cur_ws].path) != 0)
+		return EXIT_SUCCESS;
+
+	xchmod(stdin_tmp_dir, "0700");
+	xargs.virtual_dir_full_paths = xargs.virtual_dir_full_paths == 1 ? 0 : 1;
+
+	int i = (int)files;
+	while(--i >= 0) {
+		char *rp = realpath(file_info[i].name, NULL);
+		if (!rp) continue;
+
+		char *p = (char *)NULL;
+		if (xargs.virtual_dir_full_paths != 1) {
+			if ((p = strrchr(rp, '/')) && *(p + 1))
+				++p;
+		} else {
+			p = replace_slashes(rp, ':');
+		}
+
+		if (!p || !*p) continue;
+
+		if (renameat(AT_FDCWD, file_info[i].name, AT_FDCWD, p) == -1)
+			_err('w', PRINT_PROMPT, "renameat: %s: %s\n", file_info[i].name, strerror(errno));
+
+		if (xargs.virtual_dir_full_paths == 1) free(p);
+		free(rp);
+	}
+
+	xchmod(stdin_tmp_dir, "0500");
+	reload_dirlist();
+	print_reload_msg("Switched to %s names\n",
+		xargs.virtual_dir_full_paths == 1 ? "long" : "short");
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
 void
 readline_kbinds(void)
 {
@@ -1911,6 +1954,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("open-bookmarks"), rl_open_bm_file);
 
 		/* Settings */
+		rl_bind_keyseq(find_key("toggle-virtualdir-full-paths"), rl_toggle_virtualdir_full_paths);
 		rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
 		rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
 		rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
@@ -2007,6 +2051,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[23~", rl_open_bm_file);
 
 		/* Settings */
+		rl_bind_keyseq("\\M-w", rl_toggle_virtualdir_full_paths);
 		rl_bind_keyseq("\\M-t", rl_clear_msgs);
 		/*      rl_bind_keyseq("", rl_next_profile);
 		rl_bind_keyseq("", rl_previous_profile); */

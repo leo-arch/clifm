@@ -75,7 +75,6 @@ typedef char *rl_cpvfunc_t;
 #include "remotes.h"
 #include "messages.h"
 
-#include "tags.h"
 #include "file_operations.h"
 
 /* Set ELN color according to the current workspace */
@@ -1289,6 +1288,7 @@ free_stuff(void)
 		char *rm_cmd[] = {"rm", "-rd", "--", stdin_tmp_dir, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
 		free(stdin_tmp_dir);
+		unsetenv("CLIFM_VIRTUAL_DIR");
 	}
 
 	i = (int)cschemes_n;
@@ -1571,6 +1571,8 @@ handle_stdin(void)
 	char *cmd[] = {"mkdir", "-p", stdin_tmp_dir, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		goto FREE_N_EXIT;
+
+	setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
 
 	/* Get CWD: we need it to prepend it to relative paths */
 	char *cwd = (char *)NULL;

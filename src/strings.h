@@ -38,6 +38,7 @@ char **get_substr(char *str, const char ifs);
 char *home_tilde(char *new_path, int *_free);
 char **parse_input_str(char *str);
 char *remove_quotes(char *str);
+char *replace_slashes(char *str, const char c);
 char *replace_substr(char *haystack, char *needle, char *rep);
 char *savestring(const char *restrict str, size_t size);
 char **split_str(const char *str, const int update_args);

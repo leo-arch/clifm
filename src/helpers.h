@@ -197,7 +197,7 @@ extern int watch;
 #define FIRST_WORD_IS_ELN   (1 << 7)
 #define IN_BOOKMARKS_SCREEN (1 << 8)
 #define STATE_COMPLETING    (1 << 9)
-/* Instead of completion the current word, a BAEJ suggestion points to
+/* Instead of a completion for the current word, a BAEJ suggestion points to
  * a possible completion as follows: WORD > COMPLETION */
 #define BAEJ_SUGGESTION     (1 << 10)
 #define STATE_SUGGESTING    (1 << 11)

@@ -26,7 +26,6 @@
 #define TAGS_H
 
 int is_tag(char *name);
-char *replace_slashes(char *str, const char c);
 int tags_function(char **args);
 
 #endif /* TAGS_H */

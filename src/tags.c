@@ -38,6 +38,7 @@
 #include "aux.h"
 #include "misc.h"
 #include "exec.h"
+#include "strings.h"
 #include "sort.h"
 
 /* A few printing functions */
@@ -346,24 +347,6 @@ is_tag(char *name)
 	}
 
 	return 0;
-}
-
-char *
-replace_slashes(char *str, const char c)
-{
-	if (*str == '/')
-		str++;
-
-	char *p = savestring(str, strlen(str));
-	char *q = p;
-
-	while (*q) {
-		if (*q == '/' && (q == p || *(q - 1) != '\\'))
-			*q = c;
-		q++;
-	}
-
-	return p;
 }
 
 /* Tag the file named NAME as TAG */
