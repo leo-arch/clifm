@@ -442,8 +442,11 @@ use the standard mode (readline's built-in) for TAB completion
 .TP
 \fB\-\-trash\-as\-rm\fR
 the \fIr\fR command executes the built-in 'trash' (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
+.TP
+\fB\-\-virtual\-dir\-full\-paths\fR
+print file names in virtual directories as full paths instead of just base names
 .PP
-Options precedence order: 1) command line; 2) configuration file; 3) default values.
+Options precedence order: 1) command line flags; 2) configuration file; 3) default values.
 
 .SH 5. COMMANDS
 Help for all commands listed here can be accessed via the \fI-h\fR or \fI--help\fR options.
