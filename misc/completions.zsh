@@ -93,6 +93,7 @@ args=(
 	'--sort-reverse[sort in reverse order]'
 	'--std-tab-comp[use standard TAB completion]'
 	'--trash-as-rm[the '\''r'\'' command executes '\''trash'\'' instead of '\''rm'\'']'
+	'--virtual-dir-full-paths[print full path file names in virtual directories]'
 	'*:filename:_files'
 )
 

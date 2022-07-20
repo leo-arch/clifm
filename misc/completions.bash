@@ -130,6 +130,7 @@ _clifm ()
         --sort-reverse
         --std-tab-comp
         --trash-as-rm
+        --virtual-dir-full-paths
     )
 
     if [[ $prev == "-b" || $prev == "-c" || $prev == "-k" || $prev == "-p" ]]; then
