@@ -177,6 +177,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 ✔️ **Changelog**
 * `version 1.6.1`  - Development:
   - `--std-tab-comp` option renamed to `--stdtab` (to match `--fzytab` and `--smenutab` options)
+  - **NEW**: [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories). Experimental
   - **NEW**: [A better organized configuration file](https://github.com/leo-arch/clifm/blob/master/misc/clifmrc)
   - **NEW**: [Improved logs system](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status)
   - **NEW**: [smenu support for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#a-different-alternative-smenu)
