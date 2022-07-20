@@ -614,11 +614,11 @@ open_file(char *file)
 int
 xchmod(const char *file, const char *mode_str)
 {
-	struct stat a;
+/*	struct stat a;
 	if (lstat(file, &a) == -1) {
-		_err('e', PRINT_PROMPT, "stat: %s: %s\n", file, strerror(errno));
+		_err('e', PRINT_PROMPT, "lstat: %s: %s\n", file, strerror(errno));
 		return errno;
-	}
+	} */
 
 	int file_flags = S_ISDIR(a.st_mode) ? O_DIRECTORY | O_RDONLY : O_RDONLY;
 
