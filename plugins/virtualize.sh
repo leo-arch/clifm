@@ -18,7 +18,7 @@ Usage: %s FILE... \n" "$name" >&2
 fi
 
 if [ -n "$CLIFM_VIRTUAL_DIR" ]; then
-	printf "clifm: Nested virtual directories are not allowed\n" >&2
+	printf "clifm: Only one virtual directory can be created at a time\n" >&2
 	exit 1
 fi
 
