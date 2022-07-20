@@ -1028,6 +1028,8 @@ If using FZF for TAB completion, multi-selection is allowed.
 .TP
 \fBC\-Alt\-i:\fR, \fBAlt\-TAB:\fR Toggle disk usage analyzer on/off
 .TP
+\fBAlt\-w:\fR Toggle full path file names in virtual directories
+.TP
 \fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
 \fBAlt\-t:\fR Clear program messages
