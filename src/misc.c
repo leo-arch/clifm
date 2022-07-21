@@ -93,64 +93,6 @@ set_eln_color(void)
 	}
 }
 
-/* Let's send a desktop notification */
-/*
-static void
-send_desktop_notification(char *msg)
-{
-//	if (!msg || !*msg || !(flags & GUI) || desktop_noti != 1)
-	if (!msg || !*msg || desktop_noti != 1)
-		return;
-
-	char type[12];
-	*type = '\0';
-	switch(pmsg) {
-#if defined(__HAIKU__)
-	case ERROR: snprintf(type, sizeof(type), "error"); break;
-	case WARNING: snprintf(type, sizeof(type), "important"); break;
-	case NOTICE: snprintf(type, sizeof(type), "information"); break;
-	default: snprintf(type, sizeof(type), "information"); break;
-#elif defined(__APPLE__)
-	default: UNUSED(type); break;
-#else
-	case ERROR: snprintf(type, sizeof(type), "critical"); break;
-	case WARNING: snprintf(type, sizeof(type), "normal"); break;
-	case NOTICE: snprintf(type, sizeof(type), "low"); break;
-	default: snprintf(type, sizeof(type), "low"); break;
-#endif
-	}
-
-	size_t mlen = strlen(msg);
-	if (mlen > 0 && msg[mlen - 1] == '\n') {
-		msg[mlen - 1] = '\0';
-		mlen--;
-	}
-
-	// Some messages are written in the form PROGRAM_NAME: MSG. We only
-	// want the MSG part
-	char name[NAME_MAX];
-	snprintf(name, sizeof(name), "%s: ", PROGRAM_NAME);
-	char *p = msg;
-	char *q = strstr(msg, name);
-	size_t nlen = q ? strlen(name) : 0;
-	if (q && mlen > nlen)
-		p = msg + nlen;
-
-#if defined(__HAIKU__)
-	char *cmd[] = {"notify", "--type", type, "--title", PROGRAM_NAME, p, NULL};
-	launch_execve(cmd, FOREGROUND, E_MUTE);
-#elif defined (__APPLE__)
-	char _msg[PATH_MAX];
-	snprintf(_msg, sizeof(_msg), "'display notification \"%s\" with title \"%s\"'",
-		msg, PROGRAM_NAME);
-	char *cmd[] = {"osascript", "-e", _msg, NULL};
-//	osascript -e 'display notification "message" with title "title"'
-#else
-	char *cmd[] = {"notify-send", "-u", type, PROGRAM_NAME, p, NULL};
-	launch_execve(cmd, FOREGROUND, E_MUTE);
-#endif
-} */
-
 /* Custom POSIX implementation of GNU asprintf() modified to log program
  * messages.
  * MSG_TYPE is one of: 'e', 'f', 'w', 'n', zero (meaning this
@@ -209,8 +151,7 @@ _err(int msg_type, int prompt_flag, const char *format, ...)
 //			prompt_flag = NOPRINT_PROMPT;
 		}
 		log_msg(buf, prompt_flag, logme, add_to_msgs_list);
-/*		if (prompt_flag == 1)
-			send_desktop_notification(buf); */
+
 		free(buf);
 		return EXIT_SUCCESS;
 	}

@@ -188,6 +188,64 @@ write_msg_into_logfile(const char *_msg)
 	free(date);
 }
 
+/* Let's send a desktop notification */
+/*
+static void
+send_desktop_notification(char *msg)
+{
+//	if (!msg || !*msg || !(flags & GUI) || desktop_noti != 1)
+	if (!msg || !*msg || desktop_noti != 1)
+		return;
+
+	char type[12];
+	*type = '\0';
+	switch(pmsg) {
+#if defined(__HAIKU__)
+	case ERROR: snprintf(type, sizeof(type), "error"); break;
+	case WARNING: snprintf(type, sizeof(type), "important"); break;
+	case NOTICE: snprintf(type, sizeof(type), "information"); break;
+	default: snprintf(type, sizeof(type), "information"); break;
+#elif defined(__APPLE__)
+	default: UNUSED(type); break;
+#else
+	case ERROR: snprintf(type, sizeof(type), "critical"); break;
+	case WARNING: snprintf(type, sizeof(type), "normal"); break;
+	case NOTICE: snprintf(type, sizeof(type), "low"); break;
+	default: snprintf(type, sizeof(type), "low"); break;
+#endif
+	}
+
+	size_t mlen = strlen(msg);
+	if (mlen > 0 && msg[mlen - 1] == '\n') {
+		msg[mlen - 1] = '\0';
+		mlen--;
+	}
+
+	// Some messages are written in the form PROGRAM_NAME: MSG. We only
+	// want the MSG part
+	char name[NAME_MAX];
+	snprintf(name, sizeof(name), "%s: ", PROGRAM_NAME);
+	char *p = msg;
+	char *q = strstr(msg, name);
+	size_t nlen = q ? strlen(name) : 0;
+	if (q && mlen > nlen)
+		p = msg + nlen;
+
+#if defined(__HAIKU__)
+	char *cmd[] = {"notify", "--type", type, "--title", PROGRAM_NAME, p, NULL};
+	launch_execve(cmd, FOREGROUND, E_MUTE);
+#elif defined (__APPLE__)
+	char _msg[PATH_MAX];
+	snprintf(_msg, sizeof(_msg), "'display notification \"%s\" with title \"%s\"'",
+		msg, PROGRAM_NAME);
+	char *cmd[] = {"osascript", "-e", _msg, NULL};
+//	osascript -e 'display notification "message" with title "title"'
+#else
+	char *cmd[] = {"notify-send", "-u", type, PROGRAM_NAME, p, NULL};
+	launch_execve(cmd, FOREGROUND, E_MUTE);
+#endif
+} */
+
 /* Handle the error message MSG. Store MSG in an array of error
  * messages, write it into an error log file, and print it immediately
  * (if PRINT is zero (NOPRINT_PROMPT) or tell the next prompt, if PRINT
@@ -213,11 +271,14 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 		messages[msgs_n] = (char *)NULL;
 	}
 
-	if (print_prompt) /* The next prompt will take care of printing the message */
-//		print_msg = desktop_noti == 0 ? 1 : 0;
-		print_msg = 1;
-	else /* Print the message directly here */
+	if (print_prompt) {
+/*		if (desktop_noti == 1)
+			print_desktop_notification(_msg);
+		else */
+		print_msg = 1; /* The next prompt will take care of printing the message */
+	} else { /* Print the message directly here */
 		fputs(_msg, stderr);
+	}
 
 	if (xargs.stealth_mode == 1 || config_ok == 0 || !log_file || !*log_file
 	|| logme == 0 || logs_enabled == 0)
