@@ -228,6 +228,9 @@ MaxJumpTotalRank=100000
 #        4. LOGS AND HISTORY          #
 #=====================================#
 
+# Send errors, warnings, and notices to the notification daemon?
+DesktopNotifications=false
+
 # Keep track of errors and warnings
 Logs=false
 # Keep a record of external commands and internal commands able to modify the 

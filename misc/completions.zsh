@@ -48,6 +48,7 @@ args=(
 	'--cd-on-quit[write last visited path to $XDG_CONFIG_HOME/clifm/.last to be accessed later by a shell funtion]'
 	'--color-scheme=[set color scheme]:color:->colorschemes'
 	'--cwd-in-title[print current directory in the terminal window title]'
+	'--desktop-notifications[enable desktop notifications]'
 	'--disk-usage[show disk usage (free/total) for the filesystem to which the current directory belongs]'
 	'--enable-logs[enable program logs]'
 	'--expand-bookmarks[expand bookmark names into the corresponding bookmark paths]'

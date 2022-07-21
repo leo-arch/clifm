@@ -86,6 +86,7 @@ _clifm ()
         --cd-on-quit
         --color-scheme
         --cwd-in-title
+        --dektop-notifications
         --disk-usage
         --enable-logs
         --expand-bookmarks
