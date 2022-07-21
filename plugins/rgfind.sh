@@ -43,7 +43,7 @@ while true; do
 		--trim --ignore-case -- "$args" 2>/dev/null | \
 		fzf --ansi --reverse --prompt="$fzf_prompt" \
 		--height="$fzf_height" --color="$fzf_colors" \
-		--no-clear --bind "right:accept" --no-info \
+		--no-clear --bind "right:accept" --no-unicode \
 		--header="Select a file name and press Enter or Right to open it")"
 	[ -z "$file" ] && break
 	clifm --open "$PWD/$(printf "%s" "$file" | cut -d: -f1)"
