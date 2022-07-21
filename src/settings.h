@@ -196,6 +196,7 @@ xf=01;31:xs=00;32:"
 #define DEF_CP_CMD CP_CP
 #define DEF_CUR_WS 0
 #define DEF_CWD_IN_TITLE 0
+#define DEF_DESKTOP_NOTIFICATIONS 0
 #define DEF_DIRHIST_MAP 0
 #define DEF_DISK_USAGE 0
 #define DEF_DIV_LINE "-"

@@ -190,6 +190,20 @@ Examples:\n\
 - Deselect files from a menu:\n\
     ds (or 'ds <TAB>' to choose from a list; multi-selection is allowed)"
 
+#define DESKTOP_NOTIFICATIONS_USAGE "Errors, warnings, and notices are send \
+to the notification daemon instead of\n\
+being printed immediately before the next prompt\n\n\
+To enable this feature use the --desktop-notifications command line flag or\n\
+set DesktopNotifications to true in the configuration file (F10)\n\n\
+Notifications are sent using the following command:\n\n\
+Linux/BSD: notify-send -u \"TYPE\" \"TITLE\" \"MSG\"\n\
+MacOS:     osascript -e 'display notification \"MSG\" subtitle \"TYPE\" with title \"TITLE\"'\n\
+Haiku:     notify --type \"TYPE\" --title \"TITLE\" \"MSG\"\n\n\
+Note: It is the notification daemon itself who takes care of actually printing\n\
+notifications on your screen. For troubleshoting, consult your \
+daemon's documentation\n\n\
+Tip: You can always check notifications using the 'msg' command"
+
 #define DIRHIST_USAGE "List or access entries in the directory history list\n\
 Usage:\n\
   b/f [hist] [clear] [!ELN]\n\n\
@@ -866,6 +880,7 @@ database (via the 'j' command)\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
 \n      --color-scheme=NAME\t Use color scheme NAME\
 \n      --cwd-in-title\t\t Print current directory in terminal window title\
+\n      --desktop-notifications\t Enable desktop notifications\
 \n      --disk-usage\t\t Show disk usage (free/total)\
 \n      --enable-logs\t\t Enable program logs\
 \n      --expand-bookmarks\t Expand bookmark names into the corresponding \

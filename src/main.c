@@ -151,7 +151,7 @@ int
 	cur_ws = UNSET,
 	dequoted = 0,
 
-//	desktop_notis = 1,
+	desktop_notifications = UNSET,
 
 	dir_changed = 0,
 	dirhist_map = UNSET,

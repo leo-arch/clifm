@@ -1418,17 +1418,18 @@ external_arguments(int argc, char **argv)
 		{"smenutab", no_argument, 0, 56},
 		{"virtual-dir-full-paths", no_argument, 0, 57},
 		{"virtual-dir", required_argument, 0, 58},
+		{"desktop-notifications", no_argument, 0, 59},
 #ifdef __linux__
-		{"si", no_argument, 0, 59},
+		{"si", no_argument, 0, 60},
 #endif
 	    {0, 0, 0, 0}
 	};
 
 	/* Increment whenever a new (only) long option is added */
 #ifdef __linux__
-	int long_opts = 59;
+	int long_opts = 60;
 #else
-	int long_opts = 58;
+	int long_opts = 59;
 #endif
 	int optc;
 	/* Variables to store arguments to options */
@@ -1664,8 +1665,10 @@ RUN:
 			}
 			break;
 
+		case 59: xargs.desktop_notifications = desktop_notifications = 1; break;
+
 #ifdef __linux__
-		case 59: xargs.si = 1; break;
+		case 60: xargs.si = 1; break;
 #endif
 		case 'a': show_hidden = xargs.hidden = 0; break;
 		case 'A': show_hidden = xargs.hidden = 1; break;
@@ -1980,6 +1983,7 @@ unset_xargs(void)
 	xargs.config = UNSET;
 	xargs.control_d_exits = UNSET;
 	xargs.cwd_in_title = UNSET;
+	xargs.desktop_notifications = UNSET;
 	xargs.dirmap = UNSET;
 	xargs.disk_usage = UNSET;
 	xargs.disk_usage_analyzer = UNSET;
@@ -2657,6 +2661,13 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (desktop_notifications == UNSET) {
+		if (xargs.desktop_notifications == UNSET)
+			desktop_notifications = DEF_DESKTOP_NOTIFICATIONS;
+		else
+			desktop_notifications = xargs.desktop_notifications;
+	}
+
 	if (xargs.toggle_workspaces == UNSET)
 		xargs.toggle_workspaces = DEF_TOGGLE_WORKSPACES;
 

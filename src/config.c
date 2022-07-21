@@ -781,6 +781,9 @@ ListingMode=%d\n\n"
 		"# List files automatically after changing current directory\n\
 AutoLs=%s\n\n"
 
+		"# Send errors, warnings, and notices to the notification daemon?\n\
+DesktopNotifications=%s\n\n"
+
 	    "# If set to true, print a map of the current position in the directory\n\
 # history list, showing previous, current, and next entries\n\
 DirhistMap=%s\n\n"
@@ -803,6 +806,7 @@ mvCmd=%d\n\n",
 		DEF_FILES_COUNTER == 1 ? "true" : "false",
 		DEF_LISTING_MODE,
 		DEF_AUTOLS == 1 ? "true" : "false",
+		DEF_DESKTOP_NOTIFICATIONS == 1 ? "true" : "false",
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,
 		DEF_MV_CMD);
@@ -1744,6 +1748,12 @@ read_config(void)
 				continue;
 		}
 
+		else if (xargs.autols == UNSET && *line == 'A'
+		&& strncmp(line, "AutoLs=", 7) == 0) {
+			if (set_config_bool_value(line, &autols) == -1)
+				continue;
+		}
+
 		else if (xargs.auto_open == UNSET && *line == 'A'
 		&& strncmp(line, "AutoOpen=", 9) == 0) {
 			if (set_config_bool_value(line, &auto_open) == -1)
@@ -1782,12 +1792,6 @@ read_config(void)
 				continue;
 		}
 
-		else if (xargs.autols == UNSET && *line == 'A'
-		&& strncmp(line, "AutoLs=", 7) == 0) {
-			if (set_config_bool_value(line, &autols) == -1)
-				continue;
-		}
-
 		else if (xargs.cd_on_quit == UNSET && *line == 'C'
 		&& strncmp(line, "CdOnQuit=", 9) == 0) {
 			if (set_config_bool_value(line, &cd_on_quit) == -1)
@@ -1821,6 +1825,12 @@ read_config(void)
 				cp_cmd = opt_num;
 			else
 				cp_cmd = DEF_CP_CMD;
+		}
+
+		else if (xargs.desktop_notifications == UNSET && *line == 'D'
+		&& strncmp(line, "DesktopNotifications=", 21) == 0) {
+			if (set_config_bool_value(line, &desktop_notifications) == -1)
+				continue;
 		}
 
 		else if (xargs.dirmap == UNSET && *line == 'D'

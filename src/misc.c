@@ -1837,6 +1837,12 @@ print_bookmarks_topic(void)
 }
 
 static int
+print_desktop_notifications_topic(void)
+{
+	puts(DESKTOP_NOTIFICATIONS_USAGE); return EXIT_SUCCESS;
+}
+
+static int
 print_dir_jumper_topic(void)
 {
 	puts(JUMP_USAGE); return EXIT_SUCCESS;
@@ -1930,6 +1936,8 @@ run_help_topic(char *topic)
 		return print_basics_topic();
 	if (*topic == 'b' && strcmp(topic, "bookmarks") == 0)
 		return print_bookmarks_topic();
+	if (*topic == 'd' && strcmp(topic, "desktop-notifications") == 0)
+		return print_desktop_notifications_topic();
 	if (*topic == 'd' && strcmp(topic, "dir-jumper") == 0)
 		return print_dir_jumper_topic();
 	if (*topic == 'f' && strcmp(topic, "file-attributes") == 0)

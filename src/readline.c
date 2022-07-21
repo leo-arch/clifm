@@ -2143,7 +2143,7 @@ options_generator(const char *text, int state)
 	if (w != 2) /* Complete internal options only for the second word */
 		return (char *)NULL;
 
-#define MAX_OPTS 17
+#define MAX_OPTS 18
 	char *_opts[MAX_OPTS] = {0};
 
 	/* acd, ao, ext, ff, hf, pg, uc */
@@ -2178,19 +2178,20 @@ options_generator(const char *text, int state)
 		_opts[1] = "autocommands";
 		_opts[2] = "basics";
 		_opts[3] = "bookmarks";
-		_opts[4] = "dir-jumper";
-		_opts[5] = "file-attributes";
-		_opts[6] = "file-tags";
-		_opts[7] = "navigation";
-		_opts[8] = "plugins";
-		_opts[9] = "profiles";
-		_opts[10] = "remotes";
-		_opts[11] = "resource-opener";
-		_opts[12] = "selection";
-		_opts[13] = "search";
-		_opts[14] = "theming";
-		_opts[15] = "trash";
-		_opts[16] = NULL;
+		_opts[4] = "desktop-notifications";
+		_opts[5] = "dir-jumper";
+		_opts[6] = "file-attributes";
+		_opts[7] = "file-tags";
+		_opts[8] = "navigation";
+		_opts[9] = "plugins";
+		_opts[10] = "profiles";
+		_opts[11] = "remotes";
+		_opts[12] = "resource-opener";
+		_opts[13] = "selection";
+		_opts[14] = "search";
+		_opts[15] = "theming";
+		_opts[16] = "trash";
+		_opts[17] = NULL;
 	/* b, f */
 	} else if ((*l == 'b' && l[1] == ' ') || (*l == 'f' && l[1] == ' ')) {
 		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;

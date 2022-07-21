@@ -716,6 +716,7 @@ struct param {
 	int columns;
 	int config;
 	int cwd_in_title;
+	int desktop_notifications;
 	int dirmap;
 	int disk_usage;
 	int cd_on_quit;
@@ -996,7 +997,7 @@ extern int
 	cur_ws,
 	dequoted,
 
-//	desktop_notis,
+	desktop_notifications,
 
 	dir_changed, /* flag to know is dir was changed: used by autocmds */
 	dirhist_map,

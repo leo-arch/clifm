@@ -189,12 +189,11 @@ write_msg_into_logfile(const char *_msg)
 }
 
 /* Let's send a desktop notification */
-/*
 static void
 send_desktop_notification(char *msg)
 {
 //	if (!msg || !*msg || !(flags & GUI) || desktop_noti != 1)
-	if (!msg || !*msg || desktop_noti != 1)
+	if (!msg || !*msg)
 		return;
 
 	char type[12];
@@ -206,7 +205,10 @@ send_desktop_notification(char *msg)
 	case NOTICE: snprintf(type, sizeof(type), "information"); break;
 	default: snprintf(type, sizeof(type), "information"); break;
 #elif defined(__APPLE__)
-	default: UNUSED(type); break;
+	case ERROR: snprintf(type, sizeof(type), "Error"); break;
+	case WARNING: snprintf(type, sizeof(type), "Warning"); break;
+	case NOTICE: snprintf(type, sizeof(type), "Notice"); break;
+	default: snprintf(type, sizeof(type), "Notice"); break;
 #else
 	case ERROR: snprintf(type, sizeof(type), "critical"); break;
 	case WARNING: snprintf(type, sizeof(type), "normal"); break;
@@ -219,6 +221,8 @@ send_desktop_notification(char *msg)
 	if (mlen > 0 && msg[mlen - 1] == '\n') {
 		msg[mlen - 1] = '\0';
 		mlen--;
+		if (mlen == 0)
+			return;
 	}
 
 	// Some messages are written in the form PROGRAM_NAME: MSG. We only
@@ -226,25 +230,42 @@ send_desktop_notification(char *msg)
 	char name[NAME_MAX];
 	snprintf(name, sizeof(name), "%s: ", PROGRAM_NAME);
 	char *p = msg;
-	char *q = strstr(msg, name);
-	size_t nlen = q ? strlen(name) : 0;
-	if (q && mlen > nlen)
+	size_t nlen = strlen(name);
+	int ret = strncmp(p, name, nlen);
+	if (ret == 0) {
+		if (mlen <= nlen)
+			return;
 		p = msg + nlen;
+	}
 
 #if defined(__HAIKU__)
 	char *cmd[] = {"notify", "--type", type, "--title", PROGRAM_NAME, p, NULL};
-	launch_execve(cmd, FOREGROUND, E_MUTE);
+	ret = launch_execve(cmd, FOREGROUND, E_MUTE);
 #elif defined (__APPLE__)
-	char _msg[PATH_MAX];
-	snprintf(_msg, sizeof(_msg), "'display notification \"%s\" with title \"%s\"'",
-		msg, PROGRAM_NAME);
+	size_t msg_len = strlen(msg) + strlen(type) + strlen(PROGRAM_NAME) + 60;
+	char *_msg = (char *)xnmalloc(msg_len, sizeof(char));
+	snprintf(_msg, msg_len, "'display notification \"%s\" subtitle \"%s\" with title \"%s\"'",
+		msg, type, PROGRAM_NAME);
 	char *cmd[] = {"osascript", "-e", _msg, NULL};
-//	osascript -e 'display notification "message" with title "title"'
+	ret = launch_execve(cmd, FOREGROUND, E_MUTE);
+	free(_msg);
 #else
 	char *cmd[] = {"notify-send", "-u", type, PROGRAM_NAME, p, NULL};
-	launch_execve(cmd, FOREGROUND, E_MUTE);
+	ret = launch_execve(cmd, FOREGROUND, E_MUTE);
 #endif
-} */
+
+	if (ret == EXIT_SUCCESS)
+		return;
+
+	/* Error: warn and print the original message */
+	fprintf(stderr, "%s: Notification daemon error: %s\n"
+		"Disable desktop notifications (run 'help desktop-notifications' "
+		"for details) or %s to silence this "
+		"warning (original message printed below)\n", PROGRAM_NAME,
+		strerror(ret), ret == ENOENT ? "install a notification daemon"
+		: "fix this error (consult your daemon documentation)");
+	fprintf(stderr, "%s\n", msg);
+}
 
 /* Handle the error message MSG. Store MSG in an array of error
  * messages, write it into an error log file, and print it immediately
@@ -271,12 +292,12 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 		messages[msgs_n] = (char *)NULL;
 	}
 
-	if (print_prompt) {
-/*		if (desktop_noti == 1)
-			print_desktop_notification(_msg);
-		else */
-		print_msg = 1; /* The next prompt will take care of printing the message */
-	} else { /* Print the message directly here */
+	if (print_prompt == 1) {
+		if (desktop_notifications == 1)
+			send_desktop_notification(_msg);
+		else
+			print_msg = 1; /* Message is printed by the next prompt */
+	} else { /* Print message directly here */
 		fputs(_msg, stderr);
 	}
 
