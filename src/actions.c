@@ -1,4 +1,4 @@
-/* actions.c -- a few functions for the plugins systems */
+/* actions.c -- A few functions for the plugins system */
 
 /*
  * This file is part of CliFM
@@ -40,6 +40,59 @@
 #include "mime.h"
 #include "misc.h"
 
+/* Get the executable's path of the action ACTION
+ * Returns this path on success and NULL on error, in which case STATUS
+ * is set to the appropriate error code */
+static char *
+get_plugin_path(char *action, int *status)
+{
+	size_t action_len = strlen(action);
+
+	/* Remove terminating new line char */
+	if (action_len > 0 && action[action_len - 1] == '\n')
+		action[action_len - 1] = '\0';
+
+	char *cmd = (char *)NULL;
+	int dir_path = 0;
+
+	if (strchr(action, '/')) {
+		cmd = (char *)xnmalloc(action_len + 1, sizeof(char));
+		strcpy(cmd, action); /* NOLINT */
+		dir_path = 1;
+	} else { /* If not a path, PLUGINS_DIR is assumed */
+		if (!plugins_dir || !*plugins_dir) {
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("actions: Plugins directory not defined\n"));
+			*status = EXIT_FAILURE;
+			return (char *)NULL;
+		}
+		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2, sizeof(char));
+		sprintf(cmd, "%s/%s", plugins_dir, action); /* NOLINT */
+	}
+
+	/* Check if the action file exists and is executable */
+	if (access(cmd, X_OK) == -1) {
+		/* If not in local dir, check system data dir as well */
+		if (data_dir && dir_path == 0) {
+			cmd = (char *)xrealloc(cmd, (action_len + strlen(data_dir)
+				+ strlen(PNL) + 11) * sizeof(char));
+			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action); /* NOLINT */
+			if (access(cmd, X_OK) == -1) {
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
+				free(cmd);
+				*status = errno;
+				return (char *)NULL;
+			}
+		} else {
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
+			free(cmd);
+			*status = errno;
+			return (char *)NULL;
+		}
+	}
+
+	return cmd;
+}
+
 /* The core of this function was taken from NNN's run_selected_plugin
  * function and modified to fit our needs. Thanks NNN! */
 int
@@ -52,45 +105,10 @@ run_action(char *action, char **args)
 		 * #    1) CREATE CMD TO BE EXECUTED   #
 		 * ##################################### */
 
-	char *cmd = (char *)NULL;
-	size_t action_len = strlen(action);
-
-	/* Remove terminating new line char */
-	if (action_len > 0 && action[action_len - 1] == '\n')
-		action[action_len - 1] = '\0';
-
-	int dir_path = 0;
-	if (strchr(action, '/')) {
-		cmd = (char *)xnmalloc(action_len + 1, sizeof(char));
-		strcpy(cmd, action); /* NOLINT */
-		dir_path = 1;
-	} else { /* If not a path, PLUGINS_DIR is assumed */
-		if (!plugins_dir || !*plugins_dir) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("actions: Plugins directory not defined\n"));
-			return EXIT_FAILURE;
-		}
-		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2, sizeof(char));
-		sprintf(cmd, "%s/%s", plugins_dir, action); /* NOLINT */
-	}
-
-	/* Check if the action file exists and is executable */
-	if (access(cmd, X_OK) == -1) {
-		/* If not in local dir, check system data dir as well */
-		if (data_dir && !dir_path) {
-			cmd = (char *)xrealloc(cmd, (action_len + strlen(data_dir)
-				+ strlen(PNL) + 11) * sizeof(char));
-			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action); /* NOLINT */
-			if (access(cmd, X_OK) == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
-				free(cmd);
-				return errno;
-			}
-		} else {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
-			free(cmd);
-			return errno;
-		}
-	}
+	int s = EXIT_SUCCESS;
+	char *cmd = get_plugin_path(action, &s);
+	if (!cmd)
+		return s;
 
 	size_t cmd_len = strlen(cmd);
 	args[0] = (char *)xrealloc(args[0], (cmd_len + 1) * sizeof(char));

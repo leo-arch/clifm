@@ -214,6 +214,7 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 	}
 
 	if (print_prompt) /* The next prompt will take care of printing the message */
+//		print_msg = desktop_noti == 0 ? 1 : 0;
 		print_msg = 1;
 	else /* Print the message directly here */
 		fputs(_msg, stderr);
