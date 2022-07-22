@@ -1183,6 +1183,22 @@ free_prompts(void)
 	prompts_n = 0;
 }
 
+static void
+remove_virtual_dir(void)
+{
+	struct stat a;
+	if (stdin_tmp_dir && stat(stdin_tmp_dir, &a) != -1) {
+		xchmod(stdin_tmp_dir, "0700");
+
+		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
+		int ret = launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
+		if (ret != EXIT_SUCCESS)
+			exit_code = ret;
+		free(stdin_tmp_dir);
+	}
+	unsetenv("CLIFM_VIRTUAL_DIR");
+}
+
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 void
@@ -1226,14 +1242,7 @@ free_stuff(void)
 	free(wprompt_str);
 	free(fzftab_options);
 
-	if (stdin_tmp_dir) {
-		xchmod(stdin_tmp_dir, "0700");
-
-		char *rm_cmd[] = {"rm", "-rd", "--", stdin_tmp_dir, NULL};
-		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
-		free(stdin_tmp_dir);
-		unsetenv("CLIFM_VIRTUAL_DIR");
-	}
+	remove_virtual_dir();
 
 	i = (int)cschemes_n;
 	while (i-- > 0)
@@ -1465,7 +1474,7 @@ create_virtual_dir(const int user_provided)
 
 	char *cmd[] = {"mkdir", "-p", stdin_tmp_dir, NULL};
 	int ret = 0;
-	if ((ret = launch_execve(cmd, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS) {
+	if ((ret = launch_execve(cmd, FOREGROUND, E_MUTE)) != EXIT_SUCCESS) {
 		if (user_provided == 1) {
 			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s. Trying with default value\n",
 				PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
@@ -1473,18 +1482,19 @@ create_virtual_dir(const int user_provided)
 			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s\n",
 				PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
 		}
-		return EXIT_FAILURE;
+		return ret;
 	}
 
 	return EXIT_SUCCESS;
 }
 
-void
+int
 handle_stdin(void)
 {
 	/* If files are passed via stdin, we need to disable restore
 	 * last path in order to correctly understand relative paths */
 	restore_last_path = 0;
+	int exit_status = EXIT_SUCCESS;
 
 	/* Max input size: 512 * (512 * 1024)
 	 * 512 chunks of 524288 bytes (512KiB) each
@@ -1507,7 +1517,7 @@ handle_stdin(void)
 		/* Error */
 		if (input_len < 0) {
 			free(buf);
-			return;
+			return EXIT_FAILURE;
 		}
 
 		/* Nothing else to be read */
@@ -1530,18 +1540,16 @@ handle_stdin(void)
 	/* Create tmp dir to store links to files */
 	char *suffix = (char *)NULL;
 
-	if (!stdin_tmp_dir || create_virtual_dir(1) != EXIT_SUCCESS) {
+	if (!stdin_tmp_dir || (exit_status = create_virtual_dir(1)) != EXIT_SUCCESS) {
 		free(stdin_tmp_dir);
-		if (!(suffix = gen_rand_str(6)))
-			goto FREE_N_EXIT;
 
+		suffix = gen_rand_str(6);
 		char *temp = tmp_dir ? tmp_dir : P_tmpdir;
 		stdin_tmp_dir = (char *)xnmalloc(strlen(temp) + 13, sizeof(char));
-		sprintf(stdin_tmp_dir, "%s/vdir.%s", temp, suffix);
-
+		sprintf(stdin_tmp_dir, "%s/vdir.%s", temp, suffix ? suffix : "nTmp0B");
 		free(suffix);
 
-		if (create_virtual_dir(0) != EXIT_SUCCESS)
+		if ((exit_status = create_virtual_dir(0)) != EXIT_SUCCESS)
 			goto FREE_N_EXIT;
 	}
 
@@ -1550,8 +1558,10 @@ handle_stdin(void)
 	/* Get CWD: we need it to prepend it to relative paths */
 	char *cwd = (char *)NULL;
 	cwd = getcwd(NULL, 0);
-	if (!cwd)
+	if (!cwd) {
+		exit_status = errno;
 		goto FREE_N_EXIT;
+	}
 
 	/* Get substrings from buf */
 	char *p = buf, *q = buf;
@@ -1605,8 +1615,8 @@ handle_stdin(void)
 				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
 					/* File already exists: append a random six digits suffix */
 					suffix = gen_rand_str(6);
-					char tmp[PATH_MAX + 6];
-					snprintf(tmp, sizeof(tmp), "%s.%s", dest, suffix ? suffix : "copy");
+					char tmp[PATH_MAX + 8];
+					snprintf(tmp, sizeof(tmp), "%s.%s", dest, suffix ? suffix : "#dn7R4");
 					if (symlink(source, tmp) == -1)
 						_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
 					else
@@ -1632,14 +1642,15 @@ handle_stdin(void)
 
 	/* chdir to tmp dir and update path var */
 	if (xchdir(stdin_tmp_dir, SET_TITLE) == -1) {
+		exit_status = errno;
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", stdin_tmp_dir, strerror(errno));
 
 		xchmod(stdin_tmp_dir, "0700");
 
-		/* the -d parameter to rm(1) isn't POSIX, but is available for
-		 * BSD systems and MacOS */
-		char *rm_cmd[] = {"rm", "-drf", "--", stdin_tmp_dir, NULL};
-		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
+		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
+		int ret = launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
+		if (ret != EXIT_SUCCESS)
+			exit_status = ret;
 
 		free(cwd);
 		goto FREE_N_EXIT;
@@ -1664,7 +1675,7 @@ FREE_N_EXIT:
 		add_to_dirhist(workspaces[cur_ws].path);
 	}
 
-	return;
+	return exit_status;
 }
 
 /* Save pinned in a file */

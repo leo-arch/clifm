@@ -1812,8 +1812,10 @@ RUN:
 		}
 	}
 
-	if (virtual_dir_value)
+	if (virtual_dir_value) {
 		stdin_tmp_dir = savestring(virtual_dir_value, strlen(virtual_dir_value));
+		setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
+	}
 
 	if (alt_dir_value) {
 		char *dir_exp = (char *)NULL;
@@ -2062,7 +2064,7 @@ void
 init_shell(void)
 {
 	if (!isatty(STDIN_FILENO)) { /* Shell is not interactive */
-		handle_stdin();
+		exit_code = handle_stdin();
 		return;
 	}
 

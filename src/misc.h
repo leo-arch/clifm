@@ -38,7 +38,7 @@ void free_stuff(void);
 void free_remotes(int exit);
 void free_tags(void);
 void get_term_size(void);
-void handle_stdin(void);
+int handle_stdin(void);
 void help_function(void);
 int list_commands(void);
 int list_mountpoints(void);

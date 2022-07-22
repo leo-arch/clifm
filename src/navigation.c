@@ -442,8 +442,10 @@ backdir(char* str)
 int
 xchdir(char *dir, const int cd_flag)
 {
-	if (!dir || !*dir)
+	if (!dir || !*dir) {
+		errno = ENOENT;
 		return (-1);
+	}
 
 	DIR *dirp = opendir(dir);
 	if (!dirp)
