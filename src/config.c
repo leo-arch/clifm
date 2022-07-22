@@ -827,6 +827,11 @@ SplashScreen=%s\n\n\
 ShowHiddenFiles=%s\n\n\
 # List file properties next to file names instead of just file names\n\
 LongViewMode=%s\n\
+# Properties fields to be printed in long view mode\n\
+# a = attributes, i = user/group IDs, t = modification time, s = size\n\
+# A single dash \"-\" disables all fields\n\
+PropFields=%s\n\
+ApparentSize=%s\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
 ApparentSize=%s\n\
 # If running in long view, print directories full size (including contents)\n\
@@ -911,6 +916,7 @@ LightMode=%s\n\n",
 		DEF_SPLASH_SCREEN == 1 ? "true" : "false",
 		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
 		DEF_LONG_VIEW == 1 ? "true" : "false",
+		DEF_PROP_FIELDS,
 		DEF_APPARENT_SIZE == 1 ? "true" : "false",
 		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
 		DEF_LOGS_ENABLED == 1 ? "true" : "false",
