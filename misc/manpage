@@ -158,6 +158,7 @@ List of \fBclifm\fR features:
   49) Disk usage analyzer (see the \fI\-t\fR option)
   50) \fIEtiqueta\fR, a files tagging system
   51) Virtual directories
+  52) Desktop notifications
 
 .SH 4. PARAMETERS
 .SH POSITIONAL PARAMETERS
@@ -295,6 +296,9 @@ set \fINAME\fR as color scheme
 .TP
 \fB\-\-cwd\-in\-title\fR
 print current working directory in terminal window title. Otherwise, only the program name is printed
+.TP
+\fB\-\-desktop\-notifications\fR
+enable desktop notifications. Enter 'help desktop-notifications' in CliFM for more information
 .TP
 \fB\-\-disk\-usage\fR
 show disk usage (free/total) for the file system the current directory belongs to
