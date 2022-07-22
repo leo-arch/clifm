@@ -38,11 +38,12 @@ if [ -n "$CLIFM_VIRTUAL_DIR" ]; then
 	clifm_opts="$clifm_opts --virtual-dir=\"$CLIFM_VIRTUAL_DIR\""
 fi
 
+# This is what sed does:
 # 1. Replace escaped spaces by tabs
 # 2. Replace non-escaped spaces by new line chars
 # 3. Replace tabs (first step) by spaces
 # 4. Remove remaining escape chars
-files="$(echo "$*" | sed 's/\\ /\t/g' | sed 's/ /\n/g' | sed 's/\t/ /g' | sed 's/\\//g')"
+files="$(echo "$*" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g')"
 cmd="$term_cmd 'echo \"$files\" | $clifm_bin $clifm_opts'"
 
 eval "$cmd"
