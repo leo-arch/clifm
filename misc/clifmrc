@@ -64,6 +64,13 @@ Pager=false
 # List files properties next to file names instead of just file names
 LongViewMode=false
 
+# Properties fields to be printed for each file name in long view mode
+# a = File attributes, i = User/group IDs, t = Last modification time,
+# s = File size
+# Defaults to "aits" (print all fields)
+# A single dash ("-") disables all fields
+PropFields="aits"
+
 # If running in long view, print directories full size (including contents)
 FullDirSize=false
 
