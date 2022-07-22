@@ -677,10 +677,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		light_mode ? "" : df_c, pad, "", df_c,
 		trim ? tt_c : "", trim ? '~' : 0,
 
-		prop_fields.attr ? attr_s : "",
-		prop_fields.ids ? id_s : "",
-		prop_fields.time ? time_s : "",
-		prop_fields.size ? size_s : "");
+		prop_fields.attr == 1 ? attr_s : "",
+		prop_fields.ids == 1 ? id_s : "",
+		prop_fields.time == 1 ? time_s : "",
+		prop_fields.size == 1 ? size_s : "");
 #else
 	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
 		   "%s" /* Attributes */
@@ -693,10 +693,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	    light_mode ? "" : df_c, pad, "", df_c,
 	    trim ? tt_c : "", trim ? '~' : 0,
 
-		prop_fields.attr ? attr_s : "",
-		prop_fields.ids ? id_s : "",
-		prop_fields.time ? time_s : "",
-		prop_fields.size ? size_s : "");
+		prop_fields.attr == 1 ? attr_s : "",
+		prop_fields.ids == 1 ? id_s : "",
+		prop_fields.time == 1 ? time_s : "",
+		prop_fields.size == 1 ? size_s : "");
 #endif
 
 	free(t_ctype);
