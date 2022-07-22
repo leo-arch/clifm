@@ -80,6 +80,7 @@ struct sel_t *sel_elements = (struct sel_t *)NULL;
 struct prompts_t *prompts = (struct prompts_t *)NULL;
 struct history_t *history = (struct history_t *)NULL;
 struct msgs_t msgs;
+struct props_t prop_fields;
 
 struct sort_t __sorts[] = {
     {"none", 0, 0},
@@ -102,7 +103,7 @@ enum prog_msg pmsg = NOMSG;
 enum comp_type cur_comp_type = TCMP_NONE;
 enum tab_mode tabmode = STD_TAB;
 
-struct param xargs;
+struct param_t xargs;
 unsigned short term_cols;
 
 int curcol = 0,
@@ -287,6 +288,7 @@ char
 	finder_out_file[PATH_MAX],
 #endif /* _NO_FZF */
 	_fmatch[PATH_MAX],
+	prop_fields_str[PROP_FIELDS_SIZE] = "",
 
 	*actions_file = (char *)NULL,
 	*alt_bm_file = (char *)NULL,

@@ -401,6 +401,8 @@ extern int watch;
 # define P_tmpdir "/tmp"
 #endif
 
+#define PROP_FIELDS_SIZE 5 /* Five fields in the properties string (long view) */
+
 /* Dirjump macros for calculating directories rank extra points */
 #define BASENAME_BONUS 	300
 #define BOOKMARK_BONUS 	500
@@ -701,7 +703,7 @@ extern struct opts_t opts;
  * line parameter will be overriden, the user still can modifiy on the
  * fly (editing the config file) any option not specified in the command
  * line */
-struct param {
+struct param_t {
 	int apparent_size;
 	int auto_open;
 	int autocd;
@@ -793,7 +795,7 @@ struct param {
 	int warning_prompt;
 };
 
-extern struct param xargs;
+extern struct param_t xargs;
 
 /* Struct to store remotes information */
 struct remote_t {
@@ -878,6 +880,14 @@ struct msgs_t {
 	size_t notice;
 };
 extern struct msgs_t msgs;
+
+struct props_t {
+	int attr; /* File attributes */
+	int ids; /* User and group IDs */
+	int time; /* Last modification time */
+	int size; /* File size */
+};
+extern struct props_t prop_fields;
 
 struct cmdslist_t {
 	char *name;
@@ -1139,6 +1149,7 @@ extern char
 	finder_out_file[PATH_MAX],
 #endif /* _NO_FZF */
 	_fmatch[PATH_MAX], /* First regular match if fuzzy matching is enabled */
+	prop_fields_str[PROP_FIELDS_SIZE],
 
 	*actions_file,
 	*alt_config_dir,

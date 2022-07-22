@@ -1729,6 +1729,8 @@ read_config(void)
 	*div_line = *DEF_DIV_LINE;
 	char line[PATH_MAX + 15];
 
+	*prop_fields_str = '\0';
+
 	while (fgets(line, (int)sizeof(line), config_fp)) {
 		if (*line == '\n' || *line == '#')
 			continue;
@@ -2060,6 +2062,14 @@ read_config(void)
 				prompt_notif = 0;
 			else
 				prompt_notif = DEF_PROMPT_NOTIF;
+		}
+
+		else if (*line == 'P' && strncmp(line, "PropFields=", 11) == 0) {
+			char *tmp = get_line_value(line);
+			if (!tmp)
+				continue;
+			xstrsncpy(prop_fields_str, tmp, PROP_FIELDS_SIZE);
+			set_prop_fields(prop_fields_str);
 		}
 
 		else if (xargs.restore_last_path == UNSET && *line == 'R'

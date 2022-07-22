@@ -63,6 +63,29 @@
 #define STRINGIZE_(x) #x
 #define STRINGIZE(x) STRINGIZE_(x)
 
+void
+set_prop_fields(char *line)
+{
+	if (!line || !*line)
+		return;
+
+	prop_fields.attr = 0;
+	prop_fields.ids =  0;
+	prop_fields.time = 0;
+	prop_fields.size = 0;
+
+	size_t i;
+	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
+		switch(line[i]) {
+		case 'a': prop_fields.attr = 1; break;
+		case 'i': prop_fields.ids = 1; break;
+		case 't': prop_fields.time = 1; break;
+		case 's': prop_fields.size = 1; break;
+		default: break;
+		}
+	}
+}
+
 int
 get_sys_shell(void)
 {
@@ -2668,6 +2691,11 @@ check_options(void)
 			desktop_notifications = DEF_DESKTOP_NOTIFICATIONS;
 		else
 			desktop_notifications = xargs.desktop_notifications;
+	}
+
+	if (!*prop_fields_str) {
+		xstrsncpy(prop_fields_str, DEF_PROP_FIELDS, PROP_FIELDS_SIZE);
+		set_prop_fields(prop_fields_str);
 	}
 
 	if (xargs.toggle_workspaces == UNSET)

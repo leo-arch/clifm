@@ -479,7 +479,7 @@ END:
 int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 {
-	char *size_type;
+	char *size_type = (char *)NULL;
 	if (full_dir_size == 1 && props->dir == 1)
 		size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
 	else
@@ -519,24 +519,15 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	mode_t val = (props->mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) { read_usr = 'r'; cu1 = dr_c; }
 	if (val & S_IWUSR) { write_usr = 'w'; cu2 = dw_c; }
-	if (val & S_IXUSR) {
-		exec_usr = 'x';
-		cu3 = props->dir ? dxd_c : dxr_c;
-	}
+	if (val & S_IXUSR) { exec_usr = 'x'; cu3 = props->dir ? dxd_c : dxr_c; }
 
 	if (val & S_IRGRP) { read_grp = 'r'; cg1 = dr_c; }
 	if (val & S_IWGRP) { write_grp = 'w'; cg2 = dw_c; }
-	if (val & S_IXGRP) {
-		exec_grp = 'x';
-		cg3 = props->dir ? dxd_c : dxr_c;
-	}
+	if (val & S_IXGRP) { exec_grp = 'x'; cg3 = props->dir ? dxd_c : dxr_c; }
 
 	if (val & S_IROTH) { read_others = 'r'; co1 = dr_c; }
 	if (val & S_IWOTH) { write_others = 'w'; co2 = dw_c; }
-	if (val & S_IXOTH) {
-		exec_others = 'x';
-		co3 = props->dir ? dxd_c : dxr_c;
-	}
+	if (val & S_IXOTH) { exec_others = 'x'; co3 = props->dir ? dxd_c : dxr_c; }
 
 	if (props->mode & S_ISUID) {
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
@@ -638,53 +629,74 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	if (u + g < (int)ug_max)
 		ug_pad = (int)ug_max - u;
 
-	/* Last field is either file size or "major,minor" IDs in case of special
-	 * files (char and block devs) */
-	char last_field[NAME_MAX];
-	if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
-		snprintf(last_field, NAME_MAX, "%s%s%s", csize, size_type
-			? size_type : "?", cend);
-	} else {
-		snprintf(last_field, NAME_MAX, "%d,%d", major(props->rdev),
-			minor(props->rdev));
-	}
 
 	char *t_ctype = savestring(ctype, strlen(ctype));
 	remove_bold_attr(&t_ctype);
 
+	/* Let's compose each properties field individually to be able to
+	 * print only the desired ones. This is specified via the PropFields
+	 * option in the config file */
+
+	char attr_s[601];
+	snprintf(attr_s, sizeof(attr_s),
+		"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s ",
+		t_ctype, file_type, cend,
+		cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
+		cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
+		co1, read_others, co2, write_others, co3, exec_others, cend,
+		is_acl(props->name) ? "+" : "");
+
+	char id_s[95];
+	snprintf(id_s, sizeof(id_s), "%s%u:%-*u%s ", cid, props->uid, ug_pad, props->gid, cend);
+
+	char time_s[220];
+	snprintf(time_s, sizeof(time_s), "%s%s%s ", cdate, *mod_time ? mod_time : "?", cend);
+
+	/* size_s is either file size or "major,minor" IDs in case of special
+	 * files (char and block devs) */
+	char size_s[NAME_MAX];
+	if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
+		snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
+			? size_type : "?", cend);
+	} else {
+		snprintf(size_s, sizeof(size_s), "%d,%d", major(props->rdev),
+			minor(props->rdev));
+	}
+
 #ifndef _NO_ICONS
-	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
-		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
-		   "%s%u:%-*u%s %s%s%s %s\n",
-	    colorize ? props->icon_color : "",
-	    icons ? props->icon : "", icons ? ' ' : 0, df_c,
+	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
+		   "%s" /* Attributes */
+		   "%s" /* User and group ID */
+		   "%s" /* Time */
+		   "%s\n", /* Size / device info */
+		colorize ? props->icon_color : "",
+		icons ? props->icon : "", icons ? ' ' : 0, df_c,
+
+		colorize ? props->color : "",
+		(wchar_t *)tname, trim_diff,
+		light_mode ? "" : df_c, pad, "", df_c,
+		trim ? tt_c : "", trim ? '~' : 0,
+
+		prop_fields.attr ? attr_s : "",
+		prop_fields.ids ? id_s : "",
+		prop_fields.time ? time_s : "",
+		prop_fields.size ? size_s : "");
+#else
+	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
+		   "%s" /* Attributes */
+		   "%s" /* User and group ID */
+		   "%s" /* Time */
+		   "%s\n", /* Size / device info */
 
 	    colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
 	    light_mode ? "" : df_c, pad, "", df_c,
-	    trim ? tt_c : "", trim ? '~' : 0, t_ctype, file_type, cend,
-	    cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
-	    cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
-	    co1, read_others, co2, write_others, co3, exec_others, cend,
-	    is_acl(props->name) ? "+" : "",
-	    cid, props->uid, ug_pad, props->gid, cend,
-	    cdate, *mod_time ? mod_time : "?", cend,
-	    last_field);
-#else
-	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m "
-		   "%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
-	       "%s%u:%-*u%s %s%s%s %s\n",
-	    colorize ? props->color : "",
-		(wchar_t *)tname, trim_diff,
-	    light_mode ? "" : df_c, pad, "", df_c,
-	    trim ? tt_c : "", trim ? '~' : 0, t_ctype, file_type, cend,
-	    cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
-	    cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
-	    co1, read_others, co2, write_others, co3, exec_others, cend,
-	    is_acl(props->name) ? "+" : "",
-	    cid, props->uid, ug_pad, props->gid, cend,
-	    cdate, *mod_time ? mod_time : "?", cend,
-	    last_field);
+	    trim ? tt_c : "", trim ? '~' : 0,
+
+		prop_fields.attr ? attr_s : "",
+		prop_fields.ids ? id_s : "",
+		prop_fields.time ? time_s : "",
+		prop_fields.size ? size_s : "");
 #endif
 
 	free(t_ctype);

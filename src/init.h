@@ -55,6 +55,7 @@ int init_gettext(void);
 int get_home(void);
 int backup_argv(int argc, char **argv);
 int get_sys_shell(void);
+void set_prop_fields(char *line);
 /*int xsecure_env(const int mode); */
 
 struct user_t get_user(void);
