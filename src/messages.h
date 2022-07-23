@@ -32,6 +32,7 @@
 #define FILE_ATTRIBUTES "List file attributes\n\
 - Toggle long/detail view mode:\n\
     Alt-l\n\
+  Note: use PropFields in the configuration file to toggle properties fields on/off\n\
 - Print properties of the file whose ELN is 4:\n\
     p4\n\
 - Print file properties, including directory full size:\n\
