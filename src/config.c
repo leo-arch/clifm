@@ -830,7 +830,7 @@ LongViewMode=%s\n\
 # Properties fields to be printed in long view mode\n\
 # a = attributes, i = user/group IDs, t = modification time, s = size\n\
 # A single dash \"-\" disables all fields\n\
-PropFields=%s\n\
+PropFields=\"%s\"\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
 ApparentSize=%s\n\
 # If running in long view, print directories full size (including contents)\n\
@@ -1067,7 +1067,7 @@ RlEditMode=%d\n\n",
 # Control CliFM settings on a per directory basis. For more information\n\
 # consult the manpage\n\
 #autocmd /media/remotes/** lm=1,fc=0\n\
-#autocmd ~/important !printf \"Keep your fingers outta here!\n\" && read -n1\n\
+#autocmd ~/important !printf \"Keep your fingers outta here!\\n\" && read -n1\n\
 #autocmd ~/Downloads !/usr/share/clifm/plugins/fzfnav.sh\n\n",
 	    config_fp);
 
