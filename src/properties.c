@@ -480,10 +480,12 @@ int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 {
 	char *size_type = (char *)NULL;
-	if (full_dir_size == 1 && props->dir == 1)
-		size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
-	else
-		size_type = get_size_unit(props->size);
+	if (prop_fields.size == 1) {
+		if (full_dir_size == 1 && props->dir == 1)
+			size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
+		else
+			size_type = get_size_unit(props->size);
+	}
 
 	char file_type = 0; /* File type indicator */
 	char *ctype = dn_c, /* Color for file type */
@@ -561,13 +563,17 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 
 	/* Get modification time */
 	char mod_time[128];
-	if (props->ltime) {
-		struct tm t;
-		localtime_r(&props->ltime, &t);
-		snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
-		    t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
+	if (prop_fields.time == 1) {
+		if (props->ltime) {
+			struct tm t;
+			localtime_r(&props->ltime, &t);
+			snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
+				t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
+		} else {
+			strcpy(mod_time, "-               ");
+		}
 	} else {
-		strcpy(mod_time, "-               ");
+		*mod_time = '\0';
 	}
 
 	/*  If file name length is greater than max, truncate it
@@ -625,10 +631,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 	/* Calculate right pad for UID:GID string */
-	int ug_pad = 0, u = DIGINUM(props->uid), g = DIGINUM(props->gid);
-	if (u + g < (int)ug_max)
-		ug_pad = (int)ug_max - u;
-
+	int ug_pad = 0, u = 0, g = 0;
+	if (prop_fields.ids == 1) {
+		u = DIGINUM(props->uid), g = DIGINUM(props->gid);
+		if (u + g < (int)ug_max)
+			ug_pad = (int)ug_max - u;
+	}
 
 	char *t_ctype = savestring(ctype, strlen(ctype));
 	remove_bold_attr(&t_ctype);
@@ -638,29 +646,43 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	 * option in the config file */
 
 	char attr_s[601];
-	snprintf(attr_s, sizeof(attr_s),
-		"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s ",
-		t_ctype, file_type, cend,
-		cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
-		cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
-		co1, read_others, co2, write_others, co3, exec_others, cend,
-		is_acl(props->name) ? "+" : "");
+	if (prop_fields.attr == 1) {
+		snprintf(attr_s, sizeof(attr_s),
+			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s ",
+			t_ctype, file_type, cend,
+			cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
+			cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
+			co1, read_others, co2, write_others, co3, exec_others, cend,
+			is_acl(props->name) ? "+" : "");
+	} else {
+		*attr_s = '\0';
+	}
 
 	char id_s[95];
-	snprintf(id_s, sizeof(id_s), "%s%u:%-*u%s ", cid, props->uid, ug_pad, props->gid, cend);
+	if (prop_fields.ids == 1)
+		snprintf(id_s, sizeof(id_s), "%s%u:%-*u%s ", cid, props->uid, ug_pad, props->gid, cend);
+	else
+		*id_s = '\0';
 
 	char time_s[220];
-	snprintf(time_s, sizeof(time_s), "%s%s%s ", cdate, *mod_time ? mod_time : "?", cend);
+	if (prop_fields.time == 1)
+		snprintf(time_s, sizeof(time_s), "%s%s%s ", cdate, *mod_time ? mod_time : "?", cend);
+	else
+		*time_s = '\0';
 
 	/* size_s is either file size or "major,minor" IDs in case of special
 	 * files (char and block devs) */
 	char size_s[NAME_MAX];
-	if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
-		snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
-			? size_type : "?", cend);
+	if (prop_fields.size == 1) {
+		if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
+			snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
+				? size_type : "?", cend);
+		} else {
+			snprintf(size_s, sizeof(size_s), "%d,%d", major(props->rdev),
+				minor(props->rdev));
+		}
 	} else {
-		snprintf(size_s, sizeof(size_s), "%d,%d", major(props->rdev),
-			minor(props->rdev));
+		*size_s = '\0';
 	}
 
 #ifndef _NO_ICONS
