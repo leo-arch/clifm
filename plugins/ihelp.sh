@@ -4,6 +4,8 @@
 # Written by L. Abramovich
 # License: GPL3
 
+# Dependencies: man, sed, less, fzf or rofi
+
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Interactively browse the CliFM manpage via FZF or Rofi\n"
@@ -64,7 +66,7 @@ OPTIONS@
 13. PLUGINS@
 14. AUTOCOMMANDS@
 15. FILE TAGS@
-16. STANDARD INPUT@
+16. VIRTUAL DIRECTORIES@
 17. NOTE ON SPEED
 18. KANGAROO FRECENCY ALGORITHM@
 19. ENVIRONMENT@
