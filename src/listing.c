@@ -158,8 +158,7 @@ print_div_line(void)
 	fflush(stdout);
 }
 
-/* Print free/total space for the filesystem of the current working
- * directory */
+/* Print free/total space for the file system the current directory belongs to */
 static void
 print_disk_usage(void)
 {
@@ -174,11 +173,13 @@ print_disk_usage(void)
 
 	char *free_space = get_size_unit((off_t)(stat.f_frsize * stat.f_bavail));
 	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
+
 	print_reload_msg("%s/%s free\n",
 		free_space ? free_space : "?", size ? size : "?");
 
 	free(free_space);
 	free(size);
+
 	return;
 }
 

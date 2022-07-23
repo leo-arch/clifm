@@ -192,7 +192,7 @@ write_msg_into_logfile(const char *_msg)
 static void
 send_desktop_notification(char *msg)
 {
-//	if (!msg || !*msg || !(flags & GUI) || desktop_noti != 1)
+/*	if (!msg || !*msg || !(flags & GUI) || desktop_noti != 1) */
 	if (!msg || !*msg)
 		return;
 
@@ -225,8 +225,8 @@ send_desktop_notification(char *msg)
 			return;
 	}
 
-	// Some messages are written in the form PROGRAM_NAME: MSG. We only
-	// want the MSG part
+	/* Some messages are written in the form PROGRAM_NAME: MSG. We only
+	 * want the MSG part */
 	char name[NAME_MAX];
 	snprintf(name, sizeof(name), "%s: ", PROGRAM_NAME);
 	char *p = msg;
@@ -267,12 +267,20 @@ send_desktop_notification(char *msg)
 	fprintf(stderr, "%s\n", msg);
 }
 
-/* Handle the error message MSG. Store MSG in an array of error
- * messages, write it into an error log file, and print it immediately
- * (if PRINT is zero (NOPRINT_PROMPT) or tell the next prompt, if PRINT
- * is one to do it (PRINT_PROMPT)). Messages wrote to the error log file
- * have the following format:
- * "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
+/* Handle the error message MSG.
+ *
+ * If ADD_TO_MSGS_LIST is 1, store MSG into the messages array: MSG will be
+ * accessible to the user via the 'msg' command
+ *
+ * If PRINT_PROMPT is 1, either raise a flag to tell the next prompt to print
+ * the message itself, or, if desktop notifications are enabled and LOGME is
+ * not zero (ERR_NO_LOG), send the notification to the notification daemon
+ * NOTE: if not zero, LOGME could be either 1 (error/warning) or -1 (notice)
+ *
+ * If PRINT_PROMPT is not 1, MSG is printed directly here
+ *
+ * Finally, if logs are enabled and LOGME is 1, write the message into the log
+ * file as follows: "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
 void
 log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 {
@@ -284,8 +292,6 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 		return;
 
 	if (add_to_msgs_list == 1) {
-		/* Store messages (for current session only) into an array, so that
-		 * the user can check them via the 'msg' command */
 		msgs_n++;
 		messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1) * sizeof(char *));
 		messages[msgs_n - 1] = savestring(_msg, msg_len);
@@ -293,17 +299,16 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 	}
 
 	if (print_prompt == 1) {
-		if (desktop_notifications == 1 && logme != 0) /* logme == 0 == ERR_NO_LOG */
+		if (desktop_notifications == 1 && logme != 0)
 			send_desktop_notification(_msg);
 		else
-			print_msg = 1; /* Message is printed by the next prompt */
-	} else { /* Print message directly here */
+			print_msg = 1;
+	} else
 		fputs(_msg, stderr);
 	}
 
 	if (xargs.stealth_mode == 1 || config_ok == 0 || !log_file || !*log_file
-	|| logme == 0 || logme == -1 || logs_enabled == 0)
-		/* logme == -1 == notice */
+	|| logme != 1 || logs_enabled == 0)
 		return;
 
 	write_msg_into_logfile(_msg);
@@ -320,8 +325,8 @@ save_dirhist(void)
 
 	FILE *fp = fopen(dirhist_file, "w");
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Could not save directory history: %s\n"),
-		    strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Could not save "
+			"directory history: %s\n"), strerror(errno));
 		return EXIT_FAILURE;
 	}
 
