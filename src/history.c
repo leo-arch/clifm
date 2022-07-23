@@ -293,7 +293,7 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 	}
 
 	if (print_prompt == 1) {
-		if (desktop_notifications == 1)
+		if (desktop_notifications == 1 && logme != 0) /* logme == 0 == ERR_NO_LOG */
 			send_desktop_notification(_msg);
 		else
 			print_msg = 1; /* Message is printed by the next prompt */
@@ -302,7 +302,8 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 	}
 
 	if (xargs.stealth_mode == 1 || config_ok == 0 || !log_file || !*log_file
-	|| logme == 0 || logs_enabled == 0)
+	|| logme == 0 || logme == -1 || logs_enabled == 0)
+		/* logme == -1 == notice */
 		return;
 
 	write_msg_into_logfile(_msg);
