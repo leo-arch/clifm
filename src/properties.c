@@ -479,13 +479,9 @@ END:
 int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 {
-	char *size_type = (char *)NULL;
-	if (prop_fields.size == 1) {
-		if (full_dir_size == 1 && props->dir == 1)
-			size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
-		else
-			size_type = get_size_unit(props->size);
-	}
+				/* ###########################
+				 * #   ATTRIBUTES & COLORS   #
+				 * ########################### */
 
 	char file_type = 0; /* File type indicator */
 	char *ctype = dn_c, /* Color for file type */
@@ -508,7 +504,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	default: file_type = '?'; break;
 	}
 
-	/* Get file permissions */
+	/* Get file permissions bit char */
 	char read_usr = '-', write_usr = '-', exec_usr = '-',
 	     read_grp = '-', write_grp = '-', exec_grp = '-',
 	     read_others = '-', write_others = '-', exec_others = '-';
@@ -561,20 +557,16 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		co3 = df_c;
 	}
 
-	/* Get modification time */
-	char mod_time[128];
-	if (prop_fields.time == 1) {
-		if (props->ltime) {
-			struct tm t;
-			localtime_r(&props->ltime, &t);
-			snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
-				t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
-		} else {
-			strcpy(mod_time, "-               ");
-		}
-	} else {
-		*mod_time = '\0';
-	}
+	char *t_ctype = savestring(ctype, strlen(ctype));
+	remove_bold_attr(&t_ctype);
+
+	/* Let's compose each properties field individually to be able to
+	 * print only the desired ones. This is specified via the PropFields
+	 * option in the config file */
+
+				/* ###########################
+				 * #      1. FILE NAME       #
+				 * ########################### */
 
 	/*  If file name length is greater than max, truncate it
 	 * to max (later a tilde (~) will be appended to let the user know
@@ -630,20 +622,9 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
-	/* Calculate right pad for UID:GID string */
-	int ug_pad = 0, u = 0, g = 0;
-	if (prop_fields.ids == 1) {
-		u = DIGINUM(props->uid), g = DIGINUM(props->gid);
-		if (u + g < (int)ug_max)
-			ug_pad = (int)ug_max - u;
-	}
-
-	char *t_ctype = savestring(ctype, strlen(ctype));
-	remove_bold_attr(&t_ctype);
-
-	/* Let's compose each properties field individually to be able to
-	 * print only the desired ones. This is specified via the PropFields
-	 * option in the config file */
+				/* ###########################
+				 * #      2. ATTRIBUTES      #
+				 * ########################### */
 
 	char attr_s[601];
 	if (prop_fields.attr == 1) {
@@ -658,23 +639,58 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		*attr_s = '\0';
 	}
 
-	char id_s[95];
-	if (prop_fields.ids == 1)
-		snprintf(id_s, sizeof(id_s), "%s%u:%-*u%s ", cid, props->uid, ug_pad, props->gid, cend);
-	else
-		*id_s = '\0';
+				/* ###########################
+				 * #    3. USER/GROUP IDS    #
+				 * ########################### */
 
+	int ug_pad = 0, u = 0, g = 0;
+	char id_s[95];
+	if (prop_fields.ids == 1) {
+		/* Calculate right pad for UID:GID string */
+		u = DIGINUM(props->uid), g = DIGINUM(props->gid);
+		if (u + g < (int)ug_max)
+			ug_pad = (int)ug_max - u;
+		snprintf(id_s, sizeof(id_s), "%s%u:%-*u%s ", cid, props->uid, ug_pad, props->gid, cend);
+	} else {
+		*id_s = '\0';
+	}
+
+				/* ###############################
+				 * #  4. LAST MODIFICATION TIME  #
+				 * ############################### */
+
+	char mod_time[128];
 	char time_s[220];
-	if (prop_fields.time == 1)
+	if (prop_fields.time == 1) {
+		if (props->ltime) {
+			struct tm t;
+			localtime_r(&props->ltime, &t);
+			snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
+				t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
+		} else {
+			strcpy(mod_time, "-               ");
+		}
 		snprintf(time_s, sizeof(time_s), "%s%s%s ", cdate, *mod_time ? mod_time : "?", cend);
-	else
+	} else {
+		*mod_time = '\0';
 		*time_s = '\0';
+	}
+
+				/* ###########################
+				 * #       5. FILE SIZE      #
+				 * ########################### */
 
 	/* size_s is either file size or "major,minor" IDs in case of special
 	 * files (char and block devs) */
+	char *size_type = (char *)NULL;
 	char size_s[NAME_MAX];
 	if (prop_fields.size == 1) {
 		if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
+			if (full_dir_size == 1 && props->dir == 1)
+				size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
+			else
+				size_type = get_size_unit(props->size);
+
 			snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
 				? size_type : "?", cend);
 		} else {
@@ -684,6 +700,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	} else {
 		*size_s = '\0';
 	}
+
+	/* Print stuff */
 
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
