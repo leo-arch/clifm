@@ -606,7 +606,7 @@ print_tips(int all)
 		"Try the help topics: 'help <TAB>'",
 		"List symlinks in the current directory: '=l<TAB>'. Enter 'help file-attributes' for more information",
 		"Use PropFields in the configuration file to toggle properties fields on/off when "
-		"listing file in long view mode",
+		"listing files in long view mode",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
