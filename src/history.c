@@ -303,7 +303,7 @@ log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
 			send_desktop_notification(_msg);
 		else
 			print_msg = 1;
-	} else
+	} else {
 		fputs(_msg, stderr);
 	}
 
