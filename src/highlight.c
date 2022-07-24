@@ -262,6 +262,7 @@ recolorize_line(void)
 	rl_point = rl_end = start;
 // TESTING HIGHLIGHT!
 	if (start == 0 && end_bk > 1)
+		/* First char of a non-empty recolored line (recovering from wrong cmd) */
 		rl_redisplay();
 // TESTING HIGHLIGHT!
 	i = 0;

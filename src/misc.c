@@ -143,7 +143,7 @@ _err(int msg_type, int prompt_flag, const char *format, ...)
 			}
 		}
 
-		int logme = msg_type == ERR_NO_LOG ? 0 : msg_type == 'n' ? -1 : 1;
+		int logme = msg_type == ERR_NO_LOG ? 0 : (msg_type == 'n' ? -1 : 1);
 		int add_to_msgs_list = 1;
 		if (msg_type == ERR_NO_STORE) {
 			add_to_msgs_list = 0;

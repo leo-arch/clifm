@@ -263,7 +263,7 @@ send_desktop_notification(char *msg)
 		"for details) or %s to silence this "
 		"warning (original message printed below)\n", PROGRAM_NAME,
 		strerror(ret), ret == ENOENT ? "install a notification daemon"
-		: "fix this error (consult your daemon documentation)");
+		: "fix this error (consult your daemon's documentation)");
 	fprintf(stderr, "%s\n", msg);
 }
 
