@@ -255,10 +255,15 @@ recolorize_line(void)
 		return;
 	}
 
+	int end_bk = rl_end;
 	int start = rl_point > 0 ? rl_point - 1 : 0;
 	char *ss = rl_copy_text(start, rl_end);
 	rl_delete_text(start, rl_end);
 	rl_point = rl_end = start;
+// TESTING HIGHLIGHT!
+	if (start == 0 && end_bk > 1)
+		rl_redisplay();
+// TESTING HIGHLIGHT!
 	i = 0;
 
 /*	int point = rl_point;

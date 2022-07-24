@@ -109,8 +109,15 @@ recover_from_wrong_cmd(void)
 	rl_clear_message();
 
 #ifndef _NO_HIGHLIGHT
-	if (highlight == 1)
+	if (highlight == 1) {
+// TESTING HIGHLIGHT!
+		int p = rl_point;
+		rl_point = 0;
 		recolorize_line();
+		rl_point = p;
+// TESTING HIGHLIGHT!
+//		recolorize_line();
+	}
 #endif
 	wrong_cmd = 0;
 	return EXIT_SUCCESS;
