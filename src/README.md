@@ -1,4 +1,4 @@
-# Coding suggestions for CliFM
+# Coding suggestions for _CliFM_
 
 **NOTE**: To keep a consintent style, run `clang-format` over all source files, including header files, using the `_clang-format` file (in `/src`) as the formatting model:
 
@@ -168,19 +168,20 @@ This is the basic structure of _CliFM_: generally speaking, it is just a shell. 
 | --- | --- | --- | --- |
 | Initialization | `main.c` | `main` | |
 | Default settings | `settings.h` | | |
-| Add a new command | `exec.c` | `exec_cmd` | Most of the times you want to your command avaialable for TAB completion and suggestions. See below. |
+| Add a new command | `exec.c` | `exec_cmd` | Most of the time you want your command to be available for TAB completion and suggestions. See below. |
 | Add a new prompt feature | `prompt.c` (specially `decode_prompt`) | `prompt` | |
 | Modify/add keybindings | `keybindings.c` | `readline_kbinds` |
 | Icons | `icons.h`, `listing.c` | `list_dir` | Consult the [customizing icons](https://github.com/leo-arch/clifm/wiki/Advanced#customizing-icons) section |
-| TAB completion (including the FZF mode) | `readline.c` (`my_rl_completion`), `tabcomp.c` | |
+| TAB completion (including alternative completers) | `readline.c` (`my_rl_completion`), `tabcomp.c` | |
 | Interface | `listing.c` (particularly `list_dir`) and `colors.c` | | |
 | Directory jumper | `jump.c` | `dirjump` | |
-| Suggestions | `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` function) | | |
+| Suggestions | `suggestions.c` and `keybinds.c` | `rl_suggestions` and `rl_accept_suggestion` respectively | |
 | Syntax highlighting | `highlight.c` | `rl_highlight` | See also `readline.c` and `keybinds.c` |
 | Autocommands | `autocmds.c` | `check_autocmds` | |
 | File names cleaner(`bleach`) | `name_cleaner.c` and `cleaner_table.h` | `bleach_files` | |
 | Improve my security | `sanitize.c` | `sanitize_cmd`, `sanitize_cmd_environ`, and `xsecure_env` | |
 | The tags system | `tags.c` | `tags_function` | |
+| Plugins | `actions.c` | `run_action` | |
 
 ## 5) Compilation
 
