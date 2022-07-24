@@ -65,11 +65,11 @@ Pager=false
 LongViewMode=false
 
 # Properties fields to be printed for each file name in long view mode
-# a = File attributes, i = User/group IDs, t = Last modification time,
+# p = File permissions, i = User/group IDs, t = Last modification time,
 # s = File size
-# Defaults to "aits" (print all fields)
+# Defaults to "pits" (print all fields)
 # A single dash ("-") disables all fields
-PropFields="aits"
+PropFields="pits"
 
 # If running in long view, print directories full size (including contents)
 FullDirSize=false
