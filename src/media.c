@@ -316,7 +316,6 @@ list_unmounted_devs(void)
 	media[mp_n].mnt = (char *)NULL;
 	media[mp_n].label = (char *)NULL;
 }
-#endif /* __linux__ */
 
 static int
 list_mounted_devs(int mode)
@@ -457,6 +456,7 @@ mount_dev(int n)
 
 	return EXIT_SUCCESS;
 }
+#endif /* __linux__ */
 
 static void
 free_media(void)

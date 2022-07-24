@@ -415,6 +415,7 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 	free(*tmp);
 }
 
+#if !defined(__HAIKU__) && !defined(__OpenBSD__)
 static inline void
 reset_ifs(const char *value)
 {
@@ -424,7 +425,6 @@ reset_ifs(const char *value)
 		unsetenv("IFS");
 }
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__)
 static inline void
 substitute_cmd(char **line, char **res, size_t *len)
 {

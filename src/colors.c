@@ -94,6 +94,8 @@ get_file_color(const char *filename, const struct stat *attr)
 
 #ifdef _LINUX_CAP
 	cap_t cap;
+#else
+	UNUSED(filename);
 #endif
 	if (attr->st_mode & 04000) { /* SUID */
 		color = su_c;

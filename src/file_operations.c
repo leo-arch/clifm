@@ -177,6 +177,7 @@ static void
 print_file(FILE *fp, char *name, mode_t type)
 {
 #ifndef _DIRENT_HAVE_D_TYPE
+	UNUSED(type);
 	char s = 0;
 	struct stat a;
 	if (lstat(name, &a) != -1)
