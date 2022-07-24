@@ -27,6 +27,7 @@ ListDirsFirst=true
 # when, for example, listing files on a remote server. The files counter
 # can be disabled here, via the --no-files-counter option, or using the
 # 'fc' command while in the program itself.
+# Note: Classify (see below) must be set to true.
 FilesCounter=true
 
 # If running with colors, append directory indicator to directories. If
@@ -41,6 +42,7 @@ FilesCounter=true
 # Bear in mind that when running in light mode the check for executable
 # files won't be performed, and thereby no indicator will be added to
 # executable files.
+# Note: Setting this option to false disables the files counter.
 Classify=true
 
 # How to list files: 0 = vertically (like ls(1) would), 1 = horizontally

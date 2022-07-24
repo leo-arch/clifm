@@ -356,7 +356,7 @@ by default, \fBclifm\fR appends a file type indicator character to file names wh
  =: sockets
  *: executable files
  ?: unknown file type
-Use this option to disable this file type classification.
+Use this option to disable file type classification.
 .TP
 \fB\-\-no\-clear\-screen\fR
 do not clear the screen before listing files
