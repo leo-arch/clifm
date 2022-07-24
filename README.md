@@ -43,10 +43,10 @@ href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-r
 ---
 
 ## Table of contents
-🔸 [Description](#description) \
+🔸 [Brief description](#brief-description) \
 🔸 [Features](#features) \
-🔸 [Installing _CliFM_](#installing-clifm) \
-🔸 [First steps](#first-steps) \
+🔸 [Installion](#installation) \
+🔸 [Getting started](#getting-started) \
 🔸 [Support](#support) \
 🔸 [License](#license) \
 🔸 [Contributing](#contributing) \
@@ -54,7 +54,7 @@ href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-r
 
 ---
 
-## Description
+## Brief description
 
 _CliFM_ is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
 
@@ -66,7 +66,7 @@ Briefly put, with _CliFM_ the command-line is always already there, never hidden
 
 ---
 <sup>1</sup> <i>For more information about these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>. \
-<sup>2</sup> <i>For a detailed explanation consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki</i>.
+<sup>2</sup> <i>For a detailed description consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki</i>.
 
 ---
 
@@ -200,13 +200,13 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ---
 
-## Installing _CliFM_
+## Installation
 
 Consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
 
 ---
 
-## First steps
+## Getting started
 
 To start using _CliFM_ **you don't need to learn anything new**: the usual shell commands will just work. However, there is much more that just shell commands... \
 ✓ The `help` command gives you a quick introduction to _CliFM_: once in the _CliFM_ prompt, type `help` or `?`. \
