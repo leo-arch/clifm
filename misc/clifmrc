@@ -243,7 +243,7 @@ DesktopNotifications=false
 # Keep track of errors and warnings
 Logs=false
 # Keep a record of external commands and internal commands able to modify the 
-# files system (e.g. 'r', 'c', 'm', and so on). Logs should be set to true.
+# files system (e.g. 'r', 'c', 'm', and so on). Logs must be set to true.
 LogCmds=false
 # Keep only the last N lines of the log file
 MaxLog=1000

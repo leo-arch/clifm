@@ -223,7 +223,7 @@ set an alternative keybindings file
 disable long view mode (default)
 .TP
 \fB\-L\fR, \fB\-\-long\-view\fR
-enable long view mode to list files and their properties. For each file, the following information is provided: file name, file properties (symbolic notation), owner, group, last modification time, and size. To get more detailed information use the \fIp\fR command (see below).
+enable long view mode to list files and their properties. For each file, the following information is provided: file name, file permissions (symbolic notation), owner, group, last modification time, and size (these fields could be turned on/off using the \fIPropFields\fR option in the configuration file). To get more detailed information use the \fIp\fR command (see below).
 .TP
 \fB\-m\fR, \fB\-\-dirhist\-map\fR
 enable the directory history map to keep in view previous, current and next entries in the directory history list
@@ -865,6 +865,8 @@ with no argument, prints the currently used resource opener (by default, \fILira
 .TP
 .B p, pr, prop \fIELN/FILE\fR...
 print file properties for ELN/FILE. The output of this function is much like the combined output of \fIls\ \-l\fR and \fIstat\fR. By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content).
+.sp
+If you need to list the properties of all files in the current directory, try the long view mode (\fIAlt-l\fR). Fields displayed in this mode can be turned on/off using the \fIPropFields\fR option in the configuration file.
 .TP
 .B path, cwd
 print the current working directory.
