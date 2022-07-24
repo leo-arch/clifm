@@ -45,7 +45,7 @@ href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug-r
 ## Table of contents
 🔸 [Brief description](#brief-description) \
 🔸 [Features](#features) \
-🔸 [Installion](#installation) \
+🔸 [Installation](#installation) \
 🔸 [Getting started](#getting-started) \
 🔸 [Support](#support) \
 🔸 [License](#license) \
