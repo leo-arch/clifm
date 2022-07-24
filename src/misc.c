@@ -1788,6 +1788,7 @@ list_commands(void)
 	return EXIT_SUCCESS;
 }
 
+#if !defined(__HAIKU__)
 /* Retrieve pager path, first from PAGER, then try less(1), and finally
  * more(1). If none is found returns NULL */
 static char *
@@ -1813,6 +1814,7 @@ get_pager(void)
 
 	return _pager;
 }
+#endif /* !__HAIKU__ */
 
 /* Help topics */
 static void
@@ -1993,7 +1995,6 @@ quick_help(char *topic)
 		"at your current keybindings via the 'kb' command"));
 	return EXIT_SUCCESS;
 #else
-
 	char *_pager = (char *)NULL;
 	if (xargs.stealth_mode == 1 || !(_pager = get_pager())) {
 		printf("%s                                %s\n\n%s",

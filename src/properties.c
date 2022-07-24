@@ -413,7 +413,7 @@ get_properties(char *filename, const int dsize)
 	printf(_("\tBlocks: %s%ld%s"), cbold, attr.st_blocks, cend);
 #endif
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
-|| defined(__APPLE__)
+|| defined(__APPLE__) || defined(__HAIKU__)
 	printf(_("\tIO Block: %s%d%s"), cbold, attr.st_blksize, cend);
 #else
 	printf(_("\tIO Block: %s%ld%s"), cbold, attr.st_blksize, cend);
@@ -423,7 +423,7 @@ get_properties(char *filename, const int dsize)
 #else
 	printf(_("\tInode: %s%zu%s\n"), cbold, attr.st_ino, cend);
 #endif
-#if defined(__OpenBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__HAIKU__)
 	printf(_("Device: %s%d%s"), cbold, attr.st_dev, cend);
 #else
 	printf(_("Device: %s%zu%s"), cbold, attr.st_dev, cend);
