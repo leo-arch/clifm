@@ -476,12 +476,13 @@ END:
 	return EXIT_SUCCESS;
 }
 
+/* Compose the properties line for the current file name
+ * This function is called by list_dir(), in listing.c for each file name
+ * in the current directory when running on long view mode */
 int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 {
-				/* ###########################
-				 * #   ATTRIBUTES & COLORS   #
-				 * ########################### */
+	/* Let's get file attributes and the corresponding colors */
 
 	char file_type = 0; /* File type indicator */
 	char *ctype = dn_c, /* Color for file type */
@@ -504,12 +505,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	default: file_type = '?'; break;
 	}
 
-	/* Get file permissions bit char */
+	/* File permissions bit char */
 	char read_usr = '-', write_usr = '-', exec_usr = '-',
 	     read_grp = '-', write_grp = '-', exec_grp = '-',
 	     read_others = '-', write_others = '-', exec_others = '-';
 
-	/* Colors for each field of the properties string */
+	/* Colors for each field of the attributes string */
 	char *cu1 = dn_c, *cu2 = dn_c, *cu3 = dn_c,
 		 *cg1 = dn_c, *cg2 = dn_c, *cg3 = dn_c,
 		 *co1 = dn_c, *co2 = dn_c, *co3 = dn_c;
@@ -607,8 +608,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	}
 
 	/* Calculate pad for each file name */
-	int pad;
-	pad = (int)(max - cur_len);
+	int pad = (int)(max - cur_len);
 	if (pad < 0)
 		pad = 0;
 
@@ -626,7 +626,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 				 * #      2. ATTRIBUTES      #
 				 * ########################### */
 
-	char attr_s[601];
+//	char attr_s[601];
+	char attr_s[(MAX_COLOR * 14) + 16]; /* 14 colors + 15 single chars + NUL byte */
 	if (prop_fields.attr == 1) {
 		snprintf(attr_s, sizeof(attr_s),
 			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s ",
@@ -644,7 +645,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 				 * ########################### */
 
 	int ug_pad = 0, u = 0, g = 0;
-	char id_s[95];
+	/* Let's suppose that IDs go up to 999 billions (12 digits)
+	 * 2 IDs + pad (at most 12 more digits) == 36
+	 * 39 == 36 + colon + space + NUL byte */
+	char id_s[(MAX_COLOR * 2) + 39];
 	if (prop_fields.ids == 1) {
 		/* Calculate right pad for UID:GID string */
 		u = DIGINUM(props->uid), g = DIGINUM(props->gid);
@@ -660,12 +664,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 				 * ############################### */
 
 	char mod_time[128];
-	char time_s[220];
+	char time_s[128 + (MAX_COLOR * 2) + 2]; /* mod_time + 2 colors + space + NUL byte */
 	if (prop_fields.time == 1) {
 		if (props->ltime) {
 			struct tm t;
 			localtime_r(&props->ltime, &t);
-			snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
+			snprintf(mod_time, sizeof(mod_time), "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
 				t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
 		} else {
 			strcpy(mod_time, "-               ");
@@ -683,7 +687,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	/* size_s is either file size or "major,minor" IDs in case of special
 	 * files (char and block devs) */
 	char *size_type = (char *)NULL;
-	char size_s[NAME_MAX];
+	/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars (see aux.h) */
+	char size_s[MAX_UNIT_SIZE + (MAX_COLOR * 2) + 1];
 	if (prop_fields.size == 1) {
 		if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
 			if (full_dir_size == 1 && props->dir == 1)

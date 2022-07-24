@@ -1390,7 +1390,7 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 	free(l);
 }
 
-/* Get the lenght of the longest UID:GID string in long view mode */
+/* Return the lenght of the longest UID:GID string for files listed in long view mode */
 static size_t
 get_max_ug_str(void)
 {

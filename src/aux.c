@@ -830,12 +830,12 @@ get_cmd_path(const char *cmd)
 	return (char *)NULL;
 }
 
-/* Convert SIZE to human readeable form */
+/* Convert SIZE to human readeable form (at most 2 decimal places)
+ * Returns a string of at most MAX_UNIT_SIZE, defined in aux.h */
 char *
 get_size_unit(off_t size)
 {
-#define MAX_UNIT_SIZE 10
-	/* Max size type length == 10 == "1023.99KB\0" */
+	/* MAX_UNIT_SIZE == 10 == "1023.99YB\0" */
 	char *str = xnmalloc(MAX_UNIT_SIZE, sizeof(char));
 
 	float base = xargs.si == 1 ? 1000 : 1024;
@@ -849,7 +849,7 @@ get_size_unit(off_t size)
 	}
 
 	int x = (int)s;
-	/* If s - x == 0, then S has no reminder (zero)
+	/* If (s - x || s - (float)x) == 0, then S has no reminder (zero)
 	 * We don't want to print the reminder when it is zero */
 
 	const char *const u = "BKMGTPEZY";
