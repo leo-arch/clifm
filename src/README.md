@@ -231,25 +231,25 @@ upx clifm
 
 _CliFM_ allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a POSIX compliant executable without icons support:
 ```sh
-clang ... -D_BE_POSIX -D_NO_ICONS ...
+gcc ... -D_BE_POSIX -D_NO_ICONS ...
 ```
 
 | Option | Description |
 | --- | --- |
 | `_BE_POSIX` | Build a fully `POSIX.1-2008` compliant executable<sup>1</sup> |
 | `CLIFM_SUCKLESS` | Remove all code aimed at parsing config files. Configuration is done either via `settings.h` (and recompilation) or via [environment variables](https://github.com/leo-arch/clifm/wiki/Specifics#environment)<sup>2</sup> |
-| `_ICONS_IN_TERMINAL` | Use icons-in-terminal for icons instead of the default (emoji-icons) |
-| `_NERD` | Use Nerdfonts for icons instead of the default (emoji-icons) |
-| `_NO_ARCHIVING` | Disable archiving support |
-| `_NO_BLEACH` | Disable support for `Bleach`, the built-in file names cleaner |
+| `_ICONS_IN_TERMINAL` | Use icons-in-terminal for [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) instead of the default (emoji-icons) |
+| `_NERD` | Use Nerdfonts for [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) instead of the default (emoji-icons) |
+| `_NO_ARCHIVING` | Disable [archiving](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support |
+| `_NO_BLEACH` | Disable support for [`Bleach`, the built-in file names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n) |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
-| `_NO_HIGHLIGHT`| Disable syntax highlighting support |
-| `_NO_ICONS` | Disable icons support |
+| `_NO_HIGHLIGHT`| Disable [syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting) support |
+| `_NO_ICONS` | Disable [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) support |
 | `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support. Implies `_NO_MAGIC` |
 | `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>3</sup> |
-| `_NO_SUGGESTIONS` | Disable suggestions support |
-| `_NO_TAGS` | Disable support for `Etiqueta`, the tags system |
-| `_NO_TRASH` | Disable trash support |
+| `_NO_SUGGESTIONS` | Disable [suggestions](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions) support |
+| `_NO_TAGS` | Disable support for [`Etiqueta`, the tags system](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files) |
+| `_NO_TRASH` | Disable [trash](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files) support |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 
 <sup>1</sup> Only one feature is lost (Linux): Files birth time. We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
