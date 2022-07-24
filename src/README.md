@@ -186,7 +186,7 @@ This is the basic structure of _CliFM_: generally speaking, it is just a shell. 
 
 **Note**: For the list of dependencies, see the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
 
-_CliFM_ is compiled using `(g)cc` (`clang` and `tcc` work as well) as follows:
+_CliFM_ is compiled using `gcc` (or `clang`) as follows:
 
 1)  _Linux_:
 ```sh
