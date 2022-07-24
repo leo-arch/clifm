@@ -626,9 +626,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 				 * #      2. ATTRIBUTES      #
 				 * ########################### */
 
-//	char attr_s[601];
 	char attr_s[(MAX_COLOR * 14) + 16]; /* 14 colors + 15 single chars + NUL byte */
-	if (prop_fields.attr == 1) {
+	if (prop_fields.perm == 1) {
 		snprintf(attr_s, sizeof(attr_s),
 			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s ",
 			t_ctype, file_type, cend,
@@ -710,7 +709,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
-		   "%s" /* Attributes */
+		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
 		   "%s\n", /* Size / device info */
@@ -722,13 +721,13 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		light_mode ? "" : df_c, pad, "", df_c,
 		trim ? tt_c : "", trim ? '~' : 0,
 
-		prop_fields.attr == 1 ? attr_s : "",
+		prop_fields.perm == 1 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time == 1 ? time_s : "",
 		prop_fields.size == 1 ? size_s : "");
 #else
 	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
-		   "%s" /* Attributes */
+		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
 		   "%s\n", /* Size / device info */

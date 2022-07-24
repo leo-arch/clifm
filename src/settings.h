@@ -235,7 +235,7 @@ xf=01;31:xs=00;32:"
 #define DEF_PAGER 0
 #define DEF_PRINTSEL 0
 #define DEF_PRINT_REMOVED_FILES 1
-#define DEF_PROP_FIELDS "aits"
+#define DEF_PROP_FIELDS "pits" /* Permissions, owner/grp Ids, mod Time, Size */
 #define DEF_REFRESH_ON_EMPTY_LINE 1
 #define DEF_REFRESH_ON_RESIZE 1
 #define DEF_RESTORE_LAST_PATH 1

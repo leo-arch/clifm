@@ -882,7 +882,7 @@ struct msgs_t {
 extern struct msgs_t msgs;
 
 struct props_t {
-	int attr; /* File attributes */
+	int perm; /* File permissions */
 	int ids; /* User and group IDs */
 	int time; /* Last modification time */
 	int size; /* File size */
