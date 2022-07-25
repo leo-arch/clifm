@@ -278,7 +278,7 @@ get_properties(char *filename, const int dsize)
 	char mod_time[128];
 
 	if (time) {
-		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", &tm);
+		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y %z", &tm);
 	} else {
 		*mod_time = '-';
 		mod_time[1] = '\0';
@@ -343,7 +343,7 @@ get_properties(char *filename, const int dsize)
 	char access_time[128];
 
 	if (time) {
-		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", &tm);
+		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y %z", &tm);
 	} else {
 		*access_time = '-';
 		access_time[1] = '\0';
@@ -354,7 +354,7 @@ get_properties(char *filename, const int dsize)
 	localtime_r(&time, &tm);
 	char change_time[128];
 	if (time) {
-		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", &tm);
+		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y %z", &tm);
 	} else {
 		*change_time = '-';
 		change_time[0] = '\0';
@@ -374,7 +374,7 @@ get_properties(char *filename, const int dsize)
 		creation_time[1] = '\0';
 	} else {
 		strftime(creation_time, sizeof(creation_time),
-		    "%b %d %H:%M:%S %Y", &tm);
+		    "%b %d %H:%M:%S %Y %z", &tm);
 	}
 #elif defined(_STATX)
 	struct statx attrx;
@@ -388,7 +388,7 @@ get_properties(char *filename, const int dsize)
 		creation_time[1] = '\0';
 	} else {
 		strftime(creation_time, sizeof(creation_time),
-		    "%b %d %H:%M:%S %Y", &tm);
+		    "%b %d %H:%M:%S %Y %z", &tm);
 	}
 #endif /* _STATX */
 
