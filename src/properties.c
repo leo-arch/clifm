@@ -326,7 +326,7 @@ get_properties(char *filename, const int dsize)
 	/* Stat information */
 #define MAX_TIME_STR 128
 /* Our resulting time string won't go usually beyond 27 chars. But since this length
- * is locale dependent (at some point), let's use a much larger buffer size */
+ * is locale dependent (at least %b), let's use a much larger buffer size */
 
 	/* Last modification time */
 	time_t time = (time_t)attr.st_mtime;
@@ -361,7 +361,7 @@ get_properties(char *filename, const int dsize)
 		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y %z", &tm);
 	} else {
 		*change_time = '-';
-		change_time[0] = '\0';
+		change_time[1] = '\0';
 	}
 
 	/* Creation (birth) time */
