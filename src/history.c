@@ -282,7 +282,7 @@ send_desktop_notification(char *msg)
  * Finally, if logs are enabled and LOGME is 1, write the message into the log
  * file as follows: "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
 void
-log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list)
+log_msg(char *_msg, const int print_prompt, const int logme, const int add_to_msgs_list)
 {
 	if (!_msg)
 		return;

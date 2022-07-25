@@ -30,7 +30,7 @@ void add_to_dirhist(const char *dir_path);
 int get_history(void);
 int history_function(char **comm);
 int log_function(char **comm);
-void log_msg(char *_msg, int print_prompt, int logme, int add_to_msgs_list);
+void log_msg(char *_msg, const int print_prompt, const int logme, const int add_to_msgs_list);
 int record_cmd(char *input);
 int run_history_cmd(const char *cmd);
 int save_dirhist(void);

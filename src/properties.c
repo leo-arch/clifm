@@ -407,7 +407,7 @@ get_properties(char *filename, const int dsize)
 	if (colorize == 1)
 		printf("%s", cend);
 
-#if defined(__OpenBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__)
 	printf(_("\tBlocks: %s%lld%s"), cbold, attr.st_blocks, cend);
 #else
 	printf(_("\tBlocks: %s%ld%s"), cbold, attr.st_blocks, cend);
@@ -418,13 +418,15 @@ get_properties(char *filename, const int dsize)
 #else
 	printf(_("\tIO Block: %s%ld%s"), cbold, attr.st_blksize, cend);
 #endif
-#if defined(__OpenBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__)
 	printf(_("\tInode: %s%llu%s\n"), cbold, attr.st_ino, cend);
 #else
 	printf(_("\tInode: %s%zu%s\n"), cbold, attr.st_ino, cend);
 #endif
 #if defined(__OpenBSD__) || defined(__APPLE__) || defined(__HAIKU__)
 	printf(_("Device: %s%d%s"), cbold, attr.st_dev, cend);
+#elif defined(__i386__)
+	printf(_("Device: %s%lld%s"), cbold, attr.st_dev, cend);
 #else
 	printf(_("Device: %s%zu%s"), cbold, attr.st_dev, cend);
 #endif
