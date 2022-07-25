@@ -203,7 +203,7 @@ get_properties(char *filename, const int dsize)
 		break;
 	}
 
-	/* Get file permissions */
+	/* File permissions */
 	char read_usr = '-', write_usr = '-', exec_usr = '-',
 	     read_grp = '-', write_grp = '-', exec_grp = '-',
 	     read_others = '-', write_others = '-', exec_others = '-';
@@ -271,19 +271,6 @@ get_properties(char *filename, const int dsize)
 	/* Get number of links to the file */
 	nlink_t link_n = attr.st_nlink;
 
-	/* Get modification time */
-	time_t time = (time_t)attr.st_mtime;
-	struct tm tm;
-	localtime_r(&time, &tm);
-	char mod_time[128];
-
-	if (time) {
-		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y %z", &tm);
-	} else {
-		*mod_time = '-';
-		mod_time[1] = '\0';
-	}
-
 	/* Get owner and group names */
 	uid_t owner_id = attr.st_uid; /* owner ID */
 	gid_t group_id = attr.st_gid; /* group ID */
@@ -337,10 +324,27 @@ get_properties(char *filename, const int dsize)
 	free(wname);
 
 	/* Stat information */
+#define MAX_TIME_STR 128
+/* Our resulting time string won't go usually beyond 27 chars. But since this length
+ * is locale dependent (at some point), let's use a much larger buffer size */
+
+	/* Last modification time */
+	time_t time = (time_t)attr.st_mtime;
+	struct tm tm;
+	localtime_r(&time, &tm);
+	char mod_time[MAX_TIME_STR];
+
+	if (time) {
+		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y %z", &tm);
+	} else {
+		*mod_time = '-';
+		mod_time[1] = '\0';
+	}
+
 	/* Last access time */
 	time = (time_t)attr.st_atime;
 	localtime_r(&time, &tm);
-	char access_time[128];
+	char access_time[MAX_TIME_STR];
 
 	if (time) {
 		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y %z", &tm);
@@ -352,7 +356,7 @@ get_properties(char *filename, const int dsize)
 	/* Last properties change time */
 	time = (time_t)attr.st_ctime;
 	localtime_r(&time, &tm);
-	char change_time[128];
+	char change_time[MAX_TIME_STR];
 	if (time) {
 		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y %z", &tm);
 	} else {
@@ -360,7 +364,7 @@ get_properties(char *filename, const int dsize)
 		change_time[0] = '\0';
 	}
 
-	/* Get creation (birth) time */
+	/* Creation (birth) time */
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
 #ifdef __OpenBSD__
 	time = attr.__st_birthtim.tv_sec;
@@ -368,27 +372,25 @@ get_properties(char *filename, const int dsize)
 	time = attr.st_birthtime;
 #endif
 	localtime_r(&time, &tm);
-	char creation_time[128];
+	char creation_time[MAX_TIME_STR];
 	if (!time) {
 		*creation_time = '-';
 		creation_time[1] = '\0';
 	} else {
-		strftime(creation_time, sizeof(creation_time),
-		    "%b %d %H:%M:%S %Y %z", &tm);
+		strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y %z", &tm);
 	}
 #elif defined(_STATX)
 	struct statx attrx;
 	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
 	time = (time_t)attrx.stx_btime.tv_sec;
 	localtime_r(&time, &tm);
-	char creation_time[128];
+	char creation_time[MAX_TIME_STR];
 
 	if (!time) {
 		*creation_time = '-';
 		creation_time[1] = '\0';
 	} else {
-		strftime(creation_time, sizeof(creation_time),
-		    "%b %d %H:%M:%S %Y %z", &tm);
+		strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y %z", &tm);
 	}
 #endif /* _STATX */
 
