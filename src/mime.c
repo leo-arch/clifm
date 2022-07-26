@@ -44,6 +44,7 @@
 
 #include "aux.h"
 #include "checks.h"
+#include "config.h"
 #include "exec.h"
 #include "mime.h"
 #include "messages.h"
@@ -547,12 +548,19 @@ mime_edit(char **args)
 		return EXIT_SUCCESS;
 	}
 
+	if (!mime_file || !*mime_file) {
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: mimelist file is undefined\n");
+		return EXIT_FAILURE;
+	}
+
 	int exit_status = EXIT_SUCCESS;
 	struct stat a;
-	if (!mime_file || stat(mime_file, &a) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: Cannot access the mimelist file. %s\n",
-			strerror(ENOENT));
-		return ENOENT;
+	if (stat(mime_file, &a) == -1) {
+		if (create_mime_file_anew(mime_file) != EXIT_SUCCESS) {
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: Cannot access "
+				"the mimelist file. %s\n", strerror(ENOENT));
+			return ENOENT;
+		}
 	}
 
 	time_t prev = a.st_mtime;
@@ -1444,7 +1452,7 @@ get_open_file_path(char **args, char **fpath, char **deq)
 }
 
 /* Handle mime when no opening app has been found */
-static inline int
+static int
 handle_no_app(int info, char **fpath, char **mime, char *arg)
 {
 	if (info) {

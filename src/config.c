@@ -1311,13 +1311,13 @@ create_config_files(void)
 	create_remotes_file();
 }
 
-static int
+int
 create_mime_file_anew(char *file)
 {
 	int fd;
 	FILE *fp = open_fstream_w(file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

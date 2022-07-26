@@ -1622,7 +1622,7 @@ bulk_rename(char **args)
 
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: br: %s: %s\n", PROGRAM_NAME, bulk_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "br: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1659,8 +1659,7 @@ bulk_rename(char **args)
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		puts(_("bulk: Nothing to do"));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
-			_err('e', PRINT_PROMPT, "%s: br: unlinkat: %s: %s\n", PROGRAM_NAME,
-			    bulk_file, strerror(errno));
+			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
 		close_fstream(fp, fd);
@@ -1678,10 +1677,9 @@ bulk_rename(char **args)
 	}
 
 	if (arg_total != file_total) {
-		fputs(_("bulk: Line mismatch in renaming file\n"), stderr);
+		fputs(_("br: Line mismatch in renaming file\n"), stderr);
 		if (unlinkat(fd, bulk_file, 0) == -1)
-			_err('e', PRINT_PROMPT, "%s: br: unlinkat: %s: %s\n", PROGRAM_NAME,
-			    bulk_file, strerror(errno));
+			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		close_fstream(fp, fd);
 		return EXIT_FAILURE;
 	}
@@ -1714,8 +1712,7 @@ bulk_rename(char **args)
 	if (!modified) {
 		puts(_("br: Nothing to do"));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
-			_err('e', PRINT_PROMPT, "%s: br: %s: %s\n", PROGRAM_NAME,
-			    bulk_file, strerror(errno));
+			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
 		free(line);
@@ -1788,8 +1785,7 @@ bulk_rename(char **args)
 	free(line);
 
 	if (unlinkat(fd, bulk_file, 0) == -1) {
-		_err('e', PRINT_PROMPT, "%s: br: unlinkat: %s: %s\n", PROGRAM_NAME,
-		    bulk_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	}
 	close_fstream(fp, fd);

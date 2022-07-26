@@ -28,6 +28,7 @@
 int edit_function(char **comm);
 int create_config(char *file);
 int create_kbinds_file(void);
+int create_mime_file_anew(char *file);
 void init_config(void);
 int create_bm_file(void);
 int create_mime_file(char *file, int new_prof);
