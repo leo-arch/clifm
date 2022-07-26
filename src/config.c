@@ -526,8 +526,12 @@ create_tmp_files(void)
 	 * in here, but only the file's owner can remove or modify them */
 	size_t user_len = user.name ? strlen(user.name) : 7; /* 7: length of "unknown" */
 	tmp_dir = (char *)xnmalloc(P_tmpdir_len + pnl_len + user_len + 3, sizeof(char));
-	sprintf(tmp_dir, "%s/%s", P_tmpdir, PNL);
-	/* P_tmpdir is defined in stdio.h and it's value is usually /tmp */
+	if (P_tmpdir_len > 0 && P_tmpdir[P_tmpdir_len - 1] == '/')
+		sprintf(tmp_dir, "%s%s", P_tmpdir, PNL); /* On OpenBSD we get "/tmp/" */
+	else
+		sprintf(tmp_dir, "%s/%s", P_tmpdir, PNL);
+	/* P_tmpdir is defined in stdio.h and it's value is usually /tmp
+	 * If not defined, it will be defined as "/tmp" */
 
 	int tmp_root_ok = 1;
 	struct stat attr;
