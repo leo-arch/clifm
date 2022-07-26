@@ -633,12 +633,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	char attr_s[(MAX_COLOR * 14) + 16]; /* 14 colors + 15 single chars + NUL byte */
 	if (prop_fields.perm == PERM_SYMBOLIC) {
 		snprintf(attr_s, sizeof(attr_s),
-			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s ",
+			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s ",
 			t_ctype, file_type, cend,
 			cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
 			cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
-			co1, read_others, co2, write_others, co3, exec_others, cend,
-			is_acl(props->name) ? "+" : "");
+			co1, read_others, co2, write_others, co3, exec_others, cend);
+//			is_acl(props->name) ? "+" : "");
 	} else if (prop_fields.perm == PERM_NUMERIC) {
 		snprintf(attr_s, sizeof(attr_s), "%s%04o%s ", do_c, props->mode & 07777, cend);
 	} else {
