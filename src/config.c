@@ -829,6 +829,7 @@ ShowHiddenFiles=%s\n\n\
 LongViewMode=%s\n\
 # Properties fields to be printed in long view mode\n\
 # p = permissions, i = user/group IDs, t = modification time, s = size\n\
+# n = same as 'p', but uses numeric/octal notation\n\
 # A single dash \"-\" disables all fields\n\
 PropFields=\"%s\"\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
