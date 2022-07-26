@@ -126,7 +126,7 @@ skip_line_prefix(char *line)
  * If true, the pointer PATTERN will point to the beginning of the
  * null terminated pattern, and the pointer CMDS will point to the
  * beginnning of the list of opening applications */
-static inline int
+static int
 skip_line(char *line, char **pattern, char **cmds)
 {
 	if (*line == '#' || *line == '[' || *line == '\n')
@@ -150,7 +150,7 @@ skip_line(char *line, char **pattern, char **cmds)
 
 /* Test PATTERN against either FILENAME or the mime-type MIME
  * Returns zero in case of a match, and 1 otherwise */
-static inline int
+static int
 test_pattern(const char *pattern, const char *filename, const char *mime)
 {
 	int ret = EXIT_FAILURE;
@@ -174,7 +174,7 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 }
 
 /* Return 1 if APP is a valid and existent application. Zero otherwise */
-static inline int
+static int
 check_app_existence(char **app)
 {
 	if (*(*app) == 'a' && *(*app + 1) == 'd' && !*(*app + 2))
@@ -208,7 +208,7 @@ check_app_existence(char **app)
 }
 
 /* Return the first NULL terminated cmd in LINE or NULL */
-static inline char *
+static char *
 get_cmd_from_line(char **line)
 {
 	char *l = *line;
@@ -233,7 +233,7 @@ get_cmd_from_line(char **line)
 }
 
 /* Return the first valid and existent opening application in LINE or NULL */
-static inline char *
+static char *
 retrieve_app(char *line)
 {
 	while (*line) {
@@ -1010,7 +1010,7 @@ FAIL:
 	return (char **)NULL;
 }
 
-static inline int
+static int
 run_cmd_noargs(char *arg, char *name)
 {
 	errno = 0;
@@ -1033,7 +1033,7 @@ run_cmd_noargs(char *arg, char *name)
 	return EXIT_FAILURE;
 }
 
-static inline void
+static void
 append_params(char **args, char *name, char ***cmd)
 {
 	size_t i, n = 1, f = 0;
@@ -1071,7 +1071,7 @@ append_params(char **args, char *name, char ***cmd)
 	(*cmd)[n] = (char *)NULL;
 }
 
-static inline int
+static int
 run_cmd_plus_args(char **args, char *name)
 {
 	size_t i;
@@ -1387,7 +1387,7 @@ import_mime(void)
 	return EXIT_FAILURE;
 }
 
-static inline int
+static int
 mime_info(char *arg, char **fpath, char **deq)
 {
 	if (!arg) {
@@ -1421,7 +1421,7 @@ mime_info(char *arg, char **fpath, char **deq)
 
 /* Get the full path of the file to be opened by mime
  * Returns 1 on success and 0 on error */
-static inline int
+static int
 get_open_file_path(char **args, char **fpath, char **deq)
 {
 	char *f = (char *)NULL;
@@ -1486,7 +1486,7 @@ handle_no_app(int info, char **fpath, char **mime, char *arg)
 	return EXIT_FAILURE;
 }
 
-static inline int
+static int
 print_error_no_mime(char **fpath)
 {
 	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("mime: Error getting mime-type\n"));
@@ -1494,14 +1494,14 @@ print_error_no_mime(char **fpath)
 	return EXIT_FAILURE;
 }
 
-static inline void
+static void
 print_info_name_mime(char *filename, char *mime)
 {
 	printf(_("Name: %s\n"), filename ? filename : _("None"));
 	printf(_("MIME type: %s\n"), mime);
 }
 
-static inline int
+static int
 print_mime_info(char **app, char **fpath, char **mime)
 {
 	if (*(*app) == 'a' && (*app)[1] == 'd' && !(*app)[2]) {
@@ -1520,7 +1520,7 @@ print_mime_info(char **app, char **fpath, char **mime)
 }
 
 #ifndef _NO_ARCHIVING
-static inline int
+static int
 run_archiver(char **fpath, char **app)
 {
 	char *cmd[] = {"ad", *fpath, NULL};
@@ -1549,7 +1549,7 @@ set_exec_flags(char *s, int *f)
 
 /* Expand %f placeholder, stderr/stdout flags, and environment variables
  * in the opening application line */
-static inline size_t
+static size_t
 expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 {
 	size_t f = 0, i;
@@ -1596,7 +1596,7 @@ expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
 }
 
 /* Open the file FPATH via the application APP */
-static inline int
+static int
 run_mime_app(char **app, char **fpath)
 {
 	char **cmd = split_str(*app, NO_UPDATE_ARGS);
@@ -1636,7 +1636,7 @@ run_mime_app(char **app, char **fpath)
 
 #ifdef _NO_MAGIC
 /* Check the existence of the 'file' command */
-static inline int
+static int
 check_file_cmd(void)
 {
 	char *p = get_cmd_path("file");
@@ -1650,7 +1650,7 @@ check_file_cmd(void)
 }
 #endif /* _NO_MAGIC */
 
-static inline int
+static int
 print_mime_help(void)
 {
 	puts(_(MIME_USAGE));
