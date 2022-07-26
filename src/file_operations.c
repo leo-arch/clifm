@@ -1571,7 +1571,7 @@ bulk_rename(char **args)
 
 	int fd = mkstemp(bulk_file);
 	if (fd == -1) {
-		_err('e', PRINT_PROMPT, "%s: br: %s: %s\n", PROGRAM_NAME, bulk_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "br: mkstemp: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1581,7 +1581,7 @@ bulk_rename(char **args)
 #ifdef __HAIKU__
 	fp = fopen(bulk_file, "w");
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: br: %s: %s\n", PROGRAM_NAME, bulk_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "br: fopen: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 #endif

@@ -549,7 +549,7 @@ mime_edit(char **args)
 	}
 
 	if (!mime_file || !*mime_file) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: mimelist file is undefined\n");
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: The mimelist file name is undefined\n");
 		return EXIT_FAILURE;
 	}
 
