@@ -544,7 +544,7 @@ bulk_remove(char *s1, char *s2)
 }
 
 #ifndef _NO_LIRA
-static inline int
+static int
 run_mime(char *file)
 {
 	if (!file || !*file)
@@ -1586,8 +1586,8 @@ bulk_rename(char **args)
 	}
 #endif
 
-#define BULK_MESSAGE "# Edit the file names, save, and quit the editor\n\
-# Just quit the editor to cancel the operation\n\n"
+#define BULK_MESSAGE "# Edit file names, save, and quit the editor\n\
+# Just quit the editor without any edit to cancel the operation\n\n"
 
 #ifndef __HAIKU__
 	dprintf(fd, BULK_MESSAGE);
@@ -1595,6 +1595,8 @@ bulk_rename(char **args)
 	fprintf(fp, BULK_MESSAGE);
 #endif
 
+	struct stat attr;
+	size_t counter = 0;
 	/* Copy all files to be renamed to the bulk file */
 	for (i = 1; args[i]; i++) {
 		/* Dequote file name, if necessary */
@@ -1608,6 +1610,13 @@ bulk_rename(char **args)
 			strcpy(args[i], deq_file);
 			free(deq_file);
 		}
+		if (lstat(args[i], &attr) == -1) { /* Ex: in case of failed glob */
+			fprintf(stderr, "br: %s: %s\n", args[i], strerror(errno));
+			continue;
+		} else {
+			counter++;
+		}
+
 #ifndef __HAIKU__
 		dprintf(fd, "%s\n", args[i]);
 #else
@@ -1620,6 +1629,9 @@ bulk_rename(char **args)
 	arg_total = i;
 	close(fd);
 
+	if (counter == 0)
+		return EXIT_FAILURE;
+
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "br: %s: %s\n", bulk_file, strerror(errno));
@@ -1629,7 +1641,7 @@ bulk_rename(char **args)
 	/* Store the last modification time of the bulk file. This time
 	 * will be later compared to the modification time of the same
 	 * file after shown to the user */
-	struct stat attr;
+//	struct stat attr;
 	fstat(fd, &attr);
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
@@ -1657,7 +1669,7 @@ bulk_rename(char **args)
 	 * match, nothing was modified */
 	fstat(fd, &attr);
 	if (mtime_bfr == (time_t)attr.st_mtime) {
-		puts(_("bulk: Nothing to do"));
+		puts(_("br: Nothing to do"));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 			exit_status = EXIT_FAILURE;

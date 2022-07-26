@@ -1457,7 +1457,7 @@ get_open_file_path(char **args, char **fpath, char **deq)
 
 /* Handle mime when no opening app has been found */
 static int
-handle_no_app(int info, char **fpath, char **mime, char *arg)
+handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 {
 	if (info) {
 		fputs(_("Associated application: None\n"), stderr);
