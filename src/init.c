@@ -80,7 +80,9 @@ set_prop_fields(char *line)
 		case 'p': prop_fields.perm = PERM_SYMBOLIC; break;
 		case 'n': prop_fields.perm = PERM_NUMERIC; break;
 		case 'i': prop_fields.ids = 1; break;
-		case 't': prop_fields.time = 1; break;
+		case 'a': prop_fields.time = PROP_TIME_ACCESS; break;
+		case 'c': prop_fields.time = PROP_TIME_CHANGE; break;
+		case 'm': prop_fields.time = PROP_TIME_MOD; break;
 		case 's': prop_fields.size = 1; break;
 		default: break;
 		}

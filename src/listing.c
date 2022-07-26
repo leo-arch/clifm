@@ -501,15 +501,21 @@ get_longest_filename(const int n, const int pad)
 #endif
 }
 
-/* Set a few extra attributes needed for long view mode */
+/* Set a few extra properties needed for long view mode */
 static void
 set_long_attribs(const int n, const struct stat *attr)
 {
 	file_info[n].uid = attr->st_uid;
 	file_info[n].gid = attr->st_gid;
-	file_info[n].ltime = (time_t)attr->st_mtime;
 	file_info[n].mode = attr->st_mode;
 	file_info[n].rdev = attr->st_rdev;
+
+	switch(prop_fields.time) {
+	case PROP_TIME_ACCESS: file_info[n].ltime = (time_t)attr->st_atime; break;
+	case PROP_TIME_CHANGE: file_info[n].ltime = (time_t)attr->st_ctime; break;
+	case PROP_TIME_MOD: file_info[n].ltime = (time_t)attr->st_mtime; break;
+	default: file_info[n].ltime = (time_t)attr->st_mtime; break;
+	}
 
 	if (full_dir_size == 1 && file_info[n].dir == 1) {
 		char name[PATH_MAX]; *name = '\0';
@@ -1914,8 +1920,13 @@ list_dir(void)
 			file_info[n].gid = attr.st_gid;
 			file_info[n].mode = attr.st_mode;
 
-			if (long_view) {
-				file_info[n].ltime = (time_t)attr.st_mtime;
+			if (long_view == 1) {
+				switch(prop_fields.time) {
+				case PROP_TIME_ACCESS: file_info[n].ltime = (time_t)attr.st_atime; break;
+				case PROP_TIME_CHANGE: file_info[n].ltime = (time_t)attr.st_ctime; break;
+				case PROP_TIME_MOD: file_info[n].ltime = (time_t)attr.st_mtime; break;
+				default: file_info[n].ltime = (time_t)attr.st_mtime; break;
+				}
 			}
 		} else {
 			file_info[n].type = DT_UNKNOWN;

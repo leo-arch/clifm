@@ -665,23 +665,25 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	}
 
 				/* ###############################
-				 * #  4. LAST MODIFICATION TIME  #
+				 * #        4. FILE TIME         #
 				 * ############################### */
 
-	char mod_time[128];
+	/* Whether time is access, modification, or status change, this value is set
+	 * by list_dir, in listing.c (file_info[n].ltime) before calling this function */
+	char file_time[128];
 	char time_s[128 + (MAX_COLOR * 2) + 2]; /* mod_time + 2 colors + space + NUL byte */
-	if (prop_fields.time == 1) {
+	if (prop_fields.time != 0) {
 		if (props->ltime) {
 			struct tm t;
 			localtime_r(&props->ltime, &t);
-			snprintf(mod_time, sizeof(mod_time), "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
+			snprintf(file_time, sizeof(file_time), "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
 				t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
 		} else {
-			strcpy(mod_time, "-               ");
+			strcpy(file_time, "-               ");
 		}
-		snprintf(time_s, sizeof(time_s), "%s%s%s ", cdate, *mod_time ? mod_time : "?", cend);
+		snprintf(time_s, sizeof(time_s), "%s%s%s ", cdate, *file_time ? file_time : "?", cend);
 	} else {
-		*mod_time = '\0';
+		*file_time = '\0';
 		*time_s = '\0';
 	}
 
@@ -729,7 +731,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 
 		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
-		prop_fields.time == 1 ? time_s : "",
+		prop_fields.time != 0 ? time_s : "",
 		prop_fields.size == 1 ? size_s : "");
 #else
 	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/

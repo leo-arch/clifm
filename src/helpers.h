@@ -881,12 +881,18 @@ struct msgs_t {
 };
 extern struct msgs_t msgs;
 
+/* Macros for properties string fields in long view */
 #define PERM_SYMBOLIC 1
 #define PERM_NUMERIC  2
+
+#define PROP_TIME_ACCESS 1
+#define PROP_TIME_MOD    2
+#define PROP_TIME_CHANGE 3
+
 struct props_t {
-	int perm; /* File permissions */
+	int perm; /* File permissions; either NUMERIC or SYMBOLIC */
 	int ids; /* User and group IDs */
-	int time; /* Last modification time */
+	int time; /* Time: either ACCESS, MOD, or CHANGE */
 	int size; /* File size */
 };
 extern struct props_t prop_fields;
