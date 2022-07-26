@@ -881,6 +881,8 @@ struct msgs_t {
 };
 extern struct msgs_t msgs;
 
+#define PERM_SYMBOLIC 1
+#define PERM_NUMERIC  2
 struct props_t {
 	int perm; /* File permissions */
 	int ids; /* User and group IDs */

@@ -77,7 +77,8 @@ set_prop_fields(char *line)
 	size_t i;
 	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
 		switch(line[i]) {
-		case 'p': prop_fields.perm = 1; break;
+		case 'p': prop_fields.perm = PERM_SYMBOLIC; break;
+		case 'n': prop_fields.perm = PERM_NUMERIC; break;
 		case 'i': prop_fields.ids = 1; break;
 		case 't': prop_fields.time = 1; break;
 		case 's': prop_fields.size = 1; break;

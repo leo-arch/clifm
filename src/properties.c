@@ -499,14 +499,14 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		cid = dg_c;
 
 	switch (props->mode & S_IFMT) {
-	case S_IFREG: file_type = '-'; break;
-	case S_IFDIR: file_type = 'd'; ctype = di_c; break;
-	case S_IFLNK: file_type = 'l'; ctype = ln_c; break;
+	case S_IFREG: file_type =  '-'; break;
+	case S_IFDIR: file_type =  'd'; ctype = di_c; break;
+	case S_IFLNK: file_type =  'l'; ctype = ln_c; break;
 	case S_IFSOCK: file_type = 's'; ctype = so_c; break;
-	case S_IFBLK: file_type = 'b'; ctype = bd_c; break;
-	case S_IFCHR: file_type = 'c'; ctype = cd_c; break;
-	case S_IFIFO: file_type = 'p'; ctype = pi_c; break;
-	default: file_type = '?'; break;
+	case S_IFBLK: file_type =  'b'; ctype = bd_c; break;
+	case S_IFCHR: file_type =  'c'; ctype = cd_c; break;
+	case S_IFIFO: file_type =  'p'; ctype = pi_c; break;
+	default: file_type =       '?'; break;
 	}
 
 	/* File permissions bit char */
@@ -514,7 +514,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	     read_grp = '-', write_grp = '-', exec_grp = '-',
 	     read_others = '-', write_others = '-', exec_others = '-';
 
-	/* Colors for each field of the attributes string */
+	/* Colors for each field of the permissions string */
 	char *cu1 = dn_c, *cu2 = dn_c, *cu3 = dn_c,
 		 *cg1 = dn_c, *cg2 = dn_c, *cg3 = dn_c,
 		 *co1 = dn_c, *co2 = dn_c, *co3 = dn_c;
@@ -627,11 +627,11 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 				/* ###########################
-				 * #      2. ATTRIBUTES      #
+				 * #     2. PERMISSIONS      #
 				 * ########################### */
 
 	char attr_s[(MAX_COLOR * 14) + 16]; /* 14 colors + 15 single chars + NUL byte */
-	if (prop_fields.perm == 1) {
+	if (prop_fields.perm == PERM_SYMBOLIC) {
 		snprintf(attr_s, sizeof(attr_s),
 			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s ",
 			t_ctype, file_type, cend,
@@ -639,6 +639,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 			cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
 			co1, read_others, co2, write_others, co3, exec_others, cend,
 			is_acl(props->name) ? "+" : "");
+	} else if (prop_fields.perm == PERM_NUMERIC) {
+		snprintf(attr_s, sizeof(attr_s), "%s%04o%s ", do_c, props->mode & 07777, cend);
 	} else {
 		*attr_s = '\0';
 	}
@@ -725,7 +727,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		light_mode ? "" : df_c, pad, "", df_c,
 		trim ? tt_c : "", trim ? '~' : 0,
 
-		prop_fields.perm == 1 ? attr_s : "",
+		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time == 1 ? time_s : "",
 		prop_fields.size == 1 ? size_s : "");
