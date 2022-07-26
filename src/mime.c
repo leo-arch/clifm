@@ -556,10 +556,14 @@ mime_edit(char **args)
 	int exit_status = EXIT_SUCCESS;
 	struct stat a;
 	if (stat(mime_file, &a) == -1) {
-		if (create_mime_file_anew(mime_file) != EXIT_SUCCESS) {
+		if (create_mime_file(mime_file, 1) != EXIT_SUCCESS) {
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: Cannot access "
 				"the mimelist file. %s\n", strerror(ENOENT));
 			return ENOENT;
+		}
+		if (stat(mime_file, &a) == -1) {
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", mime_file, strerror(errno));
+			return errno;
 		}
 	}
 

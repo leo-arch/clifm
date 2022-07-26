@@ -25,18 +25,17 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-int edit_function(char **comm);
+int create_bm_file(void);
 int create_config(char *file);
 int create_kbinds_file(void);
-int create_mime_file_anew(char *file);
-void init_config(void);
-int create_bm_file(void);
 int create_mime_file(char *file, int new_prof);
-int reload_config(void);
 void create_tmp_files(void);
-void set_sel_file(void);
-void set_env(void);
+int edit_function(char **comm);
+void init_config(void);
+int reload_config(void);
 void set_div_line(const char *line);
+void set_env(void);
 void set_finder_paths(void);
+void set_sel_file(void);
 
 #endif /* CONFIG_H */
