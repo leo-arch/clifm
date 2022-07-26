@@ -67,11 +67,11 @@ Pager=false
 LongViewMode=false
 
 # Properties fields to be printed for each file name in long view mode
-# p|n = file permissions: either symbolic (p) or numeric/octal (n)
+# p|n = permissions: either symbolic (p) or numeric/octal (n)
 # i = user/group IDs
-# a|c|m = last (a)ccess, (m)odification, or status (c)hange time,
-# s = File size
-# Defaults to "pims" (print all fields)
+# a|m|c = either last (a)ccess, (m)odification, or status (c)hange time
+# s = size
+# Defaults to "pims" (all fields: symbolic notation and modification time)
 # A single dash ("-") disables all fields
 # Ex: print only permissions (numeric) and size:
 #PropFields="ns"
