@@ -866,7 +866,9 @@ with no argument, prints the currently used resource opener (by default, \fILira
 .B p, pr, prop \fIELN/FILE\fR...
 print file properties for ELN/FILE. The output of this function is much like the combined output of \fIls\ \-l\fR and \fIstat\fR. By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content).
 .sp
-If you need to list the properties of all files in the current directory, try the long view mode (\fIAlt-l\fR). Fields displayed in this mode can be turned on/off using the \fIPropFields\fR option in the configuration file.
+If you need to list the properties of all files in the current directory, try the long view mode (\fIAlt-l\fR). Fields displayed in this mode can be customized using the \fIPropFields\fR option in the configuration file.
+.sp
+For more information about file details consult the file-details help topic: \fIhelp file\-details\fR.
 .TP
 .B path, cwd
 print the current working directory.
