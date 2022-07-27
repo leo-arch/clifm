@@ -1612,6 +1612,19 @@ bulk_rename(char **args)
 			free(deq_file);
 		}
 
+		/* Resolve "./" and "../" */
+		if (*args[i] == '.' && (args[i][1] == '/' || (args[i][1] == '.'
+		&& args[i][2] == '/') ) ) {
+			char *p = realpath(args[i], NULL);
+			if (!p) {
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "br: %s: %s\n", args[i],
+					strerror(errno));
+				continue;
+			}
+			free(args[i]);
+			args[i] = p;
+		}
+
 		if (lstat(args[i], &attr) == -1) {
 			fprintf(stderr, "br: %s: %s\n", args[i], strerror(errno));
 			continue;
