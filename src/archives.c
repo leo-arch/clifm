@@ -259,6 +259,7 @@ create_mountpoint(char *file)
 	return mountpoint;
 }
 
+#if defined(__linux__)
 static int
 cd_to_mountpoint(char *file, char *mountpoint)
 {
@@ -272,10 +273,8 @@ cd_to_mountpoint(char *file, char *mountpoint)
 	add_to_jumpdb(workspaces[cur_ws].path);
 
 	int exit_status = EXIT_SUCCESS;
-	if (autols) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+	if (autols == 1) {
+		reload_dirlist();
 		add_to_dirhist(workspaces[cur_ws].path);
 	} else {
 		printf("%s: Successfully mounted on %s\n", file, mountpoint);
@@ -283,10 +282,15 @@ cd_to_mountpoint(char *file, char *mountpoint)
 
 	return exit_status;
 }
+#endif /* __linux__ */
 
 static int
 mount_iso(char *file)
 {
+#if !defined(__linux__)
+	UNUSED(file);
+	fprintf(stderr, "mount: This feature is for Linux only\n");
+#else
 	char *mountpoint = create_mountpoint(file);
 	if (!mountpoint)
 		return EXIT_FAILURE;
@@ -309,6 +313,7 @@ mount_iso(char *file)
 	int exit_status = cd_to_mountpoint(file, mountpoint);
 	free(mountpoint);
 	return exit_status;
+#endif /* __linux__ */
 }
 
 /* Use 7z to
