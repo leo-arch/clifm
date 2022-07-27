@@ -2180,7 +2180,7 @@ options_generator(const char *text, int state)
 		_opts[3] = "bookmarks";
 		_opts[4] = "desktop-notifications";
 		_opts[5] = "dir-jumper";
-		_opts[6] = "file-attributes";
+		_opts[6] = "file-details";
 		_opts[7] = "file-tags";
 		_opts[8] = "navigation";
 		_opts[9] = "plugins";

@@ -604,7 +604,7 @@ print_tips(int all)
 		"Fuzzy completion is supported: 'dwn<TAB> -> Downloads'. Enable it via '--fuzzy-match'",
 		"Wildcards can be expanded via TAB: 's *.c<TAB>'",
 		"Try the help topics: 'help <TAB>'",
-		"List symlinks in the current directory: '=l<TAB>'. Enter 'help file-attributes' for more information",
+		"List symlinks in the current directory: '=l<TAB>'. Enter 'help file-details' for more information",
 		"Use PropFields in the configuration file to toggle fields on/off in long view mode",
 		NULL};
 
@@ -1871,7 +1871,7 @@ print_file_tags_topic(void)
 static int
 print_file_attributes_topic(void)
 {
-	puts(FILE_ATTRIBUTES);
+	puts(FILE_DETAILS);
 	putchar('\n');
 	puts(FILE_SIZE_USAGE);
 	putchar('\n');
@@ -1954,7 +1954,7 @@ run_help_topic(char *topic)
 		return print_desktop_notifications_topic();
 	if (*topic == 'd' && strcmp(topic, "dir-jumper") == 0)
 		return print_dir_jumper_topic();
-	if (*topic == 'f' && strcmp(topic, "file-attributes") == 0)
+	if (*topic == 'f' && strcmp(topic, "file-details") == 0)
 		return print_file_attributes_topic();
 	if (*topic == 'f' && strcmp(topic, "file-tags") == 0)
 		return print_file_tags_topic();

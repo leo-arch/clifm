@@ -29,15 +29,6 @@
 #define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOprsStuUvwWxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
-#define FILE_ATTRIBUTES "List file attributes\n\
-- Toggle long/detail view mode:\n\
-    Alt-l\n\
-  Note: use PropFields in the configuration file to toggle properties fields on/off\n\
-- Print properties of the file whose ELN is 4:\n\
-    p4\n\
-- Print file properties, including directory full size:\n\
-    pp DIR"
-
 #define ACTIONS_USAGE "List or edit actions/plugins\n\
 Usage:\n\
   actions [edit [APP]]\n\n\
@@ -255,6 +246,15 @@ Examples:\n\
 #define FC_USAGE "Turn the files counter for directories on-off\n\
 Usage:\n\
   fc, filescounter [on, off, status]"
+
+#define FILE_DETAILS "List file details\n\
+- Toggle long/detail view mode:\n\
+    Alt-l\n\
+  Note: use PropFields in the configuration file to customize output fields\n\
+- Print properties of the file whose ELN is 4:\n\
+    p4\n\
+- Print file properties, including directory full size:\n\
+    pp DIR"
 
 #define FILE_SIZE_USAGE "File sizes/disk usage\n\
 - Enable full directory size (long view):\n\
