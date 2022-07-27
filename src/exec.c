@@ -2187,8 +2187,11 @@ exec_cmd(char **comm)
 
 		if (*comm[0] == 'l' && !comm[0][1]) {
 			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char));
+#if defined(_BE_POSIX)
+			strcpy(comm[0], "ln -s");
+#else
 			strcpy(comm[0], "ln -sn");
-
+#endif
 			/* Make sure the symlink source is always an absolute path */
 			if (comm[1] && *comm[1] != '/' && *comm[1] != '~') {
 				size_t len = strlen(comm[1]);

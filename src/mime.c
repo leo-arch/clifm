@@ -320,13 +320,18 @@ xmagic(const char *file, const int query_mime)
 
 	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
 					: MAGIC_ERROR);
-	if (!cookie)
+	if (!cookie) {
+//		fprintf(stderr, "%s: xmagic: %s\n", PROGRAM_NAME, strerror(errno));
 		return (char *)NULL;
+	}
 
 	magic_load(cookie, NULL);
 
 	const char *mime = magic_file(cookie, file);
 	if (!mime) {
+/*		const char *err_str = magic_error(cookie);
+		if (err_str)
+			fprintf(stderr, "%s: xmagic: %s\n", PROGRAM_NAME, err_str); */
 		magic_close(cookie);
 		return (char *)NULL;
 	}

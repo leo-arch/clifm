@@ -382,21 +382,21 @@ get_rm_param(char ***rfiles, int n)
 			continue;
 
 		if (S_ISDIR(attr.st_mode)) {
-#if defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
 			_param = savestring("-r", 2);
-#else
+#else /* Linux and FreeBSD only */
 			_param = savestring("-dIr", 4);
-#endif
+#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
 			break;
 		}
 	}
 
 	if (!_param) {
-#if defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
 		_param = savestring("-f", 2);
-#else
+#else /* Linux and FreeBSD only */
 		_param = savestring("-I", 2);
-#endif
+#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
 	}
 
 	return _param;
@@ -483,7 +483,7 @@ diff_files(char *tmp_file, int n)
 static int
 nothing_to_do(char **tmp_file, struct dirent ***a, int n)
 {
-	printf(_("%s: Nothing to do\n"), PROGRAM_NAME);
+	printf(_("rr: Nothing to do\n"));
 	unlink(*tmp_file);
 	free(*tmp_file);
 
@@ -775,7 +775,11 @@ dup_file(char **cmd)
 			if (launch_execve(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} else {
+#if !defined(_BE_POSIX)
 			char *_cmd[] = {"cp", "-a", source, dest, NULL};
+#else
+			char *_cmd[] = {"cp", source, dest, NULL};
+#endif
 			if (launch_execve(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
@@ -1157,7 +1161,7 @@ edit_link(char *link)
 	}
 
 	if (!S_ISLNK(attr.st_mode)) {
-		fprintf(stderr, _("%s: le: %s: Not a symbolic link\n"), PROGRAM_NAME, link);
+		fprintf(stderr, _("le: %s: Not a symbolic link\n"), link);
 		return EXIT_FAILURE;
 	}
 
@@ -1206,7 +1210,7 @@ edit_link(char *link)
 			if (file_info[a].name)
 				new_path = savestring(file_info[a].name, strlen(file_info[a].name));
 		} else {
-			fprintf(stderr, _("%s: le: %s: Invalid ELN\n"), PROGRAM_NAME, new_path);
+			fprintf(stderr, _("le: %s: Invalid ELN\n"), new_path);
 			free(new_path);
 			return EXIT_FAILURE;
 		}
@@ -1270,7 +1274,11 @@ edit_link(char *link)
 	}
 
 	/* Finally, relink the symlink to new_path */
+#if !defined(_BE_POSIX)
 	char *cmd[] = {"ln", "-sfn", new_path, link, NULL};
+#else
+	char *cmd[] = {"ln", "-sf", new_path, link, NULL};
+#endif /* _BE_POSIX */
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		free(new_path);
 		return EXIT_FAILURE;
@@ -1504,17 +1512,17 @@ remove_file(char **args)
 
 	rm_cmd[0] = savestring("rm", 2);
 	if (dirs == 1)
-#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(_BE_POSIX)
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
 		rm_cmd[1] = savestring("-r", 2);
-#else
+#else /* Linux and FreeBSD only */
 		rm_cmd[1] = savestring("-dIr", 4);
-#endif /* __NetBSD__ || __OpenBSD__ */
+#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
 	else
-#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(_BE_POSIX)
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
 		rm_cmd[1] = savestring("-f", 2);
-#else
+#else /* Linux and FreeBSD only */
 		rm_cmd[1] = savestring("-I", 2);
-#endif /* __NetBSD__ || __OpenBSD__ */
+#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
 	rm_cmd[2] = savestring("--", 2);
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -1814,7 +1822,7 @@ bulk_rename(char **args)
 	}
 	close_fstream(fp, fd);
 
-#if defined(__HAIKU__) || defined(__APPLE__)
+#if defined(__HAIKU__)// || defined(__APPLE__)
 	if (autols == 1)
 		reload_dirlist();
 #endif
