@@ -597,13 +597,13 @@ open_file(char *file)
 		exit_status = run_mime(file);
 #else
 		/* Fallback to (xdg-)open */
-#if defined(__HAIKU__)
+# if defined(__HAIKU__)
 		char *cmd[] = {"open", file, NULL};
-#elif defined(__APPLE__)
+# elif defined(__APPLE__)
 		char *cmd[] = {"/usr/bin/open", file, NULL};
-#else
+# else
 		char *cmd[] = {"xdg-open", file, NULL};
-#endif /* __HAIKU__ */
+# endif /* __HAIKU__ */
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 #endif /* _NO_LIRA */
@@ -1586,7 +1586,8 @@ bulk_rename(char **args)
 	}
 #endif
 
-#define BULK_MESSAGE "# Edit file names, save, and quit the editor\n\
+#define BULK_MESSAGE "# Edit file names, save, and quit the editor (you will be\n\
+# asked for confirmation)\n#\n\
 # Just quit the editor without any edit to cancel the operation\n\n"
 
 #ifndef __HAIKU__
@@ -1610,7 +1611,8 @@ bulk_rename(char **args)
 			strcpy(args[i], deq_file);
 			free(deq_file);
 		}
-		if (lstat(args[i], &attr) == -1) { /* Ex: in case of failed glob */
+
+		if (lstat(args[i], &attr) == -1) {
 			fprintf(stderr, "br: %s: %s\n", args[i], strerror(errno));
 			continue;
 		} else {
@@ -1629,7 +1631,7 @@ bulk_rename(char **args)
 	arg_total = i;
 	close(fd);
 
-	if (counter == 0)
+	if (counter == 0) /* No valid file name */
 		return EXIT_FAILURE;
 
 	fp = open_fstream_r(bulk_file, &fd);
@@ -1641,7 +1643,6 @@ bulk_rename(char **args)
 	/* Store the last modification time of the bulk file. This time
 	 * will be later compared to the modification time of the same
 	 * file after shown to the user */
-//	struct stat attr;
 	fstat(fd, &attr);
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
@@ -1650,7 +1651,8 @@ bulk_rename(char **args)
 	exit_status = open_file(bulk_file);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "br: %s\n", strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "br: %s\n",
+			errno != 0 ? strerror(errno) : "Error opening temporary file");
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		}
