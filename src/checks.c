@@ -563,6 +563,9 @@ is_internal_f(const char *restrict cmd)
 		{"ln", 2},
 		{"le", 2},
 		{"m", 1},
+// TESTING MIME!
+		{"mm", 2},
+// TESTING MIME!
 		{"mv", 2},
 		{"md", 2},
 		{"mkdir", 5},
