@@ -331,8 +331,7 @@ xmagic(const char *file, const int query_mime)
 		return (char *)NULL;
 	}
 
-	char *str = (char *)xnmalloc(strlen(mime) + 1, sizeof(char));
-	strcpy(str, mime);
+	char *str = savestring(mime, strlen(mime));
 	magic_close(cookie);
 	return str;
 }
@@ -421,6 +420,7 @@ get_mime(char *file)
 		unlink(mime_tmp_file);
 		return (char *)NULL;
 	}
+
 	char *tmp = strrchr(line, ' ');
 	if (tmp) {
 		size_t len = strlen(tmp);
@@ -526,7 +526,7 @@ mime_import(char *file)
 	free(local_path);
 
 	if (mime_defs == 0) {
-		fprintf(stderr, _("mime: Nothing was imported. No MIME definitions found\n"));
+		fprintf(stderr, _("mime: Nothing was imported. No MIME definition found\n"));
 	}
 
 	/* Make sure there is an entry for text/plain files, so that at least
@@ -597,9 +597,11 @@ static char *
 get_filename(char *file_path)
 {
 	char *f = strrchr(file_path, '/');
+	if (f && *(++f))
+		return f;
 
-	if (f)
-		return (f + 1);
+/*	if (f)
+		return (f + 1); */
 
 	return (char *)NULL;
 }
@@ -1340,7 +1342,6 @@ mime_open_url(char *url)
 		return EXIT_FAILURE;
 
 	char *app = get_app("text/html", 0);
-
 	if (!app)
 		return EXIT_FAILURE;
 
@@ -1420,7 +1421,7 @@ mime_info(char *arg, char **fpath, char **deq)
 }
 
 /* Get the full path of the file to be opened by mime
- * Returns 1 on success and 0 on error */
+ * Returns 0 on success and 1 on error */
 static int
 get_open_file_path(char **args, char **fpath, char **deq)
 {
