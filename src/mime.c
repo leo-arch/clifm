@@ -152,7 +152,7 @@ skip_line(char *line, char **pattern, char **cmds)
 	*(*cmds) = '\0';
 	(*cmds)++;
 	_err(0, PRINT_PROMPT, "DEBUG: %zu: cmds is: %s\n", __LINE__, *cmds);
-	_err(0, PRINT_PROMPT, "DEBUG: %zu: returning from skip_line\n", __LINE__);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: leaving skip_line\n", __LINE__);
 	/* CMDS points now to the beginning of the list of opening cmds */
 	return 0;
 }
@@ -191,7 +191,7 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 	}
 
 	regfree(&regex);
-	_err(0, PRINT_PROMPT, "DEBUG: %zu: returning from test_pattern\n", __LINE__);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: leaving test_pattern\n", __LINE__);
 	return ret;
 }
 
@@ -343,7 +343,7 @@ get_app(const char *mime, const char *filename)
 		if ((app = retrieve_app(cmds)))
 			break;
 	}
-	_err(0, PRINT_PROMPT, "DEBUG: %zu: getting out from getline while loop\n", __LINE__);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: leaving getline while loop\n", __LINE__);
 	free(line);
 	fclose(defs_fp);
 	_err(0, PRINT_PROMPT, "DEBUG: %zu: get_app returned: %s\n", __LINE__, app ? app : "NULL");
@@ -384,11 +384,11 @@ xmagic(const char *file, const int query_mime)
 		magic_close(cookie);
 		return (char *)NULL;
 	}
-	_err(0, PRINT_PROMPT, "DEBUG: %zu: magic_file returns: %s\n", __LINE__, mime);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: magic_file returned: %s\n", __LINE__, mime);
 
 	char *str = savestring(mime, strlen(mime));
 	magic_close(cookie);
-	_err(0, PRINT_PROMPT, "DEBUG: %zu: returning from xmagic\n", __LINE__);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: leaving xmagic\n", __LINE__);
 	return str;
 }
 
@@ -656,13 +656,13 @@ get_filename(char *file_path)
 	_err(0, PRINT_PROMPT, "DEBUG: %zu: running strchr(%s, '/')\n", __LINE__, file_path ? file_path : "NULL");
 	char *f = strrchr(file_path, '/');
 	if (f && *(++f)) {
-		_err(0, PRINT_PROMPT, "DEBUG: %zu: get_filename returns: %s\n", __LINE__, f);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: get_filename returned: %s\n", __LINE__, f);
 		return f;
 	}
 
 /*	if (f)
 		return (f + 1); */
-	_err(0, PRINT_PROMPT, "DEBUG: %zu: get_filename returns NULL\n", __LINE__, f);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: get_filename returned NULL\n", __LINE__, f);
 	return (char *)NULL;
 }
 
@@ -1485,7 +1485,7 @@ mime_info(char *arg, char **fpath, char **deq)
 static int
 get_open_file_path(char **args, char **fpath, char **deq)
 {
-	_err(0, PRINT_PROMPT, "DEBUG: %zu: Entering get_open_file_path\n", __LINE__);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering get_open_file_path\n", __LINE__);
 	char *f = (char *)NULL;
 	if (*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2]) {
 		_err(0, PRINT_PROMPT, "DEBUG: %zu: f is args[2] (%s)\n", __LINE__, args[2]);
@@ -1497,11 +1497,11 @@ get_open_file_path(char **args, char **fpath, char **deq)
 
 	/* Only dequote the file name if coming from the mime command */
 	if (*args[0] == 'm' && strchr(f, '\\')) {
-		_err(0, PRINT_PROMPT, "DEBUG: %zu: Coming from mime\n", __LINE__);
-		_err(0, PRINT_PROMPT, "DEBUG: %zu: Running dequote_str(%s, 0)\n", __LINE__, f);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: coming from mime\n", __LINE__);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: running dequote_str(%s, 0)\n", __LINE__, f);
 		*deq = dequote_str(f, 0);
 		_err(0, PRINT_PROMPT, "DEBUG: %zu: dequote_str returned: %s\n", __LINE__, *deq ? *deq : "NULL");
-		_err(0, PRINT_PROMPT, "DEBUG: %zu: Running realpath(%s, NULL)\n", __LINE__, *deq ? *deq : "NULL");
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: running realpath(%s, NULL)\n", __LINE__, *deq ? *deq : "NULL");
 		*fpath = realpath(*deq, NULL);
 		_err(0, PRINT_PROMPT, "DEBUG: %zu: realpath(3) returned: %s\n", __LINE__, *fpath ? *fpath : "NULL");
 		free(*deq);
@@ -1509,7 +1509,7 @@ get_open_file_path(char **args, char **fpath, char **deq)
 	}
 
 	if (!*fpath) {
-		_err(0, PRINT_PROMPT, "DEBUG: %zu: Running realpath(%s, NULL)\n", __LINE__, f);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: running realpath(%s, NULL)\n", __LINE__, f);
 		*fpath = realpath(f, NULL);
 		_err(0, PRINT_PROMPT, "DEBUG: %zu: realpath(3) returned: %s\n", __LINE__, *fpath ? *fpath : "NULL");
 		if (!*fpath) {
@@ -1518,7 +1518,7 @@ get_open_file_path(char **args, char **fpath, char **deq)
 		}
 	}
 
-	_err(0, PRINT_PROMPT, "DEBUG: %zu: Running access(%s, R_OK)\n", __LINE__, *fpath);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running access(%s, R_OK)\n", __LINE__, *fpath);
 	if (access(*fpath, R_OK) == -1) {
 		_err(0, PRINT_PROMPT, "DEBUG: %zu: access(3) failed with error %d: %s\n", __LINE__, errno, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", __LINE__, *fpath, strerror(errno));

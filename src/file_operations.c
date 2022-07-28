@@ -1678,7 +1678,7 @@ bulk_rename(char **args)
 	open_in_foreground = 1;
 	_err(0, PRINT_PROMPT, "DEBUG: %zu: running open_file(%s)\n", __LINE__, bulk_file);
 	exit_status = open_file(bulk_file);
-	_err(0, PRINT_PROMPT, "DEBUG: %zu: open_file returned %d\n", __LINE__, exit_status);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: open_file returned: %d\n", __LINE__, exit_status);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "br: %s\n",
