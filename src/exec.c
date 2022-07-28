@@ -993,7 +993,7 @@ msgs_function(char *arg)
 		for (i = 0; i < (size_t)msgs_n; i++)
 			printf("%s", messages[i]);
 	} else {
-		printf(_("%s: There are no messages\n"), PROGRAM_NAME);
+		printf(_("%s: No messages\n"), PROGRAM_NAME);
 	}
 
 	return EXIT_SUCCESS;
