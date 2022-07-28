@@ -310,6 +310,7 @@ static char *
 get_app(const char *mime, const char *filename)
 {
 	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering get_app(%s, %s)\n", __LINE__, mime ? mime : "NULL", filename ? filename : "NULL");
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: the mimelist file is: %s\n", __LINE__, mime_file ? mime_file : "NULL");
 	if (!mime || !mime_file || !*mime_file)
 		return (char *)NULL;
 
