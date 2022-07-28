@@ -129,21 +129,30 @@ skip_line_prefix(char *line)
 static int
 skip_line(char *line, char **pattern, char **cmds)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering skip_line\n", __LINE__);
 	if (*line == '#' || *line == '[' || *line == '\n')
 		return 1;
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: checking pattern via skip_line_prefix\n", __LINE__);
 	*pattern = skip_line_prefix(line);
-	if (!*pattern)
+	if (!*pattern) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: pattern is NULL\n", __LINE__);
 		return 1;
+	}
 	/* PATTERN points now to the beginning of the pattern */
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: pattern is: %s\n", __LINE__, *pattern);
 
 	*cmds = strchr(*pattern, '=');
-	if (!*cmds || !*(*cmds + 1))
+	if (!*cmds || !*(*cmds + 1)) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: cmds is NULL\n", __LINE__);
 		return 1;
+	}
 
 	/* Truncate line in '=' to get only the name/mimetype pattern */
 	*(*cmds) = '\0';
 	(*cmds)++;
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: cmds is: %s\n", __LINE__, *cmds);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: returning from skip_line\n", __LINE__);
 	/* CMDS points now to the beginning of the list of opening cmds */
 	return 0;
 }
@@ -153,23 +162,36 @@ skip_line(char *line, char **pattern, char **cmds)
 static int
 test_pattern(const char *pattern, const char *filename, const char *mime)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering test_pattern\n", __LINE__);
 	int ret = EXIT_FAILURE;
 	regex_t regex;
 
 	if (filename && (*pattern == 'N' || *pattern == 'E')
 	&& *(pattern + 1) == ':') {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: filename is not NULL && pattern == N\n", __LINE__);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: running regcomp(%s) and regexec(%s)\n", __LINE__, *(pattern + 2) ? pattern + 2 : "NULL", filename);
 		if (regcomp(&regex, pattern + 2, REG_NOSUB | REG_EXTENDED) == 0
-		&& regexec(&regex, filename, 0, NULL, 0) == 0)
+		&& regexec(&regex, filename, 0, NULL, 0) == 0) {
+			_err(0, PRINT_PROMPT, "DEBUG: %zu: regcomp/regexec succeded\n", __LINE__);
 			ret = EXIT_SUCCESS;
+		} else {
+			_err(0, PRINT_PROMPT, "DEBUG: %zu: regcomp/regexec failed\n", __LINE__);
+		}
 	} else {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: filename is NULL || pattern != N\n", __LINE__);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: running regcomp(%s) and regexec(%s)\n", __LINE__, pattern ? pattern : "NULL", mime ? mime : "NULL");
 		if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) == 0
 		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
 			mime_match = 1;
 			ret = EXIT_SUCCESS;
+			_err(0, PRINT_PROMPT, "DEBUG: %zu: regcomp/regexec succeded\n", __LINE__);
+		} else {
+			_err(0, PRINT_PROMPT, "DEBUG: %zu: regcomp/regexec failed\n", __LINE__);
 		}
 	}
 
 	regfree(&regex);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: returning from test_pattern\n", __LINE__);
 	return ret;
 }
 
@@ -236,9 +258,16 @@ get_cmd_from_line(char **line)
 static char *
 retrieve_app(char *line)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering retrieve_app(%s)\n", __LINE__, line ? line : "NULL");
 	while (*line) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: running get_cmd_from_line\n", __LINE__);
 		char *app = get_cmd_from_line(&line);
-		if (!app) { line++; continue; }
+		if (!app) {
+			_err(0, PRINT_PROMPT, "DEBUG: %zu: get_cmd_from_line returned NULL\n", __LINE__);
+			line++;
+			continue;
+		}
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: get_cmd_from_line returned: %s\n", __LINE__, app);
 
 		if (strchr(app, '$')) { /* Environment variable */
 			char *t = expand_env(app);
@@ -256,17 +285,21 @@ retrieve_app(char *line)
 		char *ret = strchr(app, ' ');
 		if (ret) *ret = '\0';
 
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: running check_app_existence(%s)\n", __LINE__, app);
 		int exists = check_app_existence(&app);
 
 		if (ret) *ret = ' ';
 		if (exists == 0) {
+			_err(0, PRINT_PROMPT, "DEBUG: %zu: check_app_existence returned FALSE\n", __LINE__);
 			free(app);
 			continue;
 		}
-
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: check_cmd_existence returned TRUE\n", __LINE__);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: retrieve_app returned: %s\n", __LINE__, app ? app : "NULL");
 		return app; /* Valid app. Return it */
 	}
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: retrieve_app returned NULL\n", __LINE__);
 	return (char *)NULL; /* No app was found */
 }
 
@@ -276,18 +309,23 @@ retrieve_app(char *line)
 static char *
 get_app(const char *mime, const char *filename)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering get_app(%s, %s)\n", __LINE__, mime ? mime : "NULL", filename ? filename : "NULL");
 	if (!mime || !mime_file || !*mime_file)
 		return (char *)NULL;
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running fopen(%s, \"r\")\n", __LINE__, mime_file ? mime_file : "NULL");
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: fopen(3) failed with error %d: %s\n", __LINE__, errno, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", mime_file, strerror(errno));
 		return (char *)NULL;
 	}
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: fopen(3) succeded\n", __LINE__);
 
 	size_t line_size = 0;
 	char *line = (char *)NULL, *app = (char *)NULL;
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering getline while loop\n", __LINE__);
 	/* Each line has this form: prefix:pattern=cmd;cmd;cmd... */
 	while (getline(&line, &line_size, defs_fp) > 0) {
 		char *pattern = (char *)NULL, *cmds = (char *)NULL;
@@ -304,9 +342,10 @@ get_app(const char *mime, const char *filename)
 		if ((app = retrieve_app(cmds)))
 			break;
 	}
-
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: getting out from getline while loop\n", __LINE__);
 	free(line);
 	fclose(defs_fp);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: get_app returned: %s\n", __LINE__, app ? app : "NULL");
 	return app;
 }
 
@@ -315,29 +354,40 @@ get_app(const char *mime, const char *filename)
 char *
 xmagic(const char *file, const int query_mime)
 {
-	if (!file || !*file)
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running xmagic(%s, %d)\n", __LINE__, file ? file : "NULL", query_mime);
+	if (!file || !*file) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: file parameter is NULL\n", __LINE__);
 		return (char *)NULL;
+	}
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running magic_open(%d)\n", __LINE__, query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR) : MAGIC_ERROR);
 	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
 					: MAGIC_ERROR);
 	if (!cookie) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: magic_open failed with error %d: %s\n", __LINE__, errno, strerror(errno));
 //		fprintf(stderr, "%s: xmagic: %s\n", PROGRAM_NAME, strerror(errno));
 		return (char *)NULL;
 	}
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: magic_open succeded\n", __LINE__);
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running magic_load(cookie, NULL)\n", __LINE__);
 	magic_load(cookie, NULL);
-
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running magic_file(cookie, %s)\n", __LINE__, file);
 	const char *mime = magic_file(cookie, file);
 	if (!mime) {
-/*		const char *err_str = magic_error(cookie);
-		if (err_str)
+		const char *err_str = magic_error(cookie);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: magic_file failed: %s\n", __LINE__, err_str);
+/*		if (err_str)
 			fprintf(stderr, "%s: xmagic: %s\n", PROGRAM_NAME, err_str); */
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: running magic_close(cookie)\n", __LINE__);
 		magic_close(cookie);
 		return (char *)NULL;
 	}
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: magic_file returns: %s\n", __LINE__, mime);
 
 	char *str = savestring(mime, strlen(mime));
 	magic_close(cookie);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: returning from xmagic\n", __LINE__);
 	return str;
 }
 
@@ -601,13 +651,17 @@ mime_edit(char **args)
 static char *
 get_filename(char *file_path)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering get_filename(%s)\n", __LINE__, file_path ? file_path : "NULL");
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running strchr(%s, '/')\n", __LINE__, file_path ? file_path : "NULL");
 	char *f = strrchr(file_path, '/');
-	if (f && *(++f))
+	if (f && *(++f)) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: get_filename returns: %s\n", __LINE__, f);
 		return f;
+	}
 
 /*	if (f)
 		return (f + 1); */
-
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: get_filename returns NULL\n", __LINE__, f);
 	return (char *)NULL;
 }
 
@@ -1430,33 +1484,47 @@ mime_info(char *arg, char **fpath, char **deq)
 static int
 get_open_file_path(char **args, char **fpath, char **deq)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: Entering get_open_file_path\n", __LINE__);
 	char *f = (char *)NULL;
-	if (*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2])
+	if (*args[1] == 'o' && strcmp(args[1], "open") == 0 && args[2]) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: f is args[2] (%s)\n", __LINE__, args[2]);
 		f = args[2];
-	else
+	} else {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: f is args[1] (%s)\n", __LINE__, args[1]);
 		f = args[1];
+	}
 
 	/* Only dequote the file name if coming from the mime command */
 	if (*args[0] == 'm' && strchr(f, '\\')) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: Coming from mime\n", __LINE__);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: Running dequote_str(%s, 0)\n", __LINE__, f);
 		*deq = dequote_str(f, 0);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: dequote_str returned: %s\n", __LINE__, *deq ? *deq : "NULL");
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: Running realpath(%s, NULL)\n", __LINE__, *deq ? *deq : "NULL");
 		*fpath = realpath(*deq, NULL);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: realpath(3) returned: %s\n", __LINE__, *fpath ? *fpath : "NULL");
 		free(*deq);
 		*deq = (char *)NULL;
 	}
 
 	if (!*fpath) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: Running realpath(%s, NULL)\n", __LINE__, f);
 		*fpath = realpath(f, NULL);
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: realpath(3) returned: %s\n", __LINE__, *fpath ? *fpath : "NULL");
 		if (!*fpath) {
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", f, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: Running access(%s, R_OK)\n", __LINE__, *fpath);
 	if (access(*fpath, R_OK) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", *fpath, strerror(errno));
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: access(3) failed with error %d: %s\n", __LINE__, errno, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: %s: %s\n", __LINE__, *fpath, strerror(errno));
 		free(*fpath);
 		return EXIT_FAILURE;
 	}
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: access(3) succeded\n", __LINE__, *fpath);
 
 	return EXIT_SUCCESS;
 }
@@ -1465,6 +1533,7 @@ get_open_file_path(char **args, char **fpath, char **deq)
 static int
 handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering handle_no_app\n", __LINE__);
 	if (info) {
 		fputs(_("Associated application: None\n"), stderr);
 	} else {
@@ -1476,12 +1545,14 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 
 			free(*fpath);
 			free(*mime);
-
+			_err(0, PRINT_PROMPT, "DEBUG: %zu: handle_no_app returned %d\n", __LINE__, exit_status);
 			return exit_status;
 		} else {
+			_err(0, PRINT_PROMPT, "DEBUG: %zu: handle_no_app returned %d\n", __LINE__, EXIT_FAILURE);
 			fprintf(stderr, _("mime: %s: No associated application found\n"), arg);
 		}
 #else
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: handle_no_app returned %d\n", __LINE__, EXIT_FAILURE);
 		fprintf(stderr, _("mime: %s: No associated application found\n"), arg);
 #endif
 	}
@@ -1695,6 +1766,7 @@ mime_open(char **args)
 	}
 
 	if (!file_path) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: file_path is NULL\n", __LINE__);
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", args[file_index], strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1710,8 +1782,10 @@ mime_open(char **args)
 	char *mime = get_mime(file_path);
 #endif
 
-	if (!mime)
+	if (!mime) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: mime is NULL\n", __LINE__);
 		return print_error_no_mime(&file_path);
+	}
 
 	char *filename = get_filename(file_path);
 
