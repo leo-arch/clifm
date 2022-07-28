@@ -1003,7 +1003,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * height of the FZF window based on the amount of entries. This
 	 * specifies how many entries will be displayed at once */
 	size_t height = 0;
-	if (fzf_height_set == 0) {
+
+	if (fzf_height_set == 0 || tabmode == FZY_TAB) {
 		size_t max_height = set_fzf_max_win_height();
 		if (i + 1 > max_height)
 			height = max_height;
