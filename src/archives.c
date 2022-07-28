@@ -290,6 +290,7 @@ mount_iso(char *file)
 #if !defined(__linux__)
 	UNUSED(file);
 	fprintf(stderr, "mount: This feature is for Linux only\n");
+	return EXIT_FAILURE;
 #else
 	char *mountpoint = create_mountpoint(file);
 	if (!mountpoint)
