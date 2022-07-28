@@ -942,13 +942,12 @@ International System of Units (SI), instead of 1024 (Linux only)\
 
 #define CLIFM_COMMANDS "\
 \nBUILT-IN COMMANDS:\n\nFor a complete description of each of these \
-commands run 'cmd' (or press F2) or consult the manpage (F1).\n\n\
+commands run 'cmd' (or press F2) or consult the manpage (F1).\n\
 You can also try the interactive help plugin (it depends on FZF): just \
-enter 'ih', that's it.\n\n\
-It is also recommended to consult the project's wiki \
-(https://github.com/leo-arch/clifm/wiki)\n\n\
+enter 'ih', that's it.\n\
+Help topics are available. Type 'help <TAB>' to get a list of topics.\n\n\
 The following is just a brief list of available commands and possible \
-parameters.\n\n\
+parameters:\n\n\
  ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
  ;[CMD], :[CMD] (run CMD via the system shell)\n\
@@ -1083,12 +1082,16 @@ parameters.\n\n\
 NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in \
 most keyboards)\n"
 
+/*
 #define HELP_END_NOTE "Run the 'colors' or 'cc' command to see the list \
 of currently used color codes.\n\n\
 The color schemes file, just as the configuration and profile \
 files, allow you to customize colors, the prompt string, define \
 some prompt and profile commands, aliases, autocommands, and more.\n\n\
-For a full description consult the manpage and/or our Wiki (https://github.com/leo-arch/clifm/wiki)."
+For a full description consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)." */
+
+#define HELP_END_NOTE "For a full description consult the manpage and/or the \
+Wiki (https://github.com/leo-arch/clifm/wiki)."
 
 #define ASCII_LOGO "\
                             _______     _ \n\
