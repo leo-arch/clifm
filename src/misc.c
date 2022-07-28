@@ -1585,6 +1585,11 @@ handle_stdin(void)
 			}
 			/* Construct source and destiny files */
 
+			/* symlink(3) doesn't like file names ending with slash */
+			size_t slen = strlen(q);
+			if (slen > 0 && q[slen - 1] == '/')
+				q[slen - 1] = '\0';
+
 			/* Should we construct destiny file as full path or using only the
 			 * last path component (the file's basename)? */
 			char *tmp_file = (char *)NULL;
