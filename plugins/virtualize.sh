@@ -44,7 +44,7 @@ fi
 # 3. Replace tabs (first step) by spaces
 # 4. Remove remaining escape chars
 files="$(echo "$*" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g')"
-cmd="$term_cmd 'echo \"$files\" | $clifm_bin $clifm_opts'"
+cmd="$term_cmd 'echo \"$files\" | $clifm_bin $clifm_opts --no-restore-last-path'"
 
 eval "$cmd"
 
