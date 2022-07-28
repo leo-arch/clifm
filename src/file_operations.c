@@ -1561,6 +1561,7 @@ remove_file(char **args)
 int
 bulk_rename(char **args)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering bulk_rename\n", __LINE__);
 	if (!args || !args[0] || !args[1])
 		return EXIT_FAILURE;
 
@@ -1574,11 +1575,14 @@ bulk_rename(char **args)
 	else
 		snprintf(bulk_file, PATH_MAX - 1, "%s/%s", tmp_dir, TMP_FILENAME);
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running mkstemp(%s)\n", __LINE__, bulk_file);
 	int fd = mkstemp(bulk_file);
 	if (fd == -1) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: mkstemp(3) failed\n", __LINE__);
 		_err('e', PRINT_PROMPT, "br: mkstemp: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: mkstemp(3) returned: %s\n", __LINE__, bulk_file);
 
 	size_t i, arg_total = 0;
 	FILE *fp = (FILE *)NULL;
@@ -1649,14 +1653,20 @@ bulk_rename(char **args)
 	arg_total = i;
 	close(fd);
 
-	if (counter == 0) /* No valid file name */
+	if (counter == 0) { /* No valid file name */
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: No line written. Exiting from bulk_rename\n", __LINE__);
 		return EXIT_FAILURE;
 
+	}
+
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: written %d lines into the temp file\n", __LINE__, counter);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running open_fstream_r(%s)\n", __LINE__, bulk_file);
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "br: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: open_fstream_r succeded\n", __LINE__);
 
 	/* Store the last modification time of the bulk file. This time
 	 * will be later compared to the modification time of the same
@@ -1666,7 +1676,9 @@ bulk_rename(char **args)
 
 	/* Open the bulk file */
 	open_in_foreground = 1;
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: running open_file(%s)\n", __LINE__, bulk_file);
 	exit_status = open_file(bulk_file);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: open_file returned %d\n", __LINE__, exit_status);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "br: %s\n",
