@@ -592,7 +592,7 @@ open_fstream_r(char *name, int *fd)
 		return (FILE *)NULL;
 	}
 
-	return fp;	
+	return fp;
 }
 
 /* Create a file for writing. Return a file stream associated to a file

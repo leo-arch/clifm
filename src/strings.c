@@ -1764,7 +1764,7 @@ parse_input_str(char *str)
 				strcpy(substr[i], p);
 			}
 		}
-	
+
 		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
 		if (stdin_dir_ok == 1) {
 			struct stat a;

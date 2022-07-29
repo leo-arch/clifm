@@ -734,7 +734,7 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 static int
 launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int sudo)
 {
-	int ret = 0; 
+	int ret = 0;
 
 	if (*cmd) {
 		ret = launch_execve(*cmd, BACKGROUND, E_NOFLAG);
@@ -1419,6 +1419,11 @@ free_stuff(void)
 	free(quote_chars);
 	rl_clear_history();
 	rl_clear_visible_line();
+	/* These lines give 3 errors (invalid free) in Valgrind. However,
+	 * they do free some still reachable pointers
+	 * Memory will be freed by the OS anyway. Avoid errors */
+/*	Keymap km = rl_get_keymap();
+	rl_discard_keymap(km); */
 
 	/* Restore the color of the running terminal */
 	if (colorize == 1 && xargs.list_and_quit != 1)

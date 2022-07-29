@@ -412,7 +412,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	}
 
 	char *spath = *_path ? _path : tmp;
-	char *epath = (char *)NULL; 
+	char *epath = (char *)NULL;
 	if (*spath == '~')
 		epath = tilde_expand(spath);
 	else {

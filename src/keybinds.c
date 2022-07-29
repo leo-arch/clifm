@@ -385,7 +385,7 @@ rl_prepend_sudo(int count, int key)
 		s = (char *)xnmalloc(len + 1, sizeof(char));
 		sprintf(s, "%s ", DEF_SUDO_CMD);
 	}
-	
+
 	int p = rl_point;
 	if (*rl_line_buffer == *s
 	&& strncmp(rl_line_buffer, s, len) == 0) {

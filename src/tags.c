@@ -252,7 +252,7 @@ create_tags(char **args)
 
 	size_t i;
 	int exit_status = EXIT_SUCCESS;
-	
+
 	for (i = 2; args[i]; i++) {
 		char *p = strchr(args[i], '\\'), dir[PATH_MAX];
 		if (p) {
@@ -368,7 +368,7 @@ tag_file(char *name, char *tag)
 			free(p);
 			return EXIT_FAILURE;
 		}
-		new_tag = 1;	
+		new_tag = 1;
 	}
 	free(p);
 

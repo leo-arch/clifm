@@ -2706,7 +2706,7 @@ my_rl_completion(const char *text, int start, int end)
 					*r = '-';
 				}
 			}
-			
+
 			int n = atoi(text);
 			if (n == INT_MIN)
 				return (char **)NULL;
@@ -3050,7 +3050,7 @@ initialize_readline(void)
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 	if (!(flags & GUI) && getenv("CLIFM_FREEBSD_CONSOLE_SC"))
 		freebsd_sc_console = 1;
-#endif 
+#endif
 
 	return EXIT_SUCCESS;
 }

@@ -302,7 +302,7 @@ mount_iso(char *file)
 		free(mountpoint);
 		return EXIT_FAILURE;
 	}
-	
+
 	char *cmd[] = {sudo, "mount", "-o", "loop", file, mountpoint, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		free(mountpoint);

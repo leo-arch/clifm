@@ -448,7 +448,7 @@ get_reg_file_color(const char *filename, const struct stat *attr, int *free_colo
 static char *
 get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 {
-	char *color = no_c; 
+	char *color = no_c;
 
 	switch(attr->st_mode & S_IFMT) {
 	case S_IFDIR:
@@ -999,7 +999,7 @@ print_internal_cmd_suggestion(char *str, size_t len, const int print)
 
 	if (!p || p == str)
 		return check_builtins(str, len, print);
-	
+
 	*p = '\0';
 	if (!is_internal_c(str))
 		return NO_MATCH;
@@ -1411,7 +1411,7 @@ is_last_word(void)
 	char *p = strchr(rl_line_buffer + rl_point, ' ');
 	if (!p)
 		return lw;
-	
+
 	while (*(++p)) {
 		if (*p != ' ') {
 			lw = 0;

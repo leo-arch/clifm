@@ -36,7 +36,7 @@
 
 #define UNSAFE_CMD "Unsafe command. Consult the manpage for more information"
 
-char **env_bk = (char **)NULL; 
+char **env_bk = (char **)NULL;
 char **new_env = (char **)NULL;
 
 /* Unset environ: little implementation of clearenv(3), not available
