@@ -2274,18 +2274,8 @@ exec_cmd(char **comm)
 
 	/*    ############### BULK RENAME ##################     */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'r' && !comm[0][2])
-	|| strcmp(comm[0], "bulk") == 0)) {
-		if (!comm[1]) {
-			fprintf(stderr, "%s\n", _(BULK_USAGE));
-			return (exit_code = EXIT_SUCCESS);
-		}
-
-		if (IS_HELP(comm[1])) {
-			puts(_(BULK_USAGE));
-			return EXIT_SUCCESS;
-		}
+	|| strcmp(comm[0], "bulk") == 0))
 		exit_code = bulk_rename(comm);
-	}
 
 	/*      ################ SORT ##################     */
 	else if (*comm[0] == 's' && ((comm[0][1] == 't' && !comm[0][2])

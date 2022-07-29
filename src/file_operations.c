@@ -1561,8 +1561,10 @@ remove_file(char **args)
 int
 bulk_rename(char **args)
 {
-	if (!args || !args[0] || !args[1])
-		return EXIT_FAILURE;
+	if (!args || !args[1] || IS_HELP(args[1])) {
+		puts(_(BULK_USAGE));
+		return EXIT_SUCCESS;
+	}
 
 	log_function(NULL);
 
