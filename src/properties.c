@@ -745,9 +745,9 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	    light_mode ? "" : df_c, pad, "", df_c,
 	    trim ? tt_c : "", trim ? '~' : 0,
 
-		prop_fields.attr == 1 ? attr_s : "",
+		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
-		prop_fields.time == 1 ? time_s : "",
+		prop_fields.time != 0 ? time_s : "",
 		prop_fields.size == 1 ? size_s : "");
 #endif
 
