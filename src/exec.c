@@ -2277,7 +2277,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "bulk") == 0)) {
 		if (!comm[1]) {
 			fprintf(stderr, "%s\n", _(BULK_USAGE));
-			return (exit_code = EXIT_FAILURE);
+			return (exit_code = EXIT_SUCCESS);
 		}
 
 		if (IS_HELP(comm[1])) {
