@@ -1473,7 +1473,7 @@ create_virtual_dir(const int user_provided)
 		return EXIT_FAILURE;
 	}
 
-	char *cmd[] = {"mkdir", "-p", stdin_tmp_dir, NULL};
+	char *cmd[] = {"mkdir", "-p", "--", stdin_tmp_dir, NULL};
 	int ret = 0;
 	if ((ret = launch_execve(cmd, FOREGROUND, E_MUTE)) != EXIT_SUCCESS) {
 		if (user_provided == 1) {
@@ -1566,28 +1566,27 @@ handle_stdin(void)
 
 	/* Get substrings from buf */
 	char *p = buf, *q = buf;
+	size_t links_counter = 0;
 
 	while (*p) {
 		if (!*p || *p == '\n') {
 			*p = '\0';
 
-			/* Create symlinks (in tmp dir) to each valid file in
-			 * the buffer */
-
+			/* Create symlinks (in tmp dir) to each valid file in the buffer */
 			if (SELFORPARENT(q))
-				continue;
+				goto END;
 
-			/* If file does not exist */
 			struct stat attr;
 			if (lstat(q, &attr) == -1) {
 				_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, q, strerror(errno));
-				continue;
+				goto END;
 			}
+
 			/* Construct source and destiny files */
 
 			/* symlink(3) doesn't like file names ending with slash */
 			size_t slen = strlen(q);
-			if (slen > 0 && q[slen - 1] == '/')
+			if (slen > 1 && q[slen - 1] == '/')
 				q[slen - 1] = '\0';
 
 			/* Should we construct destiny file as full path or using only the
@@ -1603,7 +1602,7 @@ handle_stdin(void)
 				if (!tmp_file) {
 					_err('w', PRINT_PROMPT, "%s: %s: Error formatting file name\n",
 						PROGRAM_NAME, q);
-					continue;
+					goto END;
 				}
 				free_tmp_file = 1;
 			}
@@ -1632,15 +1631,30 @@ handle_stdin(void)
 				} else {
 					_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
 				}
+			} else {
+				links_counter++;
 			}
 
 			if (free_tmp_file == 1)
 				free(tmp_file);
 
+END:
 			q = p + 1;
 		}
 
 		p++;
+	}
+
+	if (links_counter == 0) { /* No symlink was created. Exit */
+		dup2(STDOUT_FILENO, STDIN_FILENO);
+		_err(0, NOPRINT_PROMPT, "%s: Empty file names buffer. Nothing to do\n", PROGRAM_NAME);
+		if (getenv("CLIFM_VT_RUNNING")) {
+			fprintf(stderr, "Press any key to continue... ");
+			xgetchar();
+		}
+		free(cwd);
+		free(buf);
+		exit(EXIT_FAILURE);
 	}
 
 	/* Make the virtual dir read only */
