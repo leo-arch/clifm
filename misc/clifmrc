@@ -323,7 +323,8 @@ SplashScreen=false
 #alias b='dh'
 # Replace the standard deselect command (ds) by the fzfdesel plugin
 #alias ds='**'
-
+# You can use this alias to quickly change to the current virtual directory
+#alias vtd='cd $CLIFM_VIRTUAL_DIR'
 
 #=====================================#
 #         7. PROMPT COMMANDS          #
