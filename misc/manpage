@@ -982,7 +982,7 @@ show \fBclifm\fR version details.
 .sp
 With no argument, the \fIws\fR command prints the list of workspaces and its corresponding paths, highlighting the current workspace. Use NUM to switch to workspace NUM, NAME to switch to the workspace named NAME, the plus sign (+) to switch to the next workspace, and the minus sign (-) to switch to the previous workspace. Four keyboard shortcuts are available to easily switch to any of the first four workspaces: \fBAlt-[1-4]\fR.
 .sp
-Every time an empty workspace is created, it starts in the path of the workspace from which it was invoked (in other words, in the current working directory).
+Every time an empty workspace is created, it starts in the path to the workspace from which it was invoked (in other words, in the current working directory).
 .sp
 Though by default workspaces are unnamed, you can name them wathever you like using the \fIWorkspaceNames\fR option in the configuration file.
 .TP
@@ -1950,7 +1950,7 @@ T}	Set image as wallpaper	wallpaper_setter.sh	feh, xloadimage, or hsetroot
 .TP
 NOTE: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to show files preview \fIBFG\fR requires \fBueberzug\fR to be installed or the Kitty protocol via the Kitty terminal). A configuration file (BFG.cfg, in the plugins directory itlsef) is provided to customize the previewer's behavior.
 .TP
-In addition to the built-in BFG previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR. To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path of the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
+In addition to the built-in BFG previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR. To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
 .TP
 NOTE 2: The \fIgit_status\fR plugin is not intended to be used as a normal plugin, that is, executed via an action name, but rather to be executed as a prompt command:
 
@@ -2122,7 +2122,7 @@ Let's suppose you have a tag named \fIwork\fR which contains ten tagged files, b
 .sp
  \fBp t:work<TAB>\fR
 
-The list of files tagged as \fIwork\fR will be displayed via FZF. Now just mark the two files you need using \fBTAB\fR, press \fBEnter\fR or \fBRight\fR, and the full path of both files will be inserted into the command line. So, '\fBp t:work\fR' will be replaced by '\fBp /path/to/work1.odt /path/to/work2.odt\fR'.
+The list of files tagged as \fIwork\fR will be displayed via FZF. Now just mark the two files you need using \fBTAB\fR, press \fBEnter\fR or \fBRight\fR, and the full path to both files will be inserted into the command line. So, '\fBp t:work\fR' will be replaced by '\fBp /path/to/work1.odt /path/to/work2.odt\fR'.
 
 .SH 16. VIRTUAL DIRECTORIES
 CliFM is able to read and list files from the standard input stream (STDIN). Each file in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
@@ -2133,7 +2133,7 @@ The user can operate on these files as if they were any other regular file, sinc
 .sp
 Once in the virtual directory, files are listed by default using only the base name of the target file. For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, this file will be listed as \fImyfile.tar.gz\fR. If this file already exists in the virtual directory (because there is another target file with the same base name, say, \fI/home/user/Documents/tars/myfile.tar.gz\fR), a random six digits suffix will be appended to the file (for instance, \fImyfile.tar.gz.12Rgj6\fR).
 .sp
-Since this listing mode does not allow the user to get a clear idea of the actual location of each listed file, a keybinding (by default \fIAlt-w\fR) is available to toggle short (base names only) and long file names: in this latter case, file names are listed using the full path of the target file, replacing slashes by colons (:). For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, it will be listed in the virtual directory as \fIhome:user:Downloads:myfile.tar.gz\fR.
+Since this listing mode does not allow the user to get a clear idea of the actual location of each listed file, a keybinding (by default \fIAlt-w\fR) is available to toggle short (base names only) and long file names: in this latter case, file names are listed using the full path to the target file, replacing slashes by colons (:). For example, if the target file is \fI/home/user/Downloads/myfile.tar.gz\fR, it will be listed in the virtual directory as \fIhome:user:Downloads:myfile.tar.gz\fR.
 .sp
 If you prefer the long names approach, you can use the \fI--virtual-dir-full-paths\fR command line flag.
 .sp
@@ -2218,7 +2218,7 @@ The information stored in the database, always per directory, is:
  a) Number of visits
  b) Date of first visit (seconds since the Unix epoch)
  c) Date of the last visit
- d) The full path of each visited directory
+ d) The full path to each visited directory
 .sp
 With this information it is possible to construct a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this kind of algorithm is often called a \fBfrecency\fR algorithm).
 .sp
@@ -2285,13 +2285,13 @@ A quoted list of options to be passed to FZF (if used for TAB completion)
 Except when running in stealth mode, \fBclifm\fR sets the following environment variables:
 .TP
 .B CLIFM
-This variable is set to the path of the configuration directory. By inspecting this variable other programs can find out if they were spawned by \fBclifm\fR. It can also be used to quickly jump into the configuration directory: 'cd $CLIFM' or just '$CLIFM'
+This variable is set to the path to the configuration directory. By inspecting this variable other programs can find out if they were spawned by \fBclifm\fR. It can also be used to quickly jump into the configuration directory: 'cd $CLIFM' or just '$CLIFM'
 .TP
 .B CLIFM_PLUGINS_HELPER
-Set to the full path of the plugins-helper script used by many plugins.
+Set to the full path to the plugins-helper script used by many plugins.
 .TP
 .B CLIFM_PROFILE
-This variable is set to the current profile of \fBclifm\fR (if using two or more instances of \fBclifm\fR under different profiles, the last onw wil be used). Specially useful to develop \fBclifm\fR plugins on a per profile basis.
+This variable is set to the current profile of \fBclifm\fR (if using two or more instances of \fBclifm\fR under different profiles, the last one will be used). Specially useful to develop \fBclifm\fR plugins on a per profile basis.
 .TP
 .B CLIFM_SELFILE
 The path to the current selection file.
@@ -2300,12 +2300,11 @@ The path to the current selection file.
 Set to 1 if running colorless (via the \fBNO_COLOR\fR or \fBCLIFM_NO_COLOR\fR environment variables, or the \fI--no-color\fR command line option).
 .TP
 .B CLIFM_BUS
-This variable contains the path of a pipe by means of which plugins can talk to \fBclifm\fR. See the \fBPLUGINS\fR section for more information.
-.TP
+This variable contains the path to a pipe by means of which plugins can talk to \fBclifm\fR. See the \fBPLUGINS\fR section for more information..TP
 .B CLIFM_VIRTUAL_DIR
 This variable is set to the path to the currently used virtual directory only if (and while) the virtual directory function is exectued. See the \fBVIRTUAL DIRECTORIES\fR section above.
 .TP
-If \fIPromptStyle\fR is set to "custom" in the configuration file, the following variables are exported to the environment to be used, if needed, by your custom prompt:
+If \fINotifications\fR is set to \fIfalse\fR for the current prompt, the following variables are exported to the environment to be used, if needed, by your custom prompt:
 .TP
 .B CLIFM_STAT_SEL
 Current amount of selected files
