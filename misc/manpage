@@ -616,7 +616,7 @@ NOTE: On POSIX compliant systems, like NetBSD, the \fIr\fR command amounts to \f
 \fIadvmv\fR is also supported to move files (to add a progress bar to \fImv\fR). Use the \fImvCmd\fR option in the configuration file to choose this alternative implementation of \fImv\fR. In this case, the command used is \fIadvmv\ \-gi\fR.
 
 .TP
-.B cc, colors
+.B colors
 print the color codes list currently used for files listing.
 .TP
 .B cd \fR[\fIELN/DIR\fR]
