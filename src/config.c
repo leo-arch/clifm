@@ -2352,6 +2352,13 @@ create_trash_dirs(void)
 {
 	struct stat attr;
 	if (stat(trash_dir, &attr) == -1) {
+		if (xargs.stealth_mode == 1) {
+			_err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled\n"),
+				PROGRAM_NAME, trash_dir, strerror(errno));
+			trash_ok = 0;
+			return;
+		}
+
 		char *trash_files = (char *)NULL;
 		trash_files = (char *)xnmalloc(strlen(trash_dir) + 7, sizeof(char));
 
