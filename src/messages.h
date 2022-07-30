@@ -154,7 +154,7 @@ Examples:\n\
 
 #define COLORS_USAGE "Print the list of currently used color codes\n\
 Usage:\n\
-  cc, colors"
+  colors"
 
 #define COLUMNS_USAGE "Set columned list of files on-off\n\
 Usage:\n\
@@ -963,7 +963,7 @@ parameters:\n\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  br, bulk ELN/FILE...\n\
  c, l [e, edit], m, md, r (copy, link, move, makedir, and remove)\n\
- cc, colors\n\
+ colors\n\
  cd [ELN/DIR]\n\
  cl, columns [on, off]\n\
  cmd, commands\n\

@@ -1200,6 +1200,35 @@ remove_virtual_dir(void)
 	unsetenv("CLIFM_VIRTUAL_DIR");
 }
 
+/*
+#if defined(__clang__)
+// Free the storage associated with MAP
+static void
+xrl_discard_keymap(Keymap map)
+{
+	if (map == 0)
+		return;
+
+	int i;
+	for (i = 0; i < KEYMAP_SIZE; i++) {
+		switch (map[i].type) {
+		case ISFUNC: break;
+
+		case ISKMAP:
+			// GCC (but not clang) complains about this if compiled with -pedantic
+			// See discussion here: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=83584
+			xrl_discard_keymap((Keymap)map[i].function);
+			break;
+
+		case ISMACR:
+			// GCC (not clang) complains about this one too
+			free((char *)map[i].function);
+			break;
+		}
+	}
+}
+#endif // __clang__ */
+
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 void
@@ -1418,12 +1447,13 @@ free_stuff(void)
 	free(term);
 	free(quote_chars);
 	rl_clear_history();
-	rl_clear_visible_line();
-	/* These lines give 3 errors (invalid free) in Valgrind. However,
-	 * they do free some still reachable pointers
-	 * Memory will be freed by the OS anyway. Avoid errors */
-/*	Keymap km = rl_get_keymap();
-	rl_discard_keymap(km); */
+//	rl_clear_visible_line();
+
+/*
+#if defined(__clang__)
+	Keymap km = rl_get_keymap();
+	xrl_discard_keymap(km);
+#endif // __clang__ */
 
 	/* Restore the color of the running terminal */
 	if (colorize == 1 && xargs.list_and_quit != 1)

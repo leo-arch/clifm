@@ -385,7 +385,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"br", 2},
 	{"bulk", 4},
 	{"c", 1}, //"cp",
-	{"cc", 2},
+//	{"cc", 2}, /* Remove to avoid conflicts with /bin/cc */
 	{"colors", 6},
 	{"cd", 2},
 	{"cl", 2},
