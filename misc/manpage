@@ -2302,6 +2302,9 @@ Set to 1 if running colorless (via the \fBNO_COLOR\fR or \fBCLIFM_NO_COLOR\fR en
 .B CLIFM_BUS
 This variable contains the path of a pipe by means of which plugins can talk to \fBclifm\fR. See the \fBPLUGINS\fR section for more information.
 .TP
+.B CLIFM_VIRTUAL_DIR
+This variable is set to the path to the currently used virtual directory only if (and while) the virtual directory function is exectued. See the \fBVIRTUAL DIRECTORIES\fR section above.
+.TP
 If \fIPromptStyle\fR is set to "custom" in the configuration file, the following variables are exported to the environment to be used, if needed, by your custom prompt:
 .TP
 .B CLIFM_STAT_SEL
