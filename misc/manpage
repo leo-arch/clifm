@@ -2180,6 +2180,8 @@ Of course, individual files can also be used:
 .sp
 Once executed, the vt plugin will launch a new instance of CliFM (on a new terminal emulator window) where you can operate on the specified files as if they were just normal files. Once done, quit this new instance (via the \fIq\fR command) to return to the primary instance of CliFM.
 .sp
+If navigating the file system, you can quickly go back to the virtual directory using the \fI\-d\fR option: \fIvt -d\fR. The navigation keys (see the \fBKEYBOARD SHORTCUTS\fR section above) and the \fBCLIFM_VIRTUAL_DIR\fR environment variable are also available.
+.sp
 \fBNote\fR: By default, the terminal emulator used is \fBxterm\fR(1), but can easily be customized by just editing the plugin script (\fIvirtualize.sh\fR).
 
 .SH 17. NOTE ON SPEED
