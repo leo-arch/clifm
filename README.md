@@ -181,7 +181,7 @@ For a detailed explanation of each of these features, follow the corresponding l
   - `--std-tab-comp` option renamed to `--stdtab` (to match `--fzytab` and `--smenutab` options)
   - **NEW**: [Customize properties fields in long view mode](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details) 
   - **NEW**: [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
-  - **NEW**: [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories). Experimental
+  - **NEW**: [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories)
   - **NEW**: [A better organized configuration file](https://github.com/leo-arch/clifm/blob/master/misc/clifmrc)
   - **NEW**: [Improved logs system](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status)
   - **NEW**: [smenu support for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#a-different-alternative-smenu)
