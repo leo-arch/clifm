@@ -2423,7 +2423,7 @@ init_config(void)
 	if (xargs.stealth_mode == 1) {
 		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Running in stealth mode: "
 			"persistent selection, bookmarks, jump database and directory history, "
-			"just as logs and configuration files, are disabled.\n"), PROGRAM_NAME);
+			"just as plugins, logs and configuration files, are disabled.\n"), PROGRAM_NAME);
 		config_ok = 0;
 		check_colors();
 		return;

@@ -1589,7 +1589,8 @@ handle_stdin(void)
 			goto FREE_N_EXIT;
 	}
 
-	setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
+	if (xargs.stealth_mode != 1)
+		setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
 
 	/* Get CWD: we need it to prepend it to relative paths */
 	char *cwd = (char *)NULL;
