@@ -1651,8 +1651,11 @@ bulk_rename(char **args)
 	arg_total = i;
 	close(fd);
 
-	if (counter == 0) /* No valid file name */
+	if (counter == 0) { /* No valid file name */
+		if (unlinkat(fd, bulk_file, 0) == -1)
+			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
+	}
 
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
@@ -1673,9 +1676,8 @@ bulk_rename(char **args)
 	if (exit_status != EXIT_SUCCESS) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "br: %s\n",
 			errno != 0 ? strerror(errno) : "Error opening temporary file");
-		if (unlinkat(fd, bulk_file, 0) == -1) {
+		if (unlinkat(fd, bulk_file, 0) == -1)
 			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
-		}
 		close_fstream(fp, fd);
 		return EXIT_FAILURE;
 	}
