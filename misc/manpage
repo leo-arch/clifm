@@ -1806,7 +1806,11 @@ You can set \fBSuggestFiletypeColor\fR to "true" in the configuration file to us
 \fBclifm\fR includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
 
 .SH 13. PLUGINS
-Plugins are just scripts or programs (written in any language) able to add, extend or improve \fBclifm\fR functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
+Plugins are just scripts or programs (written in any language) aimed to add, extend or improve CliFM's functionalities. They are linked to actions names defined in a dedicated configuration file (\fIXDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.cfm\fR): entering the action name immediately executes the corresponding plugin.
+
+\fBNote\fR: In \fIstealth mode\fR, since access to configuration files is not allowed, plugins are disabled.
+
+Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
 
 A convenient helper script is provided to get a consistent look across all plugins, specially those running FZF. This helper script is located in \fIDATADIR/clifm/plugins/plugins-helper\fR, but it will be overridden by \fIXDG_CONFIG_HOME/clifm/plugins/plugins-helper\fR if found. The location of this file is set by \fBclifm\fR itself in the \fBCLIFM_PLUGINS_HELPER\fR environment variable to be used by plugins. Source the file and use any of the functions and variables provided by it to write a new FZF plugin:
 
@@ -1818,13 +1822,13 @@ A convenient helper script is provided to get a consistent look across all plugi
     # shellcheck source=/dev/null
     . "$CLIFM_PLUGINS_HELPER"
 
-Plugins can talk to CliFM via a dedicated pipe created for this purpose and exposed via an environment variable (\fBCLIFM_BUS\fR). Just write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the open function, changing the current directory to the new path, if a directory, or opening it with the resource opener, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
+Plugins can talk to CliFM via a dedicated pipe created for this purpose and exposed via an environment variable (\fBCLIFM_BUS\fR). Just write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the \fIopen\fR function, changing the current directory to the new path, if a directory, or opening it with the \fIresource opener\fR, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
 
     \'echo "/tmp" > "$CLIFM_BUS"\' tells \fBclifm\fR to change the current directory to /tmp
 
     \'echo "s *.png" > "$CLIFM_BUS"\' makes \fBclifm\fR select all files in the current directory ending with ".png"
 
-The pipe (CLIFM_BUS) is deleted immediately after the execution of its content and recreated before running any other plugin.
+The pipe (\fBCLIFM_BUS\fR) is deleted immediately after the execution of its content and recreated before running any other plugin.
 .sp
 This is a list of available plugins:
 .TS
@@ -1948,11 +1952,13 @@ T}	Set image as wallpaper	wallpaper_setter.sh	feh, xloadimage, or hsetroot
   \fBfile info\fR: exiftool, mediainfo, or file
 
 .TP
-NOTE: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to show files preview \fIBFG\fR requires \fBueberzug\fR to be installed or the Kitty protocol via the Kitty terminal). A configuration file (BFG.cfg, in the plugins directory itlsef) is provided to customize the previewer's behavior.
+To run the \fIpager.sh\fR plugin, for example, you only need to enter the corresponding action name, in this case \fIgg\fR. In case of need, all plugins provide a \fI-h,--help\fR switch for a brief usage description.
+.TP
+\fBNote\fR: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to show files preview \fIBFG\fR requires \fBueberzug\fR to be installed or the Kitty protocol via the Kitty terminal). A configuration file (BFG.cfg, in the plugins directory itlsef) is provided to customize the previewer's behavior.
 .TP
 In addition to the built-in BFG previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR. To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
 .TP
-NOTE 2: The \fIgit_status\fR plugin is not intended to be used as a normal plugin, that is, executed via an action name, but rather to be executed as a prompt command:
+\fBNote 2\fR: The \fIgit_status\fR plugin is not intended to be used as a normal plugin, that is, executed via an action name, but rather to be executed as a prompt command:
 
  promptcmd /usr/share/clifm/plugins/git_status.sh
 .TP
