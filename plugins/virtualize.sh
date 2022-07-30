@@ -17,8 +17,14 @@ clifm_opts=""
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Create a virtual directory for a set of files\n\
-Usage: %s FILE... \n" "$name" >&2
+	printf "Create a virtual directory for a set or collection of files\n\
+Usage: %s [-d] [FILE...] \n\
+\n\
+Examples:\n\
+  'vt sel'          Send all selected files to a virtual directory\n\
+  'vt file1 file2'  Send file1 and file2 to a virtual directory\n\
+  'vt -d'           If navigating the file system, use the -d option to quickly go back to the virtual directory\n" "$name" >&2
+
 	exit 0
 fi
 
@@ -28,7 +34,19 @@ if ! type sed > /dev/null 2>&1; then
 fi
 
 if [ -n "$CLIFM_VT_RUNNING" ]; then
+	if [ -n "$1" ] && [ "$1" = "-d" ]; then
+		if [ -n "$CLIFM_VIRTUAL_DIR" ]; then
+			echo "$CLIFM_VIRTUAL_DIR" > "$CLIFM_BUS"
+			exit 0
+		fi
+	fi
+
 	printf "clifm: Only one virtual directory can be created at a time\n" >&2
+	exit 1
+fi
+
+if [ -n "$1" ] && [ "$1" = "-d" ]; then
+	printf "clifm: No virtual directory found\n" >&2
 	exit 1
 fi
 
@@ -38,7 +56,6 @@ if [ -n "$CLIFM_VIRTUAL_DIR" ]; then
 	clifm_opts="$clifm_opts --virtual-dir=\"$CLIFM_VIRTUAL_DIR\""
 fi
 
-# This is what sed does:
 # 1. Replace escaped spaces by tabs
 # 2. Replace non-escaped spaces by new line chars
 # 3. Replace tabs (first step) by spaces
