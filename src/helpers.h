@@ -395,7 +395,12 @@ extern int watch;
 
 #define __MB_LEN_MAX 16
 
-#define TMP_FILENAME ".clifmXXXXXX"
+/* OpenBSD recommends the use of ten trailing X's. See mkstemp(3) */
+#if defined(__OpenBSD__)
+# define TMP_FILENAME ".tempXXXXXXXXXX"
+#else
+# define TMP_FILENAME ".tempXXXXXX"
+#endif /* __OpenBSD__ */
 
 #ifndef P_tmpdir
 # define P_tmpdir "/tmp"
