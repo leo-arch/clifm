@@ -2353,8 +2353,9 @@ create_trash_dirs(void)
 	struct stat attr;
 	if (stat(trash_dir, &attr) == -1) {
 		if (xargs.stealth_mode == 1) {
-			_err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled\n"),
-				PROGRAM_NAME, trash_dir, strerror(errno));
+			_err('w', PRINT_PROMPT, _("%s: %s: %s. Trash function disabled. "
+				"If needed, create the directory manually and restart %s.\n"),
+				PROGRAM_NAME, trash_dir, strerror(errno), PROGRAM_NAME);
 			trash_ok = 0;
 			return;
 		}
