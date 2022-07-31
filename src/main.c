@@ -1156,6 +1156,8 @@ main(int argc, char *argv[])
 	load_pinned_dir();
 	load_prompts();
 
+	char *ptr = get_cmd_path("nvim");
+	free(ptr);
 	/* # 2. MAIN PROGRAM LOOP # */
 	run_main_loop();
 

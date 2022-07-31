@@ -794,37 +794,48 @@ count_dir(const char *dir, int pop)
 char *
 get_cmd_path(const char *cmd)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering get_cmd_path\n", __LINE__);
 	errno = 0;
 	if (!cmd || !*cmd) {
 		errno = EINVAL;
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: cmd is NULL or empty. Returning NULL\n", __LINE__);
 		return (char *)NULL;
 	}
 
 	char *cmd_path = (char *)NULL;
 
 	if (*cmd == '~') {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: cmd is \"~*\"\n", __LINE__);
 		char *p = tilde_expand(cmd);
 		if (p && access(p, X_OK) == 0)
 			cmd_path = savestring(p, strlen(p));
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: get_cmd_path returned: %s\n", __LINE__, cmd_path ? cmd_path : "NULL");
 		return cmd_path;
 	}
 
 	if (*cmd == '/') {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: cmd is absolute path\n", __LINE__);
 		if (access(cmd, X_OK) == 0)
 			cmd_path = savestring(cmd, strlen(cmd));
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: get_cmd_path returned: %s\n", __LINE__, cmd_path ? cmd_path : "NULL");
 		return cmd_path;
 	}
 
 	cmd_path = (char *)xnmalloc(PATH_MAX + 1, sizeof(char));
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: testing paths in PATH\n", __LINE__);
 	size_t i;
 	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
 	/* Append cmd to each path and check if it exists and is executable */
 		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i], cmd); /* NOLINT */
-		if (access(cmd_path, X_OK) == 0)
+		if (access(cmd_path, X_OK) == 0) {
+			_err(0, PRINT_PROMPT, "DEBUG: %zu: get_cmd_path returned: %s\n", __LINE__, cmd_path ? cmd_path : "NULL");
 			return cmd_path;
+		}
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: access(%s) failed\n", __LINE__, cmd_path ? cmd_path : "NULL");
 	}
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: get_cmd_path returned: NULL\n", __LINE__);
 	errno = ENOENT;
 	free(cmd_path);
 	return (char *)NULL;
