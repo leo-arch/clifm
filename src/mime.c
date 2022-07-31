@@ -485,8 +485,7 @@ mime_import(char *file)
 	    "/usr/share/applications/mimeapps.list",
 	    "/etc/xdg/mimeapps.list", NULL};
 
-	/* Check each mimeapps.list file and store its associations into
-	 * FILE */
+	/* Check each mimeapps.list file and store its associations into FILE */
 	size_t i;
 	int mime_defs = 0;
 
@@ -507,7 +506,7 @@ mime_import(char *file)
 				continue;
 			}
 
-			if (da_found) {
+			if (da_found == 1) {
 				if (*line == '[')
 					break;
 				if (*line == '#' || *line == '\n')
@@ -530,15 +529,15 @@ mime_import(char *file)
 	free(config_path);
 	free(local_path);
 
-	if (mime_defs == 0) {
+	if (mime_defs == 0)
 		fprintf(stderr, _("mime: Nothing was imported. No MIME definition found\n"));
-	}
 
 	/* Make sure there is an entry for text/plain files, so that at least
 	 * 'mm edit' will work */
-	fputs("X:text/plain=nano;vim;vi;emacs;ed;vis;micro;kakoune;"
+
+	fputs("X:text/plain=nano;vim;vi;emacs;ed;micro;kakoune;"
 		  "gedit;kate;pluma;mousepad;leafpad;fetchpad\n"
-		  "!X:text/plain=nano;vim;vi;emacs;ed;vis;micro;kakoune\n",
+		  "!X:text/plain=nano;vim;vi;emacs;ed;micro;kakoune\n",
 		  mime_fp);
 
 	fclose(mime_fp);
