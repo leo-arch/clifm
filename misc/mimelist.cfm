@@ -37,6 +37,12 @@
 # Replace 'TERM' and 'APP' by the corresponding values. The -e option
 # might vary depending on the terminal emulator used (TERM)
 
+# Note on graphical applications: If the opening application is already
+# running, the file will be opened, usually in a new tab, and CliFM won't
+# wait for the file to be closed (because the procecss already returned).
+# To avoid this, instruct the application to run a new instance. For example:
+# geany -i, gedit -s, kate -n, pluma --new-window, and so on.
+
 # To silence STDERR and/or STDOUT use !E and !O respectivelly (they could
 # be used together). Examples:
 # Silence STDERR only and run in the foreground:
