@@ -762,7 +762,7 @@ This is \fILira\fR, \fBclifm\fR's resource opener. The \fIinfo\fR option prints 
 .sp
 The \fIedit\fR option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running \fImm\ info\ FILE\fR), and then add a value for it to the MIME list file using the \fIedit\fR option (\fImm\ edit\fI or F6). Check the \fBRESOURCE OPENER\fR section below for information about the mimelist file syntax.
 .sp
-Finally, via the \fIimport\fR option \fBclifm\fR will try to import MIME definitions from the system looking for \fImimeapps.list\fR files in those paths specified by the Freedesktop specification (see \fIhttps://specifications.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html\fR). If at least one MIME definition is successfuly imported, a backup of the old \fImimelist.cfm\fR file will be stored as \fImimelist.cfm.YYYYMMDDHHMMSS\fR. Otherwise, no change will be made.
+Finally, via the \fIimport\fR option \fBclifm\fR will try to import MIME associations from the system looking for \fImimeapps.list\fR files in those paths specified by the Freedesktop specification (see \fIhttps://specifications.freedesktop.org/mime-apps-spec/mime-apps-spec-latest.html\fR). If at least one MIME association is successfuly imported, it will be stored as \fImimelist.cfm.XXXXXX\fR (where XXXXXX is a random six digits alphanumerical string). You can add these new associations to your mimelist file using the \fImime edit\fR command.
 .TP
 .B mp, mountpoints
 list available mountpoints and change the current working directory to the selected mountpoint.
