@@ -2218,6 +2218,7 @@ get_cdpath(void)
 size_t
 get_path_env(void)
 {
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering get_path_env\n", __LINE__);
 	size_t i = 0;
 	/* Get the value of the PATH env variable */
 	char *path_tmp = (char *)NULL;
@@ -2228,23 +2229,31 @@ get_path_env(void)
 	 * a secure source */
 	if (xargs.secure_cmds == 1 || xargs.secure_env == 1
 	|| xargs.secure_env_full == 1) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: secure cmds/env enabled\n", __LINE__);
 		malloced_ptr = 1;
 #ifdef _PATH_STDPATH
 		ptr = savestring(_PATH_STDPATH, strlen(_PATH_STDPATH));
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: ptr is: %s\n", __LINE__, ptr ? ptr : "NULL");
 #else
-		size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-		char *p = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
-		confstr(_CS_PATH, p, n);               /* Get value */
+		size_t s = confstr(_CS_PATH, NULL, 0); /* Get value's size */
+		char *p = (char *)xnmalloc(s, sizeof(char)); /* Allocate space */
+		confstr(_CS_PATH, p, s);               /* Get value */
 		ptr = p;
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: ptr is: %s\n", __LINE__, ptr ? ptr : "NULL");
 #endif
 	} else {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: secure cmds/env is disabled\n", __LINE__);
 		ptr = getenv("PATH");
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: ptr is: %s\n", __LINE__, ptr ? ptr : "NULL");
 	}
 
-	if (!ptr)
+	if (!ptr) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: ptr is NULL. Returning 0\n", __LINE__);
 		return 0;
+	}
 
 	if (!*ptr) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: ptr is empty. Returning 0\n", __LINE__);
 		if (malloced_ptr == 1)
 			free(ptr);
 		return 0;
@@ -2255,11 +2264,16 @@ get_path_env(void)
 	else
 		path_tmp = savestring(ptr, strlen(ptr));
 
-	if (!path_tmp)
+	if (!path_tmp) {
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: path_tmp is NULL. Returning 0\n", __LINE__);
 		return 0;
+	}
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: path_tmp is: %s\n", __LINE__, path_tmp);
 
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: printing values in PATH\n", __LINE__);
 	/* Get each path in PATH */
 	size_t n = 0, len = 0;
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: entering for loop\n", __LINE__);
 	for (i = 0; path_tmp[i]; i++) {
 		/* Store path in PATH in a tmp buffer */
 		char buf[PATH_MAX];
@@ -2269,6 +2283,7 @@ get_path_env(void)
 			i++;
 		}
 		buf[len] = '\0';
+		_err(0, PRINT_PROMPT, "DEBUG: %zu: value %zu: %s\n", __LINE__, n, buf);
 
 		/* Make room in paths for a new path */
 		paths = (char **)xrealloc(paths, (n + 1) * sizeof(char *));
@@ -2279,7 +2294,9 @@ get_path_env(void)
 		if (!path_tmp[i])
 			break;
 	}
-
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: leaving for loop\n", __LINE__);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: get_path_env returned: %d\n", __LINE__, n);
+	_err(0, PRINT_PROMPT, "DEBUG: %zu: leaving get_path_env\n", __LINE__);
 	free(path_tmp);
 	return n;
 }
