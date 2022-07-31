@@ -84,14 +84,34 @@ if [ -n "$1" ] && ! [ -d "$1" ]; then
 	exit 1
 fi
 
+
 dir="${1:-.}"
+
+# The find command below fails when file names contain single quotes
+# Let's warn the user
+SQF="$($FIND "$dir" -type f -name "*'*")"
+if [ -n "$SQF" ]; then
+#if $FIND "$dir" -type f -name "*'*"; then
+	printf "Warning: Some files in this directory contain single quotes in their names.\n\
+Rename them or they will be ignored.\n\n\
+TIP: You can use the 'br' command to rename them in bulk:\n\
+  s *%c'*\n\
+  br sel\n\n\
+Ignore these files and continue? [y/N] " '\\'
+	read -r answer
+	if [ "$answer" != "y" ] && [ "$answer" != "Y" ]; then
+		exit 0
+	fi
+	echo ""
+fi
+
 EDITOR="${EDITOR:-nano}"
 TMPDIR="${TMPDIR:-/tmp}"
 tmp_file=$(mktemp "$TMPDIR/.${me}XXXXXX")
 size_digits=12
 
 printf "\
-## This is a list of all duplicates found.
+## This is a list of all duplicates found (if empty, just exit).
 ## Comment out the files you want to remove (lines starting with double number
 ## sign (##) are ignored.
 ## Save and close this file to remove commented files (deletion approval will
@@ -102,7 +122,7 @@ printf "\
 # shellcheck disable=SC2016
 $FIND "$dir" -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | $UNIQ -w"${size_digits}" -D \
 | sed -e "s/^ \{0,12\}\([0-9]\{0,12\}\) \(.*\)\$/printf '%s %s\\\n' \"\$($MD5 '\2')\" 'd\1'/" \
-| tr '\n' '\0' | xargs -0 -n1 -r sh -c | sort | { $UNIQ -w32 --all-repeated=separate; echo; } \
+| tr '\n' '\0' | xargs -0 -n1 -r sh -c 2>/dev/null | sort | { $UNIQ -w32 --all-repeated=separate; echo; } \
 | sed -ne 'h
 s/^\(.\{32\}\).* d\([0-9]*\)$/## md5sum: \1 size: \2 bytes/p
 g
@@ -123,7 +143,8 @@ if [ "$time_pre" = "$time_post" ]; then
 	exit 0
 fi
 
-printf "Remove commented files? [y/N] "
+printf "Note: If you answer is yes, you will be given the option to remove them interactively\n\
+Remove commented files? [y/N] "
 read -r answer
 
 if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
@@ -132,7 +153,7 @@ else
 	exit 0
 fi
 
-printf "Remove forcefully or interactively? [f/I] "
+printf "Remove files forcefully or interactively? [f/I] "
 read -r force
 
 if [ "$force" = "f" ] || [ "$force" = "F" ]; then
