@@ -1103,7 +1103,7 @@ join_and_run(char **args, char *name)
 	if (!args[1])
 		return run_cmd_noargs(args[0], name);
 
-	/* Application name plus paramters */
+	/* Application name plus parameters */
 	return run_cmd_plus_args(args, name);
 }
 
