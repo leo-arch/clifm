@@ -2232,9 +2232,9 @@ get_path_env(void)
 #ifdef _PATH_STDPATH
 		ptr = savestring(_PATH_STDPATH, strlen(_PATH_STDPATH));
 #else
-		size_t n = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-		char *p = (char *)xnmalloc(n, sizeof(char)); /* Allocate space */
-		confstr(_CS_PATH, p, n);               /* Get value */
+		size_t s = confstr(_CS_PATH, NULL, 0); /* Get value's size */
+		char *p = (char *)xnmalloc(s, sizeof(char)); /* Allocate space */
+		confstr(_CS_PATH, p, s);               /* Get value */
 		ptr = p;
 #endif
 	} else {

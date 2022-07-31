@@ -440,21 +440,21 @@ get_mime(char *file)
 }
 #endif /* !_NO_MAGIC */
 
-/* Import MIME definitions from the system and store them into FILE.
- * Returns the amount of definitions found, if any, or -1 in case of error
+/* Import MIME associations from the system and store them into FILE.
+ * Returns the amount of associations found, if any, or -1 in case of error
  * or no association found */
 static int
 mime_import(char *file)
 {
 #if defined(__HAIKU__)
-	fprintf(stderr, "mime: Importing MIME definitions is not supported on Haiku\n");
+	fprintf(stderr, "mime: Importing MIME associations is not supported on Haiku\n");
 	return (-1);
 #elif defined(__APPLE__)
-	fprintf(stderr, "mime: Importing MIME definitions is not supported on MacOS\n");
+	fprintf(stderr, "mime: Importing MIME associations is not supported on MacOS\n");
 	return (-1);
 #endif
-	/* If not in X, exit */
-	if (!(flags & GUI)) {
+
+	if (!(flags & GUI)) { /* Not in X, exit */
 		fprintf(stderr, _("mime: Nothing was imported. No graphical environment found\n"));
 		return (-1);
 	}
@@ -464,7 +464,7 @@ mime_import(char *file)
 		return (-1);
 	}
 
-	/* Open the local MIME file */
+	/* Open the new mimelist file */
 	FILE *mime_fp = fopen(file, "w");
 	if (!mime_fp) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mime: fopen: %s: %s\n", file, strerror(errno));
@@ -498,15 +498,16 @@ mime_import(char *file)
 		size_t line_size = 0;
 		char *line = (char *)NULL;
 		/* Only store associations in the "Default Applications" section */
-		int da_found = 0;
+		int header_found = 0;
 
 		while (getline(&line, &line_size, sys_mime_fp) > 0) {
-			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
-				da_found = 1;
+			if (!header_found && (strncmp(line, "[Default Applications]", 22) == 0
+			|| strncmp(line, "[Added Associations]", 20) == 0)) {
+				header_found = 1;
 				continue;
 			}
 
-			if (da_found == 1) {
+			if (header_found == 1) {
 				if (*line == '[')
 					break;
 				if (*line == '#' || *line == '\n')
@@ -530,15 +531,7 @@ mime_import(char *file)
 	free(local_path);
 
 	if (mime_defs == 0)
-		fprintf(stderr, _("mime: Nothing was imported. No MIME definition found\n"));
-
-	/* Make sure there is an entry for text/plain files, so that at least
-	 * 'mm edit' will work */
-
-	fputs("X:text/plain=nano;vim;vi;emacs;ed;micro;kakoune;"
-		  "gedit;kate;pluma;mousepad;leafpad;fetchpad\n"
-		  "!X:text/plain=nano;vim;vi;emacs;ed;micro;kakoune\n",
-		  mime_fp);
+		fprintf(stderr, _("mime: Nothing was imported. No MIME association found\n"));
 
 	fclose(mime_fp);
 	return mime_defs;
@@ -1366,29 +1359,19 @@ mime_open_url(char *url)
 static int
 import_mime(void)
 {
-	time_t rawtime = time(NULL);
-	struct tm tm;
-	localtime_r(&rawtime, &tm);
-	char date[64];
-	strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
-
-	char suffix[68];
-	snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
-	    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
-
+	char *suffix = gen_rand_str(6);
 	char new[PATH_MAX];
-	snprintf(new, PATH_MAX - 1, "%s.%s", mime_file, suffix);
-	rename(mime_file, new);
+	snprintf(new, sizeof(new), "%s.%s", mime_file, suffix ? suffix : "5i0TM#");
+	free(suffix);
 
-	int mime_defs = mime_import(mime_file);
+	int mime_defs = mime_import(new);
 	if (mime_defs > 0) {
-		printf(_("%s: %d MIME definition(s) imported from the system. "
-			"Old MIME list file stored as %s\n"),
-			PROGRAM_NAME, mime_defs, new);
+		printf(_("%d MIME association(s) imported from the system\n"
+			"File stored as %s\nAdd these new associations to your mimelist "
+			"file running 'mm edit'\n"), mime_defs, new);
 		return EXIT_SUCCESS;
 	}
 
-	rename(new, mime_file);
 	return EXIT_FAILURE;
 }
 
