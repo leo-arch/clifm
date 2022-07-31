@@ -138,15 +138,9 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 static int
 create_tmp_file(char **file, int *fd)
 {
-	if (xargs.stealth_mode == 1) {
-		*file = (char *)xnmalloc(strlen(P_tmpdir) + strlen(TMP_FILENAME)
-		        + 2, sizeof(char));
-		sprintf(*file, "%s/%s", P_tmpdir, TMP_FILENAME);
-	} else {
-		*file = (char *)xnmalloc(strlen(tmp_dir) + strlen(TMP_FILENAME)
-		        + 2, sizeof(char));
-		sprintf(*file, "%s/%s", tmp_dir, TMP_FILENAME);
-	}
+	size_t tmp_len = strlen(xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir);
+	*file = (char *)xnmalloc(tmp_len + strlen(TMP_FILENAME) + 2, sizeof(char));
+	sprintf(*file, "%s/%s", xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	errno = 0;
 	*fd = mkstemp(*file);
