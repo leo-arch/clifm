@@ -402,7 +402,8 @@ mount_dev(int n)
 	}
 
 	char file[PATH_MAX];
-	snprintf(file, PATH_MAX, "%s/clifm.XXXXXX", P_tmpdir);
+	snprintf(file, PATH_MAX, "%s/%s", xargs.stealth_mode == 1
+		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(file);
 	if (fd == -1)
