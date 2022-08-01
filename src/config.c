@@ -1364,6 +1364,12 @@ create_mime_file_anew(char *file)
 # Replace 'TERM' and 'APP' by the corresponding values. The -e option\n\
 # might vary depending on the terminal emulator used (TERM)\n\
 \n\
+# Note on graphical applications: If the opening application is already running\n\
+# the file might be opened in a tab, and CliFM won't wait for the file to be\n\
+# closed (because the process already returned). To avoid this, instruct the\n\
+# application to run a new instance: Ex: geany -i, gedit -s, kate -n,\n\
+# pluma --new-window, and so on.\n\
+\n\
 # To silence STDERR and/or STDOUT use !E and !O respectivelly (they could\n\
 # be used together). Examples:\n\
 # Silence STDERR only and run in the foreground:\n\
