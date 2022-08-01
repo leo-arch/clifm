@@ -2224,21 +2224,19 @@ get_path_env(void)
 	char *ptr = (char *)NULL;
 	int malloced_ptr = 0;
 
-	/* If running in a sanitized environment, get PATH value from
-	 * a secure source */
+	/* If running in a sanitized environment, or PATH cannot be retrieved for
+	 * whatever reason, get PATH value from a secure source */
 	if (xargs.secure_cmds == 1 || xargs.secure_env == 1
-	|| xargs.secure_env_full == 1) {
+	|| xargs.secure_env_full == 1 || !(ptr = getenv("PATH")) || !*ptr) {
 		malloced_ptr = 1;
 #ifdef _PATH_STDPATH
 		ptr = savestring(_PATH_STDPATH, strlen(_PATH_STDPATH));
 #else
-		size_t s = confstr(_CS_PATH, NULL, 0); /* Get value's size */
-		char *p = (char *)xnmalloc(s, sizeof(char)); /* Allocate space */
-		confstr(_CS_PATH, p, s);               /* Get value */
+		size_t s = confstr(_CS_PATH, NULL, 0); // Get value's size
+		char *p = (char *)xnmalloc(s, sizeof(char)); // Allocate space/
+		confstr(_CS_PATH, p, s);               // Get value
 		ptr = p;
 #endif
-	} else {
-		ptr = getenv("PATH");
 	}
 
 	if (!ptr)

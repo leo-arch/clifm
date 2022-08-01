@@ -439,9 +439,9 @@ check_iso(char *file)
 
 	char iso_tmp_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		snprintf(iso_tmp_file, PATH_MAX - 1, "%s/.clifm%s", P_tmpdir, rand_ext);
+		snprintf(iso_tmp_file, PATH_MAX - 1, "%s/.temp%s", P_tmpdir, rand_ext);
 	else
-		snprintf(iso_tmp_file, PATH_MAX - 1, "%s/.clifm%s", tmp_dir, rand_ext);
+		snprintf(iso_tmp_file, PATH_MAX - 1, "%s/.temp%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;
