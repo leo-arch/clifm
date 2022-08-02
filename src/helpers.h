@@ -899,6 +899,7 @@ struct props_t {
 	int ids; /* User and group IDs */
 	int time; /* Time: either ACCESS, MOD, or CHANGE */
 	int size; /* File size */
+	int inode; /* File inode number */
 };
 extern struct props_t prop_fields;
 

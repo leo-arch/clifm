@@ -484,7 +484,7 @@ END:
  * This function is called by list_dir(), in listing.c for each file name
  * in the current directory when running on long view mode */
 int
-print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
+print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max, const size_t ino_max)
 {
 	/* Let's get file attributes and the corresponding colors */
 
@@ -713,10 +713,16 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		*size_s = '\0';
 	}
 
+	char ino_s[12 + 1]; /* Max inode number able to hold: 999 billions! */
+	*ino_s = '\0';
+	if (prop_fields.inode == 1)
+		snprintf(ino_s, sizeof(ino_s), "%-*zu ", (int)ino_max, props->inode);
+
 	/* Print stuff */
 
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
+		   "%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
@@ -729,12 +735,14 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 		light_mode ? "" : df_c, pad, "", df_c,
 		trim ? tt_c : "", trim ? '~' : 0,
 
+		prop_fields.inode ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time != 0 ? time_s : "",
 		prop_fields.size == 1 ? size_s : "");
 #else
 	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
+		   "%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
@@ -745,6 +753,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max)
 	    light_mode ? "" : df_c, pad, "", df_c,
 	    trim ? tt_c : "", trim ? '~' : 0,
 
+		prop_fields.inode ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time != 0 ? time_s : "",

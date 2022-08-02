@@ -530,7 +530,7 @@ set_long_attribs(const int n, const struct stat *attr)
 }
 
 static void
-print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max)
+print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max, const size_t ino_max)
 {
 	struct stat lattr;
 	int space_left = (int)term_cols - MAX_PROP_STR;
@@ -565,7 +565,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max)
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
 				li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c);
 		/* Print the remaining part of the entry */
-		print_entry_props(&file_info[i], (size_t)space_left, ug_max);
+		print_entry_props(&file_info[i], (size_t)space_left, ug_max, ino_max);
 	}
 }
 
@@ -1412,6 +1412,21 @@ get_max_ug_str(void)
 	return ug_max;
 }
 
+static size_t
+get_longest_inode(void)
+{
+	size_t l = 0;
+
+	int i = (int)files;
+	while (--i >= 0) {
+		size_t n = DIGINUM(file_info[i].inode);
+		if (n > l)
+			l = n;
+	}
+
+	return l;
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -1636,7 +1651,9 @@ list_dir_light(void)
 				 * ######################## */
 
 	if (long_view) {
-		print_long_mode(&counter, &reset_pager, pad, get_max_ug_str());
+		print_long_mode(&counter, &reset_pager, pad,
+			prop_fields.ids == 1 ? get_max_ug_str() : 0,
+			prop_fields.inode == 1 ? get_longest_inode() : 0);
 		goto END;
 	}
 
@@ -1758,8 +1775,6 @@ reset_stats(void)
 	stats.unknown = 0;
 	stats.unstat = 0;
 }
-
-
 
 /* List files in the current working directory. Uses file type colors
  * and columns. Return zero on success or one on error */
@@ -2188,7 +2203,9 @@ list_dir(void)
 				 * ######################## */
 
 	if (long_view) {
-		print_long_mode(&counter, &reset_pager, pad, get_max_ug_str());
+		print_long_mode(&counter, &reset_pager, pad,
+			prop_fields.ids == 1 ? get_max_ug_str() : 0,
+			prop_fields.inode == 1 ? get_longest_inode() : 0);
 		goto END;
 	}
 

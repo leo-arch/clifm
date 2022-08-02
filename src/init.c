@@ -69,14 +69,16 @@ set_prop_fields(char *line)
 	if (!line || !*line)
 		return;
 
-	prop_fields.perm = 0;
-	prop_fields.ids =  0;
-	prop_fields.time = 0;
-	prop_fields.size = 0;
+	prop_fields.perm =  0;
+	prop_fields.ids =   0;
+	prop_fields.time =  0;
+	prop_fields.size =  0;
+	prop_fields.inode = 0;
 
 	size_t i;
 	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
 		switch(line[i]) {
+		case 'd': prop_fields.inode = 1; break;
 		case 'p': prop_fields.perm = PERM_SYMBOLIC; break;
 		case 'n': prop_fields.perm = PERM_NUMERIC; break;
 		case 'i': prop_fields.ids = 1; break;

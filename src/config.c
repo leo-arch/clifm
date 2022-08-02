@@ -836,6 +836,7 @@ ShowHiddenFiles=%s\n\n\
 # List file properties next to file names instead of just file names\n\
 LongViewMode=%s\n\
 # Properties fields to be printed in long view mode\n\
+# d = inode number\n\
 # p|n = permissions: either symbolic (p) or numeric/octal (n)\n\
 # i = user/group IDs (numeric)\n\
 # a|c|m = either last (a)ccess, (m)odification or status (c)hange time\n\
@@ -1967,11 +1968,6 @@ read_config(void)
 		else if (*line == 'M' && strncmp(line, "MaxFilenameLen=", 15) == 0) {
 			if (set_max_filename_len(line) == -1)
 				continue;
-/*			int opt_num = 0;
-			sscanf(line, "MaxFilenameLen=%d\n", &opt_num);
-			if (opt_num <= 0)
-				continue;
-			max_name_len = opt_num; */
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {
