@@ -217,7 +217,7 @@ Consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduct
 
 ## Getting started
 
-To start using _CliFM_ **you don't need to learn anything new**: the usual shell commands will just work. However, there is much more that just shell commands... \
+To start using _CliFM_ **you don't need to learn anything new**: the usual shell commands will just work. However, there is much more than just shell commands... \
 ✓ The `help` command gives you a quick introduction to _CliFM_: once in the _CliFM_ prompt, type `help` or `?`. \
 ✓ Type `help` and then press <kbd>TAB</kbd> to get a list of _help topics_. Select the one you want and press <kbd>Enter</kbd>. \
 ✓ To jump into the **COMMANDS** section in the [manpage](https://github.com/leo-arch/clifm/blob/master/misc/clifm.1.pdf), simply enter `cmd` or press <kbd>F2</kbd>. \
