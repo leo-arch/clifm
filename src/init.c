@@ -477,7 +477,7 @@ get_user_env(void)
 	return tmp_user;
 }
 
-/* Retrieve user information and store in a user_t struct for later access */
+/* Retrieve user information and store it in a user_t struct for later access */
 struct user_t
 get_user(void)
 {
@@ -2232,9 +2232,9 @@ get_path_env(void)
 #ifdef _PATH_STDPATH
 		ptr = savestring(_PATH_STDPATH, strlen(_PATH_STDPATH));
 #else
-		size_t s = confstr(_CS_PATH, NULL, 0); // Get value's size
-		char *p = (char *)xnmalloc(s, sizeof(char)); // Allocate space/
-		confstr(_CS_PATH, p, s);               // Get value
+		size_t s = confstr(_CS_PATH, NULL, 0); /* Get value's size */
+		char *p = (char *)xnmalloc(s, sizeof(char)); /* Allocate space */
+		confstr(_CS_PATH, p, s);               /* Get value */
 		ptr = p;
 #endif
 	}

@@ -2082,6 +2082,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
+	rl_bind_keyseq("\\C-l", rl_refresh);
 	rl_bind_keyseq("\x1b[A", rl_cmdhist);
 	rl_bind_keyseq("\x1b[B", rl_cmdhist);
 
