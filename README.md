@@ -45,6 +45,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 ## Table of contents
 🔸 [Brief description](#brief-description) \
+🔸 [Introduction video](#clapper-introduction-video) \
 🔸 [Features](#features) \
 🔸 [Installation](#installation) \
 🔸 [Getting started](#getting-started) \
@@ -71,6 +72,11 @@ Briefly put, with _CliFM_ the command-line is always already there, never hidden
 
 ---
 
+## :clapper: Introduction video
+
+[![Alt text](https://img.youtube.com/vi/CJmcisw9F90/0.jpg)](https://www.youtube.com/watch?v=CJmcisw9F90)
+
+<!---
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="https://i.postimg.cc/Zqp4sgLK/clifm-interface8.png"></p>
 
@@ -84,6 +90,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 **Note**: Icons and files preview depend on third-party software. Consult the [icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) and [files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) sections.
 
 </details>
+-->
 
 ## Features
 
