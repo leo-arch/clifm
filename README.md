@@ -184,6 +184,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ✔️ **Changelog**
 * `version 1.6.1`  - Development:
+  - <kbd>Ctrl-l</kbd> added for screen refresh
   - `cc` command removed to avoid conflicts with `/bin/cc` (use `colors` instead)
   - `--std-tab-comp` option renamed to `--stdtab` (to match `--fzytab` and `--smenutab` options)
   - **NEW**: [Customize properties fields in long view mode](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details) 
