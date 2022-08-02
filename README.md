@@ -72,14 +72,16 @@ Briefly put, with _CliFM_ the command-line is always already there, never hidden
 
 ---
 
+<h4 align="center">CliFM's interface</h4>
+<p align="center"><img src="https://i.postimg.cc/Zqp4sgLK/clifm-interface8.png"></p>
+
+---
+
 ## :clapper: Introduction video
 
 [![Alt text](https://img.youtube.com/vi/CJmcisw9F90/0.jpg)](https://www.youtube.com/watch?v=CJmcisw9F90)
 
 <!---
-<h4 align="center">CliFM's interface</h4>
-<p align="center"><img src="https://i.postimg.cc/Zqp4sgLK/clifm-interface8.png"></p>
-
 <details>
 <summary>Watch me fly!</summary>
 
