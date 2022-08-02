@@ -716,7 +716,11 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	char ino_s[12 + 1]; /* Max inode number able to hold: 999 billions! */
 	*ino_s = '\0';
 	if (prop_fields.inode == 1)
+#if defined (__APPLE__) || defined(__OpenBSD__) || defined(__i386__)
+		snprintf(ino_s, sizeof(ino_s), "%-*llu ", (int)ino_max, props->inode);
+#else
 		snprintf(ino_s, sizeof(ino_s), "%-*zu ", (int)ino_max, props->inode);
+#endif
 
 	/* Print stuff */
 
