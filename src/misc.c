@@ -518,7 +518,7 @@ print_tips(int all)
 		"Open a file or directory by just typing its ELN or file name",
 		"Bypass the resource opener specifying an application: '12 leafpad'",
 		"Open a file and send it to the background: '24&'",
-		"Create a custom prompt editing the color scheme file ('cs edit')",
+		"Create a custom prompt editing the prompts file ('prompt edit')",
 		"Customize your color scheme: 'cs edit' or F6",
 		"Open the bookmarks manager with Alt-b",
 		"Chain commands using ; and &&: 's 2 7-10; r sel'",
