@@ -284,6 +284,10 @@ create_kbinds_file(void)
 	}
 
 	fprintf(fp, "# Keybindings file for %s\n\n\
+# Emacs style key escapes are the simplest way of setting your \n\
+# keybindings. For example, use \"action:\\C-t\" to bind the action name \n\
+# 'action' to Ctrl-t \n\
+# Note: available action names are defined below \n\n\
 # Use the 'kbgen' plugin (compile it first: gcc -o kbgen kbgen.c) to \n\
 # find out the escape code for the key or key sequence you want. Use \n\
 # either octal, hexadecimal codes or symbols.\n\
