@@ -1045,7 +1045,7 @@ If using FZF for TAB completion, multi-selection is allowed.
 .TP
 \fBAlt\-w:\fR Toggle full path file names in virtual directories
 .TP
-\fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
+\fBC\-l:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
 \fBAlt\-t:\fR Clear program messages
 .TP
