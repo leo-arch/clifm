@@ -687,7 +687,7 @@ rename_profile_files(char *dir)
 			free(_files[i]);
 			continue;
 		}
-		if (S_ISDIR(a.st_mode)
+		if (S_ISDIR(a.st_mode))
 #else
 		if (_files[i]->d_type == DT_DIR)
 #endif /* !_DIRENT_HAVE_D_TYPE */
