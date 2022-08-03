@@ -95,9 +95,9 @@ if [ -n "$SQF" ]; then
 	printf "Warning: Some files in this directory contain single quotes in their names.\n\
 Rename them or they will be ignored.\n\n\
 TIP: You can use the 'br' command to rename them in bulk:\n\
-  s *%c'*\n\
+  s *\\\'*\n\
   br sel\n\n\
-Ignore these files and continue? [y/N] " '\\'
+Ignore these files and continue? [y/N] "
 	read -r answer
 	if [ "$answer" != "y" ] && [ "$answer" != "Y" ]; then
 		exit 0
