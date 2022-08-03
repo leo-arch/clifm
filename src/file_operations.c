@@ -249,7 +249,7 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 		}
 
 		size_t i;
-		for (i = 0; i < (size_t)n; i++)
+		for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
 			free((*a)[i]);
 		free(*a);
 		return exit_status;
@@ -267,7 +267,7 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 	}
 
 	size_t i;
-	for (i = 0; i < (size_t)n; i++)
+	for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
 		free((*a)[i]);
 	free(*a);
 	return exit_status;
