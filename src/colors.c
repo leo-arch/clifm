@@ -1730,12 +1730,14 @@ get_colorschemes(void)
 	if (colors_dir && stat(colors_dir, &attr) == EXIT_SUCCESS) {
 		schemes_total = count_dir(colors_dir, NO_CPOP) - 2;
 		if (schemes_total) {
+			if (!(dir_p = opendir(colors_dir))) {
+				_err('e', PRINT_PROMPT, "opendir: %s: %s\n", colors_dir, strerror(errno));
+				return 0;
+			}
+
 			color_schemes = (char **)xrealloc(color_schemes,
 							((size_t)schemes_total + 2) * sizeof(char *));
 
-			/* count_dir already opened and read this directory succesfully,
-			 * so that we don't need to check opendir for errors */
-			dir_p = opendir(colors_dir);
 			while ((ent = readdir(dir_p)) != NULL) {
 				/* Skipp . and .. */
 				char *name = ent->d_name;
@@ -1774,12 +1776,16 @@ get_colorschemes(void)
 	if (schemes_total <= total_tmp)
 		return i;
 
+	if (!(dir_p = opendir(sys_colors_dir))) {
+		_err('e', PRINT_PROMPT, "opendir: %s: %s\n", sys_colors_dir, strerror(errno));
+		return i;
+	}
+
 	color_schemes = (char **)xrealloc(color_schemes,
 					((size_t)schemes_total + 2) * sizeof(char *));
 
 	size_t i_tmp = i;
 
-	dir_p = opendir(sys_colors_dir);
 	while ((ent = readdir(dir_p)) != NULL) {
 		/* Skipp . and .. */
 		char *name = ent->d_name;
