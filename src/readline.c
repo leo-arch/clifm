@@ -114,7 +114,8 @@ get_shell_cmd_opts(char *cmd)
 		return EXIT_FAILURE;
 
 	char p[PATH_MAX];
-	snprintf(p, PATH_MAX, "%s/.local/share/%s/completions/%s.cfm", user.home, PNL, cmd);
+//	snprintf(p, PATH_MAX, "%s/.local/share/%s/completions/%s.cfm", user.home, PNL, cmd);
+	snprintf(p, PATH_MAX, "%s/.local/share/%s/completions/%s.clifm", user.home, PNL, cmd);
 
 	struct stat a;
 	if (stat(p, &a) == -1) {
@@ -2932,7 +2933,7 @@ my_rl_completion(const char *text, int start, int end)
 /* Load readline initialization file (inputrc)
  * Check order:
  * 1) INPUTRC environment variable
- * 2) ~/.config/clifm/readline.cfm
+ * 2) ~/.config/clifm/readline.clifm
  * 3) ~/.inputrc
  * 4) /etc/inputrc
  * If neither 1 nor 2 exist, readline will try to read 3 and 4 by default) */
@@ -2948,8 +2949,10 @@ set_rl_init_file(void)
 	if (!config_dir_gral || !*config_dir_gral)
 		return;
 
-	char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14, sizeof(char));
-	sprintf(rl_file, "%s/readline.cfm", config_dir_gral);
+/*	char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14, sizeof(char));
+	sprintf(rl_file, "%s/readline.cfm", config_dir_gral); */
+	char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 16, sizeof(char));
+	sprintf(rl_file, "%s/readline.clifm", config_dir_gral);
 	rl_read_init_file(rl_file);
 	free(rl_file);
 }

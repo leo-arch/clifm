@@ -16,7 +16,7 @@ if ! type fzf > /dev/null 2>&1; then
 	exit 127
 fi
 
-FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/dirhist.cfm"
+FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/dirhist.clifm"
 
 # Source our plugins helper
 if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then

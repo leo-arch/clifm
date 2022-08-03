@@ -21,7 +21,7 @@ else
 	exit 1
 fi
 
-FILE="${XDG_CONFIG_HOME:-${HOME}/.config}/clifm/profiles/$CLIFM_PROFILE/jump.cfm"
+FILE="${XDG_CONFIG_HOME:-${HOME}/.config}/clifm/profiles/$CLIFM_PROFILE/jump.clifm"
 
 if ! [ -f "$FILE" ]; then
 	exit 1

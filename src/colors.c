@@ -428,7 +428,8 @@ import_color_scheme(const char *name)
 		return EXIT_FAILURE;
 
 	char dfile[PATH_MAX];
-	snprintf(dfile, PATH_MAX - 1, "%s/%s/colors/%s.cfm", data_dir, PNL, name);
+//	snprintf(dfile, PATH_MAX - 1, "%s/%s/colors/%s.cfm", data_dir, PNL, name);
+	snprintf(dfile, PATH_MAX - 1, "%s/%s/colors/%s.clifm", data_dir, PNL, name);
 
 	struct stat attr;
 	if (stat(dfile, &attr) == -1)
@@ -479,7 +480,8 @@ edit_colorscheme(char *app)
 	struct stat attr;
 	char file[PATH_MAX];
 
-	snprintf(file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, cur_cscheme); /* NOLINT */
+//	snprintf(file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, cur_cscheme); /* NOLINT */
+	snprintf(file, PATH_MAX - 1, "%s/%s.clifm", colors_dir, cur_cscheme); /* NOLINT */
 	if (stat(file, &attr) == -1 && import_color_scheme(cur_cscheme) != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: %s: No such color scheme\n"), PROGRAM_NAME, cur_cscheme);
 		return EXIT_FAILURE;
@@ -1093,14 +1095,16 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	char colorscheme_file[PATH_MAX];
 	*colorscheme_file = '\0';
 	if (config_ok == 1 && colors_dir) {
-		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, /* NOLINT */
+//		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, /* NOLINT */
+		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.clifm", colors_dir, /* NOLINT */
 			colorscheme ? colorscheme : "default");
 	}
 
 	/* If not in local dir, check system data dir as well */
 	struct stat attr;
 	if (data_dir && (!*colorscheme_file || stat(colorscheme_file, &attr) == -1)) {
-		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s/colors/%s.cfm", /* NOLINT */
+//		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s/colors/%s.cfm", /* NOLINT */
+		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s/colors/%s.clifm", /* NOLINT */
 			data_dir, PNL, colorscheme ? colorscheme : "default");
 	}
 
@@ -1741,7 +1745,8 @@ get_colorschemes(void)
 				char *ret = strchr(name, '.');
 				/* If the file contains not dot, or if its extension is not
 				 * .cfm, or if it's just a hidden file named ".cfm", skip it */
-				if (!ret || strcmp(ret, ".cfm") != 0 || ret == name)
+//				if (!ret || strcmp(ret, ".cfm") != 0 || ret == name)
+				if (!ret || strcmp(ret, ".clifm") != 0 || ret == name)
 					continue;
 
 				*ret = '\0';
@@ -1784,7 +1789,8 @@ get_colorschemes(void)
 		char *ret = strchr(name, '.');
 		/* If the file contains not dot, or if its extension is not
 		 * .cfm, or if it's just a hidden file named ".cfm", skip it */
-		if (!ret || ret == name || strcmp(ret, ".cfm") != 0)
+//		if (!ret || ret == name || strcmp(ret, ".cfm") != 0)
+		if (!ret || ret == name || strcmp(ret, ".clifm") != 0)
 			continue;
 
 		*ret = '\0';

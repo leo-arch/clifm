@@ -243,12 +243,16 @@ set_sel_file(void)
 
 	if (!share_selbox) {
 		/* Private selection box is stored in the profile directory */
-		sel_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
-		sprintf(sel_file, "%s/selbox.cfm", config_dir);
+/*		sel_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
+		sprintf(sel_file, "%s/selbox.cfm", config_dir); */
+		sel_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
+		sprintf(sel_file, "%s/selbox.clifm", config_dir);
 	} else {
 		/* Common selection box is stored in the general configuration directory */
-		sel_file = (char *)xnmalloc(config_dir_len + 21, sizeof(char));
-		sprintf(sel_file, "%s/.config/%s/selbox.cfm", user.home, PNL);
+/*		sel_file = (char *)xnmalloc(config_dir_len + 21, sizeof(char));
+		sprintf(sel_file, "%s/.config/%s/selbox.cfm", user.home, PNL); */
+		sel_file = (char *)xnmalloc(config_dir_len + 23, sizeof(char));
+		sprintf(sel_file, "%s/.config/%s/selbox.clifm", user.home, PNL);
 	}
 
 	return;
@@ -268,7 +272,8 @@ create_kbinds_file(void)
 	/* If not, try to import it from DATADIR */
 	if (data_dir) {
 		char sys_file[PATH_MAX];
-		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings.cfm", data_dir, PNL);
+//		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings.cfm", data_dir, PNL);
+		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings.clifm", data_dir, PNL);
 		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
 			char *cmd[] = {"cp", sys_file, kbinds_file, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
@@ -456,7 +461,8 @@ create_actions_file(char *file)
 		return EXIT_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-	if (import_from_data_dir("actions.cfm", file) == EXIT_SUCCESS)
+//	if (import_from_data_dir("actions.cfm", file) == EXIT_SUCCESS)
+	if (import_from_data_dir("actions.clifm", file) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
 	/* Else, create it */
@@ -592,18 +598,195 @@ create_tmp_files(void)
 		else
 			prof_len = 7; /* Lenght of "default" */
 
-		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 13, sizeof(char));
-		sprintf(sel_file, "%s/selbox_%s.cfm", P_tmpdir,
+/*		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 13, sizeof(char));
+		sprintf(sel_file, "%s/selbox_%s.cfm", P_tmpdir, */
+		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 15, sizeof(char));
+		sprintf(sel_file, "%s/selbox_%s.clifm", P_tmpdir,
 		    (alt_profile) ? alt_profile : "default");
 	} else {
-		sel_file = (char *)xnmalloc(P_tmpdir_len + 12, sizeof(char));
-		sprintf(sel_file, "%s/selbox.cfm", P_tmpdir);
+/*		sel_file = (char *)xnmalloc(P_tmpdir_len + 12, sizeof(char));
+		sprintf(sel_file, "%s/selbox.cfm", P_tmpdir); */
+		sel_file = (char *)xnmalloc(P_tmpdir_len + 14, sizeof(char));
+		sprintf(sel_file, "%s/selbox.clifm", P_tmpdir);
 	}
 
 	_err('w', PRINT_PROMPT, _("%s: %s: Using a temporary directory for "
 		"the Selection Box. Selected files won't be persistent across "
 		"reboots\n"), PROGRAM_NAME, tmp_dir);
 }
+
+/* THIS IS TEMPORAL CODE!
+ * It is intended to rename config files from .cfm to .clifm, and should
+ * be removed once this transition has been made (2 releases?) */
+
+#if !defined(_NO_RENAME_CONFIG)
+#include <dirent.h>
+static void
+rename_cfm_files(char *dir)
+{
+	struct dirent **_files = (struct dirent **)NULL;
+	int n = scandir(dir, &_files, NULL, NULL);
+
+	if (n == -1)
+		return;
+
+	size_t i;
+	for (i = 0; i < (size_t)n; i++) {
+		if (SELFORPARENT(_files[i]->d_name)) {
+			free(_files[i]);
+			continue;
+		}
+
+		char *p = strrchr(_files[i]->d_name, '.');
+		if (!p || !*(p + 1) || strcmp(p, ".cfm") != 0) {
+			free(_files[i]);
+			continue;
+		}
+
+		*p = '\0';
+		char src[PATH_MAX], dst[PATH_MAX];
+		snprintf(src, sizeof(src), "%s/%s.cfm", dir, _files[i]->d_name);
+		snprintf(dst, sizeof(dst), "%s/%s.clifm", dir, _files[i]->d_name);
+
+//		printf("%s renamed as %s\n", src, dst);
+		if (rename(src, dst) == -1)
+			_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, src, strerror(errno));
+		free(_files[i]);
+	}
+
+	free(_files);
+}
+
+static void
+rename_profile_files(char *dir)
+{
+	char p[PATH_MAX];
+	snprintf(p, sizeof(p), "%s/profiles", dir);
+	struct stat a;
+	if (stat(p, &a) == -1)
+		return;
+
+	struct dirent **_files = (struct dirent **)NULL;
+	int n = scandir(p, &_files, NULL, NULL);
+
+	if (n == -1)
+		return;
+
+	size_t i;
+	for (i = 0; i < (size_t)n; i++) {
+		if (SELFORPARENT(_files[i]->d_name)) {
+			free(_files[i]);
+			continue;
+		}
+
+		char tmp[PATH_MAX * 2];
+		snprintf(tmp, sizeof(tmp), "%s/%s", p, _files[i]->d_name);
+
+#if !defined(_DIRENT_HAVE_D_TYPE)
+		if (stat(tmp, &a) == -1) {
+			free(_files[i]);
+			continue;
+		}
+		if (S_ISDIR(a.st_mode)
+#else
+		if (_files[i]->d_type == DT_DIR)
+#endif /* !_DIRENT_HAVE_D_TYPE */
+			rename_cfm_files(tmp);
+
+		free(_files[i]);
+	}
+
+	free(_files);
+}
+
+static void
+rename_color_files(char *dir)
+{
+	char p[PATH_MAX];
+	snprintf(p, sizeof(p), "%s/colors", dir);
+
+	struct stat a;
+	if (stat(p, &a) != -1)
+		rename_cfm_files(p);
+}
+
+static void
+rename_config_files(char *dir)
+{
+	rename_cfm_files(dir);
+	rename_color_files(dir);
+	rename_profile_files(dir);
+}
+
+#include "readline.h"
+static int
+get_user_answer(const char *_msg)
+{
+	char *answer = (char *)NULL;
+	while (!answer) {
+		answer = rl_no_hist(_msg);
+		if (!answer)
+			continue;
+
+		if (!*answer || answer[1]) {
+			free(answer);
+			answer = (char *)NULL;
+			continue;
+		}
+
+		switch(*answer) {
+		case 'y': /* fallthrough */
+		case 'Y': free(answer); return 1;
+		case 'n': /* fallthrough */
+		case 'N': free(answer); return 0;
+		default: free(answer); answer = (char *)NULL; continue;
+		}
+	}
+
+	return 0; /* Never reached */
+}
+
+static void
+check_cfm_files(void)
+{
+	/* Let's suppose that, if keybindings.cfm doesn't exist, the
+	 * transition has been already made (or this is a fresh installation) */
+	struct stat a;
+	char q[PATH_MAX + 17];
+	snprintf(q, sizeof(q), "%s/keybindings.cfm", config_dir_gral);
+	if (stat(q, &a) == -1)
+		return;
+
+	fprintf(stderr, "##################\n"
+	"# IMPORTANT NOTE #\n"
+	"##################\n\n"
+	"%s transitioned from .cfm to .clifm file extension for its "
+	"configuration files.\n"
+	"This has been done to avoid conflicts with the ColdFusion Markup Language file "
+	"extension (cfm).\n"
+	"Your config files, including color schemes, will be automatically renamed, "
+	"that's all: nothing will be lost.\n"
+	"Note that if you cancel this operation (by pressing 'n'), new .clifm config files will be "
+	"created and the\nold .cfm ones will be kept, but ignored (in which case you "
+	"should manually remove/rename them to silence this warning).\n\n"
+	"If you prefer to perform a manual transition, please follow these steps:\n"
+	"1. Press 'n' (clifm will start as usual, using the new configuration files)\n"
+	"2. cd into the appropriate directories (those containing .cfm files, i.e, clifm, "
+	"clifm/colors, and /clifm/profiles)\n"
+	"3. Bulk rename .cfm files as .clifm files: 'br *.cfm' (or, file by "
+	"file: 'm FILE.cfm FILE.clifm')\n"
+	"4. Restart clifm\n",
+	_PROGRAM_NAME);
+
+	putchar('\n');
+	if (get_user_answer("Rename configuration files automatically? [y/n] ") != 1)
+		return;
+
+	rename_config_files(config_dir_gral);
+	_err('n', PRINT_PROMPT, "%s: Configuration files changed from .cfm to .clifm "
+		"file extension\n", PROGRAM_NAME);
+}
+#endif /* !_NO_RENAME_CONFIG */
 
 static void
 define_config_file_names(void)
@@ -620,8 +803,7 @@ define_config_file_names(void)
 		char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 		if (xdg_config_home) {
 			size_t xdg_config_home_len = strlen(xdg_config_home);
-			config_dir_gral = (char *)xnmalloc(xdg_config_home_len + pnl_len
-							+ 2, sizeof(char));
+			config_dir_gral = (char *)xnmalloc(xdg_config_home_len + pnl_len + 2, sizeof(char));
 			sprintf(config_dir_gral, "%s/%s", xdg_config_home, PNL);
 			xdg_config_home = (char *)NULL;
 		} else {
@@ -629,6 +811,10 @@ define_config_file_names(void)
 			sprintf(config_dir_gral, "%s/.config/%s", user.home, PNL);
 		}
 	}
+
+#if !defined(_NO_RENAME_CONFIG)
+	check_cfm_files();
+#endif /* !_NO_RENAME_CONFIG */
 
 	size_t config_gral_len = strlen(config_dir_gral);
 
@@ -653,8 +839,10 @@ define_config_file_names(void)
 		alt_kbinds_file = (char *)NULL;
 	} else {
 		/* Keybindings per user, not per profile */
-		kbinds_file = (char *)xnmalloc(config_gral_len + 17, sizeof(char));
-		sprintf(kbinds_file, "%s/keybindings.cfm", config_dir_gral);
+/*		kbinds_file = (char *)xnmalloc(config_gral_len + 17, sizeof(char));
+		sprintf(kbinds_file, "%s/keybindings.cfm", config_dir_gral); */
+		kbinds_file = (char *)xnmalloc(config_gral_len + 19, sizeof(char));
+		sprintf(kbinds_file, "%s/keybindings.clifm", config_dir_gral);
 	}
 
 	colors_dir = (char *)xnmalloc(config_gral_len + 8, sizeof(char));
@@ -676,23 +864,31 @@ define_config_file_names(void)
 	sprintf(trash_info_dir, "%s/info", trash_dir);
 #endif */
 
-	dirhist_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
-	sprintf(dirhist_file, "%s/dirhist.cfm", config_dir);
+/*	dirhist_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
+	sprintf(dirhist_file, "%s/dirhist.cfm", config_dir); */
+	dirhist_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+	sprintf(dirhist_file, "%s/dirhist.clifm", config_dir);
 
 	if (!alt_bm_file) {
-		bm_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-		sprintf(bm_file, "%s/bookmarks.cfm", config_dir);
+/*		bm_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+		sprintf(bm_file, "%s/bookmarks.cfm", config_dir); */
+		bm_file = (char *)xnmalloc(config_dir_len + 17, sizeof(char));
+		sprintf(bm_file, "%s/bookmarks.clifm", config_dir);
 	} else {
 		bm_file = savestring(alt_bm_file, strlen(alt_bm_file));
 		free(alt_bm_file);
 		alt_bm_file = (char *)NULL;
 	}
 
-	log_file = (char *)xnmalloc(config_dir_len + 9, sizeof(char));
-	sprintf(log_file, "%s/log.cfm", config_dir);
+/*	log_file = (char *)xnmalloc(config_dir_len + 9, sizeof(char));
+	sprintf(log_file, "%s/log.cfm", config_dir); */
+	log_file = (char *)xnmalloc(config_dir_len + 11, sizeof(char));
+	sprintf(log_file, "%s/log.clifm", config_dir);
 
-	hist_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
-	sprintf(hist_file, "%s/history.cfm", config_dir);
+/*	hist_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
+	sprintf(hist_file, "%s/history.cfm", config_dir); */
+	hist_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+	sprintf(hist_file, "%s/history.clifm", config_dir);
 
 	if (!alt_config_file) {
 		config_file = (char *)xnmalloc(config_dir_len + pnl_len + 4, sizeof(char));
@@ -703,17 +899,25 @@ define_config_file_names(void)
 		alt_config_file = (char *)NULL;
 	}
 
-	profile_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
-	sprintf(profile_file, "%s/profile.cfm", config_dir);
+/*	profile_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
+	sprintf(profile_file, "%s/profile.cfm", config_dir); */
+	profile_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+	sprintf(profile_file, "%s/profile.clifm", config_dir);
 
-	mime_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
-	sprintf(mime_file, "%s/mimelist.cfm", config_dir);
+/*	mime_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
+	sprintf(mime_file, "%s/mimelist.cfm", config_dir); */
+	mime_file = (char *)xnmalloc(config_dir_len + 16, sizeof(char));
+	sprintf(mime_file, "%s/mimelist.clifm", config_dir);
 
-	actions_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
-	sprintf(actions_file, "%s/actions.cfm", config_dir);
+/*	actions_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
+	sprintf(actions_file, "%s/actions.cfm", config_dir); */
+	actions_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+	sprintf(actions_file, "%s/actions.clifm", config_dir);
 
-	remotes_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
-	sprintf(remotes_file, "%s/nets.cfm", config_dir);
+/*	remotes_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
+	sprintf(remotes_file, "%s/nets.cfm", config_dir); */
+	remotes_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
+	sprintf(remotes_file, "%s/nets.clifm", config_dir);
 
 	return;
 }
@@ -725,13 +929,15 @@ import_rl_file(void)
 		return EXIT_FAILURE;
 
 	char tmp[PATH_MAX];
-	sprintf(tmp, "%s/readline.cfm", config_dir_gral);
+//	sprintf(tmp, "%s/readline.cfm", config_dir_gral);
+	sprintf(tmp, "%s/readline.clifm", config_dir_gral);
 	struct stat attr;
 	if (lstat(tmp, &attr) == 0)
 		return EXIT_SUCCESS;
 
 	char rl_file[PATH_MAX];
-	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.cfm", data_dir, PNL);
+//	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.cfm", data_dir, PNL);
+	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.clifm", data_dir, PNL);
 	if (stat(rl_file, &attr) == EXIT_SUCCESS) {
 		char *cmd[] = {"cp", rl_file, config_dir_gral, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
@@ -1093,8 +1299,10 @@ create_def_cscheme(void)
 	if (!colors_dir || !*colors_dir)
 		return;
 
-	char *cscheme_file = (char *)xnmalloc(strlen(colors_dir) + 13, sizeof(char));
-	sprintf(cscheme_file, "%s/default.cfm", colors_dir);
+/*	char *cscheme_file = (char *)xnmalloc(strlen(colors_dir) + 13, sizeof(char));
+	sprintf(cscheme_file, "%s/default.cfm", colors_dir); */
+	char *cscheme_file = (char *)xnmalloc(strlen(colors_dir) + 15, sizeof(char));
+	sprintf(cscheme_file, "%s/default.clifm", colors_dir);
 
 	/* If the file already exists, do nothing */
 	struct stat attr;
@@ -1181,7 +1389,8 @@ create_remotes_file(void)
 
 	/* Let's try to copy the file from DATADIR */
 	char sys_remotes[PATH_MAX];
-	snprintf(sys_remotes, PATH_MAX - 1, "%s/%s/nets.cfm", data_dir, PNL);
+//	snprintf(sys_remotes, PATH_MAX - 1, "%s/%s/nets.cfm", data_dir, PNL);
+	snprintf(sys_remotes, PATH_MAX - 1, "%s/%s/nets.clifm", data_dir, PNL);
 
 	if (stat(sys_remotes, &attr) == EXIT_SUCCESS) {
 		char *cmd[] = {"cp", "-f", sys_remotes, remotes_file, NULL};
@@ -1404,8 +1613,8 @@ X:N:.*\\.djvu$=djview;zathura;evince;atril\n\
 X:N:.*\\.epub$=mupdf;zathura;ebook-viewer\n\
 X:N:.*\\.mobi$=ebook-viewer\n\
 X:N:.*\\.(cbr|cbz)$=zathura\n\
-X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
-!X:N:(.*\\.cfm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano\n\
+X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
+!X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano\n\
 \n\n");
 
 	fprintf(fp, "##################\n\
@@ -1487,7 +1696,8 @@ create_mime_file(char *file, int new_prof)
 	if (stat(file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	int ret = import_from_data_dir("mimelist.cfm", file);
+//	int ret = import_from_data_dir("mimelist.cfm", file);
+	int ret = import_from_data_dir("mimelist.clifm", file);
 	if (ret != EXIT_SUCCESS)
 		ret = create_mime_file_anew(file);
 

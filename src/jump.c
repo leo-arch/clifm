@@ -111,8 +111,10 @@ save_jumpdb(void)
 	|| jump_n == 0)
 		return;
 
-	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
-	sprintf(jump_file, "%s/jump.cfm", config_dir);
+//	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
+//	sprintf(jump_file, "%s/jump.cfm", config_dir);
+	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
+	sprintf(jump_file, "%s/jump.clifm", config_dir);
 
 	FILE *fp = fopen(jump_file, "w+");
 	if (!fp) {
@@ -230,8 +232,10 @@ edit_jumpdb(void)
 
 	save_jumpdb();
 
-	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
-	sprintf(jump_file, "%s/jump.cfm", config_dir);
+/*	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
+	sprintf(jump_file, "%s/jump.cfm", config_dir); */
+	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
+	sprintf(jump_file, "%s/jump.clifm", config_dir);
 
 	struct stat attr;
 	if (stat(jump_file, &attr) == -1) {

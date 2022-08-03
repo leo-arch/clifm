@@ -77,7 +77,7 @@ install(DIRECTORY misc/tools DESTINATION "${_PROG_DATADIR}"
 
 install(FILES plugins/BFG.cfg plugins/kbgen.c plugins/plugins-helper DESTINATION "${_PLUGINSDIR}")
 
-install(FILES misc/actions.cfm misc/keybindings.cfm misc/mimelist.cfm misc/nets.cfm misc/prompts.cfm misc/readline.cfm misc/clifmrc DESTINATION "${_PROG_DATADIR}")
+install(FILES misc/actions.clifm misc/keybindings.clifm misc/mimelist.clifm misc/nets.clifm misc/prompts.clifm misc/readline.clifm misc/clifmrc DESTINATION "${_PROG_DATADIR}")
 
 install(DIRECTORY misc/colors functions DESTINATION "${_PROG_DATADIR}")
 

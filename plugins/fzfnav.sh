@@ -17,9 +17,9 @@
 # $HOME/.config/clifm/plugins/BFG.sh
 
 # A configuration file is available:
-# $HOME/.config/clifm/plugins/BFG.cfm
+# $HOME/.config/clifm/plugins/BFG.cfg
 # or
-# $XDG_DATA_DIRS/clifm/plugins/BFG.cfm (usually /usr/local/share/clifm/plugins/BFG.cfm)
+# $XDG_DATA_DIRS/clifm/plugins/BFG.cfg (usually /usr/local/share/clifm/plugins/BFG.cfg)
 
 # How the files previewer works?
 # 1. The config file is read looking for predefined options and previewing

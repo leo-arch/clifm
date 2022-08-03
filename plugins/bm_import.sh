@@ -18,12 +18,12 @@ if ! [ -f "$file" ]; then
 	exit 1
 fi
 
-if [ -z "$CLIFM" ] || ! [ -f "${CLIFM}/bookmarks.cfm" ]; then
+if [ -z "$CLIFM" ] || ! [ -f "${CLIFM}/bookmarks.clifm" ]; then
 	printf "Bookmarks file for CliFM not found\n" >&2
 	exit 1
 fi
 
-clifm_bm="${CLIFM}/bookmarks.cfm"
+clifm_bm="${CLIFM}/bookmarks.clifm"
 bmn=0
 
 if grep -q ^"ENTRY " "$file"; then

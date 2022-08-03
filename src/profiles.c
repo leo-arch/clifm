@@ -322,10 +322,14 @@ profile_add(char *prof)
 
 	char *nconfig_file = (char *)xnmalloc(config_len + pnl_len + 4, sizeof(char));
 	sprintf(nconfig_file, "%s/%src", nconfig_dir, PNL);
-	char *nhist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+/*	char *nhist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
 	sprintf(nhist_file, "%s/history.cfm", nconfig_dir);
 	char *nmime_file = (char *)xnmalloc(config_len + 14, sizeof(char));
-	sprintf(nmime_file, "%s/mimelist.cfm", nconfig_dir);
+	sprintf(nmime_file, "%s/mimelist.cfm", nconfig_dir); */
+	char *nhist_file = (char *)xnmalloc(config_len + 15, sizeof(char));
+	sprintf(nhist_file, "%s/history.clifm", nconfig_dir);
+	char *nmime_file = (char *)xnmalloc(config_len + 16, sizeof(char));
+	sprintf(nmime_file, "%s/mimelist.clifm", nconfig_dir);
 
 	/* Create config files */
 

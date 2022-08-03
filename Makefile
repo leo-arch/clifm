@@ -55,7 +55,7 @@ install: $(BIN)
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(INSTALL) -m 0644 misc/$(BIN).desktop $(DESTDIR)$(DESKTOPPREFIX)
-	$(INSTALL) -m 0644 misc/*.cfm $(DESTDIR)$(PROG_DATADIR)
+	$(INSTALL) -m 0644 misc/*.clifm $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 misc/clifmrc $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 misc/logo/$(BIN).svg $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
@@ -67,7 +67,7 @@ install: $(BIN)
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/BFG.cfg
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/kbgen.c
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/plugins-helper
-	$(INSTALL) -m 0644 misc/colors/*.cfm $(DESTDIR)$(PROG_DATADIR)/colors
+	$(INSTALL) -m 0644 misc/colors/*.clifm $(DESTDIR)$(PROG_DATADIR)/colors
 	$(INSTALL) -m 0644 functions/* $(DESTDIR)$(PROG_DATADIR)/functions
 	@printf "Successfully installed $(BIN)\n"
 

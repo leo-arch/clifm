@@ -81,8 +81,8 @@ install: build
 	gzip -f -- $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
-	$(INSTALL) -m 0644 misc/*.cfm $(DESTDIR)$(PROG_DATADIR)
-	$(INSTALL) -m 0644 misc/haiku/*.cfm $(DESTDIR)$(PROG_DATADIR)
+	$(INSTALL) -m 0644 misc/*.clifm $(DESTDIR)$(PROG_DATADIR)
+	$(INSTALL) -m 0644 misc/haiku/*.clifm $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 misc/clifmrc $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
@@ -92,7 +92,7 @@ install: build
 	$(INSTALL) -m 0755 misc/tools/*.py $(DESTDIR)$(PROG_DATADIR)/tools
 	chmod 644 -- $(DESTDIR)$(PROG_DATADIR)/plugins/BFG.cfg
 	chmod 644 -- $(DESTDIR)$(PROG_DATADIR)/plugins/kbgen.c
-	$(INSTALL) -m 0644 misc/colors/*.cfm $(DESTDIR)$(PROG_DATADIR)/colors
+	$(INSTALL) -m 0644 misc/colors/*.clifm $(DESTDIR)$(PROG_DATADIR)/colors
 	$(INSTALL) -m 0644 functions/* $(DESTDIR)$(PROG_DATADIR)/functions
 	@printf "Successfully installed $(BIN)\n"
 

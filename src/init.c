@@ -577,8 +577,10 @@ load_jumpdb(void)
 	if (xargs.no_dirjump == 1 || !config_ok || !config_dir)
 		return;
 
-	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
-	snprintf(jump_file, config_dir_len + 10, "%s/jump.cfm", config_dir);
+/*	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
+	snprintf(jump_file, config_dir_len + 10, "%s/jump.cfm", config_dir); */
+	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
+	snprintf(jump_file, config_dir_len + 12, "%s/jump.clifm", config_dir);
 
 	int fd;
 	FILE *fp = open_fstream_r(jump_file, &fd);
@@ -1078,8 +1080,10 @@ set_prompts_file(void)
 		return (char *)NULL;
 
 	struct stat a;
-	char *f = (char *)xnmalloc(strlen(config_dir_gral) + 13, sizeof(char));
-	sprintf(f, "%s/prompts.cfm", config_dir_gral);
+/*	char *f = (char *)xnmalloc(strlen(config_dir_gral) + 13, sizeof(char));
+	sprintf(f, "%s/prompts.cfm", config_dir_gral); */
+	char *f = (char *)xnmalloc(strlen(config_dir_gral) + 15, sizeof(char));
+	sprintf(f, "%s/prompts.clifm", config_dir_gral);
 
 	if (stat(f, &a) != -1 && S_ISREG(a.st_mode))
 		return f;
@@ -1088,7 +1092,8 @@ set_prompts_file(void)
 		goto ERROR;
 
 	char t[PATH_MAX];
-	snprintf(t, sizeof(t), "%s/%s/prompts.cfm", data_dir, PNL);
+//	snprintf(t, sizeof(t), "%s/%s/prompts.cfm", data_dir, PNL);
+	snprintf(t, sizeof(t), "%s/%s/prompts.clifm", data_dir, PNL);
 	if (stat(t, &a) == -1 || !S_ISREG(a.st_mode))
 		goto ERROR;
 
@@ -1234,9 +1239,11 @@ open_reg_exit(char *filename, int url)
 	tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
 
 	size_t mime_file_len = strlen(homedir) + (alt_profile
-					? strlen(alt_profile) : 7) + 38;
+//					? strlen(alt_profile) : 7) + 38;
+					? strlen(alt_profile) : 7) + 40;
 	mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
-	sprintf(mime_file, "%s/.config/clifm/profiles/%s/mimelist.cfm",
+//	sprintf(mime_file, "%s/.config/clifm/profiles/%s/mimelist.cfm",
+	sprintf(mime_file, "%s/.config/clifm/profiles/%s/mimelist.clifm",
 			homedir, alt_profile ? alt_profile : "default");
 
 	if (path_n == 0)
