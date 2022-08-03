@@ -186,6 +186,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ✔️ **Changelog**
 * `version 1.6.1`  - Development:
+  - Configuration files renamed from `.cfm` to `.clifm` (avoid conflict with [ColdFusion](https://en.wikipedia.org/wiki/ColdFusion_Markup_Language) files)
   - <kbd>Ctrl-l</kbd> added for screen refresh
   - `cc` command removed to avoid conflicts with `/bin/cc` (use `colors` instead)
   - `--std-tab-comp` option renamed to `--stdtab` (to match `--fzytab` and `--smenutab` options)
