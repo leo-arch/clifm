@@ -2223,6 +2223,10 @@ options_generator(const char *text, int state)
 static char *
 users_generator(const char *text, int state)
 {
+#if defined(__ANDROID__)
+	UNUSED(text); UNUSED(state);
+	return (char *)NULL;
+#else
 	static size_t len;
 	const struct passwd *p;
 	rl_filename_completion_desired = 1;
@@ -2240,6 +2244,7 @@ users_generator(const char *text, int state)
 	}
 
 	return (char *)NULL;
+#endif /* __ANDROID__ */
 }
 
 static int

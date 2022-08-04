@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#if !defined(__HAIKU__) && !defined(__OpenBSD__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 # include <wordexp.h>
 #endif
 #include <readline/readline.h>
@@ -415,7 +415,7 @@ add_string(char **tmp, const int c, char **line, char **res, size_t *len)
 	free(*tmp);
 }
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 static inline void
 reset_ifs(const char *value)
 {
@@ -465,7 +465,7 @@ substitute_cmd(char **line, char **res, size_t *len)
 	wordfree(&wordbuf);
 	return;
 }
-#endif /* !__HAIKU__ && !__OpenBSD__*/
+#endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
 static inline char *
 gen_emergency_prompt(void)
@@ -692,13 +692,13 @@ ADD_STRING:
 			if (c == '\'' || c == '"')
 				continue;
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 			/* Command substitution */
 			if (c == '$' && *line == '(') {
 				substitute_cmd(&line, &result, &result_len);
 				continue;
 			}
-#endif /* __HAIKU__ && __OpenBSD__ */
+#endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
 			size_t new_len = result_len + 2
 							+ (wrong_cmd ? (MAX_COLOR + 6) : 0);

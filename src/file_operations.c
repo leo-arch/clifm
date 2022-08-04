@@ -53,8 +53,14 @@
 #include "selection.h"
 #include "messages.h"
 
-#define BULK_RM_TMP_FILE_HEADER "# Remove the files you want to be \
-deleted, save and exit\n# Close the editor to cancel the operation\n\n"
+#define BULK_RENAME_TMP_FILE_HEADER "# CliFM - Rename files in bulk\n\
+# Edit file names, save, and quit the editor (you will be\n\
+# asked for confirmation)\n\
+# Just quit the editor without any edit to cancel the operation\n\n"
+
+#define BULK_RM_TMP_FILE_HEADER "# CliFM - Remove files in bulk\n\
+# Remove the files you want to be deleted, save and exit\n\
+# Just quit the editor without any edit to cancel the operation\n\n"
 
 static char
 ask_user_y_or_n(const char *msg, char default_answer)
@@ -1587,14 +1593,10 @@ bulk_rename(char **args)
 	}
 #endif
 
-#define BULK_MESSAGE "# Edit file names, save, and quit the editor (you will be\n\
-# asked for confirmation)\n#\n\
-# Just quit the editor without any edit to cancel the operation\n\n"
-
 #ifndef __HAIKU__
-	dprintf(fd, BULK_MESSAGE);
+	dprintf(fd, BULK_RENAME_TMP_FILE_HEADER);
 #else
-	fprintf(fp, BULK_MESSAGE);
+	fprintf(fp, BULK_RENAME_TMP_FILE_HEADER);
 #endif
 
 	struct stat attr;

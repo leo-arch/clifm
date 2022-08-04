@@ -33,7 +33,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <wchar.h>
-#if !defined(__HAIKU__) && !defined(__OpenBSD__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 # include <wordexp.h>
 #endif
 #include <limits.h>
@@ -1847,10 +1847,10 @@ parse_input_str(char *str)
 
 	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int));
 	size_t glob_n = 0;
-#if !defined(__HAIKU__) && !defined(__OpenBSD__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 	int *word_array = (int *)xnmalloc(int_array_max, sizeof(int));
 	size_t word_n = 0;
-#endif
+#endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
 	for (i = 0; substr[i]; i++) {
 
@@ -1891,7 +1891,7 @@ parse_input_str(char *str)
 				}
 			}
 
-#if !defined(__HAIKU__) && !defined(__OpenBSD__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 			/* Command substitution is made by wordexp() */
 			if (substr[i][j] == '$' && (substr[i][j + 1] == '('
 			|| substr[i][j + 1] == '{')) {
@@ -1907,7 +1907,7 @@ parse_input_str(char *str)
 					word_n++;
 				}
 			}
-#endif /* __HAIKU__ */
+#endif /* __HAIKU__ && !OpenBSD && !__ANDROID__ */
 		}
 	}
 
@@ -2017,7 +2017,7 @@ parse_input_str(char *str)
 		/* #############################################
 		 * #    4) COMMAND & PARAMETER SUBSTITUTION    #
 		 * ############################################# */
-#if !defined(__HAIKU__) && !defined(__OpenBSD__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 	if (word_n) {
 		size_t old_pathc = 0;
 		register size_t w = 0;
@@ -2087,7 +2087,7 @@ parse_input_str(char *str)
 	}
 
 	free(word_array);
-#endif /* __HAIKU__ */
+#endif /* !__HAIKU__ && !__OpenBSD && !__ANDROID__ */
 
 	if (substr[0] && (*substr[0] == 'd' || *substr[0] == 'u')
 	&& (strcmp(substr[0], "desel") == 0 || strcmp(substr[0], "undel") == 0

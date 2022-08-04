@@ -124,8 +124,12 @@ void *__dso_handle;
 #endif /* PATH_MAX */
 
 #ifndef HOST_NAME_MAX
-# define HOST_NAME_MAX 64
-#endif
+# if defined(__ANDROID__)
+#  define HOST_NAME_MAX 255
+# else
+#  define HOST_NAME_MAX 64
+# endif /* __ANDROID__ */
+#endif /* !HOST_NAME_MAX */
 
 #ifndef NAME_MAX
 # define NAME_MAX 255

@@ -1315,6 +1315,10 @@ check_help(char *full_line, const char *_last_word)
 static int
 check_users(const char *str, const size_t len)
 {
+#if defined(__ANDROID__)
+	UNUSED(str); UNUSED(len);
+	return NO_MATCH;
+#else
 	struct passwd *p;
 	while ((p = getpwent())) {
 		if (!p->pw_name) break;
@@ -1330,6 +1334,7 @@ check_users(const char *str, const size_t len)
 
 	endpwent();
 	return NO_MATCH;
+#endif /* __ANDROID__ */
 }
 
 static int

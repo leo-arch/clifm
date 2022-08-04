@@ -409,7 +409,7 @@ get_properties(char *filename, const int dsize)
 	if (colorize == 1)
 		printf("%s", cend);
 
-#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__)
+#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__) || defined(__ANDROID__)
 	printf(_("\tBlocks: %s%lld%s"), cbold, attr.st_blocks, cend);
 #else
 	printf(_("\tBlocks: %s%ld%s"), cbold, attr.st_blocks, cend);
@@ -420,14 +420,14 @@ get_properties(char *filename, const int dsize)
 #else
 	printf(_("\tIO Block: %s%ld%s"), cbold, attr.st_blksize, cend);
 #endif
-#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__)
+#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__) || defined(__ANDROID__)
 	printf(_("\tInode: %s%llu%s\n"), cbold, attr.st_ino, cend);
 #else
 	printf(_("\tInode: %s%zu%s\n"), cbold, attr.st_ino, cend);
 #endif
 #if defined(__OpenBSD__) || defined(__APPLE__) || defined(__HAIKU__)
 	printf(_("Device: %s%d%s"), cbold, attr.st_dev, cend);
-#elif defined(__i386__)
+#elif defined(__i386__) || defined(__ANDROID__)
 	printf(_("Device: %s%lld%s"), cbold, attr.st_dev, cend);
 #else
 	printf(_("Device: %s%zu%s"), cbold, attr.st_dev, cend);
@@ -724,6 +724,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	if (prop_fields.inode == 1)
 #if defined (__APPLE__) || defined(__OpenBSD__) || defined(__i386__)
 		snprintf(ino_s, sizeof(ino_s), "%-*llu ", (int)ino_max, props->inode);
+#elif defined(__ANDROID__)
+		snprintf(ino_s, sizeof(ino_s), "%-*lu ", (int)ino_max, props->inode);
 #else
 		snprintf(ino_s, sizeof(ino_s), "%-*zu ", (int)ino_max, props->inode);
 #endif
