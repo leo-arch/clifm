@@ -460,10 +460,10 @@ get_properties(char *filename, const int dsize)
 	if (link_to_dir == 1)
 		snprintf(_path, sizeof(_path), "%s/", filename);
 	fputs(HIDE_CURSOR, stdout);
-	fputs("Retrieving file size... ", stdout);
+	fputs("Calculating... ", stdout);
 	fflush(stdout);
 	off_t total_size = dir_size(*_path ? _path : filename);
-	MOVE_CURSOR_LEFT(24);
+	MOVE_CURSOR_LEFT(15);
 	ERASE_TO_RIGHT;
 	fputs(UNHIDE_CURSOR, stdout);
 	if (S_ISDIR(attr.st_mode) && attr.st_nlink == 2 && total_size == 4)
