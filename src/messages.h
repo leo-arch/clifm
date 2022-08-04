@@ -853,7 +853,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -I, --case-sensitive\t\t Case-sensitive files listing\
 \n  -k, --keybindings-file=FILE\t Specify an alternative keybindings file\
 \n  -l, --no-long-view\t\t Disable long/detail view mode (default)\
-\n  -L, --long-view\t\t Enable long view mode\
+\n  -L, --long-view\t\t Enable long/detail view mode\
 \n  -m, --dihist-map\t\t Enable the directory history map\
 \n  -o, --no-autols\t\t Do not list files automatically\
 \n  -O, --autols\t\t\t List files automatically (default)\
@@ -863,7 +863,7 @@ parameters instead)\
 \n  -r, --no-refresh-on-empty-line Do not refresh the list of files when pressing Enter \
 on an empty line\
 \n  -s, --splash\t\t\t Enable the splash screen\
-\n  -S, --stealth-mode\t\t Leave no trace on the host system (see the manpage)\
+\n  -S, --stealth-mode\t\t Leave no trace on the host system\
 \n  -t, --disk-usage-analyzer\t Run in disk usage analyzer mode\
 \n  -u, --no-unicode\t\t Disable Unicode support\
 \n  -U, --unicode \t\t Enable Unicode support (default)\
@@ -880,7 +880,7 @@ database (via the 'j' command)\
 \n      --case-sens-path-comp\t Enable case sensitive path completion\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
 \n      --color-scheme=NAME\t Use color scheme NAME\
-\n      --cwd-in-title\t\t Print current directory in terminal window title\
+\n      --cwd-in-title\t\t Print current directory in the terminal window title\
 \n      --desktop-notifications\t Enable desktop notifications\
 \n      --disk-usage\t\t Show disk usage (free/total)\
 \n      --enable-logs\t\t Enable program logs\
@@ -892,7 +892,7 @@ in long view mode\
 and paths\
 \n      --fzytab\t\t\t Use fzy to display completion matches\
 \n      --icons\t\t\t Enable icons\
-\n      --icons-use-file-color\t Icons color follows file color\
+\n      --icons-use-file-color\t Icon colors follow file colors\
 \n      --int-vars\t\t Enable internal variables\
 \n      --list-and-quit\t\t List files and quit\
 \n      --max-dirhist\t\t Maximum number of visited directories to recall\
@@ -903,12 +903,12 @@ base name (if \\z is used in the prompt)\
 \n      --no-dir-jumper\t\t Disable the directory jumper function\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
-\n      --no-clear-screen\t\t Do not clear the screen when listing directories\
+\n      --no-clear-screen\t\t Do not clear the screen when listing files\
 \n      --no-color\t\t Disable colors \
 \n      --no-columns\t\t Disable columned files listing\
 \n      --no-control-d-exit\t Do not allow exit on EOF (Control-d)\
-\n      --no-file-cap\t\t Do not check files capabilities when listing files\
-\n      --no-file-ext\t\t Do not check files extension when listing files\
+\n      --no-file-cap\t\t Do not check file capabilities when listing files\
+\n      --no-file-ext\t\t Do not check file extensions when listing files\
 \n      --no-files-counter\t Disable the files counter for directories\
 \n      --no-follow-symlink\t Do not follow symbolic links when listing files\
 \n      --no-highlight\t\t Disable syntax highlighting\
@@ -921,7 +921,7 @@ base name (if \\z is used in the prompt)\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\
 \n      --open=FILE\t\t Run as a stand-alone resource opener: open FILE and exit\
-\n      --opener=APPLICATION\t Resource opener to use instead of 'lira',\
+\n      --opener=APPLICATION\t Resource opener to use instead of 'lira', \
 CliFM's built-in opener\
 \n      --print-sel\t\t Keep the list of selected files in sight\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
@@ -929,15 +929,13 @@ CliFM's built-in opener\
 \n      --secure-env\t\t Run in a sanitized environment (regular mode)\
 \n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
-\n      --si\t\t\t Print sizes in powers of 1000, as defined in the \
-International System of Units (SI), instead of 1024 (Linux only)\
-\n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z \
+\n      --si\t\t\t Print sizes in powers of 1000 instead of 1024 (Linux only)\
+\n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
 \n      --smenutab\t\t Use smenu to display completion matches\
-(default order)\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 'rm' to prevent accidental deletions\
-\n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instad of target base names\
+\n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
 \n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\n"
 
 #define CLIFM_COMMANDS "\
