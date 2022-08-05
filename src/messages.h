@@ -1173,7 +1173,7 @@ mm info 12     Get MIME information for the file whose ELN is 12\n\
 cs             Manage color schemes\n\
 Right          Accept the entire suggestion\n\
 Alt-f          Accept the first/next word of the current suggestion\n\
-rf | .         Reprint the current list of files\n\
+Enter | rf | . Reprint the current list of files\n\
 pf set test    Change to the profile named 'test'\n\
 st size rev    Sort files by size in reverse order\n\
 Alt-x | Alt-z  Toggle sort method\n\
