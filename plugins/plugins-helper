@@ -16,7 +16,11 @@ cmd_exists()
 # Get the current terminal amount of supported colors: normally 8 or 256
 term_colors()
 {
-	echo "$(tput colors)"
+	if type tput > /dev/null 2>&1; then
+		echo "$(tput colors)"
+	else
+		echo "8"
+	fi
 }
 
 # Return the appropriate value for FZF --color option, honoring no-color

@@ -88,11 +88,13 @@ get_bfg_cfg_file() {
 				FILE="/boot/system/data/clifm/plugins/BFG.cfg"
 			elif [ -f /boot/system/non-packaged/data/clifm/plugins/BFG.cfg ]; then
 				FILE="/boot/system/non-packaged/data/clifm/plugins/BFG.cfg"
+			elif [ -f /data/data/com.termux/files/usr/share/clifm/plugins/BFG.cfg ]; then
+				FILE="/data/data/com.termux/files/usr/share/clifm/plugins/BFG.cfg"
 			fi
 		fi
 
 		# Copy the file to HOME, so that we perform this check only once
-		[ -n "$FILE" ] && cp "$FILE" "$HOME_FILE" 2>/dev/null
+#		[ -n "$FILE" ] && cp "$FILE" "$HOME_FILE" 2>/dev/null
 	fi
 
 	[ -n "$FILE" ] && printf "%s\n" "$FILE"
@@ -184,7 +186,7 @@ main() {
 		exit 127
 	fi
 
-	export TMP_SEL="/tmp/fzfnav.sel"
+	export TMP_SEL="${TMPDIR:-/tmp}/fzfnav.sel"
 	rm -rf -- "$TMP_SEL"
 	BFG_CFG_FILE="$(get_bfg_cfg_file)"
 	if [ -z "$BFG_CFG_FILE" ]; then
@@ -432,7 +434,11 @@ main() {
 	done < "$BFG_CFG_FILE"
 
 	export COLORS
-	COLORS="$(tput colors)"
+	if type tput >/dev/null 2>&1; then
+		COLORS="$(tput colors)"
+	else
+		COLORS="8"
+	fi
 
 #	if [ -z "$ls_cmd" ]; then
 #		export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
@@ -672,7 +678,7 @@ main() {
 		start_ueberzug
 	fi
 
-	TMP="$(mktemp /tmp/clifm.XXXXXX)"
+	TMP="$(mktemp ${TMPDIR:-/tmp}/clifm.XXXXXX)"
 
 				#####################################
 				#	 3. RUN FZF, WHICH CALLS BFG	#
