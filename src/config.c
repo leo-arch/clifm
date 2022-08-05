@@ -197,6 +197,7 @@ setenv_plugins_helper(void)
 		"/boot/system/data/clifm/plugins/plugins-helper",
 #elif defined(__TERMUX__)
 		"/data/data/com.termux/files/usr/share/clifm/plugins/plugins-helper",
+		"/data/data/com.termux/files/usr/local/share/clifm/plugins/plugins-helper",
 #else
 		"/usr/share/clifm/plugins/plugins-helper",
 		"/usr/local/share/clifm/plugins/plugins-helper",
