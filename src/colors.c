@@ -1341,13 +1341,19 @@ store_extension_line(char *line, size_t len)
 #endif /* CLIFM_SUCKLESS */
 		return EXIT_FAILURE;
 
-	ext_colors = (char **)xrealloc(ext_colors,
-	             (ext_colors_n + 1) * sizeof(char *));
+	ext_colors = (char **)xrealloc(ext_colors, (ext_colors_n + 1) * sizeof(char *));
 #ifndef CLIFM_SUCKLESS
 	if (c) {
-		size_t clen = (size_t)(q - line) + strlen(c) + 3;
-		ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
-		sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, c);
+		if (*c == '#') {
+			char *cc = hex2rgb(c);
+			size_t clen = (size_t)(q - line) + 3 + (cc ? strlen(cc) : 0);
+			ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
+			sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, cc ? cc : "0");
+		} else {
+			size_t clen = (size_t)(q - line) + strlen(c) + 3;
+			ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
+			sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, c);
+		}
 	} else
 #endif /* CLIFM_SUCKLESS */
 	{
@@ -1410,9 +1416,8 @@ split_extensions_colors(char *extcolors)
 		ext_colors[ext_colors_n] = (char *)NULL;
 	}
 
-	/* Make sure we have valid color codes and store the length
-	 * of each stored extension: this length will be used later
-	 * when listing files */
+	/* Make sure we have valid color codes and store the length of each stored
+	 * extension: this length will be used later when listing files */
 	ext_colors_len = (size_t *)xnmalloc(ext_colors_n, sizeof(size_t));
 
 	int i = (int)ext_colors_n;
