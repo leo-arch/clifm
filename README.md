@@ -190,6 +190,7 @@ For a detailed explanation of each of these features, follow the corresponding l
   - <kbd>Ctrl-l</kbd> added for screen refresh
   - `cc` command removed to avoid conflicts with `/bin/cc` (use `colors` instead)
   - `--std-tab-comp` option renamed to `--stdtab` (to match `--fzytab` and `--smenutab` options)
+  - **NEW**: [Termux support](https://github.com/leo-arch/clifm/wiki/Introduction#small_blue_diamond-c-termux)
   - **NEW**: [Customize properties fields in long view mode](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details) 
   - **NEW**: [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
   - **NEW**: [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories)
