@@ -187,18 +187,19 @@ setenv_plugins_helper(void)
 		char _path[PATH_MAX];
 		snprintf(_path, sizeof(_path), "%s/plugins-helper", plugins_dir);
 
-	//	struct stat attr;
 		if (stat(_path, &attr) != -1 && setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
 			return EXIT_SUCCESS;
 	}
 
 	const char *_paths[] = {
-#ifndef __HAIKU__
-		"/usr/share/clifm/plugins/plugins-helper",
-		"/usr/local/share/clifm/plugins/plugins-helper",
-#else
+#if defined(__HAIKU__)
 		"/boot/system/non-packaged/data/clifm/plugins/plugins-helper",
 		"/boot/system/data/clifm/plugins/plugins-helper",
+#elif defined(__TERMUX__)
+		"/data/data/com.termux/files/usr/share/clifm/plugins/plugins-helper",
+#else
+		"/usr/share/clifm/plugins/plugins-helper",
+		"/usr/local/share/clifm/plugins/plugins-helper",
 #endif
 		NULL};
 
