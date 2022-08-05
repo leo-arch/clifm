@@ -38,7 +38,7 @@ fi
 # shellcheck source=/dev/null
 . "$CLIFM_PLUGINS_HELPER"
 
-TMP_FILE="$(mktemp /tmp/clifm_rrm.XXXXXX)"
+TMP_FILE=$(mktemp "${TMPDIR:-/tmp}/clifm_rrm.XXXXXX")
 
 # shellcheck disable=SC2154
 find . -type f -name "$pattern" 2>/dev/null | fzf \

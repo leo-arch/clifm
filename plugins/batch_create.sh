@@ -11,14 +11,16 @@ if [ -n "$1" ] && [ "$1" = "--help" ]; then
 	exit 0
 fi
 
-TMP="$(mktemp /tmp/clifm_bn.XXXXXX)"
-FILES="$(mktemp /tmp/clifm_bn.XXXXXX)"
-DIRS="$(mktemp /tmp/clifm_bn.XXXXXX)"
+TMP_DIR="${TMPDIR:-/tmp}"
+TMP=$(mktemp "$TMP_DIR/clifm_bn.XXXXXX")
+FILES=$(mktemp "$TMP_DIR/clifm_bn.XXXXXX")
+DIRS=$(mktemp "$TMP_DIR/clifm_bn.XXXXXX")
 
 dirsn=0
 filesn=0
 
-printf "# Write here file names to be created \n\
+printf "# CliFM - Create files in batch \n\
+# Write here file names to be created \n\
 # End file name with a slash to create a directory \n\
 # Empty and commented lines are omitted\n\n" > "$TMP"
 

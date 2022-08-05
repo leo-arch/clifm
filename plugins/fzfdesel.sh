@@ -49,7 +49,8 @@ Enter: Confirm and deselect all selected files
 
 Esc: Cancel and exit"
 
-TMPFILE="$(mktemp /tmp/clifm_desel.XXXXXX)"
+TMPFILE=$(mktemp "${TMPDIR:-/tmp}/clifm_desel.XXXXXX")
+
 # shellcheck disable=SC2154
 fzf --multi --marker='*' --info=inline \
 	--height="$fzf_height" --keep-right \
@@ -75,7 +76,7 @@ fi
 #	sed "${safe_line}d" "$CLIFM_SELFILE"
 #done < "$TMPFILE"
 
-BK_FILE="$(mktemp /tmp/clifm_sel.XXXXXX)"
+BK_FILE=$(mktemp "${TMPDIR:-/tmp}/clifm_sel.XXXXXX")
 
 # shellcheck disable=SC1007
 while IFS= read -r sel_line; do

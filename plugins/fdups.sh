@@ -105,9 +105,9 @@ Ignore these files and continue? [y/N] "
 	echo ""
 fi
 
-EDITOR="${EDITOR:-nano}"
-TMPDIR="${TMPDIR:-/tmp}"
-tmp_file=$(mktemp "$TMPDIR/.${me}XXXXXX")
+_EDITOR="${EDITOR:-nano}"
+TMP_DIR="${TMPDIR:-/tmp}"
+tmp_file=$(mktemp "$TMP_DIR/.${me}XXXXXX")
 size_digits=12
 
 printf "\
@@ -134,7 +134,7 @@ p' \
 
 time_pre="$($STAT "$tmp_file")"
 
-"$EDITOR" "$tmp_file"
+"$_EDITOR" "$tmp_file"
 
 time_post="$($STAT "$tmp_file")"
 

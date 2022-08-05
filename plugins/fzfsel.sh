@@ -29,8 +29,8 @@ if ! type fzf > /dev/null 2>&1; then
 	exit 127
 fi
 
-TMPDIR="/tmp/clifm/$CLIFM_PROFILE"
-TMPFILE="$TMPDIR/${CLIFM_PROFILE}.fzfsel"
+TMP_DIR="${TMPDIR:-/tmp}/clifm/$CLIFM_PROFILE"
+TMPFILE="$TMP_DIR/${CLIFM_PROFILE}.fzfsel"
 
 # Source our plugins helper
 if [ -z "$CLIFM_PLUGINS_HELPER" ] || ! [ -f "$CLIFM_PLUGINS_HELPER" ]; then
@@ -40,7 +40,7 @@ fi
 # shellcheck source=/dev/null
 . "$CLIFM_PLUGINS_HELPER"
 
-! [ -d "$TMPDIR" ] && mkdir -p "$TMPDIR"
+! [ -d "$TMP_DIR" ] && mkdir -p "$TMP_DIR"
 
 HELP="Usage:
 

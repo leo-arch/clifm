@@ -15,7 +15,7 @@ one or more files/directories specified via a text editor\n"
 	exit 0
 fi
 
-DEST="$(mktemp /tmp/clifm_bcd.XXXXXX)"
+DEST=$(mktemp "${TMPDIR:-/tmp}/clifm_bcd.XXXXXX")
 
 printf "# Write here destinty files/directories, one per line.\n\
 # Blank and commented lines are ommited\n" > "$DEST"

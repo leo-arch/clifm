@@ -4,6 +4,8 @@
 # Written by L. Abramovich
 # License: GPL3
 
+# Dependencies: mplayer (default), tr, head, sed
+
 PLAYER="mplayer"
 OPTS="-playlist"
 
@@ -19,7 +21,7 @@ if ! type "$PLAYER" >/dev/null 2>&1; then
 	exit 127;
 fi
 
-TMP_FILE="/tmp/clifm/playlist.$(tr -dc A-Za-z0-9 </dev/urandom | head -c 6)"
+TMP_FILE="${TMPDIR:-/tmp}/clifm/playlist.$(tr -dc A-Za-z0-9 </dev/urandom | head -c 6)"
 
 for file in "$@"; do
 	if [ "$(printf "%s\n" "$file" | cut -c 1-1 )" != '/' ]; then
