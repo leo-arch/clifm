@@ -237,7 +237,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 ## Support
 
 _CliFM_ is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). Consult the [compilation page](https://github.com/leo-arch/clifm/blob/master/src/README.md#5-compilation).\
-It works on Linux, FreeBSD, NetBSD, OpenBSD, MacOS, and Haiku, on x86 and ARM architectures.
+It works on Linux, Termux (Android), FreeBSD, NetBSD, OpenBSD, MacOS, and Haiku, on x86 and ARM architectures.
 
 ---
 
