@@ -682,12 +682,7 @@ set_max_files(char **args)
 static int
 unicode_function(char *arg)
 {
-	if (!arg) {
-		fprintf(stderr, "%s\n", _(UNICODE_USAGE));
-		return (exit_code = EXIT_FAILURE);
-	}
-
-	if (IS_HELP(arg)) {
+	if (!arg || IS_HELP(arg)) {
 		puts(_(UNICODE_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -716,12 +711,7 @@ dirs_first_function(char *arg)
 	if (autols == 0)
 		return EXIT_SUCCESS;
 
-	if (!arg) {
-		fprintf(stderr, "%s\n", _(FF_USAGE));
-		return (exit_code = EXIT_FAILURE);
-	}
-
-	if (IS_HELP(arg)) {
+	if (!arg || IS_HELP(arg)) {
 		puts(_(FF_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -751,8 +741,8 @@ static int
 filescounter_function(char *arg)
 {
 	if (!arg) {
-		fprintf(stderr, "%s\n", _(FC_USAGE));
-		return EXIT_FAILURE;
+		puts(_(FC_USAGE));
+		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
@@ -784,12 +774,7 @@ filescounter_function(char *arg)
 static int
 pager_function(char *arg)
 {
-	if (!arg) {
-		puts(_(PAGER_USAGE));
-		return (exit_code = EXIT_FAILURE);
-	}
-
-	if (IS_HELP(arg)) {
+	if (!arg || IS_HELP(arg)) {
 		puts(_(PAGER_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -817,12 +802,7 @@ pager_function(char *arg)
 static int
 ext_args_function(char *arg)
 {
-	if (!arg) {
-		puts(_(EXT_USAGE));
-		return EXIT_FAILURE;
-	}
-
-	if (IS_HELP(arg)) {
+	if (!arg || IS_HELP(arg)) {
 		puts(_(EXT_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -1006,6 +986,7 @@ opener_function(char *arg)
 		printf("opener: %s\n", opener ? opener : "lira (built-in)");
 		return EXIT_SUCCESS;
 	}
+
 	if (IS_HELP(arg)) {
 		puts(_(OPENER_USAGE));
 		return EXIT_SUCCESS;
@@ -1184,12 +1165,7 @@ hidden_function(char **comm)
 static int
 _hidden_function(char **args)
 {
-	if (!args[1]) {
-		puts(_(HF_USAGE));
-		return EXIT_FAILURE;
-	}
-
-	if (IS_HELP(args[1])) {
+	if (!args[1] || IS_HELP(args[1])) {
 		/* The same message is in hidden_function(), and printed
 		 * whenever an invalid argument is entered */
 		puts(_(HF_USAGE));
@@ -1262,13 +1238,8 @@ pin_function(char *arg)
 static int
 props_function(char **args)
 {
-	if (!args[1]) {
+	if (!args[1] || IS_HELP(args[1])) {
 		fprintf(stderr, "%s\n", _(PROP_USAGE));
-		return EXIT_FAILURE;
-	}
-
-	if (IS_HELP(args[1])) {
-		puts(_(PROP_USAGE));
 		return EXIT_SUCCESS;
 	}
 
