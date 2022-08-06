@@ -9,9 +9,10 @@
 
 if [ -z "$1" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Copy one or more files/directories passed as arguments to \
-one or more files/directories specified via a text editor\n"
-	printf "Usage: %s FILE(s)\n" "$name"
+	printf "Copy files into multiple directories at once\n"
+	printf "Usage: %s FILE...\n" "$name"
+	printf "\nExample:\nCopy file1 and file2 into dir1 and dir2 at once:\n\
+  %s file1 file2\n\nOnce in the editor, enter dir1 and dir2, save, and exit\n" "$name"
 	exit 0
 fi
 
