@@ -1120,8 +1120,8 @@ alias_function(char **args)
 
 	if (*args[1] == 'i' && strcmp(args[1], "import") == 0) {
 		if (!args[2]) {
-			fprintf(stderr, "%s\n", _(ALIAS_USAGE));
-			return EXIT_FAILURE;
+			puts(_(ALIAS_USAGE));
+			return EXIT_SUCCESS;
 		}
 		return alias_import(args[2]);
 	}
