@@ -368,8 +368,10 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	/* Let's check for baej suggestions, mostly in case of fuzzy matches */
 	size_t wlen = last_word ? strlen(last_word) : 0;
-	if (last_word && cur_comp_type == TCMP_PATH && (case_sens_path_comp ? strncmp(last_word, str, wlen)
-	: strncasecmp(last_word, str, wlen)) != 0) {
+	/* An alias name can be the same as the beginning of the alias definition, so that
+	 * this check must always be true in case of aliases */
+	if (suggestion.type == ALIAS_SUG || (last_word && cur_comp_type == TCMP_PATH && (case_sens_path_comp ? strncmp(last_word, str, wlen)
+	: strncasecmp(last_word, str, wlen)) != 0) ) {
 		flags |= BAEJ_SUGGESTION;
 		baej = 1;
 		offset = 0;
@@ -1743,7 +1745,9 @@ rl_suggestions(const unsigned char c)
 				printed = zero_offset = 1;
 				goto SUCCESS;
 			}
-		} else if (c != ' ' && word && (case_sens_path_comp
+		/* An alias name could be the same as the beginning of the alias defintion,
+		 * so that this test must always be skipped in case of aliases */
+		} else if (suggestion.type != ALIAS_SUG && c != ' ' && word && (case_sens_path_comp
 		? (*word == *suggestion_buf && strncmp(word, suggestion_buf, wlen) == 0)
 		: (TOUPPER(*word) == TOUPPER(*suggestion_buf)
 		&& strncasecmp(word, suggestion_buf, wlen) == 0) ) ) {
