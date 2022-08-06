@@ -263,6 +263,7 @@ leftmost_bell(void)
 	rl_ring_bell();
 
 	if (bell == BELL_VISIBLE) {
+		rl_delete_text(0, rl_end);
 		rl_end = rl_point = 0;
 	}
 }
