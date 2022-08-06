@@ -678,7 +678,7 @@ main() {
 		start_ueberzug
 	fi
 
-	TMP="$(mktemp ${TMPDIR:-/tmp}/clifm.XXXXXX)"
+	TMP=$(mktemp "${TMPDIR:-/tmp}/clifm.XXXXXX")
 
 				#####################################
 				#	 3. RUN FZF, WHICH CALLS BFG	#
