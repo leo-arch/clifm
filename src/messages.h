@@ -103,14 +103,14 @@ Example:\n\
 
 #define BL_USAGE "Create multiple symbolic links at once\n\
 Usage:\n\
-  bl FILE(s)\n\n\
+  bl FILE...\n\n\
 Example:\n\
 - Symlink files file1 file2 file3 and file4 at once:\n\
     bl file* (or 'bl <TAB>' to choose from a list; multi-selection is allowed)"
 
 #define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\
 Usage:\n\
-  bb, bleach FILE(s)\n\n\
+  bb, bleach ELN/FILE...\n\n\
 Example:\n\
 - Bleach file names in your Downloads directory:\n\
     bb ~/Downloads/*"
@@ -209,7 +209,7 @@ Examples:\n\
 
 #define DUP_USAGE "Duplicate files via rsync(1) (cp(1) if rsync is not found)\n\
 Usage:\n\
-  d, dup FILE(s)\n\n\
+  d, dup ELN/FILE...\n\n\
 Example:\n\
 - Duplicate files whose ELN's are 12 through 20:\n\
     d 12-20\n\n\
@@ -236,7 +236,7 @@ Usage:\n\
 
 #define EXPORT_USAGE "Export files to a temporary file\n\
 Usage:\n\
-  exp [FILE(s)]\n\n\
+  exp [ELN/FILE]...\n\n\
 Examples:\n\
 - Export all selected files:\n\
     exp sel\n\
@@ -670,7 +670,7 @@ Examples:\n\
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\
 Usage:\n\
-  tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE(s)] [[:]TAG]\n\n\
+  tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE]... [[:]TAG]\n\n\
 Instead of the long format described above, you can use any of the \
 following shortcuts as well:\n\
   ta: Tag files\n\
@@ -715,7 +715,7 @@ Mark the files you need, and then press Enter or right"
 
 #define TE_USAGE "Toggle the executable bit on files\n\
 Usage:\n\
-  te FILE(s) (or 'te <TAB>' to choose from a list; multi-selection is allowed)\n\n\
+  te ELN/FILE... (or 'te <TAB>' to choose from a list; multi-selection is allowed)\n\n\
 Examples:\n\
 - Set the executable bit on all shell scripts in the current directory:\n\
     te *.sh\n\
@@ -747,7 +747,7 @@ Usage:\n\
 
 #define UNTRASH_USAGE "Restore files from the trash can\n\
 Usage:\n\
-  u, undel, untrash [FILE(s)] [*, a, all]\n\n\
+  u, undel, untrash [FILE]... [*, a, all]\n\n\
 Examples:\n\
 - Untrash all trashed files (restore them to their original location):\n\
     u *\n\
@@ -966,7 +966,7 @@ parameters:\n\n\
  cl, columns [on, off]\n\
  cmd, commands\n\
  cs, colorscheme [edit [APP]] [COLORSCHEME]\n\
- d, dup FILE(s)\n\
+ d, dup ELN/FILE...\n\
  ds, desel [*, a, all]\n\
  edit [APPLICATION] [reset]\n\
  exp [ELN/FILE]...\n\
@@ -1009,8 +1009,8 @@ parameters:\n\n\
  st, sort [METHOD] [rev]\n\
  stats\n\
  t, tr, trash [ELN/FILE]... [ls, list] [clear, empty] [del]\n\
- tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE(s)] [[:]TAG]\n\
- te [FILE(s)]\n\
+ tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE]... [[:]TAG]\n\
+ te ELN/FILE...\n\
  tips\n\
  u, undel, untrash [*, a, all]\n\
  uc, unicode [on, off, status]\n\
