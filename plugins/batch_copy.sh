@@ -17,13 +17,20 @@ fi
 
 DEST=$(mktemp "${TMPDIR:-/tmp}/clifm_bcd.XXXXXX")
 
-printf "# Write here destinty files/directories, one per line.\n\
-# Blank and commented lines are ommited\n" > "$DEST"
+printf "# CliFM - Copy files in batch\n\
+# Write here destinty files/directories, one per line.\n\
+# Blank and commented lines are ommited\n\
+# Just quit the editor to cancel the operation\n" > "$DEST"
 
 "${EDITOR-:nano}" "$DEST"
 
+if ! grep -qv "^$\|^#" "$DEST"; then
+	rm -f -- "$DEST"
+	exit 0
+fi
+
 for file in "$@"; do
- 	grep -v "^$\|^#" "$DEST" | xargs -n1 cp -v "$file"
+	grep -v "^$\|^#" "$DEST" | xargs -n1 cp -v "$file"
 done
 
 rm -f -- "$DEST"
