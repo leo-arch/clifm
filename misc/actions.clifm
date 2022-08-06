@@ -17,6 +17,7 @@
 **=fzfdesel.sh
 //=rgfind.sh
 _=fzcd.sh
+bcp=batch_copy.sh
 bn=batch_create.sh
 cr=cprm.sh
 da=disk_analyzer.sh
