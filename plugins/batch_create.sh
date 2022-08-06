@@ -22,7 +22,8 @@ filesn=0
 printf "# CliFM - Create files in batch \n\
 # Write here file names to be created \n\
 # End file name with a slash to create a directory \n\
-# Empty and commented lines are omitted\n\n" > "$TMP"
+# Empty and commented lines are omitted \n\
+# Just quit the editor to cancel the operation\n\n" > "$TMP"
 
 "${EDITOR:-nano}" "$TMP"
 
@@ -45,7 +46,6 @@ while read -r line; do
 done < "$TMP"
 
 if [ $dirsn -gt 0  ]; then
-#	cat "$DIRS" | xargs -I{} mkdir -p {}
 	xargs -I{} mkdir -p {} < "$DIRS"
 fi
 
