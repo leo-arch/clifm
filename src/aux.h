@@ -50,7 +50,6 @@ char *normalize_path(char *src, size_t src_len);
 FILE *open_fstream_r(char *name, int *fd);
 FILE *open_fstream_w(char *name, int *fd);
 int read_octal(char *str);
-void remove_bold_attr(char **str);
 void rl_ring_bell(void);
 char *url_encode(char *str);
 char *url_decode(char *str);

@@ -64,6 +64,70 @@ struct defs_t *defs;
 size_t defs_n = 0;
 #endif /* CLIFM_SUCKLESS */
 
+/* Turn the first or second field of a color code sequence, provided
+ * it is either 1 or 01 (bold attribute), into 0 (regular)
+ * It returns no value: the change is made in place via a pointer
+ * STR must be a color code with this form: \x1b[xx;xx;xx...
+ * It cannot handle the bold attribute beyond the second field
+ * Though this is usually enough, it's far from ideal
+ *
+ * This function is used to print properties strings ('p' command
+ * and long view mode). It takes the user defined color of the
+ * corresponding file type (e.g. dirs) and removes the bold attribute */
+void
+remove_bold_attr(char **str)
+{
+	if (!*str || !*(*str))
+		return;
+
+	char *p = *str, *q = *str;
+	size_t c = 0;
+
+	while (1) {
+		if (*p == '\\' && *(p + 1) == 'x'
+		&& *(p + 2) == '1' && *(p + 3) == 'b') {
+			if (*(p + 4)) {
+				p += 4;
+				q = p;
+				continue;
+			} else {
+				break;
+			}
+		}
+
+		if (*p == '[') {
+			p++;
+			q = p;
+			continue;
+		}
+
+		/* Skip leading "0;" or "00;" */
+		if (*p == '0' && (p[1] == ';' || (p[1] == '0' && p[2] == ';'))) {
+			p += p[1] == ';' ? 2 : 3;
+			q = p;
+		}
+
+		if ( (*q == '0' && *(q + 1) == '1' && (*(q + 2) == ';'
+		|| *(q + 2) == 'm')) || (*q == '1' && (*(q + 1) == 'm'
+		|| *(q + 1) == ';')) ) {
+			if (*q == '0')
+				*(q + 1) = '0';
+			else
+				*q = '0';
+			break;
+		}
+
+		if (*p == ';' && *(p + 1)) {
+			q = p + 1;
+			c++;
+		}
+
+		p++;
+		if (!*p || c >= 2)
+			break;
+	}
+}
+
 /* Retrieve the color corresponding to dir FILENAME with mode MODE
  * If LINKS > 2, we know the directory is populated, so that there's no need
  * to run count_dir() */

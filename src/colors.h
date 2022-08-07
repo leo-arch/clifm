@@ -37,6 +37,7 @@ char *get_dir_color(const char *filename, const mode_t mode, const nlink_t links
 char *get_ext_color(char *ext);
 char *get_file_color(const char *filename, const struct stat *attr);
 int import_color_scheme(const char *name);
+void remove_bold_attr(char **str);
 void reset_filetype_colors(void);
 void reset_iface_colors(void);
 int set_colors(const char *colorscheme, const int env);
