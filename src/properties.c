@@ -30,15 +30,20 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
-#ifdef __linux__
-#include <sys/capability.h>
-#include <sys/sysmacros.h>
+#if defined(__linux__)
+# include <sys/capability.h>
+# include <sys/sysmacros.h>
 #endif
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
 #include <sys/types.h>
 #include <wchar.h>
+
+#if defined(__OpenBSD__) || defined(__NetBSD__) \
+|| defined(__FreeBSD__) || defined(__APPLE__)
+# include <inttypes.h> /* uintmax_t */
+#endif
 
 #include "aux.h"
 #include "checks.h"
@@ -409,6 +414,13 @@ get_properties(char *filename, const int dsize)
 	if (colorize == 1)
 		printf("%s", cend);
 
+	printf(_("\tBlocks: %s%jd%s"), cbold, (intmax_t)attr.st_blocks, cend);
+	printf(_("\tIO Block: %s%jd%s"), cbold, (intmax_t)attr.st_blksize, cend);
+	printf(_("\tInode: %s%ju%s\n"), cbold, (uintmax_t)attr.st_ino, cend);
+	printf(_("Device: %s%ju,%ju%s"), cbold, (uintmax_t)major(attr.st_dev),
+		(uintmax_t)minor(attr.st_dev), cend);
+
+/*
 #if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__) || defined(__ANDROID__)
 	printf(_("\tBlocks: %s%lld%s"), cbold, attr.st_blocks, cend);
 #else
@@ -431,7 +443,7 @@ get_properties(char *filename, const int dsize)
 	printf(_("Device: %s%lld%s"), cbold, attr.st_dev, cend);
 #else
 	printf(_("Device: %s%zu%s"), cbold, attr.st_dev, cend);
-#endif
+#endif */
 	printf(_("\tUid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("unknown")
 			: owner->pw_name, cend);
 	printf(_("\tGid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("unknown")
