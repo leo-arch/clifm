@@ -652,8 +652,6 @@ struct fileinfo {
 	time_t ltime; /* For long view mode */
 	time_t time;
 	dev_t rdev; /* To calculate major and minor devs in long view */
-/*	dev_t dev;
-	ino_t ino; */
 };
 
 extern struct fileinfo *file_info;

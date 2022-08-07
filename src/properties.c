@@ -371,11 +371,11 @@ get_properties(char *filename, const int dsize)
 
 	/* Creation (birth) time */
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
-#ifdef __OpenBSD__
+# ifdef __OpenBSD__
 	time = attr.__st_birthtim.tv_sec;
-#else
+# else
 	time = attr.st_birthtime;
-#endif
+# endif
 	localtime_r(&time, &tm);
 	char creation_time[MAX_TIME_STR];
 	if (!time) {
@@ -734,13 +734,15 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	char ino_s[12 + 1]; /* Max inode number able to hold: 999 billions! */
 	*ino_s = '\0';
 	if (prop_fields.inode == 1)
+		snprintf(ino_s, sizeof(ino_s), "%-*ju ", (int)ino_max, (uintmax_t)props->inode);
+/*
 #if defined (__APPLE__) || defined(__OpenBSD__) || defined(__i386__)
 		snprintf(ino_s, sizeof(ino_s), "%-*llu ", (int)ino_max, props->inode);
 #elif defined(__ANDROID__)
 		snprintf(ino_s, sizeof(ino_s), "%-*lu ", (int)ino_max, props->inode);
 #else
 		snprintf(ino_s, sizeof(ino_s), "%-*zu ", (int)ino_max, props->inode);
-#endif
+#endif */
 
 	/* Print stuff */
 
