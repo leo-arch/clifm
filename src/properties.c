@@ -417,8 +417,8 @@ get_properties(char *filename, const int dsize)
 	printf(_("\tBlocks: %s%jd%s"), cbold, (intmax_t)attr.st_blocks, cend);
 	printf(_("\tIO Block: %s%jd%s"), cbold, (intmax_t)attr.st_blksize, cend);
 	printf(_("\tInode: %s%ju%s\n"), cbold, (uintmax_t)attr.st_ino, cend);
-	printf(_("Device: %s%ju,%ju%s"), cbold, (uintmax_t)major(attr.st_dev),
-		(uintmax_t)minor(attr.st_dev), cend);
+	dev_t d = (S_ISCHR(attr.st_mode) || S_ISBLK(attr.st_mode)) ? attr.st_rdev : attr.st_dev;
+	printf(_("Device: %s%ju,%ju%s"), cbold, (uintmax_t)major(d), (uintmax_t)minor(d), cend);
 
 /*
 #if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__) || defined(__ANDROID__)
@@ -715,7 +715,9 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars (see aux.h) */
 	char size_s[MAX_UNIT_SIZE + (MAX_COLOR * 2) + 1];
 	if (prop_fields.size == 1) {
-		if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
+//		if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
+		if (!(S_ISCHR(props->mode) || S_ISBLK(props->mode))
+		|| xargs.disk_usage_analyzer == 1) {
 			if (full_dir_size == 1 && props->dir == 1)
 				size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
 			else
@@ -724,14 +726,16 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
 				? size_type : "?", cend);
 		} else {
-			snprintf(size_s, sizeof(size_s), "%d,%d", major(props->rdev),
-				minor(props->rdev));
+			snprintf(size_s, sizeof(size_s), "%ju,%ju", (uintmax_t)major(props->rdev),
+				(uintmax_t)minor(props->rdev));
 		}
 	} else {
 		*size_s = '\0';
 	}
 
-	char ino_s[12 + 1]; /* Max inode number able to hold: 999 billions! */
+	/* Max inode number able to hold: 999 billions! Padding could be as long
+	 * as max inode lenght - 1 */
+	char ino_s[(12 + 1) * 2];
 	*ino_s = '\0';
 	if (prop_fields.inode == 1)
 		snprintf(ino_s, sizeof(ino_s), "%-*ju ", (int)ino_max, (uintmax_t)props->inode);
