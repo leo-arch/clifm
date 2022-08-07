@@ -20,7 +20,7 @@ SRCDIR = src
 SRC = $(SRCDIR)/*.c
 HEADERS = $(SRCDIR)/*.h
 
-CFLAGS ?= -O3 -fstack-protector-strong -march=native
+CFLAGS ?= -O3 -fstack-protector-strong
 LIBS ?= -lreadline -lacl -lcap -lmagic -landroid-glob
 
 CFLAGS += -Wall -Wextra -DCLIFM_DATADIR=$(DATADIR) -D_NO_GETTEXT -D__TERMUX__
