@@ -76,6 +76,10 @@
 #define UTF_8_ENCODED_2_BYTES_MASK 0xE0
 #define UTF_8_ENCODED_2_BYTES      0xC0
 
+#define BLEACH_TMP_HEADER "# CliFM - Bleach\n\
+# Edit replacement file names as you wish, save, and close the editor\n\
+# You will be asked for confirmation at exit\n\n"
+
 #define check_width(chr, size) if ((chr & UTF_8_ENCODED_ ## size ## _BYTES_MASK) == UTF_8_ENCODED_ ## size ## _BYTES) { return size; }
 #define unpack_start(chr, size) ((unsigned char) chr & ~UTF_8_ENCODED_ ## size ## _BYTES_MASK)
 #define unpack_cont(chr) ((unsigned char) chr & ~UTF_8_ENCODED_MASK)
@@ -371,6 +375,12 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	}
 #endif
 
+#ifndef __HAIKU__
+	dprintf(fd,BLEACH_TMP_HEADER);
+#else
+	fprintf(fp, BLEACH_TMP_HEADER);
+#endif
+
 	size_t i;
 	/* Copy all files to be renamed to the temp file */
 	for (i = 0; i < *n; i++) {
@@ -621,8 +631,7 @@ CONFIRM:
 	 * be done */
 	if (_edit == 1) {
 		printf("%zu %s will be bleached\n", f, f > 1 ? "files" : "file");
-		int cont = rl_get_y_or_n("Continue? [y/n] ");
-		if (cont == 0) {
+		if (rl_get_y_or_n("Continue? [y/n] ") != 1) {
 			for (i = 0; i < f; i++) {
 				free(bfiles[i].original);
 				free(bfiles[i].replacement);
