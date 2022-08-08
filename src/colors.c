@@ -1817,7 +1817,7 @@ get_colorschemes(void)
 				/* If the file contains not dot, or if its extension is not
 				 * .clifm, or if it's just a hidden file named ".clifm", skip it */
 //				if (!ret || strcmp(ret, ".cfm") != 0 || ret == name)
-				if (!ret || strcmp(ret, ".clifm") != 0 || ret == name)
+				if (!ret || ret == name || strcmp(ret, ".clifm") != 0)
 					continue;
 
 				*ret = '\0';

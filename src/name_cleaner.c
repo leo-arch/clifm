@@ -234,8 +234,7 @@ clean_file_name(char *restrict name)
 					*q = (char)ret;
 					q++;
 					cur_len++;
-				}
-				else {
+				} else {
 					if (*(q - 1) == DEFAULT_TRANSLATION) {
 						q--;
 						*q = (char)ret;
@@ -514,6 +513,11 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 int
 bleach_files(char **names)
 {
+	if (!names || !names[1] || IS_HELP(names[1])) {
+		puts(_(BLEACH_USAGE));
+		return EXIT_SUCCESS;
+	}
+
 	struct bleach_t *bfiles = (struct bleach_t *)NULL;
 
 	size_t f = 0, i = 1;
@@ -536,7 +540,8 @@ bleach_files(char **names)
 			continue;
 
 		/* Nothing to clean. Skip this one */
-		if (*names[i] == *p && strcmp(names[i], p) == 0) {
+		char *n = (sl && *(sl + 1)) ? sl + 1 : names[i];
+		if (*n == *p && strcmp(n, p) == 0) {
 			free(p);
 			continue;
 		}

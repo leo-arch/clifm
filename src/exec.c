@@ -2256,10 +2256,6 @@ exec_cmd(char **comm)
 	/*    ########## FILE NAMES CLEANER ############## */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'b' && !comm[0][2])
 	|| strcmp(comm[0], "bleach") == 0)) {
-		if (comm[1] && IS_HELP(comm[1])) {
-			puts(_(BLEACH_USAGE));
-			return EXIT_SUCCESS;
-		}
 #ifndef _NO_BLEACH
 		exit_code = bleach_files(comm);
 #else

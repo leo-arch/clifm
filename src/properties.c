@@ -500,11 +500,11 @@ END:
 
 /* Compose the properties line for the current file name
  * This function is called by list_dir(), in listing.c for each file name
- * in the current directory when running on long view mode */
+ * in the current directory when running in long view mode */
 int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max, const size_t ino_max)
 {
-	/* Let's get file attributes and the corresponding colors */
+	/* Let's get file properties and the corresponding colors */
 
 	char file_type = 0; /* File type indicator */
 	char *ctype = dn_c, /* Color for file type */
@@ -733,6 +733,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		*size_s = '\0';
 	}
 
+				/* ###########################
+				 * #      6. FILE INODE      #
+				 * ########################### */
+
 	/* Max inode number able to hold: 999 billions! Padding could be as long
 	 * as max inode lenght - 1 */
 	char ino_s[(12 + 1) * 2];
@@ -765,7 +769,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		light_mode ? "" : df_c, pad, "", df_c,
 		trim ? tt_c : "", trim ? '~' : 0,
 
-		prop_fields.inode ? ino_s : "",
+		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time != 0 ? time_s : "",
@@ -783,7 +787,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	    light_mode ? "" : df_c, pad, "", df_c,
 	    trim ? tt_c : "", trim ? '~' : 0,
 
-		prop_fields.inode ? ino_s : "",
+		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time != 0 ? time_s : "",
