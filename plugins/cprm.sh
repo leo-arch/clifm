@@ -19,11 +19,15 @@ if ! [ -f "$CONFIG_FILE" ]; then
 # See scp(1) for information about scp options
 #[Desktop machine]
 #Options=\"-P 1046\"
-#Target=\"test@192.168.0.23:\"
+#Target=\"user@192.168.0.23:\"
 #
 #[Android phone]
 #Options=\"-P 2222 -o HostKeyAlgorithms=+ssh-dss\"
 #Target=\"android@192.168.0.24:/storage/emulated/0/Download\"
+#
+#[Termux]
+#Options=\"-P 8022\"
+#Target=\"u0_a155@192.168.0.152:\"
 #
 # Just install ffsend. You'll get a download link
 # Do not alter this remote name
