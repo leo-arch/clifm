@@ -80,8 +80,6 @@
 #define unpack_start(chr, size) ((unsigned char) chr & ~UTF_8_ENCODED_ ## size ## _BYTES_MASK)
 #define unpack_cont(chr) ((unsigned char) chr & ~UTF_8_ENCODED_MASK)
 
-int edited_names = 1;
-
 struct  bleach_t {
 	char *original;
 	char *replacement;
@@ -343,12 +341,12 @@ clean_file_name(char *restrict name)
  * the original list of files is returned instead. In case of error
  * returns NULL */
 static struct bleach_t *
-edit_replacements(struct bleach_t *bfiles, size_t *n)
+edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 {
 	if (!bfiles || !bfiles[0].original)
 		return (struct bleach_t *)NULL;
 
-	edited_names = 1;
+	*edited_names = 1;
 	log_function(NULL);
 
 	char f[PATH_MAX];
@@ -429,7 +427,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n)
 			_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		}
 		close_fstream(fp, fd);
-		edited_names = 0;
+		*edited_names = 0;
 		return bfiles; /* Return the original list of files */
 	}
 	/* Free the original list of files */
@@ -571,6 +569,7 @@ bleach_files(char **names)
 
 CONFIRM:
 	putchar('\n');
+	int _edit = 0, edited_names = 0;
 
 	while (!input) {
 		input = rl_no_hist(_("Is this OK? [y/N/(e)dit] "));
@@ -588,10 +587,11 @@ CONFIRM:
 			case 'y': /* fallthrough */
 			case 'Y': rename = 1; break;
 			case 'e':
-				bfiles = edit_replacements(bfiles, &f);
+				_edit = 1;
+				bfiles = edit_replacements(bfiles, &f, &edited_names);
 				if (!bfiles)
 					break;
-				if (edited_names && f > 0) {
+				if (edited_names == 1 && f > 0) {
 					free(input);
 					input = (char *)NULL;
 					goto CONFIRM;
@@ -616,11 +616,27 @@ CONFIRM:
 		return EXIT_SUCCESS;
 	}
 
+	/* The user entered 'e' to edit the file, but nothing was modified
+	 * Ask for confirmation in case the user just wanted to see what would
+	 * be done */
+	if (_edit == 1) {
+		printf("%zu %s will be bleached\n", f, f > 1 ? "files" : "file");
+		int cont = rl_get_y_or_n("Continue? [y/n] ");
+		if (cont == 0) {
+			for (i = 0; i < f; i++) {
+				free(bfiles[i].original);
+				free(bfiles[i].replacement);
+			}
+			free(bfiles);
+			return EXIT_SUCCESS;
+		}
+	}
+
 	/* If renaming all selected files, deselect them */
-	if (rename && is_sel)
+	if (rename == 1 && is_sel)
 		deselect_all();
 
-	int total_rename = rename ? (int)f : 0;
+	int total_rename = rename == 1 ? (int)f : 0;
 	size_t rep_suffix = 1;
 	int exit_status = EXIT_SUCCESS;
 	for (i = 0; i < f; i++) {

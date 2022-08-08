@@ -46,6 +46,9 @@
 #include "file_operations.h"
 #include "autocmds.h"
 
+/* Only for config files migration. Remove when needed */
+#include "readline.h"
+
 #ifndef _NO_FZF
 /* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)
  * Let's do this even if fzftab is not enabled at startup, because this feature
@@ -721,34 +724,6 @@ rename_config_files(char *dir)
 	rename_profile_files(dir);
 }
 
-#include "readline.h"
-static int
-get_user_answer(const char *_msg)
-{
-	char *answer = (char *)NULL;
-	while (!answer) {
-		answer = rl_no_hist(_msg);
-		if (!answer)
-			continue;
-
-		if (!*answer || answer[1]) {
-			free(answer);
-			answer = (char *)NULL;
-			continue;
-		}
-
-		switch(*answer) {
-		case 'y': /* fallthrough */
-		case 'Y': free(answer); return 1;
-		case 'n': /* fallthrough */
-		case 'N': free(answer); return 0;
-		default: free(answer); answer = (char *)NULL; continue;
-		}
-	}
-
-	return 0; /* Never reached */
-}
-
 static void
 check_cfm_files(void)
 {
@@ -782,7 +757,7 @@ check_cfm_files(void)
 	_PROGRAM_NAME);
 
 	putchar('\n');
-	if (get_user_answer("Rename configuration files automatically? [y/n] ") != 1)
+	if (rl_get_y_or_n("Rename configuration files automatically? [y/n] ") != 1)
 		return;
 
 	rename_config_files(config_dir_gral);

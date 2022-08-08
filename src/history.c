@@ -325,8 +325,8 @@ save_dirhist(void)
 
 	FILE *fp = fopen(dirhist_file, "w");
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Could not save "
-			"directory history: %s\n"), strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error saving "
+			"directory history: %s\n"), PROGRAM_NAME, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

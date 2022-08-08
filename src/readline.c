@@ -88,6 +88,36 @@ int tagged_files_n = 0;
 #define MAX_EXT_OPTS_LEN NAME_MAX
 char ext_opts[MAX_EXT_OPTS][MAX_EXT_OPTS_LEN];
 
+/* Get user input (y/n, uppercase is allowed) using _MSG as message
+ * The question will be repeated until 'y' or 'n' is entered
+ * Returns 1 if 'y' and zero if 'n' */
+int
+rl_get_y_or_n(const char *_msg)
+{
+	char *answer = (char *)NULL;
+	while (!answer) {
+		answer = rl_no_hist(_msg);
+		if (!answer)
+			continue;
+
+		if (!*answer || answer[1]) {
+			free(answer);
+			answer = (char *)NULL;
+			continue;
+		}
+
+		switch(*answer) {
+		case 'y': /* fallthrough */
+		case 'Y': free(answer); return 1;
+		case 'n': /* fallthrough */
+		case 'N': free(answer); return 0;
+		default: free(answer); answer = (char *)NULL; continue;
+		}
+	}
+
+	return 0; /* Never reached */
+}
+
 /* Generate completions for command CMD using a modified version of
  * fish's manpages parser */
 static int
