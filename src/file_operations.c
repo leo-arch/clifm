@@ -1309,7 +1309,7 @@ copy_function(char **args, int copy_and_rename)
 	}
 
 	if (!is_sel)
-		return run_and_refresh(args);
+		return run_and_refresh(args, 1);
 
 	size_t n = 0;
 	char **tcmd = (char **)xnmalloc(2 + args_n + 2, sizeof(char *));
@@ -1327,6 +1327,11 @@ copy_function(char **args, int copy_and_rename)
 
 	size_t i;
 	for (i = 1; args[i]; i++) {
+		/* The -f,--force parameter is internal. Skip it
+		 * It instructs cp/mv to run non-interactively (no -i param) */
+		if (i == 1 && *args[i] == '-' && (strcmp(args[i], "-f") == 0
+		|| strcmp(args[i], "--force") == 0))
+			continue;
 		p = dequote_str(args[i], 0);
 		if (!p)
 			continue;
@@ -1459,7 +1464,15 @@ remove_file(char **args)
 	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
 	int i, j = 3, dirs = 0;
 
-	for (i = 1; args[i]; i++) {
+	int bk_rm_force = rm_force;
+	i = (args[1] && *args[1] == '-' && (strcmp(args[1], "-f") == 0
+	|| strcmp(args[1], "--force") == 0)) ? 2 : 1;
+	if (i == 2)
+		rm_force = 1;
+
+	for (; args[i]; i++) {
+
+//	for (i = 1; args[i]; i++) {
 		/* Check if at least one file is in the current directory. If not,
 		 * there is no need to refresh the screen */
 		if (cwd == 0)
@@ -1507,21 +1520,26 @@ remove_file(char **args)
 
 	if (j == 3) { /* No file to be deleted */
 		free(rm_cmd);
+		rm_force = bk_rm_force;
 		return EXIT_FAILURE;
 	}
 
 	rm_cmd[0] = savestring("rm", 2);
 	if (dirs == 1)
-#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
+		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dr", rm_force == 1 ? 4 : 3);
+#elif defined(_BE_POSIX)
 		rm_cmd[1] = savestring("-r", 2);
 #else /* Linux and FreeBSD only */
-		rm_cmd[1] = savestring("-dIr", 4);
+//		rm_cmd[1] = savestring("-dIr", 4);
+		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dIr", 4);
 #endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
 	else
 #if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
 		rm_cmd[1] = savestring("-f", 2);
 #else /* Linux and FreeBSD only */
-		rm_cmd[1] = savestring("-I", 2);
+//		rm_cmd[1] = savestring("-I", 2);
+		rm_cmd[1] = savestring(rm_force == 1 ? "-f" : "-I", 2);
 #endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
 	rm_cmd[2] = savestring("--", 2);
 
@@ -1545,6 +1563,7 @@ remove_file(char **args)
 		free(rm_cmd[i]);
 	free(rm_cmd);
 
+	rm_force = bk_rm_force;
 	return exit_status;
 }
 

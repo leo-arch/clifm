@@ -274,12 +274,20 @@ xf=01;31:xs=00;32:"
 #define DEF_BELL_STYLE     BELL_VISIBLE
 #define VISIBLE_BELL_DELAY 30 /* Milliseconds */
 
+/* cp, mv, and rm commands */
 #define __DEF_CP_CMD "cp -iRp"
+#define __DEF_CP_CMD_FORCE "cp -Rp"
 #define __DEF_ADVCP_CMD "advcp -giRp"
+#define __DEF_ADVCP_CMD_FORCE "advcp -gRp"
 #define __DEF_WCP_CMD "wcp"
 #define __DEF_RSYNC_CMD "rsync -avP"
+
 #define __DEF_MV_CMD "mv -i"
+#define __DEF_MV_CMD_FORCE "mv"
 #define __DEF_ADVMV_CMD "advmv -gi"
+#define __DEF_ADVMV_CMD_FORCE "advmv -g"
+
+#define DEF_RM_FORCE 0
 
 #define SUG_STRATS 7
 

@@ -985,13 +985,19 @@ DirhistMap=%s\n\n"
 # only hidden files. Do not quote the regular expression\n\
 Filter=\n\n"
 
-	    "# Set the default copy command. Available options are: 0 = cp,\n\
-# 1 = advcp, and 2 = wcp. Both 1 and 2 add a progress bar to cp.\n\
+	    "# Set the default copy command. Available options are: 0 = 'cp -iRp',\n\
+# 1 = 'cp -Rp', 2 = 'advcp -giRp', 3 = 'advcp -gRp', 4 = 'wcp', and 5 = 'rsync -avP'\n\
+# Options 2-5 include a progress bar for the copy command.\n\
 cpCmd=%d\n\n"
 
-	    "# Set the default move command. Available options are: 0 = mv,\n\
-# and 1 = advmv. 1 adds a progress bar to mv.\n\
-mvCmd=%d\n\n",
+	    "# Set the default move command. Available options are: 0 = 'mv -i',\n\
+# 1 = 'mv', 2 = 'advmv -gi', and 3 = 'advmv -g'.\n\
+# Options 2 and 3 include a progress bar for the move command.\n\
+mvCmd=%d\n\n"
+
+		"# If set to true, the 'r' command will never prompt before removals\n\
+# rm(1) is invoked with the -f flag.\n\
+rmForce=%s\n\n",
 
 	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
@@ -1001,7 +1007,8 @@ mvCmd=%d\n\n",
 		DEF_DESKTOP_NOTIFICATIONS == 1 ? "true" : "false",
 		DEF_DIRHIST_MAP == 1 ? "true" : "false",
 		DEF_CP_CMD,
-		DEF_MV_CMD);
+		DEF_MV_CMD,
+		DEF_RM_FORCE == 1 ? "true" : "false");
 
 	fprintf(config_fp,
 		"# TAB completion mode: 'standard', 'fzf', 'fzy', or 'smenu'. Defaults to\n\
@@ -2034,7 +2041,8 @@ read_config(void)
 			ret = sscanf(line, "cpCmd=%d\n", &opt_num);
 			if (ret == -1)
 				continue;
-			if (opt_num >= 0 && opt_num <= CP_CMD_AVAILABLE)
+//			if (opt_num >= 0 && opt_num <= CP_CMD_AVAILABLE)
+			if (opt_num >= 0 && opt_num < CP_CMD_AVAILABLE)
 				cp_cmd = opt_num;
 			else
 				cp_cmd = DEF_CP_CMD;
@@ -2223,7 +2231,7 @@ read_config(void)
 			ret = sscanf(line, "mvCmd=%d\n", &opt_num);
 			if (ret == -1)
 				continue;
-			if (opt_num == 0 || opt_num == 1)
+			if (opt_num >= 0 && opt_num < MV_CMD_AVAILABLE)
 				mv_cmd = opt_num;
 			else /* default (sort by name) */
 				mv_cmd = DEF_MV_CMD;
@@ -2286,6 +2294,11 @@ read_config(void)
 
 		else if (*line == 'R' && strncmp(line, "RlEditMode=0", 12) == 0) {
 			rl_vi_editing_mode(1, 0); /* Readline defaults to emacs */
+		}
+
+		else if (*line == 'r' && strncmp(line, "rmForce=", 8) == 0) {
+			if (set_config_bool_value(line, &rm_force) == -1)
+				continue;
 		}
 
 		else if (*line == 'S' && strncmp(line, "SearchStrategy=", 15) == 0) {

@@ -34,6 +34,6 @@ void exec_chained_cmds(char *cmd);
 void exec_profile(void);
 int launch_execve(char **cmd, const int bg, const int xflags);
 int launch_execle(const char *cmd);
-int run_and_refresh(char **comm);
+int run_and_refresh(char **comm, const int skip_force);
 
 #endif /* EXEC_H */

@@ -762,16 +762,22 @@ Example:\n\
     vv sel mydir"
 
 #define WRAPPERS_USAGE "c (v, paste), l, m, md, and r commands are wrappers \
-for cp, ln, mv, mkdir, and rm shell commands respectivelly.\n\n\
-\n\
+for cp, ln, mv, mkdir, and rm shell commands respectively.\n\n\
 c -> cp -iRp\n\
 l -> ln -sn\n\
 m -> mv -i\n\
 md -> mkdir -p\n\
-r (for directories) -> rm -dIr (\"rm -r\" on NetBSD and OpenBSD)\n\
-r (for non-directories) -> rm -I (\"rm -f\" on NetBSD and OpenBSD)\n\
+r (for directories) -> rm -dIr (\"rm -r\" on NetBSD/OpenBSD/MacOS)\n\
+r (for non-directories) -> rm -I (\"rm -f\" on NetBSD/OpenBSD/MacOS)\n\
 v, paste FILE -> c FILE .\n\n\
-Note: To use different parameters, just invoke the corresponding utility, as usual. For example:\n\
+By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively (-i), i.e. prompting \n\
+before overwriting a file. To run non-interactivelly instead, use the -f,--force \n\
+parameter (see the examples below). You can also permanently run in non-interactive \n\
+mode using the cpCmd/mvCmd options in the configuration file ('edit' or F10).\n\n\
+Just as 'c' and 'm', the 'r' command accepts -f,--force as paramater to prevent rm(1) \n\
+from prompting before removals. Set rmForce to true in the configuration file to make \n\
+this option permanent.\n\n\
+To use different parameters, just invoke the corresponding utility, as usual. For example:\n\
   cp -abf ...\n\n\
 Examples:\n\
 - Create a copy of file1 named file2\n\
@@ -780,12 +786,18 @@ Examples:\n\
     c file1 dir1/file2\n\
 - Copy all selected files into the current directory:\n\
     c sel\n\
+- Copy all selected files into the current directory (non-interactively):\n\
+    c -f sel\n\
 - Move all selected files into the directory named testdir:\n\
     m sel testdir\n\
-- Remove all selected files:\n\
-    r sel\n\
 - Rename file1 as file_test:\n\
     m file1 file_test\n\
+- Move all selected files into the current directory (non-interactively):\n\
+    m -f sel\n\
+- Remove all selected files:\n\
+    r sel\n\
+- Remove all selected files (non-interactively):\n\
+    r -f sel\n\
 - Create a symbolic link pointing to the directory whose ELN is 12 named link:\n\
     l 12 link\n\
 - Create a directory named mydir:\n\

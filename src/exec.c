@@ -118,9 +118,12 @@ get_new_name(void)
 	return input;
 }
 
-/* Run CMD via execve() and refresh the screen in case of success */
+/* Run CMD via execve() and refresh the screen in case of success
+ * skip_force is true (1) only when coming from copy_function, that is,
+ * for the c and m commands, which take -f,--force as parameter to
+ * intruct cp/mv to run non-interactivelly (no -i) */
 int
-run_and_refresh(char **cmd)
+run_and_refresh(char **cmd, const int skip_force)
 {
 	if (!cmd)
 		return EXIT_FAILURE;
@@ -171,6 +174,11 @@ run_and_refresh(char **cmd)
 
 	size_t i;
 	for (i = 1; cmd[i]; i++) {
+		/* The -f,--force parameter is internal. Skip it
+		 * It instructs cp/mv to run non-interactively (no -i param) */
+		if (skip_force == 1 && i == 1 && *cmd[i] == '-' && (strcmp(cmd[i], "-f") == 0
+		|| strcmp(cmd[i], "--force") == 0))
+			continue;
 		p = dequote_str(cmd[i], 0);
 		if (!p)
 			continue;
@@ -1815,12 +1823,24 @@ toggle_full_dir_size(const char *arg)
 }
 
 static void
-set_cp_cmd(char **cmd)
+set_cp_cmd(char **cmd, const int cp_force)
 {
+	int bk_cp_cmd = cp_cmd;
+	if (cp_force == 1) {
+		if (cp_cmd == CP_ADVCP)
+			cp_cmd = CP_ADVCP_FORCE;
+		else if (cp_cmd == CP_CP)
+			cp_cmd = CP_CP_FORCE;
+	}
+
 	switch(cp_cmd) {
 	case CP_ADVCP:
 		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVCP_CMD) + 1) * sizeof(char));
 		strcpy(*cmd, __DEF_ADVCP_CMD);
+		break;
+	case CP_ADVCP_FORCE:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVCP_CMD_FORCE) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_ADVCP_CMD_FORCE);
 		break;
 	case CP_WCP:
 		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_WCP_CMD) + 1) * sizeof(char));
@@ -1830,21 +1850,43 @@ set_cp_cmd(char **cmd)
 		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_RSYNC_CMD) + 1) * sizeof(char));
 		strcpy(*cmd, __DEF_RSYNC_CMD);
 		break;
+	case CP_CP_FORCE:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_CP_CMD_FORCE) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_CP_CMD_FORCE);
+		break;
 	case CP_CP: /* fallthrough */
 	default:
 		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_CP_CMD) + 1) * sizeof(char));
 		strcpy(*cmd, __DEF_CP_CMD);
 		break;
 	}
+
+	cp_cmd = bk_cp_cmd;
 }
 
 static void
-set_mv_cmd(char **cmd)
+set_mv_cmd(char **cmd, const int mv_force)
 {
+	int bk_mv_cmd = mv_cmd;
+	if (mv_force == 1) {
+		if (mv_cmd == CP_ADVCP)
+			mv_cmd = CP_ADVCP_FORCE;
+		else if (mv_cmd == CP_CP)
+			mv_cmd = CP_CP_FORCE;
+	}
+
 	switch(mv_cmd) {
 	case MV_ADVMV:
 		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVMV_CMD) + 1) * sizeof(char));
 		strcpy(*cmd, __DEF_ADVMV_CMD);
+		break;
+	case MV_ADVMV_FORCE:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVMV_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_ADVMV_CMD_FORCE);
+		break;
+	case MV_MV_FORCE:
+		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_MV_CMD_FORCE) + 1) * sizeof(char));
+		strcpy(*cmd, __DEF_MV_CMD_FORCE);
 		break;
 	case MV_MV: /* fallthrough */
 	default:
@@ -1852,6 +1894,8 @@ set_mv_cmd(char **cmd)
 		strcpy(*cmd, __DEF_MV_CMD);
 		break;
 	}
+
+	mv_cmd = bk_mv_cmd;
 }
 
 /* Let's check we have not left any zombie process behind. This happens
@@ -2070,7 +2114,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "mkdir") == 0 || strcmp(comm[0], "unlink") == 0
 	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0
 	|| strcmp(comm[0], "chmod") == 0))
-		return (exit_code = run_and_refresh(comm));
+		return (exit_code = run_and_refresh(comm, 0));
 #endif
 
 	/*     ############### COPY AND MOVE ##################     */
@@ -2100,7 +2144,12 @@ exec_cmd(char **comm)
 			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
 				copy_and_rename = 1;
 
-			set_cp_cmd(&comm[0]);
+			int cp_force = 0;
+			if (comm[1] && *comm[1] == '-' && (strcmp(comm[1], "-f") == 0
+			|| strcmp(comm[1], "--force") == 0))
+				cp_force = 1;
+
+			set_cp_cmd(&comm[0], cp_force);
 		} else if (*comm[0] == 'm' && !comm[0][1]) {
 			if (comm[1] && IS_HELP(comm[1])) {
 				puts(_(WRAPPERS_USAGE));
@@ -2108,7 +2157,12 @@ exec_cmd(char **comm)
 			}
 			if (!sel_is_last && comm[1] && !comm[2])
 				xrename = 1;
-			set_mv_cmd(&comm[0]);
+
+			int mv_force = 0;
+			if (comm[1] && *comm[1] == '-' && (strcmp(comm[1], "-f") == 0
+			|| strcmp(comm[1], "--force") == 0))
+				mv_force = 1;
+			set_mv_cmd(&comm[0], mv_force);
 		}
 
 		kbind_busy = 1;
@@ -2201,7 +2255,7 @@ exec_cmd(char **comm)
 		}
 
 		kbind_busy = 1;
-		exit_code = run_and_refresh(comm);
+		exit_code = run_and_refresh(comm, 0);
 		kbind_busy = 0;
 	}
 

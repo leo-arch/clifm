@@ -288,13 +288,19 @@ extern int watch;
 #define UNSET -1
 
 /* Macros for the cp and mv cmds */
-#define CP_CP    0
-#define CP_ADVCP 1
-#define CP_WCP   2
-#define CP_RSYNC 3
-#define CP_CMD_AVAILABLE 4
-#define MV_MV    0
-#define MV_ADVMV 1
+#define CP_CP          0 /* cp -iRp */
+#define CP_CP_FORCE    1 /* cp -Rp */
+#define CP_ADVCP       2 /* advcp -giRp */
+#define CP_ADVCP_FORCE 3 /* advcp -gRp */
+#define CP_WCP         4 /* wcp */
+#define CP_RSYNC       5 /* rsync -avP */
+#define CP_CMD_AVAILABLE 6
+
+#define MV_MV          0 /* mv -i */
+#define MV_MV_FORCE    1 /* mv */
+#define MV_ADVMV       2 /* advmv -gi */
+#define MV_ADVMV_FORCE 3 /* advmv -g */
+#define MV_CMD_AVAILABLE 4
 
 /* Macros for listing_mode */
 #define VERTLIST 0 /* ls-like listing mode */
@@ -1076,6 +1082,7 @@ extern int
 	rl_last_word_start,
 	rl_nohist,
 	rl_notab,
+	rm_force,
 	search_strategy,
 	sel_is_last,
 	selfile_ok,
