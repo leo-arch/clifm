@@ -1529,7 +1529,7 @@ remove_file(char **args)
 #if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dr", rm_force == 1 ? 4 : 3);
 #elif defined(_BE_POSIX)
-		rm_cmd[1] = savestring("-r", 2);
+		rm_cmd[1] = savestring(rm_force == 1 ? "-rf" : "-r", rm_force == 1 ? 3 : 2);
 #else /* Linux and FreeBSD only */
 //		rm_cmd[1] = savestring("-dIr", 4);
 		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dIr", 4);
