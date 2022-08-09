@@ -1113,7 +1113,7 @@ Wiki (https://github.com/leo-arch/clifm/wiki)."
                            `-------------'\n"
 
 #define QUICK_HELP "\
-This is only a quick help. For more information and advanced tricks \n\
+This is only a quick start guide. For more information and advanced tricks \n\
 consult the manpage and/or our Wiki (https://github.com/leo-arch/clifm/wiki)\n\
 \n\
 NAVIGATION\n\
@@ -1150,13 +1150,12 @@ s *.c              Select all C files\n\
 s 1-4 8 19-26      Select multiple files by ELN\n\
 sb                 List currently selected files\n\
 ds                 Deselect a few selected files\n\
-ds *               Deselect all selected files\n\
+ds * | Alt-d       Deselect all selected files\n\
 c sel              Copy selected files into the current directory\n\
 r sel              Remove all selected files\n\
 br sel             Bulk rename selected files\n\
-d sel              Duplicate all selected files\n\
 c 34 file_copy     Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
-d myfile           Duplicate 'myfile' (via rsync)\n\
+cr myfile          Copy 'myfile' to a remote location\n\
 m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
 m myfile.txt       Rename 'myfile.txt'\n\
 l myfile mylink    Create a symbolic link named 'mylink' to 'myfile'\n\
@@ -1164,9 +1163,9 @@ le mylink          Edit the symbolic link 'mylink'\n\
 bl sel             Create symbolic links for all selected files\n\
 te *.sh            Toggle the executable bit on all .sh files\n\
 t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
-t del              Select trashed files and remove them permanently\n\
+t del              Permanently remove trashed files using a menu\n\
 t empty            Empty the trash can\n\
-u                  Undelete trashed files\n\
+u                  Undelete trashed files using a menu\n\
 bm a mydir         Bookmark the directory named 'mydir'\n\
 bm d mybm          Remove the bookmark named 'mybm'\n\
 ac sel             Compress/archive selected files\n\
@@ -1174,6 +1173,7 @@ ac sel             Compress/archive selected files\n\
 MISC\n\
 ----\n\
 cmd --help     Get help for command 'cmd'\n\
+help TOPIC     Get help for topic TOPIC\n\
 F1             Open the manpage\n\
 ih             Run the interactive help plugin (needs fzf)\n\
 edit | F10     View and/or edit the configuration file\n\
@@ -1185,7 +1185,7 @@ mm info 12     Get MIME information for the file whose ELN is 12\n\
 cs             Manage color schemes\n\
 Right          Accept the entire suggestion\n\
 Alt-f          Accept the first/next word of the current suggestion\n\
-Enter | rf | . Reprint the current list of files\n\
+Enter | Ctrl-l Reprint the current list of files\n\
 pf set test    Change to the profile named 'test'\n\
 st size rev    Sort files by size in reverse order\n\
 Alt-x | Alt-z  Toggle sort method\n\
