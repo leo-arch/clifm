@@ -603,17 +603,25 @@ Each file name will be copied into a temporary file, which will be opened with t
 This built-in bulk rename function won't deal with deletions, replacements, file name conflicts and the like. For a smarter alternative use \fBqmv\fR(1).
 .TP
 \fBc\fR, \fBl \fR[\fIe\fR, \fIedit\fR], \fBm\fR, \fBmd\fR, \fBr\fR
-short for the following commands respectively: \fIcp\ \-iRp\fR, \fIln\ \-sn\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\ \-I\fR (for files) or \fIrm\ \-dIr\fR (for directories). To use these commands without any of these arguments, or with any other argument you need, just use the non-abbreviated command, for instance, \fIcp\fR instead of \fIc\fR.
+short for the following commands respectively: \fIcp\ \-iRp\fR, \fIln\ \-sn\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\ \-I\fR (for files) or \fIrm\ \-dIr\fR (for directories).
 .sp
-The \fIln\fR command allows the use of the 'e, edit' option to modify the destination of a symbolic link. Example: \fIl\ e\ 12\fR, or \fIle\ 12\fR,  to relink the symbolic link corresponding to the ELN 12.
+By default, the \fIc\fR, \fIm\fR, and \fIr\fR commands execute \fBcp\fR(1), \fBmv\fR(1), and \fBrm\fR(1) respectively in interactive mode (using the \fI\-i/\-I\fR switches) to ask for confirmation before operations. Since this might sometimes be quite intrusive (specially when operating on large amount of files), it is possible to turn interactivity off in two different ways:
+
+  a) For the current command only: via the \fI\-f\fR, \fI\-\-force\fR switch. Example: \fIc \-f sel\fR, \fIm \-f sel\fR, or \fIr \-f *\fR.
+
+  b) Permanently. Use the \fIcpCmd\fR, \fImvCmd\fR, and \fIrmForce\fR options in the configuration file to permanently set any of these commands to non-interactive mode.
 .sp
-The \fIm\fR command is just like \fImv\ \-i\fR, but with the following differences: When using the \fIsel\fR keyword and no destiny is provided, \fIm\fR will move selected files into the current directory. Otherwise, whenever \fIsel\fR is not used, but just a source file name (and no destiny is provided), the \fIm\fR command behaves much like the \fBimv\fR(1) shell command (from the `renameutils` package), providing an interactive renaming function: it prompts the user to enter a new name using the source file name as base, so that it does not need to be typed twice. For this alternative prompt, only TAB completion for file names is available.
+On systems not supporting the \fI\-I\fR switch (NetBSD, OpenBSD, and MacOS), the \fIr\fR command executes \fBrm\fR(1) as follows: \fIrm \-drf\fR for directories, and \fIrm \-f\fR for files. Note that, if compiled with _BE_POSIX, the \fI\-d\fR flag is not available, in which case \fIrm \-rf\fR is used instead.
 .sp
-NOTE: On POSIX compliant systems, like NetBSD, the \fIr\fR command amounts to \fIrm\ \-r\fR for directories and \fIrm\ \-f\fR for files, since the \fI-I\fR option is not available and \fI-i\fR is too instrusive.
+To use these commands without any of these arguments, or with any other argument you want, just use the non-abbreviated (shell) command, for instance, \fIcp\fR instead of \fIc\fR. Of course, you can also create aliases to use you preferred commands, for example, "c='cp \-adp'". Consult the \fIalias\fR command above for more information.
 .sp
-\fBclifm\fR supports \fIadvcp\fR, \fIwcp\fR, and \fIrsync\fR to copy files (they include a progress bar). To use them instead of \fIcp\fR set the corresponding option (\fIcpCmd\fR) in the configuration file. If \fIadvcp\fR is selected, the command used is \fIadvcp\ \-giRp\fR. If \fIrsync\fR, the command is \fIrsync\ \-avP\fR. \fIwcp\fR takes no argument.
+The \fIl\fR command allows the use of the \fIe, edit\fR option to modify the destination of a symbolic link. Example: \fIl\ edit\ 12\fR (or \fIle\ 12\fR)  to relink the symbolic link corresponding to the file whose ELN is 12.
 .sp
-\fIadvmv\fR is also supported to move files (to add a progress bar to \fImv\fR). Use the \fImvCmd\fR option in the configuration file to choose this alternative implementation of \fImv\fR. In this case, the command used is \fIadvmv\ \-gi\fR.
+When using the \fIsel\fR keyword and no destiny is provided, \fIc\fR and \fIm\fR will copy/move selected files into the current directory. Whenever \fIsel\fR is not used, but just a source file name (and no destiny is provided), the \fIm\fR command behaves much like the \fBimv\fR(1) shell command (from the `renameutils` package), providing an interactive renaming function: it prompts the user to enter a new name using the source file name as base, so that it does not need to be typed twice. For this alternative prompt, only TAB completion for file names is available.
+.sp
+\fBclifm\fR supports \fBadvcp\fR(1), \fIwcp\fR, and \fBrsync\fR(1) to copy files (they include a progress bar). To use them instead of \fBcp\fR(1) set the corresponding option (\fIcpCmd\fR) in the configuration file. If \fIadvcp\fR is selected, the command used is \fIadvcp\ \-giRp\fR (or \fIadvcp \-gRp\fR, for non-interactive mode). If \fIrsync\fR, the command is \fIrsync\ \-avP\fR. \fIwcp\fR takes no argument.
+.sp
+\fBadvmv\fR(1) is also supported to move files (to add a progress bar to the move command). Use the \fImvCmd\fR option in the configuration file to choose this alternative implementation of \fImv\fR. In this case, the command used is \fIadvmv\ \-gi\fR (or \fIadvmv \-g\fR for non-interactive mode).
 
 .TP
 .B colors
