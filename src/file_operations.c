@@ -1471,8 +1471,6 @@ remove_file(char **args)
 		rm_force = 1;
 
 	for (; args[i]; i++) {
-
-//	for (i = 1; args[i]; i++) {
 		/* Check if at least one file is in the current directory. If not,
 		 * there is no need to refresh the screen */
 		if (cwd == 0)
@@ -1531,16 +1529,14 @@ remove_file(char **args)
 #elif defined(_BE_POSIX)
 		rm_cmd[1] = savestring(rm_force == 1 ? "-rf" : "-r", rm_force == 1 ? 3 : 2);
 #else /* Linux and FreeBSD only */
-//		rm_cmd[1] = savestring("-dIr", 4);
 		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dIr", 4);
 #endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
 	else
 #if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
 		rm_cmd[1] = savestring("-f", 2);
 #else /* Linux and FreeBSD only */
-//		rm_cmd[1] = savestring("-I", 2);
 		rm_cmd[1] = savestring(rm_force == 1 ? "-f" : "-I", 2);
-#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
+#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ */
 	rm_cmd[2] = savestring("--", 2);
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
