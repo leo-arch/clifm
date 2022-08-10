@@ -2119,9 +2119,9 @@ list_dir(void)
 				name_icon_found = get_name_icon(file_info[n].name, (int)n);
 #endif
 
-			/* Check file extension */
+			/* Check file extension (only if the user has access to the file) */
 			char *ext = (char *)NULL;
-			if (check_ext == 1)
+			if (check_ext == 1 && file_info[n].color != nf_c)
 				ext = strrchr(file_info[n].name, '.');
 			/* Make sure not to take a hidden file for a file extension */
 			if (!ext || ext == file_info[n].name)

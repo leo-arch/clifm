@@ -1114,7 +1114,7 @@ Wiki (https://github.com/leo-arch/clifm/wiki)."
 
 #define QUICK_HELP "\
 This is only a quick start guide. For more information and advanced tricks \n\
-consult the manpage and/or our Wiki (https://github.com/leo-arch/clifm/wiki)\n\
+consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)\n\
 \n\
 NAVIGATION\n\
 ----------\n\

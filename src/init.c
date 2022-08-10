@@ -28,6 +28,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
+
+#if defined(__linux__) || defined(__HAIKU__)
+# include <grp.h> /* getgrouplist(3) */
+#endif
+
 #include <pwd.h>
 #include <signal.h>
 #include <stdio.h>
@@ -495,6 +500,14 @@ get_user(void)
 	tmp_user.gid = pw->pw_gid;
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
+
+	/* Let's get secondary user groups */
+	tmp_user.ngroups = 0;
+	/* Get number of secondary groups and allocate enough memory */
+	getgrouplist(pw->pw_name, pw->pw_gid, NULL, &tmp_user.ngroups);
+	tmp_user.groups = (gid_t *)xnmalloc((size_t)tmp_user.ngroups, sizeof(tmp_user.groups));
+	/* Get actual secondary group ID's */
+	getgrouplist(pw->pw_name, pw->pw_gid, tmp_user.groups, &tmp_user.ngroups);
 
 	/* Sometimes (FreeBSD for example) the home directory, as returned by the
 	 * passwd struct, might be a symlink, in which case we want to resolve it

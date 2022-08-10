@@ -258,6 +258,20 @@ check_third_party_cmds(void)
 	set_mount_cmd(udisks2ok, udevilok);
 }
 
+/* Returns 1 if at least one of the user's groups match the file GID FILE_GID.
+ * Otherwise returns 0 */
+static int
+check_user_groups(const gid_t file_gid)
+{
+	int i;
+	for (i = 0; i < user.ngroups; i++) {
+		if (user.groups[i] == file_gid)
+			return 1;
+	}
+
+	return 0;
+}
+
 /* Return 1 if current user has access to FILE. Otherwise, return zero */
 int
 check_file_access(const struct stat *file)
@@ -277,14 +291,16 @@ check_file_access(const struct stat *file)
 	if (S_ISDIR(file->st_mode)) {
 		if ((f & R_USR) && (f & X_USR) && file->st_uid == user.uid)
 			return 1;
-		if ((f & R_GRP) && (f & X_GRP) && file->st_gid == user.gid)
+		if ((f & R_GRP) && (f & X_GRP) && (file->st_gid == user.gid
+		|| check_user_groups(file->st_gid) == 1))
 			return 1;
 		if ((f & R_OTH) && (f & X_OTH))
 			return 1;
 	} else {
 		if ((f & R_USR) && file->st_uid == user.uid)
 			return 1;
-		if ((f & R_GRP) && file->st_gid == user.gid)
+		if ((f & R_GRP) && (file->st_gid == user.gid
+		|| check_user_groups(file->st_gid) == 1))
 			return 1;
 		if (f & R_OTH)
 			return 1;

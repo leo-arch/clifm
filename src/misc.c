@@ -1438,6 +1438,9 @@ free_stuff(void)
 	free(user.name);
 	free(user.home);
 	free(user.shell);
+
+	free(user.groups);
+
 #ifndef _NO_TRASH
 	free(trash_dir);
 	free(trash_files_dir);

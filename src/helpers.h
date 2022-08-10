@@ -563,7 +563,9 @@ struct user_t {
 	char *shell;
 	size_t home_len;
 	uid_t uid;
-	gid_t gid;
+	gid_t gid; /* Primary user group */
+	int ngroups; /* Number of secondary groups */
+	gid_t *groups; /* Secondary groups ID's */
 };
 
 extern struct user_t user;
