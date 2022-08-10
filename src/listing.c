@@ -961,14 +961,14 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 
 #ifndef _NO_ICONS
 	if (icons) {
-		if (no_eln)
+		if (no_eln) {
 			if (_trim) {
 				xprintf("%s %ls%s%c", file_info[i].icon, (wchar_t *)n,
 					trim_diff, TRIMFILE_CHR);
 			} else {
 				xprintf("%s %s", file_info[i].icon, n);
 			}
-		else {
+		} else {
 			if (_trim) {
 				xprintf("%s%*d%s %s %ls%s%c", el_c, pad, i + 1, df_c,
 					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR);
@@ -980,14 +980,13 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 	} else
 #endif /* _NO_ICONS */
 	{
-		if (no_eln)
+		if (no_eln) {
 			if (_trim) {
-				printf("%ls%s%c", (wchar_t *)file_info[i].name,
-					trim_diff, TRIMFILE_CHR);
+				printf("%ls%s%c", (wchar_t *)n, trim_diff, TRIMFILE_CHR);
 			} else {
 				fputs(file_info[i].name, stdout);
 			}
-		else {
+		} else {
 			if (_trim) {
 				xprintf("%s%*d%s %ls%s%c", el_c, pad, i + 1, df_c,
 					(wchar_t *)n, trim_diff, TRIMFILE_CHR);
