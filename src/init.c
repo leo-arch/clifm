@@ -517,7 +517,11 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 #else
 	n = NGROUPS_MAX;
 	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
+#if defined(__APPLE__)
+	getgrouplist(name, (int)gid, (int *)g, &n);
+#else
 	getgrouplist(name, gid, g, &n);
+#endif
 
 	if (NGROUPS_MAX > n)
 		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
