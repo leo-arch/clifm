@@ -501,6 +501,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 	int n = *ngroups;
 
 #if defined(__TERMUX__)
+	UNUSED(name); UNUSED(gid);
 	gid_t *g = (gid_t *)xnmalloc(NGROUPS_MAX, sizeof(g));
 	if ((n = getgroups(NGROUPS_MAX, g)) == -1) {
 		_err('e', PRINT_PROMPT, "%s: getgroups: %s\n", PROGRAM_NAME, strerror(errno));
@@ -517,11 +518,11 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 #else
 	n = NGROUPS_MAX;
 	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
-#if defined(__APPLE__)
+# if defined(__APPLE__)
 	getgrouplist(name, (int)gid, (int *)g, &n);
-#else
+# else
 	getgrouplist(name, gid, g, &n);
-#endif
+# endif /* __APPLE__ */
 
 	if (NGROUPS_MAX > n)
 		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
