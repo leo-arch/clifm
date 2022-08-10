@@ -68,6 +68,15 @@
 #define STRINGIZE_(x) #x
 #define STRINGIZE(x) STRINGIZE_(x)
 
+/* We need this for get_user_groups() */
+#ifndef NGROUPS_MAX
+# ifdef __linux__
+#  define NGROUPS_MAX 65536
+# else
+#  define NGROUPS_MAX 1024
+# endif /* __linux__ */
+#endif /* !NGROUPS_MAX */
+
 void
 set_prop_fields(char *line)
 {
@@ -460,9 +469,6 @@ get_user_env(void)
 	tmp_user.gid = sec_env == 0 ? (gid_t)get_user_id(1) : (gid_t)-1;
 
 	char *t = sec_env == 0 ? getenv("HOME") : (char *)NULL;
-/*	size_t tlen = t ? strlen(t) : 0;
-	tmp_user.home = t ? savestring(t, strlen(t)) : (char *)NULL;
-	tmp_user.home_len = tlen; */
 
 	if (t) {
 		char *p = realpath(t, NULL);
@@ -484,6 +490,39 @@ get_user_env(void)
 	return tmp_user;
 }
 
+static gid_t *
+get_user_groups(const char *name, const gid_t gid, int *ngroups)
+{
+	int n = *ngroups;
+
+#if defined(__TERMUX__)
+	/* getgrouplist(3) refuses to work on Termux. Let's fallback to getgroups(3) */
+	gid_t *g = (gid_t *)xnmalloc(NGROUPS_MAX, sizeof(g));
+	if ((n = getgroups(NGROUPS_MAX, g)) == -1) {
+		_err('e', PRINT_PROMPT, "%s: getgroups: %s\n", PROGRAM_NAME, strerror(errno));
+		free(g);
+		return (gid_t *)0;
+	}
+	if (NGROUPS_MAX > n) /* Reduce array to actual amount of groups found */
+		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
+#elif defined(__linux__)
+	n = 0;
+	getgrouplist(name, gid, NULL, &n);
+	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
+	getgrouplist(name, gid, g, &n);
+#else
+	n = NGROUPS_MAX;
+	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
+	getgrouplist(name, gid, g, &n);
+
+	if (NGROUPS_MAX > n)
+		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
+#endif /* __TERMUX__ */
+
+	*ngroups = n;
+	return g;
+}
+
 /* Retrieve user information and store it in a user_t struct for later access */
 struct user_t
 get_user(void)
@@ -501,13 +540,7 @@ get_user(void)
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
-	/* Let's get secondary user groups */
-	tmp_user.ngroups = 0;
-	/* Get number of secondary groups and allocate enough memory */
-	getgrouplist(pw->pw_name, pw->pw_gid, NULL, &tmp_user.ngroups);
-	tmp_user.groups = (gid_t *)xnmalloc((size_t)tmp_user.ngroups, sizeof(tmp_user.groups));
-	/* Get actual secondary group ID's */
-	getgrouplist(pw->pw_name, pw->pw_gid, tmp_user.groups, &tmp_user.ngroups);
+	tmp_user.groups = get_user_groups(pw->pw_name, pw->pw_gid, &tmp_user.ngroups);
 
 	/* Sometimes (FreeBSD for example) the home directory, as returned by the
 	 * passwd struct, might be a symlink, in which case we want to resolve it
