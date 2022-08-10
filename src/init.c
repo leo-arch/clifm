@@ -490,20 +490,24 @@ get_user_env(void)
 	return tmp_user;
 }
 
+/* Retrieve user groups
+ * Return an array with the ID's of groups to which the user belongs
+ * NGROUPS is set to the number of groups
+ * NOTE: getgroups(3) does not include the user's main group
+ * We use getgroups(3) on TERMUX because getgrouplist(3) always returns zero groups */
 static gid_t *
 get_user_groups(const char *name, const gid_t gid, int *ngroups)
 {
 	int n = *ngroups;
 
 #if defined(__TERMUX__)
-	/* getgrouplist(3) refuses to work on Termux. Let's fallback to getgroups(3) */
 	gid_t *g = (gid_t *)xnmalloc(NGROUPS_MAX, sizeof(g));
 	if ((n = getgroups(NGROUPS_MAX, g)) == -1) {
 		_err('e', PRINT_PROMPT, "%s: getgroups: %s\n", PROGRAM_NAME, strerror(errno));
 		free(g);
 		return (gid_t *)0;
 	}
-	if (NGROUPS_MAX > n) /* Reduce array to actual amount of groups found */
+	if (NGROUPS_MAX > n) /* Reduce array to actual amount of groups (N) */
 		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
 #elif defined(__linux__)
 	n = 0;
