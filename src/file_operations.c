@@ -1235,8 +1235,7 @@ edit_link(char *link)
 		free(tmp);
 	}
 
-	/* Check new_path existence and warn the user if it does not
-	 * exist */
+	/* Check new_path existence and warn the user if it does not exist */
 	if (lstat(new_path, &attr) == -1) {
 		printf("'%s': %s\n", new_path, strerror(errno));
 		char *answer = (char *)NULL;
@@ -1285,8 +1284,7 @@ edit_link(char *link)
 	}
 
 	real_path = realpath(link, NULL);
-	printf(_("%s%s%s successfully relinked to "), real_path ? ln_c
-			: or_c, link, df_c);
+	printf(_("%s%s%s successfully relinked to "), real_path ? ln_c : or_c, link, df_c);
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 	free(new_path);
 	if (real_path)
@@ -1394,12 +1392,12 @@ copy_function(char **args, int copy_and_rename)
 		}
 
 		tmp[j + 1] = (char *)NULL;
-		bulk_rename(tmp);
+		ret = bulk_rename(tmp);
 
 		for (i = 0; tmp[i]; i++)
 			free(tmp[i]);
 		free(tmp);
-		return EXIT_SUCCESS;
+		return ret;
 	}
 
 	/* If 'mv sel' and command is successful deselect everything,
@@ -1587,9 +1585,9 @@ bulk_rename(char **args)
 
 	char bulk_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		snprintf(bulk_file, PATH_MAX - 1, "%s/%s", P_tmpdir, TMP_FILENAME);
+		snprintf(bulk_file, sizeof(bulk_file), "%s/%s", P_tmpdir, TMP_FILENAME);
 	else
-		snprintf(bulk_file, PATH_MAX - 1, "%s/%s", tmp_dir, TMP_FILENAME);
+		snprintf(bulk_file, sizeof(bulk_file), "%s/%s", tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(bulk_file);
 	if (fd == -1) {
@@ -1687,17 +1685,19 @@ bulk_rename(char **args)
 	if (exit_status != EXIT_SUCCESS) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "br: %s\n",
 			errno != 0 ? strerror(errno) : "Error opening temporary file");
-		if (unlinkat(fd, bulk_file, 0) == -1)
+		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
+			exit_status = errno;
+		}
 		close_fstream(fp, fd);
-		return EXIT_FAILURE;
+		return exit_status;
 	}
 
 	close_fstream(fp, fd);
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "br: %s: %s\n", bulk_file, strerror(errno));
-		return EXIT_FAILURE;
+		return errno;
 	}
 
 	/* Compare the new modification time to the stored one: if they
@@ -1707,7 +1707,7 @@ bulk_rename(char **args)
 		puts(_("br: Nothing to do"));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
-			exit_status = EXIT_FAILURE;
+			exit_status = errno;
 		}
 		close_fstream(fp, fd);
 		return exit_status;
@@ -1725,10 +1725,12 @@ bulk_rename(char **args)
 
 	if (arg_total != file_total) {
 		fputs(_("br: Line mismatch in renaming file\n"), stderr);
-		if (unlinkat(fd, bulk_file, 0) == -1)
+		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
+			exit_status = errno;
+		}
 		close_fstream(fp, fd);
-		return EXIT_FAILURE;
+		return exit_status;
 	}
 
 	/* Go back to the beginning of the bulk file, again */
@@ -1760,7 +1762,7 @@ bulk_rename(char **args)
 		puts(_("br: Nothing to do"));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
-			exit_status = EXIT_FAILURE;
+			exit_status = errno;
 		}
 		free(line);
 		close_fstream(fp, fd);
@@ -1779,8 +1781,12 @@ bulk_rename(char **args)
 
 		if (!answer) {
 			free(line);
+			if (unlinkat(fd, bulk_file, 0) == -1) {
+				_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
+				exit_status = errno;
+			}
 			close_fstream(fp, fd);
-			return EXIT_SUCCESS;
+			return exit_status;
 		}
 
 		switch (*answer) {
@@ -1794,10 +1800,10 @@ bulk_rename(char **args)
 			free(line);
 			if (unlinkat(fd, bulk_file, 0) == -1) {
 				_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
-				return EXIT_FAILURE;
+				exit_status = errno;
 			}
 			close_fstream(fp, fd);
-			return EXIT_SUCCESS;
+			return exit_status;
 
 		default:
 			free(answer);
@@ -1827,7 +1833,7 @@ bulk_rename(char **args)
 			line[line_len - 1] = '\0';
 		if (args[i] && strcmp(args[i], line) != 0) {
 			if (renameat(AT_FDCWD, args[i], AT_FDCWD, line) == -1)
-				exit_status = EXIT_FAILURE;
+				exit_status = errno;
 		}
 
 		i++;
@@ -1837,7 +1843,7 @@ bulk_rename(char **args)
 
 	if (unlinkat(fd, bulk_file, 0) == -1) {
 		_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
-		exit_status = EXIT_FAILURE;
+		exit_status = errno;
 	}
 	close_fstream(fp, fd);
 
