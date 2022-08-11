@@ -1792,6 +1792,10 @@ bulk_rename(char **args)
 		case '\0':
 			free(answer);
 			free(line);
+			if (unlinkat(fd, bulk_file, 0) == -1) {
+				_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
+				return EXIT_FAILURE;
+			}
 			close_fstream(fp, fd);
 			return EXIT_SUCCESS;
 

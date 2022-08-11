@@ -858,7 +858,6 @@ static inline char *
 construct_prompt(const char *decoded_prompt)
 {
 	/* Construct indicators: MSGS (ERR, WARN, and NOTICE), SEL, and TRASH */
-	/* Messages are categorized in three groups: errors, warnings, and notices */
 	char err_ind[N_IND], warn_ind[N_IND], notice_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND];
 	*err_ind = *warn_ind = *notice_ind = *trash_ind = *sel_ind = '\0';
 
