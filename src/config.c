@@ -2805,6 +2805,7 @@ reset_variables(void)
 	prompt_offset = UNSET;
 	prompt_notif = UNSET;
 	restore_last_path = UNSET;
+	rm_force = UNSET;
 	search_strategy = UNSET;
 	share_selbox = UNSET;
 	show_hidden = UNSET;
