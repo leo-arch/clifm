@@ -213,10 +213,11 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 			fclose(fp);
 			if (unlink(tmp_file) == -1) {
 				tmp_err = errno;
-				_err('e', PRINT_PROMPT, "rr: unlink: %s: %s", target, strerror(errno));
+				_err('e', PRINT_PROMPT, "rr: unlink: %s: %s", tmp_file, strerror(errno));
 			}
 			return tmp_err;
 		}
+
 		*n = scandir(target, a, NULL, alphasort);
 		if (*n == -1) {
 			int tmp_err = errno;
@@ -224,10 +225,11 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 			fclose(fp);
 			if (unlink(tmp_file) == -1) {
 				tmp_err = errno;
-				_err('e', PRINT_PROMPT, "rr: unlink: %s: %s", target, strerror(errno));
+				_err('e', PRINT_PROMPT, "rr: unlink: %s: %s", tmp_file, strerror(errno));
 			}
 			return tmp_err;
 		}
+
 		for (i = 0; i < (size_t)*n; i++) {
 			if (SELFORPARENT((*a)[i]->d_name))
 				continue;
