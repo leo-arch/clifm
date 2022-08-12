@@ -3233,6 +3233,7 @@ check_options(void)
 		/* We don't need these values of the user struct: free them */
 		free(tmp_user.name);
 		free(tmp_user.home);
+		free(tmp_user.groups);
 
 		if (!user.shell)
 			user.shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));
