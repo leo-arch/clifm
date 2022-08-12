@@ -742,9 +742,9 @@ load_jumpdb(void)
 		if (is_number(tmpb)) {
 			int a = atoi(tmpb);
 			jump_db[jump_n].last_visit = a == INT_MIN ? 0 : (time_t)a;
-		}
-		else
+		} else {
 			jump_db[jump_n].last_visit = 0; /* UNIX Epoch */
+		}
 
 		jump_db[jump_n].keep = 0;
 		jump_db[jump_n].rank = 0;

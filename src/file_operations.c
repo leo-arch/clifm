@@ -208,17 +208,25 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 			print_file(fp, file_info[i].name, file_info[i].type);
 	} else {
 		if (count_dir(target, CPOP) <= 2) {
+			int tmp_err = EXIT_FAILURE;
 			fprintf(stderr, _("%s: %s: Directory empty\n"), PROGRAM_NAME, target);
 			fclose(fp);
-			unlink(tmp_file);
-			return EXIT_FAILURE;
+			if (unlink(tmp_file) == -1) {
+				tmp_err = errno;
+				_err('e', PRINT_PROMPT, "rr: unlink: %s: %s", target, strerror(errno));
+			}
+			return tmp_err;
 		}
 		*n = scandir(target, a, NULL, alphasort);
 		if (*n == -1) {
-			fclose(fp);
-			unlink(tmp_file);
+			int tmp_err = errno;
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "rr: %s: %s", target, strerror(errno));
-			return errno;
+			fclose(fp);
+			if (unlink(tmp_file) == -1) {
+				tmp_err = errno;
+				_err('e', PRINT_PROMPT, "rr: unlink: %s: %s", target, strerror(errno));
+			}
+			return tmp_err;
 		}
 		for (i = 0; i < (size_t)*n; i++) {
 			if (SELFORPARENT((*a)[i]->d_name))
