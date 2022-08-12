@@ -73,7 +73,7 @@ Briefly put, with _CliFM_ the command-line is always already there, never hidden
 ---
 
 <h4 align="center">CliFM's interface</h4>
-<p align="center"><img src="https://i.postimg.cc/RFNbMZz6/interface1-7.png"></p>
+<p align="center"><img src="https://i.postimg.cc/BZMv62VP/interface1-7-5.png"></p>
 <!---
 <p align="center"><img src="https://i.postimg.cc/Zqp4sgLK/clifm-interface8.png"></p>
 --->
