@@ -526,6 +526,7 @@ get_user_data_env(void)
 	t = sec_env == 0 ? getenv("USER") : (char *)NULL;;
 	tmp_user.name = t ? savestring(t, strlen(t)) : (char *)NULL;
 
+	tmp_user.ngroups = 0;
 	if (tmp_user.name && tmp_user.gid != (gid_t)-1)
 		tmp_user.groups = get_user_groups(tmp_user.name, tmp_user.gid, &tmp_user.ngroups);
 	else
@@ -554,6 +555,7 @@ get_user_data(void)
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
+	tmp_user.ngroups = 0;
 	tmp_user.groups = get_user_groups(pw->pw_name, pw->pw_gid, &tmp_user.ngroups);
 
 	/* Sometimes (FreeBSD for example) the home directory, as returned by the
