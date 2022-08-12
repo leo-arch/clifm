@@ -355,9 +355,9 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	char f[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		snprintf(f, PATH_MAX - 1, "%s/%s", P_tmpdir, TMP_FILENAME);
+		snprintf(f, sizeof(f), "%s/%s", P_tmpdir, TMP_FILENAME);
 	else
-		snprintf(f, PATH_MAX - 1, "%s/%s", tmp_dir, TMP_FILENAME);
+		snprintf(f, sizeof(f), "%s/%s", tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(f);
 	if (fd == -1) {
@@ -438,6 +438,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		*edited_names = 0;
 		return bfiles; /* Return the original list of files */
 	}
+
 	/* Free the original list of files */
 	for (i = 0; i < *n; i++) {
 		free(bfiles[i].original);

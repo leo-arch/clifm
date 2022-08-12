@@ -250,9 +250,8 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 			return EXIT_SUCCESS;
 
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("rr: %s: Cannot open file\n"), tmp_file);
-		if (unlink(tmp_file) == -1) {
+		if (unlink(tmp_file) == -1)
 			_err('e', PRINT_PROMPT, "rr: unlink: %s: %s\n",	tmp_file, strerror(errno));
-		}
 
 		size_t i;
 		for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
@@ -382,11 +381,13 @@ get_rm_param(char ***rfiles, int n)
 			continue;
 
 		if (S_ISDIR(attr.st_mode)) {
-#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
+#if defined(_BE_POSIX)
 			_param = savestring("-r", 2);
+#elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
+			_param = savestring("-dr", 3);
 #else /* Linux and FreeBSD only */
 			_param = savestring("-dIr", 4);
-#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
+#endif /* _BE_POSIX */
 			break;
 		}
 	}
@@ -1522,13 +1523,13 @@ remove_file(char **args)
 
 	rm_cmd[0] = savestring("rm", 2);
 	if (dirs == 1)
-#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
-		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dr", rm_force == 1 ? 4 : 3);
-#elif defined(_BE_POSIX)
+#if defined(_BE_POSIX)
 		rm_cmd[1] = savestring(rm_force == 1 ? "-rf" : "-r", rm_force == 1 ? 3 : 2);
+#elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
+		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dr", rm_force == 1 ? 4 : 3);
 #else /* Linux and FreeBSD only */
 		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dIr", 4);
-#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
+#endif /* _BE_POSIX */
 	else
 #if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
 		rm_cmd[1] = savestring("-f", 2);
@@ -1847,7 +1848,7 @@ bulk_rename(char **args)
 	}
 	close_fstream(fp, fd);
 
-#if defined(__HAIKU__)// || defined(__APPLE__)
+#if defined(__HAIKU__)
 	if (autols == 1)
 		reload_dirlist();
 #endif
