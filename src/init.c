@@ -455,6 +455,48 @@ get_user_id(const int group)
 	return atoi(line);
 }
 
+/* Retrieve user groups
+ * Return an array with the ID's of groups to which the user belongs
+ * NGROUPS is set to the number of groups
+ * NOTE: getgroups(3) does not include the user's main group
+ * We use getgroups(3) on TERMUX because getgrouplist(3) always returns zero groups */
+static gid_t *
+get_user_groups(const char *name, const gid_t gid, int *ngroups)
+{
+	int n = *ngroups;
+
+#if defined(__TERMUX__)
+	UNUSED(name); UNUSED(gid);
+	gid_t *g = (gid_t *)xnmalloc(NGROUPS_MAX, sizeof(g));
+	if ((n = getgroups(NGROUPS_MAX, g)) == -1) {
+		_err('e', PRINT_PROMPT, "%s: getgroups: %s\n", PROGRAM_NAME, strerror(errno));
+		free(g);
+		return (gid_t *)NULL;
+	}
+	if (NGROUPS_MAX > n) /* Reduce array to actual amount of groups (N) */
+		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
+#elif defined(__linux__)
+	n = 0;
+	getgrouplist(name, gid, NULL, &n);
+	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
+	getgrouplist(name, gid, g, &n);
+#else
+	n = NGROUPS_MAX;
+	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
+# if defined(__APPLE__)
+	getgrouplist(name, (int)gid, (int *)g, &n);
+# else
+	getgrouplist(name, gid, g, &n);
+# endif /* __APPLE__ */
+
+	if (NGROUPS_MAX > n)
+		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
+#endif /* __TERMUX__ */
+
+	*ngroups = n;
+	return g;
+}
+
 /* Get user data from environment variables. Used only in case getpwuid() failed */
 static struct user_t
 get_user_data_env(void)
@@ -484,52 +526,15 @@ get_user_data_env(void)
 	t = sec_env == 0 ? getenv("USER") : (char *)NULL;;
 	tmp_user.name = t ? savestring(t, strlen(t)) : (char *)NULL;
 
+	if (tmp_user.name && tmp_user.gid != (gid_t)-1)
+		tmp_user.groups = get_user_groups(tmp_user.name, tmp_user.gid, &tmp_user.ngroups);
+	else
+		tmp_user.groups = (gid_t *)NULL;
+
 	t = sec_env == 0 ? getenv("SHELL") : (char *)NULL;
 	tmp_user.shell = t ? savestring(t, strlen(t)) : (char *)NULL;
 
 	return tmp_user;
-}
-
-/* Retrieve user groups
- * Return an array with the ID's of groups to which the user belongs
- * NGROUPS is set to the number of groups
- * NOTE: getgroups(3) does not include the user's main group
- * We use getgroups(3) on TERMUX because getgrouplist(3) always returns zero groups */
-static gid_t *
-get_user_groups(const char *name, const gid_t gid, int *ngroups)
-{
-	int n = *ngroups;
-
-#if defined(__TERMUX__)
-	UNUSED(name); UNUSED(gid);
-	gid_t *g = (gid_t *)xnmalloc(NGROUPS_MAX, sizeof(g));
-	if ((n = getgroups(NGROUPS_MAX, g)) == -1) {
-		_err('e', PRINT_PROMPT, "%s: getgroups: %s\n", PROGRAM_NAME, strerror(errno));
-		free(g);
-		return (gid_t *)0;
-	}
-	if (NGROUPS_MAX > n) /* Reduce array to actual amount of groups (N) */
-		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
-#elif defined(__linux__)
-	n = 0;
-	getgrouplist(name, gid, NULL, &n);
-	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
-	getgrouplist(name, gid, g, &n);
-#else
-	n = NGROUPS_MAX;
-	gid_t *g = (gid_t *)xnmalloc((size_t)n, sizeof(g));
-# if defined(__APPLE__)
-	getgrouplist(name, (int)gid, (int *)g, &n);
-# else
-	getgrouplist(name, gid, g, &n);
-# endif /* __APPLE__ */
-
-	if (NGROUPS_MAX > n)
-		g = (gid_t *)xrealloc(g, (size_t)n * sizeof(g));
-#endif /* __TERMUX__ */
-
-	*ngroups = n;
-	return g;
 }
 
 /* Retrieve user information and store it in a user_t struct for later access */
