@@ -260,8 +260,10 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 			return EXIT_SUCCESS;
 
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("rr: %s: Cannot open file\n"), tmp_file);
-		if (unlink(tmp_file) == -1)
+		if (unlink(tmp_file) == -1) {
+			exit_status = errno;
 			_err('e', PRINT_PROMPT, "rr: unlink: %s: %s\n",	tmp_file, strerror(errno));
+		}
 
 		size_t i;
 		for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
@@ -277,6 +279,7 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 		return EXIT_SUCCESS;
 
 	if (unlink(tmp_file) == -1) {
+		exit_status = errno;
 		_err('e', PRINT_PROMPT, "%s: rr: unlink: %s: %s\n", PROGRAM_NAME,
 			tmp_file, strerror(errno));
 	}
