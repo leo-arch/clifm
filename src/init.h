@@ -58,6 +58,6 @@ int get_sys_shell(void);
 void set_prop_fields(char *line);
 /*int xsecure_env(const int mode); */
 
-struct user_t get_user(void);
+struct user_t get_user_data(void);
 
 #endif /* INIT_H */

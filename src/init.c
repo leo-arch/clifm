@@ -457,7 +457,7 @@ get_user_id(const int group)
 
 /* Get user data from environment variables. Used only in case getpwuid() failed */
 static struct user_t
-get_user_env(void)
+get_user_data_env(void)
 {
 	struct user_t tmp_user;
 
@@ -534,7 +534,7 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 
 /* Retrieve user information and store it in a user_t struct for later access */
 struct user_t
-get_user(void)
+get_user_data(void)
 {
 	struct passwd *pw = (struct passwd *)NULL;
 	struct user_t tmp_user;
@@ -542,7 +542,7 @@ get_user(void)
 	errno = 0;
 	pw = getpwuid(geteuid());
 	if (!pw) /* Fallback to environment variables (if not secure-env) */
-		return get_user_env();
+		return get_user_data_env();
 
 	tmp_user.uid = pw->pw_uid;
 	tmp_user.gid = pw->pw_gid;
@@ -3227,7 +3227,7 @@ check_options(void)
 		max_log = DEF_MAX_LOG;
 
 	if (!user.shell) {
-		struct user_t tmp_user = get_user();
+		struct user_t tmp_user = get_user_data();
 		user.shell = tmp_user.shell;
 
 		/* We don't need these values of the user struct: free them */

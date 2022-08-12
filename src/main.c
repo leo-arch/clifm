@@ -1042,7 +1042,7 @@ main(int argc, char *argv[])
 	/* free_stuff does some cleaning */
 	atexit(free_stuff);
 
-	user = get_user();
+	user = get_user_data();
 	get_home();
 
 	if (geteuid() == 0)
