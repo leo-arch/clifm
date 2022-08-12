@@ -62,40 +62,6 @@
 # Remove the files you want to be deleted, save and exit\n\
 # Just quit the editor without any edit to cancel the operation\n\n"
 
-static char
-ask_user_y_or_n(const char *msg, char default_answer)
-{
-	char *answer = (char *)NULL;
-	while (!answer) {
-		answer = rl_no_hist(msg);
-		if (answer && *answer && *(answer + 1)) {
-			free(answer);
-			answer = (char *)NULL;
-			continue;
-		}
-
-		if (!answer) /* Defaults to DEFAULT_ANSWER*/
-			return default_answer;
-
-		switch (*answer) {
-		case 'y': /* fallthrough */
-		case 'Y': free(answer); return 'y';
-
-		case 'n': /* fallthrough */
-		case 'N': free(answer); return 'n';
-		case '\0': free(answer); return default_answer;
-
-		default:
-			free(answer);
-			answer = (char *)NULL;
-			break;
-		}
-	}
-
-	free(answer);
-	return default_answer;
-}
-
 static int
 parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 {
@@ -211,10 +177,6 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 			int tmp_err = EXIT_FAILURE;
 			fprintf(stderr, _("%s: %s: Directory empty\n"), PROGRAM_NAME, target);
 			fclose(fp);
-			if (unlink(tmp_file) == -1) {
-				tmp_err = errno;
-				_err('e', PRINT_PROMPT, "rr: unlink: %s: %s", tmp_file, strerror(errno));
-			}
 			return tmp_err;
 		}
 
@@ -223,10 +185,6 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target, const char *t
 			int tmp_err = errno;
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "rr: %s: %s", target, strerror(errno));
 			fclose(fp);
-			if (unlink(tmp_file) == -1) {
-				tmp_err = errno;
-				_err('e', PRINT_PROMPT, "rr: unlink: %s: %s", tmp_file, strerror(errno));
-			}
 			return tmp_err;
 		}
 
@@ -260,10 +218,6 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 			return EXIT_SUCCESS;
 
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("rr: %s: Cannot open file\n"), tmp_file);
-		if (unlink(tmp_file) == -1) {
-			exit_status = errno;
-			_err('e', PRINT_PROMPT, "rr: unlink: %s: %s\n",	tmp_file, strerror(errno));
-		}
 
 		size_t i;
 		for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
@@ -277,12 +231,6 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 
 	if (exit_status == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
-
-	if (unlink(tmp_file) == -1) {
-		exit_status = errno;
-		_err('e', PRINT_PROMPT, "%s: rr: unlink: %s: %s\n", PROGRAM_NAME,
-			tmp_file, strerror(errno));
-	}
 
 	size_t i;
 	for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
@@ -392,26 +340,20 @@ get_rm_param(char ***rfiles, int n)
 	while (--i >= 0) {
 		if (lstat((*rfiles)[i], &attr) == -1)
 			continue;
-
+	/* We don't need interactivity here: the user already confirmed the
+	 * operation before calling this function */
 		if (S_ISDIR(attr.st_mode)) {
 #if defined(_BE_POSIX)
-			_param = savestring("-r", 2);
-#elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
-			_param = savestring("-dr", 3);
-#else /* Linux and FreeBSD only */
-			_param = savestring("-dIr", 4);
+			_param = savestring("-rf", 3);
+#else
+			_param = savestring("-drf", 4);
 #endif /* _BE_POSIX */
 			break;
 		}
 	}
 
-	if (!_param) {
-#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
+	if (!_param) /* We have only regular files, no dir */
 		_param = savestring("-f", 2);
-#else /* Linux and FreeBSD only */
-		_param = savestring("-I", 2);
-#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ || _BE_POSIX */
-	}
 
 	return _param;
 }
@@ -440,17 +382,16 @@ construct_rm_cmd(char ***rfiles, char *_param, size_t n)
 static int
 bulk_remove_files(char ***rfiles)
 {
+	puts(_("The following files will be removed:"));
 	int n;
 	for (n = 0; (*rfiles)[n]; n++)
-		printf("%s\n", (*rfiles)[n]);
+		printf("%s->%s %s\n", mi_c, df_c, (*rfiles)[n]);
 
 	if (n == 0)
 		return EXIT_FAILURE;
 
-	char a = ask_user_y_or_n("Continue? [y/N] ", 'n');
-
 	int i = n;
-	if (a == 'n') {
+	if (rl_get_y_or_n("Continue? [y/n] ") == 0) {
 		while (--i >= 0)
 			free((*rfiles)[i]);
 		free(*rfiles);
@@ -495,11 +436,12 @@ diff_files(char *tmp_file, int n)
 }
 
 static int
-nothing_to_do(char **tmp_file, struct dirent ***a, int n)
+nothing_to_do(char **tmp_file, struct dirent ***a, const int n, const int fd)
 {
 	printf(_("rr: Nothing to do\n"));
-	unlink(*tmp_file);
+	unlinkat(fd, *tmp_file, 0);
 	free(*tmp_file);
+	close(fd);
 
 	int i = n;
 	while (--i >= 0)
@@ -512,8 +454,10 @@ nothing_to_do(char **tmp_file, struct dirent ***a, int n)
 int
 bulk_remove(char *s1, char *s2)
 {
-	if (s1 && IS_HELP(s1))
-		{ puts(_(RR_USAGE)); return EXIT_SUCCESS; }
+	if (s1 && IS_HELP(s1)) {
+		puts(_(RR_USAGE));
+		return EXIT_SUCCESS;
+	}
 
 	char *app = (char *)NULL, *target = (char *)NULL;
 	int fd = 0, n = 0, ret = 0, i = 0;
@@ -527,29 +471,32 @@ bulk_remove(char *s1, char *s2)
 
 	struct dirent **a = (struct dirent **)NULL;
 	if ((ret = write_files_to_tmp(&a, &n, target, tmp_file)) != EXIT_SUCCESS)
-		{ free(tmp_file); return ret; }
+		goto END;
 
 	struct stat attr;
 	stat(tmp_file, &attr);
 	time_t old_t = attr.st_mtime;
 
 	if ((ret = open_tmp_file(&a, n, tmp_file, app)) != EXIT_SUCCESS)
-		{ free(tmp_file); return ret; }
+		goto END;
 
 	stat(tmp_file, &attr);
 	int num = (target == workspaces[cur_ws].path) ? (int)files : n - 2;
 	if (old_t == attr.st_mtime || diff_files(tmp_file, num) == 0)
-		return nothing_to_do(&tmp_file, &a, n);
+		return nothing_to_do(&tmp_file, &a, n, fd);
 
 	char **__files = get_files_from_tmp_file(tmp_file, target, n);
 	char **rem_files = get_remove_files(target, __files, &a, n);
 
 	ret = bulk_remove_files(&rem_files);
 
-	for (i = 0; __files[i]; i++) free(__files[i]);
+	for (i = 0; __files[i]; i++)
+		free(__files[i]);
 	free(__files);
 
+END:
 	unlinkat(fd, tmp_file, 0);
+	close(fd);
 	free(tmp_file);
 	return ret;
 }
