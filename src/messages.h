@@ -48,10 +48,11 @@ Example:\n\
     alias\n\
   or\n\
     alias ls (or 'alias <TAB>')\n\
-- Print a specific alias:\n\
+- Print a specific alias definition:\n\
     alias my_alias\n\
 - Import aliases from ~/.bashrc:\n\
-    alias import ~/.bashrc"
+    alias import ~/.bashrc\n\
+  Note: Only aliases following the POSIX specification (NAME=\"STR\") will be imported"
 
 #define ARCHIVE_USAGE "Compress/archive files\n\
 Usage:\n\
@@ -112,7 +113,9 @@ Usage:\n\
   bl FILE...\n\n\
 Example:\n\
 - Symlink files file1 file2 file3 and file4 at once:\n\
-    bl file* (or 'bl <TAB>' to choose from a list: multi-selection is allowed)"
+    bl file* (or 'bl <TAB>' to choose from a list: multi-selection is allowed)\n\n\
+Note: Links are created in the current directory.\n\
+By default links are named FILE.link (you will be given the option to change this suffix)"
 
 #define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\
 Usage:\n\
@@ -145,7 +148,7 @@ Usage:\n\
   br, bulk ELN/FILE...\n\n\
 Examples:\n\
 - Bulk rename all files ending with .pdf in the current directory:\n\
-    br *.pdf (or 'br <TAB> to choose from a list; mutli-selection is allowed')\n\
+    br *.pdf (or 'br <TAB> to choose from a list: mutli-selection is allowed')\n\
 - Bulk rename all selected files:\n\
     br sel"
 
@@ -509,7 +512,8 @@ Examples:\n\
     n dir1/ dir2/\n\
     Note: Note the ending slashes\n\
 - Both of the above at once:\n\
-    n file1 file2 dir1/ dir2/"
+    n file1 file2 dir1/ dir2/\n\n\
+Note: Parent directories are created if necessary"
 
 #define OPEN_USAGE "Open a file\n\
 Usage:\n\
@@ -528,10 +532,9 @@ Usage:\n\
   ow ELN/FILE\n\n\
 Example:\n\
 - Choose opening application for test.c from a menu:\n\
-    ow test.c (or 'ow test.c <TAB>')\n\
+    ow test.c (or 'ow test.c <TAB>' to get a list of applications able to open this file)\n\
 - Open the file test.c with geany:\n\
-    ow test.c geany\n\
-   Note: Type 'ow test.c' and then press TAB to get a list of applications able to open this file"
+    ow test.c geany"
 
 #define OPENER_USAGE "Set the resource opener\n\
 Usage:\n\
@@ -581,7 +584,7 @@ Examples:\n\
     p 12 (or 'p <TAB>' to choose from a list)\n\
 - Print the properties of all selected files:\n\
     p sel\n\
-- Print the properties of the directory 'dir' (including its total size):\n\
+- Print the properties of the directory 'dir' (including total size):\n\
     pp dir"
 
 #define PROMPT_USAGE "Change current prompt\n\
@@ -604,7 +607,7 @@ Usage:\n\
   rr [DIR] [EDITOR]\n\n\
 The list of files in DIR (current directory if omitted) is opened via \
 EDITOR (default associated application if omitted). Remove the lines \
-corresponding to the files you want to delete, save, and exit the editor.\n\n\
+corresponding to the files you want to delete, save, and quit the editor.\n\n\
 Examples:\n\
 - Bulk remove files/dirs in the current directory using the default editor:\n\
     rr\n\
@@ -767,7 +770,7 @@ Examples:\n\
 Usage:\n\
   vv sel DIR\n\n\
 Example:\n\
-- Copy selected files to the directory 'mydir' and rename them at once:\n\
+- Copy selected files into the directory 'mydir' and rename them at once:\n\
     vv sel mydir"
 
 #define WRAPPERS_USAGE "c (v, paste), l, m, md, and r commands are wrappers \
@@ -835,12 +838,14 @@ Note: Use the WorkspaceNames option in the configuration file to name your works
 Usage:\n\
   x, X [DIR]\n\n\
 Examples:\n\
-- Open a new instance of CliFM in the current directory:\n\
+- Launch a new instance in the current directory:\n\
     x\n\
-- Open the directory mydir in a new instance of CliFM:\n\
+- Open the directory mydir in a new instance:\n\
     x mydir\n\
-- Open a new instance of CliFM as root:\n\
-    X"
+- Launch a new instance as root:\n\
+    X\n\n\
+Note: By default xterm(1) is used. Set your preferred terminal\n\
+emulator using the TerminalCmd option in the configuration file"
 
 /* Misc messages */
 #define PAGER_HELP "?, h: help\nDown arrow, Enter, Space: Advance one line\n\
