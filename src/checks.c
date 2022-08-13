@@ -135,7 +135,7 @@ check_term(void)
 {
 	char *_term = getenv("TERM");
 	if (!_term || !*_term) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error opening terminal: unknown\n"),
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: TERM environment variable not set\n"),
 			PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
@@ -145,7 +145,7 @@ check_term(void)
 		if (*_term == *UNSUPPORTED_TERM[i]
 		&& strcmp(_term, UNSUPPORTED_TERM[i]) == 0) {
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Unsupported terminal. This "
-				"terminal cannot understand escape sequences\n"),
+				"terminal does not support escape sequences\n"),
 				PROGRAM_NAME, UNSUPPORTED_TERM[i]);
 			exit(EXIT_FAILURE);
 		}
