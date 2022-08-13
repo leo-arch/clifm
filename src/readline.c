@@ -2222,8 +2222,8 @@ options_generator(const char *text, int state)
 		_opts[10] = "profiles";
 		_opts[11] = "remotes";
 		_opts[12] = "resource-opener";
-		_opts[13] = "selection";
-		_opts[14] = "search";
+		_opts[13] = "search";
+		_opts[14] = "selection";
 		_opts[15] = "theming";
 		_opts[16] = "trash";
 		_opts[17] = NULL;

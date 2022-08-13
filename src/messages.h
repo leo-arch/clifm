@@ -60,11 +60,17 @@ Examples:\n\
 - Compress/archive all selected files:\n\
     ac sel\n\
 - Compress/archive a range of files:\n\
-    ac 12-24 (or 'ac <TAB>' to choose from a list; multi-selection is allowed)\n\
+    ac 12-24 (or 'ac <TAB>' to choose from a list: multi-selection is allowed)\n\
 - Decompress/dearchive a file:\n\
     ad file.tar.gz\n\
   or just open the file and CliFM will prompt the appropriate menu:\n\
-    o file.tar.gz (or just 'file.tar.gz')"
+    o file.tar.gz (or just 'file.tar.gz')\n\n\
+Dependencies:\n\
+zstd(1)           Everything related to Zstandard\n\
+mkisofs(1)        Create an ISO 9660 file\n\
+7z(1) / mount(1)  Operate on ISO 9660 files\n\
+archivemount(1)   Mount archives\n\
+atool(1)          Extraction/decompression, listing, and repacking archives"
 
 #define AUTOCD_USAGE "Turn autocd on-off\n\
 Usage:\n\
@@ -106,7 +112,7 @@ Usage:\n\
   bl FILE...\n\n\
 Example:\n\
 - Symlink files file1 file2 file3 and file4 at once:\n\
-    bl file* (or 'bl <TAB>' to choose from a list; multi-selection is allowed)"
+    bl file* (or 'bl <TAB>' to choose from a list: multi-selection is allowed)"
 
 #define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\
 Usage:\n\
@@ -180,7 +186,7 @@ Examples:\n\
 - Deselect all selected files:\n\
     ds * (or Alt-d)\n\
 - Deselect files from a menu:\n\
-    ds (or 'ds <TAB>' to choose from a list; multi-selection is allowed)"
+    ds (or 'ds <TAB>' to choose from a list: multi-selection is allowed)"
 
 #define DESKTOP_NOTIFICATIONS_USAGE "Errors, warnings, and notices are send \
 to the notification daemon instead of\n\
@@ -422,13 +428,16 @@ Usage:\n\
 Usage:\n\
   log [clear]"
 
-#define MEDIA_USAGE "List available media devices, allowing to mount or \
-unmount them\n\n\
+#define MEDIA_USAGE "List available media devices, allowing you to mount or \
+unmount them\n\
+Note: Either udevil(1) or udisks2(1) is required\n\n\
 Usage:\n\
   media\n\n\
-The list of mounted and unmounted devices will be displayed. Choose the \
-device you want. If mounted, it will be unmounted; if unmounted, it will \
+The list of mounted and unmounted devices will be displayed.\n\
+Choose the device you want using ELN's.\n\
+If the device is mounted, it will be unmounted; if unmounted, it will \
 be mounted.\n\
+If mounting a device, CliFM will change automatically to the corresponding mountpoint.\n\n\
 To get information about a device, enter iELN. For example: i12"
 
 #define MF_USAGE "Limit the amount of files listed on the screen to NUM \
@@ -635,7 +644,7 @@ Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink, (s)ocket, \
 (f)ifo/pipe, (b)lock device, (c)haracter device\n\n\
 Examples:\n\
 - Select the file whose ELN is 12:\n\
-    s 12 (or 's <TAB>' to choose from a list; multi-selection is allowed)\n\
+    s 12 (or 's <TAB>' to choose from a list: multi-selection is allowed)\n\
 - Select all files ending with .odt:\n\
     s *.odt\n\
 - Select multiple files at once:\n\
@@ -715,7 +724,7 @@ Mark the files you need, and then press Enter or right"
 
 #define TE_USAGE "Toggle the executable bit on files\n\
 Usage:\n\
-  te ELN/FILE... (or 'te <TAB>' to choose from a list; multi-selection is allowed)\n\n\
+  te ELN/FILE... (or 'te <TAB>' to choose from a list: multi-selection is allowed)\n\n\
 Examples:\n\
 - Set the executable bit on all shell scripts in the current directory:\n\
     te *.sh\n\
@@ -727,7 +736,7 @@ Usage:\n\
   t, tr, trash [ELN/FILE]... [ls, list] [clear, empty] [del]\n\n\
 Examples:\n\
 - Trash the file whose ELN is 12:\n\
-    t 12 (or 't <TAB>' to choose from a list; multi-selection is allowed)\n\
+    t 12 (or 't <TAB>' to choose from a list: multi-selection is allowed)\n\
 - Trash all files ending with .sh\n\
     t *.sh\n\
 - List currently trashed files:\n\
@@ -739,7 +748,7 @@ Examples:\n\
 - Untrash all trashed files (restore them to their original location):\n\
     u *\n\
 - Untrash files using a menu:\n\
-    u (or 'u <TAB>' to choose from a list; multi-selection is allowed)"
+    u (or 'u <TAB>' to choose from a list: multi-selection is allowed)"
 
 #define UNICODE_USAGE "Set unicode on-off\n\
 Usage:\n\
@@ -752,7 +761,7 @@ Examples:\n\
 - Untrash all trashed files (restore them to their original location):\n\
     u *\n\
 - Untrash files using a menu:\n\
-    u (or 'u <TAB>' to choose from a list; multi-selection is allowed)"
+    u (or 'u <TAB>' to choose from a list: multi-selection is allowed)"
 
 #define VV_USAGE "Copy selected files into a directory and rename them at once\n\
 Usage:\n\

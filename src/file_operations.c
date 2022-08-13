@@ -1367,7 +1367,7 @@ copy_function(char **args, int copy_and_rename)
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
 
-#if defined(__HAIKU__)// || defined(__APPLE__)
+#if defined(__HAIKU__)
 	if (autols == 1)
 		reload_dirlist();
 #endif
