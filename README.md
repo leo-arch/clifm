@@ -206,7 +206,7 @@ For a detailed explanation of each of these features, follow the corresponding l
   - **NEW**: [Named workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
 * `version 1.6 (Guybrush)`:
   - ELN's color defaults now to cyan
-  - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectivelly. In the same way, the `folders-first` command was renamed to `dirs-first`.
+  - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectively. In the same way, the `folders-first` command was renamed to `dirs-first`.
   - `PromptStyle` option renamed as `Notifications` (taking `true` and `false` as values)
 * `version 1.5 (Nano)`:
   - `Prompt`, `WarningPromptStr`, `DividingLine`, and `FfzTabOptions` options were moved from the config file to the color scheme file to get a **centralized and single theming file**. However, to keep backwards compatibility, the old location is still recognized. If any of these options is found in the color scheme file, values taken from the main configuration file will be overriden.
