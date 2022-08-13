@@ -25,7 +25,7 @@
 #ifndef MESSAGES_H
 #define MESSAGES_H
 
-/* Usage messages*/
+/* Usage messages */
 #define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOprsStuUvwWxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
@@ -35,10 +35,15 @@ Usage:\n\
 Examples:\n\
 - List available actions/plugins:\n\
     actions\n\
-- Open/edit the configuration file with nano:\n\
+- Open/edit the actions configuration file with nano:\n\
     actions edit nano\n\
-- Open/edit the configuration file with the default associated application:\n\
-    actions edit"
+- Open/edit the actions configuration file with the default associated application:\n\
+    actions edit\n\n\
+Actions are just names for plugins.\n\
+An action definition has the following form: \"NAME=plugin\", for example: \"-=fzfnav.sh\".\n\
+To run a plugin just enter the action name. So, to run the fzfnav.sh plugin, just enter \"-\".\n\
+Some plugins accept parameters. To get information about a specific plugin use \n\
+the -h,--help parameter. Example: \"- --help\"."
 
 #define ALIAS_USAGE "List, print, or import aliases\n\
 Usage:\n\
@@ -68,7 +73,7 @@ Examples:\n\
     o file.tar.gz (or just 'file.tar.gz')\n\n\
 Dependencies:\n\
 zstd(1)           Everything related to Zstandard\n\
-mkisofs(1)        Create an ISO 9660 file\n\
+mkisofs(1)        Create ISO 9660 files\n\
 7z(1) / mount(1)  Operate on ISO 9660 files\n\
 archivemount(1)   Mount archives\n\
 atool(1)          Extraction/decompression, listing, and repacking archives"
@@ -80,7 +85,20 @@ Usage:\n\
 #define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
 There are two ways to set autocommands:\n\
   1) Via the 'autocmd' keyword in the configuration file\n\
-  2) By placing a '.cfm.in' and/or a '.cfm.out' file in the corresponding directory"
+  2) By placing a '.cfm.in' and/or a '.cfm.out' file in the corresponding directory\n\n\
+Example using the first method:\n\
+Edit the configuration file ('edit' or F10) and add the following line:\n\n\
+  autocmd /media/remotes/** fc=0,lm=1\n\n\
+This instructs CliFM to always disable the files counter and to run in light mode\n\
+whenever you enter the /media/remotes directory (or any subdirectory).\n\n\
+Example using the second method:\n\
+Create a .cfm.in file in the ~/Important directory with the following content:\n\n\
+  echo \"Please keep me in sync with work files\" && read -n1\n\n\
+This little reminder will be printed every time you enter the Important directory.\n\
+If the file is named rather .cfm.out, the command will be executed when leaving,\n\
+instead of entering, the directory.\n\n\
+Note: Only single-line commands are allowed. If you need more advanced stuff, set\n\
+here the path to a script doing whatever needs to be done."
 
 #define AUTO_OPEN_USAGE "Turn auto-open on-off\n\
 Usage:\n\
@@ -500,7 +518,7 @@ Examples:\n\
 - Open/edit the net configuration file using nano:\n\
     net edit nano\n\
 - Copy a file to a remote location via the cprm plugin:\n\
-    cr FILE (run 'cr --edit' to set up your remotes)"
+    cr FILE (run 'cr --edit' before to set up your remotes)"
 
 #define NEW_USAGE "Create new files and/or directories\n\
 Usage:\n\
@@ -638,7 +656,11 @@ You can further filter the search using a file type filter:\n\
 with 'd' in the directory named Documents:\n\
     /[.-].*d$ -d Documents/\n\n\
 To perform a recursive search, use the -x modifier (file types not allowed):\n\
-    /str -x /boot"
+    /str -x /boot\n\n\
+To search for files by content instead of names use the rgfind plugin, bound\n\
+by default to the \"//\" action name. For example:\n\
+    // content I\\'m looking for\n\n\
+Note: This plugin depends on fzf(1) and rg(1) (ripgrep)"
 
 #define SEL_USAGE "Select one or multiple files\n\
 Usage:\n\
