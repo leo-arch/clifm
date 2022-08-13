@@ -560,6 +560,7 @@ is_internal_f(const char *restrict cmd)
 	const struct cmdslist_t int_cmds[] = {
 		{"ac", 2},
 		{"ad", 2},
+		{"alias", 5}, /* 'alias import' takes file names */
 		{"bb", 2},
 		{"bl", 2},
 		{"bleach", 6},
