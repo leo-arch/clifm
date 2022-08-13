@@ -745,7 +745,7 @@ Operating on tagged files (t:TAG)\n\
     stat t:work t:docs\n\n\
 To operate only on some tagged files use TAB as follows:\n\
     t:TAG<TAB> (multi-selection is allowed)\n\
-Mark the files you need, and then press Enter or right"
+Mark the files you need via TAB and then press Enter or Right"
 
 #define TE_USAGE "Toggle the executable bit on files\n\
 Usage:\n\
@@ -772,7 +772,7 @@ Examples:\n\
     t empty\n\
 - Untrash all trashed files (restore them to their original location):\n\
     u *\n\
-- Untrash files using a menu:\n\
+- Untrash files selectively using a menu:\n\
     u (or 'u <TAB>' to choose from a list: multi-selection is allowed)"
 
 #define UNICODE_USAGE "Set unicode on-off\n\
@@ -785,7 +785,7 @@ Usage:\n\
 Examples:\n\
 - Untrash all trashed files (restore them to their original location):\n\
     u *\n\
-- Untrash files using a menu:\n\
+- Untrash files selectively using a menu:\n\
     u (or 'u <TAB>' to choose from a list: multi-selection is allowed)"
 
 #define VV_USAGE "Copy selected files into a directory and rename them at once\n\
@@ -1148,10 +1148,12 @@ Wiki (https://github.com/leo-arch/clifm/wiki)."
                            | !___! !___! |\n\
                            `-------------'\n"
 
-#define QUICK_HELP "\
+#define QUICK_HELP_HEADER "\
 This is only a quick start guide. For more information and advanced tricks \n\
 consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)\n\
-\n\
+Help topics are also available: 'help <TAB>'"
+
+#define QUICK_HELP_NAVIGATION "\
 NAVIGATION\n\
 ----------\n\
 /etc                     Change the current directory to '/etc'\n\
@@ -1169,8 +1171,9 @@ mp                       Change to a mountpoint\n\
 pin mydir                Pin the directory 'mydir'\n\
 ,                        Change to pinned directory\n\
 x                        Run new instance in the current directory\n\
--                        Navigate the file system with files preview (needs fzf)\n\
-\n\
+-                        Navigate the file system with files preview (needs fzf)"
+
+#define QUICK_HELP_BASIC_OPERATIONS "\
 BASIC FILE OPERATIONS\n\
 ---------------------\n\
 myfile.txt         Open 'myfile.txt' with the default associated application\n\
@@ -1204,8 +1207,9 @@ t empty            Empty the trash can\n\
 u                  Undelete trashed files using a menu\n\
 bm a mydir         Bookmark the directory named 'mydir'\n\
 bm d mybm          Remove the bookmark named 'mybm'\n\
-ac sel             Compress/archive selected files\n\
-\n\
+ac sel             Compress/archive selected files"
+
+#define QUICK_HELP_MISC "\
 MISC\n\
 ----\n\
 cmd --help     Get help for command 'cmd'\n\
@@ -1230,7 +1234,7 @@ net work       Mount the network resource named 'work'\n\
 actions        List available actions/plugins\n\
 icons on       Enable icons\n\
 q              I'm tired, quit\n\
-Q              cd on quit\n"
+Q              cd on quit"
 
 #define ASCII_LOGO_BIG "\
      .okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkd. \n\

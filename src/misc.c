@@ -2046,16 +2046,18 @@ quick_help(char *topic)
 		return run_help_topic(topic);
 
 #ifdef __HAIKU__
-	printf("%s                                %s\n\n%s",
-		ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP);
+	printf("%s                                %s\n\n%s\n\n%s",
+		ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP_HEADER, QUICK_HELP_NAVIGATION);
+	printf("\n\n%s\n\n%s\n", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 	puts(_("\nNOTE: Some keybindings on Haiku might differ. Take a look "
 		"at your current keybindings via the 'kb' command"));
 	return EXIT_SUCCESS;
 #else
 	char *_pager = (char *)NULL;
 	if (xargs.stealth_mode == 1 || !(_pager = get_pager())) {
-		printf("%s                                %s\n\n%s",
-			ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP);
+		printf("%s                                %s\n\n%s\n\n%s",
+			ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP_HEADER, QUICK_HELP_NAVIGATION);
+		printf("\n\n%s\n\n%s\n", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 		return EXIT_SUCCESS;
 	}
 
@@ -2080,12 +2082,15 @@ quick_help(char *topic)
 		return EXIT_FAILURE;
 	}
 
-	dprintf(fd, "%s                                %s\n\n%s",
-			ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP);
+	dprintf(fd, "%s                                %s\n\n%s\n\n%s",
+			ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP_HEADER, QUICK_HELP_NAVIGATION);
+	dprintf(fd, "\n\n%s\n\n%s", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);
 
 	int ret;
-	if (*_pager == 'l' && strcmp(_pager, "less") == 0) {
-		char *cmd[] = {_pager, "-FIRX", tmp_file, NULL};
+	char *n = strrchr(_pager, '/');
+	char *p = (n && *(++n)) ? n : _pager;
+	if (*p == 'l' && strcmp(p, "less") == 0) {
+		char *cmd[] = {_pager, "-FIRXP?e\\(END\\):CLIFM", tmp_file, NULL};
 		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		char *cmd[] = {_pager, tmp_file, NULL};
