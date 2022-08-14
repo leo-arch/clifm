@@ -403,6 +403,10 @@ extern int watch;
 #define SET_COLOR    1
 #define INFORM_COLOR 0
 
+/* Are we trimming a file name with a extension? */
+#define TRIM_NO_EXT 1
+#define TRIM_EXT    2
+
 #define __MB_LEN_MAX 16
 
 /* OpenBSD recommends the use of ten trailing X's. See mkstemp(3) */
@@ -636,6 +640,7 @@ extern struct alias_t *aliases;
 struct fileinfo {
 	char *color;
 	char *ext_color;
+	char *ext_name;
 #ifndef _NO_ICONS
 	char *icon;
 	char *icon_color;

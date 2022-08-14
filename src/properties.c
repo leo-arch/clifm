@@ -498,6 +498,29 @@ END:
 	return EXIT_SUCCESS;
 }
 
+static char *
+get_ext_info_long(const char *name, const size_t name_len, int *trim, size_t *ext_len)
+{
+	char *ext_name = (char *)NULL;
+
+	char *e = strrchr(name, '.');
+	if (e && e != name && *(e + 1)) {
+		ext_name = e;
+		*trim = TRIM_EXT;
+		if (unicode == 0)
+			*ext_len = name_len - (size_t)(ext_name - name);
+		else
+			*ext_len = wc_xstrlen(ext_name);
+	}
+
+	if ((int)*ext_len >= max_name_len || (int)*ext_len <= 0) {
+		*ext_len = 0;
+		*trim = TRIM_NO_EXT;
+	}
+
+	return ext_name;
+}
+
 /* Compose the properties line for the current file name
  * This function is called by list_dir(), in listing.c for each file name
  * in the current directory when running in long view mode */
@@ -614,11 +637,15 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 #endif
 
 	int diff = 0;
+	char *ext_name = (char *)NULL;
 	if (cur_len > max) {
 		int rest = (int)(cur_len - max);
-		trim = 1;
+		trim = TRIM_NO_EXT;
+		size_t ext_len = 0;
+		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
+
 		xstrsncpy(tname, wname ? wname : props->name, (PATH_MAX * sizeof(wchar_t)) - 1);
-		int a = (int)plen - rest - 1;
+		int a = (int)plen - rest - 1 - (int)ext_len;
 		if (a < 0)
 			a = 0;
 		if (unicode)
@@ -656,7 +683,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
 			cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
 			co1, read_others, co2, write_others, co3, exec_others, cend);
-//			is_acl(props->name) ? "+" : "");
+/*			is_acl(props->name) ? "+" : ""); */
 	} else if (prop_fields.perm == PERM_NUMERIC) {
 		snprintf(attr_s, sizeof(attr_s), "%s%04o%s ", do_c, props->mode & 07777, cend);
 	} else {
@@ -715,7 +742,6 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars (see aux.h) */
 	char size_s[MAX_UNIT_SIZE + (MAX_COLOR * 2) + 1];
 	if (prop_fields.size == 1) {
-//		if (props->rdev == 0 || xargs.disk_usage_analyzer == 1) {
 		if (!(S_ISCHR(props->mode) || S_ISBLK(props->mode))
 		|| xargs.disk_usage_analyzer == 1) {
 			if (full_dir_size == 1 && props->dir == 1)
@@ -743,19 +769,11 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	*ino_s = '\0';
 	if (prop_fields.inode == 1)
 		snprintf(ino_s, sizeof(ino_s), "%-*ju ", (int)ino_max, (uintmax_t)props->inode);
-/*
-#if defined (__APPLE__) || defined(__OpenBSD__) || defined(__i386__)
-		snprintf(ino_s, sizeof(ino_s), "%-*llu ", (int)ino_max, props->inode);
-#elif defined(__ANDROID__)
-		snprintf(ino_s, sizeof(ino_s), "%-*lu ", (int)ino_max, props->inode);
-#else
-		snprintf(ino_s, sizeof(ino_s), "%-*zu ", (int)ino_max, props->inode);
-#endif */
 
 	/* Print stuff */
 
 #ifndef _NO_ICONS
-	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
+	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s " /* File name*/
 		   "%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
@@ -766,8 +784,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 
 		colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
-		light_mode ? "" : df_c, pad, "", df_c,
+		light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
 		trim ? tt_c : "", trim ? '~' : 0,
+		trim == TRIM_EXT ? props->color : "",
+		trim == TRIM_EXT ? ext_name : "",
 
 		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
@@ -775,7 +795,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		prop_fields.time != 0 ? time_s : "",
 		prop_fields.size == 1 ? size_s : "");
 #else
-	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m " /* File name*/
+	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s " /* File name*/
 		   "%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
@@ -784,8 +804,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 
 	    colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
-	    light_mode ? "" : df_c, pad, "", df_c,
-	    trim ? tt_c : "", trim ? '~' : 0,
+	    light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
+	    trim ? tt_c : "", trim ? TRIMFILE_CHR : 0,
+		trim == TRIM_EXT ? props->color : "",
+		trim == TRIM_EXT ? ext_name : "",
 
 		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",

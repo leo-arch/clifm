@@ -586,6 +586,39 @@ get_columns(size_t *n)
 }
 
 static void
+get_ext_info(const int i, int *_trim, size_t *ext_len)
+{
+	if (file_info[i].ext_name) {
+		*_trim = TRIM_EXT;
+		if (unicode == 0)
+			*ext_len = file_info[i].len - (size_t)(file_info[i].ext_name - file_info[i].name);
+		else
+			*ext_len = wc_xstrlen(file_info[i].ext_name);
+
+		if ((int)*ext_len >= max_name_len || (int)*ext_len <= 0) {
+			*ext_len = 0;
+			*_trim = TRIM_NO_EXT;
+		}
+		return;
+	}
+
+	char *e = strrchr(file_info[i].name, '.');
+	if (e && e != file_info[i].name && *(e + 1)) {
+		file_info[i].ext_name = e;
+		*_trim = TRIM_EXT;
+		if (unicode == 0)
+			*ext_len = file_info[i].len - (size_t)(file_info[i].ext_name - file_info[i].name);
+		else
+			*ext_len = wc_xstrlen(file_info[i].ext_name);
+
+		if ((int)*ext_len >= max_name_len || (int)*ext_len <= 0) {
+			*ext_len = 0;
+			*_trim = TRIM_NO_EXT;
+		}
+	}
+}
+
+static void
 print_entry_color(int *ind_char, const int i, const int pad)
 {
 	*ind_char = 0;
@@ -605,10 +638,13 @@ print_entry_color(int *ind_char, const int i, const int pad)
 	char tname[NAME_MAX * sizeof(wchar_t)];
 	if (unicode && max_name_len != UNSET && !long_view
 	&& (int)file_info[i].len > max_name_len) {
-		_trim = 1;
+		_trim = TRIM_NO_EXT;
+		size_t ext_len = 0;
+		get_ext_info(i, &_trim, &ext_len);
+
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
-				(NAME_MAX * sizeof(wchar_t)) - 1);
-		diff = u8truncstr(tname, (size_t)max_name_len - 1);
+			(NAME_MAX * sizeof(wchar_t)) - 1);
+		diff = u8truncstr(tname, (size_t)max_name_len - 1 - ext_len);
 		file_info[i].len = (size_t)max_name_len;
 		n = tname;
 	}
@@ -616,17 +652,20 @@ print_entry_color(int *ind_char, const int i, const int pad)
 	char trim_diff[8];
 	*trim_diff = '\0';
 	if (diff)
-		snprintf(trim_diff, 8, "\x1b[%dC", diff);
+		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%s%c%s%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
+				xprintf("%s%c%s%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c,
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, (wchar_t *)n, trim_diff,
-					tt_c, TRIMFILE_CHR, end_color);
+					tt_c, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].color : "",
+					_trim == TRIM_EXT ? file_info[i].ext_name : "",
+					end_color);
 			} else {
 				xprintf("%s%c%s%s%s %s%s%s",
 					li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c,
@@ -635,11 +674,14 @@ print_entry_color(int *ind_char, const int i, const int pad)
 			}
 		} else {
 			if (_trim) {
-				xprintf("%s%*d%s%s%c%s%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
+				xprintf("%s%*d%s%s%c%s%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? SELFILE_CHR : ' ',
 					df_c, file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, (wchar_t *)n, trim_diff,
-					tt_c, TRIMFILE_CHR, end_color);
+					tt_c, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].color : "",
+					_trim == TRIM_EXT ? file_info[i].ext_name : "",
+					end_color);
 			} else {
 				xprintf("%s%*d%s%s%c%s%s%s %s%s%s", el_c, pad, i + 1, df_c,
 					li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c,
@@ -652,10 +694,13 @@ print_entry_color(int *ind_char, const int i, const int pad)
 	{
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s",
+				xprintf("%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					li_cb, sel_n ? (file_info[i].sel ? SELFILE_CHR : ' ') : 0, df_c,
 					file_info[i].color, (wchar_t *)n, trim_diff,
-					tt_c, TRIMFILE_CHR, end_color);
+					tt_c, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].color : "",
+					_trim == TRIM_EXT ? file_info[i].ext_name : "",
+					end_color);
 			} else {
 				xprintf("%s%c%s%s%s%s",
 					li_cb, sel_n ? (file_info[i].sel ? SELFILE_CHR : ' ') : 0, df_c,
@@ -663,10 +708,13 @@ print_entry_color(int *ind_char, const int i, const int pad)
 			}
 		} else {
 			if (_trim) {
-				xprintf("%s%*d%s%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s",
+				xprintf("%s%*d%s%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? SELFILE_CHR : ' ',
 					df_c, file_info[i].color, (wchar_t *)n,
-					trim_diff, tt_c, TRIMFILE_CHR, end_color);
+					trim_diff, tt_c, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].color : "",
+					_trim == TRIM_EXT ? file_info[i].ext_name : "",
+					end_color);
 			} else {
 				xprintf("%s%*d%s%s%c%s%s%s%s", el_c, pad, i + 1, df_c,
 					li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c,
@@ -714,10 +762,13 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 	char tname[NAME_MAX * sizeof(wchar_t)];
 	if (unicode && max_name_len != UNSET && !long_view
 	&& (int)file_info[i].len > max_name_len) {
-		_trim = 1;
+		_trim = TRIM_NO_EXT;
+		size_t ext_len = 0;
+		get_ext_info(i, &_trim, &ext_len);
+
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
 			(NAME_MAX * sizeof(wchar_t)) - 1);
-		diff = u8truncstr(tname, (size_t)max_name_len - 1);
+		diff = u8truncstr(tname, (size_t)max_name_len - 1 - ext_len);
 		file_info[i].len = (size_t)max_name_len;
 		n = tname;
 	}
@@ -725,23 +776,25 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 	char trim_diff[8];
 	*trim_diff = '\0';
 	if (diff)
-		snprintf(trim_diff, 8, "\x1b[%dC", diff);
+		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%c%s %ls%s%c", file_info[i].sel ? SELFILE_CHR : ' ',
-					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR);
+				xprintf("%c%s %ls%s%c%s", file_info[i].sel ? SELFILE_CHR : ' ',
+					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
 				xprintf("%c%s %s", file_info[i].sel ? SELFILE_CHR : ' ',
 				file_info[i].icon, n);
 			}
 		} else {
 			if (_trim) {
-				xprintf("%s%*d%s%c%s %ls%s%c", el_c, pad, i + 1, df_c,
+				xprintf("%s%*d%s%c%s %ls%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', file_info[i].icon,
-					(wchar_t *)n, trim_diff, TRIMFILE_CHR);
+					(wchar_t *)n, trim_diff, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
 				xprintf("%s%*d%s%c%s %s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', file_info[i].icon, n);
@@ -752,16 +805,17 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 	{
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%c%ls%s%c", file_info[i].sel ? SELFILE_CHR : ' ',
-					(wchar_t *)n, trim_diff, TRIMFILE_CHR);
+				xprintf("%c%ls%s%c%s", file_info[i].sel ? SELFILE_CHR : ' ',
+					(wchar_t *)n, trim_diff, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
 				xprintf("%c%s", file_info[i].sel ? SELFILE_CHR : ' ', n);
 			}
 		} else {
 			if (_trim) {
-				xprintf("%s%*d%s%c%ls%s%c", el_c, pad, i + 1, df_c,
+				xprintf("%s%*d%s%c%ls%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', (wchar_t *)n,
-					trim_diff, TRIMFILE_CHR);
+					trim_diff, TRIMFILE_CHR, _trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
 				xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', n);
@@ -856,10 +910,13 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 	char tname[NAME_MAX * sizeof(wchar_t)];
 	if (unicode && max_name_len != UNSET && !long_view
 	&& (int)file_info[i].len > max_name_len) {
-		_trim = 1;
+		_trim = TRIM_NO_EXT;
+		size_t ext_len = 0;
+		get_ext_info(i, &_trim, &ext_len);
+
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
 				(NAME_MAX * sizeof(wchar_t)) - 1);
-		diff = u8truncstr(tname, (size_t)max_name_len - 1);
+		diff = u8truncstr(tname, (size_t)max_name_len - 1 - ext_len);
 		file_info[i].len = (size_t)max_name_len;
 		n = tname;
 	}
@@ -867,7 +924,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 	char trim_diff[8];
 	*trim_diff = '\0';
 	if (diff)
-		snprintf(trim_diff, 8, "\x1b[%dC", diff);
+		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 #ifndef _NO_ICONS
 	if (icons) {
@@ -876,20 +933,26 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
+				xprintf("%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, (wchar_t *)n, trim_diff,
-					tt_c, TRIMFILE_CHR, end_color);
+					tt_c, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].color : "",
+					_trim == TRIM_EXT ? file_info[i].ext_name : "",
+					end_color);
 			} else {
 				xprintf("%s%s %s%s%s", file_info[i].icon_color,
 					file_info[i].icon, file_info[i].color, n, end_color);
 			}
 		} else {
 			if (_trim) {
-				xprintf("%s%*d%s %s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
+				xprintf("%s%*d%s %s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					el_c, pad, i + 1, df_c,	file_info[i].icon_color,
 					file_info[i].icon, file_info[i].color, (wchar_t *)n,
-					trim_diff, tt_c, TRIMFILE_CHR, end_color);
+					trim_diff, tt_c, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].color : "",
+					_trim == TRIM_EXT ? file_info[i].ext_name : "",
+					end_color);
 			} else {
 				xprintf("%s%*d%s %s%s %s%s%s", el_c, pad, i + 1, df_c,
 					file_info[i].icon_color, file_info[i].icon,
@@ -901,17 +964,23 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 	{
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%s%ls%s\x1b[0m%s%c\x1b[0m%s",
+				xprintf("%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					file_info[i].color, (wchar_t *)n,
-					trim_diff, tt_c, TRIMFILE_CHR, end_color);
+					trim_diff, tt_c, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].color : "",
+					_trim == TRIM_EXT ? file_info[i].ext_name : "",
+					end_color);
 			} else {
 				xprintf("%s%s%s", file_info[i].color, n, end_color);
 			}
 		} else {
 			if (_trim) {
-				xprintf("%s%*d%s %s%ls%s\x1b[0m%s%c\x1b[0m%s",
+				xprintf("%s%*d%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					el_c, pad, i + 1, df_c,	file_info[i].color, (wchar_t *)n,
-					trim_diff, tt_c, TRIMFILE_CHR, end_color);
+					trim_diff, tt_c, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].color : "",
+					_trim == TRIM_EXT ? file_info[i].ext_name : "",
+					end_color);
 			} else {
 				xprintf("%s%*d%s %s%s%s", el_c, pad, i + 1, df_c,
 					file_info[i].color, n, end_color);
@@ -946,10 +1015,13 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 	char tname[NAME_MAX * sizeof(wchar_t)];
 	if (unicode && max_name_len != UNSET && !long_view
 	&& (int)file_info[i].len > max_name_len) {
-		_trim = 1;
+		_trim = TRIM_NO_EXT;
+		size_t ext_len = 0;
+		get_ext_info(i, &_trim, &ext_len);
+
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
 				(NAME_MAX * sizeof(wchar_t)) - 1);
-		diff = u8truncstr(tname, (size_t)max_name_len - 1);
+		diff = u8truncstr(tname, (size_t)max_name_len - 1 - ext_len);
 		file_info[i].len = (size_t)max_name_len;
 		n = tname;
 	}
@@ -957,21 +1029,23 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 	char trim_diff[8];
 	*trim_diff = '\0';
 	if (diff)
-		snprintf(trim_diff, 8, "\x1b[%dC", diff);
+		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 #ifndef _NO_ICONS
 	if (icons) {
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%s %ls%s%c", file_info[i].icon, (wchar_t *)n,
-					trim_diff, TRIMFILE_CHR);
+				xprintf("%s %ls%s%c%s", file_info[i].icon, (wchar_t *)n,
+					trim_diff, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
 				xprintf("%s %s", file_info[i].icon, n);
 			}
 		} else {
 			if (_trim) {
-				xprintf("%s%*d%s %s %ls%s%c", el_c, pad, i + 1, df_c,
-					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR);
+				xprintf("%s%*d%s %s %ls%s%c%s", el_c, pad, i + 1, df_c,
+					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
 				xprintf("%s%*d%s %s %s", el_c, pad, i + 1, df_c,
 					file_info[i].icon, n);
@@ -982,14 +1056,16 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 	{
 		if (no_eln) {
 			if (_trim) {
-				printf("%ls%s%c", (wchar_t *)n, trim_diff, TRIMFILE_CHR);
+				printf("%ls%s%c%s", (wchar_t *)n, trim_diff, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
 				fputs(file_info[i].name, stdout);
 			}
 		} else {
 			if (_trim) {
-				xprintf("%s%*d%s %ls%s%c", el_c, pad, i + 1, df_c,
-					(wchar_t *)n, trim_diff, TRIMFILE_CHR);
+				xprintf("%s%*d%s %ls%s%c%s", el_c, pad, i + 1, df_c,
+					(wchar_t *)n, trim_diff, TRIMFILE_CHR,
+					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
 				xprintf("%s%*d%s %s", el_c, pad, i + 1, df_c, n);
 			}
@@ -1540,6 +1616,7 @@ list_dir_light(void)
 		file_info[n].size = 1;
 		file_info[n].color = (char *)NULL;
 		file_info[n].ext_color = (char *)NULL;
+		file_info[n].ext_name = (char *)NULL;
 		file_info[n].exec = 0;
 		file_info[n].ruser = 1;
 		file_info[n].filesn = 0;
@@ -1723,6 +1800,7 @@ init_fileinfo(const size_t n)
 {
 	file_info[n].color = df_c;
 	file_info[n].ext_color = (char *)NULL;
+	file_info[n].ext_name = (char *)NULL;
 #ifndef _NO_ICONS
 	file_info[n].icon = DEF_FILE_ICON;
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
@@ -2123,8 +2201,10 @@ list_dir(void)
 			if (check_ext == 1 && file_info[n].color != nf_c)
 				ext = strrchr(file_info[n].name, '.');
 			/* Make sure not to take a hidden file for a file extension */
-			if (!ext || ext == file_info[n].name)
+			if (!ext || ext == file_info[n].name || !*(ext + 1))
 				break;
+			else
+				file_info[n].ext_name = ext;
 #ifndef _NO_ICONS
 			if (icons == 1 && name_icon_found == 0)
 				get_ext_icon(ext, (int)n);

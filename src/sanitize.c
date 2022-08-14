@@ -40,7 +40,7 @@ char **env_bk = (char **)NULL;
 char **new_env = (char **)NULL;
 
 /* Unset environ: little implementation of clearenv(3), not available
- * on some system (not POSIX) */
+ * on some systems (not POSIX) */
 static inline void
 xclearenv(void)
 {
@@ -87,8 +87,8 @@ set_path_env(void)
 #endif /* _PATH_STDPATH */
 
 	if (ret == -1) {
-//		fprintf(stderr, "%s: setenv: PATH: %s\n", PROGRAM_NAME, strerror(errno));
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: setenv: PATH: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: setenv: PATH: %s\n",
+			PROGRAM_NAME, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 }
@@ -97,7 +97,6 @@ static inline void
 xsetenv(const char *name, const char *value)
 {
 	if (setenv(name, value, 1) == -1)
-//		fprintf(stderr, "%s: setenv: %s: %s\n", PROGRAM_NAME, name, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: setenv: %s: %s\n", PROGRAM_NAME,
 			name, strerror(errno));
 }

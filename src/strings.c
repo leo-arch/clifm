@@ -357,16 +357,16 @@ wc_xstrlen(const char *restrict str)
 	return 0;
 }
 
-/* Truncate an UTF-8 string at width N. Returns the difference beetween
- * N and the point at which STR was actually trimmed (this difference
- * should be added to STR as spaces to equate N and get a correct length)
+/* Truncate an UTF-8 string at width MAX. Returns the difference beetween
+ * MAX and the point at which STR was actually trimmed (this difference
+ * should be added to STR as spaces to equate MAX and get a correct length)
  * Since a wide char could take two o more columns to be draw, and since
  * you might want to trim the name in the middle of a wide char, this
  * function won't store the last wide char to avoid taking more columns
- * than N. In this case, the programmer should take care of filling the
+ * than MAX. In this case, the programmer should take care of filling the
  * empty spaces (usually no more than one) herself */
 int
-u8truncstr(char *restrict str, size_t n)
+u8truncstr(char *restrict str, const size_t max)
 {
 	int len = 0;
 	wchar_t buf[PATH_MAX];
@@ -374,10 +374,13 @@ u8truncstr(char *restrict str, size_t n)
 	if (mbstowcs(buf, str, PATH_MAX) == (size_t)-1)
 		return 0;
 
-	int i;
+	int i, bmax = (int)max;
+	if (bmax < 0)
+		bmax = max_name_len;
+
 	for (i = 0; buf[i]; i++) {
 		int l = wcwidth(buf[i]);
-		if (len + l > (int)n) {
+		if (len + l > bmax) {
 			buf[i] = L'\0';
 			break;
 		}
@@ -385,7 +388,8 @@ u8truncstr(char *restrict str, size_t n)
 	}
 
 	wcscpy((wchar_t *)str, buf);
-	return (int)n - len;
+//	return (int)max - len;
+	return bmax - len;
 }
 
 /* Replace control characters in NAME by '^' */
