@@ -443,6 +443,7 @@ static void
 get_longest_filename(const int n, const int pad)
 {
 	int i = (max_files != UNSET && max_files < n) ? max_files : n;
+	int longest_index = -1;
 
 	while (--i >= 0) {
 		size_t total_len = 0;
@@ -483,6 +484,7 @@ get_longest_filename(const int n, const int pad)
 		}
 
 		if (total_len > longest) {
+			longest_index = i;
 			if (listing_mode == VERTLIST) {
 				longest = total_len;
 			} else {
@@ -499,6 +501,30 @@ get_longest_filename(const int n, const int pad)
 	if (icons && !long_view && columned)
 		longest += 3;
 #endif
+
+	/* longest_fc stores the amount of digits taken by the files counter of
+	 * the longest file name, provided it is a directory
+	 * We use this to trim file names up to MAX_NAME_LEN + LONGEST_FC, so
+	 * that we can make use the the space used by the files counter
+	 * Example:
+	 *    longest_dirname/13
+	 *    very_long_file_na~
+	 * instead of
+	 *    very_long_file_~
+	 * */
+	longest_fc = 0;
+	if (file_info[longest_index].dir == 1) {
+		if (file_info[longest_index].filesn > 0 && files_counter == 1)
+			/* We add 1 here to count the slash between the dir name
+			 * and the files counter too. However, in doing this the space
+			 * between the trimmed file name and the next column is too
+			 * tight (only one). By not adding it we get an extra space
+			 * to relax a bit the space between columns */
+/*			longest_fc = DIGINUM(file_info[longest_index].filesn) + 1; */
+			longest_fc = DIGINUM(file_info[longest_index].filesn);
+/*		else
+			longest_fc = 1; */
+	}
 }
 
 /* Set a few extra properties needed for long view mode */
@@ -634,18 +660,19 @@ print_entry_color(int *ind_char, const int i, const int pad)
 	}
 
 	char *n = wname ? wname : file_info[i].name;
-	int _trim = 0, diff = 0;
+	int _trim = 0, diff = 0, fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
+	int _max = max_name_len + fc;
 	char tname[NAME_MAX * sizeof(wchar_t)];
 	if (unicode && max_name_len != UNSET && !long_view
-	&& (int)file_info[i].len > max_name_len) {
+	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
 
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
 			(NAME_MAX * sizeof(wchar_t)) - 1);
-		diff = u8truncstr(tname, (size_t)max_name_len - 1 - ext_len);
-		file_info[i].len = (size_t)max_name_len;
+		diff = u8truncstr(tname, (size_t)_max - 1 - ext_len);
+		file_info[i].len = (size_t)_max;
 		n = tname;
 	}
 
@@ -758,18 +785,19 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 	}
 
 	char *n = wname ? wname : file_info[i].name;
-	int _trim = 0, diff = 0;
+	int _trim = 0, diff = 0, fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
+	int _max = max_name_len + fc;
 	char tname[NAME_MAX * sizeof(wchar_t)];
 	if (unicode && max_name_len != UNSET && !long_view
-	&& (int)file_info[i].len > max_name_len) {
+	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
 
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
 			(NAME_MAX * sizeof(wchar_t)) - 1);
-		diff = u8truncstr(tname, (size_t)max_name_len - 1 - ext_len);
-		file_info[i].len = (size_t)max_name_len;
+		diff = u8truncstr(tname, (size_t)_max - 1 - ext_len);
+		file_info[i].len = (size_t)_max;
 		n = tname;
 	}
 
@@ -905,19 +933,19 @@ print_entry_color_light(int *ind_char, const int i, const int pad)
 	}
 
 	char *n = wname ? wname : file_info[i].name;
-
-	int _trim = 0, diff = 0;
+	int _trim = 0, diff = 0, fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
+	int _max = max_name_len + fc;
 	char tname[NAME_MAX * sizeof(wchar_t)];
 	if (unicode && max_name_len != UNSET && !long_view
-	&& (int)file_info[i].len > max_name_len) {
+	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
 
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
 				(NAME_MAX * sizeof(wchar_t)) - 1);
-		diff = u8truncstr(tname, (size_t)max_name_len - 1 - ext_len);
-		file_info[i].len = (size_t)max_name_len;
+		diff = u8truncstr(tname, (size_t)_max - 1 - ext_len);
+		file_info[i].len = (size_t)_max;
 		n = tname;
 	}
 
@@ -1011,18 +1039,19 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad)
 	}
 
 	char *n = wname ? wname : file_info[i].name;
-	int _trim = 0, diff = 0;
+	int _trim = 0, diff = 0, fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
+	int _max = max_name_len + fc;
 	char tname[NAME_MAX * sizeof(wchar_t)];
 	if (unicode && max_name_len != UNSET && !long_view
-	&& (int)file_info[i].len > max_name_len) {
+	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
 
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
 				(NAME_MAX * sizeof(wchar_t)) - 1);
-		diff = u8truncstr(tname, (size_t)max_name_len - 1 - ext_len);
-		file_info[i].len = (size_t)max_name_len;
+		diff = u8truncstr(tname, (size_t)_max - 1 - ext_len);
+		file_info[i].len = (size_t)_max;
 		n = tname;
 	}
 
