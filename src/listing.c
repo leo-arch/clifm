@@ -810,21 +810,21 @@ print_entry_nocolor(int *ind_char, const int i, const int pad)
 	if (icons) {
 		if (no_eln) {
 			if (_trim) {
-				xprintf("%c%s %ls%s%c%s", file_info[i].sel ? SELFILE_CHR : ' ',
+				xprintf("%c%s%ls%s%c%s", file_info[i].sel ? SELFILE_CHR : ' ',
 					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
-				xprintf("%c%s %s", file_info[i].sel ? SELFILE_CHR : ' ',
+				xprintf("%c%s%s", file_info[i].sel ? SELFILE_CHR : ' ',
 				file_info[i].icon, n);
 			}
 		} else {
 			if (_trim) {
-				xprintf("%s%*d%s%c%s %ls%s%c%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%*d%s%c%s%ls%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', file_info[i].icon,
 					(wchar_t *)n, trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
-				xprintf("%s%*d%s%c%s %s", el_c, pad, i + 1, df_c,
+				xprintf("%s%*d%s%c%s%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', file_info[i].icon, n);
 			}
 		}
