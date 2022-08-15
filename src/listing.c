@@ -2185,9 +2185,11 @@ list_dir(void)
 				name_icon_found = get_name_icon(file_info[n].name, (int)n);
 #endif
 
-			/* Check file extension (only if the user has access to the file) */
+			/* Check file extension (only if accessible, has no capabilities
+			 * and is not executable) */
 			char *ext = (char *)NULL;
-			if (check_ext == 1 && file_info[n].color != nf_c)
+			if (check_ext == 1 && file_info[n].color != nf_c
+			&& file_info[n].color != ca_c && file_info[n].exec != 1)
 				ext = strrchr(file_info[n].name, '.');
 			/* Make sure not to take a hidden file for a file extension */
 			if (!ext || ext == file_info[n].name || !*(ext + 1))

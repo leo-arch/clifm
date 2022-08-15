@@ -119,74 +119,34 @@ get_properties(char *filename, const int dsize)
 	if (attr.st_uid == user.uid || attr.st_gid == user.gid)
 		cid = dg_c;
 
-	char ext_color[MAX_COLOR];
-
 	switch (attr.st_mode & S_IFMT) {
 	case S_IFREG: {
-		char *ext = (char *)NULL;
 		file_type = '-';
-		if (light_mode == 1)
-			color = fi_c;
-		else if (check_file_access(&attr) == 0)
-			color = nf_c;
-		else if (attr.st_mode & S_ISUID)
-			color = su_c;
-		else if (attr.st_mode & S_ISGID)
-			color = sg_c;
-		else {
-#ifdef _LINUX_CAP
-			cap_t cap = cap_get_file(filename);
-			if (cap) {
-				color = ca_c;
-				cap_free(cap);
-			} else if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-#else
-			if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-#endif
-				color = FILE_SIZE == 0 ? ee_c : ex_c;
-			}
-
-			else if (FILE_SIZE == 0)
-				color = ef_c;
-			else if (attr.st_nlink > 1)
-				color = mh_c;
-			else {
-				ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
-				if (ext) {
-					char *extcolor = get_ext_color(ext);
-					if (extcolor) {
-						sprintf(ext_color, "\x1b[%sm", extcolor);
-						color = ext_color;
-						extcolor = (char *)NULL;
-					} else  { /* No matching extension found */
-						color = fi_c;
-					}
-				} else {
-					color = fi_c;
-				}
-			}
-		}
+		color = get_regfile_color(filename, attr);
 	} break;
+
 	case S_IFDIR:
 		file_type = 'd';
 		ctype = di_c;
-		if (light_mode == 1)
+		if (colorize == 0)
 			color = di_c;
 		else if (check_file_access(&attr) == 0)
 			color = nd_c;
 		else
 			color = get_dir_color(filename, attr.st_mode, attr.st_nlink);
 		break;
+
 	case S_IFLNK:
 		file_type = 'l';
 		ctype = ln_c;
-		if (light_mode == 1) {
+		if (colorize == 0) {
 			color = ln_c;
 		} else {
 			linkname = realpath(filename, (char *)NULL);
 			color = linkname ? ln_c : or_c;
 		}
 		break;
+
 	case S_IFSOCK: file_type = 's';
 		color = ctype = so_c;
 		break;
@@ -207,6 +167,9 @@ get_properties(char *filename, const int dsize)
 		color = no_c;
 		break;
 	}
+
+	if (!color)
+		color = fi_c;
 
 	/* File permissions */
 	char read_usr = '-', write_usr = '-', exec_usr = '-',

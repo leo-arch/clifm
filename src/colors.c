@@ -128,6 +128,36 @@ remove_bold_attr(char **str)
 	}
 }
 
+char *
+get_regfile_color(const char *filename, const struct stat attr)
+{
+	if (colorize == 0)
+		return fi_c;
+
+	if (check_file_access(&attr) == 0)
+		return nf_c;
+
+	char *color = get_file_color(filename, &attr);
+	if (color == ee_c || color == ex_c || color == su_c || color == sg_c
+	|| color == ca_c)
+		return color ? color : fi_c;
+
+	char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
+	if (!ext)
+		return color ? color : fi_c;
+
+	char *extcolor = get_ext_color(ext);
+	ext = (char *)NULL;
+	if (!extcolor)
+		return color ? color : fi_c;
+
+	snprintf(tmp_color, sizeof(tmp_color), "\x1b[%sm", extcolor); // NOLINT
+	color = tmp_color;
+	extcolor = (char *)NULL;
+
+	return color ? color : fi_c;
+}
+
 /* Retrieve the color corresponding to dir FILENAME with mode MODE
  * If LINKS > 2, we know the directory is populated, so that there's no need
  * to run count_dir() */
@@ -1728,32 +1758,15 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		return;
 	}
 
-	char *color = fi_c, ext_color[MAX_COLOR];
+	char *color = fi_c;
 
 	switch (attr.st_mode & S_IFMT) {
 	case S_IFREG:
-		if (light_mode == 1 || colorize == 0) {
-			color = fi_c;
-		} else if (check_file_access(&attr) == 0) {
-			color = nf_c;
-		} else {
-			color = get_file_color(ent, &attr);
-			if (light_mode == 1 || color != fi_c)
-				break;
-			char *ext = check_ext == 1 ? strrchr(ent, '.') : (char *)NULL;
-			if (!ext) break;
-			char *extcolor = get_ext_color(ext);
-			ext = (char *)NULL;
-			if (!extcolor) break;
-
-			snprintf(ext_color, MAX_COLOR, "\x1b[%sm", extcolor); // NOLINT
-			color = ext_color;
-			extcolor = (char *)NULL;
-		}
+		color = get_regfile_color(ent, attr);
 		break;
 
 	case S_IFDIR:
-		if (light_mode == 1 || colorize == 0)
+		if (colorize == 0)
 			color = di_c;
 		else if (check_file_access(&attr) == 0)
 			color = nd_c;
@@ -1762,9 +1775,13 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		break;
 
 	case S_IFLNK: {
-		char *linkname = realpath(ent, NULL);
-		color = linkname ? ln_c : or_c;
-		free(linkname);
+		if (colorize == 0) {
+			color = ln_c;
+		} else {
+			char *linkname = realpath(ent, NULL);
+			color = linkname ? ln_c : or_c;
+			free(linkname);
+		}
 		}
 		break;
 
@@ -1774,6 +1791,9 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	case S_IFSOCK: color = so_c; break;
 	default: color = no_c; break;
 	}
+
+	if (!color)
+		color = fi_c;
 
 	char *name = wname ? wname : ent;
 	char *tmp = (flags & IN_SELBOX_SCREEN) ? abbreviate_file_name(name) : name;
