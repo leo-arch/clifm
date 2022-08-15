@@ -579,6 +579,7 @@ const struct cmdslist_t param_str[] = {
 	{"help plugins", 12},
 	{"help remotes", 12},
 	{"help resource-opener", 20},
+	{"help security", 13},
 	{"help selection", 14},
 	{"help search", 11},
 	{"help theming", 12},

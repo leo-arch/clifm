@@ -2178,7 +2178,7 @@ options_generator(const char *text, int state)
 	if (w != 2) /* Complete internal options only for the second word */
 		return (char *)NULL;
 
-#define MAX_OPTS 18
+#define MAX_OPTS 19
 	char *_opts[MAX_OPTS] = {0};
 
 	/* acd, ao, ext, ff, hf, pg, uc */
@@ -2223,10 +2223,11 @@ options_generator(const char *text, int state)
 		_opts[11] = "remotes";
 		_opts[12] = "resource-opener";
 		_opts[13] = "search";
-		_opts[14] = "selection";
-		_opts[15] = "theming";
-		_opts[16] = "trash";
-		_opts[17] = NULL;
+		_opts[14] = "security";
+		_opts[15] = "selection";
+		_opts[16] = "theming";
+		_opts[17] = "trash";
+		_opts[18] = NULL;
 	/* b, f */
 	} else if ((*l == 'b' && l[1] == ' ') || (*l == 'f' && l[1] == ' ')) {
 		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;

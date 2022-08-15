@@ -1972,6 +1972,15 @@ print_resource_opener_topic(void)
 }
 
 static int
+print_security_topic(void)
+{
+	puts(SECURITY_USAGE);
+	putchar('\n');
+	print_more_info();
+	return EXIT_SUCCESS;
+}
+
+static int
 print_selection_topic(void)
 {
 	puts(SEL_USAGE); return EXIT_SUCCESS;
@@ -2026,6 +2035,8 @@ run_help_topic(char *topic)
 		return print_remotes_topic();
 	if (*topic == 'r' && strcmp(topic, "resource-opener") == 0)
 		return print_resource_opener_topic();
+	if (*topic == 's' && strcmp(topic, "security") == 0)
+		return print_security_topic();
 	if (*topic == 's' && strcmp(topic, "selection") == 0)
 		return print_selection_topic();
 	if (*topic == 's' && strcmp(topic, "search") == 0)

@@ -662,6 +662,19 @@ by default to the \"//\" action name. For example:\n\
     // content I\\'m looking for\n\n\
 Note: This plugin depends on fzf(1) and rg(1) (ripgrep)"
 
+#define SECURITY_USAGE "CliFM provides three different security mechanisms:\n\n\
+1. Stealth mode: No file is read nor written to the file system (unless explicitly\n\
+required by the user via a command). Default values are used. Enable this mode via the\n\
+-S,--stealth-mode command line switch.\n\n\
+2. Secure environment: CliFM runs on a sanitized environment (most environment\n\
+variables are cleared and a few of them set to sane defaults). Enable this mode\n\
+via the --secure-env or --secure-env-full command line switches.\n\n\
+3. Secure commands: Automatically executed shell commands (autocommands, (un)mount,\n\
+opening applications, just as prompt and profile commands) are sanitized before being\n\
+executed: a secure environment is set and the command is validated using a whitelist\n\
+to prevent unexpected/insecure behavior and command injection. Enable this mode\n\
+using the --secure-cmds command line switch."
+
 #define SEL_USAGE "Select one or multiple files\n\
 Usage:\n\
   s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\
