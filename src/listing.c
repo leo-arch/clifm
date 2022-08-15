@@ -662,8 +662,7 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (unicode && max_name_len != UNSET && !long_view
-	&& (int)file_info[i].len > _max) {
+	if (max_name_len != UNSET && !long_view && (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -786,8 +785,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (unicode && max_name_len != UNSET && !long_view
-	&& (int)file_info[i].len > _max) {
+	if (max_name_len != UNSET && !long_view && (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -933,8 +931,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad, const int _ma
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (unicode && max_name_len != UNSET && !long_view
-	&& (int)file_info[i].len > _max) {
+	if (max_name_len != UNSET && !long_view && (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -1038,8 +1035,7 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad, const int _
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (unicode && max_name_len != UNSET && !long_view
-	&& (int)file_info[i].len > _max) {
+	if (max_name_len != UNSET && !long_view && (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -1146,32 +1142,6 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 	}
 }
 
-/* Trim and untrim file names when current file name length exceeds
- * man file name length. Only used when Unicode is disabled
- * This method is really efficient, but can neither preserve extensions
- * nor colorize TRIMFILE_CHR */
-static void
-trim_filename(const int i, const int _max)
-{
-	trim.state = 1;
-	trim.a = file_info[i].name[_max - 1];
-	trim.b = file_info[i].name[_max];
-	trim.len = file_info[i].len;
-	file_info[i].name[_max - 1] = TRIMFILE_CHR;
-	file_info[i].name[_max] = '\0';
-	file_info[i].len = (size_t)_max;
-}
-
-static void
-untrim_filename(const int i, const int _max)
-{
-	file_info[i].len = trim.len;
-	file_info[i].name[_max - 1] = (char)trim.a;
-	file_info[i].name[_max] = (char)trim.b;
-	trim.state = trim.a = trim.b = 0;
-	trim.len = 0;
-}
-
 /* List files horizontally:
  * 1 AAA	2 AAB	3 AAC
  * 4 AAD	5 AAE	6 AAF */
@@ -1227,9 +1197,6 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		/* Trim file name to MAX_NAME_LEN */
 		int fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
 		int _max = max_name_len + fc;
-		if (!unicode && max_name_len != UNSET && !long_view
-		&& (int)file_info[i].len > _max)
-			trim_filename(i, _max);
 
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
@@ -1253,9 +1220,6 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		} else {
 			putchar('\n');
 		}
-
-		if (!unicode && trim.state == 1)
-			untrim_filename(i, _max);
 	}
 
 	if (!last_column)
@@ -1360,9 +1324,6 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		/* Trim file name to MAX_NAME_LEN (+ LONGEST_FC) */
 		int fc = file_info[x].dir != 1 ? (int)longest_fc : 0;
 		int _max = max_name_len + fc;
-		if (!unicode && max_name_len != UNSET && !long_view
-		&& (int)file_info[x].len > _max)
-			trim_filename(x, _max);
 
 		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
 
@@ -1390,9 +1351,6 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			 * ... */
 			putchar('\n');
 		}
-
-		if (!unicode && trim.state == 1)
-			untrim_filename(x, _max);
 	}
 
 	if (!last_column)
