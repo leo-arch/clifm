@@ -1341,7 +1341,9 @@ The following codes are used for different interface elements (in the \fIInterfa
 .TP
 Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the corresponding color scheme file: \fBdi=01;34\fR. If you want ELN's to be red, add this code to the \fIInterfaceColors\fR line: \fBel=00;31\fR
 .TP
-Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the \fIExtColors\fR line in the corresponding color scheme file: \fB*.c=01;32\fR
+Color codes can be used for file extensions as well (regular files only) using this format: *.ext=color. For example, to print C source files in bold green, add this to the \fIExtColors\fR line in the corresponding color scheme file: \fB*.c=01;32\fR
+.TP
+\fBNote\fR: Non-accessible (non-readable by the current user), executable (including SUID and SGID) files, and files with capabilities take precedence over file extensions. For example, the file \fIfile.mp3\fR, if executable, will be printed using the color code associated to executable files (\fIex\fR) even if there is a color code associated to \fI.mp3\fR files.
 .TP
 Six digits \fIhexadecimal\fR color codes are supported as well using this general format: \fB#RRGGBB[-[1-9]]\fR, where 1-9 is a display attribute. For example, if you want directories to be bold Spring Green: \fBdi=#00ff7f-1\fR.
 .TP
