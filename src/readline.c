@@ -2974,7 +2974,7 @@ my_rl_completion(const char *text, int start, int end)
  * 3) ~/.inputrc
  * 4) /etc/inputrc
  * If neither 1 nor 2 exist, readline will try to read 3 and 4 by default) */
-static inline void
+static void
 set_rl_init_file(void)
 {
 	struct stat a;
