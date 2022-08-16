@@ -129,15 +129,18 @@ remove_bold_attr(char **str)
 }
 
 char *
-get_regfile_color(const char *filename, const struct stat attr)
+get_regfile_color(const char *filename, const struct stat *attr)
+//get_regfile_color(const char *filename, const struct stat attr)
 {
 	if (colorize == 0)
 		return fi_c;
 
-	if (check_file_access(&attr) == 0)
+//	if (check_file_access(&attr) == 0)
+	if (check_file_access(attr) == 0)
 		return nf_c;
 
-	char *color = get_file_color(filename, &attr);
+//	char *color = get_file_color(filename, &attr);
+	char *color = get_file_color(filename, attr);
 	if (color == ee_c || color == ex_c || color == su_c || color == sg_c
 	|| color == ca_c)
 		return color ? color : fi_c;
@@ -1762,7 +1765,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 
 	switch (attr.st_mode & S_IFMT) {
 	case S_IFREG:
-		color = get_regfile_color(ent, attr);
+		color = get_regfile_color(ent, &attr);
 		break;
 
 	case S_IFDIR:

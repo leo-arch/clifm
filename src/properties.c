@@ -122,7 +122,7 @@ get_properties(char *filename, const int dsize)
 	switch (attr.st_mode & S_IFMT) {
 	case S_IFREG: {
 		file_type = '-';
-		color = get_regfile_color(filename, attr);
+		color = get_regfile_color(filename, &attr);
 	} break;
 
 	case S_IFDIR:
