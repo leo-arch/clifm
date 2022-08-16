@@ -76,7 +76,7 @@ install(DIRECTORY misc/tools DESTINATION "${_PROG_DATADIR}"
 			WORLD_READ WORLD_EXECUTE)
 
 install(FILES plugins/BFG.cfg plugins/kbgen.c DESTINATION "${_PLUGINSDIR}")
-install(FILES plugins/plugins-helper DESTINATION "%{_PLUGINSDIR}"
+install(FILES plugins/plugins-helper DESTINATION "${_PLUGINSDIR}"
         PERMISSIONS
 	        OWNER_READ OWNER_WRITE OWNER_EXECUTE
 		GROUP_READ GROUP_EXECUTE
