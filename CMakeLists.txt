@@ -36,7 +36,7 @@ elseif(UNIX)
 endif()
 
 set(BIN "clifm")
-set(_MANDIR "man/man1")
+set(_MANDIR "share/man/man1")
 set(_BASHDIR "share/bash-completion/completions")
 set(_ZSHDIR "share/zsh/site-functions")
 set(_DESKTOPPREFIX "share/applications")
