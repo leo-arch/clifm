@@ -75,7 +75,12 @@ install(DIRECTORY misc/tools DESTINATION "${_PROG_DATADIR}"
 			GROUP_READ GROUP_EXECUTE
 			WORLD_READ WORLD_EXECUTE)
 
-install(FILES plugins/BFG.cfg plugins/kbgen.c plugins/plugins-helper DESTINATION "${_PLUGINSDIR}")
+install(FILES plugins/BFG.cfg plugins/kbgen.c DESTINATION "${_PLUGINSDIR}")
+install(FILES plugins/plugins-helper DESTINATION "%{_PLUGINSDIR}"
+        PERMISSIONS
+	        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+		GROUP_READ GROUP_EXECUTE
+		WORLD_READ WORLD_EXECUTE)
 
 install(FILES misc/actions.clifm misc/keybindings.clifm misc/mimelist.clifm misc/nets.clifm misc/prompts.clifm misc/readline.clifm misc/clifmrc DESTINATION "${_PROG_DATADIR}")
 
