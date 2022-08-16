@@ -2990,6 +2990,18 @@ set_rl_init_file(void)
 	sprintf(rl_file, "%s/readline.cfm", config_dir_gral); */
 	char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 16, sizeof(char));
 	sprintf(rl_file, "%s/readline.clifm", config_dir_gral);
+
+	/* This file should have been imported by import_rl_file (config.c)
+	 * In case it wasn't, let's create here a skeleton. If not found,
+	 * readline refuses to colorize history lines */
+	struct stat a;
+	if (lstat(rl_file, &a) == -1) {
+		int fd;
+		FILE *fp = open_fstream_w(rl_file, &fd);
+		fprintf(fp, "# This is readline's configuration file for %s\n", _PROGRAM_NAME);
+		close_fstream(fp, fd);
+	}
+
 	rl_read_init_file(rl_file);
 	free(rl_file);
 }
