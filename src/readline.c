@@ -2977,8 +2977,10 @@ my_rl_completion(const char *text, int start, int end)
 static inline void
 set_rl_init_file(void)
 {
+	struct stat a;
 	char *p = getenv("INPUTRC");
-	if (p) {
+	if (xargs.secure_env != 1 && xargs.secure_env_full != 1
+	&& p && stat(p, &a) != -1) {
 		rl_read_init_file(p);
 		return;
 	}
@@ -2992,12 +2994,16 @@ set_rl_init_file(void)
 	sprintf(rl_file, "%s/readline.clifm", config_dir_gral);
 
 	/* This file should have been imported by import_rl_file (config.c)
-	 * In case it wasn't, let's create here a skeleton. If not found,
+	 * In case it wasn't, let's create here a skeleton: if not found,
 	 * readline refuses to colorize history lines */
-	struct stat a;
-	if (lstat(rl_file, &a) == -1) {
+	if (stat(rl_file, &a) == -1) {
 		int fd;
 		FILE *fp = open_fstream_w(rl_file, &fd);
+		if (!fp) {
+			_err('w', PRINT_PROMPT, "%s: fopen: %s: %s\n", PROGRAM_NAME,
+				rl_file, strerror(errno));
+			return;
+		}
 		fprintf(fp, "# This is readline's configuration file for %s\n", _PROGRAM_NAME);
 		close_fstream(fp, fd);
 	}
