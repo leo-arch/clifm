@@ -106,10 +106,10 @@ recover_from_wrong_cmd(void)
 	}
 
 // TESTING SUGGESTIONS!
-	free(suggestion_buf);
+/*	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
 	suggestion.printed = 0;
-	suggestion.nlines = 0;
+	suggestion.nlines = 0; */
 // TESTING SUGGESTIONS!
 
 	fputs(NC, stdout);
@@ -354,11 +354,16 @@ _print_suggestion(const char *str, const size_t offset, const char *color)
 /* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
  * move the cursor back to the original position.
  * OFFSET marks the point in STR that is already typed: the suggestion
- * will be printed starting from this point */
+ * will be printed starting from this point
+ *
+ * Do nothing is WRONG_CMD is set: we're recovering from the warning prompt
+ * and if we print the suggestion here it will be cleared anyway by
+ * recover_from_wrong_cmd(), and that's a waste of resources */
 void
 print_suggestion(const char *str, size_t offset, char *color)
 {
-	if (!str || !*str)
+	if (!str || !*str || wrong_cmd == 1)
+//	if (!str || !*str)
 		return;
 
 	fputs(HIDE_CURSOR, stdout);
