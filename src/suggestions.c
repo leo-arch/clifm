@@ -104,6 +104,14 @@ recover_from_wrong_cmd(void)
 		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
 			return EXIT_FAILURE;
 	}
+
+// TESTING SUGGESTIONS!
+	free(suggestion_buf);
+	suggestion_buf = (char *)NULL;
+	suggestion.printed = 0;
+	suggestion.nlines = 0;
+// TESTING SUGGESTIONS!
+
 	fputs(NC, stdout);
 	rl_restore_prompt();
 	rl_clear_message();

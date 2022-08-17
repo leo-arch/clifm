@@ -34,7 +34,7 @@
 #endif
 
 #include "checks.h"
-#include "aux.h" /* For xatoi */
+#include "aux.h" /* xatoi */
 #include "listing.h"
 
 int
