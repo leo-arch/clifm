@@ -415,43 +415,6 @@ get_cursor_position(int *c, int *r)
 
 	return EXIT_SUCCESS;
 }
-/*
-int
-get_cursor_position(const int ifd, const int ofd, int *c, int *r)
-{
-	char buf[32];
-	unsigned int i = 0;
-
-	if (enable_raw_mode(ifd) == -1)
-		return EXIT_FAILURE;
-
-	// Report cursor location
-	if (write(ofd, "\x1b[6n", 4) != 4)
-		goto FAIL;
-
-	// Read the response: "ESC [ rows ; cols R"
-	while (i < sizeof(buf) - 1) {
-		if (read(ifd, buf + i, 1) != 1) // flawfinder: ignore
-			break;
-		if (buf[i] == 'R')
-			break;
-		i++;
-	}
-	buf[i] = '\0';
-
-	// Parse it
-	if (buf[0] != _ESC || buf[1] != '[')
-		goto FAIL;
-	if (sscanf(buf + 2, "%d;%d", r, c) != 2)
-		goto FAIL;
-
-	disable_raw_mode(ifd);
-	return EXIT_SUCCESS;
-
-FAIL:
-	disable_raw_mode(ifd);
-	return EXIT_FAILURE;
-} */
 
 /*
 int
