@@ -986,7 +986,7 @@ prompt(void)
 	input = readline(the_prompt);
 	free(the_prompt);
 
-	if (!input || !*input) {
+	if (!input || !*input || rl_end == 0) {
 		free(input);
 		if ((flags & DELAYED_REFRESH) || xargs.refresh_on_empty_line == 1) {
 			flags &= ~DELAYED_REFRESH;
