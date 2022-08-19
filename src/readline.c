@@ -593,7 +593,7 @@ my_rl_getc(FILE *stream)
 			} else {
 				prompt_offset = 6;
 			}
-#endif /* __FreeBSD__ */
+#endif /* !__FreeBSD__ */
 		}
 	}
 

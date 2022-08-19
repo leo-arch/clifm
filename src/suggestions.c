@@ -162,7 +162,10 @@ clear_suggestion(const int free_sug)
 		/* Save cursor position */
 // TESTING CURSOR POSITION
 		get_cursor_position(&curcol, &currow);
-//		curcol = prompt_offset + rl_point;
+/*		rl_redisplay();
+		curcol = prompt_offset + rl_point;
+		if (curcol > term_cols)
+			curcol -= term_cols; */
 // TESTING CURSOR POSITION
 
 		int i = (int)suggestion.nlines;
@@ -200,33 +203,37 @@ remove_suggestion_not_end(void)
 	fflush(stdout);
 }
 
+// TESTING CURSOR POSITION
+/*
 static inline void
 restore_cursor_position(const size_t slines)
 {
-	/* Update the row number, if needed */
-	/* If the cursor is on the last terminal line, printing a multi-line
-	 * suggestion will move the beginning of the current line up the number
-	 * of lines taken by the suggestion, so that we need to update the
-	 * value to move the cursor back to the correct row (the beginning
-	 * of the line) */
+	// Update the row number, if needed
+	// If the cursor is on the last terminal line, printing a multi-line
+	// suggestion will move the beginning of the current line up the number
+	// of lines taken by the suggestion, so that we need to update the
+	// value to move the cursor back to the correct row (the beginning
+	// of the line)
 	int old_currow = currow;
-	/* extra_rows: amount of extra rows needed to print the suggestion
-	 * (excluding the current row) */
+	// extra_rows: amount of extra rows needed to print the suggestion
+	// (excluding the current row)
 	int extra_rows = (int)slines - 1;
 	if (extra_rows && old_currow + extra_rows >= term_rows)
 		currow -= extra_rows - (term_rows - old_currow);
 
-	/* Restore cursor position */
+	// Restore cursor position
 
-	/* THIS BLOCK IS UNDER TEST: It corrects the cursor position whenever
-	 * a suggestion is printed and the cursor is not at the end of the line.
-	 * We do this because we modified the cursor position in correct_offset()
-	 * to correctly print the suggestion. Now we need to undo this change */
+	// THIS BLOCK IS UNDER TEST: It corrects the cursor position whenever
+	// a suggestion is printed and the cursor is not at the end of the line.
+	// We do this because we modified the cursor position in correct_offset()
+	// to correctly print the suggestion. Now we need to undo this change
 //	if (highlight && rl_point != rl_end)
 //		curcol += (rl_end - rl_point);
 
 	SET_CURSOR(currow, curcol);
-}
+} */
+// TESTING CURSOR POSITION
+
 /*
 static inline void
 correct_offset(size_t *offset)
@@ -313,16 +320,20 @@ set_cursor_position(const int baej)
 	/* Erase everything after the current cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
 
+// TESTING CURSOR POSITION
 	if (baej == 1) {
-		int off = BAEJ_OFFSET + ((highlight == 0) ? 1 : 0);
+//		int off = BAEJ_OFFSET + ((highlight == 0) ? 1 : 0);
+		int off = BAEJ_OFFSET;
+
 		SUGGEST_BAEJ(off, sp_c);
-	} else {
+	} /*else {
 		if (highlight == 0) {// || (flags & NO_RECOLOR_LINE)) {
 			MOVE_CURSOR_RIGHT(1);
 			fflush(stdout);
 //			flags &= ~NO_RECOLOR_LINE;
 		}
-	}
+	} */
+// TESTING CURSOR POSITION
 }
 
 static inline int
@@ -406,7 +417,9 @@ print_suggestion(const char *str, size_t offset, char *color)
 	}
 
 // TESTING CURSOR POSITION
-	curcol = prompt_offset + rl_end;
+	if (highlight == 0)
+		rl_redisplay();
+	curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
 	if (curcol > term_cols)
 		curcol -= term_cols;
 // TESTING CURSOR POSITION

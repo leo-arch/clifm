@@ -973,8 +973,9 @@ prompt(void)
 	free(decoded_prompt);
 
 	/* Tell my_rl_getc() (readline.c) to recalculate the length
-	 * of the last prompt line, needed to calculate FZF offset. This
-	 * length might vary if the prompt contains dynamic values */
+	 * of the last prompt line, needed to calculate the finder's offset
+	 * and the current cursor column. This length might vary if the
+	 * prompt contains dynamic values */
 	prompt_offset = UNSET;
 
 /*	if (right_prompt && *right_prompt)
