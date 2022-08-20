@@ -771,7 +771,11 @@ dir_size(char *dir)
 		return (-1);
 
 	char file[PATH_MAX];
+#if !defined(__OpenBSD__)
 	snprintf(file, PATH_MAX, "%s/duXXXXXX", (xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir); /* NOLINT */
+#else
+	snprintf(file, PATH_MAX, "%s/duXXXXXXXXXX", (xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir); /* NOLINT */
+#endif
 
 	int fd = mkstemp(file);
 	if (fd == -1)

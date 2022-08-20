@@ -423,7 +423,11 @@ static int
 get_user_id(const int group)
 {
 	char file[PATH_MAX];
+#if !defined(__OpenBSD__)
 	snprintf(file, PATH_MAX, "%s/idXXXXXX", *P_tmpdir ? P_tmpdir : "/tmp"); /* NOLINT */
+#else
+	snprintf(file, PATH_MAX, "%s/idXXXXXXXXXX", *P_tmpdir ? P_tmpdir : "/tmp"); /* NOLINT */
+#endif
 
 	int fd = mkstemp(file);
 	if (fd == -1) return (-1);

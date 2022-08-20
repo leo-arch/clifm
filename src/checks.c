@@ -804,8 +804,13 @@ check_file_size(char *file, int max)
 	/* Set the file pointer to the beginning of the log file */
 	fseek(fp, 0, SEEK_SET);
 
+#if !defined(__OpenBSD__)
 	char *tmp = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 	sprintf(tmp, "%s/log.XXXXXX", config_dir); /* NOLINT */
+#else
+	char *tmp = (char *)xnmalloc(config_dir_len + 16, sizeof(char));
+	sprintf(tmp, "%s/log.XXXXXXXXXX", config_dir); /* NOLINT */
+#endif
 
 	int fdd = mkstemp(tmp);
 	if (fdd == -1) {

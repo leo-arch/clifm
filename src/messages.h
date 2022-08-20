@@ -932,7 +932,7 @@ on an empty line\
 \n  -w, --workspace=NUM\t\t Start in workspace NUM\
 \n  -W, --no-toggle-workspaces\t Workspace keybindings do not toggle previous and current workspaces\
 \n  -x, --no-ext-cmds\t\t Disallow the use of external commands\
-\n  -y, --light-mode\t\t Enable the light mode\
+\n  -y, --light-mode\t\t Run in light mode\
 \n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
 
 #define LONG_OPTIONS "\
