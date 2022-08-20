@@ -513,6 +513,8 @@ create_actions_file(char *file)
 		"i=img_viewer.sh\n"
 		"ih=ihelp.sh\n"
 		"kbgen=kbgen\n"
+		"kd=decrypt.sh\n"
+		"ke=encrypt.sh\n"
 		"music=music_player.sh\n"
 		"ptot=pdf_viewer.sh\n"
 		"rrm=recur_rm.sh\n"
