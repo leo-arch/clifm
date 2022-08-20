@@ -1910,6 +1910,12 @@ T{
 .BR kbgen
 T}	Get escape codes for keybindings	kbgen.c	Needs to be compiled first (gcc -o kbgen kbgen.c -lcurses)
 T{
+.BR kd
+T}	Decrypt a GnuPG encrypted file	decrypt.sh	gpg, tar, sed, grep
+T{
+.BR ke
+T}	Encrypt files/dirs using GnuPG	encrypt.sh	gpg, tar, sed, fzf, awk, xargs
+T{
 .BR ml
 T}	List files by a given MIME type	mime_list.sh	fzf, file
 T{
