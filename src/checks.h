@@ -40,6 +40,9 @@ void check_term(void);
 void check_third_party_cmds(void);
 void file_cmd_check(void);
 char *get_sudo_path(void);
+
+int is_action_name(const char *s);
+
 int is_bin_cmd(char *str);
 int is_file_in_cwd(char *name);
 int is_internal(const char *cmd);

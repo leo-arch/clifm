@@ -474,6 +474,23 @@ is_internal_c(char *restrict cmd)
 	return 0;
 }
 
+/* Check whether S is an action name
+ * Returns 1 if true or 0 otherwise */
+int
+is_action_name(const char *s)
+{
+	if (actions_n == 0)
+		return 0;
+
+	int n = (int)actions_n;
+	while (--n >= 0) {
+		if (*s == *usr_actions[n].name && strcmp(s, usr_actions[n].name) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
 /* Check cmd against a list of internal commands. Used by parse_input_str()
  * to know if it should perform additional expansions, like glob, regex,
  * tilde, and so on. Only internal commands dealing with ELN/filenames

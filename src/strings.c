@@ -1832,11 +1832,11 @@ parse_input_str(char *str)
 	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
 	substr[args_n + 1] = (char *)NULL;
 
-	if (!is_internal(substr[0]))
+	if (!is_internal(substr[0]) && !is_action_name(substr[0]))
 		return substr;
 
 	/* #############################################################
-	 * #               ONLY FOR INTERNAL COMMANDS                  #
+	 * #         ONLY FOR INTERNAL COMMANDS OR PLUGINS             #
 	 * #############################################################*/
 
 	/* Some functions of CliFM are purely internal, that is, they are not
