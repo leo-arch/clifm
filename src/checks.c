@@ -34,7 +34,7 @@
 #  include <sys/acl.h>
 #  define _ACL_OK
 # endif /* __NetBSD_Prereq__ */
-#elif !defined(__HAIKU__) && !defined(__OpenBSD__)
+#elif !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__sun)
 # include <sys/acl.h>
 # define _ACL_OK
 #endif /* __NetBSD__ */
@@ -467,7 +467,7 @@ is_internal_c(char *restrict cmd)
 
 	/* Check for the search and history functions as well */
 	if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
-	&& (_ISDIGIT(cmd[1]) || (cmd[1] == '-' && _ISDIGIT(cmd[2]))
+	&& (IS_DIGIT(cmd[1]) || (cmd[1] == '-' && IS_DIGIT(cmd[2]))
 	|| cmd[1] == '!')))
 		return 1;
 
@@ -837,7 +837,7 @@ check_file_size(char *file, int max)
 		return;
 	}
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__sun)
 	FILE *fpp = fopen(tmp, "w");
 	if (!fpp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp, strerror(errno));
@@ -854,14 +854,14 @@ check_file_size(char *file, int max)
 	while (getline(&line, &line_size, fp) > 0) {
 		/* Delete old entries = copy only new ones */
 		if (i++ >= n - (max - 1))
-#ifndef __HAIKU__
+#if !defined(__HAIKU__) && !defined(__sun)
 			dprintf(fdd, "%s", line);
 #else
 			fprintf(fpp, "%s", line);
 #endif
 	}
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__sun)
 	fclose(fpp);
 #endif
 

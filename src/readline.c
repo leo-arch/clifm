@@ -659,8 +659,12 @@ my_rl_getc(FILE *stream)
 #endif // !_NO_FZF
 		if (prompt_offset == UNSET) {
 #ifndef __FreeBSD__
+# ifndef __sun
 			get_cursor_position(&curcol, &currow);
 			prompt_offset = curcol;
+# else
+			prompt_offset = 6;
+# endif
 #else
 			if ((flags & GUI) || freebsd_sc_console == 1) {
 				get_cursor_position(&curcol, &currow);

@@ -2056,7 +2056,7 @@ quick_help(char *topic)
 	if (topic && *topic)
 		return run_help_topic(topic);
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__sun)
 	printf("%s                                %s\n\n%s\n\n%s",
 		ASCII_LOGO, _PROGRAM_NAME, QUICK_HELP_HEADER, QUICK_HELP_NAVIGATION);
 	printf("\n\n%s\n\n%s\n", QUICK_HELP_BASIC_OPERATIONS, QUICK_HELP_MISC);

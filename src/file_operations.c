@@ -1559,7 +1559,7 @@ bulk_rename(char **args)
 	size_t i, arg_total = 0;
 	FILE *fp = (FILE *)NULL;
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__sun)
 	fp = fopen(bulk_file, "w");
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "br: fopen: %s: %s\n", bulk_file, strerror(errno));
@@ -1567,7 +1567,7 @@ bulk_rename(char **args)
 	}
 #endif
 
-#ifndef __HAIKU__
+#if !defined(__HAIKU__) && !defined(__sun)
 	dprintf(fd, BULK_RENAME_TMP_FILE_HEADER);
 #else
 	fprintf(fp, BULK_RENAME_TMP_FILE_HEADER);
@@ -1609,13 +1609,13 @@ bulk_rename(char **args)
 			counter++;
 		}
 
-#ifndef __HAIKU__
+#if !defined(__HAIKU__) && !defined(__sun)
 		dprintf(fd, "%s\n", args[i]);
 #else
 		fprintf(fp, "%s\n", args[i]);
 #endif
 	}
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__sun)
 	fclose(fp);
 #endif
 	arg_total = i;
@@ -1832,7 +1832,7 @@ char *export(char **filenames, int open)
 	}
 	
 	size_t i;
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__sun)
 	FILE *fp = fopen(tmp_file, "w");
 	if (!fp) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "exp: %s: %s\n", tmp_file, strerror(errno));
@@ -1844,7 +1844,7 @@ char *export(char **filenames, int open)
 	/* If no argument, export files in CWD */
 	if (!filenames[1]) {
 		for (i = 0; file_info[i].name; i++)
-#ifndef __HAIKU__
+#if !defined(__HAIKU__) && !defined(__sun)
 			dprintf(fd, "%s\n", file_info[i].name);
 #else
 			fprintf(fp, "%s\n", file_info[i].name);
@@ -1853,14 +1853,14 @@ char *export(char **filenames, int open)
 		for (i = 1; filenames[i]; i++) {
 			if (*filenames[i] == '.' && (!filenames[i][1] || (filenames[i][1] == '.' && !filenames[i][2])))
 				continue;
-#ifndef __HAIKU__
+#if !defined(__HAIKU__) && !defined(__sun)
 			dprintf(fd, "%s\n", filenames[i]);
 #else
 			fprintf(fp, "%s\n", filenames[i]);
 #endif
 		}
 	}
-#ifdef __HAIKU__
+#if defined(__HAIKU__) || defined(__sun)
 	fclose(fp);
 #endif
 	close(fd);

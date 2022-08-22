@@ -100,7 +100,7 @@ skip_name_prefixes(char **name)
 	char *s = *name;
 
 	while (*s) {
-		if (!_ISDIGIT(*s) && !_ISALPHA(*s) && (*s < 'A' || *s > 'Z')) {
+		if (!IS_DIGIT(*s) && !IS_ALPHA(*s) && (*s < 'A' || *s > 'Z')) {
 			s++;
 			continue;
 		}
@@ -120,7 +120,7 @@ namecmp(char *s1, char *s2)
 	skip_name_prefixes(&s2);
 
 	/* If both string starts with number, sort them as numbers, not as strings */
-	if (_ISDIGIT(*s1) && _ISDIGIT(*s2)) {
+	if (IS_DIGIT(*s1) && IS_DIGIT(*s2)) {
 		char *p1, *p2;
 		long long n1 = strtoll(s1, &p1, 10);
 		long long n2 = strtoll(s2, &p2, 10);

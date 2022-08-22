@@ -246,7 +246,7 @@ xstrverscmp(const char *s1, const char *s2)
 
 	/* Jump to first alphanumeric character in both strings */
 	while (*p1) {
-		if (!_ISDIGIT(*p1) && !_ISALPHA(*p1) && (*p1 < 'A' || *p1 > 'Z')) {
+		if (!IS_DIGIT(*p1) && !IS_ALPHA(*p1) && (*p1 < 'A' || *p1 > 'Z')) {
 			p1++;
 			continue;
 		}
@@ -257,7 +257,7 @@ xstrverscmp(const char *s1, const char *s2)
 		p1 = (const unsigned char *)s1;
 
 	while (*p2) {
-		if (!_ISDIGIT(*p2) && !_ISALPHA(*p2) && (*p2 < 'A' || *p2 > 'Z')) {
+		if (!IS_DIGIT(*p2) && !IS_ALPHA(*p2) && (*p2 < 'A' || *p2 > 'Z')) {
 			p2++;
 			continue;
 		}
@@ -304,7 +304,7 @@ xstrverscmp(const char *s1, const char *s2)
 	}
 
 	/* Hint: '0' is a digit too */
-	state = S_N + ((c1 == '0') + (_ISDIGIT(c1) != 0));
+	state = S_N + ((c1 == '0') + (IS_DIGIT(c1) != 0));
 
 	while ((diff = c1 - c2) == 0) {
 		if (c1 == '\0')
@@ -322,21 +322,21 @@ xstrverscmp(const char *s1, const char *s2)
 			p1++;
 			p2++;
 		}
-		state += (c1 == '0') + (_ISDIGIT(c1) != 0);
+		state += (c1 == '0') + (IS_DIGIT(c1) != 0);
 	}
 
-	state = result_type[state * 3 + (((c2 == '0') + (_ISDIGIT(c2) != 0)))];
+	state = result_type[state * 3 + (((c2 == '0') + (IS_DIGIT(c2) != 0)))];
 
 	switch (state) {
 	case VCMP: return diff;
 	case VLEN:
-		while (*p1 && *p2 && _ISDIGIT(*p1)) {
+		while (*p1 && *p2 && IS_DIGIT(*p1)) {
 			p1++;
-			if (!_ISDIGIT(*p2))
+			if (!IS_DIGIT(*p2))
 				return 1;
 			p2++;
 		}
-		return _ISDIGIT(*p2) ? -1 : diff;
+		return IS_DIGIT(*p2) ? -1 : diff;
 
 	default: return state;
 	}
@@ -1030,11 +1030,11 @@ is_fused_param(char *str)
 	int d = 0;
 
 	while (*p && *p != ' ') {
-		if (d == 0 && p != str && _ISDIGIT(*p) && _ISALPHA(*(p - 1))) {
+		if (d == 0 && p != str && IS_DIGIT(*p) && IS_ALPHA(*(p - 1))) {
 			q = p;
 			d = 1;
 		}
-		if (d == 1 && _ISALPHA(*p))
+		if (d == 1 && IS_ALPHA(*p))
 			return EXIT_FAILURE;
 		p++;
 	}
@@ -1255,7 +1255,7 @@ parse_input_str(char *str)
 
 				/* If first non-space is a number, it's not a variable
 				 * name */
-				if (!_ISDIGIT(*p)) {
+				if (!IS_DIGIT(*p)) {
 					int space_found = 0;
 					/* If there are no spaces before '=', take it as a
 					 * variable. This check is done in order to avoid
@@ -1520,12 +1520,12 @@ parse_input_str(char *str)
 		for (j = 0; substr[i][j]; j++) {
 			/* If some alphabetic char, besides '-', is found in the
 			 * string, we have no range */
-			if (substr[i][j] != '-' && !_ISDIGIT(substr[i][j]))
+			if (substr[i][j] != '-' && !IS_DIGIT(substr[i][j]))
 				break;
 
 			/* If a range is found, store its index */
 			if (j > 0 && j < substr_len && substr[i][j] == '-' &&
-			    _ISDIGIT(substr[i][j - 1]) && _ISDIGIT(substr[i][j + 1])) {
+			    IS_DIGIT(substr[i][j - 1]) && IS_DIGIT(substr[i][j + 1])) {
 				if (ranges_ok < int_array_max) {
 					range_array[ranges_ok] = (int)i;
 					ranges_ok++;

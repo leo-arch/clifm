@@ -2658,7 +2658,7 @@ exec_profile(void)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		if (int_vars == 1 && strchr(line, '=') && !_ISDIGIT(*line))
+		if (int_vars == 1 && strchr(line, '=') && !IS_DIGIT(*line))
 			create_usr_var(line);
 		else
 			run_profile_line(line);

@@ -1795,7 +1795,7 @@ rl_suggestions(const unsigned char c)
 		 * ######################################*/
 
 	/* 3.a) Check already suggested string */
-	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)) {
+	if (suggestion_buf && suggestion.printed && !IS_DIGIT(c)) {
 		if (suggestion.type == HIST_SUG || suggestion.type == INT_CMD) {
 			if (*full_line == *suggestion_buf
 			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {

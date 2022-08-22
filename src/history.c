@@ -842,8 +842,8 @@ record_cmd(char *input)
 	}
 
 	/* History */
-	if (*p == '!' && (_ISDIGIT(*(p + 1)) || (*(p + 1) == '-'
-	&& _ISDIGIT(*(p + 2))) || ((*(p + 1) == '!') && *(p + 2) == '\0')))
+	if (*p == '!' && (IS_DIGIT(*(p + 1)) || (*(p + 1) == '-'
+	&& IS_DIGIT(*(p + 2))) || ((*(p + 1) == '!') && *(p + 2) == '\0')))
 		return 0;
 
 	/* Consequtively equal commands in history */

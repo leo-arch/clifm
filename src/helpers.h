@@ -27,6 +27,8 @@
 
 #if defined(__linux__) && !defined(_BE_POSIX)
 # define _GNU_SOURCE
+#elif defined(__sun)
+# define BSD_COMP
 #else
 # define _POSIX_C_SOURCE 200809L
 # define _DEFAULT_SOURCE
@@ -90,6 +92,9 @@
 # include <sys/event.h>
 # include <sys/time.h>
 # define BSD_KQUEUE
+#elif dedfined(__sun)
+# define <sys/types.h>
+# define <sys/time.h>
 #endif /* __linux__ */
 
 #include "init.h"
@@ -436,7 +441,7 @@ extern int watch;
 #define JWEEK(n)  ((n) / 2)  /* Within last week */
 #define JOLDER(n) ((n) / 4)  /* More than a week */
 
-#if defined(__HAIKU__)
+#if defined(__HAIKU__) || defined(__sun)
 # define DT_UNKNOWN 0
 # define DT_FIFO    1
 # define DT_CHR     2
@@ -514,8 +519,8 @@ extern int watch;
 		: ((n) < 100000000)  ? 8 \
 		: ((n) < 1000000000) ? 9 \
 				      : 10)
-#define _ISDIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
-#define _ISALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
+#define IS_DIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
+#define IS_ALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
 
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
 

@@ -25,7 +25,7 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 #include <signal.h>
 #endif
 

@@ -35,8 +35,12 @@
 #include <readline/readline.h>
 
 #ifndef _NO_MAGIC
-#include <magic.h>
-#endif
+#if defined(__sun)
+# include <ast/magic.h>
+#else
+# include <magic.h>
+#endif /* __sun */
+#endif /* !_NO_MAGIC */
 
 #ifndef _NO_ARCHIVING
 #include "archives.h"
