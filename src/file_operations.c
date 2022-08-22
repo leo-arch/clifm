@@ -364,6 +364,8 @@ construct_rm_cmd(char ***rfiles, char *_param, size_t n)
 	char **cmd = (char **)xnmalloc(n + 4, sizeof(char *));
 
 	cmd[0] = savestring("rm", 2);
+	/* We know _param won't be greater than 4 (as defined in get_rm_param),
+	 * so that using strnlen here is secure */
 	cmd[1] = savestring(_param, strnlen(_param, 5));
 	cmd[2] = savestring("--", 2);
 	free(_param);
