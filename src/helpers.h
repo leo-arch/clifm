@@ -92,7 +92,7 @@
 # include <sys/event.h>
 # include <sys/time.h>
 # define BSD_KQUEUE
-#elif dedfined(__sun)
+#elif defined(__sun)
 # define <sys/types.h>
 # define <sys/time.h>
 #endif /* __linux__ */
