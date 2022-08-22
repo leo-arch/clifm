@@ -93,8 +93,8 @@
 # include <sys/time.h>
 # define BSD_KQUEUE
 #elif defined(__sun)
-# define <sys/types.h>
-# define <sys/time.h>
+# include <sys/types.h>
+# include <sys/time.h>
 #endif /* __linux__ */
 
 #include "init.h"
