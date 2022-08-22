@@ -81,9 +81,10 @@ regen_config(void)
 		localtime_r(&rawtime, &t);
 
 		char date[18];
-		strftime(date, 18, "%Y%m%d@%H:%M:%S", &t);
+		strftime(date, sizeof(date), "%Y%m%d@%H:%M:%S", &t);
 
-		char *bk = (char *)xnmalloc(strlen(config_file) + strlen(date) + 2, sizeof(char));
+		char *bk = (char *)xnmalloc(strlen(config_file)
+			+ strnlen(date, sizeof(date)) + 2, sizeof(char));
 		sprintf(bk, "%s.%s", config_file, date);
 
 		char *cmd[] = {"mv", config_file, bk, NULL};
@@ -2390,7 +2391,7 @@ read_config(void)
 			if (fail || s != SUG_STRATS)
 				continue;
 			free(suggestion_strategy);
-			suggestion_strategy = savestring(opt_str, strlen(opt_str));
+			suggestion_strategy = savestring(opt_str, strnlen(opt_str, sizeof(opt_str)));
 		}
 #endif /* !_NO_SUGGESTIONS */
 

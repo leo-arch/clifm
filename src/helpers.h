@@ -235,6 +235,9 @@ extern int watch;
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
 
+/* Terminal columns taken by the last line of the default prompt */
+#define FALLBACK_PROMPT_OFFSET 6
+
 /* A few macros for the _err function */
 #define ERR_NO_LOG   -1 /* _err prints but doesn't log */
 #define ERR_NO_STORE -2 /* _err prints and logs, but doesn't store the msg into the messages array */
@@ -1175,15 +1178,15 @@ extern struct termios shell_tmodes;
 extern pid_t own_pid;
 
 extern char
-	cur_prompt_name[NAME_MAX],
-	div_line[NAME_MAX],
-	hostname[HOST_NAME_MAX],
+	cur_prompt_name[NAME_MAX + 1],
+	div_line[NAME_MAX + 1],
+	hostname[HOST_NAME_MAX + 1],
 #ifndef _NO_FZF
-	finder_in_file[PATH_MAX],
-	finder_out_file[PATH_MAX],
+	finder_in_file[PATH_MAX + 1],
+	finder_out_file[PATH_MAX + 1],
 #endif /* _NO_FZF */
-	_fmatch[PATH_MAX], /* First regular match if fuzzy matching is enabled */
-	prop_fields_str[PROP_FIELDS_SIZE],
+	_fmatch[PATH_MAX + 1], /* First regular match if fuzzy matching is enabled */
+	prop_fields_str[PROP_FIELDS_SIZE + 1],
 
 	*actions_file,
 	*alt_config_dir,

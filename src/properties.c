@@ -252,7 +252,7 @@ get_properties(char *filename, const int dsize)
 	if (wlen == 0)
 		wname = truncate_wname(filename);
 
-	char *t_ctype = savestring(ctype, strlen(ctype));
+	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
 	remove_bold_attr(&t_ctype);
 
 	/* Print file properties */
@@ -566,7 +566,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		co3 = df_c;
 	}
 
-	char *t_ctype = savestring(ctype, strlen(ctype));
+	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
 	remove_bold_attr(&t_ctype);
 
 	/* Let's compose each properties field individually to be able to

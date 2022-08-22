@@ -476,8 +476,8 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 static char *
 construct_sel_path(char *sel_path)
 {
-	char tmpdir[PATH_MAX];
-	xstrsncpy(tmpdir, sel_path, (size_t)PATH_MAX);
+	char tmpdir[PATH_MAX + 1];
+	xstrsncpy(tmpdir, sel_path, sizeof(tmpdir) - 1);
 
 	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",	sel_path, strerror(errno));

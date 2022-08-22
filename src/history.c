@@ -230,7 +230,7 @@ send_desktop_notification(char *msg)
 	char name[NAME_MAX];
 	snprintf(name, sizeof(name), "%s: ", PROGRAM_NAME);
 	char *p = msg;
-	size_t nlen = strlen(name);
+	size_t nlen = strnlen(name, sizeof(name));
 	int ret = strncmp(p, name, nlen);
 	if (ret == 0) {
 		if (mlen <= nlen)

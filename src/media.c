@@ -449,11 +449,11 @@ mount_dev(int n)
 	}
 	p += 4;
 
-	size_t plen = strlen(p);
+	size_t plen = strnlen(p, sizeof(out_line) - 4);
 	if (p[plen - 1] == '\n')
 		p[plen - 1] = '\0';
 
-	media[n].mnt = savestring(p, strlen(p));
+	media[n].mnt = savestring(p, strnlen(p, sizeof(out_line) - 4));
 
 	return EXIT_SUCCESS;
 }

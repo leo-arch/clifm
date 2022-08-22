@@ -282,15 +282,15 @@ size_t
 	zombies = 0;
 
 char
-	cur_prompt_name[NAME_MAX] = "",
-	div_line[NAME_MAX],
-	hostname[HOST_NAME_MAX],
+	cur_prompt_name[NAME_MAX + 1] = "",
+	div_line[NAME_MAX + 1],
+	hostname[HOST_NAME_MAX + 1],
 #ifndef _NO_FZF
-	finder_in_file[PATH_MAX],
-	finder_out_file[PATH_MAX],
+	finder_in_file[PATH_MAX + 1],
+	finder_out_file[PATH_MAX + 1],
 #endif /* _NO_FZF */
-	_fmatch[PATH_MAX],
-	prop_fields_str[PROP_FIELDS_SIZE] = "",
+	_fmatch[PATH_MAX + 1],
+	prop_fields_str[PROP_FIELDS_SIZE + 1] = "",
 
 	*actions_file = (char *)NULL,
 	*alt_bm_file = (char *)NULL,

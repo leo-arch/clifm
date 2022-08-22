@@ -166,7 +166,7 @@ get_shell_cmd_opts(char *cmd)
 		if (!*line || *line == '#' || *line == '\n')
 			continue;
 
-		size_t l = strlen(line);
+		size_t l = strnlen(line, sizeof(line));
 		if (l > 0) {
 			while (line[l - 1] == '\n')
 				line[l - 1] = '\0';
@@ -526,8 +526,8 @@ prompt_xrename(void)
 		p = rl_line_buffer + 1;
 
 	size_t plen = strlen(p);
-	char pp[NAME_MAX];
-	xstrsncpy(pp, p, sizeof(pp));
+	char pp[NAME_MAX + 1];
+	xstrsncpy(pp, p, sizeof(pp) - 1);
 
 	if (plen > 0) {
 		while (pp[--plen] == ' ')
@@ -563,6 +563,71 @@ prompt_xrename(void)
 	return EXIT_SUCCESS;
 }
 
+/* Unicode aware implementation of readline's rl_expand_prompt()
+ * Returns the amount of terminal columns taken by the last prompt line,
+ * 0 if P is NULL or empty, and FALLBACK_PROMPT_OFFSET in case of error
+ * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE)
+ * is missing */
+#include <wchar.h>
+static int
+xrl_expand_prompt(char *p)
+{
+	if (!p || !*p)
+		return 0;
+
+	int n = 0;
+	while (*p) {
+		char *q = strchr(p, RL_PROMPT_START_IGNORE);
+		if (!q) {
+			char *qq = strchr(p, RL_PROMPT_END_IGNORE);
+			if (qq) {
+				_err('w', PRINT_PROMPT, "%s: Malformed prompt: "
+					"RL_PROMPT_END_IGNORE (\\%d) without "
+					"RL_PROMPT_START_IGNORE (\\%d)\n", PROGRAM_NAME,
+					RL_PROMPT_END_IGNORE, RL_PROMPT_START_IGNORE);
+				return FALLBACK_PROMPT_OFFSET;
+			}
+
+			/* No ignore characters found */
+			return (int)wc_xstrlen(p);
+		}
+
+		if (q != p) {
+			char t = *q;
+			*q = '\0';
+			n += (int)wc_xstrlen(p);
+			*q = t;
+		}
+
+		char *qq = strchr(q, RL_PROMPT_END_IGNORE);
+		if (!qq) {
+			_err('w', PRINT_PROMPT, "%s: Malformed prompt: "
+				"RL_PROMPT_START_IGNORE (\\%d) without "
+				"RL_PROMPT_END_IGNORE (\\%d)\n", PROGRAM_NAME,
+				RL_PROMPT_START_IGNORE, RL_PROMPT_END_IGNORE);
+			return FALLBACK_PROMPT_OFFSET;
+		}
+
+		if (*(++qq))
+			p = qq;
+		else
+			break;
+	}
+
+	return n;
+}
+
+/* Get amount of visible chars in the last line of the prompt (P) */
+static int
+get_prompt_offset(char *p)
+{
+	if (!p || !*p)
+		return 0;
+
+	char *l = strrchr(p, '\n');
+	return xrl_expand_prompt((l && *(++l)) ? l : p) + 1;
+}
+
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
  * to introduce the suggestions system */
@@ -581,7 +646,17 @@ my_rl_getc(FILE *stream)
 	if (xargs.fzftab == 1 || warning_prompt == 1) {
 #else
 	if (warning_prompt == 1) {
-#endif /* !_NO_FZF */
+#endif // !_NO_FZF
+		if (prompt_offset == UNSET)
+			prompt_offset = get_prompt_offset(rl_prompt);
+	}
+
+/*
+#ifndef _NO_FZF
+	if (xargs.fzftab == 1 || warning_prompt == 1) {
+#else
+	if (warning_prompt == 1) {
+#endif // !_NO_FZF
 		if (prompt_offset == UNSET) {
 #ifndef __FreeBSD__
 			get_cursor_position(&curcol, &currow);
@@ -591,11 +666,11 @@ my_rl_getc(FILE *stream)
 				get_cursor_position(&curcol, &currow);
 				prompt_offset = curcol;
 			} else {
-				prompt_offset = 6;
+				prompt_offset = FALLBACK_PROMPT_OFFSET;
 			}
-#endif /* !__FreeBSD__ */
+#endif // !__FreeBSD__
 		}
-	}
+	} */
 
 	if (xrename) {
 		/* We are using a secondary prompt for the xrename function */
@@ -1126,7 +1201,7 @@ my_rl_path_completion(const char *text, int state)
 					if (flags & STATE_SUGGESTING) {
 						if (!*_fmatch && fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 1) {
 							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
-								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
+								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 							else
 								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
 							continue;
@@ -1151,7 +1226,7 @@ my_rl_path_completion(const char *text, int state)
 					if (flags & STATE_SUGGESTING) {
 						if (!*_fmatch && fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 1) {
 							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
-								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch));
+								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 							else
 								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
 							continue;
@@ -2939,12 +3014,12 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* Let's try to complete arguments for shell commands */
 		if (*text == '-') {
-			char lw[NAME_MAX]; *lw = '\0'; /* Last word before the dash */
+			char lw[NAME_MAX + 1]; *lw = '\0'; /* Last word before the dash */
 			char *a = strrchr(rl_line_buffer, ' ');
 			if (a) {
 				*a = '\0';
 				char *b = strrchr(rl_line_buffer, ' ');
-				xstrsncpy(lw, (b && *(b + 1)) ? b + 1 : rl_line_buffer, sizeof(lw));
+				xstrsncpy(lw, (b && *(b + 1)) ? b + 1 : rl_line_buffer, sizeof(lw) - 1);
 				*a = ' ';
 			}
 			if (*lw && get_shell_cmd_opts(lw) > 0

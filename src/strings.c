@@ -78,13 +78,16 @@ char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 char *
 replace_slashes(char *str, const char c)
 {
+	if (!str || !*str)
+		return (char *)NULL;
+
 	if (*str == '/')
 		str++;
 
 	char *p = savestring(str, strlen(str));
 	char *q = p;
 
-	while (*q) {
+	while (q && *q) {
 		if (*q == '/' && (q == p || *(q - 1) != '\\'))
 			*q = c;
 		q++;

@@ -449,9 +449,9 @@ print_suggestion(const char *str, size_t offset, char *color)
 // TESTING CURSOR POSITION
 //	restore_cursor_position(slines);
 
-	int n = (int)(str_len - offset + (baej == 1 ? 3 : 0));
+/*	int n = (int)(str_len - offset + (baej == 1 ? 3 : 0));
 	if (n < 0)
-		n = 0;
+		n = 0; */
 	if (slines > 1)
 		MOVE_CURSOR_UP((int)slines - 1);
 	SET_CURSOR_COL(curcol);
@@ -1146,12 +1146,12 @@ print_bookmark_dir_suggestion(const int i)
 	suggestion.type = BOOKMARK_SUG;
 	suggestion.filetype = DT_DIR;
 
-	char tmp[PATH_MAX + 2];
+	char tmp[PATH_MAX + 3];
 	size_t path_len = strlen(bookmarks[i].path);
 	if (bookmarks[i].path[path_len - 1] != '/')
-		snprintf(tmp, PATH_MAX + 2, "%s/", bookmarks[i].path);
+		snprintf(tmp, sizeof(tmp), "%s/", bookmarks[i].path);
 	else
-		xstrsncpy(tmp, bookmarks[i].path, PATH_MAX + 2);
+		xstrsncpy(tmp, bookmarks[i].path, sizeof(tmp) - 1);
 
 	char *color = suggest_filetype_color == 1 ? di_c : sf_c;
 

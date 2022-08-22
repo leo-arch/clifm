@@ -2402,7 +2402,7 @@ get_last_path(void)
 		return EXIT_FAILURE;
 	}
 
-	char line[PATH_MAX] = "";
+	char line[PATH_MAX + 2] = "";
 	while (fgets(line, (int)sizeof(line), fp)) {
 		char *p = (char *)NULL;
 		int cur = validate_line(line, &p);
@@ -2414,7 +2414,7 @@ get_last_path(void)
 			cur_ws = ws_n;
 
 		if (ws_n >= 0 && ws_n < MAX_WS && !workspaces[ws_n].path)
-			workspaces[ws_n].path = savestring(p + 2, strlen(p + 2));
+			workspaces[ws_n].path = savestring(p + 2, strnlen(p + 2, sizeof(line) - 2));
 	}
 
 	close_fstream(fp, fd);
@@ -3260,7 +3260,7 @@ check_options(void)
 
 	if ((xargs.stealth_mode == 1 || home_ok == 0 ||
 	config_ok == 0 || !config_file) && !*div_line)
-		xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line));
+		xstrsncpy(div_line, DEF_DIV_LINE, sizeof(div_line) - 1);
 
 	if (xargs.stealth_mode == 1 && !opener) {
 		/* Since in stealth mode we have no access to the config file, we cannot

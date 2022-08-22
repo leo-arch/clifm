@@ -223,7 +223,7 @@ gen_workspace(void)
 		snprintf(s, __WS_STR_LEN, "%s%s", cl, workspaces[cur_ws].name);
 	else
 		snprintf(s, __WS_STR_LEN, "%s%d", cl, cur_ws + 1);
-	return savestring(s, strlen(s));
+	return savestring(s, strnlen(s, sizeof(s)));
 }
 
 static inline char *
@@ -312,7 +312,7 @@ gen_user_name(void)
 static inline char *
 gen_hostname(const int c)
 {
-	char *temp = savestring(hostname, strlen(hostname));
+	char *temp = savestring(hostname, strnlen(hostname, sizeof(hostname)));
 	if (c != 'h')
 		return temp;
 

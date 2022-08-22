@@ -1163,7 +1163,7 @@ expand_prompt_name(char *name)
 		prompt_notif = prompts[i].notifications;
 		warning_prompt = prompts[i].warning_prompt_enabled;
 
-		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name));
+		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name) - 1);
 		return EXIT_SUCCESS;
 	}
 
