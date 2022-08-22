@@ -563,11 +563,13 @@ prompt_xrename(void)
 	return EXIT_SUCCESS;
 }
 
+// TESTING CURSOR POSITION
 /* Unicode aware implementation of readline's rl_expand_prompt()
  * Returns the amount of terminal columns taken by the last prompt line,
  * 0 if P is NULL or empty, and FALLBACK_PROMPT_OFFSET in case of error
  * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE)
  * is missing */
+/*
 #include <wchar.h>
 static int
 xrl_expand_prompt(char *p)
@@ -588,7 +590,7 @@ xrl_expand_prompt(char *p)
 				return FALLBACK_PROMPT_OFFSET;
 			}
 
-			/* No ignore characters found */
+			// No ignore characters found
 			return (int)wc_xstrlen(p);
 		}
 
@@ -617,7 +619,7 @@ xrl_expand_prompt(char *p)
 	return n;
 }
 
-/* Get amount of visible chars in the last line of the prompt (P) */
+// Get amount of visible chars in the last line of the prompt (P)
 static int
 get_prompt_offset(char *p)
 {
@@ -626,7 +628,8 @@ get_prompt_offset(char *p)
 
 	char *l = strrchr(p, '\n');
 	return xrl_expand_prompt((l && *(++l)) ? l : p) + 1;
-}
+} */
+// TESTING CURSOR POSITION
 
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
@@ -642,6 +645,8 @@ my_rl_getc(FILE *stream)
 		return (getkey() & 0x7F);
 #endif /* __GO32__ */
 
+// TESTING CURSOR POSITION
+/*
 #ifndef _NO_FZF
 	if (xargs.fzftab == 1 || warning_prompt == 1) {
 #else
@@ -649,9 +654,9 @@ my_rl_getc(FILE *stream)
 #endif // !_NO_FZF
 		if (prompt_offset == UNSET)
 			prompt_offset = get_prompt_offset(rl_prompt);
-	}
+	} */
+// TESTING CURSOR POSITION
 
-/*
 #ifndef _NO_FZF
 	if (xargs.fzftab == 1 || warning_prompt == 1) {
 #else
@@ -674,7 +679,7 @@ my_rl_getc(FILE *stream)
 			}
 #endif // !__FreeBSD__
 		}
-	} */
+	}
 
 	if (xrename) {
 		/* We are using a secondary prompt for the xrename function */

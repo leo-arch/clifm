@@ -541,7 +541,7 @@ extern int watch;
 
 #define SET_CURSOR(y,x)            printf("\x1b[%d;%dH", (y), (x))
 // TESTING CURSOR POSITION
-#define SET_CURSOR_COL(n)          printf("\x1b[%dG", (n))
+//#define SET_CURSOR_COL(n)          printf("\x1b[%dG", (n))
 // TESTING CURSOR POSITION
 #define MOVE_CURSOR_UP(n)          printf("\x1b[%dA", (n))
 #define MOVE_CURSOR_DOWN(n)        printf("\x1b[%dB", (n))
