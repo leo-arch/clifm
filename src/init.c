@@ -88,7 +88,7 @@ set_prop_fields(char *line)
 	prop_fields.time =  0;
 	prop_fields.size =  0;
 	prop_fields.inode = 0;
-	prop_fields.len =   1;
+	prop_fields.len =   2; /* Two spaces between file name and props string */
 
 	size_t i;
 	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
@@ -105,6 +105,7 @@ set_prop_fields(char *line)
 		}
 	}
 
+	/* How much space do we need to reserve to print enabled fields? */
 	if (prop_fields.perm != 0)
 		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 3 : 13) + 1);
 	if (prop_fields.inode != 0)

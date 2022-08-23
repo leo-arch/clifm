@@ -736,8 +736,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	/* Print stuff */
 
 #ifndef _NO_ICONS
-	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s " /* File name*/
-		   "%s" /* Inode */
+	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
+		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
