@@ -93,28 +93,28 @@ set_prop_fields(char *line)
 	size_t i;
 	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
 		switch(line[i]) {
-		case 'd': prop_fields.inode = 1; prop_fields.len += 8; break;
-		case 'p': prop_fields.perm = PERM_SYMBOLIC; prop_fields.len += 13; break;
-		case 'n': prop_fields.perm = PERM_NUMERIC; prop_fields.len += 3; break;
-		case 'i': prop_fields.ids = 1; prop_fields.len += 11; break;
-		case 'a': prop_fields.time = PROP_TIME_ACCESS; prop_fields.len += 16; break;
-		case 'c': prop_fields.time = PROP_TIME_CHANGE; prop_fields.len += 16; break;
-		case 'm': prop_fields.time = PROP_TIME_MOD; prop_fields.len += 16; break;
-		case 's': prop_fields.size = 1; prop_fields.len += 8; break;
+		case 'd': prop_fields.inode = 1; break;
+		case 'p': prop_fields.perm = PERM_SYMBOLIC; break;
+		case 'n': prop_fields.perm = PERM_NUMERIC; break;
+		case 'i': prop_fields.ids = 1; break;
+		case 'a': prop_fields.time = PROP_TIME_ACCESS; break;
+		case 'c': prop_fields.time = PROP_TIME_CHANGE; break;
+		case 'm': prop_fields.time = PROP_TIME_MOD; break;
+		case 's': prop_fields.size = 1; break;
 		default: break;
 		}
 	}
 
 	if (prop_fields.perm != 0)
-		prop_fields.len += 1;
+		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 3 : 13) + 1);
 	if (prop_fields.inode != 0)
-		prop_fields.len += 1;
+		prop_fields.len += (8 + 1);
 	if (prop_fields.ids != 0)
-		prop_fields.len += 1;
+		prop_fields.len += (11 + 1);
 	if (prop_fields.time != 0)
-		prop_fields.len += 1;
+		prop_fields.len += (16 + 1);
 	if (prop_fields.size != 0)
-		prop_fields.len += 1;
+		prop_fields.len += (8 + 1);
 }
 
 int
