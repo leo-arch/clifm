@@ -396,9 +396,6 @@ extern int watch;
 #define MIME_TYPE 1
 #define TEXT_DESC 0
 
-/* Max length of the properties string in long view mode */
-#define MAX_PROP_STR 55
-
 /* Macros for the dirjump function */
 #define SUG_JUMP    0
 #define NO_SUG_JUMP 1
@@ -926,6 +923,8 @@ struct props_t {
 	int time; /* Time: either ACCESS, MOD, or CHANGE */
 	int size; /* File size */
 	int inode; /* File inode number */
+	int len; /* Approx len of the entire properties string taking into account
+	the above values */
 };
 extern struct props_t prop_fields;
 

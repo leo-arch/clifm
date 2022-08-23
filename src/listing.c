@@ -559,7 +559,7 @@ static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max, const size_t ino_max)
 {
 	struct stat lattr;
-	int space_left = (int)term_cols - MAX_PROP_STR;
+	int space_left = (int)term_cols - prop_fields.len;
 
 	if (space_left < min_name_trim)
 		space_left = min_name_trim;
