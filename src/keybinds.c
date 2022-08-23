@@ -342,8 +342,6 @@ int rl_toggle_max_filename_len(int count, int key)
 		if (clear_screen == 0)
 			putchar('\n');
 		reload_dirlist();
-//		free_dirlist();
-//		list_dir();
 	}
 
 	if (max_name_len == UNSET)

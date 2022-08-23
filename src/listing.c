@@ -453,9 +453,9 @@ get_longest_filename(const int n, const int pad)
 		if (file_info[i].len > (size_t)max_name_len)
 			file_info[i].len = (size_t)max_name_len;
 
-		if (long_view && min_name_trim != UNSET
+/*		if (long_view && min_name_trim != UNSET
 		&& file_info[i].len < (size_t)min_name_trim)
-			file_info[i].len = (size_t)min_name_trim;
+			file_info[i].len = (size_t)min_name_trim; */
 
 		total_len = (size_t)pad + 1 + file_info[i].len;
 
@@ -497,6 +497,11 @@ get_longest_filename(const int n, const int pad)
 			}
 		}
 	}
+
+/*	if (long_view == 1 && min_name_trim != UNSET
+	&& longest > (size_t)min_name_trim)
+		longest = (size_t)min_name_trim; */
+
 #ifndef _NO_ICONS
 	if (icons && !long_view && columned)
 		longest += 3;
@@ -559,12 +564,16 @@ static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max, const size_t ino_max)
 {
 	struct stat lattr;
+	/* Available space (term cols) to print the file name */
 	int space_left = (int)term_cols - prop_fields.len;
 
 	if (space_left < min_name_trim)
 		space_left = min_name_trim;
 
-	if ((int)longest < space_left)
+	if (min_name_trim != UNSET && longest > (size_t)space_left)
+		longest = (size_t)space_left;
+
+	if (longest < (size_t)space_left)
 		space_left = (int)longest;
 
 	int i, k = (int)files;

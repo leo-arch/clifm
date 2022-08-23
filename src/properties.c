@@ -607,7 +607,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		size_t ext_len = 0;
 		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
 
-		xstrsncpy(tname, wname ? wname : props->name, (PATH_MAX * sizeof(wchar_t)) - 1);
+		xstrsncpy(tname, wname ? wname : props->name, sizeof(tname) - 1);
 		int a = (int)plen - rest - 1 - (int)ext_len;
 		if (a < 0)
 			a = 0;
@@ -758,8 +758,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		prop_fields.time != 0 ? time_s : "",
 		prop_fields.size == 1 ? size_s : "");
 #else
-	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s " /* File name*/
-		   "%s" /* Inode */
+	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
+		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
