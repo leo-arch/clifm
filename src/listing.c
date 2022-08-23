@@ -498,10 +498,6 @@ get_longest_filename(const int n, const int pad)
 		}
 	}
 
-/*	if (long_view == 1 && min_name_trim != UNSET
-	&& longest > (size_t)min_name_trim)
-		longest = (size_t)min_name_trim; */
-
 #ifndef _NO_ICONS
 	if (icons && !long_view && columned)
 		longest += 3;

@@ -61,6 +61,11 @@
 # define DT_DIR 4
 #endif
 
+#define TIME_STR "%a %b %d %H:%M:%S %Y %z"
+#define MAX_TIME_STR 128
+/* Our resulting time string won't go usually beyond 29 chars. But since this
+ * length is locale dependent (at least %b), let's use a much larger buffer */
+
 static char *
 get_link_color(char *name, int *link_dir, const int dsize)
 {
@@ -292,9 +297,6 @@ get_properties(char *filename, const int dsize)
 	free(wname);
 
 	/* Stat information */
-#define MAX_TIME_STR 128
-/* Our resulting time string won't go usually beyond 27 chars. But since this length
- * is locale dependent (at least %b), let's use a much larger buffer size */
 
 	/* Last modification time */
 	time_t time = (time_t)attr.st_mtime;
@@ -303,7 +305,7 @@ get_properties(char *filename, const int dsize)
 	char mod_time[MAX_TIME_STR];
 
 	if (time) {
-		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y %z", &tm);
+		strftime(mod_time, sizeof(mod_time), TIME_STR, &tm);
 	} else {
 		*mod_time = '-';
 		mod_time[1] = '\0';
@@ -315,7 +317,7 @@ get_properties(char *filename, const int dsize)
 	char access_time[MAX_TIME_STR];
 
 	if (time) {
-		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y %z", &tm);
+		strftime(access_time, sizeof(access_time), TIME_STR, &tm);
 	} else {
 		*access_time = '-';
 		access_time[1] = '\0';
@@ -326,7 +328,7 @@ get_properties(char *filename, const int dsize)
 	localtime_r(&time, &tm);
 	char change_time[MAX_TIME_STR];
 	if (time) {
-		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y %z", &tm);
+		strftime(change_time, sizeof(change_time), TIME_STR, &tm);
 	} else {
 		*change_time = '-';
 		change_time[1] = '\0';
@@ -345,7 +347,7 @@ get_properties(char *filename, const int dsize)
 		*creation_time = '-';
 		creation_time[1] = '\0';
 	} else {
-		strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y %z", &tm);
+		strftime(creation_time, sizeof(creation_time), TIME_STR, &tm);
 	}
 #elif defined(_STATX)
 	struct statx attrx;
@@ -358,7 +360,7 @@ get_properties(char *filename, const int dsize)
 		*creation_time = '-';
 		creation_time[1] = '\0';
 	} else {
-		strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y %z", &tm);
+		strftime(creation_time, sizeof(creation_time), TIME_STR, &tm);
 	}
 #endif /* _STATX */
 
@@ -684,6 +686,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		if (props->ltime) {
 			struct tm t;
 			localtime_r(&props->ltime, &t);
+			/* Let's use the ISO 8601 date format (YYYY-MM-DD) plus time (HH:MM) */
 			snprintf(file_time, sizeof(file_time), "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
 				t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
 		} else {

@@ -70,7 +70,7 @@ LongViewMode=false
 # d: inode number
 # p|n = permissions: either symbolic (p) or numeric/octal (n)
 # i = user/group IDs
-# a|m|c = either last (a)ccess, (m)odification, or status (c)hange time
+# a|m|c = last (a)ccess, (m)odification, or status (c)hange time (YYYY-MM-DD HH:MM)
 # s = size
 # Defaults to "pims" (symbolic notation and modification time)
 # A single dash ("-") disables all fields
