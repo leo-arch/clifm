@@ -58,13 +58,20 @@ Keybindings:
   * Shift-up/down: Move one line up/down in the preview window
   * Alt-up/down: Move to the beginning/end in the preview window"
 
+HOME_PLUGINS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins"
+
 uz_cleanup() {
     rm "$FIFO_UEBERZUG" 2>/dev/null
     pkill -P $$ >/dev/null
 }
 
-get_bfg_cfg_file() {
-	HOME_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/BFG.cfg"
+# Let's get the path to a plugin file, either in home or in data dirs.
+# Used for both BFG.cfg and BFG.sh
+get_file() {
+	[ -z "$1" ] && return
+	name="$1"
+
+	HOME_FILE="${HOME_PLUGINS_DIR}/$name"
 	FILE="$HOME_FILE"
 
 	if [ -z "$FILE" ] || ! [ -f "$FILE" ]; then
@@ -72,29 +79,26 @@ get_bfg_cfg_file() {
 		if [ -n "$XDG_DATA_DIRS" ]; then
 			dirs="$(echo "$XDG_DATA_DIRS" | sed 's/:/ /g')"
 			for dir in $dirs; do
-				if [ -f "$dir/clifm/plugins/BFG.cfg" ]; then
-					FILE="$dir/clifm/plugins/BFG.cfg"
+				if [ -f "$dir/clifm/plugins/$name" ]; then
+					FILE="$dir/clifm/plugins/$name"
 					break
 				fi
 			done
 		fi
 
 		if [ -z "$FILE" ]; then
-			if [ -f /usr/share/clifm/plugins/BFG.cfg ]; then
-				FILE="/usr/share/clifm/plugins/BFG.cfg"
-			elif [ -f /usr/local/share/clifm/plugins/BFG.cfg ]; then
-				FILE="/usr/local/share/clifm/plugins/BFG.cfg"
-			elif [ -f /boot/system/data/clifm/plugins/BFG.cfg ]; then
-				FILE="/boot/system/data/clifm/plugins/BFG.cfg"
-			elif [ -f /boot/system/non-packaged/data/clifm/plugins/BFG.cfg ]; then
-				FILE="/boot/system/non-packaged/data/clifm/plugins/BFG.cfg"
-			elif [ -f /data/data/com.termux/files/usr/share/clifm/plugins/BFG.cfg ]; then
-				FILE="/data/data/com.termux/files/usr/share/clifm/plugins/BFG.cfg"
+			if [ -f "/usr/share/clifm/plugins/$name" ]; then
+				FILE="/usr/share/clifm/plugins/$name"
+			elif [ -f "/usr/local/share/clifm/plugins/$name" ]; then
+				FILE="/usr/local/share/clifm/plugins/$name"
+			elif [ -f "/boot/system/data/clifm/plugins/$name" ]; then
+				FILE="/boot/system/data/clifm/plugins/$name"
+			elif [ -f "/boot/system/non-packaged/data/clifm/plugins/$name" ]; then
+				FILE="/boot/system/non-packaged/data/clifm/plugins/$name"
+			elif [ -f "/data/data/com.termux/files/usr/share/clifm/plugins/$name" ]; then
+				FILE="/data/data/com.termux/files/usr/share/clifm/plugins/$name"
 			fi
 		fi
-
-		# Copy the file to HOME, so that we perform this check only once
-#		[ -n "$FILE" ] && cp "$FILE" "$HOME_FILE" 2>/dev/null
 	fi
 
 	[ -n "$FILE" ] && printf "%s\n" "$FILE"
@@ -188,10 +192,15 @@ main() {
 
 	export TMP_SEL="${TMPDIR:-/tmp}/fzfnav.sel"
 	rm -rf -- "$TMP_SEL"
-	BFG_CFG_FILE="$(get_bfg_cfg_file)"
+	BFG_CFG_FILE="$(get_file BFG.cfg)"
 	if [ -z "$BFG_CFG_FILE" ]; then
 		printf "clifm: BFG.cfg: No such file or directory\n" >&2
-		exit 2
+		exit 127
+	fi
+
+	if ! [ -f "${HOME_PLUGINS_DIR}/BFG.cfg" ]; then
+		cp -- "$BFG_CFG_FILE" "${HOME_PLUGINS_DIR}/BFG.cfg" 2>/dev/null
+		BFG_CFG_FILE="${HOME_PLUGINS_DIR}/BFG.cfg"
 	fi
 
 	# Do we have GNU ls?
@@ -447,13 +456,14 @@ main() {
 	# This is the previewer script, similar to Ranger's scope.sh
 	if [ -z "$BFG_FILE" ]; then
 		export BFG_FILE
-		BFG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/BFG.sh"
+		BFG_FILE="$(get_file BFG.sh)"
 		if ! [ -f "$BFG_FILE" ]; then
-			BFG_FILE="${BFG_CFG_FILE%.*}.sh"
-			if ! [ -f "$BFG_FILE" ]; then
-				printf "clifm: BFG.sh: No such file or directory\n" >&2
-				exit 1
-			fi
+			printf "clifm: BFG.sh: No such file or directory\n" >&2
+			exit 127
+		fi
+		if ! [ -x "$BFG_FILE" ]; then
+			printf "clifm: %s: Not an executable file\n" "$BFG_FILE" >&2
+			exit 1
 		fi
 	fi
 
