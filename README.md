@@ -188,7 +188,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 </details>
 
 ✔️ **Changelog**
-* `version 1.7 (Elaine)`  - Development:
+* `version 1.7 (Elaine)`:
   - [Configuration files renamed from `.cfm` to `.clifm`](https://github.com/leo-arch/clifm/wiki/Specifics#new-extension-for-configuration-files) (avoid conflict with [ColdFusion](https://en.wikipedia.org/wiki/ColdFusion_Markup_Language) files)
   - <kbd>Ctrl-l</kbd> added for screen refresh
   - `cc` command removed to avoid conflicts with `/bin/cc` (use `colors` instead)
