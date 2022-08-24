@@ -195,7 +195,7 @@ main() {
 	BFG_CFG_FILE="$(get_file BFG.cfg)"
 	if [ -z "$BFG_CFG_FILE" ]; then
 		printf "clifm: BFG.cfg: No such file or directory\n" >&2
-		exit 127
+		exit 2
 	fi
 
 	if ! [ -f "${HOME_PLUGINS_DIR}/BFG.cfg" ]; then
@@ -459,7 +459,7 @@ main() {
 		BFG_FILE="$(get_file BFG.sh)"
 		if ! [ -f "$BFG_FILE" ]; then
 			printf "clifm: BFG.sh: No such file or directory\n" >&2
-			exit 127
+			exit 2
 		fi
 		if ! [ -x "$BFG_FILE" ]; then
 			printf "clifm: %s: Not an executable file\n" "$BFG_FILE" >&2
@@ -713,11 +713,17 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 fi
 
 if [ -n "$1" ] && [ "$1" = "--edit" ]; then
-	f="$(get_bfg_cfg_file)"
+	f="$(get_file BFG.cfg)"
 	if [ -z "$f" ]; then
 		printf "clifm: BFG.cfg: No such file or directory\n" >&2
 		exit 2
 	fi
+
+	if ! [ -f "${HOME_PLUGINS_DIR}/BFG.cfg" ]; then
+		cp -- "$f" "${HOME_PLUGINS_DIR}/BFG.cfg" 2>/dev/null
+		f="${HOME_PLUGINS_DIR}/BFG.cfg"
+	fi
+
 	"${EDITOR:-VISUAL:-nano}" "$f" && exit 0
 	exit 1
 fi
