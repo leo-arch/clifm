@@ -738,6 +738,19 @@ check_cfm_files(void)
 	if (stat(q, &a) == -1)
 		return;
 
+	/* Old .cfm files found alongside new .clifm files. This happens if
+	 * the user says "no" when asked about replacing old files. Just warn the user */
+	char qq[PATH_MAX + 19];
+	snprintf(qq, sizeof(qq), "%s/keybindings.clifm", config_dir_gral);
+	if (stat(qq, &a) == EXIT_SUCCESS) {
+		_err('n', PRINT_PROMPT, "%s: Old .cfm config files were found "
+			"in %s directory. They will not be used anymore: remove/rename "
+			"them (to .clifm files) to silence this warning.\n", PROGRAM_NAME,
+			config_dir_gral);
+		return;
+	}
+
+
 	fprintf(stderr, "##################\n"
 	"# IMPORTANT NOTE #\n"
 	"##################\n\n"
