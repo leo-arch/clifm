@@ -2531,7 +2531,7 @@ check_colors(void)
 		return;
 	}
 
-	if (xargs.stealth_mode == 0)
+	if (xargs.stealth_mode != 1)
 		setenv("CLIFM_COLORLESS", "1", 1);
 
 	reset_filetype_colors();
