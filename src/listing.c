@@ -96,6 +96,18 @@ struct trim_t {
 
 struct trim_t trim;
 
+#if defined(TOURBIN_QSORT)
+static inline void
+swap_ent(size_t id1, size_t id2)
+{
+	struct fileinfo _dent, *pdent1 = &file_info[id1], *pdent2 =  &file_info[id2];
+
+	*(&_dent) = *pdent1;
+	*pdent1 = *pdent2;
+	*pdent2 = *(&_dent);
+}
+#endif
+
 /* Set the color of the dividing line: DL, is the color code is set,
  * or the color of the current workspace if not */
 static void
