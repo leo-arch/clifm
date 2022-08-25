@@ -569,7 +569,6 @@ prompt_xrename(void)
  * 0 if P is NULL or empty, and FALLBACK_PROMPT_OFFSET in case of error
  * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE)
  * is missing */
-/*
 #include <wchar.h>
 static int
 xrl_expand_prompt(char *p)
@@ -628,7 +627,7 @@ get_prompt_offset(char *p)
 
 	char *l = strrchr(p, '\n');
 	return xrl_expand_prompt((l && *(++l)) ? l : p) + 1;
-} */
+}
 // TESTING CURSOR POSITION
 
 /* This function is automatically called by readline() to handle input.
@@ -646,7 +645,6 @@ my_rl_getc(FILE *stream)
 #endif /* __GO32__ */
 
 // TESTING CURSOR POSITION
-/*
 #ifndef _NO_FZF
 	if (xargs.fzftab == 1 || warning_prompt == 1) {
 #else
@@ -654,9 +652,9 @@ my_rl_getc(FILE *stream)
 #endif // !_NO_FZF
 		if (prompt_offset == UNSET)
 			prompt_offset = get_prompt_offset(rl_prompt);
-	} */
+	}
 // TESTING CURSOR POSITION
-
+/*
 #ifndef _NO_FZF
 	if (xargs.fzftab == 1 || warning_prompt == 1) {
 #else
@@ -679,7 +677,7 @@ my_rl_getc(FILE *stream)
 			}
 #endif // !__FreeBSD__
 		}
-	}
+	} */
 
 	if (xrename) {
 		/* We are using a secondary prompt for the xrename function */

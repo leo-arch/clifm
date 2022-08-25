@@ -204,6 +204,7 @@ remove_suggestion_not_end(void)
 }
 
 // TESTING CURSOR POSITION
+/*
 static inline void
 restore_cursor_position(const size_t slines)
 {
@@ -230,9 +231,8 @@ restore_cursor_position(const size_t slines)
 //		curcol += (rl_end - rl_point);
 
 	SET_CURSOR(currow, curcol);
-}
+} */
 // TESTING CURSOR POSITION
-
 /*
 static inline void
 correct_offset(size_t *offset)
@@ -321,17 +321,17 @@ set_cursor_position(const int baej)
 
 // TESTING CURSOR POSITION
 	if (baej == 1) {
-		int off = BAEJ_OFFSET + ((highlight == 0) ? 1 : 0);
-//		int off = BAEJ_OFFSET;
+//		int off = BAEJ_OFFSET + ((highlight == 0) ? 1 : 0);
+		int off = BAEJ_OFFSET;
 
 		SUGGEST_BAEJ(off, sp_c);
-	} else { // REMOVE THIS ELSE WHEN USING NEW CURSOR POSITION METHOD
+	} /*else { // REMOVE THIS ELSE WHEN USING NEW CURSOR POSITION METHOD
 		if (highlight == 0) {// || (flags & NO_RECOLOR_LINE)) {
 			MOVE_CURSOR_RIGHT(1);
 			fflush(stdout);
 //			flags &= ~NO_RECOLOR_LINE;
 		}
-	}
+	} */
 // TESTING CURSOR POSITION
 }
 
@@ -352,8 +352,8 @@ check_conditions(const char *str, const size_t offset, const size_t str_len,
 		return EXIT_FAILURE;
 
 // TESTING CURSOR POSITION
-//	*slines = calculate_suggestion_lines(baej, suggestion_len - 1);
-	*slines = calculate_suggestion_lines(baej, suggestion_len);
+	*slines = calculate_suggestion_lines(baej, suggestion_len - 1);
+//	*slines = calculate_suggestion_lines(baej, suggestion_len);
 // TESTING CURSOR POSITION
 
 	if (*slines > (size_t)term_rows)
@@ -397,7 +397,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	/* Store current cursor position in CURROW and CURCOL (globals) */
 // TESTING CURSOR POSITION
-	get_cursor_position(&curcol, &currow);
+//	get_cursor_position(&curcol, &currow);
 // TESTING CURSOR POSITION
 
 	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump (and fuzzy matches) */
@@ -416,11 +416,11 @@ print_suggestion(const char *str, size_t offset, char *color)
 	}
 
 // TESTING CURSOR POSITION
-/*	if (highlight == 0)
+	if (highlight == 0)
 		rl_redisplay();
 	curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
-	if (curcol > term_cols)
-		curcol -= term_cols; */
+	while (curcol > term_cols)
+		curcol -= term_cols;
 // TESTING CURSOR POSITION
 
 	size_t str_len = strlen(str), slines = 0;
@@ -446,14 +446,15 @@ print_suggestion(const char *str, size_t offset, char *color)
 	_print_suggestion(str, offset, color);
 
 // TESTING CURSOR POSITION
-	restore_cursor_position(slines);
+//	printf("'%zu:%d'", slines, curcol); fflush(stdout);
+//	restore_cursor_position(slines);
 
 /*	int n = (int)(str_len - offset + (baej == 1 ? 3 : 0));
 	if (n < 0)
 		n = 0; */
-/*	if (slines > 1)
+	if (slines > 1)
 		MOVE_CURSOR_UP((int)slines - 1);
-	SET_CURSOR_COL(curcol); */
+	SET_CURSOR_COL(curcol);
 // TESTING CURSOR POSITION
 
 	/* Store the amount of lines taken by the current command line (plus the
