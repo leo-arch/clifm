@@ -1369,7 +1369,7 @@ copy_function(char **args, int copy_and_rename)
 	&& (!args[0][2] || args[0][2] == ' '))
 		deselect_all();
 
-#if defined(__HAIKU__)
+#if defined(__HAIKU__) || defined(__CYGWIN__)
 	if (autols == 1)
 		reload_dirlist();
 #endif
@@ -1502,7 +1502,7 @@ remove_file(char **args)
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
-#if defined(__HAIKU__)
+#if defined(__HAIKU__) ||  defined(__CYGWIN__)
 	else {
 		if (cwd == 1 && autols == 1 && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0)
@@ -1810,7 +1810,7 @@ bulk_rename(char **args)
 	}
 	close_fstream(fp, fd);
 
-#if defined(__HAIKU__)
+#if defined(__HAIKU__) || defined(__CYGWIN__)
 	if (autols == 1)
 		reload_dirlist();
 #endif
@@ -1923,7 +1923,7 @@ batch_link(char **args)
 		}
 	}
 
-#if defined(__HAIKU__)// || defined(__APPLE__)
+#if defined(__HAIKU__) || defined(__CYGWIN__)
 	if (exit_status == EXIT_SUCCESS && autols) {
 		free_dirlist();
 

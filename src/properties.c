@@ -385,30 +385,6 @@ get_properties(char *filename, const int dsize)
 	dev_t d = (S_ISCHR(attr.st_mode) || S_ISBLK(attr.st_mode)) ? attr.st_rdev : attr.st_dev;
 	printf(_("Device: %s%ju,%ju%s"), cbold, (uintmax_t)major(d), (uintmax_t)minor(d), cend);
 
-/*
-#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__) || defined(__ANDROID__)
-	printf(_("\tBlocks: %s%lld%s"), cbold, attr.st_blocks, cend);
-#else
-	printf(_("\tBlocks: %s%ld%s"), cbold, attr.st_blocks, cend);
-#endif
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
-|| defined(__APPLE__) || defined(__HAIKU__)
-	printf(_("\tIO Block: %s%d%s"), cbold, attr.st_blksize, cend);
-#else
-	printf(_("\tIO Block: %s%ld%s"), cbold, attr.st_blksize, cend);
-#endif
-#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__i386__) || defined(__ANDROID__)
-	printf(_("\tInode: %s%llu%s\n"), cbold, attr.st_ino, cend);
-#else
-	printf(_("\tInode: %s%zu%s\n"), cbold, attr.st_ino, cend);
-#endif
-#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__HAIKU__)
-	printf(_("Device: %s%d%s"), cbold, attr.st_dev, cend);
-#elif defined(__i386__) || defined(__ANDROID__)
-	printf(_("Device: %s%lld%s"), cbold, attr.st_dev, cend);
-#else
-	printf(_("Device: %s%zu%s"), cbold, attr.st_dev, cend);
-#endif */
 	printf(_("\tUid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("unknown")
 			: owner->pw_name, cend);
 	printf(_("\tGid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("unknown")

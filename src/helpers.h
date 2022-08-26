@@ -25,16 +25,14 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-#if defined(__linux__) && !defined(_BE_POSIX)
-# define _GNU_SOURCE
-#elif defined(__CYGWIN__)
+#if (defined(__linux__) || defined(__CYGWIN__)) && !defined(_BE_POSIX)
 # define _GNU_SOURCE
 #elif defined(__sun)
 # define BSD_COMP
 #else
 # define _POSIX_C_SOURCE 200809L
 # define _DEFAULT_SOURCE
-# if defined(__linux__)
+# if defined(__linux__) || defined(__CYGWIN__)
 #  define _XOPEN_SOURCE /* wcwidth() */
 # endif
 # if defined(__FreeBSD__)
@@ -58,6 +56,10 @@
  * available on current platform */
 #if !defined(__TINYC__) && !defined(GLOB_BRACE)
 # define GLOB_BRACE 0
+#endif
+
+#if defined(__CYGWIN__) && defined(_BE_POSIX) && !defined(GLOB_TILDE)
+# define GLOB_TILDE 0
 #endif
 
 /* Support large files on ARM or 32-bit machines */
@@ -495,9 +497,9 @@ extern int watch;
 
 #define strlen(s) xstrnlen(s)
 
-#if defined(__linux) && defined(_BE_POSIX)
+#if (defined(__linux) || defined(__CYGWIN__)) && defined(_BE_POSIX)
 # define strcasestr xstrcasestr
-#endif /* __linux && _BE_POSIX */
+#endif /* (__linux || __CYGWIN__) && _BE_POSIX */
 
 #define ENTRY_N 64
 

@@ -52,9 +52,9 @@ int u8truncstr(char *restrict str, size_t n);
 size_t wc_xstrlen(const char *restrict str);
 char *xstrrpbrk(char *s, const char *accept);
 
-#if defined(__linux__) && defined(_BE_POSIX)
+#if (defined(__linux__) || defined(__CYGWIN__)) && defined(_BE_POSIX)
 char *xstrcasestr(char *a, char *b);
-#endif /* __linux && _BE_POSIX */
+#endif /* (__linux__ || __CYGWIN__) && _BE_POSIX */
 
 size_t xstrnlen(const char *restrict s);
 size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);

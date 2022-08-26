@@ -685,7 +685,7 @@ CONFIRM:
 			FUNC_NAME, total_rename);
 	}
 
-#if defined(__HAIKU__)// || defined(__APPLE__)
+#if defined(__HAIKU__) || defined(__CYGWIN__)
 	if (exit_status == EXIT_FAILURE)
 		return EXIT_FAILURE;
 	if (autols == 1) {
@@ -695,7 +695,7 @@ CONFIRM:
 	return EXIT_SUCCESS;
 #else
 	return exit_status;
-#endif /* __HAIKU__ || __APPLE__ */
+#endif /* __HAIKU__ || __CYGWIN__ */
 }
 
 #else
