@@ -1597,6 +1597,7 @@ AFTER_USUAL_COMPLETION:
 				size_t _start = (*replacement == '\\' && *(replacement + 1) == '~') ? 1 : 0;
 				char *cc = cur_color;
 				fputs(HIDE_CURSOR, stdout);
+				fputs(tx_c, stdout);
 				char t[PATH_MAX];
 				for (k = _start; replacement[k]; k++) {
 					rl_highlight(replacement, k, SET_COLOR);
