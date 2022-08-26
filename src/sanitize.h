@@ -48,6 +48,15 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 0123456789 -_.,/'\""
 
+/* Used to sanitize commands based on a blacklist
+ * Let's reject the following shell features:
+ * <>: Input/output redirection
+ * |: Pipes/OR list
+ * &: AND list
+ * $`: Command substitution/environment variables
+ * ;: Sequential execution */
+#define BLACKLISTED_CHARS "<>|;&$`"
+
 int sanitize_cmd(char *cmd, int type);
 void sanitize_cmd_environ(void);
 void restore_cmd_environ(void);

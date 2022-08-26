@@ -1318,8 +1318,17 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			if (!q)
 				continue;
 			free(fzftab_options);
-			fzftab_options = savestring(q, strlen(q));
+			if (xargs.secure_cmds != 1 || sanitize_cmd(q, SNT_BLACKLIST) == EXIT_SUCCESS) {
+				fzftab_options = savestring(q, strlen(q));
+			} else {
+				_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
+					"unsafe characters. Falling back to default values\n"), PROGRAM_NAME);
+				char *pp = colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+				fzftab_options = savestring(pp, strlen(pp));
+			}
 			fzf_height_set = 0;
+/*			fzftab_options = savestring(q, strlen(q));
+			fzf_height_set = 0; */
 			if (strstr(fzftab_options, "--height"))
 				fzf_height_set = 1;
 		}

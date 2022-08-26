@@ -475,15 +475,16 @@ extern int watch;
 /* Macros for the sanitization function */
 /* Commands send to the system shell and taken from an untrusted source,
  * mostly config files, need to be sanitized first */
-#define SNT_MIME    0
-#define SNT_PROMPT  1
-#define SNT_PROFILE 2
-#define SNT_AUTOCMD 3
-#define SNT_NET     4
-#define SNT_GRAL    5
-#define SNT_DISPLAY 6 /* Sanitize DISPLAY environment variable */
-#define SNT_MISC    7 /* Used to sanitize a few environment variables */
-#define SNT_NONE    8 /* Trusted command: do not sanitize*/
+#define SNT_MIME      0
+#define SNT_PROMPT    1
+#define SNT_PROFILE   2
+#define SNT_AUTOCMD   3
+#define SNT_NET       4
+#define SNT_GRAL      5
+#define SNT_DISPLAY   6 /* Sanitize DISPLAY environment variable */
+#define SNT_MISC      7 /* Used to sanitize a few environment variables */
+#define SNT_NONE      8 /* Trusted command: do not sanitize*/
+#define SNT_BLACKLIST 9
 
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */

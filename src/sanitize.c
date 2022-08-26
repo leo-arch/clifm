@@ -346,6 +346,16 @@ sanitize_gral(char *cmd)
 	return EXIT_SUCCESS;
 }
 
+/* Returns 1 if at least one character in CMD is found in BLACKLISTED_CHARS
+ * Oterwise, returns 0 */
+static inline int
+sanitize_blacklist(char *cmd)
+{
+	if (strlen(cmd) > strcspn(cmd, BLACKLISTED_CHARS))
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
+}
+
 /* Check if command name in STR contains slashes. Return 1 if found,
  * zero otherwise. This means: do not allow custom scripts or binaries,
  * but only whatever could be found in the sanitized PATH variable */
@@ -404,6 +414,8 @@ sanitize_cmd(char *str, int type)
 			return EXIT_FAILURE;
 		exit_status = sanitize_gral(str);
 		break;
+	case SNT_BLACKLIST:
+		return sanitize_blacklist(str);
 	case SNT_NONE: return EXIT_SUCCESS;
 	default: return EXIT_SUCCESS;
 	}

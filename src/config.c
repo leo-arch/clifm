@@ -2436,7 +2436,14 @@ read_config(void)
 				*fzftab_options = '\0';
 			} else {
 				free(fzftab_options);
-				fzftab_options = savestring(tmp, strlen(tmp));
+				if (xargs.secure_cmds != 1 || sanitize_cmd(tmp, SNT_BLACKLIST) == EXIT_SUCCESS) {
+					fzftab_options = savestring(tmp, strlen(tmp));
+				} else {
+					_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
+						"unsafe characters. Falling back to default values\n"), PROGRAM_NAME);
+					char *p = colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+					fzftab_options = savestring(p, strlen(p));
+				}
 				if (strstr(fzftab_options, "--height"))
 					fzf_height_set = 1;
 			}
@@ -2541,6 +2548,7 @@ check_colors(void)
 	if (colorize == 1) {
 		unsetenv("CLIFM_COLORLESS");
 		set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+		cur_color = tx_c;
 		return;
 	}
 
@@ -2550,6 +2558,7 @@ check_colors(void)
 	reset_filetype_colors();
 	reset_iface_colors();
 	unset_suggestions_color();
+	cur_color = tx_c;
 }
 
 #ifndef _NO_FZF
