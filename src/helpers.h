@@ -27,6 +27,8 @@
 
 #if defined(__linux__) && !defined(_BE_POSIX)
 # define _GNU_SOURCE
+#elif defined(__CYGWIN__)
+# define _GNU_SOURCE
 #elif defined(__sun)
 # define BSD_COMP
 #else
@@ -92,7 +94,7 @@
 # include <sys/event.h>
 # include <sys/time.h>
 # define BSD_KQUEUE
-#elif defined(__sun)
+#elif defined(__sun) || defined(__CYGWIN__)
 # include <sys/types.h>
 # include <sys/time.h>
 #endif /* __linux__ */

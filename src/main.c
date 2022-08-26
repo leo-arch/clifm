@@ -881,7 +881,7 @@ check_cpu_os(void)
 
 #if !defined(__linux__) && !defined(__FreeBSD__) && !defined(__NetBSD__) \
 && !defined(__OpenBSD__) && !defined(__HAIKU__) && !defined(__APPLE__) \
-&& !defined(__sun)
+&& !defined(__sun) && !defined(__CYGWIN__)
 	fprintf(stderr, _("%s: Unsupported operating system\n"), PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #endif

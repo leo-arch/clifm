@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 
-#if defined(__linux__) || defined(__HAIKU__) || defined(__sun)
+#if defined(__linux__) || defined(__HAIKU__) || defined(__sun) || defined(__CYGWIN__)
 # include <grp.h> /* getgrouplist(3) */
 #endif
 
