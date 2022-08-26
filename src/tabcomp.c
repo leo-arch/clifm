@@ -1692,7 +1692,7 @@ AFTER_USUAL_COMPLETION:
 							fputs(hd_c, stdout);
 							rl_insert_text("/");
 							rl_redisplay();
-							fputs(cc, stdout);
+							fputs(cc ? cc : "", stdout);
 						} else {
 							rl_insert_text("/");
 						}
