@@ -1010,7 +1010,12 @@ url_encode(char *str)
 	pbuf = buf;
 
 	for (; *pstr; pstr++) {
+#if defined(__CYGWIN__)
+		/* GCC on CYGWIN complains about subscript having type 'char' */
+		if (isalnum((unsigned char)*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
+#else
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
+#endif /* __CYGWIN__ */
 		|| *pstr == '~' || *pstr == '/') {
 			/* Do not encode any of the above chars */
 			*pbuf = *pstr;
