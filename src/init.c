@@ -2476,6 +2476,42 @@ load_pinned_dir(void)
 	return EXIT_SUCCESS;
 }
 
+#if defined(__CYGWIN__)
+/* If we have a proper Unix directory (WINPATH == 0), remove the .exe extension
+ * from file names. Else (/cygdrive/*), keep only files with executable extension.
+ * Returns 1 if the file NAME must be excluded or 0 otherwise */
+static int
+cygwin_exclude_file(char *name, const int winpath)
+{
+	if (!name || !*name)
+		return 1;
+
+	char *p = strrchr(name, '.');
+	if (winpath == 0) { /* Unix directory */
+		if (!p || p == name)
+			return 0;
+
+		if (*(p + 1) && strncmp(p + 1, "exe", 3) != 0) {
+			return 1;
+		} else {
+			*p = '\0';
+			return 0;
+		}
+	}
+
+	/* Windows directory */
+	if (!p || !*(++p) ||
+	(strcasecmp(p, "exe") != 0 && strcasecmp(p, "bat") != 0
+	&& strcasecmp(p, "cmd") != 0 && strcasecmp(p, "vbs") != 0
+	&& strcasecmp(p, "vbe") != 0 && strcasecmp(p, "js") != 0
+	&& strcasecmp(p, "jse") != 0 && strcasecmp(p, "wsf") != 0
+	&& strcasecmp(p, "wsh") != 0 && strcasecmp(p, "msc") != 0) )
+		return 1;
+
+	return 0;
+}
+#endif /* __CYGWIN__ */
+
 /* Get the list of files in PATH, plus CliFM internal commands, and send
  * them into an array to be read by my readline custom auto-complete
  * function (my_rl_completion) */
@@ -2484,6 +2520,9 @@ get_path_programs(void)
 {
 	int i, l = 0, total_cmd = 0;
 	int *cmd_n = (int *)0;
+#if defined(__CYGWIN__)
+	int *winpath = (int *)0;
+#endif
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
 	if (ext_cmd_ok == 1) {
@@ -2492,6 +2531,9 @@ get_path_programs(void)
 
 		commands_bin = (struct dirent ***)xnmalloc(path_n, sizeof(struct dirent));
 		cmd_n = (int *)xnmalloc(path_n, sizeof(int));
+#if defined(__CYGWIN__)
+		winpath = (int *)xnmalloc(path_n, sizeof(int));
+#endif
 
 		i = (int)path_n;
 		while (--i >= 0) {
@@ -2499,7 +2541,9 @@ get_path_programs(void)
 				cmd_n[i] = 0;
 				continue;
 			}
-
+#if defined(__CYGWIN__)
+			winpath[i] = strncmp(path[i], "/cygdrive", 9) == 0 ? 1 : 0;
+#endif
 			cmd_n[i] = scandir(paths[i], &commands_bin[i],
 					light_mode ? NULL : skip_nonexec, xalphasort);
 			/* If paths[i] directory does not exist, scandir returns -1.
@@ -2551,6 +2595,16 @@ get_path_programs(void)
 
 			int j = cmd_n[i];
 			while (--j >= 0) {
+				if (SELFORPARENT(commands_bin[i][j]->d_name)) {
+					free(commands_bin[i][j]);
+					continue;
+				}
+#if defined(__CYGWIN__)
+				if (cygwin_exclude_file(commands_bin[i][j]->d_name, winpath[i]) == 1) {
+					free(commands_bin[i][j]);
+					continue;
+				}
+#endif /* __CYGWIN__ */
 				bin_commands[l] = savestring(commands_bin[i][j]->d_name,
 					strlen(commands_bin[i][j]->d_name));
 				l++;
@@ -2562,6 +2616,9 @@ get_path_programs(void)
 
 		free(commands_bin);
 		free(cmd_n);
+#if defined(__CYGWIN__)
+		free(winpath);
+#endif
 	}
 
 	path_progsn = (size_t)l;
