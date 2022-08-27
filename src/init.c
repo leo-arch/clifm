@@ -2829,11 +2829,18 @@ check_options(void)
 	if (!usr_cscheme)
 		usr_cscheme = savestring("default", 7);
 
-	if (!fzftab_options)
+/*	if (!fzftab_options)
 		fzftab_options = savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
 
 	smenutab_options_env = xargs.secure_env_full != 1
 		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
+
+	if (xargs.secure_cmds == 1 && tabmode == SMENU_TAB
+	&& sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
+		_err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS value contains unsafe "
+			"characters. Value rejected.\n", PROGRAM_NAME);
+		smenutab_options_env = (char *)NULL;
+	} */
 
 	if (!wprompt_str) {
 		if (colorize == 1)
@@ -2957,6 +2964,19 @@ check_options(void)
 			tabmode = SMENU_TAB;
 		else
 			tabmode = STD_TAB;
+	}
+
+	if (!fzftab_options)
+		fzftab_options = savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
+
+	smenutab_options_env = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
+		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
+
+	if (xargs.secure_cmds == 1 && smenutab_options_env
+	&& sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
+		_err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS value contains unsafe "
+			"characters. Value rejected.\n", PROGRAM_NAME);
+		smenutab_options_env = (char *)NULL;
 	}
 #else
 	tabmode = STD_TAB;

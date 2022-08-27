@@ -1102,7 +1102,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* TAB completion cases allowing multiple selection */
 	int multi = is_multi_sel();
 
-	/* Run FZF and store the ouput into the FINDER_OUT_FILE file */
+	/* Run the finder application and store the ouput into the FINDER_OUT_FILE file */
 	int ret = run_finder(&height, &finder_offset, query, multi);
 	unlink(finder_in_file);
 
@@ -1281,7 +1281,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 /* Simple comparison routine for qsort()ing strings */
 static int
-compare_strings (s1, s2)
+compare_strings(s1, s2)
   char **s1, **s2;
 {
 	int ret;
