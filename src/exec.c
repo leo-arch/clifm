@@ -471,6 +471,7 @@ graceful_quit(char **args)
 	return (-1);
 }
 
+#if !defined(__CYGWIN__)
 /* Reload the list of available commands in PATH for TAB completion.
  * Why? If this list is not updated, whenever some new program is
  * installed, renamed, or removed from some of the paths in PATH
@@ -506,6 +507,7 @@ reload_binaries(void)
 	path_n = (size_t)get_path_env();
 	get_path_programs();
 }
+#endif /* !__CYGWIN__ */
 
 static inline int
 __export(char *arg)
@@ -626,7 +628,10 @@ run_shell_cmd(char **args)
 	int exit_status = launch_execle(cmd); /* lgtm [cpp/command-line-injection] */
 	free(cmd);
 
+/* For the time being, this is too slow on Cygwin */
+#if !defined(__CYGWIN__)
 	reload_binaries();
+#endif
 
 	return exit_status;
 }

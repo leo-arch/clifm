@@ -2537,7 +2537,13 @@ get_path_programs(void)
 
 		i = (int)path_n;
 		while (--i >= 0) {
+/*#if defined(__CYGWIN__)
+			// Let's skip Windows binaries
+			if (!paths[i] || !*paths[i] || strncmp(paths[i], "/cygdrive", 9) == 0
+			|| xchdir(paths[i], NO_TITLE) == -1) {
+#else */
 			if (!paths[i] || !*paths[i] || xchdir(paths[i], NO_TITLE) == -1) {
+//#endif
 				cmd_n[i] = 0;
 				continue;
 			}
@@ -2600,6 +2606,7 @@ get_path_programs(void)
 					continue;
 				}
 #if defined(__CYGWIN__)
+//				if (cygwin_exclude_file(commands_bin[i][j]->d_name, 0) == 1) {
 				if (cygwin_exclude_file(commands_bin[i][j]->d_name, winpath[i]) == 1) {
 					free(commands_bin[i][j]);
 					continue;
