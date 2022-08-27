@@ -2542,7 +2542,7 @@ get_path_programs(void)
 				continue;
 			}
 #if defined(__CYGWIN__)
-			winpath[i] = strncmp(path[i], "/cygdrive", 9) == 0 ? 1 : 0;
+			winpath[i] = strncmp(paths[i], "/cygdrive", 9) == 0 ? 1 : 0;
 #endif
 			cmd_n[i] = scandir(paths[i], &commands_bin[i],
 					light_mode ? NULL : skip_nonexec, xalphasort);
