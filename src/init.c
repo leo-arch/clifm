@@ -2478,7 +2478,7 @@ load_pinned_dir(void)
 
 #if defined(__CYGWIN__)
 /* If we have a proper Unix directory (WINPATH == 0), remove the .exe extension
- * from file names. Else (/cygdrive/*), keep only files with executable extension.
+ * from file names. Else (/cygdrive), keep only files with executable extension.
  * Returns 1 if the file NAME must be excluded or 0 otherwise */
 static int
 cygwin_exclude_file(char *name, const int winpath)
