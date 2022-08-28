@@ -47,9 +47,17 @@ static int
 run_find(char *search_path, char *arg)
 {
 	char *_path = (search_path && *search_path) ? search_path : ".";
+#if defined(_BE_POSIX)
+	/* POSIX find(1) only supports -name */
+	char *method = "-name";
+#elif defined(__OpenBSD__)
+	/* No -regex nor -iregex option in OpenBSD's find(1) */
+	char *method = case_sens_search == 1 ? "-name" : "-iname";
+#else
 	char *method = search_strategy == REGEX_ONLY
 		? (case_sens_search == 1 ? "-regex" : "-iregex")
 		: (case_sens_search == 1 ? "-name" : "-iname");
+#endif /* _BE_POSIX */
 
 	int glob_char = check_glob_char(arg + 1, GLOB_REGEX);
 	if (glob_char == 1) {
@@ -59,10 +67,14 @@ run_find(char *search_path, char *arg)
 
 	int ret = EXIT_SUCCESS;
 	char *ss = (char *)xnmalloc(strlen(arg + 1) + 5, sizeof(char));
+#if !defined(_BE_POSIX) && !defined(__OpenBSD__)
 	if (search_strategy == REGEX_ONLY)
 		sprintf(ss, ".*%s.*", arg + 1);
 	else
 		sprintf(ss, "*%s*", arg + 1);
+#else
+	sprintf(ss, "*%s*", arg + 1);
+#endif /* !_BE_POSIX && !__OpenBSD__ */
 
 	char *cmd[] = {"find", _path, method, ss, NULL};
 	ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
