@@ -472,23 +472,41 @@ Help for all commands listed here can be accessed via the \fI-h\fR or \fI--help\
 if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, \fIFILE\fR amounts to \fIopen\ FILE\fR or \fIo\ FILE\fR, and \fIDIR\fR to \fIcd\ DIR\fR. ELN's, of course, are allowed. Example: \fI12\fR.
 .TP
 .B /\fIPATTERN\fR [\fI\-filetype\fR] [\fI-x\fR] [\fIDIR\fR]
-this is the quick search function. Just type \fI/\fR followed by a glob or regular (or extended regular) expression, and \fBclifm\fR will list all matches in the current working directory. For example, both \fI/*.pdf\fR and \fI/.pdf$\fR expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression.
+this is the \fBquick search\fR function. Just type \fI/\fR followed by a glob or regular (or extended regular) expression, and \fBclifm\fR will list all matches in the current working directory. For example, both \fI/*.pdf\fR and \fI/.pdf$\fR expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression.
 .sp
 \fBNote\fR: By default, the search function attempts to resolve a pattern first as glob, and if no matches, as regular expression. This behavior can be customizad in the configuration file, via the \fISearchStrategy\fR option.
 .sp
 \fBNote 2\fR: If no further parameter is provided, but only a glob pattern (wildcards), you can expand the pattern into the corresponding matches via the TAB key. For example, to list all C files in the current directory: \fI/*.c\fR<TAB>.
 .sp
-Expressions containing no pattern metacharacter are automatically transformed into a glob/regular expression (depending on the value of the \fISearchStrategy\fR option). For example, \fI/test\fR becomes \fI*test*\fR or \fI/.*test.*\fR.
+\fBNote 3\fR: Expressions containing no pattern metacharacter are automatically transformed into a glob/regular expression (depending on the value of the \fISearchStrategy\fR option). For example, \fI/test\fR becomes \fI*test*\fR or \fI/.*test.*\fR.
 .sp
-By default, regular expressions are case insensitive (glob expressions, by contrast, are always case sensitive). However, you can enable case sensitive search by setting the \fICaseSensitiveSearch\fR option to true in the configuration file.
+\fB1. Case sensitivity\fR
+.sp
+By default, regular expressions are case insensitive (glob expressions, by contrast, are always case sensitive). However, you can enable case sensitive search by setting the \fICaseSensitiveSearch\fR option to \fItrue\fR in the configuration file.
+.sp
+\fB2. Destiny directory\fR
 .sp
 To search for files in any directory other than the current directory, specify the directory name as a further parameter. This parameter (DIR) could be an absolute path, a relative path, or an ELN. For example, enter \fI/^A\ 7\fR to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
-The result of the search could be further filtered by specifying a filter type: \-b, \-c, \-d, \-f, \-l, \-p, and \-s (block device, character device, directory, regular file, symbolic link, FIFO/pipe, and socket respectively. For example, \fI/[.-].*d$\ \-d Documents/\fR will list all directories containing a dot or a dash and ending with 'd' in the directory named \fIDocuments\fR.
+\fB3. File type filter\fR
+.sp
+The result of the search could be further filtered by specifying a filter type: \-b, \-c, \-d, \-f, \-l, \-p, and \-s (block device, character device, directory, regular file, symbolic link, FIFO/pipe, and socket respectively. For example, \fI/[.\-].*d$\ \-d Documents/\fR will list all directories containing a dot or a dash and ending with 'd' in the directory named \fIDocuments\fR.
+.sp
+\fB4. Negate a pattern\fR
 .sp
 The quick search function also supports invert search: prepend the exclamation mark (!) to negate a given search pattern. For example: \fI!.*s$\ -d\ /etc\fR will match all directories in \fI/etc\fR NOT ending with 's', just as \fI!D*\fR will match all files in the current directory NOT starting with 'D'.
 .sp
-To perform a recursive search use the -x parameter, and, optionally, a search path (DIR) (file type filter is not allowed). The search will be performed using \fIfind\fR as follows: \fIfind\ DIR\ -name\ PATTERN\fR. If no search path is provided, the search is executed starting in the current directory. Otherwise, the search starts in DIR.
+\fB5. Recursive search\fR
+.sp
+To perform a recursive search use the \fI\-x\fR parameter, and, optionally, a search path (DIR) (file type filter is not allowed). The search will be performed using \fIfind\fR as follows: \fIfind\ DIR\ MODE PATTERN\fR. If no search path is provided, the search is executed starting in the current directory. Otherwise, the search starts in DIR. MODE is one of:
+.sp
+ -name: \fISearchStrategy\fR is not \fIregex-only\fR and \fICaseSensitiveSearch\fR is set to \fItrue\fR
+.sp
+ -iname: \fISearchStrategy\fR is not \fIregex-only\fR and \fICaseSensitiveSearch\fR is set to \fIfalse\fR
+.sp
+ -regex: \fISearchStrategy\fR is \fIregex-only\fR and \fICaseSensitiveSearch\fR is set to \fItrue\fR
+.sp
+ -iregex: \fISearchStrategy\fR is \fIregex-only\fR and \fICaseSensitiveSearch\fR is set to \fIfalse\fR
 .TP
 .B ;\fR[\fICMD\fR], \fB:\fR[\fICMD\fR]
 If no CMD, run the system shell in the current working directory. If CMD is specified, skip all \fBclifm\fR expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (CMD) as is via the default system shell.
