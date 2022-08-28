@@ -47,7 +47,9 @@ static int
 run_find(char *search_path, char *arg)
 {
 	char *_path = (search_path && *search_path) ? search_path : ".";
-	char *method = search_strategy == REGEX_ONLY ? "-regex" : "-name";
+	char *method = search_strategy == REGEX_ONLY
+		? (case_sens_search == 1 ? "-regex" : "-iregex")
+		: (case_sens_search == 1 ? "-name" : "-iname");
 
 	int glob_char = check_glob_char(arg + 1, GLOB_REGEX);
 	if (glob_char == 1) {
