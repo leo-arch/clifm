@@ -2500,13 +2500,22 @@ cygwin_exclude_file(char *name, const int winpath)
 	}
 
 	/* Windows directory */
-	if (!p || !*(++p) ||
-	(strcasecmp(p, "exe") != 0 && strcasecmp(p, "bat") != 0
-	&& strcasecmp(p, "cmd") != 0 && strcasecmp(p, "vbs") != 0
-	&& strcasecmp(p, "vbe") != 0 && strcasecmp(p, "js") != 0
-	&& strcasecmp(p, "jse") != 0 && strcasecmp(p, "wsf") != 0
-	&& strcasecmp(p, "wsh") != 0 && strcasecmp(p, "msc") != 0) )
+	if (!p || !*(++p))
 		return 1;
+
+	switch(*p) {
+	case 'b': return strcasecmp(p, "bat") == 0 ? 0 : 1;
+	case 'c': return strcasecmp(p, "cmd") == 0 ? 0 : 1;
+	case 'e': return strcasecmp(p, "exe") == 0 ? 0 : 1;
+	case 'j':
+		return (strcasecmp(p, "js") == 0 || strcasecmp(p, "jse") == 0) ? 0 : 1;
+	case 'm': return strcasecmp(p, "msc") == 0 ? 0 : 1;
+	case 'v':
+		return (strcasecmp(p, "vbs") == 0 || strcasecmp(p, "vbe") == 0) ? 0 : 1;
+	case 'w':
+		return (strcasecmp(p, "wsf") == 0 || strcasecmp(p, "wsh") == 0) ? 0 : 1;
+	default: return 1;
+	}
 
 	return 0;
 }
