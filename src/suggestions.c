@@ -232,6 +232,26 @@ restore_cursor_position(const size_t slines)
 
 	SET_CURSOR(currow, curcol);
 } */
+
+static inline void
+restore_cursor_position(const size_t slines, const size_t len, const size_t offset, const int baej)
+{
+/*	if (slines > 1)
+		MOVE_CURSOR_UP((int)slines - 1);
+	// SET_CURSOR_COL (which uses HPA escape sequence) is not supported on some consoles
+	SET_CURSOR_COL(curcol); */
+
+	if (slines > 1) {
+		MOVE_CURSOR_UP((int)slines - 1);
+		MOVE_CURSOR_LEFT(term_cols);
+		MOVE_CURSOR_RIGHT(curcol > 0 ? curcol - 1 : curcol);
+	} else {
+		int n = (int)(len - offset + (baej == 1 ? 3 : 0));
+		if (curcol + n > term_cols && n > 0)
+			n--;
+		MOVE_CURSOR_LEFT(n);
+	}
+}
 // TESTING CURSOR POSITION
 /*
 static inline void
@@ -446,15 +466,8 @@ print_suggestion(const char *str, size_t offset, char *color)
 	_print_suggestion(str, offset, color);
 
 // TESTING CURSOR POSITION
-//	printf("'%zu:%d'", slines, curcol); fflush(stdout);
 //	restore_cursor_position(slines);
-
-/*	int n = (int)(str_len - offset + (baej == 1 ? 3 : 0));
-	if (n < 0)
-		n = 0; */
-	if (slines > 1)
-		MOVE_CURSOR_UP((int)slines - 1);
-	SET_CURSOR_COL(curcol);
+	restore_cursor_position(slines, str_len, offset, baej);
 // TESTING CURSOR POSITION
 
 	/* Store the amount of lines taken by the current command line (plus the

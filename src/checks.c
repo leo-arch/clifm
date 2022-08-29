@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef __NetBSD__
+#if defined(__NetBSD__)
 # include <sys/param.h>
 # if __NetBSD_Prereq__(9,99,63)
 #  include <sys/acl.h>
@@ -123,7 +123,7 @@ check_term_support(const char *_term)
 	xargs.colorize = (cs == 0) ? 0 : UNSET;
 	if (getenv("CLIFM_FORCE_COLOR"))
 		xargs.colorize = 1;
-#ifndef _NO_SUGGESTIONS
+#if !defined(_NO_SUGGESTIONS)
 	xargs.suggestions = (cprs == 0) ? 0 : UNSET;
 #else
 	UNUSED(cprs);

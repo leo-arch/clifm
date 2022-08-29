@@ -43,8 +43,8 @@
 #include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#ifdef __NetBSD__
-#include <ctype.h>
+#if defined(__NetBSD__)
+# include <ctype.h>
 #endif
 #include <paths.h>
 
@@ -69,8 +69,8 @@
 #define STRINGIZE(x) STRINGIZE_(x)
 
 /* We need this for get_user_groups() */
-#ifndef NGROUPS_MAX
-# ifdef __linux__
+#if !defined(NGROUPS_MAX)
+# if defined(__linux__)
 #  define NGROUPS_MAX 65536
 # else
 #  define NGROUPS_MAX 1024
