@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Aug 24, 2022" "clifm 1.7" "CLIFM Manual"
+.TH "CLIFM" "1" "Aug 29, 2022" "clifm 1.7.1" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -85,21 +85,21 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBd)\fR \fBSeveral shell capabilities: Fish\-like auto\-suggestions\fR that, together with TAB completion, syntax highlighting, and history (for both commands and visited directories) assists the user when it comes to typing commands. This feature includes a warning prompt to warn the user when typing an invalid command name.
 .sp
-  \fBe)\fR \fBBookmarks\fR: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter \fIbm\fR (or press Alt\-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark.
+  \fBe)\fR \fBBookmarks\fR: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter \fIbm\fR (or press \fIAlt\-b\fR) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark.
 .sp
-  \fBf)\fR The \fBSelection Box\fR allows you to drop files and directories from different parts of the file system (even from different instances of \fBclifm\fR) and then operate on them with just one command. Example: select a few files in one instance of the program (say \fIs\ 12;\ cd\ /media;\ s\ 2\ 5\-6\fR) and then paste them somewhere else using a second instance (\fIv\ sel\fR, \fIpaste\ sel\fR or Ctrl-Alt-v). Both wildcards (globbing) and regular expressions are supported. Inverse matching is also allowed for patterns.
+  \fBf)\fR The \fBSelection Box\fR allows you to drop files and directories from different parts of the file system (even from different instances of \fBclifm\fR) and then operate on them with just one command. Example: select a few files in one instance of the program (say \fIs\ 12;\ cd\ /media;\ s\ 2\ 5\-6\fR) and then paste them somewhere else using a second instance (\fIv\ sel\fR, \fIpaste\ sel\fR or \fICtrl-Alt-v\fR). Both wildcards (globbing) and regular expressions are supported. Inverse matching is also allowed for patterns.
 .sp
-  \fBg)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering \fIb\fR or \fIf\fR (or just pressing Alt\-j and Alt\-k, or Shift\-Left and Shift\-Right, respectively). Another way of quickly navigating through visited directories is using \fIKangaroo\fR, a built-in \fBdirectory jumper\fR function. See the \fIj\fR command below.
+  \fBg)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering \fIb\fR or \fIf\fR (or just pressing \fIAlt\-j\fR and \fIAlt\-k\fR, or \fIShift\-Left\fR and \fIShift\-Right\fR, respectively). Another way of quickly navigating through visited directories is using \fIKangaroo\fR, a built-in \fBdirectory jumper\fR function. See the \fIj\fR command below.
 .sp
-  \fBh)\fR An extensive list of \fBkeyboard shortcuts\fR make it even easier and faster to navigate and operate on your files. For example, instead of typing \fIcd\ ..\fR to go back to the parent directory, or \fIs\ *\fR to select all files in the current directory, you can simply press Alt\-u (or Shift\-Up) and Alt\-a respectively.
+  \fBh)\fR An extensive list of \fBkeyboard shortcuts\fR make it even easier and faster to navigate and operate on your files. For example, instead of typing \fIcd\ ..\fR to go back to the parent directory, or \fIs\ *\fR to select all files in the current directory, you can simply press \fIAlt\-u\fR (or \fIShift\-Up\fR) and \fIAlt\-a\fR respectively.
 .sp
   \fBi)\fR The \fBquick search\fR function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: \fI/myfile\fR or \fI/.*\.png\fR), that's all. Inverse search is also allowed by prepending an exclamation mark (!) to the search pattern.
 .sp
   \fBj)\fR \fBPlugins\fR: Build your own custom commands using executable files (shell scripts or binaries). Just drop an executable file (all languages are supported) in the plugins directory, tell \fBclifm\fR to use this executable file via a custom action name, and use it as any other command.
 .sp
-  \fBk)\fR \fBFiles preview\fR: Via the \fIfzfnav\fR plugin (see the \fBPLUGINS\fR section below), \fBclifm\fR is able to preview several kinds of files, including not only text files, but also GIF's, images, office documents, PDF's, and more. This plugin requires \fIFZF\fR to be installed. For basic images preview \fIueberzug\fR is required. A list of optional dependencies to preview different kinds of files is available in the \fBPLUGINS\fR section.
+  \fBk)\fR \fBFiles preview\fR: Via the \fIfzfnav\fR plugin (see the \fBPLUGINS\fR section below), \fBclifm\fR is able to preview several kinds of files, including not only text files, but also GIF's, images, office documents, PDF's, and more. This plugin requires \fBfzf\fR(1) to be installed. For basic images preview \fBueberzug\fR(1) is required. A list of optional dependencies to preview different kinds of files is available in the \fBPLUGINS\fR section.
 .sp
-  \fBl)\fR It is blazing \fBfast\fR and incredibly \fBlightweight\fR. With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it can run on really ancient hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or any other remote session. And if this is not enough, you can still try the \fBlight mode\fR to make it even faster.
+  \fBl)\fR It is blazing \fBfast\fR and incredibly \fBlightweight\fR. With a memory footprint below 7 MiB and a disk usage of 0.7 MiB, it can run on really ancient hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or any other remote session. And if this is not enough, you can still try the \fBlight mode\fR to make it even faster.
 .sp
   \fBm)\fR When running in \fBstealth mode\fR, it will leave not trace at all on the host system.
 .sp
@@ -250,7 +250,7 @@ enable the splash screen
 leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
-run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-dirs-first --apparent-size\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press Ctrl-Alt-i (or Alt-TAB) to toggle this mode on/off in-place.
+run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-dirs-first --apparent-size\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press \fICtrl-Alt-i\fR (or \fIAlt-TAB\fR) to toggle this mode on/off in-place.
 .TP
 \fB\-u\fR, \fB\-\-no\-unicode\fR
 disable unicode
@@ -265,7 +265,7 @@ show version details and exit
 start in workspace \fINUM\fR. By default, \fBclifm\fR will recover the last visited directory for each workspace. However, you can override this behaviour using positional parameters, as described above, to start in workspace \fINUM\fR and in path \fIPATH\fR.
 .TP
 \fB\-W\fR, \fB\-\-no\-toggle\-workspaces\fR
-workspace keybindings (by default Alt\-[1\-4]) do not toggle current and previous workspaces
+workspace keybindings (by default \fIAlt\-[1\-4]\fR) do not toggle current and previous workspaces
 .TP
 \fB\-x\fR, \fB\-\-no\-ext\-cmds\fR
 disallow the use of external, shell commands
@@ -905,7 +905,7 @@ with no arguments, prints the name of the currently used profile. Use the \fIls\
 .B pg, pager \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
 toggle \fBMas\fR, the built-in pager, on/off. Useful to list directories with hundreds or thousands of files, the pager will start working, if set to on, whenever the screen is not enough to list all files.
 .sp
-Once in the pager, press the Down arrow key, Space or Enter to move downwards one line, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, Alt\-PageUp or Alt\-Up. Press 'c', 'p', or 'q' keys to stop the pager, and 'h' or '?' for help.
+Once in the pager, press the Down arrow key, Space or Enter to move downwards one line, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, \fIAlt\-PageUp\fR or \fIAlt\-Up\fR. Press 'c', 'p', or 'q' keys to stop the pager, and 'h' or '?' for help.
 .TP
 .B pin \fR[\fIFILE/DIR\fR]
 pin a file or a directory to be accessed later via the comma (,) keyword. For example, run \fIpin mydir\fR and then access \fImydir\fR as follows: \fIcd\ \,\fR where the comma is automatically expanded to the pinned file, in this case \fImydir\fR. The comma keyword could be used with any command, either internal or external, e.g, \fIls\ \,\fR.
@@ -1791,13 +1791,13 @@ h. Program names in \fBPATH\fR
 .sp
 i. Shell builtins
 
-\fBNOTE:\fR The shell name is taken from \fI/bin/sh\fR. The following shell are supported: bash, dash, fish, ksh, tcsh, and zsh. Command names are checked in the following order: \fBclifm\fR internal commands, commands in \fBPATH\fR, and shell builtins.
+\fBNOTE:\fR The shell name is taken from \fI/bin/sh\fR. The following shells are supported: bash, dash, fish, ksh, tcsh, and zsh. Command names are checked in the following order: \fBclifm\fR internal commands, commands in \fBPATH\fR, and shell builtins.
 
 To accept the entire suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press \fBEnter\fR to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
 
-To aceppt the first suggested word only (up to first slash or space), press rather \fBAlt-Right\fR or \fBAlt-f\fR. Not available for ELN's, aliases and bookmarks names.
+To aceppt the first suggested word only (up to first slash or space), press rather \fIAlt\-Right\fR or \fIAlt\-f\fR. Not available for ELN's, aliases and bookmarks names.
 
-Bear in mind that suggestions for ELN's, aliases and bookmarks names, and the jump function (invoked by the \fIj\fR command) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a file name whose ELN is '12', the file name corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press 'Right' or 'Ctrl-f' to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
+Bear in mind that suggestions for ELN's, aliases and bookmarks names, and the jump function (invoked by the \fIj\fR command) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a file name whose ELN is '12', the file name corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press \fIRight\fR or \fICtrl\-f\fR to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
 
 The order of the suggestion checks could be customized via the \fISuggestionStrategy\fR option in the configuration file. Each check is assigned a lowercase letter:
 
@@ -1809,7 +1809,7 @@ The order of the suggestion checks could be customized via the \fISuggestionStra
  h = Entries in the commands history
  j = Entries in the jump database
 
-The value taken by \fISuggestionStrategy\fR is a string of seven(7) characters containing the above letters. The letters order in this string specifies the order in which the suggestion checks will be performed. For example, to perform all checks in the same order above, the value of the string should be \fBabcefhj\fR (without quotes). Or, if you prefer to run the history check first: \fBhabcefj\fR. Finally, you can ignore one or more checks using a dash (-). So, to ignore the bookmarks and aliases checks, set \fISuggestionStrategy\fR to \fBh--cefj\fR. The default value for this option is \fBehfjbac\fR.
+The value taken by \fISuggestionStrategy\fR is a string of seven (7) characters containing the above letters. The letters order in this string specifies the order in which the suggestion checks will be performed. For example, to perform all checks in the same order above, the value of the string should be \fBabcefhj\fR (without quotes). Or, if you prefer to run the history check first: \fBhabcefj\fR. Finally, you can ignore one or more checks using a dash (-). So, to ignore the bookmarks and aliases checks, set \fISuggestionStrategy\fR to \fBh--cefj\fR. The default value for this option is \fBehfjbac\fR.
 
 \fBNote\fR: The check for program names in \fBPATH\fR is always executed at last, except when the \fIExternalCommands\fR option is disabled, in which case suggestions for them are simply not displayed.
 
@@ -1825,10 +1825,8 @@ Suggestions will be printed using one of the following color codes (see the \fBC
 
 \fIsp\fR: Greater-than sign (>) used when suggesting ELN's, bookmarks, and aliases names. Default value: 02;31 (dimmed red)
 
-You can set \fBSuggestFiletypeColor\fR to "true" in the configuration file to use the color of the file type of the current file name (as set in the color scheme file) instead of the value of
+You can set \fISuggestFiletypeColor\fR to \fItrue\fR in the configuration file to use the color of the file type of the current file name (as set in the color scheme file) instead of the value of
 \fIsf\fR. For example, if a suggestion is printed for a file that is a symbolic link, \fIln\fR or \fIor\fR (if a broken link) will be used instead of \fIsf\fR.
-.sp
-\fBNote\fR: Suggestions are disabled for the FreeBSD and the NetBSD default consoles. Take a look at the Wiki for more information.
 
 .SH 12. SHELL FUNCTIONS
 \fBclifm\fR includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
@@ -2317,7 +2315,7 @@ Force the use of colors, even if the terminal informs that it does not support c
 Define a file filter. If set, this variable overrides the \fIFilter\fR option in the configuration file
 .TP
 .B CLIFM_SUDO_CMD
-Name of the authenticator program (used by the \fIX\fR command, to launch a new instance of CliFM as root, and the Alt-v keybinding, to prepend the authenticator program name (by default "sudo", or "doas" if compiled on OpenBSD) to the current command line
+Name of the authenticator program (used by the \fIX\fR command, to launch a new instance of CliFM as root, and the \fIAlt-v\fR keybinding, to prepend the authenticator program name (by default "sudo", or "doas" if compiled on OpenBSD) to the current command line
 .TP
 .B FZF_DEFAULT_OPTS
 A quoted list of options to be passed to FZF (if used for TAB completion)
@@ -2517,7 +2515,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .SH 23. EXAMPLES
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
 
-\fBNOTE 2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press Right (or Alt-f to accept only the first suggested word). Otherwise, the suggestion is just ignored
+\fBNOTE 2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press \fIRight\fR (or \fIAlt-f\fR to accept only the first suggested word). Otherwise, the suggestion is just ignored
 
 Get help:
 \fBF1\fR: manpage
@@ -2554,9 +2552,9 @@ Get help:
 
 - Go back to the directory you came from:
 
-    \fBb\fR (or \fBShift-Left\fR or \fBAlt-j\fR)
+    \fBb\fR (or \fIShift\-Left\fR or \fIAlt\-j\fR)
 
-\fBNOTE\fR: Enter \fBf\fR, or press \fBShift-Right\fR or \fBAlt-k\fR to go back to the first directory
+\fBNOTE\fR: Enter \fBf\fR, or press \fIShift\-Right\fR or \fIAlt-k\fR to go back to the first directory
 
 - Create a new file named \fImyfile\fR and a new directory named \fImydir\fR:
 
