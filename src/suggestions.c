@@ -254,6 +254,8 @@ restore_cursor_position(const size_t slines, const size_t len, const size_t offs
 		MOVE_CURSOR_RIGHT(curcol > 0 ? curcol - 1 : curcol);
 	} else {
 		int n = (int)(len - offset + (baej == 1 ? 3 : 0));
+		if (highlight == 0 && rl_point < rl_end)
+			n += (rl_end - rl_point);
 		if (curcol + n > term_cols && n > 0)
 			n--;
 		MOVE_CURSOR_LEFT(n);
@@ -301,6 +303,8 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	}
 
 	size_t cucs = cuc + suggestion_len;
+	if (highlight == 0 && rl_point < rl_end)
+		cucs += (size_t)(rl_end - rl_point);
 	/* slines: amount of lines we need to print the suggestion, including
 	 * the current line */
 	size_t slines = 1;
