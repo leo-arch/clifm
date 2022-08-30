@@ -562,7 +562,7 @@ rl_accept_suggestion(int count, int key)
 	/* If accepting the first suggested word, accept only up to next
 	 * word delimiter */
 	char *s = (char *)NULL, _s = 0;
-	int trimmed = 0;
+	int trimmed = 0, accept_first_word_last = 0;
 	if (accept_first_word == 1) {
 		char *p = suggestion_buf + (rl_point - suggestion.offset);
 		/* Skip leading spaces */
@@ -586,15 +586,18 @@ rl_accept_suggestion(int count, int key)
 			size_t len = strlen(suggestion_buf);
 			if (suggestion_buf[len - 1] != '/' && suggestion_buf[len - 1] != ' ')
 				suggestion.type = NO_SUG;
-			accept_first_word = 0;
+			accept_first_word_last = 1;
 			s = (char *)NULL;
 		}
 	}
 
 	rl_delete_text(suggestion.offset, rl_end);
 	rl_point = suggestion.offset;
-	if (highlight == 1)
+	if (highlight == 1 && accept_first_word == 0)
 		rl_redisplay();
+
+	if (accept_first_word_last == 1)
+		accept_first_word = 0;
 
 	if (accept_first_word == 0 && (flags & BAEJ_SUGGESTION))
 		clear_suggestion(CS_KEEPBUF);
