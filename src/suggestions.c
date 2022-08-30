@@ -296,7 +296,6 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG
 	|| suggestion.type == SORT_SUG || suggestion.type == WS_NUM_SUG) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
-//		cuc += suggestion.type == ELN_SUG ? 3 : 4;
 		cuc += 3;
 		flags |= BAEJ_SUGGESTION;
 		*baej = 1;

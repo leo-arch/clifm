@@ -1,7 +1,8 @@
 /* icons-in-terminal.h - Icons definitions for CliFM */
 
 /* Taken from
- * https://github.com/sebastiencs/icons-in-terminal/blob/master/build/icons-in-terminal.h*/
+ * https://github.com/sebastiencs/icons-in-terminal/blob/master/build/icons-in-terminal.h,
+ * licensed MIT */
 
 #ifndef ICONS_IN_TERMINAL
 #define ICONS_IN_TERMINAL

@@ -24,6 +24,12 @@
  * MA 02110-1301, USA.
 */
 
+/* The following functions are taken from Bash (1.14.7), licensed GPL1+,
+ * and modified to fit our needs:
+ * my_rl_getc()
+ * my_rl_path_completion()
+ * */
+
 #include "helpers.h"
 
 //#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
@@ -631,8 +637,7 @@ get_prompt_offset(char *p)
 // TESTING CURSOR POSITION
 
 /* This function is automatically called by readline() to handle input.
- * Taken from Bash 1.14.7 and modified to fit our needs. Used
- * to introduce the suggestions system */
+ * Used to introduce the suggestions system. */
 static int
 my_rl_getc(FILE *stream)
 {

@@ -1,8 +1,5 @@
 /* icons-emoji.h - Icons definitions for CliFM */
 
-/* Taken from https://github.com/jarun/nnn/blob/master/src/icons-emoji.h
- * and modified to fir our needs */
-
 /* For a list of emojis consult:
  * https://unicode.org/Public/emoji/5.0/emoji-test.txt */
 

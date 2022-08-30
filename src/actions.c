@@ -22,6 +22,9 @@
  * MA 02110-1301, USA.
 */
 
+/* The run_action function is taken from NNN's run_selected_plugin
+ * function (licensed BSD-2-clause) and modified to fit our needs. */
+
 #include "helpers.h"
 
 #include <errno.h>
@@ -93,8 +96,6 @@ get_plugin_path(char *action, int *status)
 	return cmd;
 }
 
-/* The core of this function was taken from NNN's run_selected_plugin
- * function and modified to fit our needs. Thanks NNN! */
 int
 run_action(char *action, char **args)
 {

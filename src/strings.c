@@ -22,6 +22,12 @@
  * MA 02110-1301, USA.
 */
 
+/* The xstrsncpy function is taken from NNN (licensed BSD-2-clause) and
+ * modified to fit our needs. */
+
+/* The xstrverscmp is taken from https://elixir.bootlin.com/uclibc-ng/latest/source/libc/string/strverscmp.c
+ * (licensed GPL2.1+) and modified to fit our needs. */
+
 #include "helpers.h"
 
 #ifdef __HAIKU__
@@ -208,11 +214,13 @@ xstrnlen(const char *restrict s)
 	return (size_t)((char *)memchr(s, '\0', MAX_STR_LEN) - s);
 }
 
-/* Taken from NNN's source code: very clever. Copy SRC into DST
- * and return the string size all at once
- * Besides, it's safer than strncpy(3): it always NULL terminates the
- * destination string (DST), even if no NUL char if found in the first
- * N characters of SRC */
+/* Modified version of strlcpy(3) using memccpy(3), as suggested here:
+ * https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2349.htm
+ *
+ * Copy at most N bytes of SRC into DST and return the number of bytes
+ * copied (excluding the terminating null byte) all at once.
+ * Unlike strncpy(3), it always NULL terminates the destination string (DST),
+ * even if no NUL char is found in the first N characters of SRC. */
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {

@@ -1,9 +1,12 @@
 #!/bin/sh
 
-# Plugin to search files by content via Ripgrep and FZF for CliFM
+# Plugin to search for files by content for CliFM
+# Dependencies: rg (Ripgrep), fzf, and sed
 
 # Written by L. Abramovich
 # License: GPL3
+
+MAX_DEPTH=1
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
@@ -40,7 +43,8 @@ args="$(echo "$@" | sed 's/\\//g')"
 while true; do
 	# shellcheck disable=SC2154
 	file="$(rg --color="$rg_colors" --hidden --heading --line-number \
-		--trim --ignore-case -- "$args" 2>/dev/null | \
+		--trim --ignore-case --max-depth="$MAX_DEPTH" \
+		-- "$args" 2>/dev/null | \
 		fzf --ansi --reverse --prompt="$fzf_prompt" \
 		--height="$fzf_height" --color="$fzf_colors" \
 		--no-clear --bind "right:accept" --no-unicode \

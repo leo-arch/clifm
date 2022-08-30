@@ -22,6 +22,18 @@
  * MA 02110-1301, USA.
 */
 
+/* The following functions are taken from Bash (1.14.7), licensed GPL1+,
+ * and modified if needed:
+ * PUTX()
+ * stat_char()
+ * get_y_or_n()
+ * print_filename()
+ * printable_part()
+ * rl_strpbrk()
+ * compare_strings()
+ * tab_complete()
+ * */
+
 #include "helpers.h"
 
 #include <stdio.h>
@@ -184,9 +196,9 @@ print_filename(char *to_print, char *full_pathname)
 }
 
 /* Return the portion of PATHNAME that should be output when listing
-   possible completions. If we are hacking filename completion, we
-   are only interested in the basename, the portion following the
-   final slash. Otherwise, we return what we were passed. */
+ * possible completions. If we are hacking filename completion, we
+ * are only interested in the basename, the portion following the
+ * final slash. Otherwise, we return what we were passed. */
 static char *
 printable_part(char *pathname)
 {
@@ -202,7 +214,7 @@ printable_part(char *pathname)
 }
 
 /* Find the first occurrence in STRING1 of any character from STRING2.
-   Return a pointer to the character in STRING1. */
+ * Return a pointer to the character in STRING1. */
 static char *
 rl_strpbrk(char *s1, char *s2)
 {
@@ -1300,8 +1312,6 @@ compare_strings(s1, s2)
    `*' means insert all of the possible completions.
    `!' means to do standard completion, and list all possible completions
    if there is more than one. */
-/* This function is taken from an old bash release (1.14.7) and modified
- * to fit our needs */
 int
 tab_complete(int what_to_do)
 {

@@ -22,6 +22,9 @@
  * MA 02110-1301, USA.
 */
 
+/* The decode_prompt function is taken from Bash (1.14.7), licensed GPL2+,
+ * and modified to fit our needs. */
+
 #include "helpers.h"
 
 #include <stdio.h>
@@ -562,8 +565,7 @@ gen_notification(int flag)
 }
 
 /* Decode the prompt string (encoded_prompt global variable) taken from
- * the configuration file. Based on the decode_prompt_string function
- * found in an old bash release (1.14.7). */
+ * the configuration file. */
 char *
 decode_prompt(char *line)
 {
