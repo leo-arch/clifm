@@ -39,7 +39,11 @@ char from_hex(char c);
 //char *from_octal(char *s);
 char *gen_date_suffix(struct tm tm);
 char *get_cmd_path(const char *cmd);
-int get_cursor_position(int *c, int *r);
+
+// TESTING CURSOR POSITION
+//int get_cursor_position(int *c, int *r);
+// TESTING CURSOR POSITION
+
 mode_t get_dt(const mode_t mode);
 /*int *get_hex_num(const char *str); */
 int get_link_ref(const char *link);

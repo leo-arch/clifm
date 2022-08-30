@@ -653,7 +653,6 @@ my_rl_getc(FILE *stream)
 		if (prompt_offset == UNSET)
 			prompt_offset = get_prompt_offset(rl_prompt);
 	}
-// TESTING CURSOR POSITION
 /*
 #ifndef _NO_FZF
 	if (xargs.fzftab == 1 || warning_prompt == 1) {
@@ -678,6 +677,7 @@ my_rl_getc(FILE *stream)
 #endif // !__FreeBSD__
 		}
 	} */
+// TESTING CURSOR POSITION
 
 	if (xrename) {
 		/* We are using a secondary prompt for the xrename function */
@@ -728,29 +728,34 @@ my_rl_getc(FILE *stream)
 
 #ifndef _NO_SUGGESTIONS
 			if (ret != 2 && ret != -2 && !_xrename && suggestions) {
-				/* rl_suggestions returns -1 is C was inserted before
-				 * the end of the current line, in which case we don't
-				 * want to return it here (otherwise, it would be added
-				 * to rl_line_buffer) */
+// TESTING CURSOR POSITION
+				rl_suggestions(c);
+			}
+/*				// rl_suggestions returns -1 is C was inserted before
+				// the end of the current line, in which case we don't
+				// want to return it here (otherwise, it would be added
+				// to rl_line_buffer)
 # ifdef __FreeBSD__
-			/* For the time being, suggestions do not work on the FreeBSD
-			 * console (vt). The escape code to retrieve the current cursor
-			 * position doesn't seem to work. Switching the console to 'sc'
-			 * solves the issue */
+			// For the time being, suggestions do not work on the FreeBSD
+			// console (vt). The escape code to retrieve the current cursor
+			// position doesn't seem to work. Switching the console to 'sc'
+			// solves the issue
 				if (flags & GUI) {
 					rl_suggestions(c);
 				} else {
 					if (freebsd_sc_console)
 						rl_suggestions(c);
 				}
-# elif defined(__NetBSD__)  /* __FreeBSD__ */
+# elif defined(__NetBSD__)  // __FreeBSD__
 				if (flags & GUI)
 					rl_suggestions(c);
 # else
 				rl_suggestions(c);
-# endif /* __NetBSD__ */
-			}
+# endif // __NetBSD__
+			} */
+// TESTING CURSOR POSITION
 #endif /* !_NO_SUGGESTIONS */
+
 			if (ret != -2)
 				rl_redisplay();
 			continue;

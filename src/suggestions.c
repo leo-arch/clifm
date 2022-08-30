@@ -160,26 +160,33 @@ clear_suggestion(const int free_sug)
 
 	if (suggestion.nlines > 1) {
 		/* Save cursor position */
+
 // TESTING CURSOR POSITION
-		get_cursor_position(&curcol, &currow);
-/*		rl_redisplay();
-		curcol = prompt_offset + rl_point;
-		if (curcol > term_cols)
-			curcol -= term_cols; */
+//		get_cursor_position(&curcol, &currow);
+		if (highlight == 0)
+			rl_redisplay();
+		curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
+		while (curcol > term_cols)
+			curcol -= term_cols;
 // TESTING CURSOR POSITION
 
 		int i = (int)suggestion.nlines;
 		while (--i > 0) {
 			/* Move the cursor to the beginning of the next line */
-			if (write(STDOUT_FILENO, CNL, CNL_LEN) <= 0) {/* Avoid compiler warning */}
+// TESTING CURSOR POSITION
+			MOVE_CURSOR_DOWN(1);
+			MOVE_CURSOR_LEFT(term_cols);
+			fflush(stdout);
+//			if (write(STDOUT_FILENO, CNL, CNL_LEN) <= 0) {/* Avoid compiler warning */}
+// TESTING CURSOR POSITION
 			/* Delete the line */
 			if (write(STDOUT_FILENO, DEL_LINE, DEL_LINE_LEN) <= 0) {/* Avoid compiler warning */}
 		}
 		/* Restore cursor position */
 // TESTING CURSOR POSITION
-		SET_CURSOR(currow, curcol);
-//		MOVE_CURSOR_UP((int)suggestion.nlines - 1);
-//		SET_CURSOR_COL(curcol);
+//		SET_CURSOR(currow, curcol);
+		MOVE_CURSOR_UP((int)suggestion.nlines - 1);
+		MOVE_CURSOR_RIGHT(curcol > 0 ? curcol - 1 : 0);
 // TESTING CURSOR POSITION
 
 		fflush(stdout);

@@ -593,6 +593,8 @@ rl_accept_suggestion(int count, int key)
 
 	rl_delete_text(suggestion.offset, rl_end);
 	rl_point = suggestion.offset;
+	if (highlight == 1)
+		rl_redisplay();
 
 	if (accept_first_word == 0 && (flags & BAEJ_SUGGESTION))
 		clear_suggestion(CS_KEEPBUF);

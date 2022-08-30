@@ -305,12 +305,12 @@ rl_ring_bell(void)
 		rl_redisplay();
 		msleep(VISIBLE_BELL_DELAY);
 		rl_deactivate_mark();
-#ifndef _NO_HIGHLIGHT
+# ifndef _NO_HIGHLIGHT
 		if (highlight && !wrong_cmd) {
 			rl_point = rl_mark;
 			recolorize_line();
 		}
-#endif /* !_NO_HIGHLIGHT */
+# endif /* !_NO_HIGHLIGHT */
 		rl_point = point;
 		return;
 	}
@@ -321,12 +321,14 @@ rl_ring_bell(void)
 	}
 }
 
+// TESTING CURSOR POSITION
 /* The following three functions were taken from
  * https://github.com/antirez/linenoise/blob/master/linenoise.c
  * and modified to fir our needs: they are used to get current cursor
  * position (both vertical and horizontal) by the suggestions system */
 
 /* Set the terminal into raw mode. Return 0 on success and -1 on error */
+/*
 static int
 enable_raw_mode(const int fd)
 {
@@ -338,22 +340,22 @@ enable_raw_mode(const int fd)
 	if (tcgetattr(fd, &orig_termios) == -1)
 		goto FAIL;
 
-	raw = orig_termios;  /* modify the original mode */
-	/* input modes: no break, no CR to NL, no parity check, no strip char,
-	 * * no start/stop output control. */
+	raw = orig_termios;  // modify the original mode
+	// input modes: no break, no CR to NL, no parity check, no strip char,
+	// * no start/stop output control.
 	raw.c_iflag &= (tcflag_t)~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
-	/* output modes - disable post processing */
+	// output modes - disable post processing
 	raw.c_oflag &= (tcflag_t)~(OPOST);
-	/* control modes - set 8 bit chars */
+	// control modes - set 8 bit chars
 	raw.c_cflag |= (CS8);
-	/* local modes - choing off, canonical off, no extended functions,
-	 * no signal chars (^Z,^C) */
+	// local modes - choing off, canonical off, no extended functions,
+	// no signal chars (^Z,^C)
 	raw.c_lflag &= (tcflag_t)~(ECHO | ICANON | IEXTEN | ISIG);
-    /* control chars - set return condition: min number of bytes and timer.
-     * We want read to return every single byte, without timeout. */
-	raw.c_cc[VMIN] = 1; raw.c_cc[VTIME] = 0; /* 1 byte, no timer */
+    // control chars - set return condition: min number of bytes and timer.
+    // We want read to return every single byte, without timeout.
+	raw.c_cc[VMIN] = 1; raw.c_cc[VTIME] = 0; // 1 byte, no timer
 
-	/* put terminal in raw mode after flushing */
+	// put terminal in raw mode after flushing
 	if (tcsetattr(fd, TCSAFLUSH, &raw) < 0)
 		goto FAIL;
 
@@ -370,11 +372,12 @@ disable_raw_mode(const int fd)
 	if (tcsetattr(fd, TCSAFLUSH, &orig_termios) != -1)
 		return EXIT_SUCCESS;
 	return EXIT_FAILURE;
-}
+} */
 
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
  * vertical and horizontal) and store both values into C (columns) and R (rows).
  * Returns 0 on success and 1 on error */
+/*
 int
 get_cursor_position(int *c, int *r)
 {
@@ -383,14 +386,14 @@ get_cursor_position(int *c, int *r)
 
 	if (enable_raw_mode(STDIN_FILENO) == -1) return EXIT_FAILURE;
 
-	/* 1. Ask the terminal about cursor position */
+	// 1. Ask the terminal about cursor position
 	if (write(STDOUT_FILENO, CPR, CPR_LEN) != CPR_LEN)
 		{ disable_raw_mode(STDIN_FILENO); return EXIT_FAILURE; }
 
-	/* 2. Read the response: "ESC [ rows ; cols R" */
+	// 2. Read the response: "ESC [ rows ; cols R"
 	int read_err = 0;
 	while (i < sizeof(buf) - 1) {
-		if (read(STDIN_FILENO, buf + i, 1) != 1) /* flawfinder: ignore */
+		if (read(STDIN_FILENO, buf + i, 1) != 1) // flawfinder: ignore
 			{ read_err = 1; break; }
 		if (buf[i] == 'R')
 			break;
@@ -401,7 +404,7 @@ get_cursor_position(int *c, int *r)
 	if (disable_raw_mode(STDIN_FILENO) == -1 || read_err == 1)
 		return EXIT_FAILURE;
 
-	/* 3. Parse the response */
+	// 3. Parse the response
 	if (*buf != _ESC || *(buf + 1) != '[' || !*(buf + 2))
 		return EXIT_FAILURE;
 
@@ -414,7 +417,8 @@ get_cursor_position(int *c, int *r)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
-}
+} */
+// TESTING CURSOR POSITION
 
 /*
 int

@@ -555,8 +555,10 @@ extern int watch;
 
 #define DLFC           "\x1b[0K"     /* Delete line from cursor */
 #define DLFC_LEN       4
-#define CNL            "\x1b[1E"     /* Move the cursor to beginning next line*/
-#define CNL_LEN        4
+// TESTING CURSOR POSITION
+//#define CNL            "\x1b[1E"     /* Move the cursor to beginning next line*/
+//#define CNL_LEN        4
+// TESTING CURSOR POSITION
 #define DEL_LINE       "\x1b[0K"
 #define DEL_LINE_LEN   4
 #define HIDE_CURSOR    "\x1b[?25l"

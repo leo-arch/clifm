@@ -106,15 +106,20 @@ check_term_support(const char *_term)
 {
 	size_t i, len = strlen(_term);
 	/* Color and cursor position request support */
-	int cs = 0, cprs = 0;
+	int cs = 0;
+// TESTING CURSOR POSITION
+/*	int cprs = 0; */
+// TESTING CURSOR POSITION
 
 	for (i = 0; TERM_INFO[i].name; i++) {
 		if (*_term != *TERM_INFO[i].name || len != TERM_INFO[i].len)
 			continue;
 		if (strcmp(_term, TERM_INFO[i].name) != 0)
 			continue;
-		if (TERM_INFO[i].req_curpos == 1)
-			cprs = 1;
+// TESTING CURSOR POSITION
+/*		if (TERM_INFO[i].req_curpos == 1)
+			cprs = 1; */
+// TESTING CURSOR POSITION
 		if (TERM_INFO[i].color != -1)
 			cs = 1;
 		break;
@@ -123,11 +128,14 @@ check_term_support(const char *_term)
 	xargs.colorize = (cs == 0) ? 0 : UNSET;
 	if (getenv("CLIFM_FORCE_COLOR"))
 		xargs.colorize = 1;
+// TESTING CURSOR POSITION
+/*
 #if !defined(_NO_SUGGESTIONS)
 	xargs.suggestions = (cprs == 0) ? 0 : UNSET;
 #else
 	UNUSED(cprs);
-#endif /* _NO_SUGGESTIONS */
+#endif // _NO_SUGGESTIONS */
+// TESTING CURSOR POSITION
 }
 
 void

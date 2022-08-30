@@ -2155,9 +2155,13 @@ unset_xargs(void)
 	xargs.sort_reverse = UNSET;
 	xargs.splash = UNSET;
 	xargs.stealth_mode = UNSET;
-/*#ifndef _NO_SUGGESTIONS
+
+// TESTING CURSOR POSITION
+#ifndef _NO_SUGGESTIONS
 	xargs.suggestions = UNSET;
-#endif */
+#endif
+// TESTING CURSOR POSITION
+
 	xargs.tips = UNSET;
 	xargs.toggle_workspaces = UNSET;
 #ifndef _NO_TRASH
