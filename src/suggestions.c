@@ -150,8 +150,7 @@ clear_suggestion(const int free_sug)
 		fflush(stdout);
 	}
 
-	/* Delete everything in the current line starting from the current cursor position */
-	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
+	ERASE_TO_RIGHT;
 
 	if (rl_end > rl_point && highlight == 0) {
 		MOVE_CURSOR_LEFT(rl_end - rl_point);
@@ -178,9 +177,8 @@ clear_suggestion(const int free_sug)
 			MOVE_CURSOR_LEFT(term_cols);
 			fflush(stdout);
 //			if (write(STDOUT_FILENO, CNL, CNL_LEN) <= 0) {/* Avoid compiler warning */}
+			ERASE_TO_RIGHT;
 // TESTING CURSOR POSITION
-			/* Delete the line */
-			if (write(STDOUT_FILENO, DEL_LINE, DEL_LINE_LEN) <= 0) {/* Avoid compiler warning */}
 		}
 		/* Restore cursor position */
 // TESTING CURSOR POSITION
@@ -346,8 +344,7 @@ set_cursor_position(const int baej)
 		fflush(stdout);
 	}
 
-	/* Erase everything after the current cursor position */
-	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {/* Avoid compiler warning */}
+	ERASE_TO_RIGHT;
 
 // TESTING CURSOR POSITION
 	if (baej == 1) {

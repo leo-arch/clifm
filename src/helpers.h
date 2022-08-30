@@ -538,36 +538,35 @@ extern int watch;
 #ifndef __HAIKU__
 # define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
 #else
-# define CLEAR fputs("\x1b[H\x1b[2J", stdout);
+# define CLEAR fputs("\x1b[H\x1b[2J", stdout); /* CLEAR */
 #endif
 
-#define SET_CURSOR(y,x)            printf("\x1b[%d;%dH", (y), (x))
+//#define SET_CURSOR(y,x)            printf("\x1b[%d;%dH", (y), (x)) /* CUP */
 // TESTING CURSOR POSITION
-//#define SET_CURSOR_COL(n)          printf("\x1b[%dG", (n))
+//#define SET_CURSOR_COL(n)          printf("\x1b[%dG", (n)) /* HPA */
 // TESTING CURSOR POSITION
-#define MOVE_CURSOR_UP(n)          printf("\x1b[%dA", (n))
-#define MOVE_CURSOR_DOWN(n)        printf("\x1b[%dB", (n))
-#define MOVE_CURSOR_RIGHT(n)       printf("\x1b[%dC", (n))
-#define MOVE_CURSOR_LEFT(n)        printf("\x1b[%dD", (n))
-#define ERASE_FULL_LINE            fputs("\x1b[2K", stdout)
-#define ERASE_TO_RIGHT             fputs("\x1b[0K", stdout)
+#define MOVE_CURSOR_UP(n)     printf("\x1b[%dA", (n))  /* CUU */
+#define MOVE_CURSOR_DOWN(n)   printf("\x1b[%dB", (n))  /* CUD */
+#define MOVE_CURSOR_RIGHT(n)  printf("\x1b[%dC", (n))  /* CUF */
+#define MOVE_CURSOR_LEFT(n)   printf("\x1b[%dD", (n))  /* CUB */
+#define ERASE_TO_RIGHT        fputs("\x1b[0K", stdout) /* EL */
+#define ERASE_TO_LEFT         fputs("\x1b[1K", stdout) /* EL */
+#define ERASE_FULL_LINE       fputs("\x1b[2K", stdout) /* EL */
+
 #define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s> %s", (offset), (color), NC)
 
-#define DLFC           "\x1b[0K"     /* Delete line from cursor */
-#define DLFC_LEN       4
 // TESTING CURSOR POSITION
 //#define CNL            "\x1b[1E"     /* Move the cursor to beginning next line*/
 //#define CNL_LEN        4
+//#define CPR            "\x1b[6n"     /* Cursor position report */
+//#define CPR_LEN        4
 // TESTING CURSOR POSITION
-#define DEL_LINE       "\x1b[0K"
-#define DEL_LINE_LEN   4
-#define HIDE_CURSOR    "\x1b[?25l"
+
+#define HIDE_CURSOR    "\x1b[?25l"   /* DECTCEM */
 #define UNHIDE_CURSOR  "\x1b[?25h"
-#define CPR            "\x1b[6n"     /* Cursor position report */
-#define CPR_LEN        4
-#define SET_RVIDEO     "\x1b[?5h"    /* Enable reverse video */
+#define SET_RVIDEO     "\x1b[?5h"    /* DECSCNM: Enable reverse video */
 #define UNSET_RVIDEO   "\x1b[?5l"
-#define LINE_WRAP      "\x1b[?7h"
+#define LINE_WRAP      "\x1b[?7h"    /* DECAWM */
 #define NO_LINE_WRAP   "\x1b[?7l"
 #define META_SENDS_ESC "\x1b[?1036h"
 

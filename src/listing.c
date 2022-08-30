@@ -1700,9 +1700,8 @@ list_dir_light(void)
 	}
 
 	if (xargs.disk_usage_analyzer == 1) {
-		/* Erase the "Retrieveing file sizes" message */
-		ERASE_FULL_LINE;
-		SET_CURSOR(1, 1);
+		ERASE_TO_LEFT; /* Erase the "Retrieveing file sizes" message */
+		MOVE_CURSOR_LEFT(term_cols);
 	}
 
 	file_info[n].name = (char *)NULL;
@@ -2250,9 +2249,11 @@ list_dir(void)
 		count++;
 	}
 
-	if (xargs.disk_usage_analyzer == 1 || (long_view == 1 && full_dir_size == 1))
+	if (xargs.disk_usage_analyzer == 1 || (long_view == 1 && full_dir_size == 1)) {
 		/* Erase the "Retrieveing file sizes" message */
-		fputs("\x1b[2K\x1b[1G", stdout);
+		ERASE_TO_LEFT;
+		MOVE_CURSOR_LEFT(term_cols);
+	}
 
 	file_info[n].name = (char *)NULL;
 	files = n;
