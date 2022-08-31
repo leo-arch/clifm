@@ -593,8 +593,10 @@ rl_accept_suggestion(int count, int key)
 
 	rl_delete_text(suggestion.offset, rl_end);
 	rl_point = suggestion.offset;
-	if (highlight == 1 && accept_first_word == 0)
+	if (highlight == 1 && accept_first_word == 0) {
+		cur_color = tx_c;
 		rl_redisplay();
+	}
 
 	if (accept_first_word_last == 1)
 		accept_first_word = 0;
