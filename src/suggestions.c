@@ -164,7 +164,8 @@ clear_suggestion(const int free_sug)
 //		get_cursor_position(&curcol, &currow);
 		if (highlight == 0)
 			rl_redisplay();
-		curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
+//		curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
+		curcol = prompt_offset + (int)wc_xstrlen(rl_line_buffer);
 		while (curcol > term_cols)
 			curcol -= term_cols;
 // TESTING CURSOR POSITION
@@ -363,17 +364,17 @@ set_cursor_position(const int baej)
 }
 
 static inline int
-check_conditions(const char *str, const size_t offset, const size_t str_len,
-		int *baej, size_t *slines)
+check_conditions(const size_t offset, const size_t wlen, int *baej, size_t *slines)
 {
-	if (offset > str_len)
+	if (offset > wlen)
 		return EXIT_FAILURE;
 
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold. If length is zero (invalid wide char), or if
 	 * it equals ARG_MAX, in which case we most probably have a truncated
 	 * suggestion (mbstowcs will convert only up to ARG_MAX chars), exit */
-	size_t suggestion_len = wc_xstrlen(str + offset);
+//	size_t suggestion_len = wc_xstrlen(str + offset);
+	size_t suggestion_len = wlen - offset;
 	if (suggestion_len == 0 || suggestion_len == ARG_MAX
 	|| (int)suggestion_len > (term_cols * term_rows) - curcol)
 		return EXIT_FAILURE;
@@ -445,14 +446,15 @@ print_suggestion(const char *str, size_t offset, char *color)
 // TESTING CURSOR POSITION
 	if (highlight == 0)
 		rl_redisplay();
-	curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
+//	curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
+	curcol = prompt_offset + (rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0);
 	while (curcol > term_cols)
 		curcol -= term_cols;
 // TESTING CURSOR POSITION
 
-	size_t str_len = strlen(str), slines = 0;
+	size_t str_len = wc_xstrlen(str), slines = 0;
 
-	if (check_conditions(str, offset, str_len, &baej, &slines) == EXIT_FAILURE) {
+	if (check_conditions(offset, str_len, &baej, &slines) == EXIT_FAILURE) {
 // TESTING!
 		/* The highlight function modified the terminal idea of the cursor position,
 		 * so that we need to correct it before exiting */
@@ -467,7 +469,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	 * reprint the suggestion buffer, in which case it is already stored */
 	if (str != suggestion_buf)
 		/* Store the suggestion (used later by rl_accept_suggestion (keybinds.c) */
-		suggestion_buf = savestring(str, str_len);
+		suggestion_buf = savestring(str, strlen(str));
 
 	set_cursor_position(baej);
 	_print_suggestion(str, offset, color);
