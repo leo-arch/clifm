@@ -922,8 +922,11 @@ initialize_prompt_data(void)
 	args_n = 0;
 	curhistindex = current_hist_n;
 #ifndef _NO_SUGGESTIONS
-	if (wrong_cmd == 1)
+	if (wrong_cmd == 1) {
+		rl_delete_text(0, rl_end);
+		rl_point = rl_end = 0;
 		recover_from_wrong_cmd();
+	}
 #endif
 
 	/* Print error messages */
