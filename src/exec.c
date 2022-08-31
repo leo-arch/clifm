@@ -1538,7 +1538,7 @@ check_auto_first(char **args)
 
 	char *tmp = deq_str ? deq_str : args[0];
 	size_t len = strlen(tmp);
-	if (tmp[len - 1] == '/') tmp[len - 1] = '\0';
+	if (len > 0 && tmp[len - 1] == '/') tmp[len - 1] = '\0';
 
 	if (autocd && cdpath_n && !args[1]
 	&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
@@ -1987,6 +1987,27 @@ is_path(char *str)
 	return 1;
 }
 
+// TESTING BYPASS ALIAS
+/* Replace "\S" by "S" in the memory address pointed to by s */
+static void
+remove_backslash(char **s)
+{
+	if (!*s || !*(*s))
+		return;
+
+	char *p = *s;
+
+	while (*(*s)) {
+		*(*s) = *(*s + 1);
+		(*s)++;
+	}
+
+	*(*s) = '\0';
+
+	*s = p;
+}
+// TESTING BYPASS ALIAS
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2005,6 +2026,12 @@ exec_cmd(char **comm)
 
 	int old_exit_code = exit_code;
 	exit_code = EXIT_SUCCESS;
+
+// TESTING BYPASS ALIAS
+	/* Remove backslash in front of command names: used to bypass alias names */
+	if (*comm[0] == '\\' && *(comm[0] + 1))
+		remove_backslash(&comm[0]);
+// TESTING BYPASS ALIAS
 
 	/* Skip comments */
 	if (check_comments(comm[0]) == EXIT_SUCCESS)

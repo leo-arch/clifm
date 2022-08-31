@@ -25,7 +25,6 @@
 #ifndef SUGGESTIONS_H
 #define SUGGESTIONS_H
 
-int check_cmds(const char *str, const size_t len, const int print);
 void clear_suggestion(const int free_sug);
 void free_suggestion(void);
 void print_suggestion(char *str, size_t offset, char *color);

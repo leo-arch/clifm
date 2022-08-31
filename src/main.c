@@ -851,21 +851,21 @@ run_main_loop(void)
 		/* 4) Execute input string */
 		char **alias_cmd = check_for_alias(cmd);
 		if (alias_cmd) {
-			/* If an alias is found, check_for_alias() frees CMD
-			 * and returns ALIAS_CMD in its place to be executed by
-			 * exec_cmd() */
+			/* If an alias is found, check_for_alias() frees CMD and returns
+			 * ALIAS_CMD in its place to be executed by exec_cmd() */
 			exec_cmd(alias_cmd);
 
 			for (i = 0; alias_cmd[i]; i++)
 				free(alias_cmd[i]);
 			free(alias_cmd);
-		} else {
-			exec_cmd(cmd);
-			i = (int)args_n + 1;
-			while (--i >= 0)
-				free(cmd[i]);
-			free(cmd);
+			continue;
 		}
+
+		exec_cmd(cmd);
+		i = (int)args_n + 1;
+		while (--i >= 0)
+			free(cmd[i]);
+		free(cmd);
 	}
 }
 

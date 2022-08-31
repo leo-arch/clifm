@@ -591,6 +591,12 @@ rl_accept_suggestion(int count, int key)
 		}
 	}
 
+// TESTING BYPASS ALIAS
+	int bypass_alias = 0;
+	if (rl_line_buffer && *rl_line_buffer == '\\' && *(rl_line_buffer + 1))
+		bypass_alias = 1;
+// TESTING BYPASS ALIAS
+
 	rl_delete_text(suggestion.offset, rl_end);
 	rl_point = suggestion.offset;
 	if (highlight == 1 && accept_first_word == 0) {
@@ -685,6 +691,10 @@ rl_accept_suggestion(int count, int key)
 	}
 
 	default:
+// TESTING BYPASS ALIAS
+		if (bypass_alias == 1)
+			rl_insert_text("\\");
+// TESTING BYPASS ALIAS
 		my_insert_text(suggestion_buf, NULL, 0);
 		rl_stuff_char(' ');
 		break;

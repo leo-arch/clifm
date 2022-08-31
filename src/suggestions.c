@@ -1087,28 +1087,36 @@ print_internal_cmd_suggestion(char *str, size_t len, const int print)
 }
 
 /* Check STR against a list of command names, both internal and in PATH */
-int
-check_cmds(char *str, const size_t len, const int print)
+static int
+check_cmds(char *str, size_t len, const int print)
 {
-	if (len == 0)
+	if (len == 0 || !str || !*str)
 		return NO_MATCH;
+
+// TESTING BYPASS ALIAS
+	char *cmd = str;
+	if (cmd && *cmd == '\\' && *(cmd + 1)) {
+		cmd++;
+		len--;
+	}
+// TESTING BYPASS ALIAS
 
 	size_t i;
 	for (i = 0; bin_commands[i]; i++) {
-		if (!bin_commands[i] || *str != *bin_commands[i])
+		if (!bin_commands[i] || *cmd != *bin_commands[i])
 			continue;
 
 		if (!print) {
-			if (strcmp(str, bin_commands[i]) == 0)
+			if (strcmp(cmd, bin_commands[i]) == 0)
 				return FULL_MATCH;
 			continue;
 		}
 
 		/* Let's check the 2nd char as well before calling strcmp() */
-		if (len > 1 && *(bin_commands[i] + 1) && *(str + 1) != *(bin_commands[i] + 1))
+		if (len > 1 && *(bin_commands[i] + 1) && *(cmd + 1) != *(bin_commands[i] + 1))
 			continue;
 
-		if (strncmp(str, bin_commands[i], len) != 0)
+		if (strncmp(cmd, bin_commands[i], len) != 0)
 			continue;
 
 		int ret = print_cmd_suggestion(i, len);
@@ -1117,7 +1125,7 @@ check_cmds(char *str, const size_t len, const int print)
 		return ret;
 	}
 
-	return print_internal_cmd_suggestion(str, len, print);
+	return print_internal_cmd_suggestion(cmd, len, print);
 }
 
 static int

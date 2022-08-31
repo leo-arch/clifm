@@ -1598,6 +1598,12 @@ AFTER_USUAL_COMPLETION:
 				replacement = r;
 			}
 
+// TESTING BYPASS ALIAS
+			/* Let's keep the backslash, used to bypass alias names */
+			if (c == TCMP_CMD && text && *text == '\\' && *(text + 1))
+				start++;
+// TESTING BYPASS ALIAS
+
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);
 			rl_point = start;
@@ -1759,8 +1765,8 @@ DISPLAY_MATCHES:
 
 			len = (int)i - 1;
 
-			/* If there are multiple items, ask the user if she
-			   really wants to see them all */
+			/* If there are multiple items, ask the user if she really
+			 * wants to see them all */
 			if (len >= rl_completion_query_items) {
 				putchar('\n');
 #ifndef _NO_HIGHLIGHT
