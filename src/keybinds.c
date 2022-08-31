@@ -495,7 +495,7 @@ my_insert_text(char *text, char *s, const char _s)
 					q[l] = '\0';
 					l = 0;
 					rl_insert_text(q);
-					rl_redisplay();
+//					rl_redisplay();
 				}
 				continue;
 			}
