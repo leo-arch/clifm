@@ -29,8 +29,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef __OpenBSD__
-#include <strings.h>
+#if defined(__OpenBSD__)
+# include <strings.h>
 #endif
 #include <unistd.h>
 #include <errno.h>
@@ -39,15 +39,15 @@
 #include <pwd.h>
 #include <wchar.h>
 
-#ifdef __linux__
-#include <sys/capability.h>
+#if defined(__linux__)
+# include <sys/capability.h>
 #endif
 
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__)
 typedef char *rl_cpvfunc_t;
-#include <ereadline/readline/readline.h>
+# include <ereadline/readline/readline.h>
 #else
-#include <readline/readline.h>
+# include <readline/readline.h>
 #endif
 
 #include "aux.h"
@@ -59,7 +59,7 @@ typedef char *rl_cpvfunc_t;
 #include "prompt.h"
 
 #ifndef _NO_HIGHLIGHT
-#include "highlight.h"
+# include "highlight.h"
 #endif
 
 #define NO_MATCH      0
@@ -75,10 +75,11 @@ char *last_word = (char *)NULL;
 int last_word_offset = 0;
 int point_is_first_word = 0;
 
+/*
 #ifndef _NO_HIGHLIGHT
-/* Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
- * in the current input string */
-/*static void
+// Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
+// in the current input string
+static void
 change_word_color(const char *_last_word, const int offset, const char *color)
 {
 	int bk = rl_point;
@@ -90,8 +91,8 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 	rl_insert_text(_last_word);
 	rl_point = bk;
 	fputs("\x1b[?25h", stdout);
-} */
-#endif
+}
+#endif */
 
 int
 recover_from_wrong_cmd(void)
@@ -144,14 +145,14 @@ free_suggestion(void)
 void
 clear_suggestion(const int free_sug)
 {
-	if (rl_end > rl_point && highlight == 0) {
+	if (rl_end > rl_point) { //&& highlight == 0) {
 		MOVE_CURSOR_RIGHT(rl_end - rl_point);
 		fflush(stdout);
 	}
 
 	ERASE_TO_RIGHT;
 
-	if (rl_end > rl_point && highlight == 0) {
+	if (rl_end > rl_point) { //&& highlight == 0) {
 		MOVE_CURSOR_LEFT(rl_end - rl_point);
 		fflush(stdout);
 	}
@@ -161,10 +162,19 @@ clear_suggestion(const int free_sug)
 
 // TESTING CURSOR POSITION
 //		get_cursor_position(&curcol, &currow);
-		if (highlight == 0)
+		if (highlight == 0 && rl_point == rl_end)
 			rl_redisplay();
 //		curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
+		char c = '\0';
+		/* RL_ISSTATE(RL_STATE_MOREINPUT) == del key; backspace otherwise */
+		int n = RL_ISSTATE(RL_STATE_MOREINPUT) ? 0 : 1;
+		if (rl_end > rl_point) {
+			c = rl_line_buffer[rl_point + n];
+			rl_line_buffer[rl_point + n] = '\0';
+		}
 		curcol = prompt_offset + (int)wc_xstrlen(rl_line_buffer);
+		if (rl_end > rl_point)
+			rl_line_buffer[rl_point + n] = c;
 		while (curcol > term_cols)
 			curcol -= term_cols;
 // TESTING CURSOR POSITION
@@ -198,14 +208,20 @@ clear_suggestion(const int free_sug)
 	}
 }
 
+/* THIS FUNCTION SHOULD BE REMOVED */
 void
 remove_suggestion_not_end(void)
 {
-	MOVE_CURSOR_RIGHT(rl_end - rl_point);
-	fflush(stdout);
+//	if (highlight != 0) {
+//		MOVE_CURSOR_RIGHT(rl_end - rl_point);
+//		fflush(stdout);
+//	}
+
+//	ERASE_TO_RIGHT;
 	clear_suggestion(CS_FREEBUF);
-	MOVE_CURSOR_LEFT(rl_end - rl_point);
-	fflush(stdout);
+//	MOVE_CURSOR_LEFT(rl_end - rl_point);
+//	fflush(stdout);
+//	fflush(stdout); sleep(3);
 }
 
 // TESTING CURSOR POSITION
@@ -698,6 +714,7 @@ get_print_status(const char *str, const char *match, const size_t len)
 
 	return PARTIAL_MATCH;
 }
+
 static int
 check_completions(char *str, size_t len, const unsigned char c, const int print)
 {
