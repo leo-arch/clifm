@@ -986,6 +986,8 @@ prompt(void)
 /*	if (right_prompt && *right_prompt)
 		print_right_prompt(); */
 
+	fputs(UNHIDE_CURSOR, stdout);
+
 	/* Print the prompt and get user input */
 	char *input = (char *)NULL;
 	input = readline(the_prompt);

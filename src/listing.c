@@ -29,31 +29,31 @@
 #include <sys/statvfs.h>
 #include <sys/types.h>
 #include <unistd.h>
-#ifdef __linux__
+#if defined(__linux__)
 # include <sys/capability.h>
 #endif
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__)
 # include <strings.h>
 #endif
 
 #include <glob.h>
 
-#ifdef _LIST_SPEED
+#if defined(_LIST_SPEED)
 # include <time.h>
 #endif
 
-#ifdef TOURBIN_QSORT
+#if defined(TOURBIN_QSORT)
 # include "qsort.h"
 # define ENTLESS(i, j) (entrycmp(file_info + (i), file_info + (j)) < 0)
 # define ENTSWAP(i, j) (swap_ent((i), (j)))
 # define ENTSORT(file_info, n, entrycmp) QSORT((n), ENTLESS, ENTSWAP)
 #else
 # define ENTSORT(file_info, n, entrycmp) qsort((file_info), (n), sizeof(*(file_info)), (entrycmp))
-#endif
+#endif /* TOURBIN_QSORT */
 
 #include "aux.h"
 #include "colors.h"
@@ -69,12 +69,12 @@
 # include "icons.h"
 #endif
 
-#ifdef _PALAND_PRINTF
+#if defined(_PALAND_PRINTF)
 # include "printf.h"
-#define xprintf printf_
+# define xprintf printf_
 #else
 # define xprintf printf
-#endif
+#endif /* _PALAND_PRINTF */
 
 #include <readline/readline.h>
 
@@ -106,7 +106,7 @@ swap_ent(size_t id1, size_t id2)
 	*pdent1 = *pdent2;
 	*pdent2 = *(&_dent);
 }
-#endif
+#endif /* TOURBIN_QSORT */
 
 /* Set the color of the dividing line: DL, is the color code is set,
  * or the color of the current workspace if not */
@@ -317,8 +317,6 @@ get_ext_icon(const char *restrict ext, int n)
 static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
-	if (xargs.list_and_quit != 1)
-		fputs(UNHIDE_CURSOR, stdout);
 	if (close_dir && closedir(dir) == -1)
 		return EXIT_FAILURE;
 
@@ -425,20 +423,19 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 static void
 set_events_checker(void)
 {
-#ifdef LINUX_INOTIFY
+#if defined(LINUX_INOTIFY)
 	reset_inotify();
-
 #elif defined(BSD_KQUEUE)
 	if (event_fd >= 0) {
 		close(event_fd);
 		event_fd = -1;
 		watch = 0;
 	}
-#if defined(O_EVTONLY)
+# if defined(O_EVTONLY)
 	event_fd = open(workspaces[cur_ws].path, O_EVTONLY);
-#else
+# else
 	event_fd = open(workspaces[cur_ws].path, O_RDONLY);
-#endif
+# endif
 	if (event_fd >= 0) {
 		/* Prepare for events */
 		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
@@ -1765,7 +1762,7 @@ END:
 
 #ifdef _LIST_SPEED
 	clock_t end = clock();
-	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
+	printf("list_dir time: %f\n", (double)(end - start) / CLOCKS_PER_SEC);
 #endif
 
 	return exit_code;
@@ -1892,8 +1889,11 @@ list_dir(void)
 		trim.len = 0;
 	}
 
+	/* Hide the cursor to minimize flickering: it will be unhidden immediately
+	 * before printing the next prompt (prompt.c) */
 	if (xargs.list_and_quit != 1)
 		fputs(HIDE_CURSOR, stdout);
+
 	reset_stats();
 	get_term_size();
 
@@ -1974,13 +1974,13 @@ list_dir(void)
 			stats.unstat++;
 		}
 
-#ifdef _DIRENT_HAVE_D_TYPE
+#if defined(_DIRENT_HAVE_D_TYPE)
 		if (only_dirs == 1 && ent->d_type != DT_DIR
 		&& (ent->d_type != DT_LNK || get_link_ref(ename) != S_IFDIR))
 #else
 		if (stat_ok == 1 && only_dirs == 1 && !S_ISDIR(attr.st_mode)
 		&& (!S_ISLNK(attr.st_mode) || get_link_ref(ename) != S_IFDIR))
-#endif
+#endif /* _DIRENT_HAVE_D_TYPE */
 			continue;
 
 		if (count > ENTRY_N) {
@@ -2038,11 +2038,11 @@ list_dir(void)
 			break;
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
 		case SBTIME:
-# ifdef __OpenBSD__
+# if defined(__OpenBSD__)
 			file_info[n].time = stat_ok ? (time_t)attr.__st_birthtim.tv_sec : 0;
 # else
 			file_info[n].time = stat_ok ? (time_t)attr.st_birthtime : 0;
-# endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
+# endif /* __OpenBSD__ */
 			break;
 #elif defined(_STATX)
 		case SBTIME: {
@@ -2054,7 +2054,7 @@ list_dir(void)
 		} break;
 #else
 		case SBTIME: file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0; break;
-#endif /* _STATX */
+#endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
 		case SCTIME: file_info[n].time = stat_ok ? (time_t)attr.st_ctime : 0; break;
 		case SMTIME: file_info[n].time = stat_ok ? (time_t)attr.st_mtime : 0; break;
 		default: file_info[n].time = 0; break;
@@ -2328,7 +2328,7 @@ END:
 
 #ifdef _LIST_SPEED
 	clock_t end = clock();
-	printf("list_dir time: %f\n", (double)(end-start) / CLOCKS_PER_SEC);
+	printf("list_dir time: %f\n", (double)(end - start) / CLOCKS_PER_SEC);
 #endif
 
 	return exit_code;
