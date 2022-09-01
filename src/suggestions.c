@@ -69,7 +69,6 @@ typedef char *rl_cpvfunc_t;
 #define CHECK_MATCH 0
 #define PRINT_MATCH 1
 
-//#define BAEJ_OFFSET 2
 #define BAEJ_OFFSET 1
 
 char *last_word = (char *)NULL;
@@ -240,14 +239,15 @@ restore_cursor_position(const size_t slines)
 } */
 
 static inline void
-restore_cursor_position(const size_t slines, const size_t len, const size_t offset, const int baej)
+//restore_cursor_position(const size_t slines, const size_t len, const size_t offset, const int baej)
+restore_cursor_position(const size_t slines)
 {
-/*	if (slines > 1)
+	if (slines > 1)
 		MOVE_CURSOR_UP((int)slines - 1);
-	// SET_CURSOR_COL (which uses HPA escape sequence) is not supported on some consoles
-	SET_CURSOR_COL(curcol); */
+	MOVE_CURSOR_LEFT(term_cols);
+	MOVE_CURSOR_RIGHT(curcol > 0 ? curcol - 1 : curcol);
 
-	if (slines > 1) {
+/*	if (slines > 1) {
 		MOVE_CURSOR_UP((int)slines - 1);
 		MOVE_CURSOR_LEFT(term_cols);
 		MOVE_CURSOR_RIGHT(curcol > 0 ? curcol - 1 : curcol);
@@ -258,9 +258,10 @@ restore_cursor_position(const size_t slines, const size_t len, const size_t offs
 		if (curcol + n > term_cols && n > 0)
 			n--;
 		MOVE_CURSOR_LEFT(n);
-	}
+	} */
 }
 // TESTING CURSOR POSITION
+
 /*
 static inline void
 correct_offset(size_t *offset)
@@ -475,8 +476,8 @@ print_suggestion(const char *str, size_t offset, char *color)
 	_print_suggestion(str, offset, color);
 
 // TESTING CURSOR POSITION
-//	restore_cursor_position(slines);
-	restore_cursor_position(slines, str_len, offset, baej);
+	restore_cursor_position(slines);
+//	restore_cursor_position(slines, str_len, offset, baej);
 // TESTING CURSOR POSITION
 
 	/* Store the amount of lines taken by the current command line (plus the
