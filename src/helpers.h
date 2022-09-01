@@ -1168,7 +1168,6 @@ extern size_t
 	jump_n,
 	kbinds_n,
 	longest,
-	longest_fc, /* Amount of digits of the files counter of longest directory */
 	msgs_n,
 	nwords,
 	P_tmpdir_len,

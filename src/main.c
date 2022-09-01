@@ -265,7 +265,6 @@ size_t
 	jump_n = 0,
 	kbinds_n = 0,
 	longest = 0,
-	longest_fc = 0,
 	msgs_n = 0,
 	nwords = 0,
 	P_tmpdir_len = 0,

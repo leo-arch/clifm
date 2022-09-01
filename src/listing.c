@@ -84,6 +84,9 @@
 #define DIR_IN_NAME ".cfm.in"
 #define DIR_OUT_NAME ".cfm.out"
 
+/* Amount of digits of the files counter of the longest directory */
+size_t longest_fc = 0;
+
 /* Struct to store information about trimmed file names. Used only when
  * Unicode is disabled */
 struct trim_t {
@@ -462,10 +465,6 @@ get_longest_filename(const int n, const int pad)
 		if (file_info[i].len > (size_t)max_name_len)
 			file_info[i].len = (size_t)max_name_len;
 
-/*		if (long_view && min_name_trim != UNSET
-		&& file_info[i].len < (size_t)min_name_trim)
-			file_info[i].len = (size_t)min_name_trim; */
-
 		total_len = (size_t)pad + 1 + file_info[i].len;
 
 		file_info[i].len = blen;
@@ -520,11 +519,13 @@ get_longest_filename(const int n, const int pad)
 	 *    longest_dirname/13
 	 *    very_long_file_na~
 	 * instead of
+	 *    longest_dirname/13
 	 *    very_long_file_~
 	 * */
+
 	longest_fc = 0;
 	if (max_name_len != UNSET && file_info[longest_index].dir == 1) {
-		if (file_info[longest_index].filesn > 0 && files_counter == 1)
+		if (file_info[longest_index].filesn > 0 && files_counter == 1) {
 			/* We add 1 here to count the slash between the dir name
 			 * and the files counter too. However, in doing this the space
 			 * between the trimmed file name and the next column is too
@@ -532,6 +533,12 @@ get_longest_filename(const int n, const int pad)
 			 * to relax a bit the space between columns */
 /*			longest_fc = DIGINUM(file_info[longest_index].filesn) + 1; */
 			longest_fc = DIGINUM(file_info[longest_index].filesn);
+			size_t t = (size_t)pad + (size_t)max_name_len + 1 + longest_fc;
+			if (t > longest)
+				longest_fc -= t - longest;
+			if ((int)longest_fc < 0)
+				longest_fc = 0;
+		}
 /*		else
 			longest_fc = 1; */
 	}
@@ -1710,7 +1717,7 @@ list_dir_light(void)
 		goto END;
 	}
 
-	int pad = max_files != UNSET ? DIGINUM(max_files) : DIGINUM(files + 1);
+	int pad = max_files != UNSET ? DIGINUM(max_files) : DIGINUM(files);
 
 	if (sort)
 		ENTSORT(file_info, n, entrycmp);
@@ -2264,7 +2271,7 @@ list_dir(void)
 		goto END;
 	}
 
-	int pad = max_files != UNSET ? DIGINUM(max_files) : DIGINUM(files + 1);
+	int pad = max_files != UNSET ? DIGINUM(max_files) : DIGINUM(files);
 
 		/* #############################################
 		 * #    SORT FILES ACCORDING TO SORT METHOD    #

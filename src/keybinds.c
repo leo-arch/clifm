@@ -78,6 +78,13 @@ typedef char *rl_cpvfunc_t;
 
 int accept_first_word = 0;
 
+static void
+xrl_reset_line_state(void)
+{
+	fputs(UNHIDE_CURSOR, stdout);
+	rl_reset_line_state();
+}
+
 int
 kbinds_reset(void)
 {
@@ -349,7 +356,7 @@ int rl_toggle_max_filename_len(int count, int key)
 	else
 		print_reload_msg(_("Max name length set back to %d\n"), max_name_len);
 
-	rl_reset_line_state();
+	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
 
@@ -850,7 +857,7 @@ rl_long(int count, int key)
 
 	print_reload_msg(_("Long view mode %s\n"),
 		long_view == 1 ? _("enabled") : _("disabled"));
-	rl_reset_line_state();
+	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
 
@@ -876,7 +883,7 @@ rl_dirs_first(int count, int key)
 
 	print_reload_msg(_("Directories first %s\n"),
 		list_dirs_first ? "enabled" : "disabled");
-	rl_reset_line_state();
+	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
 
@@ -919,7 +926,7 @@ rl_hidden(int count, int key)
 	}
 
 	print_reload_msg(_("Hidden files %s\n"), show_hidden ? "enabled" : "disabled");
-	rl_reset_line_state();
+	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
 
@@ -1072,7 +1079,7 @@ rl_sort_next(int count, int key)
 		sort_switch = 0;
 	}
 
-	rl_reset_line_state();
+	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
 
@@ -1098,7 +1105,7 @@ rl_sort_previous(int count, int key)
 		sort_switch = 0;
 	}
 
-	rl_reset_line_state();
+	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
 
@@ -1125,7 +1132,7 @@ rl_lock(int count, int key)
 	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 	rl_prep_terminal(0);
-	rl_reset_line_state();
+	xrl_reset_line_state();
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -1597,7 +1604,7 @@ rl_onlydirs(int count, int key)
 
 	print_reload_msg(_("Only directories %s\n"), only_dirs
 		? _("enabled") : _("disabled"));
-	rl_reset_line_state();
+	xrl_reset_line_state();
 	return exit_status;
 }
 
@@ -1786,7 +1793,7 @@ rl_toggle_disk_usage(int count, int key)
 
 	print_reload_msg("Disk usage analyzer %s\n",
 		xargs.disk_usage_analyzer == 1 ? "enabled" : "disabled");
-	rl_reset_line_state();
+	xrl_reset_line_state();
 	return exit_status;
 }
 
@@ -1897,7 +1904,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	reload_dirlist();
 	print_reload_msg("Switched to %s names\n",
 		xargs.virtual_dir_full_paths == 1 ? "long" : "short");
-	rl_reset_line_state();
+	xrl_reset_line_state();
 
 	return EXIT_SUCCESS;
 }
