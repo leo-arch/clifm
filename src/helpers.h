@@ -549,9 +549,9 @@ extern int watch;
 #define MOVE_CURSOR_DOWN(n)   printf("\x1b[%dB", (n))  /* CUD */
 #define MOVE_CURSOR_RIGHT(n)  printf("\x1b[%dC", (n))  /* CUF */
 #define MOVE_CURSOR_LEFT(n)   printf("\x1b[%dD", (n))  /* CUB */
-#define ERASE_TO_RIGHT        fputs("\x1b[0K", stdout) /* EL */
-#define ERASE_TO_LEFT         fputs("\x1b[1K", stdout) /* EL */
-#define ERASE_FULL_LINE       fputs("\x1b[2K", stdout) /* EL */
+#define ERASE_TO_RIGHT        fputs("\x1b[0K", stdout) /* EL0 */
+#define ERASE_TO_LEFT         fputs("\x1b[1K", stdout) /* EL1 */
+//#define ERASE_FULL_LINE       fputs("\x1b[2K", stdout) /* EL2 */
 
 #define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s> %s", (offset), (color), NC)
 
