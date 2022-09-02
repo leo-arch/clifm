@@ -606,6 +606,7 @@ is_internal_f(const char *restrict cmd)
 		{"le", 2},
 		{"m", 1},
 // TESTING MIME!
+		{"mime", 4},
 		{"mm", 2},
 // TESTING MIME!
 		{"mv", 2},
