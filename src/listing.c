@@ -163,6 +163,10 @@ print_div_line(void)
 			int i;
 			for (i = (int)(term_cols / len); i; i--)
 				fputs(div_line, stdout);
+			/* Some terminals do not perform automatic carriage return (AM) when
+			 * reaching the right end of the line. Let's do it ourselves */
+			if (xargs.vt100 == 1)
+				putchar('\n');
 		} else {
 			/* Print DIV_LINE exactly */
 			puts(div_line);

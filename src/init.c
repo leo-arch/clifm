@@ -1533,17 +1533,18 @@ external_arguments(int argc, char **argv)
 		{"virtual-dir-full-paths", no_argument, 0, 57},
 		{"virtual-dir", required_argument, 0, 58},
 		{"desktop-notifications", no_argument, 0, 59},
+		{"vt100", no_argument, 0, 60},
 #ifdef __linux__
-		{"si", no_argument, 0, 60},
+		{"si", no_argument, 0, 61},
 #endif
 	    {0, 0, 0, 0}
 	};
 
 	/* Increment whenever a new (only) long option is added */
 #ifdef __linux__
-	int long_opts = 60;
+	int long_opts = 61;
 #else
-	int long_opts = 59;
+	int long_opts = 60;
 #endif
 	int optc;
 	/* Variables to store arguments to options */
@@ -1781,8 +1782,18 @@ RUN:
 
 		case 59: xargs.desktop_notifications = desktop_notifications = 1; break;
 
+		case 60:
+			xargs.vt100 = 1;
+			xargs.clear_screen = clear_screen = 0;
+			fzftab = 0; tabmode = STD_TAB;
+/*			xargs.colorize = colorize = 0;
+#ifndef _NO_HIGHLIGHT
+			xargs.highlight = highlight = 0;
+#endif */
+			break;
+
 #ifdef __linux__
-		case 60: xargs.si = 1; break;
+		case 61: xargs.si = 1; break;
 #endif
 		case 'a': show_hidden = xargs.hidden = 0; break;
 		case 'A': show_hidden = xargs.hidden = 1; break;
@@ -2169,6 +2180,7 @@ unset_xargs(void)
 #endif
 	xargs.unicode = UNSET;
 	xargs.virtual_dir_full_paths = UNSET;
+	xargs.vt100 = UNSET;
 	xargs.welcome_message = UNSET;
 	xargs.warning_prompt = UNSET;
 }
@@ -3378,6 +3390,12 @@ check_options(void)
 		 * if not already set via command line */
 		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
 	}
+
+/*	if (xargs.vt100 == 1) {
+		clear_screen = 0;
+		fzftab = 0;
+		tabmode = STD_TAB;
+	} */
 
 	reset_opts();
 }

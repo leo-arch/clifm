@@ -403,7 +403,7 @@ check_conditions(const size_t offset, const size_t wlen, int *baej, size_t *slin
 //	*slines = calculate_suggestion_lines(baej, suggestion_len);
 // TESTING CURSOR POSITION
 
-	if (*slines > (size_t)term_rows)
+	if (*slines > (size_t)term_rows || (xargs.vt100 == 1 && *slines > 1))
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
