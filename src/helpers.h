@@ -539,7 +539,6 @@ extern int watch;
 # define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
 #else
 # define CLEAR fputs("\x1b[H\x1b[2J", stdout); /* CLEAR */
-//# define CLEAR_VT100 fputs("50\x1b[H\x1b[J", stdout); /* CLEAR */
 #endif
 
 //#define SET_CURSOR(y,x)            printf("\x1b[%d;%dH", (y), (x)) /* CUP */

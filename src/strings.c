@@ -1843,7 +1843,9 @@ parse_input_str(char *str)
 	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
 	substr[args_n + 1] = (char *)NULL;
 
-	if (!is_internal(substr[0]) && !is_action_name(substr[0]))
+	int is_action = is_action_name(substr[0]);
+	if (is_internal(substr[0]) == 0 && is_action == 0)
+//	if (!is_internal(substr[0]) && !is_action_name(substr[0]))
 		return substr;
 
 	/* #############################################################
@@ -1868,7 +1870,8 @@ parse_input_str(char *str)
 #endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
 	for (i = 0; substr[i]; i++) {
-
+		if (is_action == 1 && i == 0)
+			continue;
 		/* Do not perform any of the expansions below for selected
 		 * elements: they are full path file names that, as such, do not
 		 * need any expansion */

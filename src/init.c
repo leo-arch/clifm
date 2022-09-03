@@ -1786,10 +1786,6 @@ RUN:
 			xargs.vt100 = 1;
 			xargs.clear_screen = clear_screen = 0;
 			fzftab = 0; tabmode = STD_TAB;
-/*			xargs.colorize = colorize = 0;
-#ifndef _NO_HIGHLIGHT
-			xargs.highlight = highlight = 0;
-#endif */
 			break;
 
 #ifdef __linux__
