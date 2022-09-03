@@ -194,6 +194,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - **NEW**: Flat-view for the [`fzfsel` plugin](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) via the `-f` option
   - **NEW**: [Improved VT100 compatibility via the `--vt100` switch](https://github.com/leo-arch/clifm/wiki/Extra#clifm-running-on-a-dec-vt100-terminal-1978)
   - **NEW**: [Cygwin support](https://github.com/leo-arch/clifm/wiki/Introduction#small_blue_diamond-d-cygwin)
   - **NEW**: Improved performance/portability of the suggestions system: no more slow/non-portable `CPR`-`CUP` [escape sequences](https://www.xfree86.org/current/ctlseqs.html)! These were replaced by 100% made in-house cursor position calculation plus basic/portable escape sequences: `CUU`, `CUD`, `CUF`, and `CUB`.
