@@ -1906,7 +1906,7 @@ T{
 T}	Navigate/select/preview files	fzfnav.sh/BFG.sh	See the section below
 T{
 .BR *
-T}	Select files	fzfsel.sh	fzf
+T}	Select files (includes flat view)	fzfsel.sh	fzf, find
 T{
 .BR **
 T}	Deselect files	fzfdesel.sh	fzf
@@ -1924,7 +1924,7 @@ T{
 T}	Jump to a directory in the jump database	jumper.sh	fzf or rofi
 T{
 .BR kbgen
-T}	Get escape codes for keybindings	kbgen.c	Needs to be compiled first (gcc -o kbgen kbgen.c -lcurses)
+T}	Get escape codes for keybindings	kbgen.c	Compile first: gcc -o kbgen kbgen.c -lcurses
 T{
 .BR kd
 T}	Decrypt a GnuPG encrypted file	decrypt.sh	gpg, tar, sed, grep
