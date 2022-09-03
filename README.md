@@ -196,6 +196,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 * `Development`:
   - **NEW**: [Improved VT100 compatibility via the `--vt100` switch](https://github.com/leo-arch/clifm/wiki/Extra#clifm-running-on-a-dec-vt100-terminal-1978)
   - **NEW**: [Cygwin support](https://github.com/leo-arch/clifm/wiki/Introduction#small_blue_diamond-d-cygwin)
+  - **NEW**: Improved performance/portability of the suggestions system: no more slow/non-portable [CPR escape sequence](https://www.xfree86.org/current/ctlseqs.html)!
 * `version 1.7 (Elaine)`:
   - [Configuration files renamed from `.cfm` to `.clifm`](https://github.com/leo-arch/clifm/wiki/Specifics#new-extension-for-configuration-files) (avoid conflict with [ColdFusion](https://en.wikipedia.org/wiki/ColdFusion_Markup_Language) files)
   - <kbd>Ctrl-l</kbd> added for screen refresh
