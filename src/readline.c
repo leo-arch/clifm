@@ -80,9 +80,10 @@ typedef char *rl_cpvfunc_t;
 # include <sys/stat.h>
 #endif
 
+/*
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 int freebsd_sc_console = 0;
-#endif /* __FreeBSD__ */
+#endif // __FreeBSD__ */
 
 #define DEL_EMPTY_LINE     1
 #define DEL_NON_EMPTY_LINE 2
@@ -3200,10 +3201,11 @@ initialize_readline(void)
 
 //	rl_event_hook = rl_signals;
 
+/*
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 	if (!(flags & GUI) && getenv("CLIFM_FREEBSD_CONSOLE_SC"))
 		freebsd_sc_console = 1;
-#endif
+#endif */
 
 	return EXIT_SUCCESS;
 }
