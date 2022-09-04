@@ -131,11 +131,11 @@ wx_parent_check(char *file)
 	int exit_status = -1, ret = -1;
 	size_t file_len = strlen(file);
 
-	if (file[file_len - 1] == '/')
+	if (file_len > 0 && file[file_len - 1] == '/')
 		file[file_len - 1] = '\0';
 
 	if (lstat(file, &attr) == -1) {
-		fprintf(stderr, _("%s: No such file or directory\n"), file);
+		fprintf(stderr, _("%s: %s\n"), file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
