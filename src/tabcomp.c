@@ -1612,7 +1612,7 @@ AFTER_USUAL_COMPLETION:
 				size_t k, l = 0;
 				size_t _start = (*replacement == '\\' && *(replacement + 1) == '~') ? 1 : 0;
 				char *cc = cur_color;
-				fputs(HIDE_CURSOR, stdout);
+				HIDE_CURSOR;
 				fputs(tx_c, stdout);
 				char t[PATH_MAX];
 				for (k = _start; replacement[k]; k++) {
@@ -1633,7 +1633,7 @@ AFTER_USUAL_COMPLETION:
 					rl_insert_text(t);
 					rl_redisplay();
 				}
-				fputs(UNHIDE_CURSOR, stdout);
+				UNHIDE_CURSOR;
 				cur_color = cc;
 				if (cur_color)
 					fputs(cur_color, stdout);
@@ -1944,7 +1944,7 @@ RESTART:
 /*			rl_point = 0;
 			recolorize_line();
 			rl_point = bk; */
-			fputs(HIDE_CURSOR, stdout);
+			HIDE_CURSOR;
 			char *ss = rl_copy_text(0, rl_end);
 			rl_delete_text(0, rl_end);
 			rl_redisplay();
@@ -1972,7 +1972,7 @@ RESTART:
 				rl_insert_text(t);
 				rl_redisplay();
 			}
-			fputs(UNHIDE_CURSOR, stdout);
+			UNHIDE_CURSOR;
 //			rl_point = rl_end = bk;
 			rl_point = bk;
 			free(ss);

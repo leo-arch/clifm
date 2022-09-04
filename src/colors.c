@@ -1927,7 +1927,8 @@ get_colorschemes(void)
 static void
 print_color_blocks(void)
 {
-	printf(NO_LINE_WRAP); /* Disable line wrap */
+	UNSET_LINE_WRAP;
+//	printf(NO_LINE_WRAP); /* Disable line wrap */
 
 	int pad = (term_cols - 24) / 2;
 	printf("\x1b[%dC\x1b[0;40m   \x1b[0m\x1b[0;41m   \x1b[0m\x1b[0;42m   "
@@ -1938,7 +1939,8 @@ print_color_blocks(void)
 		"\x1b[0m\x1b[0;105m   \x1b[0m\x1b[0;106m   \x1b[0m\x1b[0;107m   "
 		"\x1b[0m\n", pad, pad);
 
-	printf(LINE_WRAP); /* Reenable line wrap */
+	SET_LINE_WRAP;
+//	printf(LINE_WRAP); /* Reenable line wrap */
 }
 
 /* List color codes for file types used by the program */

@@ -541,19 +541,24 @@ extern int watch;
 # define CLEAR fputs("\x1b[H\x1b[2J", stdout); /* CLEAR */
 #endif
 
+#define MOVE_CURSOR_DOWN(n)   printf("\x1b[%dB", (n))  /* CUD */
+
+/* ######## Escape sequences used by the suggestions system */
 //#define SET_CURSOR(y,x)            printf("\x1b[%d;%dH", (y), (x)) /* CUP */
 // TESTING CURSOR POSITION
 //#define SET_CURSOR_COL(n)          printf("\x1b[%dG", (n)) /* HPA */
 // TESTING CURSOR POSITION
 #define MOVE_CURSOR_UP(n)     printf("\x1b[%dA", (n))  /* CUU */
-#define MOVE_CURSOR_DOWN(n)   printf("\x1b[%dB", (n))  /* CUD */
+#define MOVE_CURSOR_DOWN_1    fputs("\x1b[1B", stdout) /* CUD */
 #define MOVE_CURSOR_RIGHT(n)  printf("\x1b[%dC", (n))  /* CUF */
 #define MOVE_CURSOR_LEFT(n)   printf("\x1b[%dD", (n))  /* CUB */
 #define ERASE_TO_RIGHT        fputs("\x1b[0K", stdout) /* EL0 */
 #define ERASE_TO_LEFT         fputs("\x1b[1K", stdout) /* EL1 */
-//#define ERASE_FULL_LINE       fputs("\x1b[2K", stdout) /* EL2 */
 
 #define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s> %s", (offset), (color), NC)
+/* ######## */
+
+//#define ERASE_FULL_LINE     fputs("\x1b[2K", stdout) /* EL2 */
 
 // TESTING CURSOR POSITION
 //#define CNL            "\x1b[1E"     /* Move the cursor to beginning next line*/
@@ -562,13 +567,15 @@ extern int watch;
 //#define CPR_LEN        4
 // TESTING CURSOR POSITION
 
-#define HIDE_CURSOR    "\x1b[?25l"   /* DECTCEM */
-#define UNHIDE_CURSOR  "\x1b[?25h"
-#define SET_RVIDEO     "\x1b[?5h"    /* DECSCNM: Enable reverse video */
-#define UNSET_RVIDEO   "\x1b[?5l"
-#define LINE_WRAP      "\x1b[?7h"    /* DECAWM */
-#define NO_LINE_WRAP   "\x1b[?7l"
-#define META_SENDS_ESC "\x1b[?1036h"
+#define META_SENDS_ESC  fputs("\x1b[?1036h", stdout)
+#define HIDE_CURSOR     fputs("\x1b[?25l", stdout)   /* DECTCEM */
+#define UNHIDE_CURSOR   fputs("\x1b[?25h", stdout)
+
+#define SET_RVIDEO      fputs("\x1b[?5h", stderr)    /* DECSCNM: Enable reverse video */
+#define UNSET_RVIDEO    fputs("\x1b[?5l", stderr)
+#define SET_LINE_WRAP   fputs("\x1b[?7h", stderr)    /* DECAWM */
+#define UNSET_LINE_WRAP fputs("\x1b[?7l", stderr)
+#define RING_BELL       fputs("\007", stderr)
 
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #

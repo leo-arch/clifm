@@ -285,13 +285,16 @@ rl_ring_bell(void)
 {
 	switch(bell) {
 	case BELL_AUDIBLE:
-		fputs("\007", stderr); fflush(stderr); return;
+//		fputs("\007", stderr); fflush(stderr); return;
+		RING_BELL; fflush(stderr); return;
 
 	case BELL_FLASH:
-		fputs(SET_RVIDEO, stderr);
+//		fputs(SET_RVIDEO, stderr);
+		SET_RVIDEO;
 		fflush(stderr);
 		msleep(VISIBLE_BELL_DELAY);
-		fputs(UNSET_RVIDEO, stderr);
+//		fputs(UNSET_RVIDEO, stderr);
+		UNSET_RVIDEO;
 		fflush(stderr);
 		return;
 

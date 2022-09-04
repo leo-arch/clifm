@@ -183,7 +183,8 @@ clear_suggestion(const int free_sug)
 		while (--i > 0) {
 			/* Move the cursor to the beginning of the next line */
 // TESTING CURSOR POSITION
-			MOVE_CURSOR_DOWN(1);
+//			MOVE_CURSOR_DOWN(1);
+			MOVE_CURSOR_DOWN_1;
 			MOVE_CURSOR_LEFT(term_cols);
 			fflush(stdout);
 //			if (write(STDOUT_FILENO, CNL, CNL_LEN) <= 0) {/* Avoid compiler warning */}
@@ -435,7 +436,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 //	if (!str || !*str)
 		return;
 
-	fputs(HIDE_CURSOR, stdout);
+	HIDE_CURSOR;
 
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
@@ -480,7 +481,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 //		if (highlight == 1)// && str_len == offset)
 //			set_cursor_position(baej);
 // TESTING!
-		fputs(UNHIDE_CURSOR, stdout);
+		UNHIDE_CURSOR;
 		return;
 	}
 
@@ -505,7 +506,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	/* Store the suggestion color, in case we need to reprint it */
 	suggestion.color = color;
 
-	fputs(UNHIDE_CURSOR, stdout);
+	UNHIDE_CURSOR;
 }
 
 static inline char *
@@ -1581,7 +1582,7 @@ turn_it_wrong(void)
 	char *b = rl_copy_text(0, rl_end);
 	if (!b) return;
 
-//	fputs(HIDE_CURSOR, stdout);
+//	HIDE_CURSOR;
 	fputs(hw_c, stdout);
 	fflush(stdout);
 	cur_color = hw_c;
@@ -1595,7 +1596,7 @@ turn_it_wrong(void)
 	free(b);
 	rl_point = bk;
 
-//	fputs(UNHIDE_CURSOR, stdout);
+//	UNHIDE_CURSOR;
 }
 
 /* Switch to the warning prompt

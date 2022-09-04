@@ -81,7 +81,7 @@ int accept_first_word = 0;
 static void
 xrl_reset_line_state(void)
 {
-	fputs(UNHIDE_CURSOR, stdout);
+	UNHIDE_CURSOR;
 	rl_reset_line_state();
 }
 
@@ -444,7 +444,7 @@ my_insert_text(char *text, char *s, const char _s)
 #ifndef _NO_HIGHLIGHT
 	if (highlight == 1) {
 		/* Hide the cursor to minimize flickering */
-		fputs(HIDE_CURSOR, stdout);
+		HIDE_CURSOR;
 		/* Set text color to default */
 		fputs(tx_c, stdout);
 		cur_color = tx_c;
@@ -528,7 +528,7 @@ my_insert_text(char *text, char *s, const char _s)
 			*s = '\0';
 		}
 
-		fputs(UNHIDE_CURSOR, stdout);
+		UNHIDE_CURSOR;
 	} else
 #endif
 INSERT_TEXT:
@@ -1647,7 +1647,7 @@ print_cmdhist_line(int n, int beg_line)
 {
 	curhistindex = (size_t)n;
 
-	fputs(HIDE_CURSOR, stdout);
+	HIDE_CURSOR;
 	int rl_point_bk = rl_point;
 
 #ifndef _NO_HIGHLIGHT
@@ -1659,7 +1659,7 @@ print_cmdhist_line(int n, int beg_line)
 		rl_replace_line(history[n].cmd, 1);
 	}
 
-	fputs(UNHIDE_CURSOR, stdout);
+	UNHIDE_CURSOR;
 	rl_point = (beg_line == 1) ? rl_end : rl_point_bk;
 	cur_color = df_c;
 	fputs(df_c, stdout);

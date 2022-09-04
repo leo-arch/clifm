@@ -226,7 +226,7 @@ void
 recolorize_line(void)
 {
 	/* Hide the cursor to minimize flickering */
-	fputs(HIDE_CURSOR, stdout);
+	HIDE_CURSOR;
 
 	/* Set text color to default */
 	if (cur_color != tx_c && cur_color != hw_c && cur_color != hn_c) {
@@ -251,7 +251,7 @@ recolorize_line(void)
 		fputs(cl, stdout);
 
 	if (rl_point == 0 && rl_end == 0) {
-		fputs(UNHIDE_CURSOR, stdout);
+		UNHIDE_CURSOR;
 		return;
 	}
 
@@ -305,5 +305,5 @@ recolorize_line(void)
 EXIT:
 	free(ss);
 	rl_point = bk_point;
-	fputs(UNHIDE_CURSOR, stdout);
+	UNHIDE_CURSOR;
 }

@@ -1903,7 +1903,7 @@ list_dir(void)
 	/* Hide the cursor to minimize flickering: it will be unhidden immediately
 	 * before printing the next prompt (prompt.c) */
 	if (xargs.list_and_quit != 1)
-		fputs(HIDE_CURSOR, stdout);
+		HIDE_CURSOR;
 
 	reset_stats();
 	get_term_size();
