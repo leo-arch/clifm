@@ -35,6 +35,14 @@
 #include <unistd.h>
 #include <glob.h>
 
+/* We need rl_line_buffer in case of no matches and no metacharacter */
+#if defined(__OpenBSD__)
+typedef char *rl_cpvfunc_t;
+# include <ereadline/readline/readline.h>
+#else
+# include <readline/readline.h>
+#endif /* __OpenBSD__ */
+
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -656,9 +664,18 @@ search_regex(char **args, const int invert, const int case_sens)
 	regfree(&regex_files);
 
 	if (found == 0) {
+		int exit_status = EXIT_FAILURE;
 		if (search_flags & NO_GLOB_CHAR) {
 			search_flags &= ~NO_GLOB_CHAR;
-			fprintf(stderr, _("search: No matches found\n"));
+			char *s = (autocd == 1 && !args[1] && rl_line_buffer)
+					? strrchr(rl_line_buffer, '/') : (char *)NULL;
+			if (s && s != rl_line_buffer) {
+				/* Input string looks like a path: let's err like it was */
+				fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
+				exit_status = ENOENT;
+			} else {
+				fprintf(stderr, _("search: No matches found\n"));
+			}
 		} else {
 			fprintf(stderr, _("No matches found\n"));
 		}
@@ -675,7 +692,7 @@ search_regex(char **args, const int invert, const int case_sens)
 					workspaces[cur_ws].path, strerror(errno));
 		}
 
-		return EXIT_FAILURE;
+		return exit_status;
 	}
 
 	/* We have matches */
@@ -840,8 +857,16 @@ search_function(char **args)
 		if (ret != EXIT_FAILURE)
 			return (ret == 2 ? 1 : ret);
 		if (search_strategy == GLOB_ONLY) {
-			puts(_("search: No matches found"));
-			return EXIT_FAILURE;
+			char *s = (autocd == 1 && !args[1] && rl_line_buffer)
+					? strrchr(rl_line_buffer, '/') : (char *)NULL;
+			if (s && s != rl_line_buffer) {
+				/* Input string looks like a path: let's err like it was */
+				fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
+				return ENOENT;
+			} else {
+				puts(_("search: No matches found"));
+				return EXIT_FAILURE;
+			}
 		}
 		if (!(search_flags & NO_GLOB_CHAR))
 			puts(_("Glob: No matches found. Trying regex..."));
