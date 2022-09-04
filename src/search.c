@@ -553,8 +553,8 @@ search_regex(char **args, const int invert, const int case_sens)
 			char *deq_dir = dequote_str(search_path, 0);
 
 			if (!deq_dir) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("search: %s: Error dequoting file name\n"),
-					args[1]);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("search: %s: Error "
+					"dequoting file name\n"), args[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -674,10 +674,10 @@ search_regex(char **args, const int invert, const int case_sens)
 				fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
 				exit_status = ENOENT;
 			} else {
-				fprintf(stderr, _("search: No matches found\n"));
+				fputs(_("search: No matches found\n"), stderr);
 			}
 		} else {
-			fprintf(stderr, _("No matches found\n"));
+			fputs(_("No matches found\n"), stderr);
 		}
 		free(regex_index);
 
@@ -856,6 +856,7 @@ search_function(char **args)
 		int ret = search_glob(args, (args[0][1] == '!') ? 1 : 0);
 		if (ret != EXIT_FAILURE)
 			return (ret == 2 ? 1 : ret);
+
 		if (search_strategy == GLOB_ONLY) {
 			char *s = (autocd == 1 && !args[1] && rl_line_buffer)
 					? strrchr(rl_line_buffer, '/') : (char *)NULL;
@@ -864,12 +865,13 @@ search_function(char **args)
 				fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
 				return ENOENT;
 			} else {
-				puts(_("search: No matches found"));
+				fputs(_("search: No matches found"), stderr);
 				return EXIT_FAILURE;
 			}
 		}
+
 		if (!(search_flags & NO_GLOB_CHAR))
-			puts(_("Glob: No matches found. Trying regex..."));
+			fputs(_("Glob: No matches found. Trying regex..."), stderr);
 	}
 
 	return search_regex(args, (args[0][1] == '!') ? 1 : 0,
