@@ -36,12 +36,7 @@
 #include <glob.h>
 
 /* We need rl_line_buffer in case of no matches and no metacharacter */
-#if defined(__OpenBSD__)
-typedef char *rl_cpvfunc_t;
-# include <ereadline/readline/readline.h>
-#else
-# include <readline/readline.h>
-#endif /* __OpenBSD__ */
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "checks.h"

@@ -1027,14 +1027,22 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* Calculate the offset (left padding) of the FZF window based on
 	 * cursor position and current query string */
 	int max_finder_offset = term_cols > 20 ? term_cols - 20 : 0;
-	int finder_offset = (rl_point + prompt_offset < max_finder_offset)
-			? (rl_point + prompt_offset - 4) : 0;
+
+// TESTING FINDER OFFSET
+	int c = prompt_offset + (int)wc_xstrlen(rl_line_buffer);
+	while (c > term_cols)
+		c -= term_cols;
+	int finder_offset = (c + prompt_offset < max_finder_offset)
+			? (c + prompt_offset - 4) : 0;
+//	int finder_offset = (rl_point + prompt_offset < max_finder_offset)
+//			? (rl_point + prompt_offset - 4) : 0;
+// TESTING FINDER OFFSET
 
 // TESTING FZF OFFSET!
 	if (text && xargs.fuzzy_match == 1)
 		/* text is not NULL whenever a common prefix was added, replacing
 		 * the original query string */
-		finder_offset -= (int)(strlen(matches[0]) - strlen(text));
+		finder_offset -= (int)(wc_xstrlen(matches[0]) - wc_xstrlen(text));
 // TESTING FZF OFFSET!
 
 	if (!lw) {
@@ -1107,6 +1115,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 				finder_offset = prompt_offset + (int)(sl - rl_line_buffer) - 2;
 		}
 	}
+
+// TESTING FINDER OFFSET
+	while (finder_offset > term_cols)
+		finder_offset -= term_cols;
+
+	if (finder_offset > max_finder_offset)
+		finder_offset = 0;
+// TESTING FINDER OFFSET
 
 	if (finder_offset < 0)
 		finder_offset = 0;

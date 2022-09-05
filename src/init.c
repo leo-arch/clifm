@@ -3387,11 +3387,5 @@ check_options(void)
 		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
 	}
 
-/*	if (xargs.vt100 == 1) {
-		clear_screen = 0;
-		fzftab = 0;
-		tabmode = STD_TAB;
-	} */
-
 	reset_opts();
 }
