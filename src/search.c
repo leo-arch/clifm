@@ -177,12 +177,14 @@ search_glob(char **args, const int invert)
 	if (invert == 1)
 		tmp++;
 
+	search_flags &= ~NO_GLOB_CHAR;
 	/* Search for globbing char */
 	int glob_char_found = check_glob_char(tmp, GLOB_REGEX);
 
 	/* If search string is just "STR" (no glob chars), change it to either "*STR*"
 	 * (if search strategy is GLOB_ONLY), or ".*STR.*" */
 	if (glob_char_found == 0) {
+		search_flags |= NO_GLOB_CHAR;
 		size_t search_str_len = strlen(args[0]);
 
 		args[0] = (char *)xrealloc(args[0], (search_str_len + 5) * sizeof(char));
@@ -202,7 +204,7 @@ search_glob(char **args, const int invert)
 			tmp[slen + 1] = '*';
 			tmp[slen + 2] = '\0';
 			free(s);
-			search_flags |= NO_GLOB_CHAR;
+//			search_flags |= NO_GLOB_CHAR;
 			/* Let's return here to perform a regex search (if called from
 			 * search_function(), in search.c) */
 			return EXIT_FAILURE;
@@ -660,7 +662,8 @@ search_regex(char **args, const int invert, const int case_sens)
 
 	if (found == 0) {
 		int exit_status = EXIT_FAILURE;
-		char *s = (autocd == 1 && !args[1] && rl_line_buffer)
+		char *s = (autocd == 1 && !args[1] && (regex_found == EXIT_FAILURE
+				|| (search_flags & NO_GLOB_CHAR)) && rl_line_buffer)
 				? strrchr(rl_line_buffer, '/') : (char *)NULL;
 
 		if (s && s != rl_line_buffer) {
@@ -668,11 +671,11 @@ search_regex(char **args, const int invert, const int case_sens)
 			fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
 			exit_status = ENOENT;
 		} else if (search_flags & NO_GLOB_CHAR) {
-			search_flags &= ~NO_GLOB_CHAR;
 			fputs(_("search: No matches found\n"), stderr);
 		} else {
 			fputs(_("No matches found\n"), stderr);
 		}
+		search_flags &= ~NO_GLOB_CHAR;
 
 		free(regex_index);
 
@@ -847,14 +850,17 @@ search_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
+	int invert = args[0][1] == '!' ? 1 : 0;
+
 	if (search_strategy != REGEX_ONLY) {
-		int ret = search_glob(args, (args[0][1] == '!') ? 1 : 0);
+		int ret = search_glob(args, invert);
 		if (ret != EXIT_FAILURE)
 			return (ret == 2 ? 1 : ret);
 
 		if (search_strategy == GLOB_ONLY) {
-			char *s = (autocd == 1 && !args[1] && rl_line_buffer)
-					? strrchr(rl_line_buffer, '/') : (char *)NULL;
+			char *s = (autocd == 1 && !args[1] && (search_flags & NO_GLOB_CHAR)
+					&& rl_line_buffer) ? strrchr(rl_line_buffer, '/') : (char *)NULL;
+
 			if (s && s != rl_line_buffer) {
 				/* Input string looks like a path: let's err like it was */
 				fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
@@ -869,6 +875,5 @@ search_function(char **args)
 			fputs(_("Glob: No matches found. Trying regex...\n"), stderr);
 	}
 
-	return search_regex(args, (args[0][1] == '!') ? 1 : 0,
-		case_sens_search == 1 ? 1 : 0);
+	return search_regex(args, invert, case_sens_search == 1 ? 1 : 0);
 }
