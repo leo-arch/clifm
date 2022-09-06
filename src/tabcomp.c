@@ -965,7 +965,8 @@ clean_rl_buffer(const char *text)
 			rl_delete_text(0, rl_end);
 			rl_point = rl_end = 0;
 		}
-		ERASE_TO_RIGHT;
+		fputs("\x1b[J", stdout);
+//		ERASE_TO_RIGHT;
 	}
 
 	rl_insert_text(text);
@@ -1029,11 +1030,17 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	int max_finder_offset = term_cols > 20 ? term_cols - 20 : 0;
 
 // TESTING FINDER OFFSET
-	int c = prompt_offset + (int)wc_xstrlen(rl_line_buffer);
+	int n = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0;
+	while (n > term_cols)
+		n -= term_cols;
+	int finder_offset = n + prompt_offset < max_finder_offset
+		? (n + prompt_offset - 4) : 0;
+
+/*	int c = prompt_offset + (int)wc_xstrlen(rl_line_buffer);
 	while (c > term_cols)
 		c -= term_cols;
 	int finder_offset = (c + prompt_offset < max_finder_offset)
-			? (c + prompt_offset - 4) : 0;
+			? (c + prompt_offset - 4) : 0; */
 //	int finder_offset = (rl_point + prompt_offset < max_finder_offset)
 //			? (rl_point + prompt_offset - 4) : 0;
 // TESTING FINDER OFFSET
