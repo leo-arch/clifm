@@ -591,7 +591,7 @@ rl_accept_suggestion(int count, int key)
 			trimmed = 1;
 		} else { /* Last word: No word delimiter */
 			size_t len = strlen(suggestion_buf);
-			if (suggestion_buf[len - 1] != '/' && suggestion_buf[len - 1] != ' ')
+			if (len > 0 && suggestion_buf[len - 1] != '/' && suggestion_buf[len - 1] != ' ')
 				suggestion.type = NO_SUG;
 			accept_first_word_last = 1;
 			s = (char *)NULL;
