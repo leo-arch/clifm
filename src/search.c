@@ -660,20 +660,20 @@ search_regex(char **args, const int invert, const int case_sens)
 
 	if (found == 0) {
 		int exit_status = EXIT_FAILURE;
-		if (search_flags & NO_GLOB_CHAR) {
+		char *s = (autocd == 1 && !args[1] && rl_line_buffer)
+				? strrchr(rl_line_buffer, '/') : (char *)NULL;
+
+		if (s && s != rl_line_buffer) {
+			/* Input string looks like a path: let's err like it was */
+			fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
+			exit_status = ENOENT;
+		} else if (search_flags & NO_GLOB_CHAR) {
 			search_flags &= ~NO_GLOB_CHAR;
-			char *s = (autocd == 1 && !args[1] && rl_line_buffer)
-					? strrchr(rl_line_buffer, '/') : (char *)NULL;
-			if (s && s != rl_line_buffer) {
-				/* Input string looks like a path: let's err like it was */
-				fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
-				exit_status = ENOENT;
-			} else {
-				fputs(_("search: No matches found\n"), stderr);
-			}
+			fputs(_("search: No matches found\n"), stderr);
 		} else {
 			fputs(_("No matches found\n"), stderr);
 		}
+
 		free(regex_index);
 
 		if (search_path) {
@@ -860,13 +860,13 @@ search_function(char **args)
 				fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
 				return ENOENT;
 			} else {
-				fputs(_("search: No matches found"), stderr);
+				fputs(_("search: No matches found\n"), stderr);
 				return EXIT_FAILURE;
 			}
 		}
 
 		if (!(search_flags & NO_GLOB_CHAR))
-			fputs(_("Glob: No matches found. Trying regex..."), stderr);
+			fputs(_("Glob: No matches found. Trying regex...\n"), stderr);
 	}
 
 	return search_regex(args, (args[0][1] == '!') ? 1 : 0,
