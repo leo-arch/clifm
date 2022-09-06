@@ -22,7 +22,7 @@ SRCDIR = src
 SRC = $(SRCDIR)/*.c
 HEADERS = $(SRCDIR)/*.h
 
-CFLAGS ?= -O3 -fstack-protector-strong -march=native
+CFLAGS ?= -O3 -fstack-protector-strong
 LIBS_Linux ?= -lreadline -lacl -lcap -lmagic
 LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl -lmagic
 LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline -lintl -lmagic
