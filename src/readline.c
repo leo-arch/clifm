@@ -644,6 +644,7 @@ my_rl_getc(FILE *stream)
 {
 	int result;
 	unsigned char c;
+	static unsigned char prev = 0;
 
 #if defined(__GO32__)
 	if (isatty(0))
@@ -694,8 +695,10 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result > 0 && result == sizeof(unsigned char)) {
-			if (c == 4 && control_d_exits == 1) /* Ctrl-d */
+			if (c == 4 && control_d_exits == 1 && prev != _ESC) /* Ctrl-d */
 				rl_quit(0, 0);
+
+			prev = c;
 
 			if (rl_end == 0) {
 				fzf_open_with = 0;
