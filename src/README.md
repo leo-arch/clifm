@@ -248,6 +248,11 @@ _CliFM_ allows you to enable or disable some features at compile time. If for wh
 gcc ... -D_BE_POSIX -D_NO_ICONS ...
 ```
 
+If using GNU Make you can pass these options directly to **make**(1) via a GNU specific Makefile:
+```sh
+make -f misc/GNU/Makefile _BE_POSIX=1 _NO_ICONS=1
+```
+
 | Option | Description |
 | --- | --- |
 | `_BE_POSIX` | Build a fully `POSIX.1-2008` compliant executable<sup>1</sup> |
@@ -257,6 +262,7 @@ gcc ... -D_BE_POSIX -D_NO_ICONS ...
 | `_NO_ARCHIVING` | Disable [archiving](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support |
 | `_NO_BLEACH` | Disable support for [`Bleach`, the built-in file names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n) |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
+| `_NO_FZF` | Disable support for [alternative TAB completers](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (fzf, fzy, and smenu) |
 | `_NO_HIGHLIGHT`| Disable [syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting) support |
 | `_NO_ICONS` | Disable [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) support |
 | `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support. Implies `_NO_MAGIC` |
