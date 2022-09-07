@@ -965,7 +965,8 @@ clean_rl_buffer(const char *text)
 			rl_delete_text(0, rl_end);
 			rl_point = rl_end = 0;
 		}
-		fputs("\x1b[J", stdout);
+
+		ERASE_TO_RIGHT_AND_BELOW;
 //		ERASE_TO_RIGHT;
 	}
 

@@ -148,7 +148,7 @@ free_suggestion(void)
 }
 
 void
-clear_suggestion(const int free_sug)
+clear_suggestion(const int sflag)
 {
 /*	if (auto_curpos == 1)
 		printf("%c7", '\x1b'); */
@@ -168,7 +168,9 @@ clear_suggestion(const int free_sug)
 		}
 		return;
 	} else { */
-	ERASE_TO_RIGHT;
+
+//	ERASE_TO_RIGHT;
+	ERASE_TO_RIGHT_AND_BELOW;
 //	}
 
 	if (rl_end > rl_point) { //&& highlight == 0) {
@@ -176,8 +178,17 @@ clear_suggestion(const int free_sug)
 		fflush(stdout);
 	}
 
+	suggestion.printed = 0;
+	if (sflag == CS_FREEBUF) {
+		free(suggestion_buf);
+		suggestion_buf = (char *)NULL;
+	}
+
+//	return;
+
+/*
 	if (suggestion.nlines > 1) {
-		/* Save cursor position */
+		// Save cursor position
 
 // TESTING CURSOR POSITION
 //		get_cursor_position(&curcol, &currow);
@@ -185,7 +196,7 @@ clear_suggestion(const int free_sug)
 			rl_redisplay();
 //		curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
 		char c = '\0';
-		/* RL_ISSTATE(RL_STATE_MOREINPUT) == del key; backspace otherwise */
+		// RL_ISSTATE(RL_STATE_MOREINPUT) == del key; backspace otherwise
 		int n = RL_ISSTATE(RL_STATE_MOREINPUT) ? 0 : 1;
 		if (rl_end > rl_point) {
 			c = rl_line_buffer[rl_point + n];
@@ -200,17 +211,17 @@ clear_suggestion(const int free_sug)
 
 		int i = (int)suggestion.nlines;
 		while (--i > 0) {
-			/* Move the cursor to the beginning of the next line */
+			// Move the cursor to the beginning of the next line
 // TESTING CURSOR POSITION
 //			MOVE_CURSOR_DOWN(1);
 			MOVE_CURSOR_DOWN_1;
 			MOVE_CURSOR_LEFT(term_cols);
 			fflush(stdout);
-//			if (write(STDOUT_FILENO, CNL, CNL_LEN) <= 0) {/* Avoid compiler warning */}
+//			if (write(STDOUT_FILENO, CNL, CNL_LEN) <= 0) {// Avoid compiler warning }
 			ERASE_TO_RIGHT;
 // TESTING CURSOR POSITION
 		}
-		/* Restore cursor position */
+		// Restore cursor position
 // TESTING CURSOR POSITION
 //		SET_CURSOR(currow, curcol);
 		MOVE_CURSOR_UP((int)suggestion.nlines - 1);
@@ -222,10 +233,10 @@ clear_suggestion(const int free_sug)
 	}
 
 	suggestion.printed = 0;
-	if (free_sug) {
+	if (sflag == CS_FREEBUF) {
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
-	}
+	} */
 }
 
 /* THIS FUNCTION SHOULD BE REMOVED */
@@ -241,7 +252,6 @@ remove_suggestion_not_end(void)
 	clear_suggestion(CS_FREEBUF);
 //	MOVE_CURSOR_LEFT(rl_end - rl_point);
 //	fflush(stdout);
-//	fflush(stdout); sleep(3);
 }
 
 // TESTING CURSOR POSITION
