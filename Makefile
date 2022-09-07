@@ -22,18 +22,93 @@ SRCDIR = src
 SRC = $(SRCDIR)/*.c
 HEADERS = $(SRCDIR)/*.h
 
+ifdef DEBUG
+CFLAGS += -g
+else
 CFLAGS ?= -O3 -fstack-protector-strong
+endif
+
+ifdef CPU_NATIVE
+CFLAGS += -march=native
+endif
+
+ifdef CLIFM_SUCKLESS
+CPPFLAGS += -DCLIFM_SUCKLESS
+endif
+
+ifdef _NO_TAGS
+CPPFLAGS += -D_NO_TAGS
+endif
+
+ifdef _NO_BLEACH
+CPPFLAGS += -D_NO_BLEACH
+endif
+
+ifdef _TOURBIN_QSORT
+CPPFLAGS += -D_TOURBIN_QSORT
+endif
+
+ifdef _NO_HIGHLIGHT
+CPPFLAGS += -D_NO_HIGHLIGHT
+endif
+
+ifdef _NO_FZF
+CPPFLAGS += -D_NO_FZF
+endif
+
+ifdef _BE_POSIX
+CPPFLAGS += -D_BE_POSIX
+endif
+
+ifdef _NO_ARCHIVING
+CPPFLAGS += -D_NO_ARCHIVING
+endif
+
+ifdef _ICONS_IN_TERMINAL
+CPPFLAGS += -D_ICONS_IN_TERMINAL
+endif
+
+ifdef _NERD
+CPPFLAGS += -D_NERD
+endif
+
+ifdef _NO_GETTEXT
+CPPFLAGS += -D_NO_GETTEXT
+endif
+
+ifdef _NO_ICONS
+CPPFLAGS += -D_NO_ICONS
+endif
+
+ifdef _NO_LIRA
+CPPFLAGS += -D_NO_LIRA -D_NO_MAGIC
+endif
+
+ifdef _NO_MAGIC
+CPPFLAGS += -D_NO_MAGIC
+endif
+
+ifdef _NO_SUGGESTIONS
+CPPFLAGS += -D_NO_SUGGESTIONS
+endif
+
+ifdef _NO_TRASH
+CPPFLAGS += -D_NO_TRASH
+endif
+
+CPPFLAGS += -DCLIFM_DATADIR=$(DATADIR)
+
 LIBS_Linux ?= -lreadline -lacl -lcap -lmagic
 LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl -lmagic
 LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline -lintl -lmagic
 LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline -lintl -lmagic
 LIBS_Darwin ?= -I/opt/local/include -L/opt/local/lib -lreadline -lintl -lmagic
 
-CFLAGS += -Wall -Wextra -DCLIFM_DATADIR=$(DATADIR)
+CFLAGS += -Wall -Wextra
 
 $(BIN): $(SRC) $(HEADERS)
 	@printf "Detected operating system: %s\n" "$(OS)"
-	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(LDFLAGS) $(LIBS_$(OS))
+	$(CC) -o $(BIN) $(SRC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LIBS_$(OS))
 
 build: $(BIN)
 
