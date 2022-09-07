@@ -606,7 +606,7 @@ rl_accept_suggestion(int count, int key)
 
 	rl_delete_text(suggestion.offset, rl_end);
 	rl_point = suggestion.offset;
-	if (highlight == 1 && accept_first_word == 0) {
+	if (highlight == 1 && accept_first_word == 0 && cur_color != hq_c) {
 		cur_color = tx_c;
 		rl_redisplay();
 	}
@@ -663,7 +663,11 @@ rl_accept_suggestion(int count, int key)
 	case FIRST_WORD:
 		my_insert_text(suggestion_buf, s, _s); break;
 
-	case JCMD_SUG_NOACD: /* fallthrough */
+	case JCMD_SUG_NOACD:
+		rl_insert_text("cd ");
+		rl_redisplay();
+		my_insert_text(suggestion_buf, NULL, 0); break;
+
 	case SEL_SUG:        /* fallthrough */
 	case HIST_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;

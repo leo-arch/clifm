@@ -75,6 +75,11 @@ char *last_word = (char *)NULL;
 int last_word_offset = 0;
 int point_is_first_word = 0;
 
+/* Set to 1 if terminal supports SC (save cursor) and RC (restore cursor)
+ * capabilities. Otherwise, the manual method is used via CUU, CUD, CUF,
+ * and CUB capabilities */
+//int auto_curpos = 0;
+
 /*
 #ifndef _NO_HIGHLIGHT
 // Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
@@ -145,12 +150,26 @@ free_suggestion(void)
 void
 clear_suggestion(const int free_sug)
 {
+/*	if (auto_curpos == 1)
+		printf("%c7", '\x1b'); */
+
 	if (rl_end > rl_point) { //&& highlight == 0) {
 		MOVE_CURSOR_RIGHT(rl_end - rl_point);
 		fflush(stdout);
 	}
 
+/*	if (auto_curpos == 1) {
+		fputs("\x1b[J", stdout); // ED: Erase display, to the right and below
+		printf("%c8", '\x1b');
+		suggestion.printed = 0;
+		if (free_sug) {
+			free(suggestion_buf);
+			suggestion_buf = (char *)NULL;
+		}
+		return;
+	} else { */
 	ERASE_TO_RIGHT;
+//	}
 
 	if (rl_end > rl_point) { //&& highlight == 0) {
 		MOVE_CURSOR_LEFT(rl_end - rl_point);
@@ -259,6 +278,11 @@ static inline void
 //restore_cursor_position(const size_t slines, const size_t len, const size_t offset, const int baej)
 restore_cursor_position(const size_t slines)
 {
+/*	if (auto_curpos == 1) {
+		printf("%c8", '\x1b');
+		return;
+	} */
+
 	if (slines > 1)
 		MOVE_CURSOR_UP((int)slines - 1);
 	MOVE_CURSOR_LEFT(term_cols);
@@ -369,12 +393,15 @@ set_cursor_position(const int baej)
 
 // TESTING CURSOR POSITION
 	if (baej == 1) {
-//		int off = BAEJ_OFFSET + ((highlight == 0) ? 1 : 0);
-		int off = BAEJ_OFFSET;
+		int off;
+/*		if (auto_curpos == 1)
+			off = BAEJ_OFFSET + ((highlight == 0) ? 1 : 0);
+		else */
+		off = BAEJ_OFFSET;
 
 		SUGGEST_BAEJ(off, sp_c);
 	} /*else { // REMOVE THIS ELSE WHEN USING NEW CURSOR POSITION METHOD
-		if (highlight == 0) {// || (flags & NO_RECOLOR_LINE)) {
+		if (auto_curpos == 1 && highlight == 0) {// || (flags & NO_RECOLOR_LINE)) {
 			MOVE_CURSOR_RIGHT(1);
 			fflush(stdout);
 //			flags &= ~NO_RECOLOR_LINE;
@@ -464,12 +491,16 @@ print_suggestion(const char *str, size_t offset, char *color)
 	}
 
 // TESTING CURSOR POSITION
+/*	if (auto_curpos == 1) {
+		printf("%c7", '\x1b');
+	} else { */
 	if (highlight == 0)
 		rl_redisplay();
 //	curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
 	curcol = prompt_offset + (rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0);
 	while (curcol > term_cols)
 		curcol -= term_cols;
+//	}
 // TESTING CURSOR POSITION
 
 	size_t str_len = wc_xstrlen(str), slines = 0;
@@ -483,6 +514,11 @@ print_suggestion(const char *str, size_t offset, char *color)
 // TESTING!
 		UNHIDE_CURSOR;
 		return;
+	} else {
+		if (baej == 1) {
+			flags |= BAEJ_SUGGESTION;
+			offset = 0;
+		}
 	}
 
 	/* In some cases (accepting first suggested word), we might want to
@@ -1365,7 +1401,7 @@ check_jcmd(char *line)
 		clear_suggestion(CS_FREEBUF);
 
 	/* Split line into an array of substrings */
-	char **substr = get_substr(line, ' ');
+	char **substr = line ? get_substr(line, ' ') : (char **)NULL;
 	if (!substr)
 		return NO_MATCH;
 
@@ -1383,7 +1419,11 @@ check_jcmd(char *line)
 
 	suggestion.type = JCMD_SUG;
 	suggestion.filetype = DT_DIR;
-	if (!autocd) {
+
+	print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c : sf_c);
+	if (autocd == 0)
+		suggestion.type = JCMD_SUG_NOACD;
+/*	if (autocd == 0) {
 		char *tmp = xnmalloc(strlen(jump_suggestion) + 4, sizeof(char));
 		sprintf(tmp, "cd %s", jump_suggestion);
 		print_suggestion(tmp, 1, suggest_filetype_color ? di_c : sf_c);
@@ -1391,7 +1431,7 @@ check_jcmd(char *line)
 		free(tmp);
 	} else {
 		print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c : sf_c);
-	}
+	} */
 
 	free(jump_suggestion);
 	jump_suggestion = (char *)NULL;
