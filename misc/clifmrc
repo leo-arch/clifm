@@ -332,6 +332,8 @@ SplashScreen=false
 #alias ds='**'
 # You can use this alias to quickly change to the current virtual directory
 #alias vtd='cd $CLIFM_VIRTUAL_DIR'
+# Replace the built-in bulk rename function (br) by vidir(1)
+#br='vidir'
 
 #=====================================#
 #         7. PROMPT COMMANDS          #
