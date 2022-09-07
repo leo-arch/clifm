@@ -310,7 +310,7 @@ read_inotify(void)
 			refresh = 1;
 	}
 
-	if (refresh) {
+	if (refresh == 1 && exit_code == EXIT_SUCCESS) {
 #ifdef INOTIFY_DEBUG
 		puts("INOTIFY_REFRESH");
 #endif /* INOTIFY_DEBUG */
