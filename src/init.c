@@ -2995,10 +2995,11 @@ check_options(void)
 		else
 			highlight = xargs.highlight;
 	}
+/*
 # ifdef __NetBSD__
 	if (!(flags & GUI))
 		xargs.highlight = highlight = 0;
-# endif /* __NetBSD__ */
+# endif // __NetBSD__ */
 #endif /* !_NO_HIGHLIGHT */
 
 	if (apparent_size == UNSET) {
