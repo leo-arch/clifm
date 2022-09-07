@@ -3066,7 +3066,7 @@ check_options(void)
 	}
 #else
 	tabmode = STD_TAB;
-#endif
+#endif /* _NO_FZF */
 
 #ifndef _NO_ICONS
 	if (icons == UNSET) {
@@ -3075,7 +3075,7 @@ check_options(void)
 		else
 			icons = xargs.icons;
 	}
-#endif
+#endif /* _NO_ICONS */
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestions == UNSET) {
@@ -3090,7 +3090,7 @@ check_options(void)
 
 	if (suggest_filetype_color == UNSET)
 		suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
-#endif
+#endif /* _NO_SUGGESTIONS */
 
 	if (int_vars == UNSET) {
 		if (xargs.int_vars == UNSET)
@@ -3140,7 +3140,7 @@ check_options(void)
 		else
 			tr_as_rm = xargs.trasrm;
 	}
-#endif
+#endif /* _NO_TRASH */
 
 	if (only_dirs == UNSET) {
 		if (xargs.only_dirs == UNSET)

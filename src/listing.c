@@ -389,7 +389,6 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 		fputs(_(PAGER_HELP), stdout);
 		int l = (int)term_rows - 5;
 		MOVE_CURSOR_DOWN(l);
-//		printf("\x1b[%dB", l);
 		fputs(PAGER_LABEL, stdout);
 
 		xgetchar();
