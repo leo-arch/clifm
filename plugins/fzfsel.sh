@@ -106,6 +106,8 @@ eval "$ls_cmd" | fzf --multi --marker='*' --info=inline --keep-right \
 	--no-sort --ansi --prompt "$fzf_prompt" > "$TMPFILE"
 exit_status=$?
 
+[ "$exit_status" -eq 130 ] && exit_status=0
+
 # shellcheck disable=SC1007
 while ISF= read -r line; do
 	printf "%s\n" "$PWD/$line" >> "$CLIFM_SELFILE"
