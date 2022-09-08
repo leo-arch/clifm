@@ -152,6 +152,7 @@ print_div_line(void)
 		for (; k < (int)term_cols - 2; k++)
 			putchar('q');
 		fputs("\x1b(0j\x1b(B", stdout);
+		putchar('\n');
 	} else if (*div_line == '0' && !div_line[1]) {
 		/* No line */
 		putchar('\n');
@@ -163,10 +164,7 @@ print_div_line(void)
 			int i;
 			for (i = (int)(term_cols / len); i; i--)
 				fputs(div_line, stdout);
-			/* Some terminals do not perform automatic carriage return (AM) when
-			 * reaching the right end of the line. Let's do it ourselves */
-			if (xargs.vt100 == 1)
-				putchar('\n');
+			putchar('\n');
 		} else {
 			/* Print DIV_LINE exactly */
 			puts(div_line);
