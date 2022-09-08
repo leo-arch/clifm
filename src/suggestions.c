@@ -756,7 +756,7 @@ get_print_status(const char *str, const char *match, const size_t len)
 	if (suggestion.printed && suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 
-	if (str[len - 1] == '/' || strlen(match) == len)
+	if ((len > 0 && str[len - 1] == '/') || strlen(match) == len)
 		return FULL_MATCH;
 
 	return PARTIAL_MATCH;
@@ -1888,6 +1888,12 @@ rl_suggestions(const unsigned char c)
 	if (word && *word == '~' && (!word[1] || (word[1] == '/' && !word[2]))) {
 		if (wrong_cmd)
 			recover_from_wrong_cmd();
+
+		if (suggestion.printed == 1 && suggestion_buf && (!rl_line_buffer
+		|| strncmp(suggestion_buf, rl_line_buffer, (size_t)rl_point) != 0))
+			clear_suggestion(CS_FREEBUF);
+
+		printed = zero_offset = 1;
 		goto SUCCESS;
 	}
 
