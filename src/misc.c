@@ -503,7 +503,7 @@ print_tips(int all)
 		"Create aliases to easily run your preferred commands (F10)",
 		"Open and edit the configuration file: 'edit' or F10",
 		"Get a brief description for each CliFM command by running 'cmd'",
-		"Print the currently used color codes list by entering 'cc'",
+		"Print the currently used color codes list by entering 'colors'",
 		"Press Alt-. to toggle hidden files on/off",
 		"List mountpoints by pressing Alt-m",
 		"Disallow the use of shell commands with the -x option: 'clifm -x'",

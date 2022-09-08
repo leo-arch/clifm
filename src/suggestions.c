@@ -1889,8 +1889,8 @@ rl_suggestions(const unsigned char c)
 		if (wrong_cmd)
 			recover_from_wrong_cmd();
 
-		if (suggestion.printed == 1 && suggestion_buf && (!rl_line_buffer
-		|| strncmp(suggestion_buf, rl_line_buffer, (size_t)rl_point) != 0))
+		if (suggestion.printed == 1 && suggestion_buf && suggestion.type == HIST_SUG
+		&& (!rl_line_buffer || strncmp(suggestion_buf, rl_line_buffer, (size_t)rl_point) != 0))
 			clear_suggestion(CS_FREEBUF);
 
 		printed = zero_offset = 1;
