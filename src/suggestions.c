@@ -1433,15 +1433,6 @@ check_jcmd(char *line)
 	print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c : sf_c);
 	if (autocd == 0)
 		suggestion.type = JCMD_SUG_NOACD;
-/*	if (autocd == 0) {
-		char *tmp = xnmalloc(strlen(jump_suggestion) + 4, sizeof(char));
-		sprintf(tmp, "cd %s", jump_suggestion);
-		print_suggestion(tmp, 1, suggest_filetype_color ? di_c : sf_c);
-		suggestion.type = JCMD_SUG_NOACD;
-		free(tmp);
-	} else {
-		print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c : sf_c);
-	} */
 
 	free(jump_suggestion);
 	jump_suggestion = (char *)NULL;
@@ -1534,37 +1525,6 @@ check_variables(const char *str, const size_t len)
 	return NO_MATCH;
 }
 
-/*
-static char *
-get_last_word(const char *last_space, size_t buflen)
-{
-	if (last_space) {
-		char *rl = rl_line_buffer;
-		int j = rl_end;
-		while (--j >= 0) {
-			if (j + 1 && rl[j] == ' ' && rl[j + 1] && rl[j + 1] != ' '
-			&& (!rl[j - 1] || rl[j - 1] != '\\'))
-				break;
-		}
-		last_word_offset = j + 1;
-		buflen = strlen(last_space);
-
-		if (*(++last_space)) {
-			buflen--;
-			last_word = (char *)xrealloc(last_word, (buflen + 2) * sizeof(char));
-			strcpy(last_word, last_space);
-		} else {
-			last_word = (char *)xrealloc(last_word, 2 * sizeof(char));
-			*last_word = '\0';
-		}
-	} else {
-		last_word = (char *)xrealloc(last_word, (buflen + 2) * sizeof(char));
-		strcpy(last_word, rl_line_buffer);
-	}
-
-	return last_word;
-} */
-
 static int
 is_last_word(void)
 {
@@ -1632,7 +1592,6 @@ turn_it_wrong(void)
 	char *b = rl_copy_text(0, rl_end);
 	if (!b) return;
 
-//	HIDE_CURSOR;
 	fputs(hw_c, stdout);
 	fflush(stdout);
 	cur_color = hw_c;
@@ -1645,8 +1604,6 @@ turn_it_wrong(void)
 
 	free(b);
 	rl_point = bk;
-
-//	UNHIDE_CURSOR;
 }
 
 /* Switch to the warning prompt
@@ -1659,8 +1616,8 @@ print_warning_prompt(const char fc, unsigned char lc)
 	&& fc != '$' && fc != '\'' && fc != '"') {
 		if (suggestion.printed)
 			clear_suggestion(CS_FREEBUF);
-		wrong_cmd = 1;
 
+		wrong_cmd = 1;
 		rl_save_prompt();
 
 		char *decoded_prompt = decode_prompt(wprompt_str);
@@ -1732,7 +1689,6 @@ check_prompts(const char *word, const size_t len)
 	return 0;
 }
 
-// TESTING!!
 /* Get the last non-escaped space in STR (whose length is LEN)
  * Return a pointer to it if found or NULL if not */
 static char *
@@ -1772,7 +1728,6 @@ get_last_word(const char *last_space)
 	last_word_offset = (last_space && *(last_space + 1) && rl_line_buffer)
 			? (int)((last_space + 1) - rl_line_buffer) : 0;
 }
-// TESTING!!
 
 static int
 check_workspaces(char *word, size_t wlen)
@@ -1832,13 +1787,7 @@ rl_suggestions(const unsigned char c)
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
-// TESTING!!
 	char *last_space = get_last_space(rl_line_buffer, rl_end);
-// TESTING!!
-/*	char *last_space = strrchr(rl_line_buffer, ' ');
-	if (last_space && last_space != rl_line_buffer
-	&& *(last_space - 1) == '\\')
-		last_space = (char *)NULL; */
 
 	/* Reset the wrong cmd flag whenever we have a new word or a new line */
 	if (rl_end == 0 || c == '\n') {
@@ -1850,10 +1799,7 @@ rl_suggestions(const unsigned char c)
 	char *full_line = rl_line_buffer;
 
 	/* A copy of the last entered word */
-//	last_word = get_last_word(last_space, buflen);
-// TESTING!!
 	get_last_word(last_space);
-// TESTING!!
 
 	/* Count words */
 	size_t full_word = 0, start_word = 0;
@@ -2090,23 +2036,7 @@ rl_suggestions(const unsigned char c)
 	default: break;
 	}
 
-	/* 3.b) Check already suggested string */
-/*	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)) {
-		if (suggestion.type == HIST_SUG
-		&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
-			printed = zero_offset = 1;
-			goto SUCCESS;
-		}
-		if (c != ' ' && word && (case_sens_path_comp ? strncmp(word, suggestion_buf, wlen)
-		: strncasecmp(word, suggestion_buf, wlen)) == 0) {
-			printed = 1;
-			goto SUCCESS;
-		}
-	} */
-
 	/* 3.c) Check CliFM internal parameters */
-//	char *ret = strchr(full_line, ' ');
-//	if (ret) {
 	if (nwords > 1) {
 		/* 3.c.1) Suggest the sel keyword only if not first word */
 		if (sel_n > 0 && *word == 's' && strncmp(word, "sel", wlen) == 0) {
@@ -2176,9 +2106,8 @@ rl_suggestions(const unsigned char c)
 			break;
 
 		case 'c': /* 3.d.3) Possible completions (only path completion!) */
-// TESTING!
 			if (rl_point < rl_end && c == '/') goto NO_SUGGESTION;
-// TESTING!
+
 			if (last_space || autocd || auto_open) {
 				/* Skip internal commands not dealing with file names */
 				if (first_word) {
@@ -2250,7 +2179,7 @@ rl_suggestions(const unsigned char c)
 			}
 			break;
 
-		case 'f': // 3.d.5) File names in CWD
+		case 'f': /* 3.d.5) File names in CWD */
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
 			if (last_space || autocd || auto_open) {
@@ -2275,7 +2204,6 @@ rl_suggestions(const unsigned char c)
 				if (c == ' ' && suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
 
-/*				printed = check_filenames(word, wlen, c, last_space ? 0 : 1, full_word); */
 				printed = check_filenames(word, wlen, c, last_space ? 0 : 1, c == ' ' ? 1 : 0);
 				if (printed)
 					goto SUCCESS;
@@ -2318,13 +2246,6 @@ rl_suggestions(const unsigned char c)
 		default: break;
 		}
 	}
-
-	/* 3.e) Variable names, both environment and internal */
-/*	if (*word == '$') {
-		printed = check_variables(word + 1, wlen - 1);
-		if (printed)
-			goto SUCCESS;
-	} */
 
 #ifndef _NO_TAGS
 	if (*lb != ';' && *lb != ':' && *word == 't' && *(word + 1) == ':' && *(word + 2)) {

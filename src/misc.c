@@ -465,7 +465,7 @@ print_tips(int all)
 {
 	const char *TIPS[] = {
 		"Try the autocd and auto-open functions: run 'FILE' instead "
-		"of 'open FILE' or 'cd FILE'",
+		"of 'cd FILE' or 'open FILE'",
 		"Add a new entry to the mimelist file with 'mm edit' or F6",
 		"Do not forget to take a look at the manpage",
 		"Need more speed? Try the light mode (Alt-y)",
@@ -522,8 +522,7 @@ print_tips(int all)
 		"Customize your color scheme: 'cs edit' or F6",
 		"Launch the bookmarks manager with Alt-b",
 		"Chain commands using ; and &&: 's 2 7-10; r sel'",
-		"Add emojis to the prompt by copying them to the Prompt line "
-		"in the prompts file ('prompt edit')",
+		"Add emojis to your prompt by copying them to adequate prompt line ('prompt edit')",
 		"Create a new profile running 'pf add PROFILE' or 'clifm -P PROFILE'",
 		"Switch profiles using 'pf set PROFILE'",
 		"Delete a profile using 'pf del PROFILE'",

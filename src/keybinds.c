@@ -666,9 +666,10 @@ rl_accept_suggestion(int count, int key)
 	case JCMD_SUG_NOACD:
 		rl_insert_text("cd ");
 		rl_redisplay();
-		my_insert_text(suggestion_buf, NULL, 0); break;
+		my_insert_text(suggestion_buf, NULL, 0);
+		break;
 
-	case SEL_SUG:        /* fallthrough */
+	case SEL_SUG: /* fallthrough */
 	case HIST_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
