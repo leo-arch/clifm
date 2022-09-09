@@ -765,7 +765,8 @@ load_jumpdb(void)
 
 		jump_db[jump_n].keep = 0;
 		jump_db[jump_n].rank = 0;
-		jump_db[jump_n].path = savestring(tmpc, strlen(tmpc));
+		jump_db[jump_n].len = strlen(tmpc);
+		jump_db[jump_n].path = savestring(tmpc, jump_db[jump_n].len);
 		jump_n++;
 	}
 
@@ -780,6 +781,7 @@ load_jumpdb(void)
 	}
 
 	jump_db[jump_n].path = (char *)NULL;
+	jump_db[jump_n].len = 0;
 	jump_db[jump_n].rank = 0;
 	jump_db[jump_n].keep = 0;
 	jump_db[jump_n].visits = 0;

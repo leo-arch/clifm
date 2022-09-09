@@ -62,10 +62,12 @@ write_jump_entry(const char *dir)
 	jump_db[jump_n].rank = 0;
 	jump_db[jump_n].keep = 0;
 
-	jump_db[jump_n].path = savestring(dir, strlen(dir));
+	jump_db[jump_n].len = strlen(dir);
+	jump_db[jump_n].path = savestring(dir, jump_db[jump_n].len);
 	jump_n++;
 
 	jump_db[jump_n].path = (char *)NULL;
+	jump_db[jump_n].len = 0;
 	jump_db[jump_n].visits = 0;
 	jump_db[jump_n].rank = 0;
 	jump_db[jump_n].keep = 0;
@@ -274,7 +276,7 @@ save_suggestion(char *str)
 	size_t len = strlen(str);
 
 	int slash = 0;
-	if (str[len - 1] == '/')
+	if (len > 0 && str[len - 1] == '/')
 		slash = 1;
 
 	jump_suggestion = xnmalloc(len + (slash ? 1 : 2), sizeof(char));
@@ -471,11 +473,11 @@ dirjump(char **args, int mode)
 		 * string to match only the last segment of the path (i.e.,
 		 * there must be no slash after the match) */
 		size_t _len = strlen(args[i]);
-		if (args[i][_len - 1] == '/') {
+		if (_len > 0 && args[i][_len - 1] == '/') {
 			args[i][_len - 1] = '\0';
 			last_segment = 1;
 			first_segment = 0;
-		} else if (args[i][_len - 1] == '\\') {
+		} else if (_len > 0 && args[i][_len - 1] == '\\') {
 			args[i][_len - 1] = '\0';
 			last_segment = 0;
 			first_segment = 1;

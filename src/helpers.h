@@ -635,6 +635,7 @@ struct jump_t {
 	char *path;
 	int keep;
 	int rank;
+	size_t len;
 	size_t visits;
 	time_t first_visit;
 	time_t last_visit;

@@ -146,10 +146,10 @@ print_div_line(void)
 	if (colorize == 1)
 		set_div_line_color();
 
-	if (!*div_line) { /* Let's draw the line with bow drawing chars */
+	if (!*div_line) { /* Let's draw the line with box drawing chars */
 		fputs("\x1b(0m", stdout);
-		int k = 0;
-		for (; k < (int)term_cols - 2; k++)
+		int k;
+		for (k = 0; k < (int)term_cols - 2; k++)
 			putchar('q');
 		fputs("\x1b(0j\x1b(B", stdout);
 		putchar('\n');
@@ -329,6 +329,7 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
+
 	if (reset_pager)
 		pager = 1;
 
@@ -344,6 +345,7 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 
 	if (disk_usage)
 		print_disk_usage();
+
 	if (sort_switch) {
 		print_reload_msg(_("Sorted by "));
 		print_sort_method();

@@ -1218,15 +1218,14 @@ check_jumpdb(const char *str, const size_t len, const int print)
 
 		if (len && (case_sens_path_comp ? strncmp(str, jump_db[i].path, len)
 		: strncasecmp(str, jump_db[i].path, len)) == 0) {
-			size_t db_len = strlen(jump_db[i].path);
-			if (db_len <= len) return FULL_MATCH;
+			if (jump_db[i].len <= len) return FULL_MATCH;
 
 			suggestion.type = FILE_SUG;
 			suggestion.filetype = DT_DIR;
 			char tmp[PATH_MAX + 2];
 			*tmp = '\0';
 
-			if (jump_db[i].path[db_len - 1] != '/')
+			if (jump_db[i].len > 0 && jump_db[i].path[jump_db[i].len - 1] != '/')
 				snprintf(tmp, PATH_MAX + 2, "%s/", jump_db[i].path);
 
 			print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
@@ -1245,7 +1244,7 @@ print_bookmark_dir_suggestion(const int i)
 
 	char tmp[PATH_MAX + 3];
 	size_t path_len = strlen(bookmarks[i].path);
-	if (bookmarks[i].path[path_len - 1] != '/')
+	if (path_len > 0 && bookmarks[i].path[path_len - 1] != '/')
 		snprintf(tmp, sizeof(tmp), "%s/", bookmarks[i].path);
 	else
 		xstrsncpy(tmp, bookmarks[i].path, sizeof(tmp) - 1);
@@ -1565,7 +1564,7 @@ count_words(size_t *start_word, size_t *full_word)
 			first_non_space = 1;
 			continue;
 		}
-		if (w && b[w] == ' ' && b[w - 1] != '\\') {
+		if (w > 0 && b[w] == ' ' && b[w - 1] != '\\') {
 			if (b[w + 1] && b[w + 1] != ' ')
 				rl_last_word_start = (int)w + 1;
 			if (!*full_word && b[w - 1] != '|'
@@ -1577,7 +1576,7 @@ count_words(size_t *start_word, size_t *full_word)
 		}
 		/* If a process separator char is found, reset variables so that we
 		 * can start counting again for the new command */
-		if (!q && cur_color != hq_c && w && b[w - 1] != '\\'
+		if (!q && cur_color != hq_c && w > 0 && b[w - 1] != '\\'
 		&& ((b[w] == '&' && b[w - 1] == '&') || b[w] == '|' || b[w] == ';')) {
 			words = first_non_space = *full_word = 0;
 		}
@@ -1737,7 +1736,7 @@ check_workspaces(char *word, size_t wlen)
 
 	if (*word >= '1' && *word <= MAX_WS + '0' && !*(word + 1)) {
 		int a = atoi(word);
-		if (workspaces[a - 1].name) {
+		if (a > 0 && workspaces[a - 1].name) {
 			suggestion.type = WS_NUM_SUG;
 			print_suggestion(workspaces[a - 1].name, 0, sf_c);
 			return 1;
@@ -2123,7 +2122,7 @@ rl_suggestions(const unsigned char c)
 					word = first_word ? first_word : last_word;
 					wlen = strlen(word);
 				}
-				if (wlen && word[wlen - 1] == ' ')
+				if (wlen > 0 && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
 
 				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
@@ -2226,7 +2225,7 @@ rl_suggestions(const unsigned char c)
 					word = (first_word && *first_word) ? first_word : last_word;
 					wlen = strlen(word);
 				}
-				if (wlen && word[wlen - 1] == ' ')
+				if (wlen > 0 && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
 
 				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
@@ -2283,7 +2282,7 @@ CHECK_FIRST_WORD:
 	&& check_completions(word, wlen, c, CHECK_MATCH)) {
 		printed = 1;
 	} else {
-		if (wlen && word[wlen - 1] == ' ')
+		if (wlen > 0 && word[wlen - 1] == ' ')
 			word[wlen - 1] = '\0';
 
 		flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
