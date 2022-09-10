@@ -1251,7 +1251,8 @@ print_bookmark_dir_suggestion(const int i)
 	char *color = suggest_filetype_color == 1 ? di_c : sf_c;
 
 	char *_tmp = escape_str(tmp);
-	print_suggestion(_tmp ? _tmp : tmp, 1, color);
+	print_suggestion(_tmp ? _tmp : tmp, 0, color);
+//	print_suggestion(_tmp ? _tmp : tmp, 1, color);
 	free(_tmp);
 }
 
@@ -1268,7 +1269,8 @@ print_bookmark_file_suggestion(const int i, struct stat *attr)
 		color = get_comp_color(bookmarks[i].path, attr, &free_color);
 
 	char *_tmp = escape_str(bookmarks[i].path);
-	print_suggestion(_tmp ? _tmp : bookmarks[i].path, 1, color);
+	print_suggestion(_tmp ? _tmp : bookmarks[i].path, 0, color);
+//	print_suggestion(_tmp ? _tmp : bookmarks[i].path, 1, color);
 	free(_tmp);
 
 	if (free_color == 1)
@@ -1394,7 +1396,8 @@ check_aliases(const char *str, const size_t len, const int print)
 			continue;
 
 		suggestion.type = ALIAS_SUG;
-		print_suggestion(aliases[i].cmd, 1, color);
+//		print_suggestion(aliases[i].cmd, 1, color);
+		print_suggestion(aliases[i].cmd, 0, color);
 		return PARTIAL_MATCH;
 	}
 
@@ -1912,7 +1915,8 @@ rl_suggestions(const unsigned char c)
 					if (pp)
 						*pp = '\0';
 					suggestion.type = BACKDIR_SUG;
-					print_suggestion(bk_cwd, 1, sf_c);
+//					print_suggestion(bk_cwd, 1, sf_c);
+					print_suggestion(bk_cwd, 0, sf_c);
 					printed = 1;
 					goto SUCCESS;
 				}
