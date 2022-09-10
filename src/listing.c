@@ -68,13 +68,13 @@
 #ifndef _NO_ICONS
 # include "icons.h"
 #endif
-
+/*
 #if defined(_PALAND_PRINTF)
 # include "printf.h"
 # define xprintf printf_
-#else
+#else */
 # define xprintf printf
-#endif /* _PALAND_PRINTF */
+//#endif /* _PALAND_PRINTF */
 
 #include <readline/readline.h>
 
