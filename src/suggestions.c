@@ -1226,7 +1226,7 @@ check_jumpdb(const char *str, const size_t len, const int print)
 			*tmp = '\0';
 
 			if (jump_db[i].len > 0 && jump_db[i].path[jump_db[i].len - 1] != '/')
-				snprintf(tmp, PATH_MAX + 2, "%s/", jump_db[i].path);
+				snprintf(tmp, sizeof(tmp), "%s/", jump_db[i].path);
 
 			print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
 			return PARTIAL_MATCH;

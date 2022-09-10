@@ -1056,7 +1056,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (!lw) {
 		finder_offset++;
 	} else {
-		size_t lw_len = strlen(lw);
+		size_t lw_len = wc_xstrlen(lw);
 		if (lw_len > 1) {
 			finder_offset -= (int)(lw_len - 1);
 			if (finder_offset < 0)
