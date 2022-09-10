@@ -1076,9 +1076,7 @@ extern int
 	fzftab,
 	fzf_height_set,
 	fzf_open_with,
-#ifndef _NO_HIGHLIGHT
 	highlight,
-#endif
 	hist_status,
 	home_ok,
 #ifndef _NO_ICONS

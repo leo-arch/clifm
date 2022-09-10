@@ -373,8 +373,15 @@ rl_exclude_input(unsigned char c)
 
 	/* Multi-byte char. Send it directly to the input buffer. We can't
 	 * process it here, since we process only single bytes */
-	if (c > 127 || (c & 0xc0) == 0x80)
+	if (c > 127 || (c & 0xc0) == 0x80) {
+		if (highlight == 1 && cur_color != tx_c && cur_color != hq_c
+		&& cur_color != hc_c && cur_color != hp_c) {
+			cur_color = tx_c;
+			fputs(cur_color, stdout);
+			fflush(stdout);
+		}
 		return 1;
+	}
 
 	if (c != _ESC)
 		cmdhist_flag = 0;

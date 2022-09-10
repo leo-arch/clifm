@@ -166,7 +166,11 @@ int
 	fzftab = UNSET,
 	fzf_height_set = 0,
 	fzf_open_with = 0,
+#ifndef _NO_HIGHLIGHT
 	highlight = UNSET,
+#else
+	highlight = 0,
+#endif
 	hist_status = UNSET,
 	home_ok = 1,
 #ifndef _NO_ICONS

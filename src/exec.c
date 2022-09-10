@@ -91,8 +91,8 @@ get_new_name(void)
 
 	int bk_wp = warning_prompt;
 	int bk_sug = suggestions;
-	int bk_hl = highlight;
 	int bk_prompt_offset = prompt_offset;
+	int bk_hl = highlight;
 	highlight = 0;
 	suggestions = 0;
 	warning_prompt = 0;
