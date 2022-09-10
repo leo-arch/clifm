@@ -514,7 +514,6 @@ print_suggestion(const char *str, size_t offset, char *color)
 // TESTING CURSOR POSITION
 
 	size_t str_len = wc_xstrlen(str), slines = 0;
-
 	if (check_conditions(offset, str_len, &baej, &slines) == EXIT_FAILURE) {
 // TESTING!
 		/* The highlight function modified the terminal idea of the cursor position,
@@ -1354,7 +1353,7 @@ check_eln(const char *str, const int print)
 	char tmp[NAME_MAX + 1];
 	*tmp = '\0';
 	if (file_info[n].dir) {
-		snprintf(tmp, NAME_MAX + 1, "%s/", file_info[n].name);
+		snprintf(tmp, sizeof(tmp), "%s/", file_info[n].name);
 		suggestion.filetype = DT_DIR;
 	} else {
 		suggestion.filetype = DT_REG;
@@ -1429,7 +1428,8 @@ check_jcmd(char *line)
 	suggestion.type = JCMD_SUG;
 	suggestion.filetype = DT_DIR;
 
-	print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c : sf_c);
+	print_suggestion(jump_suggestion, 0, suggest_filetype_color ? di_c : sf_c);
+//	print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c : sf_c);
 	if (autocd == 0)
 		suggestion.type = JCMD_SUG_NOACD;
 
