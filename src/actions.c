@@ -206,7 +206,7 @@ run_action(char *action, char **args)
 		return exit_status;
 	}
 
-	if (buf[buf_len - 1] == '\n')
+	if (buf_len > 0 && buf[buf_len - 1] == '\n')
 		buf[buf_len - 1] = '\0';
 
 	/* If a valid file */

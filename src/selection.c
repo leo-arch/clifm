@@ -511,7 +511,7 @@ static char *
 check_sel_path(char **sel_path)
 {
 	size_t len = strlen(*sel_path);
-	if ((*sel_path)[len - 1] == '/')
+	if (len > 0 && (*sel_path)[len - 1] == '/')
 		(*sel_path)[len - 1] = '\0';
 
 	if (strchr(*sel_path, '\\')) {

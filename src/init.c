@@ -1059,7 +1059,7 @@ load_remotes(void)
 			continue;
 
 		size_t ret_len = strlen(ret);
-		if (ret[ret_len - 1] == '\n') {
+		if (ret_len > 0 && ret[ret_len - 1] == '\n') {
 			ret_len--;
 			ret[ret_len] = '\0';
 		}
@@ -1250,7 +1250,7 @@ load_prompts(void)
 			continue;
 
 		size_t ret_len = strlen(ret);
-		if (ret[ret_len - 1] == '\n') {
+		if (ret_len > 0 && ret[ret_len - 1] == '\n') {
 			ret_len--;
 			ret[ret_len] = '\0';
 		}
@@ -2395,7 +2395,7 @@ validate_line(char *line, char **p)
 		return (-1);
 
 	size_t len = strlen(s);
-	if (s[len - 1] == '\n')
+	if (len > 0 && s[len - 1] == '\n')
 		s[len - 1] = '\0';
 
 	int cur = 0;
@@ -2756,7 +2756,7 @@ write_dirhist(char *line, ssize_t len)
 	if (!line || !*line || *line == '\n')
 		return;
 
-	if (line[len - 1] == '\n') {
+	if (len > 0 && line[len - 1] == '\n') {
 		line[len - 1] = '\0';
 		len--;
 	}

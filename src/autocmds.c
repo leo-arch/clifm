@@ -287,7 +287,7 @@ parse_autocmd_line(char *cmd)
 		return;
 
 	size_t clen = strlen(cmd);
-	if (cmd[clen - 1] == '\n')
+	if (clen > 0 && cmd[clen - 1] == '\n')
 		cmd[clen - 1] = '\0';
 
 	char *p = strchr(cmd, ' ');

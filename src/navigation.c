@@ -477,7 +477,7 @@ check_cdpath(char *name)
 	struct stat a;
 	for (i = 0; cdpaths[i]; i++) {
 		size_t len = strlen(cdpaths[i]);
-		if (cdpaths[i][len - 1] == '/')
+		if (len > 0 && cdpaths[i][len - 1] == '/')
 			snprintf(tmp, sizeof(tmp), "%s%s", cdpaths[i], name);
 		else
 			snprintf(tmp, sizeof(tmp), "%s/%s", cdpaths[i], name);

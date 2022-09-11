@@ -379,7 +379,7 @@ rl_prepend_sudo(int count, int key)
 
 	if (t) {
 		len = strlen(t);
-		if (t[len - 1] != ' ') {
+		if (len > 0 && t[len - 1] != ' ') {
 			s = (char *)xnmalloc(len + 2, sizeof(char));
 			sprintf(s, "%s ", t);
 			len++;

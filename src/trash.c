@@ -730,7 +730,7 @@ untrash_element(char *file)
 
 	/* Remove new line char from original path, if any */
 	size_t orig_path_len = strlen(orig_path);
-	if (orig_path[orig_path_len - 1] == '\n')
+	if (orig_path_len > 0 && orig_path[orig_path_len - 1] == '\n')
 		orig_path[orig_path_len - 1] = '\0';
 
 	/* Decode original path's URL format */

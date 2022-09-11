@@ -293,8 +293,8 @@ clean_file_name(char *restrict name)
 			cur_len += tlen;
 		} else {
 			sprintf(q - 1, "%s", t);
-			q += tlen - 1;
-			cur_len += tlen - 1;
+			q += (tlen > 0 ? tlen - 1 : 0);
+			cur_len += (tlen > 0 ? tlen - 1 : 0);
 		}
 	}
 

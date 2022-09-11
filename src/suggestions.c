@@ -2201,7 +2201,7 @@ rl_suggestions(const unsigned char c)
 					flags &= ~STATE_COMPLETING;
 				}
 
-				if (wlen && word[wlen - 1] == ' ')
+				if (wlen > 0 && word[wlen - 1] == ' ')
 					word[wlen - 1] = '\0';
 
 				if (c == ' ' && suggestion.printed)

@@ -489,6 +489,8 @@ dirjump(char **args, int mode)
 		if (!match) {
 			j = (int)jump_n;
 			while (--j >= 0) {
+				if (!jump_db[j].path)
+					continue;
 				/* Pointer to the beginning of the search str in the
 				 * jump entry. Used to search for subsequent search
 				 * strings starting from this position in the entry
@@ -520,12 +522,14 @@ dirjump(char **args, int mode)
 				 * child options */
 				switch (jump_opt) {
 				case JPARENT:
-					if (!strstr(workspaces[cur_ws].path, jump_db[j].path))
+					if (workspaces[cur_ws].path
+					&& !strstr(workspaces[cur_ws].path, jump_db[j].path))
 						exclude = 1;
 					break;
 
 				case JCHILD:
-					if (!strstr(jump_db[j].path, workspaces[cur_ws].path))
+					if (workspaces[cur_ws].path
+					&& !strstr(jump_db[j].path, workspaces[cur_ws].path))
 						exclude = 1;
 
 				case NONE: /* fallthrough */

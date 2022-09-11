@@ -259,8 +259,8 @@ get_files_from_tmp_file(const char *tmp_file, const char *target, const int n)
 			line[len - 1] = '\0';
 			len--;
 		}
-		if (line[len - 1] == '/' || line[len - 1] == '@' || line[len - 1] == '='
-		|| line[len - 1] == '|' || line[len - 1] == '?') {
+		if (len > 0 && (line[len - 1] == '/' || line[len - 1] == '@' || line[len - 1] == '='
+		|| line[len - 1] == '|' || line[len - 1] == '?') ) {
 			line[len - 1] = '\0';
 			len--;
 		}
@@ -888,7 +888,7 @@ create_file(char **cmd)
 			continue;
 		size_t cmd_len = strlen(cmd[i]);
 		/* File names ending with a slash are taken as directory names */
-		if (cmd[i][cmd_len - 1] == '/') {
+		if (cmd_len > 0 && cmd[i][cmd_len - 1] == '/') {
 			ndirs[cndirs] = cmd[i];
 			cndirs++;
 		} else {
@@ -1113,7 +1113,7 @@ edit_link(char *link)
 	}
 
 	size_t len = strlen(link);
-	if (link[len - 1] == '/')
+	if (len > 0 && link[len - 1] == '/')
 		link[len - 1] = '\0';
 
 	/* Check we have a valid symbolic link */
@@ -1182,7 +1182,7 @@ edit_link(char *link)
 	/* Remove terminating space. TAB completion puts a final space
 	 * after file names */
 	size_t path_len = strlen(new_path);
-	if (new_path[path_len - 1] == ' ')
+	if (path_len > 0 && new_path[path_len - 1] == ' ')
 		new_path[path_len - 1] = '\0';
 
 	/* Dequote new path, if needed */
@@ -1265,7 +1265,7 @@ copy_function(char **args, int copy_and_rename)
 
 	if (*args[0] == 'm' && args[1]) {
 		size_t len = strlen(args[1]);
-		if (args[1][len - 1] == '/')
+		if (len > 0 && args[1][len - 1] == '/')
 			args[1][len - 1] = '\0';
 	}
 
@@ -1325,7 +1325,7 @@ copy_function(char **args, int copy_and_rename)
 		for (j = 0; j < sel_n; j++) {
 			size_t arg_len = strlen(sel_elements[j].name);
 
-			if (sel_elements[j].name[arg_len - 1] == '/')
+			if (arg_len > 0 && sel_elements[j].name[arg_len - 1] == '/')
 				sel_elements[j].name[arg_len - 1] = '\0';
 
 			if (*args[args_n] == '~') {
@@ -1337,7 +1337,7 @@ copy_function(char **args, int copy_and_rename)
 			}
 
 			size_t dest_len = strlen(args[args_n]);
-			if (args[args_n][dest_len - 1] == '/')
+			if (dest_len > 0 && args[args_n][dest_len - 1] == '/')
 				args[args_n][dest_len - 1] = '\0';
 
 			char dest[PATH_MAX];

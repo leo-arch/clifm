@@ -240,7 +240,7 @@ remotes_unmount(char *name)
 	/* Get out of mountpoint before unmounting */
 	size_t mlen = strlen(remotes[i].mountpoint);
 	if (strncmp(remotes[i].mountpoint, workspaces[cur_ws].path, mlen) == 0) {
-		if (remotes[i].mountpoint[mlen - 1] == '/') {
+		if (mlen > 0 && remotes[i].mountpoint[mlen - 1] == '/') {
 			mlen--;
 			remotes[i].mountpoint[mlen] = '\0';
 		}
