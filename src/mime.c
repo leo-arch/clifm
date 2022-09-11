@@ -433,9 +433,11 @@ get_mime(char *file)
 	char *tmp = strrchr(line, ' ');
 	if (tmp) {
 		size_t len = strlen(tmp);
-		if (tmp[len - 1] == '\n')
+		if (len > 0 && tmp[len - 1] == '\n') {
 			tmp[len - 1] = '\0';
-		mime_type = savestring(tmp + 1, strlen(tmp) - 1);
+			len--;
+		}
+		mime_type = len > 0 ? savestring(tmp + 1, len - 1) : (char *)NULL;
 	}
 
 	fclose(file_fp);

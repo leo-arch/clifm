@@ -1076,6 +1076,7 @@ free_extension_colors(void)
 	free(ext_colors);
 	ext_colors = (char **)NULL;
 	free(ext_colors_len);
+	ext_colors_len = (size_t *)NULL;
 	ext_colors_n = 0;
 }
 
@@ -1382,11 +1383,11 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 					continue;
 
 			ssize_t len = line_len - (opt_str - line);
-			if (len && opt_str[len - 1] == '\n') {
+			if (len > 0 && opt_str[len - 1] == '\n') {
 				opt_str[len - 1] = '\0';
 				--len;
 			}
-			if (len && (opt_str[len - 1] == '\'' || opt_str[len - 1] == '"')) {
+			if (len > 0 && (opt_str[len - 1] == '\'' || opt_str[len - 1] == '"')) {
 				opt_str[len - 1] = '\0';
 				--len;
 			}
@@ -1480,8 +1481,8 @@ split_extensions_colors(char *extcolors)
 	size_t len = 0;
 	int eol = 0;
 
-	if (ext_colors_n)
-		free_extension_colors();
+//	if (ext_colors_n)
+	free_extension_colors();
 
 	while (!eol) {
 		switch (*p) {

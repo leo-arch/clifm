@@ -170,7 +170,7 @@ get_block_devices(void)
 
 		/* Get only partition names, normally ending with a number */
 		size_t blen = strlen(name);
-		if (name[blen - 1] < '1' || name[blen - 1] > '9') {
+		if (blen > 0 && (name[blen - 1] < '1' || name[blen - 1] > '9')) {
 			free(blockdev[i]);
 			continue;
 		}
@@ -450,7 +450,7 @@ mount_dev(int n)
 	p += 4;
 
 	size_t plen = strnlen(p, sizeof(out_line) - 4);
-	if (p[plen - 1] == '\n')
+	if (plen > 0 && p[plen - 1] == '\n')
 		p[plen - 1] = '\0';
 
 	media[n].mnt = savestring(p, strnlen(p, sizeof(out_line) - 4));

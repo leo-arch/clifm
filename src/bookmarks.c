@@ -415,7 +415,7 @@ bookmark_add(char *file)
 		if (tmp_line) {
 			size_t tmp_line_len = strlen(tmp_line);
 
-			if (tmp_line_len && tmp_line[tmp_line_len - 1] == '\n')
+			if (tmp_line_len > 0 && tmp_line[tmp_line_len - 1] == '\n')
 				tmp_line[tmp_line_len - 1] = '\0';
 
 			if (strcmp(tmp_line, file) == 0) {

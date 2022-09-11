@@ -712,7 +712,7 @@ ADD_STRING:
 	}
 
 	/* Remove trailing new line char, if any */
-	if (result && result[result_len - 1] == '\n')
+	if (result && result_len > 0 && result[result_len - 1] == '\n')
 		result[result_len - 1] = '\0';
 
 	/* Emergency prompt, just in case something went wrong */
@@ -754,7 +754,7 @@ print_welcome_msg(void)
 {
 	if (welcome_message) {
 		printf("%s%s > %s\n%s%s\n", wc_c, _PROGRAM_NAME, _(PROGRAM_DESC),
-				df_c, _(HELP_MESSAGE));
+			df_c, _(HELP_MESSAGE));
 		welcome_message = 0;
 	}
 }
