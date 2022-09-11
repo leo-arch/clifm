@@ -1083,47 +1083,62 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			else
 				query = lw ? lw : (char *)NULL;
 		}
+
 		if (!query || !*query) /* Last char is space */
 			finder_offset++;
 	}
 
+	char *lb = rl_line_buffer;
+
 	if (cur_comp_type == TCMP_TAGS_F) {
-		if (rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] == ' ')
+		if (rl_end > 0 && lb && lb[rl_end - 1] == ' ') {
 			/* Coming from untag ('tu :TAG ') */
 			finder_offset++;
-		else { /* Coming from tag expression ('t:FULL_TAG') */
-			char *sp = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
-			finder_offset = prompt_offset + (sp ? (int)(sp - rl_line_buffer) - 2 : 0);
+		} else { /* Coming from tag expression ('t:FULL_TAG') */
+			char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+			finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : 0);
 		}
-	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS) {
+	}
+
+	else if (cur_comp_type == TCMP_FILE_TYPES_OPTS) {
 		finder_offset++;
-	} else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
-		char *sp = rl_line_buffer ? strrchr(rl_line_buffer,  ' ') : (char *)NULL;
+	}
+
+	else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
+		char *sp = lb ? strrchr(lb,  ' ') : (char *)NULL;
 		if (sp) /* Expression is second or more word: "text =FILE_TYPE" */
-			finder_offset = prompt_offset + (int)(sp - rl_line_buffer) - 1;
+			finder_offset = prompt_offset + (int)(sp - lb) - 1;
 		else /* Expression is first word: "=FILE_TYPE" */
 			finder_offset = prompt_offset - 2;
-	} else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES
+	}
+
+	else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES
 	|| cur_comp_type == TCMP_BM_PATHS) {
-		char *sp = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
-		finder_offset = prompt_offset + (sp ? (int)(sp - rl_line_buffer) - 2 : 0);
-	} else if (cur_comp_type == TCMP_TAGS_C) {
-		char *sp = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
-		finder_offset = prompt_offset + (sp ? (int)(sp - rl_line_buffer) - 1 : 0);
-	} else if (cur_comp_type == TCMP_TAGS_T) {
-		char *sp = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
-		finder_offset = prompt_offset + (sp ? (int)(sp - rl_line_buffer) : 0);
-	} else if (cur_comp_type == TCMP_GLOB) {
-		char *sl = rl_line_buffer ? strrchr(rl_line_buffer, '/') : (char *)NULL;
-		char *sp = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
+		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : 0);
+	}
+
+	else if (cur_comp_type == TCMP_TAGS_C) {
+		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 1 : 0);
+	}
+
+	else if (cur_comp_type == TCMP_TAGS_T) {
+		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		finder_offset = prompt_offset + (sp ? (int)(sp - lb) : 0);
+	}
+
+	else if (cur_comp_type == TCMP_GLOB) {
+		char *sl = lb ? strrchr(lb, '/') : (char *)NULL;
+		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
 		if (!sl) {
 			if (sp)
-				finder_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
+				finder_offset = prompt_offset + (int)(sp - lb) - 2;
 		} else {
 			if (sp && sp > sl)
-				finder_offset = prompt_offset + (int)(sp - rl_line_buffer) - 2;
+				finder_offset = prompt_offset + (int)(sp - lb) - 2;
 			else
-				finder_offset = prompt_offset + (int)(sl - rl_line_buffer) - 2;
+				finder_offset = prompt_offset + (int)(sl - lb) - 2;
 		}
 	}
 
@@ -1230,16 +1245,19 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			buf[blen + 1] = '\0';
 			xstrsncpy(buf + blen + 1, sp, splen);
 		}
+	}
 
-	} else if (cur_comp_type == TCMP_DESEL) {
+	else if (cur_comp_type == TCMP_DESEL) {
 		prefix_len = strlen(query ? query : (lw ? lw : ""));
+	}
 
-	} else if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
+	else if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
 		prefix_len = 0;
+	}
 
-	} else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL
+	else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL
 	|| cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
 	|| cur_comp_type == TCMP_BM_PATHS) {
 		char *s = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
@@ -1249,21 +1267,25 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			rl_end = rl_point;
 			prefix_len = 0;
 		}
+	}
 
-	} else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
+	else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
 		char *s = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
 		rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
 		rl_delete_text(rl_point, rl_end);
 		rl_end = rl_point;
 		prefix_len = 0;
+	}
 
-	} else if (cur_comp_type == TCMP_USERS) {
+	else if (cur_comp_type == TCMP_USERS) {
 		size_t l = strlen(buf);
 		char *p = savestring(buf, l);
 		buf = (char *)xrealloc(buf, (l + 2) * sizeof(char));
 		sprintf(buf, "~%s", p);
 		free(p);
-	} else {
+	}
+
+	else {
 		if ((case_sens_path_comp == 0 || xargs.fuzzy_match == 1) && query) {
 			/* Honor case insensitive completion/fuzzy matches */
 			if (strncmp(matches[0], buf, prefix_len) != 0) {
