@@ -1656,6 +1656,10 @@ AFTER_USUAL_COMPLETION:
 					t[1] = '\0';
 					rl_insert_text(t);
 					rl_redisplay();
+					if (cur_color == hv_c || cur_color == hq_c) {
+						fputs(cur_color, stdout);
+						fflush(stdout);
+					}
 				}
 				UNHIDE_CURSOR;
 				cur_color = cc;
