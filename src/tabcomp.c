@@ -993,7 +993,7 @@ clean_rl_buffer(const char *text)
  *   .file
  *   .this_file
  *   .beef
- * Common suffix: '.' (not '.f')
+ * Common preffix: '.' (not '.f')
  * */
 static int
 finder_tabcomp(char **matches, const char *text, char *original_query)
@@ -1030,7 +1030,10 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	/* Calculate the offset (left padding) of the FZF window based on
-	 * cursor position and current query string */
+	 * cursor position and current query string
+	 * We don't want to place the finder's window too much to the right,
+	 * making its contents unreadable: let's make sure we have at least
+	 * 20 chars for the finder's window */
 	int max_finder_offset = term_cols > 20 ? term_cols - 20 : 0;
 
 // TESTING FINDER OFFSET
@@ -1039,6 +1042,9 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		n -= term_cols;
 	int finder_offset = n + prompt_offset < max_finder_offset
 		? (n + prompt_offset - 4) : 0;
+	/* PROMPT_OFFSET (the space used by the prompt in the current line)
+	 * is calculated the first time we print the prompt (in my_rl_getc
+	 * (readline.c)) */
 
 /*	int c = prompt_offset + (int)wc_xstrlen(rl_line_buffer);
 	while (c > term_cols)
@@ -1146,14 +1152,21 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	while (finder_offset > term_cols)
 		finder_offset -= term_cols;
 
-	if (finder_offset > max_finder_offset)
+	if (finder_offset > max_finder_offset || finder_offset < 0)
+//		finder_offset = prompt_offset >= 4 ? prompt_offset - 3 : prompt_offset;
 		finder_offset = 0;
 // TESTING FINDER OFFSET
 
-	if (finder_offset < 0)
-		finder_offset = 0;
+	if (finder_offset == 0) {
+		/* Not enough space to align the window with the last word. Let's
+		 * try to align it with the prompt. If not enough space either, send
+		 * the window to the leftmost side of the screen */
+		finder_offset = prompt_offset >= 3 ? prompt_offset - 3 : prompt_offset;
+		if (finder_offset > max_finder_offset)
+			finder_offset = 0;
+	}
 
-	/* TAB completion cases allowing multiple selection */
+	/* TAB completion cases allowing multi-selection */
 	int multi = is_multi_sel();
 
 	/* Run the finder application and store the ouput into the FINDER_OUT_FILE file */
@@ -1163,10 +1176,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* Calculate currently used lines to go back to the correct cursor
 	 * position after quitting FZF */
 	int lines = 1, total_line_len = 0;
-	total_line_len = rl_end + prompt_offset;
-	/* PROMPT_OFFSET (the space used by the prompt in the current line)
-	 * is calculated the first time we print the prompt (in my_rl_getc
-	 * (readline.c)) */
+	total_line_len = n + prompt_offset;
+//	total_line_len = rl_end + prompt_offset;
 
 	if (total_line_len > term_cols) {
 		lines = total_line_len / term_cols;
