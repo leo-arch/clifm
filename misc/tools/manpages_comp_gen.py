@@ -61,7 +61,7 @@ except ImportError:
 # Destination dir suffix (will be appended to XDG_DATA_HOME)
 DEST_DIR_SUFFIX = "/clifm/completions"
 # Generated completion files will have this extension
-COMP_EXT = ".cfm"
+COMP_EXT = ".clifm"
 
 # Whether we're Python 3
 IS_PY3 = sys.version_info[0] >= 3

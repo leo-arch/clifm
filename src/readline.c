@@ -151,8 +151,7 @@ get_shell_cmd_opts(char *cmd)
 		return EXIT_FAILURE;
 
 	char p[PATH_MAX];
-//	snprintf(p, PATH_MAX, "%s/.local/share/%s/completions/%s.cfm", user.home, PNL, cmd);
-	snprintf(p, PATH_MAX, "%s/.local/share/%s/completions/%s.clifm", user.home, PNL, cmd);
+	snprintf(p, sizeof(p), "%s/.local/share/%s/completions/%s.clifm", user.home, PNL, cmd);
 
 	struct stat a;
 	if (stat(p, &a) == -1) {
