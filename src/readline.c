@@ -32,9 +32,7 @@
 
 #include "helpers.h"
 
-//#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/stat.h>
-//#endif
 #include <dirent.h>
 #include <fcntl.h>
 #include <glob.h>
@@ -47,6 +45,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <pwd.h>
+#include <wchar.h> /* mbrtowc(3) */
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
@@ -305,6 +304,43 @@ leftmost_bell(void)
 }
 #endif
 
+/* Construct a wide-char byte by byte
+ * Each char (C) is appended to a string (MBC), until we have a complete
+ * multi-byte char (mbrtowc(1) returns >= 0), in which case we insert the
+ * character into the readline buffer (my_rl_getc will then trigger the
+ * suggestions system using the updated input buffer) */
+static int
+construct_wide_char(unsigned char c)
+{
+	static char mbc[MB_LEN_MAX] = "";
+	static size_t mbc_len = 0;
+
+	mbc[mbc_len] = (char)c;
+
+	mbstate_t ss = {0};
+	wchar_t wc;
+	size_t length = mbrtowc(&wc, mbc, MB_CUR_MAX, &ss);
+	if (length == (size_t)-1) {
+		mbc_len++;
+		return (-2); /* Incomplete multi-byte char: Do not trigger suggestions */
+	}
+
+	if (length == (size_t)-2) {
+		mbc_len = 0;
+		memset(mbc, '\0', MB_LEN_MAX);
+		return (-2);
+	}
+
+	mbc_len++;
+	mbc[mbc_len] = '\0';
+	rl_insert_text(mbc);
+	rl_redisplay();
+	mbc_len = 0;
+	memset(mbc, '\0', MB_LEN_MAX);
+
+	return 0; /* Full multi-byte char: trigger suggestions */
+}
+
 static int
 rl_exclude_input(unsigned char c)
 {
@@ -372,7 +408,7 @@ rl_exclude_input(unsigned char c)
 
 	/* Multi-byte char. Send it directly to the input buffer. We can't
 	 * process it here, since we process only single bytes */
-	if (c > 127 || (c & 0xc0) == 0x80) {
+/*	if (c > 127 || (c & 0xc0) == 0x80) {
 		if (highlight == 1 && cur_color != tx_c && cur_color != hq_c
 		&& cur_color != hc_c && cur_color != hp_c) {
 			cur_color = tx_c;
@@ -380,7 +416,10 @@ rl_exclude_input(unsigned char c)
 			fflush(stdout);
 		}
 		return 1;
-	}
+	} */
+
+	if ((c & 0xc0) == 0xc0 || (c & 0xc0) == 0x80)
+		return construct_wide_char(c);
 
 	if (c != _ESC)
 		cmdhist_flag = 0;
@@ -701,6 +740,7 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result > 0 && result == sizeof(unsigned char)) {
+
 			/* Ctrl-d. Let's check the previous char wasn't ESC to prevent
 			 * Ctrl-Alt-d to be taken as Ctrl-d */
 			if (c == 4 && control_d_exits == 1 && prev != _ESC)
