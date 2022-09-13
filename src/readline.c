@@ -305,10 +305,11 @@ leftmost_bell(void)
 #endif
 
 /* Construct a wide-char byte by byte
- * Each char (C) is appended to a string (MBC), until we have a complete
- * multi-byte char (mbrtowc(1) returns >= 0), in which case we insert the
- * character into the readline buffer (my_rl_getc will then trigger the
- * suggestions system using the updated input buffer) */
+ * This function is called multiple times until we get a full wide-char
+ * Each byte (C), in each subsequent call, is appended to a string (MBC),
+ * until we have a complete multi-byte char (mbrtowc(1) returns >= 0), in
+ * which case we insert the character into the readline buffer (my_rl_getc
+ * will then trigger the suggestions system using the updated input buffer) */
 static int
 construct_wide_char(unsigned char c)
 {
