@@ -661,10 +661,10 @@ remove_trailing_slash(char **str, size_t *len)
 static inline void
 skip_leading_spaces(char **str, size_t *len)
 {
-	if (*len == 0)
-		return;
+//	if (*len == 0)
+//		return;
 
-	while ((*str)[*len - 1] == ' ') {
+	while (*len > 0 && (*str)[*len - 1] == ' ') {
 		(*len)--;
 		(*str)[*len] = '\0';
 	}
