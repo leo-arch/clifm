@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <pwd.h>
-#include <wchar.h> /* mbrtowc(3) */
+//#include <wchar.h> /* mbrtowc(3) */
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
@@ -304,16 +304,100 @@ leftmost_bell(void)
 }
 #endif
 
+/* The maximum number of bytes we need to contain any Unicode code point
+ * as UTF-8 as a C string. This length includes one trailing nul byte. */
+#define UTF8_MAX_LENGTH 5
+
+#define UTF8_BAD_LEADING_BYTE -1
+
+/* This table contains the length of a sequence which begins with the
+   byte given. A value of zero indicates that the byte cannot begin a
+   UTF-8 sequence. */
+
+/* https://metacpan.org/source/CHANSEN/Unicode-UTF8-0.60/UTF8.xs#L8 */
+
+const unsigned char utf8_sequence_len[0x100] =
+{
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x00-0x0F */
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x10-0x1F */
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x20-0x2F */
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x30-0x3F */
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x40-0x4F */
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x50-0x5F */
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x60-0x6F */
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 0x70-0x7F */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x80-0x8F */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0x90-0x9F */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0xA0-0xAF */
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0xB0-0xBF */
+	0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2, /* 0xC0-0xCF */
+	2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, /* 0xD0-0xDF */
+	3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3, /* 0xE0-0xEF */
+	4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0, /* 0xF0-0xFF */
+};
+
+/* This function returns the number of bytes of a UTF-8 sequence.
+   A sequence starting with byte C will become either 1 (c = 0000xxxx),
+   * 2 (c = 110xxxxx), 3 (c = 1110xxxx), or 4 (c = 111100xx or c =
+   11110100). If C is not a valid UTF-8 leading byte, the value
+   UTF8_BAD_LEADING_BYTE (-1) is returned. */
+
+/* Taken from https://github.com/benkasminbullock/unicode-c, licensed GPL2+ */
+int
+utf8_bytes(unsigned char c)
+{
+	int n;
+	n = utf8_sequence_len[c];
+	if (n == 0)
+		return UTF8_BAD_LEADING_BYTE;
+
+	return n;
+}
+
 /* Construct a wide-char byte by byte
- * This function is called multiple times until we get a full wide-char
- * Each byte (C), in each subsequent call, is appended to a string (MBC),
- * until we have a complete multi-byte char (mbrtowc(1) returns >= 0), in
- * which case we insert the character into the readline buffer (my_rl_getc
+ * This function is called multiple times until we get a full wide-char.
+ * Each byte (C), in each subsequent call, is appended to a string (WC_STR),
+ * until we have a complete multi-byte char (WC_BYTES were copied into WC_STR),
+ * in which case we insert the character into the readline buffer (my_rl_getc
  * will then trigger the suggestions system using the updated input buffer) */
 static int
 construct_wide_char(unsigned char c)
 {
-	static char mbc[MB_LEN_MAX] = "";
+	static char wc_str[UTF8_MAX_LENGTH] = "";
+	static size_t wc_len = 0;
+	static int wc_bytes = 0;
+
+	if (wc_len == 0)
+		wc_bytes = utf8_bytes(c);
+
+	/* utf8_bytes returns -1 in case of error, and a zero bytes char should never happen */
+	if (wc_bytes < 1)
+		return (-2);
+
+	if (wc_len < (size_t)wc_bytes - 1) {
+		wc_str[wc_len] = (char)c;
+		wc_len++;
+		return (-2); /* Incomplete wide char: do not trigger suggestions */
+	}
+
+	wc_str[wc_len] = (char)c;
+	wc_len++;
+	wc_str[wc_len] = '\0';
+
+	if (highlight == 1 && cur_color != tx_c && cur_color != hq_c
+	&& cur_color != hv_c && cur_color != hc_c && cur_color != hp_c) {
+		cur_color = tx_c;
+		fputs(cur_color, stdout);
+	}
+
+	rl_insert_text(wc_str);
+	rl_redisplay();
+	wc_len = wc_bytes = 0;
+	memset(wc_str, '\0', UTF8_MAX_LENGTH);
+
+	return 0;
+
+/*	static char mbc[MB_LEN_MAX] = "";
 	static size_t mbc_len = 0;
 
 	mbc[mbc_len] = (char)c;
@@ -323,7 +407,7 @@ construct_wide_char(unsigned char c)
 	size_t length = mbrtowc(&wc, mbc, MB_CUR_MAX, &ss);
 	if (length == (size_t)-1) {
 		mbc_len++;
-		return (-2); /* Incomplete multi-byte char: Do not trigger suggestions */
+		return (-2); // Incomplete multi-byte char: Do not trigger suggestions
 	}
 
 	if (length == (size_t)-2) {
@@ -346,7 +430,7 @@ construct_wide_char(unsigned char c)
 	mbc_len = 0;
 	memset(mbc, '\0', MB_LEN_MAX);
 
-	return 0; /* Full multi-byte char: trigger suggestions */
+	return 0; // Full multi-byte char: trigger suggestions */
 }
 
 static int
@@ -748,7 +832,6 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result > 0 && result == sizeof(unsigned char)) {
-
 			/* Ctrl-d. Let's check the previous char wasn't ESC to prevent
 			 * Ctrl-Alt-d to be taken as Ctrl-d */
 			if (c == 4 && control_d_exits == 1 && prev != _ESC)
