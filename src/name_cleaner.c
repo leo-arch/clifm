@@ -21,8 +21,9 @@
  * MA 02110-1301, USA.
 */
 
-/* The algorithm to translate Unicode characters into ASCII is based on
- * https://github.com/dharple/detox */
+/* The core algorithm to translate Unicode characters into ASCII is based on
+ * https://github.com/dharple/detox, licensed BSD-3-clause
+ * Copyright (c) Doug Harple <detox.dharple@gmail.com> */
 
 #ifndef _NO_BLEACH
 
@@ -92,7 +93,7 @@ struct  bleach_t {
 static int
 get_utf_8_width(char c)
 {
-	if ((c & 0xc0) == 0xc0) {
+	if ((c & UTF_8_ENCODED_MASK) == UTF_8_ENCODED_START) { /* UTF-8 leading byte */
 		check_width(c, 2);
 		check_width(c, 3);
 		check_width(c, 4);
@@ -100,7 +101,7 @@ get_utf_8_width(char c)
 		check_width(c, 6);
     }
 
-	if ((c & 0xc0) == 0x80) {
+	if ((c & UTF_8_ENCODED_MASK) == UTF_8_ENCODED_CONT) { /* UTF-8 continuation byte */
 		return -1;
 	}
 
@@ -157,7 +158,7 @@ get_uft8_dec_value(size_t *i, char *str)
 			break;
 		}
 
-		if ((str[*i] & 0xc0) != 0x80) {
+		if ((str[*i] & UTF_8_ENCODED_MASK) != UTF_8_ENCODED_CONT) { /* Not a UTF-8 continuation byte */
 /*			fprintf(stderr, "CliFM: warning: UTF-8 sequence ended unexpectedly "
 					"(missing continuation byte)\n"); */
 			failed = 1;
@@ -414,7 +415,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	int exit_status = open_file(f);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bleach: %s: %s\n"), f, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		if (unlinkat(fd, f, 0) == -1)
 			_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		close_fstream(fp, fd);
@@ -620,8 +621,7 @@ CONFIRM:
 
 	if (f == 0) {
 		/* Just in case either the original or the replacement file name
-		 * was removed from the list by the user, leaving only one of the
-		 * two */
+		 * was removed from the list by the user, leaving only one of the two */
 		free(bfiles[0].original);
 		free(bfiles[0].replacement);
 		free(bfiles);
@@ -633,8 +633,8 @@ CONFIRM:
 	 * Ask for confirmation in case the user just wanted to see what would
 	 * be done */
 	if (_edit == 1) {
-		printf("%zu %s will be bleached\n", f, f > 1 ? "files" : "file");
-		if (rl_get_y_or_n("Continue? [y/n] ") != 1) {
+		printf(_("%zu %s will be bleached\n"), f, f > 1 ? _("files") : _("file"));
+		if (rl_get_y_or_n(_("Continue? [y/n] ")) != 1) {
 			for (i = 0; i < f; i++) {
 				free(bfiles[i].original);
 				free(bfiles[i].replacement);
