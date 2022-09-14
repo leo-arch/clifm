@@ -334,6 +334,13 @@ construct_wide_char(unsigned char c)
 
 	mbc_len++;
 	mbc[mbc_len] = '\0';
+
+	if (highlight == 1 && cur_color != tx_c && cur_color != hq_c
+	&& cur_color != hv_c && cur_color != hc_c && cur_color != hp_c) {
+		cur_color = tx_c;
+		fputs(cur_color, stdout);
+	}
+
 	rl_insert_text(mbc);
 	rl_redisplay();
 	mbc_len = 0;
