@@ -403,7 +403,7 @@ construct_wide_char(unsigned char c)
 	rl_insert_text(wc_str);
 	rl_redisplay();
 	wc_len = wc_bytes = 0;
-	memset(wc_str, '\0', UTF8_MAX_LENGTH);
+	memset(wc_str, '\0', UTF8_MAX_LEN);
 
 	return 0;
 }
