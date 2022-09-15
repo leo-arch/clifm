@@ -307,7 +307,6 @@ leftmost_bell(void)
 /* The maximum number of bytes we need to contain any Unicode code point
  * as a C string: 4 bytes plus a trailing nul byte. */
 #define UTF8_MAX_LEN 5
-
 #define UTF8_BAD_LEADING_BYTE -1
 
 /* This function returns the number of bytes in a UTF-8 sequence by inspecting only
@@ -333,7 +332,7 @@ leftmost_bell(void)
  *       ^^^
  *
  * If the value is now 4 (100), only the first bit from the left (of the three
- * we are considering) is, meaning that we have 1 additional bytes (2 in total),
+ * we are considering) is set, meaning that we have 1 additional byte (2 in total),
  * so we return 2.
  *
  * Otherwise, the value is either 7 (111), meaning all three bits are set, so
@@ -363,6 +362,11 @@ utf8_bytes(unsigned char c)
 	return UTF8_BAD_LEADING_BYTE;
 }
 
+#define SUGGEST_ONLY             0
+#define RL_INSERT_CHAR           1
+#define SKIP_CHAR                2
+#define SKIP_CHAR_NO_REDISPLAY   3
+
 /* Construct a wide-char byte by byte
  * This function is called multiple times until we get a full wide-char.
  * Each byte (C), in each subsequent call, is appended to a string (WC_STR),
@@ -382,12 +386,12 @@ construct_wide_char(unsigned char c)
 	/* utf8_bytes returns -1 in case of error, and a zero bytes wide-char
 	 * should never happen */
 	if (wc_bytes < 1)
-		return (-2);
+		return SKIP_CHAR_NO_REDISPLAY;
 
 	if (wc_len < (size_t)wc_bytes - 1) {
 		wc_str[wc_len] = (char)c;
 		wc_len++;
-		return (-2); /* Incomplete wide char: do not trigger suggestions */
+		return SKIP_CHAR_NO_REDISPLAY; /* Incomplete wide char: do not trigger suggestions */
 	}
 
 	wc_str[wc_len] = (char)c;
@@ -405,9 +409,15 @@ construct_wide_char(unsigned char c)
 	wc_len = wc_bytes = 0;
 	memset(wc_str, '\0', UTF8_MAX_LEN);
 
-	return 0;
+	return SUGGEST_ONLY;
 }
 
+/* Handle the input char C and sepcify what to do next based on this char
+ * Return values:
+ * SUGGEST_ONLY = Do not insert char (already inserted here). Make suggestions
+ * RL_INSERT_ONLY = Let readline insert the char. Do not suggest
+ * SKIP_CHAR = Do not insert char. Do not suggest
+ * SKIP_CHAR_NO_REDISPLAY = Same as SKIP_CHAR, but do not call rl_redisplay() */
 static int
 rl_exclude_input(unsigned char c)
 {
@@ -423,10 +433,10 @@ rl_exclude_input(unsigned char c)
 #ifndef _NO_SUGGESTIONS
 			} else if (suggestion.printed) {
 				clear_suggestion(CS_FREEBUF);
-				return 1;
+				return RL_INSERT_CHAR;
 #endif /* !_NO_SUGGESTIONS */
 			} else {
-				return 1;
+				return RL_INSERT_CHAR;
 			}
 		}
 	}
@@ -442,7 +452,7 @@ rl_exclude_input(unsigned char c)
 				if (suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
 			}
-			return 1;
+			return RL_INSERT_CHAR;
 #endif /* !_NO_SUGGESTIONS */
 		}
 
@@ -465,13 +475,13 @@ rl_exclude_input(unsigned char c)
 				cmdhist_flag = 0;
 		}
 
-		return 1;
+		return RL_INSERT_CHAR;
 	}
 
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
 	 * enter (13), and escape (27) */
 	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC)
-		return 1;
+		return RL_INSERT_CHAR;
 
 	/* Multi-byte char. Send it directly to the input buffer. We can't
 	 * process it here, since we process only single bytes */
@@ -494,10 +504,6 @@ rl_exclude_input(unsigned char c)
 	/* Skip backspace, Enter, and TAB keys */
 	switch(c) {
 		case DELETE: /* fallthrough */
-/*			if (rl_point != rl_end && suggestion.printed)
-				clear_suggestion(CS_FREEBUF);
-			goto FAIL; */
-
 		case BS:
 			_del = (rl_point == 0 && rl_end == 0) ? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
 			xbackspace();
@@ -514,10 +520,10 @@ rl_exclude_input(unsigned char c)
 #endif /* !_NO_SUGGESTIONS */
 			cur_color = tx_c;
 			fputs(tx_c, stdout);
-			return 1;
+			return RL_INSERT_CHAR;
 
 		case _ESC:
-			return 1;
+			return RL_INSERT_CHAR;
 
 		case _TAB:
 #ifndef _NO_SUGGESTIONS
@@ -527,30 +533,14 @@ rl_exclude_input(unsigned char c)
 				|| suggestion.type == ALIAS_SUG
 				|| suggestion.type == JCMD_SUG) {
 					clear_suggestion(CS_FREEBUF);
-					return 1;
+					return RL_INSERT_CHAR;
 				}
 			}
 #endif /* !_NO_SUGGESTIONS */
-			return 1;
+			return RL_INSERT_CHAR;
 
 		default: break;
 	}
-
-/*	if (c <= 127) {
-		char t[2];
-		t[0] = (char)c;
-		t[1] = '\0';
-		rl_insert_text(t);
-	} else if (wcn >= sizeof(wc) || (c & 0xc0) != 0x80) {
-		wc[wcn] = '\0';
-		rl_insert_text(wc);
-		memset(wc, '\0', sizeof(wc));
-		wcn = 0;
-		wc[wcn++] = (char)c;
-	} else {
-		wc[wcn++] = (char)c;
-		return -2;
-	} */
 
 	char t[2];
 	t[0] = (char)c;
@@ -590,7 +580,7 @@ END:
 				/* If a suggestion is found, the normal prompt will be
 				 * restored and wrong_cmd will be set to zero */
 				rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
-				return 2;
+				return SKIP_CHAR;
 			}
 			if (rl_point == 0 && rl_end == 0) {
 				if (wrong_cmd == 1)
@@ -599,28 +589,22 @@ END:
 					leftmost_bell();
 			}
 #endif /* !_NO_SUGGESTIONS */
-			return 2;
+			return SKIP_CHAR;
 		}
-		return 0;
+		return SUGGEST_ONLY;
 	}
 
-	if (wrong_cmd == 0) {
-//		if (rl_point < rl_end) {
-//		if (rl_point < rl_end || _del > 0) {
+	if (wrong_cmd == 0)
 		recolorize_line();
-/*		} else {
-			flags |= NO_RECOLOR_LINE;
-			rl_highlight(rl_line_buffer, rl_point ? (size_t)rl_point - 1 : 0, SET_COLOR);
-		} */
-	}
 #endif /* !_NO_HIGHLIGHT */
 
 	if (_del > 0) {
 #ifndef _NO_SUGGESTIONS
 		if (wrong_cmd == 1 && s == -1 && rl_end > 0) {
 			rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
-			return 2;
+			return SKIP_CHAR;
 		}
+
 		if (rl_point == 0 && rl_end == 0) {
 			if (wrong_cmd == 1)
 				recover_from_wrong_cmd();
@@ -628,10 +612,10 @@ END:
 				leftmost_bell();
 		}
 #endif /* !_NO_SUGGESTIONS */
-		return 2;
+		return SKIP_CHAR;
 	}
 
-	return 0;
+	return SUGGEST_ONLY;
 }
 
 /* Print the corresponding file name in the xrename prompt */
@@ -665,12 +649,12 @@ prompt_xrename(void)
 	} else {
 		char *dstr = dequote_str(pp, 0);
 		if (!dstr) {
-//			fprintf(stderr, _("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, pp);
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error dequoting file name\n"),
 				PROGRAM_NAME, pp);
 			xrename = 0;
 			return EXIT_FAILURE;
 		}
+
 		rl_replace_line(dstr, 1);
 		rl_point = rl_end = (int)strlen(dstr);
 		free(dstr);
@@ -688,7 +672,6 @@ prompt_xrename(void)
  * 0 if P is NULL or empty, and FALLBACK_PROMPT_OFFSET in case of error
  * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE)
  * is missing */
-#include <wchar.h>
 static int
 xrl_expand_prompt(char *p)
 {
@@ -708,7 +691,7 @@ xrl_expand_prompt(char *p)
 				return FALLBACK_PROMPT_OFFSET;
 			}
 
-			// No ignore characters found
+			/* No ignore characters found */
 			return (int)wc_xstrlen(p);
 		}
 
@@ -737,7 +720,7 @@ xrl_expand_prompt(char *p)
 	return n;
 }
 
-// Get amount of visible chars in the last line of the prompt (P)
+/* Get amount of visible chars in the last line of the prompt (P) */
 static int
 get_prompt_offset(char *p)
 {
@@ -804,7 +787,7 @@ my_rl_getc(FILE *stream)
 			return (EOF);
 	}
 
-	while(1) {
+	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result > 0 && result == sizeof(unsigned char)) {
 			/* Ctrl-d. Let's check the previous char wasn't ESC to prevent
@@ -846,11 +829,12 @@ my_rl_getc(FILE *stream)
 
 			/* Syntax highlighting is made from here */
 			int ret = rl_exclude_input(c);
-			if (ret == 1)
+			if (ret == RL_INSERT_CHAR)
 				return c;
 
 #ifndef _NO_SUGGESTIONS
-			if (ret != 2 && ret != -2 && !_xrename && suggestions) {
+//			if (ret != 2 && ret != -2 && !_xrename && suggestions) {
+			if (ret == SUGGEST_ONLY && _xrename == 0 && suggestions == 1) {
 // TESTING CURSOR POSITION
 				rl_suggestions(c);
 			}
@@ -879,7 +863,7 @@ my_rl_getc(FILE *stream)
 // TESTING CURSOR POSITION
 #endif /* !_NO_SUGGESTIONS */
 
-			if (ret != -2)
+			if (ret != SKIP_CHAR_NO_REDISPLAY)
 				rl_redisplay();
 			continue;
 		}

@@ -22,8 +22,9 @@
 */
 
 /* The core algorithm to translate Unicode characters into ASCII is based on
- * https://github.com/dharple/detox, licensed BSD-3-clause
- * Copyright (c) Doug Harple <detox.dharple@gmail.com> */
+ * https://github.com/dharple/detox and includes:
+ * check_width, unpack_start, and unpack_cont macros, just as get_utf_8_width
+ * and get_uft8_dec_value functions */
 
 #ifndef _NO_BLEACH
 
