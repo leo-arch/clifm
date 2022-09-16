@@ -670,8 +670,8 @@ prompt_xrename(void)
 /* Unicode aware implementation of readline's rl_expand_prompt()
  * Returns the amount of terminal columns taken by the last prompt line,
  * 0 if P is NULL or empty, and FALLBACK_PROMPT_OFFSET in case of error
- * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE)
- * is missing */
+ * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE
+ * is missing) */
 static int
 xrl_expand_prompt(char *p)
 {
@@ -733,18 +733,13 @@ get_prompt_offset(char *p)
 // TESTING CURSOR POSITION
 
 /* This function is automatically called by readline() to handle input.
- * Used to introduce the suggestions system. */
+ * Used to introduce suggestions and syntax highlighting. */
 static int
 my_rl_getc(FILE *stream)
 {
 	int result;
 	unsigned char c;
 	static unsigned char prev = 0;
-
-#if defined(__GO32__)
-	if (isatty(0))
-		return (getkey() & 0x7F);
-#endif /* __GO32__ */
 
 // TESTING CURSOR POSITION
 #ifndef _NO_FZF
@@ -902,13 +897,12 @@ my_rl_getc(FILE *stream)
 		}
 #endif /* _POSIX_VERSION && EAGAIN && O_NONBLOCK */
 
-#if !defined(__GO32__)
-      /* If the error that we received was SIGINT, then try again,
-	 this is simply an interrupted system call to read().
-	 Otherwise, some error ocurred, also signifying EOF. */
 		if (errno != EINTR)
 			return (EOF);
-#endif /* !__GO32__ */
+
+		  /* If the error that we received was SIGINT, then try again,
+		 this is simply an interrupted system call to read().
+		 Otherwise, some error ocurred, also signifying EOF. */
 	}
 }
 
