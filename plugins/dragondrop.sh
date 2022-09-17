@@ -4,16 +4,18 @@
 # Written by L. Abramovich
 # License: GPL3
 
-# Depends on dragon (https://github.com/mwh/dragon). For Archers, it
-# is available on the AUR as 'dragon-drag-and-drop'
-
+# Description:
 # With no arguments, it opens a window to drop files; otherwise, files
 # passed as arguments are send to the Dragon window to be dragged onto
 # somewhere else.
-
+#
 # Files dropped remotely are first downloaded via cURL into the CWD and
 # then send to the SelBox, whereas files dropped locally are directly
 # send to the SelBox
+
+# Dependencies:
+# dragon (https://github.com/mwh/dragon), grep, sed, curl, xargs
+
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
@@ -22,7 +24,6 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	printf "\nWith no arguments, it opens a window to drop files (using dragon); otherwise, files passed as arguments are send to the Dragon window to be dragged onto somewhere else.\n"
 	exit 0
 fi
-
 
 DRAGON=""
 
@@ -47,10 +48,8 @@ if [ -z "$1" ]; then
 	done)
 
 	[ "$ret" = 0 ] && exit 0
+	exit 1
 else
-	if $DRAGON "$@"; then
-		exit 0
-	fi
+	echo "$@" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g' | xargs -d'\n' "$DRAGON"
+	exit "$?"
 fi
-
-exit 1
