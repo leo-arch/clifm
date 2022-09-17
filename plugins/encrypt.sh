@@ -30,7 +30,7 @@ if ! type tar >/dev/null 2>&1; then
 	exit 127
 fi
 
-if ! type tar >/dev/null 2>&1; then
+if ! type sed >/dev/null 2>&1; then
 	printf "clifm: sed: Command not found\n" >&2
 	exit 127
 fi
