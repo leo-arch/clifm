@@ -547,9 +547,9 @@ extern int watch;
 //#define SET_CURSOR(y,x)            printf("\x1b[%d;%dH", (y), (x)) /* CUP */
 // TESTING CURSOR POSITION
 //#define SET_CURSOR_COL(n)          printf("\x1b[%dG", (n)) /* HPA */
+//#define MOVE_CURSOR_DOWN_1    fputs("\x1b[1B", stdout) /* CUD */
 // TESTING CURSOR POSITION
 #define MOVE_CURSOR_UP(n)     printf("\x1b[%dA", (n))  /* CUU */
-#define MOVE_CURSOR_DOWN_1    fputs("\x1b[1B", stdout) /* CUD */
 #define MOVE_CURSOR_RIGHT(n)  printf("\x1b[%dC", (n))  /* CUF */
 #define MOVE_CURSOR_LEFT(n)   printf("\x1b[%dD", (n))  /* CUB */
 #define ERASE_TO_RIGHT        fputs("\x1b[0K", stdout) /* EL0 */

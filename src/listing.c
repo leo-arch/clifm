@@ -1177,6 +1177,15 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 {
 	int nn = (max_files != UNSET && max_files < (int)files) ? max_files : (int)files;
 
+	void (*print_entry_function)(int *, const int, const int, const int);
+	if (colorize == 1)
+		print_entry_function = light_mode == 1 ? print_entry_color_light : print_entry_color;
+	else
+		print_entry_function = light_mode == 1 ? print_entry_nocolor_light : print_entry_nocolor;
+
+	void (*pad_filename_function)(int *, const int, const int);
+	pad_filename_function = light_mode == 1 ? pad_filename_light : pad_filename;
+
 	size_t cur_cols = 0;
 	int i, last_column = 0;
 	int blc = last_column;
@@ -1226,7 +1235,8 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
-		if (colorize) {
+		print_entry_function(&ind_char, i, pad, _max);
+/*		if (colorize) {
 			if (light_mode)
 				print_entry_color_light(&ind_char, i, pad, _max);
 			else
@@ -1236,13 +1246,14 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 				print_entry_nocolor_light(&ind_char, i, pad, _max);
 			else
 				print_entry_nocolor(&ind_char, i, pad, _max);
-		}
+		} */
 
 		if (!last_column) {
-			if (light_mode)
+			pad_filename_function(&ind_char, i, pad);
+/*			if (light_mode)
 				pad_filename_light(&ind_char, i, pad);
 			else
-				pad_filename(&ind_char, i, pad);
+				pad_filename(&ind_char, i, pad); */
 		} else {
 			putchar('\n');
 		}
@@ -1268,6 +1279,15 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	int last_column = 0;
 	/* The previous value of LAST_COLUMN. We need this value to run the pager */
 	int blc = last_column;
+
+	void (*print_entry_function)(int *, const int, const int, const int);
+	if (colorize == 1)
+		print_entry_function = light_mode == 1 ? print_entry_color_light : print_entry_color;
+	else
+		print_entry_function = light_mode == 1 ? print_entry_nocolor_light : print_entry_nocolor;
+
+	void (*pad_filename_function)(int *, const int, const int);
+	pad_filename_function = light_mode == 1 ? pad_filename_light : pad_filename;
 
 	size_t cur_cols = 0, cc = columns_n;
 	int x = 0, xx = 0, i = 0;
@@ -1353,7 +1373,8 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 
 		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
 
-		if (colorize) {
+		print_entry_function(&ind_char, x, pad, _max);
+/*		if (colorize) {
 			if (light_mode)
 				print_entry_color_light(&ind_char, x, pad, _max);
 			else
@@ -1363,13 +1384,14 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 				print_entry_nocolor_light(&ind_char, x, pad, _max);
 			else
 				print_entry_nocolor(&ind_char, x, pad, _max);
-		}
+		} */
 
 		if (!last_column) {
-			if (light_mode)
+			pad_filename_function(&ind_char, x, pad);
+/*			if (light_mode)
 				pad_filename_light(&ind_char, x, pad);
 			else
-				pad_filename(&ind_char, x, pad);
+				pad_filename(&ind_char, x, pad); */
 		} else {
 			/* Last column is populated. Ex:
 			 * 1 file  3 file3  5 file5HERE
