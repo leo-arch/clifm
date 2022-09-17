@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # A PDF text viewer plugin for CLiFM
+# Dependencies: pdftotext
+
 # Written by L. Abramovich
 # License: GPL3
 

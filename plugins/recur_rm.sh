@@ -4,6 +4,7 @@
 # (using find and fzf) and remove selected files
 
 # Dependencies: find, fzf, cat, xargs, rm
+
 # Author: L. Abramovich
 # License: GPL3
 

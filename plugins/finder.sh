@@ -4,6 +4,8 @@
 # Written by L. Abramovich
 # License GPL3
 
+# Dependencies: fzf or rofi, and sed
+
 SUCCESS=0
 ERROR=1
 

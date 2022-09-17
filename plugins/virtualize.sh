@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Virtual directories plugin for CliFM
+# Dependencies: sed
+
 # Author: L. Abramovich
 # License: GPL3
-
-# Dependencies: sed
 
 # Note: A new instance of CliFM will be spawned on a new terminal window
 # using $term_cmd, which defaults to 'xterm -e'. Edit this variable to

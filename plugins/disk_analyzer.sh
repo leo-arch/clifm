@@ -4,7 +4,7 @@
 # Written by L. Abramovich
 # License: GPL3
 # Description: Navigate the filesystem with FZF and display directories size.
-# Dependencies: du, fzf
+# Dependencies: du, fzf, grep
 
 # Usage:
 # Left: go to parent directory

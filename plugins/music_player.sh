@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Music player plugin for CliFM
+# Dependencies: mplayer (default), tr, head, sed
+
 # Written by L. Abramovich
 # License: GPL3
-
-# Dependencies: mplayer (default), tr, head, sed
 
 PLAYER="mplayer"
 OPTS="-playlist"

@@ -59,7 +59,7 @@ elif type feh >/dev/null 2>&1; then
 elif type lsix >/dev/null 2>&1; then
 	lsix "$TMP_DIR"/*
 else
-	printf "CliFM: No thumbails viewer found\n" >&2
+	printf "clifm: No thumbails viewer found\n" >&2
 	rm -rf -- "$TMP_DIR" 2>/dev/null
 	exit 1
 fi

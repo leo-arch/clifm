@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # Plugin to list files in CWD by a given mime type using FZF
+# Dependencies: fzf, file, grep
+
 # Written by L. Abramovich
 # License GPL3
 

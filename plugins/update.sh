@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # Plugins to check for CliFM's updates
+# Dependencies: awk, grep
+
 # Written by L. Abramovich
 # License GPL3
 

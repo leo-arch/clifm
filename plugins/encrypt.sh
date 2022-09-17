@@ -65,7 +65,7 @@ if [ -e "${file}.gpg" ]; then
 	exit 1
 fi
 
-files="$(echo "$@" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g')"
+files="$(echo "$@" | sed 's/\\ /\t/g;s/ /\n/g;s/\t/ /g;s/\\//g')"
 
 if ! echo "$files" | xargs -I{} tar -rf "$file" {}; then
 	rm -rf -- "$file"

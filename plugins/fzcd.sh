@@ -6,6 +6,8 @@
 # Author: Docbroke
 # License: GPL3
 
+# Dependencies: fzf, find
+
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Find and change the current working directory via FZF\n"

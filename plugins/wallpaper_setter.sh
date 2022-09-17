@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # Wallpaper setter plugin for CliFM
+# Dependencies: file, and feh, xsetbg (xloadimage), or hsetroot
+
 # Written by L. Abramovich
 # License: GPL3
-
-# Dependencies: file, and feh, xsetbg (xloadimage), or hsetroot
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"

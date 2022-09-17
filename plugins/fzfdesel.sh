@@ -3,6 +3,8 @@
 # FZF deselection plugin for CliFM
 # Description: Deselect currently selected files using FZF
 
+# Dependencies: fzf
+
 # Written by L. Abramovich
 # License: GPL3
 

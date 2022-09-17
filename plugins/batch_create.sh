@@ -4,6 +4,8 @@
 # Written by L. Abramovich
 # License: GPL3
 
+# Dependencies: xargs, text editor
+
 if [ -n "$1" ] && [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Open a text editor to add files and/or directories to be created (file names endig with a slash will be taken as directory names). After saving the file and closing the editor, files will be created."

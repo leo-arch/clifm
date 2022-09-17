@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # CliFM plugin to navigate the jump database via fzf/Rofi
+# Dependencies: fzf or rofi, and grep
+
 # Written by L. Abramovich
 # Lincese GPL3
 

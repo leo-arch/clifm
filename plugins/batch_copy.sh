@@ -7,6 +7,8 @@
 # Description: Copy files passed as arguments to files specified via
 # a text editor
 
+# Dependencies: grep, xargs, text editor
+
 if [ -z "$1" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Copy files into multiple directories at once\n"

@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # Directory history plugin via FZF for CliFM
+# Dependencies: fzf
+
 # Written by L. Abramovich
 # License GPL2+
 
