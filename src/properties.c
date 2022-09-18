@@ -412,13 +412,20 @@ get_properties(char *filename, const int dsize)
 	char _path[PATH_MAX]; *_path = '\0';
 	if (link_to_dir == 1)
 		snprintf(_path, sizeof(_path), "%s/", filename);
-	HIDE_CURSOR;
-	fputs("Calculating... ", stdout);
-	fflush(stdout);
-	off_t total_size = dir_size(*_path ? _path : filename);
-	MOVE_CURSOR_LEFT(15);
-	ERASE_TO_RIGHT;
-	UNHIDE_CURSOR;
+
+	off_t total_size = 0;
+	if (term_caps.suggestions == 1) {
+		HIDE_CURSOR;
+		fputs("Calculating... ", stdout);
+		fflush(stdout);
+		total_size = dir_size(*_path ? _path : filename);
+		MOVE_CURSOR_LEFT(15);
+		ERASE_TO_RIGHT;
+		UNHIDE_CURSOR;
+	} else {
+		total_size = dir_size(*_path ? _path : filename);
+	}
+
 	if (S_ISDIR(attr.st_mode) && attr.st_nlink == 2 && total_size == 4)
 		total_size = 0; /* Empty directory */
 	if (total_size == -1) {
