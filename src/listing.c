@@ -421,12 +421,12 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 	 * Otherwise, some file names won't be listed.*/
 	default:
 		putchar('\r');
-		ERASE_TO_RIGHT_AND_BELOW;
+		ERASE_TO_RIGHT;
 		return (-1);
 	}
 
 	putchar('\r');
-	ERASE_TO_RIGHT_AND_BELOW;
+	ERASE_TO_RIGHT;
 	return 0;
 }
 
@@ -917,7 +917,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 
 /* Pad the current file name to equate the longest file name length */
 static void
-pad_filename(int *ind_char, const int i, const int pad)
+pad_filename(int *ind_char, const int i, const int pad, const int termcap_move_right)
 {
 	int cur_len = 0;
 
@@ -934,7 +934,8 @@ pad_filename(int *ind_char, const int i, const int pad)
 	}
 
 	int diff = (int)longest - cur_len;
-	if (xargs.list_and_quit == 1) {
+//	if (xargs.list_and_quit == 1 || term_caps.suggestions == 0) {
+	if (termcap_move_right == 0) {
 		int j = diff + 1;
 		while(--j >= 0)
 			putchar(' ');
@@ -1145,7 +1146,7 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad, const int _
 
 /* Add spaces needed to equate the longest file name length */
 static void
-pad_filename_light(int *ind_char, const int i, const int pad)
+pad_filename_light(int *ind_char, const int i, const int pad, const int termcap_move_right)
 {
 	int cur_len = 0;
 #ifndef _NO_ICONS
@@ -1163,7 +1164,8 @@ pad_filename_light(int *ind_char, const int i, const int pad)
 	}
 
 	int diff = (int)longest - cur_len;
-	if (xargs.list_and_quit == 1) {
+//	if (xargs.list_and_quit == 1 || term_caps.suggestions == 0) {
+	if (termcap_move_right == 0) {
 		int j = diff + 1;
 		while(--j >= 0)
 			putchar(' ');
@@ -1187,8 +1189,10 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 	else
 		print_entry_function = light_mode == 1 ? print_entry_nocolor_light : print_entry_nocolor;
 
-	void (*pad_filename_function)(int *, const int, const int);
+	void (*pad_filename_function)(int *, const int, const int, const int);
 	pad_filename_function = light_mode == 1 ? pad_filename_light : pad_filename;
+
+	int termcap_move_right = (xargs.list_and_quit == 1 || term_caps.suggestions == 0) ? 0 : 1;
 
 	size_t cur_cols = 0;
 	int i, last_column = 0;
@@ -1240,27 +1244,11 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
 		print_entry_function(&ind_char, i, pad, _max);
-/*		if (colorize) {
-			if (light_mode)
-				print_entry_color_light(&ind_char, i, pad, _max);
-			else
-				print_entry_color(&ind_char, i, pad, _max);
-		} else {
-			if (light_mode)
-				print_entry_nocolor_light(&ind_char, i, pad, _max);
-			else
-				print_entry_nocolor(&ind_char, i, pad, _max);
-		} */
 
-		if (!last_column) {
-			pad_filename_function(&ind_char, i, pad);
-/*			if (light_mode)
-				pad_filename_light(&ind_char, i, pad);
-			else
-				pad_filename(&ind_char, i, pad); */
-		} else {
+		if (!last_column)
+			pad_filename_function(&ind_char, i, pad, termcap_move_right);
+		else
 			putchar('\n');
-		}
 	}
 
 	if (!last_column)
@@ -1290,8 +1278,10 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 	else
 		print_entry_function = light_mode == 1 ? print_entry_nocolor_light : print_entry_nocolor;
 
-	void (*pad_filename_function)(int *, const int, const int);
+	void (*pad_filename_function)(int *, const int, const int, const int);
 	pad_filename_function = light_mode == 1 ? pad_filename_light : pad_filename;
+
+	int termcap_move_right = (xargs.list_and_quit == 1 || term_caps.suggestions == 0) ? 0 : 1;
 
 	size_t cur_cols = 0, cc = columns_n;
 	int x = 0, xx = 0, i = 0;
@@ -1378,31 +1368,15 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		file_info[x].eln_n = no_eln ? -1 : DIGINUM(x + 1);
 
 		print_entry_function(&ind_char, x, pad, _max);
-/*		if (colorize) {
-			if (light_mode)
-				print_entry_color_light(&ind_char, x, pad, _max);
-			else
-				print_entry_color(&ind_char, x, pad, _max);
-		} else {
-			if (light_mode)
-				print_entry_nocolor_light(&ind_char, x, pad, _max);
-			else
-				print_entry_nocolor(&ind_char, x, pad, _max);
-		} */
 
-		if (!last_column) {
-			pad_filename_function(&ind_char, x, pad);
-/*			if (light_mode)
-				pad_filename_light(&ind_char, x, pad);
-			else
-				pad_filename(&ind_char, x, pad); */
-		} else {
+		if (!last_column)
+			pad_filename_function(&ind_char, x, pad, termcap_move_right);
+		else
 			/* Last column is populated. Ex:
 			 * 1 file  3 file3  5 file5HERE
 			 * 2 file2 4 file4  6 file6HERE
 			 * ... */
 			putchar('\n');
-		}
 	}
 
 	if (!last_column)

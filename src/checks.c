@@ -98,6 +98,26 @@ is_url(char *url)
 	return EXIT_FAILURE;
 }
 
+static void
+set_term_caps(const int i)
+{
+	if (i == -1) {
+		term_caps.color = 0;
+		term_caps.suggestions = 0;
+		term_caps.pager = 0;
+		return;
+	}
+
+	term_caps.color = TERM_INFO[i].color > 0 ? 1 : 0;
+	if (getenv("CLIFM_FORCE_COLOR"))
+		xargs.colorize = term_caps.color = 1;
+
+	term_caps.suggestions = (TERM_INFO[i].cub == 1 && TERM_INFO[i].ed == 1
+		&& TERM_INFO[i].el == 1) ? 1 : 0;
+
+	term_caps.pager = (TERM_INFO[i].cub == 0 || TERM_INFO[i].el == 0) ? 0 : 1;
+}
+
 /* Check whether current terminal (_TERM) supports colors and requesting
  * cursor position (needed to print suggestions). If not, disable the
  * feature accordingly */
@@ -106,36 +126,18 @@ check_term_support(const char *_term)
 {
 	size_t i, len = strlen(_term);
 	/* Color and cursor position request support */
-	int cs = 0;
-// TESTING CURSOR POSITION
-/*	int cprs = 0; */
-// TESTING CURSOR POSITION
+	int index = -1;
 
 	for (i = 0; TERM_INFO[i].name; i++) {
-		if (*_term != *TERM_INFO[i].name || len != TERM_INFO[i].len)
+		if (*_term != *TERM_INFO[i].name || len != TERM_INFO[i].len
+		|| strcmp(_term, TERM_INFO[i].name) != 0)
 			continue;
-		if (strcmp(_term, TERM_INFO[i].name) != 0)
-			continue;
-// TESTING CURSOR POSITION
-/*		if (TERM_INFO[i].req_curpos == 1)
-			cprs = 1; */
-// TESTING CURSOR POSITION
-		if (TERM_INFO[i].color != -1)
-			cs = 1;
+
+		index = (int)i;
 		break;
 	}
 
-	xargs.colorize = (cs == 0) ? 0 : UNSET;
-	if (getenv("CLIFM_FORCE_COLOR"))
-		xargs.colorize = 1;
-// TESTING CURSOR POSITION
-/*
-#if !defined(_NO_SUGGESTIONS)
-	xargs.suggestions = (cprs == 0) ? 0 : UNSET;
-#else
-	UNUSED(cprs);
-#endif // _NO_SUGGESTIONS */
-// TESTING CURSOR POSITION
+	set_term_caps(index);
 }
 
 void

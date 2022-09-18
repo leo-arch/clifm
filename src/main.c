@@ -81,6 +81,7 @@ struct prompts_t *prompts = (struct prompts_t *)NULL;
 struct history_t *history = (struct history_t *)NULL;
 struct msgs_t msgs;
 struct props_t prop_fields;
+struct termcaps_t term_caps;
 
 struct sort_t __sorts[] = {
     {"none", 0, 0},

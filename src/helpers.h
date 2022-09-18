@@ -559,6 +559,13 @@ extern int watch;
 #define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s> %s", (offset), (color), NC)
 /* ######## */
 
+/* Suequences used by the pad_filename function (listing.c):
+ * MOVE_CURSOR_RIGHT() */
+
+/* Sequences used by the pager (listing.c):
+ * MOVE_CURSOR_DOWN(n)
+ * ERASE_TO_RIGHT */
+
 //#define ERASE_FULL_LINE     fputs("\x1b[2K", stdout) /* EL2 */
 
 // TESTING CURSOR POSITION
@@ -924,6 +931,13 @@ struct msgs_t {
 	size_t notice;
 };
 extern struct msgs_t msgs;
+
+struct termcaps_t {
+	int color;
+	int suggestions;
+	int pager;
+};
+extern struct termcaps_t term_caps;
 
 /* Macros for properties string fields in long view */
 #define PERM_SYMBOLIC 1

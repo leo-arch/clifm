@@ -797,9 +797,14 @@ pager_function(char *arg)
 		printf(_("The files pager is %s\n"),
 			pager == 1 ? _("enabled") : _("disabled"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		pager = 1;
-		if (autols == 1) reload_dirlist();
-		print_reload_msg(_("Pager enabled\n"));
+		if (term_caps.pager == 1) {
+			pager = 1;
+			if (autols == 1) reload_dirlist();
+			print_reload_msg(_("Pager enabled\n"));
+		} else {
+			fprintf(stderr, _("%s: Paging is not supported by this terminal\n"), PROGRAM_NAME);
+			exit_status = EXIT_FAILURE;
+		}
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		pager = 0;
 		if (autols == 1) reload_dirlist();

@@ -2103,7 +2103,7 @@ unset_xargs(void)
 	xargs.classify = UNSET;
 	xargs.clear_screen = UNSET;
 	xargs.color_scheme = UNSET;
-/*	xargs.colorize = UNSET; */
+	xargs.colorize = UNSET;
 	xargs.columns = UNSET;
 	xargs.config = UNSET;
 	xargs.control_d_exits = UNSET;
@@ -3389,6 +3389,13 @@ check_options(void)
 		 * if not already set via command line */
 		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
 	}
+
+	if (term_caps.suggestions == 0)
+		xargs.suggestions = suggestions = 0;
+	if (term_caps.color == 0)
+		xargs.colorize = colorize = 0;
+	if (term_caps.pager == 0)
+		xargs.pager = pager = 0;
 
 	reset_opts();
 }

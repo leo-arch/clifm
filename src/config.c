@@ -2534,7 +2534,7 @@ read_config(void)
 static void
 check_colors(void)
 {
-	if (getenv("CLIFM_NO_COLOR") || getenv("NO_COLOR")) {
+	if (term_caps.color == 0 || getenv("CLIFM_NO_COLOR") || getenv("NO_COLOR")) {
 		colorize = 0;
 	} else {
 		if (colorize == UNSET) {
