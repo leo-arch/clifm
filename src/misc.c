@@ -22,6 +22,11 @@
  * MA 02110-1301, USA.
 */
 
+/* The _err function is based on littlstar's asprintf implementation
+ * (https://github.com/littlstar/asprintf.c/blob/master/asprintf.c),
+ * licensed under MIT.
+ * All changes are licensed under GPL-2.0-or-later. */
+
 #include "helpers.h"
 
 #include <errno.h>
@@ -105,8 +110,7 @@ set_eln_color(void)
  * -2: Log but do not store the message into the messages array
  * PROMPT_FLAG tells whether to print the message immediately before the next
  * prompt or rather in place.
- * Based on littlstar's xasprintf implementation:
- * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
+ *  */
 __attribute__((__format__(__printf__, 3, 0)))
 /* We use __attribute__ here to silence clang warning: "format string is
  * not a string literal" */

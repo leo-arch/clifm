@@ -22,11 +22,13 @@
  * MA 02110-1301, USA.
 */
 
-/* The xstrsncpy function is taken from NNN (licensed BSD-2-clause) and
- * modified to fit our needs. */
+/* The xstrsncpy function is taken from https://github.com/jarun/nnn/blob/master/src/nnn.c,
+ * licensed under BSD-2-clause.
+ * All changes are licensed under GPL-2.0-or-later. */
 
 /* The xstrverscmp is taken from https://elixir.bootlin.com/uclibc-ng/latest/source/libc/string/strverscmp.c
- * (licensed GPL2.1+) and modified to fit our needs. */
+ * (licensed under GPL2.1+).
+ * All changes are licensed under GPL-2.0-or-later. */
 
 #include "helpers.h"
 

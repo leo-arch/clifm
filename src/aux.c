@@ -22,6 +22,12 @@
  * MA 02110-1301, USA.
  */
 
+/* These four functions: from_hex, to_hex, url_encode, and
+ * url_decode, are taken from "http://www.geekhideout.com/urlcode.shtml"
+ * (under Public domain) and modified to comform to RFC 2395, as recommended
+ * by the freedesktop trash specification.
+ * All changes are licensed under GPL-2.0-or-later. */
+
 #include "helpers.h"
 
 #include <ctype.h>
@@ -596,8 +602,9 @@ hex2int(const char *str)
  * At this point we know HEX is a valid hex color code (see is_hex_color() in colors.c).
  * If using this function outside CliFM, make sure to validate HEX yourself
  *
- * Taken from https://mprog.wordpress.com/c/miscellaneous/convert-hexcolor-to-rgb-decimal
- * and modified to fir our needs */
+ * Based on https://mprog.wordpress.com/c/miscellaneous/convert-hexcolor-to-rgb-decimal
+ */
+
 char *
 hex2rgb(char *hex)
 {
@@ -974,11 +981,6 @@ xgetchar(void)
 	return c;
 }
 
-/* The following four functions (from_hex, to_hex, url_encode, and
- * url_decode) were taken from "http://www.geekhideout.com/urlcode.shtml"
- * and modified to comform to RFC 2395, as recommended by the
- * freedesktop trash specification */
-
 /* Converts a hex char to its integer value */
 char
 from_hex(char c)
@@ -1073,7 +1075,7 @@ url_decode(char *str)
 }
 
 /* Convert octal string into integer.
- * Taken from: https://www.geeksforgeeks.org/program-octal-decimal-conversion/
+ * Based on: https://www.geeksforgeeks.org/program-octal-decimal-conversion/
  * Used by decode_prompt() to make things like this work: \033[1;34m */
 int
 read_octal(char *str)

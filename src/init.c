@@ -2185,8 +2185,7 @@ unset_xargs(void)
 
 /* Keep track of attributes of the shell. Make sure the shell is running
  * interactively as the foreground job before proceeding.
- * Taken from:
- * https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell
+ * Based on https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell
  * */
 void
 init_shell(void)

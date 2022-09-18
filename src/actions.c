@@ -22,8 +22,9 @@
  * MA 02110-1301, USA.
 */
 
-/* The run_action function is taken from NNN's run_selected_plugin
- * function (licensed BSD-2-clause) and modified to fit our needs. */
+/* The run_action function is taken from NNN's run_selected_plugin function
+ * (https://github.com/jarun/nnn/blob/master/src/nnn.c), licensed under BSD-2-Clause.
+ * All changes are licensed under GPL-2.0-or-later. */
 
 #include "helpers.h"
 

@@ -1531,9 +1531,9 @@ remove_file(char **args)
  * to the user to modify it. Once the file names have been modified and
  * saved, modifications are printed on the screen and the user is
  * asked whether to perform the actual bulk renaming or not.
- * This bulk rename method, just because it is quite simple and
- * KISS, was taken from the fff filemanager. So, thanks fff! BTW, this method
- * is also implemented by ranger and nnn */
+ *
+ * This bulk rename method is the same used by the fff filemanager,
+ * ranger, and nnn */
 int
 bulk_rename(char **args)
 {

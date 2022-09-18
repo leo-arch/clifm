@@ -1,6 +1,6 @@
 /* readline.c -- functions to control the behaviour of readline,
- * specially completions. It also introduces the suggestions system
- * via my_rl_getc function */
+ * specially completions. It also introduces both the syntax highlighting
+ * and the suggestions system (via my_rl_getc) */
 
 /*
  * This file is part of CliFM
@@ -24,11 +24,11 @@
  * MA 02110-1301, USA.
 */
 
-/* The following functions are taken from Bash (1.14.7), licensed GPL1+,
- * and modified to fit our needs:
- * my_rl_getc()
- * my_rl_path_completion()
- * */
+/* The following functions are taken from Bash (1.14.7), licensed under
+ * GPL-1.0-or-later:
+ * my_rl_getc
+ * my_rl_path_completion
+ * All changes are licensed under GPL-2.0-or-later. */
 
 #include "helpers.h"
 

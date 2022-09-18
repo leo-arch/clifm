@@ -22,8 +22,8 @@
  * MA 02110-1301, USA.
 */
 
-/* The decode_prompt function is taken from Bash (1.14.7), licensed GPL2+,
- * and modified to fit our needs. */
+/* The decode_prompt function is taken from Bash (1.14.7), licensed under
+ * GPL-2.0-or-later, and modified to fit our needs. */
 
 #include "helpers.h"
 

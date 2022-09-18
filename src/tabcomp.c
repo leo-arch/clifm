@@ -22,17 +22,17 @@
  * MA 02110-1301, USA.
 */
 
-/* The following functions are taken from Bash (1.14.7), licensed GPL1+,
+/* The following functions are taken from Bash (1.14.7), licensed GPL-1.0-or-later,
  * and modified if needed:
- * PUTX()
- * stat_char()
- * get_y_or_n()
- * print_filename()
- * printable_part()
- * rl_strpbrk()
- * compare_strings()
- * tab_complete()
- * */
+ * PUTX
+ * stat_char
+ * get_y_or_n
+ * print_filename
+ * printable_part
+ * rl_strpbrk
+ * compare_strings
+ * tab_complete
+ * All changes are licensed under GPL-2.0-or-later. */
 
 #include "helpers.h"
 

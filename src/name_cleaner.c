@@ -21,10 +21,11 @@
  * MA 02110-1301, USA.
 */
 
-/* The core algorithm to translate Unicode characters into ASCII is based on
- * https://github.com/dharple/detox and includes:
- * check_width, unpack_start, and unpack_cont macros, just as get_utf_8_width
- * and get_uft8_dec_value functions */
+/* check_width, unpack_start, and unpack_cont macros, just
+ * as get_utf_8_width and get_uft8_dec_value functions are taken from
+ * https://github.com/dharple/detox/blob/main/src/clean_utf_8.c, licensed
+ * under BSD-3-Clause.
+ * All changes are licensed under GPL-2.0-or-later. */
 
 #ifndef _NO_BLEACH
 
