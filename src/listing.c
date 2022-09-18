@@ -420,11 +420,13 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 	/* If another key is pressed, go back one position.
 	 * Otherwise, some file names won't be listed.*/
 	default:
-		fputs("\r\x1b[K\x1b[3J", stdout);
+		putchar('\r');
+		ERASE_TO_RIGHT_AND_BELOW;
 		return (-1);
 	}
 
-	fputs("\r\x1b[K\x1b[3J", stdout);
+	putchar('\r');
+	ERASE_TO_RIGHT_AND_BELOW;
 	return 0;
 }
 
