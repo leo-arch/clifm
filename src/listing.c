@@ -621,20 +621,22 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 	}
 }
 
-static void
-get_columns(size_t *n)
+static size_t
+get_columns(void)
 {
-	*n = (size_t)term_cols / (longest + 1); /* +1 for the
+	size_t n = (size_t)term_cols / (longest + 1); /* +1 for the
 	space between file names */
 
 	/* If longest is bigger than terminal columns, columns_n will
 	 * be negative or zero. To avoid this: */
-	if (*n < 1)
-		*n = 1;
+	if (n < 1)
+		n = 1;
 
 	/* If we have only three files, we don't want four columns */
-	if (*n > files)
-		*n = files;
+	if (n > files)
+		n = files;
+
+	return n;
 }
 
 static void
@@ -1565,8 +1567,8 @@ list_dir_light(void)
 	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
-		    strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			workspaces[cur_ws].path, strerror(errno));
 		close_dir = 0;
 		goto END;
 	}
@@ -1731,8 +1733,9 @@ list_dir_light(void)
 	}
 
 	if (xargs.disk_usage_analyzer == 1) {
-		ERASE_TO_LEFT; /* Erase the "Retrieveing file sizes" message */
-		MOVE_CURSOR_LEFT(term_cols);
+		putchar('\r');
+//		ERASE_TO_LEFT; /* Erase the "Retrieveing file sizes" message */
+//		MOVE_CURSOR_LEFT(term_cols);
 	}
 
 	file_info[n].name = (char *)NULL;
@@ -1774,10 +1777,7 @@ list_dir_light(void)
 				 * ######################## */
 
 	/* Get possible amount of columns for the dirlist screen */
-	if (!columned)
-		columns_n = 1;
-	else
-		get_columns(&columns_n);
+	columns_n = columned == 0 ? 1 : get_columns();
 
 	if (listing_mode == VERTLIST) /* ls(1) like listing */
 		list_files_vertical(&counter, &reset_pager, pad, columns_n);
@@ -1994,11 +1994,11 @@ list_dir(void)
 			}
 		}
 
-		if (*ename == '.')
+		if (*ename == '.') {
 			stats.hidden++;
-
-		if (!show_hidden && *ename == '.')
-			continue;
+			if (!show_hidden)
+				continue;
+		}
 
 		init_fileinfo(n);
 
@@ -2285,8 +2285,9 @@ list_dir(void)
 
 	if (xargs.disk_usage_analyzer == 1 || (long_view == 1 && full_dir_size == 1)) {
 		/* Erase the "Retrieveing file sizes" message */
-		ERASE_TO_LEFT;
-		MOVE_CURSOR_LEFT(term_cols);
+		putchar('\r');
+//		ERASE_TO_LEFT;
+//		MOVE_CURSOR_LEFT(term_cols);
 	}
 
 	file_info[n].name = (char *)NULL;
@@ -2336,10 +2337,7 @@ list_dir(void)
 				 * ######################## */
 
 	/* Get amount of columns needed to print files in CWD  */
-	if (!columned)
-		columns_n = 1;
-	else
-		get_columns(&columns_n);
+	columns_n = columned == 0 ? 1 : get_columns();
 
 	if (listing_mode == VERTLIST) /* ls(1) like listing */
 		list_files_vertical(&counter, &reset_pager, pad, columns_n);
