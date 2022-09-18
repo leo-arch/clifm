@@ -934,7 +934,6 @@ pad_filename(int *ind_char, const int i, const int pad, const int termcap_move_r
 	}
 
 	int diff = (int)longest - cur_len;
-//	if (xargs.list_and_quit == 1 || term_caps.suggestions == 0) {
 	if (termcap_move_right == 0) {
 		int j = diff + 1;
 		while(--j >= 0)

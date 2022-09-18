@@ -103,11 +103,10 @@ get_total_size(const int link_to_dir, char *filename)
 	} else {
 		fputs(_("Total size: \t"), stdout);
 		HIDE_CURSOR;
-		char msg[] = "Calculating... ";
-		fputs(msg, stdout);
+		fputs("Calculating... ", stdout);
 		fflush(stdout);
 		total_size = dir_size(*_path ? _path : filename);
-		MOVE_CURSOR_LEFT((int)strlen(msg));
+		MOVE_CURSOR_LEFT(15);
 		ERASE_TO_RIGHT;
 		UNHIDE_CURSOR;
 	}
