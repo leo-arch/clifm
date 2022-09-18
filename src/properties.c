@@ -85,6 +85,36 @@ get_link_color(char *name, int *link_dir, const int dsize)
 	return color;
 }
 
+static off_t
+get_total_size(const int link_to_dir, char *filename)
+{
+	off_t total_size = 0;
+
+	char _path[PATH_MAX]; *_path = '\0';
+	if (link_to_dir == 1)
+		snprintf(_path, sizeof(_path), "%s/", filename);
+
+	if (term_caps.suggestions == 0) {
+		fputs("Retrieving file size... ", stdout);
+		fflush(stdout);
+		total_size = dir_size(*_path ? _path : filename);
+		fputs("\r                       \r", stdout);
+		fputs(_("Total size: \t"), stdout);
+	} else {
+		fputs(_("Total size: \t"), stdout);
+		HIDE_CURSOR;
+		char msg[] = "Calculating... ";
+		fputs(msg, stdout);
+		fflush(stdout);
+		total_size = dir_size(*_path ? _path : filename);
+		MOVE_CURSOR_LEFT((int)strlen(msg));
+		ERASE_TO_RIGHT;
+		UNHIDE_CURSOR;
+	}
+
+	return total_size;
+}
+
 static int
 get_properties(char *filename, const int dsize)
 {
@@ -408,23 +438,7 @@ get_properties(char *filename, const int dsize)
 	if (dsize == 0)
 		goto END;
 
-	fputs(_("Total size: \t"), stdout);
-	char _path[PATH_MAX]; *_path = '\0';
-	if (link_to_dir == 1)
-		snprintf(_path, sizeof(_path), "%s/", filename);
-
-	off_t total_size = 0;
-	if (term_caps.suggestions == 1) {
-		HIDE_CURSOR;
-		fputs("Calculating... ", stdout);
-		fflush(stdout);
-		total_size = dir_size(*_path ? _path : filename);
-		MOVE_CURSOR_LEFT(15);
-		ERASE_TO_RIGHT;
-		UNHIDE_CURSOR;
-	} else {
-		total_size = dir_size(*_path ? _path : filename);
-	}
+	off_t total_size = get_total_size(link_to_dir, filename);
 
 	if (S_ISDIR(attr.st_mode) && attr.st_nlink == 2 && total_size == 4)
 		total_size = 0; /* Empty directory */
