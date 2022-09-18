@@ -1044,8 +1044,8 @@ main(int argc, char *argv[])
 
 	msgs.error = msgs.notice = msgs.warning = 0;
 /*	init_file_flags(); */
-	check_cpu_os(); /* Running on supported CPU and operating system? */
-	check_term(); /* Running on a supported terminal */
+	check_cpu_os(); /* Running on a supported CPU and operating system? */
+	check_term(); /* Running on a supported terminal? */
 
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 

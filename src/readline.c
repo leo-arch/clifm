@@ -1,4 +1,4 @@
-/* readline.c -- functions to control the behaviour of readline,
+/* readline.c -- functions to control the behavior of readline,
  * specially completions. It also introduces both the syntax highlighting
  * and the suggestions system (via my_rl_getc) */
 

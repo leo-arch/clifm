@@ -1,4 +1,4 @@
-/* prompt.c -- functions controlling the appearance and behaviour of the prompt */
+/* prompt.c -- functions controlling the appearance and behavior of the prompt */
 
 /*
  * This file is part of CliFM
