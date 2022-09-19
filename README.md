@@ -238,7 +238,17 @@ For a detailed explanation of each of these features, follow the corresponding l
 </a>
 </details>
 
-Consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
+### Quickly installing from a clone (Linux/BSD)
+
+**Note**: Dependencies are most like already satisfied, but in any case consult our [dependencies section](https://github.com/leo-arch/clifm/wiki/Introduction#1-satisfy-dependencies).
+
+```sh
+git clone https://github.com/leo-arch/clifm.git
+cd clifm
+sudo make install
+```
+
+For more information/supported platforms consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
 
 ---
 
