@@ -231,6 +231,8 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ## Installation
 
+### Packaged versions
+
 <details>
 <summary>Packaging status <a href="https://repology.org/project/clifm/versions"><img src="https://repology.org/badge/tiny-repos/clifm.svg" alt="Packaging status"></a></summary>
 <a href="https://repology.org/project/clifm/versions">
@@ -238,9 +240,11 @@ For a detailed explanation of each of these features, follow the corresponding l
 </a>
 </details>
 
-### Quickly installing from a clone (Linux/BSD)
+If running on Linux, you can also download and run the [AppImage](https://github.com/leo-arch/clifm/releases/download/v1.7/clifm-1.7-x86_64.AppImage) or install from a [binary package](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm) provided by the OpenSuse Build System.
 
-**Note**: Dependencies are most like already satisfied, but in any case consult our [dependencies section](https://github.com/leo-arch/clifm/wiki/Introduction#1-satisfy-dependencies).
+### Installing from a clone (Linux/BSD)
+
+**Note**: Dependencies are most likely already satisfied, but in any case consult the [dependencies section](https://github.com/leo-arch/clifm/wiki/Introduction#1-satisfy-dependencies).
 
 ```sh
 git clone https://github.com/leo-arch/clifm.git
