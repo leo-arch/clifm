@@ -8,7 +8,7 @@
 <h3 align="center">Fast, extensible, lightweight</h3>
 <h3 align="center">Linux, Termux (Android), FreeBSD, NetBSD, OpenBSD, MacOS, Haiku, Cygwin | x86, ARM</h3>
 <h4 align="center"><a
-href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm">Downloads</a> · <a
+href="https://github.com/leo-arch/clifm/#floppy_disk-installation">Install</a> · <a
 href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a> · <a
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature-request.md">Request feature</a> · <a
 href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
@@ -46,7 +46,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 🔸 [Brief description](#brief-description) \
 🔸 [Introduction video](#clapper-introduction-video) \
 🔸 [Features](#features) \
-🔸 [Installation](#installation) \
+🔸 [Installation](#floppy_disk-installation) \
 🔸 [Getting started](#getting-started) \
 🔸 [Support](#support) \
 🔸 [License](#license) \
@@ -229,7 +229,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ---
 
-## Installation
+## :floppy_disk: Installation
 
 ### Packaged versions
 
@@ -240,7 +240,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 </a>
 </details>
 
-If running on Linux, you can also download and run the [AppImage](https://github.com/leo-arch/clifm/releases/download/v1.7/clifm-1.7-x86_64.AppImage) or install from a [binary package](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm) provided by the OpenSuse Build System.
+If running on Linux, you can also download and run the [AppImage](https://github.com/leo-arch/clifm/releases/download/v1.7/clifm-1.7-x86_64.AppImage) or install from a [binary package](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm).
 
 ### Installing from a clone (Linux/BSD)
 
