@@ -367,7 +367,6 @@ main() {
 				case "$value" in
 					ueberzug) export UEBERZUG_OK=1 ;;
 					w3m|kitty|viu|catimg|img2txt|chafa|pixterm)
-#					kitty|viu|catimg|img2txt|chafa)
 						export IMG_VIEWER="$value" ;;
 					none) export IMG_VIEWER="true" ;;
 					*) IMG_VIEWER="" ;;
@@ -687,6 +686,8 @@ main() {
 		export FIFO_UEBERZUG="$CACHEDIR/ueberzug-${PPID}"
 		trap uz_cleanup EXIT
 		start_ueberzug
+	else
+		export FIFO_UEBERZUG="/dev/null"
 	fi
 
 	TMP=$(mktemp "${TMPDIR:-/tmp}/clifm.XXXXXX")
