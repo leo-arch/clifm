@@ -16,7 +16,7 @@ Once this is done, you might want to check and modify a few things from the resu
 
 Portability: Though mostly developed in Linux (and this always means better support), we try to keep _CliFM_ working on \*BSD, MacOS, and Haiku. So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBsd, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
 
-Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
+Generally, try to stick as closely as possible to the [Linux kernel coding style](https://www.kernel.org/doc/html/v4.10/process/coding-style.html). Also, though we don't follow it strictly, we also like the [Suckless coding style](https://suckless.org/coding_style/).
 
 Indentation: TABS (I use a width of 4, but you can use 8 if you like)
 
@@ -89,7 +89,9 @@ Make sure blank/empty lines do not contains TABS or spaces. In the same way, rem
 
 A program should not only provide working features, but also well written, performant, and easily understandable code:
 
-**1)** Use the proper tool (and in the proper way) for the job: be as simple as possible and do not waste resources (they are highly valuable). For example: `strcmp(3)` is a standard and quite useful function. However, it is a good idea to prevent calling this function (possibily hundreds of times in a loop) if not needed. Before calling `strcmp` compare the first byte of the strings to be compared. If they do not match, there is no need to call the function:
+### 1. Resources
+
+Use the proper tool (and in the proper way) for the job: be as simple as possible and do not waste resources (they are highly valuable). For example: `strcmp(3)` is a standard and quite useful function. However, it is a good idea to prevent calling this function (possibily hundreds of times in a loop) if not needed. Before calling `strcmp` compare the first byte of the strings to be compared. If they do not match, there is no need to call the function:
 
 ```c
 if (*str == *str2 && strcmp(str, str2) == 0)
@@ -122,23 +124,37 @@ xstrsncpy(buf, src, sizeof(buf));
 
 These are just a few examples. There are plenty of resources out there on how to write secure code.
 
-**2)** Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you don't need it any more. As a plus, compile with `clang` using the following flags to detect undefined behavior and integer overflow at run-time: `-fsanitize=integer -fsanitize=undefined`.
+### 2. Memory
 
-**3)** Static analysis tools are an invaluable resource: use them! **Always** check your code via tools like `cppcheck`, GCC's analyzer (`-fanalyzer`),<sup>1</sup> Clang's `scan-build`, `flawfinder`, or `splint`. Use them all if necessary. Once done, fix all warnings and errors (provided they are not false positives, of course). This said, we use three online platforms to check our code quality: [Codacy](https://app.codacy.com/gh/leo-arch/clifm/dashboard), [Codiga](https://app.codiga.io/project/30518/dashboard), and [LGTM](https://lgtm.com/projects/g/leo-arch/clifm).
+Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you don't need it any more. As a plus, compile with `clang` using the following flags to detect undefined behavior and integer overflow at run-time: `-fsanitize=integer -fsanitize=undefined`.
+
+### 3. Static analysis
+
+Static analysis tools are an invaluable resource: use them! **Always** check your code via tools like `cppcheck`, GCC's analyzer (`-fanalyzer`),<sup>1</sup> Clang's `scan-build`, `flawfinder`, or `splint`. Use them all if necessary. Once done, fix all warnings and errors (provided they are not false positives, of course). This said, we use three online platforms to check our code quality: [Codacy](https://app.codacy.com/gh/leo-arch/clifm/dashboard), [Codiga](https://app.codiga.io/project/30518/dashboard), and [LGTM](https://lgtm.com/projects/g/leo-arch/clifm).
 
 <sup>1</sup> On the state of the built-in static analyzer provided by GCC see https://www.reddit.com/r/C_Programming/comments/u1ylub/static_analysis_of_c_code_in_gcc_12/
 
 When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
 
-**4**) Submitted code must be compiled without any warning/error using the following compiler flags:
+### 4. Compiling
+
+Submitted code must be compiled without any warning/error using the following compiler flags:
 
 ```sh
--Wall -Wextra -Werror -Wpedantic -Wshadow -Wformat=2 -Wformat-security -Wconversion -Wsign-conversion -Wunused -Wnull-dereference -fstack-protector-strong -fstack-clash-protection -fcf-protection -Wvla -std=c99
+-Wall -Wextra -Werror -pedantic -Wshadow -Wformat=2 -Wformat-security -Wconversion -Wsign-conversion -Wunused -Wnull-dereference -fstack-protector-strong -fstack-clash-protection -fcf-protection -Wvla -std=c99
 ```
 
 To make sure your structs are properly aligned, add `-Wpadded` to detect misalignments and correct them by adding some padding if necessary. 
 
-**5**) If not obvious, comment what your code is trying to achieve: there is no good software without good documentation.
+As a plus, make sure to fix all errors/warnings emitted by a security hardened compilation, like the one [recommended by Red Hat](https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc):
+
+```sh
+gcc -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fstack-protector-strong -m64  -mtune=generic -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -Wl,-z,relro -Wl,--as-needed  -Wl,-z,now -Wl,--build-id=sha1
+```
+
+### 5. Comments
+
+If not obvious, comment what your code is trying to achieve: there is no good software without good documentation.
 
 ## 3) General code structure
 
