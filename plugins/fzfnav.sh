@@ -123,6 +123,7 @@ fcd() {
 	# Keep FZF running until the user presses Esc or C-q
 	# shellcheck disable=SC2154
 	# --header-first isn't available in fzf 0.27
+
 	while true; do
 		lsd=$(printf "\033[0;%sm..\033[0m\n" "$dir_color"; $ls_cmd)
 		file="$(printf "%s\n" "$lsd" | fzf \
@@ -133,7 +134,7 @@ fcd() {
 			--bind "right:accept,left:top+accept" \
 			--bind "insert:clear-query" \
 			--bind "home:top,end:page-down" \
-			--bind "alt-h:preview(printf %s \"$HELP\")" \
+			--bind "alt-h:preview(printf '{\"action\": \"remove\", \"identifier\": \"clifm-preview\"}\n' > \"$FIFO_UEBERZUG\"; printf %s \"$HELP\")" \
 			--bind "alt-p:toggle-preview" \
 			--bind "shift-up:preview-up" \
 			--bind "shift-down:preview-down" \
