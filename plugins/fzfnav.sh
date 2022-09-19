@@ -504,7 +504,7 @@ main() {
 	# Images
 	if [ "$PREV_IMGS" = 1 ] && [ -z "$IMG_VIEWER" ] && \
 	[ -n "$DISPLAY" ]; then
-		if type ueberzug > /dev/null 2>&1; then
+		if [ -z "$WAYLAND_DISPLAY" ] && type ueberzug > /dev/null 2>&1; then
 			export UEBERZUG_OK=1
 		elif [ "$TERM" = "xterm-kitty" ]; then
 			export IMG_VIEWER="kitty"
