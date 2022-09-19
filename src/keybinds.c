@@ -76,7 +76,7 @@ typedef char *rl_cpvfunc_t;
  * and to delete last typed word */
 #define WORD_DELIMITERS " /.-_=,:;@+*&$#<>%~|({[]})¿?¡!"
 
-int accept_first_word = 0;
+static int accept_first_word = 0;
 
 static void
 xrl_reset_line_state(void)

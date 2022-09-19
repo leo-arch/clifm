@@ -76,8 +76,6 @@
 #include "sanitize.h"
 #include "tags.h"
 
-char **_comm = (char **)NULL;
-
 static char *
 get_new_name(void)
 {

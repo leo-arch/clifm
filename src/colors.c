@@ -60,8 +60,8 @@ struct defs_t {
 	char *value;
 };
 
-struct defs_t *defs;
-size_t defs_n = 0;
+static struct defs_t *defs;
+static size_t defs_n = 0;
 #endif /* CLIFM_SUCKLESS */
 
 /* Turn the first or second field of a color code sequence, provided

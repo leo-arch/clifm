@@ -29,8 +29,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#ifdef __OpenBSD__
-#include <strings.h>
+#if defined(__OpenBSD__)
+# include <strings.h>
 #endif
 
 #include "checks.h"

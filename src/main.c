@@ -1006,6 +1006,8 @@ init_file_flags(void)
 
 /*
 #if !defined(CLIFM_LD_PRELOAD_IGNORE)
+// This only works provided getenv(3) is not itself compromised via
+// LD_PRELOAD
 static void
 check_ld_preload(void)
 {
@@ -1050,8 +1052,7 @@ main(int argc, char *argv[])
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
 	/* If running the program locally, that is, not from a path in PATH,
-	 * remove the leading "./" to get the correct program invocation
-	 * name */
+	 * remove the leading "./" to get the correct program invocation name */
 	if (*argv[0] == '.' && *(argv[0] + 1) == '/' && *(argv[0] + 2))
 		argv[0] += 2;
 
@@ -1075,7 +1076,7 @@ main(int argc, char *argv[])
 	if (geteuid() == 0)
 		flags |= ROOT_USR;
 
-	/* Running in a graphical environment? */
+	/* Running on a graphical environment? */
 	if (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))
 		flags |= GUI;
 

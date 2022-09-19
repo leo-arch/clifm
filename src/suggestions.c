@@ -71,9 +71,9 @@ typedef char *rl_cpvfunc_t;
 
 #define BAEJ_OFFSET 1
 
-char *last_word = (char *)NULL;
-int last_word_offset = 0;
-int point_is_first_word = 0;
+static char *last_word = (char *)NULL;
+static int last_word_offset = 0;
+static int point_is_first_word = 0;
 
 /* Set to 1 if terminal supports SC (save cursor) and RC (restore cursor)
  * capabilities. Otherwise, the manual method is used via CUU, CUD, CUF,

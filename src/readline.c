@@ -87,12 +87,12 @@ int freebsd_sc_console = 0;
 #define DEL_EMPTY_LINE     1
 #define DEL_NON_EMPTY_LINE 2
 
-struct dirent **tagged_files = (struct dirent **)NULL;
-int tagged_files_n = 0;
+static struct dirent **tagged_files = (struct dirent **)NULL;
+static int tagged_files_n = 0;
 
 #define MAX_EXT_OPTS NAME_MAX
 #define MAX_EXT_OPTS_LEN NAME_MAX
-char ext_opts[MAX_EXT_OPTS][MAX_EXT_OPTS_LEN];
+static char ext_opts[MAX_EXT_OPTS][MAX_EXT_OPTS_LEN];
 
 /* Get user input (y/n, uppercase is allowed) using _MSG as message
  * The question will be repeated until 'y' or 'n' is entered

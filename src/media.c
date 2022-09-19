@@ -62,8 +62,8 @@ struct mnt_t {
 	char *label; /* Device label */
 };
 
-struct mnt_t *media = (struct mnt_t *)NULL;
-size_t mp_n = 0;
+static struct mnt_t *media = (struct mnt_t *)NULL;
+static size_t mp_n = 0;
 
 /*
 #ifdef __linux__

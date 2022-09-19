@@ -64,7 +64,7 @@ typedef char *rl_cpvfunc_t;
 #include "sort.h"
 #include "tags.h"
 
-char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
+static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 
 /* Macros for xstrverscmp() */
 /* states: S_N: normal, S_I: comparing integral part, S_F: comparing

@@ -87,7 +87,7 @@
 #define DIR_OUT_NAME ".cfm.out"
 
 /* Amount of digits of the files counter of the longest directory */
-size_t longest_fc = 0;
+static size_t longest_fc = 0;
 
 /* Struct to store information about trimmed file names. Used only when
  * Unicode is disabled */
@@ -99,7 +99,7 @@ struct trim_t {
 	size_t len; /* Lenght of file name before trimming */
 };
 
-struct trim_t trim;
+static struct trim_t trim;
 
 #if defined(TOURBIN_QSORT)
 static inline void
