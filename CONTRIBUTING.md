@@ -8,10 +8,10 @@
 
 4)  For the time being, _CliFM_ includes only a spanish translation (which is now out dated, by the way). New translations are a nice way to contribute (you can find the .pot file in [here](https://github.com/leo-arch/clifm/tree/master/translations)). We are using [Hosted Weblate](https://hosted.weblate.org/projects/clifm/clifm/) as a translations platform.
 
-5)  Test it on other operating systems (working fine now on Linux, FreeBSD, NetBSD, OpenBSD, MacOS, and Haiku) and other architectures (successfully tested on i386, x86_64, and ARM).
+5)  Test it on other operating systems (working fine now on Linux, Termux (Android), FreeBSD, NetBSD, OpenBSD, MacOS, Haiku, and Cygwin) and other architectures (successfully tested on i386, x86_64, and ARM).
 
 6)  Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know your what you think: ideas, observations, comments and questions are always welcome.
 
 7)  Of course, you can also tell your friends about _CliFM_, write a (positive) review of it somewhere on the internet, or you can just create a nice t-shirt with our [logo](https://github.com/leo-arch/clifm/tree/master/images/logo) to tell the world how great _CliFM_ is (just kidding, or not).
 
-8)  Buy me a beer.
+8)  Buy me a beer or [become a sponsor](https://github.com/sponsors/leo-arch).
