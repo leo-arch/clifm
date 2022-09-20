@@ -33,7 +33,7 @@ ee=00;32:ef=02;33:ex=01;32:fi=0:ln=01;36:mh=30;46:nd=04;01;31:ne=02;04;31:nf=02;
 no=00;31;47:or=02;04;36:ow=34;42:pi=00;35:so=01;35:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:uf=02;04;37:"
 
-#define DEF_IFACE_COLORS "bm=01;36:dd=00;34:df=0:dg=00;33:\
+#define DEF_IFACE_COLORS "bm=01;36:dd=00;36:df=0:dg=00;33:\
 dl=02;37:dn=00;02;37:dr=00;33:do=00;36:dp=00;36:dw=00;31:\
 dxd=00;32:dxr=00;32:dz=00;32:el=00;36:em=01;31:fc=00;02;34:hb=00;36:hc=02;31:\
 hd=00;36:he=00;36:hn=00;35:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:\
@@ -142,7 +142,7 @@ xf=01;31:xs=00;32:"
 #define DEF_HV_C "\x1b[00;32m" /* Variables ($VAR) */
 
 /* Colors for the properties and long/detail view functions */
-#define DEF_DD_C "\x1b[00;34m" /* Modification date */
+#define DEF_DD_C "\x1b[00;36m" /* Modification date */
 #define DEF_DG_C "\x1b[00;33m" /* UID, GID */
 #define DEF_DN_C "\x1b[00;02;37m" /* Dash (no attribute) */
 #define DEF_DO_C "\x1b[00;36m" /* Perms in octal */
