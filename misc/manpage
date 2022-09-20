@@ -26,7 +26,7 @@ clifm \- The Command Line File Manager
 .sp
 \fB9.\fR Built-in expansions
 .sp
-\fB10.\fR Resource opener
+\fB10.\fR Resource opener (third-party openers are also supported)
 .sp
 \fB11.\fR Auto-suggestions (including a warning prompt for invalid command names)
 .sp
@@ -413,7 +413,7 @@ list only directories
 run as a stand-alone resource opener: open \fIFILE\fR and exit, where FILE could be a regular file or a directory, using either standard notation (/dir/file) or the URI file scheme (file:///dir/file]), or a URL (www.domain or https://domain).
 .TP
 \fB\-\-opener\fR=\fI\,APPLICATION\/\fR
-specify a resource opener to use. If \fIopener\fR is not set, \fILira\fR will be used instead
+specify a resource opener to use (say \fIrifle\fR or \fIxdg-open\fR). If \fIopener\fR is not set, \fILira\fR will be used instead
 .TP
 \fB\-\-print\-sel\fR
 always print the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fBMaxPrintSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use -1 to remove the limit or any other positive value.
@@ -887,7 +887,7 @@ If the file to be opened is an archive/compressed file, the archive function (se
 Print a list of available applications associated to _ELN/FILENAME (either via its MIME type or its file extension), allowing the user to choose one of these applications, and then open the file with the selected application. In simple words, this is what in most GUI file managers is called \fBOpen with...\fR This command supports TAB completion: just type "\fIow filename \fR", then press TAB, and those applications able to open FILENAME will be listed.
 .TP
 .B opener \fR[\fIdefault\fR] [\fIAPPLICATION\fR]
-with no argument, prints the currently used resource opener (by default, \fILira\fR, \fBclifm\fR's built\-in opener). Otherwise, set APPLICATION as opener or, if \fIdefault\fR is passed instead, use \fILira\fR.
+with no argument, prints the currently used resource opener (by default, \fILira\fR, \fBclifm\fR's built\-in opener). Otherwise, set APPLICATION (say \fIrifle\fR or \fIxdg-open\fR) as opener or, if \fIdefault\fR is passed instead, use \fILira\fR.
 .TP
 .B p, pr, prop \fIELN/FILE\fR...
 print file properties for ELN/FILE. The output of this function is much like the combined output of \fIls\ \-l\fR and \fIstat\fR. By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content).
@@ -1753,7 +1753,11 @@ In case of MIME types, you can also write the entire expression without relying 
 .TP
 For more information take a look at the mimelist file itself (\fIF6\fR or \fImm edit\fR).
 .TP
-\fBUsing \fBclifm\fR as a standalone resource opener\fR
+\fBUsing a third-party opener\fR
+.TP
+Set the \fIOpener\fR option in the configuration file to the desired opener, e.g. "Opener=xdg-open".
+.TP
+\fBUsing clifm as a standalone resource opener\fR
 .TP
 Thought \fBclifm\fR is a file manager, it can be used as a simple resource opener via the \fI\-\-open\fR command line option. For example:
 
