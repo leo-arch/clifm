@@ -55,6 +55,10 @@
 # Environment variables could be used as well. Example:
 # X:text/plain=$EDITOR %f &;$VISUAL;nano;vi
 
+# Use Ranger's rifle (or whatever opener you prefer) to open all files
+#X:N:.*=rifle
+#!X:N:.*=rifle
+
 ###########################
 #  File names/extensions  #
 ###########################

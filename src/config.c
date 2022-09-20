@@ -1597,6 +1597,10 @@ create_mime_file_anew(char *file)
 # Environment variables could be used as well. Example:\n\
 # X:text/plain=$EDITOR %%f &;$VISUAL;nano;vi\n\
 \n\
+# Use Ranger's rifle (or whatever opener you prefer) to open all files\n\
+#X:N:.*=rifle\n\
+#!X:N:.*=rifle\n\
+\n\
 ###########################\n\
 #  File names/extensions  #\n\
 ###########################\n\
@@ -1697,7 +1701,6 @@ create_mime_file(char *file, int new_prof)
 	if (stat(file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-//	int ret = import_from_data_dir("mimelist.cfm", file);
 	int ret = import_from_data_dir("mimelist.clifm", file);
 	if (ret != EXIT_SUCCESS)
 		ret = create_mime_file_anew(file);

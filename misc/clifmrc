@@ -222,7 +222,8 @@ mvCmd=0
 rmForce=false
 
 # Choose the resource opener to open files with their default associated
-# application. If not set, 'lira', CliFM's built-in opener, is used.
+# application (e.g. Ranger's rifle or xdg-open). If not set, 'lira',
+# CliFM's built-in opener, is used instead.
 Opener=
 
 # Only used when opening a directory via a new CliFM instance (with the
