@@ -1,3 +1,76 @@
+1.7 - Elaine
+New features/Improvements:
+* Better columns arrangement in long view
+* ke / kd: encryption/decryption plugins
+* Better use of space when trimming file names (the space used by the files counter in now taken into account)
+* Preserve file extension when trimming file names
+* Allow forcefully copying, moving, and removing files
+* Improve in-file documentation for the default color scheme file (default.clifm)
+* Termux support
+* Transition from .cfm (ColdFusion) to .clifm config files
+* Allow displaying inode number in long view
+* Remove cc command to avoid conflicts with /bin/cc
+* Remove mount-ISO option if not on Linux
+* Optionally use numeric instead of symbolic notation for file permissions in long view mode
+* Timezone for dates in p command
+* Toggle properties fields on/off in long view
+* Virtual directories plugin
+* A nicer config file
+* Desktop notifications
+* Improve the messages log system
+* Move messages logs into log.cfm file and get rid of the messages.cfm file
+* Increase max log size to 1000
+* fdups plugin ported to FreeBSD/NetBSD/OpenBSD (thanks @danfe!)
+* Allow glob expansion via TAB for the quick search function (/*.pdf<TAB>)
+* smenu(1) support for TAB completion
+* List available bookmark paths via b:
+* A more readable color for unstatable files
+* Abbreviate file names for ds <TAB>, sel<TAB> and when informing deleted files via r sel
+* Toggle workspaces (via workspace keybindings)
+* Named Workspaces
+* Make dup command ask for a destiny directory
+* n should inform about created files
+* n should be able to create dir/file even if dir doesn't exist
+* Bleach: ä/ö/ü should be replaced by ae/oe/ue and Ä/Ö/Ü by Ae/Oe/Ue.
+
+Bug fixes:
+* Plugins not respecting --no-color
+* Extraneous first entry in long view when toggling max file name length
+* Command line garbage when deleting the whole line with the del key
+* No suggestion when recovering from wrong command
+* No color for history lines if readline.clifm isn't found
+* Inconsistent file colors when listing, searching, and printing file properties
+* Color for inaccessible directory name is extended up to properties in long view (light mode)
+* alias import not completing/suggesting file names
+* Dangling temporary file in bulk rename
+* Jumbled output when running with -y --no-eln --no-color
+* Secondary groups not honored when checking file access
+* Bleach lists all files even if they don't need to be cleaned up
+* Screen not refreshed on Enter if backspace was previously pressed on empty line
+* Suggestions for aliases is broken
+* Hex colors not working for file extensions
+* fzfnav plugin works only once
+* mime import overwrites current mimelist file
+* br without parameters returns error exit code (1)
+* rr command not working without an explicit path
+* mm command not working with ELN's
+* Bulk rename opens temporary file even for failed glob expressions
+* ACL files in long view break columns symmetry
+* No highlighting after recovering from wrong command
+* The file picker function does not work when selected file names contain spaces
+* Switching workspaces via keybinds sometimes errs with ws: filename: No such workspace
+* edit is running vis(1), which is not a text editor on BSD systems
+* Trivial messages are being logged
+* Wrong finder offset when expanding glob expressions via TAB
+* Switching workspaces via keybinds not working if there's text in the command line
+* ./<TAB> not listing directories
+* Wrong finder window offset when fuzzy-match is enabled
+* Completion for the ZSH shell are broken
+* Home not reduced to tilde on FreeBSD
+* Enter a single &: crash!
+* Multiple screen refresh when moving back and forth via keybinds
+* Removing a symlink to dir via the r command attempts to remove the target
+
 1.6 - Guybrush
 Additions/improvements:
 * Rename PromptStyle option in the color scheme file  to Notifications=true/false
