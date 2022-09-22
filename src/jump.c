@@ -30,6 +30,11 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#if defined(__OpenBSD__) || defined(__NetBSD__) \
+|| defined(__FreeBSD__) || defined(__APPLE__)
+# include <inttypes.h> /* intmax_t */
+#endif
+
 #include "aux.h"
 #include "checks.h"
 #include "file_operations.h"
@@ -113,8 +118,6 @@ save_jumpdb(void)
 	|| jump_n == 0)
 		return;
 
-//	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
-//	sprintf(jump_file, "%s/jump.cfm", config_dir);
 	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 	sprintf(jump_file, "%s/jump.clifm", config_dir);
 
@@ -212,13 +215,9 @@ save_jumpdb(void)
 		}
 
 		jump_num++;
-#ifndef __OpenBSD__
-		fprintf(fp, "%zu:%ld:%ld:%s\n", jump_db[i].visits, jump_db[i].first_visit,
-			jump_db[i].last_visit, jump_db[i].path);
-#else
-		fprintf(fp, "%zu:%lld:%lld:%s\n", jump_db[i].visits, jump_db[i].first_visit,
-			jump_db[i].last_visit, jump_db[i].path);
-#endif
+
+		fprintf(fp, "%zu:%jd:%jd:%s\n", jump_db[i].visits, (intmax_t)jump_db[i].first_visit,
+			(intmax_t)jump_db[i].last_visit, jump_db[i].path);
 	}
 
 	fprintf(fp, "@%d\n", total_rank);
@@ -234,8 +233,6 @@ edit_jumpdb(void)
 
 	save_jumpdb();
 
-/*	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
-	sprintf(jump_file, "%s/jump.cfm", config_dir); */
 	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 	sprintf(jump_file, "%s/jump.clifm", config_dir);
 
