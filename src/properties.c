@@ -42,7 +42,7 @@
 
 #if defined(__OpenBSD__) || defined(__NetBSD__) \
 || defined(__FreeBSD__) || defined(__APPLE__)
-# include <inttypes.h> /* uintmax_t */
+# include <inttypes.h> /* uintmax_t, intmax_t */
 #endif
 
 #include "aux.h"

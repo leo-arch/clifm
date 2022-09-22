@@ -60,6 +60,11 @@
 #include "remotes.h"
 
 /* Globals */
+
+/*#ifdef RL_INPUT_TEST
+FILE *test_input_stream;
+#endif // RL_INPUT_TEST */
+
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct actions_t *usr_actions = (struct actions_t *)NULL;
 struct ws_t *workspaces = (struct ws_t *)NULL;

@@ -1237,6 +1237,11 @@ xrl_discard_keymap(Keymap map)
 void
 free_stuff(void)
 {
+/*#ifdef RL_INPUT_TEST
+	if (test_input_stream)
+		fclose(test_input_stream);
+#endif // RL_INPUT_TEST */
+
 	int i = 0;
 
 #ifdef LINUX_INOTIFY

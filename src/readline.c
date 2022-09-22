@@ -3224,6 +3224,17 @@ initialize_readline(void)
 
 	set_rl_init_file();
 
+/*#ifdef RL_INPUT_TEST
+# define STRINGIZE_(x) #x
+# define STRINGIZE(x) STRINGIZE_(x)
+	test_input_stream = fopen(STRINGIZE(RL_INPUT_TEST), "r");
+	if (!test_input_stream) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		exit(errno);
+	}
+	rl_instream = test_input_stream;
+#endif // RL_INPUT_TEST */
+
 	/* Enable tab auto-completion for commands (in PATH) in case of
 	  * first entered string (if autocd and/or auto-open are enabled, check
 	  * for paths as well). The second and later entered strings will

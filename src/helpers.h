@@ -65,7 +65,7 @@
 /* Support large files on ARM or 32-bit machines */
 #if defined(__arm__) || defined(__i386__)
 # define _FILE_OFFSET_BITS 64
-//#define _TIME_BITS 64 /* Address Y2038 problem for 32 bits machines */
+# define _TIME_BITS 64 /* Address Y2038 problem for 32 bits machines */
 #endif
 
 /* _NO_LIRA implies _NO_MAGIC */
@@ -185,6 +185,11 @@ extern unsigned int KQUEUE_FFLAGS;
 extern struct timespec timeout;
 #endif /* LINUX_INOTIFY */
 extern int watch;
+
+/*#ifdef RL_INPUT_TEST
+#include <stdio.h>
+extern FILE *test_input_stream;
+#endif // RL_INPUT_TEST */
 
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
