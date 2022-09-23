@@ -495,10 +495,10 @@ my_insert_text(char *text, char *s, const char _s)
 		int l = 0;
 		for (i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
-			if (t[i] < 0) {
+			if ((signed char)t[i] < 0) {
 				q[l] = t[i];
 				l++;
-				if (t[i + 1] >= 0) {
+				if ((signed char)t[i + 1] >= 0) {
 					q[l] = '\0';
 					l = 0;
 					rl_insert_text(q);
@@ -1629,10 +1629,10 @@ print_highlight_string(char *s)
 	char q[PATH_MAX];
 	for (i = 0; s[i]; i++) {
 		rl_highlight(s, i, SET_COLOR);
-		if (s[i] < 0) {
+		if ((signed char)s[i] < 0) {
 			q[l] = s[i];
 			l++;
-			if (s[i + 1] >= 0) {
+			if ((signed char)s[i + 1] >= 0) {
 				q[l] = '\0';
 				l = 0;
 				rl_insert_text(q);

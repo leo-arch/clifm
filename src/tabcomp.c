@@ -1677,10 +1677,10 @@ AFTER_USUAL_COMPLETION:
 				char t[PATH_MAX];
 				for (k = _start; replacement[k]; k++) {
 					rl_highlight(replacement, k, SET_COLOR);
-					if (replacement[k] < 0) {
+					if ((signed char)replacement[k] < 0) {
 						t[l] = replacement[k];
 						l++;
-						if (replacement[k + 1] >= 0) {
+						if ((signed char)replacement[k + 1] >= 0) {
 							t[l] = '\0';
 							l = 0;
 							rl_insert_text(t);
@@ -2019,10 +2019,10 @@ RESTART:
 			for (k = 0; ss[k]; k++) {
 				rl_highlight(ss, (size_t)k, SET_COLOR);
 
-				if (ss[k] < 0) {
+				if ((signed char)ss[k] < 0) {
 					t[l] = ss[k];
 					l++;
-					if (ss[k + 1] >= 0) {
+					if ((signed char)ss[k + 1] >= 0) {
 						t[l] = '\0';
 						l = 0;
 						rl_insert_text(t);

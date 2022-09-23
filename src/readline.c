@@ -733,6 +733,12 @@ get_prompt_offset(char *p)
 }
 // TESTING CURSOR POSITION
 
+/* Whenever we are on a secondary prompt, multi-byte chars are present, and
+ * we press Right on such char, rl_point gets the wrong cursor offset.
+ * This function corrects this offset.
+ * NOTE: This is just a workaround. No correction should be made because
+ * nothing should be corrected in the first place. The question is: why
+ * rl_point is wrong here, and why does this happen only in secondary prompts? */
 static void
 fix_rl_point(const unsigned char c)
 {
