@@ -733,6 +733,20 @@ get_prompt_offset(char *p)
 }
 // TESTING CURSOR POSITION
 
+static void
+fix_rl_point(const unsigned char c)
+{
+	if (!RL_ISSTATE(RL_STATE_MOREINPUT) || c != 'C')
+		return;
+
+	char d = rl_line_buffer[rl_point];
+	if ((d & 0xc0) != 0x80 && (d & 0xc0) != 0xc0)
+		return;
+
+	int mlen = mblen(rl_line_buffer + rl_point, __MB_LEN_MAX);
+	rl_point += mlen > 0 ? mlen - 1 : 0;
+}
+
 /* This function is automatically called by readline() to handle input.
  * Used to introduce suggestions and syntax highlighting. */
 static int
@@ -820,13 +834,17 @@ my_rl_getc(FILE *stream)
 					return (EOF);
 				}
 
+				fix_rl_point(c);
 				return c;
 			}
 
 			/* Syntax highlighting is made from here */
 			int ret = rl_exclude_input(c);
-			if (ret == RL_INSERT_CHAR)
+			if (ret == RL_INSERT_CHAR) {
+				if (rl_nohist == 1)
+					fix_rl_point(c);
 				return c;
+			}
 
 #ifndef _NO_SUGGESTIONS
 //			if (ret != 2 && ret != -2 && !_xrename && suggestions) {
