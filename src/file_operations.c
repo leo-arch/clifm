@@ -1917,14 +1917,17 @@ batch_link(char **args)
 		char cur_suffix[24];
 		while (stat(tmp, &a) == EXIT_SUCCESS) {
 			/* File exists. Append a positive integer suffix */
+			char *d = strrchr(tmp, '-');
+			if (d && is_number(d + 1))
+				*d = '\0';
 			snprintf(cur_suffix, sizeof(cur_suffix), "-%zu", added_suffix);
-			strncat(tmp, cur_suffix, sizeof(tmp) - strlen(tmp) - 1);
+			strncat(tmp, cur_suffix, sizeof(tmp) - strnlen(tmp, sizeof(tmp)) - 1);
 			added_suffix++;
 		}
 
 		char *ptr = strrchr(tmp, '/');
 		if (symlinkat(args[i], AT_FDCWD, (ptr && ++ptr) ? ptr : tmp) == -1) {
-			exit_status = EXIT_FAILURE;
+			exit_status = errno;
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bl: symlinkat: %s: Cannot create "
 				"symlink: %s\n"), ptr ? ptr : tmp, strerror(errno));
 		}
