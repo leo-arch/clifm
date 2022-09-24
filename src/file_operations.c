@@ -1903,10 +1903,14 @@ batch_link(char **args)
 	char tmp[NAME_MAX];
 
 	for (i = 1; args[i]; i++) {
-		if (!suffix || !*suffix)
+		if (!suffix || !*suffix) {
 			snprintf(tmp, NAME_MAX, "%s.link", args[i]);
-		else
-			snprintf(tmp, NAME_MAX, "%s%s", args[i], suffix);
+		} else {
+			if (*suffix == '.')
+				snprintf(tmp, NAME_MAX, "%s%s", args[i], suffix);
+			else
+				snprintf(tmp, NAME_MAX, "%s.%s", args[i], suffix);
+		}
 
 		struct stat a;
 		size_t added_suffix = 1;
