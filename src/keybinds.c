@@ -302,6 +302,11 @@ run_kb_cmd(char *cmd)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
+	if (colorize == 1 && wrong_cmd == 1) {
+		fputs(tx_c, stdout);
+		fflush(stdout);
+	}
+
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
