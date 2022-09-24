@@ -1903,31 +1903,32 @@ batch_link(char **args)
 	char tmp[NAME_MAX];
 
 	for (i = 1; args[i]; i++) {
-		char *linkname = (char *)NULL;
-
-		if (!suffix || !*suffix) {
+		if (!suffix || !*suffix)
 			snprintf(tmp, NAME_MAX, "%s.link", args[i]);
-			linkname = tmp;
-		} else {
+		else
 			snprintf(tmp, NAME_MAX, "%s%s", args[i], suffix);
-			linkname = tmp;
+
+		struct stat a;
+		size_t added_suffix = 1;
+		char cur_suffix[24];
+		while (stat(tmp, &a) == EXIT_SUCCESS) {
+			/* File exists. Append a positive integer suffix */
+			snprintf(cur_suffix, sizeof(cur_suffix), "-%zu", added_suffix);
+			strncat(tmp, cur_suffix, sizeof(tmp) - strlen(tmp) - 1);
+			added_suffix++;
 		}
 
-		char *ptr = strrchr(linkname, '/');
-		if (symlinkat(args[i], AT_FDCWD, ptr ? ++ptr : linkname) == -1) {
+		char *ptr = strrchr(tmp, '/');
+		if (symlinkat(args[i], AT_FDCWD, (ptr && ++ptr) ? ptr : tmp) == -1) {
 			exit_status = EXIT_FAILURE;
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bl: symlinkat: %s: Cannot create "
-				"symlink: %s\n"), ptr ? ptr : linkname, strerror(errno));
+				"symlink: %s\n"), ptr ? ptr : tmp, strerror(errno));
 		}
 	}
 
 #if defined(__HAIKU__) || defined(__CYGWIN__)
-	if (exit_status == EXIT_SUCCESS && autols) {
-		free_dirlist();
-
-		if (list_dir() != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-	}
+	if (exit_status == EXIT_SUCCESS && autols)
+		reload_dirlist();
 #endif
 
 	free(suffix);
