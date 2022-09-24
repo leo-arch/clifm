@@ -1877,6 +1877,9 @@ char *export(char **filenames, int open)
 	}
 }
 
+/* Create a symlink for each file in ARGS + 1
+ * Ask the user for a custom suffix for new symlinks (defaults to .link)
+ * If the destiny file exists, append a positive integer suffix to make it unique */
 int
 batch_link(char **args)
 {
@@ -1916,9 +1919,8 @@ batch_link(char **args)
 		size_t added_suffix = 1;
 		char cur_suffix[24];
 		while (stat(tmp, &a) == EXIT_SUCCESS) {
-			/* File exists. Append a positive integer suffix */
 			char *d = strrchr(tmp, '-');
-			if (d && is_number(d + 1))
+			if (d && *(d + 1) && is_number(d + 1))
 				*d = '\0';
 			snprintf(cur_suffix, sizeof(cur_suffix), "-%zu", added_suffix);
 			strncat(tmp, cur_suffix, sizeof(tmp) - strnlen(tmp, sizeof(tmp)) - 1);
