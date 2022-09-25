@@ -75,7 +75,7 @@
 X:N:.*\.djvu$=djview;zathura;evince;atril
 X:N:.*\.epub$=mupdf;zathura;ebook-viewer
 X:N:.*\.mobi$=ebook-viewer
-X:N:.*\.(cbr|cbz)$=mcomix;YACReader;zathura
+X:N:.*\.(cbr|cbz)$=mcomix;YACReader;qcomicview;zathura
 X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit -s;kate -n;pluma --new-window
 !X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano
 

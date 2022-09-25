@@ -1617,7 +1617,7 @@ create_mime_file_anew(char *file)
 X:N:.*\\.djvu$=djview;zathura;evince;atril\n\
 X:N:.*\\.epub$=mupdf;zathura;ebook-viewer\n\
 X:N:.*\\.mobi$=ebook-viewer\n\
-X:N:.*\\.(cbr|cbz)$=mcomix;YACReader;zathura\n\
+X:N:.*\\.(cbr|cbz)$=mcomix;YACReader;qcomicview;zathura\n\
 X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
 !X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano\n\
 \n\n");
