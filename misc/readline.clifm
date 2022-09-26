@@ -43,7 +43,6 @@ $if mode=emacs
 "\C-d":
 "\e\e":
 "\C-r\C-r": re-read-init-file
-"\C-p\C-p": exchange-point-and-mark
 "\C-zA": do-lowercase-version
 "\C-zB": do-lowercase-version
 "\C-zC": do-lowercase-version

@@ -1758,6 +1758,11 @@ rl_cmdhist(int count, int key)
 	}
 #endif
 
+	if (key == 16) /* C-p */
+		key = 65;
+	if (key == 14) /* C-n */
+		key = 66;
+
 	if (key != 65 && key != 66)
 		return EXIT_FAILURE;
 
@@ -2120,6 +2125,8 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
+	rl_bind_keyseq("\\C-p", rl_cmdhist);
+	rl_bind_keyseq("\\C-n", rl_cmdhist);
 	rl_bind_keyseq("\\C-l", rl_refresh);
 	rl_bind_keyseq("\x1b[A", rl_cmdhist);
 	rl_bind_keyseq("\x1b[B", rl_cmdhist);
@@ -2139,7 +2146,7 @@ readline_kbinds(void)
 	rl_bind_keyseq(s_right_arrow, rl_next_dir); */
 
 #ifndef _NO_SUGGESTIONS
-#ifndef __HAIKU__
+# ifndef __HAIKU__
 	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
 	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
 	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
@@ -2150,9 +2157,9 @@ readline_kbinds(void)
 	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);
 	rl_bind_keyseq("\x1b\x1b[C", rl_accept_first_word);
 	rl_bind_keyseq("\x1b[1;3C", rl_accept_first_word);
-#else
+# else
 	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
 	rl_bind_keyseq("\\C-f", rl_accept_first_word);
-#endif /* __HAIKU__ */
+# endif /* !__HAIKU__ */
 #endif /* !_NO_SUGGESTIONS */
 }
