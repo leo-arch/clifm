@@ -1743,7 +1743,7 @@ handle_cmdhist_middle(int key)
 	return print_cmdhist_line(p, 0);
 }
 
-/* Handle keybinds for the cmds history: UP and DOWN */
+/* Handle keybinds for the cmds history: UP/C-p and DOWN/C-n */
 static int
 rl_cmdhist(int count, int key)
 {
@@ -1758,10 +1758,10 @@ rl_cmdhist(int count, int key)
 	}
 #endif
 
-	if (key == 16) /* C-p */
-		key = 65;
-	if (key == 14) /* C-n */
-		key = 66;
+	if (key == 16) /* C-p  */
+		key = 65;  /* Up   */
+	if (key == 14) /* C-n  */
+		key = 66;  /* Down */
 
 	if (key != 65 && key != 66)
 		return EXIT_FAILURE;
@@ -1770,7 +1770,6 @@ rl_cmdhist(int count, int key)
 	if (rl_point == 0 || cmdhist_flag == 1)
 		return handle_cmdhist_beginning(key);
 
-	/* If cursor is not at the beginning of the line */
 	return handle_cmdhist_middle(key);
 }
 
@@ -2125,11 +2124,11 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
-	rl_bind_keyseq("\\C-p", rl_cmdhist);
-	rl_bind_keyseq("\\C-n", rl_cmdhist);
 	rl_bind_keyseq("\\C-l", rl_refresh);
 	rl_bind_keyseq("\x1b[A", rl_cmdhist);
 	rl_bind_keyseq("\x1b[B", rl_cmdhist);
+	rl_bind_keyseq("\\C-p", rl_cmdhist);
+	rl_bind_keyseq("\\C-n", rl_cmdhist);
 
 	rl_bind_keyseq("\\M-q", rl_del_last_word);
 	rl_bind_key('\t', rl_tab_comp);
