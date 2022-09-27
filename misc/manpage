@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Aug 29, 2022" "clifm 1.7.1" "CLIFM Manual"
+.TH "CLIFM" "1" "Sep 27, 2022" "clifm 1.7.3" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -737,7 +737,7 @@ toggle icons on/off
 .B j, jc, jl, jp \fR[\fISTR\fR]..., \fBjo\fR [\fINUM\fR], \fBje\fR
 \fIj\fR is the fastest way of using \fBKangaroo\fR, a \fBdirectory jumper\fR function to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
-With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself (an asterisk next to the rank value means that the corresponding directory is bookmarked, the current directory in some workspace or pinned). Otherwise, it searches for STR in the database and cd into the best ranked matching entry. Example: \fIj\ D\fR will probably take you to \fI/home/user/Downloads\fR, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FREQUENCY ALGORITHM\fR section below.
+With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself (an asterisk next to the rank value means that the corresponding directory is bookmarked, the current directory in some workspace or pinned). Otherwise, it searches for STR in the database and cd into the best ranked matching entry. Example: \fIj\ D\fR will probably take you to \fI/home/user/Downloads\fR, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FRECENCY ALGORITHM\fR section below.
 .sp
 Multiple query strings could be passed to the function. For example, \fIj\ et\ mo\fR will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the best ranked match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
 .sp
@@ -2284,11 +2284,11 @@ Once all entries in the initial list of matches have been filtered via the above
 .sp
 Automatic maintenance is done on the database applying a few simple procedures:
 
- a) Each entry in the database is checked at startup to remove non-existent directories.
+ a) If \fIPurgeJumpDB\fR is set to \fItrue\fR (see the main configuration file), each entry in the database is checked at startup to remove non-existent directories. This option is set to \fIfalse\fR by default to avoid removing paths pointing to unmounted file systems (like removable devices or remote locations) which you still might want to keep.
 
- b) Once the rank of a directory falls below MinJumpRank (by default 10), it is forgotten and deleted from the database. The MinJumpRank value can be customized in the configuration file. To make non-frequently visited directories disappear quicker from the database, increase this value.
+ b) Once the rank of a directory falls below \fIMinJumpRank\fR (by default 10), it is forgotten and deleted from the database. The \fIMinJumpRank\fR value can be customized in the configuration file. To make non-frequently visited directories disappear quicker from the database, increase this value.
 
- c) Once the sum total of ranks reaches MaxJumpTotalRank (by default 100000), each individual rank is divided by a dynamic factor so that the total rank becomes less than or equal to MaxJumpTotalRank. If some rank falls in the process below MinJumpRank, it is removed from the database. MaxJumpTotalRank can be modified in the configuration file. The higher the value of MaxJumpTotalRank, the more time directories will be kept in the database.
+ c) Once the sum total of ranks reaches \fIMaxJumpTotalRank\fR (by default 100000), each individual rank is divided by a dynamic factor so that the total rank becomes less than or equal to \fIMaxJumpTotalRank\fR. If some rank falls in the process below \fIMinJumpRank\fR, it is removed from the database. \fIMaxJumpTotalRank\fR can be modified in the configuration file. The higher the value of \fIMaxJumpTotalRank\fR, the more time directories will be kept in the database.
 
 NOTE: Directories visited in the last 24 hours will not be removed from the database, no matter what their rank is.
 .sp

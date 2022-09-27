@@ -656,8 +656,6 @@ load_jumpdb(void)
 	if (xargs.no_dirjump == 1 || !config_ok || !config_dir)
 		return;
 
-/*	char *jump_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
-	snprintf(jump_file, config_dir_len + 10, "%s/jump.cfm", config_dir); */
 	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 	snprintf(jump_file, config_dir_len + 12, "%s/jump.clifm", config_dir);
 
@@ -750,7 +748,7 @@ load_jumpdb(void)
 			continue;
 
 		/* Purge the database from non-existent directories */
-		if (access(tmpc, F_OK) == -1)
+		if (purge_jumpdb == 1 && access(tmpc, F_OK) == -1)
 			continue;
 
 		jump_db[jump_n].visits = (size_t)visits;

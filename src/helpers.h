@@ -1127,6 +1127,7 @@ extern int
 	print_removed_files,
 	prompt_offset,
 	prompt_notif,
+	purge_jumpdb,
 	recur_perm_error_flag,
 	restore_last_path,
 	rl_last_word_start,

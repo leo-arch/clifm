@@ -236,6 +236,7 @@ xf=01;31:xs=00;32:"
 #define DEF_PRINTSEL 0
 #define DEF_PRINT_REMOVED_FILES 1
 #define DEF_PROP_FIELDS "pims" /* Permissions, owner/grp Ids, mod Time, Size */
+#define DEF_PURGE_JUMPDB 0
 #define DEF_REFRESH_ON_EMPTY_LINE 1
 #define DEF_REFRESH_ON_RESIZE 1
 #define DEF_RESTORE_LAST_PATH 1

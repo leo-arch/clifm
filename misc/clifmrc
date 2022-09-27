@@ -244,6 +244,10 @@ MinJumpRank=10
 # be deleted
 MaxJumpTotalRank=100000
 
+# Automatically purge the jump database from non-existing directories at
+# startup. Note that this will remove paths pointing to unmounted removable
+# devices and remote file systems
+PurgeJumpDB=false
 
 #=====================================#
 #        4. LOGS AND HISTORY          #

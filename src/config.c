@@ -1074,6 +1074,11 @@ MinJumpRank=%d\n\n"
 # be deleted\n\
 MaxJumpTotalRank=%d\n\n"
 
+		"# Automatically purge the jump database from non-existing directories at\n\
+# startup. Note that this will remove paths pointing to unmounted removable\n\
+# devices and remote file systems\n\
+PurgeJumpDB=%s\n\n"
+
 	    "# Should CliFM be allowed to run external, shell commands?\n\
 ExternalCommands=%s\n\n"
 
@@ -1142,6 +1147,7 @@ LightMode=%s\n\n",
 		DEF_MIN_NAME_TRIM,
 		DEF_MIN_JUMP_RANK,
 		DEF_MAX_JUMP_TOTAL_RANK,
+		DEF_PURGE_JUMPDB == 1 ? "true" : "false",
 		DEF_EXT_CMD_OK == 1 ? "true" : "false",
 		DEF_CD_ON_QUIT == 1 ? "true" : "false",
 		DEF_AUTOCD == 1 ? "true" : "false",
@@ -2306,6 +2312,11 @@ read_config(void)
 			set_prop_fields(prop_fields_str);
 		}
 
+		else if (*line == 'P' && strncmp(line, "PurgeJumpDB=", 12) == 0) {
+			if (set_config_bool_value(line, &purge_jumpdb) == -1)
+				continue;
+		}
+
 		else if (xargs.restore_last_path == UNSET && *line == 'R'
 		&& strncmp(line, "RestoreLastPath=", 16) == 0) {
 			if (set_config_bool_value(line, &restore_last_path) == -1)
@@ -2834,6 +2845,7 @@ reset_variables(void)
 	print_selfiles = UNSET;
 	prompt_offset = UNSET;
 	prompt_notif = UNSET;
+	purge_jumpdb = UNSET;
 	restore_last_path = UNSET;
 	rm_force = UNSET;
 	search_strategy = UNSET;
