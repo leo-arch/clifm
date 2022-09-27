@@ -474,7 +474,7 @@ main() {
 	! [ -d "$PREVIEWDIR" ] && mkdir -p "$PREVIEWDIR"
 
 	if [ "$USE_SCOPE" = 1 ]; then
-		[ -z "$SCOPE_FILE" ] && SCOPE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ranger/scope.sh"
+		[ -z "$SCOPE_FILE" ] && export SCOPE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ranger/scope.sh"
 	fi
 
 	# If some value was not set in the config file, check for available
