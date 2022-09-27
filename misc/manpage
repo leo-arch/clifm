@@ -2284,7 +2284,7 @@ Once all entries in the initial list of matches have been filtered via the above
 .sp
 Automatic maintenance is done on the database applying a few simple procedures:
 
- a) If \fIPurgeJumpDB\fR is set to \fItrue\fR (see the main configuration file), each entry in the database is checked at startup to remove non-existent directories. This option is set to \fIfalse\fR by default to avoid removing paths pointing to unmounted file systems (like removable devices or remote locations) which you still might want to keep.
+ a) If \fIPurgeJumpDB\fR is set to \fItrue\fR (see the main configuration file), each entry in the database is checked at startup to remove non-existent directories. This option is set to \fIfalse\fR by default to avoid removing paths pointing to unmounted file systems (like removable devices or remote locations) which you still might want to keep. Non-existent directories, however, will be removed anyway due to their rank value (see below).
 
  b) Once the rank of a directory falls below \fIMinJumpRank\fR (by default 10), it is forgotten and deleted from the database. The \fIMinJumpRank\fR value can be customized in the configuration file. To make non-frequently visited directories disappear quicker from the database, increase this value.
 
