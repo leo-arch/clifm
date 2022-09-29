@@ -514,7 +514,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				finder_in_file, finder_out_file);
 	} else {
 		int prev = (fzf_preview == 1 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
-		char prev_str[] = "--preview \"/home/_leo08/build/git_repos/clifm/src/clifm --preview {}\"";
+		char prev_str[] = "--preview \"clifm --preview {}\"";
 
 		snprintf(cmd, sizeof(cmd), "fzf %s "
 				"%s --margin=0,0,0,%d "
