@@ -45,7 +45,8 @@ inode/directory=lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --col
 # Archives
 N:.*\.rar=unrar lt -p- --;
 N:.*\.7z=7z l -p --;
-^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;
+application/zstd=file -b;true
+application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;
 
 # PDF
 .*/pdf$=pdftotext -l 10 -nopgbrk -q -- %f -;mutool draw -F txt -i --;
