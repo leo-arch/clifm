@@ -1,0 +1,68 @@
+                  ######################################
+                  #   Configuration file for Shotgun   #
+                  #       CliFM's file previewer       #
+                  ######################################
+
+# Commented and blank lines are omitted
+
+# It is recommended to edit this file setting your preferred applications
+# first: the previewing process will be smoother and faster this way
+# You can even remove whatever applications you don't use
+
+# For syntax details consult the mimelist.clifm file
+
+# Uncomment this line to use pistol (or any other previewer script)
+#.*=pistol
+
+###########################
+#  File names/extensions  #
+###########################
+
+N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;
+
+N:.*\.xlsx$=xlsx2csv --;
+
+N:.*\.json$=jq --color-output . ;python -m json.tool --;
+
+##################
+#   MIME types   #
+##################
+
+# Directories
+inode/directory=lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
+
+# Web content
+^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;
+
+# Text
+^text/rtf=catdoc --;
+^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;
+
+# Office documents
+^application/msword=catdoc --;
+^application/.*(open|office)document.*=pandoc -s -t markdown --;
+
+# Archives
+N:.*\.rar=unrar lt -p- --;
+N:.*\.7z=7z l -p --;
+^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;
+
+# PDF
+.*/pdf$=pdftotext -l 10 -nopgbrk -q -- %f -;mutool draw -F txt -i --;
+
+# DjVu
+^image/vnd.djvu=djvutxt;exiftool;
+
+# Image, video and audio
+^image/.*=exiftool;
+^video/.*=mediainfo;exiftool;
+^audio/.*=mediainfo;exiftool;
+
+# Fonts
+#^font/.*=fontforge;fontpreview
+
+# Torrent:
+application/x-bittorrent=transmission-show --;
+
+# Fallback
+.*=exiftool;file -b;true;

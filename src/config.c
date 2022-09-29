@@ -459,6 +459,99 @@ import_from_data_dir(char *src_filename, char *dest)
 }
 
 static int
+create_preview_file(void)
+{
+	char file[PATH_MAX];
+	snprintf(file, sizeof(file), "%s/preview.clifm", config_dir);
+
+	struct stat attr;
+	if (stat(file, &attr) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+
+	if (import_from_data_dir("preview.clifm", file) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+
+	int fd;
+	FILE *fp = open_fstream_w(file, &fd);
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	fprintf(fp, "                  ######################################\n\
+                  #   Configuration file for Shotgun   #\n\
+                  #       CliFM's file previewer       #\n\
+                  ######################################\n\
+\n\
+# Commented and blank lines are omitted\n\
+\n\
+# It is recommended to edit this file setting your preferred applications\n\
+# first: the previewing process will be smoother and faster this way\n\
+# You can even remove whatever applications you don't use\n\
+\n\
+# For syntax details consult the mimelist.clifm file\n\
+\n\
+# Uncomment this line to use pistol (or any other previewer script)\n\
+#.*=pistol\n\
+\n\
+###########################\n\
+#  File names/extensions  #\n\
+###########################\n\
+\n\
+N:.*\\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;\n\
+\n\
+N:.*\\.xlsx$=xlsx2csv --;\n\
+\n\
+N:.*\\.json$=jq --color-output . ;python -m json.tool --;\n\
+\n\
+##################\n\
+#   MIME types   #\n\
+##################\n\
+\n\
+# Directories\n\
+inode/directory=lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;\n\
+\n\
+# Web content\n\
+^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;\n\
+\n\
+# Text\n\
+^text/rtf=catdoc --;\n\
+^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;\n\
+\n\
+# Office documents\n\
+^application/msword=catdoc --;\n\
+^application/.*(open|office)document.*=pandoc -s -t markdown --;\n\
+\n\
+# Archives\n\
+N:.*\\.rar=unrar lt -p- --;\n\
+N:.*\\.7z=7z l -p --;\n\
+^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;\n\
+\n\
+# PDF\n\
+.*/pdf$=pdftotext -l 10 -nopgbrk -q -- %%f -;mutool draw -F txt -i --;\n\
+\n\
+# DjVu\n\
+^image/vnd.djvu=djvutxt;exiftool;\n\
+\n\
+# Image, video and audio\n\
+^image/.*=exiftool;\n\
+^video/.*=mediainfo;exiftool;\n\
+^audio/.*=mediainfo;exiftool;\n\
+\n\
+# Fonts\n\
+#^font/.*=fontforge;fontpreview\n\
+\n\
+# Torrent:\n\
+application/x-bittorrent=transmission-show --;\n\
+\n\
+# Fallback\n\
+.*=exiftool;file -b;true;\n");
+
+	close_fstream(fp, fd);
+	return EXIT_SUCCESS;
+}
+
+static int
 create_actions_file(char *file)
 {
 	struct stat attr;
@@ -467,7 +560,6 @@ create_actions_file(char *file)
 		return EXIT_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-//	if (import_from_data_dir("actions.cfm", file) == EXIT_SUCCESS)
 	if (import_from_data_dir("actions.clifm", file) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
@@ -1031,6 +1123,9 @@ rmForce=%s\n\n",
 # 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used\n\
 TabCompletionMode=\n\n"
 
+		"# Preview files if using the fzf mode for TAB completion\n\
+FzfPreview=%s\n\n"
+
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
 # whenever the current path is longer than MaxPath.\n\
@@ -1133,6 +1228,7 @@ ExpandBookmarks=%s\n\n"
 # well, so that the color per extension feature is disabled.\n\
 LightMode=%s\n\n",
 
+		DEF_FZF_PREVIEW == 1 ? "true" : "false",
 		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
 		PROGRAM_NAME,
@@ -1533,6 +1629,7 @@ create_config_files(void)
 	import_rl_file();
 	create_actions_file(actions_file);
 	create_mime_file(mime_file, 0);
+	create_preview_file();
 	create_remotes_file();
 }
 
@@ -2161,6 +2258,12 @@ read_config(void)
 		else if (xargs.full_dir_size == UNSET && *line == 'F'
 		&& strncmp(line, "FullDirSize=", 12) == 0) {
 			if (set_config_bool_value(line, &full_dir_size) == -1)
+				continue;
+		}
+
+		else if (xargs.fzf_preview == UNSET && *line == 'F'
+		&& strncmp(line, "FzfPreview=", 11) == 0) {
+			if (set_config_bool_value(line, &fzf_preview) == -1)
 				continue;
 		}
 
@@ -2810,6 +2913,7 @@ reset_variables(void)
 	files_counter = UNSET;
 	follow_symlinks = UNSET;
 	full_dir_size = UNSET;
+	fzf_preview = UNSET;
 #ifndef _NO_FZF
 	fzftab = UNSET;
 #endif

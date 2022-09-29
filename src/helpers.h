@@ -791,6 +791,7 @@ struct param_t {
 	int follow_symlinks;
 	int full_dir_size;
 	int fuzzy_match;
+	int fzf_preview;
 #ifndef _NO_FZF
 	int fzftab;
 	int fzytab;
@@ -1095,6 +1096,7 @@ extern int
 	fzftab,
 	fzf_height_set,
 	fzf_open_with,
+	fzf_preview,
 	highlight,
 	hist_status,
 	home_ok,

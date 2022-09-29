@@ -980,6 +980,22 @@ rl_open_jump_db(int count, int key)
 }
 
 static int
+rl_open_preview(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	if (!config_dir)
+		return EXIT_FAILURE;
+
+	char *file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+	sprintf(file, "%s/preview.clifm", config_dir);
+
+	int ret = open_file(file);
+	free(file);
+	rl_on_new_line();
+	return ret;
+}
+
+static int
 rl_open_mime(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
@@ -1994,6 +2010,7 @@ readline_kbinds(void)
 		/* Config files */
 		rl_bind_keyseq(find_key("open-mime"), rl_open_mime);
 		rl_bind_keyseq(find_key("open-jump-db"), rl_open_jump_db);
+		rl_bind_keyseq(find_key("open-preview"), rl_open_preview);
 		rl_bind_keyseq(find_key("edit-color-scheme"), rl_open_cscheme);
 		rl_bind_keyseq(find_key("open-config"), rl_open_config);
 		rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);

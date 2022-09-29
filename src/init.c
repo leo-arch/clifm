@@ -1307,7 +1307,7 @@ load_prompts(void)
 
 /* Opener function: open FILENAME and exit */
 static void
-open_reg_exit(char *filename, int url)
+open_reg_exit(char *filename, const int url, const int preview)
 {
 	char *homedir = getenv("HOME");
 	if (!homedir) {
@@ -1318,12 +1318,11 @@ open_reg_exit(char *filename, int url)
 	tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
 
 	size_t mime_file_len = strlen(homedir) + (alt_profile
-//					? strlen(alt_profile) : 7) + 38;
-					? strlen(alt_profile) : 7) + 40;
+			? strlen(alt_profile) : 7) + 40;
 	mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
-//	sprintf(mime_file, "%s/.config/clifm/profiles/%s/mimelist.cfm",
-	sprintf(mime_file, "%s/.config/clifm/profiles/%s/mimelist.clifm",
-			homedir, alt_profile ? alt_profile : "default");
+	sprintf(mime_file, "%s/.config/clifm/profiles/%s/%s.clifm",
+			homedir, alt_profile ? alt_profile : "default",
+			preview == 1 ? "preview" : "mimelist");
 
 	if (path_n == 0)
 		path_n = get_path_env();
@@ -1335,7 +1334,12 @@ open_reg_exit(char *filename, int url)
 	UNUSED(url);
 #endif
 
-	int ret = open_file(filename);
+	char *p = (char *)NULL;
+	if (preview == 1 && *filename == '~')
+		p = tilde_expand(filename);
+
+	int ret = open_file(p ? p : filename);
+	free(p);
 	exit(ret);
 }
 
@@ -1420,7 +1424,7 @@ resolve_positional_param(char *file)
 	free(_exp_path);
 
 	if (url == 1 || !S_ISDIR(attr.st_mode))
-		open_reg_exit(_path, url);
+		open_reg_exit(_path, url, 0);
 
 	flags |= START_PATH;
 	xargs.path = 1;
@@ -1507,6 +1511,7 @@ external_arguments(int argc, char **argv)
 	    {"case-sens-path-comp", no_argument, 0, 31},
 	    {"cwd-in-title", no_argument, 0, 32},
 	    {"open", required_argument, 0, 33},
+	    {"preview", required_argument, 0, 33},
 	    {"print-sel", no_argument, 0, 34},
 	    {"no-suggestions", no_argument, 0, 35},
 	    {"autojump", no_argument, 0, 36},
@@ -1534,17 +1539,18 @@ external_arguments(int argc, char **argv)
 		{"virtual-dir", required_argument, 0, 58},
 		{"desktop-notifications", no_argument, 0, 59},
 		{"vt100", no_argument, 0, 60},
+		{"fzfpreview", no_argument, 0, 61},
 #ifdef __linux__
-		{"si", no_argument, 0, 61},
+		{"si", no_argument, 0, 62},
 #endif
 	    {0, 0, 0, 0}
 	};
 
 	/* Increment whenever a new (only) long option is added */
 #ifdef __linux__
-	int long_opts = 61;
+	int long_opts = 62;
 #else
-	int long_opts = 60;
+	int long_opts = 61;
 #endif
 	int optc;
 	/* Variables to store arguments to options */
@@ -1655,9 +1661,17 @@ external_arguments(int argc, char **argv)
 		case 31: xargs.case_sens_path_comp = case_sens_path_comp = 1; break;
 		case 32: xargs.cwd_in_title = 1; break;
 
-		case 33: { /* --open */
-			int url = 1;
+		case 33: { /* --open or --preview */
+			if (xargs.stealth_mode == 1) {
+				fprintf(stderr, "%s: Running in stealth mode. Access to "
+					"configuration files is disallowed\n", PROGRAM_NAME);
+				exit(EXIT_FAILURE);
+			}
 			char *_path = optarg;
+			int url = 1, preview = 0;
+			if (optind > 2 && *(argv[optind - 2] + 2) == 'p')
+				preview = 1;
+
 			struct stat attr;
 			if (IS_FILE_URI(_path)) {
 				_path = optarg + 7;
@@ -1672,7 +1686,7 @@ external_arguments(int argc, char **argv)
 
 			if (is_url(_path) == EXIT_FAILURE) {
 				url = 0;
-				if (stat(_path, &attr) == -1) {
+				if (*_path != '~' && stat(_path, &attr) == -1) {
 					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
 						_path, strerror(errno));
 					exit(errno);
@@ -1680,8 +1694,8 @@ external_arguments(int argc, char **argv)
 			}
 
 RUN:
-			xargs.open = 1;
-			open_reg_exit(_path, url);
+			xargs.open = preview == 1 ? 0 : 1;
+			open_reg_exit(_path, url, preview);
 		} break;
 
 		case 34: xargs.printsel = 1; break;
@@ -1788,9 +1802,12 @@ RUN:
 			fzftab = 0; tabmode = STD_TAB;
 			break;
 
+		case 61: xargs.fzf_preview = fzf_preview = 1; break;
 #ifdef __linux__
-		case 61: xargs.si = 1; break;
+		case 62: xargs.si = 1; break;
 #endif
+
+
 		case 'a': show_hidden = xargs.hidden = 0; break;
 		case 'A': show_hidden = xargs.hidden = 1; break;
 
@@ -2118,6 +2135,7 @@ unset_xargs(void)
 	xargs.follow_symlinks = UNSET;
 	xargs.full_dir_size = UNSET;
 	xargs.fuzzy_match = UNSET;
+	xargs.fzf_preview = UNSET;
 #ifndef _NO_FZF
 	xargs.fzftab = UNSET;
 	xargs.fzytab = UNSET;
@@ -2360,7 +2378,7 @@ get_path_env(void)
 	for (i = 0; path_tmp[i]; i++) {
 		/* Store path in PATH in a tmp buffer */
 		char buf[PATH_MAX];
-		while (path_tmp[i] && path_tmp[i] != ':') {
+		while (path_tmp[i] && path_tmp[i] != ':' && len < PATH_MAX) {
 			buf[len] = path_tmp[i];
 			len++;
 			i++;
@@ -3066,6 +3084,15 @@ check_options(void)
 #else
 	tabmode = STD_TAB;
 #endif /* _NO_FZF */
+
+	if (xargs.stealth_mode == 1) {
+		xargs.fzf_preview = fzf_preview = 0;
+	} else if (fzf_preview == UNSET) {
+		if (xargs.fzf_preview == UNSET)
+			fzf_preview = DEF_FZF_PREVIEW;
+		else
+			fzf_preview = xargs.fzf_preview;
+	}
 
 #ifndef _NO_ICONS
 	if (icons == UNSET) {

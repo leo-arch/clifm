@@ -105,16 +105,23 @@ expand_env(char *s)
 	return ret;
 }
 
-/* Move the pointer in LINE immediately after X or !X */
+/* Move the pointer in LINE immediately after prefix (X or !X)
+ * Returns NULL if there's nothing after prefix, if prefix is "!X" and we
+ * are in a graphical environment, or if prefix is "X" and we're not in
+ * a graphical environment. Otherwise, it returns the corresponding pointer */
 static char *
 skip_line_prefix(char *line)
 {
+	if (!line || !*line)
+		return (char *)NULL;
+
 	char *p = line;
 
 	if (!(flags & GUI)) {
-		if (*p != '!' || *(p + 1) != 'X' || *(p + 2) != ':')
+		if (*p == 'X' && *(p + 1) == ':')
 			return (char *)NULL;
-		p += 3;
+		if (*p == '!' && *(p + 1) == 'X' && *(p + 2) == ':')
+			p += 3;
 	} else {
 		if (*p == '!' && *(p + 1) == 'X')
 			return (char *)NULL;

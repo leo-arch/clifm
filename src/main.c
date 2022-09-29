@@ -174,6 +174,7 @@ int
 	fzftab = UNSET,
 	fzf_height_set = 0,
 	fzf_open_with = 0,
+	fzf_preview = UNSET,
 #ifndef _NO_HIGHLIGHT
 	highlight = UNSET,
 #else

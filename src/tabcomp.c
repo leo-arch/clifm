@@ -483,6 +483,9 @@ get_last_word(char *str)
 	}
 }
 
+#define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL || (c) == TCMP_RANGES \
+|| (c) == TCMP_DESEL || (c) == TCMP_JUMP || (c) == TCMP_TAGS_F)
+
 static int
 run_finder(const size_t *height, const int *offset, const char *lw, const int multi)
 {
@@ -510,10 +513,13 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				*height, PATH_MAX, multi ? "-P$'\n'" : "",
 				finder_in_file, finder_out_file);
 	} else {
+		int prev = (fzf_preview == 1 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+		char prev_str[] = "--preview \"/home/_leo08/build/git_repos/clifm/src/clifm --preview {}\"";
+
 		snprintf(cmd, sizeof(cmd), "fzf %s "
 				"%s --margin=0,0,0,%d "
 				"%s --read0 --ansi "
-				"--query=\"%s\" %s %s "
+				"--query=\"%s\" %s %s %s "
 				"< %s > %s",
 				fzftab_options,
 				*height_str ? height_str : "", *offset,
@@ -521,6 +527,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				lw ? lw : "", colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
+				prev == 1 ? prev_str : "",
 				finder_in_file, finder_out_file);
 	}
 

@@ -126,7 +126,8 @@ untrash-all:\C-\M-u
 
 # F6-12
 open-mime:\e[17~
-open-jump-db:\e[18~
+open-preview:\e[18~
+#open-jump-db:\e[18~
 edit-color-scheme:\e[19~
 open-keybinds:\e[20~
 open-config:\e[21~
