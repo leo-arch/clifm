@@ -29,7 +29,7 @@ N:.*\.json$=jq --color-output . ;python -m json.tool --;
 ##################
 
 # Directories
-inode/directory=lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
+inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
 
 # Web content
 ^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;
