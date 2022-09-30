@@ -45,7 +45,7 @@ inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=alway
 # Archives
 N:.*\.rar=unrar lt -p- --;
 N:.*\.7z=7z l -p --;
-application/zstd=file -b;true
+application/zstd=file -b --;true
 application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;
 
 # PDF
@@ -66,4 +66,4 @@ application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar
 application/x-bittorrent=transmission-show --;
 
 # Fallback
-.*=exiftool;file -b;true;
+.*=exiftool;file -b --;true;

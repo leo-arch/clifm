@@ -509,7 +509,7 @@ N:.*\\.json$=jq --color-output . ;python -m json.tool --;\n\
 ##################\n\
 \n\
 # Directories\n\
-inode/directory=lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;\n\
+inode/directory=exa -a --tree -level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;\n\
 \n\
 # Web content\n\
 ^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;\n\
@@ -525,7 +525,8 @@ inode/directory=lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --col
 # Archives\n\
 N:.*\\.rar=unrar lt -p- --;\n\
 N:.*\\.7z=7z l -p --;\n\
-^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;\n\
+application/zstd=file -b --;true\n\
+^application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;\n\
 \n\
 # PDF\n\
 .*/pdf$=pdftotext -l 10 -nopgbrk -q -- %%f -;mutool draw -F txt -i --;\n\
@@ -545,7 +546,7 @@ N:.*\\.7z=7z l -p --;\n\
 application/x-bittorrent=transmission-show --;\n\
 \n\
 # Fallback\n\
-.*=exiftool;file -b;true;\n");
+.*=exiftool;file -b --;true;\n");
 
 	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
