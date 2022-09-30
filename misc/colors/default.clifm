@@ -215,7 +215,7 @@ Prompt="clifm"
 DividingLine="-"
 
 # If the fzf TAB completion mode is enabled, pass these options to fzf(1):
-FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2,border:8' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list --preview-window=wrap,border-left"
+FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2,border:8' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview --inline-info --layout=reverse-list --preview-window=wrap,border-left"
 
 # Same options, but colorless
 #FzfTabOptions="--color='bw' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list --preview-window=wrap,border-left"
