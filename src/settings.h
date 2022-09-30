@@ -308,13 +308,15 @@ xf=01;31:xs=00;32:"
 #define DEF_WPROMPT_STR "\\[\\e[00;02;31m\\](!) > "
 #define DEF_WPROMPT_STR_NO_COLOR "(!) > "
 
-/* These options should work with FZF 0.18.0 or later */
+/* These options should work with FZF 0.27.0 or later */
 #define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:4,\
-hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,\
-left:abort --inline-info --layout=reverse-list"
+hl:5,hl+:5,gutter:-1,marker:2,border:8 --bind tab:accept,right:accept,\
+left:abort --inline-info --layout=reverse-list \
+--preview-window=wrap,border-left"
 
 #define DEF_FZFTAB_OPTIONS_NO_COLOR "--color=bw --bind tab:accept,\
-right:accept,left:abort --inline-info --layout=reverse-list"
+right:accept,left:abort --inline-info --layout=reverse-list \
+--preview-window=wrap,border-left"
 
 #define DEF_SMENU_OPTIONS "-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
 

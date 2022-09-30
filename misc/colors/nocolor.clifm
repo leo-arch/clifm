@@ -18,4 +18,4 @@ WarningPrompt="\[\e[0m\](!) > "
 
 DividingLine="-"
 
-FzfTabOptions="--color='bw' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list"
+FzfTabOptions="--color='bw' --marker='*' --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list --preview-window=wrap,border-left"
