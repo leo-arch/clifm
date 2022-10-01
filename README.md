@@ -195,6 +195,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - **NEW**: [Shotgun, a built-in files previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun)
   - Improved Unicode support for the suggestions system
   - **NEW**: Flat-view for the [`fzfsel` plugin](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) via the `-f` option
   - **NEW**: [Improved VT100 compatibility via the `--vt100` switch](https://github.com/leo-arch/clifm/wiki/Extra#clifm-running-on-a-dec-vt100-terminal-1978)
