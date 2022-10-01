@@ -491,62 +491,46 @@ create_preview_file(void)
 \n\
 # For syntax details consult the mimelist.clifm file\n\
 \n\
-# Uncomment this line to use pistol (or any other previewer script)\n\
+# Uncomment this line to use pistol (or any other previewing script)\n\
 #.*=pistol\n\
 \n\
-###########################\n\
-#  File names/extensions  #\n\
-###########################\n\
-\n\
-N:.*\\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;\n\
-\n\
-N:.*\\.xlsx$=xlsx2csv --;\n\
-\n\
-N:.*\\.json$=jq --color-output . ;python -m json.tool --;\n\
-\n\
-##################\n\
-#   MIME types   #\n\
-##################\n\
-\n\
 # Directories\n\
-inode/directory=exa -a --tree -level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;\n\
+inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;\n\
 \n\
 # Web content\n\
 ^text/html$=w3m -dump;lynx -dump --;elinks -dump;pandoc -s -t markdown --;\n\
 \n\
 # Text\n\
 ^text/rtf=catdoc --;\n\
+N:.*\\.json$=jq --color-output . ;python -m json.tool --;\n\
 ^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;\n\
 \n\
 # Office documents\n\
-^application/msword=catdoc --;\n\
-^application/.*(open|office)document.*=pandoc -s -t markdown --;\n\
+N:.*\\.xlsx$=xlsx2csv --;file -b --;\n\
+N:.*\\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;\n\
+^application/(.*wordprocessingml.document|.*epub+zip|x-fictionbook+xml)=pandoc -s -t markdown --;\n\
+^application/msword=catdoc --;file -b;\n\
+^application/ms-excel=xls2csv --;file -b;\n\
 \n\
 # Archives\n\
 N:.*\\.rar=unrar lt -p- --;\n\
-N:.*\\.7z=7z l -p --;\n\
 application/zstd=file -b --;true\n\
-^application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;\n\
+application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;\n\
 \n\
 # PDF\n\
-.*/pdf$=pdftotext -l 10 -nopgbrk -q -- %%f -;mutool draw -F txt -i --;\n\
+.*/pdf$=pdftotext -l 10 -nopgbrk -q -- %%f -;mutool draw -F txt -i --;exiftool;\n\
 \n\
-# DjVu\n\
+# Image, video, and audio\n\
 ^image/vnd.djvu=djvutxt;exiftool;\n\
-\n\
-# Image, video and audio\n\
 ^image/.*=exiftool;\n\
 ^video/.*=mediainfo;exiftool;\n\
 ^audio/.*=mediainfo;exiftool;\n\
-\n\
-# Fonts\n\
-#^font/.*=fontforge;fontpreview\n\
 \n\
 # Torrent:\n\
 application/x-bittorrent=transmission-show --;\n\
 \n\
 # Fallback\n\
-.*=exiftool;file -b --;true;\n");
+.*=file -b --;true;\n");
 
 	close_fstream(fp, fd);
 	return EXIT_SUCCESS;

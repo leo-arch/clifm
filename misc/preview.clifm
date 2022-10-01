@@ -11,22 +11,8 @@
 
 # For syntax details consult the mimelist.clifm file
 
-# Uncomment this line to use pistol (or any other previewer script)
+# Uncomment this line to use pistol (or any other previewing script)
 #.*=pistol
-
-###########################
-#  File names/extensions  #
-###########################
-
-N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;
-
-N:.*\.xlsx$=xlsx2csv --;
-
-N:.*\.json$=jq --color-output . ;python -m json.tool --;
-
-##################
-#   MIME types   #
-##################
 
 # Directories
 inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
@@ -36,34 +22,32 @@ inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=alway
 
 # Text
 ^text/rtf=catdoc --;
+N:.*\.json$=jq --color-output . ;python -m json.tool --;
 ^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;
 
 # Office documents
-^application/msword=catdoc --;
-^application/.*(open|office)document.*=pandoc -s -t markdown --;
+N:.*\.xlsx$=xlsx2csv --;file -b --;
+N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;
+^application/(.*wordprocessingml.document|.*epub+zip|x-fictionbook+xml)=pandoc -s -t markdown --;
+^application/msword=catdoc --;file -b;
+^application/ms-excel=xls2csv --;file -b;
 
 # Archives
 N:.*\.rar=unrar lt -p- --;
-N:.*\.7z=7z l -p --;
 application/zstd=file -b --;true
 application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;
 
 # PDF
-.*/pdf$=pdftotext -l 10 -nopgbrk -q -- %f -;mutool draw -F txt -i --;
+.*/pdf$=pdftotext -l 10 -nopgbrk -q -- %f -;mutool draw -F txt -i --;exiftool;
 
-# DjVu
+# Image, video, and audio
 ^image/vnd.djvu=djvutxt;exiftool;
-
-# Image, video and audio
 ^image/.*=exiftool;
 ^video/.*=mediainfo;exiftool;
 ^audio/.*=mediainfo;exiftool;
-
-# Fonts
-#^font/.*=fontforge;fontpreview
 
 # Torrent:
 application/x-bittorrent=transmission-show --;
 
 # Fallback
-.*=exiftool;file -b --;true;
+.*=file -b --;true;

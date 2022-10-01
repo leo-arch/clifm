@@ -66,6 +66,9 @@ typedef char *rl_cpvfunc_t;
 #include "suggestions.h"
 #endif
 
+#define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL || (c) == TCMP_RANGES \
+|| (c) == TCMP_DESEL || (c) == TCMP_JUMP || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB)
+
 #define PUTX(c) \
 	if (CTRL_CHAR(c)) { \
           putc('^', rl_outstream); \
@@ -482,9 +485,6 @@ get_last_word(char *str)
 		return d;
 	}
 }
-
-#define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL || (c) == TCMP_RANGES \
-|| (c) == TCMP_DESEL || (c) == TCMP_JUMP || (c) == TCMP_TAGS_F)
 
 static int
 run_finder(const size_t *height, const int *offset, const char *lw, const int multi)
@@ -1040,8 +1040,12 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * cursor position and current query string
 	 * We don't want to place the finder's window too much to the right,
 	 * making its contents unreadable: let's make sure we have at least
-	 * 20 chars for the finder's window */
-	int max_finder_offset = term_cols > 20 ? term_cols - 20 : 0;
+	 * 20 chars (40 if previews are enabled) for the finder's window */
+	int fspace = (tabmode == FZF_TAB && fzf_preview == 1
+		&& SHOW_PREVIEWS(cur_comp_type) == 1) ? 40 : 20;
+/*	if (fspace == 40 && height < 10) // We're previewing files
+		height = 10; */
+	int max_finder_offset = term_cols > fspace ? term_cols - fspace : 0;
 
 // TESTING FINDER OFFSET
 	int n = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0;
