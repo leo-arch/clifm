@@ -609,6 +609,7 @@ print_tips(int all)
 		"Try the help topics: 'help <TAB>'",
 		"List symlinks in the current directory: '=l<TAB>'. Enter 'help file-details' for more information",
 		"Use PropFields in the configuration file to toggle fields on/off in long view mode",
+		"Enable file previews via --fzfpreview (only for TAB completion in fzf mode)",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
