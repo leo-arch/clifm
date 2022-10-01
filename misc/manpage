@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Sep 27, 2022" "clifm 1.7.3" "CLIFM Manual"
+.TH "CLIFM" "1" "Oct 1, 2022" "clifm 1.7.4" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -18,7 +18,7 @@ clifm \- The Command Line File Manager
 .sp
 \fB5.\fR Commands
 .sp
-\fB6.\fR Files Filters
+\fB6.\fR File Filters
 .sp
 \fB7.\fR Keyboard shortcuts
 .sp
@@ -28,31 +28,33 @@ clifm \- The Command Line File Manager
 .sp
 \fB10.\fR Resource opener (third-party openers are also supported)
 .sp
-\fB11.\fR Auto-suggestions (including a warning prompt for invalid command names)
+\fB11.\fR Shotgun, a built-in files previewer
 .sp
-\fB12.\fR Shell functions
+\fB12.\fR Auto-suggestions (including a warning prompt for invalid command names)
 .sp
-\fB13.\fR Plugins
+\fB13.\fR Shell functions
 .sp
-\fB14.\fR Autocommands
+\fB14.\fR Plugins
 .sp
-\fB15.\fR File tags
+\fB15.\fR Autocommands
 .sp
-\fB16.\fR Virtual directories
+\fB16.\fR File tags
 .sp
-\fB17.\fR Note on speed
+\fB17.\fR Virtual directories
 .sp
-\fB18.\fR Kangaroo frecency algorithm
+\fB18.\fR Note on speed
 .sp
-\fB19.\fR Environment
+\fB19.\fR Kangaroo frecency algorithm
 .sp
-\fB20.\fR Security
+\fB20.\fR Environment
 .sp
-\fB21.\fR Miscellaneous notes
+\fB21.\fR Security
 .sp
-\fB22.\fR Files
+\fB22.\fR Miscellaneous notes
 .sp
-\fB23.\fR Examples
+\fB23.\fR Files
+.sp
+\fB24.\fR Examples
 
 .SH 1. GETTING HELP
 There are several ways of getting help in \fBclifm\fR. Once in the program, enter '\fB?\fR' to see some basic usage examples, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section.
@@ -97,7 +99,7 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBj)\fR \fBPlugins\fR: Build your own custom commands using executable files (shell scripts or binaries). Just drop an executable file (all languages are supported) in the plugins directory, tell \fBclifm\fR to use this executable file via a custom action name, and use it as any other command.
 .sp
-  \fBk)\fR \fBFiles preview\fR: Via the \fIfzfnav\fR plugin (see the \fBPLUGINS\fR section below), \fBclifm\fR is able to preview several kinds of files, including not only text files, but also GIF's, images, office documents, PDF's, and more. This plugin requires \fBfzf\fR(1) to be installed. For basic images preview \fBueberzug\fR(1) is required. A list of optional dependencies to preview different kinds of files is available in the \fBPLUGINS\fR section.
+  \fBk)\fR \fBFiles preview\fR: Via the \fIfzfnav\fR plugin (see the \fBPLUGINS\fR section below), \fBclifm\fR is able to preview several kinds of files, including not only text files, but also GIF's, images, office documents, PDF's, and more. This plugin requires \fBfzf\fR(1) to be installed. For basic images preview \fBueberzug\fR(1) is required. A list of optional dependencies to preview different kinds of files is available in the \fBPLUGINS\fR section. A built-in files previewer, \fIshotgun\fR, is also available.
 .sp
   \fBl)\fR It is blazing \fBfast\fR and incredibly \fBlightweight\fR. With a memory footprint below 7 MiB and a disk usage of 0.7 MiB, it can run on really ancient hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or any other remote session. And if this is not enough, you can still try the \fBlight mode\fR to make it even faster.
 .sp
@@ -463,7 +465,7 @@ Help for all commands listed here can be accessed via the \fI-h\fR or \fI--help\
 .sp
 \fBNOTE 2:\fR In case of ELN-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them in named "2", then \fBclifm\fR cannot know in advance if the command refers to the ELN 2 or to the file name "2". In we want the ELN, we just write the ELN number, for example: \fIs\ 2\fR. But if we want the file name, we need to escape the file name using the backlash character: \fIs\ \\2\fR.
 .sp
-\fBNOTE 3:\fR \fBclifm\fR supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write \fICMDELN\fR instead of \fICMD\ ELN\fR. For example: \fIo12\fR or \fIs1\-5\fR instead of \fIo\ 12\fR and \fIs\ 1\-5\fR respectively. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's won't be available. If there is a file named \fIo12\fR (more generally, CMDELN), and if you want to refer to this file instead of a \fBclifm\fR command, escape the file name to prevent the split; for example: \fIs\ \\o12\fR.
+\fBNOTE 3:\fR \fBclifm\fR supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write \fICMDELN\fR instead of \fICMD\ ELN\fR. For example: \fIo12\fR or \fIs1\-5\fR instead of \fIo\ 12\fR and \fIs\ 1\-5\fR respectively. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's will not be available. If there is a file named \fIo12\fR (more generally, CMDELN), and if you want to refer to this file instead of a \fBclifm\fR command, escape the file name to prevent the split; for example: \fIs\ \\o12\fR.
 .sp
 \fBNOTE 4:\fR \fBclifm\fR implements a \fBfastback\fR function, that is to say, the conversion of "... n" or "cmd ... n" into "../.. n" or "cmd ../.. n". In other words, subsequent dots after ".." will be converted each into "/..". For example, if you are in your home directory and type "..." or "cd ...", and since "..." amounts to "../..", you will be taken to the root directory. TAB completion is available for the fastback function: "....bin" -> TAB -> "../../../bin".
 
@@ -1611,7 +1613,6 @@ The color of this line is set via the \fIdl\fR color code in the color scheme fi
 .TP
 \fB4. FZF WINDOW\fR
 Refer to the \fBTAB completion\fR section below.
-.TP
 
 .SH 9. BUILT\-IN EXPANSIONS
 .TP
@@ -1629,18 +1630,20 @@ If using the FZF mode for TAB completion (see below), you can operate only on \f
 .TP
 \fBTAB completion\fR
 .TP
-There are four modes for TAB completion: \fIstandard\fR (interface provided by readline), \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later), \fIfzy\fR (\fIhttps://github.com/leo-arch/fzy\fR), and \fIsmenu\fR (\fIhttps://github.com/p-gen/smenu\fR). By default, if the \fIfzf\fR binary is found in \fBPATH\fR, \fBclifm\fR will attempt to use \fIfzf\fR to display completions. You can force the use of the remaining modes via the \fI\-\-std\-tab\-comp\fR, \fI\-\-fzytab\fR, and \fI\-\-smenutab\fR command line switches. The \fITabCompletionMode\fR option in the configuration file can be used to permanently set the TAB completion mode.
+There are four modes for TAB completion: \fIstandard\fR (interface provided by readline), \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later), \fIfzy\fR (\fIhttps://github.com/leo-arch/fzy\fR), and \fIsmenu\fR (\fIhttps://github.com/p-gen/smenu\fR). By default, if the \fIfzf\fR binary is found in \fBPATH\fR, \fBclifm\fR will attempt to use \fIfzf\fR to display completions. You can force the use of the remaining modes via the \fI\-\-stdtab\fR, \fI\-\-fzytab\fR, and \fI\-\-smenutab\fR command line switches. The \fITabCompletionMode\fR option in the configuration file can be used to permanently set the TAB completion mode.
 .TP
-If using the \fIfzf\fR mode, the completions interface can be customized using the \fIFzfTabOptions\fR option in the color scheme file. --height, --margin, +i/-i, --read0, --query, and --ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
+If using the \fIfzf\fR mode, the completions interface can be customized using the \fIFzfTabOptions\fR option in the color scheme file. \-\-height, \-\-margin, +i/\-i, \-\-read0, \-\-query, and \-\-ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
 .TP
 Default values for this option are:
- --color=16,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2 --bind tab:accept,right:accept,left:abort --inline-info --layout=reverse-list
+ \-\-color=16,prompt:6,fg+:\-1,pointer:4,hl:5,hl+:5,gutter:\-1,marker:2,border:8 \-\-bind tab:accept,right:accept,left:abort,alt-p:toggle\-preview \-\-inline-info \-\-layout=reverse\-list --preview-window=wrap,border\-left
 .TP
 Consult \fBfzf\fR(1) for more information.
 .TP
 If set neither in \fIFzfTabOptions\fR nor in \fBFZF_DEFAULT_OPTS\fR (in this order), the height of the FZF window is set to the default value: 40% of the current terminal amount of line/rows.
 .TP
 To use FZF global values (defined in \fBFZF_DEFAULT_OPTS\fR), just set \fIFzfTabOptions\fR to \fInone\fR.
+.TP
+File previews are available in FZF mode via \fIshotgun\fR. See the \fBSHOTGUN\fR section above.
 .TP
 If using the \fIsmenu\fR mode, the interface can be customized using the \fBCLIFM_SMENU_OPTIONS\fR environment variable. For example:
 .sp
@@ -1765,14 +1768,35 @@ Thought \fBclifm\fR is a file manager, it can be used as a simple resource opene
  clifm --open /path/to/my_dir
  clifm --open https://some_domain
 .TP
-\fBNOTE\fR: When opening web resources \fBclifm\fR will query the mimelist file using text/html as MIME type. Whatever association it finds for this specific MIME type will be used to open the web resource.
+\fBNote\fR: When opening web resources \fBclifm\fR will query the mimelist file using text/html as MIME type. Whatever association it finds for this specific MIME type will be used to open the web resource.
 .TP
 Positional parameters could be used as well, provided the parameter does not point to a directory name, in which case it will be used as \fBclifm\fR starting path. For instance:
 
  clifm /path/to/my_file.jpg
  clifm https://some_domain
 
-.SH 11. AUTO-SUGGESTIONS
+.SH 11. SHOTGUN
+Executed via the \fI\-\-preview\fR command line switch, \fIshotgun\fR performs file preview for any file passed as argument. For example:
+
+        clifm \-\-preview myfile.txt
+.TP
+Previewing applications (based on either MIME type or file name) are defined in a configuration file (\fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/preview.clifm\fR) using the same syntax used by \fILira\fR (the built\-in resource opener). See the \fBRESOURCE OPENER\fR section above.
+.TP
+Though \fIshotgun\fR may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly aimed to be used by \fBclifm\fR's TAB completion function, though only when running in FZF mode (see the \fBTAB COMPLETION\fR section above). Set \fIFzfPreview\fR option in the configuration file to \fItrue\fR (or run with \fI\-\-fzfpreview\fR) to enable this feature: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown above).
+.TP
+To customize the appearance of the previewing window, use the \fI\-\-preview-window\fR option in the \fIFzfOptions\fR line in the current color scheme file. For example, if you want the preview window down the files list (instead of to the right):
+
+ \-\-preview\-window=down
+.TP
+Consult \fBfzf\fR(1) for more information.
+.TP
+\fBNote\fR: By default, Alt-p toggles the preview window on/off.
+.TP
+\fBNote 2\fR: The border drawn at the left of the preview window uses Unicode characters by default. If you experience some issue (most likely due to the absence of a proper Unicode font), you can either disable Unicode (via the \fI--no-unicode\fR option) or the border itself (\fI--preview-window=border-none\fR). Installing a Unicode font, of course, should also do the trick.
+.TP
+\fBNote 3\fR: An alternative (more powerful but slower) files previewing function is provided by the \fIfzfnav\fR plugin. Consult the \fBPLUGINS\fR section below.
+
+.SH 12. AUTO-SUGGESTIONS
 \fIGemini\fR is a built-in suggestions system (similar to that provided by the Fish shell). As you type, \fIGemini\fR will suggest possible completions right after the current cursor position.
 
 The following checks are availabe (the order can be customized, see below):
@@ -1832,10 +1856,10 @@ Suggestions will be printed using one of the following color codes (see the \fBC
 You can set \fISuggestFiletypeColor\fR to \fItrue\fR in the configuration file to use the color of the file type of the current file name (as set in the color scheme file) instead of the value of
 \fIsf\fR. For example, if a suggestion is printed for a file that is a symbolic link, \fIln\fR or \fIor\fR (if a broken link) will be used instead of \fIsf\fR.
 
-.SH 12. SHELL FUNCTIONS
+.SH 13. SHELL FUNCTIONS
 \fBclifm\fR includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
 
-.SH 13. PLUGINS
+.SH 14. PLUGINS
 Plugins are just scripts or programs (written in any language) aimed to add, extend or improve CliFM's functionalities. They are linked to actions names defined in a dedicated configuration file (\fIXDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.clifm\fR): entering the action name immediately executes the corresponding plugin.
 
 \fBNote\fR: In \fIstealth mode\fR, since access to configuration files is not allowed, plugins are disabled.
@@ -1975,7 +1999,7 @@ T}	Set image as wallpaper	wallpaper_setter.sh	feh, xloadimage, or hsetroot
   \fBfonts\fR: fontpreview or fontforge
   \fBdocs\fR: libreoffice, catdoc, odt2txt, pandoc
   \fBPDF\fR: pdftoppm, pdftotext or mutool
-  \fBepub\fR: epub-thumbnailer
+  \fBepub\fR: epub\-thumbnailer
   \fBDjVu\fR: djvulibre or djvutxt
   \fBpostscript\fR: ghostscript
   \fBvideos\fR: ffmpegthumbnailer
@@ -1983,16 +2007,18 @@ T}	Set image as wallpaper	wallpaper_setter.sh	feh, xloadimage, or hsetroot
   \fBweb\fR: w3m, links, elinks, or pandoc
   \fBmarkdown\fR: glow
   \fBhighlight\fR: bat, highlight, or pygmentize
-  \fBtorrent\fR: transmission-cli
+  \fBtorrent\fR: transmission\-cli
   \fBjson\fR: python or pq
   \fBfile info\fR: exiftool, mediainfo, or file
 
 .TP
-To run the \fIpager.sh\fR plugin, for example, you only need to enter the corresponding action name, in this case \fIgg\fR. In case of need, all plugins provide a \fI-h,--help\fR switch for a brief usage description.
+To run the \fIpager.sh\fR plugin, for example, you only need to enter the corresponding action name, in this case \fIgg\fR. In case of need, all plugins provide a \fI\-h,\-\-help\fR switch for a brief usage description.
 .TP
-\fBNote\fR: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to show files preview \fIBFG\fR requires \fBueberzug\fR to be installed or the Kitty protocol via the Kitty terminal). A configuration file (BFG.cfg, in the plugins directory itlsef) is provided to customize the previewer's behavior.
+\fBNote\fR: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to show file previews \fIBFG\fR requires \fBueberzug\fR to be installed or the Kitty protocol via the Kitty terminal). A configuration file (\fIBFG.cfg\fR, in the plugins directory itlsef) is provided to customize the previewer's behavior.
 .TP
-In addition to the built-in BFG previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR. To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
+\fBNote 2\fR: An alternative files previewing function (less powerful than \fIBFG\fR, but certainly faster) is provided by \fIshotgun\fR, \fBclifm\fR's built\-in files previewer. See the \fBSHOTGUN\fR section above for more information.
+.TP
+In addition to the built\-in \fIBFG\fR previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR(1). To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
 .TP
 \fBNote 2\fR: The \fIgit_status\fR plugin is not intended to be used as a normal plugin, that is, executed via an action name, but rather to be executed as a prompt command:
 
@@ -2002,7 +2028,7 @@ Whereas this plugin provides basic Git integration, it could be easily modified 
 .TP
 Take a look at the Wiki for more information: \fIhttps://github.com/clifm/wiki/Advanced#plugins\fR
 
-.SH 14. AUTOCOMMANDS
+.SH 15. AUTOCOMMANDS
 Heavily inspired by \fBVifm\fR, the \fIautocommands\fR function allows the user a fine-grained control over \fBclifm\fR settings. It is mostly devised as a way to improve performance for remote file systems (usually slower than local ones) by allowing you to turn off some features (like the files counter) that might greatly affect performance under some circumstances (like remote connections). However, this function is not restricted to this use: use it for whatever purpose you find useful.
 .sp
 Add a line preceded by the \fIautocmd\fR keyword to the config file. The general syntax is: \fBautocmd PATTERN cmd,cmd,cmd\fR
@@ -2069,7 +2095,7 @@ For \fI.cfm.in\fR:
 For \fI.cfm.out\fR:
    printf "Leaving %s ...\\n" "$OLDPWD"
 
-.SH 15. FILE TAGS
+.SH 16. FILE TAGS
 .sp
 \fIEtiqueta\fR is \fBclifm\fR's built-in files tagging system
 .sp
@@ -2166,7 +2192,7 @@ Let's suppose you have a tag named \fIwork\fR which contains ten tagged files, b
 
 The list of files tagged as \fIwork\fR will be displayed via FZF. Now just mark the two files you need using \fBTAB\fR, press \fBEnter\fR or \fBRight\fR, and the full path to both files will be inserted into the command line. So, '\fBp t:work\fR' will be replaced by '\fBp /path/to/work1.odt /path/to/work2.odt\fR'.
 
-.SH 16. VIRTUAL DIRECTORIES
+.SH 17. VIRTUAL DIRECTORIES
 CliFM is able to read and list files from the standard input stream (STDIN). Each file in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
 .sp
 Each file passed via standard input is stored as a symbolic link pointing to the original file in a temporary directory (called here virtual directory) with read-only (0500) permissions. This directory, and all its contents, will be deleted at program exit. Use the \fI\-\-virtual\-dir\fR command line flag to specify a custom directory (it if does not exist, it will be created) instead of the default one, created in the system temporary directory (usually \fI/tmp/clifm/USER/vdir.XXXXXX\fR, where XXXXXX is a random six digits string).
@@ -2230,7 +2256,7 @@ If navigating the file system, you can quickly go back to the virtual directory 
 .sp
 \fBalias vtd='cd $CLIFM_VIRTUAL_DIR'\fR
 
-.SH 17. NOTE ON SPEED
+.SH 18. NOTE ON SPEED
 \fBclifm\fR is by itself quite fast by default, but if speed is still an issue, it is possible to get some extra performance.
 .sp
 The two most time consuming features are:
@@ -2253,7 +2279,7 @@ Despite the above, however, it is important to bear in mind that listing speed d
 .sp
 If using Xterm, a nice speed boost is provided by the fast scroll option: set \fIfastScroll\fR to true in your \fI~/.Xresources\fR file. See \fBxterm\fR(1).
 
-.SH 18. KANGAROO FRECENCY ALGORITHM
+.SH 19. KANGAROO FRECENCY ALGORITHM
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
@@ -2294,7 +2320,7 @@ NOTE: Directories visited in the last 24 hours will not be removed from the data
 .sp
 The idea of 'frecency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
-.SH 19. ENVIRONMENT
+.SH 20. ENVIRONMENT
 The following variables are read at initialization time:
 .TP
 .B NO_COLOR
@@ -2375,7 +2401,7 @@ Exit code of the last executed command
 .B CLIFM_STAT_STEALTH
 1 if running in stealth mode, 0 otherwise
 
-.SH 20. SECURITY
+.SH 21. SECURITY
 Since \fBclifm\fR executes OS commands, it needs to provide a way to securely run these commands, specially when it comes to untrusted environments. Two features are provided to achieve this aim: \fBsecure environment\fR and \fBsecure commands\fR.
 .TP
 Both features are aimed to protect the program and the system as such from malicious input, either coming from environment variables or from indirect input, that is to say, input coming not from the command line (in which is assumed that it is the user herself who is executing the given command), but from files: this is the case of default associated applications (the \fImime\fR command), autocommands, (un)mount commands (via the \fInet\fR command), just as profile and prompt commands.
@@ -2426,7 +2452,7 @@ Commands containing \fIat least one\fR unsafe character will be rejected. Of cou
  \fBDISPLAY\fR, \fBTZ\fR, \fBLANG\fR, \fBTERM\fR Imported from the environment and sanitized
  \fBLC_ALL\fR             Same as \fBLANG\fR
 
-.SH 21. MISCELLANEOUS NOTES
+.SH 22. MISCELLANEOUS NOTES
 .sp
 \fBSequential and conditional execution of commands\fR:
 
@@ -2466,7 +2492,7 @@ By default, \fBclifm\fR starts in the current working directory. However, you ca
 
 \fBclifm\fR's default profile is "default". To create alternative profiles use the \-P command line option or the 'pf add' command (see above).
 
-.SH 22. FILES
+.SH 23. FILES
 .TP
 .B CONFIGURATION FILE
 The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/local/share/clifm\fR), and if not found, it will be created anew with default values. Here you can permanently set up \fBclifm\fR options, define aliases, prompt commands, and autocommands.
@@ -2516,7 +2542,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .TP
 \fBNOTE\fR: If \fI$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config/\fR is used instead.
 
-.SH 23. EXAMPLES
+.SH 24. EXAMPLES
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
 
 \fBNOTE 2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press \fIRight\fR (or \fIAlt-f\fR to accept only the first suggested word). Otherwise, the suggestion is just ignored
