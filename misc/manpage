@@ -1155,13 +1155,13 @@ If using FZF for TAB completion, multi-selection is allowed.
 .TP
 \fBF6:\fR Open the MIME list file
 .TP
-\fBF7:\fR Open the jump database file
+\fBF7:\fR Open the shotgun configuration file
 .TP
 \fBF8:\fR Open the current color scheme file
 .TP
 \fBF9:\fR Open the keybindings file
 .TP
-\fBF10:\fR Open the configuration file
+\fBF10:\fR Open the main configuration file
 .TP
 \fBF11:\fR Open the bookmarks file
 .TP
