@@ -2518,8 +2518,11 @@ This directory, \fI$DATADIR/clifm/colors\fR, contains available color schemes (o
 .B ACTIONS FILE
 The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.clifm\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
 .TP
-.B MIMELIST FILE:
-The mime list file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/mimelist.clifm\fR. It is a list of file types and file extensions and their associated applications used by \fIlira\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR).
+.B MIMELIST FILE
+The mimelist file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/mimelist.clifm\fR. It is a list of file types and name/extensions and their associated applications used by \fIlira\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR).
+.TP
+.B PREVIEW FILE
+The preview file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/preview.clifm\fR and is shotgun's configuration file. It makes use of the same syntax used by the mimelist file. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR).
 .TP
 .B BOOKMARKS FILE
 The bookmarks file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/bookmarks.clifm\fR
