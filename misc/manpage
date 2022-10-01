@@ -1784,7 +1784,7 @@ Previewing applications (based on either MIME type or file name) are defined in 
 .TP
 Though \fIshotgun\fR may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly aimed to be used by \fBclifm\fR's TAB completion function, though only when running in FZF mode (see the \fBTAB COMPLETION\fR section above). Set \fIFzfPreview\fR option in the configuration file to \fItrue\fR (or run with \fI\-\-fzfpreview\fR) to enable this feature: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown above).
 .TP
-To customize the appearance of the previewing window, use the \fI\-\-preview-window\fR option in the \fIFzfOptions\fR line in the current color scheme file. For example, if you want the preview window down the files list (instead of to the right):
+To customize the appearance of the previewing window, use the \fI\-\-preview-window\fR option in the \fIFzfTabOptions\fR line in the current color scheme file. For example, if you want the preview window down the files list (instead of to the right):
 
  \-\-preview\-window=down
 .TP
