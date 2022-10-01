@@ -1643,8 +1643,12 @@ create_mime_file_anew(char *file)
 # application found will be used\n\
 \n\
 # Applications defined here are NOT desktop files, but commands (arguments\n\
-# could be used as well). Write you own handmade scripts to open specific\n\
-# files if necessary. Ex: X:^text/.*:~/scripts/my_cool_script.sh\n\
+# could be used as well). Bear in mind that these commands will be executed\n\
+# directly without shell intervention, so that no shell goodies (like pipes,\n\
+# conditions, loops, etc) are available. In case you need something more\n\
+# complex than a single command (including shell capabilities) write your\n\
+# own script and place the path to the script in place of the command.\n\
+# For example: X:^text/.*:~/scripts/my_cool_script.sh\n\
 \n\
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments,\n\
 # like the kernel built-in console or a remote SSH session.\n\

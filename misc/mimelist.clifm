@@ -13,6 +13,14 @@
 # application found will be used
 
 # Applications defined here are NOT desktop files, but commands (arguments
+# could be used as well). Bear in mind that these commands will be executed
+# directly without shell intervention, so that no shell goodies (like pipes,
+# conditions, loops, etc) are available. In case you need something more
+# complex than a single command (including shell capabilities) write your
+# own script and place the path to the script in place of the command.
+# For example: X:^text/.*:~/scripts/my_cool_script.sh
+
+# Applications defined here are NOT desktop files, but commands (arguments
 # could be used as well). Write you own handmade scripts to open specific
 # files if necessary. Ex: X:^text/.*:~/scripts/my_cool_script.sh
 
