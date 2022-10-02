@@ -469,7 +469,7 @@ get_longest_filename(const int n, const int pad)
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
 		size_t blen = file_info[i].len;
-		if (file_info[i].len > (size_t)max_name_len)
+		if (!long_view && file_info[i].len > (size_t)max_name_len)
 			file_info[i].len = (size_t)max_name_len;
 
 		total_len = (size_t)pad + 1 + file_info[i].len;
