@@ -22,6 +22,9 @@ SRCDIR = src
 SRC = $(SRCDIR)/*.c
 HEADERS = $(SRCDIR)/*.h
 
+LMAGIC = -lmagic
+LINTL = -lintl
+
 ifdef DEBUG
 	CFLAGS += -g
 else
@@ -74,6 +77,7 @@ endif
 
 ifdef _NO_GETTEXT
 	CPPFLAGS += -D_NO_GETTEXT
+	undefine LINTL
 endif
 
 ifdef _NO_ICONS
@@ -82,10 +86,12 @@ endif
 
 ifdef _NO_LIRA
 	CPPFLAGS += -D_NO_LIRA -D_NO_MAGIC
+	undefine LMAGIC
 endif
 
 ifdef _NO_MAGIC
 	CPPFLAGS += -D_NO_MAGIC
+	undefine LMAGIC
 endif
 
 ifdef _NO_SUGGESTIONS
@@ -99,11 +105,11 @@ endif
 CFLAGS += -Wall -Wextra
 CPPFLAGS += -DCLIFM_DATADIR=$(DATADIR)
 
-LIBS_Linux ?= -lreadline -lacl -lcap -lmagic
-LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl -lmagic
-LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline -lintl -lmagic
-LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline -lintl -lmagic
-LIBS_Darwin ?= -I/opt/local/include -L/opt/local/lib -lreadline -lintl -lmagic
+LIBS_Linux ?= -lreadline -lacl -lcap $(LMAGIC)
+LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline $(LINTL) $(LMAGIC)
+LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline $(LINTL) $(LMAGIC)
+LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline $(LINTL) $(LMAGIC)
+LIBS_Darwin ?= -I/opt/local/include -L/opt/local/lib -lreadline $(LINTL) $(LMAGIC)
 
 $(BIN): $(SRC) $(HEADERS)
 	@printf "Detected operating system: %s\n" "$(OS)"
