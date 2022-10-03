@@ -85,7 +85,7 @@ ifdef _NO_ICONS
 endif
 
 ifdef _NO_LIRA
-	CPPFLAGS += -D_NO_LIRA -D_NO_MAGIC
+	CPPFLAGS += -D_NO_LIRA
 	undefine LMAGIC
 endif
 

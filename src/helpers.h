@@ -69,7 +69,7 @@
 #endif
 
 /* _NO_LIRA implies _NO_MAGIC */
-#ifdef _NO_LIRA
+#if defined(_NO_LIRA) && !defined(_NO_MAGIC)
 # define _NO_MAGIC
 #endif
 
