@@ -58,6 +58,10 @@
 # endif /* RL_READLINE_VERSION >= 0x0801 */
 #endif /* RL_READLINE_VERSION */
 
+/* Remove any image printed by ueberzug.
+ * This function assumes:
+ * 1) That ueberzug was launched using the json parser (default)
+ * 2) That the pipe was created and exported as FIFO_UEBERZUG */
 void
 ueberzug_clear(void)
 {

@@ -643,7 +643,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 	} else {
 		if (prev == 1)
 			set_fzf_env_vars((int)*height);
-		char prev_str[] = "--preview \"printf \"\033[2J\"; /home/_leo08/build/git_repos/clifm/src/clifm --preview {}\"";
+		char prev_str[] = "--preview \"printf \"\033[2J\"; clifm --preview {}\"";
 
 		snprintf(cmd, sizeof(cmd), "fzf %s "
 				"%s --margin=0,0,0,%d "

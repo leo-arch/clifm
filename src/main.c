@@ -1001,6 +1001,7 @@ get_hostname(void)
 		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"), PROGRAM_NAME);
 	}
 }
+
 /*
 static void
 init_file_flags(void)
