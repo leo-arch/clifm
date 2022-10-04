@@ -58,6 +58,21 @@
 # endif /* RL_READLINE_VERSION >= 0x0801 */
 #endif /* RL_READLINE_VERSION */
 
+void
+ueberzug_clear(void)
+{
+	char *f = getenv("FIFO_UEBERZUG");
+	if (!f)
+		return;
+
+	FILE *fp = fopen(f, "w");
+	if (!fp)
+		return;
+
+	fprintf(fp, "{\"action\": \"remove\", \"identifier\": \"clifm-preview\"}\n");
+	fclose(fp);
+}
+
 static char *
 find_digit(char *str)
 {

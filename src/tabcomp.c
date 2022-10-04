@@ -79,6 +79,107 @@ typedef char *rl_cpvfunc_t;
 	} else \
 		putc(c, rl_outstream)
 
+// TESTING CURSOR POSITION
+/* The following three functions were taken from
+ * https://github.com/antirez/linenoise/blob/master/linenoise.c
+ * and modified to fir our needs: they are used to get current cursor
+ * position (both vertical and horizontal) by the suggestions system */
+
+#include <termios.h>
+#include <limits.h>
+/* Set the terminal into raw mode. Return 0 on success and -1 on error */
+static int
+enable_raw_mode(const int fd)
+{
+	struct termios raw;
+
+	if (!isatty(STDIN_FILENO))
+		goto FAIL;
+
+	if (tcgetattr(fd, &orig_termios) == -1)
+		goto FAIL;
+
+	raw = orig_termios;  // modify the original mode
+	// input modes: no break, no CR to NL, no parity check, no strip char,
+	// * no start/stop output control.
+	raw.c_iflag &= (tcflag_t)~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+	// output modes - disable post processing
+	raw.c_oflag &= (tcflag_t)~(OPOST);
+	// control modes - set 8 bit chars
+	raw.c_cflag |= (CS8);
+	// local modes - choing off, canonical off, no extended functions,
+	// no signal chars (^Z,^C)
+	raw.c_lflag &= (tcflag_t)~(ECHO | ICANON | IEXTEN | ISIG);
+    // control chars - set return condition: min number of bytes and timer.
+    // We want read to return every single byte, without timeout.
+	raw.c_cc[VMIN] = 1; raw.c_cc[VTIME] = 0; // 1 byte, no timer
+
+	// put terminal in raw mode after flushing
+	if (tcsetattr(fd, TCSAFLUSH, &raw) < 0)
+		goto FAIL;
+
+	return 0;
+
+FAIL:
+	errno = ENOTTY;
+	return -1;
+}
+
+static int
+disable_raw_mode(const int fd)
+{
+	if (tcsetattr(fd, TCSAFLUSH, &orig_termios) != -1)
+		return EXIT_SUCCESS;
+	return EXIT_FAILURE;
+}
+
+#define CPR            "\x1b[6n"     /* Cursor position report */
+#define CPR_LEN        4
+
+/* Use the "ESC [6n" escape sequence to query the cursor position (both
+ * vertical and horizontal) and store both values into C (columns) and L (lines).
+ * Returns 0 on success and 1 on error */
+static int
+get_cursor_position(int *c, int *l)
+{
+	char buf[32];
+	unsigned int i = 0;
+
+	if (enable_raw_mode(STDIN_FILENO) == -1) return EXIT_FAILURE;
+
+	// 1. Ask the terminal about cursor position
+	if (write(STDOUT_FILENO, CPR, CPR_LEN) != CPR_LEN)
+		{ disable_raw_mode(STDIN_FILENO); return EXIT_FAILURE; }
+
+	// 2. Read the response: "ESC [ rows ; cols R"
+	int read_err = 0;
+	while (i < sizeof(buf) - 1) {
+		if (read(STDIN_FILENO, buf + i, 1) != 1) // flawfinder: ignore
+			{ read_err = 1; break; }
+		if (buf[i] == 'R')
+			break;
+		i++;
+	}
+	buf[i] = '\0';
+
+	if (disable_raw_mode(STDIN_FILENO) == -1 || read_err == 1)
+		return EXIT_FAILURE;
+
+	// 3. Parse the response
+	if (*buf != _ESC || *(buf + 1) != '[' || !*(buf + 2))
+		return EXIT_FAILURE;
+
+	char *p = strchr(buf + 2, ';');
+	if (!p || !*(p + 1)) return EXIT_FAILURE;
+
+	*p = '\0';
+	*l = atoi(buf + 2);	*c = atoi(p + 1);
+	if (*l == INT_MIN || *c == INT_MIN)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
 /* Return the character which best describes FILENAME.
 `@' for symbolic links
 `/' for directories
@@ -486,9 +587,36 @@ get_last_word(char *str)
 	}
 }
 
+static void
+set_fzf_env_vars(const int h)
+{
+	int c = 0, l = 0;
+	get_cursor_position(&c, &l);
+	if (l + h - 1 > term_rows && l > h - 1)
+		l -= h - 1;
+	char p[32];
+	snprintf(p, sizeof(p), "%d", l > 0 ? l - 1 : 0);
+	setenv("CLIFM_FZF_LINE", p, 1);
+	snprintf(p, sizeof(p), "%d", term_cols);
+	setenv("CLIFM_TERM_COLUMNS", p, 1);
+	snprintf(p, sizeof(p), "%d", term_rows);
+	setenv("CLIFM_TERM_LINES", p, 1);
+}
+
+static void
+clear_fzf(void)
+{
+	ueberzug_clear();
+	unsetenv("CLIFM_FZF_LINE");
+	unsetenv("CLIFM_TERM_COLUMNS");
+	unsetenv("CLIFM_TERM_LINES");
+}
+
 static int
 run_finder(const size_t *height, const int *offset, const char *lw, const int multi)
 {
+	int prev = (fzf_preview == 1 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
 	 * file, let's define it ourselves */
 	char height_str[sizeof(size_t) + 21];
@@ -513,8 +641,9 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				*height, PATH_MAX, multi ? "-P$'\n'" : "",
 				finder_in_file, finder_out_file);
 	} else {
-		int prev = (fzf_preview == 1 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
-		char prev_str[] = "--preview \"clifm --preview {}\"";
+		if (prev == 1)
+			set_fzf_env_vars((int)*height);
+		char prev_str[] = "--preview \"printf \"\033[2J\"; /home/_leo08/build/git_repos/clifm/src/clifm --preview {}\"";
 
 		snprintf(cmd, sizeof(cmd), "fzf %s "
 				"%s --margin=0,0,0,%d "
@@ -544,6 +673,9 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;
 	int ret = launch_execle(cmd); /* lgtm [cpp/command-line-injection] */
+
+	if (prev == 1)
+		clear_fzf();
 	if (dr == 1) flags |= DELAYED_REFRESH;
 	return ret;
 }

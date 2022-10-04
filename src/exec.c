@@ -2010,6 +2010,20 @@ remove_backslash(char **s)
 	*s = p;
 }
 // TESTING BYPASS ALIAS
+/*
+#include "tabcomp.h"
+static int
+preview_function(void)
+{
+	rl_delete_text(0, rl_end);
+	rl_point = rl_end = 0;
+	rl_redisplay();
+	tab_complete('?');
+	rl_delete_text(0, rl_end);
+	rl_point = rl_end = 0;
+	rl_redisplay();
+	return EXIT_SUCCESS;
+} */
 
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -2071,6 +2085,9 @@ exec_cmd(char **comm)
 	/* ####################################################
 	 * #                 BUILTIN COMMANDS                 #
 	 * ####################################################*/
+
+/*	if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0)
+		return (exit_code = preview_function()); */
 
 	/*          ############### CD ##################     */
 	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2])

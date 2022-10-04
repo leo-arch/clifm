@@ -1695,6 +1695,8 @@ external_arguments(int argc, char **argv)
 
 RUN:
 			xargs.open = preview == 1 ? 0 : 1;
+			if (preview == 1)
+				ueberzug_clear();
 			open_reg_exit(_path, url, preview);
 		} break;
 

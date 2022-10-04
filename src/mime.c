@@ -186,7 +186,7 @@ test_pattern(const char *pattern, const char *filename, const char *mime)
 
 /* Return 1 if APP is a valid and existent application. Zero otherwise */
 static int
-check_app_existence(char **app)
+check_app_existence(char **app, char **arg)
 {
 	if (*(*app) == 'a' && *(*app + 1) == 'd' && !*(*app + 2))
 		/* No need to check: 'ad' is an internal command */
@@ -194,18 +194,23 @@ check_app_existence(char **app)
 
 	/* Expand tilde */
 	if (*(*app) == '~' && *(*app + 1) == '/' && *(*app + 2)) {
-		size_t len = strlen(user.home) + strlen(*app);
+		size_t len = user.home_len + strlen(*app);
+		len += *arg ? strlen(*arg) + 1 : 0;
 		char *_path = (char *)xnmalloc(len, sizeof(char));
 		sprintf(_path, "%s/%s", user.home, *app + 2);
+
 		if (access(_path, X_OK) == -1) {
 			free(_path);
 			return 0;
 		}
 
+		if (*arg)
+			sprintf(_path, "%s/%s %s", user.home, *app + 2, *arg);
+
 		*app = (char *)xrealloc(*app, (len + 2) * sizeof(char));
 		strcpy(*app, _path);
 		free(_path);
-		return 1;
+		return 2;
 	}
 
 	/* Either a command name or an absolute path */
@@ -266,10 +271,13 @@ retrieve_app(char *line)
 		 * before the first space */
 		char *ret = strchr(app, ' ');
 		if (ret) *ret = '\0';
+		char *p = (char *)NULL;
+		size_t arg_len = (ret && *(ret + 1)) ? strlen(ret + 1) : 0;
+		if (*app == '~' && arg_len > 0)
+			p = savestring(ret + 1, arg_len);
 
-		int exists = check_app_existence(&app);
-
-		if (ret) *ret = ' ';
+		int exists = check_app_existence(&app, &p);
+		if (exists != 2 && ret) *ret = ' ';
 		if (exists == 0) {
 			free(app);
 			continue;

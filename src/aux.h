@@ -55,6 +55,7 @@ FILE *open_fstream_r(char *name, int *fd);
 FILE *open_fstream_w(char *name, int *fd);
 int read_octal(char *str);
 void rl_ring_bell(void);
+void ueberzug_clear(void);
 char *url_encode(char *str);
 char *url_decode(char *str);
 int xatoi(const char *s);
