@@ -1323,7 +1323,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 // TESTING PREVIEWER
 	if (flags & PREVIEWER) {
-		height = i > 3 ? i - 2 : 3;
+		height = term_rows;
 		finder_offset = 0;
 		multi = 0;
 	}
