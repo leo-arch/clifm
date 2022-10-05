@@ -78,7 +78,7 @@ clifmrun --fzfpreview
 
 `--fzfpreview` is used to show file previews via [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions) (fzf mode only). However, if the `FfzPreview` option (see the [main configuration file](https://github.com/leo-arch/clifm/blob/master/misc/clifmrc)) is already set to `true`, you can omit `--fzfpreview`
 
-The [view command](), used to preview files in the current directory in full screen, will set FzfPreview to true automatically provided the `fzf` binary is found, so that `--fzfpreview` is not requiered here either.
+The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view), used to preview files in the current directory in full screen, will enable `FzfPreview` automatically provided the `fzf` binary is found, so that `--fzfpreview` is not requiered here either.
 
 ### General procedure
 
