@@ -2213,11 +2213,44 @@ init_shell(void)
 		return;
 	}
 
+// TESTING PREVIEWER
+
+	own_pid = get_own_pid();
+	pid_t shell_pgid = 0;
+
+	// Loop until we are in the foreground.
+	while (tcgetpgrp(STDIN_FILENO) != (shell_pgid = getpgrp()))
+		kill(- shell_pgid, SIGTTIN);
+
+	// Ignore interactive and job-control signals.
 	set_signals_to_ignore();
+//	signal(SIGINT, SIG_IGN);
+//	signal(SIGQUIT, SIG_IGN);
+//	signal(SIGTSTP, SIG_IGN);
+	signal(SIGTTIN, SIG_IGN);
+	signal(SIGTTOU, SIG_IGN);
+//	signal(SIGCHLD, SIG_IGN);
+
+	// Put ourselves in our own process group.
+	shell_pgid = getpid();
+	if (setpgid(shell_pgid, shell_pgid) < 0) {
+		_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
+		exit(errno);
+	}
+
+	// Grab control of the terminal.
+	tcsetpgrp(STDIN_FILENO, shell_pgid);
+
+	// Save default terminal attributes for shell.
+	tcgetattr(STDIN_FILENO, &shell_tmodes);
+
+// TESTING PREVIEWER
+
+/*	set_signals_to_ignore();
 	own_pid = get_own_pid();
 
 	tcgetattr(STDIN_FILENO, &shell_tmodes);
-	return;
+	return; */
 }
 
 /* Get current entries in the Selection Box, if any */

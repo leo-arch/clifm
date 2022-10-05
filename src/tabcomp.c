@@ -591,9 +591,15 @@ static void
 set_fzf_env_vars(const int h)
 {
 	int c = 0, l = 0;
-	get_cursor_position(&c, &l);
-	if (l + h - 1 > term_rows && l > h - 1)
-		l -= h - 1;
+
+// TESTING PREVIEWER
+	if (!(flags & PREVIEWER)) {
+		get_cursor_position(&c, &l);
+		if (l + h - 1 > term_rows && l > h - 1)
+			l -= h - 1;
+	}
+// TESTING PREVIEWER
+
 	char p[32];
 	snprintf(p, sizeof(p), "%d", l > 0 ? l - 1 : 0);
 	setenv("CLIFM_FZF_LINE", p, 1);
@@ -1312,6 +1318,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* TAB completion cases allowing multi-selection */
 	int multi = is_multi_sel();
 
+// TESTING PREVIEWER
+	if (flags & PREVIEWER) {
+		height = i > 3 ? i - 2 : 3;
+		finder_offset = 0;
+		multi = 0;
+	}
+// TESTING PREVIEWER
+
 	/* Run the finder application and store the ouput into the FINDER_OUT_FILE file */
 	int ret = run_finder(&height, &finder_offset, query, multi);
 	unlink(finder_in_file);
@@ -1329,7 +1343,13 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			lines++;
 	}
 
-	MOVE_CURSOR_UP(lines);
+// TESTING PREVIEWER
+	if (!(flags & PREVIEWER))
+		MOVE_CURSOR_UP(lines);
+	else
+		ret = EXIT_FAILURE;
+//	MOVE_CURSOR_UP(lines);
+// TESTING PREVIEWER
 
 	/* No results (the user pressed ESC) */
 	if (ret != EXIT_SUCCESS) {

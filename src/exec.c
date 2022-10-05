@@ -76,6 +76,10 @@
 #include "sanitize.h"
 #include "tags.h"
 
+// TESTING PREVIEWER
+#include "tabcomp.h"
+// TESTING PREVIEWER
+
 static char *
 get_new_name(void)
 {
@@ -2010,20 +2014,45 @@ remove_backslash(char **s)
 	*s = p;
 }
 // TESTING BYPASS ALIAS
-/*
-#include "tabcomp.h"
+
+// TESTING PREVIEWER
 static int
 preview_function(void)
 {
+	int fzf_preview_bk = fzf_preview;
+	enum tab_mode tabmode_bk = tabmode;
+
+	if (tabmode != FZF_TAB) {
+		char *p = get_cmd_path("fzf");
+		if (!p) {
+			_err(0, NOPRINT_PROMPT, "%s: fzf: Command not found\n", PROGRAM_NAME);
+			return 127;
+		}
+		free(p);
+	}
+
+	fzf_preview = 1;
+	tabmode = FZF_TAB;
+
 	rl_delete_text(0, rl_end);
 	rl_point = rl_end = 0;
 	rl_redisplay();
+
+	flags |= PREVIEWER;
 	tab_complete('?');
-	rl_delete_text(0, rl_end);
-	rl_point = rl_end = 0;
-	rl_redisplay();
+	flags &= ~PREVIEWER;
+
+	tabmode = tabmode_bk;
+	fzf_preview = fzf_preview_bk;
+
+	if (autols == 1)
+		reload_dirlist();
+	else
+		rl_clear_visible_line();
+
 	return EXIT_SUCCESS;
-} */
+}
+// TESTING PREVIEWER
 
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -2085,9 +2114,6 @@ exec_cmd(char **comm)
 	/* ####################################################
 	 * #                 BUILTIN COMMANDS                 #
 	 * ####################################################*/
-
-/*	if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0)
-		return (exit_code = preview_function()); */
 
 	/*          ############### CD ##################     */
 	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2])
@@ -2310,6 +2336,9 @@ exec_cmd(char **comm)
 		exit_code = run_and_refresh(comm, 0);
 		kbind_busy = 0;
 	}
+
+	else if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0)
+		return (exit_code = preview_function());
 
 	/*    ############### TOGGLE EXEC ##################     */
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])

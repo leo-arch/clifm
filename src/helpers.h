@@ -222,6 +222,8 @@ extern FILE *test_input_stream;
 #define IN_SELBOX_SCREEN    (1 << 12)
 #define MULTI_SEL           (1 << 13)
 
+#define PREVIEWER           (1 << 14)
+
 /* Flags for finder binaries */
 #define FZF_BIN_OK    (1 << 0)
 #define FZY_BIN_OK    (1 << 1)

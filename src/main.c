@@ -514,6 +514,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"vv", 2},
 	{"ver", 3},
 	{"version", 7},
+	{"view", 4},
 	{"ws", 2},
 	{"x", 1},
 	{"X", 1},
