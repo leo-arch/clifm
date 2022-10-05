@@ -195,6 +195,9 @@ For a detailed explanation of each of these features, follow the corresponding l
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - **NEW**: [`clifmimg` plugin, for image previews](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#image-previews-via-ueberzug)
+  - **NEW**: [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view)
+  - **NEW**: [TAB completion with file previews](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews)
   - **NEW**: [Shotgun, a built-in files previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun)
   - Improved Unicode support for the suggestions system
   - **NEW**: Flat-view for the [`fzfsel` plugin](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) via the `-f` option
