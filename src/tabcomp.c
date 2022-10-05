@@ -34,6 +34,11 @@
  * tab_complete
  * All changes are licensed under GPL-2.0-or-later. */
 
+/* enable_raw_mode, disable_raw_mode, and get_cursor_position functions are
+ * taken from https://github.com/antirez/linenoise/blob/master/linenoise.c, licensed
+ * under BSD-2-Clause.
+ * All changes are licenced under GPL-2.0-or-later. */
+
 #include "helpers.h"
 
 #include <stdio.h>
@@ -80,11 +85,9 @@ typedef char *rl_cpvfunc_t;
 		putc(c, rl_outstream)
 
 // TESTING CURSOR POSITION
-/* The following three functions were taken from
- * https://github.com/antirez/linenoise/blob/master/linenoise.c
- * and modified to fir our needs: they are used to get current cursor
- * position (both vertical and horizontal) by the suggestions system */
-
+/* The following three functions are used to get current cursor position
+ * (both vertical and horizontal), needed by TAB completion in fzf mode
+ * with previews enabled */
 #include <termios.h>
 #include <limits.h>
 /* Set the terminal into raw mode. Return 0 on success and -1 on error */
