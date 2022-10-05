@@ -77,9 +77,9 @@ The [view command](), used to preview files in the current directory in full scr
 The steps involved to genereate image previews are:
 
 1. `clifmrun` creates an instance of `ueberzug` and then launches _clifm_.
-2. Every time TAB completion is invoked for files (if running in fzf mode and `FzfPreview` is enabled), or the [view command]() is executed, **fzf**(1) is executed.
+2. Every time TAB completion is invoked for files (if running in fzf mode and `FzfPreview` is enabled), or the [view command]() is executed, **fzf**(1) is launched.
 3. **fzf**(1) calls shotgun (via `clifm --preview`) to generate a preview of the currently hovered file.
-4. Shotgun executes `clifmimg`, which takes care of genereting a thumbnail for the corresponding file.
+4. Shotgun executes `clifmimg`, which takes care of genereting a thumbnail of the corresponding file.
 5. Once the thumbnail is generated, `clifmimg` sends the image to `ueberzug`, which takes care of placing it on the fzf preview window.
 
 ## Dependencies
@@ -88,15 +88,15 @@ The following applications are used to generate thumbnails:
 
 | Application | File type | Observation |
 | --- | --- | --- |
-| `ueberzug` | image files | Images are displayed directly. No conversion is required |
-| `ffmpegthumbnailer` | video files | |
-| `epub-thumbnailer` | epub files | |
-| `pdftoppm` | pdf files | |
+| `ueberzug` | Image files | Images are displayed directly. No thumbnail generation is required |
+| `ffmpegthumbnailer` | Video files | |
+| `epub-thumbnailer` | ePub files | |
+| `pdftoppm` | PDF files | |
 | `ddjvu` | DjVu files | |
-| `ffmpeg` | audio files | |
-| `fontpreview` | font files |
+| `ffmpeg` | Audio files | |
+| `fontpreview` | Font files |
 | `libreoffice` | Office files (odt, docx, xlsx, etc) | |
-| `gs` | postscript files | Provided by the `ghostscript` package |
-| `convert` | svg files | Provided by the `imagemagick` package |
+| `gs` | Postscript files | Provided by the `ghostscript` package |
+| `convert` | SVG files | Provided by the `imagemagick` package |
 
 **Note**: The exact package names provinding the above programs vary depending on your OS/distribution, but ususally they have the same name as the corresponding program.
