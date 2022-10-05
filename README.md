@@ -243,7 +243,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 </a>
 </details>
 
-If running on Linux, you can also download and run the [AppImage](https://github.com/leo-arch/clifm/releases/download/v1.7/clifm-1.7-x86_64.AppImage) or install from a [binary package](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm).
+If running on Linux, a [binary package](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm) is available for most major distributions.
 
 ### Installing from a clone (Linux/BSD)
 
