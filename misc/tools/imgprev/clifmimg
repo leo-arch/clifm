@@ -1,0 +1,174 @@
+#!/bin/sh
+
+# Based on https://github.com/cirala/vifmimg, licensed under GPL-3.0
+# All changes are licensed under GPL-3.0
+# Authors: cirala, L. Abramovich
+
+# Description
+# Convert (if necessary) and preview images via an already running
+# instace of ueberzug. Converted images are cached (in CACHE_DIR)
+# using hash names so that files are converted to images only once,
+# after which the corresponding hashed image file will be displayed
+# directly.
+#
+# The first parameter tells what kind of file is to be converted/displayed
+# The second one is the file name to be converted/displayed.
+
+######################
+# Usage
+######################
+# This script is intended to be used by shotgun, clifm's built-in previewer,
+# to generate and display image previews for several file types.
+# Follow these steps to enable it:
+#
+# 1) Copy both this script and 'clifmrun' somewhere in you $PATH (say
+# /usr/local/bin) (otherwise, just replace 'clifmimg' in point 2 below
+# by 'path/to/clifmimg').
+#
+# 2) Edit shotgun's config file (F7) and add the following lines at the top
+# of the file (to make sure they won't be overriden by previous lines):
+#
+#^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
+#^text/rtf$=clifmimg doc;
+#N:.*\.epub$=clifmimg epub;
+#.*/pdf$=clifmimg pdf
+#^image/vnd.djvu=clifmimg djvu
+#^image/svg\+xml$=clifmimg svg;
+#^image/.*=clifmimg image;
+#^video/.*=clifmimg video;
+#^audio/.*=clifmimg audio;
+#^application/postscript$=clifmimg postscript;
+#N:.*\.otf$=clifmimg font;
+#font/.*=clifmimg font;
+#
+# This instructs clifm to use this script to generate previews for the
+# specified files.
+# In case you don't want image preview for some of these files types, just
+# comment out the corresponding line or change its value to your preferred
+# previewing application.
+#
+# 4) Run clifm via the 'clifmrun' script (which takes care of running an
+# instance of ueberzug and set the appropriate values so that it can be used
+# by clifm via shotgun, which calls this script to generate previews).
+
+# Dependencies:
+# ueberzug (of course, this one is used to display images)
+#
+# The following applications are used to convert different file types to images:
+# ffmpegthumbnailer (for videos)
+# epub-thumbnailer
+# pdftoppm
+# ddjvu
+# ffmpeg (for audio)
+# fontpreview
+# libreoffice
+# gs (for postscript files, provided by the ghostscript package)
+# convert (for svg files, provided by the imagemagick package)
+#
+# Note: The exact package names provinding these programs vary depending
+# on your OS/distribution, but ususally they have the same name as the program
+
+type="$1"
+file="$2"
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews"
+
+# Use hashes instead of file names for cached files to generate unique file names
+hash_file() {
+	! [ -d "$CACHE_DIR" ] && mkdir -p "$CACHE_DIR"
+	if type md5sum > /dev/null 2>&1; then
+		PCACHE="$CACHE_DIR/$(md5sum "$1" | cut -d' ' -f1)"
+	elif type md5 > /dev/null 2>&1; then
+		PCACHE="$CACHE_DIR/$(md5 -q "$1")"
+	else
+		printf "clifm: No hashing application found.\nEither md5sum or md5 \
+are required.\n" >&2
+		exit 1
+	fi
+}
+
+# Let's get the screen coordinates for ueberzug
+calculate_position() {
+	# CLIFM_TERM_COLUMNS: Number of columns of the current terminal
+	# window (value exported by clifm)
+	# COLUMNS: Number of columns of the fzf preview window (value exported
+	# by fzf itself)
+	X=$((CLIFM_TERM_COLUMNS - COLUMNS))
+	# CLIFM_FZF_LINE: Current terminal line of the fzf window (exported by clifm)
+	Y=$CLIFM_FZF_LINE
+}
+
+display() {
+	[ -z "$1" ] && exit 1
+	calculate_position
+	printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$FIFO_UEBERZUG"
+}
+
+main() {
+    case "$type" in
+        "image") display "$file" ;;
+        "video")
+			hash_file "$file"
+			! [ -f "${PCACHE}.jpg" ] && \
+				ffmpegthumbnailer -i "$file" -o "${PCACHE}.jpg" -s 0 -q 5
+			display "${PCACHE}.jpg"
+			;;
+        "epub")
+			hash_file "$file"
+			! [ -f "${PCACHE}.jpg" ] && \
+				epub-thumbnailer "$file" "${PCACHE}.jpg" 1024 >/dev/null 2>&1
+			display "${PCACHE}.jpg"
+			;;
+        "pdf")
+			hash_file "$file"
+			! [ -f "${PCACHE}.jpg" ] && \
+				pdftoppm -jpeg -f 1 -singlefile "$file" "$PCACHE"
+			display "${PCACHE}.jpg"
+			;;
+        "djvu")
+			hash_file "$file"
+			! [ -f "${PCACHE}.jpg" ] && \
+				ddjvu -format=tiff -quality=90 -page=1 "$file" "$PCACHE.jpg"
+			display "${PCACHE}.jpg"
+			;;
+        "audio")
+			hash_file "$file"
+			! [ -f "${PCACHE}.jpg" ] && \
+				ffmpeg -hide_banner -i "$file" "${PCACHE}.jpg" -y >/dev/null 2>&1
+			display "${PCACHE}.jpg"
+			;;
+        "font")
+			hash_file "$file"
+			! [ -f "${PCACHE}.jpg" ] && \
+				fontpreview -i "$file" -o "${PCACHE}.jpg"
+			display "${PCACHE}.jpg"
+			;;
+		"doc")
+			hash_file "$file"
+			format="png"
+			if ! [ -f "${PCACHE}.$format" ]; then
+				libreoffice --headless --convert-to "$format" "$file" \
+				--outdir "$CACHE_DIR" > /dev/null 2>&1 || exit 1
+				f="${file##*/}"
+				mv "$CACHE_DIR/${f%.*}.$format" "${PCACHE}.$format"
+			fi
+			display "${PCACHE}.$format"
+		;;
+		"postscript")
+			hash_file "$file"
+			! [ -f "${PCACHE}.jpg" ] && \
+				gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
+				-sOutputFile="${PCACHE}.jpg" "$file" > /dev/null 2>&1
+			display "${PCACHE}.jpg"
+		;;
+		"svg")
+			hash_file "$file"
+			! [ -f "${PCACHE}.png" ] && \
+				convert -background none -size 1920x1080 "$file" "${PCACHE}.png"
+			display "${PCACHE}.png"
+		;;
+        *)
+    esac
+}
+
+main "$@"

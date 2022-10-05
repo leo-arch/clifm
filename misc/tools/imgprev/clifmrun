@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# Based on https://github.com/cirala/vifmimg, licensed under GPL-3.0
+# All changes are licensed under GPL-3.0
+# Authors: cirala, L. Abramovich
+
+# Description
+# Launch an instance of ueberzug(1) and set the appropriate values so that
+# it can be used by clifm to display images via the 'clifmimg' script.
+# Consult the documentation to find out how to set shotgun to use 'clifmimg'
+#
+# Previews for FZF completion need to be enabled. Run as follows:
+#
+# ./clifmrun --fzfpreview
+#
+# Or copy this script somewhere in your $PATH and then
+#
+# clifmrun --fzfpreview
+#
+# Needless to say, you can create an alias for this command to make things
+# a bit easier. For example, a bash alias would look like this:
+#
+# alias c='clifmrun --fzfpreview'
+#
+# You can also set the FzfPreview option in clifm's main configuration file
+# to true and then drop the --fzfpreview parameter in the above lines
+
+# Dependencies:
+# ueberzug
+#
+# Note: ueberzug needs to run on a graphical environment. Wayland is not supported
+
+ueberzug_cleanup() {
+    rm -f -- "$FIFO_UEBERZUG" 2>/dev/null
+    pkill -P $$ >/dev/null
+}
+
+init_ueberzug() {
+	CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
+	PREVIEW_DIR="$CACHE_DIR/previews"
+	! [ -d "$PREVIEW_DIR" ] && mkdir -p "$PREVIEW_DIR"
+	export FIFO_UEBERZUG="$CACHE_DIR/ueberzug-${$}"
+
+	mkfifo "$FIFO_UEBERZUG"
+	tail -f "$FIFO_UEBERZUG" \
+	| ueberzug layer --silent --parser json > /dev/null 2>&1 &
+}
+
+if ! type clifm > /dev/null 2>&1; then
+	printf "clifm: Command not found\n"
+	exit 127
+elif ! type ueberzug > /dev/null 2>&1 || [ -z "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
+	clifm "$@"
+else
+	trap ueberzug_cleanup EXIT
+	init_ueberzug
+
+	clifm "$@"
+
+	printf '{"action": "remove", "identifier": "clifm-preview"}\n' > "$FIFO_UEBERZUG"
+fi
