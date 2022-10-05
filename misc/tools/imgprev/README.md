@@ -1,10 +1,12 @@
 # Image previews via Ueberzug
 
-<h4 align="center">TAB completion with image previews</h4>
-<p align="center"><img src="https://i.postimg.cc/fTG6W3yb/fzf-preview.jpg"></p>
+<h4 align="right">TAB completion with image previews</h4>
+<p align="right"><img src="https://i.postimg.cc/fTG6W3yb/fzf-preview.jpg"></p>
 
-<h4 align="center">Preview files in full screen (via the <i>view</i> command)</h4>
-<p align="center"><img src="https://i.postimg.cc/52PKY6Nv/view-preview.jpg"></p>
+<h4 align="left">Preview files in full screen (via the <i>view</i> command)</h4>
+<p align="left"><img src="https://i.postimg.cc/52PKY6Nv/view-preview.jpg"></p>
+
+---
 
 Based on [vifmimg](https://github.com/cirala/vifmimg), these scripts ([clifmimg](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) and [clifmrun](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)) are intended to provide image preview capabilities to _CliFM_ using [ueberzug](https://github.com/seebye/ueberzug).
 
