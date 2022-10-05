@@ -1,5 +1,7 @@
 # Image previews via Ueberzug
 
+**Disclaimer: Since this method relies on ueberzug, only X11 is supported**
+
 <h4 align="right">TAB completion with image previews</h4>
 <p align="right"><img src="https://i.postimg.cc/fTG6W3yb/fzf-preview.jpg"></p>
 
