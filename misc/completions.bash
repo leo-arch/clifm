@@ -92,6 +92,7 @@ _clifm ()
         --expand-bookmarks
         --full-dir-size
         --fuzzy-match
+        --fzfpreview
         --icons
         --icons-use-file-color
         --list-and-quit

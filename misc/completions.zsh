@@ -54,6 +54,7 @@ args=(
 	'--expand-bookmarks[expand bookmark names into the corresponding bookmark paths]'
 	'--full-dir-size[print size of directories and their contents in long view mode]'
 	'--fuzzy-match[enable fuzzy matches for completions and suggestions (only file names and paths)]'
+	'--fzfpreview[enable file previews for TAB completion (fzf mode only)]'
 	'--icons[enable icons]'
 	'--icons-use-file-color[icons color follows file color]'
 	'--int-vars[enable internal variables]'

@@ -951,6 +951,7 @@ bookmark paths\
 in long view mode\
 \n      --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
+\n      --fzfpreview\t\t Enable file previews for TAB completion (fzf mode only)\
 \n      --fzytab\t\t\t Use fzy to display completion matches\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icon colors follow file colors\
@@ -1078,6 +1079,7 @@ parameters:\n\n\
  unpin\n\
  v, vv, paste sel [DESTINY]\n\
  ver, version\n\
+ view\n\
  ws [NUM, +, -] (workspaces)\n\
  x, X [ELN/DIR] (new instance)\n"
 
@@ -1132,7 +1134,7 @@ parameters:\n\n\
  F2: Commands help\n\
  F3: Keybindings help\n\
  F6: Open the MIME list file\n\
- F7: Open the jump database file\n\
+ F7: Open the shotgun configuration file\n\
  F8: Open the current color scheme file\n\
  F9: Open the keybindings file\n\
  F10: Open the configuration file\n\
