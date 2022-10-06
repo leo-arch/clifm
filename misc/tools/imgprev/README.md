@@ -68,7 +68,7 @@ N:.*\.otf$=clifmimg font;
 font/.*=clifmimg font;
 ```
 
-This instructs clifm to use `clifmimg` to generate previews (and display them via ueberzug) for the specified file names or file types.
+This instructs _clifm_ to use `clifmimg` to generate previews (and display them via `ueberzug`) for the specified file names or file types.
 
 In case you don't want image preview for some of these files types, just comment out the corresponding line or change its value to your preferred previewing application.
 
@@ -101,8 +101,8 @@ The following applications are used to generate thumbnails:
 | `ueberzug` | Image files | Images are displayed directly. No thumbnail generation is required |
 | `ffmpegthumbnailer` | Video files | |
 | `epub-thumbnailer` | ePub files | |
-| `pdftoppm` | PDF files | |
-| `ddjvu` | DjVu files | |
+| `pdftoppm` | PDF files | Provided by the `poppler` package |
+| `ddjvu` | DjVu files | Provided by the `djvulibre` package |
 | `ffmpeg` | Audio files | |
 | `fontpreview` | Font files |
 | `libreoffice` | Office files (odt, docx, xlsx, etc) | |
