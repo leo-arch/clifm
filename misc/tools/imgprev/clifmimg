@@ -167,8 +167,8 @@ main() {
 				convert -background none -size 1920x1080 "$file" "${PCACHE}.png"
 			display "${PCACHE}.png"
 		;;
-        *)
-    esac
+		*)
+	esac
 }
 
 main "$@"
