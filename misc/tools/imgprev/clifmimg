@@ -87,20 +87,17 @@ are required.\n" >&2
 	fi
 }
 
-# Let's get the screen coordinates for ueberzug
-calculate_position() {
-	# CLIFM_TERM_COLUMNS: Number of columns of the current terminal
-	# window (value exported by clifm)
-	# COLUMNS: Number of columns of the fzf preview window (value exported
-	# by fzf itself)
-	X=$((CLIFM_TERM_COLUMNS - COLUMNS))
-	# CLIFM_FZF_LINE: Current terminal line of the fzf window (exported by clifm)
-	Y=$CLIFM_FZF_LINE
-}
-
 display() {
 	[ -z "$1" ] && exit 1
-	calculate_position
+
+	# CLIFM_TERM_COLUMNS: Number of columns of the current terminal
+	# window (value exported by clifm)
+	# FZF_PREVIEW_COLUMNS: Number of columns of the fzf preview
+	# window (value exported by fzf itself)
+	X=$((CLIFM_TERM_COLUMNS - FZF_PREVIEW_COLUMNS))
+	# CLIFM_FZF_LINE: Terminal line of the fzf window (exported by clifm)
+	Y=$CLIFM_FZF_LINE
+
 	printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$FIFO_UEBERZUG"
 }
 
@@ -167,8 +164,8 @@ main() {
 				convert -background none -size 1920x1080 "$file" "${PCACHE}.png"
 			display "${PCACHE}.png"
 		;;
-		*)
-	esac
+        *)
+    esac
 }
 
 main "$@"
