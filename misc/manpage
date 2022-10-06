@@ -1005,6 +1005,11 @@ the '\fIpaste sel\fR' or '\fIv sel\fR' command copies the currently selected fil
 .B ver, version
 show \fBclifm\fR version details.
 .TP
+.B view
+preview files in the current directory (full screen). Requires \fBfzf\fR(1).
+.sp
+For image previews (X11 only), consult the Wiki (https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev).
+.TP
 .B ws \fR[\fINUM/NAME\fR, \fI+\fR, \fI-\fR]
 \fBclifm\fR offers up to eight workspaces, each with its own independent path.
 .sp
@@ -1645,6 +1650,8 @@ To use FZF global values (defined in \fBFZF_DEFAULT_OPTS\fR), just set \fIFzfTab
 .TP
 File previews are available in FZF mode via \fIshotgun\fR. See the \fBSHOTGUN\fR section above.
 .TP
+Image previews (X11 only) are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews
+.TP
 If using the \fIsmenu\fR mode, the interface can be customized using the \fBCLIFM_SMENU_OPTIONS\fR environment variable. For example:
 .sp
  export CLIFM_SMENU_OPTIONS="\-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
@@ -1783,6 +1790,8 @@ Executed via the \fI\-\-preview\fR command line switch, \fIshotgun\fR performs f
 Previewing applications (based on either MIME type or file name) are defined in a configuration file (\fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/preview.clifm\fR) using the same syntax used by \fILira\fR (the built\-in resource opener). See the \fBRESOURCE OPENER\fR section above.
 .TP
 Though \fIshotgun\fR may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly aimed to be used by \fBclifm\fR's TAB completion function, though only when running in FZF mode (see the \fBTAB COMPLETION\fR section above). Set \fIFzfPreview\fR option in the configuration file to \fItrue\fR (or run with \fI\-\-fzfpreview\fR) to enable this feature: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown above).
+.TP
+Image previews are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev
 .TP
 To customize the appearance of the previewing window, use the \fI\-\-preview-window\fR option in the \fIFzfTabOptions\fR line in the current color scheme file. For example, if you want the preview window down the files list (instead of to the right):
 
