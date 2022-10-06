@@ -110,10 +110,10 @@
 #define PROGRAM_NAME "clifm"
 #define PNL "clifm" /* Program name lowercase */
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.7.4-beta"
+#define VERSION "1.7.5-beta"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
-#define DATE "Sep 29, 2022"
+#define DATE "Oct 6, 2022"
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
@@ -221,7 +221,6 @@ extern FILE *test_input_stream;
 #define STATE_SUGGESTING    (1 << 11)
 #define IN_SELBOX_SCREEN    (1 << 12)
 #define MULTI_SEL           (1 << 13)
-
 #define PREVIEWER           (1 << 14)
 
 /* Flags for finder binaries */
