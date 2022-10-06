@@ -2,6 +2,15 @@
 
 **Disclaimer: Since this method relies on ueberzug, only X11 is supported**
 
+## Table of contents
+
+* [Description](#description)
+* [Usage](#usage)
+* [General procedure](#general-procedure)
+* [Dependencies](#dependencies)
+
+---
+
 <h4 align="right">TAB completion with image previews</h4>
 <p align="right"><img src="https://i.postimg.cc/fTG6W3yb/fzf-preview.jpg"></p>
 
@@ -10,9 +19,9 @@
 
 ---
 
-Based on [vifmimg](https://github.com/cirala/vifmimg), these scripts ([clifmimg](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) and [clifmrun](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)) are intended to provide image preview capabilities to _CliFM_ using [ueberzug](https://github.com/seebye/ueberzug).
-
 ## Description
+
+Based on [vifmimg](https://github.com/cirala/vifmimg), these scripts ([clifmimg](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) and [clifmrun](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)) are intended to provide image preview capabilities to _CliFM_ using [ueberzug](https://github.com/seebye/ueberzug).
 
 ### clifmrun
 
@@ -24,7 +33,7 @@ Parameters passed to `clifmrun` will be passed to _clifm_ itself.
 
 Convert (if necessary) and preview images (thumbnails) via an already running instance of **ueberzug**(1), launched by `clifmrun` (see above).
 
-Thumbnails are cached (in the path pointed to by the `CACHE_DIR` variable, by default `${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews`, usually (`$HOME/.cache/clifm/previews`)) using hash names, so that they are generated only once, after which the cached thumbnail will be displayed instead.
+Thumbnails are cached (in the directory pointed to by the `CACHE_DIR` variable, by default `${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews`, usually (`$HOME/.cache/clifm/previews`)) using file hashes as names.
 
 It takes two parameters: the first one tells what kind of file is to be converted/displayed. The second one is the file name to be converted/displayed. For example:
 
@@ -32,20 +41,20 @@ It takes two parameters: the first one tells what kind of file is to be converte
 clifmimg doc /path/to/file.docx
 ```
 
-generates a thumbnail for the docx file.
+generates a thumbnail of `file.docx` using the method named `doc`.
 
-The first parameter could be any of the following:
+The first parameter (thumbnailing method) could be any of the following:
 
-image \
-video \
-epub \
-pdf \
-djvu \
-audio \
-font \
-doc \
-postscript \
-svg
+* image
+* video
+* epub
+* pdf
+* djvu
+* audio
+* font
+* doc
+* postscript
+* svg
 
 ## Usage
 
@@ -84,10 +93,10 @@ The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view), 
 
 ### General procedure
 
-The steps involved to genereate image previews are:
+The steps involved in generating image previews are:
 
 1. `clifmrun` creates an instance of `ueberzug` and then launches _clifm_.
-2. Every time TAB completion is invoked for files (if running in fzf mode and `FzfPreview` is enabled), or the [view command]() is executed, **fzf**(1) is launched.
+2. Every time TAB completion is invoked for files (if running in fzf mode and `FzfPreview` is enabled), or the [view command](https://github.com/leo-arch/clifm/wiki/Introduction#view) is executed, [**fzf**(1)](https://www.mankier.com/1/fzf) is launched.
 3. **fzf**(1) calls shotgun (via `clifm --preview`) to generate a preview of the currently hovered file.
 4. Shotgun executes `clifmimg`, which takes care of genereting a thumbnail of the corresponding file.
 5. Once the thumbnail is generated, `clifmimg` sends the image to `ueberzug`, which takes care of placing it on the fzf preview window.
