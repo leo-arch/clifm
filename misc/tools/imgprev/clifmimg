@@ -6,10 +6,8 @@
 
 # Description
 # Convert (if necessary) and preview images via an already running
-# instace of ueberzug. Converted images are cached (in CACHE_DIR)
-# using hash names so that files are converted to images only once,
-# after which the corresponding hashed image file will be displayed
-# directly.
+# instance of ueberzug (executed by the 'clifmrun' script). Thumbnails
+# are cached (in $CACHE_DIR) using file hashes as names.
 #
 # The first parameter tells what kind of file is to be converted/displayed
 # The second one is the file name to be converted/displayed.
@@ -53,17 +51,18 @@
 
 # Dependencies:
 # ueberzug (of course, this one is used to display images)
+# md5sum or md5 (generate file hashes)
 #
-# The following applications are used to convert different file types to images:
-# ffmpegthumbnailer (for videos)
-# epub-thumbnailer
-# pdftoppm
-# ddjvu
-# ffmpeg (for audio)
-# fontpreview
-# libreoffice
-# gs (for postscript files, provided by the ghostscript package)
-# convert (for svg files, provided by the imagemagick package)
+# The following applications are used to generate thumbnails:
+# ffmpegthumbnailer (Video files)
+# epub-thumbnailer (ePub files)
+# pdftoppm (PDF files, provided by the poppler package)
+# ddjvu (DjVu files, provided by the djvulibre package)
+# ffmpeg (Audio files)
+# fontpreview (Font files)
+# libreoffice (Office files: odt, docx, xlsx, etc)
+# gs (Postscript files, provided by the ghostscript package)
+# convert (SVG files, provided by the imagemagick package)
 #
 # Note: The exact package names provinding these programs vary depending
 # on your OS/distribution, but ususally they have the same name as the program
