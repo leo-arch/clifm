@@ -22,9 +22,9 @@ Parameters passed to `clifmrun` will be passed to _clifm_ itself.
 
 ### clifmimg
 
-Convert (if necessary) and preview images (thumbnails) via an already running instace of **ueberzug**(1), launched by `clifmrun` (see above).
+Convert (if necessary) and preview images (thumbnails) via an already running instance of **ueberzug**(1), launched by `clifmrun` (see above).
 
-Thumbnails are cached (in the `CACHE_DIR` variable, by default `${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews`, usually (`$HOME/.cache/clifm/previews`)) using hash names, so that they are generated only once, after which the cached thumbnail will be displayed directly.
+Thumbnails are cached (in the path pointed to by the `CACHE_DIR` variable, by default `${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews`, usually (`$HOME/.cache/clifm/previews`)) using hash names, so that they are generated only once, after which the cached thumbnail will be displayed instead.
 
 It takes two parameters: the first one tells what kind of file is to be converted/displayed. The second one is the file name to be converted/displayed. For example:
 
@@ -49,7 +49,7 @@ svg
 
 ## Usage
 
-1. Copy both scripts (`clifmrun` and `clifmimg`) to somewhere in you **$PATH** (say `/usr/local/bin`).
+1. Copy both scripts (`clifmrun` and `clifmimg`) to somewhere in you **$PATH** (say `/usr/local/bin`). You can find them in `DATADIR/clifm/plugins` (usually `/usr/local/share/clifm/plugins`).
 
 2. Edit [shotgun's configuration file](https://github.com/leo-arch/clifm/blob/master/misc/preview.clifm) (<kbd>F7</kbd>) and add the following lines at the top of the file (to make sure they won't be overriden by previous directives):
 
