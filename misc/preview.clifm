@@ -14,6 +14,9 @@
 # Uncomment this line to use pistol (or any other previewing script)
 #.*=pistol
 
+# Uncomment and edit this line to use Ranger's scope script:
+#.*=/home/USER/.config/ranger/scope.sh %f 120 80 /tmp/clifm/ True
+
 # Directories
 inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
 
@@ -23,14 +26,15 @@ inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=alway
 # Text
 ^text/rtf=catdoc --;
 N:.*\.json$=jq --color-output . ;python -m json.tool --;
+N:.*\.md$=glow -s dark --;mdcat --;
 ^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;
 
 # Office documents
 N:.*\.xlsx$=xlsx2csv --;file -b --;
 N:.*\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;
 ^application/(.*wordprocessingml.document|.*epub+zip|x-fictionbook+xml)=pandoc -s -t markdown --;
-^application/msword=catdoc --;file -b;
-^application/ms-excel=xls2csv --;file -b;
+^application/msword=catdoc --;file -b --;
+^application/ms-excel=xls2csv --;file -b --;
 
 # Archives
 N:.*\.rar=unrar lt -p- --;

@@ -494,6 +494,9 @@ create_preview_file(void)
 # Uncomment this line to use pistol (or any other previewing script)\n\
 #.*=pistol\n\
 \n\
+# Uncomment and edit this line to use Ranger's scope script:\n\
+#.*=/home/USER/.config/ranger/scope.sh %%f 120 80 /tmp/clifm/ True\n\
+\n\
 # Directories\n\
 inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;\n\
 \n\
@@ -503,14 +506,15 @@ inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=alway
 # Text\n\
 ^text/rtf=catdoc --;\n\
 N:.*\\.json$=jq --color-output . ;python -m json.tool --;\n\
+N:.*\\.md$=glow -s dark --;mdcat --;\n\
 ^text/.*=highlight -f --out-format=xterm256 --force --;bat --style=plain --color=always --;cat --;\n\
 \n\
 # Office documents\n\
 N:.*\\.xlsx$=xlsx2csv --;file -b --;\n\
 N:.*\\.(odt|ods|odp|sxw)$=odt2txt;pandoc -s -t markdown --;\n\
 ^application/(.*wordprocessingml.document|.*epub+zip|x-fictionbook+xml)=pandoc -s -t markdown --;\n\
-^application/msword=catdoc --;file -b;\n\
-^application/ms-excel=xls2csv --;file -b;\n\
+^application/msword=catdoc --;file -b --;\n\
+^application/ms-excel=xls2csv --;file -b --;\n\
 \n\
 # Archives\n\
 N:.*\\.rar=unrar lt -p- --;\n\
