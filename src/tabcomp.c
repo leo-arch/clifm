@@ -598,8 +598,11 @@ set_fzf_env_vars(const int h)
 // TESTING PREVIEWER
 	if (!(flags & PREVIEWER)) {
 		get_cursor_position(&c, &l);
-		if (l + h - 1 > term_rows && l > h - 1)
-			l -= h - 1;
+		if (l + h - 1 > term_rows) {
+			l -= ((l + h - 1) - term_rows);
+			if (l < 0)
+				l = 0;
+		}
 	}
 // TESTING PREVIEWER
 
