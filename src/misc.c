@@ -595,7 +595,7 @@ print_tips(int all)
 		"Quickly change to a parent directory using the 'bd' command",
 		"Use 'stats' to print statistics on files in the current directory",
 		"Customize the warning prompt by setting WarningPrompt in the prompts file ('prompt edit')",
-		"Enter '-' to run the fzfnav plugin (includes files preview)",
+		"Enter '-' to run the fzfnav plugin (includes file previews)",
 		"Create multiple links at once using the 'bl' command",
 		"Organize your files using tags. Try 'tag --help'",
 		"Remove files in bulk using a text editor with 'rr'",
@@ -604,12 +604,13 @@ print_tips(int all)
 		"Quickly switch prompts via 'prompt NAME'",
 		"Press Alt-TAB to toggle the disk usage analyzer mode",
 		"Press Ctrl-Alt-l to toggle max file name length on/off",
-		"Fuzzy completion is supported: 'dwn<TAB> -> Downloads'. Enable it via '--fuzzy-match'",
+		"Fuzzy completion is supported: 'dwn<TAB> -> Downloads'. Enable it via --fuzzy-match",
 		"Wildcards can be expanded via TAB: 's *.c<TAB>'",
 		"Try the help topics: 'help <TAB>'",
 		"List symlinks in the current directory: '=l<TAB>'. Enter 'help file-details' for more information",
 		"Use PropFields in the configuration file to toggle fields on/off in long view mode",
-		"Enable file previews via --fzfpreview (only for TAB completion in fzf mode)",
+		"Enable file previews for TAB completion (fzf mode only) via --fzfpreview",
+		"Preview files in the current directory using the 'view' command (requires fzf)",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
