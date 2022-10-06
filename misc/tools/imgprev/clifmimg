@@ -105,39 +105,39 @@ display() {
 }
 
 main() {
-    case "$type" in
-        "image") display "$file" ;;
-        "video")
+	case "$type" in
+		"image") display "$file" ;;
+		"video")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \
 				ffmpegthumbnailer -i "$file" -o "${PCACHE}.jpg" -s 0 -q 5
 			display "${PCACHE}.jpg"
 			;;
-        "epub")
+		"epub")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \
 				epub-thumbnailer "$file" "${PCACHE}.jpg" 1024 >/dev/null 2>&1
 			display "${PCACHE}.jpg"
 			;;
-        "pdf")
+		"pdf")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \
 				pdftoppm -jpeg -f 1 -singlefile "$file" "$PCACHE"
 			display "${PCACHE}.jpg"
 			;;
-        "djvu")
+		"djvu")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \
 				ddjvu -format=tiff -quality=90 -page=1 "$file" "$PCACHE.jpg"
 			display "${PCACHE}.jpg"
 			;;
-        "audio")
+		"audio")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \
 				ffmpeg -hide_banner -i "$file" "${PCACHE}.jpg" -y >/dev/null 2>&1
 			display "${PCACHE}.jpg"
 			;;
-        "font")
+		"font")
 			hash_file "$file"
 			! [ -f "${PCACHE}.jpg" ] && \
 				fontpreview -i "$file" -o "${PCACHE}.jpg"
