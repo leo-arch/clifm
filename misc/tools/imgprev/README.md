@@ -65,8 +65,8 @@ The first parameter (thumbnailing method) could be any of the following:
 ```sh
 ^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
 ^text/rtf$=clifmimg doc;
-N:.*\.epub$=clifmimg epub;
-.*/pdf$=clifmimg pdf
+^application/epub\+zip$=clifmimg epub;
+^appliaction/pdf$=clifmimg pdf
 ^image/vnd.djvu=clifmimg djvu
 ^image/svg\+xml$=clifmimg svg;
 ^image/.*=clifmimg image;
