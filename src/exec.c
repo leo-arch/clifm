@@ -23,9 +23,11 @@
 */
 
 #include "helpers.h"
+
 #ifdef __OpenBSD__
 # include <sys/dirent.h>
 #endif
+
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -34,7 +36,14 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <readline/readline.h>
+
+#ifdef __OpenBSD__
+typedef char *rl_cpvfunc_t;
+# include <ereadline/readline/readline.h>
+#else
+# include <readline/readline.h>
+#endif
+
 #include <limits.h>
 
 #include "actions.h"
