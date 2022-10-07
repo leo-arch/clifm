@@ -522,7 +522,7 @@ application/zstd=file -b --;true\n\
 application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar --list --file;\n\
 \n\
 # PDF\n\
-.*/pdf$=pdftotext -l 10 -nopgbrk -q -- %%f -;mutool draw -F txt -i --;exiftool;\n\
+^application/pdf$=pdftotext -l 10 -nopgbrk -q -- %%f -;mutool draw -F txt -i --;exiftool;\n\
 \n\
 # Image, video, and audio\n\
 ^image/vnd.djvu=djvutxt;exiftool;\n\
