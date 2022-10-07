@@ -312,11 +312,11 @@ xf=01;31:xs=00;32:"
 #define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:4,\
 hl:5,hl+:5,gutter:-1,marker:2,border:8 --bind tab:accept,right:accept,\
 left:abort,alt-p:toggle-preview --inline-info --layout=reverse-list \
---preview-window=wrap,border-left"
+--preview-window=wrap,border-left --no-unicode"
 
 #define DEF_FZFTAB_OPTIONS_NO_COLOR "--color=bw --bind tab:accept,\
 right:accept,left:abort,alt-p:toggle-preview --inline-info --layout=reverse-list \
---preview-window=wrap,border-left"
+--preview-window=wrap,border-left --no-unicode"
 
 #define DEF_SMENU_OPTIONS "-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
 

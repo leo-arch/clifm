@@ -60,4 +60,4 @@ WarningPrompt="\[\e[0m\]\[\e[0;2;38;2;224;108;117m\](!) > "
 
 DividingLine="-"
 
-FzfTabOptions="--color='dark,prompt:#56b6c2,fg+:-1,pointer:#61afef,hl:#c678dd,hl+:#c678dd,gutter:-1,marker:#98c379:bold,query:#abb2bf,info:#abb2bf:dim,border:8' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview --inline-info --layout=reverse-list --preview-window=wrap,border-left"
+FzfTabOptions="--color='dark,prompt:#56b6c2,fg+:-1,pointer:#61afef,hl:#c678dd,hl+:#c678dd,gutter:-1,marker:#98c379:bold,query:#abb2bf,info:#abb2bf:dim,border:8' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview --inline-info --layout=reverse-list --preview-window=wrap,border-left --no-unicode"

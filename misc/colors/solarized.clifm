@@ -58,4 +58,4 @@ WarningPrompt="\[\e[0;2;38;2;220;50;47m\](!) > "
 
 DividingLine="-"
 
-FzfTabOptions="--color='dark,prompt:#2aa198,fg+:-1,pointer:#268bd2,hl:#d33682,hl+:#d33682,gutter:-1,marker:#859900:bold,query:#eee8d5,info:#eee8d5:dim,border:8' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview --inline-info --layout=reverse-list --preview-window=wrap,border-left"
+FzfTabOptions="--color='dark,prompt:#2aa198,fg+:-1,pointer:#268bd2,hl:#d33682,hl+:#d33682,gutter:-1,marker:#859900:bold,query:#eee8d5,info:#eee8d5:dim,border:8' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview --inline-info --layout=reverse-list --preview-window=wrap,border-left --no-unicode"

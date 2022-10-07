@@ -60,4 +60,4 @@ WarningPrompt="\[\e[0m\]\[\e[00;02;31m\](!) > "
 
 DividingLine="-"
 
-FzfTabOptions="--color='dark,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2:bold,border:8' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview --inline-info --layout=reverse-list --preview-window=wrap,border-left"
+FzfTabOptions="--color='dark,prompt:6,fg+:-1,pointer:4,hl:5,hl+:5,gutter:-1,marker:2:bold,border:8' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview --inline-info --layout=reverse-list --preview-window=wrap,border-left --no-unicode"
