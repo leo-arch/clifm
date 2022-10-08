@@ -93,6 +93,7 @@ _clifm ()
         --full-dir-size
         --fuzzy-match
         --fzfpreview
+        --fzytab
         --icons
         --icons-use-file-color
         --list-and-quit
@@ -130,14 +131,16 @@ _clifm ()
         --secure-env
         --secure-env-full
         --share-selbox
+        --shotgun-file
+        --smenutab
         --sort-reverse
-        --std-tab-comp
+        --stdtab
         --trash-as-rm
         --virtual-dir
         --virtual-dir-full-paths
     )
 
-    if [[ $prev == "-b" || $prev == "-c" || $prev == "-k" || $prev == "-p" ]]; then
+    if [[ $prev == "-b" || $prev == "-c" || $prev == "-k" || $prev == "-p" || $prev == "--open" || $prev == "--preview" || $prev == "--shotgun-file" ]]; then
         COMPREPLY=( $(compgen -f -d -- "$cur") )
 
     elif [[ $prev == "-P" ]]; then

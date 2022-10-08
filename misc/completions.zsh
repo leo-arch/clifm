@@ -93,6 +93,7 @@ args=(
 	'--secure-env[run in a sanitized environment (regular mode)]'
 	'--secure-env-full[run in a sanitized environment (full mode)]'
 	'--share-selbox[make the Selection Box common to different profiles]'
+	'--shotgun-file=[set shotgun configuration file to FILE]:filename:_files'
 	'--sort-reverse[sort in reverse order]'
 	'--std-tab-comp[use standard TAB completion]'
 	'--trash-as-rm[the '\''r'\'' command executes '\''trash'\'' instead of '\''rm'\'']'
