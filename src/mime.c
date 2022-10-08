@@ -277,6 +277,7 @@ retrieve_app(char *line)
 			p = savestring(ret + 1, arg_len);
 
 		int exists = check_app_existence(&app, &p);
+		free(p);
 		if (exists != 2 && ret) *ret = ' ';
 		if (exists == 0) {
 			free(app);

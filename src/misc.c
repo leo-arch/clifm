@@ -1273,6 +1273,7 @@ free_stuff(void)
 	if (restore_last_path || cd_on_quit)
 		save_last_path();
 
+	free(alt_preview_file);
 	free(alt_profile);
 	free_bookmarks();
 	free(encoded_prompt);

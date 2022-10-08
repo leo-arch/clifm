@@ -982,16 +982,17 @@ base name (if \\z is used in the prompt)\
 \n      --no-warning-prompt\t Disable the warning prompt\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\
-\n      --open=FILE\t\t Open FILE and exit\
-\n      --opener=APPLICATION\t Resource opener to use instead of 'lira', \
+\n      --open=FILE\t\t Open FILE (via Lira) and exit\
+\n      --opener=APPLICATION\t Resource opener to use instead of Lira, \
 CliFM's built-in opener\
-\n      --preview=FILE\t\t Display a preview of FILE and exit\
+\n      --preview=FILE\t\t Display a preview of FILE (via Shotgun) and exit\
 \n      --print-sel\t\t Keep the list of selected files in sight\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
 \n      --secure-cmds\t\t Filter commands to prevent command injection\
 \n      --secure-env\t\t Run in a sanitized environment (regular mode)\
 \n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
+\n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\
 \n      --si\t\t\t Print sizes in powers of 1000 instead of 1024 (Linux only)\
 \n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
 \n      --smenutab\t\t Use smenu to display completion matches\

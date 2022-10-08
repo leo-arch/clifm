@@ -310,6 +310,7 @@ char
 	*alt_config_dir = (char *)NULL,
 	*alt_config_file = (char *)NULL,
 	*alt_kbinds_file = (char *)NULL,
+	*alt_preview_file = (char *)NULL,
 	*alt_profile = (char *)NULL,
 	*bm_file = (char *)NULL,
 	*colors_dir = (char *)NULL,

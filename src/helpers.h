@@ -1233,6 +1233,7 @@ extern char
 	*alt_bm_file,
 	*alt_config_file,
 	*alt_kbinds_file,
+	*alt_preview_file,
 	*alt_profile,
 	*bm_file,
 	*colors_dir,

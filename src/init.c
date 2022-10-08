@@ -68,6 +68,9 @@
 #define STRINGIZE_(x) #x
 #define STRINGIZE(x) STRINGIZE_(x)
 
+#define PREVIEW_FILE 1
+#define OPEN_FILE    2
+
 /* We need this for get_user_groups() */
 #if !defined(NGROUPS_MAX)
 # if defined(__linux__)
@@ -1317,12 +1320,17 @@ open_reg_exit(char *filename, const int url, const int preview)
 
 	tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
 
-	size_t mime_file_len = strlen(homedir) + (alt_profile
-			? strlen(alt_profile) : 7) + 40;
-	mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
-	sprintf(mime_file, "%s/.config/clifm/profiles/%s/%s.clifm",
-			homedir, alt_profile ? alt_profile : "default",
-			preview == 1 ? "preview" : "mimelist");
+	size_t mime_file_len = 0;
+
+	if (alt_preview_file && preview == 1) {
+		mime_file = savestring(alt_preview_file, strlen(alt_preview_file));
+	} else {
+		mime_file_len = strlen(homedir) + (alt_profile ? strlen(alt_profile) : 7) + 40;
+		mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
+		sprintf(mime_file, "%s/.config/clifm/profiles/%s/%s.clifm",
+				homedir, alt_profile ? alt_profile : "default",
+				preview == 1 ? "preview" : "mimelist");
+	}
 
 	if (path_n == 0)
 		path_n = get_path_env();
@@ -1429,6 +1437,46 @@ resolve_positional_param(char *file)
 	flags |= START_PATH;
 	xargs.path = 1;
 	return _path;
+}
+
+/* Open/preview FILE according to MODE: either PREVIEW_FILE or OPEN_FILE */
+static void
+open_preview_file(char *file, const int mode)
+{
+	if (xargs.stealth_mode == 1) {
+		fprintf(stderr, "%s: Running in stealth mode. Access to "
+			"configuration files is not allowed\n", PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+	char *_path = file;
+	int url = 1, preview = mode == PREVIEW_FILE ? 1 : 0;
+
+	struct stat attr;
+	if (IS_FILE_URI(_path)) {
+		_path = file + 7;
+		if (stat(_path, &attr) == -1) {
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+				file, strerror(errno));
+			exit(errno);
+		}
+		url = 0;
+		goto RUN;
+	}
+
+	if (is_url(_path) == EXIT_FAILURE) {
+		url = 0;
+		if (*_path != '~' && stat(_path, &attr) == -1) {
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+				_path, strerror(errno));
+			exit(errno);
+		}
+	}
+
+RUN:
+	xargs.open = preview == 1 ? 0 : 1;
+	if (preview == 1)
+		ueberzug_clear();
+	open_reg_exit(_path, url, preview);
 }
 
 /* Evaluate external arguments, if any, and change initial variables to
@@ -1540,17 +1588,19 @@ external_arguments(int argc, char **argv)
 		{"desktop-notifications", no_argument, 0, 59},
 		{"vt100", no_argument, 0, 60},
 		{"fzfpreview", no_argument, 0, 61},
+		{"shotgun-file", required_argument, 0, 62},
 #ifdef __linux__
-		{"si", no_argument, 0, 62},
+		/* 63 is used by '?', so it cannot be used here */
+		{"si", no_argument, 0, 64},
 #endif
 	    {0, 0, 0, 0}
 	};
 
 	/* Increment whenever a new (only) long option is added */
 #ifdef __linux__
-	int long_opts = 62;
+	int long_opts = 64;
 #else
-	int long_opts = 61;
+	int long_opts = 63;
 #endif
 	int optc;
 	/* Variables to store arguments to options */
@@ -1560,7 +1610,9 @@ external_arguments(int argc, char **argv)
 	     *config_value = (char *)NULL,
 	     *kbinds_value = (char *)NULL,
 		 *virtual_dir_value = (char *)NULL,
-	     *bm_value = (char *)NULL;
+	     *bm_value = (char *)NULL,
+	     *open_prev_file = (char *)NULL;
+	int open_prev_mode = 0;
 
 	while ((optc = getopt_long(argc, argv,
 		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:Wxyz:", longopts, (int *)0)) != EOF) {
@@ -1662,42 +1714,12 @@ external_arguments(int argc, char **argv)
 		case 32: xargs.cwd_in_title = 1; break;
 
 		case 33: { /* --open or --preview */
-			if (xargs.stealth_mode == 1) {
-				fprintf(stderr, "%s: Running in stealth mode. Access to "
-					"configuration files is disallowed\n", PROGRAM_NAME);
-				exit(EXIT_FAILURE);
-			}
-			char *_path = optarg;
-			int url = 1, preview = 0;
-			if (optind > 2 && *(argv[optind - 2] + 2) == 'p')
-				preview = 1;
-
-			struct stat attr;
-			if (IS_FILE_URI(_path)) {
-				_path = optarg + 7;
-				if (stat(_path, &attr) == -1) {
-					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-						optarg, strerror(errno));
-					exit(errno);
-				}
-				url = 0;
-				goto RUN;
-			}
-
-			if (is_url(_path) == EXIT_FAILURE) {
-				url = 0;
-				if (*_path != '~' && stat(_path, &attr) == -1) {
-					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-						_path, strerror(errno));
-					exit(errno);
-				}
-			}
-
-RUN:
-			xargs.open = preview == 1 ? 0 : 1;
-			if (preview == 1)
-				ueberzug_clear();
-			open_reg_exit(_path, url, preview);
+			open_prev_file = optarg;
+			int n = *argv[optind - 1] == '-' ? 1 : 2;
+			if (*(argv[optind - n] + 2) == 'p')
+				open_prev_mode = PREVIEW_FILE; /* --preview */
+			else
+				open_prev_mode = OPEN_FILE; /* --open */
 		} break;
 
 		case 34: xargs.printsel = 1; break;
@@ -1787,10 +1809,10 @@ RUN:
 #endif
 		case 57: xargs.virtual_dir_full_paths = 1; break;
 		case 58:
-			if (optarg && *optarg && *optarg == '/')
+			if (optarg && *optarg && *optarg == '/') {
 				virtual_dir_value = optarg;
-			else {
-				fprintf(stderr, "%s: --virtual-dir: Absolute path "
+			} else {
+				fprintf(stderr, "%s: virtual-dir: Absolute path "
 					"is required as parameter\n", PROGRAM_NAME);
 				exit(EXIT_FAILURE);
 			}
@@ -1805,8 +1827,19 @@ RUN:
 			break;
 
 		case 61: xargs.fzf_preview = fzf_preview = 1; break;
+
+		case 62:
+			if (!optarg) {
+				fprintf(stderr, _("%s: option requires an argument -- "
+					"'%s'\nTry '%s --help' for more information.\n"),
+				    PROGRAM_NAME, "preview-file", PROGRAM_NAME);
+				exit(EXIT_FAILURE);
+			}
+			alt_preview_file = savestring(optarg, strlen(optarg));
+			break;
+
 #ifdef __linux__
-		case 62: xargs.si = 1; break;
+		case 64: xargs.si = 1; break;
 #endif
 
 
@@ -1926,9 +1959,13 @@ RUN:
 		}
 	}
 
-	/* Positional parameters. If a directory, use it as CliFM starting
-	 * path. Otherwise, open the file with the associated application
-	 * and exit */
+	if (open_prev_mode != 0) {
+		open_preview_file(open_prev_file, open_prev_mode);
+		exit(EXIT_SUCCESS); /* Never reached */
+	}
+
+	/* Positional parameters. If a directory, use it as CliFM starting path.
+	 * Otherwise, open the file with the associated application and exit */
 	int i = optind;
 	if (argv[i])
 		path_value = resolve_positional_param(argv[i]);
