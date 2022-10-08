@@ -412,10 +412,13 @@ disable the welcome message
 list only directories
 .TP
 \fB\-\-open\fR=\fI\,FILE\/\fR
-run as a stand-alone resource opener: open \fIFILE\fR and exit, where FILE could be a regular file or a directory, using either standard notation (/dir/file) or the URI file scheme (file:///dir/file]), or a URL (www.domain or https://domain).
+run as a standalone resource opener: open \fIFILE\fR and exit, where FILE could be a regular file or a directory, using either standard notation (/dir/file) or the URI file scheme (file:///dir/file]), or a URL (www.domain or https://domain).
 .TP
 \fB\-\-opener\fR=\fI\,APPLICATION\/\fR
-specify a resource opener to use (say \fIrifle\fR or \fIxdg-open\fR). If \fIopener\fR is not set, \fILira\fR will be used instead
+specify a resource opener to use (say \fIrifle\fR or \fIxdg-open\fR). If \fIopener\fR is not set, \fILira\fR is used instead
+.TP
+\fB\-\-preview\fR=\fI\,FILE\/\fR
+display a preview of \fIFILE\fR (via \fIShotgun\fR) and exit. Consult the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-print\-sel\fR
 always print the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fBMaxPrintSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use -1 to remove the limit or any other positive value.
@@ -434,6 +437,9 @@ run \fBclifm\fR in a secure environment (full mode). Consult the \fBSECURITY\fR 
 .TP
 \fB\-\-share\-selbox\fR
 make the Selection Box common (that is, accessible) to different profiles. By default, each profile has a private Selection Box.
+.TP
+\fB\-\-shotgun\-file\fR=\fI\,FILE\/\fR
+Set \fIFILE\fR as shotgun's configuration file. See the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-si\fR
 print sizes in powers of 1000, as defined in the International System of Units (SI), instead of 1024 (Linux only)
