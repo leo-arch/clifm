@@ -418,7 +418,7 @@ run as a standalone resource opener: open \fIFILE\fR and exit, where FILE could 
 specify a resource opener to use (say \fIrifle\fR or \fIxdg-open\fR). If \fIopener\fR is not set, \fILira\fR is used instead
 .TP
 \fB\-\-preview\fR=\fI\,FILE\/\fR
-display a preview of \fIFILE\fR (via \fIShotgun\fR) and exit. Consult the \fBSHOTGUN\fR section below for more information
+display a preview of \fIFILE\fR (via \fIShotgun\fR) and exit. If running as a standalone files previewer, you can set an alternative confiuguration file via \fI\-\-shotgun\-file\fR. Consult the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-print\-sel\fR
 always print the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fBMaxPrintSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use -1 to remove the limit or any other positive value.
@@ -439,7 +439,7 @@ run \fBclifm\fR in a secure environment (full mode). Consult the \fBSECURITY\fR 
 make the Selection Box common (that is, accessible) to different profiles. By default, each profile has a private Selection Box.
 .TP
 \fB\-\-shotgun\-file\fR=\fI\,FILE\/\fR
-Set \fIFILE\fR as shotgun's configuration file. See the \fBSHOTGUN\fR section below for more information
+Set \fIFILE\fR as shotgun's configuration file. Only effective if running as a standalone files previewer via the \fI\-\-preview\fR switch. See the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-si\fR
 print sizes in powers of 1000, as defined in the International System of Units (SI), instead of 1024 (Linux only)
@@ -1795,21 +1795,24 @@ Executed via the \fI\-\-preview\fR command line switch, \fIshotgun\fR performs f
 .TP
 Previewing applications (based on either MIME type or file name) are defined in a configuration file (\fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/preview.clifm\fR) using the same syntax used by \fILira\fR (the built\-in resource opener). See the \fBRESOURCE OPENER\fR section above.
 .TP
-Though \fIshotgun\fR may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly aimed to be used by \fBclifm\fR's TAB completion function, though only when running in FZF mode (see the \fBTAB COMPLETION\fR section above). Set \fIFzfPreview\fR option in the configuration file to \fItrue\fR (or run with \fI\-\-fzfpreview\fR) to enable this feature: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown above).
+If running as a standalone files previewer, you can set an alternative configuration file via the \fI\-\-shotgun\-file\fR command line switch:
+
+ clifm \-\-shotgun\-file=/path/to/shotgun/config/file \-\-preview=myfile.txt
+.TP
+Though \fIshotgun\fR may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly aimed to be used by \fBclifm\fR's TAB completion function running in FZF mode (see the \fBTAB COMPLETION\fR section above). Set \fIFzfPreview\fR option in the configuration file to \fItrue\fR (or run with \fI\-\-fzfpreview\fR) to enable this feature: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown above).
+.TP
+\fIShotgun\fR is also used by the \fIview\fR command to display file previews in full screen.
 .TP
 Image previews are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev
+
 .TP
-To customize the appearance of the previewing window, use the \fI\-\-preview-window\fR option in the \fIFzfTabOptions\fR line in the current color scheme file. For example, if you want the preview window down the files list (instead of to the right):
+To customize the appearance of the preview window, use the \fI\-\-preview-window\fR option in the \fIFzfTabOptions\fR line in the current color scheme file. For example, if you want the preview window down the files list (instead of to the right):
 
  \-\-preview\-window=down
 .TP
 Consult \fBfzf\fR(1) for more information.
 .TP
 \fBNote\fR: By default, Alt-p toggles the preview window on/off.
-.TP
-\fBNote 2\fR: The border drawn at the left of the preview window uses Unicode characters by default. If you experience some issue (most likely due to the absence of a proper Unicode font), you can either disable Unicode (via the \fI--no-unicode\fR option) or the border itself (\fI--preview-window=border-none\fR). Installing a Unicode font, of course, should also do the trick.
-.TP
-\fBNote 3\fR: An alternative (more powerful but slower) files previewing function is provided by the \fIfzfnav\fR plugin. Consult the \fBPLUGINS\fR section below.
 
 .SH 12. AUTO-SUGGESTIONS
 \fIGemini\fR is a built-in suggestions system (similar to that provided by the Fish shell). As you type, \fIGemini\fR will suggest possible completions right after the current cursor position.
@@ -2029,9 +2032,9 @@ T}	Set image as wallpaper	wallpaper_setter.sh	feh, xloadimage, or hsetroot
 .TP
 To run the \fIpager.sh\fR plugin, for example, you only need to enter the corresponding action name, in this case \fIgg\fR. In case of need, all plugins provide a \fI\-h,\-\-help\fR switch for a brief usage description.
 .TP
-\fBNote\fR: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to show file previews \fIBFG\fR requires \fBueberzug\fR to be installed or the Kitty protocol via the Kitty terminal). A configuration file (\fIBFG.cfg\fR, in the plugins directory itlsef) is provided to customize the previewer's behavior.
+\fBNote\fR: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews (to display image previews \fIBFG\fR requires \fBueberzug\fR(1) or the Kitty protocol via the Kitty terminal). A configuration file (\fIBFG.cfg\fR, in the plugins directory itself) is provided to customize the previewer's behavior.
 .TP
-\fBNote 2\fR: An alternative files previewing function (less powerful than \fIBFG\fR, but certainly faster) is provided by \fIshotgun\fR, \fBclifm\fR's built\-in files previewer. See the \fBSHOTGUN\fR section above for more information.
+\fBNote 2\fR: An alternative files previewing function (built-in, and thereby faster than \fIBFG\fR) is provided by \fIshotgun\fR. See the \fBSHOTGUN\fR section above for more information.
 .TP
 In addition to the built\-in \fIBFG\fR previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR(1). To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
 .TP
