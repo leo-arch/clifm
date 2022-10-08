@@ -982,9 +982,10 @@ base name (if \\z is used in the prompt)\
 \n      --no-warning-prompt\t Disable the warning prompt\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\
-\n      --open=FILE\t\t Run as a stand-alone resource opener: open FILE and exit\
+\n      --open=FILE\t\t Open FILE and exit\
 \n      --opener=APPLICATION\t Resource opener to use instead of 'lira', \
 CliFM's built-in opener\
+\n      --preview=FILE\t\t Display a preview of FILE and exit\
 \n      --print-sel\t\t Keep the list of selected files in sight\
 \n      --rl-vi-mode\t\t Set readline to vi editing mode (defaults to emacs mode)\
 \n      --secure-cmds\t\t Filter commands to prevent command injection\
