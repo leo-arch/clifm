@@ -123,6 +123,7 @@ _clifm ()
         --only-dirs
         --open
         --opener
+        --preview
         --print-sel
         --rl-vi-mode
         --secure-cmds
