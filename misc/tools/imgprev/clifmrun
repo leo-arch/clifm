@@ -41,8 +41,8 @@ init_ueberzug() {
 	! [ -d "$PREVIEW_DIR" ] && mkdir -p "$PREVIEW_DIR"
 	export FIFO_UEBERZUG="$CACHE_DIR/ueberzug-${$}"
 
-	mkfifo "$FIFO_UEBERZUG"
-	tail -f "$FIFO_UEBERZUG" \
+	mkfifo "$CLIFM_FIFO_UEBERZUG"
+	tail -f "$CLIFM_FIFO_UEBERZUG" \
 	| ueberzug layer --silent --parser json > /dev/null 2>&1 &
 }
 
@@ -57,5 +57,5 @@ else
 
 	clifm "$@"
 
-	printf '{"action": "remove", "identifier": "clifm-preview"}\n' > "$FIFO_UEBERZUG"
+	printf '{"action": "remove", "identifier": "clifm-preview"}\n' > "$CLIFM_FIFO_UEBERZUG"
 fi

@@ -1475,7 +1475,8 @@ open_preview_file(char *file, const int mode)
 RUN:
 	xargs.open = preview == 1 ? 0 : 1;
 	if (preview == 1)
-		ueberzug_clear();
+		clear_term_img();
+
 	open_reg_exit(_path, url, preview);
 }
 

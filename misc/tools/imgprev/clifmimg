@@ -97,7 +97,7 @@ display() {
 	# CLIFM_FZF_LINE: Terminal line of the fzf window (exported by clifm)
 	Y=$CLIFM_FZF_LINE
 
-	printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$FIFO_UEBERZUG"
+	printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$CLIFM_FIFO_UEBERZUG"
 }
 
 main() {

@@ -44,6 +44,7 @@ char *get_cmd_path(const char *cmd);
 //int get_cursor_position(int *c, int *r);
 // TESTING CURSOR POSITION
 
+void clear_term_img(void);
 mode_t get_dt(const mode_t mode);
 /*int *get_hex_num(const char *str); */
 int get_link_ref(const char *link);
@@ -55,7 +56,6 @@ FILE *open_fstream_r(char *name, int *fd);
 FILE *open_fstream_w(char *name, int *fd);
 int read_octal(char *str);
 void rl_ring_bell(void);
-void ueberzug_clear(void);
 char *url_encode(char *str);
 char *url_decode(char *str);
 int xatoi(const char *s);

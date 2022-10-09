@@ -595,13 +595,11 @@ set_fzf_env_vars(const int h)
 {
 	int c = 0, l = 0;
 
-// TESTING PREVIEWER
 	if (!(flags & PREVIEWER)) {
 		get_cursor_position(&c, &l);
 		if (l + h - 1 > term_rows)
 			l -= ((l + h - 1) - term_rows);
 	}
-// TESTING PREVIEWER
 
 	char p[32];
 	snprintf(p, sizeof(p), "%d", l > 0 ? l - 1 : 0);
@@ -615,7 +613,7 @@ set_fzf_env_vars(const int h)
 static void
 clear_fzf(void)
 {
-	ueberzug_clear();
+	clear_term_img();
 	unsetenv("CLIFM_FZF_LINE");
 	unsetenv("CLIFM_TERM_COLUMNS");
 	unsetenv("CLIFM_TERM_LINES");
