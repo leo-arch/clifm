@@ -31,7 +31,7 @@
 # Note: ueberzug needs to run on a graphical environment. Wayland is not supported
 
 ueberzug_cleanup() {
-    rm -f -- "$FIFO_UEBERZUG" 2>/dev/null
+    rm -f -- "$CLIFM_FIFO_UEBERZUG" 2>/dev/null
     pkill -P $$ >/dev/null
 }
 
@@ -39,7 +39,7 @@ init_ueberzug() {
 	CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
 	PREVIEW_DIR="$CACHE_DIR/previews"
 	! [ -d "$PREVIEW_DIR" ] && mkdir -p "$PREVIEW_DIR"
-	export FIFO_UEBERZUG="$CACHE_DIR/ueberzug-${$}"
+	export CLIFM_FIFO_UEBERZUG="$CACHE_DIR/ueberzug-${$}"
 
 	mkfifo "$CLIFM_FIFO_UEBERZUG"
 	tail -f "$CLIFM_FIFO_UEBERZUG" \
