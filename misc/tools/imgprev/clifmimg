@@ -6,8 +6,9 @@
 
 # Description
 # Convert (if necessary) and preview images via an already running
-# instance of ueberzug (executed by the 'clifmrun' script). Thumbnails
-# are cached (in $CACHE_DIR) using file hashes as names.
+# instance of ueberzug (executed by the 'clifmrun' script) or the kitty
+# image protocol. Thumbnails are cached (in $CACHE_DIR) using file hashes
+# as names.
 #
 # The first parameter tells what kind of file is to be converted/displayed
 # The second one is the file name to be converted/displayed.
@@ -97,7 +98,19 @@ display() {
 	# CLIFM_FZF_LINE: Terminal line of the fzf window (exported by clifm)
 	Y=$CLIFM_FZF_LINE
 
-	printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$CLIFM_FIFO_UEBERZUG"
+	if [ -n "$CLIFM_KITTY_IMG" ]; then
+		# CLIFM_KITTY_IMG is the path to a temp file created by clifmrun
+		# if running on a kitty terminal
+		# This is a pretty dirty hack: let's create an empty temp file
+		# (CLIFM_KITTY_IMG) to let clifm know that an image is displayed
+		# and should be removed
+		touch -- "$CLIFM_KITTY_IMG"
+		kitty icat --silent --loop=0 \
+		--place "$FZF_PREVIEW_COLUMNS"x"$FZF_PREVIEW_LINES"@"$X"x"$Y" \
+		--transfer-mode=stream --align=left -- "$1"
+	else
+		printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$CLIFM_FIFO_UEBERZUG"
+	fi
 }
 
 main() {
@@ -163,6 +176,11 @@ main() {
 				convert -background none -size 1920x1080 "$file" "${PCACHE}.png"
 			display "${PCACHE}.png"
 		;;
+#		"comic")
+#			hash_file "$file"
+#			! [ -f "${PCACHE}.png" ] && comicthumb "$file" "$PCACHE" 1024
+#			display "${PCACHE}.png"
+#		;;
         *)
     esac
 }

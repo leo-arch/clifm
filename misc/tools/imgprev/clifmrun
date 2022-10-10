@@ -28,7 +28,15 @@
 # Dependencies:
 # ueberzug
 #
-# Note: ueberzug needs to run on a graphical environment. Wayland is not supported
+# NOTE: Ueberzug needs to run on a graphical environment. Wayland is not supported.
+#
+# If running on the kitty terminal you can set CLIFM_KITTY_NO_UEBERZUG to 1 to use
+# the kitty image protocol itself (currently slower than ueberzug). Run as follows:
+#
+# CLIFM_KITTY_NO_UERBERZUG=1 clifmrun --fzfpreview
+#
+# If running on Wayland, the kitty image protocol is used by default
+#
 
 ueberzug_cleanup() {
     rm -f -- "$CLIFM_FIFO_UEBERZUG" 2>/dev/null
@@ -49,6 +57,10 @@ init_ueberzug() {
 if ! type clifm > /dev/null 2>&1; then
 	printf "clifm: Command not found\n"
 	exit 127
+elif [ "$TERM" = "xterm-kitty" ] && { [ -n "$CLIFM_KITTY_NO_UEBERZUG" ] \
+|| [ -n "$WAYLAND_DISPLAY" ]; }; then
+	export CLIFM_KITTY_IMG="${TMPDIR:-/tmp}/clifm_kitty_img"
+	clifm "$@"
 elif ! type ueberzug > /dev/null 2>&1 || [ -z "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
 	clifm "$@"
 else
