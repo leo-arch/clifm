@@ -59,7 +59,6 @@
 #endif /* RL_READLINE_VERSION */
 
 /* Remove images printed on the kitty terminal */
-/*
 static void
 kitty_clear(void)
 {
@@ -69,7 +68,7 @@ kitty_clear(void)
 	char *cmd[] = {"kitty", "icat", "--clear", "--silent",
 		"--transfer-mode=stream", NULL};
 	launch_execve(cmd, 0, 0);
-} */
+}
 
 /* Remove any image printed by ueberzug.
  * This function assumes:
@@ -98,18 +97,21 @@ clear_term_img(void)
 		return;
 	}
 
+	if (!(flags & KITTY_TERM))
+		return;
+
 	/* This works, but it's too slow. Replace by ACP escape codes (both for
 	 * displaying and removing the image). Take a look at how ranger does it */
 
 	/* CLIFM_KITTY_IMG is set by the clifmrun plugin to a temp file name,
 	 * which is then created (empty) by the clifmimg plugin every time an
 	 * image is displayed via the kitty protocol */
-/*	p = getenv("CLIFM_KITTY_IMG");
+	p = getenv("CLIFM_KITTY_IMG");
 	struct stat a;
 	if (p && stat(p, &a) != -1) {
 		kitty_clear();
 		remove(p);
-	} */
+	}
 }
 
 static char *

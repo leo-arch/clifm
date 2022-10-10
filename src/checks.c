@@ -128,6 +128,9 @@ check_term_support(const char *_term)
 	/* Color and cursor position request support */
 	int index = -1;
 
+	if (*_term == 'x' && strcmp(_term, "xterm-kitty") == 0)
+		flags |= KITTY_TERM;
+
 	for (i = 0; TERM_INFO[i].name; i++) {
 		if (*_term != *TERM_INFO[i].name || len != TERM_INFO[i].len
 		|| strcmp(_term, TERM_INFO[i].name) != 0)
