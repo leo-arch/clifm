@@ -443,47 +443,6 @@ is_secure_env(void)
 	return 0;
 }
 
-/* Get user ID using id(1) shell command: GID if GROUP is one and UID otherwise */
-static int
-get_user_id(const int group)
-{
-	char file[PATH_MAX];
-#if !defined(__OpenBSD__)
-	snprintf(file, PATH_MAX, "%s/idXXXXXX", *P_tmpdir ? P_tmpdir : "/tmp"); /* NOLINT */
-#else
-	snprintf(file, PATH_MAX, "%s/idXXXXXXXXXX", *P_tmpdir ? P_tmpdir : "/tmp"); /* NOLINT */
-#endif
-
-	int fd = mkstemp(file);
-	if (fd == -1) return (-1);
-
-	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
-
-	int r = dup2(fd, STDOUT_FILENO); /* Redirect stdout to the desired file */
-	close(fd);
-	if (r == -1) { unlink(file); return (-1); }
-
-	char *cmd[] = {"id", group == 1 ? "-g" : "-u", NULL};
-	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
-
-	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-	close(stdout_bk);
-
-	FILE *fp = open_fstream_r(file, &fd);
-	if (!fp) { unlink(file); return (-1); }
-
-	char line[32];
-	if (fgets(line, (int)sizeof(line), fp) == NULL) {
-		close_fstream(fp, fd);
-		unlink(file);
-		return (-1);
-	}
-
-	close_fstream(fp, fd);
-	unlink(file);
-	return atoi(line);
-}
-
 /* Retrieve user groups
  * Return an array with the ID's of groups to which the user belongs
  * NGROUPS is set to the number of groups
@@ -531,14 +490,8 @@ static struct user_t
 get_user_data_env(void)
 {
 	struct user_t tmp_user;
-
 	/* If secure-env, do not fallback to environment variables */
 	int sec_env = is_secure_env();
-	_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n", PROGRAM_NAME, strerror(errno));
-
-	tmp_user.uid = sec_env == 0 ? (uid_t)get_user_id(0) : (uid_t)-1;
-	tmp_user.gid = sec_env == 0 ? (gid_t)get_user_id(1) : (gid_t)-1;
-
 	char *t = sec_env == 0 ? getenv("HOME") : (char *)NULL;
 
 	if (t) {
@@ -575,9 +528,13 @@ get_user_data(void)
 	struct user_t tmp_user;
 
 	errno = 0;
-	pw = getpwuid(geteuid());
-	if (!pw) /* Fallback to environment variables (if not secure-env) */
+	tmp_user.uid = geteuid();
+	pw = getpwuid(tmp_user.uid);
+	if (!pw) { /* Fallback to environment variables (if not secure-env) */
+		tmp_user.gid = getgid();
+		_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n", PROGRAM_NAME, strerror(errno));
 		return get_user_data_env();
+	}
 
 	tmp_user.uid = pw->pw_uid;
 	tmp_user.gid = pw->pw_gid;
@@ -588,7 +545,7 @@ get_user_data(void)
 	tmp_user.groups = get_user_groups(pw->pw_name, pw->pw_gid, &tmp_user.ngroups);
 
 	/* Sometimes (FreeBSD for example) the home directory, as returned by the
-	 * passwd struct, might be a symlink, in which case we want to resolve it
+	 * passwd struct, is a symlink, in which case we want to resolve it
 	 * See https://lists.freebsd.org/pipermail/freebsd-arm/2016-July/014404.html */
 	char *p = realpath(pw->pw_dir, NULL);
 	if (p) {
