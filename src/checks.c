@@ -289,6 +289,9 @@ check_user_groups(const gid_t file_gid)
 int
 check_file_access(const struct stat *file)
 {
+	if (user.uid == 0) /* We are root */
+		return 1;
+
 	int f = 0; /* Hold file ownership flags */
 
 	mode_t val = (file->st_mode & (mode_t)~S_IFMT);
