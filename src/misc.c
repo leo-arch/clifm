@@ -741,6 +741,8 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int 
 {
 	int ret = 0;
 
+	setenv("CLIFM_OWN_CHILD", "1", 1);
+
 	if (*cmd) {
 		ret = launch_execve(*cmd, BACKGROUND, E_NOFLAG);
 		size_t i;
@@ -763,6 +765,8 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int 
 	free(*_sudo);
 	free(*self);
 	free(*dir);
+
+	unsetenv("CLIFM_OWN_CHILD");
 
 	return ret;
 }

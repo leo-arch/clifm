@@ -2251,6 +2251,13 @@ init_shell(void)
 		return;
 	}
 
+	if (getenv("CLIFM_OWN_CHILD")) {
+		set_signals_to_ignore();
+		own_pid = get_own_pid();
+		tcgetattr(STDIN_FILENO, &shell_tmodes);
+		return;
+	}
+
 // TESTING PREVIEWER
 
 	own_pid = get_own_pid();
@@ -2283,12 +2290,6 @@ init_shell(void)
 	tcgetattr(STDIN_FILENO, &shell_tmodes);
 
 // TESTING PREVIEWER
-
-/*	set_signals_to_ignore();
-	own_pid = get_own_pid();
-
-	tcgetattr(STDIN_FILENO, &shell_tmodes);
-	return; */
 }
 
 /* Get current entries in the Selection Box, if any */
