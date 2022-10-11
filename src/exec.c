@@ -2621,6 +2621,11 @@ exec_cmd(char **comm)
 		if ((exit_code = check_auto_second(comm)) != -1)
 			return exit_code;
 
+		if (*comm[0] == *argv_bk[0] && strcmp(comm[0], argv_bk[0]) == 0) {
+			fprintf(stderr, _("%s: To launch a new instance use the 'x' command\n"), PROGRAM_NAME);
+			return (exit_code = EXIT_FAILURE);
+		}
+
 		/* #  EXTERNAL/SHELL COMMANDS # */
 		if ((exit_code = run_shell_cmd(comm)) == EXIT_FAILURE)
 			return EXIT_FAILURE;

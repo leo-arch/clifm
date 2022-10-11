@@ -173,10 +173,19 @@ backup_argv(int argc, char **argv)
 	argc_bk = argc;
 	argv_bk = (char **)xnmalloc((size_t)argc + 1, sizeof(char *));
 
+	/* Let's store only the executable file name, excluding the path
+	 * This is mainly done to detect and disallow nested instances (see exec.c) */
+	char *name_bk = argv[0];
+	char *n = strrchr(argv[0], '/');
+	if (n && *n && *(n + 1))
+		argv[0] = n + 1;
+
 	register int i = argc;
 	while (--i >= 0)
 		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
 	argv_bk[argc] = (char *)NULL;
+
+	argv[0] = name_bk;
 
 	return EXIT_SUCCESS;
 }
@@ -2252,6 +2261,7 @@ init_shell(void)
 	}
 
 	if (getenv("CLIFM_OWN_CHILD")) {
+//		unsetenv("CLIFM_OWN_CHILD");
 		set_signals_to_ignore();
 		own_pid = get_own_pid();
 		tcgetattr(STDIN_FILENO, &shell_tmodes);

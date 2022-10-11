@@ -1061,11 +1061,6 @@ main(int argc, char *argv[])
 
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
-	/* If running the program locally, that is, not from a path in PATH,
-	 * remove the leading "./" to get the correct program invocation name */
-	if (*argv[0] == '.' && *(argv[0] + 1) == '/' && *(argv[0] + 2))
-		argv[0] += 2;
-
 	/* Use the locale specified by the environment */
 	setlocale(LC_ALL, "");
 
