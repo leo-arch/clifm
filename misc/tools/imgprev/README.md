@@ -1,6 +1,4 @@
-# Image previews via Ueberzug
-
-**Disclaimer: Since this method relies on ueberzug, only X11 is supported**
+# Image previews
 
 ## Table of contents
 
@@ -21,13 +19,15 @@
 
 ## Description
 
-Based on [vifmimg](https://github.com/cirala/vifmimg), these scripts ([clifmimg](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) and [clifmrun](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)) are intended to provide image preview capabilities to _CliFM_ using [ueberzug](https://github.com/seebye/ueberzug).
+Based on [vifmimg](https://github.com/cirala/vifmimg), these scripts ([clifmimg](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) and [clifmrun](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)) are intended to provide image preview capabilities to _CliFM_ using either [ueberzug](https://github.com/seebye/ueberzug) (default) or the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) (currently experimental and slower). Bear in mind that `ueberzug` only works on X11.
 
 ### clifmrun
 
 Launch an instance of **ueberzug**(1) and set the appropriate values (as environment variables) so that it can be used by [shotgun](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) (clifm's built-in previewer) to display images via `clifmimg` (see below).
 
 Parameters passed to `clifmrun` will be passed to _clifm_ itself.
+
+The kitty image protocol is also supported. See the [Usage section](#usage) below.
 
 ### clifmimg
 
@@ -90,6 +90,13 @@ clifmrun --fzfpreview
 `--fzfpreview` is used to show file previews via [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions) (fzf mode only). However, if the `FfzPreview` option (see the [main configuration file](https://github.com/leo-arch/clifm/blob/master/misc/clifmrc)) is already set to `true`, you can omit `--fzfpreview`
 
 The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view), used to preview files in the current directory in full screen, will enable `FzfPreview` automatically provided the `fzf` binary is found, so that `--fzfpreview` is not requiered here either.
+
+If running on the kitty terminal you can force the use of the kitty image protocol (instead of `ueberzug`) as follows:
+
+```sh
+CLIFM_KITTY_NO_UEBERZUG=1 clifmrun --fzfpreview
+```
+Note that on Wayland the kitty image protocol will be used by default, so that there is no need to set this variable.
 
 ### General procedure
 
