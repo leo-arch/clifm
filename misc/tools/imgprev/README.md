@@ -1,5 +1,9 @@
 # Image previews
 
+> Because terminals were built to display text rather than images, making them display images can be problematic.  Some solutions work better in some environments than others, but none of them is perfect.
+
+<p align="right"><a href="https://wiki.vifm.info/index.php/How_to_preview_images">Vifm wiki</p>
+
 ## Table of contents
 
 * [Description](#description)
