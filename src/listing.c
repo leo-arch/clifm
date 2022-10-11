@@ -2149,7 +2149,7 @@ list_dir(void)
 			cap_t cap;
 #endif
 			/* Do not perform the access check if the user is root */
-			if (!(flags & ROOT_USR)	&& stat_ok && check_file_access(&attr) == 0) {
+			if (user.uid != 0 && stat_ok && check_file_access(&attr) == 0) {
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;

@@ -905,7 +905,7 @@ check_cpu_os(void)
 static inline void
 set_root_indicator(void)
 {
-	if (flags & ROOT_USR) {
+	if (user.uid == 0) {
 		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Running as root%s\n"),
 			colorize == 1 ? mi_c : "", colorize == 1 ? _RED : "", colorize == 1 ? df_c : "");
 	}
@@ -1077,9 +1077,6 @@ main(int argc, char *argv[])
 
 	user = get_user_data();
 	get_home();
-
-	if (geteuid() == 0)
-		flags |= ROOT_USR;
 
 	/* Running on a graphical environment? */
 	if (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))

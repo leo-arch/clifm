@@ -331,7 +331,7 @@ gen_user_flag(void)
 {
 	char *temp = (char *)xnmalloc(2, sizeof(char));
 
-	if ((flags & ROOT_USR))
+	if (user.uid == 0)
 		*temp = '#';
 	else
 		*temp = '$';
@@ -527,7 +527,7 @@ static inline char *
 gen_notification(int flag)
 {
 	char *p;
-	if (flags & ROOT_USR)
+	if (user.uid == 0)
 		p = (char *)xnmalloc(2, sizeof(char));
 	else
 		p = (char *)xnmalloc(sizeof(size_t) + 2, sizeof(char));
@@ -547,7 +547,7 @@ gen_notification(int flag)
 			sprintf(p, "W%zu", msgs.warning);
 		break;
 	case NOTIF_ROOT:
-		if (flags & ROOT_USR)
+		if (user.uid == 0)
 			{ *p = 'R'; p[1] = '\0'; }
 		break;
 	case NOTIF_SEL:
@@ -830,7 +830,7 @@ setenv_prompt(void)
 	setenv("CLIFM_STAT_WS", t, 1);
 	sprintf(t, "%d", exit_code);
 	setenv("CLIFM_STAT_EXIT", t, 1);
-	setenv("CLIFM_STAT_ROOT", (flags & ROOT_USR) ? "1" : "0", 1);
+	setenv("CLIFM_STAT_ROOT", user.uid == 0 ? "1" : "0", 1);
 	setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);
 }
 
@@ -842,7 +842,7 @@ set_prompt_length(size_t decoded_prompt_len)
 	if (prompt_notif == 1) {
 		len = (size_t)(decoded_prompt_len
 		+ (xargs.stealth_mode == 1 ? STEALTH_IND_SIZE : 0)
-		+ ((flags & ROOT_USR) ? ROOT_IND_SIZE : 0)
+		+ (user.uid == 0 ? ROOT_IND_SIZE : 0)
 		+ ((sel_n > 0) ? N_IND : 0)
 		+ ((trash_n > 0) ? N_IND : 0)
 		+ ((msgs.error > 0) ? N_IND : 0)
@@ -884,7 +884,7 @@ construct_prompt(const char *decoded_prompt)
 	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,
 			"%s%s%s%s%s%s%s%s%s%s\001%s\002",
-			(flags & ROOT_USR) ? (colorize == 1 ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
+			(user.uid == 0) ? (colorize == 1 ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
 			(msgs.error > 0) ? err_ind : "",
 			(msgs.warning > 0) ? warn_ind : "",
 			(msgs.notice > 0) ? notice_ind : "",

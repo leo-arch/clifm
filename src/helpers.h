@@ -199,30 +199,29 @@ extern FILE *test_input_stream;
  * case, if we want to support old 16 bit machines, we shouldn't use more than
  * 16 bits per flag, that is (1 << 15) */
 
-/* Options flags */
+/* Option flags */
 #define START_PATH    (1 << 0)
 #define ALT_PROFILE   (1 << 1)
 
 /* Internal flags */
-#define ROOT_USR      (1 << 2)
-#define GUI           (1 << 3)
-#define IS_USRVAR_DEF (1 << 4)
+#define GUI           (1 << 2)
+#define IS_USRVAR_DEF (1 << 3)
 
 /* Used by the refresh on resize feature */
-#define DELAYED_REFRESH    (1 << 5)
-#define PATH_PROGRAMS_ALREADY_LOADED (1 << 6)
+#define DELAYED_REFRESH    (1 << 4)
+#define PATH_PROGRAMS_ALREADY_LOADED (1 << 5)
 
-#define FIRST_WORD_IS_ELN   (1 << 7)
-#define IN_BOOKMARKS_SCREEN (1 << 8)
-#define STATE_COMPLETING    (1 << 9)
+#define FIRST_WORD_IS_ELN   (1 << 6)
+#define IN_BOOKMARKS_SCREEN (1 << 7)
+#define STATE_COMPLETING    (1 << 8)
 /* Instead of a completion for the current word, a BAEJ suggestion points to
  * a possible completion as follows: WORD > COMPLETION */
-#define BAEJ_SUGGESTION     (1 << 10)
-#define STATE_SUGGESTING    (1 << 11)
-#define IN_SELBOX_SCREEN    (1 << 12)
-#define MULTI_SEL           (1 << 13)
-#define PREVIEWER           (1 << 14)
-#define KITTY_TERM          (1 << 15)
+#define BAEJ_SUGGESTION     (1 << 9)
+#define STATE_SUGGESTING    (1 << 10)
+#define IN_SELBOX_SCREEN    (1 << 11)
+#define MULTI_SEL           (1 << 12)
+#define PREVIEWER           (1 << 13)
+#define KITTY_TERM          (1 << 14)
 
 /* Flags for finder binaries */
 #define FZF_BIN_OK    (1 << 0)
