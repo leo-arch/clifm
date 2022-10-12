@@ -311,6 +311,9 @@ enable program logs. See the \fIlog\fR command for more information
 \fB\-\-expand\-bookmarks\fR
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path"
 .TP
+\fB\-\-fzfpreview\fR
+enable file previews for TAB completion (fzf mode only)
+.TP
 \fB\-\-fzytab\fR
 use \fIfzy\fR to display completion matches
 .TP
@@ -1803,16 +1806,23 @@ Though \fIshotgun\fR may be used as a standalone and general purpose file previe
 .TP
 \fIShotgun\fR is also used by the \fIview\fR command to display file previews in full screen.
 .TP
-Image previews are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev
-
-.TP
 To customize the appearance of the preview window, use the \fI\-\-preview-window\fR option in the \fIFzfTabOptions\fR line in the current color scheme file. For example, if you want the preview window down the files list (instead of to the right):
 
  \-\-preview\-window=down
 .TP
+Default keybindings for the preview window:
+.sp
+ Alt-p: Toggle the preview window on/off
+ Ctrl-Up / Shift-Up: Scroll the preview window up one line
+ Ctrl-Down / Shift-Down: Scroll the preview window down one line
+ Alt-Up: Scroll the preview window up one page
+ Alt-Down: Scroll the preview window down one page
+.TP
+Keybindings can be customized using the \fI--bind\fR option in the \fIFzfTabOptions\fR field in the color scheme file.
+.TP
 Consult \fBfzf\fR(1) for more information.
 .TP
-\fBNote\fR: By default, Alt-p toggles the preview window on/off.
+Image previews are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: \fIhttps://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev\fR
 
 .SH 12. AUTO-SUGGESTIONS
 \fIGemini\fR is a built-in suggestions system (similar to that provided by the Fish shell). As you type, \fIGemini\fR will suggest possible completions right after the current cursor position.
