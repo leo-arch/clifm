@@ -310,8 +310,9 @@ Enabling image previews (either ueberzug (X11 only) or the Kitty terminal are re
 1. Copy 'clifmrun' and 'clifmimg' scripts to somewhere in you $PATH \n\
 (say /usr/local/bin). You can find them in DATADIR/clifm/plugins (usually \n\
 /usr/local/share/clifm/plugins).\n\n\
-2. Edit shotgun's configuration file (F7) and add the following lines at the top \n\
-of the file (to make sure they won't be overriden by previous directives):\n\
+2. Edit shotgun's configuration file ($HOME/.config/clifm/profiles/PROFILE/preview.clifm) \n\
+(F7 is available) and add the following lines at the top of the file (to make sure they \n\
+won't be overriden by previous directives):\n\
 \n\
 ^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;\n\
 ^text/rtf$=clifmimg doc;\n\
