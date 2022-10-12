@@ -301,6 +301,45 @@ Example:\n\
     ff off\n\
   Note: Toggle directories-first on/off pressing Alt-g"
 
+#define FILE_PREVIEWS "Use the 'view' command to preview files in the current \
+directory (depends on fzf).\n\n\
+To add file previews to TAB completion (fzf mode only), use the --fzfpreview command \n\
+line option, or set FzfPreview to true in the configuration file ('edit' or F10).\n\n\
+Enabling image previews (either ueberzug (X11 only) or the Kitty terminal are required)\n\
+\n\
+1. Copy 'clifmrun' and 'clifmimg' scripts to somewhere in you $PATH \n\
+(say /usr/local/bin). You can find them in DATADIR/clifm/plugins (usually \n\
+/usr/local/share/clifm/plugins).\n\n\
+2. Edit shotgun's configuration file (F7) and add the following lines at the top \n\
+of the file (to make sure they won't be overriden by previous directives):\n\
+\n\
+^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;\n\
+^text/rtf$=clifmimg doc;\n\
+^application/epub\\+zip$=clifmimg epub;\n\
+^appliaction/pdf$=clifmimg pdf;\n\
+^image/vnd.djvu=clifmimg djvu;\n\
+^image/svg\\+xml$=clifmimg svg;\n\
+^image/.*=clifmimg image;\n\
+^video/.*=clifmimg video;\n\
+^audio/.*=clifmimg audio;\n\
+^application/postscript$=clifmimg postscript;\n\
+N:.*\\.otf$=clifmimg font;\n\
+font/.*=clifmimg font;\n\
+\n\
+Comment out whatever you want to exclude from the image preview function.\n\
+\n\
+3. Run clifm via the 'clifmrun' script:\n\
+clifmrun --fzfpreview\n\
+\n\
+Note on Kitty and Wayland:\n\
+If running on the kitty terminal you can force the use of the kitty image \n\
+protocol (instead of ueberzug) as follows:\n\
+\n\
+CLIFM_KITTY_NO_UEBERZUG=1 clifmrun --fzfpreview\n\
+\n\
+Note that on Wayland the kitty image protocol will be used by default, so \n\
+that there is no need to set this variable."
+
 #define FILTER_USAGE "Set a filter for the files list\n\
 Usage:\n\
   ft, filter [unset] [REGEX]\n\n\

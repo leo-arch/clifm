@@ -1953,6 +1953,15 @@ print_file_attributes_topic(void)
 }
 
 static int
+print_file_previews_topic(void)
+{
+	puts(FILE_PREVIEWS);
+	putchar('\n');
+	print_more_info();
+	return EXIT_SUCCESS;
+}
+
+static int
 print_navigation_topic(void)
 {
 	puts(_("Run '?' and consult the NAVIGATION section"));
@@ -2038,6 +2047,8 @@ run_help_topic(char *topic)
 		return print_dir_jumper_topic();
 	if (*topic == 'f' && strcmp(topic, "file-details") == 0)
 		return print_file_attributes_topic();
+	if (*topic == 'f' && strcmp(topic, "file-previews") == 0)
+		return print_file_previews_topic();
 	if (*topic == 'f' && strcmp(topic, "file-tags") == 0)
 		return print_file_tags_topic();
 	if (*topic == 'n' && strcmp(topic, "navigation") == 0)
