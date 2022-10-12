@@ -64,7 +64,7 @@ The first parameter (thumbnailing method) could be any of the following:
 
 1. Copy both scripts (`clifmrun` and `clifmimg`) to somewhere in you **$PATH** (say `/usr/local/bin`). You can find them in `DATADIR/clifm/plugins` (usually `/usr/local/share/clifm/plugins`).
 
-2. Edit [shotgun's configuration file](https://github.com/leo-arch/clifm/blob/master/misc/preview.clifm) (<kbd>F7</kbd>) and add the following lines at the top of the file (to make sure they won't be overriden by previous directives):
+2. Edit [shotgun's](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) configuration file (`$HOME/.config/clifm/profiles/PROFILE/preview.clifm`) by pressing <kbd>F7</kbd> or editing the file manually, and add the following lines at the top of the file (to make sure they won't be overriden by previous directives):
 
 ```sh
 ^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
