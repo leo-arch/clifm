@@ -100,6 +100,8 @@ quit:\e[24~
 
 #open-mime:\e[17~
 #open-jump-db:\e[18~
+#open-preview:\e[18~
+
 
 # Plugins
 # 1) Make sure your plugin is in the plugins directory (or use any of the
