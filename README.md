@@ -125,6 +125,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Autocommands](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
   - [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd-on-off-status), [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open-on-off-status), and [autols](https://github.com/leo-arch/clifm/wiki/Common-Operations#navigation)
   - [Directory jumper](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide)
+  - [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories)
   - [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function)
   - [Backdir - Quickly change to a parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#bd-name)
   - [A built-in resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) (supports regular expressions and is able to discern between GUI and non-GUI environments)
@@ -134,6 +135,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Eleven sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev)
   - [Bulk rename](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename) and [bulk remove](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
   - [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n)
+  - [Files encryption/decryption (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Copy files to your smart phone (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660)
   - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
@@ -143,7 +145,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - Directory history map to keep in sight previous, current, and next entries in the directory history list
 - Shell
   - [Auto-suggestions](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
-  - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions) (including an FZF mode)
+  - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions), with _fzf_ integration
   - [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting)
   - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt)
   - [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters)
@@ -176,6 +178,7 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well)
   - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk), including emoji-icons :smirk:
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
+  - [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
   - Unicode suppport
   - Disk usage
   - [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions
@@ -209,18 +212,6 @@ For a detailed explanation of each of these features, follow the corresponding l
   - <kbd>Ctrl-l</kbd> added for screen refresh
   - `cc` command removed to avoid conflicts with `/bin/cc` (use `colors` instead)
   - `--std-tab-comp` option renamed to `--stdtab` (to match `--fzytab` and `--smenutab` options)
-  - [Files encryption/decryption plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-  - [Allow turning interactivity off when copying, moving, and/or removing files](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
-  - [Termux support](https://github.com/leo-arch/clifm/wiki/Introduction#small_blue_diamond-c-termux)
-  - [Customize properties fields in long view mode](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details) 
-  - [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
-  - [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories)
-  - [A better organized configuration file](https://github.com/leo-arch/clifm/blob/master/misc/clifmrc)
-  - [Improved logs system](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status)
-  - [smenu support for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#a-different-alternative-smenu)
-  - [FZY support for TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#no-fzf-try-with-fzy)
-  - [Operate on specific bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#operating-on-specific-bookmarks)
-  - [Named workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
 * `version 1.6 (Guybrush)`:
   - ELN's color defaults now to cyan
   - `--no-folders-first` and `--folders-first` options renamed to `--no-dirs-first` and `--dirs-first` respectively. In the same way, the `folders-first` command was renamed to `dirs-first`.
@@ -232,6 +223,8 @@ For a detailed explanation of each of these features, follow the corresponding l
   - In order to make _Lira_ more powerful (it can now match entire file names instead of just file extensions) it was necessary to introduce [a little syntax modification](https://github.com/leo-arch/clifm/wiki/Specifics#syntax) in its configuration file.
 
 </details>
+
+For more details consult the [changelog file](https://github.com/leo-arch/clifm/blob/master/CHANGELOG).
 
 ---
 
