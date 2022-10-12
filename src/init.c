@@ -338,7 +338,7 @@ get_data_dir(void)
 #ifdef CLIFM_DATADIR
 	struct stat a;
 	char p[PATH_MAX];
-	snprintf(p, PATH_MAX, "%s/%s", STRINGIZE(CLIFM_DATADIR), PNL);
+	snprintf(p, sizeof(p), "%s/%s", STRINGIZE(CLIFM_DATADIR), PNL);
 	if (stat(p, &a) != -1) {
 		data_dir = (char *)xnmalloc(strlen(STRINGIZE(CLIFM_DATADIR)) + 1, sizeof(char));
 		strcpy(data_dir, STRINGIZE(CLIFM_DATADIR));
@@ -361,7 +361,7 @@ get_data_dir(void)
 
 	for (i = 0; data_dirs[i]; i++) {
 		char tmp[PATH_MAX];
-		snprintf(tmp, PATH_MAX - 1, "%s/%s", data_dirs[i], PNL);
+		snprintf(tmp, sizeof(tmp), "%s/%s", data_dirs[i], PNL);
 		if (stat(tmp, &attr) == -1)
 			continue;
 		data_dir = (char *)xrealloc(data_dir, (strlen(data_dirs[i]) + 1) * sizeof(char));

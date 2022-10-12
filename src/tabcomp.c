@@ -1182,8 +1182,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * 20 chars (40 if previews are enabled) for the finder's window */
 	int fspace = (tabmode == FZF_TAB && fzf_preview == 1
 		&& SHOW_PREVIEWS(cur_comp_type) == 1) ? 40 : 20;
-/*	if (fspace == 40 && height < 10) // We're previewing files
-		height = 10; */
+
+	/* If showing previews, let's reserve at least a quarter of the
+	 * terminal height */
+	int min_prev_height = term_rows / 4;
+	if (fspace == 40 && (int)height < min_prev_height
+	&& min_prev_height > 0) // We're previewing files
+		height = (size_t)min_prev_height;
+
 	int max_finder_offset = term_cols > fspace ? term_cols - fspace : 0;
 
 // TESTING FINDER OFFSET
