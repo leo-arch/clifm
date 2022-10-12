@@ -893,8 +893,11 @@ store_completions(char **matches, FILE *fp)
 		no_file_comp = 1; /* We're not completing file names */
 
 	size_t i;
+	/* 'view' cmd with only one match: matches[0] */
+	size_t start = ((flags & PREVIEWER) && !matches[1]) ? 0 : 1;
 	char *_path = (char *)NULL;
-	for (i = 1; matches[i]; i++) {
+
+	for (i = start; matches[i]; i++) {
 		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
 			continue;
 		char *color = df_c, *entry = matches[i];
@@ -1326,15 +1329,17 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	int multi = is_multi_sel();
 
 // TESTING PREVIEWER
+	char *q = query;
 	if (flags & PREVIEWER) {
 		height = term_rows;
 		finder_offset = 0;
 		multi = 0;
+		q = (char *)NULL;
 	}
 // TESTING PREVIEWER
 
 	/* Run the finder application and store the ouput into the FINDER_OUT_FILE file */
-	int ret = run_finder(&height, &finder_offset, query, multi);
+	int ret = run_finder(&height, &finder_offset, q, multi);
 	unlink(finder_in_file);
 
 	/* Calculate currently used lines to go back to the correct cursor
@@ -1489,21 +1494,21 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		while (--j >= 0 && buf[j] == ' ')
 			buf[j] = '\0';
 
-		char *q = (char *)NULL;
+		char *p = (char *)NULL;
 		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_PATH
 		&& cur_comp_type != TCMP_HIST && !multi) {
-			q = escape_str(buf);
-			if (!q) {
+			p = escape_str(buf);
+			if (!p) {
 				free(buf);
 				return EXIT_FAILURE;
 			}
 		} else {
-			q = savestring(buf, blen);
+			p = savestring(buf, blen);
 		}
 
 		fzf_open_with = 1;
-		write_completion(q, &prefix_len, &exit_status, multi);
-		free(q);
+		write_completion(p, &prefix_len, &exit_status, multi);
+		free(p);
 	}
 
 	free(buf);
@@ -1965,6 +1970,9 @@ AFTER_USUAL_COMPLETION:
 	case '?': {
 		int len = 0, count = 0, limit = 0, max = 0;
 		int j = 0, k = 0, l = 0;
+
+		if (flags & PREVIEWER)
+			goto CALC_OFFSET;
 
 		/* Handle simple case first. Just one match */
 		if (!matches[1]) {
