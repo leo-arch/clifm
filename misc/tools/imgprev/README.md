@@ -95,6 +95,8 @@ clifmrun --fzfpreview
 
 The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view), used to preview files in the current directory in full screen, will enable `FzfPreview` automatically provided the `fzf` binary is found, so that `--fzfpreview` is not requiered here either.
 
+### Kitty and Wayland
+
 If running on the kitty terminal you can force the use of the kitty image protocol (instead of `ueberzug`) as follows:
 
 ```sh
