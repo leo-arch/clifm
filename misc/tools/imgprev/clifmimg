@@ -94,8 +94,15 @@ display() {
 	# window (value exported by clifm)
 	# FZF_PREVIEW_COLUMNS: Number of columns of the fzf preview
 	# window (value exported by fzf itself)
-	X=$((CLIFM_TERM_COLUMNS - FZF_PREVIEW_COLUMNS))
 	# CLIFM_FZF_LINE: Terminal line of the fzf window (exported by clifm)
+
+	# Use these values if using default fzf preview window border
+	#X=$((CLIFM_TERM_COLUMNS - FZF_PREVIEW_COLUMNS - 2))
+	#Y=$((CLIFM_FZF_LINE + 1))
+
+	# Use these values if using border-left for the fzf preview window
+	# border-left is available only since fzf 0.27
+	X=$((CLIFM_TERM_COLUMNS - FZF_PREVIEW_COLUMNS))
 	Y=$CLIFM_FZF_LINE
 
 	if [ -n "$CLIFM_KITTY_IMG" ]; then

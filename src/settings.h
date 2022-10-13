@@ -308,7 +308,8 @@ xf=01;31:xs=00;32:"
 #define DEF_WPROMPT_STR "\\[\\e[00;02;31m\\](!) > "
 #define DEF_WPROMPT_STR_NO_COLOR "(!) > "
 
-/* These options should work with FZF 0.27.0 or later */
+/* These options, execept --preview-window=border-left (fzf 0.27), work with at
+ * least fzf 0.18.0 */
 #define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:4,\
 hl:5,hl+:5,gutter:-1,marker:2,border:8 --bind tab:accept,right:accept,\
 left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,\

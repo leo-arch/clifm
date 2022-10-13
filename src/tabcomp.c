@@ -652,6 +652,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 			set_fzf_env_vars((int)*height);
 		char prev_str[] = "--preview \"printf \"\033[2J\"; clifm --preview {}\"";
 
+		/* All fixed parameters are compatible with at least fzf 0.18 */
 		snprintf(cmd, sizeof(cmd), "fzf %s "
 				"%s --margin=0,0,0,%d "
 				"%s --read0 --ansi "
@@ -660,7 +661,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				fzftab_options,
 				*height_str ? height_str : "", *offset,
 				case_sens_path_comp ? "+i" : "-i",
-				lw ? lw : "", colorize == 0 ? "--no-color" : "",
+				lw ? lw : "", colorize == 0 ? "--color=bw" : "",
 				multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				prev == 1 ? prev_str : "",
