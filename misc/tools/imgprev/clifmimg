@@ -27,18 +27,18 @@
 # 2) Edit shotgun's config file (F7) and add the following lines at the top
 # of the file (to make sure they won't be overriden by previous lines):
 #
-#^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
-#^text/rtf$=clifmimg doc;
-#N:.*\.epub$=clifmimg epub;
-#.*/pdf$=clifmimg pdf
-#^image/vnd.djvu=clifmimg djvu
-#^image/svg\+xml$=clifmimg svg;
-#^image/.*=clifmimg image;
-#^video/.*=clifmimg video;
-#^audio/.*=clifmimg audio;
-#^application/postscript$=clifmimg postscript;
-#N:.*\.otf$=clifmimg font;
-#font/.*=clifmimg font;
+#X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
+#X:^text/rtf$=clifmimg doc;
+#X:N:.*\.epub$=clifmimg epub;
+#X:.*/pdf$=clifmimg pdf
+#X:^image/vnd.djvu=clifmimg djvu
+#X:^image/svg\+xml$=clifmimg svg;
+#X:^image/.*=clifmimg image;
+#X:^video/.*=clifmimg video;
+#X:^audio/.*=clifmimg audio;
+#X:^application/postscript$=clifmimg postscript;
+#X:N:.*\.otf$=clifmimg font;
+#X:font/.*=clifmimg font;
 #
 # This instructs clifm to use this script to generate previews for the
 # specified files.

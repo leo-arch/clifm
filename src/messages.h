@@ -314,18 +314,18 @@ Enabling image previews (either ueberzug (X11 only) or the Kitty terminal are re
 (F7 is available) and add the following lines at the top of the file (to make sure they \n\
 won't be overriden by previous directives):\n\
 \n\
-^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;\n\
-^text/rtf$=clifmimg doc;\n\
-^application/epub\\+zip$=clifmimg epub;\n\
-^appliaction/pdf$=clifmimg pdf;\n\
-^image/vnd.djvu=clifmimg djvu;\n\
-^image/svg\\+xml$=clifmimg svg;\n\
-^image/.*=clifmimg image;\n\
-^video/.*=clifmimg video;\n\
-^audio/.*=clifmimg audio;\n\
-^application/postscript$=clifmimg postscript;\n\
-N:.*\\.otf$=clifmimg font;\n\
-font/.*=clifmimg font;\n\
+X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;\n\
+X:^text/rtf$=clifmimg doc;\n\
+X:^application/epub\\+zip$=clifmimg epub;\n\
+X:^appliaction/pdf$=clifmimg pdf;\n\
+X:^image/vnd.djvu=clifmimg djvu;\n\
+X:^image/svg\\+xml$=clifmimg svg;\n\
+X:^image/.*=clifmimg image;\n\
+X:^video/.*=clifmimg video;\n\
+X:^audio/.*=clifmimg audio;\n\
+X:^application/postscript$=clifmimg postscript;\n\
+X:N:.*\\.otf$=clifmimg font;\n\
+X:font/.*=clifmimg font;\n\
 \n\
 Comment out whatever you want to exclude from the image preview function.\n\
 \n\
