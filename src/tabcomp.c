@@ -84,6 +84,8 @@ typedef char *rl_cpvfunc_t;
 	} else \
 		putc(c, rl_outstream)
 
+static size_t longest_prev_entry;
+
 // TESTING CURSOR POSITION
 /* The following three functions are used to get current cursor position
  * (both vertical and horizontal), needed by TAB completion in fzf mode
@@ -619,6 +621,25 @@ clear_fzf(void)
 	unsetenv("CLIFM_TERM_LINES");
 }
 
+/* Calculate the available space for the fzf preview window based on
+ * the main window width, terminal columns, and longest entry
+ * Return (size_t)-1 if the space is less than 50% of total space */
+static size_t
+get_preview_win_width(const int offset)
+{
+	size_t w = 0;
+	size_t l = longest_prev_entry + 8;
+	int total_win_width = term_cols - offset;
+
+	if (l < (size_t)total_win_width)
+		w = (size_t)total_win_width - l;
+
+	if (w > (size_t)total_win_width / 2)
+		return w;
+
+	return (size_t)-1;
+}
+
 static int
 run_finder(const size_t *height, const int *offset, const char *lw, const int multi)
 {
@@ -648,15 +669,22 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				*height, PATH_MAX, multi ? "-P$'\n'" : "",
 				finder_in_file, finder_out_file);
 	} else {
-		if (prev == 1)
-			set_fzf_env_vars((int)*height);
+		/* All fixed parameters are compatible with at least fzf 0.18 */
+		char prev_opts[40];
+		*prev_opts = '\0';
 		char prev_str[] = "--preview \"printf \"\033[2J\"; clifm --preview {}\"";
 
-		/* All fixed parameters are compatible with at least fzf 0.18 */
+		if (prev == 1) {
+			set_fzf_env_vars((int)*height);
+			size_t s = get_preview_win_width(*offset);
+			if (s != (size_t)-1)
+				snprintf(prev_opts, sizeof(prev_opts), "--preview-window=%zu", s);
+		}
+
 		snprintf(cmd, sizeof(cmd), "fzf %s "
 				"%s --margin=0,0,0,%d "
 				"%s --read0 --ansi "
-				"--query=\"%s\" %s %s %s "
+				"--query=\"%s\" %s %s %s %s "
 				"< %s > %s",
 				fzftab_options,
 				*height_str ? height_str : "", *offset,
@@ -665,6 +693,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				prev == 1 ? prev_str : "",
+				*prev_opts ? prev_opts : "",
 				finder_in_file, finder_out_file);
 	}
 
@@ -898,9 +927,21 @@ store_completions(char **matches, FILE *fp)
 	size_t start = ((flags & PREVIEWER) && !matches[1]) ? 0 : 1;
 	char *_path = (char *)NULL;
 
+	int prev = (fzf_preview == 1 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+	longest_prev_entry = 0;
+
 	for (i = start; matches[i]; i++) {
 		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
 			continue;
+
+		if (prev == 1) {
+			char *p = (cur_comp_type == TCMP_PATH && !(flags & PREVIEWER))
+					? strrchr(matches[i], '/') : (char *)NULL;
+			size_t l = strlen(p && *(p + 1) ? p + 1 : matches[i]);
+			if (l > longest_prev_entry)
+				longest_prev_entry = l;
+		}
+
 		char *color = df_c, *entry = matches[i];
 
 		if (cur_comp_type == TCMP_BACKDIR) {
