@@ -67,18 +67,18 @@ The first parameter (thumbnailing method) could be any of the following:
 2. Edit [shotgun's](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) configuration file (`$HOME/.config/clifm/profiles/PROFILE/preview.clifm`) by pressing <kbd>F7</kbd> or editing the file manually, and add the following lines at the top of the file (to make sure they won't be overriden by previous directives):
 
 ```sh
-^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
-^text/rtf$=clifmimg doc;
-^application/epub\+zip$=clifmimg epub;
-^appliaction/pdf$=clifmimg pdf
-^image/vnd.djvu=clifmimg djvu
-^image/svg\+xml$=clifmimg svg;
-^image/.*=clifmimg image;
-^video/.*=clifmimg video;
-^audio/.*=clifmimg audio;
-^application/postscript$=clifmimg postscript;
-N:.*\.otf$=clifmimg font;
-font/.*=clifmimg font;
+X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
+X:^text/rtf$=clifmimg doc;
+X:^application/epub\+zip$=clifmimg epub;
+X:^appliaction/pdf$=clifmimg pdf
+X:^image/vnd.djvu=clifmimg djvu
+X:^image/svg\+xml$=clifmimg svg;
+X:^image/.*=clifmimg image;
+X:^video/.*=clifmimg video;
+X:^audio/.*=clifmimg audio;
+X:^application/postscript$=clifmimg postscript;
+X:N:.*\.otf$=clifmimg font;
+X:font/.*=clifmimg font;
 ```
 
 This instructs _clifm_ to use `clifmimg` to generate previews (and display them via `ueberzug`) for the specified file names or file types.
