@@ -1319,7 +1319,10 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			if (!q)
 				continue;
 			free(fzftab_options);
-			if (xargs.secure_cmds != 1 || sanitize_cmd(q, SNT_BLACKLIST) == EXIT_SUCCESS) {
+			if (*q == 'n' && strcmp(q, "none") == 0) {
+				fzftab_options = (char *)xnmalloc(1, sizeof(char));
+				*fzftab_options = '\0';
+			} else if (xargs.secure_cmds != 1 || sanitize_cmd(q, SNT_BLACKLIST) == EXIT_SUCCESS) {
 				fzftab_options = savestring(q, strlen(q));
 			} else {
 				_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
