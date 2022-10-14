@@ -2920,8 +2920,12 @@ static void
 set_fzf_preview_border_type(void)
 {
 	fzf_preview_border_type = FZF_BORDER_ROUNDED;
+	char *str = (fzftab_options && *fzftab_options)
+		? fzftab_options : getenv("FZF_DEFAULT_OPTS");
+	if (!str || !*str)
+		return;
 
-	char *p = strstr(fzftab_options, "border-");
+	char *p = strstr(str, "border-");
 	if (p && *(p + 7)) {
 		switch(*(p + 7)) {
 		case 'b': fzf_preview_border_type = FZF_BORDER_BOTTOM; break;
@@ -3136,8 +3140,7 @@ check_options(void)
 	if (!fzftab_options)
 		fzftab_options = savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
 
-	if (fzftab_options)
-		set_fzf_preview_border_type();
+	set_fzf_preview_border_type();
 
 	smenutab_options_env = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
 		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
