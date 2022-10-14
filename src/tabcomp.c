@@ -72,7 +72,8 @@ typedef char *rl_cpvfunc_t;
 #endif
 
 #define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL || (c) == TCMP_RANGES \
-|| (c) == TCMP_DESEL || (c) == TCMP_JUMP || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB)
+|| (c) == TCMP_DESEL || (c) == TCMP_JUMP || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB \
+|| (c) == TCMP_FILE_TYPES_FILES)
 
 #define PUTX(c) \
 	if (CTRL_CHAR(c)) { \
