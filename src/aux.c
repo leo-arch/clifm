@@ -110,7 +110,7 @@ clear_term_img(void)
 	struct stat a;
 	if (p && stat(p, &a) != -1) {
 		kitty_clear();
-		remove(p);
+		unlinkat(AT_FDCWD, p, 0);
 	}
 }
 
