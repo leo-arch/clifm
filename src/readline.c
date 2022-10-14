@@ -2106,8 +2106,26 @@ rl_glob(const char *text)
 
 	size_t i, j = 1;
 	char **t = (char **)xnmalloc(globbuf.gl_pathc + 3, sizeof(char *));
-	t[0] = xnmalloc(1, sizeof(char));
-	*t[0] = '\0';
+
+	/* If /path/to/dir/GLOB<TAB>, /path/to/dir goes to slot 0 */
+	int c = -1;
+	char *p = strchr(rl_line_buffer, ' '), *q = (char *)NULL;
+
+	if (p && *(++p)) {
+		q = strrchr(p, '/');
+		if (q && *(++q)) {
+			c = *q;
+			*q = '\0';
+		}
+	}
+
+	if (c != -1) {
+		t[0] = savestring(p, strlen(p));
+		*q = (char)c;
+	} else {
+		t[0] = xnmalloc(1, sizeof(char));
+		*t[0] = '\0';
+	}
 
 	for (i = 0; i < globbuf.gl_pathc; i++) {
 		if (SELFORPARENT(globbuf.gl_pathv[i]))

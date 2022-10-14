@@ -402,7 +402,7 @@ get_entry_color(char **matches, const size_t i)
 	/* Absolute path (/FILE) or file in CWD (./FILE) */
 	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') ) && (cur_comp_type == TCMP_PATH
 	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL
-	|| cur_comp_type == TCMP_BM_PATHS) ) {
+	|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_GLOB) ) {
 		if (lstat(dir, &attr) != -1)
 			return fzftab_color(dir, &attr);
 		return uf_c;
@@ -2091,9 +2091,11 @@ DISPLAY_MATCHES:
 		}
 #endif /* !_NO_HIGHLIGHT */
 		char *qq = (char *)NULL, *ptr = (char *)NULL;
-		if (cur_comp_type != TCMP_PATH)
+		if (cur_comp_type != TCMP_PATH && cur_comp_type != TCMP_GLOB)
 			goto CALC_OFFSET;
 
+		/* If /path/to/dir/<TAB> or /path/to/dir/GLOB<TAB>, let's temporarily
+		 * change to /path/to/dir, so that the finder knows where we are */
 		if (*matches[0] == '~') {
 			char *exp_path = tilde_expand(matches[0]);
 			if (exp_path) {
@@ -2218,7 +2220,8 @@ CALC_OFFSET:
 #ifndef _NO_FZF
 RESET_PATH:
 #endif /* !_NO_FZF */
-		if (cur_comp_type == TCMP_PATH)
+
+		if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_GLOB)
 			xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 RESTART:
