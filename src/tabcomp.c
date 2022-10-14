@@ -669,7 +669,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				*height, PATH_MAX, multi ? "-P$'\n'" : "",
 				finder_in_file, finder_out_file);
 	} else {
-		/* All fixed parameters are compatible with at least fzf 0.18 */
+		/* All fixed parameters are compatible with at least fzf 0.16.11 (Aug 1, 2017) */
 		char prev_opts[40];
 		*prev_opts = '\0';
 		char prev_str[] = "--preview \"printf \"\033[2J\"; clifm --preview {}\"";
@@ -935,8 +935,9 @@ store_completions(char **matches, FILE *fp)
 			continue;
 
 		if (prev == 1) {
-			char *p = (cur_comp_type == TCMP_PATH && !(flags & PREVIEWER))
-					? strrchr(matches[i], '/') : (char *)NULL;
+			int get_base_name = ((cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_GLOB)
+					&& !(flags & PREVIEWER)) ? 1 : 0;
+			char *p = get_base_name == 1 ? strrchr(matches[i], '/') : (char *)NULL;
 			size_t l = strlen(p && *(p + 1) ? p + 1 : matches[i]);
 			if (l > longest_prev_entry)
 				longest_prev_entry = l;
