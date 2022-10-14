@@ -954,6 +954,16 @@ extern struct termcaps_t term_caps;
 #define PROP_TIME_MOD    2
 #define PROP_TIME_CHANGE 3
 
+/* Macros for fzf_preview_border_type */
+#define FZF_BORDER_BOTTOM  0
+#define FZF_BORDER_HORIZ   1
+#define FZF_BORDER_LEFT    2
+#define FZF_BORDER_NONE    3
+#define FZF_BORDER_ROUNDED 4
+#define FZF_BORDER_SHARP   5
+#define FZF_BORDER_TOP     6
+#define FZF_BORDER_VERT    7
+
 struct props_t {
 	int perm; /* File permissions; either NUMERIC or SYMBOLIC */
 	int ids; /* User and group IDs */
@@ -1098,6 +1108,7 @@ extern int
 	fzf_height_set,
 	fzf_open_with,
 	fzf_preview,
+	fzf_preview_border_type,
 	highlight,
 	hist_status,
 	home_ok,

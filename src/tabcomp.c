@@ -604,10 +604,28 @@ set_fzf_env_vars(const int h)
 			l -= ((l + h - 1) - term_rows);
 	}
 
+	/* Let's correct image coordinates on the screen based on the preview
+	 * window style */
+	int x = term_cols, y = l;
+	switch(fzf_preview_border_type) {
+	case FZF_BORDER_BOTTOM: /* fallthrough */
+	case FZF_BORDER_NONE: /* fallthrough */
+	case FZF_BORDER_LEFT: break;
+
+	case FZF_BORDER_TOP: /* fallthrough */
+	case FZF_BORDER_HORIZ: y++; break;
+
+	case FZF_BORDER_ROUNDED: /* fallthrough */
+	case FZF_BORDER_SHARP: y++; x -= 2; break;
+
+	case FZF_BORDER_VERT: x -= 2; break;
+	default: break;
+	}
+
 	char p[32];
-	snprintf(p, sizeof(p), "%d", l > 0 ? l - 1 : 0);
+	snprintf(p, sizeof(p), "%d", y > 0 ? y - 1 : 0);
 	setenv("CLIFM_FZF_LINE", p, 1);
-	snprintf(p, sizeof(p), "%d", term_cols);
+	snprintf(p, sizeof(p), "%d", x > 0 ? x : 0);
 	setenv("CLIFM_TERM_COLUMNS", p, 1);
 	snprintf(p, sizeof(p), "%d", term_rows);
 	setenv("CLIFM_TERM_LINES", p, 1);

@@ -175,6 +175,7 @@ int
 	fzf_height_set = 0,
 	fzf_open_with = 0,
 	fzf_preview = UNSET,
+	fzf_preview_border_type = 0,
 #ifndef _NO_HIGHLIGHT
 	highlight = UNSET,
 #else
