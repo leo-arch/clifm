@@ -653,7 +653,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 	if (fzf_height_set == 0)
 		snprintf(height_str, sizeof(height_str), "--height=%zu", *height);
 
-	char cmd[(PATH_MAX * 2) + NAME_MAX];
+	char cmd[(PATH_MAX * 2) + (NAME_MAX * 2)];
 	if (tabmode == FZY_TAB) {
 		snprintf(cmd, sizeof(cmd), "fzy "
 				"--read-null --pad=%d --query=\"%s\" --reverse "
