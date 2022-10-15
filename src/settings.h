@@ -311,7 +311,7 @@ xf=01;31:xs=00;32:"
 /* These options, except --preview-window=border-left (fzf 0.27), work with at
  * least fzf 0.18.0 (Mar 31, 2018) */
 #define DEF_FZFTAB_OPTIONS "--color=16,prompt:6,fg+:-1,pointer:4,\
-hl:5,hl+:5,gutter:-1,marker:2,border:8 --bind tab:accept,right:accept,\
+hl:5,hl+:5,gutter:-1,marker:2,border:7:dim --bind tab:accept,right:accept,\
 left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,\
 alt-down:preview-page-down --inline-info --layout=reverse-list \
 --preview-window=wrap,border-left"
