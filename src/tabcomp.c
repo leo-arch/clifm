@@ -613,10 +613,10 @@ set_fzf_env_vars(const int h)
 	case FZF_BORDER_LEFT: break;
 
 	case FZF_BORDER_TOP: /* fallthrough */
-	case FZF_BORDER_HORIZ: y++; break;
+	case FZF_BORDER_HORIZ: y += (flags & PREVIEWER) ? 2 : 1; break;
 
 	case FZF_BORDER_ROUNDED: /* fallthrough */
-	case FZF_BORDER_SHARP: y++; x -= 2; break;
+	case FZF_BORDER_SHARP: y += (flags & PREVIEWER) ? 2 : 1; x -= 2; break;
 
 	case FZF_BORDER_VERT: x -= 2; break;
 	default: break;
