@@ -73,7 +73,7 @@ typedef char *rl_cpvfunc_t;
 
 #define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL || (c) == TCMP_RANGES \
 || (c) == TCMP_DESEL || (c) == TCMP_JUMP || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB \
-|| (c) == TCMP_FILE_TYPES_FILES)
+|| (c) == TCMP_FILE_TYPES_FILES || (c) == TCMP_BM_PATHS)
 
 #define PUTX(c) \
 	if (CTRL_CHAR(c)) { \
@@ -105,22 +105,22 @@ enable_raw_mode(const int fd)
 	if (tcgetattr(fd, &orig_termios) == -1)
 		goto FAIL;
 
-	raw = orig_termios;  // modify the original mode
-	// input modes: no break, no CR to NL, no parity check, no strip char,
-	// * no start/stop output control.
+	raw = orig_termios;  /* modify the original mode */
+	/* input modes: no break, no CR to NL, no parity check, no strip char,
+	 * no start/stop output control. */
 	raw.c_iflag &= (tcflag_t)~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
-	// output modes - disable post processing
+	/* output modes - disable post processing */
 	raw.c_oflag &= (tcflag_t)~(OPOST);
-	// control modes - set 8 bit chars
+	/* control modes - set 8 bit chars */
 	raw.c_cflag |= (CS8);
-	// local modes - choing off, canonical off, no extended functions,
-	// no signal chars (^Z,^C)
+	/* local modes - choing off, canonical off, no extended functions,
+	 * no signal chars (^Z,^C) */
 	raw.c_lflag &= (tcflag_t)~(ECHO | ICANON | IEXTEN | ISIG);
-    // control chars - set return condition: min number of bytes and timer.
-    // We want read to return every single byte, without timeout.
-	raw.c_cc[VMIN] = 1; raw.c_cc[VTIME] = 0; // 1 byte, no timer
+    /* control chars - set return condition: min number of bytes and timer. */
+    /* We want read to return every single byte, without timeout. */
+	raw.c_cc[VMIN] = 1; raw.c_cc[VTIME] = 0; /* 1 byte, no timer */
 
-	// put terminal in raw mode after flushing
+	/* Put terminal in raw mode after flushing */
 	if (tcsetattr(fd, TCSAFLUSH, &raw) < 0)
 		goto FAIL;
 
@@ -153,14 +153,14 @@ get_cursor_position(int *c, int *l)
 
 	if (enable_raw_mode(STDIN_FILENO) == -1) return EXIT_FAILURE;
 
-	// 1. Ask the terminal about cursor position
+	/* 1. Ask the terminal about cursor position */
 	if (write(STDOUT_FILENO, CPR, CPR_LEN) != CPR_LEN)
 		{ disable_raw_mode(STDIN_FILENO); return EXIT_FAILURE; }
 
-	// 2. Read the response: "ESC [ rows ; cols R"
+	/* 2. Read the response: "ESC [ rows ; cols R" */
 	int read_err = 0;
 	while (i < sizeof(buf) - 1) {
-		if (read(STDIN_FILENO, buf + i, 1) != 1) // flawfinder: ignore
+		if (read(STDIN_FILENO, buf + i, 1) != 1) /* flawfinder: ignore */
 			{ read_err = 1; break; }
 		if (buf[i] == 'R')
 			break;
@@ -171,7 +171,7 @@ get_cursor_position(int *c, int *l)
 	if (disable_raw_mode(STDIN_FILENO) == -1 || read_err == 1)
 		return EXIT_FAILURE;
 
-	// 3. Parse the response
+	/* 3. Parse the response */
 	if (*buf != _ESC || *(buf + 1) != '[' || !*(buf + 2))
 		return EXIT_FAILURE;
 
