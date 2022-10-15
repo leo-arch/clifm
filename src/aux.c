@@ -58,6 +58,33 @@
 # endif /* RL_READLINE_VERSION >= 0x0801 */
 #endif /* RL_READLINE_VERSION */
 
+/* Store the fzf preview window border style to later fix coordinates if
+ * needed (set_fzf_env_vars() in tabcomp.c) */
+void
+set_fzf_preview_border_type(void)
+{
+	fzf_preview_border_type = FZF_BORDER_ROUNDED; // fzf default
+	char *str = (fzftab_options && *fzftab_options)
+		? fzftab_options : getenv("FZF_DEFAULT_OPTS");
+	if (!str || !*str)
+		return;
+
+	char *p = strstr(str, "border-");
+	if (p && *(p + 7)) {
+		switch(*(p + 7)) {
+		case 'b': fzf_preview_border_type = FZF_BORDER_BOTTOM; break;
+		case 'h': fzf_preview_border_type = FZF_BORDER_HORIZ; break;
+		case 'l': fzf_preview_border_type = FZF_BORDER_LEFT; break;
+		case 'n': fzf_preview_border_type = FZF_BORDER_NONE; break;
+		case 'r': fzf_preview_border_type = FZF_BORDER_ROUNDED; break;
+		case 's': fzf_preview_border_type = FZF_BORDER_SHARP; break;
+		case 't': fzf_preview_border_type = FZF_BORDER_TOP; break;
+		case 'v': fzf_preview_border_type = FZF_BORDER_VERT; break;
+		default: fzf_preview_border_type = FZF_BORDER_ROUNDED; break;
+		}
+	}
+}
+
 /* Remove images printed on the kitty terminal */
 static void
 kitty_clear(void)

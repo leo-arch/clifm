@@ -2914,33 +2914,6 @@ get_prompt_cmds(void)
 	close_fstream(fp, fd);
 }
 
-/* Store the fzf preview window border style to later fix coordinates if
- * needed (set_fzf_env_vars() in tabcomp.c) */
-static void
-set_fzf_preview_border_type(void)
-{
-	fzf_preview_border_type = FZF_BORDER_ROUNDED;
-	char *str = (fzftab_options && *fzftab_options)
-		? fzftab_options : getenv("FZF_DEFAULT_OPTS");
-	if (!str || !*str)
-		return;
-
-	char *p = strstr(str, "border-");
-	if (p && *(p + 7)) {
-		switch(*(p + 7)) {
-		case 'b': fzf_preview_border_type = FZF_BORDER_BOTTOM; break;
-		case 'h': fzf_preview_border_type = FZF_BORDER_HORIZ; break;
-		case 'l': fzf_preview_border_type = FZF_BORDER_LEFT; break;
-		case 'n': fzf_preview_border_type = FZF_BORDER_NONE; break;
-		case 'r': fzf_preview_border_type = FZF_BORDER_ROUNDED; break;
-		case 's': fzf_preview_border_type = FZF_BORDER_SHARP; break;
-		case 't': fzf_preview_border_type = FZF_BORDER_TOP; break;
-		case 'v': fzf_preview_border_type = FZF_BORDER_VERT; break;
-		default: fzf_preview_border_type = FZF_BORDER_ROUNDED; break;
-		}
-	}
-}
-
 /* If some option was not set, set it to the default value */
 void
 check_options(void)
@@ -3137,8 +3110,14 @@ check_options(void)
 			tabmode = STD_TAB;
 	}
 
-	if (!fzftab_options)
-		fzftab_options = savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
+	if (!fzftab_options) {
+		if (colorize == 1 || !getenv("FZF_DEFAULT_OPTS")) {
+			char *pp = colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+			fzftab_options = savestring(pp, strlen(pp));
+		} else {
+			fzftab_options = savestring("", 1);
+		}
+	}
 
 	set_fzf_preview_border_type();
 

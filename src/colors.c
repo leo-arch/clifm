@@ -603,8 +603,10 @@ edit_colorscheme(char *app)
 	if (ret != EXIT_FAILURE) {
 		stat(file, &attr);
 		if (mtime_bfr != (time_t)attr.st_mtime
-		&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && autols == 1)
+		&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && autols == 1) {
+			set_fzf_preview_border_type();
 			reload_dirlist();
+		}
 	}
 
 	return ret;
@@ -1180,6 +1182,37 @@ init_defs(void)
 	}
 }
 
+static void
+set_fzf_opts(char *line)
+{
+	free(fzftab_options);
+
+	if (!line) {
+		char *p = colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+		fzftab_options = savestring(p, strlen(p));
+	}
+
+	else if (*line == 'n' && strcmp(line, "none") == 0) {
+		fzftab_options = (char *)xnmalloc(1, sizeof(char));
+		*fzftab_options = '\0';
+	}
+
+	else if (xargs.secure_cmds != 1 || sanitize_cmd(line, SNT_BLACKLIST) == EXIT_SUCCESS) {
+		fzftab_options = savestring(line, strlen(line));
+	}
+
+	else {
+		_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
+			"unsafe characters. Falling back to default values\n"), PROGRAM_NAME);
+		char *p = colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+		fzftab_options = savestring(p, strlen(p));
+	}
+
+	fzf_height_set = 0;
+	if (strstr(fzftab_options, "--height"))
+		fzf_height_set = 1;
+}
+
 /* Get color lines from the configuration file */
 static int
 get_colors_from_file(const char *colorscheme, char **filecolors,
@@ -1193,7 +1226,6 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	char colorscheme_file[PATH_MAX];
 	*colorscheme_file = '\0';
 	if (config_ok == 1 && colors_dir) {
-//		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, /* NOLINT */
 		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.clifm", colors_dir, /* NOLINT */
 			colorscheme ? colorscheme : "default");
 	}
@@ -1201,7 +1233,6 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	/* If not in local dir, check system data dir as well */
 	struct stat attr;
 	if (data_dir && (!*colorscheme_file || stat(colorscheme_file, &attr) == -1)) {
-//		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s/colors/%s.cfm", /* NOLINT */
 		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s/colors/%s.clifm", /* NOLINT */
 			data_dir, PNL, colorscheme ? colorscheme : "default");
 	}
@@ -1316,25 +1347,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			if (!p || !*p || !*(++p))
 				continue;
 			char *q = remove_quotes(p);
-			if (!q)
-				continue;
-			free(fzftab_options);
-			if (*q == 'n' && strcmp(q, "none") == 0) {
-				fzftab_options = (char *)xnmalloc(1, sizeof(char));
-				*fzftab_options = '\0';
-			} else if (xargs.secure_cmds != 1 || sanitize_cmd(q, SNT_BLACKLIST) == EXIT_SUCCESS) {
-				fzftab_options = savestring(q, strlen(q));
-			} else {
-				_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
-					"unsafe characters. Falling back to default values\n"), PROGRAM_NAME);
-				char *pp = colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
-				fzftab_options = savestring(pp, strlen(pp));
-			}
-			fzf_height_set = 0;
-/*			fzftab_options = savestring(q, strlen(q));
-			fzf_height_set = 0; */
-			if (strstr(fzftab_options, "--height"))
-				fzf_height_set = 1;
+			set_fzf_opts(q);
 		}
 #endif /* _NO_FZF */
 
