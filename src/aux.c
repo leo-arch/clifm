@@ -63,25 +63,27 @@
 void
 set_fzf_preview_border_type(void)
 {
-	fzf_preview_border_type = FZF_BORDER_ROUNDED; // fzf default
-	char *str = (fzftab_options && *fzftab_options)
-		? fzftab_options : getenv("FZF_DEFAULT_OPTS");
-	if (!str || !*str)
-		return;
+	fzf_preview_border_type = FZF_BORDER_ROUNDED; /* fzf default */
 
-	char *p = strstr(str, "border-");
-	if (p && *(p + 7)) {
-		switch(*(p + 7)) {
-		case 'b': fzf_preview_border_type = FZF_BORDER_BOTTOM; break;
-		case 'h': fzf_preview_border_type = FZF_BORDER_HORIZ; break;
-		case 'l': fzf_preview_border_type = FZF_BORDER_LEFT; break;
-		case 'n': fzf_preview_border_type = FZF_BORDER_NONE; break;
-		case 'r': fzf_preview_border_type = FZF_BORDER_ROUNDED; break;
-		case 's': fzf_preview_border_type = FZF_BORDER_SHARP; break;
-		case 't': fzf_preview_border_type = FZF_BORDER_TOP; break;
-		case 'v': fzf_preview_border_type = FZF_BORDER_VERT; break;
-		default: fzf_preview_border_type = FZF_BORDER_ROUNDED; break;
-		}
+	char *p = (fzftab_options && *fzftab_options)
+		? strstr(fzftab_options, "border-") : (char *)NULL;
+	if (!p || !*(p + 7)) {
+		char *q = getenv("FZF_DEFAULT_OPTS");
+		p = q ? strstr(q, "border-") : (char *)NULL;
+		if (!p || !*(p + 7))
+			return;
+	}
+
+	switch(*(p + 7)) {
+	case 'b': fzf_preview_border_type = FZF_BORDER_BOTTOM; break;
+	case 'h': fzf_preview_border_type = FZF_BORDER_HORIZ; break;
+	case 'l': fzf_preview_border_type = FZF_BORDER_LEFT; break;
+	case 'n': fzf_preview_border_type = FZF_BORDER_NONE; break;
+	case 'r': fzf_preview_border_type = FZF_BORDER_ROUNDED; break;
+	case 's': fzf_preview_border_type = FZF_BORDER_SHARP; break;
+	case 't': fzf_preview_border_type = FZF_BORDER_TOP; break;
+	case 'v': fzf_preview_border_type = FZF_BORDER_VERT; break;
+	default: break;
 	}
 }
 
