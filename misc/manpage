@@ -312,7 +312,10 @@ enable program logs. See the \fIlog\fR command for more information
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path"
 .TP
 \fB\-\-fzfpreview\fR
-enable file previews for TAB completion (fzf mode only)
+enable file previews for TAB completion (fzf mode only). Implies \fI\-\-fzftab\fR.
+.TP
+\fB\-\-fzftab\fR
+use \fIfzf\fR to display completion matches
 .TP
 \fB\-\-fzytab\fR
 use \fIfzy\fR to display completion matches

@@ -188,13 +188,13 @@ set_mount_cmd(const int udisks2ok, const int udevilok)
 }
 
 #ifndef _NO_FZF
-/* fzf, fzy, and smenu are used as alternative TAB completion mechanisms
- * fzy and smenu fallback to default if not found
- * the default value is fzf, if found, or standard (readline) */
+/* fzf, fzy, and smenu are used as alternative TAB completion mechanisms.
+ * fzy and smenu fallback to default if not found.
+ * The default value is fzf, if found, or standard (readline). */
 void
 check_completion_mode(void)
 {
-	if (fzftab == 1) { // fzftab is zero only if running with --stdtab
+	if (fzftab == 1) { /* fzftab is zero only if running with --stdtab */
 		if (!(finder_flags & FZF_BIN_OK) && tabmode == FZF_TAB) {
 			_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling back to "
 				"standard TAB completion\n"), PROGRAM_NAME);
@@ -219,10 +219,6 @@ check_completion_mode(void)
 				fzftab = 0;
 		}
 	} else {
-/*		_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling back to "
-			"standard TAB completion.\nTo remove this warning set "
-			"TabCompletionMode to the appropriate value in the configuration "
-			"file (F10 or 'edit')\n"), PROGRAM_NAME); */
 		tabmode = STD_TAB;
 		fzftab = 0;
 	}

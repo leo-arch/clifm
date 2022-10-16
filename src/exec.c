@@ -2054,10 +2054,12 @@ preview_function(void)
 	tabmode = tabmode_bk;
 	fzf_preview = fzf_preview_bk;
 
-	if (autols == 1)
+	if (autols == 1) {
+		putchar('\n');
 		reload_dirlist();
-	else
+	} else {
 		rl_clear_visible_line();
+	}
 
 	return EXIT_SUCCESS;
 }

@@ -1556,9 +1556,11 @@ external_arguments(int argc, char **argv)
 		{"vt100", no_argument, 0, 60},
 		{"fzfpreview", no_argument, 0, 61},
 		{"shotgun-file", required_argument, 0, 62},
-#ifdef __linux__
 		/* 63 is used by '?', so it cannot be used here */
-		{"si", no_argument, 0, 64},
+		{"fzftab", no_argument, 0, 64},
+#ifdef __linux__
+		/* 65-90 is a-Z: do not use */
+		{"si", no_argument, 0, 91},
 #endif
 	    {0, 0, 0, 0}
 	};
@@ -1793,7 +1795,10 @@ external_arguments(int argc, char **argv)
 			fzftab = 0; tabmode = STD_TAB;
 			break;
 
-		case 61: xargs.fzf_preview = fzf_preview = 1; break;
+		case 61:
+			xargs.fzf_preview = fzf_preview = 1;
+			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
+			break;
 
 		case 62:
 			if (!optarg) {
@@ -1805,8 +1810,10 @@ external_arguments(int argc, char **argv)
 			alt_preview_file = savestring(optarg, strlen(optarg));
 			break;
 
+		case 64: xargs.fzftab = fzftab = 1; tabmode = FZF_TAB; break;
+
 #ifdef __linux__
-		case 64: xargs.si = 1; break;
+		case 91: xargs.si = 1; break;
 #endif
 
 

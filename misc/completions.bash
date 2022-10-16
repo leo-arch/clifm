@@ -93,6 +93,7 @@ _clifm ()
         --full-dir-size
         --fuzzy-match
         --fzfpreview
+        --fzftab
         --fzytab
         --icons
         --icons-use-file-color

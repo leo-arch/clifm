@@ -991,7 +991,8 @@ bookmark paths\
 in long view mode\
 \n      --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
-\n      --fzfpreview\t\t Enable file previews for TAB completion (fzf mode only)\
+\n      --fzfpreview\t\t Enable file previews for TAB completion (fzf mode only). Implies --fzftab\
+\n      --fzftab\t\t\t Use fzf to display completion matches (default if fzf binary is found)\
 \n      --fzytab\t\t\t Use fzy to display completion matches\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icon colors follow file colors\
