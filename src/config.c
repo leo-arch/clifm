@@ -414,7 +414,8 @@ trash-sel:\\C-\\M-t\n\
 untrash-all:\\C-\\M-u\n\n\
 # F6-12\n\
 open-mime:\\e[17~\n\
-open-jump-db:\\e[18~\n\
+open-preview:\\e[18~\n\
+#open-jump-db:\\e[18~\n\
 edit-color-scheme:\\e[19~\n\
 open-keybinds:\\e[20~\n\
 open-config:\\e[21~\n\
@@ -2801,7 +2802,6 @@ init_config(void)
 	if (xargs.list_and_quit != 1 && t && *t == 'x' && strncmp(t, "xterm", 5) == 0)
 		/* If running Xterm, instruct it to send an escape code (27) for
 		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work */
-//		fputs(META_SENDS_ESC, stdout); /* metaSendsEscape = true */
 		META_SENDS_ESC;
 }
 
