@@ -136,11 +136,11 @@ The following applications are used to generate thumbnails:
 
 ## Troubleshooting
 
-Image previews are wrongly placed: This is mostly the case when your terminal emulator is using menu bar and/or a scrollbar. `Konsole`, for example, displays by default a menu bar and a main toolbar on the top of the window, plus a scrollbar on the right, which is the cause of the image misplacement. To fix this, tweak the `X` and `Y` variables in the `display` function of the `clifmimg` script as follows:
+Image previews are misplaced: This is mostly the case when your terminal emulator is using a menu bar and/or a scrollbar. `Konsole`, for example, displays by default a menu bar and a main toolbar on the top of the window, plus a scrollbar on the right, which is the cause of the image misplacement. To fix this, tweak the `X` and `Y` variables in the `display` function of the [`clifmimg` script](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#clifmimg) as follows:
 
 ```sh
 X=$((CLIFM_TERM_COLUMNS - FZF_PREVIEW_COLUMNS - 1)) # 1 extra column: the scroll bar
-Y=$((CLIFM_FZF_LINE + 2)) # 2 extra lines: menu and main bars
+Y=$((CLIFM_FZF_LINE + 2)) # 2 extra lines: menu bar and main toolbar
 ```
 
-If the issue persists, bear in mind that _clifm_ uses the `CPR` (cursor position report) [escape code](https://www.xfree86.org/current/ctlseqs.html) to get the current position of the cursor on the screen (which then is passed to the [`clifmimg` script](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev) to generate the preview). If your terminal does not support `CPR` (most do), you are out of look: just try another terminal.
+If the issue persists, bear in mind that _clifm_ uses the `CPR` (cursor position report) [escape code](https://www.xfree86.org/current/ctlseqs.html) to get the current position of the cursor on the screen (which then is passed to the `clifmimg` script to generate the preview). If your terminal does not support `CPR` (most do), you are out of look: just try another terminal.
