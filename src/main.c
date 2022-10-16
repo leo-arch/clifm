@@ -128,7 +128,7 @@ pid_t own_pid = 0;
 
 unsigned short
 	term_cols = 0,
-	term_rows = 0;
+	term_lines = 0;
 
 regex_t regex_exp;
 size_t *ext_colors_len = (size_t *)NULL;

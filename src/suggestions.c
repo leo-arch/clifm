@@ -191,7 +191,7 @@ clear_suggestion(const int sflag)
 		// Save cursor position
 
 // TESTING CURSOR POSITION
-//		get_cursor_position(&curcol, &currow);
+//		get_cursor_position(&curcol, &curline);
 		if (highlight == 0 && rl_point == rl_end)
 			rl_redisplay();
 //		curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
@@ -223,7 +223,7 @@ clear_suggestion(const int sflag)
 		}
 		// Restore cursor position
 // TESTING CURSOR POSITION
-//		SET_CURSOR(currow, curcol);
+//		SET_CURSOR(curline, curcol);
 		MOVE_CURSOR_UP((int)suggestion.nlines - 1);
 		MOVE_CURSOR_RIGHT(curcol > 0 ? curcol - 1 : 0);
 // TESTING CURSOR POSITION
@@ -265,12 +265,12 @@ restore_cursor_position(const size_t slines)
 	// of lines taken by the suggestion, so that we need to update the
 	// value to move the cursor back to the correct row (the beginning
 	// of the line)
-	int old_currow = currow;
+	int old_curline = curline;
 	// extra_rows: amount of extra rows needed to print the suggestion
 	// (excluding the current row)
-	int extra_rows = (int)slines - 1;
-	if (extra_rows && old_currow + extra_rows >= term_rows)
-		currow -= extra_rows - (term_rows - old_currow);
+	int extra_lines = (int)slines - 1;
+	if (extra_lines && old_curline + extra_lines >= term_lines)
+		curline -= extra_lines - (term_lines - old_curline);
 
 	// Restore cursor position
 
@@ -281,7 +281,7 @@ restore_cursor_position(const size_t slines)
 //	if (highlight && rl_point != rl_end)
 //		curcol += (rl_end - rl_point);
 
-	SET_CURSOR(currow, curcol);
+	SET_CURSOR(curline, curcol);
 } */
 
 static inline void
@@ -433,7 +433,7 @@ check_conditions(const size_t offset, const size_t wlen, int *baej, size_t *slin
 //	size_t suggestion_len = wc_xstrlen(str + offset);
 	size_t suggestion_len = wlen - offset;
 	if (suggestion_len == 0 || suggestion_len == ARG_MAX
-	|| (int)suggestion_len > (term_cols * term_rows) - curcol)
+	|| (int)suggestion_len > (term_cols * term_lines) - curcol)
 		return EXIT_FAILURE;
 
 // TESTING CURSOR POSITION
@@ -441,7 +441,7 @@ check_conditions(const size_t offset, const size_t wlen, int *baej, size_t *slin
 //	*slines = calculate_suggestion_lines(baej, suggestion_len);
 // TESTING CURSOR POSITION
 
-	if (*slines > (size_t)term_rows || (xargs.vt100 == 1 && *slines > 1))
+	if (*slines > (size_t)term_lines || (xargs.vt100 == 1 && *slines > 1))
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -480,9 +480,9 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 //	correct_offset(&offset);
 
-	/* Store current cursor position in CURROW and CURCOL (globals) */
+	/* Store current cursor position in CURLINE and CURCOL (globals) */
 // TESTING CURSOR POSITION
-//	get_cursor_position(&curcol, &currow);
+//	get_cursor_position(&curcol, &curline);
 // TESTING CURSOR POSITION
 
 	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump (and fuzzy matches) */

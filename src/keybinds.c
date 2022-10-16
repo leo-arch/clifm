@@ -1069,7 +1069,7 @@ rl_clear_line(int count, int key)
 		if (!recover_from_wrong_cmd())
 			rl_point = 0;
 	}
-	if (suggestion.nlines > term_rows) {
+	if (suggestion.nlines > term_lines) {
 		rl_on_new_line();
 		return EXIT_SUCCESS;
 	}

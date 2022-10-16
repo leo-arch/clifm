@@ -1192,7 +1192,7 @@ extern int
 	min_jump_rank,
 	shell_is_interactive;
 
-extern unsigned short term_cols, term_rows;
+extern unsigned short term_cols, term_lines;
 
 extern size_t
 	actions_n,

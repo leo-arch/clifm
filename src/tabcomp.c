@@ -600,8 +600,8 @@ set_fzf_env_vars(const int h)
 
 	if (!(flags & PREVIEWER)) {
 		get_cursor_position(&c, &l);
-		if (l + h - 1 > term_rows)
-			l -= ((l + h - 1) - term_rows);
+		if (l + h - 1 > term_lines)
+			l -= ((l + h - 1) - term_lines);
 	}
 
 	/* Let's correct image coordinates on the screen based on the preview
@@ -627,7 +627,7 @@ set_fzf_env_vars(const int h)
 	setenv("CLIFM_FZF_LINE", p, 1);
 	snprintf(p, sizeof(p), "%d", x > 0 ? x : 0);
 	setenv("CLIFM_TERM_COLUMNS", p, 1);
-	snprintf(p, sizeof(p), "%d", term_rows);
+	snprintf(p, sizeof(p), "%d", term_lines);
 	setenv("CLIFM_TERM_LINES", p, 1);
 }
 
@@ -741,7 +741,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 static inline size_t
 set_fzf_max_win_height(void)
 {
-	return (size_t)(DEF_FZF_WIN_HEIGHT * term_rows / 100);
+	return (size_t)(DEF_FZF_WIN_HEIGHT * term_lines / 100);
 }
 
 /* FILENAME is just a symlink name from the tags dir.
@@ -1250,7 +1250,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	/* If showing previews, let's reserve at least a quarter of the
 	 * terminal height */
-	int min_prev_height = term_rows / 4;
+	int min_prev_height = term_lines / 4;
 	if (fspace == 40 && (int)height < min_prev_height
 	&& min_prev_height > 0) // We're previewing files
 		height = (size_t)min_prev_height;
@@ -1393,7 +1393,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 // TESTING PREVIEWER
 	char *q = query;
 	if (flags & PREVIEWER) {
-		height = term_rows;
+		height = term_lines;
 		finder_offset = 0;
 		multi = 0;
 		q = (char *)NULL;
@@ -2189,7 +2189,7 @@ CALC_OFFSET:
 			tab_offset = 0;
 
 		for (i = 1; i <= (size_t)count; i++) {
-			if (i >= term_rows) {
+			if (i >= term_lines) {
 				/* A little pager */
 				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 				int c = 0;

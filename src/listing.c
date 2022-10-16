@@ -357,7 +357,7 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 		printf(_("Color scheme %s->%s %s\n"), mi_c, df_c, cur_cscheme);
 
 	if (print_selfiles && sel_n > 0)
-		_print_selfiles(term_rows);
+		_print_selfiles(term_lines);
 
 	return EXIT_SUCCESS;
 }
@@ -389,7 +389,7 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 		CLEAR;
 
 		fputs(_(PAGER_HELP), stdout);
-		int l = (int)term_rows - 5;
+		int l = (int)term_lines - 5;
 		MOVE_CURSOR_DOWN(l);
 		fputs(PAGER_LABEL, stdout);
 
@@ -604,7 +604,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 
 		if (pager) {
 			int ret = 0;
-			if (*counter > (size_t)(term_rows - 2))
+			if (*counter > (size_t)(term_lines - 2))
 				ret = run_pager(-1, reset_pager, &i, counter);
 			if (ret == -1 || ret == -2) {
 				--i;
@@ -1218,7 +1218,7 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			int ret = 0, bi = i;
-			if (blc && *counter > columns_n * ((size_t)term_rows - 2))
+			if (blc && *counter > columns_n * ((size_t)term_lines - 2))
 				ret = run_pager((int)columns_n, reset_pager, &i, counter);
 
 			if (ret == -1) {
@@ -1332,7 +1332,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			int ret = 0, bi = i;
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
-			if (blc && *counter > columns_n * ((size_t)term_rows - 2))
+			if (blc && *counter > columns_n * ((size_t)term_lines - 2))
 				ret = run_pager((int)columns_n, reset_pager, &x, counter);
 
 			if (ret == -1) {

@@ -831,8 +831,8 @@ show_sel_files(void)
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	size_t counter = 0;
-	int t_rows = (int)w.ws_row;
-	t_rows -= 2;
+	int t_lines = (int)w.ws_row;
+	t_lines -= 2;
 	size_t i;
 	off_t total = 0;
 
@@ -841,8 +841,8 @@ show_sel_files(void)
 
 	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {
-		/* if (pager && counter > (term_rows-2)) { */
-		if (pager && counter > (size_t)t_rows) {
+		/* if (pager && counter > (term_lines-2)) { */
+		if (pager && counter > (size_t)t_lines) {
 			switch (xgetchar()) {
 			/* Advance one line at a time */
 			case 66: /* fallthrough */ /* Down arrow */
