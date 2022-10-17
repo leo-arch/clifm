@@ -85,6 +85,7 @@ typedef char *rl_cpvfunc_t;
 	} else \
 		putc(c, rl_outstream)
 
+#ifndef _NO_FZF
 static size_t longest_prev_entry;
 
 // TESTING CURSOR POSITION
@@ -185,6 +186,7 @@ get_cursor_position(int *c, int *l)
 
 	return EXIT_SUCCESS;
 }
+#endif /* !_NO_FZF */
 
 /* Return the character which best describes FILENAME.
 `@' for symbolic links

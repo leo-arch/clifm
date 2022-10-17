@@ -823,6 +823,7 @@ struct param_t {
 	int open;
 	int pager;
 	int path;
+	int preview;
 	int printsel;
 	int refresh_on_empty_line;
 	int refresh_on_resize;

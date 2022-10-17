@@ -1182,6 +1182,7 @@ init_defs(void)
 	}
 }
 
+#ifndef _NO_FZF
 static void
 set_fzf_opts(char *line)
 {
@@ -1212,6 +1213,7 @@ set_fzf_opts(char *line)
 	if (strstr(fzftab_options, "--height"))
 		fzf_height_set = 1;
 }
+#endif /* !_NO_FZF */
 
 /* Get color lines from the configuration file */
 static int

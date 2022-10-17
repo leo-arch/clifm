@@ -988,7 +988,7 @@ database (via the 'j' command)\
 \n      --expand-bookmarks\t Expand bookmark names into the corresponding \
 bookmark paths\
 \n      --full-dir-size\t\t Print the size of directories and their contents \
-in long view mode\
+(long view only)\
 \n      --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
 \n      --fzfpreview\t\t Enable file previews for TAB completion (fzf mode only). Implies --fzftab\

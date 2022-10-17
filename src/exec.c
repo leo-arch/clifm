@@ -2024,10 +2024,14 @@ remove_backslash(char **s)
 }
 // TESTING BYPASS ALIAS
 
-// TESTING PREVIEWER
 static int
 preview_function(void)
 {
+#ifdef _NO_FZF
+	fprintf(stderr, "%s: view: fzf: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+	return EXIT_FAILURE;
+#endif /* _NO_FZF */
+
 	int fzf_preview_bk = fzf_preview;
 	enum tab_mode tabmode_bk = tabmode;
 
@@ -2063,7 +2067,6 @@ preview_function(void)
 
 	return EXIT_SUCCESS;
 }
-// TESTING PREVIEWER
 
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -2134,15 +2137,15 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'o' && (!comm[0][1] || strcmp(comm[0], "open") == 0))
 		return (exit_code = open_function(comm));
 
-	/*         ############### BACKDIR ##################     */
+	/*         ############## BACKDIR ##################     */
 	else if (*comm[0] == 'b' && comm[0][1] == 'd' && !comm[0][2])
 		return (exit_code = backdir(comm[1]));
 
-	/*      ############### OPEN WITH ##################     */
+	/*      ################ OPEN WITH ##################     */
 	else if (*comm[0] == 'o' && comm[0][1] == 'w' && !comm[0][2])
 		return (exit_code = ow_function(comm));
 
-	/*   ############## DIRECTORY JUMPER ##################     */
+	/*   ################ DIRECTORY JUMPER ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1] || ((comm[0][1] == 'c'
 	|| comm[0][1] == 'p' || comm[0][1] == 'e' || comm[0][1] == 'o'
 	|| comm[0][1] == 'l') && !comm[0][2])))
@@ -2153,12 +2156,12 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "refresh") == 0))
 		return (exit_code = refresh_function(old_exit_code));
 
-	/*     ############### BOOKMARKS ##################     */
+	/*     ################# BOOKMARKS ##################     */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'm' && !comm[0][2])
 	|| strcmp(comm[0], "bookmarks") == 0))
 		return (exit_code = _bookmarks_function(comm));
 
-	/*       ############### BACK AND FORTH ##################     */
+	/*       ############# BACK AND FORTH ##################     */
 	else if (*comm[0] == 'b' && (!comm[0][1] || strcmp(comm[0], "back") == 0))
 		return (exit_code = back_function(comm));
 
@@ -2348,6 +2351,7 @@ exec_cmd(char **comm)
 		kbind_busy = 0;
 	}
 
+	/*    ############# PREVIEW FILES ##################     */
 	else if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0)
 		return (exit_code = preview_function());
 
