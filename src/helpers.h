@@ -1171,7 +1171,6 @@ extern int
 	unicode,
 	warning_prompt,
 	welcome_message,
-	_xrename,
 	xrename; /* We're running a secondary prompt for the rename function */
 
 extern int wrong_cmd;
@@ -1273,6 +1272,7 @@ extern char
 	*profile_file,
 	*prompts_file,
 	*quote_chars,
+	*rl_callback_handler_input,
 	*remotes_file,
 /*	*right_prompt, */
 	*sel_file,

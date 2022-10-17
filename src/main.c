@@ -241,7 +241,6 @@ int
 	unicode = UNSET,
 	warning_prompt = UNSET,
 	welcome_message = UNSET,
-	_xrename = 0,
 	xrename = 0;
 
 int wrong_cmd = 0;
@@ -339,6 +338,7 @@ char
 	*profile_file = (char *)NULL,
 	*prompts_file = (char *)NULL,
 	*quote_chars = (char *)NULL,
+	*rl_callback_handler_input = (char *)NULL,
 	*remotes_file = (char *)NULL,
 /*	*right_prompt = (char *)NULL, */
 	*sel_file = (char *)NULL,

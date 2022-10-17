@@ -89,46 +89,6 @@ typedef char *rl_cpvfunc_t;
 #include "tabcomp.h"
 // TESTING PREVIEWER
 
-static char *
-get_new_name(void)
-{
-	char *input = (char *)NULL;
-
-	rl_nohist = 1;
-
-	char m[NAME_MAX];
-	snprintf(m, sizeof(m), "Enter new name ('Ctrl-x' to quit)\n"
-		"\001%s\002>\001%s\002 ", mi_c, tx_c);
-
-	int bk_wp = warning_prompt;
-	int bk_sug = suggestions;
-	int bk_prompt_offset = prompt_offset;
-	int bk_hl = highlight;
-	highlight = 0;
-	suggestions = 0;
-	warning_prompt = 0;
-	prompt_offset = 2;
-
-	while (!input && _xrename) {
-		input = readline(m);
-		if (!input)
-			continue;
-		if (!*input || *input == ' ') {
-			free(input);
-			input = (char *)NULL;
-			continue;
-		}
-	}
-
-	highlight = bk_hl;
-	suggestions = bk_sug;
-	warning_prompt = bk_wp;
-	prompt_offset = bk_prompt_offset;
-	rl_nohist = 0;
-
-	return input;
-}
-
 /* Run CMD via execve() and refresh the screen in case of success
  * skip_force is true (1) only when coming from copy_function, that is,
  * for the c and m commands, which take -f,--force as parameter to
@@ -142,7 +102,7 @@ run_and_refresh(char **cmd, const int skip_force)
 	log_function(cmd);
 
 	char *new_name = (char *)NULL;
-	if (xrename) {
+	if (xrename == 1) {
 		/* If we have a number, either it was not expanded by parse_input_str(),
 		 * in which case it is an invalid ELN, or it was expanded to a file named
 		 * as a number. Let's check if we have such file name in the files list */
@@ -160,13 +120,28 @@ run_and_refresh(char **cmd, const int skip_force)
 				return EXIT_FAILURE;
 			}
 		}
-		_xrename = 1;
-		new_name = get_new_name();
-		_xrename = 0;
-		if (!new_name) {
-			_xrename = 0;
-			return EXIT_SUCCESS;
+
+		int poffset_bk = prompt_offset;
+		prompt_offset = 3;
+
+		char m[NAME_MAX];
+		snprintf(m, sizeof(m), "Enter new name ('Ctrl-d' to quit)\n"
+			"\001%s\002>\001%s\002 ", mi_c, tx_c);
+		char *p = dequote_str(cmd[1], 0);
+		alt_rl_prompt(m, p ? p : cmd[1]);
+		free(p);
+
+		if (rl_callback_handler_input) {
+			new_name = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
+			free(rl_callback_handler_input);
+			rl_callback_handler_input = (char *)NULL;
 		}
+
+		xrename = 0;
+		prompt_offset = poffset_bk;
+
+		if (!new_name)
+			return EXIT_SUCCESS;
 	}
 
 	char **tcmd = xnmalloc(2 + args_n + 2, sizeof(char *));

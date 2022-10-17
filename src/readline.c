@@ -619,54 +619,6 @@ END:
 	return SUGGEST_ONLY;
 }
 
-/* Print the corresponding file name in the xrename prompt */
-static int
-prompt_xrename(void)
-{
-	char *p = (char *)NULL;
-	if (*(rl_line_buffer + 1) == ' ')
-		p = rl_line_buffer + 2;
-	else /* We have a fused parameter */
-		p = rl_line_buffer + 1;
-
-	size_t plen = strlen(p);
-	char pp[NAME_MAX + 1];
-	xstrsncpy(pp, p, sizeof(pp) - 1);
-
-	if (plen > 0) {
-		while (pp[--plen] == ' ')
-			pp[plen] = '\0';
-	}
-
-	if (is_number(pp)) {
-		int ipp = atoi(pp);
-		if (ipp > 0 && ipp <= (int)files) {
-			rl_replace_line(file_info[ipp - 1].name, 1);
-			rl_point = rl_end = (int)strlen(file_info[ipp - 1].name);
-		} else {
-			xrename = 0;
-			return EXIT_FAILURE;
-		}
-	} else {
-		char *dstr = dequote_str(pp, 0);
-		if (!dstr) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error dequoting file name\n"),
-				PROGRAM_NAME, pp);
-			xrename = 0;
-			return EXIT_FAILURE;
-		}
-
-		rl_replace_line(dstr, 1);
-		rl_point = rl_end = (int)strlen(dstr);
-		free(dstr);
-	}
-
-	rl_redisplay();
-	xrename = 0;
-
-	return EXIT_SUCCESS;
-}
-
 // TESTING CURSOR POSITION
 /* Unicode aware implementation of readline's rl_expand_prompt()
  * Returns the amount of terminal columns taken by the last prompt line,
@@ -797,12 +749,6 @@ my_rl_getc(FILE *stream)
 	} */
 // TESTING CURSOR POSITION
 
-	if (xrename) {
-		/* We are using a secondary prompt for the xrename function */
-		if (prompt_xrename() == EXIT_FAILURE)
-			return (EOF);
-	}
-
 	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result > 0 && result == sizeof(unsigned char)) {
@@ -819,31 +765,6 @@ my_rl_getc(FILE *stream)
 					rl_redisplay();
 			}
 
-			/* 24 == Ctrl-x */
-			if (_xrename) {
-/*				if (RL_ISSTATE(RL_STATE_METANEXT)) {
-					if (c == 'A' || c == 'B' || c == 'C' || c == 'D')
-						return c;
-					if ((control_d_exits == 0 && c == 4) || c == 24) {
-						xrename = _xrename = 0;
-						return (EOF);
-					}
-					return 0;
-				} */
-
-/*				if (c == _ESC && !RL_ISSTATE(RL_STATE_MOREINPUT)
-				&& !RL_ISSTATE(RL_STATE_METANEXT))
-					continue; */ /* Skip single ESC key presses */
-
-				if ((control_d_exits == 0 && c == 4) || c == 24) {
-					xrename = _xrename = 0;
-					return (EOF);
-				}
-
-				fix_rl_point(c);
-				return c;
-			}
-
 			/* Syntax highlighting is made from here */
 			int ret = rl_exclude_input(c);
 			if (ret == RL_INSERT_CHAR) {
@@ -854,7 +775,8 @@ my_rl_getc(FILE *stream)
 
 #ifndef _NO_SUGGESTIONS
 //			if (ret != 2 && ret != -2 && !_xrename && suggestions) {
-			if (ret == SUGGEST_ONLY && _xrename == 0 && suggestions == 1) {
+//			if (ret == SUGGEST_ONLY && _xrename == 0 && suggestions == 1) {
+			if (ret == SUGGEST_ONLY && suggestions == 1) {
 // TESTING CURSOR POSITION
 				rl_suggestions(c);
 			}
@@ -930,6 +852,122 @@ my_rl_getc(FILE *stream)
 		 Otherwise, some error ocurred, also signifying EOF. */
 	}
 }
+
+// TESTING RL_CALLBACK!
+static int
+alt_rl_getc(FILE *stream)
+{
+	int result;
+	unsigned char c;
+
+	while (1) {
+		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
+		if (result > 0 && result == sizeof(unsigned char)) {
+
+			if (c == 4 || c == 24) /* 4 == C-c && 24 == C-x */
+				return (EOF);
+
+			return c;
+		}
+		/* If zero characters are returned, then the file that we are
+		reading from is empty!  Return EOF in that case. */
+		if (result == 0)
+			return (EOF);
+
+		/* read(3) either failed (returned -1) or is > sizeof(unsigned char) */
+#if defined(EWOULDBLOCK)
+		if (errno == EWOULDBLOCK) {
+			int xflags;
+
+			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
+				return (EOF);
+			if (xflags & O_NDELAY) {
+/*				xflags &= ~O_NDELAY; */
+				fcntl(fileno(stream), F_SETFL, flags);
+				continue;
+			}
+			continue;
+		}
+#endif /* EWOULDBLOCK */
+
+#if defined(_POSIX_VERSION) && defined(EAGAIN) && defined(O_NONBLOCK)
+		if (errno == EAGAIN) {
+			int xflags;
+
+			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
+				return (EOF);
+			if (xflags & O_NONBLOCK) {
+/*				xflags &= ~O_NONBLOCK; */
+				fcntl(fileno(stream), F_SETFL, flags);
+				continue;
+			}
+		}
+#endif /* _POSIX_VERSION && EAGAIN && O_NONBLOCK */
+
+		if (errno != EINTR)
+			return (EOF);
+
+		  /* If the error that we received was SIGINT, then try again,
+		 this is simply an interrupted system call to read().
+		 Otherwise, some error ocurred, also signifying EOF. */
+	}
+}
+
+static int cb_running = 0;
+/* Callback function called for each line when accept-line executed, EOF
+   seen, or EOF character read.  This sets a flag and returns; it could
+   also call exit(3). */
+static void
+cb_linehandler(char *line)
+{
+	/* alt_rl_getc returns EOF in case of Ctrl-d and Ctrl-x, in which case
+	 * LINE is NULL */
+	if (line == NULL) {
+		if (line == 0)
+			putchar('\n');
+		free(line);
+		rl_callback_handler_remove();
+		cb_running = 0;
+	} else {
+		if (*line) {
+			/* Write input into a global variable */
+			rl_callback_handler_input = savestring(line, strlen(line));
+			rl_callback_handler_remove();
+			cb_running = 0;
+		}
+
+		free(line);
+	}
+}
+
+int
+alt_rl_prompt(const char *_prompt, const char *line)
+{
+	cb_running = 1;
+	kbind_busy = 1;
+	rl_getc_function = alt_rl_getc;
+	int highlight_bk = highlight;
+	highlight = 0;
+
+	/* Install the line handler. */
+	rl_callback_handler_install(_prompt, cb_linehandler);
+
+	/* Set the initial line content */
+	if (line) {
+		rl_insert_text(line);
+		rl_redisplay();
+	}
+
+	/* Take input */
+	while (cb_running == 1)
+		rl_callback_read_char();
+
+	highlight = highlight_bk;
+	kbind_busy = 0;
+	rl_getc_function = my_rl_getc;
+	return EXIT_SUCCESS;
+}
+// TESTING RL_CALLBACK!
 
 /* Simply check a single chartacter (c) against the quoting characters
  * list defined in the quote_chars global array (which takes its values from
@@ -2682,7 +2720,7 @@ my_rl_completion(const char *text, int start, int end)
 	while (*text == '\\')
 		++text;
 
-	if (!_xrename && *text == '=') {
+	if (xrename == 0 && *text == '=') {
 		if (!*(text + 1)) {
 			matches = rl_completion_matches(text, &file_types_opts_generator);
 			if (matches) {
@@ -2701,7 +2739,7 @@ my_rl_completion(const char *text, int start, int end)
 
 	char *g = strpbrk(text, GLOB_CHARS);
 	// Expand only glob expressions in the last path component
-	if (!_xrename && g && !strchr(g, '/') && access(text, F_OK) != 0) {
+	if (xrename == 0 && g && !strchr(g, '/') && access(text, F_OK) != 0) {
 		char *p = (*rl_line_buffer == '/' && rl_end > 1 && !strchr(rl_line_buffer + 1, ' ')
 			&& !strchr(rl_line_buffer + 1, '/'))
 			? (char *)(text + 1) : (char *)text;
@@ -2717,7 +2755,7 @@ my_rl_completion(const char *text, int start, int end)
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
 
-		if (!_xrename && *text == '~' && *(text + 1) != '/') {
+		if (xrename == 0 && *text == '~' && *(text + 1) != '/') {
 			matches = rl_completion_matches(text + 1, &users_generator);
 			endpwent();
 			if (matches) {
@@ -2727,7 +2765,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* HISTORY CMD AND SEARCH PATTERNS COMPLETION */
-		if (!_xrename && (*text == '!' || *text == '/')) {
+		if (xrename == 0 && (*text == '!' || *text == '/')) {
 			matches = rl_completion_matches(text, &hist_generator);
 			if (matches) {
 				cur_comp_type = TCMP_HIST;
@@ -2736,7 +2774,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ENVIRONMENT VARIABLES */
-		if (!_xrename && *text == '$' && *(text + 1) != '(') {
+		if (xrename == 0 && *text == '$' && *(text + 1) != '(') {
 			matches = rl_completion_matches(text, &environ_generator);
 			if (matches) {
 				cur_comp_type = TCMP_ENVIRON;
@@ -2780,14 +2818,14 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* BOOKMARKS COMPLETION */
-		if (!_xrename && (autocd || auto_open) && expand_bookmarks) {
+		if (xrename == 0 && (autocd || auto_open) && expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 			if (matches)
 				return matches;
 		}
 
 		/* If neither autocd nor auto-open, try to complete with command names */
-		if (!_xrename) {
+		if (xrename == 0) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 			if (matches) {
 				cur_comp_type = TCMP_CMD;
@@ -2797,7 +2835,7 @@ my_rl_completion(const char *text, int start, int end)
 	}
 
 	else { /* Second word or more */
-		if (_xrename)
+		if (xrename == 1)
 			return (char **)NULL;
 		/* Command names completion for words after process separator:
 		 * ; | && */

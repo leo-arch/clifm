@@ -25,6 +25,7 @@
 #ifndef __READLINE_H
 #define __READLINE_H
 
+int alt_rl_prompt(const char *prompt, const char *line);
 int initialize_readline(void);
 int is_quote_char(const char c);
 char **my_rl_completion(const char *text, int start, int end);
