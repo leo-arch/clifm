@@ -1884,8 +1884,9 @@ list_dir(void)
 		dir_out = 0;
 	}
 
-	if (clear_screen == 1)
-		CLEAR;
+	if (clear_screen == 1) {
+		CLEAR; fflush(stdout);
+	}
 
 	if (xargs.disk_usage_analyzer == 1
 	|| (long_view == 1 && full_dir_size == 1)) {
