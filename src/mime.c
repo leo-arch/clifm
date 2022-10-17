@@ -36,7 +36,7 @@
 
 #ifndef _NO_MAGIC
 #if defined(__sun)
-# include <ast/magic.h>
+# include <ast/magic.h> // WRONG HEADER!!!!!
 #else
 # include <magic.h>
 #endif /* __sun */
@@ -1469,6 +1469,12 @@ get_open_file_path(char **args, char **fpath, char **deq)
 static int
 handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 {
+	if (xargs.preview == 1) {
+		fprintf(stderr, _("shotgun: %s: No associated application found\n"
+			"Fix this in then configuration file:\n%s\n"), arg, mime_file);
+		return EXIT_FAILURE;
+	}
+
 	if (info) {
 		fputs(_("Associated application: None\n"), stderr);
 	} else {

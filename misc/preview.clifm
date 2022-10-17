@@ -54,4 +54,6 @@ application/(zip|gzip|x-7z-compressed|x-xz|x-bzip*|x-tar)=atool --list --;bsdtar
 application/x-bittorrent=transmission-show --;
 
 # Fallback
-.*=file -b --;true;
+.*=file -b --;
+# Add true(1) to silence the 'no application found' warning
+#.*=file -b --;true;
