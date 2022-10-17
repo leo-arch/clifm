@@ -198,6 +198,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - <kbd>F7</kbd> opens now shotgun's configuration file (instead of the jump database file). Update `keybindings.clifm`: removing the file and restarting is enough
   - **NEW**: [`clifmimg` plugin, for image previews](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#image-previews-via-ueberzug)
   - **NEW**: [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view)
   - **NEW**: [TAB completion with file previews](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews)
