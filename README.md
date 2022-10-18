@@ -197,7 +197,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 <details>
 <summary>Click here to expand</summary>
 
-* `Development`:
+* `version 1.8 (Otis)`:
   - If upgrading from a previous version (optional, but recommended):
     - <kbd>F7</kbd> opens now shotgun's configuration file (instead of the jump database file). Update `keybindings.clifm`: removing the file and restarting is enough. Manually: run `kb edit` and then replace `open-jump-db:\e[18~` by `open-preview:\e[18~`.
     - New specific options to control the files preview window. Add the following options to the `FzfTabOptions` line in your theme file (via the `cs edit` command) or just copy the theme file from the data directory (usually `/usr/local/share/clifm/colors`): `--bind alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --preview-window=wrap,border-left --color="border:7:dim"`.
