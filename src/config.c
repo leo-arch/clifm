@@ -1114,7 +1114,7 @@ rmForce=%s\n\n",
 TabCompletionMode=\n\n"
 
 		"# File previews for TAB completion (fzf mode only). Possible values:\n\
-# true, false, hidden (enabled, but hidden; toggle it with Alt-p)\n\
+# 'true', 'false', 'hidden' (enabled, but hidden; toggle it with Alt-p)\n\
 FzfPreview=%s\n\n"
 
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
