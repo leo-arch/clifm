@@ -144,6 +144,7 @@ u, undel, untrash@
 uc, unicode@
 unpin @
 v, vv, paste@
+view@
 ver, version@
 ws@
 x, X@"
