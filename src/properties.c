@@ -309,9 +309,11 @@ get_properties(char *filename, const int dsize)
 		printf("\tName: %s%s%s\n", color, wname ? wname : filename, df_c);
 	} else if (linkname) {
 		char *link_color = get_link_color(linkname, &link_to_dir, dsize);
+		char *n = abbreviate_file_name(linkname);
 		printf("\tName: %s%s%s -> %s%s%s\n", color, wname ? wname : filename, df_c,
-			link_color, linkname, NC);
+			link_color, n ? n : linkname, NC);
 		free(linkname);
+		free(n);
 	} else { /* Broken link */
 		char link[PATH_MAX] = "";
 		ssize_t ret = readlinkat(AT_FDCWD, filename, link, PATH_MAX);
