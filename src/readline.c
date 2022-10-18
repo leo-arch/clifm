@@ -853,7 +853,8 @@ my_rl_getc(FILE *stream)
 	}
 }
 
-// TESTING RL_CALLBACK!
+/* Alternative taking input function used by alt_rl_prompt(), our readline
+ * alternative interface */
 static int
 alt_rl_getc(FILE *stream)
 {
@@ -915,8 +916,8 @@ alt_rl_getc(FILE *stream)
 
 static int cb_running = 0;
 /* Callback function called for each line when accept-line executed, EOF
-   seen, or EOF character read.  This sets a flag and returns; it could
-   also call exit(3). */
+ * seen, or EOF character read. This sets a flag and returns; it could
+ * also call exit(3). */
 static void
 cb_linehandler(char *line)
 {
@@ -949,10 +950,10 @@ alt_rl_prompt(const char *_prompt, const char *line)
 	int highlight_bk = highlight;
 	highlight = 0;
 
-	/* Install the line handler. */
+	/* Install the line handler */
 	rl_callback_handler_install(_prompt, cb_linehandler);
 
-	/* Set the initial line content */
+	/* Set the initial line content, if any */
 	if (line) {
 		rl_insert_text(line);
 		rl_redisplay();
@@ -967,7 +968,6 @@ alt_rl_prompt(const char *_prompt, const char *line)
 	rl_getc_function = my_rl_getc;
 	return EXIT_SUCCESS;
 }
-// TESTING RL_CALLBACK!
 
 /* Simply check a single chartacter (c) against the quoting characters
  * list defined in the quote_chars global array (which takes its values from

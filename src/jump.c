@@ -31,7 +31,7 @@
 #include <time.h>
 
 #if defined(__OpenBSD__) || defined(__NetBSD__) \
-|| defined(__FreeBSD__) || defined(__APPLE__)
+|| defined(__FreeBSD__) || defined(__APPLE__) || defined(__HAIKU__)
 # include <inttypes.h> /* intmax_t */
 #endif
 
