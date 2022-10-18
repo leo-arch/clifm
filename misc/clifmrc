@@ -158,7 +158,8 @@ ColorScheme=default
 # mode is used
 TabCompletionMode=
 
-# Preview files if using the fzf mode for TAB completion
+# File previews for TAB completion (fzf mode only). Possible values:
+# true, false, hidden (enabled, but hidden; toggle with Alt-p)
 FzfPreview=false
 
 # If set to true, enable auto-suggestions

@@ -992,6 +992,8 @@ bookmark paths\
 \n      --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
 \n      --fzfpreview\t\t Enable file previews for TAB completion (fzf mode only). Implies --fzftab\
+\n      --fzfpreview-hidden\t Same as --fzfpreview, but with the preview window hidden. \
+Toggle it with Alt-p\
 \n      --fzftab\t\t\t Use fzf to display completion matches (default if fzf binary is found)\
 \n      --fzytab\t\t\t Use fzy to display completion matches\
 \n      --icons\t\t\t Enable icons\

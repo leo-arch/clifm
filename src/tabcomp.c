@@ -663,7 +663,8 @@ get_preview_win_width(const int offset)
 static int
 run_finder(const size_t *height, const int *offset, const char *lw, const int multi)
 {
-	int prev = (fzf_preview == 1 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+	int prev = (fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+	int prev_hidden = fzf_preview == 2 ? 1 : 0;
 
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
 	 * file, let's define it ourselves */
@@ -704,7 +705,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 		snprintf(cmd, sizeof(cmd), "fzf %s "
 				"%s --margin=0,0,0,%d "
 				"%s --read0 --ansi "
-				"--query=\"%s\" %s %s %s %s "
+				"--query=\"%s\" %s %s %s %s %s "
 				"< %s > %s",
 				fzftab_options,
 				*height_str ? height_str : "", *offset,
@@ -713,6 +714,8 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				prev == 1 ? prev_str : "",
+				(prev == 1 && prev_hidden == 1)
+					? "--preview-window=hidden --bind alt-p:toggle-preview" : "",
 				*prev_opts ? prev_opts : "",
 				finder_in_file, finder_out_file);
 	}
@@ -947,7 +950,7 @@ store_completions(char **matches, FILE *fp)
 	size_t start = ((flags & PREVIEWER) && !matches[1]) ? 0 : 1;
 	char *_path = (char *)NULL;
 
-	int prev = (fzf_preview == 1 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+	int prev = (fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
 	longest_prev_entry = 0;
 
 	for (i = start; matches[i]; i++) {

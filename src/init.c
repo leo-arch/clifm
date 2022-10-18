@@ -1584,9 +1584,10 @@ external_arguments(int argc, char **argv)
 		{"desktop-notifications", no_argument, 0, 257},
 		{"vt100", no_argument, 0, 258},
 		{"fzfpreview", no_argument, 0, 259},
-		{"shotgun-file", required_argument, 0, 260},
-		{"fzftab", no_argument, 0, 261},
-		{"si", no_argument, 0, 262},
+		{"fzfpreview-hidden", no_argument, 0, 260},
+		{"shotgun-file", required_argument, 0, 261},
+		{"fzftab", no_argument, 0, 262},
+		{"si", no_argument, 0, 263},
 	    {0, 0, 0, 0}
 	};
 
@@ -1788,9 +1789,11 @@ external_arguments(int argc, char **argv)
 			fzftab = 0; tabmode = STD_TAB;
 			break;
 
-		case 259:
+		case 259: /* fallthrough */ /* --fzfpreview */
+		case 260: /* --fzfpreview-hidden */
 #ifndef _NO_FZF
-			xargs.fzf_preview = fzf_preview = 1;
+			xargs.fzf_preview = 1;
+			fzf_preview = optc == 259 ? 1 : 2;
 			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
 #else
 			fprintf(stderr, _("%s: fzf-preview: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
@@ -1798,7 +1801,7 @@ external_arguments(int argc, char **argv)
 #endif
 			break;
 
-		case 260:
+		case 261:
 			if (!optarg || *optarg == '-') {
 				fprintf(stderr, _("%s: '%s': Option requires an argument\n"
 					"Try '%s --help' for more information.\n"),
@@ -1808,7 +1811,7 @@ external_arguments(int argc, char **argv)
 			alt_preview_file = stat_file(optarg);
 			break;
 
-		case 261:
+		case 262:
 #ifndef _NO_FZF
 			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB; break;
 #else
@@ -1816,7 +1819,7 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_FAILURE);
 #endif
 
-		case 262:
+		case 263:
 #ifdef __linux__
 			xargs.si = 1; break;
 #else

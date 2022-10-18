@@ -314,6 +314,9 @@ expand bookmark names into the corresponding bookmark paths and enable TAB compl
 \fB\-\-fzfpreview\fR
 enable file previews for TAB completion (fzf mode only). Implies \fI\-\-fzftab\fR.
 .TP
+\fB\-\-fzfpreview-hidden\fR
+same as \fI\-\-fzfpreview\fR, but the preview window starts hidden. Toggle it via Alt-p.
+.TP
 \fB\-\-fzftab\fR
 use \fIfzf\fR to display completion matches
 .TP

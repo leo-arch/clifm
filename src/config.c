@@ -1113,7 +1113,8 @@ rmForce=%s\n\n",
 # 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used\n\
 TabCompletionMode=\n\n"
 
-		"# Preview files if using the fzf mode for TAB completion\n\
+		"# File previews for TAB completion (fzf mode only). Possible values:\n\
+# true, false, hidden (enabled, but hidden; toggle it with Alt-p)\n\
 FzfPreview=%s\n\n"
 
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
@@ -1846,6 +1847,25 @@ get_line_value(char *line)
 	return remove_quotes(opt);
 }
 
+static inline int
+set_fzf_preview_value(const char *line, int *var)
+{
+	char *p = strchr(line, '=');
+	if (!p || !*(++p))
+		return (-1);
+
+	if (*p == 't' && strncmp(p, "true", 4) == 0) {
+		*var = 1;
+	} else if (*p == 'h' && strncmp(p, "hidden", 6) == 0) {
+		*var = 2;
+	} else {
+		if (*p == 'f' && strncmp(p, "false", 5) == 0)
+			*var = 0;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 /* Get boolean value from LINE and set VAR accordingly */
 static inline int
 set_config_bool_value(const char *line, int *var)
@@ -2257,7 +2277,7 @@ read_config(void)
 
 		else if (xargs.fzf_preview == UNSET && *line == 'F'
 		&& strncmp(line, "FzfPreview=", 11) == 0) {
-			if (set_config_bool_value(line, &fzf_preview) == -1)
+			if (set_fzf_preview_value(line, &fzf_preview) == -1)
 				continue;
 		}
 
