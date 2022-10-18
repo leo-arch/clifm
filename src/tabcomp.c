@@ -1261,7 +1261,11 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	int max_finder_offset = term_cols > fspace ? term_cols - fspace : 0;
 
-	int n = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0;
+	int diff = 0;
+	if (rl_end > rl_point)
+		diff = (int)wc_xstrlen(rl_line_buffer + rl_point);
+
+	int n = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) - diff : 0;
 	while (n > term_cols)
 		n -= term_cols;
 	int finder_offset = n + prompt_offset < max_finder_offset
