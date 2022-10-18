@@ -2171,11 +2171,9 @@ unset_xargs(void)
 	xargs.splash = UNSET;
 	xargs.stealth_mode = UNSET;
 
-// TESTING CURSOR POSITION
 #ifndef _NO_SUGGESTIONS
 	xargs.suggestions = UNSET;
 #endif
-// TESTING CURSOR POSITION
 
 	xargs.tips = UNSET;
 	xargs.toggle_workspaces = UNSET;
@@ -2202,45 +2200,40 @@ init_shell(void)
 	}
 
 	if (getenv("CLIFM_OWN_CHILD")) {
-//		unsetenv("CLIFM_OWN_CHILD");
 		set_signals_to_ignore();
 		own_pid = get_own_pid();
 		tcgetattr(STDIN_FILENO, &shell_tmodes);
 		return;
 	}
 
-// TESTING PREVIEWER
-
 	own_pid = get_own_pid();
 	pid_t shell_pgid = 0;
 
-	// Loop until we are in the foreground.
+	/* Loop until we are in the foreground */
 	while (tcgetpgrp(STDIN_FILENO) != (shell_pgid = getpgrp()))
 		kill(- shell_pgid, SIGTTIN);
 
-	// Ignore interactive and job-control signals.
+	/* Ignore interactive and job-control signals */
 	set_signals_to_ignore();
-//	signal(SIGINT, SIG_IGN);
-//	signal(SIGQUIT, SIG_IGN);
-//	signal(SIGTSTP, SIG_IGN);
+/*	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGTSTP, SIG_IGN); */
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN);
 //	signal(SIGCHLD, SIG_IGN);
 
-	// Put ourselves in our own process group.
+	/* Put ourselves in our own process group */
 	shell_pgid = getpid();
 	if (setpgid(shell_pgid, shell_pgid) < 0) {
 		_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
 		exit(errno);
 	}
 
-	// Grab control of the terminal.
+	/* Grab control of the terminal */
 	tcsetpgrp(STDIN_FILENO, shell_pgid);
 
-	// Save default terminal attributes for shell.
+	/* Save default terminal attributes for shell */
 	tcgetattr(STDIN_FILENO, &shell_tmodes);
-
-// TESTING PREVIEWER
 }
 
 /* Get current entries in the Selection Box, if any */

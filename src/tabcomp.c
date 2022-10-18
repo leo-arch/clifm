@@ -88,7 +88,6 @@ typedef char *rl_cpvfunc_t;
 #ifndef _NO_FZF
 static size_t longest_prev_entry;
 
-// TESTING CURSOR POSITION
 /* The following three functions are used to get current cursor position
  * (both vertical and horizontal), needed by TAB completion in fzf mode
  * with previews enabled */
@@ -1259,7 +1258,6 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	int max_finder_offset = term_cols > fspace ? term_cols - fspace : 0;
 
-// TESTING FINDER OFFSET
 	int n = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0;
 	while (n > term_cols)
 		n -= term_cols;
@@ -1269,21 +1267,10 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * is calculated the first time we print the prompt (in my_rl_getc
 	 * (readline.c)) */
 
-/*	int c = prompt_offset + (int)wc_xstrlen(rl_line_buffer);
-	while (c > term_cols)
-		c -= term_cols;
-	int finder_offset = (c + prompt_offset < max_finder_offset)
-			? (c + prompt_offset - 4) : 0; */
-//	int finder_offset = (rl_point + prompt_offset < max_finder_offset)
-//			? (rl_point + prompt_offset - 4) : 0;
-// TESTING FINDER OFFSET
-
-// TESTING FZF OFFSET!
 	if (text && xargs.fuzzy_match == 1)
 		/* text is not NULL whenever a common prefix was added, replacing
 		 * the original query string */
 		finder_offset -= (int)(wc_xstrlen(matches[0]) - wc_xstrlen(text));
-// TESTING FZF OFFSET!
 
 	if (!lw) {
 		finder_offset++;
@@ -1371,14 +1358,11 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		}
 	}
 
-// TESTING FINDER OFFSET
 	while (finder_offset > term_cols)
 		finder_offset -= term_cols;
 
 	if (finder_offset > max_finder_offset || finder_offset < 0)
-//		finder_offset = prompt_offset >= 4 ? prompt_offset - 3 : prompt_offset;
 		finder_offset = 0;
-// TESTING FINDER OFFSET
 
 	if (finder_offset == 0) {
 		/* Not enough space to align the window with the last word. Let's
@@ -1392,7 +1376,6 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* TAB completion cases allowing multi-selection */
 	int multi = is_multi_sel();
 
-// TESTING PREVIEWER
 	char *q = query;
 	if (flags & PREVIEWER) {
 		height = term_lines;
@@ -1400,7 +1383,6 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		multi = 0;
 		q = (char *)NULL;
 	}
-// TESTING PREVIEWER
 
 	/* Run the finder application and store the ouput into the FINDER_OUT_FILE file */
 	int ret = run_finder(&height, &finder_offset, q, multi);
@@ -1419,13 +1401,10 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			lines++;
 	}
 
-// TESTING PREVIEWER
 	if (!(flags & PREVIEWER))
 		MOVE_CURSOR_UP(lines);
 	else
 		ret = EXIT_FAILURE;
-//	MOVE_CURSOR_UP(lines);
-// TESTING PREVIEWER
 
 	/* No results (the user pressed ESC) */
 	if (ret != EXIT_SUCCESS) {
@@ -1897,11 +1876,9 @@ AFTER_USUAL_COMPLETION:
 				replacement = r;
 			}
 
-// TESTING BYPASS ALIAS
 			/* Let's keep the backslash, used to bypass alias names */
 			if (c == TCMP_CMD && text && *text == '\\' && *(text + 1))
 				start++;
-// TESTING BYPASS ALIAS
 
 			rl_begin_undo_group();
 			rl_delete_text(start, rl_point);

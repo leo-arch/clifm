@@ -619,7 +619,6 @@ END:
 	return SUGGEST_ONLY;
 }
 
-// TESTING CURSOR POSITION
 /* Unicode aware implementation of readline's rl_expand_prompt()
  * Returns the amount of terminal columns taken by the last prompt line,
  * 0 if P is NULL or empty, and FALLBACK_PROMPT_OFFSET in case of error
@@ -683,7 +682,6 @@ get_prompt_offset(char *p)
 	char *l = strrchr(p, '\n');
 	return xrl_expand_prompt((l && *(++l)) ? l : p) + 1;
 }
-// TESTING CURSOR POSITION
 
 /* Whenever we are on a secondary prompt, multi-byte chars are present, and
  * we press Right on such char, rl_point gets the wrong cursor offset.
@@ -714,7 +712,6 @@ my_rl_getc(FILE *stream)
 	unsigned char c;
 	static unsigned char prev = 0;
 
-// TESTING CURSOR POSITION
 #ifndef _NO_FZF
 	if (xargs.fzftab == 1 || warning_prompt == 1) {
 #else
@@ -723,31 +720,6 @@ my_rl_getc(FILE *stream)
 		if (prompt_offset == UNSET)
 			prompt_offset = get_prompt_offset(rl_prompt);
 	}
-/*
-#ifndef _NO_FZF
-	if (xargs.fzftab == 1 || warning_prompt == 1) {
-#else
-	if (warning_prompt == 1) {
-#endif // !_NO_FZF
-		if (prompt_offset == UNSET) {
-#ifndef __FreeBSD__
-# ifndef __sun
-			get_cursor_position(&curcol, &currow);
-			prompt_offset = curcol;
-# else
-			prompt_offset = 6;
-# endif
-#else
-			if ((flags & GUI) || freebsd_sc_console == 1) {
-				get_cursor_position(&curcol, &currow);
-				prompt_offset = curcol;
-			} else {
-				prompt_offset = FALLBACK_PROMPT_OFFSET;
-			}
-#endif // !__FreeBSD__
-		}
-	} */
-// TESTING CURSOR POSITION
 
 	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
@@ -776,33 +748,8 @@ my_rl_getc(FILE *stream)
 #ifndef _NO_SUGGESTIONS
 //			if (ret != 2 && ret != -2 && !_xrename && suggestions) {
 //			if (ret == SUGGEST_ONLY && _xrename == 0 && suggestions == 1) {
-			if (ret == SUGGEST_ONLY && suggestions == 1) {
-// TESTING CURSOR POSITION
+			if (ret == SUGGEST_ONLY && suggestions == 1)
 				rl_suggestions(c);
-			}
-/*				// rl_suggestions returns -1 is C was inserted before
-				// the end of the current line, in which case we don't
-				// want to return it here (otherwise, it would be added
-				// to rl_line_buffer)
-# ifdef __FreeBSD__
-			// For the time being, suggestions do not work on the FreeBSD
-			// console (vt). The escape code to retrieve the current cursor
-			// position doesn't seem to work. Switching the console to 'sc'
-			// solves the issue
-				if (flags & GUI) {
-					rl_suggestions(c);
-				} else {
-					if (freebsd_sc_console)
-						rl_suggestions(c);
-				}
-# elif defined(__NetBSD__)  // __FreeBSD__
-				if (flags & GUI)
-					rl_suggestions(c);
-# else
-				rl_suggestions(c);
-# endif // __NetBSD__
-			} */
-// TESTING CURSOR POSITION
 #endif /* !_NO_SUGGESTIONS */
 
 			if (ret != SKIP_CHAR_NO_REDISPLAY)

@@ -92,11 +92,6 @@ rl_highlight(char *str, const size_t pos, const int flag)
 
 	if (*rl_line_buffer != ';' && *rl_line_buffer != ':'
 	&& cur_color != hq_c && c >= '0' && c <= '9') {
-/*		if (prev == ' ' || cur_color == hn_c || rl_end == 1) {
-			cl = hn_c;
-			goto END;
-		} */
-// TESTING! HIGHLIGHT
 		if (prev == ' ' || prev == 0 || cur_color == hn_c || rl_end == 1) {
 			char *a = strchr(str + pos, ' ');
 			if (a) {
@@ -108,7 +103,6 @@ rl_highlight(char *str, const size_t pos, const int flag)
 				cl = hn_c;
 			}
 			goto END;
-// TESTING! HIGHLIGHT
 		} else {
 			char cc = c;
 			*(str + pos) = '\0';
@@ -260,11 +254,11 @@ recolorize_line(void)
 	char *ss = rl_copy_text(start, rl_end);
 	rl_delete_text(start, rl_end);
 	rl_point = rl_end = start;
-// TESTING HIGHLIGHT!
+
 	if (start == 0 && end_bk > 1)
 		/* First char of a non-empty recolored line (recovering from wrong cmd) */
 		rl_redisplay();
-// TESTING HIGHLIGHT!
+
 	i = 0;
 
 /*	int point = rl_point;

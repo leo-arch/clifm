@@ -110,26 +110,16 @@ recover_from_wrong_cmd(void)
 			return EXIT_FAILURE;
 	}
 
-// TESTING SUGGESTIONS!
-/*	free(suggestion_buf);
-	suggestion_buf = (char *)NULL;
-	suggestion.printed = 0;
-	suggestion.nlines = 0; */
-// TESTING SUGGESTIONS!
-
 	fputs(NC, stdout);
 	rl_restore_prompt();
 	rl_clear_message();
 
 #ifndef _NO_HIGHLIGHT
 	if (highlight == 1) {
-// TESTING HIGHLIGHT!
 		int p = rl_point;
 		rl_point = 0;
 		recolorize_line();
 		rl_point = p;
-// TESTING HIGHLIGHT!
-//		recolorize_line();
 	}
 #endif
 	wrong_cmd = 0;
@@ -150,30 +140,14 @@ free_suggestion(void)
 void
 clear_suggestion(const int sflag)
 {
-/*	if (auto_curpos == 1)
-		printf("%c7", '\x1b'); */
-
-	if (rl_end > rl_point) { //&& highlight == 0) {
+	if (rl_end > rl_point) {
 		MOVE_CURSOR_RIGHT(rl_end - rl_point);
 		fflush(stdout);
 	}
 
-/*	if (auto_curpos == 1) {
-		fputs("\x1b[J", stdout); // ED: Erase display, to the right and below
-		printf("%c8", '\x1b');
-		suggestion.printed = 0;
-		if (free_sug) {
-			free(suggestion_buf);
-			suggestion_buf = (char *)NULL;
-		}
-		return;
-	} else { */
-
-//	ERASE_TO_RIGHT;
 	ERASE_TO_RIGHT_AND_BELOW;
-//	}
 
-	if (rl_end > rl_point) { //&& highlight == 0) {
+	if (rl_end > rl_point) {
 		MOVE_CURSOR_LEFT(rl_end - rl_point);
 		fflush(stdout);
 	}
@@ -183,60 +157,6 @@ clear_suggestion(const int sflag)
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
 	}
-
-//	return;
-
-/*
-	if (suggestion.nlines > 1) {
-		// Save cursor position
-
-// TESTING CURSOR POSITION
-//		get_cursor_position(&curcol, &curline);
-		if (highlight == 0 && rl_point == rl_end)
-			rl_redisplay();
-//		curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
-		char c = '\0';
-		// RL_ISSTATE(RL_STATE_MOREINPUT) == del key; backspace otherwise
-		int n = RL_ISSTATE(RL_STATE_MOREINPUT) ? 0 : 1;
-		if (rl_end > rl_point) {
-			c = rl_line_buffer[rl_point + n];
-			rl_line_buffer[rl_point + n] = '\0';
-		}
-		curcol = prompt_offset + (int)wc_xstrlen(rl_line_buffer);
-		if (rl_end > rl_point)
-			rl_line_buffer[rl_point + n] = c;
-		while (curcol > term_cols)
-			curcol -= term_cols;
-// TESTING CURSOR POSITION
-
-		int i = (int)suggestion.nlines;
-		while (--i > 0) {
-			// Move the cursor to the beginning of the next line
-// TESTING CURSOR POSITION
-//			MOVE_CURSOR_DOWN(1);
-			MOVE_CURSOR_DOWN_1;
-			MOVE_CURSOR_LEFT(term_cols);
-			fflush(stdout);
-//			if (write(STDOUT_FILENO, CNL, CNL_LEN) <= 0) {// Avoid compiler warning }
-			ERASE_TO_RIGHT;
-// TESTING CURSOR POSITION
-		}
-		// Restore cursor position
-// TESTING CURSOR POSITION
-//		SET_CURSOR(curline, curcol);
-		MOVE_CURSOR_UP((int)suggestion.nlines - 1);
-		MOVE_CURSOR_RIGHT(curcol > 0 ? curcol - 1 : 0);
-// TESTING CURSOR POSITION
-
-		fflush(stdout);
-		suggestion.nlines = 0;
-	}
-
-	suggestion.printed = 0;
-	if (sflag == CS_FREEBUF) {
-		free(suggestion_buf);
-		suggestion_buf = (char *)NULL;
-	} */
 }
 
 /* THIS FUNCTION SHOULD BE REMOVED */
@@ -254,90 +174,16 @@ remove_suggestion_not_end(void)
 //	fflush(stdout);
 }
 
-// TESTING CURSOR POSITION
-/*
 static inline void
 restore_cursor_position(const size_t slines)
 {
-	// Update the row number, if needed
-	// If the cursor is on the last terminal line, printing a multi-line
-	// suggestion will move the beginning of the current line up the number
-	// of lines taken by the suggestion, so that we need to update the
-	// value to move the cursor back to the correct row (the beginning
-	// of the line)
-	int old_curline = curline;
-	// extra_rows: amount of extra rows needed to print the suggestion
-	// (excluding the current row)
-	int extra_lines = (int)slines - 1;
-	if (extra_lines && old_curline + extra_lines >= term_lines)
-		curline -= extra_lines - (term_lines - old_curline);
-
-	// Restore cursor position
-
-	// THIS BLOCK IS UNDER TEST: It corrects the cursor position whenever
-	// a suggestion is printed and the cursor is not at the end of the line.
-	// We do this because we modified the cursor position in correct_offset()
-	// to correctly print the suggestion. Now we need to undo this change
-//	if (highlight && rl_point != rl_end)
-//		curcol += (rl_end - rl_point);
-
-	SET_CURSOR(curline, curcol);
-} */
-
-static inline void
-//restore_cursor_position(const size_t slines, const size_t len, const size_t offset, const int baej)
-restore_cursor_position(const size_t slines)
-{
-/*	if (auto_curpos == 1) {
-		printf("%c8", '\x1b');
-		return;
-	} */
-
 	if (slines > 1)
 		MOVE_CURSOR_UP((int)slines - 1);
 	MOVE_CURSOR_LEFT(term_cols);
 	if (highlight == 0 && rl_point < rl_end)
 		curcol -= (rl_end - rl_point);
 	MOVE_CURSOR_RIGHT(curcol > 0 ? curcol - 1 : curcol);
-
-/*	if (slines > 1) {
-		MOVE_CURSOR_UP((int)slines - 1);
-		MOVE_CURSOR_LEFT(term_cols);
-		MOVE_CURSOR_RIGHT(curcol > 0 ? curcol - 1 : curcol);
-	} else {
-		int n = (int)(len - offset + (baej == 1 ? 3 : 0));
-		if (highlight == 0 && rl_point < rl_end)
-			n += (rl_end - rl_point);
-		if (curcol + n > term_cols && n > 0)
-			n--;
-		MOVE_CURSOR_LEFT(n);
-	} */
 }
-// TESTING CURSOR POSITION
-
-/*
-static inline void
-correct_offset(size_t *offset)
-{
-	if (wrong_cmd && !recover_from_wrong_cmd()
-#ifndef _NO_HIGHLIGHT
-	&& (rl_point == rl_end || !highlight))
-#else
-	&& rl_point == rl_end)
-#endif
-		(*offset)++;
-
-#ifndef _NO_HIGHLIGHT
-	/// The highlight function modifies the terminal's idea of the current
-	// cursor position: let's correct it
-	if (highlight && rl_point != rl_end) {
-		MOVE_CURSOR_LEFT(rl_end - rl_point);
-//		printf("\x1b[%dD", rl_end - rl_point);
-		fflush(stdout);
-		(*offset)++;
-	}
-#endif
-} */
 
 static inline size_t
 calculate_suggestion_lines(int *baej, const size_t suggestion_len)
@@ -401,23 +247,10 @@ set_cursor_position(const int baej)
 
 	ERASE_TO_RIGHT;
 
-// TESTING CURSOR POSITION
 	if (baej == 1) {
-		int off;
-/*		if (auto_curpos == 1)
-			off = BAEJ_OFFSET + ((highlight == 0) ? 1 : 0);
-		else */
-		off = BAEJ_OFFSET;
-
+		int off = BAEJ_OFFSET;
 		SUGGEST_BAEJ(off, sp_c);
-	} /*else { // REMOVE THIS ELSE WHEN USING NEW CURSOR POSITION METHOD
-		if (auto_curpos == 1 && highlight == 0) {// || (flags & NO_RECOLOR_LINE)) {
-			MOVE_CURSOR_RIGHT(1);
-			fflush(stdout);
-//			flags &= ~NO_RECOLOR_LINE;
-		}
-	} */
-// TESTING CURSOR POSITION
+	}
 }
 
 static inline int
@@ -436,10 +269,7 @@ check_conditions(const size_t offset, const size_t wlen, int *baej, size_t *slin
 	|| (int)suggestion_len > (term_cols * term_lines) - curcol)
 		return EXIT_FAILURE;
 
-// TESTING CURSOR POSITION
 	*slines = calculate_suggestion_lines(baej, suggestion_len - 1);
-//	*slines = calculate_suggestion_lines(baej, suggestion_len);
-// TESTING CURSOR POSITION
 
 	if (*slines > (size_t)term_lines || (xargs.vt100 == 1 && *slines > 1))
 		return EXIT_FAILURE;
@@ -470,7 +300,6 @@ void
 print_suggestion(const char *str, size_t offset, char *color)
 {
 	if (!str || !*str || wrong_cmd == 1)
-//	if (!str || !*str)
 		return;
 
 	HIDE_CURSOR;
@@ -478,13 +307,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 
-//	correct_offset(&offset);
-
 	/* Store current cursor position in CURLINE and CURCOL (globals) */
-// TESTING CURSOR POSITION
-//	get_cursor_position(&curcol, &curline);
-// TESTING CURSOR POSITION
-
 	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump (and fuzzy matches) */
 	flags &= ~BAEJ_SUGGESTION;
 
@@ -500,27 +323,14 @@ print_suggestion(const char *str, size_t offset, char *color)
 		offset = 0;
 	}
 
-// TESTING CURSOR POSITION
-/*	if (auto_curpos == 1) {
-		printf("%c7", '\x1b');
-	} else { */
 	if (highlight == 0)
 		rl_redisplay();
-//	curcol = prompt_offset + (highlight == 0 ? rl_point : rl_end);
 	curcol = prompt_offset + (rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0);
 	while (curcol > term_cols)
 		curcol -= term_cols;
-//	}
-// TESTING CURSOR POSITION
 
 	size_t str_len = wc_xstrlen(str), slines = 0;
 	if (check_conditions(offset, str_len, &baej, &slines) == EXIT_FAILURE) {
-// TESTING!
-		/* The highlight function modified the terminal idea of the cursor position,
-		 * so that we need to correct it before exiting */
-//		if (highlight == 1)// && str_len == offset)
-//			set_cursor_position(baej);
-// TESTING!
 		UNHIDE_CURSOR;
 		return;
 	} else {
@@ -539,10 +349,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 	set_cursor_position(baej);
 	_print_suggestion(str, offset, color);
 
-// TESTING CURSOR POSITION
 	restore_cursor_position(slines);
-//	restore_cursor_position(slines, str_len, offset, baej);
-// TESTING CURSOR POSITION
 
 	/* Store the amount of lines taken by the current command line (plus the
 	 * suggestion's length) to be able to correctly remove it later (via the
@@ -799,67 +606,6 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 	return printed;
 }
 
-/*
-static inline void
-free_matches(char ***matches)
-{
-	size_t i;
-	for (i = 0; (*matches)[i]; i++)
-		free((*matches)[i]);
-	free(*matches);
-}
-
-static int
-check_completions(char *str, size_t len, const unsigned char c, const int print)
-{
-	if (!str || !*str)
-		return NO_MATCH;
-
-	skip_leading_spaces(&str, &len);
-	skip_leading_backslashes(&str, &len);
-
-	if (xargs.fuzzy_match != 0 && nwords == 1 && *str != '/' && is_internal_c(str))
-		return NO_MATCH;
-
-	cur_comp_type = TCMP_NONE;
-	*_fmatch = '\0';
-
-	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
-//	char **_matches = my_rl_completion(str, nwords == 1 ? 0 : 1, rl_end);
-	if (!_matches)
-		return NO_MATCH;
-
-	int printed = NO_MATCH;
-	suggestion.filetype = DT_REG;
-
-	if (len == 0)
-		goto FREE;
-
-	// If only one match
-	if (!_matches[1] || !*_matches[1]) {
-		if (!print) {
-			printed = get_print_status(str, _matches[0], len);
-			goto FREE;
-		}
-		printed = print_match(_matches[0], len, c);
-		goto FREE;
-	}
-
-	// If multiple matches, suggest the first one
-	if (!print) {
-		printed = get_print_status(str, _matches[1], len);
-		goto FREE;
-	}
-	printed = print_match(*_fmatch ? _fmatch : _matches[1], len, c);
-	*_fmatch = '\0';
-
-FREE:
-	free_matches(&_matches);
-	if (printed == 0)
-		cur_comp_type = TCMP_NONE;
-	return printed;
-} */
-
 static inline void
 print_directory_suggestion(const size_t i, const size_t len, char *color)
 {
@@ -920,47 +666,6 @@ print_reg_file_suggestion(char *str, const size_t i, size_t len,
 
 	print_suggestion(file_info[i].name, len, color);
 }
-/*
-static int
-check_filenames(char *str, size_t len, const unsigned char c,
-				const int first_word, const size_t full_word)
-{
-	char *color = (suggest_filetype_color == 1) ? no_c : sf_c;
-
-	skip_leading_backslashes(&str, &len);
-	int dot_slash = skip_leading_dot_slash(&str, &len);
-	skip_leading_spaces(&str, &len);
-	remove_trailing_slash(&str, &len);
-
-	size_t i;
-	for (i = 0; i < files; i++) {
-		if (!file_info[i].name || TOUPPER(*str) != TOUPPER(*file_info[i].name))
-			continue;
-
-		if (full_word) {
-			if ((case_sens_path_comp ? strcmp(str, file_info[i].name)
-			: strcasecmp(str, file_info[i].name)) == 0)
-				return FULL_MATCH;
-			continue;
-		}
-
-		if (len > 0 && (case_sens_path_comp ? strncmp(str, file_info[i].name, len)
-		: strncasecmp(str, file_info[i].name, len)) == 0) {
-			if (file_info[i].len == len) return FULL_MATCH;
-			if (first_word && !auto_open) continue;
-			if (c != BS) suggestion.type = FILE_SUG;
-
-			if (file_info[i].dir)
-				print_directory_suggestion(i, len, color);
-			else
-				print_reg_file_suggestion(str, i, len, color, dot_slash);
-
-			return PARTIAL_MATCH;
-		}
-	}
-
-	return NO_MATCH;
-} */
 
 static int
 check_filenames(char *str, size_t len, const unsigned char c,
@@ -998,13 +703,6 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		: (TOUPPER(*str) == TOUPPER(*file_info[i].name)
 		&& strncasecmp(str, file_info[i].name, len) == 0)) {
 			if (file_info[i].len == len) return FULL_MATCH;
-/*			if (first_word) {
-				if ( (file_info[i].dir == 1 && autocd == 0)
-				|| (file_info[i].dir == 0 && auto_open == 0) ) {
-					printf("UUUU"); fflush(stdout); sleep(1);
-					continue;
-				}
-			} */
 
 			if (c != BS) suggestion.type = FILE_SUG;
 
@@ -1161,13 +859,11 @@ check_cmds(char *str, size_t len, const int print)
 	if (len == 0 || !str || !*str)
 		return NO_MATCH;
 
-// TESTING BYPASS ALIAS
 	char *cmd = str;
 	if (cmd && *cmd == '\\' && *(cmd + 1)) {
 		cmd++;
 		len--;
 	}
-// TESTING BYPASS ALIAS
 
 	size_t i;
 	for (i = 0; bin_commands[i]; i++) {

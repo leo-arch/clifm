@@ -609,10 +609,8 @@ is_internal_f(const char *restrict cmd)
 		{"ln", 2},
 		{"le", 2},
 		{"m", 1},
-// TESTING MIME!
 		{"mime", 4},
 		{"mm", 2},
-// TESTING MIME!
 		{"mv", 2},
 		{"md", 2},
 		{"mkdir", 5},
@@ -737,12 +735,8 @@ check_for_alias(char **args)
 	if (autocd == 1 || auto_open == 1) {
 		/* Do not expand alias is first word is a file name in CWD */
 		struct stat a;
-// TESTING BYPASS ALIAS
 		if (*args[0] == '\\' || (stat(args[0], &a) == 0 && ((S_ISDIR(a.st_mode) && autocd == 1)
 		|| (!S_ISDIR(a.st_mode) && auto_open == 1) ) ) )
-//		if (stat(args[0], &a) == 0 && ((S_ISDIR(a.st_mode) && autocd == 1)
-//		|| (!S_ISDIR(a.st_mode) && auto_open == 1) ) )
-// TESTING BYPASS ALIAS
 			return (char **)NULL;
 	}
 

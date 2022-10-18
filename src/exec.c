@@ -84,10 +84,7 @@ typedef char *rl_cpvfunc_t;
 #endif
 #include "sanitize.h"
 #include "tags.h"
-
-// TESTING PREVIEWER
 #include "tabcomp.h"
-// TESTING PREVIEWER
 
 /* Run CMD via execve() and refresh the screen in case of success
  * skip_force is true (1) only when coming from copy_function, that is,
@@ -1978,7 +1975,6 @@ is_path(char *str)
 	return 1;
 }
 
-// TESTING BYPASS ALIAS
 /* Replace "\S" by "S" in the memory address pointed to by s */
 static void
 remove_backslash(char **s)
@@ -1997,7 +1993,6 @@ remove_backslash(char **s)
 
 	*s = p;
 }
-// TESTING BYPASS ALIAS
 
 static int
 preview_function(void)
@@ -2062,11 +2057,9 @@ exec_cmd(char **comm)
 	int old_exit_code = exit_code;
 	exit_code = EXIT_SUCCESS;
 
-// TESTING BYPASS ALIAS
 	/* Remove backslash in front of command names: used to bypass alias names */
 	if (*comm[0] == '\\' && *(comm[0] + 1))
 		remove_backslash(&comm[0]);
-// TESTING BYPASS ALIAS
 
 	/* Skip comments */
 	if (check_comments(comm[0]) == EXIT_SUCCESS)

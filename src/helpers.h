@@ -550,11 +550,6 @@ extern FILE *test_input_stream;
 #define MOVE_CURSOR_DOWN(n)   printf("\x1b[%dB", (n))  /* CUD */
 
 /* ######## Escape sequences used by the suggestions system */
-//#define SET_CURSOR(y,x)            printf("\x1b[%d;%dH", (y), (x)) /* CUP */
-// TESTING CURSOR POSITION
-//#define SET_CURSOR_COL(n)          printf("\x1b[%dG", (n)) /* HPA */
-//#define MOVE_CURSOR_DOWN_1    fputs("\x1b[1B", stdout) /* CUD */
-// TESTING CURSOR POSITION
 #define MOVE_CURSOR_UP(n)     printf("\x1b[%dA", (n))  /* CUU */
 #define MOVE_CURSOR_RIGHT(n)  printf("\x1b[%dC", (n))  /* CUF */
 #define MOVE_CURSOR_LEFT(n)   printf("\x1b[%dD", (n))  /* CUB */
@@ -565,21 +560,12 @@ extern FILE *test_input_stream;
 #define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s> %s", (offset), (color), NC)
 /* ######## */
 
-/* Suequences used by the pad_filename function (listing.c):
+/* Sequences used by the pad_filename function (listing.c):
  * MOVE_CURSOR_RIGHT() */
 
 /* Sequences used by the pager (listing.c):
  * MOVE_CURSOR_DOWN(n)
  * ERASE_TO_RIGHT */
-
-//#define ERASE_FULL_LINE     fputs("\x1b[2K", stdout) /* EL2 */
-
-// TESTING CURSOR POSITION
-//#define CNL            "\x1b[1E"     /* Move the cursor to beginning next line*/
-//#define CNL_LEN        4
-//#define CPR            "\x1b[6n"     /* Cursor position report */
-//#define CPR_LEN        4
-// TESTING CURSOR POSITION
 
 #define META_SENDS_ESC  fputs("\x1b[?1036h", stdout)
 #define HIDE_CURSOR     fputs("\x1b[?25l", stdout)   /* DECTCEM */
