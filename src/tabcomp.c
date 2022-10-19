@@ -828,13 +828,14 @@ get_initial_path(void)
 	char *p = savestring(lp, strlen(lp));
 	*ls = bk;
 	return p;
- */
+} */
 
 /* Recover finder (fzf/fzy) output from FINDER_OUT_FILE file
  * Return this output (reformated if needed) or NULL in case of error */
 static char *
 get_finder_output(const int multi, char *base)
 {
+//	UNUSED(base);
 	FILE *fp = fopen(finder_out_file, "r");
 	if (!fp)
 		return print_no_finder_file();
@@ -844,7 +845,9 @@ get_finder_output(const int multi, char *base)
 	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
 //	char *initial_path = (cur_comp_type == TCMP_GLOB) ? get_initial_path() : (char *)NULL;
-	char *initial_path = (cur_comp_type == TCMP_GLOB) ? base : (char *)NULL;
+	char *b = base ? strrchr(base, ' ') : (char *)NULL;
+	char *initial_path = (cur_comp_type == TCMP_GLOB)
+		? (b && *(++b) ? b : (char *)NULL) : (char *)NULL;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n')
