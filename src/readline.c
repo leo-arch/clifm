@@ -2074,12 +2074,32 @@ prompts_generator(const char *text, int state)
 static char **
 rl_glob(const char *text)
 {
+	char *tmp = (char *)NULL;
+	if (*text == '~') {
+		char *ls = strrchr(text, '/');
+		if (ls) {
+			*ls = '\0';
+			char *q = tilde_expand(text);
+			*ls = '/';
+			if (!q)
+				return (char **)NULL;
+			char *g = *(ls + 1) ? ls + 1 : (char *)NULL;
+			tmp = (char *)xnmalloc(strlen(q) + 2 + (g ? strlen(g) : 0), sizeof(char));
+			sprintf(tmp, "%s/%s", q, g);
+			free(q);
+		}
+	}
+
 	glob_t globbuf;
 
-	if (glob(text, 0, NULL, &globbuf) != EXIT_SUCCESS) {
+//	if (glob(text, 0, NULL, &globbuf) != EXIT_SUCCESS) {
+	if (glob(tmp ? tmp : text, 0, NULL, &globbuf) != EXIT_SUCCESS) {
 		globfree(&globbuf);
+		free(tmp);
 		return (char **)NULL;
 	}
+
+	free(tmp);
 
 	if (globbuf.gl_pathc == 1) {
 		char **t = (char **)xnmalloc(globbuf.gl_pathc + 1, sizeof(char *));

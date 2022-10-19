@@ -809,6 +809,7 @@ get_glob_file_target(char *str, char *initial_path)
  * the return value should be freed by the caller. If not PATH/GLOB, return NULL
  * Ex (underscore is an asterisk):
  * documents/misc/_.c -> documents/misc/ */
+/*
 static char *
 get_initial_path(void)
 {
@@ -827,12 +828,12 @@ get_initial_path(void)
 	char *p = savestring(lp, strlen(lp));
 	*ls = bk;
 	return p;
-}
+ */
 
 /* Recover finder (fzf/fzy) output from FINDER_OUT_FILE file
  * Return this output (reformated if needed) or NULL in case of error */
 static char *
-get_finder_output(const int multi)
+get_finder_output(const int multi, char *base)
 {
 	FILE *fp = fopen(finder_out_file, "r");
 	if (!fp)
@@ -842,7 +843,8 @@ get_finder_output(const int multi)
 	*buf = '\0';
 	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
-	char *initial_path = (cur_comp_type == TCMP_GLOB) ? get_initial_path() : (char *)NULL;
+//	char *initial_path = (cur_comp_type == TCMP_GLOB) ? get_initial_path() : (char *)NULL;
+	char *initial_path = (cur_comp_type == TCMP_GLOB) ? base : (char *)NULL;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n')
@@ -880,7 +882,7 @@ get_finder_output(const int multi)
 		}
 	}
 
-	free(initial_path);
+//	free(initial_path);
 	free(line);
 	fclose(fp);
 	unlink(finder_out_file);
@@ -1419,7 +1421,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		return clean_rl_buffer(text);
 	}
 
-	char *buf = get_finder_output(multi);
+	char *buf = get_finder_output(multi, matches[0]);
 	if (!buf)
 		return EXIT_FAILURE;
 
