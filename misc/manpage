@@ -2645,6 +2645,10 @@ Get help:
 
     \fBs *.c\fR
 
+- Interactively select files in the directory \fI/media\fR (non-standard TAB completion mode only; i.e. fzf, fzy, or smenu):
+
+    \fBs /media/*<TAB>\fR
+
 - Select multiple files in the current directory by ELN:
 
     \fBs 1-4 8 19-26\fR
