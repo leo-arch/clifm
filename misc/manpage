@@ -1935,13 +1935,13 @@ T{
 T}	Import bookmarks	bm_import.sh	-
 T{
 .BR clip
-T}	Interact with the primary clipboard	clip.sh	xlip
+T}	Interact with the primary clipboard	clip.sh	xclip
 T{
 .BR
 T}	Test you terminal colors capability	colors.sh	-
 T{
 .BR cr
-T}	Copy files to remote location	cprm.sh	fzf, and scp, ffsend, or croc
+T}	Copy files to a remote location	cprm.sh	fzf, and scp, ffsend, or croc
 T{
 .BR da
 T}	Disk usage analyzer	disk_analyzer.sh	du, fzf
@@ -2729,7 +2729,7 @@ Get help:
 
 - Show hidden files:
 
-    \fBhf on\fB (or \fBAlt-.\fR)
+    \fBhf on\fR (or \fBAlt-.\fR)
 
 List available actions/plugins:
 
@@ -2737,9 +2737,9 @@ List available actions/plugins:
 
 - Want file previews?
 
-    \fB-\fR (yes, just a dash)
+    \fBview\fR
 
-\fBNOTE\fR: This runs the plugin \fIfzfnav.sh\fR. Take a look at the manpage for needed dependencies
+\fBNOTE\fR: This feature depends on \fBfzf\fR(1). Run with \fI\-\-fzfpreview\fR to enable file previews for TAB completion
 
 - Want icons?
 
