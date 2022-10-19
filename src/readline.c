@@ -2070,26 +2070,36 @@ prompts_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Expand tilde in the glob expression TEXT */
+static char *
+expand_tilde_glob(char *text)
+{
+	if (!text || !*text || *text != '~')
+		return (char *)NULL;
+
+	char *ls = strrchr(text, '/');
+	if (!ls)
+		return (char *)NULL;
+
+	*ls = '\0';
+	char *q = tilde_expand(text);
+	*ls = '/';
+	if (!q)
+		return (char *)NULL;
+
+	char *g = *(ls + 1) ? ls + 1 : (char *)NULL;
+	char *tmp = (char *)xnmalloc(strlen(q) + 2 + (g ? strlen(g) : 0), sizeof(char));
+	sprintf(tmp, "%s/%s", q, g);
+	free(q);
+
+	return tmp;
+}
+
 /* Return the list of matches for the glob expression TEXT or NULL if no matches */
 static char **
-rl_glob(const char *text)
+rl_glob(char *text)
 {
-	char *tmp = (char *)NULL;
-	if (*text == '~') {
-		char *ls = strrchr(text, '/');
-		if (ls) {
-			*ls = '\0';
-			char *q = tilde_expand(text);
-			*ls = '/';
-			if (!q)
-				return (char **)NULL;
-			char *g = *(ls + 1) ? ls + 1 : (char *)NULL;
-			tmp = (char *)xnmalloc(strlen(q) + 2 + (g ? strlen(g) : 0), sizeof(char));
-			sprintf(tmp, "%s/%s", q, g);
-			free(q);
-		}
-	}
-
+	char *tmp = expand_tilde_glob(text);
 	glob_t globbuf;
 
 //	if (glob(text, 0, NULL, &globbuf) != EXIT_SUCCESS) {
