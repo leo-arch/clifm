@@ -34,6 +34,7 @@ char *escape_str(const char *str);
 int *expand_range(char *str, int listdir);
 int fuzzy_match(char *s1, char *s2, const int case_sens);
 char *gen_rand_str(size_t len);
+char *get_last_space(char *str, const int len);
 char **get_substr(char *str, const char ifs);
 char *home_tilde(char *new_path, int *_free);
 char **parse_input_str(char *str);

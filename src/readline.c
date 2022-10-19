@@ -65,6 +65,7 @@ typedef char *rl_cpvfunc_t;
 #include "readline.h"
 #include "tabcomp.h"
 #include "mime.h"
+#include "strings.h"
 #include "tags.h"
 
 #ifndef _NO_SUGGESTIONS
@@ -2124,7 +2125,11 @@ rl_glob(char *text)
 
 	/* If /path/to/dir/GLOB<TAB>, /path/to/dir goes to slot 0 */
 	int c = -1;
-	char *p = strchr(rl_line_buffer, ' '), *q = (char *)NULL;
+//	char *p = strchr(rl_line_buffer, ' '), *q = (char *)NULL;
+//	char *p = strrchr(rl_line_buffer, ' '), *q = (char *)NULL;
+	char *ls = get_last_space(rl_line_buffer, rl_end), *q = (char *)NULL;
+	char *ds = ls ? dequote_str(ls, 0) : (char *)NULL;
+	char *p = ds ? ds : (ls ? ls : (char *)NULL);
 
 	if (p && *(++p)) {
 		q = strrchr(p, '/');
@@ -2141,6 +2146,8 @@ rl_glob(char *text)
 		t[0] = xnmalloc(1, sizeof(char));
 		*t[0] = '\0';
 	}
+
+	free(ds);
 
 	for (i = 0; i < globbuf.gl_pathc; i++) {
 		if (SELFORPARENT(globbuf.gl_pathv[i]))

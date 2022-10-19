@@ -83,6 +83,24 @@ static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
  * However, nothing beyond MAX_STR_LEN length will be correctly measured */
 #define MAX_STR_LEN 4096
 
+/* Get the last non-escaped space in STR (whose length is LEN)
+ * Return a pointer to it if found or NULL if not */
+char *
+get_last_space(char *str, const int len)
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	int i = len;
+	while (--i >= 0) {
+		if ((i > 0 && str[i] == ' ' && str[i - 1] != '\\')
+		|| (i == 0 && str[i] == ' '))
+			return str + i;
+	}
+
+	return (char *)NULL;
+}
+
 char *
 replace_slashes(char *str, const char c)
 {

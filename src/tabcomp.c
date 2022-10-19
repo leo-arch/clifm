@@ -845,9 +845,7 @@ get_finder_output(const int multi, char *base)
 	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
 //	char *initial_path = (cur_comp_type == TCMP_GLOB) ? get_initial_path() : (char *)NULL;
-	char *b = base ? strrchr(base, ' ') : (char *)NULL;
-	char *initial_path = (cur_comp_type == TCMP_GLOB)
-		? (b && *(++b) ? b : (char *)NULL) : (char *)NULL;
+	char *initial_path = (cur_comp_type == TCMP_GLOB) ? base : (char *)NULL;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n')
@@ -1501,7 +1499,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL
 	|| cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
 	|| cur_comp_type == TCMP_BM_PATHS) {
-		char *s = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
+//		char *s = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
+		char *s = rl_line_buffer ? get_last_space(rl_line_buffer, rl_end) : (char *)NULL;
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
@@ -1511,7 +1510,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
-		char *s = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
+//		char *s = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
+		char *s = rl_line_buffer ? get_last_space(rl_line_buffer, rl_end) : (char *)NULL;
 		rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
 		rl_delete_text(rl_point, rl_end);
 		rl_end = rl_point;

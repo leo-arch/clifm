@@ -57,6 +57,7 @@ typedef char *rl_cpvfunc_t;
 #include "readline.h"
 #include "builtins.h"
 #include "prompt.h"
+#include "strings.h"
 
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"
@@ -1385,24 +1386,6 @@ check_prompts(const char *word, const size_t len)
 	}
 
 	return 0;
-}
-
-/* Get the last non-escaped space in STR (whose length is LEN)
- * Return a pointer to it if found or NULL if not */
-static char *
-get_last_space(char *str, const int len)
-{
-	if (!str || !*str)
-		return (char *)NULL;
-
-	int i = len;
-	while (--i >= 0) {
-		if ((i > 0 && str[i] == ' ' && str[i - 1] != '\\')
-		|| (i == 0 && str[i] == ' '))
-			return str + i;
-	}
-
-	return (char *)NULL;
 }
 
 /* Get the word after LAST_SPACE (last non-escaped space in rl_line_buffer,
