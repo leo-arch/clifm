@@ -57,13 +57,13 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 ## Brief description
 
-_CliFM_ is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
+_Clifm_ is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
 
-Unlike most terminal file managers out there, indeed, _CliFM_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface (CLI),<sup>1</sup> also known as REPL.<sup>2</sup>
+Unlike most terminal file managers out there, indeed, _clifm_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface (CLI),<sup>1</sup> also known as REPL.<sup>2</sup>
 
-If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, tags, directory jumper, directory and commands history, auto-cd and auto-open, bulk rename, TAB completion, autosuggestions, and a trash system, among [other features](#features). In this sense, _CliFM_ is certainly a file manager, but also a shell extension.
+If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, tags, directory jumper, directory and commands history, auto-cd and auto-open, bulk rename, TAB completion, autosuggestions, and a trash system, among [other features](#features). In this sense, _clifm_ is certainly a file manager, but also a shell extension.
 
-Briefly put, with _CliFM_ the command-line is always already there, never hidden :godmode: :muscle:
+Briefly put, with _clifm_ the command-line is always already there, never hidden :godmode: :muscle:
 
 ---
 <sup>1</sup> <i>For more information about these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>. \
@@ -103,7 +103,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <details>
 <summary>Click here to expand</summary>
 
-Besides common file operations such as copy, move, remove, etc., _CliFM_ provides the following features:
+Besides common file operations such as copy, move, remove, etc., _clifm_ provides the following features:
 - Specific
   - [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI at all, but just a command-line
   - It can run on the kernel built-in console and even on a SSH or any other remote session
@@ -260,7 +260,7 @@ For more information/supported platforms consult the [installation page](https:/
 
 ## Getting started
 
-To start using _CliFM_ **you don't need to learn anything new**: the usual shell commands will just work. However, there is much more than just shell commands... \
+To start using _clifm_ **you don't need to learn anything new**: the usual shell commands will just work. However, there is much more than just shell commands... \
 ✓ The `help` command gives you a quick introduction to _CliFM_: once in the _CliFM_ prompt, type `help` or `?`. \
 ✓ Type `help` and then press <kbd>TAB</kbd> to get a list of _help topics_. Select the one you want and press <kbd>Enter</kbd>. \
 ✓ To jump into the **COMMANDS** section in the [manpage](https://github.com/leo-arch/clifm/blob/master/misc/clifm.1.pdf), simply enter `cmd` or press <kbd>F2</kbd>. \
@@ -274,7 +274,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 
 ## Support
 
-_CliFM_ is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). Consult the [compilation page](https://github.com/leo-arch/clifm/blob/master/src/README.md#5-compilation).\
+_Clifm_ is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). Consult the [compilation page](https://github.com/leo-arch/clifm/blob/master/src/README.md#5-compilation).\
 It works on Linux, Termux (Android), FreeBSD, NetBSD, OpenBSD, MacOS, Haiku, and Cygwin, on x86 and ARM architectures.
 
 ---
