@@ -611,6 +611,7 @@ print_tips(int all)
 		"Use PropFields in the configuration file to toggle fields on/off in long view mode",
 		"Enable file previews for TAB completion (fzf mode only) via --fzfpreview",
 		"Preview files in the current directory using the 'view' command (requires fzf)",
+		"Interactively select files (requires fzf, fzy, or smenu): 's /dir/*<TAB>'",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;

@@ -731,6 +731,8 @@ Examples:\n\
     s ^d.* -r :/etc\n\
 - Select all files in the current directory (including hidden files):\n\
     s * .* (or Alt-a)\n\
+- Interactively select files in '/media' (requires fzf, fzy, or smenu TAB completion mode):\n\
+    s /media/*<TAB>\n\
 - List currently selected files:\n\
     sb\n\
 - Copy selected files into the current directory:\n\
