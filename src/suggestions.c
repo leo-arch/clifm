@@ -1531,7 +1531,9 @@ rl_suggestions(const unsigned char c)
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed && !IS_DIGIT(c)) {
 		if (suggestion.type == HIST_SUG || suggestion.type == INT_CMD) {
-			if (*full_line == *suggestion_buf
+			/* Skip the j cmd: we always want the BAEJ suggestion here */
+			if ((!word || *word != 'j' || word[1] != ' ')
+			&& *full_line == *suggestion_buf
 			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
 				printed = zero_offset = 1;
 				goto SUCCESS;
