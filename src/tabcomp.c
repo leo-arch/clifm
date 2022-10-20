@@ -63,6 +63,8 @@ typedef char *rl_cpvfunc_t;
 #include "navigation.h"
 #include "readline.h"
 
+#include "selection.h"
+
 #ifndef _NO_HIGHLIGHT
 #include "highlight.h"
 #endif
@@ -854,10 +856,18 @@ get_finder_output(const int multi, char *base)
 		char *q = line;
 		if (multi == 1) {
 			char *s = line;
-			if (cur_comp_type == TCMP_GLOB)
+// TESTING PREVIEW SEL!!
+			if ((flags & PREVIEWER) && workspaces[cur_ws].path) {
+				char f[PATH_MAX];
+				snprintf(f, sizeof(f), "%s/%s", workspaces[cur_ws].path, s);
+				select_file(f);
+				continue;
+// TESTING PREVIEW SEL!!
+			} else if (cur_comp_type == TCMP_GLOB) {
 				s = get_glob_file_target(line, initial_path);
-			else if (cur_comp_type == TCMP_TAGS_F && tags_dir && cur_tag)
+			} else if (cur_comp_type == TCMP_TAGS_F && tags_dir && cur_tag) {
 				s = get_tagged_file_target(line);
+			}
 			q = escape_str(s);
 			if (s != line)
 				free(s);
@@ -1390,7 +1400,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (flags & PREVIEWER) {
 		height = term_lines;
 		finder_offset = 0;
-		multi = 0;
+//		multi = 0;
+		multi = 1;
 		q = (char *)NULL;
 	}
 
@@ -1413,8 +1424,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	if (!(flags & PREVIEWER))
 		MOVE_CURSOR_UP(lines);
-	else
-		ret = EXIT_FAILURE;
+//	else
+//		ret = EXIT_FAILURE;
 
 	/* No results (the user pressed ESC) */
 	if (ret != EXIT_SUCCESS) {

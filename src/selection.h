@@ -26,12 +26,12 @@
 #define SELECTION_H
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-#include <sys/ioctl.h>
+# include <sys/ioctl.h>
 #endif
 
-/* selection.c */
 int deselect(char **comm);
 int sel_function(char **args);
+int select_file(char *file);
 void show_sel_files(void);
 int save_sel(void);
 int deselect_all(void);

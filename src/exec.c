@@ -2002,6 +2002,10 @@ preview_function(void)
 	return EXIT_FAILURE;
 #endif /* _NO_FZF */
 
+// TESTING PREVIEW SEL!!
+	size_t seln_bk = sel_n;
+// TESTING PREVIEW SEL!!
+
 	int fzf_preview_bk = fzf_preview;
 	enum tab_mode tabmode_bk = tabmode;
 
@@ -2028,12 +2032,26 @@ preview_function(void)
 	tabmode = tabmode_bk;
 	fzf_preview = fzf_preview_bk;
 
+// TESTING PREVIEW SEL!!
+	if (sel_n > seln_bk) {
+		save_sel();
+		get_sel_files();
+	}
+// TESTING PREVIEW SEL!!
+
 	if (autols == 1) {
 		putchar('\n');
 		reload_dirlist();
 	} else {
 		rl_clear_visible_line();
 	}
+
+// TESTING PREVIEW SEL!!
+	if (sel_n > seln_bk) {
+		print_reload_msg("%zu file(s) selected\n", sel_n - seln_bk);
+		print_reload_msg("%zu total selected file(s)\n", sel_n);
+	}
+// TESTING PREVIEW SEL!!
 
 	return EXIT_SUCCESS;
 }

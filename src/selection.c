@@ -94,7 +94,7 @@ save_sel(void)
 	return EXIT_SUCCESS;
 }
 
-static int
+int
 select_file(char *file)
 {
 	if (!file || !*file)
@@ -121,11 +121,6 @@ select_file(char *file)
 		sel_n++;
 		sel_elements[sel_n].name = (char *)NULL;
 		sel_elements[sel_n].size = (off_t)UNSET;
-
-/*		new_selections = (char **)xrealloc(new_selections, (new_seln + 2) * sizeof(char *));
-		new_selections[new_seln] = savestring(file, strlen(file));
-		new_seln++;
-		new_selections[new_seln] = (char *)NULL; */
 
 		new_sel++;
 	} else {

@@ -2125,8 +2125,6 @@ rl_glob(char *text)
 
 	/* If /path/to/dir/GLOB<TAB>, /path/to/dir goes to slot 0 */
 	int c = -1;
-//	char *p = strchr(rl_line_buffer, ' '), *q = (char *)NULL;
-//	char *p = strrchr(rl_line_buffer, ' '), *q = (char *)NULL;
 	char *ls = get_last_space(rl_line_buffer, rl_end), *q = (char *)NULL;
 	char *ds = ls ? dequote_str(ls, 0) : (char *)NULL;
 	char *p = ds ? ds : (ls ? ls : (char *)NULL);
