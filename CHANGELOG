@@ -1,5 +1,58 @@
+1.8 - Otis
+New features/improvements:
+* File previews for TAB completion (fzf mode only)
+* 'clifmimg' plugin to add image preview capabilities to clifm
+* 'view' command to preview files in full screen (via fzf)
+* Shotgun, a built-in files previewer similar to pistol
+* Remove cd prefix when suggesting jump dir and autocd is off
+* Change dates color in properties (blue isn't readable on some terminals)
+* Improved Unicode support for the suggestions system
+* 'bl' command automatically prepends dot to suffix if it does not start with a dot
+* Flat or branch view via the fzfsel.sh plugin (-f, --flat option)
+* Bypass aliases using a backslash: \alias_name
+* Cygwin support
+* Improved performance/portability of the suggestions system: no more slow/non-portable CPR-CUP escape sequences! These were replaced by 100% made in-house cursor position calculation plus basic/portable escape sequences: CUU, CUD, CUF, and CUB
+
+Bug fixes:
+* Issues with the ESC key in the interactive rename prompt
+* Not honoring none in FzfTabOptions
+* No file type color for /path/to/dir/GLOB<TAB>
+* Wrong file colors when running as root
+* Script in $HOME not working with arguments (e.g. ~/script.sh arg) in mimelist.clifm file
+* 'fzfnav' plugin not working with Ranger's scope.sh
+* C-p keybinding is slow to respond
+* C-p and C-n keybindings do not highlight history lines
+* BAEJ suggestion (ex: ELN) not colored if it contains spaces
+* If wrong command and C-x fails, error is printed using the wrong command color
+* 'bl dir/file file' creates only one symlink (file.link)
+* Secondary prompts have issues with Unicode strings.
+* Termux: TAB completing/accepting suggestion of Unicode strings not working
+* Bulk create plugin (bn) stops creating files as soon as a unique quote (' or ") is found (ex. Peter's dog)
+* Cannot create directory with n command if file name contains spaces
+* 'fzfnav' previews not working on Wayland
+* Help message covered by image preview in fzfnav plugin
+* The "Calculating..." message in the pp command is not correctly removed on some terminals
+* Pager not working as expected on the Linux console
+* The 'dragon' plugin does not work with file names containing spaces
+* The manpage parser stopped working due to the file extension change
+* Multi-byte char takes color of previous char (if colored)
+* Suggestion not removed when entering a tilde path
+* Ctrl-Alt-d (remove sel) not working: conflicts with C-d to quit
+* Screen refreshed upon command error: messages are lost
+* Suggestion partially printed with j cmd
+* FZF tab offset is broken: select a few files (make sure it takes more than one line), insert all of them, type sel again and the press TAB: FZF menu appears next to the end of the screen, making its contents unreadable.
+* Wrong path as first word errs like a failed search
+* 'fzfsel' and 'fzfdesel' plugins not working
+* Wrong columns when longest file name is a directory
+* 'mime' command not taking filenames/ELNs as parameters
+* Recursive search not honoring case insensitive search option
+* FzfTabOptions not protected against command injection when running with --secure-cmds
+* Crash when only one file is listed and TAB is the first key pressed
+* Wrong path color when completing unique match via TAB
+*Suggestions are broken on high-latency remote connections
+
 1.7 - Elaine
-New features/Improvements:
+New features/improvements:
 * Better columns arrangement in long view
 * ke / kd: encryption/decryption plugins
 * Better use of space when trimming file names (the space used by the files counter in now taken into account)
