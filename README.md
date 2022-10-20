@@ -57,13 +57,13 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 ## Brief description
 
-_Clifm_ is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
+**Clifm** is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
 
-Unlike most terminal file managers out there, indeed, _clifm_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface (CLI),<sup>1</sup> also known as REPL.<sup>2</sup>
+Unlike most terminal file managers out there, indeed, **clifm** replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface (CLI),<sup>1</sup> also known as REPL.<sup>2</sup>
 
-If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, tags, directory jumper, directory and commands history, auto-cd and auto-open, bulk rename, TAB completion, autosuggestions, and a trash system, among [other features](#features). In this sense, _clifm_ is certainly a file manager, but also a shell extension.
+If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, tags, directory jumper, directory and commands history, auto-cd and auto-open, bulk rename, TAB completion, autosuggestions, and a trash system, among [other features](#features). In this sense, **clifm** is certainly a file manager, but also a shell extension.
 
-Briefly put, with _clifm_ the command-line is always already there, never hidden :godmode: :muscle:
+Briefly put, with **clifm** the command-line is always already there, never hidden :godmode: :muscle:
 
 ---
 <sup>1</sup> <i>For more information about these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>. \
@@ -107,7 +107,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
 - Specific
   - [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI at all, but just a command-line
   - It can run on the kernel built-in console and even on a SSH or any other remote session
-  - Highly compatible with old VT102-only terminal emulators like Rxvt and Rxvt-based ones: even on a terminal with only 8 colors and no Unicode support, _clifm_ will just work. [It can run even on an old DEC-VT100 terminal!](https://github.com/leo-arch/clifm/wiki/Extra#clifm-running-on-a-dec-vt100-terminal-1978)
+  - Highly compatible with old VT102-only terminal emulators like Rxvt and Rxvt-based ones: even on a terminal with only 8 colors and no Unicode support, **clifm** will just work. [It can run even on an old DEC-VT100 terminal!](https://github.com/leo-arch/clifm/wiki/Extra#clifm-running-on-a-dec-vt100-terminal-1978)
   - [High performance](https://github.com/leo-arch/clifm/wiki/Performance). Incredibly lightweight and fast even on really old hardware
   - [Short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary)
   - [Entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names
@@ -175,7 +175,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout)
 - Misc
   - [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-  - [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well)
+  - [File previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well)
   - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk), including emoji-icons :smirk:
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
   - [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
@@ -260,8 +260,8 @@ For more information/supported platforms consult the [installation page](https:/
 
 ## Getting started
 
-To start using _clifm_ **you don't need to learn anything new**: the usual shell commands will just work. However, there is much more than just shell commands... \
-✓ The `help` command gives you a quick introduction to _clifm_: once in the _clifm_ prompt, enter `help` or `?`. \
+To start using **clifm** _you don't need to learn anything new_: the usual shell commands will just work. However, there is much more than just shell commands... \
+✓ The `help` command gives you a quick introduction to **clifm**: once in the **clifm** prompt, enter `help` or `?`. \
 ✓ Type `help` and then press <kbd>TAB</kbd> to get a list of _help topics_. Select the one you want and press <kbd>Enter</kbd>. \
 ✓ To jump into the **COMMANDS** section in the [manpage](https://github.com/leo-arch/clifm/blob/master/misc/clifm.1.pdf), simply enter `cmd` or press <kbd>F2</kbd>. \
 ✓ Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page. \
@@ -274,7 +274,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 
 ## Support
 
-_Clifm_ is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). Consult the [compilation page](https://github.com/leo-arch/clifm/blob/master/src/README.md#5-compilation).\
+**Clifm** is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). Consult the [compilation page](https://github.com/leo-arch/clifm/blob/master/src/README.md#5-compilation).\
 It works on Linux, Termux (Android), FreeBSD, NetBSD, OpenBSD, MacOS, Haiku, and Cygwin, on x86 and ARM architectures.
 
 ---
