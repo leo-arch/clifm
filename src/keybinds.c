@@ -1614,6 +1614,13 @@ rl_plugin4(int count, int key)
 }
 
 static int
+rl_launch_view(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	return run_kb_cmd("view");
+}
+
+static int
 rl_onlydirs(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
@@ -2033,6 +2040,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("only-dirs"), rl_onlydirs);
 
 		/* Misc */
+		rl_bind_keyseq(find_key("launch-view"), rl_launch_view);
 		rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
 		rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
 		rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
@@ -2128,6 +2136,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-x", rl_sort_next);
 		rl_bind_keyseq("\\M-,", rl_onlydirs);
 
+		rl_bind_keyseq("\\M--", rl_launch_view);
 		rl_bind_keyseq("\\C-x", rl_new_instance);
 		rl_bind_keyseq("\\M-h", rl_dirhist);
 		rl_bind_keyseq("\\M-b", rl_bookmarks);

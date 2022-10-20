@@ -45,6 +45,7 @@ next-dir2:\e[c
 next-dir3:\e[2C
 # Shift-right (others)
 next-dir4:\e[1;2C
+
 first-dir:\C-\M-j
 last-dir:\C-\M-k
 
@@ -80,12 +81,12 @@ workspace4:\M-4
 
 # Help
 # F1-3
-show-manpage:\eOP
-show-manpage2:\e[11~
 show-cmds:\eOQ
 show-cmds2:\e[12~
 show-kbinds:\eOR
 show-kbinds2:\e[13~
+show-manpage:\eOP
+show-manpage2:\e[11~
 
 archive-sel:\C-\M-a
 bookmark-sel:\C-\M-b
@@ -94,8 +95,9 @@ clear-line:\M-c
 clear-msgs:\M-t
 create-file:\M-n
 deselect-all:\M-d
-export-sel:\C-\M-e
 dirs-first:\M-g
+export-sel:\C-\M-e
+launch-view:\M--
 lock:\M-o
 mountpoints:\M-m
 move-sel:\C-\M-n
@@ -125,13 +127,13 @@ trash-sel:\C-\M-t
 untrash-all:\C-\M-u
 
 # F6-12
+edit-color-scheme:\e[19~
+open-bookmarks:\e[23~
+open-config:\e[21~
+#open-jump-db:\e[18~
+open-keybinds:\e[20~
 open-mime:\e[17~
 open-preview:\e[18~
-#open-jump-db:\e[18~
-edit-color-scheme:\e[19~
-open-keybinds:\e[20~
-open-config:\e[21~
-open-bookmarks:\e[23~
 quit:\e[24~
 
 # Plugins

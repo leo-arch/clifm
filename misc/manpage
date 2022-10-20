@@ -1021,7 +1021,7 @@ the '\fIpaste sel\fR' or '\fIv sel\fR' command copies the currently selected fil
 show \fBclifm\fR version details.
 .TP
 .B view
-preview files in the current directory (full screen). Requires \fBfzf\fR(1).
+preview files in the current directory (full screen). Requires \fBfzf\fR(1). Alt-- is also available.
 .sp
 Since version 1.8.1, this command allows files selection. Mark files with the TAB key and then press Enter or Right to confirm: marked files will be automatically sent to the Selection box.
 .sp
@@ -1097,7 +1097,7 @@ If using FZF for TAB completion, multi-selection is allowed.
 .TP
 \fBAlt\-w:\fR Toggle full path file names in virtual directories
 .TP
-\fBC\-l:\fR Refresh the screen (reprint files in current directory and update prompt)
+\fBC\-l:\fR Refresh the screen (reprint the list of files in the current directory)
 .TP
 \fBAlt\-t:\fR Clear program messages
 .TP
@@ -1110,6 +1110,8 @@ If using FZF for TAB completion, multi-selection is allowed.
 \fBAlt\-n:\fR Create new file or directory
 .TP
 \fBAlt\-s:\fR Open the Selection Box
+.TP
+\fBAlt\--:\fR Launch the files previewer (\fIview\fR command)
 .TP
 \fBAlt\-a:\fR Select all files in the current working directory
 .TP
@@ -2741,7 +2743,7 @@ List available actions/plugins:
 
 - Want file previews?
 
-    \fBview\fR
+    \fBview\fR (or \fBAlt--\fR)
 
 \fBNOTE\fR: This feature depends on \fBfzf\fR(1). Run with \fI\-\-fzfpreview\fR to enable file previews for TAB completion
 
