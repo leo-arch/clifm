@@ -2597,13 +2597,13 @@ Get help:
 
 - Change directory to \fI/etc\fR:
 
-    \fB/etc\fR
+    \fB/etc\fR (\fIcd /etc\fR works as well)
 
 - Change-to/open the directory/file whose ELN is 5 in the current directory:
 
     \fB5\fR
 
-\fBTIP\fR: Press TAB to make sure 5 is the file you want. If the suggestions system is enabled, just pay attention to the suggestion. Press Left to accept the given suggestion
+\fBTIP\fR: Press TAB to make sure 5 is the file you want. If the suggestions system is enabled, just pay attention to the suggestion. Press Right to accept the given suggestion
 
 - Open \fImyfile.txt\fR (with the default associated application):
 
@@ -2621,7 +2621,7 @@ Get help:
 
     \fBj xproj\fR
 
-\fBNOTE\fR: This depends however on the database ranking. For more accuracy: 'j mike xproj'
+\fBNOTE\fR: This depends however on the database ranking. For more accuracy: \fIj mike xproj\fR. TAB completion is available: \fIj xproj<TAB>\fR
 
 - Go back to the directory you came from:
 
@@ -2633,7 +2633,7 @@ Get help:
 
     \fBn myfile mydir/\fR
 
-\fBNOTE\fR: Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: 'touch myfile' or 'nano myfile'
+\fBNOTE\fR: Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: \fItouch myfile\fR or \fInano myfile\fR
 
 - Change to detail/long view mode:
 
@@ -2645,7 +2645,7 @@ Get help:
 
 - Reprint the list of files in the current directory:
 
-    \fBrf\fR
+    \fBrf\fR (or just press Enter)
 
 - Select all c files in the current directory:
 
@@ -2663,21 +2663,21 @@ Get help:
 
     \fBsb\fR
 
-- Deselect a few files:
+- Selectively deselect files using a menu:
 
-    \fBds\fR
+    \fBds\fR (\fIds <TAB>\fR also works)
 
 - Send a few files to the trash can:
 
     \fBt 1-3 *.old\fR
 
-- Undelete trashed files:
+- Selectively undelete trashed files using a menu:
 
-    \fBu\fR
+    \fBu\fR (\fIu <TAB>\fR also works)
 
-- Remove files from the trash can:
+- Selectively remove files from the trash can using a menu:
 
-    \fBt del\fR
+    \fBt del\fR (\fIt del <TAB>\fR also works)
 
 - Empty the trash can:
 
@@ -2708,6 +2708,8 @@ Get help:
     \fBr sel\fR
 
 \fBNOTE\fR: To remove files in bulk via a text editor use the \fIrr\fR command.
+.sp
+\fBNOTE 2\fR: Press TAB immediately after \fIsel\fR to selectively operate on selected files.
 
 - Rename the file whose ELN is 12:
 
@@ -2719,15 +2721,15 @@ Get help:
 
 - Open the bookmarks screen. Once there, enter the bookmark ELN (1 ...) or its hotkey ([xx]) to open it:
 
-    \fBbm\fR (or \fBCtrl-b\fR)
+    \fBbm\fR (or \fIAlt-b\fR)
 
 - Switch to workspace 2:
 
-    \fBws2\fR (or \fBAlt-2\fR)
+    \fBws2\fR (or \fIAlt-2\fR)
 
 - View and/or edit the configuration file:
 
-    \fBedit\fR (or \fBF10\fR)
+    \fBedit\fR (or \fIF10\fR)
 
 - Change to profile \fItest\fR:
 
@@ -2735,7 +2737,7 @@ Get help:
 
 - Show hidden files:
 
-    \fBhf on\fR (or \fBAlt-.\fR)
+    \fBhf on\fR (or \fIAlt-.\fR)
 
 List available actions/plugins:
 
@@ -2743,7 +2745,7 @@ List available actions/plugins:
 
 - Want file previews?
 
-    \fBview\fR (or \fBAlt--\fR)
+    \fBview\fR (or \fIAlt--\fR)
 
 \fBNOTE\fR: This feature depends on \fBfzf\fR(1). Run with \fI\-\-fzfpreview\fR to enable file previews for TAB completion
 

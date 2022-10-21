@@ -525,7 +525,7 @@ remove_from_trash(char **args)
 		if (autols == 1 && exit_status == EXIT_SUCCESS)
 			reload_dirlist();
 		print_reload_msg(_("%zu file(s) removed from the trash can\n"), removed_files);
-		print_reload_msg(_("%zu trashed file(s)\n"), trash_n - removed_files);
+		print_reload_msg(_("%zu total trashed file(s)\n"), trash_n - removed_files);
 		return exit_status;
 	}
 
@@ -829,7 +829,7 @@ untrash_function(char **comm)
 			if (autols == 1)
 				reload_dirlist();
 			print_reload_msg(_("%zu file(s) untrashed\n"), untrashed_files);
-			print_reload_msg(_("%zu trashed file(s)\n"), n);
+			print_reload_msg(_("%zu total trashed file(s)\n"), n);
 		}
 
 		return exit_status;
