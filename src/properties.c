@@ -280,8 +280,6 @@ get_properties(char *filename, const int dsize)
 	if (!color)
 		color = fi_c;
 
-	struct perms_t perms = get_file_perms(attr.st_mode);
-
 	if (colorize == 0) {
 		cdate = df_c;
 		csize = df_c;
@@ -313,27 +311,28 @@ get_properties(char *filename, const int dsize)
 	remove_bold_attr(&t_ctype);
 
 	/* Print file properties */
-	printf("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
-		   "Links: %s%zu%s ",
-	    cnum_val, attr.st_mode & 07777, cend,
-	    t_ctype, file_type, cend,
+	struct perms_t perms = get_file_perms(attr.st_mode);
+	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
+		"Links: %s%zu%s "),
+		cnum_val, attr.st_mode & 07777, cend,
+		t_ctype, file_type, cend,
 		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, cend,
 		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, cend,
 		perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend,
-	    is_acl(filename) ? "+" : "", cbold, (size_t)link_n, cend);
+		is_acl(filename) ? "+" : "", cbold, (size_t)link_n, cend);
 
 	free(t_ctype);
 
 	int link_to_dir = 0;
 
 	if (file_type == 0) {
-		printf("\tName: %s%s%s\n", no_c, wname ? wname : filename, df_c);
+		printf(_("\tName: %s%s%s\n"), no_c, wname ? wname : filename, df_c);
 	} else if (file_type != 'l') {
-		printf("\tName: %s%s%s\n", color, wname ? wname : filename, df_c);
+		printf(_("\tName: %s%s%s\n"), color, wname ? wname : filename, df_c);
 	} else if (linkname) {
 		char *link_color = get_link_color(linkname, &link_to_dir, dsize);
 		char *n = abbreviate_file_name(linkname);
-		printf("\tName: %s%s%s -> %s%s%s\n", color, wname ? wname : filename, df_c,
+		printf(_("\tName: %s%s%s -> %s%s%s\n"), color, wname ? wname : filename, df_c,
 			link_color, n ? n : linkname, NC);
 		free(linkname);
 		free(n);
@@ -344,7 +343,7 @@ get_properties(char *filename, const int dsize)
 			printf(_("\tName: %s%s%s -> %s (broken link)\n"), color, wname ? wname : filename,
 			    df_c, link);
 		} else {
-			printf("\tName: %s%s%s -> ???\n", color, wname ? wname : filename, df_c);
+			printf(_("\tName: %s%s%s -> ???\n"), color, wname ? wname : filename, df_c);
 		}
 	}
 
