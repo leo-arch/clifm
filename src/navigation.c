@@ -568,6 +568,17 @@ cd_function(char *new_path, const int cd_flag)
 	if (!new_path || !*new_path) {
 		if ((ret = go_home(cd_flag)) != EXIT_SUCCESS)
 			return ret;
+	} else if (*new_path == '-' && !new_path[1]) {
+		/* Implementation of the shell 'cd -' command */
+		static int state = 0;
+		char *c[] = { state == 0 ? "b" : "f", NULL };
+		if (state == 0) {
+			state = 1;
+			return back_function(c);
+		} else {
+			state = 0;
+			return forth_function(c);
+		}
 	} else {
 		if ((ret = change_to_path(new_path, cd_flag)) != EXIT_SUCCESS)
 			return ret;

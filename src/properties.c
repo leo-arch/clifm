@@ -137,7 +137,8 @@ get_total_size(const int link_to_dir, char *filename)
 	return total_size;
 }
 
-/* Return value and color for each properties field in a struct of type perms_t */
+/* Returns the symbolic value and color for each properties field for a
+ * file with mode MODE */
 static struct perms_t
 get_file_perms(const mode_t mode)
 {
