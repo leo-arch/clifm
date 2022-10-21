@@ -66,6 +66,29 @@
 /* Our resulting time string won't go usually beyond 29 chars. But since this
  * length is locale dependent (at least %b), let's use a much larger buffer */
 
+struct perms_t {
+	/* Field values */
+	char ur;
+	char uw;
+	char ux;
+	char gr;
+	char gw;
+	char gx;
+	char or;
+	char ow;
+	char ox;
+	/* Field colors */
+	char *cur;
+	char *cuw;
+	char *cux;
+	char *cgr;
+	char *cgw;
+	char *cgx;
+	char *cor;
+	char *cow;
+	char *cox;
+};
+
 static char *
 get_link_color(char *name, int *link_dir, const int dsize)
 {
@@ -112,6 +135,58 @@ get_total_size(const int link_to_dir, char *filename)
 	}
 
 	return total_size;
+}
+
+/* Return value and color for each properties field in a struct of type perms_t */
+static struct perms_t
+get_file_perms(const mode_t mode)
+{
+	struct perms_t p;
+
+	p.ur = p.uw = p.ux = '-';
+	p.gr = p.gw = p.gx = '-';
+	p.or = p.ow = p.ox = '-';
+
+	p.cur = p.cuw = p.cux = dn_c;
+	p.cgr = p.cgw = p.cgx = dn_c;
+	p.cor = p.cow = p.cox = dn_c;
+
+	mode_t val = (mode & (mode_t)~S_IFMT);
+	if (val & S_IRUSR) { p.ur = 'r'; p.cur = dr_c; }
+	if (val & S_IWUSR) { p.uw = 'w'; p.cuw = dw_c; }
+	if (val & S_IXUSR)
+		{ p.ux = 'x'; p.cux = S_ISDIR(mode) ? dxd_c : dxr_c; }
+
+	if (val & S_IRGRP) { p.gr = 'r'; p.cgr = dr_c; }
+	if (val & S_IWGRP) { p.gw = 'w'; p.cgw = dw_c; }
+	if (val & S_IXGRP)
+		{ p.gx = 'x'; p.cgx = S_ISDIR(mode) ? dxd_c : dxr_c; }
+
+	if (val & S_IROTH) { p.or = 'r'; p.cor = dr_c; }
+	if (val & S_IWOTH) { p.ow = 'w'; p.cow = dw_c; }
+	if (val & S_IXOTH)
+		{ p.ox = 'x'; p.cox = S_ISDIR(mode) ? dxd_c : dxr_c; }
+
+	if (mode & S_ISUID) {
+		(val & S_IXUSR) ? (p.ux = 's') : (p.ux = 'S');
+		p.cux = dp_c;
+	}
+	if (mode & S_ISGID) {
+		(val & S_IXGRP) ? (p.gx = 's') : (p.gx = 'S');
+		p.cgx = dp_c;
+	}
+	if (mode & S_ISVTX) {
+		(val & S_IXOTH) ? (p.ox = 't'): (p.ox = 'T');
+		p.cox = dp_c;
+	}
+
+	if (colorize == 0) {
+		p.cur = p.cuw = p.cux = df_c;
+		p.cgr = p.cgw = p.cgx = df_c;
+		p.cor = p.cow = p.cox = df_c;
+	}
+
+	return p;
 }
 
 static int
@@ -205,50 +280,7 @@ get_properties(char *filename, const int dsize)
 	if (!color)
 		color = fi_c;
 
-	/* File permissions */
-	char read_usr = '-', write_usr = '-', exec_usr = '-',
-	     read_grp = '-', write_grp = '-', exec_grp = '-',
-	     read_others = '-', write_others = '-', exec_others = '-';
-
-	/* Colors for permissions bits */
-	char *cu1 = dn_c, *cu2 = dn_c, *cu3 = dn_c,
-		 *cg1 = dn_c, *cg2 = dn_c, *cg3 = dn_c,
-		 *co1 = dn_c, *co2 = dn_c, *co3 = dn_c;
-
-	mode_t val = (attr.st_mode & (mode_t)~S_IFMT);
-	if (val & S_IRUSR) { read_usr = 'r'; cu1 = dr_c; }
-	if (val & S_IWUSR) { write_usr = 'w'; cu2 = dw_c; }
-	if (val & S_IXUSR) {
-		exec_usr = 'x';
-		cu3 = S_ISDIR(attr.st_mode) ? dxd_c : dxr_c;
-	}
-
-	if (val & S_IRGRP) { read_grp = 'r'; cg1 = dr_c; }
-	if (val & S_IWGRP) { write_grp = 'w'; cg2 = dw_c; }
-	if (val & S_IXGRP) {
-		exec_grp = 'x';
-		cg3 = S_ISDIR(attr.st_mode) ? dxd_c : dxr_c;
-	}
-
-	if (val & S_IROTH) { read_others = 'r'; co1 = dr_c; }
-	if (val & S_IWOTH) { write_others = 'w'; co2 = dw_c; }
-	if (val & S_IXOTH) {
-		exec_others = 'x';
-		co3 = S_ISDIR(attr.st_mode) ? dxd_c : dxr_c;
-	}
-
-	if (attr.st_mode & S_ISUID) {
-		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
-		cu3 = dp_c;
-	}
-	if (attr.st_mode & S_ISGID) {
-		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
-		cg3 = dp_c;
-	}
-	if (attr.st_mode & S_ISVTX) {
-		(val & S_IXOTH) ? (exec_others = 't'): (exec_others = 'T');
-		co3 = dp_c;
-	}
+	struct perms_t perms = get_file_perms(attr.st_mode);
 
 	if (colorize == 0) {
 		cdate = df_c;
@@ -259,15 +291,6 @@ get_properties(char *filename, const int dsize)
 		ctype = df_c;
 		cend = df_c;
 		cbold = df_c;
-		cu1 = df_c;
-		cu2 = df_c;
-		cu3 = df_c;
-		cg1 = df_c;
-		cg2 = df_c;
-		cg3 = df_c;
-		co1 = df_c;
-		co2 = df_c;
-		co3 = df_c;
 	}
 
 	/* Get number of links to the file */
@@ -294,9 +317,9 @@ get_properties(char *filename, const int dsize)
 		   "Links: %s%zu%s ",
 	    cnum_val, attr.st_mode & 07777, cend,
 	    t_ctype, file_type, cend,
-	    cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
-	    cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
-	    co1, read_others, co2, write_others, co3, exec_others, cend,
+		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, cend,
+		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, cend,
+		perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend,
 	    is_acl(filename) ? "+" : "", cbold, (size_t)link_n, cend);
 
 	free(t_ctype);
@@ -513,57 +536,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	default: file_type =       '?'; break;
 	}
 
-	/* File permissions bit char */
-	char read_usr = '-', write_usr = '-', exec_usr = '-',
-	     read_grp = '-', write_grp = '-', exec_grp = '-',
-	     read_others = '-', write_others = '-', exec_others = '-';
-
-	/* Colors for each field of the permissions string */
-	char *cu1 = dn_c, *cu2 = dn_c, *cu3 = dn_c,
-		 *cg1 = dn_c, *cg2 = dn_c, *cg3 = dn_c,
-		 *co1 = dn_c, *co2 = dn_c, *co3 = dn_c;
-
-	mode_t val = (props->mode & (mode_t)~S_IFMT);
-	if (val & S_IRUSR) { read_usr = 'r'; cu1 = dr_c; }
-	if (val & S_IWUSR) { write_usr = 'w'; cu2 = dw_c; }
-	if (val & S_IXUSR) { exec_usr = 'x'; cu3 = props->dir ? dxd_c : dxr_c; }
-
-	if (val & S_IRGRP) { read_grp = 'r'; cg1 = dr_c; }
-	if (val & S_IWGRP) { write_grp = 'w'; cg2 = dw_c; }
-	if (val & S_IXGRP) { exec_grp = 'x'; cg3 = props->dir ? dxd_c : dxr_c; }
-
-	if (val & S_IROTH) { read_others = 'r'; co1 = dr_c; }
-	if (val & S_IWOTH) { write_others = 'w'; co2 = dw_c; }
-	if (val & S_IXOTH) { exec_others = 'x'; co3 = props->dir ? dxd_c : dxr_c; }
-
-	if (props->mode & S_ISUID) {
-		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
-		cu3 = dp_c;
-	}
-	if (props->mode & S_ISGID) {
-		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
-		cg3 = dp_c;
-	}
-	if (props->mode & S_ISVTX) {
-		(val & S_IXOTH) ? (exec_others = 't') : (exec_others = 'T');
-		co3 = dp_c;
-	}
-
 	if (colorize == 0) {
 		cdate = df_c;
 		csize = df_c;
 		cid = df_c;
 		ctype = df_c;
 		cend = df_c;
-		cu1 = df_c;
-		cu2 = df_c;
-		cu3 = df_c;
-		cg1 = df_c;
-		cg2 = df_c;
-		cg3 = df_c;
-		co1 = df_c;
-		co2 = df_c;
-		co3 = df_c;
 	}
 
 	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
@@ -640,12 +618,13 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 
 	char attr_s[(MAX_COLOR * 14) + 16]; /* 14 colors + 15 single chars + NUL byte */
 	if (prop_fields.perm == PERM_SYMBOLIC) {
+		struct perms_t perms = get_file_perms(props->mode);
 		snprintf(attr_s, sizeof(attr_s),
 			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s ",
 			t_ctype, file_type, cend,
-			cu1, read_usr, cu2, write_usr, cu3, exec_usr, cend,
-			cg1, read_grp, cg2, write_grp, cg3, exec_grp, cend,
-			co1, read_others, co2, write_others, co3, exec_others, cend);
+			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, cend,
+			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, cend,
+			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend);
 /*			is_acl(props->name) ? "+" : ""); */
 	} else if (prop_fields.perm == PERM_NUMERIC) {
 		snprintf(attr_s, sizeof(attr_s), "%s%04o%s ", do_c, props->mode & 07777, cend);
