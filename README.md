@@ -197,6 +197,11 @@ For a detailed explanation of each of these features, follow the corresponding l
 <details>
 <summary>Click here to expand</summary>
 
+* `Development`:
+  - `cd -` works now just like in most shells
+  - The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view) can now select files via <kbd>TAB</kbd>
+  - Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view) via <kbd>Alt--</kbd>
+  - Use `--fzfpreview-hidden` to start the preview window hidden (toggle via <kbd>Alt-p</kbd>)
 * `version 1.8 (Otis)`:
   - If upgrading from a previous version (optional, but recommended):
     - <kbd>F7</kbd> opens now shotgun's configuration file (instead of the jump database file). Update `keybindings.clifm`: removing the file and restarting is enough. Manually: run `kb edit` and then replace `open-jump-db:\e[18~` by `open-preview:\e[18~`.
