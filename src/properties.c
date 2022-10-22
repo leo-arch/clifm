@@ -200,16 +200,16 @@ static int
 validate_numval(char *s, const size_t l)
 {
 	if (l > 4 || l < 3) {
-		fprintf(stderr, "p: %s: %s digits in permissions string. "
-			"Either 3 or 4 are expected\n", s, l > 4 ? "Extra" : "Too few");
+		fprintf(stderr, _("pc: %s: %s digits in permissions string. "
+			"Either 3 or 4 are expected\n"), s, l > 4 ? _("Extra") : _("Too few"));
 		return EXIT_FAILURE;
 	}
 
 	int i = 0;
 	if (l == 4) {
 		if (*s == '3' || *s < '0' || *s > '4') {
-			fprintf(stderr, "pc: %s: Invalid first digit. Valid values "
-				"are: 0, 1, 2, 4\n", s);
+			fprintf(stderr, _("pc: %s: Invalid first digit. Valid values "
+				"are: 0, 1, 2, 4\n"), s);
 			return EXIT_FAILURE;
 		}
 		i = 1;
@@ -217,8 +217,8 @@ validate_numval(char *s, const size_t l)
 
 	for (; s[i]; i++) {
 		if (s[i] < '0' || s[i] > '7') {
-			fprintf(stderr, "pc: %s: Invalid digit. Values in the range 0-7 "
-				"are expected\n", s);
+			fprintf(stderr, _("pc: %s: Invalid digit. Values in the range 0-7 "
+				"are expected\n"), s);
 			return EXIT_FAILURE;
 		}
 	}
@@ -236,8 +236,8 @@ validate_new_perms(char *s)
 		return validate_numval(s, l);
 
 	if (l != 9) {
-		fprintf(stderr, "pc: %s: %s characters in permissions string: 9 are expected\n",
-			s, l < 9 ? "Too few" : "Extra");
+		fprintf(stderr, _("pc: %s: %s characters in permissions string: 9 are expected\n"),
+			s, l < 9 ? _("Too few") : _("Extra"));
 		return EXIT_FAILURE;
 	}
 
@@ -248,14 +248,14 @@ validate_new_perms(char *s)
 	|| (s[2] != 'x' && s[2] != '-' && s[2] != 's')
 	|| (s[5] != 'x' && s[5] != '-' && s[5] != 's')
 	|| (s[8] != 'x' && s[8] != '-' && s[8] != 't')) {
-		fprintf(stderr, "pc: %s: Invalid characters in permissions string\n", s);
+		fprintf(stderr, _("pc: %s: Invalid characters in permissions string\n"), s);
 		return EXIT_FAILURE;
 	}
 
 	if ((s[2] == 's' && (s[5] == 's' || s[8] == 't'))
 	|| (s[5] == 's' && (s[2] == 's' || s[8] == 't'))
 	|| (s[8] == 't' && (s[2] == 's' || s[5] == 's'))) {
-		fprintf(stderr, "pc: %s: Only one special permission is allowed at a time\n", s);
+		fprintf(stderr, _("pc: %s: Only one special permission is allowed at a time\n"), s);
 		return EXIT_FAILURE;
 	}
 
@@ -304,10 +304,10 @@ get_new_perms(char *str, const int diff)
 	xrename = 1;
 
 	if (diff == 1)
-		printf("Files with different sets of permissions. Using a generic permissions string\n");
+		printf(_("Files with different sets of permissions. Using a generic permissions string\n"));
 	char m[NAME_MAX];
-	snprintf(m, sizeof(m), "Edit file permissions ('Ctrl-d' to quit)\n"
-		"\001%s\002>\001%s\002 ", mi_c, tx_c);
+	snprintf(m, sizeof(m), _("Edit file permissions ('Ctrl-d' to quit)\n"
+		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 
 	alt_rl_prompt(m, str);
 
@@ -321,8 +321,8 @@ get_new_perms(char *str, const int diff)
 	xrename = 0;
 	prompt_offset = poffset_bk;
 
-	if (diff == 0 && *str == *new_perms && strcmp(str, new_perms) == 0) {
-		fprintf(stderr, "pc: Nothing to do\n");
+	if (diff == 0 && new_perms && *str == *new_perms && strcmp(str, new_perms) == 0) {
+		fprintf(stderr, _("pc: Nothing to do\n"));
 		free(new_perms);
 		new_perms = (char *)NULL;
 	}
@@ -418,7 +418,7 @@ set_file_perms(char **args)
 	}
 
 	if (n > 0)
-		printf("pc: Permissions changed for %zu file(s)\n", n);
+		printf(_("pc: Permissions changed for %zu file(s)\n"), n);
 
 	free(new_perms);
 	if (octal_str != new_perms)
