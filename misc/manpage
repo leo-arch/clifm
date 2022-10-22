@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Oct 20, 2022" "clifm 1.8.1" "CLIFM Manual"
+.TH "CLIFM" "1" "Oct 22, 2022" "clifm 1.8.2" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -112,7 +112,7 @@ List of \fBclifm\fR features:
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Commands and directory history function
-  4) A powerfull TAB completion/expansion system (see the \fBBUILT\-IN EXPANSIONS\fR section below)
+  4) A powerfull TAB completion/expansion system with fzf integration and file previews (see the \fBBUILT\-IN EXPANSIONS\fR section below)
   5) More than 40 customizable keyboard shortcuts
   6) Wildcards and regex auto\-expansion
   7) Braces auto\-expansion
@@ -161,6 +161,8 @@ List of \fBclifm\fR features:
   50) \fIEtiqueta\fR, a files tagging system
   51) Virtual directories
   52) Desktop notifications
+  53) File previews (see the \fIview\fR command)
+  54) A built-in file permissions editor (see the \fIpc\fR command)
 
 .SH 4. PARAMETERS
 .SH POSITIONAL PARAMETERS
@@ -915,6 +917,17 @@ For more information about file details consult the file-details help topic: \fI
 .TP
 .B path, cwd
 print the current working directory.
+.TP
+.B pc \fIELN/FILE\fR...
+Interactively edit file permissions of files passed as arguments.
+.sp
+A new prompt is displayed using the permissions string of the file to be edited as placeholder. If editing multiple files with different sets of permissions, a generic permissions string (rw-r--r--) is used instead.
+.sp
+Bear in mind that, if editing multiple files at once, say \fIpc sel\fR or \fIpc *.c\fR, the new permissions set will be applied to all of them.
+.sp
+Both symbolic and numeric notation for the new permissions set are allowed.
+.sp
+If you just need to toggle the executable permission bit on a file, you can use the \fIte\fR command.
 .TP
 .B pf, prof, profile \fR[\fIls\fR, \fIlist\fR] [\fIset\fR, \fIadd\fR, \fIdel PROFILE\fR]
 with no arguments, prints the name of the currently used profile. Use the \fIls\fR or \fIlist\fR option to list available profiles. To switch, add or delete a profile, use the \fIset\fR, \fIadd\fR, and \fIdel\fR options respectively followed by the corresponding profile name. Bear in mind that, when switching profiles, command line arguments will be ignored.
