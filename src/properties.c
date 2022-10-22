@@ -50,6 +50,10 @@
 #include "colors.h"
 #include "misc.h"
 
+/* Required by the pc command */
+#include "readline.h"
+#include "file_operations.h"
+
 #ifndef major
 # define major(x) ((x >> 8) & 0x7F)
 #endif
@@ -137,8 +141,8 @@ get_total_size(const int link_to_dir, char *filename)
 	return total_size;
 }
 
-/* Returns the symbolic value and color for each properties field for a
- * file with mode MODE */
+/* Returns a struct perms_t with the symbolic value and color for each
+ * properties field of a file with mode MODE */
 static struct perms_t
 get_file_perms(const mode_t mode)
 {
@@ -190,8 +194,8 @@ get_file_perms(const mode_t mode)
 	return p;
 }
 
-#include "readline.h"
-#include "file_operations.h"
+/* Returns EXIT_SUCCESS if the permissions string S (in numeric notation)
+ * is a valid permissions string or EXIT_FAILURE otherwise */
 static int
 validate_numval(char *s, const size_t l)
 {
@@ -222,6 +226,8 @@ validate_numval(char *s, const size_t l)
 	return EXIT_SUCCESS;
 }
 
+/* Returns EXIT_SUCCESS if the permissions string S is a valid permissions
+ * string or EXIT_FAILURE otherwise */
 static int
 validate_new_perms(char *s)
 {
@@ -256,6 +262,8 @@ validate_new_perms(char *s)
 	return EXIT_SUCCESS;
 }
 
+/* Convert permissions in symbolic notation given by S into octal notation
+ * and return it as a string */
 static char *
 perm2octal(char *s)
 {
@@ -284,6 +292,10 @@ perm2octal(char *s)
 	return p;
 }
 
+/* Ask the user to edit permissions given by STR and return the edited string
+ * If DIFF is set to 0, we are editing a single file or multiple files with the
+ * same set of permissions. Otherwise, we have multiple files with different
+ * sets of permissions */
 static char *
 get_new_perms(char *str, const int diff)
 {
@@ -292,7 +304,7 @@ get_new_perms(char *str, const int diff)
 	xrename = 1;
 
 	if (diff == 1)
-		printf("Files with different set of permissions. Using a generic permissions string\n");
+		printf("Files with different sets of permissions. Using a generic permissions string\n");
 	char m[NAME_MAX];
 	snprintf(m, sizeof(m), "Edit file permissions ('Ctrl-d' to quit)\n"
 		"\001%s\002>\001%s\002 ", mi_c, tx_c);
@@ -309,7 +321,6 @@ get_new_perms(char *str, const int diff)
 	xrename = 0;
 	prompt_offset = poffset_bk;
 
-	// diff == 0: Either a single file or multiple files with the same permissions
 	if (diff == 0 && *str == *new_perms && strcmp(str, new_perms) == 0) {
 		fprintf(stderr, "pc: Nothing to do\n");
 		free(new_perms);
@@ -319,6 +330,12 @@ get_new_perms(char *str, const int diff)
 	return new_perms;
 }
 
+/* Returns the permissions string of files passed as arguments
+ * If only a single file or multiple files with the same set of permissions,
+ * the actual permissions are returned. Otherwise, a generic permissions
+ * string (0644 == rw-r--r--) is returned.
+ * The value of DIFF is updated to 1 if using a generic permissions string,
+ * or to 0 if not */
 static char *
 get_perm_str(char **s, int *diff)
 {
@@ -326,7 +343,7 @@ get_perm_str(char **s, int *diff)
 	struct stat a, b;
 	*diff = 0;
 
-	if (s[1]) { // We have multiple files
+	if (s[1]) { /* We have multiple files */
 		size_t i;
 		if (stat(s[0], &a) == -1) {
 			fprintf(stderr, "stat: %s :%s\n", s[0], strerror(errno));
@@ -349,13 +366,13 @@ get_perm_str(char **s, int *diff)
 		}
 
 		if (*diff == 1) {
-			// We have files with different permissions: let's use a generic one
-			strcpy(ptr, "rw-r--r--"); // 0644
+			/* We have files with different permissions: let's use a generic one */
+			strcpy(ptr, "rw-r--r--"); /* 0644 */
 			return ptr;
 		}
 	}
 
-	// We have either a single file or multiple files with the same permissions
+	/* We have either a single file or multiple files with the same permissions */
 	if (stat(s[0], &a) == -1) {
 		fprintf(stderr, "stat: %s :%s\n", s[0], strerror(errno));
 		free(ptr);
@@ -369,6 +386,7 @@ get_perm_str(char **s, int *diff)
 	return ptr;
 }
 
+/* Change permissions of files passed via ARGS */
 int
 set_file_perms(char **args)
 {
@@ -377,7 +395,7 @@ set_file_perms(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	int diff = 0; // Either a single file o multiple files with same perms
+	int diff = 0; /* Either a single file o multiple files with same perms */
 	char *pstr = get_perm_str(args + 1, &diff);
 	if (!pstr) return errno;
 
