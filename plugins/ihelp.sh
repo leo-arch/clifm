@@ -123,6 +123,7 @@ o, open@
 opener @
 ow @
 path, cwd@
+pc @
 pin @
 pf, prof, profile@
 pg, pager@
