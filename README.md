@@ -44,8 +44,8 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 ## Table of contents
 🔸 [Brief description](#brief-description) \
-🔸 [Introduction video](#clapper-introduction-video) \
 🔸 [Features](#features) \
+🔸 [Introduction video](#clapper-introduction-video) \
 🔸 [Installation](#floppy_disk-installation) \
 🔸 [Getting started](#getting-started) \
 🔸 [Support](#support) \
@@ -71,32 +71,12 @@ Briefly put, with **clifm** the command-line is always already there, never hidd
 
 ---
 
-
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="https://i.postimg.cc/YC77qSLK/interface-1-7-9.png"></p>
 <!---
 <p align="center"><img src="https://i.postimg.cc/BZMv62VP/interface1-7-5.png"></p>
 <p align="center"><img src="https://i.postimg.cc/Zqp4sgLK/clifm-interface8.png"></p>
 --->
-
----
-
-## :clapper: Introduction video
-
-[![Alt text](https://img.youtube.com/vi/CJmcisw9F90/0.jpg)](https://www.youtube.com/watch?v=CJmcisw9F90)
-
-<!---
-<details>
-<summary>Watch me fly!</summary>
-
-<h3 align="center"><br><i>Did I say it's fast?</i></h3>
-<p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="https://i.postimg.cc/CKx6zrvL/vid-thumb.png"></a></p>
-
-Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Dikiciyan) \
-**Note**: Icons and files preview depend on third-party software. Consult the [icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) and [files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) sections.
-
-</details>
--->
 
 ## Features
 
@@ -190,6 +170,25 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
 ---
 For a detailed explanation of each of these features, follow the corresponding links or consult the [Wiki](https://github.com/leo-arch/clifm/wiki).
 </details>
+
+---
+
+## :clapper: Introduction video
+
+[![Alt text](https://img.youtube.com/vi/CJmcisw9F90/0.jpg)](https://www.youtube.com/watch?v=CJmcisw9F90)
+
+<!---
+<details>
+<summary>Watch me fly!</summary>
+
+<h3 align="center"><br><i>Did I say it's fast?</i></h3>
+<p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="https://i.postimg.cc/CKx6zrvL/vid-thumb.png"></a></p>
+
+Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Dikiciyan) \
+**Note**: Icons and files preview depend on third-party software. Consult the [icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) and [files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) sections.
+
+</details>
+-->
 
 ---
 
