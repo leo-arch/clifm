@@ -43,11 +43,11 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 ---
 
 ## Table of contents
-🔸 [Brief description](#brief-description) \
-🔸 [Features](#features) \
+🔸 [Brief description](#space_invader-brief-description) \
+🔸 [Features](#hammer-features) \
 🔸 [Introduction video](#clapper-introduction-video) \
 🔸 [Installation](#floppy_disk-installation) \
-🔸 [Getting started](#getting-started) \
+🔸 [Getting started](#bulb-getting-started) \
 🔸 [Support](#support) \
 🔸 [License](#license) \
 🔸 [Contributing](#contributing) \
@@ -55,7 +55,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 ---
 
-## Brief description
+## :space_invader: Brief description
 
 **Clifm** is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
 
@@ -78,7 +78,9 @@ Briefly put, with **clifm** the command-line is always already there, never hidd
 <p align="center"><img src="https://i.postimg.cc/Zqp4sgLK/clifm-interface8.png"></p>
 --->
 
-## Features
+---
+
+## :hammer: Features
 
 <details>
 <summary>Click here to expand</summary>
@@ -192,7 +194,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 ---
 
-## Changelog
+## :newspaper: Changelog
 <details>
 <summary>Click here to expand</summary>
 
@@ -262,7 +264,7 @@ For more information/supported platforms consult the [installation page](https:/
 
 ---
 
-## Getting started
+## :bulb: Getting started
 
 To start using **clifm** _you don't need to learn anything new_: the usual shell commands will just work. However, there is much more than just shell commands... \
 ✓ The `help` command gives you a quick introduction to **clifm**: once in the **clifm** prompt, enter `help` or `?`. \
