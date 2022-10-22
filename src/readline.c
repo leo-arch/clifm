@@ -1039,7 +1039,7 @@ my_rl_quote(char *text, int mt, char *qp)
 char *
 my_rl_path_completion(const char *text, int state)
 {
-	if (!text || !*text)
+	if (!text || !*text || xrename == 2)
 		return (char *)NULL;
 	/* state is zero before completion, and 1 ... n after getting
 	 * possible completions. Example:
@@ -2765,7 +2765,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* If autocd or auto-open, try to expand ELN's first */
-		if (autocd == 1 || auto_open == 1) {
+		if ((autocd == 1 || auto_open == 1) && xrename != 2) {
 			if (*text >= '1' && *text <= '9') {
 				int n = atoi(text);
 

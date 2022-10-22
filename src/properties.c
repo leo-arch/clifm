@@ -301,7 +301,7 @@ get_new_perms(char *str, const int diff)
 {
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
-	xrename = 1;
+	xrename = 2;
 
 	if (diff == 1)
 		printf(_("Files with different sets of permissions. Using a generic permissions string\n"));
