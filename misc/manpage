@@ -927,6 +927,8 @@ Bear in mind that, if editing multiple files at once, say \fIpc sel\fR or \fIpc 
 .sp
 Both symbolic and numeric notation for the new permissions set are allowed.
 .sp
+Recursivelly setting file permissions is not supported. Use \fBchmod\fR(1) with the \fI-R\fR flag instead.
+.sp
 If you just need to toggle the executable permission bit on a file, you can use the \fIte\fR command.
 .TP
 .B pf, prof, profile \fR[\fIls\fR, \fIlist\fR] [\fIset\fR, \fIadd\fR, \fIdel PROFILE\fR]
