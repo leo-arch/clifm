@@ -919,7 +919,7 @@ For more information about file details consult the file-details help topic: \fI
 print the current working directory.
 .TP
 .B pc \fIELN/FILE\fR...
-Interactively edit file permissions of files passed as arguments.
+Interactively edit file permissions of files passed as arguments (only traditional Unix permissions are supported).
 .sp
 A new prompt is displayed using the permissions string of the file to be edited as placeholder. If editing multiple files with different sets of permissions, a generic permissions string (rw-r--r--) is used instead.
 .sp

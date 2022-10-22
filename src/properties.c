@@ -200,7 +200,7 @@ static int
 validate_numval(char *s, const size_t l)
 {
 	if (l > 4 || l < 3) {
-		fprintf(stderr, "p: %s: %s characters in permissions string. "
+		fprintf(stderr, "p: %s: %s digits in permissions string. "
 			"Either 3 or 4 are expected\n", s, l > 4 ? "Extra" : "Too few");
 		return EXIT_FAILURE;
 	}
@@ -208,7 +208,7 @@ validate_numval(char *s, const size_t l)
 	int i = 0;
 	if (l == 4) {
 		if (*s == '3' || *s < '0' || *s > '4') {
-			fprintf(stderr, "pc: %s: Invalid first value. Valid values "
+			fprintf(stderr, "pc: %s: Invalid first digit. Valid values "
 				"are: 0, 1, 2, 4\n", s);
 			return EXIT_FAILURE;
 		}
@@ -217,7 +217,7 @@ validate_numval(char *s, const size_t l)
 
 	for (; s[i]; i++) {
 		if (s[i] < '0' || s[i] > '7') {
-			fprintf(stderr, "pc: %s: Invalid value. Values in the range 0-7 "
+			fprintf(stderr, "pc: %s: Invalid digit. Values in the range 0-7 "
 				"are expected\n", s);
 			return EXIT_FAILURE;
 		}
