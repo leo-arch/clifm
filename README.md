@@ -46,6 +46,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 🔸 [Brief description](#space_invader-brief-description) \
 🔸 [Features](#hammer-features) \
 🔸 [Introduction video](#clapper-introduction-video) \
+🔸 [What's new?](#newspaper-whats-new) \
 🔸 [Installation](#floppy_disk-installation) \
 🔸 [Getting started](#bulb-getting-started) \
 🔸 [Support](#support) \
@@ -194,7 +195,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 ---
 
-## :newspaper: Changelog
+## :newspaper: What's new?
 <details>
 <summary>Click here to expand</summary>
 
