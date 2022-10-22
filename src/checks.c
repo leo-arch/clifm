@@ -504,7 +504,7 @@ is_action_name(const char *s)
 }
 
 /* Check cmd against a list of internal commands. Used by parse_input_str()
- * to know if it should perform additional expansions, like glob, regex,
+ * to know whether it should perform additional expansions, like glob, regex,
  * tilde, and so on. Only internal commands dealing with ELN/filenames
  * should be checked here */
 int
@@ -541,6 +541,7 @@ is_internal(char *restrict cmd)
 		{"open", 4},
 		{"paste", 5},
 		{"p", 1},
+		{"pc", 2},
 		{"pp", 2},
 		{"pr", 2},
 		{"prop", 4},
@@ -621,6 +622,7 @@ is_internal_f(const char *restrict cmd)
 		{"open", 4},
 		{"ow", 2},
 		{"p", 1},
+		{"pc", 2},
 		{"pp", 2},
 		{"pr", 2},
 		{"prop", 4},

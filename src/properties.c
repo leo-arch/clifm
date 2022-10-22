@@ -169,15 +169,15 @@ get_file_perms(const mode_t mode)
 		{ p.ox = 'x'; p.cox = S_ISDIR(mode) ? dxd_c : dxr_c; }
 
 	if (mode & S_ISUID) {
-		(val & S_IXUSR) ? (p.ux = 's') : (p.ux = 'S');
+		p.ux = (val & S_IXUSR) ? 's' : 'S';
 		p.cux = dp_c;
 	}
 	if (mode & S_ISGID) {
-		(val & S_IXGRP) ? (p.gx = 's') : (p.gx = 'S');
+		p.gx = (val & S_IXGRP) ? 's' : 'S';
 		p.cgx = dp_c;
 	}
 	if (mode & S_ISVTX) {
-		(val & S_IXOTH) ? (p.ox = 't'): (p.ox = 'T');
+		p.ox = (val & S_IXOTH) ? 't' : 'T';
 		p.cox = dp_c;
 	}
 
@@ -188,6 +188,224 @@ get_file_perms(const mode_t mode)
 	}
 
 	return p;
+}
+
+#include "readline.h"
+#include "file_operations.h"
+static int
+validate_numval(char *s, const size_t l)
+{
+	if (l > 4 || l < 3) {
+		fprintf(stderr, "p: %s: %s characters in permissions string. "
+			"Either 3 or 4 are expected\n", s, l > 4 ? "Extra" : "Too few");
+		return EXIT_FAILURE;
+	}
+
+	int i = 0;
+	if (l == 4) {
+		if (*s == '3' || *s < '0' || *s > '4') {
+			fprintf(stderr, "pc: %s: Invalid first value. Valid values "
+				"are: 0, 1, 2, 4\n", s);
+			return EXIT_FAILURE;
+		}
+		i = 1;
+	}
+
+	for (; s[i]; i++) {
+		if (s[i] < '0' || s[i] > '7') {
+			fprintf(stderr, "pc: %s: Invalid value. Values in the range 0-7 "
+				"are expected\n", s);
+			return EXIT_FAILURE;
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+validate_new_perms(char *s)
+{
+	size_t l = strlen(s);
+	if (*s >= '0' && *s <= '9')
+		return validate_numval(s, l);
+
+	if (l != 9) {
+		fprintf(stderr, "pc: %s: %s characters in permissions string: 9 are expected\n",
+			s, l < 9 ? "Too few" : "Extra");
+		return EXIT_FAILURE;
+	}
+
+	if ((s[0] != 'r' && s[0] != '-') || (s[3] != 'r' && s[3] != '-')
+	|| (s[6] != 'r' && s[6] != '-')
+	|| (s[1] != 'w' && s[1] != '-') || (s[4] != 'w' && s[4] != '-')
+	|| (s[7] != 'w' && s[7] != '-')
+	|| (s[2] != 'x' && s[2] != '-' && s[2] != 's')
+	|| (s[5] != 'x' && s[5] != '-' && s[5] != 's')
+	|| (s[8] != 'x' && s[8] != '-' && s[8] != 't')) {
+		fprintf(stderr, "pc: %s: Invalid characters in permissions string\n", s);
+		return EXIT_FAILURE;
+	}
+
+	if ((s[2] == 's' && (s[5] == 's' || s[8] == 't'))
+	|| (s[5] == 's' && (s[2] == 's' || s[8] == 't'))
+	|| (s[8] == 't' && (s[2] == 's' || s[5] == 's'))) {
+		fprintf(stderr, "pc: %s: Only one special permission is allowed at a time\n", s);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static char *
+perm2octal(char *s)
+{
+	int a, b, c, d;
+	a = b = c = d = 0;
+
+	if (s[0] != '-') b += 4;
+	if (s[1] != '-') b += 2;
+	if (s[2] != '-') b += 1;
+
+	if (s[3] != '-') c += 4;
+	if (s[4] != '-') c += 2;
+	if (s[5] != '-') c += 1;
+
+	if (s[6] != '-') d += 4;
+	if (s[7] != '-') d += 2;
+	if (s[8] != '-') d += 1;
+
+	if (s[2] == 's') a = 4;
+	else if (s[5] == 's') a = 2;
+	else if (s[8] == 't') a = 1;
+
+	char *p = (char *)xnmalloc(32, sizeof(char));
+	sprintf(p, "%d%d%d%d", a, b, c, d);
+
+	return p;
+}
+
+static char *
+get_new_perms(char *str, const int diff)
+{
+	int poffset_bk = prompt_offset;
+	prompt_offset = 3;
+	xrename = 1;
+
+	if (diff == 1)
+		printf("Files with different set of permissions. Using a generic permissions string\n");
+	char m[NAME_MAX];
+	snprintf(m, sizeof(m), "Edit file permissions ('Ctrl-d' to quit)\n"
+		"\001%s\002>\001%s\002 ", mi_c, tx_c);
+
+	alt_rl_prompt(m, str);
+
+	char *new_perms = (char *)NULL;
+	if (rl_callback_handler_input) {
+		new_perms = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
+		free(rl_callback_handler_input);
+		rl_callback_handler_input = (char *)NULL;
+	}
+
+	xrename = 0;
+	prompt_offset = poffset_bk;
+
+	// diff == 0: Either a single file or multiple files with the same permissions
+	if (diff == 0 && *str == *new_perms && strcmp(str, new_perms) == 0) {
+		fprintf(stderr, "pc: Nothing to do\n");
+		free(new_perms);
+		new_perms = (char *)NULL;
+	}
+
+	return new_perms;
+}
+
+static char *
+get_perm_str(char **s, int *diff)
+{
+	char *ptr = (char *)xnmalloc(10, sizeof(char));
+	struct stat a, b;
+	*diff = 0;
+
+	if (s[1]) { // We have multiple files
+		size_t i;
+		if (stat(s[0], &a) == -1) {
+			fprintf(stderr, "stat: %s :%s\n", s[0], strerror(errno));
+			free(ptr);
+			return (char *)NULL;
+		}
+
+		for (i = 1; s[i]; i++) {
+			if (stat(s[i], &b) == -1) {
+				fprintf(stderr, "stat: %s :%s\n", s[0], strerror(errno));
+				free(ptr);
+				return (char *)NULL;
+			}
+
+			if (a.st_mode != b.st_mode) {
+				*diff = 1;
+				break;
+			}
+			a = b;
+		}
+
+		if (*diff == 1) {
+			// We have files with different permissions: let's use a generic one
+			strcpy(ptr, "rw-r--r--"); // 0644
+			return ptr;
+		}
+	}
+
+	// We have either a single file or multiple files with the same permissions
+	if (stat(s[0], &a) == -1) {
+		fprintf(stderr, "stat: %s :%s\n", s[0], strerror(errno));
+		free(ptr);
+		return (char *)NULL;
+	}
+
+	struct perms_t p = get_file_perms(a.st_mode);
+	sprintf(ptr, "%c%c%c%c%c%c%c%c%c",
+		p.ur, p.uw, p.ux, p.gr, p.gw, p.gx, p.or, p.ow, p.ox);
+
+	return ptr;
+}
+
+int
+set_file_perms(char **args)
+{
+	if (!args || !args[1] || IS_HELP(args[1])) {
+		puts(PC_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	int diff = 0; // Either a single file o multiple files with same perms
+	char *pstr = get_perm_str(args + 1, &diff);
+	if (!pstr) return errno;
+
+	char *new_perms = get_new_perms(pstr, diff);
+	free(pstr);
+
+	if (!new_perms) return EXIT_SUCCESS;
+
+	if (validate_new_perms(new_perms) != EXIT_SUCCESS) {
+		free(new_perms);
+		return EXIT_FAILURE;
+	}
+
+	char *octal_str = IS_DIGIT(*new_perms) ? new_perms : perm2octal(new_perms);
+
+	size_t i, n = 0;
+	for (i = 1; args[i]; i++) {
+		if (xchmod(args[i], octal_str, 0) == EXIT_SUCCESS)
+			n++;
+	}
+
+	if (n > 0)
+		printf("pc: Permissions changed for %zu file(s)\n", n);
+
+	free(new_perms);
+	if (octal_str != new_perms)
+		free(octal_str);
+	return EXIT_SUCCESS;
 }
 
 static int

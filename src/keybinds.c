@@ -1914,7 +1914,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	if (!stdin_tmp_dir || strcmp(stdin_tmp_dir, workspaces[cur_ws].path) != 0)
 		return EXIT_SUCCESS;
 
-	xchmod(stdin_tmp_dir, "0700");
+	xchmod(stdin_tmp_dir, "0700", 1);
 	xargs.virtual_dir_full_paths = xargs.virtual_dir_full_paths == 1 ? 0 : 1;
 
 	int i = (int)files;
@@ -1939,7 +1939,7 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 		free(rp);
 	}
 
-	xchmod(stdin_tmp_dir, "0500");
+	xchmod(stdin_tmp_dir, "0500", 1);
 	reload_dirlist();
 	print_reload_msg("Switched to %s names\n",
 		xargs.virtual_dir_full_paths == 1 ? "long" : "short");

@@ -373,8 +373,8 @@ char
 	**prompt_cmds = (char **)NULL,
 	**tags = (char **)NULL;
 
-/* A list of internal commands, with short and long formats. We use two
- * more lists of commands: one of commands dealing with file names
+/* A list of all internal commands, with short and long formats.
+ * We use two more lists of commands: one of commands dealing with file names
  * (is_internal()), and another one listing commands taking ELN's/numbers
  * as parameters (is_internal_f()), both in checks.c */
 const struct cmdslist_t internal_cmds[] = {
@@ -462,6 +462,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"ow", 2},
 	{"opener", 6},
 	{"p", 1},
+	{"pc", 2},
 	{"pp", 2},
 	{"pr", 2},
 	{"prop", 4},

@@ -28,5 +28,6 @@
 /* properties.c */
 int properties_function(char **comm);
 int print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max, const size_t ino_max);
+int set_file_perms(char **args);
 
 #endif /* PROPERTIES_H */

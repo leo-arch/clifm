@@ -573,28 +573,32 @@ open_file(char *file)
 }
 
 int
-xchmod(const char *file, const char *mode_str)
+xchmod(const char *file, const char *mode_str, const int flag)
 {
 	if (!file || !*file) {
-		_err('e', PRINT_PROMPT, "xchmod: Empty buffer for file name\n");
+		_err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
+			"xchmod: Empty buffer for file name\n");
 		return EXIT_FAILURE;
 	}
 
 	if (!mode_str || !*mode_str) {
-		_err('e', PRINT_PROMPT, "xchmod: Empty buffer for mode\n");
+		_err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
+			"xchmod: Empty buffer for mode\n");
 		return EXIT_FAILURE;
 	}
 
 	int fd = open(file, O_RDONLY);
 	if (fd == -1) {
-		_err('e', PRINT_PROMPT, "xchmod: %s: %s\n", file, strerror(errno));
+		_err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
+			"xchmod: %s: %s\n", file, strerror(errno));
 		return errno;
 	}
 
 	mode_t mode = (mode_t)strtol(mode_str, 0, 8);
 	if (fchmod(fd, mode) == -1) {
 		close(fd);
-		_err('e', PRINT_PROMPT, "xchmod: %s: %s\n", file, strerror(errno));
+		_err(flag == 1 ? 'e' : 0, flag == 1 ? PRINT_PROMPT : NOPRINT_PROMPT,
+			"xchmod: %s: %s\n", file, strerror(errno));
 		return errno;
 	}
 

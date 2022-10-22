@@ -2345,6 +2345,10 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])
 		return (exit_code = _toggle_exec(comm));
 
+	/*    ########### PERMISSIONS CHANGER ###############     */
+	else if (*comm[0] == 'p' && comm[0][1] == 'c' && !comm[0][2])
+		return (exit_code = set_file_perms(comm));
+
 	/*    ############### (UN)PIN FILE ##################     */
 	else if (*comm[0] == 'p' && strcmp(comm[0], "pin") == 0)
 		return (exit_code = pin_function(comm[1]));

@@ -1199,7 +1199,7 @@ remove_virtual_dir(void)
 {
 	struct stat a;
 	if (stdin_tmp_dir && stat(stdin_tmp_dir, &a) != -1) {
-		xchmod(stdin_tmp_dir, "0700");
+		xchmod(stdin_tmp_dir, "0700", 1);
 
 		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
 		int ret = launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
@@ -1713,14 +1713,14 @@ END:
 	}
 
 	/* Make the virtual dir read only */
-	xchmod(stdin_tmp_dir, "0500");
+	xchmod(stdin_tmp_dir, "0500", 1);
 
 	/* chdir to tmp dir and update path var */
 	if (xchdir(stdin_tmp_dir, SET_TITLE) == -1) {
 		exit_status = errno;
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", stdin_tmp_dir, strerror(errno));
 
-		xchmod(stdin_tmp_dir, "0700");
+		xchmod(stdin_tmp_dir, "0700", 1);
 
 		char *rm_cmd[] = {"rm", "-r", "--", stdin_tmp_dir, NULL};
 		int ret = launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);

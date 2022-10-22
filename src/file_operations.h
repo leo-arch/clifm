@@ -45,7 +45,7 @@ char *export(char **filenames, int open);
 int open_file(char *file);
 int open_function(char **cmd);
 int remove_file(char **args);
-int xchmod(const char *file, const char *mode_str);
+int xchmod(const char *file, const char *mode_str, const int flag);
 int toggle_exec(const char *file, mode_t mode);
 
 #endif /* FILE_OPERATIONS_H */

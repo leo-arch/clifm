@@ -608,6 +608,18 @@ Usage:\n\
   pg, pager [on, off, status]\n\
 Note: You can also try the 'pager' plugin running 'gg'"
 
+#define PC_USAGE "Interactively edit file permissions\n\
+Usage:\n\
+  pc FILE...\n\n\
+Examples:\n\
+- Change permissions of file file.txt:\n\
+    pc file.txt\n\
+- Change permissions of all selectedd files at once:\n\
+    pc sel\n\n\
+Note: When editing multiple files with different permissions at once,\n\
+a generic permissions string (rw-r--r--) will be used as placeholder\n\
+for all of them"
+
 #define PIN_USAGE "Pin a file or directory\n\
 Usage:\n\
   pin FILE/DIR\n\n\
