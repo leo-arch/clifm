@@ -618,7 +618,9 @@ Examples:\n\
     pc sel\n\n\
 Note: When editing multiple files with different permissions at once,\n\
 a generic permissions string (rw-r--r--) will be used as placeholder\n\
-for all of them"
+for all of them. Bear in mind that the new permissions set will be applied\n\
+to all files passed as arguments\n\n\
+Both symbolic and octal notation for the new permissions set are allowed"
 
 #define PIN_USAGE "Pin a file or directory\n\
 Usage:\n\
