@@ -612,9 +612,9 @@ Note: You can also try the 'pager' plugin running 'gg'"
 Usage:\n\
   pc FILE...\n\n\
 Examples:\n\
-- Change permissions of file file.txt:\n\
+- Change permissions of file named file.txt:\n\
     pc file.txt\n\
-- Change permissions of all selectedd files at once:\n\
+- Change permissions of all selected files at once:\n\
     pc sel\n\n\
 Note: When editing multiple files with different permissions at once,\n\
 a generic permissions string (rw-r--r--) will be used as placeholder\n\
