@@ -44,7 +44,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 ## Table of contents
 🔸 [Brief description](#space_invader-brief-description) \
-🔸 [Features](#hammer-features) \
+🔸 [Features](#heavy_check_mark-features) \
 🔸 [Introduction video](#clapper-introduction-video) \
 🔸 [What's new?](#newspaper-whats-new) \
 🔸 [Installation](#floppy_disk-installation) \
@@ -81,7 +81,7 @@ Briefly put, with **clifm** the command-line is always already there, never hidd
 
 ---
 
-## :hammer: Features
+## :heavy_check_mark: Features
 
 <details>
 <summary>Click here to expand</summary>
