@@ -346,14 +346,14 @@ get_perm_str(char **s, int *diff)
 	if (s[1]) { /* We have multiple files */
 		size_t i;
 		if (stat(s[0], &a) == -1) {
-			fprintf(stderr, "stat: %s :%s\n", s[0], strerror(errno));
+			fprintf(stderr, "stat: %s: %s\n", s[0], strerror(errno));
 			free(ptr);
 			return (char *)NULL;
 		}
 
 		for (i = 1; s[i]; i++) {
 			if (stat(s[i], &b) == -1) {
-				fprintf(stderr, "stat: %s :%s\n", s[0], strerror(errno));
+				fprintf(stderr, "stat: %s: %s\n", s[0], strerror(errno));
 				free(ptr);
 				return (char *)NULL;
 			}
@@ -374,7 +374,7 @@ get_perm_str(char **s, int *diff)
 
 	/* We have either a single file or multiple files with the same permissions */
 	if (stat(s[0], &a) == -1) {
-		fprintf(stderr, "stat: %s :%s\n", s[0], strerror(errno));
+		fprintf(stderr, "stat: %s: %s\n", s[0], strerror(errno));
 		free(ptr);
 		return (char *)NULL;
 	}
@@ -393,6 +393,17 @@ set_file_perms(char **args)
 	if (!args || !args[1] || IS_HELP(args[1])) {
 		puts(PC_USAGE);
 		return EXIT_SUCCESS;
+	}
+
+	int j;
+	for (j = 1; args[j]; j++) {
+		if (!strchr(args[j], '\\'))
+			continue;
+		char *t = dequote_str(args[j], 0);
+		if (t) {
+			free(args[j]);
+			args[j] = t;
+		}
 	}
 
 	int diff = 0; /* Either a single file o multiple files with same perms */
