@@ -921,11 +921,11 @@ print the current working directory.
 .B pc \fIELN/FILE\fR...
 Interactively edit file permissions of files passed as arguments (only traditional Unix permissions are supported).
 .sp
-A new prompt is displayed using the permissions string of the file to be edited as placeholder. If editing multiple files with different sets of permissions, a generic permissions string (rw-r--r--) is used instead.
+A new prompt is displayed using actual permissions (in symbolic notation) of the file to be edited as template. If editing multiple files with \fIdifferent sets of permissions\fR, a generic permissions string (rw-r--r--) is used instead.
 .sp
-Bear in mind that, if editing multiple files at once, say \fIpc sel\fR or \fIpc *.c\fR, the new permissions set will be applied to all of them.
+Bear in mind that, if editing multiple files at once, say \fIpc sel\fR or \fIpc *.c\fR, the new permissions set will be applied to \fIall\fR of them.
 .sp
-Both symbolic and numeric notation for the new permissions set are allowed.
+Both symbolic and octal notation for the new permissions set are allowed.
 .sp
 Recursivelly setting file permissions is not supported. Use \fBchmod\fR(1) with the \fI-R\fR flag instead.
 .sp

@@ -2788,15 +2788,6 @@ my_rl_completion(const char *text, int start, int end)
 					return matches;
 				}
 			}
-
-			/* #### WILDCARDS EXPANSION #### */
-/*			char *g = strpbrk(text, GLOB_CHARS);
-			if (g && !strchr(g, '/') && (matches = rl_glob(text))) {
-				cur_comp_type = TCMP_GLOB;
-				rl_filename_completion_desired = 1;
-				flags |= MULTI_SEL;
-				return matches;
-			} */
 		}
 
 		/* BOOKMARKS COMPLETION */

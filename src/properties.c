@@ -301,7 +301,7 @@ get_new_perms(char *str, const int diff)
 {
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
-	xrename = 2;
+	xrename = 2; /* Completely disable TAB completion */
 
 	if (diff == 1)
 		printf(_("Files with different sets of permissions. Using a generic permissions string\n"));
@@ -429,7 +429,7 @@ set_file_perms(char **args)
 	}
 
 	if (n > 0)
-		printf(_("pc: Permissions changed for %zu file(s)\n"), n);
+		printf(_("pc: Applied new permissions to %zu file(s)\n"), n);
 
 	free(new_perms);
 	if (octal_str != new_perms)
