@@ -304,7 +304,7 @@ get_new_perms(char *str, const int diff)
 	xrename = 2; /* Completely disable TAB completion */
 
 	if (diff == 1)
-		printf(_("Files with different sets of permissions. Using a generic permissions string\n"));
+		printf(_("Files with different sets of permissions. Only shared permission bits are set\n"));
 	char m[NAME_MAX];
 	snprintf(m, sizeof(m), _("Edit file permissions ('Ctrl-d' to quit)\n"
 		"\001%s\002>\001%s\002 "), mi_c, tx_c);
@@ -330,6 +330,42 @@ get_new_perms(char *str, const int diff)
 	return new_perms;
 }
 
+static struct perms_t
+get_common_perms(char **s, int *diff)
+{
+	*diff = 0;
+	struct stat a, b;
+	struct perms_t p;
+	p.ur = p.gr = p.or = 'r';
+	p.uw = p.gw = p.ow = 'w';
+	p.ux = p.gx = p.ox = 'x';
+
+	int i;
+	for (i = 0; s[i]; i++) {
+		if (stat(s[i], &a) == -1)
+			continue;
+		if (i > 0 && a.st_mode != b.st_mode)
+			*diff = 1;
+
+		mode_t val = (a.st_mode & (mode_t)~S_IFMT);
+		if (!(val & S_IRUSR)) p.ur = '-';
+		if (!(val & S_IWUSR)) p.uw = '-';
+		if (!(val & S_IXUSR)) p.ux = '-';
+
+		if (!(val & S_IRGRP)) p.gr = '-';
+		if (!(val & S_IWGRP)) p.gw = '-';
+		if (!(val & S_IXGRP)) p.gx = '-';
+
+		if (!(val & S_IROTH)) p.or = '-';
+		if (!(val & S_IWOTH)) p.ow = '-';
+		if (!(val & S_IXOTH)) p.ox = '-';
+
+		b = a;
+	}
+
+	return p;
+}
+
 /* Returns the permissions string of files passed as arguments
  * If only a single file or multiple files with the same set of permissions,
  * the actual permissions are returned. Otherwise, a generic permissions
@@ -340,39 +376,19 @@ static char *
 get_perm_str(char **s, int *diff)
 {
 	char *ptr = (char *)xnmalloc(10, sizeof(char));
-	struct stat a, b;
 	*diff = 0;
 
 	if (s[1]) { /* We have multiple files */
-		size_t i;
-		if (stat(s[0], &a) == -1) {
-			fprintf(stderr, "stat: %s: %s\n", s[0], strerror(errno));
-			free(ptr);
-			return (char *)NULL;
-		}
-
-		for (i = 1; s[i]; i++) {
-			if (stat(s[i], &b) == -1) {
-				fprintf(stderr, "stat: %s: %s\n", s[0], strerror(errno));
-				free(ptr);
-				return (char *)NULL;
-			}
-
-			if (a.st_mode != b.st_mode) {
-				*diff = 1;
-				break;
-			}
-			a = b;
-		}
-
-		if (*diff == 1) {
-			/* We have files with different permissions: let's use a generic one */
-			strcpy(ptr, "rw-r--r--"); /* 0644 */
-			return ptr;
-		}
+		struct perms_t p = get_common_perms(s, diff);
+		sprintf(ptr, "%c%c%c%c%c%c%c%c%c",
+			p.ur, p.uw, p.ux,
+			p.gr, p.gw, p.gx,
+			p.or, p.ow, p.ox);
+		return ptr;
 	}
 
 	/* We have either a single file or multiple files with the same permissions */
+	struct stat a;
 	if (stat(s[0], &a) == -1) {
 		fprintf(stderr, "stat: %s: %s\n", s[0], strerror(errno));
 		free(ptr);
@@ -422,10 +438,12 @@ set_file_perms(char **args)
 
 	char *octal_str = IS_DIGIT(*new_perms) ? new_perms : perm2octal(new_perms);
 
+	int ret = EXIT_SUCCESS;
 	size_t i, n = 0;
 	for (i = 1; args[i]; i++) {
-		if (xchmod(args[i], octal_str, 0) == EXIT_SUCCESS)
+		if ((ret = xchmod(args[i], octal_str, 0)) == EXIT_SUCCESS)
 			n++;
+		fflush(stdout);
 	}
 
 	if (n > 0)
@@ -434,7 +452,7 @@ set_file_perms(char **args)
 	free(new_perms);
 	if (octal_str != new_perms)
 		free(octal_str);
-	return EXIT_SUCCESS;
+	return ret;
 }
 
 static int
