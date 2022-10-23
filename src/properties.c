@@ -452,9 +452,14 @@ set_file_perms(char **args)
 
 	int ret = EXIT_SUCCESS;
 	size_t i, n = 0;
+	mode_t mode = (mode_t)strtol(octal_str, 0, 8);
 	for (i = 1; args[i]; i++) {
-		if ((ret = xchmod(args[i], octal_str, 0)) == EXIT_SUCCESS)
+		if (fchmodat(AT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
 			n++;
+		} else {
+			fprintf(stderr, "pc: %s: %s\n", args[i], strerror(errno));
+			ret = errno;
+		}
 		fflush(stdout);
 	}
 
