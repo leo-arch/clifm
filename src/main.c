@@ -714,6 +714,7 @@ const struct cmdslist_t param_str[] = {
 	{"unicode off", 11},
 	{"uc status", 9},
 	{"unicode status", 14},
+	{"view edit", 9},
 	{NULL, 0}
 };
 

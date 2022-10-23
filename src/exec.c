@@ -1995,16 +1995,44 @@ remove_backslash(char **s)
 }
 
 static int
-preview_function(void)
+preview_edit(char *app)
+{
+	if (!config_dir)
+		return EXIT_FAILURE;
+
+	char *file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+	sprintf(file, "%s/preview.clifm", config_dir);
+
+	int ret = EXIT_SUCCESS;
+	if (app) {
+		char *c[] = { app, file, NULL };
+		ret = launch_execve(c, FOREGROUND, E_NOFLAG);
+	} else {
+		ret = open_file(file);
+	}
+
+	free(file);
+	return ret;
+}
+
+static int
+preview_function(char **args)
 {
 #ifdef _NO_FZF
 	fprintf(stderr, "%s: view: fzf: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
 #endif /* _NO_FZF */
 
-// TESTING PREVIEW SEL!!
+	if (args && args[0]) {
+		if (IS_HELP(args[0])) {
+			puts(VIEW_USAGE);
+			return EXIT_SUCCESS;
+		}
+		if (*args[0] == 'e' && strcmp(args[0], "edit") == 0)
+			return preview_edit(args[1] ? args[1] : (char *)NULL);
+	}
+
 	size_t seln_bk = sel_n;
-// TESTING PREVIEW SEL!!
 
 	int fzf_preview_bk = fzf_preview;
 	enum tab_mode tabmode_bk = tabmode;
@@ -2032,12 +2060,10 @@ preview_function(void)
 	tabmode = tabmode_bk;
 	fzf_preview = fzf_preview_bk;
 
-// TESTING PREVIEW SEL!!
 	if (sel_n > seln_bk) {
 		save_sel();
 		get_sel_files();
 	}
-// TESTING PREVIEW SEL!!
 
 	if (autols == 1) {
 		putchar('\n');
@@ -2046,12 +2072,10 @@ preview_function(void)
 		rl_clear_visible_line();
 	}
 
-// TESTING PREVIEW SEL!!
 	if (sel_n > seln_bk) {
 		print_reload_msg("%zu file(s) selected\n", sel_n - seln_bk);
 		print_reload_msg("%zu total selected file(s)\n", sel_n);
 	}
-// TESTING PREVIEW SEL!!
 
 	return EXIT_SUCCESS;
 }
@@ -2339,7 +2363,7 @@ exec_cmd(char **comm)
 
 	/*    ############# PREVIEW FILES ##################     */
 	else if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0)
-		return (exit_code = preview_function());
+		return (exit_code = preview_function(comm + 1));
 
 	/*    ############### TOGGLE EXEC ##################     */
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])

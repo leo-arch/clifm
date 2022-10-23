@@ -864,6 +864,18 @@ Example:\n\
 - Copy selected files into the directory 'mydir' and rename them at once:\n\
     vv sel mydir"
 
+#define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\
+Usage:\n\
+  view [edit [app]]\n\n\
+Examples:\n\
+- Just run the previewer:\n\
+    view\n\
+- Edit the configuration file:\n\
+    view edit\n\
+- Edit the configuration file using vi:\n\
+    view edit vi\n\n\
+Enter 'help file-previews' for more information"
+
 #define WRAPPERS_USAGE "c (v, paste), l, m, md, and r commands are wrappers \
 for cp, ln, mv, mkdir, and rm shell commands respectively.\n\n\
 c -> cp -iRp\n\
