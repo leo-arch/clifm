@@ -23,10 +23,10 @@ if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	exit 0
 fi
 
-if ! type fzf 2>/dev/null; then
+if ! type fzf > /dev/null 2>&1; then
 	printf "clifm: fzf: Command not found\n" 2>&1
 	exit 127
-elif ! type du 2>/dev/null; then
+elif ! type du > /dev/null 2>&1; then
 	printf "clifm: du: Command not found\n" 2>&1
 	exit 127
 fi
