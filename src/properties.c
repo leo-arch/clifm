@@ -330,6 +330,9 @@ get_new_perms(char *str, const int diff)
 	return new_perms;
 }
 
+/* Returns a struct perms_t with only those permission bits shared by
+ * all files in S set. DIFF is set to 1 in case files in S have different
+ * permission sets. Otherwise, it is set to 0. */
 static struct perms_t
 get_common_perms(char **s, int *diff)
 {
@@ -377,24 +380,24 @@ get_common_perms(char **s, int *diff)
 
 /* Returns the permissions string of files passed as arguments
  * If only a single file or multiple files with the same set of permissions,
- * the actual permissions are returned. Otherwise, a generic permissions
- * string (0644 == rw-r--r--) is returned.
- * The value of DIFF is updated to 1 if using a generic permissions string,
- * or to 0 if not */
+ * the actual permissions are returned. Otherwise, only shared permissions
+ * bits are set in the permissions template.
+ * DIFF is set to 1 if files in S have different permission sets. Otherwise,
+ * it is set to 0. */
 static char *
 get_perm_str(char **s, int *diff)
 {
 	char *ptr = (char *)xnmalloc(10, sizeof(char));
 	*diff = 0;
 
-	if (s[1]) { /* We have multiple files */
+	if (s[1]) { /* Multiple files */
 		struct perms_t p = get_common_perms(s, diff);
 		sprintf(ptr, "%c%c%c%c%c%c%c%c%c",
 			p.ur, p.uw, p.ux, p.gr, p.gw, p.gx, p.or, p.ow, p.ox);
 		return ptr;
 	}
 
-	/* We have either a single file or multiple files with the same permissions */
+	/* Single file */
 	struct stat a;
 	if (stat(s[0], &a) == -1) {
 		fprintf(stderr, "stat: %s: %s\n", s[0], strerror(errno));
@@ -454,7 +457,7 @@ set_file_perms(char **args)
 	}
 
 	if (n > 0)
-		printf(_("pc: Applied new permissions to %zu file(s)\n"), n);
+		printf(_("pc: Applied new permissions set to %zu file(s)\n"), n);
 
 	free(new_perms);
 	if (octal_str != new_perms)
