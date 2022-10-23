@@ -241,20 +241,22 @@ validate_new_perms(char *s)
 		return EXIT_FAILURE;
 	}
 
+	char us2 = TOUPPER(s[2]), us5 = TOUPPER(s[5]), us8 = TOUPPER(s[8]);
+
 	if ((s[0] != 'r' && s[0] != '-') || (s[3] != 'r' && s[3] != '-')
 	|| (s[6] != 'r' && s[6] != '-')
 	|| (s[1] != 'w' && s[1] != '-') || (s[4] != 'w' && s[4] != '-')
 	|| (s[7] != 'w' && s[7] != '-')
-	|| (s[2] != 'x' && s[2] != '-' && s[2] != 's')
-	|| (s[5] != 'x' && s[5] != '-' && s[5] != 's')
-	|| (s[8] != 'x' && s[8] != '-' && s[8] != 't')) {
+	|| (s[2] != 'x' && s[2] != '-' && us2 != 'S')
+	|| (s[5] != 'x' && s[5] != '-' && us5 != 'S')
+	|| (s[8] != 'x' && s[8] != '-' && us8 != 'T')) {
 		fprintf(stderr, _("pc: %s: Invalid characters in permissions string\n"), s);
 		return EXIT_FAILURE;
 	}
 
-	if ((s[2] == 's' && (s[5] == 's' || s[8] == 't'))
-	|| (s[5] == 's' && (s[2] == 's' || s[8] == 't'))
-	|| (s[8] == 't' && (s[2] == 's' || s[5] == 's'))) {
+	if ((us2 == 'S' && (us5 == 'S' || us8 == 'T'))
+	|| (us5 == 'S' && (us2 == 'T' || us8 == 'T'))
+	|| (us8 == 'T' && (us2 == 'T' || us5 == 'T'))) {
 		fprintf(stderr, _("pc: %s: Only one special permission is allowed at a time\n"), s);
 		return EXIT_FAILURE;
 	}
@@ -272,19 +274,19 @@ perm2octal(char *s)
 
 	if (s[0] != '-') b += 4;
 	if (s[1] != '-') b += 2;
-	if (s[2] != '-') b += 1;
+	if (s[2] != '-' && s[2] != 'S') b += 1;
 
 	if (s[3] != '-') c += 4;
 	if (s[4] != '-') c += 2;
-	if (s[5] != '-') c += 1;
+	if (s[5] != '-' && s[5] != 'S') c += 1;
 
 	if (s[6] != '-') d += 4;
 	if (s[7] != '-') d += 2;
-	if (s[8] != '-') d += 1;
+	if (s[8] != '-' && s[8] != 'T') d += 1;
 
-	if (s[2] == 's') a = 4;
-	else if (s[5] == 's') a = 2;
-	else if (s[8] == 't') a = 1;
+	if (TOUPPER(s[2]) == 'S') a = 4;
+	else if (TOUPPER(s[5]) == 'S') a = 2;
+	else if (TOUPPER(s[8]) == 'T') a = 1;
 
 	char *p = (char *)xnmalloc(32, sizeof(char));
 	sprintf(p, "%d%d%d%d", a, b, c, d);
@@ -371,9 +373,9 @@ get_common_perms(char **s, int *diff)
 		b = a;
 	}
 
-	if (p.ux == 'x' && suid == 1) p.ux = 's';
-	if (p.gx == 'x' && sgid == 1) p.gx = 's';
-	if (p.ox == 'x' && sticky == 1) p.ox = 't';
+	if (suid == 1) p.ux = p.ux == 'x' ? 's' : 'S';
+	if (sgid == 1) p.gx = p.gx == 'x' ? 's' : 'S';
+	if (sticky == 1) p.ox = p.ox == 'x' ? 't' : 'T';
 
 	return p;
 }
