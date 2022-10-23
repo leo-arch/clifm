@@ -612,6 +612,7 @@ print_tips(int all)
 		"Enable file previews for TAB completion (fzf mode only) via --fzfpreview",
 		"Preview files in the current directory using the 'view' command (requires fzf)",
 		"Interactively select files (requires fzf, fzy, or smenu): 's /dir/*<TAB>'",
+		"Edit file permissions using the 'pc' command",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
