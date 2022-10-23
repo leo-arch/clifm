@@ -202,15 +202,15 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 * `Development`:
   - [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
   - `cd -` works now just like in most shells
-  - The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view) can now select files via <kbd>TAB</kbd>
-  - Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view) via <kbd>Alt--</kbd>
+  - The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) can now select files via <kbd>TAB</kbd>
+  - Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) via <kbd>Alt+-</kbd>
   - Use `--fzfpreview-hidden` to start the preview window hidden (toggle via <kbd>Alt-p</kbd>)
 * `version 1.8 (Otis)`:
   - If upgrading from a previous version (optional, but recommended):
     - <kbd>F7</kbd> opens now shotgun's configuration file (instead of the jump database file). Update `keybindings.clifm`: removing the file and restarting is enough. Manually: run `kb edit` and then replace `open-jump-db:\e[18~` by `open-preview:\e[18~`.
     - New specific options to control the files preview window. Add the following options to the `FzfTabOptions` line in your theme file (via the `cs edit` command) or just copy the theme file from the data directory (usually `/usr/local/share/clifm/colors`): `--bind alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --preview-window=wrap,border-left --color="border:7:dim"`.
-  - **NEW**: [`clifmimg` plugin, for image previews](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#image-previews-via-ueberzug)
-  - **NEW**: [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view)
+  - **NEW**: [`clifmimg` plugin, for image previews](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#image-previews)
+  - **NEW**: [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app)
   - **NEW**: [TAB completion with file previews](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews)
   - **NEW**: [Shotgun, a built-in files previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun)
   - Improved Unicode support for the suggestions system
