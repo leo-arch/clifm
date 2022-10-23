@@ -611,7 +611,7 @@ print_tips(int all)
 		"Enable file previews for TAB completion (fzf mode only) via --fzfpreview",
 		"Preview files in the current directory using the 'view' command (requires fzf)",
 		"Press Alt+- to launch the files previewer (requires fzf)",
-		"Customize previewing applications: F7",
+		"Customize previewing applications: 'view edit' or F7",
 		"Interactively select files (requires fzf, fzy, or smenu): 's /dir/*<TAB>'",
 		"Edit file permissions using the 'pc' command",
 		NULL};
