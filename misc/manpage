@@ -989,7 +989,6 @@ To operate on selected files, use the \fIsel\fR keyword.
 \fBNote\fR:  If there is a file named \fIsel\fR in the current directory, use \fI./sel\fR to distinguish it from the \fIsel\fR keyword. For example, enter \fIp ./sel\fR to tell CliFM that you want to get the properties of the file named sel rather than the properties of the currently selected files.
 .sp
 For more information consult the \fBBUILT-IN EXPANSIONS\fR section below.
-
 .TP
 .B sb, selbox
 show the elements currently contained in the Selection Box.
@@ -1035,8 +1034,10 @@ the '\fIpaste sel\fR' or '\fIv sel\fR' command copies the currently selected fil
 .B ver, version
 show \fBclifm\fR version details.
 .TP
-.B view
-preview files in the current directory (full screen). Requires \fBfzf\fR(1). Alt-- is also available.
+.B view \fR[\fIedit\fR [\fIAPP\fR]]
+preview files in the current directory (full screen). Requires \fBfzf\fR(1). Alt+- is also available.
+.sp
+To edit the previewer configuration file, just enter \fIview edit\fR, or \fIview edit vi\fR to open it with a specific application, in this case, \fBvi\fR(1).
 .sp
 Since version 1.8.1, this command allows files selection. Mark files with the TAB key and then press Enter or Right to confirm: marked files will be automatically sent to the Selection box.
 .sp
