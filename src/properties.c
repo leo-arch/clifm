@@ -255,8 +255,8 @@ validate_new_perms(char *s)
 	}
 
 	if ((us2 == 'S' && (us5 == 'S' || us8 == 'T'))
-	|| (us5 == 'S' && (us2 == 'T' || us8 == 'T'))
-	|| (us8 == 'T' && (us2 == 'T' || us5 == 'T'))) {
+	|| (us5 == 'S' && (us2 == 'S' || us8 == 'T'))
+	|| (us8 == 'T' && (us2 == 'S' || us5 == 'S'))) {
 		fprintf(stderr, _("pc: %s: Only one special permission is allowed at a time\n"), s);
 		return EXIT_FAILURE;
 	}
