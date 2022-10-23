@@ -868,9 +868,9 @@ Usage:\n\
   view [edit [app]]\n\n\
 Examples:\n\
 - Just run the previewer:\n\
-    view\n\
+    view (or Alt+-)\n\
 - Edit the configuration file:\n\
-    view edit\n\
+    view edit (or F7)\n\
 - Edit the configuration file using vi:\n\
     view edit vi\n\n\
 Enter 'help file-previews' for more information"

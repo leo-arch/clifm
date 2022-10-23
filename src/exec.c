@@ -2029,7 +2029,7 @@ preview_function(char **args)
 			return EXIT_SUCCESS;
 		}
 		if (*args[0] == 'e' && strcmp(args[0], "edit") == 0)
-			return preview_edit(args[1] ? args[1] : (char *)NULL);
+			return preview_edit(args[1]);
 	}
 
 	size_t seln_bk = sel_n;
