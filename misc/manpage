@@ -921,7 +921,7 @@ print the current working directory.
 .B pc \fIELN/FILE\fR...
 Interactively edit file permissions of files passed as arguments (only traditional Unix permissions are supported).
 .sp
-A new prompt is displayed using actual permissions (in symbolic notation) of the file to be edited as template. If editing multiple files with \fIdifferent sets of permissions\fR, a generic permissions string (rw-r--r--) is used instead.
+A new prompt is displayed using actual permissions (in symbolic notation) of the file to be edited as template. If editing multiple files with \fIdifferent sets of permissions\fR, only shared permission bits are set in the permissions template.
 .sp
 Bear in mind that, if editing multiple files at once, say \fIpc sel\fR or \fIpc *.c\fR, the new permissions set will be applied to \fIall\fR of them.
 .sp
