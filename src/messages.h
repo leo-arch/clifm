@@ -1247,7 +1247,7 @@ NAVIGATION\n\
 5                        Change to the directory whose ELN is 5\n\
 b | Shift-left | Alt-j   Go back in the directory history list\n\
 f | Shift-right | Alt-k  Go forth in the directory history list\n\
-dh                       Navigate the directory history list (needs fzf)\n\
+dh                       Navigate the directory history list (requires fzf)\n\
 .. | Shift-up | Alt-u    Change to the parent directory\n\
 bd media                 Change to the parent directory matching 'media'\n\
 bm | Alt-b               Open the bookmarks screen\n\
@@ -1258,7 +1258,7 @@ mp                       Change to a mountpoint\n\
 pin mydir                Pin the directory 'mydir'\n\
 ,                        Change to pinned directory\n\
 x                        Run new instance in the current directory\n\
--                        Navigate the file system with files preview (needs fzf)"
+view | Alt+-             Preview files in the current directory (requires fzf)"
 
 #define QUICK_HELP_BASIC_OPERATIONS "\
 BASIC FILE OPERATIONS\n\
@@ -1284,9 +1284,9 @@ c 34 file_copy     Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
 cr myfile          Copy 'myfile' to a remote location\n\
 m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
 m myfile.txt       Rename 'myfile.txt'\n\
-l myfile mylink    Create a symbolic link named 'mylink' to 'myfile'\n\
+l myfile mylink    Create a symbolic link named 'mylink' pointing to 'myfile'\n\
 le mylink          Edit the symbolic link 'mylink'\n\
-bl sel             Create symbolic links for all selected files\n\
+pc myfile          Edit file properties of the file 'myfile'\n\
 te *.sh            Toggle the executable bit on all .sh files\n\
 t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
 t del              Permanently remove trashed files using a menu\n\
@@ -1294,6 +1294,7 @@ t empty            Empty the trash can\n\
 u                  Undelete trashed files using a menu\n\
 bm a mydir         Bookmark the directory named 'mydir'\n\
 bm d mybm          Remove the bookmark named 'mybm'\n\
+tag --help         Learn about tagging files\n\
 ac sel             Compress/archive selected files"
 
 #define QUICK_HELP_MISC "\
@@ -1308,6 +1309,7 @@ Alt-l          Toggle detail/long view mode on/off\n\
 Alt-.          Toggle hidden files on/off\n\
 kb edit | F9   Edit keybindings\n\
 mm edit | F6   Change default associated applications\n\
+view edit | F7 Change previewing applications\n\
 mm info 12     Get MIME information for the file whose ELN is 12\n\
 cs             Manage color schemes\n\
 Right          Accept the entire suggestion\n\
