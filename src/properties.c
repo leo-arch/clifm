@@ -339,6 +339,7 @@ get_common_perms(char **s, int *diff)
 	p.ur = p.gr = p.or = 'r';
 	p.uw = p.gw = p.ow = 'w';
 	p.ux = p.gx = p.ox = 'x';
+	int suid = 1, sgid = 1, sticky = 1;
 
 	int i;
 	for (i = 0; s[i]; i++) {
@@ -360,8 +361,16 @@ get_common_perms(char **s, int *diff)
 		if (!(val & S_IWOTH)) p.ow = '-';
 		if (!(val & S_IXOTH)) p.ox = '-';
 
+		if (!(a.st_mode & S_ISUID)) suid = 0;
+		if (!(a.st_mode & S_ISGID)) sgid = 0;
+		if (!(a.st_mode & S_ISVTX)) sticky = 0;
+
 		b = a;
 	}
+
+	if (p.ux == 'x' && suid == 1) p.ux = 's';
+	if (p.gx == 'x' && sgid == 1) p.gx = 's';
+	if (p.ox == 'x' && sticky == 1) p.ox = 't';
 
 	return p;
 }
@@ -381,9 +390,7 @@ get_perm_str(char **s, int *diff)
 	if (s[1]) { /* We have multiple files */
 		struct perms_t p = get_common_perms(s, diff);
 		sprintf(ptr, "%c%c%c%c%c%c%c%c%c",
-			p.ur, p.uw, p.ux,
-			p.gr, p.gw, p.gx,
-			p.or, p.ow, p.ox);
+			p.ur, p.uw, p.ux, p.gr, p.gw, p.gx, p.or, p.ow, p.ox);
 		return ptr;
 	}
 
