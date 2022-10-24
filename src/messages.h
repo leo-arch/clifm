@@ -1247,13 +1247,13 @@ NAVIGATION\n\
 5                        Change to the directory whose ELN is 5\n\
 b | Shift-left | Alt-j   Go back in the directory history list\n\
 f | Shift-right | Alt-k  Go forth in the directory history list\n\
-dh                       Navigate the directory history list (requires fzf)\n\
 .. | Shift-up | Alt-u    Change to the parent directory\n\
 bd media                 Change to the parent directory matching 'media'\n\
-bm | Alt-b               Open the bookmarks screen\n\
-bm mybm                  Change to bookmark named 'mybm'\n\
-ws2 | Alt-2              Switch to the second workspace\n\
+j <TAB>                  Navigate the list of visited directories\n\
 j xproj                  Jump to the best ranked directory matching 'xproj'\n\
+bm | Alt-b               Open the bookmarks screen\n\
+bm mybm                  Change to the bookmark named 'mybm'\n\
+ws2 | Alt-2              Switch to the second workspace\n\
 mp                       Change to a mountpoint\n\
 pin mydir                Pin the directory 'mydir'\n\
 ,                        Change to pinned directory\n\
@@ -1301,12 +1301,13 @@ ac sel             Compress/archive selected files"
 MISC\n\
 ----\n\
 cmd --help     Get help for command 'cmd'\n\
-help TOPIC     Get help for topic TOPIC\n\
+help <TAB>     List available help topics\n\
 F1             Open the manpage\n\
-ih             Run the interactive help plugin (needs fzf)\n\
-edit | F10     View and/or edit the configuration file\n\
-Alt-l          Toggle detail/long view mode on/off\n\
-Alt-.          Toggle hidden files on/off\n\
+ih             Run the interactive help plugin (requires fzf)\n\
+edit | F10     View/edit the configuration file\n\
+Alt-l          Toggle detail/long view mode\n\
+Alt-.          Toggle hidden files\n\
+Alt-TAB        Toggle disk usage analyzer mode\n\
 kb edit | F9   Edit keybindings\n\
 mm edit | F6   Change default associated applications\n\
 view edit | F7 Change previewing applications\n\
@@ -1317,7 +1318,7 @@ Alt-f          Accept the first/next word of the current suggestion\n\
 Enter | Ctrl-l Reprint the current list of files\n\
 pf set test    Change to the profile named 'test'\n\
 st size rev    Sort files by size in reverse order\n\
-Alt-x | Alt-z  Toggle sort method\n\
+Alt-x | Alt-z  Change sort method\n\
 media          (Un)mount storage devices\n\
 net work       Mount the network resource named 'work'\n\
 actions        List available actions/plugins\n\
