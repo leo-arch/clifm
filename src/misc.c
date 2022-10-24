@@ -1956,6 +1956,12 @@ print_file_attributes_topic(void)
 }
 
 static int
+print_file_filters_topic(void)
+{
+	puts(FILTER_USAGE); return EXIT_SUCCESS;
+}
+
+static int
 print_file_previews_topic(void)
 {
 	puts(FILE_PREVIEWS);
@@ -2050,6 +2056,8 @@ run_help_topic(char *topic)
 		return print_dir_jumper_topic();
 	if (*topic == 'f' && strcmp(topic, "file-details") == 0)
 		return print_file_attributes_topic();
+	if (*topic == 'f' && strcmp(topic, "file-filters") == 0)
+		return print_file_filters_topic();
 	if (*topic == 'f' && strcmp(topic, "file-previews") == 0)
 		return print_file_previews_topic();
 	if (*topic == 'f' && strcmp(topic, "file-tags") == 0)

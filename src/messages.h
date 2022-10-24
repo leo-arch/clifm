@@ -352,12 +352,13 @@ Examples:\n\
     ft .*~$\n\
 - Unset the current filter:\n\
     ft unset\n\n\
-You can also filter files in the current directory using TAB completion via wildcards and the file types filter:\n\
+You can also filter files in the current directory using TAB\n\
+completion via wildcards and the file type filter:\n\
 - List PDF files:\n\
-    *.pdf<TAB> (second word or more)\n\
+    /*.pdf<TAB>\n\
 - List executable files:\n\
     =x<TAB>\n\n\
-This is the list of available file types for the file types filter:\n\
+This is the list of available values for the file type filter:\n\
   b: Block devices\n\
   c: Character devices\n\
   d: Directories\n\
@@ -372,7 +373,7 @@ This is the list of available file types for the file types filter:\n\
   u: SUID files\n\
   g: SGID files\n\
   x: Executable files\n\n\
-Type '=' and then hit TAB to get the list of file types filters"
+Type '=<TAB>' to get the list of available file type filters"
 
 #define FORTH_USAGE "Change to the next directory in the directory history list\n\
 Usage:\n\
@@ -1258,7 +1259,10 @@ mp                       Change to a mountpoint\n\
 pin mydir                Pin the directory 'mydir'\n\
 ,                        Change to pinned directory\n\
 x                        Run new instance in the current directory\n\
-view | Alt+-             Preview files in the current directory (requires fzf)"
+/*.pdf<TAB>              List all PDF files in the current directory\n\
+=x<TAB>                  List all executable files in the current directory (1)\n\
+view | Alt+-             Preview files in the current directory (requires fzf)\n\n\
+(1) Run 'help file-filters' for more information"
 
 #define QUICK_HELP_BASIC_OPERATIONS "\
 BASIC FILE OPERATIONS\n\

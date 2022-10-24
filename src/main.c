@@ -591,6 +591,7 @@ const struct cmdslist_t param_str[] = {
 	{"help desktop-notifications", 26},
 	{"help dir-jumper", 15},
 	{"help file-details", 17},
+	{"help file-filters", 17},
 	{"help file-previews", 18},
 	{"help file-tags", 14},
 	{"help navigation", 15},

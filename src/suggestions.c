@@ -1310,24 +1310,25 @@ turn_it_wrong(void)
 static void
 print_warning_prompt(const char fc, unsigned char lc)
 {
-	if (warning_prompt == 1 && wrong_cmd == 0
-	&& fc != ';' && fc != ':' && fc != '#'
-	&& fc != '$' && fc != '\'' && fc != '"') {
-		if (suggestion.printed)
-			clear_suggestion(CS_FREEBUF);
+	if (warning_prompt == 0 || wrong_cmd == 1
+	|| fc == ';' || fc == ':' || fc == '#'
+	|| fc == '$' || fc == '\'' || fc == '"')
+		return;
 
-		wrong_cmd = 1;
-		rl_save_prompt();
+	if (suggestion.printed)
+		clear_suggestion(CS_FREEBUF);
 
-		char *decoded_prompt = decode_prompt(wprompt_str);
-		rl_set_prompt(decoded_prompt);
-		free(decoded_prompt);
+	wrong_cmd = 1;
+	rl_save_prompt();
 
-		if (highlight == 1
-		&& ( (rl_point < rl_end && nwords > 1)
-		|| (lc == ' ' && nwords == 1) ) )
-			turn_it_wrong();
-	}
+	char *decoded_prompt = decode_prompt(wprompt_str);
+	rl_set_prompt(decoded_prompt);
+	free(decoded_prompt);
+
+	if (highlight == 1
+	&& ( (rl_point < rl_end && nwords > 1)
+	|| (lc == ' ' && nwords == 1) ) )
+		turn_it_wrong();
 }
 
 #ifndef _NO_TAGS
