@@ -200,6 +200,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/_edit#quickly-filtering-files-with-the-tab-key)
   - [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
   - `cd -` works now just like in most shells
   - The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) can now select files via <kbd>TAB</kbd>
