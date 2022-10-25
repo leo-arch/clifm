@@ -25,7 +25,6 @@
 #ifndef MIME_H
 #define MIME_H
 
-/* mime.c */
 int mime_open(char **args);
 char *xmagic(const char *file, const int mime);
 int mime_open_with(char *filename, char **args);

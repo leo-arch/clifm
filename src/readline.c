@@ -2096,6 +2096,47 @@ expand_tilde_glob(char *text)
 	return tmp;
 }
 
+#ifndef _NO_MAGIC
+static char **
+rl_mime(const char *text)
+{
+	if (!text || !*text)
+		return (char **)NULL;
+
+	if (term_caps.suggestions != 0)
+		{ HIDE_CURSOR; fputs(" [Wait...]", stdout); fflush(stdout); }
+
+	char **t = (char **)xnmalloc(files + 2, sizeof(char *));
+	t[0] = xnmalloc(1, sizeof(char));
+	*t[0] = '\0';
+
+	size_t i, n = 1;
+	for (i = 0; i < files; i++) {
+		char *m = xmagic(file_info[i].name, MIME_TYPE);
+		if (!m) continue;
+
+		char *p = strstr(m, text);
+		free(m);
+
+		if (!p) continue;
+
+		t[n] = savestring(file_info[i].name, strlen(file_info[i].name));
+		n++;
+	}
+
+	t[n] = (char *)NULL;
+
+	if (term_caps.suggestions != 0)
+		{ MOVE_CURSOR_LEFT(10); ERASE_TO_RIGHT; UNHIDE_CURSOR; }
+
+	if (n == 1)
+		{ free(t[0]); free(t); return (char **)NULL; }
+
+	t = (char **)xrealloc(t, (n + 1) * sizeof(char *));
+	return t;
+}
+#endif /* !_NO_MAGIC */
+
 /* Return the list of matches for the glob expression TEXT or NULL if no matches */
 static char **
 rl_glob(char *text)
@@ -2720,8 +2761,20 @@ my_rl_completion(const char *text, int start, int end)
 		}
 	}
 
+#ifndef _NO_MAGIC
+	/* MIME type expansion */
+	if (xrename == 0 && *text == '@' && *(text + 1)) {
+		if ((matches = rl_mime(text + 1)) != NULL) {
+			cur_comp_type = TCMP_PATH;
+			rl_filename_completion_desired = 1;
+			flags |= MULTI_SEL;
+			return matches;
+		}
+	}
+#endif /* !_NO_MAGIC */
+
 	char *g = strpbrk(text, GLOB_CHARS);
-	// Expand only glob expressions in the last path component
+	/* Expand only glob expressions in the last path component */
 	if (xrename == 0 && g && !strchr(g, '/') && access(text, F_OK) != 0) {
 		char *p = (*rl_line_buffer == '/' && rl_end > 1 && !strchr(rl_line_buffer + 1, ' ')
 			&& !strchr(rl_line_buffer + 1, '/'))

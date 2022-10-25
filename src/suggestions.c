@@ -1311,7 +1311,7 @@ static void
 print_warning_prompt(const char fc, unsigned char lc)
 {
 	if (warning_prompt == 0 || wrong_cmd == 1
-	|| fc == ';' || fc == ':' || fc == '#'
+	|| fc == ';' || fc == ':' || fc == '#' || fc == '@'
 	|| fc == '$' || fc == '\'' || fc == '"')
 		return;
 
