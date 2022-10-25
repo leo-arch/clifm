@@ -1907,7 +1907,7 @@ The pipe (\fBCLIFM_BUS\fR) is deleted immediately after the execution of its con
 This is a list of available plugins:
 .TS
 allbox;
-lbx lb lb lb
+lb lb lb lb
 l l l l.
 Action name	Description	Plugin	Dependencies
 T{
@@ -2568,179 +2568,223 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .SH 24. EXAMPLES
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
 
-\fBNOTE 2\fR: Suggestions for possible completion will be printed next to the text typed so far. To accept the given suggestion, press \fIRight\fR (or \fIAlt-f\fR to accept only the first suggested word). Otherwise, the suggestion is just ignored
+\fBNOTE 2\fR: Suggestions for possible completions are printed next to the text typed so far. To accept the given suggestion press \fIRight\fR (or \fIAlt-f\fR to accept only the first/next suggested word). Otherwise, the suggestion is just ignored
 
 Get help:
 \fBF1\fR: manpage
 \fBF2\fR: keybindings
 \fBF3\fR: commands
 
-- Change directory to \fI/etc\fR:
+\fB1. NAVIGATION\fR
 
-    \fB/etc\fR (\fIcd /etc\fR works as well)
+.TS
+allbox;
+lb lb
+l l.
+Command	Description
+T{
+/etc
+T}	Change directory to \fI/etc\fR \fB(1)\fR
+T{
+5
+T}	Change to the directory whose ELN is 5 \fB(2)\fR
+T{
+j <TAB>
+T}	List visited directories
+T{
+j xproj
+T}	Jump to \fI~/media/data/docs/work/mike/xproject\fR \fB(3)\fR
+T{
+b (Shift-Left, Alt-j)
+T}	Go back in the directory history list
+T{
+f (Shift-Right, Alt-k)
+T}	Go forth in the directory history list
+T{
+\fR.. (Shift-Up, Alt-u)
+T}	Change to the parent directory
+T{
+bd w
+T}	Change to the parent directory matching "w" \fB(4)\fR
+T{
+ws2 (Alt-2)
+T}	Swtich to the second workspace \fB(5)\fR
+T{
+/*.pdf<TAB>
+T}	List PDF files in the current directory
+T{
+=x<TAB>
+T}	List executable files in the current directory \fB(6)\fR
+T{
+view (Alt+-)
+T}	Preview files in the current directory \fB(7)\fR
+.TE
 
-- Change-to/open the directory/file whose ELN is 5 in the current directory:
-
-    \fB5\fR
-
-\fBTIP\fR: Press TAB to make sure 5 is the file you want. If the suggestions system is enabled, just pay attention to the suggestion. Press Right to accept the given suggestion
-
-- Open \fImyfile.txt\fR (with the default associated application):
-
-    \fBmyfile.txt\fR
-
-- Open \fImyfile.txt\fR using \fIvi\fR:
-
-    \fBmyfile.txt vi\fR (or \fBvi myfile.txt\fR)
-
-- Open the file whose ELN is 24 in the background:
-
-    \fB24&\fR
-
-- List visited directories:
-
-    \fBj <TAB>\fR
-
-- Jump to \fI~/media/data/docs/work/mike/xproject\fR:
-
-    \fBj xproj\fR
-
-\fBNOTE\fR: This depends however on the database ranking. For more accuracy: \fIj mike xproj\fR. TAB completion is available: \fIj xproj<TAB>\fR
-
-- Go back to the previous directory in the directory history list:
-
-    \fBb\fR (or \fIShift\-Left\fR or \fIAlt\-j\fR)
-
-\fBNOTE\fR: Enter \fBf\fR, or press \fIShift\-Right\fR or \fIAlt-k\fR to go forth in the directory history
-
-- Create a new file named \fImyfile\fR and a new directory named \fImydir\fR:
-
-    \fBn myfile mydir/\fR
-
-\fBNOTE\fR: Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: \fItouch myfile\fR or \fInano myfile\fR
-
-- Change to detail/long view mode:
-
-    \fBAlt-l\fR
-
-- Print the properties of the file whose ELN is 4:
-
-    \fBp4\fR
-
-- Reprint the list of files in the current directory:
-
-    \fBrf\fR (or just press Enter)
-
-- Select all c files in the current directory:
-
-    \fBs *.c\fR
-
-- Interactively select files in the directory \fI/media\fR (non-standard TAB completion mode only; i.e. fzf, fzy, or smenu):
-
-    \fBs /media/*<TAB>\fR
-
-- Select multiple files in the current directory by ELN:
-
-    \fBs 1-4 8 19-26\fR
-
-- List selected files:
-
-    \fBsb\fR
-
-- Selectively deselect files using a menu:
-
-    \fBds\fR (\fIds <TAB>\fR also works)
-
-- Send a few files to the trash can:
-
-    \fBt 1-3 *.old\fR
-
-- Selectively undelete trashed files using a menu:
-
-    \fBu\fR (\fIu <TAB>\fR also works)
-
-- Selectively remove files from the trash can using a menu:
-
-    \fBt del\fR (\fIt del <TAB>\fR also works)
-
-- Empty the trash can:
-
-    \fBt empty\fR
-
-- Tag all PDF files in the current directory as \fImypdfs\fR:
-
-    \fBta *.pdf :mypdfs\fR
-
-- Print the file properties of all files tagged as \fImypdfs\fR:
-
-    \fBp t:mypdfs\fR
-
-- Search for all PDF files in the current dirctory:
-
-    \fB/*.pdf\fR
-
-- Create a directory named \fImydir\fR and cd into it:
-
-    \fBn mydir/ && mydir\fR
-
-- Copy selected files into the current directory:
-
-    \fBc sel\fR
-
-- Remove all selected files:
-
-    \fBr sel\fR
-
-\fBNOTE\fR: To remove files in bulk via a text editor use the \fIrr\fR command.
 .sp
-\fBNOTE 2\fR: Press TAB immediately after \fIsel\fR to selectively operate on selected files.
+ \fB(1)\fR \fIcd /etc\fR also works
+.sp
+ \fB(2)\fR Press TAB to make sure 5 is the file you want, or just pay attention to the suggestion. Press Right to accept the given suggestion
+.sp
+ \fB(3)\fR This depends on the database ranking. For more accuracy: \fIj mike xproj\fR. TAB completion is available: \fIj xproj<TAB>\fR
+.sp
+ \fB(4)\fR Type \fIbd <TAB>\fR to list all parent directories
+.sp
+ \fB(5)\fR \fIAlt-[1-4]\fR is available for workspaces 1-4
+.sp
+ \fB(6)\fR Type \fI=<TAB>\fR to get the list of available file type characters. Consult the \fBFILE FILTERS\fR section above for more information
+.sp
+ \fB(7)\fR This feature depends on \fBfzf\fR(1). Run with \fI\-\-fzfpreview\fR to enable file previews for TAB completion (fzf mode only)
 
-- Rename the file whose ELN is 12:
+\fB2. FILE OPERATIONS\fR
 
-    \fBm12\fR
+.TS
+allbox;
+lb lb
+l l.
+Command	Description
+T{
+myfile.txt
+T}	Open \fImyfile.txt\fR (with the default associated application)
+T{
+myfile.txt vi
+T}	Open \fImyfile.txt\fR using vi \fB(1)\fR
+T{
+24&
+T}	Open the file whose ELN is 24 in the background
+T{
+n myfile mydir/
+T}	Create a new file named \fImyfile\fR and a new directory named \fImydir\fR \fB(2)\fR\fB(3)\fR
+T{
+p4
+T}	Print the properties of the file whose ELN is 4
+T{
+pc myfile.txt
+T}	Edit the permission set of the file \fImyfile.txt\fR
+T{
+s *.c
+T}	Select all c files in the current directory
+T{
+s /media/*<TAB>
+T}	Interactively select files in the directory \fI/media\fR \fB(4)\fR
+T{
+s 1-4 8 19-26
+T}	Select multiple files in the current directory by ELN
+T{
+sb
+T}	List selected files \fB(5)\fR
+T{
+ds (ds <TAB>)
+T}	Selectively deselect files using a menu
+T{
+t 1-3 *.old
+T}	Trash a few files
+T{
+u (u <TAB>)
+T}	Selectively undelete/restore trashed files using a menu
+T{
+t del (t del <TAB>)
+T}	Selectively remove files from the trash can using a menu
+T{
+t empty
+T}	Empty the trash can
+T{
+ta *.pdf :mypdfs
+T}	Tag all PDF files in the current directory as \fImypdfs\fR
+T{
+p t:mypdfs
+T}	Print the file properties of all files tagged as \fImypdfs\fR
+T{
+/*.pdf
+T}	Search for all PDF files in the current directory
+T{
+c sel
+T}	Copy selected files into the current directory
+T{
+c *.txt 2
+T}	Copy all txt file into the directory whose ELN is 2
+T{
+r sel
+T}	Remove all selected files \fB(6)\fR
+T{
+m4
+T}	Rename the file whose ELN is 4 \fB(7)\fR
+T{
+bm add mydir
+T}	Bookmark \fImydir\fR
+T{
+bm mybm
+T}	Access the bookmark named \fImybm\fR \fB(8)\fR
+T{
+bm (Alt-b)
+T}	Open the bookmarks manager
+.TE
 
-- Bookmark \fImydir\fR:
+.sp
+ \fB(1)\fR: Use the \fIow\fR command to select the opening application from a menu: \fIow myfile.txt\fR or \fIow myfile.txt <TAB>\fR
+.sp
+ \fB(2)\fR: Note the ending slash in the directory name
+.sp
+ \fB(3)\fR: Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: \fItouch myfile\fR or \fInano myfile\fR
+.sp
+ \fB(4)\fR Only for non-standard TAB completion: fzf, fzy, smenu
+.sp
+ \fB(5)\fR: You can also TAB expand the \fIsel\fR keyword: \fIp sel<TAB>\fR to list selected files (and optionally mark multiple selected files to operate on)
+.sp
+ \fB(6)\fR: To remove files in bulk use the \fIrr\fR command
+.sp
+ \fB(7)\fR: To rename files in bulk use the \fIbr\fR command
+.sp
+ \fB(8)\fR: Type \fBbm <TAB>\fR to get the list of bookmark names
 
-    \fBbm add mydir\fR
+\fB3. MISC\fR
 
-- Open the bookmarks screen. Once there, enter the bookmark ELN (1 ...) or its hotkey ([xx]) to open it:
+.TS
+allbox;
+lb lb
+l l.
+Command	Description
+T{
+hf on/off (Alt-.)
+T}	Toggle hidden files
+T{
+Alt-,
+T}	Toggle list-directories-only
+T{
+Alt-l
+T}	Toggle detail/long view mode
+T{
+Alt-TAB, Ctrl-Alt-i
+T}	Toggle disk usage analyzer mode
+T{
+rf (Enter)
+T}	Reprint the current list of files
+T{
+!<TAB>
+T}	Navigate the command history
+T{
+edit (F10)
+T}	View/edit the main configuration file
+T{
+pf set test
+T}	Change to profile \fItest\fR
+T{
+actions
+T}	List available actions/plugins
+T{
+icons on
+T}	Want icons?
+T{
+cs (cs <TAB>)
+T}	List available color schemes
+T{
+prompt (prompt <TAB>)
+T}	List available prompts
+T{
+q
+T}	I'm tired, quit
+.TE
 
-    \fBbm\fR (or \fIAlt-b\fR)
-
-- Switch to workspace 2:
-
-    \fBws2\fR (or \fIAlt-2\fR)
-
-- View/edit the configuration file:
-
-    \fBedit\fR (or \fIF10\fR)
-
-- Change to profile \fItest\fR:
-
-    \fBpf set test\fR
-
-- Show hidden files:
-
-    \fBhf on\fR (or \fIAlt-.\fR)
-
-List available actions/plugins:
-
-    \fBactions\fR
-
-- Want file previews?
-
-    \fBview\fR (or \fIAlt+-\fR)
-
-\fBNOTE\fR: This feature depends on \fBfzf\fR(1). Run with \fI\-\-fzfpreview\fR to enable file previews for TAB completion
-
-- Want icons?
-
-    \fBicons on\fR
-
-- I'm tired, quit:
-
-    \fBq\fR
-
+.TP
 There is a lot more you can do, but this should be enough to get you started.
 
 .SH EXIT STATUS
