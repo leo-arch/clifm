@@ -1034,6 +1034,8 @@ d) Filtering files via the TAB key:
 .sp
 You can filter files using wildcards (always preceded by a command). For example: \fIp *.pdf<TAB>\fR to get a list of PDF files in the current directory.
 .sp
+A mime-type filter is also available via the '@' keyword. For example, \fI@image<TAB>\fR will list all files in the current directory whose MIME type contains the given query, in this case 'image'.
+.sp
 Files can be filtered as well using the '=' keyword followed by a file type filter character. For example, \fI=l<TAB>\fR to get a list of symbolic links in the current directory. The list of available file type characters is as follows:
 
  \fBb\fR: Block devices
