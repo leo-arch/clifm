@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Oct 22, 2022" "clifm 1.8.2" "CLIFM Manual"
+.TH "CLIFM" "1" "Oct 26, 2022" "clifm 1.8.3" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1024,11 +1024,17 @@ open DIR, or the current working directory if DIR is not specified, in a new ins
 .SH 6. FILE FILTERS
 \fBClifm\fR offers four kinds of file filters:
 .sp
-\fBa)\fR A dot filter to permanently exclude hidden files from the files list. See the \fB-A\fR and \fB-a\fR options above.
+\fBa)\fR A dot filter to permanently exclude hidden files from the files list. See the \fB-A\fR and \fB-a\fR options above. You can toggle hidden files in place via the \fIhf\fR command or the Alt-. keybinding.
 .sp
-\fBb)\fR A files filter using regular expressions (via the \fIFilter\fR option in the configuration file or the \fBCLIFM_FILTER\fR environment variable) to permanently exclude certain groups of file names, for example, backup files or files ending with a tilde (~).
+\fBb)\fR A files filter using regular expressions (via the \fIFilter\fR option in the configuration file or the \fBCLIFM_FILTER\fR environment variable) to exclude (via '!') or include only specific files. For example, to exclude backup files (ending with a tilde):
 .sp
-\fBc)\fR Local filter via the \fIQuick search\fR function (supporting both regular expressions, wildcards, and invert matching) and the \fIft\fR command to temporarily filter the current list of files.
+ CLIFM_FILTER='!.*~$' clifm
+.sp
+or (in the configuration file):
+.sp
+ Filter="!.*~$"
+.sp
+\fBc)\fR Local filter via the \fIQuick search\fR function (supporting both regular expressions, wildcards, and invert matching) and the \fIft\fR command to temporarily filter the current list of files. Consult the \fBCOMMANDS\fR section above.
 .sp
 \fBd)\fR Filtering files via the TAB key:
 .sp
