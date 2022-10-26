@@ -1266,8 +1266,9 @@ mp                       Change to a mountpoint\n\
 pin mydir                Pin the directory 'mydir'\n\
 ,                        Change to pinned directory\n\
 x                        Run new instance in the current directory\n\
-/*.pdf<TAB>              List all PDF files in the current directory\n\
-=x<TAB>                  List all executable files in the current directory (1)\n\
+/*.pdf<TAB>              File-name filter: List all PDF files in the current directory\n\
+=x<TAB>                  File-type filter: List all executable files in the current directory (1)\n\
+@gzip<TAB>               MIME-type filter: List all gzip files in the current directory (1)\n\
 view | Alt+-             Preview files in the current directory (requires fzf)\n\n\
 (1) Run 'help file-filters' for more information"
 
