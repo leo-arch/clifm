@@ -2104,7 +2104,7 @@ rl_mime(const char *text)
 		return (char **)NULL;
 
 	if (term_caps.suggestions != 0)
-		{ HIDE_CURSOR; fputs(" [Wait...]", stdout); fflush(stdout); }
+		{ HIDE_CURSOR; fputs(" [wait...]", stdout); fflush(stdout); }
 
 	char **t = (char **)xnmalloc(files + 2, sizeof(char *));
 	t[0] = xnmalloc(1, sizeof(char));

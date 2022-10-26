@@ -2613,13 +2613,16 @@ ws2 (Alt-2)
 T}	Swtich to the second workspace \fB(5)\fR
 T{
 /*.pdf<TAB>
-T}	List PDF files in the current directory
+T}	List PDF files (current dir)
 T{
 =x<TAB>
-T}	List executable files in the current directory \fB(6)\fR
+T}	List executable files (current dir) \fB(6)\fR
+T{
+@gzip<TAB>
+T}	List files (current dir) whose MIME type includes "gzip"
 T{
 view (Alt+-)
-T}	Preview files in the current directory \fB(7)\fR
+T}	Preview files (current dir) \fB(7)\fR
 .TE
 
 .sp
