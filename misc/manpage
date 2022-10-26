@@ -18,7 +18,7 @@ clifm \- The Command Line File Manager
 .sp
 \fB5.\fR Commands
 .sp
-\fB6.\fR File Filters
+\fB6.\fR File Filters (by file name, file type, and MIME type)
 .sp
 \fB7.\fR Keyboard shortcuts
 .sp
