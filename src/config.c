@@ -599,6 +599,7 @@ create_actions_file(char *file)
 		"kd=decrypt.sh\n"
 		"ke=encrypt.sh\n"
 		"music=music_player.sh\n"
+		"ml=mime_list.sh\n"
 		"ptot=pdf_viewer.sh\n"
 		"rrm=recur_rm.sh\n"
 		"update=update.sh\n"
