@@ -391,6 +391,8 @@ check_env_filter(void)
 		filter.rev = 0;
 	}
 
+	filter.env = 1;
+	set_filter_type(*p);
 	filter.str = savestring(p, strlen(p));
 }
 

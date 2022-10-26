@@ -1947,6 +1947,7 @@ _set_filter(const char *line)
 		filter.rev = 0;
 	}
 
+	set_filter_type(*q);
 	free(filter.str);
 	filter.str = savestring(q, l);
 
@@ -2650,6 +2651,7 @@ read_config(void)
 	}
 
 	if (filter.str) {
+		regfree(&regex_exp);
 		ret = regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
 		if (ret != EXIT_SUCCESS) {
 			_err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
@@ -2878,10 +2880,12 @@ reset_variables(void)
 	free_tags();
 	free_remotes(0);
 
-	if (filter.str) {
+	if (filter.str && filter.env == 0) {
 		regfree(&regex_exp);
 		free(filter.str);
 		filter.str = (char *)NULL;
+		filter.rev = 0;
+		filter.type = FILTER_NONE;
 	}
 
 	free(opener);

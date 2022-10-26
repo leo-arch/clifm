@@ -388,6 +388,17 @@ set_term_title(char *str)
 		free(tmp);
 }
 
+void
+set_filter_type(const char c)
+{
+	if (c == '=')
+		filter.type = FILTER_FILE_TYPE;
+	else if (c == '@')
+		filter.type = FILTER_MIME_TYPE;
+	else
+		filter.type = FILTER_FILE_NAME;
+}
+
 static int
 unset_filter(void)
 {
@@ -403,6 +414,7 @@ unset_filter(void)
 		reload_dirlist();
 	puts(_("Filter unset"));
 	filter.rev = 0;
+	filter.type = FILTER_NONE;
 
 	return EXIT_SUCCESS;
 }
@@ -456,6 +468,7 @@ filter_function(char *arg)
 	if (*arg == '\'' || *arg == '"')
 		p = remove_quotes(arg);
 
+	set_filter_type(*p);
 	filter.str = savestring(p, strlen(p));
 
 	return compile_filter();

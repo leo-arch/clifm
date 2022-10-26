@@ -60,6 +60,7 @@ void version_function(void);
 #ifdef LINUX_INOTIFY
 void read_inotify(void);
 void reset_inotify(void);
+void set_filter_type(const char c);
 #elif defined(BSD_KQUEUE)
 void read_kqueue(void);
 #endif

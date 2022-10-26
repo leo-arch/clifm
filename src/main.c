@@ -1014,6 +1014,7 @@ init_filter(void)
 {
 	filter.str = (char *)NULL;
 	filter.rev = 0;
+	filter.env = 0;
 	filter.type = FILTER_NONE;
 }
 

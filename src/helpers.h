@@ -591,6 +591,7 @@ struct filter_t {
 	char *str;
 	int rev;
 	int type;
+	int env;
 };
 
 extern struct filter_t filter;
