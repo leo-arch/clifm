@@ -695,7 +695,9 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 		/* All fixed parameters are compatible with at least fzf 0.16.11 (Aug 1, 2017) */
 		char prev_opts[40];
 		*prev_opts = '\0';
-		char prev_str[] = "--preview \"printf \"\033[2J\"; clifm --preview {}\"";
+//		char prev_str[] = "--preview \"printf \"\033[2J\"; clifm --preview {}\"";
+		char prev_str[] = "--preview \"clifm --preview {}\"";
+//		char prev_str[] = "--preview \"printf \'\033[2J\'; clifm --preview {}\"";
 
 		if (prev == 1) {
 			set_fzf_env_vars((int)*height);
