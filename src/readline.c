@@ -2098,7 +2098,58 @@ expand_tilde_glob(char *text)
 
 #ifndef _NO_MAGIC
 static char **
-rl_mime(const char *text)
+rl_mime_list(void)
+{
+	if (term_caps.suggestions != 0)
+		{ HIDE_CURSOR; fputs(" [wait...]", stdout); fflush(stdout); }
+
+	char **t = (char **)xnmalloc(files + 2, sizeof(char *));
+	t[0] = xnmalloc(1, sizeof(char));
+	*t[0] = '\0';
+	t[1] = (char *)NULL;
+
+	size_t n = 1;
+	int i = (int)files;
+	while (--i >= 0) {
+		if (file_info[i].color == nf_c) /* no access to file */
+			continue;
+		char *m = xmagic(file_info[i].name, MIME_TYPE);
+		if (!m)
+			continue;
+
+		size_t j, found = 0;
+		for (j = 1; j < n; j++) {
+			if (*t[j] == *m && strcmp(t[j], m) == 0) {
+				found = 1;
+				break;
+			}
+		}
+
+		if (found == 1) {
+			free(m);
+			continue;
+		} else {
+			t[n] = savestring(m, strlen(m));
+			free(m);
+			n++;
+			t[n] = (char *)NULL;
+		}
+	}
+
+	if (term_caps.suggestions != 0)
+		{ MOVE_CURSOR_LEFT(10); ERASE_TO_RIGHT; UNHIDE_CURSOR; }
+
+	if (n == 1)
+		{ free(t[0]); free(t); return (char **)NULL; }
+
+	t = (char **)xrealloc(t, (n + 1) * sizeof(char *));
+	return t;
+}
+
+/* Returns the list of files in the current directory whose MIME type
+ * contains the string TEXT */
+static char **
+rl_mime_files(const char *text)
 {
 	if (!text || !*text)
 		return (char **)NULL;
@@ -2763,12 +2814,19 @@ my_rl_completion(const char *text, int start, int end)
 
 #ifndef _NO_MAGIC
 	/* MIME type expansion */
-	if (xrename == 0 && *text == '@' && *(text + 1)) {
-		if ((matches = rl_mime(text + 1)) != NULL) {
-			cur_comp_type = TCMP_PATH;
-			rl_filename_completion_desired = 1;
-			flags |= MULTI_SEL;
-			return matches;
+	if (xrename == 0 && *text == '@') {
+		if (*(text + 1)) {
+			if ((matches = rl_mime_files(text + 1)) != NULL) {
+				cur_comp_type = TCMP_MIME_FILES; /* Same as TCMP_FILE_TYPES_FILES */
+				rl_filename_completion_desired = 1;
+				flags |= MULTI_SEL;
+				return matches;
+			}
+		} else {
+			if ((matches = rl_mime_list()) != NULL) {
+				cur_comp_type = TCMP_MIME_LIST; /* Same as TCMP_FILE_TYPES_OPTS */
+				return matches;
+			}
 		}
 	}
 #endif /* !_NO_MAGIC */

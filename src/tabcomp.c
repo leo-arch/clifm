@@ -1526,6 +1526,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
 		rl_delete_text(rl_point, rl_end);
 		rl_end = rl_point;
+		ERASE_TO_RIGHT;
+		fflush(stdout);
 		prefix_len = 0;
 	}
 
@@ -1553,7 +1555,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		/* Some buffer clean up: remove new line char and ending spaces */
 		size_t blen = strlen(buf);
 		int j = (int)blen;
-		if (buf[j - 1] == '\n') {
+		if (j > 0 && buf[j - 1] == '\n') {
 			j--;
 			buf[j] = '\0';
 		}

@@ -375,10 +375,11 @@ This is the list of available values for the file type filter:\n\
   x: Executable files\n\n\
 Type '=<TAB>' to get the list of available file type filters\n\n\
 Other ways of filtering files in the current directory:\n\
-* @query   MIME-type filter. Ex: @pdf<TAB> to list all PDF files\n\
-* /query   Quick search function: consult the 'search' help topic\n\
-* Alt-.    Toggle hidden files\n\
-* Alt-,    Toggle list-only-dirs\n\
+* @<TAB>       List all MIME-types found\n\
+* @query<TAB>  MIME-type filter. Ex: @pdf<TAB> to list all PDF files\n\
+* /query       Quick search function: consult the 'search' help topic\n\
+* Alt-.        Toggle hidden files\n\
+* Alt-,        Toggle list-only-dirs\n\
 * Just press TAB (fzf/fzy mode) and perform a fuzzy search"
 
 #define FORTH_USAGE "Change to the next directory in the directory history list\n\

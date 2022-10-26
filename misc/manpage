@@ -1022,21 +1022,21 @@ Though by default workspaces are unnamed, you can name them wathever you like us
 open DIR, or the current working directory if DIR is not specified, in a new instance of \fBclifm\fR (as root if \fIX\fR, as the current unprivileged user if \fIx\fR) using the value of \fITerminalCmd\fR (from the configuration file) as terminal emulator. If this value is not set, \fIxterm\fR will be used as fallback terminal emulator. This function is only available for graphical environments.
 
 .SH 6. FILE FILTERS
-\fBclifm\fR offers four kinds of file filters:
+\fBClifm\fR offers four kinds of file filters:
 .sp
- a) A dot filter to permanently exclude hidden files from the files list. See the \fB-A\fR and \fB-a\fR options above.
+\fBa)\fR A dot filter to permanently exclude hidden files from the files list. See the \fB-A\fR and \fB-a\fR options above.
 .sp
- b) Files filter via regular expressions (using the \fIFilter\fR option in the configuration file or the CLIFM_FILTER environment variable) to permanently exclude certain groups of file names, for example, backup files or files ending with a tilde (~).
+\fBb)\fR A files filter using regular expressions (via the \fIFilter\fR option in the configuration file or the \fBCLIFM_FILTER\fR environment variable) to permanently exclude certain groups of file names, for example, backup files or files ending with a tilde (~).
 .sp
- c) Local filter via the \fIQuick search\fR function (supporting both regular expressions, wildcards, and invert matching) to temporarily filter the current list of files.
+\fBc)\fR Local filter via the \fIQuick search\fR function (supporting both regular expressions, wildcards, and invert matching) and the \fIft\fR command to temporarily filter the current list of files.
 .sp
-d) Filtering files via the TAB key:
+\fBd)\fR Filtering files via the TAB key:
 .sp
-You can filter files using wildcards (always preceded by a command). For example: \fIp *.pdf<TAB>\fR to get a list of PDF files in the current directory.
+You can filter files \fBby name\fR using wildcards. For example: \fIp *.pdf<TAB>\fR (or \fI/*.pdf<TAB>\fR) to get a list of PDF files in the current directory.
 .sp
-A mime-type filter is also available via the '@' keyword. For example, \fI@image<TAB>\fR will list all files in the current directory whose MIME type contains the given query, in this case 'image'.
+Files can also be filtered \fBby MIME-type\fR via the '@' keyword. Type \fI@<TAB>\fR to list all MIME-types found in the current directory, or \fI@query<TAB>\fR to list all files whose MIME-type includes the string "query". For example, \fI@image<TAB>\fR will list all files in the current directory whose MIME type includes the string "image".
 .sp
-Files can be filtered as well using the '=' keyword followed by a file type filter character. For example, \fI=l<TAB>\fR to get a list of symbolic links in the current directory. The list of available file type characters is as follows:
+Finally, files can be filtered as well \fBby file type\fR using the '=' keyword followed by a file type filter character. For example, \fI=l<TAB>\fR to get a list of symbolic links in the current directory. The list of available file type characters is as follows:
 
  \fBb\fR: Block devices
  \fBc\fR: Character devices

@@ -1934,8 +1934,7 @@ external_arguments(int argc, char **argv)
 		exit(EXIT_SUCCESS); /* Never reached */
 	}
 
-	/* Positional parameters. If a directory, use it as CliFM starting path.
-	 * Otherwise, open the file with the associated application and exit */
+	/* Positional parameters. If a directory, use it as CliFM's starting path */
 	int i = optind;
 	if (argv[i])
 		path_value = resolve_positional_param(argv[i]);

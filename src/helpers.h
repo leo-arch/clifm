@@ -1039,7 +1039,9 @@ enum comp_type {
 	TCMP_FILE_TYPES_OPTS = 28,
 	TCMP_FILE_TYPES_FILES = 29,
 	TCMP_WORKSPACES = 30,
-	TCMP_BM_PATHS =   31 /* 'b:' keyword expansion (second word or more) */
+	TCMP_BM_PATHS =   31, /* 'b:' keyword expansion (second word or more) */
+	TCMP_MIME_LIST =  TCMP_FILE_TYPES_OPTS, /* Same behavior */
+	TCMP_MIME_FILES = TCMP_FILE_TYPES_FILES /* Same behavior */
 };
 
 extern enum comp_type cur_comp_type;
