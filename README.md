@@ -200,25 +200,25 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `Development`:
-  - [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/_edit#quickly-filtering-files-with-the-tab-key)
-  - [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
-  - `cd -` works now just like in most shells
-  - The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) can now select files via <kbd>TAB</kbd>
-  - Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) via <kbd>Alt+-</kbd>
-  - Use `--fzfpreview-hidden` to start the preview window hidden (toggle via <kbd>Alt-p</kbd>)
+  - **NEW**: [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/_edit#quickly-filtering-files-with-the-tab-key)
+  - **NEW**: [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
+  - **NEW**: `cd -` works now just like in most shells
+  - **NEW**: The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) can now select files via <kbd>TAB</kbd>
+  - **NEW**: Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) via <kbd>Alt+-</kbd>
+  - **NEW**: Use `--fzfpreview-hidden` to start the preview window hidden (toggle via <kbd>Alt-p</kbd>)
 * `version 1.8 (Otis)`:
   - If upgrading from a previous version (optional, but recommended):
     - <kbd>F7</kbd> opens now shotgun's configuration file (instead of the jump database file). Update `keybindings.clifm`: removing the file and restarting is enough. Manually: run `kb edit` and then replace `open-jump-db:\e[18~` by `open-preview:\e[18~`.
     - New specific options to control the files preview window. Add the following options to the `FzfTabOptions` line in your theme file (via the `cs edit` command) or just copy the theme file from the data directory (usually `/usr/local/share/clifm/colors`): `--bind alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --preview-window=wrap,border-left --color="border:7:dim"`.
-  - **NEW**: [`clifmimg` plugin, for image previews](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#image-previews)
-  - **NEW**: [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app)
-  - **NEW**: [TAB completion with file previews](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews)
-  - **NEW**: [Shotgun, a built-in files previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun)
+  - [`clifmimg` plugin, for image previews](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#image-previews)
+  - [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app)
+  - [TAB completion with file previews](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews)
+  - [Shotgun, a built-in files previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun)
   - Improved Unicode support for the suggestions system
-  - **NEW**: Flat-view for the [`fzfsel` plugin](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) via the `-f` option
-  - **NEW**: [Improved VT100 compatibility via the `--vt100` switch](https://github.com/leo-arch/clifm/wiki/Extra#clifm-running-on-a-dec-vt100-terminal-1978)
-  - **NEW**: [Cygwin support](https://github.com/leo-arch/clifm/wiki/Introduction#small_blue_diamond-d-cygwin)
-  - **NEW**: Improved performance/portability of the suggestions system: no more slow/non-portable `CPR`-`CUP` [escape sequences](https://www.xfree86.org/current/ctlseqs.html)! These were replaced by 100% made in-house cursor position calculation plus basic/portable escape sequences: `CUU`, `CUD`, `CUF`, and `CUB`.
+  - Flat-view for the [`fzfsel` plugin](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) via the `-f` option
+  - [Improved VT100 compatibility via the `--vt100` switch](https://github.com/leo-arch/clifm/wiki/Extra#clifm-running-on-a-dec-vt100-terminal-1978)
+  - [Cygwin support](https://github.com/leo-arch/clifm/wiki/Introduction#small_blue_diamond-d-cygwin)
+  - Improved performance/portability of the suggestions system: no more slow/non-portable `CPR`-`CUP` [escape sequences](https://www.xfree86.org/current/ctlseqs.html)! These were replaced by 100% made in-house cursor position calculation plus basic/portable escape sequences: `CUU`, `CUD`, `CUF`, and `CUB`.
 * `version 1.7 (Elaine)`:
   - [Configuration files renamed from `.cfm` to `.clifm`](https://github.com/leo-arch/clifm/wiki/Specifics#new-extension-for-configuration-files) (avoid conflict with [ColdFusion](https://en.wikipedia.org/wiki/ColdFusion_Markup_Language) files)
   - <kbd>Ctrl-l</kbd> added for screen refresh
