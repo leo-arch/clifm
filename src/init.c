@@ -375,21 +375,23 @@ get_data_dir(void)
 void
 check_env_filter(void)
 {
-	if (_filter)
+	if (filter.str)
 		return;
 
 	char *p = getenv("CLIFM_FILTER");
 	if (!p)
 		return;
 
-	if (*p == '!') {
-		filter_rev = 1;
+	if (*p == '!' || (*p == '\\' && *(p + 1) == '!')) {
+		filter.rev = 1;
+		if (*p == '\\')
+			p++;
 		p++;
 	} else {
-		filter_rev = 0;
+		filter.rev = 0;
 	}
 
-	_filter = savestring(p, strlen(p));
+	filter.str = savestring(p, strlen(p));
 }
 
 char *

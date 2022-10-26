@@ -492,6 +492,12 @@ extern FILE *test_input_stream;
 #define SNT_NONE      8 /* Trusted command: do not sanitize*/
 #define SNT_BLACKLIST 9
 
+/* Macros for the TYPE field of the filter_t struct */
+#define FILTER_NONE 0
+#define FILTER_FILE_NAME 1 /* Regex */
+#define FILTER_FILE_TYPE 2 /* =x */
+#define FILTER_MIME_TYPE 3 /* @query */
+
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */
@@ -580,6 +586,14 @@ extern FILE *test_input_stream;
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
+
+struct filter_t {
+	char *str;
+	int rev;
+	int type;
+};
+
+extern struct filter_t filter;
 
 /* Struct to store information about current user */
 struct user_t {
@@ -1090,7 +1104,6 @@ extern int
 	expand_bookmarks,
 	ext_cmd_ok,
 	files_counter,
-	filter_rev,
 	follow_symlinks,
 	full_dir_size,
 	fzftab,
@@ -1246,7 +1259,6 @@ extern char
 	*dirhist_file,
 	*encoded_prompt,
 	*file_cmd_path,
-	*_filter,
 	*fzftab_options,
 	*hist_file,
 	*kbinds_file,

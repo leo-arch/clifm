@@ -1568,13 +1568,13 @@ list_dir_light(void)
 			check_autocmd_file(ename);
 
 		/* Skip files according to FILTER */
-		if (_filter) {
+		if (filter.str) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
-				if (filter_rev) {
+				if (filter.rev == 1) {
 					excluded_files++;
 					continue;
 				}
-			} else if (!filter_rev) {
+			} else if (filter.rev == 0) {
 				excluded_files++;
 				continue;
 			}
@@ -1958,13 +1958,13 @@ list_dir(void)
 			check_autocmd_file(ename);
 
 		/* Filter files according to _FILTER */
-		if (_filter) {
+		if (filter.str) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
-				if (filter_rev) {
+				if (filter.rev == 1) {
 					excluded_files++;
 					continue;
 				}
-			} else if (!filter_rev) {
+			} else if (filter.rev == 0) {
 				excluded_files++;
 				continue;
 			}

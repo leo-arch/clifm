@@ -89,6 +89,7 @@ struct history_t *history = (struct history_t *)NULL;
 struct msgs_t msgs;
 struct props_t prop_fields;
 struct termcaps_t term_caps;
+struct filter_t filter;
 
 struct sort_t __sorts[] = {
     {"none", 0, 0},
@@ -168,7 +169,6 @@ int
 	expand_bookmarks = UNSET,
 	ext_cmd_ok = UNSET,
 	files_counter = UNSET,
-	filter_rev = 0,
 	follow_symlinks = UNSET,
 	full_dir_size = UNSET,
 	fzftab = UNSET,
@@ -324,7 +324,6 @@ char
 	*dirhist_file = (char *)NULL,
 	*encoded_prompt = (char *)NULL,
 	*file_cmd_path = (char *)NULL,
-	*_filter = (char *)NULL,
 	*fzftab_options = (char *)NULL,
 	*hist_file = (char *)NULL,
 	*jump_suggestion = (char *)NULL,
@@ -1009,6 +1008,22 @@ get_hostname(void)
 	}
 }
 
+/* Initialize the files filter struct */
+static void
+init_filter(void)
+{
+	filter.str = (char *)NULL;
+	filter.rev = 0;
+	filter.type = FILTER_NONE;
+}
+
+/* Initialize the msgs struct */
+static void
+init_msgs(void)
+{
+	msgs.error = msgs.notice = msgs.warning = 0;
+}
+
 /*
 static void
 init_file_flags(void)
@@ -1059,7 +1074,8 @@ main(int argc, char *argv[])
 	check_ld_preload();
 #endif // !CLIFM_LD_PRELOAD_IGNORE */
 
-	msgs.error = msgs.notice = msgs.warning = 0;
+	init_filter();
+	init_msgs();
 /*	init_file_flags(); */
 	check_cpu_os(); /* Running on a supported CPU and operating system? */
 	check_term(); /* Running on a supported terminal? */

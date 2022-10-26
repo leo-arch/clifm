@@ -391,18 +391,18 @@ set_term_title(char *str)
 static int
 unset_filter(void)
 {
-	if (!_filter) {
+	if (!filter.str) {
 		puts(_("No filter set"));
 		return EXIT_SUCCESS;
 	}
 
-	free(_filter);
-	_filter = (char *)NULL;
+	free(filter.str);
+	filter.str = (char *)NULL;
 	regfree(&regex_exp);
 	if (autols == 1)
 		reload_dirlist();
 	puts(_("Filter unset"));
-	filter_rev = 0;
+	filter.rev = 0;
 
 	return EXIT_SUCCESS;
 }
@@ -410,16 +410,16 @@ unset_filter(void)
 static int
 compile_filter(void)
 {
-	if (regcomp(&regex_exp, _filter, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
+	if (regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: '%s': Invalid regular expression\n"),
-		    PROGRAM_NAME, _filter);
-		free(_filter);
-		_filter = (char *)NULL;
+			PROGRAM_NAME, filter.str);
+		free(filter.str);
+		filter.str = (char *)NULL;
 		regfree(&regex_exp);
 	} else {
 		if (autols == 1)
 			reload_dirlist();
-		print_reload_msg(_("%s: New filter successfully set\n"), _filter);
+		print_reload_msg(_("%s: New filter successfully set\n"), filter.str);
 	}
 
 	return EXIT_SUCCESS;
@@ -429,8 +429,8 @@ int
 filter_function(char *arg)
 {
 	if (!arg) {
-		printf(_("Current filter: %c%s\n"), filter_rev ? '!' : 0,
-				_filter ? _filter : "none");
+		printf(_("Current filter: %c%s\n"), filter.rev == 1 ? '!' : 0,
+				filter.str ? filter.str : "none");
 		return EXIT_SUCCESS;
 	}
 
@@ -442,23 +442,21 @@ filter_function(char *arg)
 	if (*arg == 'u' && strcmp(arg, "unset") == 0)
 		return unset_filter();
 
-	if (_filter)
-		free(_filter);
-
+	free(filter.str);
 	regfree(&regex_exp);
 
 	if (*arg == '!') {
-		filter_rev = 1;
+		filter.rev = 1;
 		arg++;
 	} else {
-		filter_rev = 0;
+		filter.rev = 0;
 	}
 
 	char *p = arg;
 	if (*arg == '\'' || *arg == '"')
 		p = remove_quotes(arg);
 
-	_filter = savestring(p, strlen(p));
+	filter.str = savestring(p, strlen(p));
 
 	return compile_filter();
 }
@@ -1308,9 +1306,10 @@ free_stuff(void)
 	if (pinned_dir)
 		free(pinned_dir);
 
-	if (_filter) {
+//	ADD FILTER TYPE CHECK!
+	if (filter.str) {
 		regfree(&regex_exp);
-		free(_filter);
+		free(filter.str);
 	}
 
 	if (ext_colors_n)

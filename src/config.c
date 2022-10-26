@@ -1940,15 +1940,15 @@ _set_filter(const char *line)
 	}
 
 	if (*q == '!') {
-		filter_rev = 1;
+		filter.rev = 1;
 		q++;
 		l--;
 	} else {
-		filter_rev = 0;
+		filter.rev = 0;
 	}
 
-	free(_filter);
-	_filter = savestring(q, l);
+	free(filter.str);
+	filter.str = savestring(q, l);
 
 	return EXIT_SUCCESS;
 }
@@ -2226,7 +2226,7 @@ read_config(void)
 				continue;
 		}
 
-		else if (!_filter && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
+		else if (!filter.str && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
 			if (_set_filter(line) == -1)
 				continue;
 		}
@@ -2649,13 +2649,13 @@ read_config(void)
 		list_dirs_first = welcome_message = 0;
 	}
 
-	if (_filter) {
-		ret = regcomp(&regex_exp, _filter, REG_NOSUB | REG_EXTENDED);
+	if (filter.str) {
+		ret = regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
 		if (ret != EXIT_SUCCESS) {
 			_err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
-				  "expression\n"), PROGRAM_NAME, _filter);
-			free(_filter);
-			_filter = (char *)NULL;
+				  "expression\n"), PROGRAM_NAME, filter.str);
+			free(filter.str);
+			filter.str = (char *)NULL;
 			regfree(&regex_exp);
 		}
 	}
@@ -2878,10 +2878,10 @@ reset_variables(void)
 	free_tags();
 	free_remotes(0);
 
-	if (_filter) {
+	if (filter.str) {
 		regfree(&regex_exp);
-		free(_filter);
-		_filter = (char *)NULL;
+		free(filter.str);
+		filter.str = (char *)NULL;
 	}
 
 	free(opener);
