@@ -2621,6 +2621,12 @@ T{
 @gzip<TAB>
 T}	List files (current dir) whose MIME type includes "gzip"
 T{
+pin mydir
+T}	Pin the directory named \fImydir\fR
+T{
+,
+T}	Change to pinned directory
+T{
 view (Alt+-)
 T}	Preview files (current dir) \fB(7)\fR
 .TE
