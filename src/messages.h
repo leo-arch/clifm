@@ -342,14 +342,19 @@ that there is no need to set this variable."
 
 #define FILTER_USAGE "Set a filter for the files list\n\
 Usage:\n\
-  ft, filter [unset] [REGEX]\n\n\
+  ft, filter [unset] [[!]REGEX,=FILE-TYPE-CHAR]\n\n\
 Examples:\n\
 - Print the current filter, if any:\n\
     ft\n\
 - Do not list hidden files:\n\
     ft !^\\.\n\
-- Do not list backup files (ending with tilde):\n\
-    ft .*~$\n\
+- List only files ending with \".pdf\":\n\
+    ft .*\\.pdf$\n\
+- List only symbolic links:\n\
+    ft =l\n\
+- Do not list socket files:\n\
+    ft !=s\n\
+  Note: See below for the list of available file type characters\n\
 - Unset the current filter:\n\
     ft unset\n\n\
 You can also filter files in the current directory using TAB\n\
@@ -358,7 +363,7 @@ completion via wildcards and the file type filter:\n\
     /*.pdf<TAB>\n\
 - List executable files:\n\
     =x<TAB>\n\n\
-This is the list of available values for the file type filter:\n\
+Available file type characters:\n\
   b: Block devices\n\
   c: Character devices\n\
   d: Directories\n\
@@ -367,12 +372,14 @@ This is the list of available values for the file type filter:\n\
   l: Symbolic links\n\
   p: FIFO/pipes\n\
   s: Sockets\n\
-  C: Files with capabilities\n\
-  o: Other-writable files\n\
-  t: Files with the sticky bit set\n\
-  u: SUID files\n\
-  g: SGID files\n\
-  x: Executable files\n\n\
+  C: Files with capabilities (1)(2)\n\
+  o: Other-writable files (2)\n\
+  t: Files with the sticky bit set (2)\n\
+  u: SUID files (2)\n\
+  g: SGID files (2)\n\
+  x: Executable files (2)\n\n\
+(1) Only via TAB completion\n\
+(2) Not available in light mode\n\n\
 Type '=<TAB>' to get the list of available file type filters\n\n\
 Other ways of filtering files in the current directory:\n\
 * @<TAB>       List all MIME-types found\n\

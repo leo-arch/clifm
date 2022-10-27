@@ -696,7 +696,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 		char prev_opts[40];
 		*prev_opts = '\0';
 //		char prev_str[] = "--preview \"printf \"\033[2J\"; clifm --preview {}\"";
-//		char prev_str[] = "--preview \"printf \'\033[2J\'; clifm --preview {}\"";
+//		char prev_str[] = "--preview 'printf \"\033[2J\"; clifm --preview {}'";
 		char prev_str[] = "--preview \"clifm --preview {}\"";
 
 		if (prev == 1) {

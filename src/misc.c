@@ -394,7 +394,7 @@ set_filter_type(const char c)
 	if (c == '=')
 		filter.type = FILTER_FILE_TYPE;
 	else if (c == '@')
-		filter.type = FILTER_MIME_TYPE;
+		filter.type = FILTER_MIME_TYPE; // Unimplemented
 	else
 		filter.type = FILTER_FILE_NAME;
 }
@@ -409,32 +409,71 @@ unset_filter(void)
 
 	free(filter.str);
 	filter.str = (char *)NULL;
-	regfree(&regex_exp);
-	if (autols == 1)
-		reload_dirlist();
-	puts(_("Filter unset"));
 	filter.rev = 0;
 	filter.type = FILTER_NONE;
+	regfree(&regex_exp);
 
+	if (autols == 1)
+		reload_dirlist();
+
+	puts(_("Filter unset"));
 	return EXIT_SUCCESS;
+}
+
+static int
+validate_file_type_filter(void)
+{
+	if (!filter.str || !*filter.str || *filter.str != '='
+	|| !*(filter.str + 1) || *(filter.str + 2))
+		return EXIT_FAILURE;
+
+	char c = *(filter.str + 1);
+	if (c == 'b' || c == 'c' || c == 'd' || c == 'f'
+	|| c == 'l' || c == 'p' || c == 's')
+		return EXIT_SUCCESS;
+
+	if (light_mode == 1)
+		return EXIT_FAILURE;
+
+	if (c == 'g' || c == 'h' || c == 'o' || c == 't'
+	|| c == 'u' || c == 'x')
+		return EXIT_SUCCESS;
+
+	return EXIT_FAILURE;
 }
 
 static int
 compile_filter(void)
 {
-	if (regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: '%s': Invalid regular expression\n"),
-			PROGRAM_NAME, filter.str);
-		free(filter.str);
-		filter.str = (char *)NULL;
-		regfree(&regex_exp);
+	if (filter.type == FILTER_FILE_NAME) {
+		if (regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
+			fputs(_("ft: Invalid regular expression\n"), stderr);
+			regfree(&regex_exp);
+			goto ERR;
+		}
+	} else if (filter.type == FILTER_FILE_TYPE) {
+		if (validate_file_type_filter() != EXIT_SUCCESS) {
+			fputs(_("ft: Invalid file type filter\n"), stderr);
+			goto ERR;
+		}
 	} else {
-		if (autols == 1)
-			reload_dirlist();
-		print_reload_msg(_("%s: New filter successfully set\n"), filter.str);
+		fputs(_("ft: Invalid filter\n"), stderr);
+		goto ERR;
 	}
 
+	if (autols == 1)
+		reload_dirlist();
+
+	print_reload_msg(_("%s%s: New filter successfully set\n"),
+		filter.rev == 1 ? "!" : "", filter.str);
+
 	return EXIT_SUCCESS;
+
+ERR:
+	free(filter.str);
+	filter.str = (char *)NULL;
+	filter.type = FILTER_NONE;
+	return EXIT_FAILURE;
 }
 
 int

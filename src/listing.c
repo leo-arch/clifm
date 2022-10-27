@@ -1516,6 +1516,71 @@ get_longest_inode(void)
 	return l;
 }
 
+static int
+exclude_file_type_light(const unsigned char type)
+{
+	if (!*(filter.str + 1))
+		return EXIT_FAILURE;
+
+	int match = 0;
+
+	switch(*(filter.str + 1)) {
+	case 'd': if (type == DT_DIR) match = 1; break;
+	case 'f': if (type == DT_REG) match = 1; break;
+	case 'l': if (type == DT_LNK) match = 1; break;
+	case 's': if (type == DT_SOCK) match = 1; break;
+	case 'c': if (type == DT_CHR) match = 1; break;
+	case 'b': if (type == DT_BLK) match = 1; break;
+	case 'p': if (type == DT_FIFO) match = 1; break;
+	default: return EXIT_FAILURE;
+	}
+
+	if (match == 1)
+		return filter.rev == 1 ? EXIT_SUCCESS : EXIT_FAILURE;
+	else
+		return filter.rev == 1 ? EXIT_FAILURE : EXIT_SUCCESS;
+}
+
+/* Returns EXIT_SUCCESS if the file with mode MODE and LINKS number
+ * of links must be excluded from the files list, or EXIT_FAILURE */
+static int
+exclude_file_type(const mode_t mode, const nlink_t links)
+{
+/* ADD: C = Files with capabilities */
+
+	if (!*(filter.str + 1))
+		return EXIT_FAILURE;
+
+	int match = 0;
+
+	switch(*(filter.str + 1)) {
+	case 'b': if (S_ISBLK(mode)) match = 1; break;
+	case 'd': if (S_ISDIR(mode)) match = 1; break;
+	case 'c': if (S_ISCHR(mode)) match = 1; break;
+	case 'f': if (S_ISREG(mode)) match = 1; break;
+	case 'l': if (S_ISLNK(mode)) match = 1; break;
+	case 'p': if (S_ISFIFO(mode)) match = 1; break;
+	case 's': if (S_ISSOCK(mode)) match = 1; break;
+
+	case 'g': if (mode & 02000) match = 1; break; // SGID
+	case 'h': if (links > 1 && !S_ISDIR(mode)) match = 1; break;
+	case 'o': if (mode & 00002) match = 1; break; // Other writable
+	case 't': if (mode & 01000) match = 1; break; // Sticky
+	case 'u': if (mode & 04000) match = 1; break; // SUID
+	case 'x': // Executable
+//		if (S_ISREG(mode) && ((mode & S_IXUSR) || (mode & S_IXGRP) || (mode & S_IXOTH))) {
+		if (S_ISREG(mode) && ((mode & 00100) || (mode & 00010) || (mode & 00001)))
+			match = 1;
+		break;
+	default: return EXIT_FAILURE;
+	}
+
+	if (match == 1)
+		return filter.rev == 1 ? EXIT_SUCCESS : EXIT_FAILURE;
+	else
+		return filter.rev == 1 ? EXIT_FAILURE : EXIT_SUCCESS;
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -1567,8 +1632,8 @@ list_dir_light(void)
 		if (dir_changed)
 			check_autocmd_file(ename);
 
-		/* Skip files according to FILTER */
-		if (filter.str) {
+		/* Skip files according to a regex filter */
+		if (filter.str && filter.type == FILTER_FILE_NAME) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (filter.rev == 1) {
 					excluded_files++;
@@ -1591,6 +1656,13 @@ list_dir_light(void)
 		if (only_dirs && ent->d_type != DT_DIR)
 #endif /* !_DIRENT_HAVE_D_TYPE */
 			continue;
+
+		/* Filter files according to file type */
+		if (filter.str && filter.type == FILTER_FILE_TYPE
+		&& exclude_file_type_light(ent->d_type) == EXIT_SUCCESS) {
+			excluded_files++;
+			continue;
+		}
 
 		if (count > ENTRY_N) {
 			count = 0;
@@ -1957,8 +2029,8 @@ list_dir(void)
 		if (dir_changed)
 			check_autocmd_file(ename);
 
-		/* Filter files according to _FILTER */
-		if (filter.str) {
+		/* Filter files according to a regex filter */
+		if (filter.str && filter.type == FILTER_FILE_NAME) {
 			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (filter.rev == 1) {
 					excluded_files++;
@@ -1982,6 +2054,13 @@ list_dir(void)
 		if (fstatat(fd, ename, &attr, virtual_dir == 1 ? 0 : AT_SYMLINK_NOFOLLOW) == -1) {
 			stat_ok = 0;
 			stats.unstat++;
+		}
+
+		/* Filter files according to file type */
+		if (stat_ok == 1 && filter.str && filter.type == FILTER_FILE_TYPE
+		&& exclude_file_type(attr.st_mode, attr.st_nlink) == EXIT_SUCCESS) {
+			excluded_files++;
+			continue;
 		}
 
 #if defined(_DIRENT_HAVE_D_TYPE)
