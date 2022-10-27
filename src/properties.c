@@ -205,7 +205,9 @@ validate_numval(char *s, const size_t l)
 		return EXIT_FAILURE;
 	}
 
-	int i = 0;
+/* Not true: special executable permission can be set for each triplet
+ * (owner, group, and others) at once
+ * int i;
 	if (l == 4) {
 		if (*s == '3' || *s < '0' || *s > '4') {
 			fprintf(stderr, _("pc: %c: Invalid first digit. Valid values "
@@ -213,9 +215,10 @@ validate_numval(char *s, const size_t l)
 			return EXIT_FAILURE;
 		}
 		i = 1;
-	}
+	} */
 
-	for (; s[i]; i++) {
+	size_t i;
+	for (i = 0; s[i]; i++) {
 		if (s[i] < '0' || s[i] > '7') {
 			fprintf(stderr, _("pc: %c: Invalid digit. Values in the range 0-7 "
 				"are expected\n"), s[i]);
@@ -254,12 +257,13 @@ validate_new_perms(char *s)
 		return EXIT_FAILURE;
 	}
 
-	if ((us2 == 'S' && (us5 == 'S' || us8 == 'T'))
+/* This is not true (/bin/mount.cifs is both SUID and SGID)
+ * 	if ((us2 == 'S' && (us5 == 'S' || us8 == 'T'))
 	|| (us5 == 'S' && (us2 == 'S' || us8 == 'T'))
 	|| (us8 == 'T' && (us2 == 'S' || us5 == 'S'))) {
 		fprintf(stderr, _("pc: Only one special permission is allowed at a time\n"));
 		return EXIT_FAILURE;
-	}
+	} */
 
 	return EXIT_SUCCESS;
 }
@@ -284,9 +288,9 @@ perm2octal(char *s)
 	if (s[7] != '-') d += 2;
 	if (s[8] != '-' && s[8] != 'T') d += 1;
 
-	if (TOUPPER(s[2]) == 'S') a = 4;
-	else if (TOUPPER(s[5]) == 'S') a = 2;
-	else if (TOUPPER(s[8]) == 'T') a = 1;
+	if (TOUPPER(s[2]) == 'S') a += 4;
+	if (TOUPPER(s[5]) == 'S') a += 2;
+	if (TOUPPER(s[8]) == 'T') a += 1;
 
 	char *p = (char *)xnmalloc(32, sizeof(char));
 	sprintf(p, "%d%d%d%d", a, b, c, d);
