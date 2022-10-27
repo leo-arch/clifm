@@ -205,18 +205,6 @@ validate_numval(char *s, const size_t l)
 		return EXIT_FAILURE;
 	}
 
-/* Not true: special executable permission can be set for each triplet
- * (owner, group, and others) at once
- * int i;
-	if (l == 4) {
-		if (*s == '3' || *s < '0' || *s > '4') {
-			fprintf(stderr, _("pc: %c: Invalid first digit. Valid values "
-				"are: 0, 1, 2, 4\n"), *s);
-			return EXIT_FAILURE;
-		}
-		i = 1;
-	} */
-
 	size_t i;
 	for (i = 0; s[i]; i++) {
 		if (s[i] < '0' || s[i] > '7') {
@@ -256,14 +244,6 @@ validate_new_perms(char *s)
 		fprintf(stderr, _("pc: Invalid characters\n"));
 		return EXIT_FAILURE;
 	}
-
-/* This is not true (/bin/mount.cifs is both SUID and SGID)
- * 	if ((us2 == 'S' && (us5 == 'S' || us8 == 'T'))
-	|| (us5 == 'S' && (us2 == 'S' || us8 == 'T'))
-	|| (us8 == 'T' && (us2 == 'S' || us5 == 'S'))) {
-		fprintf(stderr, _("pc: Only one special permission is allowed at a time\n"));
-		return EXIT_FAILURE;
-	} */
 
 	return EXIT_SUCCESS;
 }
@@ -385,7 +365,7 @@ get_common_perms(char **s, int *diff)
 	return p;
 }
 
-/* Returns the permissions string of files passed as arguments
+/* Returns the permissions string of files passed as arguments.
  * If only a single file or multiple files with the same set of permissions,
  * the actual permissions are returned. Otherwise, only shared permissions
  * bits are set in the permissions template.
@@ -544,7 +524,8 @@ get_properties(char *filename, const int dsize)
 		}
 		break;
 
-	case S_IFSOCK: file_type = 's';
+	case S_IFSOCK:
+		file_type = 's';
 		color = ctype = so_c;
 		break;
 	case S_IFBLK:
@@ -626,7 +607,7 @@ get_properties(char *filename, const int dsize)
 		free(n);
 	} else { /* Broken link */
 		char link[PATH_MAX] = "";
-		ssize_t ret = readlinkat(AT_FDCWD, filename, link, PATH_MAX);
+		ssize_t ret = readlinkat(AT_FDCWD, filename, link, sizeof(link));
 		if (ret) {
 			printf(_("\tName: %s%s%s -> %s (broken link)\n"), color, wname ? wname : filename,
 			    df_c, link);

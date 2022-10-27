@@ -2059,6 +2059,11 @@ list_dir(void)
 		/* Filter files according to file type */
 		if (stat_ok == 1 && filter.str && filter.type == FILTER_FILE_TYPE
 		&& exclude_file_type(attr.st_mode, attr.st_nlink) == EXIT_SUCCESS) {
+			/* Decrease counters: the file won't be displayed */
+			if (*ename == '.' && stats.hidden > 0)
+				stats.hidden--;
+			if (stat_ok == 0 && stats.unstat > 0)
+				stats.unstat--;
 			excluded_files++;
 			continue;
 		}
