@@ -690,12 +690,28 @@ By default, \fBclifm\fR prints the amount of files contained by listed directori
 toggle list directories first on/off.
 .TP
 .B fs
-Print an extract from 'What is Free Software?', written by Richard Stallman.
+print an extract from 'What is Free Software?', written by Richard Stallman.
 .TP
-.B ft, filter \fR[\fIunset\fR] [[\fI!\fR]REGEX]
-with no argument, print the current filter. To remove the current filter use the 'unset' option. To set a new filter enter \fIft\ [!]REGEX\fR. Use the exclamation mark to reverse the behavior or a filter. For example: \fIft\ !^\.\fR will prevent hidden files from being listed, just as 'ft ^D' will list only files starting with 'D'.
+.B ft, filter \fR[\fIunset\fR] [[\fI!\fR]REGEX,=FILE-TYPE-CHAR]
+filter the current list of files, either by file name (via a regular expression) or file type (via a file type character).
 .sp
-The filter will be lost at program exit. To permanently set a files filter use the \fIFilter\fR option (in the configuration file). You can also use the \fBCLIFM_FILTER\fR environment variable (see below), though the value of this variable will be lost at system shutdown or reboot.
+With no argument, \fIft\fR prints the current filter. To remove the current filter use the \fIunset\fR option. To set a new filter enter \fIft\fR followed by a filter expression (use the exclamation mark to reverse the meaning of a filter). Examples:
+.sp
+Exclude hidden files:
+ ft !^\.
+.sp
+List only files ending with .pdf:
+ ft .*\\.pdf$
+.sp
+List only symbolic links:
+ ft =l
+.sp
+Exclude socket files:
+ ft !=s
+.sp
+The list of file type characters is included in the \fBFILE FILTERS\fR section below.
+.sp
+The filter will be lost at program exit. To permanently set a filter use the \fIFilter\fR option (in the configuration file) or the \fBCLIFM_FILTER\fR environment variable (consult the \fBENVIRONMENT\fR and the \fBFILE FILTERS\fR sections below).
 .TP
 .B fz \fR[\fIon\fR, \fIoff\fR]
 Toggle full directory size on/off (only for long view mode).
@@ -1022,11 +1038,13 @@ Though by default workspaces are unnamed, you can name them wathever you like us
 open DIR, or the current working directory if DIR is not specified, in a new instance of \fBclifm\fR (as root if \fIX\fR, as the current unprivileged user if \fIx\fR) using the value of \fITerminalCmd\fR (from the configuration file) as terminal emulator. If this value is not set, \fIxterm\fR will be used as fallback terminal emulator. This function is only available for graphical environments.
 
 .SH 6. FILE FILTERS
-\fBClifm\fR offers four kinds of file filters:
+\fBClifm\fR provides multiple ways to filter the current list of files:
 .sp
-\fBa)\fR A dot filter to permanently exclude hidden files from the files list. See the \fB-A\fR and \fB-a\fR options above. You can toggle hidden files in place via the \fIhf\fR command or the Alt-. keybinding.
+\fBa)\fR Hidden files: via the \fB-A\fR and \fB-a\fR command line flags, the \fIhf\fR command, and the \fIAlt\-.\fR keybinding.
 .sp
-\fBb)\fR A files filter using regular expressions (via the \fIFilter\fR option in the configuration file or the \fBCLIFM_FILTER\fR environment variable) to exclude (via '!') or include only specific files. For example, to exclude backup files (ending with a tilde):
+\fBb)\fR Directories: via the \fI\-\-only\-dirs\fR command line switch and the \fIAlt\-,\fR keybinding.
+.sp
+\fBc)\fR File names and file types: either via a regular expression or a file type character (see below) using the \fIft\fR command (the \fIFilter\fR option in the configuration file and the \fBCLIFM_FILTER\fR environment variable are also available). For example, to exclude backup files (ending with a tilde):
 .sp
  CLIFM_FILTER='!.*~$' clifm
 .sp
@@ -1034,32 +1052,42 @@ or (in the configuration file):
 .sp
  Filter="!.*~$"
 .sp
-\fBc)\fR Local filter via the \fIQuick search\fR function (supporting both regular expressions, wildcards, and invert matching) and the \fIft\fR command to temporarily filter the current list of files. Consult the \fBCOMMANDS\fR section above.
+or (via the \fIft\fR command):
+.sp
+ ft !.*~$
+.sp
+See the \fIft\fR command for a few more examples.
 .sp
 \fBd)\fR Filtering files via the TAB key:
 .sp
-You can filter files \fBby name\fR using wildcards. For example: \fIp *.pdf<TAB>\fR (or \fI/*.pdf<TAB>\fR) to get a list of PDF files in the current directory.
+You can filter files \fBby name\fR using wildcards. For example: \fIp *.mp3<TAB>\fR (or \fI/*.mp3<TAB>\fR) to get a list of MP3 files in the current directory.
 .sp
 Files can also be filtered \fBby MIME-type\fR via the '@' keyword. Type \fI@<TAB>\fR to list all MIME-types found in the current directory, or \fI@query<TAB>\fR to list all files whose MIME-type includes the string "query". For example, \fI@image<TAB>\fR will list all files in the current directory whose MIME type includes the string "image".
 .sp
-Finally, files can be filtered as well \fBby file type\fR using the '=' keyword followed by a file type filter character. For example, \fI=l<TAB>\fR to get a list of symbolic links in the current directory. The list of available file type characters is as follows:
+Finally, files can be filtered as well \fBby file type\fR using the '=' keyword followed by a file type character (see below). For example, \fI=l<TAB>\fR to get a list of symbolic links in the current directory.
+.sp
+Note: If using TAB completion in fzf mode, multi-selection is allowed (except in the case of \fI@<TAB>\fR).
+.sp
+Available file type characters:
 
  \fBb\fR: Block devices
  \fBc\fR: Character devices
- \fBC\fR: Files with capabilities
+ \fBC\fR: Files with capabilities (1)(2)
  \fBd\fR: Directories
  \fBf\fR: Regular files
- \fBg\fR: SGID files
+ \fBg\fR: SGID files (2)
  \fBh\fR: Multi-hardlink files (directories excluded)
  \fBl\fR: Symbolic links
- \fBo\fR: Other-writable files
- \fBp\fR: FIFO/pipes
- \fBs\fR: Sockets
- \fBt\fR: Files with the sticky bit set
- \fBu\fR: SUID files
- \fBx\fR: Executable files
+ \fBo\fR: Other-writable files (2)
+ \fBp\fR: FIFO/pipes (2)
+ \fBs\fR: Sockets (2)
+ \fBt\fR: Files with the sticky bit set (2)
+ \fBu\fR: SUID files (2)
+ \fBx\fR: Executable files (2)
 .sp
-If using FZF for TAB completion, multi-selection is allowed.
+(1) Only for TAB completion
+.sp 0
+(2) Not available in light mode
 
 .SH 7. KEYBOARD SHORTCUTS
 .TP
