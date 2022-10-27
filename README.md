@@ -100,7 +100,8 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - Security: [Secure environment](https://github.com/leo-arch/clifm/wiki/Specifics#security) and [secure commands](https://github.com/leo-arch/clifm/wiki/Specifics#security). See also the [stealth mode section](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode)
 - Navigation and file operations
   - [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks)
-  - [Files tagging](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files)
+  - [File tags](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files)
+  - [File filters](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters)
   - [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program)
   - [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions)
   - [copy(-as), move(-as)](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), [interactive rename](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), and [open-with](https://github.com/leo-arch/clifm/wiki/Introduction#ow-elnfilename-application) functions
@@ -113,7 +114,6 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Backdir - Quickly change to a parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#bd-name)
   - [A built-in resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) (supports regular expressions and is able to discern between GUI and non-GUI environments)
   - [A built-in Freedesktop-compliant trash system](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files)
-  - [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters)
   - [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
   - [Eleven sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev)
   - [Bulk rename](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename) and [bulk remove](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
@@ -200,6 +200,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - **NEW**: [Filter files by file type](https://github.com/leo-arch/clifm/wiki/Introduction#ft-filter-unset-regexfile-type-char)
   - **NEW**: [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/#quickly-filtering-files-with-the-tab-key)
   - **NEW**: [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
   - **NEW**: `cd -` works now just like in most shells
