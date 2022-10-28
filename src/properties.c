@@ -194,10 +194,10 @@ get_file_perms(const mode_t mode)
 	return p;
 }
 
-/* Returns EXIT_SUCCESS if the permissions string S (in numeric notation)
+/* Returns EXIT_SUCCESS if the permissions string S (in octal notation)
  * is a valid permissions string or EXIT_FAILURE otherwise */
 static int
-validate_numval(char *s, const size_t l)
+validate_octal_perms(char *s, const size_t l)
 {
 	if (l > 4 || l < 3) {
 		fprintf(stderr, _("pc: %s digits. Either 3 or 4 are "
@@ -209,8 +209,60 @@ validate_numval(char *s, const size_t l)
 	for (i = 0; s[i]; i++) {
 		if (s[i] < '0' || s[i] > '7') {
 			fprintf(stderr, _("pc: %c: Invalid digit. Values in the range 0-7 "
-				"are expected\n"), s[i]);
+				"are expected for each field\n"), s[i]);
 			return EXIT_FAILURE;
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+/* Validate each field of a symbolic permissions string
+ * Returns EXIT_SUCCESS on success and EXIT_FAILURE on error */
+static int
+validate_symbolic_perms(const char *s)
+{
+	size_t i;
+	for (i = 0; i < 9; i++) {
+		switch(i) {
+		case 0: /* fallthrough */
+		case 3: /* fallthrough */
+		case 6:
+			if (s[i] != '-' && s[i] != 'r') {
+				fprintf(stderr, _("pc: Invalid character in field %zu: "
+					"%s-r%s are expected\n"), i + 1, BOLD, NC);
+				return EXIT_FAILURE;
+			}
+			break;
+
+		case 1: /* fallthrough */
+		case 4: /* fallthrough */
+		case 7:
+			if (s[i] != '-' && s[i] != 'w') {
+				fprintf(stderr, _("pc: Invalid character in field %zu: "
+					"%s-w%s are expected\n"), i + 1, BOLD, NC);
+				return EXIT_FAILURE;
+			}
+			break;
+
+		case 2: /* fallthrough */
+		case 5:
+			if (s[i] != '-' && s[i] != 'x' && TOUPPER(s[i]) != 'S') {
+				fprintf(stderr, _("pc: Invalid character in field %zu: "
+					"%s-xsS%s are expected\n"), i + 1, BOLD, NC);
+				return EXIT_FAILURE;
+			}
+			break;
+
+		case 8:
+			if (s[i] != '-' && s[i] != 'x' && TOUPPER(s[i]) != 'T') {
+				fprintf(stderr, _("pc: Invalid character in field %zu: "
+					"%s-xtT%s are expected\n"), i + 1, BOLD, NC);
+				return EXIT_FAILURE;
+			}
+			break;
+
+		default: return EXIT_FAILURE;
 		}
 	}
 
@@ -224,7 +276,7 @@ validate_new_perms(char *s)
 {
 	size_t l = strlen(s);
 	if (*s >= '0' && *s <= '9')
-		return validate_numval(s, l);
+		return validate_octal_perms(s, l);
 
 	if (l != 9) {
 		fprintf(stderr, _("pc: %s characters: 9 are expected\n"),
@@ -232,20 +284,7 @@ validate_new_perms(char *s)
 		return EXIT_FAILURE;
 	}
 
-	char us2 = TOUPPER(s[2]), us5 = TOUPPER(s[5]), us8 = TOUPPER(s[8]);
-
-	if ((s[0] != 'r' && s[0] != '-') || (s[3] != 'r' && s[3] != '-')
-	|| (s[6] != 'r' && s[6] != '-')
-	|| (s[1] != 'w' && s[1] != '-') || (s[4] != 'w' && s[4] != '-')
-	|| (s[7] != 'w' && s[7] != '-')
-	|| (s[2] != 'x' && s[2] != '-' && us2 != 'S')
-	|| (s[5] != 'x' && s[5] != '-' && us5 != 'S')
-	|| (s[8] != 'x' && s[8] != '-' && us8 != 'T')) {
-		fprintf(stderr, _("pc: Invalid characters\n"));
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
+	return validate_symbolic_perms(s);
 }
 
 /* Convert permissions in symbolic notation given by S into octal notation
