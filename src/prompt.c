@@ -1126,7 +1126,7 @@ edit_prompts_file(void)
 		return EXIT_SUCCESS;
 
 	ret = load_prompts();
-	print_reload_msg("File modified. Prompts reloaded\n");
+	print_reload_msg(_("File modified. Prompts reloaded\n"));
 	if (*cur_prompt_name)
 		set_prompt(cur_prompt_name);
 	return ret;

@@ -279,7 +279,7 @@ profile_set(char *prof)
 	if (autols == 1)
 		reload_dirlist();
 
-	print_reload_msg("Switched to profile %s%s%s\n", BOLD,	prof, NC);
+	print_reload_msg(_("Switched to profile %s%s%s\n"), BOLD,	prof, NC);
 	return exit_status;
 }
 

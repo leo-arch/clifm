@@ -802,7 +802,7 @@ sel_function(char **args)
 	}
 
 	if (f == 0)
-		fprintf(stderr, "Missing parameter. Try 's --help'\n");
+		fprintf(stderr, _("Missing parameter. Try 's --help'\n"));
 	free(dir);
 	return print_sel_results(new_sel, sel_path, pattern, err);
 }
@@ -894,7 +894,7 @@ edit_selfile(void)
 	time_t mtime_old = (time_t)attr.st_mtime;
 
 	if (open_file(sel_file) != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: Could not open the selections file\n");
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("sel: Could not open the selections file\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -908,7 +908,7 @@ edit_selfile(void)
 	int ret = get_sel_files();
 	if (autols == 1)
 		reload_dirlist();
-	print_reload_msg("%zu file(s) selected\n", sel_n);
+	print_reload_msg(_("%zu file(s) selected\n"), sel_n);
 	return ret;
 
 ERROR:
@@ -1012,7 +1012,7 @@ desel_entries(char **desel_elements, size_t desel_n, int desel_screen)
 		free(desel_path);
 	} else if (err == 1) {
 		print_reload_msg(_("%d file(s) deselected\n"), dn);
-		print_reload_msg("%zu total selected file(s)\n", sel_n);
+		print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
 	}
 	free(desel_elements);
 
@@ -1169,9 +1169,9 @@ end_deselect(const int err, char ***args)
 	if (argsbk > 0) {
 //		print_new_selections();
 		print_reload_msg(_("%zu file(s) deselected\n"), desel_files);
-		print_reload_msg("%zu total selected file(s)\n", sel_n);
+		print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
 	} else {
-		print_reload_msg("%zu selected file(s)\n", sel_n);
+		print_reload_msg(_("%zu selected file(s)\n"), sel_n);
 	}
 
 	return exit_status;

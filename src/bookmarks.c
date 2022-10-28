@@ -618,7 +618,7 @@ edit_bookmarks(char *cmd, const int flag)
 		reload_bookmarks();
 		if (flag == NO_BM_SCREEN) {
 			reload_dirlist();
-			print_reload_msg("File modified. Bookmarks reloaded\n");
+			print_reload_msg(_("File modified. Bookmarks reloaded\n"));
 		}
 	}
 

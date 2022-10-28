@@ -926,13 +926,13 @@ icons_function(char *arg)
 		icons = 1;
 		int ret = EXIT_SUCCESS;
 		if (autols == 1) { free_dirlist(); ret = list_dir(); }
-		print_reload_msg("Icons enabled\n");
+		print_reload_msg(_("Icons enabled\n"));
 		return ret;
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
 		icons = 0;
 		int ret = EXIT_SUCCESS;
 		if (autols == 1) { free_dirlist(); ret = list_dir(); }
-		print_reload_msg("Icons disabled\n");
+		print_reload_msg(_("Icons disabled\n"));
 		return ret;
 	} else {
 		fprintf(stderr, "%s\n", _(ICONS_USAGE));
@@ -2073,8 +2073,8 @@ preview_function(char **args)
 	}
 
 	if (sel_n > seln_bk) {
-		print_reload_msg("%zu file(s) selected\n", sel_n - seln_bk);
-		print_reload_msg("%zu total selected file(s)\n", sel_n);
+		print_reload_msg(_("%zu file(s) selected\n"), sel_n - seln_bk);
+		print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
 	}
 
 	return EXIT_SUCCESS;

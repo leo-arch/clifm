@@ -309,7 +309,7 @@ remotes_edit(char *app)
 	if (mtime_bfr != (time_t)attr.st_mtime) {
 		free_remotes(0);
 		load_remotes();
-		print_reload_msg("File modified. Remotes reloaded\n");
+		print_reload_msg(_("File modified. Remotes reloaded\n"));
 	}
 
 	return EXIT_SUCCESS;

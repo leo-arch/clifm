@@ -193,7 +193,7 @@ print_disk_usage(void)
 	char *free_space = get_size_unit((off_t)(stat.f_frsize * stat.f_bavail));
 	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
 
-	print_reload_msg("%s/%s free\n",
+	print_reload_msg(_("%s/%s free\n"),
 		free_space ? free_space : "?", size ? size : "?");
 
 	free(free_space);
@@ -1838,7 +1838,7 @@ list_dir_light(void)
 END:
 	exit_code = post_listing(dir, close_dir, reset_pager);
 	if (virtual_dir == 1)
-		print_reload_msg("Virtual directory\n");
+		print_reload_msg(_("Virtual directory\n"));
 	if (excluded_files > 0)
 		printf(_("Excluded files: %d\n"), excluded_files);
 
@@ -2415,7 +2415,7 @@ list_dir(void)
 END:
 	exit_code = post_listing(dir, close_dir, reset_pager);
 	if (virtual_dir == 1)
-		print_reload_msg("Virtual directory\n");
+		print_reload_msg(_("Virtual directory\n"));
 	if (excluded_files > 0)
 		printf(_("Excluded files: %d\n"), excluded_files);
 

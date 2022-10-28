@@ -1830,8 +1830,8 @@ rl_toggle_disk_usage(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg("Disk usage analyzer %s\n",
-		xargs.disk_usage_analyzer == 1 ? "enabled" : "disabled");
+	print_reload_msg(_("Disk usage analyzer %s\n"),
+		xargs.disk_usage_analyzer == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return exit_status;
 }
@@ -1941,8 +1941,8 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 
 	xchmod(stdin_tmp_dir, "0500", 1);
 	reload_dirlist();
-	print_reload_msg("Switched to %s names\n",
-		xargs.virtual_dir_full_paths == 1 ? "long" : "short");
+	print_reload_msg(_("Switched to %s names\n"),
+		xargs.virtual_dir_full_paths == 1 ? _("long") : _("short"));
 	xrl_reset_line_state();
 
 	return EXIT_SUCCESS;

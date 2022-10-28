@@ -312,7 +312,7 @@ edit_actions(char *app)
 	path_n = (size_t)get_path_env();
 	get_path_programs();
 
-	print_reload_msg("File modified. Actions reloaded\n");
+	print_reload_msg(_("File modified. Actions reloaded\n"));
 	return EXIT_SUCCESS;
 }
 

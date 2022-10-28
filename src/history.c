@@ -430,7 +430,7 @@ edit_history(char **args)
 	 * opened */
 	if (mtime_bfr != (time_t)attr.st_mtime) {
 		ret = reload_history(args);
-		print_reload_msg("File modified. History entries reloaded\n");
+		print_reload_msg(_("File modified. History entries reloaded\n"));
 		return ret;
 	}
 
