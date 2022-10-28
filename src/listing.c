@@ -1659,7 +1659,11 @@ list_dir_light(void)
 
 		/* Filter files according to file type */
 		if (filter.str && filter.type == FILTER_FILE_TYPE
+#ifndef _DIRENT_HAVE_D_TYPE
+		&& exclude_file_type_light((unsigned char)get_dt(attr.st_mode)) == EXIT_SUCCESS) {
+#else
 		&& exclude_file_type_light(ent->d_type) == EXIT_SUCCESS) {
+#endif
 			excluded_files++;
 			continue;
 		}
