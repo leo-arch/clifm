@@ -1068,8 +1068,8 @@ FilesCounter=%s\n\n"
 
 		"# If set to any positive value, automatically run the pager whenever\n\
 # the amount of files in the current directory is greater than or equal\n\
-# to this value. Set to 0 to always run the pager and to -1 (or no value\n\
-# at all) to disable this feature.\n\
+# to this value. Set to 0 to always run the pager or to -1 (or no value\n\
+# at all) to disable this feature. Set Pager to false to use this feature.\n\
 AutoPager=\n\n"
 
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
@@ -1305,7 +1305,7 @@ CaseSensitivePathComp=%s\n\n\
 CaseSensitiveSearch=%s\n\n\
 Unicode=%s\n\n\
 # Enable Mas, the files list pager (executed whenever the list of files\n\
-# does not fit in the screen)\n\
+# does not fit on the screen). See also the AutoPager option.\n\
 Pager=%s\n\n"
 
 	"# Maximum file name length for listed files. Names larger than\n\

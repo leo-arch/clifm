@@ -30,10 +30,14 @@ ListDirsFirst=true
 # Note: Classify (see below) must be set to true.
 FilesCounter=true
 
+# Enable Mas, the files list pager (executed whenever the list of files
+# does not fit on the screen). See also the AutoPager option.
+Pager=false
+
 # If set to any positive value, automatically run the pager whenever
 # the amount of files in the current directory is greater than or equal
 # to this value. Set to 0 to always run the pager and to -1 (or no value
-# at all) to disable this feature.
+# at all) to disable this feature. Set Pager to false to use this feature.
 AutoPager=
 
 # If running with colors, append directory indicator to directories. If
@@ -64,10 +68,6 @@ Sort=1
 # using the "name" method). To invert this ordering, set SortReverse to
 # true (you can also use the --sort-reverse option or the 'st' command)
 SortReverse=false
-
-# Enable Mas, the files list pager (executed whenever the list of files
-# does not fit in the screen)
-Pager=false
 
 # List files properties next to file names instead of just file names
 LongViewMode=false
