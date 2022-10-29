@@ -165,7 +165,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - Unicode suppport
   - Disk usage
   - [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions
-  - [A built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status) for files listing
+  - [A built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status-num) for files listing
   - Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
 <h4 align="center"><br><i>Auto-suggestions in action</i></h4>
 <p align="center"><img src="https://i.postimg.cc/1XSKBRh8/suggestions.gif"></a></p>
@@ -200,8 +200,8 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - **NEW**: [Run the pager based on the current amount of files](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status-num)
   - **NEW**: Files counter for directories in long view mode
-  - **NEW**: [Auto-pager](https://github.com/leo-arch/clifm/wiki/Specifics#configuration-file)
   - **NEW**: [Filter files by file type](https://github.com/leo-arch/clifm/wiki/Introduction#ft-filter-unset-regexfile-type-char)
   - **NEW**: [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/#quickly-filtering-files-with-the-tab-key)
   - **NEW**: [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
