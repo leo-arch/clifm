@@ -775,29 +775,41 @@ pager_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	int exit_status = EXIT_SUCCESS;
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		printf(_("The files pager is %s\n"),
-			pager == 1 ? _("enabled") : _("disabled"));
-	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		if (term_caps.pager == 1) {
-			pager = 1;
-			if (autols == 1) reload_dirlist();
-			print_reload_msg(_("Pager enabled\n"));
-		} else {
-			fprintf(stderr, _("%s: Paging is not supported by this terminal\n"), PROGRAM_NAME);
-			exit_status = EXIT_FAILURE;
+		switch(pager) {
+		case 0: puts(_("The pager is disabled")); break;
+		case 1: puts(_("The pager is enabled")); break;
+		default: printf(_("The pager is set to %d\n"), pager); break;
 		}
-	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		pager = 0;
-		if (autols == 1) reload_dirlist();
-		print_reload_msg(_("Pager disabled\n"));
-	} else {
-		fprintf(stderr, "%s\n", _(PAGER_USAGE));
-		exit_status = EXIT_FAILURE;
+
+		return EXIT_SUCCESS;
 	}
 
-	return exit_status;
+	if (is_number(arg)) {
+		int n = xatoi(arg);
+		if (n == INT_MIN) {
+			fprintf(stderr, _("pg: xatoi: Error converting to integer\n"));
+			return EXIT_FAILURE;
+		}
+		pager = n;
+		printf(_("Pager set to %d\n"), n);
+		return EXIT_SUCCESS;
+	}
+
+	if (*arg == 'o' && strcmp(arg, "on") == 0) {
+		pager = 1;
+		puts(_("Pager enabled"));
+		return EXIT_SUCCESS;
+	}
+
+	if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		pager = 0;
+		puts(_("Pager disabled"));
+		return EXIT_SUCCESS;
+	}
+
+	fprintf(stderr, "%s\n", _(PAGER_USAGE));
+	return EXIT_FAILURE;
 }
 
 static int

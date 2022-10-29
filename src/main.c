@@ -141,7 +141,6 @@ int
 	autocmd_set = 0,
 	autojump = UNSET,
 	autols = UNSET,
-	autopager = UNSET,
 	bell = UNSET,
 	bg_proc = 0,
 	case_sens_dirjump = UNSET,

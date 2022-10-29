@@ -88,6 +88,7 @@
 
 /* Amount of digits of the files counter of the longest directory */
 static size_t longest_fc = 0;
+static int pager_bk = 0;
 
 /* Struct to store information about trimmed file names. Used only when
  * Unicode is disabled */
@@ -333,8 +334,10 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 		exit(exit_code);
 
 //	if (reset_pager)
-	if (reset_pager && (autopager == UNSET || (int)files < autopager))
-		pager = 1;
+//	if (reset_pager && (autopager == UNSET || (int)files < autopager))
+	if (reset_pager == 1 && (pager < 2 || (int)files < pager))
+		pager = pager_bk;
+//		pager = 1;
 
 	if (max_files != UNSET && (int)files > max_files)
 		printf("%d/%zu\n", max_files, files);
@@ -415,7 +418,7 @@ run_pager(const int columns_n, int *reset_pager, int *i, size_t *counter)
 	case 99:  /* 'c' */
 	case 112: /* 'p' */
 	case 113: /* 'q' */
-		pager = 0, *reset_pager = 1;
+		pager_bk = pager; pager = 0; *reset_pager = 1;
 		break;
 
 	/* If another key is pressed, go back one position.
@@ -628,7 +631,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 		if (lstat(file_info[i].name, &lattr) == -1)
 			continue;
 
-		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
+		if (pager == 1 || (*reset_pager == 0 && pager > 1 && (int)files >= pager)) {
+//		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
 //		if (pager) {
 			int ret = 0;
 			if (*counter > (size_t)(term_lines - 2))
@@ -1241,7 +1245,8 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */
 
-		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
+		if (pager == 1 || (*reset_pager == 0 && pager > 1 && (int)files >= pager)) {
+//		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
 //		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
@@ -1356,7 +1361,8 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */
 
-		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
+		if (pager == 1 || (*reset_pager == 0 && pager > 1 && (int)files >= pager)) {
+//		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
 //		if (pager == 1) {
 			int ret = 0, bi = i;
 			/* Run the pager only once all columns and rows fitting in

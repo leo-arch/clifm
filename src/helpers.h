@@ -1077,7 +1077,6 @@ extern int
 	autocmd_set,
 	autojump,
 	autols,
-	autopager,
 	bell,
 	bg_proc,
 	case_sensitive,

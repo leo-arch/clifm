@@ -1066,12 +1066,6 @@ ColorScheme=%s\n\n"
 # command while in the program itself.\n\
 FilesCounter=%s\n\n"
 
-		"# If set to any positive value, automatically run the pager whenever\n\
-# the amount of files in the current directory is greater than or equal\n\
-# to this value. Set to 0 to always run the pager or to -1 (or no value\n\
-# at all) to disable this feature. Set Pager to false to use this feature.\n\
-AutoPager=\n\n"
-
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
 ListingMode=%d\n\n"
 
@@ -1304,8 +1298,11 @@ CaseSensitivePathComp=%s\n\n\
 # Enable case sensitive search\n\
 CaseSensitiveSearch=%s\n\n\
 Unicode=%s\n\n\
-# Enable Mas, the files list pager (executed whenever the list of files\n\
-# does not fit on the screen). See also the AutoPager option.\n\
+# Mas, the files list pager. Possible values are:\n\
+# 0/false: Disable the pager\n\
+# 1/true: Run the pager whenever the list of files does not fit on the screen\n\
+# >1: Run the pager whenever the amount of files in the current directory is\n\
+# greater than or equal to this value (say, 1000)\n\
 Pager=%s\n\n"
 
 	"# Maximum file name length for listed files. Names larger than\n\
@@ -1873,6 +1870,36 @@ set_fzf_preview_value(const char *line, int *var)
 	return EXIT_SUCCESS;
 }
 
+static int
+set_pager_value(const char *line, int *var)
+{
+	char *p = strchr(line, '=');
+	if (!p || !*(++p))
+		return (-1);
+
+	if (*p >= '0' && *p <= '9') {
+		size_t l = strlen(p);
+		if (l > 0 && p[l - 1] == '\n')
+			p[l - 1] = '\0';
+
+		int n = xatoi(p);
+		if (n == INT_MIN)
+			return (-1);
+
+		*var = n;
+		return EXIT_SUCCESS;
+	}
+
+	if (*p == 't' && strncmp(p, "true", 4) == 0) {
+		*var = 1;
+	} else {
+		if (*p == 'f' && strncmp(p, "false", 5) == 0)
+			*var = 0;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 /* Get boolean value from LINE and set VAR accordingly */
 static inline int
 set_config_bool_value(const char *line, int *var)
@@ -2123,14 +2150,6 @@ read_config(void)
 		&& strncmp(line, "AutoOpen=", 9) == 0) {
 			if (set_config_bool_value(line, &auto_open) == -1)
 				continue;
-		}
-
-		else if (*line == 'A' && strncmp(line, "AutoPager=", 10) == 0) {
-			int opt_num = 0;
-			ret = sscanf(line, "AutoPager=%d\n", &opt_num);
-			if (ret == -1)
-				continue;
-			autopager = opt_num;
 		}
 
 #ifndef _NO_SUGGESTIONS
@@ -2406,7 +2425,8 @@ read_config(void)
 
 		else if (xargs.pager == UNSET && *line == 'P'
 		&& strncmp(line, "Pager=", 6) == 0) {
-			if (set_config_bool_value(line, &pager) == -1)
+			if (set_pager_value(line, &pager) == -1)
+//			if (set_config_bool_value(line, &pager) == -1)
 				continue;
 		}
 
@@ -2927,7 +2947,6 @@ reset_variables(void)
 	autocd = UNSET;
 	autojump = UNSET;
 	autols = UNSET;
-	autopager = UNSET;
 	case_sens_dirjump = UNSET;
 	case_sens_path_comp = UNSET;
 	case_sensitive = UNSET;

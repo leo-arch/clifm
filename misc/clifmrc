@@ -30,15 +30,12 @@ ListDirsFirst=true
 # Note: Classify (see below) must be set to true.
 FilesCounter=true
 
-# Enable Mas, the files list pager (executed whenever the list of files
-# does not fit on the screen). See also the AutoPager option.
+# Mas, the files list pager. Possible values are:
+# 0/false: Disable the pager
+# 1/true: Run the pager whenever the list of files does not fit on the screen
+# >1: Run the pager whenever the amount of files in the current directory is
+# greater than or equal to this value (say, 1000)
 Pager=false
-
-# If set to any positive value, automatically run the pager whenever
-# the amount of files in the current directory is greater than or equal
-# to this value. Set to 0 to always run the pager and to -1 (or no value
-# at all) to disable this feature. Set Pager to false to use this feature.
-AutoPager=
 
 # If running with colors, append directory indicator to directories. If
 # running without colors (via the --no-color option), append file type

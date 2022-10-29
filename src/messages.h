@@ -619,7 +619,11 @@ Example:\n\
 
 #define PAGER_USAGE "Set the files list pager on-off\n\
 Usage:\n\
-  pg, pager [on, off, status]\n\
+  pg, pager [on, off, status, NUM]\n\n\
+If set to 'on', run the pager whenever the list of files does no fit on\n\
+the screen. If set to any positive integer greater than 1, run the pager\n\
+whenever the amount of files in the current directory is greater than or\n\
+equal to this value (say, 1000). 1 amounts to 'on' and 0 to 'off'\n\n\
 Note: You can also try the 'pager' plugin running 'gg'"
 
 #define PC_USAGE "Interactively edit file permissions\n\

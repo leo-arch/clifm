@@ -2904,9 +2904,6 @@ check_options(void)
 	if (rm_force == UNSET)
 		rm_force = DEF_RM_FORCE;
 
-	if (autopager == UNSET)
-		autopager = DEF_AUTOPAGER;
-
 	if (desktop_notifications == UNSET) {
 		if (xargs.desktop_notifications == UNSET)
 			desktop_notifications = DEF_DESKTOP_NOTIFICATIONS;
