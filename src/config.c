@@ -1066,10 +1066,10 @@ ColorScheme=%s\n\n"
 # command while in the program itself.\n\
 FilesCounter=%s\n\n"
 
-	"# Automatically run the pager whenever the amount of files in the\n\
-# current directory is greater than or equal this value\n\
-# Set to 0 to always run the pager and to -1 (or no value at all)\n\
-# to disable this feature\n\
+		"# If set to any positive value, automatically run the pager whenever\n\
+# the amount of files in the current directory is greater than or equal\n\
+# to this value. Set to 0 to always run the pager and to -1 (or no value\n\
+# at all) to disable this feature.\n\
 AutoPager=\n\n"
 
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\

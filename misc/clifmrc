@@ -30,10 +30,10 @@ ListDirsFirst=true
 # Note: Classify (see below) must be set to true.
 FilesCounter=true
 
-# Automatically run the pager whenever the amount of files in the
-# current directory is greater than or equal this value.
-# Set to 0 to always run the pager and to -1 (or no value at all)
-# to disable this feature
+# If set to any positive value, automatically run the pager whenever
+# the amount of files in the current directory is greater than or equal
+# to this value. Set to 0 to always run the pager and to -1 (or no value
+# at all) to disable this feature.
 AutoPager=
 
 # If running with colors, append directory indicator to directories. If
