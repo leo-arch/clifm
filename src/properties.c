@@ -1025,7 +1025,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 				 * #  7. FILES COUNTER (DIRS) #
 				 * ############################ */
 
-	char fc_str[32];
+	char fc_str[(MAX_COLOR * 2) + 32];
 	*fc_str = '\0';
 	/* FC_MAX is zero if there are no subdirs in the current dir (or all
 	 * of them are empty) */

@@ -332,7 +332,8 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
 
-	if (reset_pager)
+//	if (reset_pager)
+	if (reset_pager && (autopager == UNSET || (int)files < autopager))
 		pager = 1;
 
 	if (max_files != UNSET && (int)files > max_files)
@@ -601,7 +602,8 @@ get_max_files_counter(void)
 }
 
 static void
-print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max, const size_t ino_max)
+print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
+	const size_t ino_max)
 {
 	struct stat lattr;
 
@@ -626,7 +628,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 		if (lstat(file_info[i].name, &lattr) == -1)
 			continue;
 
-		if (pager) {
+		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
+//		if (pager) {
 			int ret = 0;
 			if (*counter > (size_t)(term_lines - 2))
 				ret = run_pager(-1, reset_pager, &i, counter);
@@ -1238,7 +1241,8 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */
 
-		if (pager) {
+		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
+//		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			int ret = 0, bi = i;
@@ -1352,7 +1356,8 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */
 
-		if (pager) {
+		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
+//		if (pager == 1) {
 			int ret = 0, bi = i;
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */

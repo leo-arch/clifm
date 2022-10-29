@@ -1066,6 +1066,12 @@ ColorScheme=%s\n\n"
 # command while in the program itself.\n\
 FilesCounter=%s\n\n"
 
+	"# Automatically run the pager whenever the amount of files in the\n\
+# current directory is greater than or equal this value\n\
+# Set to 0 to always run the pager and to -1 (or no value at all)\n\
+# to disable this feature\n\
+AutoPager=\n\n"
+
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
 ListingMode=%d\n\n"
 
@@ -2119,6 +2125,14 @@ read_config(void)
 				continue;
 		}
 
+		else if (*line == 'A' && strncmp(line, "AutoPager=", 10) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "AutoPager=%d\n", &opt_num);
+			if (ret == -1)
+				continue;
+			autopager = opt_num;
+		}
+
 #ifndef _NO_SUGGESTIONS
 		else if (xargs.suggestions == UNSET && *line == 'A'
 		&& strncmp(line, "AutoSuggestions=", 16) == 0) {
@@ -2913,6 +2927,7 @@ reset_variables(void)
 	autocd = UNSET;
 	autojump = UNSET;
 	autols = UNSET;
+	autopager = UNSET;
 	case_sens_dirjump = UNSET;
 	case_sens_path_comp = UNSET;
 	case_sensitive = UNSET;
