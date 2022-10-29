@@ -404,7 +404,7 @@ get_common_perms(char **s, int *diff)
 	return p;
 }
 
-/* Returns the permissions string of files passed as arguments.
+/* Returns the permissions string of files passed as arguments (S).
  * If only a single file or multiple files with the same set of permissions,
  * the actual permissions are returned. Otherwise, only shared permissions
  * bits are set in the permissions template.
@@ -818,7 +818,8 @@ get_ext_info_long(const char *name, const size_t name_len, int *trim, size_t *ex
  * This function is called by list_dir(), in listing.c for each file name
  * in the current directory when running in long view mode */
 int
-print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max, const size_t ino_max)
+print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
+	const size_t ino_max, const size_t fc_max)
 {
 	/* Let's get file properties and the corresponding colors */
 
@@ -1020,10 +1021,28 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	if (prop_fields.inode == 1)
 		snprintf(ino_s, sizeof(ino_s), "%-*ju ", (int)ino_max, (uintmax_t)props->inode);
 
+				/* ############################
+				 * #  7. FILES COUNTER (DIRS) #
+				 * ############################ */
+
+	char fc_str[32];
+	*fc_str = '\0';
+	/* FC_MAX is zero if there are no subdirs in the current dir (or all
+	 * of them are empty) */
+	if (files_counter == 1 && fc_max > 0) {
+		if (props->dir == 1 && props->filesn > 0) {
+			snprintf(fc_str, sizeof(fc_str), "%s%-*d%s ", fc_c, (int)fc_max,
+				(int)props->filesn, df_c);
+		} else {
+			snprintf(fc_str, sizeof(fc_str), "%-*c ", (int)fc_max, ' ');
+		}
+	}
+
 	/* Print stuff */
 
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
+		   "%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
@@ -1039,6 +1058,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",
 
+		*fc_str ? fc_str : "",
 		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
@@ -1046,6 +1066,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		prop_fields.size == 1 ? size_s : "");
 #else
 	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
+		   "%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
@@ -1059,6 +1080,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",
 
+		*fc_str ? fc_str : "",
 		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",

@@ -579,12 +579,36 @@ set_long_attribs(const int n, const struct stat *attr)
 	}
 }
 
+/* Returns the lenght of the largest files counter (directories only)
+ * This function is used by the long view function to correctly pad
+ * the properties string
+ * It returns zero if there are no subdirectories in the current dir */
+static size_t
+get_max_files_counter(void)
+{
+	size_t fc_max = 0;
+	int i = (int)files;
+
+	while (--i >= 0) {
+		if (file_info[i].dir == 0)
+			continue;
+		size_t t = (size_t)DIGINUM(file_info[i].filesn);
+		if (t > fc_max)
+			fc_max = t;
+	}
+
+	return fc_max;
+}
+
 static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max, const size_t ino_max)
 {
 	struct stat lattr;
+
+	size_t fc_max = files_counter == 1 ? get_max_files_counter() : 0;
+
 	/* Available space (term cols) to print the file name */
-	int space_left = (int)term_cols - prop_fields.len;
+	int space_left = (int)term_cols - (prop_fields.len + (int)fc_max);
 
 	if (space_left < min_name_trim)
 		space_left = min_name_trim;
@@ -619,7 +643,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
 				li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c);
 		/* Print the remaining part of the entry */
-		print_entry_props(&file_info[i], (size_t)space_left, ug_max, ino_max);
+		print_entry_props(&file_info[i], (size_t)space_left, ug_max, ino_max, fc_max);
 	}
 }
 
