@@ -858,6 +858,8 @@ with no arguments, prints the name of the currently used profile. Use the \fIls\
 toggle \fBMas\fR, the built-in pager, on/off. Useful to list directories with hundreds or thousands of files, the pager will start working, if set to on, whenever the screen is not enough to list all files.
 .sp
 Once in the pager, press the Down arrow key, Space or Enter to move downwards one line, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, \fIAlt\-PageUp\fR or \fIAlt\-Up\fR. Press 'c', 'p', or 'q' keys to stop the pager, and 'h' or '?' for help.
+.sp
+The pager can also be automatically enabled based on the amount of files in the current directory. See the \fIAutoPager\fR option in the configuration file.
 .TP
 .B pin \fR[\fIFILE/DIR\fR]
 pin a file or a directory to be accessed later via the comma (,) keyword. For example, run \fIpin mydir\fR and then access \fImydir\fR as follows: \fIcd\ \,\fR where the comma is automatically expanded to the pinned file, in this case \fImydir\fR. The comma keyword could be used with any command, either internal or external, e.g, \fIls\ \,\fR.
