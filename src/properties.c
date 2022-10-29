@@ -1027,14 +1027,13 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 
 	char fc_str[(MAX_COLOR * 2) + 32];
 	*fc_str = '\0';
-	/* FC_MAX is zero if there are no subdirs in the current dir (or all
-	 * of them are empty) */
+	/* FC_MAX is zero if there are no subdirs in the current dir */
 	if (files_counter == 1 && fc_max > 0) {
 		if (props->dir == 1 && props->filesn > 0) {
 			snprintf(fc_str, sizeof(fc_str), "%s%-*d%s ", fc_c, (int)fc_max,
-				(int)props->filesn, df_c);
+				(int)props->filesn, cend);
 		} else {
-			snprintf(fc_str, sizeof(fc_str), "%-*c ", (int)fc_max, ' ');
+			snprintf(fc_str, sizeof(fc_str), "%s%-*c%s ", dn_c, (int)fc_max, '-', cend);
 		}
 	}
 
