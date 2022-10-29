@@ -200,6 +200,8 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - **NEW**: Files counter for directories in long view mode
+  - **NEW**: [Auto-pager](https://github.com/leo-arch/clifm/wiki/Specifics#configuration-file)
   - **NEW**: [Filter files by file type](https://github.com/leo-arch/clifm/wiki/Introduction#ft-filter-unset-regexfile-type-char)
   - **NEW**: [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/#quickly-filtering-files-with-the-tab-key)
   - **NEW**: [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
