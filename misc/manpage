@@ -128,10 +128,10 @@ case\-sensitive files listing
 set an alternative keybindings file
 .TP
 \fB\-l\fR, \fB\-\-no\-long\-view\fR
-disable long view mode (default)
+disable the long view mode (default)
 .TP
 \fB\-L\fR, \fB\-\-long\-view\fR
-enable long-view mode to list files and their properties. By default, the following information is provided for each file: file name, file permissions (symbolic notation), owner and primary group, last modification time, and size (these fields could be turned on/off using the \fIPropFields\fR option in the configuration file). To get more detailed information use the \fIp\fR command (see below).
+enable the long-view mode to list files and their properties. By default, the following information is provided for each file: file name, files counter (in case of directories), file permissions (symbolic notation), owner and primary group, last modification time, and size (these fields can be customized using the \fIPropFields\fR option in the configuration file). To get more detailed information use the \fIp\fR command (see below).
 .TP
 \fB\-m\fR, \fB\-\-dirhist\-map\fR
 enable the directory history map to keep in view previous, current and next entries in the directory history list
@@ -206,7 +206,7 @@ set \fINAME\fR as color scheme
 print current working directory in terminal window title. Otherwise, only the program name is printed
 .TP
 \fB\-\-desktop\-notifications\fR
-enable desktop notifications. Enter 'help desktop-notifications' in CliFM for more information
+enable desktop notifications. Enter \fIhelp desktop-notifications\fR in \fBclifm\fR for more information
 .TP
 \fB\-\-disk\-usage\fR
 show disk usage (free/total) for the file system the current directory belongs to
@@ -702,7 +702,7 @@ An alternative way of navigating the jump database is using the jumper plugin (l
 with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the \fIedit\fR option (the file will be opened with APP, if specified, or with the default associated application otherwise). If you somehow messed up your keybindings, use the 'reset' option to create a fresh keybindings file with the default values. To list readline keybindings, use the \fIreadline\fR option. Bear in mind that these keybindings are not provided by \fBclifm\fR, but by readline itself, and as such depend on the system settings (they can be customized however via the \fI~/.inputrc\fR file).
 .TP
 .B lm \fR[\fIon\fR, \fIoff\fR]
-Toggle the light mode on/off. This option, aimed at making files listing faster than the default mode, is especially useful for really old hardware or when working on remote machines. For more details see the \fBNOTE ON SPEED\fR section below.
+Toggle the light mode on/off. This option, aimed at making files listing faster than the default mode, is especially useful for really old hardware or when working on remote machines (for more information see the \fBNOTE ON SPEED\fR section below).
 .TP
 .B log \fR[\fIclear\fR] [\fIon\fR, \fIoff\fR, \fIstatus\fR]
 with no arguments, it prints the contents of the log file. If \fIclear\fR is passed as argument, all the logs will be deleted. \fIon\fR, \fIoff\fR, and \fIstatus\fR enable, disable, and check the status of the \fIlog\fR function for the current session.
