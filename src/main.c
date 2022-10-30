@@ -1035,22 +1035,6 @@ init_file_flags(void)
 	flags |= TRASH_OK;
 } */
 
-/*
-#if !defined(CLIFM_LD_PRELOAD_IGNORE)
-// This only works provided getenv(3) is not itself compromised via
-// LD_PRELOAD
-static void
-check_ld_preload(void)
-{
-	char *p = getenv("LD_PRELOAD");
-	if (p) {
-		fprintf(stderr, "%s: LD_PRELOAD set to '%s'\nShared libraries "
-			"poisoned. Aborting!\n", PROGRAM_NAME, p);
-		exit(EXIT_FAILURE);
-	}
-}
-#endif // !CLIFM_LD_PRELOAD_IGNORE */
-
 				/**
 				 * #############################
 				 * #           MAIN            #
@@ -1070,10 +1054,6 @@ main(int argc, char *argv[])
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(EINVAL));
 		exit(EINVAL);
 	}
-/*
-#if !defined(CLIFM_LD_PRELOAD_IGNORE)
-	check_ld_preload();
-#endif // !CLIFM_LD_PRELOAD_IGNORE */
 
 	init_filter();
 	init_msgs();

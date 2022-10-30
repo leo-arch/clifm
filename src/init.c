@@ -1404,7 +1404,7 @@ resolve_positional_param(char *file)
 	if (url == 1 || !S_ISDIR(attr.st_mode))
 		open_reg_exit(_path, url, 0);
 
-	flags |= START_PATH;
+//	flags |= START_PATH;
 	xargs.path = 1;
 	return _path;
 }
@@ -1834,17 +1834,8 @@ external_arguments(int argc, char **argv)
 
 		case 'a': show_hidden = xargs.hidden = 0; break;
 		case 'A': show_hidden = xargs.hidden = 1; break;
-
-		case 'b':
-			xargs.bm_file = 1;
-			bm_value = optarg;
-			break;
-
-		case 'c':
-			xargs.config = 1;
-			config_value = optarg;
-			break;
-
+		case 'b': xargs.bm_file = 1; bm_value = optarg; break;
+		case 'c': xargs.config = 1; config_value = optarg; break;
 		case 'D': alt_dir_value = optarg; break;
 		case 'e': xargs.noeln = no_eln = 1; break;
 		case 'E': xargs.eln_use_workspace_color = 1; break;
@@ -1862,18 +1853,8 @@ external_arguments(int argc, char **argv)
 		case 'm': dirhist_map = xargs.dirmap = 1; break;
 		case 'o': autols = xargs.autols = 0; break;
 		case 'O': autols = xargs.autols = 1; break;
-
-		case 'p':
-			flags |= START_PATH;
-			path_value = optarg;
-			xargs.path = 1;
-			break;
-
-		case 'P':
-			flags |= ALT_PROFILE;
-			alt_profile_value = optarg;
-			break;
-
+		case 'p': path_value = optarg; xargs.path = 1; break;
+		case 'P': alt_profile_value = optarg; break;
 		case 'r': xargs.refresh_on_empty_line = 0; break;
 		case 's': splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
@@ -2044,7 +2025,7 @@ external_arguments(int argc, char **argv)
 		free(config_exp);
 	}
 
-	if ((flags & START_PATH) && path_value) {
+	if (path_value) {
 		char *path_exp = (char *)NULL;
 		char path_tmp[PATH_MAX];
 
@@ -2090,7 +2071,7 @@ external_arguments(int argc, char **argv)
 		free(path_exp);
 	}
 
-	if ((flags & ALT_PROFILE) && alt_profile_value) {
+	if (alt_profile_value) {
 		free(alt_profile);
 		alt_profile = savestring(alt_profile_value, strlen(alt_profile_value));
 	}

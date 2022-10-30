@@ -632,7 +632,6 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 			continue;
 
 		if (pager == 1 || (*reset_pager == 0 && pager > 1 && (int)files >= pager)) {
-//		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
 //		if (pager) {
 			int ret = 0;
 			if (*counter > (size_t)(term_lines - 2))
@@ -2381,6 +2380,10 @@ list_dir(void)
 		n++;
 		count++;
 	}
+
+/*	unsigned int tdents = total_dents > 0 ? total_dents : ENTRY_N + 2;
+	if (tdents > n)
+		file_info = xrealloc(file_info, (n + 1) * sizeof(struct fileinfo)); */
 
 	if (xargs.disk_usage_analyzer == 1 || (long_view == 1 && full_dir_size == 1)) {
 		/* Erase the "Retrieveing file sizes" message */
