@@ -588,6 +588,7 @@ struct filter_t {
 	int rev;
 	int type;
 	int env;
+	int pad;
 };
 
 extern struct filter_t filter;
@@ -599,9 +600,10 @@ struct user_t {
 	char *shell;
 	size_t home_len;
 	uid_t uid;
-	gid_t gid; /* Primary user group */
-	int ngroups; /* Number of secondary groups */
+	gid_t gid;     /* Primary user group */
 	gid_t *groups; /* Secondary groups ID's */
+	int ngroups;   /* Number of secondary groups */
+	int pad;
 };
 
 extern struct user_t user;
@@ -705,6 +707,7 @@ extern struct fileinfo *file_info;
 struct devino_t {
 	dev_t dev;
 	ino_t ino;
+	char mark;
 	char pad1;
 	char pad2;
 	char pad3;
@@ -712,7 +715,6 @@ struct devino_t {
 	char pad5;
 	char pad6;
 	char pad7;
-	char mark;
 };
 
 extern struct devino_t *sel_devino;

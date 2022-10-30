@@ -71,16 +71,6 @@
  * length is locale dependent (at least %b), let's use a much larger buffer */
 
 struct perms_t {
-	/* Field values */
-	char ur;
-	char uw;
-	char ux;
-	char gr;
-	char gw;
-	char gx;
-	char or;
-	char ow;
-	char ox;
 	/* Field colors */
 	char *cur;
 	char *cuw;
@@ -91,6 +81,20 @@ struct perms_t {
 	char *cor;
 	char *cow;
 	char *cox;
+	/* Field values */
+	char ur;
+	char uw;
+	char ux;
+	char gr;
+	char gw;
+	char gx;
+	char or;
+	char ow;
+	char ox;
+	char pad1;
+	char pad2;
+	char pad3;
+	int pad4;
 };
 
 static char *
