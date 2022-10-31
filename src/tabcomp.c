@@ -256,7 +256,7 @@ print_filename(char *to_print, char *full_pathname)
 {
 	char *s;
 
-	if (colorize == 1 && (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_SEL
+	if (conf.colorize == 1 && (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_SEL
 	|| cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_RANGES)) {
 		colors_list(to_print, NO_ELN, NO_PAD, NO_NEWLINE);
 	} else {
@@ -265,7 +265,7 @@ print_filename(char *to_print, char *full_pathname)
 		}
 	}
 
-	if (rl_filename_completion_desired && colorize == 0) {
+	if (rl_filename_completion_desired && conf.colorize == 0) {
 		if (cur_comp_type == TCMP_CMD) {
 			putc('*', rl_outstream);
 			return 1;
@@ -362,7 +362,7 @@ reinsert_slashes(char *str)
 static char *
 fzftab_color(char *filename, const struct stat *attr)
 {
-	if (!colorize)
+	if (!conf.colorize)
 		return df_c;
 
 	switch(attr->st_mode & S_IFMT) {
@@ -392,7 +392,7 @@ fzftab_color(char *filename, const struct stat *attr)
 static char *
 get_entry_color(char **matches, const size_t i)
 {
-	if (colorize == 0)
+	if (conf.colorize == 0)
 		return (char *)NULL;
 
 	struct stat attr;
@@ -475,7 +475,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		rl_insert_text(buf);
 		return;
 	} else {
-		if (autocd == 0 && cur_comp_type == TCMP_JUMP)
+		if (conf.autocd == 0 && cur_comp_type == TCMP_JUMP)
 			rl_insert_text("cd ");
 		rl_insert_text(buf + *offset);
 	}
@@ -665,8 +665,8 @@ get_preview_win_width(const int offset)
 static int
 run_finder(const size_t *height, const int *offset, const char *lw, const int multi)
 {
-	int prev = (fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
-	int prev_hidden = fzf_preview == 2 ? 1 : 0;
+	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+	int prev_hidden = conf.fzf_preview == 2 ? 1 : 0;
 
 	/* If height was not set in FZF_DEFAULT_OPTS nor in the config
 	 * file, let's define it ourselves */
@@ -682,7 +682,7 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				"--tab-accepts --right-accepts --left-aborts "
 				"--lines=%zu %s %s < %s > %s",
 				*offset, lw ? lw : "", *height,
-				colorize == 0 ? "--no-color" : "",
+				conf.colorize == 0 ? "--no-color" : "",
 				multi ? "--multi" : "",
 				finder_in_file, finder_out_file);
 	} else if (tabmode == SMENU_TAB) {
@@ -711,10 +711,10 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 				"%s --read0 --ansi "
 				"--query=\"%s\" %s %s %s %s %s "
 				"< %s > %s",
-				fzftab_options,
+				conf.fzftab_options,
 				*height_str ? height_str : "", *offset,
-				case_sens_path_comp ? "+i" : "-i",
-				lw ? lw : "", colorize == 0 ? "--color=bw" : "",
+				conf.case_sens_path_comp ? "+i" : "-i",
+				lw ? lw : "", conf.colorize == 0 ? "--color=bw" : "",
 				multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				prev == 1 ? prev_str : "",
@@ -730,7 +730,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				"--layout=reverse-list --query=\"%s\" %s %s "
 				"< %s > %s",
 				*height_str ? height_str : "", *offset,
-				lw ? lw : "", colorize == 0 ? "--no-color" : "",
+				lw ? lw : "", conf.colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down" : "",
 				finder_in_file, finder_out_file); */
 
@@ -965,7 +965,7 @@ store_completions(char **matches, FILE *fp)
 	size_t start = ((flags & PREVIEWER) && !matches[1]) ? 0 : 1;
 	char *_path = (char *)NULL;
 
-	int prev = (fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
 	longest_prev_entry = 0;
 
 	for (i = start; matches[i]; i++) {
@@ -1264,7 +1264,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * We don't want to place the finder's window too much to the right,
 	 * making its contents unreadable: let's make sure we have at least
 	 * 20 chars (40 if previews are enabled) for the finder's window */
-	int fspace = (tabmode == FZF_TAB && fzf_preview == 1
+	int fspace = (tabmode == FZF_TAB && conf.fzf_preview == 1
 		&& SHOW_PREVIEWS(cur_comp_type) == 1) ? 40 : 20;
 
 	/* If showing previews, let's reserve at least a quarter of the
@@ -1542,7 +1542,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else {
-		if ((case_sens_path_comp == 0 || xargs.fuzzy_match == 1) && query) {
+		if ((conf.case_sens_path_comp == 0 || xargs.fuzzy_match == 1) && query) {
 			/* Honor case insensitive completion/fuzzy matches */
 			if (strncmp(matches[0], buf, prefix_len) != 0) {
 				int bk = rl_point;
@@ -1584,7 +1584,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	free(buf);
 
 #ifndef _NO_SUGGESTIONS
-	if (suggestions && nwords == 1 && wrong_cmd == 1) {
+	if (conf.suggestions && nwords == 1 && wrong_cmd == 1) {
 		fputs(NC, stdout);
 		fflush(stdout);
 		rl_restore_prompt();
@@ -1911,7 +1911,7 @@ AFTER_USUAL_COMPLETION:
 			rl_delete_text(start, rl_point);
 			rl_point = start;
 #ifndef _NO_HIGHLIGHT
-			if (highlight && !wrong_cmd) {
+			if (conf.highlight && !wrong_cmd) {
 				size_t k, l = 0;
 				size_t _start = (*replacement == '\\' && *(replacement + 1) == '~') ? 1 : 0;
 				char *cc = cur_color;
@@ -2010,7 +2010,7 @@ AFTER_USUAL_COMPLETION:
 				if ((stat(d, &finfo) == 0) && S_ISDIR(finfo.st_mode)) {
 					if (rl_line_buffer[rl_point] != '/') {
 #ifndef _NO_HIGHLIGHT
-						if (highlight && !wrong_cmd) {
+						if (conf.highlight && !wrong_cmd) {
 							char *cc = cur_color;
 							fputs(hd_c, stdout);
 							rl_insert_text("/");
@@ -2080,7 +2080,7 @@ DISPLAY_MATCHES:
 			if (len >= rl_completion_query_items) {
 				putchar('\n');
 #ifndef _NO_HIGHLIGHT
-				if (highlight && cur_color != tx_c && !wrong_cmd) {
+				if (conf.highlight && cur_color != tx_c && !wrong_cmd) {
 					cur_color = tx_c;
 					fputs(tx_c, stdout);
 				}
@@ -2110,7 +2110,7 @@ DISPLAY_MATCHES:
 
 		putchar('\n');
 #ifndef _NO_HIGHLIGHT
-		if (highlight && cur_color != tx_c && !wrong_cmd) {
+		if (conf.highlight && cur_color != tx_c && !wrong_cmd) {
 			cur_color = tx_c;
 			fputs(tx_c, stdout);
 		}
@@ -2216,7 +2216,7 @@ CALC_OFFSET:
 					if (tab_offset) {
 						/* Print the matching part of the match */
 						printf("\x1b[0m%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
-						(cur_comp_type == TCMP_CMD) ? (colorize
+						(cur_comp_type == TCMP_CMD) ? (conf.colorize
 						? ex_c : "") : fc_c);
 					}
 
@@ -2238,7 +2238,7 @@ CALC_OFFSET:
 		}
 		tab_offset = 0;
 
-		if (!wrong_cmd && colorize && cur_comp_type == TCMP_CMD)
+		if (!wrong_cmd && conf.colorize && cur_comp_type == TCMP_CMD)
 			fputs(tx_c, stdout);
 		rl_reset_line_state();
 
@@ -2252,7 +2252,7 @@ RESET_PATH:
 RESTART:
 		rl_on_new_line();
 #ifndef _NO_HIGHLIGHT
-		if (highlight == 1 && wrong_cmd == 0) {
+		if (conf.highlight == 1 && wrong_cmd == 0) {
 			int bk = rl_point;
 /*			rl_point = 0;
 			recolorize_line();

@@ -147,7 +147,7 @@ static int
 get_shell_cmd_opts(char *cmd)
 {
 	*ext_opts[0] = '\0';
-	if (!cmd || !*cmd || !user.home || (suggestions == 1 && wrong_cmd == 1))
+	if (!cmd || !*cmd || !user.home || (conf.suggestions == 1 && wrong_cmd == 1))
 		return EXIT_FAILURE;
 
 	char p[PATH_MAX];
@@ -399,7 +399,7 @@ construct_wide_char(unsigned char c)
 	wc_len++;
 	wc_str[wc_len] = '\0';
 
-	if (highlight == 1 && cur_color != tx_c && cur_color != hq_c
+	if (conf.highlight == 1 && cur_color != tx_c && cur_color != hq_c
 	&& cur_color != hv_c && cur_color != hc_c && cur_color != hp_c) {
 		cur_color = tx_c;
 		fputs(cur_color, stdout);
@@ -488,7 +488,7 @@ rl_exclude_input(unsigned char c)
 	/* Multi-byte char. Send it directly to the input buffer. We can't
 	 * process it here, since we process only single bytes */
 /*	if (c > 127 || (c & 0xc0) == 0x80) {
-		if (highlight == 1 && cur_color != tx_c && cur_color != hq_c
+		if (conf.highlight == 1 && cur_color != tx_c && cur_color != hq_c
 		&& cur_color != hc_c && cur_color != hp_c) {
 			cur_color = tx_c;
 			fputs(cur_color, stdout);
@@ -573,7 +573,7 @@ END:
 #endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_HIGHLIGHT
-	if (highlight == 0) {
+	if (conf.highlight == 0) {
 		if (_del > 0) {
 #ifndef _NO_SUGGESTIONS
 			/* Since we have removed a char, let's check if there is
@@ -714,9 +714,9 @@ my_rl_getc(FILE *stream)
 	static unsigned char prev = 0;
 
 #ifndef _NO_FZF
-	if (xargs.fzftab == 1 || warning_prompt == 1) {
+	if (xargs.fzftab == 1 || conf.warning_prompt == 1) {
 #else
-	if (warning_prompt == 1) {
+	if (conf.warning_prompt == 1) {
 #endif // !_NO_FZF
 		if (prompt_offset == UNSET)
 			prompt_offset = get_prompt_offset(rl_prompt);
@@ -734,7 +734,7 @@ my_rl_getc(FILE *stream)
 
 			if (rl_end == 0) {
 				fzf_open_with = 0;
-				if (highlight == 1)
+				if (conf.highlight == 1)
 					rl_redisplay();
 			}
 
@@ -747,9 +747,9 @@ my_rl_getc(FILE *stream)
 			}
 
 #ifndef _NO_SUGGESTIONS
-//			if (ret != 2 && ret != -2 && !_xrename && suggestions) {
-//			if (ret == SUGGEST_ONLY && _xrename == 0 && suggestions == 1) {
-			if (ret == SUGGEST_ONLY && suggestions == 1)
+//			if (ret != 2 && ret != -2 && !_xrename && conf.suggestions) {
+//			if (ret == SUGGEST_ONLY && _xrename == 0 && conf.suggestions == 1) {
+			if (ret == SUGGEST_ONLY && conf.suggestions == 1)
 				rl_suggestions(c);
 #endif /* !_NO_SUGGESTIONS */
 
@@ -895,8 +895,8 @@ alt_rl_prompt(const char *_prompt, const char *line)
 	cb_running = 1;
 	kbind_busy = 1;
 	rl_getc_function = alt_rl_getc;
-	int highlight_bk = highlight;
-	highlight = 0;
+	int highlight_bk = conf.highlight;
+	conf.highlight = 0;
 
 	/* Install the line handler */
 	rl_callback_handler_install(_prompt, cb_linehandler);
@@ -911,7 +911,7 @@ alt_rl_prompt(const char *_prompt, const char *line)
 	while (cb_running == 1)
 		rl_callback_read_char();
 
-	highlight = highlight_bk;
+	conf.highlight = highlight_bk;
 	kbind_busy = 0;
 	rl_getc_function = my_rl_getc;
 	return EXIT_SUCCESS;
@@ -940,12 +940,12 @@ is_quote_char(const char c)
 char *
 rl_no_hist(const char *prompt)
 {
-	int bk = suggestions;
-	suggestions = 0;
+	int bk = conf.suggestions;
+	conf.suggestions = 0;
 	rl_nohist = rl_notab = 1;
 	char *input = readline(prompt);
 	rl_notab = rl_nohist = 0;
-	suggestions = bk;
+	conf.suggestions = bk;
 
 	if (input) {
 		/* Make sure input isn't empty string */
@@ -1207,12 +1207,12 @@ my_rl_path_completion(const char *text, int state)
 		type = ent->d_type;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
-		if (((suggestions == 1 && nwords == 1) || !strchr(rl_line_buffer, ' '))
-		&& ((type == DT_DIR && autocd == 0) || (type != DT_DIR && auto_open == 0)))
+		if (((conf.suggestions == 1 && nwords == 1) || !strchr(rl_line_buffer, ' '))
+		&& ((type == DT_DIR && conf.autocd == 0) || (type != DT_DIR && conf.auto_open == 0)))
 			continue;
 
 		/* Only dir names for cd */
-		if ((suggestions == 0 || nwords > 1) && xargs.fuzzy_match == 1
+		if ((conf.suggestions == 0 || nwords > 1) && xargs.fuzzy_match == 1
 		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && type != DT_DIR)
 			continue;
@@ -1313,7 +1313,7 @@ my_rl_path_completion(const char *text, int state)
 		else {
 			/* Check for possible matches, first using regular matching and
 			 * then, if no match, try fuzzy matching (if enabled) */
-			if (case_sens_path_comp == 1) {
+			if (conf.case_sens_path_comp == 1) {
 				if (*ent->d_name != *filename
 				/* Check 2nd char as well before calling strncasecmp() */
 				|| (filename_len > 1 && *(ent->d_name + 1)
@@ -1323,7 +1323,7 @@ my_rl_path_completion(const char *text, int state)
 					if (xargs.fuzzy_match == 0 || *filename == '-')
 						continue;
 					if (flags & STATE_SUGGESTING) {
-						if (!*_fmatch && fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 1) {
+						if (!*_fmatch && fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 1) {
 							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
 								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 							else
@@ -1333,7 +1333,7 @@ my_rl_path_completion(const char *text, int state)
 							continue;
 						}
 					} else {
-						if (fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
+						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 0)
 							continue;
 					}
 				}
@@ -1348,7 +1348,7 @@ my_rl_path_completion(const char *text, int state)
 					if (xargs.fuzzy_match == 0 || *filename == '-')
 						continue;
 					if (flags & STATE_SUGGESTING) {
-						if (!*_fmatch && fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 1) {
+						if (!*_fmatch && fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 1) {
 							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
 								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 							else
@@ -1358,7 +1358,7 @@ my_rl_path_completion(const char *text, int state)
 							continue;
 						}
 					} else {
-						if (fuzzy_match(filename, ent->d_name, case_sens_path_comp) == 0)
+						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 0)
 							continue;
 					}
 				}
@@ -1532,7 +1532,7 @@ bookmarks_generator(const char *text, int state)
 
 	/* Look for bookmarks in bookmark names for a match */
 	while ((name = bookmark_names[i++]) != NULL) {
-		if ((case_sensitive ? strncmp(name, text, len)
+		if ((conf.case_sensitive ? strncmp(name, text, len)
 		: strncasecmp(name, text, len)) == 0)
 			return strdup(name);
 	}
@@ -1560,7 +1560,7 @@ hist_generator(const char *text, int state)
 		if (*text == '!') {
 			if (len == 0 || (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
 			|| (xargs.fuzzy_match == 1
-			&& fuzzy_match((char *)(text + 1), name, case_sens_path_comp) == 1))
+			&& fuzzy_match((char *)(text + 1), name, conf.case_sens_path_comp) == 1))
 				return strdup(name);
 		} else {
 			/* Restrict the search to what seems to be a pattern:
@@ -1569,7 +1569,7 @@ hist_generator(const char *text, int state)
 			 * metacharacter */
 			if (!*name || !*(name + 1))
 				continue;
-			char *ret = strpbrk(name + 1, search_strategy == GLOB_ONLY
+			char *ret = strpbrk(name + 1, conf.search_strategy == GLOB_ONLY
 					? " /*?[{" : " /*?[{|^+$.");
 			if (!ret || *ret == ' ' || *ret == '/')
 				continue;
@@ -1599,7 +1599,7 @@ bm_paths_generator(const char *text, int state)
 	while (i < (int)bm_n && (name = bookmarks[i++].path) != NULL) {
 		if (len == 0 || (*name == *(text + 2) && strncmp(name, text + 2, len) == 0)
 		|| (xargs.fuzzy_match == 1
-		&& fuzzy_match((char *)(text + 2), name, case_sens_path_comp) == 1)) {
+		&& fuzzy_match((char *)(text + 2), name, conf.case_sens_path_comp) == 1)) {
 			size_t nlen = strlen(name);
 			if (nlen > 1 && name[nlen - 1] == '/')
 				name[nlen - 1] = '\0';
@@ -1632,7 +1632,7 @@ environ_generator(const char *text, int state)
 
 	/* Look for cmd history entries for a match */
 	while ((name = environ[i++]) != NULL) {
-		if (case_sens_path_comp ? strncmp(name, text + 1, len) == 0
+		if (conf.case_sens_path_comp ? strncmp(name, text + 1, len) == 0
 		: strncasecmp(name, text + 1, len) == 0) {
 			char *p = strrchr(name, '=');
 			if (!p)
@@ -1671,18 +1671,18 @@ jump_generator(const char *text, int state)
 			continue;
 		/* Filter by parent */
 		if (rl_line_buffer[1] == 'p') {
-			if ((case_sens_dirjump == 1 ? strstr(workspaces[cur_ws].path, name)
+			if ((conf.case_sens_dirjump == 1 ? strstr(workspaces[cur_ws].path, name)
 			: strcasestr(workspaces[cur_ws].path, name)) == NULL)
 				continue;
 		}
 		/* Filter by child */
 		else if (rl_line_buffer[1] == 'c') {
-			if ((case_sens_dirjump == 1 ? strstr(name, workspaces[cur_ws].path)
+			if ((conf.case_sens_dirjump == 1 ? strstr(name, workspaces[cur_ws].path)
 			: strcasestr(name, workspaces[cur_ws].path)) == NULL)
 				continue;
 		}
 
-		if ((case_sens_dirjump == 1 ? strstr(name, text)
+		if ((conf.case_sens_dirjump == 1 ? strstr(name, text)
 		: strcasestr(name, (char *)text)) != NULL)
 			return strdup(name);
 	}
@@ -1758,23 +1758,23 @@ filenames_gen_text(const char *text, int state)
 	while (i < files && (name = file_info[i].name) != NULL) {
 		i++;
 		/* If first word, filter files according to autocd and auto-open values */
-		if (((suggestions == 1 && nwords == 1) || !strchr(rl_line_buffer, ' '))
-		&& ( (file_info[i - 1].dir == 1 && autocd == 0)
-		|| (file_info[i - 1].dir == 0 && auto_open == 0) ))
+		if (((conf.suggestions == 1 && nwords == 1) || !strchr(rl_line_buffer, ' '))
+		&& ( (file_info[i - 1].dir == 1 && conf.autocd == 0)
+		|| (file_info[i - 1].dir == 0 && conf.auto_open == 0) ))
 			continue;
 
 		/* If cd, list only directories */
-		if ((suggestions == 0 || nwords > 1 || (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
+		if ((conf.suggestions == 0 || nwords > 1 || (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
 		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && file_info[i - 1].dir == 0)
 			continue;
 
-		if (case_sens_path_comp ? strncmp(name, text, len) == 0
+		if (conf.case_sens_path_comp ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
 		if (xargs.fuzzy_match == 0 || (*text == '.' && text[1] == '.') || *text == '-')
 			continue;
-		if (len == 0 || fuzzy_match((char *)text, name, case_sens_path_comp) == 1)
+		if (len == 0 || fuzzy_match((char *)text, name, conf.case_sens_path_comp) == 1)
 			return strdup(name);
 	}
 
@@ -1957,7 +1957,7 @@ nets_generator(const char *text, int state)
 	}
 
 	while ((name = remotes[i++].name) != NULL) {
-		if (case_sens_path_comp ? strncmp(name, text, len)
+		if (conf.case_sens_path_comp ? strncmp(name, text, len)
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
 	}
@@ -2063,7 +2063,7 @@ prompts_generator(const char *text, int state)
 	}
 
 	while (i < (int)prompts_n && (name = prompts[i++].name) != NULL) {
-		if ((case_sensitive ? strncmp(name, text, len)
+		if ((conf.case_sensitive ? strncmp(name, text, len)
 		: strncasecmp(name, text, len)) == 0)
 			return strdup(name);
 	}
@@ -2877,13 +2877,13 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* If autocd or auto-open, try to expand ELN's first */
-		if ((autocd == 1 || auto_open == 1) && xrename != 2) {
+		if ((conf.autocd == 1 || conf.auto_open == 1) && xrename != 2) {
 			if (*text >= '1' && *text <= '9') {
 				int n = atoi(text);
 
 				if (is_number(text) && n > 0 && n <= (int)files
-				&& ( (file_info[n - 1].dir == 1 && autocd == 1)
-				|| (file_info[n - 1].dir == 0 && auto_open == 1) ) ) {
+				&& ( (file_info[n - 1].dir == 1 && conf.autocd == 1)
+				|| (file_info[n - 1].dir == 0 && conf.auto_open == 1) ) ) {
 					matches = rl_completion_matches(text, &filenames_gen_eln);
 					if (matches) {
 						cur_comp_type = TCMP_ELN;
@@ -2903,7 +2903,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* BOOKMARKS COMPLETION */
-		if (xrename == 0 && (autocd || auto_open) && expand_bookmarks) {
+		if (xrename == 0 && (conf.autocd || conf.auto_open) && conf.expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 			if (matches)
 				return matches;
@@ -3230,7 +3230,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		if (*lb != ';' && *lb != ':' && expand_bookmarks) {
+		if (*lb != ';' && *lb != ':' && conf.expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 			if (matches) {
 				cur_comp_type = TCMP_BOOKMARK;

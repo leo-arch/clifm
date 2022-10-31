@@ -58,10 +58,10 @@ ask_user_for_path(void)
 	char *ext_path = (char *)NULL;
 
 	while (!ext_path) {
-		int bk = warning_prompt;
-		warning_prompt = 0;
+		int bk = conf.warning_prompt;
+		conf.warning_prompt = 0;
 		ext_path = readline(_("Extraction path ('q' to quit): "));
-		warning_prompt = bk;
+		conf.warning_prompt = bk;
 		if (!ext_path)
 			continue;
 		if (!*ext_path) {
@@ -273,7 +273,7 @@ cd_to_mountpoint(char *file, char *mountpoint)
 	add_to_jumpdb(workspaces[cur_ws].path);
 
 	int exit_status = EXIT_SUCCESS;
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		reload_dirlist();
 		add_to_dirhist(workspaces[cur_ws].path);
 	} else {
@@ -1163,7 +1163,7 @@ list_mounted_files(char *mountpoint)
 	add_to_jumpdb(workspaces[cur_ws].path);
 
 	int exit_status = EXIT_SUCCESS;
-	if (autols) {
+	if (conf.autols) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;

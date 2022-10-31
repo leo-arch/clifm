@@ -149,7 +149,7 @@ profile_set(char *prof)
 	}
 	msgs_n = msgs.error = msgs.warning = msgs.notice = 0; */
 
-	if (restore_last_path)
+	if (conf.restore_last_path)
 		save_last_path();
 
 	if (alt_profile) {
@@ -212,13 +212,13 @@ profile_set(char *prof)
 
 	if (config_ok) {
 		/* Shrink the log file if needed */
-		check_file_size(log_file, max_log);
+		check_file_size(log_file, conf.max_log);
 
 		/* Reset history */
 		if (access(hist_file, F_OK | W_OK) == 0) {
 			clear_history(); /* This is for readline */
 			read_history(hist_file);
-			history_truncate_file(hist_file, max_hist);
+			history_truncate_file(hist_file, conf.max_hist);
 		} else {
 			FILE *hist_fp = fopen(hist_file, "w");
 			if (hist_fp) {
@@ -253,7 +253,7 @@ profile_set(char *prof)
 	path_n = (size_t)get_path_env();
 	get_path_programs();
 
-	if (restore_last_path)
+	if (conf.restore_last_path)
 		get_last_path();
 
 	if (cur_ws == UNSET)
@@ -276,7 +276,7 @@ profile_set(char *prof)
 
 	int exit_status = EXIT_SUCCESS;
 
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 
 	print_reload_msg(_("Switched to profile %s%s%s\n"), BOLD,	prof, NC);

@@ -43,16 +43,16 @@ void
 reset_opts(void)
 {
 	opts.color_scheme = cur_cscheme;
-	opts.files_counter = files_counter;
-	opts.light_mode = light_mode;
+	opts.files_counter = conf.files_counter;
+	opts.light_mode = conf.light_mode;
 	opts.max_files = max_files;
-	opts.long_view = long_view;
-	opts.show_hidden = show_hidden;
-	opts.max_name_len = max_name_len;
-	opts.only_dirs = only_dirs;
-	opts.pager = pager;
-	opts.sort = sort;
-	opts.sort_reverse = sort_reverse;
+	opts.long_view = conf.long_view;
+	opts.show_hidden = conf.show_hidden;
+	opts.max_name_len = conf.max_name_len;
+	opts.only_dirs = conf.only_dirs;
+	opts.pager = conf.pager;
+	opts.sort = conf.sort;
+	opts.sort_reverse = conf.sort_reverse;
 }
 
 /* Run autocommands for the current directory */
@@ -131,16 +131,16 @@ check_autocmds(void)
 RUN_AUTOCMD:
 		if (autocmd_set == 0) {
 			/* Backup current options, only if there was no autocmd for this directory */
-			opts.light_mode = light_mode;
-			opts.files_counter = files_counter;
-			opts.long_view = long_view;
+			opts.light_mode = conf.light_mode;
+			opts.files_counter = conf.files_counter;
+			opts.long_view = conf.long_view;
 			opts.max_files = max_files;
-			opts.show_hidden = show_hidden;
-			opts.sort = sort;
-			opts.sort_reverse = sort_reverse;
-			opts.max_name_len = max_name_len;
-			opts.pager = pager;
-			opts.only_dirs = only_dirs;
+			opts.show_hidden = conf.show_hidden;
+			opts.sort = conf.sort;
+			opts.sort_reverse = conf.sort_reverse;
+			opts.max_name_len = conf.max_name_len;
+			opts.pager = conf.pager;
+			opts.only_dirs = conf.only_dirs;
 			if (autocmds[i].color_scheme && cur_cscheme)
 				opts.color_scheme = cur_cscheme;
 			else
@@ -150,23 +150,23 @@ RUN_AUTOCMD:
 
 		/* Set options for current directory */
 		if (autocmds[i].light_mode != -1)
-			light_mode = autocmds[i].light_mode;
+			conf.light_mode = autocmds[i].light_mode;
 		if (autocmds[i].files_counter != -1)
-			files_counter = autocmds[i].files_counter;
+			conf.files_counter = autocmds[i].files_counter;
 		if (autocmds[i].long_view != -1)
-			long_view = autocmds[i].long_view;
+			conf.long_view = autocmds[i].long_view;
 		if (autocmds[i].show_hidden != -1)
-			show_hidden = autocmds[i].show_hidden;
+			conf.show_hidden = autocmds[i].show_hidden;
 		if (autocmds[i].only_dirs != -1)
-			only_dirs = autocmds[i].only_dirs;
+			conf.only_dirs = autocmds[i].only_dirs;
 		if (autocmds[i].pager != -1)
-			pager = autocmds[i].pager;
+			conf.pager = autocmds[i].pager;
 		if (autocmds[i].sort != -1)
-			sort = autocmds[i].sort;
+			conf.sort = autocmds[i].sort;
 		if (autocmds[i].sort_reverse != -1)
-			sort_reverse = autocmds[i].sort_reverse;
+			conf.sort_reverse = autocmds[i].sort_reverse;
 		if (autocmds[i].max_name_len != -1)
-			max_name_len = autocmds[i].max_name_len;
+			conf.max_name_len = autocmds[i].max_name_len;
 		if (autocmds[i].max_files != -2)
 			max_files = autocmds[i].max_files;
 		if (autocmds[i].color_scheme)
@@ -187,16 +187,16 @@ RUN_AUTOCMD:
 void
 revert_autocmd_opts(void)
 {
-	light_mode = opts.light_mode;
-	files_counter = opts.files_counter;
-	long_view = opts.long_view;
+	conf.light_mode = opts.light_mode;
+	conf.files_counter = opts.files_counter;
+	conf.long_view = opts.long_view;
 	max_files = opts.max_files;
-	show_hidden = opts.show_hidden;
-	max_name_len = opts.max_name_len;
-	pager = opts.pager;
-	sort = opts.sort;
-	only_dirs = opts.only_dirs;
-	sort_reverse = opts.sort_reverse;
+	conf.show_hidden = opts.show_hidden;
+	conf.max_name_len = opts.max_name_len;
+	conf.pager = opts.pager;
+	conf.sort = opts.sort;
+	conf.only_dirs = opts.only_dirs;
+	conf.sort_reverse = opts.sort_reverse;
 	if (opts.color_scheme && opts.color_scheme != cur_cscheme)
 		set_colors(opts.color_scheme, 0);
 	autocmd_set = 0;
@@ -269,12 +269,12 @@ init_autocmd_opts()
 	autocmds[autocmds_n].light_mode = opts.light_mode;
 	autocmds[autocmds_n].long_view = opts.long_view;
 	autocmds[autocmds_n].max_files = max_files;
-	autocmds[autocmds_n].max_name_len = max_name_len;
-	autocmds[autocmds_n].only_dirs = only_dirs;
+	autocmds[autocmds_n].max_name_len = conf.max_name_len;
+	autocmds[autocmds_n].only_dirs = conf.only_dirs;
 	autocmds[autocmds_n].pager = opts.pager;
 	autocmds[autocmds_n].show_hidden = opts.show_hidden;
-	autocmds[autocmds_n].sort = sort;
-	autocmds[autocmds_n].sort_reverse = sort_reverse;
+	autocmds[autocmds_n].sort = conf.sort;
+	autocmds[autocmds_n].sort_reverse = conf.sort_reverse;
 
 }
 

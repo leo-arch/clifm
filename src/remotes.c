@@ -198,7 +198,7 @@ remotes_mount(char *name)
 		return print_cd_error(i);
 
 	int exit_status = EXIT_SUCCESS;
-	if (autols) {
+	if (conf.autols) {
 		exit_status = cd_to_mountpoint(i);
 	} else {
 		printf(_("%s: %s: Remote mounted on %s\n"), PROGRAM_NAME,

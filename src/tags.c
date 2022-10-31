@@ -152,7 +152,7 @@ list_files_in_tag(char *name)
 	snprintf(tmp, PATH_MAX, "%s/%s", tags_dir, name);
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = scandir(tmp, &t, NULL, case_sensitive ? xalphasort : alphasort_insensitive);
+	int n = scandir(tmp, &t, NULL, conf.case_sensitive ? xalphasort : alphasort_insensitive);
 	if (n == -1) {
 		fprintf(stderr, _("tag: %s: No such tag\n"), name);
 		return EXIT_FAILURE;
@@ -373,7 +373,7 @@ tag_file(char *name, char *tag)
 	free(p);
 
 	if (new_tag) {
-		printf(_("Created new tag %s%s%s\n"), colorize ? BOLD : "", tag, df_c);
+		printf(_("Created new tag %s%s%s\n"), conf.colorize ? BOLD : "", tag, df_c);
 		reload_tags();
 	}
 
@@ -512,7 +512,7 @@ untag(char **args, const size_t n, size_t *t)
 			}
 		} else {
 			fprintf(stderr, _("tag: %s: File not tagged as %s%s%s\n"),
-				args[i], colorize ? BOLD : "", args[n] + 1, df_c);
+				args[i], conf.colorize ? BOLD : "", args[n] + 1, df_c);
 			continue;
 		}
 	}
@@ -635,8 +635,8 @@ merge_tags(char **args)
 
 	reload_tags();
 	printf(_("Successfully merged %s%s%s into %s%s%s\n"),
-		colorize ? BOLD : "", src, df_c,
-		colorize ? BOLD : "", dst, df_c);
+		conf.colorize ? BOLD : "", src, df_c,
+		conf.colorize ? BOLD : "", dst, df_c);
 
 	return EXIT_SUCCESS;
 }

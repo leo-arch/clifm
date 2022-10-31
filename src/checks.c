@@ -734,11 +734,11 @@ check_for_alias(char **args)
 		return (char **)NULL;
 
 	register int i;
-	if (autocd == 1 || auto_open == 1) {
+	if (conf.autocd == 1 || conf.auto_open == 1) {
 		/* Do not expand alias is first word is a file name in CWD */
 		struct stat a;
-		if (*args[0] == '\\' || (stat(args[0], &a) == 0 && ((S_ISDIR(a.st_mode) && autocd == 1)
-		|| (!S_ISDIR(a.st_mode) && auto_open == 1) ) ) )
+		if (*args[0] == '\\' || (stat(args[0], &a) == 0 && ((S_ISDIR(a.st_mode) && conf.autocd == 1)
+		|| (!S_ISDIR(a.st_mode) && conf.auto_open == 1) ) ) )
 			return (char **)NULL;
 	}
 

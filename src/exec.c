@@ -211,7 +211,7 @@ run_and_refresh(char **cmd, const int skip_force)
 	}
 
 #if defined(__HAIKU__) || defined(__CYGWIN__)
-	if (autols == 1 && cmd[1] && strcmp(cmd[1], "--help") != 0
+	if (conf.autols == 1 && cmd[1] && strcmp(cmd[1], "--help") != 0
 	&& strcmp(cmd[1], "--version") != 0)
 		reload_dirlist();
 #endif
@@ -577,7 +577,7 @@ check_shell_cmd_condtions(char **args)
 			return EXIT_FAILURE;
 	}
 
-	if (ext_cmd_ok == 0) {
+	if (conf.ext_cmd_ok == 0) {
 		fprintf(stderr, _("%s: External commands are not allowed. "
 			"Run 'ext on' to enable them.\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
@@ -627,7 +627,7 @@ _quit(char **args, int exit_status)
 		return;
 
 	if (*args[0] == 'Q')
-		cd_on_quit = 1;
+		conf.cd_on_quit = 1;
 	int i = (int)args_n + 1;
 	while (--i >= 0)
 		free(args[i]);
@@ -650,14 +650,14 @@ set_max_files(char **args)
 
 	if (*args[1] == 'u' && strcmp(args[1], "unset") == 0) {
 		max_files = -1;
-		if (autols == 1) reload_dirlist();
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Max files unset\n"));
 		return EXIT_SUCCESS;
 	}
 
 	if (*args[1] == '0' && !args[1][1]) {
 		max_files = 0;
-		if (autols == 1) reload_dirlist();
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Max files set to %d\n"), max_files);
 		return EXIT_SUCCESS;
 	}
@@ -669,7 +669,7 @@ set_max_files(char **args)
 	}
 
 	max_files = (int)inum;
-	if (autols == 1) reload_dirlist();
+	if (conf.autols == 1) reload_dirlist();
 	print_reload_msg(_("Max files set to %d\n"), max_files);
 
 	return EXIT_SUCCESS;
@@ -686,12 +686,12 @@ unicode_function(char *arg)
 	int exit_status = EXIT_SUCCESS;
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		printf(_("Unicode is %s\n"), unicode == 1 ? _("enabled") : _("disabled"));
+		printf(_("Unicode is %s\n"), conf.unicode == 1 ? _("enabled") : _("disabled"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		unicode = 1;
+		conf.unicode = 1;
 		puts(_("Unicode enabled"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		unicode = 0;
+		conf.unicode = 0;
 		puts(_("Unicode disabled"));
 	} else {
 		fprintf(stderr, "%s\n", _(UNICODE_USAGE));
@@ -704,7 +704,7 @@ unicode_function(char *arg)
 static int
 dirs_first_function(char *arg)
 {
-	if (autols == 0)
+	if (conf.autols == 0)
 		return EXIT_SUCCESS;
 
 	if (!arg || IS_HELP(arg)) {
@@ -716,14 +716,14 @@ dirs_first_function(char *arg)
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		printf(_("Directories first is %s\n"),
-			list_dirs_first == 1 ? _("enabled") : _("disabled"));
+			conf.list_dirs_first == 1 ? _("enabled") : _("disabled"));
 	}  else if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		list_dirs_first = 1;
-		if (autols == 1) reload_dirlist();
+		conf.list_dirs_first = 1;
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Directories first enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		list_dirs_first = 0;
-		if (autols == 1) reload_dirlist();
+		conf.list_dirs_first = 0;
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Directories first disabled\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(FF_USAGE));
@@ -742,21 +742,21 @@ filescounter_function(char *arg)
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		files_counter = 1;
-		if (autols == 1) reload_dirlist();
+		conf.files_counter = 1;
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Files counter enabled\n"));
 		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		files_counter = 0;
-		if (autols == 1) reload_dirlist();
+		conf.files_counter = 0;
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Files counter disabled\n"));
 		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		if (files_counter == 1)
+		if (conf.files_counter == 1)
 			puts(_("The files counter is enabled"));
 		else
 			puts(_("The files counter is disabled"));
@@ -776,10 +776,10 @@ pager_function(char *arg)
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		switch(pager) {
+		switch(conf.pager) {
 		case 0: puts(_("The pager is disabled")); break;
 		case 1: puts(_("The pager is enabled")); break;
-		default: printf(_("The pager is set to %d\n"), pager); break;
+		default: printf(_("The pager is set to %d\n"), conf.pager); break;
 		}
 
 		return EXIT_SUCCESS;
@@ -791,19 +791,19 @@ pager_function(char *arg)
 			fprintf(stderr, _("pg: xatoi: Error converting to integer\n"));
 			return EXIT_FAILURE;
 		}
-		pager = n;
+		conf.pager = n;
 		printf(_("Pager set to %d\n"), n);
 		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		pager = 1;
+		conf.pager = 1;
 		puts(_("Pager enabled"));
 		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		pager = 0;
+		conf.pager = 0;
 		puts(_("Pager disabled"));
 		return EXIT_SUCCESS;
 	}
@@ -823,12 +823,12 @@ ext_args_function(char *arg)
 	int exit_status = EXIT_SUCCESS;
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
 		printf(_("External commands are %s\n"),
-			ext_cmd_ok ? _("allowed") : _("not allowed"));
+			conf.ext_cmd_ok ? _("allowed") : _("not allowed"));
 	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		ext_cmd_ok = 1;
+		conf.ext_cmd_ok = 1;
 		printf(_("External commands allowed\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		ext_cmd_ok = 0;
+		conf.ext_cmd_ok = 0;
 		printf(_("External commands disallowed\n"));
 	} else {
 		fprintf(stderr, "%s\n", _(EXT_USAGE));
@@ -847,13 +847,13 @@ autocd_function(char *arg)
 	}
 
 	if (strcmp(arg, "on") == 0) {
-		autocd = 1;
+		conf.autocd = 1;
 		printf(_("Autocd enabled\n"));
 	} else if (strcmp(arg, "off") == 0) {
-		autocd = 0;
+		conf.autocd = 0;
 		printf(_("Autocd disabled\n"));
 	} else if (strcmp(arg, "status") == 0) {
-		printf(_("Autocd is %s\n"), autocd == 1 ? _("enabled") : _("disabled"));
+		printf(_("Autocd is %s\n"), conf.autocd == 1 ? _("enabled") : _("disabled"));
 	} else if (IS_HELP(arg)) {
 		puts(_(AUTOCD_USAGE));
 	} else {
@@ -873,13 +873,13 @@ auto_open_function(char *arg)
 	}
 
 	if (strcmp(arg, "on") == 0) {
-		auto_open = 1;
+		conf.auto_open = 1;
 		printf(_("Auto-open enabled\n"));
 	} else if (strcmp(arg, "off") == 0) {
-		auto_open = 0;
+		conf.auto_open = 0;
 		printf(_("Auto-open disabled\n"));
 	} else if (strcmp(arg, "status") == 0) {
-		printf(_("Auto-open is %s\n"), auto_open == 1 ? _("enabled") : _("disabled"));
+		printf(_("Auto-open is %s\n"), conf.auto_open == 1 ? _("enabled") : _("disabled"));
 	} else if (IS_HELP(arg)) {
 		puts(_(AUTO_OPEN_USAGE));
 	} else {
@@ -900,15 +900,15 @@ columns_function(char *arg)
 	int exit_status = EXIT_SUCCESS;
 
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
-		columned = 1;
-		if (autols == 1) {
+		conf.columned = 1;
+		if (conf.autols == 1) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
 		print_reload_msg(_("Columns enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		columned = 0;
-		if (autols == 1) {
+		conf.columned = 0;
+		if (conf.autols == 1) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
@@ -935,15 +935,15 @@ icons_function(char *arg)
 	}
 
 	if (*arg == 'o' && arg[1] == 'n' && !arg[2]) {
-		icons = 1;
+		conf.icons = 1;
 		int ret = EXIT_SUCCESS;
-		if (autols == 1) { free_dirlist(); ret = list_dir(); }
+		if (conf.autols == 1) { free_dirlist(); ret = list_dir(); }
 		print_reload_msg(_("Icons enabled\n"));
 		return ret;
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		icons = 0;
+		conf.icons = 0;
 		int ret = EXIT_SUCCESS;
-		if (autols == 1) { free_dirlist(); ret = list_dir(); }
+		if (conf.autols == 1) { free_dirlist(); ret = list_dir(); }
 		print_reload_msg(_("Icons disabled\n"));
 		return ret;
 	} else {
@@ -973,7 +973,7 @@ msgs_function(char *arg)
 		for (i = 0; i < (size_t)msgs_n; i++)
 			free(messages[i]);
 
-		if (autols == 1)
+		if (conf.autols == 1)
 			reload_dirlist();
 		print_reload_msg(_("Messages cleared\n"));
 		msgs_n = msgs.error = msgs.warning = msgs.notice = 0;
@@ -996,7 +996,7 @@ static int
 opener_function(char *arg)
 {
 	if (!arg) {
-		printf("opener: %s\n", opener ? opener : "lira (built-in)");
+		printf("opener: %s\n", conf.opener ? conf.opener : "lira (built-in)");
 		return EXIT_SUCCESS;
 	}
 
@@ -1005,14 +1005,14 @@ opener_function(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	if (opener) {
-		free(opener);
-		opener = (char *)NULL;
+	if (conf.opener) {
+		free(conf.opener);
+		conf.opener = (char *)NULL;
 	}
 
 	if (strcmp(arg, "default") != 0 && strcmp(arg, "lira") != 0)
-		opener = savestring(arg, strlen(arg));
-	printf(_("Opener set to '%s'\n"), opener ? opener : "lira (built-in)");
+		conf.opener = savestring(arg, strlen(arg));
+	printf(_("Opener set to '%s'\n"), conf.opener ? conf.opener : "lira (built-in)");
 
 	return EXIT_SUCCESS;
 }
@@ -1026,13 +1026,13 @@ lightmode_function(char *arg)
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		light_mode = 1;
-		if (autols == 1)
+		conf.light_mode = 1;
+		if (conf.autols == 1)
 			reload_dirlist();
 		print_reload_msg(_("Switched to light mode\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		light_mode = 0;
-		if (autols == 1)
+		conf.light_mode = 0;
+		if (conf.autols == 1)
 			reload_dirlist();
 		print_reload_msg(_("Switched back to normal mode\n"));
 	} else {
@@ -1152,18 +1152,18 @@ hidden_function(char **comm)
 	int exit_status = EXIT_SUCCESS;
 
 	if (strcmp(comm[1], "status") == 0) {
-		printf(_("Hidden files is %s\n"), show_hidden
+		printf(_("Hidden files is %s\n"), conf.show_hidden
 			? _("enabled") : _("disabled"));
 	} else if (strcmp(comm[1], "off") == 0) {
-		show_hidden = 0;
-		if (autols == 1) {
+		conf.show_hidden = 0;
+		if (conf.autols == 1) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
 		print_reload_msg(_("Hidden files disabled\n"));
 	} else if (strcmp(comm[1], "on") == 0) {
-		show_hidden = 1;
-		if (autols == 1) {
+		conf.show_hidden = 1;
+		if (conf.autols == 1) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
@@ -1221,7 +1221,7 @@ _toggle_exec(char **args)
 	}
 
 	if (n > 0) {
-		if (autols == 1) reload_dirlist();
+		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Toggled executable bit on %zu %s\n"),
 			n, n > 1 ? _("files") : _("file"));
 	}
@@ -1282,7 +1282,7 @@ ow_function(char **args)
 static int
 refresh_function(const int old_exit_code)
 {
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 
 	return old_exit_code;
@@ -1375,9 +1375,9 @@ static int
 reload_function(void)
 {
 	int exit_status = reload_config();
-	welcome_message = 0;
+	conf.welcome_message = 0;
 
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
@@ -1502,10 +1502,10 @@ expand_and_deescape(char **arg, char **deq_str)
 static inline int
 _open_file(char **args, const int i)
 {
-	if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1))
+	if (conf.autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1))
 		return cd_function(args[0], CD_PRINT_ERROR);
 
-	if (auto_open && (file_info[i].type == DT_REG
+	if (conf.auto_open && (file_info[i].type == DT_REG
 	|| file_info[i].type == DT_LNK)) {
 		char *cmd[] = {"open", args[0], args[1], NULL};
 		return open_function(cmd);
@@ -1525,7 +1525,7 @@ check_auto_first(char **args)
 	if (!args || !args[0] || !*args[0])
 		return (-1);
 
-	if (*args[0] == '/' || (!autocd && !auto_open) || (args[1]
+	if (*args[0] == '/' || (!conf.autocd && !conf.auto_open) || (args[1]
 	&& (*args[1] != '&' || args[1][1])))
 		return (-1);
 
@@ -1533,14 +1533,14 @@ check_auto_first(char **args)
 		return (-1);
 
 	char *deq_str = (char *)NULL;
-	if (autocd || auto_open)
+	if (conf.autocd || conf.auto_open)
 		expand_and_deescape(&args[0], &deq_str);
 
 	char *tmp = deq_str ? deq_str : args[0];
 	size_t len = strlen(tmp);
 	if (len > 0 && tmp[len - 1] == '/') tmp[len - 1] = '\0';
 
-	if (autocd && cdpath_n && !args[1]
+	if (conf.autocd && cdpath_n && !args[1]
 	&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
 		free(deq_str);
 		return EXIT_SUCCESS;
@@ -1581,7 +1581,7 @@ autocd_dir(char *tmp)
 {
 	int ret = EXIT_SUCCESS;
 
-	if (autocd) {
+	if (conf.autocd) {
 		ret = cd_function(tmp, CD_PRINT_ERROR);
 	} else {
 		fprintf(stderr, _("%s: cd: %s: Is a directory\n"), PROGRAM_NAME, tmp);
@@ -1612,7 +1612,7 @@ check_auto_second(char **args)
 		}
 	}
 
-	if (autocd == 1 && cdpath_n > 0 && !args[1]) {
+	if (conf.autocd == 1 && cdpath_n > 0 && !args[1]) {
 		int ret = cd_function(tmp, CD_NO_PRINT_ERROR);
 		if (ret == EXIT_SUCCESS)
 			{ free(tmp); return EXIT_SUCCESS; }
@@ -1622,12 +1622,12 @@ check_auto_second(char **args)
 	if (stat(tmp, &attr) != 0)
 		{ free(tmp); return (-1); }
 
-	if (autocd == 1 && S_ISDIR(attr.st_mode) && !args[1])
+	if (conf.autocd == 1 && S_ISDIR(attr.st_mode) && !args[1])
 		return autocd_dir(tmp);
 
 	/* Regular, non-executable file, or exec file not in PATH
 	 * not ./file and not /path/to/file */
-	if (auto_open == 1 && S_ISREG(attr.st_mode)
+	if (conf.auto_open == 1 && S_ISREG(attr.st_mode)
 	&& (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
 	|| (!is_bin_cmd(tmp) && !(*tmp == '.' && *(tmp + 1) == '/') && *tmp != '/' ) ) )
 		return auto_open_file(args, tmp);
@@ -1684,10 +1684,10 @@ check_comments(const char *name)
 	if (lstat(name, &a) == -1)
 		return EXIT_SUCCESS;
 
-	if (autocd == 1 && S_ISDIR(a.st_mode))
+	if (conf.autocd == 1 && S_ISDIR(a.st_mode))
 		return EXIT_FAILURE;
 
-	if (auto_open == 1 && !S_ISDIR(a.st_mode))
+	if (conf.auto_open == 1 && !S_ISDIR(a.st_mode))
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -1696,7 +1696,7 @@ check_comments(const char *name)
 static int
 print_stats(void)
 {
-	if (light_mode == 1) {
+	if (conf.light_mode == 1) {
 		puts("Running in light mode: files statistics are not available");
 		return EXIT_SUCCESS;
 	}
@@ -1801,22 +1801,22 @@ toggle_full_dir_size(const char *arg)
 	}
 
 	if (*(arg + 1) == 'n' && !*(arg + 2)) {
-		if (full_dir_size == 1) {
+		if (conf.full_dir_size == 1) {
 			puts(_("Full directory size is already enabled"));
 		} else {
-			full_dir_size = 1;
-			if (autols == 1) reload_dirlist();
+			conf.full_dir_size = 1;
+			if (conf.autols == 1) reload_dirlist();
 			print_reload_msg(_("Full directory size enabled\n"));
 		}
 		return EXIT_SUCCESS;
 	}
 
 	if (*(arg + 1) == 'f' && *(arg + 2) == 'f' && !*(arg + 3)) {
-		if (full_dir_size == 0) {
+		if (conf.full_dir_size == 0) {
 			puts(_("Full directory size is already disabled"));
 		} else {
-			full_dir_size = 0;
-			if (autols == 1) reload_dirlist();
+			conf.full_dir_size = 0;
+			if (conf.autols == 1) reload_dirlist();
 			print_reload_msg(_("Full directory size disabled\n"));
 		}
 		return EXIT_SUCCESS;
@@ -1830,15 +1830,15 @@ toggle_full_dir_size(const char *arg)
 static void
 set_cp_cmd(char **cmd, const int cp_force)
 {
-	int bk_cp_cmd = cp_cmd;
+	int bk_cp_cmd = conf.cp_cmd;
 	if (cp_force == 1) {
-		if (cp_cmd == CP_ADVCP)
-			cp_cmd = CP_ADVCP_FORCE;
-		else if (cp_cmd == CP_CP)
-			cp_cmd = CP_CP_FORCE;
+		if (conf.cp_cmd == CP_ADVCP)
+			conf.cp_cmd = CP_ADVCP_FORCE;
+		else if (conf.cp_cmd == CP_CP)
+			conf.cp_cmd = CP_CP_FORCE;
 	}
 
-	switch(cp_cmd) {
+	switch(conf.cp_cmd) {
 	case CP_ADVCP:
 		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVCP_CMD) + 1) * sizeof(char));
 		strcpy(*cmd, __DEF_ADVCP_CMD);
@@ -1866,21 +1866,21 @@ set_cp_cmd(char **cmd, const int cp_force)
 		break;
 	}
 
-	cp_cmd = bk_cp_cmd;
+	conf.cp_cmd = bk_cp_cmd;
 }
 
 static void
 set_mv_cmd(char **cmd, const int mv_force)
 {
-	int bk_mv_cmd = mv_cmd;
+	int bk_mv_cmd = conf.mv_cmd;
 	if (mv_force == 1) {
-		if (mv_cmd == CP_ADVCP)
-			mv_cmd = CP_ADVCP_FORCE;
-		else if (mv_cmd == CP_CP)
-			mv_cmd = CP_CP_FORCE;
+		if (conf.mv_cmd == CP_ADVCP)
+			conf.mv_cmd = CP_ADVCP_FORCE;
+		else if (conf.mv_cmd == CP_CP)
+			conf.mv_cmd = CP_CP_FORCE;
 	}
 
-	switch(mv_cmd) {
+	switch(conf.mv_cmd) {
 	case MV_ADVMV:
 		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVMV_CMD) + 1) * sizeof(char));
 		strcpy(*cmd, __DEF_ADVMV_CMD);
@@ -1900,7 +1900,7 @@ set_mv_cmd(char **cmd, const int mv_force)
 		break;
 	}
 
-	mv_cmd = bk_mv_cmd;
+	conf.mv_cmd = bk_mv_cmd;
 }
 
 /* Let's check we have not left any zombie process behind. This happens
@@ -2046,7 +2046,7 @@ preview_function(char **args)
 
 	size_t seln_bk = sel_n;
 
-	int fzf_preview_bk = fzf_preview;
+	int fzf_preview_bk = conf.fzf_preview;
 	enum tab_mode tabmode_bk = tabmode;
 
 	if (tabmode != FZF_TAB) {
@@ -2058,7 +2058,7 @@ preview_function(char **args)
 		free(p);
 	}
 
-	fzf_preview = 1;
+	conf.fzf_preview = 1;
 	tabmode = FZF_TAB;
 
 	rl_delete_text(0, rl_end);
@@ -2070,14 +2070,14 @@ preview_function(char **args)
 	flags &= ~PREVIEWER;
 
 	tabmode = tabmode_bk;
-	fzf_preview = fzf_preview_bk;
+	conf.fzf_preview = fzf_preview_bk;
 
 	if (sel_n > seln_bk) {
 		save_sel();
 		get_sel_files();
 	}
 
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		putchar('\n');
 		reload_dirlist();
 	} else {
@@ -2524,7 +2524,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "mime") == 0))
 		return (exit_code = lira_function(comm));
 
-	else if (!autols && *comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2])
+	else if (!conf.autols && *comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2])
 		return (exit_code = ls_function());
 
 	/* #### PROFILE #### */
@@ -2664,7 +2664,7 @@ exec_cmd(char **comm)
 	}
 
 CHECK_EVENTS:
-	if (autols == 0)
+	if (conf.autols == 0)
 		return exit_code;
 #ifdef LINUX_INOTIFY
 	if (watch)

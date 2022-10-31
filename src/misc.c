@@ -183,7 +183,7 @@ print_reload_msg(const char *msg, ...)
 		return EXIT_FAILURE;
 	}
 
-	if (autols == 1)
+	if (conf.autols == 1)
 		printf("%s->%s ", mi_c, df_c);
 
 	char *buf = (char *)xnmalloc((size_t)size + 1, sizeof(char));
@@ -394,7 +394,7 @@ set_filter_type(const char c)
 	if (c == '=')
 		filter.type = FILTER_FILE_TYPE;
 	else if (c == '@')
-		filter.type = FILTER_MIME_TYPE; // Unimplemented
+		filter.type = FILTER_MIME_TYPE; /* UNIMPLEMENTED */
 	else
 		filter.type = FILTER_FILE_NAME;
 }
@@ -413,7 +413,7 @@ unset_filter(void)
 	filter.type = FILTER_NONE;
 	regfree(&regex_exp);
 
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 
 	puts(_("Filter unset"));
@@ -432,7 +432,7 @@ validate_file_type_filter(void)
 	|| c == 'l' || c == 'p' || c == 's')
 		return EXIT_SUCCESS;
 
-	if (light_mode == 1)
+	if (conf.light_mode == 1)
 		return EXIT_FAILURE;
 
 	if (c == 'g' || c == 'h' || c == 'o' || c == 't'
@@ -461,7 +461,7 @@ compile_filter(void)
 		goto ERR;
 	}
 
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 
 	print_reload_msg(_("%s%s: New filter successfully set\n"),
@@ -672,15 +672,15 @@ print_tips(int all)
 		size_t i;
 		for (i = 0; i < tipsn; i++) {
 			printf("%s%sTIP %zu%s: %s\n",
-				colorize ? df_c : "", colorize ? BOLD : "",
-				i, colorize ? df_c : "", TIPS[i]);
+				conf.colorize ? df_c : "", conf.colorize ? BOLD : "",
+				i, conf.colorize ? df_c : "", TIPS[i]);
 		}
 		return;
 	}
 
 	srand((unsigned int)time(NULL));
-	printf("%s%sTIP%s: %s\n", colorize ? df_c : "",
-		colorize ? BOLD : "", colorize ? df_c : "",
+	printf("%s%sTIP%s: %s\n", conf.colorize ? df_c : "",
+		conf.colorize ? BOLD : "", conf.colorize ? df_c : "",
 		TIPS[rand() % (int)tipsn]);
 }
 
@@ -689,7 +689,7 @@ print_tips(int all)
 static inline int
 check_new_instance_init_conditions(const char *dir, const int sudo)
 {
-	if (!term) {
+	if (!conf.term) {
 		UNUSED(dir); UNUSED(sudo);
 		fprintf(stderr, _("%s: Default terminal not set. Use the "
 				"configuration file (F10) to set it\n"), PROGRAM_NAME);
@@ -750,9 +750,9 @@ get_path_dir(char **dir)
 static char **
 get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 {
-	if (!strchr(term, ' '))	return (char **)NULL;
+	if (!strchr(conf.term, ' '))	return (char **)NULL;
 
-	char **tmp_term = get_substr(term, ' ');
+	char **tmp_term = get_substr(conf.term, ' ');
 	if (!tmp_term) return (char **)NULL;
 
 	int i;
@@ -804,13 +804,13 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int 
 		free(*cmd);
 	} else {
 		fprintf(stderr, _("%s: No option specified for '%s'\n"
-				"Trying '%s -e %s %s'\n"), PROGRAM_NAME, term,
-				term, *self, workspaces[cur_ws].path);
+				"Trying '%s -e %s %s'\n"), PROGRAM_NAME, conf.term,
+				conf.term, *self, workspaces[cur_ws].path);
 		if (sudo) {
-			char *tcmd[] = {term, "-e", *_sudo, *self, *dir, NULL};
+			char *tcmd[] = {conf.term, "-e", *_sudo, *self, *dir, NULL};
 			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
 		} else {
-			char *tcmd[] = {term, "-e", *self, *dir, NULL};
+			char *tcmd[] = {conf.term, "-e", *self, *dir, NULL};
 			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
 		}
 	}
@@ -1073,7 +1073,7 @@ save_last_path(void)
 	char *last_dir_tmp = xnmalloc(strlen(config_dir_gral) + 7, sizeof(char *));
 	sprintf(last_dir_tmp, "%s/.last", config_dir_gral);
 
-	if (cd_on_quit == 1) {
+	if (conf.cd_on_quit == 1) {
 		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else { /* If not cd on quit, remove the file */
@@ -1215,15 +1215,15 @@ expand_prompt_name(char *name)
 		if (*p != *prompts[i].name || strcmp(p, prompts[i].name) != 0)
 			continue;
 		if (prompts[i].regular) {
-			free(encoded_prompt);
-			encoded_prompt = savestring(prompts[i].regular, strlen(prompts[i].regular));
+			free(conf.encoded_prompt);
+			conf.encoded_prompt = savestring(prompts[i].regular, strlen(prompts[i].regular));
 		}
 		if (prompts[i].warning) {
-			free(wprompt_str);
-			wprompt_str = savestring(prompts[i].warning, strlen(prompts[i].warning));
+			free(conf.wprompt_str);
+			conf.wprompt_str = savestring(prompts[i].warning, strlen(prompts[i].warning));
 		}
 		prompt_notif = prompts[i].notifications;
-		warning_prompt = prompts[i].warning_prompt_enabled;
+		conf.warning_prompt = prompts[i].warning_prompt_enabled;
 
 		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name) - 1);
 		return EXIT_SUCCESS;
@@ -1327,18 +1327,18 @@ free_stuff(void)
 
 	save_dirhist();
 
-	if (restore_last_path || cd_on_quit)
+	if (conf.restore_last_path || conf.cd_on_quit)
 		save_last_path();
 
 	free(alt_preview_file);
 	free(alt_profile);
 	free_bookmarks();
-	free(encoded_prompt);
+	free(conf.encoded_prompt);
 /*	free(right_prompt); */
 	free_dirlist();
-	free(opener);
-	free(wprompt_str);
-	free(fzftab_options);
+	free(conf.opener);
+	free(conf.wprompt_str);
+	free(conf.fzftab_options);
 
 	remove_virtual_dir();
 
@@ -1346,7 +1346,7 @@ free_stuff(void)
 	while (i-- > 0)
 		free(color_schemes[i]);
 	free(color_schemes);
-	free(usr_cscheme);
+	free(conf.usr_cscheme);
 
 	if (jump_db) {
 		i = (int)jump_n;
@@ -1499,7 +1499,7 @@ free_stuff(void)
 
 #ifndef _NO_SUGGESTIONS
 	free(suggestion_buf);
-	free(suggestion_strategy);
+	free(conf.suggestion_strategy);
 #endif
 
 	free(sel_file);
@@ -1516,7 +1516,7 @@ free_stuff(void)
 	free(trash_info_dir);
 #endif
 	free(tags_dir);
-	free(term);
+	free(conf.term);
 	free(quote_chars);
 	rl_clear_history();
 //	rl_clear_visible_line();
@@ -1528,7 +1528,7 @@ free_stuff(void)
 #endif // __clang__ */
 
 	/* Restore the color of the running terminal */
-	if (colorize == 1 && xargs.list_and_quit != 1)
+	if (conf.colorize == 1 && xargs.list_and_quit != 1)
 		fputs("\x1b[0;39;49m", stdout);
 }
 
@@ -1548,7 +1548,7 @@ static void
 sigwinch_handler(int sig)
 {
 	UNUSED(sig);
-	if (xargs.refresh_on_resize == 0 || pager == 1 || kbind_busy == 1)
+	if (xargs.refresh_on_resize == 0 || conf.pager == 1 || kbind_busy == 1)
 		return;
 
 	get_term_size();
@@ -1601,7 +1601,7 @@ handle_stdin(void)
 {
 	/* If files are passed via stdin, we need to disable restore
 	 * last path in order to correctly understand relative paths */
-	restore_last_path = 0;
+	conf.restore_last_path = 0;
 	int exit_status = EXIT_SUCCESS;
 
 	/* Max input size: 512 * (512 * 1024)
@@ -1798,7 +1798,7 @@ FREE_N_EXIT:
 	/* Go back to tty */
 	dup2(STDOUT_FILENO, STDIN_FILENO);
 
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		reload_dirlist();
 		add_to_dirhist(workspaces[cur_ws].path);
 	}
@@ -2203,7 +2203,7 @@ quick_help(char *topic)
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 	return EXIT_SUCCESS;
 #endif
@@ -2239,10 +2239,10 @@ void
 splash(void)
 {
 	printf("\n%s%s\n\n%s%s\t\t       %s%s\n           %s\n",
-		colorize ? D_CYAN : "", ASCII_LOGO_BIG, df_c,
+		conf.colorize ? D_CYAN : "", ASCII_LOGO_BIG, df_c,
 		BOLD, df_c, _PROGRAM_NAME, _(PROGRAM_DESC));
 
-	if (splash_screen) {
+	if (conf.splash_screen) {
 		printf(_("\n            Press any key to continue... "));
 		xgetchar();
 		putchar('\n');

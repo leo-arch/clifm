@@ -189,7 +189,7 @@ get_file_perms(const mode_t mode)
 		p.cox = dp_c;
 	}
 
-	if (colorize == 0) {
+	if (conf.colorize == 0) {
 		p.cur = p.cuw = p.cux = df_c;
 		p.cgr = p.cgw = p.cgx = df_c;
 		p.cor = p.cow = p.cox = df_c;
@@ -548,7 +548,7 @@ get_properties(char *filename, const int dsize)
 	case S_IFDIR:
 		file_type = 'd';
 		ctype = di_c;
-		if (colorize == 0)
+		if (conf.colorize == 0)
 			color = di_c;
 		else if (check_file_access(&attr) == 0)
 			color = nd_c;
@@ -559,7 +559,7 @@ get_properties(char *filename, const int dsize)
 	case S_IFLNK:
 		file_type = 'l';
 		ctype = ln_c;
-		if (colorize == 0) {
+		if (conf.colorize == 0) {
 			color = ln_c;
 		} else {
 			linkname = realpath(filename, (char *)NULL);
@@ -592,7 +592,7 @@ get_properties(char *filename, const int dsize)
 	if (!color)
 		color = fi_c;
 
-	if (colorize == 0) {
+	if (conf.colorize == 0) {
 		cdate = df_c;
 		csize = df_c;
 		cid = df_c;
@@ -729,7 +729,7 @@ get_properties(char *filename, const int dsize)
 	}
 #endif /* _STATX */
 
-	if (colorize == 1)
+	if (conf.colorize == 1)
 		printf("%s", BOLD);
 	switch (file_type) {
 	case 'd': printf(_("Directory")); break;
@@ -741,7 +741,7 @@ get_properties(char *filename, const int dsize)
 	case '-': printf(_("Regular file")); break;
 	default: break;
 	}
-	if (colorize == 1)
+	if (conf.colorize == 1)
 		printf("%s", cend);
 
 	printf(_("\tBlocks: %s%jd%s"), cbold, (intmax_t)attr.st_blocks, cend);
@@ -804,13 +804,13 @@ get_ext_info_long(const char *name, const size_t name_len, int *trim, size_t *ex
 	if (e && e != name && *(e + 1)) {
 		ext_name = e;
 		*trim = TRIM_EXT;
-		if (unicode == 0)
+		if (conf.unicode == 0)
 			*ext_len = name_len - (size_t)(ext_name - name);
 		else
 			*ext_len = wc_xstrlen(ext_name);
 	}
 
-	if ((int)*ext_len >= max_name_len || (int)*ext_len <= 0) {
+	if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
 		*ext_len = 0;
 		*trim = TRIM_NO_EXT;
 	}
@@ -848,7 +848,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	default: file_type =       '?'; break;
 	}
 
-	if (colorize == 0) {
+	if (conf.colorize == 0) {
 		cdate = df_c;
 		csize = df_c;
 		cid = df_c;
@@ -883,7 +883,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 
 	size_t cur_len = (size_t)DIGINUM(files + 1) + 1 + plen;
 #ifndef _NO_ICONS
-	if (icons) {
+	if (conf.icons) {
 		cur_len += 3;
 		max += 3;
 	}
@@ -901,7 +901,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		int a = (int)plen - rest - 1 - (int)ext_len;
 		if (a < 0)
 			a = 0;
-		if (unicode)
+		if (conf.unicode)
 			diff = u8truncstr(tname, (size_t)(a));
 		else
 			tname[a] = '\0';
@@ -914,7 +914,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	if (pad < 0)
 		pad = 0;
 
-	if (!trim || !unicode)
+	if (!trim || !conf.unicode)
 		mbstowcs((wchar_t *)tname, wname ? wname : props->name, PATH_MAX);
 
 	free(wname);
@@ -999,7 +999,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	if (prop_fields.size == 1) {
 		if (!(S_ISCHR(props->mode) || S_ISBLK(props->mode))
 		|| xargs.disk_usage_analyzer == 1) {
-			if (full_dir_size == 1 && props->dir == 1)
+			if (conf.full_dir_size == 1 && props->dir == 1)
 				size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
 			else
 				size_type = get_size_unit(props->size);
@@ -1032,7 +1032,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	char fc_str[(MAX_COLOR * 2) + 32];
 	*fc_str = '\0';
 	/* FC_MAX is zero if there are no subdirs in the current dir */
-	if (files_counter == 1 && fc_max > 0) {
+	if (conf.files_counter == 1 && fc_max > 0) {
 		if (props->dir == 1 && props->filesn > 0) {
 			snprintf(fc_str, sizeof(fc_str), "%s%-*d%s ", fc_c, (int)fc_max,
 				(int)props->filesn, cend);
@@ -1051,12 +1051,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
 		   "%s\n", /* Size / device info */
-		colorize ? props->icon_color : "",
-		icons ? props->icon : "", icons ? ' ' : 0, df_c,
+		conf.colorize ? props->icon_color : "",
+		conf.icons ? props->icon : "", conf.icons ? ' ' : 0, df_c,
 
-		colorize ? props->color : "",
+		conf.colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
-		light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
+		conf.light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
 		trim ? tt_c : "", trim ? '~' : 0,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",
@@ -1076,9 +1076,9 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		   "%s" /* Time */
 		   "%s\n", /* Size / device info */
 
-	    colorize ? props->color : "",
+	    conf.colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
-	    light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
+	    conf.light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
 	    trim ? tt_c : "", trim ? TRIMFILE_CHR : 0,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",

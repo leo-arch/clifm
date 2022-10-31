@@ -65,8 +65,8 @@ set_fzf_preview_border_type(void)
 {
 	fzf_preview_border_type = FZF_BORDER_ROUNDED; /* fzf default */
 
-	char *p = (fzftab_options && *fzftab_options)
-		? strstr(fzftab_options, "border-") : (char *)NULL;
+	char *p = (conf.fzftab_options && *conf.fzftab_options)
+		? strstr(conf.fzftab_options, "border-") : (char *)NULL;
 	if (!p || !*(p + 7)) {
 		char *q = getenv("FZF_DEFAULT_OPTS");
 		p = q ? strstr(q, "border-") : (char *)NULL;
@@ -172,9 +172,9 @@ __expand_eln(const char *text)
 		return 0;
 
 	if (nwords == 1) { /* First word */
-		if (file_info[a - 1].dir && autocd == 0)
+		if (file_info[a - 1].dir && conf.autocd == 0)
 			return 0;
-		if (file_info[a - 1].dir == 0 && auto_open == 0)
+		if (file_info[a - 1].dir == 0 && conf.auto_open == 0)
 			return 0;
 	}
 
@@ -397,7 +397,7 @@ rl_ring_bell(void)
 		msleep(VISIBLE_BELL_DELAY);
 		rl_deactivate_mark();
 # ifndef _NO_HIGHLIGHT
-		if (highlight && !wrong_cmd) {
+		if (conf.highlight && !wrong_cmd) {
 			rl_point = rl_mark;
 			recolorize_line();
 		}
@@ -793,7 +793,7 @@ dir_size(char *dir)
 	else
 		strcpy(block_size, "--block-size=K");
 
-	if (apparent_size != 1) {
+	if (conf.apparent_size != 1) {
 		char *cmd[] = {"du", "-s", block_size, dir, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {

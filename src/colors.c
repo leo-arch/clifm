@@ -132,7 +132,7 @@ char *
 get_regfile_color(const char *filename, const struct stat *attr)
 //get_regfile_color(const char *filename, const struct stat attr)
 {
-	if (colorize == 0)
+	if (conf.colorize == 0)
 		return fi_c;
 
 //	if (check_file_access(&attr) == 0)
@@ -603,7 +603,7 @@ edit_colorscheme(char *app)
 	if (ret != EXIT_FAILURE) {
 		stat(file, &attr);
 		if (mtime_bfr != (time_t)attr.st_mtime
-		&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && autols == 1) {
+		&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && conf.autols == 1) {
 			set_fzf_preview_border_type();
 			reload_dirlist();
 		}
@@ -627,7 +627,7 @@ set_colorscheme(char *arg)
 		cur_cscheme = color_schemes[i];
 
 		switch_cscheme = 1;
-		if (autols == 1)
+		if (conf.autols == 1)
 			reload_dirlist();
 		switch_cscheme = 0;
 
@@ -658,7 +658,7 @@ cschemes_function(char **args)
 		return EXIT_FAILURE;
 	}
 
-	if (colorize == 0) {
+	if (conf.colorize == 0) {
 		printf("%s: Colors are disabled\n", PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -1186,31 +1186,31 @@ init_defs(void)
 static void
 set_fzf_opts(char *line)
 {
-	free(fzftab_options);
+	free(conf.fzftab_options);
 
 	if (!line) {
-		char *p = colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
-		fzftab_options = savestring(p, strlen(p));
+		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+		conf.fzftab_options = savestring(p, strlen(p));
 	}
 
 	else if (*line == 'n' && strcmp(line, "none") == 0) {
-		fzftab_options = (char *)xnmalloc(1, sizeof(char));
-		*fzftab_options = '\0';
+		conf.fzftab_options = (char *)xnmalloc(1, sizeof(char));
+		*conf.fzftab_options = '\0';
 	}
 
 	else if (xargs.secure_cmds != 1 || sanitize_cmd(line, SNT_BLACKLIST) == EXIT_SUCCESS) {
-		fzftab_options = savestring(line, strlen(line));
+		conf.fzftab_options = savestring(line, strlen(line));
 	}
 
 	else {
 		_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
 			"unsafe characters. Falling back to default values\n"), PROGRAM_NAME);
-		char *p = colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
-		fzftab_options = savestring(p, strlen(p));
+		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+		conf.fzftab_options = savestring(p, strlen(p));
 	}
 
 	fzf_height_set = 0;
-	if (strstr(fzftab_options, "--height"))
+	if (strstr(conf.fzftab_options, "--height"))
 		fzf_height_set = 1;
 }
 #endif /* !_NO_FZF */
@@ -1275,8 +1275,8 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			if (!p || !*p || !*(++p))
 				continue;
 			if (expand_prompt_name(p) != EXIT_SUCCESS) {
-				free(encoded_prompt);
-				encoded_prompt = savestring(p, strlen(p));
+				free(conf.encoded_prompt);
+				conf.encoded_prompt = savestring(p, strlen(p));
 			}
 			continue;
 		}
@@ -1326,11 +1326,11 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			if (!p || !*(++p))
 				continue;
 			if (*p == 't' && strncmp(p, "true", 4) == 0)
-				warning_prompt = 1;
+				conf.warning_prompt = 1;
 			else if (*p == 'f' && strncmp(p, "false", 5) == 0)
-				warning_prompt = 0;
+				conf.warning_prompt = 0;
 			else
-				warning_prompt = DEF_WARNING_PROMPT;
+				conf.warning_prompt = DEF_WARNING_PROMPT;
 		}
 
 		else if (*line == 'W' && strncmp(line, "WarningPrompt=", 14) == 0) {
@@ -1340,8 +1340,8 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			char *q = remove_quotes(p);
 			if (!q)
 				continue;
-			free(wprompt_str);
-			wprompt_str = savestring(q, strlen(q));
+			free(conf.wprompt_str);
+			conf.wprompt_str = savestring(q, strlen(q));
 		}
 #ifndef _NO_FZF
 		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
@@ -1797,7 +1797,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		break;
 
 	case S_IFDIR:
-		if (colorize == 0)
+		if (conf.colorize == 0)
 			color = di_c;
 		else if (check_file_access(&attr) == 0)
 			color = nd_c;
@@ -1806,7 +1806,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		break;
 
 	case S_IFLNK: {
-		if (colorize == 0) {
+		if (conf.colorize == 0) {
 			color = ln_c;
 		} else {
 			char *linkname = realpath(ent, NULL);
@@ -1964,7 +1964,7 @@ print_color_blocks(void)
 void
 color_codes(void)
 {
-	if (colorize == 0) {
+	if (conf.colorize == 0) {
 		printf(_("%s: Currently running without colors\n"), PROGRAM_NAME);
 		return;
 	}

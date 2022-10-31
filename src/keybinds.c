@@ -304,7 +304,7 @@ run_kb_cmd(char *cmd)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	if (colorize == 1 && wrong_cmd == 1) {
+	if (conf.colorize == 1 && wrong_cmd == 1) {
 		fputs(tx_c, stdout);
 		fflush(stdout);
 	}
@@ -340,28 +340,28 @@ int rl_toggle_max_filename_len(int count, int key)
 
 	static int mnl_bk = 0, flag = 0;
 	if (flag == 0) {
-		mnl_bk = max_name_len;
+		mnl_bk = conf.max_name_len;
 		flag = 1;
 	}
 
-	if (max_name_len == UNSET) {
-		max_name_len = mnl_bk;
+	if (conf.max_name_len == UNSET) {
+		conf.max_name_len = mnl_bk;
 		mnl_bk = UNSET;
 	} else {
-		mnl_bk = max_name_len;
-		max_name_len = UNSET;
+		mnl_bk = conf.max_name_len;
+		conf.max_name_len = UNSET;
 	}
 
-	if (autols == 1) {
-		if (clear_screen == 0)
+	if (conf.autols == 1) {
+		if (conf.clear_screen == 0)
 			putchar('\n');
 		reload_dirlist();
 	}
 
-	if (max_name_len == UNSET)
+	if (conf.max_name_len == UNSET)
 		print_reload_msg(_("Max name length unset\n"));
 	else
-		print_reload_msg(_("Max name length set back to %d\n"), max_name_len);
+		print_reload_msg(_("Max name length set back to %d\n"), conf.max_name_len);
 
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;
@@ -449,7 +449,7 @@ my_insert_text(char *text, char *s, const char _s)
 		goto INSERT_TEXT;
 
 #ifndef _NO_HIGHLIGHT
-	if (highlight == 1) {
+	if (conf.highlight == 1) {
 		/* Hide the cursor to minimize flickering */
 		HIDE_CURSOR;
 		/* Set text color to default */
@@ -564,7 +564,7 @@ rl_accept_suggestion(int count, int key)
 
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
-	if (!suggestions || rl_point != rl_end || !suggestion_buf) {
+	if (!conf.suggestions || rl_point != rl_end || !suggestion_buf) {
 		if (rl_point < rl_end) {
 			/* Just move the cursor forward one column */
 			int mlen = mblen(rl_line_buffer + rl_point, __MB_LEN_MAX);
@@ -612,7 +612,7 @@ rl_accept_suggestion(int count, int key)
 	rl_delete_text(suggestion.offset, rl_end);
 	rl_point = suggestion.offset;
 
-	if (highlight == 1 && accept_first_word == 0 && cur_color != hq_c) {
+	if (conf.highlight == 1 && accept_first_word == 0 && cur_color != hq_c) {
 		cur_color = tx_c;
 		rl_redisplay();
 	}
@@ -763,7 +763,7 @@ rl_refresh(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	if (clear_screen)
+	if (conf.clear_screen)
 		CLEAR;
 	keybind_exec_cmd("rf");
 	rl_reset_line_state();
@@ -857,10 +857,10 @@ rl_long(int count, int key)
 	if (kbind_busy || xargs.disk_usage_analyzer == 1)
 		return EXIT_SUCCESS;
 
-	long_view = long_view == 1 ? 0 : 1;
+	conf.long_view = conf.long_view == 1 ? 0 : 1;
 
-	if (autols == 1) {
-		if (clear_screen == 0)
+	if (conf.autols == 1) {
+		if (conf.clear_screen == 0)
 		/* Without this putchar(), the first entries of the directories
 		 * list are printed in the prompt line */
 			putchar('\n');
@@ -868,7 +868,7 @@ rl_long(int count, int key)
 	}
 
 	print_reload_msg(_("Long view mode %s\n"),
-		long_view == 1 ? _("enabled") : _("disabled"));
+		conf.long_view == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -885,16 +885,16 @@ rl_dirs_first(int count, int key)
 		free_suggestion();
 #endif
 
-	list_dirs_first = list_dirs_first ? 0 : 1;
+	conf.list_dirs_first = conf.list_dirs_first ? 0 : 1;
 
-	if (autols == 1) {
-		if (clear_screen == 0)
+	if (conf.autols == 1) {
+		if (conf.clear_screen == 0)
 			putchar('\n');
 		reload_dirlist();
 	}
 
 	print_reload_msg(_("Directories first %s\n"),
-		list_dirs_first ? "enabled" : "disabled");
+		conf.list_dirs_first ? "enabled" : "disabled");
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -906,14 +906,14 @@ rl_light(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	light_mode = light_mode == 1 ? 0 : 1;
+	conf.light_mode = conf.light_mode == 1 ? 0 : 1;
 
-	if (light_mode == 1)
+	if (conf.light_mode == 1)
 		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Switched to light mode\n"), mi_c, df_c);
 	else
 		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Switched back to normal mode\n"), mi_c, df_c);
 
-	if (autols == 1)
+	if (conf.autols == 1)
 		run_kb_cmd("rf");
 
 	return EXIT_SUCCESS;
@@ -929,15 +929,15 @@ rl_hidden(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif
-	show_hidden = show_hidden ? 0 : 1;
+	conf.show_hidden = conf.show_hidden ? 0 : 1;
 
-	if (autols == 1) {
-		if (clear_screen == 0)
+	if (conf.autols == 1) {
+		if (conf.clear_screen == 0)
 			putchar('\n');
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Hidden files %s\n"), show_hidden ? "enabled" : "disabled");
+	print_reload_msg(_("Hidden files %s\n"), conf.show_hidden ? "enabled" : "disabled");
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1095,13 +1095,13 @@ rl_sort_next(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif
-	sort++;
-	if (sort > SORT_TYPES)
-		sort = 0;
+	conf.sort++;
+	if (conf.sort > SORT_TYPES)
+		conf.sort = 0;
 
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		sort_switch = 1;
-		if (clear_screen == 0)
+		if (conf.clear_screen == 0)
 			putchar('\n');
 		reload_dirlist();
 		sort_switch = 0;
@@ -1121,13 +1121,13 @@ rl_sort_previous(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif
-	sort--;
-	if (sort < 0)
-		sort = SORT_TYPES;
+	conf.sort--;
+	if (conf.sort < 0)
+		conf.sort = SORT_TYPES;
 
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		sort_switch = 1;
-		if (clear_screen == 0)
+		if (conf.clear_screen == 0)
 			putchar('\n');
 		reload_dirlist();
 		sort_switch = 0;
@@ -1298,7 +1298,7 @@ rl_previous_profile(int count, int key)
 	if (prev_prof < 0 || !profile_names[prev_prof])
 		prev_prof = total_profs;
 
-	if (clear_screen) {
+	if (conf.clear_screen) {
 		CLEAR;
 	} else {
 		putchar('\n');
@@ -1334,7 +1334,7 @@ rl_next_profile(int count, int key)
 	if (next_prof > (int)total_profs || !profile_names[next_prof])
 		next_prof = 0;
 
-	if (clear_screen) {
+	if (conf.clear_screen) {
 		CLEAR;
 	} else {
 		putchar('\n');
@@ -1628,16 +1628,16 @@ rl_onlydirs(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	only_dirs = only_dirs ? 0 : 1;
+	conf.only_dirs = conf.only_dirs ? 0 : 1;
 
 	int exit_status = exit_code;
-	if (autols == 1) {
-		if (clear_screen == 0)
+	if (conf.autols == 1) {
+		if (conf.clear_screen == 0)
 			putchar('\n');
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Only directories %s\n"), only_dirs
+	print_reload_msg(_("Only directories %s\n"), conf.only_dirs
 		? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return exit_status;
@@ -1686,7 +1686,7 @@ print_cmdhist_line(int n, int beg_line)
 	int rl_point_bk = rl_point;
 
 #ifndef _NO_HIGHLIGHT
-	if (highlight == 1)
+	if (conf.highlight == 1)
 		print_highlight_string(history[n].cmd);
 	else
 #endif
@@ -1805,27 +1805,27 @@ rl_toggle_disk_usage(int count, int key)
 
 	if (xargs.disk_usage_analyzer == 1) {
 		xargs.disk_usage_analyzer = 0;
-		sort = dsort;
-		long_view = dlong;
-		full_dir_size = ddirsize;
-		list_dirs_first = ddf;
-		apparent_size = dapparent;
+		conf.sort = dsort;
+		conf.long_view = dlong;
+		conf.full_dir_size = ddirsize;
+		conf.list_dirs_first = ddf;
+		conf.apparent_size = dapparent;
 	} else {
 		xargs.disk_usage_analyzer = 1;
-		dsort = sort;
-		dlong = long_view;
-		ddirsize = full_dir_size;
-		ddf = list_dirs_first;
-		dapparent = apparent_size;
+		dsort = conf.sort;
+		dlong = conf.long_view;
+		ddirsize = conf.full_dir_size;
+		ddf = conf.list_dirs_first;
+		dapparent = conf.apparent_size;
 
-		sort = STSIZE;
-		long_view = full_dir_size = apparent_size = 1;
-		list_dirs_first = 0;
+		conf.sort = STSIZE;
+		conf.long_view = conf.full_dir_size = conf.apparent_size = 1;
+		conf.list_dirs_first = 0;
 	}
 
 	int exit_status = exit_code;
-	if (autols == 1) {
-		if (clear_screen == 0)
+	if (conf.autols == 1) {
+		if (conf.clear_screen == 0)
 			putchar('\n');
 		reload_dirlist();
 	}
@@ -1892,7 +1892,7 @@ rl_del_last_word(int count, int key)
 	rl_redisplay();
 
 #ifndef _NO_SUGGESTIONS
-	if (suggestions == 1 && n == 0 && wrong_cmd)
+	if (conf.suggestions == 1 && n == 0 && wrong_cmd)
 		recover_from_wrong_cmd();
 #endif
 

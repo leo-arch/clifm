@@ -68,7 +68,7 @@ log_function(char **cmd)
 		return EXIT_SUCCESS;
 
 	/* If cmd logs are disabled, allow only "log" commands */
-	if (log_cmds == 0) {
+	if (conf.log_cmds == 0) {
 		if (cmd && cmd[0] && strcmp(cmd[0], "log") != 0)
 			return EXIT_SUCCESS;
 	}
@@ -87,32 +87,32 @@ log_function(char **cmd)
 		if (*cmd[1] == 'c' && strcmp(cmd[1], "clear") == 0) {
 			clear_log = 1;
 		} else if (*cmd[1] == 's' && strcmp(cmd[1], "status") == 0) {
-			printf(_("Logs %s\n"), (logs_enabled == 1) ? _("enabled") : _("disabled"));
+			printf(_("Logs %s\n"), (conf.logs_enabled == 1) ? _("enabled") : _("disabled"));
 			return EXIT_SUCCESS;
 		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "on") == 0) {
-			if (logs_enabled == 1) {
+			if (conf.logs_enabled == 1) {
 				puts(_("Logs already enabled"));
 			} else {
-				logs_enabled = 1;
+				conf.logs_enabled = 1;
 				puts(_("Logs successfully enabled"));
 			}
 			return EXIT_SUCCESS;
 		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "off") == 0) {
 			/* If logs were already disabled, just exit. Otherwise, log
 			 * the "log off" command */
-			if (logs_enabled == 0) {
+			if (conf.logs_enabled == 0) {
 				puts(_("Logs already disabled"));
 				return EXIT_SUCCESS;
 			} else {
 				puts(_("Logs succesfully disabled"));
-				logs_enabled = 0;
+				conf.logs_enabled = 0;
 			}
 		}
 	}
 
 	/* Construct the log line */
 	if (!last_cmd) {
-		if (log_cmds == 0) {
+		if (conf.log_cmds == 0) {
 			/* When cmd logs are disabled, "log clear" and "log off" are
 			 * the only commands that can reach this code */
 			if (clear_log == 1) {
@@ -299,7 +299,7 @@ log_msg(char *_msg, const int print_prompt, const int logme, const int add_to_ms
 	}
 
 	if (print_prompt == 1) {
-		if (desktop_notifications == 1 && logme != 0)
+		if (conf.desktop_notifications == 1 && logme != 0)
 			send_desktop_notification(_msg);
 		else
 			print_msg = 1;
@@ -308,7 +308,7 @@ log_msg(char *_msg, const int print_prompt, const int logme, const int add_to_ms
 	}
 
 	if (xargs.stealth_mode == 1 || config_ok == 0 || !log_file || !*log_file
-	|| logme != 1 || logs_enabled == 0)
+	|| logme != 1 || conf.logs_enabled == 0)
 		return;
 
 	write_msg_into_logfile(_msg);
@@ -387,7 +387,7 @@ reload_history(char **args)
 {
 	clear_history();
 	read_history(hist_file);
-	history_truncate_file(hist_file, max_hist);
+	history_truncate_file(hist_file, conf.max_hist);
 
 	/* Update the history array */
 	int ret = get_history();

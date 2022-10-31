@@ -87,7 +87,7 @@ skip_files(const struct dirent *ent)
 		return 0;
 
 	/* If not hidden files */
-	if (!show_hidden && *ent->d_name == '.')
+	if (!conf.show_hidden && *ent->d_name == '.')
 		return 0;
 
 	return 1;
@@ -136,7 +136,7 @@ namecmp(char *s1, char *s2)
 	if ((*s1 & 0xc0) != 0xc0 && (*s2 & 0xc0) != 0xc0) {
 	/* None of the strings starts with a unicode char: compare the first
 	 * byte of both strings */
-		if (!case_sensitive) {
+		if (!conf.case_sensitive) {
 			ac = (char)TOUPPER(*s1);
 			bc = (char)TOUPPER(*s2);
 		}
@@ -148,7 +148,7 @@ namecmp(char *s1, char *s2)
 			return 1;
 	}
 
-	if (!case_sensitive || (*s1 & 0xc0) == 0xc0 || (*s2 & 0xc0) == 0xc0)
+	if (!conf.case_sensitive || (*s1 & 0xc0) == 0xc0 || (*s2 & 0xc0) == 0xc0)
 		return strcoll(s1, s2);
 
 	return strcmp(s1, s2);
@@ -158,7 +158,7 @@ static inline int
 sort_by_size(struct fileinfo *pa, struct fileinfo *pb)
 {
 	off_t as = pa->size, bs = pb->size;
-	if (long_view == 1 && full_dir_size == 1) {
+	if (conf.long_view == 1 && conf.full_dir_size == 1) {
 		int base = xargs.si == 1 ? 1000 : 1024;
 		if (pa->dir == 1)
 			as = pa->size * base;
@@ -278,15 +278,15 @@ entrycmp(const void *a, const void *b)
 {
 	struct fileinfo *pa = (struct fileinfo *)a;
 	struct fileinfo *pb = (struct fileinfo *)b;
-	int ret = 0, st = sort;
+	int ret = 0, st = conf.sort;
 
-	if (list_dirs_first) {
+	if (conf.list_dirs_first) {
 		ret = sort_dirs(pa->dir, pb->dir);
 		if (ret != 0)
 			return ret;
 	}
 
-	if (light_mode && (st == SOWN || st == SGRP))
+	if (conf.light_mode && (st == SOWN || st == SGRP))
 		st = SNAME;
 
 	switch (st) {
@@ -305,7 +305,7 @@ entrycmp(const void *a, const void *b)
 
 	if (!ret)
 		ret = namecmp(pa->name, pb->name);
-	if (!sort_reverse)
+	if (!conf.sort_reverse)
 		return ret;
 
 	return (ret - (ret * 2));
@@ -330,7 +330,7 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 	else
 		ret = strcmp((*a)->d_name, (*b)->d_name);
 
-	if (!sort_reverse)
+	if (!conf.sort_reverse)
 		return ret;
 
 	/* If sort_reverse, return the opposite value */
@@ -347,7 +347,7 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1
 	: (*a)->d_name, ((*b)->d_name[0] == '.') ? (*b)->d_name + 1 : (*b)->d_name);
 
-	if (!sort_reverse)
+	if (!conf.sort_reverse)
 		return ret;
 
 	return (ret - (ret * 2));
@@ -356,46 +356,46 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 static inline void
 print_owner_group_sort(int mode)
 {
-	if (light_mode) {
+	if (conf.light_mode) {
 		printf(_("%s (not available: using 'name') %s\n"),
 			(mode == SOWN) ? "owner" : "group",
-			(sort_reverse == 1) ? "[rev]" : "");
+			(conf.sort_reverse == 1) ? "[rev]" : "");
 		return;
 	}
 
 	printf(_("%s %s\n"), (mode == SOWN) ? "owner" : "group",
-		(sort_reverse == 1) ? "[rev]" : "");
+		(conf.sort_reverse == 1) ? "[rev]" : "");
 }
 
 void
 print_sort_method(void)
 {
 	fputs(BOLD, stdout);
-	switch (sort) {
+	switch (conf.sort) {
 	case SNONE:	puts(_("none")); break;
 	case SNAME:
-		printf(_("name %s\n"), (sort_reverse) ? "[rev]" : ""); break;
+		printf(_("name %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
 	case STSIZE:
-		printf(_("size %s\n"), (sort_reverse) ? "[rev]" : ""); break;
+		printf(_("size %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
 	case SATIME:
-		printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");	break;
+		printf(_("atime %s\n"), (conf.sort_reverse) ? "[rev]" : "");	break;
 	case SBTIME:
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
-		printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : ""); break;
+		printf(_("btime %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
 #else
 		printf(_("btime (not available: using 'ctime') %s\n"),
-		    (sort_reverse) ? "[rev]" : ""); break;
+		    (conf.sort_reverse) ? "[rev]" : ""); break;
 #endif
 	case SCTIME:
-		printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : ""); break;
+		printf(_("ctime %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
 	case SMTIME:
-		printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : ""); break;
+		printf(_("mtime %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
 	case SVER:
-		printf(_("version %s\n"), (sort_reverse) ? "[rev]" : ""); break;
+		printf(_("version %s\n"), (conf.sort_reverse) ? "[rev]" : ""); break;
 	case SEXT:
-		printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");	break;
+		printf(_("extension %s\n"), (conf.sort_reverse) ? "[rev]" : "");	break;
 	case SINO:
-		printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");	break;
+		printf(_("inode %s\n"), (conf.sort_reverse) ? "[rev]" : "");	break;
 	case SOWN: print_owner_group_sort(SOWN); break;
 	case SGRP: print_owner_group_sort(SGRP); break;
 	default: fputs("unknown sorting method\n", stdout); break;
@@ -406,16 +406,16 @@ print_sort_method(void)
 static inline void
 toggle_sort_reverse(void)
 {
-	if (sort_reverse)
-		sort_reverse = 0;
+	if (conf.sort_reverse)
+		conf.sort_reverse = 0;
 	else
-		sort_reverse = 1;
+		conf.sort_reverse = 1;
 }
 
 static inline int
 re_sort_files_list(void)
 {
-	if (autols == 0)
+	if (conf.autols == 0)
 		return EXIT_SUCCESS;
 
 	/* sort_switch just tells list_dir() to print a line
@@ -472,7 +472,7 @@ sort_function(char **arg)
 	int n = atoi(arg[1]);
 
 	if (n >= 0 && n <= SORT_TYPES) {
-		sort = n;
+		conf.sort = n;
 
 		if (arg[2] && *arg[2] == 'r' && strcmp(arg[2], "rev") == 0)
 			toggle_sort_reverse();

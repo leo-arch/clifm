@@ -161,7 +161,7 @@ reduce_path(char *_path)
 {
 	char *temp = (char *)NULL;
 
-	if (strlen(_path) > (size_t)max_path) {
+	if (strlen(_path) > (size_t)conf.max_path) {
 		char *ret = strrchr(_path, '/');
 		if (!ret)
 			temp = savestring(_path, strlen(_path));
@@ -205,7 +205,7 @@ gen_workspace(void)
 	char s[__WS_STR_LEN];
 	char *cl = (char *)NULL;
 
-	if (colorize == 1) {
+	if (conf.colorize == 1) {
 		switch(cur_ws + 1) {
 		case 1: cl = *ws1_c ? ws1_c : DEF_WS1_C; break;
 		case 2: cl = *ws2_c ? ws2_c : DEF_WS2_C; break;
@@ -236,8 +236,8 @@ gen_exit_status(void)
 
 	char *temp = (char *)xnmalloc(code_len + 12 + MAX_COLOR, sizeof(char));
 	sprintf(temp, "%s%d\001%s\002",
-			(exit_code == 0) ? (colorize == 1 ? xs_c : "")
-			: (colorize == 1 ? xf_c : ""), exit_code, df_c);
+			(exit_code == 0) ? (conf.colorize == 1 ? xs_c : "")
+			: (conf.colorize == 1 ? xf_c : ""), exit_code, df_c);
 
 	return temp;
 }
@@ -344,7 +344,7 @@ static inline char *
 gen_mode(void)
 {
 	char *temp = (char *)xnmalloc(2, sizeof(char));
-	if (light_mode) {
+	if (conf.light_mode) {
 		*temp = 'L';
 		temp[1] = '\0';
 	} else {
@@ -752,17 +752,17 @@ trim_final_slashes(void)
 static inline void
 print_welcome_msg(void)
 {
-	if (welcome_message) {
+	if (conf.welcome_message) {
 		printf("%s%s > %s\n%s%s\n", wc_c, _PROGRAM_NAME, _(PROGRAM_DESC),
 			df_c, _(HELP_MESSAGE));
-		welcome_message = 0;
+		conf.welcome_message = 0;
 	}
 }
 
 static inline void
 _print_tips(void)
 {
-	if (tips == 0)
+	if (conf.tips == 0)
 		return;
 
 	static int first_run = 1;
@@ -775,7 +775,7 @@ _print_tips(void)
 static inline void
 run_prompt_cmds(void)
 {
-	if (ext_cmd_ok == 0 || prompt_cmds_n == 0)
+	if (conf.ext_cmd_ok == 0 || prompt_cmds_n == 0)
 		return;
 
 	int tflags = flags;
@@ -884,7 +884,7 @@ construct_prompt(const char *decoded_prompt)
 	if (prompt_notif == 1) {
 		snprintf(the_prompt, prompt_len,
 			"%s%s%s%s%s%s%s%s%s%s\001%s\002",
-			(user.uid == 0) ? (colorize == 1 ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
+			(user.uid == 0) ? (conf.colorize == 1 ? ROOT_IND : ROOT_IND_NO_COLOR) : "",
 			(msgs.error > 0) ? err_ind : "",
 			(msgs.warning > 0) ? warn_ind : "",
 			(msgs.notice > 0) ? notice_ind : "",
@@ -942,7 +942,7 @@ log_and_record(char *input)
 {
 	/* Keep a literal copy of the last entered command to compose the
 	 * commands log, if needed and enabled */
-	if (logs_enabled) {
+	if (conf.logs_enabled) {
 		free(last_cmd);
 		last_cmd = savestring(input, strlen(input));
 	}
@@ -973,7 +973,7 @@ prompt(void)
 
 	/* Generate the prompt string using the prompt line in the config
 	 * file (stored in encoded_prompt at startup) */
-	char *decoded_prompt = decode_prompt(encoded_prompt);
+	char *decoded_prompt = decode_prompt(conf.encoded_prompt);
 	char *the_prompt = construct_prompt(decoded_prompt ? decoded_prompt : EMERGENCY_PROMPT);
 	free(decoded_prompt);
 
@@ -1034,17 +1034,17 @@ static int
 switch_prompt(const size_t n)
 {
 	if (prompts[n].regular) {
-		free(encoded_prompt);
-		encoded_prompt = savestring(prompts[n].regular, strlen(prompts[n].regular));
+		free(conf.encoded_prompt);
+		conf.encoded_prompt = savestring(prompts[n].regular, strlen(prompts[n].regular));
 	}
 
 	if (prompts[n].warning) {
-		free(wprompt_str);
-		wprompt_str = savestring(prompts[n].warning, strlen(prompts[n].warning));
+		free(conf.wprompt_str);
+		conf.wprompt_str = savestring(prompts[n].warning, strlen(prompts[n].warning));
 	}
 
 	prompt_notif = prompts[n].notifications;
-	warning_prompt = prompts[n].warning_prompt_enabled;
+	conf.warning_prompt = prompts[n].warning_prompt_enabled;
 
 	return EXIT_SUCCESS;
 }
@@ -1083,10 +1083,10 @@ set_prompt(char *name)
 static int
 set_default_prompt(void)
 {
-	free(encoded_prompt);
-	encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
-	free(wprompt_str);
-	wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
+	free(conf.encoded_prompt);
+	conf.encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+	free(conf.wprompt_str);
+	conf.wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
 	*cur_prompt_name = '\0';
 	prompt_notif = DEF_PROMPT_NOTIF;
 	return EXIT_SUCCESS;
@@ -1120,7 +1120,7 @@ edit_prompts_file(void)
 		return ret;
 
 	stat(prompts_file, &a);
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 	if (old_time == a.st_mtime)
 		return EXIT_SUCCESS;

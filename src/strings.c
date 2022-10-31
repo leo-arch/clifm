@@ -319,7 +319,7 @@ xstrverscmp(const char *s1, const char *s2)
 	if (p1 == p2)
 		return 0;
 
-	if (!case_sensitive) {
+	if (!conf.case_sensitive) {
 		c1 = TOUPPER(*p1);
 		++p1;
 		c2 = TOUPPER(*p2);
@@ -339,7 +339,7 @@ xstrverscmp(const char *s1, const char *s2)
 			return diff;
 
 		state = next_state[state];
-		if (!case_sensitive) {
+		if (!conf.case_sensitive) {
 			c1 = TOUPPER(*p1);
 			++p1;
 			c2 = TOUPPER(*p2);
@@ -407,7 +407,7 @@ u8truncstr(char *restrict str, const size_t max)
 
 	int i, bmax = (int)max;
 	if (bmax < 0)
-		bmax = max_name_len;
+		bmax = conf.max_name_len;
 
 	for (i = 0; buf[i]; i++) {
 		int l = wcwidth(buf[i]);
@@ -1104,7 +1104,7 @@ expand_tag(char ***args, const int tag_index)
 	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, tag);
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = scandir(dir, &t, NULL, case_sensitive ? xalphasort : alphasort_insensitive);
+	int n = scandir(dir, &t, NULL, conf.case_sensitive ? xalphasort : alphasort_insensitive);
 	if (n == -1)
 		return 0;
 
@@ -1418,13 +1418,14 @@ parse_input_str(char *str)
 					 * #     TRASH AS RM    #
 					 * ###################### */
 #ifndef _NO_TRASH
-	if (tr_as_rm && substr[0] && *substr[0] == 'r' && !substr[0][1]) {
+	if (conf.tr_as_rm && substr[0] && *substr[0] == 'r' && !substr[0][1]) {
 		substr[0] = (char *)xrealloc(substr[0], 3 * sizeof(char));
 		*substr[0] = 't';
 		substr[0][1] = 'r';
 		substr[0][2] = '\0';
 	}
-#endif
+#endif /* !_NO_TRASH*/
+
 				/* ##############################
 				 * #   2) BUILTIN EXPANSIONS    #
 				 * ##############################
@@ -1505,7 +1506,7 @@ parse_input_str(char *str)
 			 * ###################################### */
 
 		/* Expand bookmark names into paths */
-		if (expand_bookmarks) {
+		if (conf.expand_bookmarks) {
 			int bm_exp = 0;
 
 			for (j = 0; j < bm_n; j++) {

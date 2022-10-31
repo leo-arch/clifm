@@ -566,7 +566,7 @@ print_total_size(off_t total)
 static void
 print_selected_files(void)
 {
-	if (clear_screen)
+	if (conf.clear_screen)
 		CLEAR;
 
 	printf(_("%sSelection Box%s\n"), BOLD, df_c);
@@ -671,7 +671,7 @@ print_sel_results(const int new_sel, const char *sel_path, const char *pattern, 
 
 	get_sel_files();
 
-	if (autols == 1 && err == 0)
+	if (conf.autols == 1 && err == 0)
 		reload_dirlist();
 //	print_new_selections();
 	print_reload_msg(_("%d file(s) selected\n"), new_sel);
@@ -815,7 +815,7 @@ show_sel_files(void)
 		return;
 	}
 
-	if (clear_screen)
+	if (conf.clear_screen)
 		CLEAR;
 
 	printf(_("%s%sSelection Box%s\n"), df_c, BOLD, df_c);
@@ -837,7 +837,7 @@ show_sel_files(void)
 	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {
 		/* if (pager && counter > (term_lines-2)) { */
-		if (pager && counter > (size_t)t_lines) {
+		if (conf.pager && counter > (size_t)t_lines) {
 			switch (xgetchar()) {
 			/* Advance one line at a time */
 			case 66: /* fallthrough */ /* Down arrow */
@@ -853,7 +853,7 @@ show_sel_files(void)
 			case 99: /* fallthrough */  /* 'c' */
 			case 112: /* fallthrough */ /* 'p' */
 			case 113:
-				pager = 0, reset_pager = 1; /* 'q' */
+				conf.pager = 0, reset_pager = 1; /* 'q' */
 				break;
 			/* If another key is pressed, go back one position.
 			 * Otherwise, some file names won't be listed.*/
@@ -878,7 +878,7 @@ show_sel_files(void)
 	free(human_size);
 
 	if (reset_pager)
-		pager = 1;
+		conf.pager = 1;
 }
 
 static int
@@ -906,7 +906,7 @@ edit_selfile(void)
 		return EXIT_SUCCESS;
 
 	int ret = get_sel_files();
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 	print_reload_msg(_("%zu file(s) selected\n"), sel_n);
 	return ret;
@@ -1104,7 +1104,7 @@ handle_alpha_entry(int i, size_t desel_n, char **desel_elements)
 
 	if (*desel_elements[i] == 'q' && !desel_elements[i][1]) {
 		free_desel_elements(desel_n, &desel_elements);
-		if (autols == 1)
+		if (conf.autols == 1)
 			reload_dirlist();
 		return EXIT_SUCCESS;
 	}
@@ -1112,7 +1112,7 @@ handle_alpha_entry(int i, size_t desel_n, char **desel_elements)
 	if (*desel_elements[i] == '*' && !desel_elements[i][1]) {
 		free_desel_elements(desel_n, &desel_elements);
 		int exit_status = deselect_all();
-		if (autols == 1)
+		if (conf.autols == 1)
 			reload_dirlist();
 		return exit_status;
 	}
@@ -1164,7 +1164,7 @@ end_deselect(const int err, char ***args)
 
 	if (err) return EXIT_FAILURE;
 
-	if (autols == 1 && exit_status == EXIT_SUCCESS)
+	if (conf.autols == 1 && exit_status == EXIT_SUCCESS)
 		reload_dirlist();
 	if (argsbk > 0) {
 //		print_new_selections();
@@ -1194,7 +1194,7 @@ deselect(char **args)
 		if (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
 		|| strcmp(args[1], "all") == 0) {
 			int ret = deselect_all();
-			if (autols == 1)
+			if (conf.autols == 1)
 				reload_dirlist();
 			if (ret == EXIT_SUCCESS)
 				print_reload_msg(_("0 selected file(s)\n"));

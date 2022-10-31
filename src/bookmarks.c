@@ -656,7 +656,7 @@ print_bookmarks(void)
 			NC, el_c, eln_pad, i + 1, df_c,
 		    BOLD, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
 		    sc_ok ? ']' : 0, df_c,
-		    non_existent ? (colorize ? uf_c : "\x1b[0m\x1b[4m")
+		    non_existent ? (conf.colorize ? uf_c : "\x1b[0m\x1b[4m")
 		    : (!is_dir ? fi_c : (name_ok ? bm_c : di_c)),
 		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
 	}
@@ -727,7 +727,7 @@ int
 open_bookmark(void)
 {
 	if (bm_n == 0) { printf(_(NO_BOOKMARKS)); return EXIT_SUCCESS; }
-	if (clear_screen) CLEAR;
+	if (conf.clear_screen) CLEAR;
 
 	int exit_status = EXIT_SUCCESS, header_printed = 0,	is_dir = 0;
 
@@ -759,7 +759,7 @@ open_bookmark(void)
 	}
 
 	free_bm_input(&arg);
-	if (autols == 1 && is_dir == 0) reload_dirlist();
+	if (conf.autols == 1 && is_dir == 0) reload_dirlist();
 	return EXIT_SUCCESS;
 }
 
@@ -779,7 +779,7 @@ bm_open(char **cmd)
 			|| (bookmarks[i].name && *p == *bookmarks[i].name
 			&& strcmp(p, bookmarks[i].name) == 0)
 
-			|| (expand_bookmarks && bookmarks[i].path
+			|| (conf.expand_bookmarks && bookmarks[i].path
 			&& *p == *bookmarks[i].path
 			&& strcmp(p, bookmarks[i].path) == 0)) {
 

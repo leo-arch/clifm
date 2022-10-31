@@ -623,7 +623,7 @@ media_menu(int mode)
 		}
 
 		if (*input == 'q' && *(input + 1) == '\0') {
-			if (autols == 1) reload_dirlist();
+			if (conf.autols == 1) reload_dirlist();
 			goto EXIT;
 		}
 
@@ -687,7 +687,7 @@ media_menu(int mode)
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(media[n].mnt, strlen(media[n].mnt));
 
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 
 	add_to_dirhist(workspaces[cur_ws].path);

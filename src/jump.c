@@ -192,13 +192,13 @@ save_jumpdb(void)
 
 	/* Once we have the total rank, check if we need to reduce ranks,
 	 * and then write entries into the database */
-	if (total_rank > max_jump_total_rank)
-		reduce = (total_rank / max_jump_total_rank) + 1;
+	if (total_rank > conf.max_jump_total_rank)
+		reduce = (total_rank / conf.max_jump_total_rank) + 1;
 
 	int jump_num = 0;
 
 	for (i = 0; i < (int)jump_n; i++) {
-		if (total_rank > max_jump_total_rank) {
+		if (total_rank > conf.max_jump_total_rank) {
 			/* Once we reach MAX_JUMP_TOTAL_RANK, start forgetting */
 			if (reduce) {
 				tmp_rank = jump_db[i].rank;
@@ -206,7 +206,7 @@ save_jumpdb(void)
 			}
 
 			/* Forget directories ranked below MIN_JUMP_RANK */
-			if (jump_db[i].keep != 1 && jump_db[i].rank < min_jump_rank) {
+			if (jump_db[i].keep != 1 && jump_db[i].rank < conf.min_jump_rank) {
 				/* Discount from TOTAL_RANK the rank of the now forgotten
 				 * directory to keep this total up to date */
 				total_rank -= jump_db[i].rank;
@@ -302,8 +302,8 @@ dirjump(char **args, int mode)
 
 	/* If the sum total of ranks is greater than max, divide each entry
 	 * to make the sum total less than or equal to max */
-	if (jump_total_rank > max_jump_total_rank)
-		reduce = (jump_total_rank / max_jump_total_rank) + 1;
+	if (jump_total_rank > conf.max_jump_total_rank)
+		reduce = (jump_total_rank / conf.max_jump_total_rank) + 1;
 
 	/* If no parameter, print the list of entries in the jump
 	 * database together with the corresponding information */
@@ -392,7 +392,7 @@ dirjump(char **args, int mode)
 		}
 
 		printf("\nTotal rank: %d/%d\nTotal visits: %d\n", ranks_sum,
-		    max_jump_total_rank, visits_sum);
+		    conf.max_jump_total_rank, visits_sum);
 
 		return EXIT_SUCCESS;
 	}
@@ -492,7 +492,7 @@ dirjump(char **args, int mode)
 				 * jump entry. Used to search for subsequent search
 				 * strings starting from this position in the entry
 				 * and not before */
-				char *needle = case_sens_dirjump
+				char *needle = conf.case_sens_dirjump
 							? strstr(jump_db[j].path, args[i])
 							: strcasestr(jump_db[j].path, args[i]);
 
@@ -555,7 +555,7 @@ dirjump(char **args, int mode)
 					continue;
 				}
 
-				char *_needle = case_sens_dirjump
+				char *_needle = conf.case_sens_dirjump
 						? strstr(needles[j] + 1, args[i])
 						: strcasestr(needles[j] + 1, args[i]);
 

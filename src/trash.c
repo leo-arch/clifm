@@ -322,7 +322,7 @@ trash_clear(void)
 	}
 
 	if (ret == EXIT_SUCCESS) {
-		if (autols == 1)
+		if (conf.autols == 1)
 			reload_dirlist();
 		print_reload_msg(_("Trash can emptied\n"));
 	}
@@ -522,7 +522,7 @@ remove_from_trash(char **args)
 			free(d);
 		}
 
-		if (autols == 1 && exit_status == EXIT_SUCCESS)
+		if (conf.autols == 1 && exit_status == EXIT_SUCCESS)
 			reload_dirlist();
 		print_reload_msg(_("%zu file(s) removed from the trash can\n"), removed_files);
 		print_reload_msg(_("%zu total trashed file(s)\n"), trash_n - removed_files);
@@ -540,7 +540,7 @@ remove_from_trash(char **args)
 
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = scandir(trash_files_dir, &trash_files,
-					skip_files, (unicode) ? alphasort : (case_sensitive)
+					skip_files, (conf.unicode) ? alphasort : (conf.case_sensitive)
 					? xalphasort : alphasort_insensitive);
 
 	if (files_n) {
@@ -596,7 +596,7 @@ remove_from_trash(char **args)
 				free(trash_files[j]);
 			free(trash_files);
 
-			if (autols == 1)
+			if (conf.autols == 1)
 				reload_dirlist();
 
 			return exit_status;
@@ -624,7 +624,7 @@ remove_from_trash(char **args)
 				free(rm_elements[j]);
 			free(rm_elements);
 
-			if (autols == 1)
+			if (conf.autols == 1)
 				reload_dirlist();
 			print_reload_msg(_("%zu file(s) removed from the trash can\n"),
 				removed_files);
@@ -678,7 +678,7 @@ remove_from_trash(char **args)
 		free(trash_files[i]);
 	free(trash_files);
 
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 	print_reload_msg(_("%zu file(s) removed from the trash can\n"), removed_files);
 
@@ -826,7 +826,7 @@ untrash_function(char **comm)
 		}
 		if (exit_status == EXIT_SUCCESS) {
 			size_t n = count_trashed_files();
-			if (autols == 1)
+			if (conf.autols == 1)
 				reload_dirlist();
 			print_reload_msg(_("%zu file(s) untrashed\n"), untrashed_files);
 			print_reload_msg(_("%zu total trashed file(s)\n"), n);
@@ -844,7 +844,7 @@ untrash_function(char **comm)
 	/* Get trashed files */
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int trash_files_n = scandir(trash_files_dir, &trash_files,
-	    skip_files, (unicode) ? alphasort : (case_sensitive) ? xalphasort
+	    skip_files, (conf.unicode) ? alphasort : (conf.case_sensitive) ? xalphasort
 					 : alphasort_insensitive);
 	if (trash_files_n <= 0) {
 		puts(_("trash: No trashed files"));
@@ -875,7 +875,7 @@ untrash_function(char **comm)
 			return EXIT_FAILURE;
 		}
 
-		if (autols == 1)
+		if (conf.autols == 1)
 			reload_dirlist();
 		print_reload_msg(_("0 trashed files\n"));
 
@@ -944,7 +944,7 @@ untrash_function(char **comm)
 			free(trash_files[j]);
 		free(trash_files);
 
-		if (autols == 1 && reload_files == 1)
+		if (conf.autols == 1 && reload_files == 1)
 			reload_dirlist();
 
 		return exit_status;
@@ -997,7 +997,7 @@ list_trashed_files(void)
 
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = scandir(trash_files_dir, &trash_files,
-			skip_files, (unicode) ? alphasort : (case_sensitive)
+			skip_files, (conf.unicode) ? alphasort : (conf.case_sensitive)
 			? xalphasort : alphasort_insensitive);
 
 	if (files_n == -1) {
@@ -1130,7 +1130,7 @@ trash_files_args(char **args)
 	free(suffix);
 
 	if (exit_status == EXIT_SUCCESS) {
-		if (autols == 1 && cwd == 1)
+		if (conf.autols == 1 && cwd == 1)
 			reload_dirlist();
 		print_trashed_files(args, successfully_trashed, n);
 		print_reload_msg(_("%zu file(s) trashed\n"), trashed_files);
@@ -1141,7 +1141,7 @@ trash_files_args(char **args)
 		 * after this function (by inotify/kqueue), hidding the error message.
 		 * So let's pause here to prevent the error from being hidden, and
 		 * then refresh the list of files ourselves */
-		if (autols == 1) {
+		if (conf.autols == 1) {
 			fputs(_("Press any key to continue... \n"), stderr);
 			xgetchar();
 			reload_dirlist();

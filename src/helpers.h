@@ -494,6 +494,24 @@ extern FILE *test_input_stream;
 #define FILTER_FILE_TYPE 2 /* =x */
 #define FILTER_MIME_TYPE 3 /* @query */
 
+/* Macros for properties string fields in long view */
+#define PERM_SYMBOLIC 1
+#define PERM_NUMERIC  2
+
+#define PROP_TIME_ACCESS 1
+#define PROP_TIME_MOD    2
+#define PROP_TIME_CHANGE 3
+
+/* Macros for fzf_preview_border_type */
+#define FZF_BORDER_BOTTOM  0
+#define FZF_BORDER_HORIZ   1
+#define FZF_BORDER_LEFT    2
+#define FZF_BORDER_NONE    3
+#define FZF_BORDER_ROUNDED 4
+#define FZF_BORDER_SHARP   5
+#define FZF_BORDER_TOP     6
+#define FZF_BORDER_VERT    7
+
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */
@@ -514,8 +532,8 @@ extern FILE *test_input_stream;
 
 /* Macros to calculate file sizes */
 #define BLK_SIZE 512
-#define FILE_SIZE_PTR (apparent_size == 1 ? attr->st_size : attr->st_blocks * BLK_SIZE)
-#define FILE_SIZE (apparent_size == 1 ? attr.st_size : attr.st_blocks * BLK_SIZE)
+#define FILE_SIZE_PTR (conf.apparent_size == 1 ? attr->st_size : attr->st_blocks * BLK_SIZE)
+#define FILE_SIZE (conf.apparent_size == 1 ? attr.st_size : attr.st_blocks * BLK_SIZE)
 
 #define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
@@ -582,6 +600,91 @@ extern FILE *test_input_stream;
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
+
+struct config_t {
+	int apparent_size;
+	int auto_open;
+	int autocd;
+	int autols;
+	int case_sens_dirjump;
+	int case_sens_path_comp;
+	int case_sens_search;
+	int case_sensitive; // files list
+	int cd_on_quit;
+	int classify;
+	int clear_screen;
+	int colorize;
+	int columned;
+	int cp_cmd;
+	int desktop_notifications;
+	int dirhist_map;
+	int disk_usage;
+	int expand_bookmarks;
+	int ext_cmd_ok;
+	int files_counter;
+	int full_dir_size;
+	int fzf_preview;
+	int highlight;
+#ifndef _NO_ICONS
+	int icons;
+#else
+	int pad1; // Keep the struct alignment
+#endif // !_NO_ICONS
+	int light_mode;
+	int list_dirs_first;
+	int listing_mode;
+	int log_cmds;
+	int logs_enabled;
+	int long_view;
+	int max_dirhist;
+	int max_hist;
+	int max_jump_total_rank;
+	int max_log;
+	int max_name_len;
+	int max_path;
+	int max_printselfiles;
+	int min_jump_rank;
+	int min_name_trim;
+	int mv_cmd;
+	int no_eln;
+	int only_dirs;
+	int pager;
+	int purge_jumpdb;
+	int print_selfiles;
+	int restore_last_path;
+	int rm_force;
+	int search_strategy;
+	int share_selbox;
+	int show_hidden;
+	int sort;
+	int sort_reverse;
+	int splash_screen;
+	int suggest_filetype_color;
+	int suggestions;
+	int tips;
+#ifndef _NO_TRASH
+	int tr_as_rm;
+#else
+	int pad2;
+#endif // !_NO_TRASH
+	int unicode;
+	int warning_prompt;
+	int welcome_message;
+
+	char *opener;
+	char *encoded_prompt;
+	char *term;
+	char *wprompt_str;
+#ifndef _NO_SUGGESTIONS
+	char *suggestion_strategy;
+#else
+	char *pad3;
+#endif // !_NO_SUGGESTIONS
+	char *usr_cscheme;
+	char *fzftab_options;
+};
+
+extern struct config_t conf;
 
 struct filter_t {
 	char *str;
@@ -946,24 +1049,6 @@ struct termcaps_t {
 };
 extern struct termcaps_t term_caps;
 
-/* Macros for properties string fields in long view */
-#define PERM_SYMBOLIC 1
-#define PERM_NUMERIC  2
-
-#define PROP_TIME_ACCESS 1
-#define PROP_TIME_MOD    2
-#define PROP_TIME_CHANGE 3
-
-/* Macros for fzf_preview_border_type */
-#define FZF_BORDER_BOTTOM  0
-#define FZF_BORDER_HORIZ   1
-#define FZF_BORDER_LEFT    2
-#define FZF_BORDER_NONE    3
-#define FZF_BORDER_ROUNDED 4
-#define FZF_BORDER_SHARP   5
-#define FZF_BORDER_TOP     6
-#define FZF_BORDER_VERT    7
-
 struct props_t {
 	int perm; /* File permissions; either NUMERIC or SYMBOLIC */
 	int ids; /* User and group IDs */
@@ -1062,135 +1147,68 @@ extern enum comp_type cur_comp_type;
 extern struct termios orig_termios;
 
 extern int
-	curcol,
-	currow,
 	flags,
 	finder_flags,
 	search_flags;
 
 extern int
-	apparent_size,
-	auto_open,
-	autocd,
+	argc_bk, /* A copy of argc taken from main() */
 	autocmd_set,
 	autojump,
-	autols,
 	bell,
 	bg_proc,
-	case_sensitive,
-	case_sens_dirjump,
-	case_sens_path_comp,
-	case_sens_search,
-	cd_on_quit,
 	check_cap,
 	check_ext,
-	classify,
-	clear_screen,
 	cmdhist_flag,
-	colorize,
-	columned,
 	config_ok,
 	control_d_exits,
-	cp_cmd,
 	cur_ws,
+	curcol,
+	currow,
 	dequoted,
-
-	desktop_notifications,
-
 	dir_changed, /* flag to know is dir was changed: used by autocmds */
-	dirhist_map,
-	disk_usage,
-	expand_bookmarks,
-	ext_cmd_ok,
-	files_counter,
+	dir_out, /* Autocommands: A .cfm.out file was found in CWD*/
+	dirhist_cur_index,
+	dirhist_total_index,
+	exit_code,
 	follow_symlinks,
-	full_dir_size,
 	fzftab,
 	fzf_height_set,
 	fzf_open_with,
-	fzf_preview,
 	fzf_preview_border_type,
-	highlight,
 	hist_status,
 	home_ok,
-#ifndef _NO_ICONS
-	icons,
-#endif
 	int_vars,
 	internal_cmd,
 	is_sel,
+	jump_total_rank,
 	kb_shortcut,
 	kbind_busy,
-	light_mode,
-	list_dirs_first,
-	listing_mode,
-	log_cmds,
-	logs_enabled,
-	long_view,
-	max_name_len,
+	max_files,
 	mime_match,
-	min_name_trim,
-	mv_cmd,
-	no_eln,
 	no_log,
-	only_dirs,
 	open_in_foreground, /* Override mimelist file: used by mime_open */
-	pager,
 	prev_ws,
 	print_msg,
-	print_selfiles,
 	print_removed_files,
 	prompt_offset,
 	prompt_notif,
-	purge_jumpdb,
 	recur_perm_error_flag,
-	restore_last_path,
 	rl_last_word_start,
 	rl_nohist,
 	rl_notab,
-	rm_force,
-	search_strategy,
 	sel_is_last,
 	selfile_ok,
-	share_selbox,
 	shell,
+	shell_is_interactive,
 	shell_terminal,
-	show_hidden,
-	sort,
-	sort_reverse,
 	sort_switch,
-	splash_screen,
-	suggest_filetype_color,
-	suggestions,
 	switch_cscheme,
-	tips,
 #ifndef _NO_TRASH
-	tr_as_rm,
 	trash_ok,
 #endif
-	unicode,
-	warning_prompt,
-	welcome_message,
+	wrong_cmd,
 	xrename; /* We're running a secondary prompt for the rename function */
-
-extern int wrong_cmd;
-
-extern int
-	argc_bk, /* A copy of argc taken from main() */
-	dirhist_cur_index,
-	dirhist_total_index,
-	dir_out, /* Autocommands: A .cfm.out file was found in CWD*/
-	exit_code,
-	jump_total_rank,
-	max_dirhist,
-	max_files,
-	max_hist,
-	max_jump_total_rank,
-	max_log,
-	max_path,
-	max_printselfiles,
-	min_jump_rank,
-	shell_is_interactive;
 
 extern unsigned short term_cols, term_lines;
 
@@ -1256,16 +1274,13 @@ extern char
 	*data_dir,
 	*cur_cscheme,
 	*dirhist_file,
-	*encoded_prompt,
 	*file_cmd_path,
-	*fzftab_options,
 	*hist_file,
 	*kbinds_file,
 	*jump_suggestion,
 	*last_cmd,
 	*log_file,
 	*mime_file,
-	*opener,
 	*pinned_dir,
 	*plugins_dir,
 	*profile_file,
@@ -1279,18 +1294,14 @@ extern char
 	*stdin_tmp_dir,
 #ifndef _NO_SUGGESTIONS
 	*suggestion_buf,
-	*suggestion_strategy,
 #endif
 	*tags_dir,
-	*term,
 	*tmp_dir,
 #ifndef _NO_TRASH
 	*trash_dir,
 	*trash_files_dir,
 	*trash_info_dir,
 #endif
-	*usr_cscheme,
-	*wprompt_str,
 
 	**argv_bk,
 	**bin_commands,

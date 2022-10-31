@@ -707,7 +707,7 @@ mime_list_open(char **apps, char *file)
 	if (!input || a <= 0) {
 		free(input);
 		free(n);
-		if (!input && a == -1 && autols == 1) {
+		if (!input && a == -1 && conf.autols == 1) {
 			reload_dirlist();
 			return 0;
 		}

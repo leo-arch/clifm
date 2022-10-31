@@ -55,11 +55,11 @@ run_find(char *search_path, char *arg)
 	char *method = "-name";
 #elif defined(__OpenBSD__)
 	/* No -regex nor -iregex option in OpenBSD's find(1) */
-	char *method = case_sens_search == 1 ? "-name" : "-iname";
+	char *method = conf.case_sens_search == 1 ? "-name" : "-iname";
 #else
-	char *method = search_strategy == REGEX_ONLY
-		? (case_sens_search == 1 ? "-regex" : "-iregex")
-		: (case_sens_search == 1 ? "-name" : "-iname");
+	char *method = conf.search_strategy == REGEX_ONLY
+		? (conf.case_sens_search == 1 ? "-regex" : "-iregex")
+		: (conf.case_sens_search == 1 ? "-name" : "-iname");
 #endif /* _BE_POSIX */
 
 	int glob_char = check_glob_char(arg + 1, GLOB_REGEX);
@@ -71,7 +71,7 @@ run_find(char *search_path, char *arg)
 	int ret = EXIT_SUCCESS;
 	char *ss = (char *)xnmalloc(strlen(arg + 1) + 5, sizeof(char));
 #if !defined(_BE_POSIX) && !defined(__OpenBSD__)
-	if (search_strategy == REGEX_ONLY)
+	if (conf.search_strategy == REGEX_ONLY)
 		sprintf(ss, ".*%s.*", arg + 1);
 	else
 		sprintf(ss, "*%s*", arg + 1);
@@ -195,7 +195,7 @@ search_glob(char **args, const int invert)
 		size_t slen = strlen(tmp);
 		char *s = savestring(tmp, slen);
 
-		if (search_strategy != GLOB_ONLY) {
+		if (conf.search_strategy != GLOB_ONLY) {
 			*(tmp + 1) = '.';
 			*(tmp + 2) = '*';
 			strcpy(tmp + 3, s + 1);
@@ -242,7 +242,7 @@ search_glob(char **args, const int invert)
 	char **gfiles = (char **)NULL;
 
 	/* glob(3) doesn't sort directories first. Let's do it ourselves */
-	if (list_dirs_first == 1) {
+	if (conf.list_dirs_first == 1) {
 		int *dirs = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
 		gfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, sizeof(char *));
 		for (i = 0; globbed_files.gl_pathv[i]; i++) {
@@ -350,7 +350,7 @@ search_glob(char **args, const int invert)
 					continue;
 
 				eln[found] = -1;
-				files_len[found] = unicode
+				files_len[found] = conf.unicode
 					? wc_xstrlen(ent[k]->d_name) : strlen(ent[k]->d_name);
 
 				if (files_len[found] > flongest)
@@ -387,7 +387,7 @@ search_glob(char **args, const int invert)
 			if (search_path) {
 				/* This will be passed to colors_list(): -1 means no ELN */
 				eln[found] = -1;
-				files_len[found] = unicode ? wc_xstrlen(pfiles[found]) : strlen(pfiles[found]);
+				files_len[found] = conf.unicode ? wc_xstrlen(pfiles[found]) : strlen(pfiles[found]);
 
 				if (files_len[found] > flongest)
 					flongest = files_len[found];
@@ -460,7 +460,7 @@ SCANDIR_ERROR:
 	}
 	tab_offset = t;
 
-	printf(_("Matches found: %d%s\n"), found, search_strategy != GLOB_ONLY ? " (glob)" : "");
+	printf(_("Matches found: %d%s\n"), found, conf.search_strategy != GLOB_ONLY ? " (glob)" : "");
 
 END:
 	/* Free stuff */
@@ -474,7 +474,7 @@ END:
 	free(eln);
 	free(files_len);
 	free(pfiles);
-	if (list_dirs_first == 1)
+	if (conf.list_dirs_first == 1)
 		free(gfiles);
 	globfree(&globbed_files);
 
@@ -662,7 +662,7 @@ search_regex(char **args, const int invert, const int case_sens)
 
 	if (found == 0) {
 		int exit_status = EXIT_FAILURE;
-		char *s = (autocd == 1 && !args[1] && (regex_found == EXIT_FAILURE
+		char *s = (conf.autocd == 1 && !args[1] && (regex_found == EXIT_FAILURE
 				|| (search_flags & NO_GLOB_CHAR)) && rl_line_buffer)
 				? strrchr(rl_line_buffer, '/') : (char *)NULL;
 
@@ -741,7 +741,7 @@ search_regex(char **args, const int invert, const int case_sens)
 		/* If not searching in CWD, we only need to know the file's
 		 * length (no ELN) */
 		if (search_path) {
-			files_len[j] = unicode ? wc_xstrlen(
+			files_len[j] = conf.unicode ? wc_xstrlen(
 					reg_dirlist[regex_index[j]]->d_name)
 					: strlen(reg_dirlist[regex_index[j]]->d_name);
 
@@ -852,13 +852,13 @@ search_function(char **args)
 
 	int invert = args[0][1] == '!' ? 1 : 0;
 
-	if (search_strategy != REGEX_ONLY) {
+	if (conf.search_strategy != REGEX_ONLY) {
 		int ret = search_glob(args, invert);
 		if (ret != EXIT_FAILURE)
 			return (ret == 2 ? 1 : ret);
 
-		if (search_strategy == GLOB_ONLY) {
-			char *s = (autocd == 1 && !args[1] && (search_flags & NO_GLOB_CHAR)
+		if (conf.search_strategy == GLOB_ONLY) {
+			char *s = (conf.autocd == 1 && !args[1] && (search_flags & NO_GLOB_CHAR)
 					&& rl_line_buffer) ? strrchr(rl_line_buffer, '/') : (char *)NULL;
 
 			if (s && s != rl_line_buffer) {
@@ -875,5 +875,5 @@ search_function(char **args)
 			fputs(_("Glob: No matches found. Trying regex...\n"), stderr);
 	}
 
-	return search_regex(args, invert, case_sens_search == 1 ? 1 : 0);
+	return search_regex(args, invert, conf.case_sens_search == 1 ? 1 : 0);
 }

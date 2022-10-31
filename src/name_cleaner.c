@@ -690,7 +690,7 @@ CONFIRM:
 #if defined(__HAIKU__) || defined(__CYGWIN__)
 	if (exit_status == EXIT_FAILURE)
 		return EXIT_FAILURE;
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		free_dirlist();
 		return list_dir();
 	}

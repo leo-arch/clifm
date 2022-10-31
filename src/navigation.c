@@ -138,10 +138,10 @@ switch_workspace(int tmp_ws)
 	cur_ws = tmp_ws;
 	dir_changed = 1;
 
-	if (colorize == 1 && xargs.eln_use_workspace_color == 1)
+	if (conf.colorize == 1 && xargs.eln_use_workspace_color == 1)
 		set_eln_color();
 
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 
 	add_to_dirhist(workspaces[cur_ws].path);
@@ -228,7 +228,7 @@ get_bd_matches(const char *str, int *n, int mode)
 	while(1) {
 		char *p = (char *)NULL;
 		if (str && *str) { /* Non-empty query string */
-			p = case_sens_path_comp ? strstr(cwd, str) : strcasestr(cwd, (char *)str);
+			p = conf.case_sens_path_comp ? strstr(cwd, str) : strcasestr(cwd, (char *)str);
 			if (!p)
 				break;
 		}
@@ -587,7 +587,7 @@ cd_function(char *new_path, const int cd_flag)
 	add_to_dirhist(workspaces[cur_ws].path);
 
 	dir_changed = 1;
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			ret = EXIT_FAILURE;
@@ -708,7 +708,7 @@ change_to_num(int n)
 	dirhist_cur_index = n;
 	ret = EXIT_SUCCESS;
 
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		free_dirlist();
 		ret = list_dir();
 	}
@@ -749,7 +749,7 @@ set_path(const char *new_path)
 	int exit_status = EXIT_SUCCESS;
 
 	dir_changed = 1;
-	if (autols == 1) {
+	if (conf.autols == 1) {
 		free_dirlist();
 		exit_status = list_dir();
 	}

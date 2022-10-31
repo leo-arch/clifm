@@ -41,6 +41,7 @@ void get_prompt_cmds(void);
 int get_sel_files(void);
 int get_sys_shell(void);
 struct user_t get_user_data(void);
+void init_conf_struct(void);
 int init_gettext(void);
 int init_history(void);
 void init_shell(void);

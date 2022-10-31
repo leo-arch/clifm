@@ -542,13 +542,13 @@ open_file(char *file)
 
 	int exit_status = EXIT_SUCCESS;
 
-	if (opener) {
-		if (*opener == 'g' && strcmp(opener, "gio") == 0) {
+	if (conf.opener) {
+		if (*conf.opener == 'g' && strcmp(conf.opener, "gio") == 0) {
 			char *cmd[] = {"gio", "open", file, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		} else {
-			char *cmd[] = {opener, file, NULL};
+			char *cmd[] = {conf.opener, file, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
@@ -939,7 +939,7 @@ create_file(char **cmd)
 		file_in_cwd = 1;
 
 	if (total > 0) {
-		if (autols == 1 && file_in_cwd == 1)
+		if (conf.autols == 1 && file_in_cwd == 1)
 			reload_dirlist();
 
 		for (i = 1; cmd[i]; i++) {
@@ -1070,7 +1070,7 @@ open_function(char **cmd)
 	 * file or a symlink to a regular file. So, just open the file */
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 		int ret = open_file(file);
-		if (!opener && ret == EXIT_FAILURE) {
+		if (!conf.opener && ret == EXIT_FAILURE) {
 			fputs("Add a new entry to the mimelist file ('mime "
 				"edit' or F6) or run 'open FILE APPLICATION'\n", stderr);
 			return EXIT_FAILURE;
@@ -1144,8 +1144,8 @@ edit_link(char *link)
 	char *new_path = (char *)NULL;
 	/* Enable autocd and auto-open (in case they are not already
 	 * enabled) to allow TAB completion for ELN's */
-	int autocd_status = autocd, auto_open_status = auto_open;
-	autocd = auto_open = 1;
+	int autocd_status = conf.autocd, auto_open_status = conf.auto_open;
+	conf.autocd = conf.auto_open = 1;
 
 	while (!new_path) {
 		new_path = rl_no_hist(_("New path ('q' to quit): "));
@@ -1164,8 +1164,8 @@ edit_link(char *link)
 	}
 
 	/* Set autocd and auto-open to their original values */
-	autocd = autocd_status;
-	auto_open = auto_open_status;
+	conf.autocd = autocd_status;
+	conf.auto_open = auto_open_status;
 
 	/* If an ELN, replace by the corresponding file name */
 	if (is_number(new_path)) {
@@ -1372,7 +1372,7 @@ copy_function(char **args, int copy_and_rename)
 		deselect_all();
 
 #if defined(__HAIKU__) || defined(__CYGWIN__)
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 #endif
 
@@ -1401,7 +1401,7 @@ list_removed_files(char **cmd, const size_t start, const int cwd)
 		return;
 	}
 
-	if (autols == 1 && cwd == 1)
+	if (conf.autols == 1 && cwd == 1)
 		reload_dirlist();
 	for (i = 0; i < c; i++) {
 		if (!removed_files[i] || !*removed_files[i])
@@ -1427,11 +1427,11 @@ remove_file(char **args)
 	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
 	int i, j = 3, dirs = 0;
 
-	int bk_rm_force = rm_force;
+	int bk_rm_force = conf.rm_force;
 	i = (args[1] && *args[1] == '-' && (strcmp(args[1], "-f") == 0
 	|| strcmp(args[1], "--force") == 0)) ? 2 : 1;
 	if (i == 2)
-		rm_force = 1;
+		conf.rm_force = 1;
 
 	for (; args[i]; i++) {
 		/* Check if at least one file is in the current directory. If not,
@@ -1481,24 +1481,24 @@ remove_file(char **args)
 
 	if (j == 3) { /* No file to be deleted */
 		free(rm_cmd);
-		rm_force = bk_rm_force;
+		conf.rm_force = bk_rm_force;
 		return EXIT_FAILURE;
 	}
 
 	rm_cmd[0] = savestring("rm", 2);
 	if (dirs == 1)
 #if defined(_BE_POSIX)
-		rm_cmd[1] = savestring(rm_force == 1 ? "-rf" : "-r", rm_force == 1 ? 3 : 2);
+		rm_cmd[1] = savestring(conf.rm_force == 1 ? "-rf" : "-r", conf.rm_force == 1 ? 3 : 2);
 #elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
-		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dr", rm_force == 1 ? 4 : 3);
+		rm_cmd[1] = savestring(conf.rm_force == 1 ? "-drf" : "-dr", conf.rm_force == 1 ? 4 : 3);
 #else /* Linux and FreeBSD only */
-		rm_cmd[1] = savestring(rm_force == 1 ? "-drf" : "-dIr", 4);
+		rm_cmd[1] = savestring(conf.rm_force == 1 ? "-drf" : "-dIr", 4);
 #endif /* _BE_POSIX */
 	else
 #if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(_BE_POSIX)
 		rm_cmd[1] = savestring("-f", 2);
 #else /* Linux and FreeBSD only */
-		rm_cmd[1] = savestring(rm_force == 1 ? "-f" : "-I", 2);
+		rm_cmd[1] = savestring(conf.rm_force == 1 ? "-f" : "-I", 2);
 #endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ */
 	rm_cmd[2] = savestring("--", 2);
 
@@ -1506,7 +1506,7 @@ remove_file(char **args)
 		exit_status = EXIT_FAILURE;
 #if defined(__HAIKU__) ||  defined(__CYGWIN__)
 	else {
-		if (cwd == 1 && autols == 1 && strcmp(args[1], "--help") != 0
+		if (cwd == 1 && conf.autols == 1 && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0)
 			reload_dirlist();
 	}
@@ -1522,7 +1522,7 @@ remove_file(char **args)
 		free(rm_cmd[i]);
 	free(rm_cmd);
 
-	rm_force = bk_rm_force;
+	conf.rm_force = bk_rm_force;
 	return exit_status;
 }
 
@@ -1813,7 +1813,7 @@ bulk_rename(char **args)
 	close_fstream(fp, fd);
 
 #if defined(__HAIKU__) || defined(__CYGWIN__)
-	if (autols == 1)
+	if (conf.autols == 1)
 		reload_dirlist();
 #endif
 
@@ -1940,7 +1940,7 @@ batch_link(char **args)
 	}
 
 #if defined(__HAIKU__) || defined(__CYGWIN__)
-	if (exit_status == EXIT_SUCCESS && autols)
+	if (exit_status == EXIT_SUCCESS && conf.autols)
 		reload_dirlist();
 #endif
 
