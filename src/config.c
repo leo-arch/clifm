@@ -2172,9 +2172,9 @@ read_config(void)
 				continue;
 		}
 
-		else if (xargs.sensitive == UNSET && *line == 'C'
+		else if (xargs.case_sens_list == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
-			if (set_config_bool_value(line, &conf.case_sensitive) == -1)
+			if (set_config_bool_value(line, &conf.case_sens_list) == -1)
 				continue;
 		}
 
@@ -3087,8 +3087,8 @@ check_cmd_line_options(void)
 	if (xargs.restore_last_path != UNSET)
 		conf.restore_last_path = xargs.restore_last_path;
 
-	if (xargs.sensitive != UNSET)
-		conf.case_sensitive = xargs.sensitive;
+	if (xargs.case_sens_list != UNSET)
+		conf.case_sens_list = xargs.case_sens_list;
 
 	if (xargs.share_selbox != UNSET)
 		conf.share_selbox = xargs.share_selbox;

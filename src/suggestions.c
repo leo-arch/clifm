@@ -1378,7 +1378,7 @@ check_prompts(const char *word, const size_t len)
 	int i = (int)prompts_n;
 	while (--i >= 0) {
 		if (TOUPPER(*word) == TOUPPER(*prompts[i].name)
-		&& (conf.case_sensitive ? strncmp(prompts[i].name, word, len)
+		&& (conf.case_sens_list ? strncmp(prompts[i].name, word, len)
 		: strncasecmp(prompts[i].name, word, len)) == 0) {
 			suggestion.type = PROMPT_SUG;
 			print_suggestion(prompts[i].name, len, sx_c);
@@ -1558,7 +1558,7 @@ rl_suggestions(const unsigned char c)
 		if (bookmark_names && lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
 			size_t i;
 			for (i = 0; bookmark_names[i]; i++) {
-				if (conf.case_sensitive == 0 ? (TOUPPER(*word) == TOUPPER(*bookmark_names[i])
+				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*bookmark_names[i])
 				&& strncasecmp(word, bookmark_names[i], wlen) == 0)
 				: (*word == *bookmark_names[i]
 				&& strncmp(word, bookmark_names[i], wlen) == 0)) {

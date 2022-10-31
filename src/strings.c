@@ -319,7 +319,7 @@ xstrverscmp(const char *s1, const char *s2)
 	if (p1 == p2)
 		return 0;
 
-	if (!conf.case_sensitive) {
+	if (!conf.case_sens_list) {
 		c1 = TOUPPER(*p1);
 		++p1;
 		c2 = TOUPPER(*p2);
@@ -339,7 +339,7 @@ xstrverscmp(const char *s1, const char *s2)
 			return diff;
 
 		state = next_state[state];
-		if (!conf.case_sensitive) {
+		if (!conf.case_sens_list) {
 			c1 = TOUPPER(*p1);
 			++p1;
 			c2 = TOUPPER(*p2);
@@ -1104,7 +1104,7 @@ expand_tag(char ***args, const int tag_index)
 	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, tag);
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = scandir(dir, &t, NULL, conf.case_sensitive ? xalphasort : alphasort_insensitive);
+	int n = scandir(dir, &t, NULL, conf.case_sens_list ? xalphasort : alphasort_insensitive);
 	if (n == -1)
 		return 0;
 

@@ -152,7 +152,7 @@ list_files_in_tag(char *name)
 	snprintf(tmp, PATH_MAX, "%s/%s", tags_dir, name);
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = scandir(tmp, &t, NULL, conf.case_sensitive ? xalphasort : alphasort_insensitive);
+	int n = scandir(tmp, &t, NULL, conf.case_sens_list ? xalphasort : alphasort_insensitive);
 	if (n == -1) {
 		fprintf(stderr, _("tag: %s: No such tag\n"), name);
 		return EXIT_FAILURE;

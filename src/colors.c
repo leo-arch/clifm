@@ -130,16 +130,13 @@ remove_bold_attr(char **str)
 
 char *
 get_regfile_color(const char *filename, const struct stat *attr)
-//get_regfile_color(const char *filename, const struct stat attr)
 {
 	if (conf.colorize == 0)
 		return fi_c;
 
-//	if (check_file_access(&attr) == 0)
 	if (check_file_access(attr) == 0)
 		return nf_c;
 
-//	char *color = get_file_color(filename, &attr);
 	char *color = get_file_color(filename, attr);
 	if (color == ee_c || color == ex_c || color == su_c || color == sg_c
 	|| color == ca_c)
@@ -525,7 +522,6 @@ import_color_scheme(const char *name)
 		return EXIT_FAILURE;
 
 	char dfile[PATH_MAX];
-//	snprintf(dfile, PATH_MAX - 1, "%s/%s/colors/%s.cfm", data_dir, PNL, name);
 	snprintf(dfile, PATH_MAX - 1, "%s/%s/colors/%s.clifm", data_dir, PNL, name);
 
 	struct stat attr;
@@ -1867,7 +1863,6 @@ get_colorschemes(void)
 				char *ret = strchr(name, '.');
 				/* If the file contains not dot, or if its extension is not
 				 * .clifm, or if it's just a hidden file named ".clifm", skip it */
-//				if (!ret || strcmp(ret, ".cfm") != 0 || ret == name)
 				if (!ret || ret == name || strcmp(ret, ".clifm") != 0)
 					continue;
 
@@ -1915,7 +1910,6 @@ get_colorschemes(void)
 		char *ret = strchr(name, '.');
 		/* If the file contains not dot, or if its extension is not
 		 * .clifm, or if it's just a hidden file named ".clifm", skip it */
-//		if (!ret || ret == name || strcmp(ret, ".cfm") != 0)
 		if (!ret || ret == name || strcmp(ret, ".clifm") != 0)
 			continue;
 

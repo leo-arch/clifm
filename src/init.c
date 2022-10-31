@@ -90,7 +90,7 @@ init_conf_struct(void)
 	conf.case_sens_dirjump = UNSET;
 	conf.case_sens_path_comp = UNSET;
 	conf.case_sens_search = UNSET;
-	conf.case_sensitive = UNSET;
+	conf.case_sens_list = UNSET;
 	conf.cd_on_quit = UNSET;
 	conf.classify = UNSET;
 	conf.clear_screen = UNSET;
@@ -1927,8 +1927,8 @@ external_arguments(int argc, char **argv)
 		case 'G': conf.pager = xargs.pager = 0; break;
 		case 'h': help_function(); exit(EXIT_SUCCESS);
 		case 'H': xargs.horizontal_list = 1; conf.listing_mode = HORLIST; break;
-		case 'i': conf.case_sensitive = xargs.sensitive = 0; break;
-		case 'I': conf.case_sensitive = xargs.sensitive = 1; break;
+		case 'i': conf.case_sens_list = xargs.case_sens_list = 0; break;
+		case 'I': conf.case_sens_list = xargs.case_sens_list = 1; break;
 		case 'k': kbinds_value = optarg; break;
 		case 'l': conf.long_view = xargs.longview = 0; break;
 		case 'L': conf.long_view = xargs.longview = 1; break;
@@ -2170,6 +2170,7 @@ unset_xargs(void)
 	xargs.bell_style = UNSET;
 	xargs.bm_file = UNSET;
 	xargs.case_sens_dirjump = UNSET;
+	xargs.case_sens_list = UNSET;
 	xargs.case_sens_path_comp = UNSET;
 	xargs.check_cap = UNSET;
 	xargs.check_ext = UNSET;
@@ -2232,7 +2233,6 @@ unset_xargs(void)
 	xargs.secure_env_full = UNSET;
 	xargs.secure_env = UNSET;
 	xargs.secure_cmds = UNSET;
-	xargs.sensitive = UNSET;
 	xargs.share_selbox = UNSET;
 	xargs.si = UNSET;
 	xargs.sort = UNSET;
@@ -3230,11 +3230,11 @@ check_options(void)
 	if (conf.max_printselfiles == UNSET)
 		conf.max_printselfiles = DEF_MAXPRINTSEL;
 
-	if (conf.case_sensitive == UNSET) {
-		if (xargs.sensitive == UNSET)
-			conf.case_sensitive = DEF_CASE_SENS_LIST;
+	if (conf.case_sens_list == UNSET) {
+		if (xargs.case_sens_list == UNSET)
+			conf.case_sens_list = DEF_CASE_SENS_LIST;
 		else
-			conf.case_sensitive = xargs.sensitive;
+			conf.case_sens_list = xargs.case_sens_list;
 	}
 
 	if (conf.case_sens_search == UNSET)

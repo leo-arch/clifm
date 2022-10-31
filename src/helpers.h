@@ -606,7 +606,7 @@ struct config_t {
 	int case_sens_dirjump;
 	int case_sens_path_comp;
 	int case_sens_search;
-	int case_sensitive; // files list
+	int case_sens_list; // files list
 	int cd_on_quit;
 	int classify;
 	int clear_screen;
@@ -812,10 +812,7 @@ struct devino_t {
 	char pad1;
 	char pad2;
 	char pad3;
-	char pad4;
-	char pad5;
-	char pad6;
-	char pad7;
+	int pad4;
 };
 
 extern struct devino_t *sel_devino;
@@ -869,6 +866,7 @@ struct param_t {
 	int bm_file;
 	int case_sens_dirjump;
 	int case_sens_path_comp;
+	int case_sens_list;
 	int clear_screen;
 	int colorize;
 	int columns;
@@ -932,7 +930,6 @@ struct param_t {
 	int secure_cmds;
 	int secure_env;
 	int secure_env_full;
-	int sensitive;
 	int share_selbox;
 	int si; /* Sizes in powers of 1000 instead of 1024 */
 	int sort;
@@ -1195,7 +1192,7 @@ extern int
 	max_files,
 	mime_match,
 	no_log,
-	open_in_foreground, /* Override mimelist file: used by mime_open */
+	open_in_foreground, /* Overrides mimelist file value: used by mime_open */
 	prev_ws,
 	print_msg,
 	print_removed_files,
