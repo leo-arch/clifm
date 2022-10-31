@@ -1750,7 +1750,7 @@ AFTER_USUAL_COMPLETION:
 		common_prefix_added = 1;
 #endif /* _NO_FZF */
 
-	register size_t i;
+	size_t i;
 	int should_quote;
 
 	/* It seems to me that in all the cases we handle we would like

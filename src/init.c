@@ -262,7 +262,7 @@ backup_argv(int argc, char **argv)
 	if (n && *n && *(n + 1))
 		argv[0] = n + 1;
 
-	register int i = argc;
+	int i = argc;
 	while (--i >= 0)
 		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
 	argv_bk[argc] = (char *)NULL;

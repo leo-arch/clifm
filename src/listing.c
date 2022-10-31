@@ -1651,7 +1651,7 @@ list_dir_light(void)
 
 	errno = 0;
 	longest = 0;
-	register unsigned int n = 0;
+	unsigned int n = 0;
 	unsigned int total_dents = 0, count = 0;
 
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
@@ -2052,7 +2052,7 @@ list_dir(void)
 
 	errno = 0;
 	longest = 0;
-	register unsigned int n = 0;
+	unsigned int n = 0;
 	unsigned int total_dents = 0, count = 0;
 
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));

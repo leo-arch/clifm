@@ -733,7 +733,7 @@ check_for_alias(char **args)
 	if (!aliases_n || !aliases || !args || flags & FIRST_WORD_IS_ELN)
 		return (char **)NULL;
 
-	register int i;
+	int i;
 	if (conf.autocd == 1 || conf.auto_open == 1) {
 		/* Do not expand alias is first word is a file name in CWD */
 		struct stat a;

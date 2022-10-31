@@ -454,7 +454,7 @@ strcntchr(const char *str, const char c)
 	if (!str)
 		return (-1);
 
-	register int i = 0;
+	int i = 0;
 
 	while (*str) {
 		if (*str == c)
@@ -474,7 +474,7 @@ strcntchrlst(const char *str, const char c)
 	if (!str)
 		return (-1);
 
-	register int i = 0;
+	int i = 0;
 
 	int p = -1;
 	while (*str) {
@@ -1212,7 +1212,7 @@ parse_input_str(char *str)
 	if (!str)
 		return (char **)NULL;
 
-	register size_t i = 0;
+	size_t i = 0;
 	int fusedcmd_ok = 0;
 #ifndef _NO_TAGS
 	size_t ntags = 0;
@@ -1317,7 +1317,7 @@ parse_input_str(char *str)
 			return (char **)NULL;
 		}
 
-		register size_t j = 0;
+		size_t j = 0;
 		size_t str_len = strlen(str), len = 0, internal_ok = 0;
 		char *buf = (char *)NULL;
 
@@ -1454,7 +1454,7 @@ parse_input_str(char *str)
 		}
 #endif
 
-		register size_t j = 0;
+		size_t j = 0;
 
 		/* Normalize URI file scheme
 		 * file:///some/file -> /some/file */
@@ -1576,14 +1576,14 @@ parse_input_str(char *str)
 
 	if (ranges_ok) {
 		size_t old_ranges_n = 0;
-		register size_t r = 0;
+		size_t r = 0;
 
 		for (r = 0; r < ranges_ok; r++) {
 			size_t ranges_n = 0;
 			int *ranges = expand_range(substr[range_array[r] +
 						(int)old_ranges_n], 1);
 			if (ranges) {
-				register size_t j = 0;
+				size_t j = 0;
 
 				for (ranges_n = 0; ranges[ranges_n]; ranges_n++);
 
@@ -1643,7 +1643,7 @@ parse_input_str(char *str)
 			sel_is_last = 1;
 
 		if (sel_n) {
-			register size_t j = 0;
+			size_t j = 0;
 			char **sel_array = (char **)NULL;
 			sel_array = (char **)xnmalloc(args_n + sel_n + 2, sizeof(char *));
 
@@ -1667,7 +1667,7 @@ parse_input_str(char *str)
 					    PROGRAM_NAME, sel_elements[j].name); 
 					/* Free elements selected thus far and all the
 					 * input substrings */
-					register size_t k = 0;
+					size_t k = 0;
 					for (k = 0; k < j; k++)
 						free(sel_array[k]);
 					free(sel_array);
@@ -1707,7 +1707,7 @@ parse_input_str(char *str)
 			    kb_shortcut ? '\n' : '\0', PROGRAM_NAME,
 			    kb_shortcut ? '\0' : '\n');
 
-			register size_t j = 0;
+			size_t j = 0;
 			for (j = 0; j <= args_n; j++)
 				free(substr[j]);
 			free(substr);
@@ -1916,7 +1916,7 @@ parse_input_str(char *str)
 			}
 		}
 
-		register size_t j = 0;
+		size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
 			/* Brace and wildcard expansion is made by glob() as well */
 			if ((substr[i][j] == '*' || substr[i][j] == '?'
@@ -1982,7 +1982,7 @@ parse_input_str(char *str)
 		 * amount of files expanded in 2 (gl_pathc), we get now the
 		 * original globbed string pointed by 4.
 		*/
-		register size_t g = 0;
+		size_t g = 0;
 		for (g = 0; g < (size_t)glob_n; g++) {
 			glob_t globbuf;
 
@@ -1993,7 +1993,7 @@ parse_input_str(char *str)
 			}
 
 			if (globbuf.gl_pathc) {
-				register size_t j = 0;
+				size_t j = 0;
 				char **glob_cmd = (char **)NULL;
 				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1, sizeof(char *));
 
@@ -2015,7 +2015,7 @@ parse_input_str(char *str)
 					} else {
 						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
 							"file name\n"), PROGRAM_NAME, globbuf.gl_pathv[i]);
-						register size_t k = 0;
+						size_t k = 0;
 						for (k = 0; k < j; k++)
 							free(glob_cmd[k]);
 						free(glob_cmd);
@@ -2059,7 +2059,7 @@ parse_input_str(char *str)
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 	if (word_n) {
 		size_t old_pathc = 0;
-		register size_t w = 0;
+		size_t w = 0;
 		for (w = 0; w < (size_t)word_n; w++) {
 			wordexp_t wordbuf;
 			if (wordexp(substr[word_array[w] + (int)old_pathc],
@@ -2069,7 +2069,7 @@ parse_input_str(char *str)
 			}
 
 			if (wordbuf.we_wordc) {
-				register size_t j = 0;
+				size_t j = 0;
 				char **word_cmd = (char **)NULL;
 
 				word_cmd = (char **)xcalloc(args_n + wordbuf.we_wordc + 1,
@@ -2090,7 +2090,7 @@ parse_input_str(char *str)
 						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
 							"file name\n"), PROGRAM_NAME, wordbuf.we_wordv[i]);
 
-						register size_t k = 0;
+						size_t k = 0;
 						for (k = 0; k < j; k++)
 							free(word_cmd[k]);
 						free(word_cmd);
