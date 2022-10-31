@@ -186,11 +186,6 @@ extern struct timespec timeout;
 #endif /* LINUX_INOTIFY */
 extern int watch;
 
-/*#ifdef RL_INPUT_TEST
-#include <stdio.h>
-extern FILE *test_input_stream;
-#endif // RL_INPUT_TEST */
-
 /* The following flags are used via an integer (FLAGS). If an integer has
  * 4 bytes, then we can use a total of 32 flags (0-31)
  * 4 * 8 == 32 bits == (1 << 31)
@@ -234,6 +229,7 @@ extern FILE *test_input_stream;
 
 /* Flag to control the search function behavior */
 #define NO_GLOB_CHAR (1 << 0)
+
 /* Search strategy */
 #define GLOB_ONLY  0
 #define REGEX_ONLY 1
@@ -280,7 +276,7 @@ extern FILE *test_input_stream;
 #define _BGREEN "\x1b[1;32m"
 #define D_CYAN  "\x1b[0;36m"
 #define BOLD    "\x1b[1m"
-#define NC      "\x1b[0m"    /* Reset color to terminal defaults */
+#define NC      "\x1b[0m"    /* Reset color attributes to terminal defaults */
 
 /* Format to use for suggestions when running colorless
  * There is no universal solution for this: the Linux console does not
@@ -601,6 +597,7 @@ extern FILE *test_input_stream;
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
 
+/* User settings (mostly from the config file) */
 struct config_t {
 	int apparent_size;
 	int auto_open;
@@ -628,8 +625,8 @@ struct config_t {
 #ifndef _NO_ICONS
 	int icons;
 #else
-	int pad1; // Keep the struct alignment
-#endif // !_NO_ICONS
+	int pad1; /* Keep the struct alignment */
+#endif /* !_NO_ICONS */
 	int light_mode;
 	int list_dirs_first;
 	int listing_mode;
@@ -665,8 +662,8 @@ struct config_t {
 #ifndef _NO_TRASH
 	int tr_as_rm;
 #else
-	int pad2;
-#endif // !_NO_TRASH
+	int pad2; /* Keep the struct alignment */
+#endif /* !_NO_TRASH */
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
@@ -678,14 +675,15 @@ struct config_t {
 #ifndef _NO_SUGGESTIONS
 	char *suggestion_strategy;
 #else
-	char *pad3;
-#endif // !_NO_SUGGESTIONS
+	char *pad3; /* Keep the struct alignment */
+#endif /* !_NO_SUGGESTIONS */
 	char *usr_cscheme;
 	char *fzftab_options;
 };
 
 extern struct config_t conf;
 
+/* Store information about the current files filter */
 struct filter_t {
 	char *str;
 	int rev;
@@ -696,7 +694,7 @@ struct filter_t {
 
 extern struct filter_t filter;
 
-/* Struct to store information about current user */
+/* Struct to store information about the current user */
 struct user_t {
 	char *home;
 	char *name;
@@ -774,7 +772,7 @@ struct alias_t {
 
 extern struct alias_t *aliases;
 
-/* Struct to store file information */
+/* Struct to store files information */
 struct fileinfo {
 	char *color;
 	char *ext_color;
@@ -787,7 +785,7 @@ struct fileinfo {
 	int dir;
 	int eln_n;
 	int exec;
-	int filesn; /* Number of files in subdir */
+	int filesn; /* Number of files in subdir. Is a signed integer enough? */
 	int ruser; /* User read permission for dir */
 	int symlink;
 	int sel;
@@ -973,6 +971,7 @@ struct remote_t {
 
 extern struct remote_t *remotes;
 
+/* Store information about the current suggestion */
 struct suggestions_t {
 	int filetype;
     int printed;
@@ -993,6 +992,7 @@ struct sel_t {
 
 extern struct sel_t *sel_elements;
 
+/* File statistics for the current directory. Used by the 'stats' command */
 struct stats_t {
 	size_t dir;
 	size_t reg;
@@ -1025,6 +1025,7 @@ struct sort_t {
 
 extern struct sort_t __sorts[];
 
+/* Prompts and prompt settings */
 struct prompts_t {
 	char *name;
 	char *regular;
@@ -1035,6 +1036,7 @@ struct prompts_t {
 
 extern struct prompts_t *prompts;
 
+/* System messages */
 struct msgs_t {
 	size_t error;
 	size_t warning;
@@ -1042,6 +1044,7 @@ struct msgs_t {
 };
 extern struct msgs_t msgs;
 
+/* A few termcap values to know whether we can use some terminal features */
 struct termcaps_t {
 	int color;
 	int suggestions;
@@ -1049,6 +1052,7 @@ struct termcaps_t {
 };
 extern struct termcaps_t term_caps;
 
+/* Data to be displayed in the properties string in long mode */
 struct props_t {
 	int perm; /* File permissions; either NUMERIC or SYMBOLIC */
 	int ids; /* User and group IDs */
@@ -1064,8 +1068,10 @@ struct cmdslist_t {
 	char *name;
 	size_t len;
 };
+
 extern const struct cmdslist_t param_str[];
 extern const struct cmdslist_t internal_cmds[];
+
 extern size_t internal_cmds_n;
 
 struct history_t {
@@ -1146,11 +1152,13 @@ extern enum comp_type cur_comp_type;
 
 extern struct termios orig_termios;
 
+/* Bit flag holders */
 extern int
 	flags,
 	finder_flags,
 	search_flags;
 
+/* Internal state flags */
 extern int
 	argc_bk, /* A copy of argc taken from main() */
 	autocmd_set,
@@ -1164,7 +1172,7 @@ extern int
 	control_d_exits,
 	cur_ws,
 	curcol,
-	currow,
+//	curline,
 	dequoted,
 	dir_changed, /* flag to know is dir was changed: used by autocmds */
 	dir_out, /* Autocommands: A .cfm.out file was found in CWD*/
@@ -1224,7 +1232,7 @@ extern size_t
 	current_hist_n,
 	curhistindex,
 	ext_colors_n,
-	files,
+	files, /* Amount of files in the current dir. Is size_t enough? */
 	jump_n,
 	kbinds_n,
 	longest,
@@ -1320,8 +1328,8 @@ extern regex_t regex_exp;
 extern size_t *ext_colors_len;
 extern char **environ;
 
-/* To store all the 39 color variables I use, with 46 bytes each, I need
- * a total of 1,8Kb. It's not much but it could be less if I'd use
+/* To store all the 39 color variables we use, with 46 bytes each, we need
+ * a total of 1,8Kb. It's not much but it could be less if we'd use
  * dynamically allocated arrays for them (which, on the other side,
  * would make the whole thing slower and more tedious) */
 

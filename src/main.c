@@ -144,7 +144,7 @@ int
 	control_d_exits = 0,
 	cur_ws = UNSET,
 	curcol = 0,
-	currow = 0,
+//	curline = 0,
 	dequoted = 0,
 	dir_changed = 0,
 	dir_out = 0,

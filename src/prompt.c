@@ -960,7 +960,7 @@ print_right_prompt(void)
 	get_cursor_position(0, 1);
 	char *p = decode_prompt(right_prompt);
 	printf("%*s", term_cols, p);
-	printf("\x1b[%d;%dH", currow, curcol);
+	printf("\x1b[%d;%dH", curline, curcol);
 	free(p);
 } */
 
