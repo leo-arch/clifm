@@ -37,13 +37,16 @@ Examples:\n\
     actions\n\
 - Open/edit the actions configuration file with nano:\n\
     actions edit nano\n\
-- Open/edit the actions configuration file with the default associated application:\n\
+- Open/edit the actions configuration file with the default associated\n\
+  application:\n\
     actions edit\n\n\
 Actions are just names for plugins.\n\
-An action definition has the following form: \"NAME=plugin\", for example: \"-=fzfnav.sh\".\n\
-To run a plugin just enter the action name. So, to run the fzfnav.sh plugin, just enter \"-\".\n\
-Some plugins accept parameters. To get information about a specific plugin use \n\
-the -h,--help parameter. Example: \"- --help\"."
+An action definition has the following form: \"NAME=plugin\", for example:\n\
+\"-=fzfnav.sh\".\n\
+To run a plugin just enter the action name. So, to run the fzfnav.sh plugin,\n\
+just enter \"-\".\n\
+Some plugins accept parameters. To get information about a specific plugin\n\
+use the -h,--help parameter. Example: \"- --help\"."
 
 #define ALIAS_USAGE "List, print, or import aliases\n\
 Usage:\n\
@@ -57,7 +60,8 @@ Example:\n\
     alias my_alias\n\
 - Import aliases from ~/.bashrc:\n\
     alias import ~/.bashrc\n\
-  Note: Only aliases following the POSIX specification (NAME=\"STR\") will be imported"
+  Note: Only aliases following the POSIX specification (NAME=\"STR\")\n\
+  will be imported"
 
 #define ARCHIVE_USAGE "Compress/archive files\n\
 Usage:\n\
@@ -85,20 +89,24 @@ Usage:\n\
 #define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
 There are two ways to set autocommands:\n\
   1) Via the 'autocmd' keyword in the configuration file\n\
-  2) By placing a '.cfm.in' and/or a '.cfm.out' file in the corresponding directory\n\n\
+  2) By placing a '.cfm.in' and/or a '.cfm.out' file in the corresponding\n\
+  directory\n\n\
 Example using the first method:\n\
 Edit the configuration file ('edit' or F10) and add the following line:\n\n\
   autocmd /media/remotes/** fc=0,lm=1\n\n\
-This instructs CliFM to always disable the files counter and to run in light mode\n\
-whenever you enter the /media/remotes directory (or any subdirectory).\n\n\
+This instructs CliFM to always disable the files counter and to run in\n\
+light mode whenever you enter the /media/remotes directory (or any\n\
+subdirectory).\n\n\
 Example using the second method:\n\
-Create a .cfm.in file in the ~/Important directory with the following content:\n\n\
+Create a .cfm.in file in the ~/Important directory with the following\n\
+content:\n\n\
   echo \"Please keep me in sync with work files\" && read -n1\n\n\
-This little reminder will be printed every time you enter the Important directory.\n\
-If the file is named rather .cfm.out, the command will be executed when leaving,\n\
-instead of entering, the directory.\n\n\
-Note: Only single-line commands are allowed. If you need more advanced stuff, set\n\
-here the path to a script doing whatever needs to be done."
+This little reminder will be printed every time you enter the Important\n\
+directory.\n\
+If the file is named rather .cfm.out, the command will be executed when\n\
+leaving, instead of entering, the directory.\n\n\
+Note: Only single-line commands are allowed. If you need more advanced\n\
+stuff, set here the path to a script doing whatever needs to be done."
 
 #define AUTO_OPEN_USAGE "Turn auto-open on-off\n\
 Usage:\n\
@@ -123,7 +131,8 @@ NAME is not specified, print the list of all parent directories\n\
 Usage:\n\
   bd [NAME]\n\n\
 Example:\n\
-- Supposing you are in ~/Documents/misc/some/deep/dir, change to ~/Documents/misc:\n\
+- Supposing you are in ~/Documents/misc/some/deep/dir, change to\n\
+~/Documents/misc:\n\
     bd mi (or 'bd <TAB>' to choose from a list)"
 
 #define BL_USAGE "Create multiple symbolic links at once\n\
@@ -131,9 +140,11 @@ Usage:\n\
   bl FILE...\n\n\
 Example:\n\
 - Symlink files file1 file2 file3 and file4 at once:\n\
-    bl file* (or 'bl <TAB>' to choose from a list: multi-selection is allowed)\n\n\
+    bl file* (or 'bl <TAB>' to choose from a list: multi-selection is\n\
+  allowed)\n\n\
 Note: Links are created in the current directory.\n\
-By default links are named FILE.link (you will be given the option to change this suffix)"
+By default links are named FILE.link (you will be given the option to\n\
+change this suffix)"
 
 #define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\
 Usage:\n\
@@ -150,7 +161,8 @@ Examples:\n\
     bm (Alt-b)\n\
 - Bookmark the directory /media/mount:\n\
     bm a /media/mount\n\
-  Note: Make sure to create a simple shortcut, like 'mnt'. Then you can change to it as follows:\n\
+  Note: Make sure to create a simple shortcut, like 'mnt'. Then you can\n\
+  change to it as follows:\n\
     bm mnt (or 'bm <TAB>' to choose from a list)\n\
 - Remove a bookmark:\n\
     bm d mnt\n\
@@ -166,7 +178,8 @@ Usage:\n\
   br, bulk ELN/FILE...\n\n\
 Examples:\n\
 - Bulk rename all files ending with .pdf in the current directory:\n\
-    br *.pdf (or 'br <TAB> to choose from a list: mutli-selection is allowed')\n\
+    br *.pdf (or 'br <TAB> to choose from a list: mutli-selection is\n\
+  allowed')\n\
 - Bulk rename all selected files:\n\
     br sel"
 
@@ -277,7 +290,8 @@ Usage:\n\
 #define FILE_DETAILS "List file details\n\
 - Toggle long/detail view mode:\n\
     Alt-l\n\
-  Note: use PropFields in the configuration file to customize output fields\n\
+  Note: use PropFields in the configuration file to customize output\n\
+  fields\n\
 - Print properties of the file whose ELN is 4:\n\
     p4\n\
 - Print file properties, including directory full size:\n\
@@ -289,7 +303,8 @@ Usage:\n\
 - Toggle the disk usage analyzer mode on/off:\n\
     Alt-TAB (or -t, --disk-usage-analyzer)\n\
 - Print apparent sizes instead of actual device usage (Linux only):\n\
-    Run with --apparent-size or set ApparentSize to true in the configuration file\n\
+    Run with --apparent-size or set ApparentSize to true in the\n\
+    configuration file\n\
 - Use powers of 1000 instead of 1024 for file sizes (Linux only):\n\
     Run with --si"
 
@@ -303,15 +318,18 @@ Example:\n\
 
 #define FILE_PREVIEWS "Use the 'view' command to preview files in the current \
 directory (depends on fzf).\n\n\
-To add file previews to TAB completion (fzf mode only), use the --fzfpreview command \n\
-line option, or set FzfPreview to true in the configuration file ('edit' or F10).\n\n\
-Enabling image previews (either ueberzug (X11 only) or the Kitty terminal are required)\n\
+To add file previews to TAB completion (fzf mode only), use the --fzfpreview\n\
+command line option, or set FzfPreview to true in the configuration file\n\
+('edit' or F10).\n\n\
+Enabling image previews (either ueberzug (X11 only) or the Kitty terminal\n\
+are required)\n\
 \n\
 1. Copy 'clifmrun' and 'clifmimg' scripts to somewhere in you $PATH \n\
-(say /usr/local/bin). You can find them in DATADIR/clifm/plugins (usually \n\
+(say /usr/local/bin). You can find them in DATADIR/clifm/plugins (usually\n\
 /usr/local/share/clifm/plugins).\n\n\
-2. Edit shotgun's configuration file ('view edit' or F7) and add the following lines\n\
-at the top of the file (to make sure they won't be overriden by previous directives):\n\
+2. Edit shotgun's configuration file ('view edit' or F7) and add the\n\
+following lines at the top of the file (to make sure they won't be\n\
+overriden by previous directives):\n\
 \n\
 X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;\n\
 X:^text/rtf$=clifmimg doc;\n\
@@ -332,12 +350,12 @@ Comment out whatever you want to exclude from the image preview function.\n\
 clifmrun --fzfpreview\n\
 \n\
 Note on Kitty and Wayland:\n\
-If running on the kitty terminal you can force the use of the kitty image \n\
+If running on the kitty terminal you can force the use of the kitty image\n\
 protocol (instead of ueberzug) as follows:\n\
 \n\
 CLIFM_KITTY_NO_UEBERZUG=1 clifmrun --fzfpreview\n\
 \n\
-Note that on Wayland the kitty image protocol will be used by default, so \n\
+Note that on Wayland the kitty image protocol will be used by default, so\n\
 that there is no need to set this variable."
 
 #define FILTER_USAGE "Set a filter for the files list\n\
@@ -456,7 +474,8 @@ Usage:\n\
 #define JUMP_USAGE "Change to a directory in the jump database\n\
 Usage:\n\
   j, jc, jp, jl [STRING]..., jo [NUM], je\n\
-Note: Consult the manpage to know how Kangaroo, this directory jumper, works.\n\n\
+Note: Consult the manpage to know how Kangaroo, this directory jumper,\n\
+works.\n\n\
 Examples:\n\
 - Print the list of entries in the jump database (visited directories):\n\
     j (or jl)\n\
@@ -466,9 +485,11 @@ Examples:\n\
     j ho bui\n\
     Note: Most likey, this will take you to /home/build\n\
     Note 2: Try TAB to get a list of possible matches: 'j bui<TAB>'\n\
-- Change to any visited directory that is PARENT of the current directory and contains the string 'str':\n\
+- Change to any visited directory that is PARENT of the current directory\n\
+  and contains the string 'str':\n\
     jp str\n\
-- Change to any visited directory that is CHILD of the current directory and contains the string 'str':\n\
+- Change to any visited directory that is CHILD of the current directory\n\
+  and contains the string 'str':\n\
     jc str\n\
 - Open/Edit the jump database:\n\
     je"
@@ -512,7 +533,8 @@ The list of mounted and unmounted devices will be displayed.\n\
 Choose the device you want using ELN's.\n\
 If the device is mounted, it will be unmounted; if unmounted, it will \
 be mounted.\n\
-If mounting a device, CliFM will change automatically to the corresponding mountpoint.\n\n\
+If mounting a device, CliFM will change automatically to the corresponding\n\
+mountpoint.\n\n\
 To get information about a device, enter iELN. For example: i12"
 
 #define MF_USAGE "Limit the amount of files listed on the screen to NUM \
@@ -537,7 +559,8 @@ Examples:\n\
       mm info myfile\n\
     2) Edit the mimelist file:\n\
       mm edit (or F6)\n\
-    Once in the file, find the appropriate entry and add the opening application you want\n\
+    Once in the file, find the appropriate entry and add the opening\n\
+    application you want\n\
   For more information consult the manpage"
 
 #define MSG_USAGE "List available CliFM messages\n\
@@ -593,7 +616,8 @@ both 'dir' and 'subdir' directories will be created if they do not exist"
 Usage:\n\
   o, open ELN/FILE [APPLICATION]\n\n\
 Examples:\n\
-- Open the file whose ELN is 12 with the default associated application (see the mime command):\n\
+- Open the file whose ELN is 12 with the default associated application\n\
+  (see the 'mime' command):\n\
     o 12\n\
 - Open the file whose ELN is 12 with vi:\n\
     o 12 vi\n\
@@ -606,7 +630,8 @@ Usage:\n\
   ow ELN/FILE\n\n\
 Example:\n\
 - Choose opening application for test.c from a menu:\n\
-    ow test.c (or 'ow test.c <TAB>' to get a list of applications able to open this file)\n\
+    ow test.c (or 'ow test.c <TAB>' to get a list of applications able to\n\
+  open this file)\n\
 - Open the file test.c with geany:\n\
     ow test.c geany"
 
@@ -737,23 +762,25 @@ by default to the \"//\" action name. For example:\n\
 Note: This plugin depends on fzf(1) and rg(1) (ripgrep)"
 
 #define SECURITY_USAGE "CliFM provides three different security mechanisms:\n\n\
-1. Stealth mode: No file is read nor written to the file system (unless explicitly\n\
-required by the user via a command). Default values are used. Enable this mode via the\n\
--S,--stealth-mode command line switch.\n\n\
-2. Secure environment: CliFM runs on a sanitized environment (most environment\n\
-variables are cleared and a few of them set to sane defaults). Enable this mode\n\
-via the --secure-env or --secure-env-full command line switches.\n\n\
-3. Secure commands: Automatically executed shell commands (autocommands, (un)mount,\n\
-opening applications, just as prompt and profile commands) are sanitized before being\n\
-executed: a secure environment is set and the command is validated using a whitelist\n\
-to prevent unexpected/insecure behavior and command injection. Enable this mode\n\
-using the --secure-cmds command line switch."
+1. Stealth mode: No file is read nor written to the file system (unless\n\
+explicitly required by the user via a command). Default values are used.\n\
+Enable this mode via the -S,--stealth-mode command line switch.\n\n\
+2. Secure environment: CliFM runs on a sanitized environment (most\n\
+environment variables are cleared and a few of them set to sane defaults).\n\
+Enable this mode via the --secure-env or --secure-env-full command line\n\
+switches.\n\n\
+3. Secure commands: Automatically executed shell commands (autocommands,\n\
+(un)mount, opening applications, just as prompt and profile commands) are\n\
+sanitized before being executed: a secure environment is set and the\n\
+command is validated using a whitelist to prevent unexpected/insecure\n\
+behavior and command injection. Enable this mode using the --secure-cmds\n\
+command line switch."
 
 #define SEL_USAGE "Select one or multiple files\n\
 Usage:\n\
   s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\
-Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink, (s)ocket, \
-(f)ifo/pipe, (b)lock device, (c)haracter device\n\n\
+Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink,\n\
+(s)ocket, (f)ifo/pipe, (b)lock device, (c)haracter device\n\n\
 Examples:\n\
 - Select the file whose ELN is 12:\n\
     s 12 (or 's <TAB>' to choose from a list: multi-selection is allowed)\n\
@@ -765,7 +792,8 @@ Examples:\n\
     s ^d.* -r :/etc\n\
 - Select all files in the current directory (including hidden files):\n\
     s * .* (or Alt-a)\n\
-- Interactively select files in '/media' (requires fzf, fzy, or smenu TAB completion mode):\n\
+- Interactively select files in '/media' (requires fzf, fzy, or smenu\n\
+  TAB completion mode):\n\
     s /media/*<TAB>\n\
 - List currently selected files:\n\
     sb\n\
@@ -793,8 +821,9 @@ Examples:\n\
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\
 Usage:\n\
-  tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE]... [[:]TAG]\n\n\
-Instead of the long format described above, you can use any of the \
+  tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge]\n\
+      [FILE]... [[:]TAG]\n\n\
+Instead of the long format described above, you can use any of the\n\
 following shortcuts as well:\n\
   ta: Tag files\n\
   td: Delete tag(s)\n\
@@ -830,7 +859,8 @@ Operating on tagged files (t:TAG)\n\
     p t:docs (or 'p t:<TAB>' to choose from a list)\n\
 - Remove all files tagged as 'images':\n\
     r t:images\n\
-- Run stat(1) over all files tagged as 'work' and all files tagged as 'docs':\n\
+- Run stat(1) over all files tagged as 'work' and all files tagged as\n\
+  'docs':\n\
     stat t:work t:docs\n\n\
 To operate only on some tagged files use TAB as follows:\n\
     t:TAG<TAB> (multi-selection is allowed)\n\
@@ -838,7 +868,8 @@ Mark the files you need via TAB and then press Enter or Right"
 
 #define TE_USAGE "Toggle the executable bit on files\n\
 Usage:\n\
-  te ELN/FILE... (or 'te <TAB>' to choose from a list: multi-selection is allowed)\n\n\
+  te ELN/FILE... (or 'te <TAB>' to choose from a list: multi-selection\n\
+  is allowed)\n\n\
 Examples:\n\
 - Set the executable bit on all shell scripts in the current directory:\n\
     te *.sh\n\
@@ -881,7 +912,8 @@ Examples:\n\
 Usage:\n\
   vv sel DIR\n\n\
 Example:\n\
-- Copy selected files into the directory 'mydir' and bulk rename them at once:\n\
+- Copy selected files into the directory 'mydir' and bulk rename them\n\
+  at once:\n\
     vv sel mydir"
 
 #define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\
@@ -897,27 +929,28 @@ Examples:\n\
 Enter 'help file-previews' for more information"
 
 #define WRAPPERS_USAGE "c (v, paste), l, m, md, and r commands are wrappers \
-for cp, ln, mv, mkdir, and rm shell commands respectively.\n\n\
+for cp(1), ln(1), mv(1),\nmkdir(1), and rm(1) shell commands respectively.\n\n\
 c ->  cp -iRp\n\
 l ->  ln -sn\n\
 m ->  mv -i\n\
 md -> mkdir -p\n\
 r ->  rm -dIr (for directories) (1)\n\
 r ->  rm -I (for non-directories) (2)\n\n\
-(1) \"rm -r\" if using the POSIX version of rm(1) (NetBSD/OpenBSD/MacOS)\n\
-(2) \"rm -f\" if using the POSIX version of rm(1) (NetBSD/OpenBSD/MacOS)\n\n\
-The 'paste' command is equivalent to 'c' and exists only for semantic reasons.\n\
-For example, to copy selected files into the current directory, it makes sense to write:\n\
-'paste sel', or its shortened version: 'v sel'\n\n\
-By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively (-i), i.e. prompting \n\
-before overwriting a file. To run non-interactivelly instead, use the -f,--force \n\
-parameter (see the examples below). You can also permanently run in non-interactive \n\
-mode using the cpCmd/mvCmd options in the configuration file ('edit' or F10).\n\n\
-Just as 'c' and 'm', the 'r' command accepts -f,--force as paramater to prevent rm(1) \n\
-from prompting before removals. Set rmForce to true in the configuration file to make \n\
-this option permanent.\n\n\
-To use different parameters, just invoke the corresponding utility, as usual. For example:\n\
-  cp -abf ...\n\n\
+(1) 'rm -dr' on NetBSD/OpenBSD/MacOS.\n    Note: -d is not supported by the POSIX version of rm(1)\n\
+(2) 'rm -f' on NetBSD/OpenBSD/MacOS\n\n\
+The 'paste' command is equivalent to 'c' and exists only for semantic\n\
+reasons. For example, to copy selected files into the current directory,\n\
+it makes sense to write 'paste sel', or its shortened version, 'v sel'\n\n\
+By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
+(-i), i.e. prompting before overwriting a file. To run non-interactivelly\n\
+instead, use the -f,--force parameter (see the examples below). You can\n\
+also permanently run in non-interactive mode using the cpCmd/mvCmd options\n\
+in the configuration file ('edit' or F10).\n\n\
+Just as 'c' and 'm', the 'r' command accepts -f,--force as paramater to\n\
+prevent rm(1) from prompting before removals. Set rmForce to true in the\n\
+configuration file to make this option permanent.\n\n\
+To use different parameters, just run the corresponding utility, as usual.\n\
+Example: cp -abf ...\n\n\
 Examples:\n\
 - Create a copy of file1 named file2\n\
     c file1 file2\n\
@@ -925,7 +958,7 @@ Examples:\n\
     c file1 dir1/file2\n\
 - Copy all selected files into the current directory:\n\
     c sel\n\
-    Note: If the destiny directory is omitted, the current directory is assumed\n\
+    Note: If destiny directory is omitted, the current directory is assumed\n\
 - Copy all selected files into the current directory (non-interactively):\n\
     c -f sel\n\
 - Move all selected files into the directory named testdir:\n\
@@ -934,23 +967,26 @@ Examples:\n\
     m file1 file_test\n\
 - Interactively rename file1:\n\
     m file1\n\
-    Note: The user is prompted to enter a new name using the old name as template\n\
+    Note: The user is prompted to enter a new name using the old name as\n\
+    template\n\
 - Move all selected files into the current directory (non-interactively):\n\
     m -f sel\n\
 - Remove all selected files:\n\
     r sel\n\
 - Remove all selected files (non-interactively):\n\
     r -f sel\n\
-- Create a symbolic link pointing to the directory whose ELN is 12 named link:\n\
+- Create a symbolic link pointing to the directory whose ELN is 12 named\n\
+  link:\n\
     l 12 link\n\
 - Create a directory named mydir:\n\
     md mydir\n\
-    Note: To create files and directories you can use the 'n' command as well. See 'n --help'\n\
+    Note: To create files and directories you can use the 'n' command as\n\
+    well. See 'n --help'\n\
 - Edit the symbolic link named mylink:\n\
     le mylink\n\n\
-Use the 'vv' command to copy selected files into a directory and bulk rename them at once.\n\
-See 'vv --help'\n\n\
-Use the 'cr' plugin to copy a file to a remote location:\n\
+Use the 'vv' command to copy selected files into a directory and bulk\n\
+rename them at once. See 'vv --help'\n\n\
+Use the 'cr' plugin to send a file to a remote location:\n\
     cr FILE (run 'cr --edit' before to set up your remotes)"
 
 #define WS_USAGE "Switch workspaces\n\
@@ -967,7 +1003,8 @@ Examples:\n\
     ws +\n\
 - Switch to the previous workspace:\n\
     ws -\n\n\
-Note: Use the WorkspaceNames option in the configuration file to name your workspaces"
+Note: Use the WorkspaceNames option in the configuration file to name\n\
+your workspaces"
 
 #define X_USAGE "Launch a new instance of CliFM on a new terminal window\n\
 Usage:\n\

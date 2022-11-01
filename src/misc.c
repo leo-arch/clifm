@@ -1946,7 +1946,8 @@ get_pager(void)
 static void
 print_more_info(void)
 {
-	puts(_("For more information consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)"));
+	puts(_("For more information consult the manpage and/or the Wiki:\n"
+		"https://github.com/leo-arch/clifm/wiki"));
 }
 
 static int
@@ -1967,7 +1968,9 @@ print_autocmds_topic(void)
 static int
 print_basics_topic(void)
 {
-	puts(_("Run '?' and consult the BASIC FILE OPERATIONS section"));
+	puts(_("Run '?' and consult the BASIC FILE OPERATIONS section\n"
+		"Try also 'c --help' for more information about basic "
+		"file management commands"));
 	return EXIT_SUCCESS;
 }
 
