@@ -571,7 +571,7 @@ Examples:\n\
     net edit\n\
 - Open/edit the net configuration file using nano:\n\
     net edit nano\n\
-- Copy a file to a remote location via the cprm plugin:\n\
+- Copy a file to a remote location via the 'cr' plugin:\n\
     cr FILE (run 'cr --edit' before to set up your remotes)"
 
 #define NEW_USAGE "Create new files and/or directories\n\
@@ -585,7 +585,9 @@ Examples:\n\
     Note: Note the ending slashes\n\
 - Both of the above at once:\n\
     n file1 file2 dir1/ dir2/\n\n\
-Note: Parent directories are created if necessary"
+Parent directories are created if necessary. For example, if you run:\n\
+    n dir/subdir/file\n\
+both 'dir' and 'subdir' directories will be created if they do not exist"
 
 #define OPEN_USAGE "Open a file\n\
 Usage:\n\
@@ -875,11 +877,11 @@ Examples:\n\
 - Untrash files selectively using a menu:\n\
     u (or 'u <TAB>' to choose from a list: multi-selection is allowed)"
 
-#define VV_USAGE "Copy selected files into a directory and rename them at once\n\
+#define VV_USAGE "Copy selected files into a directory and bulk rename them at once\n\
 Usage:\n\
   vv sel DIR\n\n\
 Example:\n\
-- Copy selected files into the directory 'mydir' and rename them at once:\n\
+- Copy selected files into the directory 'mydir' and bulk rename them at once:\n\
     vv sel mydir"
 
 #define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\
@@ -896,13 +898,17 @@ Enter 'help file-previews' for more information"
 
 #define WRAPPERS_USAGE "c (v, paste), l, m, md, and r commands are wrappers \
 for cp, ln, mv, mkdir, and rm shell commands respectively.\n\n\
-c -> cp -iRp\n\
-l -> ln -sn\n\
-m -> mv -i\n\
+c ->  cp -iRp\n\
+l ->  ln -sn\n\
+m ->  mv -i\n\
 md -> mkdir -p\n\
-r (for directories) -> rm -dIr (\"rm -r\" on NetBSD/OpenBSD/MacOS)\n\
-r (for non-directories) -> rm -I (\"rm -f\" on NetBSD/OpenBSD/MacOS)\n\
-v, paste FILE -> c FILE .\n\n\
+r ->  rm -dIr (for directories) (1)\n\
+r ->  rm -I (for non-directories) (2)\n\n\
+(1) \"rm -r\" if using the POSIX version of rm(1) (NetBSD/OpenBSD/MacOS)\n\
+(2) \"rm -f\" if using the POSIX version of rm(1) (NetBSD/OpenBSD/MacOS)\n\n\
+The 'paste' command is equivalent to 'c' and exists only for semantic reasons.\n\
+For example, to copy selected files into the current directory, it makes sense to write:\n\
+'paste sel', or its shortened version: 'v sel'\n\n\
 By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively (-i), i.e. prompting \n\
 before overwriting a file. To run non-interactivelly instead, use the -f,--force \n\
 parameter (see the examples below). You can also permanently run in non-interactive \n\
@@ -919,12 +925,16 @@ Examples:\n\
     c file1 dir1/file2\n\
 - Copy all selected files into the current directory:\n\
     c sel\n\
+    Note: If the destiny directory is omitted, the current directory is assumed\n\
 - Copy all selected files into the current directory (non-interactively):\n\
     c -f sel\n\
 - Move all selected files into the directory named testdir:\n\
     m sel testdir\n\
 - Rename file1 as file_test:\n\
     m file1 file_test\n\
+- Interactively rename file1:\n\
+    m file1\n\
+    Note: The user is prompted to enter a new name using the old name as template\n\
 - Move all selected files into the current directory (non-interactively):\n\
     m -f sel\n\
 - Remove all selected files:\n\
@@ -934,10 +944,14 @@ Examples:\n\
 - Create a symbolic link pointing to the directory whose ELN is 12 named link:\n\
     l 12 link\n\
 - Create a directory named mydir:\n\
-    md mydir\n\n\
-Note: To create files and directories you can use the 'n' command as well\n\
+    md mydir\n\
+    Note: To create files and directories you can use the 'n' command as well. See 'n --help'\n\
 - Edit the symbolic link named mylink:\n\
-    le mylink"
+    le mylink\n\n\
+Use the 'vv' command to copy selected files into a directory and bulk rename them at once.\n\
+See 'vv --help'\n\n\
+Use the 'cr' plugin to copy a file to a remote location:\n\
+    cr FILE (run 'cr --edit' before to set up your remotes)"
 
 #define WS_USAGE "Switch workspaces\n\
 Usage:\n\

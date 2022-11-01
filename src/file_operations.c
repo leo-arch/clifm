@@ -1261,7 +1261,7 @@ edit_link(char *link)
 /* Launch the command associated to 'c' (also 'v' and 'vv') or 'm'
  * internal commands */
 int
-copy_function(char **args, const int copy_and_rename, const int force)
+cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
 	log_function(NULL);
 
@@ -1275,7 +1275,7 @@ copy_function(char **args, const int copy_and_rename, const int force)
 		return run_and_refresh(args, force);
 
 	size_t n = 0;
-	char **tcmd = (char **)xnmalloc(2 + args_n + 2, sizeof(char *));
+	char **tcmd = (char **)xnmalloc(3 + args_n + 2, sizeof(char *));
 	char *p = strchr(args[0], ' ');
 	if (p && *(p + 1)) {
 		*p = '\0';
@@ -1288,13 +1288,14 @@ copy_function(char **args, const int copy_and_rename, const int force)
 		n++;
 	}
 
-	size_t i;
-	for (i = 1; args[i]; i++) {
-		/* The -f,--force parameter is internal. Skip it
-		 * It instructs cp/mv to run non-interactively (no -i param) */
-		if (i == 1 && force == 1 && *args[i] == '-' && (strcmp(args[i], "-f") == 0
-		|| strcmp(args[i], "--force") == 0))
-			continue;
+	/* wcp does not support end of options (--) */
+	if (strcmp(tcmd[0], "wcp") != 0) {
+		tcmd[n] = savestring("--" , 2);
+		n++;
+	}
+
+	size_t i = force == 1 ? 2 : 1;
+	for (; args[i]; i++) {
 		p = dequote_str(args[i], 0);
 		if (!p)
 			continue;
@@ -1428,9 +1429,8 @@ remove_file(char **args)
 	int i, j = 3, dirs = 0;
 
 	int bk_rm_force = conf.rm_force;
-	i = (args[1] && *args[1] == '-'
-	&& ((strcmp(args[1], "-f") == 0 && lstat("-f", &a) == -1)
-	|| (strcmp(args[1], "--force") == 0 && lstat("--force", &a) == -1) ) ) ? 2 : 1;
+
+	i = (is_force_param(args[1] ? args[1] : (char *)NULL) == 1) ? 2 : 1;
 	if (i == 2)
 		conf.rm_force = 1;
 
@@ -1487,6 +1487,7 @@ remove_file(char **args)
 	}
 
 	rm_cmd[0] = savestring("rm", 2);
+
 	if (dirs == 1)
 #if defined(_BE_POSIX)
 		rm_cmd[1] = savestring(conf.rm_force == 1 ? "-rf" : "-r", conf.rm_force == 1 ? 3 : 2);
@@ -1501,6 +1502,7 @@ remove_file(char **args)
 #else /* Linux and FreeBSD only */
 		rm_cmd[1] = savestring(conf.rm_force == 1 ? "-f" : "-I", 2);
 #endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ */
+
 	rm_cmd[2] = savestring("--", 2);
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)

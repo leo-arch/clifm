@@ -87,7 +87,7 @@ typedef char *rl_cpvfunc_t;
 #include "tabcomp.h"
 
 /* Run CMD via execve() and refresh the screen in case of success
- * skip_force is true (1) only when coming from copy_function, that is,
+ * skip_force might be true (1) only when coming from cp_mv_file(), that is,
  * for the c and m commands, which take -f,--force as parameter to
  * intruct cp/mv to run non-interactivelly (no -i) */
 int
@@ -165,10 +165,8 @@ run_and_refresh(char **cmd, const int skip_force)
 	for (i = 1; cmd[i]; i++) {
 		/* The -f,--force parameter is internal. Skip it
 		 * It instructs cp/mv to run non-interactively (no -i param) */
-		if (skip_force == 1 && i == 1 && *cmd[i] == '-' && (strcmp(cmd[i], "-f") == 0
-		|| strcmp(cmd[i], "--force") == 0)) {
+		if (skip_force == 1 && i == 1 && is_force_param(cmd[i]) == 1)
 			continue;
-		}
 		p = dequote_str(cmd[i], 0);
 		if (!p)
 			continue;
@@ -2243,6 +2241,7 @@ exec_cmd(char **comm)
 #endif
 
 	/*     ############### COPY AND MOVE ##################     */
+	/* c, cp, m, mv, v, vv, or p, paste commands */
 	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'
 	&& !comm[0][2])))
 
@@ -2255,6 +2254,7 @@ exec_cmd(char **comm)
 	|| (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
 		int copy_and_rename = 0, use_force = 0;
 
+		/* c, v, vv, and paste commands */
 		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
 		|| (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
 		|| strcmp(comm[0], "paste") == 0) {
@@ -2270,13 +2270,9 @@ exec_cmd(char **comm)
 			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
 				copy_and_rename = 1;
 
-			struct stat b;
-			if (comm[1] && *comm[1] == '-'
-			&& ((strcmp(comm[1], "-f") == 0 && lstat("-f", &b) == -1)
-			|| (strcmp(comm[1], "--force") == 0 && lstat("--force", &b) == -1)))
-				use_force = 1;
-
+			use_force = is_force_param(comm[1] ? comm[1] : (char *)NULL);
 			set_cp_cmd(&comm[0], use_force);
+
 		} else if (*comm[0] == 'm' && !comm[0][1]) {
 			if (comm[1] && IS_HELP(comm[1])) {
 				puts(_(WRAPPERS_USAGE));
@@ -2285,16 +2281,12 @@ exec_cmd(char **comm)
 			if (!sel_is_last && comm[1] && !comm[2])
 				xrename = 1;
 
-			struct stat b;
-			if (comm[1] && *comm[1] == '-'
-			&& ((strcmp(comm[1], "-f") == 0 && lstat("-f", &b) == -1)
-			|| (strcmp(comm[1], "--force") == 0 && lstat("--force", &b) == -1)))
-				use_force = 1;
+			use_force = is_force_param(comm[1] ? comm[1] : (char *)NULL);
 			set_mv_cmd(&comm[0], use_force);
 		}
 
 		kbind_busy = 1;
-		exit_code = copy_function(comm, copy_and_rename, use_force);
+		exit_code = cp_mv_file(comm, copy_and_rename, use_force);
 		kbind_busy = 0;
 	}
 

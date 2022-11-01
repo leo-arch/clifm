@@ -50,6 +50,23 @@
 /* Terminals known not to be able to handle escape sequences */
 static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
 
+/*Check whether parameter S is -f or --force
+ * Returns 1 if yes, and there is no "-f" or "--force" file in the current dir,
+ * or 0 otherwise. */
+int
+is_force_param(const char *s)
+{
+	if (!s || !*s || *s != '-')
+		return 0;
+
+	struct stat a;
+	if ((strcmp(s, "-f") == 0 && lstat("-f", &a) == -1)
+	|| (strcmp(s, "--force") == 0 && lstat("--force", &a) == -1))
+		return 1;
+
+	return 0;
+}
+
 int
 check_glob_char(const char *str, const int gflag)
 {
@@ -642,6 +659,8 @@ is_internal_f(const char *restrict cmd)
 		{"ta", 2},
 		{"te", 2},
 		{"unlink", 6},
+		{"v", 1},
+		{"vv", 2},
 		{"ws", 2},
 		{NULL, 0}
 	};

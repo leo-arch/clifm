@@ -45,6 +45,7 @@ char *get_sudo_path(void);
 int  is_action_name(const char *);
 int  is_bin_cmd(char *);
 int  is_file_in_cwd(char *);
+int  is_force_param(const char *);
 int  is_internal(const char *);
 int  is_internal_c(const char *restrict);
 int  is_internal_f(const char *restrict);
