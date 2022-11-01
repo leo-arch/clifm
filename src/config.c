@@ -1080,9 +1080,11 @@ DesktopNotifications=%s\n\n"
 DirhistMap=%s\n\n"
 
 		"# Use a regex expression to filter file names when listing files.\n\
-# Example: !.*~$ to exclude backup files (ending with ~), or ^\\. to list \n\
-# only hidden files. Do not quote the regular expression\n\
-Filter=\n\n"
+# Example: \"!.*~$\" to exclude backup files (ending with ~), or \"^\\.\" to list \n\
+# only hidden files. File type filters are also supported. Example: \"=d\" to\n\
+# list directories only, or \"!=l\" to exclude all symlinks.\n\
+# Run 'help file-filters' for more information.\n\
+Filter=""\n\n"
 
 	    "# Set the default copy command. Available options are:\n\
 # 0 = 'cp -iRp', 1 = 'cp -Rp', 2 = 'advcp -giRp', 3 = 'advcp -gRp',\n\

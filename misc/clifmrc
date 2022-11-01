@@ -16,7 +16,9 @@ ShowHiddenFiles=false
 
 # Use a regular expression to filter files from the files list.
 # Example: "!.*~$" to exclude backup files (ending with ~), or "^\." to
-# list only hidden files.
+# list only hidden files. File type filters are also supported. Example:
+# "=d" to list directories only, or "!=l" to exclude symlinks.
+# Run 'help file-filters' for more information.
 Filter=""
 
 # List directories first?
@@ -57,7 +59,7 @@ ListingMode=0
 
 # Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime
 # 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version
-# (name if not available) 8 = extension, 9 = inode, 10 = owner,
+# (name if not available) 8 = extension, 9 = inode, 10 = owner, and
 # 11 = group
 Sort=1
 
