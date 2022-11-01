@@ -1084,14 +1084,17 @@ DirhistMap=%s\n\n"
 # only hidden files. Do not quote the regular expression\n\
 Filter=\n\n"
 
-	    "# Set the default copy command. Available options are: 0 = 'cp -iRp',\n\
-# 1 = 'cp -Rp', 2 = 'advcp -giRp', 3 = 'advcp -gRp', 4 = 'wcp', and 5 = 'rsync -avP'\n\
-# Options 2-5 include a progress bar for the copy command.\n\
+	    "# Set the default copy command. Available options are:\n\
+# 0 = 'cp -iRp', 1 = 'cp -Rp', 2 = 'advcp -giRp', 3 = 'advcp -gRp',\n\
+# 4 = 'wcp', and 5 = 'rsync -avP'\n\
+# 2-5 include a progress bar\n\
+# Only 0 and 2 will prompt before overwrite\n\
 cpCmd=%d\n\n"
 
-	    "# Set the default move command. Available options are: 0 = 'mv -i',\n\
-# 1 = 'mv', 2 = 'advmv -gi', and 3 = 'advmv -g'.\n\
-# Options 2 and 3 include a progress bar for the move command.\n\
+	    "# Set the default move command. Available options are:\n\
+# 0 = 'mv -i', 1 = 'mv', 2 = 'advmv -gi', and 3 = 'advmv -g'\n\
+# 2 and 3 include a progress bar\n\
+# Only 0 and 2 will prompt before overwrite\n\
 mvCmd=%d\n\n"
 
 		"# If set to true, the 'r' command will never prompt before removals\n\
