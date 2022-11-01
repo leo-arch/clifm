@@ -33,26 +33,24 @@ __BEGIN_DECLS
 void check_completion_mode(void);
 #endif
 void check_file_size(char *, int);
-int check_file_access(const struct stat *);
+int  check_file_access(const struct stat *);
 char **check_for_alias(char **);
-int check_glob_char(const char *, const int);
-int check_immutable_bit(char *);
-int check_regex(char *);
+int  check_glob_char(const char *, const int);
+int  check_immutable_bit(char *);
+int  check_regex(char *);
 void check_term(void);
 void check_third_party_cmds(void);
 void file_cmd_check(void);
 char *get_sudo_path(void);
-
-int is_action_name(const char *);
-
-int is_bin_cmd(char *);
-int is_file_in_cwd(char *);
-int is_internal(const char *);
-int is_internal_c(const char *restrict);
-int is_internal_f(const char *restrict);
-int is_number(const char *restrict);
-int is_acl(char *);
-int is_url(char *);
+int  is_action_name(const char *);
+int  is_bin_cmd(char *);
+int  is_file_in_cwd(char *);
+int  is_internal(const char *);
+int  is_internal_c(const char *restrict);
+int  is_internal_f(const char *restrict);
+int  is_number(const char *restrict);
+int  is_acl(char *);
+int  is_url(char *);
 
 __END_DECLS
 

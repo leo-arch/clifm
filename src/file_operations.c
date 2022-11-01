@@ -1261,7 +1261,7 @@ edit_link(char *link)
 /* Launch the command associated to 'c' (also 'v' and 'vv') or 'm'
  * internal commands */
 int
-copy_function(char **args, int copy_and_rename)
+copy_function(char **args, const int copy_and_rename, const int force)
 {
 	log_function(NULL);
 
@@ -1272,7 +1272,7 @@ copy_function(char **args, int copy_and_rename)
 	}
 
 	if (!is_sel)
-		return run_and_refresh(args, 1);
+		return run_and_refresh(args, force);
 
 	size_t n = 0;
 	char **tcmd = (char **)xnmalloc(2 + args_n + 2, sizeof(char *));
@@ -1292,7 +1292,7 @@ copy_function(char **args, int copy_and_rename)
 	for (i = 1; args[i]; i++) {
 		/* The -f,--force parameter is internal. Skip it
 		 * It instructs cp/mv to run non-interactively (no -i param) */
-		if (i == 1 && *args[i] == '-' && (strcmp(args[i], "-f") == 0
+		if (i == 1 && force == 1 && *args[i] == '-' && (strcmp(args[i], "-f") == 0
 		|| strcmp(args[i], "--force") == 0))
 			continue;
 		p = dequote_str(args[i], 0);
@@ -1428,8 +1428,9 @@ remove_file(char **args)
 	int i, j = 3, dirs = 0;
 
 	int bk_rm_force = conf.rm_force;
-	i = (args[1] && *args[1] == '-' && (strcmp(args[1], "-f") == 0
-	|| strcmp(args[1], "--force") == 0)) ? 2 : 1;
+	i = (args[1] && *args[1] == '-'
+	&& ((strcmp(args[1], "-f") == 0 && lstat("-f", &a) == -1)
+	|| (strcmp(args[1], "--force") == 0 && lstat("--force", &a) == -1) ) ) ? 2 : 1;
 	if (i == 2)
 		conf.rm_force = 1;
 
@@ -1510,7 +1511,7 @@ remove_file(char **args)
 		&& strcmp(args[1], "--version") != 0)
 			reload_dirlist();
 	}
-#endif /* __HAIKU__ */
+#endif /* __HAIKU__ || __CYGWIN__ */
 
 	if (is_sel && exit_status == EXIT_SUCCESS)
 		deselect_all();

@@ -28,7 +28,7 @@
 __BEGIN_DECLS
 
 char *rl_highlight(const char *, const size_t, const int);
-void  recolorize_line(void);
+void recolorize_line(void);
 
 __END_DECLS
 

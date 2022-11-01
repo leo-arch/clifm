@@ -26,7 +26,7 @@
 #define EXEC_H
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
-#include <signal.h>
+# include <signal.h>
 #endif
 
 __BEGIN_DECLS

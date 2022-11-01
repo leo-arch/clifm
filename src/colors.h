@@ -31,7 +31,7 @@ __BEGIN_DECLS
 
 void color_codes(void);
 void colors_list(char *, const int, const int, const int);
-int cschemes_function(char **);
+int  cschemes_function(char **);
 #ifndef CLIFM_SUCKLESS
 size_t get_colorschemes(void);
 #endif /* CLIFM_SUCKLESS */
@@ -40,11 +40,11 @@ char *get_ext_color(char *);
 char *get_file_color(const char *, const struct stat *);
 //char *get_regfile_color(const char *filename, const struct stat attr);
 char *get_regfile_color(const char *, const struct stat *);
-int import_color_scheme(const char *);
+int  import_color_scheme(const char *);
 void remove_bold_attr(char **);
 void reset_filetype_colors(void);
 void reset_iface_colors(void);
-int set_colors(const char *, const int);
+int  set_colors(const char *, const int);
 void set_default_colors(void);
 void unset_suggestions_color(void);
 
