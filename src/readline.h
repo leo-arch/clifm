@@ -25,13 +25,17 @@
 #ifndef __READLINE_H
 #define __READLINE_H
 
-int alt_rl_prompt(const char *prompt, const char *line);
-int initialize_readline(void);
-int is_quote_char(const char c);
-char **my_rl_completion(const char *text, int start, int end);
-char *my_rl_path_completion(const char *text, int state);
-int rl_get_y_or_n(const char *_msg);
-char *rl_no_hist(const char *prompt);
-int tab_complete(int mode);
+__BEGIN_DECLS
+
+int  alt_rl_prompt(const char *, const char *);
+int  initialize_readline(void);
+int  is_quote_char(const char);
+char **my_rl_completion(const char *, int, int);
+char *my_rl_path_completion(const char *, int);
+int  rl_get_y_or_n(const char *);
+char *rl_no_hist(const char *);
+int  tab_complete(int);
+
+__END_DECLS
 
 #endif /* __READLINE_H */

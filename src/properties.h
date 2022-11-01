@@ -25,10 +25,13 @@
 #ifndef PROPERTIES_H
 #define PROPERTIES_H
 
-/* properties.c */
-int properties_function(char **comm);
-int print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
-	const size_t ino_max, const size_t fc_max);
-int set_file_perms(char **args);
+__BEGIN_DECLS
+
+int properties_function(char **);
+int print_entry_props(const struct fileinfo *, size_t, const size_t,
+	const size_t, const size_t);
+int set_file_perms(char **);
+
+__END_DECLS
 
 #endif /* PROPERTIES_H */

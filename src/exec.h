@@ -29,11 +29,15 @@
 #include <signal.h>
 #endif
 
-int exec_cmd(char **comm);
-void exec_chained_cmds(char *cmd);
+__BEGIN_DECLS
+
+int  exec_cmd(char **);
+void exec_chained_cmds(char *);
 void exec_profile(void);
-int launch_execve(char **cmd, const int bg, const int xflags);
-int launch_execle(const char *cmd);
-int run_and_refresh(char **comm, const int skip_force);
+int  launch_execve(char **, const int, const int);
+int  launch_execle(const char *);
+int  run_and_refresh(char **, const int);
+
+__END_DECLS
 
 #endif /* EXEC_H */

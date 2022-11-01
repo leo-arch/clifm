@@ -25,14 +25,18 @@
 #ifndef HISTORY_H
 #define HISTORY_H
 
-void add_to_cmdhist(char *cmd);
-void add_to_dirhist(const char *dir_path);
-int get_history(void);
-int history_function(char **comm);
-int log_function(char **comm);
-void log_msg(char *_msg, const int print_prompt, const int logme, const int add_to_msgs_list);
-int record_cmd(char *input);
-int run_history_cmd(const char *cmd);
-int save_dirhist(void);
+__BEGIN_DECLS
+
+void add_to_cmdhist(char *);
+void add_to_dirhist(const char *);
+int  get_history(void);
+int  history_function(char **);
+int  log_function(char **);
+void log_msg(char *, const int, const int, const int);
+int  record_cmd(char *);
+int  run_history_cmd(const char *);
+int  save_dirhist(void);
+
+__END_DECLS
 
 #endif /* HISTORY_H */

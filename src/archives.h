@@ -24,7 +24,11 @@
 #ifndef ARCHIVES_H
 #define ARCHIVES_H
 
-int is_compressed(char *file, int test_iso);
-int archiver(char **args, char mode);
+__BEGIN_DECLS
+
+int is_compressed(char *, int);
+int archiver(char **, char);
+
+__END_DECLS
 
 #endif /* ARCHIVES_H */

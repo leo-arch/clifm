@@ -25,11 +25,15 @@
 #ifndef KEYBINDS_H
 #define KEYBINDS_H
 
+__BEGIN_DECLS
+
 /*void add_func_to_rl(void); */
-int keybind_exec_cmd(char *str);
-int kbinds_function(char **args);
-int load_keybinds(void);
+int  keybind_exec_cmd(char *);
+int  kbinds_function(char **);
+int  load_keybinds(void);
 void readline_kbinds(void);
-int rl_quit(int count, int key);
+int  rl_quit(int, int);
+
+__END_DECLS
 
 #endif /* KEYBINDS_H */

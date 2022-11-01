@@ -27,23 +27,27 @@
 
 #include <sys/stat.h>
 
+__BEGIN_DECLS
+
 void color_codes(void);
-void colors_list(char *ent, const int eln, const int pad, const int new_line);
-int cschemes_function(char **args);
+void colors_list(char *, const int, const int, const int);
+int cschemes_function(char **);
 #ifndef CLIFM_SUCKLESS
 size_t get_colorschemes(void);
 #endif /* CLIFM_SUCKLESS */
-char *get_dir_color(const char *filename, const mode_t mode, const nlink_t links);
-char *get_ext_color(char *ext);
-char *get_file_color(const char *filename, const struct stat *attr);
+char *get_dir_color(const char *, const mode_t, const nlink_t);
+char *get_ext_color(char *);
+char *get_file_color(const char *, const struct stat *);
 //char *get_regfile_color(const char *filename, const struct stat attr);
-char *get_regfile_color(const char *filename, const struct stat *attr);
-int import_color_scheme(const char *name);
-void remove_bold_attr(char **str);
+char *get_regfile_color(const char *, const struct stat *);
+int import_color_scheme(const char *);
+void remove_bold_attr(char **);
 void reset_filetype_colors(void);
 void reset_iface_colors(void);
-int set_colors(const char *colorscheme, const int env);
+int set_colors(const char *, const int);
 void set_default_colors(void);
 void unset_suggestions_color(void);
+
+__END_DECLS
 
 #endif /* COLORS_H */

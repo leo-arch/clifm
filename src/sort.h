@@ -27,12 +27,16 @@
 
 #include <dirent.h>
 
-int alphasort_insensitive(const struct dirent **a, const struct dirent **b);
-int xalphasort(const struct dirent **a, const struct dirent **b);
-int sort_function(char **arg);
-int entrycmp(const void *a, const void *b);
-int skip_nonexec(const struct dirent *ent);
-int skip_files(const struct dirent *ent);
+__BEGIN_DECLS
+
+int  alphasort_insensitive(const struct dirent **, const struct dirent **);
+int  xalphasort(const struct dirent **, const struct dirent **);
+int  sort_function(char **);
+int  entrycmp(const void *, const void *);
+int  skip_nonexec(const struct dirent *);
+int  skip_files(const struct dirent *);
 void print_sort_method(void);
+
+__END_DECLS
 
 #endif /* SORT_H */

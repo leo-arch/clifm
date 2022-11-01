@@ -24,9 +24,13 @@
 #ifndef AUTOCMDS_H
 #define AUTOCMDS_H
 
-void parse_autocmd_line(char *cmd);
+__BEGIN_DECLS
+
+void parse_autocmd_line(char *);
 void reset_opts(void);
-int check_autocmds(void);
+int  check_autocmds(void);
 void revert_autocmd_opts(void);
+
+__END_DECLS
 
 #endif /* AUTOCMDS_H */

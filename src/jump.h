@@ -25,10 +25,13 @@
 #ifndef JUMP_H
 #define JUMP_H
 
-int add_to_jumpdb(const char *dir);
+__BEGIN_DECLS
+
+int  add_to_jumpdb(const char *);
 void save_jumpdb(void);
-int dirjump(char **args, int mode);
-int run_autojump(char **cmd);
-/* int edit_jumpdb(void); */
+int  dirjump(char **, int);
+int  run_autojump(char **);
+
+__END_DECLS
 
 #endif /* JUMP_H */

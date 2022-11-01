@@ -25,8 +25,12 @@
 #ifndef BOOKMARKS_H
 #define BOOKMARKS_H
 
-int bookmarks_function(char **cmd);
-int open_bookmark(void);
+__BEGIN_DECLS
+
+int  bookmarks_function(char **);
+int  open_bookmark(void);
 void free_bookmarks(void);
+
+__END_DECLS
 
 #endif /* BOOKMARKS_H */

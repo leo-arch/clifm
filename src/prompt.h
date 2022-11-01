@@ -25,8 +25,12 @@
 #ifndef PROMPT_H
 #define PROMPT_H
 
+__BEGIN_DECLS
+
 char *prompt(void);
-char *decode_prompt(char *line);
-int prompt_function(char *arg);
+char *decode_prompt(char *);
+int  prompt_function(char *);
+
+__END_DECLS
 
 #endif /* PROMPT_H */

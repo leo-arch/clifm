@@ -57,8 +57,13 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\
  * ;: Sequential execution */
 #define BLACKLISTED_CHARS "<>|;&$`"
 
-int sanitize_cmd(char *cmd, int type);
+__BEGIN_DECLS
+
+int  sanitize_cmd(char *, int);
 void sanitize_cmd_environ(void);
 void restore_cmd_environ(void);
-int xsecure_env(const int mode);
+int  xsecure_env(const int);
+
+__END_DECLS
+
 #endif /* SANITIZE_H */

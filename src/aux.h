@@ -30,38 +30,42 @@
 /* Max size type length for the value returned by get_size_type() */
 #define MAX_UNIT_SIZE 10 /* "1023.99YB\0" */
 
-int __expand_eln(const char *text);
-char *abbreviate_file_name(char *str);
-void close_fstream(FILE *fp, int fd);
-int count_dir(const char *dir, int pop);
-off_t dir_size(char *dir);
-char from_hex(char c);
+__BEGIN_DECLS
+
+int  __expand_eln(const char *);
+char *abbreviate_file_name(char *);
+void close_fstream(FILE *, int);
+int  count_dir(const char *, int);
+off_t dir_size(char *);
+char from_hex(char);
 //char *from_octal(char *s);
-char *gen_date_suffix(struct tm tm);
-char *get_cmd_path(const char *cmd);
+char *gen_date_suffix(struct tm);
+char *get_cmd_path(const char *);
 void clear_term_img(void);
-mode_t get_dt(const mode_t mode);
+mode_t get_dt(const mode_t);
 /*int *get_hex_num(const char *str); */
-int get_link_ref(const char *link);
-char *get_size_unit(off_t size);
-//int get_term_bgcolor(const int ifd, const int ofd);
-char *hex2rgb(char *hex);
-char *normalize_path(char *src, size_t src_len);
-FILE *open_fstream_r(char *name, int *fd);
-FILE *open_fstream_w(char *name, int *fd);
-int read_octal(char *str);
+int  get_link_ref(const char *);
+char *get_size_unit(off_t);
+//int  get_term_bgcolor(const int ifd, const int ofd);
+char *hex2rgb(char *);
+char *normalize_path(char *, size_t);
+FILE *open_fstream_r(char *, int *);
+FILE *open_fstream_w(char *, int *);
+int  read_octal(char *);
 void rl_ring_bell(void);
 void set_fzf_preview_border_type(void);
-char *url_encode(char *str);
-char *url_decode(char *str);
-int xatoi(const char *s);
-char *xitoa(int n);
+char *url_encode(char *);
+char *url_decode(char *);
+int  xatoi(const char *);
+char *xitoa(int);
 char xgetchar(void);
-int xmkdir(char *dir, mode_t mode);
+int  xmkdir(char *, mode_t);
 
 /* Some memory wrapper functions */
-void *xrealloc(void *ptr, size_t size);
-void *xcalloc(size_t nmemb, size_t size);
-void *xnmalloc(size_t nmemb, size_t size);
+void *xrealloc(void *, size_t);
+void *xcalloc(size_t, size_t);
+void *xnmalloc(size_t, size_t);
+
+__END_DECLS
 
 #endif /* AUX_H */

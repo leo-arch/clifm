@@ -25,6 +25,10 @@
 #ifndef MEDIA_H
 #define MEDIA_H
 
-int media_menu(int mode);
+__BEGIN_DECLS
+
+int media_menu(int);
+
+__END_DECLS
 
 #endif /* MEDIA_H */

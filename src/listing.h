@@ -25,8 +25,12 @@
 #ifndef LISTING_H
 #define LISTING_H
 
+__BEGIN_DECLS
+
 void free_dirlist(void);
-int list_dir(void);
+int  list_dir(void);
 void reload_dirlist(void);
+
+__END_DECLS
 
 #endif /* LISTING_H */

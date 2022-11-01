@@ -25,7 +25,11 @@
 #ifndef HIGHLIGHT_H
 #define HIGHLIGHT_H
 
-char *rl_highlight(const char *str, const size_t pos, const int flag);
-void recolorize_line(void);
+__BEGIN_DECLS
+
+char *rl_highlight(const char *, const size_t, const int);
+void  recolorize_line(void);
+
+__END_DECLS
 
 #endif /* HIGHLIGHT_H */

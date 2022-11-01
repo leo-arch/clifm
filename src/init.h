@@ -25,10 +25,12 @@
 #ifndef INIT_H
 #define INIT_H
 
-int backup_argv(int argc, char **argv);
+__BEGIN_DECLS
+
+int backup_argv(int, char **);
 void check_env_filter(void);
 void check_options(void);
-void external_arguments(int argc, char **argv);
+void external_arguments(int, char **);
 void get_aliases(void);
 size_t get_cdpath(void);
 void get_data_dir(void);
@@ -54,9 +56,11 @@ int load_pinned_dir(void);
 int load_prompts(void);
 int load_remotes(void);
 void load_tags(void);
-void set_prop_fields(char *line);
+void set_prop_fields(char *);
 int set_start_path(void);
 void unset_xargs(void);
 /*int xsecure_env(const int mode); */
+
+__END_DECLS
 
 #endif /* INIT_H */

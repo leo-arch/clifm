@@ -25,8 +25,12 @@
 #ifndef _REMOTES_H
 #define _REMOTES_H
 
-int remotes_function(char **args);
+__BEGIN_DECLS
+
+int remotes_function(char **);
 int automount_remotes(void);
 int autounmount_remotes(void);
+
+__END_DECLS
 
 #endif /* _REMOTES_H */

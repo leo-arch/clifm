@@ -32,20 +32,23 @@
 #define OPEN_FIFO 3
 #define OPEN_UNK  4
 
-/* file_operations.c */
-int batch_link(char **args);
-int bulk_rename(char **args);
-int bulk_remove(char *s1, char *s2);
+__BEGIN_DECLS
+
+int  batch_link(char **);
+int  bulk_rename(char **);
+int  bulk_remove(char *, char *);
 void clear_selbox(void);
-int copy_function(char **cmd, int copy_and_rename);
-int create_file(char **cmd);
-int dup_file(char **cmd);
-int edit_link(char *link);
-char *export(char **filenames, int open);
-int open_file(char *file);
-int open_function(char **cmd);
-int remove_file(char **args);
-int xchmod(const char *file, const char *mode_str, const int flag);
-int toggle_exec(const char *file, mode_t mode);
+int  copy_function(char **, int);
+int  create_file(char **);
+int  dup_file(char **);
+int  edit_link(char *);
+char *export(char **, int);
+int  open_file(char *);
+int  open_function(char **);
+int  remove_file(char **);
+int  xchmod(const char *, const char *, const int);
+int  toggle_exec(const char *, mode_t);
+
+__END_DECLS
 
 #endif /* FILE_OPERATIONS_H */

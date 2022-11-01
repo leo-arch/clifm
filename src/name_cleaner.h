@@ -24,6 +24,10 @@
 #ifndef NAME_CLEANER_H
 #define NAME_CLEANER_H
 
-int bleach_files(char **names);
+__BEGIN_DECLS
+
+int bleach_files(char **);
+
+__END_DECLS
 
 #endif /* NAME_CLEANER_H */

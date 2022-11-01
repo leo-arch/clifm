@@ -25,14 +25,18 @@
 #ifndef NAVIGATION_H
 #define NAVIGATION_H
 
-int back_function(char **comm);
-int forth_function(char **comm);
-int xchdir(char *dir, const int set_title);
-int cd_function(char *new_path, const int print_error);
-char *fastback(char *str);
-int handle_workspaces(char *str);
+__BEGIN_DECLS
+
+int  back_function(char **);
+int  forth_function(char **);
+int  xchdir(char *, const int);
+int  cd_function(char *, const int);
+char *fastback(char *);
+int  handle_workspaces(char *);
 void print_dirhist(void);
-int backdir(char *str);
-char **get_bd_matches(const char *str, int *n, int mode);
+int  backdir(char *);
+char **get_bd_matches(const char *, int *, int);
+
+__END_DECLS
 
 #endif /* NAVIGATION_H */

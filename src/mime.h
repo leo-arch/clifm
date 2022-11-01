@@ -25,10 +25,14 @@
 #ifndef MIME_H
 #define MIME_H
 
-int mime_open(char **args);
-char *xmagic(const char *file, const int mime);
-int mime_open_with(char *filename, char **args);
-char **mime_open_with_tab(char *filename, const char *prefix);
-int mime_open_url(char *url);
+__BEGIN_DECLS
+
+int  mime_open(char **);
+char *xmagic(const char *, const int);
+int  mime_open_with(char *filename, char **);
+char **mime_open_with_tab(char *, const char *);
+int  mime_open_url(char *);
+
+__END_DECLS
 
 #endif /* MIME_H */

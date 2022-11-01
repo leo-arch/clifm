@@ -27,7 +27,11 @@
 
 #include <time.h>
 
-int trash_function(char **comm);
-int untrash_function(char **comm);
+__BEGIN_DECLS
+
+int trash_function(char **);
+int untrash_function(char **);
+
+__END_DECLS
 
 #endif /* TRASH_H */

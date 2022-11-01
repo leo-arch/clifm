@@ -25,37 +25,39 @@
 #ifndef MISC_H
 #define MISC_H
 
-int _err(int msg_type, int prompt_flag, const char *format, ...);
-int alias_import(char *file);
+__BEGIN_DECLS
+
+int  _err(int msg_type, int, const char *, ...);
+int  alias_import(char *);
 void bonus_function(void);
-int create_usr_var(char *str);
-int expand_prompt_name(char *name);
-int filter_function(char *arg);
+int  create_usr_var(char *);
+int  expand_prompt_name(char *);
+int  filter_function(char *);
 void free_autocmds(void);
 void free_prompts(void);
 void free_software(void);
 void free_stuff(void);
-void free_remotes(int exit);
+void free_remotes(int);
 void free_tags(void);
 void get_term_size(void);
-int handle_stdin(void);
+int  handle_stdin(void);
 void help_function(void);
-int list_commands(void);
-int list_mountpoints(void);
-int new_instance(char *dir, int sudo);
+int  list_commands(void);
+int  list_mountpoints(void);
+int  new_instance(char *, int);
 /* char *parse_usrvar_value(const char *str, const char c); */
-int print_reload_msg(const char *, ...);
-int pin_directory(char *dir);
-void print_tips(int all);
-int quick_help(char *topic);
+int  print_reload_msg(const char *, ...);
+int  pin_directory(char *);
+void print_tips(int);
+int  quick_help(char *);
 void save_last_path(void);
 /* void save_pinned_dir(void); */
 /*int set_shell(char *str); */
 void set_eln_color(void);
 void set_signals_to_ignore(void);
-void set_term_title(char *str);
+void set_term_title(char *);
 void splash(void);
-int unpin_dir(void);
+int  unpin_dir(void);
 void version_function(void);
 #ifdef LINUX_INOTIFY
 void read_inotify(void);
@@ -63,8 +65,10 @@ void reset_inotify(void);
 #elif defined(BSD_KQUEUE)
 void read_kqueue(void);
 #endif
-void set_filter_type(const char c);
-int sanitize_cmd(char *cmd, int type);
+void set_filter_type(const char);
+int  sanitize_cmd(char *, int);
 /*void refresh_files_list(void); */
+
+__END_DECLS
 
 #endif /* MISC_H */

@@ -25,8 +25,12 @@
 #ifndef PROFILES_H
 #define PROFILES_H
 
+__BEGIN_DECLS
+
 int get_profile_names(void);
-int profile_function(char **comm);
-int profile_set(char *prof);
+int profile_function(char **);
+int profile_set(char *);
+
+__END_DECLS
 
 #endif /* PROFILES_H */

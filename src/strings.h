@@ -29,36 +29,40 @@
 #define UPDATE_ARGS    1
 #define NO_UPDATE_ARGS 0
 
-char *dequote_str(char *text, int mt);
-char *escape_str(const char *str);
-int *expand_range(char *str, int listdir);
-int fuzzy_match(char *s1, char *s2, const int case_sens);
-char *gen_rand_str(size_t len);
-char *get_last_space(char *str, const int len);
-char **get_substr(char *str, const char ifs);
-char *home_tilde(char *new_path, int *_free);
-char **parse_input_str(char *str);
-char *remove_quotes(char *str);
-char *replace_slashes(char *str, const char c);
-char *replace_substr(char *haystack, char *needle, char *rep);
-char *savestring(const char *restrict str, size_t size);
-char **split_str(const char *str, const int update_args);
-char *straftlst(char *str, const char c);
-char *strbfrlst(char *str, const char c);
-char *strbtw(char *str, const char a, const char b);
-int strcntchr(const char *str, const char c);
-int strcntchrlst(const char *str, const char c);
-char *truncate_wname(const char *name);
-int u8truncstr(char *restrict str, size_t n);
-size_t wc_xstrlen(const char *restrict str);
-char *xstrrpbrk(char *s, const char *accept);
+__BEGIN_DECLS
+
+char *dequote_str(char *, int);
+char *escape_str(const char *);
+int  *expand_range(char *, int);
+int  fuzzy_match(char *, char *, const int);
+char *gen_rand_str(size_t);
+char *get_last_space(char *, const int);
+char **get_substr(char *, const char);
+char *home_tilde(char *, int *);
+char **parse_input_str(char *);
+char *remove_quotes(char *);
+char *replace_slashes(char *, const char);
+char *replace_substr(char *, char *, char *);
+char *savestring(const char *restrict, size_t);
+char **split_str(const char *, const int);
+char *straftlst(char *, const char);
+char *strbfrlst(char *, const char);
+char *strbtw(char *, const char, const char);
+int  strcntchr(const char *, const char);
+int  strcntchrlst(const char *, const char);
+char *truncate_wname(const char *);
+int  u8truncstr(char *restrict, size_t);
+size_t wc_xstrlen(const char *restrict);
+char *xstrrpbrk(char *, const char *);
 
 #if (defined(__linux__) || defined(__CYGWIN__)) && defined(_BE_POSIX)
-char *xstrcasestr(char *a, char *b);
+char *xstrcasestr(char *, char *);
 #endif /* (__linux__ || __CYGWIN__) && _BE_POSIX */
 
-size_t xstrnlen(const char *restrict s);
-size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
-int xstrverscmp(const char *s1, const char *s2);
+size_t xstrnlen(const char *restrict);
+size_t xstrsncpy(char *restrict, const char *restrict, size_t);
+int xstrverscmp(const char *, const char *);
+
+__END_DECLS
 
 #endif /* STRINGS_H */

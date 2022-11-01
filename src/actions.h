@@ -25,7 +25,11 @@
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
-int actions_function(char **args);
-int run_action(char *action, char **args);
+__BEGIN_DECLS
+
+int actions_function(char **);
+int run_action(char *, char **);
+
+__END_DECLS
 
 #endif /* ACTIONS_H */

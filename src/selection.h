@@ -29,11 +29,15 @@
 # include <sys/ioctl.h>
 #endif
 
-int deselect(char **comm);
-int sel_function(char **args);
-int select_file(char *file);
+__BEGIN_DECLS
+
+int  deselect(char **);
+int  sel_function(char **);
+int  select_file(char *);
 void show_sel_files(void);
-int save_sel(void);
-int deselect_all(void);
+int  save_sel(void);
+int  deselect_all(void);
+
+__END_DECLS
 
 #endif /* _SELECTION_H */
