@@ -334,15 +334,15 @@ static char *
 get_rm_param(char ***rfiles, int n)
 {
 	char *_param = (char *)NULL;
-	struct stat attr;
+	struct stat a;
 	int i = n;
 
 	while (--i >= 0) {
-		if (lstat((*rfiles)[i], &attr) == -1)
+		if (lstat((*rfiles)[i], &a) == -1)
 			continue;
 	/* We don't need interactivity here: the user already confirmed the
 	 * operation before calling this function */
-		if (S_ISDIR(attr.st_mode)) {
+		if (S_ISDIR(a.st_mode)) {
 #if defined(_BE_POSIX)
 			_param = savestring("-rf", 3);
 #else
@@ -1258,6 +1258,62 @@ edit_link(char *link)
 	return EXIT_SUCCESS;
 }
 
+static int
+vv_rename_files(char **args)
+{
+	char **tmp = (char **)xnmalloc(args_n + 2, sizeof(char *));
+	tmp[0] = savestring("br", 2);
+
+	size_t i, l = strlen(args[args_n]);
+	if (l > 0 && args[args_n][l - 1] == '/')
+		args[args_n][l - 1] = '\0';
+
+	char *dest = args[args_n];
+
+	for (i = 1; i < args_n; i++) {
+		l = strlen(args[i]);
+		if (l > 0 && args[i][l - 1] == '/')
+			args[i][l - 1] = '\0';
+
+		char p[PATH_MAX];
+		char *s = strrchr(args[i], '/');
+		snprintf(p, sizeof(p), "%s/%s", dest, (s && *(++s)) ? s : args[i]);
+
+		tmp[i] = savestring(p, strlen(p));
+	}
+
+	tmp[i] = (char *)NULL;
+	int ret = bulk_rename(tmp);
+
+	for (i = 0; tmp[i]; i++)
+		free(tmp[i]);
+	free(tmp);
+
+	return ret;
+}
+
+static int
+validate_vv_dest_dir(const char *file)
+{
+	struct stat a;
+	if (stat(file, &a) == -1) {
+		fprintf(stderr, "vv: %s: %s\n", file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (!S_ISDIR(a.st_mode)) {
+		fprintf(stderr, _("vv: %s: Not a directory\n"), file);
+		return EXIT_FAILURE;
+	}
+
+	if (strcmp(workspaces[cur_ws].path, file) == 0) {
+		fputs(_("vv: Destiny directory is the current directory\n"), stderr);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 /* Launch the command associated to 'c' (also 'v' and 'vv') or 'm'
  * internal commands */
 int
@@ -1265,13 +1321,17 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
 	log_function(NULL);
 
+	/* vv command */
+	if (copy_and_rename == 1 && validate_vv_dest_dir(args[args_n]) == EXIT_FAILURE)
+		return EXIT_FAILURE;
+
 	if (*args[0] == 'm' && args[1]) {
 		size_t len = strlen(args[1]);
 		if (len > 0 && args[1][len - 1] == '/')
 			args[1][len - 1] = '\0';
 	}
 
-	if (!is_sel)
+	if (is_sel == 0 && copy_and_rename == 0)
 		return run_and_refresh(args, force);
 
 	size_t n = 0;
@@ -1304,7 +1364,7 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 		n++;
 	}
 
-	if (sel_is_last) {
+	if (sel_is_last == 1) {
 		tcmd[n] = savestring(".", 1);
 		n++;
 	}
@@ -1320,51 +1380,8 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
-	if (copy_and_rename) { /* vv */
-		char **tmp = (char **)xnmalloc(sel_n + 3, sizeof(char *));
-		tmp[0] = savestring("br", 2);
-
-		size_t j;
-		for (j = 0; j < sel_n; j++) {
-			size_t arg_len = strlen(sel_elements[j].name);
-
-			if (arg_len > 0 && sel_elements[j].name[arg_len - 1] == '/')
-				sel_elements[j].name[arg_len - 1] = '\0';
-
-			if (*args[args_n] == '~') {
-				char *exp_dest = tilde_expand(args[args_n]);
-				args[args_n] = xrealloc(args[args_n],
-				    (strlen(exp_dest) + 1) * sizeof(char));
-				strcpy(args[args_n], exp_dest);
-				free(exp_dest);
-			}
-
-			size_t dest_len = strlen(args[args_n]);
-			if (dest_len > 0 && args[args_n][dest_len - 1] == '/')
-				args[args_n][dest_len - 1] = '\0';
-
-			char dest[PATH_MAX];
-			strcpy(dest, (sel_is_last || strcmp(args[args_n], ".") == 0)
-					 ? workspaces[cur_ws].path : args[args_n]);
-
-			char *ret_val = strrchr(sel_elements[j].name, '/');
-			char *tmp_str = (char *)xnmalloc(strlen(dest)
-					+ strlen(ret_val + 1) + 2, sizeof(char));
-
-			sprintf(tmp_str, "%s/%s", dest, ret_val + 1);
-
-			tmp[j + 1] = savestring(tmp_str, strlen(tmp_str));
-			free(tmp_str);
-		}
-
-		tmp[j + 1] = (char *)NULL;
-		ret = bulk_rename(tmp);
-
-		for (i = 0; tmp[i]; i++)
-			free(tmp[i]);
-		free(tmp);
-		return ret;
-	}
+	if (copy_and_rename == 1) /* vv command */
+		return vv_rename_files(args);
 
 	/* If 'mv sel' and command is successful deselect everything,
 	 * since sel files are note there anymore */
