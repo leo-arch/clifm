@@ -743,6 +743,10 @@ check_history(const char *str, const size_t len)
 	if (!str || !*str || len == 0)
 		return NO_MATCH;
 
+	// Skip fastback
+	if (len >= 3 && *str == '.' && str[1] == '.' && str[2] == '.')
+		return NO_MATCH;
+
 	int i = (int)current_hist_n;
 	while (--i >= 0) {
 		if (!history[i].cmd || TOUPPER(*str) != TOUPPER(*history[i].cmd))
@@ -1533,10 +1537,15 @@ rl_suggestions(const unsigned char c)
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed && !IS_DIGIT(c)) {
 		if (suggestion.type == HIST_SUG || suggestion.type == INT_CMD) {
-			/* Skip the j cmd: we always want the BAEJ suggestion here */
-			if ((!word || *word != 'j' || word[1] != ' ')
-			&& *full_line == *suggestion_buf
+			/* Skip fastback and the j cmd: we always want the BAEJ suggestion here */
+			if (word && ((*word == 'j' && word[1] == ' ')
+			|| (*word == '.' && word[1] == '.' && word[2] == '.') ) ) {
+				;
+			} else if (*full_line == *suggestion_buf
 			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
+/*			if ((!word || *word != 'j' || word[1] != ' ')
+			&& *full_line == *suggestion_buf
+			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0 ) ) { */
 				printed = zero_offset = 1;
 				goto SUCCESS;
 			}
