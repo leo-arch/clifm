@@ -598,6 +598,7 @@ cd_function(char *new_path, const int cd_flag)
 }
 
 /* Convert ... n into ../.. n */
+/* and ../.. n into the corresponding path */
 char *
 fastback(char *str)
 {
@@ -620,11 +621,12 @@ fastback(char *str)
 	if (dots <= 2)
 		return (char *)NULL;
 
-	char *q = (char *)NULL;
+	char q[PATH_MAX];
+/*	char *q = (char *)NULL;
 	if (rem)
 		q = (char *)xnmalloc((dots * 3 + strlen(rem) + 2), sizeof(char));
 	else
-		q = (char *)xnmalloc((dots * 3), sizeof(char));
+		q = (char *)xnmalloc((dots * 3), sizeof(char)); */
 
 	q[0] = '.';
 	q[1] = '.';
@@ -643,11 +645,17 @@ fastback(char *str)
 		if (*rem != '/') {
 			q[i] = '/';
 			q[i + 1] = '\0';
+			i++;
 		}
-		strcat(q, rem);
+//		strcat(q, rem);
+//		strncat(q, rem, sizeof(q) - strlen(q) - 1);
+		strncat(q, rem, sizeof(q) - i - 1);
 	}
 
-	return q;
+//	return q;
+
+	return realpath(q, NULL);
+//	free(q);
 }
 
 void

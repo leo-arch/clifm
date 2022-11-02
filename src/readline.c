@@ -1060,6 +1060,7 @@ my_rl_path_completion(const char *text, int state)
 			return (char *)NULL;
 	}
 
+	int fast_back = 0;
 	if (*text == '.' && text[1] == '.' && text[2] == '.') {
 		char *p = savestring(text, strlen(text));
 		tmp_text = fastback(p);
@@ -1069,6 +1070,7 @@ my_rl_path_completion(const char *text, int state)
 
 		if (!tmp_text)
 			return (char *)NULL;
+		fast_back = 1;
 	}
 
 /*	int rl_complete_with_tilde_expansion = 0; */
@@ -1151,8 +1153,10 @@ my_rl_path_completion(const char *text, int state)
 		}
 
 		char *d = dirname;
-		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(text))
+		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(p))
 			d = dirname + FILE_URI_PREFIX_LEN;
+//		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(text))
+//			d = dirname + FILE_URI_PREFIX_LEN;
 
 		directory = opendir(d);
 		filename_len = strlen(filename);
@@ -1489,7 +1493,11 @@ my_rl_path_completion(const char *text, int state)
 			temp = (char *)xnmalloc(strlen(users_dirname) +
 					strlen(ent->d_name) + 1, sizeof(char));
 			strcpy(temp, users_dirname);
-			strcat(temp, ent->d_name);
+
+			/* If fast_back == 1 and filename is empty, we have the
+			 * root dir: do append anything else */
+			if (fast_back == 0 || (filename && *filename))
+				strcat(temp, ent->d_name);
 		} else {
 			temp = savestring(ent->d_name, strlen(ent->d_name));
 		}

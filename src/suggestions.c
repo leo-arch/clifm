@@ -530,7 +530,8 @@ print_match(char *match, const size_t len, const unsigned char c)
 	if (lstat(p ? p : match, &attr) != -1) {
 		if (S_ISDIR(attr.st_mode)
 		|| (S_ISLNK(attr.st_mode) && get_link_ref(p ? p : match) == S_IFDIR)) {
-			append_slash = 1;
+			/* Do not append slash if suggesting the root dir */
+			append_slash = (*match == '/' && !*(match + 1)) ? 0 : 1;
 			suggestion.filetype = DT_DIR;
 		}
 
