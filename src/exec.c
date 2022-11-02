@@ -86,6 +86,32 @@ typedef char *rl_cpvfunc_t;
 #include "tags.h"
 #include "tabcomp.h"
 
+static char *
+get_new_name(char *old_name)
+{
+	int poffset_bk = prompt_offset;
+	prompt_offset = 3;
+
+	char m[NAME_MAX];
+	snprintf(m, sizeof(m), "Enter new name ('Ctrl-d' to quit)\n"
+		"\001%s\002>\001%s\002 ", mi_c, tx_c);
+	char *p = dequote_str(old_name, 0);
+	alt_rl_prompt(m, p ? p : old_name);
+	free(p);
+
+	char *new_name = (char *)NULL;
+	if (rl_callback_handler_input) {
+		new_name = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
+		free(rl_callback_handler_input);
+		rl_callback_handler_input = (char *)NULL;
+	}
+
+	xrename = 0;
+	prompt_offset = poffset_bk;
+
+	return new_name;
+}
+
 /* Run CMD via execve() and refresh the screen in case of success
  * skip_force might be true (1) only when coming from cp_mv_file(), that is,
  * for the c and m commands, which take -f,--force as parameter to
@@ -118,25 +144,7 @@ run_and_refresh(char **cmd, const int skip_force)
 			}
 		}
 
-		int poffset_bk = prompt_offset;
-		prompt_offset = 3;
-
-		char m[NAME_MAX];
-		snprintf(m, sizeof(m), "Enter new name ('Ctrl-d' to quit)\n"
-			"\001%s\002>\001%s\002 ", mi_c, tx_c);
-		char *p = dequote_str(cmd[1], 0);
-		alt_rl_prompt(m, p ? p : cmd[1]);
-		free(p);
-
-		if (rl_callback_handler_input) {
-			new_name = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
-			free(rl_callback_handler_input);
-			rl_callback_handler_input = (char *)NULL;
-		}
-
-		xrename = 0;
-		prompt_offset = poffset_bk;
-
+		new_name = get_new_name(cmd[1]);
 		if (!new_name)
 			return EXIT_SUCCESS;
 	}

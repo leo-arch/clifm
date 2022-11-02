@@ -910,11 +910,12 @@ Examples:\n\
 
 #define VV_USAGE "Copy selected files into a directory and bulk rename them at once\n\
 Usage:\n\
-  vv sel DIR\n\n\
-Example:\n\
-- Copy selected files into the directory 'mydir' and bulk rename them\n\
-  at once:\n\
-    vv sel mydir"
+  vv FILE... DIR\n\n\
+Examples:\n\
+- Copy selected files into 'mydir' and rename them:\n\
+    vv sel mydir\n\
+- Copy all PDF files into the directory whose ELN is 4 and rename them:\n\
+    vv *.pdf 4"
 
 #define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\
 Usage:\n\
@@ -984,8 +985,8 @@ Examples:\n\
     well. See 'n --help'\n\
 - Edit the symbolic link named mylink:\n\
     le mylink\n\n\
-Use the 'vv' command to copy selected files into a directory and bulk\n\
-rename them at once. See 'vv --help'\n\n\
+Use the 'vv' command to copy files into a directory and bulk rename them\n\
+at once. See 'vv --help'\n\n\
 Use the 'cr' plugin to send a file to a remote location:\n\
     cr FILE (run 'cr --edit' before to set up your remotes)"
 
@@ -1219,7 +1220,8 @@ parameters:\n\n\
  u, undel, untrash [*, a, all]\n\
  uc, unicode [on, off, status]\n\
  unpin\n\
- v, vv, paste sel [DESTINY]\n\
+ v, paste sel [DESTINY]\n\
+ vv FILE... DIR\n\
  ver, version\n\
  view\n\
  ws [NUM, +, -] (workspaces)\n\
