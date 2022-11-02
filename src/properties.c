@@ -970,14 +970,15 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	/* Whether time is access, modification, or status change, this value is set
 	 * by list_dir, in listing.c (file_info[n].ltime) before calling this function */
 	char file_time[128];
-	char time_s[128 + (MAX_COLOR * 2) + 2]; /* mod_time + 2 colors + space + NUL byte */
+	char time_s[128 + (MAX_COLOR * 2) + 2]; /* time + 2 colors + space + NUL byte */
 	if (prop_fields.time != 0) {
 		if (props->ltime) {
 			struct tm t;
 			localtime_r(&props->ltime, &t);
-			/* Let's use the ISO 8601 date format (YYYY-MM-DD) plus time (HH:MM) */
-			snprintf(file_time, sizeof(file_time), "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
-				t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
+			/* Let's use the ISO 8601 date format (YYYY-MM-DD) plus time (HH:MM:SS) */
+			snprintf(file_time, sizeof(file_time),
+				"%d-%02d-%02d %02d:%02d:%02d", t.tm_year + 1900,
+				t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
 		} else {
 			strcpy(file_time, "-               ");
 		}
@@ -996,16 +997,20 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	char *size_type = (char *)NULL;
 	/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars (see aux.h) */
 	char size_s[MAX_UNIT_SIZE + (MAX_COLOR * 2) + 1];
-	if (prop_fields.size == 1) {
+	if (prop_fields.size >= 1) {
 		if (!(S_ISCHR(props->mode) || S_ISBLK(props->mode))
 		|| xargs.disk_usage_analyzer == 1) {
-			if (conf.full_dir_size == 1 && props->dir == 1)
-				size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
-			else
-				size_type = get_size_unit(props->size);
+			if (prop_fields.size == PROP_SIZE_HUMAN) {
+				if (conf.full_dir_size == 1 && props->dir == 1)
+					size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
+				else
+					size_type = get_size_unit(props->size);
 
-			snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
-				? size_type : "?", cend);
+				snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
+					? size_type : "?", cend);
+			} else {
+				snprintf(size_s, sizeof(size_s), "%s%zu%s", csize, props->size, cend);
+			}
 		} else {
 			snprintf(size_s, sizeof(size_s), "%ju,%ju", (uintmax_t)major(props->rdev),
 				(uintmax_t)minor(props->rdev));
@@ -1032,7 +1037,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	char fc_str[(MAX_COLOR * 2) + 32];
 	*fc_str = '\0';
 	/* FC_MAX is zero if there are no subdirs in the current dir */
-	if (conf.files_counter == 1 && fc_max > 0) {
+	if (conf.files_counter == 1 && fc_max > 0 && prop_fields.counter == 1) {
 		if (props->dir == 1 && props->filesn > 0) {
 			snprintf(fc_str, sizeof(fc_str), "%s%-*d%s ", fc_c, (int)fc_max,
 				(int)props->filesn, cend);
@@ -1061,12 +1066,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",
 
-		*fc_str ? fc_str : "",
+		prop_fields.counter != 0 ? fc_str : "",
 		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time != 0 ? time_s : "",
-		prop_fields.size == 1 ? size_s : "");
+		prop_fields.size != 0 ? size_s : "");
 #else
 	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
 		   "%s" /* Files counter for dirs */
@@ -1083,12 +1088,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",
 
-		*fc_str ? fc_str : "",
+		prop_fields.counter != 0 ? fc_str : "",
 		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time != 0 ? time_s : "",
-		prop_fields.size == 1 ? size_s : "");
+		prop_fields.size != 0 ? size_s : "");
 #endif
 
 	free(t_ctype);

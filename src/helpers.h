@@ -498,6 +498,9 @@ extern int watch;
 #define PROP_TIME_MOD    2
 #define PROP_TIME_CHANGE 3
 
+#define PROP_SIZE_BYTES  1
+#define PROP_SIZE_HUMAN  2
+
 /* Macros for fzf_preview_border_type */
 #define FZF_BORDER_BOTTOM  0
 #define FZF_BORDER_HORIZ   1
@@ -1051,6 +1054,7 @@ extern struct termcaps_t term_caps;
 
 /* Data to be displayed in the properties string in long mode */
 struct props_t {
+	int counter; /* Files counter */
 	int perm; /* File permissions; either NUMERIC or SYMBOLIC */
 	int ids; /* User and group IDs */
 	int time; /* Time: either ACCESS, MOD, or CHANGE */

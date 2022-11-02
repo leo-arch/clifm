@@ -168,16 +168,18 @@ set_prop_fields(char *line)
 	if (!line || !*line)
 		return;
 
-	prop_fields.perm =  0;
-	prop_fields.ids =   0;
-	prop_fields.time =  0;
-	prop_fields.size =  0;
-	prop_fields.inode = 0;
-	prop_fields.len =   2; /* Two spaces between file name and props string */
+	prop_fields.counter = 0;
+	prop_fields.perm =    0;
+	prop_fields.ids =     0;
+	prop_fields.time =    0;
+	prop_fields.size =    0;
+	prop_fields.inode =   0;
+	prop_fields.len =     2; /* Two spaces between file name and props string */
 
 	size_t i;
 	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
 		switch(line[i]) {
+		case 'f': prop_fields.counter = 1; break;
 		case 'd': prop_fields.inode = 1; break;
 		case 'p': prop_fields.perm = PERM_SYMBOLIC; break;
 		case 'n': prop_fields.perm = PERM_NUMERIC; break;
@@ -185,12 +187,15 @@ set_prop_fields(char *line)
 		case 'a': prop_fields.time = PROP_TIME_ACCESS; break;
 		case 'c': prop_fields.time = PROP_TIME_CHANGE; break;
 		case 'm': prop_fields.time = PROP_TIME_MOD; break;
-		case 's': prop_fields.size = 1; break;
+		case 's': prop_fields.size = PROP_SIZE_HUMAN; break;
+		case 'S': prop_fields.size = PROP_SIZE_BYTES; break;
 		default: break;
 		}
 	}
 
 	/* How much space do we need to reserve to print enabled fields? */
+	if (prop_fields.counter != 0)
+		prop_fields.len += (4 + 1);
 	if (prop_fields.perm != 0)
 		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 3 : 13) + 1);
 	if (prop_fields.inode != 0)
@@ -2647,7 +2652,7 @@ get_path_programs(void)
 	int *cmd_n = (int *)0;
 #if defined(__CYGWIN__)
 	int *winpath = (int *)0;
-#endif
+#endif /* __CYGWIN__ */
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
 	if (conf.ext_cmd_ok == 1) {
@@ -2658,23 +2663,17 @@ get_path_programs(void)
 		cmd_n = (int *)xnmalloc(path_n, sizeof(int));
 #if defined(__CYGWIN__)
 		winpath = (int *)xnmalloc(path_n, sizeof(int));
-#endif
+#endif /* __CYGWIN__ */
 
 		i = (int)path_n;
 		while (--i >= 0) {
-/*#if defined(__CYGWIN__)
-			// Let's skip Windows binaries
-			if (!paths[i] || !*paths[i] || strncmp(paths[i], "/cygdrive", 9) == 0
-			|| xchdir(paths[i], NO_TITLE) == -1) {
-#else */
 			if (!paths[i] || !*paths[i] || xchdir(paths[i], NO_TITLE) == -1) {
-//#endif
 				cmd_n[i] = 0;
 				continue;
 			}
 #if defined(__CYGWIN__)
 			winpath[i] = strncmp(paths[i], "/cygdrive", 9) == 0 ? 1 : 0;
-#endif
+#endif /* __CYGWIN__ */
 			cmd_n[i] = scandir(paths[i], &commands_bin[i],
 					conf.light_mode ? NULL : skip_nonexec, xalphasort);
 			/* If paths[i] directory does not exist, scandir returns -1.
@@ -2731,7 +2730,6 @@ get_path_programs(void)
 					continue;
 				}
 #if defined(__CYGWIN__)
-//				if (cygwin_exclude_file(commands_bin[i][j]->d_name, 0) == 1) {
 				if (cygwin_exclude_file(commands_bin[i][j]->d_name, winpath[i]) == 1) {
 					free(commands_bin[i][j]);
 					continue;
@@ -2750,7 +2748,7 @@ get_path_programs(void)
 		free(cmd_n);
 #if defined(__CYGWIN__)
 		free(winpath);
-#endif
+#endif /* __CYGWIN__ */
 	}
 
 	path_progsn = (size_t)l;
