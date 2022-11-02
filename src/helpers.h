@@ -427,8 +427,6 @@ extern int watch;
 # define P_tmpdir "/tmp"
 #endif
 
-#define PROP_FIELDS_SIZE 5 /* Five fields in the properties string (long view) */
-
 /* Dirjump macros for calculating directories rank extra points */
 #define BASENAME_BONUS 	300
 #define BOOKMARK_BONUS 	500
@@ -491,6 +489,8 @@ extern int watch;
 #define FILTER_MIME_TYPE 3 /* @query */
 
 /* Macros for properties string fields in long view */
+#define PROP_FIELDS_SIZE 6 /* Six available fields */
+
 #define PERM_SYMBOLIC 1
 #define PERM_NUMERIC  2
 
