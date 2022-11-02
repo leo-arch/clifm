@@ -72,12 +72,13 @@ SortReverse=false
 LongViewMode=false
 
 # Properties fields to be printed for each file name in long view mode
+# f: files counter (for directories)
 # d: inode number
 # p|n = permissions: either symbolic (p) or numeric/octal (n)
 # i = user/group IDs
-# a|m|c = last (a)ccess, (m)odification, or status (c)hange time (YYYY-MM-DD HH:MM)
-# s = size
-# Defaults to "pims" (symbolic notation and modification time)
+# a|m|c = last (a)ccess, (m)odification, or status (c)hange time (YYYY-MM-DD HH:MM:SS)
+# s|S = size (either human readable (s) or bytes (S))
+# Defaults to "pims"
 # A single dash ("-") disables all fields
 # Ex: print only permissions (numeric) and size:
 #PropFields="ns"
