@@ -1093,6 +1093,33 @@ open_function(char **cmd)
 	return ret;
 }
 
+static char *
+get_new_link_target(char *cur_target)
+{
+	xrename = 1;
+	int poffset_bk = prompt_offset;
+	prompt_offset = 3;
+
+	char m[NAME_MAX];
+	snprintf(m, sizeof(m), "Enter new target ('Ctrl-d' to quit)\n"
+		"\001%s\002>\001%s\002 ", mi_c, tx_c);
+	char *p = cur_target ? dequote_str(cur_target, 0) : (char *)NULL;
+	alt_rl_prompt(m, p ? p : (char *)NULL);
+	free(p);
+
+	char *new_name = (char *)NULL;
+	if (rl_callback_handler_input) {
+		new_name = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
+		free(rl_callback_handler_input);
+		rl_callback_handler_input = (char *)NULL;
+	}
+
+	xrename = 0;
+	prompt_offset = poffset_bk;
+
+	return new_name;
+}
+
 /* Relink symlink to new path */
 int
 edit_link(char *link)
@@ -1137,31 +1164,17 @@ edit_link(char *link)
 	} else {
 		printf(_("%s%s%s currently pointing to "), ln_c, link, df_c);
 		colors_list(real_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
-		free(real_path);
-		real_path = (char *)NULL;
 	}
 
-	char *new_path = (char *)NULL;
 	/* Enable autocd and auto-open (in case they are not already
 	 * enabled) to allow TAB completion for ELN's */
 	int autocd_status = conf.autocd, auto_open_status = conf.auto_open;
 	conf.autocd = conf.auto_open = 1;
 
-	while (!new_path) {
-		new_path = rl_no_hist(_("New path ('q' to quit): "));
-		if (!new_path)
-			continue;
-		if (!*new_path) {
-			free(new_path);
-			new_path = (char *)NULL;
-			continue;
-		}
-
-		if (*new_path == 'q' && !new_path[1]) {
-			free(new_path);
-			return EXIT_SUCCESS;
-		}
-	}
+	char *new_path = get_new_link_target(real_path);
+	free(real_path);
+	if (!new_path)
+		return EXIT_FAILURE;
 
 	/* Set autocd and auto-open to their original values */
 	conf.autocd = autocd_status;
