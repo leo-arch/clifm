@@ -203,7 +203,7 @@ set_prop_fields(char *line)
 	if (prop_fields.ids != 0)
 		prop_fields.len += (11 + 1);
 	if (prop_fields.time != 0)
-		prop_fields.len += (16 + 1);
+		prop_fields.len += (19 + 1);
 	if (prop_fields.size != 0)
 		prop_fields.len += (8 + 1);
 }

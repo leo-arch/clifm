@@ -1495,7 +1495,7 @@ my_rl_path_completion(const char *text, int state)
 			strcpy(temp, users_dirname);
 
 			/* If fast_back == 1 and filename is empty, we have the
-			 * root dir: do append anything else */
+			 * root dir: do not append anything else */
 			if (fast_back == 0 || (filename && *filename))
 				strcat(temp, ent->d_name);
 		} else {
