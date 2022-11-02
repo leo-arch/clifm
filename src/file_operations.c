@@ -1117,7 +1117,19 @@ get_new_link_target(char *cur_target)
 	xrename = 0;
 	prompt_offset = poffset_bk;
 
-	return new_name;
+	if (!new_name)
+		return (char *)NULL;
+
+	size_t l = strlen(new_name);
+	if (l > 0 && new_name[l - 1] == ' ') {
+		l--;
+		new_name[l] = '\0';
+	}
+
+	char *n = normalize_path(new_name, l);
+	free(new_name);
+
+	return n;
 }
 
 /* Relink symlink to new path */
@@ -1166,19 +1178,10 @@ edit_link(char *link)
 		colors_list(real_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 	}
 
-	/* Enable autocd and auto-open (in case they are not already
-	 * enabled) to allow TAB completion for ELN's */
-	int autocd_status = conf.autocd, auto_open_status = conf.auto_open;
-	conf.autocd = conf.auto_open = 1;
-
 	char *new_path = get_new_link_target(real_path);
 	free(real_path);
-	if (!new_path)
-		return EXIT_FAILURE;
-
-	/* Set autocd and auto-open to their original values */
-	conf.autocd = autocd_status;
-	conf.auto_open = auto_open_status;
+	if (!new_path) /* The user pressed C-d */
+		return EXIT_SUCCESS;
 
 	/* If an ELN, replace by the corresponding file name */
 	if (is_number(new_path)) {
@@ -1215,7 +1218,7 @@ edit_link(char *link)
 
 	/* Check new_path existence and warn the user if it does not exist */
 	if (lstat(new_path, &attr) == -1) {
-		printf("'%s': %s\n", new_path, strerror(errno));
+		printf("%s: %s\n", new_path, strerror(errno));
 		char *answer = (char *)NULL;
 		while (!answer) {
 			answer = rl_no_hist(_("Relink as a broken symbolic link? [y/n] "));
@@ -1263,6 +1266,7 @@ edit_link(char *link)
 
 	real_path = realpath(link, NULL);
 	printf(_("%s%s%s successfully relinked to "), real_path ? ln_c : or_c, link, df_c);
+	fflush(stdout);
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 	free(new_path);
 	if (real_path)
