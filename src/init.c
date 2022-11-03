@@ -2598,47 +2598,47 @@ load_pinned_dir(void)
 }
 
 #if defined(__CYGWIN__)
-/* If we have a proper Unix directory (WINPATH == 0), remove the .exe extension
- * from file names. Else (/cygdrive), keep only files with executable extension.
+static int check_cmd_ext(const char *s)
+{
+	if (!s || !*s)
+		return 1;
+
+	switch(TOUPPER(*s)) {
+	case 'B': // bat
+		return (TOUPPER(s[1]) == 'A' && TOUPPER(s[2]) == 'T' && !s[3]) ? 0 : 1;
+	case 'C': // cmd
+		return (TOUPPER(s[1]) == 'M' && TOUPPER(s[2]) == 'D' && !s[3]) ? 0 : 1;
+	case 'E': // exe
+		return (TOUPPER(s[1]) == 'X' && TOUPPER(s[2]) == 'E' && !s[3]) ? 0 : 1;
+	case 'J': // js, jse
+		return (TOUPPER(s[1]) == 'S' && (!s[2] || (TOUPPER(s[2]) == 'E'
+		&& !s[3]) ) ) ? 0 : 1;
+	case 'M': // msc
+		return (TOUPPER(s[1]) == 'S' && TOUPPER(s[2]) == 'C' && !s[3]) ? 0 : 1;
+	case 'V': // vbs, vbe
+		return (TOUPPER(s[1]) == 'B' && (TOUPPER(s[2]) == 'S'
+		|| TOUPPER(s[2]) == 'E') && !s[3]) ? 0 : 1;
+	case 'W': // wsf, wsh
+		return (TOUPPER(s[1]) == 'S' && (TOUPPER(s[2]) == 'F'
+		|| TOUPPER(s[2]) == 'H') && !s[3]) ? 0 : 1;
+	default: return 1;
+	}
+}
+
+/* Keep only files with executable extension.
  * Returns 1 if the file NAME must be excluded or 0 otherwise */
 static int
-cygwin_exclude_file(char *name, const int winpath)
+cygwin_exclude_file(char *name)
 {
 	if (!name || !*name)
 		return 1;
 
 	char *p = strrchr(name, '.');
-	if (winpath == 0) { /* Unix directory */
-		if (!p || p == name)
-			return 0;
+	if (!p || !*(p + 1) || p == name)
+		return 0;
 
-		if (*(p + 1) && strncmp(p + 1, "exe", 3) != 0) {
-			return 1;
-		} else {
-			*p = '\0';
-			return 0;
-		}
-	}
-
-	/* Windows directory */
-	if (!p || !*(++p))
-		return 1;
-
-	switch(*p) {
-	case 'b': return strcasecmp(p, "bat") == 0 ? 0 : 1;
-	case 'c': return strcasecmp(p, "cmd") == 0 ? 0 : 1;
-	case 'e': return strcasecmp(p, "exe") == 0 ? 0 : 1;
-	case 'j':
-		return (strcasecmp(p, "js") == 0 || strcasecmp(p, "jse") == 0) ? 0 : 1;
-	case 'm': return strcasecmp(p, "msc") == 0 ? 0 : 1;
-	case 'v':
-		return (strcasecmp(p, "vbs") == 0 || strcasecmp(p, "vbe") == 0) ? 0 : 1;
-	case 'w':
-		return (strcasecmp(p, "wsf") == 0 || strcasecmp(p, "wsh") == 0) ? 0 : 1;
-	default: return 1;
-	}
-
-	return 0;
+	*p = '\0';
+	return check_cmd_ext(p + 1);
 }
 #endif /* __CYGWIN__ */
 
@@ -2650,9 +2650,6 @@ get_path_programs(void)
 {
 	int i, l = 0, total_cmd = 0;
 	int *cmd_n = (int *)0;
-#if defined(__CYGWIN__)
-	int *winpath = (int *)0;
-#endif /* __CYGWIN__ */
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
 	if (conf.ext_cmd_ok == 1) {
@@ -2661,9 +2658,6 @@ get_path_programs(void)
 
 		commands_bin = (struct dirent ***)xnmalloc(path_n, sizeof(struct dirent));
 		cmd_n = (int *)xnmalloc(path_n, sizeof(int));
-#if defined(__CYGWIN__)
-		winpath = (int *)xnmalloc(path_n, sizeof(int));
-#endif /* __CYGWIN__ */
 
 		i = (int)path_n;
 		while (--i >= 0) {
@@ -2671,11 +2665,13 @@ get_path_programs(void)
 				cmd_n[i] = 0;
 				continue;
 			}
-#if defined(__CYGWIN__)
-			winpath[i] = strncmp(paths[i], "/cygdrive", 9) == 0 ? 1 : 0;
-#endif /* __CYGWIN__ */
+
 			cmd_n[i] = scandir(paths[i], &commands_bin[i],
+#if defined(__CYGWIN__)
+					NULL, xalphasort);
+#else
 					conf.light_mode ? NULL : skip_nonexec, xalphasort);
+#endif /* __CYGWIN__ */
 			/* If paths[i] directory does not exist, scandir returns -1.
 			 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
 			 * PATH disregarding if they exist or not. If paths[i] dir is
@@ -2730,7 +2726,7 @@ get_path_programs(void)
 					continue;
 				}
 #if defined(__CYGWIN__)
-				if (cygwin_exclude_file(commands_bin[i][j]->d_name, winpath[i]) == 1) {
+				if (cygwin_exclude_file(commands_bin[i][j]->d_name) == 1) {
 					free(commands_bin[i][j]);
 					continue;
 				}
@@ -2746,9 +2742,6 @@ get_path_programs(void)
 
 		free(commands_bin);
 		free(cmd_n);
-#if defined(__CYGWIN__)
-		free(winpath);
-#endif /* __CYGWIN__ */
 	}
 
 	path_progsn = (size_t)l;
