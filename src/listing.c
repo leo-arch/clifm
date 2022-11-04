@@ -604,6 +604,21 @@ get_max_files_counter(void)
 	return fc_max;
 }
 
+static size_t
+get_max_size(void)
+{
+	size_t size_max = 0;
+	int i = (int)files;
+
+	while (--i >= 0) {
+		size_t t = (size_t)DIGINUM(file_info[i].size);
+		if (t > size_max)
+			size_max = t;
+	}
+
+	return size_max;
+}
+
 static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 	const size_t ino_max)
@@ -611,9 +626,11 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 	struct stat lattr;
 
 	size_t fc_max = conf.files_counter == 1 ? get_max_files_counter() : 0;
+	size_t size_max = prop_fields.size == PROP_SIZE_BYTES ? get_max_size() : 0;
 
 	/* Available space (term cols) to print the file name */
-	int space_left = (int)term_cols - (prop_fields.len + (int)fc_max);
+	int space_left = (int)term_cols - (prop_fields.len
+		+ (int)fc_max + (int)size_max + (int)ug_max + (int)ino_max);
 
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;
@@ -649,7 +666,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
 				li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c);
 		/* Print the remaining part of the entry */
-		print_entry_props(&file_info[i], (size_t)space_left, ug_max, ino_max, fc_max);
+		print_entry_props(&file_info[i], (size_t)space_left, ug_max, ino_max, fc_max, size_max);
 	}
 }
 

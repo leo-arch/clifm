@@ -29,7 +29,7 @@ __BEGIN_DECLS
 
 int properties_function(char **);
 int print_entry_props(const struct fileinfo *, size_t, const size_t,
-	const size_t, const size_t);
+	const size_t, const size_t, const size_t);
 int set_file_perms(char **);
 
 __END_DECLS

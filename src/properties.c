@@ -823,7 +823,7 @@ get_ext_info_long(const char *name, const size_t name_len, int *trim, size_t *ex
  * in the current directory when running in long view mode */
 int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
-	const size_t ino_max, const size_t fc_max)
+	const size_t ino_max, const size_t fc_max, const size_t size_max)
 {
 	/* Let's get file properties and the corresponding colors */
 
@@ -1001,7 +1001,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		if (!(S_ISCHR(props->mode) || S_ISBLK(props->mode))
 		|| xargs.disk_usage_analyzer == 1) {
 			if (prop_fields.size == PROP_SIZE_HUMAN) {
-				if (conf.full_dir_size == 1 && props->dir == 1)
+				if (props->dir == 1 && conf.full_dir_size == 1)
 					size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
 				else
 					size_type = get_size_unit(props->size);
@@ -1009,7 +1009,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 				snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
 					? size_type : "?", cend);
 			} else {
-				snprintf(size_s, sizeof(size_s), "%s%zu%s", csize, props->size, cend);
+				snprintf(size_s, sizeof(size_s), "%s%*zu%s", csize, (int)size_max, props->size, cend);
 			}
 		} else {
 			snprintf(size_s, sizeof(size_s), "%ju,%ju", (uintmax_t)major(props->rdev),
@@ -1028,7 +1028,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	char ino_s[(12 + 1) * 2];
 	*ino_s = '\0';
 	if (prop_fields.inode == 1)
-		snprintf(ino_s, sizeof(ino_s), "%-*ju ", (int)ino_max, (uintmax_t)props->inode);
+		snprintf(ino_s, sizeof(ino_s), "%*ju ", (int)ino_max, (uintmax_t)props->inode);
 
 				/* ############################
 				 * #  7. FILES COUNTER (DIRS) #
@@ -1039,10 +1039,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	/* FC_MAX is zero if there are no subdirs in the current dir */
 	if (conf.files_counter == 1 && fc_max > 0 && prop_fields.counter == 1) {
 		if (props->dir == 1 && props->filesn > 0) {
-			snprintf(fc_str, sizeof(fc_str), "%s%-*d%s ", fc_c, (int)fc_max,
+			snprintf(fc_str, sizeof(fc_str), "%s%*d%s ", fc_c, (int)fc_max,
 				(int)props->filesn, cend);
 		} else {
-			snprintf(fc_str, sizeof(fc_str), "%s%-*c%s ", dn_c, (int)fc_max, '-', cend);
+			snprintf(fc_str, sizeof(fc_str), "%s%*c%s ", dn_c, (int)fc_max, '-', cend);
 		}
 	}
 
