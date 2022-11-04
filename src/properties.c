@@ -838,7 +838,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		cid = dg_c;
 
 	switch (props->mode & S_IFMT) {
-	case S_IFREG: file_type =  '-'; break;
+	case S_IFREG: file_type =  '.'; break;
 	case S_IFDIR: file_type =  'd'; ctype = di_c; break;
 	case S_IFLNK: file_type =  'l'; ctype = ln_c; break;
 	case S_IFSOCK: file_type = 's'; ctype = so_c; break;
