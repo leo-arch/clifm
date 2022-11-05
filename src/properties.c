@@ -67,9 +67,10 @@
 
 //#define TIME_STR "%a %b %d %H:%M:%S %Y %z"
 #define TIME_STR "%a %b %d %T %Y %z"
+//#define TIME_STR "%a %F %T %z"
 #define MAX_TIME_STR 128
 /* Our resulting time string won't go usually beyond 29 chars. But since this
- * length is locale dependent (at least %b), let's use a much larger buffer */
+ * length is locale dependent, let's use a much larger buffer */
 
 struct perms_t {
 	/* Field colors */
@@ -523,11 +524,12 @@ get_properties(char *filename, const int dsize)
 	if (!filename || !*filename)
 		return EXIT_FAILURE;
 
-	/* Remove ending slash and leading dot-slash (./) */
+	/* Remove ending slash */
 	size_t len = strlen(filename);
 	if (len > 1 && filename[len - 1] == '/')
 		filename[len - 1] = '\0';
 
+	/* Remove leading "./" */
 	if (*filename == '.' && *(filename + 1) == '/' && *(filename + 2))
 		filename += 2;
 
@@ -584,26 +586,11 @@ get_properties(char *filename, const int dsize)
 		}
 		break;
 
-	case S_IFSOCK:
-		file_type = 's';
-		color = ctype = so_c;
-		break;
-	case S_IFBLK:
-		file_type = 'b';
-		color = ctype = bd_c;
-		break;
-	case S_IFCHR:
-		file_type = 'c';
-		color = ctype = cd_c;
-		break;
-	case S_IFIFO:
-		file_type = 'p';
-		color = ctype = pi_c;
-		break;
-	default:
-		file_type = '?';
-		color = no_c;
-		break;
+	case S_IFBLK:  file_type = 'b'; color = ctype = bd_c; break;
+	case S_IFCHR:  file_type = 'c'; color = ctype = cd_c; break;
+	case S_IFIFO:  file_type = 'p'; color = ctype = pi_c; break;
+	case S_IFSOCK: file_type = 's'; color = ctype = so_c; break;
+	default:       file_type = '?'; color = no_c; break;
 	}
 
 	if (!color)
@@ -620,12 +607,9 @@ get_properties(char *filename, const int dsize)
 		cbold = df_c;
 	}
 
-	/* Get number of links to the file */
 	nlink_t link_n = attr.st_nlink;
-
-	/* Get owner and group names */
-	uid_t owner_id = attr.st_uid; /* owner ID */
-	gid_t group_id = attr.st_gid; /* group ID */
+	uid_t owner_id = attr.st_uid;
+	gid_t group_id = attr.st_gid;
 	struct group *group;
 	struct passwd *owner;
 	group = getgrgid(group_id);
@@ -639,7 +623,7 @@ get_properties(char *filename, const int dsize)
 	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
 	remove_bold_attr(&t_ctype);
 
-	/* Print file properties */
+	/* File properties */
 	struct perms_t perms = get_file_perms(attr.st_mode);
 	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
 		"Links: %s%zu%s "),
@@ -661,66 +645,41 @@ get_properties(char *filename, const int dsize)
 	} else if (linkname) {
 		char *link_color = get_link_color(linkname, &link_to_dir, dsize);
 		char *n = abbreviate_file_name(linkname);
-		printf(_("\tName: %s%s%s -> %s%s%s\n"), color, wname ? wname : filename, df_c,
-			link_color, n ? n : linkname, NC);
+		printf(_("\tName: %s%s%s -> %s%s%s\n"), color, wname ? wname
+			: filename, df_c, link_color, n ? n : linkname, NC);
 		free(linkname);
 		free(n);
 	} else { /* Broken link */
 		char link[PATH_MAX] = "";
 		ssize_t ret = readlinkat(AT_FDCWD, filename, link, sizeof(link));
 		if (ret) {
-			printf(_("\tName: %s%s%s -> %s (broken link)\n"), color, wname ? wname : filename,
-			    df_c, link);
+			printf(_("\tName: %s%s%s -> %s (broken link)\n"), color,
+				wname ? wname : filename, df_c, link);
 		} else {
-			printf(_("\tName: %s%s%s -> ???\n"), color, wname ? wname : filename, df_c);
+			printf(_("\tName: %s%s%s -> ???\n"), color, wname ? wname
+				: filename, df_c);
 		}
 	}
 
 	free(wname);
 
-	/* Stat information */
-
-	/* Timestamps */
-	char mod_time[MAX_TIME_STR];
-	char access_time[MAX_TIME_STR];
-	char change_time[MAX_TIME_STR];
-
-	gen_time_str(mod_time, sizeof(mod_time), attr.st_mtime);
-	gen_time_str(access_time, sizeof(access_time), attr.st_atime);
-	gen_time_str(change_time, sizeof(change_time), attr.st_ctime);
-
-#ifndef _BE_POSIX
-# if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
-	char creation_time[MAX_TIME_STR];
-# endif
-# if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
-#  if defined(__OpenBSD__)
-	gen_time_str(creation_time, sizeof(creation_time), attr.__st_birthtim.tv_sec);
-#  else
-	gen_time_str(creation_time, sizeof(creation_time), attr.st_birthtime);
-#  endif
-# elif defined(_STATX)
-	struct statx attrx;
-	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
-	gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
-# endif /* _STATX */
-#endif /* _BE_POSIX */
-
+	/* File type */
 	if (conf.colorize == 1)
 		printf("%s", BOLD);
 	switch (file_type) {
-	case 'd': printf(_("Directory")); break;
-	case 's': printf(_("Socket")); break;
-	case 'l': printf(_("Symbolic link")); break;
+	case '.': printf(_("Regular file")); break;
 	case 'b': printf(_("Block special file")); break;
 	case 'c': printf(_("Character special file")); break;
+	case 'd': printf(_("Directory")); break;
+	case 'l': printf(_("Symbolic link")); break;
 	case 'p': printf(_("Fifo")); break;
-	case '-': printf(_("Regular file")); break;
+	case 's': printf(_("Socket")); break;
 	default: break;
 	}
 	if (conf.colorize == 1)
 		printf("%s", cend);
 
+	/* Details */
 	printf(_("\tBlocks: %s%jd%s"), cbold, (intmax_t)attr.st_blocks, cend);
 	printf(_("\tIO Block: %s%jd%s"), cbold, (intmax_t)attr.st_blksize, cend);
 	printf(_("\tInode: %s%ju%s\n"), cbold, (uintmax_t)attr.st_ino, cend);
@@ -732,19 +691,40 @@ get_properties(char *filename, const int dsize)
 	printf(_("\tGid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("unknown")
 			: group->gr_name, cend);
 
-	/* Print file timestamps */
-//	printf(_("Access: \t%s%s.%zu%s\n"), cdate, access_time, attr.st_atim.tv_nsec, cend);
+	/* Timestamps */
+	char mod_time[MAX_TIME_STR];
+	char access_time[MAX_TIME_STR];
+	char change_time[MAX_TIME_STR];
+
+	gen_time_str(mod_time, sizeof(mod_time), attr.st_mtime);
+	gen_time_str(access_time, sizeof(access_time), attr.st_atime);
+	gen_time_str(change_time, sizeof(change_time), attr.st_ctime);
+
 	printf(_("Access: \t%s%s%s\n"), cdate, access_time, cend);
 	printf(_("Modify: \t%s%s%s\n"), cdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), cdate, change_time, cend);
 
 #ifndef _BE_POSIX
 # if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
-	printf(_("Birth: \t\t%s%s%s\n"), cdate, creation_time, cend);
-# endif
-#endif /* _BE_POSIX */
+	char creation_time[MAX_TIME_STR];
 
-	/* Print size */
+#  if defined(_STATX)
+	struct statx attrx;
+	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
+	gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
+#  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
+#   if defined(__OpenBSD__)
+	gen_time_str(creation_time, sizeof(creation_time), attr.__st_birthtim.tv_sec);
+#   else
+	gen_time_str(creation_time, sizeof(creation_time), attr.st_birthtime);
+#   endif /* __OpenBSD__ */
+#  endif /* _STATX */
+
+	printf(_("Birth: \t\t%s%s%s\n"), cdate, creation_time, cend);
+# endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || _STATX */
+#endif /* !_BE_POSIX */
+
+	/* File size */
 	if (!S_ISDIR(attr.st_mode) && link_to_dir == 0) {
 		printf(_("Size: \t\t%s%s%s\n"), csize, size_type ? size_type : "?", cend);
 		goto END;
@@ -818,14 +798,14 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		cid = dg_c;
 
 	switch (props->mode & S_IFMT) {
-	case S_IFREG: file_type =  '.'; break;
-	case S_IFDIR: file_type =  'd'; ctype = di_c; break;
-	case S_IFLNK: file_type =  'l'; ctype = ln_c; break;
-	case S_IFSOCK: file_type = 's'; ctype = so_c; break;
-	case S_IFBLK: file_type =  'b'; ctype = bd_c; break;
-	case S_IFCHR: file_type =  'c'; ctype = cd_c; break;
-	case S_IFIFO: file_type =  'p'; ctype = pi_c; break;
-	default: file_type =       '?'; break;
+	case S_IFREG:  file_type = '.'; break;
+	case S_IFDIR:  file_type = 'd'; ctype = di_c; break;
+	case S_IFLNK:  file_type = 'l'; ctype = ln_c; break;
+	case S_IFSOCK: file_type ='s';  ctype = so_c; break;
+	case S_IFBLK:  file_type = 'b'; ctype = bd_c; break;
+	case S_IFCHR:  file_type = 'c'; ctype = cd_c; break;
+	case S_IFIFO:  file_type = 'p'; ctype = pi_c; break;
+	default:       file_type = '?'; break;
 	}
 
 	if (conf.colorize == 0) {
@@ -917,7 +897,6 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, cend,
 			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, cend,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend);
-/*			is_acl(props->name) ? "+" : ""); */
 	} else if (prop_fields.perm == PERM_NUMERIC) {
 		snprintf(attr_s, sizeof(attr_s), "%s%04o%s ", do_c, props->mode & 07777, cend);
 	} else {
@@ -1031,15 +1010,20 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 
 #ifndef _NO_ICONS
 	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
+#else
+	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
+#endif
 		   "%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
 		   "%s\n", /* Size / device info */
+
+#ifndef _NO_ICONS
 		conf.colorize ? props->icon_color : "",
 		conf.icons ? props->icon : "", conf.icons ? ' ' : 0, df_c,
-
+#endif
 		conf.colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
 		conf.light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
@@ -1053,29 +1037,6 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time != 0 ? time_s : "",
 		prop_fields.size != 0 ? size_s : "");
-#else
-	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
-		   "%s" /* Files counter for dirs */
-		   "\x1b[0m%s" /* Inode */
-		   "%s" /* Permissions */
-		   "%s" /* User and group ID */
-		   "%s" /* Time */
-		   "%s\n", /* Size / device info */
-
-	    conf.colorize ? props->color : "",
-		(wchar_t *)tname, trim_diff,
-	    conf.light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
-	    trim ? tt_c : "", trim ? TRIMFILE_CHR : 0,
-		trim == TRIM_EXT ? props->color : "",
-		trim == TRIM_EXT ? ext_name : "",
-
-		prop_fields.counter != 0 ? fc_str : "",
-		prop_fields.inode == 1 ? ino_s : "",
-		prop_fields.perm != 0 ? attr_s : "",
-		prop_fields.ids == 1 ? id_s : "",
-		prop_fields.time != 0 ? time_s : "",
-		prop_fields.size != 0 ? size_s : "");
-#endif
 
 	free(t_ctype);
 	free(size_type);
