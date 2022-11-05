@@ -65,7 +65,8 @@
 # define DT_DIR 4
 #endif
 
-#define TIME_STR "%a %b %d %H:%M:%S %Y %z"
+//#define TIME_STR "%a %b %d %H:%M:%S %Y %z"
+#define TIME_STR "%a %b %d %T %Y %z"
 #define MAX_TIME_STR 128
 /* Our resulting time string won't go usually beyond 29 chars. But since this
  * length is locale dependent (at least %b), let's use a much larger buffer */
@@ -500,6 +501,22 @@ set_file_perms(char **args)
 	return ret;
 }
 
+/* Format time data given by _TIME (in the format specified by the TIME_STR
+ * macro) and copy the result into the array BUF of size SIZE */
+static void
+gen_time_str(char *buf, const size_t size, const time_t _time)
+{
+	struct tm tm;
+	localtime_r(&_time, &tm);
+
+	if (_time) {
+		strftime(buf, size, TIME_STR, &tm);
+	} else {
+		*buf = '-';
+		buf[1] = '\0';
+	}
+}
+
 static int
 get_properties(char *filename, const int dsize)
 {
@@ -541,7 +558,7 @@ get_properties(char *filename, const int dsize)
 
 	switch (attr.st_mode & S_IFMT) {
 	case S_IFREG: {
-		file_type = '-';
+		file_type = '.';
 		color = get_regfile_color(filename, &attr);
 	} break;
 
@@ -663,70 +680,28 @@ get_properties(char *filename, const int dsize)
 
 	/* Stat information */
 
-	/* Last modification time */
-	time_t time = (time_t)attr.st_mtime;
-	struct tm tm;
-	localtime_r(&time, &tm);
+	/* Timestamps */
 	char mod_time[MAX_TIME_STR];
-
-	if (time) {
-		strftime(mod_time, sizeof(mod_time), TIME_STR, &tm);
-	} else {
-		*mod_time = '-';
-		mod_time[1] = '\0';
-	}
-
-	/* Last access time */
-	time = (time_t)attr.st_atime;
-	localtime_r(&time, &tm);
 	char access_time[MAX_TIME_STR];
-
-	if (time) {
-		strftime(access_time, sizeof(access_time), TIME_STR, &tm);
-	} else {
-		*access_time = '-';
-		access_time[1] = '\0';
-	}
-
-	/* Last properties change time */
-	time = (time_t)attr.st_ctime;
-	localtime_r(&time, &tm);
 	char change_time[MAX_TIME_STR];
-	if (time) {
-		strftime(change_time, sizeof(change_time), TIME_STR, &tm);
-	} else {
-		*change_time = '-';
-		change_time[1] = '\0';
-	}
-
-	/* Creation (birth) time */
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
-# ifdef __OpenBSD__
-	time = attr.__st_birthtim.tv_sec;
-# else
-	time = attr.st_birthtime;
-# endif
-	localtime_r(&time, &tm);
+#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
 	char creation_time[MAX_TIME_STR];
-	if (!time) {
-		*creation_time = '-';
-		creation_time[1] = '\0';
-	} else {
-		strftime(creation_time, sizeof(creation_time), TIME_STR, &tm);
-	}
+#endif
+
+	gen_time_str(mod_time, sizeof(mod_time), attr.st_mtime);
+	gen_time_str(access_time, sizeof(access_time), attr.st_atime);
+	gen_time_str(change_time, sizeof(change_time), attr.st_ctime);
+
+#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
+# if defined(__OpenBSD__)
+	gen_time_str(creation_time, sizeof(creation_time), attr.__st_birthtim.tv_sec);
+# else
+	gen_time_str(creation_time, sizeof(creation_time), attr.st_birthtime);
+# endif
 #elif defined(_STATX)
 	struct statx attrx;
 	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
-	time = (time_t)attrx.stx_btime.tv_sec;
-	localtime_r(&time, &tm);
-	char creation_time[MAX_TIME_STR];
-
-	if (!time) {
-		*creation_time = '-';
-		creation_time[1] = '\0';
-	} else {
-		strftime(creation_time, sizeof(creation_time), TIME_STR, &tm);
-	}
+	gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
 #endif /* _STATX */
 
 	if (conf.colorize == 1)
@@ -756,6 +731,7 @@ get_properties(char *filename, const int dsize)
 			: group->gr_name, cend);
 
 	/* Print file timestamps */
+//	printf(_("Access: \t%s%s.%zu%s\n"), cdate, access_time, attr.st_atim.tv_nsec, cend);
 	printf(_("Access: \t%s%s%s\n"), cdate, access_time, cend);
 	printf(_("Modify: \t%s%s%s\n"), cdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), cdate, change_time, cend);
@@ -1009,7 +985,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 				snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
 					? size_type : "?", cend);
 			} else {
-				snprintf(size_s, sizeof(size_s), "%s%*zu%s", csize, (int)size_max, props->size, cend);
+				snprintf(size_s, sizeof(size_s), "%s%*ju%s", csize,
+					(int)size_max, (uintmax_t)props->size, cend);
 			}
 		} else {
 			snprintf(size_s, sizeof(size_s), "%ju,%ju", (uintmax_t)major(props->rdev),
