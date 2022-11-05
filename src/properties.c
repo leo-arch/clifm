@@ -684,25 +684,27 @@ get_properties(char *filename, const int dsize)
 	char mod_time[MAX_TIME_STR];
 	char access_time[MAX_TIME_STR];
 	char change_time[MAX_TIME_STR];
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
-	char creation_time[MAX_TIME_STR];
-#endif
 
 	gen_time_str(mod_time, sizeof(mod_time), attr.st_mtime);
 	gen_time_str(access_time, sizeof(access_time), attr.st_atime);
 	gen_time_str(change_time, sizeof(change_time), attr.st_ctime);
 
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
-# if defined(__OpenBSD__)
-	gen_time_str(creation_time, sizeof(creation_time), attr.__st_birthtim.tv_sec);
-# else
-	gen_time_str(creation_time, sizeof(creation_time), attr.st_birthtime);
+#ifndef _BE_POSIX
+# if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+	char creation_time[MAX_TIME_STR];
 # endif
-#elif defined(_STATX)
+# if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
+#  if defined(__OpenBSD__)
+	gen_time_str(creation_time, sizeof(creation_time), attr.__st_birthtim.tv_sec);
+#  else
+	gen_time_str(creation_time, sizeof(creation_time), attr.st_birthtime);
+#  endif
+# elif defined(_STATX)
 	struct statx attrx;
 	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
 	gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
-#endif /* _STATX */
+# endif /* _STATX */
+#endif /* _BE_POSIX */
 
 	if (conf.colorize == 1)
 		printf("%s", BOLD);
@@ -736,9 +738,11 @@ get_properties(char *filename, const int dsize)
 	printf(_("Modify: \t%s%s%s\n"), cdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), cdate, change_time, cend);
 
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+#ifndef _BE_POSIX
+# if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
 	printf(_("Birth: \t\t%s%s%s\n"), cdate, creation_time, cend);
-#endif
+# endif
+#endif /* _BE_POSIX */
 
 	/* Print size */
 	if (!S_ISDIR(attr.st_mode) && link_to_dir == 0) {

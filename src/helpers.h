@@ -43,6 +43,7 @@
 # ifdef __NetBSD__
 #  define _XOPEN_SOURCE
 #  define _NETBSD_SOURCE
+#  define __BSD_VISIBLE 1
 # endif
 # ifdef __OpenBSD__
 #  define _BSD_SOURCE
