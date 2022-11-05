@@ -632,6 +632,7 @@ rl_accept_suggestion(int count, int key)
 	case COMP_SUG:     /* fallthrough */
 	case ELN_SUG:      /* fallthrough */
 	case PROMPT_SUG:   /* fallthrough */
+	case FASTBACK_SUG: // fallthrough
 	case FILE_SUG: {
 		char *tmp = (char *)NULL;
 		size_t i, isquote = 0, backslash = 0;
@@ -649,21 +650,17 @@ rl_accept_suggestion(int count, int key)
 
 		my_insert_text(tmp ? tmp : suggestion_buf, NULL, 0);
 		free(tmp);
-/*		if (tmp) {
-			// escape_str escapes leading tilde. But we don't want it
-			// here. Remove it
-			char *q;
-			if (cur_comp_type == TCMP_PATH && *tmp == '\\' && *(tmp + 1) == '~')
-				q = tmp + 1;
-			else
-				q = tmp;
-//			rl_insert_text(q);
-			my_insert_text(q, NULL, 0);
-			free(tmp);
-		} else {
-			my_insert_text(suggestion_buf, NULL, 0);
-		} */
-		if (suggestion.filetype != DT_DIR)
+
+		if (suggestion.type == FASTBACK_SUG) {
+			if (conf.highlight == 0) {
+				rl_insert_text("/");
+			} else if (*suggestion_buf != '/' || suggestion_buf[1]) {
+				fputs(hd_c, stdout);
+				rl_insert_text("/");
+				rl_redisplay();
+				fputs(df_c, stdout);
+			}
+		} else if (suggestion.filetype != DT_DIR)
 			rl_stuff_char(' ');
 		suggestion.type = NO_SUG;
 		}

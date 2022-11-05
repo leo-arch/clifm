@@ -1466,14 +1466,17 @@ parse_input_str(char *str)
 		}
 
 		/* Replace . and .. by absolute paths */
-		if (*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
-		&& !substr[i][2]))) {
-			char *tmp = (char *)NULL;
-			tmp = realpath(substr[i], NULL);
+		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
+		&& !substr[i][2]))) || strstr(substr[i], "/..")) {
+			char *tmp = normalize_path(substr[i], strlen(substr[i]));
+//			char *tmp = (char *)NULL;
+//			tmp = realpath(substr[i], NULL);
 			if (tmp) {
-				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1) * sizeof(char));
+				free(substr[i]);
+				substr[i] = tmp;
+/*				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1) * sizeof(char));
 				strcpy(substr[i], tmp);
-				free(tmp);
+				free(tmp); */
 			}
 		}
 
@@ -1484,10 +1487,11 @@ parse_input_str(char *str)
 		if (*substr[i] == '.' && substr[i][1] == '.' && substr[i][2] == '.') {
 			char *tmp = fastback(substr[i]);
 			if (tmp) {
-				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
-							* sizeof(char));
+				free(substr[i]);
+				substr[i] = tmp;
+/*				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1) * sizeof(char));
 				strcpy(substr[i], tmp);
-				free(tmp);
+				free(tmp); */
 			}
 		}
 

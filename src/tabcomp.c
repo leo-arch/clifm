@@ -390,7 +390,7 @@ fzftab_color(char *filename, const struct stat *attr)
 }
 
 static char *
-get_entry_color(char **matches, const size_t i)
+get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 {
 	if (conf.colorize == 0)
 		return (char *)NULL;
@@ -400,8 +400,19 @@ get_entry_color(char **matches, const size_t i)
 	/* Normalize URI file scheme */
 	char *dir = matches[i];
 	size_t dlen = strlen(dir);
-	if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
+	if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir)) {
 		dir += FILE_URI_PREFIX_LEN;
+		dlen += FILE_URI_PREFIX_LEN;
+	}
+
+	if (norm_prefix) {
+		char *s = strrchr(dir, '/');
+		char p[PATH_MAX];
+		snprintf(p, sizeof(p), "%s/%s", norm_prefix, (s && *(++s)) ? s : dir);
+		if (lstat(p, &attr) != -1)
+			return fzftab_color(p, &attr);
+		return uf_c;
+	}
 
 	/* Absolute path (/FILE) or file in CWD (./FILE) */
 	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') ) && (cur_comp_type == TCMP_PATH
@@ -524,16 +535,31 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	*_path = '\0';
 	char *tmp = *deq_str ? deq_str : ss;
 
+	UNUSED(*exit_status);
+
 	size_t dlen = strlen(tmp), is_file_uri = 0;
+	if (*tmp == 'f' && *(tmp + 1) == 'i' && dlen > FILE_URI_PREFIX_LEN
+	&& IS_FILE_URI(tmp))
+		is_file_uri = 1;
+
+	char *d = tmp;
+	char *p = is_file_uri == 0 ? normalize_path(tmp, strlen(tmp)) : (char *)NULL;
+	if (p)
+		d = p;
+
+	if (is_file_uri == 1)
+		d += FILE_URI_PREFIX_LEN;
+
+/*	size_t dlen = strlen(tmp), is_file_uri = 0;
 	if (*tmp == 'f' && *(tmp + 1) == 'i' && dlen > FILE_URI_PREFIX_LEN
 	&& IS_FILE_URI(tmp))
 		is_file_uri = 1;
 
 	if (is_file_uri == 0 && *tmp != '/' && *tmp != '.' && *tmp != '~') {
 		if (*(workspaces[cur_ws].path + 1))
-			snprintf(_path, PATH_MAX + NAME_MAX, "%s/%s", workspaces[cur_ws].path, tmp);
-		else /* Root directory */
-			snprintf(_path, PATH_MAX + NAME_MAX, "/%s", tmp);
+			snprintf(_path, sizeof(_path), "%s/%s", workspaces[cur_ws].path, tmp);
+		else // Root directory
+			snprintf(_path, sizeof(_path), "/%s", tmp);
 	}
 
 	char *spath = *_path ? _path : tmp;
@@ -544,7 +570,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		if (*spath == '.') {
 			xchdir(workspaces[cur_ws].path, NO_TITLE);
 			epath = realpath(spath, NULL);
-			/* No need to change back to CWD. Done here */
+			// No need to change back to CWD. Done here
 			*exit_status = -1;
 		}
 	}
@@ -555,6 +581,12 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	char *d = spath;
 	if (is_file_uri == 1)
 		d += FILE_URI_PREFIX_LEN;
+
+	char *e = (char *)NULL;
+	if (strstr(d, "/.."))
+		e = normalize_path(d, strlen(d));
+	if (e)
+		d = e; */
 
 	struct stat attr;
 	if (stat(d, &attr) != -1 && S_ISDIR(attr.st_mode)) {
@@ -567,7 +599,10 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 			rl_stuff_char(' ');
 	}
 
-	free(epath);
+	if (d == p)
+		free(p);
+
+//	free(epath);
 }
 
 /* Get word after last non-escaped slash */
@@ -960,6 +995,10 @@ store_completions(char **matches, FILE *fp)
 	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_PROMPTS)
 		no_file_comp = 1; /* We're not completing file names */
 
+	char *norm_prefix = (char *)NULL;
+	if (cur_comp_type == TCMP_PATH && strstr(matches[0], "/.."))
+		norm_prefix = normalize_path(matches[0], strlen(matches[0]));
+
 	size_t i;
 	/* 'view' cmd with only one match: matches[0] */
 	size_t start = ((flags & PREVIEWER) && !matches[1]) ? 0 : 1;
@@ -997,7 +1036,7 @@ store_completions(char **matches, FILE *fp)
 			color = mi_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
 		&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_FILE_TYPES_OPTS) {
-			char *cl = get_entry_color(matches, i);
+			char *cl = get_entry_color(matches, i, norm_prefix);
 			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
 			/* If color does not start with escape, then we have a color
@@ -1020,6 +1059,7 @@ store_completions(char **matches, FILE *fp)
 			write_comp_to_file(entry, color, &fp);
 	}
 
+	free(norm_prefix);
 	return i;
 }
 
@@ -1863,14 +1903,6 @@ AFTER_USUAL_COMPLETION:
 				 match, so we need to prepend a quote character if we
 				 are replacing the completion string. */
 				replacement = escape_str(matches[0]);
-
-				/* escape_str escapes the leading tilde, but we don't
-				 * want it here. Remove it */
-/*				if (cur_comp_type == TCMP_PATH && *matches[0] == '~') {
-					char *tmp = strdup(replacement + 1);
-					free(replacement);
-					replacement = tmp;
-				} */
 			}
 		}
 
@@ -1998,7 +2030,8 @@ AFTER_USUAL_COMPLETION:
 
 			if (rl_filename_completion_desired) {
 				struct stat finfo;
-				char *filename = tilde_expand(matches[0]);
+//				char *filename = tilde_expand(matches[0]);
+				char *filename = normalize_path(matches[0], strlen(matches[0]));
 
 				char *d = filename;
 				if (*filename == 'f' && filename[1] == 'i') {
@@ -2129,12 +2162,29 @@ DISPLAY_MATCHES:
 			}
 		} else {
 			char *dir = matches[0];
+
 			size_t dlen = strlen(dir);
 			if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
 				dir += FILE_URI_PREFIX_LEN;
 			char *p = strrchr(dir, '/');
 			if (!p)
 				goto CALC_OFFSET;
+
+// TESTING SYMLINKS
+			// WHAT ABOUT P????
+			char *dd = (char *)NULL;
+			// MATCHES[0] SHOULD BE DIR!!
+			if (strstr(matches[0], "/..")) {
+				dd = normalize_path(matches[0], strlen(matches[0]));
+				if (dd) {
+					char *ddd = (char *)xnmalloc(strlen(dd) + 2, sizeof(char *));
+					sprintf(ddd, "%s/", dd);
+					free(dd);
+					dd = ddd;
+				}
+			}
+			dir = dd ? dd : matches[0];
+// TESTING SYMLINKS
 
 			if (p == dir) {
 				if (*(p + 1)) {
@@ -2151,6 +2201,10 @@ DISPLAY_MATCHES:
 				xchdir(dir, NO_TITLE);
 				*p = '/';
 			}
+// TESTING SYMLINKS
+			if (dir != matches[0])
+				free(dir);
+// TESTING SYMLINKS
 		}
 
 CALC_OFFSET:

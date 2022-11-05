@@ -534,11 +534,12 @@ change_to_path(char *new_path, const int cd_flag)
 
 	char *p = check_cdpath(new_path);
 	errno = 0;
-	char *q = realpath(p ? p : new_path, NULL);
+	char *r = p ? p : new_path;
+	char *q = normalize_path(r, strlen(r));
+//	char *q = realpath(p ? p : new_path, NULL);
 	if (!q) {
-		if (cd_flag == CD_PRINT_ERROR) {
+		if (cd_flag == CD_PRINT_ERROR)
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", p ? p : new_path, strerror(errno));
-		}
 		free(p);
 		return errno;
 	}
@@ -654,7 +655,9 @@ fastback(char *str)
 
 //	return q;
 
-	return realpath(q, NULL);
+	return normalize_path(q, i);
+
+//	return realpath(q, NULL);
 //	free(q);
 }
 

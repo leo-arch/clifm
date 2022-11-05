@@ -54,6 +54,7 @@ typedef char *rl_cpvfunc_t;
 #include "checks.h"
 #include "colors.h"
 #include "jump.h"
+#include "navigation.h" /* fastback() */
 #include "readline.h"
 #include "builtins.h"
 #include "prompt.h"
@@ -308,7 +309,6 @@ print_suggestion(const char *str, size_t offset, char *color)
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 
-	/* Store current cursor position in CURLINE and CURCOL (globals) */
 	int baej = 0; /* Bookmark/backdir, alias, ELN, or jump (and fuzzy matches) */
 	flags &= ~BAEJ_SUGGESTION;
 
@@ -744,8 +744,8 @@ check_history(const char *str, const size_t len)
 		return NO_MATCH;
 
 	// Skip fastback
-	if (len >= 3 && *str == '.' && str[1] == '.' && str[2] == '.')
-		return NO_MATCH;
+/*	if (len >= 3 && *str == '.' && str[1] == '.' && str[2] == '.')
+		return NO_MATCH; */
 
 	int i = (int)current_hist_n;
 	while (--i >= 0) {
@@ -1447,6 +1447,32 @@ check_workspaces(char *word, size_t wlen)
 	return 0;
 }
 
+static int
+check_fastback(char *w)
+{
+	if (!w || !*w)
+		return 0;
+
+	char *f = fastback(w);
+	if (!f)
+		return 0;
+
+	if (!*f) {
+		free(f);
+		return 0;
+	}
+
+	suggestion.type = FASTBACK_SUG;
+	suggestion.filetype = DT_DIR;
+	cur_comp_type = TCMP_PATH;
+	char *e = escape_str(f);
+	print_suggestion(e, 0, sf_c);
+	free(f);
+	free(e);
+
+	return 1;
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -1534,12 +1560,17 @@ rl_suggestions(const unsigned char c)
 		 * #	    Search for suggestions		#
 		 * ######################################*/
 
+	/* Fastback */
+	if (word && *word == '.' && word[1] == '.' && word[2] == '.'
+	&& (printed = check_fastback(word)) == 1)
+		goto SUCCESS;
+
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed && !IS_DIGIT(c)) {
 		if (suggestion.type == HIST_SUG || suggestion.type == INT_CMD) {
-			/* Skip fastback and the j cmd: we always want the BAEJ suggestion here */
-			if (word && ((*word == 'j' && word[1] == ' ')
-			|| (*word == '.' && word[1] == '.' && word[2] == '.') ) ) {
+			/* Skip the j cmd: we always want the BAEJ suggestion here */
+			if (word && *word == 'j' && word[1] == ' ') {
+//			|| (*word == '.' && word[1] == '.' && word[2] == '.') ) ) {
 				;
 			} else if (*full_line == *suggestion_buf
 			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {

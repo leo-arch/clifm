@@ -1055,22 +1055,8 @@ my_rl_path_completion(const char *text, int state)
 		char *p = savestring(text, strlen(text));
 		tmp_text = dequote_str(p, 0);
 		free(p);
-		p = (char *)NULL;
 		if (!tmp_text)
 			return (char *)NULL;
-	}
-
-	int fast_back = 0;
-	if (*text == '.' && text[1] == '.' && text[2] == '.') {
-		char *p = savestring(text, strlen(text));
-		tmp_text = fastback(p);
-
-		free(p);
-		p = (char *)NULL;
-
-		if (!tmp_text)
-			return (char *)NULL;
-		fast_back = 1;
 	}
 
 /*	int rl_complete_with_tilde_expansion = 0; */
@@ -1158,7 +1144,18 @@ my_rl_path_completion(const char *text, int state)
 //		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(text))
 //			d = dirname + FILE_URI_PREFIX_LEN;
 
-		directory = opendir(d);
+		/* Resolve special expression in the resulting directory */
+		char *e = (char *)NULL;
+		if (strstr(d, "/.."))
+			e = normalize_path(d, strlen(d));
+		if (!e)
+			e = d;
+
+		directory = opendir(e);
+		if (e != d)
+			free(e);
+//		directory = opendir(d);
+
 		filename_len = strlen(filename);
 
 		rl_filename_completion_desired = 1;
@@ -1496,8 +1493,8 @@ my_rl_path_completion(const char *text, int state)
 
 			/* If fast_back == 1 and filename is empty, we have the
 			 * root dir: do not append anything else */
-			if (fast_back == 0 || (filename && *filename))
-				strcat(temp, ent->d_name);
+//			if (fast_back == 0 || (filename && *filename))
+			strcat(temp, ent->d_name);
 		} else {
 			temp = savestring(ent->d_name, strlen(ent->d_name));
 		}
@@ -2079,11 +2076,11 @@ prompts_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-/* Expand tilde in the glob expression TEXT */
+/* Expand tilde and resolve dot expressions in the glob expression TEXT */
 static char *
 expand_tilde_glob(char *text)
 {
-	if (!text || !*text || *text != '~')
+	if (!text || !*text || (*text != '~' && !strstr(text, "/..")))
 		return (char *)NULL;
 
 	char *ls = strrchr(text, '/');
@@ -2091,7 +2088,8 @@ expand_tilde_glob(char *text)
 		return (char *)NULL;
 
 	*ls = '\0';
-	char *q = tilde_expand(text);
+	char *q = normalize_path(text, strlen(text));
+//	char *q = tilde_expand(text);
 	*ls = '/';
 	if (!q)
 		return (char *)NULL;
@@ -2792,6 +2790,30 @@ file_types_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+static char **
+rl_fastback(char *s)
+{
+	if (!s || !*s)
+		return (char **)NULL;
+
+	char *p = fastback(s);
+	if (!p)
+		return (char **)NULL;
+
+	if (!*p) {
+		free(p);
+		return (char **)NULL;
+	}
+
+	char **matches = (char **)xnmalloc(2, sizeof(char *));
+	matches[0] = savestring(p, strlen(p));
+	matches[1] = (char *)NULL;
+
+	free(p);
+
+	return matches;
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -2803,6 +2825,7 @@ my_rl_completion(const char *text, int start, int end)
 	while (*text == '\\')
 		++text;
 
+	/* File type expansion */
 	if (xrename == 0 && *text == '=') {
 		if (!*(text + 1)) {
 			matches = rl_completion_matches(text, &file_types_opts_generator);
@@ -2817,6 +2840,16 @@ my_rl_completion(const char *text, int start, int end)
 				cur_comp_type = TCMP_FILE_TYPES_FILES;
 				return matches;
 			}
+		}
+	}
+
+	/* Fastback */
+	if (xrename == 0 && *text == '.' && text[1] == '.' && text[2] == '.') {
+		if ((matches = rl_fastback((char *)text)) != NULL) {
+			if (*matches[0] != '/' || matches[0][1])
+				rl_filename_completion_desired = 1;
+			cur_comp_type = TCMP_PATH;
+			return matches;
 		}
 	}
 
@@ -2917,8 +2950,9 @@ my_rl_completion(const char *text, int start, int end)
 				return matches;
 		}
 
-		/* If neither autocd nor auto-open, try to complete with command names */
-		if (xrename == 0) {
+		/* If neither autocd nor auto-open, try to complete with command names,
+		 * except when TEXT is "/" */
+		if (xrename == 0 && (conf.autocd == 0 || *text != '/' || text[1])) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 			if (matches) {
 				cur_comp_type = TCMP_CMD;

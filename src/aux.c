@@ -301,30 +301,40 @@ normalize_path(char *src, size_t src_len)
 		size_t tlen = strlen(tmp);
 		if (tlen > 0 && tmp[tlen - 1] == '/')
 			tmp[tlen - 1] = '\0';
-		return tmp;
+
+		if (!strstr(tmp, "/.."))
+			return tmp;
 	}
+
+	char *s = tmp ? tmp : src;
+	size_t l = tmp ? strlen(tmp) : src_len;
 
 	/* Resolve references to . and .. */
 	char *res;
 	size_t res_len;
 
-	if (src_len == 0 || *src != '/') {
+	if (l == 0 || *s != '/') {
+//	if (src_len == 0 || *src != '/') {
 		/* Relative path */
 		size_t pwd_len;
 		pwd_len = strlen(workspaces[cur_ws].path);
-		res = (char *)xnmalloc(pwd_len + 1 + src_len + 1, sizeof(char));
+//		res = (char *)xnmalloc(pwd_len + 1 + src_len + 1, sizeof(char));
+		res = (char *)xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
 		memcpy(res, workspaces[cur_ws].path, pwd_len);
 		res_len = pwd_len;
 	} else {
-		res = (char *)xnmalloc(src_len + 1, sizeof(char));
+//		res = (char *)xnmalloc(src_len + 1, sizeof(char));
+		res = (char *)xnmalloc(l + 1, sizeof(char));
 		res_len = 0;
 	}
 
 	const char *ptr;
-	const char *end = &src[src_len];
+//	const char *end = &src[src_len];
+	const char *end = &s[l];
 	const char *next;
 
-	for (ptr = src; ptr < end; ptr = next + 1) {
+//	for (ptr = src; ptr < end; ptr = next + 1) {
+	for (ptr = s; ptr < end; ptr = next + 1) {
 		size_t len;
 		next = memchr(ptr, '/', (size_t)(end - ptr));
 		if (!next)
@@ -365,8 +375,11 @@ normalize_path(char *src, size_t src_len)
 
 	res[res_len] = '\0';
 
-	if (res[res_len - 1] == '/')
+	if (res_len > 1 && res[res_len - 1] == '/')
 		res[res_len - 1] = '\0';
+
+	if (s == tmp)
+		free(s);
 
 	return res;
 }

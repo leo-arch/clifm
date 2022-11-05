@@ -372,6 +372,7 @@ extern int watch;
 #define USER_SUG       21
 #define WS_NUM_SUG     22 /* Workspace number */
 #define WS_NAME_SUG    23 /* Workspace name */
+#define FASTBACK_SUG   24
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR

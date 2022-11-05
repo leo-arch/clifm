@@ -193,19 +193,28 @@ set_prop_fields(char *line)
 		}
 	}
 
-	/* How much space do we need to reserve to print enabled fields? */
-	if (prop_fields.counter != 0)
-		prop_fields.len += (4 + 1);
+	/* How much space needs to be reserved to print enabled fields?
+	 * Only fixed values are counted: dinamical values are calculated
+	 * and added in place: for these values we only count here the space
+	 * that follows each of them, if enabled */
+	/* Static lengths */
 	if (prop_fields.perm != 0)
 		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 3 : 13) + 1);
-	if (prop_fields.inode != 0)
-		prop_fields.len += (8 + 1);
-	if (prop_fields.ids != 0)
-		prop_fields.len += (11 + 1);
 	if (prop_fields.time != 0)
 		prop_fields.len += (19 + 1);
 	if (prop_fields.size != 0)
-		prop_fields.len += (8 + 1);
+		prop_fields.len += prop_fields.size == PROP_SIZE_HUMAN ? (8 + 1) : 1;
+
+	/* Dynamic lengths */
+	if (prop_fields.counter != 0)
+//		prop_fields.len += (4 + 1);
+		prop_fields.len ++;
+	if (prop_fields.inode != 0)
+//		prop_fields.len += (8 + 1);
+		prop_fields.len ++;
+	if (prop_fields.ids != 0)
+//		prop_fields.len += (11 + 1);
+		prop_fields.len ++;
 }
 
 int

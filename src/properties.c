@@ -1062,7 +1062,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		conf.colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
 		conf.light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
-		trim ? tt_c : "", trim ? '~' : 0,
+		trim ? tt_c : "", trim ? TRIMFILE_CHR : 0,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",
 
