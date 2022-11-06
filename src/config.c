@@ -1388,6 +1388,7 @@ RlEditMode=%d\n\n",
 # Control CliFM settings on a per directory basis. For more information\n\
 # consult the manpage\n\
 #autocmd /media/remotes/** lm=1,fc=0\n\
+#autocmd @ws3 lv=1\n\
 #autocmd ~/important !printf \"Keep your fingers outta here!\\n\" && read -n1\n\
 #autocmd ~/Downloads !/usr/share/clifm/plugins/fzfnav.sh\n\n",
 	    config_fp);

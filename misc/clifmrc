@@ -374,3 +374,5 @@ SplashScreen=false
 #autocmd ~/important !printf "Keep your fingers outta here!\n" && read -n1
 # Plenty of images and vids? Launch the files previewer plugin
 #autocmd ~/Downloads !/usr/local/share/clifm/plugins/fzfnav.sh
+# I want files in the third workspace to be listed in long view
+#autocmd @ws3 lv=1
