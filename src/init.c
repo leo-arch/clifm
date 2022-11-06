@@ -1228,8 +1228,6 @@ set_prompts_file(void)
 		return (char *)NULL;
 
 	struct stat a;
-/*	char *f = (char *)xnmalloc(strlen(config_dir_gral) + 13, sizeof(char));
-	sprintf(f, "%s/prompts.cfm", config_dir_gral); */
 	char *f = (char *)xnmalloc(strlen(config_dir_gral) + 15, sizeof(char));
 	sprintf(f, "%s/prompts.clifm", config_dir_gral);
 
@@ -1240,7 +1238,6 @@ set_prompts_file(void)
 		goto ERROR;
 
 	char t[PATH_MAX];
-//	snprintf(t, sizeof(t), "%s/%s/prompts.cfm", data_dir, PNL);
 	snprintf(t, sizeof(t), "%s/%s/prompts.clifm", data_dir, PNL);
 	if (stat(t, &a) == -1 || !S_ISREG(a.st_mode))
 		goto ERROR;

@@ -32,6 +32,7 @@
 #include <limits.h>
 
 #include "aux.h"
+#include "checks.h"
 #include "colors.h"
 #include "exec.h"
 #include "listing.h"
@@ -72,6 +73,17 @@ check_autocmds(void)
 		if (*p == '!') {
 			++p;
 			rev = 1;
+		}
+
+		/* Check workspaces (@wsN)*/
+		if (*autocmds[i].pattern == '@' && autocmds[i].pattern[1] == 'w'
+		&& autocmds[i].pattern[2] == 's' && autocmds[i].pattern[3]
+		&& is_number(autocmds[i].pattern + 3)) {
+			int n = atoi(autocmds[i].pattern + 3);
+			if (n >= 0 && n <= MAX_WS && n == cur_ws + 1) {
+				found = 1;
+				goto RUN_AUTOCMD;
+			}
 		}
 
 		/* Double asterisk: match everything starting with PATTERN
