@@ -2042,9 +2042,9 @@ Add a line preceded by the \fIautocmd\fR keyword to the config file. The general
 .sp
  \fB~/Downloads\fR      Match exactly the Downloads directory (and \fIonly\fR this directory) in your home directory
  \fB~/Downloads/*\fR    Match all subdirectories in ~/Downloads (\fIexcluding\fR the Downloads directory itself)
- \fB/~/Downloads/**\fR  Match all subdirectories in ~/Downloads (\fIincluding\fR the Downloads directory itself)
+ \fB/~/Downloads/**\fR  \fIRecursively\fR match all subdirectories in ~/Downloads (\fIincluding\fR the Downloads directory itself)
  \fB~/Downloads/*.d\fR  Match all subdirectories in ~/Downloads ending with ".d" (\fRexcluding\fR the Downloads directory itself)
- \fB!~/Downloads\fR     Match everything except the Downloads directory
+ \fB!~/Downloads\fR     Match everything except the \fI~/Downloads\fR directory
 .sp
 2. \fBTARGET\fR is also able to match workspaces using the ampersand character (@) followed by the ws keyword and then the workspace number. For example, to match the third workspace: \fI@ws3\fR, and to match the first workspace: \fI@ws1\fR.
 .sp
