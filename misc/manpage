@@ -2093,7 +2093,7 @@ A few example lines:
 \fB(2)\fR As seen here, plugins could be used as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
 \fBNOTE\fR: If you decide to use a plugin, bear in mind that it won't be able to communicate with \fBclifm\fR, because the \fIautocommand\fR function always executes commands as external applications using the system shell.
 .sp
-Bear in mind that \fIautocmd\fR directives are evaluated from top to bottom, so that only the first matching target will be executed. For instace, if you want all subdirectories in \fI~/Downloads\fR, except \fImydir\fR, to be listed in light mode, write the following directives:
+Bear in mind that \fIautocmd\fR directives are evaluated from top to bottom, so that only the first matching target will be executed. This can be used to exclude some target from a subsequent directive. For instance, if you want all subdirectories in \fI~/Downloads\fR, except \fImydir\fR, to be listed in light mode, write the following directives:
 .sp
     autocmd ~/Downloads/mydir/** lm=0
     autocmd ~/Downloads/** lm=1
