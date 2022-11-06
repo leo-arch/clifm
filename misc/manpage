@@ -2037,6 +2037,8 @@ Add a line preceded by the \fIautocmd\fR keyword to the config file. The general
 .sp
 \fBPATTERN\fR is a glob expression to match directory names. If no glob metacharacter is provided, the string will be compared as is to the current working directory. To invert the meaning of a pattern, prepend an exclamation mark: \fB!PATTERN\fR
 .sp
+\fBPATTERN\fR can also be used to match workspaces instead of directory names using the ampersand character (\fI@\fR), followed by the \fIws\fR keyword and then the workspace number. For example, to match the third workspace:  \fI@ws3\fR.
+.sp
 \fBPATTERN\fR is followed by a comma separated list of commands:
 .sp
 \fB!CMD\fR: The exclamation mark allows you to run shell commands, custom binaries or scripts
@@ -2070,14 +2072,17 @@ A few example lines:
  \fB4.\fR Lots of media files (with large file names). Trim file names to 20 chars max and  run the files previewer:
     autocmd ~/Downloads mn=20,!~/.config/clifm/plugins/fzfnav.sh
 
- \fB5.\fR Mmm, just because I can. Be creative!
+ \fB5.\fR I want the second workspace, no matter what the current directory is, to list files in long/detail view:
+    autocmd @ws2 lv=1
+
+ \fB6.\fR Mmm, just because I can. Be creative!
     autocmd /home/user hf=0,cs=nord,lv=1
     autocmd / lv=1,fc=0,cs=solarized,st=5
 
 .sp
 The first example is the recommended configuration for directories containing remote file systems
 .sp
-As seen in the fifth example, plugins could be used here as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
+As seen in the fourth example, plugins could be used here as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
 .sp
 \fBNOTE\fR: If you decide to use a plugin, bear in mind that it won't be able to communicate with \fBclifm\fR, because autocommands always executes commands as external applications using the system shell.
 .sp

@@ -64,6 +64,7 @@ check_autocmds(void)
 		return EXIT_SUCCESS;
 
 	int i = (int)autocmds_n, found = 0;
+
 	while (--i >= 0) {
 		if (!autocmds[i].pattern)
 			continue;
