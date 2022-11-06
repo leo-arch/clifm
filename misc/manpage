@@ -2031,15 +2031,24 @@ Whereas this plugin provides basic Git integration, it could be easily modified 
 Take a look at the Wiki for more information: \fIhttps://github.com/clifm/wiki/Advanced#plugins\fR
 
 .SH 14. AUTOCOMMANDS
-Heavily inspired by \fBVifm\fR, the \fIautocommands\fR function allows the user a fine-grained control over \fBclifm\fR settings. It is mostly devised as a way to improve performance for remote file systems (usually slower than local ones) by allowing you to turn off some features (like the files counter) that might greatly affect performance under some circumstances (like remote connections). However, this function is not restricted to this use: use it for whatever purpose you find useful.
+Heavily inspired by \fBVifm\fR, the \fIautocommands\fR function allows the user a fine-grained control over \fBclifm\fR settings. It is mostly devised as a way to improve performance for remote file systems (usually slower than local ones) by allowing you to turn off some features (like the files counter) that might greatly affect performance under some circumstances (like remote connections). However, the \fIautocommands\fR function is not restricted to this specific use case: use it for whatever purpose you find useful.
 .sp
-Add a line preceded by the \fIautocmd\fR keyword to the config file. The general syntax is: \fBautocmd PATTERN cmd,cmd,cmd\fR
+Add a line preceded by the \fIautocmd\fR keyword to the config file. The general syntax is:
+ \fIautocmd TARGET cmd,cmd,cmd\fR
 .sp
-\fBPATTERN\fR is a glob expression to match directory names. If no glob metacharacter is provided, the string will be compared as is to the current working directory. To invert the meaning of a pattern, prepend an exclamation mark: \fB!PATTERN\fR
+\fBTARGET\fR specifies the object to which subsequent commands will apply. It can match either \fBdirectory names (paths)\fR or \fBworkspaces\fR.
 .sp
-\fBPATTERN\fR can also be used to match workspaces instead of directory names using the ampersand character (\fI@\fR), followed by the \fIws\fR keyword and then the workspace number. For example, to match the third workspace:  \fI@ws3\fR.
+1. To match directory names use a glob pattern. If no glob metacharacter is provided, the string will be compared as is to the current working directory. To invert the meaning of a pattern, prepend an exclamation mark. To match all directories under a specific directory (including this directory itself) use the double asterisk (**). A few examples:
 .sp
-\fBPATTERN\fR is followed by a comma separated list of commands:
+ \fB~/Downloads\fR      Match exactly the Downloads directory (and \fIonly\fR this directory) in your home directory
+ \fB~/Downloads/*\fR    Match all subdirectories in ~/Downloads (\fIexcluding\fR the Downloads directory itself)
+ \fB/~/Downloads/**\fR  Match all subdirectories in ~/Downloads (\fIincluding\fR the Downloads directory itself)
+ \fB~/Downloads/*.d\fR  Match all subdirectories in ~/Downloads ending with ".d" (\fRexcluding\fR the Downloads directory itself)
+ \fB!~/Downloads\fR     Match everything except the Downloads directory
+.sp
+2. \fBTARGET\fR is also able to match workspaces using the ampersand character (@) followed by the ws keyword and then the workspace number. For example, to match the third workspace: \fI@ws3\fR, and to match the first workspace: \fI@ws1\fR.
+.sp
+\fBTARGET\fR is followed by a comma separated list of commands:
 .sp
 \fB!CMD\fR: The exclamation mark allows you to run shell commands, custom binaries or scripts
 .sp
@@ -2060,7 +2069,7 @@ The following codes are used to control \fBclifm\fR's files list:
 .sp
 A few example lines:
 .sp
- \fB1.\fR Run in light mode and disable the files counter for the remotes directory:
+ \fB1.\fR Run in light mode and disable the files counter for the \fIremotes\fR directory:\fB(1)\fR
     autocmd /media/remotes/** lm=1,fc=0
 
  \fB2.\fR Just a friendly reminder:
@@ -2069,7 +2078,7 @@ A few example lines:
  \fB3.\fR This directory has thousands of files. Show only the first hundred and enable the pager:
     autocmd /usr/bin mf=100,pg=1
 
- \fB4.\fR Lots of media files (with large file names). Trim file names to 20 chars max and  run the files previewer:
+ \fB4.\fR Lots of media files (with large file names). Trim file names to 20 chars max and  run the files previewer:\fB(2)\fR
     autocmd ~/Downloads mn=20,!~/.config/clifm/plugins/fzfnav.sh
 
  \fB5.\fR I want the second workspace, no matter what the current directory is, to list files in long/detail view:
@@ -2078,15 +2087,20 @@ A few example lines:
  \fB6.\fR Mmm, just because I can. Be creative!
     autocmd /home/user hf=0,cs=nord,lv=1
     autocmd / lv=1,fc=0,cs=solarized,st=5
-
 .sp
-The first example is the recommended configuration for directories containing remote file systems
+\fB(1)\fR This is the recommended configuration for remote file systems
+.sp 0
+\fB(2)\fR As seen here, plugins could be used as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
+\fBNOTE\fR: If you decide to use a plugin, bear in mind that it won't be able to communicate with \fBclifm\fR, because the \fIautocommand\fR function always executes commands as external applications using the system shell.
 .sp
-As seen in the fourth example, plugins could be used here as well: in this case, we want to run \fIfzfnav\fR (to make use of the files preview capability) whenever we enter into the \fIDownloads\fR directory, usually containing videos, music, and images.
+Bear in mind that \fIautocmd\fR directives are evaluated from top to bottom, so that only the first matching target will be executed. For instace, if you want all subdirectories in \fI~/Downloads\fR, except \fImydir\fR, to be listed in light mode, write the following directives:
 .sp
-\fBNOTE\fR: If you decide to use a plugin, bear in mind that it won't be able to communicate with \fBclifm\fR, because autocommands always executes commands as external applications using the system shell.
+    autocmd ~/Downloads/mydir/** lm=0
+    autocmd ~/Downloads/** lm=1
 .sp
-Autocommand files: \fI.cfm.in\fR and \fI.cfm.out\fR
+Since the first directive is evaluated before the second one, this latter will apply to everything under \fIDownloads\fR, exception made of \fImydir\fR (and subdirectories).
+.sp
+\fBAutocommand files: \fI.cfm.in\fB and \fI.cfm.out\fR
 .sp
 Two files are specifically checked by the autocommands function: \fI.cfm.in\fR and \fI.cfm.out\fR.
 .sp

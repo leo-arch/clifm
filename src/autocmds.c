@@ -63,9 +63,10 @@ check_autocmds(void)
 	if (!autocmds || autocmds_n == 0)
 		return EXIT_SUCCESS;
 
-	int i = (int)autocmds_n, found = 0;
+	size_t i;
+	int found = 0;
 
-	while (--i >= 0) {
+	for (i = 0; i < autocmds_n; i++) {
 		if (!autocmds[i].pattern)
 			continue;
 

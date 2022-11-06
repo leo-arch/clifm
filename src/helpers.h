@@ -287,7 +287,7 @@ extern int watch;
  * and Eterm, do not support dimmed colors at all, and won't replace this
  * color by anything else, so that suggestions will be indistinguishable
  * from bare input text.
- * The Linux console is more important for us, so let's used dimmed color */
+ * The Linux console is more important for us, so let's use a dimmed color */
 #define SUG_NO_COLOR "\x1b[0;2m" /* Dimmed color */
 
 /* Colors for the prompt: */
@@ -462,10 +462,10 @@ extern int watch;
 #define SHELL_TCSH 5
 #define SHELL_ZSH  6
 
-#define BELL_NONE          0
-#define BELL_AUDIBLE       1
-#define BELL_VISIBLE       2
-#define BELL_FLASH         3
+#define BELL_NONE    0
+#define BELL_AUDIBLE 1
+#define BELL_VISIBLE 2
+#define BELL_FLASH   3
 
 #define SECURE_ENV_FULL   1
 #define SECURE_ENV_IMPORT 0
@@ -485,7 +485,7 @@ extern int watch;
 #define SNT_BLACKLIST 9
 
 /* Macros for the TYPE field of the filter_t struct */
-#define FILTER_NONE 0
+#define FILTER_NONE      0
 #define FILTER_FILE_NAME 1 /* Regex */
 #define FILTER_FILE_TYPE 2 /* =x */
 #define FILTER_MIME_TYPE 3 /* @query */
@@ -538,6 +538,8 @@ extern int watch;
 
 #define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
+
+/* UINT_MAX is 4294967295 == 10 digits */
 #define DIGINUM(n) (((n) < 10) ? 1 \
 		: ((n) < 100)        ? 2 \
 		: ((n) < 1000)       ? 3 \
