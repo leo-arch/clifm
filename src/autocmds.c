@@ -80,12 +80,10 @@ check_autocmds(void)
 		/* Check workspaces (@wsN)*/
 		if (*autocmds[i].pattern == '@' && autocmds[i].pattern[1] == 'w'
 		&& autocmds[i].pattern[2] == 's' && autocmds[i].pattern[3]
-		&& is_number(autocmds[i].pattern + 3)) {
-			int n = atoi(autocmds[i].pattern + 3);
-			if (n >= 0 && n <= MAX_WS && n == cur_ws + 1) {
-				found = 1;
-				goto RUN_AUTOCMD;
-			}
+		/* char '1' - 48 (or '0') == int 1 */
+		&& autocmds[i].pattern[3] - 48 == cur_ws + 1) {
+			found = 1;
+			goto RUN_AUTOCMD;
 		}
 
 		/* Double asterisk: match everything starting with PATTERN
