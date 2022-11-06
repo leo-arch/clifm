@@ -200,6 +200,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - **NEW**: [Run autocommands based on workspaces, and not just on paths](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
   - **NEW**: [Run the pager based on the current amount of files](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status-num)
   - **NEW**: Files counter for directories in long view mode
   - **NEW**: [Filter files by file type](https://github.com/leo-arch/clifm/wiki/Introduction#ft-filter-unset-regexfile-type-char)
