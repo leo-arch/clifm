@@ -38,6 +38,7 @@
 #include <string.h>
 #if defined(__OpenBSD__)
 # include <strings.h>
+# include <inttypes.h> /* uintmax_t */
 #endif
 
 #include <glob.h>
