@@ -80,7 +80,7 @@ LongViewMode=false
 # s|S = size (either human readable (s) or bytes (S))
 # Defaults to "pims"
 # A single dash ("-") disables all fields
-# Ex: print only permissions (numeric) and size:
+# Ex: print only permissions (numeric) and size (human readable):
 #PropFields="ns"
 PropFields="pims"
 

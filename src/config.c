@@ -1135,11 +1135,12 @@ ShowHiddenFiles=%s\n\n\
 # List file properties next to file names instead of just file names\n\
 LongViewMode=%s\n\
 # Properties fields to be printed in long view mode\n\
+# f = files counter for directories\n\
 # d = inode number\n\
 # p|n = permissions: either symbolic (p) or numeric/octal (n)\n\
 # i = user/group IDs (numeric)\n\
 # a|c|m = either last (a)ccess, (m)odification or status (c)hange time\n\
-# s = size\n\
+# s|S = size (either human readable (s) or bytes (S))\n\
 # A single dash \"-\" disables all fields\n\
 PropFields=\"%s\"\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
@@ -1214,16 +1215,7 @@ SearchStrategy=%d\n\n"
 	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
 # path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
 # as /path. TAB completion is also available for bookmark names.\n\
-ExpandBookmarks=%s\n\n"
-
-	    "# In light mode, extra file type checks (except those provided by\n\
-# the d_type field of the dirent structure (see readdir(3))\n\
-# are disabled to speed up the listing process. stat(3) and access(3)\n\
-# are not executed at all, so that we cannot know in advance if a file\n\
-# is readable by the current user, if it is executable, SUID, SGID, if a\n\
-# symlink is broken, and so on. The file extension check is ignored as\n\
-# well, so that the color per extension feature is disabled.\n\
-LightMode=%s\n\n",
+ExpandBookmarks=%s\n\n",
 
 		DEF_FZF_PREVIEW == 1 ? "true" : "false",
 		DEF_MAX_PATH,
@@ -1250,11 +1242,18 @@ LightMode=%s\n\n",
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
 		DEF_HIGHLIGHT == 1 ? "true" : "false",
 		DEF_SEARCH_STRATEGY,
-		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
-		DEF_LIGHT_MODE == 1 ? "true" : "false"
+		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false"
 		);
 
 	fprintf(config_fp,
+	    "# In light mode, extra file type checks (except those provided by\n\
+# the d_type field of the dirent structure (see readdir(3))\n\
+# are disabled to speed up the listing process. Because of this, we cannot\n\
+# know in advance if a file is readable by the current user, if it is executable,\n\
+# SUID, SGID, if a symlink is broken, and so on. The file extension check is\n\
+# ignored as well, so that the color per extension feature is disabled.\n\
+LightMode=%s\n\n"
+
 	    "# If running with colors, append directory indicator\n\
 # to directories. If running without colors (via the --no-colors option),\n\
 # append file type indicator at the end of file names: '/' for directories,\n\
@@ -1268,7 +1267,7 @@ Classify=%s\n\n"
 ShareSelbox=%s\n\n"
 
 	    "# Choose the resource opener to open files with their default associated\n\
-# application. If not set, 'lira', CliFM's built-in opener, is used.\n\
+# application. If not set, Lira, CliFM's built-in opener, is used.\n\
 Opener=\n\n"
 
 	    "# Only used when opening a directory via a new CliFM instance (with the 'x'\n\
@@ -1347,6 +1346,7 @@ TrashAsRm=%s\n\n"
 	    "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
 RlEditMode=%d\n\n",
 
+		DEF_LIGHT_MODE == 1 ? "true" : "false",
 		DEF_CLASSIFY == 1 ? "true" : "false",
 		DEF_SHARE_SELBOX == 1 ? "true" : "false",
 		DEFAULT_TERM_CMD,

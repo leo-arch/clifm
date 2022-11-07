@@ -1062,7 +1062,7 @@ struct props_t {
 	int perm; /* File permissions; either NUMERIC or SYMBOLIC */
 	int ids; /* User and group IDs */
 	int time; /* Time: either ACCESS, MOD, or CHANGE */
-	int size; /* File size */
+	int size; /* File size: either HUMAN or BYTES */
 	int inode; /* File inode number */
 	int len; /* Approx len of the entire properties string taking into account
 	the above values */
