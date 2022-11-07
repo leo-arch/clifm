@@ -63,7 +63,7 @@
 # define GLOB_TILDE 0
 #endif
 
-/* Support large files on ARM or 32-bit machines */
+/* Support large files on ARM and 32-bit machines */
 #if defined(__arm__) || defined(__i386__)
 # define _FILE_OFFSET_BITS 64
 # define _TIME_BITS 64 /* Address Y2038 problem for 32 bits machines */
@@ -74,9 +74,11 @@
 # define _NO_MAGIC
 #endif
 
-#include <libintl.h>
+#ifndef _NO_GETTEXT
+# include <libintl.h>
+#endif
 #include <regex.h>
-#include <stddef.h>
+//#include <stddef.h>
 #include <stdlib.h>
 
 #if defined(__linux__)

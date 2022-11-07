@@ -254,14 +254,14 @@ int
 init_gettext(void)
 {
 	char locale_dir[PATH_MAX];
-	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", data_dir ? data_dir : "/usr/local/share");
+	snprintf(locale_dir, sizeof(locale_dir), "%s/locale", data_dir ? data_dir : "/usr/local/share");
 	bindtextdomain(PNL, locale_dir);
 	textdomain(PNL);
 
 	return EXIT_SUCCESS;
 
 }
-#endif
+#endif /* !_NO_GETTEXT */
 
 int
 backup_argv(int argc, char **argv)

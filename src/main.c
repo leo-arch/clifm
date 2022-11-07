@@ -30,10 +30,10 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <libintl.h>
+//#include <libintl.h>
 #include <locale.h>
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <termios.h>

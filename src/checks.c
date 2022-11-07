@@ -749,15 +749,15 @@ char **
 check_for_alias(char **args)
 {
 	/* Do not expand alias is first word is an ELN */
-	if (!aliases_n || !aliases || !args || flags & FIRST_WORD_IS_ELN)
+	if (aliases_n == 0 || !aliases || !args || flags & FIRST_WORD_IS_ELN)
 		return (char **)NULL;
 
 	int i;
 	if (conf.autocd == 1 || conf.auto_open == 1) {
 		/* Do not expand alias is first word is a file name in CWD */
 		struct stat a;
-		if (*args[0] == '\\' || (stat(args[0], &a) == 0 && ((S_ISDIR(a.st_mode) && conf.autocd == 1)
-		|| (!S_ISDIR(a.st_mode) && conf.auto_open == 1) ) ) )
+		if (*args[0] == '\\' || (stat(args[0], &a) == 0 && ((S_ISDIR(a.st_mode)
+		&& conf.autocd == 1) || (!S_ISDIR(a.st_mode) && conf.auto_open == 1) ) ) )
 			return (char **)NULL;
 	}
 
