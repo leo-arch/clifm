@@ -648,8 +648,9 @@ get_properties(char *filename, const int dsize)
 		char *n = abbreviate_file_name(linkname);
 		printf(_("\tName: %s%s%s -> %s%s%s\n"), color, wname ? wname
 			: filename, df_c, link_color, n ? n : linkname, NC);
+		if (n != linkname)
+			free(n);
 		free(linkname);
-		free(n);
 	} else { /* Broken link */
 		char link[PATH_MAX] = "";
 		ssize_t ret = readlinkat(AT_FDCWD, filename, link, sizeof(link));
