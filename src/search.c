@@ -42,6 +42,7 @@
 #include "checks.h"
 #include "colors.h"
 #include "exec.h"
+#include "messages.h"
 #include "misc.h"
 #include "navigation.h"
 #include "sort.h"

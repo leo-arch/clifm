@@ -40,6 +40,7 @@
 #include "exec.h"
 #include "init.h"
 #include "listing.h"
+#include "messages.h"
 #include "mime.h"
 #include "misc.h"
 #include "navigation.h"

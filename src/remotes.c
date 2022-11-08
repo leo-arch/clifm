@@ -31,6 +31,7 @@
 
 #include "aux.h"
 #include "exec.h"
+#include "init.h"
 #include "listing.h"
 #include "navigation.h"
 #include "history.h"

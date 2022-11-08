@@ -48,6 +48,7 @@
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
+#include "messages.h"
 #include "misc.h"
 
 /* Required by the pc command */

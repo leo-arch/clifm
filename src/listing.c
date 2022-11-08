@@ -58,6 +58,7 @@
 
 #include "aux.h"
 #include "colors.h"
+#include "messages.h"
 #include "misc.h"
 #include "properties.h"
 #include "sort.h"

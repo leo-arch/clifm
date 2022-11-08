@@ -36,6 +36,7 @@
 #include "checks.h"
 #include "aux.h" /* xatoi */
 #include "listing.h"
+#include "messages.h"
 
 int
 skip_nonexec(const struct dirent *ent)

@@ -104,9 +104,9 @@
 # include <sys/time.h>
 #endif /* __linux__ */
 
-#include "init.h"
+//#include "init.h"
 #include "strings.h"
-#include "messages.h"
+//#include "messages.h"
 #include "settings.h"
 
 #define _PROGRAM_NAME "CliFM"

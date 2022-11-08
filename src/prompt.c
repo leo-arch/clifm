@@ -42,6 +42,7 @@
 #include "history.h"
 #include "init.h"
 #include "listing.h"
+#include "messages.h"
 #include "misc.h"
 #include "navigation.h"
 #include "prompt.h"

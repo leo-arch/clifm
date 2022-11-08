@@ -38,6 +38,8 @@
 #include "aux.h"
 #include "misc.h"
 #include "exec.h"
+#include "init.h"
+#include "messages.h"
 #include "strings.h"
 #include "sort.h"
 

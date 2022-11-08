@@ -41,6 +41,7 @@
 #include "exec.h"
 #include "file_operations.h"
 #include "init.h"
+#include "messages.h"
 #include "mime.h"
 #include "misc.h"
 

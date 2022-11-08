@@ -48,6 +48,7 @@
 #if defined(__HAIKU__) || defined(__CYGWIN__)
 # include "listing.h"
 #endif
+#include "messages.h"
 #include "misc.h"
 #include "cleaner_table.h"
 #include "readline.h"
