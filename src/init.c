@@ -632,7 +632,6 @@ get_user_data(void)
 	tmp_user.uid = geteuid();
 	pw = getpwuid(tmp_user.uid);
 	if (!pw) { /* Fallback to environment variables (if not secure-env) */
-//		tmp_user.gid = getgid();
 		_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n", PROGRAM_NAME, strerror(errno));
 		return get_user_data_env();
 	}
