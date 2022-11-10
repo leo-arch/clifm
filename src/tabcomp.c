@@ -402,7 +402,7 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 	size_t dlen = strlen(dir);
 	if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir)) {
 		dir += FILE_URI_PREFIX_LEN;
-		dlen += FILE_URI_PREFIX_LEN;
+//		dlen += FILE_URI_PREFIX_LEN;
 	}
 
 	if (norm_prefix) {
@@ -759,7 +759,8 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				finder_in_file, finder_out_file);
 	}
 
-/*		snprintf(cmd, sizeof(cmd), "sk " // skim
+/*		UNUSED(prev_str); UNUSED(prev_hidden);
+		snprintf(cmd, sizeof(cmd), "sk " // skim
 				"%s --margin=0,0,0,%d --color=16 "
 				"--read0 --ansi --inline-info "
 				"--layout=reverse-list --query=\"%s\" %s %s "
@@ -767,7 +768,8 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 				*height_str ? height_str : "", *offset,
 				lw ? lw : "", conf.colorize == 0 ? "--no-color" : "",
 				multi ? "--multi --bind tab:toggle+down" : "",
-				finder_in_file, finder_out_file); */
+				finder_in_file, finder_out_file);
+	} */
 
 	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;
@@ -2031,16 +2033,18 @@ AFTER_USUAL_COMPLETION:
 			if (rl_filename_completion_desired) {
 				struct stat finfo;
 //				char *filename = tilde_expand(matches[0]);
-				char *filename = normalize_path(matches[0], strlen(matches[0]));
+				char *filename = matches[0]
+					? normalize_path(matches[0], strlen(matches[0]))
+					: (char *)NULL;
 
 				char *d = filename;
-				if (*filename == 'f' && filename[1] == 'i') {
+				if (filename && *filename == 'f' && filename[1] == 'i') {
 					size_t flen = strlen(filename);
 					if (flen > FILE_URI_PREFIX_LEN && IS_FILE_URI(filename))
 						d = filename + FILE_URI_PREFIX_LEN;
 				}
 
-				if ((stat(d, &finfo) == 0) && S_ISDIR(finfo.st_mode)) {
+				if (d && stat(d, &finfo) == 0 && S_ISDIR(finfo.st_mode)) {
 					if (rl_line_buffer[rl_point] != '/') {
 #ifndef _NO_HIGHLIGHT
 						if (conf.highlight && !wrong_cmd) {

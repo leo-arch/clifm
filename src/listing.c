@@ -685,7 +685,7 @@ get_columns(void)
 
 	/* If we have only three files, we don't want four columns */
 	if (n > files)
-		n = files;
+		n = files > 0 ? files : 1;
 
 	return n;
 }

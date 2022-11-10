@@ -1281,13 +1281,13 @@ vv_rename_files(char **args)
 	char **tmp = (char **)xnmalloc(args_n + 2, sizeof(char *));
 	tmp[0] = savestring("br", 2);
 
-	size_t i, l = strlen(args[args_n]);
+	size_t i, l = strlen(args[args_n]), c = 1;
 	if (l > 0 && args[args_n][l - 1] == '/')
 		args[args_n][l - 1] = '\0';
 
 	char *dest = args[args_n];
 
-	for (i = 1; i < args_n; i++) {
+	for (i = 1; i < args_n && args[i]; i++) {
 		l = strlen(args[i]);
 		if (l > 0 && args[i][l - 1] == '/')
 			args[i][l - 1] = '\0';
@@ -1296,10 +1296,11 @@ vv_rename_files(char **args)
 		char *s = strrchr(args[i], '/');
 		snprintf(p, sizeof(p), "%s/%s", dest, (s && *(++s)) ? s : args[i]);
 
-		tmp[i] = savestring(p, strlen(p));
+		tmp[c] = savestring(p, strlen(p));
+		c++;
 	}
 
-	tmp[i] = (char *)NULL;
+	tmp[c] = (char *)NULL;
 	int ret = bulk_rename(tmp);
 
 	for (i = 0; tmp[i]; i++)

@@ -1092,8 +1092,8 @@ my_rl_path_completion(const char *text, int state)
 		else
 			filename = savestring("", 1);
 
-		if (!*text)
-			text = ".";
+//		if (!*text)
+//			text = ".";
 
 		if (text_len)
 			dirname = savestring(p, text_len);

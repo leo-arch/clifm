@@ -377,11 +377,11 @@ get_common_perms(char **s, int *diff)
 	p.ux = p.gx = p.ox = 'x';
 	int suid = 1, sgid = 1, sticky = 1;
 
-	int i;
+	int i, stat_ready = 0;
 	for (i = 0; s[i]; i++) {
 		if (stat(s[i], &a) == -1)
 			continue;
-		if (i > 0 && a.st_mode != b.st_mode)
+		if (stat_ready == 1 && a.st_mode != b.st_mode)
 			*diff = 1;
 
 		mode_t val = (a.st_mode & (mode_t)~S_IFMT);
@@ -401,6 +401,7 @@ get_common_perms(char **s, int *diff)
 		if (!(a.st_mode & S_ISGID)) sgid = 0;
 		if (!(a.st_mode & S_ISVTX)) sticky = 0;
 
+		stat_ready = 1;
 		b = a;
 	}
 
