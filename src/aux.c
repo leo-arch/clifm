@@ -318,10 +318,21 @@ normalize_path(char *src, size_t src_len)
 		/* Relative path */
 		size_t pwd_len;
 		pwd_len = strlen(workspaces[cur_ws].path);
+		if (pwd_len == 1 && *workspaces[cur_ws].path == '/') {
+			/* If CWD is root (/) do not copy anything. Just create a buffer
+			 * big enough to hold "/dir", which will be appended next */
+			res = (char *)xnmalloc(l + 2, sizeof(char));
+			res_len = 0;
+		} else {
+			res = (char *)xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
+			memcpy(res, workspaces[cur_ws].path, pwd_len);
+			res_len = pwd_len;
+		}
+
 //		res = (char *)xnmalloc(pwd_len + 1 + src_len + 1, sizeof(char));
-		res = (char *)xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
+/*		res = (char *)xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
 		memcpy(res, workspaces[cur_ws].path, pwd_len);
-		res_len = pwd_len;
+		res_len = pwd_len; */
 	} else {
 //		res = (char *)xnmalloc(src_len + 1, sizeof(char));
 		res = (char *)xnmalloc(l + 1, sizeof(char));
@@ -362,6 +373,7 @@ normalize_path(char *src, size_t src_len)
 			}
 			break;
 		}
+
 		res[res_len] = '/';
 		res_len++;
 		memcpy(&res[res_len], ptr, len);
