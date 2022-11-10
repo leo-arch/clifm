@@ -89,7 +89,7 @@ check_autocmds(void)
 		/* Double asterisk: match everything starting with PATTERN
 		 * (less double asterisk itself and ending slash)*/
 		size_t plen = strlen(p), n = 0;
-		if (!rev && plen > 3 && p[plen - 1] == '*' && p[plen - 2] == '*') {
+		if (!rev && plen >= 3 && p[plen - 1] == '*' && p[plen - 2] == '*') {
 			n = 2;
 			if (p[plen - 3] == '/')
 				n++;
@@ -107,7 +107,10 @@ check_autocmds(void)
 					goto RUN_AUTOCMD;
 				}
 			} else { /* We have an absolute path */
-				if (strncmp(autocmds[i].pattern, workspaces[cur_ws].path, plen - n) == 0) {
+				/* If (plen - n) == 0 we have "/\**", that is, match everything:
+				 * no need to perform any check. */
+				if (plen - n == 0
+				|| strncmp(autocmds[i].pattern, workspaces[cur_ws].path, plen - n) == 0) {
 					found = 1;
 					goto RUN_AUTOCMD;
 				}
@@ -276,18 +279,26 @@ static void
 init_autocmd_opts()
 {
 	autocmds[autocmds_n].cmd = (char *)NULL;
-	autocmds[autocmds_n].color_scheme = opts.color_scheme;
-	autocmds[autocmds_n].files_counter = opts.files_counter;
-	autocmds[autocmds_n].light_mode = opts.light_mode;
-	autocmds[autocmds_n].long_view = opts.long_view;
+//	autocmds[autocmds_n].color_scheme = opts.color_scheme;
+//	autocmds[autocmds_n].files_counter = opts.files_counter;
+//	autocmds[autocmds_n].light_mode = opts.light_mode;
+//	autocmds[autocmds_n].long_view = opts.long_view;
+	autocmds[autocmds_n].color_scheme = cur_cscheme;
+	autocmds[autocmds_n].files_counter = conf.files_counter;
+	autocmds[autocmds_n].light_mode = conf.light_mode;
+	autocmds[autocmds_n].long_view = conf.long_view;
+
 	autocmds[autocmds_n].max_files = max_files;
 	autocmds[autocmds_n].max_name_len = conf.max_name_len;
 	autocmds[autocmds_n].only_dirs = conf.only_dirs;
-	autocmds[autocmds_n].pager = opts.pager;
-	autocmds[autocmds_n].show_hidden = opts.show_hidden;
+
+//	autocmds[autocmds_n].pager = opts.pager;
+//	autocmds[autocmds_n].show_hidden = opts.show_hidden;
+	autocmds[autocmds_n].pager = conf.pager;
+	autocmds[autocmds_n].show_hidden = conf.show_hidden;
+
 	autocmds[autocmds_n].sort = conf.sort;
 	autocmds[autocmds_n].sort_reverse = conf.sort_reverse;
-
 }
 
 /* Take an autocmd line (from the config file) and store parameters
