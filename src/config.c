@@ -196,6 +196,14 @@ setenv_plugins_helper(void)
 			return EXIT_SUCCESS;
 	}
 
+	if (data_dir && *data_dir) {
+		char _path[PATH_MAX];
+		snprintf(_path, sizeof(_path), "%s/%s/plugins/plugins-helper", data_dir, PNL);
+
+		if (stat(_path, &attr) != -1 && setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
+			return EXIT_SUCCESS;
+	}
+
 	const char *_paths[] = {
 #if defined(__HAIKU__)
 		"/boot/system/non-packaged/data/clifm/plugins/plugins-helper",
