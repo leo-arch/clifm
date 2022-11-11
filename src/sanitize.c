@@ -192,7 +192,7 @@ sanitize_cmd_environ(void)
 	char p[PATH_MAX];
 
 #ifdef _PATH_STDPATH
-	snprintf(p, PATH_MAX, "PATH=%s", _PATH_STDPATH);
+	snprintf(p, sizeof(p), "PATH=%s", _PATH_STDPATH);
 	new_env[n] = savestring(p, strlen(p));
 	n++;
 #else
@@ -208,20 +208,20 @@ sanitize_cmd_environ(void)
 	new_env[n] = savestring("IFS=\" \n\t\"", 9);
 	n++;
 	if (user.name) {
-		snprintf(p, PATH_MAX, "USER=%s", user.name);
+		snprintf(p, sizeof(p), "USER=%s", user.name);
 		new_env[n] = savestring(p, strlen(p));
 		n++;
-		snprintf(p, PATH_MAX, "LOGNAME=%s", user.name);
+		snprintf(p, sizeof(p), "LOGNAME=%s", user.name);
 		new_env[n] = savestring(p, strlen(p));
 		n++;
 	}
 	if (user.home) {
-		snprintf(p, PATH_MAX, "HOME=%s", user.home);
+		snprintf(p, sizeof(p), "HOME=%s", user.home);
 		new_env[n] = savestring(p, strlen(p));
 		n++;
 	}
 	if (user.shell) {
-		snprintf(p, PATH_MAX, "SHELL=%s", user.shell);
+		snprintf(p, sizeof(p), "SHELL=%s", user.shell);
 		new_env[n] = savestring(p, strlen(p));
 		n++;
 	}

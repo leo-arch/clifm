@@ -1371,11 +1371,27 @@ load_prompts(void)
 	return EXIT_SUCCESS;
 }
 
+static char *
+get_home_sec_env(void)
+{
+	struct passwd *pw = (struct passwd *)NULL;
+
+	uid_t u = geteuid();
+	pw = getpwuid(u);
+	if (!pw) {
+		_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n", PROGRAM_NAME, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	return (pw->pw_dir);
+}
+
 /* Opener function: open FILENAME and exit */
 static void
 open_reg_exit(char *filename, const int url, const int preview)
 {
-	char *homedir = getenv("HOME");
+	char *homedir = (xargs.secure_env == 1 || xargs.secure_env_full == 1)
+		? get_home_sec_env() : getenv("HOME");
 	if (!homedir) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: Could not retrieve the home directory\n", PROGRAM_NAME);
 		exit(EXIT_FAILURE);
@@ -2428,18 +2444,32 @@ get_cdpath(void)
 	return n;
 }
 
+static size_t
+count_chars(const char *s, const char c)
+{
+	if (!s || !*s)
+		return 0;
+
+	size_t n = 0;
+	while (*s) {
+		if (*s == c)
+			n++;
+		s++;
+	}
+
+	return n;
+}
+
 /* Store all paths in the PATH environment variable into a globally
- * declared array (paths) */
+ * declared array (paths)
+ * Returns the number of stored paths  */
 size_t
 get_path_env(void)
 {
-	size_t i = 0;
-	/* Get the value of the PATH env variable */
-	char *path_tmp = (char *)NULL;
 	char *ptr = (char *)NULL;
 	int malloced_ptr = 0;
 
-	/* If running in a sanitized environment, or PATH cannot be retrieved for
+	/* If running on a sanitized environment, or PATH cannot be retrieved for
 	 * whatever reason, get PATH value from a secure source */
 	if (xargs.secure_cmds == 1 || xargs.secure_env == 1
 	|| xargs.secure_env_full == 1 || !(ptr = getenv("PATH")) || !*ptr) {
@@ -2463,37 +2493,68 @@ get_path_env(void)
 		return 0;
 	}
 
-	if (malloced_ptr == 1)
+	char *path_tmp = malloced_ptr == 1 ? ptr : savestring(ptr, strlen(ptr));
+/*	if (malloced_ptr == 1)
 		path_tmp = ptr;
 	else
 		path_tmp = savestring(ptr, strlen(ptr));
 
 	if (!path_tmp)
-		return 0;
+		return 0; */
 
-	/* Get each path in PATH */
-	size_t n = 0, len = 0;
+	size_t c = count_chars(path_tmp, ':') + 1;
+	paths = (char **)xnmalloc(c + 1, sizeof(char *));
+
+	// Get each path in PATH
+	size_t n = 0;
+	char *p = path_tmp, *q = p;
+	while (1) {
+		if (*q && *q != ':' && *(++q))
+			continue;
+
+		char d = *q;
+		*q = '\0';
+		if (*p && (q - p) > 0) {
+			paths[n] = savestring(p, (size_t)(q - p));
+			n++;
+		}
+
+		if (!d || n == c)
+			break;
+
+		p = ++q;
+	}
+
+/*	n = 0;
+	size_t i = 0, len = 0;
 	for (i = 0; path_tmp[i]; i++) {
-		/* Store path in PATH in a tmp buffer */
+		// Store path in PATH in a tmp buffer
 		char buf[PATH_MAX];
-		while (path_tmp[i] && path_tmp[i] != ':' && len < PATH_MAX) {
+		while (path_tmp[i] && path_tmp[i] != ':' && len < sizeof(buf)) {
 			buf[len] = path_tmp[i];
 			len++;
 			i++;
 		}
 		buf[len] = '\0';
 
-		/* Make room in paths for a new path */
-		paths = (char **)xrealloc(paths, (n + 1) * sizeof(char *));
-		/* Dump the buffer into the global paths array */
+		// Make room in paths for a new path
+//		paths = (char **)xrealloc(paths, (n + 1) * sizeof(char *));
+		// Dump the buffer into the global paths array
 		paths[n] = savestring(buf, len);
 		n++;
 		len = 0;
 		if (!path_tmp[i])
 			break;
-	}
+	} */
 
+	paths[n] = (char *)NULL;
 	free(path_tmp);
+
+/*	for (size_t j = 0; paths[j]; j++)
+//	for (size_t j = 0; j < n; j++)
+		printf("%s\n", paths[j]);
+
+	printf("PATHS: %zu\n", n); */
 	return n;
 }
 

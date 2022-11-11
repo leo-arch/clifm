@@ -308,6 +308,7 @@ edit_actions(char *app)
 		size_t i;
 		for (i = 0; i < path_n; i++)
 			free(paths[i]);
+		free(paths);
 	}
 
 	path_n = (size_t)get_path_env();

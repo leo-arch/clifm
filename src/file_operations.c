@@ -510,6 +510,9 @@ run_mime(char *file)
 	if (!file || !*file)
 		return EXIT_FAILURE;
 
+	if (xargs.preview == 1 || xargs.open == 1)
+		goto RUN;
+
 	char *p = rl_line_buffer ? rl_line_buffer : (char *)NULL;
 
 	/* Convert ELN into file name (rl_line_buffer) */
@@ -526,8 +529,10 @@ run_mime(char *file)
 		return mime_open(cmd);
 	}
 
+RUN: {
 	char *cmd[] = {"mm", file, NULL};
 	return mime_open(cmd);
+	}
 }
 #endif /* _NO_LIRA */
 

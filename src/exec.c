@@ -498,6 +498,7 @@ reload_binaries(void)
 		int j = (int)path_n;
 		while (--j >= 0)
 			free(paths[j]);
+		free(paths);
 	}
 
 	path_n = (size_t)get_path_env();

@@ -248,6 +248,7 @@ profile_set(char *prof)
 		i = (int)path_n;
 		while (--i >= 0)
 			free(paths[i]);
+		free(paths);
 	}
 
 	path_n = (size_t)get_path_env();
@@ -279,7 +280,7 @@ profile_set(char *prof)
 	if (conf.autols == 1)
 		reload_dirlist();
 
-	print_reload_msg(_("Switched to profile %s%s%s\n"), BOLD,	prof, NC);
+	print_reload_msg(_("Switched to profile %s%s%s\n"), BOLD, prof, NC);
 	return exit_status;
 }
 
