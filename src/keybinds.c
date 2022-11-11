@@ -247,6 +247,18 @@ load_keybinds(void)
 	return EXIT_SUCCESS;
 }
 
+/* This call to prompt() just updates the prompt in case it was modified,
+ * for example, in case of chdir, files selection, and so on */
+static void
+rl_update_prompt(void)
+{
+	int b = xargs.refresh_on_empty_line;
+	xargs.refresh_on_empty_line = 0;
+	char *input = prompt();
+	free(input);
+	xargs.refresh_on_empty_line = b;
+}
+
 /* Runs any command recognized by CliFM via a keybind. Example:
  * keybind_exec_cmd("sel *") */
 int
@@ -279,16 +291,7 @@ keybind_exec_cmd(char *str)
 			free(cmd[i]);
 		free(cmd);
 
-		/* This call to prompt() just updates the prompt in case it was
-		 * modified, for example, in case of chdir, files selection, and
-		 * so on */
-		int rel = xargs.refresh_on_empty_line;
-		xargs.refresh_on_empty_line = 0;
-
-		char *buf = prompt();
-		free(buf);
-
-		xargs.refresh_on_empty_line = rel;
+		rl_update_prompt();
 	}
 
 	args_n = old_args;
@@ -1301,10 +1304,8 @@ rl_previous_profile(int count, int key)
 		putchar('\n');
 	}
 
-	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
-		char *input = prompt();
-		free(input);
-	}
+	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS)
+		rl_update_prompt();
 
 	return EXIT_SUCCESS;
 }
@@ -1337,10 +1338,8 @@ rl_next_profile(int count, int key)
 		putchar('\n');
 	}
 
-	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
-		char *input = prompt();
-		free(input);
-	}
+	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS)
+		rl_update_prompt();
 
 	return EXIT_SUCCESS;
 }
