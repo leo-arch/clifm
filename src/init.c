@@ -442,10 +442,19 @@ get_data_dir(void)
 	}
 #endif
 
-	/* Alternatively, try standard values for DATADIR */
+	/* Alternatively, try some standard values for DATADIR */
+	char home_local[PATH_MAX];
+	*home_local = '\0';
+	if (user.home && *user.home)
+		snprintf(home_local, sizeof(home_local), "%s/.local/share", user.home);
+
 	char *data_dirs[] = {
-		"/usr/share",
 		"/usr/local/share",
+		"/usr/share",
+		"/opt/local/share",
+		"/opt/share",
+		"/opt/clifm/share",
+		home_local,
 #if defined(__HAIKU__)
 		"/boot/system/non-packaged/data",
 		"/boot/system/data",
