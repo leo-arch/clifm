@@ -5,6 +5,7 @@
 BIN ?= clifm
 
 PREFIX ?= /boot/system/non-packaged
+BINDIR ?= $(PREFIX)/bin
 MANPREFIX ?= $(PREFIX)/documentation/man
 DATADIR ?= $(PREFIX)/data
 PROG_DATADIR ?= $(DATADIR)/$(BIN)
@@ -71,8 +72,8 @@ clean:
 	$(RM) -f -- $(SRCDIR)/*.o
 
 install: build
-	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/bash-completion/completions
@@ -99,7 +100,7 @@ install: build
 	@printf "Successfully installed $(BIN)\n"
 
 uninstall:
-	$(RM) -- $(DESTDIR)$(PREFIX)/bin/$(BIN)
+	$(RM) -- $(DESTDIR)$(BINDIR)/$(BIN)
 	$(RM) -- $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1.gz
 	$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)

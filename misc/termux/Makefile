@@ -5,6 +5,7 @@
 BIN ?= clifm
 
 PREFIX ?= /data/data/com.termux/files/usr
+BINDIR ?= $(PREFIX)/bin
 DATADIR ?= $(PREFIX)/share
 MANDIR ?= $(PREFIX)/man
 LOCALEDIR ?= $(DATADIR)/locale
@@ -35,8 +36,8 @@ clean:
 	$(RM) -f -- $(SRCDIR)/*.o
 
 install: $(BIN)
-	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/bash-completion/completions
@@ -68,7 +69,7 @@ install: $(BIN)
 	@printf "Successfully installed $(BIN)\n"
 
 uninstall:
-	$(RM) -- $(DESTDIR)$(PREFIX)/bin/$(BIN)
+	$(RM) -- $(DESTDIR)$(BINDIR)/$(BIN)
 	$(RM) -- $(DESTDIR)$(MANDIR)/man1/$(BIN).1*
 	$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
