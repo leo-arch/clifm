@@ -87,7 +87,13 @@ get_file() {
 		fi
 
 		if [ -z "$FILE" ]; then
-			if [ -f "/usr/share/clifm/plugins/$name" ]; then
+			if [ "$CLIFM_PLUGINS_HELPER" ]; then
+				helper="$(dirname "$CLIFM_PLUGINS_HELPER")"
+			fi
+
+			if [ "$helper" ] && [ -f "$helper/$name" ]; then
+				FILE="$helper/$name"
+			elif [ -f "/usr/share/clifm/plugins/$name" ]; then
 				FILE="/usr/share/clifm/plugins/$name"
 			elif [ -f "/usr/local/share/clifm/plugins/$name" ]; then
 				FILE="/usr/local/share/clifm/plugins/$name"
