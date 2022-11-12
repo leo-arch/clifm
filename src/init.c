@@ -599,6 +599,7 @@ static struct user_t
 get_user_data_env(void)
 {
 	struct user_t tmp_user;
+	tmp_user.home = (char *)NULL;
 	/* If secure-env, do not fallback to environment variables */
 	int sec_env = is_secure_env();
 	char *t = sec_env == 0 ? getenv("HOME") : (char *)NULL;
@@ -608,11 +609,20 @@ get_user_data_env(void)
 		char *h = p ? p : t;
 		tmp_user.home = savestring(h, strlen(h));
 		free(p);
-	} else {
+	} /*else {
 		tmp_user.home = (char *)NULL;
+	} */
+
+	struct stat a;
+	if (!tmp_user.home || !*tmp_user.home || stat(tmp_user.home, &a) == -1
+	|| !S_ISDIR(a.st_mode)) {
+		free(tmp_user.home);
+		fprintf(stderr, "%s: Home directory not found. Exiting.\n", PROGRAM_NAME);
+		exit(EXIT_FAILURE);
 	}
 
-	tmp_user.home_len = tmp_user.home ? strlen(tmp_user.home) : 0;
+	tmp_user.home_len = strlen(tmp_user.home);
+//	tmp_user.home_len = tmp_user.home ? strlen(tmp_user.home) : 0;
 
 	t = sec_env == 0 ? getenv("USER") : (char *)NULL;;
 	tmp_user.name = t ? savestring(t, strlen(t)) : (char *)NULL;
