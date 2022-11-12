@@ -842,7 +842,6 @@ check_cfm_files(void)
 		return;
 	}
 
-
 	fprintf(stderr, "##################\n"
 	"# IMPORTANT NOTE #\n"
 	"##################\n\n"
@@ -885,7 +884,8 @@ define_config_file_names(void)
 		alt_config_dir = (char *)NULL;
 	} else {
 		/* If $XDG_CONFIG_HOME is set, use it for the config file.
-		 * Else, fall back to $HOME/.config */
+		 * Else, fall back to user.home: $HOME if not secure-env or pw_dir
+		 * from a passwd struct) */
 		char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 		if (xdg_config_home) {
 			size_t xdg_config_home_len = strlen(xdg_config_home);

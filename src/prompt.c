@@ -237,8 +237,8 @@ gen_exit_status(void)
 
 	char *temp = (char *)xnmalloc(code_len + 12 + MAX_COLOR, sizeof(char));
 	sprintf(temp, "%s%d\001%s\002",
-			(exit_code == 0) ? (conf.colorize == 1 ? xs_c : "")
-			: (conf.colorize == 1 ? xf_c : ""), exit_code, df_c);
+		(exit_code == 0) ? (conf.colorize == 1 ? xs_c : "")
+		: (conf.colorize == 1 ? xf_c : ""), exit_code, df_c);
 
 	return temp;
 }

@@ -630,6 +630,21 @@ get_user_data_env(void)
 	return tmp_user;
 }
 
+/* Return the value of the environment variable S, allocated via malloc if
+ * ALLOC is 1, or just a pointer to the value if 0 */
+char *
+xgetenv(const char *s, const int alloc)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	char *p = getenv(s);
+	if (p && *p)
+		return alloc == 1 ? savestring(p, strlen(p)) : p;
+
+	return (char *)NULL;
+}
+
 /* Retrieve user information and store it in a user_t struct for later access */
 struct user_t
 get_user_data(void)
@@ -647,24 +662,49 @@ get_user_data(void)
 
 	tmp_user.uid = pw->pw_uid;
 	tmp_user.gid = pw->pw_gid;
-	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
-	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
-
 	tmp_user.ngroups = 0;
 	tmp_user.groups = get_user_groups(pw->pw_name, pw->pw_gid, &tmp_user.ngroups);
+
+	struct stat a;
+	char *homedir = (char *)NULL;
+	if (is_secure_env() == 0) {
+		char *q = xgetenv("USER", 1);
+		tmp_user.name = q ? q : savestring(pw->pw_name, strlen(pw->pw_name));
+		q = xgetenv("SHELL", 1);
+		tmp_user.shell = q ? q : savestring(pw->pw_shell, strlen(pw->pw_shell));
+		q = xgetenv("HOME", 0);
+		homedir = q ? q : pw->pw_dir;
+
+		if (homedir == q && (stat(q, &a) == -1 || !S_ISDIR(a.st_mode))) {
+			_err('e', PRINT_PROMPT, _("%s: %s: Home directory not found\n"
+				"Falling back to %s\n"), PROGRAM_NAME, q, pw->pw_dir);
+			homedir = pw->pw_dir;
+		}
+	} else {
+		tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
+		tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
+		homedir = pw->pw_dir;
+	}
+
+	if (homedir == pw->pw_dir && (stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
+		fprintf(stderr, _("%s: %s: Invalid home directory in the password database.\n"
+			"Something is really wrong. Exiting.\n"), PROGRAM_NAME, homedir);
+		exit(errno);
+	}
 
 	/* Sometimes (FreeBSD for example) the home directory, as returned by the
 	 * passwd struct, is a symlink, in which case we want to resolve it
 	 * See https://lists.freebsd.org/pipermail/freebsd-arm/2016-July/014404.html */
-	char *p = realpath(pw->pw_dir, NULL);
-	if (p) {
-		tmp_user.home = savestring(p, strlen(p));
-		free(p);
+	char *r = realpath(homedir, NULL);
+	if (r) {
+		tmp_user.home_len = strlen(r);
+		tmp_user.home = savestring(r, tmp_user.home_len);
+		free(r);
 	} else {
-		tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
+		tmp_user.home_len = strlen(homedir);
+		tmp_user.home = savestring(homedir, tmp_user.home_len);
 	}
 
-	tmp_user.home_len = tmp_user.home ? strlen(tmp_user.home) : 0;
 	return tmp_user;
 }
 
