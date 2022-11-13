@@ -2157,7 +2157,9 @@ exec_cmd(char **comm)
 			return exit_code;
 
 	/* # AUTOCD & AUTO-OPEN (1) # */
-	if ((exit_code = check_auto_first(comm)) != -1)
+	/* rl_dispatching is set to 1 if coming from a keybind: we have a
+	 * command, not a file. So, skip this check */
+	if (rl_dispatching == 0 && (exit_code = check_auto_first(comm)) != -1)
 		return exit_code;
 
 	exit_code = EXIT_SUCCESS;
