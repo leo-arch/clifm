@@ -2070,7 +2070,7 @@ preview_function(char **args)
 	if (tabmode != FZF_TAB) {
 		char *p = get_cmd_path("fzf");
 		if (!p) {
-			_err(0, NOPRINT_PROMPT, "%s: fzf: Command not found\n", PROGRAM_NAME);
+			_err(0, NOPRINT_PROMPT, _("%s: fzf: Command not found\n"), PROGRAM_NAME);
 			return 127;
 		}
 		free(p);

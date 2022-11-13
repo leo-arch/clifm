@@ -159,7 +159,7 @@ kbinds_function(char **args)
 
 	if (!args[1]) {
 		if (kbinds_n == 0) {
-			printf("%s: kb: No keybindings defined\n", PROGRAM_NAME);
+			printf(_("%s: kb: No keybindings defined\n"), PROGRAM_NAME);
 			return EXIT_SUCCESS;
 		}
 		size_t i;
@@ -312,7 +312,7 @@ run_kb_cmd(char *cmd)
 		fflush(stdout);
 	}
 
-	/* Disable the auto-open/autocd checks: CMD is not a file, but a cmd */
+	/* Disable the auto-open/autocd checks: CMD is not a file name, but a cmd */
 	rl_dispatching = 1;
 	keybind_exec_cmd(cmd);
 	rl_dispatching = 0;
@@ -897,7 +897,7 @@ rl_dirs_first(int count, int key)
 	}
 
 	print_reload_msg(_("Directories first %s\n"),
-		conf.list_dirs_first ? "enabled" : "disabled");
+		conf.list_dirs_first ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
