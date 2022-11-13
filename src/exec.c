@@ -93,8 +93,8 @@ get_new_name(char *old_name)
 	prompt_offset = 3;
 
 	char m[NAME_MAX];
-	snprintf(m, sizeof(m), "Enter new name ('Ctrl-d' to quit)\n"
-		"\001%s\002>\001%s\002 ", mi_c, tx_c);
+	snprintf(m, sizeof(m), _("Enter new name ('Ctrl-d' to quit)\n"
+		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 	char *p = dequote_str(old_name, 0);
 	alt_rl_prompt(m, p ? p : old_name);
 	free(p);
@@ -138,7 +138,7 @@ run_and_refresh(char **cmd, const int skip_force)
 					break;
 			}
 			if (i == -1) {
-				fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, cmd[1]);
+				fprintf(stderr, _("%s: %s: Invalid ELN\n"), PROGRAM_NAME, cmd[1]);
 				xrename = 0;
 				return EXIT_FAILURE;
 			}
@@ -1312,7 +1312,7 @@ export_function(char **args)
 
 	char *ret = export(args, 1);
 	if (ret) {
-		printf("Files exported to: %s\n", ret);
+		printf(_("Files exported to: %s\n"), ret);
 		free(ret);
 		return EXIT_SUCCESS;
 	}
@@ -1680,7 +1680,7 @@ lira_function(char **args)
 	return EXIT_FAILURE;
 #else
 	UNUSED(args);
-	fprintf(stderr, _("%s: lira: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	fprintf(stderr, "%s: lira: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
 #endif
 }
@@ -1794,7 +1794,7 @@ _untrash_function(char **args, int *_cont)
 	return exit_status;
 #else
 	UNUSED(args);
-	fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	fprintf(stderr, "%s: trash: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	*_cont = 0;
 	return EXIT_FAILURE;
 #endif /* !_NO_TRASH */
@@ -2158,7 +2158,7 @@ exec_cmd(char **comm)
 
 	/* # AUTOCD & AUTO-OPEN (1) # */
 	/* rl_dispatching is set to 1 if coming from a keybind: we have a
-	 * command, not a file. So, skip this check */
+	 * command, not a file name. So, skip this check */
 	if (rl_dispatching == 0 && (exit_code = check_auto_first(comm)) != -1)
 		return exit_code;
 
@@ -2452,7 +2452,7 @@ exec_cmd(char **comm)
 #ifndef _NO_BLEACH
 		exit_code = bleach_files(comm);
 #else
-		fprintf(stderr, _("%s: bleach: %s\n"), PROGRAM_NAME, NOT_AVAILABLE);
+		fprintf(stderr, "%s: bleach: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 		return EXIT_FAILURE;
 #endif
 	}
@@ -2471,7 +2471,7 @@ exec_cmd(char **comm)
 		else
 			exit_code = archiver(comm, 'd');
 #else
-		fprintf(stderr, _("%s: archiver: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+		fprintf(stderr, "%s: archiver: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
 #endif
 	}
@@ -2771,7 +2771,6 @@ run_profile_line(char *cmd)
 	no_log = 1;
 	exec_cmd(cmds);
 	no_log = 0;
-//	flags &= ~RUNNING_SHELL_CMD;
 
 	int i = (int)args_n + 1;
 	while (--i >= 0)

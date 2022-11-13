@@ -313,9 +313,9 @@ run_kb_cmd(char *cmd)
 	}
 
 	/* Disable the auto-open/autocd checks: CMD is not a file name, but a cmd */
-	rl_dispatching = 1;
+//	rl_dispatching = 1;
 	keybind_exec_cmd(cmd);
-	rl_dispatching = 0;
+//	rl_dispatching = 0;
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
