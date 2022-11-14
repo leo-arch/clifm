@@ -205,6 +205,9 @@ set \fINAME\fR as color scheme
 \fB\-\-cwd\-in\-title\fR
 print current working directory in terminal window title. Otherwise, only the program name is printed
 .TP
+\fB\-\-data\-dir=\fI\,DIR\/\fR
+load data files, such as plugins, color schemes, and default configuration files, from \fIDIR\fR 
+.TP
 \fB\-\-desktop\-notifications\fR
 enable desktop notifications. Enter \fIhelp desktop-notifications\fR in \fBclifm\fR for more information
 .TP
