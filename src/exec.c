@@ -458,7 +458,7 @@ graceful_quit(char **args)
 	for (i = 1; i <= args_n; i++) {
 		if ((strcmp(args[0], "kill") == 0 && atoi(args[i]) == (int)own_pid)
 		|| ((strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)
-		&& strcmp(args[i], argv_bk[0]) == 0)) {
+		&& bin_name && strcmp(args[i], bin_name) == 0)) {
 			fprintf(stderr, _("%s: To gracefully quit enter 'q'\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
@@ -2670,7 +2670,8 @@ exec_cmd(char **comm)
 		if ((exit_code = check_auto_second(comm)) != -1)
 			return exit_code;
 
-		if (*comm[0] == *argv_bk[0] && strcmp(comm[0], argv_bk[0]) == 0) {
+		if (bin_name && *bin_name && *comm[0] == *bin_name
+		&& strcmp(comm[0], bin_name) == 0) {
 			fprintf(stderr, _("%s: To launch a new instance use the 'x' command\n"), PROGRAM_NAME);
 			return (exit_code = EXIT_FAILURE);
 		}

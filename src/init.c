@@ -269,19 +269,18 @@ backup_argv(int argc, char **argv)
 	argc_bk = argc;
 	argv_bk = (char **)xnmalloc((size_t)argc + 1, sizeof(char *));
 
-	/* Let's store only the executable file name, excluding the path
-	 * This is mainly done to detect and disallow nested instances (see exec.c) */
-	char *name_bk = argv[0];
+	/* Let's store the executable base name, excluding the path
+	 * This is done mainly to detect and disallow nested instances (see exec.c) */
 	char *n = strrchr(argv[0], '/');
 	if (n && *n && *(n + 1))
-		argv[0] = n + 1;
+		bin_name = savestring(n + 1, strlen(n + 1));
+	else
+		bin_name = savestring(argv[0], strlen(argv[0]));
 
 	int i = argc;
 	while (--i >= 0)
 		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
 	argv_bk[argc] = (char *)NULL;
-
-	argv[0] = name_bk;
 
 	return EXIT_SUCCESS;
 }
@@ -426,23 +425,9 @@ set_start_path(void)
 	return EXIT_SUCCESS;
 }
 
-/* Get the system data directory (usually /usr/local/share), first from
- * CLIFM_DATADIR, defined in the Makefile, and then from standard paths */
-void
-get_data_dir(void)
+static int
+try_standard_data_dirs(void)
 {
-#ifdef CLIFM_DATADIR
-	struct stat a;
-	char p[PATH_MAX];
-	snprintf(p, sizeof(p), "%s/%s", STRINGIZE(CLIFM_DATADIR), PNL);
-	if (stat(p, &a) != -1) {
-		data_dir = (char *)xnmalloc(strlen(STRINGIZE(CLIFM_DATADIR)) + 1, sizeof(char));
-		strcpy(data_dir, STRINGIZE(CLIFM_DATADIR));
-		return;
-	}
-#endif
-
-	/* Alternatively, try some standard values for DATADIR */
 	char home_local[PATH_MAX];
 	*home_local = '\0';
 	if (user.home && *user.home)
@@ -461,20 +446,167 @@ get_data_dir(void)
 #endif
 		NULL };
 
-	struct stat attr;
 	size_t i;
+	struct stat a;
 
 	for (i = 0; data_dirs[i]; i++) {
 		char tmp[PATH_MAX];
-		snprintf(tmp, sizeof(tmp), "%s/%s", data_dirs[i], PNL);
-		if (stat(tmp, &attr) == -1)
+		snprintf(tmp, sizeof(tmp), "%s/%s/%src", data_dirs[i], PNL, PNL);
+
+		if (stat(tmp, &a) == -1 || !S_ISREG(a.st_mode))
 			continue;
-		data_dir = (char *)xrealloc(data_dir, (strlen(data_dirs[i]) + 1) * sizeof(char));
-		strcpy(data_dir, data_dirs[i]);
-		break;
+
+		data_dir = savestring(data_dirs[i], strlen(data_dirs[i]));
+		return EXIT_SUCCESS;
 	}
 
-	return;
+	return EXIT_FAILURE;
+}
+
+static char *
+try_datadir(char *dir)
+{
+	if (!dir || !*dir)
+		return (char *)NULL;
+
+	/* Remove ending "/bin" from DIR */
+	char *r = strrchr(dir, '/');
+	if (r && *r && *(++r) && *r == 'b'
+	&& strcmp(r, "bin") == 0)
+		*(r - 1) = '\0';
+
+	struct stat a;
+
+	char p[PATH_MAX];
+
+	/* Try DIR/share/clifm/clifmrc */
+	snprintf(p, sizeof(p), "%s/share/%s/%src", dir, PNL, PNL);
+	if (stat(p, &a) != -1 && S_ISREG(a.st_mode)) {
+		char *q = (char *)xnmalloc(strlen(dir) + 7, sizeof(char));
+		sprintf(q, "%s/share", dir);
+		return q;
+	}
+
+	/* Try DIR/clifm/clifmrc */
+	snprintf(p, sizeof(p), "%s/%s/%src", dir, PNL, PNL);
+	if (stat(p, &a) != -1 && S_ISREG(a.st_mode))
+		return savestring(dir, strlen(dir));
+
+	/* Try DIR/clifmrc */
+	snprintf(p, sizeof(p), "%s/%src", dir, PNL);
+	if (stat(p, &a) != -1 && S_ISREG(a.st_mode))
+		return savestring(dir, strlen(dir));
+
+	return (char *)NULL;
+}
+
+static char *
+resolve_absolute_path(char *s)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	char *p = strrchr(s, '/'), *t = (char *)NULL;
+	if (p && p != s)
+		*p = '\0';
+	else
+		t = "/";
+
+	if (p)
+		*p = '/';
+
+	return try_datadir(t ? t : s);
+}
+
+static char *
+resolve_relative_path(char *s)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	char *p = realpath(s, NULL);
+	if (!p)
+		return (char *)NULL;
+
+	char *q = strrchr(p, '/');
+	if (q && q != p)
+		*q = '\0';
+
+	char *r = try_datadir(p);
+	free(p);
+	return r;
+}
+
+static char *
+resolve_basename(char *s)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	char *p = get_cmd_path(s);
+	if (!p)
+		return (char *)NULL;
+
+	char *q = strrchr(p, '/');
+	if (q && q != p)
+		*q = '\0';
+
+	char *r = try_datadir(p);
+	free(p);
+
+	return r;
+}
+
+static int
+get_data_dir_from_path(char *s)
+{
+	if (!s || !*s)
+		return EXIT_FAILURE;
+
+	char *dd = (char *)NULL;
+
+	if (*s == '/' && (dd = resolve_absolute_path(s)))
+		goto END;
+
+	if (strchr(s, '/') && (dd = resolve_relative_path(s)))
+		goto END;
+
+	dd = resolve_basename(s);
+
+END:
+	if (!dd)
+		return EXIT_FAILURE;
+
+	data_dir = dd;
+
+	return EXIT_SUCCESS;
+}
+
+/* Get the system data directory (usually /usr/local/share), first from
+ * CLIFM_DATADIR, defined in the Makefile, and then from standard paths */
+void
+get_data_dir(void)
+{
+	if (data_dir) /* DATA_DIR was defined via --data-dir */
+		return;
+
+	/* CLIFM_DATADIR is defined when compiled via the Makefile */
+#ifdef CLIFM_DATADIR
+	struct stat a;
+	char p[PATH_MAX];
+	snprintf(p, sizeof(p), "%s/%s/%src", STRINGIZE(CLIFM_DATADIR), PNL, PNL);
+	if (stat(p, &a) != -1 && S_ISREG(a.st_mode)) {
+		data_dir = savestring(STRINGIZE(CLIFM_DATADIR), strlen(STRINGIZE(CLIFM_DATADIR)));
+		return;
+	}
+#endif /* CLIFM_DATADIR */
+
+	/* Alternatively, try some standard values for DATADIR */
+	if (try_standard_data_dirs() == EXIT_SUCCESS)
+		return;
+
+	/* As a last resort, let's try to find DATADIR using whatever argv[0] provides */
+	get_data_dir_from_path(argv_bk[0]);
 }
 
 void
@@ -1619,16 +1751,18 @@ RUN:
 	open_reg_exit(_path, url, preview);
 }
 
+#define SF_DATADIR 0
+#define SF_SHOTGUN 1
 static char *
-stat_file(char *file)
+stat_file(char *file, const int flag)
 {
 	if (!file || !*file)
 		exit(EXIT_FAILURE);
 
 	char *p = (char *)NULL;
 	if (*file == '~') {
-		if (!(p = tilde_expand(optarg))) {
-			fprintf(stderr, "%s: %s: Error expanding tilde\n", PROGRAM_NAME, optarg);
+		if (!(p = tilde_expand(file))) {
+			fprintf(stderr, _("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, file);
 			exit(EXIT_FAILURE);
 		}
 	} else {
@@ -1643,7 +1777,25 @@ stat_file(char *file)
 		exit(errno);
 	}
 
+	if (flag != SF_DATADIR)
+		return p;
+
+	/* Remove ending slash and "/clifm" from data dir */
+	size_t l = strlen(p);
+	if (l > 1 && p[l - 1] == '/')
+		p[l - 1] = '\0';
+	char *s = strrchr(p, '/');
+	if (s && s != p && *(s + 1) == 'c' && strcmp(s + 1, "clifm") == 0)
+		*s = '\0';
+
 	return p;
+}
+
+static void
+err_arg_required(const char *s)
+{
+	fprintf(stderr, _("%s: '%s': Option requires an argument\n"
+		"Try '%s --help' for more information.\n"), PNL, s, PNL);
 }
 
 /* Evaluate external arguments, if any, and change initial variables to
@@ -1748,7 +1900,7 @@ external_arguments(int argc, char **argv)
 		{"no-history", no_argument, 0, 249},
 		{"fzytab", no_argument, 0, 250},
 		{"no-refresh-on-resize", no_argument, 0, 251},
-		{"bell", required_argument, 0, 253},
+		{"bell", required_argument, 0, 252},
 		{"fuzzy-match", no_argument, 0, 253},
 		{"smenutab", no_argument, 0, 254},
 		{"virtual-dir-full-paths", no_argument, 0, 255},
@@ -1760,6 +1912,7 @@ external_arguments(int argc, char **argv)
 		{"shotgun-file", required_argument, 0, 261},
 		{"fzftab", no_argument, 0, 262},
 		{"si", no_argument, 0, 263},
+		{"data-dir", required_argument, 0, 264},
 	    {0, 0, 0, 0}
 	};
 
@@ -1849,7 +2002,7 @@ external_arguments(int argc, char **argv)
 			xargs.colorize = conf.colorize = 0;
 #ifndef _NO_HIGHLIGHT
 			xargs.highlight = conf.highlight = 0;
-#endif
+#endif /* _NO_HIGHLIGHT */
 			break;
 
 		case 226:
@@ -1923,7 +2076,7 @@ external_arguments(int argc, char **argv)
 #else
 			fprintf(stderr, _("%s: fzy-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
-#endif
+#endif /* _NO_FZF */
 		case 251: xargs.refresh_on_resize = 0; break;
 		case 252: {
 			int a = atoi(optarg);
@@ -1942,7 +2095,7 @@ external_arguments(int argc, char **argv)
 #else
 			fprintf(stderr, _("%s: smenu-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
-#endif
+#endif /* !_NO_FZF */
 		case 255: xargs.virtual_dir_full_paths = 1; break;
 		case 256:
 			if (optarg && *optarg && *optarg == '/') {
@@ -1970,17 +2123,15 @@ external_arguments(int argc, char **argv)
 #else
 			fprintf(stderr, _("%s: fzf-preview: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
-#endif
+#endif /* !_NO_FZF */
 			break;
 
 		case 261:
-			if (!optarg || *optarg == '-') {
-				fprintf(stderr, _("%s: '%s': Option requires an argument\n"
-					"Try '%s --help' for more information.\n"),
-					PROGRAM_NAME, "--shotgun-file", PROGRAM_NAME);
+			if (!optarg || !*optarg || *optarg == '-') {
+				err_arg_required("--shotgun-file");
 				exit(EXIT_FAILURE);
 			}
-			alt_preview_file = stat_file(optarg);
+			alt_preview_file = stat_file(optarg, SF_SHOTGUN);
 			break;
 
 		case 262:
@@ -1989,7 +2140,7 @@ external_arguments(int argc, char **argv)
 #else
 			fprintf(stderr, _("%s: fzf-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
-#endif
+#endif /* !_NO_FZF */
 
 		case 263:
 #ifdef __linux__
@@ -1998,7 +2149,17 @@ external_arguments(int argc, char **argv)
 			fprintf(stderr, _("%s: si: This option is available on Linux "
 				"only\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
-#endif
+#endif /* __linux__ */
+
+		case 264:
+			if (!optarg || !*optarg || *optarg == '-') {
+				err_arg_required("--data-dir");
+				exit(EXIT_FAILURE);
+			}
+
+			get_data_dir_from_path(optarg);
+//			data_dir = stat_file(optarg, SF_DATADIR);
+			break;
 
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
 		case 'A': conf.show_hidden = xargs.hidden = 1; break;
@@ -2045,7 +2206,7 @@ external_arguments(int argc, char **argv)
 		case 'z': set_sort(optarg); break;
 
 		case '?': /* If some unrecognized option was found... */
-			/* Options that requires an argument */
+			/* Options that require an argument */
 			/* Short options */
 			switch (optopt) {
 			case 'b': /* fallthrough */
@@ -2063,12 +2224,11 @@ external_arguments(int argc, char **argv)
 			case 219: /* fallthrough */
 			case 226: /* fallthrough */
 			case 231: /* fallthrough */
-			case 253: /* fallthrough */
+			case 252: /* fallthrough */
 			case 256: /* fallthrough */
-			case 260: {
-				fprintf(stderr, _("%s: '%s': Option requires an argument\n"
-					"Try '%s --help' for more information.\n"),
-				    PROGRAM_NAME, argv[optind - 1], PNL);
+			case 261: /* fallthrough */
+			case 264: {
+				err_arg_required(argv[optind - 1]);
 				exit(EXIT_FAILURE);
 				}
 			default: break;

@@ -3385,8 +3385,6 @@ set_rl_init_file(void)
 	if (!config_dir_gral || !*config_dir_gral)
 		return;
 
-/*	char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14, sizeof(char));
-	sprintf(rl_file, "%s/readline.cfm", config_dir_gral); */
 	char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 16, sizeof(char));
 	sprintf(rl_file, "%s/readline.clifm", config_dir_gral);
 
@@ -3428,7 +3426,8 @@ initialize_readline(void)
 {
 	/* Set the name of the program using readline. Mostly used for
 	 * conditional constructs in the inputrc file */
-	rl_readline_name = argv_bk[0];
+	if (bin_name && *bin_name)
+		rl_readline_name = bin_name;
 
 	set_rl_init_file();
 

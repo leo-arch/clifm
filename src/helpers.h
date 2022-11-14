@@ -1279,6 +1279,7 @@ extern char
 	*alt_kbinds_file,
 	*alt_preview_file,
 	*alt_profile,
+	*bin_name,
 	*bm_file,
 	*colors_dir,
 	*config_dir,

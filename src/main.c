@@ -243,6 +243,7 @@ char
 	*alt_kbinds_file = (char *)NULL,
 	*alt_preview_file = (char *)NULL,
 	*alt_profile = (char *)NULL,
+	*bin_name = (char *)NULL,
 	*bm_file = (char *)NULL,
 	*colors_dir = (char *)NULL,
 	*config_dir = (char *)NULL,

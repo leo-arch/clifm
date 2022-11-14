@@ -1330,6 +1330,7 @@ free_stuff(void)
 	if (conf.restore_last_path || conf.cd_on_quit)
 		save_last_path();
 
+	free(bin_name);
 	free(alt_preview_file);
 	free(alt_profile);
 	free_bookmarks();
