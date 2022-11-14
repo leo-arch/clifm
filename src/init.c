@@ -608,7 +608,12 @@ get_data_dir(void)
 	if (try_standard_data_dirs() == EXIT_SUCCESS)
 		return;
 
-	get_data_dir_from_path(argv_bk[0]);
+	if (get_data_dir_from_path(argv_bk[0]) == EXIT_SUCCESS)
+		return;
+
+	_err('w', PRINT_PROMPT, _("%s: No data directory found. Data files, "
+		"such as plugins and color schemes,\nmight not be available.\n"),
+		PROGRAM_NAME);
 }
 
 void
