@@ -254,7 +254,8 @@ int
 init_gettext(void)
 {
 	char locale_dir[PATH_MAX];
-	snprintf(locale_dir, sizeof(locale_dir), "%s/locale", data_dir ? data_dir : "/usr/local/share");
+	snprintf(locale_dir, sizeof(locale_dir), "%s/locale", data_dir
+		? data_dir : "/usr/local/share");
 	bindtextdomain(PNL, locale_dir);
 	textdomain(PNL);
 
@@ -493,9 +494,9 @@ try_datadir(char *dir)
 		return savestring(dir, strlen(dir));
 
 	/* Try DIR/clifmrc */
-	snprintf(p, sizeof(p), "%s/%src", dir, PNL);
+/*	snprintf(p, sizeof(p), "%s/%src", dir, PNL);
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode))
-		return savestring(dir, strlen(dir));
+		return savestring(dir, strlen(dir)); */
 
 	return (char *)NULL;
 }
@@ -564,33 +565,36 @@ get_data_dir_from_path(char *s)
 		return EXIT_FAILURE;
 
 	char *dd = (char *)NULL;
+	char *t = *s == '~' ? tilde_expand(s) : s;
 
-	if (*s == '/' && (dd = resolve_absolute_path(s)))
+	if (*t == '/' && (dd = resolve_absolute_path(t)))
 		goto END;
 
-	if (strchr(s, '/') && (dd = resolve_relative_path(s)))
+	if (strchr(t, '/') && (dd = resolve_relative_path(t)))
 		goto END;
 
-	dd = resolve_basename(s);
+	dd = resolve_basename(t);
 
 END:
+	if (t != s)
+		free(t);
+
 	if (!dd)
 		return EXIT_FAILURE;
 
 	data_dir = dd;
-
 	return EXIT_SUCCESS;
 }
 
-/* Get the system data directory (usually /usr/local/share), first from
- * CLIFM_DATADIR, defined in the Makefile, and then from standard paths */
+/* Get the system data directory (usually /usr/local/share),
+ * Try first CLIFM_DATADIR, defined in the Makefile, then a few standard
+ * paths, and finally guessing based on whatever argv[0] provides */
 void
 get_data_dir(void)
 {
 	if (data_dir) /* DATA_DIR was defined via --data-dir */
 		return;
 
-	/* CLIFM_DATADIR is defined when compiled via the Makefile */
 #ifdef CLIFM_DATADIR
 	struct stat a;
 	char p[PATH_MAX];
@@ -601,11 +605,9 @@ get_data_dir(void)
 	}
 #endif /* CLIFM_DATADIR */
 
-	/* Alternatively, try some standard values for DATADIR */
 	if (try_standard_data_dirs() == EXIT_SUCCESS)
 		return;
 
-	/* As a last resort, let's try to find DATADIR using whatever argv[0] provides */
 	get_data_dir_from_path(argv_bk[0]);
 }
 
@@ -1751,10 +1753,8 @@ RUN:
 	open_reg_exit(_path, url, preview);
 }
 
-#define SF_DATADIR 0
-#define SF_SHOTGUN 1
 static char *
-stat_file(char *file, const int flag)
+stat_file(char *file)
 {
 	if (!file || !*file)
 		exit(EXIT_FAILURE);
@@ -1776,17 +1776,6 @@ stat_file(char *file, const int flag)
 			free(p);
 		exit(errno);
 	}
-
-	if (flag != SF_DATADIR)
-		return p;
-
-	/* Remove ending slash and "/clifm" from data dir */
-	size_t l = strlen(p);
-	if (l > 1 && p[l - 1] == '/')
-		p[l - 1] = '\0';
-	char *s = strrchr(p, '/');
-	if (s && s != p && *(s + 1) == 'c' && strcmp(s + 1, "clifm") == 0)
-		*s = '\0';
 
 	return p;
 }
@@ -2131,7 +2120,7 @@ external_arguments(int argc, char **argv)
 				err_arg_required("--shotgun-file");
 				exit(EXIT_FAILURE);
 			}
-			alt_preview_file = stat_file(optarg, SF_SHOTGUN);
+			alt_preview_file = stat_file(optarg);
 			break;
 
 		case 262:
@@ -2158,7 +2147,6 @@ external_arguments(int argc, char **argv)
 			}
 
 			get_data_dir_from_path(optarg);
-//			data_dir = stat_file(optarg, SF_DATADIR);
 			break;
 
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
