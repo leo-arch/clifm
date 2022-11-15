@@ -988,7 +988,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 
 	/* Max inode number able to hold: 999 billions! Padding could be as long
 	 * as max inode lenght - 1 */
-	char ino_s[(12 + 1) * 2];
+	char ino_s[(MAX_COLOR * 2) + ((12 + 1) * 2)];
 	*ino_s = '\0';
 	if (prop_fields.inode == 1) {
 		snprintf(ino_s, sizeof(ino_s), "%s%*ju %s", tx_c, (int)ino_max,
