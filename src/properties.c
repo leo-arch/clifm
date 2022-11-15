@@ -990,8 +990,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	 * as max inode lenght - 1 */
 	char ino_s[(12 + 1) * 2];
 	*ino_s = '\0';
-	if (prop_fields.inode == 1)
-		snprintf(ino_s, sizeof(ino_s), "%*ju ", (int)ino_max, (uintmax_t)props->inode);
+	if (prop_fields.inode == 1) {
+		snprintf(ino_s, sizeof(ino_s), "%s%*ju %s", tx_c, (int)ino_max,
+			(uintmax_t)props->inode, cend);
+	}
 
 				/* ############################
 				 * #  7. FILES COUNTER (DIRS) #
@@ -1012,9 +1014,9 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	/* Print stuff */
 
 #ifndef _NO_ICONS
-	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
+	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s%s  " /* File name*/
 #else
-	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s  " /* File name*/
+	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s%s  " /* File name*/
 #endif
 		   "%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
@@ -1033,6 +1035,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		trim ? tt_c : "", trim ? TRIMFILE_CHR : 0,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",
+		trim == TRIM_EXT ? df_c : "",
 
 		prop_fields.counter != 0 ? fc_str : "",
 		prop_fields.inode == 1 ? ino_s : "",
