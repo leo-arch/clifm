@@ -657,6 +657,7 @@ struct config_t {
 	int pager;
 	int purge_jumpdb;
 	int print_selfiles;
+	int private_ws_settings;
 	int restore_last_path;
 	int rm_force;
 	int search_strategy;
@@ -676,6 +677,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
+	int pad3;
 
 	char *opener;
 	char *encoded_prompt;
@@ -684,7 +686,7 @@ struct config_t {
 #ifndef _NO_SUGGESTIONS
 	char *suggestion_strategy;
 #else
-	char *pad3; /* Keep the struct alignment */
+	char *pad4; /* Keep the struct alignment */
 #endif /* !_NO_SUGGESTIONS */
 	char *usr_cscheme;
 	char *fzftab_options;
@@ -845,20 +847,24 @@ struct autocmds_t {
 extern struct autocmds_t *autocmds;
 
 struct opts_t {
+	struct filter_t filter;
 	char *color_scheme;
-	int long_view;
-	int light_mode;
 	int files_counter;
+	int light_mode;
+	int list_dirs_first;
+	int long_view;
 	int max_files;
 	int max_name_len;
+	int only_dirs;
+	int pager;
 	int show_hidden;
 	int sort;
 	int sort_reverse;
-	int pager;
-	int only_dirs;
+	int pad;
 };
 
 extern struct opts_t opts;
+extern struct opts_t workspace_opts[MAX_WS];
 
 /* Struct to specify which parameters have been set from the command
  * line, to avoid overriding them with init_config(). While no command

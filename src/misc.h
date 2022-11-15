@@ -39,6 +39,9 @@ void free_software(void);
 void free_stuff(void);
 void free_remotes(int);
 void free_tags(void);
+
+void free_workspaces_filters(void);
+
 void get_term_size(void);
 int  handle_stdin(void);
 void help_function(void);

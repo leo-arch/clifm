@@ -81,6 +81,33 @@
 #endif /* !NGROUPS_MAX */
 
 void
+init_workspaces_opts(void)
+{
+	size_t i;
+	for (i = 0; i < MAX_WS; i++) {
+		workspace_opts[i].color_scheme = cur_cscheme;
+		workspace_opts[i].files_counter = conf.files_counter;
+
+		workspace_opts[i].filter.str = filter.str
+			? savestring(filter.str, strlen(filter.str)) : (char *)NULL;
+		workspace_opts[i].filter.rev = filter.rev;
+		workspace_opts[i].filter.type = filter.type;
+		workspace_opts[i].filter.env = filter.env;
+
+		workspace_opts[i].light_mode = conf.light_mode;
+		workspace_opts[i].list_dirs_first = conf.list_dirs_first;
+		workspace_opts[i].long_view = conf.long_view;
+		workspace_opts[i].max_files = max_files;
+		workspace_opts[i].max_name_len = conf.max_name_len;
+		workspace_opts[i].only_dirs = conf.only_dirs;
+		workspace_opts[i].pager = conf.pager;
+		workspace_opts[i].show_hidden = conf.show_hidden;
+		workspace_opts[i].sort = conf.sort;
+		workspace_opts[i].sort_reverse = conf.sort_reverse;
+	}
+}
+
+void
 init_conf_struct(void)
 {
 	conf.apparent_size = UNSET;
@@ -132,6 +159,7 @@ init_conf_struct(void)
 	conf.no_eln = UNSET;
 	conf.only_dirs = UNSET;
 	conf.pager = UNSET;
+	conf.private_ws_settings = UNSET;
 	conf.purge_jumpdb = UNSET;
 	conf.restore_last_path = UNSET;
 	conf.rm_force = UNSET;
@@ -3234,6 +3262,9 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (conf.private_ws_settings == UNSET)
+		conf.private_ws_settings = DEF_PRIVATE_WS_SETTINGS;
+
 	if (conf.rm_force == UNSET)
 		conf.rm_force = DEF_RM_FORCE;
 

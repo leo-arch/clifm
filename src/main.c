@@ -79,6 +79,7 @@ struct suggestions_t suggestion;
 struct stats_t stats;
 struct autocmds_t *autocmds = (struct autocmds_t *)NULL;
 struct opts_t opts;
+struct opts_t workspace_opts[MAX_WS];
 struct sel_t *sel_elements = (struct sel_t *)NULL;
 struct prompts_t *prompts = (struct prompts_t *)NULL;
 struct history_t *history = (struct history_t *)NULL;
@@ -1159,6 +1160,7 @@ struct config_t {
 	get_profile_names();
 	load_pinned_dir();
 	load_prompts();
+	init_workspaces_opts();
 
 	/* # 2. MAIN PROGRAM LOOP # */
 	run_main_loop();

@@ -112,6 +112,86 @@ check_workspace_num(char *str, int *tmp_ws)
 	return 2;
 }
 
+#include "colors.h"
+static void
+save_workspace_opts(const int n)
+{
+	free(workspace_opts[n].filter.str);
+	workspace_opts[n].filter.str = filter.str
+		? savestring(filter.str, strlen(filter.str)) : (char *)NULL;
+	workspace_opts[n].filter.rev = filter.rev;
+	workspace_opts[n].filter.type = filter.type;
+	workspace_opts[n].filter.env = filter.env;
+
+	workspace_opts[n].color_scheme = cur_cscheme;
+	workspace_opts[n].files_counter = conf.files_counter;
+	workspace_opts[n].light_mode = conf.light_mode;
+	workspace_opts[n].list_dirs_first = conf.list_dirs_first;
+	workspace_opts[n].long_view = conf.long_view;
+	workspace_opts[n].max_files = max_files;
+	workspace_opts[n].max_name_len = conf.max_name_len;
+	workspace_opts[n].only_dirs = conf.only_dirs;
+	workspace_opts[n].pager = conf.pager;
+	workspace_opts[n].show_hidden = conf.show_hidden;
+	workspace_opts[n].sort = conf.sort;
+	workspace_opts[n].sort_reverse = conf.sort_reverse;
+}
+
+static void
+unset_ws_filter(void)
+{
+	free(filter.str);
+	filter.str = (char *)NULL;
+	filter.rev = 0;
+	filter.type = FILTER_NONE;
+	regfree(&regex_exp);
+}
+
+static void
+set_ws_filter(const int n)
+{
+	filter.type = workspace_opts[n].filter.type;
+	filter.rev = workspace_opts[n].filter.rev;
+	filter.env = workspace_opts[n].filter.env;
+
+	free(filter.str);
+	regfree(&regex_exp);
+	char *p = workspace_opts[n].filter.str;
+	filter.str = savestring(p, strlen(p));
+
+	if (filter.type != FILTER_FILE_NAME)
+		return;
+
+	if (regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS)
+		unset_ws_filter();
+}
+
+static void
+set_workspace_opts(const int n)
+{
+	if (workspace_opts[n].color_scheme && workspace_opts[n].color_scheme != cur_cscheme)
+		set_colors(workspace_opts[n].color_scheme, 0);
+
+	if (workspace_opts[n].filter.str && *workspace_opts[n].filter.str) {
+		set_ws_filter(n);
+	} else {
+		if (filter.str)
+			unset_ws_filter();
+	}
+
+	conf.light_mode = workspace_opts[n].light_mode;
+	conf.list_dirs_first = workspace_opts[n].list_dirs_first;
+	conf.long_view = workspace_opts[n].long_view;
+	conf.files_counter = workspace_opts[n].files_counter;
+	max_files = workspace_opts[n].max_files;
+	conf.max_name_len = workspace_opts[n].max_name_len;
+	conf.only_dirs = workspace_opts[n].only_dirs;
+	conf.pager = workspace_opts[n].pager;
+	conf.show_hidden = workspace_opts[n].show_hidden;
+	conf.sort = workspace_opts[n].sort;
+	conf.sort_reverse = workspace_opts[n].sort_reverse;
+}
+
 static int
 switch_workspace(int tmp_ws)
 {
@@ -134,12 +214,18 @@ switch_workspace(int tmp_ws)
 		return EXIT_FAILURE;
 	}
 
+	if (conf.private_ws_settings == 1)
+		save_workspace_opts(cur_ws);
+
 	prev_ws = cur_ws;
 	cur_ws = tmp_ws;
 	dir_changed = 1;
 
 	if (conf.colorize == 1 && xargs.eln_use_workspace_color == 1)
 		set_eln_color();
+
+	if (conf.private_ws_settings == 1)
+		set_workspace_opts(cur_ws);
 
 	if (conf.autols == 1)
 		reload_dirlist();

@@ -2450,6 +2450,11 @@ read_config(void)
 				continue;
 		}
 
+		else if (*line == 'P' && strncmp(line, "PrivateWorkspaceSettings=", 25) == 0) {
+			if (set_config_bool_value(line, &conf.private_ws_settings) == -1)
+				continue;
+		}
+
 		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
 			free(conf.encoded_prompt);
 			conf.encoded_prompt = (char *)NULL;
@@ -2959,6 +2964,8 @@ reset_variables(void)
 
 	init_conf_struct();
 
+	free_workspaces_filters();
+
 	autojump = UNSET;
 	check_cap = UNSET;
 	check_ext = UNSET;
@@ -3218,6 +3225,7 @@ reload_config(void)
 	load_jumpdb();
 	load_tags();
 	load_remotes();
+	init_workspaces_opts();
 
 	/* Set the current poistion of the dirhist index to the last entry */
 	dirhist_cur_index = dirhist_total_index - 1;

@@ -1291,6 +1291,18 @@ xrl_discard_keymap(Keymap map)
 }
 #endif // __clang__ */
 
+void
+free_workspaces_filters(void)
+{
+	size_t i;
+	for (i = 0; i < MAX_WS; i++) {
+		free(workspace_opts[i].filter.str);
+		workspace_opts[i].filter.str = (char *)NULL;
+		workspace_opts[i].filter.rev = 0;
+		workspace_opts[i].filter.type = FILTER_NONE;
+	}
+}
+
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 void
@@ -1364,6 +1376,8 @@ free_stuff(void)
 		regfree(&regex_exp);
 		free(filter.str);
 	}
+
+	free_workspaces_filters();
 
 	if (ext_colors_n)
 		free(ext_colors_len);
