@@ -1294,6 +1294,12 @@ Sort=%d\n\
 # true (you can also use the --sort-reverse option or the 'st' command)\n\
 SortReverse=%s\n\n"
 
+	"# If set to true, settings changed in the current workspace (only via\n\
+# the command line or keyboard shortcuts) are kept private to that workspace\n\
+# and made persistent (for the current session only), even when switching\n\
+# workspaces.\n\
+PrivateWorkspaceSettings=%s\n\n"
+
 		"# A comma separated list of workspace names in the form NUM=NAME\n\
 # Example: \"1=MAIN,2=EXTRA,3=GIT,4=WORK\" or \"1=α,2=β,3=γ,4=δ\"\n\
 WorkspaceNames=\"\"\n\n"
@@ -1322,8 +1328,28 @@ Pager=%s\n\n"
 # MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde.\n\
 # Set it to -1 (or empty) to remove this limit.\n\
 # When running in long mode, this setting is overriden by MinFilenameTrim\n\
-MaxFilenameLen=%d\n\n"
+# whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.\n\
+MaxFilenameLen=%d\n\n",
 
+		DEF_LIGHT_MODE == 1 ? "true" : "false",
+		DEF_CLASSIFY == 1 ? "true" : "false",
+		DEF_SHARE_SELBOX == 1 ? "true" : "false",
+		DEFAULT_TERM_CMD,
+		DEF_SORT,
+		DEF_SORT_REVERSE == 1 ? "true" : "false",
+		DEF_PRIVATE_WS_SETTINGS == 1 ? "true" : "false",
+		DEF_TIPS == 1 ? "true" : "false",
+		DEF_LIST_DIRS_FIRST == 1 ? "true" : "false",
+		DEF_CASE_SENS_LIST == 1 ? "true" : "false",
+		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
+		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
+		DEF_CASE_SENS_SEARCH == 1 ? "true" : "false",
+		DEF_UNICODE == 1 ? "true" : "false",
+		DEF_PAGER == 1 ? "true" : "false",
+		DEF_MAX_NAME_LEN
+		);
+
+	fprintf(config_fp,
 	"MaxHistory=%d\n\
 MaxDirhist=%d\n\
 MaxLog=%d\n\
@@ -1355,21 +1381,6 @@ TrashAsRm=%s\n\n"
 	    "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
 RlEditMode=%d\n\n",
 
-		DEF_LIGHT_MODE == 1 ? "true" : "false",
-		DEF_CLASSIFY == 1 ? "true" : "false",
-		DEF_SHARE_SELBOX == 1 ? "true" : "false",
-		DEFAULT_TERM_CMD,
-		DEF_SORT,
-		DEF_SORT_REVERSE == 1 ? "true" : "false",
-		DEF_TIPS == 1 ? "true" : "false",
-		DEF_LIST_DIRS_FIRST == 1 ? "true" : "false",
-		DEF_CASE_SENS_LIST == 1 ? "true" : "false",
-		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
-		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
-		DEF_CASE_SENS_SEARCH == 1 ? "true" : "false",
-		DEF_UNICODE == 1 ? "true" : "false",
-		DEF_PAGER == 1 ? "true" : "false",
-		DEF_MAX_NAME_LEN,
 		DEF_MAX_HIST,
 		DEF_MAX_DIRHIST,
 		DEF_MAX_LOG,

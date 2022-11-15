@@ -117,6 +117,12 @@ MinFilenameTrim=20
 # Example: "1=MAIN,2=EXTRA,3=GIT" or "1=α,2=β,3=γ"
 WorkspaceNames=""
 
+# If set to true, settings changed in the current workspace (only via
+# the command line or keyboard shortcuts) are kept private to that
+# workspace and made persistent (for the current session only), even
+# when switching workspaces.
+PrivateWorkspaceSettings=false
+
 # Print the disk usage of the file system the current directory belongs to
 # in the form FREE/TOTAL
 DiskUsage=false
