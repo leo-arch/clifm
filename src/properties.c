@@ -844,7 +844,9 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		plen = wc_xstrlen(wname);
 	}
 
-	size_t cur_len = (size_t)DIGINUM(files + 1) + 1 + plen;
+	size_t n = (max_files > UNSET && files > (size_t)max_files)
+		? (size_t)max_files : files;
+	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen;
 #ifndef _NO_ICONS
 	if (conf.icons) {
 		cur_len += 3;
