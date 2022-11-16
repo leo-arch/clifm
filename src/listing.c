@@ -1861,7 +1861,8 @@ list_dir_light(void)
 		goto END;
 	}
 
-	int pad = max_files != UNSET ? DIGINUM(max_files) : DIGINUM(files);
+	int pad = (max_files != UNSET && (int)files > max_files)
+		? DIGINUM(max_files) : DIGINUM(files);
 
 	if (conf.sort)
 		ENTSORT(file_info, n, entrycmp);
@@ -2430,7 +2431,8 @@ list_dir(void)
 		goto END;
 	}
 
-	int pad = max_files != UNSET ? DIGINUM(max_files) : DIGINUM(files);
+	int pad = (max_files != UNSET && (int)files > max_files)
+		? DIGINUM(max_files) : DIGINUM(files);
 
 		/* #############################################
 		 * #    SORT FILES ACCORDING TO SORT METHOD    #

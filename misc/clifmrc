@@ -110,7 +110,8 @@ MaxFilenameLen=20
 
 # Minimum length at which a file name can be trimmed in long view mode
 # (including ELN length and spaces). When running in long mode, this
-# setting overrides MaxFilenameLen.
+# setting overrides MaxFilenameLen whenever MAXFILENAMELEN is smaller
+# than MINFILENAMETRIM.
 MinFilenameTrim=20
 
 # A comma separated list of workspace names in the form NUM=NAME

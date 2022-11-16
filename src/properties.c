@@ -561,10 +561,10 @@ get_properties(char *filename, const int dsize)
 		cid = dg_c;
 
 	switch (attr.st_mode & S_IFMT) {
-	case S_IFREG: {
+	case S_IFREG:
 		file_type = '.';
 		color = get_regfile_color(filename, &attr);
-	} break;
+		break;
 
 	case S_IFDIR:
 		file_type = 'd';
