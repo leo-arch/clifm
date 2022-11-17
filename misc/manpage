@@ -2607,17 +2607,20 @@ T{
 \fR.. (Shift-Up, Alt-u)
 T}	Change to the parent directory
 T{
+\fR...
+T}	Change to the parent directory of the current parent directory \fB(4)\fR
+T{
 bd w
-T}	Change to the parent directory matching "w" \fB(4)\fR
+T}	Change to the parent directory matching "w" \fB(5)\fR
 T{
 ws2 (Alt-2)
-T}	Swtich to the second workspace \fB(5)\fR
+T}	Swtich to the second workspace \fB(6)\fR
 T{
 /*.pdf<TAB>
 T}	List PDF files (current dir)
 T{
 =x<TAB>
-T}	List executable files (current dir) \fB(6)\fR
+T}	List executable files (current dir) \fB(7)\fR
 T{
 @gzip<TAB>
 T}	List files (current dir) whose MIME type includes "gzip"
@@ -2629,23 +2632,25 @@ T{
 T}	Change to pinned directory
 T{
 view (Alt+-)
-T}	Preview files (current dir) \fB(7)\fR
+T}	Preview files (current dir) \fB(8)\fR
 .TE
 
 .sp
  \fB(1)\fR \fIcd /etc\fR also works
-.sp
+.sp 0
  \fB(2)\fR Press TAB to make sure 5 is the file you want, or just pay attention to the suggestion. Press Right to accept the given suggestion
-.sp
+.sp 0
  \fB(3)\fR This depends on the database ranking. For more accuracy: \fIj mike xproj\fR. TAB completion is available: \fIj xproj<TAB>\fR
-.sp
- \fB(4)\fR Type \fIbd <TAB>\fR to list all parent directories
-.sp
- \fB(5)\fR \fIAlt-[1-4]\fR is available for workspaces 1-4
-.sp
- \fB(6)\fR Type \fI=<TAB>\fR to get the list of available file type characters. Consult the \fBFILE FILTERS\fR section above for more information
-.sp
- \fB(7)\fR This feature depends on \fBfzf\fR(1). Run with \fI\-\-fzfpreview\fR to enable file previews for TAB completion (fzf mode only)
+.sp 0
+ \fB(4)\fR This is the \fIfastback\fR function: each susequent dot after the two first dots is understood as an extra "/.."
+.sp 0
+ \fB(5)\fR Type \fIbd <TAB>\fR to list all parent directories
+.sp 0
+ \fB(6)\fR \fIAlt-[1-4]\fR is available for workspaces 1-4
+.sp 0
+ \fB(7)\fR Type \fI=<TAB>\fR to get the list of available file type characters. Consult the \fBFILE FILTERS\fR section above for more information
+.sp 0
+ \fB(8)\fR This feature depends on \fBfzf\fR(1). Run with \fI\-\-fzfpreview\fR to enable file previews for TAB completion (fzf mode only)
 
 \fB2. FILE OPERATIONS\fR
 
@@ -2733,20 +2738,20 @@ T}	Open the bookmarks manager
 
 .sp
  \fB(1)\fR: Use the \fIow\fR command to select the opening application from a menu: \fIow myfile.txt\fR or \fIow myfile.txt <TAB>\fR
-.sp
+.sp 0
  \fB(2)\fR: Note the ending slash in the directory name
-.sp
+.sp 0
  \fB(3)\fR: Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: \fItouch myfile\fR or \fInano myfile\fR
-.sp
+.sp 0
  \fB(4)\fR Only for non-standard TAB completion: fzf, fzy, smenu
-.sp
+.sp 0
  \fB(5)\fR: You can also TAB expand the \fIsel\fR keyword: \fIp sel<TAB>\fR to list selected files (and optionally mark multiple selected files to operate on)
-.sp
+.sp 0
  \fB(6)\fR: To remove files in bulk use the \fIrr\fR command
-.sp
+.sp 0
  \fB(7)\fR: To rename files in bulk use the \fIbr\fR command
-.sp
- \fB(8)\fR: Type \fBbm <TAB>\fR to get the list of bookmark names
+.sp 0
+ \fB(8)\fR: Type \fIbm <TAB>\fR to get the list of bookmark names
 
 \fB3. MISC\fR
 
@@ -2805,8 +2810,10 @@ There is a lot more you can do, but this should be enough to get you started.
 .SH CONFORMING TO
 \fBclifm\fR is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 compliant as well. If not, just a single non-POSIX function is used: \fBstatx\fR(2) (Linux specific), to get files birth time.
 
-.SH BUGS AND FEATURE REQUESTS
+.SH BUG AND FEATURE REQUESTS
 Report at <https://github.com/leo\-arch/clifm/issues>
 
 .SH AUTHOR
 L. M. Abramovich
+
+For additional contributors, use \fIgit shortlog -s\fR on the clifm.git repository.
