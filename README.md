@@ -116,8 +116,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [A built-in Freedesktop-compliant trash system](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files)
   - [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
   - [Eleven sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev)
-  - [Bulk rename](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename) and [bulk remove](https://github.com/leo-arch/clifm/wiki/Introduction#rr-dir-editor)
-  - [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n)
+  - [Bulk operations](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-operations): rename, create, remove, and create symbolik links in bulk
   - [Files encryption/decryption (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Copy files to your smart phone (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660)
