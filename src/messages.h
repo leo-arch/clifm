@@ -1200,6 +1200,7 @@ parameters:\n\n\
  opener [default] [APPLICATION]\n\
  p, pr, pp, prop [ELN/FILE]...\n\
  path, cwd\n\
+ pc FILE... (file permissions editor)\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  pg, pager [on, off, status]\n\
  pin [FILE/DIR]\n\
