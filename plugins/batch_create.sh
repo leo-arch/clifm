@@ -67,6 +67,11 @@ fi
 
 rm -f -- "$TMP" "$FILES" "$DIRS" 2>/dev/null
 
+if [ $dirsn -eq 0 ] && [ $filesn -eq 0 ]; then
+	echo "clifm: Nothing to do"
+	exit 0
+fi
+
 if [ $reta -eq 0 ] && [ $retb -eq 0 ]; then
 	echo "rf" > "$CLIFM_BUS"
 	exit 0
