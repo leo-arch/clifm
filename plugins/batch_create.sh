@@ -52,14 +52,24 @@ while read -r line; do
 
 done < "$TMP"
 
+reta=0
+retb=0
+
 if [ $dirsn -gt 0  ]; then
 	xargs -0 -I{} mkdir -p {} < "$DIRS"
+	reta=$?
 fi
 
 if [ $filesn -gt 0 ]; then
 	xargs -0 -I{} touch {} < "$FILES"
+	retb=$?
 fi
 
 rm -f -- "$TMP" "$FILES" "$DIRS" 2>/dev/null
 
-exit 0
+if [ $reta -eq 0 ] && [ $retb -eq 0 ]; then
+	echo "rf" > "$CLIFM_BUS"
+	exit 0
+fi
+
+exit 1
