@@ -134,13 +134,12 @@ DirhistMap=false
 
 # If set to true, always print the list of selected files. Since this
 # list could become quite extensive, you can limit the number of printed 
-# entries using the MaxPrintSelfiles option (-1 = no limit, 0 = auto
-# (never print more than half terminal height), or any custom value)
+# entries using the MaxPrintSelfiles option below
 PrintSelfiles=false
 
 # Maximum amount of selected files to be printed if PrinSelFiles is set
 # to true. Possible values: -1 = no limit, 0 = auto (never print more
-# than half terminal height), or any custom value
+# than half terminal height), or any positive value
 MaxPrintSelfiles=0
 
 # Color schemes (or just themes) are stored in the colors directory

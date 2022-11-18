@@ -1,4 +1,4 @@
-/* icons.h - Icons definitions for CliFM */
+/* icons.h - Icon definitions for CliFM */
 
 #ifndef ICONS_H
 #define ICONS_H
@@ -388,7 +388,6 @@ struct icons_t icon_ext[] = {
     {"cbz", ICON_ARCHIVE, YELLOW},
     {"cc", ICON_CPP, WHITE},
     {"cfg", ICON_CONF, WHITE},
-//    {"cfm", ICON_CONF, WHITE},
     {"clifm", ICON_CONF, WHITE},
     {"class", ICON_JAVA, WHITE},
     {"clj", ICON_CLOJURE, BLUE},
