@@ -222,8 +222,13 @@ _print_selfiles(unsigned short t_rows)
 		limit = (int)sel_n;
 
 	int i;
-	for (i = 0; i < (conf.max_printselfiles != UNSET ? limit : (int)sel_n); i++)
-		colors_list(sel_elements[i].name, 0, NO_PAD, PRINT_NEWLINE);
+	for (i = 0; i < (conf.max_printselfiles != UNSET ? limit : (int)sel_n); i++) {
+		char *p = abbreviate_file_name(sel_elements[i].name);
+		if (!p)
+			continue;
+		colors_list(p, 0, NO_PAD, PRINT_NEWLINE);
+		free(p);
+	}
 
 	if (conf.max_printselfiles != UNSET && limit < (int)sel_n)
 		printf("%d/%zu\n", i, sel_n);
