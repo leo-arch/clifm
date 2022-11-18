@@ -591,7 +591,10 @@ END:
 					leftmost_bell();
 			}
 #endif /* !_NO_SUGGESTIONS */
+
+#ifndef BACKWARD_SUGGEST
 			return SKIP_CHAR;
+#endif /* BACKWARD_SUGGEST */
 		}
 		return SUGGEST_ONLY;
 	}
@@ -614,7 +617,10 @@ END:
 				leftmost_bell();
 		}
 #endif /* !_NO_SUGGESTIONS */
+
+#ifndef BACKWARD_SUGGEST
 		return SKIP_CHAR;
+#endif /* BACKWARD_SUGGEST */
 	}
 
 	return SUGGEST_ONLY;
