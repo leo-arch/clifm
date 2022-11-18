@@ -638,7 +638,7 @@ rl_accept_suggestion(int count, int key)
 	case COMP_SUG:     /* fallthrough */
 	case ELN_SUG:      /* fallthrough */
 	case PROMPT_SUG:   /* fallthrough */
-	case FASTBACK_SUG: // fallthrough
+	case FASTBACK_SUG: /* fallthrough */
 	case FILE_SUG: {
 		char *tmp = (char *)NULL;
 		size_t i, isquote = 0, backslash = 0;
@@ -666,8 +666,9 @@ rl_accept_suggestion(int count, int key)
 				rl_redisplay();
 				fputs(df_c, stdout);
 			}
-		} else if (suggestion.filetype != DT_DIR)
+		} else if (suggestion.filetype != DT_DIR) {
 			rl_stuff_char(' ');
+		}
 		suggestion.type = NO_SUG;
 		}
 		break;

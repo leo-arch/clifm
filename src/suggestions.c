@@ -548,8 +548,12 @@ print_match(char *match, const size_t len, const unsigned char c)
 
 	free(p);
 
+#ifndef BACKWARD_SUGGEST
 	if (c != BS)
 		suggestion.type = COMP_SUG;
+#else
+	UNUSED(c);
+#endif
 
 	match_print(match, len, color, append_slash);
 
@@ -706,7 +710,9 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		&& strncasecmp(str, file_info[i].name, len) == 0)) {
 			if (file_info[i].len == len) return FULL_MATCH;
 
+#ifndef BACKWARD_SUGGEST
 			if (c != BS) suggestion.type = FILE_SUG;
+#endif
 
 			if (file_info[i].dir)
 				print_directory_suggestion(i, len, color);
