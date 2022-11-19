@@ -340,6 +340,9 @@ Tips=true
 # Just a kind welcome message at startup
 WelcomeMessage=true
 
+# Set a custom welcome message
+WelcomeMessageStr=""
+
 # Print CliFM's logo screen at startup
 SplashScreen=false
 

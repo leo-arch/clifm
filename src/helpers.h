@@ -682,6 +682,7 @@ struct config_t {
 	char *opener;
 	char *encoded_prompt;
 	char *term;
+	char *welcome_message_str;
 	char *wprompt_str;
 #ifndef _NO_SUGGESTIONS
 	char *suggestion_strategy;

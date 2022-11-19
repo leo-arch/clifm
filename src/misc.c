@@ -1352,6 +1352,7 @@ free_stuff(void)
 	free(conf.opener);
 	free(conf.wprompt_str);
 	free(conf.fzftab_options);
+	free(conf.welcome_message_str);
 
 	remove_virtual_dir();
 

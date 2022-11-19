@@ -1137,7 +1137,8 @@ FzfPreview=%s\n\n"
 # whenever the current path is longer than MaxPath.\n\
 MaxPath=%d\n\n"
 
-	    "WelcomeMessage=%s\n\n\
+	    "WelcomeMessage=%s\n\
+WelcomeMessageStr=\"\"\n\n\
 # Print %s's logo screen at startup\n\
 SplashScreen=%s\n\n\
 ShowHiddenFiles=%s\n\n\
@@ -2701,6 +2702,14 @@ read_config(void)
 				continue;
 		}
 
+		else if (*line == 'W' && strncmp(line, "WelcomeMessageStr=", 18) == 0) {
+			char *tmp = get_line_value(line);
+			if (!tmp)
+				continue;
+			free(conf.welcome_message_str);
+			conf.welcome_message_str = savestring(tmp, strlen(tmp));
+		}
+
 		else {
 			if (*line == 'W' && strncmp(line, "WorkspaceNames=", 15) == 0)
 				set_workspaces_names(line);
@@ -2941,6 +2950,8 @@ reset_variables(void)
 	free(tags_dir);
 	free(conf.wprompt_str);
 	conf.fzftab_options = tags_dir = conf.wprompt_str = (char *)NULL;
+	free(conf.welcome_message_str);
+	conf.welcome_message_str = (char *)NULL;
 
 	free_autocmds();
 	free_tags();

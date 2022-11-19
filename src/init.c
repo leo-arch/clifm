@@ -188,6 +188,7 @@ init_conf_struct(void)
 	conf.term = (char *)NULL;
 	conf.usr_cscheme = (char *)NULL;
 	conf.wprompt_str = (char *)NULL;
+	conf.welcome_message_str = (char *)NULL;
 }
 
 void
