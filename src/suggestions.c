@@ -552,6 +552,7 @@ print_match(char *match, const size_t len, const unsigned char c)
 	if (c != BS)
 		suggestion.type = COMP_SUG;
 #else
+	suggestion.type = COMP_SUG;
 	UNUSED(c);
 #endif
 
@@ -712,6 +713,8 @@ check_filenames(char *str, size_t len, const unsigned char c,
 
 #ifndef BACKWARD_SUGGEST
 			if (c != BS) suggestion.type = FILE_SUG;
+#else
+			suggestion.type = FILE_SUG;
 #endif
 
 			if (file_info[i].dir)
