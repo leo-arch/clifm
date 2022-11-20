@@ -2018,6 +2018,11 @@ list_dir(void)
 	clock_t start = clock();
 #endif
 
+	/* Hide the cursor to minimize flickering: it will be unhidden immediately
+	 * before printing the next prompt (prompt.c) */
+	if (xargs.list_and_quit != 1)
+		HIDE_CURSOR;
+
 	if (dir_changed && autocmds_n) {
 		if (autocmd_set)
 			revert_autocmd_opts();
@@ -2035,19 +2040,17 @@ list_dir(void)
 
 	if (xargs.disk_usage_analyzer == 1
 	|| (conf.long_view == 1 && conf.full_dir_size == 1)) {
+		UNHIDE_CURSOR;
 		fputs(_("Retrieving file sizes. Please wait... "), stdout);
 		fflush(stdout);
+		if (xargs.list_and_quit != 1)
+			HIDE_CURSOR;
 	}
 
 	if (!conf.unicode) {
 		trim.state = trim.a = trim.b = 0;
 		trim.len = 0;
 	}
-
-	/* Hide the cursor to minimize flickering: it will be unhidden immediately
-	 * before printing the next prompt (prompt.c) */
-	if (xargs.list_and_quit != 1)
-		HIDE_CURSOR;
 
 	reset_stats();
 	get_term_size();
@@ -2420,12 +2423,8 @@ list_dir(void)
 	if (tdents > n)
 		file_info = xrealloc(file_info, (n + 1) * sizeof(struct fileinfo)); */
 
-	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1 && conf.full_dir_size == 1)) {
-		/* Erase the "Retrieveing file sizes" message */
-		putchar('\r');
-//		ERASE_TO_LEFT;
-//		MOVE_CURSOR_LEFT(term_cols);
-	}
+	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1 && conf.full_dir_size == 1))
+		putchar('\r'); /* Erase the "Retrieveing file sizes" message */
 
 	file_info[n].name = (char *)NULL;
 	files = n;

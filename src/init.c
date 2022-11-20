@@ -641,7 +641,7 @@ get_data_dir(void)
 		return;
 
 	_err('w', PRINT_PROMPT, _("%s: No data directory found. Data files, "
-		"such as plugins and color schemes,\nmight not be available.\n"),
+		"such as plugins and color schemes, might not be available.\n"),
 		PROGRAM_NAME);
 }
 
