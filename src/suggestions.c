@@ -235,13 +235,14 @@ truncate_name(const char *str)
 }
 
 static inline void
+//set_cursor_position(const int baej, size_t *slines)
 set_cursor_position(const int baej)
 {
 	/* If not at the end of the line, move the cursor there */
 	/* rl_end and rl_point are not updated: they do not include
 	 * the last typed char. However, since we only care here about
 	 * the difference between them, it doesn't matter: the result
-	 * is the same (7 - 4 == 6 - 3 == 1) */
+	 * is the same (7 - 4 == 6 - 3 == 3) */
 	if (rl_end > rl_point && conf.highlight == 0) {
 		MOVE_CURSOR_RIGHT(rl_end - rl_point);
 		fflush(stdout);
@@ -249,10 +250,19 @@ set_cursor_position(const int baej)
 
 	ERASE_TO_RIGHT;
 
+	if (baej == 1)
+		SUGGEST_BAEJ(BAEJ_OFFSET, sp_c);
+
+/*	int baej_new_line = 1;
 	if (baej == 1) {
-		int off = BAEJ_OFFSET;
-		SUGGEST_BAEJ(off, sp_c);
-	}
+		if (baej_new_line == 1) {
+			puts("");
+			(*slines)++;
+		} else {
+			int off = BAEJ_OFFSET;
+			SUGGEST_BAEJ(off, sp_c);
+		}
+	} */
 }
 
 static inline int
@@ -293,16 +303,24 @@ _print_suggestion(const char *str, const size_t offset, const char *color)
 /* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
  * move the cursor back to the original position.
  * OFFSET marks the point in STR that is already typed: the suggestion
- * will be printed starting from this point
- *
- * Do nothing if WRONG_CMD is set: we're recovering from the warning prompt
- * and if we print the suggestion here it will be cleared anyway by
- * recover_from_wrong_cmd(), and that's a waste of resources */
+ * will be printed starting from this point */
+
 void
 print_suggestion(const char *str, size_t offset, char *color)
 {
+#ifndef BACKWARD_SUGGEST
+	/* Do nothing if WRONG_CMD is set: we're recovering from the warning prompt
+	 * and if we print the suggestion here it will be cleared anyway by
+	 * recover_from_wrong_cmd(), and that's a waste of resources */
 	if (!str || !*str || wrong_cmd == 1)
 		return;
+#else
+	if (!str || !*str)
+		return;
+
+	if (wrong_cmd == 1)
+		recover_from_wrong_cmd();
+#endif /* BACKWARD_SUGGEST */
 
 	HIDE_CURSOR;
 
@@ -347,6 +365,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 		/* Store the suggestion (used later by rl_accept_suggestion (keybinds.c) */
 		suggestion_buf = savestring(str, strlen(str));
 
+//	set_cursor_position(baej, &slines);
 	set_cursor_position(baej);
 	_print_suggestion(str, offset, color);
 
@@ -646,7 +665,7 @@ print_reg_file_suggestion(char *str, const size_t i, size_t len,
 	char *tmp = escape_str(file_info[i].name);
 	if (tmp) {
 		char *s = str;
-		while(*s) {
+		while (*s) {
 			if (is_quote_char(*s))
 				len++;
 			s++;
