@@ -592,9 +592,9 @@ END:
 			}
 #endif /* !_NO_SUGGESTIONS */
 
-#ifndef BACKWARD_SUGGEST
+#ifdef NO_BACKWARD_SUGGEST
 			return SKIP_CHAR;
-#endif /* BACKWARD_SUGGEST */
+#endif /* NO_BACKWARD_SUGGEST */
 		}
 		return SUGGEST_ONLY;
 	}
@@ -618,9 +618,9 @@ END:
 		}
 #endif /* !_NO_SUGGESTIONS */
 
-#ifndef BACKWARD_SUGGEST
+#ifdef NO_BACKWARD_SUGGEST
 		return SKIP_CHAR;
-#endif /* BACKWARD_SUGGEST */
+#endif /* NO_BACKWARD_SUGGEST */
 	}
 
 	return SUGGEST_ONLY;

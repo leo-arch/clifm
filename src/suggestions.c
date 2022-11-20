@@ -304,11 +304,10 @@ _print_suggestion(const char *str, const size_t offset, const char *color)
  * move the cursor back to the original position.
  * OFFSET marks the point in STR that is already typed: the suggestion
  * will be printed starting from this point */
-
 void
 print_suggestion(const char *str, size_t offset, char *color)
 {
-#ifndef BACKWARD_SUGGEST
+#ifdef NO_BACKWARD_SUGGEST
 	/* Do nothing if WRONG_CMD is set: we're recovering from the warning prompt
 	 * and if we print the suggestion here it will be cleared anyway by
 	 * recover_from_wrong_cmd(), and that's a waste of resources */
@@ -320,7 +319,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	if (wrong_cmd == 1)
 		recover_from_wrong_cmd();
-#endif /* BACKWARD_SUGGEST */
+#endif /* NO_BACKWARD_SUGGEST */
 
 	HIDE_CURSOR;
 
@@ -567,13 +566,13 @@ print_match(char *match, const size_t len, const unsigned char c)
 
 	free(p);
 
-#ifndef BACKWARD_SUGGEST
+#ifdef NO_BACKWARD_SUGGEST
 	if (c != BS)
 		suggestion.type = COMP_SUG;
 #else
 	suggestion.type = COMP_SUG;
 	UNUSED(c);
-#endif
+#endif /* NO_BACKWARD_SUGGEST */
 
 	match_print(match, len, color, append_slash);
 
@@ -730,11 +729,11 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		&& strncasecmp(str, file_info[i].name, len) == 0)) {
 			if (file_info[i].len == len) return FULL_MATCH;
 
-#ifndef BACKWARD_SUGGEST
+#ifdef NO_BACKWARD_SUGGEST
 			if (c != BS) suggestion.type = FILE_SUG;
 #else
 			suggestion.type = FILE_SUG;
-#endif
+#endif /* NO_BACKWARD_SUGGEST */
 
 			if (file_info[i].dir)
 				print_directory_suggestion(i, len, color);
