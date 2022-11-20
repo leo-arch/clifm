@@ -806,8 +806,8 @@ record_cmd(char *input)
 		p[len - 1] = '&';
 
 	switch(*p) {
-	case '.': /* . */
-		if (!*(p + 1))
+	case '.': /* Self, parent, and fastback */
+		if (!*(p + 1) || (*(p + 1) == '.' && (!*(p + 2) || *(p + 2) == '.') ) )
 			return 0;
 		break;
 
@@ -847,7 +847,7 @@ record_cmd(char *input)
 		return 0;
 
 	/* Consequtively equal commands in history */
-	if (history && history[current_hist_n - 1].cmd
+	if (history && current_hist_n > 0 && history[current_hist_n - 1].cmd
 	&& *p == *history[current_hist_n - 1].cmd
 	&& strcmp(p, history[current_hist_n - 1].cmd) == 0)
 		return 0;
