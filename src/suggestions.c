@@ -317,8 +317,11 @@ print_suggestion(const char *str, size_t offset, char *color)
 	if (!str || !*str)
 		return;
 
-	if (wrong_cmd == 1)
+	if (wrong_cmd == 1) {
+		if (nwords > 1)
+			return;
 		recover_from_wrong_cmd();
+	}
 #endif /* NO_BACKWARD_SUGGEST */
 
 	HIDE_CURSOR;
@@ -485,12 +488,14 @@ remove_trailing_slash(char **str, size_t *len)
 }
 
 static inline void
-skip_leading_spaces(char **str, size_t *len)
+skip_trailing_spaces(char **str, size_t *len)
 {
 //	if (*len == 0)
 //		return;
 
-	while (*len > 0 && (*str)[*len - 1] == ' ') {
+//	while (*len > 0 && (*str)[*len - 1] == ' ') {
+	while (*len > 0 && (*str)[*len - 1] == ' '
+	&& (*len == 1 || (*str)[*len - 2] != '\\') ) {
 		(*len)--;
 		(*str)[*len] = '\0';
 	}
@@ -599,7 +604,7 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 	if (!str || !*str)
 		return NO_MATCH;
 
-	skip_leading_spaces(&str, &len);
+	skip_trailing_spaces(&str, &len);
 	skip_leading_backslashes(&str, &len);
 
 	if (xargs.fuzzy_match != 0 && nwords == 1 && *str != '/' && is_internal_c(str))
@@ -700,7 +705,7 @@ check_filenames(char *str, size_t len, const unsigned char c,
 
 	skip_leading_backslashes(&str, &len);
 	int dot_slash = skip_leading_dot_slash(&str, &len), fuzzy_index = -1;
-	skip_leading_spaces(&str, &len);
+	skip_trailing_spaces(&str, &len);
 	int removed_slash = remove_trailing_slash(&str, &len);
 
 	size_t i;
@@ -1072,7 +1077,7 @@ check_eln(const char *str, const int print)
 	|| (file_info[n - 1].dir == 0 && conf.auto_open == 0) ) ) )
 		return NO_MATCH;
 
-	if (!print)
+	if (print == 0)
 		return FULL_MATCH;
 
 	n--;
@@ -1833,6 +1838,10 @@ rl_suggestions(const unsigned char c)
 	size_t st;
 	int flag = 0;
 
+	/* This handles a single case: "file\ <char removed via backspace>"
+	 * to match a file name with spaces */
+	int escaped = (c == BS && wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
+
 	for (st = 0; st < SUG_STRATS; st++) {
 		switch(conf.suggestion_strategy[st]) {
 
@@ -1876,8 +1885,10 @@ rl_suggestions(const unsigned char c)
 					word = first_word ? first_word : last_word;
 					wlen = strlen(word);
 				}
-				if (wlen > 0 && word[wlen - 1] == ' ')
+				if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
 					word[wlen - 1] = '\0';
+//					wlen--;
+				}
 
 				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 
@@ -1910,7 +1921,7 @@ rl_suggestions(const unsigned char c)
 				break;
 
 			int nlen = (int)wlen;
-			while (nlen > 0 && word[nlen - 1] == ' ') {
+			while (nlen > 0 && word[nlen - 1] == ' ' && escaped == 0) {
 				nlen--;
 				word[nlen] = '\0';
 			}
@@ -1927,7 +1938,7 @@ rl_suggestions(const unsigned char c)
 				clear_suggestion(CS_FREEBUF);
 
 			if (*lb != ';' && *lb != ':' && *word >= '1' && *word <= '9') {
-				if (__expand_eln(word) == 1 && (printed = check_eln(word, flag)) == 1)
+				if (__expand_eln(word) == 1 && (printed = check_eln(word, flag)) > 0)
 					goto SUCCESS;
 			}
 			break;
@@ -1951,8 +1962,10 @@ rl_suggestions(const unsigned char c)
 					flags &= ~STATE_COMPLETING;
 				}
 
-				if (wlen > 0 && word[wlen - 1] == ' ')
+				if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
 					word[wlen - 1] = '\0';
+//					wlen--;
+				}
 
 				if (c == ' ' && suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
@@ -1979,8 +1992,10 @@ rl_suggestions(const unsigned char c)
 					word = (first_word && *first_word) ? first_word : last_word;
 					wlen = strlen(word);
 				}
-				if (wlen > 0 && word[wlen - 1] == ' ')
+				if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
 					word[wlen - 1] = '\0';
+//					wlen--;
+				}
 
 				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
 
