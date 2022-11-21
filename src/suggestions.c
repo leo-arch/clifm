@@ -1840,7 +1840,8 @@ rl_suggestions(const unsigned char c)
 
 	/* This handles a single case: "file\ <char removed via backspace>"
 	 * to match a file name with spaces */
-	int escaped = (c == BS && wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
+//	int escaped = (c == BS && wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
+	int escaped = (wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
 
 	for (st = 0; st < SUG_STRATS; st++) {
 		switch(conf.suggestion_strategy[st]) {
@@ -1885,12 +1886,13 @@ rl_suggestions(const unsigned char c)
 					word = first_word ? first_word : last_word;
 					wlen = strlen(word);
 				}
+
 				if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
 					word[wlen - 1] = '\0';
 //					wlen--;
 				}
 
-				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
+				flag = (c == ' ' && escaped == 0) ? CHECK_MATCH : PRINT_MATCH;
 
 				char *d = word;
 				if (wlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(word)) {
@@ -1967,7 +1969,7 @@ rl_suggestions(const unsigned char c)
 //					wlen--;
 				}
 
-				if (c == ' ' && suggestion.printed)
+				if (c == ' ' && escaped == 0 && suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
 
 				printed = check_filenames(word, wlen, c, last_space ? 0 : 1, c == ' ' ? 1 : 0);
