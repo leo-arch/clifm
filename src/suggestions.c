@@ -712,6 +712,9 @@ check_filenames(char *str, size_t len, const unsigned char c,
 	for (i = 0; i < files; i++) {
 		if (!file_info[i].name)	continue;
 
+		if (removed_slash == 1 && file_info[i].dir != 1)
+			continue;
+
 		if (full_word) {
 			if ((conf.case_sens_path_comp ? strcmp(str, file_info[i].name)
 			: strcasecmp(str, file_info[i].name)) == 0)
@@ -1602,13 +1605,9 @@ rl_suggestions(const unsigned char c)
 		if (suggestion.type == HIST_SUG || suggestion.type == INT_CMD) {
 			/* Skip the j cmd: we always want the BAEJ suggestion here */
 			if (word && *word == 'j' && word[1] == ' ') {
-//			|| (*word == '.' && word[1] == '.' && word[2] == '.') ) ) {
 				;
 			} else if (*full_line == *suggestion_buf
 			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
-/*			if ((!word || *word != 'j' || word[1] != ' ')
-			&& *full_line == *suggestion_buf
-			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0 ) ) { */
 				printed = zero_offset = 1;
 				goto SUCCESS;
 			}
@@ -1838,8 +1837,7 @@ rl_suggestions(const unsigned char c)
 	size_t st;
 	int flag = 0;
 
-	/* This handles a single case: "file\ <char removed via backspace>"
-	 * to match a file name with spaces */
+	/* Let's find out whether the last entered character is escaped */
 //	int escaped = (c == BS && wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
 	int escaped = (wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
 

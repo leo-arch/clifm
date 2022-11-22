@@ -877,10 +877,8 @@ construct_prompt(const char *decoded_prompt)
 			snprintf(warn_ind, N_IND, "%sW%zu%s", wm_c, msgs.warning, RL_NC);
 		if (msgs.notice > 0)
 			snprintf(notice_ind, N_IND, "%sN%zu%s", nm_c, msgs.notice, RL_NC);
-
 		if (trash_n > 2)
 			snprintf(trash_ind, N_IND, "%sT%zu%s", ti_c, (size_t)trash_n - 2, RL_NC);
-
 		if (sel_n > 0)
 			snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
 	}
