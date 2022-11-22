@@ -1869,46 +1869,49 @@ rl_suggestions(const unsigned char c)
 		case 'c': /* 3.d.3) Possible completions (only path completion!) */
 			if (rl_point < rl_end && c == '/') goto NO_SUGGESTION;
 
-			if (last_space || conf.autocd || conf.auto_open) {
-				/* Skip internal commands not dealing with file names */
-				if (first_word) {
-					flags |= STATE_COMPLETING;
-					if (is_internal_c(first_word) && !is_internal_f(first_word)) {
-						flags &= ~STATE_COMPLETING;
-						goto NO_SUGGESTION;
-					}
+			/* First word and neither autocd nor auto-open */
+			if (!last_space && conf.autocd == 0 && conf.auto_open == 0)
+				break;
+
+			/* Skip internal commands not dealing with file names */
+			if (first_word) {
+				flags |= STATE_COMPLETING;
+				if (is_internal_c(first_word) && !is_internal_f(first_word)) {
 					flags &= ~STATE_COMPLETING;
+					goto NO_SUGGESTION;
 				}
+				flags &= ~STATE_COMPLETING;
+			}
 
-				if (nwords == 1) {
-					word = first_word ? first_word : last_word;
-					wlen = strlen(word);
-				}
+			if (nwords == 1) {
+				word = first_word ? first_word : last_word;
+				wlen = strlen(word);
+			}
 
-				if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
-					word[wlen - 1] = '\0';
-//					wlen--;
-				}
+			if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
+				word[wlen - 1] = '\0';
+//				wlen--;
+			}
 
-				flag = (c == ' ' && escaped == 0) ? CHECK_MATCH : PRINT_MATCH;
+			flag = (c == ' ' && escaped == 0) ? CHECK_MATCH : PRINT_MATCH;
 
-				char *d = word;
-				if (wlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(word)) {
-					d += FILE_URI_PREFIX_LEN;
-					wlen -= FILE_URI_PREFIX_LEN;
-					last_word_offset += FILE_URI_PREFIX_LEN;
-				}
+			char *d = word;
+			if (wlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(word)) {
+				d += FILE_URI_PREFIX_LEN;
+				wlen -= FILE_URI_PREFIX_LEN;
+				last_word_offset += FILE_URI_PREFIX_LEN;
+			}
 
-				printed = check_completions(d, wlen, c, flag);
-				if (printed) {
-					if (flag == CHECK_MATCH) {
-						if (printed == FULL_MATCH)
-							goto SUCCESS;
-					} else {
+			printed = check_completions(d, wlen, c, flag);
+			if (printed) {
+				if (flag == CHECK_MATCH) {
+					if (printed == FULL_MATCH)
 						goto SUCCESS;
-					}
+				} else {
+					goto SUCCESS;
 				}
 			}
+
 			break;
 
 		case 'e': /* 3.d.4) ELN's */
@@ -1946,34 +1949,44 @@ rl_suggestions(const unsigned char c)
 		case 'f': /* 3.d.5) File names in CWD */
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
-			if (last_space || conf.autocd || conf.auto_open) {
-				if (nwords == 1) {
-					word = (first_word && *first_word) ? first_word : last_word;
-					wlen = strlen(word);
-				}
+			if (!last_space && conf.autocd == 0 && conf.auto_open == 0)
+				break;
 
-				/* Skip internal commands not dealing with file names */
-				if (first_word) {
-					flags |= STATE_COMPLETING;
-					if (is_internal_c(first_word) && !is_internal_f(first_word)) {
-						flags &= ~STATE_COMPLETING;
-						goto NO_SUGGESTION;
-					}
-					flags &= ~STATE_COMPLETING;
-				}
-
-				if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
-					word[wlen - 1] = '\0';
-//					wlen--;
-				}
-
-				if (c == ' ' && escaped == 0 && suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
-
-				printed = check_filenames(word, wlen, c, last_space ? 0 : 1, c == ' ' ? 1 : 0);
-				if (printed)
-					goto SUCCESS;
+			if (nwords == 1) {
+				word = (first_word && *first_word) ? first_word : last_word;
+				wlen = strlen(word);
 			}
+
+			if (*word == '/') /* Absolute path: nothing to do here */
+				break;
+
+			/* If we have "/x...", we're not looking for files in the CWD */
+			char *p = strchr(word, '/');
+			if (p && *(p + 1))
+				break;
+
+			/* Skip internal commands not dealing with file names */
+			if (first_word) {
+				flags |= STATE_COMPLETING;
+				if (is_internal_c(first_word) && !is_internal_f(first_word)) {
+					flags &= ~STATE_COMPLETING;
+					goto NO_SUGGESTION;
+				}
+				flags &= ~STATE_COMPLETING;
+			}
+
+			if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
+				word[wlen - 1] = '\0';
+//				wlen--;
+			}
+
+			if (c == ' ' && escaped == 0 && suggestion.printed)
+				clear_suggestion(CS_FREEBUF);
+
+			printed = check_filenames(word, wlen, c, last_space ? 0 : 1, c == ' ' ? 1 : 0);
+			if (printed)
+				goto SUCCESS;
+
 			break;
 
 		case 'h': /* 3.d.6) Commands history */
@@ -1987,30 +2000,32 @@ rl_suggestions(const unsigned char c)
 		case 'j': /* 3.d.7) Jump database */
 			/* We don't care about auto-open here: the jump function
 			 * deals with directories only */
-			if (last_space || conf.autocd) {
-				if (nwords == 1) {
-					word = (first_word && *first_word) ? first_word : last_word;
-					wlen = strlen(word);
-				}
-				if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
-					word[wlen - 1] = '\0';
-//					wlen--;
-				}
+			if (!last_space && conf.autocd == 0)
+				break;
 
-				flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
-
-				if (flag == CHECK_MATCH && suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
-
-				printed = check_jumpdb(word, wlen, flag);
-
-				if (printed)
-					goto SUCCESS;
+			if (nwords == 1) {
+				word = (first_word && *first_word) ? first_word : last_word;
+				wlen = strlen(word);
 			}
+
+			if (wlen > 0 && word[wlen - 1] == ' ' && escaped == 0) {
+				word[wlen - 1] = '\0';
+//				wlen--;
+			}
+
+			flag = (c == ' ' || full_word) ? CHECK_MATCH : PRINT_MATCH;
+
+			if (flag == CHECK_MATCH && suggestion.printed)
+				clear_suggestion(CS_FREEBUF);
+
+			printed = check_jumpdb(word, wlen, flag);
+
+			if (printed)
+				goto SUCCESS;
+
 			break;
 
 		case '-': break; /* Ignore check */
-
 		default: break;
 		}
 	}
