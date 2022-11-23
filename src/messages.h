@@ -399,13 +399,19 @@ Available file type characters:\n\
 (1) Only via TAB completion\n\
 (2) Not available in light mode\n\n\
 Type '=<TAB>' to get the list of available file type filters\n\n\
-Other ways of filtering files in the current directory:\n\
+Other ways of filtering files in the current directory:\n\n\
 * @<TAB>       List all MIME-types found\n\
 * @query<TAB>  MIME-type filter. Ex: @pdf<TAB> to list all PDF files\n\
 * /query       Quick search function: consult the 'search' help topic\n\
 * Alt-.        Toggle hidden files\n\
 * Alt-,        Toggle list-only-dirs\n\
-* Just press TAB (fzf/fzy mode) and perform a fuzzy search"
+* Just press TAB (fzf/fzy mode) and perform a fuzzy search\n\n\
+You can also operate on files filtered by file type and/or MIME type as\n\
+follows:\n\n\
+    CMD =file-type-char @query\n\n\
+For example, to select all executable files, symbolic links, and image\n\
+files in the current directory:\n\n\
+    s =x =l @image"
 
 #define FORTH_USAGE "Change to the next directory in the directory history list\n\
 Usage:\n\
