@@ -2863,6 +2863,9 @@ my_rl_completion(const char *text, int start, int end)
 			matches = rl_completion_matches(text, &file_types_opts_generator);
 			if (matches) {
 				if (!matches[1]) {
+					/* A single match: let's swap fields so that the match
+					 * is listed instead of automatically inserted into the
+					 * command line */
 					matches[1] = strdup(matches[0]);
 					*matches[0] = '\0';
 				}

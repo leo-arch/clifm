@@ -864,9 +864,17 @@ get_user_data(void)
 		homedir = pw->pw_dir;
 	}
 
-	if (homedir == pw->pw_dir && (stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
-		fprintf(stderr, _("%s: %s: Invalid home directory in the password database.\n"
-			"Something is really wrong. Exiting.\n"), PROGRAM_NAME, homedir);
+	if (homedir == pw->pw_dir && (!homedir
+	|| stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
+		fprintf(stderr, _("%s: %s: Invalid home directory in the password "
+			"database.\nSomething is really wrong. Exiting.\n"), PROGRAM_NAME,
+			homedir ? homedir : "!");
+		exit(errno);
+	}
+
+	if (!homedir) {
+		fprintf(stderr, _("%s: Home directory not found.\n"
+			"Something is really wrong. Exiting.\n"), PROGRAM_NAME);
 		exit(errno);
 	}
 
