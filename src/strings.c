@@ -1318,6 +1318,8 @@ get_bm_paths(void)
 	return b;
 }
 
+/* Reconstruct the array DST inserting all fields in the array SRC at
+ * index I in DST. NUM is uptdated to the number of inserted fields. */
 static char **
 insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 {
@@ -2096,7 +2098,7 @@ parse_input_str(char *str)
 
 				substr = ret;
 				ret = (char **)NULL;
-				args_n += c - 1;
+				args_n += (c > 0 ? c - 1 : 0);
 			}
 		}
 
@@ -2148,7 +2150,7 @@ parse_input_str(char *str)
 
 				substr = ret;
 				ret = (char **)NULL;
-				args_n += c - 1;
+				args_n += (c > 0 ? c - 1 : 0);
 			}
 		}
 
@@ -2195,7 +2197,7 @@ parse_input_str(char *str)
 
 				substr = ret;
 				ret = (char **)NULL;
-				args_n += c - 1;
+				args_n += (c > 0 ? c - 1 : 0);
 			}
 		}
 

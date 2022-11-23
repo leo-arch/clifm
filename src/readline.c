@@ -2715,20 +2715,20 @@ file_types_opts_generator(const char *text, int state)
 		i = 0;
 
 	static char *ft_opts[] = {
-		"b (Block device)", /* Block device */
-		"c (Character device)", /* Character device */
-		"d (Directory)", /* Directory */
-		"f (Regular file)", /* Regular file */
-		"h (Multi-hardlink file)", /* Multi-hardlink files */
-		"l (Symbolic link)", /* Symbolic link */
-		"p (FIFO-pipe)", /* FIFO/Pipe */
-		"s (Socket)", /* Socket */
-		"x (Executable)", /* Executable file */
-		"o (Other writable)", /* Other-writable file */
-		"t (Sticky)", /* File with the sticky bit set */
-		"u (SUID)", /* SUID file */
-		"g (SGID)", /* SGID file */
-		"C (Capabilities)", /* File with capabilities */
+		"b (Block device)",
+		"c (Character device)",
+		"d (Directory)",
+		"f (Regular file)",
+		"h (Multi-hardlink file)",
+		"l (Symbolic link)",
+		"p (FIFO-pipe)",
+		"s (Socket)",
+		"x (Executable)",
+		"o (Other writable)",
+		"t (Sticky)",
+		"u (SUID)",
+		"g (SGID)",
+		"C (Capabilities)",
 		NULL
 	};
 
