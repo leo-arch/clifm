@@ -64,6 +64,10 @@ typedef char *rl_cpvfunc_t;
 #include "sort.h"
 #include "tags.h"
 
+#ifndef _NO_MAGIC
+# include "mime.h" /* MIME-type filter expansion */
+#endif
+
 static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 
 /* Macros for xstrverscmp() */
@@ -82,6 +86,11 @@ static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
  * Minimize the danger of non-null terminated strings
  * However, nothing beyond MAX_STR_LEN length will be correctly measured */
 #define MAX_STR_LEN 4096
+
+#define IS_FILE_TYPE_FILTER(x) ((x) == 'b' || (x) == 'c' || (x) == 'C' \
+|| (x) == 'd' || (x) == 'f' || (x) == 'g' || (x) == 'h' || (x) == 'l' \
+|| (x) == 'o' || (x) == 'p' || (x) == 's' || (x) == 't' || (x) == 'u' \
+|| (x) == 'x')
 
 /* Get the last non-escaped space in STR (whose length is LEN)
  * Return a pointer to it if found or NULL if not */
@@ -1172,6 +1181,192 @@ expand_tag(char ***args, const int tag_index)
 }
 #endif /* NO_TAGS */
 
+#ifndef _NO_MAGIC
+static char **
+expand_mime_type_filter(const char *pattern)
+{
+	if (!pattern || !*pattern)
+		return (char **)NULL;
+
+	char **t = (char **)xnmalloc(files + 1, sizeof(char *));
+
+	size_t i, n = 0;
+	for (i = 0; i < files; i++) {
+		char *m = xmagic(file_info[i].name, MIME_TYPE);
+		if (!m) continue;
+
+		char *p = strstr(m, pattern);
+		free(m);
+
+		if (!p) continue;
+
+		t[n] = savestring(file_info[i].name, strlen(file_info[i].name));
+		n++;
+	}
+
+	t[n] = (char *)NULL;
+
+	if (n == 0)
+		{ free(t); return (char **)NULL; }
+
+	t = (char **)xrealloc(t, (n + 1) * sizeof(char *));
+	return t;
+}
+#endif /* !_NO_MAGIC */
+
+static char **
+expand_file_type_filter(const char t)
+{
+	if (files == 0)
+		return (char **)NULL;
+
+	size_t i = 0, n = 0;
+
+	char *name = (char *)NULL;
+	char **f = (char **)xnmalloc(files + 1, sizeof(char *));
+
+	while (i < files && (name = file_info[i].name)) {
+		switch(t) {
+		case 'b':
+			if (file_info[i].type == DT_BLK)
+				f[n++] = strdup(name);
+			break;
+		case 'c':
+			if (file_info[i].type == DT_CHR)
+				f[n++] = strdup(name);
+			break;
+		case 'C':
+			if (file_info[i].color == ca_c)
+				f[n++] = strdup(name);
+			break;
+		case 'd':
+			if (file_info[i].dir == 1)
+				f[n++] = strdup(name);
+			break;
+		case 'f':
+			if (file_info[i].dir == 0)
+				f[n++] = strdup(name);
+			break;
+		case 'h':
+			if (file_info[i].dir == 0 && file_info[i].linkn > 2)
+				f[n++] = strdup(name);
+			break;
+		case 'l':
+			if (file_info[i].type == DT_LNK)
+				f[n++] = strdup(name);
+			break;
+
+		case 'o':
+			if (file_info[i].color == tw_c || file_info[i].color == ow_c)
+				f[n++] = strdup(name);
+			break;
+		case 't':
+			if (file_info[i].color == tw_c || file_info[i].color == st_c)
+				f[n++] = strdup(name);
+			break;
+
+		case 'p':
+			if (file_info[i].type == DT_FIFO)
+				f[n++] = strdup(name);
+			break;
+		case 's':
+			if (file_info[i].type == DT_SOCK)
+				f[n++] = strdup(name);
+			break;
+		case 'x':
+			if (file_info[i].exec == 1)
+				f[n++] = strdup(name);
+			break;
+		case 'u':
+			if (file_info[i].color == su_c)
+				f[n++] = strdup(name);
+			break;
+		case 'g':
+			if (file_info[i].color == sg_c)
+				f[n++] = strdup(name);
+			break;
+		default: break;
+		}
+
+		i++;
+	}
+
+	if (n == 0) {
+		free(f);
+		return (char **)NULL;
+	}
+
+	f[n] = (char *)NULL;
+	f = (char **)xrealloc(f, (n + 1) * sizeof(char *));
+
+	return f;
+}
+
+static char **
+get_bm_paths(void)
+{
+	if (bm_n == 0)
+		return (char **)NULL;
+
+	char **b = (char **)xnmalloc(bm_n + 1, sizeof(char *));
+
+	size_t i;
+	for (i = 0; i < bm_n && bookmarks[i].path; i++)
+		b[i] = bookmarks[i].path;
+
+	b[i] = (char *)NULL;
+	return b;
+}
+
+static char **
+insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
+{
+	if (!*dst || !*src)
+		return (char **)NULL;
+
+	char **s = *src;
+
+	/* 1. Get amount of fields in SRC */
+	size_t sn;
+	for (sn = 0; s[sn]; sn++);
+
+	if (sn == 0)
+		return (char **)NULL;
+
+	/* 2. Store fields in DST after the field to be expanded (I) */
+	char **tail = args_n - i > 0
+		? (char **)xnmalloc(args_n - i + 1, sizeof(char *)) : (char **)NULL;
+
+	size_t t, n = 0;
+	if (tail) {
+		for (t = i + 1; (*dst)[t]; t++)
+			tail[n++] = strdup((*dst)[t]);
+		tail[n] = (char *)NULL;
+	}
+
+	/* 3. Append SRC fields, plus TAIL fields, to DST */
+	char **d = (char **)xnmalloc(args_n + sn + 1, sizeof(char *));
+
+	size_t c;
+	for (c = 0; c < i; c++)
+		d[c] = strdup((*dst)[c]);
+
+	for (n = 0; s[n]; n++)
+		d[c++] = strdup(s[n]);
+
+	if (tail) {
+		for (n = 0; tail[n]; n++) {
+			d[c++] = strdup(tail[n]);
+			free(tail[n]);
+		}
+		free(tail);
+	}
+
+	*num = sn;
+	d[c] = (char *)NULL;
+	return d;
+}
+
 /* THIS IS A QUITE SHITTY FUNCTION, I KNOW. PLEASE REFACTOR IT!!!
  *
  * This function is one of the keys of CliFM. It will perform a series of
@@ -1469,14 +1664,9 @@ parse_input_str(char *str)
 		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
 		&& !substr[i][2]))) || strstr(substr[i], "/..")) {
 			char *tmp = normalize_path(substr[i], strlen(substr[i]));
-//			char *tmp = (char *)NULL;
-//			tmp = realpath(substr[i], NULL);
 			if (tmp) {
 				free(substr[i]);
 				substr[i] = tmp;
-/*				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1) * sizeof(char));
-				strcpy(substr[i], tmp);
-				free(tmp); */
 			}
 		}
 
@@ -1489,9 +1679,6 @@ parse_input_str(char *str)
 			if (tmp) {
 				free(substr[i]);
 				substr[i] = tmp;
-/*				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1) * sizeof(char));
-				strcpy(substr[i], tmp);
-				free(tmp); */
 			}
 		}
 
@@ -1568,7 +1755,8 @@ parse_input_str(char *str)
 
 		/* Expand 'sel' only as an argument, not as command */
 		if (i > 0 && *substr[i] == 's' && strcmp(substr[i], "sel") == 0)
-			is_sel = (short)i;
+//			is_sel = (short)i;
+			is_sel = (int)i;
 	}
 
 			/* ####################################
@@ -1692,8 +1880,7 @@ parse_input_str(char *str)
 			for (i = 0; i <= args_n; i++)
 				free(substr[i]);
 
-			substr = (char **)xrealloc(substr, (args_n + sel_n + 2)
-										* sizeof(char *));
+			substr = (char **)xrealloc(substr, (args_n + sel_n + 2) * sizeof(char *));
 
 			for (i = 0; i < j; i++) {
 				substr[i] = savestring(sel_array[i], strlen(sel_array[i]));
@@ -1782,8 +1969,8 @@ parse_input_str(char *str)
 						}
 					}
 				} else {
-					_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error getting variable name\n"),
-						PROGRAM_NAME, substr[i]);
+					_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error "
+						"getting variable name\n"), PROGRAM_NAME, substr[i]);
 					size_t j;
 					for (j = 0; j <= args_n; j++)
 						free(substr[j]);
@@ -1864,9 +2051,163 @@ parse_input_str(char *str)
 		}
 	}
 
+				/* ###############################
+				 * #    2.k) FILE TYPE (=CHAR)   #
+				 * ###############################*/
+
+	int *file_type_array = (int *)xnmalloc(int_array_max, sizeof(int));
+	size_t file_type_n = 0;
+
+	for (i = 0; substr[i]; i++) {
+		if (*substr[i] != '=' || !substr[i][1])
+			continue;
+
+		if (IS_FILE_TYPE_FILTER(substr[i][1])) {
+			file_type_array[file_type_n] = (int)i;
+			file_type_n++;
+			continue;
+		}
+
+		fprintf(stderr, _("%s: %c: Invalid file type filter. Run 'help "
+			"file-filters' for more information\n"), PROGRAM_NAME,
+			substr[i][1]);
+	}
+
+	size_t old_ft = 0;
+	for (i = 0; i < file_type_n; i++) {
+		int index = file_type_array[i] + (int)old_ft;
+
+		char **p = substr[index][1] ? expand_file_type_filter(substr[index][1])
+			: (char **)NULL;
+
+		size_t c = 0;
+		if (p) {
+			char **ret = insert_fields(&substr, &p, (size_t)index, &c);
+
+			size_t n;
+			for (n = 0; p[n]; n++)
+				free(p[n]);
+			free(p);
+
+			if (ret) {
+				for (n = 0; n <= args_n; n++)
+					free(substr[n]);
+				free(substr);
+
+				substr = ret;
+				ret = (char **)NULL;
+				args_n += c - 1;
+			}
+		}
+
+		old_ft += (c > 0 ? c - 1 : 0);
+	}
+
+	free(file_type_array);
+
+#ifndef _NO_MAGIC
+
+				/* #################################
+				 * #   2.l) MIME TYPE (@PATTERN)   #
+				 * #################################*/
+
+	int *mime_type_array = (int *)xnmalloc(int_array_max, sizeof(int));
+	size_t mime_type_n = 0;
+
+	for (i = 0; substr[i]; i++) {
+		if (*substr[i] == '@' && *(substr[i] + 1)) {
+			mime_type_array[mime_type_n] = (int)i;
+			mime_type_n++;
+		}
+	}
+
+	if (mime_type_n > 0) {
+		printf(_("Querying MIME types... "));
+		fflush(stdout);
+	}
+
+	size_t old_mt = 0;
+	for (i = 0; i < mime_type_n; i++) {
+		int index = mime_type_array[i] + (int)old_mt;
+
+		char **p = *(substr[index] + 1) ? expand_mime_type_filter(substr[index] + 1)
+			: (char **)NULL;
+		size_t c = 0;
+		if (p) {
+			char **ret = insert_fields(&substr, &p, (size_t)index, &c);
+
+			size_t n;
+			for (n = 0; p[n]; n++)
+				free(p[n]);
+			free(p);
+
+			if (ret) {
+				for (n = 0; n <= args_n; n++)
+					free(substr[n]);
+				free(substr);
+
+				substr = ret;
+				ret = (char **)NULL;
+				args_n += c - 1;
+			}
+		}
+
+		old_mt += (c > 0 ? c - 1 : 0);
+	}
+
+	putchar('\r');
+	fflush(stdout);
+
+	free(mime_type_array);
+#endif /* !_NO_MAGIC */
+
+				/* ##############################
+				 * #    2.m) BOOKMARKS (:b)     #
+				 * ##############################*/
+
+	int *bm_array = (int *)xnmalloc(int_array_max, sizeof(int));
+	size_t bn = 0;
+
+	for (i = 0; substr[i]; i++) {
+		if ((*substr[i] == ':' && *(substr[i] + 1) == 'b')
+		|| (*substr[i] == 'b' && *(substr[i] + 1) == ':')) {
+			bm_array[bn] = (int)i;
+			bn++;
+		}
+	}
+
+	size_t old_bm = 0;
+	for (i = 0; i < bn; i++) {
+		int index = bm_array[i] + (int)old_bm;
+
+		char **p = get_bm_paths();
+
+		size_t c = 0;
+		if (p) {
+			char **ret = insert_fields(&substr, &p, (size_t)index, &c);
+			free(p);
+
+			if (ret) {
+				size_t n;
+				for (n = 0; n <= args_n; n++)
+					free(substr[n]);
+				free(substr);
+
+				substr = ret;
+				ret = (char **)NULL;
+				args_n += c - 1;
+			}
+		}
+
+		old_bm += (c > 0 ? c - 1 : 0);
+	}
+
+	free(bm_array);
+
 	/* #### 3) NULL TERMINATE THE INPUT STRING ARRAY #### */
 	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
 	substr[args_n + 1] = (char *)NULL;
+
 
 	int is_action = is_action_name(substr[0]);
 	if (is_internal(substr[0]) == 0 && is_action == 0)

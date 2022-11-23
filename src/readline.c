@@ -2982,7 +2982,8 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		if (*text == 'b' && *(text + 1) == ':') {
+		if ((*text == 'b' && *(text + 1) == ':')
+		|| (*text == ':' && *(text + 1) == 'b')) {
 			matches = rl_completion_matches(text, &bm_paths_generator);
 			if (matches) {
 				flags |= MULTI_SEL;
