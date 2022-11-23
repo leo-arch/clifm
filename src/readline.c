@@ -2681,6 +2681,30 @@ tag_complete(const char *text)
 	return comp;
 }
 
+static int
+check_file_type_opts(const char c)
+{
+	switch(c) {
+	case 'b': return stats.block_dev > 0 ? 1 : 0;
+	case 'c': return stats.char_dev > 0 ? 1 : 0;
+	case 'd': return stats.dir > 0 ? 1 : 0;
+	case 'f': return stats.reg > 0 ? 1 : 0;
+	case 'h': return stats.multi_link > 0 ? 1 : 0;
+	case 'l': return stats.link > 0 ? 1 : 0;
+	case 'p': return stats.fifo > 0 ? 1 : 0;
+	case 's': return stats.socket > 0 ? 1 : 0;
+	case 'x': return stats.exec > 0 ? 1 : 0;
+	case 'o': return stats.other_writable > 0 ? 1 : 0;
+	case 't': return stats.sticky > 0 ? 1 : 0;
+	case 'u': return stats.suid > 0 ? 1 : 0;
+	case 'g': return stats.sgid > 0 ? 1 : 0;
+	case 'C': return stats.caps > 0 ? 1 : 0;
+	default: return 0;
+	}
+
+	return 0;
+}
+
 static char *
 file_types_opts_generator(const char *text, int state)
 {
@@ -2691,26 +2715,28 @@ file_types_opts_generator(const char *text, int state)
 		i = 0;
 
 	static char *ft_opts[] = {
-		"b", /* Block device */
-		"c", /* Character device */
-		"d", /* Directory */
-		"f", /* Regular file */
-		"h", /* Multi-hardlink files */
-		"l", /* Symbolic link */
-		"p", /* FIFO/Pipe */
-		"s", /* Socket */
-		"x", /* Executable file */
-		"o", /* Other-writable file */
-		"t", /* File with the sticky bit set */
-		"u", /* SUID file */
-		"g", /* SGID file */
-		"C", /* File with capabilities */
+		"b (Block device)", /* Block device */
+		"c (Character device)", /* Character device */
+		"d (Directory)", /* Directory */
+		"f (Regular file)", /* Regular file */
+		"h (Multi-hardlink file)", /* Multi-hardlink files */
+		"l (Symbolic link)", /* Symbolic link */
+		"p (FIFO-pipe)", /* FIFO/Pipe */
+		"s (Socket)", /* Socket */
+		"x (Executable)", /* Executable file */
+		"o (Other writable)", /* Other-writable file */
+		"t (Sticky)", /* File with the sticky bit set */
+		"u (SUID)", /* SUID file */
+		"g (SGID)", /* SGID file */
+		"C (Capabilities)", /* File with capabilities */
 		NULL
 	};
 
 	char *name;
-	while ((name = ft_opts[i++]))
-		return strdup(name);
+	while ((name = ft_opts[i++])) {
+		if (check_file_type_opts(*name) == 1)
+			return strdup(name);
+	}
 
 	return (char *)NULL;
 }

@@ -892,6 +892,11 @@ get_finder_output(const int multi, char *base)
 		if (line[line_len - 1] == '\n')
 			line[--line_len] = '\0';
 
+		if (cur_comp_type == TCMP_FILE_TYPES_OPTS && *line && *(line + 1)) {
+			*(line + 1) = '\0';
+			line_len = 1;
+		}
+
 		char *q = line;
 		if (multi == 1) {
 			char *s = line;
