@@ -1248,7 +1248,7 @@ expand_file_type_filter(const char t)
 				f[n++] = strdup(name);
 			break;
 		case 'h':
-			if (file_info[i].dir == 0 && file_info[i].linkn > 2)
+			if (file_info[i].dir == 0 && file_info[i].linkn > 1)
 				f[n++] = strdup(name);
 			break;
 		case 'l':

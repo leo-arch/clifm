@@ -2748,7 +2748,7 @@ file_types_generator(const char *text, int state)
 				ret = strdup(name);
 			break;
 		case 'h':
-			if (file_info[i].dir == 0 && file_info[i].linkn > 2)
+			if (file_info[i].dir == 0 && file_info[i].linkn > 1)
 				ret = strdup(name);
 			break;
 		case 'l':
