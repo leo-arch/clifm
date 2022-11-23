@@ -579,7 +579,9 @@ print_selected_files(void)
 	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {
 		colors_list(sel_elements[i].name, (int)i + 1, NO_PAD, PRINT_NEWLINE);
+		printf(_("Calculating file size... ")); fflush(stdout);
 		off_t s = get_sel_file_size(i);
+		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
 		if (s != (off_t)-1)
 			total += s;
 	}
@@ -866,7 +868,9 @@ show_sel_files(void)
 
 		counter++;
 		colors_list(sel_elements[i].name, (int)i + 1, NO_PAD, PRINT_NEWLINE);
+		printf(_("Calculating file size... ")); fflush(stdout);
 		off_t s = get_sel_file_size(i);
+		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
 		if (s != (off_t)-1)
 			total += s;
 	}
