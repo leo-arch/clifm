@@ -853,7 +853,7 @@ get_user_data(void)
 		q = xgetenv("HOME", 0);
 		homedir = q ? q : pw->pw_dir;
 
-		if (homedir == q && (stat(q, &a) == -1 || !S_ISDIR(a.st_mode))) {
+		if (homedir == q && q && (stat(q, &a) == -1 || !S_ISDIR(a.st_mode))) {
 			_err('e', PRINT_PROMPT, _("%s: %s: Home directory not found\n"
 				"Falling back to %s\n"), PROGRAM_NAME, q, pw->pw_dir);
 			homedir = pw->pw_dir;
