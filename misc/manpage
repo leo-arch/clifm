@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Nov 20, 2022" "clifm 1.8.7" "CLIFM Manual"
+.TH "CLIFM" "1" "Nov 22, 2022" "clifm 1.8.8" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1041,6 +1041,39 @@ Available file type characters:
 (1) Only for TAB completion
 .sp 0
 (2) Not available in light mode
+.sp
+\fBe)\fR Grouping files (via automatic expansion):
+.sp
+By means of the above features, you can easily group and operate on groups of files. For example, this command:
+.sp
+ vt :b @image =x sel t:work *.txt
+.sp
+opens a virtual directory (see the \fBVIRTUAL DIRECTORIES\fR section below) automatically expanding the above expressions as follows:
+
+.TS
+allbox;
+lb lb
+l l.
+Expression	Description
+T{
+:b
+T}	All your bookmarks (paths)
+T{
+@image
+T}	All image files (CWD)
+T{
+=x
+T}	All executable files (CWD)
+T{
+sel
+T}	All selected files
+T{
+t:work
+T}	All files tagged as \fIwork\fR
+T{
+*.txt
+T}	All .txt files (CWD)
+.TE
 
 .SH 6. KEYBOARD SHORTCUTS
 .TP
