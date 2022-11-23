@@ -1710,10 +1710,8 @@ check_comments(const char *name)
 static int
 print_stats(void)
 {
-	if (conf.light_mode == 1) {
-		puts("Running in light mode: files statistics are not available");
-		return EXIT_SUCCESS;
-	}
+	if (conf.light_mode == 1)
+		puts(_("Running in light mode: Some files statistics are not available\n"));
 
 	printf(_("Total files:                 %zu\n\
 Directories:                 %zu\n\

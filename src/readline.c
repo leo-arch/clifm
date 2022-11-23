@@ -2862,6 +2862,10 @@ my_rl_completion(const char *text, int start, int end)
 		if (!*(text + 1)) {
 			matches = rl_completion_matches(text, &file_types_opts_generator);
 			if (matches) {
+				if (!matches[1]) {
+					matches[1] = strdup(matches[0]);
+					*matches[0] = '\0';
+				}
 				cur_comp_type = TCMP_FILE_TYPES_OPTS;
 				return matches;
 			}

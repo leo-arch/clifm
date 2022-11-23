@@ -1798,6 +1798,7 @@ list_dir_light(void)
 			}
 #endif
 
+			stats.dir++;
 			if (conf.files_counter == 1)
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			else
@@ -1822,14 +1823,15 @@ list_dir_light(void)
 			file_info[n].icon = ICON_LINK;
 #endif
 			file_info[n].color = ln_c;
+			stats.link++;
 			break;
 
-		case DT_REG: file_info[n].color = fi_c; break;
-		case DT_SOCK: file_info[n].color = so_c; break;
-		case DT_FIFO: file_info[n].color = pi_c; break;
-		case DT_BLK: file_info[n].color = bd_c; break;
-		case DT_CHR: file_info[n].color = cd_c; break;
-		case DT_UNKNOWN: file_info[n].color = uf_c; break;
+		case DT_REG: file_info[n].color = fi_c; stats.reg++; break;
+		case DT_SOCK: file_info[n].color = so_c; stats.socket++; break;
+		case DT_FIFO: file_info[n].color = pi_c; stats.fifo++; break;
+		case DT_BLK: file_info[n].color = bd_c; stats.block_dev++; break;
+		case DT_CHR: file_info[n].color = cd_c; stats.char_dev++; break;
+		case DT_UNKNOWN: file_info[n].color = uf_c; stats.unknown++; break;
 		default: file_info[n].color = df_c; break;
 		}
 
@@ -1851,11 +1853,8 @@ list_dir_light(void)
 		count++;
 	}
 
-	if (xargs.disk_usage_analyzer == 1) {
+	if (xargs.disk_usage_analyzer == 1)
 		putchar('\r');
-//		ERASE_TO_LEFT; /* Erase the "Retrieveing file sizes" message */
-//		MOVE_CURSOR_LEFT(term_cols);
-	}
 
 	file_info[n].name = (char *)NULL;
 	files = (size_t)n;
