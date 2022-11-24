@@ -2846,6 +2846,18 @@ rl_fastback(char *s)
 	return matches;
 }
 
+/* Readline returned a single match: let's swap the first and second fields
+ * of the returned array (A), so that the match is listed instead of
+ * automatically inserted into the command line (by tab_complete() in tabcomp.c) */
+static void
+rl_swap_fields(char ***a)
+{
+	*a = (char **)xrealloc(*a, 3 * sizeof(char *));
+	(*a)[1] = strdup((*a)[0]);
+	*(*a)[0] = '\0';
+	(*a)[2] = (char *)NULL;
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -2857,18 +2869,13 @@ my_rl_completion(const char *text, int start, int end)
 	while (*text == '\\')
 		++text;
 
-	/* File type expansion */
+	/* #### FILE TYPE EXPANSION #### */
 	if (xrename == 0 && *text == '=') {
 		if (!*(text + 1)) {
 			matches = rl_completion_matches(text, &file_types_opts_generator);
 			if (matches) {
-				if (!matches[1]) {
-					/* A single match: let's swap fields so that the match
-					 * is listed instead of automatically inserted into the
-					 * command line */
-					matches[1] = strdup(matches[0]);
-					*matches[0] = '\0';
-				}
+				if (!matches[1])
+					rl_swap_fields(&matches);
 				cur_comp_type = TCMP_FILE_TYPES_OPTS;
 				return matches;
 			}
@@ -2882,7 +2889,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 	}
 
-	/* Fastback */
+	/* #### FASTBACK EXPANSION #### */
 	if (xrename == 0 && *text == '.' && text[1] == '.' && text[2] == '.') {
 		if ((matches = rl_fastback((char *)text)) != NULL) {
 			if (*matches[0] != '/' || matches[0][1])
@@ -2893,7 +2900,8 @@ my_rl_completion(const char *text, int start, int end)
 	}
 
 #ifndef _NO_MAGIC
-	/* MIME type expansion */
+
+	/* #### MIME TYPE EXPANSION #### */
 	if (xrename == 0 && *text == '@') {
 		if (*(text + 1)) {
 			if ((matches = rl_mime_files(text + 1)) != NULL) {
@@ -2911,6 +2919,7 @@ my_rl_completion(const char *text, int start, int end)
 	}
 #endif /* !_NO_MAGIC */
 
+	/* #### WILDCARDS EXPANSION #### */
 	char *g = strpbrk(text, GLOB_CHARS);
 	/* Expand only glob expressions in the last path component */
 	if (xrename == 0 && g && !strchr(g, '/') && access(text, F_OK) != 0) {
@@ -2918,9 +2927,44 @@ my_rl_completion(const char *text, int start, int end)
 			&& !strchr(rl_line_buffer + 1, '/'))
 			? (char *)(text + 1) : (char *)text;
 		if ((matches = rl_glob(p)) != NULL) {
+			if (!matches[1])
+				rl_swap_fields(&matches);
 			cur_comp_type = TCMP_GLOB;
 			rl_filename_completion_desired = 1;
 			flags |= MULTI_SEL;
+			return matches;
+		}
+	}
+
+	/* #### BOOKMARKS EXPANSION (:b or b:) #### */
+	if (xrename == 0 && ((*text == 'b' && *(text + 1) == ':')
+	|| (*text == ':' && *(text + 1) == 'b'))) {
+		matches = rl_completion_matches(text, &bm_paths_generator);
+		if (matches) {
+			if (!matches[1])
+				rl_swap_fields(&matches);
+			flags |= MULTI_SEL;
+			rl_filename_completion_desired = 1;
+			cur_comp_type = TCMP_BM_PATHS;
+			return matches;
+		}
+	}
+
+	/* #### USERS EXPANSION (~) #### */
+	if (xrename == 0 && *text == '~' && *(text + 1) != '/') {
+		matches = rl_completion_matches(text + 1, &users_generator);
+		endpwent();
+		if (matches) {
+			cur_comp_type = TCMP_USERS;
+			return matches;
+		}
+	}
+
+	/* ##### ENVIRONMENT VARIABLES ##### */
+	if (*text == '$' && *(text + 1) != '(') {
+		matches = rl_completion_matches(text, &environ_generator);
+		if (matches) {
+			cur_comp_type = TCMP_ENVIRON;
 			return matches;
 		}
 	}
@@ -2929,29 +2973,11 @@ my_rl_completion(const char *text, int start, int end)
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
 
-		if (xrename == 0 && *text == '~' && *(text + 1) != '/') {
-			matches = rl_completion_matches(text + 1, &users_generator);
-			endpwent();
-			if (matches) {
-				cur_comp_type = TCMP_USERS;
-				return matches;
-			}
-		}
-
 		/* HISTORY CMD AND SEARCH PATTERNS COMPLETION */
 		if (xrename == 0 && (*text == '!' || *text == '/')) {
 			matches = rl_completion_matches(text, &hist_generator);
 			if (matches) {
 				cur_comp_type = TCMP_HIST;
-				return matches;
-			}
-		}
-
-		/* ENVIRONMENT VARIABLES */
-		if (xrename == 0 && *text == '$' && *(text + 1) != '(') {
-			matches = rl_completion_matches(text, &environ_generator);
-			if (matches) {
-				cur_comp_type = TCMP_ENVIRON;
 				return matches;
 			}
 		}
@@ -3015,17 +3041,6 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		if ((*text == 'b' && *(text + 1) == ':')
-		|| (*text == ':' && *(text + 1) == 'b')) {
-			matches = rl_completion_matches(text, &bm_paths_generator);
-			if (matches) {
-				flags |= MULTI_SEL;
-				rl_filename_completion_desired = 1;
-				cur_comp_type = TCMP_BM_PATHS;
-				return matches;
-			}
-		}
-
 		char *lb = rl_line_buffer;
 #ifndef _NO_TAGS
 		/* #### TAGS COMPLETION #### */
@@ -3036,6 +3051,8 @@ my_rl_completion(const char *text, int start, int end)
 			cur_tag = savestring(text + 2, strlen(text + 2));
 			matches = check_tagged_files(cur_tag);
 			if (matches) {
+				if (!matches[1])
+					rl_swap_fields(&matches);
 				cur_comp_type = TCMP_TAGS_F;
 				return matches;
 			}
@@ -3072,36 +3089,6 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 #endif
-
-		/* ##### ENVIRONMENT VARIABLES ##### */
-		if (*text == '$' && *(text + 1) != '(') {
-			matches = rl_completion_matches(text, &environ_generator);
-			if (matches) {
-				cur_comp_type = TCMP_ENVIRON;
-				return matches;
-			}
-		}
-
-		/* ##### ~USERS ##### */
-		if (*text == '~' && *(text + 1) != '/') {
-			matches = rl_completion_matches(text + 1, &users_generator);
-			endpwent();
-			if (matches) {
-				cur_comp_type = TCMP_USERS;
-				return matches;
-			}
-		}
-
-		/* #### WILDCARDS EXPANSION #### */
-/*		char *g = strpbrk(text, GLOB_CHARS);
-		// Expand only glob expressions in the last path component
-		if (g && !strchr(g, '/') && access(text, F_OK) != 0
-		&& (matches = rl_glob(text))) {
-			cur_comp_type = TCMP_GLOB;
-			rl_filename_completion_desired = 1;
-			flags |= MULTI_SEL;
-			return matches;
-		} */
 
 		/* #### BACKDIR COMPLETION #### */
 		if (*text != '/' && nwords <= 2 && rl_end >= 3

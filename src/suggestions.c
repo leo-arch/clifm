@@ -2041,6 +2041,9 @@ rl_suggestions(const unsigned char c)
 	if (nwords > 1)
 		goto NO_SUGGESTION;
 
+	if (*word == 'b' && *(word + 1) == ':')
+		goto NO_SUGGESTION;
+
 CHECK_FIRST_WORD:
 	word = first_word ? first_word : last_word;
 	if (!word || !*word || (c == ' ' && (*word == '\''

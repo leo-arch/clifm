@@ -459,6 +459,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	if (n)
 		*n = '\0';
 
+//	ERASE_TO_RIGHT;
+
 	if (cur_comp_type == TCMP_GLOB) {
 		size_t blen = strlen(buf);
 		if (blen > 0 && buf[blen - 1] == '/')
@@ -1401,6 +1403,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	|| cur_comp_type == TCMP_BM_PATHS) {
 		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : 0);
+		if (finder_offset == prompt_offset && cur_comp_type == TCMP_BM_PATHS)
+			finder_offset -= (prompt_offset > 3) ? 3 : 0;
 	}
 
 	else if (cur_comp_type == TCMP_TAGS_C) {
@@ -1565,6 +1569,10 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
 			rl_end = rl_point;
+			prefix_len = 0;
+		} else if (cur_comp_type == TCMP_BM_PATHS) {
+			rl_delete_text(0, rl_end);
+			rl_end = rl_point = 0;
 			prefix_len = 0;
 		}
 	}
