@@ -531,7 +531,9 @@ The query string could match any part of a directory name: \fIbd er\fR, for inst
 Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
 .TP
 .B bm, bookmarks \fR[\fIa\fR, \fIadd PATH\fI] [\fId\fR, \fIdel\fR] [\fIedit\fR] [\fISHORTCUT\fR, \fINAME\fR]
-with no argument, open the bookmarks menu. Here you can cd into the desired bookmark by entering either its ELN, its shortcut or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents).
+with no argument, open the bookmarks manager. Here you can cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents).
+.sp
+To quickly access your bookmarks you can also type \fIb:<TAB>\fR, choose one, and then cd into it by just pressing Enter.
 .sp
 If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectively. Example: \fIbm\ a\ /media/misc\fR or \fIbm\ d\fR. You can also open a bookmark by typing 'bm shortcut' or \fIbm\ name\fR (in which latter case TAB completion is available).
 .sp
