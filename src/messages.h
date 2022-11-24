@@ -159,6 +159,7 @@ Usage:\n\
 Examples:\n\
 - Open the bookmarks screen:\n\
     bm (Alt-b)\n\
+    Note: 'b:<TAB>' can also be used\n\
 - Bookmark the directory /media/mount:\n\
     bm a /media/mount\n\
   Note: Make sure to create a simple shortcut, like 'mnt'. Then you can\n\
@@ -1330,7 +1331,7 @@ f | Shift-right | Alt-k  Go forth in the directory history list\n\
 bd media                 Change to the parent directory matching 'media'\n\
 j <TAB>                  Navigate the list of visited directories\n\
 j xproj                  Jump to the best ranked directory matching 'xproj'\n\
-bm | Alt-b               Open the bookmarks screen\n\
+bm | Alt-b | b:<TAB>     List bookmarks\n\
 bm mybm                  Change to the bookmark named 'mybm'\n\
 ws2 | Alt-2              Switch to the second workspace\n\
 mp                       Change to a mountpoint\n\

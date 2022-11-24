@@ -575,6 +575,7 @@ print_tips(int all)
 		"Create a custom prompt by editing the prompts file ('prompt edit')",
 		"Customize your color scheme: 'cs edit' or F6",
 		"Launch the bookmarks manager: 'bm' or Alt-b",
+		"Quickly list your bookmarks: 'b:<TAB>'",
 		"Chain commands using ; and &&: 's 2 7-10; r sel'",
 		"Add emojis to your prompt by copying them to the prompt line ('prompt edit')",
 		"Create a new profile running 'pf add PROFILE' or 'clifm -P PROFILE'",
