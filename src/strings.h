@@ -34,7 +34,7 @@ __BEGIN_DECLS
 char *dequote_str(char *, int);
 char *escape_str(const char *);
 int  *expand_range(char *, int);
-int  fuzzy_match(char *, char *, const int);
+int  fuzzy_match(char *, char *, const int, const int);
 char *gen_rand_str(size_t);
 char *get_last_space(char *, const int);
 char **get_substr(char *, const char);

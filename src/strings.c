@@ -159,13 +159,15 @@ xstrcasechr(char *s, char c)
  * For the time being, fuzzy match does not work with standard completion
  * (fzftab == 0) */
 int
-fuzzy_match(char *s1, char *s2, const int case_sens)
+fuzzy_match(char *s1, char *s2, const int case_sens, const int type)
 {
 	if (!s1 || !*s1 || !s2 || !*s2 || fzftab == 0)
 		return 0;
 
-	if (*s1 == '.' && *(s1 + 1) == '.')
-		return 0;
+	if (type == FUZZY_FILES) {
+		if ((*s1 == '.' && *(s1 + 1) == '.') || *s1 == '-')
+			return 0;
+	}
 
 	if (case_sens ? strstr(s2, s1) : strcasestr(s2, s1))
 		return 1;

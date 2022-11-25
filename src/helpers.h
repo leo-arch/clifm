@@ -515,6 +515,11 @@ extern int watch;
 #define FZF_BORDER_TOP     6
 #define FZF_BORDER_VERT    7
 
+/* Flags to skip fuzzy matching based on what we're comparing */
+#define FUZZY_FILES    0
+#define FUZZY_BM_NAMES 1
+#define FUZZY_HISTORY  2
+
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */

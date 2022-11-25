@@ -1327,10 +1327,11 @@ my_rl_path_completion(const char *text, int state)
 				&& *(ent->d_name + 1) != *(filename + 1))
 
 				|| (strncmp(filename, ent->d_name, filename_len) != 0) ) {
-					if (conf.fuzzy_match == 0 || *filename == '-')
+					if (conf.fuzzy_match == 0)// || *filename == '-')
 						continue;
 					if (flags & STATE_SUGGESTING) {
-						if (!*_fmatch && fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 1) {
+						if (!*_fmatch
+						&& fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 1) {
 							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
 								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 							else
@@ -1340,7 +1341,7 @@ my_rl_path_completion(const char *text, int state)
 							continue;
 						}
 					} else {
-						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 0)
+						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 0)
 							continue;
 					}
 				}
@@ -1352,10 +1353,10 @@ my_rl_path_completion(const char *text, int state)
 				&& TOUPPER(*(ent->d_name + 1)) != TOUPPER(*(filename + 1)))
 
 				|| (strncasecmp(filename, ent->d_name, filename_len) != 0)) {
-					if (conf.fuzzy_match == 0 || *filename == '-')
+					if (conf.fuzzy_match == 0)// || *filename == '-')
 						continue;
 					if (flags & STATE_SUGGESTING) {
-						if (!*_fmatch && fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 1) {
+						if (!*_fmatch && fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 1) {
 							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
 								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 							else
@@ -1365,7 +1366,7 @@ my_rl_path_completion(const char *text, int state)
 							continue;
 						}
 					} else {
-						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 0)
+						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 0)
 							continue;
 					}
 				}
@@ -1571,7 +1572,7 @@ hist_generator(const char *text, int state)
 		if (*text == '!') {
 			if (len == 0 || (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
 			|| (conf.fuzzy_match == 1
-			&& fuzzy_match((char *)(text + 1), name, conf.case_sens_path_comp) == 1))
+			&& fuzzy_match((char *)(text + 1), name, conf.case_sens_path_comp, FUZZY_HISTORY) == 1))
 				return strdup(name);
 		} else {
 			/* Restrict the search to what seems to be a pattern:
@@ -1610,7 +1611,7 @@ bm_paths_generator(const char *text, int state)
 	while (i < (int)bm_n && (name = bookmarks[i++].path) != NULL) {
 		if (len == 0 || (*name == *(text + 2) && strncmp(name, text + 2, len) == 0)
 		|| (conf.fuzzy_match == 1
-		&& fuzzy_match((char *)(text + 2), name, conf.case_sens_path_comp) == 1)) {
+		&& fuzzy_match((char *)(text + 2), name, conf.case_sens_path_comp, FUZZY_BM_NAMES) == 1)) {
 			size_t nlen = strlen(name);
 			if (nlen > 1 && name[nlen - 1] == '/')
 				name[nlen - 1] = '\0';
@@ -1783,9 +1784,10 @@ filenames_gen_text(const char *text, int state)
 		if (conf.case_sens_path_comp ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
-		if (conf.fuzzy_match == 0 || (*text == '.' && text[1] == '.') || *text == '-')
+		if (conf.fuzzy_match == 0)// || (*text == '.' && text[1] == '.') || *text == '-')
 			continue;
-		if (len == 0 || fuzzy_match((char *)text, name, conf.case_sens_path_comp) == 1)
+		if (len == 0 || fuzzy_match((char *)text, name,
+		conf.case_sens_path_comp, FUZZY_FILES) == 1)
 			return strdup(name);
 	}
 
