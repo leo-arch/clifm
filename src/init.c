@@ -1933,8 +1933,8 @@ external_arguments(int argc, char **argv)
 		{"fzytab", no_argument, 0, 250},
 		{"no-refresh-on-resize", no_argument, 0, 251},
 		{"bell", required_argument, 0, 252},
-		{"fuzzy-matching", no_argument, 0, 253},
-		{"fuzzy-match", no_argument, 0, 253}, // Deprecated
+		{"no-fuzzy-matching", no_argument, 0, 253},
+//		{"fuzzy-match", no_argument, 0, 253}, // Deprecated
 		{"smenutab", no_argument, 0, 254},
 		{"virtual-dir-full-paths", no_argument, 0, 255},
 		{"virtual-dir", required_argument, 0, 256},
@@ -2121,7 +2121,7 @@ external_arguments(int argc, char **argv)
 			}
 			xargs.bell_style = a; break;
 			}
-		case 253: xargs.fuzzy_match = conf.fuzzy_match = 1; break;
+		case 253: xargs.fuzzy_match = conf.fuzzy_match = 0; break;
 		case 254:
 #ifndef _NO_FZF
 			xargs.smenutab = 1; fzftab = 1; tabmode = SMENU_TAB; break;
