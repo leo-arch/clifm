@@ -742,6 +742,7 @@ rl_accept_suggestion(int count, int key)
 		accept_first_word = 0;
 	}
 
+	flags &= ~BAEJ_SUGGESTION;
 	return EXIT_SUCCESS;
 }
 

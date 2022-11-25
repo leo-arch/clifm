@@ -767,8 +767,10 @@ add_to_cmdhist(char *cmd)
 int
 record_cmd(char *input)
 {
-	/* NULL input, self or parent (. ..) and commands starting with space */
-	if (!input || !*input || SELFORPARENT(input) || *input == ' ')
+	/* NULL input, self or parent (. ..), commands starting with space,
+	 * and input generating a BAEJ suggestion */
+	if (!input || !*input || SELFORPARENT(input) || *input == ' '
+	|| (flags & BAEJ_SUGGESTION))
 		return 0;
 
 	/* Blank lines */
