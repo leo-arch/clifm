@@ -131,6 +131,7 @@ init_conf_struct(void)
 	conf.ext_cmd_ok = UNSET;
 	conf.files_counter = UNSET;
 	conf.full_dir_size = UNSET;
+	conf.fuzzy_match = UNSET;
 	conf.fzf_preview = UNSET;
 #ifndef _NO_HIGHLIGHT
 	conf.highlight = UNSET;
@@ -1932,7 +1933,8 @@ external_arguments(int argc, char **argv)
 		{"fzytab", no_argument, 0, 250},
 		{"no-refresh-on-resize", no_argument, 0, 251},
 		{"bell", required_argument, 0, 252},
-		{"fuzzy-match", no_argument, 0, 253},
+		{"fuzzy-matching", no_argument, 0, 253},
+		{"fuzzy-match", no_argument, 0, 253}, // Deprecated
 		{"smenutab", no_argument, 0, 254},
 		{"virtual-dir-full-paths", no_argument, 0, 255},
 		{"virtual-dir", required_argument, 0, 256},
@@ -2119,7 +2121,7 @@ external_arguments(int argc, char **argv)
 			}
 			xargs.bell_style = a; break;
 			}
-		case 253: xargs.fuzzy_match = 1; break;
+		case 253: xargs.fuzzy_match = conf.fuzzy_match = 1; break;
 		case 254:
 #ifndef _NO_FZF
 			xargs.smenutab = 1; fzftab = 1; tabmode = SMENU_TAB; break;
@@ -3271,6 +3273,11 @@ get_prompt_cmds(void)
 void
 check_options(void)
 {
+	if (conf.fuzzy_match == UNSET) {
+		conf.fuzzy_match = xargs.fuzzy_match == UNSET
+			? DEF_FUZZY_MATCH : xargs.fuzzy_match;
+	}
+
 	if (conf.private_ws_settings == UNSET)
 		conf.private_ws_settings = DEF_PRIVATE_WS_SETTINGS;
 
@@ -3303,9 +3310,6 @@ check_options(void)
 
 	if (print_removed_files == UNSET)
 		print_removed_files = DEF_PRINT_REMOVED_FILES;
-
-	if (xargs.fuzzy_match == UNSET)
-		xargs.fuzzy_match = DEF_FUZZY_MATCH;
 
 	if (xargs.bell_style == UNSET)
 		bell = DEF_BELL_STYLE;

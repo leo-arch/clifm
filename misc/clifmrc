@@ -165,6 +165,9 @@ ColorScheme=default
 #         2. COMMAND LINE             #
 #=====================================#
 
+# Enable fuzzy matching for filename/path completions and suggestions
+FuzzyMatching=false
+
 # TAB completion mode: 'standard', 'fzf', 'fzy' or 'smenu'. Defaults
 # to 'fzf' if the binary is found in PATH. Othwerwise, the standard
 # mode is used

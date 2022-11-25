@@ -54,7 +54,7 @@ args=(
 	'--enable-logs[enable program logs]'
 	'--expand-bookmarks[expand bookmark names into the corresponding bookmark paths]'
 	'--full-dir-size[print size of directories and their contents in long view mode]'
-	'--fuzzy-match[enable fuzzy matches for completions and suggestions (only file names and paths)]'
+	'--fuzzy-matching[enable fuzzy matches for completions and suggestions (only file names and paths)]'
 	'--fzfpreview[enable file previews for TAB completion (fzf mode only). Implies --fzftab]'
 	'--fzfpreview-hidden[same as --fzftab, but with the preview window hidden. Toggle it via Alt-p]'
 	'--fzftab[use FZF to display completion matches]'

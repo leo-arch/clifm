@@ -629,6 +629,7 @@ struct config_t {
 	int ext_cmd_ok;
 	int files_counter;
 	int full_dir_size;
+	int fuzzy_match;
 	int fzf_preview;
 	int highlight;
 #ifndef _NO_ICONS
@@ -677,7 +678,6 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-	int pad3;
 
 	char *opener;
 	char *encoded_prompt;

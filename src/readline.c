@@ -1219,7 +1219,7 @@ my_rl_path_completion(const char *text, int state)
 			continue;
 
 		/* Only dir names for cd */
-		if ((conf.suggestions == 0 || nwords > 1) && xargs.fuzzy_match == 1
+		if ((conf.suggestions == 0 || nwords > 1) && conf.fuzzy_match == 1
 		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && type != DT_DIR)
 			continue;
@@ -1327,7 +1327,7 @@ my_rl_path_completion(const char *text, int state)
 				&& *(ent->d_name + 1) != *(filename + 1))
 
 				|| (strncmp(filename, ent->d_name, filename_len) != 0) ) {
-					if (xargs.fuzzy_match == 0 || *filename == '-')
+					if (conf.fuzzy_match == 0 || *filename == '-')
 						continue;
 					if (flags & STATE_SUGGESTING) {
 						if (!*_fmatch && fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 1) {
@@ -1352,7 +1352,7 @@ my_rl_path_completion(const char *text, int state)
 				&& TOUPPER(*(ent->d_name + 1)) != TOUPPER(*(filename + 1)))
 
 				|| (strncasecmp(filename, ent->d_name, filename_len) != 0)) {
-					if (xargs.fuzzy_match == 0 || *filename == '-')
+					if (conf.fuzzy_match == 0 || *filename == '-')
 						continue;
 					if (flags & STATE_SUGGESTING) {
 						if (!*_fmatch && fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp) == 1) {
@@ -1570,7 +1570,7 @@ hist_generator(const char *text, int state)
 	while ((name = history[i++].cmd) != NULL) {
 		if (*text == '!') {
 			if (len == 0 || (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
-			|| (xargs.fuzzy_match == 1
+			|| (conf.fuzzy_match == 1
 			&& fuzzy_match((char *)(text + 1), name, conf.case_sens_path_comp) == 1))
 				return strdup(name);
 		} else {
@@ -1609,7 +1609,7 @@ bm_paths_generator(const char *text, int state)
 
 	while (i < (int)bm_n && (name = bookmarks[i++].path) != NULL) {
 		if (len == 0 || (*name == *(text + 2) && strncmp(name, text + 2, len) == 0)
-		|| (xargs.fuzzy_match == 1
+		|| (conf.fuzzy_match == 1
 		&& fuzzy_match((char *)(text + 2), name, conf.case_sens_path_comp) == 1)) {
 			size_t nlen = strlen(name);
 			if (nlen > 1 && name[nlen - 1] == '/')
@@ -1783,7 +1783,7 @@ filenames_gen_text(const char *text, int state)
 		if (conf.case_sens_path_comp ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
-		if (xargs.fuzzy_match == 0 || (*text == '.' && text[1] == '.') || *text == '-')
+		if (conf.fuzzy_match == 0 || (*text == '.' && text[1] == '.') || *text == '-')
 			continue;
 		if (len == 0 || fuzzy_match((char *)text, name, conf.case_sens_path_comp) == 1)
 			return strdup(name);

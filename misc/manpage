@@ -235,7 +235,7 @@ use \fIfzy\fR to display completion matches
 \fB\-\-full\-dir\-size\fR
 if running in long view, print directories size and their contents
 .TP
-\fB\-\-fuzzy\-match\fR
+\fB\-\-fuzzy\-matching\fR
 enable fuzzy matches for completions and suggestions (only file names and paths)
 .TP
 \fB\-\-icons\fR
@@ -1685,7 +1685,7 @@ Consult \fBsmenu\fR(1) for more information.
 .TP
 For information about how to customize \fIfzy\fR consult \fBfzy\fR(1).
 .TP
-\fBclifm\fR can perform fuzzy TAB completion (just as suggestions, if enabled) for file names and paths (e.g. 'dwn<TAB>' is completed as 'Downloads'). To enable this feature use the \fI\-\-fuzzy\-match\fR command line switch.
+\fBclifm\fR can perform fuzzy TAB completion (just as suggestions, if enabled) for file names and paths (e.g. 'dwn<TAB>' is completed as 'Downloads'). To enable this feature use the \fI\-\-fuzzy\-matching\fR command line switch.
 .TP
 Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. \fBclifm\fR uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP

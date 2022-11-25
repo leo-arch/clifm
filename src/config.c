@@ -1124,6 +1124,9 @@ rmForce=%s\n\n",
 		DEF_RM_FORCE == 1 ? "true" : "false");
 
 	fprintf(config_fp,
+		"# Enable fuzzy matching for filename/path completions and suggestions\n\
+FuzzyMatching=%s\n\n"
+
 		"# TAB completion mode: 'standard', 'fzf', 'fzy', or 'smenu'. Defaults to\n\
 # 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used\n\
 TabCompletionMode=\n\n"
@@ -1188,8 +1191,30 @@ ExternalCommands=%s\n\n"
 	    "# Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be\n\
 # later accessed by the corresponding shell function at program exit.\n\
 # To enable this feature consult the manpage.\n\
-CdOnQuit=%s\n\n"
+CdOnQuit=%s\n\n",
 
+		DEF_FUZZY_MATCH == 1 ? "true" : "false",
+		DEF_FZF_PREVIEW == 1 ? "true" : "false",
+		DEF_MAX_PATH,
+		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
+		PROGRAM_NAME,
+		DEF_SPLASH_SCREEN == 1 ? "true" : "false",
+		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
+		DEF_LONG_VIEW == 1 ? "true" : "false",
+		DEF_PROP_FIELDS,
+		DEF_APPARENT_SIZE == 1 ? "true" : "false",
+		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
+		DEF_LOGS_ENABLED == 1 ? "true" : "false",
+		DEF_LOG_CMDS == 1 ? "true" : "false",
+		DEF_MIN_NAME_TRIM,
+		DEF_MIN_JUMP_RANK,
+		DEF_MAX_JUMP_TOTAL_RANK,
+		DEF_PURGE_JUMPDB == 1 ? "true" : "false",
+		DEF_EXT_CMD_OK == 1 ? "true" : "false",
+		DEF_CD_ON_QUIT == 1 ? "true" : "false"
+		);
+
+	fprintf(config_fp,
 	    "# If set to true, a command name that is the name of a directory or a\n\
 # file is executed as if it were the argument to the the 'cd' or the \n\
 # 'open' commands respectivelly: 'cd DIR' works the same as just 'DIR'\n\
@@ -1227,24 +1252,6 @@ SearchStrategy=%d\n\n"
 # as /path. TAB completion is also available for bookmark names.\n\
 ExpandBookmarks=%s\n\n",
 
-		DEF_FZF_PREVIEW == 1 ? "true" : "false",
-		DEF_MAX_PATH,
-		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
-		PROGRAM_NAME,
-		DEF_SPLASH_SCREEN == 1 ? "true" : "false",
-		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
-		DEF_LONG_VIEW == 1 ? "true" : "false",
-		DEF_PROP_FIELDS,
-		DEF_APPARENT_SIZE == 1 ? "true" : "false",
-		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
-		DEF_LOGS_ENABLED == 1 ? "true" : "false",
-		DEF_LOG_CMDS == 1 ? "true" : "false",
-		DEF_MIN_NAME_TRIM,
-		DEF_MIN_JUMP_RANK,
-		DEF_MAX_JUMP_TOTAL_RANK,
-		DEF_PURGE_JUMPDB == 1 ? "true" : "false",
-		DEF_EXT_CMD_OK == 1 ? "true" : "false",
-		DEF_CD_ON_QUIT == 1 ? "true" : "false",
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
@@ -2334,6 +2341,12 @@ read_config(void)
 		else if (xargs.full_dir_size == UNSET && *line == 'F'
 		&& strncmp(line, "FullDirSize=", 12) == 0) {
 			if (set_config_bool_value(line, &conf.full_dir_size) == -1)
+				continue;
+		}
+
+		else if (xargs.fuzzy_match == UNSET && *line == 'F'
+		&& strncmp(line, "FuzzyMatching=", 14) == 0) {
+			if (set_config_bool_value(line, &conf.fuzzy_match) == -1)
 				continue;
 		}
 

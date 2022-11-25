@@ -140,7 +140,7 @@ xstrcasechr(char *s, char c)
 		return (char *)NULL;
 
 	char uc = TOUPPER(c);
-	while(*s) {
+	while (*s) {
 		if (TOUPPER(*s) != uc) {
 			s++;
 			continue;
@@ -153,6 +153,9 @@ xstrcasechr(char *s, char c)
 
 /* A very basic fuzzy strings matcher
  * Returns 1 if match (S1 is contained in S2) or zero otherwise
+ *
+ * It matches: "bcd" in both "*bcd*" and "*b*c*d*"
+ *
  * For the time being, fuzzy match does not work with standard completion
  * (fzftab == 0) */
 int

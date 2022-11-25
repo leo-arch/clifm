@@ -92,7 +92,7 @@ _clifm ()
         --enable-logs
         --expand-bookmarks
         --full-dir-size
-        --fuzzy-match
+        --fuzzy-matching
         --fzfpreview
         --fzfpreview-hidden
         --fzftab
