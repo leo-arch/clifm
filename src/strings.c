@@ -151,6 +151,8 @@ xstrcasechr(char *s, char c)
 	return (char *)NULL;
 }
 
+#define IS_ALPHA_CASE(c) ( ((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') )
+
 int
 fuzzy_match(char *s1, char *s2, const int type)
 {
@@ -163,22 +165,28 @@ fuzzy_match(char *s1, char *s2, const int type)
 	}
 
 	char *p = (char *)NULL;
-	if (conf.case_sens_path_comp ? (p = strstr(s2, s1)) : (p = strcasestr(s2, s1))) {
+	if (conf.case_sens_path_comp == 1 ? (p = strstr(s2, s1)) : (p = strcasestr(s2, s1))) {
 		if (*p == *s2) { // first char matches
-			return 4;
+			return 5;
 /*			if (*(s2 + len)) { // S2 is longer than S1
 				return FZ_PART_MATCH + (len * FZ_CONS_CHARS);
 			} else { // Exact match
 				return FZ_FULL_MATCH + (len * FZ_CONS_CHARS);
 			} */
 		}
-		return 2;
+		return 4;
 //		return (FZ_PART_MATCH + ((len > 1 ? len - 1 : 1) * FZ_CONS_CHARS));
 	}
 
-	int first_char = *s1 == *s2 ? 1 : 0;
+	int first_char = 0;
+	if (conf.case_sens_path_comp == 1)
+		first_char = *s1 == *s2 ? 1 : 0;
+	else
+		first_char = TOUPPER(*s1) == TOUPPER(*s2) ? 1 : 0;
+
+	int extra_first_chars = 0;
 	int cons_chars = 0;
-//	size_t l = 0;
+	size_t l = 0;
 	char *hs = s2;
 
 	while (*s1) {
@@ -189,12 +197,17 @@ fuzzy_match(char *s1, char *s2, const int type)
 		if (*(s1 + 1) && *(m + 1) && *(s1 + 1) == *(m + 1))
 			cons_chars++;
 
+		if (l > 0 && !IS_ALPHA_CASE(*(m - 1)) )
+			extra_first_chars++;
+
 		hs = ++m;
 		s1++;
-//		l++;
+		l++;
 	}
 
 	if (!*s1) {
+		if (first_char == 1 && extra_first_chars > 0)
+			return 4;
 		if (first_char == 1 && cons_chars > 0)
 			return 3;
 		if (first_char == 1 || cons_chars > 0)

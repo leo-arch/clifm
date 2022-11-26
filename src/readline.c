@@ -1344,9 +1344,9 @@ my_rl_path_completion(const char *text, int state)
 							snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
 						}
 
-						// We look for matches ranked 3 or 4. If none of them is
-						// found, we take the closest ranked match (1 or 2)
-						if (r < 3) {
+						// We look for matches ranked 4 or 5. If none of them is
+						// found, we take the closest ranked match (1-3)
+						if (r < 4) {
 							best_fz_match = r;
 							continue;
 						}
