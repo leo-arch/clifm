@@ -1198,6 +1198,11 @@ my_rl_path_completion(const char *text, int state)
 	/* #        This is the heart of the function         #
 	 * #################################################### */
 	mode_t type;
+	int best_fz_match = 0;
+//	int fuzzy_match_first_chr = 0;
+//	int fz_ranking = 0;
+//	int min_fz_ranking = 1;
+//	int xx = 0;
 
 	while (directory && (ent = readdir(directory))) {
 #if !defined(_DIRENT_HAVE_D_TYPE)
@@ -1320,9 +1325,83 @@ my_rl_path_completion(const char *text, int state)
 		else {
 			/* Check for possible matches, first using regular matching and
 			 * then, if no match, try fuzzy matching (if enabled) */
+			if (conf.fuzzy_match == 0 || (*filename == '.' && *(filename + 1) == '.')
+			|| *filename == '-') {
+				if ( (conf.case_sens_path_comp == 0
+					? TOUPPER(*ent->d_name) != TOUPPER(*filename)
+					: *ent->d_name != *filename)
+					|| (conf.case_sens_path_comp == 0
+					? strncmp(filename, ent->d_name, filename_len) != 0
+					: strncasecmp(filename, ent->d_name, filename_len) != 0) )
+						continue;
+			} else {
+				if (flags & STATE_SUGGESTING) {
+					int r = 0;
+					if ((r = fuzzy_match(filename, ent->d_name, FUZZY_FILES)) > best_fz_match) {
+						if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
+							xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
+						} else {
+							snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
+						}
+
+						// We look for matches ranked 3 or 4. If none of them is
+						// found, we take the closest ranked match (1 or 2)
+						if (r < 3) {
+							best_fz_match = r;
+							continue;
+						}
+					} else {
+						continue;
+					}
+				} else {
+					if (fuzzy_match(filename, ent->d_name, FUZZY_FILES) == 0)
+						continue;
+				}
+			}
+
+			// Check 2nd char as well before calling strncasecmp()
+/*			|| (filename_len > 1 && *(ent->d_name + 1)
+			&& TOUPPER(*(ent->d_name + 1)) != TOUPPER(*(filename + 1)))
+			|| strncasecmp(filename, ent->d_name, filename_len) != 0 )
+				continue;
+
 			if (conf.case_sens_path_comp == 1) {
+				if (conf.fuzzy_match == 0) {
+					if (*ent->d_name != *filename
+					// Check 2nd char as well before calling strncasecmp()
+					|| (filename_len > 1 && *(ent->d_name + 1)
+					&& *(ent->d_name + 1) != *(filename + 1))
+
+					|| (strncmp(filename, ent->d_name, filename_len) != 0) )
+						continue;
+				} else {
+					if (flags & STATE_SUGGESTING) {
+						int r = 0;
+						if ((r = fuzzy_match2(filename, ent->d_name,
+						filename_len, FUZZY_FILES)) > best_fz_match) {
+							if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
+								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
+							} else {
+								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
+							}
+
+							if (r <= 2) {
+								best_fz_match = r;
+								continue;
+							}
+						} else {
+							continue;
+						}
+					} else {
+						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 0)
+							continue;
+					}
+				}
+			} */
+
+/*			if (conf.case_sens_path_comp == 1) {
 				if (*ent->d_name != *filename
-				/* Check 2nd char as well before calling strncasecmp() */
+				// Check 2nd char as well before calling strncasecmp()
 				|| (filename_len > 1 && *(ent->d_name + 1)
 				&& *(ent->d_name + 1) != *(filename + 1))
 
@@ -1344,11 +1423,42 @@ my_rl_path_completion(const char *text, int state)
 						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 0)
 							continue;
 					}
-				}
+				} */
 
-			} else {
-				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
-				/* Check 2nd char as well before calling strncasecmp() */
+/*			} else {
+				if (conf.fuzzy_match == 0) {
+					if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
+					// Check 2nd char as well before calling strncasecmp()
+					|| (filename_len > 1 && *(ent->d_name + 1)
+					&& TOUPPER(*(ent->d_name + 1)) != TOUPPER(*(filename + 1)))
+					|| strncasecmp(filename, ent->d_name, filename_len) != 0 )
+						continue;
+				} else {
+					if (flags & STATE_SUGGESTING) {
+						int r = 0;
+						if ((r = fuzzy_match2(filename, ent->d_name,
+						filename_len, FUZZY_FILES)) > best_fz_match) {
+							if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
+								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
+							} else {
+								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
+							}
+
+							if (r <= 2) {
+								best_fz_match = r;
+								continue;
+							}
+						} else {
+							continue;
+						}
+					} else {
+						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 0)
+							continue;
+					}
+				} */
+
+/*				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
+				// Check 2nd char as well before calling strncasecmp()
 				|| (filename_len > 1 && *(ent->d_name + 1)
 				&& TOUPPER(*(ent->d_name + 1)) != TOUPPER(*(filename + 1)))
 
@@ -1356,12 +1466,19 @@ my_rl_path_completion(const char *text, int state)
 					if (conf.fuzzy_match == 0)// || *filename == '-')
 						continue;
 					if (flags & STATE_SUGGESTING) {
-						if (!*_fmatch && fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 1) {
-							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
+						int r = 0;
+						if ((r = fuzzy_match2(filename, ent->d_name,
+						filename_len, FUZZY_FILES)) > best_fz_match) {
+							if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
 								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
-							else
+							} else {
 								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
-							continue;
+							}
+
+							if (r <= 2) {
+								best_fz_match = r;
+								continue;
+							}
 						} else {
 							continue;
 						}
@@ -1370,7 +1487,7 @@ my_rl_path_completion(const char *text, int state)
 							continue;
 					}
 				}
-			}
+			} */
 
 			if (*rl_line_buffer == 'c'
 			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
@@ -1572,7 +1689,8 @@ hist_generator(const char *text, int state)
 		if (*text == '!') {
 			if (len == 0 || (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
 			|| (conf.fuzzy_match == 1
-			&& fuzzy_match((char *)(text + 1), name, conf.case_sens_path_comp, FUZZY_HISTORY) == 1))
+			&& fuzzy_match((char *)(text + 1), name, FUZZY_HISTORY) > 0))
+//			&& fuzzy_match((char *)(text + 1), name, conf.case_sens_path_comp, FUZZY_HISTORY) == 1))
 				return strdup(name);
 		} else {
 			/* Restrict the search to what seems to be a pattern:
@@ -1611,7 +1729,8 @@ bm_paths_generator(const char *text, int state)
 	while (i < (int)bm_n && (name = bookmarks[i++].path) != NULL) {
 		if (len == 0 || (*name == *(text + 2) && strncmp(name, text + 2, len) == 0)
 		|| (conf.fuzzy_match == 1
-		&& fuzzy_match((char *)(text + 2), name, conf.case_sens_path_comp, FUZZY_BM_NAMES) == 1)) {
+		&& fuzzy_match((char *)(text + 2), name, FUZZY_BM_NAMES) > 0)) {
+//		&& fuzzy_match((char *)(text + 2), name, conf.case_sens_path_comp, FUZZY_BM_NAMES) == 1)) {
 			size_t nlen = strlen(name);
 			if (nlen > 1 && name[nlen - 1] == '/')
 				name[nlen - 1] = '\0';
@@ -1786,8 +1905,9 @@ filenames_gen_text(const char *text, int state)
 			return strdup(name);
 		if (conf.fuzzy_match == 0)// || (*text == '.' && text[1] == '.') || *text == '-')
 			continue;
-		if (len == 0 || fuzzy_match((char *)text, name,
-		conf.case_sens_path_comp, FUZZY_FILES) == 1)
+		if (len == 0 || fuzzy_match((char *)text, name, FUZZY_FILES) > 0)
+//		if (len == 0 || fuzzy_match((char *)text, name,
+//		conf.case_sens_path_comp, FUZZY_FILES) == 1)
 			return strdup(name);
 	}
 

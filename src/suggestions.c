@@ -751,7 +751,8 @@ check_filenames(char *str, size_t len, const unsigned char c,
 			return PARTIAL_MATCH;
 		} else {
 			if (xargs.fuzzy_match == 1 && fuzzy_index == -1
-			&& fuzzy_match(str, file_info[i].name, conf.case_sens_path_comp, FUZZY_FILES) == 1)
+			&& fuzzy_match(str, file_info[i].name, FUZZY_FILES) > 0)
+//			&& fuzzy_match(str, file_info[i].name, conf.case_sens_path_comp, FUZZY_FILES) == 1)
 				fuzzy_index = (int)i;
 		}
 	}

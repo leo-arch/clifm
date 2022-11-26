@@ -151,6 +151,62 @@ xstrcasechr(char *s, char c)
 	return (char *)NULL;
 }
 
+int
+fuzzy_match(char *s1, char *s2, const int type)
+{
+	if (!s1 || !*s1 || !s2 || !*s2)
+		return 0;
+
+	if (type == FUZZY_FILES) {
+		if ((*s1 == '.' && *(s1 + 1) == '.') || *s1 == '-')
+			return 0;
+	}
+
+	char *p = (char *)NULL;
+	if (conf.case_sens_path_comp ? (p = strstr(s2, s1)) : (p = strcasestr(s2, s1))) {
+		if (*p == *s2) { // first char matches
+			return 4;
+/*			if (*(s2 + len)) { // S2 is longer than S1
+				return FZ_PART_MATCH + (len * FZ_CONS_CHARS);
+			} else { // Exact match
+				return FZ_FULL_MATCH + (len * FZ_CONS_CHARS);
+			} */
+		}
+		return 2;
+//		return (FZ_PART_MATCH + ((len > 1 ? len - 1 : 1) * FZ_CONS_CHARS));
+	}
+
+	int first_char = *s1 == *s2 ? 1 : 0;
+	int cons_chars = 0;
+//	size_t l = 0;
+	char *hs = s2;
+
+	while (*s1) {
+		char *m = conf.case_sens_path_comp == 1 ? strchr(hs, *s1) : xstrcasechr(hs, *s1);
+		if (!m)
+			break;
+
+		if (*(s1 + 1) && *(m + 1) && *(s1 + 1) == *(m + 1))
+			cons_chars++;
+
+		hs = ++m;
+		s1++;
+//		l++;
+	}
+
+	if (!*s1) {
+		if (first_char == 1 && cons_chars > 0)
+			return 3;
+		if (first_char == 1 || cons_chars > 0)
+			return 2;
+		return 1;
+/*		printf("len: %d, FC: %d, CC: %d, %cM\n", l, first_char,
+			cons_chars, *(s2 + l) ? 'P' : 'F'); */
+	}
+
+	return 0;
+}
+
 /* A very basic fuzzy strings matcher
  * Returns 1 if match (S1 is contained in S2) or zero otherwise
  *
@@ -158,6 +214,7 @@ xstrcasechr(char *s, char c)
  *
  * For the time being, fuzzy match does not work with standard completion
  * (fzftab == 0) */
+/*
 int
 fuzzy_match(char *s1, char *s2, const int case_sens, const int type)
 {
@@ -186,7 +243,7 @@ fuzzy_match(char *s1, char *s2, const int case_sens, const int type)
 		return 1;
 
 	return 0;
-}
+} */
 
 /* A reverse strpbrk(3): returns a pointer to the LAST char in S matching
  * a char in ACCEPT, or NULL if no match is found */
