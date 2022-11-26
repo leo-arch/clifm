@@ -152,6 +152,7 @@ xstrcasechr(char *s, char c)
 }
 
 #define IS_ALPHA_CASE(c) ( ((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') )
+#define IS_CAMEL_CASE(c, p) ( (c) >= 'A' && (c) <= 'Z' && (p) >= 'a' && (p) <= 'z' )
 
 int
 fuzzy_match(char *s1, char *s2, const int type)
@@ -197,7 +198,7 @@ fuzzy_match(char *s1, char *s2, const int type)
 		if (*(s1 + 1) && *(m + 1) && *(s1 + 1) == *(m + 1))
 			cons_chars++;
 
-		if (l > 0 && !IS_ALPHA_CASE(*(m - 1)) )
+		if (l > 0 && (!IS_ALPHA_CASE(*(m - 1)) || IS_CAMEL_CASE(*m, *(m - 1)) ) )
 			extra_first_chars++;
 
 		hs = ++m;
