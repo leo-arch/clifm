@@ -771,7 +771,8 @@ check_filenames(char *str, size_t len, const unsigned char c,
 	if (fuzzy_index > -1) { /* We have a fuzzy match */
 		cur_comp_type = TCMP_PATH;
 		if (c != BS)
-			suggestion.type = FILE_SUG;
+			suggestion.type = FUZZY_FILENAME;
+//			suggestion.type = FILE_SUG;
 
 		if (file_info[fuzzy_index].dir)
 			print_directory_suggestion((size_t)fuzzy_index, len, color);

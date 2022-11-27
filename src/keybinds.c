@@ -632,13 +632,14 @@ rl_accept_suggestion(int count, int key)
 	/* Complete according to the suggestion type */
 	switch(suggestion.type) {
 
-	case BACKDIR_SUG:  /* fallthrough */
-	case JCMD_SUG:     /* fallthrough */
-	case BOOKMARK_SUG: /* fallthrough */
-	case COMP_SUG:     /* fallthrough */
-	case ELN_SUG:      /* fallthrough */
-	case PROMPT_SUG:   /* fallthrough */
-	case FASTBACK_SUG: /* fallthrough */
+	case BACKDIR_SUG:    /* fallthrough */
+	case JCMD_SUG:       /* fallthrough */
+	case BOOKMARK_SUG:   /* fallthrough */
+	case COMP_SUG:       /* fallthrough */
+	case ELN_SUG:        /* fallthrough */
+	case PROMPT_SUG:     /* fallthrough */
+	case FASTBACK_SUG:   /* fallthrough */
+	case FUZZY_FILENAME: /* fallthrough */
 	case FILE_SUG: {
 		char *tmp = (char *)NULL;
 		size_t i, isquote = 0, backslash = 0;
@@ -753,7 +754,7 @@ rl_accept_first_word(int count, int key)
 	 * bookmarks and aliases names */
 	if (suggestion.type != ELN_SUG && suggestion.type != BOOKMARK_SUG
 	&& suggestion.type != ALIAS_SUG && suggestion.type != JCMD_SUG
-	&& suggestion.type != JCMD_SUG_NOACD) {
+	&& suggestion.type != JCMD_SUG_NOACD && suggestion.type != FUZZY_FILENAME) {
 		accept_first_word = 1;
 		suggestion.type = FIRST_WORD;
 	}
