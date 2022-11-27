@@ -235,6 +235,9 @@ use \fIfzy\fR to display completion matches
 \fB\-\-full\-dir\-size\fR
 if running in long view, print directories size and their contents
 .TP
+\fB\-\-fuzzy\-matching\fR
+enable fuzzy matches for filename/path completions and suggestions
+.TP
 \fB\-\-icons\fR
 enable icons
 .TP
@@ -295,9 +298,6 @@ disable the files counter for directories. This option is especially useful to s
 .TP
 \fB\-\-no\-follow\-symlink\fR
 do not follow symbolic links when listing files
-.TP
-\fB\-\-no\-fuzzy\-matching\fR
-disable fuzzy matches for filename/path completions and suggestions
 .TP
 \fB\-\-no\-highlight\fR
 disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below

@@ -181,6 +181,7 @@ fuzzy_match(char *s1, char *s2, const int type)
 			return 0;
 	}
 
+	int included = 0;
 	char *p = (char *)NULL;
 	if (conf.case_sens_path_comp == 1 ? (p = strstr(s2, s1)) : (p = strcasestr(s2, s1))) {
 		if (*p == *s2) { // first char matches
@@ -191,7 +192,8 @@ fuzzy_match(char *s1, char *s2, const int type)
 				return FZ_FULL_MATCH + (len * FZ_CONS_CHARS);
 			} */
 		}
-		return 4;
+		included = 1;
+//		return 4;
 //		return (FZ_PART_MATCH + ((len > 1 ? len - 1 : 1) * FZ_CONS_CHARS));
 	}
 
@@ -223,9 +225,11 @@ fuzzy_match(char *s1, char *s2, const int type)
 	}
 
 	if (!*s1) {
-		if (first_char == 1 && extra_first_chars > 0)
+		if (first_char == 1 && extra_first_chars > 0 && included == 0)
 			return 4;
-		if (first_char == 1 && cons_chars > 0)
+		if (first_char == 1 && cons_chars > 0 && included == 0)
+			return 3;
+		if (included == 1)
 			return 3;
 		if (first_char == 1 || cons_chars > 0)
 			return 2;
