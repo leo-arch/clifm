@@ -520,6 +520,10 @@ extern int watch;
 #define FUZZY_BM_NAMES 1
 #define FUZZY_HISTORY  2
 
+/* When doing fuzzy matching, always try to get this ranking before
+ * returning a match */
+#define MIN_FUZZY_RANKING 4
+
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */

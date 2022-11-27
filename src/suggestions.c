@@ -708,7 +708,9 @@ check_filenames(char *str, size_t len, const unsigned char c,
 	skip_trailing_spaces(&str, &len);
 	int removed_slash = remove_trailing_slash(&str, &len);
 
+	int best_fz_match = 0;
 	size_t i;
+
 	for (i = 0; i < files; i++) {
 		if (!file_info[i].name)	continue;
 
@@ -731,39 +733,51 @@ check_filenames(char *str, size_t len, const unsigned char c,
 		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
 			continue;
 
-		if (conf.case_sens_path_comp ? (*str == *file_info[i].name
-		&& strncmp(str, file_info[i].name, len) == 0)
-		: (TOUPPER(*str) == TOUPPER(*file_info[i].name)
-		&& strncasecmp(str, file_info[i].name, len) == 0)) {
-			if (file_info[i].len == len) return FULL_MATCH;
+		if (conf.fuzzy_match == 0) {
+			if (conf.case_sens_path_comp ? (*str == *file_info[i].name
+			&& strncmp(str, file_info[i].name, len) == 0)
+			: (TOUPPER(*str) == TOUPPER(*file_info[i].name)
+			&& strncasecmp(str, file_info[i].name, len) == 0)) {
+				if (file_info[i].len == len) return FULL_MATCH;
 
 #ifdef NO_BACKWARD_SUGGEST
-			if (c != BS) suggestion.type = FILE_SUG;
+				if (c != BS) suggestion.type = FILE_SUG;
 #else
-			suggestion.type = FILE_SUG;
+				suggestion.type = FILE_SUG;
 #endif /* NO_BACKWARD_SUGGEST */
 
-			if (file_info[i].dir)
-				print_directory_suggestion(i, len, color);
-			else
-				print_reg_file_suggestion(str, i, len, color, dot_slash);
+				if (file_info[i].dir)
+					print_directory_suggestion(i, len, color);
+				else
+					print_reg_file_suggestion(str, i, len, color, dot_slash);
 
-			return PARTIAL_MATCH;
-		} else {
-			if (xargs.fuzzy_match == 1 && fuzzy_index == -1
-			&& fuzzy_match(str, file_info[i].name, FUZZY_FILES) > 0)
-//			&& fuzzy_match(str, file_info[i].name, conf.case_sens_path_comp, FUZZY_FILES) == 1)
+				return PARTIAL_MATCH;
+			}
+		}
+
+		/* ############### FUZZY MATCHING ################## */
+		else {
+			int r = 0;
+			if ((r = fuzzy_match(str, file_info[i].name, FUZZY_FILES)) > best_fz_match) {
 				fuzzy_index = (int)i;
+				if (r < MIN_FUZZY_RANKING)
+					best_fz_match = r;
+				else
+					break;
+			}
 		}
 	}
 
-	if (fuzzy_index > -1) { /* No regular match, just a fuzzy one */
+	if (fuzzy_index > -1) { /* We have a fuzzy match */
 		cur_comp_type = TCMP_PATH;
-		if (c != BS) suggestion.type = FILE_SUG;
+		if (c != BS)
+			suggestion.type = FILE_SUG;
+
 		if (file_info[fuzzy_index].dir)
 			print_directory_suggestion((size_t)fuzzy_index, len, color);
 		else
 			print_reg_file_suggestion(str, (size_t)fuzzy_index, len, color, dot_slash);
+
 		return PARTIAL_MATCH;
 	}
 

@@ -1323,8 +1323,7 @@ my_rl_path_completion(const char *text, int state)
 
 		/* If there is at least one char to complete (ex: "cd .[TAB]") */
 		else {
-			/* Check for possible matches, first using regular matching and
-			 * then, if no match, try fuzzy matching (if enabled) */
+			/* Let's check for possible matches */
 			if (conf.fuzzy_match == 0 || (*filename == '.' && *(filename + 1) == '.')
 			|| *filename == '-') {
 				if ( (conf.case_sens_path_comp == 0
@@ -1335,6 +1334,9 @@ my_rl_path_completion(const char *text, int state)
 					: strncasecmp(filename, ent->d_name, filename_len) != 0) )
 						continue;
 			} else {
+
+				/* ############### FUZZY MATCHING ################## */
+
 				if (flags & STATE_SUGGESTING) {
 					int r = 0;
 					if ((r = fuzzy_match(filename, ent->d_name, FUZZY_FILES)) > best_fz_match) {
@@ -1344,9 +1346,11 @@ my_rl_path_completion(const char *text, int state)
 							snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
 						}
 
-						// We look for matches ranked 4 or 5. If none of them is
-						// found, we take the closest ranked match (1-3)
-						if (r < 4) {
+						/* We look for matches ranked 4 or 5. If none of them is
+						 * found, we take the closest ranked match (1-3)
+						 * If we set this value to 1, the first match will be returned,
+						 * which makes the computation much faster */
+						if (r < MIN_FUZZY_RANKING) {
 							best_fz_match = r;
 							continue;
 						}
@@ -1354,140 +1358,12 @@ my_rl_path_completion(const char *text, int state)
 						continue;
 					}
 				} else {
+					/* This is for TAB completion: accept all matches */
 					if (fuzzy_match(filename, ent->d_name, FUZZY_FILES) == 0)
 						continue;
 				}
 			}
-
-			// Check 2nd char as well before calling strncasecmp()
-/*			|| (filename_len > 1 && *(ent->d_name + 1)
-			&& TOUPPER(*(ent->d_name + 1)) != TOUPPER(*(filename + 1)))
-			|| strncasecmp(filename, ent->d_name, filename_len) != 0 )
-				continue;
-
-			if (conf.case_sens_path_comp == 1) {
-				if (conf.fuzzy_match == 0) {
-					if (*ent->d_name != *filename
-					// Check 2nd char as well before calling strncasecmp()
-					|| (filename_len > 1 && *(ent->d_name + 1)
-					&& *(ent->d_name + 1) != *(filename + 1))
-
-					|| (strncmp(filename, ent->d_name, filename_len) != 0) )
-						continue;
-				} else {
-					if (flags & STATE_SUGGESTING) {
-						int r = 0;
-						if ((r = fuzzy_match2(filename, ent->d_name,
-						filename_len, FUZZY_FILES)) > best_fz_match) {
-							if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
-								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
-							} else {
-								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
-							}
-
-							if (r <= 2) {
-								best_fz_match = r;
-								continue;
-							}
-						} else {
-							continue;
-						}
-					} else {
-						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 0)
-							continue;
-					}
-				}
-			} */
-
-/*			if (conf.case_sens_path_comp == 1) {
-				if (*ent->d_name != *filename
-				// Check 2nd char as well before calling strncasecmp()
-				|| (filename_len > 1 && *(ent->d_name + 1)
-				&& *(ent->d_name + 1) != *(filename + 1))
-
-				|| (strncmp(filename, ent->d_name, filename_len) != 0) ) {
-					if (conf.fuzzy_match == 0)// || *filename == '-')
-						continue;
-					if (flags & STATE_SUGGESTING) {
-						if (!*_fmatch
-						&& fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 1) {
-							if (!dirname || (*dirname == '.' && !*(dirname + 1)))
-								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
-							else
-								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
-							continue;
-						} else {
-							continue;
-						}
-					} else {
-						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 0)
-							continue;
-					}
-				} */
-
-/*			} else {
-				if (conf.fuzzy_match == 0) {
-					if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
-					// Check 2nd char as well before calling strncasecmp()
-					|| (filename_len > 1 && *(ent->d_name + 1)
-					&& TOUPPER(*(ent->d_name + 1)) != TOUPPER(*(filename + 1)))
-					|| strncasecmp(filename, ent->d_name, filename_len) != 0 )
-						continue;
-				} else {
-					if (flags & STATE_SUGGESTING) {
-						int r = 0;
-						if ((r = fuzzy_match2(filename, ent->d_name,
-						filename_len, FUZZY_FILES)) > best_fz_match) {
-							if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
-								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
-							} else {
-								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
-							}
-
-							if (r <= 2) {
-								best_fz_match = r;
-								continue;
-							}
-						} else {
-							continue;
-						}
-					} else {
-						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 0)
-							continue;
-					}
-				} */
-
-/*				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
-				// Check 2nd char as well before calling strncasecmp()
-				|| (filename_len > 1 && *(ent->d_name + 1)
-				&& TOUPPER(*(ent->d_name + 1)) != TOUPPER(*(filename + 1)))
-
-				|| (strncasecmp(filename, ent->d_name, filename_len) != 0)) {
-					if (conf.fuzzy_match == 0)// || *filename == '-')
-						continue;
-					if (flags & STATE_SUGGESTING) {
-						int r = 0;
-						if ((r = fuzzy_match2(filename, ent->d_name,
-						filename_len, FUZZY_FILES)) > best_fz_match) {
-							if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
-								xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
-							} else {
-								snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
-							}
-
-							if (r <= 2) {
-								best_fz_match = r;
-								continue;
-							}
-						} else {
-							continue;
-						}
-					} else {
-						if (fuzzy_match(filename, ent->d_name, conf.case_sens_path_comp, FUZZY_FILES) == 0)
-							continue;
-					}
-				}
-			} */
+			/* ################################################ */
 
 			if (*rl_line_buffer == 'c'
 			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {

@@ -92,6 +92,9 @@ static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 || (x) == 'o' || (x) == 'p' || (x) == 's' || (x) == 't' || (x) == 'u' \
 || (x) == 'x')
 
+#define IS_ALPHA_CASE(c) ( ((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') )
+#define IS_CAMEL_CASE(c, p) ( (c) >= 'A' && (c) <= 'Z' && (p) >= 'a' && (p) <= 'z' )
+
 /* Get the last non-escaped space in STR (whose length is LEN)
  * Return a pointer to it if found or NULL if not */
 char *
@@ -151,9 +154,22 @@ xstrcasechr(char *s, char c)
 	return (char *)NULL;
 }
 
-#define IS_ALPHA_CASE(c) ( ((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') )
-#define IS_CAMEL_CASE(c, p) ( (c) >= 'A' && (c) <= 'Z' && (p) >= 'a' && (p) <= 'z' )
-
+/* A basic fuzzy matcher. It returns four different values (ranking) based on
+ * how much the pattern (S1) matches the item (S2):
+ * 0: No match
+ * 1: Neither first char nor consecutive chars are matched
+ * 2: Either the first char is matched or we have consecutive chars matched
+ * 3: Both first char and consecutive chars matched
+ * 4: First char and characters beggining a word are matched, or the entire
+ *    pattern is contained in the item (but does not start with it)
+ * 5: The item starts with the pattern (but might be longer)
+ *
+ * The caller must decide whether the returned ranking is enough. If not,
+ * a new item must be inspected until we get the desired ranking. Previous
+ * values should be stored in case the desired ranking is never found.
+ *
+ * What this fuzzy matcher lacks: take gap (distance) between matched chars
+ * into account */
 int
 fuzzy_match(char *s1, char *s2, const int type)
 {
