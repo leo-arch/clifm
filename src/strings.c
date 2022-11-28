@@ -1789,6 +1789,7 @@ parse_input_str(char *str)
 					substr[i] = savestring(ranges_cmd[i], strlen(ranges_cmd[i]));
 					free(ranges_cmd[i]);
 				}
+				substr[i] = (char *)NULL;
 
 				free(ranges_cmd);
 				args_n = j - 1;
