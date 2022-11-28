@@ -92,9 +92,6 @@ static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 || (x) == 'o' || (x) == 'p' || (x) == 's' || (x) == 't' || (x) == 'u' \
 || (x) == 'x')
 
-#define IS_ALPHA_CASE(c) ( ((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') )
-#define IS_CAMEL_CASE(c, p) ( (c) >= 'A' && (c) <= 'Z' && (p) >= 'a' && (p) <= 'z' )
-
 /* Get the last non-escaped space in STR (whose length is LEN)
  * Return a pointer to it if found or NULL if not */
 char *
@@ -136,7 +133,7 @@ replace_slashes(char *str, const char c)
 
 /* Find the character C in the string S ignoring case
  * Returns a pointer to the matching char in S if C was found, or NULL otherwise */
-static char *
+char *
 xstrcasechr(char *s, char c)
 {
 	if (!s || !*s)
@@ -154,130 +151,7 @@ xstrcasechr(char *s, char c)
 	return (char *)NULL;
 }
 
-/* A basic fuzzy matcher. It returns four different values (ranking) based on
- * how much the pattern (S1) matches the item (S2):
- * 0: No match
- * 1: Neither first char nor consecutive chars are matched
- * 2: Either the first char is matched or we have consecutive chars matched
- * 3: Both first char and consecutive chars matched
- * 4: First char and characters beggining a word are matched, or the entire
- *    pattern is contained in the item (but does not start with it)
- * 5: The item starts with the pattern (but might be longer)
- *
- * The caller must decide whether the returned ranking is enough. If not,
- * a new item must be inspected until we get the desired ranking. Previous
- * values should be stored in case the desired ranking is never found.
- *
- * What this fuzzy matcher lacks: take gap (distance) between matched chars
- * into account */
-int
-fuzzy_match(char *s1, char *s2, const int type)
-{
-	if (!s1 || !*s1 || !s2 || !*s2)
-		return 0;
 
-	if (type == FUZZY_FILES) {
-		if ((*s1 == '.' && *(s1 + 1) == '.') || *s1 == '-')
-			return 0;
-	}
-
-	int included = 0;
-	char *p = (char *)NULL;
-	if (conf.case_sens_path_comp == 1 ? (p = strstr(s2, s1)) : (p = strcasestr(s2, s1))) {
-		if (*p == *s2) { // first char matches
-			return 5;
-/*			if (*(s2 + len)) { // S2 is longer than S1
-				return FZ_PART_MATCH + (len * FZ_CONS_CHARS);
-			} else { // Exact match
-				return FZ_FULL_MATCH + (len * FZ_CONS_CHARS);
-			} */
-		}
-		included = 1;
-//		return 4;
-//		return (FZ_PART_MATCH + ((len > 1 ? len - 1 : 1) * FZ_CONS_CHARS));
-	}
-
-	int first_char = 0;
-	if (conf.case_sens_path_comp == 1)
-		first_char = *s1 == *s2 ? 1 : 0;
-	else
-		first_char = TOUPPER(*s1) == TOUPPER(*s2) ? 1 : 0;
-
-	int extra_first_chars = 0;
-	int cons_chars = 0;
-	size_t l = 0;
-	char *hs = s2;
-
-	while (*s1) {
-		char *m = conf.case_sens_path_comp == 1 ? strchr(hs, *s1) : xstrcasechr(hs, *s1);
-		if (!m)
-			break;
-
-		if (*(s1 + 1) && *(m + 1) && *(s1 + 1) == *(m + 1))
-			cons_chars++;
-
-		if (l > 0 && (!IS_ALPHA_CASE(*(m - 1)) || IS_CAMEL_CASE(*m, *(m - 1)) ) )
-			extra_first_chars++;
-
-		hs = ++m;
-		s1++;
-		l++;
-	}
-
-	if (!*s1) {
-		if (first_char == 1 && extra_first_chars > 0 && included == 0)
-			return 4;
-		if (first_char == 1 && cons_chars > 0 && included == 0)
-			return 3;
-		if (included == 1)
-			return 3;
-		if (first_char == 1 || cons_chars > 0)
-			return 2;
-		return 1;
-/*		printf("len: %d, FC: %d, CC: %d, %cM\n", l, first_char,
-			cons_chars, *(s2 + l) ? 'P' : 'F'); */
-	}
-
-	return 0;
-}
-
-/* A very basic fuzzy strings matcher
- * Returns 1 if match (S1 is contained in S2) or zero otherwise
- *
- * It matches: "bcd" in both "*bcd*" and "*b*c*d*"
- *
- * For the time being, fuzzy match does not work with standard completion
- * (fzftab == 0) */
-/*
-int
-fuzzy_match(char *s1, char *s2, const int case_sens, const int type)
-{
-	if (!s1 || !*s1 || !s2 || !*s2 || fzftab == 0)
-		return 0;
-
-	if (type == FUZZY_FILES) {
-		if ((*s1 == '.' && *(s1 + 1) == '.') || *s1 == '-')
-			return 0;
-	}
-
-	if (case_sens ? strstr(s2, s1) : strcasestr(s2, s1))
-		return 1;
-
-	char *hs = s2;
-	while (*s1) {
-		char *m = case_sens ? strchr(hs, *s1) : xstrcasechr(hs, *s1);
-		if (!m)
-			break;
-		m++;
-		hs = m;
-		s1++;
-	}
-
-	if (!*s1)
-		return 1;
-
-	return 0;
-} */
 
 /* A reverse strpbrk(3): returns a pointer to the LAST char in S matching
  * a char in ACCEPT, or NULL if no match is found */

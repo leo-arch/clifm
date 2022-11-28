@@ -60,6 +60,7 @@ typedef char *rl_cpvfunc_t;
 #include "aux.h"
 #include "checks.h"
 #include "exec.h"
+#include "fuzzy_match.h"
 #include "keybinds.h"
 #include "navigation.h"
 #include "readline.h"
@@ -1198,7 +1199,7 @@ my_rl_path_completion(const char *text, int state)
 	/* #        This is the heart of the function         #
 	 * #################################################### */
 	mode_t type;
-	int best_fz_match = 0;
+	int best_fz_score = 0;
 //	int fuzzy_match_first_chr = 0;
 //	int fz_ranking = 0;
 //	int min_fz_ranking = 1;
@@ -1339,7 +1340,7 @@ my_rl_path_completion(const char *text, int state)
 
 				if (flags & STATE_SUGGESTING) {
 					int r = 0;
-					if ((r = fuzzy_match(filename, ent->d_name, FUZZY_FILES)) > best_fz_match) {
+					if ((r = fuzzy_match(filename, ent->d_name, filename_len, FUZZY_FILES)) > best_fz_score) {
 						if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
 							xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 						} else {
@@ -1350,8 +1351,8 @@ my_rl_path_completion(const char *text, int state)
 						 * found, we take the closest ranked match (1-3)
 						 * If we set this value to 1, the first match will be returned,
 						 * which makes the computation much faster */
-						if (r < MIN_FUZZY_RANKING) {
-							best_fz_match = r;
+						if (r != TARGET_BEGINNING_BONUS) {
+							best_fz_score = r;
 							continue;
 						}
 					} else {
@@ -1359,7 +1360,7 @@ my_rl_path_completion(const char *text, int state)
 					}
 				} else {
 					/* This is for TAB completion: accept all matches */
-					if (fuzzy_match(filename, ent->d_name, FUZZY_FILES) == 0)
+					if (fuzzy_match(filename, ent->d_name, filename_len, FUZZY_FILES) == 0)
 						continue;
 				}
 			}
@@ -1565,7 +1566,7 @@ hist_generator(const char *text, int state)
 		if (*text == '!') {
 			if (len == 0 || (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
 			|| (conf.fuzzy_match == 1
-			&& fuzzy_match((char *)(text + 1), name, FUZZY_HISTORY) > 0))
+			&& fuzzy_match((char *)(text + 1), name, len, FUZZY_HISTORY) > 0))
 //			&& fuzzy_match((char *)(text + 1), name, conf.case_sens_path_comp, FUZZY_HISTORY) == 1))
 				return strdup(name);
 		} else {
@@ -1605,7 +1606,7 @@ bm_paths_generator(const char *text, int state)
 	while (i < (int)bm_n && (name = bookmarks[i++].path) != NULL) {
 		if (len == 0 || (*name == *(text + 2) && strncmp(name, text + 2, len) == 0)
 		|| (conf.fuzzy_match == 1
-		&& fuzzy_match((char *)(text + 2), name, FUZZY_BM_NAMES) > 0)) {
+		&& fuzzy_match((char *)(text + 2), name, len, FUZZY_BM_NAMES) > 0)) {
 //		&& fuzzy_match((char *)(text + 2), name, conf.case_sens_path_comp, FUZZY_BM_NAMES) == 1)) {
 			size_t nlen = strlen(name);
 			if (nlen > 1 && name[nlen - 1] == '/')
@@ -1781,7 +1782,7 @@ filenames_gen_text(const char *text, int state)
 			return strdup(name);
 		if (conf.fuzzy_match == 0)// || (*text == '.' && text[1] == '.') || *text == '-')
 			continue;
-		if (len == 0 || fuzzy_match((char *)text, name, FUZZY_FILES) > 0)
+		if (len == 0 || fuzzy_match((char *)text, name, len, FUZZY_FILES) > 0)
 //		if (len == 0 || fuzzy_match((char *)text, name,
 //		conf.case_sens_path_comp, FUZZY_FILES) == 1)
 			return strdup(name);

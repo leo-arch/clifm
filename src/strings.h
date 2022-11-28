@@ -36,7 +36,8 @@ char *escape_str(const char *);
 int  *expand_range(char *, int);
 //int  fuzzy_match(char *, char *, const int, const int);
 
-int  fuzzy_match(char *, char *, const int);
+//int  fuzzy_match(char *, char *, const int);
+//int  fuzzy_match2(char *, char *, const int, int *);
 
 char *gen_rand_str(size_t);
 char *get_last_space(char *, const int);
@@ -62,6 +63,7 @@ char *xstrrpbrk(char *, const char *);
 char *xstrcasestr(char *, char *);
 #endif /* (__linux__ || __CYGWIN__) && _BE_POSIX */
 
+char * xstrcasechr(char *, char);
 size_t xstrnlen(const char *restrict);
 size_t xstrsncpy(char *restrict, const char *restrict, size_t);
 int xstrverscmp(const char *, const char *);

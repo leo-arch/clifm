@@ -53,6 +53,7 @@ typedef char *rl_cpvfunc_t;
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
+#include "fuzzy_match.h"
 #include "jump.h"
 #include "navigation.h" /* fastback() */
 #include "readline.h"
@@ -72,6 +73,9 @@ typedef char *rl_cpvfunc_t;
 #define PRINT_MATCH 1
 
 #define BAEJ_OFFSET 1
+
+//#define FUZZY_ALGO_CLIFM 1
+//#define FUZZY_ALGO_FZY   2
 
 static char *last_word = (char *)NULL;
 static int last_word_offset = 0;
@@ -708,7 +712,13 @@ check_filenames(char *str, size_t len, const unsigned char c,
 	skip_trailing_spaces(&str, &len);
 	int removed_slash = remove_trailing_slash(&str, &len);
 
-	int best_fz_match = 0;
+/* ########################### */
+//	int fuzzy_algorithm = FUZZY_ALGO_CLIFM;
+/* ########################### */
+
+	int best_fz_score = 0;
+//	score_t best_score = 0;
+
 	size_t i;
 
 	for (i = 0; i < files; i++) {
@@ -757,14 +767,36 @@ check_filenames(char *str, size_t len, const unsigned char c,
 
 		/* ############### FUZZY MATCHING ################## */
 		else {
-			int r = 0;
-			if ((r = fuzzy_match(str, file_info[i].name, FUZZY_FILES)) > best_fz_match) {
+/* ########################### */
+/*			if (fuzzy_algorithm == FUZZY_ALGO_FZY) {
+				size_t positions[MATCH_MAX_LEN];
+				score_t s = fuzzy_match_fzy(str, file_info[i].name, &positions[0], len);
+				if (s > best_score && s != INFINITY) {
+					fuzzy_index = (int)i;
+					best_score = s;
+				} */
+/* ########################### */
+//			} else {
+			int s = fuzzy_match(str, file_info[i].name, len, FUZZY_FILES);
+			if (s > best_fz_score) {
 				fuzzy_index = (int)i;
-				if (r < MIN_FUZZY_RANKING)
-					best_fz_match = r;
-				else
+				if (s == TARGET_BEGINNING_BONUS)
 					break;
+				best_fz_score = s;
 			}
+//			}
+
+/*			int distance = 0;
+			int r = fuzzy_match2(str, file_info[i].name, FUZZY_FILES, &distance);
+			if (r > best_fz_match || distance < shorter_distance) {
+				fuzzy_index = (int)i;
+				if (r < MIN_FUZZY_RANKING) {
+					best_fz_match = r;
+					shorter_distance = distance;
+				} //else {
+//					break;
+//				}
+			} */
 		}
 	}
 
