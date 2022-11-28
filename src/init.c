@@ -2571,10 +2571,11 @@ init_shell(void)
 
 	/* Put ourselves in our own process group */
 	shell_pgid = getpid();
-	if (setpgid(shell_pgid, shell_pgid) < 0) {
+	setpgid(shell_pgid, shell_pgid);
+/*	if (setpgid(shell_pgid, shell_pgid) < 0) {
 		_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
 		exit(errno);
-	}
+	} */
 
 	/* Grab control of the terminal */
 	tcsetpgrp(STDIN_FILENO, shell_pgid);
