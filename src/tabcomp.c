@@ -788,6 +788,15 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 static inline size_t
 set_fzf_max_win_height(void)
 {
+	/* On some terminals, like lxterminal, urxvt, and vte, the amount
+	 * of terminal lines is not properly detected when first running
+	 * the finder. So, let's update this value. */
+	static int first_run = 0;
+	if (first_run == 0) {
+		get_term_size();
+		first_run = 1;
+	}
+
 	return (size_t)(DEF_FZF_WIN_HEIGHT * term_lines / 100);
 }
 

@@ -2573,8 +2573,9 @@ init_shell(void)
 	shell_pgid = getpid();
 	setpgid(shell_pgid, shell_pgid);
 /*	if (setpgid(shell_pgid, shell_pgid) < 0) {
-		_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
-		exit(errno);
+		// This fails with EPERM when running as 'term -e clifm'
+//		_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
+//		exit(errno);
 	} */
 
 	/* Grab control of the terminal */
