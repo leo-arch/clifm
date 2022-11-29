@@ -1085,9 +1085,8 @@ rl_clear_line(int count, int key)
 	}
 #endif
 	curhistindex = current_hist_n;
-	rl_point = 0;
-	rl_delete_text(rl_point, rl_end);
-	rl_end = 0;
+	rl_kill_text(0, rl_end);
+	rl_point = rl_end = 0;
 	return EXIT_SUCCESS;
 }
 
