@@ -2031,6 +2031,8 @@ parse_input_str(char *str)
 				 * #    2.k) FILE TYPE (=CHAR)   #
 				 * ###############################*/
 
+	struct stat a;
+
 	int *file_type_array = (int *)xnmalloc(int_array_max, sizeof(int));
 	size_t file_type_n = 0;
 
@@ -2039,8 +2041,10 @@ parse_input_str(char *str)
 			continue;
 
 		if (IS_FILE_TYPE_FILTER(substr[i][1])) {
-			file_type_array[file_type_n] = (int)i;
-			file_type_n++;
+			if (lstat(substr[i], &a) == -1) {
+				file_type_array[file_type_n] = (int)i;
+				file_type_n++;
+			}
 			continue;
 		}
 
@@ -2091,7 +2095,7 @@ parse_input_str(char *str)
 	size_t mime_type_n = 0;
 
 	for (i = 0; substr[i]; i++) {
-		if (*substr[i] == '@' && *(substr[i] + 1)) {
+		if (*substr[i] == '@' && *(substr[i] + 1) && lstat(substr[i], &a) == -1) {
 			mime_type_array[mime_type_n] = (int)i;
 			mime_type_n++;
 		}
@@ -2145,8 +2149,9 @@ parse_input_str(char *str)
 	size_t bn = 0;
 
 	for (i = 0; substr[i]; i++) {
-		if ((*substr[i] == ':' && *(substr[i] + 1) == 'b')
-		|| (*substr[i] == 'b' && *(substr[i] + 1) == ':')) {
+		if ( ( (*substr[i] == ':' && *(substr[i] + 1) == 'b')
+		|| (*substr[i] == 'b' && *(substr[i] + 1) == ':') )
+		&& lstat(substr[i], &a) == -1) {
 			bm_array[bn] = (int)i;
 			bn++;
 		}
