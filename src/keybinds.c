@@ -1181,9 +1181,7 @@ rl_remove_sel(int count, int key)
 		return EXIT_SUCCESS;
 
 	rl_deprep_terminal();
-	kb_shortcut = 1;
 	keybind_exec_cmd("r sel");
-	kb_shortcut = 0;
 	rl_prep_terminal(0);
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
@@ -1196,9 +1194,7 @@ rl_export_sel(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	kb_shortcut = 1;
 	keybind_exec_cmd("exp sel");
-	kb_shortcut = 0;
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1210,9 +1206,7 @@ rl_move_sel(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	kb_shortcut = 1;
 	keybind_exec_cmd("m sel");
-	kb_shortcut = 0;
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1224,9 +1218,7 @@ rl_rename_sel(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	kb_shortcut = 1;
 	keybind_exec_cmd("br sel");
-	kb_shortcut = 0;
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1238,11 +1230,9 @@ rl_paste_sel(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	kb_shortcut = 1;
 	rl_deprep_terminal();
 	keybind_exec_cmd("c sel");
 	rl_prep_terminal(0);
-	kb_shortcut = 0;
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1403,9 +1393,7 @@ rl_open_sel(int count, int key)
 	sprintf(cmd, "o %s", (sel_n && sel_elements[sel_n - 1].name)
 			? sel_elements[sel_n - 1].name : "sel");
 
-	kb_shortcut = 1;
 	keybind_exec_cmd(cmd);
-	kb_shortcut = 0;
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1421,9 +1409,7 @@ rl_bm_sel(int count, int key)
 	sprintf(cmd, "bm a %s", (sel_n && sel_elements[sel_n - 1].name)
 			? sel_elements[sel_n - 1].name : "sel");
 
-	kb_shortcut = 1;
 	keybind_exec_cmd(cmd);
-	kb_shortcut = 0;
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
 }

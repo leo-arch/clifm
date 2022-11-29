@@ -1871,8 +1871,9 @@ parse_input_str(char *str)
 		else {
 			/* 'sel' is an argument, but there are no selected files. */
 			fprintf(stderr, _("%c%s: No selected files%c"),
-			    kb_shortcut ? '\n' : '\0', PROGRAM_NAME,
-			    kb_shortcut ? '\0' : '\n');
+				/* rl_dispatching equals one if coming from a keybind */
+			    rl_dispatching == 1 ? '\n' : '\0', PROGRAM_NAME,
+			    rl_dispatching == 1 ? '\0' : '\n');
 
 			size_t j = 0;
 			for (j = 0; j <= args_n; j++)

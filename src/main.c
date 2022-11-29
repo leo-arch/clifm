@@ -163,7 +163,6 @@ int
 	internal_cmd = 0,
 	is_sel = 0,
 	jump_total_rank = 0,
-	kb_shortcut = 0,
 	kbind_busy = 0,
 	list_dirs_first = UNSET,
 	max_files = UNSET,

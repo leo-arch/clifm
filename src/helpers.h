@@ -1214,7 +1214,6 @@ extern int
 	internal_cmd,
 	is_sel,
 	jump_total_rank,
-	kb_shortcut,
 	kbind_busy,
 	max_files,
 	mime_match,
