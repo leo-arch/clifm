@@ -654,7 +654,7 @@ print_tips(int all)
 		"Quickly switch prompts via 'prompt NAME'",
 		"Press Alt-TAB to toggle the disk usage analyzer mode",
 		"Press Ctrl-Alt-l to toggle max file name length on/off",
-		"Fuzzy completion is supported: 'dwn<TAB> -> Downloads'. Enable it via --fuzzy-match",
+		"Fuzzy suggestions are supported: 'dwn > Downloads'. Enable them via --fuzzy-matching, or FuzzyMatching in the configuration file",
 		"Wildcards can be expanded via TAB: 's *.c<TAB>'",
 		"Try the help topics: 'help <TAB>'",
 		"List symlinks in the current directory: '=l<TAB>'. Enter 'help file-filters' for more information",

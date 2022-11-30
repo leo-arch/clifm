@@ -1685,7 +1685,7 @@ Consult \fBsmenu\fR(1) for more information.
 .TP
 For information about how to customize \fIfzy\fR consult \fBfzy\fR(1).
 .TP
-By default, \fBclifm\fR performs fuzzy TAB completion (just as suggestions) for file names and paths (e.g. "dwn" is completed/suggested as "Downloads"). To disable this feature use the \fI\-\-no\-fuzzy\-matching\fR command line switch.
+\fBClifm\fR can perform fuzzy TAB completion (just as suggestions) for file names and paths (e.g. "dwn" is completed/suggested as "Downloads"). To enable this feature use the \fI\-\-fuzzy\-matching\fR command line switch or set \fIFuzzyMatching\fR to \fItrue\fR in the configuration file.
 .TP
 Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. \fBclifm\fR uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
@@ -1851,7 +1851,7 @@ b. \fBclifm\fR commands and parameters (including the \fIsel\fR keyword)
 .sp
 c. Entries in the command history list (already used commands)
 .sp
-d. File names in the current working directory
+d. File names in the current working directory and paths \fB(1)\fR
 .sp
 e. Entries in the jump database
 .sp
@@ -1861,15 +1861,17 @@ g. Bookmarks names
 .sp
 h. Program names in \fBPATH\fR
 .sp
-i. Shell builtins
+i. Shell builtins \fB(2)\fR
 
-\fBNOTE:\fR The shell name is taken from \fI/bin/sh\fR. The following shells are supported: bash, dash, fish, ksh, tcsh, and zsh. Command names are checked in the following order: \fBclifm\fR internal commands, commands in \fBPATH\fR, and shell builtins.
+\fB(1)\fR Fuzzy suggestions are supported. For example: dwn > Downloads. Enable this feature via the \fI\-\-fuzzy\-marching\fR command line switch or setting \fIFuzzyMatching\fR to \fItrue\fR in the configuration file.
+.sp 0
+\fB(2)\fR The shell name is taken from \fI/bin/sh\fR. The following shells are supported: bash, dash, fish, ksh, tcsh, and zsh. Command names are checked in the following order: \fBclifm\fR internal commands, commands in \fBPATH\fR, and shell builtins.
 
 To accept the entire suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press \fBEnter\fR to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
 
-To aceppt the first suggested word only (up to first slash or space), press rather \fIAlt\-Right\fR or \fIAlt\-f\fR. Not available for ELN's, aliases and bookmarks names.
+To accept the first suggested word only (up to first slash or space), press rather \fIAlt\-Right\fR or \fIAlt\-f\fR. Not available for ELN's, aliases and bookmarks names.
 
-Bear in mind that suggestions for ELN's, aliases and bookmarks names, and the jump function (invoked by the \fIj\fR command) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a file name whose ELN is '12', the file name corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press \fIRight\fR or \fICtrl\-f\fR to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
+Bear in mind that suggestions for ELN's, aliases, bookmarks names, the jump function (invoked by the \fIj\fR command), just as file names and paths (if fuzzy-suggestions are enabled) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a file name whose ELN is '12', the file name corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press \fIRight\fR or \fICtrl\-f\fR to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
 
 The order of the suggestion checks could be customized via the \fISuggestionStrategy\fR option in the configuration file. Each check is assigned a lowercase letter:
 
