@@ -1151,7 +1151,7 @@ CliFM's built-in opener\
 \n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\n"
 
 #define CLIFM_COMMANDS "\
-For a complete description of all of the below \
+For a complete description of all the below \
 commands run 'cmd' (or press F2) or consult the manpage (F1).\n\
 You can also try the interactive help plugin (it depends on FZF): just \
 enter 'ih', that's it.\n\
