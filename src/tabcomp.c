@@ -1684,7 +1684,7 @@ compare_strings(s1, s2)
 int
 tab_complete(int what_to_do)
 {
-	if (rl_notab)
+	if (rl_notab == 1)
 		return EXIT_SUCCESS;
 
 	if (*rl_line_buffer == '#' || cur_color == hc_c) {

@@ -748,6 +748,7 @@ my_rl_getc(FILE *stream)
 			/* Syntax highlighting is made from here */
 			int ret = rl_exclude_input(c);
 			if (ret == RL_INSERT_CHAR) {
+//				if (rl_inhibit_completion == 1)
 				if (rl_nohist == 1)
 					fix_rl_point(c);
 				return c;
@@ -950,18 +951,19 @@ rl_no_hist(const char *prompt)
 	int bk = conf.suggestions;
 	conf.suggestions = 0;
 	rl_nohist = rl_notab = 1;
+//	rl_inhibit_completion = 1;
 	char *input = readline(prompt);
+//	rl_inhibit_completion = 0;
 	rl_notab = rl_nohist = 0;
 	conf.suggestions = bk;
 
 	if (input) {
-		/* Make sure input isn't empty string */
 		if (!*input) {
 			free(input);
 			return (char *)NULL;
 		}
 
-		/* Check we have some non-blank char */
+		/* Do we have some non-blank char? */
 		int no_blank = 0;
 		char *p = input;
 

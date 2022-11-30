@@ -1535,7 +1535,11 @@ free_stuff(void)
 	free(tags_dir);
 	free(conf.term);
 	free(quote_chars);
+
 	rl_clear_history();
+	rl_free_undo_list();
+	rl_clear_pending_input();
+	rl_free_line_state();
 //	rl_clear_visible_line();
 
 /*
@@ -2282,15 +2286,15 @@ bonus_function(void)
 	    "\"Simplicity is the ultimate sophistication\" (Leo Da Vinci)",
 	    "\"Yo vendí semillas de alambre de púa, al contado, y me lo agradecieron\" (Marquitos, 9 Reinas)",
 	    "\"I'm so happy, because today I've found my friends, they're in my head\" (K. D. Cobain)",
-	    "\"The best code is written with the delete key (Someone, somewhere, sometime)",
-	    "\"I'm selling these fine leather jackets (Indy)",
+	    "\"The best code is written with the delete key\" (Someone, somewhere, sometime)",
+	    "\"I'm selling these fine leather jackets\" (Indy)",
 	    "\"I pray to God to make me free of God\" (Meister Eckhart)",
 	    "¡Truco y quiero retruco mierda!",
-	    "The only truth is that there is no truth",
+	    "\"The are no facts, only interpretations\" (F. Nietzsche)",
 	    "\"This is a lie\" (The liar paradox)",
 	    "\"There are two ways to write error-free programs; only the third one works\" (Alan J. Perlis)",
 	    "The man who sold the world was later sold by the big G",
-	    "A programmer is always one year older than herself",
+	    "A programmer is always one year older than themself",
 	    "A smartphone is anything but smart",
 	    "And he did it: he killed the one who killed him",
 	    ">++('>",
@@ -2300,15 +2304,15 @@ bonus_function(void)
 	    "\"I only know that I know nothing\" (Socrates)",
 	    "(Learned) Ignorance is the true outcome of wisdom (Nicholas "
 	    "of Cusa)",
-	    "True intelligence is about questions, not about answers",
+	    "True intelligence is about questions, not answers",
 	    "Humanity is just an arrow released towards God",
-	    "Buzz is right: infinity is our only and ultimate goal",
+	    "Buzz is right: infinity is our only and ultimate aim",
 	    "That stain will never ever be erased (La 12)",
 	    "\"A work of art is never finished, but adandoned\" (J. L. Guerrero)",
 	    "At the beginning, software was hardware; but today hardware is "
 	    "being absorbed by software",
-	    "\"What you're referring to as Linux, is in fact, GNU/Linux\" (RMS)",
-	    "\"Given enough eyeballs, all bugs are shallow.\" (Linus's law)",
+	    "\"Juremos con gloria morir\"",
+	    "\"Given enough eyeballs, all bugs are shallow.\" (Linus' law)",
 	    "\"We're gonna need a bigger boat.\" (Caleb)",
 	    "\"Ein Verletzter, Alarm, Alarm!\"",
 	    "\"There is not knowledge that is not power\"",

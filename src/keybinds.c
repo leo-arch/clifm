@@ -1756,7 +1756,8 @@ static int
 rl_cmdhist(int count, int key)
 {
 	UNUSED(count);
-	if (rl_nohist)
+//	if (rl_inhibit_completion == 1)
+	if (rl_nohist == 1)
 		return EXIT_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS

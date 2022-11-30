@@ -746,7 +746,7 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
+	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -869,7 +869,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
+	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -1015,7 +1015,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad, const int _ma
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
+	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -1119,7 +1119,7 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad, const int _
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
+	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
