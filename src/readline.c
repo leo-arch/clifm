@@ -2534,7 +2534,7 @@ options_generator(const char *text, int state)
 	if (w != 2) /* Complete internal options only for the second word */
 		return (char *)NULL;
 
-#define MAX_OPTS 21
+#define MAX_OPTS 22
 	char *_opts[MAX_OPTS] = {0};
 
 	/* acd, ao, ext, ff, hf, pg, uc */
@@ -2569,23 +2569,24 @@ options_generator(const char *text, int state)
 		_opts[1] = "autocommands";
 		_opts[2] = "basics";
 		_opts[3] = "bookmarks";
-		_opts[4] = "desktop-notifications";
-		_opts[5] = "dir-jumper";
-		_opts[6] = "file-details";
-		_opts[7] = "file-filters";
-		_opts[8] = "file-previews";
-		_opts[9] = "file-tags";
-		_opts[10] = "navigation";
-		_opts[11] = "plugins";
-		_opts[12] = "profiles";
-		_opts[13] = "remotes";
-		_opts[14] = "resource-opener";
-		_opts[15] = "search";
-		_opts[16] = "security";
-		_opts[17] = "selection";
-		_opts[18] = "theming";
-		_opts[19] = "trash";
-		_opts[20] = NULL;
+		_opts[4] = "commands";
+		_opts[5] = "desktop-notifications";
+		_opts[6] = "dir-jumper";
+		_opts[7] = "file-details";
+		_opts[8] = "file-filters";
+		_opts[9] = "file-previews";
+		_opts[10] = "file-tags";
+		_opts[11] = "navigation";
+		_opts[12] = "plugins";
+		_opts[13] = "profiles";
+		_opts[14] = "remotes";
+		_opts[15] = "resource-opener";
+		_opts[16] = "search";
+		_opts[17] = "security";
+		_opts[18] = "selection";
+		_opts[19] = "theming";
+		_opts[20] = "trash";
+		_opts[21] = NULL;
 	/* b, f */
 	} else if ((*l == 'b' && l[1] == ' ') || (*l == 'f' && l[1] == ' ')) {
 		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;

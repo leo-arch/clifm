@@ -1151,157 +1151,146 @@ CliFM's built-in opener\
 \n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\n"
 
 #define CLIFM_COMMANDS "\
-\nBUILT-IN COMMANDS:\n\nFor a complete description of each of these \
+For a complete description of all of the below \
 commands run 'cmd' (or press F2) or consult the manpage (F1).\n\
 You can also try the interactive help plugin (it depends on FZF): just \
 enter 'ih', that's it.\n\
-Help topics are available. Type 'help <TAB>' to get a list of topics.\n\n\
-The following is just a brief list of available commands and possible \
-parameters:\n\n\
- ELN/FILE/DIR (auto-open and autocd functions)\n\
- /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
- ;[CMD], :[CMD] (run CMD via the system shell)\n\
- ac, ad ELN/FILE... (archiving functions)\n\
- acd, autocd [on, off, status]\n\
- actions [edit [APP]]\n\
- alias [import FILE] [ls, list] [NAME]\n\
- ao, auto-open [on, off, status]\n\
- b, back [h, hist] [clear] [!ELN]\n\
- bb, bleach ELN/FILE... (file names cleaner)\n\
- bd [NAME]... (backdir function)\n\
- bl ELN/FILE... (batch links)\n\
- bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
- br, bulk ELN/FILE...\n\
- c, l [e, edit], m, md, r (copy, link, move, makedir, and remove)\n\
- colors\n\
- cd [ELN/DIR]\n\
- cl, columns [on, off]\n\
- cmd, commands\n\
- cs, colorscheme [edit [APP]] [COLORSCHEME]\n\
- d, dup ELN/FILE...\n\
- ds, desel [*, a, all]\n\
- edit [APPLICATION] [reset]\n\
- exp [ELN/FILE]...\n\
- ext [on, off, status]\n\
- f, forth [h, hist] [clear] [!ELN]\n\
- fc, filescounter [on, off, status]\n\
- ff, dirs-first [on, off, status]\n\
- fs\n\
- ft, filter [unset] [REGEX]\n\
- fz [on, off]\n\
- hf, hidden [on, off, status]\n\
- history [edit [APP]] [clear] [-n] [on, off, status]\n\
- icons [on, off]\n\
- j, jc, jp, jl [STRING]... jo [NUM], je (directory jumper function)\n\
- kb, keybinds [edit [APP]] [reset] [readline]\n\
- lm [on, off] (lightmode)\n\
- log [clear]\n\
- mf [NUM, unset] (List up to NUM files)\n\
- mm, mime [info ELN/FILE] [edit] [import] (resource opener)\n\
- mp, mountpoints\n\
- msg, messages [clear]\n\
- n, new [FILE]... [DIR/]...n\n\
- net [NAME] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\
- o, open [ELN/FILE] [APPLICATION]\n\
- ow [ELN/FILE] [APPLICATION] (open with ...)\n\
- opener [default] [APPLICATION]\n\
- p, pr, pp, prop [ELN/FILE]...\n\
- path, cwd\n\
- pc FILE... (file permissions editor)\n\
- pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
- pg, pager [on, off, status]\n\
- pin [FILE/DIR]\n\
- prompt [NAME, edit, reload, unset]\n\
- q, quit, exit\n\
- Q\n\
- rf, refresh\n\
- rl, reload\n\
- s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\
- sb, selbox\n\
- splash\n\
- st, sort [METHOD] [rev]\n\
- stats\n\
- t, tr, trash [ELN/FILE]... [ls, list] [clear, empty] [del]\n\
- tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE]... [[:]TAG]\n\
- te ELN/FILE...\n\
- tips\n\
- u, undel, untrash [*, a, all]\n\
- uc, unicode [on, off, status]\n\
- unpin\n\
- v, paste sel [DESTINY]\n\
- vv FILE... DIR\n\
- ver, version\n\
- view\n\
- ws [NUM, +, -] (workspaces)\n\
- x, X [ELN/DIR] (new instance)\n"
+For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\
+Help topics are available as well. Type 'help <TAB>' to get a list of topics.\n\n\
+The following is just a list of available commands and a brief description:\n\n\
+ ELN/FILE/DIR       Auto-open and autocd functions\n\
+ /PATTERN           Quick search\n\
+ ;[CMD], :[CMD]     Run CMD via the system shell\n\
+ ac, ad             Archiving functions\n\
+ acd, autocd        Set auto-cd on/off\n\
+ actions            Manage actions/plugins\n\
+ alias              Manage aliases\n\
+ ao, auto-open      Set auto-open on/off\n\
+ b, back            Go back in the directory history list\n\
+ bb, bleach         A file names cleaner)\n\
+ bd                 Go back to any parent directory\n\
+ bl                 Create symbolic links in bulk\n\
+ bm, bookmarks      Manage bookmarks\n\
+ br, bulk           Remove files in bulk\n\
+ c, l, m, md, r     Copy, link, move, makedir, and remove\n\
+ colors             List current file type colors\n\
+ cd                 Change directory\n\
+ cl, columns        Set columns on/off\n\
+ cmd, commands      Jump to the COMMANDS section in the manpage\n\
+ cs, colorscheme    Manage color schemes\n\
+ d, dup             Duplicate files\n\
+ ds, desel          Deselect selected files\n\
+ edit               Open/edit the main configuration file\n\
+ exp                Export file names to a temporary file\n\
+ ext                Set external/shell commands on/off\n\
+ f, forth           Go forth in the directory history list\n\
+ fc, filescounter   Set the files counter on/off\n\
+ ff, dirs-first     Set list-directories-first on/off\n\
+ fs                 What is free software?\n\
+ ft, filter         Set a files filter\n\
+ fz                 Printf directories full size (long view mode only)\n\
+ hf, hidden         Set show-hidden-files on/off\n\
+ history            Manage the commands history\n\
+ icons              Set icons on/off\n\
+ j                  The directory jumper function)\n\
+ kb, keybinds       Manage keybindings\n\
+ lm                 Set the light mode on/off\n\
+ log                Manage your logs\n\
+ mf                 Limit the number of listed files\n\
+ mm, mime           The resource opener\n\
+ mp, mountpoints    Change to a mountpoint\n\
+ msg, messages      Print system messages\n\
+ n, new             Create new files\n\
+ net                Manage network/remote resources\n\
+ o, open            Open a file\n\
+ ow                 Open a file with ...\n\
+ opener             Set a custom resource opener\n\
+ p, pr, pp, prop    Print file properties\n\
+ path, cwd          Print the current working directory\n\
+ pc                 A file permissions editor\n\
+ pf, prof, profile  Manage profiles\n\
+ pg, pager          Set the files pager on/off\n\
+ pin                Pin a directory\n\
+ prompt             Manage your prompts\n\
+ q, quit, exit      Quit clifm\n\
+ Q                  CD on quit\n\
+ rf, refresh        Reprint the current list of files\n\
+ rl, reload         Reload the main configuration file\n\
+ s, sel             Select files\n\
+ sb, selbox         Access the Selection Box\n\
+ splash             Print the splash screen\n\
+ st, sort           Change sorting method\n\
+ stats              Print file statistics\n\
+ t, tr, trash       Send files to the trash can\n\
+ tag                Tag files\n\
+ te                 Toggle the executable bit on files\n\
+ tips               Print tips\n\
+ u, undel, untrash  Restore trashed files\n\
+ uc, unicode        Set unicode on/off\n\
+ unpin              Unpin the currently pinned directory\n\
+ v, paste sel       Copy selected files into the current directory\n\
+ vv                 Copy and rename files at once\n\
+ ver, version       Print version information\n\
+ view               Preview files in the current directory\n\
+ ws                 Switch workspaces\n\
+ x, X               Launch a new instance of clifm\n"
 
 #define CLIFM_KEYBOARD_SHORTCUTS "DEFAULT KEYBOARD SHORTCUTS:\n\n\
- Right, C-f: Accept the entire suggestion\n\
- M-Right, M-f: Accept the first suggested word\n\
- M-c: Clear the current command line buffer\n\
- M-q: Delete the last entered word\n\
- M-g: Toggle list directories first on/off\n\
- M-l: Toggle long/detail view mode on/off\n\
- M-.: Toggle hidden files on/off\n\
- M-,: Toggle list only directories on/off\n\
- M-m: List mountpoints\n\
- M-h: Show directory history\n\
- M-t: Clear messages\n\
- C-r: Refresh the screen\n\
- M-s: Open the Selection Box\n\
- M-a: Select all files in the current working directory\n\
- M-d: Deselect all selected files\n\
- M-r: Change to the root directory\n\
- M-e, Home: Change to the home directory\n\
- M-u, S-Up: Change to the parent directory\n\
- M-j, S-Left: Change to previous visited directory\n\
- M-k, S-Right: Change to next visited directory\n\
- M-o: Lock terminal\n\
- M-p: Change to pinned directory\n\
- M-v: Toggle prepend sudo\n\
- M-1: Switch to workspace 1\n\
- M-2: Switch to workspace 2\n\
- M-3: Switch to workspace 3\n\
- M-4: Switch to workspace 4\n\
- C-M-j: Change to first visited directory\n\
- C-M-k: Change to last visited directory\n\
- C-M-o: Switch to previous profile\n\
- C-M-p: Switch to next profile\n\
- C-M-a: Archive selected files\n\
- C-M-e: Export selected files\n\
- C-M-r: Rename selected files\n\
- C-M-d: Remove selected files\n\
- C-M-t: Trash selected files\n\
- C-M-u: Restore trashed files\n\
- C-M-b: Bookmark last selected file or directory\n\
- C-M-g: Open/change-into last selected file/directory\n\
- C-M-n: Move selected files into the current working directory\n\
- C-M-v: Copy selected files into the current working directory\n\
- C-M-l: Toggle max name length on/off\n\
- M-y: Toggle light mode on/off\n\
- M-z: Switch to previous sorting method\n\
- M-x: Switch to next sorting method\n\
- C-x: Launch a new instance\n\
- F1: Manual page\n\
- F2: Commands help\n\
- F3: Keybindings help\n\
- F6: Open the MIME list file\n\
- F7: Open the shotgun configuration file\n\
- F8: Open the current color scheme file\n\
- F9: Open the keybindings file\n\
- F10: Open the configuration file\n\
- F11: Open the bookmarks file\n\
- F12: Quit\n\n\
+ Right, C-f    Accept the entire suggestion\n\
+ M-Right, M-f  Accept the first suggested word\n\
+ M-c           Clear the current command line buffer\n\
+ M-q           Delete the last entered word\n\
+ M-g           Toggle list directories first on/off\n\
+ M-l           Toggle long/detail view mode on/off\n\
+ M-.           Toggle hidden files on/off\n\
+ M-,           Toggle list only directories on/off\n\
+ M-m           List mountpoints\n\
+ M-h           Show directory history\n\
+ M-t           Clear messages\n\
+ C-r           Refresh the screen\n\
+ M-s           Open the Selection Box\n\
+ M-a           Select all files in the current working directory\n\
+ M-d           Deselect all selected files\n\
+ M-r           Change to the root directory\n\
+ M-e, Home     Change to the home directory\n\
+ M-u, S-Up     Change to the parent directory\n\
+ M-j, S-Left   Change to previous visited directory\n\
+ M-k, S-Right  Change to next visited directory\n\
+ M-o           Lock terminal\n\
+ M-p           Change to pinned directory\n\
+ M-v           Toggle prepend sudo\n\
+ M-[1-4]       Switch to workspace 1-4\n\
+ C-M-j         Change to first visited directory\n\
+ C-M-k         Change to last visited directory\n\
+ C-M-o         Switch to previous profile\n\
+ C-M-p         Switch to next profile\n\
+ C-M-a         Archive selected files\n\
+ C-M-e         Export selected files\n\
+ C-M-r         Rename selected files\n\
+ C-M-d         Remove selected files\n\
+ C-M-t         Trash selected files\n\
+ C-M-u         Restore trashed files\n\
+ C-M-b         Bookmark last selected file or directory\n\
+ C-M-g         Open/change-into last selected file/directory\n\
+ C-M-n         Move selected files into the current working directory\n\
+ C-M-v         Copy selected files into the current working directory\n\
+ C-M-l         Toggle max name length on/off\n\
+ M-y           Toggle light mode on/off\n\
+ M-z           Switch to previous sorting method\n\
+ M-x           Switch to next sorting method\n\
+ C-x           Launch a new instance\n\
+ F1            Manual page\n\
+ F2            Commands help\n\
+ F3            Keybindings help\n\
+ F6            Open the MIME list file\n\
+ F7            Open the shotgun configuration file\n\
+ F8            Open the current color scheme file\n\
+ F9            Open the keybindings file\n\
+ F10           Open the configuration file\n\
+ F11           Open the bookmarks file\n\
+ F12           Quit\n\n\
 NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in \
 most keyboards)\n"
-
-/*
-#define HELP_END_NOTE "Run the 'colors' or 'cc' command to see the list \
-of currently used color codes.\n\n\
-The color schemes file, just as the configuration and profile \
-files, allow you to customize colors, the prompt string, define \
-some prompt and profile commands, aliases, autocommands, and more.\n\n\
-For a full description consult the manpage and/or the Wiki (https://github.com/leo-arch/clifm/wiki)." */
 
 #define HELP_END_NOTE "For a full description consult the manpage and/or the \
 Wiki (https://github.com/leo-arch/clifm/wiki)."

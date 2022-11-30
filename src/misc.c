@@ -2002,6 +2002,12 @@ print_bookmarks_topic(void)
 }
 
 static int
+print_commands_topic(void)
+{
+	printf("%s", CLIFM_COMMANDS); return EXIT_SUCCESS;
+}
+
+static int
 print_desktop_notifications_topic(void)
 {
 	puts(DESKTOP_NOTIFICATIONS_USAGE); return EXIT_SUCCESS;
@@ -2125,6 +2131,8 @@ run_help_topic(char *topic)
 		return print_basics_topic();
 	if (*topic == 'b' && strcmp(topic, "bookmarks") == 0)
 		return print_bookmarks_topic();
+	if (*topic == 'c' && strcmp(topic, "commands") == 0)
+		return print_commands_topic();
 	if (*topic == 'd' && strcmp(topic, "desktop-notifications") == 0)
 		return print_desktop_notifications_topic();
 	if (*topic == 'd' && strcmp(topic, "dir-jumper") == 0)
@@ -2241,6 +2249,7 @@ help_function(void)
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 	printf("\nUSAGE: %s %s\n%s%s", PNL, GRAL_USAGE, _(SHORT_OPTIONS), _(LONG_OPTIONS));
 
+	puts("\nBUILT-IN COMMANDS:\n");
 	puts(_(CLIFM_COMMANDS));
 	puts(_(CLIFM_KEYBOARD_SHORTCUTS));
 	puts(_(HELP_END_NOTE));
