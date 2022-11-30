@@ -1155,9 +1155,9 @@ For a complete description of all of the below \
 commands run 'cmd' (or press F2) or consult the manpage (F1).\n\
 You can also try the interactive help plugin (it depends on FZF): just \
 enter 'ih', that's it.\n\
-For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\
 Help topics are available as well. Type 'help <TAB>' to get a list of topics.\n\n\
-The following is just a list of available commands and a brief description:\n\n\
+The following is just a list of available commands and a brief description.\n\
+For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\n\
  ELN/FILE/DIR       Auto-open and autocd functions\n\
  /PATTERN           Quick search\n\
  ;[CMD], :[CMD]     Run CMD via the system shell\n\
