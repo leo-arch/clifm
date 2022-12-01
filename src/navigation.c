@@ -610,6 +610,11 @@ go_home(const int cd_flag)
 static int
 change_to_path(char *new_path, const int cd_flag)
 {
+	if (!new_path || !*new_path) {
+		fprintf(stderr, _("cd: Path is NULL or empty\n"));
+		return EINVAL;
+	}
+
 	if (strchr(new_path, '\\')) {
 		char *deq_path = dequote_str(new_path, 0);
 		if (deq_path) {
