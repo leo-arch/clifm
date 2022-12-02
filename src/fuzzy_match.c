@@ -217,10 +217,11 @@ fuzzy_match_fzy(const char *needle, const char *haystack, size_t *positions,
  * 
  * The caller can decide whether the returned score is enough. If not,
  * a new item must be inspected until we get the desired score. Previous
- * values should be stored in case the desired score is never found.
+ * values should be stored in case the desired score is never reached.
  *
- * What this fuzzy matcher lacks: taking gap (distance) between matched chars
- * into account */
+ * What this fuzzy matcher lacks:
+ * 1. Taking gap (distance) between matched chars into account
+ * 2. Full Unicode awareness: case insensitivity doesn't work */
 int
 fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 {
