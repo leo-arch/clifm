@@ -258,14 +258,10 @@ set_sel_file(void)
 
 	if (!conf.share_selbox) {
 		/* Private selection box is stored in the profile directory */
-/*		sel_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
-		sprintf(sel_file, "%s/selbox.cfm", config_dir); */
 		sel_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
 		sprintf(sel_file, "%s/selbox.clifm", config_dir);
 	} else {
 		/* Common selection box is stored in the general configuration directory */
-/*		sel_file = (char *)xnmalloc(config_dir_len + 21, sizeof(char));
-		sprintf(sel_file, "%s/.config/%s/selbox.cfm", user.home, PNL); */
 		sel_file = (char *)xnmalloc(config_dir_len + 23, sizeof(char));
 		sprintf(sel_file, "%s/.config/%s/selbox.clifm", user.home, PNL);
 	}
@@ -287,7 +283,6 @@ create_kbinds_file(void)
 	/* If not, try to import it from DATADIR */
 	if (data_dir) {
 		char sys_file[PATH_MAX];
-//		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings.cfm", data_dir, PNL);
 		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings.clifm", data_dir, PNL);
 		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
 			char *cmd[] = {"cp", sys_file, kbinds_file, NULL};
@@ -699,14 +694,10 @@ create_tmp_files(void)
 		else
 			prof_len = 7; /* Lenght of "default" */
 
-/*		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 13, sizeof(char));
-		sprintf(sel_file, "%s/selbox_%s.cfm", P_tmpdir, */
 		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 15, sizeof(char));
 		sprintf(sel_file, "%s/selbox_%s.clifm", P_tmpdir,
 		    (alt_profile) ? alt_profile : "default");
 	} else {
-/*		sel_file = (char *)xnmalloc(P_tmpdir_len + 12, sizeof(char));
-		sprintf(sel_file, "%s/selbox.cfm", P_tmpdir); */
 		sel_file = (char *)xnmalloc(P_tmpdir_len + 14, sizeof(char));
 		sprintf(sel_file, "%s/selbox.clifm", P_tmpdir);
 	}
@@ -749,7 +740,6 @@ rename_cfm_files(char *dir)
 		snprintf(src, sizeof(src), "%s/%s.cfm", dir, _files[i]->d_name);
 		snprintf(dst, sizeof(dst), "%s/%s.clifm", dir, _files[i]->d_name);
 
-//		printf("%s renamed as %s\n", src, dst);
 		if (rename(src, dst) == -1)
 			_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, src, strerror(errno));
 		free(_files[i]);
@@ -925,8 +915,6 @@ define_config_file_names(void)
 		alt_kbinds_file = (char *)NULL;
 	} else {
 		/* Keybindings per user, not per profile */
-/*		kbinds_file = (char *)xnmalloc(config_gral_len + 17, sizeof(char));
-		sprintf(kbinds_file, "%s/keybindings.cfm", config_dir_gral); */
 		kbinds_file = (char *)xnmalloc(config_gral_len + 19, sizeof(char));
 		sprintf(kbinds_file, "%s/keybindings.clifm", config_dir_gral);
 	}
@@ -950,14 +938,10 @@ define_config_file_names(void)
 	sprintf(trash_info_dir, "%s/info", trash_dir);
 #endif */
 
-/*	dirhist_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
-	sprintf(dirhist_file, "%s/dirhist.cfm", config_dir); */
 	dirhist_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
 	sprintf(dirhist_file, "%s/dirhist.clifm", config_dir);
 
 	if (!alt_bm_file) {
-/*		bm_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
-		sprintf(bm_file, "%s/bookmarks.cfm", config_dir); */
 		bm_file = (char *)xnmalloc(config_dir_len + 17, sizeof(char));
 		sprintf(bm_file, "%s/bookmarks.clifm", config_dir);
 	} else {
@@ -966,13 +950,9 @@ define_config_file_names(void)
 		alt_bm_file = (char *)NULL;
 	}
 
-/*	log_file = (char *)xnmalloc(config_dir_len + 9, sizeof(char));
-	sprintf(log_file, "%s/log.cfm", config_dir); */
 	log_file = (char *)xnmalloc(config_dir_len + 11, sizeof(char));
 	sprintf(log_file, "%s/log.clifm", config_dir);
 
-/*	hist_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
-	sprintf(hist_file, "%s/history.cfm", config_dir); */
 	hist_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
 	sprintf(hist_file, "%s/history.clifm", config_dir);
 
@@ -985,23 +965,15 @@ define_config_file_names(void)
 		alt_config_file = (char *)NULL;
 	}
 
-/*	profile_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
-	sprintf(profile_file, "%s/profile.cfm", config_dir); */
 	profile_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
 	sprintf(profile_file, "%s/profile.clifm", config_dir);
 
-/*	mime_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
-	sprintf(mime_file, "%s/mimelist.cfm", config_dir); */
 	mime_file = (char *)xnmalloc(config_dir_len + 16, sizeof(char));
 	sprintf(mime_file, "%s/mimelist.clifm", config_dir);
 
-/*	actions_file = (char *)xnmalloc(config_dir_len + 13, sizeof(char));
-	sprintf(actions_file, "%s/actions.cfm", config_dir); */
 	actions_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
 	sprintf(actions_file, "%s/actions.clifm", config_dir);
 
-/*	remotes_file = (char *)xnmalloc(config_dir_len + 10, sizeof(char));
-	sprintf(remotes_file, "%s/nets.cfm", config_dir); */
 	remotes_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 	sprintf(remotes_file, "%s/nets.clifm", config_dir);
 
@@ -1015,14 +987,12 @@ import_rl_file(void)
 		return EXIT_FAILURE;
 
 	char tmp[PATH_MAX];
-//	sprintf(tmp, "%s/readline.cfm", config_dir_gral);
 	sprintf(tmp, "%s/readline.clifm", config_dir_gral);
 	struct stat attr;
 	if (lstat(tmp, &attr) == 0)
 		return EXIT_SUCCESS;
 
 	char rl_file[PATH_MAX];
-//	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.cfm", data_dir, PNL);
 	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.clifm", data_dir, PNL);
 	if (stat(rl_file, &attr) == EXIT_SUCCESS) {
 		char *cmd[] = {"cp", rl_file, config_dir_gral, NULL};
@@ -1431,8 +1401,6 @@ create_def_cscheme(void)
 	if (!colors_dir || !*colors_dir)
 		return;
 
-/*	char *cscheme_file = (char *)xnmalloc(strlen(colors_dir) + 13, sizeof(char));
-	sprintf(cscheme_file, "%s/default.cfm", colors_dir); */
 	char *cscheme_file = (char *)xnmalloc(strlen(colors_dir) + 15, sizeof(char));
 	sprintf(cscheme_file, "%s/default.clifm", colors_dir);
 
@@ -1521,7 +1489,6 @@ create_remotes_file(void)
 
 	/* Let's try to copy the file from DATADIR */
 	char sys_remotes[PATH_MAX];
-//	snprintf(sys_remotes, PATH_MAX - 1, "%s/%s/nets.cfm", data_dir, PNL);
 	snprintf(sys_remotes, PATH_MAX - 1, "%s/%s/nets.clifm", data_dir, PNL);
 
 	if (stat(sys_remotes, &attr) == EXIT_SUCCESS) {
