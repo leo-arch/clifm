@@ -509,9 +509,7 @@ check_iso(char *file)
 	}
 #endif /* !_NO_MAGIC */
 
-	if (is_iso)
-		return EXIT_SUCCESS;
-	return EXIT_FAILURE;
+	return is_iso == 1 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 /* Run the 'file' command on FILE and look for "archive" and

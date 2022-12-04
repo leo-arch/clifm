@@ -539,7 +539,7 @@ open_fstream_w(char *name, int *fd)
 		return (FILE *)NULL;
 	}
 
-	return fp;	
+	return fp;
 }
 
 /* Close file stream FP and file descriptor FD */
@@ -547,7 +547,9 @@ void
 close_fstream(FILE *fp, int fd)
 {
 	fclose(fp);
-	close(fd);
+//	No need to close FD: it is automatically closed by fclose(3)
+	UNUSED(fd);
+//	close(fd);
 }
 
 /* Transform S_IFXXX (MODE) into the corresponding DT_XXX constant */
