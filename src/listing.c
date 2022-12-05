@@ -233,7 +233,7 @@ _print_selfiles(unsigned short t_rows)
 	}
 
 	if (conf.max_printselfiles != UNSET && limit < (int)sel_n)
-		printf("%d/%zu\n", i, sel_n);
+		printf("... (%d/%zu)\n", i, sel_n);
 
 	print_div_line();
 }
@@ -342,14 +342,11 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
 
-//	if (reset_pager)
-//	if (reset_pager && (autopager == UNSET || (int)files < autopager))
 	if (reset_pager == 1 && (conf.pager < 2 || (int)files < conf.pager))
 		conf.pager = pager_bk;
-//		pager = 1;
 
 	if (max_files != UNSET && (int)files > max_files)
-		printf("%d/%zu\n", max_files, files);
+		printf("... (%d/%zu)\n", max_files, files);
 
 	print_div_line();
 
@@ -1219,7 +1216,7 @@ pad_filename_light(int *ind_char, const int i, const int pad, const int termcap_
 	}
 
 	int diff = (int)longest - cur_len;
-//	if (xargs.list_and_quit == 1 || term_caps.suggestions == 0) {
+
 	if (termcap_move_right == 0) {
 		int j = diff + 1;
 		while(--j >= 0)
@@ -1271,8 +1268,6 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 				 * ########################## */
 
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1 && (int)files >= conf.pager)) {
-//		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
-//		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			int ret = 0, bi = i;
@@ -1387,8 +1382,6 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 				 * ########################## */
 
 		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1 && (int)files >= conf.pager)) {
-//		if (pager == 1 || (*reset_pager == 0 && autopager >= 0 && (int)files >= autopager)) {
-//		if (pager == 1) {
 			int ret = 0, bi = i;
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */

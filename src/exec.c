@@ -642,10 +642,12 @@ _quit(char **args, int exit_status)
 
 	if (*args[0] == 'Q')
 		conf.cd_on_quit = 1;
+
 	int i = (int)args_n + 1;
 	while (--i >= 0)
 		free(args[i]);
 	free(args);
+
 	exit(exit_status);
 }
 

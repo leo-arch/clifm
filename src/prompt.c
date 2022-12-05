@@ -969,8 +969,8 @@ print_right_prompt(void)
 	free(p);
 } */
 
-/* Print the prompt and return the string entered by the user (to be
- * parsed later by parse_input_str()) */
+/* Print the prompt and return the string entered by the user, to be
+ * parsed later by parse_input_str() */
 char *
 prompt(void)
 {
