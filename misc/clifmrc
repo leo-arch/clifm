@@ -166,7 +166,7 @@ ColorScheme=default
 #=====================================#
 
 # Enable fuzzy matching for filename/path completions and suggestions
-FuzzyMatching=true
+FuzzyMatching=false
 
 # TAB completion mode: 'standard', 'fzf', 'fzy' or 'smenu'. Defaults
 # to 'fzf' if the binary is found in PATH. Othwerwise, the standard
