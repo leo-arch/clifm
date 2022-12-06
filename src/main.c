@@ -1029,7 +1029,11 @@ struct config_t {
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
 	/* Use the locale specified by the environment */
+#if defined(__CYGWIN__)
+	setlocale(LC_ALL, "C.UTF-8");
+#else
 	setlocale(LC_ALL, "");
+#endif /* __CYGWIN__ */
 
 	conf.unicode = DEF_UNICODE;
 
