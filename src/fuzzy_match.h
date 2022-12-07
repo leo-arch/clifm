@@ -27,20 +27,24 @@
 
 #ifndef FUZZY_MATCH_H
 #define FUZZY_MATCH_H
-
 /* Macros for our native fuzzy matcher: fuzzy_match() */
+
+#define IS_WORD_SEPARATOR(c) ( (c) == '-' || (c) == '_' || (c) == ' ' || (c) == '.' \
+|| (c) ==  ',' || (c) ==  ';' || (c) ==  ':' || (c) ==  '@' || (c) ==  '=' \
+|| (c) ==  '+' || (c) ==  '*' || (c) ==  '&')
 
 #define IS_ALPHA_CASE(c) ( ((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') )
 #define IS_CAMEL_CASE(c, p) ( (c) >= 'A' && (c) <= 'Z' && (p) >= 'a' && (p) <= 'z' )
 
-#define TARGET_BEGINNING_BONUS NAME_MAX * 10
-#define FIRST_CHAR_BONUS       10
-#define INCLUDED_BONUS         8
-#define WORD_BEGINNING_BONUS   5
-#define CONSECUTIVE_CHAR_BONUS 4
-/* When suggesting file names, en exact match doesn't provide anything
+#define TARGET_BEGINNING_BONUS  NAME_MAX * 10
+#define FIRST_CHAR_BONUS        10
+#define INCLUDED_BONUS          8
+#define WORD_BEGINNING_BONUS    5
+#define CONSECUTIVE_CHAR_BONUS  4
+#define SINGLE_CHAR_MATCH_BONUS 2
+/* When suggesting file names, an exact match doesn't provide anything
  * else for suggesting, so that it isn't useful */
-#define EXACT_MATCH_BONUS      1
+#define EXACT_MATCH_BONUS       1
 
 /* Macros for fuzzy_match_fzy() */
 /*

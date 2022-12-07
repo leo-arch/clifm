@@ -33,17 +33,51 @@
 #include "helpers.h"
 
 #include <string.h>
-/*
-#include <ctype.h>
-#include <string.h>
-//#include <strings.h>
-#include <stdio.h>
-#include <float.h>
-//#include <math.h>
-#include <stdlib.h> */
 
 #include "fuzzy_match.h"
 #include "strings.h"
+#include "utf8.h"
+
+/* Two functions added to the utf8.h library */
+static int
+utf8nextcodepoint(const char *s)
+{
+    if (0xf0 == (0xf8 & *s)) {
+      /* 4-byte utf8 code point (began with 0b11110xxx) */
+      return 4;
+    } else if (0xe0 == (0xf0 & *s)) {
+      /* 3-byte utf8 code point (began with 0b1110xxxx) */
+      return 3;
+    } else if (0xc0 == (0xe0 & *s)) {
+      /* 2-byte utf8 code point (began with 0b110xxxxx) */
+      return 2;
+    } else { /* if (0x00 == (0x80 & *s)) { */
+      /* 1-byte ascii (began with 0b0xxxxxxx) */
+      return 1;
+    }
+}
+
+static char *
+utf8casechr(char *s, char *c)
+{
+	if (!s || !*s || !c || !*c)
+		return (char *)NULL;
+
+	utf8_int32_t cps = 0, cpc = 0, cp = 0;
+	utf8codepoint(c, &cpc);
+	cp = utf8uprcodepoint(cpc);
+
+	while (*s) {
+		utf8codepoint(s, &cps);
+		if (utf8uprcodepoint(cps) != cp) {
+			s += utf8nextcodepoint(s);
+			continue;
+		}
+		return s;
+	}
+
+	return (char *)NULL;
+}
 
 /*
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -208,31 +242,12 @@ fuzzy_match_fzy(const char *needle, const char *haystack, size_t *positions,
 	return result;
 } */
 
-/* A basic fuzzy matcher. It returns a score based on how much the
- * pattern (S1) matches the item (S2) taking into account:
- * 
- * Initial character
- * Word beginnings
- * Consecutive characters
- * 
- * The caller can decide whether the returned score is enough. If not,
- * a new item must be inspected until we get the desired score. Previous
- * values should be stored in case the desired score is never reached.
- *
- * What this fuzzy matcher lacks:
- * 1. Taking gap (distance) between matched chars into account
- * 2. Full Unicode awareness: case insensitivity doesn't work */
-int
-fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
+/* Same as fuzzy_match(), but:
+ * 1: Not Unicode aware
+ * 2: Much faster */
+static int
+fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
 {
-	if (!s1 || !*s1 || !s2 || !*s2)
-		return 0;
-
-	if (type == FUZZY_FILES) {
-		if ((*s1 == '.' && *(s1 + 1) == '.') || *s1 == '-')
-			return 0;
-	}
-
 	int cs = conf.case_sens_path_comp;
 	int included = 0;
 	char *p = (char *)NULL;
@@ -283,7 +298,124 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 	score += (first_char * FIRST_CHAR_BONUS);
 	score += (included * INCLUDED_BONUS);
 	score += (consecutive_chars * CONSECUTIVE_CHAR_BONUS);
+	score += ((int)l * SINGLE_CHAR_MATCH_BONUS);
 
+/*
+#include <stdio.h>
+	printf("'%s:%d=%d+%d+%d+%d+%d'", s2, score,
+		word_beginning * WORD_BEGINNING_BONUS,
+		first_char * FIRST_CHAR_BONUS,
+		included * INCLUDED_BONUS,
+		consecutive_chars * CONSECUTIVE_CHAR_BONUS,
+		(int)l * SINGLE_CHAR_MATCH_BONUS); */
+	return score;
+}
+
+/* A basic fuzzy matcher. It returns a score based on how much the
+ * pattern (S1) matches the item (S2), taking into account:
+ * 
+ * Initial character
+ * Word beginnings
+ * Consecutive characters
+ * 
+ * The caller can decide whether the returned score is enough. If not,
+ * a new item must be inspected until we get the desired score. Previous
+ * values should be stored in case the desired score is never reached.
+ *
+ * What this fuzzy matcher lacks:
+ * 1. Taking gap (distance) between matched chars into account */
+int
+fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
+{
+	if (!s1 || !*s1 || !s2 || !*s2)
+		return 0;
+
+	if (type == FUZZY_FILES) {
+		if ((*s1 == '.' && *(s1 + 1) == '.') || *s1 == '-')
+			return 0;
+	}
+
+	if (conf.fuzzy_match_algo == 1)
+		return fuzzy_match_v1(s1, s2, s1_len);
+
+	int cs = conf.case_sens_path_comp;
+	int included = 0;
+	char *p = (char *)NULL;
+
+	if (cs == 1 ? (p = utf8str(s2, s1)) : (p = utf8casestr(s2, s1))) {
+		if (p == s2) {
+			if (!*(s2 + s1_len))
+				return EXACT_MATCH_BONUS;
+			return TARGET_BEGINNING_BONUS;
+		}
+
+		included = 1;
+	}
+
+	int word_beginning = 0;
+	int consecutive_chars = 0;
+	int first_char = 0;
+
+	utf8_int32_t cp1 = 0, cp2 = 0;
+	utf8codepoint(s1, &cp1);
+	utf8codepoint(s2, &cp2);
+	first_char = (cs == 1) ? (cp1 == cp2)
+		: (utf8uprcodepoint(cp1) == utf8uprcodepoint(cp2));
+
+	size_t l = 0;
+	char *hs = s2;
+
+	while (*s1) {
+		char *m = (char *)NULL;
+		if (cs == 1) {
+			utf8codepoint(s1, &cp1);
+			m = utf8chr(hs, cp1);
+		} else {
+			m = utf8casechr(hs, s1);
+		}
+		if (!m)
+			break;
+
+		int a = utf8nextcodepoint(s1);
+		int b = utf8nextcodepoint(m);
+
+		cp1 = 0, cp2 = 0;
+		utf8codepoint(s1 + a, &cp1);
+		utf8codepoint(m + b, &cp2);
+		if (*(s1 + a) && *(m + b) && (cs == 1 ? (cp1 == cp2)
+		: (utf8uprcodepoint(cp1) == utf8uprcodepoint(cp2)) ) )
+			consecutive_chars++;
+
+		char *bc = l > 0 ? utf8rcodepoint(m, &cp1) : (char *)NULL;
+		if (bc) {
+			utf8codepoint(bc, &cp2);
+			if (IS_WORD_SEPARATOR(*bc) || (utf8isupper(cp2) != 1 && utf8isupper(cp1) == 1) )
+				word_beginning++;
+		}
+
+		hs = m + b;
+		s1 += a;
+		l++;
+	}
+
+	if (*s1)
+		return 0;
+
+	int score = 0;
+	score += (word_beginning * WORD_BEGINNING_BONUS);
+	score += (first_char * FIRST_CHAR_BONUS);
+	score += (included * INCLUDED_BONUS);
+	score += (consecutive_chars * CONSECUTIVE_CHAR_BONUS);
+	score += ((int)l * SINGLE_CHAR_MATCH_BONUS);
+
+/*
+#include <stdio.h>
+	printf("'%s:%d=%d+%d+%d+%d+%d'", s2, score,
+		word_beginning * WORD_BEGINNING_BONUS,
+		first_char * FIRST_CHAR_BONUS,
+		included * INCLUDED_BONUS,
+		consecutive_chars * CONSECUTIVE_CHAR_BONUS,
+		(int)l * SINGLE_CHAR_MATCH_BONUS); */
 	return score;
 }
 

@@ -1097,6 +1097,9 @@ rmForce=%s\n\n",
 		"# Enable fuzzy matching for filename/path completions and suggestions\n\
 FuzzyMatching=%s\n\n"
 
+		"# Fuzzy matching algorithm: 1 (faster, non-Unicode), 2 (slower, Unicode)\n\
+FuzzyAlgorithm=%d\n\n"
+
 		"# TAB completion mode: 'standard', 'fzf', 'fzy', or 'smenu'. Defaults to\n\
 # 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used\n\
 TabCompletionMode=\n\n"
@@ -1164,6 +1167,7 @@ ExternalCommands=%s\n\n"
 CdOnQuit=%s\n\n",
 
 		DEF_FUZZY_MATCH == 1 ? "true" : "false",
+		DEF_FUZZY_MATCH_ALGO,
 		DEF_FZF_PREVIEW == 1 ? "true" : "false",
 		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
@@ -2266,6 +2270,33 @@ read_config(void)
 				continue;
 		}
 
+		else if (xargs.full_dir_size == UNSET && *line == 'F'
+		&& strncmp(line, "FullDirSize=", 12) == 0) {
+			if (set_config_bool_value(line, &conf.full_dir_size) == -1)
+				continue;
+		}
+
+		else if (xargs.fuzzy_match_algo == UNSET && *line == 'F'
+		&& strncmp(line, "FuzzyAlgorithm=", 15) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "FuzzyAlgorithm=%d\n", &opt_num);
+			if (ret == -1 || opt_num < 1 || opt_num > FUZZY_ALGO_MAX)
+				continue;
+			conf.fuzzy_match_algo = opt_num;
+		}
+
+		else if (xargs.fuzzy_match == UNSET && *line == 'F'
+		&& strncmp(line, "FuzzyMatching=", 14) == 0) {
+			if (set_config_bool_value(line, &conf.fuzzy_match) == -1)
+				continue;
+		}
+
+		else if (xargs.fzf_preview == UNSET && *line == 'F'
+		&& strncmp(line, "FzfPreview=", 11) == 0) {
+			if (set_fzf_preview_value(line, &conf.fzf_preview) == -1)
+				continue;
+		}
+
 #ifndef _NO_HIGHLIGHT
 		else if (xargs.highlight == UNSET && *line == 'S'
 		&& strncmp(line, "SyntaxHighlighting=", 19) == 0) {
@@ -2302,24 +2333,6 @@ read_config(void)
 		else if (xargs.longview == UNSET && *line == 'L'
 		&& strncmp(line, "LongViewMode=", 13) == 0) {
 			if (set_config_bool_value(line, &conf.long_view) == -1)
-				continue;
-		}
-
-		else if (xargs.full_dir_size == UNSET && *line == 'F'
-		&& strncmp(line, "FullDirSize=", 12) == 0) {
-			if (set_config_bool_value(line, &conf.full_dir_size) == -1)
-				continue;
-		}
-
-		else if (xargs.fuzzy_match == UNSET && *line == 'F'
-		&& strncmp(line, "FuzzyMatching=", 14) == 0) {
-			if (set_config_bool_value(line, &conf.fuzzy_match) == -1)
-				continue;
-		}
-
-		else if (xargs.fzf_preview == UNSET && *line == 'F'
-		&& strncmp(line, "FzfPreview=", 11) == 0) {
-			if (set_fzf_preview_value(line, &conf.fzf_preview) == -1)
 				continue;
 		}
 

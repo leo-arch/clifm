@@ -132,6 +132,7 @@ init_conf_struct(void)
 	conf.files_counter = UNSET;
 	conf.full_dir_size = UNSET;
 	conf.fuzzy_match = UNSET;
+	conf.fuzzy_match_algo = UNSET;
 	conf.fzf_preview = UNSET;
 #ifndef _NO_HIGHLIGHT
 	conf.highlight = UNSET;
@@ -1946,6 +1947,7 @@ external_arguments(int argc, char **argv)
 		{"fzftab", no_argument, 0, 262},
 		{"si", no_argument, 0, 263},
 		{"data-dir", required_argument, 0, 264},
+		{"fuzzy-algo", required_argument, 0, 265},
 	    {0, 0, 0, 0}
 	};
 
@@ -2135,7 +2137,7 @@ external_arguments(int argc, char **argv)
 				virtual_dir_value = optarg;
 			} else {
 				fprintf(stderr, "%s: '--virtual-dir': Absolute path "
-					"is required as parameter\n", PROGRAM_NAME);
+					"is required as argument\n", PROGRAM_NAME);
 				exit(EXIT_FAILURE);
 			}
 			break;
@@ -2191,6 +2193,17 @@ external_arguments(int argc, char **argv)
 			}
 
 			get_data_dir_from_path(optarg);
+			break;
+
+		case 265: {
+			int a = optarg ? atoi(optarg) : -1;
+			if (!optarg || a < 1 || a > FUZZY_ALGO_MAX) {
+				fprintf(stderr, "%s: fuzzy-algo: Valid arguments are 1 "
+					"or 2\n", PROGRAM_NAME);
+				exit(EXIT_FAILURE);
+			}
+			xargs.fuzzy_match_algo = conf.fuzzy_match_algo = a;
+			}
 			break;
 
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
@@ -2259,7 +2272,8 @@ external_arguments(int argc, char **argv)
 			case 252: /* fallthrough */
 			case 256: /* fallthrough */
 			case 261: /* fallthrough */
-			case 264: {
+			case 264: /* fallthrough */
+			case 265: {
 				err_arg_required(argv[optind - 1]);
 				exit(EXIT_FAILURE);
 				}
@@ -2473,6 +2487,7 @@ unset_xargs(void)
 	xargs.follow_symlinks = UNSET;
 	xargs.full_dir_size = UNSET;
 	xargs.fuzzy_match = UNSET;
+	xargs.fuzzy_match_algo = UNSET;
 	xargs.fzf_preview = UNSET;
 #ifndef _NO_FZF
 	xargs.fzftab = UNSET;
@@ -3278,6 +3293,11 @@ check_options(void)
 	if (conf.fuzzy_match == UNSET) {
 		conf.fuzzy_match = xargs.fuzzy_match == UNSET
 			? DEF_FUZZY_MATCH : xargs.fuzzy_match;
+	}
+
+	if (conf.fuzzy_match_algo == UNSET) {
+		conf.fuzzy_match_algo = xargs.fuzzy_match_algo == UNSET
+			? DEF_FUZZY_MATCH_ALGO : xargs.fuzzy_match_algo;
 	}
 
 	if (conf.private_ws_settings == UNSET)

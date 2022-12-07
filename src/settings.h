@@ -207,6 +207,7 @@ xf=01;31:xs=00;32:"
 #define DEF_FOLLOW_SYMLINKS 1
 #define DEF_FULL_DIR_SIZE 0
 #define DEF_FUZZY_MATCH 0
+#define DEF_FUZZY_MATCH_ALGO 2 /* 1 or 2. 2 is Unicode aware, but slower than 1 */
 #define DEF_FZF_WIN_HEIGHT 40 /* Max win percentage taken by FZF */
 #define DEF_FZF_PREVIEW 0
 #define DEF_HIGHLIGHT 1

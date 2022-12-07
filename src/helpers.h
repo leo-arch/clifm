@@ -241,6 +241,8 @@ extern int watch;
 #define GLOB_CHARS "*?[{"
 #define GLOB_REGEX_CHARS "*?[{|^+$."
 
+#define FUZZY_ALGO_MAX 2 /* We have two fuzzy algorithms */
+
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
@@ -640,6 +642,7 @@ struct config_t {
 	int files_counter;
 	int full_dir_size;
 	int fuzzy_match;
+	int fuzzy_match_algo;
 	int fzf_preview;
 	int highlight;
 #ifndef _NO_ICONS
@@ -688,6 +691,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
+	int pad3;
 
 	char *opener;
 	char *encoded_prompt;
@@ -916,6 +920,7 @@ struct param_t {
 	int follow_symlinks;
 	int full_dir_size;
 	int fuzzy_match;
+	int fuzzy_match_algo;
 	int fzf_preview;
 #ifndef _NO_FZF
 	int fzftab;
