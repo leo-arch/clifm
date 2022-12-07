@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Nov 30, 2022" "clifm 1.9" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 7, 2022" "clifm 1.9" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -237,6 +237,9 @@ if running in long view, print directories size and their contents
 .TP
 \fB\-\-fuzzy\-matching\fR
 enable fuzzy matches for filename/path completions and suggestions
+.TP
+\fB\-\-fuzzy\-algo\fR=\fI\,VER\/\fR
+fuzzy matching algorithm, where \fIVER\fR is either \fI1\fR (faster, but not Unicode aware), or \fI2\fR (slower, Unicode aware)
 .TP
 \fB\-\-icons\fR
 enable icons
