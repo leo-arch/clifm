@@ -821,9 +821,12 @@ alt_rl_getc(FILE *stream)
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result > 0 && result == sizeof(unsigned char)) {
 
-			if (c == 4 || c == 24) /* 4 == C-c && 24 == C-x */
+			if (c == 4 || c == 24) { /* 4 == C-d && 24 == C-x */
+				MOVE_CURSOR_UP(1);
 				return (EOF);
+			}
 
+			fix_rl_point(c);
 			return c;
 		}
 		/* If zero characters are returned, then the file that we are
