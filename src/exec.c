@@ -97,7 +97,7 @@ get_new_filename(char *cur_name)
 	while (!new_name) {
 		new_name = get_newname(_prompt, cur_name);
 
-		if (!new_name) // The user pressed Ctrl-d
+		if (!new_name) /* The user pressed Ctrl-d */
 			return (char *)NULL;
 
 		if (is_blank_name(new_name) == 1) {

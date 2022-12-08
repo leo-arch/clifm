@@ -2916,7 +2916,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		} else {
 			if ((matches = rl_mime_list()) != NULL) {
-				cur_comp_type = TCMP_MIME_LIST; /* Same as TCMP_FILE_TYPES_OPTS */
+				cur_comp_type = TCMP_MIME_LIST;
 				return matches;
 			}
 		}

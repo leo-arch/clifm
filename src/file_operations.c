@@ -787,7 +787,7 @@ create_file(char **cmd)
 		while (!filename) {
 			filename = get_newname(_prompt, (char *)NULL);
 
-			if (!filename) // The user pressed Ctrl-d
+			if (!filename) /* The user pressed Ctrl-d */
 				return EXIT_SUCCESS;
 
 			if (is_blank_name(filename) == 1) {
@@ -1106,7 +1106,7 @@ get_new_link_target(char *cur_target)
 	while (!new_target) {
 		new_target = get_newname(_prompt, cur_target);
 
-		if (!new_target) // The user pressed Ctrl-d
+		if (!new_target) /* The user pressed Ctrl-d */
 			return (char *)NULL;
 
 		if (is_blank_name(new_target) == 1) {

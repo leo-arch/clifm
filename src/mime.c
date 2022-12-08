@@ -630,7 +630,9 @@ get_filename(char *file_path)
 	return (char *)NULL;
 }
 
-/* Get user input for the 'open with' function */
+/* Get user input for the 'open with' function
+ * A is a pointer to an integer storing the item selected by the user
+ * NN is the amount of available items */
 static char *
 get_user_input(int *a, const size_t *nn)
 {

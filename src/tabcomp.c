@@ -484,7 +484,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		} else {
 			rl_insert_text(buf + *offset);
 		}
-	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS) {
+	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS || cur_comp_type == TCMP_MIME_LIST) {
 		rl_insert_text(buf);
 		return;
 	} else {
@@ -597,7 +597,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 			rl_insert_text("/");
 	} else {
 		if (rl_end == rl_point && cur_comp_type != TCMP_OPENWITH
-		&& cur_comp_type != TCMP_TAGS_T && cur_comp_type != TCMP_FILE_TYPES_OPTS)
+		&& cur_comp_type != TCMP_TAGS_T && cur_comp_type != TCMP_FILE_TYPES_OPTS
+		&& cur_comp_type != TCMP_MIME_LIST)
 			rl_stuff_char(' ');
 	}
 
@@ -1053,7 +1054,8 @@ store_completions(char **matches, FILE *fp)
 		} else if (no_file_comp == 1) {
 			color = mi_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
-		&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_FILE_TYPES_OPTS) {
+		&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_FILE_TYPES_OPTS
+		&& cur_comp_type != TCMP_MIME_LIST) {
 			char *cl = get_entry_color(matches, i, norm_prefix);
 			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
@@ -1369,7 +1371,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL
 	&& cur_comp_type != TCMP_BM_PATHS
 	&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_GLOB
-	&& cur_comp_type != TCMP_FILE_TYPES_OPTS && cur_comp_type != TCMP_FILE_TYPES_FILES) {
+	&& cur_comp_type != TCMP_FILE_TYPES_OPTS
+	&& cur_comp_type != TCMP_FILE_TYPES_FILES && cur_comp_type != TCMP_MIME_LIST) {
 		query = get_query_str(&finder_offset);
 		if (!query) {
 			if (cur_comp_type == TCMP_TAGS_T)
@@ -1396,7 +1399,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		}
 	}
 
-	else if (cur_comp_type == TCMP_FILE_TYPES_OPTS) {
+	else if (cur_comp_type == TCMP_FILE_TYPES_OPTS || cur_comp_type == TCMP_MIME_LIST) {
 		finder_offset++;
 	}
 
@@ -1932,6 +1935,7 @@ AFTER_USUAL_COMPLETION:
 
 		if (replacement && cur_comp_type != TCMP_HIST
 		&& cur_comp_type != TCMP_FILE_TYPES_OPTS
+		&& cur_comp_type != TCMP_MIME_LIST
 		&& (cur_comp_type != TCMP_FILE_TYPES_FILES || !matches[1])
 		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
@@ -2271,7 +2275,7 @@ CALC_OFFSET:
 
 		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR
 		|| cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_FILE_TYPES_OPTS
-		|| cur_comp_type == TCMP_BM_PATHS)
+		|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_MIME_LIST)
 			tab_offset = 0;
 
 		for (i = 1; i <= (size_t)count; i++) {
