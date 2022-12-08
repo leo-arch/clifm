@@ -38,43 +38,27 @@
 #include "strings.h"
 #include "utf8.h"
 
-/* Two functions added to the utf8.h library */
+/* Three functions added to the utf8.h library */
+/* Returns the amount of bytes needed to advance to the character next to S */
 static int
 utf8nextcodepoint(const char *s)
 {
-    if (0xf0 == (0xf8 & *s)) {
-      /* 4-byte utf8 code point (began with 0b11110xxx) */
-      return 4;
-    } else if (0xe0 == (0xf0 & *s)) {
-      /* 3-byte utf8 code point (began with 0b1110xxxx) */
-      return 3;
-    } else if (0xc0 == (0xe0 & *s)) {
-      /* 2-byte utf8 code point (began with 0b110xxxxx) */
-      return 2;
-    } else { /* if (0x00 == (0x80 & *s)) { */
-      /* 1-byte ascii (began with 0b0xxxxxxx) */
-      return 1;
-    }
-}
-
-/* Check whether the string S contains at least one Unicode codepoint
- * Returns 1 if true or 0 if false */
-int
-contains_utf8(const char *s)
-{
-	if (!s || !*s)
-		return 0;
-
-	while (*s) {
-		int n = utf8nextcodepoint(s);
-		if (n > 1)
-			return 1;
-		s++;
+	if (0xf0 == (0xf8 & *s)) {
+		/* 4-byte utf8 code point (began with 0b11110xxx) */
+		return 4;
+	} else if (0xe0 == (0xf0 & *s)) {
+		/* 3-byte utf8 code point (began with 0b1110xxxx) */
+		return 3;
+	} else if (0xc0 == (0xe0 & *s)) {
+		/* 2-byte utf8 code point (began with 0b110xxxxx) */
+		return 2;
+	} else { /* if (0x00 == (0x80 & *s)) { */
+		/* 1-byte ascii (began with 0b0xxxxxxx) */
+		return 1;
 	}
-
-	return 0;
 }
 
+/* A Unicode aware version of xstrcaschr (in strings.c)*/
 static char *
 utf8casechr(char *s, char *c)
 {
@@ -95,6 +79,23 @@ utf8casechr(char *s, char *c)
 	}
 
 	return (char *)NULL;
+}
+
+/* Check whether the string S contains at least one UTF8 codepoint
+ * Returns 1 if true or 0 if false */
+int
+contains_utf8(const char *s)
+{
+	if (!s || !*s)
+		return 0;
+
+	while (*s) {
+		if (utf8nextcodepoint(s) > 1)
+			return 1;
+		s++;
+	}
+
+	return 0;
 }
 
 /*
@@ -335,6 +336,8 @@ fuzzy_match_v1(char *s1, char *s2, const size_t s1_len)
  * Initial character
  * Word beginnings
  * Consecutive characters
+ *
+ * fuzzy_match_v1() will be used whenever the pattern contains no UTF8 char
  * 
  * The caller can decide whether the returned score is enough. If not,
  * a new item must be inspected until we get the desired score. Previous
