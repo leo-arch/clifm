@@ -779,24 +779,21 @@ create_file(char **cmd)
 
 	/* If no argument provided, ask the user for a filename */
 	if (!cmd[1]) {
+		puts(_("End filename with a slash to create a directory"));
+		char _prompt[NAME_MAX];
+		snprintf(_prompt, sizeof(_prompt), "Enter new file name ('Ctrl-d' to quit)\n"
+			"\001%s\002>\001%s\002 ", mi_c, tx_c);
 		char *filename = (char *)NULL;
 		while (!filename) {
-			puts(_("End filename with a slash to create a directory"));
-			filename = rl_no_hist(_("Filename ('q' to quit): "));
+			filename = get_newname(_prompt, (char *)NULL);
 
-			if (!filename)
-				continue;
+			if (!filename) // The user pressed Ctrl-d
+				return EXIT_SUCCESS;
 
-			if (!*filename) {
+			if (is_blank_name(filename) == 1) {
 				free(filename);
 				filename = (char *)NULL;
-				continue;
 			}
-		}
-
-		if (*filename == 'q' && !filename[1]) {
-			free(filename);
-			return EXIT_SUCCESS;
 		}
 
 		/* Once we have the filename, reconstruct the cmd array */
@@ -1101,38 +1098,31 @@ open_function(char **cmd)
 static char *
 get_new_link_target(char *cur_target)
 {
-	xrename = 1;
-	int poffset_bk = prompt_offset;
-	prompt_offset = 3;
-
-	char m[NAME_MAX];
-	snprintf(m, sizeof(m), "Enter new target ('Ctrl-d' to quit)\n"
+	char _prompt[NAME_MAX];
+	snprintf(_prompt, sizeof(_prompt), "Enter new target ('Ctrl-d' to quit)\n"
 		"\001%s\002>\001%s\002 ", mi_c, tx_c);
-	char *p = cur_target ? dequote_str(cur_target, 0) : (char *)NULL;
-	alt_rl_prompt(m, p ? p : (char *)NULL);
-	free(p);
 
-	char *new_name = (char *)NULL;
-	if (rl_callback_handler_input) {
-		new_name = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
-		free(rl_callback_handler_input);
-		rl_callback_handler_input = (char *)NULL;
+	char *new_target = (char *)NULL;
+	while (!new_target) {
+		new_target = get_newname(_prompt, cur_target);
+
+		if (!new_target) // The user pressed Ctrl-d
+			return (char *)NULL;
+
+		if (is_blank_name(new_target) == 1) {
+			free(new_target);
+			new_target = (char *)NULL;
+		}
 	}
 
-	xrename = 0;
-	prompt_offset = poffset_bk;
-
-	if (!new_name)
-		return (char *)NULL;
-
-	size_t l = strlen(new_name);
-	if (l > 0 && new_name[l - 1] == ' ') {
+	size_t l = strlen(new_target);
+	if (l > 0 && new_target[l - 1] == ' ') {
 		l--;
-		new_name[l] = '\0';
+		new_target[l] = '\0';
 	}
 
-	char *n = normalize_path(new_name, l);
-	free(new_name);
+	char *n = normalize_path(new_target, l);
+	free(new_target);
 
 	return n;
 }

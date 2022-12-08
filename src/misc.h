@@ -39,12 +39,12 @@ void free_software(void);
 void free_stuff(void);
 void free_remotes(int);
 void free_tags(void);
-
 void free_workspaces_filters(void);
-
+char *get_newname(const char *_prompt, char *old_name);
 void get_term_size(void);
 int  handle_stdin(void);
 void help_function(void);
+int  is_blank_name(const char *s);
 int  list_commands(void);
 int  list_mountpoints(void);
 int  new_instance(char *, int);

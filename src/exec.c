@@ -87,29 +87,35 @@ typedef char *rl_cpvfunc_t;
 #include "tabcomp.h"
 
 static char *
-get_new_name(char *old_name)
+get_new_filename(char *cur_name)
 {
-	int poffset_bk = prompt_offset;
-	prompt_offset = 3;
-
-	char m[NAME_MAX];
-	snprintf(m, sizeof(m), _("Enter new name ('Ctrl-d' to quit)\n"
-		"\001%s\002>\001%s\002 "), mi_c, tx_c);
-	char *p = dequote_str(old_name, 0);
-	alt_rl_prompt(m, p ? p : old_name);
-	free(p);
+	char _prompt[NAME_MAX];
+	snprintf(_prompt, sizeof(_prompt), "Enter new name ('Ctrl-d' to quit)\n"
+		"\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	char *new_name = (char *)NULL;
-	if (rl_callback_handler_input) {
-		new_name = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
-		free(rl_callback_handler_input);
-		rl_callback_handler_input = (char *)NULL;
+	while (!new_name) {
+		new_name = get_newname(_prompt, cur_name);
+
+		if (!new_name) // The user pressed Ctrl-d
+			return (char *)NULL;
+
+		if (is_blank_name(new_name) == 1) {
+			free(new_name);
+			new_name = (char *)NULL;
+		}
 	}
 
-	xrename = 0;
-	prompt_offset = poffset_bk;
+	size_t l = strlen(new_name);
+	if (l > 0 && new_name[l - 1] == ' ') {
+		l--;
+		new_name[l] = '\0';
+	}
 
-	return new_name;
+	char *n = normalize_path(new_name, l);
+	free(new_name);
+
+	return n;
 }
 
 /* Run CMD via execve() and refresh the screen in case of success
@@ -144,7 +150,7 @@ run_and_refresh(char **cmd, const int skip_force)
 			}
 		}
 
-		new_name = get_new_name(cmd[1]);
+		new_name = get_new_filename(cmd[1]);
 		if (!new_name)
 			return EXIT_SUCCESS;
 	}

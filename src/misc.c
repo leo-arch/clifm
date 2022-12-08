@@ -81,6 +81,49 @@ typedef char *rl_cpvfunc_t;
 #include "messages.h"
 #include "file_operations.h"
 
+int
+is_blank_name(const char *s)
+{
+	if (!s || !*s)
+		return 1;
+
+	int blank = 1;
+
+	while (*s) {
+		if (*s != ' ' && *s != '\n' && *s != '\t') {
+			blank = 0;
+			break;
+		}
+		s++;
+	}
+
+	return blank;
+}
+
+char *
+get_newname(const char *_prompt, char *old_name)
+{
+	xrename = 1;
+	int poffset_bk = prompt_offset;
+	prompt_offset = 3;
+
+	char *n = (old_name && *old_name) ? dequote_str(old_name, 0) : (char *)NULL;
+	alt_rl_prompt((_prompt && *_prompt) ? _prompt : "> ", n ? n : (char *)NULL);
+	free(n);
+
+	char *new_name = (char *)NULL;
+	if (rl_callback_handler_input) {
+		new_name = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
+		free(rl_callback_handler_input);
+		rl_callback_handler_input = (char *)NULL;
+	}
+
+	xrename = 0;
+	prompt_offset = poffset_bk;
+
+	return new_name;
+}
+
 /* Set ELN color according to the current workspace */
 void
 set_eln_color(void)
