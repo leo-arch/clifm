@@ -611,7 +611,7 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 	skip_trailing_spaces(&str, &len);
 	skip_leading_backslashes(&str, &len);
 
-	if (xargs.fuzzy_match != 0 && nwords == 1 && *str != '/' && is_internal_c(str))
+	if (conf.fuzzy_match != 0 && nwords == 1 && *str != '/' && is_internal_c(str))
 		return NO_MATCH;
 
 	int printed = NO_MATCH;

@@ -1349,7 +1349,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * is calculated the first time we print the prompt (in my_rl_getc
 	 * (readline.c)) */
 
-	if (text && xargs.fuzzy_match == 1)
+	if (text && conf.fuzzy_match == 1 && cur_comp_type != TCMP_TAGS_F)
 		/* text is not NULL whenever a common prefix was added, replacing
 		 * the original query string */
 		finder_offset -= (int)(wc_xstrlen(matches[0]) - wc_xstrlen(text));
@@ -1609,7 +1609,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else {
-		if ((conf.case_sens_path_comp == 0 || xargs.fuzzy_match == 1) && query) {
+		if ((conf.case_sens_path_comp == 0 || conf.fuzzy_match == 1) && query) {
 			/* Honor case insensitive completion/fuzzy matches */
 			if (strncmp(matches[0], buf, prefix_len) != 0) {
 				int bk = rl_point;
@@ -2242,7 +2242,7 @@ CALC_OFFSET:
 		if (fzftab == 1) {
 			char *t = text ? text : (char *)NULL;
 			if (finder_tabcomp(matches, common_prefix_added == 1 ? t : NULL,
-			xargs.fuzzy_match == 1 ? t : NULL) == -1)
+			conf.fuzzy_match == 1 ? t : NULL) == -1)
 				goto RESTART;
 			goto RESET_PATH;
 		}
