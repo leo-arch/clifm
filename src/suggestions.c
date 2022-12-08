@@ -716,6 +716,8 @@ check_filenames(char *str, size_t len, const unsigned char c,
 //	int fuzzy_algorithm = FUZZY_ALGO_CLIFM;
 /* ########################### */
 
+	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(str) == 1)
+		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0;
 //	score_t best_score = 0;
 
@@ -777,7 +779,7 @@ check_filenames(char *str, size_t len, const unsigned char c,
 				} */
 /* ########################### */
 //			} else {
-			int s = fuzzy_match(str, file_info[i].name, len, FUZZY_FILES);
+			int s = fuzzy_match(str, file_info[i].name, len, fuzzy_str_type);
 			if (s > best_fz_score) {
 				fuzzy_index = (int)i;
 				if (s == TARGET_BEGINNING_BONUS)

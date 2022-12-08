@@ -1204,11 +1204,9 @@ my_rl_path_completion(const char *text, int state)
 	/* #        This is the heart of the function         #
 	 * #################################################### */
 	mode_t type;
+	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(filename) == 1)
+		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0;
-//	int fuzzy_match_first_chr = 0;
-//	int fz_ranking = 0;
-//	int min_fz_ranking = 1;
-//	int xx = 0;
 
 	while (directory && (ent = readdir(directory))) {
 #if !defined(_DIRENT_HAVE_D_TYPE)
@@ -1345,7 +1343,7 @@ my_rl_path_completion(const char *text, int state)
 
 				if (flags & STATE_SUGGESTING) {
 					int r = 0;
-					if ((r = fuzzy_match(filename, ent->d_name, filename_len, FUZZY_FILES)) > best_fz_score) {
+					if ((r = fuzzy_match(filename, ent->d_name, filename_len, fuzzy_str_type)) > best_fz_score) {
 						if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
 							xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 						} else {
@@ -1365,7 +1363,7 @@ my_rl_path_completion(const char *text, int state)
 					}
 				} else {
 					/* This is for TAB completion: accept all matches */
-					if (fuzzy_match(filename, ent->d_name, filename_len, FUZZY_FILES) == 0)
+					if (fuzzy_match(filename, ent->d_name, filename_len, fuzzy_str_type) == 0)
 						continue;
 				}
 			}
@@ -1767,6 +1765,9 @@ filenames_gen_text(const char *text, int state)
 		len = strlen(text);
 	}
 
+	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(text) == 1)
+		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
+
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = file_info[i].name) != NULL) {
 		i++;
@@ -1787,9 +1788,7 @@ filenames_gen_text(const char *text, int state)
 			return strdup(name);
 		if (conf.fuzzy_match == 0)// || (*text == '.' && text[1] == '.') || *text == '-')
 			continue;
-		if (len == 0 || fuzzy_match((char *)text, name, len, FUZZY_FILES) > 0)
-//		if (len == 0 || fuzzy_match((char *)text, name,
-//		conf.case_sens_path_comp, FUZZY_FILES) == 1)
+		if (len == 0 || fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
 			return strdup(name);
 	}
 

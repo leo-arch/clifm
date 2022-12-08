@@ -241,8 +241,6 @@ extern int watch;
 #define GLOB_CHARS "*?[{"
 #define GLOB_REGEX_CHARS "*?[{|^+$."
 
-#define FUZZY_ALGO_MAX 2 /* We have two fuzzy algorithms */
-
 /* Used by log_msg() to know wether to tell prompt() to print messages or not */
 #define PRINT_PROMPT   1
 #define NOPRINT_PROMPT 0
@@ -519,13 +517,11 @@ extern int watch;
 #define FZF_BORDER_VERT    7
 
 /* Flags to skip fuzzy matching based on what we're comparing */
-#define FUZZY_FILES    0
-#define FUZZY_BM_NAMES 1
-#define FUZZY_HISTORY  2
-
-/* When doing fuzzy matching, always try to get this ranking before
- * returning a match */
-#define MIN_FUZZY_RANKING 4
+#define FUZZY_FILES_ASCII 0
+#define FUZZY_FILES_UTF8  1
+#define FUZZY_BM_NAMES    2
+#define FUZZY_HISTORY     3
+#define FUZZY_ALGO_MAX    2 /* We have two fuzzy algorithms */
 
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */

@@ -164,6 +164,7 @@ static const size_t bonus_index[256] = {
 
 score_t fuzzy_match_fzy(const char *, const char *, size_t *, const size_t);
 */
-int     fuzzy_match(char *, char *, const size_t, const int);
+int fuzzy_match(char *, char *, const size_t, const int);
+int contains_utf8(const char *);
 
 #endif /* FUZZY_MATCH_H */

@@ -57,6 +57,24 @@ utf8nextcodepoint(const char *s)
     }
 }
 
+/* Check whether the string S contains at least one Unicode codepoint
+ * Returns 1 if true or 0 if false */
+int
+contains_utf8(const char *s)
+{
+	if (!s || !*s)
+		return 0;
+
+	while (*s) {
+		int n = utf8nextcodepoint(s);
+		if (n > 1)
+			return 1;
+		s++;
+	}
+
+	return 0;
+}
+
 static char *
 utf8casechr(char *s, char *c)
 {
@@ -330,12 +348,12 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 	if (!s1 || !*s1 || !s2 || !*s2)
 		return 0;
 
-	if (type == FUZZY_FILES) {
+	if (type == FUZZY_FILES_ASCII || type == FUZZY_FILES_UTF8) {
 		if ((*s1 == '.' && *(s1 + 1) == '.') || *s1 == '-')
 			return 0;
 	}
 
-	if (conf.fuzzy_match_algo == 1)
+	if (conf.fuzzy_match_algo == 1 || type == FUZZY_FILES_ASCII)
 		return fuzzy_match_v1(s1, s2, s1_len);
 
 	int cs = conf.case_sens_path_comp;
