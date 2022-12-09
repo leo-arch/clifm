@@ -242,10 +242,54 @@ check_completion_mode(void)
 }
 #endif /* !_NO_FZF */
 
+/* Same thing as check_third_party_cmds(), but slower, since we need to run
+ * malloc(3) and access(3) for each checked command. */
+static void
+check_third_party_cmds_alt(void)
+{
+	int udisks2ok = 0, udevilok = 0;
+	char *p = (char *)NULL;
+
+	if ( (p = get_cmd_path("fzf")) ) {
+		free(p);
+		finder_flags |= FZF_BIN_OK;
+		if (fzftab == UNSET) fzftab = 1;
+	}
+
+	if ( (p = get_cmd_path("fzy")) ) {
+		free(p);
+		finder_flags |= FZY_BIN_OK;
+		if (fzftab == UNSET) fzftab = 1;
+	}
+
+	if ( (p = get_cmd_path("smenu")) ) {
+		free(p);
+		finder_flags |= SMENU_BIN_OK;
+		if (fzftab == UNSET) fzftab = 1;
+	}
+
+	if ( (p = get_cmd_path("udisksctl")) ) {
+		free(p); udisks2ok = 1;
+	}
+
+	if ( (p = get_cmd_path("udevil")) ) {
+		free(p); udevilok = 1;
+	}
+
+	set_mount_cmd(udisks2ok, udevilok);
+}
+
 /* Let's check for third-party programs */
 void
 check_third_party_cmds(void)
 {
+	if (conf.ext_cmd_ok == 0) {
+		/* We haven't loaded system binaries. Let's run an alternative,
+		 * though slower, check. */
+		check_third_party_cmds_alt();
+		return;
+	}
+
 	int udisks2ok = 0, udevilok = 0;
 	int i = (int)path_progsn;
 

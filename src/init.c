@@ -503,8 +503,7 @@ try_datadir(char *dir)
 
 	/* Remove ending "/bin" from DIR */
 	char *r = strrchr(dir, '/');
-	if (r && *r && *(++r) && *r == 'b'
-	&& strcmp(r, "bin") == 0)
+	if (r && *r && *(++r) && *r == 'b' && strcmp(r, "bin") == 0)
 		*(r - 1) = '\0';
 
 	struct stat a;

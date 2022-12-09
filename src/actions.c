@@ -82,13 +82,13 @@ get_plugin_path(char *action, int *status)
 				+ strlen(PNL) + 11) * sizeof(char));
 			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action); /* NOLINT */
 			if (access(cmd, X_OK) == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n", cmd, strerror(errno));
 				free(cmd);
 				*status = errno;
 				return (char *)NULL;
 			}
 		} else {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	cmd, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n", cmd, strerror(errno));
 			free(cmd);
 			*status = errno;
 			return (char *)NULL;
@@ -254,7 +254,7 @@ static int
 edit_actions(char *app)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("actions: Access to configuration files is not allowed in stealth mode\n");
+		printf(_("actions: Access to configuration files is not allowed in stealth mode\n"));
 		return EXIT_SUCCESS;
 	}
 
