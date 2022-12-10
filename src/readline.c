@@ -1530,7 +1530,7 @@ my_rl_path_completion(const char *text, int state)
 static char *
 bookmarks_generator(const char *text, int state)
 {
-	if (!bookmark_names)
+	if (!bookmarks || bm_n == 0)
 		return (char *)NULL;
 
 	static int i;
@@ -1543,10 +1543,19 @@ bookmarks_generator(const char *text, int state)
 	}
 
 	/* Look for bookmarks in bookmark names for a match */
-	while ((name = bookmark_names[i++]) != NULL) {
+	while ((size_t)i < bm_n) {
+		name = bookmarks[i++].name;
+		if (!name || !*name)
+			continue;
+
 		if ((conf.case_sens_list ? strncmp(name, text, len)
-		: strncasecmp(name, text, len)) == 0)
+		: strncasecmp(name, text, len)) == 0) {
+/*			char t[PATH_MAX + NAME_MAX + 4];
+			snprintf(t, sizeof(t), "%s (%s)", name, (i > 0 && bookmarks[i - 1].path)
+				? bookmarks[i - 1].path : "None");
+			return strdup(t); */
 			return strdup(name);
+		}
 	}
 
 	return (char *)NULL;
@@ -3128,6 +3137,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 #endif /* _NO_LIRA */
 
+		/* #### PROMPT #### */
 		if (*lb == 'p' && lb[1] == 'r' && strncmp(lb, "prompt " , 7) == 0) {
 			matches = rl_completion_matches(text, &prompts_generator);
 			if (matches) {

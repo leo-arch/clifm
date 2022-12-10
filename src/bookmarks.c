@@ -55,7 +55,7 @@ to add a new bookmark\n"
 void
 free_bookmarks(void)
 {
-	if (!bm_n)
+	if (bm_n == 0)
 		return;
 
 	size_t i;
@@ -67,12 +67,6 @@ free_bookmarks(void)
 
 	free(bookmarks);
 	bookmarks = (struct bookmarks_t *)NULL;
-
-	for (i = 0; bookmark_names[i]; i++)
-		free(bookmark_names[i]);
-	free(bookmark_names);
-	bookmark_names = (char **)NULL;
-
 	bm_n = 0;
 
 	return;
@@ -297,7 +291,7 @@ bookmark_del(char *name)
 
 			/* If the argument "*" was specified in command line */
 			if (cmd_line != -1)
-				fputs(_("All bookmarks succesfully removed\n"), stdout);
+				fputs(_("bookmarks: All bookmarks succesfully removed\n"), stdout);
 
 			return EXIT_SUCCESS;
 		}
@@ -368,7 +362,7 @@ bookmark_del(char *name)
 
 	/* If the bookmark to be removed was specified in command line */
 	if (cmd_line != -1)
-		printf(_("Successfully removed '%s'\n"), name);
+		printf(_("bookmarks: Successfully removed %s%s%s\n"), BOLD, name, NC);
 
 	return EXIT_SUCCESS;
 }
@@ -392,7 +386,6 @@ bookmark_add(char *file)
 	}
 
 	/* Check if FILE is an available path */
-
 	FILE *bm_fp = fopen(bm_file, "r");
 	if (!bm_fp) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "bookmarks: fopen: %s: %s\n",
@@ -450,11 +443,15 @@ bookmark_add(char *file)
 	/* If path is available */
 
 	char *name = (char *)NULL, *hk = (char *)NULL, *tmp = (char *)NULL;
+	char _prompt[(MAX_COLOR * 2) + 17];
 
 	/* Ask for data to construct the bookmark line. Both values could be NULL */
 	puts(_("Enter 'q' to quit"));
-	puts(_("Bookmark: [shorcut]name:path (Ex: [g]games:~/games)"));
-	hk = rl_no_hist("Shortcut: ");
+	puts(_("Bookmark: [shortcut]name:path (Ex: [g]games:~/games)"));
+	snprintf(_prompt, sizeof(_prompt), "%c%s%c>%c%s%c Shortcut: ",
+		RL_PROMPT_START_IGNORE, mi_c, RL_PROMPT_END_IGNORE,
+		RL_PROMPT_START_IGNORE, tx_c, RL_PROMPT_END_IGNORE);
+	hk = rl_no_hist(_prompt);
 
 	if (hk && *hk == 'q' && !*(hk + 1)) {
 		free(hk);
@@ -497,7 +494,10 @@ bookmark_add(char *file)
 		return EXIT_FAILURE;
 	}
 
-	name = rl_no_hist("Name: ");
+	snprintf(_prompt, sizeof(_prompt), "%c%s%c>%c%s%c Name: ",
+		RL_PROMPT_START_IGNORE, mi_c, RL_PROMPT_END_IGNORE,
+		RL_PROMPT_START_IGNORE, tx_c, RL_PROMPT_END_IGNORE);
+	name = rl_no_hist(_prompt);
 
 	if (name && *name == 'q' && !*(name + 1)) {
 		free(hk);
@@ -598,7 +598,7 @@ bookmark_add(char *file)
 	/* Everything is fine: add the new bookmark to the bookmarks file */
 	fprintf(bm_fp, "%s", tmp);
 	fclose(bm_fp);
-	printf(_("File succesfully bookmarked\n"));
+	printf(_("bookmarks: File succesfully bookmarked\n"));
 	free(tmp);
 	reload_bookmarks(); /* Update bookmarks for TAB completion */
 

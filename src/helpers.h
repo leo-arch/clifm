@@ -1339,7 +1339,6 @@ extern char
 
 	**argv_bk,
 	**bin_commands,
-	**bookmark_names,
 	**cdpaths,
 	**color_schemes,
 	**ext_colors,

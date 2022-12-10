@@ -1678,25 +1678,28 @@ rl_suggestions(const unsigned char c)
 
 	switch(*lb) {
 	case 'b': /* Bookmarks names */
-		if (bookmark_names && lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
+		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
 			size_t i;
-			for (i = 0; bookmark_names[i]; i++) {
-				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*bookmark_names[i])
-				&& strncasecmp(word, bookmark_names[i], wlen) == 0)
-				: (*word == *bookmark_names[i]
-				&& strncmp(word, bookmark_names[i], wlen) == 0)) {
+			for (i = 0; i < bm_n; i++) {
+				if (!bookmarks[i].name || !*bookmarks[i].name)
+					continue;
+				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*bookmarks[i].name)
+				&& strncasecmp(word, bookmarks[i].name, wlen) == 0)
+				: (*word == *bookmarks[i].name
+				&& strncmp(word, bookmarks[i].name, wlen) == 0)) {
 					suggestion.type = BM_NAME_SUG;
-					char *p = escape_str(bookmark_names[i]);
-					print_suggestion(p ? p : bookmark_names[i], wlen, sx_c);
+					char *p = escape_str(bookmarks[i].name);
+					print_suggestion(p ? p : bookmarks[i].name, wlen, sx_c);
 					free(p);
 					printed = 1;
 					break;
 				}
 			}
-			if (printed) {
+			if (printed ==  1) {
 				goto SUCCESS;
 			}
 		}
+
 		/* Backdir function (bd) */
 		else {
 			if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {

@@ -909,6 +909,14 @@ get_finder_output(const int multi, char *base)
 			line_len = 1;
 		}
 
+/*		if (cur_comp_type == TCMP_BOOKMARK) {
+			char *p = strrchr(line, '(');
+			if (p && p > line && *(p - 1) == ' ') {
+				*(p - 1) = '\0';
+				line_len = (ssize_t)xstrnlen(line);
+			}
+		} */
+
 		char *q = line;
 		if (multi == 1) {
 			char *s = line;
@@ -1053,6 +1061,8 @@ store_completions(char **matches, FILE *fp)
 				entry += 1;
 		} else if (no_file_comp == 1) {
 			color = mi_c;
+//			if (cur_comp_type == TCMP_BOOKMARK)
+//				color = tx_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
 		&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_FILE_TYPES_OPTS
 		&& cur_comp_type != TCMP_MIME_LIST) {

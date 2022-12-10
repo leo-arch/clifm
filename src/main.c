@@ -286,7 +286,6 @@ char
 
 	**argv_bk = (char **)NULL,
 	**bin_commands = (char **)NULL,
-	**bookmark_names = (char **)NULL,
 	**cdpaths = (char **)NULL,
 	**color_schemes = (char **)NULL,
 	**ext_colors = (char **)NULL,

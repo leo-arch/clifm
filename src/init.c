@@ -1113,7 +1113,7 @@ load_bookmarks(void)
 		bm_total++;
 	}
 
-	if (!bm_total) {
+	if (bm_total == 0) {
 		close_fstream(fp, fd);
 		return EXIT_SUCCESS;
 	}
@@ -1213,28 +1213,16 @@ load_bookmarks(void)
 	free(line);
 	close_fstream(fp, fd);
 
-	if (!bm_n) {
+	if (bm_n == 0) {
 		free(bookmarks);
 		bookmarks = (struct bookmarks_t *)NULL;
 		return EXIT_SUCCESS;
 	}
 
-	/* bookmark_names array shouldn't exist: is only used for bookmark
-	 * completion. xbookmarks[i].name should be used instead, but is
-	 * currently not working */
+	bookmarks[bm_n].name = (char *)NULL;
+	bookmarks[bm_n].path = (char *)NULL;
+	bookmarks[bm_n].shortcut = (char *)NULL;
 
-	size_t i, j = 0;
-	bookmark_names = (char **)xnmalloc(bm_n + 2, sizeof(char *));
-
-	for (i = 0; i < bm_n; i++) {
-		if (!bookmarks[i].name || !*bookmarks[i].name)
-			continue;
-		bookmark_names[j] = savestring(bookmarks[i].name,
-		    strlen(bookmarks[i].name));
-		j++;
-	}
-
-	bookmark_names[j] = (char *)NULL;
 	return EXIT_SUCCESS;
 }
 
