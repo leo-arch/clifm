@@ -749,7 +749,7 @@ my_rl_getc(FILE *stream)
 			int ret = rl_exclude_input(c);
 			if (ret == RL_INSERT_CHAR) {
 //				if (rl_inhibit_completion == 1)
-				if (rl_nohist == 1)
+				if (rl_nohist == 1 && !(flags & NO_FIX_RL_POINT))
 					fix_rl_point(c);
 				return c;
 			}

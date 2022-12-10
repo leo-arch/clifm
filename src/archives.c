@@ -677,7 +677,9 @@ get_archive_filename(void)
 	       "(defaults to .tar.gz)\nExample: myarchive.xz"));
 	char *name = (char *)NULL;
 	while (!name) {
+		flags |= NO_FIX_RL_POINT;
 		name = rl_no_hist(_("File name ('q' to quit): "));
+		flags &= ~NO_FIX_RL_POINT;
 		if (!name)
 			continue;
 		if (!*name) {

@@ -216,6 +216,7 @@ extern int watch;
 #define MULTI_SEL           (1 << 10)
 #define PREVIEWER           (1 << 11)
 #define KITTY_TERM          (1 << 12)
+#define NO_FIX_RL_POINT     (1 << 13)
 
 /* Flags for finder binaries */
 #define FZF_BIN_OK    (1 << 0)
@@ -1170,7 +1171,6 @@ enum comp_type {
 	TCMP_WORKSPACES = 30,
 	TCMP_BM_PATHS =   31, /* 'b:' keyword expansion (second word or more) */
 	TCMP_MIME_LIST =  32,
-//	TCMP_MIME_LIST =  TCMP_FILE_TYPES_OPTS, /* Same behavior */
 	TCMP_MIME_FILES = TCMP_FILE_TYPES_FILES /* Same behavior */
 };
 

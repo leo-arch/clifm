@@ -1931,7 +1931,9 @@ batch_link(char **args)
 	log_function(NULL);
 
 	puts("Suffix defaults to '.link'");
+	flags |= NO_FIX_RL_POINT;
 	char *suffix = rl_no_hist(_("Enter links suffix ('q' to quit): "));
+	flags &= ~NO_FIX_RL_POINT;
 
 	if (suffix && *suffix == 'q' && !*(suffix + 1)) {
 		free(suffix);
