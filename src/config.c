@@ -389,6 +389,7 @@ create-file:\\M-n\n\
 deselect-all:\\M-d\n\
 export-sel:\\C-\\M-e\n\
 dirs-first:\\M-g\n\
+launch-view:\\M--\n\
 lock:\\M-o\n\
 mountpoints:\\M-m\n\
 move-sel:\\C-\\M-n\n\
