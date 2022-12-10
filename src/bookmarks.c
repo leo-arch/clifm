@@ -26,6 +26,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <readline/readline.h> // tilde_expand
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -452,7 +453,7 @@ bookmark_add(char *file)
 
 	/* Ask for data to construct the bookmark line. Both values could be NULL */
 	puts(_("Enter 'q' to quit"));
-	puts(_("Bookmark: [shorcut]name:path (Ex: [g]games:/home/user/games)"));
+	puts(_("Bookmark: [shorcut]name:path (Ex: [g]games:~/games)"));
 	hk = rl_no_hist("Shortcut: ");
 
 	if (hk && *hk == 'q' && !*(hk + 1)) {
@@ -658,7 +659,9 @@ print_bookmarks(void)
 	for (size_t i = 0; i < bm_n; i++) {
 		if (!bookmarks[i].path || !*bookmarks[i].path) continue;
 		int is_dir = 0, sc_ok = 0, name_ok = 0, non_existent = 0;
-		int path_ok = stat(bookmarks[i].path, &attr);
+		char *p = *bookmarks[i].path == '~' ? tilde_expand(bookmarks[i].path) : (char *)NULL;
+		int path_ok = stat(p ? p : bookmarks[i].path, &attr);
+		free(p);
 
 		if (bookmarks[i].shortcut) sc_ok = 1;
 		if (bookmarks[i].name) name_ok = 1;
@@ -768,12 +771,16 @@ open_bookmark(void)
 		char *tmp_path = get_bm_path(arg[0]);
 		if (!tmp_path) { free_bm_input(&arg); continue;	}
 
+		char *ep = *tmp_path == '~' ? tilde_expand(tmp_path) : (char *)NULL;
+		char *p = ep ? ep : tmp_path;
+
 		struct stat a; /* If not a dir, refresh files list */
-		if (stat(tmp_path, &a) != -1 && S_ISDIR(a.st_mode))
+		if (stat(p, &a) != -1 && S_ISDIR(a.st_mode))
 			is_dir = 1;
 
-		char *tmp_cmd[] = {"o", tmp_path, arg[1] ? arg[1] : NULL, NULL};
+		char *tmp_cmd[] = {"o", p, arg[1] ? arg[1] : NULL, NULL};
 		exit_status = open_function(tmp_cmd);
+		free(ep);
 		if (exit_status != EXIT_SUCCESS)
 			{ free_bm_input(&arg); continue; }
 		break;
