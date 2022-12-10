@@ -255,7 +255,7 @@ bookmark_del(char *name)
 			}
 		}
 
-		if (quit) {
+		if (quit == 1) {
 			free_bms(bms, bmn);
 			free_del_elements(del_elements);
 			fclose(bm_fp);
@@ -437,7 +437,7 @@ bookmark_add(char *file)
 	line = (char *)NULL;
 	fclose(bm_fp);
 
-	if (dup) {
+	if (dup == 1) {
 		for (i = 0; i < bmn; i++)
 			free(bms[i]);
 		free(bms);
@@ -450,10 +450,20 @@ bookmark_add(char *file)
 
 	char *name = (char *)NULL, *hk = (char *)NULL, *tmp = (char *)NULL;
 
-	/* Ask for data to construct the bookmark line. Both values could be
-	 * NULL */
-	puts(_("Bookmark line example: [sc]name:path"));
+	/* Ask for data to construct the bookmark line. Both values could be NULL */
+	puts(_("Enter 'q' to quit"));
+	puts(_("Bookmark: [shorcut]name:path (Ex: [g]games:/home/user/games)"));
 	hk = rl_no_hist("Shortcut: ");
+
+	if (hk && *hk == 'q' && !*(hk + 1)) {
+		free(hk);
+		for (i = 0; i < bmn; i++)
+			free(bms[i]);
+		free(bms);
+		if (mod_file)
+			free(file);
+		return EXIT_SUCCESS;
+	}
 
 	/* Check if hotkey is available */
 	if (hk) {
@@ -475,7 +485,7 @@ bookmark_add(char *file)
 		}
 	}
 
-	if (dup) {
+	if (dup == 1) {
 		if (hk)
 			free(hk);
 		for (i = 0; i < bmn; i++)
@@ -487,6 +497,17 @@ bookmark_add(char *file)
 	}
 
 	name = rl_no_hist("Name: ");
+
+	if (name && *name == 'q' && !*(name + 1)) {
+		free(hk);
+		free(name);
+		for (i = 0; i < bmn; i++)
+			free(bms[i]);
+		free(bms);
+		if (mod_file)
+			free(file);
+		return EXIT_SUCCESS;
+	}
 
 	if (name) {
 		/* Check name is not duplicated */
@@ -505,7 +526,7 @@ bookmark_add(char *file)
 			free(tmp_line);
 		}
 
-		if (dup) {
+		if (dup == 1) {
 			free(name);
 			if (hk)
 				free(hk);

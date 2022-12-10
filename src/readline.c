@@ -734,7 +734,7 @@ my_rl_getc(FILE *stream)
 		if (result > 0 && result == sizeof(unsigned char)) {
 			/* Ctrl-d. Let's check the previous char wasn't ESC to prevent
 			 * Ctrl-Alt-d to be taken as Ctrl-d */
-			if (c == 4 && control_d_exits == 1 && prev != _ESC)
+			if (c == 4 && control_d_exits == 1 && prev != _ESC && rl_nohist == 0)
 				rl_quit(0, 0);
 
 			prev = c;
@@ -960,6 +960,9 @@ rl_no_hist(const char *prompt)
 	rl_notab = rl_nohist = 0;
 	conf.suggestions = bk;
 
+//	if (!input) // Ctrl-d
+//		return savestring("q", 1);
+
 	if (input) {
 		if (!*input) {
 			free(input);
@@ -967,18 +970,18 @@ rl_no_hist(const char *prompt)
 		}
 
 		/* Do we have some non-blank char? */
-		int no_blank = 0;
+		int blank = 1;
 		char *p = input;
 
 		while (*p) {
 			if (*p != ' ' && *p != '\n' && *p != '\t') {
-				no_blank = 1;
+				blank = 0;
 				break;
 			}
 			p++;
 		}
 
-		if (!no_blank) {
+		if (blank == 1) {
 			free(input);
 			return (char *)NULL;
 		}

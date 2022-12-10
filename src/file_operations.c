@@ -1225,7 +1225,7 @@ edit_link(char *link)
 				continue;
 			}
 
-			if (*answer != 'y' && *answer != 'n') {
+			if (*answer != 'y' && *answer != 'n' && *answer != 'q') {
 				free(answer);
 				answer = (char *)NULL;
 				continue;
@@ -1791,6 +1791,7 @@ bulk_rename(char **args)
 		case 'y': /* fallthrough */
 		case 'Y': break;
 
+		case 'q': /* fallthrough */
 		case 'n': /* fallthrough */
 		case 'N': /* fallthrough */
 		case '\0':

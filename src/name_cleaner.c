@@ -591,7 +591,7 @@ CONFIRM:
 	while (!input) {
 		input = rl_no_hist(_("Is this OK? [y/N/(e)dit] "));
 
-		if (input && (*(input + 1) || !strchr("yYnNeE", *input))) {
+		if (input && (*(input + 1) || !strchr("yYnNeEq", *input))) {
 			free(input);
 			input = (char *)NULL;
 			continue;
@@ -600,23 +600,23 @@ CONFIRM:
 		if (!input)
 			break;
 
-		switch(*input) {
-			case 'y': /* fallthrough */
-			case 'Y': rename = 1; break;
-			case 'e':
-				_edit = 1;
-				bfiles = edit_replacements(bfiles, &f, &edited_names);
-				if (!bfiles)
-					break;
-				if (edited_names == 1 && f > 0) {
-					free(input);
-					input = (char *)NULL;
-					goto CONFIRM;
-				} else {
-					rename = 1;
-				}
+		switch (*input) {
+		case 'y': /* fallthrough */
+		case 'Y': rename = 1; break;
+		case 'e':
+			_edit = 1;
+			bfiles = edit_replacements(bfiles, &f, &edited_names);
+			if (!bfiles)
 				break;
-			default: break;
+			if (edited_names == 1 && f > 0) {
+				free(input);
+				input = (char *)NULL;
+				goto CONFIRM;
+			} else {
+				rename = 1;
+			}
+			break;
+		default: break;
 		}
 	}
 
