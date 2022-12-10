@@ -847,7 +847,7 @@ add_bookmark(char *cmd)
 	}
 
 	if (access(p, F_OK) != 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: %s: %s\n"), p, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "bookmarks: %s: %s\n", p, strerror(errno));
 		free(p);
 		return errno;
 	}
