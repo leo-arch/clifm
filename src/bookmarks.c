@@ -796,8 +796,7 @@ static int
 bm_open(char **cmd)
 {
 	char *p = dequote_str(cmd[1], 0);
-	if (!p)
-		p = cmd[1];
+	if (!p) p = cmd[1];
 
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
@@ -813,20 +812,23 @@ bm_open(char **cmd)
 
 			if (!bookmarks[i].path) {
 				fprintf(stderr, _("%s: Invalid bookmark\n"), p);
-				if (p != cmd[1])
-					free(p);
+				if (p != cmd[1]) free(p);
 				return EXIT_FAILURE;
 			}
-			if (p != cmd[1])
-				free(p);
-			char *tmp_cmd[] = {"o", bookmarks[i].path, cmd[2], NULL};
-			return open_function(tmp_cmd);
+
+			if (p != cmd[1]) free(p);
+
+			char *et = *bookmarks[i].path == '~'
+				? tilde_expand(bookmarks[i].path) : (char *)NULL;
+			char *tmp_cmd[] = {"o", et ? et : bookmarks[i].path, cmd[2], NULL};
+			int ret = open_function(tmp_cmd);
+			free(et);
+			return ret;
 		}
 	}
 
 	fprintf(stderr, _("%s: No such bookmark\n"), p);
-	if (p != cmd[1])
-		free(p);
+	if (p != cmd[1]) free(p);
 	return EXIT_FAILURE;
 }
 
