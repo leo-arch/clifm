@@ -44,7 +44,7 @@
 #include "listing.h"
 #include "misc.h"
 
-#define NO_BOOKMARKS "Bookmarks: There are no bookmarks\nEnter 'bm edit' \
+#define NO_BOOKMARKS "bookmarks: There are no bookmarks\nEnter 'bm edit' \
 or press F11 to edit the bookmarks file. You can also enter 'bm add PATH' \
 to add a new bookmark\n"
 #define PRINT_BM_HEADER 1

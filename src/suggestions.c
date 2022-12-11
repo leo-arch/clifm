@@ -1652,7 +1652,8 @@ rl_suggestions(const unsigned char c)
 		goto SUCCESS;
 
 	/* 3.a) Check already suggested string */
-	if (suggestion_buf && suggestion.printed && !IS_DIGIT(c)) {
+	if (suggestion_buf && suggestion.printed
+	&& !(flags & BAEJ_SUGGESTION) && !IS_DIGIT(c)) {
 		if (suggestion.type == HIST_SUG || suggestion.type == INT_CMD) {
 			/* Skip the j cmd: we always want the BAEJ suggestion here */
 			if (word && *word == 'j' && word[1] == ' ') {
