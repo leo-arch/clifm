@@ -31,6 +31,7 @@
 
 #include <errno.h>
 //#include <libintl.h>
+#include <langinfo.h> /* nl_langinfo() */
 #include <locale.h>
 #include <stdio.h>
 //#include <stdlib.h>
@@ -950,6 +951,18 @@ init_msgs(void)
 	msgs.error = msgs.notice = msgs.warning = 0;
 }
 
+static void
+set_locale(void)
+{
+	/* Use the locale specified by the environment */
+	setlocale(LC_ALL, "");
+	if (strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
+		_err('w', PRINT_PROMPT, "%s: Locale is not UTF-8. To avoid "
+			"encoding issues you might want to set an UTF-8 locale. Ex: "
+			"export LANG=es_AR.UTF-8\n", PROGRAM_NAME);
+	}
+}
+
 /*
 static void
 init_file_flags(void)
@@ -1027,13 +1040,7 @@ struct config_t {
 
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
-	/* Use the locale specified by the environment */
-#if defined(__CYGWIN__)
-	setlocale(LC_ALL, "C.UTF-8");
-#else
-	setlocale(LC_ALL, "");
-#endif /* __CYGWIN__ */
-
+	set_locale();
 	conf.unicode = DEF_UNICODE;
 
 	/* Store external arguments to be able to rerun external_arguments()
