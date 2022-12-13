@@ -1,3 +1,66 @@
+1.9 - Sharptooth
+New features/improvements
+* Allow autocmds for workspaces as well, instead of just paths
+* Abbreviate target path of symlinks in the properties function
+* Allow starting the file preview window hidden (--fzfpreview-hidden)
+* Allow the 'view' command to select files
+* Keybinding for the 'view' command (Alt+-)
+* Implement 'cd -' (as it works in most shells)
+* 'pc' command to interactively edit file permissions
+* List available MIME-types: @<TAB>
+* List available file types: =<TAB>
+* Optional files counter field for directories in long view
+* Optionally print file size in bytes in long view
+* Added timestamp seconds in long view
+* Allow setting custom values to automatically run the pager
+* Improve the prompt of the symlink editor (le)
+* Allow the 'vv' command to rename files passed as parameters, and not only selected files
+* Improved fastback function: absolute paths are now suggested
+* Private workspace settings
+* Customizable welcome message via WelcomeMessageStr
+* Make suggestions even when removing text via backspace
+* Automatically expand bookmarks (:b), file types (=c) and mime types (@patter)
+* Improve list of available file types (=<TAB>)
+* 'stats' command now work in light mode too (reduced though)
+* Make the b: (or :b) construct work as first word as well
+* Send text cut via Alt-c to the kill-ring
+* Do not trim file name if there's only one file and we're not in long view
+* "Commands" help topic
+* FuzzyMatching is now an option in the config file
+* Improve fuzzy matching: detect consecutive chars and beginning of words (including camel case)
+* Make fuzzy matching Unicode aware
+* Allow exiting the bookmark creation screen via 'q'
+* Allow using tilde for bookmark paths
+* Properly test UTF-8 support
+
+Bug fixes
+* Wrong window offset when TAB completing 'tu' command and fuzzy-matching is enabled
+* Wrong cursor movement in some secondary prompts when Unicode text is entered
+* Crash when PrintSelFiles is enabled
+* Wrong ueberzug image position when running 'TERM -e clifmrun --fzfpreview' on some terminals
+* Immediately quits if exectued as terminal parameter (ex: "lxterminal -e clifm")
+* "=h<TAB>" not expanding into multi-hardlink files 
+* If there's a file named "file.txt" and you type "file/", "file.txt" is suggested anyway
+* "ELN APP" triggers the warning prompt
+* Unexpected trimmed file name in long view
+* Wrong ELN pad when max files is set and files is smaller than max files 
+* Wrong colors for new property fields in long view
+* View keybind (Alt--) not working when there's a file named "view" in CWD
+* Mutiple screen refreshes when siwtching profiles via keybinding
+* Autocommands override some current settings
+* Autocommands are evaluated backwards (from bottom to top)
+* File birth time is missing for the 'p' command on NetBSD
+* Type '/<TAB>': another slash is inserted
+* 'v' and 'vv' commands not expanding ELN's
+* Cannot remove/rename files named "-f" or "--force"
+* The 'view' command fails on some systems due to the ED escape code (^[[2J)
+* Filter set from CLIFM_FILTER is lost after changing profiles
+* CLIFM_FILTER="!.*\.c$" not working. The shell expands "!": either use single quotes or escape '!'
+* Suggesting jump entries from history ('j query') is not useful: it hides the directory targeted by the query 
+* Wildcards expansion not working whit paths containing spaces: 's ~/Docu\ ments/*'
+* Wildcards not expanded when using tilde: 's ~/*<TAB>'
+* Wrong finder offset when TAB completing in the middle of the cmd line
+
 1.8 - Otis
 New features/improvements:
 * File previews for TAB completion (fzf mode only)
