@@ -960,8 +960,8 @@ rl_no_hist(const char *prompt)
 	rl_notab = rl_nohist = 0;
 	conf.suggestions = bk;
 
-//	if (!input) // Ctrl-d
-//		return savestring("q", 1);
+	if (!input) // Ctrl-d
+		return savestring("q", 1);
 
 	if (input) {
 		if (!*input) {
