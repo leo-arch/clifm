@@ -113,10 +113,10 @@
 #define PROGRAM_NAME "clifm"
 #define PNL "clifm" /* Program name lowercase */
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.9-rc6"
+#define VERSION "1.9-Sharptooth"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
-#define DATE "Dec 10, 2022"
+#define DATE "Dec 13, 2022"
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
