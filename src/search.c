@@ -65,8 +65,13 @@ run_find(char *search_path, char *arg)
 
 	int glob_char = check_glob_char(arg + 1, GLOB_REGEX);
 	if (glob_char == 1) {
-		char *cmd[] = {"find", _path, method, arg + 1, NULL};
-		return launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		if (follow_symlinks == 1) {
+			char *cmd[] = {"find", "-L", _path, method, arg + 1, NULL};
+			return launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		} else {
+			char *cmd[] = {"find", _path, method, arg + 1, NULL};
+			return launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		}
 	}
 
 	int ret = EXIT_SUCCESS;
@@ -80,8 +85,13 @@ run_find(char *search_path, char *arg)
 	sprintf(ss, "*%s*", arg + 1);
 #endif /* !_BE_POSIX && !__OpenBSD__ */
 
-	char *cmd[] = {"find", _path, method, ss, NULL};
-	ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	if (follow_symlinks == 1) {
+		char *cmd[] = {"find", "-L", _path, method, ss, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	} else {
+		char *cmd[] = {"find", _path, method, ss, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	}
 	free(ss);
 
 	return ret;
