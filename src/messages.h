@@ -29,16 +29,16 @@
 #define GRAL_USAGE "[-aAeEfFgGhHiIlLmoOprsStuUvwWxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
-#define ACTIONS_USAGE "List or edit actions/plugins\n\
-Usage:\n\
+#define ACTIONS_USAGE "List or edit actions/plugins\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   actions [edit [APP]]\n\n\
-Examples:\n\
-- List available actions/plugins:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List available actions/plugins\n\
     actions\n\
-- Open/edit the actions configuration file with nano:\n\
+- Open/edit the actions configuration file with nano\n\
     actions edit nano\n\
 - Open/edit the actions configuration file with the default associated\n\
-  application:\n\
+  application\n\
     actions edit\n\n\
 Actions are just names for plugins.\n\
 An action definition has the following form: \"NAME=plugin\", for example:\n\
@@ -46,36 +46,36 @@ An action definition has the following form: \"NAME=plugin\", for example:\n\
 To run a plugin just enter the action name. So, to run the fzfnav.sh plugin,\n\
 just enter \"-\".\n\
 Some plugins accept parameters. To get information about a specific plugin\n\
-use the -h,--help parameter. Example: \"- --help\"."
+use the -h,--help flag. Example: \"- --help\"."
 
-#define ALIAS_USAGE "List, print, or import aliases\n\
-Usage:\n\
+#define ALIAS_USAGE "List, print, or import aliases\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   alias [import FILE] [ls, list] [NAME]\n\n\
-Example:\n\
-- List available aliases:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List available aliases\n\
     alias\n\
   or\n\
     alias ls (or 'alias <TAB>')\n\
-- Print a specific alias definition:\n\
+- Print a specific alias definition\n\
     alias my_alias\n\
-- Import aliases from ~/.bashrc:\n\
+- Import aliases from ~/.bashrc\n\
     alias import ~/.bashrc\n\
   Note: Only aliases following the POSIX specification (NAME=\"STR\")\n\
   will be imported"
 
-#define ARCHIVE_USAGE "Compress/archive files\n\
-Usage:\n\
+#define ARCHIVE_USAGE "Compress/archive files\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   ac, ad ELN/FILE...\n\n\
-Examples:\n\
-- Compress/archive all selected files:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Compress/archive all selected files\n\
     ac sel\n\
-- Compress/archive a range of files:\n\
+- Compress/archive a range of files\n\
     ac 12-24 (or 'ac <TAB>' to choose from a list: multi-selection is allowed)\n\
-- Decompress/dearchive a file:\n\
+- Decompress/dearchive a file\n\
     ad file.tar.gz\n\
-  or just open the file and CliFM will prompt the appropriate menu:\n\
+  or just open the file and CliFM will prompt the appropriate menu\n\
     o file.tar.gz (or just 'file.tar.gz')\n\n\
-Dependencies:\n\
+\x1b[1mDEPENDENCIES\x1b[0m\n\
 zstd(1)           Everything related to Zstandard\n\
 mkisofs(1)        Create ISO 9660 files\n\
 7z(1) / mount(1)  Operate on ISO 9660 files\n\
@@ -83,7 +83,7 @@ archivemount(1)   Mount archives\n\
 atool(1)          Extraction/decompression, listing, and repacking archives"
 
 #define AUTOCD_USAGE "Turn autocd on-off\n\
-Usage:\n\
+\x1b[1mUSAGE\x1b[0m\n\
   acd, autocd [on, off, status]"
 
 #define AUTOCMDS_USAGE "Tweak settings or run custom commands on a per directory basis\n\n\
@@ -108,119 +108,119 @@ leaving, instead of entering, the directory.\n\n\
 Note: Only single-line commands are allowed. If you need more advanced\n\
 stuff, set here the path to a script doing whatever needs to be done."
 
-#define AUTO_OPEN_USAGE "Turn auto-open on-off\n\
-Usage:\n\
+#define AUTO_OPEN_USAGE "Turn auto-open on-off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   ao, auto-open [on, off, status]"
 
 #define BACK_USAGE "Change to the previous directory in the directory \
-history list\n\
-Usage:\n\
+history list\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   b, back [h, hist] [clear] [!ELN]\n\n\
-Examples:\n\
-- Just change to the previously visited directory:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Just change to the previously visited directory\n\
     b (Alt-j or Shift-Left also work)\n\
-- Print the directory history list:\n\
+- Print the directory history list\n\
     bh\n\
-- Change to the directory whose ELN in the list is 24:\n\
+- Change to the directory whose ELN in the list is 24\n\
     b !24\n\
-- Use the 'f' command to go forward:\n\
+- Use the 'f' command to go forward\n\
     f (Alt-k or Shift-Right also work)"
 
 #define BD_USAGE "Quickly change to a parent directory matching NAME. If \
-NAME is not specified, print the list of all parent directories\n\
-Usage:\n\
+NAME is not specified, print the list of all parent directories\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   bd [NAME]\n\n\
-Example:\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
 - Supposing you are in ~/Documents/misc/some/deep/dir, change to\n\
-~/Documents/misc:\n\
+~/Documents/misc\n\
     bd mi (or 'bd <TAB>' to choose from a list)"
 
-#define BL_USAGE "Create multiple symbolic links at once\n\
-Usage:\n\
+#define BL_USAGE "Create multiple symbolic links at once\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   bl FILE...\n\n\
-Example:\n\
-- Symlink files file1 file2 file3 and file4 at once:\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
+- Symlink files file1 file2 file3 and file4 at once\n\
     bl file* (or 'bl <TAB>' to choose from a list: multi-selection is\n\
   allowed)\n\n\
 Note: Links are created in the current directory.\n\
 By default links are named FILE.link (you will be given the option to\n\
 change this suffix)"
 
-#define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\
-Usage:\n\
+#define BLEACH_USAGE "Clean up file names from non-ASCII characters\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   bb, bleach ELN/FILE...\n\n\
-Example:\n\
-- Bleach file names in your Downloads directory:\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
+- Bleach file names in your Downloads directory\n\
     bb ~/Downloads/*"
 
-#define BOOKMARKS_USAGE "Handle bookmarks\n\
-Usage:\n\
+#define BOOKMARKS_USAGE "Handle bookmarks\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   bm, bookmarks [a, add FILE] [d, del] [edit [APP]]\n\n\
-Examples:\n\
-- Open the bookmarks screen:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Open the bookmarks screen\n\
     bm (Alt-b)\n\
-    Note: 'b:<TAB>' can also be used\n\
-- Bookmark the directory /media/mount:\n\
+  Note: 'b:<TAB>' can also be used\n\
+- Bookmark the directory /media/mount\n\
     bm a /media/mount\n\
   Note: Make sure to create a simple shortcut, like 'mnt'. Then you can\n\
   change to it as follows:\n\
     bm mnt (or 'bm <TAB>' to choose from a list)\n\
-- Remove a bookmark:\n\
+- Remove a bookmark\n\
     bm d mnt\n\
-- Edit the bookmarks file manually:\n\
+- Edit the bookmarks file manually\n\
     bm edit (or F11)\n\
-- Edit the bookmarks file using vi:\n\
+- Edit the bookmarks file using vi\n\
     bm edit vi\n\
-- Print file properties of specific bookmarks using the 'b:' construct:\n\
+- Print file properties of specific bookmarks using the 'b:' construct\n\
     p b:<TAB> (multi-selection is available)"
 
-#define BULK_USAGE "Bulk rename files\n\
-Usage:\n\
+#define BULK_USAGE "Bulk rename files\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   br, bulk ELN/FILE...\n\n\
-Examples:\n\
-- Bulk rename all files ending with .pdf in the current directory:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Bulk rename all files ending with .pdf in the current directory\n\
     br *.pdf (or 'br <TAB> to choose from a list: mutli-selection is\n\
   allowed')\n\
-- Bulk rename all selected files:\n\
+- Bulk rename all selected files\n\
     br sel"
 
-#define CD_USAGE "Change the current working directory\n\
-Usage:\n\
+#define CD_USAGE "Change the current working directory\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   cd [ELN/DIR]\n\n\
-Examples:\n\
-- Change to /var:\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
+- Change to /var\n\
     cd /var\n\
-  or, if autocd is enabled (default):\n\
+  or, if autocd is enabled (default)\n\
     /var"
 
-#define COLORS_USAGE "Print the list of currently used color codes\n\
-Usage:\n\
+#define COLORS_USAGE "Print the list of currently used color codes\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   colors"
 
-#define COLUMNS_USAGE "Set columned list of files on-off\n\
-Usage:\n\
+#define COLUMNS_USAGE "Set columned list of files on-off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   cl, columns [on, off]"
 
-#define CS_USAGE "Switch color schemes\n\
-Usage:\n\
+#define CS_USAGE "Switch color schemes\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   cs, colorschemes [edit [APP]] [COLORSCHEME]\n\n\
-Examples:\n\
-- List available color schemes:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List available color schemes\n\
     cs (or 'cs <TAB>')\n\
-- Edit the current color scheme:\n\
+- Edit the current color scheme\n\
     cs edit\n\
-- Edit the current color scheme using vi:\n\
+- Edit the current color scheme using vi\n\
     cs edit vi\n\
-- Switch to the color scheme named 'mytheme':\n\
+- Switch to the color scheme named 'mytheme'\n\
     cs mytheme"
 
-#define DESEL_USAGE "Deselect one or more selected files\n\
-Usage:\n\
+#define DESEL_USAGE "Deselect one or more selected files\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   ds, desel [*, a, all]\n\n\
-Examples:\n\
-- Deselect all selected files:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Deselect all selected files\n\
     ds * (or Alt-d)\n\
-- Deselect files from a menu:\n\
+- Deselect files from a menu\n\
     ds (or 'ds <TAB>' to choose from a list: multi-selection is allowed)"
 
 #define DESKTOP_NOTIFICATIONS_USAGE "Errors, warnings, and notices are send \
@@ -237,22 +237,22 @@ notifications on your screen. For troubleshoting, consult your \
 daemon's documentation\n\n\
 Tip: You can always check notifications using the 'msg' command"
 
-#define DIRHIST_USAGE "List or access entries in the directory history list\n\
-Usage:\n\
+#define DIRHIST_USAGE "List or access entries in the directory history list\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   b/f [hist] [clear] [!ELN]\n\n\
-Examples:\n\
-- Print the directory history list:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the directory history list\n\
     bh (or 'b hist')\n\
-- Change to the directory whose ELN is 12 in the directory history list:\n\
+- Change to the directory whose ELN is 12 in the directory history list\n\
     b !12\n\
-- Remove all entries from the directory history list:\n\
+- Remove all entries from the directory history list\n\
     b clear\n"
 
-#define DUP_USAGE "Duplicate files via rsync(1) (cp(1) if rsync is not found)\n\
-Usage:\n\
+#define DUP_USAGE "Duplicate files via rsync(1) (cp(1) if rsync is not found)\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   d, dup ELN/FILE...\n\n\
-Example:\n\
-- Duplicate files whose ELN's are 12 through 20:\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
+- Duplicate files whose ELN's are 12 through 20\n\
     d 12-20\n\n\
 You will be asked for a destiny directory\n\
 Duplicated files are created as SRC.copy, and, if SRC.copy exists, as \n\
@@ -260,60 +260,62 @@ SRC.copy-n, where n is an positive integer (starting at 1)\n\n\
 Parameters passed to rsync: --aczvAXHS --progress\n\n\
 Parameters passed to cp: -a"
 
-#define EDIT_USAGE "Edit the main configuration file\n\
-Usage:\n\
+#define EDIT_USAGE "Edit the main configuration file\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   edit [reset] [APPLICATION]\n\n\
-Examples:\n\
-- Open/edit the configuration file:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Open/edit the configuration file\n\
     edit (or F10)\n\
-- Open/edit the configuration file using nano:\n\
+- Open/edit the configuration file using nano\n\
     edit nano\n\
-- Create a fresh configuration file (making a backup of the old one):\n\
+- Create a fresh configuration file (making a backup of the old one)\n\
     edit reset"
 
-#define EXT_USAGE "Turn the use of external commands on-off\n\
-Usage:\n\
+#define EXT_USAGE "Turn the use of external commands on-off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   ext [on, off, status]"
 
-#define EXPORT_USAGE "Export files to a temporary file\n\
-Usage:\n\
+#define EXPORT_USAGE "Export files to a temporary file\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   exp [ELN/FILE]...\n\n\
-Examples:\n\
-- Export all selected files:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Export all selected files\n\
     exp sel\n\
-- Export all PDF files in the current directory:\n\
+- Export all PDF files in the current directory\n\
     exp *.pdf"
 
-#define FC_USAGE "Turn the files counter for directories on-off\n\
-Usage:\n\
+#define FC_USAGE "Turn the files counter for directories on-off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   fc, filescounter [on, off, status]"
 
-#define FILE_DETAILS "List file details\n\
-- Toggle long/detail view mode:\n\
+#define FILE_DETAILS "List file details\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Toggle long/detail view mode\n\
     Alt-l\n\
   Note: use PropFields in the configuration file to customize output\n\
   fields\n\
-- Print properties of the file whose ELN is 4:\n\
+- Print properties of the file whose ELN is 4\n\
     p4\n\
-- Print file properties, including directory full size:\n\
+- Print file properties, including directory full size\n\
     pp DIR"
 
-#define FILE_SIZE_USAGE "File sizes/disk usage\n\
-- Enable full directory size (long view):\n\
+#define FILE_SIZE_USAGE "File sizes/disk usage\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Enable full directory size (long view)\n\
     fz on (or --full-dir-size)\n\
-- Toggle the disk usage analyzer mode on/off:\n\
+- Toggle the disk usage analyzer mode on/off\n\
     Alt-TAB (or -t, --disk-usage-analyzer)\n\
-- Print apparent sizes instead of actual device usage (Linux only):\n\
+- Print apparent sizes instead of actual device usage (Linux only)\n\
     Run with --apparent-size or set ApparentSize to true in the\n\
     configuration file\n\
-- Use powers of 1000 instead of 1024 for file sizes (Linux only):\n\
+- Use powers of 1000 instead of 1024 for file sizes (Linux only)\n\
     Run with --si"
 
-#define FF_USAGE "Set list directories first on-off\n\
-Usage:\n\
+#define FF_USAGE "Set list directories first on-off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   ff, dirs-first [on, off, status]\n\
-Example:\n\
-- Disable list directories-first:\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
+- Disable list directories-first\n\
     ff off\n\
   Note: Toggle directories-first on/off pressing Alt-g"
 
@@ -359,28 +361,28 @@ CLIFM_KITTY_NO_UEBERZUG=1 clifmrun --fzfpreview\n\
 Note that on Wayland the kitty image protocol will be used by default, so\n\
 that there is no need to set this variable."
 
-#define FILTER_USAGE "Set a filter for the files list\n\
-Usage:\n\
+#define FILTER_USAGE "Set a filter for the files list\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   ft, filter [unset] [[!]REGEX,=FILE-TYPE-CHAR]\n\n\
-Examples:\n\
-- Print the current filter, if any:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the current filter, if any\n\
     ft\n\
-- Do not list hidden files:\n\
+- Do not list hidden files\n\
     ft !^\\.\n\
-- List only files ending with \".pdf\":\n\
+- List only files ending with \".pdf\"\n\
     ft .*\\.pdf$\n\
-- List only symbolic links:\n\
+- List only symbolic links\n\
     ft =l\n\
-- Do not list socket files:\n\
+- Do not list socket files\n\
     ft !=s\n\
   Note: See below for the list of available file type characters\n\
-- Unset the current filter:\n\
+- Unset the current filter\n\
     ft unset\n\n\
 You can also filter files in the current directory using TAB\n\
 completion via wildcards and the file type filter:\n\
-- List PDF files:\n\
+- List PDF files\n\
     /*.pdf<TAB>\n\
-- List executable files:\n\
+- List executable files\n\
     =x<TAB>\n\n\
 Available file type characters:\n\
   b: Block devices\n\
@@ -414,127 +416,127 @@ For example, to select all executable files, symbolic links, and image\n\
 files in the current directory:\n\n\
     s =x =l @image"
 
-#define FORTH_USAGE "Change to the next directory in the directory history list\n\
-Usage:\n\
+#define FORTH_USAGE "Change to the next directory in the directory history list\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   f, forth [h, hist] [clear] [!ELN]\n\n\
-Examples:\n\
-- Just change to the next visited directory:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Just change to the next visited directory\n\
     f (Alt-k or Shift-Right also work)\n\
-- Print the directory history list:\n\
+- Print the directory history list\n\
     fh\n\
-- Change to the directory whose ELN in the list is 24:\n\
+- Change to the directory whose ELN in the list is 24\n\
     f !24\n\
-- Use the 'b' command to go backwards:\n\
+- Use the 'b' command to go backwards\n\
     b (Alt-j or Shift-Left also work)"
 
-#define FZ_USAGE "Toggle full directory size on/off (only for long view mode)\n\
-Usage:\n\
+#define FZ_USAGE "Toggle full directory size on/off (only for long view mode)\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   fz [on, off]"
 
 #define HF_USAGE "Set hidden files on-off\n\
-Usage:\n\
+\x1b[1mUSAGE\x1b[0m\n\
   hf, hidden [on, off, status]\n\
-Example:\n\
-- Show hidden files:\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
+- Show hidden files\n\
     hf on\n\
   Note: Press Alt-. to toggle hidden files on/off"
 
-#define HISTEXEC_USAGE "Access commands history entries\n\
-Usage:\n\
+#define HISTEXEC_USAGE "Access commands history entries\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
 history or !<TAB>: List available commands\n\
 !!: Execute the last command\n\
 !n: Execute the command number 'n' in the history list\n\
 !-n: Execute the last - n command in the history list"
 
-#define HISTORY_USAGE "List or access commands history entries\n\
-Usage:\n\
+#define HISTORY_USAGE "List or access commands history entries\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   history [edit [APP]] [clear] [-n] [on, off, status]\n\n\
-Examples:\n\
-- Edit the commands history list:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Edit the commands history list\n\
     history edit\n\
 - Edit the commands history list using vi\n\
     history edit vi\n\
-- Clear the history list:\n\
+- Clear the history list\n\
     history clear\n\
-- Print the complete list of commands in history:\n\
+- Print the complete list of commands in history\n\
     history\n\
-- Print the last 4 commands in history:\n\
+- Print the last 4 commands in history\n\
     history -4\n\n\
-You can also access the commands history via the exclamation mark (!):\n\
-- List available commands: \n\
+You can also access the commands history via the exclamation mark (!)\n\
+- List available commands\n\
     history\n\
-- Execute the last command: \n\
+- Execute the last command\n\
     !!\n\
-- Execute the command number 'n' in the history list:\n\
+- Execute the command number 'n' in the history list\n\
     !n\n\
-- Execute the last - n command in the history list:\n\
+- Execute the last - n command in the history list\n\
     !-n\n\
-- Prevent subsequent entries from being written to the history file:\n\
+- Prevent subsequent entries from being written to the history file\n\
     history off\n\n\
 Note: If FZF TAB completion mode is enabled, you can easily navigate the \
 commands history list by typing '!' and then pressing TAB"
 
-#define ICONS_USAGE "Set icons on-off\n\
-Usage:\n\
+#define ICONS_USAGE "Set icons on-off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   icons [on, off]"
 
-#define JUMP_USAGE "Change to a directory in the jump database\n\
-Usage:\n\
+#define JUMP_USAGE "Change to a directory in the jump database\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   j, jc, jp, jl [STRING]..., jo [NUM], je\n\
 Note: Consult the manpage to know how Kangaroo, this directory jumper,\n\
 works.\n\n\
-Examples:\n\
-- Print the list of entries in the jump database (visited directories):\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the list of entries in the jump database (visited directories)\n\
     j (or jl)\n\
-- Change to any visited directory containing the string 'bui':\n\
+- Change to any visited directory containing the string 'bui'\n\
     j bui\n\
-- If not enough, use multiple query strings:\n\
+- If not enough, use multiple query strings\n\
     j ho bui\n\
     Note: Most likey, this will take you to /home/build\n\
     Note 2: Try TAB to get a list of possible matches: 'j bui<TAB>'\n\
 - Change to any visited directory that is PARENT of the current directory\n\
-  and contains the string 'str':\n\
+  and contains the string 'str'\n\
     jp str\n\
 - Change to any visited directory that is CHILD of the current directory\n\
-  and contains the string 'str':\n\
+  and contains the string 'str'\n\
     jc str\n\
-- Open/Edit the jump database:\n\
+- Open/Edit the jump database\n\
     je"
 
-#define KB_USAGE "Handle keybindings\n\
-Usage:\n\
+#define KB_USAGE "Handle keybindings\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   kb, keybinds [edit [APP]] [reset] [readline]\n\n\
-Examples:\n\
-- List your current key bindings:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List your current key bindings\n\
     kb\n\
-- Open/edit the key bindings file:\n\
+- Open/edit the key bindings file\n\
     kb edit\n\
-- Open/edit the key bindings file using mousepad:\n\
+- Open/edit the key bindings file using mousepad\n\
     kb edit mousepad\n\
-- List the current key bindings for readline:\n\
+- List the current key bindings for readline\n\
     kb readline\n\
-- Reset your key bindings settings:\n\
+- Reset your key bindings settings\n\
     kb reset"
 
-#define LE_USAGE "Edit a symbolic link\n\
-Usage:\n\
+#define LE_USAGE "Edit a symbolic link\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   le SYMLINK\n\n\
-Example:\n\
-- Edit the symbolic link named file.link:\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
+- Edit the symbolic link named file.link\n\
     le file.link"
 
-#define LM_USAGE "Set light mode on-off\n\
-Usage:\n\
+#define LM_USAGE "Set light mode on-off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   lm [on, off]"
 
-#define LOG_USAGE "List or clear CliFM logs\n\
-Usage:\n\
+#define LOG_USAGE "List or clear CliFM logs\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   log [clear]"
 
 #define MEDIA_USAGE "List available media devices, allowing you to mount or \
 unmount them\n\
 Note: Either udevil(1) or udisks2(1) is required\n\n\
-Usage:\n\
+\x1b[1mUSAGE\x1b[0m\n\
   media\n\n\
 The list of mounted and unmounted devices will be displayed.\n\
 Choose the device you want using ELN's.\n\
@@ -545,72 +547,72 @@ mountpoint.\n\n\
 To get information about a device, enter iELN. For example: i12"
 
 #define MF_USAGE "Limit the amount of files listed on the screen to NUM \
-(valid range: >= 0). Use 'unset' to remove the files limit.\n\
-Usage:\n\
+(valid range: >= 0). Use 'unset' to remove the files limit.\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   mf [NUM, unset]"
 
-#define MIME_USAGE "Set default opening applications based on MIME types or file names\n\
-Usage:\n\
+#define MIME_USAGE "Set default opening applications based on MIME types or file names\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   mm, mime [info ELN/FILENAME] [edit [APP]] [import]\n\n\
-Examples:\n\
-- Get MIME information for the file whose ELN is 12:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Get MIME information for the file whose ELN is 12\n\
     mm info 12\n\
-- Open/edit the MIME configuration file:\n\
+- Open/edit the MIME configuration file\n\
     mm edit (or F6)\n\
-- Open/edit the MIME configuration file using vim:\n\
+- Open/edit the MIME configuration file using vim\n\
     mm edit vim\n\
-- Try to import MIME file associations from the system:\n\
+- Try to import MIME file associations from the system\n\
     mm import\n\
 - Add/modify default opening application for myfile\n\
     1) Find out the MIME type (or file name) of the file\n\
       mm info myfile\n\
-    2) Edit the mimelist file:\n\
+    2) Edit the mimelist file\n\
       mm edit (or F6)\n\
     Once in the file, find the appropriate entry and add the opening\n\
     application you want\n\
   For more information consult the manpage"
 
-#define MSG_USAGE "List available CliFM messages\n\
-Usage:\n\
+#define MSG_USAGE "List available CliFM messages\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   msg, messages [clear]\n\n\
-Examples:\n\
-- List available messages:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List available messages\n\
     msg\n\
-- Clear the current list of messages:\n\
+- Clear the current list of messages\n\
     msg clear (or Alt-t)"
 
-#define MOUNTPOINTS_USAGE "List and change to a mountpoint\n\
-Usage:\n\
+#define MOUNTPOINTS_USAGE "List and change to a mountpoint\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   mp, mountpoints\n\n\
-Example:\n\
-- List available mountpoints:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List available mountpoints\n\
     mp\n\
   Once here, just select the mountpoint you want to change to"
 
-#define NET_USAGE "Handle network resources\n\
-Usage:\n\
+#define NET_USAGE "Handle network resources\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   net [NAME] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\n\
-Examples:\n\
-- List available remote resources (like SSHFS or samba):\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List available remote resources (like SSHFS or samba)\n\
     net (or 'net <TAB>')\n\
 - Mount the remote resource named 'work'\n\
     net work (or 'net m work', 'net mount work', or 'net m <TAB>')\n\
 - Unmount the remote resource named 'work'\n\
     net u work (or 'net unmount work' or 'net u <TAB>')\n\
-- Open/edit the net configuration file:\n\
+- Open/edit the net configuration file\n\
     net edit\n\
-- Open/edit the net configuration file using nano:\n\
+- Open/edit the net configuration file using nano\n\
     net edit nano\n\
-- Copy a file to a remote location via the 'cr' plugin:\n\
+- Copy a file to a remote location via the 'cr' plugin\n\
     cr FILE (run 'cr --edit' before to set up your remotes)"
 
-#define NEW_USAGE "Create new files and/or directories\n\
-Usage:\n\
+#define NEW_USAGE "Create new files and/or directories\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   n, new [FILE]... [DIR/]...\n\n\
-Examples:\n\
-- Create two files named file1 and file2:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Create two files named file1 and file2\n\
     n file1 file2\n\
-- Create two directories named dir1 and dir2:\n\
+- Create two directories named dir1 and dir2\n\
     n dir1/ dir2/\n\
     Note: Note the ending slashes\n\
 - Both of the above at once:\n\
@@ -619,40 +621,40 @@ Parent directories are created if necessary. For example, if you run:\n\
     n dir/subdir/file\n\
 both 'dir' and 'subdir' directories will be created if they do not exist"
 
-#define OPEN_USAGE "Open a file\n\
-Usage:\n\
+#define OPEN_USAGE "Open a file\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   o, open ELN/FILE [APPLICATION]\n\n\
-Examples:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
 - Open the file whose ELN is 12 with the default associated application\n\
-  (see the 'mime' command):\n\
+  (see the 'mime' command)\n\
     o 12\n\
-- Open the file whose ELN is 12 with vi:\n\
+- Open the file whose ELN is 12 with vi\n\
     o 12 vi\n\
-  Note: If auto-open is enabled (default), 'o' could be just omitted:\n\
+  Note: If auto-open is enabled (default), 'o' could be just omitted\n\
     12\n\
     12 vi"
 
-#define OW_USAGE "Open a file with a specific application\n\
-Usage:\n\
+#define OW_USAGE "Open a file with a specific application\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   ow ELN/FILE\n\n\
-Example:\n\
-- Choose opening application for test.c from a menu:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Choose opening application for test.c from a menu\n\
     ow test.c (or 'ow test.c <TAB>' to get a list of applications able to\n\
   open this file)\n\
-- Open the file test.c with geany:\n\
+- Open the file test.c with geany\n\
     ow test.c geany"
 
-#define OPENER_USAGE "Set the resource opener\n\
-Usage:\n\
+#define OPENER_USAGE "Set the resource opener\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   opener APPLICATION\n\n\
-Example:\n\
-- Set the resources opener to xdg-open (instead of the default, Lira):\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Set the resources opener to xdg-open (instead of the default, Lira)\n\
     opener xdg-open\n\
-- Set the resources opener back to the default (Lira):\n\
+- Set the resources opener back to the default (Lira)\n\
     opener default"
 
-#define PAGER_USAGE "Set the files list pager on-off\n\
-Usage:\n\
+#define PAGER_USAGE "Set the files list pager on-off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   pg, pager [on, off, status, NUM]\n\n\
 If set to 'on', run the pager whenever the list of files does no fit on\n\
 the screen. If set to any positive integer greater than 1, run the pager\n\
@@ -660,13 +662,13 @@ whenever the amount of files in the current directory is greater than or\n\
 equal to this value (say, 1000). 1 amounts to 'on' and 0 to 'off'\n\n\
 Note: You can also try the 'pager' plugin running 'gg'"
 
-#define PC_USAGE "Interactively edit file permissions\n\
-Usage:\n\
+#define PC_USAGE "Interactively edit file permissions\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   pc FILE...\n\n\
-Examples:\n\
-- Change permissions of file named file.txt:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Change permissions of file named file.txt\n\
     pc file.txt\n\
-- Change permissions of all selected files at once:\n\
+- Change permissions of all selected files at once\n\
     pc sel\n\n\
 Note: When editing multiple files with different permissions at once,\n\
 only shared permission bits will be set in the permissions template.\n\
@@ -674,79 +676,79 @@ Bear in mind that the new permissions set will be applied to all files\n\
 passed as arguments\n\n\
 Both symbolic and octal notation for the new permissions set are allowed"
 
-#define PIN_USAGE "Pin a file or directory\n\
-Usage:\n\
+#define PIN_USAGE "Pin a file or directory\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   pin FILE/DIR\n\n\
-Examples:\n\
-- Pin the directory ~/my_important_dir:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Pin the directory ~/my_important_dir\n\
     pin ~/my_important_dir\n\
-- Change to the pinned directory:\n\
+- Change to the pinned directory\n\
     , (yes, just a comma)\n\
-- Unpin the currently pinned directory:\n\
+- Unpin the currently pinned directory\n\
     unpin"
 
-#define PROFILES_USAGE "Manage profiles\n\
-Usage:\n\
+#define PROFILES_USAGE "Manage profiles\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   pf, prof, profile [ls, list] [set, add, del PROFILE]\n\n\
-Examples:\n\
-- Print the current profile name:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the current profile name\n\
     pf\n\
-- List available profiles:\n\
+- List available profiles\n\
     pf ls\n\
-- Set profile to the profile named myprofile:\n\
+- Set profile to the profile named myprofile\n\
     pf set myprofile (or 'pf set <TAB>' to choose from a list)\n\
-- Add a new profile named new_profile:\n\
+- Add a new profile named new_profile\n\
     pf add new_profile\n\
-- Remove the profile named myprofile:\n\
+- Remove the profile named myprofile\n\
     pf del myprofile (or 'pf del <TAB>' to choose from a list)"
 
-#define PROP_USAGE "Print files properties\n\
-Usage:\n\
+#define PROP_USAGE "Print files properties\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   p, pr, pp, prop [ELN/FILE]...\n\n\
-Examples:\n\
-- Print the properties of the file whose ELN is 12:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the properties of the file whose ELN is 12\n\
     p 12 (or 'p <TAB>' to choose from a list)\n\
-- Print the properties of all selected files:\n\
+- Print the properties of all selected files\n\
     p sel\n\
-- Print the properties of the directory 'dir' (including total size):\n\
+- Print the properties of the directory 'dir' (including total size)\n\
     pp dir"
 
-#define PROMPT_USAGE "Change current prompt\n\
-Usage:\n\
+#define PROMPT_USAGE "Change current prompt\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   prompt [NAME, edit, list, reload, unset]\n\
-Examples:\n\
-- List available prompts:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List available prompts\n\
     prompt list (or 'prompt <TAB>' to choose from a list)\n\
-- Change prompt to prompt named MYPROMPT:\n\
+- Change prompt to prompt named MYPROMPT\n\
     prompt MYPROMPT\n\
-- Edit the prompts file:\n\
+- Edit the prompts file\n\
     prompt edit\n\
-- Set the default prompt:\n\
+- Set the default prompt\n\
     prompt unset\n\
-- Reload available prompts:\n\
+- Reload available prompts\n\
     prompt reload"
 
-#define RR_USAGE "Remove files in bulk using a text editor\n\
-Usage:\n\
+#define RR_USAGE "Remove files in bulk using a text editor\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   rr [DIR] [EDITOR]\n\n\
 The list of files in DIR (current directory if omitted) is opened via \
 EDITOR (default associated application if omitted). Remove the lines \
 corresponding to the files you want to delete, save, and quit the editor.\n\n\
-Examples:\n\
-- Bulk remove files/dirs in the current directory using the default editor:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Bulk remove files/dirs in the current directory using the default editor\n\
     rr\n\
-- Bulk remove files/dirs in the current directory using nano:\n\
+- Bulk remove files/dirs in the current directory using nano\n\
     rr nano\n\
-- Bulk remove files/dirs in the directory 'mydir' using vi:\n\
+- Bulk remove files/dirs in the directory 'mydir' using vi\n\
     rr mydir vi"
 
-#define SEARCH_USAGE "Search for files using either glob or regular expressions\n\
-Usage:\n\
+#define SEARCH_USAGE "Search for files using either glob or regular expressions\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   /PATTERN [-filetype] [-x] [DIR]\n\n\
-Examples:\n\
-- List all PDF files in the current working directory:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List all PDF files in the current working directory\n\
     /*.pdf (or, as a regular expression, '/.*\\.pdf$')\n\
-- List all files starting with 'A' in the directory whose ELN is 7:\n\
+- List all files starting with 'A' in the directory whose ELN is 7\n\
     /A* 7\n\
 - List all .conf files in /etc\n\
     /*.conf /etc\n\n\
@@ -759,9 +761,9 @@ You can further filter the search using a file type filter:\n\
   -p	FIFO/pipe\n\
   -s	socket\n\
 - For example, to list all directories containing a dot or a dash and ending \
-with 'd' in the directory named Documents:\n\
+with 'd' in the directory named Documents\n\
     /[.-].*d$ -d Documents/\n\n\
-To perform a recursive search, use the -x modifier (file types not allowed):\n\
+To perform a recursive search, use the -x modifier (file types not allowed)\n\
     /str -x /boot\n\n\
 To search for files by content instead of names use the rgfind plugin, bound\n\
 by default to the \"//\" action name. For example:\n\
@@ -783,51 +785,51 @@ command is validated using a whitelist to prevent unexpected/insecure\n\
 behavior and command injection. Enable this mode using the --secure-cmds\n\
 command line switch."
 
-#define SEL_USAGE "Select one or multiple files\n\
-Usage:\n\
+#define SEL_USAGE "Select one or multiple files\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\n\
 Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink,\n\
 (s)ocket, (f)ifo/pipe, (b)lock device, (c)haracter device\n\n\
-Examples:\n\
-- Select the file whose ELN is 12:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Select the file whose ELN is 12\n\
     s 12 (or 's <TAB>' to choose from a list: multi-selection is allowed)\n\
 - Select all files ending with .odt:\n\
     s *.odt\n\
-- Select multiple files at once:\n\
+- Select multiple files at once\n\
     s 12 15-21 *.pdf\n\
-- Select all regular files in /etc starting with 'd':\n\
+- Select all regular files in /etc starting with 'd'\n\
     s ^d.* -r :/etc\n\
-- Select all files in the current directory (including hidden files):\n\
+- Select all files in the current directory (including hidden files)\n\
     s * .* (or Alt-a)\n\
 - Interactively select files in '/media' (requires fzf, fzy, or smenu\n\
-  TAB completion mode):\n\
+  TAB completion mode)\n\
     s /media/*<TAB>\n\
-- List currently selected files:\n\
+- List currently selected files\n\
     sb\n\
 - Copy selected files into the current directory:\n\
     c sel\n\
-- Move selected files into the directory whose ELN is 24:\n\
+- Move selected files into the directory whose ELN is 24\n\
     m sel 24\n\
-- Deselect all selected files:\n\
+- Deselect all selected files\n\
     ds * (or Alt-d)\n\
-- Deselect files selectively:\n\
+- Deselect files selectively\n\
     ds <TAB> (multi-selection is allowed)"
 
-#define SORT_USAGE "Change sort method for the files list\n\
-Usage:\n\
+#define SORT_USAGE "Change sort method for the files list\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   st [METHOD] [rev]\nMETHOD: 0 = none, \
 1 = name, 2 = size, 3 = atime, 4 = btime, \
 5 = ctime, 6 = mtime, 7 = version, 8 = extension, \
 9 = inode, 10 = owner, 11 = group\n\
 Note: Both numbers and names are allowed\n\n\
-Examples:\n\
-- List files by size:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List files by size\n\
     st size (or 'st <TAB>' to choose from a list)\n\
-- Revert the current sorting method (i.e. z-a instead of a-z):\n\
+- Revert the current sorting method (i.e. z-a instead of a-z)\n\
     st rev"
 
-#define TAG_USAGE "(Un)tag files and/or directories\n\
-Usage:\n\
+#define TAG_USAGE "(Un)tag files and/or directories\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge]\n\
       [FILE]... [[:]TAG]\n\n\
 Instead of the long format described above, you can use any of the\n\
@@ -839,111 +841,112 @@ following shortcuts as well:\n\
   tn: Create new tag(s)\n\
   tu: Untag file(s)\n\
   ty: Merge two tags\n\n\
-Examples:\n\
-- List available tags:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- List available tags\n\
     tl\n\
-- Tag all .PNG files in the current directory as both 'images' and 'png':\n\
+- Tag all .PNG files in the current directory as both 'images' and 'png'\n\
     ta *.png :images :png\n\
     NOTE: Tags are created if they do not exist\n\
-- Tag all selected files as 'special':\n\
+- Tag all selected files as 'special'\n\
     ta sel :special\n\
-- List all files tagged as 'work' and all files tagged as 'documents':\n\
+- List all files tagged as 'work' and all files tagged as 'documents'\n\
     tl work documents (or 'tl <TAB>' to choose from a list)\n\
-- Rename tag 'documents' as 'docs':\n\
+- Rename tag 'documents' as 'docs'\n\
     tm documents docs\n\
-- Merge tag 'png' into 'images':\n\
+- Merge tag 'png' into 'images'\n\
     ty png images\n\
     NOTE: All files tagged as 'png' will be now tagged as 'images', \
 and the 'png' tag will be removed\n\
-- Remove the tag 'images' (untag all files tagged as 'images'):\n\
+- Remove the tag 'images' (untag all files tagged as 'images')\n\
     td images\n\
-- Untag a few files from the 'work' tag:\n\
+- Untag a few files from the 'work' tag\n\
     tu :work file1 image.png dir2\n\
     or\n\
     tu :<TAB> (and then TAB again to select tagged files)\n\
 Operating on tagged files (t:TAG)\n\
-- Print the file properties of all files tagged as 'docs':\n\
+- Print the file properties of all files tagged as 'docs'\n\
     p t:docs (or 'p t:<TAB>' to choose from a list)\n\
-- Remove all files tagged as 'images':\n\
+- Remove all files tagged as 'images'\n\
     r t:images\n\
 - Run stat(1) over all files tagged as 'work' and all files tagged as\n\
-  'docs':\n\
+  'docs'\n\
     stat t:work t:docs\n\n\
 To operate only on some tagged files use TAB as follows:\n\
     t:TAG<TAB> (multi-selection is allowed)\n\
 Mark the files you need via TAB and then press Enter or Right"
 
-#define TE_USAGE "Toggle the executable bit on files\n\
-Usage:\n\
+#define TE_USAGE "Toggle the executable bit on files\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   te ELN/FILE... (or 'te <TAB>' to choose from a list: multi-selection\n\
   is allowed)\n\n\
-Examples:\n\
-- Set the executable bit on all shell scripts in the current directory:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Set the executable bit on all shell scripts in the current directory\n\
     te *.sh\n\
-- Set the executable bit on all selected files:\n\
+- Set the executable bit on all selected files\n\
    te sel"
 
-#define TRASH_USAGE "Send one or multiple files to the trash can\n\
-Usage:\n\
+#define TRASH_USAGE "Send one or multiple files to the trash can\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   t, tr, trash [ELN/FILE]... [ls, list] [clear, empty] [del]\n\n\
-Examples:\n\
-- Trash the file whose ELN is 12:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Trash the file whose ELN is 12\n\
     t 12 (or 't <TAB>' to choose from a list: multi-selection is allowed)\n\
 - Trash all files ending with .sh\n\
     t *.sh\n\
-- List currently trashed files:\n\
+- List currently trashed files\n\
     t (or 't ls' or 't list')\n\
-- Remove/delete trashed files using a menu (permanent removal):\n\
+- Remove/delete trashed files using a menu (permanent removal)\n\
     t del\n\
 - Remove all files from the trash can:\n\
     t empty\n\
-- Untrash all trashed files (restore them to their original location):\n\
+- Untrash all trashed files (restore them to their original location)\n\
     u *\n\
-- Untrash files selectively using a menu:\n\
+- Untrash files selectively using a menu\n\
     u (or 'u <TAB>' to choose from a list: multi-selection is allowed)"
 
-#define UNICODE_USAGE "Set unicode on-off\n\
-Usage:\n\
+#define UNICODE_USAGE "Set unicode on-off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   uc, unicode [on, off, status]"
 
-#define UNTRASH_USAGE "Restore files from the trash can\n\
-Usage:\n\
+#define UNTRASH_USAGE "Restore files from the trash can\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   u, undel, untrash [FILE]... [*, a, all]\n\n\
-Examples:\n\
-- Untrash all trashed files (restore them to their original location):\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Untrash all trashed files (restore them to their original location)\n\
     u *\n\
-- Untrash files selectively using a menu:\n\
+- Untrash files selectively using a menu\n\
     u (or 'u <TAB>' to choose from a list: multi-selection is allowed)"
 
-#define VV_USAGE "Copy selected files into a directory and bulk rename them at once\n\
-Usage:\n\
+#define VV_USAGE "Copy selected files into a directory and bulk rename them at once\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   vv FILE... DIR\n\n\
-Examples:\n\
-- Copy selected files into 'mydir' and rename them:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Copy selected files into 'mydir' and rename them\n\
     vv sel mydir\n\
-- Copy all PDF files into the directory whose ELN is 4 and rename them:\n\
+- Copy all PDF files into the directory whose ELN is 4 and rename them\n\
     vv *.pdf 4"
 
-#define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\
-Usage:\n\
+#define VIEW_USAGE "Preview files in the current directory (requires fzf)\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   view [edit [app]]\n\n\
-Examples:\n\
-- Just run the previewer:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Just run the previewer\n\
     view (or Alt+-)\n\
-- Edit the configuration file:\n\
+- Edit the configuration file\n\
     view edit (or F7)\n\
-- Edit the configuration file using vi:\n\
+- Edit the configuration file using vi\n\
     view edit vi\n\n\
 Enter 'help file-previews' for more information"
 
 #define WRAPPERS_USAGE "c (v, paste), l, m, md, and r commands are wrappers \
 for cp(1), ln(1), mv(1),\nmkdir(1), and rm(1) shell commands respectively.\n\n\
-c ->  cp -iRp\n\
-l ->  ln -sn\n\
-m ->  mv -i\n\
+\x1b[1mUSAGE\x1b[0m\n\
+c  -> cp -iRp\n\
+l  -> ln -sn\n\
+m  -> mv -i\n\
 md -> mkdir -p\n\
-r ->  rm -dIr (for directories) (1)\n\
-r ->  rm -I (for non-directories) (2)\n\n\
+r  -> rm -dIr (for directories) (1)\n\
+r  -> rm -I (for non-directories) (2)\n\n\
 (1) 'rm -dr' on NetBSD/OpenBSD/MacOS.\n    Note: -d is not supported by the POSIX version of rm(1)\n\
 (2) 'rm -f' on NetBSD/OpenBSD/MacOS\n\n\
 The 'paste' command is equivalent to 'c' and exists only for semantic\n\
@@ -959,65 +962,65 @@ prevent rm(1) from prompting before removals. Set rmForce to true in the\n\
 configuration file to make this option permanent.\n\n\
 To use different parameters, just run the corresponding utility, as usual.\n\
 Example: cp -abf ...\n\n\
-Examples:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
 - Create a copy of file1 named file2\n\
     c file1 file2\n\
 - Create a copy of file1 in the directory dir1 named file2\n\
     c file1 dir1/file2\n\
-- Copy all selected files into the current directory:\n\
+- Copy all selected files into the current directory\n\
     c sel\n\
     Note: If destiny directory is omitted, the current directory is assumed\n\
 - Copy all selected files into the current directory (non-interactively):\n\
     c -f sel\n\
-- Move all selected files into the directory named testdir:\n\
+- Move all selected files into the directory named testdir\n\
     m sel testdir\n\
-- Rename file1 as file_test:\n\
+- Rename file1 as file_test\n\
     m file1 file_test\n\
-- Interactively rename file1:\n\
+- Interactively rename file1\n\
     m file1\n\
     Note: The user is prompted to enter a new name using the old name as\n\
     template\n\
-- Move all selected files into the current directory (non-interactively):\n\
+- Move all selected files into the current directory (non-interactively)\n\
     m -f sel\n\
-- Remove all selected files:\n\
+- Remove all selected files\n\
     r sel\n\
-- Remove all selected files (non-interactively):\n\
+- Remove all selected files (non-interactively)\n\
     r -f sel\n\
 - Create a symbolic link pointing to the directory whose ELN is 12 named\n\
-  link:\n\
+  link\n\
     l 12 link\n\
-- Create a directory named mydir:\n\
+- Create a directory named mydir\n\
     md mydir\n\
     Note: To create files and directories you can use the 'n' command as\n\
     well. See 'n --help'\n\
-- Edit the symbolic link named mylink:\n\
+- Edit the symbolic link named mylink\n\
     le mylink\n\n\
 Use the 'vv' command to copy files into a directory and bulk rename them\n\
 at once. See 'vv --help'\n\n\
 Use the 'cr' plugin to send a file to a remote location:\n\
     cr FILE (run 'cr --edit' before to set up your remotes)"
 
-#define WS_USAGE "Switch workspaces\n\
-Usage:\n\
+#define WS_USAGE "Switch workspaces\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   ws [NUM/NAME, +, -]\n\n\
-Examples:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
 - List available workspaces\n\
     ws (or 'ws <TAB>')\n\
 - Switch to the first workspace\n\
     ws 1 (or Alt-1)\n\
 - Switch to worksapce named 'main'\n\
     ws main\n\
-- Switch to the next workspace:\n\
+- Switch to the next workspace\n\
     ws +\n\
-- Switch to the previous workspace:\n\
+- Switch to the previous workspace\n\
     ws -\n\n\
 Note: Use the WorkspaceNames option in the configuration file to name\n\
 your workspaces"
 
-#define X_USAGE "Launch a new instance of CliFM on a new terminal window\n\
-Usage:\n\
+#define X_USAGE "Launch a new instance of CliFM on a new terminal window\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
   x, X [DIR]\n\n\
-Examples:\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
 - Launch a new instance in the current directory:\n\
     x\n\
 - Open the directory mydir in a new instance:\n\
@@ -1171,7 +1174,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\n\
  bd                 Go back to any parent directory\n\
  bl                 Create symbolic links in bulk\n\
  bm, bookmarks      Manage bookmarks\n\
- br, bulk           Remove files in bulk\n\
+ br, bulk           Rename files in bulk\n\
  c, l, m, md, r     Copy, link, move, makedir, and remove\n\
  colors             List current file type colors\n\
  cd                 Change directory\n\
