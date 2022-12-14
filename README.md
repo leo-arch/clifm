@@ -199,7 +199,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <details>
 <summary>Click here to expand</summary>
 
-* `Development`:
+* `version 1.9 (Sharptooth)`:
   - [Improved fuzzy suggestions/completions for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
   - **NEW**: [Automatic expansion for bookmarks, file type, and MIME type filters](https://github.com/leo-arch/clifm/wiki/Advanced#grouping-files-via-automatic-expansion)
   - **NEW**: [Private workspace settings](https://github.com/leo-arch/clifm/wiki/Specifics#workspace-settings)
