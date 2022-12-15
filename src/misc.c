@@ -2290,7 +2290,8 @@ help_function(void)
 	fputs(NC, stdout);
 	printf("%s\n", ASCII_LOGO);
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
-	printf("\nUSAGE: %s %s\n%s%s", PNL, GRAL_USAGE, _(SHORT_OPTIONS), _(LONG_OPTIONS));
+	printf("\nUSAGE: %s %s\n%s%s%s", PNL, GRAL_USAGE, _(SHORT_OPTIONS),
+		_(LONG_OPTIONS_A), _(LONG_OPTIONS_B));
 
 	puts("\nBUILT-IN COMMANDS:\n");
 	puts(_(CLIFM_COMMANDS));

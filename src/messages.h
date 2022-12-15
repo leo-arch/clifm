@@ -1083,7 +1083,7 @@ on an empty line\
 \n  -y, --light-mode\t\t Run in light mode\
 \n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
 
-#define LONG_OPTIONS "\
+#define LONG_OPTIONS_A "\
 \n      --case-sens-dirjump\t Do not ignore case when consulting the jump \
 database (via the 'j' command)\
 \n      --case-sens-path-comp\t Enable case sensitive path completion\
@@ -1142,6 +1142,7 @@ CliFM's built-in opener\
 \n      --secure-cmds\t\t Filter commands to prevent command injection\
 \n      --secure-env\t\t Run in a sanitized environment (regular mode)\
 \n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
+\n      --sel-file=FILE\t\t Set FILE as custom selections file\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
 \n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\
 \n      --si\t\t\t Print sizes in powers of 1000 instead of 1024 (Linux only)\
@@ -1149,8 +1150,10 @@ CliFM's built-in opener\
 \n      --smenutab\t\t Use smenu to display completion matches\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
-'rm' to prevent accidental deletions\
-\n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
+'rm' to prevent accidental deletions\n"
+
+#define LONG_OPTIONS_B "\
+      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
 \n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\n"
 
 #define CLIFM_COMMANDS "\
