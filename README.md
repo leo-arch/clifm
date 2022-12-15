@@ -199,20 +199,22 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <details>
 <summary>Click here to expand</summary>
 
+* `Development`:
+  - **NEW**: Set a custom selections file via the `--sel-file` flag
 * `version 1.9 (Sharptooth)`:
   - [Improved fuzzy suggestions/completions for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
   - **NEW**: [Automatic expansion for bookmarks, file type, and MIME type filters](https://github.com/leo-arch/clifm/wiki/Advanced#grouping-files-via-automatic-expansion)
-  - **NEW**: [Private workspace settings](https://github.com/leo-arch/clifm/wiki/Specifics#workspace-settings)
-  - **NEW**: [Run autocommands based on workspaces, and not just on paths](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
-  - **NEW**: [Run the pager based on the current amount of files](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status-num)
-  - **NEW**: Files counter for directories in long view mode
-  - **NEW**: [Filter files by file type](https://github.com/leo-arch/clifm/wiki/Introduction#ft-filter-unset-regexfile-type-char)
-  - **NEW**: [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/#quickly-filtering-files-with-the-tab-key)
-  - **NEW**: [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
-  - **NEW**: `cd -` works now just like in most shells
-  - **NEW**: The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) can now select files via <kbd>TAB</kbd>
-  - **NEW**: Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) via <kbd>Alt+-</kbd>
-  - **NEW**: Use `--fzfpreview-hidden` to start the preview window hidden (toggle via <kbd>Alt-p</kbd>)
+  - [Private workspace settings](https://github.com/leo-arch/clifm/wiki/Specifics#workspace-settings)
+  - [Run autocommands based on workspaces, and not just on paths](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
+  - [Run the pager based on the current amount of files](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status-num)
+  - Files counter for directories in long view mode
+  - [Filter files by file type](https://github.com/leo-arch/clifm/wiki/Introduction#ft-filter-unset-regexfile-type-char)
+  - [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/#quickly-filtering-files-with-the-tab-key)
+  - [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
+  - `cd -` works now just like in most shells
+  - The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) can now select files via <kbd>TAB</kbd>
+  - Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) via <kbd>Alt+-</kbd>
+  - Use `--fzfpreview-hidden` to start the preview window hidden (toggle via <kbd>Alt-p</kbd>)
 * `version 1.8 (Otis)`:
   - If upgrading from a previous version (optional, but recommended):
     - <kbd>F7</kbd> opens now shotgun's configuration file (instead of the jump database file). Update `keybindings.clifm`: removing the file and restarting is enough. Manually: run `kb edit` and then replace `open-jump-db:\e[18~` by `open-preview:\e[18~`.
