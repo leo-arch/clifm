@@ -96,6 +96,7 @@ args=(
 	'--secure-cmds[filter commands to prevent command injection]'
 	'--secure-env[run in a sanitized environment (regular mode)]'
 	'--secure-env-full[run in a sanitized environment (full mode)]'
+	'--sel-file=[set FILE as selections file]:filename:_files'
 	'--share-selbox[make the Selection Box common to different profiles]'
 	'--shotgun-file=[set shotgun configuration file to FILE]:filename:_files'
 	'--smenutab[use smenu to display completion matches]'

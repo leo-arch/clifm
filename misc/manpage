@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 13, 2022" "clifm 1.9" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 15, 2022" "clifm 1.9.1" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -355,6 +355,9 @@ run \fBclifm\fR in a secure environment (regular mode). Consult the \fBSECURITY\
 .TP
 \fB\-\-secure\-env\-full\fR
 run \fBclifm\fR in a secure environment (full mode). Consult the \fBSECURITY\fR section below
+.TP
+\fB\-\-sel\-file\fR=\fI\,FILE\/\fR
+set \fIFILE\fR as selections file
 .TP
 \fB\-\-share\-selbox\fR
 make the Selection Box common (that is, accessible) to different profiles. By default, each profile has a private Selection Box.

@@ -133,6 +133,7 @@ _clifm ()
         --secure-cmds
         --secure-env
         --secure-env-full
+        --sel-file
         --share-selbox
         --shotgun-file
         --smenutab

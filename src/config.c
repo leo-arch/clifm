@@ -248,6 +248,9 @@ set_env(void)
 void
 set_sel_file(void)
 {
+	if (xargs.sel_file == 1) /* Already set via --sel-file flag */
+		return;
+
 	if (sel_file) {
 		free(sel_file);
 		sel_file = (char *)NULL;
@@ -261,7 +264,7 @@ set_sel_file(void)
 		sel_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
 		sprintf(sel_file, "%s/selbox.clifm", config_dir);
 	} else {
-		/* Common selection box is stored in the general configuration directory */
+		/* Shared selection box is stored in the general configuration directory */
 		sel_file = (char *)xnmalloc(config_dir_len + 23, sizeof(char));
 		sprintf(sel_file, "%s/.config/%s/selbox.clifm", user.home, PNL);
 	}

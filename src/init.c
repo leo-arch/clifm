@@ -1818,6 +1818,23 @@ err_arg_required(const char *s)
 		"Try '%s --help' for more information.\n"), PNL, s, PNL);
 }
 
+static void
+set_custom_selfile(char *file)
+{
+	if (!file || !*file || *file == '-') {
+		err_arg_required("--sel-file");
+		exit(EXIT_FAILURE);
+	}
+
+	if ( (sel_file = normalize_path(file, strlen(file))) ) {
+		xargs.sel_file = 1;
+		return;
+	}
+
+	_err('e', PRINT_PROMPT, _("%s: %s: Error setting custom "
+		"selections file\n"), PROGRAM_NAME, file);
+}
+
 /* Evaluate external arguments, if any, and change initial variables to
  * its corresponding value */
 void
@@ -1935,6 +1952,7 @@ external_arguments(int argc, char **argv)
 		{"si", no_argument, 0, 263},
 		{"data-dir", required_argument, 0, 264},
 		{"fuzzy-algo", required_argument, 0, 265},
+		{"sel-file", required_argument, 0, 266},
 	    {0, 0, 0, 0}
 	};
 
@@ -2193,6 +2211,8 @@ external_arguments(int argc, char **argv)
 			}
 			break;
 
+		case 266: set_custom_selfile(optarg); break;
+
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
 		case 'A': conf.show_hidden = xargs.hidden = 1; break;
 		case 'b': xargs.bm_file = 1; bm_value = optarg; break;
@@ -2260,7 +2280,8 @@ external_arguments(int argc, char **argv)
 			case 256: /* fallthrough */
 			case 261: /* fallthrough */
 			case 264: /* fallthrough */
-			case 265: {
+			case 265: /* fallthrough */
+			case 266: {
 				err_arg_required(argv[optind - 1]);
 				exit(EXIT_FAILURE);
 				}
@@ -2513,6 +2534,7 @@ unset_xargs(void)
 	xargs.secure_env_full = UNSET;
 	xargs.secure_env = UNSET;
 	xargs.secure_cmds = UNSET;
+	xargs.sel_file = UNSET;
 	xargs.share_selbox = UNSET;
 	xargs.si = UNSET;
 	xargs.sort = UNSET;

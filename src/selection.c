@@ -592,64 +592,6 @@ print_selected_files(void)
 	print_total_size(total);
 }
 
-/* IMPROVE ME: This check is performed twice: once here and then when reloading the
- * list of files (check_sel_tag()) */
-/* Check if selected file at index INDEX is a file in the current directory
- * Returns one if true or zero otherwise */
-/*
-static int
-is_sel_file_in_cwd(const int index)
-{
-	if (!sel_devino || !sel_elements)
-		return 0;
-
-	int f = (int)files;
-
-	while (--f >= 0) {
-		if (sel_devino[index].dev == file_info[f].ino
-		|| sel_devino[index].ino == file_info[f].ino)
-			return 1;
-
-		if (file_info[f].type == DT_DIR || file_info[f].linkn < 2)
-			continue;
-
-		char *p = strrchr(sel_elements[index], '/');
-		if (!p || !*(++p))
-			continue;
-
-		if (*p == *file_info[f].name && strcmp(p, file_info[f].name) == 0)
-			return 1;
-	}
-
-	return 0;
-} */
-
-/*
-static void
-print_new_selections(void)
-{
-	size_t i, wlen = workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 0;
-	size_t max = 10;
-
-	for (i = 0; new_selections[i]; i++) {
-		if (i == max)
-			printf("... (and %zu more)\n", new_seln - max);
-		else if (i < max) {
-			if (wlen > 0 && strlen(new_selections[i]) > wlen
-			&& strncmp(new_selections[i], workspaces[cur_ws].path, wlen) == 0
-			&& *(new_selections[i] + wlen + 1))
-				printf("%s\n", new_selections[i] + wlen + 1);
-			else
-				printf("%s\n", new_selections[i]);
-		}
-		free(new_selections[i]);
-	}
-
-	free(new_selections);
-	new_selections = (char **)NULL;
-	new_seln = 0;
-} */
-
 static int
 print_sel_results(const int new_sel, const char *sel_path, const char *pattern, const int err)
 {
@@ -657,6 +599,7 @@ print_sel_results(const int new_sel, const char *sel_path, const char *pattern, 
 	&& save_sel() != EXIT_SUCCESS) {
 		_err('e', PRINT_PROMPT, _("sel: Error writing selected files "
 			"into the selections file\n"));
+		return EXIT_FAILURE;
 	}
 
 	if (sel_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
@@ -675,7 +618,7 @@ print_sel_results(const int new_sel, const char *sel_path, const char *pattern, 
 
 	if (conf.autols == 1 && err == 0)
 		reload_dirlist();
-//	print_new_selections();
+
 	print_reload_msg(_("%d file(s) selected\n"), new_sel);
 	print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
 
@@ -696,7 +639,7 @@ construct_sel_filename(const char *dir, const char *name)
 		}
 
 		f = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
-					+ strlen(name) + 2, sizeof(char));
+			+ strlen(name) + 2, sizeof(char));
 		sprintf(f, "%s/%s", workspaces[cur_ws].path, name);
 		return f;
 	}
