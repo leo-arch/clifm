@@ -113,7 +113,7 @@ _clifm ()
         --no-file-cap
         --no-file-ext
         --no-files-counter
-        --no-follow-symlink
+        --no-follow-symlinks
         --no-highlight
         --no-history
         --no-open-auto

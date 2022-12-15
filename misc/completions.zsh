@@ -76,7 +76,7 @@ args=(
 	'--no-file-cap[do not check files capabilities when listing files]'
 	'--no-file-ext[do not check files extension when listing files]'
 	'--no-files-counter[disable the files counter for directories]'
-	'--no-follow-symlink[do not follow symbolic links when listing files]'
+	'--no-follow-symlinks[do not follow symbolic links when listing files]'
 	'--no-highlight[disable syntax highlighting]'
 	'--no-history[do not write commands into the history file]'
 	'--no-open-auto[same as no-cd-auto, but for files]'

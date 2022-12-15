@@ -299,7 +299,7 @@ do not check files extension when listing files
 \fB\-\-no\-files\-counter\fR
 disable the files counter for directories. This option is especially useful to speed up the listing process; counting files in directories is particularly expensive
 .TP
-\fB\-\-no\-follow\-symlink\fR
+\fB\-\-no\-follow\-symlinks\fR
 do not follow symbolic links when listing files
 .TP
 \fB\-\-no\-highlight\fR

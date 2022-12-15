@@ -1906,7 +1906,7 @@ external_arguments(int argc, char **argv)
 		{"no-highlight", no_argument, 0, 235},
 		{"no-file-cap", no_argument, 0, 236},
 		{"no-file-ext", no_argument, 0, 237},
-		{"no-follow-symlink", no_argument, 0, 238},
+		{"no-follow-symlinks", no_argument, 0, 238},
 		{"no-control-d-exit", no_argument, 0, 239},
 		{"int-vars", no_argument, 0, 240},
 		{"stdtab", no_argument, 0, 241},
