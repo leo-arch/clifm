@@ -19,24 +19,21 @@
 p() {
 	# Options to be passed to clifm
 	CLIFM_OPTIONS=""
+	CLIFM_SELFILE="$(mktemp "/tmp/clifm_selfile.XXXXXXXXXX")"
 
 	# shellcheck disable=SC2086
-	clifm $CLIFM_OPTIONS
-	sel_file="$(find "${XDG_CONFIG_HOME:=${HOME}/.config}/clifm" -name 'selbox*')"
-	if [ -z "$sel_file" ]; then
-		sel_file="$(find /tmp/clifm -name 'selbox*')"
-	fi
+	clifm $CLIFM_OPTIONS --sel-file="$CLIFM_SELFILE"
 
-	if [ -f "$sel_file" ]; then
+	if [ -f "$CLIFM_SELFILE" ]; then
 		cmd=""
 		while [ -z "$cmd" ]; do
 			printf "Enter command ('q' to quit): "
 			read -r cmd
 		done
 		# shellcheck disable=SC2086
-		[ "$cmd" != "q" ] && sed 's/ /\\ /g' "$sel_file" | xargs $cmd
-		rm -- "$sel_file"
+		[ "$cmd" != "q" ] && sed 's/ /\\ /g' "$CLIFM_SELFILE" | xargs $cmd
+		rm -- "$CLIFM_SELFILE"
 	else
-		printf "No selected files\n" >&2
+		printf "clifm: No selected files\n" >&2
 	fi
 }
