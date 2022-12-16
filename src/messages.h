@@ -1173,7 +1173,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\n\
  alias              Manage aliases\n\
  ao, auto-open      Set auto-open on/off\n\
  b, back            Go back in the directory history list\n\
- bb, bleach         A file names cleaner)\n\
+ bb, bleach         A file names cleaner\n\
  bd                 Go back to any parent directory\n\
  bl                 Create symbolic links in bulk\n\
  bm, bookmarks      Manage bookmarks\n\
@@ -1198,10 +1198,11 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\n\
  hf, hidden         Set show-hidden-files on/off\n\
  history            Manage the commands history\n\
  icons              Set icons on/off\n\
- j                  The directory jumper function)\n\
+ j                  The directory jumper function\n\
  kb, keybinds       Manage keybindings\n\
  lm                 Set the light mode on/off\n\
  log                Manage your logs\n\
+ media              (Un)mount storage devices\n\
  mf                 Limit the number of listed files\n\
  mm, mime           The resource opener\n\
  mp, mountpoints    Change to a mountpoint\n\
