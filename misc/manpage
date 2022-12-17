@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 15, 2022" "clifm 1.9.1" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 17, 2022" "clifm 1.9.2" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1872,7 +1872,9 @@ i. Shell builtins \fB(2)\fR
 \fB(1)\fR Fuzzy suggestions are supported. For example: dwn > Downloads. Enable this feature via the \fI\-\-fuzzy\-marching\fR command line switch or setting \fIFuzzyMatching\fR to \fItrue\fR in the configuration file.
 .sp 0
 \fB(2)\fR The shell name is taken from \fI/bin/sh\fR. The following shells are supported: bash, dash, fish, ksh, tcsh, and zsh. Command names are checked in the following order: \fBclifm\fR internal commands, commands in \fBPATH\fR, and shell builtins.
-
+.sp
+\fBNote\fR: By default, a brief description for internal commands is suggested. You can disable this feature via the \fISuggestCmdDesc\fR option in the configuration file.
+.sp
 To accept the entire suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press \fBEnter\fR to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
 
 To accept the first suggested word only (up to first slash or space), press rather \fIAlt\-Right\fR or \fIAlt\-f\fR. Not available for ELN's, aliases and bookmarks names.
