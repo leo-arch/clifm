@@ -246,6 +246,8 @@ get_files_from_tmp_file(const char *tmp_file, const char *target, const int n)
 	char **tmp_files = (char **)xnmalloc(nfiles + 2, sizeof(char *));
 
 	FILE *fp = fopen(tmp_file, "r");
+	if (!fp)
+		return (char **)NULL;
 
 	size_t size = 0, i;
 	char *line = (char *)NULL;
@@ -268,6 +270,7 @@ get_files_from_tmp_file(const char *tmp_file, const char *target, const int n)
 		tmp_files[i] = savestring(line, (size_t)len);
 		i++;
 	}
+
 	tmp_files[i] = (char *)NULL;
 
 	free(line);
@@ -1308,6 +1311,11 @@ vv_rename_files(char **args)
 static int
 validate_vv_dest_dir(const char *file)
 {
+	if (args_n == 0) {
+		fprintf(stderr, "%s\n", VV_USAGE);
+		return EXIT_FAILURE;
+	}
+
 	struct stat a;
 	if (stat(file, &a) == -1) {
 		fprintf(stderr, "vv: %s: %s\n", file, strerror(errno));

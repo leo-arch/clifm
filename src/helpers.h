@@ -378,6 +378,7 @@ extern int watch;
 #define WS_NAME_SUG    23 /* Workspace name */
 #define FASTBACK_SUG   24
 #define FUZZY_FILENAME 25
+#define CMD_DESC_SUG   26
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -628,6 +629,7 @@ struct config_t {
 	int cd_on_quit;
 	int classify;
 	int clear_screen;
+	int cmd_desc_sug;
 	int colorize;
 	int columned;
 	int cp_cmd;
@@ -688,7 +690,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-	int pad3;
+//	int pad3;
 
 	char *opener;
 	char *encoded_prompt;

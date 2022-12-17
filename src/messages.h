@@ -815,7 +815,7 @@ Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink,\n\
 - Deselect files selectively\n\
     ds <TAB> (multi-selection is allowed)"
 
-#define SORT_USAGE "Change sort method for the files list\n\n\
+#define SORT_USAGE "Change files sorting order\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   st [METHOD] [rev]\nMETHOD: 0 = none, \
 1 = name, 2 = size, 3 = atime, 4 = btime, \
@@ -825,7 +825,7 @@ Note: Both numbers and names are allowed\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List files by size\n\
     st size (or 'st <TAB>' to choose from a list)\n\
-- Revert the current sorting method (i.e. z-a instead of a-z)\n\
+- Revert the current sorting order (i.e. z-a instead of a-z)\n\
     st rev"
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
@@ -1223,10 +1223,11 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\n\
  Q                  CD on quit\n\
  rf, refresh        Reprint the current list of files\n\
  rl, reload         Reload the main configuration file\n\
+ rr                 Remove files in bulk\n\
  s, sel             Select files\n\
  sb, selbox         Access the Selection Box\n\
  splash             Print the splash screen\n\
- st, sort           Change sorting method\n\
+ st, sort           Change files sorting order\n\
  stats              Print file statistics\n\
  t, tr, trash       Send files to the trash can\n\
  tag                Tag files\n\

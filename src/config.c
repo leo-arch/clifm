@@ -1219,6 +1219,9 @@ SuggestionStrategy=%s\n\n"
 # file type color (set via the color scheme file).\n\
 SuggestFiletypeColor=%s\n\n"
 
+		"# Suggest a brief decription for internal commands\n\
+SuggestCmdDesc=%s\n\n"
+
 "SyntaxHighlighting=%s\n\n"
 
 		"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
@@ -1235,6 +1238,7 @@ ExpandBookmarks=%s\n\n",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
 		DEF_SUG_STRATEGY,
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
+		DEF_CMD_DESC_SUG == 1 ? "true" : "false",
 		DEF_HIGHLIGHT == 1 ? "true" : "false",
 		DEF_SEARCH_STRATEGY,
 		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false"
@@ -2576,6 +2580,11 @@ read_config(void)
 		}
 
 #ifndef _NO_SUGGESTIONS
+		else if (*line == 'S' && strncmp(line, "SuggestCmdDesc=", 15) == 0) {
+			if (set_config_bool_value(line, &conf.cmd_desc_sug) == -1)
+				continue;
+		}
+
 		else if (*line == 'S' && strncmp(line, "SuggestFiletypeColor=", 21) == 0) {
 			if (set_config_bool_value(line, &conf.suggest_filetype_color) == -1)
 				continue;

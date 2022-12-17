@@ -94,7 +94,7 @@ xf=01;31:xs=00;32:"
 #define DEF_DL_C  "\x1b[02;37m" /* Dividing line */
 #define DEF_EL_C  "\x1b[00;36m" /* ELN's */
 #define DEF_EM_C  "\001\x1b[01;31m\002" /* Error msg indicator */
-#define DEF_FC_C  "\x1b[00;02;34m"
+#define DEF_FC_C  "\x1b[00;02;34m" /* Files counter */
 #define DEF_LI_C  "\001\x1b[01;32m\002" /* Sel files indicator (prompt) */
 #define DEF_LI_CB "\x1b[01;32m" /* Sel files indicator (files list) */
 #define DEF_MI_C  "\x1b[01;36m" /* Misc */
@@ -190,6 +190,7 @@ xf=01;31:xs=00;32:"
 #define DEF_CHECK_EXT 1 /* Check file names extension (for color) */
 #define DEF_CLASSIFY 1
 #define DEF_CLEAR_SCREEN 1
+#define DEF_CMD_DESC_SUG 1
 #define DEF_COLOR_SCHEME "default"
 #define DEF_COLORS 1
 #define DEF_CONTROL_D_EXITS 1

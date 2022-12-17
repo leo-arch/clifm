@@ -567,7 +567,8 @@ rl_accept_suggestion(int count, int key)
 
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
-	if (!conf.suggestions || rl_point != rl_end || !suggestion_buf) {
+	if (!conf.suggestions || rl_point != rl_end || !suggestion_buf
+	|| suggestion.type == CMD_DESC_SUG) {
 		if (rl_point < rl_end) {
 			/* Just move the cursor forward one column */
 			int mlen = mblen(rl_line_buffer + rl_point, __MB_LEN_MAX);
@@ -751,7 +752,8 @@ rl_accept_first_word(int count, int key)
 	 * bookmarks and aliases names */
 	if (suggestion.type != ELN_SUG && suggestion.type != BOOKMARK_SUG
 	&& suggestion.type != ALIAS_SUG && suggestion.type != JCMD_SUG
-	&& suggestion.type != JCMD_SUG_NOACD && suggestion.type != FUZZY_FILENAME) {
+	&& suggestion.type != JCMD_SUG_NOACD && suggestion.type != FUZZY_FILENAME
+	&& suggestion.type != CMD_DESC_SUG) {
 		accept_first_word = 1;
 		suggestion.type = FIRST_WORD;
 	}

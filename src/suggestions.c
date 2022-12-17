@@ -105,6 +105,382 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 }
 #endif */
 
+#define AC_DESC      " (archive/compress files)"
+#define ACD_DESC     " (set autocd on/off)"
+#define ACTIONS_DESC " (manage actions/plugins)"
+#define AD_DESC      " (dearchive/decompress files)"
+#define ALIAS_DESC   " (manage aliases)"
+#define AO_DESC      " (set auto-open on/off)"
+#define B_DESC       " (go back in the directory history list)"
+#define BD_DESC      " (change to a parent directory)"
+#define BL_DESC      " (create symbolic links in bulk)"
+#define BB_DESC      " (clean up non-ASCII file names)"
+#define BM_DESC      " (manage bookmarks)"
+#define BR_DESC      " (rename files in bulk)"
+#define C_DESC       " (copy files)"
+#define CD_DESC      " (change directory)"
+#define CL_DESC      " (set columns on/off)"
+#define CMD_DESC     " (jump to the COMMANDS section in the manpage)"
+#define COLORS_DESC  " (print currently used file type colors)"
+#define CS_DESC      " (manage color schemes)"
+#define CWD_DESC     " (print the current directory)"
+#define D_DESC       " (duplicate files)"
+#define DS_DESC      " (deselect files)"
+#define EDIT_DESC    " (edit the main configuration file)"
+#define EXP_DESC     " (export file names to a temporary file)"
+#define EXT_DESC     " (set external/shell commands on/off)"
+#define F_DESC       " (go forth in the directory history list)"
+#define FC_DESC      " (set the files counter on/off)"
+#define FF_DESC      " (set list-directories-first on/off)"
+#define FS_DESC      " (what is free software?)"
+#define FT_DESC      " (set a files filter)"
+#define FZ_DESC      " (print directories full size - long view only)"
+#define HF_DESC      " (set show-hidden-files on/off)"
+#define HIST_DESC    " (manage the commands history)"
+#define ICONS_DESC   " (set icons on/off)"
+#define J_DESC       " (jump to a visited directory)"
+#define KB_DESC      " (manage keybindings)"
+#define L_DESC       " (create a symbolic link)"
+#define LE_DESC      " (edit a symbolic link)"
+#define LM_DESC      " (set light mode on/off)"
+#define LOG_DESC     " (manage logs)"
+#define M_DESC       " (move files)"
+#define MD_DESC      " (create directories)"
+#define MEDIA_DESC   " (mount/unmount storage devices)"
+#define MF_DESC      " (limit the number of listed files)"
+#define MM_DESC      " (manage default opening applications)"
+#define MP_DESC      " (change to a mountpoint)"
+#define MSG_DESC     " (print system messages)"
+#define N_DESC       " (create files)"
+#define NET_DESC     " (manage remotes)"
+#define O_DESC       " (open file)"
+#define OPENER_DESC  " (set a custom resource opener)"
+#define OW_DESC      " (open file with...)"
+#define P_DESC       " (print files properties)"
+#define PC_DESC      " (edit files permissions)"
+#define PF_DESC      " (manage profiles)"
+#define PG_DESC      " (set the files pager on/off)"
+#define PIN_DESC     " (pin a directory)"
+#define PP_DESC      " (print files properties - with full directory size)"
+#define PROMPT_DESC  " (set a new prompt)"
+#define Q_DESC       " (quit)"
+#define QU_DESC      " (exit - cd on quit)"
+#define R_DESC       " (remove files)"
+#define RF_DESC      " (reprint the current list of files)"
+#define RL_DESC      " (reload the configuration file)"
+#define RR_DESC      " (remove files in bulk)"
+#define SB_DESC      " (access the selection box)"
+#define SEL_DESC     " (select files)"
+#define SPLASH_DESC  " (print the splash screen)"
+#define ST_DESC      " (change files sorting order)"
+#define STATS_DESC   " (print file statistics)"
+#define TA_DESC      " (tag files)"
+#define TD_DESC      " (delete tags)"
+#define TE_DESC      " (toggle the executable bit on files)"
+#define TIPS_DESC    " (print tips)"
+#define TL_DESC      " (list tags or tagged files)"
+#define TM_DESC      " (rename tags)"
+#define TN_DESC      " (create tags)"
+#define TU_DESC      " (untag files)"
+#define TY_DESC      " (merge tags)"
+#define TRASH_DESC   " (trash files)"
+#define U_DESC       " (restore trashed files using a menu)"
+#define UC_DESC      " (set Unicode on/off)"
+#define UNPIN_DESC   " (unpin the pinned directory)"
+#define V_DESC       " (copy selected files here: v sel, or paste sel)"
+#define VER_DESC     " (print version information)"
+#define VIEW_DESC    " (preview files in the current directory)"
+#define VV_DESC      " (copy and rename files at once)"
+#define WS_DESC      " (switch workspaces: ws NUM/NAME)"
+#define X_DESC       " (launch a new instance of clifm)"
+#define XU_DESC      " (launch a new instance of clifm as root)"
+
+static char *
+check_int_cmd_desc(const char *s, const size_t l)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	if (l == 1) {
+		if (*s == 'b') return B_DESC;
+		if (*s == 'c') return C_DESC;
+		if (*s == 'd') return D_DESC;
+		if (*s == 'f') return F_DESC;
+		if (*s == 'j') return J_DESC;
+		if (*s == 'l') return L_DESC;
+		if (*s == 'm') return M_DESC;
+		if (*s == 'n') return N_DESC;
+		if (*s == 'o') return O_DESC;
+		if (*s == 'p') return P_DESC;
+		if (*s == 'q') return Q_DESC;
+		if (*s == 'Q') return QU_DESC;
+		if (*s == 'r') return R_DESC;
+		if (*s == 's') return SEL_DESC;
+		if (*s == 't') return TRASH_DESC;
+		if (*s == 'u') return U_DESC;
+		if (*s == 'v') return V_DESC;
+		if (*s == 'x') return X_DESC;
+		if (*s == 'X') return XU_DESC;
+	}
+
+	else if (l == 2) {
+		if (*s == 'a') {
+			if (*(s + 1) == 'c') return AC_DESC;
+			if (*(s + 1) == 'd') return AD_DESC;
+			if (*(s + 1) == 'o') return AO_DESC;
+		}
+
+		else if (*s == 'b') {
+			if (*(s + 1) == 'b') return BB_DESC;
+			if (*(s + 1) == 'd') return BD_DESC;
+			if (*(s + 1) == 'l') return BL_DESC;
+			if (*(s + 1) == 'm') return BM_DESC;
+			if (*(s + 1) == 'r') return BR_DESC;
+		}
+
+		else if (*s == 'c') {
+			if (*(s + 1) == 'd') return CD_DESC;
+			if (*(s + 1) == 'l') return CL_DESC;
+			if (*(s + 1) == 's') return CS_DESC;
+		}
+
+		else if (*s == 'd') {
+			if (*(s + 1) == 's') return DS_DESC;
+		}
+
+		else if (*s == 'f') {
+			if (*(s + 1) == 'c') return FC_DESC;
+			if (*(s + 1) == 'f') return FF_DESC;
+			if (*(s + 1) == 's') return FS_DESC;
+			if (*(s + 1) == 't') return FT_DESC;
+			if (*(s + 1) == 'z') return FZ_DESC;
+		}
+
+		else if (*s == 'h' && *(s + 1) == 'f')
+			return HF_DESC;
+
+		else if (*s == 'k') {
+			if (*(s + 1) == 'b') return KB_DESC;
+		}
+
+		else if (*s == 'l' && *(s + 1) == 'm')
+			return LM_DESC;
+
+		else if (*s == 'm') {
+			if (*(s + 1) == 'd') return MD_DESC;
+			if (*(s + 1) == 'f') return MF_DESC;
+			if (*(s + 1) == 'm') return MM_DESC;
+			if (*(s + 1) == 'p') return MP_DESC;
+		}
+
+		else if (*s == 'l') {
+			if (*(s + 1) == 'e') return LE_DESC;
+		}
+
+		else if (*s == 'o') {
+			if (*(s + 1) == 'w') return OW_DESC;
+		}
+
+		else if (*s == 'p') {
+			if (*(s + 1) == 'c') return PC_DESC;
+			if (*(s + 1) == 'f') return PF_DESC;
+			if (*(s + 1) == 'g') return PG_DESC;
+			if (*(s + 1) == 'r') return P_DESC;
+			if (*(s + 1) == 'p') return PP_DESC;
+		}
+
+		else if (*s == 'r') {
+			if (*(s + 1) == 'f') return RF_DESC;
+			if (*(s + 1) == 'l') return RL_DESC;
+			if (*(s + 1) == 'r') return RR_DESC;
+		}
+
+		else if (*s == 's') {
+			if (*(s + 1) == 'b') return SB_DESC;
+			if (*(s + 1) == 't') return ST_DESC;
+		}
+
+		else if (*s == 't') {
+			if (*(s + 1) == 'a') return TA_DESC;
+			if (*(s + 1) == 'd') return TD_DESC;
+			if (*(s + 1) == 'e') return TE_DESC;
+			if (*(s + 1) == 'l') return TL_DESC;
+			if (*(s + 1) == 'm') return TM_DESC;
+			if (*(s + 1) == 'n') return TN_DESC;
+			if (*(s + 1) == 'r') return TRASH_DESC;
+			if (*(s + 1) == 'u') return TU_DESC;
+			if (*(s + 1) == 'y') return TY_DESC;
+		}
+
+		else if (*s == 'u' && *(s + 1) == 'c')
+			return UC_DESC;
+
+		else if (*s == 'v' && *(s + 1) == 'v')
+			return VV_DESC;
+
+		else if (*s == 'w') {
+			if (*(s + 1) == 's') return WS_DESC;
+		}
+
+	} else if (l == 3) {
+		if (*s == 'a' && *(s + 1) == 'c' && *(s + 2) == 'd')
+			return ACD_DESC;
+		if (*s == 'c' && *(s + 1) == 'm' && *(s + 2) == 'd')
+			return CMD_DESC;
+		if (*s == 'c' && *(s + 1) == 'w' && *(s + 2) == 'd')
+			return CWD_DESC;
+		if (*s == 'd' && *(s + 1) == 'u' && *(s + 2) == 'p')
+			return D_DESC;
+		if (*s == 'e' && *(s + 1) == 'x') {
+			if (*(s + 2) == 'p') return EXP_DESC;
+			if (*(s + 2) == 't') return EXT_DESC;
+		}
+		if (*s == 'l' && *(s + 1) == 'o' && *(s + 2) == 'g')
+			return LOG_DESC;
+		if (*s == 'm' && *(s + 1) == 's' && *(s + 2) == 'g')
+			return MSG_DESC;
+		if (*s == 'n' && *(s + 1) == 'e') {
+			if (*(s + 2) == 't') return NET_DESC;
+			if (*(s + 2) == 'w') return N_DESC;
+		}
+		if (*s == 'p' && *(s + 1) == 'i' && *(s + 2) == 'n')
+			return PIN_DESC;
+		if (*s == 's' && *(s + 1) == 'e' && *(s + 2) == 'l')
+			return SEL_DESC;
+		if (*s == 't' && *(s + 1) == 'a' && *(s + 2) == 'g')
+			return TA_DESC;
+		if (*s == 'v' && *(s + 1) == 'e' && *(s + 2) == 'r')
+			return VER_DESC;
+	}
+
+	else if (l == 4) {
+		if (*s == 'b' && strcmp(s + 1, "ack") == 0)
+			return B_DESC;
+		if (*s == 'b' && strcmp(s + 1, "ulk") == 0)
+			return BR_DESC;
+		if (*s == 'e' && strcmp(s + 1, "dit") == 0)
+			return EDIT_DESC;
+		if (*s == 'j' && strcmp(s + 1, "ump") == 0)
+			return J_DESC;
+/*		if (*s == 'e' && strcmp(s + 1, "xit") == 0)
+			return Q_DESC; */
+		if (*s == 'm' && strcmp(s + 1, "ime") == 0)
+			return MM_DESC;
+		if (*s == 'o' && strcmp(s + 1, "pen") == 0)
+			return O_DESC;
+		if (*s == 'p' && strcmp(s + 1, "ath") == 0)
+			return CWD_DESC;
+		if (*s == 'p' && strcmp(s + 1, "rof") == 0)
+			return PF_DESC;
+		if (*s == 'p' && strcmp(s + 1, "rop") == 0)
+			return P_DESC;
+/*		if (*s == 'q' && strcmp(s + 1, "uit") == 0)
+			return Q_DESC; */
+		if (*s == 's' && strcmp(s + 1, "ort") == 0)
+			return ST_DESC;
+		if (*s == 't' && strcmp(s + 1, "ips") == 0)
+			return TIPS_DESC;
+		if (*s == 'v' && strcmp(s + 1, "iew") == 0)
+			return VIEW_DESC;
+	}
+
+	else if (l == 5) {
+		if (*s == 'a' && strcmp(s + 1, "lias") == 0)
+			return ALIAS_DESC;
+		if (*s == 'd' && strcmp(s + 1, "esel") == 0)
+			return DS_DESC;
+		if (*s == 'f' && strcmp(s + 1, "orth") == 0)
+			return F_DESC;
+		if (*s == 'i' && strcmp(s + 1, "cons") == 0)
+			return ICONS_DESC;
+		if (*s == 'm' && strcmp(s + 1, "edia") == 0)
+			return MEDIA_DESC;
+		if (*s == 'p' && strcmp(s + 1, "ager") == 0)
+			return PG_DESC;
+		if (*s == 'p' && strcmp(s + 1, "aste") == 0)
+			return V_DESC;
+		if (*s == 's' && strcmp(s + 1, "tats") == 0)
+			return STATS_DESC;
+		if (*s == 't' && strcmp(s + 1, "rash") == 0)
+			return TRASH_DESC;
+		if (*s == 'u' && strcmp(s + 1, "ndel") == 0)
+			return U_DESC;
+		if (*s == 'u' && strcmp(s + 1, "npin") == 0)
+			return UNPIN_DESC;
+	}
+
+	else if (l == 6) {
+		if (*s == 'a' && strcmp(s + 1, "utocd") == 0)
+			return ACD_DESC;
+		if (*s == 'b' && strcmp(s + 1, "leach") == 0)
+			return BB_DESC;
+		if (*s == 'c' && strcmp(s + 1, "olors") == 0)
+			return COLORS_DESC;
+		if (*s == 'f' && strcmp(s + 1, "ilter") == 0)
+			return FT_DESC;
+		if (*s == 'h' && strcmp(s + 1, "idden") == 0)
+			return HF_DESC;
+		if (*s == 'o' && strcmp(s + 1, "pener") == 0)
+			return OPENER_DESC;
+		if (*s == 'p' && strcmp(s + 1, "rompt") == 0)
+			return PROMPT_DESC;
+		if (*s == 'r' && strcmp(s + 1, "eload") == 0)
+			return RL_DESC;
+		if (*s == 's' && strcmp(s + 1, "elbox") == 0)
+			return SB_DESC;
+		if (*s == 's' && strcmp(s + 1, "plash") == 0)
+			return SPLASH_DESC;
+	}
+
+	else if (l == 7) {
+		if (*s == 'a' && strcmp(s + 1, "ctions") == 0)
+			return ACTIONS_DESC;
+		if (*s == 'c' && strcmp(s + 1, "olumns") == 0)
+			return CL_DESC;
+		if (*s == 'h' && strcmp(s + 1, "istory") == 0)
+			return HIST_DESC;
+		if (*s == 'p' && strcmp(s + 1, "rofile") == 0)
+			return PF_DESC;
+		if (*s == 'r' && strcmp(s + 1, "efresh") == 0)
+			return RF_DESC;
+		if (*s == 'u' && strcmp(s + 1, "ntrash") == 0)
+			return U_DESC;
+		if (*s == 'u' && strcmp(s + 1, "nicode") == 0)
+			return UC_DESC;
+		if (*s == 'v' && strcmp(s + 1, "ersion") == 0)
+			return VER_DESC;
+	}
+
+	else if (l == 8) {
+		if (*s == 'c' && strcmp(s + 1, "ommands") == 0)
+			return CMD_DESC;
+		if (*s == 'k' && strcmp(s + 1, "eybinds") == 0)
+			return KB_DESC;
+		if (*s == 'm' && strcmp(s + 1, "essages") == 0)
+			return MSG_DESC;
+	}
+
+	else if (l == 9) {
+		if (*s == 'a' && strcmp(s + 1, "uto-open") == 0)
+			return AO_DESC;
+		if (*s == 'b' && strcmp(s + 1, "ookmarks") == 0)
+			return BM_DESC;
+		if (*s == 'd' && strcmp(s + 1, "irs-first") == 0)
+			return FF_DESC;
+	}
+
+	else if (l == 11 && *s == 'm' && strcmp(s + 1, "ountpoints") == 0)
+		return MP_DESC;
+
+	else if (l == 11 && *s == 'c' && strcmp(s + 1, "olorscheme") == 0)
+		return CS_DESC;
+
+	else if (l == 12 && *s == 'f' && strcmp(s + 1, "ilescounter") == 0)
+		return FC_DESC;
+
+	return (char *)NULL;
+}
+
 int
 recover_from_wrong_cmd(void)
 {
@@ -1650,6 +2026,15 @@ rl_suggestions(const unsigned char c)
 	if (word && *word == '.' && word[1] == '.' && word[2] == '.'
 	&& (printed = check_fastback(word)) == 1)
 		goto SUCCESS;
+
+	char *cdesc = (char *)NULL;
+	if (conf.cmd_desc_sug == 1 && c != ' ' && nwords == 1
+	&& (cdesc = check_int_cmd_desc(word, wlen))) {
+		suggestion.type = CMD_DESC_SUG;
+		print_suggestion(cdesc, 0, conf.colorize == 1 ? "\x1b[2;37m" : "\x1b[2m");
+		printed = 1;
+		goto SUCCESS;
+	}
 
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
