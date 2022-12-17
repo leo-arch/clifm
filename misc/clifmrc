@@ -202,6 +202,9 @@ SuggestionStrategy=ehfjbac
 # color (set via the color scheme file)
 SuggestFiletypeColor=false
 
+# Suggest a brief description for internal commands
+SuggestCmdDesc=true
+
 # Enable syntax highlighting?
 SyntaxHighlighting=true
 
