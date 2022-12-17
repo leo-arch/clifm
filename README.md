@@ -200,6 +200,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - **NEW**: [Suggest a brief description for internal commands](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
   - **NEW**: Set a custom selections file via the `--sel-file` flag
 * `version 1.9 (Sharptooth)`:
   - [Improved fuzzy suggestions/completions for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
