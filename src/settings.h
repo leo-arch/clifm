@@ -124,6 +124,7 @@ xf=01;31:xs=00;32:"
 /* Suggestions */
 #define DEF_SB_C "\x1b[02;33m" /* Shell built-ins */
 #define DEF_SC_C "\x1b[02;36m" /* Aliases and binaries in PATH */
+#define DEF_SD_C "\x1b[02;37m" /* Internal commands description */
 #define DEF_SH_C "\x1b[02;35m" /* Commands history */
 #define DEF_SF_C "\x1b[02;04;36m"  /* ELN's, bookmark, file, and directory names */
 #define DEF_SP_C "\x1b[02;31m" /* Suggestions pointer (12 > filename) */

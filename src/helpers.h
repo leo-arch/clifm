@@ -1404,10 +1404,11 @@ extern char
 	/* Suggestions */
 	sb_c[MAX_COLOR], /* Auto-suggestions: shell builtins */
 	sc_c[MAX_COLOR], /* Auto-suggestions: external commands and aliases */
+	sd_c[MAX_COLOR], /* Auto-suggestions: internal commands description */
 	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
 	sh_c[MAX_COLOR], /* Auto-suggestions: history */
-	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and parameters */
 	sp_c[MAX_COLOR], /* Auto-suggestions: BAEJ suggestions pointer */
+	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and parameters */
 
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */

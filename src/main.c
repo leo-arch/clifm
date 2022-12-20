@@ -340,6 +340,7 @@ char
 	/* Suggestions */
 	sb_c[MAX_COLOR], /* Auto-suggestions: shell builtins */
 	sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
+	sd_c[MAX_COLOR], /* Auto-suggestions: internal commands description */
 	sh_c[MAX_COLOR], /* Auto-suggestions: history */
 	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
 	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */

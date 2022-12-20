@@ -195,6 +195,41 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 #define X_DESC       " (launch a new instance of clifm)"
 #define XU_DESC      " (launch a new instance of clifm as root)"
 
+/*
+#define P_HASH    1426843782
+#define PR_HASH   1109929557
+#define PROP_HASH 2548745446
+
+#include <stdint.h>
+#define HASH_SEED 13344
+// Murmur One Byte At A Time 32 bit hashing algorithm
+// Source: https://github.com/aappleby/smhasher/blob/master/src/Hashes.cpp
+static uint32_t
+hashme32(const char *str, const uint32_t seed)
+{
+	uint32_t h = seed;
+	for (; *str; ++str) {
+		h ^= (uint32_t)*str;
+		h *= 0x5bd1e995;
+		h ^= h >> 15;
+	}
+	return h;
+}
+
+static char *
+check_int_cmd_desc_hash(const char *s)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	uint32_t h = hashme32(s, HASH_SEED);
+
+	if (h == P_HASH || h == PR_HASH || h == PROP_HASH)
+		return P_DESC;
+
+	return (char *)NULL;
+} */
+
 static char *
 check_int_cmd_desc(const char *s, const size_t l)
 {
@@ -362,8 +397,8 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return EDIT_DESC;
 		if (*s == 'j' && strcmp(s + 1, "ump") == 0)
 			return J_DESC;
-/*		if (*s == 'e' && strcmp(s + 1, "xit") == 0)
-			return Q_DESC; */
+//		if (*s == 'e' && strcmp(s + 1, "xit") == 0)
+//			return Q_DESC;
 		if (*s == 'm' && strcmp(s + 1, "ime") == 0)
 			return MM_DESC;
 		if (*s == 'o' && strcmp(s + 1, "pen") == 0)
@@ -374,8 +409,8 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return PF_DESC;
 		if (*s == 'p' && strcmp(s + 1, "rop") == 0)
 			return P_DESC;
-/*		if (*s == 'q' && strcmp(s + 1, "uit") == 0)
-			return Q_DESC; */
+//		if (*s == 'q' && strcmp(s + 1, "uit") == 0)
+//			return Q_DESC;
 		if (*s == 's' && strcmp(s + 1, "ort") == 0)
 			return ST_DESC;
 		if (*s == 't' && strcmp(s + 1, "ips") == 0)
@@ -2029,9 +2064,10 @@ rl_suggestions(const unsigned char c)
 
 	char *cdesc = (char *)NULL;
 	if (conf.cmd_desc_sug == 1 && c != ' ' && nwords == 1
+//	&& (cdesc = check_int_cmd_desc_hash(word))) {
 	&& (cdesc = check_int_cmd_desc(word, wlen))) {
 		suggestion.type = CMD_DESC_SUG;
-		print_suggestion(cdesc, 0, conf.colorize == 1 ? "\x1b[2;37m" : "\x1b[2m");
+		print_suggestion(cdesc, 0, conf.colorize == 1 ? sd_c : "\x1b[2m");
 		printed = 1;
 		goto SUCCESS;
 	}
