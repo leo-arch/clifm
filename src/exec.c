@@ -146,7 +146,14 @@ run_and_refresh(char **cmd, const int skip_force)
 			if (i == -1) {
 				fprintf(stderr, _("%s: %s: Invalid ELN\n"), PROGRAM_NAME, cmd[1]);
 				xrename = 0;
-				return EXIT_FAILURE;
+				return EINVAL;
+			}
+		} else {
+			struct stat a;
+			if (lstat(cmd[1], &a) == -1) {
+				xrename = 0;
+				fprintf(stderr, "m: %s: %s\n", cmd[1], strerror(errno));
+				return errno;
 			}
 		}
 
