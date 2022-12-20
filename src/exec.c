@@ -144,9 +144,9 @@ run_and_refresh(char **cmd, const int skip_force)
 					break;
 			}
 			if (i == -1) {
-				fprintf(stderr, _("%s: %s: Invalid ELN\n"), PROGRAM_NAME, cmd[1]);
+				fprintf(stderr, _("%s: %s: No such ELN\n"), PROGRAM_NAME, cmd[1]);
 				xrename = 0;
-				return EINVAL;
+				return ENOENT;
 			}
 		} else {
 			struct stat a;
