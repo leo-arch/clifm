@@ -1342,6 +1342,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  \fBSuggestions\fR
  sb = shell built-ins
  sc = aliases and shell command names
+ sd = internal commands description
  sf = ELN's plus bookmarks, file, tag, and directory names
  sh = commands history entries
  sx = suggestions for \fBclifm\fR's internal commands and parameters
