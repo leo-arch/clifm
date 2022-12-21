@@ -126,9 +126,9 @@ xf=01;31:xs=00;32:"
 #define DEF_SC_C "\x1b[02;36m" /* Aliases and binaries in PATH */
 #define DEF_SD_C "\x1b[02;37m" /* Internal commands description */
 #define DEF_SH_C "\x1b[02;35m" /* Commands history */
-#define DEF_SF_C "\x1b[02;04;36m"  /* ELN's, bookmark, file, and directory names */
+#define DEF_SF_C "\x1b[02;04;36m" /* ELN's, bookmark, file, and directory names */
 #define DEF_SP_C "\x1b[02;31m" /* Suggestions pointer (12 > filename) */
-#define DEF_SX_C "\x1b[02;32m" /* CliFM internal commands and parameters */
+#define DEF_SX_C "\x1b[02;32m" /* Internal commands and parameters */
 
 /* Highlight */
 #define DEF_HB_C "\x1b[00;36m" /* Parenthesis, Brackets ( {[()]} ) */
@@ -139,7 +139,7 @@ xf=01;31:xs=00;32:"
 #define DEF_HP_C "\x1b[00;36m" /* Parameters (e.g. -h --help) */
 #define DEF_HQ_C "\x1b[00;33m" /* Quotes (single and double) */
 #define DEF_HR_C "\x1b[00;31m" /* Redirection operator (>) */
-#define DEF_HS_C "\x1b[00;32m" /* Commands separator (; & |)*/
+#define DEF_HS_C "\x1b[00;32m" /* Process separators (; & |)*/
 #define DEF_HV_C "\x1b[00;32m" /* Variables ($VAR) */
 
 /* Colors for the properties and long/detail view functions */

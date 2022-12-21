@@ -2067,7 +2067,7 @@ rl_suggestions(const unsigned char c)
 //	&& (cdesc = check_int_cmd_desc_hash(word))) {
 	&& (cdesc = check_int_cmd_desc(word, wlen))) {
 		suggestion.type = CMD_DESC_SUG;
-		print_suggestion(cdesc, 0, conf.colorize == 1 ? sd_c : "\x1b[2m");
+		print_suggestion(cdesc, 0, conf.colorize == 1 ? sd_c : SUG_NO_COLOR);
 		printed = 1;
 		goto SUCCESS;
 	}

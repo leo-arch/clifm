@@ -268,7 +268,6 @@ extern int watch;
 
 /* Error codes, used by the launch_exec functions */
 #define EXNULLERR  79
-//#define EXFORKERR  81
 #define EXCRASHERR 82
 
 #define BACKGROUND 1
@@ -276,7 +275,6 @@ extern int watch;
 
 /* A few fixed colors */
 #define _RED    "\x1b[1;31m"
-#define _GREEN  "\x1b[0;32m"
 #define _BGREEN "\x1b[1;32m"
 #define D_CYAN  "\x1b[0;36m"
 #define BOLD    "\x1b[1m"
