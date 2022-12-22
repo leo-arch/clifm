@@ -700,6 +700,7 @@ print_tips(int all)
 		"Fuzzy suggestions are supported: 'dwn > Downloads'. Enable them via --fuzzy-matching, or FuzzyMatching in the configuration file",
 		"Wildcards can be expanded via TAB: 's *.c<TAB>'",
 		"Try the help topics: 'help <TAB>'",
+		"List commands together with a brief description: 'cmd<TAB>'",
 		"List symlinks in the current directory: '=l<TAB>'. Enter 'help file-filters' for more information",
 		"Use PropFields in the configuration file to toggle fields on/off in long view mode",
 		"Enable file previews for TAB completion (fzf mode only) via --fzfpreview",
