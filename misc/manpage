@@ -1954,7 +1954,7 @@ T{
 .BR bcp
 T}	Copy files in batch	batch_copy.sh	-
 T{
-.BR bi
+.BR bmi
 T}	Import bookmarks	bm_import.sh	-
 T{
 .BR clip
