@@ -8,9 +8,9 @@
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Usage: %s [-f, --flat] [\PATTERN] [-h, --help]
-List files in the current directory allowing \
-the user to select one or more of them.
+	printf "List files in the current directory allowing \
+the user to select one or more of them.\n"
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s [-f, --flat] [\PATTERN] [-h, --help]
 
 With the -f or --flat option files are listed recursively \
 starting from the current directory (aka flat or branch view).

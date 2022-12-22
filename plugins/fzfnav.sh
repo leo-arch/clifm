@@ -36,7 +36,7 @@
 #     determining file types and executing the corresponding previewing
 #     application.
 
-HELP="Usage:
+HELP="USAGE
   Type in the prompt to filter the current list of files. Regular expressions are \
 allowed.
 
@@ -45,7 +45,7 @@ open the last accepted file (Enter). Press Esc to cancel and exit.
 
   Use the --edit command line option to edit the configuration file.
 
-Keybindings:
+KEYBINDINGS
 
   * Left: Change to parent directory
   * Right/Enter: Change to the highlighted directory or open the highlighted file and exit
@@ -716,7 +716,7 @@ main() {
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 #	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Navigate/preview/select files via FZF\n"
-	printf "%s\n" "$HELP"
+	printf "\n%s\n" "$HELP"
 	exit 0
 fi
 

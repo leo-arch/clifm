@@ -11,7 +11,7 @@
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Decrypt a GnuPG encrypted file\n" >&2
-	printf "Usage: %s FILE\n\n" "$name" >&2
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s FILE\n\n" "$name" >&2
 	printf "Note: You will be given the options to extract the unencrypted\n\
 file (if archived) and then to remove the original encrypted file\n" >&2
 	exit 0

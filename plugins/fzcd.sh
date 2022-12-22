@@ -11,7 +11,7 @@
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Find and change the current working directory via FZF\n"
-	printf "Usage: %s\n" "$name"
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s\n" "$name"
 	exit 0
 fi
 

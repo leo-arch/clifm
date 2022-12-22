@@ -11,9 +11,9 @@
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Encrypt one or more files and/or directories using GnuPG\n" >&2
-	printf "Usage: %s FILE...\n\n" "$name" >&2
-	printf "Note: Files are first archived into a single file via tar(1) and \n\
-then encrypted with gpg(1), using either a passphrase or a public key.\n\
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s FILE...\n\n" "$name" >&2
+	printf "Note: Files are first archived into a single file via \x1b[1mtar\x1b[0m(1) and \n\
+then encrypted with \x1b[1mgpg\x1b[0m(1), using either a passphrase or a public key.\n\
 You will be given the option to remove original files.\n" >&2
 	exit 0
 fi

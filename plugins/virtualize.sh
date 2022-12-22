@@ -17,10 +17,9 @@ clifm_opts=""
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Create a virtual directory for a set or collection of files\n\
-Usage: %s [-d] [FILE...] \n\
-\n\
-Examples:\n\
+	printf "Create a virtual directory for a set or collection of files
+\n\x1b[1mUSAGE\x1b[0m\n  %s [-d] [FILE...] \n\
+\n\x1b[1mEXAMPLES\x1b[0m
   'vt sel'          Send all selected files to a virtual directory\n\
   'vt file1 file2'  Send file1 and file2 to a virtual directory\n\
   'vt -d'           If navigating the file system, use the -d option to quickly go back to the virtual directory\n" "$name" >&2

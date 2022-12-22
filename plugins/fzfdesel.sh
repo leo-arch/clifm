@@ -11,7 +11,7 @@
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Deselect CliFM selected files using FZF\n"
-	printf "Usage: %s\n" "$name"
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s\n" "$name"
 	exit 0
 fi
 

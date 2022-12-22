@@ -22,7 +22,7 @@ fi
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Display thumbnails of VIDEO(s) or of videos contained in DIR (current working directory if omitted)
-Usage: %s [VIDEO... n] [DIR]\n" "$name"
+\n\x1b[1mUSAGE\x1b[0m\n  %s [VIDEO... n] [DIR]\n" "$name"
 	exit 0
 fi
 

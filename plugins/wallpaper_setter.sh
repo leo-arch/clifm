@@ -9,7 +9,7 @@
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Set IMAGE as wallpaper\n"
-	printf "Usage: %s IMAGE\n" "$name"
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s IMAGE\n" "$name"
 	exit 0
 fi
 

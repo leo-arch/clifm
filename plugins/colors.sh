@@ -10,7 +10,7 @@ USAGE="Usage: $name [16, 256, test]"
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	printf "Terminal colors test script for CliFM\n"
-	printf "Usage: %s [16, 256, test]\n" "$name"
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s [16, 256, test]\n" "$name"
 	exit 1
 fi
 

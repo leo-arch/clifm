@@ -17,9 +17,9 @@
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ] ; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
-	printf "Interact with the primary clipboard via xclip\n"
-	printf "\nUsage: %s [s, i] FILE... n\n" "$name"
-	printf "\nUse the 's' parameter to send files to the X primary clipboard, and the 'i' parameter to import files in the clipboard to CliFM's Selection box"
+	printf "Interact with the primary clipboard via \x1b[1mxclip\x1b[0m(1)\n"
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s [s, i] FILE... n\n" "$name"
+	printf "\nUse the 's' parameter to send files to the X primary clipboard, and the 'i' parameter to import files in the clipboard to CliFM's Selection Box"
 	exit 0
 fi
 

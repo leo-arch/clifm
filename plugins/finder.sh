@@ -12,8 +12,8 @@ ERROR=1
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Find/open/cd files using FZF/Rofi. Once found, press Enter to cd/open the desired file.\n"
-	printf "Usage: %s [DIR]\n" "$name"
-	printf "If DIR is not specified, the current directory is used instead\n"
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s [DIR]\n" "$name"
+	printf "\nNote: If DIR is not specified, the current directory is assumed\n"
 	exit $SUCCESS
 fi
 

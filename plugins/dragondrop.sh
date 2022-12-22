@@ -20,8 +20,10 @@
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Drag and drop files\n"
-	printf "\nUsage: %s [FILE... n]\n" "$name"
-	printf "\nWith no arguments, it opens a window to drop files (using dragon); otherwise, files passed as arguments are send to the Dragon window to be dragged onto somewhere else.\n"
+	printf "\n\x1b[1mUSAGE\x1b[0m\n  %s [FILE... n]\n" "$name"
+	printf "\nWith no arguments, it opens a window to drop files (using dragon).
+Otherwise, files passed as arguments are sent to the Dragon window
+to be dragged onto somewhere else.\n"
 	exit 0
 fi
 

@@ -9,7 +9,8 @@
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Copy a regular file or directory to a remote machine
-Usage: %s [-e, --edit] [FILE/DIR]\n" "$name"
+
+\x1b[1mUSAGE\x1b[0m\n  %s [-e, --edit] [FILE/DIR]\n" "$name"
 	exit 0
 fi
 

@@ -21,7 +21,7 @@ fi
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
 	printf "Recursively remove regular files via FZF
-Usage: %s [PATTERN]\n" "$name"
+\n\x1b[1mUSAGE\x1b[0m\n  %s [PATTERN]\n" "$name"
 	exit 0
 fi
 
