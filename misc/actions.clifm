@@ -18,6 +18,7 @@
 //=rgfind.sh
 _=fzcd.sh
 bcp=batch_copy.sh
+bmi=bm_import.sh
 bn=batch_create.sh
 cr=cprm.sh
 da=disk_analyzer.sh

@@ -593,6 +593,7 @@ create_actions_file(char *file)
 		"//=rgfind.sh\n"
 		"_=fzcd.sh\n"
 		"bcp=batch_copy.sh\n"
+		"bmi=bm_import.sh\n"
 		"bn=batch_create.sh\n"
 		"cr=cprm.sh\n"
 		"da=disk_analyzer.sh\n"
