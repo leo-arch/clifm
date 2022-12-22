@@ -1,4 +1,4 @@
-/* messages.h - Usage messages for CliFM */
+/* messages.h - Usage and help messages for CliFM */
 
 /*
  * This file is part of CliFM
@@ -1218,7 +1218,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\n\
  pf, prof, profile  Manage profiles\n\
  pg, pager          Set the files pager on/off\n\
  pin                Pin a directory\n\
- prompt             Manage your prompts\n\
+ prompt             Switch/edit prompt\n\
  q, quit, exit      Quit clifm\n\
  Q                  CD on quit\n\
  rf, refresh        Reprint the current list of files\n\
@@ -1514,7 +1514,7 @@ being free, we consider them all equally unethical [...]\""
 #define MP_DESC      " (change to a mountpoint)"
 #define MSG_DESC     " (print system messages)"
 #define N_DESC       " (create files)"
-#define NET_DESC     " (manage remotes)"
+#define NET_DESC     " (manage remote resources)"
 #define O_DESC       " (open file)"
 #define OPENER_DESC  " (set a custom resource opener)"
 #define OW_DESC      " (open file with...)"
@@ -1524,7 +1524,7 @@ being free, we consider them all equally unethical [...]\""
 #define PG_DESC      " (set the files pager on/off)"
 #define PIN_DESC     " (pin a directory)"
 #define PP_DESC      " (print files properties - with full directory size)"
-#define PROMPT_DESC  " (set a new prompt)"
+#define PROMPT_DESC  " (switch/edit prompt)"
 #define Q_DESC       " (quit)"
 #define QU_DESC      " (exit - cd on quit)"
 #define R_DESC       " (remove files)"

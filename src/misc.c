@@ -636,7 +636,7 @@ print_tips(int all)
 		"Take a look at the splash screen with the 'splash' command",
 		"Have some fun trying the 'bonus' command",
 		"Launch the default system shell in CWD using ':' or ';'",
-		"Use Alt-z and Alt-x to switch sorting methods",
+		"Use Alt-z and Alt-x to switch sorting order",
 		"Reverse sorting order using the 'rev' option: 'st rev'",
 		"Compress and decompress files using the 'ac' and 'ad' "
 		"commands respectively: 'ac sel' or 'ad FILE.zip'",
