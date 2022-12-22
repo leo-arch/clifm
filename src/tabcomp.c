@@ -484,7 +484,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		} else {
 			rl_insert_text(buf + *offset);
 		}
-	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS || cur_comp_type == TCMP_MIME_LIST) {
+	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS
+	|| cur_comp_type == TCMP_MIME_LIST) {
 		rl_insert_text(buf);
 		return;
 	} else {
@@ -909,6 +910,14 @@ get_finder_output(const int multi, char *base)
 			line_len = 1;
 		}
 
+		if (cur_comp_type == TCMP_CMD_DESC && *line) {
+			char *p = strchr(line, ' ');
+			if (p) {
+				*p = '\0';
+				line_len = (ssize_t)strlen(line);
+			}
+		}
+
 /*		if (cur_comp_type == TCMP_BOOKMARK) {
 			char *p = strrchr(line, '(');
 			if (p && p > line && *(p - 1) == ' ') {
@@ -1065,7 +1074,7 @@ store_completions(char **matches, FILE *fp)
 //				color = tx_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
 		&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_FILE_TYPES_OPTS
-		&& cur_comp_type != TCMP_MIME_LIST) {
+		&& cur_comp_type != TCMP_MIME_LIST && cur_comp_type != TCMP_CMD_DESC) {
 			char *cl = get_entry_color(matches, i, norm_prefix);
 			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
@@ -1382,7 +1391,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	&& cur_comp_type != TCMP_BM_PATHS
 	&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_GLOB
 	&& cur_comp_type != TCMP_FILE_TYPES_OPTS
-	&& cur_comp_type != TCMP_FILE_TYPES_FILES && cur_comp_type != TCMP_MIME_LIST) {
+	&& cur_comp_type != TCMP_FILE_TYPES_FILES && cur_comp_type != TCMP_MIME_LIST
+	&& cur_comp_type != TCMP_CMD_DESC) {
 		query = get_query_str(&finder_offset);
 		if (!query) {
 			if (cur_comp_type == TCMP_TAGS_T)
@@ -1599,7 +1609,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		}
 	}
 
-	else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
+	else if (cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_CMD_DESC) {
 //		char *s = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
 		char *s = rl_line_buffer ? get_last_space(rl_line_buffer, rl_end) : (char *)NULL;
 		rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
@@ -1950,6 +1960,7 @@ AFTER_USUAL_COMPLETION:
 		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
 		&& (cur_comp_type != TCMP_SEL || fzftab != 1 || sel_n == 1)
+		&& cur_comp_type != TCMP_CMD_DESC
 
 		&& (cur_comp_type != TCMP_BM_PATHS || !matches[1])
 
@@ -2285,7 +2296,8 @@ CALC_OFFSET:
 
 		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR
 		|| cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_FILE_TYPES_OPTS
-		|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_MIME_LIST)
+		|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_MIME_LIST
+		|| cur_comp_type == TCMP_CMD_DESC)
 			tab_offset = 0;
 
 		for (i = 1; i <= (size_t)count; i++) {

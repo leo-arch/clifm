@@ -55,6 +55,7 @@ typedef char *rl_cpvfunc_t;
 #include "colors.h"
 #include "fuzzy_match.h"
 #include "jump.h"
+#include "messages.h"
 #include "navigation.h" /* fastback() */
 #include "readline.h"
 #include "builtins.h"
@@ -74,17 +75,9 @@ typedef char *rl_cpvfunc_t;
 
 #define BAEJ_OFFSET 1
 
-//#define FUZZY_ALGO_CLIFM 1
-//#define FUZZY_ALGO_FZY   2
-
 static char *last_word = (char *)NULL;
 static int last_word_offset = 0;
 static int point_is_first_word = 0;
-
-/* Set to 1 if terminal supports SC (save cursor) and RC (restore cursor)
- * capabilities. Otherwise, the manual method is used via CUU, CUD, CUF,
- * and CUB capabilities */
-//int auto_curpos = 0;
 
 /*
 #ifndef _NO_HIGHLIGHT
@@ -104,96 +97,6 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 	fputs("\x1b[?25h", stdout);
 }
 #endif */
-
-#define AC_DESC      " (archive/compress files)"
-#define ACD_DESC     " (set autocd on/off)"
-#define ACTIONS_DESC " (manage actions/plugins)"
-#define AD_DESC      " (dearchive/decompress files)"
-#define ALIAS_DESC   " (manage aliases)"
-#define AO_DESC      " (set auto-open on/off)"
-#define B_DESC       " (go back in the directory history list)"
-#define BD_DESC      " (change to a parent directory)"
-#define BL_DESC      " (create symbolic links in bulk)"
-#define BB_DESC      " (clean up non-ASCII file names)"
-#define BM_DESC      " (manage bookmarks)"
-#define BR_DESC      " (rename files in bulk)"
-#define C_DESC       " (copy files)"
-#define CD_DESC      " (change directory)"
-#define CL_DESC      " (set columns on/off)"
-#define CMD_DESC     " (jump to the COMMANDS section in the manpage)"
-#define COLORS_DESC  " (print currently used file type colors)"
-#define CS_DESC      " (manage color schemes)"
-#define CWD_DESC     " (print the current directory)"
-#define D_DESC       " (duplicate files)"
-#define DS_DESC      " (deselect files)"
-#define EDIT_DESC    " (edit the main configuration file)"
-#define EXP_DESC     " (export file names to a temporary file)"
-#define EXT_DESC     " (set external/shell commands on/off)"
-#define F_DESC       " (go forth in the directory history list)"
-#define FC_DESC      " (set the files counter on/off)"
-#define FF_DESC      " (set list-directories-first on/off)"
-#define FS_DESC      " (what is free software?)"
-#define FT_DESC      " (set a files filter)"
-#define FZ_DESC      " (print directories full size - long view only)"
-#define HF_DESC      " (set show-hidden-files on/off)"
-#define HIST_DESC    " (manage the commands history)"
-#define ICONS_DESC   " (set icons on/off)"
-#define J_DESC       " (jump to a visited directory)"
-#define KB_DESC      " (manage keybindings)"
-#define L_DESC       " (create a symbolic link)"
-#define LE_DESC      " (edit a symbolic link)"
-#define LM_DESC      " (set light mode on/off)"
-#define LOG_DESC     " (manage logs)"
-#define M_DESC       " (move files)"
-#define MD_DESC      " (create directories)"
-#define MEDIA_DESC   " (mount/unmount storage devices)"
-#define MF_DESC      " (limit the number of listed files)"
-#define MM_DESC      " (manage default opening applications)"
-#define MP_DESC      " (change to a mountpoint)"
-#define MSG_DESC     " (print system messages)"
-#define N_DESC       " (create files)"
-#define NET_DESC     " (manage remotes)"
-#define O_DESC       " (open file)"
-#define OPENER_DESC  " (set a custom resource opener)"
-#define OW_DESC      " (open file with...)"
-#define P_DESC       " (print files properties)"
-#define PC_DESC      " (edit files permissions)"
-#define PF_DESC      " (manage profiles)"
-#define PG_DESC      " (set the files pager on/off)"
-#define PIN_DESC     " (pin a directory)"
-#define PP_DESC      " (print files properties - with full directory size)"
-#define PROMPT_DESC  " (set a new prompt)"
-#define Q_DESC       " (quit)"
-#define QU_DESC      " (exit - cd on quit)"
-#define R_DESC       " (remove files)"
-#define RF_DESC      " (reprint the current list of files)"
-#define RL_DESC      " (reload the configuration file)"
-#define RR_DESC      " (remove files in bulk)"
-#define SB_DESC      " (access the selection box)"
-#define SEL_DESC     " (select files)"
-#define SPLASH_DESC  " (print the splash screen)"
-#define ST_DESC      " (change files sorting order)"
-#define STATS_DESC   " (print file statistics)"
-#define TA_DESC      " (tag files)"
-#define TD_DESC      " (delete tags)"
-#define TE_DESC      " (toggle the executable bit on files)"
-#define TIPS_DESC    " (print tips)"
-#define TL_DESC      " (list tags or tagged files)"
-#define TM_DESC      " (rename tags)"
-#define TN_DESC      " (create tags)"
-#define TU_DESC      " (untag files)"
-#define TY_DESC      " (merge tags)"
-#define TRASH_DESC   " (trash files)"
-#define U_DESC       " (restore trashed files using a menu)"
-#define UC_DESC      " (set Unicode on/off)"
-#define UNPIN_DESC   " (unpin the pinned directory)"
-#define V_DESC       " (copy selected files here: v sel, or paste sel)"
-#define VER_DESC     " (print version information)"
-#define VIEW_DESC    " (preview files in the current directory)"
-#define VV_DESC      " (copy and rename files at once)"
-#define WS_DESC      " (switch workspaces: ws NUM/NAME)"
-#define X_DESC       " (launch a new instance of clifm)"
-#define XU_DESC      " (launch a new instance of clifm as root)"
 
 /*
 #define P_HASH    1426843782

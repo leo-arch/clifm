@@ -126,6 +126,128 @@ rl_get_y_or_n(const char *_msg)
 	return 0; /* Never reached */
 }
 
+/*
+static int
+check_cmd_desc(const char *s, const char *t)
+{
+	if (!s || !*s)
+		return 0;
+
+	if (!t || !*t)
+		return 1;
+
+	return strstr(s, t) ? 1 : 0;
+} */
+
+static char *
+int_cmds_generator(const char *text, int state)
+{
+	UNUSED(text);
+	static int i;
+
+	if (!state)
+		i = 0;
+
+	static char *cmd_desc[] = {
+		"ac (archive-compress files)",
+		"acd (set autocd on-off)",
+		"actions (manage actions-plugins)",
+		"ad (dearchive-decompress files)",
+		"alias (manage aliases)",
+		"ao (set auto-open on-off)",
+		"b (go back in the directory history list)",
+		"bd (change to a parent directory)",
+		"bl (create symbolic links in bulk)",
+		"bb (clean up non-ASCII file names)",
+		"bm (manage bookmarks)",
+		"br (rename files in bulk)",
+		"c (copy files)",
+		"cd (change directory)",
+		"cl (set columns on-off)",
+		"cmd (jump to the COMMANDS section in the manpage)",
+		"colors (print currently used file type colors)",
+		"cs (manage color schemes)",
+		"cwd (print the current directory)",
+		"d (duplicate files)",
+		"ds (deselect files)",
+		"edit (edit the main configuration file)",
+		"exp (export file names to a temporary file)",
+		"ext (set external-shell commands on-off)",
+		"f (go forth in the directory history list)",
+		"fc (set the files counter on-off)",
+		"ff (set list-directories-first on-off)",
+		"fs (what is free software?)",
+		"ft (set a files filter)",
+		"fz (print directories full size - long view only)",
+		"hf (set show-hidden-files on-off)",
+		"history (manage the commands history)",
+		"icons (set icons on/off)",
+		"j (jump to a visited directory)",
+		"kb (manage keybindings)",
+		"l (create a symbolic link)",
+		"le (edit a symbolic link)",
+		"lm (set light mode on-off)",
+		"log (manage logs)",
+		"m (move files)",
+		"md (create directories)",
+		"media (mount/unmount storage devices)",
+		"mf (limit the number of listed files)",
+		"mm (manage default opening applications)",
+		"mp (change to a mountpoint)",
+		"msg (print system messages)",
+		"n (create files)",
+		"net (manage remotes)",
+		"o (open file)",
+		"opener (set a custom resource opener)",
+		"ow (open file with...)",
+		"p (print files properties)",
+		"pc (edit files permissions)",
+		"pf (manage profiles)",
+		"pg (set the files pager on-off)",
+		"pin (pin a directory)",
+		"pp (print files properties - with full directory size)",
+		"prompt (set a new prompt)",
+		"q (quit)",
+		"Q (exit - cd on quit)",
+		"r (remove files)",
+		"rf (reprint the current list of files)",
+		"rl (reload the configuration file)",
+		"rr (remove files in bulk)",
+		"sb (access the selection box)",
+		"s (select files)",
+		"splash (print the splash screen)",
+		"st (change files sorting order)",
+		"stats (print file statistics)",
+		"ta (tag files)",
+		"td (delete tags)",
+		"te (toggle the executable bit on files)",
+		"tips (print tips)",
+		"tl (list tags or tagged files)",
+		"tm (rename tags)",
+		"tn (create tags)",
+		"tu (untag files)",
+		"ty (merge tags)",
+		"t (trash files)",
+		"u (restore trashed files using a menu)",
+		"uc (set Unicode on-off)",
+		"unpin (unpin the pinned directory)",
+		"v (copy selected files here: v sel, or paste sel)",
+		"ver (print version information)",
+		"view (preview files in the current directory)",
+		"vv (copy and rename files in bulk at once)",
+		"ws (switch workspaces)",
+		"x (launch a new instance of clifm)",
+		"X (launch a new instance of clifm as root)",
+		NULL
+	};
+
+	char *name;
+	while ((name = cmd_desc[i++]))
+		return strdup(name);
+
+	return (char *)NULL;
+}
+
 /* Generate completions for command CMD using a modified version of
  * fish's manpages parser */
 static int
@@ -2988,6 +3110,13 @@ my_rl_completion(const char *text, int start, int end)
 	if (start == 0) { /* Only for the first entered word */
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
+
+		if (xrename == 0 && *text == 'c' && *(text + 1) == 'm' && *(text + 2) == 'd') {
+			if ((matches = rl_completion_matches(text, &int_cmds_generator))) {
+				cur_comp_type = TCMP_CMD_DESC;
+				return matches;
+			}
+		}
 
 		/* HISTORY CMD AND SEARCH PATTERNS COMPLETION */
 		if (xrename == 0 && (*text == '!' || *text == '/')) {

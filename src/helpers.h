@@ -1171,7 +1171,8 @@ enum comp_type {
 	TCMP_FILE_TYPES_FILES = 29,
 	TCMP_WORKSPACES = 30,
 	TCMP_BM_PATHS =   31, /* 'b:' keyword expansion (second word or more) */
-	TCMP_MIME_LIST =  32,
+	TCMP_CMD_DESC =   32,
+	TCMP_MIME_LIST =  33,
 	TCMP_MIME_FILES = TCMP_FILE_TYPES_FILES /* Same behavior */
 };
 
