@@ -59,6 +59,8 @@ There are several ways of getting help in \fBclifm\fR. Once in the program, ente
 .sp
 To get help about some specific topic, type \fIhelp <TAB>\fR to get a list of available help topics. Choose the topic you want and then just press Enter.
 .sp
+For a list of available commands and a brief description type \fIcmd<TAB>\fR.
+.sp
 Help for all internal commands can be accessed via the \fI-h\fR or \fI--help\fR flags. For example, to get help about the selection function, \fIs -h\fR or \fIs --help\fR.
 .sp
 A convenient way of getting full information about \fBclifm\fR commands is via the \fIih\fR action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Just type \fIih\fR to run the plugin (it depends on \fBfzf\fR(1)) and select the command you want to obtain information about.
