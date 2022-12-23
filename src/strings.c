@@ -2185,8 +2185,11 @@ parse_input_str(char *str)
 		old_mt += (c > 0 ? c - 1 : 0);
 	}
 
-	putchar('\r');
-	fflush(stdout);
+	if (mime_type_n > 0) {
+		putchar('\r');
+		ERASE_TO_RIGHT;
+		fflush(stdout);
+	}
 
 	free(mime_type_array);
 #endif /* !_NO_MAGIC */
