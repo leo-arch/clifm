@@ -387,6 +387,9 @@ construct_rm_cmd(char ***rfiles, char *_param, size_t n)
 static int
 bulk_remove_files(char ***rfiles)
 {
+	if (!*rfiles)
+		return EXIT_FAILURE;
+
 	puts(_("The following files will be removed:"));
 	int n;
 	for (n = 0; (*rfiles)[n]; n++)
@@ -491,6 +494,9 @@ bulk_remove(char *s1, char *s2)
 		return nothing_to_do(&tmp_file, &a, n, fd);
 
 	char **__files = get_files_from_tmp_file(tmp_file, target, n);
+	if (!__files)
+		goto END;
+
 	char **rem_files = get_remove_files(target, __files, &a, n);
 
 	ret = bulk_remove_files(&rem_files);
