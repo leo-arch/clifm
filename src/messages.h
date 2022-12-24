@@ -70,7 +70,7 @@ use the -h,--help flag. Example: \"- --help\"."
 - Compress/archive all selected files\n\
     ac sel\n\
 - Compress/archive a range of files\n\
-    ac 12-24 (or 'ac <TAB>' to choose from a list: multi-selection is allowed)\n\
+    ac 12-24 (or 'ac <TAB>' to choose from a list - multi-selection is allowed)\n\
 - Decompress/dearchive a file\n\
     ad file.tar.gz\n\
   or just open the file and CliFM will prompt the appropriate menu\n\
@@ -80,9 +80,9 @@ zstd(1)           Everything related to Zstandard\n\
 mkisofs(1)        Create ISO 9660 files\n\
 7z(1) / mount(1)  Operate on ISO 9660 files\n\
 archivemount(1)   Mount archives\n\
-atool(1)          Extraction/decompression, listing, and repacking archives"
+atool(1)          Extraction/decompression, listing, and repacking of archives"
 
-#define AUTOCD_USAGE "Turn autocd on-off\n\
+#define AUTOCD_USAGE "Turn autocd on/off\n\
 \x1b[1mUSAGE\x1b[0m\n\
   acd, autocd [on, off, status]"
 
@@ -108,7 +108,7 @@ leaving, instead of entering, the directory.\n\n\
 Note: Only single-line commands are allowed. If you need more advanced\n\
 stuff, set here the path to a script doing whatever needs to be done."
 
-#define AUTO_OPEN_USAGE "Turn auto-open on-off\n\n\
+#define AUTO_OPEN_USAGE "Turn auto-open on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   ao, auto-open [on, off, status]"
 
@@ -140,7 +140,7 @@ NAME is not specified, print the list of all parent directories\n\n\
   bl FILE...\n\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
 - Symlink files file1 file2 file3 and file4 at once\n\
-    bl file* (or 'bl <TAB>' to choose from a list: multi-selection is\n\
+    bl file* (or 'bl <TAB>' to choose from a list - multi-selection is\n\
   allowed)\n\n\
 Note: Links are created in the current directory.\n\
 By default links are named FILE.link (you will be given the option to\n\
@@ -179,7 +179,7 @@ change this suffix)"
   br, bulk ELN/FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Bulk rename all files ending with .pdf in the current directory\n\
-    br *.pdf (or 'br <TAB> to choose from a list: mutli-selection is\n\
+    br *.pdf (or 'br <TAB> to choose from a list - mutli-selection is\n\
   allowed')\n\
 - Bulk rename all selected files\n\
     br sel"
@@ -197,7 +197,7 @@ change this suffix)"
 \x1b[1mUSAGE\x1b[0m\n\
   colors"
 
-#define COLUMNS_USAGE "Set columned list of files on-off\n\n\
+#define COLUMNS_USAGE "Set columned list of files on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   cl, columns [on, off]"
 
@@ -221,7 +221,7 @@ change this suffix)"
 - Deselect all selected files\n\
     ds * (or Alt-d)\n\
 - Deselect files from a menu\n\
-    ds (or 'ds <TAB>' to choose from a list: multi-selection is allowed)"
+    ds (or 'ds <TAB>' to choose from a list - multi-selection is allowed)"
 
 #define DESKTOP_NOTIFICATIONS_USAGE "Errors, warnings, and notices are send \
 to the notification daemon instead of\n\
@@ -271,7 +271,7 @@ Parameters passed to cp: -a"
 - Create a fresh configuration file (making a backup of the old one)\n\
     edit reset"
 
-#define EXT_USAGE "Turn the use of external commands on-off\n\n\
+#define EXT_USAGE "Turn on/off the use of external commands\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   ext [on, off, status]"
 
@@ -284,7 +284,7 @@ Parameters passed to cp: -a"
 - Export all PDF files in the current directory\n\
     exp *.pdf"
 
-#define FC_USAGE "Turn the files counter for directories on-off\n\n\
+#define FC_USAGE "Turn on/off the files counter for directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   fc, filescounter [on, off, status]"
 
@@ -311,7 +311,7 @@ Parameters passed to cp: -a"
 - Use powers of 1000 instead of 1024 for file sizes (Linux only)\n\
     Run with --si"
 
-#define FF_USAGE "Set list directories first on-off\n\n\
+#define FF_USAGE "Set list-directories-first on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   ff, dirs-first [on, off, status]\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
@@ -433,7 +433,7 @@ files in the current directory:\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   fz [on, off]"
 
-#define HF_USAGE "Set hidden files on-off\n\
+#define HF_USAGE "Set hidden files on/off\n\
 \x1b[1mUSAGE\x1b[0m\n\
   hf, hidden [on, off, status]\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
@@ -476,7 +476,7 @@ You can also access the commands history via the exclamation mark (!)\n\
 Note: If FZF TAB completion mode is enabled, you can easily navigate the \
 commands history list by typing '!' and then pressing TAB"
 
-#define ICONS_USAGE "Set icons on-off\n\n\
+#define ICONS_USAGE "Set icons on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   icons [on, off]"
 
@@ -525,7 +525,7 @@ works.\n\n\
 - Edit the symbolic link named file.link\n\
     le file.link"
 
-#define LM_USAGE "Set light mode on-off\n\n\
+#define LM_USAGE "Set light mode on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   lm [on, off]"
 
@@ -653,7 +653,7 @@ both 'dir' and 'subdir' directories will be created if they do not exist"
 - Set the resources opener back to the default (Lira)\n\
     opener default"
 
-#define PAGER_USAGE "Set the files list pager on-off\n\n\
+#define PAGER_USAGE "Set the files list pager on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   pg, pager [on, off, status, NUM]\n\n\
 If set to 'on', run the pager whenever the list of files does no fit on\n\
@@ -792,7 +792,7 @@ Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink,\n\
 (s)ocket, (f)ifo/pipe, (b)lock device, (c)haracter device\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Select the file whose ELN is 12\n\
-    s 12 (or 's <TAB>' to choose from a list: multi-selection is allowed)\n\
+    s 12 (or 's <TAB>' to choose from a list - multi-selection is allowed)\n\
 - Select all files ending with .odt:\n\
     s *.odt\n\
 - Select multiple files at once\n\
@@ -877,7 +877,7 @@ Mark the files you need via TAB and then press Enter or Right"
 
 #define TE_USAGE "Toggle the executable bit on files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  te ELN/FILE... (or 'te <TAB>' to choose from a list: multi-selection\n\
+  te ELN/FILE... (or 'te <TAB>' to choose from a list - multi-selection\n\
   is allowed)\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Set the executable bit on all shell scripts in the current directory\n\
@@ -890,7 +890,7 @@ Mark the files you need via TAB and then press Enter or Right"
   t, tr, trash [ELN/FILE]... [ls, list] [clear, empty] [del]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Trash the file whose ELN is 12\n\
-    t 12 (or 't <TAB>' to choose from a list: multi-selection is allowed)\n\
+    t 12 (or 't <TAB>' to choose from a list - multi-selection is allowed)\n\
 - Trash all files ending with .sh\n\
     t *.sh\n\
 - List currently trashed files\n\
@@ -902,9 +902,9 @@ Mark the files you need via TAB and then press Enter or Right"
 - Untrash all trashed files (restore them to their original location)\n\
     u *\n\
 - Untrash files selectively using a menu\n\
-    u (or 'u <TAB>' to choose from a list: multi-selection is allowed)"
+    u (or 'u <TAB>' to choose from a list - multi-selection is allowed)"
 
-#define UNICODE_USAGE "Set unicode on-off\n\n\
+#define UNICODE_USAGE "Set Unicode on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   uc, unicode [on, off, status]"
 
@@ -915,7 +915,7 @@ Mark the files you need via TAB and then press Enter or Right"
 - Untrash all trashed files (restore them to their original location)\n\
     u *\n\
 - Untrash files selectively using a menu\n\
-    u (or 'u <TAB>' to choose from a list: multi-selection is allowed)"
+    u (or 'u <TAB>' to choose from a list - multi-selection is allowed)"
 
 #define VV_USAGE "Copy files into a directory and bulk rename them at once\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -951,7 +951,7 @@ r  -> rm -I (for non-directories) (2)\n\n\
 (2) 'rm -f' on NetBSD/OpenBSD/MacOS\n\n\
 The 'paste' command is equivalent to 'c' and exists only for semantic\n\
 reasons. For example, to copy selected files into the current directory,\n\
-it makes sense to write 'paste sel', or its shortened version, 'v sel'\n\n\
+it makes sense to write 'paste sel', or its shortened version, 'v sel'.\n\n\
 By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
 (-i), i.e. prompting before overwriting a file. To run non-interactivelly\n\
 instead, use the -f,--force parameter (see the examples below). You can\n\
@@ -1021,11 +1021,11 @@ your workspaces"
 \x1b[1mUSAGE\x1b[0m\n\
   x, X [DIR]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
-- Launch a new instance in the current directory:\n\
+- Launch a new instance in the current directory\n\
     x\n\
-- Open the directory mydir in a new instance:\n\
+- Open the directory mydir in a new instance\n\
     x mydir\n\
-- Launch a new instance as root:\n\
+- Launch a new instance as root\n\
     X\n\n\
 Note: By default xterm(1) is used. Set your preferred terminal\n\
 emulator using the TerminalCmd option in the configuration file"
@@ -1108,7 +1108,7 @@ Toggle it with Alt-p\
 \n      --icons-use-file-color\t Icon colors follow file colors\
 \n      --int-vars\t\t Enable internal variables\
 \n      --list-and-quit\t\t List files and quit\
-\n      --max-dirhist\t\t Maximum number of visited directories to recall\
+\n      --max-dirhist=NUM\t\t Maximum number of visited directories to recall\
 \n      --max-files=NUM\t\t List only up to NUM files\
 \n      --max-path=NUM\t\t Number of characters \
 after which the current directory in the prompt will be abreviated to its \
