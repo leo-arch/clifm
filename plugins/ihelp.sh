@@ -120,6 +120,7 @@ msg, messages@
 n, new@
 net \[@
 o, open@
+oc @
 opener @
 ow @
 path, cwd@
