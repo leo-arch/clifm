@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 17, 2022" "clifm 1.9.2" "CLIFM Manual"
+.TH "CLIFM" "1" "Dec 26, 2022" "clifm 1.9.3" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -835,6 +835,19 @@ If you want to run the program in the background, simply add the ampersand chara
 .sp
 If the file to be opened is an archive/compressed file, the archive function (see the \fIad\fR command above) will be executed instead.
 .TP
+.B oc \fIELN/FILE\fR...
+Interactively change files ownership
+.sp
+A new prompt is displayed using user and primary group common to all files passed as parameters as ownership template.
+.sp
+Ownership (both user and primary group, if specified) is changed for all files passed as parameters. If the file is a symbolic link, the operation is performed on the target file, and not on the symbolic link itself. Bear in mind that recursion is not supported: use \fBchown\fR(1) (with the \fI\-R\fR option) instead.
+.sp
+Both names and ID numbers are allowed (TAB completion for names is available).
+.sp
+If only a name/number is entered, it is taken as the user who owns the file(s).
+.sp
+Use the \fIpc\fR command to edit files permissions.
+.TP
 .B ow \fIELN/FILE\fR [\fIAPPLICATION\fR]
 Print a list of available applications associated to _ELN/FILENAME (either via its MIME type or its file extension), allowing the user to choose one of these applications, and then open the file with the selected application. In simple words, this is what in most GUI file managers is called \fBOpen with...\fR This command supports TAB completion: just type "\fIow filename \fR", then press TAB, and those applications able to open FILENAME will be listed.
 .TP
@@ -852,7 +865,7 @@ For more information about file details consult the file-details help topic: \fI
 print the current working directory.
 .TP
 .B pc \fIELN/FILE\fR...
-Interactively edit file permissions of files passed as arguments (only traditional Unix permissions are supported).
+Interactively change files permissions (only traditional Unix permissions are supported).
 .sp
 A new prompt is displayed using actual permissions (in symbolic notation) of the file to be edited as template. If editing multiple files with \fIdifferent sets of permissions\fR, only shared permission bits are set in the permissions template.
 .sp
@@ -863,6 +876,8 @@ Both symbolic and octal notation for the new permissions set are allowed.
 Recursivelly setting file permissions is not supported. Use \fBchmod\fR(1) with the \fI-R\fR flag instead.
 .sp
 If you just need to toggle the executable permission bit on a file, you can use the \fIte\fR command.
+.sp
+Use the \fIoc\fR command to edit files ownership.
 .TP
 .B pf, prof, profile \fR[\fIls\fR, \fIlist\fR] [\fIset\fR, \fIadd\fR, \fIdel PROFILE\fR]
 with no arguments, prints the name of the currently used profile. Use the \fIls\fR or \fIlist\fR option to list available profiles. To switch, add or delete a profile, use the \fIset\fR, \fIadd\fR, and \fIdel\fR options respectively followed by the corresponding profile name. Bear in mind that, when switching profiles, command line arguments will be ignored.
