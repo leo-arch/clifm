@@ -708,7 +708,8 @@ print_tips(int all)
 		"Press Alt+- to launch the files previewer (requires fzf)",
 		"Customize previewing applications: 'view edit' or F7",
 		"Interactively select files (requires fzf, fzy, or smenu): 's /dir/*<TAB>'",
-		"Edit file permissions using the 'pc' command",
+		"Change files permissions using the 'pc' command",
+		"Change files ownership using the 'oc' command",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
