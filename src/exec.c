@@ -90,8 +90,8 @@ static char *
 get_new_filename(char *cur_name)
 {
 	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), "Enter new name ('Ctrl-d' to quit)\n"
-		"\001%s\002>\001%s\002 ", mi_c, tx_c);
+	snprintf(_prompt, sizeof(_prompt), _("Enter new name (Ctrl-d to quit)\n"
+		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 
 	char *new_name = (char *)NULL;
 	while (!new_name) {

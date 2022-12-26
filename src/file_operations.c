@@ -790,8 +790,8 @@ create_file(char **cmd)
 	if (!cmd[1]) {
 		puts(_("End filename with a slash to create a directory"));
 		char _prompt[NAME_MAX];
-		snprintf(_prompt, sizeof(_prompt), "Enter new file name ('Ctrl-d' to quit)\n"
-			"\001%s\002>\001%s\002 ", mi_c, tx_c);
+		snprintf(_prompt, sizeof(_prompt), _("Enter new file name (Ctrl-d to quit)\n"
+			"\001%s\002>\001%s\002 "), mi_c, tx_c);
 		char *filename = (char *)NULL;
 		while (!filename) {
 			filename = get_newname(_prompt, (char *)NULL);
@@ -1108,8 +1108,8 @@ static char *
 get_new_link_target(char *cur_target)
 {
 	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), "Enter new target ('Ctrl-d' to quit)\n"
-		"\001%s\002>\001%s\002 ", mi_c, tx_c);
+	snprintf(_prompt, sizeof(_prompt), _("Enter new target (Ctrl-d to quit)\n"
+		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 
 	char *new_target = (char *)NULL;
 	while (!new_target) {
