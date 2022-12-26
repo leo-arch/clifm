@@ -328,21 +328,22 @@ check_third_party_cmds(void)
 	set_mount_cmd(udisks2ok, udevilok);
 }
 
-/* Returns 1 if at least one of the user's groups match the file GID FILE_GID.
- * Otherwise returns 0 */
+/* Return 1 if at least one of the user's groups match the file gid GID.
+ * Otherwise, return 0 */
 static int
-check_user_groups(const gid_t file_gid)
+check_user_groups(const gid_t gid)
 {
 	int i;
 	for (i = 0; i < user.ngroups; i++) {
-		if (user.groups[i] == file_gid)
+		if (user.groups[i] == gid)
 			return 1;
 	}
 
 	return 0;
 }
 
-/* Return 1 if current user has access to FILE. Otherwise, return zero */
+/* Return 1 if current user has access to file with mode MODE, uid UID, and gid GID.
+ * Otherwise, return zero */
 int
 check_file_access(const mode_t mode, const uid_t uid, const gid_t gid)
 {

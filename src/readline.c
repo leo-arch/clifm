@@ -46,10 +46,7 @@
 #include <limits.h>
 #include <pwd.h>
 //#include <wchar.h> /* mbrtowc(3) */
-
-#if !defined(__ANDROID__)
-# include <grp.h> /* Needed by groups_generator(): getgrent(3) */
-#endif /* __ANDROID__ */
+#include <grp.h> /* Needed by groups_generator(): getgrent(3) */
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
