@@ -344,14 +344,14 @@ check_user_groups(const gid_t file_gid)
 
 /* Return 1 if current user has access to FILE. Otherwise, return zero */
 int
-check_file_access(const struct stat *file)
+check_file_access(const mode_t mode, const uid_t uid, const gid_t gid)
 {
 	if (user.uid == 0) /* We are root */
 		return 1;
 
 	int f = 0; /* Hold file ownership flags */
 
-	mode_t val = (file->st_mode & (mode_t)~S_IFMT);
+	mode_t val = (mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) f |= R_USR;
 	if (val & S_IXUSR) f |= X_USR;
 
@@ -361,19 +361,19 @@ check_file_access(const struct stat *file)
 	if (val & S_IROTH) f |= R_OTH;
 	if (val & S_IXOTH) f |= X_OTH;
 
-	if (S_ISDIR(file->st_mode)) {
-		if ((f & R_USR) && (f & X_USR) && file->st_uid == user.uid)
+	if (S_ISDIR(mode)) {
+		if ((f & R_USR) && (f & X_USR) && uid == user.uid)
 			return 1;
-		if ((f & R_GRP) && (f & X_GRP) && (file->st_gid == user.gid
-		|| check_user_groups(file->st_gid) == 1))
+		if ((f & R_GRP) && (f & X_GRP) && (gid == user.gid
+		|| check_user_groups(gid) == 1))
 			return 1;
 		if ((f & R_OTH) && (f & X_OTH))
 			return 1;
 	} else {
-		if ((f & R_USR) && file->st_uid == user.uid)
+		if ((f & R_USR) && uid == user.uid)
 			return 1;
-		if ((f & R_GRP) && (file->st_gid == user.gid
-		|| check_user_groups(file->st_gid) == 1))
+		if ((f & R_GRP) && (gid == user.gid
+		|| check_user_groups(gid) == 1))
 			return 1;
 		if (f & R_OTH)
 			return 1;

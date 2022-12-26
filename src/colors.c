@@ -134,7 +134,7 @@ get_regfile_color(const char *filename, const struct stat *attr)
 	if (conf.colorize == 0)
 		return fi_c;
 
-	if (check_file_access(attr) == 0)
+	if (check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
 		return nf_c;
 
 	char *color = get_file_color(filename, attr);
@@ -1801,7 +1801,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	case S_IFDIR:
 		if (conf.colorize == 0)
 			color = di_c;
-		else if (check_file_access(&attr) == 0)
+		else if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
 			color = nd_c;
 		else
 			color = get_dir_color(ent, attr.st_mode, attr.st_nlink);

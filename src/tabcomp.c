@@ -367,11 +367,11 @@ fzftab_color(char *filename, const struct stat *attr)
 
 	switch(attr->st_mode & S_IFMT) {
 	case S_IFDIR:
-		if (!check_file_access(attr))
+		if (check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
 			return nd_c;
 		return get_dir_color(filename, attr->st_mode, attr->st_nlink);
 	case S_IFREG:
-		if (!check_file_access(attr))
+		if (check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
 			return nf_c;
 		char *ext_cl = (char *)NULL;
 		char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;

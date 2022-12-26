@@ -753,7 +753,7 @@ get_properties(char *filename, const int dsize)
 		 *cbold = BOLD,    /* Just bold */
 		 *cend = df_c;     /* Ending olor */
 
-	if (attr.st_uid == user.uid || attr.st_gid == user.gid)
+	if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 1)
 		cid = dg_c;
 
 	switch (attr.st_mode & S_IFMT) {
@@ -767,7 +767,7 @@ get_properties(char *filename, const int dsize)
 		ctype = di_c;
 		if (conf.colorize == 0)
 			color = di_c;
-		else if (check_file_access(&attr) == 0)
+		else if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
 			color = nd_c;
 		else
 			color = get_dir_color(filename, attr.st_mode, attr.st_nlink);
@@ -991,7 +991,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		 *csize = props->dir ? dz_c : df_c, /* Directories size */
 		 *cend = df_c;  /* Ending Color */
 
-	if (props->uid == user.uid || props->gid == user.gid)
+	if (check_file_access(props->mode, props->uid, props->gid) == 1)
 		cid = dg_c;
 
 	switch (props->mode & S_IFMT) {

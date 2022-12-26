@@ -2239,7 +2239,7 @@ list_dir(void)
 			if (conf.files_counter) {
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			} else {
-				if (stat_ok && check_file_access(&attr) == 0)
+				if (stat_ok && check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
 					file_info[n].filesn = -1;
 				else
 					file_info[n].filesn = 1;
@@ -2304,7 +2304,8 @@ list_dir(void)
 			cap_t cap;
 #endif
 			/* Do not perform the access check if the user is root */
-			if (user.uid != 0 && stat_ok && check_file_access(&attr) == 0) {
+			if (user.uid != 0 && stat_ok
+			&& check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0) {
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;

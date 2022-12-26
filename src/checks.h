@@ -33,7 +33,7 @@ __BEGIN_DECLS
 void check_completion_mode(void);
 #endif
 void check_file_size(char *, int);
-int  check_file_access(const struct stat *);
+int  check_file_access(const mode_t, const uid_t, const gid_t);
 char **check_for_alias(char **);
 int  check_glob_char(const char *, const int);
 int  check_immutable_bit(char *);
