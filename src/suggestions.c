@@ -216,6 +216,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 		}
 
 		else if (*s == 'o') {
+			if (*(s + 1) == 'c') return OC_DESC;
 			if (*(s + 1) == 'w') return OW_DESC;
 		}
 

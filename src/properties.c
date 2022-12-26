@@ -339,7 +339,7 @@ get_new_perms(char *str, const int diff)
 		printf(_("Files with different sets of permissions\n"
 			"Only shared permission bits are set in the template\n"));
 	char m[NAME_MAX];
-	snprintf(m, sizeof(m), _("Edit file permissions ('Ctrl-d' to quit)\n"
+	snprintf(m, sizeof(m), _("Edit file permissions (Ctrl-d to quit)\n"
 		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 
 	alt_rl_prompt(m, str);
@@ -504,6 +504,202 @@ set_file_perms(char **args)
 	return ret;
 }
 
+static char *
+get_new_ownership(char *str, const int diff)
+{
+	int poffset_bk = prompt_offset;
+	prompt_offset = 3;
+	xrename = 3; /* Allow only completion for user and group names */
+
+	if (diff == 1)
+		printf(_("%sFiles with different owners\n"
+			"Only common owners are set in the template\n"), tx_c);
+	char m[NAME_MAX];
+	snprintf(m, sizeof(m), _("%sEdit file ownership (Ctrl-d to quit)\n"
+		"\001%s\002>\001%s\002 "), tx_c, mi_c, tx_c);
+
+	alt_rl_prompt(m, str);
+
+	char *new_own = (char *)NULL;
+	if (rl_callback_handler_input) {
+		new_own = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
+		free(rl_callback_handler_input);
+		rl_callback_handler_input = (char *)NULL;
+	}
+
+	xrename = 0;
+	prompt_offset = poffset_bk;
+
+	if (diff == 0 && new_own && *str == *new_own && strcmp(str, new_own) == 0) {
+		fprintf(stderr, _("oc: Nothing to do\n"));
+		free(new_own);
+		new_own = (char *)NULL;
+	}
+
+	return new_own;
+}
+
+static char *
+get_common_ownership(char **args, int *exit_status, int *diff)
+{
+	if (!args || !args[0])
+		return (char *)NULL;
+
+	*exit_status = EXIT_SUCCESS;
+	struct stat a;
+	if (stat(args[0], &a) == -1) {
+		fprintf(stderr, "oc: %s: %s\n", args[0], strerror(errno));
+		*exit_status = errno;
+		return (char *)NULL;
+	}
+
+	int common_uid = 1, common_gid = 1;
+	struct stat b;
+	size_t i;
+
+	for (i = 1; args[i]; i++) {
+		if (stat(args[i], &b) == -1) {
+			fprintf(stderr, "oc: %s: %s\n", args[i], strerror(errno));
+			*exit_status = errno;
+			return (char *)NULL;
+		}
+		if (b.st_uid != a.st_uid) {
+			common_uid = 0;
+			*diff = 1;
+		}
+		if (b.st_gid != a.st_gid) {
+			common_gid = 0;
+			*diff = 1;
+		}
+		if (common_gid == 0 && common_uid == 0)
+			return savestring(":", 1);
+	}
+
+	struct passwd *owner = getpwuid(a.st_uid);
+	struct group *group = getgrgid(a.st_gid);
+
+	size_t owner_len = (common_uid > 0 && owner && owner->pw_name)
+		? wc_xstrlen(owner->pw_name) : 0;
+	size_t group_len = (common_gid > 0 && group && group->gr_name)
+		? wc_xstrlen(group->gr_name) : 0;
+
+	if (owner_len + group_len == 0)
+		return (char *)NULL;
+
+	char *p = xnmalloc(owner_len + group_len + 2, sizeof(char));
+	sprintf(p, "%s%c%s", owner_len > 0 ? owner->pw_name : "",
+		group_len > 0 ? ':' : 0,
+		group_len > 0 ? group->gr_name : "");
+
+	return p;
+}
+
+int
+set_file_owner(char **args)
+{
+	if (!args || !args[1] || IS_HELP(args[1])) {
+		puts(OC_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	int exit_status = EXIT_SUCCESS, diff = 0;
+	char *own = get_common_ownership(args + 1, &exit_status, &diff);
+	if (!own)
+		return exit_status;
+
+	/* Neither owners nor primary groups are common */
+	if (*own == ':' && !*(own + 1))
+		*own = '\0';
+
+	char *new_own = get_new_ownership(own, diff);
+	free(own);
+
+	if (!new_own || !*new_own) {
+		free(new_own);
+		return EXIT_SUCCESS;
+	}
+
+	char *new_group = (strchr(new_own, ':'));
+	if (new_group) {
+		*new_group = '\0';
+		if (!*(new_group + 1))
+			new_group = (char *)NULL;
+	}
+
+	struct passwd *owner = (struct passwd *)NULL;
+	struct group *group = (struct group *)NULL;
+
+	// Validate new ownership
+	if (*new_own) { // *NEW_OWN is null in case of ":group" or ":gid"
+		if (is_number(new_own))
+			owner = getpwuid((uid_t)atoi(new_own));
+		else
+			owner = getpwnam(new_own);
+
+		if (!owner || !owner->pw_name) {
+			fprintf(stderr, _("oc: %s: Invalid user\n"), new_own);
+			free(new_own);
+			return EXIT_FAILURE;
+		}
+	}
+
+	if (new_group && *(++new_group)) {
+		if (is_number(new_group))
+			group = getgrgid((gid_t)atoi(new_group));
+		else
+			group = getgrnam(new_group);
+
+		if (!group || !group->gr_name) {
+			fprintf(stderr, _("oc: %s: Invalid group\n"), new_group);
+			free(new_own);
+			return EXIT_FAILURE;
+		}
+	}
+
+	// Change ownership
+	struct stat a;
+	size_t new_o = 0, new_g = 0, i;
+
+	for (i = 1; args[i]; i++) {
+		if (stat(args[i], &a) == -1) {
+			fprintf(stderr, "%s: %s\n", args[i], strerror(errno));
+			free(new_own);
+			return errno;
+		}
+
+		if (fchownat(AT_FDCWD, args[i],
+		*new_own ? owner->pw_uid : a.st_uid,
+		new_group ? group->gr_gid : a.st_gid,
+		0) == -1) {
+			fprintf(stderr, "chown: %s: %s\n", args[i], strerror(errno));
+			exit_status = errno;
+			continue;
+		}
+
+		if (*new_own && owner->pw_uid != a.st_uid) {
+			printf(_("%s->%s %s: User set to %d (%s%s%s)\n"),
+				mi_c, NC, args[i], owner->pw_uid, BOLD, owner->pw_name, NC);
+			new_o++;
+		}
+
+		if (new_group && group->gr_gid != a.st_gid) {
+			printf(_("%s->%s %s: Primary group set to %d (%s%s%s)\n"),
+				mi_c, NC, args[i], group->gr_gid, BOLD, group->gr_name, NC);
+			new_g++;
+		}
+	}
+
+	if (new_o + new_g == 0) {
+		if (exit_status == 0)
+			puts(_("oc: Nothing to do"));
+	} else {
+		printf(_("New ownership set for %zu file(s)\n"), new_o + new_g);
+	}
+
+	free(new_own);
+	return exit_status;
+}
+
 /* Format time data given by _TIME (in the format specified by the TIME_STR
  * macro) and copy the result into the array BUF of size SIZE */
 static void
@@ -612,10 +808,8 @@ get_properties(char *filename, const int dsize)
 	nlink_t link_n = attr.st_nlink;
 	uid_t owner_id = attr.st_uid;
 	gid_t group_id = attr.st_gid;
-	struct group *group;
-	struct passwd *owner;
-	group = getgrgid(group_id);
-	owner = getpwuid(owner_id);
+	struct passwd *owner = getpwuid(owner_id);
+	struct group *group = getgrgid(group_id);
 
 	char *wname = (char *)NULL;
 	size_t wlen = wc_xstrlen(filename);

@@ -488,6 +488,11 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	|| cur_comp_type == TCMP_MIME_LIST) {
 		rl_insert_text(buf);
 		return;
+	} else if (cur_comp_type == TCMP_OWNERSHIP) {
+		rl_insert_text(buf + *offset);
+		if (rl_line_buffer && !strchr(rl_line_buffer, ':'))
+			rl_stuff_char(':');
+		return;
 	} else {
 		if (conf.autocd == 0 && cur_comp_type == TCMP_JUMP)
 			rl_insert_text("cd ");
@@ -1108,6 +1113,20 @@ get_query_str(int *fzf_offset)
 	char *query = (char *)NULL;
 
 	switch(cur_comp_type) {
+	case TCMP_OWNERSHIP: {
+		char *sc = rl_line_buffer ? strchr(rl_line_buffer, ':') : (char *)NULL;
+		if (sc) {
+			if (!*(sc + 1))
+				return (char *)NULL;
+			query = sc + 1;
+			*fzf_offset = (int)((sc + 1) - rl_line_buffer);
+		} else {
+			query = rl_line_buffer;
+			*fzf_offset = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) - 3 : 0;
+		}
+		}
+		break;
+
 	case TCMP_DESEL: {
 		char *sp = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
 		if (!sp || !*(sp++))
@@ -1399,6 +1418,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 				query = lw ? lw + 2 : (char *)NULL;
 			else if (cur_comp_type == TCMP_TAGS_C)
 				query = lw ? lw + 1 : (char *)NULL;
+			else if (cur_comp_type == TCMP_OWNERSHIP)
+				query = (char *)NULL;
 			else
 				query = lw ? lw : (char *)NULL;
 		}
@@ -1584,6 +1605,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	else if (cur_comp_type == TCMP_DESEL) {
 		prefix_len = strlen(query ? query : (lw ? lw : ""));
+	}
+
+	else if (cur_comp_type == TCMP_OWNERSHIP) {
+		char *p = rl_line_buffer ? strchr(rl_line_buffer, ':') : (char *)NULL;
+		if (p)
+			prefix_len = *(++p) ? wc_xstrlen(p) : 0;
+		else
+			prefix_len = rl_line_buffer ? wc_xstrlen(rl_line_buffer) : 0;
 	}
 
 	else if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
@@ -1961,6 +1990,7 @@ AFTER_USUAL_COMPLETION:
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
 		&& (cur_comp_type != TCMP_SEL || fzftab != 1 || sel_n == 1)
 		&& cur_comp_type != TCMP_CMD_DESC
+		&& cur_comp_type != TCMP_OWNERSHIP
 
 		&& (cur_comp_type != TCMP_BM_PATHS || !matches[1])
 
@@ -2063,6 +2093,15 @@ AFTER_USUAL_COMPLETION:
 					rl_ding();	/* There are other matches remaining. */
 			}
 		} else {
+			if (cur_comp_type == TCMP_OWNERSHIP) {
+				char *sc = rl_line_buffer ? strchr(rl_line_buffer, ':') : (char *)NULL;
+				size_t l = wc_xstrlen(sc ? sc + 1 : rl_line_buffer ? rl_line_buffer : "");
+				rl_insert_text(matches[0] + l);
+				if (!sc)
+					rl_stuff_char(':');
+				break;
+			}
+
 			char temp_string[4];
 			int temp_string_index = 0;
 
@@ -2292,6 +2331,11 @@ CALC_OFFSET:
 			}
 		} else {
 			tab_offset = strlen(ptr);
+		}
+
+		if (cur_comp_type == TCMP_OWNERSHIP && *ptr == ':' && !*(ptr + 1)) {
+			ptr = (char *)NULL;
+			tab_offset = 0;
 		}
 
 		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR

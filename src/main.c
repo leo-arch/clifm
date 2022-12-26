@@ -483,6 +483,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"new", 3},
 	{"net", 3},
 	{"o", 1},
+	{"oc", 2},
 	{"open", 4},
 	{"ow", 2},
 	{"opener", 6},

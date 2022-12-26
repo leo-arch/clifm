@@ -2407,9 +2407,12 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0)
 		return (exit_code = preview_function(comm + 1));
 
-	/*    ############### TOGGLE EXEC ##################     */
+	/*    ############## TOGGLE EXEC ##################     */
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])
 		return (exit_code = _toggle_exec(comm));
+
+	else if (*comm[0] == 'o' && comm[0][1] == 'c' && !comm[0][2])
+		return (exit_code = set_file_owner(comm));
 
 	/*    ########### PERMISSIONS CHANGER ###############     */
 	else if (*comm[0] == 'p' && comm[0][1] == 'c' && !comm[0][2])

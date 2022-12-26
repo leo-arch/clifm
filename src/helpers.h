@@ -113,10 +113,10 @@
 #define PROGRAM_NAME "clifm"
 #define PNL "clifm" /* Program name lowercase */
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.9.2"
+#define VERSION "1.9.3"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
-#define DATE "Dec 17, 2022"
+#define DATE "Dec 26, 2022"
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
@@ -1172,7 +1172,8 @@ enum comp_type {
 	TCMP_WORKSPACES = 30,
 	TCMP_BM_PATHS =   31, /* 'b:' keyword expansion (second word or more) */
 	TCMP_CMD_DESC =   32,
-	TCMP_MIME_LIST =  33,
+	TCMP_OWNERSHIP =  33,
+	TCMP_MIME_LIST =  34,
 	TCMP_MIME_FILES = TCMP_FILE_TYPES_FILES /* Same behavior */
 };
 

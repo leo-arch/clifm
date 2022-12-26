@@ -47,6 +47,10 @@
 #include <pwd.h>
 //#include <wchar.h> /* mbrtowc(3) */
 
+#if !defined(__ANDROID__)
+# include <grp.h> /* Needed by groups_generator(): getgrent(3) */
+#endif /* __ANDROID__ */
+
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
@@ -199,10 +203,11 @@ int_cmds_generator(const char *text, int state)
 		"n       (create files/directories)",
 		"net     (manage remote resources)",
 		"o       (open file)",
+		"oc      (change files ownership)",
 		"opener  (set a custom resource opener)",
 		"ow      (open file with...)",
 		"p       (print files properties)",
-		"pc      (edit files permissions)",
+		"pc      (change files permissions)",
 		"pf      (manage profiles)",
 		"pg      (set the files pager on-off)",
 		"pin     (pin a directory)",
@@ -2749,6 +2754,52 @@ options_generator(const char *text, int state)
 }
 
 static char *
+groups_generator(const char *text, int state)
+{
+#if defined(__ANDROID__)
+	UNUSED(text); UNUSED(state);
+	return (char *)NULL;
+#else
+	static size_t len;
+	const struct group *p;
+
+	if (!state)
+		len = *(text + 1) ? wc_xstrlen(text + 1) : 0;
+
+	while ((p = getgrent())) {
+		if (!p->gr_name) break;
+		if (len == 0 || strncmp(p->gr_name, text + 1, len) == 0)
+			return strdup(p->gr_name);
+	}
+
+	return (char *)NULL;
+#endif /* __ANDROID__ */
+}
+
+static char *
+owners_generator(const char *text, int state)
+{
+#if defined(__ANDROID__)
+	UNUSED(text); UNUSED(state);
+	return (char *)NULL;
+#else
+	static size_t len;
+	const struct passwd *p;
+
+	if (!state)
+		len = wc_xstrlen(text);
+
+	while ((p = getpwent())) {
+		if (!p->pw_name) break;
+		if (len == 0 || strncmp(p->pw_name, text, len) == 0)
+			return strdup(p->pw_name);
+	}
+
+	return (char *)NULL;
+#endif /* __ANDROID__ */
+}
+
+static char *
 users_generator(const char *text, int state)
 {
 #if defined(__ANDROID__)
@@ -2757,7 +2808,7 @@ users_generator(const char *text, int state)
 #else
 	static size_t len;
 	const struct passwd *p;
-	rl_filename_completion_desired = 1;
+//	rl_filename_completion_desired = 1;
 
 	if (!state)
 		len = strlen(text);
@@ -3112,6 +3163,25 @@ my_rl_completion(const char *text, int start, int end)
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
 
+		/* #### OWNERSHIP EXPANSION ####
+		 * Used only by the oc command to edit files ownership */
+		if (xrename == 3) {
+			rl_attempted_completion_over = 1;
+			char *sc = strchr(text, ':');
+			if (!sc) {
+				matches = rl_completion_matches(text, &owners_generator);
+				endpwent();
+			} else {
+				matches = rl_completion_matches(sc, &groups_generator);
+				endgrent();
+			}
+			if (matches) {
+				cur_comp_type = TCMP_OWNERSHIP;
+				return matches;
+			}
+		}
+
+		/* #### INTERNAL COMMANDS EXPANSION #### */
 		if (xrename == 0 && *text == 'c' && *(text + 1) == 'm' && *(text + 2) == 'd') {
 			if ((matches = rl_completion_matches(text, &int_cmds_generator))) {
 				cur_comp_type = TCMP_CMD_DESC;
@@ -3129,7 +3199,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* If autocd or auto-open, try to expand ELN's first */
-		if ((conf.autocd == 1 || conf.auto_open == 1) && xrename != 2) {
+		if ((conf.autocd == 1 || conf.auto_open == 1) && xrename < 2) {
 			if (*text >= '1' && *text <= '9') {
 				int n = atoi(text);
 
@@ -3173,7 +3243,7 @@ my_rl_completion(const char *text, int start, int end)
 	}
 
 	else { /* Second word or more */
-		if (xrename == 1)
+		if (xrename == 1 || xrename == 3)
 			return (char **)NULL;
 		/* Command names completion for words after process separator:
 		 * ; | && */

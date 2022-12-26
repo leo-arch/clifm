@@ -621,6 +621,31 @@ Parent directories are created if necessary. For example, if you run:\n\
     n dir/subdir/file\n\
 both 'dir' and 'subdir' directories will be created if they do not exist"
 
+#define OC_USAGE "Interactively change files ownership\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  oc FILE...\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Change ownership of selected files\n\
+  oc sel\n\
+- Change ownership of all .iso files\n\
+  oc *.iso\n\n\
+\x1b[1mNOTES\x1b[0m\n\
+A template is presented to the user to be edited.\n\n\
+Only user and primary group common to all files passed as\n\
+parameters are set in the ownership template.\n\n\
+Ownership (both user and primary group, if specified) is\n\
+changed for all files passed as parameters.\n\n\
+Both names and ID numbers are allowed (TAB completion is available).\n\n\
+If only a name/number is entered, it is taken as user.\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Change user to root\n\
+  root (or \"0\")\n\
+- Change primary group to video\n\
+  :video (or \":981\")\n\
+- Change user to peter and primary group to audio\n\
+  peter:audio (or \"1000:986\" or \"peter:986\" or \"1000:audio\")\n\n\
+Note: Use the 'pc' command to edit files permissions"
+
 #define OPEN_USAGE "Open a file\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   o, open ELN/FILE [APPLICATION]\n\n\
@@ -634,6 +659,15 @@ both 'dir' and 'subdir' directories will be created if they do not exist"
     12\n\
     12 vi"
 
+#define OPENER_USAGE "Set the resource opener\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  opener APPLICATION\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Set the resources opener to xdg-open (instead of the default, Lira)\n\
+    opener xdg-open\n\
+- Set the resources opener back to the default (Lira)\n\
+    opener default"
+
 #define OW_USAGE "Open a file with a specific application\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   ow ELN/FILE\n\n\
@@ -643,15 +677,6 @@ both 'dir' and 'subdir' directories will be created if they do not exist"
   open this file)\n\
 - Open the file test.c with geany\n\
     ow test.c geany"
-
-#define OPENER_USAGE "Set the resource opener\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
-  opener APPLICATION\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
-- Set the resources opener to xdg-open (instead of the default, Lira)\n\
-    opener xdg-open\n\
-- Set the resources opener back to the default (Lira)\n\
-    opener default"
 
 #define PAGER_USAGE "Set the files list pager on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -670,11 +695,12 @@ Note: You can also try the 'pager' plugin running 'gg'"
     pc file.txt\n\
 - Change permissions of all selected files at once\n\
     pc sel\n\n\
-Note: When editing multiple files with different permissions at once,\n\
+When editing multiple files with different permissions at once,\n\
 only shared permission bits will be set in the permissions template.\n\
 Bear in mind that the new permissions set will be applied to all files\n\
 passed as arguments\n\n\
-Both symbolic and octal notation for the new permissions set are allowed"
+Both symbolic and octal notation for the new permissions set are allowed\n\n\
+Note: Use the 'oc' command to edit files ownership"
 
 #define PIN_USAGE "Pin a file or directory\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1516,10 +1542,11 @@ being free, we consider them all equally unethical [...]\""
 #define N_DESC       " (create files)"
 #define NET_DESC     " (manage remote resources)"
 #define O_DESC       " (open file)"
+#define OC_DESC      " (change files ownership)"
 #define OPENER_DESC  " (set a custom resource opener)"
 #define OW_DESC      " (open file with...)"
 #define P_DESC       " (print files properties)"
-#define PC_DESC      " (edit files permissions)"
+#define PC_DESC      " (change files permissions)"
 #define PF_DESC      " (manage profiles)"
 #define PG_DESC      " (set the files pager on/off)"
 #define PIN_DESC     " (pin a directory)"
