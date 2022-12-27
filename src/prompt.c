@@ -808,7 +808,7 @@ update_trash_indicator(void)
 			trash_n = (size_t)n;
 	}
 }
-#endif
+#endif /* !_NO_TRASH */
 
 static inline void
 setenv_prompt(void)

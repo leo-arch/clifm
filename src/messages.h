@@ -1236,11 +1236,12 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\n\
  n, new             Create new files\n\
  net                Manage network/remote resources\n\
  o, open            Open a file\n\
+ oc                 Change files ownership interactively\n\
  ow                 Open a file with ...\n\
  opener             Set a custom resource opener\n\
  p, pr, pp, prop    Print file properties\n\
  path, cwd          Print the current working directory\n\
- pc                 A file permissions editor\n\
+ pc                 Change files permissions interactively\n\
  pf, prof, profile  Manage profiles\n\
  pg, pager          Set the files pager on/off\n\
  pin                Pin a directory\n\
@@ -1394,6 +1395,7 @@ m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
 m myfile.txt       Rename 'myfile.txt'\n\
 l myfile mylink    Create a symbolic link named 'mylink' pointing to 'myfile'\n\
 le mylink          Edit the symbolic link 'mylink'\n\
+oc myfile          Edit file ownership of the file 'myfile'\n\
 pc myfile          Edit file properties of the file 'myfile'\n\
 te *.sh            Toggle the executable bit on all .sh files\n\
 t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\

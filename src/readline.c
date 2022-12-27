@@ -45,7 +45,6 @@
 #include <errno.h>
 #include <limits.h>
 #include <pwd.h>
-//#include <wchar.h> /* mbrtowc(3) */
 #include <grp.h> /* Needed by groups_generator(): getgrent(3) */
 
 #ifdef __OpenBSD__
@@ -82,20 +81,25 @@ typedef char *rl_cpvfunc_t;
 # include <sys/stat.h>
 #endif
 
-/*
-#if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
-int freebsd_sc_console = 0;
-#endif // __FreeBSD__ */
-
 #define DEL_EMPTY_LINE     1
 #define DEL_NON_EMPTY_LINE 2
 
-static struct dirent **tagged_files = (struct dirent **)NULL;
-static int tagged_files_n = 0;
+/* The maximum number of bytes we need to contain any Unicode code point
+ * as a C string: 4 bytes plus a trailing nul byte. */
+#define UTF8_MAX_LEN 5
+#define UTF8_BAD_LEADING_BYTE -1
+
+#define SUGGEST_ONLY             0
+#define RL_INSERT_CHAR           1
+#define SKIP_CHAR                2
+#define SKIP_CHAR_NO_REDISPLAY   3
 
 #define MAX_EXT_OPTS NAME_MAX
 #define MAX_EXT_OPTS_LEN NAME_MAX
+
 static char ext_opts[MAX_EXT_OPTS][MAX_EXT_OPTS_LEN];
+static struct dirent **tagged_files = (struct dirent **)NULL;
+static int tagged_files_n = 0;
 
 /* Get user input (y/n, uppercase is allowed) using _MSG as message
  * The question will be repeated until 'y' or 'n' is entered
@@ -127,19 +131,8 @@ rl_get_y_or_n(const char *_msg)
 	return 0; /* Never reached */
 }
 
-/*
-static int
-check_cmd_desc(const char *s, const char *t)
-{
-	if (!s || !*s)
-		return 0;
-
-	if (!t || !*t)
-		return 1;
-
-	return strstr(s, t) ? 1 : 0;
-} */
-
+/* Generate a list of internal commands and a brief description
+ * for cmd<TAB> */
 static char *
 int_cmds_generator(const char *text, int state)
 {
@@ -220,7 +213,7 @@ int_cmds_generator(const char *text, int state)
 		"s       (select files)",
 		"splash  (print the splash screen)",
 		"st      (change files sorting order)",
-		"stats   (print file statistics)",
+		"stats   (print files statistics)",
 		"ta      (tag files)",
 		"td      (delete tags)",
 		"te      (toggle the executable bit on files)",
@@ -429,12 +422,7 @@ leftmost_bell(void)
 		rl_end = rl_point = 0;
 	}
 }
-#endif
-
-/* The maximum number of bytes we need to contain any Unicode code point
- * as a C string: 4 bytes plus a trailing nul byte. */
-#define UTF8_MAX_LEN 5
-#define UTF8_BAD_LEADING_BYTE -1
+#endif /* !_NO_SUGGESTIONS */
 
 /* This function returns the number of bytes in a UTF-8 sequence by inspecting only
  * the leading byte (C). Return values other than 2, 3, or 4 are considered invalid
@@ -488,11 +476,6 @@ utf8_bytes(unsigned char c)
 
 	return UTF8_BAD_LEADING_BYTE;
 }
-
-#define SUGGEST_ONLY             0
-#define RL_INSERT_CHAR           1
-#define SKIP_CHAR                2
-#define SKIP_CHAR_NO_REDISPLAY   3
 
 /* Construct a wide-char byte by byte
  * This function is called multiple times until we get a full wide-char.

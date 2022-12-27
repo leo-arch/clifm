@@ -782,7 +782,7 @@ clear_dirhist(void)
 	return EXIT_SUCCESS;
 }
 
-/* Change to the specified directory  number (N) in the directory
+/* Change to the specified directory number (N) in the directory
  * history list */
 static int
 change_to_num(int n)
