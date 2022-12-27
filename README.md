@@ -265,7 +265,7 @@ For more details consult the [changelog file](https://github.com/leo-arch/clifm/
 
 If running on Linux, a [binary package](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm) is available for most major distributions.
 
-### Installing from a clone (Linux/BSD)
+### Installing from source (Linux/BSD)
 
 **Note**: Dependencies are most likely already satisfied, but in any case consult the [dependencies section](https://github.com/leo-arch/clifm/wiki/Introduction#1-satisfy-dependencies).
 
