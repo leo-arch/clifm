@@ -299,8 +299,8 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return BR_DESC;
 		if (*s == 'e' && strcmp(s + 1, "dit") == 0)
 			return EDIT_DESC;
-		if (*s == 'j' && strcmp(s + 1, "ump") == 0)
-			return J_DESC;
+//		if (*s == 'j' && strcmp(s + 1, "ump") == 0)
+//			return J_DESC;
 //		if (*s == 'e' && strcmp(s + 1, "xit") == 0)
 //			return Q_DESC;
 		if (*s == 'm' && strcmp(s + 1, "ime") == 0)
