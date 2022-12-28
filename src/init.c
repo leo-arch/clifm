@@ -239,14 +239,11 @@ set_prop_fields(char *line)
 
 	/* Dynamic lengths */
 	if (prop_fields.counter != 0)
-//		prop_fields.len += (4 + 1);
-		prop_fields.len ++;
+		prop_fields.len++;
 	if (prop_fields.inode != 0)
-//		prop_fields.len += (8 + 1);
-		prop_fields.len ++;
+		prop_fields.len++;
 	if (prop_fields.ids != 0)
-//		prop_fields.len += (11 + 1);
-		prop_fields.len ++;
+		prop_fields.len++;
 }
 
 int
@@ -524,11 +521,6 @@ try_datadir(char *dir)
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode))
 		return savestring(dir, strlen(dir));
 
-	/* Try DIR/clifmrc */
-/*	snprintf(p, sizeof(p), "%s/%src", dir, PNL);
-	if (stat(p, &a) != -1 && S_ISREG(a.st_mode))
-		return savestring(dir, strlen(dir)); */
-
 	return (char *)NULL;
 }
 
@@ -696,7 +688,6 @@ get_own_pid(void)
 {
 	pid_t pid;
 
-	/* Get the process id */
 	pid = getpid();
 
 	if (pid < 0)
@@ -779,9 +770,7 @@ get_user_data_env(void)
 		char *h = p ? p : t;
 		tmp_user.home = savestring(h, strlen(h));
 		free(p);
-	} /*else {
-		tmp_user.home = (char *)NULL;
-	} */
+	}
 
 	struct stat a;
 	if (!tmp_user.home || !*tmp_user.home || stat(tmp_user.home, &a) == -1
@@ -792,8 +781,6 @@ get_user_data_env(void)
 	}
 
 	tmp_user.home_len = strlen(tmp_user.home);
-//	tmp_user.home_len = tmp_user.home ? strlen(tmp_user.home) : 0;
-
 	t = sec_env == 0 ? getenv("USER") : (char *)NULL;;
 	tmp_user.name = t ? savestring(t, strlen(t)) : (char *)NULL;
 
@@ -1738,7 +1725,6 @@ resolve_positional_param(char *file)
 	if (url == 1 || !S_ISDIR(attr.st_mode))
 		open_reg_exit(_path, url, 0);
 
-//	flags |= START_PATH;
 	xargs.path = 1;
 	return _path;
 }
@@ -2587,20 +2573,16 @@ init_shell(void)
 
 	/* Ignore interactive and job-control signals */
 	set_signals_to_ignore();
-/*	signal(SIGINT, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
-	signal(SIGTSTP, SIG_IGN); */
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN);
-//	signal(SIGCHLD, SIG_IGN);
 
 	/* Put ourselves in our own process group */
 	shell_pgid = getpid();
 	setpgid(shell_pgid, shell_pgid);
 /*	if (setpgid(shell_pgid, shell_pgid) < 0) {
 		// This fails with EPERM when running as 'term -e clifm'
-//		_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
-//		exit(errno);
+		_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, strerror(errno));
+		exit(errno);
 	} */
 
 	/* Grab control of the terminal */
@@ -2772,18 +2754,11 @@ get_path_env(void)
 	}
 
 	char *path_tmp = malloced_ptr == 1 ? ptr : savestring(ptr, strlen(ptr));
-/*	if (malloced_ptr == 1)
-		path_tmp = ptr;
-	else
-		path_tmp = savestring(ptr, strlen(ptr));
-
-	if (!path_tmp)
-		return 0; */
 
 	size_t c = count_chars(path_tmp, ':') + 1;
 	paths = (char **)xnmalloc(c + 1, sizeof(char *));
 
-	// Get each path in PATH
+	/* Get each path in PATH */
 	size_t n = 0;
 	char *p = path_tmp, *q = p;
 	while (1) {
@@ -2803,36 +2778,9 @@ get_path_env(void)
 		p = ++q;
 	}
 
-/*	n = 0;
-	size_t i = 0, len = 0;
-	for (i = 0; path_tmp[i]; i++) {
-		// Store path in PATH in a tmp buffer
-		char buf[PATH_MAX];
-		while (path_tmp[i] && path_tmp[i] != ':' && len < sizeof(buf)) {
-			buf[len] = path_tmp[i];
-			len++;
-			i++;
-		}
-		buf[len] = '\0';
-
-		// Make room in paths for a new path
-//		paths = (char **)xrealloc(paths, (n + 1) * sizeof(char *));
-		// Dump the buffer into the global paths array
-		paths[n] = savestring(buf, len);
-		n++;
-		len = 0;
-		if (!path_tmp[i])
-			break;
-	} */
-
 	paths[n] = (char *)NULL;
 	free(path_tmp);
 
-/*	for (size_t j = 0; paths[j]; j++)
-//	for (size_t j = 0; j < n; j++)
-		printf("%s\n", paths[j]);
-
-	printf("PATHS: %zu\n", n); */
 	return n;
 }
 
@@ -3367,19 +3315,6 @@ check_options(void)
 	if (!conf.usr_cscheme)
 		conf.usr_cscheme = savestring("default", 7);
 
-/*	if (!conf.fzftab_options)
-		conf.fzftab_options = savestring(DEF_FZFTAB_OPTIONS, strlen(DEF_FZFTAB_OPTIONS));
-
-	smenutab_options_env = xargs.secure_env_full != 1
-		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
-
-	if (xargs.secure_cmds == 1 && tabmode == SMENU_TAB
-	&& sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
-		_err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS value contains unsafe "
-			"characters. Value rejected.\n", PROGRAM_NAME);
-		smenutab_options_env = (char *)NULL;
-	} */
-
 	if (!conf.wprompt_str) {
 		if (conf.colorize == 1)
 			conf.wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
@@ -3400,9 +3335,6 @@ check_options(void)
 
 	if (xargs.secure_env_full == UNSET)
 		xargs.secure_env_full = DEF_SECURE_ENV_FULL;
-
-/*	if (xargs.mount_cmd == UNSET)
-		xargs.mount_cmd = DEF_MOUNT_CMD; */
 
 	if (xargs.control_d_exits == UNSET)
 		control_d_exits = DEF_CONTROL_D_EXITS;
@@ -3448,11 +3380,6 @@ check_options(void)
 		else
 			conf.highlight = xargs.highlight;
 	}
-/*
-# ifdef __NetBSD__
-	if (!(flags & GUI))
-		xargs.highlight = conf.highlight = 0;
-# endif // __NetBSD__ */
 #endif /* !_NO_HIGHLIGHT */
 
 	if (conf.apparent_size == UNSET) {
