@@ -111,8 +111,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd-on-off-status), [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open-on-off-status), and [autols](https://github.com/leo-arch/clifm/wiki/Common-Operations#navigation)
   - [Directory jumper](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide)
   - [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories)
-  - [Fastback](https://github.com/leo-arch/clifm/wiki/Introduction#fastback)
-  - [Backdir - Quickly change to a parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#bd-name)
+  - [Fastback - Quickly change to any parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#fastback)
   - [A built-in resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) (supports regular expressions and is able to discern between GUI and non-GUI environments)
   - [A built-in Freedesktop-compliant trash system](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files)
   - [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
@@ -128,7 +127,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - Directory history map to keep in sight previous, current, and next entries in the directory history list
 - Shell
   - [Auto-suggestions](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
-  - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions), with _fzf_ integration
+  - [TAB completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions), with _fzf_ integration (including [file previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview))
   - [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting)
   - [Warning prompt for invalid command names](https://github.com/leo-arch/clifm/wiki/Customization#the-warning-prompt)
   - [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters)
@@ -158,7 +157,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout)
 - Misc
   - [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-  - [File previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well)
+  - [File previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via TAB completion!)
   - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk), including emoji-icons :smirk:
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
   - [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
