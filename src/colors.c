@@ -508,6 +508,7 @@ unset_suggestions_color(void)
 {
 	strcpy(sb_c, SUG_NO_COLOR); /* shell built-ins */
 	strcpy(sc_c, SUG_NO_COLOR); /* external commands */
+	strcpy(sd_c, SUG_NO_COLOR); /* internal commands description */
 	strcpy(sf_c, SUG_NO_COLOR); /* filenames */
 	strcpy(sh_c, SUG_NO_COLOR); /* history */
 	strcpy(sp_c, SUG_NO_COLOR); /* suggestions pointer */
@@ -575,7 +576,6 @@ edit_colorscheme(char *app)
 	struct stat attr;
 	char file[PATH_MAX];
 
-//	snprintf(file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, cur_cscheme); /* NOLINT */
 	snprintf(file, PATH_MAX - 1, "%s/%s.clifm", colors_dir, cur_cscheme); /* NOLINT */
 	if (stat(file, &attr) == -1 && import_color_scheme(cur_cscheme) != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: %s: No such color scheme\n"), PROGRAM_NAME, cur_cscheme);
@@ -1501,7 +1501,6 @@ split_extensions_colors(char *extcolors)
 	size_t len = 0;
 	int eol = 0;
 
-//	if (ext_colors_n)
 	free_extension_colors();
 
 	while (!eol) {
@@ -1517,12 +1516,12 @@ split_extensions_colors(char *extcolors)
 			buf[len] = '\0';
 			if (store_extension_line(buf, len) == EXIT_SUCCESS)
 				*buf = '\0';
-//			else {
+
 			if (!*p)
 				eol = 1;
 			len = 0;
 			p++;
-//			}
+
 			break;
 
 		default:

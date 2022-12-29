@@ -314,7 +314,6 @@ normalize_path(char *src, size_t src_len)
 	size_t res_len;
 
 	if (l == 0 || *s != '/') {
-//	if (src_len == 0 || *src != '/') {
 		/* Relative path */
 		size_t pwd_len;
 		pwd_len = strlen(workspaces[cur_ws].path);
@@ -328,23 +327,15 @@ normalize_path(char *src, size_t src_len)
 			memcpy(res, workspaces[cur_ws].path, pwd_len);
 			res_len = pwd_len;
 		}
-
-//		res = (char *)xnmalloc(pwd_len + 1 + src_len + 1, sizeof(char));
-/*		res = (char *)xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
-		memcpy(res, workspaces[cur_ws].path, pwd_len);
-		res_len = pwd_len; */
 	} else {
-//		res = (char *)xnmalloc(src_len + 1, sizeof(char));
 		res = (char *)xnmalloc(l + 1, sizeof(char));
 		res_len = 0;
 	}
 
 	const char *ptr;
-//	const char *end = &src[src_len];
 	const char *end = &s[l];
 	const char *next;
 
-//	for (ptr = src; ptr < end; ptr = next + 1) {
 	for (ptr = s; ptr < end; ptr = next + 1) {
 		size_t len;
 		next = memchr(ptr, '/', (size_t)(end - ptr));
@@ -617,7 +608,6 @@ hex2int(const char *str)
  *
  * Based on https://mprog.wordpress.com/c/miscellaneous/convert-hexcolor-to-rgb-decimal
  */
-
 char *
 hex2rgb(char *hex)
 {
@@ -1062,8 +1052,7 @@ url_decode(char *str)
 		return (char *)NULL;
 
 	char *buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
-	/* The decoded string will be at most as long as the encoded
-	 * string */
+	/* The decoded string will be at most as long as the encoded string */
 
 	char *pstr, *pbuf;
 	pstr = str;

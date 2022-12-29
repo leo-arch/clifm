@@ -3148,7 +3148,7 @@ write_dirhist(char *line, ssize_t len)
 	}
 
 	old_pwd[dirhist_total_index] = (char *)xnmalloc((size_t)len + 1,
-									sizeof(char));
+		sizeof(char));
 	strcpy(old_pwd[dirhist_total_index], line);
 	dirhist_total_index++;
 }
@@ -3780,7 +3780,7 @@ check_options(void)
 
 	if (xargs.stealth_mode == 1 && !conf.opener) {
 		/* Since in stealth mode we have no access to the config file, we cannot
-		 * use 'lira', since it relays on a file. Set it thus to FALLBACK_OPENER,
+		 * use Lira, since it relays on a file. Set it thus to FALLBACK_OPENER,
 		 * if not already set via command line */
 		conf.opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
 	}
