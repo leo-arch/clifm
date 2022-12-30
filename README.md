@@ -74,7 +74,7 @@ Briefly put, with **clifm** the command-line is always already there, never hidd
 
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="https://i.postimg.cc/YC77qSLK/interface-1-7-9.png"></p>
-<p align="center">We need only 7 characters to move all selected files into the <i>images</i> directory</p>
+<p align="center">We only need 7 keystrokes to move all selected files into the <i>images</i> directory</p>
 <!---
 <p align="center"><img src="https://i.postimg.cc/BZMv62VP/interface1-7-5.png"></p>
 <p align="center"><img src="https://i.postimg.cc/Zqp4sgLK/clifm-interface8.png"></p>
