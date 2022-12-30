@@ -1077,12 +1077,12 @@ check_shell_functions(char *str)
 	return 0;
 }
 
-/* Check whether STRINGDIGIT expression is an internal command with a
- * fused parameter. Returns 1 if true and 0 otherwise */
+/* Check whether STR is an internal command with a fused parameter (CMDNUMBER).
+ * Returns 1 if true or 0 otherwise */
 static int
 is_fused_param(char *str)
 {
-	if (!str || !*str)
+	if (!str || !*str || !*(str + 1))
 		return EXIT_FAILURE;
 
 	char *p = str, *q = (char *)NULL;

@@ -259,9 +259,17 @@ reset_inotify(void)
 		return;
 	}
 
-	inotify_wd = inotify_add_watch(inotify_fd, workspaces[cur_ws].path, INOTIFY_MASK);
+	/* If CWD is a symlink to a directory and it does not end with a slash,
+	 * inotify_add_watch(3) fails with ENOTDIR */
+	char rpath[PATH_MAX];
+	snprintf(rpath, sizeof(rpath), "%s/", workspaces[cur_ws].path);
+
+//	inotify_wd = inotify_add_watch(inotify_fd, workspaces[cur_ws].path, INOTIFY_MASK);
+	inotify_wd = inotify_add_watch(inotify_fd, rpath, INOTIFY_MASK);
 	if (inotify_wd > 0)
 		watch = 1;
+	else
+		_err('w', PRINT_PROMPT, "%s: inotify: %s: %s\n", PROGRAM_NAME, rpath, strerror(errno));
 }
 
 void
