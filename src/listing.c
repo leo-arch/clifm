@@ -451,6 +451,7 @@ set_events_checker(void)
 		event_fd = -1;
 		watch = 0;
 	}
+
 # if defined(O_EVTONLY)
 	event_fd = open(workspaces[cur_ws].path, O_EVTONLY);
 # else
@@ -462,7 +463,7 @@ set_events_checker(void)
 				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, workspaces[cur_ws].path);
 		watch = 1;
 		/* Register events */
-		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, NULL, 0, NULL);
+		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, NULL, NUM_EVENT_FDS, NULL);
 
 	}
 #endif /* LINUX_INOTIFY */

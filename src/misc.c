@@ -417,11 +417,11 @@ read_kqueue(void)
 		return;
 	}
 
-	if (event_fd >= 0) {
+/*	if (event_fd >= 0) {
 		close(event_fd);
 		event_fd = -1;
 		watch = 0;
-	}
+	} */
 }
 #endif /* LINUX_INOTIFY */
 
