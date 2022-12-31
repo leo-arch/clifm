@@ -3433,6 +3433,8 @@ my_rl_completion(const char *text, int start, int end)
 		/* j, jc, jp commands */
 		if (*lb == 'j' && (lb[1] == ' '	|| ((lb[1] == 'c' || lb[1] == 'p')
 		&& lb[2] == ' ') || strncmp(lb, "jump ", 5) == 0)) {
+//		if (*lb == 'j' && (lb[1] == ' '	|| ( (lb[1] == 'c' || lb[1] == 'p')
+//		&& lb[2] == ' ') ) ) {
 			matches = rl_completion_matches(text, &jump_generator);
 			if (matches) {
 				cur_comp_type = TCMP_JUMP;

@@ -500,7 +500,7 @@ works.\n\n\
 - Change to any visited directory that is CHILD of the current directory\n\
   and contains the string 'str'\n\
     jc str\n\
-- Open/Edit the jump database\n\
+- Open/edit the jump database\n\
     je"
 
 #define KB_USAGE "Handle keybindings\n\n\
@@ -860,7 +860,7 @@ Note: Both numbers and names are allowed\n\n\
       [FILE]... [[:]TAG]\n\n\
 Instead of the long format described above, you can use any of the\n\
 following shortcuts as well:\n\
-  ta: Tag files\n\
+  ta: Tag files as ...\n\
   td: Delete tag(s)\n\
   tl: List tags or tagged files\n\
   tm: Rename (mv) tag\n\
@@ -1565,7 +1565,7 @@ being free, we consider them all equally unethical [...]\""
 #define SPLASH_DESC  " (print the splash screen)"
 #define ST_DESC      " (change files sorting order)"
 #define STATS_DESC   " (print file statistics)"
-#define TA_DESC      " (tag files)"
+#define TA_DESC      " (tag files as ...)"
 #define TD_DESC      " (delete tags)"
 #define TE_DESC      " (toggle the executable bit on files)"
 #define TIPS_DESC    " (print tips)"
