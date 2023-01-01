@@ -3,7 +3,7 @@
 /*
  * This file is part of CliFM
  * 
- * Copyright (C) 2016-2022, L. Abramovich <johndoe.arch@outlook.com>
+ * Copyright (C) 2016-2023, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.
 
  * CliFM is free software; you can redistribute it and/or modify
@@ -612,6 +612,10 @@ check_conditions(const size_t offset, const size_t wlen, int *baej, size_t *slin
 static inline void
 _print_suggestion(const char *str, const size_t offset, const char *color)
 {
+//	if (suggestion.type == FUZZY_FILENAME
+//	|| (suggestion.type == COMP_SUG && (flags & BAEJ_SUGGESTION)))
+//		color = "\x1b[2;4;35m";
+
 	char *wname = truncate_name(str);
 	fputs(color, stdout);
 //	fputs((wname ? wname : str) + offset - (offset ? 1 : 0), stdout);

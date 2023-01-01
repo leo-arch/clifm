@@ -3,7 +3,7 @@
 /*
  * This file is part of CliFM
  * 
- * Copyright (C) 2016-2022, L. Abramovich <johndoe.arch@outlook.com>
+ * Copyright (C) 2016-2023, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.
 
  * CliFM is free software; you can redistribute it and/or modify
@@ -78,7 +78,6 @@
 # include <libintl.h>
 #endif
 #include <regex.h>
-//#include <stddef.h>
 #include <stdlib.h>
 
 #if defined(__linux__)
@@ -104,9 +103,7 @@
 # include <sys/time.h>
 #endif /* __linux__ */
 
-//#include "init.h"
 #include "strings.h"
-//#include "messages.h"
 #include "settings.h"
 
 #define _PROGRAM_NAME "CliFM"
@@ -116,13 +113,13 @@
 #define VERSION "1.9.4"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
-#define DATE "Dec 31, 2022"
+#define DATE "Jan 1, 2023"
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
 #if defined(__TINYC__)
 void *__dso_handle;
-#endif
+#endif /* __TINYC__ */
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
@@ -173,7 +170,7 @@ void *__dso_handle;
 #endif /* __linux__ */
 
 /* Event handling */
-#ifdef LINUX_INOTIFY
+#if defined(LINUX_INOTIFY)
 # define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
 # define EVENT_SIZE (sizeof(struct inotify_event))
 # define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
@@ -345,9 +342,6 @@ extern int watch;
 #define BS     8
 #define DELETE 127
 #define ENTER  13
-/* #define OP_BRACKET 91
-#define UC_O 79
-#define SPACE 32 */
 
 /* Macros to specify suggestions type */
 #define NO_SUG         0
@@ -452,7 +446,7 @@ extern int watch;
 # define DT_REG     8
 # define DT_LNK     10
 # define DT_SOCK    12
-#endif
+#endif /* __HAIKU__ || __sun */
 
 #define DT_NONE     14
 
@@ -531,7 +525,7 @@ extern int watch;
 # define _(String) gettext(String)
 #else
 # define _(String) String
-#endif /* _GETTEXT */
+#endif /* !_GETTEXT */
 
 #define strlen(s) xstrnlen(s)
 
@@ -578,17 +572,17 @@ extern int watch;
 # define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
 #else
 # define CLEAR fputs("\x1b[H\x1b[2J", stdout); /* CLEAR */
-#endif
+#endif /* !__HAIKU__ */
 
 #define MOVE_CURSOR_DOWN(n)   printf("\x1b[%dB", (n))  /* CUD */
 
 /* ######## Escape sequences used by the suggestions system */
-#define MOVE_CURSOR_UP(n)     printf("\x1b[%dA", (n))  /* CUU */
-#define MOVE_CURSOR_RIGHT(n)  printf("\x1b[%dC", (n))  /* CUF */
-#define MOVE_CURSOR_LEFT(n)   printf("\x1b[%dD", (n))  /* CUB */
-#define ERASE_TO_RIGHT        fputs("\x1b[0K", stdout) /* EL0 */
-#define ERASE_TO_LEFT         fputs("\x1b[1K", stdout) /* EL1 */
-#define ERASE_TO_RIGHT_AND_BELOW fputs("\x1b[J", stdout) /* ED0 */
+#define MOVE_CURSOR_UP(n)        printf("\x1b[%dA", (n))  /* CUU */
+#define MOVE_CURSOR_RIGHT(n)     printf("\x1b[%dC", (n))  /* CUF */
+#define MOVE_CURSOR_LEFT(n)      printf("\x1b[%dD", (n))  /* CUB */
+#define ERASE_TO_RIGHT           fputs("\x1b[0K", stdout) /* EL0 */
+#define ERASE_TO_LEFT            fputs("\x1b[1K", stdout) /* EL1 */
+#define ERASE_TO_RIGHT_AND_BELOW fputs("\x1b[J", stdout)  /* ED0 */
 
 #define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s> %s", (offset), (color), NC)
 /* ######## */
