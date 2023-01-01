@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Dec 26, 2022" "clifm 1.9.3" "CLIFM Manual"
+.TH "CLIFM" "1" "Jan 1, 2023" "clifm 1.9.4" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1360,10 +1360,11 @@ The following codes are used for different interface elements (in the \fIInterfa
  sb = shell built-ins
  sc = aliases and shell command names
  sd = internal commands description
- sf = ELN's plus bookmarks, file, tag, and directory names
+ sf = ELN's, bookmarks, tag, and file names
  sh = commands history entries
  sx = suggestions for \fBclifm\fR's internal commands and parameters
  sp = suggestions pointer (ex: 56 > filename, where '>' is the suggestion pointer)
+ sz = file names (fuzzy)
 
  \fBSyntax highlighting\fR
  hb = brackets '()[]{}'
