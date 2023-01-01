@@ -37,8 +37,8 @@ tw=30;42:uf=02;04;37:"
 dl=02;37:dn=00;02;37:dr=00;33:do=00;36:dp=00;36:dw=00;31:\
 dxd=00;32:dxr=00;32:dz=00;32:el=00;36:em=01;31:fc=00;02;34:hb=00;36:hc=02;31:\
 hd=00;36:he=00;36:hn=00;35:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:\
-li=01;32:mi=01;36:nm=01;32:sb=00;02;33:sc=02;36:\
-sf=04;02;36:sh=02;35:si=01;34:sp=02;31:sx=02;32:\
+li=01;32:mi=01;36:nm=01;32:sb=00;02;33:sc=02;36:sd=00;02;37:\
+sf=04;02;36:sh=02;35:si=01;34:sp=02;31:sx=02;32:sz=00;02;04;35:\
 ti=01;36:ts=04;35:tt=02;01;36:tx=0:\
 wc=01;36:wm=01;33:wp=00;02;31:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:\
 xf=01;31:xs=00;32:"
@@ -122,13 +122,14 @@ xf=01;31:xs=00;32:"
 #define DEF_WS8_C "\001\x1b[36m\002"
 
 /* Suggestions */
-#define DEF_SB_C "\x1b[02;33m" /* Shell built-ins */
-#define DEF_SC_C "\x1b[02;36m" /* Aliases and binaries in PATH */
-#define DEF_SD_C "\x1b[02;37m" /* Internal commands description */
-#define DEF_SH_C "\x1b[02;35m" /* Commands history */
+#define DEF_SB_C "\x1b[02;33m"    /* Shell built-ins */
+#define DEF_SC_C "\x1b[02;36m"    /* Aliases and binaries in PATH */
+#define DEF_SD_C "\x1b[02;37m"    /* Internal commands description */
+#define DEF_SH_C "\x1b[02;35m"    /* Commands history */
 #define DEF_SF_C "\x1b[02;04;36m" /* ELN's, bookmark, file, and directory names */
-#define DEF_SP_C "\x1b[02;31m" /* Suggestions pointer (12 > filename) */
-#define DEF_SX_C "\x1b[02;32m" /* Internal commands and parameters */
+#define DEF_SP_C "\x1b[02;31m"    /* Suggestions pointer (12 > filename) */
+#define DEF_SX_C "\x1b[02;32m"    /* Internal commands and parameters */
+#define DEF_SZ_C "\x1b[02;04;35m" /* File names (fuzzy) */
 
 /* Highlight */
 #define DEF_HB_C "\x1b[00;36m" /* Parenthesis, Brackets ( {[()]} ) */

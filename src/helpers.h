@@ -1399,10 +1399,11 @@ extern char
 	sb_c[MAX_COLOR], /* Auto-suggestions: shell builtins */
 	sc_c[MAX_COLOR], /* Auto-suggestions: external commands and aliases */
 	sd_c[MAX_COLOR], /* Auto-suggestions: internal commands description */
-	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
+	sf_c[MAX_COLOR], /* Auto-suggestions: file names */
 	sh_c[MAX_COLOR], /* Auto-suggestions: history */
 	sp_c[MAX_COLOR], /* Auto-suggestions: BAEJ suggestions pointer */
 	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and parameters */
+	sz_c[MAX_COLOR], /* Auto-suggestions: file names (fuzzy) */
 
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */

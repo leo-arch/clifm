@@ -612,9 +612,9 @@ check_conditions(const size_t offset, const size_t wlen, int *baej, size_t *slin
 static inline void
 _print_suggestion(const char *str, const size_t offset, const char *color)
 {
-//	if (suggestion.type == FUZZY_FILENAME
-//	|| (suggestion.type == COMP_SUG && (flags & BAEJ_SUGGESTION)))
-//		color = "\x1b[2;4;35m";
+	if (suggestion.type == FUZZY_FILENAME
+	|| (suggestion.type == COMP_SUG && (flags & BAEJ_SUGGESTION)))
+		color = sz_c;
 
 	char *wname = truncate_name(str);
 	fputs(color, stdout);

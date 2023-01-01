@@ -459,6 +459,7 @@ reset_iface_colors(void)
 	*sh_c = '\0';
 	*sp_c = '\0';
 	*sx_c = '\0';
+	*sz_c = '\0';
 
 	*bm_c = '\0';
 	*dl_c = '\0';
@@ -509,10 +510,11 @@ unset_suggestions_color(void)
 	strcpy(sb_c, SUG_NO_COLOR); /* shell built-ins */
 	strcpy(sc_c, SUG_NO_COLOR); /* external commands */
 	strcpy(sd_c, SUG_NO_COLOR); /* internal commands description */
-	strcpy(sf_c, SUG_NO_COLOR); /* filenames */
+	strcpy(sf_c, SUG_NO_COLOR); /* file names */
 	strcpy(sh_c, SUG_NO_COLOR); /* history */
 	strcpy(sp_c, SUG_NO_COLOR); /* suggestions pointer */
 	strcpy(sx_c, SUG_NO_COLOR); /* internal commands and params */
+	strcpy(sz_c, SUG_NO_COLOR); /* file names (fuzzy) */
 }
 
 /* Import the color scheme NAME from DATADIR (usually /usr/local/share)
@@ -868,7 +870,32 @@ set_iface_colors(char **colors, const size_t words)
 /*		else if (*colors[i] == 'h' && strncmp(colors[i], "hw=", 3) == 0)
 			set_color(colors[i], 3, hw_c, RL_PRINTABLE); */
 
-		else if (*colors[i] == 's' && strncmp(colors[i], "sb=", 3) == 0)
+		else if (*colors[i] == 's') {
+			if (colors[i][1] == 'b' && colors[i][2] == '=')
+				set_color(colors[i], 3, sb_c, RL_PRINTABLE);
+
+			else if (colors[i][1] == 'c' && colors[i][2] == '=')
+				set_color(colors[i], 3, sc_c, RL_PRINTABLE);
+
+			else if (colors[i][1] == 'd' && colors[i][2] == '=')
+				set_color(colors[i], 3, sd_c, RL_PRINTABLE);
+
+			else if (colors[i][1] == 'h' && colors[i][2] == '=')
+				set_color(colors[i], 3, sh_c, RL_PRINTABLE);
+
+			else if (colors[i][1] == 'f' && colors[i][2] == '=')
+				set_color(colors[i], 3, sf_c, RL_PRINTABLE);
+
+			else if (colors[i][1] == 'p' && colors[i][2] == '=')
+				set_color(colors[i], 3, sp_c, RL_PRINTABLE);
+
+			else if (colors[i][1] == 'x' && colors[i][2] == '=')
+				set_color(colors[i], 3, sx_c, RL_PRINTABLE);
+
+			else if (colors[i][1] == 'z' && colors[i][2] == '=')
+				set_color(colors[i], 3, sz_c, RL_PRINTABLE);
+		}
+/*		else if (*colors[i] == 's' && strncmp(colors[i], "sb=", 3) == 0)
 			set_color(colors[i], 3, sb_c, RL_PRINTABLE);
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0)
@@ -888,6 +915,9 @@ set_iface_colors(char **colors, const size_t words)
 
 		else if (*colors[i] == 's' && strncmp(colors[i], "sx=", 3) == 0)
 			set_color(colors[i], 3, sx_c, RL_PRINTABLE);
+
+		else if (*colors[i] == 's' && strncmp(colors[i], "sz=", 3) == 0)
+			set_color(colors[i], 3, sz_c, RL_PRINTABLE); */
 
 		else if (*colors[i] == 'b' && strncmp(colors[i], "bm=", 3) == 0)
 			set_color(colors[i], 3, bm_c, RL_PRINTABLE);
@@ -999,6 +1029,7 @@ set_default_colors(void)
 	if (!*sf_c) strcpy(sf_c, DEF_SF_C);
 	if (!*sx_c) strcpy(sx_c, DEF_SX_C);
 	if (!*sp_c) strcpy(sp_c, DEF_SP_C);
+	if (!*sz_c) strcpy(sz_c, DEF_SZ_C);
 
 	if (!*el_c) strcpy(el_c, DEF_EL_C);
 	if (!*mi_c) strcpy(mi_c, DEF_MI_C);

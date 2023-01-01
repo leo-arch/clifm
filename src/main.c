@@ -342,9 +342,10 @@ char
 	sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
 	sd_c[MAX_COLOR], /* Auto-suggestions: internal commands description */
 	sh_c[MAX_COLOR], /* Auto-suggestions: history */
-	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
+	sf_c[MAX_COLOR], /* Auto-suggestions: file names */
 	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
 	sp_c[MAX_COLOR], /* Auto-suggestions: suggestions pointer */
+	sz_c[MAX_COLOR], /* Auto-suggestions: file names (fuzzy) */
 
 #ifndef _NO_ICONS
 	dir_ico_c[MAX_COLOR], /* Directories icon color */
