@@ -285,30 +285,30 @@ extern int watch;
  * and Eterm, do not support dimmed colors at all, and won't replace this
  * color by anything else, so that suggestions will be indistinguishable
  * from bare input text.
- * The Linux console is more important for us, so let's use a dimmed color */
+ * The Linux console is more important to us, so let's use a dimmed color */
 #define SUG_NO_COLOR "\x1b[0;2m" /* Dimmed color */
 
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are
  * non-printing chars. This is specially useful for the prompt, i.e.,
  * when passing color codes to readline */
-#define RL_NC    "\001\x1b[0m\002"
+#define RL_NC "\001\x1b[0m\002"
 
 #define UNSET -1
 
 /* Macros for the cp and mv cmds */
-#define CP_CP          0 /* cp -iRp */
-#define CP_CP_FORCE    1 /* cp -Rp */
-#define CP_ADVCP       2 /* advcp -giRp */
-#define CP_ADVCP_FORCE 3 /* advcp -gRp */
-#define CP_WCP         4 /* wcp */
-#define CP_RSYNC       5 /* rsync -avP */
+#define CP_CP            0 /* cp -iRp */
+#define CP_CP_FORCE      1 /* cp -Rp */
+#define CP_ADVCP         2 /* advcp -giRp */
+#define CP_ADVCP_FORCE   3 /* advcp -gRp */
+#define CP_WCP           4 /* wcp */
+#define CP_RSYNC         5 /* rsync -avP */
 #define CP_CMD_AVAILABLE 6
 
-#define MV_MV          0 /* mv -i */
-#define MV_MV_FORCE    1 /* mv */
-#define MV_ADVMV       2 /* advmv -gi */
-#define MV_ADVMV_FORCE 3 /* advmv -g */
+#define MV_MV            0 /* mv -i */
+#define MV_MV_FORCE      1 /* mv */
+#define MV_ADVMV         2 /* advmv -gi */
+#define MV_ADVMV_FORCE   3 /* advmv -g */
 #define MV_CMD_AVAILABLE 4
 
 /* Macros for listing_mode */
@@ -574,7 +574,7 @@ extern int watch;
 # define CLEAR fputs("\x1b[H\x1b[2J", stdout); /* CLEAR */
 #endif /* !__HAIKU__ */
 
-#define MOVE_CURSOR_DOWN(n)   printf("\x1b[%dB", (n))  /* CUD */
+#define MOVE_CURSOR_DOWN(n)      printf("\x1b[%dB", (n))  /* CUD */
 
 /* ######## Escape sequences used by the suggestions system */
 #define MOVE_CURSOR_UP(n)        printf("\x1b[%dA", (n))  /* CUU */
@@ -584,7 +584,7 @@ extern int watch;
 #define ERASE_TO_LEFT            fputs("\x1b[1K", stdout) /* EL1 */
 #define ERASE_TO_RIGHT_AND_BELOW fputs("\x1b[J", stdout)  /* ED0 */
 
-#define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s>%s ", (offset), (color), NC)
+#define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s>\x1b[0m ", (offset), (color))
 /* ######## */
 
 /* Sequences used by the pad_filename function (listing.c):
