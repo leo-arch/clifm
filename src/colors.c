@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2023, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.
 
@@ -28,7 +28,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #ifdef __linux__
-#include <sys/capability.h>
+# include <sys/capability.h>
 #endif
 #include <dirent.h>
 #include <errno.h>
