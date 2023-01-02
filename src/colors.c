@@ -50,6 +50,10 @@
 #define RL_PRINTABLE    1
 #define RL_NO_PRINTABLE 0 /* Add non-printing flags (\001 and \002)*/
 
+/* Tell split_color_line weather we're dealing with interface or file type colors */
+#define SPLIT_INTERFACE_COLORS 0
+#define SPLIT_FILETYPE_COLORS  1
+
 /* Max amount of custom color variables in the color scheme file */
 #define MAX_DEFS 64
 
@@ -804,6 +808,8 @@ set_filetype_colors(char **colors, const size_t words)
 
 		free(colors[i]);
 	}
+
+	free(colors);
 }
 
 static void
@@ -954,6 +960,8 @@ set_iface_colors(char **colors, const size_t words)
 
 		free(colors[i]);
 	}
+
+	free(colors);
 }
 
 void
@@ -1159,7 +1167,7 @@ static void
 init_defs(void)
 {
 	int n = MAX_DEFS;
-	while(--n >= 0) {
+	while (--n >= 0) {
 		defs[n].name = (char *)NULL;
 		defs[n].value = (char *)NULL;
 	}
@@ -1476,7 +1484,7 @@ store_extension_line(char *line, size_t len)
 }
 
 static void
-split_extensions_colors(char *extcolors)
+split_extension_colors(char *extcolors)
 {
 	char *p = extcolors, *buf = (char *)NULL;
 	size_t len = 0;
@@ -1543,66 +1551,17 @@ split_extensions_colors(char *extcolors)
 	}
 }
 
+/* Split the colors line COLORS_LINE and set the corresponding colors
+ * according to TYPE (either interface or file type color) */
 static void
-split_iface_colors(char *ifacecolors)
-{
-	char *p = ifacecolors, *buf = (char *)NULL,
-	     **colors = (char **)NULL;
-	size_t len = 0, words = 0;
-	int eol = 0;
-
-	while (!eol) {
-		switch (*p) {
-
-		case '\0': /* fallthrough */
-		case '\n': /* fallthrough */
-		case ':':
-			if (!buf)
-				break;
-			buf[len] = '\0';
-			colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
-			colors[words] = savestring(buf, len);
-			words++;
-			*buf = '\0';
-
-			if (!*p)
-				eol = 1;
-
-			len = 0;
-			p++;
-			break;
-
-		default:
-			buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
-			buf[len] = *p;
-			len++;
-			p++;
-			break;
-		}
-	}
-
-	p = (char *)NULL;
-
-	free(buf);
-
-	if (colors) {
-		colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
-		colors[words] = (char *)NULL;
-	}
-
-	set_iface_colors(colors, words);
-	free(colors);
-}
-
-static void
-split_filetype_colors(char *filecolors)
+split_color_line(char *colors_line, const int type)
 {
 	/* Split the colors line into substrings (one per color) */
-	char *p = filecolors, *buf = (char *)NULL, **colors = (char **)NULL;
+	char *p = colors_line, *buf = (char *)NULL, **colors = (char **)NULL;
 	size_t len = 0, words = 0;
 	int eol = 0;
 
-	while (!eol) {
+	while (eol == 0) {
 		switch (*p) {
 
 		case '\0': /* fallthrough */
@@ -1636,19 +1595,23 @@ split_filetype_colors(char *filecolors)
 
 	free(buf);
 
-	if (colors) {
-		colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
-		colors[words] = (char *)NULL;
-	}
+	if (!colors)
+		return;
 
-	/* Set the file type color variables */
-	set_filetype_colors(colors, words);
-	free(colors);
+	colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
+	colors[words] = (char *)NULL;
+
+	/* Set the color variables
+	 * The colors array is free'd by any of these functions */
+	if (type == SPLIT_FILETYPE_COLORS)
+		set_filetype_colors(colors, words);
+	else
+		set_iface_colors(colors, words);
 }
 
-/* Open the config file, get values for file type and extension colors
- * and copy these values into the corresponding variable. If some value
- * is not found, or if it's a wrong value, the default is set. */
+/* Get color codes values from either the environment or the config file
+ * and set colors accordingly. If some value is not found or is a wrong
+ * value, the default is set. */
 int
 set_colors(const char *colorscheme, const int env)
 {
@@ -1687,35 +1650,36 @@ set_colors(const char *colorscheme, const int env)
 		if (ext_colors_n)
 			free_extension_colors();
 	} else {
-		split_extensions_colors(extcolors);
+		split_extension_colors(extcolors);
 		free(extcolors);
 	}
 
 	if (!ifacecolors) {
 		reset_iface_colors();
 	} else {
-		split_iface_colors(ifacecolors);
+		split_color_line(ifacecolors, SPLIT_INTERFACE_COLORS);
 		free(ifacecolors);
 	}
 
 	if (!filecolors) {
 		reset_filetype_colors();
 	} else {
-		split_filetype_colors(filecolors);
+		split_color_line(filecolors, SPLIT_FILETYPE_COLORS);
 		free(filecolors);
 	}
+
 #ifndef CLIFM_SUCKLESS
 	clear_defs();
 #endif
 
-	/* If some color is unset or it's a wrong color code, set the default */
+	/* If some color is unset or is a wrong color code, set the default */
 	set_default_colors();
 
 	return EXIT_SUCCESS;
 }
 
-/* Print ENTRY using color codes and ELN as ELN, right padding PAD
- * chars and terminating ENTRY with or without a new line char (NEW_LINE
+/* Print the entry ENT using color codes and ELN as ELN, right padding PAD
+ * chars and terminate ENT with or without a new line char (NEW_LINE
  * 1 or 0 respectivelly)
  * ELN could be:
  * > 0: The ELN of a file in CWD
@@ -1838,7 +1802,7 @@ get_colorschemes(void)
 			}
 
 			color_schemes = (char **)xrealloc(color_schemes,
-							((size_t)schemes_total + 2) * sizeof(char *));
+				((size_t)schemes_total + 2) * sizeof(char *));
 
 			while ((ent = readdir(dir_p)) != NULL) {
 				/* Skipp . and .. */
