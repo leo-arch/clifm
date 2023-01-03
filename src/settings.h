@@ -168,7 +168,10 @@ xf=01;31:xs=00;32:"
 #define FIFO_CHR    '|'
 #define DIR_CHR     '/'
 #define LINK_CHR    '@'
+#define BRK_LNK_CHR '!'
 #define SOCK_CHR    '='
+#define BLK_CHR     '+'
+#define CHR_CHR     '-'
 #define UNKNOWN_CHR '?'
 
 #define SELFILE_CHR  '*'

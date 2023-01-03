@@ -274,13 +274,15 @@ do not allow exit on EOF (Control-d)
 disable the directory jumper function
 .TP
 \fB\-\-no-classify\fR
-by default, \fBclifm\fR appends a file type indicator character to file names when running with no colors (see the \fB--no-color\fR option below) and both a directory indicator and a files counter for directories when running with colors. Classification characters are: 
+by default, \fBclifm\fR appends a file type indicator character to file names when running with no colors (see the \fB--no-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
  /n: directories (n = files counter)
- @: symbolic links
- |: fifo/pipes
- =: sockets
- *: executable files
- ?: unknown file type
+ @:  symbolic links
+ |:  fifo/pipes
+ =:  sockets
+ *:  executable files
+ +:  block devices
+ -:  character devices
+ ?:  unknown file type
 Use this option to disable file type classification.
 .TP
 \fB\-\-no\-clear\-screen\fR

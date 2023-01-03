@@ -500,6 +500,8 @@ get_longest_filename(const int n, const int pad)
 					if (file_info[i].exec)
 						total_len++;
 					break;
+				case DT_BLK:  /* fallthrough */
+				case DT_CHR:  /* fallthrough */
 				case DT_LNK:  /* fallthrough */
 				case DT_SOCK: /* fallthrough */
 				case DT_FIFO: /* fallthrough */
@@ -959,6 +961,8 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 				*ind_char = 0;
 			break;
 
+		case DT_BLK: putchar(BLK_CHR); break;
+		case DT_CHR: putchar(CHR_CHR); break;
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_SOCK: putchar(SOCK_CHR); break;
 		case DT_UNKNOWN: putchar(UNKNOWN_CHR); break;
@@ -1186,6 +1190,8 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad, const int _
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
 
+		case DT_BLK: putchar(BLK_CHR); break;
+		case DT_CHR: putchar(CHR_CHR); break;
 		case DT_FIFO: putchar(FIFO_CHR); break;
 		case DT_LNK: putchar(LINK_CHR); break;
 		case DT_SOCK: putchar(SOCK_CHR); break;
