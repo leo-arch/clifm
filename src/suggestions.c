@@ -2063,7 +2063,7 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'c': /* Color schemes */
-		if (color_schemes && lb[1] == 's' && lb[2] == ' ') {
+		if (conf.colorize == 1 && color_schemes && lb[1] == 's' && lb[2] == ' ') {
 			size_t i;
 			for (i = 0; color_schemes[i]; i++) {
 				if (*last_word == *color_schemes[i]

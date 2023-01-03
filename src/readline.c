@@ -3472,7 +3472,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### COLOR SCHEMES COMPLETION ### */
-		if (*lb == 'c' && ((lb[1] == 's' && lb[2] == ' ')
+		if (conf.colorize == 1 && *lb == 'c' && ((lb[1] == 's' && lb[2] == ' ')
 		|| strncmp(lb, "colorschemes ", 13) == 0)) {
 			matches = rl_completion_matches(text, &cschemes_generator);
 			if (matches) {
