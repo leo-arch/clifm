@@ -1100,7 +1100,8 @@ get_cur_colorscheme(const char *colorscheme)
 
 		if (def_cscheme)
 			cur_cscheme = def_cscheme;
-		return EXIT_FAILURE;
+		else
+			return EXIT_FAILURE;
 	}
 
 	return EXIT_SUCCESS;
@@ -1238,7 +1239,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			return EXIT_FAILURE;
 		} else {
 			_err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "
-				"Falling back to the default one\n"), PROGRAM_NAME, colorscheme);
+				"Falling back to default\n"), PROGRAM_NAME, colorscheme);
 			return EXIT_SUCCESS;
 		}
 	}
@@ -1635,8 +1636,8 @@ set_colors(const char *colorscheme, const int env)
 	if (ret == EXIT_SUCCESS && xargs.stealth_mode != 1
 	&& (!filecolors || !extcolors || !ifacecolors)) {
 		/* Get color lines, for both file types and extensions, from
-		 * COLORSCHEME file */
-		if (get_colors_from_file(colorscheme, &filecolors,
+		 * CUR_CSCHEME file */
+		if (get_colors_from_file(cur_cscheme, &filecolors,
 		&extcolors, &ifacecolors, env) == EXIT_FAILURE) {
 			clear_defs();
 			return EXIT_FAILURE;

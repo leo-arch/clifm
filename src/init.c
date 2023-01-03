@@ -1803,15 +1803,14 @@ err_arg_required(const char *s)
 {
 	fprintf(stderr, _("%s: '%s': Option requires an argument\n"
 		"Try '%s --help' for more information.\n"), PNL, s, PNL);
+	exit(EXIT_FAILURE);
 }
 
 static void
 set_custom_selfile(char *file)
 {
-	if (!file || !*file || *file == '-') {
+	if (!file || !*file || *file == '-')
 		err_arg_required("--sel-file");
-		exit(EXIT_FAILURE);
-	}
 
 	if ( (sel_file = normalize_path(file, strlen(file))) ) {
 		xargs.sel_file = 1;
@@ -2012,7 +2011,14 @@ external_arguments(int argc, char **argv)
 		case 216: xargs.expand_bookmarks = conf.expand_bookmarks = 1; break;
 		case 217: xargs.only_dirs = conf.only_dirs = 1; break;
 		case 218: xargs.list_and_quit = 1; break;
-		case 219: conf.usr_cscheme = savestring(optarg, strlen(optarg)); break;
+
+		case 219:
+			if (!optarg || !*optarg || *optarg == '-')
+				err_arg_required("--color-scheme");
+
+			conf.usr_cscheme = savestring(optarg, strlen(optarg));
+			break;
+
 		case 220: xargs.cd_on_quit = conf.cd_on_quit = 1; break;
 		case 221: xargs.no_dirjump = 1; break;
 #ifndef _NO_ICONS
@@ -2154,10 +2160,9 @@ external_arguments(int argc, char **argv)
 			break;
 
 		case 261:
-			if (!optarg || !*optarg || *optarg == '-') {
+			if (!optarg || !*optarg || *optarg == '-')
 				err_arg_required("--shotgun-file");
-				exit(EXIT_FAILURE);
-			}
+
 			alt_preview_file = stat_file(optarg);
 			break;
 
@@ -2179,10 +2184,8 @@ external_arguments(int argc, char **argv)
 #endif /* __linux__ */
 
 		case 264:
-			if (!optarg || !*optarg || *optarg == '-') {
+			if (!optarg || !*optarg || *optarg == '-')
 				err_arg_required("--data-dir");
-				exit(EXIT_FAILURE);
-			}
 
 			get_data_dir_from_path(optarg);
 			break;
@@ -2268,10 +2271,8 @@ external_arguments(int argc, char **argv)
 			case 261: /* fallthrough */
 			case 264: /* fallthrough */
 			case 265: /* fallthrough */
-			case 266: {
-				err_arg_required(argv[optind - 1]);
-				exit(EXIT_FAILURE);
-				}
+			case 266: err_arg_required(argv[optind - 1]); break;
+
 			default: break;
 			}
 
