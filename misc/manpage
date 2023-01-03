@@ -277,6 +277,7 @@ disable the directory jumper function
 by default, \fBclifm\fR appends a file type indicator character to file names when running with no colors (see the \fB--no-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
  /n: directories (n = files counter)
  @:  symbolic links
+ !:  broken symbolic links
  |:  fifo/pipes
  =:  sockets
  *:  executable files

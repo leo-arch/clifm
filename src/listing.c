@@ -944,7 +944,9 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 			break;
 
 		case DT_LNK:
-			if (file_info[i].dir) {
+			if (file_info[i].color == or_c) {
+				putchar(BRK_LNK_CHR);
+			} else if (file_info[i].dir) {
 				*ind_char = 0;
 				putchar(DIR_CHR);
 				if (file_info[i].filesn > 0 && conf.files_counter)

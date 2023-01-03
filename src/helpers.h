@@ -803,7 +803,7 @@ struct fileinfo {
 	int eln_n;
 	int exec;
 	int filesn; /* Number of files in subdir. Is a signed integer enough? */
-	int ruser; /* User read permission for dir */
+	int ruser;  /* User read permission for dir */
 	int symlink;
 	int sel;
 	int pad;
