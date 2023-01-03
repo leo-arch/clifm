@@ -1754,6 +1754,7 @@ X:^text/html$=$BROWSER;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;lua
 \n\
 # Text\n\
 #X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany\n\
+X:^text/rtf$=libreoffice;soffice;ooffice\n\
 X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;nedit;kate;gedit;pluma;io.elementary.code;liri-text;xed;atom;nota;gobby;kwrite;xedit\n\
 !X:(^text/.*|application/json|inode/x-empty)=$EDITOR;$VISUAL;kak;micro;dte;nvim;vim;vi;mg;emacs;ed;nano\n\
 \n\
