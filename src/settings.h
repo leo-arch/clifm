@@ -260,7 +260,7 @@ xf=01;31:xs=00;32:"
 /* Available sort options:
  * SNONE, SNAME, STSIZE, SATIME, SBTIME, SCTIME, SMTIME
  * SVER, SEXT, SINO, SOWN, SGRP */
-#define DEF_SORT SNAME
+#define DEF_SORT SVER
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0
 #ifdef __OpenBSD__

@@ -1084,7 +1084,7 @@ rl_clear_line(int count, int key)
 		suggestion.printed = 0;
 		suggestion.nlines = 0;
 	}
-#endif
+#endif /* !_NO_SUGGESTIONS */
 	curhistindex = current_hist_n;
 	rl_kill_text(0, rl_end);
 	rl_point = rl_end = 0;
