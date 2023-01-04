@@ -797,8 +797,9 @@ by default to the \"//\" action name. For example:\n\
 Note: This plugin depends on fzf(1) and rg(1) (ripgrep)"
 
 #define SECURITY_USAGE "CliFM provides three different security mechanisms:\n\n\
-1. Stealth mode: No file is read nor written to the file system (unless\n\
-explicitly required by the user via a command). Default values are used.\n\
+1. Stealth mode (aka incognito/private mode): No file is read nor written\n\
+to the file system (unless explicitly required by the user via a command).\n\
+Default values are used.\n\
 Enable this mode via the -S,--stealth-mode command line switch.\n\n\
 2. Secure environment: CliFM runs on a sanitized environment (most\n\
 environment variables are cleared and a few of them set to sane defaults).\n\
@@ -1098,7 +1099,7 @@ parameters instead)\
 \n  -r, --no-refresh-on-empty-line Do not refresh the list of files when pressing Enter \
 on an empty line\
 \n  -s, --splash\t\t\t Enable the splash screen\
-\n  -S, --stealth-mode\t\t Leave no trace on the host system\
+\n  -S, --stealth-mode\t\t Run in incognito/private mode\
 \n  -t, --disk-usage-analyzer\t Run in disk usage analyzer mode\
 \n  -u, --no-unicode\t\t Disable Unicode support\
 \n  -U, --unicode \t\t Enable Unicode support (default)\

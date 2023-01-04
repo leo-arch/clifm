@@ -589,7 +589,7 @@ print_tips(int all)
 		"Once in the pager, go backwards by pressing the keyboard shortcut "
 		"provided by your terminal emulator",
 		"Once in the pager, press 'q' to stop it",
-		"Press Alt-l to switch to long view mode",
+		"Press Alt-l to switch to long/detail view mode",
 		"Search for files using the slash command: '/*.png'",
 		"The search function allows regular expressions: '/^c'",
 		"Add a new bookmark by just entering 'bm a ELN/FILE'",
@@ -632,7 +632,6 @@ print_tips(int all)
 		"Create a new profile running 'pf add PROFILE' or 'clifm -P PROFILE'",
 		"Switch profiles using 'pf set PROFILE'",
 		"Delete a profile using 'pf del PROFILE'",
-		"Copy selected files into CWD: 'c sel' or Ctrl-Alt-v",
 		"Use 'p ELN' to print file properties for ELN",
 		"Deselect all selected files with Alt-d",
 		"Select all files in the current directory: 'Alt-a'",
@@ -660,10 +659,10 @@ print_tips(int all)
 		"Change default keyboard shortcuts by editing the keybindings file (F9)",
 		"Keep in sight previous and next visited directories enabling the "
 		"DirhistMap option in the configuration file (F10)",
-		"Leave no traces at all running in stealth mode (-S)",
+		"Run in incognito/private mode (-S, --stealth-mode)",
 		"Pin a file via the 'pin' command and then use it with the "
 		"period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
-		"Switch between color schemes using the 'cs' command",
+		"Switch color schemes using the 'cs' command",
 		"Try the 'j' command to quickly jump into any visited directory",
 		"Switch workspaces by pressing Alt-[1-4]",
 		"Use the 'ws' command to list available workspaces",
@@ -700,7 +699,6 @@ print_tips(int all)
 		"Create multiple links at once using the 'bl' command",
 		"Organize your files using tags. Try 'tag --help'",
 		"Remove files in bulk using a text editor with 'rr'",
-		"Press Ctrl-Alt-l to toggle max file name length on/off",
 		"Easily send files to a remote location with the 'cr' command",
 		"Quickly switch prompts via 'prompt NAME'",
 		"Press Alt-TAB to toggle the disk usage analyzer mode",
