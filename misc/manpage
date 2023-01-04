@@ -157,7 +157,7 @@ do not refresh the current list of files when pressing the Enter key on an empty
 enable the splash screen
 .TP
 \fB\-S\fR, \fB\-\-stealth-mode\fR
-leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
+in stealth mode (also known as incognito or private mode) no trace is left on the host system. Nothing is read from files nor any file is created: all settings are set to the default values. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
 run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-dirs-first --apparent-size\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Sizes are calculated using actual device usage (rather than apparent size) in powers of 1024 (KiB, MiB, etc). To use apparent sizes instead add the \fI--apparent-size\fR switch. Press \fICtrl-Alt-i\fR (or \fIAlt-TAB\fR) to toggle this mode on/off in-place.
