@@ -2008,7 +2008,8 @@ rl_suggestions(const unsigned char c)
 
 	switch(*lb) {
 	case 'b': /* Bookmarks names */
-		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
+		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ' && !(*(lb + 3) == 'a'
+		&& *(lb + 4) == ' ') && strncmp(lb + 3, "add", 3) != 0) {
 			size_t i;
 			for (i = 0; i < bm_n; i++) {
 				if (!bookmarks[i].name || !*bookmarks[i].name)
