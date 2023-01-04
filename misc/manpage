@@ -950,7 +950,7 @@ show the elements currently contained in the Selection Box.
 show the splash screen.
 .TP
 .B st, sort \fR[\fIMETHOD\fR] [\fIrev\fR]
-with no argument, print the current sorting method. Else, set sorting method to METHOD, where METHOD could be one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime, if btime is not available), 5 = ctime, 6 = mtime, 7 = version (name, if ctime is not available), 8 = extension, and 9 = inode, 10 = owner, and 11 = group. Both numbers and names are allowed. Bear in mind that methods 10 and 11 sort by owner and group ID number, not by owner and group names.
+with no argument, print the current sorting order. Else, set sorting order to METHOD, where METHOD could be one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime, if btime is not available), 5 = ctime, 6 = mtime, 7 = version (name, if ctime is not available), 8 = extension, and 9 = inode, 10 = owner, and 11 = group. Both numbers and names are allowed. Bear in mind that methods 10 and 11 sort by owner and group ID number, not by owner and group names. The default is \fIversion\fR.
 .sp
 By default, files are sorted from less to more (ex: from 'a' to 'z' if using the "name" method). Use the \fIrev\fR option to invert this order. Ex: \fIst\ rev\fR or \fIst\ 3\ rev\fR. Switch back to the previous ordering running \fIst rev\fR again.
 .TP
