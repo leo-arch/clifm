@@ -143,7 +143,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status)
   - [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup)
 - Modes
-  - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
+  - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode), also known as incognito or private mode
   - [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#light-mode) (just in case it is not fast enough for you)
   - [Resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#using-clifm-as-a-standalone-resource-opener)
   - [Disk usage analyzer mode](https://github.com/leo-arch/clifm/wiki/Specifics#disk-usage-analyzer)
