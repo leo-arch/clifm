@@ -485,7 +485,7 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 			rl_insert_text(buf + *offset);
 		}
 	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS
-	|| cur_comp_type == TCMP_MIME_LIST) {
+	|| cur_comp_type == TCMP_MIME_LIST || cur_comp_type == TCMP_BOOKMARK) {
 		rl_insert_text(buf);
 		return;
 	} else if (cur_comp_type == TCMP_OWNERSHIP) {

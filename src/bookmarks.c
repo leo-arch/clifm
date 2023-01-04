@@ -421,7 +421,7 @@ bookmark_add(char *file)
 			tmp_line = (char *)NULL;
 		}
 
-		/* Store lines: used later to check hotkeys */
+		/* Store lines: used later to check for duplicated shortcuts and names */
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
 		bms[bmn] = savestring(line, strlen(line));
 		bmn++;

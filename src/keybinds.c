@@ -665,7 +665,8 @@ rl_accept_suggestion(int count, int key)
 				rl_redisplay();
 				fputs(df_c, stdout);
 			}
-		} else if (suggestion.filetype != DT_DIR) {
+		} else if (suggestion.filetype != DT_DIR
+		&& suggestion.type != BOOKMARK_SUG) {
 			rl_stuff_char(' ');
 		}
 		suggestion.type = NO_SUG;
@@ -681,8 +682,9 @@ rl_accept_suggestion(int count, int key)
 		my_insert_text(suggestion_buf, NULL, 0);
 		break;
 
-	case SEL_SUG: /* fallthrough */
-	case HIST_SUG:
+	case SEL_SUG:  /* fallthrough */
+	case HIST_SUG: /* fallthrough */
+	case BM_NAME_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
 #ifndef _NO_TAGS
@@ -749,11 +751,11 @@ static int
 rl_accept_first_word(int count, int key)
 {
 	/* Accepting the first suggested word is not supported for ELN's,
-	 * bookmarks and aliases names */
+	 * bookmark and alias names */
 	if (suggestion.type != ELN_SUG && suggestion.type != BOOKMARK_SUG
 	&& suggestion.type != ALIAS_SUG && suggestion.type != JCMD_SUG
 	&& suggestion.type != JCMD_SUG_NOACD && suggestion.type != FUZZY_FILENAME
-	&& suggestion.type != CMD_DESC_SUG) {
+	&& suggestion.type != CMD_DESC_SUG && suggestion.type != BM_NAME_SUG) {
 		accept_first_word = 1;
 		suggestion.type = FIRST_WORD;
 	}
