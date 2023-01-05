@@ -1972,7 +1972,6 @@ rl_suggestions(const unsigned char c)
 
 	char *cdesc = (char *)NULL;
 	if (conf.cmd_desc_sug == 1 && c != ' ' && nwords == 1
-//	&& (cdesc = check_int_cmd_desc_hash(word))) {
 	&& (cdesc = check_int_cmd_desc(word, wlen))) {
 		suggestion.type = CMD_DESC_SUG;
 		print_suggestion(cdesc, 0, conf.colorize == 1 ? sd_c : SUG_NO_COLOR);
@@ -2054,7 +2053,6 @@ rl_suggestions(const unsigned char c)
 					if (pp)
 						*pp = '\0';
 					suggestion.type = BACKDIR_SUG;
-//					print_suggestion(bk_cwd, 1, sf_c);
 					print_suggestion(bk_cwd, 0, sf_c);
 					printed = 1;
 					goto SUCCESS;
@@ -2067,8 +2065,10 @@ rl_suggestions(const unsigned char c)
 		if (conf.colorize == 1 && color_schemes && lb[1] == 's' && lb[2] == ' ') {
 			size_t i;
 			for (i = 0; color_schemes[i]; i++) {
-				if (*last_word == *color_schemes[i]
-				&& strncmp(color_schemes[i], word, wlen) == 0) {
+				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*color_schemes[i])
+				&& strncasecmp(word, color_schemes[i], wlen) == 0)
+				: (*word == *color_schemes[i]
+				&& strncmp(word, color_schemes[i], wlen) == 0)) {
 					suggestion.type = CMD_SUG;
 					print_suggestion(color_schemes[i], wlen, sx_c);
 					printed = 1;
@@ -2101,8 +2101,10 @@ rl_suggestions(const unsigned char c)
 		if (remotes && lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
 			size_t i;
 			for (i = 0; remotes[i].name; i++) {
-				if (*word == *remotes[i].name
-				&& strncmp(remotes[i].name, word, wlen) == 0) {
+				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*remotes[i].name)
+				&& strncasecmp(word, remotes[i].name, wlen) == 0)
+				: (*word == *remotes[i].name
+				&& strncmp(word, remotes[i].name, wlen) == 0)) {
 					suggestion.type = CMD_SUG;
 					print_suggestion(remotes[i].name, wlen, sx_c);
 					printed = 1;
@@ -2119,8 +2121,10 @@ rl_suggestions(const unsigned char c)
 		|| strncmp(lb + 3, "del", 3) == 0)) {
 			size_t i;
 			for (i = 0; profile_names[i]; i++) {
-				if (*word == *profile_names[i]
-				&& strncmp(profile_names[i], word, wlen) == 0) {
+				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*profile_names[i])
+				&& strncasecmp(word, profile_names[i], wlen) == 0)
+				: (*word == *profile_names[i]
+				&& strncmp(word, profile_names[i], wlen) == 0)) {
 					suggestion.type = CMD_SUG;
 					print_suggestion(profile_names[i], wlen, sx_c);
 					printed = 1;
@@ -2130,6 +2134,8 @@ rl_suggestions(const unsigned char c)
 			if (printed) {
 				goto SUCCESS;
 			} else {
+				if (suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
 				goto FAIL;
 			}
 		}
