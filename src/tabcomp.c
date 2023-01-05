@@ -1988,7 +1988,8 @@ AFTER_USUAL_COMPLETION:
 		&& (cur_comp_type != TCMP_FILE_TYPES_FILES || !matches[1])
 		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
-		&& (cur_comp_type != TCMP_SEL || fzftab != 1 || sel_n == 1)
+//		&& (cur_comp_type != TCMP_SEL || fzftab != 1 || sel_n == 1)
+		&& (cur_comp_type != TCMP_SEL)
 		&& cur_comp_type != TCMP_CMD_DESC
 		&& cur_comp_type != TCMP_OWNERSHIP
 
@@ -1996,7 +1997,8 @@ AFTER_USUAL_COMPLETION:
 
 		&& (cur_comp_type != TCMP_TAGS_F || !matches[1])) {
 			enum comp_type c = cur_comp_type;
-			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
+//			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
+			if ((c == TCMP_DESEL || c == TCMP_NET
 
 			|| c == TCMP_BM_PATHS
 

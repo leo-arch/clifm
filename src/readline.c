@@ -3052,7 +3052,10 @@ my_rl_completion(const char *text, int start, int end)
 		} else if (!*(text + 2)) {
 			matches = rl_completion_matches(text + 1, &file_types_generator);
 			if (matches) {
-				flags |= MULTI_SEL;
+				if (!matches[1])
+					rl_swap_fields(&matches);
+				else
+					flags |= MULTI_SEL;
 				cur_comp_type = TCMP_FILE_TYPES_FILES;
 				return matches;
 			}
@@ -3413,6 +3416,8 @@ my_rl_completion(const char *text, int start, int end)
 		&& strncmp(text, "sel", 3) == 0) {
 			matches = rl_completion_matches("", &sel_entries_generator);
 			if (matches) {
+				if (!matches[1])
+					rl_swap_fields(&matches);
 				cur_comp_type = TCMP_SEL;
 				return matches;
 			}
