@@ -2344,6 +2344,9 @@ CALC_OFFSET:
 		|| cur_comp_type == TCMP_CMD_DESC)
 			tab_offset = 0;
 
+		if (cur_comp_type == TCMP_PATH && ptr && *ptr == '/' && tab_offset > 0)
+			tab_offset--;
+
 		for (i = 1; i <= (size_t)count; i++) {
 			if (i >= term_lines) {
 				/* A little pager */
