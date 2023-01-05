@@ -332,7 +332,13 @@ alt-down:preview-page-down --inline-info --layout=reverse-list \
 
 #define DEF_SMENU_OPTIONS "-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
 
-#define DEFAULT_TERM_CMD "xterm -e"
+/* Should we add __APPLE__ here too */
+#if defined(__HAIKU__)
+# define DEFAULT_TERM_CMD "Terminal"
+#else
+# define DEFAULT_TERM_CMD "xterm -e"
+#endif
+
 #define FALLBACK_SHELL "/bin/sh"
 
 #ifdef __APPLE__

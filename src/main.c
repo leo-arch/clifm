@@ -1060,7 +1060,9 @@ struct config_t {
 	get_home();
 
 	/* Running on a graphical environment? */
+#ifndef __HAIKU__
 	if (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))
+#endif
 		flags |= GUI;
 
 	P_tmpdir_len = strlen(P_tmpdir);

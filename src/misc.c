@@ -739,19 +739,17 @@ print_tips(int all)
 /* Check whether the conditions to run the new_instance function are
  * fulfilled */
 static inline int
-check_new_instance_init_conditions(const char *dir, const int sudo)
+check_new_instance_init_conditions(void)
 {
 	if (!conf.term) {
-		UNUSED(dir); UNUSED(sudo);
 		fprintf(stderr, _("%s: Default terminal not set. Use the "
-				"configuration file (F10) to set it\n"), PROGRAM_NAME);
+			"configuration file (F10) to set it\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
 	if (!(flags & GUI)) {
-		UNUSED(dir); UNUSED(sudo);
 		fprintf(stderr, _("%s: Function only available for graphical "
-				"environments\n"), PROGRAM_NAME);
+			"environments\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -785,7 +783,7 @@ get_path_dir(char **dir)
 
 	if (*(*dir) != '/') {
 		path_dir = (char *)xnmalloc(strlen(workspaces[cur_ws].path)
-					+ strlen(*dir) + 2, sizeof(char));
+			+ strlen(*dir) + 2, sizeof(char));
 		sprintf(path_dir, "%s/%s", workspaces[cur_ws].path, *dir);
 		free(*dir);
 		*dir = (char *)NULL;
@@ -797,12 +795,12 @@ get_path_dir(char **dir)
 }
 
 /* Get command to be executed by the new_instance function, only if
- * TERM (global) contains spaces. Otherwise, new_instance will try
- * TERM -e */
+ * CONF.TERM (global) contains spaces. Otherwise, new_instance will try
+ * "CONF.TERM clifm" */
 static char **
 get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 {
-	if (!strchr(conf.term, ' '))	return (char **)NULL;
+	if (!strchr(conf.term, ' ')) return (char **)NULL;
 
 	char **tmp_term = get_substr(conf.term, ' ');
 	if (!tmp_term) return (char **)NULL;
@@ -839,12 +837,15 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 	return cmd;
 }
 
-/* Launch a new instance using CMD. If CMD is NULL, try TERM -e
- * Returns the exit status of this execution */
+/* Launch a new instance using CMD. If CMD is NULL, try "CONF.TERM clifm"
+ * Returns the exit status of the executed command */
 static int
 launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int sudo)
 {
 	int ret = 0;
+#if defined(__HAIKU__)
+	sudo = 0;
+#endif
 
 	setenv("CLIFM_OWN_CHILD", "1", 1);
 
@@ -855,14 +856,16 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int 
 			free((*cmd)[i]);
 		free(*cmd);
 	} else {
-		fprintf(stderr, _("%s: No option specified for '%s'\n"
+/*		fprintf(stderr, _("%s: No option specified for '%s'\n"
 				"Trying '%s -e %s %s'\n"), PROGRAM_NAME, conf.term,
-				conf.term, *self, workspaces[cur_ws].path);
+				conf.term, *self, workspaces[cur_ws].path); */
 		if (sudo) {
-			char *tcmd[] = {conf.term, "-e", *_sudo, *self, *dir, NULL};
+//			char *tcmd[] = {conf.term, "-e", *_sudo, *self, *dir, NULL};
+			char *tcmd[] = {conf.term, *_sudo, *self, *dir, NULL};
 			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
 		} else {
-			char *tcmd[] = {conf.term, "-e", *self, *dir, NULL};
+//			char *tcmd[] = {conf.term, "-e", *self, *dir, NULL};
+			char *tcmd[] = {conf.term, *self, *dir, NULL};
 			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
 		}
 	}
@@ -884,15 +887,17 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int 
 int
 new_instance(char *dir, const int sudo)
 {
-	if (check_new_instance_init_conditions(dir, sudo) == EXIT_FAILURE)
+	if (check_new_instance_init_conditions() == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
 	if (!dir)
 		return EINVAL;
 
 	char *_sudo = (char *)NULL;
+#ifndef __HAIKU__
 	if (sudo && !(_sudo = get_sudo_path()))
 		return errno;
+#endif
 
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
