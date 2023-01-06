@@ -2990,8 +2990,8 @@ dequote_str(char *text, int mt)
 	if (!text || !*text)
 		return (char *)NULL;
 
-	/* At most, we need as many bytes as text (in case no escape sequence
-	 * is found)*/
+	/* At most, we need as many bytes as in text (in case no escape
+	 * sequence is found) */
 	char *buf = (char *)NULL;
 	buf = (char *)xnmalloc(strlen(text) + 1, sizeof(char));
 	size_t len = 0;

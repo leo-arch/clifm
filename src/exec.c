@@ -149,8 +149,11 @@ run_and_refresh(char **cmd, const int skip_force)
 				return ENOENT;
 			}
 		} else {
+			char *p = dequote_str(cmd[1], 0);
 			struct stat a;
-			if (lstat(cmd[1], &a) == -1) {
+			int ret = lstat(p ? p : cmd[1], &a);
+			free(p);
+			if (ret == -1) {
 				xrename = 0;
 				fprintf(stderr, "m: %s: %s\n", cmd[1], strerror(errno));
 				return errno;
