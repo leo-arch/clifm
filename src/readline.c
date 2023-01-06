@@ -3244,7 +3244,8 @@ my_rl_completion(const char *text, int start, int end)
 #ifndef _NO_TAGS
 		/* #### TAGS COMPLETION #### */
 		/* 1. Expand tag expressions (t:TAG) into tagged files */
-		if (fzftab == 1 && tags_n > 0 && *text == 't'
+//		if (fzftab == 1 && tags_n > 0 && *text == 't'
+		if (tags_n > 0 && *text == 't'
 		&& *(text + 1) == ':' && *(text + 2)) {
 			free(cur_tag);
 			cur_tag = savestring(text + 2, strlen(text + 2));
@@ -3464,6 +3465,7 @@ my_rl_completion(const char *text, int start, int end)
 					cur_comp_type = TCMP_BOOKMARK;
 					return matches;
 				}
+				return (char **)NULL;
 			}
 		}
 

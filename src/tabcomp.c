@@ -257,7 +257,8 @@ print_filename(char *to_print, char *full_pathname)
 	char *s;
 
 	if (conf.colorize == 1 && (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_SEL
-	|| cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_RANGES)) {
+	|| cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_RANGES
+	|| cur_comp_type == TCMP_TAGS_F)) {
 		colors_list(to_print, NO_ELN, NO_PAD, NO_NEWLINE);
 	} else {
 		for (s = to_print + tab_offset; *s; s++) {
@@ -2343,7 +2344,7 @@ CALC_OFFSET:
 		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR
 		|| cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_FILE_TYPES_OPTS
 		|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_MIME_LIST
-		|| cur_comp_type == TCMP_CMD_DESC)
+		|| cur_comp_type == TCMP_CMD_DESC || cur_comp_type == TCMP_SEL)
 			tab_offset = 0;
 
 		if (cur_comp_type == TCMP_PATH && ptr && *ptr == '/' && tab_offset > 0)

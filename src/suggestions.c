@@ -1503,7 +1503,7 @@ check_aliases(const char *str, const size_t len, const int print)
 			continue;
 
 		suggestion.type = ALIAS_SUG;
-//		print_suggestion(aliases[i].cmd, 1, color);
+
 		print_suggestion(aliases[i].cmd, 0, color);
 		return PARTIAL_MATCH;
 	}
@@ -1539,7 +1539,7 @@ check_jcmd(char *line)
 	suggestion.filetype = DT_DIR;
 
 	print_suggestion(jump_suggestion, 0, conf.suggest_filetype_color ? di_c : sf_c);
-//	print_suggestion(jump_suggestion, 1, conf.suggest_filetype_color ? di_c : sf_c);
+
 	if (conf.autocd == 0)
 		suggestion.type = JCMD_SUG_NOACD;
 
@@ -1791,7 +1791,9 @@ check_prompts(const char *word, const size_t len)
 		&& (conf.case_sens_list ? strncmp(prompts[i].name, word, len)
 		: strncasecmp(prompts[i].name, word, len)) == 0) {
 			suggestion.type = PROMPT_SUG;
-			print_suggestion(prompts[i].name, len, sx_c);
+			char *p = escape_str(prompts[i].name);
+			print_suggestion(p ? p : prompts[i].name, len, sx_c);
+			free(p);
 			return 1;
 		}
 	}
@@ -1822,7 +1824,7 @@ get_last_word(const char *last_space)
 }
 
 static int
-check_workspaces(char *word, size_t wlen)
+check_workspaces(const char *word, size_t wlen)
 {
 	if (!word || !*word || !workspaces)
 		return 0;
@@ -1834,6 +1836,7 @@ check_workspaces(char *word, size_t wlen)
 			print_suggestion(workspaces[a - 1].name, 0, sf_c);
 			return 1;
 		}
+
 		return 0;
 	}
 
@@ -1876,6 +1879,130 @@ check_fastback(char *w)
 	free(e);
 
 	return 1;
+}
+
+static int
+check_profiles(const char *word, const size_t len)
+{
+	if (!word || !*word || !profile_names)
+		return 0;
+
+	size_t i;
+	for (i = 0; profile_names[i]; i++) {
+		if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*profile_names[i])
+		&& strncasecmp(word, profile_names[i], len) == 0)
+		: (*word == *profile_names[i]
+		&& strncmp(word, profile_names[i], len) == 0)) {
+			suggestion.type = CMD_SUG;
+			char *p = escape_str(profile_names[i]);
+			print_suggestion(p ? p : profile_names[i], len, sx_c);
+			free(p);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+check_remotes(const char *word, const size_t len)
+{
+	if (!word || !*word || !remotes)
+		return 0;
+
+	size_t i;
+	for (i = 0; remotes[i].name; i++) {
+		if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*remotes[i].name)
+		&& strncasecmp(word, remotes[i].name, len) == 0)
+		: (*word == *remotes[i].name
+		&& strncmp(word, remotes[i].name, len) == 0)) {
+			suggestion.type = CMD_SUG;
+			char *p = escape_str(remotes[i].name);
+			print_suggestion(p ? p : remotes[i].name, len, sx_c);
+			free(p);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+check_color_schemes(const char *word, const size_t len)
+{
+	if (!word || !*word || !color_schemes)
+		return 0;
+
+	size_t i;
+	for (i = 0; color_schemes[i]; i++) {
+		if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*color_schemes[i])
+		&& strncasecmp(word, color_schemes[i], len) == 0)
+		: (*word == *color_schemes[i]
+		&& strncmp(word, color_schemes[i], len) == 0)) {
+			suggestion.type = CMD_SUG;
+			char *p = escape_str(color_schemes[i]);
+			print_suggestion(p ? p : color_schemes[i], len, sx_c);
+			free(p);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+check_bookmark_names(const char *word, const size_t len)
+{
+	if (!word || !*word || !bookmarks)
+		return 0;
+
+	size_t i;
+	for (i = 0; i < bm_n; i++) {
+		if (!bookmarks[i].name || !*bookmarks[i].name)
+			continue;
+		if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*bookmarks[i].name)
+		&& strncasecmp(word, bookmarks[i].name, len) == 0)
+		: (*word == *bookmarks[i].name
+		&& strncmp(word, bookmarks[i].name, len) == 0)) {
+			suggestion.type = BM_NAME_SUG;
+			char *p = escape_str(bookmarks[i].name);
+			print_suggestion(p ? p : bookmarks[i].name, len, sx_c);
+			free(p);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+check_backdir(void)
+{
+	if (!workspaces || !workspaces[cur_ws].path)
+		return 0;
+
+	/* Remove the last component of the current path name (CWD):
+	 * we want to match only PARENT directories */
+	char bk_cwd[PATH_MAX + 1];
+	xstrsncpy(bk_cwd, workspaces[cur_ws].path, PATH_MAX);
+
+	char *q = strrchr(bk_cwd, '/');
+	if (q)
+		*q = '\0';
+
+	/* Find the query string in the list of parent directories */
+	char *p = strstr(bk_cwd, rl_line_buffer + 3);
+	if (p) {
+		char *pp = strchr(p, '/');
+		if (pp)
+			*pp = '\0';
+
+		suggestion.type = BACKDIR_SUG;
+		print_suggestion(bk_cwd, 0, sf_c);
+		return 1;
+	}
+
+	return 0;
 }
 
 /* Check for available suggestions. Returns zero if true, one if not,
@@ -1972,6 +2099,7 @@ rl_suggestions(const unsigned char c)
 
 	char *cdesc = (char *)NULL;
 	if (conf.cmd_desc_sug == 1 && c != ' ' && nwords == 1
+	&& (!rl_line_buffer || (rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '))
 	&& (cdesc = check_int_cmd_desc(word, wlen))) {
 		suggestion.type = CMD_DESC_SUG;
 		print_suggestion(cdesc, 0, conf.colorize == 1 ? sd_c : SUG_NO_COLOR);
@@ -2006,27 +2134,15 @@ rl_suggestions(const unsigned char c)
 	/* 3.b) Let's suggest non-fixed parameters for internal commands */
 
 	switch(*lb) {
-	case 'b': /* Bookmarks names */
+	case 'b': /* Bookmark names */
 		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ' && !(*(lb + 3) == 'a'
 		&& *(lb + 4) == ' ') && strncmp(lb + 3, "add", 3) != 0) {
-			size_t i;
-			for (i = 0; i < bm_n; i++) {
-				if (!bookmarks[i].name || !*bookmarks[i].name)
-					continue;
-				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*bookmarks[i].name)
-				&& strncasecmp(word, bookmarks[i].name, wlen) == 0)
-				: (*word == *bookmarks[i].name
-				&& strncmp(word, bookmarks[i].name, wlen) == 0)) {
-					suggestion.type = BM_NAME_SUG;
-					char *p = escape_str(bookmarks[i].name);
-					print_suggestion(p ? p : bookmarks[i].name, wlen, sx_c);
-					free(p);
-					printed = 1;
-					break;
-				}
-			}
-			if (printed ==  1) {
+			if ((printed = check_bookmark_names(word, wlen)) == 1) {
 				goto SUCCESS;
+			} else {
+				if (suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
+				goto FAIL;
 			}
 		}
 
@@ -2039,45 +2155,16 @@ rl_suggestions(const unsigned char c)
 						clear_suggestion(CS_FREEBUF);
 					goto FAIL;
 				}
-				/* Remove the last component of the current path name (CWD):
-				 * we want to match only PARENT directories */
-				char bk_cwd[PATH_MAX + 1];
-				xstrsncpy(bk_cwd, workspaces[cur_ws].path, PATH_MAX);
-				char *q = strrchr(bk_cwd, '/');
-				if (q)
-					*q = '\0';
-				/* Find the query string in the list of parent directories */
-				char *p = strstr(bk_cwd, lb + 3);
-				if (p) {
-					char *pp = strchr(p, '/');
-					if (pp)
-						*pp = '\0';
-					suggestion.type = BACKDIR_SUG;
-					print_suggestion(bk_cwd, 0, sf_c);
-					printed = 1;
+				if ((printed = check_backdir()) == 1)
 					goto SUCCESS;
-				}
 			}
 		}
 		break;
 
 	case 'c': /* Color schemes */
 		if (conf.colorize == 1 && color_schemes && lb[1] == 's' && lb[2] == ' ') {
-			size_t i;
-			for (i = 0; color_schemes[i]; i++) {
-				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*color_schemes[i])
-				&& strncasecmp(word, color_schemes[i], wlen) == 0)
-				: (*word == *color_schemes[i]
-				&& strncmp(word, color_schemes[i], wlen) == 0)) {
-					suggestion.type = CMD_SUG;
-					print_suggestion(color_schemes[i], wlen, sx_c);
-					printed = 1;
-					break;
-				}
-			}
-			if (printed) {
+			if ((printed = check_color_schemes(word, wlen)) == 1)
 				goto SUCCESS;
-			}
 		}
 		break;
 
@@ -2087,8 +2174,7 @@ rl_suggestions(const unsigned char c)
 			break;
 		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'o'
 		|| lb[1] == 'p') && lb[2] == ' ')) {
-			printed = check_jcmd(full_line);
-			if (printed) {
+			if ((printed = check_jcmd(full_line)) == 1) {
 				zero_offset = 1;
 				goto SUCCESS;
 			} else {
@@ -2099,19 +2185,7 @@ rl_suggestions(const unsigned char c)
 
 	case 'n': /* Remotes */
 		if (remotes && lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
-			size_t i;
-			for (i = 0; remotes[i].name; i++) {
-				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*remotes[i].name)
-				&& strncasecmp(word, remotes[i].name, wlen) == 0)
-				: (*word == *remotes[i].name
-				&& strncmp(word, remotes[i].name, wlen) == 0)) {
-					suggestion.type = CMD_SUG;
-					print_suggestion(remotes[i].name, wlen, sx_c);
-					printed = 1;
-					break;
-				}
-			}
-			if (printed)
+			if ((printed = check_remotes(word, wlen)) == 1)
 				goto SUCCESS;
 		}
 		break;
@@ -2119,19 +2193,7 @@ rl_suggestions(const unsigned char c)
 	case 'p': /* Profiles */
 		if (profile_names && lb[1] == 'f' && lb[2] == ' ' && (strncmp(lb + 3, "set", 3) == 0
 		|| strncmp(lb + 3, "del", 3) == 0)) {
-			size_t i;
-			for (i = 0; profile_names[i]; i++) {
-				if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*profile_names[i])
-				&& strncasecmp(word, profile_names[i], wlen) == 0)
-				: (*word == *profile_names[i]
-				&& strncmp(word, profile_names[i], wlen) == 0)) {
-					suggestion.type = CMD_SUG;
-					print_suggestion(profile_names[i], wlen, sx_c);
-					printed = 1;
-					break;
-				}
-			}
-			if (printed) {
+			if ((printed = check_profiles(word, wlen)) == 1) {
 				goto SUCCESS;
 			} else {
 				if (suggestion.printed)
@@ -2151,8 +2213,7 @@ rl_suggestions(const unsigned char c)
 		&& is_number(word)) {
 			if (nwords > 2)
 				goto FAIL;
-			printed = check_sort_methods(word, wlen);
-			if (printed)
+			if ((printed = check_sort_methods(word, wlen)) == 1)
 				goto SUCCESS;
 			goto FAIL;
 		}
@@ -2175,8 +2236,7 @@ rl_suggestions(const unsigned char c)
 		if (lb[1] == 's' && lb[2] == ' ') {
 			if (nwords > 2)
 				goto FAIL;
-			printed = check_workspaces(word, wlen);
-			if (printed)
+			if ((printed = check_workspaces(word, wlen)) == 1)
 				goto SUCCESS;
 		}
 	break;
@@ -2195,8 +2255,7 @@ rl_suggestions(const unsigned char c)
 		}
 
 		/* 3.c.2) Check commands fixed parameters */
-		printed = check_int_params(full_line, (size_t)rl_end);
-		if (printed) {
+		if ((printed = check_int_params(full_line, (size_t)rl_end)) == 1) {
 			zero_offset = 1;
 			goto SUCCESS;
 		}
@@ -2204,22 +2263,19 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.c.3) Let's suggest --help for internal commands */
 	if (*word == '-') {
-		printed = check_help(full_line, word);
-		if (printed)
+		if ((printed = check_help(full_line, word)))
 			goto SUCCESS;
 	}
 
 	/* 3.c.4) Variable names, both environment and internal */
 	if (*word == '$') {
-		printed = check_variables(word + 1, wlen - 1);
-		if (printed)
+		if ((printed = check_variables(word + 1, wlen - 1)))
 			goto SUCCESS;
 	}
 
 	/* 3.c.5) ~usernames */
 	if (*word == '~' && *(word + 1) != '/') {
-		printed = check_users(word + 1, wlen - 1);
-		if (printed)
+		if ((printed = check_users(word + 1, wlen - 1)))
 			goto SUCCESS;
 	}
 
@@ -2240,8 +2296,7 @@ rl_suggestions(const unsigned char c)
 			if (flag == CHECK_MATCH && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
 
-			printed = check_aliases(word, wlen, flag);
-			if (printed)
+			if ((printed = check_aliases(word, wlen, flag)))
 				goto SUCCESS;
 			break;
 
