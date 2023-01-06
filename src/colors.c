@@ -1729,45 +1729,42 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	if (wlen == 0)
 		wname = truncate_wname(ent);
 
-	if (ret == -1) {
-		fprintf(stderr, "%s%s%s%s%-*s%s%s", eln_color, index, df_c,
-		    uf_c, pad, wname ? wname : ent, df_c, new_line ? "\n" : "");
-		free(wname);
-		return;
-	}
-
 	char *color = fi_c;
 
-	switch (attr.st_mode & S_IFMT) {
-	case S_IFREG:
-		color = get_regfile_color(ent, &attr);
-		break;
+	if (ret == -1) {
+		color = uf_c;
+	} else {
+		switch (attr.st_mode & S_IFMT) {
+		case S_IFREG:
+			color = get_regfile_color(ent, &attr);
+			break;
 
-	case S_IFDIR:
-		if (conf.colorize == 0)
-			color = di_c;
-		else if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
-			color = nd_c;
-		else
-			color = get_dir_color(ent, attr.st_mode, attr.st_nlink);
-		break;
+		case S_IFDIR:
+			if (conf.colorize == 0)
+				color = di_c;
+			else if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
+				color = nd_c;
+			else
+				color = get_dir_color(ent, attr.st_mode, attr.st_nlink);
+			break;
 
-	case S_IFLNK: {
-		if (conf.colorize == 0) {
-			color = ln_c;
-		} else {
-			char *linkname = realpath(ent, NULL);
-			color = linkname ? ln_c : or_c;
-			free(linkname);
+		case S_IFLNK: {
+			if (conf.colorize == 0) {
+				color = ln_c;
+			} else {
+				char *linkname = realpath(ent, NULL);
+				color = linkname ? ln_c : or_c;
+				free(linkname);
+			}
+			}
+			break;
+
+		case S_IFIFO: color = pi_c; break;
+		case S_IFBLK: color = bd_c; break;
+		case S_IFCHR: color = cd_c; break;
+		case S_IFSOCK: color = so_c; break;
+		default: color = no_c; break;
 		}
-		}
-		break;
-
-	case S_IFIFO: color = pi_c; break;
-	case S_IFBLK: color = bd_c; break;
-	case S_IFCHR: color = cd_c; break;
-	case S_IFSOCK: color = so_c; break;
-	default: color = no_c; break;
 	}
 
 	if (!color)
