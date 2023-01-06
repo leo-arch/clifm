@@ -1960,6 +1960,7 @@ check_bookmark_names(const char *word, const size_t len)
 	for (i = 0; i < bm_n; i++) {
 		if (!bookmarks[i].name || !*bookmarks[i].name)
 			continue;
+
 		if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*bookmarks[i].name)
 		&& strncasecmp(word, bookmarks[i].name, len) == 0)
 		: (*word == *bookmarks[i].name
@@ -2131,9 +2132,10 @@ rl_suggestions(const unsigned char c)
 	}
 
 	char *lb = rl_line_buffer;
-	/* 3.b) Let's suggest non-fixed parameters for internal commands */
+	/* 3.b) Let's suggest non-fixed parameters for internal commands
+	 * Only if second word or more (first word is the command name) */
 
-	switch(*lb) {
+	switch (nwords > 1 ? *lb : '\0') {
 	case 'b': /* Bookmark names */
 		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ' && !(*(lb + 3) == 'a'
 		&& *(lb + 4) == ' ') && strncmp(lb + 3, "add", 3) != 0) {
@@ -2142,7 +2144,8 @@ rl_suggestions(const unsigned char c)
 			} else {
 				if (suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
-				goto FAIL;
+				if (*(lb + 3) != '-') /* Might be --help, let it continue */
+					goto FAIL;
 			}
 		}
 
@@ -2259,12 +2262,13 @@ rl_suggestions(const unsigned char c)
 			zero_offset = 1;
 			goto SUCCESS;
 		}
-	}
 
-	/* 3.c.3) Let's suggest --help for internal commands */
-	if (*word == '-') {
-		if ((printed = check_help(full_line, word)))
-			goto SUCCESS;
+		/* 3.c.3) Let's suggest --help for internal commands */
+		if (*word == '-') {
+			if ((printed = check_help(full_line, word)))
+				goto SUCCESS;
+		}
+
 	}
 
 	/* 3.c.4) Variable names, both environment and internal */

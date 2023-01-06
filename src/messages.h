@@ -769,7 +769,7 @@ Note: Use the 'oc' command to edit files ownership"
 \x1b[1mUSAGE\x1b[0m\n\
   Q, q, quit, exit\n\n\
 Use 'Q' to exit running the CD on quit function\n\
-Consult the manpage for instructions"
+To enable this feature consult the manpage"
 
 #define RR_USAGE "Remove files in bulk using a text editor\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
