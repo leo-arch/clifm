@@ -433,9 +433,20 @@ files in the current directory:\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   fz [on, off]"
 
-#define HF_USAGE "Set hidden files on/off\n\
+#define HELP_USAGE "Get help\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  hf, hidden [on, off, status]\n\
+  help [TOPIC]\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the help screen\n\
+    help\n\
+- Get help about the 'bookmarks' topic\n\
+    help bookmarks\n\
+- Print the list of available help topics\n\
+    help <TAB>"
+
+#define HF_USAGE "Set hidden files on/off\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  hf, hidden [on, off, status]\n\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
 - Show hidden files\n\
     hf on\n\
@@ -753,6 +764,12 @@ Note: Use the 'oc' command to edit files ownership"
     prompt unset\n\
 - Reload available prompts\n\
     prompt reload"
+
+#define QUIT_HELP "Exit clifm\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  Q, q, quit, exit\n\n\
+Use 'Q' to exit running the CD on quit function\n\
+Consult the manpage for instructions"
 
 #define RR_USAGE "Remove files in bulk using a text editor\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

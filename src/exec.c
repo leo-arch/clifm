@@ -659,6 +659,11 @@ _quit(char **args, int exit_status)
 	if (*args[0] == 'Q')
 		conf.cd_on_quit = 1;
 
+	if (args[1] && *args[1] == '-' && IS_HELP(args[1])) {
+		puts(QUIT_HELP);
+		return;
+	}
+
 	int i = (int)args_n + 1;
 	while (--i >= 0)
 		free(args[i]);
@@ -2231,6 +2236,7 @@ exec_cmd(char **comm)
 		print_dirhist(); return EXIT_SUCCESS;
 	}
 
+	/*    ############### BULK REMOVE ##################     */
 	else if (*comm[0] == 'r' && comm[0][1] == 'r' && !comm[0][2])
 		exit_code = bulk_remove(comm[1] ? comm[1] : NULL,
 					(comm[1] && comm[2]) ? comm[2] : NULL);
@@ -2317,7 +2323,7 @@ exec_cmd(char **comm)
 		kbind_busy = 0;
 	}
 
-	/*         ############### TRASH ##################     */
+	/*         ############# (UN)TRASH ##################     */
 	else if (*comm[0] == 't' && (!comm[0][1] || strcmp(comm[0], "tr") == 0
 	|| strcmp(comm[0], "trash") == 0)) {
 		int _cont = 1;
@@ -2348,7 +2354,6 @@ exec_cmd(char **comm)
 		return (exit_code = desel_function(comm));
 
 	/*  ############# SOME SHELL CMD WRAPPERS ###############  */
-
 	else if ((*comm[0] == 'r' || *comm[0] == 'm' || *comm[0] == 'l')
 	&& (strcmp(comm[0], "r") == 0 || strcmp(comm[0], "l") == 0
 	|| strcmp(comm[0], "md") == 0 || strcmp(comm[0], "le") == 0)) {
@@ -2414,6 +2419,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2])
 		return (exit_code = _toggle_exec(comm));
 
+	/*    ########### OWNERSHIP CHANGER ###############     */
 	else if (*comm[0] == 'o' && comm[0][1] == 'c' && !comm[0][2])
 		return (exit_code = set_file_owner(comm));
 
@@ -2428,6 +2434,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'u' && strcmp(comm[0], "unpin") == 0)
 		return (exit_code = unpin_dir());
 
+	/*    ############### PROMPT ##################     */
 	else if (*comm[0] == 'p' && strcmp(comm[0], "prompt") == 0)
 		return (exit_code = prompt_function(comm[1] ? comm[1] : NULL));
 
@@ -2465,7 +2472,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "sort") == 0))
 		return (exit_code = _sort_function(comm));
 
-	/*    ########## FILE NAMES CLEANER ############## */
+	/*    ############ FILE NAMES CLEANER ############## */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'b' && !comm[0][2])
 	|| strcmp(comm[0], "bleach") == 0)) {
 #ifndef _NO_BLEACH

@@ -2179,6 +2179,11 @@ print_trash_topic(void)
 static int
 run_help_topic(char *topic)
 {
+	if (*topic == '-' && IS_HELP(topic)) {
+		puts(HELP_USAGE);
+		return EXIT_SUCCESS;
+	}
+
 	if (*topic == 'a' && strcmp(topic, "archives") == 0)
 		return print_archives_topic();
 	if (*topic == 'a' && strcmp(topic, "autocommands") == 0)
