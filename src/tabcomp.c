@@ -2096,6 +2096,9 @@ AFTER_USUAL_COMPLETION:
 					rl_ding();	/* There are other matches remaining. */
 			}
 		} else {
+			if (cur_comp_type == TCMP_TAGS_T)
+				break;
+
 			if (cur_comp_type == TCMP_OWNERSHIP) {
 				char *sc = rl_line_buffer ? strchr(rl_line_buffer, ':') : (char *)NULL;
 				size_t l = wc_xstrlen(sc ? sc + 1 : rl_line_buffer ? rl_line_buffer : "");
@@ -2113,10 +2116,13 @@ AFTER_USUAL_COMPLETION:
 				temp_string_index++;
 			}
 
-			if (fzftab != 1 || cur_comp_type != TCMP_TAGS_T) {
+/*			if (cur_comp_type != TCMP_TAGS_T) {
 				temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
 				temp_string_index++;
-			}
+			} */
+			temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
+			temp_string_index++;
+
 			temp_string[temp_string_index] = '\0';
 
 			if (rl_filename_completion_desired) {

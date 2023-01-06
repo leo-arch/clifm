@@ -1767,9 +1767,6 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		}
 	}
 
-	if (!color)
-		color = fi_c;
-
 	char *name = wname ? wname : ent;
 	char *tmp = (flags & IN_SELBOX_SCREEN) ? abbreviate_file_name(name) : name;
 
