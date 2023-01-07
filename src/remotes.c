@@ -94,7 +94,7 @@ dequote_remote_name(char *name)
 }
 
 /* Get the index of the remote named NAME from the remotes list. Returns
- * this index incase of success and -1 in case of error */
+ * this index in case of success or -1 in case of error */
 static int
 get_remote(char *name)
 {

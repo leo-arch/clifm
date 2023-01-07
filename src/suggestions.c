@@ -1783,21 +1783,33 @@ check_sort_methods(char *str, const size_t len)
 }
 
 static int
-check_prompts(const char *word, const size_t len)
+check_prompts(char *word, const size_t len)
 {
 	int i = (int)prompts_n;
+
+	char *q = (char *)NULL, *w = word;
+	size_t l = len;
+
+	if (strchr(word, '\\')) {
+		q = dequote_str(word, 0);
+		w = q ? q : word;
+		l = w == q ? strlen(w) : len;
+	}
+
 	while (--i >= 0) {
-		if (TOUPPER(*word) == TOUPPER(*prompts[i].name)
-		&& (conf.case_sens_list ? strncmp(prompts[i].name, word, len)
-		: strncasecmp(prompts[i].name, word, len)) == 0) {
+		if (TOUPPER(*w) == TOUPPER(*prompts[i].name)
+		&& (conf.case_sens_list ? strncmp(prompts[i].name, w, l)
+		: strncasecmp(prompts[i].name, w, l)) == 0) {
 			suggestion.type = PROMPT_SUG;
 			char *p = escape_str(prompts[i].name);
 			print_suggestion(p ? p : prompts[i].name, len, sx_c);
 			free(p);
+			free(q);
 			return 1;
 		}
 	}
 
+	free(q);
 	return 0;
 }
 
@@ -1905,74 +1917,107 @@ check_profiles(const char *word, const size_t len)
 }
 
 static int
-check_remotes(const char *word, const size_t len)
+check_remotes(char *word, const size_t len)
 {
 	if (!word || !*word || !remotes)
 		return 0;
 
+	char *q = (char *)NULL, *w = word;
+	size_t l = len;
+
+	if (strchr(word, '\\')) {
+		q = dequote_str(word, 0);
+		w = q ? q : word;
+		l = w == q ? strlen(w) : len;
+	}
+
 	size_t i;
 	for (i = 0; remotes[i].name; i++) {
-		if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*remotes[i].name)
-		&& strncasecmp(word, remotes[i].name, len) == 0)
-		: (*word == *remotes[i].name
-		&& strncmp(word, remotes[i].name, len) == 0)) {
+		if (conf.case_sens_list == 0 ? (TOUPPER(*w) == TOUPPER(*remotes[i].name)
+		&& strncasecmp(w, remotes[i].name, l) == 0)
+		: (*w == *remotes[i].name
+		&& strncmp(w, remotes[i].name, l) == 0)) {
 			suggestion.type = CMD_SUG;
 			char *p = escape_str(remotes[i].name);
 			print_suggestion(p ? p : remotes[i].name, len, sx_c);
 			free(p);
+			free(q);
 			return 1;
 		}
 	}
 
+	free(q);
 	return 0;
 }
 
 static int
-check_color_schemes(const char *word, const size_t len)
+check_color_schemes(char *word, const size_t len)
 {
 	if (!word || !*word || !color_schemes)
 		return 0;
 
+	char *q = (char *)NULL, *w = word;
+	size_t l = len;
+
+	if (strchr(word, '\\')) {
+		q = dequote_str(word, 0);
+		w = q ? q : word;
+		l = w == q ? strlen(w) : len;
+	}
+
 	size_t i;
 	for (i = 0; color_schemes[i]; i++) {
-		if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*color_schemes[i])
-		&& strncasecmp(word, color_schemes[i], len) == 0)
-		: (*word == *color_schemes[i]
-		&& strncmp(word, color_schemes[i], len) == 0)) {
+		if (conf.case_sens_list == 0 ? (TOUPPER(*w) == TOUPPER(*color_schemes[i])
+		&& strncasecmp(w, color_schemes[i], l) == 0)
+		: (*w == *color_schemes[i]
+		&& strncmp(w, color_schemes[i], l) == 0)) {
 			suggestion.type = CMD_SUG;
 			char *p = escape_str(color_schemes[i]);
 			print_suggestion(p ? p : color_schemes[i], len, sx_c);
 			free(p);
+			free(q);
 			return 1;
 		}
 	}
 
+	free(q);
 	return 0;
 }
 
 static int
-check_bookmark_names(const char *word, const size_t len)
+check_bookmark_names(char *word, const size_t len)
 {
 	if (!word || !*word || !bookmarks)
 		return 0;
+
+	char *q = (char *)NULL, *w = word;
+	size_t l = len;
+
+	if (strchr(word, '\\')) {
+		q = dequote_str(word, 0);
+		w = q ? q : word;
+		l = w == q ? strlen(w) : len;
+	}
 
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
 		if (!bookmarks[i].name || !*bookmarks[i].name)
 			continue;
 
-		if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*bookmarks[i].name)
-		&& strncasecmp(word, bookmarks[i].name, len) == 0)
-		: (*word == *bookmarks[i].name
-		&& strncmp(word, bookmarks[i].name, len) == 0)) {
+		if (conf.case_sens_list == 0 ? (TOUPPER(*w) == TOUPPER(*bookmarks[i].name)
+		&& strncasecmp(w, bookmarks[i].name, l) == 0)
+		: (*w == *bookmarks[i].name
+		&& strncmp(w, bookmarks[i].name, l) == 0)) {
 			suggestion.type = BM_NAME_SUG;
 			char *p = escape_str(bookmarks[i].name);
 			print_suggestion(p ? p : bookmarks[i].name, len, sx_c);
 			free(p);
+			free(q);
 			return 1;
 		}
 	}
 
+	free(q);
 	return 0;
 }
 

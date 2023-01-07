@@ -619,14 +619,20 @@ edit_colorscheme(char *app)
 static int
 set_colorscheme(char *arg)
 {
+	if (!arg || !*arg)
+		return EXIT_FAILURE;
+
+	char *p = dequote_str(arg, 0);
+	char *q = p ? p : arg;
+
 	size_t i, cs_found = 0;
 	for (i = 0; color_schemes[i]; i++) {
-		if (*arg != *color_schemes[i]
-		|| strcmp(arg, color_schemes[i]) != 0)
+		if (*q != *color_schemes[i]
+		|| strcmp(q, color_schemes[i]) != 0)
 			continue;
 		cs_found = 1;
 
-		if (set_colors(arg, 0) != EXIT_SUCCESS)
+		if (set_colors(q, 0) != EXIT_SUCCESS)
 			continue;
 		cur_cscheme = color_schemes[i];
 
@@ -635,8 +641,12 @@ set_colorscheme(char *arg)
 			reload_dirlist();
 		switch_cscheme = 0;
 
+		free(p);
+
 		return EXIT_SUCCESS;
 	}
+
+	free(p);
 
 	if (cs_found == 0)
 		fprintf(stderr, _("%s: No such color scheme\n"), PROGRAM_NAME);

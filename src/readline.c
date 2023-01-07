@@ -3460,7 +3460,9 @@ my_rl_completion(const char *text, int start, int end)
 				if (suggestion.type != FILE_SUG)
 					rl_attempted_completion_over = 1;
 #endif
+//				char *p = dequote_str((char *)text, 0);
 				matches = rl_completion_matches(text, &bookmarks_generator);
+//				free(p);
 				if (matches) {
 					cur_comp_type = TCMP_BOOKMARK;
 					return matches;
