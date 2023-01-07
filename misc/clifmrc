@@ -82,7 +82,7 @@ LongViewMode=false
 # A single dash ("-") disables all fields
 # Ex: print only permissions (numeric) and size (human readable):
 #PropFields="ns"
-PropFields="pims"
+PropFields="fpims"
 
 # If running in long view, print directories full size (including contents)
 FullDirSize=false
