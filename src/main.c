@@ -505,6 +505,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"unpin", 5},
 	{"prompt", 6},
 	{"q", 1},
+	{"Q", 1},
 	{"quit", 4},
 	{"exit", 4},
 	{"r", 1}, //"rm",

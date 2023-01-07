@@ -2186,7 +2186,7 @@ rl_suggestions(const unsigned char c)
 		}
 		break;
 
-	case 'n': /* Remotes */
+	case 'n': /* 'net' command: remotes */
 		if (remotes && lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
 			if ((printed = check_remotes(word, wlen)) == 1)
 				goto SUCCESS;
