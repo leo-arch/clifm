@@ -3323,7 +3323,9 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* #### PROMPT #### */
 		if (*lb == 'p' && lb[1] == 'r' && strncmp(lb, "prompt " , 7) == 0) {
-			matches = rl_completion_matches(text, &prompts_generator);
+			char *p = dequote_str((char *)text, 0);
+			matches = rl_completion_matches(p ? p : text, &prompts_generator);
+			free(p);
 			if (matches) {
 				cur_comp_type = TCMP_PROMPTS;
 				return matches;
@@ -3460,9 +3462,9 @@ my_rl_completion(const char *text, int start, int end)
 				if (suggestion.type != FILE_SUG)
 					rl_attempted_completion_over = 1;
 #endif
-//				char *p = dequote_str((char *)text, 0);
-				matches = rl_completion_matches(text, &bookmarks_generator);
-//				free(p);
+				char *p = dequote_str((char *)text, 0);
+				matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
+				free(p);
 				if (matches) {
 					cur_comp_type = TCMP_BOOKMARK;
 					return matches;
@@ -3483,7 +3485,9 @@ my_rl_completion(const char *text, int start, int end)
 		/* ### COLOR SCHEMES COMPLETION ### */
 		if (conf.colorize == 1 && *lb == 'c' && ((lb[1] == 's' && lb[2] == ' ')
 		|| strncmp(lb, "colorschemes ", 13) == 0)) {
-			matches = rl_completion_matches(text, &cschemes_generator);
+			char *p = dequote_str((char *)text, 0);
+			matches = rl_completion_matches(p ? p : text, &cschemes_generator);
+			free(p);
 			if (matches) {
 				cur_comp_type = TCMP_CSCHEME;
 				return matches;
@@ -3530,7 +3534,9 @@ my_rl_completion(const char *text, int start, int end)
 		if (*lb == 'w' && strncmp(lb, "ws ", 3) == 0 && nwords <= 2) {
 			rl_sort_completion_matches = 0;
 			rl_attempted_completion_over = 1;
-			matches = rl_completion_matches(text, &workspaces_generator);
+			char *p = dequote_str((char *)text, 0);
+			matches = rl_completion_matches(p ? p : text, &workspaces_generator);
+			free(p);
 			if (matches) {
 				cur_comp_type = TCMP_WORKSPACES;
 				return matches;
@@ -3540,7 +3546,9 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* ### NET COMMAND COMPLETION ### */
 		if (*lb == 'n' && strncmp(lb, "net ", 4) == 0) {
-			matches = rl_completion_matches(text, &nets_generator);
+			char *p = dequote_str((char *)text, 0);
+			matches = rl_completion_matches(p ? p : text, &nets_generator);
+			free(p);
 			if (matches) {
 				cur_comp_type = TCMP_NET;
 				return matches;

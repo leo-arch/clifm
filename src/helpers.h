@@ -371,6 +371,8 @@ extern int watch;
 #define FASTBACK_SUG   24
 #define FUZZY_FILENAME 25
 #define CMD_DESC_SUG   26
+#define NET_SUG        27
+#define CSCHEME_SUG    28
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR

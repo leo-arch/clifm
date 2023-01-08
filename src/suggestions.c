@@ -1836,7 +1836,7 @@ get_last_word(const char *last_space)
 }
 
 static int
-check_workspaces(const char *word, size_t wlen)
+check_workspaces(char *word, size_t wlen)
 {
 	if (!word || !*word || !workspaces)
 		return 0;
@@ -1852,18 +1852,32 @@ check_workspaces(const char *word, size_t wlen)
 		return 0;
 	}
 
+	char *q = (char *)NULL, *w = word;
+	size_t l = wlen;
+
+	if (strchr(word, '\\')) {
+		q = dequote_str(word, 0);
+		w = q ? q : word;
+		l = w == q ? strlen(w) : wlen;
+	}
+
 	int i = MAX_WS;
 	while (--i >= 0) {
 		if (!workspaces[i].name)
 			continue;
-		if (TOUPPER(*word) == TOUPPER(*workspaces[i].name)
-		&& strncasecmp(word, workspaces[i].name, wlen) == 0) {
+
+		if (TOUPPER(*w) == TOUPPER(*workspaces[i].name)
+		&& strncasecmp(w, workspaces[i].name, l) == 0) {
 			suggestion.type = WS_NAME_SUG;
-			print_suggestion(workspaces[i].name, wlen, sf_c);
+			char *p = escape_str(workspaces[i].name);
+			print_suggestion(p ? p : workspaces[i].name, wlen, sf_c);
+			free(p);
+			free(q);
 			return 1;
 		}
 	}
 
+	free(q);
 	return 0;
 }
 
@@ -1937,7 +1951,7 @@ check_remotes(char *word, const size_t len)
 		&& strncasecmp(w, remotes[i].name, l) == 0)
 		: (*w == *remotes[i].name
 		&& strncmp(w, remotes[i].name, l) == 0)) {
-			suggestion.type = CMD_SUG;
+			suggestion.type = NET_SUG;
 			char *p = escape_str(remotes[i].name);
 			print_suggestion(p ? p : remotes[i].name, len, sx_c);
 			free(p);
@@ -1971,7 +1985,7 @@ check_color_schemes(char *word, const size_t len)
 		&& strncasecmp(w, color_schemes[i], l) == 0)
 		: (*w == *color_schemes[i]
 		&& strncmp(w, color_schemes[i], l) == 0)) {
-			suggestion.type = CMD_SUG;
+			suggestion.type = CSCHEME_SUG;
 			char *p = escape_str(color_schemes[i]);
 			print_suggestion(p ? p : color_schemes[i], len, sx_c);
 			free(p);

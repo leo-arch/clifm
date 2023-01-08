@@ -243,19 +243,25 @@ get_workspace_by_name(char *name)
 	if (!workspaces || !name || !*name)
 		return (-1);
 
+	char *p = dequote_str(name, 0);
+	char *q = p ? p : name;
+
 	int n = MAX_WS;
 	while (--n >= 0) {
-		if (!workspaces[n].name || *workspaces[n].name != *name
-		|| strcmp(workspaces[n].name, name) != 0)
+		if (!workspaces[n].name || *workspaces[n].name != *q
+		|| strcmp(workspaces[n].name, q) != 0)
 			continue;
 		if (n == cur_ws) {
-			fprintf(stderr, _("ws: %s is already the current workspace\n"), name);
+			fprintf(stderr, _("ws: %s is already the current workspace\n"), q);
+			free(p);
 			return (-1);
 		}
+		free(p);
 		return n;
 	}
 
-	fprintf(stderr, _("ws: %s: No such workspace\n"), name);
+	fprintf(stderr, _("ws: %s: No such workspace\n"), q);
+	free(p);
 	return (-1);
 }
 

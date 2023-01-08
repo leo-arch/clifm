@@ -635,7 +635,6 @@ rl_accept_suggestion(int count, int key)
 	case BOOKMARK_SUG:   /* fallthrough */
 	case COMP_SUG:       /* fallthrough */
 	case ELN_SUG:        /* fallthrough */
-	case PROMPT_SUG:     /* fallthrough */
 	case FASTBACK_SUG:   /* fallthrough */
 	case FUZZY_FILENAME: /* fallthrough */
 	case FILE_SUG: {
@@ -682,9 +681,13 @@ rl_accept_suggestion(int count, int key)
 		my_insert_text(suggestion_buf, NULL, 0);
 		break;
 
-	case SEL_SUG:  /* fallthrough */
-	case HIST_SUG: /* fallthrough */
-	case BM_NAME_SUG:
+	case SEL_SUG:     /* fallthrough */
+	case HIST_SUG:    /* fallthrough */
+	case BM_NAME_SUG: /* fallthrough */
+	case PROMPT_SUG:  /* fallthrough */
+	case NET_SUG:     /* fallthrough */
+	case CSCHEME_SUG: /* fallthrough */
+	case WS_NAME_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
 #ifndef _NO_TAGS

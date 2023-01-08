@@ -460,8 +460,6 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	if (n)
 		*n = '\0';
 
-//	ERASE_TO_RIGHT;
-
 	if (cur_comp_type == TCMP_GLOB) {
 		size_t blen = strlen(buf);
 		if (blen > 0 && buf[blen - 1] == '/')
@@ -486,8 +484,10 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 			rl_insert_text(buf + *offset);
 		}
 	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS
-	|| cur_comp_type == TCMP_MIME_LIST || cur_comp_type == TCMP_BOOKMARK) {
-		rl_insert_text(buf);
+	|| cur_comp_type == TCMP_MIME_LIST || cur_comp_type == TCMP_BOOKMARK
+	|| cur_comp_type == TCMP_WORKSPACES || cur_comp_type == TCMP_NET
+	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_PROMPTS) {
+		rl_insert_text(buf + *offset);
 		return;
 	} else if (cur_comp_type == TCMP_OWNERSHIP) {
 		rl_insert_text(buf + *offset);
@@ -740,8 +740,6 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 		/* All fixed parameters are compatible with at least fzf 0.16.11 (Aug 1, 2017) */
 		char prev_opts[40];
 		*prev_opts = '\0';
-//		char prev_str[] = "--preview \"printf \"\033[2J\"; clifm --preview {}\"";
-//		char prev_str[] = "--preview 'printf \"\033[2J\"; clifm --preview {}'";
 		char prev_str[] = "--preview \"clifm --preview {}\"";
 
 		if (prev == 1) {
@@ -890,12 +888,11 @@ get_initial_path(void)
 	return p;
 } */
 
-/* Recover finder (fzf/fzy) output from FINDER_OUT_FILE file
+/* Recover finder (fzf/fzy/smenu) output from FINDER_OUT_FILE file
  * Return this output (reformated if needed) or NULL in case of error */
 static char *
 get_finder_output(const int multi, char *base)
 {
-//	UNUSED(base);
 	FILE *fp = fopen(finder_out_file, "r");
 	if (!fp)
 		return print_no_finder_file();
@@ -904,7 +901,6 @@ get_finder_output(const int multi, char *base)
 	*buf = '\0';
 	size_t bsize = 0, line_size = 0;
 	ssize_t line_len = 0;
-//	char *initial_path = (cur_comp_type == TCMP_GLOB) ? get_initial_path() : (char *)NULL;
 	char *initial_path = (cur_comp_type == TCMP_GLOB) ? base : (char *)NULL;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
@@ -923,14 +919,6 @@ get_finder_output(const int multi, char *base)
 				line_len = (ssize_t)strlen(line);
 			}
 		}
-
-/*		if (cur_comp_type == TCMP_BOOKMARK) {
-			char *p = strrchr(line, '(');
-			if (p && p > line && *(p - 1) == ' ') {
-				*(p - 1) = '\0';
-				line_len = (ssize_t)xstrnlen(line);
-			}
-		} */
 
 		char *q = line;
 		if (multi == 1) {
@@ -972,7 +960,6 @@ get_finder_output(const int multi, char *base)
 		}
 	}
 
-//	free(initial_path);
 	free(line);
 	fclose(fp);
 	unlink(finder_out_file);
@@ -1076,8 +1063,6 @@ store_completions(char **matches, FILE *fp)
 				entry += 1;
 		} else if (no_file_comp == 1) {
 			color = mi_c;
-//			if (cur_comp_type == TCMP_BOOKMARK)
-//				color = tx_c;
 		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
 		&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_FILE_TYPES_OPTS
 		&& cur_comp_type != TCMP_MIME_LIST && cur_comp_type != TCMP_CMD_DESC) {
@@ -1168,6 +1153,9 @@ get_query_str(int *fzf_offset)
 static size_t
 calculate_prefix_len(char *str)
 {
+	if (cur_comp_type == TCMP_FILE_TYPES_OPTS)
+		return 0;
+
 	size_t prefix_len = 0, len = strlen(str);
 
 	if (len == 0 || str[len - 1] == '/')
@@ -1191,7 +1179,9 @@ calculate_prefix_len(char *str)
 			prefix_len = qlen + 1;
 		}
 	} else { /* We have just a name, no slash */
-		if (cur_comp_type == TCMP_PATH) {
+		if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_WORKSPACES
+		|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_NET
+		|| cur_comp_type == TCMP_PROMPTS || cur_comp_type == TCMP_BOOKMARK) {
 			size_t c = 0;
 			int x = (int)len;
 			while (--x >= 0) {
@@ -1222,10 +1212,6 @@ is_multi_sel(void)
 	|| t == TCMP_TRASHDEL || t == TCMP_UNTRASH || t == TCMP_TAGS_F
 	|| t == TCMP_TAGS_U || (flags & MULTI_SEL))
 		return 1;
-
-/*	if (t == TCMP_BOOKMARK && (strncmp(rl_line_buffer, "bm del ", 7) == 0
-	|| strncmp(rl_line_buffer, "bookmarks del ", 14) == 0))
-		return 1; */
 
 	if (!rl_line_buffer)
 		return 0;
@@ -1299,7 +1285,6 @@ clean_rl_buffer(const char *text)
 		}
 
 		ERASE_TO_RIGHT_AND_BELOW;
-//		ERASE_TO_RIGHT;
 	}
 
 	rl_insert_text(text);
@@ -1344,6 +1329,13 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* Set a pointer to the last word (either space or slash) in the
 	 * input buffer. We use this to highlight the matching prefix in FZF */
 	char *lw = get_last_word(original_query ? original_query : matches[0]);
+
+	/* Remove ending backslash to avoid finder (fzf) error: no ending '"' */
+	if (original_query && lw) {
+		char *bs = strrchr(lw, '\\');
+		if (bs && !*(bs + 1))
+			*bs = '\0';
+	}
 
 	/* If not already defined (environment or config file), calculate the
 	 * height of the FZF window based on the amount of entries. This
@@ -1507,7 +1499,6 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (flags & PREVIEWER) {
 		height = term_lines;
 		finder_offset = 0;
-//		multi = 0;
 		multi = 1;
 		q = (char *)NULL;
 	}
@@ -1534,7 +1525,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 //	else
 //		ret = EXIT_FAILURE;
 
-	/* No results (the user pressed ESC) */
+	/* No results (the user pressed ESC or the Left arrow key) */
 	if (ret != EXIT_SUCCESS) {
 		unlink(finder_out_file);
 		return clean_rl_buffer(text);
@@ -1625,7 +1616,6 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL
 	|| cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
 	|| cur_comp_type == TCMP_BM_PATHS) {
-//		char *s = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
 		char *s = rl_line_buffer ? get_last_space(rl_line_buffer, rl_end) : (char *)NULL;
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
@@ -1997,6 +1987,7 @@ AFTER_USUAL_COMPLETION:
 		&& (cur_comp_type != TCMP_BM_PATHS || !matches[1])
 
 		&& (cur_comp_type != TCMP_TAGS_F || !matches[1])) {
+
 			enum comp_type c = cur_comp_type;
 //			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
 			if ((c == TCMP_DESEL || c == TCMP_NET
@@ -2005,7 +1996,8 @@ AFTER_USUAL_COMPLETION:
 
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
 			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK || c == TCMP_GLOB
-			|| c == TCMP_PROMPTS) && !strchr(replacement, '\\')) {
+			|| c == TCMP_PROMPTS || c == TCMP_CSCHEME || c == TCMP_WORKSPACES)
+			&& !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
 					if (replacement != matches[0])
@@ -2096,7 +2088,9 @@ AFTER_USUAL_COMPLETION:
 					rl_ding();	/* There are other matches remaining. */
 			}
 		} else {
-			if (cur_comp_type == TCMP_TAGS_T)
+			if (cur_comp_type == TCMP_TAGS_T || cur_comp_type == TCMP_BOOKMARK
+			|| cur_comp_type == TCMP_PROMPTS || cur_comp_type == TCMP_NET
+			|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_WORKSPACES)
 				break;
 
 			if (cur_comp_type == TCMP_OWNERSHIP) {
