@@ -171,7 +171,9 @@ change this suffix)"
 - Edit the bookmarks file using vi\n\
     bm edit vi\n\
 - Print file properties of specific bookmarks using the 'b:' construct\n\
-    p b:<TAB> (multi-selection is allowed)"
+    p b:<TAB> (multi-selection is allowed)\n\
+- Select all bookmarks at once\n\
+    s b:"
 
 #define BULK_USAGE "Bulk rename files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
