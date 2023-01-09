@@ -998,8 +998,12 @@ add_bookmark_not_interactive(char *file, char *name, char *shortcut)
 		fprintf(bm_fp, "%s:%s\n", n, np ? np : file);
 
 	fclose(bm_fp);
+
 	printf(_("File succesfully bookmarked\n"));
-	printf("%s %s->%s %s\n", name, mi_c, tx_c, np ? np : file);
+	if (s)
+		printf("[%s]%s %s->%s %s\n", s, name, mi_c, tx_c, np ? np : file);
+	else
+		printf("%s %s->%s %s\n", name, mi_c, tx_c, np ? np : file);
 
 	free(np);
 	free(p);

@@ -1162,6 +1162,10 @@ my_rl_quote(char *text, int mt, char *qp)
 char *
 my_rl_path_completion(const char *text, int state)
 {
+/*	if (conf.suggestions == 1 && conf.fuzzy_match == 1
+	&& suggestion.type != FILE_SUG && suggestion.type != FUZZY_FILENAME)
+		return (char *)NULL; */
+
 	if (!text || !*text || xrename == 2)
 		return (char *)NULL;
 	/* state is zero before completion, and 1 ... n after getting
@@ -1877,6 +1881,13 @@ profiles_generator(const char *text, int state)
 static char *
 filenames_gen_text(const char *text, int state)
 {
+/*	if (conf.suggestions == 1 && conf.fuzzy_match == 1
+	&& suggestion.type != FILE_SUG && suggestion.type != FUZZY_FILENAME) {
+		// Disable file completion if we have a non-file suggestion
+		rl_attempted_completion_over = 1;
+		return (char *)NULL;
+	} */
+
 	static size_t i, len = 0;
 	char *name;
 	rl_filename_completion_desired = 1;
@@ -2218,7 +2229,6 @@ expand_tilde_glob(char *text)
 
 	*ls = '\0';
 	char *q = normalize_path(text, strlen(text));
-//	char *q = tilde_expand(text);
 	*ls = '/';
 	if (!q)
 		return (char *)NULL;
@@ -2330,7 +2340,6 @@ rl_glob(char *text)
 	char *tmp = expand_tilde_glob(text);
 	glob_t globbuf;
 
-//	if (glob(text, 0, NULL, &globbuf) != EXIT_SUCCESS) {
 	if (glob(tmp ? tmp : text, 0, NULL, &globbuf) != EXIT_SUCCESS) {
 		globfree(&globbuf);
 		free(tmp);
@@ -3455,6 +3464,7 @@ my_rl_completion(const char *text, int start, int end)
 		&& (strncmp(lb, "bm ", 3) == 0
 		|| strncmp(lb, "bookmarks ", 10) == 0)) {
 			char *q = strchr(lb, ' ');
+
 			/* If 'bm add' do path completion instead */
 			if (!(q && *(q + 1) == 'a' && (*(q + 2) == ' '
 			|| strncmp(q + 1, "add ", 4) == 0)) ) {
@@ -3469,6 +3479,11 @@ my_rl_completion(const char *text, int start, int end)
 					cur_comp_type = TCMP_BOOKMARK;
 					return matches;
 				}
+				return (char **)NULL;
+			} else if (nwords > 3) {
+				// THIS ONLY WORKS WITH SUGGESTIONS ENABLED. FIX!!
+				/* Do not complete anything after "bm add FILE" */
+				rl_attempted_completion_over = 1;
 				return (char **)NULL;
 			}
 		}

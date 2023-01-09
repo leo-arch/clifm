@@ -541,22 +541,20 @@ The query string could match any part of a directory name: \fIbd er\fR, for inst
 .B bl \fIELN/FILE\fR...
 Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
 .TP
-.B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILE\fR [\fINAME\fR] [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR [\fINAME\fR]] [\fIedit\fR [\fIAPP\fR]]
-with no argument, open the bookmarks manager. Here you can cd into the desired bookmark by entering either its ELN, shortcut, or name. In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents).
+.B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILE\fR \fINAME\fR [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR [\fINAME\fR]] [\fIe, edit\fR [\fIAPP\fR]]
+with no argument, open the bookmarks manager. Here you can cd into the desired bookmark by entering either its ELN, shortcut, or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). Make your changes, save, and exit.
 .sp
-To quickly access your bookmarks you can also type \fIb:<TAB>\fR, choose one, and then cd into it by just pressing Enter.
-.sp
-If you want to add or remove a bookmark directly from the command line, use the \fIadd\fR and \fIdel\fR arguments respectively:
+If you want to add or remove a bookmark directly from the command line, use the \fIadd\fR and \fIdel\fR arguments respectively (the \fIa\fR and \fId\fR shortcuts can be used as well):
 .sp
 To bookmark the \fI/media/mount\fR directory as "mnt": \fIbm add /media/mount mnt\fR.
 .sp
 To delete a bookmark use the \fIdel\fR argument followed by the desired bookmark name: \fIbm del mnt\fR.
 .sp
-You can also open a bookmark by typing \fIbm SHORTCUT\fR or \fIbm NAME\fR (in which latter case TAB completion is available). Example: \fIbm mnt\fR
+Open a bookmark by typing \fIbm SHORTCUT\fR or \fIbm NAME\fR (in which latter case TAB completion is available). Example: \fIbm mnt\fR
 .sp
-A handy use for the bookmarks function, provided the expand-bookmarks option is enabled, is to create bookmarks using short names, which will be later easily accessible via TAB completion.
+A handy use for the bookmarks function, provided the \fIexpand-bookmarks\fR option is enabled, is to create bookmarks using short names, which will be later easily accessible via TAB completion.
 .sp
-To operate on specific bookmark paths, you can use the \fIb:\fR construct (mostly useful if using the FZF mode for TAB completion). For example, type \fIp b:<TAB>\fR, select the bookmarks you want and press Enter, to print the file properties of the selected bookmarks (multi-selection is available).
+To operate on specific bookmark paths, you can use the \fIb:\fR construct (mostly useful if using TAB completion in FZF mode). For example, type \fIp b:<TAB>\fR, select the bookmarks you want and press Enter, to print the file properties of the selected bookmarks (multi-selection is available).
 .TP
 .B br, bulk \fIELN/FILE\fR...
 rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the 'sel' keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.

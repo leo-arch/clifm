@@ -1846,6 +1846,9 @@ create_bm_file(void)
 
 	fprintf(fp, "### This is the bookmarks file for %s ###\n\n"
 		    "# Empty and commented lines are ommited\n"
+		    "# Make your changes, save, and exit\n"
+		    "# To remove a bookmark, delete the corresponding line, save, and exit\n"
+		    "# Changes are applied automatically at exit (to cancel just quit the editor).\n\n"
 		    "# The bookmarks syntax is: [shortcut]name:path\n"
 		    "# Example:\n"
 		    "[c]clifm:%s\n",

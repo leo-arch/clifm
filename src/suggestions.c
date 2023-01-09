@@ -2196,15 +2196,18 @@ rl_suggestions(const unsigned char c)
 
 	switch (nwords > 1 ? *lb : '\0') {
 	case 'b': /* Bookmark names */
-		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ' && !(*(lb + 3) == 'a'
-		&& *(lb + 4) == ' ') && strncmp(lb + 3, "add", 3) != 0) {
-			if ((printed = check_bookmark_names(word, wlen)) == 1) {
-				goto SUCCESS;
-			} else {
-				if (suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
-				if (*(lb + 3) != '-') /* Might be --help, let it continue */
-					goto FAIL;
+		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ') {
+			if (!(*(lb + 3) == 'a' && *(lb + 4) == ' ') && strncmp(lb + 3, "add", 3) != 0) {
+				if ((printed = check_bookmark_names(word, wlen)) == 1) {
+					goto SUCCESS;
+				} else {
+					if (suggestion.printed)
+						clear_suggestion(CS_FREEBUF);
+					if (*(lb + 3) != '-') // Might be --help, let it continue
+						goto FAIL;
+				}
+			} else if (nwords > 3) {
+				goto FAIL;
 			}
 		}
 
