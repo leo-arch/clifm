@@ -2429,7 +2429,7 @@ rl_trashed_files(const char *text)
 
 	char **tfiles = (char **)xnmalloc((size_t)n + 2, sizeof(char *));
 	if (f) {
-		tfiles[0] = savestring(f, strlen(text));
+		tfiles[0] = savestring(f, strlen(f));
 	} else {
 		tfiles[0] = (char *)xnmalloc(1, sizeof(char));
 		*tfiles[0] = '\0';
@@ -3351,6 +3351,10 @@ my_rl_completion(const char *text, int start, int end)
 		&& (strncmp(lb, "untrash ", 8) == 0 || strncmp(lb, "undel ", 6) == 0)))) {
 			matches = rl_trashed_files(text);
 			if (matches) {
+				if (tabmode == STD_TAB && conf.colorize == 1)
+					/* Only used to remove trash extension from files so
+					 * that we can correctly set file color by extension */
+					flags |= STATE_COMPLETING;
 				cur_comp_type = TCMP_UNTRASH;
 				return matches;
 			}
@@ -3363,6 +3367,8 @@ my_rl_completion(const char *text, int start, int end)
 		|| strncmp(lb, "trash del ", 10) == 0)) {
 			matches = rl_trashed_files(text);
 			if (matches) {
+				if (tabmode == STD_TAB && conf.colorize == 1)
+					flags |= STATE_COMPLETING;
 				cur_comp_type = TCMP_TRASHDEL;
 				return matches;
 			}

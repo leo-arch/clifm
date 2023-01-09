@@ -42,6 +42,7 @@ char *get_file_color(const char *, const struct stat *);
 char *get_regfile_color(const char *, const struct stat *);
 int  import_color_scheme(const char *);
 void remove_bold_attr(char **);
+char *remove_trash_ext(char **);
 void reset_filetype_colors(void);
 void reset_iface_colors(void);
 int  set_colors(const char *, const int);

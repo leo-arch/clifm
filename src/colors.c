@@ -1689,6 +1689,25 @@ set_colors(const char *colorscheme, const int env)
 	return EXIT_SUCCESS;
 }
 
+/* If completing trashed files (regular only) we need to remove the trash
+ * extension in order to correctly determine the file color (according to
+ * its actual extension).
+ * Remove this extension (setting the initial dot to NULL) and return a
+ * pointer to this character, so that we can later reinsert the dot */
+char *
+remove_trash_ext(char **ent)
+{
+	if (!(flags & STATE_COMPLETING) || (cur_comp_type != TCMP_UNTRASH
+	&& cur_comp_type != TCMP_TRASHDEL))
+		return (char *)NULL;
+
+	char *d = strrchr(*ent, '.');
+	if (d && d != *ent)
+		*d = '\0';
+
+	return d;
+}
+
 /* Print the entry ENT using color codes and ELN as ELN, right padding PAD
  * chars and terminate ENT with or without a new line char (NEW_LINE
  * 1 or 0 respectivelly)
@@ -1745,8 +1764,12 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		color = uf_c;
 	} else {
 		switch (attr.st_mode & S_IFMT) {
-		case S_IFREG:
+		case S_IFREG: {
+			char *d = remove_trash_ext(&ent);
 			color = get_regfile_color(ent, &attr);
+			if (d)
+				*d = '.';
+			}
 			break;
 
 		case S_IFDIR:

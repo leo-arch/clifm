@@ -543,6 +543,7 @@ bookmark_add(char *file)
 				break;
 			}
 			free(tmp_line);
+			tmp_line = (char *)NULL;
 		}
 
 		if (dup == 1) {

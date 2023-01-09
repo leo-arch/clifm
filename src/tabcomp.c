@@ -245,7 +245,7 @@ get_y_or_n(void)
 			putchar('\n');
 			return (0);
 		}
-		if (c == ABORT_CHAR) /* defined by readline as CTRL('G') */
+		if (c == ABORT_CHAR) /* Defined by readline as CTRL('G') */
 			rl_abort(0, 0);
 		rl_ding();
 	}
@@ -275,8 +275,8 @@ print_filename(char *to_print, char *full_pathname)
 			return 1;
 		}
       /* If to_print != full_pathname, to_print is the basename of the
-	 path passed. In this case, we try to expand the directory
-	 name before checking for the stat character */
+       * path passed. In this case, we try to expand the directory
+       * name before checking for the stat character */
 		int extension_char = 0;
 		if (to_print != full_pathname) {
 			/* Terminate the directory name */
@@ -366,24 +366,44 @@ reinsert_slashes(char *str)
 static char *
 fzftab_color(char *filename, const struct stat *attr)
 {
-	if (!conf.colorize)
+	if (conf.colorize == 0)
 		return df_c;
 
-	switch(attr->st_mode & S_IFMT) {
+	switch (attr->st_mode & S_IFMT) {
 	case S_IFDIR:
 		if (check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
 			return nd_c;
 		return get_dir_color(filename, attr->st_mode, attr->st_nlink);
-	case S_IFREG:
+
+	case S_IFREG: {
 		if (check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
 			return nf_c;
+
+		char *cl = get_file_color(filename, attr);
+
+		if (cl && (check_ext == 0 || cl == nf_c || cl == ca_c
+		|| (attr->st_mode & 00100) || (attr->st_mode & 00010) || (attr->st_mode & 00001)))
+			return cl;
+
+		/* If trashed file, remove the trash extension, so we can get the
+		 * color according to the actual file extension */
+		char *te = (char *)NULL;
+		if (cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL) {
+			flags |= STATE_COMPLETING;
+			te = remove_trash_ext(&filename);
+			flags &= ~STATE_COMPLETING;
+		}
+
 		char *ext_cl = (char *)NULL;
-		char *ext = check_ext == 1 ? strrchr(filename, '.') : (char *)NULL;
+		char *ext = strrchr(filename, '.');
 		if (ext && ext != filename)
 			ext_cl = get_ext_color(ext);
-		if (ext_cl)
-			return ext_cl;
-		return get_file_color(filename, attr);
+
+		if (te) *te = '.';
+
+		return ext_cl ? ext_cl : df_c;
+		}
+
 	case S_IFSOCK: return so_c;
 	case S_IFIFO: return pi_c;
 	case S_IFBLK: return bd_c;
@@ -404,10 +424,8 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 	/* Normalize URI file scheme */
 	char *dir = matches[i];
 	size_t dlen = strlen(dir);
-	if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir)) {
+	if (dlen > FILE_URI_PREFIX_LEN && IS_FILE_URI(dir))
 		dir += FILE_URI_PREFIX_LEN;
-//		dlen += FILE_URI_PREFIX_LEN;
-	}
 
 	if (norm_prefix) {
 		char *s = strrchr(dir, '/');
@@ -446,6 +464,12 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 		snprintf(tmp_path, sizeof(tmp_path), "%s/%s", workspaces[cur_ws].path, dir);
 		if (lstat(tmp_path, &attr) != -1)
 			return fzftab_color(tmp_path, &attr);
+		return uf_c;
+	}
+
+	if (cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL) {
+		if (lstat(dir, &attr) != -1)
+			return fzftab_color(dir, &attr);
 		return uf_c;
 	}
 
@@ -562,44 +586,6 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	if (is_file_uri == 1)
 		d += FILE_URI_PREFIX_LEN;
 
-/*	size_t dlen = strlen(tmp), is_file_uri = 0;
-	if (*tmp == 'f' && *(tmp + 1) == 'i' && dlen > FILE_URI_PREFIX_LEN
-	&& IS_FILE_URI(tmp))
-		is_file_uri = 1;
-
-	if (is_file_uri == 0 && *tmp != '/' && *tmp != '.' && *tmp != '~') {
-		if (*(workspaces[cur_ws].path + 1))
-			snprintf(_path, sizeof(_path), "%s/%s", workspaces[cur_ws].path, tmp);
-		else // Root directory
-			snprintf(_path, sizeof(_path), "/%s", tmp);
-	}
-
-	char *spath = *_path ? _path : tmp;
-	char *epath = (char *)NULL;
-	if (*spath == '~')
-		epath = tilde_expand(spath);
-	else {
-		if (*spath == '.') {
-			xchdir(workspaces[cur_ws].path, NO_TITLE);
-			epath = realpath(spath, NULL);
-			// No need to change back to CWD. Done here
-			*exit_status = -1;
-		}
-	}
-
-	if (epath)
-		spath = epath;
-
-	char *d = spath;
-	if (is_file_uri == 1)
-		d += FILE_URI_PREFIX_LEN;
-
-	char *e = (char *)NULL;
-	if (strstr(d, "/.."))
-		e = normalize_path(d, strlen(d));
-	if (e)
-		d = e; */
-
 	struct stat attr;
 	if (stat(d, &attr) != -1 && S_ISDIR(attr.st_mode)) {
 		/* If not the root directory, append a slash */
@@ -614,8 +600,6 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 
 	if (d == p)
 		free(p);
-
-//	free(epath);
 }
 
 /* Get word after last non-escaped slash */
@@ -866,31 +850,6 @@ get_glob_file_target(char *str, char *initial_path)
 	return p;
 }
 
-/* Given PATH/GLOB (last word of the line buffer) return PATH/, in which case
- * the return value should be freed by the caller. If not PATH/GLOB, return NULL
- * Ex (underscore is an asterisk):
- * documents/misc/_.c -> documents/misc/ */
-/*
-static char *
-get_initial_path(void)
-{
-	char *lp = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
-	char *ls = (lp && *(++lp)) ? strrchr(lp, '/') : (char *)NULL;
-
-	if (!ls || !*(ls + 1) || check_glob_char(ls, GLOB_ONLY) == 0)
-		ls = (char *)NULL;
-
-	if (!ls)
-		return (char *)NULL;
-
-	++ls;
-	char bk = *ls;
-	*ls = '\0';
-	char *p = savestring(lp, strlen(lp));
-	*ls = bk;
-	return p;
-} */
-
 /* Recover finder (fzf/fzy/smenu) output from FINDER_OUT_FILE file
  * Return this output (reformated if needed) or NULL in case of error */
 static char *
@@ -1039,6 +998,11 @@ store_completions(char **matches, FILE *fp)
 	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
 	longest_prev_entry = 0;
 
+	/* Change to the trash dir so we can correctly get trashed files color */
+	if (conf.colorize == 1 && (cur_comp_type == TCMP_TRASHDEL
+	|| cur_comp_type == TCMP_UNTRASH) && trash_files_dir)
+		xchdir(trash_files_dir, NO_TITLE);
+
 	for (i = start; matches[i]; i++) {
 		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
 			continue;
@@ -1091,6 +1055,11 @@ store_completions(char **matches, FILE *fp)
 		if (*entry)
 			write_comp_to_file(entry, color, &fp);
 	}
+
+	/* We changed to the trash dir. Change back to the current dir */
+	if (conf.colorize == 1 && (cur_comp_type == TCMP_TRASHDEL
+	|| cur_comp_type == TCMP_UNTRASH) && workspaces && workspaces[cur_ws].path)
+		xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 	free(norm_prefix);
 	return i;
@@ -2120,7 +2089,6 @@ AFTER_USUAL_COMPLETION:
 
 			if (rl_filename_completion_desired) {
 				struct stat finfo;
-//				char *filename = tilde_expand(matches[0]);
 				char *filename = matches[0]
 					? normalize_path(matches[0], strlen(matches[0]))
 					: (char *)NULL;
@@ -2177,9 +2145,8 @@ AFTER_USUAL_COMPLETION:
 			goto RESTART;
 		}
 
-		/* There is more than one match. Find out how many there are,
-		and find out what the maximum printed length of a single entry
-		is. */
+		/* There is more than one match. Find out how many there are, and
+		 * find out what the maximum printed length of a single entry is */
 
 DISPLAY_MATCHES:
 #ifndef _NO_FZF
@@ -2349,6 +2316,12 @@ CALC_OFFSET:
 		if (cur_comp_type == TCMP_PATH && ptr && *ptr == '/' && tab_offset > 0)
 			tab_offset--;
 
+		/* If printing trashed files, let's change to the trash dir
+		 * to allow files colorization */
+		if (conf.colorize == 1 && trash_files_dir && (cur_comp_type == TCMP_UNTRASH
+		|| cur_comp_type == TCMP_TRASHDEL))
+			xchdir(trash_files_dir, NO_TITLE);
+
 		for (i = 1; i <= (size_t)count; i++) {
 			if (i >= term_lines) {
 				/* A little pager */
@@ -2362,12 +2335,6 @@ CALC_OFFSET:
 				}
 				fputs("\x1b[7D\x1b[0K", stdout);
 			}
-
-			/* If printing trashed files, let's change to the trash dir
-			 * to allow files colorization */
-			if (conf.colorize == 1 && trash_files_dir && (cur_comp_type == TCMP_UNTRASH
-			|| cur_comp_type == TCMP_TRASHDEL))
-				xchdir(trash_files_dir, NO_TITLE);
 
 			l = (int)i;
 			for (j = 0; j < limit; j++) {
@@ -2396,12 +2363,6 @@ CALC_OFFSET:
 				l += count;
 			}
 			putchar('\n');
-
-			/* Let's change back to the current directory */
-			if (conf.colorize == 1 && workspaces && workspaces[cur_ws].path
-			&& (cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL))
-				xchdir(workspaces[cur_ws].path, NO_TITLE);
-
 		}
 		tab_offset = 0;
 
@@ -2409,12 +2370,19 @@ CALC_OFFSET:
 			fputs(tx_c, stdout);
 		rl_reset_line_state();
 
+		if (cur_comp_type == TCMP_UNTRASH || cur_comp_type ==  TCMP_TRASHDEL) {
+			/* This flag was set to true when completing trashed files.
+			 * See 't del' and 'u' commands completion in readline.c */
+			flags &= ~STATE_COMPLETING;
+
+			if (conf.colorize == 1 && workspaces && workspaces[cur_ws].path)
+				/* Let's change back to the current directory */
+				xchdir(workspaces[cur_ws].path, NO_TITLE);
+		}
+
 #ifndef _NO_FZF
 RESET_PATH:
 #endif /* !_NO_FZF */
-
-		if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_GLOB)
-			xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 RESTART:
 		rl_on_new_line();
