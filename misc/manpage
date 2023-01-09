@@ -542,13 +542,13 @@ The query string could match any part of a directory name: \fIbd er\fR, for inst
 Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
 .TP
 .B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILE\fR [\fINAME\fR] [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR [\fINAME\fR]] [\fIedit\fR [\fIAPP\fR]]
-with no argument, open the bookmarks manager. Here you can cd into the desired bookmark by entering either its ELN, shortcut, or name. In this screen you can also add, remove, or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents).
+with no argument, open the bookmarks manager. Here you can cd into the desired bookmark by entering either its ELN, shortcut, or name. In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents).
 .sp
 To quickly access your bookmarks you can also type \fIb:<TAB>\fR, choose one, and then cd into it by just pressing Enter.
 .sp
-If you want to add or remove a bookmark directly from the command line, use the \fIadd\fR and \fIdel\fR arguments respectively.
+If you want to add or remove a bookmark directly from the command line, use the \fIadd\fR and \fIdel\fR arguments respectively:
 .sp
-For example, to bookmark the \fI/media/mount\fR directory as "mnt": \fIbm add /media/mount mnt\fR.
+To bookmark the \fI/media/mount\fR directory as "mnt": \fIbm add /media/mount mnt\fR.
 .sp
 To delete a bookmark use the \fIdel\fR argument followed by the desired bookmark name: \fIbm del mnt\fR.
 .sp
