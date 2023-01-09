@@ -3126,7 +3126,8 @@ my_rl_completion(const char *text, int start, int end)
 			if (!matches[1])
 				rl_swap_fields(&matches);
 			flags |= MULTI_SEL;
-			rl_filename_completion_desired = 1;
+			if (tabmode != STD_TAB)
+				rl_filename_completion_desired = 1;
 			cur_comp_type = TCMP_BM_PATHS;
 			return matches;
 		}

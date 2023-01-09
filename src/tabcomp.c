@@ -255,10 +255,12 @@ static int
 print_filename(char *to_print, char *full_pathname)
 {
 	char *s;
+	enum comp_type t = cur_comp_type;
 
-	if (conf.colorize == 1 && (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_SEL
-	|| cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_RANGES
-	|| cur_comp_type == TCMP_TAGS_F)) {
+	if (conf.colorize == 1 && (t == TCMP_PATH || t == TCMP_SEL
+	|| t == TCMP_DESEL || t == TCMP_RANGES || t == TCMP_TAGS_F
+	|| t == TCMP_FILE_TYPES_FILES || t == TCMP_MIME_LIST
+	|| t == TCMP_BM_PATHS || t == TCMP_GLOB)) {
 		colors_list(to_print, NO_ELN, NO_PAD, NO_NEWLINE);
 	} else {
 		for (s = to_print + tab_offset; *s; s++) {
@@ -267,7 +269,7 @@ print_filename(char *to_print, char *full_pathname)
 	}
 
 	if (rl_filename_completion_desired && conf.colorize == 0) {
-		if (cur_comp_type == TCMP_CMD) {
+		if (t == TCMP_CMD) {
 			putc('*', rl_outstream);
 			return 1;
 		}
@@ -2110,10 +2112,6 @@ AFTER_USUAL_COMPLETION:
 				temp_string_index++;
 			}
 
-/*			if (cur_comp_type != TCMP_TAGS_T) {
-				temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
-				temp_string_index++;
-			} */
 			temp_string[temp_string_index] = (char)(delimiter ? delimiter : ' ');
 			temp_string_index++;
 
