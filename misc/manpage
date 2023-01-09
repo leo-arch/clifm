@@ -2796,11 +2796,14 @@ T{
 m4
 T}	Rename the file whose ELN is 4 \fB(7)\fR
 T{
-bm add mydir
-T}	Bookmark \fImydir\fR
+bm add mydir/ mybm
+T}	Bookmark the directory \fImydir/\fR as "mybm"\fR
 T{
 bm mybm
 T}	Access the bookmark named \fImybm\fR \fB(8)\fR
+T{
+bm del mybm
+T}	Remove the bookmark named \fImybm\fR
 T{
 bm (Alt-b)
 T}	Open the bookmarks manager
@@ -2821,7 +2824,7 @@ T}	Open the bookmarks manager
 .sp 0
  \fB(7)\fR: To rename files in bulk use the \fIbr\fR command
 .sp 0
- \fB(8)\fR: Type \fIbm <TAB>\fR to get the list of bookmark names
+ \fB(8)\fR: Type \fIbm <TAB>\fR to get the list of available bookmark names
 
 \fB3. MISC\fR
 
