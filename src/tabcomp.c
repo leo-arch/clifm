@@ -260,7 +260,8 @@ print_filename(char *to_print, char *full_pathname)
 	if (conf.colorize == 1 && (t == TCMP_PATH || t == TCMP_SEL
 	|| t == TCMP_DESEL || t == TCMP_RANGES || t == TCMP_TAGS_F
 	|| t == TCMP_FILE_TYPES_FILES || t == TCMP_MIME_LIST
-	|| t == TCMP_BM_PATHS || t == TCMP_GLOB)) {
+	|| t == TCMP_BM_PATHS || t == TCMP_GLOB || t == TCMP_UNTRASH
+	|| t == TCMP_TRASHDEL)) {
 		colors_list(to_print, NO_ELN, NO_PAD, NO_NEWLINE);
 	} else {
 		for (s = to_print + tab_offset; *s; s++) {
@@ -2362,6 +2363,12 @@ CALC_OFFSET:
 				fputs("\x1b[7D\x1b[0K", stdout);
 			}
 
+			/* If printing trashed files, let's change to the trash dir
+			 * to allow files colorization */
+			if (conf.colorize == 1 && trash_files_dir && (cur_comp_type == TCMP_UNTRASH
+			|| cur_comp_type == TCMP_TRASHDEL))
+				xchdir(trash_files_dir, NO_TITLE);
+
 			l = (int)i;
 			for (j = 0; j < limit; j++) {
 				if (l > len || !matches[l] || !*matches[l]) {
@@ -2389,6 +2396,12 @@ CALC_OFFSET:
 				l += count;
 			}
 			putchar('\n');
+
+			/* Let's change back to the current directory */
+			if (conf.colorize == 1 && workspaces && workspaces[cur_ws].path
+			&& (cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL))
+				xchdir(workspaces[cur_ws].path, NO_TITLE);
+
 		}
 		tab_offset = 0;
 

@@ -960,7 +960,8 @@ Mark the files you need via TAB and then press Enter or Right"
 - Untrash all trashed files (restore them to their original location)\n\
     u *\n\
 - Untrash files selectively using a menu\n\
-    u (or 'u <TAB>' to choose from a list - multi-selection is allowed)"
+    u (or 'u <TAB>' to choose from a list - multi-selection is allowed)\n\n\
+Note: Use the 'trash' command to trash files. Try 'trash --help'"
 
 #define VV_USAGE "Copy files into a directory and bulk rename them at once\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

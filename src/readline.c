@@ -2424,19 +2424,22 @@ rl_trashed_files(const char *text)
 		return (char **)NULL;
 	}
 
+	char *p = dequote_str((char *)text, 0);
+	char *f = p ? p : (char *)text;
+
 	char **tfiles = (char **)xnmalloc((size_t)n + 2, sizeof(char *));
-	if (text) {
-		tfiles[0] = savestring(text, strlen(text));
+	if (f) {
+		tfiles[0] = savestring(f, strlen(text));
 	} else {
 		tfiles[0] = (char *)xnmalloc(1, sizeof(char));
 		*tfiles[0] = '\0';
 	}
 
 	int nn = 1, i;
-	size_t tlen = text ? strlen(text) : 0;
+	size_t tlen = f ? strlen(f) : 0;
 	for (i = 0; i < n; i++) {
 		char *name = t[i]->d_name;
-		if (SELFORPARENT(name) || !text || strncmp(text, name, tlen) != 0) {
+		if (SELFORPARENT(name) || !f || strncmp(f, name, tlen) != 0) {
 			free(t[i]);
 			continue;
 		}
@@ -2460,6 +2463,7 @@ rl_trashed_files(const char *text)
 		}
 	}
 
+	free(p);
 	return tfiles;
 #endif /* _NO_TRASH */
 }
