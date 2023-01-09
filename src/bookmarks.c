@@ -877,15 +877,30 @@ check_bm_path(char *file)
 }
 
 static int
+name_is_reserved_keyword(const char *name)
+{
+	if (!name || !*name)
+		return 0;
+
+	if ( ((*name == 'q' || *name == 'e' || *name == 'd'
+	|| *name == 'a') && !*(name + 1))
+	|| strcmp(name, "quit") == 0 || strcmp(name, "edit") == 0
+	|| strcmp(name, "del") == 0 || strcmp(name, "add") == 0) {
+		fprintf(stderr, _("bookmarks: '%s': Reserved bookmark keyword\n"), name);
+		return 1;
+	}
+
+	return 0;
+}
+
+static int
 check_bm_name(const char *name)
 {
 	if (bm_n == 0 || !bookmarks)
 		return 1;
 
-	if (*name == 'q' && !*(name + 1)) {
-		fprintf(stderr, _("bookmarks: 'q' is not allowed as bookmark name\n"));
+	if (name_is_reserved_keyword(name) == 1)
 		return 0;
-	}
 
 	int i = (int)bm_n;
 	while (--i >= 0) {
@@ -907,10 +922,8 @@ check_bm_shortcut(const char *shortcut)
 	if (bm_n == 0 || !bookmarks)
 		return 1;
 
-	if (*shortcut == 'q' && !*(shortcut + 1)) {
-		fprintf(stderr, _("bookmarks: 'q' is not allowed as bookmark shortcut\n"));
+	if (name_is_reserved_keyword(shortcut) == 1)
 		return 0;
-	}
 
 	int i = (int)bm_n;
 	while (--i >= 0) {
