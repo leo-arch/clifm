@@ -153,20 +153,21 @@ change this suffix)"
 - Bleach file names in your Downloads directory\n\
     bb ~/Downloads/*"
 
-#define BOOKMARKS_USAGE "Handle bookmarks\n\n\
+#define BOOKMARKS_USAGE "Manage bookmarks\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  bm, bookmarks [a, add FILE] [d, del] [edit [APP]]\n\n\
+  bm, bookmarks [a, add FILE [NAME] [SHORTCUT]] [d, del [NAME]] [edit [APP]]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Open the bookmarks screen\n\
     bm (Alt-b)\n\
   Note: 'b:<TAB>' can also be used\n\
-- Bookmark the directory /media/mount\n\
-    bm a /media/mount\n\
-  Note: Make sure to create a simple shortcut, like 'mnt'. Then you can\n\
-  change to it as follows:\n\
+- Bookmark the directory /media/mount as 'mnt'\n\
+    bm add /media/mount mnt\n\
+  Note: If only a file name is provided, you will be asked for both a\n\
+  shortcut and a name. Make sure to create a simple name, like 'mnt'.\n\
+  Then you can change to it as follows:\n\
     bm mnt (or 'bm <TAB>' to choose from a list)\n\
-- Remove a bookmark\n\
-    bm d mnt\n\
+- Remove the bookmark named 'mnt'\n\
+    bm del mnt (or 'bm d <TAB>' to choose from a list)\n\
 - Edit the bookmarks file manually\n\
     bm edit (or F11)\n\
 - Edit the bookmarks file using vi\n\
@@ -514,7 +515,7 @@ works.\n\n\
 - Open/edit the jump database\n\
     je"
 
-#define KB_USAGE "Handle keybindings\n\n\
+#define KB_USAGE "Manage keybindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   kb, keybinds [edit [APP]] [reset] [readline]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -600,7 +601,7 @@ To get information about a device, enter iELN. For example: i12"
     mp\n\
   Once here, just select the mountpoint you want to change to"
 
-#define NET_USAGE "Handle network resources\n\n\
+#define NET_USAGE "Manage network resources\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   net [NAME] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
