@@ -2800,7 +2800,6 @@ users_generator(const char *text, int state)
 #else
 	static size_t len;
 	const struct passwd *p;
-//	rl_filename_completion_desired = 1;
 
 	if (!state)
 		len = strlen(text);

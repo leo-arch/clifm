@@ -1797,6 +1797,7 @@ tab_complete(int what_to_do)
 		}
 	}
 
+	int did_chdir = 0;
 	int start = rl_point;
 	rl_point = end;
 	char *text = rl_copy_text(start, end);
@@ -2243,6 +2244,7 @@ DISPLAY_MATCHES:
 				}
 			}
 			dir = dd ? dd : matches[0];
+			did_chdir = 1;
 // TESTING SYMLINKS
 
 			if (p == dir) {
@@ -2260,6 +2262,7 @@ DISPLAY_MATCHES:
 				xchdir(dir, NO_TITLE);
 				*p = '/';
 			}
+
 // TESTING SYMLINKS
 			if (dir != matches[0])
 				free(dir);
@@ -2327,8 +2330,10 @@ CALC_OFFSET:
 		/* If printing trashed files, let's change to the trash dir
 		 * to allow files colorization */
 		if ((cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL)
-		&& conf.colorize == 1 && trash_files_dir)
+		&& conf.colorize == 1 && trash_files_dir) {
+			did_chdir = 1;
 			xchdir(trash_files_dir, NO_TITLE);
+		}
 
 		for (i = 1; i <= (size_t)count; i++) {
 			if (i >= term_lines) {
@@ -2378,21 +2383,25 @@ CALC_OFFSET:
 			fputs(tx_c, stdout);
 		rl_reset_line_state();
 
-		if (cur_comp_type == TCMP_UNTRASH || cur_comp_type ==  TCMP_TRASHDEL) {
+//		if (cur_comp_type == TCMP_UNTRASH || cur_comp_type ==  TCMP_TRASHDEL) {
 			/* This flag was set to true when completing trashed files.
 			 * See 't del' and 'u' commands completion in readline.c */
-			flags &= ~STATE_COMPLETING;
+//			flags &= ~STATE_COMPLETING;
 
-			if (conf.colorize == 1 && workspaces && workspaces[cur_ws].path)
+//			if (conf.colorize == 1 && workspaces && workspaces[cur_ws].path)
 				/* Let's change back to the current directory */
-				xchdir(workspaces[cur_ws].path, NO_TITLE);
-		}
+//				xchdir(workspaces[cur_ws].path, NO_TITLE);
+//		}
 
 #ifndef _NO_FZF
 RESET_PATH:
 #endif /* !_NO_FZF */
 
 RESTART:
+		flags &= ~STATE_COMPLETING;
+		if (did_chdir == 1 && workspaces && workspaces[cur_ws].path)
+			xchdir(workspaces[cur_ws].path, NO_TITLE);
+
 		rl_on_new_line();
 #ifndef _NO_HIGHLIGHT
 		if (conf.highlight == 1 && wrong_cmd == 0) {
