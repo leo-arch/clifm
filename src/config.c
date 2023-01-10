@@ -2785,7 +2785,7 @@ check_colors(void)
 #ifndef _NO_FZF
 /* Just check if --height is specified in FZF_DEFAULT_OPTS */
 static int
-get_fzf_win_height()
+get_fzf_win_height(void)
 {
 	char *p = getenv("FZF_DEFAULT_OPTS");
 	if (!p || !*p)

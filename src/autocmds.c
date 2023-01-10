@@ -276,7 +276,7 @@ set_autocmd_opt(char *opt)
 }
 
 static void
-init_autocmd_opts()
+init_autocmd_opts(void)
 {
 	autocmds[autocmds_n].cmd = (char *)NULL;
 //	autocmds[autocmds_n].color_scheme = opts.color_scheme;

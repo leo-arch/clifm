@@ -696,16 +696,21 @@ count_dir(const char *dir, int pop)
 		return (-1);
 	}
 
-	int c = 0;
+	unsigned int c = 0;
 
 	while (readdir(p)) {
 		c++;
+		if (c > (unsigned int)INT_MAX) {
+			--c;
+			break;
+		}
+
 		if (pop && c > 2)
 			break;
 	}
 
 	closedir(p);
-	return c;
+	return (int)c;
 }
 
 /* Get the path of a given command from the PATH environment variable.

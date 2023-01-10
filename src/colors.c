@@ -177,7 +177,7 @@ get_dir_color(const char *filename, const mode_t mode, const nlink_t links)
 	if (mode & S_IWOTH)
 		is_oth_w = 1;
 
-	int files_dir = links > 2 ? (int)links : count_dir(filename, CPOP);
+	size_t files_dir = links > 2 ? (size_t)links : (size_t)count_dir(filename, CPOP);
 
 	color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
 		   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);

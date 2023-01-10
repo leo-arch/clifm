@@ -41,6 +41,7 @@
 # include <inttypes.h> /* uintmax_t */
 #endif
 
+#include <limits.h> /* INT_MAX */
 #include <glob.h>
 
 #if defined(_LIST_SPEED)
@@ -1695,12 +1696,6 @@ list_dir_light(void)
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
-		if (n + 1 == 0) {
-			_err('w', PRINT_PROMPT, _("%s: Unsigned integer overflow "
-				"detected (showing only %u files)\n"), PNL, n);
-			break;
-		}
-
 		char *ename = ent->d_name;
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
@@ -1860,6 +1855,13 @@ list_dir_light(void)
 			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
 
 		n++;
+		if (n > (unsigned int)INT_MAX) {
+			n--;
+			_err('w', PRINT_PROMPT, _("%s: Integer overflow "
+				"detected (showing only %u files)\n"), PNL, n);
+			break;
+		}
+
 		count++;
 	}
 
@@ -2105,12 +2107,6 @@ list_dir(void)
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
-		if (n + 1 == 0) {
-			_err('w', PRINT_PROMPT, _("%s: Unsigned integer overflow "
-				"detected (showing only %u files)\n"), PNL, n);
-			break;
-		}
-
 		char *ename = ent->d_name;
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
@@ -2432,6 +2428,13 @@ list_dir(void)
 			get_largest(n, &largest_size, &largest_name, &largest_color, &total_size);
 
 		n++;
+		if (n > (unsigned int)INT_MAX) {
+			n--;
+			_err('w', PRINT_PROMPT, _("%s: Integer overflow "
+				"detected (showing only %u files)\n"), PNL, n);
+			break;
+		}
+
 		count++;
 	}
 
