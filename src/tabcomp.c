@@ -90,6 +90,8 @@ typedef char *rl_cpvfunc_t;
 #ifndef _NO_FZF
 static size_t longest_prev_entry;
 
+typedef int QSFUNC(const void *, const void *);
+
 /* The following three functions are used to get current cursor position
  * (both vertical and horizontal), needed by TAB completion in fzf mode
  * with previews enabled */
@@ -1683,9 +1685,11 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 /* Simple comparison routine for qsort()ing strings */
 static int
-compare_strings(s1, s2)
-  char **s1, **s2;
+compare_strings(char **s1, char **s2)
 {
+#if defined(HAVE_STRCOLL)
+	return strcoll(*s2, *s2);
+#else
 	int ret;
 
 	ret = **s1 - **s2;
@@ -1693,6 +1697,7 @@ compare_strings(s1, s2)
 		ret = strcmp(*s1, *s2);
 
 	return ret;
+#endif /* HAVE_STRCOLL */
 }
 
 /* Complete the word at or before point.
@@ -1854,7 +1859,7 @@ AFTER_USUAL_COMPLETION:
 			 * place no matter what */
 			for (i = 0; matches[i]; i++);
 			if (i > 0)
-				qsort(matches + 1, i - 1, sizeof(char *), compare_strings);
+				qsort(matches + 1, i - 1, sizeof(char *), (QSFUNC *)compare_strings);
 		}
 
 		/* Remember the lowest common denominator, for it may be unique */

@@ -195,7 +195,7 @@ save_jumpdb(void)
 	if (total_rank > conf.max_jump_total_rank)
 		reduce = (total_rank / conf.max_jump_total_rank) + 1;
 
-	int jump_num = 0;
+//	int jump_num = 0;
 
 	for (i = 0; i < (int)jump_n; i++) {
 		if (total_rank > conf.max_jump_total_rank) {
@@ -214,7 +214,7 @@ save_jumpdb(void)
 			}
 		}
 
-		jump_num++;
+//		jump_num++;
 
 		fprintf(fp, "%zu:%jd:%jd:%s\n", jump_db[i].visits, (intmax_t)jump_db[i].first_visit,
 			(intmax_t)jump_db[i].last_visit, jump_db[i].path);

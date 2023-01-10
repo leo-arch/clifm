@@ -1567,7 +1567,7 @@ check_help(char *full_line, const char *_last_word)
 	if (!retval)
 		return NO_MATCH;
 
-	suggestion.type = CMD_SUG;
+	suggestion.type = INT_HELP_SUG;
 	print_suggestion("--help", len, sx_c);
 	return PARTIAL_MATCH;
 }

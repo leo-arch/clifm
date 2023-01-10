@@ -687,7 +687,8 @@ rl_accept_suggestion(int count, int key)
 	case PROMPT_SUG:  /* fallthrough */
 	case NET_SUG:     /* fallthrough */
 	case CSCHEME_SUG: /* fallthrough */
-	case WS_NAME_SUG:
+	case WS_NAME_SUG: /* fallthrough */
+	case INT_HELP_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
 #ifndef _NO_TAGS
@@ -758,7 +759,8 @@ rl_accept_first_word(int count, int key)
 	if (suggestion.type != ELN_SUG && suggestion.type != BOOKMARK_SUG
 	&& suggestion.type != ALIAS_SUG && suggestion.type != JCMD_SUG
 	&& suggestion.type != JCMD_SUG_NOACD && suggestion.type != FUZZY_FILENAME
-	&& suggestion.type != CMD_DESC_SUG && suggestion.type != BM_NAME_SUG) {
+	&& suggestion.type != CMD_DESC_SUG && suggestion.type != BM_NAME_SUG
+	&& suggestion.type != INT_HELP_SUG) {
 		accept_first_word = 1;
 		suggestion.type = FIRST_WORD;
 	}
