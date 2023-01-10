@@ -1692,9 +1692,8 @@ hist_generator(const char *text, int state)
 	while ((name = history[i++].cmd) != NULL) {
 		if (*text == '!') {
 			if (len == 0 || (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
-			|| (conf.fuzzy_match == 1
+			|| (conf.fuzzy_match == 1 && tabmode != STD_TAB
 			&& fuzzy_match((char *)(text + 1), name, len, FUZZY_HISTORY) > 0))
-//			&& fuzzy_match((char *)(text + 1), name, conf.case_sens_path_comp, FUZZY_HISTORY) == 1))
 				return strdup(name);
 		} else {
 			/* Restrict the search to what seems to be a pattern:
@@ -3187,8 +3186,10 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* HISTORY CMD AND SEARCH PATTERNS COMPLETION */
-		if (xrename == 0 && (*text == '!' || *text == '/')) {
-			matches = rl_completion_matches(text, &hist_generator);
+		if (xrename == 0 && *text == '!') {// || *text == '/')) {
+			char *p = dequote_str((char *)text, 0);
+			matches = rl_completion_matches(p ? p : text, &hist_generator);
+			free(p);
 			if (matches) {
 				cur_comp_type = TCMP_HIST;
 				return matches;

@@ -513,7 +513,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS
 	|| cur_comp_type == TCMP_MIME_LIST || cur_comp_type == TCMP_BOOKMARK
 	|| cur_comp_type == TCMP_WORKSPACES || cur_comp_type == TCMP_NET
-	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_PROMPTS) {
+	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_PROMPTS
+	|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR) {
 		rl_insert_text(buf + *offset);
 		return;
 	} else if (cur_comp_type == TCMP_OWNERSHIP) {
@@ -1475,8 +1476,13 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		q = (char *)NULL;
 	}
 
+	char *dq = q ? (strchr(q, '\\') ? dequote_str(q, 0) : q) : (char *)NULL;
+
 	/* Run the finder application and store the ouput into the FINDER_OUT_FILE file */
-	int ret = run_finder(&height, &finder_offset, q, multi);
+	int ret = run_finder(&height, &finder_offset, dq, multi);
+
+	if (dq && dq != q)
+		free(dq);
 	unlink(finder_in_file);
 
 	/* Calculate currently used lines to go back to the correct cursor
@@ -1945,7 +1951,7 @@ AFTER_USUAL_COMPLETION:
 			}
 		}
 
-		if (replacement && cur_comp_type != TCMP_HIST
+		if (replacement && (cur_comp_type != TCMP_HIST || !matches[1])
 		&& cur_comp_type != TCMP_FILE_TYPES_OPTS
 		&& cur_comp_type != TCMP_MIME_LIST
 		&& (cur_comp_type != TCMP_FILE_TYPES_FILES || !matches[1])
@@ -2040,14 +2046,6 @@ AFTER_USUAL_COMPLETION:
 		if (replacement != matches[0])
 			free(replacement);
 
-/*		if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
-			char *s = strrchr(rl_line_buffer, ' ');
-			rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
-			rl_delete_text(rl_point, rl_end);
-			rl_end = rl_point;
-			rl_redisplay();
-		} */
-
 		/* If there are more matches, ring the bell to indicate. If this was
 		 * the only match, and we are hacking files, check the file to see if
 		 * it was a directory. If so, add a '/' to the name.  If not, and we
@@ -2059,12 +2057,14 @@ AFTER_USUAL_COMPLETION:
 				if (rl_editing_mode != 0) /* vi_mode */
 					rl_ding();	/* There are other matches remaining. */
 			}
-		} else {
+		} else { /* Just one match */
 			if (cur_comp_type == TCMP_TAGS_T || cur_comp_type == TCMP_BOOKMARK
 			|| cur_comp_type == TCMP_PROMPTS || cur_comp_type == TCMP_NET
-			|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_WORKSPACES)
+			|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_WORKSPACES
+			|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR)
 				break;
 
+			/* Let's append an ending character to the inserted match */
 			if (cur_comp_type == TCMP_OWNERSHIP) {
 				char *sc = rl_line_buffer ? strchr(rl_line_buffer, ':') : (char *)NULL;
 				size_t l = wc_xstrlen(sc ? sc + 1 : rl_line_buffer ? rl_line_buffer : "");
@@ -2159,10 +2159,10 @@ DISPLAY_MATCHES:
 				size_t name_length;
 
 				temp = printable_part(matches[i]);
-				name_length = strlen(temp);
+				name_length = wc_xstrlen(temp);
 
 				if ((int)name_length > max)
-				  max = (int)name_length;
+					max = (int)name_length;
 			}
 
 			len = (int)i - 1;
@@ -2287,8 +2287,9 @@ CALC_OFFSET:
 
 /*		qq = strrchr(ptr, '/');
 		if (qq) { */
-		qq = (cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_SEL)
-			? ptr : strrchr(ptr, '/');
+		qq = (cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_SEL
+		|| cur_comp_type == TCMP_HIST) ? ptr : strrchr(ptr, '/');
+
 		if (qq && qq != ptr) {
 			if (*(++qq)) {
 				tab_offset = strlen(qq);
@@ -2316,10 +2317,17 @@ CALC_OFFSET:
 		if (cur_comp_type == TCMP_PATH && ptr && *ptr == '/' && tab_offset > 0)
 			tab_offset--;
 
+		if (cur_comp_type == TCMP_HIST && ptr && *ptr == '!' && tab_offset > 0) {
+			if (conf.fuzzy_match == 1)
+				tab_offset = 0;
+			else
+				tab_offset--;
+		}
+
 		/* If printing trashed files, let's change to the trash dir
 		 * to allow files colorization */
-		if (conf.colorize == 1 && trash_files_dir && (cur_comp_type == TCMP_UNTRASH
-		|| cur_comp_type == TCMP_TRASHDEL))
+		if ((cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL)
+		&& conf.colorize == 1 && trash_files_dir)
 			xchdir(trash_files_dir, NO_TITLE);
 
 		for (i = 1; i <= (size_t)count; i++) {
@@ -2352,7 +2360,7 @@ CALC_OFFSET:
 					char *temp;
 					int printed_length;
 					temp = printable_part(matches[l]);
-					printed_length = (int)strlen(temp);
+					printed_length = (int)wc_xstrlen(temp);
 					printed_length += print_filename(temp, matches[l]);
 
 					if (j + 1 < limit) {

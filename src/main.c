@@ -850,7 +850,7 @@ set_root_indicator(void)
 }
 
 static inline void
-__list()
+__list(void)
 {
 	if (conf.autols == 1 && isatty(STDIN_FILENO)) {
 #ifdef LINUX_INOTIFY
