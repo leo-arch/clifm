@@ -1695,6 +1695,12 @@ list_dir_light(void)
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
+		if (n + 1 == 0) {
+			_err('w', PRINT_PROMPT, _("%s: Unsigned integer overflow "
+				"detected (showing only %u files)\n"), PNL, n);
+			break;
+		}
+
 		char *ename = ent->d_name;
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
@@ -2099,6 +2105,12 @@ list_dir(void)
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2, sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
+		if (n + 1 == 0) {
+			_err('w', PRINT_PROMPT, _("%s: Unsigned integer overflow "
+				"detected (showing only %u files)\n"), PNL, n);
+			break;
+		}
+
 		char *ename = ent->d_name;
 		/* Skip self and parent directories */
 		if (SELFORPARENT(ename))
