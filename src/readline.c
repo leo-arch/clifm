@@ -3309,7 +3309,9 @@ my_rl_completion(const char *text, int start, int end)
 		&& *lb == 'b' && lb[1] == 'd' && lb[2] == ' ') {
 			if (nwords < 2 || (rl_end && lb[rl_end - 1] != ' ')) {
 				int n = 0;
-				matches = get_bd_matches(text, &n, BD_TAB);
+				char *p = dequote_str((char *)text, 0);
+				matches = get_bd_matches(p ? p : text, &n, BD_TAB);
+				free(p);
 				if (matches) {
 					cur_comp_type = TCMP_BACKDIR;
 					return matches;

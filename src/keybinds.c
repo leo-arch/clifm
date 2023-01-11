@@ -665,7 +665,7 @@ rl_accept_suggestion(int count, int key)
 				fputs(df_c, stdout);
 			}
 		} else if (suggestion.filetype != DT_DIR
-		&& suggestion.type != BOOKMARK_SUG) {
+		&& suggestion.type != BOOKMARK_SUG && suggestion.type != BACKDIR_SUG) {
 			rl_stuff_char(' ');
 		}
 		suggestion.type = NO_SUG;

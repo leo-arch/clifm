@@ -2050,8 +2050,12 @@ check_backdir(void)
 	if (q)
 		*q = '\0';
 
+	char *lb = rl_line_buffer + 3;
+	char *ds = strchr(lb, '\\') ? dequote_str(lb, 0) : lb;
+
 	/* Find the query string in the list of parent directories */
-	char *p = strstr(bk_cwd, rl_line_buffer + 3);
+	char *p = conf.case_sens_path_comp == 1 ? strstr(bk_cwd, ds)
+	: strcasestr(bk_cwd, ds);
 	if (p) {
 		char *pp = strchr(p, '/');
 		if (pp)
@@ -2059,8 +2063,13 @@ check_backdir(void)
 
 		suggestion.type = BACKDIR_SUG;
 		print_suggestion(bk_cwd, 0, sf_c);
+		if (ds && ds != lb)
+			free(ds);
 		return 1;
 	}
+
+	if (ds && ds != lb)
+		free(ds);
 
 	return 0;
 }
