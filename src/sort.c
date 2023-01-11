@@ -121,7 +121,7 @@ namecmp(char *s1, char *s2)
 	skip_name_prefixes(&s1);
 	skip_name_prefixes(&s2);
 
-	/* If both string starts with number, sort them as numbers, not as strings */
+	/* If both strings start with number, sort them as numbers, not as strings */
 	if (IS_DIGIT(*s1) && IS_DIGIT(*s2)) {
 		char *p1, *p2;
 		long long n1 = strtoll(s1, &p1, 10);
@@ -419,9 +419,8 @@ re_sort_files_list(void)
 	if (conf.autols == 0)
 		return EXIT_SUCCESS;
 
-	/* sort_switch just tells list_dir() to print a line
-	 * with the current sorting method at the end of the
-	 * files list */
+	/* sort_switch just tells list_dir() to print a line with the current
+	 * sorting order at the end of the files list */
 	sort_switch = 1;
 	free_dirlist();
 	int ret = list_dir();

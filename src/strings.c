@@ -68,15 +68,7 @@ typedef char *rl_cpvfunc_t;
 # include "mime.h" /* MIME-type filter expansion */
 #endif /* _NO_MAGIC */
 
-
-/*
-#if defined(__CYGWIN__)
-# define SHEREDOM_UTF8LEN 1
-#endif // __CYGWIN__ */
-
-//#ifndef SHEREDOM_UTF8LEN
 static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
-//#endif /* _UTF8LEN */
 
 /* Macros for xstrverscmp() */
 /* states: S_N: normal, S_I: comparing integral part, S_F: comparing
@@ -158,8 +150,6 @@ xstrcasechr(char *s, char c)
 
 	return (char *)NULL;
 }
-
-
 
 /* A reverse strpbrk(3): returns a pointer to the LAST char in S matching
  * a char in ACCEPT, or NULL if no match is found */
@@ -360,46 +350,6 @@ xstrverscmp(const char *s1, const char *s2)
 	}
 }
 
-/*
-#if defined(SHEREDOM_UTF8LEN)
-// Taken from https://github.com/sheredom/utf8.h, in public domain
-static size_t
-utf8nlen(const char *str, size_t n)
-{
-	const char *t = str;
-	size_t length = 0;
-
-	while ((size_t)(str - t) < n && '\0' != *str) {
-		if (0xf0 == (0xf8 & *str)) {
-		// 4-byte utf8 code point (began with 0b11110xxx)
-			str += 4;
-		} else if (0xe0 == (0xf0 & *str)) {
-		// 3-byte utf8 code point (began with 0b1110xxxx)
-			str += 3;
-		} else if (0xc0 == (0xe0 & *str)) {
-		// 2-byte utf8 code point (began with 0b110xxxxx)
-			str += 2;
-		} else { // if (0x00 == (0x80 & *s)) {
-			// 1-byte ascii (began with 0b0xxxxxxx)
-			str += 1;
-		}
-
-		// no matter the bytes we marched s forward by, it was
-		// only 1 utf8 codepoint
-		length++;
-	}
-
-	if ((size_t)(str - t) > n)
-		length--;
-
-	return length;
-}
-
-size_t
-wc_xstrlen(const char *restrict str) {
-	return utf8nlen(str, SIZE_MAX);
-}
-#else */
 /* A strlen implementation able to handle wide chars */
 size_t
 wc_xstrlen(const char *restrict str)
@@ -417,7 +367,6 @@ wc_xstrlen(const char *restrict str)
 	/* A non-printable wide char was found */
 	return 0;
 }
-//#endif /* SHEREDOM_UTF8LEN */
 
 /* Truncate an UTF-8 string at width MAX. Returns the difference beetween
  * MAX and the point at which STR was actually trimmed (this difference
@@ -450,7 +399,6 @@ u8truncstr(char *restrict str, const size_t max)
 	}
 
 	wcscpy((wchar_t *)str, buf);
-//	return (int)max - len;
 	return bmax - len;
 }
 
@@ -2713,8 +2661,8 @@ expand_range(char *str, int listdir)
 	return buf;
 }
 
-/* used a lot.
- * creates a copy of a string */
+/* Returns a pointer to a copy of the string STR with size SIZE, or
+ * NULL on error */
 char *
 savestring(const char *restrict str, size_t size)
 {
