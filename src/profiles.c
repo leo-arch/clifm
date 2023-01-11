@@ -323,10 +323,6 @@ profile_add(char *prof)
 
 	char *nconfig_file = (char *)xnmalloc(config_len + pnl_len + 4, sizeof(char));
 	sprintf(nconfig_file, "%s/%src", nconfig_dir, PNL);
-/*	char *nhist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
-	sprintf(nhist_file, "%s/history.cfm", nconfig_dir);
-	char *nmime_file = (char *)xnmalloc(config_len + 14, sizeof(char));
-	sprintf(nmime_file, "%s/mimelist.cfm", nconfig_dir); */
 	char *nhist_file = (char *)xnmalloc(config_len + 15, sizeof(char));
 	sprintf(nhist_file, "%s/history.clifm", nconfig_dir);
 	char *nmime_file = (char *)xnmalloc(config_len + 16, sizeof(char));
@@ -362,7 +358,7 @@ profile_add(char *prof)
 	free(nmime_file);
 
 	if (exit_status == EXIT_SUCCESS) {
-		printf(_("%s: '%s': Profile succesfully created\n"), PROGRAM_NAME, prof);
+		printf(_("Succesfully created profile %s%s%s\n"), BOLD, prof, df_c);
 
 		size_t i;
 		for (i = 0; profile_names[i]; i++)
@@ -407,7 +403,7 @@ profile_del(char *prof)
 		return ret;
 	}
 
-	printf(_("%s: '%s': Profile successfully removed\n"), PROGRAM_NAME, prof);
+	printf(_("Successfully removed profile %s%s%s\n"), BOLD, prof, df_c);
 	size_t i;
 	for (i = 0; profile_names[i]; i++)
 		free(profile_names[i]);
@@ -429,8 +425,8 @@ print_profiles(void)
 static int
 print_current_profile(void)
 {
-	printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile
-		? alt_profile : "default");
+	printf("Current profile: %s%s%s\n", BOLD, alt_profile
+		? alt_profile : "default", df_c);
 	return EXIT_SUCCESS;
 }
 
@@ -486,6 +482,14 @@ profile_function(char **comm)
 	if (*comm[1] == 'l' && (strcmp(comm[1], "ls") == 0
 	|| strcmp(comm[1], "list") == 0))
 		return print_profiles();
+
+	if (comm[2]) {
+		char *p = dequote_str(comm[2], 0);
+		if (p) {
+			free(comm[2]);
+			comm[2] = p;
+		}
+	}
 
 	/* Create a new profile */
 	if (*comm[1] == 'a' && strcmp(comm[1], "add") == 0)

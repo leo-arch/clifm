@@ -374,6 +374,7 @@ extern int watch;
 #define NET_SUG        27
 #define CSCHEME_SUG    28
 #define INT_HELP_SUG   29
+#define PROFILE_SUG    30
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR

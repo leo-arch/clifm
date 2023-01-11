@@ -3532,7 +3532,9 @@ my_rl_completion(const char *text, int start, int end)
 			if (suggestion.type != FILE_SUG)
 				rl_attempted_completion_over = 1;
 #endif /* _NO_SUGGESTIONS */
-			matches = rl_completion_matches(text, &profiles_generator);
+			char *p = dequote_str((char *)text, 0);
+			matches = rl_completion_matches(p ? p : text, &profiles_generator);
+			free(p);
 			if (matches) {
 				cur_comp_type = TCMP_PROF;
 				return matches;

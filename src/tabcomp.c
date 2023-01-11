@@ -516,7 +516,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	|| cur_comp_type == TCMP_MIME_LIST || cur_comp_type == TCMP_BOOKMARK
 	|| cur_comp_type == TCMP_WORKSPACES || cur_comp_type == TCMP_NET
 	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_PROMPTS
-	|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR) {
+	|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR
+	|| cur_comp_type == TCMP_PROF) {
 		rl_insert_text(buf + *offset);
 		return;
 	} else if (cur_comp_type == TCMP_OWNERSHIP) {
@@ -1973,14 +1974,12 @@ AFTER_USUAL_COMPLETION:
 		&& (cur_comp_type != TCMP_TAGS_F || !matches[1])) {
 
 			enum comp_type c = cur_comp_type;
-//			if ((c == TCMP_SEL || c == TCMP_DESEL || c == TCMP_NET
 			if ((c == TCMP_DESEL || c == TCMP_NET
-
-			|| c == TCMP_BM_PATHS
-
+			|| c == TCMP_BM_PATHS || c == TCMP_PROF
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
 			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK || c == TCMP_GLOB
-			|| c == TCMP_PROMPTS || c == TCMP_CSCHEME || c == TCMP_WORKSPACES)
+			|| c == TCMP_PROMPTS || c == TCMP_CSCHEME || c == TCMP_WORKSPACES
+			|| c == TCMP_PROF)
 			&& !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
@@ -2067,7 +2066,8 @@ AFTER_USUAL_COMPLETION:
 			if (cur_comp_type == TCMP_TAGS_T || cur_comp_type == TCMP_BOOKMARK
 			|| cur_comp_type == TCMP_PROMPTS || cur_comp_type == TCMP_NET
 			|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_WORKSPACES
-			|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR)
+			|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR
+			|| cur_comp_type == TCMP_PROF)
 				break;
 
 			/* Let's append an ending character to the inserted match */

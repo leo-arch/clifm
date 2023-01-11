@@ -1908,25 +1908,36 @@ check_fastback(char *w)
 }
 
 static int
-check_profiles(const char *word, const size_t len)
+check_profiles(char *word, const size_t len)
 {
 	if (!word || !*word || !profile_names)
 		return 0;
 
+	char *q = (char *)NULL, *w = word;
+	size_t l = len;
+
+	if (strchr(word, '\\')) {
+		q = dequote_str(word, 0);
+		w = q ? q : word;
+		l = w == q ? strlen(w) : len;
+	}
+
 	size_t i;
 	for (i = 0; profile_names[i]; i++) {
-		if (conf.case_sens_list == 0 ? (TOUPPER(*word) == TOUPPER(*profile_names[i])
-		&& strncasecmp(word, profile_names[i], len) == 0)
-		: (*word == *profile_names[i]
-		&& strncmp(word, profile_names[i], len) == 0)) {
-			suggestion.type = CMD_SUG;
+		if (conf.case_sens_list == 0 ? (TOUPPER(*w) == TOUPPER(*profile_names[i])
+		&& strncasecmp(w, profile_names[i], l) == 0)
+		: (*w == *profile_names[i]
+		&& strncmp(w, profile_names[i], l) == 0)) {
+			suggestion.type = PROFILE_SUG;
 			char *p = escape_str(profile_names[i]);
 			print_suggestion(p ? p : profile_names[i], len, sx_c);
 			free(p);
+			free(q);
 			return 1;
 		}
 	}
 
+	free(q);
 	return 0;
 }
 

@@ -450,9 +450,9 @@ _set_sort_by_name(char **arg)
 int
 sort_function(char **arg)
 {
-	/* No argument: Just print current sorting method */
+	/* No argument: Just print current sorting order */
 	if (!arg[1]) {
-		fputs(_("Sorting method: "), stdout);
+		fputs(_("Sorting order: "), stdout);
 		print_sort_method();
 		return EXIT_SUCCESS;
 	}
