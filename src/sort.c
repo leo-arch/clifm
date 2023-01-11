@@ -399,7 +399,7 @@ print_sort_method(void)
 		printf(_("inode %s\n"), (conf.sort_reverse) ? "[rev]" : "");	break;
 	case SOWN: print_owner_group_sort(SOWN); break;
 	case SGRP: print_owner_group_sort(SGRP); break;
-	default: fputs("unknown sorting method\n", stdout); break;
+	default: fputs("unknown sorting order\n", stdout); break;
 	}
 	fputs(NC, stdout);
 }
@@ -443,7 +443,7 @@ _set_sort_by_name(char **arg)
 		}
 	}
 
-	fprintf(stdout, _("st: %s: No such sorting method\n"), *arg);
+	fprintf(stdout, _("st: %s: No such sorting order\n"), *arg);
 	return EXIT_FAILURE;
 }
 
