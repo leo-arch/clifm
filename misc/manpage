@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 9, 2023" "clifm 1.9.6" "CLIFM Manual"
+.TH "CLIFM" "1" "Jan 12, 2023" "clifm 1.9.8" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -886,8 +886,8 @@ If you just need to toggle the executable permission bit on a file, you can use 
 .sp
 Use the \fIoc\fR command to edit files ownership.
 .TP
-.B pf, prof, profile \fR[\fIls\fR, \fIlist\fR] [\fIset\fR, \fIadd\fR, \fIdel PROFILE\fR]
-with no arguments, prints the name of the currently used profile. Use the \fIls\fR or \fIlist\fR option to list available profiles. To switch, add or delete a profile, use the \fIset\fR, \fIadd\fR, and \fIdel\fR options respectively followed by the corresponding profile name. Bear in mind that, when switching profiles, command line arguments will be ignored.
+.B pf, prof, profile \fR[\fIls\fR, \fIlist\fR] [\fIset\fR, \fIadd\fR, \fIdel PROFILE\fR] [\fIrename PROFILE NEW_NAME\fR]
+with no arguments, prints the name of the currently used profile. Use the \fIls\fR or \fIlist\fR option to list available profiles. To switch, add, delete, or rename a profile, use the \fIset\fR, \fIadd\fR, \fIdel\fR, and \fIrename\fR options respectively.
 .TP
 .B pg, pager \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR, [\fINUM\fR]]
 toggle \fBMas\fR, the built-in pager, on/off. Useful to list directories with hundreds or thousands of files, the pager will start working, if set to \fIon\fR, whenever the screen is not enough to list all files.
