@@ -45,8 +45,8 @@
 static int
 remotes_list(void)
 {
-	if (!remotes_n) {
-		printf(_("%s: No remotes defined\n"), PROGRAM_NAME);
+	if (remotes_n == 0) {
+		printf(_("%s: No remotes defined. Run 'net edit' to add one.\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 

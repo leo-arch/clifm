@@ -581,7 +581,7 @@ print_tips(int all)
 		"ELN's and the 'sel' keyword work for shell commands as well: "
 		"'ls -ld 1 sel'",
 		"Press TAB to automatically expand an ELN: 's 2<TAB>' -> 's FILENAME'",
-		"Easily copy everything in CWD into another directory: 's * && c sel ELN/DIR'",
+//		"Easily copy everything in CWD into another directory: 's * && c sel ELN/DIR'",
 		"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 ELN/DIR'",
 		"Trash files with a simple 't ELN'",
 		"Get mime information for a file: 'mm info ELN'",
