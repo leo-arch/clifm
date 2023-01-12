@@ -2708,7 +2708,8 @@ options_generator(const char *text, int state)
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = NULL;
 	/* pf */
 	} else if (*l == 'p' && l[1] == 'f' && l[2] == ' ') {
-		_opts[0] = "list"; _opts[1] = "set"; _opts[2] = "add"; _opts[3] = "del"; _opts[4] = NULL;
+		_opts[0] = "list"; _opts[1] = "set"; _opts[2] = "add";
+		_opts[3] = "del"; _opts[4] = "rename"; _opts[5] = NULL;
 	/* tag */
 	} else if (*l == 't' && l[1] == 'a' && l[2] == 'g' && l[3] == ' ') {
 		_opts[0] = "list"; _opts[1] = "new"; _opts[2] = "remove";
@@ -3546,11 +3547,13 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### PROFILES COMPLETION ### */
-		if (*lb == 'p' && (lb[1] == 'r'	|| lb[1] == 'f')
+		if (nwords < 3 && *lb == 'p' && (lb[1] == 'r' || lb[1] == 'f')
 		&& (strncmp(lb, "pf set ", 7) == 0
 		|| strncmp(lb, "profile set ", 12) == 0
 		|| strncmp(lb, "pf del ", 7) == 0
-		|| strncmp(lb, "profile del ", 12) == 0)) {
+		|| strncmp(lb, "profile del ", 12) == 0
+		|| strncmp(lb, "pf rename ", 10) == 0
+		|| strncmp(lb, "profile rename ", 15) == 0) ) {
 #ifndef _NO_SUGGESTIONS
 			if (suggestion.type != FILE_SUG)
 				rl_attempted_completion_over = 1;

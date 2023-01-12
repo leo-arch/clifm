@@ -102,16 +102,18 @@ get_profile_names(void)
 	return EXIT_SUCCESS;
 }
 
-/* Check if NAME is an existing profile name */
+/* Check if NAME is an existing profile name.
+ * If true, returns the index of the profile in the PROFILE_NAMES array.
+ * Otherwise, returns -1. */
 static int
 check_profile(const char *name)
 {
-	size_t i;
+	int i;
 	for (i = 0; profile_names[i]; i++) {
 		if (*name == *profile_names[i] && strcmp(name, profile_names[i]) == 0)
-			return 1;
+			return i;
 	}
-	return 0;
+	return (-1);
 }
 
 /* Switch profile to PROF */
@@ -128,7 +130,7 @@ profile_set(char *prof)
 
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
-	if (found == 0) {
+	if (found == -1) {
 		fprintf(stderr, _("pf: %s: No such profile\nTo add a new "
 			"profile enter 'pf add PROFILE'\n"), prof);
 		return EXIT_FAILURE;
@@ -292,7 +294,7 @@ profile_add(char *prof)
 		return EXIT_FAILURE;
 
 	int found = check_profile(prof);
-	if (found == 1) {
+	if (found != -1) {
 		fprintf(stderr, _("pf: %s: Profile already exists\n"), prof);
 		return EXIT_FAILURE;
 	}
@@ -386,7 +388,7 @@ profile_del(char *prof)
 
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
-	if (found == 0) {
+	if (found == -1) {
 		fprintf(stderr, _("pf: %s: No such profile\n"), prof);
 		return EXIT_FAILURE;
 	}
@@ -460,48 +462,119 @@ switch_profile(char *name)
 	return EXIT_FAILURE;
 }
 
+/* Rename profile named as first ARG and second ARG
+ * The corresponding profile file is renamed, just the the corresponding
+ * entry in the PROFILE_NAMES array */
+static int
+rename_profile(char **args)
+{
+	if (!args || !args[0] || !args[1]) {
+		fprintf(stderr, "%s\n", PROFILES_USAGE);
+		return EXIT_FAILURE;
+	}
+
+	if (!config_dir_gral) {
+		fprintf(stderr, _("pf: Configuration directory is not set\n"));
+		return EXIT_FAILURE;
+	}
+
+	if (*args[0] == *args[1] && strcmp(args[0], args[1]) == 0) {
+		puts(_("pf: Nothing to do. Source and destination names are the same."));
+		return EXIT_FAILURE;
+	}
+
+	char *p = dequote_str(args[0], 0);
+	if (p) {
+		free(args[0]);
+		args[0] = p;
+	}
+
+	int src_pf_index = check_profile(args[0]);
+	if (src_pf_index == -1) {
+		fprintf(stderr, _("pf: %s: No such profile\n"), args[0]);
+		return EXIT_FAILURE;
+	}
+
+	char src_pf_name[PATH_MAX + NAME_MAX + 11];
+	snprintf(src_pf_name, sizeof(src_pf_name), "%s/profiles/%s", config_dir_gral, args[0]);
+
+	struct stat a;
+	if (lstat(src_pf_name, &a) == -1) {
+		fprintf(stderr, "pf: %s: %s\n", src_pf_name, strerror(errno));
+		return errno;
+	}
+
+	p = dequote_str(args[1], 0);
+	if (p) {
+		free(args[1]);
+		args[1] = p;
+	}
+
+	char dst_pf_name[PATH_MAX + NAME_MAX + 11];
+	snprintf(dst_pf_name, sizeof(dst_pf_name), "%s/profiles/%s", config_dir_gral, args[1]);
+
+	char *cmd[] = {"mv", "--", src_pf_name, dst_pf_name, NULL};
+	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	if (ret != EXIT_SUCCESS) {
+		fprintf(stderr, _("pf: Error renaming profile\n"));
+		return ret;
+	}
+
+	profile_names[src_pf_index] = (char *)xrealloc(profile_names[src_pf_index],
+		(strlen(args[1]) + 1) * sizeof(char));
+	strcpy(profile_names[src_pf_index], args[1]);
+
+	printf(_("pf: %s: Profile successfully renamed to %s%s%s\n"), args[0], BOLD, args[1], df_c);
+
+	return EXIT_SUCCESS;
+}
+
 /* Main profiles function. Call the operation specified by the first
  * argument option: list, add, set, or delete */
 int
-profile_function(char **comm)
+profile_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: profiles: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
-	if (!comm[1])
+	if (!args[1])
 		return print_current_profile();
 
-	if (IS_HELP(comm[1])) {
+	if (IS_HELP(args[1])) {
 		puts(_(PROFILES_USAGE));
 		return EXIT_SUCCESS;
 	}
 
 	/* List profiles */
-	if (*comm[1] == 'l' && (strcmp(comm[1], "ls") == 0
-	|| strcmp(comm[1], "list") == 0))
+	if (*args[1] == 'l' && (strcmp(args[1], "ls") == 0
+	|| strcmp(args[1], "list") == 0))
 		return print_profiles();
 
-	if (comm[2]) {
-		char *p = dequote_str(comm[2], 0);
+	if (args[2]) {
+		char *p = dequote_str(args[2], 0);
 		if (p) {
-			free(comm[2]);
-			comm[2] = p;
+			free(args[2]);
+			args[2] = p;
 		}
 	}
 
 	/* Create a new profile */
-	if (*comm[1] == 'a' && strcmp(comm[1], "add") == 0)
-		return create_profile(comm[2]);
+	if (*args[1] == 'a' && strcmp(args[1], "add") == 0)
+		return create_profile(args[2]);
 
 	/* Delete a profile */
-	if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0)
-		return delete_profile(comm[2]);
+	if (*args[1] == 'd' && strcmp(args[1], "del") == 0)
+		return delete_profile(args[2]);
+
+	/* Rename a profile */
+	if (*args[1] == 'r' && strcmp(args[1], "rename") == 0)
+		return rename_profile(args + 2);
 
 	/* Switch to another profile */
-	if (*comm[1] == 's' && strcmp(comm[1], "set") == 0)
-		return switch_profile(comm[2]);
+	if (*args[1] == 's' && strcmp(args[1], "set") == 0)
+		return switch_profile(args[2]);
 
 	fprintf(stderr, "%s\n", PROFILES_USAGE);
 	return EXIT_FAILURE;

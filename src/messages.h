@@ -727,18 +727,20 @@ Note: Use the 'oc' command to edit files ownership"
 
 #define PROFILES_USAGE "Manage profiles\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\n\
+  pf, prof, profile [ls, list] [set, add, del PROFILE] [rename PROFILE NEW_NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the current profile name\n\
     pf\n\
 - List available profiles\n\
     pf ls\n\
-- Set profile to the profile named myprofile\n\
+- Switch to the profile 'myprofile'\n\
     pf set myprofile (or 'pf set <TAB>' to choose from a list)\n\
 - Add a new profile named new_profile\n\
     pf add new_profile\n\
-- Remove the profile named myprofile\n\
-    pf del myprofile (or 'pf del <TAB>' to choose from a list)"
+- Remove the profile 'myprofile'\n\
+    pf del myprofile (or 'pf del <TAB>' to choose from a list)\n\
+- Rename the profile 'myprofile' as 'cool_name'\n\
+    pf rename myprofile cool_name"
 
 #define PROP_USAGE "Print files properties\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

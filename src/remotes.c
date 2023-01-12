@@ -114,7 +114,7 @@ get_remote(char *name)
 		}
 	}
 
-	if (!found) {
+	if (found == 0) {
 		fprintf(stderr, _("net: %s: No such remote\n"), name);
 		return (-1);
 	}
@@ -134,7 +134,7 @@ _create_mountpoint(int i)
 
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n",
-				remotes[i].mountpoint, strerror(errno));
+			remotes[i].mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -223,14 +223,14 @@ remotes_unmount(char *name)
 	}
 
 	if (!remotes[i].mountpoint) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: Error getting mountpoint for '%s'\n"),
-			remotes[i].name);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: Error getting "
+			"mountpoint for '%s'\n"), remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
 	if (!remotes[i].unmount_cmd) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: No unmount command found for '%s'\n"),
-			remotes[i].name);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: No unmount command "
+			"for '%s'\n"), remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
@@ -248,8 +248,8 @@ remotes_unmount(char *name)
 
 		char *p = strrchr(remotes[i].mountpoint, '/');
 		if (!p) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Error getting parent directory\n"),
-					remotes[i].mountpoint);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Error getting "
+				"parent directory\n"), remotes[i].mountpoint);
 			return EXIT_FAILURE;
 		}
 
@@ -258,7 +258,7 @@ remotes_unmount(char *name)
 		if (xchdir(remotes[i].mountpoint, SET_TITLE) == EXIT_FAILURE) {
 			*p = '/';
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n",
-					remotes[i].mountpoint, strerror(errno));
+				remotes[i].mountpoint, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -357,7 +357,7 @@ remotes_function(char **args)
 int
 automount_remotes(void)
 {
-	if (!remotes_n)
+	if (remotes_n == 0)
 		return EXIT_SUCCESS;
 
 	int i = (int)remotes_n,
@@ -398,11 +398,11 @@ automount_remotes(void)
 int
 autounmount_remotes(void)
 {
-	if (!remotes_n)
+	if (remotes_n == 0)
 		return EXIT_SUCCESS;
 
-	int i = (int)remotes_n,
-		exit_status = EXIT_SUCCESS;
+	int i = (int)remotes_n, exit_status = EXIT_SUCCESS;
+
 	while (--i >= 0) {
 		if (remotes[i].name && remotes[i].auto_unmount == 1
 		&& remotes[i].mountpoint && remotes[i].unmount_cmd) {
@@ -429,7 +429,7 @@ autounmount_remotes(void)
 				exit_status = EXIT_FAILURE;
 			}
 
-			if (dir_change)
+			if (dir_change == 1)
 				xchdir(workspaces[cur_ws].path, NO_TITLE);
 		}
 	}

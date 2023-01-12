@@ -1103,7 +1103,7 @@ get_query_str(int *fzf_offset)
 	case TCMP_HIST:
 		/* Skip the leading ! char of the input string */
 		query = rl_line_buffer + 1;
-		*fzf_offset = 1 + prompt_offset - (*query ? 3 : 4);
+		*fzf_offset = 1 + prompt_offset - ((query && *query) ? 3 : 4);
 		break;
 
 	case TCMP_JUMP: {

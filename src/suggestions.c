@@ -2284,8 +2284,9 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'p': /* Profiles */
-		if (profile_names && lb[1] == 'f' && lb[2] == ' ' && (strncmp(lb + 3, "set", 3) == 0
-		|| strncmp(lb + 3, "del", 3) == 0)) {
+		if (profile_names && nwords == 3 && lb[1] == 'f' && lb[2] == ' '
+		&& (strncmp(lb + 3, "set ", 4) == 0 || strncmp(lb + 3, "del ", 4) == 0
+		|| strncmp(lb + 3, "rename ", 7) == 0)) {
 			if ((printed = check_profiles(word, wlen)) == 1) {
 				goto SUCCESS;
 			} else {
