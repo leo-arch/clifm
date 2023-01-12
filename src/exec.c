@@ -2274,12 +2274,15 @@ exec_cmd(char **comm)
 #endif
 
 	/*     ############### COPY AND MOVE ##################     */
-	/* c, cp, m, mv, v, vv, or p, paste commands */
-	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'
-	&& !comm[0][2])))
+	/* c, m, v, vv, or p, paste commands */
+	else if ((*comm[0] == 'c' && !comm[0][1])
 
-	|| (*comm[0] == 'm' && (!comm[0][1] || (comm[0][1] == 'v'
-	&& !comm[0][2])))
+	|| (*comm[0] == 'm' && !comm[0][1])
+
+//	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'
+//	&& !comm[0][2])))
+//	|| (*comm[0] == 'm' && (!comm[0][1] || (comm[0][1] == 'v'
+//	&& !comm[0][2])))
 
 	|| (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
 	&& !comm[0][2])))
