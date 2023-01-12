@@ -54,6 +54,9 @@ typedef char *rl_cpvfunc_t;
 #include <errno.h>
 #include <fcntl.h>
 
+#include <termios.h> /* Get cursor position functions */
+#include <limits.h> /* INT_MIN */
+
 #include "exec.h"
 #include "aux.h"
 #include "misc.h"
@@ -72,6 +75,9 @@ typedef char *rl_cpvfunc_t;
 #ifndef _NO_SUGGESTIONS
 #include "suggestions.h"
 #endif
+
+#define CPR     "\x1b[6n" /* Cursor position report */
+#define CPR_LEN 4
 
 #define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL || (c) == TCMP_RANGES \
 || (c) == TCMP_DESEL || (c) == TCMP_JUMP || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB \
@@ -95,8 +101,7 @@ typedef int QSFUNC(const void *, const void *);
 /* The following three functions are used to get current cursor position
  * (both vertical and horizontal), needed by TAB completion in fzf mode
  * with previews enabled */
-#include <termios.h>
-#include <limits.h>
+
 /* Set the terminal into raw mode. Return 0 on success and -1 on error */
 static int
 enable_raw_mode(const int fd)
@@ -142,9 +147,6 @@ disable_raw_mode(const int fd)
 		return EXIT_SUCCESS;
 	return EXIT_FAILURE;
 }
-
-#define CPR            "\x1b[6n"     /* Cursor position report */
-#define CPR_LEN        4
 
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
  * vertical and horizontal) and store both values into C (columns) and L (lines).
@@ -648,7 +650,7 @@ set_fzf_env_vars(const int h)
 	int x = term_cols, y = l;
 	switch(fzf_preview_border_type) {
 	case FZF_BORDER_BOTTOM: /* fallthrough */
-	case FZF_BORDER_NONE: /* fallthrough */
+	case FZF_BORDER_NONE:   /* fallthrough */
 	case FZF_BORDER_LEFT: break;
 
 	case FZF_BORDER_TOP: /* fallthrough */

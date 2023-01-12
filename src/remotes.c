@@ -190,7 +190,7 @@ remotes_mount(char *name)
 	&& _create_mountpoint(i) == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
-	/* Make sure mountpoint is not populated */
+	/* Make sure mountpoint is not populated and run the mount command */
 	if (count_dir(remotes[i].mountpoint, CPOP) <= 2
 	&& launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -203,7 +203,7 @@ remotes_mount(char *name)
 		exit_status = cd_to_mountpoint(i);
 	} else {
 		printf(_("%s: %s: Remote mounted on %s\n"), PROGRAM_NAME,
-				remotes[i].name, remotes[i].mountpoint);
+			remotes[i].name, remotes[i].mountpoint);
 	}
 
 	remotes[i].mounted = 1;
@@ -379,11 +379,16 @@ automount_remotes(void)
 				if (count_dir(remotes[i].mountpoint, CPOP) > 2)
 					continue;
 			}
-			printf(_("%s: Mounting remote...\n"), remotes[i].name);
-			if (launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
+
+			int ret = 0;
+			printf(_("%s: net: %s: Mounting remote...\n"), PROGRAM_NAME, remotes[i].name);
+			if ((ret = launch_execle(remotes[i].mount_cmd)) != EXIT_SUCCESS) {
+				_err('w', PRINT_PROMPT, _("net: %s: Mount command failed with "
+					"error code %d\n"), remotes[i].name, ret);
 				exit_status = EXIT_FAILURE;
-			else
+			} else {
 				remotes[i].mounted = 1;
+			}
 		}
 	}
 
@@ -416,9 +421,13 @@ autounmount_remotes(void)
 				dir_change = 1;
 			}
 
-			printf(_("%s: Unmounting remote...\n"), remotes[i].name);
-			if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)
+			int ret = 0;
+			printf(_("%s: net: %s: Unmounting remote...\n"), PROGRAM_NAME, remotes[i].name);
+			if ((ret = launch_execle(remotes[i].unmount_cmd)) != EXIT_SUCCESS) {
+				fprintf(stderr, _("%s: net: %s: Unmount command failed with "
+					"error code %d\n"), PROGRAM_NAME, remotes[i].name, ret);
 				exit_status = EXIT_FAILURE;
+			}
 
 			if (dir_change)
 				xchdir(workspaces[cur_ws].path, NO_TITLE);
