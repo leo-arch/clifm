@@ -199,6 +199,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `Development`:
+  - **NEW**: [Rename profiles via the `rename` subcommand](https://github.com/leo-arch/clifm/wiki/Introduction#pf-prof-profile-ls-list-set-add-del-profile-rename-profile-new_name)
   - **NEW**: [`oc`, a files ownership editor](https://github.com/leo-arch/clifm/wiki/Introduction#oc-elnfile-)
   - **NEW**: Get list of commands and a brief description via `cmd<TAB>` 
   - **NEW**: [Suggest a brief description for internal commands](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
