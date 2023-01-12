@@ -54,7 +54,7 @@ remotes_list(void)
 	for (i = 0; i < remotes_n; i++) {
 		if (!remotes[i].name)
 			continue;
-		printf(_("Name: %s\n"), remotes[i].name);
+		printf(_("Name: %s%s%s\n"), BOLD, remotes[i].name, df_c);
 		if (remotes[i].desc)
 			printf(_(" Comment: %s\n"), remotes[i].desc);
 		if (remotes[i].mountpoint)
@@ -67,8 +67,8 @@ remotes_list(void)
 				? _("false") : _("true"));
 		printf(_(" Auto-mount: %s\n"), (remotes[i].auto_mount == 0)
 				? _("false") : _("true"));
-		printf(_(" Mounted: %s\n"), (remotes[i].mounted == 0) ? _("No")
-				: _("Yes"));
+		printf(_(" Mounted: %s%s%s\n"), BOLD, (remotes[i].mounted == 0) ? _("No")
+				: _("Yes"), df_c);
 		if (i < remotes_n - 1)
 			puts("");
 	}
