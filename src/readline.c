@@ -3547,7 +3547,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### PROFILES COMPLETION ### */
-		if (nwords < 3 && *lb == 'p' && (lb[1] == 'r' || lb[1] == 'f')
+		if (*lb == 'p' && (lb[1] == 'r' || lb[1] == 'f')
 		&& (strncmp(lb, "pf set ", 7) == 0
 		|| strncmp(lb, "profile set ", 12) == 0
 		|| strncmp(lb, "pf del ", 7) == 0
