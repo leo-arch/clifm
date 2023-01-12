@@ -2092,18 +2092,41 @@ nets_generator(const char *text, int state)
 		return (char *)NULL;
 
 	static int i;
+	static int is_unmount, is_mount;
 	static size_t len;
 	char *name;
 
 	if (!state) {
 		i = 0;
 		len = strlen(text);
+
+		/* Let's find out whether we have a 'mount' or 'unmount' subcommands */
+		if (*(rl_line_buffer + 4) == 'u' && (*(rl_line_buffer + 5) == ' '
+		|| strncmp(rl_line_buffer + 5, "nmount ", 7) == 0))
+			is_unmount = 1;
+		else
+			is_unmount = 0;
+
+		if (*(rl_line_buffer + 4) == 'm' && (*(rl_line_buffer + 5) == ' '
+		|| strncmp(rl_line_buffer + 5, "ount ", 5) == 0))
+			is_mount = 1;
+		else
+			is_mount = 0;
 	}
 
 	while ((name = remotes[i++].name) != NULL) {
 		if (conf.case_sens_path_comp ? strncmp(name, text, len)
-		: strncasecmp(name, text, len) == 0)
-			return strdup(name);
+		: strncasecmp(name, text, len) == 0) {
+			if (is_unmount == 1) { /* List only mounted resources */
+				if (i > 0 && remotes[i - 1].mounted == 1)
+					return strdup(name);
+			} else if (is_mount == 1) { /* List only unmounted resources */
+				if (i > 0 && remotes[i - 1].mounted == 0)
+					return strdup(name);
+			} else {
+				return strdup(name);
+			}
+		}
 	}
 
 	return (char *)NULL;
