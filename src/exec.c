@@ -2735,8 +2735,9 @@ run_chained_cmd(char **cmd, size_t *err_code)
 			free(alias_cmd[i]);
 		free(alias_cmd);
 	} else {
-		if (exec_cmd(cmd) != 0)
+		if ((flags & FAILED_ALIAS) || exec_cmd(cmd) != 0)
 			*err_code = 1;
+		flags &= ~FAILED_ALIAS;
 		for (i = 0; i <= args_n; i++)
 			free(cmd[i]);
 		free(cmd);

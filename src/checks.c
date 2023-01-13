@@ -43,6 +43,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#if defined(LINUX_FILE_ATTRS)
+# include <linux/fs.h> // FS_IMMUTABLE_FL
+# include <sys/ioctl.h> // ioctl(3)
+# include <fcntl.h> // O_RDONLY
+#endif /* LINUX_FILE_ATTRS */
+
 #include "aux.h"
 #include "misc.h"
 #include "term_info.h"
@@ -405,31 +411,31 @@ get_sudo_path(void)
 int
 check_immutable_bit(char *file)
 {
+	if (!file || !*file)
+		return (-1);
+
 #if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
-	UNUSED(file);
 	return 0;
 #else
-	int attr, fd, immut_flag = -1;
+	int attr = 0, fd;
 
 	fd = open(file, O_RDONLY);
 	if (fd == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
-		return -1;
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "open: %s: %s\n", file, strerror(errno));
+		return (-1);
 	}
 
-	ioctl(fd, FS_IOC_GETFLAGS, &attr);
-	if (attr & FS_IMMUTABLE_FL)
-		immut_flag = 1;
-	else
-		immut_flag = 0;
-
+	int ret = ioctl(fd, FS_IOC_GETFLAGS, &attr);
+	int saved_errno = errno;
 	close(fd);
 
-	if (immut_flag)
-		return 1;
+	if (ret == -1) {
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "ioctl: %s: %s\n", file, strerror(saved_errno));
+		return (-1);
+	}
 
-	return 0;
-#endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
+	return (attr & FS_IMMUTABLE_FL) ? 1 : 0;
+#endif /* !FS_IOC_GETFLAGS || !FS_IMMUTABLE_FL */
 }
 
 /* Return 1 if FILE has some ACL property and zero if none
@@ -437,12 +443,12 @@ check_immutable_bit(char *file)
 int
 is_acl(char *file)
 {
-#ifndef _ACL_OK
-	UNUSED(file);
-	return 0;
-#else
 	if (!file || !*file)
 		return 0;
+
+#ifndef _ACL_OK
+	return 0;
+#else
 
 	acl_t acl;
 	acl = acl_get_file(file, ACL_TYPE_ACCESS);
@@ -463,10 +469,12 @@ is_acl(char *file)
 
 	/* If num > 3 we have something else besides owner, group, and others,
 	 * that is, we have at least one ACL property */
-	if (num > 3)
+	return (num > 3 ? 1 : 0);
+
+/*	if (num > 3)
 		return 1;
 
-	return 0;
+	return 0; */
 #endif /* _ACL_OK */
 }
 
@@ -824,8 +832,10 @@ check_for_alias(char **args)
 		char **alias_comm = parse_input_str(aliases[i].cmd);
 		if (!alias_comm) {
 			args_n = 0;
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error parsing aliased command\n"),
-				PROGRAM_NAME);
+			/* The error message should have been printed by parse_input_str()
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Aliased command exited with error\n"),
+				PROGRAM_NAME); */
+			flags |= FAILED_ALIAS; /* Prevent exec_cmd() from being executed */
 			return (char **)NULL;
 		}
 

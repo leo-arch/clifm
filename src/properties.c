@@ -45,6 +45,11 @@
 # include <inttypes.h> /* uintmax_t, intmax_t */
 #endif
 
+#if defined(LINUX_FILE_ATTRS)
+# include <sys/ioctl.h> // ioctl(3)
+# include <linux/fs.h> // FS_XXX_FL flags
+#endif /* LINUX_FILE_ATTRS */
+
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -99,6 +104,79 @@ struct perms_t {
 	char pad3;
 	int pad4;
 };
+
+#if defined(LINUX_FILE_ATTRS)
+/* Print file attributes as lsattr(1) would.
+ * Bits order as listed by lsattr(1): suSDiadAcEjItTeCxFNPVm
+ * See https://git.kernel.org/pub/scm/fs/ext2/e2fsprogs.git/tree/lib/e2p/pf.c
+ * Used flags are defined in linux/fs.h */
+static int
+print_file_attrs(const int aflags)
+{
+	if (aflags == -1) {
+		printf("unavailable");
+		return EXIT_FAILURE;
+	}
+
+	char bits[23];
+	char c = '-';
+
+	bits[0] = (aflags & FS_SECRM_FL) ? 's' : c;
+	bits[1] = (aflags & FS_UNRM_FL) ? 'u' : c;
+	bits[2] = (aflags & FS_SYNC_FL) ? 'S' : c;
+	bits[3] = (aflags & FS_DIRSYNC_FL) ? 'D' : c;
+	bits[4] = (aflags & FS_IMMUTABLE_FL) ? 'i' : c;
+	bits[5] = (aflags & FS_APPEND_FL) ? 'a' : c;
+	bits[6] = (aflags & FS_NODUMP_FL) ? 'd' : c;
+	bits[7] = (aflags & FS_NOATIME_FL) ? 'A' : c;
+	bits[8] = (aflags & FS_COMPR_FL) ? 'c' : c;
+	bits[9] = (aflags & FS_ENCRYPT_FL) ? 'E' : c;
+	bits[10] = (aflags & FS_JOURNAL_DATA_FL) ? 'j' : c;
+	bits[11] = (aflags & FS_INDEX_FL) ? 'I' : c;
+	bits[12] = (aflags & FS_NOTAIL_FL) ? 't' : c;
+	bits[13] = (aflags & FS_TOPDIR_FL) ? 'T' : c;
+	bits[14] = (aflags & FS_EXTENT_FL) ? 'e' : c;
+	bits[15] = (aflags & FS_NOCOW_FL) ? 'C' : c;
+	bits[16] = (aflags & FS_DAX_FL) ? 'x' : c;
+	bits[17] = (aflags & FS_CASEFOLD_FL) ? 'F' : c;
+	bits[18] = (aflags & FS_INLINE_DATA_FL) ? 'N' : c;
+	bits[19] = (aflags & FS_PROJINHERIT_FL) ? 'P' : c;
+	bits[20] = (aflags & FS_VERITY_FL) ? 'V' : c;
+	bits[21] = (aflags & FS_NOCOMP_FL) ? 'm' : c;
+	bits[22] = '\0';
+
+	printf("%s", bits);
+
+	return EXIT_SUCCESS;
+}
+
+static int
+get_file_attrs(char *file)
+{
+#if !defined(FS_IOC_GETFLAGS)
+	UNUSED(file);
+	return (-1);
+#else
+	int attr, fd, ret = 0;
+
+	struct stat a;
+	if (lstat(file, &a) == -1 || (!S_ISDIR(a.st_mode) && !S_ISREG(a.st_mode)))
+		return (-1);
+
+	fd = open(file, O_RDONLY);
+	if (fd == -1)
+		return (-1);
+
+	ret = ioctl(fd, FS_IOC_GETFLAGS, &attr);
+	close(fd);
+
+	if (ret == -1)
+		return (-1);
+
+	return attr;
+#endif /* !FS_IOC_GETFLAGS */
+}
+#endif /* LINUX_FILE_ATTRS */
 
 static char *
 get_link_color(char *name, int *link_dir, const int dsize)
@@ -887,6 +965,12 @@ get_properties(char *filename, const int dsize)
 			: owner->pw_name, cend);
 	printf(_("\tGid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("unknown")
 			: group->gr_name, cend);
+
+#if defined(LINUX_FILE_ATTRS)
+	printf("Attributes: \t");
+	print_file_attrs(get_file_attrs(filename));
+	putchar('\n');
+#endif /* LINUX_FILE_ATTRS */
 
 	/* Timestamps */
 	char mod_time[MAX_TIME_STR];

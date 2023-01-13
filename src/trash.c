@@ -212,8 +212,7 @@ wx_parent_check(char *file)
 		ret = check_immutable_bit(file);
 
 		if (ret == -1) {
-			/* Error message is printed by check_immutable_bit()
-			 * itself */
+			/* Error message is printed by check_immutable_bit() itself */
 			exit_status = EXIT_FAILURE;
 		} else if (ret == 1) {
 			fprintf(stderr, _("%s: File is immutable\n"), file);

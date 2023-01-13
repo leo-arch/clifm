@@ -557,9 +557,10 @@ exec_hist_cmd(char **cmd)
 		free(alias_cmd);
 		alias_cmd = (char **)NULL;
 	} else {
-		if (exec_cmd(cmd) != 0)
+		if ((flags & FAILED_ALIAS) || exec_cmd(cmd) != 0)
 			exit_status = EXIT_FAILURE;
 
+		flags &= ~FAILED_ALIAS;
 		for (i = 0; cmd[i]; i++)
 			free(cmd[i]);
 		free(cmd);

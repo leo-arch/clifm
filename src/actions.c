@@ -211,11 +211,11 @@ run_action(char *action, char **args)
 	if (buf_len > 0 && buf[buf_len - 1] == '\n')
 		buf[buf_len - 1] = '\0';
 
-	/* If a valid file */
 	struct stat attr;
-	if (lstat(buf, &attr) != -1) {
+	if (lstat(buf, &attr) != -1) { /* If a valid file, open it */
 		char *o_cmd[] = {"o", buf, NULL};
 		exit_status = open_function(o_cmd);
+
 	} else { /* If not a file, take it as a command*/
 		size_t old_args = args_n;
 		args_n = 0;
@@ -230,7 +230,9 @@ run_action(char *action, char **args)
 					free(alias_cmd[i]);
 				free(alias_cmd);
 			} else {
-				exit_status = exec_cmd(_cmd);
+				if (!(flags & FAILED_ALIAS))
+					exit_status = exec_cmd(_cmd);
+				flags &= ~FAILED_ALIAS;
 				for (i = 0; i <= args_n; i++)
 					free(_cmd[i]);
 				free(_cmd);

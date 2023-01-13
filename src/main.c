@@ -815,7 +815,10 @@ run_main_loop(void)
 			continue;
 		}
 
-		exec_cmd(cmd);
+		if (!(flags & FAILED_ALIAS))
+			exec_cmd(cmd);
+		flags &= ~FAILED_ALIAS;
+
 		i = (int)args_n + 1;
 		while (--i >= 0)
 			free(cmd[i]);

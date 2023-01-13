@@ -169,6 +169,12 @@ void *__dso_handle;
 # endif /* LINUX_VERSION (2.6.24)*/
 #endif /* __linux__ */
 
+// NOT SURE ABOUT TERMUX AND CYGWIN. CHECK!!!
+#if defined(__linux__) && !defined(_BE_POSIX) && !defined(__TERMUX__) \
+&& !defined(__CYGWIN__)
+# define LINUX_FILE_ATTRS
+#endif
+
 /* Event handling */
 #if defined(LINUX_INOTIFY)
 # define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
@@ -214,6 +220,7 @@ extern int watch;
 #define PREVIEWER           (1 << 11)
 #define KITTY_TERM          (1 << 12)
 #define NO_FIX_RL_POINT     (1 << 13)
+#define FAILED_ALIAS        (1 << 14)
 
 /* Flags for finder binaries */
 #define FZF_BIN_OK    (1 << 0)
