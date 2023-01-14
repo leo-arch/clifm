@@ -114,7 +114,7 @@ static int
 print_file_attrs(const int aflags)
 {
 	if (aflags == -1) {
-		printf("unavailable");
+		printf("Unavailable\n");
 		return EXIT_FAILURE;
 	}
 
@@ -145,7 +145,7 @@ print_file_attrs(const int aflags)
 	bits[21] = (aflags & FS_NOCOMP_FL) ? 'm' : c;
 	bits[22] = '\0';
 
-	printf("%s", bits);
+	puts(bits);
 
 	return EXIT_SUCCESS;
 }
@@ -969,7 +969,6 @@ get_properties(char *filename, const int dsize)
 #if defined(LINUX_FILE_ATTRS)
 	printf("Attributes: \t");
 	print_file_attrs(get_file_attrs(filename));
-	putchar('\n');
 #endif /* LINUX_FILE_ATTRS */
 
 	/* Timestamps */

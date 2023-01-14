@@ -830,7 +830,7 @@ static inline void
 check_cpu_os(void)
 {
 	/* Though this program might perfectly work on other architectures,
-	 * I just didn't test anything beyond x86 and ARM */
+	 * Nothing beyond x86 and ARM has been tested */
 #if !defined(__x86_64__) && !defined(__i386__) && !defined(__ARM_ARCH)
 	fprintf(stderr, _("%s: Unsupported CPU architecture\n"), PROGRAM_NAME);
 	exit(EXIT_FAILURE);
@@ -920,8 +920,8 @@ check_working_shell(void)
 {
 	if (access(user.shell, X_OK) == -1) {
 		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. "
-				"Please edit the configuration file to specify a working "
-				"shell.\n"), PROGRAM_NAME, user.shell);
+			"Please edit the configuration file to specify a working "
+			"shell.\n"), PROGRAM_NAME, user.shell);
 	}
 }
 

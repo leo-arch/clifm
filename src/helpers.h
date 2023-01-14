@@ -169,7 +169,7 @@ void *__dso_handle;
 # endif /* LINUX_VERSION (2.6.24)*/
 #endif /* __linux__ */
 
-// NOT SURE ABOUT TERMUX AND CYGWIN. CHECK!!!
+// NOT SUPPORTED ON TERMUX. NOT SURE ABOUT CYGWIN. CHECK.
 #if defined(__linux__) && !defined(_BE_POSIX) && !defined(__TERMUX__) \
 && !defined(__CYGWIN__)
 # define LINUX_FILE_ATTRS

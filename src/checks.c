@@ -807,7 +807,6 @@ check_for_alias(char **args)
 	if (aliases_n == 0 || !aliases || !args || flags & FIRST_WORD_IS_ELN)
 		return (char **)NULL;
 
-	int i;
 	if (conf.autocd == 1 || conf.auto_open == 1) {
 		/* Do not expand alias is first word is a file name in CWD */
 		struct stat a;
@@ -816,7 +815,7 @@ check_for_alias(char **args)
 			return (char **)NULL;
 	}
 
-	i = (int)aliases_n;
+	int i = (int)aliases_n;
 
 	while (--i >= 0) {
 		if (!aliases[i].name || !aliases[i].cmd || !*aliases[i].name
@@ -831,10 +830,11 @@ check_for_alias(char **args)
 		/* Parse the aliased cmd */
 		char **alias_comm = parse_input_str(aliases[i].cmd);
 		if (!alias_comm) {
-			args_n = 0;
+//			args_n = 0;
 			/* The error message should have been printed by parse_input_str()
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Aliased command exited with error\n"),
 				PROGRAM_NAME); */
+
 			flags |= FAILED_ALIAS; /* Prevent exec_cmd() from being executed */
 			return (char **)NULL;
 		}
