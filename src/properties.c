@@ -831,7 +831,8 @@ get_properties(char *filename, const int dsize)
 		 *cbold = BOLD,    /* Just bold */
 		 *cend = df_c;     /* Ending olor */
 
-	if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 1)
+	int file_perm = check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
+	if (file_perm == 1)
 		cid = dg_c;
 
 	switch (attr.st_mode & S_IFMT) {
@@ -1013,12 +1014,16 @@ get_properties(char *filename, const int dsize)
 	if (dsize == 0)
 		goto END;
 
-	off_t total_size = get_total_size(link_to_dir, filename);
+	off_t total_size = file_perm == 1 ? get_total_size(link_to_dir, filename) : -2;
 
 	if (S_ISDIR(attr.st_mode) && attr.st_nlink == 2 && total_size == 4)
 		total_size = 0; /* Empty directory */
-	if (total_size == -1) {
-		puts("?");
+
+	if (total_size < 0) {
+		if (total_size == -2) /* No access */
+			printf("Total size: \t%s-%s\n", dn_c, cend);
+		else /* get_total_size returned error (-1) */
+			puts("Total size: \t?");
 		goto END;
 	}
 
@@ -1074,7 +1079,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		 *csize = props->dir ? dz_c : df_c, /* Directories size */
 		 *cend = df_c;  /* Ending Color */
 
-	if (check_file_access(props->mode, props->uid, props->gid) == 1)
+	int file_perm = check_file_access(props->mode, props->uid, props->gid);
+	if (file_perm == 1)
 		cid = dg_c;
 
 	switch (props->mode & S_IFMT) {
@@ -1241,17 +1247,21 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	if (prop_fields.size >= 1) {
 		if (!(S_ISCHR(props->mode) || S_ISBLK(props->mode))
 		|| xargs.disk_usage_analyzer == 1) {
-			if (prop_fields.size == PROP_SIZE_HUMAN) {
-				if (props->dir == 1 && conf.full_dir_size == 1)
-					size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
-				else
-					size_type = get_size_unit(props->size);
-
-				snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
-					? size_type : "?", cend);
+			if (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1) {
+				snprintf(size_s, sizeof(size_s), "%s-%s", dn_c, cend);
 			} else {
-				snprintf(size_s, sizeof(size_s), "%s%*ju%s", csize,
-					(int)size_max, (uintmax_t)props->size, cend);
+				if (prop_fields.size == PROP_SIZE_HUMAN) {
+					if (props->dir == 1 && conf.full_dir_size == 1)
+						size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
+					else
+						size_type = get_size_unit(props->size);
+
+					snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
+						? size_type : "?", cend);
+				} else {
+					snprintf(size_s, sizeof(size_s), "%s%*ju%s", csize,
+						(int)size_max, (uintmax_t)props->size, cend);
+				}
 			}
 		} else {
 			snprintf(size_s, sizeof(size_s), "%ju,%ju", (uintmax_t)major(props->rdev),
@@ -1352,8 +1362,8 @@ properties_function(char **args)
 				continue;
 			}
 
-			strcpy(args[i], deq_file);
-			free(deq_file);
+			free(args[i]);
+			args[i] = deq_file;
 		}
 
 		if (get_properties(args[i], _dir_size) != 0)
