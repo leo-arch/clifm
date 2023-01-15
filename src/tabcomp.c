@@ -2226,6 +2226,7 @@ DISPLAY_MATCHES:
 			if (exp_path) {
 				xchdir(exp_path, NO_TITLE);
 				free(exp_path);
+				did_chdir = 1;
 			}
 		} else {
 			char *dir = matches[0];
