@@ -527,18 +527,31 @@ __export(char *arg)
 {
 	if (!arg || !*arg)
 		return (-1);
-	char *p = strchr(arg, '=');
-	if (!p || !*(p + 1))
+
+	/* ARG might have been escaped by parse_input_str(), in the command
+	 * and parameter substitution block. Let's deescape it */
+	char *ds = dequote_str(arg, 0);
+	if (!ds) {
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error dequoting argument\n"), PNL);
 		return (-1);
+	}
+
+	char *p = strchr(ds, '=');
+	if (!p || !*(p + 1)) {
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Empty assignement\n"), PNL, ds);
+		free(ds);
+		return (-1);
+	}
 
 	errno = 0;
 
 	*p = '\0';
-	int ret = setenv(arg, p + 1, 1);
+	int ret = setenv(ds, p + 1, 1);
 	if (ret == -1)
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 	*p = '=';
 
+	free(ds);
 	return errno;
 }
 
