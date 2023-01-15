@@ -1021,9 +1021,9 @@ get_properties(char *filename, const int dsize)
 
 	if (total_size < 0) {
 		if (total_size == -2) /* No access */
-			printf("Total size: \t%s-%s\n", dn_c, cend);
+			printf(_("Total size: \t%s-%s\n"), dn_c, cend);
 		else /* get_total_size returned error (-1) */
-			puts("Total size: \t?");
+			puts("?");
 		goto END;
 	}
 
