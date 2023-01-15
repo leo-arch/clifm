@@ -1339,6 +1339,181 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	return d;
 }
 
+/* Expand the ELN at SUBSTR[I] into the corresponding file name */
+static int
+eln_expand(char ***substr, const size_t i)
+{
+	int num = atoi((*substr)[i]);
+	/* Because of __expand_eln(), which is called immediately before this
+	 * function, it is guaranteed that NUM won't over/under-flow J:
+	 * NUM is > 0 and <= the amount of listed files (and this latter is
+	 * never greater than INT_MAX) */
+	int j = num - 1;
+	char *esc_str = escape_str(file_info[j].name);
+
+	if (!esc_str) {
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting file name\n"),
+			PROGRAM_NAME, file_info[num - 1].name);
+
+		/* Free whatever was allocated thus far */
+		for (j = 0; j <= (int)args_n; j++)
+			free((*substr)[j]);
+		free(*substr);
+
+		return EXIT_FAILURE;
+	}
+
+	if (i == 0)
+		flags |= FIRST_WORD_IS_ELN;
+
+	/* Replace the ELN by the corresponding escaped file name */
+	if (file_info[j].type == DT_DIR && file_info[j].name[file_info[j].len > 0
+	? file_info[j].len - 1 : 0] != '/') {
+		(*substr)[i] = (char *)xrealloc((*substr)[i], (strlen(esc_str) + 2) * sizeof(char));
+		sprintf((*substr)[i], "%s/", esc_str);
+		free(esc_str);
+	} else {
+		free((*substr)[i]);
+		(*substr)[i] = esc_str;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+/* Expand the 'sel' keyword in SUBSTR by all selected files */
+static int
+expand_sel(char ***substr)
+{
+	size_t i = 0;
+
+	if (sel_n == 0) {
+		/* 'sel' is an argument, but there are no selected files */
+		fprintf(stderr, _("%c%s: No selected files%c"),
+			/* rl_dispatching equals one if coming from a keybind */
+			rl_dispatching == 1 ? '\n' : '\0', PROGRAM_NAME,
+			rl_dispatching == 1 ? '\0' : '\n');
+
+		for (i = 0; i <= args_n; i++)
+			free((*substr)[i]);
+		free(*substr);
+		*substr = (char **)NULL;
+
+		return EXIT_FAILURE;
+	}
+
+	size_t j = 0;
+	char **sel_array = (char **)xnmalloc(args_n + sel_n + 2, sizeof(char *));
+
+	/* 1. Copy all words before 'sel' */
+	for (i = 0; i < (size_t)is_sel; i++) {
+		if (!(*substr)[i])
+			continue;
+		sel_array[j] = savestring((*substr)[i], strlen((*substr)[i]));
+		j++;
+	}
+
+	/* 2. Add all selected files (in place of 'sel') */
+	for (i = 0; i < sel_n; i++) {
+		/* Escape selected file names and copy them into tmp array */
+		char *esc_str = escape_str(sel_elements[i].name);
+		if (!esc_str) {
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting file name\n"),
+			    PROGRAM_NAME, sel_elements[j].name);
+			/* Free elements selected thus far and all the input substrings */
+			size_t k = 0;
+			for (k = 0; k < j; k++)
+				free(sel_array[k]);
+			free(sel_array);
+
+			for (k = 0; k <= args_n; k++)
+				free((*substr)[k]);
+			free(*substr);
+			*substr = (char **)NULL;
+
+			return EXIT_FAILURE;
+		}
+
+		sel_array[j] = esc_str;
+		j++;
+	}
+
+	/* 3. Add words after 'sel' as well */
+	for (i = (size_t)is_sel + 1; i <= args_n; i++) {
+		sel_array[j] = savestring((*substr)[i], strlen((*substr)[i]));
+		j++;
+	}
+
+	sel_array[j] = (char *)NULL;
+
+	/* 4. Free the original input string and replace by the new sel_array */
+	for (i = 0; i <= args_n; i++)
+		free((*substr)[i]);
+	free(*substr);
+
+	(*substr) = sel_array;
+
+	args_n = j - 1;
+
+	return EXIT_SUCCESS;
+}
+
+/* Expand the bookmark name NAME into the corresponding bookmark path.
+ * Return EXIT_SUCCESS if the expansion took place or EXIT_FAILURE otherwise */
+static int
+expand_bm_name(char **name)
+{
+	size_t j;
+	int bm_exp = EXIT_FAILURE;
+	char *p = dequote_str(*name, 0);
+	char *n = p ? p : *name;
+
+	for (j = 0; j < bm_n; j++) {
+		if (!bookmarks[j].name || *n != *bookmarks[j].name
+		|| strcmp(n, bookmarks[j].name) != 0)
+			continue;
+
+		/* Do not expand bookmark names that conflicts with a file name in CWD */
+		int conflict = 0, k = (int)files;
+		while (--k >= 0) {
+			if (*bookmarks[j].name == *file_info[k].name
+			&& strcmp(bookmarks[j].name, file_info[k].name) == 0) {
+				conflict = 1;
+				break;
+			}
+		}
+
+		if (conflict == 1 || !bookmarks[j].path)
+			break;
+
+		*name = (char *)xrealloc(*name, (strlen(bookmarks[j].path) + 1) * sizeof(char));
+		strcpy(*name, bookmarks[j].path);
+		bm_exp = EXIT_SUCCESS;
+
+		break;
+	}
+
+	free(p);
+	return bm_exp;
+}
+
+/* Expand internal variable name NAME into its value */
+static void
+expand_int_var(char **name)
+{
+	char *var_name = (*name) + 1;
+
+	int j = (int)usrvar_n;
+	while (--j >= 0) {
+		if (*var_name != *usr_var[j].name
+		|| strcmp(var_name, usr_var[j].name) != 0 || !usr_var[j].value)
+			continue;
+
+		*name = (char *)xrealloc(*name, (strlen(usr_var[j].value) + 1) * sizeof(char));
+		strcpy(*name, usr_var[j].value);
+		break;
+	}
+}
+
 /* THIS IS A QUITE SHITTY FUNCTION, I KNOW. PLEASE REFACTOR IT!!!
  *
  * This function is one of the keys of CliFM. It will perform a series of
@@ -1474,12 +1649,12 @@ parse_input_str(char *str)
 	 * is internal, take care of the job (the system shell does not know
 	 * our internal commands and therefore cannot execute them); else,
 	 * if no internal command is found, let it to the system shell */
-	if (chaining || cond_cmd) {
+	if (chaining == 1 || cond_cmd == 1) {
 		/* User defined variables are always internal, so that there is
 		 * no need to check whatever else is in the command string */
 		if (flags & IS_USRVAR_DEF) {
 			exec_chained_cmds(str);
-			if (fusedcmd_ok)
+			if (fusedcmd_ok == 1)
 				free(str);
 			return (char **)NULL;
 		}
@@ -1512,15 +1687,15 @@ parse_input_str(char *str)
 		free(buf);
 		buf = (char *)NULL;
 
-		if (internal_ok) {
+		if (internal_ok == 1) {
 			exec_chained_cmds(str);
-			if (fusedcmd_ok)
+			if (fusedcmd_ok == 1)
 				free(str);
 			return (char **)NULL;
 		}
 	}
 
-	if (flags & IS_USRVAR_DEF || send_shell) {
+	if (flags & IS_USRVAR_DEF || send_shell == 1) {
 		/* Remove leading spaces, again */
 		char *p = str;
 		while (*p == ' ' || *p == '\t')
@@ -1528,14 +1703,13 @@ parse_input_str(char *str)
 
 		args_n = 0;
 
-		char **cmd = (char **)NULL;
-		cmd = (char **)xnmalloc(2, sizeof(char *));
+		char **cmd = (char **)xnmalloc(2, sizeof(char *));
 		cmd[0] = savestring(p, strlen(p));
 		cmd[1] = (char *)NULL;
 
 		p = (char *)NULL;
 
-		if (fusedcmd_ok)
+		if (fusedcmd_ok == 1)
 			free(str);
 
 		return cmd;
@@ -1554,7 +1728,7 @@ parse_input_str(char *str)
 	char **substr = split_str(str, UPDATE_ARGS);
 
 	/** ###################### */
-	if (fusedcmd_ok) /* Just in case split_fusedcmd returned NULL */
+	if (fusedcmd_ok == 1) /* Just in case split_fusedcmd returned NULL */
 		free(str);
 	/** ###################### */
 
@@ -1660,47 +1834,18 @@ parse_input_str(char *str)
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
 			substr[i] = (char *)xrealloc(substr[i], (strlen(pinned_dir) + 1)
-						* sizeof(char));
+					* sizeof(char));
 			strcpy(substr[i], pinned_dir);
 		}
 
 			/* ######################################
-			 * #      2.c) BOOKMARKS EXPANSION      #
+			 * #   2.c) BOOKMARK NAMES EXPANSION    #
 			 * ###################################### */
 
-		/* Expand bookmark names into paths */
-		if (conf.expand_bookmarks) {
-			int bm_exp = 0;
-
-			for (j = 0; j < bm_n; j++) {
-				if (bookmarks[j].name && *substr[i] == *bookmarks[j].name
-				&& strcmp(substr[i], bookmarks[j].name) == 0) {
-
-					/* Do not expand bookmark names that conflicts
-					 * with a file name in CWD */
-					int conflict = 0, k = (int)files;
-					while (--k >= 0) {
-						if (*bookmarks[j].name == *file_info[k].name
-						&& strcmp(bookmarks[j].name, file_info[k].name) == 0) {
-							conflict = 1;
-							break;
-						}
-					}
-
-					if (!conflict && bookmarks[j].path) {
-						substr[i] = (char *)xrealloc(substr[i],
-						    (strlen(bookmarks[j].path) + 1) * sizeof(char));
-						strcpy(substr[i], bookmarks[j].path);
-
-						bm_exp = 1;
-
-						break;
-					}
-				}
-			}
-
+		/* Expand bookmark names into the corresponding paths */
+		if (conf.expand_bookmarks == 1) {
 			/* Do not perform further checks on the expanded bookmark */
-			if (bm_exp)
+			if (expand_bm_name(&substr[i]) == EXIT_SUCCESS)
 				continue;
 		}
 
@@ -1725,9 +1870,8 @@ parse_input_str(char *str)
 			}
 		}
 
-		/* Expand 'sel' only as an argument, not as command */
+		/* Expand 'sel' only as argument, not as command */
 		if (i > 0 && *substr[i] == 's' && strcmp(substr[i], "sel") == 0)
-//			is_sel = (short)i;
 			is_sel = (int)i;
 	}
 
@@ -1738,7 +1882,7 @@ parse_input_str(char *str)
 	/* Expand expressions like "1-3" to "1 2 3" if all the numbers in
 	  * the range correspond to an ELN */
 
-	if (ranges_ok) {
+	if (ranges_ok > 0) {
 		size_t old_ranges_n = 0;
 		size_t r = 0;
 
@@ -1773,22 +1917,14 @@ parse_input_str(char *str)
 					j++;
 				}
 
-				ranges_cmd[j] = NULL;
+				ranges_cmd[j] = (char *)NULL;
 				free(ranges);
 
 				for (i = 0; i <= args_n; i++)
 					free(substr[i]);
+				free(substr);
 
-				substr = (char **)xrealloc(substr, (args_n + ranges_n + 2)
-							* sizeof(char *));
-
-				for (i = 0; i < j; i++) {
-					substr[i] = savestring(ranges_cmd[i], strlen(ranges_cmd[i]));
-					free(ranges_cmd[i]);
-				}
-				substr[i] = (char *)NULL;
-
-				free(ranges_cmd);
+				substr = ranges_cmd;
 				args_n = j - 1;
 			}
 
@@ -1803,83 +1939,15 @@ parse_input_str(char *str)
 				 * ##########################*/
 
 	/*  if (is_sel && *substr[0] != '/') { */
-	if (is_sel) {
+	if (is_sel > 0) {
 		if ((size_t)is_sel == args_n)
 			sel_is_last = 1;
 
-		if (sel_n) {
-			size_t j = 0;
-			char **sel_array = (char **)NULL;
-			sel_array = (char **)xnmalloc(args_n + sel_n + 2, sizeof(char *));
-
-			for (i = 0; i < (size_t)is_sel; i++) {
-				if (!substr[i])
-					continue;
-				sel_array[j] = savestring(substr[i], strlen(substr[i]));
-				j++;
-			}
-
-			for (i = 0; i < sel_n; i++) {
-				/* Escape selected file names and copy them into tmp array */
-				char *esc_str = escape_str(sel_elements[i].name);
-				if (esc_str) {
-					sel_array[j] = savestring(esc_str, strlen(esc_str));
-					j++;
-					free(esc_str);
-					esc_str = (char *)NULL;
-				} else {
-					_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting file name\n"),
-					    PROGRAM_NAME, sel_elements[j].name); 
-					/* Free elements selected thus far and all the
-					 * input substrings */
-					size_t k = 0;
-					for (k = 0; k < j; k++)
-						free(sel_array[k]);
-					free(sel_array);
-
-					for (k = 0; k <= args_n; k++)
-						free(substr[k]);
-					free(substr);
-
-					return (char **)NULL;
-				}
-			}
-
-			for (i = (size_t)is_sel + 1; i <= args_n; i++) {
-				sel_array[j] = savestring(substr[i], strlen(substr[i]));
-				j++;
-			}
-
-			for (i = 0; i <= args_n; i++)
-				free(substr[i]);
-
-			substr = (char **)xrealloc(substr, (args_n + sel_n + 2) * sizeof(char *));
-
-			for (i = 0; i < j; i++) {
-				substr[i] = savestring(sel_array[i], strlen(sel_array[i]));
-				free(sel_array[i]);
-			}
-
-			free(sel_array);
-			substr[i] = (char *)NULL;
-			args_n = j - 1;
-		}
-
-		else {
-			/* 'sel' is an argument, but there are no selected files. */
-			fprintf(stderr, _("%c%s: No selected files%c"),
-				/* rl_dispatching equals one if coming from a keybind */
-			    rl_dispatching == 1 ? '\n' : '\0', PROGRAM_NAME,
-			    rl_dispatching == 1 ? '\0' : '\n');
-
-			size_t j = 0;
-			for (j = 0; j <= args_n; j++)
-				free(substr[j]);
-			free(substr);
-
+		if (expand_sel(&substr) == EXIT_FAILURE)
 			return (char **)NULL;
-		}
 	}
+
+		/* ############################################# */
 
 	int stdin_dir_ok = 0;
 	if (stdin_tmp_dir && strcmp(workspaces[cur_ws].path, stdin_tmp_dir) == 0)
@@ -1894,64 +1962,18 @@ parse_input_str(char *str)
 				 * ########################## */
 
 		if (__expand_eln(substr[i]) == 1) {
-			int num = atoi(substr[i]);
-			int j = num - 1;
-			char *esc_str = escape_str(file_info[j].name);
-			if (!esc_str) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting file name\n"),
-					PROGRAM_NAME, file_info[num - 1].name);
-				/* Free whatever was allocated thus far */
-				for (j = 0; j <= (int)args_n; j++)
-					free(substr[j]);
-				free(substr);
+			if (eln_expand(&substr, i) == EXIT_FAILURE)
 				return (char **)NULL;
-			}
-			/* Replace the ELN by the corresponding escaped file name */
-			if (i == 0)
-				flags |= FIRST_WORD_IS_ELN;
-			if (file_info[j].type == DT_DIR &&
-			file_info[j].name[file_info[j].len > 0
-			? file_info[j].len - 1 : 0] != '/') {
-				substr[i] = (char *)xrealloc(substr[i],
-				    (strlen(esc_str) + 2) * sizeof(char));
-				sprintf(substr[i], "%s/", esc_str);
-			} else {
-				substr[i] = (char *)xrealloc(substr[i],
-				    (strlen(esc_str) + 1) * sizeof(char));
-				strcpy(substr[i], esc_str);
-			}
-			free(esc_str);
-			esc_str = (char *)NULL;
 		}
 
 		/* #############################################
 		 * #   2.g) USER DEFINED VARIABLES EXPANSION   #
 		 * #############################################*/
 
-		if (int_vars) {
-			if (substr[i][0] == '$' && substr[i][1] != '(' && substr[i][1] != '{') {
-				char *var_name = strchr(substr[i], '$');
-				if (var_name && *(++var_name)) {
-					int j = (int)usrvar_n;
-					while (--j >= 0) {
-						if (*var_name == *usr_var[j].name
-						&& strcmp(var_name, usr_var[j].name) == 0) {
-							substr[i] = (char *)xrealloc(substr[i],
-								(strlen(usr_var[j].value) + 1) * sizeof(char));
-							strcpy(substr[i], usr_var[j].value);
-							break;
-						}
-					}
-				} else {
-					_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error "
-						"getting variable name\n"), PROGRAM_NAME, substr[i]);
-					size_t j;
-					for (j = 0; j <= args_n; j++)
-						free(substr[j]);
-					free(substr);
-					return (char **)NULL;
-				}
-			}
+		if (int_vars && usrvar_n > 0) {
+			if (substr[i][0] == '$' && substr[i][1] && substr[i][1] != '('
+			&& substr[i][1] != '{')
+				expand_int_var(&substr[i]);
 		}
 
 				/* ###############################
@@ -1963,6 +1985,18 @@ parse_input_str(char *str)
 			if (p) {
 				substr[i] = (char *)xrealloc(substr[i], (strlen(p) + 1) * sizeof(char));
 				strcpy(substr[i], p);
+			}
+		}
+
+					/* ################################
+					 * #  2.i) TILDE: ~user and home  #
+					 * ################################ */
+
+		if (*substr[i] == '~') { //&& substr[i][1] && substr[i][1] != '/') {
+			char *p = tilde_expand(substr[i]);
+			if (p) {
+				free(substr[i]);
+				substr[i] = p;
 			}
 		}
 
@@ -1989,8 +2023,8 @@ parse_input_str(char *str)
 		}
 	}
 
-				/* ###############################
-				 * #     2.i) TAGS EXPANSION      #
+				/* ################################
+				 * #     2.j) TAGS EXPANSION      #
 				 * ###############################*/
 
 #ifndef _NO_TAGS
@@ -2010,20 +2044,6 @@ parse_input_str(char *str)
 		free(tag_index);
 	}
 #endif /* _NO_TAGS */
-
-				/* ###############################
-				 * #     2.j) ~USERNAME          #
-				 * ###############################*/
-
-	if (*substr[0] == '~' && substr[0][1] != '/') {
-		char *p = tilde_expand(substr[0]);
-		if (p) {
-			size_t l = strlen(p);
-			substr[0] = (char *)xrealloc(substr[0], (l + 1) * sizeof(char));
-			strcpy(substr[0], p);
-			free(p);
-		}
-	}
 
 				/* ###############################
 				 * #    2.k) FILE TYPE (=CHAR)   #
@@ -2161,10 +2181,9 @@ parse_input_str(char *str)
 	size_t old_bm = 0;
 	for (i = 0; i < bn; i++) {
 		int index = bm_array[i] + (int)old_bm;
-
 		char **p = get_bm_paths();
-
 		size_t c = 0;
+
 		if (p) {
 			char **ret = insert_fields(&substr, &p, (size_t)index, &c);
 			free(p);
@@ -2193,14 +2212,13 @@ parse_input_str(char *str)
 
 	int is_action = is_action_name(substr[0]);
 	if (is_internal(substr[0]) == 0 && is_action == 0)
-//	if (!is_internal(substr[0]) && !is_action_name(substr[0]))
 		return substr;
 
 	/* #############################################################
-	 * #         ONLY FOR INTERNAL COMMANDS OR PLUGINS             #
+	 * #         ONLY FOR INTERNAL COMMANDS AND PLUGINS            #
 	 * #############################################################*/
 
-	/* Some functions of CliFM are purely internal, that is, they are not
+	/* Some clifm functions are purely internal, that is, they are not
 	 * wrappers of a shell command and do not call the system shell at all.
 	 * For this reason, some expansions normally made by the system shell
 	 * must be made here (in the lobby [got it?]) in order to be able to
@@ -2235,7 +2253,9 @@ parse_input_str(char *str)
 		if (substr[0][0] == '/' && i == 0)
 			continue;
 
-		/* Tilde expansion is made by glob() */
+		/* Tilde expansion is also made by glob() */
+		/* NOT SURE WHETHER THIS IS NEEDED: TILDE EXPANSION WAS ALREADY
+		 * PERFORMED ABOVE VIA TILDE_EXPAND() */
 		if (*substr[i] == '~') {
 			if (glob_n < int_array_max) {
 				glob_array[glob_n] = (int)i;
@@ -2258,16 +2278,14 @@ parse_input_str(char *str)
 			}
 
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
-			/* Command substitution is made by wordexp() */
-			if (substr[i][j] == '$' && (substr[i][j + 1] == '('
-			|| substr[i][j + 1] == '{')) {
-				if (word_n < int_array_max) {
-					word_array[word_n] = (int)i;
-					word_n++;
-				}
-			}
-
-			if (substr[i][j] == '`' && substr[i][j + 1] != ' ') {
+			/* Command substitution, tilde and environment variables
+			 * expansion is made by wordexp() */
+			if ((substr[i][j] == '$' && (substr[i][j + 1] == '('
+			|| substr[i][j + 1] == '{')) // command substitution
+			|| (substr[i][j] == '`' && substr[i][j + 1] != ' ') // command substitution
+			|| substr[i][j] == '~' || substr[i][j] == '$') { // tilde and env vars expansion
+				/* Unlike glob() and tilde_expand(), wordexp() can expand tilde
+				 * and env vars even in the middle of a string. Ex: $HOME/Downloads */
 				if (word_n < int_array_max) {
 					word_array[word_n] = (int)i;
 					word_n++;
@@ -2280,7 +2298,7 @@ parse_input_str(char *str)
 	/* Do not expand if command is deselect, sel or untrash, just to
 	 * allow the use of "*" for desel and untrash ("ds *" and "u *")
 	 * and to let the sel function handle patterns itself */
-	if (glob_n && strcmp(substr[0], "s") != 0 && strcmp(substr[0], "sel") != 0
+	if (glob_n > 0 && strcmp(substr[0], "s") != 0 && strcmp(substr[0], "sel") != 0
 	&& strcmp(substr[0], "ds") != 0 && strcmp(substr[0], "desel") != 0
 	&& strcmp(substr[0], "u") != 0 && strcmp(substr[0], "undel") != 0
 	&& strcmp(substr[0], "untrash") != 0
@@ -2336,9 +2354,8 @@ parse_input_str(char *str)
 					/* Escape the globbed file name and copy it */
 					char *esc_str = escape_str(globbuf.gl_pathv[i]);
 					if (esc_str) {
-						glob_cmd[j] = savestring(esc_str, strlen(esc_str));
+						glob_cmd[j] = esc_str;
 						j++;
-						free(esc_str);
 					} else {
 						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
 							"file name\n"), PROGRAM_NAME, globbuf.gl_pathv[i]);
@@ -2384,7 +2401,7 @@ parse_input_str(char *str)
 		 * #    4) COMMAND & PARAMETER SUBSTITUTION    #
 		 * ############################################# */
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
-	if (word_n) {
+	if (word_n > 0) {
 		size_t old_pathc = 0;
 		size_t w = 0;
 		for (w = 0; w < (size_t)word_n; w++) {
@@ -2400,19 +2417,19 @@ parse_input_str(char *str)
 				char **word_cmd = (char **)NULL;
 
 				word_cmd = (char **)xcalloc(args_n + wordbuf.we_wordc + 1,
-											sizeof(char *));
+							sizeof(char *));
 
 				for (i = 0; i < ((size_t)word_array[w] + old_pathc); i++) {
 					word_cmd[j] = savestring(substr[i], strlen(substr[i]));
 					j++;
 				}
+
 				for (i = 0; i < wordbuf.we_wordc; i++) {
-					/* Escape the globbed file name and copy it*/
+					/* Escape the globbed file name and copy it */
 					char *esc_str = escape_str(wordbuf.we_wordv[i]);
 					if (esc_str) {
-						word_cmd[j] = savestring(esc_str, strlen(esc_str));
+						word_cmd[j] = esc_str;
 						j++;
-						free(esc_str);
 					} else {
 						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
 							"file name\n"), PROGRAM_NAME, wordbuf.we_wordv[i]);
@@ -2468,8 +2485,8 @@ parse_input_str(char *str)
 		 * #             5) REGEX EXPANSION            #
 		 * ############################################# */
 
-	if ((*substr[0] == 's' && (!substr[0][1] || strcmp(substr[0], "sel") == 0))
-	|| (*substr[0] == 'n' && (!substr[0][1] || strcmp(substr[0], "new") == 0)))
+	if (substr[0] && ((*substr[0] == 's' && (!substr[0][1] || strcmp(substr[0], "sel") == 0))
+	|| (*substr[0] == 'n' && (!substr[0][1] || strcmp(substr[0], "new") == 0) ) ) )
 		return substr;
 
 	/* Let's store all strings currently in substr plus REGEX expanded
@@ -2517,8 +2534,7 @@ parse_input_str(char *str)
 			if (regexec(&regex, file_info[j].name, 0, NULL, 0) != EXIT_SUCCESS)
 				continue;
 
-			/* Make sure the matching file name is not already in the
-			 * tmp array */
+			/* Make sure the matching file name is not already in the tmp array */
 			int m = (int)n, found = 0;
 			while (--m >= 0) {
 				if (*file_info[j].name == *tmp[m]
@@ -2526,7 +2542,7 @@ parse_input_str(char *str)
 					found = 1;
 			}
 
-			if (found)
+			if (found == 1)
 				continue;
 
 			tmp[n] = file_info[j].name;
@@ -2534,7 +2550,7 @@ parse_input_str(char *str)
 			reg_found = 1;
 		}
 
-		if (!reg_found) {
+		if (reg_found == 0) {
 			tmp[n] = substr[i];
 			n++;
 		}
@@ -2542,7 +2558,7 @@ parse_input_str(char *str)
 		regfree(&regex);
 	}
 
-	if (n) {
+	if (n > 0) {
 		tmp[n] = (char *)NULL;
 		char **tmp_files = (char **)xnmalloc(n + 2, sizeof(char *));
 		size_t k = 0;
