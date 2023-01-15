@@ -3034,10 +3034,12 @@ get_path_programs(void)
 			free(commands_bin[i]);
 		}
 
-		free(commands_bin);
-		free(cmd_n);
+//		free(commands_bin);
+//		free(cmd_n);
 	}
 
+	free(commands_bin);
+	free(cmd_n);
 	path_progsn = (size_t)l;
 	bin_commands[l] = (char *)NULL;
 }
