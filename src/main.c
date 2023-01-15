@@ -1006,44 +1006,6 @@ main(int argc, char *argv[])
 		exit(EINVAL);
 	}
 
-/*
-// Is bit N in X set? Returns a positive integer if true or 0 if false
-//#define true(x, n) ((x) & (1 << (n)))
-
-struct config_t {
-	uint x : 1; // 1 bit (first from right or bit 0): true (1) or false (0)
-	uint y : 2; // 2 bits (1-0). It can hold four values: 0-3
-//	uint z : 3; // 3 bits (2-1-0). Can hold 8 values: 0-7
-//	uint r : 4; // 4 bits. (3-2-1-0). Can hold 16 values: 0-15
-
-	// Padding
-	uint pad1 : 1;
-	uint pad2 : 4; // Up to here we have 8 bits == 1 byte
-	char pad3;
-	char pad4;
-	char pad5; // 3 more bytes. Total == 4 bytes
-	// We need to use at least 32 bits == 4 bytes == 1 word, to properly
-	// align the struct
-};
-
-	struct config_t conf;
-	conf.x = conf.y = 0; // init all fields to 0
-
-	conf.x = 1; // since X has only 1 bit (bit 0), only this bit is set to 1
-	printf("%s\n", conf.x == 1 ? "True" : "False");
-//	printf("%s\n", true(conf.x, 0) ? "True" : "False");
-
-	conf.x = 0; // since X has only 1 bit (bit 0), only this bit is set to 0
-	printf("%s\n", conf.x == 1 ? "True" : "False");
-//	printf("%s\n", true(conf.x, 0) ? "True" : "False");
-
-	// since Y has 2 bits (1-0), the second bit (1) is set to 1 (and the first one to 0)
-	conf.y = 3;
-	printf("%s\n", conf.y == 3 ? "True" : "False");
-//	printf("First:  %s\n", true(conf.y, 0) ? "True" : "False");
-//	printf("Second: %s\n", true(conf.y, 1) ? "True" : "False");
-*/
-
 	init_conf_struct();
 	init_filter();
 	init_msgs();
