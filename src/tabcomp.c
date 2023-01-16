@@ -1639,7 +1639,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			rl_end = rl_point;
 			prefix_len = 0;
 		} else if (cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_TAGS_F
-		|| cur_comp_type == TCMP_BM_PREFIX || cur_comp_type == TCMP_TAGS_T) {
+		|| cur_comp_type == TCMP_BM_PREFIX || cur_comp_type == TCMP_TAGS_T
+		|| cur_comp_type == TCMP_SEL) {
 			rl_delete_text(0, rl_end);
 			rl_end = rl_point = 0;
 			prefix_len = 0;
