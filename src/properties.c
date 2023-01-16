@@ -1011,7 +1011,7 @@ get_properties(char *filename, const int dsize)
 		goto END;
 	}
 
-	if (dsize == 0)
+	if (dsize == 0) /* We're running 'p', not 'pp' */
 		goto END;
 
 	off_t total_size = file_perm == 1 ? get_total_size(link_to_dir, filename) : -2;

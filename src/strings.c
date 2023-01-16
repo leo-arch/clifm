@@ -1464,8 +1464,8 @@ expand_bm_name(char **name)
 {
 	size_t j;
 	int bm_exp = EXIT_FAILURE;
-	char *p = dequote_str(*name, 0);
-	char *n = p ? p : *name;
+	char *p = dequote_str(*name + 2, 0);
+	char *n = p ? p : *name + 2;
 
 	for (j = 0; j < bm_n; j++) {
 		if (!bookmarks[j].name || *n != *bookmarks[j].name
@@ -1473,7 +1473,7 @@ expand_bm_name(char **name)
 			continue;
 
 		/* Do not expand bookmark names that conflicts with a file name in CWD */
-		int conflict = 0, k = (int)files;
+/*		int conflict = 0, k = (int)files;
 		while (--k >= 0) {
 			if (*bookmarks[j].name == *file_info[k].name
 			&& strcmp(bookmarks[j].name, file_info[k].name) == 0) {
@@ -1483,7 +1483,7 @@ expand_bm_name(char **name)
 		}
 
 		if (conflict == 1 || !bookmarks[j].path)
-			break;
+			break; */
 
 		*name = (char *)xrealloc(*name, (strlen(bookmarks[j].path) + 1) * sizeof(char));
 		strcpy(*name, bookmarks[j].path);
@@ -1842,12 +1842,16 @@ parse_input_str(char *str)
 			 * #   2.c) BOOKMARK NAMES EXPANSION    #
 			 * ###################################### */
 
-		/* Expand bookmark names into the corresponding paths */
-		if (conf.expand_bookmarks == 1) {
-			/* Do not perform further checks on the expanded bookmark */
+		/* Expand bookmark name (b:NAME) into the corresponding path */
+		if (*substr[i] == 'b' && substr[i][1] == ':' && substr[i][2]) {
 			if (expand_bm_name(&substr[i]) == EXIT_SUCCESS)
 				continue;
 		}
+/*		if (conf.expand_bookmarks == 1) {
+			// Do not perform further checks on the expanded bookmark
+			if (expand_bm_name(&substr[i]) == EXIT_SUCCESS)
+				continue;
+		} */
 
 		/* ############################################# */
 
@@ -1871,7 +1875,9 @@ parse_input_str(char *str)
 		}
 
 		/* Expand 'sel' only as argument, not as command */
-		if (i > 0 && *substr[i] == 's' && strcmp(substr[i], "sel") == 0)
+//		if (i > 0 && *substr[i] == 's' && strcmp(substr[i], "sel") == 0)
+		if (i > 0 && *substr[i] == 's' && ((substr[i][1] == ':'
+		&& !substr[i][2]) || strcmp(substr[i], "sel") == 0))
 			is_sel = (int)i;
 	}
 
@@ -2163,15 +2169,16 @@ parse_input_str(char *str)
 #endif /* !_NO_MAGIC */
 
 				/* ##############################
-				 * #    2.m) BOOKMARKS (:b)     #
+				 * #    2.m) BOOKMARKS (b:)     #
 				 * ##############################*/
 
 	int *bm_array = (int *)xnmalloc(int_array_max, sizeof(int));
 	size_t bn = 0;
 
 	for (i = 0; substr[i]; i++) {
-		if ( ( (*substr[i] == ':' && *(substr[i] + 1) == 'b')
-		|| (*substr[i] == 'b' && *(substr[i] + 1) == ':') )
+		if (*substr[i] == 'b' && *(substr[i] + 1) == ':' && !*(substr[i] + 2)
+//		if ( ( (*substr[i] == ':' && *(substr[i] + 1) == 'b')
+//		|| (*substr[i] == 'b' && *(substr[i] + 1) == ':') )
 		&& lstat(substr[i], &a) == -1) {
 			bm_array[bn] = (int)i;
 			bn++;

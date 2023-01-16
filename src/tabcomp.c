@@ -463,6 +463,20 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 		}
 	}
 
+/*	if (*dir == '$' && dir[1] && isupper(dir[1]) && cur_comp_type == TCMP_PATH) {
+		char *s = strchr(dir + 1, '/');
+		if (s) *s = '\0';
+		char *p = getenv(dir + 1);
+		if (s) *s = '/';
+		if (!p)
+			return uf_c;
+		char tmp_path[PATH_MAX];
+		snprintf(tmp_path, sizeof(tmp_path), "%s/%s", p, s + 1 ? s + 1 : "");
+		if (lstat(tmp_path, &attr) != -1)
+			return fzftab_color(tmp_path, &attr);
+		return uf_c;
+	} */
+
 	if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_RANGES) {
 		char tmp_path[PATH_MAX];
 		snprintf(tmp_path, sizeof(tmp_path), "%s/%s", workspaces[cur_ws].path, dir);
@@ -514,19 +528,22 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		} else {
 			rl_insert_text(buf + *offset);
 		}
+
 	} else if (cur_comp_type == TCMP_FILE_TYPES_OPTS
 	|| cur_comp_type == TCMP_MIME_LIST || cur_comp_type == TCMP_BOOKMARK
 	|| cur_comp_type == TCMP_WORKSPACES || cur_comp_type == TCMP_NET
 	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_PROMPTS
 	|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR
-	|| cur_comp_type == TCMP_PROF) {
+	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_BM_PREFIX) {
 		rl_insert_text(buf + *offset);
 		return;
+
 	} else if (cur_comp_type == TCMP_OWNERSHIP) {
 		rl_insert_text(buf + *offset);
 		if (rl_line_buffer && !strchr(rl_line_buffer, ':'))
 			rl_stuff_char(':');
 		return;
+
 	} else {
 		if (conf.autocd == 0 && cur_comp_type == TCMP_JUMP)
 			rl_insert_text("cd ");
@@ -902,6 +919,12 @@ get_finder_output(const int multi, char *base)
 				s = get_glob_file_target(line, initial_path);
 			} else if (cur_comp_type == TCMP_TAGS_F && tags_dir && cur_tag) {
 				s = get_tagged_file_target(line);
+			} else if (cur_comp_type == TCMP_BM_PREFIX) {
+				s = (char *)xnmalloc(strlen(line) + 3, sizeof(char));
+				sprintf(s, "b:%s", line);
+			} else if (cur_comp_type == TCMP_TAGS_T) {
+				s = (char *)xnmalloc(strlen(line) + 3, sizeof(char));
+				sprintf(s, "t:%s", line);
 			}
 			q = escape_str(s);
 			if (s != line)
@@ -989,7 +1012,8 @@ store_completions(char **matches, FILE *fp)
 	if (cur_comp_type == TCMP_TAGS_S || cur_comp_type == TCMP_TAGS_U
 	|| cur_comp_type == TCMP_SORT || cur_comp_type == TCMP_BOOKMARK
 	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_NET
-	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_PROMPTS)
+	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_PROMPTS
+	|| cur_comp_type == TCMP_BM_PREFIX)
 		no_file_comp = 1; /* We're not completing file names */
 
 	char *norm_prefix = (char *)NULL;
@@ -1026,7 +1050,7 @@ store_completions(char **matches, FILE *fp)
 
 		if (cur_comp_type == TCMP_BACKDIR) {
 			color = di_c;
-		} else if (cur_comp_type == TCMP_TAGS_T) {
+		} else if (cur_comp_type == TCMP_TAGS_T || cur_comp_type == TCMP_BM_PREFIX) {
 			color = mi_c;
 			if (*(entry + 2))
 				entry += 2;
@@ -1167,7 +1191,7 @@ calculate_prefix_len(char *str)
 					c++;
 			}
 			prefix_len = len + c;
-		} else if (cur_comp_type == TCMP_TAGS_T && len >= 2) {
+		} else if ((cur_comp_type == TCMP_TAGS_T || cur_comp_type == TCMP_BM_PREFIX) && len >= 2) {
 			prefix_len = len - 2;
 		} else if (cur_comp_type == TCMP_TAGS_C) {
 			prefix_len = len - 1;
@@ -1385,7 +1409,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	&& cur_comp_type != TCMP_CMD_DESC) {
 		query = get_query_str(&finder_offset);
 		if (!query) {
-			if (cur_comp_type == TCMP_TAGS_T)
+			if (cur_comp_type == TCMP_TAGS_T || cur_comp_type == TCMP_BM_PREFIX)
 				query = lw ? lw + 2 : (char *)NULL;
 			else if (cur_comp_type == TCMP_TAGS_C)
 				query = lw ? lw + 1 : (char *)NULL;
@@ -1407,7 +1431,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			finder_offset++;
 		} else { /* Coming from tag expression ('t:FULL_TAG') */
 			char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
-			finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : 0);
+			finder_offset = prompt_offset + (sp ? (int)(sp - lb): -1);
+//			finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -2);
 		}
 	}
 
@@ -1423,12 +1448,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			finder_offset = prompt_offset - 2;
 	}
 
-	else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES
-	|| cur_comp_type == TCMP_BM_PATHS) {
+	else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES) {
 		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
-		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : 0);
-		if (finder_offset == prompt_offset && cur_comp_type == TCMP_BM_PATHS)
-			finder_offset -= (prompt_offset > 3) ? 3 : 0;
+		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -(rl_end + 1));
+	}
+
+	else if (cur_comp_type == TCMP_BM_PATHS) {
+		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -3);
 	}
 
 	else if (cur_comp_type == TCMP_TAGS_C) {
@@ -1436,9 +1463,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 1 : 0);
 	}
 
-	else if (cur_comp_type == TCMP_TAGS_T) {
+/*	else if (cur_comp_type == TCMP_TAGS_T) {
 		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) : 0);
+	} */
+
+	else if (cur_comp_type == TCMP_BM_PREFIX || cur_comp_type == TCMP_TAGS_T) {
+		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		finder_offset = prompt_offset + (sp ? (int)(sp - lb): -1);
 	}
 
 	else if (cur_comp_type == TCMP_GLOB) {
@@ -1598,14 +1630,16 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL
 	|| cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
-	|| cur_comp_type == TCMP_BM_PATHS) {
+	|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_BM_PREFIX
+	|| cur_comp_type == TCMP_TAGS_T) {
 		char *s = rl_line_buffer ? get_last_space(rl_line_buffer, rl_end) : (char *)NULL;
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
 			rl_end = rl_point;
 			prefix_len = 0;
-		} else if (cur_comp_type == TCMP_BM_PATHS) {
+		} else if (cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_TAGS_F
+		|| cur_comp_type == TCMP_BM_PREFIX || cur_comp_type == TCMP_TAGS_T) {
 			rl_delete_text(0, rl_end);
 			rl_end = rl_point = 0;
 			prefix_len = 0;
@@ -1981,7 +2015,7 @@ AFTER_USUAL_COMPLETION:
 			|| c == TCMP_TAGS_C || c == TCMP_TAGS_S || c == TCMP_TAGS_T
 			|| c == TCMP_TAGS_U || c == TCMP_BOOKMARK || c == TCMP_GLOB
 			|| c == TCMP_PROMPTS || c == TCMP_CSCHEME || c == TCMP_WORKSPACES
-			|| c == TCMP_PROF)
+			|| c == TCMP_PROF || c == TCMP_BM_PREFIX)
 			&& !strchr(replacement, '\\')) {
 				char *r = escape_str(replacement);
 				if (!r) {
@@ -2069,7 +2103,7 @@ AFTER_USUAL_COMPLETION:
 			|| cur_comp_type == TCMP_PROMPTS || cur_comp_type == TCMP_NET
 			|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_WORKSPACES
 			|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR
-			|| cur_comp_type == TCMP_PROF)
+			|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_BM_PREFIX)
 				break;
 
 			/* Let's append an ending character to the inserted match */
@@ -2228,6 +2262,18 @@ DISPLAY_MATCHES:
 				free(exp_path);
 				did_chdir = 1;
 			}
+
+/*		} else if (*matches[0] == '$' && matches[0][1]) {
+			char *p = strchr(matches[0] + 1, '/');
+			if (p)
+				*p = '\0';
+			char *e = getenv(matches[0] + 1);
+			if (p)
+				*p = '/';
+			if (e && xchdir(e, NO_TITLE) == 0) {
+				did_chdir = 1;
+			} */
+
 		} else {
 			char *dir = matches[0];
 

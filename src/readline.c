@@ -98,8 +98,10 @@ typedef char *rl_cpvfunc_t;
 #define MAX_EXT_OPTS_LEN NAME_MAX
 
 static char ext_opts[MAX_EXT_OPTS][MAX_EXT_OPTS_LEN];
+#ifndef _NO_TAGS
 static struct dirent **tagged_files = (struct dirent **)NULL;
 static int tagged_files_n = 0;
+#endif
 
 /* Get user input (y/n, uppercase is allowed) using _MSG as message
  * The question will be repeated until 'y' or 'n' is entered
@@ -1251,7 +1253,21 @@ my_rl_path_completion(const char *text, int state)
 		char *temp_dirname;
 		int replace_dirname;
 
+//////////////////////////
+/*		char *r = (char *)NULL;
+		if (*dirname == '$' && dirname[1] && dirname[1] != '{'
+		&& dirname[1] != '(') {
+			char *q = strchr(dirname + 1, '/');
+			if (q && q != dirname + 1)
+				*q = '\0';
+			r = getenv(dirname + 1);
+			if (q)
+				*q = '/';
+		}
+		temp_dirname = tilde_expand(r ? r : dirname); */
+///////////////////////////
 		temp_dirname = tilde_expand(dirname);
+
 		free(dirname);
 		dirname = temp_dirname;
 
@@ -1647,11 +1663,13 @@ bookmarks_generator(const char *text, int state)
 
 	static int i;
 	static size_t len;
+	static int prefix;
 	char *name;
 
 	if (!state) {
 		i = 0;
-		len = strlen(text);
+		prefix = (*text == 'b' && *(text + 1) == ':') ? 2 : 0;
+		len = strlen(text + prefix);
 	}
 
 	/* Look for bookmarks in bookmark names for a match */
@@ -1660,12 +1678,15 @@ bookmarks_generator(const char *text, int state)
 		if (!name || !*name)
 			continue;
 
-		if ((conf.case_sens_list ? strncmp(name, text, len)
-		: strncasecmp(name, text, len)) == 0) {
-/*			char t[PATH_MAX + NAME_MAX + 4];
-			snprintf(t, sizeof(t), "%s (%s)", name, (i > 0 && bookmarks[i - 1].path)
-				? bookmarks[i - 1].path : "None");
-			return strdup(t); */
+		if ((conf.case_sens_list == 1 ? strncmp(name, text + prefix, len)
+		: strncasecmp(name, text + prefix, len)) != 0)
+			continue;
+
+		if (prefix == 2) {
+			char t[NAME_MAX + 3];
+			snprintf(t, sizeof(t), "b:%s", name);
+			return strdup(t);
+		} else {
 			return strdup(name);
 		}
 	}
@@ -1714,6 +1735,7 @@ hist_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+/*
 static char *
 bm_paths_generator(const char *text, int state)
 {
@@ -1743,6 +1765,45 @@ bm_paths_generator(const char *text, int state)
 				free(p);
 			return ret;
 		}
+	}
+
+	return (char *)NULL;
+} */
+
+/* Returns the path corresponding to be bookmark name TEXT */
+static char *
+bm_paths_generator(const char *text, int state)
+{
+	if (!bookmarks || bm_n == 0)
+		return (char *)NULL;
+
+	static int i;
+	char *name, *_path;
+
+	if (!state)
+		i = 0;
+
+	while (i < (int)bm_n) {
+		name = bookmarks[i].name;
+		_path = bookmarks[i].path;
+		i++;
+
+		if (!name || !_path || (conf.case_sens_list == 1 ? strcmp(name, text)
+		: strcasecmp(name, text)) != 0)
+			continue;
+
+		size_t plen = strlen(_path);
+
+		if (plen > 1 && _path[plen - 1] == '/')
+			_path[plen - 1] = '\0';
+
+		char *p = abbreviate_file_name(_path);
+		char *ret = strdup(p ? p : _path);
+
+		if (p != _path)
+			free(p);
+
+		return ret;
 	}
 
 	return (char *)NULL;
@@ -2841,6 +2902,7 @@ users_generator(const char *text, int state)
 #endif /* __ANDROID__ */
 }
 
+#ifndef _NO_TAGS
 static int
 tag_complete(const char *text)
 {
@@ -2885,6 +2947,7 @@ tag_complete(const char *text)
 
 	return comp;
 }
+#endif /* !_NO_TAGS */
 
 static int
 check_file_type_opts(const char c)
@@ -3067,6 +3130,7 @@ char **
 my_rl_completion(const char *text, int start, int end)
 {
 	char **matches = (char **)NULL;
+	char *lb = rl_line_buffer;
 	cur_comp_type = TCMP_NONE;
 	flags &= ~MULTI_SEL;
 	UNUSED(end);
@@ -3145,7 +3209,7 @@ my_rl_completion(const char *text, int start, int end)
 	}
 
 	/* #### BOOKMARKS EXPANSION (:b or b:) #### */
-	if (xrename == 0 && ((*text == 'b' && *(text + 1) == ':')
+/*	if (xrename == 0 && ((*text == 'b' && *(text + 1) == ':')
 	|| (*text == ':' && *(text + 1) == 'b'))) {
 		matches = rl_completion_matches(text, &bm_paths_generator);
 		if (matches) {
@@ -3157,7 +3221,7 @@ my_rl_completion(const char *text, int start, int end)
 			cur_comp_type = TCMP_BM_PATHS;
 			return matches;
 		}
-	}
+	} */
 
 	/* #### USERS EXPANSION (~) #### */
 	if (xrename == 0 && *text == '~' && *(text + 1) != '/') {
@@ -3178,9 +3242,84 @@ my_rl_completion(const char *text, int start, int end)
 		}
 	}
 
+#ifndef _NO_TAGS
+	/* ##### TAGS ##### */
+	/* ##### 1. TAGGED FILES (t:NAME<TAB>) ##### */
+	if (tags_n > 0 && rl_point == rl_end && *text == 't'
+	&& *(text + 1) == ':' && *(text + 2)) {
+		free(cur_tag);
+		cur_tag = savestring(text + 2, strlen(text + 2));
+		matches = check_tagged_files(cur_tag);
+		if (matches) {
+			if (!matches[1])
+				rl_swap_fields(&matches);
+			cur_comp_type = TCMP_TAGS_F;
+			return matches;
+		}
+		free(cur_tag);
+		cur_tag = (char *)NULL;
+	}
+
+	/* ##### 2. TAG NAMES (t:<TAB>) ##### */
+	if (*lb != ';' && *lb != ':' && tags_n > 0
+	&& *text == 't' && *(text + 1) == ':') {
+		cur_comp_type = TCMP_TAGS_T;
+		char *p = dequote_str((char *)text, 0);
+		matches = rl_completion_matches(p ? p : text, &tags_generator);
+		free(p);
+		if (matches) {
+			flags |= MULTI_SEL;
+			return matches;
+		}
+		cur_comp_type = TCMP_NONE;
+	}
+#endif /* !_NO_TAGS */
+
+	/* #### BOOKMARK PATH (b:FULLNAME) #### */
+	if (rl_point == rl_end && xrename == 0 && *text == 'b'
+	&& *(text + 1) == ':' && *(text + 2)) {
+		char *t = (char *)text + 2;
+		char *p = dequote_str(t, 0);
+		matches = rl_completion_matches(p ? p : t, &bm_paths_generator);
+		free(p);
+		if (matches) {
+			if (!matches[1])
+				rl_swap_fields(&matches);
+//			if (tabmode != STD_TAB)
+//				rl_filename_completion_desired = 1;
+			cur_comp_type = TCMP_BM_PATHS;
+			return matches;
+		}
+	}
+
+	/* ##### BOOKMARK NAMES (b:) ##### */
+	if (xrename == 0 && (conf.autocd == 1 || conf.auto_open == 1)
+	&& rl_point == rl_end && *text == 'b' && *(text + 1) == ':') {
+		char *p = dequote_str((char *)text, 0);
+		matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
+		free(p);
+		if (matches) {
+			flags |= MULTI_SEL;
+			cur_comp_type = TCMP_BM_PREFIX;
+			return matches;
+		}
+	}
+
 	if (start == 0) { /* Only for the first entered word */
 		/* If the xrename function (for the m command) is running
 		 * only filenames completion is available */
+
+		/* Selected files expansion. For first word only 's:' is allowed (no 'sel')*/
+		if (*lb != ';' && *lb != ':' && sel_n > 0 && *text == 's'
+		&& *(text + 1) == ':') {
+			matches = rl_completion_matches("", &sel_entries_generator);
+			if (matches) {
+				if (!matches[1])
+					rl_swap_fields(&matches);
+				cur_comp_type = TCMP_SEL;
+				return matches;
+			}
+		}
 
 		/* #### OWNERSHIP EXPANSION ####
 		 * Used only by the oc command to edit files ownership */
@@ -3246,11 +3385,20 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* BOOKMARKS COMPLETION */
-		if (xrename == 0 && (conf.autocd || conf.auto_open) && conf.expand_bookmarks) {
+/*		if (xrename == 0 && (conf.autocd == 1 || conf.auto_open == 1)
+		&& *text == 'b' && *(text + 1) == ':') {
+			matches = rl_completion_matches(text, &bookmarks_generator);
+			if (matches) {
+				cur_comp_type = TCMP_BM_PREFIX;
+				return matches;
+			}
+		} */
+/*		if (xrename == 0 && (conf.autocd || conf.auto_open)
+		&& conf.expand_bookmarks == 1 && *text) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 			if (matches)
 				return matches;
-		}
+		} */
 
 		/* If neither autocd nor auto-open, try to complete with command names,
 		 * except when TEXT is "/" */
@@ -3278,12 +3426,12 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		char *lb = rl_line_buffer;
+//		char *lb = rl_line_buffer;
 #ifndef _NO_TAGS
 		/* #### TAGS COMPLETION #### */
 		/* 1. Expand tag expressions (t:TAG) into tagged files */
 //		if (fzftab == 1 && tags_n > 0 && *text == 't'
-		if (tags_n > 0 && *text == 't'
+/*		if (tags_n > 0 && *text == 't'
 		&& *(text + 1) == ':' && *(text + 2)) {
 			free(cur_tag);
 			cur_tag = savestring(text + 2, strlen(text + 2));
@@ -3296,16 +3444,16 @@ my_rl_completion(const char *text, int start, int end)
 			}
 			free(cur_tag);
 			cur_tag = (char *)NULL;
-		}
+		} */
 
 		/* 2. tag expressions (t:TAG)*/
-		if (*lb != ';' && *lb != ':' && tags_n > 0 && *text == 't' && *(text + 1) == ':') {
+/*		if (*lb != ';' && *lb != ':' && tags_n > 0 && *text == 't' && *(text + 1) == ':') {
 			cur_comp_type = TCMP_TAGS_T;
 			matches = rl_completion_matches(text, &tags_generator);
 			if (matches)
 				return matches;
 			cur_comp_type = TCMP_NONE;
-		}
+		} */
 
 		/* 3. 't? TAG' and 't? :tag' */
 		if (tags_n > 0 && *lb == 't' && rl_end > 2) {
@@ -3316,7 +3464,7 @@ my_rl_completion(const char *text, int start, int end)
 					return matches;
 				cur_comp_type = TCMP_NONE;
 			} else if (comp == 2) {
-				/* Let's match tagged files for the untag function */
+				// Let's match tagged files for the untag function
 				char *_tag = get_cur_tag();
 				matches = check_tagged_files(_tag);
 				free(_tag);
@@ -3326,7 +3474,7 @@ my_rl_completion(const char *text, int start, int end)
 				}
 			}
 		}
-#endif
+#endif /* !_NO_TAGS */
 
 		/* #### BACKDIR COMPLETION #### */
 		if (*text != '/' && nwords <= 2 && rl_end >= 3
@@ -3462,7 +3610,7 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* ### SEL KEYWORD EXPANSION ### */
 		if (*lb != ';' && *lb != ':' && sel_n && *text == 's'
-		&& strncmp(text, "sel", 3) == 0) {
+		&& ((*(text + 1) == ':') || strncmp(text, "sel", 3) == 0)) {
 			matches = rl_completion_matches("", &sel_entries_generator);
 			if (matches) {
 				if (!matches[1])
@@ -3567,13 +3715,20 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		if (*lb != ';' && *lb != ':' && conf.expand_bookmarks) {
+/*		if (*lb != ';' && *lb != ':' && *text == 'b' && *(text + 1) == ':') {
+			matches = rl_completion_matches(text, &bookmarks_generator);
+			if (matches) {
+				cur_comp_type = TCMP_BM_PREFIX;
+				return matches;
+			}
+		} */
+/*		if (*lb != ';' && *lb != ':' && conf.expand_bookmarks == 1 && *text) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 			if (matches) {
 				cur_comp_type = TCMP_BOOKMARK;
 				return matches;
 			}
-		}
+		} */
 
 		/* ### SORT COMMAND COMPLETION ### */
 		if (*lb == 's' && (strncmp(lb, "st ", 3) == 0
@@ -3650,11 +3805,20 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
-		/* Finally, try to complete with filenames in CWD */
+		/* Try to complete with filenames in CWD */
 		if ((matches = rl_completion_matches(text, &filenames_gen_text))) {
 			cur_comp_type = TCMP_PATH;
 			return matches;
 		}
+
+		/* As a last resource, try to expand bookmark names */
+/*		if (*lb != ';' && *lb != ':' && conf.expand_bookmarks == 1 && *text) {
+			matches = rl_completion_matches(text, &bookmarks_generator);
+			if (matches) {
+				cur_comp_type = TCMP_BOOKMARK;
+				return matches;
+			}
+		} */
 	}
 
 	/* ### PATH COMPLETION ### */

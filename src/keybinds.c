@@ -649,6 +649,7 @@ rl_accept_suggestion(int count, int key)
 				break;
 			}
 		}
+
 		if (isquote == 1 && backslash == 0)
 			tmp = escape_str(suggestion_buf);
 
@@ -693,20 +694,26 @@ rl_accept_suggestion(int count, int key)
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
 #ifndef _NO_TAGS
+	case TAGT_SUG: /* fallthrough */
 	case TAGC_SUG: /* fallthrough */
 	case TAGS_SUG: /* fallthrough */
-	case TAGT_SUG: {
+	case BM_PREFIX_SUG: {
 		char prefix[3];
 		if (suggestion.type == TAGC_SUG) {
 			prefix[0] = ':'; prefix[1] = '\0';
-			rl_insert_text(prefix);
 		} else if (suggestion.type == TAGT_SUG) {
 			prefix[0] = 't'; prefix[1] = ':'; prefix[2] = '\0';
-			rl_insert_text(prefix);
+		} else if (suggestion.type == BM_PREFIX_SUG) {
+			prefix[0] = 'b'; prefix[1] = ':'; prefix[2] = '\0';
 		}
-		char *p = escape_str(suggestion_buf);
+
+		rl_insert_text(prefix);
+		char *p = suggestion.type != BM_PREFIX_SUG
+			? escape_str(suggestion_buf) : (char *)NULL;
+
 		my_insert_text(p ? p : suggestion_buf, NULL, 0);
-		if (fzftab != 1 || suggestion.type != TAGT_SUG)
+
+		if (suggestion.type != BM_PREFIX_SUG && (fzftab != 1 || (suggestion.type != TAGT_SUG)))
 			rl_stuff_char(' ');
 		free(p);
 		}
@@ -757,11 +764,11 @@ rl_accept_first_word(int count, int key)
 {
 	/* Accepting the first suggested word is not supported for ELN's,
 	 * bookmark and alias names */
-	if (suggestion.type != ELN_SUG && suggestion.type != BOOKMARK_SUG
-	&& suggestion.type != ALIAS_SUG && suggestion.type != JCMD_SUG
-	&& suggestion.type != JCMD_SUG_NOACD && suggestion.type != FUZZY_FILENAME
-	&& suggestion.type != CMD_DESC_SUG && suggestion.type != BM_NAME_SUG
-	&& suggestion.type != INT_HELP_SUG) {
+	int t = suggestion.type;
+	if (t != ELN_SUG && t != BOOKMARK_SUG && t != ALIAS_SUG && t != JCMD_SUG
+	&& t != JCMD_SUG_NOACD && t != FUZZY_FILENAME && t != CMD_DESC_SUG
+	&& t != BM_NAME_SUG && t != INT_HELP_SUG && t != TAGT_SUG
+	&& t != BM_PREFIX_SUG) {
 		accept_first_word = 1;
 		suggestion.type = FIRST_WORD;
 	}

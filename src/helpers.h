@@ -369,7 +369,7 @@ extern int watch;
 #define TAGT_SUG       15 /* t:TAG (expand tag TAG) */
 #define TAGC_SUG       16 /* :TAG (param to tag command) */
 #define TAGS_SUG       17 /* TAG  (param to tag command) */
-#define BM_NAME_SUG    18 /* Bookmarks names */
+#define BM_NAME_SUG    18 /* Bookmark names */
 #define SORT_SUG       19
 #define PROMPT_SUG     20
 #define USER_SUG       21
@@ -382,6 +382,7 @@ extern int watch;
 #define CSCHEME_SUG    28
 #define INT_HELP_SUG   29
 #define PROFILE_SUG    30
+#define BM_PREFIX_SUG  31 /* Bookmark name (b:NAME) */
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -1175,10 +1176,11 @@ enum comp_type {
 	TCMP_FILE_TYPES_OPTS = 28,
 	TCMP_FILE_TYPES_FILES = 29,
 	TCMP_WORKSPACES = 30,
-	TCMP_BM_PATHS =   31, /* 'b:' keyword expansion (second word or more) */
-	TCMP_CMD_DESC =   32,
-	TCMP_OWNERSHIP =  33,
-	TCMP_MIME_LIST =  34,
+	TCMP_BM_PATHS =   31, /* 'b:FULLNAME' keyword expansion */
+	TCMP_BM_PREFIX =  32, /* 'b:' keyword expansion */
+	TCMP_CMD_DESC =   33,
+	TCMP_OWNERSHIP =  34,
+	TCMP_MIME_LIST =  35,
 	TCMP_MIME_FILES = TCMP_FILE_TYPES_FILES /* Same behavior */
 };
 

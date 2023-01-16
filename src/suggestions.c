@@ -1350,6 +1350,7 @@ check_jumpdb(const char *str, const size_t len, const int print)
 	return NO_MATCH;
 }
 
+/*
 static inline void
 print_bookmark_dir_suggestion(const int i)
 {
@@ -1425,7 +1426,31 @@ check_bookmarks(const char *str, const size_t len, const int print)
 	}
 
 	return NO_MATCH;
-}
+} */
+
+/*
+static int
+check_bookmarks(const char *str, const size_t len)
+{
+	if (bm_n == 0)
+		return NO_MATCH;
+
+	int i = (int)bm_n;
+	while (--i >= 0) {
+		if (!bookmarks[i].name || !bookmarks[i].path
+		|| TOUPPER(*str) != TOUPPER(*bookmarks[i].name))
+			continue;
+
+		if (len > 0 && (conf.case_sens_path_comp == 1 ? strcmp(str, bookmarks[i].name)
+		: strcasecmp(str, bookmarks[i].name)) == 0) {
+			suggestion.type = BOOKMARK_SUG;
+			print_suggestion(bookmarks[i].path, 0, sf_c);
+			return PARTIAL_MATCH;
+		}
+	}
+
+	return NO_MATCH;
+} */
 
 static int
 check_int_params(const char *str, const size_t len)
@@ -2023,12 +2048,13 @@ check_bookmark_names(char *word, const size_t len)
 	if (!word || !*word || !bookmarks)
 		return 0;
 
-	char *q = (char *)NULL, *w = word;
-	size_t l = len;
+	size_t prefix = (*word == 'b' && *(word + 1) == ':') ? 2 : 0;
+	char *q = (char *)NULL, *w = word + prefix;
+	size_t l = len - prefix;
 
-	if (strchr(word, '\\')) {
-		q = dequote_str(word, 0);
-		w = q ? q : word;
+	if (strchr(word + prefix, '\\')) {
+		q = dequote_str(word + prefix, 0);
+		w = q ? q : word + prefix;
 		l = w == q ? strlen(w) : len;
 	}
 
@@ -2041,9 +2067,23 @@ check_bookmark_names(char *word, const size_t len)
 		&& strncasecmp(w, bookmarks[i].name, l) == 0)
 		: (*w == *bookmarks[i].name
 		&& strncmp(w, bookmarks[i].name, l) == 0)) {
-			suggestion.type = BM_NAME_SUG;
+			if (prefix == 2 && !*(bookmarks[i].name + l)) // full match
+				break;
+
 			char *p = escape_str(bookmarks[i].name);
-			print_suggestion(p ? p : bookmarks[i].name, len, sx_c);
+
+/*			if (prefix == 2) {
+				suggestion.type = BM_PREFIX_SUG;
+//				char tmp[NAME_MAX + 3];
+//				snprintf(tmp, sizeof(tmp), "b:%s", p ? p : bookmarks[i].name);
+//				print_suggestion(tmp, len, sx_c);
+			} else {
+				suggestion.type = BM_NAME_SUG;
+//				print_suggestion(p ? p : bookmarks[i].name, len, sx_c);
+			} */
+			suggestion.type = prefix == 2 ? BM_PREFIX_SUG : BM_NAME_SUG;
+			print_suggestion(p ? p : bookmarks[i].name, len - prefix, sx_c);
+
 			free(p);
 			free(q);
 			return 1;
@@ -2374,6 +2414,11 @@ rl_suggestions(const unsigned char c)
 			goto SUCCESS;
 	}
 
+	if (*word == 'b' && *(word + 1) == ':' && *(word + 2)) {
+		if ((printed = check_bookmark_names(word, wlen)) == 1)
+			goto SUCCESS;
+	}
+
 	/* 3.d) Execute the following checks in the order specified by
 	 * suggestion_strategy (the value is taken form the configuration file) */
 	size_t st;
@@ -2395,8 +2440,16 @@ rl_suggestions(const unsigned char c)
 				goto SUCCESS;
 			break;
 
-		case 'b': /* 3.d.2) Bookmarks */
-			if (last_space || conf.autocd || conf.auto_open) {
+/*		case 'b': // 3.d.2) Bookmarks
+			if ((conf.autocd == 1 || conf.auto_open == 1) && *word == 'b'
+			&& *(word + 1) == ':' && *(word + 2)) {
+				if (suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
+
+				if ((printed = check_bookmarks(word + 2, wlen - 2)))
+					goto SUCCESS;
+			} */
+/*			if (last_space || conf.autocd || conf.auto_open) {
 				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 				if (flag == CHECK_MATCH && suggestion.printed)
 					clear_suggestion(CS_FREEBUF);
@@ -2404,7 +2457,7 @@ rl_suggestions(const unsigned char c)
 				printed = check_bookmarks(word, wlen, flag);
 				if (printed)
 					goto SUCCESS;
-			}
+			} */
 			break;
 
 		case 'c': /* 3.d.3) Possible completions (only path completion!) */
@@ -2585,7 +2638,7 @@ rl_suggestions(const unsigned char c)
 	if (nwords > 1)
 		goto NO_SUGGESTION;
 
-	if (*word == 'b' && *(word + 1) == ':')
+	if ((*word == 'b' || *word == 't' || *word == 's') && *(word + 1) == ':')
 		goto NO_SUGGESTION;
 
 CHECK_FIRST_WORD:
