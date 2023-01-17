@@ -1207,8 +1207,8 @@ AutoSuggestions=%s\n\n"
 	    "# The following checks will be performed in the order specified\n\
 # by SuggestionStrategy. Available checks:\n\
 # a = Aliases names\n\
-# b = Bookmarks names\n\
-# c = Possible completions\n\
+# b = Bookmarks names (deprecated since v1.9.9)\n\
+# c = Path completion\n\
 # e = ELN's\n\
 # f = File names in current directory\n\
 # h = Commands history\n\

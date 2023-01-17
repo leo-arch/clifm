@@ -188,15 +188,15 @@ AutoSuggestions=true
 # The following checks will be performed in the order specified
 # by SuggestionStrategy. Available checks:
 # a = Aliases names\n\
-# b = Bookmarks names\n\
-# c = Possible completions\n\
+# b = Bookmarks names (deprecated since v1.9.9)\n\
+# c = Path completion\n\
 # e = ELN's
 # f = File names in current directory\n\
 # h = Commands history\n\
 # j = Jump database\n\
 # Use a dash (-) to skip a check. Ex: 'ehfj-ac' to skip the bookmarks
 # check
-SuggestionStrategy=ehfjbac
+SuggestionStrategy=ehfj-ac
 
 # If set to true, suggest file names using the corresponding file type
 # color (set via the color scheme file)

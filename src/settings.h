@@ -269,7 +269,7 @@ xf=01;31:xs=00;32:"
 # define DEF_SUDO_CMD "sudo"
 #endif
 #define DEF_SUG_FILETYPE_COLOR 0
-#define DEF_SUG_STRATEGY "ehfjbac"
+#define DEF_SUG_STRATEGY "ehfj-ac"
 #define DEF_SUGGESTIONS 1
 #define DEF_TIPS 1
 #define DEF_TOGGLE_WORKSPACES 1
