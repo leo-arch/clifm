@@ -1377,7 +1377,7 @@ bd media                 Change to the parent directory matching 'media'\n\
 j <TAB>                  Navigate the list of visited directories\n\
 j xproj                  Jump to the best ranked directory matching 'xproj'\n\
 bm | Alt-b | b:<TAB>     List bookmarks\n\
-bm mybm                  Change to the bookmark named 'mybm'\n\
+bm mybm | b:mybm         Change to the bookmark named 'mybm'\n\
 ws2 | Alt-2              Switch to the second workspace\n\
 mp                       Change to a mountpoint\n\
 pin mydir                Pin the directory 'mydir'\n\
@@ -1412,7 +1412,7 @@ br sel             Bulk rename selected files\n\
 c 34 file_copy     Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
 cr myfile          Copy 'myfile' to a remote location\n\
 m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
-m myfile.txt       Rename 'myfile.txt'\n\
+m myfile.txt       Interactively rename 'myfile.txt'\n\
 l myfile mylink    Create a symbolic link named 'mylink' pointing to 'myfile'\n\
 le mylink          Edit the symbolic link 'mylink'\n\
 oc myfile          Edit file ownership of the file 'myfile'\n\
@@ -1422,7 +1422,7 @@ t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
 t del              Permanently remove trashed files using a menu\n\
 t empty            Empty the trash can\n\
 u                  Undelete trashed files using a menu\n\
-bm a mydir         Bookmark the directory named 'mydir'\n\
+bm a mydir mybm    Bookmark the directory named 'mydir' as 'mybm'\n\
 bm d mybm          Remove the bookmark named 'mybm'\n\
 tag --help         Learn about tagging files\n\
 ac sel             Compress/archive selected files"
