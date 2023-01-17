@@ -820,14 +820,14 @@ bm_open(char **cmd)
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
 		if ((bookmarks[i].shortcut && *p == *bookmarks[i].shortcut
-			&& strcmp(p, bookmarks[i].shortcut) == 0)
+		&& strcmp(p, bookmarks[i].shortcut) == 0)
 
-			|| (bookmarks[i].name && *p == *bookmarks[i].name
-			&& strcmp(p, bookmarks[i].name) == 0)
+		|| (bookmarks[i].name && *p == *bookmarks[i].name
+		&& strcmp(p, bookmarks[i].name) == 0)) {
 
-			|| (conf.expand_bookmarks && bookmarks[i].path
-			&& *p == *bookmarks[i].path
-			&& strcmp(p, bookmarks[i].path) == 0)) {
+/*		|| (conf.expand_bookmarks && bookmarks[i].path
+		&& *p == *bookmarks[i].path
+		&& strcmp(p, bookmarks[i].path) == 0)) { */
 
 			if (!bookmarks[i].path) {
 				fprintf(stderr, _("%s: Invalid bookmark\n"), p);

@@ -1227,12 +1227,7 @@ SuggestCmdDesc=%s\n\n"
 
 		"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
 # and 2 = glob-regex\n\
-SearchStrategy=%d\n\n"
-
-	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
-# path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
-# as /path. TAB completion is also available for bookmark names.\n\
-ExpandBookmarks=%s\n\n",
+SearchStrategy=%d\n\n",
 
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
@@ -1241,8 +1236,8 @@ ExpandBookmarks=%s\n\n",
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
 		DEF_CMD_DESC_SUG == 1 ? "true" : "false",
 		DEF_HIGHLIGHT == 1 ? "true" : "false",
-		DEF_SEARCH_STRATEGY,
-		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false"
+		DEF_SEARCH_STRATEGY
+//		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false"
 		);
 
 	fprintf(config_fp,
@@ -2260,11 +2255,11 @@ read_config(void)
 			set_div_line(line);
 		}
 
-		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
+/*		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
 		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
 			if (set_config_bool_value(line, &conf.expand_bookmarks) == -1)
 				continue;
-		}
+		} */
 
 		else if (xargs.ext == UNSET && *line == 'E'
 		&& strncmp(line, "ExternalCommands=", 17) == 0) {
@@ -3091,8 +3086,8 @@ check_cmd_line_options(void)
 	if (xargs.disk_usage != UNSET)
 		conf.disk_usage = xargs.disk_usage;
 
-	if (xargs.expand_bookmarks != UNSET)
-		conf.expand_bookmarks = xargs.expand_bookmarks;
+/*	if (xargs.expand_bookmarks != UNSET)
+		conf.expand_bookmarks = xargs.expand_bookmarks; */
 
 	if (xargs.ext != UNSET)
 		conf.ext_cmd_ok = xargs.ext;

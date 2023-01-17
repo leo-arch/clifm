@@ -1141,8 +1141,6 @@ database (via the 'j' command)\
 \n      --desktop-notifications\t Enable desktop notifications\
 \n      --disk-usage\t\t Show disk usage (free/total)\
 \n      --enable-logs\t\t Enable program logs\
-\n      --expand-bookmarks\t Expand bookmark names into the corresponding \
-bookmark paths\
 \n      --full-dir-size\t\t Print the size of directories and their contents \
 (long view only)\
 \n      --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \

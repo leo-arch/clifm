@@ -52,7 +52,6 @@ args=(
 	'--desktop-notifications[enable desktop notifications]'
 	'--disk-usage[show disk usage (free/total) for the filesystem to which the current directory belongs]'
 	'--enable-logs[enable program logs]'
-	'--expand-bookmarks[expand bookmark names into the corresponding bookmark paths]'
 	'--full-dir-size[print size of directories and their contents in long view mode]'
 	'--fuzzy-matching[enable fuzzy matches for filename/path completions and suggestions]'
 	'--fzfpreview[enable file previews for TAB completion (fzf mode only). Implies --fzftab]'

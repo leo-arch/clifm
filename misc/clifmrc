@@ -211,11 +211,6 @@ SyntaxHighlighting=true
 # Should CliFM be allowed to run external, shell commands?
 ExternalCommands=true
 
-# If set to true, expand bookmark names into the corresponding bookmark
-# path: if the bookmark is "name=/path", "name" will be interpreted
-# as /path. TAB completion is available for bookmark names.
-ExpandBookmarks=false
-
 
 #=====================================#
 #           3. COMMANDS               #

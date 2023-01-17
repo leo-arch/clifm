@@ -128,7 +128,7 @@ init_conf_struct(void)
 	conf.desktop_notifications = UNSET;
 	conf.dirhist_map = UNSET;
 	conf.disk_usage = UNSET;
-	conf.expand_bookmarks = UNSET;
+//	conf.expand_bookmarks = UNSET;
 	conf.ext_cmd_ok = UNSET;
 	conf.files_counter = UNSET;
 	conf.full_dir_size = UNSET;
@@ -1886,7 +1886,7 @@ external_arguments(int argc, char **argv)
 		{"enable-logs", no_argument, 0, 213},
 		{"max-path", required_argument, 0, 214},
 		{"opener", required_argument, 0, 215},
-		{"expand-bookmarks", no_argument, 0, 216},
+//		{"expand-bookmarks", no_argument, 0, 216},
 		{"only-dirs", no_argument, 0, 217},
 		{"list-and-quit", no_argument, 0, 218},
 		{"color-scheme", required_argument, 0, 219},
@@ -2008,7 +2008,7 @@ external_arguments(int argc, char **argv)
 			}
 			break;
 
-		case 216: xargs.expand_bookmarks = conf.expand_bookmarks = 1; break;
+//		case 216: xargs.expand_bookmarks = conf.expand_bookmarks = 1; break;
 		case 217: xargs.only_dirs = conf.only_dirs = 1; break;
 		case 218: xargs.list_and_quit = 1; break;
 
@@ -2476,7 +2476,7 @@ unset_xargs(void)
 	xargs.disk_usage = UNSET;
 	xargs.disk_usage_analyzer = UNSET;
 	xargs.eln_use_workspace_color = UNSET;
-	xargs.expand_bookmarks = UNSET;
+//	xargs.expand_bookmarks = UNSET;
 	xargs.ext = UNSET;
 	xargs.dirs_first = UNSET;
 	xargs.files_counter = UNSET;
@@ -3549,12 +3549,12 @@ check_options(void)
 			conf.only_dirs = xargs.only_dirs;
 	}
 
-	if (conf.expand_bookmarks == UNSET) {
+/*	if (conf.expand_bookmarks == UNSET) {
 		if (xargs.expand_bookmarks == UNSET)
 			conf.expand_bookmarks = DEF_EXPAND_BOOKMARKS;
 		else
 			conf.expand_bookmarks = xargs.expand_bookmarks;
-	}
+	} */
 
 	if (conf.splash_screen == UNSET) {
 		if (xargs.splash == UNSET)

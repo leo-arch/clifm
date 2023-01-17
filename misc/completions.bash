@@ -90,7 +90,6 @@ _clifm ()
         --dektop-notifications
         --disk-usage
         --enable-logs
-        --expand-bookmarks
         --full-dir-size
         --fuzzy-matching
         --fzfpreview

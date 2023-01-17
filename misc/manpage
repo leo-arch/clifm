@@ -219,9 +219,6 @@ show disk usage (free/total) for the file system the current directory belongs t
 \fB\-\-enable\-logs\fR
 enable program logs. See the \fIlog\fR command for more information
 .TP
-\fB\-\-expand\-bookmarks\fR
-expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path"
-.TP
 \fB\-\-fzfpreview\fR
 enable file previews for TAB completion (fzf mode only). Implies \fI\-\-fzftab\fR.
 .TP
@@ -552,7 +549,7 @@ To delete a bookmark use the \fIdel\fR argument followed by the desired bookmark
 .sp
 Open a bookmark by typing \fIbm SHORTCUT\fR or \fIbm NAME\fR (in which latter case TAB completion is available). Example: \fIbm mnt\fR.
 .sp
-A handy use for the bookmarks function, provided the \fIexpand-bookmarks\fR option is enabled, is to create bookmarks using short names, which will be later easily accessible via TAB completion.
+A handy use for the bookmarks function is to create bookmarks using short names, which will be later easily accessible via TAB completion.
 .sp
 \fBThe b: construct\fR
 .sp

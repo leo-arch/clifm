@@ -616,6 +616,23 @@ extern int watch;
 #define UNSET_LINE_WRAP fputs("\x1b[?7l", stderr)
 #define RING_BELL       fputs("\007", stderr)
 
+/*
+// See https://bestasciitable.com
+#define __CTRL(n) ((n) & ~(1 << 6)) // Just unset (set to zero) the seventh bit
+#define ___CTRL(n) ((n) & 0x3f) // Same as __CTRL
+#define _SHIFT(n) ((n) & ~(1 << 5)) // Unset the sixth bit
+
+// As defined by readline. Explanation:
+// 0x1ff == 0011111
+// So, this bitwise AND operation: 'n & 0x1f', means: set to zero whatever
+// bits in N that are zero in 0x1f, that is, the sixth and seventh bits
+#define _CTRL(n)  ((n) & 0x1f)
+// As defined by readline: set to one the eight bit in N
+#define _META(n)  ((n) | 0x80)
+// Ex: 'A' == 01000001
+//     ('A' | 0x80) == 11000001 == 193 == Á
+ */
+
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
@@ -640,7 +657,7 @@ struct config_t {
 	int desktop_notifications;
 	int dirhist_map;
 	int disk_usage;
-	int expand_bookmarks;
+//	int expand_bookmarks;
 	int ext_cmd_ok;
 	int files_counter;
 	int full_dir_size;
@@ -694,7 +711,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-//	int pad3;
+	int pad3;
 
 	char *opener;
 	char *encoded_prompt;
@@ -916,7 +933,7 @@ struct param_t {
 	int control_d_exits;
 	int disk_usage_analyzer;
 	int eln_use_workspace_color;
-	int expand_bookmarks;
+//	int expand_bookmarks;
 	int ext;
 	int dirs_first;
 	int files_counter;
