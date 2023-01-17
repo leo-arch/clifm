@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 12, 2023" "clifm 1.9.8" "CLIFM Manual"
+.TH "CLIFM" "1" "Jan 16, 2023" "clifm 1.9.9" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -550,14 +550,26 @@ To bookmark the \fI/media/mount\fR directory as "mnt": \fIbm add /media/mount mn
 .sp
 To delete a bookmark use the \fIdel\fR argument followed by the desired bookmark name: \fIbm del mnt\fR.
 .sp
-Open a bookmark by typing \fIbm SHORTCUT\fR or \fIbm NAME\fR (in which latter case TAB completion is available). Example: \fIbm mnt\fR
+Open a bookmark by typing \fIbm SHORTCUT\fR or \fIbm NAME\fR (in which latter case TAB completion is available). Example: \fIbm mnt\fR.
 .sp
 A handy use for the bookmarks function, provided the \fIexpand-bookmarks\fR option is enabled, is to create bookmarks using short names, which will be later easily accessible via TAB completion.
 .sp
-To operate on specific bookmark paths, you can use the \fIb:\fR construct (mostly useful if using TAB completion in FZF mode). For example, type \fIp b:<TAB>\fR, select the bookmarks you want and press Enter, to print the file properties of the selected bookmarks (multi-selection is available).
+\fBThe b: construct\fR
+.sp
+The \fIb:\fR construct is used as a way to quickly access/operate on bookmarks. A few examples:
+.sp
+List available bookmarks: \fIb:<TAB>\fR
+.sp
+Change to the bookmark named \fInet\fR: \fIb:net\fR (or \fIcd b:net\fR)
+.sp
+Print file properties of the bookmarks named \fIbm1\fR and \fIbm2\fR: \fIp b:bm1 b:bm2\fR. If running in FZF mode, you can just press TAB to select multiple bookmarks at once.
+.sp
+Select \fIall\fR bookmarks at once: \fIs b:\fR
+.sp
+If your are not sure about where a bookmark points to, just type \fIb:NAME<TAB>\fR.
 .TP
 .B br, bulk \fIELN/FILE\fR...
-rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the 'sel' keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
+rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the \fIsel\fR keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
 .sp
 Each file name will be copied into a temporary file, which will be opened with the default text editor (via the \fImime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked whether to proceed with the actual bulk renaming or not.
 .sp
@@ -925,25 +937,35 @@ Remove files and/or directories in bulk using a text editor.
 Once in the editor, remove the lines corresponding to the files you want to delete. Save changes and close the editor. Removed files will be listed and the user asked for confirmation.
 .TP
 .B s, sel \fIELN/FILE\fR... [[\fI!\fR]\fIPATTERN\fR] [\fI\-filetype\fR] [\fI:PATH\fR]
-send one or multiple elements (either files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: \fIs\ 1\ 4\-10\ \^r\ file*\ file\ name /path/to/filename\fR. To deselect selected files, use the \fIds\fR command (see above), or the M-d keyboard shortcut.
+send one or multiple files (either regular files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, file names and paths, just as wildcards (globbing) and regular expressions. Example: \fIs 1 4\-10 ^r file* filename /path/to/filename\fR.
 .sp
 If not in light mode, once a file is selected, and if the file is in the current working directory, the corresponding file name will be marked with an asterisk (colored according to the value of \fIli\fR in the color scheme file (by default bold green)), at the left of the file name (and at the right of its ELN).
 .sp
-Just as in the \fIsearch\fR function, it is also possible to further filter the list of matches indicating the desired file type. For instance, \fIs\ \^ \-d\fR will select all directories in the current working directory. For available file type filters see the \fIsearch\fR function above.
+Just as in the \fIsearch\fR function, it is also possible to further filter the list of matches indicating the desired file type. For instance, \fIs ^ \-d\fR will select all directories in the current working directory. For available file type filters see the \fIsearch\fR function above.
 .sp
-By default, the selection function operates on the current working directory. To select files in any other directory use the ":PATH" expression. For example, to select all regular files with a .conf extension in the /etc directory, the command would be: \fIs\ .*\\.conf$\ \-r :/etc\fR, or using wildcards: \fIs\ *.conf\ \-r\ :/etc\fR.
+By default, the selection function operates on the current working directory. To select files in any other directory use the ":PATH" expression. For example, to select all regular files with a .conf extension in the /etc directory, the command would be: \fIs\ .*\\.conf$\ \-r :/etc\fR, or using wildcards: \fIs *.conf \-r\ :/etc\fR. Of course, you can also do just \fIs -r /etc/*.conf\fR.
 .sp
-Just as in the case of the \fIsearch\fR function, inverse matching is supported for patterns, either wildcards or regular expressions. To invert or reverse the meaning and action of a pattern, just prepend an exclamation mark (!). E.g., to select all non-hidden regular files in the Documents directory, issue this command: \fIs\ !^\.\ \-r\ :Documents\fR, or, to select all directories in /etc, except those ending with ".d": \fIs\ !*.d\ \-d\ :/etc\fR.
+Just as in the case of the \fIsearch\fR function, inverse matching is supported for patterns, either wildcards or regular expressions. To invert or reverse the meaning and action of a pattern, just prepend an exclamation mark (!). E.g., to select all non-hidden regular files in the Documents directory, issue this command: \fIs !^\.\ \-r :Documents\fR, or, to select all directories in /etc, except those ending with ".d": \fIs !*.d \-d :/etc\fR.
 .sp
-Glob and regular expressions could be used together. For example: \fIs\ ^[r|R].*d$ /etc/*.conf\fR will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in the \fI/etc\fR directory. However, this use is discouraged if both patterns refer to the same directory, since the second one will probably override the result of the first one.
+Glob and regular expressions could be used together. For example: \fIs ^[r|R].*d$ /etc/*.conf\fR will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in the \fI/etc\fR directory. However, this use is discouraged if both patterns refer to the same directory, since the second one will probably override the result of the first one.
 .sp
-It is important to note that glob expressions are evaluated before regular expressions, in such a way that any pattern that could be understood by both kinds of pattern matching mechanisms will be evaluated first according to the former, that is, as a glob expression. For example, '.*', as regular expression, should match all files. However, since glob expressions are evaluated first, it will only match hidden files. To select all files using a glob expression, try '.* *', or, with a regular expression: '^' or '(.*?)'. The keyboard shortcut M-a is also available to perform the same operation.
+It is important to note that glob expressions are evaluated before regular expressions, in such a way that any pattern that could be understood by both kinds of pattern matching mechanisms will be evaluated first according to the former, that is, as a glob expression. For example, '.*', as regular expression, should match all files. However, since glob expressions are evaluated first, it will only match hidden files. To select all files using a glob expression, try '.* *', or, with a regular expression: '^' or '(.*?)'. The keyboard shortcut \fIAlt\-a\fR is also available to perform the same operation.
 .sp
 The Selection Box is accessible to different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behavior via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox.clifm\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename.clifm\fR is used (this is the default).
 .sp
-To operate on selected files, use the \fIsel\fR keyword. 
+\fBOperating on selected files\fR
 .sp
-\fBNote\fR:  If there is a file named \fIsel\fR in the current directory, use \fI./sel\fR to distinguish it from the \fIsel\fR keyword. For example, enter \fIp ./sel\fR to tell CliFM that you want to get the properties of the file named sel rather than the properties of the currently selected files.
+To operate on one or more selected files use the \fIsel\fR keyword (\fIs:\fR can be used as well). For example, to print the file properties of all selected files: \fIp sel\fR (or \fIp s:\fR). Use \fIs:<TAB>\fR to list selected files (multi-selection is available if running in FZF mode).
+.sp
+\fBListing selected files\fR
+.sp
+To list selected files use the \fIsb\fR command (standing for Selection Box). You can also type \fIs:<TAB>\fR.
+.sp
+\fBDeselecting files\fR
+.sp
+To deselect files use the \fIds\fR command. See above. You can also press \fIAlt-d\fR to deselect all files at once.
+.sp
+\fBNote\fR:  If there is a file named \fIsel\fR in the current directory, use \fI./sel\fR to distinguish it from the \fIsel\fR keyword. For example, enter \fIp ./sel\fR to tell CliFM that you want to get the properties of the file named \fIsel\fR rather than the properties of the currently selected files.
 .sp
 For more information consult the \fBBUILT-IN EXPANSIONS\fR section below.
 .TP
@@ -1680,15 +1702,15 @@ Refer to the \fBTAB completion\fR section below.
 .TP
 \fBThe SEL keyword\fR
 .TP
-\fBclifm\fR will automatically expand the \fB'sel' keyword\fR: 'sel' indeed amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword with any command.
+\fBclifm\fR will automatically expand the \fIsel\fR keyword\fR: \fIsel\fR indeed amounts to 'file1 file2 file3 ...' In this way, you can use the \fIsel\fR keyword with any command. \fIs:\fR can be used interchangeably (with the difference that \fIs:\fR can be used as first word, and not only as parameter to other commands).
 .TP
-If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: 'chmod +x sel'. Or, if you want to copy or move several files into some directory: 'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to a directory), respectively.
+If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: \fIchmod +x sel\fR. Or, if you want to copy or move several files into some directory: \fIcp sel 12\fR, or \fImv sel 12\fR (provided the ELN 12 corresponds to a directory), respectively.
 .TP
-If the destiny directory is omitted, selected files are copied into the current working directory, that is to say, 'mv sel' amounts to 'mv sel .'.
+If the destiny directory is omitted, selected files are copied into the current working directory, that is to say, \fImv sel\fR amounts to \fImv sel .\fR.
 .TP
-To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectively. The same goes for wildcards and braces: 'chmod +x *', for example, will set the executable bit on all files (excluding hidden files) in the current working directory, while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 respectively.
+To trash or remove selected files, simply run \fItr sel\fR or \fIrm sel\fR respectively. The same goes for wildcards and braces: \fIchmod +x *\fR, for example, will set the executable bit on all files (excluding hidden files) in the current working directory, while \fIchmod +x file{1,2,3}\fR will do it for file1, file2, and file3 respectively.
 .TP
-If using the FZF mode for TAB completion (see below), you can operate only on \fIsome\fR selected files as follows: type 'CMD sel' and, without appending any space char, press TAB: the list of selected files will be displayed. Choose one or more of them (use TAB to mark entries) to operate only on those specific files. For example, to print the file properties of some specific selected files: p sel->TAB, select the files you want via TAB, press Enter or Right (marked files will be inserted in the command line), and the press Enter, as usual.
+If using the FZF mode for TAB completion (see below), you can operate only on \fIsome\fR selected files as follows: type \fICMD sel\fR and, without appending any space char, press TAB: the list of selected files will be displayed. Choose one or more of them (use TAB to mark entries) to operate only on those specific files. For example, to print the file properties of some specific selected files: p sel->TAB, select the files you want via TAB, press Enter or Right (marked files will be inserted in the command line), and the press Enter, as usual.
 .TP
 \fBTAB completion\fR
 .TP
@@ -2755,7 +2777,7 @@ T{
 s 1-4 8 19-26
 T}	Select multiple files in the current directory by ELN
 T{
-sb
+sb (sel<TAB> or s:<TAB>)
 T}	List selected files \fB(5)\fR
 T{
 ds (ds <TAB>)
@@ -2797,13 +2819,13 @@ T{
 bm add mydir/ mybm
 T}	Bookmark the directory \fImydir/\fR as "mybm"\fR
 T{
-bm mybm
+bm mybm (b:mybm)
 T}	Access the bookmark named \fImybm\fR \fB(8)\fR
 T{
 bm del mybm
 T}	Remove the bookmark named \fImybm\fR
 T{
-bm (Alt-b)
+bm (Alt-b or b:<TAB>)
 T}	Open the bookmarks manager
 .TE
 
