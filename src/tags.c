@@ -372,12 +372,12 @@ tag_file(char *name, char *tag)
 		}
 		new_tag = 1;
 	}
-	free(p);
 
-	if (new_tag) {
-		printf(_("Created new tag %s%s%s\n"), conf.colorize ? BOLD : "", tag, df_c);
+	if (new_tag == 1) {
+		printf(_("Created new tag %s%s%s\n"), conf.colorize ? BOLD : "", p ? p : tag, df_c);
 		reload_tags();
 	}
+	free(p);
 
 	char name_path[PATH_MAX];
 	*name_path = '\0';
