@@ -1430,7 +1430,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			/* Coming from untag ('tu :TAG ') */
 			finder_offset++;
 		} else { /* Coming from tag expression ('t:FULL_TAG') */
-			char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+			char *sp = lb ? get_last_space(lb, rl_point) : (char *)NULL;
 			finder_offset = prompt_offset + (sp ? (int)(sp - lb): -1);
 //			finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -2);
 		}
@@ -1454,7 +1454,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else if (cur_comp_type == TCMP_BM_PATHS) {
-		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		char *sp = lb ? get_last_space(lb, rl_point) : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -3);
 	}
 
