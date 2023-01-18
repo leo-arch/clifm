@@ -118,8 +118,8 @@ print_file_attrs(const int aflags)
 		return EXIT_FAILURE;
 	}
 
-	char bits[23];
 	char c = '-';
+	char bits[23] = {c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c};
 
 	bits[0] = (aflags & FS_SECRM_FL) ? 's' : c;
 	bits[1] = (aflags & FS_UNRM_FL) ? 'u' : c;
@@ -137,11 +137,17 @@ print_file_attrs(const int aflags)
 	bits[13] = (aflags & FS_TOPDIR_FL) ? 'T' : c;
 	bits[14] = (aflags & FS_EXTENT_FL) ? 'e' : c;
 	bits[15] = (aflags & FS_NOCOW_FL) ? 'C' : c;
+#ifdef FS_DAX_FL // Not on Debian
 	bits[16] = (aflags & FS_DAX_FL) ? 'x' : c;
+#endif
+#ifdef FS_CASEFOLD_FL // Not on Debian
 	bits[17] = (aflags & FS_CASEFOLD_FL) ? 'F' : c;
+#endif
 	bits[18] = (aflags & FS_INLINE_DATA_FL) ? 'N' : c;
 	bits[19] = (aflags & FS_PROJINHERIT_FL) ? 'P' : c;
+#ifdef FS_VERITY_FL // Not on Debian
 	bits[20] = (aflags & FS_VERITY_FL) ? 'V' : c;
+#endif
 	bits[21] = (aflags & FS_NOCOMP_FL) ? 'm' : c;
 	bits[22] = '\0';
 
