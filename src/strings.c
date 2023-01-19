@@ -92,9 +92,27 @@ static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 || (x) == 'o' || (x) == 'p' || (x) == 's' || (x) == 't' || (x) == 'u' \
 || (x) == 'x')
 
-/* Get the last non-escaped space in STR (whose length is LEN)
+/* Get the last occurrence of the (non-escaped) character C in STR (whose length is LEN)
  * Return a pointer to it if found or NULL if not */
 char *
+get_last_chr(char *str, const char c, const int len)
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	int i = len;
+	while (--i >= 0) {
+		if ((i > 0 && str[i] == c && str[i - 1] != '\\')
+		|| (i == 0 && str[i] == c))
+			return str + i;
+	}
+
+	return (char *)NULL;
+}
+
+/* Get the last occurrence of a non-escaped space in STR (whose length is LEN)
+ * Return a pointer to it if found or NULL if not */
+/*char *
 get_last_space(char *str, const int len)
 {
 	if (!str || !*str)
@@ -108,7 +126,7 @@ get_last_space(char *str, const int len)
 	}
 
 	return (char *)NULL;
-}
+} */
 
 char *
 replace_slashes(char *str, const char c)

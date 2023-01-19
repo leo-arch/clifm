@@ -2160,7 +2160,8 @@ rl_suggestions(const unsigned char c)
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
-	char *last_space = get_last_space(rl_line_buffer, rl_end);
+//	char *last_space = get_last_space(rl_line_buffer, rl_end);
+	char *last_space = get_last_chr(rl_line_buffer, ' ', rl_end);
 
 	/* Reset the wrong cmd flag whenever we have a new word or a new line */
 	if (rl_end == 0 || c == '\n') {

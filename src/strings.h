@@ -40,7 +40,8 @@ int  *expand_range(char *, int);
 //int  fuzzy_match2(char *, char *, const int, int *);
 
 char *gen_rand_str(size_t);
-char *get_last_space(char *, const int);
+char *get_last_chr(char *, const char, const int);
+//char *get_last_space(char *, const int);
 char **get_substr(char *, const char);
 char *home_tilde(char *, int *);
 char **parse_input_str(char *);

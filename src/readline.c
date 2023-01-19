@@ -2432,9 +2432,19 @@ rl_glob(char *text)
 	free(tmp);
 
 	if (globbuf.gl_pathc == 1) {
-		char **t = (char **)xnmalloc(globbuf.gl_pathc + 1, sizeof(char *));
-		t[0] = savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
-		t[1] = (char *)NULL;
+		char **t = (char **)xnmalloc(globbuf.gl_pathc + 2, sizeof(char *));
+		char *p = strrchr(globbuf.gl_pathv[0], '/');
+		if (p && *(++p)) {
+			char c = *p;
+			*p = '\0';
+			t[0] = savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
+			*p = c;
+			t[1] = savestring(p, strlen(p));
+			t[2] = (char *)NULL;
+		} else {
+			t[0] = savestring(globbuf.gl_pathv[0], strlen(globbuf.gl_pathv[0]));
+			t[1] = (char *)NULL;
+		}
 		globfree(&globbuf);
 		return t;
 	}
@@ -2444,7 +2454,7 @@ rl_glob(char *text)
 
 	/* If /path/to/dir/GLOB<TAB>, /path/to/dir goes to slot 0 */
 	int c = -1;
-	char *ls = get_last_space(rl_line_buffer, rl_end), *q = (char *)NULL;
+	char *ls = get_last_chr(rl_line_buffer, ' ', rl_point), *q = (char *)NULL;
 	char *ds = ls ? dequote_str(ls, 0) : (char *)NULL;
 	char *p = ds ? ds : (ls ? ls : (char *)NULL);
 
@@ -3138,6 +3148,12 @@ my_rl_completion(const char *text, int start, int end)
 	while (*text == '\\')
 		++text;
 
+	/* Do not complete when the cursor is on a word. Ex: dir/_ilename */
+	if (rl_point < rl_end && rl_line_buffer[rl_point] != ' ') {
+		rl_attempted_completion_over = 1;
+		return (char **)NULL;
+	}
+
 	/* #### FILE TYPE EXPANSION #### */
 	if (xrename == 0 && *text == '=') {
 		if (!*(text + 1)) {
@@ -3245,8 +3261,7 @@ my_rl_completion(const char *text, int start, int end)
 #ifndef _NO_TAGS
 	/* ##### TAGS ##### */
 	/* ##### 1. TAGGED FILES (t:NAME<TAB>) ##### */
-	if (tags_n > 0 && rl_point == rl_end && *text == 't'
-	&& *(text + 1) == ':' && *(text + 2)) {
+	if (tags_n > 0 && *text == 't' && *(text + 1) == ':' && *(text + 2)) {
 		free(cur_tag);
 		cur_tag = savestring(text + 2, strlen(text + 2));
 		matches = check_tagged_files(cur_tag);
@@ -3276,8 +3291,7 @@ my_rl_completion(const char *text, int start, int end)
 #endif /* !_NO_TAGS */
 
 	/* #### BOOKMARK PATH (b:FULLNAME) #### */
-	if (rl_point == rl_end && xrename == 0 && *text == 'b'
-	&& *(text + 1) == ':' && *(text + 2)) {
+	if (xrename == 0 && *text == 'b' && *(text + 1) == ':' && *(text + 2)) {
 		char *t = (char *)text + 2;
 		char *p = dequote_str(t, 0);
 		matches = rl_completion_matches(p ? p : t, &bm_paths_generator);
@@ -3294,7 +3308,7 @@ my_rl_completion(const char *text, int start, int end)
 
 	/* ##### BOOKMARK NAMES (b:) ##### */
 	if (xrename == 0 && (conf.autocd == 1 || conf.auto_open == 1)
-	&& rl_point == rl_end && *text == 'b' && *(text + 1) == ':') {
+	&& *text == 'b' && *(text + 1) == ':') {
 		char *p = dequote_str((char *)text, 0);
 		matches = rl_completion_matches(p ? p : text, &bookmarks_generator);
 		free(p);

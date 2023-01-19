@@ -1219,7 +1219,8 @@ is_multi_sel(void)
 		return 0;
 
 	char *l = rl_line_buffer;
-	char *lws = strrchr(rl_line_buffer, ' ');
+//	char *lws = strrchr(rl_line_buffer, ' ');
+	char *lws = get_last_chr(rl_line_buffer, ' ', rl_point);
 
 	/* Do not allow multi-sel if we have a path, only file names */
 	if (t == TCMP_PATH && *l != '/' && (!lws || !strchr(lws, '/'))) {
@@ -1262,6 +1263,9 @@ clean_rl_buffer(const char *text)
 	if (!text || !*text)
 		return EXIT_FAILURE;
 
+	if (rl_point != rl_end)
+		return EXIT_SUCCESS;
+
 	/* If the previous char is not space, then a common prefix was appended:
 	 * remove it */
 	if ((rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] != ' ')
@@ -1294,6 +1298,7 @@ clean_rl_buffer(const char *text)
 	return EXIT_FAILURE;
 }
 
+// MOVE SOME CODE OUT OF HERE!!
 /* Display possible completions using the corresponding finder. If one of these
  * possible completions is selected, insert it into the current line buffer.
  *
@@ -1430,7 +1435,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			/* Coming from untag ('tu :TAG ') */
 			finder_offset++;
 		} else { /* Coming from tag expression ('t:FULL_TAG') */
-			char *sp = lb ? get_last_space(lb, rl_point) : (char *)NULL;
+			char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 			finder_offset = prompt_offset + (sp ? (int)(sp - lb): -1);
 //			finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -2);
 		}
@@ -1441,7 +1446,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
-		char *sp = lb ? strrchr(lb,  ' ') : (char *)NULL;
+		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		if (sp) /* Expression is second or more word: "text =FILE_TYPE" */
 			finder_offset = prompt_offset + (int)(sp - lb) - 1;
 		else /* Expression is first word: "=FILE_TYPE" */
@@ -1449,12 +1454,12 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES) {
-		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -(rl_end + 1));
 	}
 
 	else if (cur_comp_type == TCMP_BM_PATHS) {
-		char *sp = lb ? get_last_space(lb, rl_point) : (char *)NULL;
+		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -3);
 	}
 
@@ -1463,19 +1468,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 1 : 0);
 	}
 
-/*	else if (cur_comp_type == TCMP_TAGS_T) {
-		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
-		finder_offset = prompt_offset + (sp ? (int)(sp - lb) : 0);
-	} */
-
 	else if (cur_comp_type == TCMP_BM_PREFIX || cur_comp_type == TCMP_TAGS_T) {
-		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb): -1);
 	}
 
 	else if (cur_comp_type == TCMP_GLOB) {
-		char *sl = lb ? strrchr(lb, '/') : (char *)NULL;
-		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
+		char *sl = lb ? get_last_chr(lb, '/', rl_point) : (char *)NULL;
+		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		if (!sl) {
 			if (sp)
 				finder_offset = prompt_offset + (int)(sp - lb) - 2;
@@ -1550,11 +1550,28 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (!buf)
 		return EXIT_FAILURE;
 
+/*	if (rl_end > rl_point && cur_comp_type != TCMP_PATH) {
+		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_point) : (char *)NULL;
+		int start = s ? (int)(s - rl_line_buffer + 1) : 0;
+		rl_delete_text(start, rl_point);
+		rl_point = start;
+		rl_insert_text(buf);
+		free(buf);
+		return EXIT_SUCCESS;
+	} */
+
 	/* Calculate the length of the matching prefix to insert into the
 	 * line buffer only the non-matched part of the string returned by FZF */
 	size_t prefix_len = calculate_prefix_len(matches[0]);
 
-	if (cur_comp_type == TCMP_OPENWITH) {
+	if (rl_end > rl_point && cur_comp_type != TCMP_PATH) {
+		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_point) : (char *)NULL;
+		int start = s ? (int)(s - rl_line_buffer + 1) : 0;
+		rl_delete_text(start, rl_point);
+		rl_point = start;
+	}
+
+	else if (cur_comp_type == TCMP_OPENWITH) {
 		/* Interpret the corresponding cmd line in the mimelist file
 		 * and replace the input string by the interpreted line */
 		char *sp = (char *)NULL;
@@ -1632,7 +1649,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	|| cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
 	|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_BM_PREFIX
 	|| cur_comp_type == TCMP_TAGS_T) {
-		char *s = rl_line_buffer ? get_last_space(rl_line_buffer, rl_end) : (char *)NULL;
+		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_end) : (char *)NULL;
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
@@ -1648,8 +1665,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else if (cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_CMD_DESC) {
-//		char *s = rl_line_buffer ? strrchr(rl_line_buffer, ' ') : (char *)NULL;
-		char *s = rl_line_buffer ? get_last_space(rl_line_buffer, rl_end) : (char *)NULL;
+		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_end) : (char *)NULL;
 		rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
 		rl_delete_text(rl_point, rl_end);
 		rl_end = rl_point;
