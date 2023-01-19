@@ -2241,7 +2241,7 @@ rl_suggestions(const unsigned char c)
 	&& !(flags & BAEJ_SUGGESTION) && !IS_DIGIT(c)) {
 		if (suggestion.type == HIST_SUG || suggestion.type == INT_CMD) {
 			/* Skip the j cmd: we always want the BAEJ suggestion here */
-			if (word && *word == 'j' && word[1] == ' ') {
+			if (full_line && *full_line == 'j' && full_line[1] == ' ') {
 				;
 			} else if (*full_line == *suggestion_buf
 			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
