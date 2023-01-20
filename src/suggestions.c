@@ -1735,7 +1735,9 @@ turn_it_wrong(void)
 	if (!b) return;
 
 	fputs(hw_c, stdout);
+//	fputs(wp_c, stdout);
 	fflush(stdout);
+//	cur_color = wp_c;
 	cur_color = hw_c;
 	int bk = rl_point;
 

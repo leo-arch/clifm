@@ -50,7 +50,7 @@ xf=01;31:xs=00;32:"
 *.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:\
 *.rar=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.html=33:*.htm=33:\
 *.jpg=01;35:*.JPG=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:\
-*.GIF=01;35:*.bmp=01;35:*.xbm=01;35:*.xpm=01;35:*.png=01;35:*.PNG=01;35:\
+*.GIF=01;35:*.bmp=01;35:*.xbm=01;35:*.xpm=01;35:*.png=01;35:*.PNG=01;35:*.jxl:01;35:\
 *.svg=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:\
 *.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.MP4=01;35:\
 *.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.wmv=01;35:*.flc=01;35:*.avi=01;35:*.ogv=01;35:\
@@ -158,7 +158,8 @@ xf=01;31:xs=00;32:"
 /* This one is purely internal: cur_color is set to this value when
  * entering the warning prompt, so that that we can check cur_color
  * anytime to know whether we are in the warning prompt or not */
-#define DEF_HW_C "\x1b[00;31m"
+//#define DEF_HW_C "\x1b[00;31m"
+//#define DEF_HW_C DEF_WP_C
 
 #define DEF_DIR_ICO_C "\x1b[00;33m"
 

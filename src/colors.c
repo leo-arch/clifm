@@ -987,7 +987,7 @@ set_default_colors(void)
 	if (!*hr_c) strcpy(hr_c, DEF_HR_C);
 	if (!*hs_c) strcpy(hs_c, DEF_HS_C);
 	if (!*hv_c) strcpy(hv_c, DEF_HV_C);
-	if (!*hw_c) strcpy(hw_c, DEF_HW_C);
+//	if (!*hw_c) strcpy(hw_c, DEF_HW_C);
 	if (!*tt_c) strcpy(tt_c, DEF_TT_C);
 
 	if (!*sb_c) strcpy(sb_c, DEF_SB_C);
@@ -1020,6 +1020,8 @@ set_default_colors(void)
 	if (!*wp_c) strcpy(wp_c, DEF_WP_C);
 	if (!*xs_c) strcpy(xs_c, DEF_XS_C);
 	if (!*xf_c) strcpy(xf_c, DEF_XF_C);
+
+	if (!*hw_c) strcpy(hw_c, wp_c);
 
 	if (!*ws1_c) strcpy(ws1_c, DEF_WS1_C);
 	if (!*ws2_c) strcpy(ws2_c, DEF_WS2_C);

@@ -71,6 +71,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	char prev = pos ? str[pos - 1] : 0;
 	char c = *(str + pos);
 
+//	if (wrong_cmd == 1 && cur_color == wp_c && rl_end == 0) {
 	if (wrong_cmd == 1 && cur_color == hw_c && rl_end == 0) {
 		fputs(tx_c, stdout); fflush(stdout);
 		rl_redisplay();
@@ -87,6 +88,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		goto END;
 
 	char *sp = strchr(rl_line_buffer, ' ');
+//	if (cur_color == wp_c && !sp)
 	if (cur_color == hw_c && !sp)
 		goto END;
 
@@ -224,6 +226,7 @@ recolorize_line(void)
 
 	/* Set text color to default */
 	if (cur_color != tx_c && cur_color != hw_c && cur_color != hn_c) {
+//	if (cur_color != tx_c && cur_color != wp_c && cur_color != hn_c) {
 		cur_color = tx_c;
 		fputs(tx_c, stdout);
 	}
