@@ -42,9 +42,9 @@
     actions edit\n\n\
 Actions are just names for plugins.\n\
 An action definition has the following form: \"NAME=plugin\", for example:\n\
-\"-=fzfnav.sh\".\n\
-To run a plugin just enter the action name. So, to run the fzfnav.sh plugin,\n\
-just enter \"-\".\n\
+\"//=rgfind.sh\".\n\
+To run a plugin just enter the action name. So, to run the rgfind.sh plugin,\n\
+just enter \"//\".\n\
 Some plugins accept parameters. To get information about a specific plugin\n\
 use the -h,--help flag. Example: \"- --help\"."
 

@@ -341,7 +341,7 @@ actions_function(char **args)
 		if (actions_n > 0) {
 			/* Just list available actions */
 			printf(_("To run a plugin just enter its action name\n"
-				"Example: enter '-' to run the fzfnav plugin\n"));
+				"Example: enter '//' to run the rgfind plugin\n"));
 			size_t i, largest = get_largest_action_name();
 			for (i = 0; i < actions_n; i++) {
 				printf("%-*s %s->%s %s\n", (int)largest, usr_actions[i].name,
