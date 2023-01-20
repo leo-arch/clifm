@@ -29,7 +29,7 @@
 
 /* Default color definitions */
 #define DEF_FILE_COLORS "bd=01;33:ca=30;41:cd=01:di=01;34:ed=02;34:\
-ee=00;32:ef=02;33:ex=01;32:fi=0:ln=01;36:mh=30;46:nd=04;01;31:ne=02;04;31:nf=02;04;31:\
+ee=00;32:ef=00;02:ex=01;32:fi=0:ln=01;36:mh=30;46:nd=04;01;31:ne=02;04;31:nf=02;04;31:\
 no=00;31;47:or=02;04;36:ow=34;42:pi=00;35:so=01;35:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:uf=02;04;37:"
 
@@ -48,28 +48,29 @@ xf=01;31:xs=00;32:"
 *.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.iso=01;31:\
 *.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:\
 *.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:\
-*.rar=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.html=33:*.htm=33:\
-*.jpg=01;35:*.JPG=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:\
-*.GIF=01;35:*.bmp=01;35:*.xbm=01;35:*.xpm=01;35:*.png=01;35:*.PNG=01;35:*.jxl:01;35:\
-*.svg=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:\
-*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.MP4=01;35:\
-*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.wmv=01;35:*.flc=01;35:*.avi=01;35:*.ogv=01;35:\
-*.flv=01;35:*.m4a=01;33:*.mid=01;33:*.midi=01;33:*.mp3=01;33:*.MP3=01;33:\
-*.ogg=01;33:*.wav=01;33:*.pdf=01;31:*.PDF=01;31:*.djvu=01;31:*.doc=35:*.docx=35:\
-*.xls=35:*.xlsx=35:*.ppt=35:*.pptx=35:*.odt=35:*.ods=35:*.odp=35:\
-*.rtf=35:*.cache=02;37:*.tmp=02;37:*.temp=02;37:*.log=02;37:*.bak=02;37:*.bk=02;37:\
-*.in=02;37:*.out=02;37:*.part=02;37:*.aux=02;37:*.c=00;01:*.c++=00;01:\
-*.h=00;01:*.cc=00;01:*.cpp=00;01:*.h=00;01:*.h++=00;01:*.hh=00;01:\
-*.go=00;01:*.java=00;01:*.js=00;01:*.lua=00;01:*.rb=00;01:*.rs=00;01:"
+*.rar=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.jpg=35:\
+*.JPG=35:*.jpeg=35:*.mjpg=35:*.mjpeg=35:*.gif=35:*.GIF=35:*.bmp=35:*.xbm=35:\
+*.xpm=35:*.png=35:*.PNG=35:*.jxl:35:*.svg=35:*.pcx=35:*.mov=35:\
+*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:\
+*.ogm=01;35:*.mp4=01;35:*.MP4=01;35:*.asf=01;35:*.m4v=01;35:*.mp4v=01;35:\
+*.vob=01;35:*.wmv=01;35:*.flc=01;35:*.avi=01;35:*.ogv=01;35:*.flv=01;35:\
+*.m4a=01;33:*.mid=01;33:*.midi=01;33:*.mp3=01;33:*.MP3=01;33:*.ogg=01;33:\
+*.wav=01;33:*.pdf=01:*.PDF=01:*.djvu=01:*.doc=01:*.docx=01:*.xls=01:*.xlsx=01:\
+*.ppt=01:*.pptx=01:*.odt=01:*.ods=01:*.odp=01:*.rtf=01:*.cache=02;37:\
+*.tmp=02;37:*.temp=02;37:*.log=02;37:*.bak=02;37:*.bk=02;37:*.in=02;37:\
+*.out=02;37:*.part=02;37:*.aux=02;37:*.c=01;33:*.c++=01;33:*.h=01;33:\
+*.cc=01;33:*.cpp=01;33:*.h=01;33:*.h++=01;33:*.hh=01;33:*.go=01;33:\
+*.java=01;33:*.js=01;33:*.lua=01;33:*.rb=01;33:*.rs=01;33:*.html=01;33:\
+*.htm=01;33:*.vb=01;33:"
 
 /* Filetypes */
 #define DEF_BD_C  "\x1b[01;33m" /* Block device */
 #define DEF_CA_C  "\x1b[30;41m" /* File with capabilities */
-#define DEF_CD_C  "\x1b[1m"     /* Character device */
+#define DEF_CD_C  "\x1b[00;01m" /* Character device */
 #define DEF_DI_C  "\x1b[01;34m" /* Dir */
 #define DEF_ED_C  "\x1b[02;34m" /* Empty dir */
 #define DEF_EE_C  "\x1b[00;32m" /* Empty executable file */
-#define DEF_EF_C  "\x1b[02;33m" /* Empty regular file */
+#define DEF_EF_C  "\x1b[00;02m" /* Empty regular file */
 #define DEF_EX_C  "\x1b[01;32m" /* Executable file */
 #define DEF_FI_C  "\x1b[0m"     /* Regular file */
 #define DEF_LN_C  "\x1b[01;36m" /* Symbolic link */

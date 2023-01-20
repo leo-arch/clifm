@@ -45,9 +45,9 @@
 # For example, if 'M' is defined as "00;01;36", we can use this color for
 # ELN's as follows: "el=M" (see below) 
 
-define D=0 # Default terminal foreground color
-#define BD=1 # Bold (keep current color)
-define BD=0;1 # Bold (reset foreground color)
+define D=0 # Default terminal color
+define BD=0;1 # Bold
+define DIM=0;2 # Dimmed
 
 define R=31 # Red
 define BR=1;31 # Bold red
@@ -93,6 +93,14 @@ define KG=30;42 # Black foreground, green background
 # BG is already used for bold green
 define BlGr=34;42 # Blue foreground, green background
 define WB=37;44 # white foreground, blue background
+
+# File groups (used for file extensions)
+define DOC=0;1      # Bold
+define VIDEO=1;35   # Bold magenta
+define IMAGE=0;35   # Magenta
+define SOUND=0;36   # Cyan
+define CODE=1;33    # Bold yellow
+define ARCHIVE=1;31 # Bold red
 
 ### To know what are we applying colors to, we use the following codes:
 
@@ -185,12 +193,12 @@ define WB=37;44 # white foreground, blue background
 
 # FiletypeColors defines the color used for file names when listing files, 
 # just as InterfaceColors defines colors for CliFM's interface.
-FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DY:ex=BG:fi=D:ln=BC:mh=RC:nd=UBR:ne=UDR:nf=UDR:no=URW:or=UDC:ow=BlGr:pi=M:sg=KY:so=BM:st=WB:su=WR:tw=KG:uf=UDW:"
+FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DIM:ex=BG:fi=D:ln=BC:mh=RC:nd=UBR:ne=UDR:nf=UDR:no=URW:or=UDC:ow=BlGr:pi=M:sg=KY:so=BM:st=WB:su=WR:tw=KG:uf=UDW:"
 
 InterfaceColors="bm=BG:dd=C:df=D:dg=Y:dl=DW:dn=DW:dr=Y:do=C:dp=M:dw=R:dxd=G:dxr=C:dz=G:el=C:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:li=BG:mi=BC:nm=BG:si=BB:sb=DY:sc=DC:sd=DW:sf=UDC:sh=DM:sp=DR:sx=DG:sz=UDM:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:wp=DR:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
 # Colors for specific file extensions
-ExtColors="*.tar=BR:*.tgz=BR:*.taz=BR:*.lha=BR:*.lz4=BR:*.lzh=BR:*.lzma=BR:*.tlz=BR:*.txz=BR:*.tzo=BR:*.t7z=BR:*.zip=BR:*.z=BR:*.dz=BR:*.gz=BR:*.lrz=BR:*.lz=BR:*.lzo=BR:*.xz=BR:*.zst=BR:*.tzst=BR:*.bz2=BR:*.bz=BR:*.tbz=BR:*.tbz2=BR:*.tz=BR:*.deb=BR:*.rpm=BR:*.rar=BR:*.cpio=BR:*.7z=BR:*.rz=BR:*.cab=BR:*.iso=BR:*.html=Y:*.htm=Y:*.jpg=BM:*.JPG=BM:*.jpeg=BM:*.jxl=BM:*.mjpg=BM:*.mjpeg=BM:*.gif=BM:*.GIF=BM:*.bmp=BM:*.xbm=BM:*.xpm=BM:*.png=BM:*.PNG=BM:*.svg=BM:*.pcx=BM:*.mov=BM:*.mpg=BM:*.mpeg=BM:*.m2v=BM:*.mkv=BM:*.webm=BM:*.webp=BM:*.ogm=BM:*.ogv=BM:*.mp4=BM:*.MP4=BM:*.m4v=BM:*.mp4v=BM:*.vob=BM:*.wmv=BM:*.flc=BM:*.avi=BM:*.flv=BM:*.m4a=BY:*.mid=BY:*.midi=BY:*.mp3=BY:*.MP3=BY:*.ogg=BY:*.wav=BY:*.pdf=BR:*.PDF=BR:*.djvu=BR:*.doc=M:*.docx=M:*.xls=M:*.xlsx=M:*.ppt=M:*.pptx=M:*.odt=M:*.ods=M:*.odp=M:*.rtf=M:*.cache=DW:*.tmp=DW:*.temp=DW:*.log=DW:*.bak=DW:*.bk=DW:*.in=DW:*.out=DW:*.part=DW:*.aux=DW:*.c=BD:*.c++=BD:*.h=BD:*.cc=BD:*.cpp=BD:*.h=BD:*.h++=BD:*.hh=BD:*.go=BD:*.java=BD:*.js=BD:*.lua=BD:*.rb=BD:*.rs=BD:"
+ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.taz=ARCHIVE:*.lha=ARCHIVE:*.lz4=ARCHIVE:*.lzh=ARCHIVE:*.lzma=ARCHIVE:*.tlz=ARCHIVE:*.txz=ARCHIVE:*.tzo=ARCHIVE:*.t7z=ARCHIVE:*.zip=ARCHIVE:*.z=ARCHIVE:*.dz=ARCHIVE:*.gz=ARCHIVE:*.lrz=ARCHIVE:*.lz=ARCHIVE:*.lzo=ARCHIVE:*.xz=ARCHIVE:*.zst=ARCHIVE:*.tzst=ARCHIVE:*.bz2=ARCHIVE:*.bz=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tz=ARCHIVE:*.deb=ARCHIVE:*.rpm=ARCHIVE:*.rar=ARCHIVE:*.cpio=ARCHIVE:*.7z=ARCHIVE:*.rz=ARCHIVE:*.cab=ARCHIVE:*.iso=ARCHIVE:*.jpg=IMAGE:*.JPG=IMAGE:*.jpeg=IMAGE:*.jxl=IMAGE:*.mjpg=IMAGE:*.mjpeg=IMAGE:*.gif=IMAGE:*.GIF=IMAGE:*.bmp=IMAGE:*.xbm=IMAGE:*.xpm=IMAGE:*.png=IMAGE:*.PNG=IMAGE:*.svg=IMAGE:*.pcx=IMAGE:*.mov=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.m2v=VIDEO:*.mkv=VIDEO:*.webm=VIDEO:*.webp=VIDEO:*.ogm=VIDEO:*.ogv=VIDEO:*.mp4=VIDEO:*.MP4=VIDEO:*.m4v=VIDEO:*.mp4v=VIDEO:*.vob=VIDEO:*.wmv=VIDEO:*.flc=VIDEO:*.avi=VIDEO:*.flv=VIDEO:*.asf=VIDEO:*.m4a=SOUND:*.mid=SOUND:*.midi=SOUND:*.mp3=SOUND:*.MP3=SOUND:*.ogg=SOUND:*.wav=SOUND:*.pdf=DOC:*.PDF=DOC:*.djvu=DOC:*.doc=DOC:*.docx=DOC:*.xls=DOC:*.xlsx=DOC:*.ppt=DOC:*.pptx=DOC:*.odt=DOC:*.ods=DOC:*.odp=DOC:*.rtf=DOC:*.cache=DW:*.tmp=DW:*.temp=DW:*.log=DW:*.bak=DW:*.bk=DW:*.in=DW:*.out=DW:*.part=DW:*.aux=DW:*.c=CODE:*.c++=CODE:*.h=CODE:*.cc=CODE:*.cpp=CODE:*.h=CODE:*.h++=CODE:*.hh=CODE:*.go=CODE:*.java=CODE:*.js=CODE:*.lua=CODE:*.rb=CODE:*.rs=CODE:*.vb=CODE:*.html=CODE:*.htm=CODE:*.md=CODE:"
 
 # If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts)
 DirIconColor="Y"
