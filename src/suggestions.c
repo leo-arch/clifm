@@ -955,7 +955,7 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 		printed = print_match(_match ? _match : _fmatch, len, c);
 	*_fmatch = '\0';
 
-	cur_comp_type = printed == 0 ? TCMP_NONE : TCMP_PATH;
+	cur_comp_type = printed == NO_MATCH ? TCMP_NONE : TCMP_PATH;
 	free(_match);
 	return printed;
 }
@@ -1781,7 +1781,7 @@ static inline int
 check_tags(const char *str, const size_t len, int type)
 {
 	if (!str || !*str || len == 0 || tags_n == 0 || !tags)
-		return 0;
+		return NO_MATCH;
 
 	size_t i;
 	for (i = 0; tags[i]; i++) {
@@ -1789,10 +1789,10 @@ check_tags(const char *str, const size_t len, int type)
 			continue;
 		suggestion.type = type;
 		print_suggestion(tags[i], len, sf_c);
-		return 1;
+		return PARTIAL_MATCH;
 	}
 
-	return 0;
+	return NO_MATCH;
 }
 #endif /* _NO_TAGS */
 
@@ -1802,19 +1802,19 @@ check_sort_methods(char *str, const size_t len)
 	if (len == 0) {
 		if (suggestion.printed)
 			clear_suggestion(CS_FREEBUF);
-		return 0;
+		return NO_MATCH;
 	}
 
 	int a = atoi(str);
 	if (a < 0 || a > SORT_TYPES) {
 		if (suggestion.printed)
 			clear_suggestion(CS_FREEBUF);
-		return 0;
+		return NO_MATCH;
 	}
 
 	suggestion.type = SORT_SUG;
 	print_suggestion(__sorts[a].name, 0, sf_c);
-	return 1;
+	return PARTIAL_MATCH;
 }
 
 static int
@@ -1840,12 +1840,12 @@ check_prompts(char *word, const size_t len)
 			print_suggestion(p ? p : prompts[i].name, len, sx_c);
 			free(p);
 			free(q);
-			return 1;
+			return PARTIAL_MATCH;
 		}
 	}
 
 	free(q);
-	return 0;
+	return NO_MATCH;
 }
 
 /* Get the word after LAST_SPACE (last non-escaped space in rl_line_buffer,
@@ -1920,15 +1920,15 @@ static int
 check_fastback(char *w)
 {
 	if (!w || !*w)
-		return 0;
+		return NO_MATCH;
 
 	char *f = fastback(w);
 	if (!f)
-		return 0;
+		return NO_MATCH;
 
 	if (!*f) {
 		free(f);
-		return 0;
+		return NO_MATCH;
 	}
 
 	suggestion.type = FASTBACK_SUG;
@@ -1939,14 +1939,14 @@ check_fastback(char *w)
 	free(f);
 	free(e);
 
-	return 1;
+	return PARTIAL_MATCH;
 }
 
 static int
 check_profiles(char *word, const size_t len)
 {
 	if (!word || !*word || !profile_names)
-		return 0;
+		return NO_MATCH;
 
 	char *q = (char *)NULL, *w = word;
 	size_t l = len;
@@ -1968,19 +1968,19 @@ check_profiles(char *word, const size_t len)
 			print_suggestion(p ? p : profile_names[i], len, sx_c);
 			free(p);
 			free(q);
-			return 1;
+			return PARTIAL_MATCH;
 		}
 	}
 
 	free(q);
-	return 0;
+	return NO_MATCH;
 }
 
 static int
 check_remotes(char *word, const size_t len)
 {
 	if (!word || !*word || !remotes)
-		return 0;
+		return NO_MATCH;
 
 	char *q = (char *)NULL, *w = word;
 	size_t l = len;
@@ -2002,19 +2002,19 @@ check_remotes(char *word, const size_t len)
 			print_suggestion(p ? p : remotes[i].name, len, sx_c);
 			free(p);
 			free(q);
-			return 1;
+			return PARTIAL_MATCH;
 		}
 	}
 
 	free(q);
-	return 0;
+	return NO_MATCH;
 }
 
 static int
 check_color_schemes(char *word, const size_t len)
 {
 	if (!word || !*word || !color_schemes)
-		return 0;
+		return NO_MATCH;
 
 	char *q = (char *)NULL, *w = word;
 	size_t l = len;
@@ -2036,19 +2036,19 @@ check_color_schemes(char *word, const size_t len)
 			print_suggestion(p ? p : color_schemes[i], len, sx_c);
 			free(p);
 			free(q);
-			return 1;
+			return PARTIAL_MATCH;
 		}
 	}
 
 	free(q);
-	return 0;
+	return NO_MATCH;
 }
 
 static int
 check_bookmark_names(char *word, const size_t len)
 {
 	if (!word || !*word || !bookmarks)
-		return 0;
+		return NO_MATCH;
 
 	size_t prefix = (*word == 'b' && *(word + 1) == ':') ? 2 : 0;
 	char *q = (char *)NULL, *w = word + prefix;
@@ -2088,19 +2088,19 @@ check_bookmark_names(char *word, const size_t len)
 
 			free(p);
 			free(q);
-			return 1;
+			return PARTIAL_MATCH;
 		}
 	}
 
 	free(q);
-	return 0;
+	return NO_MATCH;
 }
 
 static int
 check_backdir(void)
 {
 	if (!workspaces || !workspaces[cur_ws].path)
-		return 0;
+		return NO_MATCH;
 
 	/* Remove the last component of the current path name (CWD):
 	 * we want to match only PARENT directories */
@@ -2126,13 +2126,13 @@ check_backdir(void)
 		print_suggestion(bk_cwd, 0, sf_c);
 		if (ds && ds != lb)
 			free(ds);
-		return 1;
+		return PARTIAL_MATCH;
 	}
 
 	if (ds && ds != lb)
 		free(ds);
 
-	return 0;
+	return NO_MATCH;
 }
 
 /* Check for available suggestions. Returns zero if true, one if not,
@@ -2162,7 +2162,6 @@ rl_suggestions(const unsigned char c)
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
-//	char *last_space = get_last_space(rl_line_buffer, rl_end);
 	char *last_space = get_last_chr(rl_line_buffer, ' ', rl_end);
 
 	/* Reset the wrong cmd flag whenever we have a new word or a new line */
@@ -2215,7 +2214,8 @@ rl_suggestions(const unsigned char c)
 		&& (!rl_line_buffer || strncmp(suggestion_buf, rl_line_buffer, (size_t)rl_point) != 0))
 			clear_suggestion(CS_FREEBUF);
 
-		printed = zero_offset = 1;
+		printed = PARTIAL_MATCH;
+		zero_offset = 1;
 		goto SUCCESS;
 	}
 
@@ -2234,7 +2234,7 @@ rl_suggestions(const unsigned char c)
 	&& (cdesc = check_int_cmd_desc(word, wlen))) {
 		suggestion.type = CMD_DESC_SUG;
 		print_suggestion(cdesc, 0, conf.colorize == 1 ? sd_c : SUG_NO_COLOR);
-		printed = 1;
+		printed = PARTIAL_MATCH;
 		goto SUCCESS;
 	}
 
@@ -2247,7 +2247,8 @@ rl_suggestions(const unsigned char c)
 				;
 			} else if (*full_line == *suggestion_buf
 			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
-				printed = zero_offset = 1;
+				printed = PARTIAL_MATCH;
+				zero_offset = 1;
 				goto SUCCESS;
 			}
 		/* An alias name could be the same as the beginning of the alias defintion,
@@ -2256,7 +2257,7 @@ rl_suggestions(const unsigned char c)
 		? (*word == *suggestion_buf && strncmp(word, suggestion_buf, wlen) == 0)
 		: (TOUPPER(*word) == TOUPPER(*suggestion_buf)
 		&& strncasecmp(word, suggestion_buf, wlen) == 0) ) ) {
-			printed = 1;
+			printed = PARTIAL_MATCH;
 			goto SUCCESS;
 		}
 	}
@@ -2428,7 +2429,6 @@ rl_suggestions(const unsigned char c)
 	int flag = 0;
 
 	/* Let's find out whether the last entered character is escaped */
-//	int escaped = (c == BS && wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
 	int escaped = (wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
 
 	for (st = 0; st < SUG_STRATS; st++) {
