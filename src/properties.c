@@ -159,10 +159,6 @@ get_file_attrs(char *file)
 #else
 	int attr, fd, ret = 0;
 
-	struct stat a;
-	if (lstat(file, &a) == -1 || (!S_ISDIR(a.st_mode) && !S_ISREG(a.st_mode)))
-		return (-1);
-
 	fd = open(file, O_RDONLY);
 	if (fd == -1)
 		return (-1);
@@ -170,10 +166,7 @@ get_file_attrs(char *file)
 	ret = ioctl(fd, FS_IOC_GETFLAGS, &attr);
 	close(fd);
 
-	if (ret == -1)
-		return (-1);
-
-	return attr;
+	return (ret == -1 ? -1 : attr);
 #endif /* !FS_IOC_GETFLAGS */
 }
 #endif /* LINUX_FILE_ATTRS */
@@ -969,7 +962,10 @@ get_properties(char *filename, const int dsize)
 
 #if defined(LINUX_FILE_ATTRS)
 	printf("Attributes: \t");
-	print_file_attrs(get_file_attrs(filename));
+	if (S_ISDIR(attr.st_mode) || S_ISREG(attr.st_mode))
+		print_file_attrs(get_file_attrs(filename));
+	else
+		puts("Unavailable");
 #endif /* LINUX_FILE_ATTRS */
 
 	/* Timestamps */
