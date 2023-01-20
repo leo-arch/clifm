@@ -671,8 +671,10 @@ print_suggestion(const char *str, size_t offset, char *color)
 	if (conf.highlight == 0)
 		rl_redisplay();
 	curcol = prompt_offset + (rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0);
-	while (curcol > term_cols)
-		curcol -= term_cols;
+	if (term_cols > 0) {
+		while (curcol > term_cols)
+			curcol -= term_cols;
+	}
 
 	size_t str_len = wc_xstrlen(str), slines = 0;
 	if (check_conditions(offset, str_len, &baej, &slines) == EXIT_FAILURE) {

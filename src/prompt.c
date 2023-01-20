@@ -913,6 +913,12 @@ initialize_prompt_data(void)
 	print_welcome_msg();
 	_print_tips();
 
+	/* If autols is disabled, and since terminal dimensions are gathered
+	 * in list_dir() via get_term_size(), let's get terminal dimensions
+	 * here. We need them to print suggestions */
+	if (conf.autols == 0 && conf.suggestions == 1)
+		get_term_size();
+
 	/* Set foreground color to default */
 	fputs(df_c, stdout);
 	fflush(stdout);
@@ -1000,9 +1006,13 @@ prompt(void)
 
 	if (!input || !*input || rl_end == 0) {
 		free(input);
-		if ((flags & DELAYED_REFRESH) || xargs.refresh_on_empty_line == 1) {
+//		if ((flags & DELAYED_REFRESH) || xargs.refresh_on_empty_line == 1) {
+		if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
+		|| xargs.refresh_on_empty_line == 1)) {
 			flags &= ~DELAYED_REFRESH;
 			reload_dirlist();
+		} else {
+			flags &= ~DELAYED_REFRESH;
 		}
 		return (char *)NULL;
 	}
