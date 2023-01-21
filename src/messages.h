@@ -473,20 +473,21 @@ history or !<TAB>: List available commands\n\
 - Print the complete list of commands in history\n\
     history\n\
 - Print the last 4 commands in history\n\
-    history -4\n\n\
+    history -4\n\
+- Prevent subsequent entries from being written to the history file\n\
+    history off (then reenable it via 'history on')\n\
+  Note: Starting a command by a space prevent it from being added to history\n\n\
 You can also access the commands history via the exclamation mark (!)\n\
 - List available commands\n\
-    history\n\
+    !<TAB>\n\
+- List all history entries matching 'sudo'\n\
+    !sudo<TAB>\n\
 - Execute the last command\n\
     !!\n\
 - Execute the command number 'n' in the history list\n\
     !n\n\
-- Execute the last - n command in the history list\n\
-    !-n\n\
-- Prevent subsequent entries from being written to the history file\n\
-    history off\n\n\
-Note: If FZF TAB completion mode is enabled, you can easily navigate the \
-commands history list by typing '!' and then pressing TAB"
+- Execute the 'last - n' command in the history list\n\
+    !-n"
 
 #define ICONS_USAGE "Set icons on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
