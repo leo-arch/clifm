@@ -464,19 +464,19 @@ history or !<TAB>: List available commands\n\
 \x1b[1mUSAGE\x1b[0m\n\
   history [edit [APP]] [clear] [-n] [on, off, status]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
+- Print the complete list of commands in history\n\
+    history\n\
+- Print the last 4 commands in history\n\
+    history -4\n\
+- Prevent subsequent commands from being written to the history file\n\
+    history off (then reenable it via 'history on')\n\
+  Note: Starting a command by a space prevent it from being added to history\n\
 - Edit the commands history list\n\
     history edit\n\
 - Edit the commands history list using vi\n\
     history edit vi\n\
 - Clear the history list\n\
-    history clear\n\
-- Print the complete list of commands in history\n\
-    history\n\
-- Print the last 4 commands in history\n\
-    history -4\n\
-- Prevent subsequent entries from being written to the history file\n\
-    history off (then reenable it via 'history on')\n\
-  Note: Starting a command by a space prevent it from being added to history\n\n\
+    history clear\n\n\
 You can also access the commands history via the exclamation mark (!)\n\
 - List available commands\n\
     !<TAB>\n\

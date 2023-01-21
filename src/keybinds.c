@@ -403,6 +403,12 @@ rl_prepend_sudo(int count, int key)
 		sprintf(s, "%s ", DEF_SUDO_CMD);
 	}
 
+	char *c = (char *)NULL;
+	if (conf.highlight == 1 && cur_color && cur_color != tx_c) {
+		c = cur_color;
+		fputs(tx_c, stdout);
+	}
+
 	int p = rl_point;
 	if (*rl_line_buffer == *s
 	&& strncmp(rl_line_buffer, s, len) == 0) {
@@ -412,7 +418,12 @@ rl_prepend_sudo(int count, int key)
 		rl_point = 0;
 		rl_insert_text(s);
 		rl_point = p + (int)len;
+		if (c)
+			rl_redisplay();
 	}
+
+	if (c)
+		fputs(c, stdout);
 
 	if (free_s)
 		free(s);
