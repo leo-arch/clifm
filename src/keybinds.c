@@ -404,7 +404,7 @@ rl_prepend_sudo(int count, int key)
 	}
 
 	char *c = (char *)NULL;
-	if (conf.highlight == 1 && cur_color && cur_color != tx_c) {
+	if (conf.highlight == 1 && conf.colorize == 1 && cur_color && cur_color != tx_c) {
 		c = cur_color;
 		fputs(tx_c, stdout);
 	}
