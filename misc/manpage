@@ -408,7 +408,9 @@ if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the defa
 .B /\fIPATTERN\fR [\fI\-filetype\fR] [\fI-x\fR] [\fIDIR\fR]
 this is the \fBquick search\fR function. Just type \fI/\fR followed by a glob or regular (or extended regular) expression, and \fBclifm\fR will list all matches in the current working directory. For example, both \fI/*.pdf\fR and \fI/.pdf$\fR expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression.
 .sp
-\fBNote\fR: By default, the search function attempts to resolve a pattern first as glob, and if no matches, as regular expression. This behavior can be customizad in the configuration file, via the \fISearchStrategy\fR option.
+You can list previously used search patterns via TAB: \fI/*<TAB>\fR.
+.sp
+\fBNote\fR: By default, the search function attempts to resolve a pattern first as glob, and then, if no matches are found, as a regular expression. This behavior can be customizad however in the configuration file, via the \fISearchStrategy\fR option.
 .sp
 \fBNote 2\fR: If no further parameter is provided, but only a glob pattern (wildcards), you can expand the pattern into the corresponding matches via the TAB key. For example, to list all C files in the current directory: \fI/*.c\fR<TAB>.
 .sp
