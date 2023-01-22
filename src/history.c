@@ -890,8 +890,11 @@ record_cmd(char *input)
 	/* Consequtively equal commands in history */
 	if (history && current_hist_n > 0 && history[current_hist_n - 1].cmd
 	&& *p == *history[current_hist_n - 1].cmd
-	&& strcmp(p, history[current_hist_n - 1].cmd) == 0)
+	&& strcmp(p, history[current_hist_n - 1].cmd) == 0) {
+		/* Update timestamp */
+		history[current_hist_n - 1].date = time(NULL);
 		return 0;
+	}
 
 	return 1;
 }
