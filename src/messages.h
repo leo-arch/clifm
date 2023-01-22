@@ -945,10 +945,10 @@ Mark the files you need via TAB and then press Enter or Right"
 - Trash all files ending with .sh\n\
     t *.sh\n\
 - List currently trashed files\n\
-    t (or 't ls' or 't list')\n\
+    t (or 't ls', 't list', or 't <TAB>')\n\
 - Remove/delete trashed files using a menu (permanent removal)\n\
     t del\n\
-- Remove all files from the trash can:\n\
+- Remove/delete all files from the trash can (permanent removal)\n\
     t empty\n\
 - Untrash all trashed files (restore them to their original location)\n\
     u *\n\
@@ -1401,8 +1401,6 @@ myfile.txt vi      Open 'myfile.txt' with vi\n\
 12                 Open the file whose ELN is 12\n\
 12&                Open the file whose ELN is 12 in the background\n\
 ow myfile.txt      Choose opening application for 'myfile.txt' from a menu\n\
-n myfile           Create a new file named 'myfile'\n\
-n mydir/           Create a new directory named 'mydir'\n\
 p4                 Print the properties of the file whose ELN is 4\n\
 /*.png             Search for files ending with .png in the current dir\n\
 s *.c              Select all C files\n\
@@ -1410,6 +1408,11 @@ s 1-4 8 19-26      Select multiple files by ELN\n\
 sb | s:<TAB>       List currently selected files\n\
 ds                 Deselect a few selected files\n\
 ds * | Alt-d       Deselect all selected files\n\
+bm a mydir mybm    Bookmark the directory named 'mydir' as 'mybm'\n\
+bm d mybm          Remove the bookmark named 'mybm'\n\
+tag --help         Learn about tagging files\n\
+n myfile           Create a new file named 'myfile'\n\
+n mydir/           Create a new directory named 'mydir'\n\
 c sel              Copy selected files into the current directory (1)\n\
 r sel              Remove all selected files (1)\n\
 br sel             Bulk rename selected files (1)\n\
@@ -1426,9 +1429,6 @@ t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
 t del              Permanently remove trashed files using a menu\n\
 t empty            Empty the trash can\n\
 u                  Undelete trashed files using a menu\n\
-bm a mydir mybm    Bookmark the directory named 'mydir' as 'mybm'\n\
-bm d mybm          Remove the bookmark named 'mybm'\n\
-tag --help         Learn about tagging files\n\
 ac sel             Compress/archive selected files (1)\n\n\
 (1) 's:' can be used instead of the 'sel' keyword"
 
