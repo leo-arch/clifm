@@ -604,7 +604,7 @@ print_tips(int all)
 		"Send a command directly to the system shell with ';CMD'",
 		"Run the last executed command: '!!'",
 		"Access the commands history list: '!<TAB>'",
-//		"Access the search patterns history list: '/<TAB>'",
+		"List previously used search patterns: '/*<TAB>'",
 		"Import aliases from file using 'alias import FILE'",
 		"List available aliases by running 'alias'",
 		"Create aliases to easily run your preferred commands (F10)",
