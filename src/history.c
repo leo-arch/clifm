@@ -854,7 +854,7 @@ record_cmd(char *input)
 
 	/* Do not record the history command itself */
 	case 'h':
-		if (*(p + 1) == 'i' && strcmp(p, "history") == 0)
+		if (*(p + 1) == 'i' && strcmp(p + 2, "story") == 0)
 			return 0;
 		break;
 
@@ -865,17 +865,17 @@ record_cmd(char *input)
 
 	/* Do not record exit commands */
 	case 'q':
-		if (*(p + 1) == '\0' || strcmp(p, "quit") == 0)
+		if (!*(p + 1) || strcmp(p + 1, "uit") == 0)
 			return 0;
 		break;
 
 	case 'Q':
-		if (*(p + 1) == '\0')
+		if (!*(p + 1))
 			return 0;
 		break;
 
 	case 'e':
-		if (*(p + 1) == 'x' && strcmp(p, "exit") == 0)
+		if (*(p + 1) == 'x' && strcmp(p + 2, "it") == 0)
 			return 0;
 		break;
 

@@ -894,19 +894,19 @@ following shortcuts as well:\n\
   ty: Merge two tags\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available tags\n\
-    tl\n\
+    tl (or 't:<TAB>')\n\
+- List files tagged as 'pdf'\n\
+    tl pdf (or 't:pdf<TAB>')\n\
 - Tag all .PNG files in the current directory as both 'images' and 'png'\n\
     ta *.png :images :png\n\
-    NOTE: Tags are created if they do not exist\n\
+  Note: Tags are created if they do not exist\n\
 - Tag all selected files as 'special'\n\
     ta sel :special\n\
-- List all files tagged as 'work' and all files tagged as 'documents'\n\
-    tl work documents (or 'tl <TAB>' to choose from a list)\n\
 - Rename tag 'documents' as 'docs'\n\
     tm documents docs\n\
 - Merge tag 'png' into 'images'\n\
     ty png images\n\
-    NOTE: All files tagged as 'png' will be now tagged as 'images', \
+  Note: All files tagged as 'png' will be now tagged as 'images', \
 and the 'png' tag will be removed\n\
 - Remove the tag 'images' (untag all files tagged as 'images')\n\
     td images\n\
@@ -1407,12 +1407,12 @@ p4                 Print the properties of the file whose ELN is 4\n\
 /*.png             Search for files ending with .png in the current dir\n\
 s *.c              Select all C files\n\
 s 1-4 8 19-26      Select multiple files by ELN\n\
-sb                 List currently selected files\n\
+sb | s:<TAB>       List currently selected files\n\
 ds                 Deselect a few selected files\n\
 ds * | Alt-d       Deselect all selected files\n\
-c sel              Copy selected files into the current directory\n\
-r sel              Remove all selected files\n\
-br sel             Bulk rename selected files\n\
+c sel              Copy selected files into the current directory (1)\n\
+r sel              Remove all selected files (1)\n\
+br sel             Bulk rename selected files (1)\n\
 c 34 file_copy     Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
 cr myfile          Copy 'myfile' to a remote location\n\
 m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
@@ -1429,7 +1429,8 @@ u                  Undelete trashed files using a menu\n\
 bm a mydir mybm    Bookmark the directory named 'mydir' as 'mybm'\n\
 bm d mybm          Remove the bookmark named 'mybm'\n\
 tag --help         Learn about tagging files\n\
-ac sel             Compress/archive selected files"
+ac sel             Compress/archive selected files (1)\n\n\
+(1) 's:' can be used instead of the 'sel' keyword"
 
 #define QUICK_HELP_MISC "\
 MISC\n\
@@ -1452,13 +1453,13 @@ Alt-f          Accept the first/next word of the current suggestion\n\
 Enter | Ctrl-l Reprint the current list of files\n\
 pf set test    Change to the profile named 'test'\n\
 st size rev    Sort files by size in reverse order\n\
-Alt-x | Alt-z  Change sort method\n\
+Alt-x | Alt-z  Change sort order\n\
 media          (Un)mount storage devices\n\
 net work       Mount the network resource named 'work'\n\
 actions        List available actions/plugins\n\
 icons on       Enable icons\n\
 q              I'm tired, quit\n\
-Q              cd on quit"
+Q              cd on quit (consult the manpage)"
 
 #define ASCII_LOGO_BIG "\
      .okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkd. \n\
