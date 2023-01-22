@@ -29,6 +29,7 @@
 #include <string.h>
 #include <time.h>
 #include <readline/history.h>
+#include <limits.h> /* INT_MIN */
 
 #include "aux.h"
 #include "checks.h"
@@ -456,18 +457,24 @@ __clear_history(char **args)
 }
 
 static int
-print_history_list(void)
+print_history_list(const int timestamp)
 {
 	int n = DIGINUM(current_hist_n);
 	size_t i;
-	for (i = 0; i < current_hist_n; i++)
+	for (i = 0; i < current_hist_n; i++) {
+		if (timestamp == 1 && history[i].date != -1) {
+			char tdate[MAX_TIME_STR];
+			gen_time_str(tdate, sizeof(tdate), history[i].date);
+			printf(" %s# %s%s\n", "\x1b[0;2m", tdate, "\x1b[0m");
+		}
 		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i].cmd);
+	}
 
 	return EXIT_SUCCESS;
 }
 
 static int
-print_last_items(char *str)
+print_last_items(char *str, const int timestamp)
 {
 	int num = atoi(str);
 
@@ -476,8 +483,14 @@ print_last_items(char *str)
 
 	int n = DIGINUM(current_hist_n);
 	size_t i;
-	for (i = current_hist_n - (size_t)num; i < current_hist_n; i++)
+	for (i = current_hist_n - (size_t)num; i < current_hist_n; i++) {
+		if (timestamp == 1 && history[i].date != -1) {
+			char tdate[MAX_TIME_STR];
+			gen_time_str(tdate, sizeof(tdate), history[i].date);
+			printf(" %s# %s%s\n", "\x1b[0;2m", tdate, "\x1b[0m");
+		}
 		printf(" %s%-*zu%s %s\n", el_c, n, i + 1, df_c, history[i].cmd);
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -505,7 +518,7 @@ toggle_history(const char *arg)
 }
 
 int
-history_function(char **comm)
+history_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		printf(_("%s: history: %s\n"), PROGRAM_NAME, STEALTH_DISABLED);
@@ -518,22 +531,28 @@ history_function(char **comm)
 	}
 
 	/* If no arguments, print the history list */
-	if (!comm[1])
-		return print_history_list();
+	if (!args[1] || (strcmp(args[1], "show-time") == 0 && !args[2]))
+		return print_history_list(args[1] ? HIST_TIME : NO_HIST_TIME);
 
-	if (*comm[1] == 'e' && strcmp(comm[1], "edit") == 0)
-		return edit_history(comm);
+	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
+		return edit_history(args);
 
-	if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0)
-		return __clear_history(comm);
+	if (*args[1] == 'c' && strcmp(args[1], "clear") == 0)
+		return __clear_history(args);
 
-	/* If 'history -n', print the last -n elements */
-	if (*comm[1] == '-' && is_number(comm[1] + 1))
-		return print_last_items(comm[1] + 1);
+	/* If "history -n [show-time]", print the last -n elements */
+	if (*args[1] == '-' && is_number(args[1] + 1))
+		return print_last_items(args[1] + 1, (args[2]
+			&& strcmp(args[2], "show-time") == 0) ? HIST_TIME : NO_HIST_TIME);
 
-	if ((*comm[1] == 'o' || *comm[1] == 's') && (strcmp(comm[1], "on") == 0
-	|| strcmp(comm[1], "off") == 0 || strcmp(comm[1], "status") == 0))
-		return toggle_history(comm[1]);
+	/* If "history show-time -n" */
+	if ((*args[1] == 's' && strcmp(args[1], "show-time") == 0)
+	&& args[2] && *args[2] == '-' && is_number(args[2] + 1))
+		return print_last_items(args[2] + 1, HIST_TIME);
+
+	if ((*args[1] == 'o' || *args[1] == 's') && (strcmp(args[1], "on") == 0
+	|| strcmp(args[1], "off") == 0 || strcmp(args[1], "status") == 0))
+		return toggle_history(args[1]);
 
 	/* None of the above */
 	puts(_(HISTORY_USAGE));
@@ -715,18 +734,35 @@ get_history(void)
 	size_t line_size = 0;
 	char *line_buff = (char *)NULL;
 	ssize_t line_len = 0;
+	time_t tdate = -1;
 
 	while ((line_len = getline(&line_buff, &line_size, hist_fp)) > 0) {
 		line_buff[line_len - 1] = '\0';
+		if (!*line_buff)
+			continue;
+
+		/* Store the command timestamp and continue: the next line is the cmd itself */
+		if (*line_buff == history_comment_char && *(line_buff + 1)
+		&& is_number(line_buff + 1)) {
+//			if (conf.hist_timestamp == 0)
+//				continue;
+			int d = atoi(line_buff + 1);
+			tdate = d == INT_MIN ? -1 : (time_t)d;
+			continue;
+		}
+
 		history = (struct history_t *)xrealloc(history, (current_hist_n + 2) * sizeof(struct history_t));
 		history[current_hist_n].cmd = savestring(line_buff, (size_t)line_len);
 		history[current_hist_n].len = (size_t)line_len;
+		history[current_hist_n].date = tdate;
+		tdate = -1;
 		current_hist_n++;
 	}
 
 	curhistindex = current_hist_n ? current_hist_n - 1 : 0;
 	history[current_hist_n].cmd = (char *)NULL;
 	history[current_hist_n].len = 0;
+	history[current_hist_n].date = -1;
 	free(line_buff);
 	fclose(hist_fp);
 	return EXIT_SUCCESS;
@@ -756,12 +792,15 @@ add_to_cmdhist(char *cmd)
 
 	/* For us */
 	/* Add the new input to the history array */
+	time_t tdate = time(NULL);
 	history = (struct history_t *)xrealloc(history, (size_t)(current_hist_n + 2) * sizeof(struct history_t));
 	history[current_hist_n].cmd = savestring(cmd, cmd_len);
 	history[current_hist_n].len = cmd_len;
+	history[current_hist_n].date = tdate;
 	current_hist_n++;
 	history[current_hist_n].cmd = (char *)NULL;
 	history[current_hist_n].len = 0;
+	history[current_hist_n].date = -1;
 }
 
 /* Returns 1 if INPUT should be stored in history and 0 if not */

@@ -1237,7 +1237,6 @@ SearchStrategy=%d\n\n",
 		DEF_CMD_DESC_SUG == 1 ? "true" : "false",
 		DEF_HIGHLIGHT == 1 ? "true" : "false",
 		DEF_SEARCH_STRATEGY
-//		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false"
 		);
 
 	fprintf(config_fp,

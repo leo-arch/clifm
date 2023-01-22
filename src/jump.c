@@ -96,6 +96,8 @@ add_to_jumpdb(const char *dir)
 
 	int i = (int)jump_n, new_entry = 1;
 	while (--i >= 0) {
+		/* Jump entries are all absolute paths, so that they all start with
+		 * a slash. Let's start comparing then the second char */
 		if (dir[1] == jump_db[i].path[1] && strcmp(jump_db[i].path, dir) == 0) {
 			jump_db[i].visits++;
 			jump_db[i].last_visit = time(NULL);
@@ -104,7 +106,7 @@ add_to_jumpdb(const char *dir)
 		}
 	}
 
-	if (!new_entry)
+	if (new_entry == 0)
 		return EXIT_SUCCESS;
 
 	return write_jump_entry(dir);

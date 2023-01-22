@@ -27,8 +27,19 @@
 
 #include <time.h>
 
+#ifdef RL_READLINE_VERSION
+# if RL_READLINE_VERSION >= 0x0801
+#  define _READLINE_HAS_ACTIVATE_MARK
+# endif /* RL_READLINE_VERSION >= 0x0801 */
+#endif /* RL_READLINE_VERSION */
+
 /* Max size type length for the value returned by get_size_type() */
 #define MAX_UNIT_SIZE 10 /* "1023.99YB\0" */
+
+#define TIME_STR "%a %b %d %T %Y %z"
+#define MAX_TIME_STR 128
+/* Our resulting time string won't go usually beyond 29 chars. But since this
+ * length is locale dependent, let's use a much larger buffer */
 
 __BEGIN_DECLS
 
@@ -41,6 +52,7 @@ char from_hex(char);
 //char *from_octal(char *s);
 char *gen_date_suffix(struct tm);
 char *get_cmd_path(const char *);
+void gen_time_str(char *, const size_t, const time_t);
 void clear_term_img(void);
 mode_t get_dt(const mode_t);
 /*int *get_hex_num(const char *str); */

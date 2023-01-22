@@ -1127,6 +1127,7 @@ extern size_t internal_cmds_n;
 struct history_t {
 	char *cmd;
 	size_t len;
+	time_t date;
 };
 extern struct history_t *history;
 

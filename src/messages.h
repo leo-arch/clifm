@@ -462,12 +462,15 @@ history or !<TAB>: List available commands\n\
 
 #define HISTORY_USAGE "List or access commands history entries\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  history [edit [APP]] [clear] [-n] [on, off, status]\n\n\
+  history [edit [APP]] [clear] [-n] [on, off, status, show-time]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the complete list of commands in history\n\
     history\n\
+- Print the complete list of commands in history (with timestamps)\n\
+    history show-time\n\
 - Print the last 4 commands in history\n\
     history -4\n\
+  Note: 'history show-time -4' to add timestamps\n\
 - Prevent subsequent commands from being written to the history file\n\
     history off (then reenable it via 'history on')\n\
   Note: Starting a command by a space prevent it from being added to history\n\

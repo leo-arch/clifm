@@ -358,6 +358,9 @@ init_history(void)
 		check_file_size(log_file, conf.max_log);
 
 	/* Get history */
+	history_comment_char = '#';
+	history_write_timestamps = 1;
+
 	struct stat attr;
 	if (stat(hist_file, &attr) == 0 && FILE_SIZE != 0) {
 		/* If the size condition is not included, and in case of a zero

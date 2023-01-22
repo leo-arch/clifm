@@ -72,13 +72,6 @@
 # define DT_DIR 4
 #endif
 
-//#define TIME_STR "%a %b %d %H:%M:%S %Y %z"
-#define TIME_STR "%a %b %d %T %Y %z"
-//#define TIME_STR "%a %F %T %z"
-#define MAX_TIME_STR 128
-/* Our resulting time string won't go usually beyond 29 chars. But since this
- * length is locale dependent, let's use a much larger buffer */
-
 struct perms_t {
 	/* Field colors */
 	char *cur;
@@ -769,22 +762,6 @@ set_file_owner(char **args)
 
 	free(new_own);
 	return exit_status;
-}
-
-/* Format time data given by _TIME (in the format specified by the TIME_STR
- * macro) and copy the result into the array BUF of size SIZE */
-static void
-gen_time_str(char *buf, const size_t size, const time_t _time)
-{
-	struct tm tm;
-	localtime_r(&_time, &tm);
-
-	if (_time) {
-		strftime(buf, size, TIME_STR, &tm);
-	} else {
-		*buf = '-';
-		buf[1] = '\0';
-	}
 }
 
 static int

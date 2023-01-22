@@ -25,6 +25,10 @@
 #ifndef HISTORY_H
 #define HISTORY_H
 
+/* Macros for history_function() */
+#define NO_HIST_TIME 0
+#define HIST_TIME    1
+
 __BEGIN_DECLS
 
 void add_to_cmdhist(char *);

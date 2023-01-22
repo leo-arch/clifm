@@ -1158,10 +1158,6 @@ check_history(const char *str, const size_t len)
 	if (!str || !*str || len == 0)
 		return NO_MATCH;
 
-	// Skip fastback
-/*	if (len >= 3 && *str == '.' && str[1] == '.' && str[2] == '.')
-		return NO_MATCH; */
-
 	int i = (int)current_hist_n;
 	while (--i >= 0) {
 		if (!history[i].cmd || TOUPPER(*str) != TOUPPER(*history[i].cmd))
@@ -1351,108 +1347,6 @@ check_jumpdb(const char *str, const size_t len, const int print)
 
 	return NO_MATCH;
 }
-
-/*
-static inline void
-print_bookmark_dir_suggestion(const int i)
-{
-	suggestion.type = BOOKMARK_SUG;
-	suggestion.filetype = DT_DIR;
-
-	char tmp[PATH_MAX + 3];
-	size_t path_len = strlen(bookmarks[i].path);
-	if (path_len > 0 && bookmarks[i].path[path_len - 1] != '/')
-		snprintf(tmp, sizeof(tmp), "%s/", bookmarks[i].path);
-	else
-		xstrsncpy(tmp, bookmarks[i].path, sizeof(tmp) - 1);
-
-	char *color = conf.suggest_filetype_color == 1 ? di_c : sf_c;
-
-	char *_tmp = escape_str(tmp);
-	print_suggestion(_tmp ? _tmp : tmp, 0, color);
-//	print_suggestion(_tmp ? _tmp : tmp, 1, color);
-	free(_tmp);
-}
-
-static inline void
-print_bookmark_file_suggestion(const int i, struct stat *attr)
-{
-	suggestion.type = BOOKMARK_SUG;
-	suggestion.filetype = DT_REG;
-
-	int free_color = 0;
-	char *color = (!conf.suggest_filetype_color) ? sf_c : (char *)NULL;
-
-	if (conf.suggest_filetype_color)
-		color = get_comp_color(bookmarks[i].path, attr, &free_color);
-
-	char *_tmp = escape_str(bookmarks[i].path);
-	print_suggestion(_tmp ? _tmp : bookmarks[i].path, 0, color);
-//	print_suggestion(_tmp ? _tmp : bookmarks[i].path, 1, color);
-	free(_tmp);
-
-	if (free_color == 1)
-		free(color);
-}
-
-static int
-check_bookmarks(const char *str, const size_t len, const int print)
-{
-	if (bm_n == 0)
-		return NO_MATCH;
-
-	int i = (int)bm_n;
-	while (--i >= 0) {
-		if (!bookmarks[i].name || TOUPPER(*str) != TOUPPER(*bookmarks[i].name))
-			continue;
-
-		if (!print) {
-			if ((conf.case_sens_path_comp ? strcmp(str, bookmarks[i].name)
-			: strcasecmp(str, bookmarks[i].name)) == 0)
-				return FULL_MATCH;
-			continue;
-		}
-
-		if (len && (conf.case_sens_path_comp ? strncmp(str, bookmarks[i].name, len)
-		: strncasecmp(str, bookmarks[i].name, len)) == 0) {
-			struct stat attr;
-			if (lstat(bookmarks[i].path, &attr) == -1)
-				continue;
-			else if ((attr.st_mode & S_IFMT) == S_IFDIR)
-				print_bookmark_dir_suggestion(i);
-			else
-				print_bookmark_file_suggestion(i, &attr);
-
-			return PARTIAL_MATCH;
-		}
-	}
-
-	return NO_MATCH;
-} */
-
-/*
-static int
-check_bookmarks(const char *str, const size_t len)
-{
-	if (bm_n == 0)
-		return NO_MATCH;
-
-	int i = (int)bm_n;
-	while (--i >= 0) {
-		if (!bookmarks[i].name || !bookmarks[i].path
-		|| TOUPPER(*str) != TOUPPER(*bookmarks[i].name))
-			continue;
-
-		if (len > 0 && (conf.case_sens_path_comp == 1 ? strcmp(str, bookmarks[i].name)
-		: strcasecmp(str, bookmarks[i].name)) == 0) {
-			suggestion.type = BOOKMARK_SUG;
-			print_suggestion(bookmarks[i].path, 0, sf_c);
-			return PARTIAL_MATCH;
-		}
-	}
-
-	return NO_MATCH;
-} */
 
 static int
 check_int_params(const char *str, const size_t len)
@@ -2075,15 +1969,6 @@ check_bookmark_names(char *word, const size_t len)
 
 			char *p = escape_str(bookmarks[i].name);
 
-/*			if (prefix == 2) {
-				suggestion.type = BM_PREFIX_SUG;
-//				char tmp[NAME_MAX + 3];
-//				snprintf(tmp, sizeof(tmp), "b:%s", p ? p : bookmarks[i].name);
-//				print_suggestion(tmp, len, sx_c);
-			} else {
-				suggestion.type = BM_NAME_SUG;
-//				print_suggestion(p ? p : bookmarks[i].name, len, sx_c);
-			} */
 			suggestion.type = prefix == 2 ? BM_PREFIX_SUG : BM_NAME_SUG;
 			print_suggestion(p ? p : bookmarks[i].name, len - prefix, sx_c);
 
@@ -2446,27 +2331,7 @@ rl_suggestions(const unsigned char c)
 				goto SUCCESS;
 			break;
 
-/*		case 'b': // 3.d.2) Bookmarks
-			if ((conf.autocd == 1 || conf.auto_open == 1) && *word == 'b'
-			&& *(word + 1) == ':' && *(word + 2)) {
-				if (suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
-
-				if ((printed = check_bookmarks(word + 2, wlen - 2)))
-					goto SUCCESS;
-			} */
-/*			if (last_space || conf.autocd || conf.auto_open) {
-				flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
-				if (flag == CHECK_MATCH && suggestion.printed)
-					clear_suggestion(CS_FREEBUF);
-
-				printed = check_bookmarks(word, wlen, flag);
-				if (printed)
-					goto SUCCESS;
-			} */
-			break;
-
-		case 'c': /* 3.d.3) Possible completions (only path completion!) */
+		case 'c': /* 3.d.2) Possible completions (only path completion!) */
 			if (rl_point < rl_end && c == '/') goto NO_SUGGESTION;
 
 			/* First word and neither autocd nor auto-open */
@@ -2514,7 +2379,7 @@ rl_suggestions(const unsigned char c)
 
 			break;
 
-		case 'e': /* 3.d.4) ELN's */
+		case 'e': /* 3.d.3) ELN's */
 			if (nwords == 1 && first_word) {
 				word = first_word;
 				wlen = strlen(word);
@@ -2546,7 +2411,7 @@ rl_suggestions(const unsigned char c)
 			}
 			break;
 
-		case 'f': /* 3.d.5) File names in CWD */
+		case 'f': /* 3.d.4) File names in CWD */
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
 			if (!last_space && conf.autocd == 0 && conf.auto_open == 0)
@@ -2592,7 +2457,7 @@ rl_suggestions(const unsigned char c)
 
 			break;
 
-		case 'h': /* 3.d.6) Commands history */
+		case 'h': /* 3.d.5) Commands history */
 			printed = check_history(full_line, (size_t)rl_end);
 			if (printed != NO_MATCH) {
 				zero_offset = 1;
@@ -2600,7 +2465,7 @@ rl_suggestions(const unsigned char c)
 			}
 			break;
 
-		case 'j': /* 3.d.7) Jump database */
+		case 'j': /* 3.d.6) Jump database */
 			/* We don't care about auto-open here: the jump function
 			 * deals with directories only */
 			if (!last_space && conf.autocd == 0)

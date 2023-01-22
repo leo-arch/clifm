@@ -52,11 +52,19 @@
 # include "highlight.h"
 #endif
 
-#ifdef RL_READLINE_VERSION
-# if RL_READLINE_VERSION >= 0x0801
-#  define _READLINE_HAS_ACTIVATE_MARK
-# endif /* RL_READLINE_VERSION >= 0x0801 */
-#endif /* RL_READLINE_VERSION */
+void
+gen_time_str(char *buf, const size_t size, const time_t _time)
+{
+	struct tm tm;
+	localtime_r(&_time, &tm);
+
+	if (_time) {
+		strftime(buf, size, TIME_STR, &tm);
+	} else {
+		*buf = '-';
+		buf[1] = '\0';
+	}
+}
 
 /* Store the fzf preview window border style to later fix coordinates if
  * needed (set_fzf_env_vars() in tabcomp.c) */
