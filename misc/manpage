@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 19, 2023" "clifm 1.9.10" "CLIFM Manual"
+.TH "CLIFM" "1" "Jan 21, 2023" "clifm 1.9.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -688,16 +688,15 @@ Toggle full directory size on/off (only for long view mode).
 .B hf, hidden \fR[\fIon\fR, \fIoff\fR, status\fR]
 toggle hidden files on/off.
 .TP
-.B history \fR[\fIedit\fR [\fIAPP\fR]] [\fIclear\fR] [\fI\-n\fR] [\fIon\fR, \fIoff\fR, \fIstatus\fR]
-with no arguments, it shows the history list. If \fIclear\fR is passed as argument, it will delete all entries in the history file. Use 'edit' to open the history file and modify it if needed (the file will be opened with APP, if specified, or with the default associated application otherwise). \fI\-n\fR tells the \fIhistory\fR command to list only the last 'n' commands in the history list. Finally, you can disable history (subsequent entries won't be written to the history file) via \fIhistory\ off\fR.
+.B history \fR[\fIedit\fR [\fIAPP\fR]] [\fIclear\fR] [\fI\-n\fR] [\fIon\fR, \fIoff\fR, \fIstatus\fR, \fIshow\-time\fR]
+with no arguments, it prints the history list (use \fIshow-time\fR to print timestamps as well). If \fIclear\fR is passed as argument, it will delete all entries in the history file. Use 'edit' to open the history file and modify it if needed (the file will be opened with APP, if specified, or with the default associated application otherwise). \fI\-n\fR tells the \fIhistory\fR command to list only the last 'n' commands in the history list. Finally, you can disable history (subsequent entries won't be written to the history file) via \fIhistory\ off\fR.
 .sp
 You can use the exclamation mark (!) to perform some history commands:
+  !<TAB>: List history entries
   !!: Execute the last command.
   !n: Execute the command number 'n' in the history list.
-  !\-n: Execute the last\-n command in the history list.
-  ![STRING]: Execute command starting with STRING. TAB completion is available in this case.
-.sp
-TAB completion is available: just type \fI!\fR and then TAB to see the complete list of history commands, or \fI!str\fR and then TAB to see the list of entries matching 'STR'.
+  !\-n: Execute the 'last \- n' command in the history list.
+  !STRING: Execute the command starting with STRING. TAB completion is available in this case: \fI!STRING<TAB>\fR.
 .TP
 .B icons \fR[\fIon\fR, \fIoff\fR]
 toggle icons on/off
