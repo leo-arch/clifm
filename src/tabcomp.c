@@ -1487,6 +1487,10 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		}
 	}
 
+	else if (cur_comp_type == TCMP_HIST && *rl_line_buffer == '/') { /* Search patterns */
+		finder_offset--;
+	}
+
 	while (finder_offset > term_cols)
 		finder_offset -= term_cols;
 

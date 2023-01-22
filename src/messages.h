@@ -763,14 +763,17 @@ Note: Use the 'oc' command to edit files ownership"
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available prompts\n\
     prompt list (or 'prompt <TAB>' to choose from a list)\n\
-- Change prompt to prompt named MYPROMPT\n\
+- Change prompt to the prompt named MYPROMPT\n\
     prompt MYPROMPT\n\
 - Edit the prompts file\n\
     prompt edit\n\
 - Set the default prompt\n\
     prompt unset\n\
 - Reload available prompts\n\
-    prompt reload"
+    prompt reload\n\n\
+Note: To permanently set a new prompt edit the current\n\
+color scheme file ('cs edit'), and set the Prompt field to\n\
+whatever prompt you like."
 
 #define QUIT_HELP "Exit clifm\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

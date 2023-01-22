@@ -1717,8 +1717,8 @@ hist_generator(const char *text, int state)
 					? " /*?[{" : " /*?[{|^+$.");
 			if (!ret || *ret == ' ' || *ret == '/')
 				continue;
-			if (len == 0 || (*text == *name && strncmp(name, text, len) == 0))
-				return strdup(name);
+//			if (len == 0 || (*text == *name && strncmp(name, text, len) == 0))
+			return strdup(name);
 		}
 	}
 
@@ -3201,7 +3201,8 @@ my_rl_completion(const char *text, int start, int end)
 	/* #### WILDCARDS EXPANSION #### */
 	char *g = strpbrk(text, GLOB_CHARS);
 	/* Expand only glob expressions in the last path component */
-	if (xrename == 0 && g && !strchr(g, '/') && access(text, F_OK) != 0) {
+	if (xrename == 0 && g && !(rl_end == 2 && *rl_line_buffer == '/'
+	&& *(rl_line_buffer + 1) == '*') && !strchr(g, '/') && access(text, F_OK) != 0) {
 		char *p = (*rl_line_buffer == '/' && rl_end > 1 && !strchr(rl_line_buffer + 1, ' ')
 			&& !strchr(rl_line_buffer + 1, '/'))
 			? (char *)(text + 1) : (char *)text;
@@ -3337,8 +3338,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* HISTORY CMD AND SEARCH PATTERNS COMPLETION */
-		if (xrename == 0 && *text == '!') {
-//		if (xrename == 0 && (*text == '!' || *text == '/')) {
+//		if (xrename == 0 && *text == '!') {
+		if (xrename == 0 && (*text == '!' || (*text == '/' && *(text + 1) == '*'))) {
 			char *p = dequote_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &hist_generator);
 			free(p);
