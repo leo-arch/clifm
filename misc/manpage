@@ -1022,7 +1022,7 @@ To edit the previewer configuration file, just enter \fIview edit\fR, or \fIview
 .sp
 Since version 1.8.1, this command allows files selection. Mark files with the TAB key and then press Enter or Right to confirm: marked files will be automatically sent to the Selection box.
 .sp
-For image previews consult the Wiki (https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev).
+For image previews consult the Wiki (\fIhttps://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev\fR).
 .sp
 For further information consult the \fBSHOTGUN\fR section below.
 .TP
@@ -1727,7 +1727,7 @@ To use FZF global values (defined in \fBFZF_DEFAULT_OPTS\fR), just set \fIFzfTab
 .TP
 File previews are available in FZF mode via \fIshotgun\fR. See the \fBSHOTGUN\fR section above.
 .TP
-Image previews (X11 only) are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews
+Image previews (X11 only) are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: \fIhttps://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews\fR
 .TP
 If using the \fIsmenu\fR mode, the interface can be customized using the \fBCLIFM_SMENU_OPTIONS\fR environment variable. For example:
 .sp
@@ -1860,19 +1860,29 @@ Positional parameters could be used as well, provided the parameter does not poi
  clifm https://some_domain
 
 .SH 10. SHOTGUN
+\fB1. TAB completion with file previews\fR
+.TP
+\fIShotgun\fR is \fBclifm\fR's built-in files previewer. Though, as described below, it may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly intended to be used by \fBclifm\fR's TAB completion function running in FZF mode (see the \fBTAB COMPLETION\fR section above).
+.TP
+Set \fIFzfPreview\fR option in the configuration file to \fItrue\fR (or run with \fI\-\-fzfpreview\fR) to enable this feature: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown below) to generate the preview.
+.TP
+\fIShotgun\fR is also used by the \fIview\fR command to display file previews in full screen.
+.TP
+\fB2. Running as a standalone files previewer\fR
+.TP
 Executed via the \fI\-\-preview\fR command line switch, \fIshotgun\fR performs file preview for any file passed as argument. For example:
 
         clifm \-\-preview myfile.txt
 .TP
+This command generates a preview of the file \fImyfile.txt\fR and immediately afterwards quits  \fBclifm\fR.
+.TP
+\fB3. Customization
+.TP
 Previewing applications (based on either MIME type or file name) are defined in a configuration file (\fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/preview.clifm\fR) using the same syntax used by \fILira\fR (the built\-in resource opener). See the \fBRESOURCE OPENER\fR section above.
 .TP
-If running as a standalone files previewer, you can set an alternative configuration file via the \fI\-\-shotgun\-file\fR command line switch:
+You can set an alternative configuration file via the \fI\-\-shotgun\-file\fR command line switch:
 
  clifm \-\-shotgun\-file=/path/to/shotgun/config/file \-\-preview=myfile.txt
-.TP
-Though \fIshotgun\fR may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly intended to be used by \fBclifm\fR's TAB completion function running in FZF mode (see the \fBTAB COMPLETION\fR section above). Set \fIFzfPreview\fR option in the configuration file to \fItrue\fR (or run with \fI\-\-fzfpreview\fR) to enable this feature: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown above).
-.TP
-\fIShotgun\fR is also used by the \fIview\fR command to display file previews in full screen.
 .TP
 To customize the appearance of the preview window, use the \fI\-\-preview-window\fR option in the \fIFzfTabOptions\fR line in the current color scheme file. For example, if you want the preview window down the files list (instead of to the right):
 
@@ -1889,6 +1899,8 @@ Default keybindings for the preview window:
 Keybindings can be customized using the \fI--bind\fR option in the \fIFzfTabOptions\fR field in the color scheme file.
 .TP
 Consult \fBfzf\fR(1) for more information.
+.TP
+\fB4. Image previews\fR
 .TP
 Image previews are available via the \fIclifmimg\fR plugin. Consult the Wiki for more information: \fIhttps://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev\fR
 
