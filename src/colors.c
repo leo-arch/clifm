@@ -334,21 +334,15 @@ END:
 char *
 get_ext_color(char *ext)
 {
-	//if (!ext || !*ext || !*(ext + 1) || ext_colors_n == 0)
 	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
 		return (char *)NULL;
 
-//	ext++;
-
 	int i = (int)ext_colors_n;
 	while (--i >= 0) {
-//		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][1] || !ext_colors[i][2])
 		if (!ext_colors[i] || !*ext_colors[i] || *ext != *ext_colors[i])
 			continue;
 
 		char *p = ext + 1, *q = ext_colors[i] + 1;
-//		char *p = ext, *q = ext_colors[i];
-//		q += 2; /* +2 because stored extensions have this form: *.ext */
 
 		size_t match = 1;
 		while (*p) {
@@ -1089,8 +1083,6 @@ free_extension_colors(void)
 		free(ext_colors[i]);
 	free(ext_colors);
 	ext_colors = (char **)NULL;
-/*	free(ext_colors_len);
-	ext_colors_len = (size_t *)NULL; */
 	ext_colors_n = 0;
 }
 
@@ -1466,13 +1458,11 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 static int
 store_extension_line(char *line, size_t len)
 {
-/////////////////////////
 	/* Remove the leading "*." from the extension line */
 	if (len <= 2 || *line != '*' || *(line + 1) != '.' || !*(line + 2))
 		return EXIT_FAILURE;
 	line += 2;
 	len -= 2;
-/////////////////////////
 
 	char *q = strchr(line, '=');
 	if (!q || !*(q + 1) || q == line)
@@ -1560,27 +1550,6 @@ split_extension_colors(char *extcolors)
 		ext_colors = (char **)xrealloc(ext_colors, (ext_colors_n + 1) * sizeof(char *));
 		ext_colors[ext_colors_n] = (char *)NULL;
 	}
-
-	/* Make sure we have valid color codes and store the length of each stored
-	 * extension: this length will be used later when listing files */
-/*	ext_colors_len = (size_t *)xnmalloc(ext_colors_n, sizeof(size_t));
-
-	int i = (int)ext_colors_n;
-	while (--i >= 0) {
-		char *ret = strrchr(ext_colors[i], '=');
-		if (!ret || !*(++ret) || !is_color_code(ret)) {
-			*ext_colors[i] = '\0';
-			ext_colors_len[i] = 0;
-			continue;
-		}
-
-		size_t j, ext_len = 0;
-//		for (j = 2; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
-		for (j = 0; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
-			ext_len++;
-
-		ext_colors_len[i] = ext_len;
-	} */
 }
 
 /* Split the colors line COLORS_LINE and set the corresponding colors
