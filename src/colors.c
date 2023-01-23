@@ -1986,7 +1986,7 @@ color_codes(void)
 			char *ret = strrchr(ext_colors[i], '=');
 			if (!ret)
 				continue;
-//			printf(" \x1b[%sm", ret + 1);
+
 			printf(" \x1b[%sm*.", ret + 1);
 			for (j = 0; ext_colors[i][j] != '='; j++)
 				putchar(ext_colors[i][j]);
