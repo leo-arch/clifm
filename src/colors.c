@@ -334,18 +334,21 @@ END:
 char *
 get_ext_color(char *ext)
 {
-	if (!ext || !*ext || !*(ext + 1) || ext_colors_n == 0)
+	//if (!ext || !*ext || !*(ext + 1) || ext_colors_n == 0)
+	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
 		return (char *)NULL;
 
-	ext++;
+//	ext++;
 
 	int i = (int)ext_colors_n;
 	while (--i >= 0) {
-		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][1] || !ext_colors[i][2])
+//		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][1] || !ext_colors[i][2])
+		if (!ext_colors[i] || !*ext_colors[i] || *ext != *ext_colors[i])
 			continue;
 
-		char *p = ext, *q = ext_colors[i];
-		q += 2; /* +2 because stored extensions have this form: *.ext */
+		char *p = ext + 1, *q = ext_colors[i] + 1;
+//		char *p = ext, *q = ext_colors[i];
+//		q += 2; /* +2 because stored extensions have this form: *.ext */
 
 		size_t match = 1;
 		while (*p) {
@@ -357,7 +360,7 @@ get_ext_color(char *ext)
 			q++;
 		}
 
-		if (!match || *q != '=')
+		if (match == 0 || *q != '=')
 			continue;
 
 		q++;
@@ -1463,6 +1466,14 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 static int
 store_extension_line(char *line, size_t len)
 {
+/////////////////////////
+	/* Remove the "*." from the beginning of the line */
+	if (len <= 2 || *line != '*' || *(line + 1) != '.' || !*(line + 2))
+		return EXIT_FAILURE;
+	line += 2;
+	len -= 2;
+/////////////////////////
+
 	char *q = strchr(line, '=');
 	if (!q || !*(q + 1) || q == line)
 		return EXIT_FAILURE;
@@ -1490,7 +1501,7 @@ store_extension_line(char *line, size_t len)
 			sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, c);
 		}
 	} else
-#endif /* CLIFM_SUCKLESS */
+#endif /* !CLIFM_SUCKLESS */
 	{
 		ext_colors[ext_colors_n] = (char *)xnmalloc(len + 3, sizeof(char));
 		sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, q + 1);
@@ -1511,7 +1522,7 @@ split_extension_colors(char *extcolors)
 
 	free_extension_colors();
 
-	while (!eol) {
+	while (eol == 0) {
 		switch (*p) {
 
 		case '\0': /* fallthrough */
@@ -1564,8 +1575,10 @@ split_extension_colors(char *extcolors)
 		}
 
 		size_t j, ext_len = 0;
-		for (j = 2; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
+//		for (j = 2; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
+		for (j = 0; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
 			ext_len++;
+
 		ext_colors_len[i] = ext_len;
 	}
 }
@@ -2004,7 +2017,8 @@ color_codes(void)
 			char *ret = strrchr(ext_colors[i], '=');
 			if (!ret)
 				continue;
-			printf(" \x1b[%sm", ret + 1);
+//			printf(" \x1b[%sm", ret + 1);
+			printf(" \x1b[%sm*.", ret + 1);
 			for (j = 0; ext_colors[i][j] != '='; j++)
 				putchar(ext_colors[i][j]);
 			puts(NC);
