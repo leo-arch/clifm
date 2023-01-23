@@ -1089,8 +1089,8 @@ free_extension_colors(void)
 		free(ext_colors[i]);
 	free(ext_colors);
 	ext_colors = (char **)NULL;
-	free(ext_colors_len);
-	ext_colors_len = (size_t *)NULL;
+/*	free(ext_colors_len);
+	ext_colors_len = (size_t *)NULL; */
 	ext_colors_n = 0;
 }
 
@@ -1467,7 +1467,7 @@ static int
 store_extension_line(char *line, size_t len)
 {
 /////////////////////////
-	/* Remove the "*." from the beginning of the line */
+	/* Remove the leading "*." from the extension line */
 	if (len <= 2 || *line != '*' || *(line + 1) != '.' || !*(line + 2))
 		return EXIT_FAILURE;
 	line += 2;
@@ -1563,7 +1563,7 @@ split_extension_colors(char *extcolors)
 
 	/* Make sure we have valid color codes and store the length of each stored
 	 * extension: this length will be used later when listing files */
-	ext_colors_len = (size_t *)xnmalloc(ext_colors_n, sizeof(size_t));
+/*	ext_colors_len = (size_t *)xnmalloc(ext_colors_n, sizeof(size_t));
 
 	int i = (int)ext_colors_n;
 	while (--i >= 0) {
@@ -1580,7 +1580,7 @@ split_extension_colors(char *extcolors)
 			ext_len++;
 
 		ext_colors_len[i] = ext_len;
-	}
+	} */
 }
 
 /* Split the colors line COLORS_LINE and set the corresponding colors

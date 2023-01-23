@@ -1378,7 +1378,7 @@ extern char
 	**tags;
 
 extern regex_t regex_exp;
-extern size_t *ext_colors_len;
+//extern size_t *ext_colors_len;
 extern char **environ;
 
 /* To store all the 39 color variables we use, with 46 bytes each, we need

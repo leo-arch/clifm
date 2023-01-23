@@ -224,7 +224,7 @@ size_t
 	usrvar_n = 0,
 	zombies = 0;
 
-size_t *ext_colors_len = (size_t *)NULL;
+//size_t *ext_colors_len = (size_t *)NULL;
 
 char
 	cur_prompt_name[NAME_MAX + 1] = "",

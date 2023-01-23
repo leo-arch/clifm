@@ -95,10 +95,10 @@ define BlGr=34;42 # Blue foreground, green background
 define WB=37;44 # white foreground, blue background
 
 # File groups (used for file extensions)
-define DOC=0;1      # Bold
+define DOC=1        # Bold
 define VIDEO=1;35   # Bold magenta
-define IMAGE=0;35   # Magenta
-define SOUND=0;36   # Cyan
+define IMAGE=35     # Magenta
+define SOUND=36     # Cyan
 define CODE=1;33    # Bold yellow
 define ARCHIVE=1;31 # Bold red
 

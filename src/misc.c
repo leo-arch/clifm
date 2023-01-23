@@ -1440,8 +1440,8 @@ free_stuff(void)
 
 	free_workspaces_filters();
 
-	if (ext_colors_n)
-		free(ext_colors_len);
+//	if (ext_colors_n)
+//		free(ext_colors_len);
 
 	if (profile_names) {
 		for (i = 0; profile_names[i]; i++)
