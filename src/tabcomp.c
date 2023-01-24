@@ -2089,12 +2089,32 @@ AFTER_USUAL_COMPLETION:
 					t[0] = (char)replacement[k];
 					t[1] = '\0';
 					rl_insert_text(t);
+
+/////////////////////////////////
+					/* WORKAROUND: If we are not at the end of the line,
+					 * redisplay only up to the cursor position, to prevent
+					 * whatever is after it from being printed using the
+					 * last printed color.
+					 * Drawback: there will be no color after the cursor
+					 * position (no color however is better than a wrong color) */
+					if (!replacement[k + 1] && rl_point < rl_end && cur_color != tx_c) {
+						int _end = rl_end;
+						rl_end = rl_point;
+						rl_redisplay();
+						rl_end = _end;
+						fputs(tx_c, stdout);
+						fflush(stdout);
+					}
+////////////////////////////////
+
 					rl_redisplay();
+
 					if (cur_color == hv_c || cur_color == hq_c || cur_color == hp_c) {
 						fputs(cur_color, stdout);
 						fflush(stdout);
 					}
 				}
+
 				UNHIDE_CURSOR;
 				cur_color = cc;
 				if (cur_color)
@@ -2177,10 +2197,32 @@ AFTER_USUAL_COMPLETION:
 #ifndef _NO_HIGHLIGHT
 						if (conf.highlight && !wrong_cmd) {
 							char *cc = cur_color;
+
 							fputs(hd_c, stdout);
 							rl_insert_text("/");
-							rl_redisplay();
-							fputs(cc ? cc : "", stdout);
+
+/////////////////////////////////
+					/* WORKAROUND: If we are not at the end of the line,
+					 * redisplay only up to the cursor position, to prevent
+					 * whatever is after it from being printed using the
+					 * last printed color.
+					 * Drawback: there will be no color after the cursor
+					 * position (no color however is better than a wrong color) */
+							if (rl_point < rl_end) {
+								int _end = rl_end;
+								rl_end = rl_point;
+								fputs(tx_c, stdout);
+								fflush(stdout);
+								rl_redisplay();
+								rl_end = _end;
+							} else {
+								rl_redisplay();
+							}
+/////////////////////////////
+
+//							rl_redisplay();
+//							fputs(cc ? cc : "", stdout);
+							fputs(rl_point < rl_end ? tx_c : (cc ? cc : ""), stdout);
 						} else {
 							rl_insert_text("/");
 						}
