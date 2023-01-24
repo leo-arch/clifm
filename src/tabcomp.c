@@ -552,6 +552,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	}
 
 	/* Append slash for dirs and space for non-dirs */
+
+	/* We only want the line before the cursor position */
 	char cur_point = rl_line_buffer[rl_point];
 	rl_line_buffer[rl_point] = '\0';
 
@@ -570,8 +572,6 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 			pp++;
 		}
 	}
-
-	rl_line_buffer[rl_point] = cur_point;
 
 	if (!ss || !*ss)
 		ss = rl_line_buffer;
@@ -626,6 +626,9 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		&& cur_comp_type != TCMP_MIME_LIST)
 			rl_stuff_char(' ');
 	}
+
+	/* Restore the character we removed to trim the line at cursor position */
+	rl_line_buffer[rl_point] = cur_point;
 
 	if (d == p)
 		free(p);
