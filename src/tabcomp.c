@@ -552,6 +552,9 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	}
 
 	/* Append slash for dirs and space for non-dirs */
+	char cur_point = rl_line_buffer[rl_point];
+	rl_line_buffer[rl_point] = '\0';
+
 	char *pp = rl_line_buffer;
 	char *ss = (char *)NULL;
 	if (pp) {
@@ -567,6 +570,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 			pp++;
 		}
 	}
+
+	rl_line_buffer[rl_point] = cur_point;
 
 	if (!ss || !*ss)
 		ss = rl_line_buffer;
