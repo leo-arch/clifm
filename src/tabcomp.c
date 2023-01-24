@@ -534,7 +534,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 	|| cur_comp_type == TCMP_WORKSPACES || cur_comp_type == TCMP_NET
 	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_PROMPTS
 	|| cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_BACKDIR
-	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_BM_PREFIX) {
+	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_BM_PREFIX
+	|| cur_comp_type == TCMP_TAGS_T) {
 		rl_insert_text(buf + *offset);
 		return;
 
