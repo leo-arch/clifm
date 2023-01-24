@@ -1379,7 +1379,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * terminal height */
 	int min_prev_height = term_lines / 4;
 	if (fspace == 40 && (int)height < min_prev_height
-	&& min_prev_height > 0) // We're previewing files
+	&& min_prev_height > 0) /* fspace == 40: We're previewing files */
 		height = (size_t)min_prev_height;
 
 	int max_finder_offset = term_cols > fspace ? term_cols - fspace : 0;
@@ -1388,11 +1388,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (rl_end > rl_point)
 		diff = (int)wc_xstrlen(rl_line_buffer + rl_point);
 
-	int n = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) - diff : 0;
-	while (n > term_cols)
-		n -= term_cols;
-	int finder_offset = n + prompt_offset < max_finder_offset
-		? (n + prompt_offset - 4) : 0;
+	int cur_line_len = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) - diff : 0;
+	int total_line_len = cur_line_len + prompt_offset;
+
+	while (cur_line_len > term_cols)
+		cur_line_len -= term_cols;
+
+	int finder_offset = cur_line_len + prompt_offset < max_finder_offset
+		? (cur_line_len + prompt_offset - 4) : 0;
 	/* PROMPT_OFFSET (the space used by the prompt in the current line)
 	 * is calculated the first time we print the prompt (in my_rl_getc
 	 * (readline.c)) */
@@ -1538,9 +1541,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	/* Calculate currently used lines to go back to the correct cursor
 	 * position after quitting FZF */
-	int lines = 1, total_line_len = 0;
-	total_line_len = n + prompt_offset;
-//	total_line_len = rl_end + prompt_offset;
+	int lines = 1;
 
 	if (total_line_len > term_cols) {
 		lines = total_line_len / term_cols;
@@ -1551,8 +1552,6 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	if (!(flags & PREVIEWER))
 		MOVE_CURSOR_UP(lines);
-//	else
-//		ret = EXIT_FAILURE;
 
 	/* No results (the user pressed ESC or the Left arrow key) */
 	if (ret != EXIT_SUCCESS) {
@@ -1561,18 +1560,9 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	char *buf = get_finder_output(multi, matches[0]);
+
 	if (!buf)
 		return EXIT_FAILURE;
-
-/*	if (rl_end > rl_point && cur_comp_type != TCMP_PATH) {
-		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_point) : (char *)NULL;
-		int start = s ? (int)(s - rl_line_buffer + 1) : 0;
-		rl_delete_text(start, rl_point);
-		rl_point = start;
-		rl_insert_text(buf);
-		free(buf);
-		return EXIT_SUCCESS;
-	} */
 
 	/* Calculate the length of the matching prefix to insert into the
 	 * line buffer only the non-matched part of the string returned by FZF */
