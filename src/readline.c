@@ -370,8 +370,8 @@ xdelete(void)
 static void
 xbackspace(void)
 {
-	if (rl_point != rl_end) {
-		if (rl_point) {
+	if (rl_point < rl_end) {
+		if (rl_point > 0) {
 			int bk = rl_point, cc = 0;
 			char *s = rl_copy_text(rl_point, rl_end);
 			while ((rl_line_buffer[rl_point - 1] & 0xc0) == 0x80) {
@@ -393,7 +393,10 @@ xbackspace(void)
 		if (suggestion_buf)
 			clear_suggestion(CS_FREEBUF);
 #endif /* !_NO_SUGGESTIONS */
-		if (rl_end) {
+		if (rl_end > 0) {
+			if (wrong_cmd == 1 && rl_line_buffer[rl_end - 1] == ' ')
+				cur_color = tx_c;
+
 			while ((rl_line_buffer[rl_end - 1] & 0xc0) == 0x80) {
 				rl_line_buffer[rl_end - 1] = '\0';
 				rl_point--;
@@ -605,7 +608,7 @@ rl_exclude_input(unsigned char c)
 		cmdhist_flag = 0;
 
 	/* Skip backspace, Enter, and TAB keys */
-	switch(c) {
+	switch (c) {
 		case DELETE: /* fallthrough */
 		case BS:
 			_del = (rl_point == 0 && rl_end == 0) ? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
