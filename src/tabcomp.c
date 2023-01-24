@@ -1164,7 +1164,8 @@ get_query_str(int *fzf_offset)
 static size_t
 calculate_prefix_len(char *str)
 {
-	if (cur_comp_type == TCMP_FILE_TYPES_OPTS)
+	if (cur_comp_type == TCMP_FILE_TYPES_OPTS || cur_comp_type == TCMP_SEL
+	|| cur_comp_type == TCMP_RANGES)
 		return 0;
 
 	size_t prefix_len = 0, len = strlen(str);
