@@ -444,6 +444,7 @@ recover_from_wrong_cmd(void)
 	}
 #endif
 	wrong_cmd = 0;
+
 	return EXIT_SUCCESS;
 }
 
@@ -1072,7 +1073,8 @@ check_filenames(char *str, size_t len, const int first_word, const size_t full_w
 		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
 			continue;
 
-		if (conf.fuzzy_match == 0) {
+		/* No fuzzy matching if not at the end of the line */
+		if (conf.fuzzy_match == 0 || rl_point < rl_end) {
 			if (conf.case_sens_path_comp ? (*str == *file_info[i].name
 			&& strncmp(str, file_info[i].name, len) == 0)
 			: (TOUPPER(*str) == TOUPPER(*file_info[i].name)
@@ -2331,7 +2333,7 @@ rl_suggestions(const unsigned char c)
 				goto SUCCESS;
 			break;
 
-		case 'c': /* 3.d.2) Possible completions (only path completion!) */
+		case 'c': /* 3.d.2) Path completion */
 			if (rl_point < rl_end && c == '/') goto NO_SUGGESTION;
 
 			/* First word and neither autocd nor auto-open */
@@ -2585,11 +2587,14 @@ SUCCESS:
 			rl_dispatching = 1;
 			recover_from_wrong_cmd();
 			rl_dispatching = 0;
+			/* recover_from_wrong_cmd() removes the suggestion. Let's reprint it */
+			if (rl_point < rl_end && suggestion_buf && rl_line_buffer && *rl_line_buffer)
+				print_suggestion(suggestion_buf, wc_xstrlen(rl_line_buffer), suggestion.color);
 		}
 
 		fputs(NC, stdout);
-//		suggestion.printed = 1;
-		suggestion.printed = rl_point < rl_end ? 0 : 1;
+		suggestion.printed = 1;
+//		suggestion.printed = rl_point < rl_end ? 0 : 1;
 		/* Restore color */
 		if (wrong_cmd == 0) {
 			fputs(cur_color ? cur_color : tx_c, stdout);
@@ -2603,6 +2608,7 @@ SUCCESS:
 		}
 		suggestion.printed = 0;
 	}
+
 	free(first_word);
 	free(last_word);
 	last_word = (char *)NULL;

@@ -1467,7 +1467,9 @@ my_rl_path_completion(const char *text, int state)
 
 				if (flags & STATE_SUGGESTING) {
 					int r = 0;
-					if ((r = fuzzy_match(filename, ent->d_name, filename_len, fuzzy_str_type)) > best_fz_score) {
+					/* Do not fuzzy suggest if not at the end of the line */
+					if (rl_point == rl_end && (r = fuzzy_match(filename, ent->d_name,
+					filename_len, fuzzy_str_type)) > best_fz_score) {
 						if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
 							xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 						} else {
