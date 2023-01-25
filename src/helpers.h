@@ -1255,7 +1255,7 @@ extern int
 	prompt_offset,
 	prompt_notif,
 	recur_perm_error_flag,
-	rl_last_word_start,
+//	rl_last_word_start,
 	rl_nohist,
 	rl_notab,
 	sel_is_last,

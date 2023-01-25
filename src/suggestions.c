@@ -1590,7 +1590,7 @@ is_last_word(void)
 static size_t
 count_words(size_t *start_word, size_t *full_word)
 {
-	rl_last_word_start = 0;
+//	rl_last_word_start = 0;
 	size_t words = 0, w = 0, first_non_space = 0;
 	char q = 0;
 	char *b = rl_line_buffer;
@@ -1606,8 +1606,8 @@ count_words(size_t *start_word, size_t *full_word)
 			continue;
 		}
 		if (w > 0 && b[w] == ' ' && b[w - 1] != '\\') {
-			if (b[w + 1] && b[w + 1] != ' ')
-				rl_last_word_start = (int)w + 1;
+/*			if (b[w + 1] && b[w + 1] != ' ')
+				rl_last_word_start = (int)w + 1; */
 			if (!*full_word && b[w - 1] != '|'
 			&& b[w - 1] != ';' && b[w - 1] != '&')
 				*full_word = w; /* Index of the end of the first full word (cmd) */
@@ -1658,7 +1658,7 @@ print_warning_prompt(const char fc, unsigned char lc)
 	|| fc == '$' || fc == '\'' || fc == '"')
 		return;
 
-	if (suggestion.printed)
+	if (suggestion.printed || suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 
 	wrong_cmd = 1;
@@ -2583,6 +2583,8 @@ SUCCESS:
 		if (printed == FULL_MATCH && suggestion_buf)
 			clear_suggestion(CS_FREEBUF);
 
+		suggestion.printed = rl_point < rl_end ? 0 : 1;
+
 		if (wrong_cmd == 1 && nwords == 1) {
 			rl_dispatching = 1;
 			recover_from_wrong_cmd();
@@ -2590,11 +2592,11 @@ SUCCESS:
 			/* recover_from_wrong_cmd() removes the suggestion. Let's reprint it */
 			if (rl_point < rl_end && suggestion_buf && rl_line_buffer && *rl_line_buffer)
 				print_suggestion(suggestion_buf, wc_xstrlen(rl_line_buffer), suggestion.color);
+			suggestion.printed = 1;
 		}
 
 		fputs(NC, stdout);
-		suggestion.printed = 1;
-//		suggestion.printed = rl_point < rl_end ? 0 : 1;
+
 		/* Restore color */
 		if (wrong_cmd == 0) {
 			fputs(cur_color ? cur_color : tx_c, stdout);

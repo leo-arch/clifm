@@ -413,13 +413,20 @@ rl_ring_bell(void)
 #ifdef _READLINE_HAS_ACTIVATE_MARK
 	case BELL_VISIBLE: {
 		int point = rl_point;
-		rl_mark = rl_last_word_start;
+
+		rl_mark = 0;
+		char *p = get_last_chr(rl_line_buffer, ' ', rl_point);
+		if (p && p != rl_line_buffer && *(++p))
+			rl_mark = (int)(p - rl_line_buffer);
+
 		if (rl_end > 1 && rl_line_buffer[rl_end - 1] == ' ')
 			rl_point--;
+
 		rl_activate_mark();
 		rl_redisplay();
 		msleep(VISIBLE_BELL_DELAY);
 		rl_deactivate_mark();
+
 # ifndef _NO_HIGHLIGHT
 		if (conf.highlight && !wrong_cmd) {
 			rl_point = rl_mark;
