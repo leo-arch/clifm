@@ -2588,7 +2588,8 @@ SUCCESS:
 		}
 
 		fputs(NC, stdout);
-		suggestion.printed = 1;
+//		suggestion.printed = 1;
+		suggestion.printed = rl_point < rl_end ? 0 : 1;
 		/* Restore color */
 		if (wrong_cmd == 0) {
 			fputs(cur_color ? cur_color : tx_c, stdout);

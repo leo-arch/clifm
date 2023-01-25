@@ -1391,11 +1391,12 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	int cur_line_len = rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) - diff : 0;
 	int total_line_len = cur_line_len + prompt_offset;
 
-	while (cur_line_len > term_cols)
-		cur_line_len -= term_cols;
+	int last_line_len = cur_line_len;
+	while (last_line_len > term_cols)
+		last_line_len -= term_cols;
 
-	int finder_offset = cur_line_len + prompt_offset < max_finder_offset
-		? (cur_line_len + prompt_offset - 4) : 0;
+	int finder_offset = last_line_len + prompt_offset < max_finder_offset
+		? (last_line_len + prompt_offset - 4) : 0;
 	/* PROMPT_OFFSET (the space used by the prompt in the current line)
 	 * is calculated the first time we print the prompt (in my_rl_getc
 	 * (readline.c)) */
