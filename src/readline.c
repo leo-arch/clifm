@@ -1452,7 +1452,7 @@ my_rl_path_completion(const char *text, int state)
 		/* If there is at least one char to complete (ex: "cd .[TAB]") */
 		else {
 			/* Let's check for possible matches */
-			if (conf.fuzzy_match == 0 || (*filename == '.' && *(filename + 1) == '.')
+			if (conf.fuzzy_match == 0 || rl_point < rl_end || (*filename == '.' && *(filename + 1) == '.')
 			|| *filename == '-' || (tabmode == STD_TAB && !(flags & STATE_SUGGESTING))) {
 				if ( (conf.case_sens_path_comp == 0
 					? TOUPPER(*ent->d_name) != TOUPPER(*filename)
@@ -1972,7 +1972,7 @@ filenames_gen_text(const char *text, int state)
 		if (conf.case_sens_path_comp ? strncmp(name, text, len) == 0
 		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
-		if (conf.fuzzy_match == 0 || tabmode == STD_TAB)// || (*text == '.' && text[1] == '.') || *text == '-')
+		if (conf.fuzzy_match == 0 || tabmode == STD_TAB || rl_point < rl_end)
 			continue;
 		if (len == 0 || fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
 			return strdup(name);
