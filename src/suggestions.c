@@ -2104,8 +2104,11 @@ rl_suggestions(const unsigned char c)
 
 	/* If not on the first word and not at the end of the last word, do nothing */
 	int lw = is_last_word();
-	if (!lw)
+	if (!lw) {
+		if (suggestion.printed == 1 && suggestion.nlines > 1)
+			clear_suggestion(CS_FREEBUF);
 		goto SUCCESS;
+	}
 
 	/* '~' or '~/' */
 	if (word && *word == '~' && (!word[1] || (word[1] == '/' && !word[2]))) {
