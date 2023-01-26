@@ -2452,6 +2452,8 @@ CALC_OFFSET:
 			xchdir(trash_files_dir, NO_TITLE);
 		}
 
+		ERASE_TO_RIGHT_AND_BELOW;
+
 		for (i = 1; i <= (size_t)count; i++) {
 			if (i >= term_lines) {
 				/* A little pager */
