@@ -1165,7 +1165,8 @@ static size_t
 calculate_prefix_len(char *str)
 {
 	if (cur_comp_type == TCMP_FILE_TYPES_OPTS || cur_comp_type == TCMP_SEL
-	|| cur_comp_type == TCMP_RANGES)
+	|| cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_TAGS_T
+	|| cur_comp_type == TCMP_BM_PREFIX)
 		return 0;
 
 	size_t prefix_len = 0, len = strlen(str);
@@ -1201,8 +1202,6 @@ calculate_prefix_len(char *str)
 					c++;
 			}
 			prefix_len = len + c;
-		} else if ((cur_comp_type == TCMP_TAGS_T || cur_comp_type == TCMP_BM_PREFIX) && len >= 2) {
-			prefix_len = len - 2;
 		} else if (cur_comp_type == TCMP_TAGS_C) {
 			prefix_len = len - 1;
 		} else {
