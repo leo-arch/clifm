@@ -649,8 +649,18 @@ print_suggestion(const char *str, size_t offset, char *color)
 	}
 #endif /* NO_BACKWARD_SUGGEST */
 
+	if (nwords == 1 && rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] == ' '
+	&& (rl_end == 1 || rl_line_buffer[rl_end - 2] != '\\') && suggestion.type != HIST_SUG) {
+		// We have "cmd     " (with one or more trailing spaces)
+		suggestion.printed = 0;
+		if (suggestion_buf)
+			clear_suggestion(CS_FREEBUF);
+		return;
+	}
+
 	HIDE_CURSOR;
 
+//	if (suggestion_buf && suggestion_buf != str)
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 
@@ -689,10 +699,12 @@ print_suggestion(const char *str, size_t offset, char *color)
 	}
 
 	/* In some cases (accepting first suggested word), we might want to
-	 * reprint the suggestion buffer, in which case it is already stored */
-	if (str != suggestion_buf)
+	 * reprint the suggestion buffer, in which case it would be already stored */
+	if (str != suggestion_buf) {
 		/* Store the suggestion (used later by rl_accept_suggestion (keybinds.c) */
+		free(suggestion_buf);
 		suggestion_buf = savestring(str, strlen(str));
+	}
 
 //	set_cursor_position(baej, &slines);
 	set_cursor_position(baej);
@@ -1756,7 +1768,8 @@ get_last_word(const char *last_space)
 	const char *tmp = (last_space && *(last_space + 1)) ? last_space + 1
 			: (rl_line_buffer ? rl_line_buffer : (char *)NULL);
 	if (tmp) {
-		size_t len = tmp == rl_line_buffer ? ((size_t)rl_end + 1) : (strlen(tmp) + 1);
+//		size_t len = tmp == rl_line_buffer ? ((size_t)rl_end + 5) : (strlen(tmp) + 1);
+		size_t len = strlen(tmp) + 1;
 		last_word = (char *)xrealloc(last_word, len * sizeof(char));
 		strcpy(last_word, tmp);
 	} else {
@@ -2048,8 +2061,9 @@ rl_suggestions(const unsigned char c)
 		return EXIT_SUCCESS;
 	}
 
-	size_t buflen = (size_t)rl_end;
-	suggestion.full_line_len = buflen + 1;
+//	size_t buflen = (size_t)rl_end;
+//	suggestion.full_line_len = buflen + 1;
+	suggestion.full_line_len = (size_t)rl_end + 1;
 	char *last_space = get_last_chr(rl_line_buffer, ' ', rl_end);
 
 	/* Reset the wrong cmd flag whenever we have a new word or a new line */
@@ -2590,9 +2604,15 @@ SUCCESS:
 			recover_from_wrong_cmd();
 			rl_dispatching = 0;
 			/* recover_from_wrong_cmd() removes the suggestion. Let's reprint it */
-			if (rl_point < rl_end && suggestion_buf && rl_line_buffer && *rl_line_buffer)
+			if (rl_point < rl_end && suggestion_buf && rl_line_buffer && *rl_line_buffer) {
 				print_suggestion(suggestion_buf, wc_xstrlen(rl_line_buffer), suggestion.color);
-			suggestion.printed = 1;
+				suggestion.printed = 1;
+			} /*else {
+				printf("'a'"); fflush(stdout); sleep(1);
+				suggestion.printed = 0;
+				if (suggestion_buf)
+					clear_suggestion(CS_FREEBUF);
+			} */
 		}
 
 		fputs(NC, stdout);
