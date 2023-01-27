@@ -932,9 +932,9 @@ get_properties(char *filename, const int dsize)
 	dev_t d = (S_ISCHR(attr.st_mode) || S_ISBLK(attr.st_mode)) ? attr.st_rdev : attr.st_dev;
 	printf(_("Device: %s%ju,%ju%s"), cbold, (uintmax_t)major(d), (uintmax_t)minor(d), cend);
 
-	printf(_("\tUid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("unknown")
+	printf(_("\tUid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("UNKNOWN")
 			: owner->pw_name, cend);
-	printf(_("\tGid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("unknown")
+	printf(_("\tGid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("UNKNOWN")
 			: group->gr_name, cend);
 
 #if defined(LINUX_FILE_ATTRS)

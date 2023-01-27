@@ -83,7 +83,13 @@ set_fzf_preview_border_type(void)
 	}
 
 	switch(*(p + 7)) {
-	case 'b': fzf_preview_border_type = FZF_BORDER_BOTTOM; break;
+	case 'b':
+		if (*(p + 8) == 'o' && *(p + 9) == 't')
+			fzf_preview_border_type = FZF_BORDER_BOTTOM;
+		else
+			fzf_preview_border_type = FZF_BORDER_BOLD;
+		break;
+	case 'd': fzf_preview_border_type = FZF_BORDER_DOUBLE; break;
 	case 'h': fzf_preview_border_type = FZF_BORDER_HORIZ; break;
 	case 'l': fzf_preview_border_type = FZF_BORDER_LEFT; break;
 	case 'n': fzf_preview_border_type = FZF_BORDER_NONE; break;

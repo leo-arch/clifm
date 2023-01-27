@@ -674,14 +674,16 @@ set_fzf_env_vars(const int h)
 	/* Let's correct image coordinates on the screen based on the preview
 	 * window style */
 	int x = term_cols, y = l;
-	switch(fzf_preview_border_type) {
+	switch (fzf_preview_border_type) {
 	case FZF_BORDER_BOTTOM: /* fallthrough */
 	case FZF_BORDER_NONE:   /* fallthrough */
 	case FZF_BORDER_LEFT: break;
 
-	case FZF_BORDER_TOP: /* fallthrough */
+	case FZF_BORDER_TOP:  /* fallthrough */
 	case FZF_BORDER_HORIZ: y += (flags & PREVIEWER) ? 2 : 1; break;
 
+	case FZF_BORDER_BOLD:    /* fallthrough */
+	case FZF_BORDER_DOUBLE:  /* fallthrough */
 	case FZF_BORDER_ROUNDED: /* fallthrough */
 	case FZF_BORDER_SHARP: y += (flags & PREVIEWER) ? 2 : 1; x -= 2; break;
 
