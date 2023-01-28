@@ -1570,7 +1570,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * line buffer only the non-matched part of the string returned by FZF */
 	size_t prefix_len = calculate_prefix_len(matches[0]);
 
-	if (rl_end > rl_point && cur_comp_type != TCMP_PATH) {
+	if (rl_point < rl_end && cur_comp_type != TCMP_PATH && cur_comp_type != TCMP_CMD) {
 		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_point) : (char *)NULL;
 		int start = s ? (int)(s - rl_line_buffer + 1) : 0;
 		rl_delete_text(start, rl_point);
