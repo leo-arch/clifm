@@ -22,7 +22,6 @@ bmi=bm_import.sh
 bn=batch_create.sh
 cr=cprm.sh
 da=disk_analyzer.sh
-dh=fzfdirhist.sh
 dr=dragondrop.sh
 fdups=fdups.sh
 gg=pager.sh
