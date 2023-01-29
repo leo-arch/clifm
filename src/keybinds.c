@@ -701,7 +701,8 @@ rl_accept_suggestion(int count, int key)
 	case CSCHEME_SUG:  /* fallthrough */
 	case WS_NAME_SUG:  /* fallthrough */
 	case INT_HELP_SUG: /* fallthrough */
-	case PROFILE_SUG:
+	case PROFILE_SUG:  /* fallthrough */
+	case DIRHIST_SUG:
 		my_insert_text(suggestion_buf, NULL, 0); break;
 
 #ifndef _NO_TAGS

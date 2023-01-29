@@ -1503,6 +1503,16 @@ check_actions(char **args)
 	while (--i >= 0) {
 		if (*args[0] == *usr_actions[i].name
 		&& strcmp(args[0], usr_actions[i].name) == 0) {
+
+			// REMOVE ONCE THE DH PLUGIN'S DEPRECATION PERIOD IS OVER
+			if (*usr_actions[i].name == 'd' && usr_actions[i].name[1] == 'h'
+			&& !usr_actions[i].name[2]) {
+				_err('n', PRINT_PROMPT, "%s: The 'dh' plugin is deprecated. "
+					"Use the built-in 'dh' command instead disabling the "
+					"'dh' plugin ('actions edit'). Once done, run 'dh --help' "
+					"for more information.\n", PROGRAM_NAME);
+			}
+
 			setenv("CLIFM_PLUGIN_NAME", usr_actions[i].name, 1);
 			int ret = run_action(usr_actions[i].value, args);
 			unsetenv("CLIFM_PLUGIN_NAME");
@@ -2144,6 +2154,43 @@ preview_function(char **args)
 	return EXIT_SUCCESS;
 }
 
+static int
+dirhist_function(char *dir)
+{
+	if (!dir || !*dir) {
+		print_dirhist(NULL);
+		return EXIT_SUCCESS;
+	}
+
+	if (IS_HELP(dir)) {
+		puts(DH_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	if (*dir == '!' && is_number(dir + 1)) {
+		int n = atoi(dir + 1);
+		if (n <= 0 || n > dirhist_total_index) {
+			fprintf(stderr, _("dh: %d: No such entry number\n"), n);
+			return EXIT_FAILURE;
+		}
+
+		n--;
+		if (!old_pwd[n] || *old_pwd[n] == _ESC) {
+			fprintf(stderr, _("dh: Invalid history entry\n"));
+			return EXIT_FAILURE;
+		}
+
+		return cd_function(old_pwd[n], CD_PRINT_ERROR);
+	}
+
+	if (*dir != '/' || !strchr(dir + 1, '/')) {
+		print_dirhist(dir);
+		return EXIT_SUCCESS;
+	}
+
+	return cd_function(dir, CD_PRINT_ERROR);
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2237,22 +2284,21 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "bookmarks") == 0))
 		return (exit_code = _bookmarks_function(comm));
 
-	/*       ############# BACK AND FORTH ##################     */
+	/*  ############# BACK, FORTH, and DH (dirhist) ##################     */
 	else if (*comm[0] == 'b' && (!comm[0][1] || strcmp(comm[0], "back") == 0))
 		return (exit_code = back_function(comm));
 
 	else if (*comm[0] == 'f' && (!comm[0][1] || strcmp(comm[0], "forth") == 0))
 		return (exit_code = forth_function(comm));
 
-	else if ((*comm[0] == 'b' || *comm[0] == 'f')
-	&& comm[0][1] == 'h' && !comm[0][2]) {
-		print_dirhist(); return EXIT_SUCCESS;
-	}
+	else if ((*comm[0] == 'b' || *comm[0] == 'f' || *comm[0] == 'd')
+	&& comm[0][1] == 'h' && !comm[0][2])
+		return (exit_code = dirhist_function(comm[1]));
 
 	/*    ############### BULK REMOVE ##################     */
 	else if (*comm[0] == 'r' && comm[0][1] == 'r' && !comm[0][2])
 		exit_code = bulk_remove(comm[1] ? comm[1] : NULL,
-					(comm[1] && comm[2]) ? comm[2] : NULL);
+			(comm[1] && comm[2]) ? comm[2] : NULL);
 
 	/*     ################# TAGS ##################     */
 	else if (*comm[0] == 't'

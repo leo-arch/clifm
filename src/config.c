@@ -597,7 +597,6 @@ create_actions_file(char *file)
 		"bn=batch_create.sh\n"
 		"cr=cprm.sh\n"
 		"da=disk_analyzer.sh\n"
-		"dh=fzfdirhist.sh\n"
 		"dr=dragondrop.sh\n"
 		"fdups=fdups.sh\n"
 		"gg=pager.sh\n"

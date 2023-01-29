@@ -34,6 +34,7 @@
 
 #include "aux.h"
 #include "checks.h"
+#include "fuzzy_match.h"
 #include "history.h"
 #include "jump.h"
 #include "listing.h"
@@ -759,13 +760,21 @@ fastback(char *str)
 }
 
 void
-print_dirhist(void)
+print_dirhist(char *query)
 {
 	int n = DIGINUM(dirhist_total_index), i;
+	size_t len = (query && conf.fuzzy_match == 1) ? strlen(query) : 0;
+	int fuzzy_str_type = (len > 0 && contains_utf8(query) == 1)
+		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 
 	for (i = 0; i < dirhist_total_index; i++) {
 		if (!old_pwd[i] || *old_pwd[i] == _ESC)
 			continue;
+
+		if (query && (conf.fuzzy_match == 1 ? fuzzy_match(query, old_pwd[i], len, fuzzy_str_type) == 0
+		: !strstr(old_pwd[i], query) ) )
+			continue;
+
 		if (i == dirhist_cur_index)
 			printf(" %s%-*d%s %s%s%s\n", el_c, n, i + 1, df_c, mi_c, old_pwd[i], df_c);
 		else
@@ -791,7 +800,7 @@ clear_dirhist(void)
 /* Change to the specified directory number (N) in the directory
  * history list */
 static int
-change_to_num(int n)
+change_to_dirhist_num(int n)
 {
 	if (n <= 0 || n > dirhist_total_index) {
 		fprintf(stderr, _("history: %d: No such ELN\n"), n);
@@ -825,23 +834,23 @@ change_to_num(int n)
 }
 
 static int
-surf_hist(char **comm)
+surf_hist(char **args)
 {
-	if (*comm[1] == 'h' && (!comm[1][1] || strcmp(comm[1], "hist") == 0)) {
-		print_dirhist();
+	if (*args[1] == 'h' && (!args[1][1] || strcmp(args[1], "hist") == 0)) {
+		print_dirhist(NULL);
 		return EXIT_SUCCESS;
 	}
 
-	if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0)
+	if (*args[1] == 'c' && strcmp(args[1], "clear") == 0)
 		return clear_dirhist();
 
-	if (*comm[1] != '!' || is_number(comm[1] + 1) != 1) {
+	if (*args[1] != '!' || is_number(args[1] + 1) != 1) {
 		fprintf(stderr, "%s\n", _(DIRHIST_USAGE));
 		return EXIT_FAILURE;
 	}
 
-	int n = atoi(comm[1] + 1);
-	return change_to_num(n);
+	int n = atoi(args[1] + 1);
+	return change_to_dirhist_num(n);
 }
 
 /* Set the path of the current workspace to NEW_PATH */

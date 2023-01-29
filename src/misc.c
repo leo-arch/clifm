@@ -604,6 +604,7 @@ print_tips(int all)
 		"Send a command directly to the system shell with ';CMD'",
 		"Run the last executed command: '!!'",
 		"Access the commands history list: '!<TAB>'",
+		"Access the directory history list: 'dh <TAB>'",
 		"List previously used search patterns: '/*<TAB>'",
 		"Import aliases from file using 'alias import FILE'",
 		"List available aliases by running 'alias'",
@@ -2060,7 +2061,7 @@ print_bookmarks_topic(void)
 static int
 print_commands_topic(void)
 {
-	printf("%s", CLIFM_COMMANDS); return EXIT_SUCCESS;
+	printf("%s%s", CLIFM_COMMANDS_HEADER, CLIFM_COMMANDS); return EXIT_SUCCESS;
 }
 
 static int
@@ -2312,6 +2313,7 @@ help_function(void)
 		_(LONG_OPTIONS_A), _(LONG_OPTIONS_B));
 
 	puts("\nBUILT-IN COMMANDS:\n");
+	puts(_(CLIFM_COMMANDS_HEADER));
 	puts(_(CLIFM_COMMANDS));
 	puts(_(CLIFM_KEYBOARD_SHORTCUTS));
 	puts(_(HELP_END_NOTE));

@@ -383,6 +383,7 @@ extern int watch;
 #define INT_HELP_SUG   29
 #define PROFILE_SUG    30
 #define BM_PREFIX_SUG  31 /* Bookmark name (b:NAME) */
+#define DIRHIST_SUG    32
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -1200,7 +1201,8 @@ enum comp_type {
 	TCMP_BM_PREFIX =  32, /* 'b:' keyword expansion */
 	TCMP_CMD_DESC =   33,
 	TCMP_OWNERSHIP =  34,
-	TCMP_MIME_LIST =  35,
+	TCMP_DIRHIST =    35,
+	TCMP_MIME_LIST =  36,
 	TCMP_MIME_FILES = TCMP_FILE_TYPES_FILES /* Same behavior */
 };
 

@@ -33,7 +33,7 @@ int  xchdir(char *, const int);
 int  cd_function(char *, const int);
 char *fastback(char *);
 int  handle_workspaces(char *);
-void print_dirhist(void);
+void print_dirhist(char *);
 int  backdir(char *);
 char **get_bd_matches(const char *, int *, int);
 

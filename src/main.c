@@ -418,8 +418,9 @@ const struct cmdslist_t internal_cmds[] = {
 	{"bb", 2},
 	{"bleach", 6},
 	{"bd", 2},
-	{"bh", 2},
-	{"fh", 2},
+	{"bh", 2}, // REMOVE AS SOON AS REPLACED BY DH
+	{"fh", 2}, // REMOVE AS SOON AS REPLACED BY DH
+	{"dh", 2},
 	{"bl", 2},
 	{"bm", 2},
 	{"bookmarks", 9},

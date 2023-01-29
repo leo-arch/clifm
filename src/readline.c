@@ -2052,6 +2052,44 @@ filenames_gen_ranges(const char *text, int state)
 	return (char *)NULL;
 }
 
+static char *
+dirhist_generator(const char *text, int state)
+{
+	if (!old_pwd || dirhist_total_index == 0)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len;
+	static int fuzzy_str_type;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+		fuzzy_str_type = (conf.fuzzy_match == 1	&& contains_utf8(text) == 1)
+			? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
+	}
+
+	while ((name = old_pwd[i++]) != NULL) {
+		if (*name == _ESC)
+			continue;
+
+		if (!text || !*text)
+			return strdup(name);
+
+		if (conf.fuzzy_match == 1) {
+			if (fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
+				return strdup(name);
+		} else {
+			if ((conf.case_sens_path_comp == 1 ? strstr(name, text)
+			: strcasestr(name, text)) != NULL)
+				return strdup(name);
+		}
+	}
+
+	return (char *)NULL;
+}
+
 /* Used by commands completion */
 static char *
 bin_cmd_generator(const char *text, int state)
@@ -3394,6 +3432,7 @@ my_rl_completion(const char *text, int start, int end)
 	else { /* Second word or more */
 		if (xrename == 1 || xrename == 3)
 			return (char **)NULL;
+
 		/* Command names completion for words after process separator: ; | && */
 		if (nwords == 1 && rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '
 		/* No command name contains slashes */
@@ -3427,6 +3466,20 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 #endif /* !_NO_TAGS */
+
+		/* #### DIRECTORY HISTORY COMPLETION #### */
+		if (((*lb == 'b' || *lb == 'f' || *lb == 'd') && lb[1] == 'h' && lb[2] == ' ')
+		&& !strchr(text, '/') && (conf.suggestions == 0 || nwords <= 2)) {
+			char *p = dequote_str((char *)text, 0);
+			matches = rl_completion_matches(p ? p : text, &dirhist_generator);
+			free(p);
+			if (matches) {
+				if (!matches[1])
+					rl_swap_fields(&matches);
+				cur_comp_type = TCMP_DIRHIST;
+				return matches;
+			}
+		}
 
 		/* #### BACKDIR COMPLETION #### */
 		if (*text != '/' && nwords <= 2 && rl_end >= 3

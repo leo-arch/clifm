@@ -443,7 +443,8 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 	/* Absolute path (/FILE) or file in CWD (./FILE) */
 	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') ) && (cur_comp_type == TCMP_PATH
 	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL
-	|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_GLOB) ) {
+	|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_GLOB
+	|| cur_comp_type == TCMP_DIRHIST) ) {
 		if (lstat(dir, &attr) != -1)
 			return fzftab_color(dir, &attr);
 		return uf_c;
@@ -1086,7 +1087,7 @@ store_completions(char **matches, FILE *fp)
 			color = *ext_cl ? ext_cl : (cl ? cl : "");
 
 			if (cur_comp_type != TCMP_SEL && cur_comp_type != TCMP_DESEL
-			&& cur_comp_type != TCMP_BM_PATHS
+			&& cur_comp_type != TCMP_BM_PATHS && cur_comp_type != TCMP_DIRHIST
 			&& cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_BACKDIR) {
 				_path = strrchr(matches[i], '/');
 				entry = (_path && *(++_path)) ? _path : matches[i];
@@ -1362,19 +1363,21 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	if (fzf_height_set == 0 || tabmode == FZY_TAB) {
 		size_t max_height = set_fzf_max_win_height();
-		if (i + 1 > max_height)
+		height = (i + 1 > max_height) ? max_height : i;
+/*		if (i + 1 > max_height)
 			height = max_height;
 		else
-			height = i;
+			height = i; */
 	}
 
+	enum comp_type ct = cur_comp_type;
 	/* Calculate the offset (left padding) of the FZF window based on
 	 * cursor position and current query string
 	 * We don't want to place the finder's window too much to the right,
 	 * making its contents unreadable: let's make sure we have at least
 	 * 20 chars (40 if previews are enabled) for the finder's window */
 	int fspace = (tabmode == FZF_TAB && conf.fzf_preview == 1
-		&& SHOW_PREVIEWS(cur_comp_type) == 1) ? 40 : 20;
+		&& SHOW_PREVIEWS(ct) == 1) ? 40 : 20;
 
 	/* If showing previews, let's reserve at least a quarter of the
 	 * terminal height */
@@ -1402,7 +1405,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * is calculated the first time we print the prompt (in my_rl_getc
 	 * (readline.c)) */
 
-	if (text && conf.fuzzy_match == 1 && cur_comp_type != TCMP_TAGS_F)
+	if (text && conf.fuzzy_match == 1 && ct != TCMP_TAGS_F && ct != TCMP_DIRHIST)
 		/* text is not NULL whenever a common prefix was added, replacing
 		 * the original query string */
 		finder_offset -= (int)(wc_xstrlen(matches[0]) - wc_xstrlen(text));
@@ -1421,19 +1424,17 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	char *query = (char *)NULL;
 	/* In case of a range, the sel keyword, or a full tag expression,
 	 * the query string is just empty */
-	if (cur_comp_type != TCMP_RANGES && cur_comp_type != TCMP_SEL
-	&& cur_comp_type != TCMP_BM_PATHS
-	&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_GLOB
-	&& cur_comp_type != TCMP_FILE_TYPES_OPTS
-	&& cur_comp_type != TCMP_FILE_TYPES_FILES && cur_comp_type != TCMP_MIME_LIST
-	&& cur_comp_type != TCMP_CMD_DESC) {
+	if (ct != TCMP_RANGES && ct != TCMP_SEL	&& ct != TCMP_BM_PATHS
+	&& ct != TCMP_TAGS_F && ct != TCMP_GLOB && ct != TCMP_CMD_DESC
+	&& ct != TCMP_FILE_TYPES_OPTS && ct != TCMP_FILE_TYPES_FILES
+	&& ct != TCMP_MIME_LIST) {
 		query = get_query_str(&finder_offset);
 		if (!query) {
-			if (cur_comp_type == TCMP_TAGS_T || cur_comp_type == TCMP_BM_PREFIX)
+			if (ct == TCMP_TAGS_T || ct == TCMP_BM_PREFIX)
 				query = lw ? lw + 2 : (char *)NULL;
-			else if (cur_comp_type == TCMP_TAGS_C)
+			else if (ct == TCMP_TAGS_C)
 				query = lw ? lw + 1 : (char *)NULL;
-			else if (cur_comp_type == TCMP_OWNERSHIP)
+			else if (ct == TCMP_OWNERSHIP)
 				query = (char *)NULL;
 			else
 				query = lw ? lw : (char *)NULL;
@@ -1445,7 +1446,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	char *lb = rl_line_buffer;
 
-	if (cur_comp_type == TCMP_TAGS_F) {
+	if (ct == TCMP_TAGS_F) {
 		if (rl_end > 0 && lb && lb[rl_end - 1] == ' ') {
 			/* Coming from untag ('tu :TAG ') */
 			finder_offset++;
@@ -1456,11 +1457,15 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		}
 	}
 
-	else if (cur_comp_type == TCMP_FILE_TYPES_OPTS || cur_comp_type == TCMP_MIME_LIST) {
+	else if (ct == TCMP_DIRHIST) {
+		finder_offset = prompt_offset;
+	}
+
+	else if (ct == TCMP_FILE_TYPES_OPTS || ct == TCMP_MIME_LIST) {
 		finder_offset++;
 	}
 
-	else if (cur_comp_type == TCMP_FILE_TYPES_FILES) {
+	else if (ct == TCMP_FILE_TYPES_FILES) {
 		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		if (sp) /* Expression is second or more word: "text =FILE_TYPE" */
 			finder_offset = prompt_offset + (int)(sp - lb) - 1;
@@ -1468,27 +1473,27 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			finder_offset = prompt_offset - 2;
 	}
 
-	else if (cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_RANGES) {
+	else if (ct == TCMP_SEL || ct == TCMP_RANGES) {
 		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -(rl_end + 1));
 	}
 
-	else if (cur_comp_type == TCMP_BM_PATHS) {
+	else if (ct == TCMP_BM_PATHS) {
 		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -3);
 	}
 
-	else if (cur_comp_type == TCMP_TAGS_C) {
+	else if (ct == TCMP_TAGS_C) {
 		char *sp = lb ? strrchr(lb, ' ') : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 1 : 0);
 	}
 
-	else if (cur_comp_type == TCMP_BM_PREFIX || cur_comp_type == TCMP_TAGS_T) {
+	else if (ct == TCMP_BM_PREFIX || ct == TCMP_TAGS_T) {
 		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		finder_offset = prompt_offset + (sp ? (int)(sp - lb): -1);
 	}
 
-	else if (cur_comp_type == TCMP_GLOB) {
+	else if (ct == TCMP_GLOB) {
 		char *sl = lb ? get_last_chr(lb, '/', rl_point) : (char *)NULL;
 		char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 		if (!sl) {
@@ -1502,7 +1507,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		}
 	}
 
-	else if (cur_comp_type == TCMP_HIST && *rl_line_buffer == '/') { /* Search patterns */
+	else if (ct == TCMP_HIST && *rl_line_buffer == '/') { /* Search patterns */
 		finder_offset--;
 	}
 
@@ -1570,14 +1575,14 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * line buffer only the non-matched part of the string returned by FZF */
 	size_t prefix_len = calculate_prefix_len(matches[0]);
 
-	if (rl_point < rl_end && cur_comp_type != TCMP_PATH && cur_comp_type != TCMP_CMD) {
+	if (rl_point < rl_end && ct != TCMP_PATH && ct != TCMP_CMD) {
 		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_point) : (char *)NULL;
 		int start = s ? (int)(s - rl_line_buffer + 1) : 0;
 		rl_delete_text(start, rl_point);
 		rl_point = start;
 	}
 
-	else if (cur_comp_type == TCMP_OPENWITH) {
+	else if (ct == TCMP_OPENWITH) {
 		/* Interpret the corresponding cmd line in the mimelist file
 		 * and replace the input string by the interpreted line */
 		char *sp = (char *)NULL;
@@ -1633,11 +1638,11 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		}
 	}
 
-	else if (cur_comp_type == TCMP_DESEL) {
+	else if (ct == TCMP_DESEL) {
 		prefix_len = strlen(query ? query : (lw ? lw : ""));
 	}
 
-	else if (cur_comp_type == TCMP_OWNERSHIP) {
+	else if (ct == TCMP_OWNERSHIP) {
 		char *p = rl_line_buffer ? strchr(rl_line_buffer, ':') : (char *)NULL;
 		if (p)
 			prefix_len = *(++p) ? wc_xstrlen(p) : 0;
@@ -1645,32 +1650,32 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			prefix_len = rl_line_buffer ? wc_xstrlen(rl_line_buffer) : 0;
 	}
 
-	else if (cur_comp_type == TCMP_HIST || cur_comp_type == TCMP_JUMP) {
+	else if (ct == TCMP_HIST || ct == TCMP_JUMP) {
 		rl_delete_text(0, rl_end);
 		rl_point = rl_end = 0;
 		prefix_len = 0;
 	}
 
-	else if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_SEL
-	|| cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
-	|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_BM_PREFIX
-	|| cur_comp_type == TCMP_TAGS_T) {
+	else if (ct == TCMP_RANGES || ct == TCMP_SEL
+	|| ct == TCMP_TAGS_F || ct == TCMP_GLOB
+	|| ct == TCMP_BM_PATHS || ct == TCMP_BM_PREFIX
+	|| ct == TCMP_TAGS_T || ct == TCMP_DIRHIST) {
 		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_end) : (char *)NULL;
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
 			rl_end = rl_point;
 			prefix_len = 0;
-		} else if (cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_TAGS_F
-		|| cur_comp_type == TCMP_BM_PREFIX || cur_comp_type == TCMP_TAGS_T
-		|| cur_comp_type == TCMP_SEL) {
+		} else if (ct == TCMP_BM_PATHS || ct == TCMP_TAGS_F
+		|| ct == TCMP_BM_PREFIX || ct == TCMP_TAGS_T
+		|| ct == TCMP_SEL || ct == TCMP_DIRHIST) {
 			rl_delete_text(0, rl_end);
 			rl_end = rl_point = 0;
 			prefix_len = 0;
 		}
 	}
 
-	else if (cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_CMD_DESC) {
+	else if (ct == TCMP_FILE_TYPES_FILES || ct == TCMP_CMD_DESC) {
 		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_end) : (char *)NULL;
 		rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
 		rl_delete_text(rl_point, rl_end);
@@ -1680,7 +1685,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		prefix_len = 0;
 	}
 
-	else if (cur_comp_type == TCMP_USERS) {
+	else if (ct == TCMP_USERS) {
 		size_t l = strlen(buf);
 		char *p = savestring(buf, l);
 		buf = (char *)xrealloc(buf, (l + 2) * sizeof(char));
@@ -1712,8 +1717,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			buf[j] = '\0';
 
 		char *p = (char *)NULL;
-		if (cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_PATH
-		&& cur_comp_type != TCMP_HIST && !multi) {
+		if (ct != TCMP_OPENWITH && ct != TCMP_PATH && ct != TCMP_HIST && !multi) {
 			p = escape_str(buf);
 			if (!p) {
 				free(buf);
@@ -2024,9 +2028,10 @@ AFTER_USUAL_COMPLETION:
 		&& (cur_comp_type != TCMP_GLOB || !matches[1])
 		&& cur_comp_type != TCMP_JUMP && cur_comp_type != TCMP_RANGES
 //		&& (cur_comp_type != TCMP_SEL || fzftab != 1 || sel_n == 1)
-		&& (cur_comp_type != TCMP_SEL)
+		&& cur_comp_type != TCMP_SEL
 		&& cur_comp_type != TCMP_CMD_DESC
 		&& cur_comp_type != TCMP_OWNERSHIP
+		&& cur_comp_type != TCMP_DIRHIST
 
 		&& (cur_comp_type != TCMP_BM_PATHS || !matches[1])
 
@@ -2433,7 +2438,8 @@ CALC_OFFSET:
 		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR
 		|| cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_FILE_TYPES_OPTS
 		|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_MIME_LIST
-		|| cur_comp_type == TCMP_CMD_DESC || cur_comp_type == TCMP_SEL)
+		|| cur_comp_type == TCMP_CMD_DESC || cur_comp_type == TCMP_SEL
+		|| cur_comp_type == TCMP_DIRHIST) /* We don't want to highlight the matching part */
 			tab_offset = 0;
 
 		if (cur_comp_type == TCMP_PATH && ptr && *ptr == '/' && tab_offset > 0)

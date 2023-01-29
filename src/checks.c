@@ -536,9 +536,10 @@ find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 	if (d != -1)
 		cmd[d] = (char)c;
 
-	if (found)
+	return found;
+/*	if (found)
 		return 1;
-	return 0;
+	return 0; */
 }
 
 int
@@ -663,6 +664,9 @@ is_internal_f(const char *restrict cmd)
 		{"ad", 2},
 		{"alias", 5}, /* 'alias import' takes file names */
 		{"bb", 2},
+		{"bh", 2}, // REMOVE AS SOON AS REPLACED BY DH
+		{"fh", 2}, // REMOVE AS SOON AS REPLACED BY DH
+		{"dh", 2},
 		{"bl", 2},
 		{"bleach", 6},
 		{"bm", 2},

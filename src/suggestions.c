@@ -516,7 +516,7 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
 	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG
 	|| suggestion.type == SORT_SUG || suggestion.type == WS_NUM_SUG
-	|| suggestion.type == FUZZY_FILENAME) {
+	|| suggestion.type == FUZZY_FILENAME || suggestion.type == DIRHIST_SUG) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 		cuc += 3;
 		flags |= BAEJ_SUGGESTION;
@@ -2036,6 +2036,50 @@ check_backdir(void)
 	return NO_MATCH;
 }
 
+static int
+check_dirhist(char *word, const size_t len)
+{
+	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(word) == 1)
+		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
+	int best_fz_score = 0, fuzzy_index = -1;
+
+	int i = dirhist_total_index;
+	while (--i >= 0) {
+		if (!old_pwd[i] || !*old_pwd[i] || *old_pwd[i] == _ESC)
+			continue;
+
+		if (conf.fuzzy_match == 0 || rl_point < rl_end) {
+			if (strstr(old_pwd[i], word)) {
+				suggestion.type = DIRHIST_SUG;
+				print_suggestion(old_pwd[i], 0, sf_c);
+				return PARTIAL_MATCH;
+			}
+		} else {
+			int s = fuzzy_match(word, old_pwd[i], len, fuzzy_str_type);
+			if (s > best_fz_score) {
+				fuzzy_index = (int)i;
+				if (s == TARGET_BEGINNING_BONUS)
+					break;
+				best_fz_score = s;
+			}
+		}
+	}
+
+	if (fuzzy_index == -1)
+		return NO_MATCH;
+
+	cur_comp_type = TCMP_DIRHIST;
+#ifdef NO_BACKWARD_SUGGEST
+	if (c != BS) suggestion.type = DIRHIST_SUG;
+#else
+	suggestion.type = DIRHIST_SUG;
+#endif /* NO_BACKWARD_SUGGEST */
+
+	print_suggestion(old_pwd[fuzzy_index], 0, sf_c);
+
+	return PARTIAL_MATCH;
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -2191,8 +2235,7 @@ rl_suggestions(const unsigned char c)
 		}
 
 		/* Backdir function (bd) */
-		else {
-			if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {
+		else if (lb[1] == 'd' && lb[2] == ' ' && lb[3]) {
 				if (*(lb + 3) == '/' && !*(lb + 4)) {
 					/* The query string is a single slash: do nothing */
 					if (suggestion.printed)
@@ -2201,6 +2244,20 @@ rl_suggestions(const unsigned char c)
 				}
 				if ((printed = check_backdir()) != NO_MATCH)
 					goto SUCCESS;
+		}
+
+		/* REMOVE AS SOON AS BH IS REPLACED BY DH!! */
+		else if (nwords == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0 && lb[1] == 'h'
+		&& lb[2] == ' ' && !strchr(word, '/')) {
+			if (lb[1] == 'h' && lb[2] == ' ' && (lb[3] == '-'
+			|| strncmp(lb + 3, "--help", strlen(lb + 3)) == 0))
+				break;
+			if ((printed = check_dirhist(word, wlen)) != NO_MATCH) {
+				goto SUCCESS;
+			} else {
+				if (suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
+				goto FAIL;
 			}
 		}
 		break;
@@ -2209,6 +2266,23 @@ rl_suggestions(const unsigned char c)
 		if (conf.colorize == 1 && color_schemes && lb[1] == 's' && lb[2] == ' ') {
 			if ((printed = check_color_schemes(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
+		}
+		break;
+
+	case 'f': /* fallthrough */ /* REMOVE AS SOON AS FH CMD IS REMOVED! */
+	case 'd': /* Dirhist command (dh) */
+		if (lb[1] == 'h' && lb[2] == ' ' && (lb[3] == '-'
+		|| strncmp(lb + 3, "--help", strlen(lb + 3)) == 0))
+			break;
+		if (nwords == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0 && lb[1] == 'h'
+		&& lb[2] == ' ' && !strchr(word, '/')) {
+			if ((printed = check_dirhist(word, wlen)) != NO_MATCH) {
+				goto SUCCESS;
+			} else {
+				if (suggestion.printed)
+					clear_suggestion(CS_FREEBUF);
+				goto FAIL;
+			}
 		}
 		break;
 

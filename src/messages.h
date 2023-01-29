@@ -118,13 +118,13 @@ history list\n\n\
   b, back [h, hist] [clear] [!ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Just change to the previously visited directory\n\
-    b (Alt-j or Shift-Left also work)\n\
+    b (also Alt-j or Shift-Left)\n\
 - Print the directory history list\n\
-    bh\n\
+    b hist (or 'dh')\n\
 - Change to the directory whose ELN in the list is 24\n\
     b !24\n\
 - Use the 'f' command to go forward\n\
-    f (Alt-k or Shift-Right also work)"
+    f (also Alt-k or Shift-Right)"
 
 #define BD_USAGE "Quickly change to a parent directory matching NAME. If \
 NAME is not specified, print the list of all parent directories\n\n\
@@ -238,16 +238,31 @@ notifications on your screen. For troubleshoting, consult your \
 daemon's documentation\n\n\
 Tip: You can always check notifications using the 'msg' command"
 
+#define DH_USAGE "Access the directory history list\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  dh [PATH]\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the directory history list\n\
+    dh (also 'dh <TAB>')\n\
+- Print directory history entries matching \"query\"\n\
+    dh query (also 'dh query<TAB>')\n\
+- Change to the entry number 12\n\
+    dh !12\n\
+  Note: Entry numbers are not available when using TAB completion\n\n\
+Note: If the first argument is an absolute path, 'dh' works just as 'cd'\n\
+Tip: Take a look at the 'j' command as well"
+
 #define DIRHIST_USAGE "List or access entries in the directory history list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   b/f [hist] [clear] [!ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the directory history list\n\
-    bh (or 'b hist')\n\
+    b hist\n\
 - Change to the directory whose ELN is 12 in the directory history list\n\
     b !12\n\
 - Remove all entries from the directory history list\n\
-    b clear\n"
+    b clear\n\n\
+Tip: See also the 'dh' and 'j' commands"
 
 #define DUP_USAGE "Duplicate files via rsync(1) (cp(1) if rsync is not found)\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -422,13 +437,13 @@ files in the current directory:\n\n\
   f, forth [h, hist] [clear] [!ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Just change to the next visited directory\n\
-    f (Alt-k or Shift-Right also work)\n\
+    f (also Alt-k or Shift-Right)\n\
 - Print the directory history list\n\
-    fh\n\
+    f hist (or 'dh')\n\
 - Change to the directory whose ELN in the list is 24\n\
     f !24\n\
 - Use the 'b' command to go backwards\n\
-    b (Alt-j or Shift-Left also work)"
+    b (also Alt-j or Shift-Left)"
 
 #define FZ_USAGE "Toggle full directory size on/off (only for long view mode)\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1209,14 +1224,16 @@ CliFM's built-in opener\
       --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
 \n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\n"
 
-#define CLIFM_COMMANDS "\
+#define CLIFM_COMMANDS_HEADER "\
 For a complete description of all the below \
 commands run 'cmd' (or press F2) or consult the manpage (F1).\n\
 You can also try the interactive help plugin (it depends on FZF): just \
 enter 'ih', that's it.\n\
 Help topics are available as well. Type 'help <TAB>' to get a list of topics.\n\n\
 The following is just a list of available commands and a brief description.\n\
-For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\n\
+For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
+
+#define CLIFM_COMMANDS "\
  ELN/FILE/DIR       Auto-open and autocd functions\n\
  /PATTERN           Quick search\n\
  ;[CMD], :[CMD]     Run CMD via the system shell\n\
@@ -1238,6 +1255,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n\n\
  cmd, commands      Jump to the COMMANDS section in the manpage\n\
  cs, colorscheme    Manage color schemes\n\
  d, dup             Duplicate files\n\
+ dh                 Access the directory history list\n\
  ds, desel          Deselect selected files\n\
  edit               Open/edit the main configuration file\n\
  exp                Export file names to a temporary file\n\
@@ -1381,9 +1399,9 @@ b | Shift-left | Alt-j   Go back in the directory history list\n\
 f | Shift-right | Alt-k  Go forth in the directory history list\n\
 .. | Shift-up | Alt-u    Change to the parent directory\n\
 bd media                 Change to the parent directory matching 'media'\n\
-j <TAB>                  Navigate the list of visited directories\n\
+dh <TAB>                 Navigate the directory history list\n\
 j xproj                  Jump to the best ranked directory matching 'xproj'\n\
-bm | Alt-b | b:<TAB>     List bookmarks\n\
+bm | b:<TAB> | Alt-b     List bookmarks\n\
 bm mybm | b:mybm         Change to the bookmark named 'mybm'\n\
 ws2 | Alt-2              Switch to the second workspace\n\
 mp                       Change to a mountpoint\n\
