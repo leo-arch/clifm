@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 21, 2023" "clifm 1.9.11" "CLIFM Manual"
+.TH "CLIFM" "1" "Jan 29, 2023" "clifm 1.9.13" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -489,7 +489,7 @@ toggle the auto-open function on/off. If set to on, \fIFILE\fR amounts to \fIope
 .B b, back \fR[\fIh\fR, \fIhist\fR] [\fIclear\fR] [\fI!ELN\fR]
 unlike \fIcd\ ..\fR, which sends you to the parent directory of the current directory, this command (with no argument) sends you back to the previously visited directory.
 .sp
-\fBclifm\fR keeps a record of all visited directories. You can see this list by typing \fIb\ hist\fR, \fIb\ h\fR or \fIbh\fR, and you can access any element in this list by simply passing the corresponding ELN in this list to the \fIback\fR command. Example:
+\fBclifm\fR keeps a record of all visited directories. You can see this list by typing \fIb\ hist\fR or \fIb\ h\fR, and you can access any element in this list by simply passing the corresponding ELN in this list to the \fIback\fR command. Example:
         :) > ~ $ bh
         1 /home/user
         2 /etc
@@ -501,7 +501,7 @@ unlike \fIcd\ ..\fR, which sends you to the parent directory of the current dire
 .sp
 Finally, you can also clear this history list by typing \fIb\ clear\fR.
 .sp
-The best way of navigating the directory history list, however, is via the \fIdirectory jumper\fR function. See the \fIj\fR command below.
+The best way of navigating the directory history list, however, is via the \fIdirectory jumper\fR function. See the \fIj\fR command below. You can take a look at the \fIdh\fR command as well.
 .TP
 .B bb, bleach \fIELN/FILE\fR...
 \fIBleach\fR is a built-in file names cleaner (based on detox [\fIhttps://github.com/dharple/detox\fR]), whose main aim is to rename file names using only safe characters.
@@ -631,6 +631,15 @@ If \fBrsync\fR(1) is found, it will be used as follows: \fIrsync\ \-aczvAXHS\ \-
 .B dc \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
 toggle the files counter function on/off.
 .TP
+.B dh \fR[\fISTRING\fR] [\fIPATH\fR] [\fI!ELN\fR]
+With no parameters, it prints the directory history list. To filter this list just pass a string: only entries matching this string will be displayed. In both cases, TAB completion is available. For example: \fIdh down<TAB>\fR will list only those entries matching \fIdown\fR (fuzzily, if \fIfuzzy-matching\fR is enabled).
+.sp
+To access a specific entry, you can pass the entry number preceded by an exclamation mark. For example, if you want the entry number 12, just enter \fIdh !12\fR to change to the corresponding directory.
+.sp
+Finally, if an absolute path is passed as first parameter, \fIdh\fR works just as the \fIcd\fR command.
+.sp
+\fINote\fR: Take a look at the \fIj\fR command as well. Both commands deal with the list of visited directories, but in slightly different ways: while \fIdh\fR deals with the list of the last \fIMaxDirhist\fR entries (see the configuration file), the \fIj\fR command deals with the \fIranked\fR list of visited directories.
+.TP
 .B ds, desel \fR[\fI*\fR, \fIa\fR, \fIall\fR] [\fIFILE\fR]...
 deselect one or more selected files.
 .sp
@@ -652,7 +661,7 @@ with no argument, export the list of files in the current working directory to a
 toggle external commands on/off.
 .TP
 .B f, forth \fR[\fIh\fR, \fIhist\fR] [\fIclear\fR] [\fI!ELN\fR]
-it works just like the \fIback\fR function, but it goes forward in the history record. Of course, you can use \fIf\ hist\fR, \fIf\ h\fR, \fIfh\fR, and \fIf\ !ELN\fR.
+it works just like the \fIback\fR function, but it goes forward in the history record. Of course, you can use \fIf\ hist\fR, \fIf\ h\fR, and \fIf\ !ELN\fR.
 .TP
 .B  fc, filescounter \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
 By default, \fBclifm\fR prints the amount of files contained by listed directories next to directories name. However, since this is an expensive feature, It might be desirable, for example, when listing files in a remote machine, to disable this feature. Use the 'off' option to disable it. To permanently disable it, use the FilesCounter option in the configuration file.
@@ -727,6 +736,8 @@ Since it is not always obvious or easy to know where exactly a query string will
 To reset or modify the jump database as you wish, simply open the jump file using the \fIje\fR command, edit whatever needs to be edited, save changes, and close the editor.
 .sp
 An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and bound by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Just enter \fI++\fR to perform a fuzzy search over the jump database.
+.sp
+Take a look at the \fIdh\fR command as well.
 .TP
 .B kb, keybinds \fR[\fIedit\fR [\fIAPP\fR]] [\fIreset\fR] [\fIreadline\fR]
 with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the \fIedit\fR option (the file will be opened with APP, if specified, or with the default associated application otherwise). If you somehow messed up your keybindings, use the 'reset' option to create a fresh keybindings file with the default values. To list readline keybindings, use the \fIreadline\fR option. Bear in mind that these keybindings are not provided by \fBclifm\fR, but by readline itself, and as such depend on the system settings (they can be customized however via the \fI~/.inputrc\fR file).
@@ -2035,9 +2046,6 @@ T{
 _ (underscore)
 T}	Quickly change directory	fzcd.sh	fzf
 T{
-dh
-T}	Browse the directory history	fzfdirhist.sh	fzf
-T{
 h
 T}	Browse the commands history	fzfhist.h	fzf
 T{
@@ -2692,7 +2700,7 @@ T{
 5
 T}	Change to the directory whose ELN is 5 \fB(2)\fR
 T{
-j <TAB>
+dh <TAB>
 T}	List visited directories
 T{
 j xproj
