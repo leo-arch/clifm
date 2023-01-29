@@ -240,15 +240,15 @@ Tip: You can always check notifications using the 'msg' command"
 
 #define DH_USAGE "Access the directory history list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  dh [PATH]\n\n\
+  dh [STRING] [PATH] [!ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the directory history list\n\
     dh (also 'dh <TAB>')\n\
 - Print directory history entries matching \"query\"\n\
     dh query (also 'dh query<TAB>')\n\
-- Change to the entry number 12\n\
+- Change to the entry number (ELN) 12\n\
     dh !12\n\
-  Note: Entry numbers are not available when using TAB completion\n\n\
+  Note: Entry numbers are not displayed when using TAB completion\n\n\
 Note: If the first argument is an absolute path, 'dh' works just as 'cd'\n\
 Tip: Take a look at the 'j' command as well"
 
