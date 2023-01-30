@@ -82,6 +82,10 @@ display() {
 2. Run `view edit` (<kbd>F7</kbd> is also available) to edit [shotgun's](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun) configuration file (`$HOME/.config/clifm/profiles/PROFILE/preview.clifm`), and add the following lines at the top of the file (to make sure they won't be overriden by previous directives):
 
 ```sh
+...
+# Uncomment and edit this line to use Ranger's scope script: 
+#.*=/home/USER/.config/ranger/scope.sh %f 120 80 /tmp/clifm/ True;
+
 X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
 X:^text/rtf$=clifmimg doc;
 X:^application/epub\+zip$=clifmimg epub;
@@ -94,6 +98,10 @@ X:^audio/.*=clifmimg audio;
 X:^application/postscript$=clifmimg postscript;
 X:N:.*\.otf$=clifmimg font;
 X:font/.*=clifmimg font;
+
+# Directories
+...
+
 ```
 
 This instructs _clifm_ to use `clifmimg` to generate previews (and display them via `ueberzug`) for the specified file names or file types.
