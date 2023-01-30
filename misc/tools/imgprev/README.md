@@ -89,8 +89,8 @@ display() {
 X:^application/.*(officedocument|msword|ms-excel|opendocument).*=clifmimg doc;
 X:^text/rtf$=clifmimg doc;
 X:^application/epub\+zip$=clifmimg epub;
-X:^appliaction/pdf$=clifmimg pdf
-X:^image/vnd.djvu=clifmimg djvu
+X:^appliaction/pdf$=clifmimg pdf;
+X:^image/vnd.djvu=clifmimg djvu;
 X:^image/svg\+xml$=clifmimg svg;
 X:^image/.*=clifmimg image;
 X:^video/.*=clifmimg video;
