@@ -90,6 +90,14 @@ are required.\n" >&2
 display() {
 	[ -z "$1" ] && exit 1
 
+## Uncomment any of the following lines to use a character art method (instead of kitty or ueberzug)
+#	chafa -f symbols -s "$((FZF_PREVIEW_COLUMNS - 2))x$((FZF_PREVIEW_LINES))" "$1"; exit 0
+#	pixterm -s 2 -tc "$((FZF_PREVIEW_COLUMNS - 2))" -tr "$FZF_PREVIEW_LINES" "$1"; exit 0
+#   img2txt -H"$FZF_PREVIEW_LINES" -W"$((FZF_PREVIEW_COLUMNS - 2))" "$1"; exit 0
+#	viu -b -h"$FZF_PREVIEW_LINES" -w"$((FZF_PREVIEW_COLUMNS - 2))" "$1"; exit 0
+#	catimg -H"$FZF_PREVIEW_LINES" "$1"; exit 0
+#	tiv -h "$FZF_PREVIEW_LINES" -w "$((FZF_PREVIEW_COLUMNS - 2))" "$1"; exit 0
+
 	# CLIFM_TERM_COLUMNS: Number of columns of the current terminal
 	# window (value exported by clifm)
 	# FZF_PREVIEW_COLUMNS: Number of columns of the fzf preview
