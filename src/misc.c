@@ -2389,6 +2389,10 @@ bonus_function(void)
 	    "\"We're gonna need a bigger boat.\" (Caleb)",
 	    "\"Ein Verletzter, Alarm, Alarm!\"",
 	    "\"There is not knowledge that is not power\"",
+	    "idkfa",
+	    "\"Computer updated [...] Establish communications, priority alpha\"",
+	    "\"Step one: find plans, step two: save world, step three: get out of my house!\"",
+	    "\"Leave my loneliness unbroken!, quit the bust above my door! Quoth the raven: Nevermore.\"",
 	    NULL};
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;

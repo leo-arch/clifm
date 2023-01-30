@@ -1112,7 +1112,7 @@ get_query_str(int *fzf_offset)
 {
 	char *query = (char *)NULL;
 
-	switch(cur_comp_type) {
+	switch (cur_comp_type) {
 	case TCMP_OWNERSHIP: {
 		char *sc = rl_line_buffer ? strchr(rl_line_buffer, ':') : (char *)NULL;
 		if (sc) {
@@ -1146,12 +1146,16 @@ get_query_str(int *fzf_offset)
 		char *sp = rl_line_buffer ? strchr(rl_line_buffer, ' ') : (char *)NULL;
 		if (sp && *(++sp)) {
 			query = sp;
-			if (*(rl_line_buffer + 1) == ' ')
+			if (*(rl_line_buffer + 1) == ' ') {
 				/* The command is "j" */
 				*fzf_offset = 2 + prompt_offset - 3;
-			else
+			} else {
 				/* The command is "jump" */
 				*fzf_offset = 5 + prompt_offset - 3;
+			}
+		} else {
+			*fzf_offset = prompt_offset
+				+ (*(rl_line_buffer + 1) == ' ' ? -2 : 1);
 		}
 		}
 		break;
