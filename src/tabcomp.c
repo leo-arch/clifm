@@ -441,10 +441,11 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 	}
 
 	/* Absolute path (/FILE) or file in CWD (./FILE) */
-	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') ) && (cur_comp_type == TCMP_PATH
-	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL
-	|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_GLOB
-	|| cur_comp_type == TCMP_DIRHIST) ) {
+	if ( (*dir == '/' || (*dir == '.' && *(dir + 1) == '/') )
+	&& (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_SEL
+	|| cur_comp_type == TCMP_DESEL || cur_comp_type == TCMP_BM_PATHS
+	|| cur_comp_type == TCMP_GLOB || cur_comp_type == TCMP_DIRHIST
+	|| cur_comp_type == TCMP_JUMP) ) {
 		if (lstat(dir, &attr) != -1)
 			return fzftab_color(dir, &attr);
 		return uf_c;
@@ -1021,15 +1022,15 @@ static size_t
 store_completions(char **matches, FILE *fp)
 {
 	int no_file_comp = 0;
-	if (cur_comp_type == TCMP_TAGS_S || cur_comp_type == TCMP_TAGS_U
-	|| cur_comp_type == TCMP_SORT || cur_comp_type == TCMP_BOOKMARK
-	|| cur_comp_type == TCMP_CSCHEME || cur_comp_type == TCMP_NET
-	|| cur_comp_type == TCMP_PROF || cur_comp_type == TCMP_PROMPTS
-	|| cur_comp_type == TCMP_BM_PREFIX)
+	enum comp_type ct = cur_comp_type;
+
+	if (ct == TCMP_TAGS_S || ct == TCMP_TAGS_U || ct == TCMP_SORT
+	|| ct == TCMP_BOOKMARK || ct == TCMP_CSCHEME || ct == TCMP_NET
+	|| ct == TCMP_PROF || ct == TCMP_PROMPTS || ct == TCMP_BM_PREFIX)
 		no_file_comp = 1; /* We're not completing file names */
 
 	char *norm_prefix = (char *)NULL;
-	if (cur_comp_type == TCMP_PATH && strstr(matches[0], "/.."))
+	if (ct == TCMP_PATH && strstr(matches[0], "/.."))
 		norm_prefix = normalize_path(matches[0], strlen(matches[0]));
 
 	size_t i;
@@ -1037,12 +1038,12 @@ store_completions(char **matches, FILE *fp)
 	size_t start = ((flags & PREVIEWER) && !matches[1]) ? 0 : 1;
 	char *_path = (char *)NULL;
 
-	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
+	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(ct) == 1) ? 1 : 0;
 	longest_prev_entry = 0;
 
 	/* Change to the trash dir so we can correctly get trashed files color */
-	if (conf.colorize == 1 && (cur_comp_type == TCMP_TRASHDEL
-	|| cur_comp_type == TCMP_UNTRASH) && trash_files_dir)
+	if (conf.colorize == 1 && (ct == TCMP_TRASHDEL || ct == TCMP_UNTRASH)
+	&& trash_files_dir)
 		xchdir(trash_files_dir, NO_TITLE);
 
 	for (i = start; matches[i]; i++) {
@@ -1050,7 +1051,7 @@ store_completions(char **matches, FILE *fp)
 			continue;
 
 		if (prev == 1) {
-			int get_base_name = ((cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_GLOB)
+			int get_base_name = ((ct == TCMP_PATH || ct == TCMP_GLOB)
 					&& !(flags & PREVIEWER)) ? 1 : 0;
 			char *p = get_base_name == 1 ? strrchr(matches[i], '/') : (char *)NULL;
 			size_t l = strlen(p && *(p + 1) ? p + 1 : matches[i]);
@@ -1060,21 +1061,21 @@ store_completions(char **matches, FILE *fp)
 
 		char *color = df_c, *entry = matches[i];
 
-		if (cur_comp_type == TCMP_BACKDIR) {
+		if (ct == TCMP_BACKDIR) {
 			color = di_c;
-		} else if (cur_comp_type == TCMP_TAGS_T || cur_comp_type == TCMP_BM_PREFIX) {
+		} else if (ct == TCMP_TAGS_T || ct == TCMP_BM_PREFIX) {
 			color = mi_c;
 			if (*(entry + 2))
 				entry += 2;
-		} else if (cur_comp_type == TCMP_TAGS_C) {
+		} else if (ct == TCMP_TAGS_C) {
 			color = mi_c;
 			if (*(entry + 1))
 				entry += 1;
 		} else if (no_file_comp == 1) {
 			color = mi_c;
-		} else if (cur_comp_type != TCMP_HIST && cur_comp_type != TCMP_JUMP
-		&& cur_comp_type != TCMP_TAGS_F && cur_comp_type != TCMP_FILE_TYPES_OPTS
-		&& cur_comp_type != TCMP_MIME_LIST && cur_comp_type != TCMP_CMD_DESC) {
+		} else if (ct != TCMP_HIST && ct != TCMP_TAGS_F
+		&& ct != TCMP_FILE_TYPES_OPTS && ct != TCMP_MIME_LIST
+		&& ct != TCMP_CMD_DESC) {
 			char *cl = get_entry_color(matches, i, norm_prefix);
 			char ext_cl[MAX_COLOR + 5];
 			*ext_cl = '\0';
@@ -1086,9 +1087,9 @@ store_completions(char **matches, FILE *fp)
 
 			color = *ext_cl ? ext_cl : (cl ? cl : "");
 
-			if (cur_comp_type != TCMP_SEL && cur_comp_type != TCMP_DESEL
-			&& cur_comp_type != TCMP_BM_PATHS && cur_comp_type != TCMP_DIRHIST
-			&& cur_comp_type != TCMP_OPENWITH && cur_comp_type != TCMP_BACKDIR) {
+			if (ct != TCMP_SEL && ct != TCMP_DESEL && ct != TCMP_BM_PATHS
+			&& ct != TCMP_DIRHIST && ct != TCMP_OPENWITH && ct != TCMP_BACKDIR
+			&& ct != TCMP_JUMP) {
 				_path = strrchr(matches[i], '/');
 				entry = (_path && *(++_path)) ? _path : matches[i];
 			}
@@ -1099,8 +1100,8 @@ store_completions(char **matches, FILE *fp)
 	}
 
 	/* We changed to the trash dir. Change back to the current dir */
-	if (conf.colorize == 1 && (cur_comp_type == TCMP_TRASHDEL
-	|| cur_comp_type == TCMP_UNTRASH) && workspaces && workspaces[cur_ws].path)
+	if (conf.colorize == 1 && (ct == TCMP_TRASHDEL || ct == TCMP_UNTRASH)
+	&& workspaces && workspaces[cur_ws].path)
 		xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 	free(norm_prefix);
