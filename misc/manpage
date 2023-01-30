@@ -2701,7 +2701,7 @@ T{
 T}	Change to the directory whose ELN is 5 \fB(2)\fR
 T{
 j <TAB> (also dh <TAB>)
-T}	List visited directories
+T}	Navigate through visited directories
 T{
 j xproj
 T}	Jump to \fI~/media/data/docs/work/mike/xproject\fR \fB(3)\fR
@@ -2888,7 +2888,7 @@ rf (Enter)
 T}	Reprint the current list of files
 T{
 !<TAB>
-T}	Navigate the command history
+T}	Navigate through the command history
 T{
 edit (F10)
 T}	View/edit the main configuration file
