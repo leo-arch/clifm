@@ -1399,7 +1399,7 @@ b | Shift-left | Alt-j   Go back in the directory history list\n\
 f | Shift-right | Alt-k  Go forth in the directory history list\n\
 .. | Shift-up | Alt-u    Change to the parent directory\n\
 bd media                 Change to the parent directory matching 'media'\n\
-dh <TAB>                 Navigate the directory history list\n\
+j <TAB> | dh <TAB>       Navigate the directory history list\n\
 j xproj                  Jump to the best ranked directory matching 'xproj'\n\
 bm | b:<TAB> | Alt-b     List bookmarks\n\
 bm mybm | b:mybm         Change to the bookmark named 'mybm'\n\

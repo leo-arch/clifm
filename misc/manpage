@@ -2700,7 +2700,7 @@ T{
 5
 T}	Change to the directory whose ELN is 5 \fB(2)\fR
 T{
-dh <TAB>
+j <TAB> (also dh <TAB>)
 T}	List visited directories
 T{
 j xproj
@@ -2784,7 +2784,7 @@ p4
 T}	Print the properties of the file whose ELN is 4
 T{
 pc myfile.txt
-T}	Edit the permission set of the file \fImyfile.txt\fR
+T}	Edit the permission set of the file \fImyfile.txt\fR (use \fIoc\fR to edit ownership)
 T{
 s *.c
 T}	Select all c files in the current directory
