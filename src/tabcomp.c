@@ -1149,14 +1149,14 @@ get_query_str(int *fzf_offset)
 			query = sp;
 			if (*(rl_line_buffer + 1) == ' ') {
 				/* The command is "j" */
-				*fzf_offset = 2 + prompt_offset - 3;
+				*fzf_offset = prompt_offset - 1;
 			} else {
 				/* The command is "jump" */
-				*fzf_offset = 5 + prompt_offset - 3;
+				*fzf_offset = prompt_offset + 2;
 			}
 		} else {
-			*fzf_offset = prompt_offset
-				+ (*(rl_line_buffer + 1) == ' ' ? -2 : 1);
+			*fzf_offset = prompt_offset + (rl_line_buffer ?
+				(*(rl_line_buffer + 1) == ' ' ? -2 : 1) : -2);
 		}
 		}
 		break;
