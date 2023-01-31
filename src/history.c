@@ -331,11 +331,16 @@ save_dirhist(void)
 		return EXIT_FAILURE;
 	}
 
-	int i;
-	for (i = 0; i < dirhist_total_index; i++) {
-		/* Exclude invalid entries */
-		if (!old_pwd[i] || *old_pwd[i] == _ESC)
+	/* Let's keep only the last MaxDirhist entries */
+	int i, n = dirhist_total_index <= conf.max_dirhist ? 0
+		: dirhist_total_index - conf.max_dirhist;
+
+	for (i = n; i < dirhist_total_index; i++) {
+		/* Exclude invalid/consecutive equal entries */
+		if (!old_pwd[i] || *old_pwd[i] == _ESC || (i > 0 && old_pwd[i - 1]
+		&& strcmp(old_pwd[i - 1], old_pwd[i]) == 0))
 			continue;
+
 		fprintf(fp, "%s\n", old_pwd[i]);
 	}
 

@@ -1707,8 +1707,7 @@ create_mime_file_anew(char *file)
 # X:text/plain=$EDITOR %%f &;$VISUAL;nano;vi\n\
 \n\
 # Use Ranger's rifle (or whatever opener you prefer) to open all files\n\
-#X:N:.*=rifle\n\
-#!X:N:.*=rifle\n\
+#.*=rifle\n\
 \n\
 ###########################\n\
 #  File names/extensions  #\n\

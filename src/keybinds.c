@@ -834,12 +834,25 @@ rl_home_dir(int count, int key)
 }
 
 static int
+rl_previous_dir(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	/* If already at the beginning of dir hist, do nothing */
+	if (dirhist_cur_index == 0)
+		return EXIT_SUCCESS;
+
+	return run_kb_cmd("b");
+}
+
+static int
 rl_next_dir(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+
 	/* If already at the end of dir hist, do nothing */
 	if (dirhist_cur_index + 1 == dirhist_total_index)
 		return EXIT_SUCCESS;
+
 	return run_kb_cmd("f");
 }
 
@@ -870,16 +883,6 @@ rl_last_dir(int count, int key)
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
-}
-
-static int
-rl_previous_dir(int count, int key)
-{
-	UNUSED(count); UNUSED(key);
-	/* If already at the beginning of dir hist, do nothing */
-	if (dirhist_cur_index == 0)
-		return EXIT_SUCCESS;
-	return run_kb_cmd("b");
 }
 
 static int

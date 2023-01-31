@@ -1510,7 +1510,7 @@ check_actions(char **args)
 				_err('n', PRINT_PROMPT, "%s: The 'dh' plugin is deprecated. "
 					"Use the built-in 'dh' command instead disabling the "
 					"'dh' plugin ('actions edit'). Once done, run 'dh --help' "
-					"for more information.\n", PROGRAM_NAME);
+					"for more information about the new command.\n", PROGRAM_NAME);
 			}
 
 			setenv("CLIFM_PLUGIN_NAME", usr_actions[i].name, 1);

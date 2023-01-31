@@ -876,33 +876,35 @@ set_path(const char *new_path)
 
 /* Go back one entry in dirhist */
 int
-back_function(char **comm)
+back_function(char **args)
 {
-	if (!comm)
+	if (!args)
 		return EXIT_FAILURE;
 
-	if (comm[1]) {
-		if (!IS_HELP(comm[1]))
-			return surf_hist(comm);
+	if (args[1]) {
+		if (!IS_HELP(args[1]))
+			return surf_hist(args);
 		puts(_(BACK_USAGE));
 		return EXIT_SUCCESS;
 	}
 
-	/* If just 'back', with no arguments */
-	/* If first path in current dirhist was reached, do nothing */
-	if (dirhist_cur_index <= 0)
+	/* Find the previous non-consecutive equal and valid entry */
+	int i = dirhist_cur_index;
+	while (--i >= 0) {
+		if (old_pwd[i] && *old_pwd[i] != _ESC && (!workspaces[cur_ws].path
+		|| strcmp(workspaces[cur_ws].path, old_pwd[i]) != 0))
+			break;
+	}
+
+	if (i < 0)
 		return EXIT_SUCCESS;
 
-	dirhist_cur_index--;
+	dirhist_cur_index = i;
 
-	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
-		if (dirhist_cur_index <= 0)
-			return EXIT_FAILURE;
-		dirhist_cur_index--;
-	}
 
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
+
 	_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n",
 	    old_pwd[dirhist_cur_index], strerror(errno));
 
@@ -916,35 +918,37 @@ back_function(char **comm)
 
 /* Go forth one entry in dirhist */
 int
-forth_function(char **comm)
+forth_function(char **args)
 {
-	if (!comm)
+	if (!args)
 		return EXIT_FAILURE;
-	if (comm[1]) {
-		if (!IS_HELP(comm[1]))
-			return surf_hist(comm);
+
+	if (args[1]) {
+		if (!IS_HELP(args[1]))
+			return surf_hist(args);
 		puts(_(FORTH_USAGE));
 		return EXIT_SUCCESS;
 	}
 
-	/* If just 'forth', with no arguments */
-	/* If last path in dirhist was reached, do nothing */
-	if (dirhist_cur_index + 1 >= dirhist_total_index)
+	/* Find the next valid entry */
+	int i = dirhist_cur_index;
+	while (++i <= dirhist_total_index) {
+		if (old_pwd[i] && (*old_pwd[i] != _ESC && (!workspaces[cur_ws].path
+		|| strcmp(workspaces[cur_ws].path, old_pwd[i]) != 0)))
+			break;
+	}
+
+	if (i > dirhist_total_index)
 		return EXIT_SUCCESS;
 
-	dirhist_cur_index++;
+	dirhist_cur_index = i;
 
-	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
-/*		if (dirhist_cur_index >= dirhist_total_index
-		|| !old_pwd[dirhist_cur_index + 1]) */
-		if (!old_pwd[dirhist_cur_index + 1])
-			return EXIT_FAILURE;
-		dirhist_cur_index++;
-	}
 
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", old_pwd[dirhist_cur_index], strerror(errno));
+
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n",
+		old_pwd[dirhist_cur_index], strerror(errno));
 
 	/* Invalidate this entry */
 	*old_pwd[dirhist_cur_index] = _ESC;
