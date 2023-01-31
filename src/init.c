@@ -42,10 +42,16 @@
 #include <time.h>
 #include <unistd.h>
 #include <readline/readline.h>
-#include <readline/history.h>
+#if defined(__OpenBSD__)
+# include <ereadline/readline/history.h> /* history_write_timestamps */
+#else
+# include <readline/history.h>
+#endif /* __OpenBSD__ */
+
 #if defined(__NetBSD__)
 # include <ctype.h>
 #endif
+
 #include <paths.h>
 
 #include "aux.h"
