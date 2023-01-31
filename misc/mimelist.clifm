@@ -64,8 +64,7 @@
 # X:text/plain=$EDITOR %f &;$VISUAL;nano;vi
 
 # Use Ranger's rifle (or whatever opener you prefer) to open all files
-#X:N:.*=rifle
-#!X:N:.*=rifle
+#.*=rifle
 
 ###########################
 #  File names/extensions  #

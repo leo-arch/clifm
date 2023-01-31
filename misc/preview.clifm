@@ -15,7 +15,7 @@
 #.*=pistol
 
 # Uncomment and edit this line to use Ranger's scope script:
-#.*=/home/USER/.config/ranger/scope.sh %f 120 80 /tmp/clifm/ True
+#.*=~/.config/ranger/scope.sh %f 120 80 /tmp/clifm/ True
 
 # Directories
 inode/directory=exa -a --tree --level=1 --;lsd -A --tree --depth=1 --color=always;tree -a -L 1;ls -Ap --color=always --indicator-style=none;
