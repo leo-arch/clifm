@@ -358,7 +358,7 @@ get_ext_color(char *ext)
 			continue;
 
 		q++;
-		return q ? q : (char *)NULL;
+		return *q ? q : (char *)NULL;
 	}
 
 	return (char *)NULL;
