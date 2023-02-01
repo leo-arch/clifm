@@ -61,20 +61,6 @@ The first parameter (thumbnailing method) could be any of the following:
 * postscript
 * svg
 
-If you prefer a character art method (instead of ueberzug or kitty), just uncomment the corresponding line in the `display` function in the `clifmimg` file. For example, to use [**chafa**(1)](https://github.com/hpjansson/chafa/):
-
-```sh
-display() {
-    [ -z ] && exit 1
-
-    chafa -f symbols -s "$((FZF_PREVIEW_COLUMNS - 2))x$((FZF_PREVIEW_LINES))" "$1"; exit 0
-#  pixterm -s 2 -tc "$((FZF_PREVIEW_COLUMNS - 2))" -tr "$FZF_PREVIEW_LINES" "$1"; exit 0
-#  img2txt -H"$FZF_PREVIEW_LINES" -W"$((FZF_PREVIEW_COLUMNS - 2))" "$1"; exit 0
-...
-```
-
-**Note**: In this case, there is no need to run `clifmrun`.
-
 ## Usage
 
 1. Copy both scripts (`clifmrun` and `clifmimg`) to somewhere in you **$PATH** (say `/usr/local/bin`). You can find them in `DATADIR/clifm/plugins` (usually `/usr/local/share/clifm/plugins`).
@@ -127,7 +113,25 @@ CLIFM_KITTY_NO_UEBERZUG=1 clifmrun --fzfpreview
 ```
 Note that on Wayland the kitty image protocol will be used by default, so that there is no need to set this variable.
 
-### General procedure
+### ASCII/Unicode images
+
+If you prefer a character art method (instead of `ueberzug` or `kitty`), just uncomment the corresponding line in the `display` function in the `clifmimg` file. For example, to use [**chafa**(1)](https://github.com/hpjansson/chafa/):
+
+```sh
+
+display() {
+
+    [ -z ] && exit 1
+
+    chafa -f symbols -s "$((FZF_PREVIEW_COLUMNS - 2))x$((FZF_PREVIEW_LINES))" "$1"; exit 0
+#  pixterm -s 2 -tc "$((FZF_PREVIEW_COLUMNS - 2))" -tr "$FZF_PREVIEW_LINES" "$1"; exit 0
+#  img2txt -H"$FZF_PREVIEW_LINES" -W"$((FZF_PREVIEW_COLUMNS - 2))" "$1"; exit 0
+...
+```
+
+**Note**: In this case, there is no need to run `clifmrun`.
+
+## General procedure
 
 The steps involved in generating image previews are:
 
