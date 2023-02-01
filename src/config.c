@@ -2770,7 +2770,7 @@ check_colors(void)
 
 	reset_filetype_colors();
 	reset_iface_colors();
-	unset_suggestions_color();
+//	unset_suggestions_color();
 	cur_color = tx_c;
 }
 

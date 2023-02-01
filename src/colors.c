@@ -505,18 +505,19 @@ reset_iface_colors(void)
 }
 
 /* Disable colors for suggestions */
+/*
 void
 unset_suggestions_color(void)
 {
-	strcpy(sb_c, SUG_NO_COLOR); /* shell built-ins */
-	strcpy(sc_c, SUG_NO_COLOR); /* external commands */
-	strcpy(sd_c, SUG_NO_COLOR); /* internal commands description */
-	strcpy(sf_c, SUG_NO_COLOR); /* file names */
-	strcpy(sh_c, SUG_NO_COLOR); /* history */
-	strcpy(sp_c, SUG_NO_COLOR); /* suggestions pointer */
-	strcpy(sx_c, SUG_NO_COLOR); /* internal commands and params */
-	strcpy(sz_c, SUG_NO_COLOR); /* file names (fuzzy) */
-}
+	strcpy(sb_c, SUG_NO_COLOR); // shell built-ins
+	strcpy(sc_c, SUG_NO_COLOR); // external commands
+	strcpy(sd_c, SUG_NO_COLOR); // internal commands description
+	strcpy(sf_c, SUG_NO_COLOR); // file names
+	strcpy(sh_c, SUG_NO_COLOR); // history
+	strcpy(sp_c, SUG_NO_COLOR); // suggestions pointer
+	strcpy(sx_c, SUG_NO_COLOR); // internal commands and params
+	strcpy(sz_c, SUG_NO_COLOR); // file names (fuzzy)
+} */
 
 /* Import the color scheme NAME from DATADIR (usually /usr/local/share)
  * Return zero on success or one on failure */

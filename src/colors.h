@@ -47,7 +47,7 @@ void reset_filetype_colors(void);
 void reset_iface_colors(void);
 int  set_colors(const char *, const int);
 void set_default_colors(void);
-void unset_suggestions_color(void);
+//void unset_suggestions_color(void);
 
 __END_DECLS
 

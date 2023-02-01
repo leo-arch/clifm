@@ -293,7 +293,8 @@ extern int watch;
  * color by anything else, so that suggestions will be indistinguishable
  * from bare input text.
  * The Linux console is more important to us, so let's use a dimmed color */
-#define SUG_NO_COLOR "\x1b[0;2m" /* Dimmed color */
+//#define SUG_NO_COLOR "\x1b[0;2m" /* Dimmed color */
+#define SUG_NO_COLOR "\x1b[0m" /* No color */
 
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are

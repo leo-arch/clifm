@@ -2183,7 +2183,8 @@ rl_suggestions(const unsigned char c)
 	&& (!rl_line_buffer || (rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '))
 	&& (cdesc = check_int_cmd_desc(word, wlen)) != NULL) {
 		suggestion.type = CMD_DESC_SUG;
-		print_suggestion(cdesc, 0, conf.colorize == 1 ? sd_c : SUG_NO_COLOR);
+//		print_suggestion(cdesc, 0, conf.colorize == 1 ? sd_c : SUG_NO_COLOR);
+		print_suggestion(cdesc, 0, sd_c);
 		printed = PARTIAL_MATCH;
 		goto SUCCESS;
 	}
