@@ -2586,8 +2586,8 @@ RESTART:
 		break;
 
 	default:
-		fprintf(stderr, "\r\nreadline: bad value for what_to_do in rl_complete\n");
-		abort();
+		fprintf(stderr, "\r\nreadline: %c: Bad value for what_to_do in tab_complete\n", what_to_do);
+		exit(EXIT_FAILURE);
 		break;
 	}
 

@@ -343,7 +343,7 @@ is_tag(char *name)
 	}
 
 	int i = (int)tags_n;
-	while(--i >= 0) {
+	while (--i >= 0) {
 		if (*name == *tags[i] && strcmp(name, tags[i]) == 0)
 			return 1;
 	}
@@ -659,7 +659,7 @@ static char **
 reconstruct_input(char **args)
 {
 	size_t n = 0, c;
-	for(n = 0; args[n]; n++);
+	for (n = 0; args[n]; n++);
 	char **a = (char **)xnmalloc(n + 2, sizeof(char *));
 
 	a[0] = savestring("tag", 3);
