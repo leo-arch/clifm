@@ -1114,6 +1114,14 @@ get_query_str(int *fzf_offset)
 	char *query = (char *)NULL;
 
 	switch (cur_comp_type) {
+	case TCMP_DIRHIST:
+		if (rl_line_buffer && *(rl_line_buffer + 1) && *(rl_line_buffer + 2)
+		&& *(rl_line_buffer + 3))
+			query = rl_line_buffer + 3;
+		else
+			return (char *)NULL;
+		break;
+
 	case TCMP_OWNERSHIP: {
 		char *sc = rl_line_buffer ? strchr(rl_line_buffer, ':') : (char *)NULL;
 		if (sc) {
@@ -1439,7 +1447,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 				query = lw ? lw + 2 : (char *)NULL;
 			else if (ct == TCMP_TAGS_C)
 				query = lw ? lw + 1 : (char *)NULL;
-			else if (ct == TCMP_OWNERSHIP)
+			else if (ct == TCMP_OWNERSHIP || ct == TCMP_DIRHIST)
 				query = (char *)NULL;
 			else
 				query = lw ? lw : (char *)NULL;
@@ -1452,13 +1460,12 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	char *lb = rl_line_buffer;
 
 	if (ct == TCMP_TAGS_F) {
-		if (rl_end > 0 && lb && lb[rl_end - 1] == ' ') {
+		if (rl_end > 0 && lb && *lb == 't' && *(lb + 1) == 'u' && lb[rl_end - 1] == ' ') {
 			/* Coming from untag ('tu :TAG ') */
 			finder_offset++;
 		} else { /* Coming from tag expression ('t:FULL_TAG') */
 			char *sp = lb ? get_last_chr(lb, ' ', rl_point) : (char *)NULL;
 			finder_offset = prompt_offset + (sp ? (int)(sp - lb): -1);
-//			finder_offset = prompt_offset + (sp ? (int)(sp - lb) - 2 : -2);
 		}
 	}
 
