@@ -483,8 +483,10 @@ untag(char **args, const size_t n, size_t *t)
 		if (i == n || (*args[i] == ':' && *(args[1] + 1)))
 			continue;
 
+		char *ds = dequote_str(args[n] + 1, 0);
 		char dir[PATH_MAX];
-		snprintf(dir, PATH_MAX, "%s/%s", tags_dir, args[n] + 1);
+		snprintf(dir, sizeof(dir), "%s/%s", tags_dir, ds ? ds : args[n] + 1);
+		free(ds);
 
 		struct stat a;
 		if (lstat(dir, &a) == -1 || !S_ISDIR(a.st_mode))
