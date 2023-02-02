@@ -88,7 +88,7 @@ bm_prompt(const int print_header)
 			NC, df_c, 'e', 'q');
 
 	while (!bm)
-		bm = rl_no_hist(_("Choose a bookmark: "));
+		bm = rl_no_hist(_("Choose a bookmark (ELN or shortcut): "));
 
 	flags |= IN_BOOKMARKS_SCREEN;
 	char **cmd = split_str(bm, NO_UPDATE_ARGS);
@@ -666,6 +666,25 @@ edit_bookmarks(char *cmd, const int flag)
 	return EXIT_SUCCESS;
 }
 
+static size_t
+get_largest_shortcut(void)
+{
+	if (bm_n == 0 || !bookmarks)
+		return 0;
+
+	size_t l = 0;
+	int i = (int)bm_n;
+	while (--i >= 0) {
+		if (!bookmarks[i].shortcut || !*bookmarks[i].shortcut)
+			continue;
+		size_t slen = strlen(bookmarks[i].shortcut);
+		if (slen > l)
+			l = slen;
+	}
+
+	return l;
+}
+
 static void
 print_bookmarks(void)
 {
@@ -673,6 +692,8 @@ print_bookmarks(void)
 
 	struct stat attr;
 	int eln_pad = DIGINUM(bm_n); /* Longest shortcut name to properly pad output */
+
+	size_t ls = get_largest_shortcut();
 
 	/* Print bookmarks, taking into account shortcut, name, and path */
 	for (size_t i = 0; i < bm_n; i++) {
@@ -695,10 +716,18 @@ print_bookmarks(void)
 			}
 		}
 
-		printf("%s%s%-*zu%s %s%c%s%c%s %s%s%s\n",
+		int sc_pad = (int)ls;
+		if (sc_ok == 0 && ls > 0)
+			sc_pad += 2; // No shortcut. Let's count '[' and ']'
+		if (sc_ok == 1)
+			sc_pad -= strlen(bookmarks[i].shortcut);
+		if (sc_pad < 0)
+			sc_pad = 0;
+
+		printf("%s%s%-*zu%s %s%c%s%c%s%-*s %s%s%s\n",
 			NC, el_c, eln_pad, i + 1, df_c,
-		    BOLD, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
-		    sc_ok ? ']' : 0, df_c,
+		    BOLD, sc_ok == 1 ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
+		    sc_ok == 1 ? ']' : 0, df_c, sc_pad, "",
 		    non_existent ? (conf.colorize ? uf_c : "\x1b[0m\x1b[4m")
 		    : (!is_dir ? fi_c : (name_ok ? bm_c : di_c)),
 		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
