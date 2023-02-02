@@ -896,11 +896,16 @@ untrash_function(char **comm)
 	}
 
 	/* Get user input */
-	printf(_("\n%sEnter 'q' to quit.\n"), df_c);
+	printf(_("\n%sEnter 'q' to quit\n"
+		"File(s) to be undeleted (ex: 1 2-6, or *):\n"), df_c);
+
+	char up[(MAX_COLOR * 2) + 7];
+	snprintf(up, sizeof(up), "\001%s\002>\001%s\002 ", mi_c, tx_c);
+
 	int undel_n = 0;
 	char *line = (char *)NULL, **undel_elements = (char **)NULL;
 	while (!line)
-		line = rl_no_hist(_("File(s) to be undeleted (ex: 1 2-6, or *): "));
+		line = rl_no_hist(up);
 
 	undel_elements = get_substr(line, ' ');
 	free(line);

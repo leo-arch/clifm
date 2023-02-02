@@ -566,11 +566,11 @@ print_total_size(off_t total)
 static void
 print_selected_files(void)
 {
-	if (conf.clear_screen)
+	if (conf.clear_screen == 1)
 		CLEAR;
 
-	printf(_("%sSelection Box%s\n"), BOLD, df_c);
-	putchar('\0');
+	printf(_("%sSelection Box%s\n\n"), BOLD, df_c);
+//	putchar('\0');
 
 	size_t t = tab_offset, i;
 	off_t total = 0;
@@ -1010,14 +1010,17 @@ deselect_from_args(char **args)
 	return EXIT_SUCCESS;
 }
 
-static inline char **
+static char **
 get_desel_input(size_t *n)
 {
-	printf(_("\n%sEnter 'q' to quit or 'e' to edit the selections file\n"), df_c);
+	printf(_("\n%sEnter 'q' to quit or 'e' to edit the selections file\n"
+		"File(s) to be deselected (ex: 1 2-6, or *):\n"), df_c);
 
+	char dp[(MAX_COLOR * 2) + 7];
+	snprintf(dp, sizeof(dp), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 	char *line = NULL;
 	while (!line)
-		line = rl_no_hist(_("File(s) to be deselected (ex: 1 2-6, or *): "));
+		line = rl_no_hist(dp);
 
 	char **entries = get_substr(line, ' ');
 	free(line);
