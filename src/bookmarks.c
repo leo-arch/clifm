@@ -726,8 +726,8 @@ print_bookmarks(void)
 		if (sc_pad < 0)
 			sc_pad = 0;
 
-		printf("%s%s%-*zu%s %s%c%s%c%s%-*s %s%s%s\n",
-			NC, el_c, eln_pad, i + 1, df_c,
+		printf("%s%s%-*zu%s%c%s%c%s%c%s%-*s %s%s%s\n",
+			NC, el_c, eln_pad, i + 1, df_c, ls > 0 ? ' ' : 0,
 		    BOLD, sc_ok == 1 ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
 		    sc_ok == 1 ? ']' : 0, df_c, sc_pad, "",
 		    non_existent ? (conf.colorize ? uf_c : "\x1b[0m\x1b[4m")
