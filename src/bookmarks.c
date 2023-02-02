@@ -84,11 +84,13 @@ bm_prompt(const int print_header)
 {
 	char *bm = (char *)NULL;
 	if (print_header)
-		printf(_("%s%s\nEnter '%c' to edit your bookmarks or '%c' to quit.\n"),
-			NC, df_c, 'e', 'q');
+		printf(_("%s%s\nEnter '%c' to edit your bookmarks or '%c' to quit.\n"
+			"Choose a bookmark (either ELN or shortcut):\n"), NC, df_c, 'e', 'q');
 
+	char bm_str[(MAX_COLOR * 2) + 7];
+	snprintf(bm_str, sizeof(bm_str), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 	while (!bm)
-		bm = rl_no_hist(_("Choose a bookmark (ELN or shortcut): "));
+		bm = rl_no_hist(bm_str);
 
 	flags |= IN_BOOKMARKS_SCREEN;
 	char **cmd = split_str(bm, NO_UPDATE_ARGS);
@@ -720,7 +722,7 @@ print_bookmarks(void)
 		if (sc_ok == 0 && ls > 0)
 			sc_pad += 2; // No shortcut. Let's count '[' and ']'
 		if (sc_ok == 1)
-			sc_pad -= strlen(bookmarks[i].shortcut);
+			sc_pad -= (int)strlen(bookmarks[i].shortcut);
 		if (sc_pad < 0)
 			sc_pad = 0;
 
