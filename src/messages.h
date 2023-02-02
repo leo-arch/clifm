@@ -1420,40 +1420,40 @@ view | Alt+-             Preview files in the current directory (requires fzf)\n
 #define QUICK_HELP_BASIC_OPERATIONS "\
 BASIC FILE OPERATIONS\n\
 ---------------------\n\
-myfile.txt         Open 'myfile.txt' with the default associated application\n\
-myfile.txt vi      Open 'myfile.txt' with vi\n\
-12                 Open the file whose ELN is 12\n\
-12&                Open the file whose ELN is 12 in the background\n\
-ow myfile.txt      Choose opening application for 'myfile.txt' from a menu\n\
-p4                 Print the properties of the file whose ELN is 4\n\
-/*.png             Search for files ending with .png in the current dir\n\
-s *.c              Select all C files\n\
-s 1-4 8 19-26      Select multiple files by ELN\n\
-sb | s:<TAB>       List currently selected files\n\
-ds                 Deselect a few selected files\n\
-ds * | Alt-d       Deselect all selected files\n\
-bm a mydir mybm    Bookmark the directory named 'mydir' as 'mybm'\n\
-bm d mybm          Remove the bookmark named 'mybm'\n\
-tag --help         Learn about tagging files\n\
-n myfile           Create a new file named 'myfile'\n\
-n mydir/           Create a new directory named 'mydir'\n\
-c sel              Copy selected files into the current directory (1)\n\
-r sel              Remove all selected files (1)\n\
-br sel             Bulk rename selected files (1)\n\
-c 34 file_copy     Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
-cr myfile          Copy 'myfile' to a remote location\n\
-m 45 3             Move the file whose ELN is 45 to the dir whose ELN is 3\n\
-m myfile.txt       Interactively rename 'myfile.txt'\n\
-l myfile mylink    Create a symbolic link named 'mylink' pointing to 'myfile'\n\
-le mylink          Edit the symbolic link 'mylink'\n\
-oc myfile          Edit file ownership of the file 'myfile'\n\
-pc myfile          Edit file properties of the file 'myfile'\n\
-te *.sh            Toggle the executable bit on all .sh files\n\
-t 12-18            Send the files whose ELN's are 12-18 to the trash can\n\
-t del              Permanently remove trashed files using a menu\n\
-t empty            Empty the trash can\n\
-u                  Undelete trashed files using a menu\n\
-ac sel             Compress/archive selected files (1)\n\n\
+myfile.txt          Open 'myfile.txt' with the default associated application\n\
+myfile.txt vi       Open 'myfile.txt' with vi (also 'vi myfile.txt')\n\
+12                  Open the file whose ELN is 12\n\
+12&                 Open the file whose ELN is 12 in the background\n\
+ow 10 | ow 10 <TAB> Choose opening application for the file whose ELN is 10\n\
+p4                  Print the properties of the file whose ELN is 4\n\
+/*.png              Search for files ending with .png in the current dir\n\
+s *.c               Select all C files\n\
+s 1-4 8 19-26       Select multiple files by ELN\n\
+sb | s:<TAB>        List currently selected files\n\
+ds | ds <TAB>       Deselect a few selected files\n\
+ds * | Alt-d        Deselect all selected files\n\
+bm add mydir mybm   Bookmark the directory named 'mydir' as 'mybm'\n\
+bm del mybm         Remove the bookmark named 'mybm'\n\
+tag --help          Learn about tagging files\n\
+n myfile            Create a new file named 'myfile'\n\
+n mydir/            Create a new directory named 'mydir'\n\
+c sel               Copy selected files into the current directory (1)\n\
+r sel               Remove all selected files (1)\n\
+br sel              Bulk rename selected files (1)\n\
+c 34 file_copy      Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
+cr myfile           Copy 'myfile' to a remote location\n\
+m 45 3              Move the file whose ELN is 45 to the dir whose ELN is 3\n\
+m myfile.txt        Interactively rename 'myfile.txt'\n\
+l myfile mylink     Create a symbolic link named 'mylink' pointing to 'myfile'\n\
+le mylink           Edit the symbolic link 'mylink'\n\
+oc myfile           Edit file ownership of the file 'myfile'\n\
+pc myfile           Edit file properties of the file 'myfile'\n\
+te *.sh             Toggle the executable bit on all .sh files\n\
+t 12-18             Send the files whose ELN's are 12-18 to the trash can\n\
+t del | t del <TAB> Permanently remove trashed files using a menu\n\
+t empty             Empty the trash can\n\
+u | u <TAB>         Undelete trashed files using a menu\n\
+ac sel              Compress/archive selected files (1)\n\n\
 (1) 's:' can be used instead of the 'sel' keyword"
 
 #define QUICK_HELP_MISC "\

@@ -567,11 +567,15 @@ remove_from_trash(char **args)
 	}
 
 	/* Get user input */
-	printf(_("\n%sEnter 'q' to quit.\n"), df_c);
+	printf(_("\n%sEnter 'q' to quit\n"
+		"File(s) to be removed (ex: 1 2-6, or *):\n"), df_c);
+
 	char *line = (char *)NULL, **rm_elements = (char **)NULL;
+	char tp[(MAX_COLOR * 2) + 7];
+	snprintf(tp, sizeof(tp), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	while (!line)
-		line = rl_no_hist(_("File(s) to be removed (ex: 1 2-6, or *): "));
+		line = rl_no_hist(tp);
 
 	rm_elements = get_substr(line, ' ');
 	free(line);

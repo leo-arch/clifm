@@ -579,14 +579,13 @@ print_tips(int all)
 		"Use wildcards and regular expressions to select files: "
 		"'s *.c' or 's .*\\.c$'",
 		"Operate on selected files: 'p sel' or 'p s:'",
-		"List selected files: 'ds' or s:<TAB>",
+		"List selected files: 'sb' or s:<TAB>",
 		"ELN's and the 'sel' keyword work for shell commands as well: "
 		"'ls -ld 1 sel'",
 		"Press TAB to automatically expand an ELN: 's 2<TAB>' -> 's FILENAME'",
-//		"Easily copy everything in CWD into another directory: 's * && c sel ELN/DIR'",
 		"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 ELN/DIR'",
-		"Trash files with a simple 't ELN'",
-		"Get mime information for a file: 'mm info ELN'",
+		"Trash files with a simple 't ELN/FILE'",
+		"Get mime information for a file: 'mm info ELN/FILE'",
 		"If too many files are listed, try enabling the pager ('pg on')",
 		"Once in the pager, go backwards by pressing the keyboard shortcut "
 		"provided by your terminal emulator",
@@ -631,11 +630,12 @@ print_tips(int all)
 		"Launch the bookmarks manager: 'bm' or Alt-b",
 		"Quickly list your bookmarks: 'b:<TAB>'",
 		"Change to a bookmark: 'bm NAME' or 'b:NAME'",
-		"Chain commands using ; and &&: 's 2 7-10; r sel'",
+		"Chain commands using ';' and '&&': 's 2 7-10; r sel'",
 		"Add emojis to your prompt by copying them to the prompt line ('prompt edit')",
 		"Create a new profile running 'pf add PROFILE' or 'clifm -P PROFILE'",
 		"Switch profiles using 'pf set PROFILE'",
 		"Delete a profile using 'pf del PROFILE'",
+		"Rename a profile using 'pf rename PROFILE'",
 		"Use 'p ELN' to print file properties for ELN",
 		"Deselect all selected files with Alt-d",
 		"Select all files in the current directory: 'Alt-a'",
@@ -718,8 +718,7 @@ print_tips(int all)
 		"Press Alt+- to launch the files previewer (requires fzf)",
 		"Customize previewing applications: 'view edit' or F7",
 		"Interactively select files (requires fzf, fzy, or smenu): 's /dir/*<TAB>'",
-		"Change files permissions using the 'pc' command",
-		"Change files ownership using the 'oc' command",
+		"Change files permissions/ownership using the 'pc' and 'oc' commands respectivelly",
 		NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
