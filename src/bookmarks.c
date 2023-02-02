@@ -85,7 +85,7 @@ bm_prompt(const int print_header)
 	char *bm = (char *)NULL;
 	if (print_header)
 		printf(_("%s%s\nEnter '%c' to edit your bookmarks or '%c' to quit.\n"
-			"Choose a bookmark (either ELN or shortcut):\n"), NC, df_c, 'e', 'q');
+			"Choose a bookmark (by ELN, shortcut, or name):\n"), NC, df_c, 'e', 'q');
 
 	char bm_str[(MAX_COLOR * 2) + 7];
 	snprintf(bm_str, sizeof(bm_str), "\001%s\002>\001%s\002 ", mi_c, tx_c);
