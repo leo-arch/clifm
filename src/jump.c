@@ -197,26 +197,21 @@ save_jumpdb(void)
 	if (total_rank > conf.max_jump_total_rank)
 		reduce = (total_rank / conf.max_jump_total_rank) + 1;
 
-//	int jump_num = 0;
-
 	for (i = 0; i < (int)jump_n; i++) {
 		if (total_rank > conf.max_jump_total_rank) {
-			/* Once we reach MAX_JUMP_TOTAL_RANK, start forgetting */
 			if (reduce) {
 				tmp_rank = jump_db[i].rank;
 				jump_db[i].rank = tmp_rank / reduce;
 			}
-
-			/* Forget directories ranked below MIN_JUMP_RANK */
-			if (jump_db[i].keep != 1 && jump_db[i].rank < conf.min_jump_rank) {
-				/* Discount from TOTAL_RANK the rank of the now forgotten
-				 * directory to keep this total up to date */
-				total_rank -= jump_db[i].rank;
-				continue;
-			}
 		}
 
-//		jump_num++;
+		/* Forget directories ranked below MIN_JUMP_RANK */
+		if (jump_db[i].keep != 1 && jump_db[i].rank < conf.min_jump_rank) {
+			/* Discount from TOTAL_RANK the rank of the now forgotten
+			 * directory to keep this total up to date */
+			total_rank -= jump_db[i].rank;
+			continue;
+		}
 
 		fprintf(fp, "%zu:%jd:%jd:%s\n", jump_db[i].visits, (intmax_t)jump_db[i].first_visit,
 			(intmax_t)jump_db[i].last_visit, jump_db[i].path);

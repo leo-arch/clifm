@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jan 31, 2023" "clifm 1.10" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 2, 2023" "clifm 1.10" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2448,7 +2448,7 @@ Automatic maintenance is done on the database applying a few simple procedures:
 
  a) If \fIPurgeJumpDB\fR is set to \fItrue\fR (see the main configuration file), each entry in the database is checked at startup to remove non-existent directories. This option is set to \fIfalse\fR by default to avoid removing paths pointing to unmounted file systems (like removable devices or remote locations) which you still might want to keep. Non-existent directories, however, will be removed anyway due to their rank value (see below).
 
- b) Once the rank of a directory falls below \fIMinJumpRank\fR (by default 10), it is forgotten and deleted from the database. The \fIMinJumpRank\fR value can be customized in the configuration file. To make non-frequently visited directories disappear quicker from the database, increase this value.
+ b) Once the rank of a directory falls below \fIMinJumpRank\fR (by default 10), it is forgotten and deleted from the database. The \fIMinJumpRank\fR value can be customized in the configuration file. To make non-frequently visited directories disappear quicker from the database, increase this value. If set to \-1, by contrast, directories will never be removed from the database.
 
  c) Once the sum total of ranks reaches \fIMaxJumpTotalRank\fR (by default 100000), each individual rank is divided by a dynamic factor so that the total rank becomes less than or equal to \fIMaxJumpTotalRank\fR. If some rank falls in the process below \fIMinJumpRank\fR, it is removed from the database. \fIMaxJumpTotalRank\fR can be modified in the configuration file. The higher the value of \fIMaxJumpTotalRank\fR, the more time directories will be kept in the database.
 

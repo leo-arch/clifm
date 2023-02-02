@@ -162,7 +162,7 @@ init_conf_struct(void)
 	conf.max_name_len = DEF_MAX_NAME_LEN;
 	conf.max_path = UNSET;
 	conf.max_printselfiles = UNSET;
-	conf.min_jump_rank = UNSET;
+	conf.min_jump_rank = JUMP_UNSET; /* UNSET (-1) is a valid value for MinJumpRank */
 	conf.min_name_trim = UNSET;
 	conf.mv_cmd = UNSET;
 	conf.no_eln = UNSET;
@@ -3369,7 +3369,7 @@ check_options(void)
 	if (conf.min_name_trim == UNSET)
 		conf.min_name_trim = DEF_MIN_NAME_TRIM;
 
-	if (conf.min_jump_rank == UNSET)
+	if (conf.min_jump_rank == JUMP_UNSET)
 		conf.min_jump_rank = DEF_MIN_JUMP_RANK;
 
 	if (conf.max_jump_total_rank == UNSET)
