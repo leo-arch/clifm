@@ -198,7 +198,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <details>
 <summary>Click here to expand</summary>
 
-* `Development`:
+* `version 1.10 (Swordmaster)`:
   - **NEW**: [Quickly access the directory history list via the `dh` command](https://github.com/leo-arch/clifm/wiki/Introduction#dh-string-path-eln). The `dh` plugin, just as the `bh` and `fh` commands, is now deprecated.
   - **NEW**: [History timestamps](https://github.com/leo-arch/clifm/wiki/Introduction#history-edit-clear--n-on-off-status-show-time)
   - **NEW**: `s:` works now like `sel` keyword, to be in line with `t:` (for tags) and `b:` (for bookmarks). Consult the [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) section.
