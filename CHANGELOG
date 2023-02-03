@@ -1,3 +1,72 @@
+1.10 - Swordmaster
+Overall, 1.10 brings a much more solid command line experience
+
+Bug fixes
+* ID color not honoring secondary groups in properties
+* Recursive search not following symlinks
+* Attempting to rename a non-existent file
+* "Querying MIME types" message is overwritten by cmd output
+* Not refreshing screen if CWD is a symlink to dir (Linux)
+* Not refreshing screen on *BSD
+* Wrong default theme when argument to --color-scheme is invalid
+* A slash is appended to bookmark names when completing with the 'bm' command
+* No suggestion for ELN's after 'bm a '
+* Fix 'x' command on Haiku
+* Wrong completion offset with "/<TAB>" in standard TAB completion mode
+* 'net', 'cs', and 'pf' commands do not suggest case insensitively
+* 't:TAG<TAB>' not displaying files in standard TAB completion
+* 'q ' (with at least one space) triggers the warning prompt
+* No suggestion/completion for names containing spaces (bd, bm, net, cs, pf, and prompt commands)
+* No completion for file names containing spaces ('u', 't del')
+* No file color when listing trashed files via 'u' or 't del' commands
+* No color when listing trashed files in standard TAB completion
+* Unable to remove bookmarks having no shortcut
+* 'b:<TAB>' is broken in standard TAB completion
+* History completion (!<TAB>) is broken in standard TAB completion mode
+* Extra slash appended to history entries which are directory names
+* Wrong columns offset when listing unicode files in standard TAB completion mode 
+* Wrong file color after TAB completion
+* 'mv' and 'cp' shell commands take --help as a file name
+* 'export' fails with env var and home tilde
+* TAB completion in the middle of the command line is unstable
+* No path inserted when completing wildcards and there is only one match
+* History suggestions take precedence over jump ones when using the 'j' command
+* Freeze when running with --no-autols
+* When prepending "sudo" (Alt-v), it takes the color of the current word
+* Empty files not colored in TAB completion
+* Persistent warning prompt color after deleting a space char
+* Extra line when completing multi-line commands
+* Prompt disappears when editing first word and we're not at the end of the line 
+* Invalid command/file name taken as correct when editing first word (fuzzy-matching enabled)
+* Wrong visible bell region when not at the end of the line
+* More directory history entries (bh/fh) than MaxDirhist 
+* Cannot untag files tagged with a name containing spaces
+* Jump is not forgetting directories ranked below MinJumpRank
+
+New features/improvements
+* New command: 'oc', a files ownership changer
+* Allow setting a custom selections file (via --sel-file)
+* Suggest a brief description for internal commands
+* 'cmd<TAB>' displays available commands together with a brief description
+* Plugins help messages reformated to fit clifm's format
+* Specific color for fuzzy file name suggsetions
+* New color scheme: aqua
+* New classification characters: broken symlinks (!), character device (-), and block device (+)
+* Make "version" the default sorting order
+* Extended syntax for the bookmarks command: 'bm add FILE NAME'
+* 'b:<TAB>' completes/suggests bookmark names (instead of paths), and 'b:NAME' is expanded to NAME's path. The ExpandBookmarks option (just as --expand-bookmarks and the bookmarks suggestion strategy) is deprecated.
+* Multi-selection for the b: and t: constructs (bookmarks and tags respectivelly)
+* 's:' works exactly as 'sel', to be in line with 'b:' and 't:'. Unlike 'sel', 's:<TAB>' works as first word as well
+* 'net unmount <TAB>' should only list mounted resources, while 'net mount <TAB>' unmounted resources only
+* Allow renaming profiles via the 'rename' subcommand: 'pf rename'
+* List file attributes (as lsattr(1) would) in file properties (Linux only)
+* Group file extensions by type in the default color scheme for easier customization
+* History timestamps via the 'show-time' subcommand: 'history show-time'
+* Search patterns history changed to '/*<TAB>' (instead of '/<TAB>')
+* Colorize jump entries in TAB completion (fzf): 'j <TAB>'
+* Pad bookmark names in the bookmarks screen
+* Allow jump to never forget directories by setting MinJumpRank to -1
+
 1.9 - Sharptooth
 New features/improvements
 * Allow autocmds for workspaces as well, instead of just paths
