@@ -1892,7 +1892,8 @@ bulk_rename(char **args)
 /* Export files in CWD (if FILENAMES is NULL), or files in FILENAMES,
  * into a temporary file. Return the address of this empt file if
  * success (it must be freed) or NULL in case of error */
-char *export(char **filenames, int open)
+char *
+export(char **filenames, int open)
 {
 	char *tmp_file = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
 	sprintf(tmp_file, "%s/%s", tmp_dir, TMP_FILENAME);

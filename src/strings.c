@@ -1341,8 +1341,11 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	for (c = 0; c < i; c++)
 		d[c] = strdup((*dst)[c]);
 
-	for (n = 0; s[n]; n++)
-		d[c++] = strdup(s[n]);
+	for (n = 0; s[n]; n++) {
+		char *p = escape_str(s[n]);
+		d[c++] = strdup(p ? p : s[n]);
+		free(p);
+	}
 
 	if (tail) {
 		for (n = 0; tail[n]; n++) {
@@ -1503,8 +1506,11 @@ expand_bm_name(char **name)
 		if (conflict == 1 || !bookmarks[j].path)
 			break; */
 
-		*name = (char *)xrealloc(*name, (strlen(bookmarks[j].path) + 1) * sizeof(char));
-		strcpy(*name, bookmarks[j].path);
+		char *q = escape_str(bookmarks[j].path);
+		char *tmp = q ? q : bookmarks[j].path;
+		*name = (char *)xrealloc(*name, (strlen(tmp) + 1) * sizeof(char));
+		strcpy(*name, tmp);
+		free(q);
 		bm_exp = EXIT_SUCCESS;
 
 		break;
