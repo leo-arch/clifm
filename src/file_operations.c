@@ -842,7 +842,7 @@ create_file(char **cmd)
 				? cmd[i] + hlen + 1 : cmd[i];
 			fprintf(stderr, "%s: File exists\n", name);
 			if (cmd[i + 1]) {
-				printf("Press any key to continue ...");
+				printf(_("Press any key to continue ..."));
 				xgetchar();
 				putchar('\n');
 			}
@@ -867,7 +867,7 @@ create_file(char **cmd)
 		if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			*cmd[i] = '\0'; /* Invalidate this entry */
 			if (cmd[i + 1]) {
-				printf("Press any key to continue ...");
+				printf(_("Press any key to continue ..."));
 				xgetchar();
 				putchar('\n');
 			}
@@ -919,7 +919,7 @@ create_file(char **cmd)
 	if (cnfiles > 1) {
 		if ((ret = launch_execve(nfiles, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS) {
 			if (total > 1) {
-				printf("Press any key to continue ...");
+				printf(_("Press any key to continue ..."));
 				xgetchar();
 				putchar('\n');
 			}
@@ -930,7 +930,7 @@ create_file(char **cmd)
 	if (cndirs > 2) {
 		if ((ret = launch_execve(ndirs, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS) {
 			if (total > 1) {
-				printf("Press any key to continue ...");
+				printf(_("Press any key to continue ..."));
 				xgetchar();
 				putchar('\n');
 			}
@@ -993,6 +993,25 @@ create_file(char **cmd)
 	return exit_status;
 }
 
+static int
+check_opening_app(char *cmd)
+{
+	int invalid_app = 0;
+	struct stat a;
+	char *tmp = strrchr(cmd, '/');
+
+	if (tmp && *(++tmp) && stat(cmd, &a) == 0 && !is_bin_cmd(tmp))
+		invalid_app = 1;
+
+	if (invalid_app == 1 || !is_bin_cmd((tmp && *tmp) ? tmp : cmd)) {
+		fprintf(stderr, _("open: %s: Not a valid opening application\n"
+			"Try 'open --help' for more information\n"), cmd);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 int
 open_function(char **cmd)
 {
@@ -1049,7 +1068,7 @@ open_function(char **cmd)
 	case S_IFLNK: {
 		int ret = get_link_ref(file);
 		if (ret == -1) {
-			fprintf(stderr, _("%s: open: %s: Broken symbolic link\n"), PROGRAM_NAME, file);
+			fprintf(stderr, _("open: %s: Broken symbolic link\n"), file);
 			return EXIT_FAILURE;
 		} else if (ret == S_IFDIR) {
 			return cd_function(file, CD_PRINT_ERROR);
@@ -1069,11 +1088,10 @@ open_function(char **cmd)
 	}
 
 	/* If neither directory nor regular file nor symlink (to directory
-	 * or regular file), print the corresponding error message and
-	 * exit */
+	 * or regular file), print the corresponding error message and exit */
 	if (no_open_file) {
-		fprintf(stderr, _("%s: open: %s (%s): Cannot open file\nTry "
-			"'APPLICATION FILENAME'\n"), PROGRAM_NAME, cmd[1], file_type);
+		fprintf(stderr, _("open: %s (%s): Cannot open file\nTry "
+			"'APPLICATION FILE' or 'open FILE APPLICATION'\n"), cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
 
@@ -1082,12 +1100,15 @@ open_function(char **cmd)
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 		int ret = open_file(file);
 		if (!conf.opener && ret == EXIT_FAILURE) {
-			fputs("Add a new entry to the mimelist file ('mime "
-				"edit' or F6) or run 'open FILE APPLICATION'\n", stderr);
+			fputs(_("Add a new entry to the mimelist file ('mime edit' "
+				"or F6) or run 'open FILE APPLICATION'\n"), stderr);
 			return EXIT_FAILURE;
 		}
 		return ret;
 	}
+
+	if (check_opening_app(cmd[2]) == EXIT_FAILURE)
+		return EXIT_FAILURE;
 
 	/* If some application was specified to open the file */
 	char *tmp_cmd[] = {cmd[2], file, NULL};
@@ -1095,12 +1116,12 @@ open_function(char **cmd)
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	if (ret == ENOENT) { /* 2: No such file or directory */
-		fprintf(stderr, "%s: open: %s: Command not found\n", PROGRAM_NAME, cmd[2]);
+	if (ret == ENOENT) { /* ENOENT == 2: No such file or directory */
+		fprintf(stderr, _("open: %s: Command not found\n"), cmd[2]);
 		return 127;
 	}
 
-	fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[2], strerror(ret));
+	fprintf(stderr, "open: %s: %s\n", cmd[2], strerror(ret));
 	return ret;
 }
 
