@@ -20,6 +20,7 @@ _=fzcd.sh
 bcp=batch_copy.sh
 bmi=bm_import.sh
 bn=batch_create.sh
+clip=clip.sh
 cr=cprm.sh
 da=disk_analyzer.sh
 dr=dragondrop.sh

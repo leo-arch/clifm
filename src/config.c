@@ -595,6 +595,7 @@ create_actions_file(char *file)
 		"bcp=batch_copy.sh\n"
 		"bmi=bm_import.sh\n"
 		"bn=batch_create.sh\n"
+		"clip=clip.sh\n"
 		"cr=cprm.sh\n"
 		"da=disk_analyzer.sh\n"
 		"dr=dragondrop.sh\n"
