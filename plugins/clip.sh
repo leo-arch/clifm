@@ -11,15 +11,16 @@
 #  clip (Cygwin)
 #  pbcopy/pbget (MacOS)
 #  termux-clipboard-set/termux-clipboard-get (Termux)
+#  cb (cross-platform: https://github.com/Slackadays/Clipboard)
 
 # Use the 'e,export' parameter to send selected files to the system clipboard (new line separated list),
 # and the 'i,import' parameter to import files in the clipboard to the Selection box
 
 
 get_from_clip() {
-#	if type cb >/dev/null 2>&1; then
-#		cb | cat 2>/dev/null # slackadays implementation
-	if [ -n "$WAYLAND_DISPLAY" ]; then
+	if type cb >/dev/null 2>&1; then
+		cb | cat 2>/dev/null # slackadays implementation
+	elif [ -n "$WAYLAND_DISPLAY" ]; then
 		wl-paste 2>/dev/null
 	elif type xclip >/dev/null 2>&1; then
 		xclip -sel clip -o 2>/dev/null
@@ -37,9 +38,9 @@ get_from_clip() {
 }
 
 send_to_clip() {
-#	if type cb >/dev/null 2>&1; then
-#		cb --copy < "$CLIFM_SELFILE" # slackadays implementation
-	if [ -n "$WAYLAND_DISPLAY" ]; then
+	if type cb >/dev/null 2>&1; then
+		cb --copy < "$CLIFM_SELFILE" # slackadays implementation
+	elif [ -n "$WAYLAND_DISPLAY" ]; then
 		wl-copy < "$CLIFM_SELFILE"
 	elif type xclip >/dev/null 2>&1; then
 		xclip -sel clip "$CLIFM_SELFILE"
