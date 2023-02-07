@@ -1066,7 +1066,8 @@ check_filenames(char *str, size_t len, const int first_word, const size_t full_w
 	for (i = 0; i < files; i++) {
 		if (!file_info[i].name)	continue;
 
-		if (removed_slash == 1 && file_info[i].dir != 1)
+//		if (removed_slash == 1 && file_info[i].dir != 1)
+		if (removed_slash == 1 && (file_info[i].dir != 1 || len != file_info[i].len))
 			continue;
 
 		if (full_word) {
