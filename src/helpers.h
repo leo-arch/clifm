@@ -442,17 +442,6 @@ extern int watch;
 # define P_tmpdir "/tmp"
 #endif
 
-/* Dirjump macros for calculating directories rank extra points */
-#define BASENAME_BONUS 	300
-#define BOOKMARK_BONUS 	500
-#define PINNED_BONUS    1000
-#define WORKSPACE_BONUS 300
-/* Last directory access */
-#define JHOUR(n)  ((n) *= 4) /* Within last hour */
-#define JDAY(n)   ((n) *= 2) /* Within last day */
-#define JWEEK(n)  ((n) / 2)  /* Within last week */
-#define JOLDER(n) ((n) / 4)  /* More than a week */
-
 #if defined(__HAIKU__) || defined(__sun)
 # define DT_UNKNOWN 0
 # define DT_FIFO    1

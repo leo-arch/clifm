@@ -44,6 +44,20 @@
 #include "messages.h"
 #include "misc.h"
 
+/* Macros to calculate directories rank extra points */
+#define BASENAME_BONUS 	300
+#define BOOKMARK_BONUS  500
+#define PINNED_BONUS    1000
+#define WORKSPACE_BONUS 300
+//#define VISIT_BONUS     100
+#define VISIT_BONUS     300
+
+/* Calculate last directory access credit */
+#define JHOUR(n)  ((n) *= 4) /* Within last hour */
+#define JDAY(n)   ((n) *= 2) /* Within last day */
+#define JWEEK(n)  ((n) / 2)  /* Within last week */
+#define JOLDER(n) ((n) / 4)  /* More than a week */
+
 static inline void
 free_jump_database(void)
 {
@@ -139,11 +153,13 @@ save_jumpdb(void)
 	i = (int)jump_n;
 	while (--i >= 0) {
 
-		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
-		int rank = days_since_first > 1 ? ((int)jump_db[i].visits * 100)
-					/ days_since_first : ((int)jump_db[i].visits * 100);
+//		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
+		int days_since_first = (int)(now - jump_db[i].first_visit) / 86400;
+		int rank = days_since_first > 1 ? ((int)jump_db[i].visits * VISIT_BONUS)
+					/ days_since_first : ((int)jump_db[i].visits * VISIT_BONUS);
 
-		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
+//		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
+		int hours_since_last = (int)(now - jump_db[i].last_visit) / 3600;
 
 		/* Do not remove directories visited in the last 24 hours, no
 		 * matter what their rank is */
@@ -307,6 +323,106 @@ _get_dir_color(const char *filename, const struct stat a)
 	return get_dir_color(filename, a.st_mode, a.st_nlink);
 }
 
+static int
+print_jump_table(const int reduce, const time_t now)
+{
+	if (jump_n == 0) {
+		printf("jump: Database still empty\n");
+		return EXIT_SUCCESS;
+	}
+
+	puts(_("* First time access is displayed in days, while last "
+	       "time access is displayed in hours"));
+	puts(_("* An asterisk next rank values means that the "
+	       "corresponding directory is bookmarked, pinned, or currently "
+	       "used in some workspace\n"));
+	printf(_("%sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"),
+		conf.colorize == 1 ? BOLD : "", NC);
+
+	size_t i;
+	int ranks_sum = 0, visits_sum = 0;
+
+	for (i = 0; i < jump_n; i++) {
+
+//		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
+//		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
+		int days_since_first = (int)(now - jump_db[i].first_visit) / 86400;
+		int hours_since_last = (int)(now - jump_db[i].last_visit) / 3600;
+
+		int rank;
+		rank = days_since_first > 1
+			   ? ((int)jump_db[i].visits * VISIT_BONUS) / days_since_first
+			   : (int)jump_db[i].visits * VISIT_BONUS;
+
+		int tmp_rank = rank;
+		if (hours_since_last == 0) /* Last hour */
+			rank = JHOUR(tmp_rank);
+		else if (hours_since_last <= 24) /* Last day */
+			rank = JDAY(tmp_rank);
+		else if (hours_since_last <= 168) /* Last week */
+			rank = JWEEK(tmp_rank);
+		else /* More than a week */
+			rank = JOLDER(tmp_rank);
+
+		int j = (int)bm_n, bpw = 0; /* Bookmarked, pinned or workspace */
+		while (--j >= 0) {
+			if (bookmarks[j].path && bookmarks[j].path[1] == jump_db[i].path[1]
+			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
+				rank += BOOKMARK_BONUS;
+				bpw = 1;
+				break;
+			}
+		}
+
+		if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
+		&& strcmp(pinned_dir, jump_db[i].path) == 0) {
+			rank += PINNED_BONUS;
+			bpw = 1;
+		}
+
+		j = MAX_WS;
+		while (--j >= 0) {
+			if (workspaces[j].path && workspaces[j].path[1] == jump_db[i].path[1]
+			&& strcmp(jump_db[i].path, workspaces[j].path) == 0) {
+				rank += WORKSPACE_BONUS;
+				bpw = 1;
+				break;
+			}
+		}
+
+		if (reduce) {
+			tmp_rank = rank;
+			rank = tmp_rank / reduce;
+		}
+
+		ranks_sum += rank;
+		visits_sum += (int)jump_db[i].visits;
+
+		char *color = (workspaces[cur_ws].path
+		&& workspaces[cur_ws].path[1] == jump_db[i].path[1]
+		&& strcmp(workspaces[cur_ws].path, jump_db[i].path) == 0) ? mi_c : df_c;
+
+		struct stat a;
+		if (lstat(jump_db[i].path, &a) == -1)
+			color = uf_c;
+
+		char *dir_color = color == uf_c ? uf_c : _get_dir_color(jump_db[i].path, a);
+
+		printf("  %s%zu\t %zu\t %d\t %d\t%s%d%s%s%c%s\t%c%s%s%s \n",
+			color != uf_c ? color : df_c,
+		    i + 1, jump_db[i].visits, days_since_first, hours_since_last,
+		    conf.colorize == 1 ? BOLD : "", rank, color != uf_c ? color : "",
+		    bpw ? li_c : "", bpw ? '*' : 0, (bpw && color != uf_c) ? color : "",
+		    (conf.colorize == 0 && color == uf_c) ? '!' : 0,
+		    dir_color, jump_db[i].path, df_c);
+	}
+
+	printf("\nTotal rank: %d/%d\nTotal visits: %d\n", ranks_sum,
+	    conf.max_jump_total_rank, visits_sum);
+
+	return EXIT_SUCCESS;
+}
+
 /* Jump into best ranked directory matched by ARGS */
 int
 dirjump(char **args, int mode)
@@ -324,102 +440,10 @@ dirjump(char **args, int mode)
 	if (jump_total_rank > conf.max_jump_total_rank)
 		reduce = (jump_total_rank / conf.max_jump_total_rank) + 1;
 
-	/* If no parameter, print the list of entries in the jump
+	/* If no parameter (and no 'je'), print the list of entries in the jump
 	 * database together with the corresponding information */
-	if (mode == NO_SUG_JUMP && !args[1] && args[0][1] != 'e') {
-		if (!jump_n) {
-			printf("jump: Database still empty\n");
-			return EXIT_SUCCESS;
-		}
-
-		puts(_("* First time access is displayed in days, while last "
-		       "time access is displayed in hours"));
-		puts(_("* An asterisk next rank values means that the "
-		       "corresponding directory is bookmarked, pinned, or currently "
-		       "used in some workspace\n"));
-		printf(_("%sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"),
-			conf.colorize == 1 ? BOLD : "", NC);
-
-		size_t i;
-		int ranks_sum = 0, visits_sum = 0;
-
-		for (i = 0; i < jump_n; i++) {
-
-			int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
-			int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
-
-			int rank;
-			rank = days_since_first > 1
-				   ? ((int)jump_db[i].visits * 100) / days_since_first
-				   : (int)jump_db[i].visits * 100;
-
-			int tmp_rank = rank;
-			if (hours_since_last == 0) /* Last hour */
-				rank = JHOUR(tmp_rank);
-			else if (hours_since_last <= 24) /* Last day */
-				rank = JDAY(tmp_rank);
-			else if (hours_since_last <= 168) /* Last week */
-				rank = JWEEK(tmp_rank);
-			else /* More than a week */
-				rank = JOLDER(tmp_rank);
-
-			int j = (int)bm_n, bpw = 0; /* Bookmarked, pinned or workspace */
-			while (--j >= 0) {
-				if (bookmarks[j].path && bookmarks[j].path[1] == jump_db[i].path[1]
-				&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
-					rank += BOOKMARK_BONUS;
-					bpw = 1;
-					break;
-				}
-			}
-
-			if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
-			&& strcmp(pinned_dir, jump_db[i].path) == 0) {
-				rank += PINNED_BONUS;
-				bpw = 1;
-			}
-
-			j = MAX_WS;
-			while (--j >= 0) {
-				if (workspaces[j].path && workspaces[j].path[1] == jump_db[i].path[1]
-				&& strcmp(jump_db[i].path, workspaces[j].path) == 0) {
-					rank += WORKSPACE_BONUS;
-					bpw = 1;
-					break;
-				}
-			}
-
-			if (reduce) {
-				tmp_rank = rank;
-				rank = tmp_rank / reduce;
-			}
-
-			ranks_sum += rank;
-			visits_sum += (int)jump_db[i].visits;
-
-			char *color = (workspaces[cur_ws].path && workspaces[cur_ws].path[1] == jump_db[i].path[1]
-			&& strcmp(workspaces[cur_ws].path, jump_db[i].path) == 0) ? mi_c : df_c;
-
-			struct stat a;
-			if (lstat(jump_db[i].path, &a) == -1)
-				color = uf_c;
-
-			char *dir_color = color == uf_c ? uf_c : _get_dir_color(jump_db[i].path, a);
-
-			printf("  %s%zu\t %zu\t %d\t %d\t%s%d%s%s%c%s\t%c%s%s%s \n",
-				color != uf_c ? color : df_c,
-			    i + 1, jump_db[i].visits, days_since_first, hours_since_last,
-			    conf.colorize == 1 ? BOLD : "", rank, color != uf_c ? color : "",
-			    bpw ? li_c : "", bpw ? '*' : 0, (bpw && color != uf_c) ? color : "",
-			    (conf.colorize == 0 && color == uf_c) ? '!' : 0,
-			    dir_color, jump_db[i].path, df_c);
-		}
-
-		printf("\nTotal rank: %d/%d\nTotal visits: %d\n", ranks_sum,
-		    conf.max_jump_total_rank, visits_sum);
-
-		return EXIT_SUCCESS;
-	}
+	if (mode == NO_SUG_JUMP && !args[1] && args[0][1] != 'e')
+		return print_jump_table(reduce, now);
 
 	if (mode == NO_SUG_JUMP && args[1] && IS_HELP(args[1])) {
 		puts(_(JUMP_USAGE));
@@ -623,7 +647,8 @@ dirjump(char **args, int mode)
 		if (jump_opt == JLIST) {
 			printf("%s\n", matches[j]);
 		} else {
-			int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
+//			int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
+			int days_since_first = (int)(now - first[j]) / 86400;
 
 			/* Calculate the rank as frecency. The algorithm is based
 			 * on Mozilla, zoxide, and z.lua. See:
@@ -631,10 +656,11 @@ dirjump(char **args, int mode)
 			 * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
 			 * "https://github.com/skywind3000/z.lua#aging" */
 			int rank;
-			rank = days_since_first > 0 ? ((int)visits[j] * 100)
-					/ days_since_first : ((int)visits[j] * 100);
+			rank = days_since_first > 0 ? ((int)visits[j] * VISIT_BONUS)
+					/ days_since_first : ((int)visits[j] * VISIT_BONUS);
 
-			int hours_since_last = (int)(now - last[j]) / 60 / 60;
+//			int hours_since_last = (int)(now - last[j]) / 60 / 60;
+			int hours_since_last = (int)(now - last[j]) / 3600;
 
 			/* Credit or penalty based on last directory access */
 			int tmp_rank = rank;
