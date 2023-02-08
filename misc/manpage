@@ -2428,7 +2428,7 @@ With this information it is possible to build a ranking of directories to offer 
 .sp
 After getting an initial list of matches based on the query string(s) entered by the user, the frequency algorithm is applied on each entry in the list. The algorithm is quite simple: \fB(visits * VISIT-CREDIT) / days-since-first-visit\fR. As a result, we get the average of visits per day since the day of the first visit (what we call \fIthe directory rank\fR).
 .sp
-NOTE: VISIT-CREDIT is a hardcoded value: 300.
+NOTE: VISIT-CREDIT is a hardcoded value: 200.
 .sp
 There are however some further steps in the ranking process: \fBBonus points\fR.
 .sp
