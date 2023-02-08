@@ -1500,6 +1500,16 @@ remove_file(char **args)
 		conf.rm_force = 1;
 
 	for (; args[i]; i++) {
+
+		size_t l = strlen(args[i]);
+		/* If we have a symlink to dir ending with a slash, stat(3) takes it
+		 * as a directory, and then rm(1) complains that cannot remove it,
+		 * because "Is a directory". So, let's remove the ending slash:
+		 * stat(3) will take it as the symlink it is and rm(1) will remove
+		 * the symlink (not the target), without complains */
+		if (l > 0 && args[i][l - 1] == '/')
+			args[i][l - 1] = '\0';
+
 		/* Check if at least one file is in the current directory. If not,
 		 * there is no need to refresh the screen */
 		if (cwd == 0)

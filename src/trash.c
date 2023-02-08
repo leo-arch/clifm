@@ -392,7 +392,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	 * itself */
 	sprintf(file_suffix, "%s.%s", filename, suffix);
 
-	/* Copy the original file into the trash files directory */
+	/* Move the original file into the trash directory */
 	char *dest = (char *)NULL;
 	dest = (char *)xnmalloc(strlen(trash_files_dir) + strlen(file_suffix) + 2,
 			sizeof(char));
@@ -406,7 +406,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	dest = (char *)NULL;
 
 	if (ret != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Failed copying file to Trash\n"), file);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Failed moving file to Trash\n"), file);
 		free(file_suffix);
 		return ret;
 	}
@@ -1054,6 +1054,18 @@ check_trash_file(char *deq_file)
 		return EXIT_FAILURE;
 	}
 
+	size_t l = strlen(deq_file);
+	if (l > 0 && deq_file[l - 1] == '/')
+		// Do not trash (move) symlinks ending with a slash. According to 'info mv':
+		//"_Warning_: Avoid specifying a source name with a trailing slash, when
+		//it might be a symlink to a directory. Otherwise, 'mv' may do something
+		//very surprising, since its behavior depends on the underlying rename
+		//system call. On a system with a modern Linux-based kernel, it fails
+		//with 'errno=ENOTDIR'.  However, on other systems (at least FreeBSD 6.1
+		//and Solaris 10) it silently renames not the symlink but rather the
+		//directory referenced by the symlink."
+		deq_file[l - 1] = '\0';
+
 	struct stat a;
 	if (lstat(deq_file, &a) == -1) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: %s\n"), deq_file, strerror(errno));
@@ -1111,14 +1123,17 @@ trash_files_args(char **args)
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, "trash: %s: Error dequoting file\n", args[i]);
 			continue;
 		}
+
 		/* Make sure we are trashing a valid file */
 		if (check_trash_file(deq_file) == EXIT_FAILURE) {
 			exit_status = EXIT_FAILURE;
 			free(deq_file);
 			continue;
 		}
+
 		if (cwd == 0)
 			cwd = is_file_in_cwd(deq_file);
+
 		/* Once here, everything is fine: trash the file */
 		if (trash_element(suffix, &tm, deq_file) == EXIT_SUCCESS) {
 			trashed_files++;

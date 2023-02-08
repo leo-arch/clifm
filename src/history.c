@@ -370,7 +370,7 @@ add_to_dirhist(const char *dir_path)
 		old_pwd[dirhist_total_index] = (char *)NULL;
 	}
 
-	/* I not at the end of dirhist, add previous AND new entry */
+	/* If not at the end of dirhist, add previous AND new entry */
 	else {
 		old_pwd = (char **)xrealloc(old_pwd,
 		    (size_t)(dirhist_total_index + 3) * sizeof(char *));
