@@ -199,16 +199,16 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `version 1.10 (Swordmaster)`:
-  - **NEW**: [Quickly access the directory history list via the `dh` command](https://github.com/leo-arch/clifm/wiki/Introduction#dh-string-path-eln). The `dh` plugin, just as the `bh` and `fh` commands, is now deprecated.
-  - **NEW**: [History timestamps](https://github.com/leo-arch/clifm/wiki/Introduction#history-edit-clear--n-on-off-status-show-time)
-  - **NEW**: `s:` works now like `sel` keyword, to be in line with `t:` (for tags) and `b:` (for bookmarks). Consult the [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) section.
-  - **NEW**: The `:b` construct was removed. `b:` now lists bookmark names instead of paths. `b:mybm` expands to the path pointed to by the bookmark named `mybm`. The `ExpandBookmarks` option (config file) is now deprecated, just as the bookmarks suggestions strategy (in the `SuggestionStrategy` option). See the [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks) section.
-  - **NEW**: Bookmarks can be created directly from the command line, without an interactive prompt: `bm add FILE BM_NAME`.
-  - **NEW**: [Rename profiles via the `rename` subcommand](https://github.com/leo-arch/clifm/wiki/Introduction#pf-prof-profile-ls-list-set-add-del-profile-rename-profile-new_name)
-  - **NEW**: [`oc`, a files ownership editor](https://github.com/leo-arch/clifm/wiki/Introduction#oc-elnfile-)
-  - **NEW**: Get list of commands and a brief description via `cmd<TAB>` 
-  - **NEW**: [Suggest a brief description for internal commands](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
-  - **NEW**: Set a custom selections file via the `--sel-file` flag
+  - [Quickly access the directory history list via the `dh` command](https://github.com/leo-arch/clifm/wiki/Introduction#dh-string-path-eln). The `dh` plugin, just as the `bh` and `fh` commands, is now deprecated.
+  - [History timestamps](https://github.com/leo-arch/clifm/wiki/Introduction#history-edit-clear--n-on-off-status-show-time)
+  - `s:` works now like `sel` keyword, to be in line with `t:` (for tags) and `b:` (for bookmarks). Consult the [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) section.
+  - The `:b` construct was removed. `b:` now lists bookmark names instead of paths. `b:mybm` expands to the path pointed to by the bookmark named `mybm`. The `ExpandBookmarks` option (config file) is now deprecated, just as the bookmarks suggestions strategy (in the `SuggestionStrategy` option). See the [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks) section.
+  - Bookmarks can be created directly from the command line, without an interactive prompt: `bm add FILE BM_NAME`.
+  - [Rename profiles via the `rename` subcommand](https://github.com/leo-arch/clifm/wiki/Introduction#pf-prof-profile-ls-list-set-add-del-profile-rename-profile-new_name)
+  - [`oc`, a files ownership editor](https://github.com/leo-arch/clifm/wiki/Introduction#oc-elnfile-)
+  - Get list of commands and a brief description via `cmd<TAB>` 
+  - [Suggest a brief description for internal commands](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
+  - Set a custom selections file via the `--sel-file` flag
 * `version 1.9 (Sharptooth)`:
   - [Improved fuzzy suggestions/completions for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
   - [Automatic expansion for bookmarks, file type, and MIME type filters](https://github.com/leo-arch/clifm/wiki/Advanced#grouping-files-via-automatic-expansion)
