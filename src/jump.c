@@ -37,6 +37,7 @@
 
 #include "aux.h"
 #include "checks.h"
+#include "colors.h" /* get_dir_color() */
 #include "file_operations.h"
 #include "init.h"
 #include "navigation.h"
@@ -96,6 +97,8 @@ add_to_jumpdb(const char *dir)
 
 	int i = (int)jump_n, new_entry = 1;
 	while (--i >= 0) {
+		if (!jump_db[i].path || !*jump_db[i].path)
+			continue;
 		/* Jump entries are all absolute paths, so that they all start with
 		 * a slash. Let's start comparing then the second char */
 		if (dir[1] == jump_db[i].path[1] && strcmp(jump_db[i].path, dir) == 0) {
@@ -210,6 +213,10 @@ save_jumpdb(void)
 			/* Discount from TOTAL_RANK the rank of the now forgotten
 			 * directory to keep this total up to date */
 			total_rank -= jump_db[i].rank;
+#ifdef JUMP_MONITOR
+			printf("jump: %s: Forgotten directory (%d)\n", jump_db[i].path, jump_db[i].rank);
+			fflush(stdout);
+#endif
 			continue;
 		}
 
@@ -282,13 +289,28 @@ save_suggestion(char *str)
 	return EXIT_SUCCESS;
 }
 
+static char *
+_get_dir_color(const char *filename, const struct stat a)
+{
+	if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0)
+		return nd_c;
+
+	if (S_ISLNK(a.st_mode)) {
+		char *linkname = realpath(filename, (char *)NULL);
+		if (linkname) {
+			free(linkname);
+			return ln_c;
+		}
+		return or_c;
+	}
+
+	return get_dir_color(filename, a.st_mode, a.st_nlink);
+}
+
 /* Jump into best ranked directory matched by ARGS */
 int
 dirjump(char **args, int mode)
 {
-/*	if (!args || !*args[0])
-		return EXIT_FAILURE; */
-
 	if (xargs.no_dirjump == 1) {
 		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
@@ -310,12 +332,13 @@ dirjump(char **args, int mode)
 			return EXIT_SUCCESS;
 		}
 
-		puts(_("NOTE: First time access is displayed in days, while last "
+		puts(_("* First time access is displayed in days, while last "
 		       "time access is displayed in hours"));
-		puts(_("NOTE 2: An asterisk next rank values means that the "
+		puts(_("* An asterisk next rank values means that the "
 		       "corresponding directory is bookmarked, pinned, or currently "
 		       "used in some workspace\n"));
-		puts(_("Order\tVisits\tFirst\tLast\tRank\tDirectory"));
+		printf(_("%sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"),
+			conf.colorize == 1 ? BOLD : "", NC);
 
 		size_t i;
 		int ranks_sum = 0, visits_sum = 0;
@@ -374,18 +397,22 @@ dirjump(char **args, int mode)
 			ranks_sum += rank;
 			visits_sum += (int)jump_db[i].visits;
 
-			if (workspaces[cur_ws].path && workspaces[cur_ws].path[1] == jump_db[i].path[1]
-			&& strcmp(workspaces[cur_ws].path, jump_db[i].path) == 0) {
-				printf("  %s%zu\t %zu\t %d\t %d\t%d%c\t%s%s \n", mi_c,
-				    i + 1, jump_db[i].visits, days_since_first,
-				    hours_since_last, rank, bpw ? '*' : 0,
-				    jump_db[i].path, df_c);
-			} else {
-				printf("  %zu\t %zu\t %d\t %d\t%d%c\t%s \n", i + 1,
-				    jump_db[i].visits, days_since_first,
-				    hours_since_last, rank,
-				    bpw ? '*' : 0, jump_db[i].path);
-			}
+			char *color = (workspaces[cur_ws].path && workspaces[cur_ws].path[1] == jump_db[i].path[1]
+			&& strcmp(workspaces[cur_ws].path, jump_db[i].path) == 0) ? mi_c : df_c;
+
+			struct stat a;
+			if (lstat(jump_db[i].path, &a) == -1)
+				color = uf_c;
+
+			char *dir_color = color == uf_c ? uf_c : _get_dir_color(jump_db[i].path, a);
+
+			printf("  %s%zu\t %zu\t %d\t %d\t%s%d%s%s%c%s\t%c%s%s%s \n",
+				color != uf_c ? color : df_c,
+			    i + 1, jump_db[i].visits, days_since_first, hours_since_last,
+			    conf.colorize == 1 ? BOLD : "", rank, color != uf_c ? color : "",
+			    bpw ? li_c : "", bpw ? '*' : 0, (bpw && color != uf_c) ? color : "",
+			    (conf.colorize == 0 && color == uf_c) ? '!' : 0,
+			    dir_color, jump_db[i].path, df_c);
 		}
 
 		printf("\nTotal rank: %d/%d\nTotal visits: %d\n", ranks_sum,
