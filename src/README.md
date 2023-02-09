@@ -285,6 +285,7 @@ make -f misc/GNU/Makefile _BE_POSIX=1 _NO_ICONS=1
 | `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>3</sup> |
 | `_NO_SUGGESTIONS` | Disable [suggestions](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions) support |
 | `_NO_TAGS` | Disable support for [`Etiqueta`, the tags system](https://github.com/leo-arch/clifm/wiki/Common-Operations#tagging-files) |
+| `_NO_PROFILES` | Disable [user profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles) support |
 | `_NO_TRASH` | Disable [trash](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files) support |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 
