@@ -124,15 +124,17 @@ is_url(char *url)
 static void
 set_term_caps(const int i)
 {
-	if (i == -1) {
-		term_caps.color = 0;
+	char *force_color = getenv("CLIFM_FORCE_COLOR");
+
+	if (i == -1) { /* TERM not found in our terminfo database */
+		term_caps.color = force_color ? 1 : 0;
 		term_caps.suggestions = 0;
 		term_caps.pager = 0;
 		return;
 	}
 
 	term_caps.color = TERM_INFO[i].color > 0 ? 1 : 0;
-	if (getenv("CLIFM_FORCE_COLOR"))
+	if (force_color)
 		xargs.colorize = term_caps.color = 1;
 
 	term_caps.suggestions = (TERM_INFO[i].cub == 1 && TERM_INFO[i].ed == 1
@@ -171,8 +173,8 @@ check_term(void)
 {
 	char *_term = getenv("TERM");
 	if (!_term || !*_term) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: TERM environment variable not set\n"),
-			PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: TERM environment "
+			"variable not set\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -180,8 +182,8 @@ check_term(void)
 	for (i = 0; UNSUPPORTED_TERM[i]; i++) {
 		if (*_term == *UNSUPPORTED_TERM[i]
 		&& strcmp(_term, UNSUPPORTED_TERM[i]) == 0) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Unsupported terminal. This "
-				"terminal does not support escape sequences\n"),
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Unsupported "
+				"terminal. This terminal does not support escape sequences\n"),
 				PROGRAM_NAME, UNSUPPORTED_TERM[i]);
 			exit(EXIT_FAILURE);
 		}
