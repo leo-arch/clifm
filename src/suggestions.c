@@ -516,7 +516,8 @@ calculate_suggestion_lines(int *baej, const size_t suggestion_len)
 	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
 	|| suggestion.type == JCMD_SUG_NOACD || suggestion.type == BACKDIR_SUG
 	|| suggestion.type == SORT_SUG || suggestion.type == WS_NUM_SUG
-	|| suggestion.type == FUZZY_FILENAME || suggestion.type == DIRHIST_SUG) {
+	|| suggestion.type == FUZZY_FILENAME || suggestion.type == DIRHIST_SUG
+	|| suggestion.type == FASTBACK_SUG) {
 		/* 3 = 1 (one char forward) + 2 (" >") */
 		cuc += 3;
 		flags |= BAEJ_SUGGESTION;
@@ -1331,7 +1332,8 @@ check_jumpdb(const char *str, const size_t len, const int print)
 
 	int i = (int)jump_n;
 	while (--i >= 0) {
-		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
+		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path)
+		|| jump_db[i].rank == JUMP_ENTRY_PURGED)
 			continue;
 		if (len > 1 && *(jump_db[i].path + 1)
 		&& TOUPPER(*(str + 1)) != TOUPPER(*(jump_db[i].path + 1)))

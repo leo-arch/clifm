@@ -58,6 +58,69 @@
 #define JWEEK(n)  ((n) / 2)  /* Within last week */
 #define JOLDER(n) ((n) / 4)  /* More than a week */
 
+#define IS_VALID_JUMP_ENTRY(n) ((!jump_db[(n)].path || !*jump_db[(n)].path \
+|| jump_db[(n)].rank == JUMP_ENTRY_PURGED) ? 0 : 1)
+
+/* Calculate the rank as frecency. The algorithm is based
+ * on Mozilla, zoxide, and z.lua. See:
+ * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
+ * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
+ * "https://github.com/skywind3000/z.lua#aging" */
+static int
+rank_entry(const int i, const time_t now, int *days_since_first, int *hours_since_last)
+{
+//	int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
+//	int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
+	*days_since_first = (int)(now - jump_db[i].first_visit) / 86400;
+	*hours_since_last = (int)(now - jump_db[i].last_visit) / 3600;
+
+	int rank;
+	rank = *days_since_first > 1
+		   ? ((int)jump_db[i].visits * VISIT_BONUS) / *days_since_first
+		   : (int)jump_db[i].visits * VISIT_BONUS;
+
+	int tmp_rank = rank;
+	if (*hours_since_last == 0) { /* Last hour */
+		rank = JHOUR(tmp_rank);
+		jump_db[i].keep = 1;
+	} else if (*hours_since_last <= 24) { /* Last day */
+		rank = JDAY(tmp_rank);
+		jump_db[i].keep = 1;
+	} else if (*hours_since_last <= 168) { /* Last week */
+		rank = JWEEK(tmp_rank);
+	} else { /* More than a week */
+		rank = JOLDER(tmp_rank);
+	}
+
+	int j = (int)bm_n;//, bpw = 0; /* Bookmarked, pinned or workspace */
+	while (--j >= 0) {
+		if (bookmarks[j].path && bookmarks[j].path[1] == jump_db[i].path[1]
+		&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
+			rank += BOOKMARK_BONUS;
+			jump_db[i].keep = 1;
+			break;
+		}
+	}
+
+	if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
+	&& strcmp(pinned_dir, jump_db[i].path) == 0) {
+		rank += PINNED_BONUS;
+		jump_db[i].keep = 1;
+	}
+
+	j = MAX_WS;
+	while (--j >= 0) {
+		if (workspaces[j].path && workspaces[j].path[1] == jump_db[i].path[1]
+		&& strcmp(jump_db[i].path, workspaces[j].path) == 0) {
+			rank += WORKSPACE_BONUS;
+			jump_db[i].keep = 1;
+			break;
+		}
+	}
+
+	return rank;
+}
+
 static inline void
 free_jump_database(void)
 {
@@ -111,8 +174,9 @@ add_to_jumpdb(const char *dir)
 
 	int i = (int)jump_n, new_entry = 1;
 	while (--i >= 0) {
-		if (!jump_db[i].path || !*jump_db[i].path)
+		if (!IS_VALID_JUMP_ENTRY(i))
 			continue;
+
 		/* Jump entries are all absolute paths, so that they all start with
 		 * a slash. Let's start comparing then the second char */
 		if (dir[1] == jump_db[i].path[1] && strcmp(jump_db[i].path, dir) == 0) {
@@ -146,69 +210,21 @@ save_jumpdb(void)
 		return;
 	}
 
-	int i, reduce = 0, tmp_rank = 0, total_rank = 0;
+	int i, reduce = 0, total_rank = 0;
 	time_t now = time(NULL);
 
 	/* Calculate both total rank sum and rank for each entry */
 	i = (int)jump_n;
 	while (--i >= 0) {
+		if (!IS_VALID_JUMP_ENTRY(i))
+			continue;
 
-//		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
-		int days_since_first = (int)(now - jump_db[i].first_visit) / 86400;
-		int rank = days_since_first > 1 ? ((int)jump_db[i].visits * VISIT_BONUS)
-					/ days_since_first : ((int)jump_db[i].visits * VISIT_BONUS);
-
-//		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
-		int hours_since_last = (int)(now - jump_db[i].last_visit) / 3600;
-
-		/* Do not remove directories visited in the last 24 hours, no
-		 * matter what their rank is */
-		tmp_rank = rank;
-		if (hours_since_last == 0) {			/* Last hour */
-			rank = JHOUR(tmp_rank);
-			jump_db[i].keep = 1;
-		} else if (hours_since_last <= 24) {	/* Last day */
-			rank = JDAY(tmp_rank);
-			jump_db[i].keep = 1;
-		} else if (hours_since_last <= 168) {	/* Last week */
-			rank = JWEEK(tmp_rank);
-		} else {								/* More than a week */
-			rank = JOLDER(tmp_rank);
-		}
+		int days_since_first = 0, hours_since_last = 0;
+		int rank = rank_entry(i, now, &days_since_first, &hours_since_last);
+		UNUSED(days_since_first); UNUSED(hours_since_last);
 
 		jump_db[i].rank = rank;
-
-		/* Do not remove bookmarked, pinned, or workspaced directories */
-		/* Add bonus points */
-		int j = (int)bm_n;
-		while (--j >= 0) {
-			if (bookmarks[j].path && bookmarks[j].path[1] == jump_db[i].path[1]
-			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
-				jump_db[i].rank += BOOKMARK_BONUS;
-				jump_db[i].keep = 1;
-				break;
-			}
-		}
-
-		if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
-		&& strcmp(pinned_dir, jump_db[i].path) == 0) {
-			jump_db[i].rank += PINNED_BONUS;
-			jump_db[i].keep = 1;
-		}
-
-		j = MAX_WS;
-		while (--j >= 0) {
-			if (workspaces[j].path && workspaces[j].path[1] == jump_db[i].path[1]
-			&& strcmp(jump_db[i].path, workspaces[j].path) == 0) {
-				jump_db[i].rank += WORKSPACE_BONUS;
-				jump_db[i].keep = 1;
-				break;
-			}
-		}
-
-/*		jump_db[i].rank = rank;
-		total_rank += rank; */
-		total_rank += jump_db[i].rank;
+		total_rank += rank;
 	}
 
 	/* Once we have the total rank, check if we need to reduce ranks,
@@ -219,7 +235,7 @@ save_jumpdb(void)
 	for (i = 0; i < (int)jump_n; i++) {
 		if (total_rank > conf.max_jump_total_rank) {
 			if (reduce) {
-				tmp_rank = jump_db[i].rank;
+				int tmp_rank = jump_db[i].rank;
 				jump_db[i].rank = tmp_rank / reduce;
 			}
 		}
@@ -332,66 +348,30 @@ print_jump_table(const int reduce, const time_t now)
 	}
 
 	puts(_("* First time access is displayed in days, while last "
-	       "time access is displayed in hours"));
+		"time access is displayed in hours."));
 	puts(_("* An asterisk next rank values means that the "
-	       "corresponding directory is bookmarked, pinned, or currently "
-	       "used in some workspace\n"));
-	printf(_("%sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"),
+		"corresponding directory will not be removed despite its rank, "
+		"either because it was visited in the last 24 hours, or because "
+		"it is bookmarked, pinned, or currently active in some workspace."));
+	printf(_("* Entries ranked below MinJumpRank (currently %d) will be "
+		"removed at program exit.\n"), conf.min_jump_rank);
+	printf(_("\n%sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"),
 		conf.colorize == 1 ? BOLD : "", NC);
 
 	size_t i;
 	int ranks_sum = 0, visits_sum = 0;
 
 	for (i = 0; i < jump_n; i++) {
+		if (!IS_VALID_JUMP_ENTRY(i))
+			continue;
 
-//		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
-//		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
-		int days_since_first = (int)(now - jump_db[i].first_visit) / 86400;
-		int hours_since_last = (int)(now - jump_db[i].last_visit) / 3600;
-
-		int rank;
-		rank = days_since_first > 1
-			   ? ((int)jump_db[i].visits * VISIT_BONUS) / days_since_first
-			   : (int)jump_db[i].visits * VISIT_BONUS;
-
-		int tmp_rank = rank;
-		if (hours_since_last == 0) /* Last hour */
-			rank = JHOUR(tmp_rank);
-		else if (hours_since_last <= 24) /* Last day */
-			rank = JDAY(tmp_rank);
-		else if (hours_since_last <= 168) /* Last week */
-			rank = JWEEK(tmp_rank);
-		else /* More than a week */
-			rank = JOLDER(tmp_rank);
-
-		int j = (int)bm_n, bpw = 0; /* Bookmarked, pinned or workspace */
-		while (--j >= 0) {
-			if (bookmarks[j].path && bookmarks[j].path[1] == jump_db[i].path[1]
-			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
-				rank += BOOKMARK_BONUS;
-				bpw = 1;
-				break;
-			}
-		}
-
-		if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
-		&& strcmp(pinned_dir, jump_db[i].path) == 0) {
-			rank += PINNED_BONUS;
-			bpw = 1;
-		}
-
-		j = MAX_WS;
-		while (--j >= 0) {
-			if (workspaces[j].path && workspaces[j].path[1] == jump_db[i].path[1]
-			&& strcmp(jump_db[i].path, workspaces[j].path) == 0) {
-				rank += WORKSPACE_BONUS;
-				bpw = 1;
-				break;
-			}
-		}
+		int days_since_first = 0, hours_since_last = 0;
+		int rank = rank_entry((int)i, now, &days_since_first, &hours_since_last);
+		int keep = jump_db[i].keep;
+		jump_db[i].keep = 0;
 
 		if (reduce) {
-			tmp_rank = rank;
+			int tmp_rank = rank;
 			rank = tmp_rank / reduce;
 		}
 
@@ -412,22 +392,103 @@ print_jump_table(const int reduce, const time_t now)
 			color != uf_c ? color : df_c,
 		    i + 1, jump_db[i].visits, days_since_first, hours_since_last,
 		    conf.colorize == 1 ? BOLD : "", rank, color != uf_c ? color : "",
-		    bpw ? li_c : "", bpw ? '*' : 0, (bpw && color != uf_c) ? color : "",
+		    keep == 1 ? li_c : "", keep == 1 ? '*' : 0, (keep == 1 && color != uf_c) ? color : "",
 		    (conf.colorize == 0 && color == uf_c) ? '!' : 0,
 		    dir_color, jump_db[i].path, df_c);
 	}
 
-	printf("\nTotal rank: %d/%d\nTotal visits: %d\n", ranks_sum,
+	printf(_("\nTotal rank: %d/%d\nTotal visits: %d\n"), ranks_sum,
 	    conf.max_jump_total_rank, visits_sum);
 
 	return EXIT_SUCCESS;
+}
+
+static int
+purge_invalid_entries(void)
+{
+	int i = (int)jump_n;
+	int c = 0;
+
+	struct stat a;
+	while (--i >= 0) {
+		if (!IS_VALID_JUMP_ENTRY(i))
+			continue;
+
+		if (stat(jump_db[i].path, &a) == -1) {
+			printf("%s->%s %s%s%s\n", mi_c, df_c, uf_c, jump_db[i].path, df_c);
+			jump_db[i].rank = JUMP_ENTRY_PURGED;
+			c++;
+		}
+	}
+
+	if (c == 0)
+		puts(_("jump: No invalid entries"));
+	else
+		printf(_("\njump: Purged %d invalid %s\n"), c, c == 1 ? _("entry") : _("entries"));
+
+	return EXIT_SUCCESS;
+}
+
+static int
+purge_low_ranked_entries(const int limit)
+{
+	int i = (int)jump_n;
+	int c = 0;
+	time_t now = time(NULL);
+
+	while (--i >= 0) {
+		if (!IS_VALID_JUMP_ENTRY(i))
+			continue;
+
+		int days_since_first = 0, hours_since_last = 0;
+		int rank = rank_entry(i, now, &days_since_first, &hours_since_last);
+		UNUSED(days_since_first); UNUSED(hours_since_last);
+
+		if (rank < limit) {
+			if (jump_db[i].keep == 1) {
+				jump_db[i].keep = 0;
+				continue;
+			}
+			jump_db[i].keep = 0;
+			printf("%s->%s %s (%d)\n", mi_c, df_c, jump_db[i].path, rank);
+			jump_db[i].rank = JUMP_ENTRY_PURGED;
+			c++;
+		}
+	}
+
+	if (c == 0)
+		printf(_("jump: No entry ranked below %d\n"), limit);
+	else
+		printf(_("\njump: Purged %d %s\n"), c, c == 1 ? _("entry") : _("entries"));
+
+	return EXIT_SUCCESS;
+}
+
+static int
+_purge_jumpdb(char *arg)
+{
+	if (!arg || !*arg)
+		return purge_invalid_entries();
+
+	if (!is_number(arg)) {
+		puts(JUMP_USAGE);
+		return EXIT_FAILURE;
+	}
+
+	int n = atoi(arg);
+	if (n < 0) {
+		fprintf(stderr, _("jump: %s: Invalid value\n"), arg);
+		return EXIT_FAILURE;
+	}
+
+	return purge_low_ranked_entries(n);
 }
 
 /* Jump into best ranked directory matched by ARGS */
 int
 dirjump(char **args, int mode)
 {
-	if (xargs.no_dirjump == 1) {
+	if (xargs.no_dirjump == 1 && mode == NO_SUG_JUMP) {
 		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -442,12 +503,20 @@ dirjump(char **args, int mode)
 
 	/* If no parameter (and no 'je'), print the list of entries in the jump
 	 * database together with the corresponding information */
-	if (mode == NO_SUG_JUMP && !args[1] && args[0][1] != 'e')
-		return print_jump_table(reduce, now);
+	if (mode == NO_SUG_JUMP) {
+		if (!args[1] && args[0][1] != 'e')
+			return print_jump_table(reduce, now);
 
-	if (mode == NO_SUG_JUMP && args[1] && IS_HELP(args[1])) {
-		puts(_(JUMP_USAGE));
-		return EXIT_SUCCESS;
+		if (args[1] && IS_HELP(args[1])) {
+			puts(_(JUMP_USAGE));
+			return EXIT_SUCCESS;
+		}
+
+		if (args[1] && *args[1] == '-' && strcmp(args[1], "--edit") == 0)
+			return edit_jumpdb();
+
+		if (args[1] && *args[1] == '-' && strcmp(args[1], "--purge") == 0)
+			return _purge_jumpdb(args[2]);
 	}
 
 	enum jump jump_opt = NONE;
@@ -534,8 +603,9 @@ dirjump(char **args, int mode)
 		if (!match) {
 			j = (int)jump_n;
 			while (--j >= 0) {
-				if (!jump_db[j].path)
+				if (!IS_VALID_JUMP_ENTRY(j))
 					continue;
+
 				/* Pointer to the beginning of the search str in the
 				 * jump entry. Used to search for subsequent search
 				 * strings starting from this position in the entry

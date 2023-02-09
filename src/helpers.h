@@ -524,6 +524,8 @@ extern int watch;
 #define FUZZY_HISTORY     3
 #define FUZZY_ALGO_MAX    2 /* We have two fuzzy algorithms */
 
+#define JUMP_ENTRY_PURGED -1
+
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */

@@ -1855,6 +1855,10 @@ jump_generator(const char *text, int state)
 
 	/* Look for matches in the dirhist list */
 	while ((name = jump_db[i++].path) != NULL) {
+
+		if (i > 0 && jump_db[i - 1].rank == JUMP_ENTRY_PURGED)
+			continue;
+
 		/* Exclude CWD */
 		if (name[1] == workspaces[cur_ws].path[1]
 		&& strcmp(name, workspaces[cur_ws].path) == 0)

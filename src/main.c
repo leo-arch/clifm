@@ -647,6 +647,8 @@ const struct cmdslist_t param_str[] = {
 	{"history show-time", 17},
 	{"icons on", 8},
 	{"icons off", 9},
+	{"j --purge", 9},
+	{"j --edit", 8},
 	{"kb edit", 7},
 	{"keybinds edit", 13},
 	{"kb reset", 8},

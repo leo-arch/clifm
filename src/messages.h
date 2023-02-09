@@ -516,18 +516,17 @@ You can also access the commands history via the exclamation mark (!)\n\
 
 #define JUMP_USAGE "Change to a directory in the jump database\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  j, jc, jp, jl [STRING]..., jo [NUM], je\n\
-Note: Consult the manpage to know how Kangaroo, this directory jumper,\n\
-works.\n\n\
+  j [--purge [NUM]] [--edit], jc, jp, jl [STRING]..., jo [NUM], je\n\n\
+For information about the matching algorithm consult the manpage\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the list of entries in the jump database (visited directories)\n\
     j (or jl)\n\
 - Change to any visited directory containing the string 'bui'\n\
     j bui\n\
+    Note: Hit TAB to get a list of possible matches: 'j bui<TAB>'\n\
 - If not enough, use multiple query strings\n\
     j ho bui\n\
     Note: Most likey, this will take you to /home/build\n\
-    Note 2: Try TAB to get a list of possible matches: 'j bui<TAB>'\n\
 - Change to any visited directory that is PARENT of the current directory\n\
   and contains the string 'str'\n\
     jp str\n\
@@ -535,7 +534,15 @@ works.\n\n\
   and contains the string 'str'\n\
     jc str\n\
 - Open/edit the jump database\n\
-    je"
+    je (also 'j --edit')\n\
+- Purge the database from non-existent directories\n\
+    j --purge\n\
+    Note: To automatically purge the database from non-existent directories\n\
+    at startup, set PurgeJumpDB to true in the configuration file\n\
+- Purge the database from entries ranked below 100\n\
+    j --purge 100\n\
+    Note: To remove a specific entry, just remove the corresponding line\n\
+    from the database ('je' or 'j --edit')"
 
 #define KB_USAGE "Manage keybindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
