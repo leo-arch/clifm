@@ -521,6 +521,8 @@ For information about the matching algorithm consult the manpage\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the list of entries in the jump database (visited directories)\n\
     j (or jl)\n\
+- List all entries matching the string 'str'\n\
+    jl str\n\
 - Change to any visited directory containing the string 'bui'\n\
     j bui\n\
     Note: Hit TAB to get a list of possible matches: 'j bui<TAB>'\n\

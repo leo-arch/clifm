@@ -1150,12 +1150,12 @@ LogCmds=%s\n\n"
 MinFilenameTrim=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
-# will be removed. If set to -1, directories are kept indefinitely\n\
+# is removed. If set to -1, directories are kept indefinitely\n\
 MinJumpRank=%d\n\n"
 
 	    "# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,\n\
-# all ranks will be reduced using a dynamic factor so that the total sum falls below\n\
-# MaxJumpTotalRank again. Those entries falling below MinJumpRank will\n\
+# all ranks will be reduced using a dynamic factor so that the total sum falls\n\
+# below MaxJumpTotalRank again. Those entries falling below MinJumpRank will\n\
 # be deleted\n\
 MaxJumpTotalRank=%d\n\n"
 
