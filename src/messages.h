@@ -155,7 +155,7 @@ change this suffix)"
 
 #define BOOKMARKS_USAGE "Manage bookmarks\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  bm, bookmarks [a, add FILE NAME [SHORTCUT]] [d, del [NAME]] [e, edit [APP]]\n\n\
+  bm, bookmarks [a, add FILENAME NAME [SHORTCUT]] [d, del [NAME]] [e, edit [APP]] [NAME, SHORTCUT]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Open the bookmarks screen\n\
     bm (Alt-b)\n\

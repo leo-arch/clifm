@@ -540,32 +540,64 @@ The query string could match any part of a directory name: \fIbd er\fR, for inst
 .B bl \fIELN/FILE\fR...
 Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
 .TP
-.B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILE\fR \fINAME\fR [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR [\fINAME\fR]] [\fIe, edit\fR [\fIAPP\fR]]
-with no argument, open the bookmarks manager. Here you can cd into the desired bookmark by entering either its ELN, shortcut, or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). Make your changes, save, and exit.
+.B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILENAME\fR \fINAME\fR [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR [\fINAME\fR]] [\fIe, edit\fR [\fIAPP\fR]] [\fINAME\fR, \fISHORTCUT\fR]
+Bookmarks can be manager either from the bookmarks manager screen or from the command line.
 .sp
-If you want to add or remove a bookmark directly from the command line, use the \fIadd\fR and \fIdel\fR arguments respectively (the \fIa\fR and \fId\fR shortcuts can be used as well):
+\fB1. The bookmarks manager screen\fR
 .sp
-To bookmark the \fI/media/mount\fR directory as "mnt": \fIbm add /media/mount mnt\fR.
+To access the bookmarks manager screen simply enter \fIbm\fR. Here you can cd into the desired bookmark by entering either its ELN, shortcut, or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). Make your changes, save, and exit.
 .sp
-To delete a bookmark use the \fIdel\fR argument followed by the desired bookmark name: \fIbm del mnt\fR.
+\fB2. The command line\fR
+.TS
+allbox;
+lb lb
+l l.
+Command	Description
+T{
+bm add /media/mount mnt
+T}	Bookmark the \fI/media/mount\fR directory as "mnt" \fB(1)\fR
+T{
+bm mnt
+T}	Change to/open the bookmark named "mnt" \fB(2)\fR
+T{
+bm del mnt
+T}	Delete the bookmark named "mnt"
+T{
+bm edit
+T}	Edit your bookmarks
+.TE
+
 .sp
-Open a bookmark by typing \fIbm SHORTCUT\fR or \fIbm NAME\fR (in which latter case TAB completion is available). Example: \fIbm mnt\fR.
+\fB(1)\fR A shortcut (i.e. short name) can be specified as well. For example \fIbm add /media/mount mnt m\fR
+.sp 0
+\fB(2)\fR Shortcuts can be used as well: \fI bm m\fR
 .sp
 A handy use for the bookmarks function is to create bookmarks using short names, which will be later easily accessible via TAB completion.
 .sp
 \fBThe b: construct\fR
 .sp
 The \fIb:\fR construct is used as a way to quickly access/operate on bookmarks. A few examples:
+.TS
+allbox;
+lb lb
+l l.
+Command	Description
+T{
+b:<TAB>
+T}	List available bookmarks
+T{
+b:net
+T}	Change to the bookmark named "net" \fB(1)\fR
+T{
+p b:bm1 b:bm2
+T}	Print file properties of the bookmarks named "bm1" and "bm2"
+T{
+s b:
+T}	Select all bookmarks at once
+.TE
+
 .sp
-List available bookmarks: \fIb:<TAB>\fR
-.sp
-Change to the bookmark named \fInet\fR: \fIb:net\fR (or \fIcd b:net\fR)
-.sp
-Print file properties of the bookmarks named \fIbm1\fR and \fIbm2\fR: \fIp b:bm1 b:bm2\fR. If running in FZF mode, you can just press TAB to select multiple bookmarks at once.
-.sp
-Select \fIall\fR bookmarks at once: \fIs b:\fR
-.sp
-If your are not sure about where a bookmark points to, just type \fIb:NAME<TAB>\fR.
+\fB(1)\fR If your are not sure about where a bookmark points to, just type \fIb:NAME<TAB>\fR.
 .TP
 .B br, bulk \fIELN/FILE\fR...
 rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the \fIsel\fR keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
