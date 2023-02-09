@@ -1856,6 +1856,7 @@ check_fastback(char *w)
 	return PARTIAL_MATCH;
 }
 
+#ifndef _NO_PROFILES
 static int
 check_profiles(char *word, const size_t len)
 {
@@ -1889,6 +1890,7 @@ check_profiles(char *word, const size_t len)
 	free(q);
 	return NO_MATCH;
 }
+#endif /* !_NO_PROFILES */
 
 static int
 check_remotes(char *word, const size_t len)
@@ -2313,6 +2315,7 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'p': /* Profiles */
+#ifndef _NO_PROFILES
 		if (profile_names && nwords == 3 && lb[1] == 'f' && lb[2] == ' '
 		&& (strncmp(lb + 3, "set ", 4) == 0 || strncmp(lb + 3, "del ", 4) == 0
 		|| strncmp(lb + 3, "rename ", 7) == 0)) {
@@ -2324,6 +2327,7 @@ rl_suggestions(const unsigned char c)
 				goto FAIL;
 			}
 		}
+#endif /* !_NO_PROFILES */
 
 		if (lb[1] == 'r' && strncmp(lb, "prompt ", 7) == 0) {
 			if (prompts_n > 0 && (printed = check_prompts(word, wlen)) != NO_MATCH)

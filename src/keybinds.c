@@ -1279,6 +1279,7 @@ rl_quit(int count, int key)
 	exit(EXIT_SUCCESS);
 }
 
+#ifndef _NO_PROFILES
 /* Get current profile and total amount of profiles and store this info
  * in pointers CUR and TOTAL */
 static void
@@ -1367,6 +1368,7 @@ rl_next_profile(int count, int key)
 
 	return EXIT_SUCCESS;
 }
+#endif /* _NO_PROFILES */
 
 static int
 rl_dirhist(int count, int key)
@@ -2035,8 +2037,10 @@ set_keybinds_from_file(void)
 	/* Settings */
 	rl_bind_keyseq(find_key("toggle-virtualdir-full-paths"), rl_toggle_virtualdir_full_paths);
 	rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
+#ifndef _NO_PROFILES
 	rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
 	rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
+#endif /* _NO_PROFILES */
 	rl_bind_keyseq(find_key("quit"), rl_quit);
 	rl_bind_keyseq(find_key("lock"), rl_lock);
 	rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);

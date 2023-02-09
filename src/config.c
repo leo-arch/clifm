@@ -753,6 +753,7 @@ rename_cfm_files(char *dir)
 	free(_files);
 }
 
+#ifndef _NO_PROFILES
 static void
 rename_profile_files(char *dir)
 {
@@ -794,6 +795,7 @@ rename_profile_files(char *dir)
 
 	free(_files);
 }
+#endif /* _NO_PROFILES */
 
 static void
 rename_color_files(char *dir)
@@ -811,7 +813,9 @@ rename_config_files(char *dir)
 {
 	rename_cfm_files(dir);
 	rename_color_files(dir);
+#ifndef _NO_PROFILES
 	rename_profile_files(dir);
+#endif
 }
 
 static void

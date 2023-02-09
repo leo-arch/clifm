@@ -59,6 +59,9 @@
 #include "config.h"
 #include "exec.h"
 #include "init.h"
+#ifdef _NO_PROFILES
+# include "messages.h"
+#endif
 #include "mime.h"
 #include "misc.h"
 #include "navigation.h"
@@ -1954,7 +1957,9 @@ external_arguments(int argc, char **argv)
 	int optc;
 	/* Variables to store arguments to options */
 	char *path_value = (char *)NULL,
+#ifndef _NO_PROFILES
 		 *alt_profile_value = (char *)NULL,
+#endif
 	     *alt_dir_value = (char *)NULL,
 	     *config_value = (char *)NULL,
 	     *kbinds_value = (char *)NULL,
@@ -2234,7 +2239,13 @@ external_arguments(int argc, char **argv)
 		case 'o': conf.autols = xargs.autols = 0; break;
 		case 'O': conf.autols = xargs.autols = 1; break;
 		case 'p': path_value = optarg; xargs.path = 1; break;
-		case 'P': alt_profile_value = optarg; break;
+		case 'P':
+#ifndef _NO_PROFILES
+			alt_profile_value = optarg; break;
+#else
+			fprintf(stderr, "%s: profiles: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
+			exit(EXIT_FAILURE);
+#endif /* !_NO_PROFILES */
 		case 'r': xargs.refresh_on_empty_line = 0; break;
 		case 's': conf.splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
@@ -2450,10 +2461,12 @@ external_arguments(int argc, char **argv)
 		free(path_exp);
 	}
 
+#ifndef _NO_PROFILES
 	if (alt_profile_value) {
 		free(alt_profile);
 		alt_profile = savestring(alt_profile_value, strlen(alt_profile_value));
 	}
+#endif
 }
 
 void

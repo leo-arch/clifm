@@ -1730,41 +1730,6 @@ hist_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-/*
-static char *
-bm_paths_generator(const char *text, int state)
-{
-	if (!bookmarks || bm_n == 0)
-		return (char *)NULL;
-
-	static int i;
-	static size_t len;
-	char *name;
-
-	if (!state) {
-		i = 0;
-		len = (text && *text + 1 && *text + 2) ? strlen(text + 2) : 0;
-	}
-
-	while (i < (int)bm_n && (name = bookmarks[i++].path) != NULL) {
-		if (len == 0 || (*name == *(text + 2) && strncmp(name, text + 2, len) == 0)
-		|| (conf.fuzzy_match == 1
-		&& fuzzy_match((char *)(text + 2), name, len, FUZZY_BM_NAMES) > 0)) {
-//		&& fuzzy_match((char *)(text + 2), name, conf.case_sens_path_comp, FUZZY_BM_NAMES) == 1)) {
-			size_t nlen = strlen(name);
-			if (nlen > 1 && name[nlen - 1] == '/')
-				name[nlen - 1] = '\0';
-			char *p = abbreviate_file_name(name);
-			char *ret = strdup(p ? p : name);
-			if (p != name)
-				free(p);
-			return ret;
-		}
-	}
-
-	return (char *)NULL;
-} */
-
 /* Returns the path corresponding to be bookmark name TEXT */
 static char *
 bm_paths_generator(const char *text, int state)
@@ -1910,6 +1875,7 @@ cschemes_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+#ifndef _NO_PROFILES
 /* Used by profiles completion */
 static char *
 profiles_generator(const char *text, int state)
@@ -1936,6 +1902,7 @@ profiles_generator(const char *text, int state)
 
 	return (char *)NULL;
 }
+#endif /* !_NO_PROFILES */
 
 static char *
 filenames_gen_text(const char *text, int state)
@@ -2525,14 +2492,11 @@ rl_glob(char *text)
 	return t;
 }
 
+#ifndef _NO_TRASH
 /* Return the list of currently trashed files matching TEXT, or NULL */
 static char **
 rl_trashed_files(const char *text)
 {
-#ifdef _NO_TRASH
-	UNUSED(text);
-	return (char **)NULL;
-#else
 	if (!trash_files_dir || !*trash_files_dir)
 		return (char **)NULL;
 
@@ -2595,8 +2559,8 @@ rl_trashed_files(const char *text)
 
 	free(p);
 	return tfiles;
-#endif /* _NO_TRASH */
 }
+#endif /* _NO_TRASH */
 
 #ifndef _NO_TAGS
 static char *
@@ -2814,14 +2778,18 @@ options_generator(const char *text, int state)
 	} else if ( (*l == 'c' && l[1] == 'l' && l[2] == ' ')
 	|| (*l == 'i' && strncmp(l, "icons ", 6) == 0) ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = NULL;
+#ifndef _NO_PROFILES
 	/* pf */
 	} else if (*l == 'p' && l[1] == 'f' && l[2] == ' ') {
 		_opts[0] = "list"; _opts[1] = "set"; _opts[2] = "add";
 		_opts[3] = "del"; _opts[4] = "rename"; _opts[5] = NULL;
+#endif /* _NO_PROFILES */
+#ifndef _NO_TAGS
 	/* tag */
 	} else if (*l == 't' && l[1] == 'a' && l[2] == 'g' && l[3] == ' ') {
 		_opts[0] = "list"; _opts[1] = "new"; _opts[2] = "remove";
 		_opts[3] = "rename"; _opts[4] = "untag"; _opts[5] = "merge"; _opts[6] = NULL;
+#endif /* !_NO_TAGS */
 	/* mm */
 	} else if (*l == 'm' && l[1] == 'm' && l[2] == ' ') {
 		_opts[0] = "info"; _opts[1] = "edit"; _opts[2] = "import"; _opts[3] = NULL;
@@ -3529,6 +3497,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+#ifndef _NO_TRASH
 		/* ### UNTRASH ### */
 		if (*lb == 'u' && (lb[1] == ' ' || (lb[1] == 'n'
 		&& (strncmp(lb, "untrash ", 8) == 0 || strncmp(lb, "undel ", 6) == 0)))) {
@@ -3556,6 +3525,7 @@ my_rl_completion(const char *text, int start, int end)
 				return matches;
 			}
 		}
+#endif /* !_NO_TRASH */
 
 		/* #### ELN AND JUMP ORDER EXPANSION ### */
 		/* Perform this check only if the first char of the string to be
@@ -3703,6 +3673,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+#ifndef _NO_PROFILES
 		/* ### PROFILES COMPLETION ### */
 		if (*lb == 'p' && (lb[1] == 'r' || lb[1] == 'f')
 		&& (strncmp(lb, "pf set ", 7) == 0
@@ -3711,10 +3682,10 @@ my_rl_completion(const char *text, int start, int end)
 		|| strncmp(lb, "profile del ", 12) == 0
 		|| strncmp(lb, "pf rename ", 10) == 0
 		|| strncmp(lb, "profile rename ", 15) == 0) ) {
-#ifndef _NO_SUGGESTIONS
+# ifndef _NO_SUGGESTIONS
 			if (suggestion.type != FILE_SUG)
 				rl_attempted_completion_over = 1;
-#endif /* _NO_SUGGESTIONS */
+# endif /* _NO_SUGGESTIONS */
 			char *p = dequote_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &profiles_generator);
 			free(p);
@@ -3723,6 +3694,7 @@ my_rl_completion(const char *text, int start, int end)
 				return matches;
 			}
 		}
+#endif /* !_NO_PROFILES */
 
 		/* ### SORT COMMAND COMPLETION ### */
 		if (*lb == 's' && (strncmp(lb, "st ", 3) == 0

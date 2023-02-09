@@ -22,6 +22,8 @@
  * MA 02110-1301, USA.
 */
 
+#ifndef _NO_PROFILES
+
 #include "helpers.h"
 
 #include <errno.h>
@@ -579,3 +581,7 @@ profile_function(char **args)
 	fprintf(stderr, "%s\n", PROFILES_USAGE);
 	return EXIT_FAILURE;
 }
+
+#else
+void *__skip_me_prof;
+#endif /* !_NO_PROFILES */

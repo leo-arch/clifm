@@ -65,7 +65,9 @@ typedef char *rl_cpvfunc_t;
 #include "mime.h"
 #include "misc.h"
 #include "navigation.h"
-#include "profiles.h"
+#ifndef _NO_PROFILES
+# include "profiles.h"
+#endif
 #include "prompt.h"
 #include "properties.h"
 #include "readline.h"
@@ -2569,7 +2571,7 @@ exec_cmd(char **comm)
 	 * ##################################################*/
 
 	else if (*comm[0] == 'w' && comm[0][1] == 's' && !comm[0][2])
-		return (exit_code = handle_workspaces(comm[1] ? comm[1] : NULL));
+		return (exit_code = handle_workspaces(comm[1]));
 
 	else if (*comm[0] == 's' && strcmp(comm[0], "stats") == 0)
 		return (exit_code = print_stats());
@@ -2635,7 +2637,12 @@ exec_cmd(char **comm)
 	/* #### PROFILE #### */
 	else if (*comm[0] == 'p' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "prof") == 0 || strcmp(comm[0], "profile") == 0))
+#ifndef _NO_PROFILES
 		return (exit_code = profile_function(comm));
+#else
+		{ fprintf(stderr, "%s: prof: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
+		return EXIT_FAILURE; }
+#endif /* _NO_PROFILES */
 
 	/* #### MOUNTPOINTS #### */
 	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2])

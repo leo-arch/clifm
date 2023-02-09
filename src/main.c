@@ -54,7 +54,9 @@
 #include "listing.h"
 #include "misc.h"
 #include "navigation.h"
-#include "profiles.h"
+#ifndef _NO_PROFILES
+# include "profiles.h"
+#endif
 #include "prompt.h"
 #include "readline.h"
 #include "strings.h"
@@ -1146,7 +1148,10 @@ main(int argc, char *argv[])
 	/* Store history into an array to be able to manipulate it */
 	get_history();
 
+#ifndef _NO_PROFILES
 	get_profile_names();
+#endif
+
 	load_pinned_dir();
 	load_prompts();
 	init_workspaces_opts();

@@ -1041,10 +1041,12 @@ store_completions(char **matches, FILE *fp)
 	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(ct) == 1) ? 1 : 0;
 	longest_prev_entry = 0;
 
+#ifndef _NO_TRASH
 	/* Change to the trash dir so we can correctly get trashed files color */
 	if (conf.colorize == 1 && (ct == TCMP_TRASHDEL || ct == TCMP_UNTRASH)
 	&& trash_files_dir)
 		xchdir(trash_files_dir, NO_TITLE);
+#endif /* _NO_TRASH */
 
 	for (i = start; matches[i]; i++) {
 		if (!matches[i] || !*matches[i] || SELFORPARENT(matches[i]))
@@ -1099,10 +1101,12 @@ store_completions(char **matches, FILE *fp)
 			write_comp_to_file(entry, color, &fp);
 	}
 
+#ifndef _NO_TRASH
 	/* We changed to the trash dir. Change back to the current dir */
 	if (conf.colorize == 1 && (ct == TCMP_TRASHDEL || ct == TCMP_UNTRASH)
 	&& workspaces && workspaces[cur_ws].path)
 		xchdir(workspaces[cur_ws].path, NO_TITLE);
+#endif /* _NO_TRASH */
 
 	free(norm_prefix);
 	return i;
@@ -2464,6 +2468,8 @@ CALC_OFFSET:
 				tab_offset--;
 		}
 
+
+#ifndef _NO_TRASH
 		/* If printing trashed files, let's change to the trash dir
 		 * to allow files colorization */
 		if ((cur_comp_type == TCMP_UNTRASH || cur_comp_type == TCMP_TRASHDEL)
@@ -2471,6 +2477,7 @@ CALC_OFFSET:
 			did_chdir = 1;
 			xchdir(trash_files_dir, NO_TITLE);
 		}
+#endif /* _NO_TRASH */
 
 		ERASE_TO_RIGHT_AND_BELOW;
 
