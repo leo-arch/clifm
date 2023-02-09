@@ -121,6 +121,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Copy files to your smart phone (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660)
   - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
+  - File permissions/ownership editor via the [`pc`](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-) and [`oc`](https://github.com/leo-arch/clifm/wiki/Introduction#oc-elnfile-) commands respectively 
   - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name)
   - [Mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
   - [Advanced Copy](https://github.com/leo-arch/clifm/wiki/Advanced#cpmv-with-a-progress-bar) support (just `cp` and `mv` with a nice progress bar)
@@ -134,6 +135,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Fuzzy completion for file names and paths](https://github.com/leo-arch/clifm/wiki/Specifics#fuzzy-match)
   - [Wildcards expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`s *.[ch]<TAB>`)
   - [File types expansion via <kbd>TAB</kbd>](https://github.com/leo-arch/clifm/wiki/Introduction#filter-files-with-the-tab-key) (`=l<TAB>` to list all symlinks in the current dir)
+  - [MIME types expansion](https://github.com/leo-arch/clifm/wiki/Advanced/#quickly-filtering-files-with-the-tab-key) (`@image<TAB>`)
   - Bash-like quoting system
   - Shell commands execution
   - Sequential and conditional commands execution
@@ -157,7 +159,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout)
 - Misc
   - [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-  - [File previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via TAB completion!)
+  - [File previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via TAB completion or the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app))
   - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk), including emoji-icons :smirk:
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
   - [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
