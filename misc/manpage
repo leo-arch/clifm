@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 2, 2023" "clifm 1.10" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 8, 2023" "clifm 1.10.3" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -712,10 +712,12 @@ You can use the exclamation mark (!) to perform some history commands:
 .B icons \fR[\fIon\fR, \fIoff\fR]
 toggle icons on/off
 .TP
-.B j, jc, jl, jp \fR[\fISTR\fR]..., \fBjo\fR [\fINUM\fR], \fBje\fR
+.B j [\fI\-\-purge\fR [\fINUM\fR]] [\fI\-\-edit\fR], jc, jl, jp \fR[\fISTR\fR]..., \fBjo\fR [\fINUM\fR], \fBje\fR
 \fIj\fR is the fastest way of using \fBKangaroo\fR, a \fBdirectory jumper\fR function to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
-With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself (an asterisk next to the rank value means that the corresponding directory is bookmarked, the current directory in some workspace or pinned). Otherwise, it searches for STR in the database and cd into the best ranked matching entry. Example: \fIj\ D\fR will probably take you to \fI/home/user/Downloads\fR, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FRECENCY ALGORITHM\fR section below.
+With no argument, \fIj\fR just lists the entries in the jump database, printing: \fBa)\fI order number of the corresponding entry, \fBb)\fI total sum of visits, \fBc)\fR days since the first visit, \fBd)\fI hours since the last visit, \fBe)\fR the rank value, and \fBf)\fR the directory name itself. An asterisk next to the rank value means that the corresponding directory will not be removed from the database, despite its rank, either becuase it has been visited in the lasat 24 hours, or because it is bookmarked, pinned, or currently active in some workspace.
+.sp
+Otherwise, if a query string is provided as parameter, \fIj\fR searches for this string in the database and cd into the best ranked matching entry. Example: \fIj\ D\fR will probably take you to \fI/home/user/Downloads\fR, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FRECENCY ALGORITHM\fR section below.
 .sp
 Multiple query strings could be passed to the function. For example, \fIj\ et\ mo\fR will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the best ranked match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
 .sp
@@ -723,17 +725,33 @@ The backslash (\\) and the slash (/) could be used to instruct \fBKangaroo\fR to
 .sp
 Since it is not always obvious or easy to know where exactly a query string will take you, \fBclifm\fR (if the suggestions system is enabled) will print, at the right of the cursor, the path matched by \fBKangaroo\fR. If that is the actually intended path, just press the Right arrow key to accept the suggestion. Otherwise, it will be ignored. You can also use TAB completion to print the list of matches for the current query string. For example: \fIj - c<TAB>\fR to list all entries in the directory history list containing a dash (-) and a 'c'.
 .sp
-\fIj\fR accepts five modifiers: 'e', 'p' 'c', 'o', and 'l', the first standing for "edit", the second for "parent", the third for "child", the fourth for "order", and the last one for 'list'. Thus, \fIje\fR will open the jump database to be edited if needed; \fIjc\fR will search for files querying only child directories relative to the current working directory, while \fIjp\fR will do the same but for parent directories. \fIjo\fR allows to specify an order number (the left most value in the jump list) instead of a string or a file name, in which case no matching process is performed. Finally, \fIjl\fR just prints the matches for the given query string(s), but without changing the current directory. Examples:
+\fIj\fR accepts five modifiers: 'e', 'p' 'c', 'o', and 'l', the first standing for "edit", the second for "parent", the third for "child", the fourth for "order", and the last one for 'list'. Thus, \fIje\fR (or \fIj --edit\fR) will open the jump database to be edited if needed; \fIjc\fR will search for files querying only child directories relative to the current working directory, while \fIjp\fR will do the same but for parent directories. \fIjo\fR allows to specify an order number (the left most value in the jump list) instead of a string or a file name, in which case no matching process is performed. Finally, \fIjl\fR just prints the matches for the given query string(s), but without changing the current directory. Examples:
+
+.TS
+allbox;
+lb lb
+l l.
+Command	Description
+T{
+jp foo
+T}	Change to the best ranked \fBparent\fR directory containing the string "foo".
+T{
+jc bar test
+T}	Change to the best ranked \fBchild\fR directory containing the string "bar" and "test"
+T{
+jo 13
+T}	Change into the directory corresponding to the order number 13 \fB(1)\fR
+T{
+jl foo
+T}	Print all entries in the database containing the word "foo"
+.TE
+
 .sp
-\fIjp\ foo\fR will take you to the most visited \fBparent\fR directory containing the string "foo".
+\fB(1)\fR TAB completion is available to expand order numbers into the corresponding paths.
 .sp
-\fIjc\ bar\ test\fR will take you to the most visited \fBchild\fR directory containing the strings "bar" and "test".
+Use the \fI--purge\fR option to shrink the database. Without further parameters, \fI--purge\fR removes all non-existent (un-stat'able) directories from the database. If a numeric parameter is passed, by contrast, all entries ranked below this number will be removed from the database. For example, \fIj --purge 100\fR will remove all entries ranked below 100.
 .sp
-\fIjo\ 13\fR will cd into the path corresponding to the order number 13. TAB completion is available to expand order numbers into the corresponding paths.
-.sp
-\fIjl\ foo\fR will print all entries in the database matching the word "foo".
-.sp
-To reset or modify the jump database as you wish, simply open the jump file using the \fIje\fR command, edit whatever needs to be edited, save changes, and close the editor.
+You can also manually edit the database file using the \fIje\fR (or \fIj --edit\fR) command: edit whatever needs to be edited, save changes, and close the editor. This is useful, for example, to remove a specific entry/directory from the database.
 .sp
 An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and bound by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Just enter \fI++\fR to perform a fuzzy search over the jump database.
 .sp

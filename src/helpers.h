@@ -110,7 +110,7 @@
 #define PROGRAM_NAME "clifm"
 #define PNL "clifm" /* Program name lowercase */
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.10.2"
+#define VERSION "1.10.3"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
 #define DATE "Feb 8, 2023"
