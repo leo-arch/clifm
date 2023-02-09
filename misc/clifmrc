@@ -265,7 +265,8 @@ SearchStrategy=2
 MinJumpRank=10
 
 # When the sum of all ranks in the jump database reaches MaxJumpTotalRank,
-# all ranks will be reduced 10%, and those falling below MinJumpRank will
+# all ranks will be reduced using a dynamic factor so that the total sum falls
+# below MaxJumpTotalRank again. Those entries falling below MinJumpRank will
 # be deleted
 MaxJumpTotalRank=100000
 

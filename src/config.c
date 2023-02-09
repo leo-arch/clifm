@@ -1154,7 +1154,8 @@ MinFilenameTrim=%d\n\n"
 MinJumpRank=%d\n\n"
 
 	    "# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,\n\
-# all ranks will be reduced 10%%, and those falling below MinJumpRank will\n\
+# all ranks will be reduced using a dynamic factor so that the total sum falls below\n\
+# MaxJumpTotalRank again. Those entries falling below MinJumpRank will\n\
 # be deleted\n\
 MaxJumpTotalRank=%d\n\n"
 
