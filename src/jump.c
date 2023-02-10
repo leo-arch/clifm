@@ -468,7 +468,6 @@ print_jump_table(const int reduce, const time_t now)
 	printf(_("\nTotal rank: %d/%d\nTotal visits: %d\n"), ranks_sum,
 	    conf.max_jump_total_rank, visits_sum);
 
-	printf("%zu\n", jump_n);
 	return EXIT_SUCCESS;
 }
 
