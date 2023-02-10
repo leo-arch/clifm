@@ -538,7 +538,7 @@ extern int watch;
 
 #define strlen(s) xstrnlen(s)
 
-#if (defined(__linux) || defined(__CYGWIN__)) && defined(_BE_POSIX)
+#if (defined(__linux__) || defined(__CYGWIN__)) && defined(_BE_POSIX)
 # define strcasestr xstrcasestr
 #endif /* (__linux || __CYGWIN__) && _BE_POSIX */
 
@@ -1069,7 +1069,7 @@ struct sort_t {
 	int pad;
 };
 
-extern struct sort_t __sorts[];
+extern struct sort_t _sorts[];
 
 /* Prompts and prompt settings */
 struct prompts_t {

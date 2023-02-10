@@ -1726,7 +1726,7 @@ check_sort_methods(char *str, const size_t len)
 	}
 
 	suggestion.type = SORT_SUG;
-	print_suggestion(__sorts[a].name, 0, sf_c);
+	print_suggestion(_sorts[a].name, 0, sf_c);
 	return PARTIAL_MATCH;
 }
 
@@ -2507,7 +2507,7 @@ rl_suggestions(const unsigned char c)
 				clear_suggestion(CS_FREEBUF);
 
 			if (*lb != ';' && *lb != ':' && *word >= '1' && *word <= '9') {
-				if (__expand_eln(word) == 1 && (printed = check_eln(word, flag)) > 0)
+				if (_expand_eln(word) == 1 && (printed = check_eln(word, flag)) > 0)
 					goto SUCCESS;
 			}
 			break;
@@ -2731,5 +2731,5 @@ FAIL:
 	return EXIT_FAILURE;
 }
 #else
-void *__skip_me_suggestions;
+void *_skip_me_suggestions;
 #endif /* _NO_SUGGESTIONS */

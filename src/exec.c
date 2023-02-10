@@ -524,8 +524,8 @@ reload_binaries(void)
 }
 #endif /* !__CYGWIN__ */
 
-static inline int
-__export(char *arg)
+static int
+_export(char *arg)
 {
 	if (!arg || !*arg)
 		return (-1);
@@ -643,7 +643,7 @@ run_shell_cmd(char **args)
 
 	/* Little export implementation. What it lacks? Command substitution */
 	if (*args[0] == 'e' && strcmp(args[0], "export") == 0 && args[1]) {
-		int exit_status = __export(args[1]);
+		int exit_status = _export(args[1]);
 		if (exit_status != -1)
 			return exit_status;
 	}
@@ -1900,29 +1900,29 @@ set_cp_cmd(char **cmd, const int cp_force)
 
 	switch(conf.cp_cmd) {
 	case CP_ADVCP:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVCP_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_ADVCP_CMD);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVCP_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_ADVCP_CMD);
 		break;
 	case CP_ADVCP_FORCE:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVCP_CMD_FORCE) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_ADVCP_CMD_FORCE);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVCP_CMD_FORCE) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_ADVCP_CMD_FORCE);
 		break;
 	case CP_WCP:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_WCP_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_WCP_CMD);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_WCP_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_WCP_CMD);
 		break;
 	case CP_RSYNC:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_RSYNC_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_RSYNC_CMD);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_RSYNC_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_RSYNC_CMD);
 		break;
 	case CP_CP_FORCE:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_CP_CMD_FORCE) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_CP_CMD_FORCE);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_CP_CMD_FORCE) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_CP_CMD_FORCE);
 		break;
 	case CP_CP: /* fallthrough */
 	default:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_CP_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_CP_CMD);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_CP_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_CP_CMD);
 		break;
 	}
 
@@ -1946,21 +1946,21 @@ set_mv_cmd(char **cmd, const int mv_force)
 
 	switch(conf.mv_cmd) {
 	case MV_ADVMV:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVMV_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_ADVMV_CMD);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVMV_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_ADVMV_CMD);
 		break;
 	case MV_ADVMV_FORCE:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_ADVMV_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_ADVMV_CMD_FORCE);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVMV_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_ADVMV_CMD_FORCE);
 		break;
 	case MV_MV_FORCE:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_MV_CMD_FORCE) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_MV_CMD_FORCE);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_MV_CMD_FORCE) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_MV_CMD_FORCE);
 		break;
 	case MV_MV: /* fallthrough */
 	default:
-		*cmd = (char *)xrealloc(*cmd, (strlen(__DEF_MV_CMD) + 1) * sizeof(char));
-		strcpy(*cmd, __DEF_MV_CMD);
+		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_MV_CMD) + 1) * sizeof(char));
+		strcpy(*cmd, _DEF_MV_CMD);
 		break;
 	}
 

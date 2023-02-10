@@ -583,5 +583,5 @@ profile_function(char **args)
 }
 
 #else
-void *__skip_me_prof;
+void *_skip_me_prof;
 #endif /* !_NO_PROFILES */

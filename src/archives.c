@@ -1271,6 +1271,6 @@ archiver(char **args, char mode)
 }
 
 #else
-void *__skip_me_archiving;
+void *_skip_me_archiving;
 #endif /* !_NO_ARCHIVING */
 

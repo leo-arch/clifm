@@ -92,7 +92,7 @@ struct termcaps_t term_caps;
 struct filter_t filter;
 struct config_t conf;
 
-struct sort_t __sorts[] = {
+struct sort_t _sorts[] = {
     {"none", 0, 0},
     {"name", 1, 0},
     {"size", 2, 0},
@@ -860,7 +860,7 @@ set_root_indicator(void)
 }
 
 static inline void
-__list(void)
+_list(void)
 {
 	if (conf.autols == 1 && isatty(STDIN_FILENO)) {
 #ifdef LINUX_INOTIFY
@@ -1116,7 +1116,7 @@ main(int argc, char *argv[])
 	get_sel_files();
 
 	/* Start listing as soon as possible to speed up startup time */
-	__list();
+	_list();
 
 	shell = get_sys_shell();
 	create_kbinds_file();

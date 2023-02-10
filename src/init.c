@@ -1659,8 +1659,8 @@ set_sort_by_name(const char *name)
 {
 	size_t i;
 	for (i = 0; i <= SORT_TYPES; i++) {
-		if (*name == *__sorts[i].name && strcmp(name, __sorts[i].name) == 0)
-			return __sorts[i].num;
+		if (*name == *_sorts[i].name && strcmp(name, _sorts[i].name) == 0)
+			return _sorts[i].num;
 	}
 
 	return SNAME;

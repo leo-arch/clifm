@@ -175,7 +175,7 @@ find_digit(char *str)
 /* Check whether a given command needs ELN's to be expanded/completed/suggested
  * Returns 1 if yes or 0 if not */
 int
-__expand_eln(const char *text)
+_expand_eln(const char *text)
 {
 	char *l = rl_line_buffer;
 	if (!l || !*l || !is_number(text))

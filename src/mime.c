@@ -1762,5 +1762,5 @@ mime_open(char **args)
 	return run_mime_app(&app, &file_path);
 }
 #else
-void *__skip_me_lira;
+void *_skip_me_lira;
 #endif /* !_NO_LIRA */

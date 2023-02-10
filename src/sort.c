@@ -437,8 +437,8 @@ _set_sort_by_name(char **arg)
 {
 	size_t i;
 	for (i = 0; i <= SORT_TYPES; i++) {
-		if (*(*arg) == *__sorts[i].name && strcmp(*arg, __sorts[i].name) == 0) {
-			sprintf(*arg, "%d", __sorts[i].num);
+		if (*(*arg) == *_sorts[i].name && strcmp(*arg, _sorts[i].name) == 0) {
+			sprintf(*arg, "%d", _sorts[i].num);
 			return EXIT_SUCCESS;
 		}
 	}

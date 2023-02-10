@@ -702,5 +702,5 @@ CONFIRM:
 }
 
 #else
-void *__skip_me_bleach;
+void *_skip_me_bleach;
 #endif /* !_NO_BLEACH */

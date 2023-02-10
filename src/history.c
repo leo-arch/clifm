@@ -444,7 +444,7 @@ edit_history(char **args)
 }
 
 static int
-__clear_history(char **args)
+_clear_history(char **args)
 {
 	/* Let's overwrite whatever was there */
 	FILE *hist_fp = fopen(hist_file, "w+");
@@ -543,7 +543,7 @@ history_function(char **args)
 		return edit_history(args);
 
 	if (*args[1] == 'c' && strcmp(args[1], "clear") == 0)
-		return __clear_history(args);
+		return _clear_history(args);
 
 	/* If "history -n [show-time]", print the last -n elements */
 	if (*args[1] == '-' && is_number(args[1] + 1))

@@ -2209,7 +2209,7 @@ sort_name_generator(const char *text, int state)
 		len = strlen(text);
 	}
 
-	while ((name = __sorts[i++].name) != NULL) {
+	while ((name = _sorts[i++].name) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
@@ -3578,7 +3578,7 @@ my_rl_completion(const char *text, int start, int end)
 			}
 
 			/* ELN expansion */
-			if (is_number(text) && n > 0 && n <= (int)files && __expand_eln(text) == 1) {
+			if (is_number(text) && n > 0 && n <= (int)files && _expand_eln(text) == 1) {
 				matches = rl_completion_matches(text, &filenames_gen_eln);
 				if (matches) {
 					cur_comp_type = TCMP_ELN;

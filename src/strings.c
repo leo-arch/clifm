@@ -1365,7 +1365,7 @@ static int
 eln_expand(char ***substr, const size_t i)
 {
 	int num = atoi((*substr)[i]);
-	/* Because of __expand_eln(), which is called immediately before this
+	/* Because of _expand_eln(), which is called immediately before this
 	 * function, it is guaranteed that NUM won't over/under-flow J:
 	 * NUM is > 0 and <= the amount of listed files (and this latter is
 	 * never greater than INT_MAX) */
@@ -1991,7 +1991,7 @@ parse_input_str(char *str)
 				 * #   2.f) ELN EXPANSION   #
 				 * ########################## */
 
-		if (__expand_eln(substr[i]) == 1) {
+		if (_expand_eln(substr[i]) == 1) {
 			if (eln_expand(&substr, i) == EXIT_FAILURE)
 				return (char **)NULL;
 		}

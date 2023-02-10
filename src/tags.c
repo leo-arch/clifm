@@ -739,5 +739,5 @@ END:
 }
 
 #else
-void *__skip_me_tags;
+void *_skip_me_tags;
 #endif /* !_NO_TAGS */

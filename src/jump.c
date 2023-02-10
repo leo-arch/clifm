@@ -121,7 +121,7 @@ rank_entry(const int i, const time_t now, int *days_since_first, int *hours_sinc
 	return rank;
 }
 
-static inline void
+static void
 free_jump_database(void)
 {
 	int i = (int)jump_n;
@@ -134,8 +134,8 @@ free_jump_database(void)
 	jump_n = 0;
 }
 
-static inline int
-write_jump_entry(const char *dir)
+static int
+add_jump_entry(const char *dir)
 {
 	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2) * sizeof(struct jump_t));
 	jump_db[jump_n].visits = 1;
@@ -190,7 +190,7 @@ add_to_jumpdb(const char *dir)
 	if (new_entry == 0)
 		return EXIT_SUCCESS;
 
-	return write_jump_entry(dir);
+	return add_jump_entry(dir);
 }
 
 /* Store the jump database into a file */
@@ -892,27 +892,26 @@ run_autojump(char **cmd)
 
 	int i;
 
-	char **__cmd = (char **)xnmalloc(args_n + 3, sizeof(char *));
-	__cmd[0] = (char *)xnmalloc(2, sizeof(char));
-	*__cmd[0] = 'j';
-	__cmd[0][1] = '\0';
+	char **tmp_cmd = (char **)xnmalloc(args_n + 3, sizeof(char *));
+	tmp_cmd[0] = (char *)xnmalloc(2, sizeof(char));
+	*_cmd[0] = 'j';
+	tmp_cmd[0][1] = '\0';
 
 	for (i = 0; i <= (int)args_n; i++) {
-		__cmd[i + 1] = (char *)xnmalloc(strlen(cmd[i]) + 1,
-						sizeof(char));
-		strcpy(__cmd[i + 1], cmd[i]);
+		tmp_cmd[i + 1] = (char *)xnmalloc(strlen(cmd[i]) + 1, sizeof(char));
+		strcpy(tmp_cmd[i + 1], cmd[i]);
 	}
 
-	__cmd[args_n + 2] = (char *)NULL;
+	tmp_cmd[args_n + 2] = (char *)NULL;
 
 	args_n++;
-	exit_code = dirjump(__cmd, NO_SUG_JUMP);
+	exit_code = dirjump(tmp_cmd, NO_SUG_JUMP);
 	args_n--;
 
 	i = (int)args_n + 2;
 	while (--i >= 0)
-		free(__cmd[i]);
-	free(__cmd);
+		free(tmp_cmd[i]);
+	free(tmp_cmd);
 
 	return exit_code;
 } */
