@@ -568,9 +568,9 @@ T}	Edit your bookmarks
 .TE
 
 .sp
-\fB(1)\fR A shortcut (i.e. short name) can be specified as well. For example \fIbm add /media/mount mnt m\fR
+ \fB(1)\fR A shortcut (i.e. short name) can be specified as well. For example \fIbm add /media/mount mnt m\fR
 .sp 0
-\fB(2)\fR Shortcuts can be used as well: \fI bm m\fR
+ \fB(2)\fR Shortcuts can be used as well: \fI bm m\fR
 .sp
 A handy use for the bookmarks function is to create bookmarks using short names, which will be later easily accessible via TAB completion.
 .sp
@@ -597,7 +597,7 @@ T}	Select all bookmarks at once
 .TE
 
 .sp
-\fB(1)\fR If your are not sure about where a bookmark points to, just type \fIb:NAME<TAB>\fR.
+ \fB(1)\fR If your are not sure about where a bookmark points to, just type \fIb:NAME<TAB>\fR.
 .TP
 .B br, bulk \fIELN/FILE\fR...
 rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the \fIsel\fR keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
@@ -779,7 +779,7 @@ T}	Print all entries in the database containing the word "foo"
 .TE
 
 .sp
-\fB(1)\fR TAB completion is available to expand order numbers into the corresponding paths.
+ \fB(1)\fR TAB completion is available to expand order numbers into the corresponding paths.
 .sp
 Use the \fI--purge\fR option to shrink the database. Without further parameters, \fI--purge\fR removes all non-existent (un-stat'able) directories from the database. If a numeric parameter is passed, by contrast, all entries ranked below this number will be removed from the database. For example, \fIj --purge 100\fR will remove all entries ranked below 100.
 .sp
@@ -2853,6 +2853,18 @@ T{
 ds (ds <TAB>)
 T}	Selectively deselect files using a menu
 T{
+bm add mydir/ mybm
+T}	Bookmark the directory \fImydir/\fR as "mybm"\fR
+T{
+bm mybm (b:mybm)
+T}	Access the bookmark named \fImybm\fR \fB(6)\fR
+T{
+bm del mybm
+T}	Remove the bookmark named \fImybm\fR
+T{
+bm (Alt-b or b:<TAB>)
+T}	Open the bookmarks manager
+T{
 t 1-3 *.old
 T}	Trash a few files
 T{
@@ -2881,40 +2893,28 @@ c *.txt 2
 T}	Copy all txt file into the directory whose ELN is 2
 T{
 r sel
-T}	Remove all selected files \fB(6)\fR
+T}	Remove all selected files \fB(7)\fR
 T{
 m4
-T}	Rename the file whose ELN is 4 \fB(7)\fR
-T{
-bm add mydir/ mybm
-T}	Bookmark the directory \fImydir/\fR as "mybm"\fR
-T{
-bm mybm (b:mybm)
-T}	Access the bookmark named \fImybm\fR \fB(8)\fR
-T{
-bm del mybm
-T}	Remove the bookmark named \fImybm\fR
-T{
-bm (Alt-b or b:<TAB>)
-T}	Open the bookmarks manager
+T}	Rename the file whose ELN is 4 \fB(8)\fR
 .TE
 
 .sp
- \fB(1)\fR: Use the \fIow\fR command to select the opening application from a menu: \fIow myfile.txt\fR or \fIow myfile.txt <TAB>\fR
+ \fB(1)\fR Use the \fIow\fR command to select the opening application from a menu: \fIow myfile.txt\fR or \fIow myfile.txt <TAB>\fR
 .sp 0
- \fB(2)\fR: Note the ending slash in the directory name
+ \fB(2)\fR Note the ending slash in the directory name
 .sp 0
- \fB(3)\fR: Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: \fItouch myfile\fR or \fInano myfile\fR
+ \fB(3)\fR Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: \fItouch myfile\fR or \fInano myfile\fR
 .sp 0
  \fB(4)\fR Only for non-standard TAB completion: fzf, fzy, smenu
 .sp 0
- \fB(5)\fR: You can also TAB expand the \fIsel\fR keyword: \fIp sel<TAB>\fR to list selected files (and optionally mark multiple selected files to operate on)
+ \fB(5)\fR You can also TAB expand the \fIsel\fR keyword: \fIp sel<TAB>\fR to list selected files (and optionally mark multiple selected files to operate on)
 .sp 0
- \fB(6)\fR: To remove files in bulk use the \fIrr\fR command
+ \fB(6)\fR Type \fIbm <TAB>\fR to get the list of available bookmark names
 .sp 0
- \fB(7)\fR: To rename files in bulk use the \fIbr\fR command
+ \fB(7)\fR To remove files in bulk use the \fIrr\fR command
 .sp 0
- \fB(8)\fR: Type \fIbm <TAB>\fR to get the list of available bookmark names
+ \fB(8)\fR To rename files in bulk use the \fIbr\fR command
 
 \fB3. MISC\fR
 

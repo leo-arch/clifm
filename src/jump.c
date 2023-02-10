@@ -339,6 +339,41 @@ _get_dir_color(const char *filename, const struct stat a)
 	return get_dir_color(filename, a.st_mode, a.st_nlink);
 }
 
+/* Compare ranks A and B (used to sort jump entries by rank)*/
+int
+rank_cmp(const void *a, const void *b)
+{
+	struct jump_t *pa = (struct jump_t *)a;
+	struct jump_t *pb = (struct jump_t *)b;
+
+	return (pa->rank > pb->rank);
+}
+
+static void
+print_jump_table_header(void)
+{
+	char item[10]; /* BOLD and NC are 4 bytes each */
+	snprintf(item, sizeof(item), "%s*%s", conf.colorize == 1 ? BOLD : "", NC);
+
+	printf(_("%s First time access is displayed in days, while last "
+		"time access is displayed in hours.\n"), item);
+	printf(_("%s An asterisk next rank values means that the "
+		"corresponding directory will not be removed despite its rank, "
+		"either because it was visited in the last 24 hours, or because "
+		"it is bookmarked, pinned, or currently active in some workspace.\n"), item);
+
+	if (conf.min_jump_rank <= 0) {
+		printf(_("%s MinJumpRank is set to %d: entries will not be removed "
+			"from the database (no matter their rank).\n"), item, conf.min_jump_rank);
+	} else {
+		printf(_("%s Entries ranked below MinJumpRank (currently %d) will be "
+			"removed at program exit.\n"), item, conf.min_jump_rank);
+	}
+
+	printf(_("\n %sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"),
+		conf.colorize == 1 ? BOLD : "", NC);
+}
+
 static int
 print_jump_table(const int reduce, const time_t now)
 {
@@ -347,23 +382,20 @@ print_jump_table(const int reduce, const time_t now)
 		return EXIT_SUCCESS;
 	}
 
-	puts(_("* First time access is displayed in days, while last "
-		"time access is displayed in hours."));
-	puts(_("* An asterisk next rank values means that the "
-		"corresponding directory will not be removed despite its rank, "
-		"either because it was visited in the last 24 hours, or because "
-		"it is bookmarked, pinned, or currently active in some workspace."));
-	printf(_("* Entries ranked below MinJumpRank (currently %d) will be "
-		"removed at program exit.\n"), conf.min_jump_rank);
-	printf(_("\n%sOrder\tVisits\tFirst\tLast\tRank\tDirectory%s\n"),
-		conf.colorize == 1 ? BOLD : "", NC);
+	print_jump_table_header();
 
 	size_t i;
 	int ranks_sum = 0, visits_sum = 0;
+	int max_rank = 0, max_visits = 0, max_first = 0, max_last = 0;
+	int max_order = DIGINUM(jump_n);
+
+	struct jump_t *tmp_jump = (struct jump_t *)xnmalloc(jump_n + 1, sizeof(struct jump_t));
 
 	for (i = 0; i < jump_n; i++) {
-		if (!IS_VALID_JUMP_ENTRY(i))
+		if (!IS_VALID_JUMP_ENTRY(i)) {
+			tmp_jump[i].path = (char *)NULL;
 			continue;
+		}
 
 		int days_since_first = 0, hours_since_last = 0;
 		int rank = rank_entry((int)i, now, &days_since_first, &hours_since_last);
@@ -378,28 +410,65 @@ print_jump_table(const int reduce, const time_t now)
 		ranks_sum += rank;
 		visits_sum += (int)jump_db[i].visits;
 
+		tmp_jump[i].path = jump_db[i].path;
+		tmp_jump[i].keep = keep;
+		tmp_jump[i].rank = rank;
+		tmp_jump[i].len = jump_db[i].len;
+		tmp_jump[i].visits = jump_db[i].visits;
+		tmp_jump[i].first_visit = (time_t)days_since_first;
+		tmp_jump[i].last_visit = (time_t)hours_since_last;
+
+		/* Get largest item for each field to correctly calculate pad */
+		int n = DIGINUM(rank);
+		if (n > max_rank)
+			max_rank = n;
+		n = DIGINUM(tmp_jump[i].visits);
+		if (n > max_visits)
+			max_visits = n;
+		n = DIGINUM(tmp_jump[i].first_visit);
+		if (n > max_first)
+			max_first = n;
+		n = DIGINUM(tmp_jump[i].last_visit);
+		if (n > max_last)
+			max_last = n;
+	}
+
+	/* Sort entries by rank (from less to more) */
+	qsort(tmp_jump, jump_n, sizeof(*tmp_jump), rank_cmp);
+
+	for (i = 0; i < jump_n; i++) {
+		if (!tmp_jump[i].path)
+			continue;
+
 		char *color = (workspaces[cur_ws].path
-		&& workspaces[cur_ws].path[1] == jump_db[i].path[1]
-		&& strcmp(workspaces[cur_ws].path, jump_db[i].path) == 0) ? mi_c : df_c;
+		&& workspaces[cur_ws].path[1] == tmp_jump[i].path[1]
+		&& strcmp(workspaces[cur_ws].path, tmp_jump[i].path) == 0) ? mi_c : df_c;
 
 		struct stat a;
-		if (lstat(jump_db[i].path, &a) == -1)
+		if (lstat(tmp_jump[i].path, &a) == -1)
 			color = uf_c;
 
-		char *dir_color = color == uf_c ? uf_c : _get_dir_color(jump_db[i].path, a);
+		char *dir_color = color == uf_c ? uf_c : _get_dir_color(tmp_jump[i].path, a);
 
-		printf("  %s%zu\t %zu\t %d\t %d\t%s%d%s%s%c%s\t%c%s%s%s \n",
-			color != uf_c ? color : df_c,
-		    i + 1, jump_db[i].visits, days_since_first, hours_since_last,
-		    conf.colorize == 1 ? BOLD : "", rank, color != uf_c ? color : "",
-		    keep == 1 ? li_c : "", keep == 1 ? '*' : 0, (keep == 1 && color != uf_c) ? color : "",
+		printf(" %s%*zu\t%*zu\t%*d\t%*d\t%s%*d%s%s%c%s\t%c%s%s%s\n",
+			color != uf_c ? color : df_c, max_order, i + 1,
+			max_visits, tmp_jump[i].visits,
+			max_first, (int)tmp_jump[i].first_visit,
+			max_last, (int)tmp_jump[i].last_visit,
+		    conf.colorize == 1 ? BOLD : "", max_rank, tmp_jump[i].rank,
+		    color != uf_c ? color : "",
+		    tmp_jump[i].keep == 1 ? li_c : "", tmp_jump[i].keep == 1
+		    ? '*' : 0, (tmp_jump[i].keep == 1 && color != uf_c) ? color : "",
 		    (conf.colorize == 0 && color == uf_c) ? '!' : 0,
-		    dir_color, jump_db[i].path, df_c);
+		    dir_color, tmp_jump[i].path, df_c);
 	}
+
+	free(tmp_jump);
 
 	printf(_("\nTotal rank: %d/%d\nTotal visits: %d\n"), ranks_sum,
 	    conf.max_jump_total_rank, visits_sum);
 
+	printf("%zu\n", jump_n);
 	return EXIT_SUCCESS;
 }
 
