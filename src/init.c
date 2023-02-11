@@ -59,7 +59,7 @@
 #include "config.h"
 #include "exec.h"
 #include "init.h"
-#if defined(_NO_PROFILES) || defined(_NO_FZF)
+#if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) || defined(_NO_TRASH)
 # include "messages.h"
 #endif
 #include "mime.h"
