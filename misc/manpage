@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 8, 2023" "clifm 1.10.3" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 11, 2023" "clifm 1.10.4" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -219,11 +219,8 @@ show disk usage (free/total) for the file system the current directory belongs t
 \fB\-\-enable\-logs\fR
 enable program logs. See the \fIlog\fR command for more information
 .TP
-\fB\-\-fzfpreview\fR
-enable file previews for TAB completion (fzf mode only). Implies \fI\-\-fzftab\fR.
-.TP
 \fB\-\-fzfpreview-hidden\fR
-same as \fI\-\-fzfpreview\fR, but the preview window starts hidden. Toggle it via Alt-p.
+enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle it via Alt-p)
 .TP
 \fB\-\-fzftab\fR
 use \fIfzf\fR to display completion matches
@@ -303,6 +300,9 @@ disable the files counter for directories. This option is especially useful to s
 .TP
 \fB\-\-no\-follow\-symlinks\fR
 do not follow symbolic links when listing files
+.TP
+\fB\-\-no\-fzfpreview\fR
+disable file previews for TAB completion (fzf mode only)
 .TP
 \fB\-\-no\-highlight\fR
 disable syntax highlighting. To customize highlighting colors see the \fBCOLOR CODES\fR section below
@@ -1923,9 +1923,7 @@ Positional parameters could be used as well, provided the parameter does not poi
 .SH 10. SHOTGUN
 \fB1. TAB completion with file previews\fR
 .TP
-\fIShotgun\fR is \fBclifm\fR's built-in files previewer. Though, as described below, it may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly intended to be used by \fBclifm\fR's TAB completion function running in FZF mode (see the \fBTAB COMPLETION\fR section above).
-.TP
-Set \fIFzfPreview\fR option in the configuration file to \fItrue\fR (or run with \fI\-\-fzfpreview\fR) to enable this feature: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown below) to generate the preview.
+\fIShotgun\fR is \fBclifm\fR's built-in files previewer. Though, as described below, it may be used as a standalone and general purpose file previewer (similar in this regard to \fBpistol\fR(1)), it is mainly intended to be used by \fBclifm\fR's TAB completion function running in FZF mode: every time TAB completion is invoked for files, \fIshotgun\fR will be executed with the currently highlighted file as argument (as shown below) to generate the preview. Set the \fIFzfPreview\fR option in the configuration file to \fIfalse\fR (or run with \fI\-\-no\-fzfpreview\fR) to disable this feature.
 .TP
 \fIShotgun\fR is also used by the \fIview\fR command to display file previews in full screen.
 .TP
@@ -2810,7 +2808,7 @@ T}	Preview files (current dir) \fB(8)\fR
 .sp 0
  \fB(7)\fR Type \fI=<TAB>\fR to get the list of available file type characters. Consult the \fBFILE FILTERS\fR section above for more information
 .sp 0
- \fB(8)\fR This feature depends on \fBfzf\fR(1). Run with \fI\-\-fzfpreview\fR to enable file previews for TAB completion (fzf mode only)
+ \fB(8)\fR This feature depends on \fBfzf\fR(1)
 
 \fB2. FILE OPERATIONS\fR
 
