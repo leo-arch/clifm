@@ -756,12 +756,12 @@ print_welcome_msg(void)
 	if (conf.welcome_message != 1)
 		return;
 
-	if (conf.welcome_message_str) {
+	if (conf.welcome_message_str)
 		printf("%s%s%s\n", wc_c, conf.welcome_message_str, df_c);
-	} else {
-		printf("%s%s > %s\n%s%s\n", wc_c, _PROGRAM_NAME, _(PROGRAM_DESC),
-			df_c, _(HELP_MESSAGE));
-	}
+	else
+		printf("%s%s > %s\n%s", wc_c, _PROGRAM_NAME, _(PROGRAM_DESC), df_c);
+
+	printf("%s\n", _(HELP_MESSAGE));
 
 	conf.welcome_message = 0;
 }
