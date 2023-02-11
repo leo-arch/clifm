@@ -1945,13 +1945,14 @@ external_arguments(int argc, char **argv)
 		{"vt100", no_argument, 0, 258},
 //		{"fzfpreview", no_argument, 0, 259},
 		{"no-fzfpreview", no_argument, 0, 259},
-		{"fzfpreview-hidden", no_argument, 0, 260},
-		{"shotgun-file", required_argument, 0, 261},
-		{"fzftab", no_argument, 0, 262},
-		{"si", no_argument, 0, 263},
-		{"data-dir", required_argument, 0, 264},
-		{"fuzzy-algo", required_argument, 0, 265},
-		{"sel-file", required_argument, 0, 266},
+		{"fzfpreview", no_argument, 0, 260}, // legacy
+		{"fzfpreview-hidden", no_argument, 0, 261},
+		{"shotgun-file", required_argument, 0, 262},
+		{"fzftab", no_argument, 0, 263},
+		{"si", no_argument, 0, 264},
+		{"data-dir", required_argument, 0, 265},
+		{"fuzzy-algo", required_argument, 0, 266},
+		{"sel-file", required_argument, 0, 267},
 	    {0, 0, 0, 0}
 	};
 
@@ -2164,12 +2165,12 @@ external_arguments(int argc, char **argv)
 
 		case 259: xargs.fzf_preview = conf.fzf_preview = 0; break;
 
-//		case 259: /* fallthrough */ /* --no-fzfpreview */
-		case 260: /* --fzfpreview-hidden */
+		case 260: /* fallthrough */ /* --fzfpreview */
+		case 261: /* --fzfpreview-hidden */
 #ifndef _NO_FZF
 			xargs.fzf_preview = 1;
-//			conf.fzf_preview = optc == 259 ? 1 : 2;
-			conf.fzf_preview = 2;
+			conf.fzf_preview = optc == 260 ? 1 : 2;
+//			conf.fzf_preview = 2;
 			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
 #else
 			fprintf(stderr, _("%s: fzf-preview: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
@@ -2177,14 +2178,14 @@ external_arguments(int argc, char **argv)
 #endif /* !_NO_FZF */
 			break;
 
-		case 261:
+		case 262:
 			if (!optarg || !*optarg || *optarg == '-')
 				err_arg_required("--shotgun-file");
 
 			alt_preview_file = stat_file(optarg);
 			break;
 
-		case 262:
+		case 263:
 #ifndef _NO_FZF
 			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB; break;
 #else
@@ -2192,7 +2193,7 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
 
-		case 263:
+		case 264:
 #ifdef __linux__
 			xargs.si = 1; break;
 #else
@@ -2201,14 +2202,14 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_FAILURE);
 #endif /* __linux__ */
 
-		case 264:
+		case 265:
 			if (!optarg || !*optarg || *optarg == '-')
 				err_arg_required("--data-dir");
 
 			get_data_dir_from_path(optarg);
 			break;
 
-		case 265: {
+		case 266: {
 			int a = optarg ? atoi(optarg) : -1;
 			if (!optarg || a < 1 || a > FUZZY_ALGO_MAX) {
 				fprintf(stderr, "%s: fuzzy-algo: Valid arguments are 1 "
@@ -2219,7 +2220,7 @@ external_arguments(int argc, char **argv)
 			}
 			break;
 
-		case 266: set_custom_selfile(optarg); break;
+		case 267: set_custom_selfile(optarg); break;
 
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
 		case 'A': conf.show_hidden = xargs.hidden = 1; break;
@@ -2292,10 +2293,10 @@ external_arguments(int argc, char **argv)
 			case 231: /* fallthrough */
 			case 252: /* fallthrough */
 			case 256: /* fallthrough */
-			case 261: /* fallthrough */
-			case 264: /* fallthrough */
+			case 262: /* fallthrough */
 			case 265: /* fallthrough */
-			case 266: err_arg_required(argv[optind - 1]); break;
+			case 266: /* fallthrough */
+			case 267: err_arg_required(argv[optind - 1]); break;
 
 			default: break;
 			}
