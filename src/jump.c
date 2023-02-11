@@ -49,7 +49,6 @@
 #define BOOKMARK_BONUS  500
 #define PINNED_BONUS    1000
 #define WORKSPACE_BONUS 300
-//#define VISIT_BONUS     100
 #define VISIT_BONUS     200
 
 /* Calculate last directory access credit */

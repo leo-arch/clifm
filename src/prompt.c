@@ -64,7 +64,7 @@
 #define __WS_STR_LEN sizeof(int) + 6 + (MAX_COLOR + 2) * 2
 
 #define ROOT_IND "\001\x1b[1;31m\002R\001\x1b[0m\002"
-#define ROOT_IND_NO_COLOR "\001\x1b[1m\002R\001\x1b[0m\002"
+#define ROOT_IND_NO_COLOR "R"
 #define ROOT_IND_SIZE 17
 #define STEALTH_IND "S\001\x1b[0m\002"
 #define STEALTH_IND_SIZE MAX_COLOR + 7 + 1

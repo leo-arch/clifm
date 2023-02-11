@@ -278,22 +278,13 @@ extern int watch;
 #define FOREGROUND 0
 
 /* A few fixed colors */
-#define _RED    "\x1b[1;31m"
-#define _BGREEN "\x1b[1;32m"
-#define D_CYAN  "\x1b[0;36m"
-#define BOLD    "\x1b[1m"
-#define NC      "\x1b[0m"    /* Reset color attributes to terminal defaults */
+#define _RED    (conf.colorize == 1 ? "\x1b[1;31m" : "")
+#define _BGREEN (conf.colorize == 1 ? "\x1b[1;32m" : "")
+#define D_CYAN  (conf.colorize == 1 ? "\x1b[0;36m" : "")
+#define BOLD    (conf.colorize == 1 ? "\x1b[1m" : "")
+#define NC      (conf.colorize == 1 ? "\x1b[0m" : "") /* Reset color attributes to terminal defaults */
 
-/* Format to use for suggestions when running colorless
- * There is no universal solution for this: the Linux console does not
- * support underline, and uses a cyan color instead. It doesn't support
- * dimmed colors either, but at least the color is replaced by bold black
- * (gray), which is fine. However, some terminal emulators, like Aterm
- * and Eterm, do not support dimmed colors at all, and won't replace this
- * color by anything else, so that suggestions will be indistinguishable
- * from bare input text.
- * The Linux console is more important to us, so let's use a dimmed color */
-//#define SUG_NO_COLOR "\x1b[0;2m" /* Dimmed color */
+/* Format to use for suggestions when running colorless */
 #define SUG_NO_COLOR "\x1b[0m" /* No color */
 
 /* Colors for the prompt: */
