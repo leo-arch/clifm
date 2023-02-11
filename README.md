@@ -200,6 +200,10 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <details>
 <summary>Click here to expand</summary>
 
+* `Development`
+  - `FzfPreview` (file previews in TAB completion - fzf mode only) is now enabled by default (disable via `--no-fzfpreview`)
+  - Improved jump table screen (via the [`j` command](https://github.com/leo-arch/clifm/wiki/Introduction#j---purge-num---edit-jc-jl-jp-str--jo-num-je))
+  - [Purge the jump database via the `--purge` option](https://github.com/leo-arch/clifm/wiki/Introduction#j---purge-num---edit-jc-jl-jp-str--jo-num-je)
 * `version 1.10 (Swordmaster)`:
   - [Quickly access the directory history list via the `dh` command](https://github.com/leo-arch/clifm/wiki/Introduction#dh-string-path-eln). The `dh` plugin, just as the `bh` and `fh` commands, is now deprecated.
   - [History timestamps](https://github.com/leo-arch/clifm/wiki/Introduction#history-edit-clear--n-on-off-status-show-time)
