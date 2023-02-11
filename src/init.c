@@ -1943,7 +1943,8 @@ external_arguments(int argc, char **argv)
 		{"virtual-dir", required_argument, 0, 256},
 		{"desktop-notifications", no_argument, 0, 257},
 		{"vt100", no_argument, 0, 258},
-		{"fzfpreview", no_argument, 0, 259},
+//		{"fzfpreview", no_argument, 0, 259},
+		{"no-fzfpreview", no_argument, 0, 259},
 		{"fzfpreview-hidden", no_argument, 0, 260},
 		{"shotgun-file", required_argument, 0, 261},
 		{"fzftab", no_argument, 0, 262},
@@ -2161,11 +2162,14 @@ external_arguments(int argc, char **argv)
 			fzftab = 0; tabmode = STD_TAB;
 			break;
 
-		case 259: /* fallthrough */ /* --fzfpreview */
+		case 259: xargs.fzf_preview = conf.fzf_preview = 0; break;
+
+//		case 259: /* fallthrough */ /* --no-fzfpreview */
 		case 260: /* --fzfpreview-hidden */
 #ifndef _NO_FZF
 			xargs.fzf_preview = 1;
-			conf.fzf_preview = optc == 259 ? 1 : 2;
+//			conf.fzf_preview = optc == 259 ? 1 : 2;
+			conf.fzf_preview = 2;
 			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
 #else
 			fprintf(stderr, _("%s: fzf-preview: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));

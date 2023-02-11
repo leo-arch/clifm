@@ -180,7 +180,7 @@ TabCompletionMode=
 
 # File previews for TAB completion (fzf mode only). Possible values:
 # 'true', 'false', 'hidden' (enabled, but hidden; toggle with Alt-p)
-FzfPreview=false
+FzfPreview=true
 
 # If set to true, enable auto-suggestions
 AutoSuggestions=true

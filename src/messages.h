@@ -1165,6 +1165,7 @@ on an empty line\
 \n  -y, --light-mode\t\t Run in light mode\
 \n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
 
+//\n      --fzfpreview\t\t Enable file previews for TAB completion (fzf mode only). Implies --fzftab
 #define LONG_OPTIONS_A "\
 \n      --case-sens-dirjump\t Do not ignore case when consulting the jump \
 database (via the 'j' command)\
@@ -1179,7 +1180,6 @@ database (via the 'j' command)\
 (long view only)\
 \n      --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
-\n      --fzfpreview\t\t Enable file previews for TAB completion (fzf mode only). Implies --fzftab\
 \n      --fzfpreview-hidden\t Same as --fzfpreview, but with the preview window hidden. \
 Toggle it with Alt-p\
 \n      --fzftab\t\t\t Use fzf to display completion matches (default if fzf binary is found)\
@@ -1204,6 +1204,7 @@ base name (if \\z is used in the prompt)\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
 \n      --no-files-counter\t Disable the files counter for directories\
 \n      --no-follow-symlink\t Do not follow symbolic links when listing files\
+\n      --no-fzfpreview\t\t Disable file previews for TAB completion (fzf mode only)\
 \n      --no-highlight\t\t Disable syntax highlighting\
 \n      --no-history\t\t Do not write commands into the history file\
 \n      --no-open-auto\t\t Same as no-cd-auto, but for files\
