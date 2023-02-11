@@ -93,10 +93,10 @@ typedef char *rl_cpvfunc_t;
 	} else \
 		putc(c, rl_outstream)
 
+typedef int QSFUNC(const void *, const void *);
+
 #ifndef _NO_FZF
 static size_t longest_prev_entry;
-
-typedef int QSFUNC(const void *, const void *);
 
 /* The following three functions are used to get current cursor position
  * (both vertical and horizontal), needed by TAB completion in fzf mode

@@ -1602,10 +1602,10 @@ is_last_word(void)
 	return lw;
 }
 
+/* Return the number of words found in the current readline buffer */
 static size_t
 count_words(size_t *start_word, size_t *full_word)
 {
-//	rl_last_word_start = 0;
 	size_t words = 0, w = 0, first_non_space = 0;
 	char q = 0;
 	char *b = rl_line_buffer;
@@ -1621,8 +1621,6 @@ count_words(size_t *start_word, size_t *full_word)
 			continue;
 		}
 		if (w > 0 && b[w] == ' ' && b[w - 1] != '\\') {
-/*			if (b[w + 1] && b[w + 1] != ' ')
-				rl_last_word_start = (int)w + 1; */
 			if (!*full_word && b[w - 1] != '|'
 			&& b[w - 1] != ';' && b[w - 1] != '&')
 				*full_word = w; /* Index of the end of the first full word (cmd) */

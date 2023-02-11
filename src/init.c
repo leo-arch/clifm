@@ -59,7 +59,7 @@
 #include "config.h"
 #include "exec.h"
 #include "init.h"
-#ifdef _NO_PROFILES
+#if defined(_NO_PROFILES) || defined(_NO_FZF)
 # include "messages.h"
 #endif
 #include "mime.h"
@@ -1898,7 +1898,6 @@ external_arguments(int argc, char **argv)
 		{"enable-logs", no_argument, 0, 213},
 		{"max-path", required_argument, 0, 214},
 		{"opener", required_argument, 0, 215},
-//		{"expand-bookmarks", no_argument, 0, 216},
 		{"only-dirs", no_argument, 0, 217},
 		{"list-and-quit", no_argument, 0, 218},
 		{"color-scheme", required_argument, 0, 219},
@@ -1943,7 +1942,6 @@ external_arguments(int argc, char **argv)
 		{"virtual-dir", required_argument, 0, 256},
 		{"desktop-notifications", no_argument, 0, 257},
 		{"vt100", no_argument, 0, 258},
-//		{"fzfpreview", no_argument, 0, 259},
 		{"no-fzfpreview", no_argument, 0, 259},
 		{"fzfpreview", no_argument, 0, 260}, // legacy
 		{"fzfpreview-hidden", no_argument, 0, 261},
@@ -2024,7 +2022,6 @@ external_arguments(int argc, char **argv)
 			}
 			break;
 
-//		case 216: xargs.expand_bookmarks = conf.expand_bookmarks = 1; break;
 		case 217: xargs.only_dirs = conf.only_dirs = 1; break;
 		case 218: xargs.list_and_quit = 1; break;
 
@@ -2170,7 +2167,6 @@ external_arguments(int argc, char **argv)
 #ifndef _NO_FZF
 			xargs.fzf_preview = 1;
 			conf.fzf_preview = optc == 260 ? 1 : 2;
-//			conf.fzf_preview = 2;
 			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
 #else
 			fprintf(stderr, _("%s: fzf-preview: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
