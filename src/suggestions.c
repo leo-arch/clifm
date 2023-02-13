@@ -355,6 +355,8 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return BB_DESC;
 		if (*s == 'c' && strcmp(s + 1, "olors") == 0)
 			return COLORS_DESC;
+		if (*s == 'c' && strcmp(s + 1, "onfig") == 0)
+			return CONFIG_DESC;
 		if (*s == 'f' && strcmp(s + 1, "ilter") == 0)
 			return FT_DESC;
 		if (*s == 'h' && strcmp(s + 1, "idden") == 0)

@@ -1265,11 +1265,11 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  cd                 Change directory\n\
  cl, columns        Set columns on/off\n\
  cmd, commands      Jump to the COMMANDS section in the manpage\n\
+ config, edit       Open/edit the main configuration file\n\
  cs, colorscheme    Manage color schemes\n\
  d, dup             Duplicate files\n\
  dh                 Access the directory history list\n\
  ds, desel          Deselect selected files\n\
- edit               Open/edit the main configuration file\n\
  exp                Export file names to a temporary file\n\
  ext                Set external/shell commands on/off\n\
  f, forth           Go forth in the directory history list\n\
@@ -1472,7 +1472,7 @@ cmd --help     Get help for command 'cmd'\n\
 help <TAB>     List available help topics\n\
 F1             Open the manpage\n\
 ih             Run the interactive help plugin (requires fzf)\n\
-edit | F10     View/edit the configuration file\n\
+config | F10   View/edit the configuration file\n\
 Alt-l          Toggle detail/long view mode\n\
 Alt-.          Toggle hidden files\n\
 Alt-TAB        Toggle disk usage analyzer mode\n\
@@ -1570,6 +1570,7 @@ being free, we consider them all equally unethical [...]\""
 #define CL_DESC      " (set columns on/off)"
 #define CMD_DESC     " (jump to the COMMANDS section in the manpage)"
 #define COLORS_DESC  " (print currently used file type colors)"
+#define CONFIG_DESC  " (edit the main configuration file)"
 #define CS_DESC      " (manage color schemes)"
 #define CWD_DESC     " (print the current directory)"
 #define D_DESC       " (duplicate files)"
