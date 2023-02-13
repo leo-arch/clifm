@@ -201,6 +201,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 <summary>Click here to expand</summary>
 
 * `Development`
+  - The [`config` command](https://github.com/leo-arch/clifm/wiki/Introduction#config-reset-application) is now used to open/edit the main configuration file (`edit` can still be used, but is deprecated and might be removed in a future release)
   - `FzfPreview` (file previews in TAB completion - fzf mode only) is now enabled by default (disable via `--no-fzfpreview`)
   - Improved jump table screen (via the [`j` command](https://github.com/leo-arch/clifm/wiki/Introduction#j---purge-num---edit-jc-jl-jp-str--jo-num-je))
   - [Purge the jump database via the `--purge` option](https://github.com/leo-arch/clifm/wiki/Introduction#j---purge-num---edit-jc-jl-jp-str--jo-num-je)
