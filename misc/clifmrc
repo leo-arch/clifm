@@ -160,6 +160,12 @@ MaxPrintSelfiles=0
 # Visit https://github.com/leo-arch/clifm-colors to get some extra themes
 ColorScheme=default
 
+# Enable/disable icons.
+# By default, emojis (widely available today) are used as icons.
+# Nerd-fonts and icons-in-terminal are supported as well, though clifm
+# needs to be recompiled in order to enable support. Consult our Wiki
+# (https://github.com/leo-arch/clifm/wiki) for more information.
+Icons=false
 
 #=====================================#
 #         2. COMMAND LINE             #
