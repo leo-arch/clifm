@@ -753,17 +753,19 @@ trim_final_slashes(void)
 static inline void
 print_welcome_msg(void)
 {
-	if (conf.welcome_message != 1)
+	static int wm = UNSET;
+
+	if (wm == 0 || conf.welcome_message == 0)
 		return;
 
 	if (conf.welcome_message_str)
 		printf("%s%s%s\n", wc_c, conf.welcome_message_str, df_c);
 	else
-		printf("%s%s > %s\n%s", wc_c, _PROGRAM_NAME, _(PROGRAM_DESC), df_c);
+		printf("%s%s\n%s", wc_c, DEF_WELCOME_MESSAGE_STR, df_c);
 
 	printf("%s\n", _(HELP_MESSAGE));
 
-	conf.welcome_message = 0;
+	wm = 0;
 }
 
 static inline void

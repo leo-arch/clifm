@@ -1144,13 +1144,10 @@ get_colors_from_env(char **file, char **ext, char **iface)
 static void
 store_definition(char *str)
 {
-	if (!str || !*str || defs_n > MAX_DEFS)
+	if (!str || !*str || *str == '\n' || defs_n > MAX_DEFS)
 		return;
 
-	char *name = strchr(str, ' ');
-	if (!name || !*(++name))
-		return;
-
+	char *name = str;
 	char *value = strchr(name, '=');
 	if (!value || !*(value + 1) || value == name)
 		return;
@@ -1273,13 +1270,21 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			continue;
 
 		if (*line == 'd' && strncmp(line, "define ", 7) == 0) {
-			store_definition(line);
+			store_definition(line + 7);
 		}
 
 		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
-			char *p = strchr(line, '=');
-			if (!p || !*p || !*(++p))
+			if (line[line_len - 1] == '\n') {
+				line[line_len - 1] = '\0';
+				line_len--;
+			}
+			char *p = line + 7;
+			if (*p < ' ')
 				continue;
+			if ((*p == '\'' || *p == '"') && (!*(p + 1) || (*(p + 1) == '\''
+			|| *(p + 1) == '"' )) && (*(p + 1) && !*(p + 2)))
+				continue;
+
 			if (expand_prompt_name(p) != EXIT_SUCCESS) {
 				free(conf.encoded_prompt);
 				conf.encoded_prompt = savestring(p, strlen(p));
@@ -1289,9 +1294,10 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 		/* THIS OPTION IS DEPRECATED */
 		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {
-			char *p = strchr(line, '=');
-			if (!p || !*(++p))
+			char *p = line + 12;
+			if (*p < ' ')
 				continue;
+
 			if (*p == 'd' && strncmp(p, "default", 7) == 0)
 				prompt_notif = 1;
 			else if (*p == 'c' && strncmp(p, "custom", 6) == 0)
@@ -1304,9 +1310,10 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		 * (provided it was set to a valid prompt name, as defined in the
 		 * prompts file)*/
 		else if (*line == 'N' && strncmp(line, "Notifications=", 14) == 0) {
-			char *p = strchr(line, '=');
-			if (!p || !*(++p))
+			char *p = line + 14;
+			if (*p < ' ')
 				continue;
+
 			if (*p == 't' && strncmp(p, "true", 4) == 0)
 				prompt_notif = 1;
 			else if (*p == 'f' && strncmp(p, "false", 5) == 0)
@@ -1316,8 +1323,8 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		}
 
 /*		else if (*line == 'R' && strncmp(line, "RightPrompt=", 12) == 0) {
-			char *p = strchr(line, '=');
-			if (!p || !*p || !*(++p))
+			char *p = line + 12;
+			if (*p < ' ')
 				continue;
 			char *q = remove_quotes(p);
 			if (!q)
@@ -1328,9 +1335,10 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 		else if (xargs.warning_prompt == UNSET && *line == 'E'
 		&& strncmp(line, "EnableWarningPrompt=", 20) == 0) {
-			char *p = strchr(line, '=');
-			if (!p || !*(++p))
+			char *p = line + 20;
+			if (*p < ' ')
 				continue;
+
 			if (*p == 't' && strncmp(p, "true", 4) == 0)
 				conf.warning_prompt = 1;
 			else if (*p == 'f' && strncmp(p, "false", 5) == 0)
@@ -1340,38 +1348,40 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		}
 
 		else if (*line == 'W' && strncmp(line, "WarningPrompt=", 14) == 0) {
-			char *p = strchr(line, '=');
-			if (!p || !*p || !*(++p))
+			char *p = line + 14;
+			if (*p < ' ')
 				continue;
+
 			char *q = remove_quotes(p);
 			if (!q)
 				continue;
+
 			free(conf.wprompt_str);
 			conf.wprompt_str = savestring(q, strlen(q));
 		}
 #ifndef _NO_FZF
 		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
-			char *p = strchr(line, '=');
-			if (!p || !*p || !*(++p))
+			char *p = line + 14;
+			if (*p < ' ')
 				continue;
+
 			char *q = remove_quotes(p);
 			set_fzf_opts(q);
 		}
 #endif /* _NO_FZF */
 
-		else if (*line == 'D' && strncmp(line, "DividingLine", 12) == 0) {
-			set_div_line(line);
+		else if (*line == 'D' && strncmp(line, "DividingLine=", 13) == 0) {
+			set_div_line(line + 13);
 		}
 
 		/* Interface colors */
 		else if (!*ifacecolors && *line == 'I'
 		&& strncmp(line, "InterfaceColors=", 16) == 0) {
-			char *opt_str = strchr(line, '=');
-			if (!opt_str)
+			char *p = line + 16;
+			if (*p < ' ')
 				continue;
 
-			opt_str++;
-			char *color_line = strip_color_line(opt_str, 't');
+			char *color_line = strip_color_line(p, 't');
 			if (!color_line)
 				continue;
 
@@ -1382,13 +1392,11 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 		/* Filetype colors */
 		else if (!*filecolors && *line == 'F'
 		&& strncmp(line, "FiletypeColors=", 15) == 0) {
-			char *opt_str = strchr(line, '=');
-			if (!opt_str)
+			char *p = line + 15;
+			if (*p < ' ')
 				continue;
 
-			opt_str++;
-
-			char *color_line = strip_color_line(opt_str, 't');
+			char *color_line = strip_color_line(p, 't');
 			if (!color_line)
 				continue;
 
@@ -1398,34 +1406,34 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 		/* File extension colors */
 		else if (!*extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
-			char *opt_str = strchr(line, '=');
-			if (!opt_str || !*(++opt_str))
+			char *p = line + 10;
+			if (*p < ' ')
 				continue;
 
-			if (*opt_str == '\'' || *opt_str == '"')
-				if (!*(++opt_str))
+			if (*p == '\'' || *p == '"')
+				if (!*(++p))
 					continue;
 
-			ssize_t len = line_len - (opt_str - line);
-			if (len > 0 && opt_str[len - 1] == '\n') {
-				opt_str[len - 1] = '\0';
-				--len;
+			ssize_t l = line_len - (p - line);
+			if (l > 0 && p[l - 1] == '\n') {
+				p[l - 1] = '\0';
+				l--;
 			}
-			if (len > 0 && (opt_str[len - 1] == '\'' || opt_str[len - 1] == '"')) {
-				opt_str[len - 1] = '\0';
-				--len;
+			if (l > 0 && (p[l - 1] == '\'' || p[l - 1] == '"')) {
+				p[l - 1] = '\0';
+				l--;
 			}
-			*extcolors = savestring(opt_str, (size_t)len);
+			*extcolors = savestring(p, (size_t)l);
 		}
 
 #ifndef _NO_ICONS
 		/* Directory icon color */
 		else if (*line == 'D' && strncmp(line, "DirIconColor=", 13) == 0) {
-			char *opt_str = strchr(line, '=');
-			if (!opt_str || !*(++opt_str))
+			char *p = line + 13;
+			if (*p < ' ')
 				continue;
 
-			if ((*opt_str == '\'' || *opt_str == '"') && !*(++opt_str))
+			if ((*p == '\'' || *p == '"') && !*(++p))
 				continue;
 
 			if (line[line_len - 1] == '\n') {
@@ -1438,10 +1446,10 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 			char *c = (char *)NULL;
 
-			if (is_color_code(opt_str) == 0 && (c = check_defs(opt_str)) == NULL)
+			if (is_color_code(p) == 0 && (c = check_defs(p)) == NULL)
 				continue;
 
-			sprintf(dir_ico_c, "\x1b[%sm", c ? c : opt_str);
+			sprintf(dir_ico_c, "\x1b[%sm", c ? c : p);
 		}
 #endif /* !_NO_ICONS */
 	}
@@ -1451,7 +1459,7 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 
 	return EXIT_SUCCESS;
 }
-#endif /* CLIFM_SUCKLESS */
+#endif /* !CLIFM_SUCKLESS */
 
 /* Check if LINE contains a valid color code, and store it into the
  * ext_colors global array

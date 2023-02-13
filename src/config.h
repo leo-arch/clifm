@@ -35,7 +35,7 @@ void create_tmp_files(void);
 int  edit_function(char **);
 void init_config(void);
 int  reload_config(void);
-void set_div_line(const char *);
+void set_div_line(char *);
 void set_env(void);
 void set_finder_paths(void);
 void set_sel_file(void);

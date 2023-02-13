@@ -442,6 +442,9 @@ const struct cmdslist_t internal_cmds[] = {
 	{"ds", 2},
 	{"desel", 5},
 	{"edit", 4},
+///////
+	{"config", 6},
+///////
 	{"exp", 3},
 	{"export", 6},
 	{"ext", 3},
@@ -592,6 +595,10 @@ const struct cmdslist_t param_str[] = {
 	{"ds all", 6},
 	{"edit", 4},
 	{"edit reset", 10},
+/////////
+	{"config", 6},
+	{"config reset", 10},
+/////////
 	{"ext on", 6},
 	{"ext off", 7},
 	{"ext status", 10},

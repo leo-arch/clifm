@@ -3530,7 +3530,7 @@ check_options(void)
 	}
 
 	if (conf.max_printselfiles == UNSET)
-		conf.max_printselfiles = DEF_MAXPRINTSEL;
+		conf.max_printselfiles = DEF_MAX_PRINTSEL;
 
 	if (conf.case_sens_list == UNSET) {
 		if (xargs.case_sens_list == UNSET)
@@ -3793,9 +3793,9 @@ check_options(void)
 	}
 
 	if (!conf.term)
-		conf.term = savestring(DEFAULT_TERM_CMD, strlen(DEFAULT_TERM_CMD));
+		conf.term = savestring(DEF_TERM_CMD, strlen(DEF_TERM_CMD));
 
-	if (!conf.encoded_prompt) {
+	if (!conf.encoded_prompt || !*conf.encoded_prompt) {
 		char *t = conf.colorize == 1 ? DEFAULT_PROMPT : DEFAULT_PROMPT_NO_COLOR;
 		conf.encoded_prompt = savestring(t, strlen(t));
 	}

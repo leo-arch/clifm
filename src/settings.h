@@ -253,7 +253,7 @@ xf=01;31:xs=00;32:"
 #define DEF_MAX_JUMP_TOTAL_RANK 100000
 #define DEF_MAX_LOG 1000
 #define DEF_MAX_PATH 40
-#define DEF_MAXPRINTSEL 0
+#define DEF_MAX_PRINTSEL 0
 #define DEF_MIN_JUMP_RANK 10
 #define DEF_MIN_NAME_TRIM 20
 #define DEF_MOUNT_CMD MNT_UDEVIL
@@ -297,6 +297,9 @@ xf=01;31:xs=00;32:"
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
 
+/* This expands to "CliFM > The command line file manager" */
+#define DEF_WELCOME_MESSAGE_STR _PROGRAM_NAME " > " PROGRAM_DESC
+
 /* We have three search strategies: GLOB_ONLY, REGEX_ONLY, GLOB_REGEX */
 #define DEF_SEARCH_STRATEGY GLOB_REGEX
 
@@ -329,7 +332,7 @@ xf=01;31:xs=00;32:"
 #define DEF_PROMPT_NOTIF 1
 #define DEFAULT_PROMPT "\\[\\e[0m\\][\\S\\[\\e[0m\\]]\\l \
 \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z\\[\\e[0m\\]\
->\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
+>\\[\\e[00;34m\\] \\$\\[\\e[0m\\] "
 #define DEFAULT_PROMPT_NO_COLOR "[\\S]\\l \\A \\u:\\H \\w\\n<\\z> \\$ "
 
 #define DEF_WARNING_PROMPT 1
@@ -352,20 +355,20 @@ alt-down:preview-page-down --inline-info --layout=reverse-list \
 
 #define DEF_SMENU_OPTIONS "-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
 
-/* Should we add __APPLE__ here too */
+/* We should add __APPLE__ here too */
 #if defined(__HAIKU__)
-# define DEFAULT_TERM_CMD "Terminal"
+# define DEF_TERM_CMD "Terminal"
 #else
-# define DEFAULT_TERM_CMD "xterm -e"
+# define DEF_TERM_CMD "xterm -e"
 #endif
 
 #define FALLBACK_SHELL "/bin/sh"
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
 # define FALLBACK_OPENER "/usr/bin/open"
-#elif defined __CYGWIN__
+#elif defined(__CYGWIN__)
 # define FALLBACK_OPENER "cygstart"
-#elif __HAIKU__
+#elif defined(__HAIKU__)
 # define FALLBACK_OPENER "open"
 #else
 # define FALLBACK_OPENER "xdg-open"

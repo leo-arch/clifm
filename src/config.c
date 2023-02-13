@@ -63,8 +63,7 @@ set_finder_paths(void)
 }
 #endif /* _NO_FZF */
 
-/* Regenerate the configuration file and create a back up of the old
- * one */
+/* Regenerate the configuration file and create a back up of the old one */
 static int
 regen_config(void)
 {
@@ -166,7 +165,6 @@ edit_function(char **comm)
 	if (mtime_bfr != (time_t)attr.st_mtime) {
 		/* Reload configuration only if the config file was modified */
 		reload_config();
-		conf.welcome_message = 0;
 
 		if (conf.autols == 1) {
 			free_dirlist();
@@ -1324,7 +1322,7 @@ MaxFilenameLen=%d\n\n",
 		DEF_LIGHT_MODE == 1 ? "true" : "false",
 		DEF_CLASSIFY == 1 ? "true" : "false",
 		DEF_SHARE_SELBOX == 1 ? "true" : "false",
-		DEFAULT_TERM_CMD,
+		DEF_TERM_CMD,
 		DEF_SORT,
 		DEF_SORT_REVERSE == 1 ? "true" : "false",
 		DEF_PRIVATE_WS_SETTINGS == 1 ? "true" : "false",
@@ -1377,7 +1375,7 @@ RlEditMode=%d\n\n",
 		DEF_ICONS == 1 ? "true" : "false",
 		DEF_DISK_USAGE == 1 ? "true" : "false",
 		DEF_PRINTSEL == 1 ? "true" : "false",
-		DEF_MAXPRINTSEL,
+		DEF_MAX_PRINTSEL,
 		DEF_CLEAR_SCREEN == 1 ? "true" : "false",
 		DEF_RESTORE_LAST_PATH == 1 ? "true" : "false",
 		DEF_TRASRM == 1 ? "true" : "false",
@@ -1860,11 +1858,10 @@ create_bm_file(void)
 static char *
 get_line_value(char *line)
 {
-	char *opt = strchr(line, '=');
-	if (!opt || !*opt || !*(++opt) )
+	if (!line || *line < ' ') /* Skip non-printable chars */
 		return (char *)NULL;
 
-	return remove_quotes(opt);
+	return remove_quotes(line);
 }
 
 static inline int
@@ -1886,12 +1883,12 @@ set_fzf_preview_value(const char *line, int *var)
 	return EXIT_SUCCESS;
 }
 
-static int
-set_pager_value(const char *line, int *var)
+static void
+set_pager_value(char *line, int *var)
 {
-	char *p = strchr(line, '=');
-	if (!p || !*(++p))
-		return (-1);
+	char *p = line;
+	if (!p || *p < '0')
+		return;
 
 	if (*p >= '0' && *p <= '9') {
 		size_t l = strlen(p);
@@ -1900,10 +1897,10 @@ set_pager_value(const char *line, int *var)
 
 		int n = xatoi(p);
 		if (n == INT_MIN)
-			return (-1);
+			return;
 
 		*var = n;
-		return EXIT_SUCCESS;
+		return;
 	}
 
 	if (*p == 't' && strncmp(p, "true", 4) == 0) {
@@ -1912,17 +1909,15 @@ set_pager_value(const char *line, int *var)
 		if (*p == 'f' && strncmp(p, "false", 5) == 0)
 			*var = 0;
 	}
-
-	return EXIT_SUCCESS;
 }
 
 /* Get boolean value from LINE and set VAR accordingly */
-static inline int
-set_config_bool_value(const char *line, int *var)
+static void
+set_config_bool_value(char *line, int *var)
 {
-	char *p = strchr(line, '=');
-	if (!p || !*(++p))
-		return (-1);
+	char *p = line;
+	if (!p || !*p || *p < 'f')
+		return;
 
 	if (*p == 't' && strncmp(p, "true", 4) == 0) {
 		*var = 1;
@@ -1930,16 +1925,17 @@ set_config_bool_value(const char *line, int *var)
 		if (*p == 'f' && strncmp(p, "false", 5) == 0)
 			*var = 0;
 	}
-
-	return EXIT_SUCCESS;
 }
 
-static inline int
-_set_colorscheme(const char *line)
+static void
+_set_colorscheme(char *line)
 {
-	char *p = strchr(line, '=');
-	if (!p || !*(++p))
-		return (-1);
+	if (!line || *line < ' ')
+		return;
+
+	char *p = remove_quotes(line);
+	if (!p)
+		return;
 
 	size_t l = strlen(p);
 	if (p[l - 1] == '\n') {
@@ -1949,20 +1945,17 @@ _set_colorscheme(const char *line)
 
 	free(conf.usr_cscheme);
 	conf.usr_cscheme = savestring(p, l);
-
-	return EXIT_SUCCESS;
 }
 
 void
-set_div_line(const char *line)
+set_div_line(char *line)
 {
-	char *opt = strchr(line, '=');
-	if (!opt || !*opt || !*(++opt)) {
+	if (!line || *line < ' ') {
 		*div_line = *DEF_DIV_LINE;
 		return;
 	}
 
-	char *tmp = remove_quotes(opt);
+	char *tmp = remove_quotes(line);
 	if (!tmp) {
 		*div_line = '\0';
 		return;
@@ -2025,12 +2018,12 @@ END:
 }
 
 static void
-set_search_strategy(char *line)
+set_search_strategy(const char *line)
 {
-	char *p = strchr(line, '=');
-	if (!p || !*p || !*(++p))
+	if (!line || *line < '0' || *line > '2')
 		return;
-	switch(*p) {
+
+	switch(*line) {
 	case '0': conf.search_strategy = GLOB_ONLY; break;
 	case '1': conf.search_strategy = REGEX_ONLY; break;
 	case '2': conf.search_strategy = GLOB_REGEX; break;
@@ -2143,93 +2136,80 @@ read_config(void)
 
 		else if (xargs.apparent_size == UNSET && *line == 'A'
 		&& strncmp(line, "ApparentSize=", 13) == 0) {
-			if (set_config_bool_value(line, &conf.apparent_size) == -1)
-				continue;
+			set_config_bool_value(line + 13, &conf.apparent_size);
 		}
 
-		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0)
+		else if (*line == 'a' && strncmp(line, "autocmd ", 8) == 0) {
 			parse_autocmd_line(line + 8);
+		}
 
 		else if (xargs.autocd == UNSET && *line == 'A'
 		&& strncmp(line, "Autocd=", 7) == 0) {
-			if (set_config_bool_value(line, &conf.autocd) == -1)
-				continue;
+			set_config_bool_value(line + 7, &conf.autocd);
 		}
 
 		else if (xargs.autols == UNSET && *line == 'A'
 		&& strncmp(line, "AutoLs=", 7) == 0) {
-			if (set_config_bool_value(line, &conf.autols) == -1)
-				continue;
+			set_config_bool_value(line + 7, &conf.autols);
 		}
 
 		else if (xargs.auto_open == UNSET && *line == 'A'
 		&& strncmp(line, "AutoOpen=", 9) == 0) {
-			if (set_config_bool_value(line, &conf.auto_open) == -1)
-				continue;
+			set_config_bool_value(line + 9, &conf.auto_open);
 		}
 
 #ifndef _NO_SUGGESTIONS
 		else if (xargs.suggestions == UNSET && *line == 'A'
 		&& strncmp(line, "AutoSuggestions=", 16) == 0) {
-			if (set_config_bool_value(line, &conf.suggestions) == -1)
-				continue;
+			set_config_bool_value(line + 16, &conf.suggestions);
 		}
 #endif
 
 		else if (xargs.case_sens_dirjump == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
-			if (set_config_bool_value(line, &conf.case_sens_dirjump) == -1)
-				continue;
+			set_config_bool_value(line + 21, &conf.case_sens_dirjump);
 		}
 
 		else if (*line == 'C'
 		&& strncmp(line, "CaseSensitiveSearch=", 20) == 0) {
-			if (set_config_bool_value(line, &conf.case_sens_search) == -1)
-				continue;
+			set_config_bool_value(line + 20, &conf.case_sens_search);
 		}
 
 		else if (xargs.case_sens_list == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
-			if (set_config_bool_value(line, &conf.case_sens_list) == -1)
-				continue;
+			set_config_bool_value(line + 18, &conf.case_sens_list);
 		}
 
 		else if (xargs.case_sens_path_comp == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitivePathComp=", 22) == 0) {
-			if (set_config_bool_value(line, &conf.case_sens_path_comp) == -1)
-				continue;
+			set_config_bool_value(line + 22, &conf.case_sens_path_comp);
 		}
 
 		else if (xargs.cd_on_quit == UNSET && *line == 'C'
 		&& strncmp(line, "CdOnQuit=", 9) == 0) {
-			if (set_config_bool_value(line, &conf.cd_on_quit) == -1)
-				continue;
+			set_config_bool_value(line + 9, &conf.cd_on_quit);
 		}
 
 		else if (xargs.classify == UNSET && *line == 'C'
 		&& strncmp(line, "Classify=", 9) == 0) {
-			if (set_config_bool_value(line, &conf.classify) == -1)
-				continue;
+			set_config_bool_value(line + 9, &conf.classify);
 		}
 
 		else if (xargs.clear_screen == UNSET && *line == 'C'
 		&& strncmp(line, "ClearScreen=", 12) == 0) {
-			if (set_config_bool_value(line, &conf.clear_screen) == -1)
-				continue;
+			set_config_bool_value(line + 12, &conf.clear_screen);
 		}
 
 		else if (!conf.usr_cscheme && *line == 'C'
 		&& strncmp(line, "ColorScheme=", 12) == 0) {
-			if (_set_colorscheme(line) == -1)
-				continue;
+			_set_colorscheme(line + 12);
 		}
 
 		else if (*line == 'c' && strncmp(line, "cpCmd=", 6) == 0) {
 			int opt_num = 0;
-			ret = sscanf(line, "cpCmd=%d\n", &opt_num);
+			ret = sscanf(line + 6, "%d\n", &opt_num);
 			if (ret == -1)
 				continue;
-//			if (opt_num >= 0 && opt_num <= CP_CMD_AVAILABLE)
 			if (opt_num >= 0 && opt_num < CP_CMD_AVAILABLE)
 				conf.cp_cmd = opt_num;
 			else
@@ -2238,42 +2218,37 @@ read_config(void)
 
 		else if (xargs.desktop_notifications == UNSET && *line == 'D'
 		&& strncmp(line, "DesktopNotifications=", 21) == 0) {
-			if (set_config_bool_value(line, &conf.desktop_notifications) == -1)
-				continue;
+			set_config_bool_value(line + 21, &conf.desktop_notifications);
 		}
 
 		else if (xargs.dirmap == UNSET && *line == 'D'
 		&& strncmp(line, "DirhistMap=", 11) == 0) {
-			if (set_config_bool_value(line, &conf.dirhist_map) == -1)
-				continue;
+			set_config_bool_value(line + 11, &conf.dirhist_map);
 		}
 
 		else if (xargs.disk_usage == UNSET && *line == 'D'
 		&& strncmp(line, "DiskUsage=", 10) == 0) {
-			if (set_config_bool_value(line, &conf.disk_usage) == -1)
-				continue;
+			set_config_bool_value(line + 10, &conf.disk_usage);
 		}
 
 		else if (*line == 'D' && strncmp(line, "DividingLine", 12) == 0) {
-			set_div_line(line);
+			set_div_line(line + 12);
 		}
 
 /*		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
 		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
-			if (set_config_bool_value(line, &conf.expand_bookmarks) == -1)
+			if (set_config_bool_value(line + 16, &conf.expand_bookmarks) == -1)
 				continue;
 		} */
 
 		else if (xargs.ext == UNSET && *line == 'E'
 		&& strncmp(line, "ExternalCommands=", 17) == 0) {
-			if (set_config_bool_value(line, &conf.ext_cmd_ok) == -1)
-				continue;
+			set_config_bool_value(line + 17, &conf.ext_cmd_ok);
 		}
 
 		else if (xargs.files_counter == UNSET && *line == 'F'
 		&& strncmp(line, "FilesCounter=", 13) == 0) {
-			if (set_config_bool_value(line, &conf.files_counter) == -1)
-				continue;
+			set_config_bool_value(line + 13, &conf.files_counter);
 		}
 
 		else if (!filter.str && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
@@ -2283,14 +2258,13 @@ read_config(void)
 
 		else if (xargs.full_dir_size == UNSET && *line == 'F'
 		&& strncmp(line, "FullDirSize=", 12) == 0) {
-			if (set_config_bool_value(line, &conf.full_dir_size) == -1)
-				continue;
+			set_config_bool_value(line + 12, &conf.full_dir_size);
 		}
 
 		else if (xargs.fuzzy_match_algo == UNSET && *line == 'F'
 		&& strncmp(line, "FuzzyAlgorithm=", 15) == 0) {
 			int opt_num = 0;
-			ret = sscanf(line, "FuzzyAlgorithm=%d\n", &opt_num);
+			ret = sscanf(line + 15, "%d\n", &opt_num);
 			if (ret == -1 || opt_num < 1 || opt_num > FUZZY_ALGO_MAX)
 				continue;
 			conf.fuzzy_match_algo = opt_num;
@@ -2298,8 +2272,7 @@ read_config(void)
 
 		else if (xargs.fuzzy_match == UNSET && *line == 'F'
 		&& strncmp(line, "FuzzyMatching=", 14) == 0) {
-			if (set_config_bool_value(line, &conf.fuzzy_match) == -1)
-				continue;
+			set_config_bool_value(line + 14, &conf.fuzzy_match);
 		}
 
 		else if (xargs.fzf_preview == UNSET && *line == 'F'
@@ -2311,29 +2284,25 @@ read_config(void)
 #ifndef _NO_HIGHLIGHT
 		else if (xargs.highlight == UNSET && *line == 'S'
 		&& strncmp(line, "SyntaxHighlighting=", 19) == 0) {
-			if (set_config_bool_value(line, &conf.highlight) == -1)
-				continue;
+			set_config_bool_value(line + 19, &conf.highlight);
 		}
 #endif /* !_NO_HIGHLIGHT */
 
 #ifndef _NO_ICONS
 		else if (xargs.icons == UNSET && *line == 'I'
 		&& strncmp(line, "Icons=", 6) == 0) {
-			if (set_config_bool_value(line, &conf.icons) == -1)
-				continue;
+			set_config_bool_value(line + 6, &conf.icons);
 		}
 #endif /* !_NO_ICONS */
 
 		else if (xargs.light == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {
-			if (set_config_bool_value(line, &conf.light_mode) == -1)
-				continue;
+			set_config_bool_value(line + 10, &conf.light_mode);
 		}
 
 		else if (xargs.dirs_first == UNSET && *line == 'L'
 		&& strncmp(line, "ListDirsFirst=", 17) == 0) {
-			if (set_config_bool_value(line, &conf.list_dirs_first) == -1)
-				continue;
+			set_config_bool_value(line + 17, &conf.list_dirs_first);
 		}
 
 		else if (xargs.horizontal_list == UNSET && *line == 'L'
@@ -2343,25 +2312,22 @@ read_config(void)
 
 		else if (xargs.longview == UNSET && *line == 'L'
 		&& strncmp(line, "LongViewMode=", 13) == 0) {
-			if (set_config_bool_value(line, &conf.long_view) == -1)
-				continue;
+			set_config_bool_value(line + 13, &conf.long_view);
 		}
 
 		else if (xargs.logs == UNSET && *line == 'L'
 		&& strncmp(line, "Logs=", 5) == 0) {
-			if (set_config_bool_value(line, &conf.logs_enabled) == -1)
-				continue;
+			set_config_bool_value(line + 5, &conf.logs_enabled);
 		}
 
 		else if (*line == 'L' && strncmp(line, "LogCmds=", 8) == 0) {
-			if (set_config_bool_value(line, &conf.log_cmds) == -1)
-				continue;
+			set_config_bool_value(line + 8, &conf.log_cmds);
 		}
 
 		else if (xargs.max_dirhist == UNSET && *line == 'M'
 		&& strncmp(line, "MaxDirhist=", 11) == 0) {
 			int opt_num = 0;
-			ret = sscanf(line, "MaxDirhist=%d\n", &opt_num);
+			ret = sscanf(line + 11, "%d\n", &opt_num);
 			if (ret == -1)
 				continue;
 			if (opt_num >= 0)
@@ -2377,7 +2343,7 @@ read_config(void)
 
 		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {
 			int opt_num = 0;
-			sscanf(line, "MaxHistory=%d\n", &opt_num);
+			sscanf(line + 11, "%d\n", &opt_num);
 			if (opt_num <= 0)
 				continue;
 			conf.max_hist = opt_num;
@@ -2385,7 +2351,7 @@ read_config(void)
 
 		else if (*line == 'M' && strncmp(line, "MaxJumpTotalRank=", 17) == 0) {
 			int opt_num = 0;
-			ret = sscanf(line, "MaxJumpTotalRank=%d\n", &opt_num);
+			ret = sscanf(line + 17, "%d\n", &opt_num);
 			if (ret == -1)
 				continue;
 			conf.max_jump_total_rank = opt_num;
@@ -2393,7 +2359,7 @@ read_config(void)
 
 		else if (*line == 'M' && strncmp(line, "MaxLog=", 7) == 0) {
 			int opt_num = 0;
-			sscanf(line, "MaxLog=%d\n", &opt_num);
+			sscanf(line + 7, "%d\n", &opt_num);
 			if (opt_num <= 0)
 				continue;
 			conf.max_log = opt_num;
@@ -2402,7 +2368,7 @@ read_config(void)
 		else if (xargs.max_path == UNSET && *line == 'M'
 		&& strncmp(line, "MaxPath=", 8) == 0) {
 			int opt_num = 0;
-			sscanf(line, "MaxPath=%d\n", &opt_num);
+			sscanf(line + 8, "%d\n", &opt_num);
 			if (opt_num <= 0)
 				continue;
 			conf.max_path = opt_num;
@@ -2410,7 +2376,7 @@ read_config(void)
 
 		else if (*line == 'M' && strncmp(line, "MaxPrintSelfiles=", 17) == 0) {
 			int opt_num = 0;
-			ret = sscanf(line, "MaxPrintSelfiles=%d\n", &opt_num);
+			ret = sscanf(line + 17, "%d\n", &opt_num);
 			if (ret == -1)
 				continue;
 			conf.max_printselfiles = opt_num;
@@ -2418,7 +2384,7 @@ read_config(void)
 
 		else if (*line == 'M' && strncmp(line, "MinFilenameTrim=", 16) == 0) {
 			int opt_num = 0;
-			ret = sscanf(line, "MinFilenameTrim=%d\n", &opt_num);
+			ret = sscanf(line + 16, "%d\n", &opt_num);
 			if (ret == -1)
 				continue;
 			if (opt_num > 0)
@@ -2429,7 +2395,7 @@ read_config(void)
 
 		else if (*line == 'M' && strncmp(line, "MinJumpRank=", 12) == 0) {
 			int opt_num = 0;
-			ret = sscanf(line, "MinJumpRank=%d\n", &opt_num);
+			ret = sscanf(line + 12, "%d\n", &opt_num);
 			if (ret == -1)
 				continue;
 			conf.min_jump_rank = opt_num;
@@ -2437,7 +2403,7 @@ read_config(void)
 
 		else if (*line == 'm' && strncmp(line, "mvCmd=", 6) == 0) {
 			int opt_num = 0;
-			ret = sscanf(line, "mvCmd=%d\n", &opt_num);
+			ret = sscanf(line + 6, "%d\n", &opt_num);
 			if (ret == -1)
 				continue;
 			if (opt_num >= 0 && opt_num < MV_CMD_AVAILABLE)
@@ -2447,7 +2413,7 @@ read_config(void)
 		}
 
 		else if (!conf.opener && *line == 'O' && strncmp(line, "Opener=", 7) == 0) {
-			char *tmp = get_line_value(line);
+			char *tmp = get_line_value(line + 7);
 			if (!tmp)
 				continue;
 			free(conf.opener);
@@ -2456,21 +2422,20 @@ read_config(void)
 
 		else if (xargs.pager == UNSET && *line == 'P'
 		&& strncmp(line, "Pager=", 6) == 0) {
-			if (set_pager_value(line, &conf.pager) == -1)
-				continue;
+			set_pager_value(line + 6, &conf.pager);
 		}
 
 		else if (xargs.printsel == UNSET && *line == 'P'
 		&& strncmp(line, "PrintSelfiles=", 14) == 0) {
-			if (set_config_bool_value(line, &conf.print_selfiles) == -1)
-				continue;
+			set_config_bool_value(line + 14, &conf.print_selfiles);
 		}
 
 		else if (*line == 'P' && strncmp(line, "PrivateWorkspaceSettings=", 25) == 0) {
-			if (set_config_bool_value(line, &conf.private_ws_settings) == -1)
-				continue;
+			set_config_bool_value(line + 25, &conf.private_ws_settings);
 		}
 
+		/* This option has been moved to the color scheme file and is here
+		 * only for backward compatibility */
 		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
 			free(conf.encoded_prompt);
 			conf.encoded_prompt = (char *)NULL;
@@ -2479,10 +2444,11 @@ read_config(void)
 				conf.encoded_prompt = savestring(p, strlen(p));
 		}
 
-		/* This option is DEPRECATED! */
+		/* This option is DEPRECATED! Replaced by "Notifications", in the
+		 * color scheme file */
 		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {
 			char opt_str[8] = "";
-			ret = sscanf(line, "PromptStyle=%7s\n", opt_str);
+			ret = sscanf(line + 12, "%7s\n", opt_str);
 			if (ret == -1)
 				continue;
 			if (strncmp(opt_str, "default", 7) == 0)
@@ -2494,7 +2460,7 @@ read_config(void)
 		}
 
 		else if (*line == 'P' && strncmp(line, "PropFields=", 11) == 0) {
-			char *tmp = get_line_value(line);
+			char *tmp = get_line_value(line + 11);
 			if (!tmp)
 				continue;
 			xstrsncpy(prop_fields_str, tmp, PROP_FIELDS_SIZE);
@@ -2502,44 +2468,38 @@ read_config(void)
 		}
 
 		else if (*line == 'P' && strncmp(line, "PurgeJumpDB=", 12) == 0) {
-			if (set_config_bool_value(line, &conf.purge_jumpdb) == -1)
-				continue;
+			set_config_bool_value(line + 12, &conf.purge_jumpdb);
 		}
 
 		else if (xargs.restore_last_path == UNSET && *line == 'R'
 		&& strncmp(line, "RestoreLastPath=", 16) == 0) {
-			if (set_config_bool_value(line, &conf.restore_last_path) == -1)
-				continue;
+			set_config_bool_value(line + 16, &conf.restore_last_path);
 		}
 
-		else if (*line == 'R' && strncmp(line, "RlEditMode=0", 12) == 0) {
+		else if (*line == 'R' && strncmp(line, "RlEditMode=0", 12) == 0)
 			rl_vi_editing_mode(1, 0); /* Readline defaults to emacs */
-		}
 
 		else if (*line == 'r' && strncmp(line, "rmForce=", 8) == 0) {
-			if (set_config_bool_value(line, &conf.rm_force) == -1)
-				continue;
+			set_config_bool_value(line + 8, &conf.rm_force);
 		}
 
 		else if (*line == 'S' && strncmp(line, "SearchStrategy=", 15) == 0) {
-			set_search_strategy(line);
+			set_search_strategy(line + 15);
 		}
 
 		else if (xargs.share_selbox == UNSET && *line == 'S'
 		&& strncmp(line, "ShareSelbox=", 12) == 0) {
-			if (set_config_bool_value(line, &conf.share_selbox) == -1)
-				continue;
+			set_config_bool_value(line + 12, &conf.share_selbox);
 		}
 
 		else if (xargs.hidden == UNSET && *line == 'S'
 		&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
-			if (set_config_bool_value(line, &conf.show_hidden) == -1)
-				continue;
+			set_config_bool_value(line + 16, &conf.show_hidden);
 		}
 
 		else if (xargs.sort == UNSET && *line == 'S' && strncmp(line, "Sort=", 5) == 0) {
 			int opt_num = 0;
-			ret = sscanf(line, "Sort=%d\n", &opt_num);
+			ret = sscanf(line + 5, "%d\n", &opt_num);
 			if (ret == -1)
 				continue;
 			if (opt_num >= 0 && opt_num <= SORT_TYPES)
@@ -2550,19 +2510,17 @@ read_config(void)
 
 		else if (xargs.sort_reverse == UNSET && *line == 'S'
 		&& strncmp(line, "SortReverse=", 12) == 0) {
-			if (set_config_bool_value(line, &conf.sort_reverse) == -1)
-				continue;
+			set_config_bool_value(line + 12, &conf.sort_reverse);
 		}
 
 		else if (xargs.splash == UNSET && *line == 'S'
 		&& strncmp(line, "SplashScreen=", 13) == 0) {
-			if (set_config_bool_value(line, &conf.splash_screen) == -1)
-				continue;
+			set_config_bool_value(line + 13, &conf.splash_screen);
 		}
 
 		else if (xargs.path == UNSET && cur_ws == UNSET && *line == 'S'
 		&& strncmp(line, "StartingPath=", 13) == 0) {
-			char *tmp = get_line_value(line);
+			char *tmp = get_line_value(line + 13);
 			if (!tmp)
 				continue;
 
@@ -2584,19 +2542,17 @@ read_config(void)
 
 #ifndef _NO_SUGGESTIONS
 		else if (*line == 'S' && strncmp(line, "SuggestCmdDesc=", 15) == 0) {
-			if (set_config_bool_value(line, &conf.cmd_desc_sug) == -1)
-				continue;
+			set_config_bool_value(line + 15, &conf.cmd_desc_sug);
 		}
 
 		else if (*line == 'S' && strncmp(line, "SuggestFiletypeColor=", 21) == 0) {
-			if (set_config_bool_value(line, &conf.suggest_filetype_color) == -1)
-				continue;
+			set_config_bool_value(line + 21, &conf.suggest_filetype_color);
 		}
 
 		else if (*line == 'S'
 		&& strncmp(line, "SuggestionStrategy=", 19) == 0) {
 			char opt_str[SUG_STRATS + 1] = "";
-			ret = sscanf(line, "SuggestionStrategy=%7s\n", opt_str);
+			ret = sscanf(line + 19, "%7s\n", opt_str);
 			if (ret == -1)
 				continue;
 			int fail = 0;
@@ -2610,7 +2566,7 @@ read_config(void)
 					break;
 				}
 			}
-			if (fail || s != SUG_STRATS)
+			if (fail == 1 || s != SUG_STRATS)
 				continue;
 			free(conf.suggestion_strategy);
 			conf.suggestion_strategy = savestring(opt_str, strnlen(opt_str, sizeof(opt_str)));
@@ -2621,7 +2577,7 @@ read_config(void)
 		else if (xargs.fzftab == UNSET && xargs.fzytab == UNSET && xargs.smenutab == UNSET
 		&& *line == 'T' && strncmp(line, "TabCompletionMode=", 18) == 0) {
 			char opt_str[9] = "";
-			ret = sscanf(line, "TabCompletionMode=%8s\n", opt_str);
+			ret = sscanf(line + 18, "%8s\n", opt_str);
 			if (ret == -1)
 				continue;
 			if (strncmp(opt_str, "standard", 8) == 0) {
@@ -2637,7 +2593,7 @@ read_config(void)
 #endif /* !_NO_FZF */
 
 		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
-			char *tmp = get_line_value(line);
+			char *tmp = get_line_value(line + 14);
 			if (!tmp)
 				continue;
 			if (*tmp == 'n' && strcmp(tmp, "none") == 0) {
@@ -2659,8 +2615,8 @@ read_config(void)
 		}
 
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
-			char *opt = strchr(line, '=');
-			if (!opt || !*opt || !*(++opt))
+			char *opt = line + 12;
+			if (!*opt)
 				continue;
 
 			char *tmp = remove_quotes(opt);
@@ -2672,33 +2628,31 @@ read_config(void)
 		}
 
 		else if (xargs.tips == UNSET && *line == 'T' && strncmp(line, "Tips=", 5) == 0) {
-			if (set_config_bool_value(line, &conf.tips) == -1)
-				continue;
+			set_config_bool_value(line + 5, &conf.tips);
 		}
 
 #ifndef _NO_TRASH
 		else if (xargs.trasrm == UNSET && *line == 'T'
 		&& strncmp(line, "TrashAsRm=", 10) == 0) {
-			if (set_config_bool_value(line, &conf.tr_as_rm) == -1)
-				continue;
+			set_config_bool_value(line + 10, &conf.tr_as_rm);
 		}
 #endif
 
 		else if (xargs.unicode == UNSET && *line == 'U'
 		&& strncmp(line, "Unicode=", 8) == 0) {
-			if (set_config_bool_value(line, &conf.unicode) == -1)
-				continue;
+			set_config_bool_value(line + 8, &conf.unicode);
 		}
 
+	/* Both WarningPrompt and WarningPromptStr have been moved to the color
+	 * scheme file and are here just for backwards compatibility */
 		else if (xargs.warning_prompt == UNSET && *line == 'W'
 		&& strncmp(line, "WarningPrompt=", 14) == 0) {
-			if (set_config_bool_value(line, &conf.warning_prompt) == -1)
-				continue;
+			set_config_bool_value(line + 14, &conf.warning_prompt);
 		}
 
 		else if (*line == 'W'
 		&& strncmp(line, "WarningPromptStr=", 17) == 0) {
-			char *tmp = get_line_value(line);
+			char *tmp = get_line_value(line + 17);
 			if (!tmp)
 				continue;
 			free(conf.wprompt_str);
@@ -2707,12 +2661,11 @@ read_config(void)
 
 		else if (xargs.welcome_message == UNSET && *line == 'W'
 			&& strncmp(line, "WelcomeMessage=", 15) == 0) {
-			if (set_config_bool_value(line, &conf.welcome_message) == -1)
-				continue;
+			set_config_bool_value(line + 15, &conf.welcome_message);
 		}
 
 		else if (*line == 'W' && strncmp(line, "WelcomeMessageStr=", 18) == 0) {
-			char *tmp = get_line_value(line);
+			char *tmp = get_line_value(line + 18);
 			if (!tmp)
 				continue;
 			free(conf.welcome_message_str);
@@ -2734,7 +2687,6 @@ read_config(void)
 	}
 
 	if (filter.str && filter.type == FILTER_FILE_NAME) {
-//	if (filter.str) {
 		regfree(&regex_exp);
 		ret = regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED);
 		if (ret != EXIT_SUCCESS) {

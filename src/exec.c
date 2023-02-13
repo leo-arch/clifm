@@ -2696,7 +2696,8 @@ exec_cmd(char **comm)
 		return (exit_code = alias_function(comm));
 
 	/* #### EDIT #### */
-	else if (*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
+	else if ((*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
+	|| (*comm[0] == 'c' && strcmp(comm[0], "config") == 0))
 		return (exit_code = edit_function(comm));
 
 	/* #### HISTORY #### */
