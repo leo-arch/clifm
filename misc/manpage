@@ -652,6 +652,11 @@ toggle columns on/off.
 .B cmd, commands
 show this list of commands. A more convenient way of getting information about \fBclifm\fR commands is via the interactive help plugin (depends on \fIfzf\fR), by default bound to the "ihelp" action name.
 .TP
+.B config \fR[\fIreset\fR] [\fIAPPLICATION\fR]
+open the main configuration file (F10 key is also available). If an application is specified, it will be used to open the configuration file. Use the 'reset' option to generate a fresh configuration file and create a backup copy of the old one (named clifmrc.YYYYMMDD@HH:MM:SS).
+.sp
+The \fIedit\fR command can be used as well instead of \fIconfig\fR.
+.TP
 .B cs, colorschemes \fR[\fIedit\fR [\fIAPP\fR]] [\fINAME\fR]
 with no arguments, list available color schemes. Use the \fIedit\fR option to open/edit the configuration file of the current color scheme (open with APP if specified or via the default associated application). Otherwise, just switch to the color scheme NAME. TAB completion is available.
 .TP
@@ -682,11 +687,6 @@ Use \fI*\fR, \fIa\fR or \fIall\fR to deselect all selected entries at once. Ex: 
 You can also pass the file name(s) (or ELN's) to be deselected as a parameter. For example: \fIds\ myfile\ 24\fR.
 .sp
 TAB completion is available for this command.
-.TP
-.B edit \fR[\fIreset\fR] [\fIAPPLICATION\fR]
-edit the main configuration file (F10 key is also available). If an application is specified, it will be used to open the configuration file. Use the 'reset' option to generate a fresh configuration file and create a backup copy of the old one (named clifmrc.YYYYMMDD@HH:MM:SS).
-.sp
-The \fIconfig\fR command can be used instead of \fIedit\fR.
 .TP
 .B exp \fR[\fIFILE\fR]...
 with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they could be directories, file names, ELN's or some search expression like "*.c".
@@ -904,7 +904,7 @@ If not already mounted, the \fIm\fR, \fImount\fR option mounts the specified rem
 .sp
 The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmount command specified in the configuration file. For example: \fInet u smb_work\fR. TAB completion is also available for this function.
 .sp
-\fBNOTE\fR: If you only need to copy some files to a remote location (including mobile phones) without the need to mount the resource, you can make use of the cprm.sh plugin, bound by default to the \fIcr\fR action. Just set up your remotes (\fIcr edit\fR) and then simply send the file you want (\fIcr FILE\fR). That's all.
+\fBNOTE\fR: If you only need to copy some files to a remote location (including mobile phones) without the need to mount the resource, you can make use of the cprm.sh plugin, bound by default to the \fIcr\fR action. Just set up your remotes (\fIcr \-\-edit\fR) and then simply send the file you want (\fIcr FILE\fR). That's all.
 .TP
 .B o, open \fIELN/FILE\fR [\fIAPPLICATION\fR]
 open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see above), a regular file, or a symbolic link to either of the two. For example: \fIo\ 12\fR, \fIo\ filename\fR, \fIo\ /path/to/filename\fR.
@@ -2678,7 +2678,7 @@ By default, \fBclifm\fR starts in the current working directory. However, you ca
 .SH 22. FILES
 .TP
 .B CONFIGURATION FILE
-The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/local/share/clifm\fR), and if not found, it will be created anew with default values. Here you can permanently set up \fBclifm\fR options, define aliases, prompt commands, and autocommands.
+The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/local/share/clifm\fR), and if not found, it will be created anew with default values. Here you can permanently set up \fBclifm\fR options, define aliases, prompt commands, and autocommands. You can access the configuration file either via the \fIconfig\fR command (or \fIedit\fR) or just pressing F10.
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
 .TP
@@ -2942,7 +2942,7 @@ T{
 !<TAB>
 T}	Navigate through the command history
 T{
-edit (F10)
+config (also 'edit' or F10)
 T}	View/edit the main configuration file
 T{
 pf set test
