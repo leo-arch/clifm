@@ -1117,7 +1117,6 @@ end_deselect(const int err, char ***args)
 	if (conf.autols == 1 && exit_status == EXIT_SUCCESS)
 		reload_dirlist();
 	if (argsbk > 0) {
-//		print_new_selections();
 		print_reload_msg(_("%zu file(s) deselected\n"), desel_files);
 		print_reload_msg(_("%zu total selected file(s)\n"), sel_n);
 	} else {
@@ -1143,11 +1142,14 @@ deselect(char **args)
 	if (args[1] && *args[1]) {
 		if (strcmp(args[1], "*") == 0 || strcmp(args[1], "a") == 0
 		|| strcmp(args[1], "all") == 0) {
+			size_t n = sel_n;
 			int ret = deselect_all();
 			if (conf.autols == 1)
 				reload_dirlist();
-			if (ret == EXIT_SUCCESS)
-				print_reload_msg(_("0 selected file(s)\n"));
+			if (ret == EXIT_SUCCESS) {
+				print_reload_msg(_("%zu file(s) deselected\n"), n);
+				print_reload_msg(_("0 total selected file(s)\n"));
+			}
 			return ret;
 		} else {
 			err = deselect_from_args(args);
