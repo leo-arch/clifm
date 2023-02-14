@@ -600,7 +600,7 @@ dirjump(char **args, int mode)
 	enum jump jump_opt = NONE;
 
 	switch (args[0][1]) {
-	case 'e': return edit_jumpdb(NULL);
+	case 'e': return edit_jumpdb(args[1]);
 	case 'c': jump_opt = JCHILD; break;
 	case 'p': jump_opt = JPARENT; break;
 	case 'o': jump_opt = JORDER; break;
