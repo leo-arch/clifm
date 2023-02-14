@@ -441,10 +441,8 @@ const struct cmdslist_t internal_cmds[] = {
 	{"dup", 3},
 	{"ds", 2},
 	{"desel", 5},
-	{"edit", 4},
-///////
+	{"edit", 4}, /* Deprecated */
 	{"config", 6},
-///////
 	{"exp", 3},
 	{"export", 6},
 	{"ext", 3},
@@ -593,12 +591,14 @@ const struct cmdslist_t param_str[] = {
 	{"cs edit", 7},
 	{"desel all", 9},
 	{"ds all", 6},
+///////// Deprecated
 	{"edit", 4},
 	{"edit reset", 10},
+	{"edit dump", 9},
 /////////
 	{"config", 6},
-	{"config reset", 10},
-/////////
+	{"config reset", 12},
+	{"config dump", 11},
 	{"ext on", 6},
 	{"ext off", 7},
 	{"ext status", 10},
