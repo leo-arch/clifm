@@ -442,8 +442,13 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		}
 
 		execvp(cmd[0], cmd);
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
-		_exit(errno);
+		if (errno == ENOENT) {
+			fprintf(stderr, "%s: %s: Command not found\n", PROGRAM_NAME, cmd[0]);
+			_exit(127);
+		} else {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
+			_exit(errno);
+		}
 	}
 
 	/* Get command status (pid > 0) */

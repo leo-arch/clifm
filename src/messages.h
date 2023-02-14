@@ -516,7 +516,7 @@ You can also access the commands history via the exclamation mark (!)\n\
 
 #define JUMP_USAGE "Change to a directory in the jump database\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  j [--purge [NUM]] [--edit], jc, jp, jl [STRING]..., jo [NUM], je\n\n\
+  j [--purge [NUM]] [--edit [APP]], jc, jp, jl [STRING]..., jo [NUM], je\n\n\
 For information about the matching algorithm consult the manpage\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the list of entries in the jump database (visited directories)\n\
@@ -537,6 +537,8 @@ For information about the matching algorithm consult the manpage\n\n\
     jc str\n\
 - Open/edit the jump database\n\
     je (also 'j --edit')\n\
+- Open/edit the jump database using vim\n\
+    j --edit vim\n\
 - Purge the database from non-existent directories\n\
     j --purge\n\
     Note: To automatically purge the database from non-existent directories\n\
@@ -786,7 +788,7 @@ Note: Use the 'oc' command to edit files ownership"
 
 #define PROMPT_USAGE "Change current prompt\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  prompt [NAME, edit, list, reload, unset]\n\
+  prompt [NAME, edit [APP], list, reload, unset]\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available prompts\n\
     prompt list (or 'prompt <TAB>' to choose from a list)\n\
@@ -794,6 +796,8 @@ Note: Use the 'oc' command to edit files ownership"
     prompt MYPROMPT\n\
 - Edit the prompts file\n\
     prompt edit\n\
+- Edit the prompts file with vi\n\
+    prompt edit vi\n\
 - Set the default prompt\n\
     prompt unset\n\
 - Reload available prompts\n\
