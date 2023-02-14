@@ -106,23 +106,296 @@ regen_config(void)
 	return EXIT_SUCCESS;
 }
 
+
+#define DUMP_CONFIG_STR  0
+#define DUMP_CONFIG_INT  1
+#define DUMP_CONFIG_BOOL 2
+static void
+print_config_value(const char *option, void *cur_value, void *def_value, const int type)
+{
+	if (type == DUMP_CONFIG_STR) {
+		char *cv = (char *)cur_value, *dv = (char *)def_value;
+		if (!cv || (dv && strcmp(cv, dv) == 0))
+			printf("%s: \"%s\"\n", option, dv);
+		else
+			printf("%s%s: \"%s\" [\"%s\"]%s\n", BOLD, option, cv, dv, df_c);
+	}
+
+	else if (type == DUMP_CONFIG_BOOL) {
+		int cv = *((int *)cur_value), dv = *((int *)def_value);
+		if (cv == dv)
+			printf("%s: %s\n", option, cv == 1 ? "true" : "false");
+		else
+			printf("%s%s: %s [%s]%s\n", BOLD, option, cv == 1
+				? "true" : "false", dv == 1 ? "true" : "false", df_c);
+	}
+
+	else { // CONFIG_BOOL_INT
+		int cv = *((int *)cur_value), dv = *((int *)def_value);
+		if (cv == dv)
+			printf("%s: %d\n", option, cv);
+		else
+			printf("%s%s: %d [%d]%s\n", BOLD, option, cv, dv, df_c);
+	}
+}
+
+// Return a mallo'ced pointer to a string representing the value for
+// TabCompletionMode in the config file
+static char *
+get_tab_comp_mode_str(void)
+{
+	char *s = (char *)xnmalloc(9, sizeof(char));
+
+	switch(tabmode) {
+	case FZF_TAB: strcpy(s, "fzf"); break;
+	case FZY_TAB: strcpy(s, "fzy"); break;
+	case SMENU_TAB: strcpy(s, "smenu"); break;
+	case STD_TAB: strcpy(s, "standard"); break;
+	default: free(s); s = (char *)NULL; break;
+	}
+
+	return s;
+}
+
+static char *
+get_ws_names_line(void)
+{
+	if (config_ok == 0 || !config_file)
+		return (char *)NULL;
+
+	int fd;
+	FILE *fp = open_fstream_r(config_file, &fd);
+	if (!fp)
+		return (char *)NULL;
+
+	char *p = (char *)NULL;
+	char line[PATH_MAX + 15];
+	while (fgets(line, (int)sizeof(line), fp)) {
+		if (*line != 'W' || strncmp(line, "WorkspaceNames=", 15) != 0
+		|| *(line + 15) == '\0')
+			continue;
+
+		char *tmp = remove_quotes(line + 15);
+		if (!tmp || !*tmp)
+			return (char *)NULL;
+
+		p = savestring(tmp, strlen(tmp));
+	}
+
+	close_fstream(fp, fd);
+	return p;
+}
+
+static int
+dump_config(void)
+{
+	// Values displayed here represent the current status of the
+	// corresponding option, and not necessarilly that of the config file:
+	// some of these options can be changed in the fly via commands
+
+	// MISSING!
+	// StartingPath (Stored in workspaces[cur_ws].path at startup)
+
+	puts("The following is the list of options (as defined in the configuration "
+		"file) and their current values. Whenever a current value differs "
+		"from the default value, this latter is displayed in brackets\n");
+
+	char *s = (char *)NULL;
+	int n = 0;
+
+	n = DEF_APPARENT_SIZE;
+	print_config_value("ApparentSize", &conf.apparent_size, &n, DUMP_CONFIG_BOOL);
+	n = DEF_AUTOCD;
+	print_config_value("Autocd", &conf.autocd, &n, DUMP_CONFIG_BOOL);
+	n = DEF_AUTOLS;
+	print_config_value("AutoLs", &conf.autols, &n, DUMP_CONFIG_BOOL);
+	n = DEF_AUTO_OPEN;
+	print_config_value("AutoOpen", &conf.auto_open, &n, DUMP_CONFIG_BOOL);
+#ifndef _NO_SUGGESTIONS
+	n = DEF_SUGGESTIONS;
+	print_config_value("AutoSuggestions", &conf.suggestions, &n, DUMP_CONFIG_BOOL);
+#endif
+	n = DEF_CASE_SENS_DIRJUMP;
+	print_config_value("CaseSensitiveDirjump", &conf.case_sens_dirjump, &n, DUMP_CONFIG_BOOL);
+	n = DEF_CASE_SENS_LIST;
+	print_config_value("CaseSensitiveList", &conf.case_sens_list, &n, DUMP_CONFIG_BOOL);
+	n = DEF_CASE_SENS_PATH_COMP;
+	print_config_value("CaseSensitivePathComp", &conf.case_sens_path_comp, &n, DUMP_CONFIG_BOOL);
+	n = DEF_CASE_SENS_SEARCH;
+	print_config_value("CaseSensitiveSearch", &conf.case_sens_search, &n, DUMP_CONFIG_BOOL);
+	n = DEF_CD_ON_QUIT;
+	print_config_value("CdOnQuit", &conf.cd_on_quit, &n, DUMP_CONFIG_BOOL);
+	n = DEF_CLASSIFY;
+	print_config_value("Classify", &conf.classify, &n, DUMP_CONFIG_BOOL);
+	n = DEF_CLEAR_SCREEN;
+	print_config_value("ClearScreen", &conf.clear_screen, &n, DUMP_CONFIG_BOOL);
+	s = DEF_COLOR_SCHEME;
+	print_config_value("ColorScheme", cur_cscheme, s, DUMP_CONFIG_STR);
+	n = DEF_CP_CMD;
+	print_config_value("cpCmd", &conf.cp_cmd, &n, DUMP_CONFIG_INT);
+	n = DEF_DESKTOP_NOTIFICATIONS;
+	print_config_value("DesktopNotifications", &conf.desktop_notifications, &n, DUMP_CONFIG_BOOL);
+	n = DEF_DIRHIST_MAP;
+	print_config_value("DirhistMap", &conf.dirhist_map, &n, DUMP_CONFIG_BOOL);
+	n = DEF_DISK_USAGE;
+	print_config_value("DiskUsage", &conf.disk_usage, &n, DUMP_CONFIG_BOOL);
+	n = DEF_EXT_CMD_OK;
+	print_config_value("ExternalCommands", &conf.ext_cmd_ok, &n, DUMP_CONFIG_BOOL);
+	n = DEF_FILES_COUNTER;
+	print_config_value("FilesCounter", &conf.files_counter, &n, DUMP_CONFIG_BOOL);
+	s = "";
+	print_config_value("Filter", filter.str, s, DUMP_CONFIG_STR);
+	n = DEF_FULL_DIR_SIZE;
+	print_config_value("FullDirSize", &conf.full_dir_size, &n, DUMP_CONFIG_BOOL);
+
+#ifndef _NO_FZF
+	n = DEF_FUZZY_MATCH;
+	print_config_value("FuzzyMatching", &conf.fuzzy_match, &n, DUMP_CONFIG_BOOL);
+	n = DEF_FUZZY_MATCH_ALGO;
+	print_config_value("FuzzyAlgorithm", &conf.fuzzy_match_algo, &n, DUMP_CONFIG_INT);
+	n = DEF_FZF_PREVIEW;
+	print_config_value("FzfPreview", &conf.fzf_preview, &n, DUMP_CONFIG_BOOL);
+#endif
+
+	n = DEF_ICONS;
+	print_config_value("Icons", &conf.icons, &n, DUMP_CONFIG_BOOL);
+	n = DEF_LIGHT_MODE;
+	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
+	n = DEF_LIST_DIRS_FIRST;
+	print_config_value("ListDirsFirst", &conf.list_dirs_first, &n, DUMP_CONFIG_BOOL);
+	n = DEF_LISTING_MODE;
+	print_config_value("ListingMode", &conf.listing_mode, &n, DUMP_CONFIG_INT);
+	n = DEF_LOG_CMDS;
+	print_config_value("LogCmds", &conf.log_cmds, &n, DUMP_CONFIG_BOOL);
+	n = DEF_LOGS_ENABLED;
+	print_config_value("Logs", &conf.logs_enabled, &n, DUMP_CONFIG_BOOL);
+	n = DEF_LONG_VIEW;
+	print_config_value("LongViewMode", &conf.long_view, &n, DUMP_CONFIG_BOOL);
+	n = DEF_MAX_DIRHIST;
+	print_config_value("MaxDirhist", &conf.max_dirhist, &n, DUMP_CONFIG_INT);
+	n = DEF_MAX_NAME_LEN;
+	print_config_value("MaxFilenameLen", &conf.max_name_len, &n, DUMP_CONFIG_INT);
+	n = DEF_MAX_HIST;
+	print_config_value("MaxHistory", &conf.max_hist, &n, DUMP_CONFIG_INT);
+	n = DEF_MAX_JUMP_TOTAL_RANK;
+	print_config_value("MaxJumpTotalRank", &conf.max_jump_total_rank, &n, DUMP_CONFIG_INT);
+	n = DEF_MAX_LOG;
+	print_config_value("MaxLog", &conf.max_log, &n, DUMP_CONFIG_INT);
+	n = DEF_MAX_PATH;
+	print_config_value("MaxPath", &conf.max_path, &n, DUMP_CONFIG_INT);
+	n = DEF_MAX_PRINTSEL;
+	print_config_value("MaxPrintSelfiles", &conf.max_printselfiles, &n, DUMP_CONFIG_INT);
+	n = DEF_MIN_NAME_TRIM;
+	print_config_value("MinFilenameTrim", &conf.min_name_trim, &n, DUMP_CONFIG_INT);
+	n = DEF_MIN_JUMP_RANK;
+	print_config_value("MinJumpRank", &conf.min_jump_rank, &n, DUMP_CONFIG_INT);
+	n = DEF_MV_CMD;
+	print_config_value("mvCmd", &conf.mv_cmd, &n, DUMP_CONFIG_INT);
+	s = "";
+	print_config_value("Opener", conf.opener, s, DUMP_CONFIG_STR);
+	n = DEF_PAGER;
+	print_config_value("Pager", &conf.pager, &n, conf.pager > 1 ? DUMP_CONFIG_INT : DUMP_CONFIG_BOOL);
+	n = DEF_PRINTSEL;
+	print_config_value("PrintSelfiles", &conf.print_selfiles, &n, DUMP_CONFIG_BOOL);
+	n = DEF_PRIVATE_WS_SETTINGS;
+	print_config_value("PrivateWorkspaceSettings", &conf.private_ws_settings, &n, DUMP_CONFIG_BOOL);
+	s = DEF_PROP_FIELDS;
+	print_config_value("PropFields", prop_fields_str, s, DUMP_CONFIG_STR);
+	n = DEF_PURGE_JUMPDB;
+	print_config_value("PurgeJumpDB", &conf.purge_jumpdb, &n, DUMP_CONFIG_BOOL);
+	n = DEF_RESTORE_LAST_PATH;
+	print_config_value("RestoreLastPath", &conf.restore_last_path, &n, DUMP_CONFIG_BOOL);
+	n = DEF_RL_EDIT_MODE;
+	print_config_value("RlEditMode", &rl_editing_mode, &n, DUMP_CONFIG_INT);
+	n = DEF_RM_FORCE;
+	print_config_value("rmForce", &conf.rm_force, &n, DUMP_CONFIG_BOOL);
+	n = DEF_SEARCH_STRATEGY;
+	print_config_value("SearchStrategy", &conf.search_strategy, &n, DUMP_CONFIG_INT);
+	n = DEF_SHARE_SELBOX;
+	print_config_value("ShareSelbox", &conf.share_selbox, &n, DUMP_CONFIG_BOOL);
+	n = DEF_SHOW_HIDDEN;
+	print_config_value("ShowHiddenFiles", &conf.show_hidden, &n, DUMP_CONFIG_BOOL);
+	n = DEF_SORT;
+	print_config_value("Sort", &conf.sort, &n, DUMP_CONFIG_INT);
+	n = DEF_SORT_REVERSE;
+	print_config_value("SortReverse", &conf.sort_reverse, &n, DUMP_CONFIG_BOOL);
+	n = DEF_SPLASH_SCREEN;
+	print_config_value("SplashScreen", &conf.splash_screen, &n, DUMP_CONFIG_BOOL);
+
+#ifndef _NO_SUGGESTIONS
+	n = DEF_CMD_DESC_SUG;
+	print_config_value("SuggestCmdDesc", &conf.cmd_desc_sug, &n, DUMP_CONFIG_BOOL);
+	n = DEF_SUG_FILETYPE_COLOR;
+	print_config_value("SuggestFiletypeColor", &conf.suggest_filetype_color, &n, DUMP_CONFIG_BOOL);
+	s = DEF_SUG_STRATEGY;
+	print_config_value("SuggestionStrategy", conf.suggestion_strategy, s, DUMP_CONFIG_STR);
+#endif
+#ifndef _NO_HIGHLIGHT
+	n = DEF_HIGHLIGHT;
+	print_config_value("SyntaxHighlighting", &conf.highlight, &n, DUMP_CONFIG_BOOL);
+#endif
+
+	char *ss = get_tab_comp_mode_str();
+	print_config_value("TabCompletionMode", ss,
+#ifndef _NO_FZF
+		(flags & FZF_BIN_OK) ? "fzf" : "standard",
+#else
+		"standard",
+#endif
+		DUMP_CONFIG_STR);
+	free(ss);
+
+	s = DEF_TERM_CMD;
+	print_config_value("TerminalCmd", conf.term, s, DUMP_CONFIG_STR);
+	n = DEF_TIPS;
+	print_config_value("Tips", &conf.tips, &n, DUMP_CONFIG_BOOL);
+
+#ifndef _NO_TRASH
+	n = DEF_TRASRM;
+	print_config_value("TrashAsRm", &conf.tr_as_rm, &n, DUMP_CONFIG_BOOL);
+#endif
+
+	n = DEF_UNICODE;
+	print_config_value("Unicode", &conf.unicode, &n, DUMP_CONFIG_BOOL);
+
+	n = DEF_WELCOME_MESSAGE;
+	print_config_value("WelcomeMessage", &conf.welcome_message, &n, DUMP_CONFIG_BOOL);
+	s = DEF_WELCOME_MESSAGE_STR;
+	print_config_value("WelcomeMessageStr", conf.welcome_message_str, s, DUMP_CONFIG_STR);
+
+	s = "";
+	char *ws_names_line = get_ws_names_line();
+	print_config_value("WorkspaceNames", ws_names_line, s, DUMP_CONFIG_STR);
+	free(ws_names_line);
+
+	return EXIT_SUCCESS;
+}
+
 /* Edit the config file, either via the mime function or via the first
  * passed argument (Ex: 'edit nano'). The 'gen' option regenerates
  * the configuration file and creates a back up of the old one */
 int
-edit_function(char **comm)
+edit_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
 		return EXIT_SUCCESS;
 	}
 
-	if (comm[1] && IS_HELP(comm[1])) {
+	if (*args[0] == 'e') {
+		_err('n', PRINT_PROMPT, "%s: The 'edit' command is deprecated. "
+			"Use 'config' instead\n", PROGRAM_NAME);
+	}
+
+	if (args[1] && IS_HELP(args[1])) {
 		printf("%s\n", EDIT_USAGE);
 		return EXIT_SUCCESS;
 	}
 
-	if (comm[1] && *comm[1] == 'r' && strcmp(comm[1], "reset") == 0)
+	if (args[1] && *args[1] == 'd' && strcmp(args[1], "dump") == 0)
+		return dump_config();
+
+	if (args[1] && *args[1] == 'r' && strcmp(args[1], "reset") == 0)
 		return regen_config();
 
 	if (config_ok == 0) {
@@ -146,9 +419,9 @@ edit_function(char **comm)
 	int ret = EXIT_SUCCESS;
 
 	/* If there is an argument... */
-	if (comm[1]) {
-		char *cmd[] = {comm[1], config_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	if (args[1]) {
+		char *cmd[] = {args[1], config_file, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		/* If no application was passed as 2nd argument */
 		open_in_foreground = 1;
@@ -157,7 +430,7 @@ edit_function(char **comm)
 	}
 
 	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+		return ret;
 
 	/* Get modification time after opening the config file */
 	stat(config_file, &attr);
@@ -1864,7 +2137,7 @@ get_line_value(char *line)
 	return remove_quotes(line);
 }
 
-static inline int
+static int
 set_fzf_preview_value(const char *line, int *var)
 {
 	char *p = strchr(line, '=');

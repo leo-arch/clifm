@@ -290,9 +290,9 @@ remotes_edit(char *app)
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	int ret = EXIT_SUCCESS;
-	if (app) {
+	if (app && *app) {
 		char *cmd[] = {app, remotes_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(remotes_file);
@@ -333,7 +333,7 @@ remotes_function(char **args)
 	}
 
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
-		return remotes_edit(args[2] ? args[2] : NULL);
+		return remotes_edit(args[2]);
 
 	if (*args[1] == 'u' && (!*(args[1] + 1) || strcmp(args[1], "unmount") == 0)) {
 		if (!args[2]) {

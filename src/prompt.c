@@ -1110,7 +1110,7 @@ set_default_prompt(void)
 }
 
 static int
-edit_prompts_file(void)
+edit_prompts_file(char *app)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: prompt: %s\n", PROGRAM_NAME, STEALTH_DISABLED);
@@ -1130,9 +1130,16 @@ edit_prompts_file(void)
 
 	time_t old_time = a.st_mtime;
 
-	open_in_foreground = 1;
-	int ret = open_file(prompts_file);
-	open_in_foreground = 0;
+	int ret = EXIT_FAILURE;
+	if (app && *app) {
+		char *cmd[] = {app, prompts_file, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	} else {
+		open_in_foreground = 1;
+		ret = open_file(prompts_file);
+		open_in_foreground = 0;
+	}
+
 	if (ret != EXIT_SUCCESS)
 		return ret;
 
@@ -1150,7 +1157,7 @@ edit_prompts_file(void)
 }
 
 int
-prompt_function(char *arg)
+prompt_function(char *arg, char *app)
 {
 	if (!arg || !*arg || (*arg == 'l' && strcmp(arg, "list") == 0))
 		return list_prompts();
@@ -1164,7 +1171,7 @@ prompt_function(char *arg)
 		return set_default_prompt();
 
 	if (*arg == 'e' && strcmp(arg, "edit") == 0)
-		return edit_prompts_file();
+		return edit_prompts_file(app);
 
 	if (*arg == 'r' && strcmp(arg, "reload") == 0) {
 		int ret = load_prompts();

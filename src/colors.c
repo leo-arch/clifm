@@ -590,25 +590,23 @@ edit_colorscheme(char *app)
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	int ret = EXIT_FAILURE;
-	char *app_path = (char *)NULL;
-	if (app && *app && (app_path = get_cmd_path(app)) != NULL) {
-		char *cmd[] = {app_path, file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
-			ret = EXIT_SUCCESS;
-		free(app_path);
+	if (app && *app) {
+		char *cmd[] = {app, file, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(file);
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_FAILURE) {
-		stat(file, &attr);
-		if (mtime_bfr != (time_t)attr.st_mtime
-		&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && conf.autols == 1) {
-			set_fzf_preview_border_type();
-			reload_dirlist();
-		}
+	if (ret != EXIT_SUCCESS)
+		return ret;
+
+	stat(file, &attr);
+	if (mtime_bfr != (time_t)attr.st_mtime
+	&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS && conf.autols == 1) {
+		set_fzf_preview_border_type();
+		reload_dirlist();
 	}
 
 	return ret;

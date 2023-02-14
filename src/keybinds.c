@@ -132,7 +132,7 @@ kbinds_edit(char *app)
 	int ret = EXIT_SUCCESS;
 	if (app && *app) {
 		char *cmd[] = {app, kbinds_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(kbinds_file);

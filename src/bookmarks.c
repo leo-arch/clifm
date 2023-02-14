@@ -629,7 +629,6 @@ bookmark_add(char *file)
 static int
 edit_bookmarks(char *cmd, const int flag)
 {
-	int exit_status = EXIT_SUCCESS;
 	struct stat a;
 	if (stat(bm_file, &a) == -1) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "bookmarks: %s: %s\n", bm_file, strerror(errno));
@@ -637,23 +636,20 @@ edit_bookmarks(char *cmd, const int flag)
 	}
 	time_t prev = a.st_mtime;
 
+	int ret = EXIT_SUCCESS;
 	if (!cmd) {
 		open_in_foreground = 1;
-		exit_status = open_file(bm_file);
+		ret = open_file(bm_file);
 		open_in_foreground = 0;
 	} else {
 		char *tmp_cmd[] = {cmd, bm_file, NULL};
-		exit_status = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
+		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 	}
 
-	if (exit_status != EXIT_SUCCESS) {
-		if (cmd) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: %s: %s\n"), cmd, strerror(errno));
-			exit_status = errno;
-		} else {
+	if (ret != EXIT_SUCCESS) {
+		if (!cmd)
 			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bookmarks: Error opening the bookmarks file\n"));
-		}
-		return exit_status;
+		return ret;
 	}
 
 	stat(bm_file, &a);

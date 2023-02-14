@@ -420,7 +420,7 @@ edit_history(char **args)
 	/* If we have an opening application (2nd argument) */
 	if (args[2]) {
 		char *cmd[] = {args[2], hist_file, NULL};
-		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		open_in_foreground = 1;
 		ret = open_file(hist_file);

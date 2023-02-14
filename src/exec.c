@@ -1723,9 +1723,7 @@ static int
 lira_function(char **args)
 {
 #ifndef _NO_LIRA
-	if (mime_open(args) == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
-	return EXIT_FAILURE;
+	return mime_open(args);
 #else
 	UNUSED(args);
 	fprintf(stderr, "%s: lira: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
@@ -2500,7 +2498,7 @@ exec_cmd(char **comm)
 
 	/*    ############### PROMPT ##################     */
 	else if (*comm[0] == 'p' && strcmp(comm[0], "prompt") == 0)
-		return (exit_code = prompt_function(comm[1] ? comm[1] : NULL));
+		return (exit_code = prompt_function(comm[1], comm[1] ? comm[2] : NULL));
 
 	/*    ############### PROPERTIES ##################     */
 	else if (*comm[0] == 'p' && (!comm[0][1] || strcmp(comm[0], "pr") == 0
@@ -2696,6 +2694,7 @@ exec_cmd(char **comm)
 		return (exit_code = alias_function(comm));
 
 	/* #### EDIT #### */
+	/* The 'edit' command is deprecated */
 	else if ((*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
 	|| (*comm[0] == 'c' && strcmp(comm[0], "config") == 0))
 		return (exit_code = edit_function(comm));

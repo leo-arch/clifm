@@ -604,8 +604,8 @@ mime_edit(char **args)
 
 	} else {
 		char *cmd[] = {args[2], mime_file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
+		if ((exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS)
+			return exit_status;
 	}
 
 	stat(mime_file, &a);

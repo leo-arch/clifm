@@ -38,6 +38,7 @@
 #include "aux.h"
 #include "checks.h"
 #include "colors.h" /* get_dir_color() */
+#include "exec.h"
 #include "file_operations.h"
 #include "init.h"
 #include "navigation.h"
@@ -261,7 +262,7 @@ save_jumpdb(void)
 }
 
 int
-edit_jumpdb(void)
+edit_jumpdb(char *app)
 {
 	if (!config_ok || !config_dir)
 		return EXIT_FAILURE;
@@ -280,10 +281,20 @@ edit_jumpdb(void)
 
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
-	char *cmd[] = {"o", jump_file, NULL};
-	open_in_foreground = 1;
-	open_function(cmd);
-	open_in_foreground = 0;
+	int ret = EXIT_FAILURE;
+	if (app && *app) {
+		char *cmd[] = {app, jump_file, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	} else {
+		open_in_foreground = 1;
+		ret = open_file(jump_file);
+		open_in_foreground = 0;
+	}
+
+	if (ret != EXIT_SUCCESS) {
+		free(jump_file);
+		return ret;
+	}
 
 	stat(jump_file, &attr);
 
@@ -580,7 +591,7 @@ dirjump(char **args, int mode)
 		}
 
 		if (args[1] && *args[1] == '-' && strcmp(args[1], "--edit") == 0)
-			return edit_jumpdb();
+			return edit_jumpdb(args[2]);
 
 		if (args[1] && *args[1] == '-' && strcmp(args[1], "--purge") == 0)
 			return _purge_jumpdb(args[2]);
@@ -589,7 +600,7 @@ dirjump(char **args, int mode)
 	enum jump jump_opt = NONE;
 
 	switch (args[0][1]) {
-	case 'e': return edit_jumpdb();
+	case 'e': return edit_jumpdb(NULL);
 	case 'c': jump_opt = JCHILD; break;
 	case 'p': jump_opt = JPARENT; break;
 	case 'o': jump_opt = JORDER; break;
