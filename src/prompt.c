@@ -35,6 +35,7 @@
 #include <readline/readline.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <unistd.h> /* Required by CLEAR macro (for write(3)) */
 
 #include "aux.h"
 #include "exec.h"
@@ -943,7 +944,6 @@ initialize_prompt_data(void)
 #endif
 
 	/* Print error messages */
-//	if ((!(flags & GUI) || desktop_notis != 1) && print_msg == 1 && msgs_n > 0) {
 	if (print_msg == 1 && msgs_n > 0) {
 		fputs(messages[msgs_n - 1], stderr);
 		print_msg = 0; /* Print messages only once */
@@ -1008,9 +1008,11 @@ prompt(void)
 
 	if (!input || !*input || rl_end == 0) {
 		free(input);
-//		if ((flags & DELAYED_REFRESH) || xargs.refresh_on_empty_line == 1) {
 		if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
 		|| xargs.refresh_on_empty_line == 1)) {
+			if (conf.clear_screen == 1) {
+				CLEAR; fflush(stdout);
+			}
 			flags &= ~DELAYED_REFRESH;
 			reload_dirlist();
 		} else {
