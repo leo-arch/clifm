@@ -863,7 +863,7 @@ dirjump(char **args, int mode)
 		}
 	}
 
-	if (!found) {
+	if (found == 0) {
 		if (mode == NO_SUG_JUMP)
 			printf(_("jump: No matches found\n"));
 		exit_status = EXIT_FAILURE;
@@ -873,6 +873,8 @@ dirjump(char **args, int mode)
 				exit_status = cd_function(matches[best_ranked], CD_PRINT_ERROR);
 			else
 				exit_status = save_suggestion(matches[best_ranked]);
+		} else {
+			exit_status = EXIT_SUCCESS;
 		}
 	}
 
