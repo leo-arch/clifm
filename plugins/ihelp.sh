@@ -93,10 +93,10 @@ cc, colors@
 cd @
 cl, columns@
 cmd, commands@
+config @
 cs, colorscheme@
 d, dup@
 ds, desel@
-edit @
 exp @
 ext @
 f, forth@
