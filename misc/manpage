@@ -2078,7 +2078,7 @@ bmi
 T}	Import bookmarks	bm_import.sh	-
 T{
 clip
-T}	Interact with the primary clipboard	clip.sh	xclip
+T}	Interact with the primary clipboard	clip.sh	\fB(1)\fR
 T{
 T}	Test you terminal colors capability	colors.sh	-
 T{
@@ -2163,6 +2163,8 @@ T}	Set image as wallpaper	wallpaper_setter.sh	feh, xloadimage, or hsetroot
 .TE
 
 .sp
+\fB(1)\fR xclip or xsel (Xorg), wl-copy/wl-paste (Wayland), clipboard (Haiku), clip (Cygwin), pbcopy/pbget (MacOS), termux-clipboard-get/termux-clipboard-set (Termux), cb (cross-platform: https://github.com/Slackadays/Clipboard)
+
 .B Dependencies of the previewer plugin (fzfnav.sh)
 
   \fBarchives\fR: atool, bsdtar, or tar
