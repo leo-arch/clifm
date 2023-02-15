@@ -399,12 +399,14 @@ get_new_perms(char *str, const int diff)
 	prompt_offset = 3;
 	xrename = 2; /* Completely disable TAB completion */
 
-	if (diff == 1)
-		printf(_("Files with different sets of permissions\n"
-			"Only shared permission bits are set in the template\n"));
-	char m[NAME_MAX];
-	snprintf(m, sizeof(m), _("Edit file permissions (Ctrl-d to quit)\n"
-		"\001%s\002>\001%s\002 "), mi_c, tx_c);
+	if (diff == 1) {
+		puts(_("Files with different sets of permissions\n"
+			"Only shared permission bits are set in the template"));
+	}
+	puts("Edit file permissions (Ctrl-d to quit)\n"
+		"Both symbolic and numeric notation are supported");
+	char m[(MAX_COLOR * 2) + 7];
+	snprintf(m, sizeof(m), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	alt_rl_prompt(m, str);
 
@@ -573,14 +575,16 @@ get_new_ownership(char *str, const int diff)
 {
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
-	xrename = 3; /* Allow only completion for user and group names */
+	xrename = 3; /* Allow completion only for user and group names */
 
-	if (diff == 1)
+	if (diff == 1) {
 		printf(_("%sFiles with different owners\n"
 			"Only common owners are set in the template\n"), tx_c);
-	char m[NAME_MAX];
-	snprintf(m, sizeof(m), _("%sEdit file ownership (Ctrl-d to quit)\n"
-		"\001%s\002>\001%s\002 "), tx_c, mi_c, tx_c);
+	}
+	printf(_("%sEdit file ownership (Ctrl-d to quit)\n"
+		"Both ID numbers and names are supported\n"), tx_c);
+	char m[(MAX_COLOR * 2) + 7];
+	snprintf(m, sizeof(m), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	alt_rl_prompt(m, str);
 
@@ -693,8 +697,8 @@ set_file_owner(char **args)
 	struct passwd *owner = (struct passwd *)NULL;
 	struct group *group = (struct group *)NULL;
 
-	// Validate new ownership
-	if (*new_own) { // *NEW_OWN is null in case of ":group" or ":gid"
+	/* Validate new ownership */
+	if (*new_own) { /* *NEW_OWN is null in case of ":group" or ":gid" */
 		if (is_number(new_own))
 			owner = getpwuid((uid_t)atoi(new_own));
 		else
@@ -720,7 +724,7 @@ set_file_owner(char **args)
 		}
 	}
 
-	// Change ownership
+	/* Change ownership */
 	struct stat a;
 	size_t new_o = 0, new_g = 0, i;
 

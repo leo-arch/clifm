@@ -566,9 +566,14 @@ bleach_files(char **names)
 		if (sl) {
 			*sl = '\0';
 			bfiles[f].replacement = (char *)xnmalloc(nlen + strlen(p) + 2, sizeof(char));
+//			Fix comp warning with -O3 and -Wformat -Werror=format-security
+//			Why? p comes from clean_file_name(), which returns at most NAME_MAX
+//			bfiles[f].replacement = (char *)xnmalloc(nlen + strnlen(p, NAME_MAX) + 2, sizeof(char));
 			sprintf(bfiles[f].replacement, "%s/%s", names[i], p);
 			*sl = '/';
 		} else {
+//			Fix comp warning with -O3 and -Wformat -Werror=format-security
+//			bfiles[f].replacement = savestring(p, strnlen(p, NAME_MAX));
 			bfiles[f].replacement = savestring(p, strlen(p));
 		}
 		printf("%s %s->%s %s\n", bfiles[f].original, mi_c, df_c, bfiles[f].replacement);

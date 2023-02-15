@@ -134,6 +134,9 @@ log_function(char **cmd)
 
 	char *date = get_date();
 
+// Fix comp warning with -O3 and -Wformat -Werror=format-security
+// Why? date comes from get_date(), which returns at most 128 bytes
+//	size_t log_len = strnlen(date, 128);
 	size_t log_len = strlen(date)
 		+ (workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 2)
 		+ strlen(last_cmd) + 8;

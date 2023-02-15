@@ -2188,7 +2188,6 @@ rl_suggestions(const unsigned char c)
 	&& (!rl_line_buffer || (rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '))
 	&& (cdesc = check_int_cmd_desc(word, wlen)) != NULL) {
 		suggestion.type = CMD_DESC_SUG;
-//		print_suggestion(cdesc, 0, conf.colorize == 1 ? sd_c : SUG_NO_COLOR);
 		print_suggestion(cdesc, 0, sd_c);
 		printed = PARTIAL_MATCH;
 		goto SUCCESS;
@@ -2692,12 +2691,7 @@ SUCCESS:
 			if (rl_point < rl_end && suggestion_buf && rl_line_buffer && *rl_line_buffer) {
 				print_suggestion(suggestion_buf, wc_xstrlen(rl_line_buffer), suggestion.color);
 				suggestion.printed = 1;
-			} /*else {
-				printf("'a'"); fflush(stdout); sleep(1);
-				suggestion.printed = 0;
-				if (suggestion_buf)
-					clear_suggestion(CS_FREEBUF);
-			} */
+			}
 		}
 
 		fputs(NC, stdout);

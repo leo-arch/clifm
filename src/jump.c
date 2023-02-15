@@ -865,7 +865,7 @@ dirjump(char **args, int mode)
 
 	if (found == 0) {
 		if (mode == NO_SUG_JUMP)
-			printf(_("jump: No matches found\n"));
+			puts(_("jump: No matches found"));
 		exit_status = EXIT_FAILURE;
 	} else {
 		if (jump_opt != JLIST) {
