@@ -92,7 +92,6 @@ _clifm ()
         --enable-logs
         --full-dir-size
         --fuzzy-matching
-        --fzfpreview
         --fzfpreview-hidden
         --fzftab
         --fzytab
@@ -113,6 +112,7 @@ _clifm ()
         --no-file-ext
         --no-files-counter
         --no-follow-symlinks
+        --no-fzfpreview
         --no-highlight
         --no-history
         --no-open-auto
