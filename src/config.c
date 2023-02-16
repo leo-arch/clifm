@@ -767,7 +767,7 @@ create_preview_file(void)
 \n\
 # For syntax details consult the mimelist.clifm file\n\
 \n\
-# Uncomment this line to use pistol (or any other previewing script)\n\
+# Uncomment this line to use pistol (or any other previewing program)\n\
 #.*=pistol\n\
 \n\
 # Uncomment and edit this line to use Ranger's scope script:\n\
@@ -2859,11 +2859,12 @@ read_config(void)
 				*conf.fzftab_options = '\0';
 			} else {
 				free(conf.fzftab_options);
-				if (xargs.secure_cmds != 1 || sanitize_cmd(tmp, SNT_BLACKLIST) == EXIT_SUCCESS) {
+				if (sanitize_cmd(tmp, SNT_BLACKLIST) == EXIT_SUCCESS) {
 					conf.fzftab_options = savestring(tmp, strlen(tmp));
 				} else {
 					_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
-						"unsafe characters. Falling back to default values\n"), PROGRAM_NAME);
+						"unsafe characters (<>|;&$`). Falling back to default "
+						"values.\n"), PROGRAM_NAME);
 					char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
 					conf.fzftab_options = savestring(p, strlen(p));
 				}

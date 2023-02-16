@@ -3472,10 +3472,9 @@ check_options(void)
 	smenutab_options_env = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
 		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
 
-	if (xargs.secure_cmds == 1 && smenutab_options_env
-	&& sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
+	if (smenutab_options_env && sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
 		_err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS value contains unsafe "
-			"characters. Value rejected.\n", PROGRAM_NAME);
+			"characters (<>|;&$`). Falling back to default values.\n", PROGRAM_NAME);
 		smenutab_options_env = (char *)NULL;
 	}
 #else

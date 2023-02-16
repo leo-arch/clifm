@@ -1199,13 +1199,13 @@ set_fzf_opts(char *line)
 		*conf.fzftab_options = '\0';
 	}
 
-	else if (xargs.secure_cmds != 1 || sanitize_cmd(line, SNT_BLACKLIST) == EXIT_SUCCESS) {
+	else if (sanitize_cmd(line, SNT_BLACKLIST) == EXIT_SUCCESS) {
 		conf.fzftab_options = savestring(line, strlen(line));
 	}
 
 	else {
 		_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
-			"unsafe characters. Falling back to default values\n"), PROGRAM_NAME);
+			"unsafe characters (<>|;&$`). Falling back to default values.\n"), PROGRAM_NAME);
 		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
 		conf.fzftab_options = savestring(p, strlen(p));
 	}

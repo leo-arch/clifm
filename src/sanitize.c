@@ -41,7 +41,7 @@ static char **new_env = (char **)NULL;
 
 /* Unset environ: little implementation of clearenv(3), not available
  * on some systems (not POSIX) */
-static inline void
+static void
 xclearenv(void)
 {
 	environ = NULL; /* This seems to be enough (it is it according to
@@ -70,7 +70,7 @@ xclearenv(void)
 	} */
 }
 
-static inline void
+static void
 set_path_env(void)
 {
 	int ret = -1;
@@ -93,7 +93,7 @@ set_path_env(void)
 	}
 }
 
-static inline void
+static void
 xsetenv(const char *name, const char *value)
 {
 	if (setenv(name, value, 1) == -1)
@@ -287,7 +287,7 @@ restore_cmd_environ(void)
 }
 
 /* Sanitize cmd string coming from the mimelist file */
-static inline int
+static int
 sanitize_mime(char *cmd)
 {
 	/* Only %f is allowed */
@@ -307,7 +307,7 @@ sanitize_mime(char *cmd)
 }
 
 /* Sanitize cmd string coming from the net file */
-static inline int
+static int
 sanitize_net(char *cmd)
 {
 	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_NET))
@@ -317,7 +317,7 @@ sanitize_net(char *cmd)
 }
 
 /* Sanitize value of DISPLAY env var */
-static inline int
+static int
 sanitize_misc(char *str)
 {
 	if (strlen(str) > strspn(str, ALLOWED_CHARS_MISC))
@@ -327,7 +327,7 @@ sanitize_misc(char *str)
 }
 
 /* Sanitize value of DISPLAY env var */
-static inline int
+static int
 sanitize_display(char *str)
 {
 	if (strlen(str) > strspn(str, ALLOWED_CHARS_DISPLAY))
@@ -337,7 +337,7 @@ sanitize_display(char *str)
 }
 
 /* Sanitize cmd string coming from profile, prompt, and autocmds */
-static inline int
+static int
 sanitize_gral(char *cmd)
 {
 	if (strlen(cmd) > strspn(cmd, ALLOWED_CHARS_GRAL))
@@ -346,20 +346,38 @@ sanitize_gral(char *cmd)
 	return EXIT_SUCCESS;
 }
 
-/* Returns 1 if at least one character in CMD is found in BLACKLISTED_CHARS
+/* Returns 1 if at least one character in CMD is a non-escaped blacklisted char (<>|;&$)
  * Oterwise, returns 0 */
-static inline int
+static int
 sanitize_blacklist(char *cmd)
 {
-	if (strlen(cmd) > strcspn(cmd, BLACKLISTED_CHARS))
-		return EXIT_FAILURE;
+	if (!cmd || !*cmd)
+		return EXIT_SUCCESS;
+
+	size_t i;
+	for (i = 0; cmd[i]; i++) {
+		switch(cmd[i]) {
+		case '<': /* fallthrough */
+		case '>': /* fallthrough */
+		case '|': /* fallthrough */
+		case ';': /* fallthrough */
+		case '&': /* fallthrough */
+		case '$': /* fallthrough */
+		case '`':
+			if (i == 0 || cmd[i - 1] != '\\')
+				return EXIT_FAILURE;
+			break;
+		default: break;
+		}
+	}
+
 	return EXIT_SUCCESS;
 }
 
 /* Check if command name in STR contains slashes. Return 1 if found,
  * zero otherwise. This means: do not allow custom scripts or binaries,
  * but only whatever could be found in the sanitized PATH variable */
-static inline int
+static int
 clean_cmd(char *str)
 {
 	if (!str || !*str)

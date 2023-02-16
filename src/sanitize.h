@@ -55,7 +55,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\
  * &: AND list
  * $`: Command substitution/environment variables
  * ;: Sequential execution */
-#define BLACKLISTED_CHARS "<>|;&$`"
+//#define BLACKLISTED_CHARS "<>|;&$`"
 
 __BEGIN_DECLS
 
