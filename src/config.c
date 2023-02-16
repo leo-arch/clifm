@@ -83,19 +83,15 @@ regen_config(void)
 		char date[18];
 		strftime(date, sizeof(date), "%Y%m%d@%H:%M:%S", &t);
 
-		char *bk = (char *)xnmalloc(strlen(config_file)
-			+ strnlen(date, sizeof(date)) + 2, sizeof(char));
-		sprintf(bk, "%s.%s", config_file, date);
+		char bk[PATH_MAX];
+		snprintf(bk, sizeof(bk), "%s.%s", config_file, date);
 
 		char *cmd[] = {"mv", config_file, bk, NULL};
 
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			free(bk);
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			return EXIT_FAILURE;
-		}
 
 		printf(_("Old configuration file stored as '%s'\n"), bk);
-		free(bk);
 	}
 
 	if (create_config(config_file) != EXIT_SUCCESS)
@@ -399,8 +395,8 @@ edit_function(char **args)
 		return regen_config();
 
 	if (config_ok == 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Cannot access the configuration file\n"),
-			PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Cannot access the "
+			"configuration file\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -530,7 +526,7 @@ set_sel_file(void)
 	if (!config_dir)
 		return;
 
-	if (!conf.share_selbox) {
+	if (conf.share_selbox == 0) {
 		/* Private selection box is stored in the profile directory */
 		sel_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
 		sprintf(sel_file, "%s/selbox.clifm", config_dir);
@@ -557,7 +553,7 @@ create_kbinds_file(void)
 	/* If not, try to import it from DATADIR */
 	if (data_dir) {
 		char sys_file[PATH_MAX];
-		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings.clifm", data_dir, PNL);
+		snprintf(sys_file, sizeof(sys_file), "%s/%s/keybindings.clifm", data_dir, PNL);
 		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
 			char *cmd[] = {"cp", sys_file, kbinds_file, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
@@ -726,7 +722,7 @@ import_from_data_dir(char *src_filename, char *dest)
 
 	struct stat attr;
 	char sys_file[PATH_MAX];
-	snprintf(sys_file, PATH_MAX - 1, "%s/%s/%s", data_dir, PNL, src_filename);
+	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PNL, src_filename);
 	if (stat(sys_file, &attr) == -1)
 		return EXIT_FAILURE;
 
@@ -953,7 +949,7 @@ create_tmp_files(void)
 		return;
 
 	/*"We will write a temporary selfile in /tmp. Check if this latter is available */
-	if (!tmp_root_ok) {
+	if (tmp_root_ok == 0) {
 		_err('w', PRINT_PROMPT, "%s: Could not create the selections file.\n"
 			"Selected files will be lost after program exit\n",
 		    PROGRAM_NAME, tmp_dir);
@@ -962,17 +958,13 @@ create_tmp_files(void)
 
 	/* If the config directory isn't available, define an alternative
 	 * selection file in /tmp (if available) */
-	if (!conf.share_selbox) {
-		size_t prof_len = 0;
-
-		if (alt_profile)
-			prof_len = strlen(alt_profile);
-		else
-			prof_len = 7; /* Lenght of "default" */
+	if (conf.share_selbox == 0) {
+		size_t prof_len = alt_profile ? strlen(alt_profile) : 7;
+		/* 7 == lenght of "default" */
 
 		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 15, sizeof(char));
 		sprintf(sel_file, "%s/selbox_%s.clifm", P_tmpdir,
-		    (alt_profile) ? alt_profile : "default");
+		    alt_profile ? alt_profile : "default");
 	} else {
 		sel_file = (char *)xnmalloc(P_tmpdir_len + 14, sizeof(char));
 		sprintf(sel_file, "%s/selbox.clifm", P_tmpdir);
@@ -1158,8 +1150,8 @@ define_config_file_names(void)
 		 * from a passwd struct) */
 		char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 		if (xdg_config_home) {
-			size_t xdg_config_home_len = strlen(xdg_config_home);
-			config_dir_gral = (char *)xnmalloc(xdg_config_home_len + pnl_len + 2, sizeof(char));
+			size_t len = strlen(xdg_config_home);
+			config_dir_gral = (char *)xnmalloc(len + pnl_len + 2, sizeof(char));
 			sprintf(config_dir_gral, "%s/%s", xdg_config_home, PNL);
 			xdg_config_home = (char *)NULL;
 		} else {
@@ -1175,7 +1167,7 @@ define_config_file_names(void)
 	size_t config_gral_len = strlen(config_dir_gral);
 
 	/* alt_profile will not be NULL whenever the -P option is used
-	 * to run the program under an alternative profile */
+	 * to run clifm under an alternative profile */
 	if (alt_profile) {
 		config_dir = (char *)xnmalloc(config_gral_len + strlen(alt_profile) + 11, sizeof(char));
 		sprintf(config_dir, "%s/profiles/%s", config_dir_gral, alt_profile);
@@ -1267,15 +1259,14 @@ import_rl_file(void)
 		return EXIT_FAILURE;
 
 	char tmp[PATH_MAX];
-	sprintf(tmp, "%s/readline.clifm", config_dir_gral);
+	snprintf(tmp, sizeof(tmp), "%s/readline.clifm", config_dir_gral);
 	struct stat attr;
 	if (lstat(tmp, &attr) == 0)
 		return EXIT_SUCCESS;
 
-	char rl_file[PATH_MAX];
-	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.clifm", data_dir, PNL);
-	if (stat(rl_file, &attr) == EXIT_SUCCESS) {
-		char *cmd[] = {"cp", rl_file, config_dir_gral, NULL};
+	snprintf(tmp, sizeof(tmp), "%s/%s/readline.clifm", data_dir, PNL);
+	if (stat(tmp, &attr) == EXIT_SUCCESS) {
+		char *cmd[] = {"cp", tmp, config_dir_gral, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
 	}
@@ -1288,7 +1279,7 @@ create_config(char *file)
 {
 	/* First, try to import it from DATADIR */
 	char src_filename[NAME_MAX];
-	snprintf(src_filename, NAME_MAX, "%src", PNL);
+	snprintf(src_filename, sizeof(src_filename), "%src", PNL);
 	if (import_from_data_dir(src_filename, file) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
@@ -1684,21 +1675,17 @@ create_def_cscheme(void)
 	if (!colors_dir || !*colors_dir)
 		return;
 
-	char *cscheme_file = (char *)xnmalloc(strlen(colors_dir) + 15, sizeof(char));
-	sprintf(cscheme_file, "%s/default.clifm", colors_dir);
+	char cscheme_file[PATH_MAX];
+	snprintf(cscheme_file, sizeof(cscheme_file), "%s/default.clifm", colors_dir);
 
 	/* If the file already exists, do nothing */
 	struct stat attr;
-	if (stat(cscheme_file, &attr) != -1) {
-		free(cscheme_file);
+	if (stat(cscheme_file, &attr) != -1)
 		return;
-	}
 
 	/* Try to import it from data dir */
-	if (import_color_scheme("default") == EXIT_SUCCESS) {
-		free(cscheme_file);
+	if (import_color_scheme("default") == EXIT_SUCCESS)
 		return;
-	}
 
 	/* If cannot be imported either, create it with default values */
 	int fd;
@@ -1706,7 +1693,6 @@ create_def_cscheme(void)
 	if (!fp) {
 		_err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
 			"file: %s\n", PROGRAM_NAME, strerror(errno));
-		free(cscheme_file);
 		return;
 	}
 
@@ -1754,7 +1740,6 @@ itself via escape codes. See the manpage for more information\n"
 		DEF_FZFTAB_OPTIONS);
 
 	close_fstream(fp, fd);
-	free(cscheme_file);
 	return;
 }
 
@@ -1772,7 +1757,7 @@ create_remotes_file(void)
 
 	/* Let's try to copy the file from DATADIR */
 	char sys_remotes[PATH_MAX];
-	snprintf(sys_remotes, PATH_MAX - 1, "%s/%s/nets.clifm", data_dir, PNL);
+	snprintf(sys_remotes, sizeof(sys_remotes), "%s/%s/nets.clifm", data_dir, PNL);
 
 	if (stat(sys_remotes, &attr) == EXIT_SUCCESS) {
 		char *cmd[] = {"cp", "-f", sys_remotes, remotes_file, NULL};
@@ -3036,19 +3021,14 @@ create_trash_dirs(void)
 			return;
 		}
 
-		char *trash_files = (char *)NULL;
-		trash_files = (char *)xnmalloc(strlen(trash_dir) + 7, sizeof(char));
+		char trash_files[PATH_MAX];
+		snprintf(trash_files, sizeof(trash_files), "%s/files", trash_dir);
 
-		sprintf(trash_files, "%s/files", trash_dir);
-		char *trash_info = (char *)NULL;
-		trash_info = (char *)xnmalloc(strlen(trash_dir) + 6, sizeof(char));
+		char trash_info[PATH_MAX];
+		snprintf(trash_info, sizeof(trash_info), "%s/files", trash_dir);
 
-		sprintf(trash_info, "%s/info", trash_dir);
 		char *cmd[] = {"mkdir", "-p", trash_files, trash_info, NULL};
-
 		int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-		free(trash_files);
-		free(trash_info);
 
 		if (ret != EXIT_SUCCESS) {
 			trash_ok = 0;
@@ -3057,7 +3037,7 @@ create_trash_dirs(void)
 		}
 	}
 
-	/* If it exists, check it is writable */
+	/* If it exists, check if it is writable */
 	else if (access(trash_dir, W_OK) == -1) {
 		trash_ok = 0;
 		_err('w', PRINT_PROMPT, _("%s: %s: Directory not writable. "
