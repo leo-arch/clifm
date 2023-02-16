@@ -2124,7 +2124,7 @@ T{
 T}	Jump to a directory in the jump database	jumper.sh	fzf or rofi
 T{
 kbgen
-T}	Get escape codes for keybindings	kbgen.c	Compile first: gcc -o kbgen kbgen.c -lcurses
+T}	Get escape codes for keybindings	kbgen.c	\fB(2)\fR
 T{
 kd
 T}	Decrypt a GnuPG encrypted file	decrypt.sh	gpg, tar, sed, grep
@@ -2159,11 +2159,15 @@ vt
 T}	Virtual directory for sets of files	virtualize.sh	sed
 T{
 wall
-T}	Set image as wallpaper	wallpaper_setter.sh	feh, xloadimage, or hsetroot
+T}	Set image as wallpaper	wallpaper_setter.sh	\fB(3)\fR
 .TE
 
 .sp
 \fB(1)\fR xclip or xsel (Xorg), wl-copy/wl-paste (Wayland), clipboard (Haiku), clip (Cygwin), pbcopy/pbget (MacOS), termux-clipboard-get/termux-clipboard-set (Termux), cb (cross-platform: https://github.com/Slackadays/Clipboard)
+.sp
+\fB(2)\fR It needs to be compiled first: \fIgcc -o kbgen kbgen.c -lcurses\fR
+.sp
+\fB(3)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
 
 .B Dependencies of the previewer plugin (fzfnav.sh)
 
