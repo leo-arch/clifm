@@ -3472,13 +3472,15 @@ check_options(void)
 	char *p = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
 		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
 
-	if (p && sanitize_cmd(p, SNT_BLACKLIST) != EXIT_SUCCESS) {
-		_err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS value contains unsafe "
-			"characters (<>|;&$`). Falling back to default values.\n", PROGRAM_NAME);
-//		smenutab_options_env = (char *)NULL;
-	} else {
-		smenutab_options_env = p;
+	if (p) {
+		if (sanitize_cmd(p, SNT_BLACKLIST) == EXIT_SUCCESS) {
+			smenutab_options_env = p;
+		} else {
+			_err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS value contains unsafe "
+				"characters (<>|;&$`). Falling back to default values.\n", PROGRAM_NAME);
+		}
 	}
+
 #else
 	tabmode = STD_TAB;
 #endif /* _NO_FZF */

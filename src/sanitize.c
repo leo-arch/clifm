@@ -432,8 +432,7 @@ sanitize_cmd(char *str, int type)
 			return EXIT_FAILURE;
 		exit_status = sanitize_gral(str);
 		break;
-	case SNT_BLACKLIST:
-		return sanitize_blacklist(str);
+	case SNT_BLACKLIST: return sanitize_blacklist(str);
 	case SNT_NONE: return EXIT_SUCCESS;
 	default: return EXIT_SUCCESS;
 	}
