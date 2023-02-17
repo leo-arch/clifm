@@ -378,7 +378,7 @@ dump_config(void)
 }
 
 /* Edit the config file, either via the mime function or via the first
- * passed argument (Ex: 'edit nano'). The 'gen' option regenerates
+ * passed argument (Ex: 'edit nano'). The 'reset' option regenerates
  * the configuration file and creates a back up of the old one */
 int
 edit_function(char **args)
@@ -1426,7 +1426,7 @@ LogCmds=%s\n\n"
 MinFilenameTrim=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
-# is removed. If set to -1, directories are kept indefinitely\n\
+# is removed. If set to 0, directories are kept indefinitely\n\
 MinJumpRank=%d\n\n"
 
 	    "# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,\n\

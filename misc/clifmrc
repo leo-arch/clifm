@@ -267,7 +267,7 @@ TerminalCmd="xterm -e"
 SearchStrategy=2
 
 # When a directory rank in the jump database is below MinJumpRank, it
-# will be removed. If set to -1, directories are kept indefinitely
+# will be removed. If set to 0, directories are kept indefinitely
 MinJumpRank=10
 
 # When the sum of all ranks in the jump database reaches MaxJumpTotalRank,
