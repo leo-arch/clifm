@@ -3469,13 +3469,15 @@ check_options(void)
 
 	set_fzf_preview_border_type();
 
-	smenutab_options_env = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
+	char *p = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
 		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
 
-	if (smenutab_options_env && sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
+	if (p && sanitize_cmd(p, SNT_BLACKLIST) != EXIT_SUCCESS) {
 		_err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS value contains unsafe "
 			"characters (<>|;&$`). Falling back to default values.\n", PROGRAM_NAME);
-		smenutab_options_env = (char *)NULL;
+//		smenutab_options_env = (char *)NULL;
+	} else {
+		smenutab_options_env = p;
 	}
 #else
 	tabmode = STD_TAB;
