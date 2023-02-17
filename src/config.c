@@ -50,6 +50,10 @@
 /* Only for config files migration. Remove when needed */
 #include "readline.h"
 
+#define DUMP_CONFIG_STR  0
+#define DUMP_CONFIG_INT  1
+#define DUMP_CONFIG_BOOL 2
+
 #ifndef _NO_FZF
 /* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)
  * Let's do this even if fzftab is not enabled at startup, because this feature
@@ -102,10 +106,6 @@ regen_config(void)
 	return EXIT_SUCCESS;
 }
 
-
-#define DUMP_CONFIG_STR  0
-#define DUMP_CONFIG_INT  1
-#define DUMP_CONFIG_BOOL 2
 static void
 print_config_value(const char *option, void *cur_value, void *def_value, const int type)
 {
@@ -126,7 +126,7 @@ print_config_value(const char *option, void *cur_value, void *def_value, const i
 				? "true" : "false", dv == 1 ? "true" : "false", df_c);
 	}
 
-	else { // CONFIG_BOOL_INT
+	else { /* CONFIG_BOOL_INT */
 		int cv = *((int *)cur_value), dv = *((int *)def_value);
 		if (cv == dv)
 			printf("%s: %d\n", option, cv);
@@ -135,8 +135,8 @@ print_config_value(const char *option, void *cur_value, void *def_value, const i
 	}
 }
 
-// Return a mallo'ced pointer to a string representing the value for
-// TabCompletionMode in the config file
+/* Return a mallo'ced pointer to a string representing the value for
+ * TabCompletionMode in the config file */
 static char *
 get_tab_comp_mode_str(void)
 {
@@ -153,48 +153,55 @@ get_tab_comp_mode_str(void)
 	return s;
 }
 
-static char *
-get_ws_names_line(void)
+static void
+get_start_path_and_ws_names(char **sp, char **ws)
 {
 	if (config_ok == 0 || !config_file)
-		return (char *)NULL;
+		return;
 
 	int fd;
 	FILE *fp = open_fstream_r(config_file, &fd);
 	if (!fp)
-		return (char *)NULL;
+		return;
 
-	char *p = (char *)NULL;
 	char line[PATH_MAX + 15];
 	while (fgets(line, (int)sizeof(line), fp)) {
-		if (*line != 'W' || strncmp(line, "WorkspaceNames=", 15) != 0
-		|| *(line + 15) == '\0')
-			continue;
+		if (*line == 'W' && strncmp(line, "WorkspaceNames=", 15) == 0
+		&& *(line + 15)) {
+			char *tmp = remove_quotes(line + 15);
+			if (!tmp || !*tmp)
+				continue;
 
-		char *tmp = remove_quotes(line + 15);
-		if (!tmp || !*tmp)
-			return (char *)NULL;
+			*ws = savestring(tmp, strlen(tmp));
+		}
 
-		p = savestring(tmp, strlen(tmp));
+		if (*line == 'S' && strncmp(line, "StartingPath=", 13) == 0
+		&& *(line + 13)) {
+			char *tmp = remove_quotes(line + 13);
+			if (!tmp || !*tmp)
+				continue;
+
+			*sp = savestring(tmp, strlen(tmp));
+		}
 	}
 
 	close_fstream(fp, fd);
-	return p;
 }
 
+/* Dump current value of config options (as defined in the config file),
+ * highlighting those that differ from default values.
+ * Note that values displayed here represent the CURRENT status of the
+ * corresponding option, and not necessarily that of the config file:
+ * some of these options can be changed on the fly via commands */
 static int
 dump_config(void)
 {
-	// Values displayed here represent the current status of the
-	// corresponding option, and not necessarilly that of the config file:
-	// some of these options can be changed in the fly via commands
-
-	// MISSING!
-	// StartingPath (Stored in workspaces[cur_ws].path at startup)
-
 	puts("The following is the list of options (as defined in the configuration "
 		"file) and their current values. Whenever a current value differs "
 		"from the default value, this latter is displayed in brackets\n");
+
+	char *start_path = (char *)NULL, *ws_names = (char *)NULL;
+	get_start_path_and_ws_names(&start_path, &ws_names);
 
 	char *s = (char *)NULL;
 	int n = 0;
@@ -318,6 +325,10 @@ dump_config(void)
 	n = DEF_SPLASH_SCREEN;
 	print_config_value("SplashScreen", &conf.splash_screen, &n, DUMP_CONFIG_BOOL);
 
+	s = "";
+	print_config_value("StartingPath", start_path, s, DUMP_CONFIG_STR);
+	free(start_path);
+
 #ifndef _NO_SUGGESTIONS
 	n = DEF_CMD_DESC_SUG;
 	print_config_value("SuggestCmdDesc", &conf.cmd_desc_sug, &n, DUMP_CONFIG_BOOL);
@@ -360,9 +371,8 @@ dump_config(void)
 	print_config_value("WelcomeMessageStr", conf.welcome_message_str, s, DUMP_CONFIG_STR);
 
 	s = "";
-	char *ws_names_line = get_ws_names_line();
-	print_config_value("WorkspaceNames", ws_names_line, s, DUMP_CONFIG_STR);
-	free(ws_names_line);
+	print_config_value("WorkspaceNames", ws_names, s, DUMP_CONFIG_STR);
+	free(ws_names);
 
 	return EXIT_SUCCESS;
 }
@@ -1619,11 +1629,11 @@ MaxPrintSelfiles=%d\n\n"
 ClearScreen=%s\n\n"
 
 	    "# If not specified, StartingPath defaults to the current working\n\
-# directory.\n\
+# directory. If set, it overrides RestoreLastPath\n\
 StartingPath=\n\n"
 
 	    "# If set to true, start CliFM in the last visited directory (and in the\n\
-# last used workspace). This option overrides StartingPath.\n\
+# last used workspace). This option is overriden by StartingPath (if set).\n\
 RestoreLastPath=%s\n\n"
 
 	    "# If set to true, the 'r' command executes 'trash' instead of 'rm' to\n\
@@ -2862,7 +2872,7 @@ read_config(void)
 				if (sanitize_cmd(tmp, SNT_BLACKLIST) == EXIT_SUCCESS) {
 					conf.fzftab_options = savestring(tmp, strlen(tmp));
 				} else {
-					_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
+					_err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains "
 						"unsafe characters (<>|;&$`). Falling back to default "
 						"values.\n"), PROGRAM_NAME);
 					char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;

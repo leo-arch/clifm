@@ -1204,8 +1204,8 @@ set_fzf_opts(char *line)
 	}
 
 	else {
-		_err('w', PRINT_PROMPT, _("%s: FzfTabOptions value contains "
-			"unsafe characters (<>|;&$`). Falling back to default values.\n"), PROGRAM_NAME);
+		_err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains unsafe "
+			"characters (<>|;&$`). Falling back to default values.\n"), PROGRAM_NAME);
 		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
 		conf.fzftab_options = savestring(p, strlen(p));
 	}

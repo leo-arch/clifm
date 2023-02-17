@@ -324,11 +324,11 @@ CaseSensitiveSearch=false
 Unicode=true
 
 # CliFM's starting path. If not specified, it defaults to the current
-# working directory
+# working directory. If set, it overrides RestoreLastPath.
 StartingPath=
 
 # If set to true, start CliFM in the last visited directory (and in the
-# last used workspace). This option overrides StartingPath.
+# last used workspace). This option is overriden by StartingPath (if set).
 RestoreLastPath=true
 
 # MaxPath is only used for the /p option of the prompt: the current
