@@ -1458,8 +1458,8 @@ my_rl_path_completion(const char *text, int state)
 					? TOUPPER(*ent->d_name) != TOUPPER(*filename)
 					: *ent->d_name != *filename)
 					|| (conf.case_sens_path_comp == 0
-					? strncmp(filename, ent->d_name, filename_len) != 0
-					: strncasecmp(filename, ent->d_name, filename_len) != 0) )
+					? strncasecmp(filename, ent->d_name, filename_len) != 0
+					: strncmp(filename, ent->d_name, filename_len) != 0) )
 						continue;
 			} else {
 
