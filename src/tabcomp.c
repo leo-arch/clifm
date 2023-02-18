@@ -1381,10 +1381,6 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (fzf_height_set == 0 || tabmode == FZY_TAB) {
 		size_t max_height = set_fzf_max_win_height();
 		height = (i + 1 > max_height) ? max_height : i;
-/*		if (i + 1 > max_height)
-			height = max_height;
-		else
-			height = i; */
 	}
 
 	enum comp_type ct = cur_comp_type;
@@ -1515,6 +1511,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 		if (!sl) {
 			if (sp)
 				finder_offset = prompt_offset + (int)(sp - lb) - 2;
+			else /* Neither space nor slash == first word */
+				finder_offset = prompt_offset - 3;
 		} else {
 			if (sp && sp > sl)
 				finder_offset = prompt_offset + (int)(sp - lb) - 2;
@@ -1676,7 +1674,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	|| ct == TCMP_TAGS_F || ct == TCMP_GLOB
 	|| ct == TCMP_BM_PATHS || ct == TCMP_BM_PREFIX
 	|| ct == TCMP_TAGS_T || ct == TCMP_DIRHIST) {
-		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_end) : (char *)NULL;
+		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer,
+			(ct == TCMP_GLOB && nwords == 1) ? '/' : ' ', rl_end) : (char *)NULL;
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
@@ -1684,7 +1683,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			prefix_len = 0;
 		} else if (ct == TCMP_BM_PATHS || ct == TCMP_TAGS_F
 		|| ct == TCMP_BM_PREFIX || ct == TCMP_TAGS_T
-		|| ct == TCMP_SEL || ct == TCMP_DIRHIST) {
+		|| ct == TCMP_SEL || ct == TCMP_DIRHIST || ct == TCMP_GLOB) {
 			rl_delete_text(0, rl_end);
 			rl_end = rl_point = 0;
 			prefix_len = 0;

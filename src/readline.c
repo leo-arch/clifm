@@ -3222,11 +3222,14 @@ my_rl_completion(const char *text, int start, int end)
 			&& !strchr(rl_line_buffer + 1, '/'))
 			? (char *)(text + 1) : (char *)text;
 		if ((matches = rl_glob(p)) != NULL) {
+			if (conf.suggestions == 1 && wrong_cmd == 1)
+				recover_from_wrong_cmd();
 			if (!matches[1])
 				rl_swap_fields(&matches);
 			cur_comp_type = TCMP_GLOB;
 			rl_filename_completion_desired = 1;
-			flags |= MULTI_SEL;
+			if (nwords > 1)
+				flags |= MULTI_SEL;
 			return matches;
 		}
 	}
