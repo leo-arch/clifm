@@ -566,7 +566,7 @@ filter_function(char *arg)
 
 /* Print either all tips (if ALL == 1) or just a random one (ALL == 0) */
 void
-print_tips(int all)
+print_tips(const int all)
 {
 	const char *TIPS[] = {
 		"Try the autocd and auto-open functions: run 'FILE' instead "
@@ -674,7 +674,7 @@ print_tips(int all)
 		"Space is not needed: enter 'p12' instead of 'p 12'",
 		"When searching or selecting files, use the exclamation mark "
 		"to reverse the meaning of a pattern: 's !*.pdf'",
-		"Enable the TrashAsRm option to prevent accidental deletions",
+		"Enable the TrashAsRm option to always send removed files to the trash can",
 		"Don't like ELN's? Disable them using the -e command line switch",
 		"Use the 'n' command to create multiple files and/or directories: 'n FILE DIR/'",
 		"Add prompt commands via the 'promptcmd' keyword: 'edit' (F10)",

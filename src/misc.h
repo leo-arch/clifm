@@ -51,7 +51,7 @@ int  new_instance(char *, int);
 /* char *parse_usrvar_value(const char *str, const char c); */
 int  print_reload_msg(const char *, ...);
 int  pin_directory(char *);
-void print_tips(int);
+void print_tips(const int);
 int  quick_help(char *);
 void save_last_path(void);
 /* void save_pinned_dir(void); */

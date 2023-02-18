@@ -3222,8 +3222,10 @@ my_rl_completion(const char *text, int start, int end)
 			&& !strchr(rl_line_buffer + 1, '/'))
 			? (char *)(text + 1) : (char *)text;
 		if ((matches = rl_glob(p)) != NULL) {
+#ifndef _NO_SUGGESTIONS
 			if (conf.suggestions == 1 && wrong_cmd == 1)
 				recover_from_wrong_cmd();
+#endif
 			if (!matches[1])
 				rl_swap_fields(&matches);
 			cur_comp_type = TCMP_GLOB;
