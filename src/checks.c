@@ -124,18 +124,14 @@ is_url(char *url)
 static void
 set_term_caps(const int i)
 {
-	char *force_color = getenv("CLIFM_FORCE_COLOR");
-
 	if (i == -1) { /* TERM not found in our terminfo database */
-		term_caps.color = force_color ? 1 : 0;
+		term_caps.color = 0;
 		term_caps.suggestions = 0;
 		term_caps.pager = 0;
 		return;
 	}
 
 	term_caps.color = TERM_INFO[i].color > 0 ? 1 : 0;
-	if (force_color)
-		xargs.colorize = term_caps.color = 1;
 
 	term_caps.suggestions = (TERM_INFO[i].cub == 1 && TERM_INFO[i].ed == 1
 		&& TERM_INFO[i].el == 1) ? 1 : 0;
@@ -163,6 +159,11 @@ check_term_support(const char *_term)
 
 		index = (int)i;
 		break;
+	}
+
+	if (index == -1) {
+		_err('w', PRINT_PROMPT, _("%s: '%s': Unknown terminal type. "
+			"Limited functionality is expected.\n"), PROGRAM_NAME, _term);
 	}
 
 	set_term_caps(index);

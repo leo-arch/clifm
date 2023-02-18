@@ -198,7 +198,8 @@ dump_config(void)
 {
 	puts("The following is the list of options (as defined in the configuration "
 		"file) and their current values. Whenever a current value differs "
-		"from the default value, this latter is displayed in brackets\n");
+		"from the default value, the entry is highlighted and the default "
+		"value is displayed in brackets\n");
 
 	char *start_path = (char *)NULL, *ws_names = (char *)NULL;
 	get_start_path_and_ws_names(&start_path, &ws_names);
@@ -2974,7 +2975,11 @@ read_config(void)
 static void
 check_colors(void)
 {
-	if (term_caps.color == 0 || getenv("CLIFM_NO_COLOR") || getenv("NO_COLOR")) {
+	char *nc = getenv("NO_COLOR");
+	char *cnc = getenv("CLIFM_NO_COLOR");
+	char *cfc = (getenv("CLIFM_FORCE_COLOR"));
+
+	if (term_caps.color == 0 || (nc && *nc) || (cnc && *cnc)) {
 		conf.colorize = 0;
 	} else {
 		if (conf.colorize == UNSET) {
@@ -2984,6 +2989,9 @@ check_colors(void)
 				conf.colorize = xargs.colorize;
 		}
 	}
+
+	if (xargs.colorize == UNSET && cfc && *cfc)
+		term_caps.color = conf.colorize = 1;
 
 	if (conf.colorize == 1) {
 		unsetenv("CLIFM_COLORLESS");
