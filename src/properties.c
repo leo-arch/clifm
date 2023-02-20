@@ -816,9 +816,11 @@ get_color_age256(const time_t t, char *str, const size_t len)
 
 /* B&W gradient */
 	if      (age <                0LL) { c = 196; a = 2; }
-	else if (age <=        24*60*60LL) { c = 231; } /* One day or less */
-	else if (age <=   52*7*24*60*60LL) { c = 252; } /* One year or less */
-	else                               { c = 245; } /* Older */
+	else if (age <=           60*60LL) { c = 231; } /* One hour or less */
+	else if (age <=        24*60*60LL) { c = 253; } /* One day or less */
+	else if (age <=      7*24*60*60LL) { c = 250; } /* One weak or less */
+	else if (age <=    4*7*24*60*60LL) { c = 247; } /* One month or less */
+	else                               { c = 244; } /* Older */
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
 }
@@ -857,8 +859,8 @@ get_color_age(const time_t t, char *str, const size_t len)
 	int c = 0, a = 0;
 
 	if      (age <                0LL) { c = 31; a = 2; }
-	else if (age <=        24*60*60LL) { c = 36; a = 1; } /* One day or less */
-	else if (age <=   52*7*24*60*60LL) { c = 36; a = 0; } /* One year or less */
+	else if (age <=           60*60LL) { c = 36; a = 1; } /* One hour or less */
+	else if (age <=        24*60*60LL) { c = 36; a = 0; } /* One day or less */
 	else                               { c = 36; a = 2; } /* Older */
 
 	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
