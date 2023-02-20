@@ -813,11 +813,11 @@ get_color_age256(const time_t t, char *str, const size_t len)
  * Older (36) */
 
 // Cyan scale
-	if      (age <                0LL) c = 196; // Wrong date
+	if      (age <                0LL) { c = 196; a = 2; } // Wrong date
 	else if (age <=        24*60*60LL) c = 15;  // A day or less
-	else if (age <=    4*7*24*60*60LL) c = 87;  // A month or less
-	else if (age <=   52*7*24*60*60LL) c = 115; // A year or less
-	else				               { c = 36; a = 2; }  // Older
+	else if (age <=    4*7*24*60*60LL) c = 50;  // A month or less
+	else if (age <=   52*7*24*60*60LL) { c = 50; a = 2; } // A year or less
+	else				               { c = 72; a = 2; }  // Older
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
 }

@@ -167,9 +167,9 @@ xf=01;31:xs=00;32:"
 #define DEF_DG_C256  "\x1b[0;38;5;214m"
 #define DEF_DN_C     "\x1b[00;02;37m" /* Dash (no attribute) */
 #define DEF_DO_C     "\x1b[00;36m" /* Perms in octal */
-#define DEF_DO_C256  "\x1b[0;38;5;87m"
+#define DEF_DO_C256  "\x1b[0;38;5;50m"
 #define DEF_DP_C     "\x1b[00;36m" /* SUID, SGID, Sticky */
-#define DEF_DP_C256  "\x1b[0;38;5;87m"
+#define DEF_DP_C256  "\x1b[0;38;5;50m"
 #define DEF_DR_C     "\x1b[00;33m" /* Read perm */
 #define DEF_DR_C256  "\x1b[0;38;5;226m"
 #define DEF_DW_C     "\x1b[00;31m" /* Write perm */
@@ -177,7 +177,7 @@ xf=01;31:xs=00;32:"
 #define DEF_DXD_C    "\x1b[00;32m" /* Execute perm (dirs) */
 #define DEF_DXD_C256 "\x1b[0;38;5;46m"
 #define DEF_DXR_C    "\x1b[00;36m" /* Execute perm (reg files) */
-#define DEF_DXR_C256 "\x1b[0;38;5;87m"
+#define DEF_DXR_C256 "\x1b[0;38;5;50m"
 #define DEF_DZ_C     "\x1b[00;32m" /* Size (only for dirs) */
 
 /* This one is purely internal: cur_color is set to this value when
