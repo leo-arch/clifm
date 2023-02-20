@@ -55,11 +55,12 @@
 
 __BEGIN_DECLS
 
-int properties_function(char **);
-int print_entry_props(const struct fileinfo *, size_t, const size_t,
-	const size_t, const size_t, const size_t);
-int set_file_perms(char **);
-int set_file_owner(char **);
+int  properties_function(char **);
+void print_analysis_stats(off_t, off_t, char *, char *);
+int  print_entry_props(const struct fileinfo *, size_t, const size_t,
+	 const size_t, const size_t, const size_t);
+int  set_file_perms(char **);
+int  set_file_owner(char **);
 
 __END_DECLS
 

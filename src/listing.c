@@ -1527,37 +1527,6 @@ get_largest(size_t i, off_t *size, char **name, char **color, off_t *total)
 	*total += file_info[i].size * d;
 }
 
-static void
-print_analysis_stats(off_t total, off_t largest, char *color, char *name)
-{
-	char *t = (char *)NULL;
-	char *l = (char *)NULL;
-
-	if (prop_fields.size == PROP_SIZE_HUMAN) {
-		t = get_size_unit(total);
-		l = get_size_unit(largest);
-	} else {
-		t = (char *)xnmalloc(32, sizeof(char));
-		l = (char *)xnmalloc(32, sizeof(char));
-		snprintf(t, 32, "%ju", (uintmax_t)total);
-		snprintf(l, 32, "%ju", (uintmax_t)largest);
-	}
-
-	printf(_("Total size:   %s%s%s\n"
-		"Largest file: %s%s%s %c%s%s%s%c\n"),
-		conf.colorize ? _BGREEN : "" , t ? t : "?",
-		conf.colorize ? NC : "",
-		conf.colorize ? _BGREEN : "" , l ? l : "?",
-		conf.colorize ? NC : "",
-		name ? '[' : 0,
-		(conf.colorize && color) ? color : "",
-		name ? name : "", df_c,
-		name ? ']' : 0);
-
-	free(t);
-	free(l);
-}
-
 /* Return the lenght of the longest UID:GID string for files listed in long view mode */
 static size_t
 get_max_ug_str(void)

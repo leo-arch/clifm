@@ -24,7 +24,7 @@
 
 /* These four functions: get_color_size, get_color_size256, get_color_age,
  * and get_color_age256 are based on https://github.com/leahneukirchen/lr
- * (licenced MIT) and modified to fit out needs.
+ * (licenced MIT) and modified to fit our needs.
  * All changes are licensed under GPL-2.0-or-later. */
 
 #include "helpers.h"
@@ -773,6 +773,7 @@ set_file_owner(char **args)
 	return exit_status;
 }
 
+/* Get gradient color based on file size (256 colors version) */
 static void
 get_color_size256(const off_t s, char *str, const size_t len)
 {
@@ -785,21 +786,22 @@ get_color_size256(const off_t s, char *str, const size_t len)
  * Mb = medium (216)
  * * = large (172) */
 
-	if      (s <              1024LL) c = 46;  // less than 1K // Green
-	else if (s <            4*1024LL) c = 82;  // less than 4K
-	else if (s <           16*1024LL) c = 118; // less than 16K
-	else if (s <           32*1024LL) c = 154; // less than 32K
-	else if (s <          128*1024LL) c = 190; // less than 128K
-	else if (s <          512*1024LL) c = 226; // less than 512K // Yellow
-	else if (s <         1024*1024LL) c = 220; // less than 1M
-	else if (s <     500*1024*1024LL) c = 214; // less than 500M
-	else if (s <    1024*1024*1024LL) c = 208; // less than 1G
-	else if (s < 10*1024*1024*1024LL) c = 196; // less than 10G
-	else				              { c = 196; a = 1; } // More than 10G // Red
+	if      (s <              1024LL) c = 46;  /* Less than 1K (Green) */
+	else if (s <            4*1024LL) c = 82;  /* Less than 4K */
+	else if (s <           16*1024LL) c = 118; /* Less than 16K */
+	else if (s <           32*1024LL) c = 154; /* Less than 32K */
+	else if (s <          128*1024LL) c = 190; /* Less than 128K */
+	else if (s <          512*1024LL) c = 226; /* Less than 512K (Yellow) */
+	else if (s <         1024*1024LL) c = 220; /* Less than 1M */
+	else if (s <     500*1024*1024LL) c = 214; /* Less than 500M */
+	else if (s <    1024*1024*1024LL) c = 208; /* Less than 1G */
+	else if (s < 10*1024*1024*1024LL) c = 196; /* Less than 10G */
+	else				              { c = 196; a = 1; } /* More than 10G (Red) */
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
 }
 
+/* Get gradient color based on file time (256 colors version) */
 static void
 get_color_age256(const time_t t, char *str, const size_t len)
 {
@@ -812,16 +814,25 @@ get_color_age256(const time_t t, char *str, const size_t len)
  * DayOld (42)
  * Older (36) */
 
-// Cyan scale
-	if      (age <                0LL) { c = 196; a = 2; } // Wrong date
-	else if (age <=        24*60*60LL) c = 15;  // A day or less
-	else if (age <=    4*7*24*60*60LL) c = 50;  // A month or less
-	else if (age <=   52*7*24*60*60LL) { c = 50; a = 2; } // A year or less
-	else				               { c = 72; a = 2; }  // Older
+// Cyan/aqua gradient
+	if      (age <                0LL) { c = 196; a = 2; } /* Wrong date */
+	else if (age <=        24*60*60LL) c = 15; /* One day or less */
+	else if (age <=    4*7*24*60*60LL) c = 50; /* One month or less */
+	else if (age <=   52*7*24*60*60LL) { c = 50; a = 2; } /* One year or less */
+	else				               { c = 72; a = 2; }  /* Older */
+
+// B&W gradient
+/*	if      (age <                0LL) { c = 196; a = 2; } // Wrong date
+	else if (age <=        24*60*60LL) c = 255; // A day or less
+	else if (age <=    4*7*24*60*60LL) c = 251; // A month or less
+	else if (age <=   52*7*24*60*60LL) c = 247; // A year or less
+	else				               c = 242; // Older */
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
 }
 
+/* Get gradient color (based on size) for the file whose size is S.
+ * Store color in STR, whose len is LEN. */
 static void
 get_color_size(const off_t s, char *str, const size_t len)
 {
@@ -832,13 +843,15 @@ get_color_size(const off_t s, char *str, const size_t len)
 
 	int c = 0, a = 0;
 
-	if (s <           1024*1024LL) c = 32; // less than 1M
-	else if (s < 1024*1024*1024LL) c = 33; // less than 1G
-	else                           c = 31; // 1G or more
+	if (s <           1024*1024LL) c = 32; /* Less than 1M */
+	else if (s < 1024*1024*1024LL) c = 33; /* Less than 1G */
+	else                           c = 31; /* 1G or more */
 
 	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
 }
 
+/* Get gradient color (based on time) for the file whose time is T.
+ * Store color in STR, whose len is LEN. */
 static void
 get_color_age(const time_t t, char *str, const size_t len)
 {
@@ -851,11 +864,53 @@ get_color_age(const time_t t, char *str, const size_t len)
 	int c = 0, a = 0;
 
 	if      (age <                0LL) { c = 31; a = 0; }
-	else if (age <=        24*60*60LL) { c = 36; a = 1; } // day or less
-	else if (age <=   52*7*24*60*60LL) { c = 36; a = 0; } // year or less
-	else                               { c = 36; a = 2; } // older
+	else if (age <=        24*60*60LL) { c = 36; a = 1; } /* One day or less */
+	else if (age <=   52*7*24*60*60LL) { c = 36; a = 0; } /* One year or less */
+	else                               { c = 36; a = 2; } /* Older */
 
 	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
+}
+
+void
+print_analysis_stats(off_t total, off_t largest, char *color, char *name)
+{
+	char *t = (char *)NULL;
+	char *l = (char *)NULL;
+
+	if (prop_fields.size == PROP_SIZE_HUMAN) {
+		t = get_size_unit(total);
+		l = get_size_unit(largest);
+	} else {
+		t = (char *)xnmalloc(32, sizeof(char));
+		l = (char *)xnmalloc(32, sizeof(char));
+		snprintf(t, 32, "%ju", (uintmax_t)total);
+		snprintf(l, 32, "%ju", (uintmax_t)largest);
+	}
+
+	char *tsize = _BGREEN,
+		 *lsize = _BGREEN;
+
+	char ts[32], ls[32];
+	if (term_caps.color > 0 && !*dz_c) {
+		get_color_size(total, ts, sizeof(ts));
+		tsize = ts;
+		get_color_size(largest, ls, sizeof(ls));
+		lsize = ls;
+	}
+
+	printf(_("Total size:   %s%s%s\n"
+		"Largest file: %s%s%s %c%s%s%s%c\n"),
+		conf.colorize == 1 ? tsize : "" , t ? t : "?",
+		conf.colorize == 1 ? NC : "",
+		conf.colorize == 1 ? lsize : "" , l ? l : "?",
+		conf.colorize == 1 ? NC : "",
+		name ? '[' : 0,
+		(conf.colorize && color) ? color : "",
+		name ? name : "", df_c,
+		name ? ']' : 0);
+
+	free(t);
+	free(l);
 }
 
 static int
