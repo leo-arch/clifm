@@ -1891,7 +1891,7 @@ END:
 	if (excluded_files > 0)
 		printf(_("Excluded files: %d\n"), excluded_files);
 
-	if (xargs.disk_usage_analyzer == 1 && conf.long_view && conf.full_dir_size)
+	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1 && conf.full_dir_size == 1)
 		print_analysis_stats(total_size, largest_size, largest_color, largest_name);
 
 #ifdef _LIST_SPEED

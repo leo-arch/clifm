@@ -779,24 +779,24 @@ get_color_size256(const off_t s, char *str, const size_t len)
 {
 	int c = 0, a = 0;
 
-//	int base = xargs.si == 1 ? 1000LL : 1024LL;
+	long long base = xargs.si == 1 ? 1000 : 1024;
 
 /* LSD uses this criteria and colors:
  * Bytes and Kb = small (229)
  * Mb = medium (216)
  * * = large (172) */
 
-	if      (s <              1024LL) c = 46;  /* Less than 1K (Green) */
-	else if (s <            4*1024LL) c = 82;  /* Less than 4K */
-	else if (s <           16*1024LL) c = 118; /* Less than 16K */
-	else if (s <           32*1024LL) c = 154; /* Less than 32K */
-	else if (s <          128*1024LL) c = 190; /* Less than 128K */
-	else if (s <          512*1024LL) c = 226; /* Less than 512K (Yellow) */
-	else if (s <         1024*1024LL) c = 220; /* Less than 1M */
-	else if (s <     500*1024*1024LL) c = 214; /* Less than 500M */
-	else if (s <    1024*1024*1024LL) c = 208; /* Less than 1G */
-	else if (s < 10*1024*1024*1024LL) c = 196; /* Less than 10G */
-	else				              { c = 196; a = 1; } /* More than 10G (Red) */
+	if      (s <              base) c = 46;  /* Less than 1K (Green) */
+	else if (s <            4*base) c = 82;  /* Less than 4K */
+	else if (s <           16*base) c = 118; /* Less than 16K */
+	else if (s <           32*base) c = 154; /* Less than 32K */
+	else if (s <          128*base) c = 190; /* Less than 128K */
+	else if (s <          512*base) c = 226; /* Less than 512K (Yellow) */
+	else if (s <         base*base) c = 220; /* Less than 1M */
+	else if (s <     500*base*base) c = 214; /* Less than 500M */
+	else if (s <    base*base*base) c = 208; /* Less than 1G */
+	else if (s < 10*base*base*base) c = 196; /* Less than 10G */
+	else				            { c = 196; a = 1; } /* More than 10G (Red) */
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
 }
@@ -814,19 +814,11 @@ get_color_age256(const time_t t, char *str, const size_t len)
  * DayOld (42)
  * Older (36) */
 
-// Cyan/aqua gradient
-	if      (age <                0LL) { c = 196; a = 2; } /* Wrong date */
-	else if (age <=        24*60*60LL) c = 15; /* One day or less */
-	else if (age <=    4*7*24*60*60LL) c = 50; /* One month or less */
-	else if (age <=   52*7*24*60*60LL) { c = 50; a = 2; } /* One year or less */
-	else				               { c = 72; a = 2; }  /* Older */
-
-// B&W gradient
-/*	if      (age <                0LL) { c = 196; a = 2; } // Wrong date
-	else if (age <=        24*60*60LL) c = 255; // A day or less
-	else if (age <=    4*7*24*60*60LL) c = 251; // A month or less
-	else if (age <=   52*7*24*60*60LL) c = 247; // A year or less
-	else				               c = 242; // Older */
+/* B&W gradient */
+	if      (age <                0LL) { c = 196; a = 2; }
+	else if (age <=        24*60*60LL) { c = 231; } /* One day or less */
+	else if (age <=   52*7*24*60*60LL) { c = 252; } /* One year or less */
+	else                               { c = 245; } /* Older */
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
 }
@@ -842,10 +834,11 @@ get_color_size(const off_t s, char *str, const size_t len)
 	}
 
 	int c = 0, a = 0;
+	long long base = xargs.si == 1 ? 1000 : 1024;
 
-	if (s <           1024*1024LL) c = 32; /* Less than 1M */
-	else if (s < 1024*1024*1024LL) c = 33; /* Less than 1G */
-	else                           c = 31; /* 1G or more */
+	if (s <           base*base) c = 32; /* Less than 1M */
+	else if (s < base*base*base) c = 33; /* Less than 1G */
+	else                         c = 31; /* 1G or more */
 
 	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
 }
@@ -863,7 +856,7 @@ get_color_age(const time_t t, char *str, const size_t len)
 	time_t age = props_now - t;
 	int c = 0, a = 0;
 
-	if      (age <                0LL) { c = 31; a = 0; }
+	if      (age <                0LL) { c = 31; a = 2; }
 	else if (age <=        24*60*60LL) { c = 36; a = 1; } /* One day or less */
 	else if (age <=   52*7*24*60*60LL) { c = 36; a = 0; } /* One year or less */
 	else                               { c = 36; a = 2; } /* Older */
@@ -871,6 +864,7 @@ get_color_age(const time_t t, char *str, const size_t len)
 	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
 }
 
+/* Print final stats for the disk usage analyzer mode: total and largest file */
 void
 print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 {
