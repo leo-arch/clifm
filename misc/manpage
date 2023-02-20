@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 17, 2023" "clifm 1.10.5" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 17, 2023" "clifm 1.10.7" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -63,7 +63,7 @@ For a list of available commands and a brief description type \fIcmd<TAB>\fR.
 .sp
 Help for all internal commands can be accessed via the \fI-h\fR or \fI--help\fR flags. For example, to get help about the selection function, \fIs -h\fR or \fIs --help\fR.
 .sp
-A convenient way of getting full information about \fBclifm\fR commands is via the \fIih\fR action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Just type \fIih\fR to run the plugin (it depends on \fBfzf\fR(1)) and select the command you want to obtain information about.
+A convenient way of getting full information about \fBclifm\fR commands is via the \fIih\fR action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Just enter \fIih\fR to run the plugin (it depends on \fBfzf\fR(1)) and select the command you want to obtain information about.
 .sp
 For a quick introduction jump to the \fBEXAMPLES\fR section at the bottom of this document.
 
@@ -1483,17 +1483,21 @@ The following codes are used for different interface elements (in the \fIInterfa
  wp = command line text (warning prompt)
 
  \fBFile properties\fR
- dn = Dash (unset property)
- dr = Read permission bit
- dw = Write permission bit
- dxd = Executable permission bit (directories)
- dxr = Executable permission bit (regular files)
- dp = SUID, SGID, sticky bit
- dg = File ID (UID, GID) whenever the current user owns the file or is in the file's group
- dd = Last modification time
- dz = Directories size
- do = Octal value for file properties
-
+ dd  = last access/change/modification time \fB(1)\fR
+ dg  = file ID (UID, GID) whenever the current user owns the file or is in the file's group
+ dn  = dash (unset property)
+ do  = octal value for file properties
+ dp  = SUID, SGID, sticky bit
+ dr  = read permission bit
+ dw  = write permission bit
+ dxd = executable permission bit (directories)
+ dxr = executable permission bit (regular files)
+ dz  = size \fB(1)\fR
+.sp
+ \fB(1)\fR If unset, gradient colors are used (based on file size and file age). This is the default.
+.sp
+ \fBNOTE\fR: For a better graphical representation of file properties, 256 colors are used if possible (otherwise, \fBclifm\fR falls back to 8 colors).
+.sp
  \fBMiscellaneous interface elements\fR
  bm  = bookmarked directory in the bookmarks screen
  fc  = files counter
