@@ -1010,9 +1010,6 @@ prompt(void)
 		free(input);
 		if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
 		|| xargs.refresh_on_empty_line == 1)) {
-			if (conf.clear_screen == 1) {
-				CLEAR; fflush(stdout);
-			}
 			flags &= ~DELAYED_REFRESH;
 			reload_dirlist();
 		} else {

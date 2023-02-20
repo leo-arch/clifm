@@ -2029,6 +2029,10 @@ list_dir(void)
 	clock_t start = clock();
 #endif
 
+	if (conf.clear_screen == 1) {
+		CLEAR; fflush(stdout);
+	}
+
 	/* Hide the cursor to minimize flickering: it will be unhidden immediately
 	 * before printing the next prompt (prompt.c) */
 	if (xargs.list_and_quit != 1)
@@ -2046,6 +2050,8 @@ list_dir(void)
 	}
 
 	if (conf.clear_screen == 1) {
+		// For some reason we need to clear the screen twice to prevent
+		// a garbage first line when scrolling up
 		CLEAR; fflush(stdout);
 	}
 
@@ -2065,6 +2071,9 @@ list_dir(void)
 
 	reset_stats();
 	get_term_size();
+
+	if (conf.long_view == 1)
+		props_now = time(0);
 
 	if (conf.light_mode)
 		return list_dir_light();

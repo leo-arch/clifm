@@ -131,7 +131,7 @@ set_term_caps(const int i)
 		return;
 	}
 
-	term_caps.color = TERM_INFO[i].color > 0 ? 1 : 0;
+	term_caps.color = TERM_INFO[i].color > 0 ? TERM_INFO[i].color : 0;
 
 	term_caps.suggestions = (TERM_INFO[i].cub == 1 && TERM_INFO[i].ed == 1
 		&& TERM_INFO[i].el == 1) ? 1 : 0;

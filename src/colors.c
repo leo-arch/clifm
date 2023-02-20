@@ -728,7 +728,7 @@ set_color(char *_color, char var[], const int flag)
 	if (flag == RL_NO_PRINTABLE)
 		snprintf(var, MAX_COLOR + 2, "\001\x1b[%sm\002", s ? s : p); /* NOLINT */
 	else
-		snprintf(var, MAX_COLOR - 1, "\x1b[0;%sm", s ? s : p); /* NOLINT */
+		snprintf(var, MAX_COLOR - 1, "\x1b[00;%sm", s ? s : p); /* NOLINT */
 }
 
 static void
@@ -1062,15 +1062,15 @@ set_default_colors(void)
 	if (!*dir_ico_c) strcpy(dir_ico_c, DEF_DIR_ICO_C);
 #endif
 
-	if (!*dr_c) strcpy(dr_c, DEF_DR_C);
-	if (!*dw_c) strcpy(dw_c, DEF_DW_C);
-	if (!*dxd_c) strcpy(dxd_c, DEF_DXD_C);
-	if (!*dxr_c) strcpy(dxr_c, DEF_DXR_C);
-	if (!*dg_c) strcpy(dg_c, DEF_DG_C);
-	if (!*dd_c) strcpy(dd_c, DEF_DD_C);
-	if (!*dz_c) strcpy(dz_c, DEF_DZ_C);
-	if (!*do_c) strcpy(do_c, DEF_DO_C);
-	if (!*dp_c) strcpy(dp_c, DEF_DP_C);
+	if (!*dr_c) strcpy(dr_c, term_caps.color >= 256 ? DEF_DR_C256 : DEF_DR_C);
+	if (!*dw_c) strcpy(dw_c, term_caps.color >= 256 ? DEF_DW_C256 : DEF_DW_C);
+	if (!*dxd_c) strcpy(dxd_c, term_caps.color >= 256 ? DEF_DXD_C256 : DEF_DXD_C);
+	if (!*dxr_c) strcpy(dxr_c, term_caps.color >= 256 ? DEF_DXR_C256 : DEF_DXR_C);
+	if (!*dg_c) strcpy(dg_c, term_caps.color >= 256 ? DEF_DG_C256 : DEF_DG_C);
+//	if (!*dd_c) strcpy(dd_c, DEF_DD_C); // Date color unset: let's use gradient
+//	if (!*dz_c) strcpy(dz_c, DEF_DZ_C); // Size color unset: let's use gradient
+	if (!*do_c) strcpy(do_c, term_caps.color >= 256 ? DEF_DO_C256 : DEF_DO_C);
+	if (!*dp_c) strcpy(dp_c, term_caps.color >= 256 ? DEF_DP_C256 : DEF_DP_C);
 	if (!*dn_c) strcpy(dn_c, DEF_DN_C);
 }
 

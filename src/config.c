@@ -54,6 +54,10 @@
 #define DUMP_CONFIG_INT  1
 #define DUMP_CONFIG_BOOL 2
 
+#define _4BIT_COLOR 8
+//#define _8BIT_COLOR 256
+#define TRUE_COLOR 16777216
+
 #ifndef _NO_FZF
 /* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)
  * Let's do this even if fzftab is not enabled at startup, because this feature
@@ -2972,12 +2976,25 @@ read_config(void)
 }
 #endif /* CLIFM_SUCKLESS */
 
+/* See https://github.com/termstandard/colors#truecolor-detection */
+static int
+check_truecolor(void)
+{
+	char *c = getenv("COLORTERM");
+
+	if (c && ((*c == 't' && strcmp(c + 1, "ruecolor") == 0)
+	|| (*c == '2' && strcmp(c + 1, "4bit") == 0) ) )
+		return 1;
+
+	return 0;
+}
+
 static void
 check_colors(void)
 {
 	char *nc = getenv("NO_COLOR");
 	char *cnc = getenv("CLIFM_NO_COLOR");
-	char *cfc = (getenv("CLIFM_FORCE_COLOR"));
+	char *cfc = getenv("CLIFM_FORCE_COLOR");
 
 	if (term_caps.color == 0 || (nc && *nc) || (cnc && *cnc)) {
 		conf.colorize = 0;
@@ -2990,10 +3007,15 @@ check_colors(void)
 		}
 	}
 
-	if (xargs.colorize == UNSET && cfc && *cfc)
-		term_caps.color = conf.colorize = 1;
+	if (xargs.colorize == UNSET && cfc && *cfc) {
+		if (term_caps.color == 0)
+			term_caps.color = _4BIT_COLOR; // We don't know. Just use a highly compatible value
+		conf.colorize = 1;
+	}
 
 	if (conf.colorize == 1) {
+		if (check_truecolor() == 1)
+			term_caps.color = TRUE_COLOR;
 		unsetenv("CLIFM_COLORLESS");
 		set_colors(conf.usr_cscheme ? conf.usr_cscheme : "default", 1);
 		cur_color = tx_c;

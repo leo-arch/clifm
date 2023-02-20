@@ -22,6 +22,11 @@
  * MA 02110-1301, USA.
 */
 
+/* These four functions: get_color_size, get_color_size256, get_color_age,
+ * and get_color_age256 are based on https://github.com/leahneukirchen/lr
+ * (licenced MIT) and modified to fit out needs.
+ * All changes are licensed under GPL-2.0-or-later. */
+
 #include "helpers.h"
 
 #include <errno.h>
@@ -768,6 +773,91 @@ set_file_owner(char **args)
 	return exit_status;
 }
 
+static void
+get_color_size256(const off_t s, char *str, const size_t len)
+{
+	int c = 0, a = 0;
+
+//	int base = xargs.si == 1 ? 1000LL : 1024LL;
+
+/* LSD uses this criteria and colors:
+ * Bytes and Kb = small (229)
+ * Mb = medium (216)
+ * * = large (172) */
+
+	if      (s <              1024LL) c = 46;  // less than 1K // Green
+	else if (s <            4*1024LL) c = 82;  // less than 4K
+	else if (s <           16*1024LL) c = 118; // less than 16K
+	else if (s <           32*1024LL) c = 154; // less than 32K
+	else if (s <          128*1024LL) c = 190; // less than 128K
+	else if (s <          512*1024LL) c = 226; // less than 512K // Yellow
+	else if (s <         1024*1024LL) c = 220; // less than 1M
+	else if (s <     500*1024*1024LL) c = 214; // less than 500M
+	else if (s <    1024*1024*1024LL) c = 208; // less than 1G
+	else if (s < 10*1024*1024*1024LL) c = 196; // less than 10G
+	else				              { c = 196; a = 1; } // More than 10G // Red
+
+	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
+}
+
+static void
+get_color_age256(const time_t t, char *str, const size_t len)
+{
+	/* PROPS_NOW is global. Calculated before by list_dir() */
+	time_t age = props_now - t;
+	int c, a = 0;
+
+/* LSD uses this criteria and colors:
+ * HourOld (40)
+ * DayOld (42)
+ * Older (36) */
+
+// Cyan scale
+	if      (age <                0LL) c = 196; // Wrong date
+	else if (age <=        24*60*60LL) c = 15;  // A day or less
+	else if (age <=    4*7*24*60*60LL) c = 87;  // A month or less
+	else if (age <=   52*7*24*60*60LL) c = 115; // A year or less
+	else				               { c = 36; a = 2; }  // Older
+
+	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
+}
+
+static void
+get_color_size(const off_t s, char *str, const size_t len)
+{
+	if (term_caps.color >= 256) {
+		get_color_size256(s, str, len);
+		return;
+	}
+
+	int c = 0, a = 0;
+
+	if (s <           1024*1024LL) c = 32; // less than 1M
+	else if (s < 1024*1024*1024LL) c = 33; // less than 1G
+	else                           c = 31; // 1G or more
+
+	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
+}
+
+static void
+get_color_age(const time_t t, char *str, const size_t len)
+{
+	if (term_caps.color >= 256) {
+		get_color_age256(t, str, len);
+		return;
+	}
+
+	time_t age = props_now - t;
+	int c = 0, a = 0;
+
+	if      (age <                0LL) { c = 31; a = 0; }
+	else if (age <=        24*60*60LL) { c = 36; a = 1; } // day or less
+	else if (age <=   52*7*24*60*60LL) { c = 36; a = 0; } // year or less
+	else                               { c = 36; a = 2; } // older
+
+	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
+}
+
 static int
 get_properties(char *filename, const int dsize)
 {
@@ -808,6 +898,14 @@ get_properties(char *filename, const int dsize)
 	int file_perm = check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
 	if (file_perm == 1)
 		cid = dg_c;
+
+	char sf[32];
+	if (term_caps.color > 0) {
+		if (!*dz_c && dsize == 0) {
+			get_color_size(attr.st_size, sf, sizeof(sf));
+			csize = sf;
+		}
+	}
 
 	switch (attr.st_mode & S_IFMT) {
 	case S_IFREG:
@@ -958,9 +1056,25 @@ get_properties(char *filename, const int dsize)
 	gen_time_str(access_time, sizeof(access_time), attr.st_atime);
 	gen_time_str(change_time, sizeof(change_time), attr.st_ctime);
 
-	printf(_("Access: \t%s%s%s\n"), cdate, access_time, cend);
-	printf(_("Modify: \t%s%s%s\n"), cdate, mod_time, cend);
-	printf(_("Change: \t%s%s%s\n"), cdate, change_time, cend);
+	char *cadate = cdate,
+		 *cmdate = cdate,
+		 *ccdate = cdate,
+		 *cbdate = cdate;
+
+	char atf[32], mtf[32], ctf[32], btf[32];
+	if (term_caps.color > 0 && !*dd_c) {
+		props_now = time(0);
+		get_color_age(attr.st_atime, atf, sizeof(atf));
+		cadate = atf;
+		get_color_age(attr.st_mtime, mtf, sizeof(mtf));
+		cmdate = mtf;
+		get_color_age(attr.st_ctime, ctf, sizeof(ctf));
+		ccdate = ctf;
+	}
+
+	printf(_("Access: \t%s%s%s\n"), cadate, access_time, cend);
+	printf(_("Modify: \t%s%s%s\n"), cmdate, mod_time, cend);
+	printf(_("Change: \t%s%s%s\n"), ccdate, change_time, cend);
 
 #ifndef _BE_POSIX
 # if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
@@ -970,15 +1084,27 @@ get_properties(char *filename, const int dsize)
 	struct statx attrx;
 	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
 	gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
+	if (term_caps.color > 0 && !*dd_c) {
+		get_color_age(attrx.stx_btime.tv_sec, btf, sizeof(btf));
+		cbdate = btf;
+	}
 #  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
 #   if defined(__OpenBSD__)
 	gen_time_str(creation_time, sizeof(creation_time), attr.__st_birthtim.tv_sec);
+	if (term_caps.color > 0 && !*dd_c) {
+		get_color_age(attr.__st_birthtim.tv_sec, btf, sizeof(btf));
+		cbdate = btf;
+	}
 #   else
 	gen_time_str(creation_time, sizeof(creation_time), attr.st_birthtime);
+	if (term_caps.color > 0 && !*dd_c) {
+		get_color_age(attr.st_birthtime, btf, sizeof(btf));
+		cbdate = btf;
+	}
 #   endif /* __OpenBSD__ */
 #  endif /* _STATX */
 
-	printf(_("Birth: \t\t%s%s%s\n"), cdate, creation_time, cend);
+	printf(_("Birth: \t\t%s%s%s\n"), cbdate, creation_time, cend);
 # endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || _STATX */
 #endif /* !_BE_POSIX */
 
@@ -1004,7 +1130,13 @@ get_properties(char *filename, const int dsize)
 		goto END;
 	}
 
-	char *human_size = get_size_unit(total_size * (xargs.si == 1 ? 1000 : 1024));
+	int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
+	if (!*dz_c) {
+		get_color_size(total_size * size_mult_factor, sf, sizeof(sf));
+		csize = sf;
+	}
+
+	char *human_size = get_size_unit(total_size * size_mult_factor);
 	if (human_size) {
 		printf("%s%s%s\n", csize, human_size, cend);
 		free(human_size);
@@ -1056,6 +1188,24 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		 *csize = props->dir ? dz_c : df_c, /* Directories size */
 		 *cend = df_c;  /* Ending Color */
 
+	/* Let's construct gradient colors for file size and time fields */
+	char sf[32], df[32];
+	if (term_caps.color > 0) {
+		off_t s = props->size;
+		if (props->dir == 1 && conf.full_dir_size == 1)
+			s = props->size * (xargs.si == 1 ? 1000 : 1024);
+
+		if (!*dz_c) {
+			get_color_size(s, sf, sizeof(sf));
+			csize = sf;
+		}
+
+		if (!*dd_c) {
+			get_color_age(props->ltime, df, sizeof(df));
+			cdate = df;
+		}
+	}
+
 	int file_perm = check_file_access(props->mode, props->uid, props->gid);
 	if (file_perm == 1)
 		cid = dg_c;
@@ -1064,7 +1214,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	case S_IFREG:  file_type = '.'; break;
 	case S_IFDIR:  file_type = 'd'; ctype = di_c; break;
 	case S_IFLNK:  file_type = 'l'; ctype = ln_c; break;
-	case S_IFSOCK: file_type ='s';  ctype = so_c; break;
+	case S_IFSOCK: file_type = 's'; ctype = so_c; break;
 	case S_IFBLK:  file_type = 'b'; ctype = bd_c; break;
 	case S_IFCHR:  file_type = 'c'; ctype = cd_c; break;
 	case S_IFIFO:  file_type = 'p'; ctype = pi_c; break;

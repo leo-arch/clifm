@@ -1295,6 +1295,7 @@ extern size_t
 
 extern struct termios shell_tmodes;
 extern pid_t own_pid;
+extern time_t props_now;
 
 extern char
 	cur_prompt_name[NAME_MAX + 1],

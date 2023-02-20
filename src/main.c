@@ -127,6 +127,7 @@ struct termios
 	shell_tmodes;
 
 pid_t own_pid = 0;
+time_t props_now = 0;
 
 unsigned short
 	term_cols = 0,

@@ -255,7 +255,7 @@ gen_shell_cmd_comp(char *cmd)
 		return EXIT_FAILURE;
 
 	char manpage_parser_file[PATH_MAX];
-	snprintf(manpage_parser_file, PATH_MAX - 1,
+	snprintf(manpage_parser_file, sizeof(manpage_parser_file),
 		"%s/%s/tools/manpages_comp_gen.py", data_dir, PNL);
 
 	char *c[] = {manpage_parser_file, "-k", cmd, NULL};
@@ -827,7 +827,7 @@ my_rl_getc(FILE *stream)
 	if (xargs.fzftab == 1 || conf.warning_prompt == 1) {
 #else
 	if (conf.warning_prompt == 1) {
-#endif // !_NO_FZF
+#endif /* !_NO_FZF */
 		if (prompt_offset == UNSET)
 			prompt_offset = get_prompt_offset(rl_prompt);
 	}
@@ -851,15 +851,12 @@ my_rl_getc(FILE *stream)
 			/* Syntax highlighting is made from here */
 			int ret = rl_exclude_input(c);
 			if (ret == RL_INSERT_CHAR) {
-//				if (rl_inhibit_completion == 1)
 				if (rl_nohist == 1 && !(flags & NO_FIX_RL_POINT))
 					fix_rl_point(c);
 				return c;
 			}
 
 #ifndef _NO_SUGGESTIONS
-//			if (ret != 2 && ret != -2 && !_xrename && conf.suggestions) {
-//			if (ret == SUGGEST_ONLY && _xrename == 0 && conf.suggestions == 1) {
 			if (ret == SUGGEST_ONLY && conf.suggestions == 1)
 				rl_suggestions(c);
 #endif /* !_NO_SUGGESTIONS */
@@ -933,7 +930,7 @@ alt_rl_getc(FILE *stream)
 			return c;
 		}
 		/* If zero characters are returned, then the file that we are
-		reading from is empty!  Return EOF in that case. */
+		reading from is empty! Return EOF in that case. */
 		if (result == 0)
 			return (EOF);
 
@@ -1157,10 +1154,6 @@ my_rl_quote(char *text, int mt, char *qp)
 char *
 my_rl_path_completion(const char *text, int state)
 {
-/*	if (conf.suggestions == 1 && conf.fuzzy_match == 1
-	&& suggestion.type != FILE_SUG && suggestion.type != FUZZY_FILENAME)
-		return (char *)NULL; */
-
 	if (!text || !*text || xrename == 2)
 		return (char *)NULL;
 	/* state is zero before completion, and 1 ... n after getting
@@ -1246,19 +1239,6 @@ my_rl_path_completion(const char *text, int state)
 		char *temp_dirname;
 		int replace_dirname;
 
-//////////////////////////
-/*		char *r = (char *)NULL;
-		if (*dirname == '$' && dirname[1] && dirname[1] != '{'
-		&& dirname[1] != '(') {
-			char *q = strchr(dirname + 1, '/');
-			if (q && q != dirname + 1)
-				*q = '\0';
-			r = getenv(dirname + 1);
-			if (q)
-				*q = '/';
-		}
-		temp_dirname = tilde_expand(r ? r : dirname); */
-///////////////////////////
 		temp_dirname = tilde_expand(dirname);
 
 		free(dirname);
@@ -1277,8 +1257,6 @@ my_rl_path_completion(const char *text, int state)
 		char *d = dirname;
 		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(p))
 			d = dirname + FILE_URI_PREFIX_LEN;
-//		if (text_len > FILE_URI_PREFIX_LEN && IS_FILE_URI(text))
-//			d = dirname + FILE_URI_PREFIX_LEN;
 
 		/* Resolve special expression in the resulting directory */
 		char *e = (char *)NULL;
@@ -1290,7 +1268,6 @@ my_rl_path_completion(const char *text, int state)
 		directory = opendir(e);
 		if (e != d)
 			free(e);
-//		directory = opendir(d);
 
 		filename_len = strlen(filename);
 
@@ -1662,6 +1639,9 @@ bookmarks_generator(const char *text, int state)
 	char *name;
 
 	if (!state) {
+		/* The state variable is zero only the first time the function is
+		 * called, and a non-zero positive in later calls. This means that
+		 * I and LEN will be necessarilly initialized the first time */
 		i = 0;
 		prefix = (*text == 'b' && *(text + 1) == ':') ? 2 : 0;
 		len = strlen(text + prefix);
@@ -1722,7 +1702,7 @@ hist_generator(const char *text, int state)
 					? " /*?[{" : " /*?[{|^+$.");
 			if (!ret || *ret == ' ' || *ret == '/')
 				continue;
-//			if (len == 0 || (*text == *name && strncmp(name, text, len) == 0))
+
 			return strdup(name);
 		}
 	}
@@ -1785,7 +1765,6 @@ environ_generator(const char *text, int state)
 		len = strlen(text + 1);
 	}
 
-	/* Look for cmd history entries for a match */
 	while ((name = environ[i++]) != NULL) {
 		if (conf.case_sens_path_comp ? strncmp(name, text + 1, len) == 0
 		: strncasecmp(name, text + 1, len) == 0) {
@@ -1862,11 +1841,8 @@ cschemes_generator(const char *text, int state)
 	if (!state) {
 		i = 0;
 		len = strlen(text);
-	} /* The state variable is zero only the first time the function is
-	called, and a non-zero positive in later calls. This means that i
-	and len will be necessarilly initialized the first time */
+	}
 
-	/* Look for color schemes in color_schemes for a match */
 	while ((name = color_schemes[i++]) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
@@ -1890,11 +1866,8 @@ profiles_generator(const char *text, int state)
 	if (!state) {
 		i = 0;
 		len = strlen(text);
-	} /* The state variable is zero only the first time the function is
-	called, and a non-zero positive in later calls. This means that i
-	and len will be necessarilly initialized the first time */
+	}
 
-	/* Look for profiles in profile_names for a match */
 	while ((name = profile_names[i++]) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
@@ -1907,17 +1880,10 @@ profiles_generator(const char *text, int state)
 static char *
 filenames_gen_text(const char *text, int state)
 {
-/*	if (conf.suggestions == 1 && conf.fuzzy_match == 1
-	&& suggestion.type != FILE_SUG && suggestion.type != FUZZY_FILENAME) {
-		// Disable file completion if we have a non-file suggestion
-		rl_attempted_completion_over = 1;
-		return (char *)NULL;
-	} */
-
 	static size_t i, len = 0;
 	char *name;
 	rl_filename_completion_desired = 1;
-	if (!state) { /* state is zero only the first time readline is executed */
+	if (!state) {
 		i = 0;
 		len = strlen(text);
 	}
@@ -2009,7 +1975,6 @@ filenames_gen_ranges(const char *text, int state)
 	if (a >= b)
 		return (char *)NULL;
 
-	/* Check list of currently displayed files for a match */
 	while (i < (int)files && (name = file_info[i++].name) != NULL) {
 		if (i >= a && i <= b) {
 #ifndef _NO_SUGGESTIONS
@@ -2117,7 +2082,6 @@ sort_num_generator(const char *text, int state)
 	    NULL
 	};
 
-	/* Check list of currently displayed files for a match */
 	while (i <= SORT_TYPES && (name = sorts[i++]) != NULL) {
 		if (*name == *sorts[num_text]
 		&& strcmp(name, sorts[num_text]) == 0)
@@ -2272,7 +2236,6 @@ sel_entries_generator(const char *text, int state)
 			if (p && p != name)
 				free(p);
 			return ret;
-//			return strdup(name);
 		}
 	}
 
@@ -2343,7 +2306,7 @@ rl_mime_list(void)
 	size_t n = 1;
 	int i = (int)files;
 	while (--i >= 0) {
-		if (file_info[i].color == nf_c) /* no access to file */
+		if (file_info[i].color == nf_c) /* No access to file */
 			continue;
 		char *m = xmagic(file_info[i].name, MIME_TYPE);
 		if (!m)
@@ -3225,7 +3188,7 @@ my_rl_completion(const char *text, int start, int end)
 #ifndef _NO_SUGGESTIONS
 			if (conf.suggestions == 1 && wrong_cmd == 1)
 				recover_from_wrong_cmd();
-#endif
+#endif /* !_NO_SUGGESTIONS */
 			if (!matches[1])
 				rl_swap_fields(&matches);
 			cur_comp_type = TCMP_GLOB;
@@ -3296,8 +3259,6 @@ my_rl_completion(const char *text, int start, int end)
 		if (matches) {
 			if (!matches[1])
 				rl_swap_fields(&matches);
-//			if (tabmode != STD_TAB)
-//				rl_filename_completion_desired = 1;
 			cur_comp_type = TCMP_BM_PATHS;
 			return matches;
 		}
@@ -3358,7 +3319,6 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* HISTORY CMD AND SEARCH PATTERNS COMPLETION */
-//		if (xrename == 0 && *text == '!') {
 		if (xrename == 0 && (*text == '!' || (*text == '/' && *(text + 1) == '*'))) {
 			char *p = dequote_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &hist_generator);

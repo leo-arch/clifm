@@ -33,9 +33,9 @@ ee=32:ef=02:ex=01;32:fi=0:ln=01;36:mh=30;46:nd=04;01;31:ne=02;04;31:nf=02;04;31:
 no=31;47:or=02;04;36:ow=34;42:pi=35:so=01;35:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:uf=02;04;37:"
 
-#define DEF_IFACE_COLORS "bm=01;36:dd=00;36:df=0:dg=00;33:\
-dl=02;37:dn=00;02;37:dr=00;33:do=00;36:dp=00;36:dw=00;31:\
-dxd=00;32:dxr=00;32:dz=00;32:el=00;36:em=01;31:fc=00;02;34:hb=00;36:hc=02;31:\
+#define DEF_IFACE_COLORS "bm=01;36:dd=:df=0:dg=:dl=02;37:\
+dn=00;02;37:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:\
+el=00;36:em=01;31:fc=00;02;34:hb=00;36:hc=02;31:\
 hd=00;36:he=00;36:hn=00;35:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:\
 li=01;32:mi=01;36:nm=01;32:sb=00;02;33:sc=02;36:sd=00;02;37:\
 sf=04;02;36:sh=02;35:si=01;34:sp=02;31:sx=02;32:sz=00;02;04;35:\
@@ -162,16 +162,23 @@ xf=01;31:xs=00;32:"
 #define DEF_HV_C "\x1b[00;32m" /* Variables ($VAR) */
 
 /* Colors for the properties and long/detail view functions */
-#define DEF_DD_C "\x1b[00;36m" /* Modification date */
-#define DEF_DG_C "\x1b[00;33m" /* UID, GID */
-#define DEF_DN_C "\x1b[00;02;37m" /* Dash (no attribute) */
-#define DEF_DO_C "\x1b[00;36m" /* Perms in octal */
-#define DEF_DP_C "\x1b[00;36m" /* SUID, SGID, Sticky */
-#define DEF_DR_C "\x1b[00;33m" /* Read perm */
-#define DEF_DW_C "\x1b[00;31m" /* Write perm */
-#define DEF_DXD_C "\x1b[00;32m" /* Execute perm (dirs) */
-#define DEF_DXR_C "\x1b[00;32m" /* Execute perm (reg files) */
-#define DEF_DZ_C "\x1b[00;32m" /* Size (only for dirs) */
+#define DEF_DD_C     "\x1b[00;36m" /* Modification date */
+#define DEF_DG_C     "\x1b[00;33m" /* UID, GID */
+#define DEF_DG_C256  "\x1b[0;38;5;214m"
+#define DEF_DN_C     "\x1b[00;02;37m" /* Dash (no attribute) */
+#define DEF_DO_C     "\x1b[00;36m" /* Perms in octal */
+#define DEF_DO_C256  "\x1b[0;38;5;87m"
+#define DEF_DP_C     "\x1b[00;36m" /* SUID, SGID, Sticky */
+#define DEF_DP_C256  "\x1b[0;38;5;87m"
+#define DEF_DR_C     "\x1b[00;33m" /* Read perm */
+#define DEF_DR_C256  "\x1b[0;38;5;226m"
+#define DEF_DW_C     "\x1b[00;31m" /* Write perm */
+#define DEF_DW_C256  "\x1b[0;38;5;196m"
+#define DEF_DXD_C    "\x1b[00;32m" /* Execute perm (dirs) */
+#define DEF_DXD_C256 "\x1b[0;38;5;46m"
+#define DEF_DXR_C    "\x1b[00;36m" /* Execute perm (reg files) */
+#define DEF_DXR_C256 "\x1b[0;38;5;87m"
+#define DEF_DZ_C     "\x1b[00;32m" /* Size (only for dirs) */
 
 /* This one is purely internal: cur_color is set to this value when
  * entering the warning prompt, so that that we can check cur_color
