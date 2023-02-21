@@ -786,17 +786,18 @@ get_color_size256(const off_t s, char *str, const size_t len)
  * Mb = medium (216)
  * * = large (172) */
 
-	if      (s <              base) c = 46;  /* Less than 1K (Green) */
-	else if (s <            4*base) c = 82;  /* Less than 4K */
-	else if (s <           16*base) c = 118; /* Less than 16K */
-	else if (s <           32*base) c = 154; /* Less than 32K */
-	else if (s <          128*base) c = 190; /* Less than 128K */
-	else if (s <          512*base) c = 226; /* Less than 512K (Yellow) */
-	else if (s <         base*base) c = 220; /* Less than 1M */
-	else if (s <     500*base*base) c = 214; /* Less than 500M */
-	else if (s <    base*base*base) c = 208; /* Less than 1G */
-	else if (s < 10*base*base*base) c = 196; /* Less than 10G */
-	else				            { c = 196; a = 1; } /* More than 10G (Red) */
+/* EXA uses this criteria and colors:
+ * Byte (118)
+ * Kb (190)
+ * Mb (226)
+ * Gb (220)
+ * Larger (214) */
+
+	if      (s <                base) c = 46;  // Bytes
+	else if (s <           base*base) c = 118; // Kb
+	else if (s <      base*base*base) c = 226; // Mb
+	else if (s < base*base*base*base) c = 214; // Gb
+	else				              c = 202; // Larger
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
 }
@@ -805,7 +806,8 @@ get_color_size256(const off_t s, char *str, const size_t len)
 static void
 get_color_age256(const time_t t, char *str, const size_t len)
 {
-	/* PROPS_NOW is global. Calculated before by list_dir() */
+	/* PROPS_NOW is global. Calculated before by list_dir() and when
+	 * running the 'p' command */
 	time_t age = props_now - t;
 	int c, a = 0;
 
@@ -814,13 +816,13 @@ get_color_age256(const time_t t, char *str, const size_t len)
  * DayOld (42)
  * Older (36) */
 
-/* B&W gradient */
-	if      (age <                0LL) { c = 196; a = 2; }
-	else if (age <=           60*60LL) { c = 231; } /* One hour or less */
-	else if (age <=        24*60*60LL) { c = 253; } /* One day or less */
-	else if (age <=      7*24*60*60LL) { c = 250; } /* One weak or less */
-	else if (age <=    4*7*24*60*60LL) { c = 247; } /* One month or less */
-	else                               { c = 244; } /* Older */
+	/* B&W gradient */
+	if      (age <             0LL) { c = 196; a = 2; }
+	else if (age <=        60*60LL) { c = 231; } /* One hour or less */
+	else if (age <=     24*60*60LL) { c = 253; } /* One day or less */
+	else if (age <=   7*24*60*60LL) { c = 250; } /* One weak or less */
+	else if (age <= 4*7*24*60*60LL) { c = 247; } /* One month or less */
+	else                            { c = 244; } /* Older */
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
 }
@@ -838,9 +840,9 @@ get_color_size(const off_t s, char *str, const size_t len)
 	int c = 0, a = 0;
 	long long base = xargs.si == 1 ? 1000 : 1024;
 
-	if (s <           base*base) c = 32; /* Less than 1M */
-	else if (s < base*base*base) c = 33; /* Less than 1G */
-	else                         c = 31; /* 1G or more */
+	if (s <           base*base) c = 32; /* Byte and Kb */
+	else if (s < base*base*base) c = 33; /* Mb */
+	else		                 c = 31; /* Larger */
 
 	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
 }
@@ -858,10 +860,10 @@ get_color_age(const time_t t, char *str, const size_t len)
 	time_t age = props_now - t;
 	int c = 0, a = 0;
 
-	if      (age <                0LL) { c = 31; a = 2; }
-	else if (age <=           60*60LL) { c = 36; a = 1; } /* One hour or less */
-	else if (age <=        24*60*60LL) { c = 36; a = 0; } /* One day or less */
-	else                               { c = 36; a = 2; } /* Older */
+	if      (age <         0LL) { c = 31; a = 2; }
+	else if (age <=    60*60LL) { c = 36; a = 1; } /* One hour or less */
+	else if (age <= 24*60*60LL) { c = 36; a = 0; } /* One day or less */
+	else                        { c = 36; a = 2; } /* Older */
 
 	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
 }

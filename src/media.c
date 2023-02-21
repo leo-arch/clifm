@@ -334,7 +334,7 @@ list_mounted_devs(int mode)
 		if (strncmp(line, "/dev/", 5) != 0)
 			continue;
 
-		/* Use strtok() to split LINE into tokens using space as IFS */
+		/* Use strtok(3) to split LINE into tokens using space as IFS */
 		char *str = strtok(line, " ");
 		size_t counter = 0, dev_len = strlen(str);
 
