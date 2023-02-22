@@ -773,13 +773,53 @@ set_file_owner(char **args)
 	return exit_status;
 }
 
+/* Get gradient color based on file size (true colors version) */
+static void
+get_color_size_truecolor(const off_t s, char *str, const size_t len)
+{
+	long long base = xargs.si == 1 ? 1000 : 1024;
+	uint8_t n = 0;
+
+	if      (s <                base) n = 1; // Bytes
+	else if (s <           base*base) n = 2; // Kb
+	else if (s <      base*base*base) n = 3; // Mb
+	else if (s < base*base*base*base) n = 4; // Gb
+	else				              n = 5; // Larger
+
+	snprintf(str, len, "\x1b[0;%d;38;2;%d;%d;%dm",
+		size_shades.shades[n].attr,
+		size_shades.shades[n].R,
+		size_shades.shades[n].G,
+		size_shades.shades[n].B);
+}
+
+/* Get gradient color based on file time (true colors version) */
+static void
+get_color_age_truecolor(const time_t t, char *str, const size_t len)
+{
+	time_t age = props_now - t;
+	uint8_t n;
+
+	if      (age <             0LL) n = 0;
+	else if (age <=        60*60LL) n = 1; /* One hour or less */
+	else if (age <=     24*60*60LL) n = 2; /* One day or less */
+	else if (age <=   7*24*60*60LL) n = 3; /* One weak or less */
+	else if (age <= 4*7*24*60*60LL) n = 4; /* One month or less */
+	else                            n = 5; /* Older */
+
+	snprintf(str, len, "\x1b[0;%d;38;2;%d;%d;%dm",
+		date_shades.shades[n].attr,
+		date_shades.shades[n].R,
+		date_shades.shades[n].G,
+		date_shades.shades[n].B);
+}
+
 /* Get gradient color based on file size (256 colors version) */
 static void
 get_color_size256(const off_t s, char *str, const size_t len)
 {
-	int c = 0, a = 0;
-
 	long long base = xargs.si == 1 ? 1000 : 1024;
+	uint8_t n = 0;
 
 /* LSD uses this criteria and colors:
  * Bytes and Kb = small (229)
@@ -793,13 +833,15 @@ get_color_size256(const off_t s, char *str, const size_t len)
  * Gb (220)
  * Larger (214) */
 
-	if      (s <                base) c = 46;  // Bytes
-	else if (s <           base*base) c = 118; // Kb
-	else if (s <      base*base*base) c = 226; // Mb
-	else if (s < base*base*base*base) c = 214; // Gb
-	else				              c = 202; // Larger
+	if      (s <                base) n = 1; // Bytes
+	else if (s <           base*base) n = 2; // Kb
+	else if (s <      base*base*base) n = 3; // Mb
+	else if (s < base*base*base*base) n = 4; // Gb
+	else				              n = 5; // Larger
 
-	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
+	snprintf(str, len, "\x1b[0;%d;38;5;%dm",
+		size_shades.shades[n].attr,
+		size_shades.shades[n].R);
 }
 
 /* Get gradient color based on file time (256 colors version) */
@@ -809,22 +851,54 @@ get_color_age256(const time_t t, char *str, const size_t len)
 	/* PROPS_NOW is global. Calculated before by list_dir() and when
 	 * running the 'p' command */
 	time_t age = props_now - t;
-	int c, a = 0;
+	uint8_t n;
 
 /* LSD uses this criteria and colors:
  * HourOld (40)
  * DayOld (42)
  * Older (36) */
 
-	/* B&W gradient */
-	if      (age <             0LL) { c = 196; a = 2; }
-	else if (age <=        60*60LL) { c = 231; } /* One hour or less */
-	else if (age <=     24*60*60LL) { c = 253; } /* One day or less */
-	else if (age <=   7*24*60*60LL) { c = 250; } /* One weak or less */
-	else if (age <= 4*7*24*60*60LL) { c = 247; } /* One month or less */
-	else                            { c = 244; } /* Older */
+	if      (age <             0LL) n = 0;
+	else if (age <=        60*60LL) n = 1; // One hour or less
+	else if (age <=     24*60*60LL) n = 2; // One day or less
+	else if (age <=   7*24*60*60LL) n = 3; // One weak or less
+	else if (age <= 4*7*24*60*60LL) n = 4; // One month or less
+	else                            n = 5; // Older
 
-	snprintf(str, len, "\x1b[0;%d;38;5;%dm", a, c);
+	snprintf(str, len, "\x1b[0;%d;38;5;%dm",
+		date_shades.shades[n].attr,
+		date_shades.shades[n].R);
+}
+
+static void
+get_color_size8(const off_t s, char *str, const size_t len)
+{
+	long long base = xargs.si == 1 ? 1000 : 1024;
+	uint8_t n;
+
+	if      (s <      base*base) n = 1; // Byte and Kb
+	else if (s < base*base*base) n = 2; // Mb
+	else		                 n = 3; // Larger
+
+	snprintf(str, len, "\x1b[0;%d;%dm",
+		size_shades.shades[n].attr,
+		size_shades.shades[n].R);
+}
+
+static void
+get_color_age8(const time_t t, char *str, const size_t len)
+{
+	time_t age = props_now - t;
+	uint8_t n;
+
+	if      (age <         0LL) n = 0;
+	else if (age <=    60*60LL) n = 1; // One hour or less
+	else if (age <= 24*60*60LL) n = 2; // One day or less
+	else                        n = 3; // Older
+
+	snprintf(str, len, "\x1b[0;%d;%dm",
+		date_shades.shades[n].attr,
+		date_shades.shades[n].R);
 }
 
 /* Get gradient color (based on size) for the file whose size is S.
@@ -832,19 +906,12 @@ get_color_age256(const time_t t, char *str, const size_t len)
 static void
 get_color_size(const off_t s, char *str, const size_t len)
 {
-	if (term_caps.color >= 256) {
-		get_color_size256(s, str, len);
-		return;
+	switch(size_shades.type) {
+	case SHADE_TYPE_8COLORS: get_color_size8(s, str, len); break;
+	case SHADE_TYPE_256COLORS: get_color_size256(s, str, len); break;
+	case SHADE_TYPE_TRUECOLOR: get_color_size_truecolor(s, str, len); break;
+	default: break;
 	}
-
-	int c = 0, a = 0;
-	long long base = xargs.si == 1 ? 1000 : 1024;
-
-	if (s <           base*base) c = 32; /* Byte and Kb */
-	else if (s < base*base*base) c = 33; /* Mb */
-	else		                 c = 31; /* Larger */
-
-	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
 }
 
 /* Get gradient color (based on time) for the file whose time is T.
@@ -852,20 +919,12 @@ get_color_size(const off_t s, char *str, const size_t len)
 static void
 get_color_age(const time_t t, char *str, const size_t len)
 {
-	if (term_caps.color >= 256) {
-		get_color_age256(t, str, len);
-		return;
+	switch(date_shades.type) {
+	case SHADE_TYPE_8COLORS: get_color_age8(t, str, len); break;
+	case SHADE_TYPE_256COLORS: get_color_age256(t, str, len); break;
+	case SHADE_TYPE_TRUECOLOR: get_color_age_truecolor(t, str, len); break;
+	default: break;
 	}
-
-	time_t age = props_now - t;
-	int c = 0, a = 0;
-
-	if      (age <         0LL) { c = 31; a = 2; }
-	else if (age <=    60*60LL) { c = 36; a = 1; } /* One hour or less */
-	else if (age <= 24*60*60LL) { c = 36; a = 0; } /* One day or less */
-	else                        { c = 36; a = 2; } /* Older */
-
-	snprintf(str, len, "\x1b[0;%d;%dm", a, c);
 }
 
 /* Print final stats for the disk usage analyzer mode: total and largest file */

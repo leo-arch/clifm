@@ -92,6 +92,9 @@ struct termcaps_t term_caps;
 struct filter_t filter;
 struct config_t conf;
 
+struct shades_t date_shades;
+struct shades_t size_shades;
+
 struct sort_t _sorts[] = {
     {"none", 0, 0},
     {"name", 1, 0},

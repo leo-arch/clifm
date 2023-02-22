@@ -1729,16 +1729,22 @@ create_def_cscheme(void)
 # *.EXT=COLOR\n"
 
 			"ExtColors=\"%s\"\n\n"
+
+			"# Color shades used to colorize timestamps and file sizes. Consult the\n\
+# manpage for more information\n"
+			"#DateShades=\"%s\"\n"
+			"#SizeShades=\"%s\"\n\n"
+
 			"DirIconColor=\"00;33\"\n\n"
 			"DividingLine=\"%s\"\n\n"
 
-			"If set to 'true', automatically print notifications at the left\n\
+			"# If set to 'true', automatically print notifications at the left\n\
 of the prompt. If set to 'false', let the prompt string handle these notifications\n\
 itself via escape codes. See the manpage for more information\n"
 			"Notifications=\"%s\"\n\n"
 			"Prompt=\"%s\"\n\n"
 
-			"An alternative prompt to warn the user about invalid command names\n"
+			"# An alternative prompt to warn the user about invalid command names\n"
 			"EnableWarningPrompt=\"%s\"\n\n"
 			"WarningPrompt=\"%s\"\n\n"
 			"FzfTabOptions=\"%s\"\n\n",
@@ -1747,6 +1753,8 @@ itself via escape codes. See the manpage for more information\n"
 		DEF_FILE_COLORS,
 		DEF_IFACE_COLORS,
 		DEF_EXT_COLORS,
+		term_caps.color >= 256 ? DEF_DATE_SHADES_256 : DEF_DATE_SHADES_8,
+		term_caps.color >= 256 ? DEF_SIZE_SHADES_256 : DEF_SIZE_SHADES_8,
 		DEF_DIV_LINE,
 		DEF_PROMPT_NOTIF == 1 ? "true" : "false",
 		DEFAULT_PROMPT,

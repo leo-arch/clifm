@@ -51,8 +51,9 @@ off_t dir_size(char *);
 char from_hex(char);
 //char *from_octal(char *s);
 char *gen_date_suffix(struct tm);
-char *get_cmd_path(const char *);
 void gen_time_str(char *, const size_t, const time_t);
+char *get_cmd_path(const char *);
+int  get_rgb(char *, int *, int *, int *, int *);
 void clear_term_img(void);
 mode_t get_dt(const mode_t);
 /*int *get_hex_num(const char *str); */

@@ -609,6 +609,38 @@ hex2int(const char *str)
 	return ((n[0] * 16) + n[1]);
 }
 
+/* Disassemble the hex color HEX into attribute, R, G, and B values
+ * Based on https://mprog.wordpress.com/c/miscellaneous/convert-hexcolor-to-rgb-decimal */
+int
+get_rgb(char *hex, int *attr, int *r, int *g, int *b)
+{
+	if (!hex || !*hex)
+		return (-1);
+
+	if (*hex == '#') {
+		if (!*(hex + 1))
+			return (-1);
+		hex++;
+	}
+
+	char tmp[3];
+	tmp[2] = '\0';
+
+	tmp[0] = *hex, tmp[1] = *(hex + 1);
+	*r = hex2int(tmp);
+
+	tmp[0] = *(hex + 2), tmp[1] = *(hex + 3);
+	*g = hex2int(tmp);
+
+	tmp[0] = *(hex + 4), tmp[1] = *(hex + 5);
+	*b = hex2int(tmp);
+
+	if (*(hex + 6) == '-' && *(hex + 7) && *(hex + 7) >= '1' && *(hex + 7) <= '9')
+		*attr = atoi(hex + 7);
+
+	return 0;
+}
+
 /* Convert hex color HEX into RGB format (as a color code)
  * One color attribute can be added to the hex color as follows:
  * RRGGBB-[1-9], where 1-9 could be:
@@ -627,40 +659,15 @@ hex2int(const char *str)
  * At this point we know HEX is a valid hex color code (see is_hex_color() in colors.c).
  * If using this function outside CliFM, make sure to validate HEX yourself
  *
- * Based on https://mprog.wordpress.com/c/miscellaneous/convert-hexcolor-to-rgb-decimal
  */
 char *
 hex2rgb(char *hex)
 {
-	if (!hex || !*hex)
+	int attr = 0, r = 0, g = 0, b = 0;
+	if (get_rgb(hex, &attr, &r, &g, &b) == -1)
 		return (char *)NULL;
 
-	if (*hex == '#') {
-		if (!*(hex + 1))
-			return (char *)NULL;
-		hex++;
-	}
-
-	char tmp[3];
-	int r = 0, g = 0, b = 0;
-
-	tmp[2] = '\0';
-
-	tmp[0] = *hex, tmp[1] = *(hex + 1);
-	r = hex2int(tmp);
-
-	tmp[0] = *(hex + 2), tmp[1] = *(hex + 3);
-	g = hex2int(tmp);
-
-	tmp[0] = *(hex + 4), tmp[1] = *(hex + 5);
-	b = hex2int(tmp);
-
-	int attr = 0;
-	if (*(hex + 6) == '-' && *(hex + 7) && *(hex + 7) >= '1' && *(hex + 7) <= '9')
-		attr = atoi(hex + 7);
-
-	snprintf(tmp_color, MAX_COLOR, "%d;38;2;%d;%d;%d", attr, r, g, b);
-
+	snprintf(tmp_color, sizeof(tmp_color), "%d;38;2;%d;%d;%d", attr, r, g, b);
 	return tmp_color;
 }
 

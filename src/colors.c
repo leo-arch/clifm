@@ -57,6 +57,10 @@
 /* Max amount of custom color variables in the color scheme file */
 #define MAX_DEFS 64
 
+/* Macros for the set_shades function */
+#define DATE_SHADES 0
+#define SIZE_SHADES 1
+
 #ifndef CLIFM_SUCKLESS
 /* A struct to hold color variables */
 struct defs_t {
@@ -1216,6 +1220,98 @@ set_fzf_opts(char *line)
 }
 #endif /* !_NO_FZF */
 
+static void
+set_shades(char *line, const int type)
+{
+	char *l = remove_quotes(line);
+	if (!l || !*l)
+		return;
+
+	char *str = strtok(l, ",");
+	if (!str || !*str)
+		return;
+
+	int t = *str - '0';
+	if (t < 0 || t > 3)
+		return;
+
+	if (type == DATE_SHADES)
+		date_shades.type = (uint8_t)t;
+	else
+		size_shades.type = (uint8_t)t;
+
+	int c = 0;
+	while ((str = strtok(NULL, ",")) && c < NUM_SHADES) {
+		if (*str == '#') {
+			if (!*(str + 1) || t != SHADE_TYPE_TRUECOLOR)
+				goto NEXT;
+
+			int a = 0, r = 0, g = 0, b = 0;
+
+			if (get_rgb(str + 1, &a, &r, &g, &b) == -1)
+				goto NEXT;
+
+			if (type == DATE_SHADES) {
+				date_shades.shades[c].attr = (uint8_t)a;
+				date_shades.shades[c].R = (uint8_t)r;
+				date_shades.shades[c].G = (uint8_t)g;
+				date_shades.shades[c].B = (uint8_t)b;
+			} else {
+				size_shades.shades[c].attr = (uint8_t)a;
+				size_shades.shades[c].R = (uint8_t)r;
+				size_shades.shades[c].G = (uint8_t)g;
+				size_shades.shades[c].B = (uint8_t)b;
+			}
+
+			goto NEXT;
+		}
+
+		if (t == SHADE_TYPE_TRUECOLOR)
+			goto NEXT;
+
+		char *p = strchr(str, '-');
+		uint8_t color_attr = 0;
+
+		if (p) {
+			*p = '\0';
+			if (*(p + 1) && *(p + 1) >= '0' && *(p + 1) <= '9')
+				color_attr = (uint8_t)(*(p + 1) - '0');
+		}
+
+		int n = atoi(str);
+		if (n < 0 || n > 255)
+			goto NEXT;
+
+		if (type == DATE_SHADES) {
+			date_shades.shades[c].attr = color_attr;
+			date_shades.shades[c].R = (uint8_t)atoi(str);
+		} else {
+			size_shades.shades[c].attr = color_attr;
+			size_shades.shades[c].R = (uint8_t)atoi(str);
+		}
+
+NEXT:
+		c++;
+	}
+}
+
+static void
+set_default_shades(void)
+{
+	char tmp[NAME_MAX];
+	if (term_caps.color >= 256) {
+		snprintf(tmp, sizeof(tmp), "%s", DEF_DATE_SHADES_256);
+		set_shades(tmp, DATE_SHADES);
+		snprintf(tmp, sizeof(tmp), "%s", DEF_SIZE_SHADES_256);
+		set_shades(tmp, SIZE_SHADES);
+	} else {
+		snprintf(tmp, sizeof(tmp), "%s", DEF_DATE_SHADES_8);
+		set_shades(tmp, DATE_SHADES);
+		snprintf(tmp, sizeof(tmp), "%s", DEF_SIZE_SHADES_8);
+		set_shades(tmp, SIZE_SHADES);
+	}
+}
+
 /* Get color lines from the configuration file */
 static int
 get_colors_from_file(const char *colorscheme, char **filecolors,
@@ -1450,6 +1546,15 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 			sprintf(dir_ico_c, "\x1b[%sm", c ? c : p);
 		}
 #endif /* !_NO_ICONS */
+
+		else if (*line == 'D' && strncmp(line, "DateShades=", 11) == 0) {
+			set_shades(line + 11, DATE_SHADES);
+		}
+
+
+		else if (*line == 'S' && strncmp(line, "SizeShades=", 11) == 0) {
+			set_shades(line + 11, SIZE_SHADES);
+		}
 	}
 
 	free(line);
@@ -1626,6 +1731,8 @@ set_colors(const char *colorscheme, const int env)
 	char *filecolors = (char *)NULL,
 		 *extcolors = (char *)NULL,
 	     *ifacecolors = (char *)NULL;
+
+	set_default_shades();
 
 #ifndef _NO_ICONS
 	*dir_ico_c = '\0';

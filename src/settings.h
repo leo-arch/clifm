@@ -180,6 +180,14 @@ xf=01;31:xs=00;32:"
 #define DEF_DXR_C256 "\x1b[0;38;5;50m"
 #define DEF_DZ_C     "\x1b[00;32m" /* Size (only for dirs) */
 
+/* Default color shades and attributes for date field in file properties */
+#define DEF_DATE_SHADES_256 "2,196-2,231,253,250,247,244"
+#define DEF_DATE_SHADES_8   "1,31-2,36-1,36,36-2"
+
+/* Default color shades and attributes for size field in file properties */
+#define DEF_SIZE_SHADES_256 "2,196-2,46,118,226,214,202"
+#define DEF_SIZE_SHADES_8   "1,31-2,32,33,31"
+
 /* This one is purely internal: cur_color is set to this value when
  * entering the warning prompt, so that that we can check cur_color
  * anytime to know whether we are in the warning prompt or not */

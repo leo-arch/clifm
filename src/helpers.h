@@ -1119,6 +1119,27 @@ struct history_t {
 };
 extern struct history_t *history;
 
+#define SHADE_TYPE_UNSET     0
+#define SHADE_TYPE_8COLORS   1
+#define SHADE_TYPE_256COLORS 2
+#define SHADE_TYPE_TRUECOLOR 3
+
+#define NUM_SHADES 6
+// Structs to hold color info for size and date fields in file properties
+struct rgb_t {
+	uint8_t attr;
+	uint8_t R;
+	uint8_t G;
+	uint8_t B;
+};
+
+struct shades_t {
+	uint8_t type;
+	struct rgb_t shades[NUM_SHADES];
+};
+extern struct shades_t date_shades;
+extern struct shades_t size_shades;
+
 enum tab_mode {
 	STD_TAB =   0,
 	FZF_TAB =   1,

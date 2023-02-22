@@ -116,6 +116,26 @@ init_workspaces_opts(void)
 	}
 }
 
+static void
+init_shades(void)
+{
+	date_shades.type = SHADE_TYPE_UNSET;
+	size_shades.type = SHADE_TYPE_UNSET;
+
+	int i = NUM_SHADES;
+	while (--i >= 0) {
+		date_shades.shades[i].attr = 0;
+		date_shades.shades[i].R = 0;
+		date_shades.shades[i].G = 0;
+		date_shades.shades[i].B = 0;
+
+		size_shades.shades[i].attr = 0;
+		size_shades.shades[i].R = 0;
+		size_shades.shades[i].G = 0;
+		size_shades.shades[i].B = 0;
+	}
+}
+
 void
 init_conf_struct(void)
 {
@@ -201,6 +221,8 @@ init_conf_struct(void)
 	conf.usr_cscheme = (char *)NULL;
 	conf.wprompt_str = (char *)NULL;
 	conf.welcome_message_str = (char *)NULL;
+
+	init_shades();
 }
 
 void
