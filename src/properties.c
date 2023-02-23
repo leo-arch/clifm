@@ -958,12 +958,12 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 	printf(_("Total size:   %s%s%s\n"
 		"Largest file: %s%s%s %c%s%s%s%c\n"),
 		conf.colorize == 1 ? tsize : "" , t ? t : "?",
-		conf.colorize == 1 ? NC : "",
+		conf.colorize == 1 ? tx_c : "",
 		conf.colorize == 1 ? lsize : "" , l ? l : "?",
-		conf.colorize == 1 ? NC : "",
+		conf.colorize == 1 ? tx_c : "",
 		name ? '[' : 0,
 		(conf.colorize && color) ? color : "",
-		name ? name : "", df_c,
+		name ? name : "", tx_c,
 		name ? ']' : 0);
 
 	free(t);
