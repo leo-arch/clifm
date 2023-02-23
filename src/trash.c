@@ -330,7 +330,7 @@ trash_clear(void)
 }
 
 static int
-trash_element(const char *suffix, struct tm *tm, char *file)
+trash_element(const char *suffix, const struct tm *tm, char *file)
 {
 	/* Check file's existence */
 	struct stat attr;
@@ -340,43 +340,39 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	}
 
 	/* Check whether the user has enough permissions to remove file */
-	/* If relative path */
-	char full_path[PATH_MAX] = "";
+	char full_path[PATH_MAX];
 
-	if (*file != '/') {
+	if (*file != '/') { /* If relative path */
+		if (!workspaces[cur_ws].path)
+			return EXIT_FAILURE;
 		/* Construct absolute path for file */
-		snprintf(full_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, file);
-		if (wx_parent_check(full_path) != 0)
-			return EXIT_FAILURE;
-	} else {
-		if (wx_parent_check(file) != 0)
-			/* If absolute path */
-			return EXIT_FAILURE;
+		snprintf(full_path, sizeof(full_path), "%s/%s", workspaces[cur_ws].path, file);
 	}
+
+	if (wx_parent_check(*file != '/' ? full_path : file) != 0)
+		return EXIT_FAILURE;
 
 	int ret = -1;
 
 	/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
 	 * current date and time */
-	char *filename = (char *)NULL;
-	if (*file != '/') /* If relative path */
-		filename = straftlst(full_path, '/');
-	else /* If absolute path */
-		filename = straftlst(file, '/');
-
-	if (!filename) {
+	char *filename = strrchr(*file != '/' ? full_path : file, '/');
+	if (!filename || !*(++filename)) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Error getting file name\n"), file);
 		return EXIT_FAILURE;
 	}
+
 	/* If the length of the trashed file name (orig_filename.suffix) is
 	 * longer than NAME_MAX (255), trim the original filename, so that
 	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
 	 * than NAME_MAX */
-	size_t filename_len = strlen(filename), suffix_len = strlen(suffix);
+	size_t filename_len = strlen(filename);
+	size_t suffix_len = strlen(suffix);
 	int size = (int)(filename_len + suffix_len + 11) - NAME_MAX;
 	/* len = filename.suffix.trashinfo */
 
 	if (size > 0) {
+		/* THIS IS NOT UNICODE AWARE */
 		/* If SIZE is a positive value, that is, the trashed file name
 		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name
 		 * SIZE bytes. Terminate the original file name (FILENAME) with
@@ -385,21 +381,18 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		filename[filename_len - (size_t)size] = '\0';
 	}
 
-	/* 2 = dot + null byte */
 	size_t file_suffix_len = filename_len + suffix_len + 2;
 	char *file_suffix = (char *)xnmalloc(file_suffix_len, sizeof(char));
-	/* No need for memset. sprintf adds the terminating null byte by
-	 * itself */
 	sprintf(file_suffix, "%s.%s", filename, suffix);
 
 	/* Move the original file into the trash directory */
+	/* NOTE: It is guaranteed (by check_trash_file()) that FILE does not
+	 * end with a slash */
 	char *dest = (char *)NULL;
 	dest = (char *)xnmalloc(strlen(trash_files_dir) + strlen(file_suffix) + 2,
 			sizeof(char));
 	sprintf(dest, "%s/%s", trash_files_dir, file_suffix);
-	char *tmp_cmd[] = {"mv", file, dest, NULL};
-
-	free(filename);
+	char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
 
 	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 	free(dest);
@@ -1040,7 +1033,7 @@ check_trash_file(char *deq_file)
 	if (*deq_file == '/') /* If absolute path */
 		strcpy(tmp_cmd, deq_file);
 	else /* If relative path, add path to check against TRASH_DIR */
-		snprintf(tmp_cmd, PATH_MAX, "%s/%s", workspaces[cur_ws].path, deq_file);
+		snprintf(tmp_cmd, sizeof(tmp_cmd), "%s/%s", workspaces[cur_ws].path, deq_file);
 
 	/* Do not trash any of the parent directories of TRASH_DIR */
 	if (strncmp(tmp_cmd, trash_dir, strlen(tmp_cmd)) == 0) {

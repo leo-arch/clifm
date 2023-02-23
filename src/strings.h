@@ -50,7 +50,6 @@ char *replace_slashes(char *, const char);
 char *replace_substr(char *, char *, char *);
 char *savestring(const char *restrict, size_t);
 char **split_str(const char *, const int);
-char *straftlst(char *, const char);
 char *strbfrlst(char *, const char);
 char *strbtw(char *, const char, const char);
 int  strcntchr(const char *, const char);

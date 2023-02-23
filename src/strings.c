@@ -484,34 +484,6 @@ strcntchrlst(const char *str, const char c)
 	return p;
 }
 
-/* Returns the string after the last appearance of a given char, or
- * NULL if no match */
-char *
-straftlst(char *str, const char c)
-{
-	if (!str || !*str || !c)
-		return (char *)NULL;
-
-	char *p = str, *q = (char *)NULL;
-
-	while (*p) {
-		if (*p == c)
-			q = p;
-		p++;
-	}
-
-	if (!q || !*(q + 1))
-		return (char *)NULL;
-
-	char *buf = (char *)malloc(strlen(q + 1) + 1);
-
-	if (!buf)
-		return (char *)NULL;
-
-	strcpy(buf, q + 1);
-	return buf;
-}
-
 /* Get substring in STR before the last appearance of C. Returns
  * substring  if C is found and NULL if not (or if C was the first
  * char in STR). */
