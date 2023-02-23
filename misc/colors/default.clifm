@@ -223,16 +223,16 @@ ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.taz=ARCHIVE
 
 #DateShades="1,31-2,36-1,36,36-2"
 #DateShades="2,196-2,231,253,250,247,244"
-#DateShades="3,ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
+#DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 
-#NOTE: For DateShades to work, the 'dd' color code (solid color for dates) needs to be unset
+#NOTE: For DateShades to work, the 'dd' color code (solid color for dates) needs to be unset (default)
 
 # Same as DateShades, but for file sizes
 #SizeShades="1,31-2,32,33,31"
 #SizeShades="2,196-2,46,118,226,214,202"
 #SizeShades="3,#ff0000-2,#00ff00,#87ff00,#ffff00,#ffaf00,#ff5f00"
 
-#NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to be unset
+#NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to be unset (default)
 
 # If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts)
 DirIconColor="Y"
