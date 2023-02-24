@@ -86,7 +86,14 @@ PropFields="fpims"
 
 # Format used to print dates in long view mode.
 # Consult strftime(3) for information about time format modifiers.
-#TimeStyle="%F %T"
+# Defaults to "%b %e %H:%M" for recent files (< 6 months) and "%b %e  %Y" for older files.
+# Examples:
+## ISO
+#TimeStyle="%Y-%m-%d"
+## Long ISO
+#TimeStyle="%Y-%m-%d %H:%M"
+## Full ISO (%z is a GNU extension)
+#TimeStyle="%Y-%m-%d %H:%M:%S %z"
 
 # If running in long view, print directories full size (including contents)
 FullDirSize=false
