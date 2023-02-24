@@ -92,7 +92,7 @@ PropFields="fpims"
 #TimeStyle="%Y-%m-%d"
 ## Long ISO
 #TimeStyle="%Y-%m-%d %H:%M"
-## Full ISO (%z is a GNU extension)
+## Full ISO
 #TimeStyle="%Y-%m-%d %H:%M:%S %z"
 
 # If running in long view, print directories full size (including contents)

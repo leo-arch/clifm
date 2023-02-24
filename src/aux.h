@@ -35,7 +35,6 @@
 
 /* Max size type length for the value returned by get_size_type() */
 #define MAX_UNIT_SIZE 10 /* "1023.99YB\0" */
-#define LONG_TIME_STR "%a %b %d %T %Y %z" /* Used by history and trash */
 
 __BEGIN_DECLS
 

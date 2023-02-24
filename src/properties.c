@@ -1469,7 +1469,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			uint8_t recent = age >= 0 && age < 14515200LL;
 			/* 14515200 == 6*4*7*24*60*60 == six months */
 			/* If not user defined, let's mimic ls(1) behavior */
-			char *tfmt = conf.time_str ? conf.time_str : recent ? "%b %e %H:%M" : "%b %e  %Y";
+			char *tfmt = conf.time_str ? conf.time_str :
+				recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER;
 			/* GCC, not clang, complains about tfmt being not a string literal.
 			 * Let's silence this warning until we find a better approach. */
 #pragma GCC diagnostic push
