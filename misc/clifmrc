@@ -84,6 +84,10 @@ LongViewMode=false
 #PropFields="ns"
 PropFields="fpims"
 
+# Format used to print dates in long view mode.
+# Consult strftime(3) for information about time format modifiers.
+#TimeStyle="%F %T"
+
 # If running in long view, print directories full size (including contents)
 FullDirSize=false
 

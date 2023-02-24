@@ -1415,6 +1415,8 @@ LongViewMode=%s\n\
 # s|S = size (either human readable (s) or bytes (S))\n\
 # A single dash \"-\" disables all fields\n\
 PropFields=\"%s\"\n\
+# Format used to print dates in long view (see strftime(3))\n\
+#TimeStyle=\"%%F %%T\"\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
 ApparentSize=%s\n\
 # If running in long view, print directories full size (including contents)\n\
@@ -2873,8 +2875,8 @@ read_config(void)
 		}
 #endif /* !_NO_FZF */
 
-		else if (*line == 'T' && strncmp(line, "TimeFormat=", 11) == 0) {
-			char *tmp = get_line_value(line + 11);
+		else if (*line == 'T' && strncmp(line, "TimeStyle=", 10) == 0) {
+			char *tmp = get_line_value(line + 10);
 			if (!tmp)
 				continue;
 			free(conf.time_str);
