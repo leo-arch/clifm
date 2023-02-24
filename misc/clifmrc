@@ -84,8 +84,8 @@ LongViewMode=false
 #PropFields="ns"
 PropFields="fpims"
 
-# Format used to print dates in long view mode.
-# Consult strftime(3) for information about time format modifiers.
+# Format used to display timestamps in long view mode.
+# Consult strftime(3) for information about time format specifiers.
 # Defaults to "%b %e %H:%M" for recent files (< 6 months) and "%b %e  %Y" for older files.
 # Examples:
 ## ISO

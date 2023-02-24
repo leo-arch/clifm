@@ -1415,7 +1415,7 @@ LongViewMode=%s\n\
 # s|S = size (either human readable (s) or bytes (S))\n\
 # A single dash \"-\" disables all fields\n\
 PropFields=\"%s\"\n\
-# Format used to print dates in long view (see strftime(3))\n\
+# Format used to print timestamps in long view (see strftime(3))\n\
 #TimeStyle=\"%%F %%T\"\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
 ApparentSize=%s\n\
