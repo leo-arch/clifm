@@ -3295,8 +3295,11 @@ get_prompt_cmds(void)
 /* Get the length of the current time format
  * We need this to construct the time string in case of invalid timestamp (0),
  * and to calculate the space left to print file names in long view */
-/* GCC, not clang, complains about tfmt being not a string literal.
- * Let's silence this warning until we find a better approach. */
+
+/* GCC (not clang though) complains about tfmt being not a string literal.
+ * Let's silence this warning until we find a better approach.
+ * This shouldn't be a problem, however, since the use of non string literals
+ * for the format string is documented in the strftime manpage itself. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 static void
@@ -3304,10 +3307,10 @@ check_time_str(void)
 {
 	/* Get length of the current time format */
 	struct tm tm;
-	time_t t = time(0);
+	time_t t = time(NULL);
 	localtime_r(&t, &tm);
 	char tim[MAX_TIME_STR];
-	char *tfmt = conf.time_str ? conf.time_str : "%b %e  %Y";
+	char *tfmt = conf.time_str ? conf.time_str : DEF_TIME_STYLE_OLDER;
 	size_t l = strftime(tim, sizeof(tim), tfmt, &tm);
 
 	/* Construct the invalid time format string (used when we get an

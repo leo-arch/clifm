@@ -1175,7 +1175,7 @@ get_properties(char *filename, const int dsize)
 
 	char atf[32], mtf[32], ctf[32], btf[32];
 	if (term_caps.color > 0 && !*dd_c) {
-		props_now = time(0);
+		props_now = time(NULL);
 		get_color_age(attr.st_atime, atf, sizeof(atf));
 		cadate = atf;
 		get_color_age(attr.st_mtime, mtf, sizeof(mtf));
@@ -1471,7 +1471,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			/* If not user defined, let's mimic ls(1) behavior */
 			char *tfmt = conf.time_str ? conf.time_str :
 				recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER;
-			/* GCC, not clang, complains about tfmt being not a string literal.
+			/* GCC (not clang) complains about tfmt being not a string literal.
 			 * Let's silence this warning until we find a better approach. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"

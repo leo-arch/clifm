@@ -658,8 +658,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 		if (lstat(file_info[i].name, &lattr) == -1)
 			continue;
 
-		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1 && (int)files >= conf.pager)) {
-//		if (pager) {
+		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
+		&& (int)files >= conf.pager)) {
 			int ret = 0;
 			if (*counter > (size_t)(term_lines - 2))
 				ret = run_pager(-1, reset_pager, &i, counter);
@@ -2042,7 +2042,7 @@ list_dir(void)
 	get_term_size();
 
 	if (conf.long_view == 1)
-		props_now = time(0);
+		props_now = time(NULL);
 
 	if (conf.light_mode)
 		return list_dir_light();
