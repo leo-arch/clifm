@@ -218,6 +218,7 @@ init_conf_struct(void)
 	conf.suggestion_strategy = (char *)NULL;
 #endif
 	conf.term = (char *)NULL;
+	conf.time_str = (char *)NULL;
 	conf.usr_cscheme = (char *)NULL;
 	conf.wprompt_str = (char *)NULL;
 	conf.welcome_message_str = (char *)NULL;
@@ -263,8 +264,6 @@ set_prop_fields(char *line)
 	/* Static lengths */
 	if (prop_fields.perm != 0)
 		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 3 : 13) + 1);
-	if (prop_fields.time != 0)
-		prop_fields.len += (19 + 1);
 	if (prop_fields.size != 0)
 		prop_fields.len += prop_fields.size == PROP_SIZE_HUMAN ? (8 + 1) : 1;
 
@@ -275,6 +274,7 @@ set_prop_fields(char *line)
 		prop_fields.len++;
 	if (prop_fields.ids != 0)
 		prop_fields.len++;
+	/* The length of the date field is calculated by check_time_str() */
 }
 
 int
@@ -3292,6 +3292,42 @@ get_prompt_cmds(void)
 	close_fstream(fp, fd);
 }
 
+/* Get the length of the current time format
+ * We need this to construct the time string in case of invalid timestamp (0),
+ * and to calculate the space left to print file names in long view */
+/* GCC, not clang, complains about tfmt being not a string literal.
+ * Let's silence this warning until we find a better approach. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+static void
+check_time_str(void)
+{
+	/* Get length of the current time format */
+	struct tm tm;
+	time_t t = time(0);
+	localtime_r(&t, &tm);
+	char tim[MAX_TIME_STR];
+	char *tfmt = conf.time_str ? conf.time_str : "%b %e  %Y";
+	size_t l = strftime(tim, sizeof(tim), tfmt, &tm);
+
+	/* Construct the invalid time format string (used when we get an
+	 * invalid file timestamp) */
+	if (l > MAX_TIME_STR)
+		l = MAX_TIME_STR;
+
+	size_t i;
+	*invalid_time_str = '-';
+	for (i = 1; i < l; i++)
+		invalid_time_str[i] = ' ';
+	invalid_time_str[i] = '\0';
+
+	/* Append the time string length to the properties total length, so that
+	 * we can better calculate how much space left we have to print file names */
+	if (prop_fields.time != 0)
+		prop_fields.len += (int)(l + 1);
+}
+#pragma GCC diagnostic pop
+
 /* If some option was not set, set it to the default value */
 void
 check_options(void)
@@ -3326,6 +3362,7 @@ check_options(void)
 		xstrsncpy(prop_fields_str, DEF_PROP_FIELDS, PROP_FIELDS_SIZE);
 		set_prop_fields(prop_fields_str);
 	}
+	check_time_str();
 
 	if (xargs.toggle_workspaces == UNSET)
 		xargs.toggle_workspaces = DEF_TOGGLE_WORKSPACES;
@@ -3368,7 +3405,7 @@ check_options(void)
 			conf.wprompt_str = savestring(DEF_WPROMPT_STR, strlen(DEF_WPROMPT_STR));
 		else
 			conf.wprompt_str = savestring(DEF_WPROMPT_STR_NO_COLOR,
-						strlen(DEF_WPROMPT_STR_NO_COLOR));
+				strlen(DEF_WPROMPT_STR_NO_COLOR));
 	}
 
 	/* Do no override command line options */

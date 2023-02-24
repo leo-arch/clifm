@@ -35,11 +35,7 @@
 
 /* Max size type length for the value returned by get_size_type() */
 #define MAX_UNIT_SIZE 10 /* "1023.99YB\0" */
-
-#define TIME_STR "%a %b %d %T %Y %z"
-#define MAX_TIME_STR 128
-/* Our resulting time string won't go usually beyond 29 chars. But since this
- * length is locale dependent, let's use a much larger buffer */
+#define LONG_TIME_STR "%a %b %d %T %Y %z" /* Used by history and trash */
 
 __BEGIN_DECLS
 

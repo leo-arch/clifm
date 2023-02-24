@@ -2873,6 +2873,14 @@ read_config(void)
 		}
 #endif /* !_NO_FZF */
 
+		else if (*line == 'T' && strncmp(line, "TimeFormat=", 11) == 0) {
+			char *tmp = get_line_value(line + 11);
+			if (!tmp)
+				continue;
+			free(conf.time_str);
+			conf.time_str = savestring(tmp, strlen(tmp));
+		}
+
 		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
 			char *tmp = get_line_value(line + 14);
 			if (!tmp)
@@ -3170,6 +3178,9 @@ static void
 reset_variables(void)
 {
 	/* Free everything */
+	free(conf.time_str);
+	conf.time_str = (char *)NULL;
+
 	free(config_dir_gral);
 	free(config_dir);
 	config_dir = config_dir_gral = (char *)NULL;

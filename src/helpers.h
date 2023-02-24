@@ -517,6 +517,8 @@ extern int watch;
 
 #define JUMP_ENTRY_PURGED -1
 
+#define MAX_TIME_STR 256
+
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */
@@ -704,6 +706,7 @@ struct config_t {
 	char *opener;
 	char *encoded_prompt;
 	char *term;
+	char *time_str;
 	char *welcome_message_str;
 	char *wprompt_str;
 #ifndef _NO_SUGGESTIONS
@@ -1328,6 +1331,7 @@ extern char
 #endif /* _NO_FZF */
 	_fmatch[PATH_MAX + 1], /* First regular match if fuzzy matching is enabled */
 	prop_fields_str[PROP_FIELDS_SIZE + 1],
+	invalid_time_str[MAX_TIME_STR],
 
 	*actions_file,
 	*alt_config_dir,

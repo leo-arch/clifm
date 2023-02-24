@@ -1376,6 +1376,8 @@ free_stuff(void)
 
 	int i = 0;
 
+	free(conf.time_str);
+
 #ifdef LINUX_INOTIFY
 	/* Shutdown inotify */
 	if (inotify_wd >= 0)

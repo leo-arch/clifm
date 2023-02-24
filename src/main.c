@@ -240,6 +240,7 @@ char
 #endif /* _NO_FZF */
 	_fmatch[PATH_MAX + 1],
 	prop_fields_str[PROP_FIELDS_SIZE + 1] = "",
+	invalid_time_str[MAX_TIME_STR] = "",
 
 	*actions_file = (char *)NULL,
 	*alt_bm_file = (char *)NULL,
