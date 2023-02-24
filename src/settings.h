@@ -306,7 +306,7 @@ xf=01;31:xs=00;32:"
 #define DEF_SUG_FILETYPE_COLOR 0
 #define DEF_SUG_STRATEGY "ehfj-ac"
 #define DEF_SUGGESTIONS 1
-#define DEF_TIME_STYLE_RECENT "%b %e %H:%M"
+#define DEF_TIME_STYLE_RECENT "%b %e %H:%M" /* Dates in long view mode */
 #define DEF_TIME_STYLE_OLDER  "%b %e  %Y"
 #define DEF_TIME_STYLE_LONG   "%a %b %d %T %Y %z" /* Used by history and trash */
 #define DEF_TIPS 1
