@@ -171,11 +171,11 @@ xf=01;31:xs=00;32:"
 #define DEF_DP_C     "\x1b[00;36m" /* SUID, SGID, Sticky */
 #define DEF_DP_C256  "\x1b[0;38;5;50m"
 #define DEF_DR_C     "\x1b[00;33m" /* Read perm */
-#define DEF_DR_C256  "\x1b[0;38;5;226m"
+#define DEF_DR_C256  "\x1b[0;38;5;227m"
 #define DEF_DW_C     "\x1b[00;31m" /* Write perm */
 #define DEF_DW_C256  "\x1b[0;38;5;196m"
 #define DEF_DXD_C    "\x1b[00;32m" /* Execute perm (dirs) */
-#define DEF_DXD_C256 "\x1b[0;38;5;46m"
+#define DEF_DXD_C256 "\x1b[0;38;5;40m"
 #define DEF_DXR_C    "\x1b[00;36m" /* Execute perm (reg files) */
 #define DEF_DXR_C256 "\x1b[0;38;5;50m"
 #define DEF_DZ_C     "\x1b[00;32m" /* Size (only for dirs) */
@@ -185,7 +185,8 @@ xf=01;31:xs=00;32:"
 #define DEF_DATE_SHADES_8   "1,31-2,36-1,36,36-2"
 
 /* Default color shades and attributes for size field in file properties */
-#define DEF_SIZE_SHADES_256 "2,196-2,46,118,226,214,202"
+//#define DEF_SIZE_SHADES_256 "2,196-2,46,118,226,214,202"
+#define DEF_SIZE_SHADES_256 "2,196-2,40,112,227,214,202"
 #define DEF_SIZE_SHADES_8   "1,31-2,32,33,31"
 
 /* This one is purely internal: cur_color is set to this value when
