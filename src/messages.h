@@ -1088,7 +1088,7 @@ Use the 'cr' plugin to send a file to a remote location:\n\
 
 #define WS_USAGE "Switch workspaces\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  ws [NUM/NAME, +, -]\n\n\
+  ws [NUM/NAME [unset], +, -]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available workspaces\n\
     ws (or 'ws <TAB>')\n\
@@ -1099,7 +1099,9 @@ Use the 'cr' plugin to send a file to a remote location:\n\
 - Switch to the next workspace\n\
     ws +\n\
 - Switch to the previous workspace\n\
-    ws -\n\n\
+    ws -\n\
+- Unset the workspace number 2\n\
+    ws 2 unset\n\n\
 Note: Use the WorkspaceNames option in the configuration file to name\n\
 your workspaces"
 

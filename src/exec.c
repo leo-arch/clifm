@@ -2574,7 +2574,7 @@ exec_cmd(char **comm)
 	 * ##################################################*/
 
 	else if (*comm[0] == 'w' && comm[0][1] == 's' && !comm[0][2])
-		return (exit_code = handle_workspaces(comm[1]));
+		return (exit_code = handle_workspaces(comm + 1));
 
 	else if (*comm[0] == 's' && strcmp(comm[0], "stats") == 0)
 		return (exit_code = print_stats());

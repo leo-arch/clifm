@@ -34,6 +34,7 @@
 
 #include "aux.h"
 #include "checks.h"
+#include "colors.h" /* Used to get workspace path color */
 #include "fuzzy_match.h"
 #include "history.h"
 #include "jump.h"
@@ -68,6 +69,7 @@ get_longest_workspace_name(void)
 	return longest_ws;
 }
 
+/*
 static char *
 get_workspace_color(const uint8_t num)
 {
@@ -85,6 +87,32 @@ get_workspace_color(const uint8_t num)
 	case 8: return *ws8_c ? ws8_c : DEF_WS8_C;
 	default: return df_c;
 	}
+} */
+
+static char *
+get_workspace_path_color(const uint8_t num)
+{
+	if (conf.colorize == 0)
+		return df_c;
+
+	if (!workspaces[num].path)
+		return DEF_DL_C; /* Unset. DL (diviling line) defaults to gray: let's use this */
+
+	struct stat a;
+	if (lstat(workspaces[num].path, &a) == -1)
+		return uf_c;
+
+	if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0)
+		return nd_c;
+
+	if (S_ISLNK(a.st_mode)) {
+		char p[PATH_MAX];
+		*p = '\0';
+		realpath(workspaces[num].path, p);
+		return *p ? ln_c : or_c;
+	}
+
+	return get_dir_color(workspaces[num].path, a.st_mode, a.st_nlink);
 }
 
 static int
@@ -94,19 +122,32 @@ list_workspaces(void)
 	int pad = (int)get_longest_workspace_name();
 
 	for (i = 0; i < MAX_WS; i++) {
-		if (workspaces[i].name) {
-			printf("%d [%s%s%s]: %s%*s%s%s", i + 1, get_workspace_color(i),
-				workspaces[i].name, df_c, i == cur_ws ? mi_c : "",
-				pad - (int)wc_xstrlen(workspaces[i].name), "", workspaces[i].path
-				? workspaces[i].path : "none", df_c);
-		} else {
-			printf("%s%d%s: %s%*s%s%s", get_workspace_color(i), i + 1, df_c,
-				i == cur_ws ? mi_c : "", pad > 0 ? pad + 3 : 0, "", workspaces[i].path
-				? workspaces[i].path : "none", df_c);
-		}
+		char *path_color = get_workspace_path_color(i);
+
 		if (i == cur_ws)
-			fputs(df_c, stdout);
-		putchar('\n');
+			printf("%s>%s ", mi_c, df_c);
+		else
+			fputs("  ", stdout);
+
+//		char *p = get_workspace_color(i);
+//		char *ws_color = p ? p : df_c;
+		char *ws_color = df_c;
+
+		if (workspaces[i].name) {
+			printf("%s%d%s [%s%s%s]: %*s",
+				ws_color, i + 1, df_c,
+				ws_color, workspaces[i].name, df_c,
+				pad - (int)wc_xstrlen(workspaces[i].name), "");
+		} else {
+			printf("%s%d%s: %*s",
+				ws_color, i + 1, df_c,
+				pad > 0 ? pad + 3 : 0, "");
+		}
+
+		printf("%s%s%s\n",
+			path_color,
+			workspaces[i].path ? workspaces[i].path : "unset",
+			df_c);
 	}
 
 	return EXIT_SUCCESS;
@@ -117,22 +158,21 @@ check_workspace_num(char *str, int *tmp_ws)
 {
 	int istr = atoi(str);
 	if (istr <= 0 || istr > MAX_WS) {
-		fprintf(stderr, _("%s: ws: %d: No such workspace (valid workspace numbers: 1-%d)\n"),
-			PROGRAM_NAME, istr, MAX_WS);
+		fprintf(stderr, _("ws: %d: No such workspace (valid workspaces: "
+			"1-%d)\n"), istr, MAX_WS);
 		return EXIT_FAILURE;
 	}
 
 	*tmp_ws = istr - 1;
 
 	if (*tmp_ws == cur_ws) {
-		fprintf(stderr, _("ws: %d is already the current workspace\n"), *tmp_ws + 1);
+		fprintf(stderr, _("ws: %d: Is the current workspace\n"), *tmp_ws + 1);
 		return EXIT_SUCCESS;
 	}
 
 	return 2;
 }
 
-#include "colors.h"
 static void
 save_workspace_opts(const int n)
 {
@@ -258,12 +298,14 @@ switch_workspace(int tmp_ws)
  * or -1 if no workspace is named NAME, if error, or if NAME is already
  * the current workspace */
 static int
-get_workspace_by_name(char *name)
+get_workspace_by_name(char *name, const int check_current)
 {
 	if (!workspaces || !name || !*name)
 		return (-1);
 
-	char *p = dequote_str(name, 0);
+	/* CHECK_CURRENT is zero when coming from unset_workspace(), in which
+	 * case name is already dequoted */
+	char *p = check_current == 1 ? dequote_str(name, 0) : (char *)NULL;
 	char *q = p ? p : name;
 
 	int n = MAX_WS;
@@ -271,8 +313,8 @@ get_workspace_by_name(char *name)
 		if (!workspaces[n].name || *workspaces[n].name != *q
 		|| strcmp(workspaces[n].name, q) != 0)
 			continue;
-		if (n == cur_ws) {
-			fprintf(stderr, _("ws: %s is already the current workspace\n"), q);
+		if (n == cur_ws && check_current == 1) {
+			fprintf(stderr, _("ws: %s: Is the current workspace\n"), q);
 			free(p);
 			return (-1);
 		}
@@ -285,33 +327,85 @@ get_workspace_by_name(char *name)
 	return (-1);
 }
 
-int
-handle_workspaces(char *str)
+static int
+unset_workspace(char *str)
 {
-	if (!str || !*str)
+	int n = -1;
+
+	char *name = dequote_str(str, 0);
+	if (!name) {
+		fprintf(stderr, "ws: %s: Error dequoting name\n", str);
+		return EXIT_FAILURE;
+	}
+
+	if (!is_number(name)) {
+		if ((n = get_workspace_by_name(name, 0)) == -1)
+			goto ERROR;
+		n++;
+	} else {
+		n = atoi(name);
+	}
+
+	if (n < 1 || n > MAX_WS) {
+		fprintf(stderr, _("ws: %s: No such workspace (valid workspaces: "
+			"1-%d)\n"), name, MAX_WS);
+		goto ERROR;
+	}
+
+	n--;
+	if (n == cur_ws) {
+		fprintf(stderr, _("ws: %s: Is the current workspace\n"), name);
+		goto ERROR;
+	}
+
+	if (!workspaces[n].path) {
+		fprintf(stderr, _("ws: %s: Already unset\n"), name);
+		goto ERROR;
+	}
+
+	printf(_("ws: %s: Workspace unset\n"), name);
+	free(name);
+
+	free(workspaces[n].path);
+	workspaces[n].path = (char *)NULL;
+
+	return EXIT_SUCCESS;
+
+ERROR:
+	free(name);
+	return EXIT_FAILURE;
+}
+
+int
+handle_workspaces(char **args)
+{
+	if (!args[0] || !*args[0])
 		return list_workspaces();
 
-	if (IS_HELP(str)) {
+	if (IS_HELP(args[0])) {
 		puts(_(WS_USAGE));
 		return EXIT_SUCCESS;
 	}
 
+	if (args[1] && strcmp(args[1], "unset") == 0)
+		return unset_workspace(args[0]);
+
 	int tmp_ws = 0;
 
-	if (is_number(str)) {
-		int ret = check_workspace_num(str, &tmp_ws);
+	if (is_number(args[0])) {
+		int ret = check_workspace_num(args[0], &tmp_ws);
 		if (ret != 2)
 			return ret;
-	} else if (*str == '+' && !str[1]) {
+	} else if (*args[0] == '+' && !args[0][1]) {
 		if ((cur_ws + 1) >= MAX_WS)
 			return EXIT_FAILURE;
 		tmp_ws = cur_ws + 1;
-	} else if (*str == '-' && !str[1]) {
+	} else if (*args[0] == '-' && !args[0][1]) {
 			if ((cur_ws - 1) < 0)
 				return EXIT_FAILURE;
 			tmp_ws = cur_ws - 1;
 	} else {
-		tmp_ws = get_workspace_by_name(str);
+		tmp_ws = get_workspace_by_name(args[0], 1);
 		if (tmp_ws == -1)
 			return EXIT_FAILURE;
 	}

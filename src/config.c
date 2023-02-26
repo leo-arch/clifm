@@ -2346,16 +2346,10 @@ free_workspaces_names(void)
 /* Get workspaces names from the WorkspacesNames line in the configuration
  * file and store them in the workspaces array */
 void
-set_workspaces_names(char *line)
+set_workspace_names(char *line)
 {
-	if (!line || !*line)
-		return;
-
-	char *e = strchr(line, '=');
-	if (!e || !*(++e))
-		return;
-
-	char *t = remove_quotes(e);
+	char *e = (char *)NULL;
+	char *t = remove_quotes(line);
 	if (!t || !*t)
 		return;
 
@@ -2515,8 +2509,8 @@ read_config(void)
 			set_config_bool_value(line + 10, &conf.disk_usage);
 		}
 
-		else if (*line == 'D' && strncmp(line, "DividingLine", 12) == 0) {
-			set_div_line(line + 12);
+		else if (*line == 'D' && strncmp(line, "DividingLine=", 13) == 0) {
+			set_div_line(line + 13);
 		}
 
 /*		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
@@ -2967,7 +2961,7 @@ read_config(void)
 
 		else {
 			if (*line == 'W' && strncmp(line, "WorkspaceNames=", 15) == 0)
-				set_workspaces_names(line);
+				set_workspace_names(line + 15);
 		}
 	}
 
