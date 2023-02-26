@@ -2414,10 +2414,11 @@ read_config(void)
 	*prop_fields_str = '\0';
 
 	while (fgets(line, (int)sizeof(line), config_fp)) {
-		if (*line == '\n' || *line == '#')
+//		if (*line == '\n' || *line == '#' || *line == ';')
+		if (*line < 'A' || *line > 'z')
 			continue;
 
-		else if (xargs.apparent_size == UNSET && *line == 'A'
+		if (xargs.apparent_size == UNSET && *line == 'A'
 		&& strncmp(line, "ApparentSize=", 13) == 0) {
 			set_config_bool_value(line + 13, &conf.apparent_size);
 		}
