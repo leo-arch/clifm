@@ -35,7 +35,7 @@ tw=30;42:uf=02;04;37:"
 
 #define DEF_IFACE_COLORS "bm=01;36:dd=:df=0:dg=:dl=02;37:\
 dn=00;02;37:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:\
-el=00;36:em=01;31:fc=00;02;34:hb=00;36:hc=02;31:\
+el=00;36:em=01;31:fc=00;02;37:hb=00;36:hc=02;31:\
 hd=00;36:he=00;36:hn=00;35:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:\
 li=01;32:mi=01;36:nm=01;32:sb=00;02;33:sc=02;36:sd=00;02;37:\
 sf=04;02;36:sh=02;35:si=01;34:sp=02;31:sx=02;32:sz=00;02;04;35:\
@@ -112,7 +112,7 @@ xf=01;31:xs=00;32:"
 #define DEF_DL_C  "\x1b[02;37m" /* Dividing line */
 #define DEF_EL_C  "\x1b[00;36m" /* ELN's */
 #define DEF_EM_C  "\001\x1b[01;31m\002" /* Error msg indicator */
-#define DEF_FC_C  "\x1b[00;02;34m" /* Files counter */
+#define DEF_FC_C  "\x1b[00;02;37m" /* Files counter */
 #define DEF_LI_C  "\001\x1b[01;32m\002" /* Sel files indicator (prompt) */
 #define DEF_LI_CB "\x1b[01;32m" /* Sel files indicator (files list) */
 #define DEF_MI_C  "\x1b[01;36m" /* Misc */
