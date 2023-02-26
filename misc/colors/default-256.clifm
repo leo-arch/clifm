@@ -1,0 +1,279 @@
+# Theme file for CliFM
+# Theme name: clifm (256 colors version)
+# Author: L. Abramovich
+# License: GPL3
+
+### How do we define colors?
+#
+# FiletypeColors, InterfaceColors, and ExtColors use the same format used
+# by the LS_COLORS environment variable. Thus, "di=01;34" means that (non-empty)
+# directories will be printed in bold blue.
+#
+# Color codes are just traditional ANSI escape sequences less the escape char
+# and the final 'm'.
+# 4-bit, 8-bit (256 colors), and 24-bit (RGB/HEX) colors are supported.
+# Example:
+# 31            4-bit
+# 38;5;160      8-bit
+# 38;2;255;0;0  24-bit (RGB)
+# #ff0000       24-bit (HEX)
+#
+# One attribute can be used for hex colors using a dash and an attribute
+# number (RRGGBB-[1-9]), where 1-9 is:
+#
+# 1: Bold or increased intensity
+# 2: Faint, decreased intensity or dim
+# 3: Italic (Not widely supported)
+# 4: Underline
+# 5: Slow blink
+# 6: Rapid blink
+# 7: Reverse video or invert
+# 8: Conceal or hide (Not widely supported)
+# 9: Crossed-out or strike
+#
+# For example, to print bold red color, the hex code is #ff0000-1
+
+### Use some variables to hold your color codes
+#
+# The 'define' keyword allows you to define up to 64 custom color variables.
+# They can be used for:
+# FiletypeColors
+# InterfaceColors
+# ExtColors
+# DirIconColor
+#
+# For example, if 'M' is defined as "00;01;36", we can use this color for
+# ELN's as follows: "el=M" (see below) 
+
+define D=0   # Default terminal color
+define BD=1  # Bold
+define DIM=2 # Dimmed
+
+define DR=2;38;5;197    # Dimmed red
+define R8=31            # Red (4-bit)
+define BR8=1;31         # Bold red (4-bit)
+define UR8=4;31         # Underlined red (4-bit)
+define UDR8=4;2;31      # Underlined dimmed red (4-bit)
+define DR8=2;31         # Dimmed red (4-bit)
+
+define G=38;5;76    # Green
+define G8=32        # Green (4-bit)
+define BG8=1;32     # Bold green (4-bit)
+define DG8=2;32     # Dimmed green (4-bit)
+
+define Y=38;5;228    # Yellow
+define BY=1;38;5;229 # Bold yellow
+define LY=38;5;185   # Light yellow
+define DY8=2;33      # Dimmed yellow (4-bit)
+
+define BB8=1;34 # Bold blue (4-bit)
+define DB8=2;34 # Dimmed blue (4-bit)
+
+define M=38;5;170  # Magenta
+define M8=35	   # Magenta (4-bit)
+define BM8=1;35    # Bold magenta (4-bit)
+define DM8=2;35    # Dimmed magenta (4-bit)
+define UM8=4;35    # Underlined magenta (4-bit)
+define UDM8=4;2;35 # Underlined dimmed magenta (4-bit)
+
+define C=38;5;43   # Cyan
+define C8=36       # Cyan (4-bit)
+define BC8=1;36    # Bold cyan (4-bit)
+define DC8=2;36    # Dimmed cyan (4-bit)
+define BDC8=1;2;36 # Bold dimmed cyan (4-bit)
+define RC8=7;36    # Reverse cyan (4-bit)
+define UDC8=4;2;36 # Underlined dimmed cyan (4-bit)
+
+define DW=38;5;247 # Dimmed white
+define DW8=2;37    # Dimmed white (4-bit)
+define UDW8=4;2;37 # Underlined dimmed white (4-bit)
+
+# Foreground-background combinations
+define URW=4;31;47 # Red foreground, white background
+define WR=37;41    # White foreground, red background
+# K stands for black (B is used for Blue)
+define KY=30;43    # Black foreground, yellow background
+define KR=30;41    # Black foreground, red background
+define KG=30;42    # Black foreground, green background
+# BG is already used for bold green
+define BlGr=34;42  # Blue foreground, green background
+define WB=37;44    # white foreground, blue background
+
+define O=38;5;214    # Orange
+define BO=1;38;5;214 # Bold orange
+
+# File groups (used for file extensions)
+define DOC=38;5;228    # Yellow
+define VIDEO=1;35      # Bold magenta  (4-bit)
+define IMAGE=35        # Magenta (4-bit)
+define SOUND=38;5;214  # Orange
+define CODE=1;38;5;247 # Bold gray
+define ARCHIVE=1;31    # Bold red (4-bit)
+define BOOK=38;5;222   # Salmon
+define TEMP=38;5;247   # Dimmed white
+
+### To know what are we applying colors to, we use the following codes:
+
+## File types
+# bd = Block device
+# ca = File with capabilities
+# cd = Char device
+# ed = Empty directory
+# ee = Empty executable file
+# ex = Executable file
+# ef = Empty regular file
+# fi = Regular file
+# di = Directory
+# ln = Symbolic link
+# mh = Multi-hardlink file
+# nd = Directory with no read permission
+# ne = Empty directory with no read permission
+# nf = Regular file with no read permission
+# no = Unknown
+# or = Broken symlink
+# ow = Other-writable
+# pi = FIFO/pipe
+# sg = SGID file
+# so = Socket
+# st = Sticky (not other-writable)
+# su = SUID file
+# tw = Sticky and other-writable
+# uf = Non-'stat'able file
+
+## Interface
+# bm = Bookmarked directory
+# fc = Files counter
+# df = Default color
+# dl = Dividing line
+# el = ELN color
+# mi = Misc indicators
+# ts = TAB completion suffix
+# tt = Tilde for trimmed files
+# wc = Welcome message
+# wp = Warning prompt
+
+## Auto-suggestions
+# sb = Shell builtins
+# sc = External commands and aliases
+# sd = Internal commands description
+# sf = File names
+# sh = History
+# sx = Internal commands and parameters
+# sp = BAEJ suggestions pointer
+# sz = File names (fuzzy)
+
+## Syntax highlighting
+# hb = Brackets () [] {}
+# hc = Comments
+# hd = Paths (slashes)
+# he = Expansion operators: * ~
+# hn = Numbers
+# hp = Parameters: -
+# hq = Quoted strings
+# hr = Redirection >
+# hs = Process separators | & ; */
+# hv = Variables $ */
+# hw = Wrong, non-existent command name
+
+## File properties
+# dd =  Date (1)
+# dg =  UID, GID
+# dn =  dash (none)
+# do =  Permissions in octal notation
+# dp =  Special files (SUID, SGID, etc)
+# dr =  Read
+# dw =  Write
+# dxd = Execute (dirs)
+# dxr = Execute (reg files)
+# dz =  Size (1)
+
+# (1) If unset, gradient colors will be used (default)
+
+## Workspaces
+# wsN = Workspace number N
+
+## Prompt notifications
+# em = Errors
+# li = Selected files indicator
+# nm = Notices
+# ti = Trash indicator
+# tx = Command line text
+# si = Stealth mode indicator
+# wm = Warnings
+# xs = Exit code: success
+# xf = Exit code: failure
+
+# NOTE: Whenever a code is unset, the default value is used
+
+# FiletypeColors defines the color used for file names when listing files, 
+# just as InterfaceColors defines colors for CliFM's interface.
+FiletypeColors="bd=BY:ca=KR:cd=BO:di=BB8:ed=DB8:ee=G8:ef=DIM:ex=BG8:fi=D:ln=BC8:mh=RC8:nd=UBR8:ne=UDR8:nf=UDR8:no=URW:or=UDC8:ow=BlGr:pi=M:sg=KY:so=BM8:st=WB:su=WR:tw=KG:uf=UDW8:"
+
+InterfaceColors="bm=BG8:dd=:df=D:dg=:dl=DW8:dn=DW8:do=C:dp=:dr=:dw=:dxd=G:dxr=C:dz=:el=C8:em=BR8:fc=DW:hb=C8:hc=DR:hd=C8:he=C8:hn=M8:hp=C8:hq=LY:hr=R8:hs=G8:hv=G8:li=BG8:mi=BC8:nm=BG8:si=BB8:sb=DY8:sc=DC8:sd=DW8:sf=UDC8:sh=DM8:sp=DR8:sx=DG8:sz=UDM8:ti=BC8:ts=UM8:tt=BDC8:tx=D:wc=BC8:wm=BY:wp=DR8:ws1=B8:ws2=R8:ws3=Y:ws4=G8:ws5=C:ws6=O:ws7=M:ws8=DW:xf=BR8:xs=G8:"
+
+# Colors for specific file extensions
+ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.taz=ARCHIVE:*.lha=ARCHIVE:*.lz4=ARCHIVE:*.lzh=ARCHIVE:*.lzma=ARCHIVE:*.tlz=ARCHIVE:*.txz=ARCHIVE:*.tzo=ARCHIVE:*.t7z=ARCHIVE:*.zip=ARCHIVE:*.z=ARCHIVE:*.dz=ARCHIVE:*.gz=ARCHIVE:*.lrz=ARCHIVE:*.lz=ARCHIVE:*.lzo=ARCHIVE:*.xz=ARCHIVE:*.zst=ARCHIVE:*.tzst=ARCHIVE:*.bz2=ARCHIVE:*.bz=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tz=ARCHIVE:*.deb=ARCHIVE:*.rpm=ARCHIVE:*.jar=ARCHIVE:*.war=ARCHIVE:*.ear=ARCHIVE:*.sar=ARCHIVE:*.rar=ARCHIVE:*.alz=ARCHIVE:*.ace=ARCHIVE:*.zoo=ARCHIVE:*.cpio=ARCHIVE:*.7z=ARCHIVE:*.rz=ARCHIVE:*.cab=ARCHIVE:*.wim=ARCHIVE:*.swm=ARCHIVE:*.dwm=ARCHIVE:*.esd=ARCHIVE:*.apk=ARCHIVE:*.iso=ARCHIVE:*.img=ARCHIVE:*.cbr=ARCHIVE:*.cbz=ARCHIVE:*.avif=IMAGE:*.jpg=IMAGE:*.jpeg=IMAGE:*.jxl=IMAGE:*.mjpg=IMAGE:*.mjpeg=IMAGE:*.gif=IMAGE:*.bmp=IMAGE:*.xbm=IMAGE:*.xpm=IMAGE:*.png=IMAGE:*.svg=IMAGE:*.svgz=IMAGE:*.pcx=IMAGE:*.pbm=IMAGE:*.pgm=IMAGE:*.ppm=IMAGE:*.tga=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.mng=IMAGE:*.mov=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.m2v=VIDEO:*.mkv=VIDEO:*.webm=VIDEO:*.webp=VIDEO:*.ogm=VIDEO:*.mp4=VIDEO:*.m4v=VIDEO:*.mp4v=VIDEO:*.vob=VIDEO:*.qt=VIDEO:*.nuv=VIDEO:*.wmv=VIDEO:*.asf=VIDEO:*.rm=VIDEO:*.rmvb=VIDEO:*.flc=VIDEO:*.avi=VIDEO:*.fli=VIDEO:*.flv=VIDEO:*.gl=VIDEO:*.dl=VIDEO:*.xcf=VIDEO:*.xwd=VIDEO:*.yuv=VIDEO:*.cgm=VIDEO:*.emf=VIDEO:*.ogv=VIDEO:*.ogx=VIDEO:*.mov=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.m2v=VIDEO:*.mkv=VIDEO:*.webm=VIDEO:*.webp=VIDEO:*.ogm=VIDEO:*.ogv=VIDEO:*.ogx=VIDEO:*.mp4=VIDEO:*.m4v=VIDEO:*.mp4v=VIDEO:*.vob=VIDEO:*.qt=VIDEO:*.nuv=VIDEO:*.wmv=VIDEO:*.flc=VIDEO:*.avi=VIDEO:*.fli=VIDEO:*.flv=VIDEO:*.asf=VIDEO:*.rm=VIDEO:*.rmvb=VIDEO:*.gl=VIDEO:*.dl=VIDEO:*.xcf=VIDEO:*.xwd=VIDEO:*.yuv=VIDEO:*.cgm=VIDEO:*.emf=VIDEO:*.aac=SOUND:*.au=SOUND:*.m4a=SOUND:*.mid=SOUND:*.midi=SOUND:*.mp3=SOUND:*.mka=SOUND:*.ogg=SOUND:*.opus=SOUND:*.spx=SOUND:*.wma=SOUND:*.wv=SOUND:*.wav=SOUND:*.flac=SOUND:*.aif=SOUND:*.pdf=BOOK:*.djvu=BOOK:*.epub=BOOK:*.ps=DOC:*.sxw=DOC:*.doc=DOC:*.docx=DOC:*.xls=DOC:*.xlsx=DOC:*.xlr=DOC:*.sxi=DOC:*.ppt=DOC:*.pptx=DOC:*.odt=DOC:*.ods=DOC:*.odp=DOC:*.rtf=DOC:*.c=CODE:*.c++=CODE:*.cc=CODE:*.cpp=CODE:*.h=CODE:*.h++=CODE:*.hh=CODE:*.go=CODE:*.java=CODE:*.js=CODE:*.lua=CODE:*.rb=CODE:*.rs=CODE:*.kt=CODE:*.kts=CODE:*.hs=CODE:*.pl=CODE:*.vb=CODE:*.html=CODE:*.htm=CODE:*.shtml=CODE:xhtml=CODE:*.xml=CODE:*.php=CODE:*.tex=CODE:*.ltx=CODE:*.md=CODE:*.cache=TEMP:*.tmp=TEMP:*.temp=TEMP:*.log=TEMP:*.bak=TEMP:*.bk=TEMP:*.in=TEMP:*.out=TEMP:*.part=TEMP:*.aux=TEMP:*.old=TEMP:*.orig=TEMP:*.rej=TEMP:*.swp=TEMP:*.pid=TEMP:"
+
+# The series of color shades used to print timestamps
+# The format is: "COLOR-TYPE,ERROR,SHADE1,SHADE2,SHADE3,SHADE4,SHADE5"
+#
+# COLOR-TYPE is one of: 1 (4-bit: 8 colors), 2 (8-bit: 256 colors), 3 (24-bit: truecolor)
+# ERROR is the color used to print bad values
+# SHADEn is the color used for the shade N
+#
+# For 4-bit colors (1), valid colors are in the range 30-37
+# For 8-bit colors (2), valid colors are in the range 0-255
+# For 24-bit colors (3), valid colors have this format: #RRGGBB
+#
+# An attribute (0-9) can be added to any color (either ERROR or SHADE) using a dash.
+# For example:
+#    "34-1"       -> "bold blue"         (4-bit colors notation)
+#    "226-2"      -> "dimmed yellow"     (8-bit colors notation)
+#    "#ffaff00-4" -> "underlined orange" (24-bit colors notation)
+
+#DateShades="1,31-2,36-1,36,36-2"
+#DateShades="2,196-2,231,253,250,247,244"
+#DateShades="3,#ff0000-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
+
+#NOTE: For DateShades to work, the 'dd' color code (solid color for dates) needs to be unset (default)
+
+# Same as DateShades, but for file sizes
+#SizeShades="1,31-2,32,33,31"
+SizeShades="2,196-2,43,76,227,214,202"
+#SizeShades="2,196-2,6,2,184,214,202"
+#SizeShades="3,#ff0000-2,#00d700,#87d700,#ffff5f,#ffaf00,#ff5f00"
+
+#NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to be unset (default)
+
+# If icons are enabled, use this color for directories icon (only for icons-in-terminal and Nerd-fonts)
+DirIconColor="Y"
+
+# The prompt used by CliFM. Use the 'prompt' command to check for available
+# prompts. Enter 'prompt --help' for more information
+# You can use here either prompt codes (see the prompts.clifm file for details)
+# or a prompt name defined in the prompts file
+Prompt="clifm"
+#Prompt=curves
+# Override prompt values (as defined in the prompts file)
+#Prompt=""
+#Notifications=
+#EnableWarningPrompt=
+#WarningPrompt=""
+
+# The string used to construct the line dividing the list of files and
+# the prompt (Unicode is supported). Possible values:
+# "0": Print just an empty line
+# "C": C is a single char. This char is printed up to the end of the screen
+# "CCC": 3 or more chars. Only these chars (no more) will be printed
+# "": Print a special line drawn with box-drawing characters (not
+#     supported by all terminals/consoles)
+# The color of this line is controlled by the 'dl' code in InterfaceColors
+DividingLine="-"
+
+# If the fzf TAB completion mode is enabled, pass these options to fzf(1):
+FzfTabOptions="--color='16,prompt:6,fg+:-1,pointer:4,hl:2,hl+:2,gutter:-1,marker:2,border:7:dim' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --inline-info --layout=reverse-list --preview-window=wrap,border-left"
+
+# Same options, but colorless
+#FzfTabOptions="--color='bw' --marker='*' --bind tab:accept,right:accept,left:abort,alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --inline-info --layout=reverse-list --preview-window=wrap,border-left"
+
+# For more information consult fzf(1)
