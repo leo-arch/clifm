@@ -101,6 +101,7 @@ define IMAGE=35     # Magenta
 define SOUND=36     # Cyan
 define CODE=1;33    # Bold yellow
 define ARCHIVE=1;31 # Bold red
+define TEMP=2;37    # Dimmed white
 
 ### To know what are we applying colors to, we use the following codes:
 
@@ -202,23 +203,23 @@ FiletypeColors="bd=BY:ca=KR:cd=BD:di=BB:ed=DB:ee=G:ef=DIM:ex=BG:fi=D:ln=BC:mh=RC
 InterfaceColors="bm=BG:dd=:df=D:dg=:dl=DW:dn=DW:do=C:dp=:dr=:dw=:dxd=:dxr=:dz=:el=C:em=BR:fc=DB:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:li=BG:mi=BC:nm=BG:si=BB:sb=DY:sc=DC:sd=DW:sf=UDC:sh=DM:sp=DR:sx=DG:sz=UDM:ti=BC:ts=UM:tt=BDC:tx=D:wc=BC:wm=BY:wp=DR:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xf=BR:xs=G:"
 
 # Colors for specific file extensions
-ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.taz=ARCHIVE:*.lha=ARCHIVE:*.lz4=ARCHIVE:*.lzh=ARCHIVE:*.lzma=ARCHIVE:*.tlz=ARCHIVE:*.txz=ARCHIVE:*.tzo=ARCHIVE:*.t7z=ARCHIVE:*.zip=ARCHIVE:*.z=ARCHIVE:*.dz=ARCHIVE:*.gz=ARCHIVE:*.lrz=ARCHIVE:*.lz=ARCHIVE:*.lzo=ARCHIVE:*.xz=ARCHIVE:*.zst=ARCHIVE:*.tzst=ARCHIVE:*.bz2=ARCHIVE:*.bz=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tz=ARCHIVE:*.deb=ARCHIVE:*.rpm=ARCHIVE:*.jar=ARCHIVE:*.war=ARCHIVE:*.ear=ARCHIVE:*.sar=ARCHIVE:*.rar=ARCHIVE:*.alz=ARCHIVE:*.ace=ARCHIVE:*.zoo=ARCHIVE:*.cpio=ARCHIVE:*.7z=ARCHIVE:*.rz=ARCHIVE:*.cab=ARCHIVE:*.wim=ARCHIVE:*.swm=ARCHIVE:*.dwm=ARCHIVE:*.esd=ARCHIVE:*.apk=ARCHIVE:*.avif=IMAGE:*.jpg=IMAGE:*.jpeg=IMAGE:*.jxl=IMAGE:*.mjpg=IMAGE:*.mjpeg=IMAGE:*.gif=IMAGE:*.bmp=IMAGE:*.xbm=IMAGE:*.xpm=IMAGE:*.png=IMAGE:*.svg=IMAGE:*.svgz=IMAGE:*.pcx=IMAGE:*.pbm=IMAGE:*.pgm=IMAGE:*.ppm=IMAGE:*.tga=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.mng=IMAGE:*.mov=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.m2v=VIDEO:*.mkv=VIDEO:*.webm=VIDEO:*.webp=VIDEO:*.ogm=VIDEO:*.mp4=VIDEO:*.m4v=VIDEO:*.mp4v=VIDEO:*.vob=VIDEO:*.qt=VIDEO:*.nuv=VIDEO:*.wmv=VIDEO:*.asf=VIDEO:*.rm=VIDEO:*.rmvb=VIDEO:*.flc=VIDEO:*.avi=VIDEO:*.fli=VIDEO:*.flv=VIDEO:*.gl=VIDEO:*.dl=VIDEO:*.xcf=VIDEO:*.xwd=VIDEO:*.yuv=VIDEO:*.cgm=VIDEO:*.emf=VIDEO:*.ogv=VIDEO:*.ogx=VIDEO:*.mov=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.m2v=VIDEO:*.mkv=VIDEO:*.webm=VIDEO:*.webp=VIDEO:*.ogm=VIDEO:*.ogv=VIDEO:*.ogx=VIDEO:*.mp4=VIDEO:*.m4v=VIDEO:*.mp4v=VIDEO:*.vob=VIDEO:*.qt=VIDEO:*.nuv=VIDEO:*.wmv=VIDEO:*.flc=VIDEO:*.avi=VIDEO:*.fli=VIDEO:*.flv=VIDEO:*.asf=VIDEO:*.rm=VIDEO:*.rmvb=VIDEO:*.gl=VIDEO:*.dl=VIDEO:*.xcf=VIDEO:*.xwd=VIDEO:*.yuv=VIDEO:*.cgm=VIDEO:*.emf=VIDEO:*.aac=SOUND:*.au=SOUND:*.m4a=SOUND:*.mid=SOUND:*.midi=SOUND:*.mp3=SOUND:*.mka=SOUND:*.ogg=SOUND:*.opus=SOUND:*.spx=SOUND:*.wma=SOUND:*.wv=SOUND:*.wav=SOUND:*.flac=SOUND:*.aif=SOUND:*.pdf=DOC:*.djvu=DOC:*.epub=DOC:*.ps=DOC:*.sxw=DOC:*.doc=DOC:*.docx=DOC:*.xls=DOC:*.xlsx=DOC:*.xlr=DOC:*.sxi=DOC:*.ppt=DOC:*.pptx=DOC:*.odt=DOC:*.ods=DOC:*.odp=DOC:*.rtf=DOC:*.c=CODE:*.c++=CODE:*.cc=CODE:*.cpp=CODE:*.h=CODE:*.h++=CODE:*.hh=CODE:*.go=CODE:*.java=CODE:*.js=CODE:*.lua=CODE:*.rb=CODE:*.rs=CODE:*.kt=CODE:*.kts=CODE:*.hs=CODE:*.pl=CODE:*.vb=CODE:*.html=CODE:*.htm=CODE:*.shtml=CODE:xhtml=CODE:*.xml=CODE:*.php=CODE:*.tex=CODE:*.ltx=CODE:*.md=CODE:*.cache=DW:*.tmp=DW:*.temp=DW:*.log=DW:*.bak=DW:*.bk=DW:*.in=DW:*.out=DW:*.part=DW:*.aux=DW:*.old=DW:*.orig=DW:*.rej=DW:*.swp=DW:*.pid=DW:"
+ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.taz=ARCHIVE:*.lha=ARCHIVE:*.lz4=ARCHIVE:*.lzh=ARCHIVE:*.lzma=ARCHIVE:*.tlz=ARCHIVE:*.txz=ARCHIVE:*.tzo=ARCHIVE:*.t7z=ARCHIVE:*.zip=ARCHIVE:*.z=ARCHIVE:*.dz=ARCHIVE:*.gz=ARCHIVE:*.lrz=ARCHIVE:*.lz=ARCHIVE:*.lzo=ARCHIVE:*.xz=ARCHIVE:*.zst=ARCHIVE:*.tzst=ARCHIVE:*.bz2=ARCHIVE:*.bz=ARCHIVE:*.tbz=ARCHIVE:*.tbz2=ARCHIVE:*.tz=ARCHIVE:*.deb=ARCHIVE:*.rpm=ARCHIVE:*.jar=ARCHIVE:*.war=ARCHIVE:*.ear=ARCHIVE:*.sar=ARCHIVE:*.rar=ARCHIVE:*.alz=ARCHIVE:*.ace=ARCHIVE:*.zoo=ARCHIVE:*.cpio=ARCHIVE:*.7z=ARCHIVE:*.rz=ARCHIVE:*.cab=ARCHIVE:*.wim=ARCHIVE:*.swm=ARCHIVE:*.dwm=ARCHIVE:*.esd=ARCHIVE:*.apk=ARCHIVE:*.iso=ARCHIVE:*.cbr=ARCHIVE:*.cbz=ARCHIVE:*.img=ARCHIVE:*.avif=IMAGE:*.jpg=IMAGE:*.jpeg=IMAGE:*.jxl=IMAGE:*.mjpg=IMAGE:*.mjpeg=IMAGE:*.gif=IMAGE:*.bmp=IMAGE:*.xbm=IMAGE:*.xpm=IMAGE:*.png=IMAGE:*.svg=IMAGE:*.svgz=IMAGE:*.pcx=IMAGE:*.pbm=IMAGE:*.pgm=IMAGE:*.ppm=IMAGE:*.tga=IMAGE:*.tif=IMAGE:*.tiff=IMAGE:*.mng=IMAGE:*.mov=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.m2v=VIDEO:*.mkv=VIDEO:*.webm=VIDEO:*.webp=VIDEO:*.ogm=VIDEO:*.mp4=VIDEO:*.m4v=VIDEO:*.mp4v=VIDEO:*.vob=VIDEO:*.qt=VIDEO:*.nuv=VIDEO:*.wmv=VIDEO:*.asf=VIDEO:*.rm=VIDEO:*.rmvb=VIDEO:*.flc=VIDEO:*.avi=VIDEO:*.fli=VIDEO:*.flv=VIDEO:*.gl=VIDEO:*.dl=VIDEO:*.xcf=VIDEO:*.xwd=VIDEO:*.yuv=VIDEO:*.cgm=VIDEO:*.emf=VIDEO:*.ogv=VIDEO:*.ogx=VIDEO:*.mov=VIDEO:*.mpg=VIDEO:*.mpeg=VIDEO:*.m2v=VIDEO:*.mkv=VIDEO:*.webm=VIDEO:*.webp=VIDEO:*.ogm=VIDEO:*.ogv=VIDEO:*.ogx=VIDEO:*.mp4=VIDEO:*.m4v=VIDEO:*.mp4v=VIDEO:*.vob=VIDEO:*.qt=VIDEO:*.nuv=VIDEO:*.wmv=VIDEO:*.flc=VIDEO:*.avi=VIDEO:*.fli=VIDEO:*.flv=VIDEO:*.asf=VIDEO:*.rm=VIDEO:*.rmvb=VIDEO:*.gl=VIDEO:*.dl=VIDEO:*.xcf=VIDEO:*.xwd=VIDEO:*.yuv=VIDEO:*.cgm=VIDEO:*.emf=VIDEO:*.aac=SOUND:*.au=SOUND:*.m4a=SOUND:*.mid=SOUND:*.midi=SOUND:*.mp3=SOUND:*.mka=SOUND:*.ogg=SOUND:*.opus=SOUND:*.spx=SOUND:*.wma=SOUND:*.wv=SOUND:*.wav=SOUND:*.flac=SOUND:*.aif=SOUND:*.pdf=DOC:*.djvu=DOC:*.epub=DOC:*.ps=DOC:*.sxw=DOC:*.doc=DOC:*.docx=DOC:*.xls=DOC:*.xlsx=DOC:*.xlr=DOC:*.sxi=DOC:*.ppt=DOC:*.pptx=DOC:*.odt=DOC:*.ods=DOC:*.odp=DOC:*.rtf=DOC:*.c=CODE:*.c++=CODE:*.cc=CODE:*.cpp=CODE:*.h=CODE:*.h++=CODE:*.hh=CODE:*.go=CODE:*.java=CODE:*.js=CODE:*.lua=CODE:*.rb=CODE:*.rs=CODE:*.kt=CODE:*.kts=CODE:*.hs=CODE:*.pl=CODE:*.vb=CODE:*.html=CODE:*.htm=CODE:*.shtml=CODE:xhtml=CODE:*.xml=CODE:*.php=CODE:*.tex=CODE:*.ltx=CODE:*.md=CODE:*.cache=TEMP:*.tmp=TEMP:*.temp=TEMP:*.log=TEMP:*.bak=TEMP:*.bk=TEMP:*.in=TEMP:*.out=TEMP:*.part=TEMP:*.aux=TEMP:*.old=TEMP:*.orig=TEMP:*.rej=TEMP:*.swp=TEMP:*.pid=TEMP:"
 
 # The series of color shades used to print timestamps
 # The format is: "COLOR-TYPE,ERROR,SHADE1,SHADE2,SHADE3,SHADE4,SHADE5"
 #
-# COLOR-TYPE is one of: 1 (4-bit: 8 colors), 2 (16-bit: 256 colors), 3 (24-bit: truecolor)
+# COLOR-TYPE is one of: 1 (4-bit: 8 colors), 2 (8-bit: 256 colors), 3 (24-bit: truecolor)
 # ERROR is the color used to print bad values
 # SHADEn is the color used for the shade N
 #
 # For 4-bit colors (1), valid colors are in the range 30-37
-# For 16-bit colors (2), valid colors are in the range 0-255
+# For 8-bit colors (2), valid colors are in the range 0-255
 # For 24-bit colors (3), valid colors have this format: #RRGGBB
 #
 # An attribute (0-9) can be added to any color (either ERROR or SHADE) using a dash.
 # For example:
 #    "34-1"       -> "bold blue"         (4-bit colors notation)
-#    "226-2"      -> "dimmed yellow"     (16-bit colors notation)
+#    "226-2"      -> "dimmed yellow"     (8-bit colors notation)
 #    "#ffaff00-4" -> "underlined orange" (24-bit colors notation)
 
 #DateShades="1,31-2,36-1,36,36-2"
