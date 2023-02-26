@@ -55,7 +55,7 @@
 #define SPLIT_FILETYPE_COLORS  1
 
 /* Max amount of custom color variables in the color scheme file */
-#define MAX_DEFS 64
+#define MAX_DEFS 128
 
 /* Macros for the set_shades function */
 #define DATE_SHADES 0
@@ -1107,6 +1107,7 @@ get_cur_colorscheme(const char *colorscheme)
 
 		if (*color_schemes[i] == 'd'
 		&& strcmp(color_schemes[i], "default") == 0)
+//		&& strcmp(color_schemes[i], term_caps.color < 256 ? "default" : "default-256") == 0)
 			def_cscheme = color_schemes[i];
 	}
 
