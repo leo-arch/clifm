@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Feb 24, 2023" "clifm 1.10.9" "CLIFM Manual"
+.TH "CLIFM" "1" "Feb 26, 2023" "clifm 1.10.10" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1093,10 +1093,16 @@ For image previews consult the Wiki (\fIhttps://github.com/leo-arch/clifm/tree/m
 .sp
 For further information consult the \fBSHOTGUN\fR section below.
 .TP
-.B ws \fR[\fINUM/NAME\fR, \fI+\fR, \fI-\fR]
+.B ws \fR[\fINUM/NAME\fR [\fIunset\fR], \fI+\fR, \fI-\fR]
 \fBclifm\fR offers up to eight workspaces, each with its own independent path.
 .sp
-With no argument, the \fIws\fR command prints the list of workspaces and its corresponding paths, highlighting the current workspace. Use NUM to switch to workspace NUM, NAME to switch to the workspace named NAME, the plus sign (+) to switch to the next workspace, and the minus sign (-) to switch to the previous workspace. Four keyboard shortcuts are available to easily switch to any of the first four workspaces: \fBAlt-[1-4]\fR.
+With no argument, the \fIws\fR command prints the list of workspaces and its corresponding paths, highlighting the current workspace.
+.sp
+Use \fINUM\fR to switch to the workspace number NUM, \fINAME\fR to switch to the workspace named NAME, the plus sign (+) to switch to the next workspace, and the minus sign (-) to switch to the previous workspace.
+.sp
+To unset a workspace use the \fIunset\fR subcommand preceded by the workspace (either number or name) to be unset. For example: \fIws 2 unset\fR.
+.sp
+Four keyboard shortcuts are available to easily switch to any of the first four workspaces: \fBAlt-[1-4]\fR.
 .sp
 Every time an empty workspace is created, it starts in the current working directory.
 .sp
