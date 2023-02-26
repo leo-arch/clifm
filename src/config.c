@@ -2585,8 +2585,8 @@ read_config(void)
 		}
 
 		else if (xargs.dirs_first == UNSET && *line == 'L'
-		&& strncmp(line, "ListDirsFirst=", 17) == 0) {
-			set_config_bool_value(line + 17, &conf.list_dirs_first);
+		&& strncmp(line, "ListDirsFirst=", 14) == 0) {
+			set_config_bool_value(line + 14, &conf.list_dirs_first);
 		}
 
 		else if (xargs.horizontal_list == UNSET && *line == 'L'
