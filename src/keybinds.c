@@ -732,10 +732,12 @@ rl_accept_suggestion(int count, int key)
 		break;
 #endif /* _NO_TAGS */
 
+	case WS_NUM_SUG: /* fallthrough */
 	case USER_SUG: {
 		char *p = escape_str(suggestion_buf);
 		my_insert_text(p ? p : suggestion_buf, NULL, 0);
-		rl_stuff_char('/');
+		if (suggestion.type == USER_SUG)
+			rl_stuff_char('/');
 		free(p);
 		break;
 	}
