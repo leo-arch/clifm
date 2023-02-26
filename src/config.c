@@ -1318,55 +1318,58 @@ create_config(char *file)
 
 	    "# This is the configuration file for CliFM\n\n"
 
+		"# Lines starting with '#' or ';' are commented (ignored)\n\
+# Uncomment an option to override the default value\n\n"
+
 	    "# Color schemes (or just themes) are stored in the colors directory.\n\
 # Available themes: base16, default, dracula, dracula-vivid, gruvbox,\n\
 # jellybeans-vivid, light, molokai, nocolor, nord, one-dark, solarized, zenburn\n\
 # Visit %s to get some extra themes\n\
-ColorScheme=%s\n\n"
+;ColorScheme=%s\n\n"
 
 	    "# The amount of files contained by a directory is informed next\n\
 # to the directory name. However, this feature might slow things down when,\n\
 # for example, listing files on a remote server. The filescounter can be\n\
 # disabled here, via the --no-files-counter option, or using the 'fc'\n\
 # command while in the program itself.\n\
-FilesCounter=%s\n\n"
+;FilesCounter=%s\n\n"
 
 		"# How to list files: 0 = vertically (like ls(1) would), 1 = horizontally\n\
-ListingMode=%d\n\n"
+;ListingMode=%d\n\n"
 
 		"# List files automatically after changing current directory\n\
-AutoLs=%s\n\n"
+;AutoLs=%s\n\n"
 
 		"# Send errors, warnings, and notices to the notification daemon?\n\
-DesktopNotifications=%s\n\n"
+;DesktopNotifications=%s\n\n"
 
 	    "# If set to true, print a map of the current position in the directory\n\
 # history list, showing previous, current, and next entries\n\
-DirhistMap=%s\n\n"
+;DirhistMap=%s\n\n"
 
 		"# Use a regex expression to filter file names when listing files.\n\
 # Example: \"!.*~$\" to exclude backup files (ending with ~), or \"^\\.\" to list \n\
 # only hidden files. File type filters are also supported. Example: \"=d\" to\n\
 # list directories only, or \"!=l\" to exclude all symlinks.\n\
 # Run 'help file-filters' for more information.\n\
-Filter=""\n\n"
+;Filter=""\n\n"
 
 	    "# Set the default copy command. Available options are:\n\
 # 0 = 'cp -iRp', 1 = 'cp -Rp', 2 = 'advcp -giRp', 3 = 'advcp -gRp',\n\
 # 4 = 'wcp', and 5 = 'rsync -avP'\n\
 # 2-5 include a progress bar\n\
 # Only 0 and 2 will prompt before overwrite\n\
-cpCmd=%d\n\n"
+;cpCmd=%d\n\n"
 
 	    "# Set the default move command. Available options are:\n\
 # 0 = 'mv -i', 1 = 'mv', 2 = 'advmv -gi', and 3 = 'advmv -g'\n\
 # 2 and 3 include a progress bar\n\
 # Only 0 and 2 will prompt before overwrite\n\
-mvCmd=%d\n\n"
+;mvCmd=%d\n\n"
 
 		"# If set to true, the 'r' command will never prompt before removals\n\
 # rm(1) is invoked with the -f flag.\n\
-rmForce=%s\n\n",
+;rmForce=%s\n\n",
 
 	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
@@ -1381,31 +1384,31 @@ rmForce=%s\n\n",
 
 	fprintf(config_fp,
 		"# Enable fuzzy matching for filename/path completions and suggestions\n\
-FuzzyMatching=%s\n\n"
+;FuzzyMatching=%s\n\n"
 
 		"# Fuzzy matching algorithm: 1 (faster, non-Unicode), 2 (slower, Unicode)\n\
-FuzzyAlgorithm=%d\n\n"
+;FuzzyAlgorithm=%d\n\n"
 
 		"# TAB completion mode: 'standard', 'fzf', 'fzy', or 'smenu'. Defaults to\n\
 # 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used\n\
-TabCompletionMode=\n\n"
+;TabCompletionMode=\n\n"
 
 		"# File previews for TAB completion (fzf mode only). Possible values:\n\
 # 'true', 'false', 'hidden' (enabled, but hidden; toggle it with Alt-p)\n\
-FzfPreview=%s\n\n"
+;FzfPreview=%s\n\n"
 
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
 # whenever the current path is longer than MaxPath.\n\
-MaxPath=%d\n\n"
+;MaxPath=%d\n\n"
 
-	    "WelcomeMessage=%s\n\
-WelcomeMessageStr=\"\"\n\n\
+	    ";WelcomeMessage=%s\n\
+;WelcomeMessageStr=\"\"\n\n\
 # Print %s's logo screen at startup\n\
-SplashScreen=%s\n\n\
-ShowHiddenFiles=%s\n\n\
+;SplashScreen=%s\n\n\
+;ShowHiddenFiles=%s\n\n\
 # List file properties next to file names instead of just file names\n\
-LongViewMode=%s\n\
+;LongViewMode=%s\n\
 # Properties fields to be printed in long view mode\n\
 # f = files counter for directories\n\
 # d = inode number\n\
@@ -1414,46 +1417,46 @@ LongViewMode=%s\n\
 # a|c|m = either last (a)ccess, (m)odification or status (c)hange time\n\
 # s|S = size (either human readable (s) or bytes (S))\n\
 # A single dash \"-\" disables all fields\n\
-PropFields=\"%s\"\n\
+;PropFields=\"%s\"\n\
 # Format used to print timestamps in long view (see strftime(3))\n\
-#TimeStyle=\"%%F %%T\"\n\
+;TimeStyle=\"\"\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
-ApparentSize=%s\n\
+;ApparentSize=%s\n\
 # If running in long view, print directories full size (including contents)\n\
-FullDirSize=%s\n\n\
+;FullDirSize=%s\n\n\
 # Log errors and warnings\n\
-Logs=%s\n\
+;Logs=%s\n\
 # Keep a record of external commands and internal commands able to\n\
 # modify the files system (e.g. 'r', 'c', 'm', and so on). Logs must be set to true\n\
-LogCmds=%s\n\n"
+;LogCmds=%s\n\n"
 
 	    "# Minimum length at which a file name can be trimmed in long view mode\n\
 # (including ELN length and spaces). When running in long mode, this setting\n\
 # overrides MaxFilenameLen\n\
-MinFilenameTrim=%d\n\n"
+;MinFilenameTrim=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
 # is removed. If set to 0, directories are kept indefinitely\n\
-MinJumpRank=%d\n\n"
+;MinJumpRank=%d\n\n"
 
 	    "# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,\n\
 # all ranks will be reduced using a dynamic factor so that the total sum falls\n\
 # below MaxJumpTotalRank again. Those entries falling below MinJumpRank will\n\
 # be deleted\n\
-MaxJumpTotalRank=%d\n\n"
+;MaxJumpTotalRank=%d\n\n"
 
 		"# Automatically purge the jump database from non-existing directories at\n\
 # startup. Note that this will remove paths pointing to unmounted removable\n\
 # devices and remote file systems\n\
-PurgeJumpDB=%s\n\n"
+;PurgeJumpDB=%s\n\n"
 
 	    "# Should CliFM be allowed to run external, shell commands?\n\
-ExternalCommands=%s\n\n"
+;ExternalCommands=%s\n\n"
 
 	    "# Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be\n\
 # later accessed by the corresponding shell function at program exit.\n\
 # To enable this feature consult the manpage.\n\
-CdOnQuit=%s\n\n",
+;CdOnQuit=%s\n\n",
 
 		DEF_FUZZY_MATCH == 1 ? "true" : "false",
 		DEF_FUZZY_MATCH_ALGO,
@@ -1482,11 +1485,11 @@ CdOnQuit=%s\n\n",
 # file is executed as if it were the argument to the the 'cd' or the \n\
 # 'open' commands respectivelly: 'cd DIR' works the same as just 'DIR'\n\
 # and 'open FILE' works the same as just 'FILE'.\n\
-Autocd=%s\n\
-AutoOpen=%s\n\n"
+;Autocd=%s\n\
+;AutoOpen=%s\n\n"
 
 	    "# If set to true, enable auto-suggestions.\n\
-AutoSuggestions=%s\n\n"
+;AutoSuggestions=%s\n\n"
 
 	    "# The following checks will be performed in the order specified\n\
 # by SuggestionStrategy. Available checks:\n\
@@ -1498,20 +1501,20 @@ AutoSuggestions=%s\n\n"
 # h = Commands history\n\
 # j = Jump database\n\
 # Use a dash (-) to skip a check. Ex: 'eahfj-c' to skip the bookmarks check\n\
-SuggestionStrategy=%s\n\n"
+;SuggestionStrategy=%s\n\n"
 
 	    "# If set to true, suggest file names using the corresponding\n\
 # file type color (set via the color scheme file).\n\
-SuggestFiletypeColor=%s\n\n"
+;SuggestFiletypeColor=%s\n\n"
 
 		"# Suggest a brief decription for internal commands\n\
-SuggestCmdDesc=%s\n\n"
+;SuggestCmdDesc=%s\n\n"
 
-"SyntaxHighlighting=%s\n\n"
+";SyntaxHighlighting=%s\n\n"
 
 		"# We have three search strategies: 0 = glob-only, 1 = regex-only,\n\
 # and 2 = glob-regex\n\
-SearchStrategy=%d\n\n",
+;SearchStrategy=%d\n\n",
 
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
@@ -1530,7 +1533,7 @@ SearchStrategy=%d\n\n",
 # know in advance if a file is readable by the current user, if it is executable,\n\
 # SUID, SGID, if a symlink is broken, and so on. The file extension check is\n\
 # ignored as well, so that the color per extension feature is disabled.\n\
-LightMode=%s\n\n"
+;LightMode=%s\n\n"
 
 	    "# If running with colors, append directory indicator\n\
 # to directories. If running without colors (via the --no-colors option),\n\
@@ -1539,66 +1542,66 @@ LightMode=%s\n\n"
 # for for executable files, and '?' for unknown file types. Bear in mind\n\
 # that when running in light mode the check for executable files won't be\n\
 # performed, and thereby no indicator will be added to executable files.\n\
-Classify=%s\n\n"
+;Classify=%s\n\n"
 
 	    "# Should the Selection Box be shared among different profiles?\n\
-ShareSelbox=%s\n\n"
+;ShareSelbox=%s\n\n"
 
 	    "# Choose the resource opener to open files with their default associated\n\
 # application. If not set, Lira, CliFM's built-in opener, is used.\n\
-Opener=\n\n"
+;Opener=\n\n"
 
 	    "# Only used when opening a directory via a new CliFM instance (with the 'x'\n\
 # command), this option specifies the command to be used to launch a\n\
 # terminal emulator to run CliFM on it.\n\
-TerminalCmd='%s'\n\n"
+;TerminalCmd='%s'\n\n"
 
 	    "# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
 # 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version\n\
 # (name if note available) 8 = extension, 9 = inode, 10 = owner, 11 = group\n\
 # NOTE: the 'version' method is not available on FreeBSD\n\
-Sort=%d\n\
+;Sort=%d\n\
 # By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\
 # using the \"name\" method). To invert this ordering, set SortReverse to\n\
 # true (you can also use the --sort-reverse option or the 'st' command)\n\
-SortReverse=%s\n\n"
+;SortReverse=%s\n\n"
 
 	"# If set to true, settings changed in the current workspace (only via\n\
 # the command line or keyboard shortcuts) are kept private to that workspace\n\
 # and made persistent (for the current session only), even when switching\n\
 # workspaces.\n\
-PrivateWorkspaceSettings=%s\n\n"
+;PrivateWorkspaceSettings=%s\n\n"
 
 		"# A comma separated list of workspace names in the form NUM=NAME\n\
 # Example: \"1=MAIN,2=EXTRA,3=GIT,4=WORK\" or \"1=α,2=β,3=γ,4=δ\"\n\
-WorkspaceNames=\"\"\n\n"
+;WorkspaceNames=\"\"\n\n"
 
 	    "# Print a usage tip at startup\n\
-Tips=%s\n\n\
-ListDirsFirst=%s\n\n\
+;Tips=%s\n\n\
+;ListDirsFirst=%s\n\n\
 # Enable case sensitive listing for files in the current directory\n\
-CaseSensitiveList=%s\n\n\
+;CaseSensitiveList=%s\n\n\
 # Enable case sensitive lookup for the directory jumper function (via \n\
 # the 'j' command)\n\
-CaseSensitiveDirJump=%s\n\n\
+;CaseSensitiveDirJump=%s\n\n\
 # Enable case sensitive completion for file names\n\
-CaseSensitivePathComp=%s\n\n\
+;CaseSensitivePathComp=%s\n\n\
 # Enable case sensitive search\n\
-CaseSensitiveSearch=%s\n\n\
-Unicode=%s\n\n\
+;CaseSensitiveSearch=%s\n\n\
+;Unicode=%s\n\n\
 # Mas, the files list pager. Possible values are:\n\
 # 0/false: Disable the pager\n\
 # 1/true: Run the pager whenever the list of files does not fit on the screen\n\
 # >1: Run the pager whenever the amount of files in the current directory is\n\
 # greater than or equal to this value (say, 1000)\n\
-Pager=%s\n\n"
+;Pager=%s\n\n"
 
 	"# Maximum file name length for listed files. Names larger than\n\
 # MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde.\n\
 # Set it to -1 (or empty) to remove this limit.\n\
 # When running in long mode, this setting is overriden by MinFilenameTrim\n\
 # whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.\n\
-MaxFilenameLen=%d\n\n",
+;MaxFilenameLen=%d\n\n",
 
 		DEF_LIGHT_MODE == 1 ? "true" : "false",
 		DEF_CLASSIFY == 1 ? "true" : "false",
@@ -1619,36 +1622,36 @@ MaxFilenameLen=%d\n\n",
 		);
 
 	fprintf(config_fp,
-	"MaxHistory=%d\n\
-MaxDirhist=%d\n\
-MaxLog=%d\n\
-Icons=%s\n\
-DiskUsage=%s\n\n"
+	";MaxHistory=%d\n\
+;MaxDirhist=%d\n\
+;MaxLog=%d\n\
+;Icons=%s\n\
+;DiskUsage=%s\n\n"
 
 		"# If set to true, always print the list of selected files. Since this\n\
 # list could become quite extensive, you can limit the number of printed \n\
 # entries using the MaxPrintSelfiles option (-1 = no limit, 0 = auto (never\n\
 # print more than half terminal height), or any custom value)\n\
-PrintSelfiles=%s\n\
-MaxPrintSelfiles=%d\n\n"
+;PrintSelfiles=%s\n\
+;MaxPrintSelfiles=%d\n\n"
 
 	    "# If set to true, clear the screen before listing files\n\
-ClearScreen=%s\n\n"
+;ClearScreen=%s\n\n"
 
 	    "# If not specified, StartingPath defaults to the current working\n\
 # directory. If set, it overrides RestoreLastPath\n\
-StartingPath=\n\n"
+;StartingPath=\n\n"
 
 	    "# If set to true, start CliFM in the last visited directory (and in the\n\
 # last used workspace). This option is overriden by StartingPath (if set).\n\
-RestoreLastPath=%s\n\n"
+;RestoreLastPath=%s\n\n"
 
 	    "# If set to true, the 'r' command executes 'trash' instead of 'rm' to\n\
 # prevent accidental deletions.\n\
-TrashAsRm=%s\n\n"
+;TrashAsRm=%s\n\n"
 
 	    "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
-RlEditMode=%d\n\n",
+;RlEditMode=%d\n\n",
 
 		DEF_MAX_HIST,
 		DEF_MAX_DIRHIST,

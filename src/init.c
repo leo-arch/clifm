@@ -3338,6 +3338,9 @@ check_options(void)
 	if (conf.cmd_desc_sug == UNSET)
 		conf.cmd_desc_sug = DEF_CMD_DESC_SUG;
 
+	if (conf.purge_jumpdb == UNSET)
+		conf.purge_jumpdb = DEF_PURGE_JUMPDB;
+
 	if (conf.fuzzy_match == UNSET) {
 		conf.fuzzy_match = xargs.fuzzy_match == UNSET
 			? DEF_FUZZY_MATCH : xargs.fuzzy_match;
