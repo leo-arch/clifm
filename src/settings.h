@@ -185,7 +185,6 @@ xf=01;31:xs=00;32:"
 #define DEF_DATE_SHADES_8   "1,31-2,36-1,36,36-2"
 
 /* Default color shades and attributes for size field in file properties */
-//#define DEF_SIZE_SHADES_256 "2,196-2,46,118,226,214,202"
 #define DEF_SIZE_SHADES_256 "2,196-2,40,112,227,214,202"
 #define DEF_SIZE_SHADES_8   "1,31-2,32,33,31"
 

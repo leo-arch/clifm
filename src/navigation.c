@@ -68,22 +68,41 @@ get_longest_workspace_name(void)
 	return longest_ws;
 }
 
+static char *
+get_workspace_color(const uint8_t num)
+{
+	if (conf.colorize == 0)
+		return df_c;
+
+	switch(num + 1) {
+	case 1: return *ws1_c ? ws1_c : DEF_WS1_C;
+	case 2: return *ws2_c ? ws2_c : DEF_WS2_C;
+	case 3: return *ws3_c ? ws3_c : DEF_WS3_C;
+	case 4: return *ws4_c ? ws4_c : DEF_WS4_C;
+	case 5: return *ws5_c ? ws5_c : DEF_WS5_C;
+	case 6: return *ws6_c ? ws6_c : DEF_WS6_C;
+	case 7: return *ws7_c ? ws7_c : DEF_WS7_C;
+	case 8: return *ws8_c ? ws8_c : DEF_WS8_C;
+	default: return df_c;
+	}
+}
+
 static int
 list_workspaces(void)
 {
-	int i;
+	uint8_t i;
 	int pad = (int)get_longest_workspace_name();
 
 	for (i = 0; i < MAX_WS; i++) {
-		if (i == cur_ws)
-			fputs(mi_c, stdout);
 		if (workspaces[i].name) {
-			printf("%d [%s]: %*s%s", i + 1, workspaces[i].name,
+			printf("%d [%s%s%s]: %s%*s%s%s", i + 1, get_workspace_color(i),
+				workspaces[i].name, df_c, i == cur_ws ? mi_c : "",
 				pad - (int)wc_xstrlen(workspaces[i].name), "", workspaces[i].path
-				? workspaces[i].path : "none");
+				? workspaces[i].path : "none", df_c);
 		} else {
-			printf("%d: %*s%s", i + 1, pad > 0 ? pad + 3 : 0, "", workspaces[i].path
-				? workspaces[i].path : "none");
+			printf("%s%d%s: %s%*s%s%s", get_workspace_color(i), i + 1, df_c,
+				i == cur_ws ? mi_c : "", pad > 0 ? pad + 3 : 0, "", workspaces[i].path
+				? workspaces[i].path : "none", df_c);
 		}
 		if (i == cur_ws)
 			fputs(df_c, stdout);
