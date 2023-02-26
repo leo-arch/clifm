@@ -5,7 +5,7 @@
 
 # This is CliFM's main configuration file
 
-# Commented and empty lines are ignored
+# Commented lines (starting with either '#' or ';') are ignored
 
 #=====================================#
 #          1. INTERFACE               #
