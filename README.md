@@ -46,9 +46,9 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 🔸 [Brief description](#space_invader-brief-description) \
 🔸 [Features](#heavy_check_mark-features) \
 🔸 [Introduction video](#clapper-introduction-video) \
-🔸 [What's new?](#newspaper-whats-new) \
 🔸 [Installation](#floppy_disk-installation) \
 🔸 [Getting started](#bulb-getting-started) \
+🔸 [What's new?](#newspaper-whats-new) \
 🔸 [Support](#support) \
 🔸 [License](#license) \
 🔸 [Contributing](#contributing) \
@@ -75,10 +75,6 @@ Briefly put, with **clifm** the command-line is always already there, never hidd
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="https://i.postimg.cc/YC77qSLK/interface-1-7-9.png"></p>
 <p align="center">We only need 7 keystrokes to move all selected files into the <i>images</i> directory</p>
-<!---
-<p align="center"><img src="https://i.postimg.cc/BZMv62VP/interface1-7-5.png"></p>
-<p align="center"><img src="https://i.postimg.cc/Zqp4sgLK/clifm-interface8.png"></p>
---->
 
 ---
 
@@ -196,6 +192,48 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 ---
 
+## :floppy_disk: Installation
+
+### Packaged versions
+
+<details>
+<summary>Packaging status <a href="https://repology.org/project/clifm/versions"><img src="https://repology.org/badge/tiny-repos/clifm.svg" alt="Packaging status"></a></summary>
+<a href="https://repology.org/project/clifm/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/clifm.svg" alt="Packaging status">
+</a>
+</details>
+
+If running on Linux, [binary packages](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm) are available for most major distributions.
+
+### Installing from source (Linux/BSD)
+
+**Note**: Dependencies are most likely already satisfied, but in any case consult the [dependencies section](https://github.com/leo-arch/clifm/wiki/Introduction#1-satisfy-dependencies).
+
+```sh
+git clone https://github.com/leo-arch/clifm.git
+cd clifm
+sudo make install
+```
+
+For more information/supported platforms consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
+
+---
+
+## :bulb: Getting started
+
+To start using **clifm** _you don't need to learn anything new_: the usual shell commands will just work. However, there is much more than just shell commands... \
+✓ The `help` command gives you a quick introduction to **clifm**: once in the **clifm** prompt, enter `help` or `?`. \
+✓ Type `cmd<TAB>` to get the list of available commands and a brief description (since version 1.9.2). \
+✓ Type `help <TAB>` to get the list of available _help topics_. Select the one you want and press <kbd>Enter</kbd>. \
+✓ To jump into the **COMMANDS** section in the [manpage](https://github.com/leo-arch/clifm/blob/master/misc/clifm.1.pdf), simply enter `cmd` or press <kbd>F2</kbd>. \
+✓ Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page. \
+✓ To get help about some specific command just type `CMD -h`. For instance, `s -h`.
+
+You can also take a look at some of these [basic usage-examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started. \
+For a complete description please consult our [Wiki](https://github.com/leo-arch/clifm/wiki).
+
+---
+
 ## :newspaper: What's new?
 <details>
 <summary>Click here to expand</summary>
@@ -264,48 +302,6 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 </details>
 
 For more details consult the [changelog file](https://github.com/leo-arch/clifm/blob/master/CHANGELOG).
-
----
-
-## :floppy_disk: Installation
-
-### Packaged versions
-
-<details>
-<summary>Packaging status <a href="https://repology.org/project/clifm/versions"><img src="https://repology.org/badge/tiny-repos/clifm.svg" alt="Packaging status"></a></summary>
-<a href="https://repology.org/project/clifm/versions">
-    <img src="https://repology.org/badge/vertical-allrepos/clifm.svg" alt="Packaging status">
-</a>
-</details>
-
-If running on Linux, [binary packages](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm) are available for most major distributions.
-
-### Installing from source (Linux/BSD)
-
-**Note**: Dependencies are most likely already satisfied, but in any case consult the [dependencies section](https://github.com/leo-arch/clifm/wiki/Introduction#1-satisfy-dependencies).
-
-```sh
-git clone https://github.com/leo-arch/clifm.git
-cd clifm
-sudo make install
-```
-
-For more information/supported platforms consult the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
-
----
-
-## :bulb: Getting started
-
-To start using **clifm** _you don't need to learn anything new_: the usual shell commands will just work. However, there is much more than just shell commands... \
-✓ The `help` command gives you a quick introduction to **clifm**: once in the **clifm** prompt, enter `help` or `?`. \
-✓ Type `cmd<TAB>` to get the list of available commands and a brief description (since version 1.9.2). \
-✓ Type `help <TAB>` to get the list of available _help topics_. Select the one you want and press <kbd>Enter</kbd>. \
-✓ To jump into the **COMMANDS** section in the [manpage](https://github.com/leo-arch/clifm/blob/master/misc/clifm.1.pdf), simply enter `cmd` or press <kbd>F2</kbd>. \
-✓ Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page. \
-✓ To get help about some specific command just type `CMD -h`. For instance, `s -h`.
-
-You can also take a look at some of these [basic usage-examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started. \
-For a complete description please consult our [Wiki](https://github.com/leo-arch/clifm/wiki).
 
 ---
 
