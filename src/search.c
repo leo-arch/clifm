@@ -295,6 +295,7 @@ search_glob(char **args, const int invert)
 	int *eln = (int *)0;
 	size_t *files_len = (size_t *)0;
 	struct dirent **ent = (struct dirent **)NULL;
+	int longest_eln = -1;
 
 	if (invert == 1) {
 		if (!search_path) {
@@ -318,9 +319,13 @@ search_glob(char **args, const int invert)
 					continue;
 
 				eln[found] = (int)(k + 1);
-				files_len[found] = strlen(file_info[k].name) + (size_t)file_info[k].eln_n + 1;
-				if (files_len[found] > flongest)
+				files_len[found] = wc_xstrlen(file_info[k].name)
+					+ (size_t)file_info[k].eln_n + 1;
+
+				if (files_len[found] > flongest) {
 					flongest = files_len[found];
+					longest_eln = k + 1;
+				}
 
 				pfiles[found] = file_info[k].name;
 				found++;
@@ -360,8 +365,7 @@ search_glob(char **args, const int invert)
 					continue;
 
 				eln[found] = -1;
-				files_len[found] = conf.unicode
-					? wc_xstrlen(ent[k]->d_name) : strlen(ent[k]->d_name);
+				files_len[found] = wc_xstrlen(ent[k]->d_name);
 
 				if (files_len[found] > flongest)
 					flongest = files_len[found];
@@ -397,7 +401,7 @@ search_glob(char **args, const int invert)
 			if (search_path) {
 				/* This will be passed to colors_list(): -1 means no ELN */
 				eln[found] = -1;
-				files_len[found] = conf.unicode ? wc_xstrlen(pfiles[found]) : strlen(pfiles[found]);
+				files_len[found] = wc_xstrlen(pfiles[found]);
 
 				if (files_len[found] > flongest)
 					flongest = files_len[found];
@@ -417,10 +421,13 @@ search_glob(char **args, const int invert)
 
 				f = 1;
 				eln[found] = (int)(j + 1);
-				files_len[found] = strlen(file_info[j].name) + (size_t)file_info[j].eln_n + 1;
+				files_len[found] = wc_xstrlen(file_info[j].name)
+					+ (size_t)file_info[j].eln_n + 1;
 
-				if (files_len[found] > flongest)
+				if (files_len[found] > flongest) {
 					flongest = files_len[found];
+					longest_eln = (int)(j + 1);
+				}
 			}
 
 			if (f == 0) {
@@ -438,6 +445,23 @@ SCANDIR_ERROR:
 
 	if (!search_path && conf.icons == 1)
 		flongest += 3;
+
+	int eln_pad = 0;
+	if (!search_path) {
+		if (conf.icons == 1)
+			flongest += 3;
+
+		int largest = 0;
+		i = found;
+		while (--i >= 0) {
+			if (eln[i] > largest)
+				largest = eln[i];
+		}
+		eln_pad = DIGINUM(largest);
+
+		if (longest_eln > -1)
+			flongest += (size_t)(eln_pad - DIGINUM(longest_eln));
+	}
 
 	/* Print the results using colors and columns */
 	int columns_n = 0, last_column = 0;
@@ -457,16 +481,6 @@ SCANDIR_ERROR:
 	size_t t = tab_offset;
 	tab_offset = 0;
 
-	int eln_pad = 0;
-	if (!search_path) {
-		i = found;
-		while (--i >= 0) {
-			int len = DIGINUM(eln[i]);
-			if (len > eln_pad)
-				eln_pad = len;
-		}
-	}
-
 	for (i = 0; i < found; i++) {
 		if (!pfiles[i])
 			continue;
@@ -484,9 +498,11 @@ SCANDIR_ERROR:
 		}
 
 		int name_pad = (last_column == 1 || i == (found - 1)) ? NO_PAD :
-		    (int)(flongest - files_len[i] - (size_t)(eln_pad - DIGINUM(eln[i]))) + 1;
+		    (int)(flongest - files_len[i] - ( search_path ? 0
+		    : (size_t)(eln_pad - DIGINUM(eln[i])) ) ) + 1;
+
 		if (name_pad <= 0)
-			name_pad = 1;
+			name_pad = 0;
 
 		colors_list(pfiles[i], NO_ELN, name_pad,
 		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE);
@@ -740,6 +756,7 @@ search_regex(char **args, const int invert, const int case_sens)
 
 	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
 	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
+	int longest_eln = -1;
 
 	/* Get the longest file name in the list */
 	int j = (int)found;
@@ -783,21 +800,20 @@ search_regex(char **args, const int invert, const int case_sens)
 		/* If not searching in CWD, we only need to know the file's
 		 * length (no ELN) */
 		if (search_path) {
-			files_len[j] = conf.unicode ? wc_xstrlen(
-					reg_dirlist[regex_index[j]]->d_name)
-					: strlen(reg_dirlist[regex_index[j]]->d_name);
+			files_len[j] = wc_xstrlen(reg_dirlist[regex_index[j]]->d_name);
 
 			if (files_len[j] > flongest)
 				flongest = files_len[j];
 		} else {
 			/* If searching in CWD, take into account the file's ELN
-			 * when calculating its legnth */
-/*			files_len[j] = file_info[regex_index[j]].len */
-			files_len[j] = strlen(file_info[regex_index[j]].name)
+			 * when calculating its length */
+			files_len[j] = wc_xstrlen(file_info[regex_index[j]].name)
 					+ (size_t)DIGINUM(regex_index[j] + 1) + 1;
 
-			if (files_len[j] > flongest)
+			if (files_len[j] > flongest) {
 				flongest = files_len[j];
+				longest_eln = regex_index[j] + 1;
+			}
 		}
 	}
 
@@ -812,8 +828,24 @@ search_regex(char **args, const int invert, const int case_sens)
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		unsigned short terminal_cols = w.ws_col;
 
-		if (!search_path && conf.icons == 1)
-			flongest += 3;
+		int eln_pad = 0;
+		if (!search_path) {
+			if (conf.icons == 1)
+				flongest += 3;
+
+			int largest = 0;
+			j = (int)found;
+			while (--j >= 0) {
+				if (match_type[j] == 0)
+					continue;
+				if (regex_index[j] + 1 > largest)
+					largest = regex_index[j] + 1;
+			}
+			eln_pad = DIGINUM(largest);
+
+			if (longest_eln > -1)
+				flongest += (size_t)(eln_pad - DIGINUM(longest_eln));
+		}
 
 		if (flongest == 0 || flongest > terminal_cols)
 			total_cols = 1;
@@ -822,18 +854,6 @@ search_regex(char **args, const int invert, const int case_sens)
 
 		if (total_cols > type_ok)
 			total_cols = type_ok;
-
-		int eln_pad = 0;
-		if (!search_path) {
-			j = (int)found;
-			while (--j >= 0) {
-				if (match_type[j] == 0)
-					continue;
-				int len = DIGINUM(regex_index[j] + 1);
-				if (len > eln_pad)
-					eln_pad = len;
-			}
-		}
 
 		/* cur_col: Current columns number */
 		size_t cur_col = 0, counter = 0;
@@ -868,11 +888,12 @@ search_regex(char **args, const int invert, const int case_sens)
 					df_c, conf.icons == 1 ? ' ' : 0);
 			}
 
-			int name_pad = (last_column == 1 || counter == type_ok) ? NO_PAD :
-				(int)(flongest - files_len[i] - (size_t)(eln_pad
-				- DIGINUM(regex_index[i] + 1))) + 1;
-			if (name_pad <= 0)
-				name_pad = 1;
+			int name_pad = (last_column == 1 || counter == type_ok) ? NO_PAD
+				: (int)(flongest - files_len[i] - (search_path ? 0 : (size_t)(eln_pad
+				- DIGINUM(regex_index[i] + 1))) ) + 1;
+
+			if (name_pad < 0)
+				name_pad = 0;
 
 			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
 				: file_info[regex_index[i]].name,
@@ -892,7 +913,6 @@ search_regex(char **args, const int invert, const int case_sens)
 
 		putchar('\n');
 		print_reload_msg(_("Matches found: %zu\n"), counter);
-//		printf(_("Matches found: %zu\n"), counter);
 	} else {
 		fputs(_("No matches found\n"), stderr);
 	}
