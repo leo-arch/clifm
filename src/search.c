@@ -436,6 +436,9 @@ SCANDIR_ERROR:
 	if (found == 0)
 		goto END;
 
+	if (!search_path && conf.icons == 1)
+		flongest += 3;
+
 	/* Print the results using colors and columns */
 	int columns_n = 0, last_column = 0;
 
@@ -454,6 +457,16 @@ SCANDIR_ERROR:
 	size_t t = tab_offset;
 	tab_offset = 0;
 
+	int eln_pad = 0;
+	if (!search_path) {
+		i = found;
+		while (--i >= 0) {
+			int len = DIGINUM(eln[i]);
+			if (len > eln_pad)
+				eln_pad = len;
+		}
+	}
+
 	for (i = 0; i < found; i++) {
 		if (!pfiles[i])
 			continue;
@@ -463,14 +476,31 @@ SCANDIR_ERROR:
 		else
 			last_column = 0;
 
-		colors_list(pfiles[i], !search_path ? eln[i] : NO_ELN,
+		if (!search_path) {
+			printf("%s%*d%s %s%s%s%c", el_c, eln_pad, eln[i], df_c,
+				conf.icons == 1 ? file_info[eln[i] - 1].icon_color : "",
+				conf.icons == 1 ? file_info[eln[i] - 1].icon : "",
+				df_c, conf.icons == 1 ? ' ' : 0);
+		}
+
+		int name_pad = (last_column == 1 || i == (found - 1)) ? NO_PAD :
+		    (int)(flongest - files_len[i] - (size_t)(eln_pad - DIGINUM(eln[i]))) + 1;
+
+		colors_list(pfiles[i], NO_ELN, name_pad,
+		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE);
+
+/*		colors_list(pfiles[i], !search_path ? eln[i] : NO_ELN,
 		    (last_column == 1 || i == (found - 1)) ? NO_PAD :
 		    (int)(flongest - files_len[i]) + 1,
-		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE);
+		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE); */
 	}
 	tab_offset = t;
 
-	printf(_("Matches found: %d%s\n"), found, conf.search_strategy != GLOB_ONLY ? " (glob)" : "");
+	putchar('\n');
+	print_reload_msg(_("Matches found: %d%s\n"), found,
+		conf.search_strategy != GLOB_ONLY ? " (glob)" : "");
+/*	printf(_("\nMatches found: %d%s\n"), found,
+		conf.search_strategy != GLOB_ONLY ? " (glob)" : ""); */
 
 END:
 	/* Free stuff */
@@ -770,12 +800,18 @@ search_regex(char **args, const int invert, const int case_sens)
 	}
 
 	if (type_ok != 0) {
+		if (conf.search_strategy != REGEX_ONLY)
+			putchar('\n');
+
 		int last_column = 0;
 		size_t total_cols = 0;
 
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		unsigned short terminal_cols = w.ws_col;
+
+		if (!search_path && conf.icons == 1)
+			flongest += 3;
 
 		if (flongest == 0 || flongest > terminal_cols)
 			total_cols = 1;
@@ -784,6 +820,18 @@ search_regex(char **args, const int invert, const int case_sens)
 
 		if (total_cols > type_ok)
 			total_cols = type_ok;
+
+		int eln_pad = 0;
+		if (!search_path) {
+			int n = (int)found;
+			while (--n >= 0) {
+				if (match_type[n] == 0)
+					continue;
+				int l = DIGINUM(regex_index[n] + 1);
+				if (l > eln_pad)
+					eln_pad = l;
+			}
+		}
 
 		/* cur_col: Current columns number */
 		size_t cur_col = 0, counter = 0;
@@ -811,17 +859,36 @@ search_regex(char **args, const int invert, const int case_sens)
 			 * files), we have the last file to be printed */
 			counter++;
 
+			if (!search_path) {
+				printf("%s%*d%s %s%s%s%c", el_c, eln_pad, regex_index[i] + 1, df_c,
+					conf.icons == 1 ? file_info[regex_index[i]].icon_color : "",
+					conf.icons == 1 ? file_info[regex_index[i]].icon : "",
+					df_c, conf.icons == 1 ? ' ' : 0);
+			}
+
+			int name_pad = (last_column == 1 || counter == type_ok) ? NO_PAD :
+				(int)(flongest - files_len[i] - (size_t)(eln_pad
+				- DIGINUM(regex_index[i] + 1))) + 1;
+
 			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
+				: file_info[regex_index[i]].name,
+				NO_ELN, name_pad,
+				(last_column == 1 || counter == type_ok) ? PRINT_NEWLINE
+				: NO_NEWLINE);
+
+/*			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
 					: file_info[regex_index[i]].name,
 					search_path ? NO_ELN : regex_index[i] + 1,
 					(last_column || counter == type_ok) ? NO_PAD
 					: (int)(flongest - files_len[i]) + 1,
 					(last_column || counter == type_ok) ? PRINT_NEWLINE
-					: NO_NEWLINE);
+					: NO_NEWLINE); */
 		}
 		tab_offset = t;
 
-		printf(_("Matches found: %zu\n"), counter);
+		putchar('\n');
+		print_reload_msg(_("Matches found: %zu\n"), counter);
+//		printf(_("Matches found: %zu\n"), counter);
 	} else {
 		fputs(_("No matches found\n"), stderr);
 	}
