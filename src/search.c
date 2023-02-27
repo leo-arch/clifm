@@ -485,6 +485,8 @@ SCANDIR_ERROR:
 
 		int name_pad = (last_column == 1 || i == (found - 1)) ? NO_PAD :
 		    (int)(flongest - files_len[i] - (size_t)(eln_pad - DIGINUM(eln[i]))) + 1;
+		if (name_pad <= 0)
+			name_pad = 1;
 
 		colors_list(pfiles[i], NO_ELN, name_pad,
 		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE);
@@ -823,13 +825,13 @@ search_regex(char **args, const int invert, const int case_sens)
 
 		int eln_pad = 0;
 		if (!search_path) {
-			int n = (int)found;
-			while (--n >= 0) {
-				if (match_type[n] == 0)
+			j = (int)found;
+			while (--j >= 0) {
+				if (match_type[j] == 0)
 					continue;
-				int l = DIGINUM(regex_index[n] + 1);
-				if (l > eln_pad)
-					eln_pad = l;
+				int len = DIGINUM(regex_index[j] + 1);
+				if (len > eln_pad)
+					eln_pad = len;
 			}
 		}
 
@@ -869,6 +871,8 @@ search_regex(char **args, const int invert, const int case_sens)
 			int name_pad = (last_column == 1 || counter == type_ok) ? NO_PAD :
 				(int)(flongest - files_len[i] - (size_t)(eln_pad
 				- DIGINUM(regex_index[i] + 1))) + 1;
+			if (name_pad <= 0)
+				name_pad = 1;
 
 			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
 				: file_info[regex_index[i]].name,
