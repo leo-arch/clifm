@@ -54,10 +54,6 @@
 #define DUMP_CONFIG_INT  1
 #define DUMP_CONFIG_BOOL 2
 
-#define _4BIT_COLOR 8
-//#define _8BIT_COLOR 256
-#define TRUE_COLOR 16777216
-
 #ifndef _NO_FZF
 /* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)
  * Let's do this even if fzftab is not enabled at startup, because this feature
@@ -1689,11 +1685,32 @@ create_config(char *file)
 	return EXIT_SUCCESS;
 }
 
+static int
+create_def_color_scheme256(void)
+{
+	char cscheme_file[PATH_MAX];
+	snprintf(cscheme_file, sizeof(cscheme_file), "%s/default-256.clifm", colors_dir);
+
+	/* If the file already exists, do nothing */
+	struct stat attr;
+	if (stat(cscheme_file, &attr) != -1)
+		return EXIT_SUCCESS;
+
+	/* Try to import it from data dir */
+	if (import_color_scheme("default-256") == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+
+	return EXIT_FAILURE;
+}
+
 static void
-create_def_cscheme(void)
+create_def_color_scheme(void)
 {
 	if (!colors_dir || !*colors_dir)
 		return;
+
+	if (term_caps.color >= 256)
+		create_def_color_scheme256();
 
 	char cscheme_file[PATH_MAX];
 	snprintf(cscheme_file, sizeof(cscheme_file), "%s/default.clifm", colors_dir);
@@ -1732,7 +1749,6 @@ create_def_cscheme(void)
 
 			"# Same as FiletypeColors, but for file extensions. The format is always\n\
 # *.EXT=COLOR\n"
-
 			"ExtColors=\"%s\"\n\n"
 
 			"# Color shades used to colorize timestamps and file sizes. Consult the\n\
@@ -1907,7 +1923,7 @@ create_config_files(void)
 			"directory. Using the default color scheme\n"), PROGRAM_NAME);
 
 	/* Generate the default color scheme file */
-	create_def_cscheme();
+	create_def_color_scheme();
 
 				/* #####################
 				 * #      PLUGINS      #
@@ -2992,19 +3008,6 @@ read_config(void)
 }
 #endif /* CLIFM_SUCKLESS */
 
-/* See https://github.com/termstandard/colors#truecolor-detection */
-static int
-check_truecolor(void)
-{
-	char *c = getenv("COLORTERM");
-
-	if (c && ((*c == 't' && strcmp(c + 1, "ruecolor") == 0)
-	|| (*c == '2' && strcmp(c + 1, "4bit") == 0) ) )
-		return 1;
-
-	return 0;
-}
-
 static void
 check_colors(void)
 {
@@ -3025,15 +3028,16 @@ check_colors(void)
 
 	if (xargs.colorize == UNSET && cfc && *cfc) {
 		if (term_caps.color == 0)
-			term_caps.color = _4BIT_COLOR; // We don't know. Just use a highly compatible value
+			/* The user is forcing the use of colors even when the terminal
+			 * reports no color capability. Let's assume a highly compatible value */
+			term_caps.color = 8;
 		conf.colorize = 1;
 	}
 
 	if (conf.colorize == 1) {
-		if (check_truecolor() == 1)
-			term_caps.color = TRUE_COLOR;
 		unsetenv("CLIFM_COLORLESS");
-		set_colors(conf.usr_cscheme ? conf.usr_cscheme : "default", 1);
+		set_colors(conf.usr_cscheme ? conf.usr_cscheme
+			: (term_caps.color >= 256 ? "default-256" : "default"), 1);
 		cur_color = tx_c;
 		return;
 	}

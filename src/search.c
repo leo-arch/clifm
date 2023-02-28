@@ -443,9 +443,6 @@ SCANDIR_ERROR:
 	if (found == 0)
 		goto END;
 
-	if (!search_path && conf.icons == 1)
-		flongest += 3;
-
 	int eln_pad = 0;
 	if (!search_path) {
 		if (conf.icons == 1)
@@ -499,9 +496,9 @@ SCANDIR_ERROR:
 
 		int name_pad = (last_column == 1 || i == (found - 1)) ? NO_PAD :
 		    (int)(flongest - files_len[i] - ( search_path ? 0
-		    : (size_t)(eln_pad - DIGINUM(eln[i])) ) ) + 1;
+		    : (size_t)(eln_pad - DIGINUM(eln[i])) ) + 1);
 
-		if (name_pad <= 0)
+		if (name_pad < 0)
 			name_pad = 0;
 
 		colors_list(pfiles[i], NO_ELN, name_pad,
@@ -888,9 +885,9 @@ search_regex(char **args, const int invert, const int case_sens)
 					df_c, conf.icons == 1 ? ' ' : 0);
 			}
 
-			int name_pad = (last_column == 1 || counter == type_ok) ? NO_PAD
-				: (int)(flongest - files_len[i] - (search_path ? 0 : (size_t)(eln_pad
-				- DIGINUM(regex_index[i] + 1))) ) + 1;
+			int name_pad = (last_column == 1 || counter == type_ok) ? NO_PAD :
+				(int)(flongest - files_len[i] - ( search_path ? 0
+				: (size_t)(eln_pad - DIGINUM(regex_index[i] + 1)) ) + 1);
 
 			if (name_pad < 0)
 				name_pad = 0;

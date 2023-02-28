@@ -172,7 +172,10 @@
 # Use TAB to list available themes: 'cs TAB'
 #
 # Visit https://github.com/leo-arch/clifm-colors to get some extra themes
-;ColorScheme=default
+#
+# Defaults to 'default-256', or 'default' (8 colors) if 256 colors support
+# is not detected
+;ColorScheme=
 
 # Enable/disable icons.
 # By default, emojis (widely available today) are used as icons.

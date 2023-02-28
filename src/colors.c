@@ -1106,8 +1106,7 @@ get_cur_colorscheme(const char *colorscheme)
 		}
 
 		if (*color_schemes[i] == 'd'
-		&& strcmp(color_schemes[i], "default") == 0)
-//		&& strcmp(color_schemes[i], term_caps.color < 256 ? "default" : "default-256") == 0)
+		&& strcmp(color_schemes[i], term_caps.color < 256 ? "default" : "default-256") == 0)
 			def_cscheme = color_schemes[i];
 	}
 
@@ -1788,7 +1787,7 @@ set_colors(const char *colorscheme, const int env)
 	clear_defs();
 #endif
 
-	/* If some color is unset or is a wrong color code, set the default */
+	/* If some color is unset or is a wrong color code, set the default value */
 	set_default_colors();
 
 	return EXIT_SUCCESS;

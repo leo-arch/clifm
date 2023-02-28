@@ -121,17 +121,34 @@ is_url(char *url)
 	return EXIT_FAILURE;
 }
 
+/* See https://github.com/termstandard/colors#truecolor-detection */
+static int
+check_truecolor(void)
+{
+	char *c = getenv("COLORTERM");
+
+	if (c && ((*c == 't' && strcmp(c + 1, "ruecolor") == 0)
+	|| (*c == '2' && strcmp(c + 1, "4bit") == 0) ) )
+		return 1;
+
+	return 0;
+}
+
+#define TRUE_COLOR 16777216
 static void
 set_term_caps(const int i)
 {
+	int true_color = check_truecolor();
+
 	if (i == -1) { /* TERM not found in our terminfo database */
-		term_caps.color = 0;
+		term_caps.color = true_color == 1 ? TRUE_COLOR : 0;
 		term_caps.suggestions = 0;
 		term_caps.pager = 0;
 		return;
 	}
 
-	term_caps.color = TERM_INFO[i].color > 0 ? TERM_INFO[i].color : 0;
+	term_caps.color = true_color == 1 ? TRUE_COLOR
+		: (TERM_INFO[i].color > 0 ? TERM_INFO[i].color : 0);
 
 	term_caps.suggestions = (TERM_INFO[i].cub == 1 && TERM_INFO[i].ed == 1
 		&& TERM_INFO[i].el == 1) ? 1 : 0;

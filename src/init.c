@@ -3403,8 +3403,12 @@ check_options(void)
 			hist_status = xargs.history;
 	}
 
-	if (!conf.usr_cscheme)
-		conf.usr_cscheme = savestring("default", 7);
+/*	if (!conf.usr_cscheme) {
+		if (term_caps.color >= 256)
+			conf.usr_cscheme = savestring("default-256", 11);
+		else
+			conf.usr_cscheme = savestring("default", 7);
+	} */
 
 	if (!conf.wprompt_str) {
 		if (conf.colorize == 1)
