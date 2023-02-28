@@ -1748,7 +1748,7 @@ create_def_color_scheme(void)
 			"InterfaceColors=\"%s\"\n\n"
 
 			"# Same as FiletypeColors, but for file extensions. The format is always\n\
-# *.EXT=COLOR\n"
+# *.EXT=COLOR (extensions are case insensitive)\n"
 			"ExtColors=\"%s\"\n\n"
 
 			"# Color shades used to colorize timestamps and file sizes. Consult the\n\

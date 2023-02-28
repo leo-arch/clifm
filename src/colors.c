@@ -342,14 +342,14 @@ get_ext_color(char *ext)
 		return (char *)NULL;
 
 	/* Hold extensions names. NAME_MAX should be enough: no file name should go
-	 * beyond NAME_MAX, so it's pretty safe to asumme that no file extension
+	 * beyond NAME_MAX, so it's pretty safe to assume that no file extension
 	 * will be larger */
 	static char tmp_ext[NAME_MAX];
 	char *ptr = tmp_ext;
 //	int case_sensitive_ext = 0;
-	int i;
 
 //	if (case_sensitive_ext == 0) {
+	int i;
 	for (i = 0; ext[i] && i < NAME_MAX; i++) {
 		if (ext[i] >= 'A' && ext[i] <= 'Z')
 			tmp_ext[i] = ext[i] + ' ';
