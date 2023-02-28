@@ -341,12 +341,32 @@ get_ext_color(char *ext)
 	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
 		return (char *)NULL;
 
-	int i = (int)ext_colors_n;
+	/* Hold extensions names. NAME_MAX should be enough: no file name should go
+	 * beyond NAME_MAX, so it's pretty safe to asumme that no file extension
+	 * will be larger */
+	static char tmp_ext[NAME_MAX];
+	char *ptr = tmp_ext;
+//	int case_sensitive_ext = 0;
+	int i;
+
+//	if (case_sensitive_ext == 0) {
+	for (i = 0; ext[i] && i < NAME_MAX; i++) {
+		if (ext[i] >= 'A' && ext[i] <= 'Z')
+			tmp_ext[i] = ext[i] + ' ';
+		else
+		tmp_ext[i] = ext[i];
+	}
+	tmp_ext[i] = '\0';
+//	} else {
+//		ptr = ext;
+//	}
+
+	i = (int)ext_colors_n;
 	while (--i >= 0) {
-		if (!ext_colors[i] || !*ext_colors[i] || *ext != *ext_colors[i])
+		if (!ext_colors[i] || !*ext_colors[i] || *ptr != *ext_colors[i])
 			continue;
 
-		char *p = ext + 1, *q = ext_colors[i] + 1;
+		char *p = ptr + 1, *q = ext_colors[i] + 1;
 
 		size_t match = 1;
 		while (*p) {

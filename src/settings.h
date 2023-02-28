@@ -36,7 +36,7 @@ tw=30;42:uf=02;04;37:"
 #define DEF_IFACE_COLORS "bm=01;36:dd=:df=0:dg=:dl=02;37:\
 dn=00;02;37:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:\
 el=00;36:em=01;31:fc=00;02;37:hb=00;36:hc=02;31:\
-hd=00;36:he=00;36:hn=00;35:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:\
+hd=00;36:he=00;36:hn=0:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:\
 li=01;32:mi=01;36:nm=01;32:sb=00;02;33:sc=02;36:sd=00;02;37:\
 sf=04;02;36:sh=02;35:si=01;34:sp=02;31:sx=02;32:sz=00;02;04;35:\
 ti=01;36:ts=04;35:tt=02;01;36:tx=0:\
@@ -250,7 +250,6 @@ xf=01;31:xs=00;32:"
 #define DEF_FUZZY_MATCH 0
 #define DEF_FUZZY_MATCH_ALGO 2 /* 1 or 2. 2 is Unicode aware, but slower than 1 */
 #define DEF_FZF_WIN_HEIGHT 40 /* Max win percentage taken by FZF */
-//#define DEF_FZF_PREVIEW 0
 #define DEF_FZF_PREVIEW 1
 #define DEF_HIGHLIGHT 1
 #define DEF_HIST_STATUS 1
@@ -307,7 +306,7 @@ xf=01;31:xs=00;32:"
 #define DEF_SUG_FILETYPE_COLOR 0
 #define DEF_SUG_STRATEGY "ehfj-ac"
 #define DEF_SUGGESTIONS 1
-#define DEF_TIME_STYLE_RECENT "%b %e %H:%M" /* Dates in long view mode */
+#define DEF_TIME_STYLE_RECENT "%b %e %H:%M" /* Timestamps in long view mode */
 #define DEF_TIME_STYLE_OLDER  "%b %e  %Y"
 #define DEF_TIME_STYLE_LONG   "%a %b %d %T %Y %z" /* Used by history and trash */
 #define DEF_TIPS 1
@@ -374,7 +373,7 @@ alt-down:preview-page-down --inline-info --layout=reverse-list \
 
 #define DEF_SMENU_OPTIONS "-a t:2,b b:4 c:r ct:2,r sf:6,r st:5,r mt:5,b"
 
-/* We should add __APPLE__ here too */
+/* Should we add __APPLE__ here too? */
 #if defined(__HAIKU__)
 # define DEF_TERM_CMD "Terminal"
 #else
