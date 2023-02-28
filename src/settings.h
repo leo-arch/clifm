@@ -151,10 +151,11 @@ xf=01;31:xs=00;32:"
 
 /* Highlight */
 #define DEF_HB_C "\x1b[00;36m" /* Parenthesis, Brackets ( {[()]} ) */
-#define DEF_HC_C "\x1b[02;31m" /* Comments (#comment) */
+#define DEF_HC_C "\x1b[02;37m" /* Comments (#comment) */
 #define DEF_HD_C "\x1b[00;36m" /* Slashes (for paths) */
 #define DEF_HE_C "\x1b[00;36m" /* Expansion operators (* ~) */
-#define DEF_HN_C "\x1b[00;35m" /* Numbers (including ELN's) */
+//#define DEF_HN_C "\x1b[00;35m" /* Numbers (including ELN's) */
+#define DEF_HN_C "\x1b[0m" /* Numbers (including ELN's) */
 #define DEF_HP_C "\x1b[00;36m" /* Parameters (e.g. -h --help) */
 #define DEF_HQ_C "\x1b[00;33m" /* Quotes (single and double) */
 #define DEF_HR_C "\x1b[00;31m" /* Redirection operator (>) */

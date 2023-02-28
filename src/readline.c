@@ -3112,10 +3112,13 @@ my_rl_completion(const char *text, int start, int end)
 	char *lb = rl_line_buffer;
 	cur_comp_type = TCMP_NONE;
 	flags &= ~MULTI_SEL;
+	int escaped = 0;
 	UNUSED(end);
 
-	while (*text == '\\')
+	while (*text == '\\') {
 		++text;
+		escaped = 1;
+	}
 
 	/* Do not complete when the cursor is on a word. Ex: dir/_ilename */
 	if (rl_point < rl_end && rl_line_buffer[rl_point] != ' ') {
@@ -3334,7 +3337,7 @@ my_rl_completion(const char *text, int start, int end)
 			if (*text >= '1' && *text <= '9') {
 				int n = atoi(text);
 
-				if (is_number(text) && n > 0 && n <= (int)files
+				if (escaped == 0 && is_number(text) && n > 0 && n <= (int)files
 				&& ( (file_info[n - 1].dir == 1 && conf.autocd == 1)
 				|| (file_info[n - 1].dir == 0 && conf.auto_open == 1) ) ) {
 					matches = rl_completion_matches(text, &filenames_gen_eln);
@@ -3543,7 +3546,8 @@ my_rl_completion(const char *text, int start, int end)
 			}
 
 			/* ELN expansion */
-			if (is_number(text) && n > 0 && n <= (int)files && _expand_eln(text) == 1) {
+			if (escaped == 0 && is_number(text) && n > 0 && n <= (int)files
+			&& _expand_eln(text) == 1) {
 				matches = rl_completion_matches(text, &filenames_gen_eln);
 				if (matches) {
 					cur_comp_type = TCMP_ELN;

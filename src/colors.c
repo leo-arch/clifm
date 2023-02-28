@@ -981,7 +981,7 @@ set_default_colors(void)
 	if (!*hc_c) strcpy(hc_c, DEF_HC_C);
 	if (!*hd_c) strcpy(hd_c, DEF_HD_C);
 	if (!*he_c) strcpy(he_c, DEF_HE_C);
-//	if (!*hn_c) strcpy(hn_c, DEF_HN_C);
+	if (!*hn_c) strcpy(hn_c, DEF_HN_C);
 	if (!*hp_c) strcpy(hp_c, DEF_HP_C);
 	if (!*hq_c) strcpy(hq_c, DEF_HQ_C);
 	if (!*hr_c) strcpy(hr_c, DEF_HR_C);
@@ -1022,12 +1022,6 @@ set_default_colors(void)
 	if (!*xf_c) strcpy(xf_c, DEF_XF_C);
 
 	if (!*hw_c) strcpy(hw_c, wp_c);
-
-	if (conf.autols == 1) {
-		if (!*hn_c) strcpy(hn_c, DEF_HN_C);
-	} else {
-		strcpy(hn_c, tx_c);
-	}
 
 	if (!*ws1_c) strcpy(ws1_c, DEF_WS1_C);
 	if (!*ws2_c) strcpy(ws2_c, DEF_WS2_C);

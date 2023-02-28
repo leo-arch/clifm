@@ -68,7 +68,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 {
 	char *cl = (char *)NULL;
 	/* PREV is 0 when there is no previous char (STR[POS] is the first one) */
-	char prev = pos ? str[pos - 1] : 0;
+	char prev = pos > 0 ? str[pos - 1] : 0;
 	char c = *(str + pos);
 
 //	if (wrong_cmd == 1 && cur_color == wp_c && rl_end == 0) {
