@@ -79,10 +79,10 @@
 # Match files with extension 'ext'
 #X:N:.*\.ext$=cmd
 
-X:N:.*\.djvu$=djview;zathura;evince;atril
-X:N:.*\.epub$=mupdf;zathura;ebook-viewer
-X:N:.*\.mobi$=ebook-viewer
-X:N:.*\.(cbr|cbz)$=mcomix;YACReader;qcomicbook;zathura
+X:N:.*\.djvu$=djview;zathura;xreader;evince;atril
+X:N:.*\.epub$=mupdf;zathura;xreader;ebook-viewer;FBReader
+X:N:.*\.mobi$=ebook-viewer;FBReader
+X:N:.*\.(cbr|cbz)$=mcomix;xreader;YACReader;qcomicbook;zathura
 X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit -s;kate -n;pluma --new-window
 !X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano
 
@@ -116,7 +116,7 @@ X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad
 
 # PDF
-X:.*/pdf$=mupdf;sioyek;llpp;lpdf;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;qpdfview
+X:.*/pdf$=mupdf;sioyek;llpp;lpdf;zathura;mupdf-x11;apvlv;xpdf;xreader;evince;atril;okular;epdfview;qpdfview
 
 # Images
 X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a

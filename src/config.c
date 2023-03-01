@@ -2028,10 +2028,10 @@ create_mime_file_anew(char *file)
 # Match files with extension 'ext'\n\
 #X:N:.*\\.ext$=cmd\n\
 \n\
-X:N:.*\\.djvu$=djview;zathura;evince;atril\n\
-X:N:.*\\.epub$=mupdf;zathura;ebook-viewer\n\
-X:N:.*\\.mobi$=ebook-viewer\n\
-X:N:.*\\.(cbr|cbz)$=mcomix;YACReader;qcomicbook;zathura\n\
+X:N:.*\\.djvu$=djview;zathura;xreader;evince;atril\n\
+X:N:.*\\.epub$=mupdf;zathura;xreader;ebook-viewer;FBReader\n\
+X:N:.*\\.mobi$=ebook-viewer;FBReader\n\
+X:N:.*\\.(cbr|cbz)$=mcomix;xreader;YACReader;qcomicbook;zathura\n\
 X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit;kate;pluma\n\
 !X:N:(.*\\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano\n\
 \n\n");
@@ -2066,7 +2066,7 @@ X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image
 !X:^application/(zip|gzip|zstd|x-7z-compressed|x-xz|x-bzip*|x-tar|x-iso9660-image)=ad\n\
 \n\
 # PDF\n\
-X:.*/pdf$=mupdf;sioyek;llpp;lpdf;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;qpdfview\n\
+X:.*/pdf$=mupdf;sioyek;llpp;lpdf;zathura;mupdf-x11;apvlv;xpdf;xreader;evince;atril;okular;epdfview;qpdfview\n\
 \n\
 # Images\n\
 X:^image/gif$=animate;pqiv;sxiv -a;nsxiv -a\n\
