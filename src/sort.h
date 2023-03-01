@@ -27,9 +27,13 @@
 
 #include <dirent.h>
 
+/* Needed by qsort(3) to use compare_string() as comparison function */
+typedef int QSFUNC(const void *, const void *);
+
 __BEGIN_DECLS
 
 int  alphasort_insensitive(const struct dirent **, const struct dirent **);
+int  compare_strings(char **, char **);
 int  xalphasort(const struct dirent **, const struct dirent **);
 int  sort_function(char **);
 int  entrycmp(const void *, const void *);

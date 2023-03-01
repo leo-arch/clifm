@@ -47,10 +47,11 @@
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
-#include <ereadline/readline/readline.h>
+# include <ereadline/readline/readline.h>
 #else
-#include <readline/readline.h>
+# include <readline/readline.h>
 #endif
+
 #include <errno.h>
 #include <fcntl.h>
 
@@ -65,15 +66,15 @@ typedef char *rl_cpvfunc_t;
 #include "colors.h"
 #include "navigation.h"
 #include "readline.h"
-
 #include "selection.h"
+#include "sort.h"
 
 #ifndef _NO_HIGHLIGHT
-#include "highlight.h"
+# include "highlight.h"
 #endif
 
 #ifndef _NO_SUGGESTIONS
-#include "suggestions.h"
+# include "suggestions.h"
 #endif
 
 #define CPR     "\x1b[6n" /* Cursor position report */
@@ -92,8 +93,6 @@ typedef char *rl_cpvfunc_t;
 		putc('?', rl_outstream); \
 	} else \
 		putc(c, rl_outstream)
-
-typedef int QSFUNC(const void *, const void *);
 
 #ifndef _NO_FZF
 static size_t longest_prev_entry;
@@ -1761,23 +1760,6 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	return exit_status;
 }
 #endif /* !_NO_FZF */
-
-/* Simple comparison routine for qsort()ing strings */
-static int
-compare_strings(char **s1, char **s2)
-{
-#if defined(HAVE_STRCOLL)
-	return strcoll(*s2, *s2);
-#else
-	int ret;
-
-	ret = **s1 - **s2;
-	if (ret == 0)
-		ret = strcmp(*s1, *s2);
-
-	return ret;
-#endif /* HAVE_STRCOLL */
-}
 
 /* Complete the word at or before point.
    WHAT_TO_DO says what to do with the completion.

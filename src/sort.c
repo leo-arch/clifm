@@ -115,6 +115,23 @@ skip_name_prefixes(char **name)
 	*name = s;
 }
 
+/* Simple comparison routine for qsort()ing strings */
+int
+compare_strings(char **s1, char **s2)
+{
+#if defined(HAVE_STRCOLL)
+	return strcoll(*s2, *s2);
+#else
+	int ret;
+
+	ret = **s1 - **s2;
+	if (ret == 0)
+		ret = strcmp(*s1, *s2);
+
+	return ret;
+#endif // HAVE_STRCOLL
+}
+
 static int
 namecmp(char *s1, char *s2)
 {

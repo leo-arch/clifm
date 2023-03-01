@@ -47,6 +47,12 @@
 #include "exec.h"
 #include "config.h" /* set_div_line() */
 
+#ifndef CLIFM_SUCKLESS
+/* qsort(3) is used only by get_colorschemes(), which is not included
+ * if CLIFM_SUCKLESS is defined */
+# include "sort.h" /* compare_string() (used by qsort(3)) */
+#endif
+
 #define RL_PRINTABLE    1
 #define RL_NO_PRINTABLE 0 /* Add non-printing flags (\001 and \002)*/
 
@@ -553,7 +559,7 @@ import_color_scheme(const char *name)
 		return EXIT_FAILURE;
 
 	char dfile[PATH_MAX];
-	snprintf(dfile, PATH_MAX - 1, "%s/%s/colors/%s.clifm", data_dir, PNL, name);
+	snprintf(dfile, sizeof(dfile), "%s/%s/colors/%s.clifm", data_dir, PNL, name);
 
 	struct stat attr;
 	if (stat(dfile, &attr) == -1)
@@ -574,12 +580,13 @@ print_cur_colorscheme(void)
 		printf(_("%s: No color scheme found\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
+
 	size_t i;
 	for (i = 0; color_schemes[i]; i++) {
 		if (cur_cscheme == color_schemes[i])
-			printf("%s%s%s\n", mi_c, color_schemes[i], df_c);
+			printf("%s>%s %s\n", mi_c, df_c, color_schemes[i]);
 		else
-			printf("%s\n", color_schemes[i]);
+			printf("  %s\n", color_schemes[i]);
 	}
 
 	return EXIT_SUCCESS;
@@ -1155,85 +1162,6 @@ get_colors_from_env(char **file, char **ext, char **iface)
 		*iface = savestring(env_ifacecolors, strlen(env_ifacecolors));
 }
 
-#ifndef CLIFM_SUCKLESS
-/* Store color variable defined in STR into the global defs struct */
-static void
-store_definition(char *str)
-{
-	if (!str || !*str || *str == '\n' || defs_n > MAX_DEFS)
-		return;
-
-	char *name = str;
-	char *value = strchr(name, '=');
-	if (!value || !*(value + 1) || value == name)
-		return;
-
-	*value = '\0';
-	value++;
-
-	defs[defs_n].name = savestring(name, (size_t)(value - name - 1));
-
-	size_t val_len;
-	char *s = strchr(value, ' ');
-	if (s) {
-		*s = '\0';
-		val_len = (size_t)(s - value);
-	} else {
-		val_len = strlen(value);
-		if (val_len > 0 && value[val_len - 1] == '\n') {
-			value[val_len - 1] = '\0';
-			val_len--;
-		}
-	}
-
-	defs[defs_n].value = savestring(value, val_len);
-	defs_n++;
-}
-
-/* Initialize the defs_t struct */
-static void
-init_defs(void)
-{
-	int n = MAX_DEFS;
-	while (--n >= 0) {
-		defs[n].name = (char *)NULL;
-		defs[n].value = (char *)NULL;
-	}
-}
-
-#ifndef _NO_FZF
-static void
-set_fzf_opts(char *line)
-{
-	free(conf.fzftab_options);
-
-	if (!line) {
-		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
-		conf.fzftab_options = savestring(p, strlen(p));
-	}
-
-	else if (*line == 'n' && strcmp(line, "none") == 0) {
-		conf.fzftab_options = (char *)xnmalloc(1, sizeof(char));
-		*conf.fzftab_options = '\0';
-	}
-
-	else if (sanitize_cmd(line, SNT_BLACKLIST) == EXIT_SUCCESS) {
-		conf.fzftab_options = savestring(line, strlen(line));
-	}
-
-	else {
-		_err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains unsafe "
-			"characters (<>|;&$`). Falling back to default values.\n"), PROGRAM_NAME);
-		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
-		conf.fzftab_options = savestring(p, strlen(p));
-	}
-
-	fzf_height_set = 0;
-	if (strstr(conf.fzftab_options, "--height"))
-		fzf_height_set = 1;
-}
-#endif /* !_NO_FZF */
-
 static void
 set_shades(char *line, const int type)
 {
@@ -1325,6 +1253,85 @@ set_default_shades(void)
 		set_shades(tmp, SIZE_SHADES);
 	}
 }
+
+#ifndef CLIFM_SUCKLESS
+/* Store color variable defined in STR into the global defs struct */
+static void
+store_definition(char *str)
+{
+	if (!str || !*str || *str == '\n' || defs_n > MAX_DEFS)
+		return;
+
+	char *name = str;
+	char *value = strchr(name, '=');
+	if (!value || !*(value + 1) || value == name)
+		return;
+
+	*value = '\0';
+	value++;
+
+	defs[defs_n].name = savestring(name, (size_t)(value - name - 1));
+
+	size_t val_len;
+	char *s = strchr(value, ' ');
+	if (s) {
+		*s = '\0';
+		val_len = (size_t)(s - value);
+	} else {
+		val_len = strlen(value);
+		if (val_len > 0 && value[val_len - 1] == '\n') {
+			value[val_len - 1] = '\0';
+			val_len--;
+		}
+	}
+
+	defs[defs_n].value = savestring(value, val_len);
+	defs_n++;
+}
+
+/* Initialize the defs_t struct */
+static void
+init_defs(void)
+{
+	int n = MAX_DEFS;
+	while (--n >= 0) {
+		defs[n].name = (char *)NULL;
+		defs[n].value = (char *)NULL;
+	}
+}
+
+#ifndef _NO_FZF
+static void
+set_fzf_opts(char *line)
+{
+	free(conf.fzftab_options);
+
+	if (!line) {
+		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+		conf.fzftab_options = savestring(p, strlen(p));
+	}
+
+	else if (*line == 'n' && strcmp(line, "none") == 0) {
+		conf.fzftab_options = (char *)xnmalloc(1, sizeof(char));
+		*conf.fzftab_options = '\0';
+	}
+
+	else if (sanitize_cmd(line, SNT_BLACKLIST) == EXIT_SUCCESS) {
+		conf.fzftab_options = savestring(line, strlen(line));
+	}
+
+	else {
+		_err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains unsafe "
+			"characters (<>|;&$`). Falling back to default values.\n"), PROGRAM_NAME);
+		char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+		conf.fzftab_options = savestring(p, strlen(p));
+	}
+
+	fzf_height_set = 0;
+	if (strstr(conf.fzftab_options, "--height"))
+		fzf_height_set = 1;
+}
+#endif /* !_NO_FZF */
 
 /* Get color lines from the configuration file */
 static int
@@ -2029,6 +2036,9 @@ get_colorschemes(void)
 
 	closedir(dir_p);
 	color_schemes[i] = (char *)NULL;
+
+	qsort(color_schemes, i, sizeof(char *), (QSFUNC *)compare_strings);
+
 	return i;
 }
 #endif /* CLIFM_SUCKLESS */
