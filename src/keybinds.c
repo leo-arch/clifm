@@ -776,6 +776,9 @@ rl_accept_suggestion(int count, int key)
 static int
 rl_accept_first_word(int count, int key)
 {
+	if (rl_point < rl_end)
+		return rl_forward_word(1, 0);
+
 	/* Accepting the first suggested word is not supported for ELN's,
 	 * bookmark and alias names */
 	int t = suggestion.type;

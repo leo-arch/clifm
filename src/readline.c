@@ -595,8 +595,8 @@ rl_exclude_input(unsigned char c)
 	}
 
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
-	 * enter (13), and escape (27) */
-	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC)
+	 * enter (13), escape (27) and EOT (4 or Ctrl-D) */
+	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC && c != 4)
 		return RL_INSERT_CHAR;
 
 	/* Multi-byte char. Send it directly to the input buffer. We can't
@@ -609,6 +609,7 @@ rl_exclude_input(unsigned char c)
 
 	/* Skip backspace, Enter, and TAB keys */
 	switch (c) {
+		case 4: /* fallthrough */ /* Ctrl-D (EOT) */
 		case DELETE: /* fallthrough */
 		case BS:
 			_del = (rl_point == 0 && rl_end == 0) ? DEL_EMPTY_LINE : DEL_NON_EMPTY_LINE;
@@ -835,9 +836,10 @@ my_rl_getc(FILE *stream)
 	while (1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char)); /* flawfinder: ignore */
 		if (result > 0 && result == sizeof(unsigned char)) {
-			/* Ctrl-d. Let's check the previous char wasn't ESC to prevent
-			 * Ctrl-Alt-d to be taken as Ctrl-d */
-			if (c == 4 && control_d_exits == 1 && prev != _ESC && rl_nohist == 0)
+			/* Ctrl-d (empty command line only). Let's check the previous
+			 * char wasn't ESC to prevent Ctrl-Alt-d to be taken as Ctrl-d */
+			if (c == 4 && control_d_exits == 1 && prev != _ESC && rl_nohist == 0
+			&& (!rl_line_buffer || !*rl_line_buffer))
 				rl_quit(0, 0);
 
 			prev = c;
