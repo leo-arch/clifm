@@ -261,9 +261,6 @@ set the maximum number of characters after which the current directory in the pr
 \fB\-\-no\-cd\-auto\fR
 by default, \fBclifm\fR changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of \fIcd\fR
 .TP
-\fB\-\-no-control\-d\-exit\fR
-do not allow exit on EOF (Control-d)
-.TP
 \fB\-\-no\-dir\-jumper\fR
 disable the directory jumper function
 .TP

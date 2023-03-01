@@ -921,7 +921,7 @@ struct param_t {
 	int check_ext;
 	int classify;
 	int color_scheme;
-	int control_d_exits;
+//	int control_d_exits;
 	int disk_usage_analyzer;
 	int eln_use_workspace_color;
 //	int expand_bookmarks;
@@ -1236,7 +1236,7 @@ extern int
 	check_ext,
 	cmdhist_flag,
 	config_ok,
-	control_d_exits,
+//	control_d_exits,
 	cur_ws,
 	curcol,
 //	curline,

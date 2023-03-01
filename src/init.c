@@ -1943,7 +1943,7 @@ external_arguments(int argc, char **argv)
 		{"no-file-cap", no_argument, 0, 236},
 		{"no-file-ext", no_argument, 0, 237},
 		{"no-follow-symlinks", no_argument, 0, 238},
-		{"no-control-d-exit", no_argument, 0, 239},
+//		{"no-control-d-exit", no_argument, 0, 239},
 		{"int-vars", no_argument, 0, 240},
 		{"stdtab", no_argument, 0, 241},
 		{"no-warning-prompt", no_argument, 0, 242},
@@ -2116,7 +2116,7 @@ external_arguments(int argc, char **argv)
 		case 236: xargs.check_cap = check_cap = 0; break;
 		case 237: xargs.check_ext = check_ext = 0; break;
 		case 238: xargs.follow_symlinks = follow_symlinks = 0; break;
-		case 239: xargs.control_d_exits = control_d_exits = 0; break;
+//		case 239: xargs.control_d_exits = control_d_exits = 0; break;
 		case 240: xargs.int_vars = int_vars = 1; break;
 		case 241:
 #ifndef _NO_FZF
@@ -2514,7 +2514,7 @@ unset_xargs(void)
 	xargs.colorize = UNSET;
 	xargs.columns = UNSET;
 	xargs.config = UNSET;
-	xargs.control_d_exits = UNSET;
+//	xargs.control_d_exits = UNSET;
 	xargs.cwd_in_title = UNSET;
 	xargs.desktop_notifications = UNSET;
 	xargs.dirmap = UNSET;
@@ -3431,8 +3431,8 @@ check_options(void)
 	if (xargs.secure_env_full == UNSET)
 		xargs.secure_env_full = DEF_SECURE_ENV_FULL;
 
-	if (xargs.control_d_exits == UNSET)
-		control_d_exits = DEF_CONTROL_D_EXITS;
+//	if (xargs.control_d_exits == UNSET)
+//		control_d_exits = DEF_CONTROL_D_EXITS;
 
 	if (conf.cp_cmd == UNSET)
 		conf.cp_cmd = DEF_CP_CMD;

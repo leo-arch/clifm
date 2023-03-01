@@ -838,7 +838,8 @@ my_rl_getc(FILE *stream)
 		if (result > 0 && result == sizeof(unsigned char)) {
 			/* Ctrl-d (empty command line only). Let's check the previous
 			 * char wasn't ESC to prevent Ctrl-Alt-d to be taken as Ctrl-d */
-			if (c == 4 && control_d_exits == 1 && prev != _ESC && rl_nohist == 0
+//			if (c == 4 && control_d_exits == 1 && prev != _ESC && rl_nohist == 0
+			if (c == 4 && prev != _ESC && rl_nohist == 0
 			&& (!rl_line_buffer || !*rl_line_buffer))
 				rl_quit(0, 0);
 

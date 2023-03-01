@@ -1206,7 +1206,6 @@ base name (if \\z is used in the prompt)\
 \n      --no-clear-screen\t\t Do not clear the screen when listing files\
 \n      --no-color\t\t Disable colors \
 \n      --no-columns\t\t Disable columned files listing\
-\n      --no-control-d-exit\t Do not allow exit on EOF (Control-d)\
 \n      --no-file-cap\t\t Do not check file capabilities when listing files\
 \n      --no-file-ext\t\t Do not check file extensions when listing files\
 \n      --no-files-counter\t Disable the files counter for directories\
