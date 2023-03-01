@@ -80,9 +80,9 @@
 #X:N:.*\.ext$=cmd
 
 X:N:.*\.djvu$=djview;zathura;xreader;evince;atril
-X:N:.*\.epub$=mupdf;zathura;xreader;ebook-viewer;FBReader
-X:N:.*\.mobi$=ebook-viewer;FBReader
-X:N:.*\.(cbr|cbz)$=mcomix;xreader;YACReader;qcomicbook;zathura
+X:N:.*\.epub$=mupdf;zathura;xreader;ebook-viewer;FBReader;foliate
+X:N:.*\.mobi$=ebook-viewer;FBReader;foliate
+X:N:.*\.(cbr|cbz)$=mcomix;xreader;YACReader;qcomicbook;zathura;foliate
 X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano;mili;leafpad;mousepad;featherpad;gedit -s;kate -n;pluma --new-window
 !X:N:(.*\.clifm$|clifmrc)=$EDITOR;$VISUAL;kak;micro;nvim;vim;vi;mg;emacs;ed;nano
 

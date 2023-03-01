@@ -110,7 +110,7 @@ define IMAGE=35        # Magenta (4-bit)
 define SOUND=38;5;214  # Orange
 define CODE=1;38;5;247 # Bold gray
 define ARCHIVE=1;31    # Bold red (4-bit)
-define BOOK=38;5;222   # Salmon
+define BOOK=38;5;223   # Salmon
 define TEMP=38;5;247   # Dimmed white
 
 ### To know what are we applying colors to, we use the following codes:
