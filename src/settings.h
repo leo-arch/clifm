@@ -232,6 +232,7 @@ xf=01;31:xs=00;32:"
 #define DEF_CLEAR_SCREEN 1
 #define DEF_CMD_DESC_SUG 1
 #define DEF_COLOR_SCHEME "default"
+#define DEF_COLOR_SCHEME_256 "default-256"
 #define DEF_COLORS 1
 #define DEF_CONTROL_D_EXITS 1
 #define DEF_CP_CMD CP_CP

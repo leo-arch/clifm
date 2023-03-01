@@ -577,7 +577,7 @@ static int
 list_colorschemes(void)
 {
 	if (cschemes_n == 0) {
-		printf(_("%s: No color scheme found\n"), PROGRAM_NAME);
+		printf(_("cs: No color scheme found\n"));
 		return EXIT_SUCCESS;
 	}
 
@@ -599,21 +599,21 @@ static int
 edit_colorscheme(char *app)
 {
 	if (!colors_dir) {
-		fprintf(stderr, _("%s: No color scheme found\n"), PROGRAM_NAME);
+		fprintf(stderr, _("cs: No color scheme found\n"));
 		return EXIT_FAILURE;
 	}
 
 	if (!cur_cscheme) {
-		fprintf(stderr, _("%s: Current color scheme is unknown\n"), PROGRAM_NAME);
+		fprintf(stderr, _("cs: Current color scheme is unknown\n"));
 		return EXIT_FAILURE;
 	}
 
 	struct stat attr;
 	char file[PATH_MAX];
 
-	snprintf(file, PATH_MAX - 1, "%s/%s.clifm", colors_dir, cur_cscheme); /* NOLINT */
+	snprintf(file, sizeof(file), "%s/%s.clifm", colors_dir, cur_cscheme); /* NOLINT */
 	if (stat(file, &attr) == -1 && import_color_scheme(cur_cscheme) != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: %s: No such color scheme\n"), PROGRAM_NAME, cur_cscheme);
+		fprintf(stderr, _("cs: %s: No such color scheme\n"), cur_cscheme);
 		return EXIT_FAILURE;
 	}
 
@@ -673,10 +673,10 @@ set_colorscheme(char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	free(p);
-
 	if (cs_found == 0)
-		fprintf(stderr, _("%s: No such color scheme\n"), PROGRAM_NAME);
+		fprintf(stderr, _("cs: %s: No such color scheme\n"), p);
+
+	free(p);
 
 	return EXIT_FAILURE;
 }
@@ -714,8 +714,7 @@ cschemes_function(char **args)
 		return edit_colorscheme(args[2]);
 
 	if (*args[1] == 'n' && (!args[1][1] || strcmp(args[1], "name") == 0)) {
-		printf(_("%s: Current color scheme: %s\n"), PROGRAM_NAME,
-		    cur_cscheme ? cur_cscheme : "?");
+		printf(_("cs: Current color scheme is '%s'\n"), cur_cscheme ? cur_cscheme : "?");
 		return EXIT_SUCCESS;
 	}
 

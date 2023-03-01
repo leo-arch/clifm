@@ -233,7 +233,7 @@ dump_config(void)
 	print_config_value("Classify", &conf.classify, &n, DUMP_CONFIG_BOOL);
 	n = DEF_CLEAR_SCREEN;
 	print_config_value("ClearScreen", &conf.clear_screen, &n, DUMP_CONFIG_BOOL);
-	s = DEF_COLOR_SCHEME;
+	s = term_caps.color < 256 ? DEF_COLOR_SCHEME : DEF_COLOR_SCHEME_256;
 	print_config_value("ColorScheme", cur_cscheme, s, DUMP_CONFIG_STR);
 	n = DEF_CP_CMD;
 	print_config_value("cpCmd", &conf.cp_cmd, &n, DUMP_CONFIG_INT);

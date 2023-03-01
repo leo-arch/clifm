@@ -207,8 +207,10 @@ Note: When using TAB completion only bookmark names are listed"
 
 #define CS_USAGE "Switch color schemes\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  cs, colorschemes [edit [APP]] [COLORSCHEME]\n\n\
+  cs, colorschemes [COLORSCHEME] [edit [APP]] [n, name]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
+- Print current color scheme\n\
+    cs name (or 'cs n')\n\
 - List available color schemes\n\
     cs (or 'cs <TAB>')\n\
 - Edit the current color scheme\n\
