@@ -1188,6 +1188,10 @@ get_properties(char *filename, const int dsize)
 	printf(_("Modify: \t%s%s%s\n"), cmdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), ccdate, change_time, cend);
 
+#ifdef __TERMUX__
+	UNUSED(cbdate); UNUSED(btf);
+#endif
+
 #ifndef _BE_POSIX
 # if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
 	char creation_time[MAX_TIME_STR];

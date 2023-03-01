@@ -108,8 +108,8 @@ get_workspace_path_color(const uint8_t num)
 	if (S_ISLNK(a.st_mode)) {
 		char p[PATH_MAX];
 		*p = '\0';
-		realpath(workspaces[num].path, p);
-		return *p ? ln_c : or_c;
+		char *ret = realpath(workspaces[num].path, p);
+		return (ret && *p) ? ln_c : or_c;
 	}
 
 	return get_dir_color(workspaces[num].path, a.st_mode, a.st_nlink);

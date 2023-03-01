@@ -574,9 +574,9 @@ import_color_scheme(const char *name)
 
 #ifndef CLIFM_SUCKLESS
 static int
-print_cur_colorscheme(void)
+list_colorschemes(void)
 {
-	if (!cschemes_n) {
+	if (cschemes_n == 0) {
 		printf(_("%s: No color scheme found\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
@@ -706,7 +706,7 @@ cschemes_function(char **args)
 
 	if (!args) return EXIT_FAILURE;
 
-	if (!args[1]) return print_cur_colorscheme();
+	if (!args[1]) return list_colorschemes();
 
 	if (IS_HELP(args[1])) { puts(_(CS_USAGE)); return EXIT_SUCCESS;	}
 
