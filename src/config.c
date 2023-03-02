@@ -346,7 +346,7 @@ dump_config(void)
 	char *ss = get_tab_comp_mode_str();
 	print_config_value("TabCompletionMode", ss,
 #ifndef _NO_FZF
-		(flags & FZF_BIN_OK) ? "fzf" : "standard",
+		(finder_flags & FZF_BIN_OK) ? "fzf" : "standard",
 #else
 		"standard",
 #endif
