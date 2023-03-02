@@ -1689,7 +1689,8 @@ static int
 create_def_color_scheme256(void)
 {
 	char cscheme_file[PATH_MAX];
-	snprintf(cscheme_file, sizeof(cscheme_file), "%s/default-256.clifm", colors_dir);
+	snprintf(cscheme_file, sizeof(cscheme_file), "%s/%s.clifm", colors_dir,
+		DEF_COLOR_SCHEME_256);
 
 	/* If the file already exists, do nothing */
 	struct stat attr;
@@ -1697,7 +1698,7 @@ create_def_color_scheme256(void)
 		return EXIT_SUCCESS;
 
 	/* Try to import it from data dir */
-	if (import_color_scheme("default-256") == EXIT_SUCCESS)
+	if (import_color_scheme(DEF_COLOR_SCHEME_256) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
 	return EXIT_FAILURE;
@@ -1713,7 +1714,8 @@ create_def_color_scheme(void)
 		create_def_color_scheme256();
 
 	char cscheme_file[PATH_MAX];
-	snprintf(cscheme_file, sizeof(cscheme_file), "%s/default.clifm", colors_dir);
+	snprintf(cscheme_file, sizeof(cscheme_file), "%s/%s.clifm", colors_dir,
+		DEF_COLOR_SCHEME);
 
 	/* If the file already exists, do nothing */
 	struct stat attr;
@@ -1721,7 +1723,7 @@ create_def_color_scheme(void)
 		return;
 
 	/* Try to import it from data dir */
-	if (import_color_scheme("default") == EXIT_SUCCESS)
+	if (import_color_scheme(DEF_COLOR_SCHEME) == EXIT_SUCCESS)
 		return;
 
 	/* If cannot be imported either, create it with default values */
@@ -3037,7 +3039,8 @@ check_colors(void)
 	if (conf.colorize == 1) {
 		unsetenv("CLIFM_COLORLESS");
 		set_colors(conf.usr_cscheme ? conf.usr_cscheme
-			: (term_caps.color >= 256 ? "default-256" : "default"), 1);
+//			: (term_caps.color >= 256 ? "default-256" : "default"), 1);
+			: (term_caps.color >= 256 ? DEF_COLOR_SCHEME_256 : DEF_COLOR_SCHEME), 1);
 		cur_color = tx_c;
 		return;
 	}

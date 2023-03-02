@@ -1126,7 +1126,8 @@ get_cur_colorscheme(const char *colorscheme)
 		}
 
 		if (*color_schemes[i] == 'd'
-		&& strcmp(color_schemes[i], term_caps.color < 256 ? "default" : "default-256") == 0)
+		&& strcmp(color_schemes[i], term_caps.color < 256 ? DEF_COLOR_SCHEME
+		: DEF_COLOR_SCHEME_256) == 0)
 			def_cscheme = color_schemes[i];
 	}
 
