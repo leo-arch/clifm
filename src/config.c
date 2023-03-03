@@ -112,26 +112,26 @@ print_config_value(const char *option, void *cur_value, void *def_value, const i
 	if (type == DUMP_CONFIG_STR) {
 		char *cv = (char *)cur_value, *dv = (char *)def_value;
 		if (!cv || (dv && strcmp(cv, dv) == 0))
-			printf("%s: \"%s\"\n", option, dv);
+			printf("  %s: \"%s\"\n", option, dv);
 		else
-			printf("%s%s: \"%s\" [\"%s\"]%s\n", BOLD, option, cv, dv, df_c);
+			printf("%s>%s %s%s: \"%s\" [\"%s\"]%s\n", mi_c, df_c, BOLD, option, cv, dv, df_c);
 	}
 
 	else if (type == DUMP_CONFIG_BOOL) {
 		int cv = *((int *)cur_value), dv = *((int *)def_value);
 		if (cv == dv)
-			printf("%s: %s\n", option, cv == 1 ? "true" : "false");
+			printf("  %s: %s\n", option, cv == 1 ? "true" : "false");
 		else
-			printf("%s%s: %s [%s]%s\n", BOLD, option, cv == 1
+			printf("%s>%s %s%s: %s [%s]%s\n", mi_c, df_c, BOLD, option, cv == 1
 				? "true" : "false", dv == 1 ? "true" : "false", df_c);
 	}
 
 	else { /* CONFIG_BOOL_INT */
 		int cv = *((int *)cur_value), dv = *((int *)def_value);
 		if (cv == dv)
-			printf("%s: %d\n", option, cv);
+			printf("  %s: %d\n", option, cv);
 		else
-			printf("%s%s: %d [%d]%s\n", BOLD, option, cv, dv, df_c);
+			printf("%s>%s %s%s: %d [%d]%s\n", mi_c, df_c, BOLD, option, cv, dv, df_c);
 	}
 }
 
