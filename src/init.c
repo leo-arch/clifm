@@ -193,6 +193,7 @@ init_conf_struct(void)
 	conf.pager = UNSET;
 	conf.private_ws_settings = UNSET;
 	conf.purge_jumpdb = UNSET;
+	conf.relative_time = UNSET;
 	conf.restore_last_path = UNSET;
 	conf.rm_force = UNSET;
 	conf.search_strategy = UNSET;
@@ -3335,6 +3336,9 @@ check_time_str(void)
 void
 check_options(void)
 {
+	if (conf.relative_time == UNSET)
+		conf.relative_time = DEF_RELATIVE_TIME;
+
 	if (conf.cmd_desc_sug == UNSET)
 		conf.cmd_desc_sug = DEF_CMD_DESC_SUG;
 

@@ -1416,6 +1416,8 @@ create_config(char *file)
 ;PropFields=\"%s\"\n\
 # Format used to print timestamps in long view (see strftime(3))\n\
 ;TimeStyle=\"\"\n\
+# If you prefer rather relative times\n\
+;TimeStyle=relative\n\
 # Print files apparent size instead of actual device usage (Linux only)\n\
 ;ApparentSize=%s\n\
 # If running in long view, print directories full size (including contents)\n\
@@ -2891,14 +2893,6 @@ read_config(void)
 		}
 #endif /* !_NO_FZF */
 
-		else if (*line == 'T' && strncmp(line, "TimeStyle=", 10) == 0) {
-			char *tmp = get_line_value(line + 10);
-			if (!tmp)
-				continue;
-			free(conf.time_str);
-			conf.time_str = savestring(tmp, strlen(tmp));
-		}
-
 		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
 			char *tmp = get_line_value(line + 14);
 			if (!tmp)
@@ -2933,6 +2927,16 @@ read_config(void)
 
 			free(conf.term);
 			conf.term = savestring(tmp, strlen(tmp));
+		}
+
+		else if (*line == 'T' && strncmp(line, "TimeStyle=", 10) == 0) {
+			char *tmp = get_line_value(line + 10);
+			if (!tmp)
+				continue;
+			free(conf.time_str);
+			conf.time_str = savestring(tmp, strlen(tmp));
+			if (*tmp == 'r' && strcmp(tmp + 1, "elative") == 0)
+				conf.relative_time = 1;
 		}
 
 		else if (xargs.tips == UNSET && *line == 'T' && strncmp(line, "Tips=", 5) == 0) {

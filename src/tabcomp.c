@@ -78,7 +78,7 @@ typedef char *rl_cpvfunc_t;
 #endif
 
 #define CPR     "\x1b[6n" /* Cursor position report */
-#define CPR_LEN 4
+#define CPR_LEN (sizeof(CPR) - 1)
 
 #define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL || (c) == TCMP_RANGES \
 || (c) == TCMP_DESEL || (c) == TCMP_JUMP || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB \

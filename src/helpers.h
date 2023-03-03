@@ -682,6 +682,7 @@ struct config_t {
 	int purge_jumpdb;
 	int print_selfiles;
 	int private_ws_settings;
+	int relative_time;
 	int restore_last_path;
 	int rm_force;
 	int search_strategy;
@@ -701,7 +702,6 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
-	int pad3;
 
 	char *opener;
 	char *encoded_prompt;

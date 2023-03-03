@@ -97,6 +97,10 @@
 ;TimeStyle="%Y-%m-%d %H:%M"
 ## Full ISO
 ;TimeStyle="%Y-%m-%d %H:%M:%S %z"
+## Legacy style (old versions)
+;TimeStyle="%F %T"
+## Relative time
+;TimeStyle=relative
 
 # If running in long view, print directories full size (including contents)
 ;FullDirSize=false
