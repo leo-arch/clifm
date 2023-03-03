@@ -355,6 +355,8 @@ dump_config(void)
 
 	s = DEF_TERM_CMD;
 	print_config_value("TerminalCmd", conf.term, s, DUMP_CONFIG_STR);
+	s = "";
+	print_config_value("TimeStyle", conf.time_str, s, DUMP_CONFIG_STR);
 	n = DEF_TIPS;
 	print_config_value("Tips", &conf.tips, &n, DUMP_CONFIG_BOOL);
 
