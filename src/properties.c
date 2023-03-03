@@ -56,6 +56,10 @@
 # include "properties.h" /* XFS_?????_FL flags */
 #endif
 
+#ifdef _LINUX_XATTR
+# include <sys/xattr.h>
+#endif
+
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -983,6 +987,89 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 	free(l);
 }
 
+#if defined(_LINUX_XATTR)
+static int
+print_extended_attributes(char *s)
+{
+	ssize_t buflen = 0, keylen = 0, vallen = 0;
+	char *buf = (char *)NULL, *key = (char *)NULL, *val = (char *)NULL;
+
+	/* Determine the length of the buffer needed */
+	buflen = listxattr(s, NULL, 0);
+	if (buflen == -1) {
+		fprintf(stderr, "%s\n", strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (buflen == 0) {
+		puts("None");
+		return EXIT_SUCCESS;
+	}
+
+	/* Allocate the buffer */
+	buf = (char *)xnmalloc((size_t)buflen, sizeof(char));
+
+	/* Copy the list of attribute keys to the buffer */
+	buflen = listxattr(s, buf, (size_t)buflen);
+	if (buflen == -1) {
+		fprintf(stderr, "%s\n", strerror(errno));
+		free(buf);
+		return EXIT_FAILURE;
+	}
+
+	/* Loop over the list of zero terminated strings with the
+	 * attribute keys. Use the remaining buffer length to determine
+	 * the end of the list */
+	key = buf;
+	size_t count = 0;
+	while (buflen > 0) {
+
+		/* Output attribute key */
+		if (count == 0)
+			printf("%s: ", key);
+		else
+			printf("                %s: ", key);
+		count++;
+
+		/* Determine length of the value */
+		vallen = getxattr(s, key, NULL, 0);
+		if (vallen == -1)
+			printf("%s", strerror(errno));
+
+		if (vallen > 0) {
+
+			/* Allocate value buffer.
+			 * One extra byte is needed to append the nul byte */
+			val = (char *)xnmalloc((size_t)vallen + 1, sizeof(char));
+
+			/* Copy value to buffer */
+			vallen = getxattr(s, key, val, (size_t)vallen);
+			if (vallen == -1) {
+				printf("%s", strerror(errno));
+			} else {
+				/* Output attribute value */
+				val[vallen] = '\0';
+				printf("%s", val);
+			}
+
+			free(val);
+		} else if (vallen == 0) {
+			printf("<no value>");
+		}
+
+		putchar('\n');
+
+		/* Forward to next attribute key */
+		keylen = (ssize_t)strlen(key) + 1;
+		buflen -= keylen;
+		key += keylen;
+	}
+
+	free(buf);
+	return EXIT_SUCCESS;
+}
+#endif /* _LINUX_XATTR */
+
 static int
 get_properties(char *filename, const int dsize)
 {
@@ -1171,6 +1258,11 @@ get_properties(char *filename, const int dsize)
 	else
 		puts("Unavailable");
 #endif /* LINUX_FILE_ATTRS */
+
+#if defined(_LINUX_XATTR)
+	printf("Xattributes:\t");
+	print_extended_attributes(filename);
+#endif /* _LINUX_XATTR */
 
 	/* Timestamps */
 	char mod_time[MAX_TIME_STR];
