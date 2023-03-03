@@ -84,7 +84,7 @@
 #define RT_DAY    (24  * RT_HOUR)
 #define RT_WEEK   (7   * RT_DAY)
 #define RT_MONTH  (30  * RT_DAY)
-#define RT_YEAR   (365 * RT_MONTH)
+#define RT_YEAR   (365 * RT_DAY)
 
 /* Max length of a relative timestamp string
  * 7 = 99 year */
@@ -1322,12 +1322,17 @@ calc_relative_time(const time_t age, char *s, const size_t len)
 		 * in some cases, which is weird. Always make 4 weeks into 1 month */
 		long n = age / RT_WEEK;
 		if (n == 4)
-			snprintf(s, len, " 1  mon");
+			strncpy(s, " 1  mon", len);
 		else
 			snprintf(s, len, "%*ld week", 2, n);
 	}
-	else if (age < RT_YEAR)
-		snprintf(s, len, "%*ld  mon", 2, age / RT_MONTH);
+	else if (age < RT_YEAR) {
+		long n = age / RT_MONTH;
+		if (n == 12)
+			strncpy(s, " 1 year", len);
+		else
+			snprintf(s, len, "%*ld  mon", 2, n);
+	}
 	else
 		snprintf(s, len, "%*ld year", 2, age / RT_YEAR);
 }
@@ -1514,7 +1519,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			/* AGE is negative if file time is in the future */
 
 			if (conf.relative_time == 1) {
-				calc_relative_time(age < 0 ? age - (age * 2) : age, file_time, sizeof(file_time));
+				calc_relative_time(age < 0 ? age - (age * 2) : age,
+					file_time, sizeof(file_time));
 			} else {
 				/* Let's consider a file to be recent if it is within the past
 				 * six months (like ls(1) does) */
