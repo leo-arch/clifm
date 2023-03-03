@@ -1308,19 +1308,19 @@ static void
 calc_relative_time(const time_t age, char *s, const size_t len)
 {
 	if (age < 0L) // Future
-		strncpy(s, "-", len);
+		strncpy(s, " -", len);
 	else if (age < RT_MINUTE)
-		snprintf(s, len, "%*ld sec", 2, age);
+		snprintf(s, len, "%*ld  sec", 2, age);
 	else if (age < RT_HOUR)
-		snprintf(s, len, "%*ld min", 2, age / RT_MINUTE);
+		snprintf(s, len, "%*ld  min", 2, age / RT_MINUTE);
 	else if (age < RT_DAY)
 		snprintf(s, len, "%*ld hour", 2, age / RT_HOUR);
 	else if (age < RT_WEEK)
-		snprintf(s, len, "%*ld day", 2, age / RT_DAY);
+		snprintf(s, len, "%*ld  day", 2, age / RT_DAY);
 	else if (age < RT_MONTH)
 		snprintf(s, len, "%*ld week", 2, age / RT_WEEK);
 	else if (age < RT_YEAR)
-		snprintf(s, len, "%*ld mon", 2, age / RT_MONTH);
+		snprintf(s, len, "%*ld  mon", 2, age / RT_MONTH);
 	else
 		snprintf(s, len, "%*ld year", 2, age / RT_YEAR);
 }
