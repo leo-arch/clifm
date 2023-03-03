@@ -3327,8 +3327,12 @@ check_time_str(void)
 
 	/* Append the time string length to the properties total length, so that
 	 * we can better calculate how much space left we have to print file names */
-	if (prop_fields.time != 0)
-		prop_fields.len += (int)(l + 1);
+	if (prop_fields.time != 0) {
+		if (conf.relative_time == 1)
+			prop_fields.len += 7;
+		else
+			prop_fields.len += (int)(l + 1);
+	}
 }
 #pragma GCC diagnostic pop
 
