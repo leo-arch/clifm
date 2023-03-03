@@ -79,12 +79,12 @@
 
 /* Macros to calculate relative timestamps */
 #define RT_SECOND 1
-#define RT_MINUTE (60 * RT_SECOND)
-#define RT_HOUR   (60 * RT_MINUTE)
-#define RT_DAY    (24 * RT_HOUR)
-#define RT_WEEK   (7  * RT_DAY)
-#define RT_MONTH  (30 * RT_DAY)
-#define RT_YEAR   (12 * RT_MONTH)
+#define RT_MINUTE (60  * RT_SECOND)
+#define RT_HOUR   (60  * RT_MINUTE)
+#define RT_DAY    (24  * RT_HOUR)
+#define RT_WEEK   (7   * RT_DAY)
+#define RT_MONTH  (30  * RT_DAY)
+#define RT_YEAR   (365 * RT_MONTH)
 
 /* Max length of a relative timestamp string
  * 7 = 99 year */
@@ -1514,7 +1514,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			/* AGE is negative if file time is in the future */
 
 			if (conf.relative_time == 1) {
-				calc_relative_time(age, file_time, sizeof(file_time));
+				calc_relative_time(age < 0 ? age - (age * 2) : age, file_time, sizeof(file_time));
 			} else {
 				/* Let's consider a file to be recent if it is within the past
 				 * six months (like ls(1) does) */
