@@ -239,7 +239,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
-  - **NEW**: [Customizable timestamps (long view mode)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles)
+  - **NEW**: [Customizable timestamps, including relative times (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles)
   - **NEW**: [Color gradients for file sizes and timestamps (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details)
   - **NEW**: [Use `config dump` to print the list of settings and their current value (highlighting those differing from default values)](https://github.com/leo-arch/clifm/wiki/Introduction#config-reset-dump-application)
   - The [`config` command](https://github.com/leo-arch/clifm/wiki/Introduction#config-reset-application) is now used to open/edit the main configuration file (`edit` can still be used, but is deprecated and might be removed in a future release)
