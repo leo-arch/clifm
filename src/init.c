@@ -239,6 +239,7 @@ set_prop_fields(char *line)
 	prop_fields.time =    0;
 	prop_fields.size =    0;
 	prop_fields.inode =   0;
+	prop_fields.xattr =   0;
 	prop_fields.len =     2; /* Two spaces between file name and props string */
 
 	size_t i;
@@ -254,6 +255,9 @@ set_prop_fields(char *line)
 		case 'm': prop_fields.time = PROP_TIME_MOD; break;
 		case 's': prop_fields.size = PROP_SIZE_HUMAN; break;
 		case 'S': prop_fields.size = PROP_SIZE_BYTES; break;
+#if defined(_LINUX_XATTR)
+		case 'x': prop_fields.xattr = 1; break;
+#endif
 		default: break;
 		}
 	}
@@ -264,7 +268,7 @@ set_prop_fields(char *line)
 	 * that follows each of them, if enabled */
 	/* Static lengths */
 	if (prop_fields.perm != 0)
-		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 3 : 13) + 1);
+		prop_fields.len += ((prop_fields.perm == PERM_NUMERIC ? 4 : 13) + 1);
 	if (prop_fields.size != 0)
 		prop_fields.len += prop_fields.size == PROP_SIZE_HUMAN ? (8 + 1) : 1;
 
@@ -3306,6 +3310,14 @@ get_prompt_cmds(void)
 static void
 check_time_str(void)
 {
+	if (prop_fields.time == 0)
+		return;
+
+	if (conf.relative_time == 1) {
+		prop_fields.len += 7;
+		return;
+	}
+
 	/* Get length of the current time format */
 	struct tm tm;
 	time_t t = time(NULL);
@@ -3327,12 +3339,7 @@ check_time_str(void)
 
 	/* Append the time string length to the properties total length, so that
 	 * we can better calculate how much space left we have to print file names */
-	if (prop_fields.time != 0) {
-		if (conf.relative_time == 1)
-			prop_fields.len += 7;
-		else
-			prop_fields.len += (int)(l + 1);
-	}
+	prop_fields.len += (int)(l + 1);
 }
 #pragma GCC diagnostic pop
 

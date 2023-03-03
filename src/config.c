@@ -1414,7 +1414,8 @@ create_config(char *file)
 # i = user/group IDs (numeric)\n\
 # a|c|m = either last (a)ccess, (m)odification or status (c)hange time\n\
 # s|S = size (either human readable (s) or bytes (S))\n\
-# A single dash \"-\" disables all fields\n\
+# x = extended attributes (marked as '@')\n\
+# A single dash (\'-\') disables all fields\n\
 ;PropFields=\"%s\"\n\
 # Format used to print timestamps in long view (see strftime(3))\n\
 ;TimeStyle=\"\"\n\

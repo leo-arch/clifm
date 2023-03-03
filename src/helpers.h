@@ -160,6 +160,11 @@ void *__dso_handle;
 #   define _STATX
 #  endif /* LINUX_VERSION (4.11) */
 # endif /* __GLIBC__ */
+# if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3))
+#  if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 4, 0)
+#   define _LINUX_XATTR
+#  endif /* LINUX_VERSION (2.4) */
+# endif /* __GLIBC__ */
 #endif /* _GNU_SOURCE */
 
 /* Because capability.h is deprecated in BSD */
@@ -484,7 +489,11 @@ extern int watch;
 #define FILTER_MIME_TYPE 3 /* @query */
 
 /* Macros for properties string fields in long view */
-#define PROP_FIELDS_SIZE 6 /* Six available fields */
+#if defined(_LINUX_XATTR)
+# define PROP_FIELDS_SIZE 7 /* Seven available fields */
+#else
+# define PROP_FIELDS_SIZE 6 /* Six available fields */
+#endif /* _LINUX_XATTR */
 
 #define PERM_SYMBOLIC 1
 #define PERM_NUMERIC  2
@@ -826,7 +835,7 @@ struct fileinfo {
 	int ruser;  /* User read permission for dir */
 	int symlink;
 	int sel;
-	int pad;
+	int xattr;
 	size_t len;
 	mode_t mode; /* Store st_mode (for long view mode) */
 	mode_t type; /* Store d_type value */
@@ -1100,6 +1109,7 @@ struct props_t {
 	int time; /* Time: either ACCESS, MOD, or CHANGE */
 	int size; /* File size: either HUMAN or BYTES */
 	int inode; /* File inode number */
+	int xattr; /* Extended attributes */
 	int len; /* Approx len of the entire properties string taking into account
 	the above values */
 };

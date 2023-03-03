@@ -41,6 +41,10 @@
 # include <inttypes.h> /* uintmax_t */
 #endif
 
+#if defined(_LINUX_XATTR)
+# include <sys/xattr.h>
+#endif
+
 #include <limits.h> /* INT_MAX */
 #include <glob.h>
 
@@ -631,7 +635,7 @@ get_max_size(void)
 
 static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
-	const size_t ino_max)
+	const size_t ino_max, const uint8_t have_xattr)
 {
 	struct stat lattr;
 
@@ -639,7 +643,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 	size_t size_max = prop_fields.size == PROP_SIZE_BYTES ? get_max_size() : 0;
 
 	/* Available space (term cols) to print the file name */
-	int space_left = (int)term_cols - (prop_fields.len
+	int space_left = (int)term_cols - (prop_fields.len + have_xattr
 		+ (int)fc_max + (int)size_max + (int)ug_max + (int)ino_max);
 
 	if (space_left < conf.min_name_trim)
@@ -672,11 +676,12 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
 			(*counter)++;
 		}
 
-		if (!conf.no_eln) /* Print ELN */
+		if (conf.no_eln == 0) /* Print ELN */
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
 				li_cb, file_info[i].sel ? SELFILE_CHR : ' ', df_c);
 		/* Print the remaining part of the entry */
-		print_entry_props(&file_info[i], (size_t)space_left, ug_max, ino_max, fc_max, size_max);
+		print_entry_props(&file_info[i], (size_t)space_left, ug_max,
+			ino_max, fc_max, size_max, have_xattr);
 	}
 }
 
@@ -1643,6 +1648,7 @@ list_dir_light(void)
 	int reset_pager = 0;
 	int close_dir = 1;
 	int excluded_files = 0;
+	uint8_t have_xattr = 0;
 
 	/* A few variables for the disk usage analyzer mode */
 	off_t largest_size = 0, total_size = 0;
@@ -1715,6 +1721,8 @@ list_dir_light(void)
 			total_dents = n + ENTRY_N;
 			file_info = xrealloc(file_info, (total_dents + 2) * sizeof(struct fileinfo));
 		}
+
+//		init_fileinfo(n);
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
 		if (!conf.unicode) {
@@ -1814,7 +1822,14 @@ list_dir_light(void)
 			file_info[n].icon_color = file_info[n].color;
 #endif
 
-		if (conf.long_view) {
+		if (conf.long_view == 1) {
+/*
+#if defined(_LINUX_XATTR)
+			if (prop_fields.xattr == 1 && listxattr(file_info[n].name, NULL, 0)) {
+				file_info[n].xattr = 1;
+				have_xattr = 1;
+			}
+#endif // _LINUX_XATTR */
 			struct stat _attr;
 			if (lstat(file_info[n].name, &_attr) != -1)
 				set_long_attribs((int)n, &_attr);
@@ -1865,10 +1880,10 @@ list_dir_light(void)
 				 * #    LONG VIEW MODE    #
 				 * ######################## */
 
-	if (conf.long_view) {
+	if (conf.long_view == 1) {
 		print_long_mode(&counter, &reset_pager, pad,
 			prop_fields.ids == 1 ? get_max_ug_str() : 0,
-			prop_fields.inode == 1 ? get_longest_inode() : 0);
+			prop_fields.inode == 1 ? get_longest_inode() : 0, have_xattr);
 		goto END;
 	}
 
@@ -1949,7 +1964,6 @@ init_fileinfo(const size_t n)
 	file_info[n].ruser = 1; /* User read permission for dir */
 	file_info[n].symlink = 0;
 	file_info[n].sel = 0;
-	file_info[n].pad = 0;
 	file_info[n].len = 0;
 	file_info[n].mode = 0; /* Store st_mode (for long view mode) */
 	file_info[n].type = 0; /* Store d_type value */
@@ -1960,6 +1974,7 @@ init_fileinfo(const size_t n)
 	file_info[n].linkn = 1;
 	file_info[n].ltime = 0; /* For long view mode */
 	file_info[n].time = 0;
+	file_info[n].xattr = 0;
 /*	file_info[n].dev = 0;
 	file_info[n].ino = 0; */
 }
@@ -2057,6 +2072,7 @@ list_dir(void)
 	int reset_pager = 0;
 	int close_dir = 1;
 	int excluded_files = 0;
+	uint8_t have_xattr = 0;
 
 	/* A few variables for the disk usage analyzer mode */
 	off_t largest_size = 0, total_size = 0;
@@ -2177,6 +2193,12 @@ list_dir(void)
 			file_info[n].mode = attr.st_mode;
 
 			if (conf.long_view == 1) {
+#if defined(_LINUX_XATTR)
+				if (prop_fields.xattr == 1 && listxattr(ename, NULL, 0)) {
+					file_info[n].xattr = 1;
+					have_xattr = 1;
+				}
+#endif /* _LINUX_XATTR */
 				switch(prop_fields.time) {
 				case PROP_TIME_ACCESS: file_info[n].ltime = (time_t)attr.st_atime; break;
 				case PROP_TIME_CHANGE: file_info[n].ltime = (time_t)attr.st_ctime; break;
@@ -2281,6 +2303,7 @@ list_dir(void)
 			struct stat attrl;
 			if (fstatat(fd, ename, &attrl, 0) == -1) {
 				file_info[n].color = or_c;
+				file_info[n].xattr = 0;
 				stats.broken_link++;
 			} else {
 				if (S_ISDIR(attrl.st_mode)) {
@@ -2396,10 +2419,10 @@ list_dir(void)
 		}
 
 #ifndef _NO_ICONS
-		if (xargs.icons_use_file_color == 1 && conf.icons)
+		if (xargs.icons_use_file_color == 1 && conf.icons == 1)
 			file_info[n].icon_color = file_info[n].color;
 #endif
-		if (conf.long_view && stat_ok)
+		if (conf.long_view == 1 && stat_ok == 1)
 			set_long_attribs((int)n, &attr);
 
 		if (xargs.disk_usage_analyzer == 1)
@@ -2459,10 +2482,10 @@ list_dir(void)
 				 * #    LONG VIEW MODE    #
 				 * ######################## */
 
-	if (conf.long_view) {
+	if (conf.long_view == 1) {
 		print_long_mode(&counter, &reset_pager, pad,
 			prop_fields.ids == 1 ? get_max_ug_str() : 0,
-			prop_fields.inode == 1 ? get_longest_inode() : 0);
+			prop_fields.inode == 1 ? get_longest_inode() : 0, have_xattr);
 		goto END;
 	}
 

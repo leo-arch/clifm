@@ -212,6 +212,9 @@ xf=01;31:xs=00;32:"
 #define SELFILE_CHR  '*'
 #define TRIMFILE_CHR '~'
 
+/* Character used to mark files with extended attributes (long view) */
+#define XATTR_CHAR '@'
+
 #define MNT_UDEVIL 	0
 #define MNT_UDISKS2 1
 

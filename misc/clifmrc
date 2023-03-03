@@ -81,9 +81,9 @@
 # i = user/group IDs
 # a|m|c = last (a)ccess, (m)odification, or status (c)hange time (YYYY-MM-DD HH:MM:SS)
 # s|S = size (either human readable (s) or bytes (S))
-# Defaults to "pims"
+# x = extended attributes (marked as '@')
 # A single dash ("-") disables all fields
-# Ex: print only permissions (numeric) and size (human readable):
+# Example: print only permissions (numeric) and size (human readable):
 #PropFields="ns"
 ;PropFields="fpims"
 

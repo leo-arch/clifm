@@ -1201,7 +1201,7 @@ get_properties(char *filename, const int dsize)
 	printf(_("Modify: \t%s%s%s\n"), cmdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), ccdate, change_time, cend);
 
-#ifdef __TERMUX__
+#if defined(__TERMUX__) || defined(_BE_POSIX)
 	UNUSED(cbdate); UNUSED(btf);
 #endif
 
@@ -1342,7 +1342,7 @@ calc_relative_time(const time_t age, char *s, const size_t len)
  * in the current directory when running in long view mode */
 int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
-	const size_t ino_max, const size_t fc_max, const size_t size_max)
+	const size_t ino_max, const size_t fc_max, const size_t size_max, const uint8_t have_xattr)
 {
 	/* Let's get file properties and the corresponding colors */
 
@@ -1472,13 +1472,13 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	if (prop_fields.perm == PERM_SYMBOLIC) {
 		struct perms_t perms = get_file_perms(props->mode);
 		snprintf(attr_s, sizeof(attr_s),
-			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s ",
+			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s",
 			t_ctype, file_type, cend,
 			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, cend,
 			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, cend,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend);
 	} else if (prop_fields.perm == PERM_NUMERIC) {
-		snprintf(attr_s, sizeof(attr_s), "%s%04o%s ", do_c, props->mode & 07777, cend);
+		snprintf(attr_s, sizeof(attr_s), "%s%04o%s", do_c, props->mode & 07777, cend);
 	} else {
 		*attr_s = '\0';
 	}
@@ -1607,7 +1607,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			snprintf(fc_str, sizeof(fc_str), "%s%*d%s ", fc_c, (int)fc_max,
 				(int)props->filesn, cend);
 		} else {
-			snprintf(fc_str, sizeof(fc_str), "%s%*c%s ", dn_c, (int)fc_max, '-', cend);
+			snprintf(fc_str, sizeof(fc_str), "%s%*c%s ", dn_c, (int)fc_max, '-',
+			cend);
 		}
 	}
 
@@ -1621,6 +1622,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		   "%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
+		   "%c " /* Extended attributes (@) */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
 		   "%s\n", /* Size / device info */
@@ -1640,6 +1642,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		prop_fields.counter != 0 ? fc_str : "",
 		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
+		have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0,
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time != 0 ? time_s : "",
 		prop_fields.size != 0 ? size_s : "");
