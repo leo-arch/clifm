@@ -1034,7 +1034,7 @@ print_extended_attributes(char *s)
 		/* Determine length of the value */
 		vallen = getxattr(s, key, NULL, 0);
 		if (vallen == -1)
-			printf("%s", strerror(errno));
+			printf("%s\n", strerror(errno));
 
 		if (vallen > 0) {
 
@@ -1045,19 +1045,17 @@ print_extended_attributes(char *s)
 			/* Copy value to buffer */
 			vallen = getxattr(s, key, val, (size_t)vallen);
 			if (vallen == -1) {
-				printf("%s", strerror(errno));
+				printf("%s\n", strerror(errno));
 			} else {
 				/* Output attribute value */
 				val[vallen] = '\0';
-				printf("%s", val);
+				printf("%s\n", val);
 			}
 
 			free(val);
 		} else if (vallen == 0) {
-			printf("<no value>");
+			printf("<no value>\n");
 		}
-
-		putchar('\n');
 
 		/* Forward to next attribute key */
 		keylen = (ssize_t)strlen(key) + 1;
@@ -1402,13 +1400,13 @@ calc_relative_time(const time_t age, char *s, const size_t len)
 	if (age < 0L) /* Future */
 		strncpy(s, " -     ", len);
 	else if (age < RT_MINUTE)
-		snprintf(s, len, "%*ld  sec", 2, age);
+		snprintf(s, len, "%*ju  sec", 2, (uintmax_t)age);
 	else if (age < RT_HOUR)
-		snprintf(s, len, "%*ld  min", 2, age / RT_MINUTE);
+		snprintf(s, len, "%*ju  min", 2, (uintmax_t)(age / RT_MINUTE));
 	else if (age < RT_DAY)
-		snprintf(s, len, "%*ld hour", 2, age / RT_HOUR);
+		snprintf(s, len, "%*ju hour", 2, (uintmax_t)(age / RT_HOUR));
 	else if (age < RT_WEEK)
-		snprintf(s, len, "%*ld  day", 2, age / RT_DAY);
+		snprintf(s, len, "%*ju  day", 2, (uintmax_t)(age / RT_DAY));
 	else if (age < RT_MONTH) {
 		/* RT_MONTH is 30 days. But since Feb has only 28, we get 4 weeks
 		 * in some cases, which is weird. Always make 4 weeks into 1 month */
@@ -1416,17 +1414,17 @@ calc_relative_time(const time_t age, char *s, const size_t len)
 		if (n == 4)
 			strncpy(s, " 1  mon", len);
 		else
-			snprintf(s, len, "%*ld week", 2, n);
+			snprintf(s, len, "%*ju week", 2, (uintmax_t)n);
 	}
 	else if (age < RT_YEAR) {
 		long n = age / RT_MONTH;
 		if (n == 12)
 			strncpy(s, " 1 year", len);
 		else
-			snprintf(s, len, "%*ld  mon", 2, n);
+			snprintf(s, len, "%*ju  mon", 2, (uintmax_t)n);
 	}
 	else
-		snprintf(s, len, "%*ld year", 2, age / RT_YEAR);
+		snprintf(s, len, "%*ju year", 2, (uintmax_t)(age / RT_YEAR));
 }
 
 /* Compose the properties line for the current file name
