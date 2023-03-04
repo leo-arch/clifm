@@ -1513,7 +1513,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		? (size_t)max_files : files;
 	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen;
 #ifndef _NO_ICONS
-	if (conf.icons) {
+	if (conf.icons == 1) {
 		cur_len += 3;
 		max += 3;
 	}
