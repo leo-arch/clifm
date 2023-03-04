@@ -239,7 +239,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
-  - **NEW**: [**Clifm** will try to run in 256 colors mode if support is detected](https://github.com/leo-arch/clifm/wiki/Customization#theming). Just comment out the `ColorScheme` option in the config file (or set it to an empty value) to enable this feature.
+  - **NEW**: [**Clifm** will try to run in 256 colors mode if support is detected](https://github.com/leo-arch/clifm/wiki/Customization#color-support). Just comment out the `ColorScheme` option in the config file (or set it to an empty value) to enable this feature.
   - **NEW**: [Mark files with extended attributes (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode)
   - **NEW**: [Customizable timestamps, including relative times (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles)
   - **NEW**: [Color gradients for file sizes and timestamps (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details)
