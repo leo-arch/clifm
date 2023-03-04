@@ -1403,13 +1403,17 @@ All customization settings (theming) are made from a single configuration file (
 .TP
 \fBNote\fR: Color scheme files are copied automatically into the local colors directory when running the \fIcs edit\fR command.
 .TP
-Each color scheme file includes:
+Each color scheme may include any (or all) of the below options:
 .TP
  \fIFiletypeColors\fR = Colors for different file types, such as directory, regular files, and so on. See the \fBCOLORS\fR section below.
 .TP
  \fIInterfaceColors\fR = Colors for \fBclifm\fR's interface, such as ELN's, file properties bits, suggestions, syntax highlighting, etc. See the \fBCOLORS\fR section below.
 .TP
  \fIExtColors\fR = Colors for files based of file name's extension. See the \fBCOLORS\fR section below.
+.TP
+ \fIDateShades\fR = A comma delimited list of colors used to print timestamps (long view). Consult the default color scheme file for more information.
+.TP
+ \fISizeShades\fR = A comma delimited list of colors used to print file sizes (long view). Consult the default color scheme file for more information.
 .TP
  \fIDirIconColor\fR = Color for the directory icon (when icons are enabled). See the \fBCOLORS\fR section below. Only when using icons-in-terminal or Nerfonts. If using rather emoji-icons (default build), this option is ignored.
 .TP
@@ -1422,6 +1426,8 @@ Each color scheme file includes:
 The color scheme (or just theme) can be set either via the command line (\fI--color-scheme=NAME\fR), via the \fIColorScheme\fR option in the main configuration file, or using the \fIcs\fR command, for instance, \fIcs mytheme\fR. Enter just \fIcs\fR to list available color schemes (TAB completion is available). To edit the current color scheme enter \fIcs edit\fR.
 .TP
 .B 1. COLORS
+.TP
+If 256 colors support is detected for the current terminal, and not set in any other way (either via the \fIColorScheme\fR option in the configuration file or the \fI--color-scheme\fR command line switch), \fBclifm\fR will attempt to load the 256 colors version of the default color scheme: default-256. Otherwise, it falls back to the 16 colors version.
 .TP
 All color codes are specified in the corresponding color scheme file (by default \fI~/.config/clifm/colors/default.clifm\fR). You can edit this file pressing \fBF8\fR or entering \fIcs edit\fR.
 .TP
@@ -1503,7 +1509,7 @@ The following codes are used for different interface elements (in the \fIInterfa
 .sp
  \fB(1)\fR If unset, gradient colors are used (based on file size and file age). This is the default.
 .sp
- \fBNOTE\fR: For a better graphical representation of file properties, 256 colors are used if possible (otherwise, \fBclifm\fR falls back to 8 colors).
+ \fBNOTE\fR: For a better graphical representation of file properties, 256 colors are used if possible (otherwise, \fBclifm\fR falls back to 16 colors).
 .sp
  \fBMiscellaneous interface elements\fR
  bm  = bookmarked directory in the bookmarks screen
@@ -1539,7 +1545,7 @@ Up to 64 custom color variables can be used via the \fIdefine\fR keyword to make
 .TP
 These variables can only be used for \fIFiletypeColors\fR, \fIInterfaceColors\fR, \fIExtColors\fR, and \fIDirIconColor\fR. The \fIPrompt\fR line (if using a prompt code) use full ANSI escape sequences instead.
 .TP
-Though by default \fBclifm\fR uses only 8 colors (16 with the high intensity variant), you can use 256 and RGB colors as well. Example:
+Though by default \fBclifm\fR uses only 8 colors (16 with the high intensity variant), you can use 256 and 24-bit colors as well. Example:
 
  \fBfi=04;38;2;245;76;00;48;2;00;00;255\fR
 .TP
