@@ -35,7 +35,7 @@
 
 ### Use some variables to hold your color codes
 #
-# The 'define' keyword allows you to define up to 64 custom color variables.
+# The 'define' keyword allows you to define up to 128 custom color variables.
 # They can be used for:
 # FiletypeColors
 # InterfaceColors
