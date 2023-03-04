@@ -1535,7 +1535,7 @@ Six digits \fIhexadecimal\fR color codes are supported as well using this genera
 .TP
 \fBColor variables\fR
 .TP
-Up to 64 custom color variables can be used via the \fIdefine\fR keyword to make it easier to build and read theme files. Example:
+Up to 128 custom color variables can be used via the \fIdefine\fR keyword to make it easier to build and read theme files. Example:
 
  define RED=00;31
  define MY_SPECIAL_COLOR=04;38;2;255;255;0;48;2;0;14;191
@@ -1545,7 +1545,7 @@ Up to 64 custom color variables can be used via the \fIdefine\fR keyword to make
 .TP
 These variables can only be used for \fIFiletypeColors\fR, \fIInterfaceColors\fR, \fIExtColors\fR, and \fIDirIconColor\fR. The \fIPrompt\fR line (if using a prompt code) use full ANSI escape sequences instead.
 .TP
-Though by default \fBclifm\fR uses only 8 colors (16 with the high intensity variant), you can use 256 and 24-bit colors as well. Example:
+Though by default \fBclifm\fR uses only 16 colors, you can use 256 and 24-bit colors as well. For example:
 
  \fBfi=04;38;2;245;76;00;48;2;00;00;255\fR
 .TP
