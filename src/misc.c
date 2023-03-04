@@ -2168,7 +2168,7 @@ print_search_topic(void)
 static int
 print_theming_topic(void)
 {
-	puts(_("Take a look at the colorscheme, prompt, and edit commands"));
+	puts(_("Take a look at the 'colorschemes', 'prompt', and 'edit' commands"));
 	print_more_info();
 	return EXIT_SUCCESS;
 }

@@ -11,7 +11,7 @@
 #
 # Color codes are just traditional ANSI escape sequences less the escape char
 # and the final 'm'.
-# 4-bit, 8-bit (256 colors), and 24-bit (RGB/HEX) colors are supported.
+# 4-bit (16 colors), 8-bit (256 colors), and 24-bit (RGB/HEX) colors are supported.
 # Example:
 # 31            4-bit
 # 38;5;160      8-bit
