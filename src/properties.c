@@ -90,7 +90,7 @@
 #define RT_MONTH  (30  * RT_DAY)
 #define RT_YEAR   (365 * RT_DAY)
 
-#define MAX_SHADE_LEN 24 /* "\x1b[0;x;38;2;xxx;xxx;xxxm\0" */
+#define MAX_SHADE_LEN 26 /* "\x1b[0;x;38;2;xxx;xxx;xxxm\0" */
 
 struct perms_t {
 	/* Field colors */
