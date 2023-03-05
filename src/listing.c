@@ -634,7 +634,7 @@ get_max_size(void)
 }
 
 static void
-print_long_mode(size_t *counter, int *reset_pager, const int pad, size_t ug_max,
+print_long_mode(size_t *counter, int *reset_pager, const int pad, const size_t ug_max,
 	const size_t ino_max, const uint8_t have_xattr)
 {
 	struct stat lattr;

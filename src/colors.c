@@ -1216,7 +1216,7 @@ set_shades(char *line, const int type)
 
 		if (p) {
 			*p = '\0';
-			if (*(p + 1) && *(p + 1) >= '0' && *(p + 1) <= '9')
+			if (*(p + 1) && *(p + 1) >= '0' && *(p + 1) <= '9' && !*(p + 2))
 				color_attr = (uint8_t)(*(p + 1) - '0');
 		}
 
@@ -1226,10 +1226,10 @@ set_shades(char *line, const int type)
 
 		if (type == DATE_SHADES) {
 			date_shades.shades[c].attr = color_attr;
-			date_shades.shades[c].R = (uint8_t)atoi(str);
+			date_shades.shades[c].R = (uint8_t)n;
 		} else {
 			size_shades.shades[c].attr = color_attr;
-			size_shades.shades[c].R = (uint8_t)atoi(str);
+			size_shades.shades[c].R = (uint8_t)n;
 		}
 
 NEXT:
