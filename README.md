@@ -194,7 +194,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 ## :floppy_disk: Installation
 
-### Packaged versions
+### From a package manager
 
 <details>
 <summary>Packaging status <a href="https://repology.org/project/clifm/versions"><img src="https://repology.org/badge/tiny-repos/clifm.svg" alt="Packaging status"></a></summary>
@@ -203,9 +203,9 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 </a>
 </details>
 
-If running on Linux, [binary packages](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm) are available for most major distributions.
+If running on Linux, [binary packages](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm) are available for most major distributions via the OpenSUSE Build System.
 
-### Installing from source (Linux/BSD)
+### From source (Linux/BSD)
 
 **Note**: Dependencies are most likely already satisfied, but in any case consult the [dependencies section](https://github.com/leo-arch/clifm/wiki/Introduction#1-satisfy-dependencies).
 
