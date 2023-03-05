@@ -90,9 +90,7 @@
 #define RT_MONTH  (30  * RT_DAY)
 #define RT_YEAR   (365 * RT_DAY)
 
-/* Max length of a relative timestamp string
- * 7 = 99 year */
-//#define RT_MAX 7
+#define MAX_SHADE_LEN 24 /* "\x1b[0;x;38;2;xxx;xxx;xxxm\0" */
 
 struct perms_t {
 	/* Field colors */
@@ -118,7 +116,7 @@ struct perms_t {
 	char pad1;
 	char pad2;
 	char pad3;
-	int pad4;
+	int  pad4;
 };
 
 #if defined(LINUX_FILE_ATTRS)
@@ -964,7 +962,7 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 	char *tsize = _BGREEN,
 		 *lsize = _BGREEN;
 
-	char ts[32], ls[32];
+	char ts[MAX_SHADE_LEN], ls[MAX_SHADE_LEN];
 	if (term_caps.color > 0 && !*dz_c) {
 		get_color_size(total, ts, sizeof(ts));
 		tsize = ts;
@@ -1109,7 +1107,7 @@ get_properties(char *filename, const int dsize)
 	if (file_perm == 1)
 		cid = dg_c;
 
-	char sf[32];
+	char sf[MAX_SHADE_LEN];
 	if (term_caps.color > 0) {
 		if (!*dz_c && dsize == 0) {
 			get_color_size(attr.st_size, sf, sizeof(sf));
@@ -1276,7 +1274,7 @@ get_properties(char *filename, const int dsize)
 		 *ccdate = cdate,
 		 *cbdate = cdate;
 
-	char atf[32], mtf[32], ctf[32], btf[32];
+	char atf[MAX_SHADE_LEN], mtf[MAX_SHADE_LEN], ctf[MAX_SHADE_LEN], btf[MAX_SHADE_LEN];
 	if (term_caps.color > 0 && !*dd_c) {
 		props_now = time(NULL);
 		get_color_age(attr.st_atime, atf, sizeof(atf));
@@ -1393,7 +1391,7 @@ get_ext_info_long(const char *name, const size_t name_len, int *trim, size_t *ex
 
 /* Calculate the relative time of AGE, which is the difference between
  * NOW and the corresponding file time
- * At most LEN bytes are copied in into S */
+ * At most LEN bytes are copied into S */
 static void
 calc_relative_time(const time_t age, char *s, const size_t len)
 {
@@ -1444,7 +1442,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		 *cend = df_c;  /* Ending Color */
 
 	/* Let's construct gradient colors for file size and time fields */
-	char sf[32], df[32];
+	char sf[MAX_SHADE_LEN], df[MAX_SHADE_LEN];
+
 	if (term_caps.color > 0) {
 		off_t s = props->size;
 		if (props->dir == 1 && conf.full_dir_size == 1)
