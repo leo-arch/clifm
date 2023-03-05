@@ -1396,7 +1396,7 @@ static void
 calc_relative_time(const time_t age, char *s, const size_t len)
 {
 	if (age < 0L) /* Future */
-		strncpy(s, " -     ", len);
+		xstrsncpy(s, " -     ", len);
 	else if (age < RT_MINUTE)
 		snprintf(s, len, "%*ju  sec", 2, (uintmax_t)age);
 	else if (age < RT_HOUR)
@@ -1410,14 +1410,14 @@ calc_relative_time(const time_t age, char *s, const size_t len)
 		 * in some cases, which is weird. Always make 4 weeks into 1 month */
 		long n = age / RT_WEEK;
 		if (n == 4)
-			strncpy(s, " 1  mon", len);
+			xstrsncpy(s, " 1  mon", len);
 		else
 			snprintf(s, len, "%*ju week", 2, (uintmax_t)n);
 	}
 	else if (age < RT_YEAR) {
 		long n = age / RT_MONTH;
 		if (n == 12)
-			strncpy(s, " 1 year", len);
+			xstrsncpy(s, " 1 year", len);
 		else
 			snprintf(s, len, "%*ju  mon", 2, (uintmax_t)n);
 	}
