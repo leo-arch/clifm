@@ -846,9 +846,7 @@ run_main_loop(void)
 static inline void
 check_cpu_os(void)
 {
-	/* Though this program might perfectly work on other architectures,
-	 * Nothing beyond x86 and ARM has been tested */
-#if !defined(__x86_64__) && !defined(__i386__) && !defined(__ARM_ARCH)
+#if !defined(__x86_64__) && !defined(__i386__) && !defined(__arm__)
 	fprintf(stderr, _("%s: Unsupported CPU architecture\n"), PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #endif
