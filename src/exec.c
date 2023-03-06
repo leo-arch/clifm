@@ -2147,9 +2147,12 @@ preview_function(char **args)
 	if (conf.autols == 1) {
 		putchar('\n');
 		reload_dirlist();
-	} else {
+	}
+#if RL_READLINE_VERSION >= 0x0700
+	else { /* Only available since readline 7.0 */
 		rl_clear_visible_line();
 	}
+#endif
 
 	if (sel_n > seln_bk) {
 		print_reload_msg(_("%zu file(s) selected\n"), sel_n - seln_bk);
