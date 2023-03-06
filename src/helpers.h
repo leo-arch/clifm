@@ -103,6 +103,22 @@
 # include <sys/time.h>
 #endif /* __linux__ */
 
+#ifndef __BEGIN_DECLS
+# ifdef __cpluplus
+#  define __BEGIN_DECLS extern "C" {
+# else
+#  define __BEGIN_DECLS
+# endif
+#endif
+
+#ifndef __END_DECLS
+# ifdef __cpluplus
+#  define __END_DECLS }
+# else
+#  define __END_DECLS
+# endif
+#endif
+
 #include "strings.h"
 #include "settings.h"
 
@@ -159,7 +175,7 @@ void *__dso_handle;
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #   define _STATX
 #  endif /* LINUX_VERSION (4.11) */
-# endif /* __GLIBC__ */
+# endif /* __GLIBC__ >= 2.28 */
 # if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3))
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 4, 0)
 #   define _LINUX_XATTR

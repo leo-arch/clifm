@@ -1271,10 +1271,9 @@ get_properties(char *filename, const int dsize)
 
 	char *cadate = cdate,
 		 *cmdate = cdate,
-		 *ccdate = cdate,
-		 *cbdate = cdate;
+		 *ccdate = cdate;
 
-	char atf[MAX_SHADE_LEN], mtf[MAX_SHADE_LEN], ctf[MAX_SHADE_LEN], btf[MAX_SHADE_LEN];
+	char atf[MAX_SHADE_LEN], mtf[MAX_SHADE_LEN], ctf[MAX_SHADE_LEN];
 	if (term_caps.color > 0 && !*dd_c) {
 		props_now = time(NULL);
 		get_color_age(attr.st_atime, atf, sizeof(atf));
@@ -1289,12 +1288,10 @@ get_properties(char *filename, const int dsize)
 	printf(_("Modify: \t%s%s%s\n"), cmdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), ccdate, change_time, cend);
 
-#if defined(__TERMUX__) || defined(_BE_POSIX)
-	UNUSED(cbdate); UNUSED(btf);
-#endif
-
 #ifndef _BE_POSIX
 # if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+	char *cbdate = cdate;
+	char btf[MAX_SHADE_LEN];
 	char creation_time[MAX_TIME_STR];
 
 #  if defined(_STATX)
