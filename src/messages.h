@@ -991,11 +991,6 @@ Mark the files you need via TAB and then press Enter or Right"
 - Untrash files selectively using a menu\n\
     u (or 'u <TAB>' to choose from a list - multi-selection is allowed)"
 
-/*
-#define UNICODE_USAGE "Set Unicode on/off\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
-  uc, unicode [on, off, status]" */
-
 #define UNTRASH_USAGE "Restore files from the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   u, undel, untrash [FILE]... [*, a, all]\n\n\
@@ -1171,7 +1166,6 @@ on an empty line\
 \n  -y, --light-mode\t\t Run in light mode\
 \n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
 
-//\n      --fzfpreview\t\t Enable file previews for TAB completion (fzf mode only). Implies --fzftab
 #define LONG_OPTIONS_A "\
 \n      --case-sens-dirjump\t Do not ignore case when consulting the jump \
 database (via the 'j' command)\
@@ -1250,7 +1244,6 @@ Help topics are available as well. Type 'help <TAB>' to get a list of topics.\n\
 The following is just a list of available commands and a brief description.\n\
 For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
 
-/* uc, unicode        Set unicode on/off\n\ */
 #define CLIFM_COMMANDS "\
  ELN/FILE/DIR       Auto-open and autocd functions\n\
  /PATTERN           Quick search\n\

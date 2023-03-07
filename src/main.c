@@ -759,12 +759,6 @@ const struct cmdslist_t param_str[] = {
 	{"u all", 5},
 	{"undel all", 9},
 	{"untrash all", 11},
-/*	{"uc on", 5},
-	{"unicode on", 10},
-	{"uc off", 6},
-	{"unicode off", 11},
-	{"uc status", 9},
-	{"unicode status", 14}, */
 	{"view edit", 9},
 	{NULL, 0}
 };
@@ -975,6 +969,18 @@ set_locale(void)
 	}
 }
 
+static void
+check_gui(void)
+{
+	/* Running on a graphical environment? */
+#ifndef __HAIKU__
+	if (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))
+#endif
+	{
+		flags |= GUI;
+	}
+}
+
 /*
 static void
 init_file_flags(void)
@@ -1027,11 +1033,7 @@ main(int argc, char *argv[])
 	user = get_user_data();
 	get_home();
 
-	/* Running on a graphical environment? */
-#ifndef __HAIKU__
-	if (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))
-#endif
-		flags |= GUI;
+	check_gui();
 
 	P_tmpdir_len = strlen(P_tmpdir);
 	init_workspaces();

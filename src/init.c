@@ -1899,11 +1899,8 @@ external_arguments(int argc, char **argv)
 		{"splash", no_argument, 0, 's'},
 		{"stealth-mode", no_argument, 0, 'S'},
 		{"disk-usage-analyzer", no_argument, 0, 't'},
-/*		{"unicode", no_argument, 0, 'U'},
-		{"no-unicode", no_argument, 0, 'u'}, */
 		{"version", no_argument, 0, 'v'},
 		{"workspace", required_argument, 0, 'w'},
-//		{"no-toggle-workspaces", no_argument, 0, 'W'},
 		{"no-ext-cmds", no_argument, 0, 'x'},
 		{"light-mode", no_argument, 0, 'y'},
 		{"sort", required_argument, 0, 'z'},
@@ -1949,7 +1946,6 @@ external_arguments(int argc, char **argv)
 		{"no-file-cap", no_argument, 0, 236},
 		{"no-file-ext", no_argument, 0, 237},
 		{"no-follow-symlinks", no_argument, 0, 238},
-//		{"no-control-d-exit", no_argument, 0, 239},
 		{"int-vars", no_argument, 0, 240},
 		{"stdtab", no_argument, 0, 241},
 		{"no-warning-prompt", no_argument, 0, 242},
@@ -1964,7 +1960,6 @@ external_arguments(int argc, char **argv)
 		{"no-refresh-on-resize", no_argument, 0, 251},
 		{"bell", required_argument, 0, 252},
 		{"fuzzy-matching", no_argument, 0, 253},
-//		{"fuzzy-match", no_argument, 0, 253}, // Deprecated
 		{"smenutab", no_argument, 0, 254},
 		{"virtual-dir-full-paths", no_argument, 0, 255},
 		{"virtual-dir", required_argument, 0, 256},
@@ -2122,7 +2117,6 @@ external_arguments(int argc, char **argv)
 		case 236: xargs.check_cap = check_cap = 0; break;
 		case 237: xargs.check_ext = check_ext = 0; break;
 		case 238: xargs.follow_symlinks = follow_symlinks = 0; break;
-//		case 239: xargs.control_d_exits = control_d_exits = 0; break;
 		case 240: xargs.int_vars = int_vars = 1; break;
 		case 241:
 #ifndef _NO_FZF
@@ -2279,8 +2273,6 @@ external_arguments(int argc, char **argv)
 		case 's': conf.splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
-//		case 'u': conf.unicode = xargs.unicode = 0; break;
-//		case 'U': conf.unicode = xargs.unicode = 1; break;
 		case 'v': printf("%s\n", VERSION); exit(EXIT_SUCCESS);
 
 		case 'w': {
@@ -2291,7 +2283,6 @@ external_arguments(int argc, char **argv)
 				cur_ws = iopt - 1;
 		} break;
 
-//		case 'W': xargs.toggle_workspaces = 0; break;
 		case 'x': conf.ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': conf.light_mode = xargs.light = 1; break;
 		case 'z': set_sort(optarg); break;
@@ -2586,11 +2577,9 @@ unset_xargs(void)
 #endif
 
 	xargs.tips = UNSET;
-//	xargs.toggle_workspaces = UNSET;
 #ifndef _NO_TRASH
 	xargs.trasrm = UNSET;
 #endif
-//	xargs.unicode = UNSET;
 	xargs.virtual_dir_full_paths = UNSET;
 	xargs.vt100 = UNSET;
 	xargs.welcome_message = UNSET;
@@ -3386,9 +3375,6 @@ check_options(void)
 	}
 	check_time_str();
 
-/*	if (xargs.toggle_workspaces == UNSET)
-		xargs.toggle_workspaces = DEF_TOGGLE_WORKSPACES; */
-
 	if (conf.search_strategy == UNSET)
 		conf.search_strategy = DEF_SEARCH_STRATEGY;
 
@@ -3446,9 +3432,6 @@ check_options(void)
 
 	if (xargs.secure_env_full == UNSET)
 		xargs.secure_env_full = DEF_SECURE_ENV_FULL;
-
-//	if (xargs.control_d_exits == UNSET)
-//		control_d_exits = DEF_CONTROL_D_EXITS;
 
 	if (conf.cp_cmd == UNSET)
 		conf.cp_cmd = DEF_CP_CMD;
@@ -3657,13 +3640,6 @@ check_options(void)
 			conf.only_dirs = xargs.only_dirs;
 	}
 
-/*	if (conf.expand_bookmarks == UNSET) {
-		if (xargs.expand_bookmarks == UNSET)
-			conf.expand_bookmarks = DEF_EXPAND_BOOKMARKS;
-		else
-			conf.expand_bookmarks = xargs.expand_bookmarks;
-	} */
-
 	if (conf.splash_screen == UNSET) {
 		if (xargs.splash == UNSET)
 			conf.splash_screen = DEF_SPLASH_SCREEN;
@@ -3741,12 +3717,8 @@ check_options(void)
 			conf.autols = xargs.autols;
 	}
 
-	if (conf.unicode == UNSET) {
-//		if (xargs.unicode == UNSET)
-			conf.unicode = DEF_UNICODE;
-//		else
-//			conf.unicode = xargs.unicode;
-	}
+	if (conf.unicode == UNSET)
+		conf.unicode = DEF_UNICODE;
 
 	if (conf.max_path == UNSET) {
 		if (xargs.max_path == UNSET)

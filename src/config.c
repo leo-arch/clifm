@@ -2953,7 +2953,6 @@ read_config(void)
 		}
 #endif
 
-//		else if (xargs.unicode == UNSET && *line == 'U'
 		else if (*line == 'U' && strncmp(line, "Unicode=", 8) == 0) {
 			set_config_bool_value(line + 8, &conf.unicode);
 		}
@@ -3441,9 +3440,6 @@ check_cmd_line_options(void)
 
 	if (xargs.tips != UNSET)
 		conf.tips = xargs.tips;
-
-//	if (xargs.unicode != UNSET)
-//		conf.unicode = xargs.unicode;
 
 	if (xargs.welcome_message != UNSET)
 		conf.welcome_message = xargs.welcome_message;

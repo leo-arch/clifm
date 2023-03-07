@@ -732,33 +732,6 @@ set_max_files(char **args)
 	return EXIT_SUCCESS;
 }
 
-/*
-static int
-unicode_function(char *arg)
-{
-	if (!arg || IS_HELP(arg)) {
-		puts(_(UNICODE_USAGE));
-		return EXIT_SUCCESS;
-	}
-
-	int exit_status = EXIT_SUCCESS;
-
-	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		printf(_("Unicode is %s\n"), conf.unicode == 1 ? _("enabled") : _("disabled"));
-	} else if (*arg == 'o' && strcmp(arg, "on") == 0) {
-		conf.unicode = 1;
-		puts(_("Unicode enabled"));
-	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
-		conf.unicode = 0;
-		puts(_("Unicode disabled"));
-	} else {
-		fprintf(stderr, "%s\n", _(UNICODE_USAGE));
-		exit_status = EXIT_FAILURE;
-	}
-
-	return exit_status;
-} */
-
 static int
 dirs_first_function(char *arg)
 {
@@ -2678,11 +2651,6 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "filescounter") == 0))
 		return (exit_code = filescounter_function(comm[1]));
-
-	/* #### UNICODE #### */
-/*	else if (*comm[0] == 'u' && ((comm[0][1] == 'c' && !comm[0][2])
-	|| strcmp(comm[0], "unicode") == 0))
-		return (exit_code = unicode_function(comm[1])); */
 
 	/* #### DIRECTORIES FIRST #### */
 	else if ((*comm[0] == 'f' && comm[0][1] == 'f' && !comm[0][2])
