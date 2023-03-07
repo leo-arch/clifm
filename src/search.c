@@ -511,7 +511,6 @@ SCANDIR_ERROR:
 	}
 	tab_offset = t;
 
-	putchar('\n');
 	print_reload_msg(_("Matches found: %d%s\n"), found,
 		conf.search_strategy != GLOB_ONLY ? " (glob)" : "");
 /*	printf(_("\nMatches found: %d%s\n"), found,
@@ -815,9 +814,6 @@ search_regex(char **args, const int invert, const int case_sens)
 	}
 
 	if (type_ok != 0) {
-		if (conf.search_strategy != REGEX_ONLY)
-			putchar('\n');
-
 		int last_column = 0;
 		size_t total_cols = 0;
 
@@ -908,7 +904,6 @@ search_regex(char **args, const int invert, const int case_sens)
 		}
 		tab_offset = t;
 
-		putchar('\n');
 		print_reload_msg(_("Matches found: %zu\n"), counter);
 	} else {
 		fputs(_("No matches found\n"), stderr);
