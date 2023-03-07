@@ -2755,8 +2755,8 @@ options_generator(const char *text, int state)
 	|| (*l == 'e' && strncmp(l, "ext ", 4) == 0)
 	|| (*l == 'f' && l[1] == 'f' && l[2] == ' ')
 	|| (*l == 'h' && l[1] == 'f' && l[2] == ' ')
-	|| (*l == 'p' && l[1] == 'g' && l[2] == ' ')
-	|| (*l == 'u' && l[1] == 'c' && l[2] == ' ') ) {
+	|| (*l == 'p' && l[1] == 'g' && l[2] == ' ') ) {
+//	|| (*l == 'u' && l[1] == 'c' && l[2] == ' ') ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
 	/* cl, icons */
 	} else if ( (*l == 'c' && l[1] == 'l' && l[2] == ' ')

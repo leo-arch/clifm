@@ -732,6 +732,7 @@ set_max_files(char **args)
 	return EXIT_SUCCESS;
 }
 
+/*
 static int
 unicode_function(char *arg)
 {
@@ -756,7 +757,7 @@ unicode_function(char *arg)
 	}
 
 	return exit_status;
-}
+} */
 
 static int
 dirs_first_function(char *arg)
@@ -2679,9 +2680,9 @@ exec_cmd(char **comm)
 		return (exit_code = filescounter_function(comm[1]));
 
 	/* #### UNICODE #### */
-	else if (*comm[0] == 'u' && ((comm[0][1] == 'c' && !comm[0][2])
+/*	else if (*comm[0] == 'u' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "unicode") == 0))
-		return (exit_code = unicode_function(comm[1]));
+		return (exit_code = unicode_function(comm[1])); */
 
 	/* #### DIRECTORIES FIRST #### */
 	else if ((*comm[0] == 'f' && comm[0][1] == 'f' && !comm[0][2])

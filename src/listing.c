@@ -1725,7 +1725,7 @@ list_dir_light(void)
 //		init_fileinfo(n);
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-		if (!conf.unicode) {
+		if (conf.unicode == 0) {
 			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
 		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX);
@@ -2048,7 +2048,7 @@ list_dir(void)
 			HIDE_CURSOR;
 	}
 
-	if (!conf.unicode) {
+	if (conf.unicode == 0) {
 		trim.state = trim.a = trim.b = 0;
 		trim.len = 0;
 	}
@@ -2165,7 +2165,7 @@ list_dir(void)
 		}
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-		if (!conf.unicode) {
+		if (conf.unicode == 0) {
 			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
 		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX);

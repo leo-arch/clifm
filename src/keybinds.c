@@ -1544,7 +1544,8 @@ rl_ws1(int count, int key)
 	if (cur_ws == 0) {
 		/* If the user attempts to switch to the same workspace she's
 		 * currently in, switch rather to the previous workspace */
-		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+//		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+		if (prev_ws != cur_ws) {
 			char t[16];
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
 			return run_kb_cmd(t);
@@ -1562,7 +1563,8 @@ rl_ws2(int count, int key)
 		rl_delete_text(0, rl_end);
 
 	if (cur_ws == 1) {
-		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+//		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+		if (prev_ws != cur_ws) {
 			char t[16];
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
 			return run_kb_cmd(t);
@@ -1580,7 +1582,8 @@ rl_ws3(int count, int key)
 		rl_delete_text(0, rl_end);
 
 	if (cur_ws == 2) {
-		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+//		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+		if (prev_ws != cur_ws) {
 			char t[16];
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
 			return run_kb_cmd(t);
@@ -1598,7 +1601,8 @@ rl_ws4(int count, int key)
 		rl_delete_text(0, rl_end);
 
 	if (cur_ws == 3) {
-		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+//		if (xargs.toggle_workspaces == 1 && prev_ws != cur_ws) {
+		if (prev_ws != cur_ws) {
 			char t[16];
 			snprintf(t, sizeof(t), "ws %d", prev_ws + 1);
 			return run_kb_cmd(t);

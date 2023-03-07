@@ -759,12 +759,12 @@ const struct cmdslist_t param_str[] = {
 	{"u all", 5},
 	{"undel all", 9},
 	{"untrash all", 11},
-	{"uc on", 5},
+/*	{"uc on", 5},
 	{"unicode on", 10},
 	{"uc off", 6},
 	{"unicode off", 11},
 	{"uc status", 9},
-	{"unicode status", 14},
+	{"unicode status", 14}, */
 	{"view edit", 9},
 	{NULL, 0}
 };
@@ -1022,17 +1022,18 @@ main(int argc, char *argv[])
 		exit(EINVAL);
 	}
 
-	init_conf_struct();
-	init_filter();
-	init_msgs();
-/*	init_file_flags(); */
 	check_cpu_os(); /* Running on a supported CPU and operating system? */
 	check_term(); /* Running on a supported terminal? */
 
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
+	init_conf_struct();
+	init_filter();
+	init_msgs();
+/*	init_file_flags(); */
+
 	set_locale();
-	conf.unicode = DEF_UNICODE;
+//	conf.unicode = DEF_UNICODE;
 
 	/* Store external arguments to be able to rerun external_arguments()
 	 * in case the user edits the config file, in which case the program
@@ -1040,8 +1041,7 @@ main(int argc, char *argv[])
 	 * then external_arguments() */
 	backup_argv(argc, argv);
 
-	/* free_stuff does some cleaning */
-	atexit(free_stuff);
+	atexit(free_stuff); /* free_stuff does some cleaning */
 
 	user = get_user_data();
 	get_home();

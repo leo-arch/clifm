@@ -208,7 +208,8 @@ init_conf_struct(void)
 #ifndef _NO_TRASH
 	conf.tr_as_rm = UNSET;
 #endif
-	conf.unicode = UNSET;
+//	conf.unicode = UNSET;
+	conf.unicode = DEF_UNICODE;
 	conf.warning_prompt = UNSET;
 	conf.welcome_message = UNSET;
 
@@ -1898,11 +1899,11 @@ external_arguments(int argc, char **argv)
 		{"splash", no_argument, 0, 's'},
 		{"stealth-mode", no_argument, 0, 'S'},
 		{"disk-usage-analyzer", no_argument, 0, 't'},
-		{"unicode", no_argument, 0, 'U'},
-		{"no-unicode", no_argument, 0, 'u'},
+/*		{"unicode", no_argument, 0, 'U'},
+		{"no-unicode", no_argument, 0, 'u'}, */
 		{"version", no_argument, 0, 'v'},
 		{"workspace", required_argument, 0, 'w'},
-		{"no-toggle-workspaces", no_argument, 0, 'W'},
+//		{"no-toggle-workspaces", no_argument, 0, 'W'},
 		{"no-ext-cmds", no_argument, 0, 'x'},
 		{"light-mode", no_argument, 0, 'y'},
 		{"sort", required_argument, 0, 'z'},
@@ -2278,8 +2279,8 @@ external_arguments(int argc, char **argv)
 		case 's': conf.splash_screen = xargs.splash = 1; break;
 		case 'S': xargs.stealth_mode = 1; break;
 		case 't': xargs.disk_usage_analyzer = 1; break;
-		case 'u': conf.unicode = xargs.unicode = 0; break;
-		case 'U': conf.unicode = xargs.unicode = 1; break;
+//		case 'u': conf.unicode = xargs.unicode = 0; break;
+//		case 'U': conf.unicode = xargs.unicode = 1; break;
 		case 'v': printf("%s\n", VERSION); exit(EXIT_SUCCESS);
 
 		case 'w': {
@@ -2290,7 +2291,7 @@ external_arguments(int argc, char **argv)
 				cur_ws = iopt - 1;
 		} break;
 
-		case 'W': xargs.toggle_workspaces = 0; break;
+//		case 'W': xargs.toggle_workspaces = 0; break;
 		case 'x': conf.ext_cmd_ok = xargs.ext = 0; break;
 		case 'y': conf.light_mode = xargs.light = 1; break;
 		case 'z': set_sort(optarg); break;
@@ -2585,11 +2586,11 @@ unset_xargs(void)
 #endif
 
 	xargs.tips = UNSET;
-	xargs.toggle_workspaces = UNSET;
+//	xargs.toggle_workspaces = UNSET;
 #ifndef _NO_TRASH
 	xargs.trasrm = UNSET;
 #endif
-	xargs.unicode = UNSET;
+//	xargs.unicode = UNSET;
 	xargs.virtual_dir_full_paths = UNSET;
 	xargs.vt100 = UNSET;
 	xargs.welcome_message = UNSET;
@@ -3385,8 +3386,8 @@ check_options(void)
 	}
 	check_time_str();
 
-	if (xargs.toggle_workspaces == UNSET)
-		xargs.toggle_workspaces = DEF_TOGGLE_WORKSPACES;
+/*	if (xargs.toggle_workspaces == UNSET)
+		xargs.toggle_workspaces = DEF_TOGGLE_WORKSPACES; */
 
 	if (conf.search_strategy == UNSET)
 		conf.search_strategy = DEF_SEARCH_STRATEGY;
@@ -3741,10 +3742,10 @@ check_options(void)
 	}
 
 	if (conf.unicode == UNSET) {
-		if (xargs.unicode == UNSET)
+//		if (xargs.unicode == UNSET)
 			conf.unicode = DEF_UNICODE;
-		else
-			conf.unicode = xargs.unicode;
+//		else
+//			conf.unicode = xargs.unicode;
 	}
 
 	if (conf.max_path == UNSET) {

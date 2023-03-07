@@ -66,10 +66,6 @@ _clifm ()
         --stealth-mode
         -t
         --disk-usage-analyzer
-        -u
-        --no-unicode
-        -U
-        --unicode
         -v
         --version
         -w
@@ -107,7 +103,6 @@ _clifm ()
         --no-clear-screen
         --no-color
         --no-columns
-        --no-control-d-exit
         --no-file-cap
         --no-file-ext
         --no-files-counter

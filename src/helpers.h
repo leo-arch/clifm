@@ -1008,11 +1008,11 @@ struct param_t {
 	int suggestions;
 #endif
 	int tips;
-	int toggle_workspaces;
+//	int toggle_workspaces;
 #ifndef _NO_TRASH
 	int trasrm;
 #endif
-	int unicode;
+//	int unicode;
 	int virtual_dir_full_paths;
 	int vt100;
 	int welcome_message;

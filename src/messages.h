@@ -991,9 +991,10 @@ Mark the files you need via TAB and then press Enter or Right"
 - Untrash files selectively using a menu\n\
     u (or 'u <TAB>' to choose from a list - multi-selection is allowed)"
 
+/*
 #define UNICODE_USAGE "Set Unicode on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  uc, unicode [on, off, status]"
+  uc, unicode [on, off, status]" */
 
 #define UNTRASH_USAGE "Restore files from the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1164,11 +1165,8 @@ on an empty line\
 \n  -s, --splash\t\t\t Enable the splash screen\
 \n  -S, --stealth-mode\t\t Run in incognito/private mode\
 \n  -t, --disk-usage-analyzer\t Run in disk usage analyzer mode\
-\n  -u, --no-unicode\t\t Disable Unicode support\
-\n  -U, --unicode \t\t Enable Unicode support (default)\
 \n  -v, --version\t\t\t Show version details and exit\
 \n  -w, --workspace=NUM\t\t Start in workspace NUM\
-\n  -W, --no-toggle-workspaces\t Workspace keybindings do not toggle previous and current workspaces\
 \n  -x, --no-ext-cmds\t\t Disallow the use of external commands\
 \n  -y, --light-mode\t\t Run in light mode\
 \n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
@@ -1252,6 +1250,7 @@ Help topics are available as well. Type 'help <TAB>' to get a list of topics.\n\
 The following is just a list of available commands and a brief description.\n\
 For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
 
+/* uc, unicode        Set unicode on/off\n\ */
 #define CLIFM_COMMANDS "\
  ELN/FILE/DIR       Auto-open and autocd functions\n\
  /PATTERN           Quick search\n\
@@ -1325,7 +1324,6 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  te                 Toggle the executable bit on files\n\
  tips               Print tips\n\
  u, undel, untrash  Restore trashed files\n\
- uc, unicode        Set unicode on/off\n\
  unpin              Unpin the currently pinned directory\n\
  v, paste sel       Copy selected files into the current directory\n\
  vv                 Copy and rename files at once\n\
