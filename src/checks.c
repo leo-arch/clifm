@@ -53,10 +53,9 @@
 #include "misc.h"
 #include "term_info.h"
 
-/* Terminals known not to be able to handle escape sequences */
-static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
+#define TRUE_COLOR 16777216
 
-/*Check whether parameter S is -f or --force
+/* Check whether parameter S is -f or --force
  * Returns 1 if yes, and there is no "-f" or "--force" file in the current dir,
  * or 0 otherwise. */
 int
@@ -134,7 +133,6 @@ check_truecolor(void)
 	return 0;
 }
 
-#define TRUE_COLOR 16777216
 static void
 set_term_caps(const int i)
 {
@@ -179,7 +177,7 @@ check_term_support(const char *_term)
 	}
 
 	if (index == -1) {
-		_err('w', PRINT_PROMPT, _("%s: '%s': Unknown terminal type. "
+		_err('w', PRINT_PROMPT, _("%s: '%s': Terminal type not supported. "
 			"Limited functionality is expected.\n"), PROGRAM_NAME, _term);
 	}
 
@@ -194,17 +192,6 @@ check_term(void)
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: TERM environment "
 			"variable not set\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
-	}
-
-	size_t i;
-	for (i = 0; UNSUPPORTED_TERM[i]; i++) {
-		if (*_term == *UNSUPPORTED_TERM[i]
-		&& strcmp(_term, UNSUPPORTED_TERM[i]) == 0) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Unsupported "
-				"terminal. This terminal does not support escape sequences\n"),
-				PROGRAM_NAME, UNSUPPORTED_TERM[i]);
-			exit(EXIT_FAILURE);
-		}
 	}
 
 	check_term_support(_term);

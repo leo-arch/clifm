@@ -844,23 +844,6 @@ run_main_loop(void)
 }
 
 static inline void
-check_cpu_os(void)
-{
-#if !defined(__x86_64__) && !defined(__i386__) && !defined(__arm__) \
-&& !defined(__powerpc__)
-	fprintf(stderr, _("%s: Unsupported CPU architecture\n"), PROGRAM_NAME);
-	exit(EXIT_FAILURE);
-#endif
-
-#if !defined(__linux__) && !defined(__FreeBSD__) && !defined(__NetBSD__) \
-&& !defined(__OpenBSD__) && !defined(__HAIKU__) && !defined(__APPLE__) \
-&& !defined(__sun) && !defined(__CYGWIN__)
-	fprintf(stderr, _("%s: Unsupported operating system\n"), PROGRAM_NAME);
-	exit(EXIT_FAILURE);
-#endif
-}
-
-static inline void
 set_root_indicator(void)
 {
 	if (user.uid == 0) {
@@ -1022,8 +1005,7 @@ main(int argc, char *argv[])
 		exit(EINVAL);
 	}
 
-	check_cpu_os(); /* Running on a supported CPU and operating system? */
-	check_term(); /* Running on a supported terminal? */
+	check_term(); /* Let's check terminal capabilities */
 
 	/* # 1. INITIALIZE EVERYTHING WE NEED # */
 
@@ -1033,7 +1015,6 @@ main(int argc, char *argv[])
 /*	init_file_flags(); */
 
 	set_locale();
-//	conf.unicode = DEF_UNICODE;
 
 	/* Store external arguments to be able to rerun external_arguments()
 	 * in case the user edits the config file, in which case the program
