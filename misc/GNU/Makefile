@@ -108,6 +108,7 @@ CPPFLAGS += -DCLIFM_DATADIR=$(DATADIR)
 
 LIBS_Linux ?= -lreadline -lacl -lcap $(LMAGIC)
 LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline $(LINTL) $(LMAGIC)
+LIBS_DragonFly ?= -I/usr/local/include -L/usr/local/lib -lreadline $(LINTL) $(LMAGIC)
 LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline $(LINTL) $(LMAGIC)
 LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline $(LINTL) $(LMAGIC)
 LIBS_Darwin ?= -I/opt/local/include -L/opt/local/lib -lreadline $(LINTL) $(LMAGIC)

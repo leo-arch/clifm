@@ -1288,7 +1288,7 @@ get_properties(char *filename, const int dsize)
 	printf(_("Modify: \t%s%s%s\n"), cmdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), ccdate, change_time, cend);
 
-#ifndef _BE_POSIX
+#if !defined(_BE_POSIX) && !defined(__DragonFly__)
 # if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
 	char *cbdate = cdate;
 	char btf[MAX_SHADE_LEN];

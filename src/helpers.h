@@ -35,7 +35,7 @@
 # if defined(__linux__) || defined(__CYGWIN__)
 #  define _XOPEN_SOURCE /* wcwidth() */
 # endif
-# if defined(__FreeBSD__)
+# if defined(__FreeBSD__) || defined(__DragonFly__)
 #  define _XOPEN_SOURCE
 #  define __XSI_VISIBLE 700
 #  define __BSD_VISIBLE 1
@@ -86,7 +86,8 @@
 # include <sys/inotify.h>
 # include <sys/types.h>
 # define LINUX_INOTIFY
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+|| defined(__DragonFly__)
 # include <sys/types.h>
 # include <sys/event.h>
 # include <sys/time.h>

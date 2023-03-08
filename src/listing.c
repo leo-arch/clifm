@@ -2221,7 +2221,7 @@ list_dir(void)
 		case SBTIME:
 # if defined(__OpenBSD__)
 			file_info[n].time = stat_ok ? (time_t)attr.__st_birthtim.tv_sec : 0;
-# else
+# elif !defined(__DragonFly__)
 			file_info[n].time = stat_ok ? (time_t)attr.st_birthtime : 0;
 # endif /* __OpenBSD__ */
 			break;
