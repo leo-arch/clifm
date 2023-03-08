@@ -1390,36 +1390,36 @@ get_ext_info_long(const char *name, const size_t name_len, int *trim, size_t *ex
  * NOW and the corresponding file time
  * At most LEN bytes are copied into S */
 static void
-calc_relative_time(const time_t age, char *s, const size_t len)
+calc_relative_time(const time_t age, char *s)
 {
 	if (age < 0L) /* Future */
-		xstrsncpy(s, " -     ", len);
+		snprintf(s, MAX_TIME_STR, " -     ");
 	else if (age < RT_MINUTE)
-		snprintf(s, len, "%*ju  sec", 2, (uintmax_t)age);
+		snprintf(s, MAX_TIME_STR, "%*ju  sec", 2, (uintmax_t)age);
 	else if (age < RT_HOUR)
-		snprintf(s, len, "%*ju  min", 2, (uintmax_t)(age / RT_MINUTE));
+		snprintf(s, MAX_TIME_STR, "%*ju  min", 2, (uintmax_t)(age / RT_MINUTE));
 	else if (age < RT_DAY)
-		snprintf(s, len, "%*ju hour", 2, (uintmax_t)(age / RT_HOUR));
+		snprintf(s, MAX_TIME_STR, "%*ju hour", 2, (uintmax_t)(age / RT_HOUR));
 	else if (age < RT_WEEK)
-		snprintf(s, len, "%*ju  day", 2, (uintmax_t)(age / RT_DAY));
+		snprintf(s, MAX_TIME_STR, "%*ju  day", 2, (uintmax_t)(age / RT_DAY));
 	else if (age < RT_MONTH) {
 		/* RT_MONTH is 30 days. But since Feb has only 28, we get 4 weeks
 		 * in some cases, which is weird. Always make 4 weeks into 1 month */
 		long n = age / RT_WEEK;
 		if (n == 4)
-			xstrsncpy(s, " 1  mon", len);
+			snprintf(s, MAX_TIME_STR, " 1  mon");
 		else
-			snprintf(s, len, "%*ju week", 2, (uintmax_t)n);
+			snprintf(s, MAX_TIME_STR, "%*ju week", 2, (uintmax_t)n);
 	}
 	else if (age < RT_YEAR) {
 		long n = age / RT_MONTH;
 		if (n == 12)
-			xstrsncpy(s, " 1 year", len);
+			snprintf(s, MAX_TIME_STR, " 1 year");
 		else
-			snprintf(s, len, "%*ju  mon", 2, (uintmax_t)n);
+			snprintf(s, MAX_TIME_STR, "%*ju  mon", 2, (uintmax_t)n);
 	}
 	else
-		snprintf(s, len, "%*ju year", 2, (uintmax_t)(age / RT_YEAR));
+		snprintf(s, MAX_TIME_STR, "%*ju year", 2, (uintmax_t)(age / RT_YEAR));
 }
 
 /* Compose the properties line for the current file name
@@ -1605,8 +1605,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			/* AGE is negative if file time is in the future */
 
 			if (conf.relative_time == 1) {
-				calc_relative_time(age < 0 ? age - (age * 2) : age,
-					file_time, sizeof(file_time));
+				calc_relative_time(age < 0 ? age - (age * 2) : age, file_time);
 			} else {
 				/* Let's consider a file to be recent if it is within the past
 				 * six months (like ls(1) does) */
