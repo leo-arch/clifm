@@ -143,8 +143,11 @@ set_term_caps(const int i)
 		term_caps.color = true_color == 1 ? TRUE_COLOR : 0;
 		term_caps.suggestions = 0;
 		term_caps.pager = 0;
+		term_caps.hide_cursor = 0;
 		return;
 	}
+
+	term_caps.hide_cursor = TERM_INFO[i].hide_cursor;
 
 	term_caps.color = true_color == 1 ? TRUE_COLOR
 		: (TERM_INFO[i].color > 0 ? TERM_INFO[i].color : 0);

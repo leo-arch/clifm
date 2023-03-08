@@ -623,8 +623,8 @@ extern int watch;
  * ERASE_TO_RIGHT */
 
 #define META_SENDS_ESC  fputs("\x1b[?1036h", stdout)
-#define HIDE_CURSOR     fputs("\x1b[?25l", stdout)   /* DECTCEM */
-#define UNHIDE_CURSOR   fputs("\x1b[?25h", stdout)
+#define HIDE_CURSOR     fputs(term_caps.hide_cursor == 1 ? "\x1b[?25l" : "", stdout) /* DECTCEM */
+#define UNHIDE_CURSOR   fputs(term_caps.hide_cursor == 1 ? "\x1b[?25h" : "", stdout)
 
 #define SET_RVIDEO      fputs("\x1b[?5h", stderr)    /* DECSCNM: Enable reverse video */
 #define UNSET_RVIDEO    fputs("\x1b[?5l", stderr)
@@ -1115,6 +1115,7 @@ struct termcaps_t {
 	int color;
 	int suggestions;
 	int pager;
+	int hide_cursor;
 };
 extern struct termcaps_t term_caps;
 
