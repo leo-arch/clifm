@@ -596,11 +596,26 @@ extern int watch;
 				|| strcmp((s), "--help") == 0))
 
 /* Terminal escape codes */
+/*
 #ifndef __HAIKU__
 # define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
 #else
-# define CLEAR fputs("\x1b[H\x1b[2J", stdout); /* CLEAR */
-#endif /* !__HAIKU__ */
+# define CLEAR fputs("\x1b[H\x1b[2J", stdout); // CLEAR
+#endif // !__HAIKU__ */
+/* "\033c" amounts to "\x1b[H\x1b[2J\x1b[3J" in xterm:
+ * \x1b[H = Move cursor to coordintates 1,1 (Home)
+ * \x1b[2J = Delete all screen content
+ * \x1b[3J = Delete saved lines (scrollback buffer)
+ * Other terminals might handle this differently, depending on their
+ * capabilities, which makes "\033c" quite portable */
+
+#define CLEAR \
+	if (term_caps.home == 1 && term_caps.clear == 1) { \
+		if (term_caps.del_scrollback == 1) \
+			fputs("\x1b[H\x1b[2J\x1b[3J", stdout); \
+		else \
+			fputs("\x1b[H\x1b[J", stdout); \
+	}
 
 #define MOVE_CURSOR_DOWN(n)      printf("\x1b[%dB", (n))  /* CUD */
 
@@ -1116,6 +1131,9 @@ struct termcaps_t {
 	int suggestions;
 	int pager;
 	int hide_cursor;
+	int home;  // Move cursor to line 1, column 1
+	int clear; // ED (erase display)
+	int del_scrollback; // E3
 };
 extern struct termcaps_t term_caps;
 
