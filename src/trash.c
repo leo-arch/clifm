@@ -881,10 +881,12 @@ untrash_function(char **comm)
 	/* List trashed files */
 	printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
 	size_t i;
+	uint8_t tpad = DIGINUM(trash_files_n);
 
-	for (i = 0; i < (size_t)trash_files_n; i++)
-		colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
-		    PRINT_NEWLINE);
+	for (i = 0; i < (size_t)trash_files_n; i++) {
+		printf("%s%*zu%s ", el_c, tpad, i + 1, df_c);
+		colors_list(trash_files[i]->d_name, NO_ELN, NO_PAD, PRINT_NEWLINE);
+	}
 
 	/* Go back to previous path */
 	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {

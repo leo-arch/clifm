@@ -570,7 +570,6 @@ print_selected_files(void)
 		CLEAR;
 
 	printf(_("%sSelection Box%s\n\n"), BOLD, df_c);
-//	putchar('\0');
 
 	size_t t = tab_offset, i;
 	off_t total = 0;
