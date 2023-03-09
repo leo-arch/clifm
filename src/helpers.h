@@ -102,6 +102,8 @@
 #elif defined(__sun) || defined(__CYGWIN__)
 # include <sys/types.h>
 # include <sys/time.h>
+#elif defined(__HAIKU__)
+# include <stdint.h> /* uint8_t */
 #endif /* __linux__ */
 
 #ifndef __BEGIN_DECLS
