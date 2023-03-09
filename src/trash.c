@@ -1010,9 +1010,11 @@ list_trashed_files(void)
 		return (-1);
 	}
 
+	uint8_t tpad = DIGINUM(files_n);
 	size_t i;
 	for (i = 0; i < (size_t)files_n; i++) {
-		colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD, PRINT_NEWLINE);
+		printf("%s%*zu%s ", el_c, tpad, i + 1, df_c);
+		colors_list(trash_files[i]->d_name, NO_ELN, NO_PAD, PRINT_NEWLINE);
 		free(trash_files[i]);
 	}
 	free(trash_files);

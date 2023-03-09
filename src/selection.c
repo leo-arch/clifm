@@ -576,12 +576,17 @@ print_selected_files(void)
 	off_t total = 0;
 	tab_offset = 0;
 
+	uint8_t epad = DIGINUM(sel_n);
+
 	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {
-		colors_list(sel_elements[i].name, (int)i + 1, NO_PAD, PRINT_NEWLINE);
+		printf("%s%*zu%s ", el_c, epad, i + 1, df_c);
+		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE);
+
 		printf(_("Calculating file size... ")); fflush(stdout);
 		off_t s = get_sel_file_size(i);
 		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
+
 		if (s != (off_t)-1)
 			total += s;
 	}
@@ -778,6 +783,7 @@ show_sel_files(void)
 
 	size_t t = tab_offset;
 	tab_offset = 0;
+	uint8_t epad = DIGINUM(sel_n);
 
 	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {
@@ -810,7 +816,10 @@ show_sel_files(void)
 		}
 
 		counter++;
-		colors_list(sel_elements[i].name, (int)i + 1, NO_PAD, PRINT_NEWLINE);
+
+		printf("%s%*zu%s ", el_c, epad, i + 1, df_c);
+		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE);
+
 		printf(_("Calculating file size... ")); fflush(stdout);
 		off_t s = get_sel_file_size(i);
 		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
