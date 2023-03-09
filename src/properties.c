@@ -1699,27 +1699,37 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 
 	/* Print stuff */
 
+	/* These are just two characters, which we would normally print like this:
+	 * %c <-- x ? 'x' : 0
+	 * However, some terminals, like 'cons25', print the 0 above graphically,
+	 * as a space, which is not what we want here. To fix this, let's print
+	 * these chars as strings, and not as chars */
+	char trim_s[2] = {0};
+	char xattr_s[2] = {0};
+	*trim_s = trim > 0 ? TRIMFILE_CHR : 0;
+	*xattr_s = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
+
 #ifndef _NO_ICONS
-	printf("%s%s%c%s%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s%s  " /* File name*/
+	printf("%s%s%s%s%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  " /* File name*/
 #else
-	printf("%s%ls%s%s%-*s%s\x1b[0m%s%c\x1b[0m%s%s%s  " /* File name*/
+	printf("%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  " /* File name*/
 #endif
 		   "%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
-		   "%c " /* Extended attributes (@) */
+		   "%s " /* Extended attributes (@) */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
 		   "%s\n", /* Size / device info */
 
 #ifndef _NO_ICONS
 		conf.colorize ? props->icon_color : "",
-		conf.icons ? props->icon : "", conf.icons ? ' ' : 0, df_c,
+		conf.icons ? props->icon : "", conf.icons ? " " : "", df_c,
 #endif
 		conf.colorize ? props->color : "",
 		(wchar_t *)tname, trim_diff,
 		conf.light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
-		trim ? tt_c : "", trim ? TRIMFILE_CHR : 0,
+		trim ? tt_c : "", trim_s,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",
 		trim == TRIM_EXT ? df_c : "",
@@ -1727,7 +1737,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		prop_fields.counter != 0 ? fc_str : "",
 		prop_fields.inode == 1 ? ino_s : "",
 		prop_fields.perm != 0 ? attr_s : "",
-		have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0,
+		xattr_s,
 		prop_fields.ids == 1 ? id_s : "",
 		prop_fields.time != 0 ? time_s : "",
 		prop_fields.size != 0 ? size_s : "");
