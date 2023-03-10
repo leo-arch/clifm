@@ -353,19 +353,6 @@ xdelete(void)
 #endif /* !_NO_SUGGESTIONS */
 
 	rl_delete(1, 0);
-
-/*	if (rl_point == rl_end)
-		return;
-
-	int bk = rl_point;
-	int mlen = mblen(rl_line_buffer + rl_point, __MB_LEN_MAX);
-
-	rl_point = bk;
-	char *s = rl_copy_text(rl_point + mlen, rl_end);
-	rl_end = rl_point;
-	rl_insert_text(s);
-	free(s);
-	rl_point = bk; */
 }
 
 /* Backspace implementation */
@@ -378,44 +365,6 @@ xbackspace(void)
 #endif /* !_NO_SUGGESTIONS */
 
 	rl_rubout(1, 0);
-
-/*	if (rl_point < rl_end) {
-		if (rl_point > 0) {
-			int bk = rl_point, cc = 0;
-			char *s = rl_copy_text(rl_point, rl_end);
-			while ((rl_line_buffer[rl_point - 1] & 0xc0) == 0x80) {
-				rl_point--;
-				cc++;
-			}
-			rl_point--;
-			rl_end = rl_point;
-			rl_insert_text(s);
-			free(s);
-			rl_point = bk - 1 - cc;
-		}
-#ifndef _NO_SUGGESTIONS
-		if (suggestion.printed && suggestion_buf)
-			remove_suggestion_not_end();
-#endif // !_NO_SUGGESTIONS
-	} else {
-#ifndef _NO_SUGGESTIONS
-		if (suggestion_buf)
-			clear_suggestion(CS_FREEBUF);
-#endif // !_NO_SUGGESTIONS
-		if (rl_end > 0) {
-			if (wrong_cmd == 1 && rl_line_buffer[rl_end - 1] == ' ')
-				cur_color = tx_c;
-
-			while ((rl_line_buffer[rl_end - 1] & 0xc0) == 0x80) {
-				rl_line_buffer[rl_end - 1] = '\0';
-				rl_point--;
-				rl_end--;
-			}
-			rl_line_buffer[rl_end - 1] = '\0';
-			rl_point--;
-			rl_end--;
-		}
-	} */
 }
 
 #ifndef _NO_SUGGESTIONS
