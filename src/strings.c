@@ -1070,7 +1070,7 @@ expand_tag(char ***args, const int tag_index)
 		return 0;
 
 	char dir[PATH_MAX];
-	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, tag);
+	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 
 	struct dirent **t = (struct dirent **)NULL;
 	int n = scandir(dir, &t, NULL, conf.case_sens_list ? xalphasort : alphasort_insensitive);
@@ -1101,7 +1101,12 @@ expand_tag(char ***args, const int tag_index)
 			continue;
 		char filename[PATH_MAX + NAME_MAX + 1];
 		snprintf(filename, sizeof(filename), "%s/%s", dir, t[i]->d_name);
-		char rpath[PATH_MAX];
+
+		/* If PATH_MAX isn't MAX_STR_LEN (4096), for example on BSD, where
+		 * it is 1024, we get a compilation warning about xstrnlen(),
+		 * called by escape_str() here. Let's use MAX_STR_LEN directly to
+		 * silence this warning. */
+		char rpath[MAX_STR_LEN];
 		*rpath = '\0';
 		char *ret = realpath(filename, rpath);
 		if (!ret || !*rpath)
