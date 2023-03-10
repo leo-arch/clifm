@@ -14,7 +14,7 @@ Once this is done, you might want to check and modify a few things from the resu
 
 ### C source
 
-Portability: Though mostly developed in Linux (and this always means better support), we try to keep _CliFM_ working on \*BSD, MacOS, and Haiku. So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBsd, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
+Portability: Though mostly developed in Linux (and this always means better support), we try to keep **clifm** working on \*BSD, MacOS, and Haiku. So, when calling a function make sure it exists on these platforms as well, and, if possible, make sure it is POSIX. Check its syntax as well: some functions might take different parameters on different platforms. For example, **getmntinfo**(3) does not exist in Linux, and, while it takes a `statfs` struct in FreeBsd, OpenBSD, and MacOS, it takes a `statvfs` struct instead in NetBSD.
 
 Generally, try to stick as closely as possible to the [Linux kernel coding style](https://www.kernel.org/doc/html/v4.10/process/coding-style.html). Also, though we don't follow it strictly, we also like the [Suckless coding style](https://suckless.org/coding_style/).
 
@@ -120,7 +120,7 @@ buf[PATH_MAX];
 xstrsncpy(buf, src, sizeof(buf));
 ```
 
-**Note**: Both `xstrsncpy` and `xnmalloc` are safe implementations of `strcpy(3)` and `malloc(3)` respectively and are provided by CliFM itself (see `strings.c` and `aux.c` respectivelly).
+**Note**: Both `xstrsncpy` and `xnmalloc` are safe implementations of `strcpy(3)` and `malloc(3)` respectively and are provided by **clifm** itself (see `strings.c` and `aux.c` respectivelly).
 
 These are just a few examples. There are plenty of resources out there on how to write secure code.
 
@@ -158,7 +158,7 @@ If not obvious, comment what your code is trying to achieve: there is no good so
 
 ## 3) General code structure
 
-CliFM's source code consists of multiple C source files, being `main.c` the starting point and `helpers.h` the main header file. In `main.c` you'll find:
+**Clifm**'s source code consists of multiple C source files, being `main.c` the starting point and `helpers.h` the main header file. In `main.c` you'll find:
 
 **A)** Initialization stuff, like loading config files (see `config.c`), command line options (parsed by the `external_arguments()` function, in `init.c`), readline and keybindings initialization (see `readline.c` and `keybindings.c`), bookmarks, workspaces, history, and the like.
 
@@ -170,11 +170,11 @@ CliFM's source code consists of multiple C source files, being `main.c` the star
 3)  Execute command
  And take more input...
 
-**C)** The last step above (3) calls the `exec_cmd()` function (`in exec.c`) to find out what needs to be done based on the user's input. The structure of the `exec_cmd` function is a big if-else chain: if the command is internal, that is, one of CliFM's built-in commands, the corresponding function will be called and executed; if not, if it is rather an external command, it will be executed by the system shell (via `launch_execle()`, also in `exec.c`).
+**C)** The last step above (3) calls the `exec_cmd()` function (`in exec.c`) to find out what needs to be done based on the user's input. The structure of the `exec_cmd` function is a big if-else chain: if the command is internal, that is, one of **Clifm**'s built-in commands, the corresponding function will be called and executed; if not, if it is rather an external command, it will be executed by the system shell (via `launch_execle()`, also in `exec.c`).
 
 **D)** Listing
 
-This is the basic structure of _CliFM_: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
+This is the basic structure of **Clifm**: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
 
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), operating on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
 
@@ -216,29 +216,29 @@ This is the basic structure of _CliFM_: generally speaking, it is just a shell. 
 
 **Note**: For the list of dependencies, see the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
 
-_CliFM_ is compiled using `gcc` (or `clang`) as follows:
+**CliFM** is compiled using `gcc` (or `clang`) as follows:
 
 1)  _Linux_:
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lcap -lacl -lmagic
 ```
 
-2)  _FreeBSD_:
+2)  _FreeBSD_ / _DragonFly_:
 
 ```sh
-gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lintl -lmagic
+gcc -I/usr/local/include -L/usr/local/lib -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lintl -lmagic
 ```
 
 3)  _NetBSD_:
 
 ```sh
-gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lintl -lreadline -lmagic
+gcc -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lintl -lreadline -lmagic
 ```
 
 4)  _OpenBSD_:
 
 ```sh
-cc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/local/include -L/usr/local/lib -lereadline -lintl -lmagic
+cc -I/usr/local/include -L/usr/local/lib -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lereadline -lintl -lmagic
 ```
 
 5)  _Haiku_:
@@ -259,7 +259,7 @@ upx clifm
 
 ### Compiling features in/out
 
-_CliFM_ allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a POSIX compliant executable without icons support:
+**Clifm** allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a POSIX compliant executable without icons support:
 ```sh
 gcc ... -D_BE_POSIX -D_NO_ICONS ...
 ```
@@ -297,4 +297,4 @@ make -f misc/GNU/Makefile _BE_POSIX=1 _NO_ICONS=1
 
 ## 6) Plugins
 
-CliFM's plugins, that is, commands or set of commands executed by _CliFM_, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
+**Clifm**'s plugins, that is, commands or set of commands executed by **Clifm**, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
