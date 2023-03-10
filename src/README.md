@@ -216,29 +216,29 @@ This is the basic structure of _CliFM_: generally speaking, it is just a shell. 
 
 **Note**: For the list of dependencies, see the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
 
-_CliFM_ is compiled using `gcc` (or `clang`) as follows:
+**CliFM** is compiled using `gcc` (or `clang`) as follows:
 
 1)  _Linux_:
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lcap -lacl -lmagic
 ```
 
-2)  _FreeBSD_:
+2)  _FreeBSD_ / _DragonFly_:
 
 ```sh
-gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lintl -lmagic
+gcc -I/usr/local/include -L/usr/local/lib -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lintl -lmagic
 ```
 
 3)  _NetBSD_:
 
 ```sh
-gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lintl -lreadline -lmagic
+gcc -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lintl -lreadline -lmagic
 ```
 
 4)  _OpenBSD_:
 
 ```sh
-cc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/local/include -L/usr/local/lib -lereadline -lintl -lmagic
+cc -I/usr/local/include -L/usr/local/lib -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lereadline -lintl -lmagic
 ```
 
 5)  _Haiku_:
