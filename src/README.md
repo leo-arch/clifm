@@ -149,7 +149,7 @@ To make sure your structs are properly aligned, add `-Wpadded` to detect misalig
 As a plus, make sure to fix all errors/warnings emitted by a security hardened compilation, like the one [recommended by Red Hat](https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc):
 
 ```sh
-gcc -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fstack-protector-strong -m64  -mtune=generic -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -Wl,-z,relro -Wl,--as-needed  -Wl,-z,now -Wl,--build-id=sha1
+gcc -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fstack-protector-strong -mtune=generic -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -Wl,-z,relro -Wl,--as-needed  -Wl,-z,now -Wl,--build-id=sha1
 ```
 
 ### 5. Comments
