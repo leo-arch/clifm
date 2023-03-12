@@ -3022,13 +3022,13 @@ check_colors(void)
 	char *nc = getenv("NO_COLOR");
 	char *cnc = getenv("CLIFM_NO_COLOR");
 	char *cfc = getenv("CLIFM_FORCE_COLOR");
-	/* See https://bixense.com/clicolors
-	 * This environment variable is also honored by the FreeBSD ls(1) */
-/*	char *cc = getenv("CLICOLOR");
-	char *ccf = getenv("CLICOLOR_FORCE"); */
 
-	if (term_caps.color == 0 || (nc && *nc) || (cnc && *cnc)) {
-/*	|| (cc && *cc == '0' && !*(cc + 1))) { */
+	/* See https://bixense.com/clicolors */
+	char *cc = getenv("CLICOLOR");
+	char *ccf = getenv("CLICOLOR_FORCE");
+
+	if (term_caps.color == 0 || (nc && *nc) || (cnc && *cnc)
+	|| (cc && *cc == '0' && !*(cc + 1))) {
 		conf.colorize = 0;
 	} else {
 		if (conf.colorize == UNSET) {
@@ -3039,8 +3039,7 @@ check_colors(void)
 		}
 	}
 
-	if (xargs.colorize == UNSET && cfc && *cfc) {
-/*	if (xargs.colorize == UNSET && ((cfc && *cfc) || (ccf && *ccf && *ccf != '0'))) { */
+	if (xargs.colorize == UNSET && ((cfc && *cfc) || (ccf && *ccf && *ccf != '0'))) {
 		if (term_caps.color == 0)
 			/* The user is forcing the use of colors even when the terminal
 			 * reports no color capability. Let's assume a highly compatible value */

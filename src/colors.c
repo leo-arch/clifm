@@ -1348,7 +1348,7 @@ set_fzf_opts(char *line)
 /* Get color lines from the configuration file */
 static int
 read_color_scheme_file(const char *colorscheme, char **filecolors,
-                     char **extcolors, char **ifacecolors, const int env)
+			char **extcolors, char **ifacecolors, const int env)
 {
 	/* Allocate some memory for custom color variables */
 	defs = (struct defs_t *)xnmalloc(MAX_DEFS + 1, sizeof(struct defs_t));
