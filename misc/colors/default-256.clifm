@@ -241,9 +241,8 @@ ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.taz=ARCHIVE
 
 # Same as DateShades, but for file sizes
 #SizeShades="1,31-2,32,33,31"
-SizeShades="2,196-2,43,76,227,214,202"
-#SizeShades="2,196-2,6,2,184,214,202"
-#SizeShades="3,#ff0000-2,#00d700,#87d700,#ffff5f,#ffaf00,#ff5f00"
+#SizeShades="2,196-2,43,76,227,214,202"
+#SizeShades="3,#ff0000-2,#00d7af,#87d700,#ffff5f,#ffaf00,#ff5f00"
 
 #NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to be unset (default)
 

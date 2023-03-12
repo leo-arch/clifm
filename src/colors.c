@@ -1000,9 +1000,108 @@ set_iface_colors(char **colors, const size_t words)
 	free(colors);
 }
 
+static void
+set_shades(char *line, const int type)
+{
+	char *l = remove_quotes(line);
+	if (!l || !*l)
+		return;
+
+	char *str = strtok(l, ",");
+	if (!str || !*str)
+		return;
+
+	int t = *str - '0';
+	if (t < 0 || t > 3)
+		return;
+
+	if (type == DATE_SHADES)
+		date_shades.type = (uint8_t)t;
+	else
+		size_shades.type = (uint8_t)t;
+
+	int c = 0;
+	while ((str = strtok(NULL, ",")) && c < NUM_SHADES) {
+		if (*str == '#') {
+			if (!*(str + 1) || t != SHADE_TYPE_TRUECOLOR)
+				goto NEXT;
+
+			int a = 0, r = 0, g = 0, b = 0;
+
+			if (get_rgb(str + 1, &a, &r, &g, &b) == -1)
+				goto NEXT;
+
+			if (type == DATE_SHADES) {
+				date_shades.shades[c].attr = (uint8_t)a;
+				date_shades.shades[c].R = (uint8_t)r;
+				date_shades.shades[c].G = (uint8_t)g;
+				date_shades.shades[c].B = (uint8_t)b;
+			} else {
+				size_shades.shades[c].attr = (uint8_t)a;
+				size_shades.shades[c].R = (uint8_t)r;
+				size_shades.shades[c].G = (uint8_t)g;
+				size_shades.shades[c].B = (uint8_t)b;
+			}
+
+			goto NEXT;
+		}
+
+		if (t == SHADE_TYPE_TRUECOLOR)
+			goto NEXT;
+
+		char *p = strchr(str, '-');
+		uint8_t color_attr = 0;
+
+		if (p) {
+			*p = '\0';
+			if (*(p + 1) && *(p + 1) >= '0' && *(p + 1) <= '9' && !*(p + 2))
+				color_attr = (uint8_t)(*(p + 1) - '0');
+		}
+
+		int n = atoi(str);
+		if (n < 0 || n > 255)
+			goto NEXT;
+
+		if (type == DATE_SHADES) {
+			date_shades.shades[c].attr = color_attr;
+			date_shades.shades[c].R = (uint8_t)n;
+		} else {
+			size_shades.shades[c].attr = color_attr;
+			size_shades.shades[c].R = (uint8_t)n;
+		}
+
+NEXT:
+		c++;
+	}
+}
+
+static void
+set_default_date_shades(void)
+{
+	char tmp[NAME_MAX];
+	snprintf(tmp, sizeof(tmp), "%s", term_caps.color >= 256
+		? DEF_DATE_SHADES_256 : DEF_DATE_SHADES_8);
+	set_shades(tmp, DATE_SHADES);
+}
+
+static void
+set_default_size_shades(void)
+{
+	char tmp[NAME_MAX];
+	snprintf(tmp, sizeof(tmp), "%s", term_caps.color >= 256
+		? DEF_SIZE_SHADES_256 : DEF_SIZE_SHADES_8);
+	set_shades(tmp, SIZE_SHADES);
+}
+
 void
 set_default_colors(void)
 {
+	if (size_shades.type == SHADE_TYPE_UNSET)
+		set_default_size_shades();
+
+	if (date_shades.type == SHADE_TYPE_UNSET)
+		set_default_date_shades();
+
 	if (!*hb_c) strcpy(hb_c, DEF_HB_C);
 	if (!*hc_c) strcpy(hc_c, DEF_HC_C);
 	if (!*hd_c) strcpy(hd_c, DEF_HD_C);
@@ -1148,6 +1247,14 @@ get_colors_from_env(char **file, char **ext, char **iface)
 	char *env_filecolors = getenv("CLIFM_FILE_COLORS");
 	char *env_extcolors = getenv("CLIFM_EXT_COLORS");
 	char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
+	char *env_date_shades = getenv("CLIFM_DATE_SHADES");
+	char *env_size_shades = getenv("CLIFM_SIZE_SHADES");
+
+	if (env_date_shades)
+		set_shades(env_date_shades, DATE_SHADES);
+
+	if (env_size_shades)
+		set_shades(env_size_shades, SIZE_SHADES);
 
 	if (env_filecolors)
 		*file = savestring(env_filecolors, strlen(env_filecolors));
@@ -1157,102 +1264,6 @@ get_colors_from_env(char **file, char **ext, char **iface)
 
 	if (env_ifacecolors)
 		*iface = savestring(env_ifacecolors, strlen(env_ifacecolors));
-}
-
-static void
-set_shades(char *line, const int type)
-{
-//	char *tmp = (char *)NULL;
-//	tmp = getenv(type == DATE_SHADES ? "CLIFM_DATE_SHADES" : "CLIFM_SIZE_SHADES");
-
-//	char *l = remove_quotes(tmp ? tmp : line);
-	char *l = remove_quotes(line);
-	if (!l || !*l)
-		return;
-
-	char *str = strtok(l, ",");
-	if (!str || !*str)
-		return;
-
-	int t = *str - '0';
-	if (t < 0 || t > 3)
-		return;
-
-	if (type == DATE_SHADES)
-		date_shades.type = (uint8_t)t;
-	else
-		size_shades.type = (uint8_t)t;
-
-	int c = 0;
-	while ((str = strtok(NULL, ",")) && c < NUM_SHADES) {
-		if (*str == '#') {
-			if (!*(str + 1) || t != SHADE_TYPE_TRUECOLOR)
-				goto NEXT;
-
-			int a = 0, r = 0, g = 0, b = 0;
-
-			if (get_rgb(str + 1, &a, &r, &g, &b) == -1)
-				goto NEXT;
-
-			if (type == DATE_SHADES) {
-				date_shades.shades[c].attr = (uint8_t)a;
-				date_shades.shades[c].R = (uint8_t)r;
-				date_shades.shades[c].G = (uint8_t)g;
-				date_shades.shades[c].B = (uint8_t)b;
-			} else {
-				size_shades.shades[c].attr = (uint8_t)a;
-				size_shades.shades[c].R = (uint8_t)r;
-				size_shades.shades[c].G = (uint8_t)g;
-				size_shades.shades[c].B = (uint8_t)b;
-			}
-
-			goto NEXT;
-		}
-
-		if (t == SHADE_TYPE_TRUECOLOR)
-			goto NEXT;
-
-		char *p = strchr(str, '-');
-		uint8_t color_attr = 0;
-
-		if (p) {
-			*p = '\0';
-			if (*(p + 1) && *(p + 1) >= '0' && *(p + 1) <= '9' && !*(p + 2))
-				color_attr = (uint8_t)(*(p + 1) - '0');
-		}
-
-		int n = atoi(str);
-		if (n < 0 || n > 255)
-			goto NEXT;
-
-		if (type == DATE_SHADES) {
-			date_shades.shades[c].attr = color_attr;
-			date_shades.shades[c].R = (uint8_t)n;
-		} else {
-			size_shades.shades[c].attr = color_attr;
-			size_shades.shades[c].R = (uint8_t)n;
-		}
-
-NEXT:
-		c++;
-	}
-}
-
-static void
-set_default_shades(void)
-{
-	char tmp[NAME_MAX];
-	if (term_caps.color >= 256) {
-		snprintf(tmp, sizeof(tmp), "%s", DEF_DATE_SHADES_256);
-		set_shades(tmp, DATE_SHADES);
-		snprintf(tmp, sizeof(tmp), "%s", DEF_SIZE_SHADES_256);
-		set_shades(tmp, SIZE_SHADES);
-	} else {
-		snprintf(tmp, sizeof(tmp), "%s", DEF_DATE_SHADES_8);
-		set_shades(tmp, DATE_SHADES);
-		snprintf(tmp, sizeof(tmp), "%s", DEF_SIZE_SHADES_8);
-		set_shades(tmp, SIZE_SHADES);
-	}
 }
 
 #ifndef CLIFM_SUCKLESS
@@ -1569,12 +1580,13 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 		}
 #endif /* !_NO_ICONS */
 
-		else if (*line == 'D' && strncmp(line, "DateShades=", 11) == 0) {
+		else if (date_shades.type == SHADE_TYPE_UNSET
+		&& *line == 'D' && strncmp(line, "DateShades=", 11) == 0) {
 			set_shades(line + 11, DATE_SHADES);
 		}
 
-
-		else if (*line == 'S' && strncmp(line, "SizeShades=", 11) == 0) {
+		else if (size_shades.type == SHADE_TYPE_UNSET
+		&& *line == 'S' && strncmp(line, "SizeShades=", 11) == 0) {
 			set_shades(line + 11, SIZE_SHADES);
 		}
 	}
@@ -1754,7 +1766,8 @@ set_colors(const char *colorscheme, const int check_env)
 		 *extcolors = (char *)NULL,
 	     *ifacecolors = (char *)NULL;
 
-	set_default_shades();
+	date_shades.type = SHADE_TYPE_UNSET;
+	size_shades.type = SHADE_TYPE_UNSET;
 
 #ifndef _NO_ICONS
 	*dir_ico_c = '\0';
