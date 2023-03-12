@@ -1113,9 +1113,6 @@ free_extension_colors(void)
 static int
 get_cur_colorscheme(const char *colorscheme)
 {
-	if (!colorscheme)
-		return EXIT_FAILURE;
-
 	char *def_cscheme = (char *)NULL;
 	int i = (int)cschemes_n;
 	while (--i >= 0) {
@@ -1165,6 +1162,10 @@ get_colors_from_env(char **file, char **ext, char **iface)
 static void
 set_shades(char *line, const int type)
 {
+//	char *tmp = (char *)NULL;
+//	tmp = getenv(type == DATE_SHADES ? "CLIFM_DATE_SHADES" : "CLIFM_SIZE_SHADES");
+
+//	char *l = remove_quotes(tmp ? tmp : line);
 	char *l = remove_quotes(line);
 	if (!l || !*l)
 		return;
@@ -1346,14 +1347,14 @@ get_colors_from_file(const char *colorscheme, char **filecolors,
 	char colorscheme_file[PATH_MAX];
 	*colorscheme_file = '\0';
 	if (config_ok == 1 && colors_dir) {
-		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.clifm", colors_dir, /* NOLINT */
+		snprintf(colorscheme_file, sizeof(colorscheme_file), "%s/%s.clifm", colors_dir, /* NOLINT */
 			colorscheme ? colorscheme : "default");
 	}
 
 	/* If not in local dir, check system data dir as well */
 	struct stat attr;
 	if (data_dir && (!*colorscheme_file || stat(colorscheme_file, &attr) == -1)) {
-		snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s/colors/%s.clifm", /* NOLINT */
+		snprintf(colorscheme_file, sizeof(colorscheme_file), "%s/%s/colors/%s.clifm", /* NOLINT */
 			data_dir, PNL, colorscheme ? colorscheme : "default");
 	}
 
@@ -1747,7 +1748,7 @@ split_color_line(char *colors_line, const int type)
  * and set colors accordingly. If some value is not found or is a wrong
  * value, the default is set. */
 int
-set_colors(const char *colorscheme, const int env)
+set_colors(const char *colorscheme, const int check_env)
 {
 	char *filecolors = (char *)NULL,
 		 *extcolors = (char *)NULL,
@@ -1763,8 +1764,8 @@ set_colors(const char *colorscheme, const int env)
 	if (colorscheme && *colorscheme && color_schemes)
 		ret = get_cur_colorscheme(colorscheme);
 
-	/* env is true only when the function is called from main() */
-	if (ret == EXIT_SUCCESS && env)
+	/* CHECK_ENV is true only when this function is called from check_colors() (config.c) */
+	if (ret == EXIT_SUCCESS && check_env == 1)
 		get_colors_from_env(&filecolors, &extcolors, &ifacecolors);
 
 #ifndef CLIFM_SUCKLESS
@@ -1773,7 +1774,7 @@ set_colors(const char *colorscheme, const int env)
 		/* Get color lines, for both file types and extensions, from
 		 * CUR_CSCHEME file */
 		if (get_colors_from_file(cur_cscheme, &filecolors,
-		&extcolors, &ifacecolors, env) == EXIT_FAILURE) {
+		&extcolors, &ifacecolors, check_env) == EXIT_FAILURE) {
 			clear_defs();
 			return EXIT_FAILURE;
 		}
@@ -1783,7 +1784,7 @@ set_colors(const char *colorscheme, const int env)
 
 	if (!extcolors) {
 		/* Unload current extension colors */
-		if (ext_colors_n)
+		if (ext_colors_n > 0)
 			free_extension_colors();
 	} else {
 		split_extension_colors(extcolors);
@@ -1980,23 +1981,23 @@ get_colorschemes(void)
 	}
 
 	if (!data_dir)
-		return i;
+		goto END;
 
 	char sys_colors_dir[PATH_MAX];
-	snprintf(sys_colors_dir, PATH_MAX - 1, "%s/%s/colors", data_dir, PNL); /* NOLINT */
+	snprintf(sys_colors_dir, sizeof(sys_colors_dir), "%s/%s/colors", data_dir, PNL); /* NOLINT */
 
 	if (stat(sys_colors_dir, &attr) == -1)
-		return i;
+		goto END;
 
 	int total_tmp = schemes_total;
 	schemes_total += (count_dir(sys_colors_dir, NO_CPOP) - 2);
 
 	if (schemes_total <= total_tmp)
-		return i;
+		goto END;
 
 	if (!(dir_p = opendir(sys_colors_dir))) {
 		_err('e', PRINT_PROMPT, "opendir: %s: %s\n", sys_colors_dir, strerror(errno));
-		return i;
+		goto END;
 	}
 
 	color_schemes = (char **)xrealloc(color_schemes,
@@ -2037,8 +2038,8 @@ get_colorschemes(void)
 	closedir(dir_p);
 	color_schemes[i] = (char *)NULL;
 
+END:
 	qsort(color_schemes, i, sizeof(char *), (QSFUNC *)compare_strings);
-
 	return i;
 }
 #endif /* CLIFM_SUCKLESS */
