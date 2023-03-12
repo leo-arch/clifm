@@ -1392,7 +1392,7 @@ get_ext_info_long(const char *name, const size_t name_len, int *trim, size_t *ex
 static void
 calc_relative_time(const time_t age, char *s)
 {
-	if (age < 0L) /* Future */
+	if (age < 0L) /* Future (AGE, however, is guaranteed to be positive) */
 		snprintf(s, MAX_TIME_STR, " -     ");
 	else if (age < RT_MINUTE)
 		snprintf(s, MAX_TIME_STR, "%*ju  sec", 2, (uintmax_t)age);
@@ -1405,14 +1405,14 @@ calc_relative_time(const time_t age, char *s)
 	else if (age < RT_MONTH) {
 		/* RT_MONTH is 30 days. But since Feb has only 28, we get 4 weeks
 		 * in some cases, which is weird. Always make 4 weeks into 1 month */
-		long n = age / RT_WEEK;
+		long long n = age / RT_WEEK;
 		if (n == 4)
 			snprintf(s, MAX_TIME_STR, " 1  mon");
 		else
 			snprintf(s, MAX_TIME_STR, "%*ju week", 2, (uintmax_t)n);
 	}
 	else if (age < RT_YEAR) {
-		long n = age / RT_MONTH;
+		long long n = age / RT_MONTH;
 		if (n == 12)
 			snprintf(s, MAX_TIME_STR, " 1 year");
 		else
