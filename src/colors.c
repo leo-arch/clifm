@@ -1115,6 +1115,7 @@ get_cur_colorscheme(const char *colorscheme)
 {
 	char *def_cscheme = (char *)NULL;
 	int i = (int)cschemes_n;
+
 	while (--i >= 0) {
 		if (*colorscheme == *color_schemes[i]
 		&& strcmp(colorscheme, color_schemes[i]) == 0) {
@@ -1122,8 +1123,7 @@ get_cur_colorscheme(const char *colorscheme)
 			break;
 		}
 
-		if (*color_schemes[i] == 'd'
-		&& strcmp(color_schemes[i], term_caps.color < 256 ? DEF_COLOR_SCHEME
+		if (strcmp(color_schemes[i], term_caps.color < 256 ? DEF_COLOR_SCHEME
 		: DEF_COLOR_SCHEME_256) == 0)
 			def_cscheme = color_schemes[i];
 	}
@@ -1336,7 +1336,7 @@ set_fzf_opts(char *line)
 
 /* Get color lines from the configuration file */
 static int
-get_colors_from_file(const char *colorscheme, char **filecolors,
+read_color_scheme_file(const char *colorscheme, char **filecolors,
                      char **extcolors, char **ifacecolors, const int env)
 {
 	/* Allocate some memory for custom color variables */
@@ -1769,11 +1769,8 @@ set_colors(const char *colorscheme, const int check_env)
 		get_colors_from_env(&filecolors, &extcolors, &ifacecolors);
 
 #ifndef CLIFM_SUCKLESS
-	if (ret == EXIT_SUCCESS && xargs.stealth_mode != 1
-	&& (!filecolors || !extcolors || !ifacecolors)) {
-		/* Get color lines, for both file types and extensions, from
-		 * CUR_CSCHEME file */
-		if (get_colors_from_file(cur_cscheme, &filecolors,
+	if (ret == EXIT_SUCCESS && xargs.stealth_mode != 1) {
+		if (read_color_scheme_file(cur_cscheme, &filecolors,
 		&extcolors, &ifacecolors, check_env) == EXIT_FAILURE) {
 			clear_defs();
 			return EXIT_FAILURE;
