@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 1, 2023" "clifm 1.10.10" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 12, 2023" "clifm 1.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2540,6 +2540,12 @@ Same as above, but for file extensions
 .TP
 .B CLIFM_IFACE_COLORS
 Same as above, but for different elements of \fBclifm\fR's interface
+.TP
+.B CLIFM_DATE_SHADES
+A comma separated list of colors used to print timetamps based on age
+.TP
+.B CLIFM_SIZE_SHADES
+Same as \fBCLIFM_DATE_SHADES\fR, but for file sizes
 .TP
 .B CLIFM_FORCE_COLOR
 Force the use of colors, even if the terminal informs that it does not support colors
