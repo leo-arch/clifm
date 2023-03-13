@@ -245,10 +245,6 @@ save_jumpdb(void)
 			/* Discount from TOTAL_RANK the rank of the now forgotten
 			 * directory to keep this total up to date */
 			total_rank -= jump_db[i].rank;
-#ifdef JUMP_MONITOR
-			printf("jump: %s: Forgotten directory (%d)\n", jump_db[i].path, jump_db[i].rank);
-			fflush(stdout);
-#endif
 			continue;
 		}
 
