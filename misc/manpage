@@ -1918,7 +1918,7 @@ Set the \fIOpener\fR option in the configuration file to the desired opener, e.g
 .TP
 \fBUsing clifm as a standalone resource opener\fR
 .TP
-Thought \fBclifm\fR is a file manager, it can be used as a simple resource opener via the \fI\-\-open\fR command line option. For example:
+Though \fBclifm\fR is a file manager, it can be used as a simple resource opener via the \fI\-\-open\fR command line option. For example:
 
  clifm --open /path/to/my_file.jpg
  clifm --open /path/to/my_dir
