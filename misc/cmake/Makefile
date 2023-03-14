@@ -6,7 +6,7 @@ BIN ?= clifm
 
 PREFIX ?= /usr/local
 DATADIR ?= $(PREFIX)/share
-MANDIR ?= $(DATADIR)/man
+MANDIR ?= $(PREFIX)/man
 LOCALEDIR ?= $(DATADIR)/locale
 DESKTOPPREFIX ?= $(DATADIR)/applications
 DESKTOPICONPREFIX ?= $(DATADIR)/icons/hicolor
