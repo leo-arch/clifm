@@ -1918,7 +1918,7 @@ Set the \fIOpener\fR option in the configuration file to the desired opener, e.g
 .TP
 \fBUsing clifm as a standalone resource opener\fR
 .TP
-Though \fBclifm\fR is a file manager, it can be used as a simple resource opener via the \fI\-\-open\fR command line option. For example:
+Thought \fBclifm\fR is a file manager, it can be used as a simple resource opener via the \fI\-\-open\fR command line option. For example:
 
  clifm --open /path/to/my_file.jpg
  clifm --open /path/to/my_dir
@@ -2069,110 +2069,118 @@ The pipe (\fBCLIFM_BUS\fR) is deleted immediately after the execution of its con
 This is a list of available plugins:
 .TS
 allbox;
-lb lb lb lb
-l l l l.
-Action name	Description	Plugin	Dependencies
+lb lb lb
+l l l.
+Action name	Description	Dependencies
 T{
 bn
-T}	Create files in batch	batch_create.sh	-
+T}	Create files in batch	-
 T{
 bcp
-T}	Copy files in batch	batch_copy.sh	-
+T}	Copy files in batch	-
 T{
 bmi
-T}	Import bookmarks	bm_import.sh	-
+T}	Import bookmarks	-
 T{
 clip
-T}	Interact with the primary clipboard	clip.sh	\fB(1)\fR
+T}	Interact with the primary clipboard	\fB(1)\fR
 T{
-T}	Test you terminal colors capability	colors.sh	-
+\fIunset\fR
+T}	Test you terminal colors capability	-
 T{
 cr
-T}	Copy files to a remote location	cprm.sh	fzf, and scp, ffsend, or croc
+T}	Copy files to a remote location	fzf, and scp, ffsend, or croc
 T{
 da
-T}	Disk usage analyzer	disk_analyzer.sh	du, fzf
+T}	Disk usage analyzer	du, fzf
 T{
 dr
-T}	Drag and drop files	dragondrop.sh	dragon or dragon-drag-and-drop
+T}	Drag and drop files	dragon or dragon-drag-and-drop
 T{
 fdups
-T}	Find and remove file duplicates	fdups.sh	find, md5sum, sort, uniq, xargs, sed, stat
+T}	Find/remove file dups	\fB(2)\fR
 T{
 +
-T}	Find files in the current directory	finder.sh	fzf or rofi
+T}	Find files in the current directory	fzf or rofi
 T{
 _ (underscore)
-T}	Quickly change directory	fzcd.sh	fzf
+T}	Quickly change directory	fzf
 T{
 h
-T}	Browse the commands history	fzfhist.h	fzf
+T}	Browse the commands history	fzf
 T{
 \- (yes, just a dash)
-T}	Navigate/select/preview files	fzfnav.sh/BFG.sh	See the section below
+T}	Navigate/select/preview files	See section below
 T{
 *
-T}	Select files (includes flat view)	fzfsel.sh	fzf, find
+T}	Select files (includes flat view)	fzf, find
 T{
 **
-T}	Deselect files	fzfdesel.sh	fzf
+T}	Deselect files	fzf
 T{
-T}	Show git repo status	git.sh	git
+\fIunset\fR
+T}	Show git repo status	git
 T{
 ih
-T}	Browse \fBclifm\fR's manpage	ihelp.sh	fzf
+T}	Browse \fBclifm\fR's manpage	fzf
 T{
 i
-T}	Image thumbnails previewer	img_viewer.sh	sxiv, feh or lsix
+T}	Image thumbnails previewer	sxiv, feh or lsix
 T{
 ++
-T}	Jump to a directory in the jump database	jumper.sh	fzf or rofi
+T}	Jump to a directory in the jump database	fzf or rofi
 T{
 kbgen
-T}	Get escape codes for keybindings	kbgen.c	\fB(2)\fR
+T}	Get escape codes for keybindings	\fB(3)\fR
 T{
 kd
-T}	Decrypt a GnuPG encrypted file	decrypt.sh	gpg, tar, sed, grep
+T}	Decrypt a GnuPG encrypted file	gpg, tar, sed, grep
 T{
 ke
-T}	Encrypt files/dirs using GnuPG	encrypt.sh	gpg, tar, sed, fzf, awk, xargs
+T}	Encrypt files/dirs using GnuPG	gpg, tar, sed, fzf, awk, xargs
 T{
 ml
-T}	List files by a given MIME type	mime_list.sh	fzf, file
+T}	List files by a given MIME type	fzf, file
 T{
 music
-T}	Create a music playlist	music_player.sh	mplayer
+T}	Create a music playlist	mplayer
 T{
 gg
-T}	Pipe files in CWD through a pager	pager.sh	less, column
+T}	Pipe files in CWD through a pager	less, column
 T{
 ptot
-T}	Preview PDF files as text	pdf_viewer.sh	pdftotext
+T}	Preview PDF files as text	pdftotext
 T{
 rrm
-T}	Recursively remove files	recur_rm.sh	find, fzf
+T}	Recursively remove files	find, fzf
 T{
 //
-T}	Search files by content	rgfind.sh	fzf, ripgrep
+T}	Search files by content	fzf, ripgrep
 T{
-T}	Update plugins	update.sh	-
+\fIunset\fR
+T}	Update plugins	-
 T{
 vid
-T}	Preview video files thumbnails	vid_viewer.sh	ffmpegthumbnailer
+T}	Preview video files thumbnails	ffmpegthumbnailer
 T{
 vt
-T}	Virtual directory for sets of files	virtualize.sh	sed
+T}	Virtual directory for sets of files	sed
 T{
 wall
-T}	Set image as wallpaper	wallpaper_setter.sh	\fB(3)\fR
+T}	Set image as wallpaper	\fB(4)\fR
 .TE
 
 .sp
 \fB(1)\fR xclip or xsel (Xorg), wl-copy/wl-paste (Wayland), clipboard (Haiku), clip (Cygwin), pbcopy/pbget (MacOS), termux-clipboard-get/termux-clipboard-set (Termux), cb (cross-platform: https://github.com/Slackadays/Clipboard)
 .sp
-\fB(2)\fR It needs to be compiled first: \fIgcc -o kbgen kbgen.c -lcurses\fR
+\fB(2)\fR find, md5sum, sort, uniq, xargs, sed, stat
 .sp
-\fB(3)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
+\fB(3)\fR It needs to be compiled first: \fIgcc -o kbgen kbgen.c -lcurses\fR
+.sp
+\fB(4)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
+.sp
+To find out the actual file executed by an action name just run \fIactions\fR. For example, in this line: \fImyplugin -> myplugin.sh\fR, the action name \fImyplugin\fR executes \fImuplugin.sh\fR, which must be located in either \fIHOME/.config/clifm/plugins\fR or \fIDATADIR/clifm/plugins\fR (usually \fI/usr/local/share/clifm/plugins\fR or \fI/usr/share/clifm/plugins\fR).
+.sp
 
 .B Dependencies of the previewer plugin (fzfnav.sh)
 

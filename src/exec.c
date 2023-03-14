@@ -254,7 +254,7 @@ int
 get_exit_code(const int status, const int exec_flag)
 {
 	if (WIFSIGNALED(status))
-		/* As required by exit(1p), we return a value greater than 128 */
+		/* As required by exit(1p), we return a value greater than 128 (EXEC_SIGINT) */
 		return (EXEC_SIGINT + WTERMSIG(status));
 	if (WIFEXITED(status))
 		return WEXITSTATUS(status);
