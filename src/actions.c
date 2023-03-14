@@ -187,13 +187,7 @@ run_action(char *action, char **args)
 	 * zombie process. Store plugin exit status in EXIT_STATUS */
 	int status = 0, exit_status = 0;
 	if (waitpid(pid, &status, 0) > 0) {
-			if (WIFEXITED(status) && !WEXITSTATUS(status)) {
-			exit_status = EXIT_SUCCESS;
-		} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-			exit_status = WEXITSTATUS(status);
-		} else {
-			exit_status = EXCRASHERR;
-		}
+		exit_status = get_exit_code(status, EXEC_FG_PROC);
 	} else {
 		exit_status = errno;
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: waitpid: %s\n", strerror(errno));

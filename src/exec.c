@@ -250,7 +250,7 @@ run_and_refresh(char **cmd, const int skip_force)
 	return EXIT_SUCCESS;
 }
 
-static int
+int
 get_exit_code(const int status, const int exec_flag)
 {
 	if (WIFSIGNALED(status))
@@ -301,7 +301,7 @@ int
 launch_execle(const char *cmd)
 {
 	if (!cmd || !*cmd)
-		return EXNULLERR;
+		return EXEC_NULLPARAM;
 
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
@@ -339,7 +339,7 @@ int
 launch_execve(char **cmd, const int bg, const int xflags)
 {
 	if (!cmd)
-		return EXNULLERR;
+		return EXEC_NULLPARAM;
 
 	/* Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid
 	 * won't be able to catch error codes coming from the child. */

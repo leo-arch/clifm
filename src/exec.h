@@ -32,14 +32,16 @@
 #define EXEC_BG_PROC 0
 #define EXEC_FG_PROC 1
 
-#define EXEC_NOTFOUND 127
-#define EXEC_SIGINT   128
+#define EXEC_NULLPARAM EXIT_FAILURE
+#define EXEC_NOTFOUND  127
+#define EXEC_SIGINT    128
 
 __BEGIN_DECLS
 
 int  exec_cmd(char **);
 void exec_chained_cmds(char *);
 void exec_profile(void);
+int  get_exit_code(const int, const int);
 int  launch_execve(char **, const int, const int);
 int  launch_execle(const char *);
 int  run_and_refresh(char **, const int);

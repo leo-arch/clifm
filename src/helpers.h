@@ -294,10 +294,6 @@ extern int watch;
 #define CPOP    1
 #define NO_CPOP 0
 
-/* Error codes, used by the launch_exec functions */
-#define EXNULLERR  79
-#define EXCRASHERR 82
-
 #define BACKGROUND 1
 #define FOREGROUND 0
 
