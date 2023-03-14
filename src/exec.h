@@ -29,6 +29,12 @@
 # include <signal.h>
 #endif
 
+#define EXEC_BG_PROC 0
+#define EXEC_FG_PROC 1
+
+#define EXEC_NOTFOUND 127
+#define EXEC_SIGINT   128
+
 __BEGIN_DECLS
 
 int  exec_cmd(char **);

@@ -251,48 +251,46 @@ run_and_refresh(char **cmd, const int skip_force)
 }
 
 static int
+get_exit_code(const int status, const int exec_flag)
+{
+	if (WIFSIGNALED(status))
+		/* As required by exit(1p), we return a value greater than 128 */
+		return (EXEC_SIGINT + WTERMSIG(status));
+	if (WIFEXITED(status))
+		return WEXITSTATUS(status);
+
+	return exec_flag == EXEC_BG_PROC ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+static int
 run_in_foreground(pid_t pid)
 {
 	int status = 0;
 
 	/* The parent process calls waitpid() on the child */
-	if (waitpid(pid, &status, 0) > 0) {
-		if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-			/* The program terminated normally and executed successfully */
-			return EXIT_SUCCESS;
-		} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-			/* Program terminated normally, but returned a non-zero status.
-			 * Error codes should be printed by the child process */
-			return WEXITSTATUS(status);
-		} else {
-			/* The program didn't terminate normally. In this case too,
-			 * error codes should be printed by the child process */
-			return EXCRASHERR;
-		}
-	} else { /* waitpid() failed */
-		int ret = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
-		return ret;
-	}
+	if (waitpid(pid, &status, 0) > 0)
+		return get_exit_code(status, EXEC_FG_PROC);
 
-	return EXIT_FAILURE; /* Never reached */
+	/* waitpid() failed */
+	int ret = errno;
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+	return ret;
 }
 
 static int
 run_in_background(pid_t pid)
 {
 	int status = 0;
-	pid_t wpid = waitpid(pid, &status, WNOHANG);
-	if (wpid == -1) {
+
+	if (waitpid(pid, &status, WNOHANG) == -1) {
+		int ret = errno;
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
-		return errno;
+		return ret;
 	}
 
 	zombies++;
-	if (WIFEXITED(status))
-		return WEXITSTATUS(status);
 
-	return EXIT_SUCCESS;
+	return get_exit_code(status, EXEC_BG_PROC);
 }
 
 /* Execute a command using the system shell (/bin/sh), which takes care
@@ -313,7 +311,7 @@ launch_execle(const char *cmd)
 	&& xargs.secure_env == 0)
 		sanitize_cmd_environ();
 
-	int ret = system(cmd);
+	int status = system(cmd);
 
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
 	&& xargs.secure_env == 0)
@@ -321,13 +319,7 @@ launch_execle(const char *cmd)
 
 	set_signals_to_ignore();
 
-	int exit_status = 0;
-	if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0)
-		exit_status = EXIT_SUCCESS;
-	else if (WIFEXITED(ret) && WEXITSTATUS(ret))
-		exit_status = WEXITSTATUS(ret);
-	else
-		exit_status = EXCRASHERR;
+	int exit_status = get_exit_code(status, EXEC_FG_PROC);
 
 	if (flags & DELAYED_REFRESH) {
 		flags &= ~DELAYED_REFRESH;
@@ -335,66 +327,6 @@ launch_execle(const char *cmd)
 	}
 
 	return exit_status;
-
-/*	// Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid won't
-	// be able to catch error codes coming from the child
-	signal(SIGCHLD, SIG_DFL);
-
-	flags |= RUNNING_SHELL_CMD;
-	flags |= RUNNING_CMD_FG;
-
-	int status, ret = 0;
-	pid_t pid = fork();
-	if (pid < 0) {
-		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
-		return errno;
-	} else if (pid == 0) {
-		// Reenable signals only for the child, in case they were
-		// disabled for the parent
-		signal(SIGHUP, SIG_DFL);
-		signal(SIGINT, SIG_DFL);
-		signal(SIGQUIT, SIG_DFL);
-		signal(SIGTERM, SIG_DFL);
-
-		// Get shell base name
-		char *name = strrchr(user.shell, '/');
-
-		execl(user.shell, name ? name + 1 : user.shell, "-c", cmd, NULL);
-		fprintf(stderr, "%s: %s: execle: %s\n", PROGRAM_NAME, user.shell,
-		    strerror(errno));
-		_exit(errno);
-	}
-	// Get command status
-	else {
-		// The parent process calls waitpid() on the child
-		if (waitpid(pid, &status, 0) > 0) {
-			if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-				// The program terminated normally and executed successfully
-				ret = EXIT_SUCCESS;
-			} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-				// Either "command not found" (WEXITSTATUS(status) == 127),
-				// "permission denied" (not executable) (WEXITSTATUS(status) ==
-				// 126) or the program terminated normally, but returned a
-				// non-zero status. These exit codes will be handled by the
-				// system shell itself, since we're using here execle()
-				ret = WEXITSTATUS(status);
-			} else { // The program didn't terminate normally
-				ret = EXCRASHERR;
-			}
-		} else { // Waitpid() failed
-			fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
-			    strerror(errno));
-			ret = errno;
-		}
-	}
-
-	flags &= ~RUNNING_CMD_FG;
-	if (flags & DELAYED_REFRESH) {
-		flags &= ~DELAYED_REFRESH;
-		refresh_files_list(0);
-	}
-
-	return ret;*/
 }
 
 /* Execute a command and return the corresponding exit status. The exit
@@ -413,7 +345,7 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	 * won't be able to catch error codes coming from the child. */
 	signal(SIGCHLD, SIG_DFL);
 
-	int ret = 0;
+	int status = 0;
 	pid_t pid = fork();
 	if (pid < 0) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
@@ -444,7 +376,7 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		execvp(cmd[0], cmd);
 		if (errno == ENOENT) {
 			fprintf(stderr, "%s: %s: Command not found\n", PROGRAM_NAME, cmd[0]);
-			_exit(127);
+			_exit(EXEC_NOTFOUND); /* 127, as required by exit(1p) */
 		} else {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
 			_exit(errno);
@@ -454,9 +386,9 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	/* Get command status (pid > 0) */
 	else {
 		if (bg == 1) {
-			ret = run_in_background(pid);
+			status = run_in_background(pid);
 		} else {
-			ret = run_in_foreground(pid);
+			status = run_in_foreground(pid);
 			if ((flags & DELAYED_REFRESH) && xargs.open != 1) {
 				flags &= ~DELAYED_REFRESH;
 				reload_dirlist();
@@ -464,10 +396,10 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		}
 	}
 
-	if (bg == 1 && ret == EXIT_SUCCESS && xargs.open != 1)
+	if (bg == 1 && status == EXIT_SUCCESS && xargs.open != 1)
 		reload_dirlist();
 
-	return ret;
+	return status;
 }
 
 /* Prevent the user from killing the program via the 'kill',
