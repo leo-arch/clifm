@@ -1100,8 +1100,8 @@ open_function(char **cmd)
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 		int ret = open_file(file);
 		if (!conf.opener && ret == EXIT_FAILURE) {
-			fputs(_("Add a new entry to the mimelist file ('mime edit' "
-				"or F6) or run 'open FILE APPLICATION'\n"), stderr);
+			fprintf(stderr, _("%s: Add a new entry to the mimelist file ('mime edit' "
+				"or F6) or run 'APP FILE' or 'open FILE APP'\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 		return ret;

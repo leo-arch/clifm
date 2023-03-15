@@ -43,7 +43,7 @@
 #include "checks.h"
 
 #ifndef _NO_MAGIC
-#include "mime.h"
+# include "mime.h"
 #endif
 
 #define OP_ISO    1
@@ -926,20 +926,30 @@ check_not_compressed(char **args)
 	return 0;
 }
 
-/* Check if we have at least one Zstandard file */
+/* Check whether we have at least one Zstandard file */
 static size_t
 check_zstandard(char **args)
 {
 	size_t zst = 0, i;
 
 	for (i = 1; args[i]; i++) {
-		if (args[i][strlen(args[i]) - 1] != 't')
+#ifndef _NO_MAGIC
+		char *mime = xmagic(args[i], MIME_TYPE);
+		if (!mime || !*mime)
 			continue;
+		if (strcmp(mime, "application/zstd") == 0) {
+			zst = 1;
+			free(mime);
+			break;
+		}
+		free(mime);
+#else
 		char *ret = strrchr(args[i], '.');
 		if (ret && strcmp(ret, ".zst") == 0) {
 			zst = 1;
 			break;
 		}
+#endif /* !_NO_MAGIC */
 	}
 
 	return zst;
