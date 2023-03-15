@@ -261,8 +261,10 @@ dump_config(void)
 	print_config_value("FzfPreview", &conf.fzf_preview, &n, DUMP_CONFIG_BOOL);
 #endif
 
+#ifndef _NO_ICONS
 	n = DEF_ICONS;
 	print_config_value("Icons", &conf.icons, &n, DUMP_CONFIG_BOOL);
+#endif
 	n = DEF_LIGHT_MODE;
 	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
 	n = DEF_LIST_DIRS_FIRST;

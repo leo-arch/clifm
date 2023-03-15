@@ -59,7 +59,6 @@
 #endif
 #include "prompt.h"
 #include "readline.h"
-#include "strings.h"
 #include "remotes.h"
 
 /* Globals */

@@ -60,7 +60,6 @@ typedef char *rl_cpvfunc_t;
 #include "readline.h"
 #include "builtins.h"
 #include "prompt.h"
-#include "strings.h"
 
 #ifndef _NO_HIGHLIGHT
 # include "highlight.h"

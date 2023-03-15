@@ -25,7 +25,6 @@
 #include "helpers.h"
 
 #include <stdio.h>
-//#include <stdlib.h>
 #include <string.h>
 #include <glob.h>
 #include <readline/readline.h>
@@ -36,7 +35,6 @@
 #include "colors.h"
 #include "exec.h"
 #include "listing.h"
-#include "strings.h"
 #include "sanitize.h"
 
 /* The opts struct contains option values previous to any autocommand call */

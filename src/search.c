@@ -445,8 +445,10 @@ SCANDIR_ERROR:
 
 	int eln_pad = 0;
 	if (!search_path) {
+#ifndef _NO_ICONS
 		if (conf.icons == 1)
 			flongest += 3;
+#endif
 
 		int largest = 0;
 		i = found;
@@ -489,9 +491,13 @@ SCANDIR_ERROR:
 
 		if (!search_path) {
 			printf("%s%*d%s %s%s%s%c", el_c, eln_pad, eln[i], df_c,
+#ifndef _NO_ICONS
 				conf.icons == 1 ? file_info[eln[i] - 1].icon_color : "",
 				conf.icons == 1 ? file_info[eln[i] - 1].icon : "",
 				df_c, conf.icons == 1 ? ' ' : 0);
+#else
+				"", "", df_c, 0);
+#endif
 		}
 
 		int name_pad = (last_column == 1 || i == (found - 1)) ? NO_PAD :
@@ -823,8 +829,10 @@ search_regex(char **args, const int invert, const int case_sens)
 
 		int eln_pad = 0;
 		if (!search_path) {
+#ifndef _NO_ICONS
 			if (conf.icons == 1)
 				flongest += 3;
+#endif
 
 			int largest = 0;
 			j = (int)found;
@@ -876,9 +884,13 @@ search_regex(char **args, const int invert, const int case_sens)
 
 			if (!search_path) {
 				printf("%s%*d%s %s%s%s%c", el_c, eln_pad, regex_index[i] + 1, df_c,
+#ifndef _NO_ICONS
 					conf.icons == 1 ? file_info[regex_index[i]].icon_color : "",
 					conf.icons == 1 ? file_info[regex_index[i]].icon : "",
 					df_c, conf.icons == 1 ? ' ' : 0);
+#else
+					"", "", df_c, 0);
+#endif
 			}
 
 			int name_pad = (last_column == 1 || counter == type_ok) ? NO_PAD :

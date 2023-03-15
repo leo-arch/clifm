@@ -67,7 +67,6 @@
 #include "misc.h"
 #include "properties.h"
 #include "sort.h"
-#include "strings.h"
 #include "checks.h"
 #include "exec.h"
 #include "autocmds.h"

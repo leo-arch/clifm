@@ -32,7 +32,6 @@ typedef char *rl_cpvfunc_t;
 #include <readline/readline.h>
 #endif
 
-#include "strings.h"
 #include "checks.h"
 #include "aux.h"
 

@@ -75,7 +75,6 @@ typedef char *rl_cpvfunc_t;
 #include "search.h"
 #include "selection.h"
 #include "sort.h"
-#include "strings.h"
 #ifndef _NO_TRASH
 # include "trash.h"
 #endif

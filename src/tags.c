@@ -40,7 +40,6 @@
 #include "exec.h"
 #include "init.h"
 #include "messages.h"
-#include "strings.h"
 #include "sort.h"
 
 /* A few printing functions */

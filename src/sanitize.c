@@ -30,7 +30,6 @@
 #include <errno.h>
 
 #include "sanitize.h"
-#include "strings.h"
 #include "aux.h"
 #include "misc.h"
 

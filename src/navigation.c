@@ -43,9 +43,6 @@
 #include "navigation.h"
 #include "messages.h"
 #include "readline.h"
-#if defined(__linux__) && defined(_BE_POSIX)
-# include "strings.h"
-#endif /* __linux__ && _BE_POSIX */
 
 #define BD_CONTINUE 2
 

@@ -76,7 +76,6 @@ typedef char *rl_cpvfunc_t;
 #include "listing.h"
 #include "navigation.h"
 #include "readline.h"
-#include "strings.h"
 #include "remotes.h"
 #include "messages.h"
 #include "file_operations.h"

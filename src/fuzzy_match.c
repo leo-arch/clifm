@@ -35,7 +35,6 @@
 #include <string.h>
 
 #include "fuzzy_match.h"
-#include "strings.h"
 #include "utf8.h"
 
 /* Three functions added to the utf8.h library */

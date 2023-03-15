@@ -60,7 +60,6 @@ typedef char *rl_cpvfunc_t;
 #include "profiles.h"
 #include "prompt.h"
 #include "messages.h"
-#include "strings.h"
 #include "readline.h"
 #include "file_operations.h"
 

@@ -62,7 +62,6 @@ typedef char *rl_cpvfunc_t;
 #include "aux.h"
 #include "misc.h"
 #include "checks.h"
-#include "strings.h"
 #include "colors.h"
 #include "navigation.h"
 #include "readline.h"
