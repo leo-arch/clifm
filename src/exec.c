@@ -221,7 +221,8 @@ run_and_refresh(char **cmd, const int skip_force)
 	tcmd[n] = (char *)NULL;
 	int ret = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
 
-	for (i = 0; tcmd[i]; i++)
+//	for (i = 0; tcmd[i]; i++)
+	for (i = 0; i < n; i++)
 		free(tcmd[i]);
 	free(tcmd);
 
