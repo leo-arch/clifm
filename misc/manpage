@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 12, 2023" "clifm 1.11" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 14, 2023" "clifm 1.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2042,9 +2042,15 @@ You can set \fISuggestFiletypeColor\fR to \fItrue\fR in the configuration file t
 \fBclifm\fR includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
 
 .SH 13. PLUGINS
-Plugins are just scripts or programs (written in any language) intended to add, extend or improve CliFM's functionalities. They are linked to actions names defined in a dedicated configuration file (\fIXDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.clifm\fR): entering the action name immediately executes the corresponding plugin.
+Plugins are just scripts or programs (written in any language) intended to add, extend or improve \fBclifm\fR's functionalities. They are linked to actions names defined in a dedicated configuration file (\fIXDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.clifm\fR).
 
 \fBNote\fR: In \fIstealth mode\fR, since access to configuration files is not allowed, plugins are disabled.
+
+To list available actions and the plugins they are linked to, just run \fIactions\fR.
+
+To execute a given plugin, just enter the corresponding action name (plus parameters if requiered).
+
+To get information about a specific plugin, enter the action name followed by \fI--help\fR.
 
 Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
 
@@ -2058,7 +2064,7 @@ A convenient helper script is provided to get a consistent look across all plugi
     # shellcheck source=/dev/null
     . "$CLIFM_PLUGINS_HELPER"
 
-Plugins can talk to CliFM via a dedicated pipe created for this purpose and exposed via an environment variable (\fBCLIFM_BUS\fR). Just write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the \fIopen\fR function, changing the current directory to the new path, if a directory, or opening it with the \fIresource opener\fR, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
+Plugins can talk to \fBclifm\fR via a dedicated pipe created for this purpose and exposed via an environment variable (\fBCLIFM_BUS\fR). Just write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the \fIopen\fR function, changing the current directory to the new path, if a directory, or opening it with the \fIresource opener\fR, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
 
     \'echo "/tmp" > "$CLIFM_BUS"\' tells \fBclifm\fR to change the current directory to /tmp
 
@@ -2083,10 +2089,10 @@ bmi
 T}	Import bookmarks	-
 T{
 clip
-T}	Interact with the primary clipboard	\fB(1)\fR
+T}	Interact with the system clipboard	\fB(1)\fR
 T{
 \fIunset\fR
-T}	Test you terminal colors capability	-
+T}	Test terminal's colors capability	- \fB(2)\fR
 T{
 cr
 T}	Copy files to a remote location	fzf, and scp, ffsend, or croc
@@ -2098,7 +2104,7 @@ dr
 T}	Drag and drop files	dragon or dragon-drag-and-drop
 T{
 fdups
-T}	Find/remove file dups	\fB(2)\fR
+T}	Find/remove file dups	\fB(3)\fR
 T{
 +
 T}	Find files in the current directory	fzf or rofi
@@ -2119,7 +2125,7 @@ T{
 T}	Deselect files	fzf
 T{
 \fIunset\fR
-T}	Show git repo status	git
+T}	Show git repo status	git \fB(4)\fR
 T{
 ih
 T}	Browse \fBclifm\fR's manpage	fzf
@@ -2131,7 +2137,7 @@ T{
 T}	Jump to a directory in the jump database	fzf or rofi
 T{
 kbgen
-T}	Get escape codes for keybindings	\fB(3)\fR
+T}	Get escape codes for keybindings	\fB(5)\fR
 T{
 kd
 T}	Decrypt a GnuPG encrypted file	gpg, tar, sed, grep
@@ -2158,7 +2164,7 @@ T{
 T}	Search files by content	fzf, ripgrep
 T{
 \fIunset\fR
-T}	Update plugins	-
+T}	Update plugins	- \fB(6)\fR
 T{
 vid
 T}	Preview video files thumbnails	ffmpegthumbnailer
@@ -2167,19 +2173,27 @@ vt
 T}	Virtual directory for sets of files	sed
 T{
 wall
-T}	Set image as wallpaper	\fB(4)\fR
+T}	Set image as wallpaper	\fB(7)\fR
 .TE
 
 .sp
 \fB(1)\fR xclip or xsel (Xorg), wl-copy/wl-paste (Wayland), clipboard (Haiku), clip (Cygwin), pbcopy/pbget (MacOS), termux-clipboard-get/termux-clipboard-set (Termux), cb (cross-platform: https://github.com/Slackadays/Clipboard)
 .sp
-\fB(2)\fR find, md5sum, sort, uniq, xargs, sed, stat
+\fB(2)\fR \fIcolors.sh\fR (by default unset)
 .sp
-\fB(3)\fR It needs to be compiled first: \fIgcc -o kbgen kbgen.c -lcurses\fR
+\fB(3)\fR find, md5sum, sort, uniq, xargs, sed, stat
 .sp
-\fB(4)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
+\fB(4)\fR The \fIgit_status.sh\fR plugin is not intended to be used as a normal plugin, that is, executed via an action name, but rather to be executed as a prompt command (it will be executed immediately before each prompt). Add this line to the main configuration file:
+
+ promptcmd /usr/share/clifm/plugins/git_status.sh
 .sp
-To find out the actual file executed by an action name just run \fIactions\fR. For example, in this line: \fImyplugin -> myplugin.sh\fR, the action name \fImyplugin\fR executes \fImuplugin.sh\fR, which must be located in either \fIHOME/.config/clifm/plugins\fR or \fIDATADIR/clifm/plugins\fR (usually \fI/usr/local/share/clifm/plugins\fR or \fI/usr/share/clifm/plugins\fR).
+Whereas this plugin provides basic Git integration, it could be easily modified (it is just a few lines long) to include whatever git function you might need.
+.sp
+\fB(5)\fR It needs to be compiled first: \fIgcc -o kbgen kbgen.c -lcurses\fR
+.sp
+\fB(6)\fR \fIupdate.sh\fR (by default unset)
+.sp
+\fB(7)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
 .sp
 
 .B Dependencies of the previewer plugin (fzfnav.sh)
@@ -2210,11 +2224,6 @@ To run the \fIpager.sh\fR plugin, for example, you only need to enter the corres
 .TP
 In addition to the built\-in \fIBFG\fR previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR(1). To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
 .TP
-\fBNote 2\fR: The \fIgit_status\fR plugin is not intended to be used as a normal plugin, that is, executed via an action name, but rather to be executed as a prompt command:
-
- promptcmd /usr/share/clifm/plugins/git_status.sh
-.TP
-Whereas this plugin provides basic Git integration, it could be easily modified (it is just a few lines long) to include whatever git function you might need.
 .TP
 Take a look at the Wiki for more information: \fIhttps://github.com/clifm/wiki/Advanced#plugins\fR
 
@@ -2713,7 +2722,7 @@ A description for each option in the configuration file can be found in the conf
 .TP
 .B PROFILE FILE
 The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.clifm\fR.
-In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/dir"' (this feature is disabled by default; enable it via the \fI\-\-int\-vars\fR command line flag). This variable may be used as a shortcut to that directory, for instance: \fIcd $dir\fR. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
+In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/dir"'. This variable may be used as a shortcut to that directory, for instance: \fIcd $dir\fR. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit. Internal variables are disabled by default; enable them via the \fI\-\-int\-vars\fR command line switch.
 .TP
 .B PROMPTS FILE
 This file contains prompts definitions and is located in \fIDATADIR/clifm/prompts.clifm\fR. It will be copied automatically into \fI$XDG_CONFIG_HOME/clifm/prompts.clifm\fR if it doesn't exist. The \fIPrompt\fR line in the color scheme file should point to one of the prompt names defined in this file. See the \fBPROMPT\fR section for more information.
