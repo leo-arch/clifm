@@ -177,7 +177,7 @@
 #
 # Visit https://github.com/leo-arch/clifm-colors to get some extra themes
 #
-# Defaults to 'default-256', or 'default' (8 colors) if 256 colors support
+# Defaults to 'default-256', or 'default' (16 colors) if 256 colors support
 # is not detected
 ;ColorScheme=
 
