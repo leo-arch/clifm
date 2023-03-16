@@ -152,6 +152,8 @@ As a plus, make sure to fix all errors/warnings emitted by a security hardened c
 gcc -O2 -flto=auto -ffat-lto-objects -fexceptions -g -grecord-gcc-switches -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fstack-protector-strong -mtune=generic -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection -Wl,-z,relro -Wl,--as-needed  -Wl,-z,now -Wl,--build-id=sha1
 ```
 
+Finally, purge the code from unused headers. An execellent tool specifically desinged for this purpose is [include-what-you-use](https://github.com/include-what-you-use/include-what-you-use).
+
 ### 5. Comments
 
 If not obvious, comment what your code is trying to achieve: there is no good software without good documentation.
