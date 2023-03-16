@@ -42,7 +42,6 @@
 #include "file_operations.h"
 #include "init.h"
 #include "messages.h"
-//#include "mime.h"
 #include "misc.h"
 
 /* Get the executable's path of the action ACTION

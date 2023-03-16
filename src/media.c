@@ -28,7 +28,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-//#include <sys/stat.h>
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 # include <sys/mount.h>
 # include <sys/sysctl.h>
@@ -39,8 +38,6 @@
 #endif
 #include <dirent.h>
 
-//#include <libudev.h>
-
 #include "aux.h"
 #include "readline.h"
 #include "navigation.h"
@@ -48,7 +45,6 @@
 #include "listing.h"
 #include "jump.h"
 #include "misc.h"
-//#include "checks.h"
 #include "history.h"
 
 #ifdef __linux__

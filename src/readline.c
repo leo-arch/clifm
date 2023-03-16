@@ -50,10 +50,8 @@
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
-//# include <ereadline/readline/history.h>
 #else
 # include <readline/readline.h>
-//# include <readline/history.h>
 #endif
 
 #include "misc.h"

@@ -33,11 +33,8 @@
 # include <strings.h>
 #endif
 #include <unistd.h>
-//#include <errno.h>
 #include <dirent.h>
-//#include <termios.h>
 #include <pwd.h>
-//#include <wchar.h>
 
 #if defined(__linux__)
 # include <sys/capability.h>

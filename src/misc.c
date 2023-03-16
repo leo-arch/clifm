@@ -30,7 +30,6 @@
 #include "helpers.h"
 
 #include <errno.h>
-//#include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -50,21 +49,11 @@ typedef char *rl_cpvfunc_t;
 # include <readline/readline.h>
 #endif
 
-/*
-#if defined(__HAIKU__)
-#include <private/libs/compat/freebsd_network/compat/sys/mount.h>
-#include <private/libs/compat/freebsd_network/compat/sys/sysctl.h>
-#endif */
 #include <time.h>
 #include <unistd.h>
 #ifdef LINUX_INOTIFY
 # include <sys/inotify.h>
 #endif
-
-/*
-#ifdef __linux__
-#include <libudev.h>
-#endif */
 
 #include "aux.h"
 #include "bookmarks.h"

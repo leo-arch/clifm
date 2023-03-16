@@ -29,16 +29,10 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-//#include <time.h>
 #include <readline/readline.h>
 #include <limits.h>
 #include <fcntl.h>
-
 #include <dirent.h>
-
-//#ifndef _NO_ARCHIVING
-//# include "archives.h"
-//#endif
 
 #include "aux.h"
 #include "checks.h"

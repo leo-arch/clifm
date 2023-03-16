@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
-//#include <sys/types.h>
 #if defined(BSD_KQUEUE)
 # include <unistd.h>
 #endif
@@ -48,7 +47,6 @@
 #endif
 
 #include <limits.h> /* INT_MAX */
-//#include <glob.h>
 
 #if defined(_LIST_SPEED)
 # include <time.h>

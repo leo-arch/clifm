@@ -32,17 +32,14 @@
 #include "helpers.h"
 
 #include <stdio.h>
-//#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-//#include <ctype.h>
 #include <time.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
 #include "aux.h"
-//#include "exec.h"
 #include "file_operations.h"
 #include "history.h"
 #if defined(__HAIKU__) || defined(__CYGWIN__)

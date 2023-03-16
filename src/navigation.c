@@ -30,7 +30,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
-//#include <readline/readline.h>
 #include <readline/tilde.h>
 
 #include "aux.h"

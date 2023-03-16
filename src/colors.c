@@ -33,14 +33,11 @@
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
-//#include <unistd.h>
-//#include <wchar.h>
 
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
 #include "listing.h"
-//#include "mime.h"
 #include "misc.h"
 #include "messages.h"
 #include "file_operations.h"

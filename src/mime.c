@@ -30,9 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-//#include <time.h>
 #include <sys/stat.h>
-//#include <readline/readline.h>
 #include <readline/tilde.h>
 
 #ifndef _NO_MAGIC
@@ -53,7 +51,6 @@
 #include "exec.h"
 #include "mime.h"
 #include "messages.h"
-//#include "navigation.h"
 #include "readline.h"
 #include "misc.h"
 #include "sanitize.h"

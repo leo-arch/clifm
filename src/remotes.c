@@ -35,7 +35,6 @@
 #include "listing.h"
 #include "navigation.h"
 #include "history.h"
-//#include "mime.h"
 #include "misc.h"
 #include "jump.h"
 #include "messages.h"

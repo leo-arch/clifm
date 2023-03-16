@@ -31,10 +31,8 @@
 #include <limits.h>
 
 #include "aux.h"
-//#include "checks.h"
 #include "colors.h"
 #include "exec.h"
-//#include "listing.h"
 #include "sanitize.h"
 
 /* The opts struct contains option values previous to any autocommand call */

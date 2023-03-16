@@ -55,7 +55,6 @@ typedef char *rl_cpvfunc_t;
 #include "exec.h"
 #include "keybinds.h"
 #include "listing.h"
-//#include "mime.h"
 #include "misc.h"
 #include "profiles.h"
 #include "prompt.h"

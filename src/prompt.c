@@ -35,7 +35,6 @@
 #include <readline/readline.h>
 #include <sys/stat.h>
 #include <errno.h>
-//#include <unistd.h> /* Required by CLEAR macro (for write(3)) */
 
 #include "aux.h"
 #include "exec.h"

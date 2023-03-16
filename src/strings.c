@@ -38,7 +38,6 @@
 #include <glob.h>
 #include <stdio.h>
 #include <string.h>
-//#include <ctype.h>
 #include <time.h>
 #include <wchar.h>
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)

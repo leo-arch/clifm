@@ -41,7 +41,6 @@
 #endif /* __NetBSD__ */
 
 #include <sys/stat.h>
-//#include <sys/types.h>
 #include <unistd.h>
 
 #if defined(LINUX_FILE_ATTRS)

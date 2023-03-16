@@ -67,7 +67,6 @@
 #include "misc.h"
 #include "navigation.h"
 #include "sort.h"
-//#include "history.h"
 #include "file_operations.h"
 #include "autocmds.h"
 #include "sanitize.h"

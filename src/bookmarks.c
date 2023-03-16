@@ -38,7 +38,6 @@
 #include "exec.h"
 #include "file_operations.h"
 #include "init.h"
-//#include "mime.h"
 #include "readline.h"
 #include "messages.h"
 #include "listing.h"
