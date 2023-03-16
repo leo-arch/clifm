@@ -28,8 +28,7 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 //#include <sys/types.h>
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
-|| defined(__DragonFly__)
+#if defined(BSD_KQUEUE)
 # include <unistd.h>
 #endif
 #if defined(__linux__)
