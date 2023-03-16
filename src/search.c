@@ -26,7 +26,7 @@
 
 #include <dirent.h>
 #include <errno.h>
-#include <fcntl.h>
+//#include <fcntl.h>
 //#include <regex.h>
 #include <stdio.h>
 #include <string.h>

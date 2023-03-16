@@ -27,14 +27,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <glob.h>
-#include <readline/readline.h>
+#include <readline/tilde.h>
 #include <limits.h>
 
 #include "aux.h"
-#include "checks.h"
+//#include "checks.h"
 #include "colors.h"
 #include "exec.h"
-#include "listing.h"
+//#include "listing.h"
 #include "sanitize.h"
 
 /* The opts struct contains option values previous to any autocommand call */

@@ -29,10 +29,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <readline/readline.h>
 
 #include "aux.h"
+#include "checks.h"
 #include "exec.h"
 #include "history.h"
 #include "jump.h"
@@ -40,7 +41,6 @@
 #include "misc.h"
 #include "navigation.h"
 #include "readline.h"
-#include "checks.h"
 
 #ifndef _NO_MAGIC
 # include "mime.h"

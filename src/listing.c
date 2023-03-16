@@ -27,8 +27,11 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
-#include <sys/types.h>
-#include <unistd.h>
+//#include <sys/types.h>
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+|| defined(__DragonFly__)
+# include <unistd.h>
+#endif
 #if defined(__linux__)
 # include <sys/capability.h>
 #endif
@@ -46,7 +49,7 @@
 #endif
 
 #include <limits.h> /* INT_MAX */
-#include <glob.h>
+//#include <glob.h>
 
 #if defined(_LIST_SPEED)
 # include <time.h>
@@ -84,7 +87,7 @@
 #endif // _PALAND_PRINTF */
 #define xprintf printf
 
-#include <readline/readline.h>
+//#include <readline/readline.h>
 
 /* Macros for run_dir_cmd function */
 #define DIR_IN 0

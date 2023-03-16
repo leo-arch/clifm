@@ -33,7 +33,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <readline/readline.h>
+//#include <readline/readline.h>
+#include <readline/tilde.h>
 
 #include "aux.h"
 #include "misc.h"

@@ -39,12 +39,12 @@
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+//#include <readline/readline.h>
+//#include <readline/history.h>
 
 #include "aux.h"
 #include "checks.h"
-#include "colors.h"
+//#include "colors.h"
 #include "config.h"
 #include "exec.h"
 #include "history.h"
@@ -53,7 +53,7 @@
 #include "keybinds.h"
 #include "listing.h"
 #include "misc.h"
-#include "navigation.h"
+//#include "navigation.h"
 #ifndef _NO_PROFILES
 # include "profiles.h"
 #endif

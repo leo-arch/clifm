@@ -26,10 +26,11 @@
 
 #include <dirent.h>
 #include <errno.h>
-#include <fcntl.h>
+//#include <fcntl.h>
 #include <glob.h>
 #include <stdio.h>
-#include <readline/readline.h>
+//#include <readline/readline.h>
+#include <readline/tilde.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>

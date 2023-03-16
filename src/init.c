@@ -41,7 +41,8 @@
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
-#include <readline/readline.h>
+//#include <readline/readline.h>
+#include <readline/tilde.h>
 #if defined(__OpenBSD__)
 # include <ereadline/readline/history.h> /* history_write_timestamps */
 #else
@@ -66,7 +67,7 @@
 #include "misc.h"
 #include "navigation.h"
 #include "sort.h"
-#include "history.h"
+//#include "history.h"
 #include "file_operations.h"
 #include "autocmds.h"
 #include "sanitize.h"

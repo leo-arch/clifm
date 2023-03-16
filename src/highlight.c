@@ -33,7 +33,7 @@ typedef char *rl_cpvfunc_t;
 #endif
 
 #include "checks.h"
-#include "aux.h"
+//#include "aux.h"
 
 /* Macros for single and double quotes */
 #define _SINGLE 0

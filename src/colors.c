@@ -26,21 +26,21 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
-#include <sys/types.h>
+//#include <sys/types.h>
 #ifdef __linux__
 # include <sys/capability.h>
 #endif
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
-#include <unistd.h>
-#include <wchar.h>
+//#include <unistd.h>
+//#include <wchar.h>
 
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
 #include "listing.h"
-#include "mime.h"
+//#include "mime.h"
 #include "misc.h"
 #include "messages.h"
 #include "file_operations.h"

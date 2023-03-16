@@ -33,7 +33,7 @@
 #include <sys/stat.h>
 #include <readline/history.h>
 
-#include "actions.h"
+//#include "actions.h"
 #include "aux.h"
 #include "bookmarks.h"
 #include "checks.h"
@@ -42,7 +42,7 @@
 #include "history.h"
 #include "init.h"
 #include "listing.h"
-#include "mime.h"
+//#include "mime.h"
 #include "misc.h"
 #include "navigation.h"
 #include "profiles.h"

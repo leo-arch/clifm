@@ -36,14 +36,14 @@
 #include <time.h>
 #include <unistd.h>
 #if defined(__linux__)
-# include <sys/capability.h>
+//# include <sys/capability.h>
 # include <sys/sysmacros.h>
 #endif
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
-#include <sys/types.h>
-#include <wchar.h>
+//#include <sys/types.h>
+//#include <wchar.h>
 
 #if defined(__OpenBSD__) || defined(__NetBSD__) \
 || defined(__FreeBSD__) || defined(__APPLE__)
@@ -68,7 +68,7 @@
 
 /* Required by the pc command */
 #include "readline.h"
-#include "file_operations.h"
+//#include "file_operations.h"
 
 #ifndef major
 # define major(x) ((x >> 8) & 0x7F)

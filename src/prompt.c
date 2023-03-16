@@ -35,7 +35,7 @@
 #include <readline/readline.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <unistd.h> /* Required by CLEAR macro (for write(3)) */
+//#include <unistd.h> /* Required by CLEAR macro (for write(3)) */
 
 #include "aux.h"
 #include "exec.h"
@@ -53,11 +53,12 @@
 # include "suggestions.h"
 #endif
 
+/*
 #ifndef _NO_TRASH
 # include "trash.h"
 #else
 # include <time.h>
-#endif
+#endif */
 
 #define CTLESC '\001'
 #define CTLNUL '\177'
