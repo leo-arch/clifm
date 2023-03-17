@@ -26,7 +26,6 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
-//#include <sys/types.h>
 #ifdef __linux__
 # include <sys/capability.h>
 #endif

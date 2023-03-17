@@ -746,18 +746,28 @@ change_to_path(char *new_path, const int cd_flag)
 	char *q = normalize_path(r, strlen(r));
 //	char *q = realpath(p ? p : new_path, NULL);
 	if (!q) {
-		if (cd_flag == CD_PRINT_ERROR)
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", p ? p : new_path, strerror(errno));
+		if (cd_flag == CD_PRINT_ERROR) {
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("cd: %s: Error normalizing "
+				"path\n"), new_path);
+		}
 		free(p);
-		return errno;
+		return EXIT_FAILURE;
 	}
 	free(p);
 
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
-		if (cd_flag == CD_PRINT_ERROR)
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", q, strerror(errno));
+		int err = errno;
+		if (cd_flag == CD_PRINT_ERROR) {
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", new_path,
+				strerror(err));
+		}
 		free(q);
-		return errno;
+		/* Most shells return 1 in case of cd error. However, 1, as a general
+		 * error code, is not quite informative. Why not to return the actual
+		 * error code returned by chdir(3)? Let's do that.
+		 * Note that POSIX only requires for cd to return >0 in case of error
+		 * (see cd(1p)). So, we're fine. */
+		return err;
 	}
 
 	free(workspaces[cur_ws].path);

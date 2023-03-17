@@ -28,7 +28,7 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #if defined(BSD_KQUEUE)
-# include <unistd.h>
+# include <unistd.h> // open(2)
 #endif
 #if defined(__linux__)
 # include <sys/capability.h>
