@@ -490,6 +490,15 @@ set_start_path(void)
 		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
+	/* Set OLDPWD */
+	char *pwd = getenv("PWD");
+	if (pwd && workspaces[cur_ws].path && strcmp(workspaces[cur_ws].path, pwd) != 0) {
+#if _DEBUG_OLDPWD
+		_err(ERR_NO_LOG, PRINT_PROMPT, "OLDPWD: %s\n", pwd);
+#endif
+		setenv("OLDPWD", pwd, 1);
+	}
+
 	dir_changed = 1;
 	return EXIT_SUCCESS;
 }

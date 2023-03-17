@@ -519,6 +519,12 @@ set_env(void)
 	setenv("CLIFM", config_dir ? config_dir : "1", 1);
 	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
 
+	char t[NAME_MAX];
+	snprintf(t, sizeof(t), "%d", (int)own_pid);
+	setenv("CLIFM_PID", t, 1);
+	snprintf(t, sizeof(t), "%s", VERSION);
+	setenv("CLIFM_VERSION", t, 1);
+
 	if (sel_file)
 		setenv("CLIFM_SELFILE", sel_file, 1);
 

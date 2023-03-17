@@ -46,6 +46,19 @@
 
 #define BD_CONTINUE 2
 
+/* Set OLDPWD environment variable, provided we are not changing to the
+ * same directory (OLD != NEW) */
+static void
+set_oldpwd(const char *old, const char *new)
+{
+	if (!old || !new || strcmp(old, new) == 0)
+		return;
+#if _DEBUG_OLDPWD
+	_err(ERR_NO_LOG, PRINT_PROMPT, "OLDPWD: %s\n", old);
+#endif
+	setenv("OLDPWD", old, 1);
+}
+
 static size_t
 get_longest_workspace_name(void)
 {
@@ -93,7 +106,7 @@ get_workspace_path_color(const uint8_t num)
 		return df_c;
 
 	if (!workspaces[num].path)
-		return DEF_DL_C; /* Unset. DL (diviling line) defaults to gray: let's use this */
+		return DEF_DL_C; /* Unset. DL (dividing line) defaults to gray: let's use this */
 
 	struct stat a;
 	if (lstat(workspaces[num].path, &a) == -1)
@@ -267,7 +280,8 @@ switch_workspace(int tmp_ws)
 	}
 
 	if (xchdir(workspaces[tmp_ws].path, SET_TITLE) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "ws: %s: %s\n", workspaces[tmp_ws].path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "ws: %s: %s\n",
+			workspaces[tmp_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -283,6 +297,8 @@ switch_workspace(int tmp_ws)
 
 	if (conf.private_ws_settings == 1)
 		set_workspace_opts(cur_ws);
+
+	set_oldpwd(old_pwd[dirhist_cur_index], workspaces[cur_ws].path);
 
 	if (conf.autols == 1)
 		reload_dirlist();
@@ -712,10 +728,13 @@ go_home(const int cd_flag)
 	}
 
 	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
+		int err = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", user.home, strerror(errno));
-		return errno;
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", user.home, strerror(err));
+		return err;
 	}
+
+	set_oldpwd(old_pwd[dirhist_cur_index], user.home);
 
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(user.home, strlen(user.home));
@@ -769,6 +788,8 @@ change_to_path(char *new_path, const int cd_flag)
 		 * (see cd(1p)). So, we're fine. */
 		return err;
 	}
+
+	set_oldpwd(workspaces[cur_ws].path, q);
 
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(q, strlen(q));
@@ -939,6 +960,8 @@ change_to_dirhist_num(int n)
 		return EXIT_FAILURE;
 	}
 
+	set_oldpwd(old_pwd[dirhist_cur_index], old_pwd[n]);
+
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(old_pwd[n], strlen(old_pwd[n]));
 
@@ -977,6 +1000,8 @@ surf_hist(char **args)
 static int
 set_path(const char *new_path)
 {
+	set_oldpwd(workspaces[cur_ws].path, new_path);
+
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(new_path, strlen(new_path));
 	if (!workspaces[cur_ws].path)

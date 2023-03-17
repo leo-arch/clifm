@@ -1059,7 +1059,7 @@ main(int argc, char *argv[])
 	init_config();
 	check_options();
 	set_sel_file();
-	set_env();
+//	set_env();
 	create_tmp_files();
 #ifndef _NO_FZF
 	set_finder_paths();
@@ -1128,6 +1128,7 @@ main(int argc, char *argv[])
 
 	get_hostname();
 	init_shell();
+	set_env();
 
 	if (config_ok == 1)
 		init_history();
