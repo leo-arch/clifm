@@ -3765,7 +3765,7 @@ set_rl_init_file(void)
 int
 initialize_readline(void)
 {
-#ifdef VANILLA_READLINE
+#ifdef _VANILLA_READLINE
 	return EXIT_SUCCESS;
 #endif
 
