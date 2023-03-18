@@ -3761,41 +3761,20 @@ set_rl_init_file(void)
 	rl_read_init_file(rl_file);
 	free(rl_file);
 }
-/*
-int
-rl_signals(void)
-{
-	if (flags & DELAYED_REFRESH) {
-		flags &= ~DELAYED_REFRESH;
-		puts("EVENT HOOK DELAYED!");
-//		fflush(stdout);
-//		sleep(2);
-//		get_term_size();
-//		reload_dirlist();
-	}
-	return EXIT_SUCCESS;
-} */
 
 int
 initialize_readline(void)
 {
+#ifdef VANILLA_READLINE
+	return EXIT_SUCCESS;
+#endif
+
 	/* Set the name of the program using readline. Mostly used for
 	 * conditional constructs in the inputrc file */
 	if (bin_name && *bin_name)
 		rl_readline_name = bin_name;
 
 	set_rl_init_file();
-
-/*#ifdef RL_INPUT_TEST
-# define STRINGIZE_(x) #x
-# define STRINGIZE(x) STRINGIZE_(x)
-	test_input_stream = fopen(STRINGIZE(RL_INPUT_TEST), "r");
-	if (!test_input_stream) {
-		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-		exit(errno);
-	}
-	rl_instream = test_input_stream;
-#endif // RL_INPUT_TEST */
 
 	/* Enable tab auto-completion for commands (in PATH) in case of
 	  * first entered string (if autocd and/or auto-open are enabled, check
@@ -3867,14 +3846,6 @@ initialize_readline(void)
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
 	quote_chars = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
-
-//	rl_event_hook = rl_signals;
-
-/*
-#if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
-	if (!(flags & GUI) && getenv("CLIFM_FREEBSD_CONSOLE_SC"))
-		freebsd_sc_console = 1;
-#endif */
 
 	return EXIT_SUCCESS;
 }

@@ -145,7 +145,6 @@ int
 	control_d_exits = 0,
 	cur_ws = UNSET,
 	curcol = 0,
-//	curline = 0,
 	dequoted = 0,
 	dir_changed = 0,
 	dir_out = 0,
@@ -176,7 +175,6 @@ int
 	prompt_offset = UNSET,
 	prompt_notif = UNSET,
 	recur_perm_error_flag = 0,
-//	rl_last_word_start = 0,
 	rl_nohist = 0,
 	rl_notab = 0,
 	sel_is_last = 0,
@@ -1114,8 +1112,6 @@ main(int argc, char *argv[])
 	if (!jump_db || xargs.path == 1)
 		add_to_jumpdb(workspaces[cur_ws].path);
 
-//	int vanilla_readline = 1;
-//	if (vanilla_readline != 1)
 	initialize_readline();
 	/*Trim the directory history file if necessary */
 //	check_file_size(dirhist_file, conf.max_dirhist);

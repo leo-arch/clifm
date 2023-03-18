@@ -593,20 +593,7 @@ extern int watch;
 #define IS_HELP(s) (*(s) == '-' && (((s)[1] == 'h' && !(s)[2]) \
 				|| strcmp((s), "--help") == 0))
 
-/* Terminal escape codes */
-/*
-#ifndef __HAIKU__
-# define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
-#else
-# define CLEAR fputs("\x1b[H\x1b[2J", stdout); // CLEAR
-#endif // !__HAIKU__ */
-/* "\033c" amounts to "\x1b[H\x1b[2J\x1b[3J" in xterm:
- * \x1b[H = Move cursor to coordintates 1,1 (Home)
- * \x1b[2J = Delete all screen content
- * \x1b[3J = Delete saved lines (scrollback buffer)
- * Other terminals might handle this differently, depending on their
- * capabilities, which makes "\033c" quite portable */
-
+/* TERMINAL ESCAPE CODES */
 #define CLEAR \
 	if (term_caps.home == 1 && term_caps.clear == 1) { \
 		if (term_caps.del_scrollback == 1) \
@@ -639,9 +626,9 @@ extern int watch;
 #define HIDE_CURSOR     fputs(term_caps.hide_cursor == 1 ? "\x1b[?25l" : "", stdout) /* DECTCEM */
 #define UNHIDE_CURSOR   fputs(term_caps.hide_cursor == 1 ? "\x1b[?25h" : "", stdout)
 
-#define SET_RVIDEO      fputs("\x1b[?5h", stderr)    /* DECSCNM: Enable reverse video */
+#define SET_RVIDEO      fputs("\x1b[?5h", stderr) /* DECSCNM: Enable reverse video */
 #define UNSET_RVIDEO    fputs("\x1b[?5l", stderr)
-#define SET_LINE_WRAP   fputs("\x1b[?7h", stderr)    /* DECAWM */
+#define SET_LINE_WRAP   fputs("\x1b[?7h", stderr) /* DECAWM */
 #define UNSET_LINE_WRAP fputs("\x1b[?7l", stderr)
 #define RING_BELL       fputs("\007", stderr)
 
@@ -686,7 +673,6 @@ struct config_t {
 	int desktop_notifications;
 	int dirhist_map;
 	int disk_usage;
-//	int expand_bookmarks;
 	int ext_cmd_ok;
 	int files_counter;
 	int full_dir_size;
@@ -960,10 +946,8 @@ struct param_t {
 	int check_ext;
 	int classify;
 	int color_scheme;
-//	int control_d_exits;
 	int disk_usage_analyzer;
 	int eln_use_workspace_color;
-//	int expand_bookmarks;
 	int ext;
 	int dirs_first;
 	int files_counter;
@@ -1022,11 +1006,9 @@ struct param_t {
 	int suggestions;
 #endif
 	int tips;
-//	int toggle_workspaces;
 #ifndef _NO_TRASH
 	int trasrm;
 #endif
-//	int unicode;
 	int virtual_dir_full_paths;
 	int vt100;
 	int welcome_message;
@@ -1280,10 +1262,8 @@ extern int
 	check_ext,
 	cmdhist_flag,
 	config_ok,
-//	control_d_exits,
 	cur_ws,
 	curcol,
-//	curline,
 	dequoted,
 	dir_changed, /* flag to know is dir was changed: used by autocmds */
 	dir_out, /* Autocommands: A .cfm.out file was found in CWD*/
@@ -1312,7 +1292,6 @@ extern int
 	prompt_offset,
 	prompt_notif,
 	recur_perm_error_flag,
-//	rl_last_word_start,
 	rl_nohist,
 	rl_notab,
 	sel_is_last,
