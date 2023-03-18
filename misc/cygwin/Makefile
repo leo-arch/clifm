@@ -3,6 +3,7 @@
 ###############################
 
 BIN ?= clifm
+BIN_EXE ?= $(BIN).exe
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
@@ -26,18 +27,18 @@ LIBS ?= -lreadline -lacl -lmagic -lintl
 
 CFLAGS += -Wall -Wextra -DCLIFM_DATADIR=$(DATADIR)
 
-$(BIN): $(SRC) $(HEADERS)
-	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(LDFLAGS) $(LIBS)
+$(BIN_EXE): $(SRC) $(HEADERS)
+	$(CC) -o $(BIN_EXE) $(SRC) $(CFLAGS) $(LDFLAGS) $(LIBS)
 
-build: $(BIN)
+build: $(BIN_EXE)
 
 clean:
-	$(RM) -- $(BIN)
+	$(RM) -- $(BIN_EXE)
 	$(RM) -f -- $(SRCDIR)/*.o
 
-install: $(BIN)
+install: $(BIN_EXE)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 0755 $(BIN_EXE) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/bash-completion/completions
@@ -68,7 +69,7 @@ install: $(BIN)
 	@printf "Successfully installed $(BIN)\n"
 
 uninstall:
-	$(RM) -- $(DESTDIR)$(BINDIR)/$(BIN)
+	$(RM) -- $(DESTDIR)$(BINDIR)/$(BIN_EXE)
 	$(RM) -- $(DESTDIR)$(MANDIR)/man1/$(BIN).1*
 	$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
