@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 14, 2023" "clifm 1.11" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 18, 2023" "clifm 1.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2547,7 +2547,10 @@ The following variables are read at initialization time:
 If set to any value, \fBclifm\fR will run colorless
 .TP
 .B CLIFM_NO_COLOR
-Same as \fBNO_COLOR\fR, but specific to \fBclifm\fR
+Same as \fBNO_COLOR\fR (or \fBCLICOLOR=0\fR), but specific to \fBclifm\fR
+.TP
+.B COLORTERM
+If set to either \fItruecolor\fR or \fI24bit\fR, \fBclifm\fR assumes the terminal emulator to be capable of displaying true colors (and thereby also 256 colors), despite what the \fBterminfo\fR(5) database informs.
 .TP
 .B CLIFM_FILE_COLORS
 A colon separated list of file type color codes in the same form specified above in the \fBCOLOR CODES\fR section
@@ -2580,6 +2583,12 @@ Except when running in stealth mode, \fBclifm\fR sets the following environment 
 .TP
 .B CLIFM
 This variable is set to the path to the configuration directory. By inspecting this variable other programs can find out if they were spawned by \fBclifm\fR. It can also be used to quickly jump into the configuration directory: \fIcd $CLIFM\fR or just \fI$CLIFM\fR
+.TP
+.B CLIFM_PID
+Set to the PID number of \fBclifm\fR's running instance
+.TP
+.B CLIFM_VERSION
+Set to the version number of \fBclifm\fR's running instance
 .TP
 .B CLIFM_PLUGINS_HELPER
 Set to the full path to the plugins-helper script used by many plugins.
