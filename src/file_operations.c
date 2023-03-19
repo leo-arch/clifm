@@ -988,25 +988,6 @@ create_file(char **cmd)
 	return exit_status;
 }
 
-static int
-check_opening_app(char *cmd)
-{
-	int invalid_app = 0;
-	struct stat a;
-	char *tmp = strrchr(cmd, '/');
-
-	if (tmp && *(++tmp) && stat(cmd, &a) == 0 && !is_bin_cmd(tmp))
-		invalid_app = 1;
-
-	if (invalid_app == 1 || !is_bin_cmd((tmp && *tmp) ? tmp : cmd)) {
-		fprintf(stderr, _("open: %s: Not a valid opening application\n"
-			"Try 'open --help' for more information\n"), cmd);
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
-}
-
 int
 open_function(char **cmd)
 {
@@ -1022,8 +1003,8 @@ open_function(char **cmd)
 		if (strchr(cmd[1], '\\')) {
 			char *deq_path = dequote_str(cmd[1], 0);
 			if (!deq_path) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("open: %s: Error dequoting filename\n"),
-					cmd[1]);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("open: %s: Error dequoting "
+					"filename\n"), cmd[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -1073,27 +1054,30 @@ open_function(char **cmd)
 			case S_IFCHR: file_type = types[OPEN_CHR]; break;
 			case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
 			case S_IFIFO: file_type = types[OPEN_FIFO]; break;
-			default: file_type = types[OPEN_UNK]; break;
+			default: file_type = types[OPEN_UNKNOWN]; break;
 			}
 		}
 		}
 		break;
 	case S_IFREG: no_open_file = 0;	break;
-	default: file_type = types[OPEN_UNK]; break;
+	default: file_type = types[OPEN_UNKNOWN]; break;
 	}
 
 	/* If neither directory nor regular file nor symlink (to directory
 	 * or regular file), print the corresponding error message and exit */
-	if (no_open_file) {
+	if (no_open_file == 1) {
 		fprintf(stderr, _("open: %s (%s): Cannot open file\nTry "
-			"'APPLICATION FILE' or 'open FILE APPLICATION'\n"), cmd[1], file_type);
+			"'APP FILE' or 'open FILE APP'\n"), cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
 
+	int ret = EXIT_SUCCESS;
+
 	/* At this point we know that the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file */
+
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
-		int ret = open_file(file);
+		ret = open_file(file);
 		if (!conf.opener && ret == EXIT_FAILURE) {
 			fprintf(stderr, _("%s: Add a new entry to the mimelist file ('mime edit' "
 				"or F6) or run 'APP FILE' or 'open FILE APP'\n"), PROGRAM_NAME);
@@ -1102,18 +1086,16 @@ open_function(char **cmd)
 		return ret;
 	}
 
-	if (check_opening_app(cmd[2]) == EXIT_FAILURE)
-		return EXIT_FAILURE;
-
-	/* If some application was specified to open the file */
+	/* Some application was specified to open the file */
 	char *tmp_cmd[] = {cmd[2], file, NULL};
-	int ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	if (ret == ENOENT) { /* ENOENT == 2: No such file or directory */
-		fprintf(stderr, _("open: %s: Command not found\n"), cmd[2]);
-		return 127;
+	if (ret == EXEC_NOTFOUND || ret == EACCES) {
+		fprintf(stderr, "open: %s: %s\nTry 'open --help' for more "
+			"information\n", cmd[2], NOTFOUND_MSG);
+		return EXEC_NOTFOUND;
 	}
 
 	fprintf(stderr, "open: %s: %s\n", cmd[2], strerror(ret));

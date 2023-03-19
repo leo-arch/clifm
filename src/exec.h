@@ -36,6 +36,8 @@
 #define EXEC_NOTFOUND  127
 #define EXEC_SIGINT    128
 
+#define NOTFOUND_MSG "Command not found"
+
 __BEGIN_DECLS
 
 int  exec_cmd(char **);

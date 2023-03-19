@@ -374,8 +374,10 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		}
 
 		execvp(cmd[0], cmd);
+		/* These error messages will be printed only if E_NOSTDERR is not set.
+		 * Otherwise, the caller should print the error messages itself */
 		if (errno == ENOENT) {
-			fprintf(stderr, "%s: %s: Command not found\n", PROGRAM_NAME, cmd[0]);
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], NOTFOUND_MSG);
 			_exit(EXEC_NOTFOUND); /* 127, as required by exit(1p) */
 		} else {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
@@ -2025,8 +2027,8 @@ preview_function(char **args)
 	if (tabmode != FZF_TAB) {
 		char *p = get_cmd_path("fzf");
 		if (!p) {
-			_err(0, NOPRINT_PROMPT, _("%s: fzf: Command not found\n"), PROGRAM_NAME);
-			return 127;
+			_err(0, NOPRINT_PROMPT, "%s: fzf: %s\n", PROGRAM_NAME, NOTFOUND_MSG);
+			return EXEC_NOTFOUND; /* 127, as required by exit(1) */
 		}
 		free(p);
 	}

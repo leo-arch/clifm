@@ -26,11 +26,11 @@
 #define FILE_OPERATIONS_H
 
 /* Macros for open_function */
-#define OPEN_BLK  0
-#define OPEN_CHR  1
-#define OPEN_SOCK 2
-#define OPEN_FIFO 3
-#define OPEN_UNK  4
+#define OPEN_BLK     0
+#define OPEN_CHR     1
+#define OPEN_SOCK    2
+#define OPEN_FIFO    3
+#define OPEN_UNKNOWN 4
 
 __BEGIN_DECLS
 
