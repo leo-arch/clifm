@@ -423,7 +423,8 @@ recover_from_wrong_cmd(void)
 {
 	/* Check rl_dispathing to know whether we are called from a keybind,
 	 * in which case we should skip this check */
-	if (rl_line_buffer && (rl_dispatching == 0 || (nwords > 1 && point_is_first_word == 0))) {
+	if (rl_line_buffer && (rl_dispatching == 0
+	|| (nwords > 1 && point_is_first_word == 0))) {
 		char *p = (strrchr(rl_line_buffer, ' '));
 		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
 			return EXIT_FAILURE;
@@ -586,7 +587,8 @@ set_cursor_position(const int baej)
 }
 
 static inline int
-check_conditions(const size_t offset, const size_t wlen, int *baej, size_t *slines)
+check_conditions(const size_t offset, const size_t wlen, int *baej,
+				size_t *slines)
 {
 	if (offset > wlen)
 		return EXIT_FAILURE;
@@ -648,8 +650,9 @@ print_suggestion(const char *str, size_t offset, char *color)
 	}
 #endif /* NO_BACKWARD_SUGGEST */
 
-	if (nwords == 1 && rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] == ' '
-	&& (rl_end == 1 || rl_line_buffer[rl_end - 2] != '\\') && suggestion.type != HIST_SUG) {
+	if (nwords == 1 && rl_end > 0 && rl_line_buffer
+	&& rl_line_buffer[rl_end - 1] == ' ' && (rl_end == 1
+	|| rl_line_buffer[rl_end - 2] != '\\') && suggestion.type != HIST_SUG) {
 		// We have "cmd     " (with one or more trailing spaces)
 		suggestion.printed = 0;
 		if (suggestion_buf)
@@ -668,8 +671,8 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	/* Let's check for baej suggestions, mostly in case of fuzzy matches */
 	size_t wlen = last_word ? strlen(last_word) : 0;
-	/* An alias name can be the same as the beginning of the alias definition, so that
-	 * this check must always be true in case of aliases */
+	/* An alias name can be the same as the beginning of the alias definition,
+	 * so that this check must always be true in case of aliases */
 	if (suggestion.type == ALIAS_SUG || (last_word && cur_comp_type == TCMP_PATH
 	&& (conf.case_sens_path_comp ? strncmp(last_word, str, wlen)
 	: strncasecmp(last_word, str, wlen)) != 0) ) {
@@ -680,7 +683,9 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 	if (conf.highlight == 0)
 		rl_redisplay();
-	curcol = prompt_offset + (rl_line_buffer ? (int)wc_xstrlen(rl_line_buffer) : 0);
+	curcol = prompt_offset + (rl_line_buffer
+			? (int)wc_xstrlen(rl_line_buffer) : 0);
+
 	if (term_cols > 0) {
 		while (curcol > term_cols)
 			curcol -= term_cols;
@@ -722,7 +727,8 @@ print_suggestion(const char *str, size_t offset, char *color)
 }
 
 static inline char *
-get_reg_file_color(const char *filename, const struct stat *attr, int *free_color)
+get_reg_file_color(const char *filename, const struct stat *attr,
+				int *free_color)
 {
 	if (conf.light_mode == 1) return fi_c;
 	if (access(filename, R_OK) == -1) return nf_c;
@@ -877,7 +883,11 @@ match_print(char *match, size_t len, char *color, const int append_slash)
 }
 
 static inline int
+#ifdef NO_BACKWARD_SUGGEST
 print_match(char *match, const size_t len, const unsigned char c)
+#else
+print_match(char *match, const size_t len)
+#endif /* NO_BACKWARD_SUGGEST */
 {
 	int append_slash = 0, free_color = 0;
 
@@ -914,7 +924,7 @@ print_match(char *match, const size_t len, const unsigned char c)
 		suggestion.type = COMP_SUG;
 #else
 	suggestion.type = COMP_SUG;
-	UNUSED(c);
+//	UNUSED(c);
 #endif /* NO_BACKWARD_SUGGEST */
 
 	match_print(match, len, color, append_slash);
@@ -924,6 +934,7 @@ print_match(char *match, const size_t len, const unsigned char c)
 	return PARTIAL_MATCH;
 }
 
+/*
 static inline int
 get_print_status(const char *str, const char *match, const size_t len)
 {
@@ -934,8 +945,64 @@ get_print_status(const char *str, const char *match, const size_t len)
 		return FULL_MATCH;
 
 	return PARTIAL_MATCH;
+} */
+
+static int
+#ifdef NO_BACKWARD_SUGGEST
+check_completions(char *str, size_t len, const unsigned char c, const int print)
+#else
+check_completions(char *str, size_t len, const int print)
+#endif /* NO_BACKWARD_SUGGEST */
+{
+	if (!str || !*str)
+		return NO_MATCH;
+
+	skip_trailing_spaces(&str, &len);
+	skip_leading_backslashes(&str, &len);
+
+	if (len == 0)
+		return NO_MATCH;
+
+	if (conf.fuzzy_match != 0 && nwords == 1 && *str != '/'
+	&& is_internal_c(str))
+		return NO_MATCH;
+
+	int printed = NO_MATCH;
+	suggestion.filetype = DT_REG;
+	cur_comp_type = TCMP_NONE;
+
+	if (print == 0 && nwords == 1) {
+		// First (and only) word followed by a space
+		struct stat a;
+		if (lstat(str, &a) == 0) {
+			cur_comp_type = TCMP_PATH;
+			return FULL_MATCH;
+		}
+		return NO_MATCH;
+	}
+
+	*_fmatch = '\0';
+	flags |= STATE_SUGGESTING;
+	char *_match = my_rl_path_completion(str, 0);
+	flags &= ~STATE_SUGGESTING;
+	if (!_match && !*_fmatch)
+		return NO_MATCH;
+
+	cur_comp_type = TCMP_PATH; // Required by print_match()
+#ifdef NO_BACKWARD_SUGGEST
+	printed = print_match(_match ? _match : _fmatch, len, c);
+#else
+	printed = print_match(_match ? _match : _fmatch, len);
+#endif /* NO_BACKWARD_SUGGEST */
+	*_fmatch = '\0';
+
+	cur_comp_type = printed == NO_MATCH ? TCMP_NONE : TCMP_PATH;
+	free(_match);
+
+	return printed;
 }
 
+/*
 static int
 check_completions(char *str, size_t len, const unsigned char c, const int print)
 {
@@ -962,7 +1029,7 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 	if (!_match && !*_fmatch)
 		return NO_MATCH;
 
-	cur_comp_type = TCMP_PATH;
+	cur_comp_type = TCMP_PATH; // Required by print_match()
 	if (print == 0)
 		printed = get_print_status(str, _match ? _match : _fmatch, len);
 	else
@@ -971,8 +1038,11 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 
 	cur_comp_type = printed == NO_MATCH ? TCMP_NONE : TCMP_PATH;
 	free(_match);
+//	if (_match != str)
+//		free(_match);
+
 	return printed;
-}
+} */
 
 static inline void
 print_directory_suggestion(const size_t i, const size_t len, char *color)
@@ -1041,7 +1111,8 @@ check_filenames(char *str, size_t len, const unsigned char c,
 				const int first_word, const size_t full_word)
 #else
 static int
-check_filenames(char *str, size_t len, const int first_word, const size_t full_word)
+check_filenames(char *str, size_t len, const int first_word,
+				const size_t full_word)
 #endif /* NO_BACKWARD_SUGGEST */
 {
 	char *color = (conf.suggest_filetype_color == 1) ? no_c : sf_c;
@@ -1066,7 +1137,8 @@ check_filenames(char *str, size_t len, const int first_word, const size_t full_w
 		if (!file_info[i].name)	continue;
 
 //		if (removed_slash == 1 && file_info[i].dir != 1)
-		if (removed_slash == 1 && (file_info[i].dir != 1 || len != file_info[i].len))
+		if (removed_slash == 1 && (file_info[i].dir != 1
+		|| len != file_info[i].len))
 			continue;
 
 		if (full_word) {
@@ -1081,8 +1153,9 @@ check_filenames(char *str, size_t len, const int first_word, const size_t full_w
 		|| (file_info[i].dir == 0 && conf.auto_open == 0) ) )
 			continue;
 
-		if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
-		&& rl_line_buffer[2] == ' ' && file_info[i].dir == 0)
+		if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c'
+		&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' '
+		&& file_info[i].dir == 0)
 			continue;
 
 		/* No fuzzy matching if not at the end of the line */
@@ -1155,7 +1228,8 @@ check_filenames(char *str, size_t len, const int first_word, const size_t full_w
 		if (file_info[fuzzy_index].dir)
 			print_directory_suggestion((size_t)fuzzy_index, len, color);
 		else
-			print_reg_file_suggestion(str, (size_t)fuzzy_index, len, color, dot_slash);
+			print_reg_file_suggestion(str, (size_t)fuzzy_index, len, color,
+				dot_slash);
 
 		return PARTIAL_MATCH;
 	}
@@ -1308,7 +1382,8 @@ check_cmds(char *str, size_t len, const int print)
 		}
 
 		/* Let's check the 2nd char as well before calling strcmp() */
-		if (len > 1 && *(bin_commands[i] + 1) && *(cmd + 1) != *(bin_commands[i] + 1))
+		if (len > 1 && *(bin_commands[i] + 1)
+		&& *(cmd + 1) != *(bin_commands[i] + 1))
 			continue;
 
 		if (strncmp(cmd, bin_commands[i], len) != 0)
@@ -1343,7 +1418,8 @@ check_jumpdb(const char *str, const size_t len, const int print)
 			continue;
 		}
 
-		if (len && (conf.case_sens_path_comp ? strncmp(str, jump_db[i].path, len)
+		if (len && (conf.case_sens_path_comp
+		? strncmp(str, jump_db[i].path, len)
 		: strncasecmp(str, jump_db[i].path, len)) == 0) {
 			if (jump_db[i].len <= len) return FULL_MATCH;
 
@@ -1352,7 +1428,8 @@ check_jumpdb(const char *str, const size_t len, const int print)
 			char tmp[PATH_MAX + 2];
 			*tmp = '\0';
 
-			if (jump_db[i].len > 0 && jump_db[i].path[jump_db[i].len - 1] != '/')
+			if (jump_db[i].len > 0
+			&& jump_db[i].path[jump_db[i].len - 1] != '/')
 				snprintf(tmp, sizeof(tmp), "%s/", jump_db[i].path);
 
 			print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
@@ -1482,7 +1559,8 @@ check_jcmd(char *line)
 	suggestion.type = JCMD_SUG;
 	suggestion.filetype = DT_DIR;
 
-	print_suggestion(jump_suggestion, 0, conf.suggest_filetype_color ? di_c : sf_c);
+	print_suggestion(jump_suggestion, 0,
+		conf.suggest_filetype_color ? di_c : sf_c);
 
 	if (conf.autocd == 0)
 		suggestion.type = JCMD_SUG_NOACD;
@@ -1526,7 +1604,8 @@ check_users(const char *str, const size_t len)
 	struct passwd *p;
 	while ((p = getpwent())) {
 		if (!p->pw_name) break;
-		if (len == 0 || (*str == *p->pw_name && strncmp(str, p->pw_name, len) == 0)) {
+		if (len == 0 || (*str == *p->pw_name
+		&& strncmp(str, p->pw_name, len) == 0)) {
 			suggestion.type = USER_SUG;
 			char t[NAME_MAX + 1];
 			snprintf(t, sizeof(t), "~%s", p->pw_name);
@@ -1870,7 +1949,8 @@ check_profiles(char *word, const size_t len)
 
 	size_t i;
 	for (i = 0; profile_names[i]; i++) {
-		if (conf.case_sens_list == 0 ? (TOUPPER(*w) == TOUPPER(*profile_names[i])
+		if (conf.case_sens_list == 0
+		? (TOUPPER(*w) == TOUPPER(*profile_names[i])
 		&& strncasecmp(w, profile_names[i], l) == 0)
 		: (*w == *profile_names[i]
 		&& strncmp(w, profile_names[i], l) == 0)) {
@@ -1905,7 +1985,8 @@ check_remotes(char *word, const size_t len)
 
 	size_t i;
 	for (i = 0; remotes[i].name; i++) {
-		if (conf.case_sens_list == 0 ? (TOUPPER(*w) == TOUPPER(*remotes[i].name)
+		if (conf.case_sens_list == 0
+		? (TOUPPER(*w) == TOUPPER(*remotes[i].name)
 		&& strncasecmp(w, remotes[i].name, l) == 0)
 		: (*w == *remotes[i].name
 		&& strncmp(w, remotes[i].name, l) == 0)) {
@@ -1939,8 +2020,10 @@ check_color_schemes(char *word, const size_t len)
 
 	size_t i;
 	for (i = 0; color_schemes[i]; i++) {
-		if (conf.case_sens_list == 0 ? (TOUPPER(*w) == TOUPPER(*color_schemes[i])
-		&& strncasecmp(w, color_schemes[i], l) == 0) : (*w == *color_schemes[i]
+		if (conf.case_sens_list == 0
+		? (TOUPPER(*w) == TOUPPER(*color_schemes[i])
+		&& strncasecmp(w, color_schemes[i], l) == 0)
+		: (*w == *color_schemes[i]
 		&& strncmp(w, color_schemes[i], l) == 0)) {
 			suggestion.type = CSCHEME_SUG;
 			char *p = escape_str(color_schemes[i]);
@@ -1976,7 +2059,8 @@ check_bookmark_names(char *word, const size_t len)
 		if (!bookmarks[i].name || !*bookmarks[i].name)
 			continue;
 
-		if (conf.case_sens_list == 0 ? (TOUPPER(*w) == TOUPPER(*bookmarks[i].name)
+		if (conf.case_sens_list == 0
+		? (TOUPPER(*w) == TOUPPER(*bookmarks[i].name)
 		&& strncasecmp(w, bookmarks[i].name, l) == 0)
 		: (*w == *bookmarks[i].name
 		&& strncmp(w, bookmarks[i].name, l) == 0)) {
@@ -2136,7 +2220,8 @@ rl_suggestions(const unsigned char c)
 		rl_line_buffer[full_word] = ' ';
 	}
 
-	char *word = (nwords == 1 && c != ' ' && first_word) ? first_word : last_word;
+	char *word = (nwords == 1 && c != ' ' && first_word)
+		? first_word : last_word;
 	size_t wlen = strlen(word);
 
 	/* If more than one word and the cursor is on the first word,
@@ -2160,8 +2245,9 @@ rl_suggestions(const unsigned char c)
 		if (wrong_cmd)
 			recover_from_wrong_cmd();
 
-		if (suggestion.printed == 1 && suggestion_buf && suggestion.type == HIST_SUG
-		&& (!rl_line_buffer || strncmp(suggestion_buf, rl_line_buffer, (size_t)rl_point) != 0))
+		if (suggestion.printed == 1 && suggestion_buf
+		&& suggestion.type == HIST_SUG && (!rl_line_buffer
+		|| strncmp(suggestion_buf, rl_line_buffer, (size_t)rl_point) != 0))
 			clear_suggestion(CS_FREEBUF);
 
 		printed = PARTIAL_MATCH;
@@ -2202,8 +2288,9 @@ rl_suggestions(const unsigned char c)
 				zero_offset = 1;
 				goto SUCCESS;
 			}
-		/* An alias name could be the same as the beginning of the alias defintion,
-		 * so that this test must always be skipped in case of aliases */
+		/* An alias name could be the same as the beginning of the alias
+		 * defintion, so that this test must always be skipped in case
+		 * of aliases */
 		} else if (suggestion.type != ALIAS_SUG && c != ' ' && word
 		&& (conf.case_sens_path_comp ? (*word == *suggestion_buf
 		&& strncmp(word, suggestion_buf, wlen) == 0)
@@ -2221,7 +2308,8 @@ rl_suggestions(const unsigned char c)
 	switch (nwords > 1 ? *lb : '\0') {
 	case 'b': /* Bookmark names */
 		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ') {
-			if (!(*(lb + 3) == 'a' && *(lb + 4) == ' ') && strncmp(lb + 3, "add", 3) != 0) {
+			if (!(*(lb + 3) == 'a' && *(lb + 4) == ' ')
+			&& strncmp(lb + 3, "add", 3) != 0) {
 				if ((printed = check_bookmark_names(word, wlen)) != NO_MATCH) {
 					goto SUCCESS;
 				} else {
@@ -2248,8 +2336,8 @@ rl_suggestions(const unsigned char c)
 		}
 
 		/* REMOVE AS SOON AS BH IS REPLACED BY DH!! */
-		else if (nwords == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0 && lb[1] == 'h'
-		&& lb[2] == ' ' && !strchr(word, '/')) {
+		else if (nwords == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
+		&& lb[1] == 'h' && lb[2] == ' ' && !strchr(word, '/')) {
 			if (lb[1] == 'h' && lb[2] == ' ' && (lb[3] == '-'
 			|| strncmp(lb + 3, "--help", strlen(lb + 3)) == 0))
 				break;
@@ -2264,7 +2352,8 @@ rl_suggestions(const unsigned char c)
 		break;
 
 	case 'c': /* Color schemes */
-		if (conf.colorize == 1 && color_schemes && lb[1] == 's' && lb[2] == ' ') {
+		if (conf.colorize == 1 && color_schemes && lb[1] == 's'
+		&& lb[2] == ' ') {
 			if ((printed = check_color_schemes(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
 		}
@@ -2275,8 +2364,8 @@ rl_suggestions(const unsigned char c)
 		if (lb[1] == 'h' && lb[2] == ' ' && (lb[3] == '-'
 		|| strncmp(lb + 3, "--help", strlen(lb + 3)) == 0))
 			break;
-		if (nwords == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0 && lb[1] == 'h'
-		&& lb[2] == ' ' && !strchr(word, '/')) {
+		if (nwords == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
+		&& lb[1] == 'h' && lb[2] == ' ' && !strchr(word, '/')) {
 			if ((printed = check_dirhist(word, wlen)) != NO_MATCH) {
 				goto SUCCESS;
 			} else {
@@ -2325,7 +2414,8 @@ rl_suggestions(const unsigned char c)
 #endif /* !_NO_PROFILES */
 
 		if (lb[1] == 'r' && strncmp(lb, "prompt ", 7) == 0) {
-			if (prompts_n > 0 && (printed = check_prompts(word, wlen)) != NO_MATCH)
+			printed = check_prompts(word, wlen);
+			if (prompts_n > 0 && printed != NO_MATCH)
 				goto SUCCESS;
 		}
 		break;
@@ -2348,9 +2438,11 @@ rl_suggestions(const unsigned char c)
 			&& (printed = check_tags(word + 1, wlen - 1, TAGC_SUG)) != NO_MATCH)
 				goto SUCCESS;
 		} else if ((lb[1] == 'l' || lb[1] == 'm' || lb[1] == 'n'
-		|| lb[1] == 'r' || lb[1] == 'y') && lb[2] == ' ')
-			if (*word && (printed = check_tags(word, wlen, TAGS_SUG)) != NO_MATCH)
+		|| lb[1] == 'r' || lb[1] == 'y') && lb[2] == ' ') {
+			printed = check_tags(word, wlen, TAGS_SUG);
+			if (*word && printed != NO_MATCH)
 				goto SUCCESS;
+		}
 		break;
 #endif /* _NO_TAGS */
 
@@ -2377,7 +2469,8 @@ rl_suggestions(const unsigned char c)
 		}
 
 		/* 3.c.2) Check commands fixed parameters */
-		if ((printed = check_int_params(full_line, (size_t)rl_end)) != NO_MATCH) {
+		printed = check_int_params(full_line, (size_t)rl_end);
+		if (printed != NO_MATCH) {
 			zero_offset = 1;
 			goto SUCCESS;
 		}
@@ -2463,7 +2556,11 @@ rl_suggestions(const unsigned char c)
 				last_word_offset += FILE_URI_PREFIX_LEN;
 			}
 
+#ifdef NO_BACKWARD_SUGGEST
 			printed = check_completions(d, wlen, c, flag);
+#else
+			printed = check_completions(d, wlen, flag);
+#endif /* NO_BACKWARD_SUGGEST */
 			if (printed != NO_MATCH) {
 				if (flag == CHECK_MATCH) {
 					if (printed == FULL_MATCH)
@@ -2502,7 +2599,8 @@ rl_suggestions(const unsigned char c)
 				clear_suggestion(CS_FREEBUF);
 
 			if (*lb != ';' && *lb != ':' && *word >= '1' && *word <= '9') {
-				if (_expand_eln(word) == 1 && (printed = check_eln(word, flag)) > 0)
+				if (_expand_eln(word) == 1
+				&& (printed = check_eln(word, flag)) > 0)
 					goto SUCCESS;
 			}
 			break;
@@ -2551,9 +2649,11 @@ rl_suggestions(const unsigned char c)
 			if (c == ' ' && escaped == 0 && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
 #ifdef NO_BACKWARD_SUGGEST
-			printed = check_filenames(word, wlen, c, last_space ? 0 : 1, c == ' ' ? 1 : 0);
+			printed = check_filenames(word, wlen, c, last_space ? 0 : 1,
+				c == ' ' ? 1 : 0);
 #else
-			printed = check_filenames(word, wlen, last_space ? 0 : 1, c == ' ' ? 1 : 0);
+			printed = check_filenames(word, wlen, last_space ? 0 : 1,
+				c == ' ' ? 1 : 0);
 #endif /* NO_BACKWARD_SUGGEST */
 			if (printed != NO_MATCH)
 				goto SUCCESS;
@@ -2600,7 +2700,8 @@ rl_suggestions(const unsigned char c)
 	}
 
 #ifndef _NO_TAGS
-	if (*lb != ';' && *lb != ':' && *word == 't' && *(word + 1) == ':' && *(word + 2)) {
+	if (*lb != ';' && *lb != ':' && *word == 't' && *(word + 1) == ':'
+	&& *(word + 2)) {
 		if ((printed = check_tags(word + 2, wlen - 2, TAGT_SUG)) != NO_MATCH)
 			goto SUCCESS;
 	}
@@ -2635,7 +2736,11 @@ CHECK_FIRST_WORD:
 		if (a > 0 && a <= (int)files)
 			printed = PARTIAL_MATCH;
 	} else if (point_is_first_word && rl_point < rl_end
+#ifdef NO_BACKWARD_SUGGEST
 	&& check_completions(word, wlen, c, CHECK_MATCH)) {
+#else
+	&& check_completions(word, wlen, CHECK_MATCH)) {
+#endif /* NO_BACKWARD_SUGGEST */
 		printed = PARTIAL_MATCH;
 	} else {
 		if (wlen > 0 && word[wlen - 1] == ' ')
@@ -2656,8 +2761,8 @@ CHECK_FIRST_WORD:
 	/* Let's suppose that two slashes do not constitue a search expression */
 	} else {
 	/* There's no suggestion nor any command name matching the first entered
-	 * word. So, we assume we have an invalid command name. Switch to the warning
-	 * prompt to warn the user */
+	 * word. So, we assume we have an invalid command name. Switch to the
+	 * warning prompt to warn the user */
 		if (*word != '/' || strchr(word + 1, '/'))
 			print_warning_prompt(*word, c);
 	}
@@ -2690,9 +2795,12 @@ SUCCESS:
 			rl_dispatching = 1;
 			recover_from_wrong_cmd();
 			rl_dispatching = 0;
-			/* recover_from_wrong_cmd() removes the suggestion. Let's reprint it */
-			if (rl_point < rl_end && suggestion_buf && rl_line_buffer && *rl_line_buffer) {
-				print_suggestion(suggestion_buf, wc_xstrlen(rl_line_buffer), suggestion.color);
+			/* recover_from_wrong_cmd() removes the suggestion.
+			 * Let's reprint it */
+			if (rl_point < rl_end && suggestion_buf && rl_line_buffer
+			&& *rl_line_buffer) {
+				print_suggestion(suggestion_buf, wc_xstrlen(rl_line_buffer),
+					suggestion.color);
 				suggestion.printed = 1;
 			}
 		}
