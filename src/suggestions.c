@@ -633,13 +633,6 @@ _print_suggestion(const char *str, const size_t offset, const char *color)
 void
 print_suggestion(const char *str, size_t offset, char *color)
 {
-#ifdef NO_BACKWARD_SUGGEST
-	/* Do nothing if WRONG_CMD is set: we're recovering from the warning prompt
-	 * and if we print the suggestion here it will be cleared anyway by
-	 * recover_from_wrong_cmd(), and that's a waste of resources */
-	if (!str || !*str || wrong_cmd == 1)
-		return;
-#else
 	if (!str || !*str)
 		return;
 
@@ -648,7 +641,6 @@ print_suggestion(const char *str, size_t offset, char *color)
 			return;
 		recover_from_wrong_cmd();
 	}
-#endif /* NO_BACKWARD_SUGGEST */
 
 	if (nwords == 1 && rl_end > 0 && rl_line_buffer
 	&& rl_line_buffer[rl_end - 1] == ' ' && (rl_end == 1
@@ -883,11 +875,7 @@ match_print(char *match, size_t len, char *color, const int append_slash)
 }
 
 static inline int
-#ifdef NO_BACKWARD_SUGGEST
-print_match(char *match, const size_t len, const unsigned char c)
-#else
 print_match(char *match, const size_t len)
-#endif /* NO_BACKWARD_SUGGEST */
 {
 	int append_slash = 0, free_color = 0;
 
@@ -919,13 +907,7 @@ print_match(char *match, const size_t len)
 
 	free(p);
 
-#ifdef NO_BACKWARD_SUGGEST
-	if (c != BS)
-		suggestion.type = COMP_SUG;
-#else
 	suggestion.type = COMP_SUG;
-//	UNUSED(c);
-#endif /* NO_BACKWARD_SUGGEST */
 
 	match_print(match, len, color, append_slash);
 
@@ -948,11 +930,7 @@ get_print_status(const char *str, const char *match, const size_t len)
 } */
 
 static int
-#ifdef NO_BACKWARD_SUGGEST
-check_completions(char *str, size_t len, const unsigned char c, const int print)
-#else
 check_completions(char *str, size_t len, const int print)
-#endif /* NO_BACKWARD_SUGGEST */
 {
 	if (!str || !*str)
 		return NO_MATCH;
@@ -989,11 +967,7 @@ check_completions(char *str, size_t len, const int print)
 		return NO_MATCH;
 
 	cur_comp_type = TCMP_PATH; // Required by print_match()
-#ifdef NO_BACKWARD_SUGGEST
-	printed = print_match(_match ? _match : _fmatch, len, c);
-#else
 	printed = print_match(_match ? _match : _fmatch, len);
-#endif /* NO_BACKWARD_SUGGEST */
 	*_fmatch = '\0';
 
 	cur_comp_type = printed == NO_MATCH ? TCMP_NONE : TCMP_PATH;
@@ -1105,15 +1079,9 @@ print_reg_file_suggestion(char *str, const size_t i, size_t len,
 	print_suggestion(file_info[i].name, len, color);
 }
 
-#ifdef NO_BACKWARD_SUGGEST
-static int
-check_filenames(char *str, size_t len, const unsigned char c,
-				const int first_word, const size_t full_word)
-#else
 static int
 check_filenames(char *str, size_t len, const int first_word,
 				const size_t full_word)
-#endif /* NO_BACKWARD_SUGGEST */
 {
 	char *color = (conf.suggest_filetype_color == 1) ? no_c : sf_c;
 
@@ -1166,11 +1134,7 @@ check_filenames(char *str, size_t len, const int first_word,
 			&& strncasecmp(str, file_info[i].name, len) == 0)) {
 				if (file_info[i].len == len) return FULL_MATCH;
 
-#ifdef NO_BACKWARD_SUGGEST
-				if (c != BS) suggestion.type = FILE_SUG;
-#else
 				suggestion.type = FILE_SUG;
-#endif /* NO_BACKWARD_SUGGEST */
 
 				if (file_info[i].dir)
 					print_directory_suggestion(i, len, color);
@@ -1218,12 +1182,9 @@ check_filenames(char *str, size_t len, const int first_word,
 
 	if (fuzzy_index > -1) { /* We have a fuzzy match */
 		cur_comp_type = TCMP_PATH;
-#ifdef NO_BACKWARD_SUGGEST
-		if (c != BS) suggestion.type = i < files ? FILE_SUG : FUZZY_FILENAME;
-#else
+
 		/* i < files == we have a full match (TARGET_BEGINNING_BONUS) */
 		suggestion.type = i < files ? FILE_SUG : FUZZY_FILENAME;
-#endif /* NO_BACKWARD_SUGGEST */
 
 		if (file_info[fuzzy_index].dir)
 			print_directory_suggestion((size_t)fuzzy_index, len, color);
@@ -2154,11 +2115,7 @@ check_dirhist(char *word, const size_t len)
 		return NO_MATCH;
 
 	cur_comp_type = TCMP_DIRHIST;
-#ifdef NO_BACKWARD_SUGGEST
-	if (c != BS) suggestion.type = DIRHIST_SUG;
-#else
 	suggestion.type = DIRHIST_SUG;
-#endif /* NO_BACKWARD_SUGGEST */
 
 	print_suggestion(old_pwd[fuzzy_index], 0, sf_c);
 
@@ -2556,11 +2513,7 @@ rl_suggestions(const unsigned char c)
 				last_word_offset += FILE_URI_PREFIX_LEN;
 			}
 
-#ifdef NO_BACKWARD_SUGGEST
-			printed = check_completions(d, wlen, c, flag);
-#else
 			printed = check_completions(d, wlen, flag);
-#endif /* NO_BACKWARD_SUGGEST */
 			if (printed != NO_MATCH) {
 				if (flag == CHECK_MATCH) {
 					if (printed == FULL_MATCH)
@@ -2648,13 +2601,9 @@ rl_suggestions(const unsigned char c)
 
 			if (c == ' ' && escaped == 0 && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
-#ifdef NO_BACKWARD_SUGGEST
-			printed = check_filenames(word, wlen, c, last_space ? 0 : 1,
-				c == ' ' ? 1 : 0);
-#else
+
 			printed = check_filenames(word, wlen, last_space ? 0 : 1,
 				c == ' ' ? 1 : 0);
-#endif /* NO_BACKWARD_SUGGEST */
 			if (printed != NO_MATCH)
 				goto SUCCESS;
 
@@ -2736,11 +2685,7 @@ CHECK_FIRST_WORD:
 		if (a > 0 && a <= (int)files)
 			printed = PARTIAL_MATCH;
 	} else if (point_is_first_word && rl_point < rl_end
-#ifdef NO_BACKWARD_SUGGEST
-	&& check_completions(word, wlen, c, CHECK_MATCH)) {
-#else
 	&& check_completions(word, wlen, CHECK_MATCH)) {
-#endif /* NO_BACKWARD_SUGGEST */
 		printed = PARTIAL_MATCH;
 	} else {
 		if (wlen > 0 && word[wlen - 1] == ' ')
