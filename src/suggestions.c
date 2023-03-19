@@ -2518,6 +2518,13 @@ rl_suggestions(const unsigned char c)
 				wlen = strlen(word);
 			}
 
+			/* If "./FILE" check only "FILE" */
+			if (wlen > 2 && *word == '.' && *(word + 1) == '/') {
+				word += 2;
+				wlen -= 2;
+				last_word_offset += 2;
+			}
+
 			if (*word == '/') /* Absolute path: nothing to do here */
 				break;
 
