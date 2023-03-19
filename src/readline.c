@@ -1491,10 +1491,10 @@ my_rl_path_completion(const char *text, int state)
 					match = 1;
 			}
 
-			else if (exec) {
+/*			else if (exec) {
 				if (type == DT_REG && access(ent->d_name, X_OK) == 0)
 					match = 1;
-			}
+			} */
 
 			else if (exec_path) {
 				if (type == DT_REG || type == DT_DIR) {
