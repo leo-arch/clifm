@@ -964,7 +964,7 @@ static void
 check_gui(void)
 {
 	/* Running on a graphical environment? */
-#ifndef __HAIKU__
+#if !defined(__HAIKU__) && !defined(__CYGWIN__)
 	if (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))
 #endif
 	{
