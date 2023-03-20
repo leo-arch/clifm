@@ -1629,7 +1629,10 @@ run_mime_app(char **app, char **fpath)
 	char **cmd = split_str(*app, NO_UPDATE_ARGS);
 	if (!cmd) {
 		free(*app);
+#ifndef __CYGWIN__
+	// fpath is an argument passed to mime_open(), which should not be freed
 		free(*fpath);
+#endif
 		return EXIT_FAILURE;
 	}
 
@@ -1654,7 +1657,10 @@ run_mime_app(char **app, char **fpath)
 	free(cmd);
 
 	free(*app);
+#ifndef __CYGWIN__
+	// fpath is an argument passed to mime_open(), which should not be freed
 	free(*fpath);
+#endif
 
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
@@ -1757,7 +1763,19 @@ mime_open(char **args)
 		return run_archiver(&file_path, &app);
 #endif
 
+#ifdef __CYGWIN__
+	// Some Windows programs, like Word and Powerpoint (but not Excel!!), do
+	// not like absolute paths when the file name contains spaces. So, let's
+	// pass the file name as it was passed to this function, without
+	// expanding it to an absolute path.
+	// This hack must be removed as soon as the real cause is discovered:
+	// why Word/Powerpoint fails to open absolute paths when the file name
+	// contains spaces?
+	free(file_path);
+	return run_mime_app(&app, &args[file_index]);
+#else
 	return run_mime_app(&app, &file_path);
+#endif
 }
 #else
 void *_skip_me_lira;
