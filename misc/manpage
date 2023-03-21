@@ -3024,6 +3024,6 @@ There is a lot more you can do, but this should be enough to get you started.
 Report at <https://github.com/leo\-arch/clifm/issues>
 
 .SH AUTHOR
-L. M. Abramovich
+L. M. Abramovich <leo.clifm@outlook.com>
 
 For additional contributors, use \fIgit shortlog -s\fR on the clifm.git repository.
