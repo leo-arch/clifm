@@ -95,6 +95,10 @@ ifdef _NO_MAGIC
 	undefine LMAGIC
 endif
 
+ifdef _NO_PROFILES
+	CPPFLAGS += -D_NO_PROFILES
+endif
+
 ifdef _NO_SUGGESTIONS
 	CPPFLAGS += -D_NO_SUGGESTIONS
 endif
