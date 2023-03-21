@@ -335,3 +335,8 @@ Yes. Please see our [contribution guidelines](https://github.com/leo-arch/clifm/
 ## Community
 Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always welcome. \
 The [Discussions section](https://github.com/leo-arch/clifm/discussions) of this repo is also open to input.
+
+---
+
+## Developer
+[Leo Abramovich](https://github.com/leo-arch) <<leo.clifm@outlook.com>>
