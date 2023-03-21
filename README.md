@@ -5,9 +5,12 @@
 </p>
 <h1 align="center">CliFM</h1>
 <h2 align="center">The Command Line File Manager</h2>
+<h4 align="center">No GUI, no TUI, no menus. Just you and a (powerful, file-management oriented) command line</h4>
+<!---
 <h3 align="center">Fast, extensible, lightweight</h3>
 <h4 align="center">Linux, Termux (Android), FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS, Haiku, Cygwin</h4>
 <h4 align="center">x86, ARM, PowerPC</h4>
+-->
 <h4 align="center"><a
 href="https://github.com/leo-arch/clifm/#floppy_disk-installation">Install</a> · <a
 href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a> · <a
