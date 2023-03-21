@@ -53,9 +53,7 @@ set_oldpwd(const char *old, const char *new)
 {
 	if (!old || !new || strcmp(old, new) == 0)
 		return;
-#if _DEBUG_OLDPWD
-	_err(ERR_NO_LOG, PRINT_PROMPT, "OLDPWD: %s\n", old);
-#endif
+
 	setenv("OLDPWD", old, 1);
 }
 
