@@ -245,6 +245,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - Files apparent size is used now by default. Revert via `--no-apparent-size` or setting `ApparentSize` to `false` in the config file. 
   - **NEW**: [**Clifm** will try to run in 256 colors mode if support is detected](https://github.com/leo-arch/clifm/wiki/Customization#color-support). Just comment out the `ColorScheme` option in the config file (or set it either to an empty value or to `default-256`) to enable this feature.
   - **NEW**: [Mark files with extended attributes (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode)
   - **NEW**: [Customizable timestamps, including relative times (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles)
