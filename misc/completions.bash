@@ -97,6 +97,7 @@ _clifm ()
         --max-dirhist
         --max-files
         --max-path
+        --no-apparent-size
         --no-dir-jumper
         --no-cd-auto
         --no-classify
