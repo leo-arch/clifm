@@ -2174,11 +2174,13 @@ set_default_keybinds(void)
 static void
 set_hardcoded_keybinds(void)
 {
+#ifndef __HAIKU__
 	rl_bind_keyseq("\\C-l", rl_refresh);
-	rl_bind_keyseq("\x1b[A", rl_cmdhist);
-	rl_bind_keyseq("\x1b[B", rl_cmdhist);
 	rl_bind_keyseq("\\C-p", rl_cmdhist);
 	rl_bind_keyseq("\\C-n", rl_cmdhist);
+#endif /* !__HAIKU__ */
+	rl_bind_keyseq("\x1b[A", rl_cmdhist);
+	rl_bind_keyseq("\x1b[B", rl_cmdhist);
 
 	rl_bind_keyseq("\\M-q", rl_del_last_word);
 	rl_bind_key('\t', rl_tab_comp);
