@@ -326,10 +326,10 @@ Parameters passed to cp: -a"
     fz on (or --full-dir-size)\n\
 - Toggle the disk usage analyzer mode on/off\n\
     Alt-TAB (or -t, --disk-usage-analyzer)\n\
-- Print apparent sizes instead of actual device usage (Linux only)\n\
-    Run with --apparent-size or set ApparentSize to true in the\n\
+- Print files sizes as used blocks instead of used bytes (apparent size)\n\
+    Run with --no-apparent-size or set ApparentSize to false in the\n\
     configuration file\n\
-- Use powers of 1000 instead of 1024 for file sizes (Linux only)\n\
+- Use powers of 1000 instead of 1024 for file sizes\n\
     Run with --si"
 
 #define FF_USAGE "Set list-directories-first on/off\n\n\
@@ -1192,6 +1192,7 @@ and paths\
 \n      --max-path=NUM\t\t Number of characters \
 after which the current directory in the prompt will be abreviated to its \
 base name (if \\z is used in the prompt)\
+\n      --no-apparent-size\t Inform file sizes as used blocks instead of used bytes (apparent size)\
 \n      --no-dir-jumper\t\t Disable the directory jumper function\
 \n      --no-cd-auto\t\t Disable the autocd function\
 \n      --no-classify\t\t Do not append file type indicators\
@@ -1224,7 +1225,7 @@ CliFM's built-in opener\
 \n      --sel-file=FILE\t\t Set FILE as custom selections file\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
 \n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\
-\n      --si\t\t\t Print sizes in powers of 1000 instead of 1024 (Linux only)\
+\n      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
 \n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
 \n      --smenutab\t\t Use smenu to display completion matches\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\

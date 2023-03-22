@@ -219,7 +219,7 @@ xf=01;31:xs=00;32:"
 #define MNT_UDISKS2 1
 
 /* Default options */
-#define DEF_APPARENT_SIZE 0
+#define DEF_APPARENT_SIZE 1
 #define DEF_AUTOCD 1
 #define DEF_AUTOJUMP 0
 #define DEF_AUTO_OPEN 1

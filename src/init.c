@@ -1958,7 +1958,7 @@ external_arguments(int argc, char **argv)
 		{"secure-env-full", no_argument, 0, 245},
 		{"secure-cmds", no_argument, 0, 246},
 		{"full-dir-size", no_argument, 0, 247},
-		{"apparent-size", no_argument, 0, 248},
+		{"no-apparent-size", no_argument, 0, 248},
 		{"no-history", no_argument, 0, 249},
 		{"fzytab", no_argument, 0, 250},
 		{"no-refresh-on-resize", no_argument, 0, 251},
@@ -2140,7 +2140,7 @@ external_arguments(int argc, char **argv)
 			break;
 		case 246: xargs.secure_cmds = 1; break;
 		case 247: xargs.full_dir_size = conf.full_dir_size = 1; break;
-		case 248: xargs.apparent_size = conf.apparent_size = 1; break;
+		case 248: xargs.apparent_size = conf.apparent_size = 0; break;
 		case 249: xargs.history = 0; break;
 		case 250:
 #ifndef _NO_FZF
