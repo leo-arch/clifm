@@ -106,8 +106,11 @@
 # If running in long view, print directories full size (including contents)
 ;FullDirSize=false
 
-# Print files apparent size instead of actual device usage (Linux only)
-;ApparentSize=false
+# Print files apparent size instead of actual device usage
+# Note that on non-Linux or POSIX-compliant systems, du(1), used by clifm
+# to get full directories size, has no option to display files apparent
+# sizes, so that actual device usage is always used instead.
+;ApparentSize=true
 
 # In light mode, extra file type checks (except those provided by
 # the d_type field of the dirent structure (see readdir(3))
