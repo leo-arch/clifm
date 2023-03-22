@@ -89,7 +89,8 @@
 
 # Format used to display timestamps in long view mode.
 # Consult strftime(3) for information about time format specifiers.
-# Defaults to "%b %e %H:%M" for recent files (< 6 months) and "%b %e  %Y" for older files.
+# Defaults to "%b %e %H:%M" for recent files (< 6 months) and "%b %e  %Y"
+# for older files.
 # Examples:
 ## ISO
 ;TimeStyle="%Y-%m-%d"
@@ -387,7 +388,8 @@
 #            6. ALIASES               #
 #=====================================#
 
-# Bind '?' to the interactive help plugin. Run 'actions' to print the # list of available plugins
+# Bind '?' to the interactive help plugin. Run 'actions' to print the
+# list of available plugins
 #alias ?='ih'
 # Bind 'b' to the directory history navigation plugin
 #alias b='dh'
