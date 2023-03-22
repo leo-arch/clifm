@@ -243,6 +243,9 @@ get_file_perms(const mode_t mode)
 	p.cgr = p.cgw = p.cgx = dn_c;
 	p.cor = p.cow = p.cox = dn_c;
 
+	p.pad1 = p.pad2 = p.pad3 = 0;
+	p.pad4 = 0;
+
 	mode_t val = (mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) { p.ur = 'r'; p.cur = dr_c; }
 	if (val & S_IWUSR) { p.uw = 'w'; p.cuw = dw_c; }
@@ -454,6 +457,14 @@ get_common_perms(char **s, int *diff)
 	*diff = 0;
 	struct stat a, b;
 	struct perms_t p;
+
+	p.cur = p.cuw = p.cux = (char *)NULL;
+	p.cgr = p.cgw = p.cgx = (char *)NULL;
+	p.cor = p.cow = p.cox = (char *)NULL;
+
+	p.pad1 = p.pad2 = p.pad3 = 0;
+	p.pad4 = 0;
+
 	p.ur = p.gr = p.or = 'r';
 	p.uw = p.gw = p.ow = 'w';
 	p.ux = p.gx = p.ox = 'x';
@@ -1104,11 +1115,10 @@ get_properties(char *filename, const int dsize)
 		cid = dg_c;
 
 	char sf[MAX_SHADE_LEN];
-	if (term_caps.color > 0) {
-		if (!*dz_c && dsize == 0) {
-			get_color_size(attr.st_size, sf, sizeof(sf));
-			csize = sf;
-		}
+	*sf = '\0';
+	if (conf.colorize == 1 && !*dz_c && !S_ISDIR(attr.st_mode)) {
+		get_color_size(FILE_SIZE, sf, sizeof(sf));
+		csize = sf;
 	}
 
 	switch (attr.st_mode & S_IFMT) {
@@ -1270,7 +1280,8 @@ get_properties(char *filename, const int dsize)
 		 *ccdate = cdate;
 
 	char atf[MAX_SHADE_LEN], mtf[MAX_SHADE_LEN], ctf[MAX_SHADE_LEN];
-	if (term_caps.color > 0 && !*dd_c) {
+	*atf = *mtf = *ctf = '\0';
+	if (conf.colorize == 1 && !*dd_c) {
 		props_now = time(NULL);
 		get_color_age(attr.st_atime, atf, sizeof(atf));
 		cadate = atf;
@@ -1288,26 +1299,27 @@ get_properties(char *filename, const int dsize)
 # if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
 	char *cbdate = cdate;
 	char btf[MAX_SHADE_LEN];
+	*btf = '\0';
 	char creation_time[MAX_TIME_STR];
 
 #  if defined(_STATX)
 	struct statx attrx;
 	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
 	gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
-	if (term_caps.color > 0 && !*dd_c) {
+	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(attrx.stx_btime.tv_sec, btf, sizeof(btf));
 		cbdate = btf;
 	}
 #  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
 #   if defined(__OpenBSD__)
 	gen_time_str(creation_time, sizeof(creation_time), attr.__st_birthtim.tv_sec);
-	if (term_caps.color > 0 && !*dd_c) {
+	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(attr.__st_birthtim.tv_sec, btf, sizeof(btf));
 		cbdate = btf;
 	}
 #   else
 	gen_time_str(creation_time, sizeof(creation_time), attr.st_birthtime);
-	if (term_caps.color > 0 && !*dd_c) {
+	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(attr.st_birthtime, btf, sizeof(btf));
 		cbdate = btf;
 	}
