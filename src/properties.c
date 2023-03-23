@@ -1301,7 +1301,7 @@ get_properties(char *filename, const int dsize)
 	printf(_("Modify: \t%s%s%s\n"), cmdate, mod_time, cend);
 	printf(_("Change: \t%s%s%s\n"), ccdate, change_time, cend);
 
-#if !defined(_BE_POSIX) && !defined(__DragonFly__)
+#if !defined(_BE_POSIX) && !defined(__DragonFly__) && !defined(__OpenBSD__)
 # if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
 	char *cbdate = cdate;
 	char btf[MAX_SHADE_LEN];
@@ -1310,31 +1310,36 @@ get_properties(char *filename, const int dsize)
 
 #  if defined(_STATX)
 	struct statx attrx;
-	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
-	gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
+	int ret = statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
+	if (ret == 0 && attrx.stx_mask & STATX_BTIME) {
+		gen_time_str(creation_time, sizeof(creation_time), attrx.stx_btime.tv_sec);
+	} else {
+		/* Birthtime is not available */
+		*creation_time = '-';
+		creation_time[1] = '\0';
+	}
+
 	if (conf.colorize == 1 && !*dd_c) {
 		get_color_age(attrx.stx_btime.tv_sec, btf, sizeof(btf));
 		cbdate = btf;
 	}
 #  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
-#   if defined(__OpenBSD__)
-	gen_time_str(creation_time, sizeof(creation_time), attr.__st_birthtim.tv_sec);
+//#   if defined(__OpenBSD__)
+//	time_t bt = attr.__st_birthtim.tv_sec;
+//#   else
+	time_t bt = attr.st_birthtime;
+//#   endif // __OpenBSD__
+	gen_time_str(creation_time, sizeof(creation_time), bt);
+
 	if (conf.colorize == 1 && !*dd_c) {
-		get_color_age(attr.__st_birthtim.tv_sec, btf, sizeof(btf));
+		get_color_age(bt, btf, sizeof(btf));
 		cbdate = btf;
 	}
-#   else
-	gen_time_str(creation_time, sizeof(creation_time), attr.st_birthtime);
-	if (conf.colorize == 1 && !*dd_c) {
-		get_color_age(attr.st_birthtime, btf, sizeof(btf));
-		cbdate = btf;
-	}
-#   endif /* __OpenBSD__ */
 #  endif /* _STATX */
 
 	printf(_("Birth: \t\t%s%s%s\n"), cbdate, creation_time, cend);
 # endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || _STATX */
-#endif /* !_BE_POSIX */
+#endif /* !_BE_POSIX && !__DragonFly__ && !__OpenBSD__ */
 
 	/* File size (human size / bytes (apparent|real [/ si])) */
 	if (!S_ISDIR(attr.st_mode) && link_to_dir == 0) {
@@ -1455,8 +1460,9 @@ calc_relative_time(const time_t age, char *s)
 }
 
 /* Compose the properties line for the current file name
- * This function is called by list_dir(), in listing.c for each file name
- * in the current directory when running in long view mode */
+ * This function is called by list_dir(), in listing.c, for each file name
+ * in the current directory when running in long view mode, and after
+ * printing the corresponding ELN */
 int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	const size_t ino_max, const size_t fc_max, const size_t size_max,
@@ -1471,7 +1477,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		 *csize = props->dir ? dz_c : df_c, /* Directories size */
 		 *cend = df_c;  /* Ending Color */
 
-	/* Let's construct gradient colors for file size and time fields */
+	/* Let's construct color shades for file size and time fields */
 	char sf[MAX_SHADE_LEN], df[MAX_SHADE_LEN];
 
 	if (conf.colorize == 1) {
@@ -1739,7 +1745,9 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		}
 	}
 
-	/* Print stuff */
+					/* ######################
+					 * #   8. PRINT STUFF   #
+					 * ###################### */
 
 	/* These are just two characters, which we would normally print like this:
 	 * %c <-- x ? 'x' : 0
