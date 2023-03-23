@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2016-2022 L. Abramovich <johndoe.arch@outlook.com>
+ * SPDX-FileCopyrightText: 2016-2022 L. Abramovich <leo.clifm@outlook.com>
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
@@ -8,7 +8,7 @@
 			 *  # 	  The command line file manager    #
 			 *  ######################################## */
 
-/* Copyright (C) 2016-2023, L. Abramovich <johndoe.arch@outlook.com>
+/* Copyright (C) 2016-2023, L. Abramovich <leo.clifm@outlook.com>
  * All rights reserved.
 
  * This program is free software; you can redistribute it and/or modify
