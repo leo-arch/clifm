@@ -43,7 +43,6 @@
 
 #include <stdio.h>
 #include <unistd.h>
-//#include <sys/stat.h>
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;

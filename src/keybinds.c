@@ -25,7 +25,6 @@
 #include "helpers.h"
 
 #include <stdio.h>
-//#include <sys/stat.h>
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;

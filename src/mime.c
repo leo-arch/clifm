@@ -30,7 +30,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-//#include <sys/stat.h>
 #include <readline/tilde.h>
 
 #ifndef _NO_MAGIC

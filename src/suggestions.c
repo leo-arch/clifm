@@ -25,7 +25,6 @@
 
 #include "helpers.h"
 
-//#include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
