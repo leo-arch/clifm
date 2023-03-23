@@ -430,7 +430,8 @@ get_new_perms(char *str, const int diff)
 
 	char *new_perms = (char *)NULL;
 	if (rl_callback_handler_input) {
-		new_perms = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
+		new_perms = savestring(rl_callback_handler_input,
+			strlen(rl_callback_handler_input));
 		free(rl_callback_handler_input);
 		rl_callback_handler_input = (char *)NULL;
 	}
@@ -438,7 +439,8 @@ get_new_perms(char *str, const int diff)
 	xrename = 0;
 	prompt_offset = poffset_bk;
 
-	if (diff == 0 && new_perms && *str == *new_perms && strcmp(str, new_perms) == 0) {
+	if (diff == 0 && new_perms && *str == *new_perms
+	&& strcmp(str, new_perms) == 0) {
 		fprintf(stderr, _("pc: Nothing to do\n"));
 		free(new_perms);
 		new_perms = (char *)NULL;
@@ -616,7 +618,8 @@ get_new_ownership(char *str, const int diff)
 
 	char *new_own = (char *)NULL;
 	if (rl_callback_handler_input) {
-		new_own = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
+		new_own = savestring(rl_callback_handler_input,
+			strlen(rl_callback_handler_input));
 		free(rl_callback_handler_input);
 		rl_callback_handler_input = (char *)NULL;
 	}
@@ -1090,7 +1093,8 @@ get_properties(char *filename, const int dsize)
 	/* Check file existence */
 	struct stat attr;
 	if (lstat(filename, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pr: %s: %s\n", filename, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pr: %s: %s\n", filename,
+			strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1242,14 +1246,17 @@ get_properties(char *filename, const int dsize)
 
 	/* Details */
 	printf(_("\tBlocks: %s%jd%s"), cbold, (intmax_t)attr.st_blocks, cend);
-	printf(_("\tIO Block: %s%jd%s"), cbold, (intmax_t)attr.st_blksize, cend);
-	printf(_("\tInode: %s%ju%s\n"), cbold, (uintmax_t)attr.st_ino, cend);
-	dev_t d = (S_ISCHR(attr.st_mode) || S_ISBLK(attr.st_mode)) ? attr.st_rdev : attr.st_dev;
-	printf(_("Device: %s%ju,%ju%s"), cbold, (uintmax_t)major(d), (uintmax_t)minor(d), cend);
+	printf(_("  Block size: %s%d%s"), cbold, S_BLKSIZE, cend);
+	printf(_("  IO Block: %s%jd%s\n"), cbold, (intmax_t)attr.st_blksize, cend);
+	dev_t d = (S_ISCHR(attr.st_mode) || S_ISBLK(attr.st_mode))
+		? attr.st_rdev : attr.st_dev;
+	printf(_("Device: %s%ju,%ju%s"), cbold, (uintmax_t)major(d),
+		(uintmax_t)minor(d), cend);
+	printf(_("\tInode: %s%ju%s"), cbold, (uintmax_t)attr.st_ino, cend);
 
-	printf(_("\tUid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("UNKNOWN")
+	printf(_("  Uid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("UNKNOWN")
 			: owner->pw_name, cend);
-	printf(_("\tGid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("UNKNOWN")
+	printf(_("  Gid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("UNKNOWN")
 			: group->gr_name, cend);
 
 #if defined(LINUX_FILE_ATTRS)
@@ -1329,16 +1336,31 @@ get_properties(char *filename, const int dsize)
 # endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || _STATX */
 #endif /* !_BE_POSIX */
 
-	/* File size */
+	/* File size (human size / bytes (apparent|real [/ si])) */
 	if (!S_ISDIR(attr.st_mode) && link_to_dir == 0) {
-		printf(_("Size: \t\t%s%s%s\n"), csize, size_type ? size_type : "?", cend);
+		printf(_("Size: \t\t%s%s%s"), csize, size_type ? size_type : "?", cend);
+
+		int bigger_than_bytes = (conf.apparent_size == 1 ? attr.st_size
+			: (attr.st_blocks * S_BLKSIZE)) > (xargs.si == 1 ? 1000 : 1024);
+
+		if (bigger_than_bytes == 1) {
+			printf(" / %s%juB%s", csize, conf.apparent_size == 1
+				? (uintmax_t)attr.st_size
+				: (uintmax_t)attr.st_blocks * S_BLKSIZE, cend);
+		}
+
+		printf(" (%s%s)\n", conf.apparent_size == 1 ? _("apparent")
+			: _("real"), (xargs.si == 1 && bigger_than_bytes == 1)
+			? " / si" : "");
+
 		goto END;
 	}
 
 	if (dsize == 0) /* We're running 'p', not 'pp' */
 		goto END;
 
-	off_t total_size = file_perm == 1 ? get_total_size(link_to_dir, filename) : -2;
+	off_t total_size = file_perm == 1 ? get_total_size(link_to_dir, filename)
+		: -2;
 
 	if (S_ISDIR(attr.st_mode) && attr.st_nlink == 2 && total_size == 4)
 		total_size = 0; /* Empty directory */
@@ -1359,7 +1381,8 @@ get_properties(char *filename, const int dsize)
 
 	char *human_size = get_size_unit(total_size * size_mult_factor);
 	if (human_size) {
-		printf("%s%s%s\n", csize, human_size, cend);
+		printf("%s%s%s (%s)\n", csize, human_size, cend,
+			conf.apparent_size == 1 ? _("apparent") : _("real"));
 		free(human_size);
 	} else {
 		puts("?");
@@ -1371,7 +1394,8 @@ END:
 }
 
 static char *
-get_ext_info_long(const char *name, const size_t name_len, int *trim, size_t *ext_len)
+get_ext_info_long(const char *name, const size_t name_len, int *trim,
+	size_t *ext_len)
 {
 	char *ext_name = (char *)NULL;
 
@@ -1425,8 +1449,9 @@ calc_relative_time(const time_t age, char *s)
 		else
 			snprintf(s, MAX_TIME_STR, "%*ju  mon", 2, (uintmax_t)n);
 	}
-	else
+	else {
 		snprintf(s, MAX_TIME_STR, "%*ju year", 2, (uintmax_t)(age / RT_YEAR));
+	}
 }
 
 /* Compose the properties line for the current file name
@@ -1434,7 +1459,8 @@ calc_relative_time(const time_t age, char *s)
  * in the current directory when running in long view mode */
 int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
-	const size_t ino_max, const size_t fc_max, const size_t size_max, const uint8_t have_xattr)
+	const size_t ino_max, const size_t fc_max, const size_t size_max,
+	const uint8_t have_xattr)
 {
 	/* Let's get file properties and the corresponding colors */
 
@@ -1448,7 +1474,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	/* Let's construct gradient colors for file size and time fields */
 	char sf[MAX_SHADE_LEN], df[MAX_SHADE_LEN];
 
-	if (term_caps.color > 0) {
+	if (conf.colorize == 1) {
 		off_t s = props->size;
 		if (props->dir == 1 && conf.full_dir_size == 1)
 			s = props->size * (xargs.si == 1 ? 1000 : 1024);
@@ -1561,7 +1587,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 				 * #     2. PERMISSIONS      #
 				 * ########################### */
 
-	char attr_s[(MAX_COLOR * 14) + 16]; /* 14 colors + 15 single chars + NUL byte */
+		/* 14 colors + 15 single chars + NUL byte */
+	char attr_s[(MAX_COLOR * 14) + 16];
 	if (prop_fields.perm == PERM_SYMBOLIC) {
 		struct perms_t perms = get_file_perms(props->mode);
 		snprintf(attr_s, sizeof(attr_s),
@@ -1571,7 +1598,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, cend,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend);
 	} else if (prop_fields.perm == PERM_NUMERIC) {
-		snprintf(attr_s, sizeof(attr_s), "%s%04o%s", do_c, props->mode & 07777, cend);
+		snprintf(attr_s, sizeof(attr_s), "%s%04o%s", do_c,
+			props->mode & 07777, cend);
 	} else {
 		*attr_s = '\0';
 	}
@@ -1590,7 +1618,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		u = DIGINUM(props->uid), g = DIGINUM(props->gid);
 		if (u + g < (int)ug_max)
 			ug_pad = (int)ug_max - u;
-		snprintf(id_s, sizeof(id_s), "%s%u:%-*u%s ", cid, props->uid, ug_pad, props->gid, cend);
+		snprintf(id_s, sizeof(id_s), "%s%u:%-*u%s ", cid, props->uid,
+			ug_pad, props->gid, cend);
 	} else {
 		*id_s = '\0';
 	}
@@ -1599,12 +1628,14 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 				 * #        4. FILE TIME         #
 				 * ############################### */
 
-	/* Whether time is access, modification, or status change, this value is set
-	 * by list_dir, in listing.c (file_info[n].ltime) before calling this function */
+	/* Whether time is access, modification, or status change, this value is
+	 * set by list_dir, in listing.c (file_info[n].ltime) before calling this
+	 * function */
 	char file_time[MAX_TIME_STR];
-	char time_s[MAX_TIME_STR + (MAX_COLOR * 2) + 2]; /* time + 2 colors + space + NUL byte */
+		/* time + 2 colors + space + NUL byte */
+	char time_s[MAX_TIME_STR + (MAX_COLOR * 2) + 2];
 	if (prop_fields.time != 0) {
-		if (props->ltime) {
+		if (props->ltime >= 0) {
 			struct tm t;
 			localtime_r(&props->ltime, &t);
 
@@ -1620,9 +1651,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 				/* 14515200 == 6*4*7*24*60*60 == six months */
 				/* If not user defined, let's mimic ls(1) behavior */
 				char *tfmt = conf.time_str ? conf.time_str :
-					recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER;
-				/* GCC (not clang) complains about tfmt being not a string literal.
-				 * Let's silence this warning until we find a better approach. */
+					(recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER);
+				/* GCC (not clang) complains about tfmt being not a string
+				 * literal. Let's silence this warning until we find a better
+				 * approach. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 				strftime(file_time, sizeof(file_time), tfmt, &t);
@@ -1632,7 +1664,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			/* INVALID_TIME_STR is generated by check_time_str() in init.c */
 			strcpy(file_time, invalid_time_str);
 		}
-		snprintf(time_s, sizeof(time_s), "%s%s%s ", cdate, *file_time ? file_time : "?", cend);
+		snprintf(time_s, sizeof(time_s), "%s%s%s ", cdate, *file_time
+			? file_time : "?", cend);
 	} else {
 		*file_time = '\0';
 		*time_s = '\0';
@@ -1645,7 +1678,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	/* size_s is either file size or "major,minor" IDs in case of special
 	 * files (char and block devs) */
 	char *size_type = (char *)NULL;
-	/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars (see aux.h) */
+	/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars
+	 * (see aux.h) */
 	char size_s[MAX_UNIT_SIZE + (MAX_COLOR * 2) + 1];
 	if (prop_fields.size >= 1) {
 		if (!(S_ISCHR(props->mode) || S_ISBLK(props->mode))
@@ -1655,20 +1689,21 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			} else {
 				if (prop_fields.size == PROP_SIZE_HUMAN) {
 					if (props->dir == 1 && conf.full_dir_size == 1)
-						size_type = get_size_unit(props->size * (xargs.si == 1 ? 1000 : 1024));
+						size_type = get_size_unit(props->size *
+						(xargs.si == 1 ? 1000 : 1024));
 					else
 						size_type = get_size_unit(props->size);
 
-					snprintf(size_s, sizeof(size_s), "%s%s%s", csize, size_type
-						? size_type : "?", cend);
+					snprintf(size_s, sizeof(size_s), "%s%s%s", csize,
+						size_type ? size_type : "?", cend);
 				} else {
 					snprintf(size_s, sizeof(size_s), "%s%*ju%s", csize,
 						(int)size_max, (uintmax_t)props->size, cend);
 				}
 			}
 		} else {
-			snprintf(size_s, sizeof(size_s), "%ju,%ju", (uintmax_t)major(props->rdev),
-				(uintmax_t)minor(props->rdev));
+			snprintf(size_s, sizeof(size_s), "%ju,%ju",
+				(uintmax_t)major(props->rdev), (uintmax_t)minor(props->rdev));
 		}
 	} else {
 		*size_s = '\0';
@@ -1699,8 +1734,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			snprintf(fc_str, sizeof(fc_str), "%s%*d%s ", fc_c, (int)fc_max,
 				(int)props->filesn, cend);
 		} else {
-			snprintf(fc_str, sizeof(fc_str), "%s%*c%s ", dn_c, (int)fc_max, '-',
-			cend);
+			snprintf(fc_str, sizeof(fc_str), "%s%*c%s ", dn_c, (int)fc_max,
+				'-', cend);
 		}
 	}
 
@@ -1773,7 +1808,8 @@ properties_function(char **args)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pr: %s: Error dequoting file name\n"), args[i]);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pr: %s: Error dequoting "
+					"file name\n"), args[i]);
 				exit_status = EXIT_FAILURE;
 				continue;
 			}
