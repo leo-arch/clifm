@@ -53,7 +53,7 @@
 void
 gen_time_str(char *buf, const size_t size, const time_t _time)
 {
-	if (_time) {
+	if (_time >= 0) {
 		struct tm tm;
 		localtime_r(&_time, &tm);
 		strftime(buf, size, DEF_TIME_STYLE_LONG, &tm);
