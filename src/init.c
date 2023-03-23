@@ -3307,6 +3307,7 @@ check_time_str(void)
 
 	if (conf.relative_time == 1) {
 		prop_fields.len += 7;
+		strncpy(invalid_time_str, " -     ", MAX_TIME_STR);
 		return;
 	}
 
