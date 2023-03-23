@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <readline/tilde.h>
 #include <string.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <unistd.h>
 #if defined(__linux__) || defined(__HAIKU__) || defined(__APPLE__) \
 || defined(__sun) || defined(__CYGWIN__)

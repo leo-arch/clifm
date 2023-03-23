@@ -40,7 +40,7 @@
 # define _ACL_OK
 #endif /* __NetBSD__ */
 
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <unistd.h>
 
 #if defined(LINUX_FILE_ATTRS)

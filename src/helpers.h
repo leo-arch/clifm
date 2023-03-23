@@ -79,6 +79,7 @@
 #endif
 #include <regex.h>
 #include <stdlib.h>
+#include <sys/stat.h> /* S_BLKSIZE */
 
 #if defined(__linux__)
 # include <linux/version.h>
@@ -161,6 +162,11 @@ void *__dso_handle;
 
 #ifndef NAME_MAX
 # define NAME_MAX 255
+#endif
+
+/* Used by FILE_SIZE and FILE_SIZE_PTR macros to calculate file sizes */
+#ifndef S_BLKSIZE
+# define S_BLKSIZE 512 /* Not defined in Termux */
 #endif
 
 /*#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1)) */
@@ -562,9 +568,8 @@ extern int watch;
 #define ENTRY_N 64
 
 /* Macros to calculate file sizes */
-#define BLK_SIZE 512
-#define FILE_SIZE_PTR (conf.apparent_size == 1 ? attr->st_size : attr->st_blocks * BLK_SIZE)
-#define FILE_SIZE (conf.apparent_size == 1 ? attr.st_size : attr.st_blocks * BLK_SIZE)
+#define FILE_SIZE_PTR (conf.apparent_size == 1 ? attr->st_size : attr->st_blocks * S_BLKSIZE)
+#define FILE_SIZE (conf.apparent_size == 1 ? attr.st_size : attr.st_blocks * S_BLKSIZE)
 
 #define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))

@@ -25,7 +25,7 @@
 #include "helpers.h"
 
 #include <stdio.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <sys/statvfs.h>
 #if defined(BSD_KQUEUE)
 # include <unistd.h> // open(2)

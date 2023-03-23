@@ -33,7 +33,7 @@
 # include <wordexp.h>
 #endif
 #include <readline/readline.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <errno.h>
 
 #include "aux.h"

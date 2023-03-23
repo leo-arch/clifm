@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <readline/readline.h>
 #include <string.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
 

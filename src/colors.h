@@ -25,7 +25,7 @@
 #ifndef COLORS_H
 #define COLORS_H
 
-#include <sys/stat.h>
+//#include <sys/stat.h>
 
 __BEGIN_DECLS
 

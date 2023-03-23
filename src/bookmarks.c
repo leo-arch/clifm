@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <readline/readline.h> // tilde_expand
 #include <string.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <unistd.h>
 #include <limits.h>
 

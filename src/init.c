@@ -37,7 +37,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>

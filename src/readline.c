@@ -32,7 +32,7 @@
 
 #include "helpers.h"
 
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <glob.h>
@@ -74,9 +74,9 @@ typedef char *rl_cpvfunc_t;
 # include "highlight.h"
 #endif
 
-#if !defined(S_IFREG) || !defined(S_IFDIR)
-# include <sys/stat.h>
-#endif
+//#if !defined(S_IFREG) || !defined(S_IFDIR)
+//# include <sys/stat.h>
+//#endif
 
 #define DEL_EMPTY_LINE     1
 #define DEL_NON_EMPTY_LINE 2

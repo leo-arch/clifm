@@ -25,7 +25,7 @@
 #ifndef CHECKS_H
 #define CHECKS_H
 
-#include <sys/stat.h>
+//#include <sys/stat.h>
 
 __BEGIN_DECLS
 

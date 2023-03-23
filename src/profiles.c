@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <readline/history.h>
 
 #include "aux.h"
