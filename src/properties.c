@@ -1248,16 +1248,24 @@ get_properties(char *filename, const int dsize)
 	printf(_("\tBlocks: %s%jd%s"), cbold, (intmax_t)attr.st_blocks, cend);
 	printf(_("  Block size: %s%d%s"), cbold, S_BLKSIZE, cend);
 	printf(_("  IO Block: %s%jd%s\n"), cbold, (intmax_t)attr.st_blksize, cend);
-	dev_t d = (S_ISCHR(attr.st_mode) || S_ISBLK(attr.st_mode))
-		? attr.st_rdev : attr.st_dev;
+
+	dev_t d = attr.st_dev;
 	printf(_("Device: %s%ju,%ju%s"), cbold, (uintmax_t)major(d),
 		(uintmax_t)minor(d), cend);
 	printf(_("\tInode: %s%ju%s"), cbold, (uintmax_t)attr.st_ino, cend);
 
 	printf(_("  Uid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("UNKNOWN")
 			: owner->pw_name, cend);
-	printf(_("  Gid: %s%u (%s)%s\n"), cid, attr.st_gid, !group ? _("UNKNOWN")
+	printf(_("  Gid: %s%u (%s)%s"), cid, attr.st_gid, !group ? _("UNKNOWN")
 			: group->gr_name, cend);
+
+	if (S_ISCHR(attr.st_mode) || S_ISBLK(attr.st_mode)) {
+		d = attr.st_rdev;
+		printf(_("  Device type: %s%ju,%ju%s\n"), cbold, (uintmax_t)major(d),
+			(uintmax_t)minor(d), cend);
+	} else {
+		putchar('\n');
+	}
 
 #if defined(LINUX_FILE_ATTRS)
 	printf("Attributes: \t");
