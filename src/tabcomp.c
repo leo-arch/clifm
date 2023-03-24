@@ -770,34 +770,38 @@ run_finder(const size_t *height, const int *offset, const char *lw, const int mu
 		}
 
 		snprintf(cmd, sizeof(cmd), "fzf %s "
-				"%s --margin=0,0,0,%d "
-				"%s --read0 --ansi "
-				"--query=\"%s\" %s %s %s %s %s "
-				"< %s > %s",
-				conf.fzftab_options,
-				*height_str ? height_str : "", *offset,
-				conf.case_sens_path_comp ? "+i" : "-i",
-				lw ? lw : "", conf.colorize == 0 ? "--color=bw" : "",
-				multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
+			"%s --margin=0,0,0,%d "
+			"%s --read0 --ansi "
+			"--query=\"%s\" %s %s %s %s %s "
+			"< %s > %s",
+			conf.fzftab_options,
+			*height_str ? height_str : "", *offset,
+			conf.case_sens_path_comp ? "+i" : "-i",
+			lw ? lw : "", conf.colorize == 0 ? "--color=bw" : "",
+			multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
 ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
-				prev == 1 ? prev_str : "",
-				(prev == 1 && prev_hidden == 1)
-					? "--preview-window=hidden --bind alt-p:toggle-preview" : "",
-				*prev_opts ? prev_opts : "",
-				finder_in_file, finder_out_file);
-	}
+			prev == 1 ? prev_str : "",
+			(prev == 1 && prev_hidden == 1)
+				? "--preview-window=hidden --bind alt-p:toggle-preview" : "",
+			*prev_opts ? prev_opts : "",
+			finder_in_file, finder_out_file);
 
-/*		UNUSED(prev_str); UNUSED(prev_hidden);
-		snprintf(cmd, sizeof(cmd), "sk " // skim
-				"%s --margin=0,0,0,%d --color=16 "
-				"--read0 --ansi --inline-info "
-				"--layout=reverse-list --query=\"%s\" %s %s "
-				"< %s > %s",
-				*height_str ? height_str : "", *offset,
-				lw ? lw : "", conf.colorize == 0 ? "--no-color" : "",
-				multi ? "--multi --bind tab:toggle+down" : "",
-				finder_in_file, finder_out_file);
-	} */
+/*		snprintf(cmd, sizeof(cmd), "sk %s " // skim
+			"%s --margin=0,0,0,%d --color=16 "
+			"--read0 --ansi --inline-info "
+			"--layout=reverse-list --query=\"%s\" %s %s %s %s %s "
+			"< %s > %s",
+			conf.fzftab_options,
+			*height_str ? height_str : "", *offset,
+			lw ? lw : "", conf.colorize == 0 ? "--no-color" : "",
+			multi ? "--multi --bind tab:toggle+down,ctrl-s:select-all,\
+ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
+			prev == 1 ? prev_str : "",
+			(prev == 1 && prev_hidden == 1)
+				? "--preview-window=hidden --bind alt-p:toggle-preview" : "",
+			*prev_opts ? prev_opts : "",
+			finder_in_file, finder_out_file); */
+	}
 
 	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;

@@ -44,7 +44,8 @@ static int
 remotes_list(void)
 {
 	if (remotes_n == 0) {
-		printf(_("%s: No remotes defined. Run 'net edit' to add one.\n"), PROGRAM_NAME);
+		printf(_("%s: No remotes defined. Run 'net edit' to add one.\n"),
+			PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -62,11 +63,11 @@ remotes_list(void)
 		if (remotes[i].unmount_cmd)
 			printf(_(" Unmount command: %s\n"), remotes[i].unmount_cmd);
 		printf(_(" Auto-unmount: %s\n"), (remotes[i].auto_unmount == 0)
-				? _("false") : _("true"));
+			? _("false") : _("true"));
 		printf(_(" Auto-mount: %s\n"), (remotes[i].auto_mount == 0)
-				? _("false") : _("true"));
-		printf(_(" Mounted: %s%s%s\n"), BOLD, (remotes[i].mounted == 0) ? _("No")
-				: _("Yes"), df_c);
+			? _("false") : _("true"));
+		printf(_(" Mounted: %s%s%s\n"), BOLD, (remotes[i].mounted == 0)
+			? _("No") : _("Yes"), df_c);
 		if (i < remotes_n - 1)
 			puts("");
 	}
@@ -83,7 +84,8 @@ dequote_remote_name(char *name)
 			strcpy(name, deq);
 			free(deq);
 		} else {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: Error dequoting resource name\n", name);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: Error dequoting "
+				"resource name\n", name);
 			return EXIT_FAILURE;
 		}
 	}
@@ -118,7 +120,8 @@ get_remote(char *name)
 	}
 
 	if (!remotes[i].mountpoint) {
-		fprintf(stderr, _("net: No mountpoint specified for '%s'\n"), remotes[i].name);
+		fprintf(stderr, _("net: No mountpoint specified for '%s'\n"),
+			remotes[i].name);
 		return (-1);
 	}
 
@@ -143,7 +146,8 @@ static inline int
 cd_to_mountpoint(int i)
 {
 	free(workspaces[cur_ws].path);
-	workspaces[cur_ws].path = savestring(remotes[i].mountpoint, strlen(remotes[i].mountpoint));
+	workspaces[cur_ws].path = savestring(remotes[i].mountpoint,
+		strlen(remotes[i].mountpoint));
 	add_to_jumpdb(workspaces[cur_ws].path);
 	add_to_dirhist(workspaces[cur_ws].path);
 
@@ -157,14 +161,16 @@ cd_to_mountpoint(int i)
 static inline int
 print_cd_error(int i)
 {
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes[i].mountpoint,
+		strerror(errno));
 	return EXIT_FAILURE;
 }
 
 static inline int
 print_no_mount_cmd_error(int i)
 {
-	fprintf(stderr, _("net: No mount command specified for '%s'\n"), remotes[i].name);
+	fprintf(stderr, _("net: No mount command specified for '%s'\n"),
+		remotes[i].name);
 	return EXIT_FAILURE;
 }
 
@@ -216,7 +222,8 @@ remotes_unmount(char *name)
 		return EXIT_FAILURE;
 
 	if (remotes[i].mounted == 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Not mounted\n"), remotes[i].name);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Not mounted\n"),
+			remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
@@ -281,7 +288,8 @@ remotes_edit(char *app)
 
 	struct stat attr;
 	if (stat(remotes_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file,
+			strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -301,7 +309,8 @@ remotes_edit(char *app)
 		return ret;
 
 	if (stat(remotes_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file,
+			strerror(errno));
 		return errno;
 	}
 
@@ -379,7 +388,8 @@ automount_remotes(void)
 			}
 
 			int ret = 0;
-			printf(_("%s: net: %s: Mounting remote...\n"), PROGRAM_NAME, remotes[i].name);
+			printf(_("%s: net: %s: Mounting remote...\n"), PROGRAM_NAME,
+				remotes[i].name);
 			if ((ret = launch_execle(remotes[i].mount_cmd)) != EXIT_SUCCESS) {
 				_err('w', PRINT_PROMPT, _("net: %s: Mount command failed with "
 					"error code %d\n"), remotes[i].name, ret);
@@ -420,7 +430,8 @@ autounmount_remotes(void)
 			}
 
 			int ret = 0;
-			printf(_("%s: net: %s: Unmounting remote...\n"), PROGRAM_NAME, remotes[i].name);
+			printf(_("%s: net: %s: Unmounting remote...\n"), PROGRAM_NAME,
+				remotes[i].name);
 			if ((ret = launch_execle(remotes[i].unmount_cmd)) != EXIT_SUCCESS) {
 				fprintf(stderr, _("%s: net: %s: Unmount command failed with "
 					"error code %d\n"), PROGRAM_NAME, remotes[i].name, ret);
