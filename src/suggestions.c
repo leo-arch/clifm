@@ -430,6 +430,7 @@ recover_from_wrong_cmd(void)
 	}
 
 	fputs(NC, stdout);
+	cur_color = (char *)NULL;
 	rl_restore_prompt();
 	rl_clear_message();
 
