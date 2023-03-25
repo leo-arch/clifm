@@ -317,7 +317,7 @@ For more details consult the [changelog file](https://github.com/leo-arch/clifm/
 ## Support
 
 **Clifm** is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). Consult the [compilation page](https://github.com/leo-arch/clifm/blob/master/src/README.md#5-compilation).\
-It works on Linux, Termux (Android), FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS, Haiku, and Cygwin, on x86, ARM, and PowerPC architectures.
+Successfully tested and running flawlessly on Termux (Android), FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS, Haiku, and Cygwin, on x86, ARM, and PowerPC architectures.
 
 ---
 
