@@ -253,7 +253,8 @@ abbreviate_file_name(char *str)
 
 	char *name = (char *)NULL;
 	size_t len = strlen(str);
-	size_t wlen = (workspaces && workspaces[cur_ws].path) ? strlen(workspaces[cur_ws].path) : 0;
+	size_t wlen = (workspaces && workspaces[cur_ws].path)
+		? strlen(workspaces[cur_ws].path) : 0;
 
 	/* If STR is in CWD -> ./STR */
 	if (workspaces && workspaces[cur_ws].path && wlen > 1 && len > wlen
@@ -289,8 +290,8 @@ normalize_path(char *src, size_t src_len)
 	if (strchr(src, '\\')) {
 		tmp = dequote_str(src, 0);
 		if (!tmp) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error deescaping string\n"),
-				PROGRAM_NAME, src);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error deescaping "
+				"string\n"), PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
 		size_t tlen = strlen(tmp);
@@ -305,8 +306,8 @@ normalize_path(char *src, size_t src_len)
 	if (*src == '~') {
 		tmp = tilde_expand(src);
 		if (!tmp) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error expanding tilde\n"),
-				PROGRAM_NAME, src);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error expanding "
+				"tilde\n"), PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
 		size_t tlen = strlen(tmp);
@@ -655,7 +656,8 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
  *
  * Example: ffaff00-4 -> 4;38;2;250;255;0
  *
- * At this point we know HEX is a valid hex color code (see is_hex_color() in colors.c).
+ * At this point we know HEX is a valid hex color code (see is_hex_color() in
+ * colors.c).
  * If using this function outside CliFM, make sure to validate HEX yourself
  *
  */
@@ -818,9 +820,11 @@ dir_size(char *dir)
 
 	char file[PATH_MAX];
 #if !defined(__OpenBSD__)
-	snprintf(file, PATH_MAX, "%s/duXXXXXX", (xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir); /* NOLINT */
+	snprintf(file, PATH_MAX, "%s/duXXXXXX", (xargs.stealth_mode == 1)
+		? P_tmpdir : tmp_dir); /* NOLINT */
 #else
-	snprintf(file, PATH_MAX, "%s/duXXXXXXXXXX", (xargs.stealth_mode == 1) ? P_tmpdir : tmp_dir); /* NOLINT */
+	snprintf(file, PATH_MAX, "%s/duXXXXXXXXXX", (xargs.stealth_mode == 1)
+		? P_tmpdir : tmp_dir); /* NOLINT */
 #endif
 
 	int fd = mkstemp(file);
@@ -835,12 +839,13 @@ dir_size(char *dir)
 	if (r == -1)
 		return (-1);
 
-#if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) && !defined(_BE_POSIX)
-	char block_size[16];
+#if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) \
+&& !defined(_BE_POSIX)
+	char *block_size = (char *)NULL;
 	if (xargs.si == 1)
-		strcpy(block_size, "--block-size=KB");
+		block_size = "--block_size=KB";
 	else
-		strcpy(block_size, "--block-size=K");
+		block_size = "--block-size=K";
 
 	if (conf.apparent_size != 1) {
 		char *cmd[] = {"du", "-s", block_size, dir, NULL};
@@ -1053,7 +1058,8 @@ url_encode(char *str)
 	for (; *pstr; pstr++) {
 #if defined(__CYGWIN__)
 		/* GCC on CYGWIN complains about subscript having type 'char' */
-		if (isalnum((unsigned char)*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
+		if (isalnum((unsigned char)*pstr) || *pstr == '-' || *pstr == '_'
+		|| *pstr == '.'
 #else
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
 #endif /* __CYGWIN__ */
