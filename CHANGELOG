@@ -1,3 +1,73 @@
+1.11 - Cobb
+
+Bug Fixes
+* File names containing sapces are not properly escaped when expanding file types (=), MIME types (@), and bookmarks (b:)
+* Wrong directory suggestion when entering ending slash
+* No color on wezterm terminal
+* If TERM is not found in clifm's terminfo database, CLIFM_FORCE_COLOR won't work.
+* Wrong cursor position with fastback and multi-line path suggestions
+* 'jl' (an actual command) triggers the warning prompt
+* Error when attempting to compile without trash support (_NO_TRASH)
+* Error compiling with _NO_FZF, _NO_TRASH, and _NO_ICONS
+* When a custom welcome message is set the initial help message is not shown
+* 'Icons' option is missing in the config file
+* No error message when specifying invalid opening application to edit config files
+* Garbage first line when refreshing screen via ENTER
+* 'jl STR' is returning an error code even if a match was found
+* Wallpaper setter plugin not working on Wayland
+* 'dir/*<TAB>' as first word triggers the warning prompt. PARTIALLY SOLVED: if there are matches, the prompt switches back to normal.
+* Wrong window offset with TAB completion for wildcards as first word
+* Not honoring case insensitivity when TAB completing paths
+* 'ListDirsFirs't in the config file is broken
+* Name not escaped when accepting workspace number suggestion
+* Highlight color for numbers (hn) not working
+* Ctrl-D exits clifm no matter if the command line isn't empty
+* If CLIFM_IFACE_COLORS, CLIFM_FILE_COLORS, and CLIFM_EXT_COLORS are set, the color scheme file won't be read
+* 82 is not the proper exit code for processes interrupted by a signal (e.g. Ctrl-c)
+* 'clifm.1' crashes man(1) in Termux
+* Lira fails to identify Zstandard files not ending with .zst
+* './FILE' triggers the warning prompt even if FILE exists in CWD
+*  Unable to TAB complete './FILE' if FILE is not an executable file
+* '/bin/ls ' triggers the warning prompt, even if /bin/ls exists
+* In Cugwin there's no DISPLAY variable, sot that it always runs as if there's no GUI (this impacts on Lira)
+* Garbage text when printing full dir sizes ('pp' command) and running colorless
+* Device field in p command for character and block devices wrongly set to device ID instead of ID of device containing file
+
+New features/improvements
+* Proper error message when attempting to open multiple files at once
+* 'clip' plugin reintroduced and rewritten
+* Add a '--purge [RANK]' option to jump: purge both non existent dirs (no param) and dirs ranked below RANK
+* Colorize the list of jump entries ('j<ENTER>'), right pad fields, and sort by rank
+* Allow compiling profiles out (_NO_PROFILES)
+* Enable fzfpreview by default
+* The 'config' command can be used instead of 'edit' (which is now deprecated)
+* 'config dump': List current settings highlighting those that deviate from the default values
+* Allow specifying opening application for 'jump edit' and 'prompt edit' commands
+* Use 256 colors for file properties if available
+* Gradient colors for file size and timestamps in file properties
+* New color scheme: default-256 (a 256 colors version of the default theme)
+* Default to default-256 color scheme if 256 colors support is detected (ColorScheme must be unset)
+* Customize time format for timestamps in long view (including relative time) using TimeStyle (config file)
+* Default time format in long view is now ls(1)-like
+* Colorize the list of workspaces ('ws' command)
+* Allow unsetting workspaces via the 'unset' subcommand ('ws NUM unset')
+* Options in main config file are by default commented
+* Right pad ELN's and add icons (if enabled) to search results (CWD only)
+* Match file extensions case-insensitively
+* Alphabetically sort color schemes ('cs' command)
+* Make Alt-f behave like in most shells (if not at the end of line, move forward one word)
+* Remove --no-ctrl-d-quits, --unicode, --no-unicode, and --no-toggle-workspaces switches
+* Remove 'uc, unicode' command
+* Added support for extended attributes (for both long view and 'p' command). See PropFields in the config file.
+* Ported to DragonFly BSD
+* Take terminal capabilites into account when clearing the screen
+* Right pad ELN's when listing selected and trashed files
+* Add support for CLICOLOR and CLICOLOR_FORCE environment variables. See https://bixense.com/clicolors
+* Properly set OLDPWD
+* Set CLIFM_PID and CLIFM_VERSION environment variables
+* Apparent sizes are used now by default (--apparent-size changed to --no-apparent-size)
+* Add Device type field to p command for character and block devices
+
 1.10 - Swordmaster
 Overall, 1.10 brings a much more solid command line experience
 
