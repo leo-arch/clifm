@@ -843,7 +843,7 @@ dir_size(char *dir)
 && !defined(_BE_POSIX)
 	char *block_size = (char *)NULL;
 	if (xargs.si == 1)
-		block_size = "--block_size=KB";
+		block_size = "--block-size=KB";
 	else
 		block_size = "--block-size=K";
 
