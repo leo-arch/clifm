@@ -546,7 +546,7 @@ get_sel_file_size(size_t i)
 
 	int base = xargs.si == 1 ? 1000 : 1024;
 	if (S_ISDIR(attr.st_mode))
-		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name) * base);
+		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name, 0) * base);
 	else
 		sel_elements[i].size = (off_t)FILE_SIZE;
 

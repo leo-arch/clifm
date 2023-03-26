@@ -74,6 +74,12 @@
 # define _NO_MAGIC
 #endif
 
+#if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) \
+&& !defined(_BE_POSIX)
+/* du(1) can report sizes in bytes, apparent sizes, and take custom block sizes */
+# define HAVE_GNU_DU
+#endif
+
 #ifndef _NO_GETTEXT
 # include <libintl.h>
 #endif

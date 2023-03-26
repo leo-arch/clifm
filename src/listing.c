@@ -593,9 +593,7 @@ set_long_attribs(const int n, const struct stat *attr)
 		char name[PATH_MAX]; *name = '\0';
 		if (file_info[n].type == DT_LNK) /* Symlink to directory */
 			snprintf(name, sizeof(name), "%s/", file_info[n].name);
-		file_info[n].size = dir_size(*name ? name : file_info[n].name);
-		if (file_info[n].type == DT_DIR && attr->st_nlink == 2 && file_info[n].size == 4)
-			file_info[n].size = 0; /* Empty directory */
+		file_info[n].size = dir_size(*name ? name : file_info[n].name, 0);
 	} else {
 		file_info[n].size = FILE_SIZE_PTR;
 	}
@@ -1827,13 +1825,6 @@ list_dir_light(void)
 #endif
 
 		if (conf.long_view == 1) {
-/*
-#if defined(_LINUX_XATTR)
-			if (prop_fields.xattr == 1 && listxattr(file_info[n].name, NULL, 0)) {
-				file_info[n].xattr = 1;
-				have_xattr = 1;
-			}
-#endif // _LINUX_XATTR */
 			struct stat _attr;
 			if (lstat(file_info[n].name, &_attr) != -1)
 				set_long_attribs((int)n, &_attr);

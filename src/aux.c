@@ -813,7 +813,7 @@ get_size_unit(off_t size)
 }
 
 off_t
-dir_size(char *dir)
+dir_size(char *dir, const int size_in_bytes)
 {
 	if (!dir || !*dir)
 		return (-1);
@@ -825,7 +825,7 @@ dir_size(char *dir)
 #else
 	snprintf(file, PATH_MAX, "%s/duXXXXXXXXXX", (xargs.stealth_mode == 1)
 		? P_tmpdir : tmp_dir); /* NOLINT */
-#endif
+#endif /* !__OpenBSD__ */
 
 	int fd = mkstemp(file);
 	if (fd == -1)
@@ -839,13 +839,17 @@ dir_size(char *dir)
 	if (r == -1)
 		return (-1);
 
-#if (defined(__linux__) || defined(__CYGWIN__) || defined(__HAIKU__)) \
-&& !defined(_BE_POSIX)
+#if defined(HAVE_GNU_DU)
 	char *block_size = (char *)NULL;
-	if (xargs.si == 1)
-		block_size = "--block-size=KB";
-	else
-		block_size = "--block-size=K";
+
+	if (size_in_bytes == 1) {
+		block_size = "--block-size=1";
+	} else {
+		if (xargs.si == 1)
+			block_size = "--block-size=KB";
+		else
+			block_size = "--block-size=K";
+	}
 
 	if (conf.apparent_size != 1) {
 		char *cmd[] = {"du", "-s", block_size, dir, NULL};
@@ -855,9 +859,10 @@ dir_size(char *dir)
 		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	}
 #else
+	UNUSED(size_in_bytes);
 	char *cmd[] = {"du", "-ks", dir, NULL};
 	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
-#endif /* __linux__ */
+#endif /* HAVE_GNU_DU */
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	close(stdout_bk);

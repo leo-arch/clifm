@@ -42,7 +42,7 @@ int  _expand_eln(const char *);
 char *abbreviate_file_name(char *);
 void close_fstream(FILE *, int);
 int  count_dir(const char *, int);
-off_t dir_size(char *);
+off_t dir_size(char *, const int);
 char from_hex(char);
 //char *from_octal(char *s);
 char *gen_date_suffix(struct tm);

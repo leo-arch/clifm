@@ -210,7 +210,11 @@ get_total_size(const int link_to_dir, char *filename)
 	if (term_caps.suggestions == 0) {
 		fputs("Retrieving file size... ", stdout);
 		fflush(stdout);
-		total_size = dir_size(*_path ? _path : filename);
+#if defined(HAVE_GNU_DU)
+		total_size = dir_size(*_path ? _path : filename, 1);
+#else
+		total_size = dir_size(*_path ? _path : filename, 0);
+#endif /* HAVE_GNU_DU */
 		fputs("\r                       \r", stdout);
 		fputs(_("Total size: \t"), stdout);
 	} else {
@@ -218,7 +222,11 @@ get_total_size(const int link_to_dir, char *filename)
 		HIDE_CURSOR;
 		fputs("Calculating... ", stdout);
 		fflush(stdout);
-		total_size = dir_size(*_path ? _path : filename);
+#if defined(HAVE_GNU_DU)
+		total_size = dir_size(*_path ? _path : filename, 1);
+#else
+		total_size = dir_size(*_path ? _path : filename, 0);
+#endif /* HAVE_GNU_DU */
 		MOVE_CURSOR_LEFT(15);
 		ERASE_TO_RIGHT;
 		UNHIDE_CURSOR;
@@ -1332,11 +1340,7 @@ get_properties(char *filename, const int dsize)
 		cbdate = btf;
 	}
 #  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
-//#   if defined(__OpenBSD__)
-//	time_t bt = attr.__st_birthtim.tv_sec;
-//#   else
 	time_t bt = attr.st_birthtime;
-//#   endif // __OpenBSD__
 	gen_time_str(creation_time, sizeof(creation_time), bt);
 
 	if (conf.colorize == 1 && !*dd_c) {
@@ -1372,11 +1376,8 @@ get_properties(char *filename, const int dsize)
 	if (dsize == 0) /* We're running 'p', not 'pp' */
 		goto END;
 
-	off_t total_size = file_perm == 1 ? get_total_size(link_to_dir, filename)
-		: -2;
-
-	if (S_ISDIR(attr.st_mode) && attr.st_nlink == 2 && total_size == 4)
-		total_size = 0; /* Empty directory */
+	off_t total_size = file_perm == 1
+		? get_total_size(link_to_dir, filename) : (-2);
 
 	if (total_size < 0) {
 		if (total_size == -2) /* No access */
@@ -1387,15 +1388,32 @@ get_properties(char *filename, const int dsize)
 	}
 
 	int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
+
+#if defined(HAVE_GNU_DU)
+	off_t total_size_kb = total_size > size_mult_factor
+		? (total_size / size_mult_factor) : total_size;
+#else
+	off_t total_size_kb = total_size;
+#endif /* HAVE_GNU_DU */
+
 	if (!*dz_c) {
-		get_color_size(total_size * size_mult_factor, sf, sizeof(sf));
+		get_color_size(total_size_kb * size_mult_factor, sf, sizeof(sf));
 		csize = sf;
 	}
 
-	char *human_size = get_size_unit(total_size * size_mult_factor);
+	char *human_size = get_size_unit(total_size_kb * size_mult_factor);
 	if (human_size) {
-		printf("%s%s%s (%s)\n", csize, human_size, cend,
-			conf.apparent_size == 1 ? _("apparent") : _("real"));
+#if defined(HAVE_GNU_DU)
+		printf("%s%s%s ", csize, human_size, cend);
+
+		if (total_size > size_mult_factor)
+			printf("/ %s%zuB%s ", csize, total_size, cend);
+
+		printf("(%s%s)\n", conf.apparent_size == 1 ? "apparent" : "real",
+			xargs.si == 1 ? " / si" : "");
+#else
+		printf("%s%s%s\n", csize, human_size, cend);
+#endif /* HAVE_GNU_DU */
 		free(human_size);
 	} else {
 		puts("?");
@@ -1702,11 +1720,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 				snprintf(size_s, sizeof(size_s), "%s-%s", dn_c, cend);
 			} else {
 				if (prop_fields.size == PROP_SIZE_HUMAN) {
-					if (props->dir == 1 && conf.full_dir_size == 1)
+					if (props->dir == 1 && conf.full_dir_size == 1) {
 						size_type = get_size_unit(props->size *
-						(xargs.si == 1 ? 1000 : 1024));
-					else
+							(xargs.si == 1 ? 1000 : 1024));
+					} else {
 						size_type = get_size_unit(props->size);
+					}
 
 					snprintf(size_s, sizeof(size_s), "%s%s%s", csize,
 						size_type ? size_type : "?", cend);
