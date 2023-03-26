@@ -916,8 +916,7 @@ print_match(char *match, const size_t len)
 	return PARTIAL_MATCH;
 }
 
-/*
-static inline int
+static int
 get_print_status(const char *str, const char *match, const size_t len)
 {
 	if (suggestion.printed && suggestion_buf)
@@ -927,7 +926,7 @@ get_print_status(const char *str, const char *match, const size_t len)
 		return FULL_MATCH;
 
 	return PARTIAL_MATCH;
-} */
+}
 
 static int
 check_completions(char *str, size_t len, const int print)
@@ -966,7 +965,14 @@ check_completions(char *str, size_t len, const int print)
 	if (!_match && !*_fmatch)
 		return NO_MATCH;
 
-	cur_comp_type = TCMP_PATH; // Required by print_match()
+	if (print == 0 && _match) {
+		int ret = get_print_status(str, _match, len);
+		free(_match);
+		cur_comp_type = TCMP_PATH;
+		return ret;
+	}
+
+	cur_comp_type = TCMP_PATH; /* Required by print_match() */
 	printed = print_match(_match ? _match : _fmatch, len);
 	*_fmatch = '\0';
 
@@ -1090,21 +1096,15 @@ check_filenames(char *str, size_t len, const int first_word,
 	skip_trailing_spaces(&str, &len);
 	int removed_slash = remove_trailing_slash(&str, &len);
 
-/* ########################### */
-//	int fuzzy_algorithm = FUZZY_ALGO_CLIFM;
-/* ########################### */
-
 	int fuzzy_str_type = (conf.fuzzy_match == 1 && contains_utf8(str) == 1)
 		? FUZZY_FILES_UTF8 : FUZZY_FILES_ASCII;
 	int best_fz_score = 0;
-//	score_t best_score = 0;
 
 	size_t i;
 
 	for (i = 0; i < files; i++) {
 		if (!file_info[i].name)	continue;
 
-//		if (removed_slash == 1 && file_info[i].dir != 1)
 		if (removed_slash == 1 && (file_info[i].dir != 1
 		|| len != file_info[i].len))
 			continue;
@@ -1147,16 +1147,6 @@ check_filenames(char *str, size_t len, const int first_word,
 
 		/* ############### FUZZY MATCHING ################## */
 		else {
-/* ########################### */
-/*			if (fuzzy_algorithm == FUZZY_ALGO_FZY) {
-				size_t positions[MATCH_MAX_LEN];
-				score_t s = fuzzy_match_fzy(str, file_info[i].name, &positions[0], len);
-				if (s > best_score && s != INFINITY) {
-					fuzzy_index = (int)i;
-					best_score = s;
-				} */
-/* ########################### */
-//			} else {
 			int s = fuzzy_match(str, file_info[i].name, len, fuzzy_str_type);
 			if (s > best_fz_score) {
 				fuzzy_index = (int)i;
@@ -1164,19 +1154,6 @@ check_filenames(char *str, size_t len, const int first_word,
 					break;
 				best_fz_score = s;
 			}
-//			}
-
-/*			int distance = 0;
-			int r = fuzzy_match2(str, file_info[i].name, FUZZY_FILES, &distance);
-			if (r > best_fz_match || distance < shorter_distance) {
-				fuzzy_index = (int)i;
-				if (r < MIN_FUZZY_RANKING) {
-					best_fz_match = r;
-					shorter_distance = distance;
-				} //else {
-//					break;
-//				}
-			} */
 		}
 	}
 
@@ -1204,7 +1181,7 @@ check_filenames(char *str, size_t len, const int first_word,
 static int
 check_history(const char *str, const size_t len)
 {
-	if (!str || !*str || len == 0)
+	if (!history || !str || !*str || len == 0)
 		return NO_MATCH;
 
 	int i = (int)current_hist_n;
@@ -2602,8 +2579,8 @@ rl_suggestions(const unsigned char c)
 			if (c == ' ' && escaped == 0 && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
 
-			printed = check_filenames(word, wlen, last_space ? 0 : 1,
-				c == ' ' ? 1 : 0);
+			printed = check_filenames(word, wlen,
+				last_space ? 0 : 1, c == ' ' ? 1 : 0);
 			if (printed != NO_MATCH)
 				goto SUCCESS;
 
@@ -2679,14 +2656,18 @@ CHECK_FIRST_WORD:
 	/* If absolute path */
 	if (point_is_first_word && *word == '/' && access(word, X_OK) == 0) {
 		printed = 1;
+
 	} else if (point_is_first_word && rl_point < rl_end
 	&& *word >= '1' && *word <= '9' && is_number(word)) {
 		int a = atoi(word);
 		if (a > 0 && a <= (int)files)
 			printed = PARTIAL_MATCH;
+
 	} else if (point_is_first_word && rl_point < rl_end
-	&& check_completions(word, wlen, CHECK_MATCH)) {
-		printed = PARTIAL_MATCH;
+	&& (printed = check_completions(word, wlen, CHECK_MATCH)) != NO_MATCH) {
+		if (c == ' ' && printed != FULL_MATCH)
+			printed = NO_MATCH;
+
 	} else {
 		if (wlen > 0 && word[wlen - 1] == ' ')
 			word[wlen - 1] = '\0';
