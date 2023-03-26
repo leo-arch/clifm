@@ -141,7 +141,8 @@ check_autocmds(void)
 
 RUN_AUTOCMD:
 		if (autocmd_set == 0) {
-			/* Backup current options, only if there was no autocmd for this directory */
+			/* Backup current options, only if there was no autocmd for
+			 * this directory */
 			opts.light_mode = conf.light_mode;
 			opts.files_counter = conf.files_counter;
 			opts.long_view = conf.long_view;

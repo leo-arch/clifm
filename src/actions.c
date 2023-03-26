@@ -64,7 +64,8 @@ get_plugin_path(char *action, int *status)
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("actions: Plugins directory not defined\n"));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("actions: Plugins "
+				"directory not defined\n"));
 			*status = EXIT_FAILURE;
 			return (char *)NULL;
 		}
@@ -80,13 +81,15 @@ get_plugin_path(char *action, int *status)
 				+ strlen(PNL) + 11) * sizeof(char));
 			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action); /* NOLINT */
 			if (access(cmd, X_OK) == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n", cmd, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
+					cmd, strerror(errno));
 				free(cmd);
 				*status = errno;
 				return (char *)NULL;
 			}
 		} else {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n", cmd, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
+				cmd, strerror(errno));
 			free(cmd);
 			*status = errno;
 			return (char *)NULL;
@@ -132,7 +135,8 @@ run_action(char *action, char **args)
 	setenv("CLIFM_BUS", fifo_path, 1);
 
 	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	fifo_path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
+			fifo_path, strerror(errno));
 		unsetenv("CLIFM_BUS");
 		return EXIT_FAILURE;
 	}
@@ -188,7 +192,8 @@ run_action(char *action, char **args)
 		exit_status = get_exit_code(status, EXEC_FG_PROC);
 	} else {
 		exit_status = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: waitpid: %s\n", strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: waitpid: %s\n",
+			strerror(errno));
 	}
 
 	/* If the pipe is empty */
@@ -248,7 +253,8 @@ static int
 edit_actions(char *app)
 {
 	if (xargs.stealth_mode == 1) {
-		printf(_("actions: Access to configuration files is not allowed in stealth mode\n"));
+		printf(_("actions: Access to configuration files is not allowed "
+			"in stealth mode\n"));
 		return EXIT_SUCCESS;
 	}
 
@@ -258,7 +264,8 @@ edit_actions(char *app)
 	/* Get actions file's current modification time */
 	struct stat attr;
 	if (stat(actions_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",	actions_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
+			actions_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

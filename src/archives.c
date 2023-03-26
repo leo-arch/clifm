@@ -262,7 +262,8 @@ static int
 cd_to_mountpoint(char *file, char *mountpoint)
 {
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n", mountpoint, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n",
+			mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -383,7 +384,8 @@ create_iso(char *in_file, char *out_file)
 {
 	struct stat attr;
 	if (lstat(in_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n", in_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n",
+			in_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -400,8 +402,8 @@ create_iso(char *in_file, char *out_file)
 		return create_iso_from_block_dev(in_file, out_file);
 
 	/* If any other file format */
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: Invalid file format. File should "
-			"be either a directory or a block device\n", in_file);
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: Invalid file format. "
+		"File should be either a directory or a block device\n", in_file);
 	return EXIT_FAILURE;
 }
 
@@ -445,13 +447,15 @@ check_iso(char *file)
 	int fd;
 	FILE *fp = open_fstream_w(iso_tmp_file, &fd);
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n", iso_tmp_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n",
+			iso_tmp_file, strerror(errno));
 		return (-1);
 	}
 
 	FILE *fpp = fopen("/dev/null", "w");
 	if (!fpp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: /dev/null: %s\n", strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: /dev/null: %s\n",
+			strerror(errno));
 		close_fstream(fp, fd);
 		return (-1);
 	}
@@ -559,23 +563,25 @@ is_compressed(char *file, int test_iso)
 
 	char archiver_tmp_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		snprintf(archiver_tmp_file, PATH_MAX - 1, "%s/.clifm%s", P_tmpdir, rand_ext);
+		snprintf(archiver_tmp_file, PATH_MAX - 1, "%s/.clifm%s",
+			P_tmpdir, rand_ext);
 	else
-		snprintf(archiver_tmp_file, PATH_MAX - 1, "%s/.clifm%s", tmp_dir, rand_ext);
+		snprintf(archiver_tmp_file, PATH_MAX - 1, "%s/.clifm%s",
+			tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;
 	FILE *fp = open_fstream_w(archiver_tmp_file, &fd);
 	if (!fp) {
-//		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, archiver_tmp_file, strerror(errno));
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n", archiver_tmp_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n",
+			archiver_tmp_file, strerror(errno));
 		return (-1);
 	}
 
 	FILE *fpp = fopen("/dev/null", "w");
 	if (!fpp) {
-//		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: /dev/null: %s\n", strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: /dev/null: %s\n",
+			strerror(errno));
 		close_fstream(fp, fd);
 		return (-1);
 	}
@@ -585,7 +591,6 @@ is_compressed(char *file, int test_iso)
 
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
-//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		fclose(fpp);
@@ -594,7 +599,6 @@ is_compressed(char *file, int test_iso)
 
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
-//		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		fclose(fpp);
@@ -717,9 +721,8 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	int exit_status = EXIT_SUCCESS;
 	char *deq_file = dequote_str(in_file, 0);
 	if (!deq_file) {
-//		fprintf(stderr, _("archiver: %s: Error dequoting file name\n"), in_file);
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("archiver: %s: Error dequoting file name\n"),
-			in_file);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("archiver: %s: Error "
+			"dequoting file name\n"), in_file);
 		return EXIT_FAILURE;
 	}
 
@@ -1203,7 +1206,8 @@ mount_others(char **args)
 
 		/* List content of mountpoint if there is only one archive */
 		if (files_num > 1) {
-			printf(_("%s%s%s: Succesfully mounted on %s\n"), BOLD, args[i], df_c, mountpoint);
+			printf(_("%s%s%s: Succesfully mounted on %s\n"),
+				BOLD, args[i], df_c, mountpoint);
 			free(mountpoint);
 			continue;
 		}
