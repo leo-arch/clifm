@@ -796,7 +796,7 @@ get_size_unit(off_t size)
 	size_t n = 0;
 	float s = (float)size;
 
-	while (s > base) {
+	while (s >= base) {
 		s = s / base;
 		++n;
 	}
