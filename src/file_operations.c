@@ -1068,8 +1068,9 @@ open_function(char **cmd)
 			return EXIT_FAILURE;
 		} else if (ret == S_IFDIR) {
 			return cd_function(file, CD_PRINT_ERROR);
-		} else if (ret != S_IFREG) {
+		} else {
 			switch (ret) {
+			case S_IFREG: no_open_file = 0; break;
 			case S_IFBLK: file_type = types[OPEN_BLK]; break;
 			case S_IFCHR: file_type = types[OPEN_CHR]; break;
 			case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
