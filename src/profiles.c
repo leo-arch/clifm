@@ -137,7 +137,8 @@ profile_set(char *prof)
 
 	/* If changing to the current profile, do nothing */
 	if ((!alt_profile && *prof == 'd' && strcmp(prof, "default") == 0)
-	|| (alt_profile && *prof == *alt_profile && strcmp(prof, alt_profile) == 0)) {
+	|| (alt_profile && *prof == *alt_profile
+	&& strcmp(prof, alt_profile) == 0)) {
 		printf(_("pf: '%s' is the current profile\n"), prof);
 		return EXIT_SUCCESS;
 	}
@@ -178,7 +179,8 @@ profile_set(char *prof)
 	/* Check whether we have a working shell */
 	if (access(user.shell, X_OK) == -1) {
 		_err('w', PRINT_PROMPT, _("pf: %s: System shell not found. Please "
-			"edit the configuration file to specify a working shell.\n"), user.shell);
+			"edit the configuration file to specify a working shell.\n"),
+			user.shell);
 	}
 
 	i = (int)usrvar_n;
@@ -226,7 +228,8 @@ profile_set(char *prof)
 				fputs("edit\n", hist_fp);
 				fclose(hist_fp);
 			} else {
-				_err('w', PRINT_PROMPT, _("pf: Error opening the history file\n"));
+				_err('w', PRINT_PROMPT, _("pf: Error opening the "
+					"history file\n"));
 			}
 		}
 
@@ -272,7 +275,8 @@ profile_set(char *prof)
 	}
 
 	if (xchdir(workspaces[cur_ws].path, SET_TITLE) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: %s: %s\n",
+			workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -299,8 +303,8 @@ profile_add(char *prof)
 	}
 
 	if (!home_ok) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pf: %s: Cannot create profile: Home "
-			"directory not found\n"), prof);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pf: %s: Cannot create profile: "
+			"Home directory not found\n"), prof);
 		return EXIT_FAILURE;
 	}
 
@@ -335,7 +339,8 @@ profile_add(char *prof)
 	FILE *hist_fp = fopen(nhist_file, "w+");
 
 	if (!hist_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: fopen: %s: %s\n", nhist_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: fopen: %s: %s\n",
+			nhist_file, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	} else {
 		/* To avoid malloc errors in read_history(), do not create
@@ -495,7 +500,8 @@ rename_profile(char **args)
 	}
 
 	char src_pf_name[PATH_MAX + NAME_MAX + 11];
-	snprintf(src_pf_name, sizeof(src_pf_name), "%s/profiles/%s", config_dir_gral, args[0]);
+	snprintf(src_pf_name, sizeof(src_pf_name), "%s/profiles/%s",
+		config_dir_gral, args[0]);
 
 	struct stat a;
 	if (lstat(src_pf_name, &a) == -1) {
@@ -510,7 +516,8 @@ rename_profile(char **args)
 	}
 
 	char dst_pf_name[PATH_MAX + NAME_MAX + 11];
-	snprintf(dst_pf_name, sizeof(dst_pf_name), "%s/profiles/%s", config_dir_gral, args[1]);
+	snprintf(dst_pf_name, sizeof(dst_pf_name), "%s/profiles/%s",
+		config_dir_gral, args[1]);
 
 	char *cmd[] = {"mv", "--", src_pf_name, dst_pf_name, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
@@ -523,7 +530,8 @@ rename_profile(char **args)
 		(strlen(args[1]) + 1) * sizeof(char));
 	strcpy(profile_names[src_pf_index], args[1]);
 
-	printf(_("pf: %s: Profile successfully renamed to %s%s%s\n"), args[0], BOLD, args[1], df_c);
+	printf(_("pf: %s: Profile successfully renamed to %s%s%s\n"),
+		args[0], BOLD, args[1], df_c);
 
 	return EXIT_SUCCESS;
 }

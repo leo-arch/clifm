@@ -409,7 +409,8 @@ fuzzy_match(char *s1, char *s2, const size_t s1_len, const int type)
 		char *bc = l > 0 ? utf8rcodepoint(m, &cp1) : (char *)NULL;
 		if (bc) {
 			utf8codepoint(bc, &cp2);
-			if (IS_WORD_SEPARATOR(*bc) || (utf8isupper(cp2) != 1 && utf8isupper(cp1) == 1) )
+			if (IS_WORD_SEPARATOR(*bc) || (utf8isupper(cp2) != 1
+			&& utf8isupper(cp1) == 1) )
 				word_beginning++;
 		}
 

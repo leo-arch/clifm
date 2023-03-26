@@ -636,8 +636,8 @@ get_max_size(void)
 }
 
 static void
-print_long_mode(size_t *counter, int *reset_pager, const int pad, const size_t ug_max,
-	const size_t ino_max, const uint8_t have_xattr)
+print_long_mode(size_t *counter, int *reset_pager, const int pad,
+	const size_t ug_max, const size_t ino_max, const uint8_t have_xattr)
 {
 	struct stat lattr;
 
@@ -756,7 +756,8 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
+	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view
+	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -794,7 +795,8 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 		} else {
 			if (_trim) {
 				xprintf("%s%*d%s%s%c%s%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? SELFILE_CHR : ' ',
+					el_c, pad, i + 1, df_c, li_cb,
+					file_info[i].sel ? SELFILE_CHR : ' ',
 					df_c, file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, (wchar_t *)n, trim_diff,
 					tt_c, TRIMFILE_CHR,
@@ -814,21 +816,22 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 		if (conf.no_eln) {
 			if (_trim) {
 				xprintf("%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					li_cb, sel_n ? (file_info[i].sel ? SELFILE_CHR : ' ') : 0, df_c,
-					file_info[i].color, (wchar_t *)n, trim_diff,
+					li_cb, sel_n ? (file_info[i].sel ? SELFILE_CHR : ' ') : 0,
+					df_c, file_info[i].color, (wchar_t *)n, trim_diff,
 					tt_c, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].color : "",
 					_trim == TRIM_EXT ? file_info[i].ext_name : "",
 					end_color);
 			} else {
 				xprintf("%s%c%s%s%s%s",
-					li_cb, sel_n ? (file_info[i].sel ? SELFILE_CHR : ' ') : 0, df_c,
-					file_info[i].color, n, end_color);
+					li_cb, sel_n ? (file_info[i].sel ? SELFILE_CHR : ' ') : 0,
+					df_c, file_info[i].color, n, end_color);
 			}
 		} else {
 			if (_trim) {
 				xprintf("%s%*d%s%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
-					el_c, pad, i + 1, df_c, li_cb, file_info[i].sel ? SELFILE_CHR : ' ',
+					el_c, pad, i + 1, df_c, li_cb,
+					file_info[i].sel ? SELFILE_CHR : ' ',
 					df_c, file_info[i].color, (wchar_t *)n,
 					trim_diff, tt_c, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].color : "",
@@ -879,7 +882,8 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
+	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view
+	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -933,7 +937,8 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 			if (_trim) {
 				xprintf("%s%*d%s%c%ls%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', (wchar_t *)n,
-					trim_diff, TRIMFILE_CHR, _trim == TRIM_EXT ? file_info[i].ext_name : "");
+					trim_diff, TRIMFILE_CHR, _trim == TRIM_EXT
+					? file_info[i].ext_name : "");
 			} else {
 				xprintf("%s%*d%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', n);
@@ -985,7 +990,8 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 
 /* Pad the current file name to equate the longest file name length */
 static void
-pad_filename(int *ind_char, const int i, const int pad, const int termcap_move_right)
+pad_filename(int *ind_char, const int i, const int pad,
+	const int termcap_move_right)
 {
 	int cur_len = 0;
 
@@ -1012,7 +1018,8 @@ pad_filename(int *ind_char, const int i, const int pad, const int termcap_move_r
 }
 
 static void
-print_entry_color_light(int *ind_char, const int i, const int pad, const int _max)
+print_entry_color_light(int *ind_char, const int i, const int pad,
+	const int _max)
 {
 	*ind_char = 0;
 	char *end_color = df_c;
@@ -1029,7 +1036,8 @@ print_entry_color_light(int *ind_char, const int i, const int pad, const int _ma
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
+	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view
+	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -1121,7 +1129,8 @@ print_entry_color_light(int *ind_char, const int i, const int pad, const int _ma
 }
 
 static void
-print_entry_nocolor_light(int *ind_char, const int i, const int pad, const int _max)
+print_entry_nocolor_light(int *ind_char, const int i, const int pad,
+	const int _max)
 {
 	char *wname = (char *)NULL;
 	/* wc_strlen returns 0 if a non-printable char was found in the file name */
@@ -1133,7 +1142,8 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad, const int _
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view && (int)file_info[i].len > _max) {
+	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view
+	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
@@ -1215,11 +1225,12 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad, const int _
 
 /* Add spaces needed to equate the longest file name length */
 static void
-pad_filename_light(int *ind_char, const int i, const int pad, const int termcap_move_right)
+pad_filename_light(int *ind_char, const int i, const int pad,
+	const int termcap_move_right)
 {
 	int cur_len = 0;
 #ifndef _NO_ICONS
-	cur_len = pad + 1 + (conf.icons ? 3 : 0)	+ (int)file_info[i].len + (*ind_char ? 1 : 0);
+	cur_len = pad + 1 + (conf.icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #else
 	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
@@ -1250,18 +1261,23 @@ static void
 list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
-	int nn = (max_files != UNSET && max_files < (int)files) ? max_files : (int)files;
+	int nn = (max_files != UNSET && max_files < (int)files)
+		? max_files : (int)files;
 
 	void (*print_entry_function)(int *, const int, const int, const int);
 	if (conf.colorize == 1)
-		print_entry_function = conf.light_mode == 1 ? print_entry_color_light : print_entry_color;
+		print_entry_function = conf.light_mode == 1
+			? print_entry_color_light : print_entry_color;
 	else
-		print_entry_function = conf.light_mode == 1 ? print_entry_nocolor_light : print_entry_nocolor;
+		print_entry_function = conf.light_mode == 1
+			? print_entry_nocolor_light : print_entry_nocolor;
 
 	void (*pad_filename_function)(int *, const int, const int, const int);
-	pad_filename_function = conf.light_mode == 1 ? pad_filename_light : pad_filename;
+	pad_filename_function = conf.light_mode == 1
+		? pad_filename_light : pad_filename;
 
-	int termcap_move_right = (xargs.list_and_quit == 1 || term_caps.suggestions == 0) ? 0 : 1;
+	int termcap_move_right = (xargs.list_and_quit == 1
+		|| term_caps.suggestions == 0) ? 0 : 1;
 
 	size_t cur_cols = 0;
 	int i, last_column = 0;
@@ -1284,7 +1300,8 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */
 
-		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1 && (int)files >= conf.pager)) {
+		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
+		&& (int)files >= conf.pager)) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			int ret = 0, bi = i;
@@ -1331,7 +1348,8 @@ static void
 list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		const size_t columns_n)
 {
-	int nn = (max_files != UNSET && max_files < (int)files) ? max_files : (int)files;
+	int nn = (max_files != UNSET && max_files < (int)files)
+		? max_files : (int)files;
 
 	int rows = nn / (int)columns_n;
 	if (nn % (int)columns_n > 0)
@@ -1343,14 +1361,18 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 
 	void (*print_entry_function)(int *, const int, const int, const int);
 	if (conf.colorize == 1)
-		print_entry_function = conf.light_mode == 1 ? print_entry_color_light : print_entry_color;
+		print_entry_function = conf.light_mode == 1
+			? print_entry_color_light : print_entry_color;
 	else
-		print_entry_function = conf.light_mode == 1 ? print_entry_nocolor_light : print_entry_nocolor;
+		print_entry_function = conf.light_mode == 1
+			? print_entry_nocolor_light : print_entry_nocolor;
 
 	void (*pad_filename_function)(int *, const int, const int, const int);
-	pad_filename_function = conf.light_mode == 1 ? pad_filename_light : pad_filename;
+	pad_filename_function = conf.light_mode == 1
+		? pad_filename_light : pad_filename;
 
-	int termcap_move_right = (xargs.list_and_quit == 1 || term_caps.suggestions == 0) ? 0 : 1;
+	int termcap_move_right = (xargs.list_and_quit == 1
+		|| term_caps.suggestions == 0) ? 0 : 1;
 
 	size_t cur_cols = 0, cc = columns_n;
 	int x = 0, xx = 0, i = 0;
@@ -1398,7 +1420,8 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 				 * #  MAS: A SIMPLE PAGER   #
 				 * ########################## */
 
-		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1 && (int)files >= conf.pager)) {
+		if (conf.pager == 1 || (*reset_pager == 0 && conf.pager > 1
+		&& (int)files >= conf.pager)) {
 			int ret = 0, bi = i;
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
@@ -1463,12 +1486,14 @@ run_dir_cmd(const int mode)
 	char path[PATH_MAX];
 
 	if (mode == DIR_IN) {
-		snprintf(path, PATH_MAX - 1, "%s/%s", workspaces[cur_ws].path, DIR_IN_NAME);
+		snprintf(path, PATH_MAX - 1, "%s/%s",
+			workspaces[cur_ws].path, DIR_IN_NAME);
 	} else {
 		if (mode == DIR_OUT) {
 			if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
 				return;
-			snprintf(path, PATH_MAX - 1, "%s/%s", old_pwd[dirhist_cur_index - 1], DIR_OUT_NAME);
+			snprintf(path, PATH_MAX - 1, "%s/%s",
+				old_pwd[dirhist_cur_index - 1], DIR_OUT_NAME);
 		}
 	}
 
@@ -1534,7 +1559,8 @@ get_largest(size_t i, off_t *size, char **name, char **color, off_t *total)
 	*total += file_info[i].size * d;
 }
 
-/* Return the lenght of the longest UID:GID string for files listed in long view mode */
+/* Return the lenght of the longest UID:GID string for files listed in
+ * long view mode */
 static size_t
 get_max_ug_str(void)
 {
@@ -1901,7 +1927,8 @@ END:
 	if (excluded_files > 0)
 		printf(_("Excluded files: %d\n"), excluded_files);
 
-	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1 && conf.full_dir_size == 1)
+	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
+	&& conf.full_dir_size == 1)
 		print_analysis_stats(total_size, largest_size, largest_color, largest_name);
 
 #ifdef _LIST_SPEED
@@ -1915,7 +1942,8 @@ END:
 /* Check whether the file in the device DEV with inode INO is selected.
  * Used to mark selected files in the files list */
 static inline int
-check_seltag(const dev_t dev, const ino_t ino, const nlink_t links, const size_t index)
+check_seltag(const dev_t dev, const ino_t ino, const nlink_t links,
+	const size_t index)
 {
 	if (sel_n == 0 || !sel_devino)
 		return 0;
@@ -2251,7 +2279,8 @@ list_dir(void)
 			if (conf.files_counter) {
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			} else {
-				if (stat_ok && check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
+				if (stat_ok
+				&& check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
 					file_info[n].filesn = -1;
 				else
 					file_info[n].filesn = 1;
@@ -2438,7 +2467,8 @@ list_dir(void)
 	if (tdents > n)
 		file_info = xrealloc(file_info, (n + 1) * sizeof(struct fileinfo)); */
 
-	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1 && conf.full_dir_size == 1))
+	if (xargs.disk_usage_analyzer == 1 || (conf.long_view == 1
+	&& conf.full_dir_size == 1))
 		putchar('\r'); /* Erase the "Retrieveing file sizes" message */
 
 	file_info[n].name = (char *)NULL;

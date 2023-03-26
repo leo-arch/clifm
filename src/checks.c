@@ -55,8 +55,8 @@
 #define TRUE_COLOR 16777216
 
 /* Check whether parameter S is -f or --force
- * Returns 1 if yes, and there is no "-f" or "--force" file in the current dir,
- * or 0 otherwise. */
+ * Returns 1 if yes, and there is no "-f" or "--force" file in the current
+ * dir, or 0 otherwise. */
 int
 is_force_param(const char *s)
 {
@@ -76,7 +76,8 @@ check_glob_char(const char *str, const int gflag)
 {
 	if (!str || !*str)
 		return 0;
-	return strpbrk(str, (gflag == GLOB_ONLY) ? GLOB_CHARS : GLOB_REGEX_CHARS) ? 1 : 0;
+	return strpbrk(str, (gflag == GLOB_ONLY)
+		? GLOB_CHARS : GLOB_REGEX_CHARS) ? 1 : 0;
 }
 
 int
@@ -234,26 +235,31 @@ check_completion_mode(void)
 {
 	if (fzftab == 1) { /* fzftab is zero only if running with --stdtab */
 		if (!(finder_flags & FZF_BIN_OK) && tabmode == FZF_TAB) {
-			_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling back to "
-				"standard TAB completion\n"), PROGRAM_NAME);
+			_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling "
+				"back to standard TAB completion\n"), PROGRAM_NAME);
 			tabmode = STD_TAB;
 			fzftab = 0;
 		}
 
 		if (!(finder_flags & FZY_BIN_OK) && tabmode == FZY_TAB) {
-			_err('w', PRINT_PROMPT, _("%s: fzy: Command not found. Falling back to the "
-				"default value (fzf, if found, or standard)\n"), PROGRAM_NAME);
+			_err('w', PRINT_PROMPT, _("%s: fzy: Command not found. Falling "
+				"back to the default value (fzf, if found, or standard)\n"),
+				PROGRAM_NAME);
 			tabmode = (finder_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
 		} else if (!(finder_flags & SMENU_BIN_OK) && tabmode == SMENU_TAB) {
-			_err('w', PRINT_PROMPT, _("%s: smenu: Command not found. Falling back to the "
-				"default value (fzf, if found, or standard)\n"), PROGRAM_NAME);
+			_err('w', PRINT_PROMPT, _("%s: smenu: Command not found. Falling "
+				"back to the default value (fzf, if found, or standard)\n"),
+				PROGRAM_NAME);
 			tabmode = (finder_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
 		}
 
 		if (tabmode == STD_TAB) {
-			if (finder_flags & FZF_BIN_OK) /* We have the fzf binary, let's run in FZF mode */
+			if (finder_flags & FZF_BIN_OK)
+				/* We have the fzf binary, let's run in FZF mode */
 				tabmode = FZF_TAB;
-			else /* Either specified mode was not found or no mode was specified */
+			else
+				/* Either specified mode was not found or no mode was
+				 * specified */
 				fzftab = 0;
 		}
 	} else {
@@ -315,7 +321,8 @@ check_third_party_cmds(void)
 	int i = (int)path_progsn;
 
 	while (--i >= 0) {
-		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f' && *bin_commands[i] != 's')
+		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f'
+		&& *bin_commands[i] != 's')
 			continue;
 
 		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzf") == 0) {
@@ -336,7 +343,8 @@ check_third_party_cmds(void)
 				fzftab = 1;
 		}
 
-		if (*bin_commands[i] == 'u' && strcmp(bin_commands[i], "udisksctl") == 0)
+		if (*bin_commands[i] == 'u'
+		&& strcmp(bin_commands[i], "udisksctl") == 0)
 			udisks2ok = 1;
 		if (*bin_commands[i] == 'u' && strcmp(bin_commands[i], "udevil") == 0)
 			udevilok = 1;
@@ -363,8 +371,8 @@ check_user_groups(const gid_t gid)
 	return 0;
 }
 
-/* Return 1 if current user has access to file with mode MODE, uid UID, and gid GID.
- * Otherwise, return zero */
+/* Return 1 if current user has access to file with mode MODE, uid UID,
+ * and gid GID. Otherwise, return zero */
 int
 check_file_access(const mode_t mode, const uid_t uid, const gid_t gid)
 {
@@ -436,7 +444,8 @@ check_immutable_bit(char *file)
 
 	fd = open(file, O_RDONLY);
 	if (fd == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "open: %s: %s\n", file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "open: %s: %s\n", file,
+			strerror(errno));
 		return (-1);
 	}
 
@@ -445,7 +454,8 @@ check_immutable_bit(char *file)
 	close(fd);
 
 	if (ret == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "ioctl: %s: %s\n", file, strerror(saved_errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "ioctl: %s: %s\n", file,
+			strerror(saved_errno));
 		return (-1);
 	}
 
@@ -666,9 +676,10 @@ is_internal(char *restrict cmd)
 int
 is_internal_f(const char *restrict cmd)
 {
-	/* If we are completing/suggesting, do not take 'ws', 'mf', and 'st' commands
-	 * into account: they do not take ELN/filenames as parameters, but just
-	 * numbers, in which case no ELN-filename completion should be made */
+	/* If we are completing/suggesting, do not take 'ws', 'mf', and 'st'
+	 * commands into account: they do not take ELN/filenames as parameters,
+	 * but just numbers, in which case no ELN-filename completion should
+	 * be made */
 	if (flags & STATE_COMPLETING
 	&& (*cmd == 'w' || (*cmd == 'm' && *(cmd + 1) == 'f')
 	|| (*cmd == 's' && (*(cmd + 1) == 't' || *(cmd + 1) == 'o')) ) )
@@ -830,7 +841,8 @@ check_for_alias(char **args)
 		/* Do not expand alias is first word is a file name in CWD */
 		struct stat a;
 		if (*args[0] == '\\' || (stat(args[0], &a) == 0 && ((S_ISDIR(a.st_mode)
-		&& conf.autocd == 1) || (!S_ISDIR(a.st_mode) && conf.auto_open == 1) ) ) )
+		&& conf.autocd == 1) || (!S_ISDIR(a.st_mode)
+		&& conf.auto_open == 1) ) ) )
 			return (char **)NULL;
 	}
 
@@ -841,7 +853,8 @@ check_for_alias(char **args)
 		|| !*aliases[i].cmd)
 			continue;
 
-		if (*aliases[i].name != *args[0] || strcmp(args[0], aliases[i].name) != 0)
+		if (*aliases[i].name != *args[0]
+		|| strcmp(args[0], aliases[i].name) != 0)
 			continue;
 
 		args_n = 0; /* Reset args_n to be used by parse_input_str() */
@@ -851,8 +864,8 @@ check_for_alias(char **args)
 		if (!alias_comm) {
 //			args_n = 0;
 			/* The error message should have been printed by parse_input_str()
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Aliased command exited with error\n"),
-				PROGRAM_NAME); */
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Aliased command exited
+				with error\n"), PROGRAM_NAME); */
 
 			flags |= FAILED_ALIAS; /* Prevent exec_cmd() from being executed */
 			return (char **)NULL;
@@ -896,7 +909,8 @@ check_file_size(char *file, int max)
 	if (stat(file, &attr) == -1) {
 		fp = open_fstream_w(file, &fd);
 		if (!fp) {
-			_err(0, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			_err(0, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+				strerror(errno));
 		} else {
 			close_fstream(fp, fd);
 		}
@@ -939,7 +953,8 @@ check_file_size(char *file, int max)
 
 	int fdd = mkstemp(tmp);
 	if (fdd == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "log: %s: %s", tmp, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "log: %s: %s", tmp,
+			strerror(errno));
 		close_fstream(fp, fd);
 		free(tmp);
 		return;
@@ -948,7 +963,8 @@ check_file_size(char *file, int max)
 #if defined(__HAIKU__) || defined(__sun)
 	FILE *fpp = fopen(tmp, "w");
 	if (!fpp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp,
+			strerror(errno));
 		close_fstream(fp, fd);
 		free(tmp);
 		return;

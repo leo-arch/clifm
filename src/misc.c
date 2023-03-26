@@ -242,7 +242,8 @@ reset_inotify(void)
 		close(inotify_fd);
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
-		_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME, strerror(errno));
+		_err('w', PRINT_PROMPT, "%s: inotify: %s\n",
+			PROGRAM_NAME, strerror(errno));
 		return;
 	}
 
@@ -256,7 +257,8 @@ reset_inotify(void)
 	if (inotify_wd > 0)
 		watch = 1;
 	else
-		_err('w', PRINT_PROMPT, "%s: inotify: %s: %s\n", PROGRAM_NAME, rpath, strerror(errno));
+		_err('w', PRINT_PROMPT, "%s: inotify: %s: %s\n",
+			PROGRAM_NAME, rpath, strerror(errno));
 }
 
 void
@@ -286,7 +288,8 @@ read_inotify(void)
 		event = (struct inotify_event *)ptr;
 
 #ifdef INOTIFY_DEBUG
-		printf("%s (%u:%d): ", *event->name ? event->name : NULL, event->len, event->wd);
+		printf("%s (%u:%d): ", *event->name
+			? event->name : NULL, event->len, event->wd);
 #endif /* INOTIFY_DEBUG */
 
 		if (!event->wd) {
@@ -753,7 +756,8 @@ check_dir(char **dir)
 	int ret = EXIT_SUCCESS;
 	struct stat attr;
 	if (stat(*dir, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, *dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+			PROGRAM_NAME, *dir, strerror(errno));
 		return errno;
 	}
 
@@ -830,7 +834,8 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 /* Launch a new instance using CMD. If CMD is NULL, try "CONF.TERM clifm"
  * Returns the exit status of the executed command */
 static int
-launch_new_instance_cmd(char ***cmd, char **self, char **_sudo, char **dir, int sudo)
+launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
+	char **dir, int sudo)
 {
 	int ret = 0;
 #if defined(__HAIKU__)
@@ -891,8 +896,8 @@ new_instance(char *dir, const int sudo)
 
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error dequoting file name\n"),
-			PROGRAM_NAME, dir);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error dequoting "
+			"file name\n"), PROGRAM_NAME, dir);
 		free(_sudo);
 		return EXIT_FAILURE;
 	}
@@ -901,7 +906,8 @@ new_instance(char *dir, const int sudo)
 	if (!self) {
 		free(_sudo);
 		free(deq_dir);
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, PNL, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+			PROGRAM_NAME, PNL, strerror(errno));
 		return errno;
 	}
 
@@ -933,7 +939,8 @@ alias_import(char *file)
 	if (*file == '~') {
 		char *file_exp = tilde_expand(file);
 		if (!file_exp) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+				PROGRAM_NAME, file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -953,7 +960,8 @@ alias_import(char *file)
 	}
 
 	if (rfile[0] == '\0') {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+			PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -961,7 +969,8 @@ alias_import(char *file)
 	int fd;
 	FILE *fp = open_fstream_r(rfile, &fd);
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: '%s': %s\n",
+			PROGRAM_NAME, rfile, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -990,7 +999,8 @@ alias_import(char *file)
 				continue;
 
 			if (is_internal_c(alias_name)) {
-				fprintf(stderr, _("%s: Alias conflicts with internal command\n"), alias_name);
+				fprintf(stderr, _("%s: Alias conflicts with internal "
+					"command\n"), alias_name);
 				free(alias_name);
 				continue;
 			}
@@ -1100,8 +1110,8 @@ save_last_path(void)
 
 	FILE *last_fp = fopen(last_dir, "w");
 	if (!last_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error saving last visited directory: %s\n"),
-			PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error saving last "
+			"visited directory: %s\n"), PROGRAM_NAME, strerror(errno));
 		free(last_dir);
 		return;
 	}
@@ -1184,7 +1194,8 @@ create_usr_var(char *str)
 
 	if (!value) {
 		free(name);
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error getting variable value\n"), PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error getting variable "
+			"value\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -1650,8 +1661,8 @@ create_virtual_dir(const int user_provided)
 	int ret = 0;
 	if ((ret = launch_execve(cmd, FOREGROUND, E_MUTE)) != EXIT_SUCCESS) {
 		if (user_provided == 1) {
-			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s. Trying with default value\n",
-				PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
+			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s. Trying with "
+				"default value\n", PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
 		} else {
 			_err('e', PRINT_PROMPT, "%s: mkdir: %s: %s\n",
 				PROGRAM_NAME, stdin_tmp_dir, strerror(ret));
@@ -1752,7 +1763,8 @@ handle_stdin(void)
 
 			struct stat attr;
 			if (lstat(q, &attr) == -1) {
-				_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, q, strerror(errno));
+				_err('w', PRINT_PROMPT, "%s: %s: %s\n",
+					PROGRAM_NAME, q, strerror(errno));
 				goto END;
 			}
 
@@ -1774,8 +1786,8 @@ handle_stdin(void)
 			} else {
 				tmp_file = replace_slashes(q, ':');
 				if (!tmp_file) {
-					_err('w', PRINT_PROMPT, "%s: %s: Error formatting file name\n",
-						PROGRAM_NAME, q);
+					_err('w', PRINT_PROMPT, "%s: %s: Error formatting "
+						"file name\n", PROGRAM_NAME, q);
 					goto END;
 				}
 				free_tmp_file = 1;
@@ -1795,15 +1807,18 @@ handle_stdin(void)
 					/* File already exists: append a random six digits suffix */
 					suffix = gen_rand_str(6);
 					char tmp[PATH_MAX + 8];
-					snprintf(tmp, sizeof(tmp), "%s.%s", dest, suffix ? suffix : "#dn7R4");
+					snprintf(tmp, sizeof(tmp), "%s.%s",
+						dest, suffix ? suffix : "#dn7R4");
 					if (symlink(source, tmp) == -1)
-						_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
+						_err('w', PRINT_PROMPT, "symlink: %s: %s\n",
+							q, strerror(errno));
 					else
-						_err('w', PRINT_PROMPT, "symlink: %s: Destiny exists. Created "
-							"as %s\n", q, tmp);
+						_err('w', PRINT_PROMPT, "symlink: %s: Destiny exists. "
+							"Created as %s\n", q, tmp);
 					free(suffix);
 				} else {
-					_err('w', PRINT_PROMPT, "symlink: %s: %s\n", q, strerror(errno));
+					_err('w', PRINT_PROMPT, "symlink: %s: %s\n",
+						q, strerror(errno));
 				}
 			} else {
 				links_counter++;
@@ -1821,7 +1836,8 @@ END:
 
 	if (links_counter == 0) { /* No symlink was created. Exit */
 		dup2(STDOUT_FILENO, STDIN_FILENO);
-		_err(0, NOPRINT_PROMPT, "%s: Empty file names buffer. Nothing to do\n", PROGRAM_NAME);
+		_err(0, NOPRINT_PROMPT, "%s: Empty file names buffer. "
+			"Nothing to do\n", PROGRAM_NAME);
 		if (getenv("CLIFM_VT_RUNNING")) {
 			fprintf(stderr, "Press any key to continue... ");
 			xgetchar();
@@ -1837,7 +1853,8 @@ END:
 	/* chdir to tmp dir and update path var */
 	if (xchdir(stdin_tmp_dir, SET_TITLE) == -1) {
 		exit_status = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", stdin_tmp_dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n",
+			stdin_tmp_dir, strerror(errno));
 
 		xchmod(stdin_tmp_dir, "0700", 1);
 
@@ -1884,8 +1901,8 @@ save_pinned_dir(void)
 
 	FILE *fp = fopen(pin_file, "w");
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error storing pinned directory: %s\n"),
-			PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error storing pinned "
+			"directory: %s\n"), PROGRAM_NAME, strerror(errno));
 	} else {
 		fprintf(fp, "%s", pinned_dir);
 		fclose(fp);
@@ -1903,7 +1920,8 @@ pin_directory(char *dir)
 
 	struct stat attr;
 	if (lstat(dir, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+			PROGRAM_NAME, dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2248,8 +2266,8 @@ quick_help(char *topic)
 
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: Error creating temporary file: %s\n",
-			PROGRAM_NAME, tmp_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: Error creating temporary "
+			"file: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		free(_pager);
 		return EXIT_FAILURE;
 	}

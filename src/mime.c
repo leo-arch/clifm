@@ -300,7 +300,8 @@ get_app(const char *mime, const char *filename)
 
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", err_name, mime_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+			err_name, mime_file, strerror(errno));
 		return (char *)NULL;
 	}
 
@@ -389,7 +390,8 @@ get_mime(char *file)
 
 	FILE *file_fp_err = fopen("/dev/null", "w");
 	if (!file_fp_err) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: /dev/null: %s\n", err_name, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: /dev/null: %s\n",
+			err_name, strerror(errno));
 		fclose(file_fp);
 		return (char *)NULL;
 	}
@@ -399,7 +401,8 @@ get_mime(char *file)
 
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", err_name, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
+			err_name, strerror(errno));
 		fclose(file_fp);
 		fclose(file_fp_err);
 		return (char *)NULL;
@@ -407,7 +410,8 @@ get_mime(char *file)
 
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", err_name, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
+			err_name, strerror(errno));
 		fclose(file_fp);
 		fclose(file_fp_err);
 		return (char *)NULL;
@@ -468,27 +472,32 @@ static int
 mime_import(char *file)
 {
 #if defined(__HAIKU__)
-	fprintf(stderr, "%s: Importing MIME associations is not supported on Haiku\n", err_name);
+	fprintf(stderr, "%s: Importing MIME associations is not supported "
+		"on Haiku\n", err_name);
 	return (-1);
 #elif defined(__APPLE__)
-	fprintf(stderr, "%s: Importing MIME associations is not supported on MacOS\n", err_name);
+	fprintf(stderr, "%s: Importing MIME associations is not supported "
+		"on MacOS\n", err_name);
 	return (-1);
 #endif
 
 	if (!(flags & GUI)) { /* Not in X, exit */
-		fprintf(stderr, _("%s: Nothing was imported. No graphical environment found\n"), err_name);
+		fprintf(stderr, _("%s: Nothing was imported. No graphical "
+			"environment found\n"), err_name);
 		return (-1);
 	}
 
 	if (!user.home) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error getting home directory\n"), err_name);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error getting home "
+			"directory\n"), err_name);
 		return (-1);
 	}
 
 	/* Open the new mimelist file */
 	FILE *mime_fp = fopen(file, "w");
 	if (!mime_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n", err_name, file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n",
+			err_name, file, strerror(errno));
 		return (-1);
 	}
 
@@ -522,7 +531,8 @@ mime_import(char *file)
 		int header_found = 0;
 
 		while (getline(&line, &line_size, sys_mime_fp) > 0) {
-			if (!header_found && (strncmp(line, "[Default Applications]", 22) == 0
+			if (!header_found
+			&& (strncmp(line, "[Default Applications]", 22) == 0
 			|| strncmp(line, "[Added Associations]", 20) == 0)) {
 				header_found = 1;
 				continue;
@@ -1056,7 +1066,8 @@ run_cmd_noargs(char *arg, char *name)
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", err_name, arg, strerror(ret));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+		err_name, arg, strerror(ret));
 	return EXIT_FAILURE;
 }
 
@@ -1431,7 +1442,8 @@ mime_info(char *arg, char **fpath, char **deq)
 	}
 
 	if (access(*fpath, R_OK) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", err_name, *fpath, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+			err_name, *fpath, strerror(errno));
 		free(*fpath);
 		return EXIT_FAILURE;
 	}
@@ -1461,13 +1473,15 @@ get_open_file_path(char **args, char **fpath, char **deq)
 	if (!*fpath) {
 		*fpath = realpath(f, NULL);
 		if (!*fpath) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", err_name, f, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+				err_name, f, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
 
 	if (xargs.preview == 0 && access(*fpath, R_OK) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", err_name, *fpath, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+			err_name, *fpath, strerror(errno));
 		free(*fpath);
 		return EXIT_FAILURE;
 	}
@@ -1499,10 +1513,12 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 
 			return exit_status;
 		} else {
-			fprintf(stderr, _("%s: %s: No associated application found\n"), err_name, arg);
+			fprintf(stderr, _("%s: %s: No associated application found\n"),
+				err_name, arg);
 		}
 #else
-		fprintf(stderr, _("%s: %s: No associated application found\n"), err_name, arg);
+		fprintf(stderr, _("%s: %s: No associated application found\n"),
+			err_name, arg);
 #endif
 	}
 
@@ -1515,7 +1531,8 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 static int
 print_error_no_mime(char **fpath)
 {
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error getting mime-type\n"), err_name);
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error getting mime-type\n"),
+		err_name);
 	free(*fpath);
 	return EXIT_FAILURE;
 }
@@ -1673,7 +1690,8 @@ check_file_cmd(void)
 {
 	char *p = get_cmd_path("file");
 	if (!p) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: file: Command not found\n"), err_name);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: file: Command not "
+			"found\n"), err_name);
 		return EXIT_FAILURE;
 	}
 
@@ -1723,7 +1741,8 @@ mime_open(char **args)
 	}
 
 	if (!file_path) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", args[file_index], strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
+			args[file_index], strerror(errno));
 		return EXIT_FAILURE;
 	}
 

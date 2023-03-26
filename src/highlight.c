@@ -57,10 +57,11 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 	fputs("\x1b[?25h", stdout);
 } */
 
-/* Get the appropriate color for the character at position POS in the string STR
- * and print the color if SET_COLOR is set to 1 (in which case NULL is returned);
- * otherwise, just return a pointer to the corresponding color.
- * This function is used to colorize input, history entries, and accepted suggestions */
+/* Get the appropriate color for the character at position POS in the string
+ * STR and print the color if SET_COLOR is set to 1 (in which case NULL is
+ * returned); otherwise, just return a pointer to the corresponding color.
+ * This function is used to colorize input, history entries, and accepted
+ * suggestions */
 char *
 rl_highlight(char *str, const size_t pos, const int flag)
 {

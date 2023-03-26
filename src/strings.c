@@ -1414,8 +1414,8 @@ expand_sel(char ***substr)
 		/* Escape selected file names and copy them into tmp array */
 		char *esc_str = escape_str(sel_elements[i].name);
 		if (!esc_str) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting file name\n"),
-			    PROGRAM_NAME, sel_elements[j].name);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
+				"file name\n"), PROGRAM_NAME, sel_elements[j].name);
 			/* Free elements selected thus far and all the input substrings */
 			size_t k = 0;
 			for (k = 0; k < j; k++)
@@ -2134,8 +2134,8 @@ parse_input_str(char *str)
 	for (i = 0; i < mime_type_n; i++) {
 		int index = mime_type_array[i] + (int)old_mt;
 
-		char **p = *(substr[index] + 1) ? expand_mime_type_filter(substr[index] + 1)
-			: (char **)NULL;
+		char **p = *(substr[index] + 1)
+			? expand_mime_type_filter(substr[index] + 1) : (char **)NULL;
 		size_t c = 0;
 		if (p) {
 			char **ret = insert_fields(&substr, &p, (size_t)index, &c);
@@ -2277,7 +2277,8 @@ parse_input_str(char *str)
 			|| substr[i][j] == '[' || substr[i][j] == '{')
 			&& substr[i][j + 1] != ' ') {
 				/* Strings containing these characters are taken as wildacard
-				 * patterns and are expanded by the glob function. See man (7) glob */
+				 * patterns and are expanded by the glob function.
+				 * See man (7) glob */
 				if (glob_n < int_array_max) {
 					glob_array[glob_n] = (int)i;
 					glob_n++;
@@ -2364,8 +2365,9 @@ parse_input_str(char *str)
 						glob_cmd[j] = esc_str;
 						j++;
 					} else {
-						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
-							"file name\n"), PROGRAM_NAME, globbuf.gl_pathv[i]);
+						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error "
+							"quoting file name\n"), PROGRAM_NAME,
+							globbuf.gl_pathv[i]);
 						size_t k = 0;
 						for (k = 0; k < j; k++)
 							free(glob_cmd[k]);
@@ -2438,8 +2440,9 @@ parse_input_str(char *str)
 						word_cmd[j] = esc_str;
 						j++;
 					} else {
-						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
-							"file name\n"), PROGRAM_NAME, wordbuf.we_wordv[i]);
+						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error "
+							"quoting file name\n"), PROGRAM_NAME,
+							wordbuf.we_wordv[i]);
 
 						size_t k = 0;
 						for (k = 0; k < j; k++)
@@ -2492,8 +2495,9 @@ parse_input_str(char *str)
 		 * #             5) REGEX EXPANSION            #
 		 * ############################################# */
 
-	if (substr[0] && ((*substr[0] == 's' && (!substr[0][1] || strcmp(substr[0], "sel") == 0))
-	|| (*substr[0] == 'n' && (!substr[0][1] || strcmp(substr[0], "new") == 0) ) ) )
+	if (substr[0] && ((*substr[0] == 's' && (!substr[0][1]
+	|| strcmp(substr[0], "sel") == 0)) || (*substr[0] == 'n' && (!substr[0][1]
+	|| strcmp(substr[0], "new") == 0) ) ) )
 		return substr;
 
 	/* Let's store all strings currently in substr plus REGEX expanded
@@ -2619,7 +2623,8 @@ home_tilde(char *new_path, int *_free)
 	if (new_path[1] && user.home[1] && new_path[1] == user.home[1]
 	&& strncmp(new_path, user.home, user.home_len) == 0
 	/* Avoid names like these: "HOMEfile". It should always be rather "HOME/file" */
-	&& (user.home[user.home_len - 1] == '/' || *(new_path + user.home_len) == '/') ) {
+	&& (user.home[user.home_len - 1] == '/'
+	|| *(new_path + user.home_len) == '/') ) {
 		/* If path == HOME/file */
 		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3, sizeof(char));
 		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);

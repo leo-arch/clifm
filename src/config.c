@@ -53,15 +53,18 @@
 #define DUMP_CONFIG_BOOL 2
 
 #ifndef _NO_FZF
-/* Determine input and output files to be used by the fuzzy finder (either fzf or fzy)
+/* Determine input and output files to be used by the fuzzy finder (either
+ * fzf or fzy)
  * Let's do this even if fzftab is not enabled at startup, because this feature
  * can be enabled in place editing the config file */
 void
 set_finder_paths(void)
 {
 	char *p = xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir;
-	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.finder.in", p, PNL);
-	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.finder.out", p, PNL);
+	snprintf(finder_in_file, sizeof(finder_in_file), "%s/%s.finder.in",
+		p, PNL);
+	snprintf(finder_out_file, sizeof(finder_out_file), "%s/%s.finder.out",
+		p, PNL);
 }
 #endif /* _NO_FZF */
 
@@ -105,14 +108,16 @@ regen_config(void)
 }
 
 static void
-print_config_value(const char *option, void *cur_value, void *def_value, const int type)
+print_config_value(const char *option, void *cur_value, void *def_value,
+		const int type)
 {
 	if (type == DUMP_CONFIG_STR) {
 		char *cv = (char *)cur_value, *dv = (char *)def_value;
 		if (!cv || (dv && strcmp(cv, dv) == 0))
 			printf("  %s: \"%s\"\n", option, dv);
 		else
-			printf("%s>%s %s%s: \"%s\" [\"%s\"]%s\n", mi_c, df_c, BOLD, option, cv, dv, df_c);
+			printf("%s>%s %s%s: \"%s\" [\"%s\"]%s\n", mi_c, df_c,
+				BOLD, option, cv, dv, df_c);
 	}
 
 	else if (type == DUMP_CONFIG_BOOL) {
@@ -120,8 +125,8 @@ print_config_value(const char *option, void *cur_value, void *def_value, const i
 		if (cv == dv)
 			printf("  %s: %s\n", option, cv == 1 ? "true" : "false");
 		else
-			printf("%s>%s %s%s: %s [%s]%s\n", mi_c, df_c, BOLD, option, cv == 1
-				? "true" : "false", dv == 1 ? "true" : "false", df_c);
+			printf("%s>%s %s%s: %s [%s]%s\n", mi_c, df_c, BOLD, option,
+				cv == 1 ? "true" : "false", dv == 1 ? "true" : "false", df_c);
 	}
 
 	else { /* CONFIG_BOOL_INT */
@@ -129,7 +134,8 @@ print_config_value(const char *option, void *cur_value, void *def_value, const i
 		if (cv == dv)
 			printf("  %s: %d\n", option, cv);
 		else
-			printf("%s>%s %s%s: %d [%d]%s\n", mi_c, df_c, BOLD, option, cv, dv, df_c);
+			printf("%s>%s %s%s: %d [%d]%s\n", mi_c, df_c, BOLD, option,
+				cv, dv, df_c);
 	}
 }
 
@@ -206,7 +212,8 @@ dump_config(void)
 	int n = 0;
 
 	n = DEF_APPARENT_SIZE;
-	print_config_value("ApparentSize", &conf.apparent_size, &n, DUMP_CONFIG_BOOL);
+	print_config_value("ApparentSize", &conf.apparent_size, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_AUTOCD;
 	print_config_value("Autocd", &conf.autocd, &n, DUMP_CONFIG_BOOL);
 	n = DEF_AUTOLS;
@@ -215,16 +222,21 @@ dump_config(void)
 	print_config_value("AutoOpen", &conf.auto_open, &n, DUMP_CONFIG_BOOL);
 #ifndef _NO_SUGGESTIONS
 	n = DEF_SUGGESTIONS;
-	print_config_value("AutoSuggestions", &conf.suggestions, &n, DUMP_CONFIG_BOOL);
+	print_config_value("AutoSuggestions", &conf.suggestions, &n,
+		DUMP_CONFIG_BOOL);
 #endif
 	n = DEF_CASE_SENS_DIRJUMP;
-	print_config_value("CaseSensitiveDirjump", &conf.case_sens_dirjump, &n, DUMP_CONFIG_BOOL);
+	print_config_value("CaseSensitiveDirjump", &conf.case_sens_dirjump,
+		&n, DUMP_CONFIG_BOOL);
 	n = DEF_CASE_SENS_LIST;
-	print_config_value("CaseSensitiveList", &conf.case_sens_list, &n, DUMP_CONFIG_BOOL);
+	print_config_value("CaseSensitiveList", &conf.case_sens_list, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_CASE_SENS_PATH_COMP;
-	print_config_value("CaseSensitivePathComp", &conf.case_sens_path_comp, &n, DUMP_CONFIG_BOOL);
+	print_config_value("CaseSensitivePathComp", &conf.case_sens_path_comp,
+		&n, DUMP_CONFIG_BOOL);
 	n = DEF_CASE_SENS_SEARCH;
-	print_config_value("CaseSensitiveSearch", &conf.case_sens_search, &n, DUMP_CONFIG_BOOL);
+	print_config_value("CaseSensitiveSearch", &conf.case_sens_search, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_CD_ON_QUIT;
 	print_config_value("CdOnQuit", &conf.cd_on_quit, &n, DUMP_CONFIG_BOOL);
 	n = DEF_CLASSIFY;
@@ -236,15 +248,18 @@ dump_config(void)
 	n = DEF_CP_CMD;
 	print_config_value("cpCmd", &conf.cp_cmd, &n, DUMP_CONFIG_INT);
 	n = DEF_DESKTOP_NOTIFICATIONS;
-	print_config_value("DesktopNotifications", &conf.desktop_notifications, &n, DUMP_CONFIG_BOOL);
+	print_config_value("DesktopNotifications", &conf.desktop_notifications,
+		&n, DUMP_CONFIG_BOOL);
 	n = DEF_DIRHIST_MAP;
 	print_config_value("DirhistMap", &conf.dirhist_map, &n, DUMP_CONFIG_BOOL);
 	n = DEF_DISK_USAGE;
 	print_config_value("DiskUsage", &conf.disk_usage, &n, DUMP_CONFIG_BOOL);
 	n = DEF_EXT_CMD_OK;
-	print_config_value("ExternalCommands", &conf.ext_cmd_ok, &n, DUMP_CONFIG_BOOL);
+	print_config_value("ExternalCommands", &conf.ext_cmd_ok, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_FILES_COUNTER;
-	print_config_value("FilesCounter", &conf.files_counter, &n, DUMP_CONFIG_BOOL);
+	print_config_value("FilesCounter", &conf.files_counter, &n,
+		DUMP_CONFIG_BOOL);
 	s = "";
 	print_config_value("Filter", filter.str, s, DUMP_CONFIG_STR);
 	n = DEF_FULL_DIR_SIZE;
@@ -252,9 +267,11 @@ dump_config(void)
 
 #ifndef _NO_FZF
 	n = DEF_FUZZY_MATCH;
-	print_config_value("FuzzyMatching", &conf.fuzzy_match, &n, DUMP_CONFIG_BOOL);
+	print_config_value("FuzzyMatching", &conf.fuzzy_match, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_FUZZY_MATCH_ALGO;
-	print_config_value("FuzzyAlgorithm", &conf.fuzzy_match_algo, &n, DUMP_CONFIG_INT);
+	print_config_value("FuzzyAlgorithm", &conf.fuzzy_match_algo, &n,
+		DUMP_CONFIG_INT);
 	n = DEF_FZF_PREVIEW;
 	print_config_value("FzfPreview", &conf.fzf_preview, &n, DUMP_CONFIG_BOOL);
 #endif
@@ -266,7 +283,8 @@ dump_config(void)
 	n = DEF_LIGHT_MODE;
 	print_config_value("LightMode", &conf.light_mode, &n, DUMP_CONFIG_BOOL);
 	n = DEF_LIST_DIRS_FIRST;
-	print_config_value("ListDirsFirst", &conf.list_dirs_first, &n, DUMP_CONFIG_BOOL);
+	print_config_value("ListDirsFirst", &conf.list_dirs_first, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_LISTING_MODE;
 	print_config_value("ListingMode", &conf.listing_mode, &n, DUMP_CONFIG_INT);
 	n = DEF_LOG_CMDS;
@@ -278,19 +296,23 @@ dump_config(void)
 	n = DEF_MAX_DIRHIST;
 	print_config_value("MaxDirhist", &conf.max_dirhist, &n, DUMP_CONFIG_INT);
 	n = DEF_MAX_NAME_LEN;
-	print_config_value("MaxFilenameLen", &conf.max_name_len, &n, DUMP_CONFIG_INT);
+	print_config_value("MaxFilenameLen", &conf.max_name_len, &n,
+		DUMP_CONFIG_INT);
 	n = DEF_MAX_HIST;
 	print_config_value("MaxHistory", &conf.max_hist, &n, DUMP_CONFIG_INT);
 	n = DEF_MAX_JUMP_TOTAL_RANK;
-	print_config_value("MaxJumpTotalRank", &conf.max_jump_total_rank, &n, DUMP_CONFIG_INT);
+	print_config_value("MaxJumpTotalRank", &conf.max_jump_total_rank,
+		&n, DUMP_CONFIG_INT);
 	n = DEF_MAX_LOG;
 	print_config_value("MaxLog", &conf.max_log, &n, DUMP_CONFIG_INT);
 	n = DEF_MAX_PATH;
 	print_config_value("MaxPath", &conf.max_path, &n, DUMP_CONFIG_INT);
 	n = DEF_MAX_PRINTSEL;
-	print_config_value("MaxPrintSelfiles", &conf.max_printselfiles, &n, DUMP_CONFIG_INT);
+	print_config_value("MaxPrintSelfiles", &conf.max_printselfiles, &n,
+		DUMP_CONFIG_INT);
 	n = DEF_MIN_NAME_TRIM;
-	print_config_value("MinFilenameTrim", &conf.min_name_trim, &n, DUMP_CONFIG_INT);
+	print_config_value("MinFilenameTrim", &conf.min_name_trim, &n,
+		DUMP_CONFIG_INT);
 	n = DEF_MIN_JUMP_RANK;
 	print_config_value("MinJumpRank", &conf.min_jump_rank, &n, DUMP_CONFIG_INT);
 	n = DEF_MV_CMD;
@@ -298,33 +320,40 @@ dump_config(void)
 	s = "";
 	print_config_value("Opener", conf.opener, s, DUMP_CONFIG_STR);
 	n = DEF_PAGER;
-	print_config_value("Pager", &conf.pager, &n, conf.pager > 1 ? DUMP_CONFIG_INT : DUMP_CONFIG_BOOL);
+	print_config_value("Pager", &conf.pager, &n, conf.pager > 1
+		? DUMP_CONFIG_INT : DUMP_CONFIG_BOOL);
 	n = DEF_PRINTSEL;
-	print_config_value("PrintSelfiles", &conf.print_selfiles, &n, DUMP_CONFIG_BOOL);
+	print_config_value("PrintSelfiles", &conf.print_selfiles, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_PRIVATE_WS_SETTINGS;
-	print_config_value("PrivateWorkspaceSettings", &conf.private_ws_settings, &n, DUMP_CONFIG_BOOL);
+	print_config_value("PrivateWorkspaceSettings", &conf.private_ws_settings,
+		&n, DUMP_CONFIG_BOOL);
 	s = DEF_PROP_FIELDS;
 	print_config_value("PropFields", prop_fields_str, s, DUMP_CONFIG_STR);
 	n = DEF_PURGE_JUMPDB;
 	print_config_value("PurgeJumpDB", &conf.purge_jumpdb, &n, DUMP_CONFIG_BOOL);
 	n = DEF_RESTORE_LAST_PATH;
-	print_config_value("RestoreLastPath", &conf.restore_last_path, &n, DUMP_CONFIG_BOOL);
+	print_config_value("RestoreLastPath", &conf.restore_last_path, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_RL_EDIT_MODE;
 	print_config_value("RlEditMode", &rl_editing_mode, &n, DUMP_CONFIG_INT);
 	n = DEF_RM_FORCE;
 	print_config_value("rmForce", &conf.rm_force, &n, DUMP_CONFIG_BOOL);
 	n = DEF_SEARCH_STRATEGY;
-	print_config_value("SearchStrategy", &conf.search_strategy, &n, DUMP_CONFIG_INT);
+	print_config_value("SearchStrategy", &conf.search_strategy, &n,
+		DUMP_CONFIG_INT);
 	n = DEF_SHARE_SELBOX;
 	print_config_value("ShareSelbox", &conf.share_selbox, &n, DUMP_CONFIG_BOOL);
 	n = DEF_SHOW_HIDDEN;
-	print_config_value("ShowHiddenFiles", &conf.show_hidden, &n, DUMP_CONFIG_BOOL);
+	print_config_value("ShowHiddenFiles", &conf.show_hidden, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_SORT;
 	print_config_value("Sort", &conf.sort, &n, DUMP_CONFIG_INT);
 	n = DEF_SORT_REVERSE;
 	print_config_value("SortReverse", &conf.sort_reverse, &n, DUMP_CONFIG_BOOL);
 	n = DEF_SPLASH_SCREEN;
-	print_config_value("SplashScreen", &conf.splash_screen, &n, DUMP_CONFIG_BOOL);
+	print_config_value("SplashScreen", &conf.splash_screen, &n,
+		DUMP_CONFIG_BOOL);
 
 	s = "";
 	print_config_value("StartingPath", start_path, s, DUMP_CONFIG_STR);
@@ -332,15 +361,19 @@ dump_config(void)
 
 #ifndef _NO_SUGGESTIONS
 	n = DEF_CMD_DESC_SUG;
-	print_config_value("SuggestCmdDesc", &conf.cmd_desc_sug, &n, DUMP_CONFIG_BOOL);
+	print_config_value("SuggestCmdDesc", &conf.cmd_desc_sug, &n,
+		DUMP_CONFIG_BOOL);
 	n = DEF_SUG_FILETYPE_COLOR;
-	print_config_value("SuggestFiletypeColor", &conf.suggest_filetype_color, &n, DUMP_CONFIG_BOOL);
+	print_config_value("SuggestFiletypeColor", &conf.suggest_filetype_color,
+		&n, DUMP_CONFIG_BOOL);
 	s = DEF_SUG_STRATEGY;
-	print_config_value("SuggestionStrategy", conf.suggestion_strategy, s, DUMP_CONFIG_STR);
+	print_config_value("SuggestionStrategy", conf.suggestion_strategy,
+		s, DUMP_CONFIG_STR);
 #endif
 #ifndef _NO_HIGHLIGHT
 	n = DEF_HIGHLIGHT;
-	print_config_value("SyntaxHighlighting", &conf.highlight, &n, DUMP_CONFIG_BOOL);
+	print_config_value("SyntaxHighlighting", &conf.highlight, &n,
+		DUMP_CONFIG_BOOL);
 #endif
 
 	char *ss = get_tab_comp_mode_str();
@@ -369,9 +402,11 @@ dump_config(void)
 	print_config_value("Unicode", &conf.unicode, &n, DUMP_CONFIG_BOOL);
 
 	n = DEF_WELCOME_MESSAGE;
-	print_config_value("WelcomeMessage", &conf.welcome_message, &n, DUMP_CONFIG_BOOL);
+	print_config_value("WelcomeMessage", &conf.welcome_message, &n,
+		DUMP_CONFIG_BOOL);
 	s = DEF_WELCOME_MESSAGE_STR;
-	print_config_value("WelcomeMessageStr", conf.welcome_message_str, s, DUMP_CONFIG_STR);
+	print_config_value("WelcomeMessageStr", conf.welcome_message_str,
+		s, DUMP_CONFIG_STR);
 
 	s = "";
 	print_config_value("WorkspaceNames", ws_names, s, DUMP_CONFIG_STR);
@@ -472,15 +507,18 @@ setenv_plugins_helper(void)
 		char _path[PATH_MAX];
 		snprintf(_path, sizeof(_path), "%s/plugins-helper", plugins_dir);
 
-		if (stat(_path, &attr) != -1 && setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
+		if (stat(_path, &attr) != -1
+		&& setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
 			return EXIT_SUCCESS;
 	}
 
 	if (data_dir && *data_dir) {
 		char _path[PATH_MAX];
-		snprintf(_path, sizeof(_path), "%s/%s/plugins/plugins-helper", data_dir, PNL);
+		snprintf(_path, sizeof(_path), "%s/%s/plugins/plugins-helper",
+			data_dir, PNL);
 
-		if (stat(_path, &attr) != -1 && setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
+		if (stat(_path, &attr) != -1
+		&& setenv("CLIFM_PLUGINS_HELPER", _path, 1) == 0)
 			return EXIT_SUCCESS;
 	}
 
@@ -550,7 +588,7 @@ set_sel_file(void)
 		sel_file = (char *)xnmalloc(config_dir_len + 14, sizeof(char));
 		sprintf(sel_file, "%s/selbox.clifm", config_dir);
 	} else {
-		/* Shared selection box is stored in the general configuration directory */
+		/* Shared selection box is stored in the general config dir */
 		sel_file = (char *)xnmalloc(config_dir_len + 23, sizeof(char));
 		sprintf(sel_file, "%s/.config/%s/selbox.clifm", user.home, PNL);
 	}
@@ -572,7 +610,8 @@ create_kbinds_file(void)
 	/* If not, try to import it from DATADIR */
 	if (data_dir) {
 		char sys_file[PATH_MAX];
-		snprintf(sys_file, sizeof(sys_file), "%s/%s/keybindings.clifm", data_dir, PNL);
+		snprintf(sys_file, sizeof(sys_file), "%s/%s/keybindings.clifm",
+			data_dir, PNL);
 		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
 			char *cmd[] = {"cp", sys_file, kbinds_file, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
@@ -583,7 +622,8 @@ create_kbinds_file(void)
 	/* Else, create it */
 	FILE *fp = fopen(kbinds_file, "w");
 	if (!fp) {
-		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file, strerror(errno));
+		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
+			strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -741,7 +781,8 @@ import_from_data_dir(char *src_filename, char *dest)
 
 	struct stat attr;
 	char sys_file[PATH_MAX];
-	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PNL, src_filename);
+	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PNL,
+		src_filename);
 	if (stat(sys_file, &attr) == -1)
 		return EXIT_FAILURE;
 
@@ -769,7 +810,8 @@ create_preview_file(void)
 	int fd;
 	FILE *fp = open_fstream_w(file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+			strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -851,7 +893,8 @@ create_actions_file(char *file)
 	int fd;
 	FILE *fp = open_fstream_w(file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+			strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -921,8 +964,9 @@ create_tmp_files(void)
 	 * parent directory (/tmp/clifm) with 1777 permissions (world writable
 	 * with the sticky bit set), so that every user is able to create files
 	 * in here, but only the file's owner can remove or modify them */
-	size_t user_len = user.name ? strlen(user.name) : 7; /* 7: length of "unknown" */
-	tmp_dir = (char *)xnmalloc(P_tmpdir_len + pnl_len + user_len + 3, sizeof(char));
+	size_t user_len = user.name ? strlen(user.name) : 7; /* 7: len of "unknown" */
+	tmp_dir = (char *)xnmalloc(P_tmpdir_len + pnl_len
+			+ user_len + 3, sizeof(char));
 	if (P_tmpdir_len > 0 && P_tmpdir[P_tmpdir_len - 1] == '/')
 		sprintf(tmp_dir, "%s%s", P_tmpdir, PNL); /* On OpenBSD we get "/tmp/" */
 	else
@@ -1028,7 +1072,8 @@ rename_cfm_files(char *dir)
 		snprintf(dst, sizeof(dst), "%s/%s.clifm", dir, _files[i]->d_name);
 
 		if (rename(src, dst) == -1)
-			_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, src, strerror(errno));
+			_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, src,
+				strerror(errno));
 		free(_files[i]);
 	}
 
@@ -1112,7 +1157,8 @@ check_cfm_files(void)
 		return;
 
 	/* Old .cfm files found alongside new .clifm files. This happens if
-	 * the user says "no" when asked about replacing old files. Just warn the user */
+	 * the user says "no" when asked about replacing old files. Just warn
+	 * the user */
 	char qq[PATH_MAX + 19];
 	snprintf(qq, sizeof(qq), "%s/keybindings.clifm", config_dir_gral);
 	if (stat(qq, &a) == EXIT_SUCCESS) {
@@ -1174,7 +1220,8 @@ define_config_file_names(void)
 			sprintf(config_dir_gral, "%s/%s", xdg_config_home, PNL);
 			xdg_config_home = (char *)NULL;
 		} else {
-			config_dir_gral = (char *)xnmalloc(user.home_len + pnl_len + 11, sizeof(char));
+			config_dir_gral = (char *)xnmalloc(user.home_len + pnl_len
+				+ 11, sizeof(char));
 			sprintf(config_dir_gral, "%s/.config/%s", user.home, PNL);
 		}
 	}
@@ -1188,7 +1235,8 @@ define_config_file_names(void)
 	/* alt_profile will not be NULL whenever the -P option is used
 	 * to run clifm under an alternative profile */
 	if (alt_profile) {
-		config_dir = (char *)xnmalloc(config_gral_len + strlen(alt_profile) + 11, sizeof(char));
+		config_dir = (char *)xnmalloc(config_gral_len + strlen(alt_profile)
+			+ 11, sizeof(char));
 		sprintf(config_dir, "%s/profiles/%s", config_dir_gral, alt_profile);
 	} else {
 		config_dir = (char *)xnmalloc(config_gral_len + 18, sizeof(char));
@@ -1248,7 +1296,8 @@ define_config_file_names(void)
 	sprintf(hist_file, "%s/history.clifm", config_dir);
 
 	if (!alt_config_file) {
-		config_file = (char *)xnmalloc(config_dir_len + pnl_len + 4, sizeof(char));
+		config_file = (char *)xnmalloc(config_dir_len + pnl_len
+			+ 4, sizeof(char));
 		sprintf(config_file, "%s/%src", config_dir, PNL);
 	} else {
 		config_file = savestring(alt_config_file, strlen(alt_config_file));
@@ -1307,8 +1356,8 @@ create_config(char *file)
 	FILE *config_fp = open_fstream_w(file, &fd);
 
 	if (!config_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-			file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n",
+			PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1814,7 +1863,8 @@ create_remotes_file(void)
 
 	/* Let's try to copy the file from DATADIR */
 	char sys_remotes[PATH_MAX];
-	snprintf(sys_remotes, sizeof(sys_remotes), "%s/%s/nets.clifm", data_dir, PNL);
+	snprintf(sys_remotes, sizeof(sys_remotes), "%s/%s/nets.clifm",
+		data_dir, PNL);
 
 	if (stat(sys_remotes, &attr) == EXIT_SUCCESS) {
 		char *cmd[] = {"cp", "-f", sys_remotes, remotes_file, NULL};
@@ -1960,7 +2010,8 @@ create_mime_file_anew(char *file)
 	int fd;
 	FILE *fp = open_fstream_w(file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
+			strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2151,7 +2202,8 @@ create_bm_file(void)
 
 	FILE *fp = fopen(bm_file, "w+");
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file,
+			strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -2422,8 +2474,8 @@ read_config(void)
 	int fd;
 	FILE *config_fp = open_fstream_r(config_file, &fd);
 	if (!config_fp) {
-		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default values.\n"),
-		    PROGRAM_NAME, config_file, strerror(errno));
+		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default "
+			"values.\n"), PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
 
@@ -2561,7 +2613,8 @@ read_config(void)
 			set_config_bool_value(line + 13, &conf.files_counter);
 		}
 
-		else if (!filter.str && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
+		else if (!filter.str && *line == 'F'
+		&& strncmp(line, "Filter=", 7) == 0) {
 			if (_set_filter(line) == -1)
 				continue;
 		}
@@ -2722,7 +2775,8 @@ read_config(void)
 				conf.mv_cmd = DEF_MV_CMD;
 		}
 
-		else if (!conf.opener && *line == 'O' && strncmp(line, "Opener=", 7) == 0) {
+		else if (!conf.opener && *line == 'O'
+		&& strncmp(line, "Opener=", 7) == 0) {
 			char *tmp = get_line_value(line + 7);
 			if (!tmp)
 				continue;
@@ -2740,7 +2794,8 @@ read_config(void)
 			set_config_bool_value(line + 14, &conf.print_selfiles);
 		}
 
-		else if (*line == 'P' && strncmp(line, "PrivateWorkspaceSettings=", 25) == 0) {
+		else if (*line == 'P'
+		&& strncmp(line, "PrivateWorkspaceSettings=", 25) == 0) {
 			set_config_bool_value(line + 25, &conf.private_ws_settings);
 		}
 
@@ -2807,7 +2862,8 @@ read_config(void)
 			set_config_bool_value(line + 16, &conf.show_hidden);
 		}
 
-		else if (xargs.sort == UNSET && *line == 'S' && strncmp(line, "Sort=", 5) == 0) {
+		else if (xargs.sort == UNSET && *line == 'S'
+		&& strncmp(line, "Sort=", 5) == 0) {
 			int opt_num = 0;
 			ret = sscanf(line + 5, "%d\n", &opt_num);
 			if (ret == -1)
@@ -2855,7 +2911,8 @@ read_config(void)
 			set_config_bool_value(line + 15, &conf.cmd_desc_sug);
 		}
 
-		else if (*line == 'S' && strncmp(line, "SuggestFiletypeColor=", 21) == 0) {
+		else if (*line == 'S'
+		&& strncmp(line, "SuggestFiletypeColor=", 21) == 0) {
 			set_config_bool_value(line + 21, &conf.suggest_filetype_color);
 		}
 
@@ -2879,12 +2936,14 @@ read_config(void)
 			if (fail == 1 || s != SUG_STRATS)
 				continue;
 			free(conf.suggestion_strategy);
-			conf.suggestion_strategy = savestring(opt_str, strnlen(opt_str, sizeof(opt_str)));
+			conf.suggestion_strategy = savestring(opt_str,
+				strnlen(opt_str, sizeof(opt_str)));
 		}
 #endif /* !_NO_SUGGESTIONS */
 
 #ifndef _NO_FZF
-		else if (xargs.fzftab == UNSET && xargs.fzytab == UNSET && xargs.smenutab == UNSET
+		else if (xargs.fzftab == UNSET
+		&& xargs.fzytab == UNSET && xargs.smenutab == UNSET
 		&& *line == 'T' && strncmp(line, "TabCompletionMode=", 18) == 0) {
 			char opt_str[9] = "";
 			ret = sscanf(line + 18, "%8s\n", opt_str);
@@ -2917,7 +2976,8 @@ read_config(void)
 					_err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains "
 						"unsafe characters (<>|;&$`). Falling back to default "
 						"values.\n"), PROGRAM_NAME);
-					char *p = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+					char *p = conf.colorize == 1
+						? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
 					conf.fzftab_options = savestring(p, strlen(p));
 				}
 				if (strstr(conf.fzftab_options, "--height"))
@@ -2948,7 +3008,8 @@ read_config(void)
 				conf.relative_time = 1;
 		}
 
-		else if (xargs.tips == UNSET && *line == 'T' && strncmp(line, "Tips=", 5) == 0) {
+		else if (xargs.tips == UNSET && *line == 'T'
+		&& strncmp(line, "Tips=", 5) == 0) {
 			set_config_bool_value(line + 5, &conf.tips);
 		}
 
@@ -3045,7 +3106,8 @@ check_colors(void)
 		}
 	}
 
-	if (xargs.colorize == UNSET && ((cfc && *cfc) || (ccf && *ccf && *ccf != '0'))) {
+	if (xargs.colorize == UNSET
+	&& ((cfc && *cfc) || (ccf && *ccf && *ccf != '0'))) {
 		if (term_caps.color == 0)
 			/* The user is forcing the use of colors even when the terminal
 			 * reports no color capability. Let's assume a highly compatible value */
@@ -3056,7 +3118,8 @@ check_colors(void)
 	if (conf.colorize == 1) {
 		unsetenv("CLIFM_COLORLESS");
 		set_colors(conf.usr_cscheme ? conf.usr_cscheme
-			: (term_caps.color >= 256 ? DEF_COLOR_SCHEME_256 : DEF_COLOR_SCHEME), 1);
+			: (term_caps.color >= 256
+			? DEF_COLOR_SCHEME_256 : DEF_COLOR_SCHEME), 1);
 		cur_color = tx_c;
 		return;
 	}
@@ -3113,7 +3176,8 @@ create_trash_dirs(void)
 		if (ret != EXIT_SUCCESS) {
 			trash_ok = 0;
 			_err('w', PRINT_PROMPT, _("%s: mkdir: %s: Error creating trash "
-				"directory. Trash function disabled\n"), PROGRAM_NAME, trash_dir);
+				"directory. Trash function disabled\n"),
+				PROGRAM_NAME, trash_dir);
 		}
 	}
 
@@ -3158,8 +3222,9 @@ init_config(void)
 #endif /* _NO_TRASH */
 	if (xargs.stealth_mode == 1) {
 		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Running in stealth mode: "
-			"persistent selection, bookmarks, jump database and directory history, "
-			"just as plugins, logs and configuration files, are disabled.\n"), PROGRAM_NAME);
+			"persistent selection, bookmarks, jump database and directory "
+			"history, just as plugins, logs and configuration files, are "
+			"disabled.\n"), PROGRAM_NAME);
 		config_ok = 0;
 		check_colors();
 		return;
@@ -3191,7 +3256,8 @@ init_config(void)
 #endif
 
 	char *t = getenv("TERM");
-	if (xargs.list_and_quit != 1 && t && *t == 'x' && strncmp(t, "xterm", 5) == 0)
+	if (xargs.list_and_quit != 1 && t && *t == 'x'
+	&& strncmp(t, "xterm", 5) == 0)
 		/* If running Xterm, instruct it to send an escape code (27) for
 		 * Meta (Alt) key sequences. Otherwise, Alt keybindings won't work */
 		META_SENDS_ESC;
@@ -3266,7 +3332,8 @@ reset_variables(void)
 	free(conf.encoded_prompt);
 /*	free(right_prompt); */
 	free(conf.term);
-	conf.opener = conf.encoded_prompt /*= right_prompt*/ = conf.term = (char *)NULL;
+//	conf.opener = conf.encoded_prompt = right_prompt = conf.term = (char *)NULL;
+	conf.opener = conf.encoded_prompt = conf.term = (char *)NULL;
 
 	int i = (int)cschemes_n;
 	while (--i >= 0)

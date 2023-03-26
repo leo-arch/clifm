@@ -260,11 +260,13 @@ static int
 get_shell_cmd_opts(char *cmd)
 {
 	*ext_opts[0] = '\0';
-	if (!cmd || !*cmd || !user.home || (conf.suggestions == 1 && wrong_cmd == 1))
+	if (!cmd || !*cmd || !user.home
+	|| (conf.suggestions == 1 && wrong_cmd == 1))
 		return EXIT_FAILURE;
 
 	char p[PATH_MAX];
-	snprintf(p, sizeof(p), "%s/.local/share/%s/completions/%s.clifm", user.home, PNL, cmd);
+	snprintf(p, sizeof(p), "%s/.local/share/%s/completions/%s.clifm",
+		user.home, PNL, cmd);
 
 	struct stat a;
 	if (stat(p, &a) == -1) {
@@ -1282,8 +1284,10 @@ my_rl_path_completion(const char *text, int state)
 		type = ent->d_type;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
-		if (((conf.suggestions == 1 && nwords == 1) || !strchr(rl_line_buffer, ' '))
-		&& ((type == DT_DIR && conf.autocd == 0) || (type != DT_DIR && conf.auto_open == 0)))
+		if (((conf.suggestions == 1 && nwords == 1)
+		|| !strchr(rl_line_buffer, ' '))
+		&& ((type == DT_DIR && conf.autocd == 0)
+		|| (type != DT_DIR && conf.auto_open == 0)))
 			continue;
 
 		/* Only dir names for cd */
@@ -1362,7 +1366,8 @@ my_rl_path_completion(const char *text, int state)
 
 			/* If "./", list only executable regular files and directories */
 			else if (exec) {
-				if (type == DT_DIR || (type == DT_REG && access(ent->d_name, X_OK) == 0))
+				if (type == DT_DIR
+				|| (type == DT_REG && access(ent->d_name, X_OK) == 0))
 					match = 1;
 			}
 
@@ -1387,8 +1392,10 @@ my_rl_path_completion(const char *text, int state)
 		/* If there is at least one char to complete (ex: "cd .[TAB]") */
 		else {
 			/* Let's check for possible matches */
-			if (conf.fuzzy_match == 0 || rl_point < rl_end || (*filename == '.' && *(filename + 1) == '.')
-			|| *filename == '-' || (tabmode == STD_TAB && !(flags & STATE_SUGGESTING))) {
+			if (conf.fuzzy_match == 0 || rl_point < rl_end
+			|| (*filename == '.' && *(filename + 1) == '.')
+			|| *filename == '-'
+			|| (tabmode == STD_TAB && !(flags & STATE_SUGGESTING))) {
 				if ( (conf.case_sens_path_comp == 0
 					? TOUPPER(*ent->d_name) != TOUPPER(*filename)
 					: *ent->d_name != *filename)
@@ -1403,12 +1410,14 @@ my_rl_path_completion(const char *text, int state)
 				if (flags & STATE_SUGGESTING) {
 					int r = 0;
 					/* Do not fuzzy suggest if not at the end of the line */
-					if (rl_point == rl_end && (r = fuzzy_match(filename, ent->d_name,
+					if (rl_point == rl_end
+					&& (r = fuzzy_match(filename, ent->d_name,
 					filename_len, fuzzy_str_type)) > best_fz_score) {
 						if (!dirname || (*dirname == '.' && !*(dirname + 1))) {
 							xstrsncpy(_fmatch, ent->d_name, sizeof(_fmatch) - 1);
 						} else {
-							snprintf(_fmatch, sizeof(_fmatch), "%s%s", dirname, ent->d_name);
+							snprintf(_fmatch, sizeof(_fmatch), "%s%s",
+								dirname, ent->d_name);
 						}
 
 						/* We look for matches ranked 4 or 5. If none of them is
@@ -1645,7 +1654,8 @@ hist_generator(const char *text, int state)
 
 	while ((name = history[i++].cmd) != NULL) {
 		if (*text == '!') {
-			if (len == 0 || (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
+			if (len == 0
+			|| (*name == *(text + 1) && strncmp(name, text + 1, len) == 0)
 			|| (conf.fuzzy_match == 1 && tabmode != STD_TAB
 			&& fuzzy_match((char *)(text + 1), name, len, FUZZY_HISTORY) > 0))
 				return strdup(name);
@@ -1859,7 +1869,8 @@ filenames_gen_text(const char *text, int state)
 			continue;
 
 		/* If cd, list only directories */
-		if ((conf.suggestions == 0 || nwords > 1 || (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
+		if ((conf.suggestions == 0 || nwords > 1
+		|| (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
 		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && file_info[i - 1].dir == 0)
 			continue;
@@ -1869,7 +1880,8 @@ filenames_gen_text(const char *text, int state)
 			return strdup(name);
 		if (conf.fuzzy_match == 0 || tabmode == STD_TAB || rl_point < rl_end)
 			continue;
-		if (len == 0 || fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
+		if (len == 0
+		|| fuzzy_match((char *)text, name, len, fuzzy_str_type) > 0)
 			return strdup(name);
 	}
 
@@ -1895,7 +1907,8 @@ filenames_gen_eln(const char *text, int state)
 	while (i < files && (name = file_info[i++].name) != NULL) {
 		if (*name == *file_info[num_text - 1].name
 		&& strcmp(name, file_info[num_text - 1].name) == 0) {
-			if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
+			if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c'
+			&& rl_line_buffer[1] == 'd'
 			&& rl_line_buffer[2] == ' ' && file_info[num_text - 1].dir == 0)
 				continue;
 #ifndef _NO_SUGGESTIONS
@@ -3144,8 +3157,10 @@ my_rl_completion(const char *text, int start, int end)
 	char *g = strpbrk(text, GLOB_CHARS);
 	/* Expand only glob expressions in the last path component */
 	if (xrename == 0 && g && !(rl_end == 2 && *rl_line_buffer == '/'
-	&& *(rl_line_buffer + 1) == '*') && !strchr(g, '/') && access(text, F_OK) != 0) {
-		char *p = (*rl_line_buffer == '/' && rl_end > 1 && !strchr(rl_line_buffer + 1, ' ')
+	&& *(rl_line_buffer + 1) == '*') && !strchr(g, '/')
+	&& access(text, F_OK) != 0) {
+		char *p = (*rl_line_buffer == '/' && rl_end > 1
+			&& !strchr(rl_line_buffer + 1, ' ')
 			&& !strchr(rl_line_buffer + 1, '/'))
 			? (char *)(text + 1) : (char *)text;
 		if ((matches = rl_glob(p)) != NULL) {
@@ -3275,7 +3290,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* #### INTERNAL COMMANDS EXPANSION #### */
-		if (xrename == 0 && *text == 'c' && *(text + 1) == 'm' && *(text + 2) == 'd') {
+		if (xrename == 0 && *text == 'c' && *(text + 1) == 'm'
+		&& *(text + 2) == 'd') {
 			if ((matches = rl_completion_matches(text, &int_cmds_generator))) {
 				cur_comp_type = TCMP_CMD_DESC;
 				return matches;
@@ -3283,7 +3299,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* HISTORY CMD AND SEARCH PATTERNS COMPLETION */
-		if (xrename == 0 && (*text == '!' || (*text == '/' && *(text + 1) == '*'))) {
+		if (xrename == 0 && (*text == '!'
+		|| (*text == '/' && *(text + 1) == '*'))) {
 			char *p = dequote_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &hist_generator);
 			free(p);
@@ -3369,8 +3386,9 @@ my_rl_completion(const char *text, int start, int end)
 #endif /* !_NO_TAGS */
 
 		/* #### DIRECTORY HISTORY COMPLETION #### */
-		if (((*lb == 'b' || *lb == 'f' || *lb == 'd') && lb[1] == 'h' && lb[2] == ' ')
-		&& !strchr(text, '/') && (conf.suggestions == 0 || nwords <= 2)) {
+		if (((*lb == 'b' || *lb == 'f' || *lb == 'd') && lb[1] == 'h'
+		&& lb[2] == ' ') && !strchr(text, '/')
+		&& (conf.suggestions == 0 || nwords <= 2)) {
 			char *p = dequote_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &dirhist_generator);
 			free(p);
@@ -3749,7 +3767,8 @@ set_rl_init_file(void)
 				rl_file, strerror(errno));
 			return;
 		}
-		fprintf(fp, "# This is readline's configuration file for %s\n", _PROGRAM_NAME);
+		fprintf(fp, "# This is readline's configuration file for %s\n",
+			_PROGRAM_NAME);
 		close_fstream(fp, fd);
 	}
 

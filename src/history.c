@@ -88,7 +88,8 @@ log_function(char **cmd)
 		if (*cmd[1] == 'c' && strcmp(cmd[1], "clear") == 0) {
 			clear_log = 1;
 		} else if (*cmd[1] == 's' && strcmp(cmd[1], "status") == 0) {
-			printf(_("Logs %s\n"), (conf.logs_enabled == 1) ? _("enabled") : _("disabled"));
+			printf(_("Logs %s\n"), (conf.logs_enabled == 1)
+				? _("enabled") : _("disabled"));
 			return EXIT_SUCCESS;
 		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "on") == 0) {
 			if (conf.logs_enabled == 1) {
@@ -248,7 +249,8 @@ send_desktop_notification(char *msg)
 #elif defined (__APPLE__)
 	size_t msg_len = strlen(msg) + strlen(type) + strlen(PROGRAM_NAME) + 60;
 	char *_msg = (char *)xnmalloc(msg_len, sizeof(char));
-	snprintf(_msg, msg_len, "'display notification \"%s\" subtitle \"%s\" with title \"%s\"'",
+	snprintf(_msg, msg_len,
+		"'display notification \"%s\" subtitle \"%s\" with title \"%s\"'",
 		msg, type, PROGRAM_NAME);
 	char *cmd[] = {"osascript", "-e", _msg, NULL};
 	ret = launch_execve(cmd, FOREGROUND, E_MUTE);
@@ -286,7 +288,8 @@ send_desktop_notification(char *msg)
  * Finally, if logs are enabled and LOGME is 1, write the message into the log
  * file as follows: "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
 void
-log_msg(char *_msg, const int print_prompt, const int logme, const int add_to_msgs_list)
+log_msg(char *_msg, const int print_prompt, const int logme,
+	const int add_to_msgs_list)
 {
 	if (!_msg)
 		return;
@@ -413,7 +416,8 @@ edit_history(char **args)
 	struct stat attr;
 	if (stat(hist_file, &attr) == -1) {
 		int err = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "history: %s: %s\n",
+			hist_file, strerror(errno));
 		return err;
 	}
 	time_t mtime_bfr = (time_t)attr.st_mtime;
@@ -613,7 +617,8 @@ run_hist_num(const char *cmd)
 
 	char **cmd_hist = parse_input_str(history[num - 1].cmd);
 	if (!cmd_hist) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing history command\n"));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing "
+			"history command\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -632,7 +637,8 @@ run_last_hist_cmd(void)
 
 	char **cmd_hist = parse_input_str(history[current_hist_n - 1].cmd);
 	if (!cmd_hist) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing history command\n"));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing "
+			"history command\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -665,7 +671,8 @@ run_last_lessn_hist_cmd(const char *cmd)
 		return exit_status;
 	}
 
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing history command\n"));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing "
+		"history command\n"));
 	return EXIT_FAILURE;
 }
 
@@ -759,7 +766,8 @@ get_history(void)
 			continue;
 		}
 
-		history = (struct history_t *)xrealloc(history, (current_hist_n + 2) * sizeof(struct history_t));
+		history = (struct history_t *)xrealloc(history,
+				(current_hist_n + 2) * sizeof(struct history_t));
 		history[current_hist_n].cmd = savestring(line_buff, (size_t)line_len);
 		history[current_hist_n].len = (size_t)line_len;
 		history[current_hist_n].date = tdate;
@@ -801,7 +809,8 @@ add_to_cmdhist(char *cmd)
 	/* For us */
 	/* Add the new input to the history array */
 	time_t tdate = time(NULL);
-	history = (struct history_t *)xrealloc(history, (size_t)(current_hist_n + 2) * sizeof(struct history_t));
+	history = (struct history_t *)xrealloc(history,
+			(size_t)(current_hist_n + 2) * sizeof(struct history_t));
 	history[current_hist_n].cmd = savestring(cmd, cmd_len);
 	history[current_hist_n].len = cmd_len;
 	history[current_hist_n].date = tdate;

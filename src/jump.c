@@ -66,7 +66,8 @@
  * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
  * "https://github.com/skywind3000/z.lua#aging" */
 static int
-rank_entry(const int i, const time_t now, int *days_since_first, int *hours_since_last)
+rank_entry(const int i, const time_t now, int *days_since_first,
+	int *hours_since_last)
 {
 //	int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
 //	int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
@@ -247,7 +248,8 @@ save_jumpdb(void)
 			continue;
 		}
 
-		fprintf(fp, "%zu:%jd:%jd:%s\n", jump_db[i].visits, (intmax_t)jump_db[i].first_visit,
+		fprintf(fp, "%zu:%jd:%jd:%s\n", jump_db[i].visits,
+			(intmax_t)jump_db[i].first_visit,
 			(intmax_t)jump_db[i].last_visit, jump_db[i].path);
 	}
 
@@ -269,7 +271,8 @@ edit_jumpdb(char *app)
 
 	struct stat attr;
 	if (stat(jump_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "jump: %s: %s\n", jump_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "jump: %s: %s\n",
+			jump_file, strerror(errno));
 		free(jump_file);
 		return EXIT_FAILURE;
 	}
@@ -365,11 +368,13 @@ print_jump_table_header(void)
 	printf(_("%s An asterisk next rank values means that the "
 		"corresponding directory will not be removed despite its rank, "
 		"either because it was visited in the last 24 hours, or because "
-		"it is bookmarked, pinned, or currently active in some workspace.\n"), item);
+		"it is bookmarked, pinned, or currently active in some "
+		"workspace.\n"), item);
 
 	if (conf.min_jump_rank <= 0) {
 		printf(_("%s MinJumpRank is set to %d: entries will not be removed "
-			"from the database (no matter their rank).\n"), item, conf.min_jump_rank);
+			"from the database (no matter their rank).\n"),
+			item, conf.min_jump_rank);
 	} else {
 		printf(_("%s Entries ranked below MinJumpRank (currently %d) will be "
 			"removed at program exit.\n"), item, conf.min_jump_rank);
@@ -532,7 +537,8 @@ purge_low_ranked_entries(const int limit)
 	if (c == 0)
 		printf(_("jump: No entry ranked below %d\n"), limit);
 	else
-		printf(_("\njump: Purged %d %s\n"), c, c == 1 ? _("entry") : _("entries"));
+		printf(_("\njump: Purged %d %s\n"),
+			c, c == 1 ? _("entry") : _("entries"));
 
 	return EXIT_SUCCESS;
 }
@@ -623,7 +629,8 @@ dirjump(char **args, int mode)
 			int int_order = atoi(args[1]);
 			if (int_order <= 0 || int_order > (int)jump_n) {
 				if (mode == NO_SUG_JUMP) {
-					fprintf(stderr, _("jump: %s: No such order number\n"), args[1]);
+					fprintf(stderr, _("jump: %s: No such order "
+						"number\n"), args[1]);
 				}
 				return EXIT_FAILURE;
 			}
@@ -701,7 +708,8 @@ dirjump(char **args, int mode)
 				}
 
 				/* Exclue CWD */
-				if (workspaces[cur_ws].path && jump_db[j].path[1] == workspaces[cur_ws].path[1]
+				if (workspaces[cur_ws].path
+				&& jump_db[j].path[1] == workspaces[cur_ws].path[1]
 				&& strcmp(jump_db[j].path, workspaces[cur_ws].path) == 0)
 					continue;
 

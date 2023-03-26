@@ -48,7 +48,8 @@ print_tag_creation_error(const char *link, mode_t mode)
 	if (S_ISLNK(mode)) {
 		fprintf(stderr, _("tag: %s: File already tagged\n"), link);
 	} else {
-		fprintf(stderr, _("tag: %s: Cannot create tag: file already exists\n"), link);
+		fprintf(stderr, _("tag: %s: Cannot create tag: file already "
+			"exists\n"), link);
 	}
 
 	return EXIT_FAILURE;
@@ -64,7 +65,8 @@ print_symlink_error(const char *name)
 static int
 print_no_tags(void)
 {
-	printf(_("%s: No tags found, Use 'tag new' to create new tags\n"), PROGRAM_NAME);
+	printf(_("%s: No tags found, Use 'tag new' to create new "
+		"tags\n"), PROGRAM_NAME);
 	return EXIT_SUCCESS;
 }
 
@@ -273,8 +275,8 @@ create_tags(char **args)
 		}
 
 		if (xmkdir(dir, S_IRWXU) == EXIT_FAILURE) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("tag: %s: Error creating tag: %s\n"),
-				args[i], strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("tag: %s: Error creating "
+				"tag: %s\n"), args[i], strerror(errno));
 			exit_status = EXIT_FAILURE;
 			continue;
 		}
@@ -314,7 +316,8 @@ remove_tags(char **args)
 
 		char *cmd[] = {"rm", "-r", "--", dir, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS) {
-			printf(_("%s: %s: Successfully removed tag\n"), PROGRAM_NAME, args[i]);
+			printf(_("%s: %s: Successfully removed tag\n"),
+				PROGRAM_NAME, args[i]);
 			reload_tags();
 		} else {
 			exit_status = EXIT_FAILURE;
@@ -363,8 +366,8 @@ tag_file(char *name, char *tag)
 	struct stat a;
 	if (stat(dir, &a) == -1) {
 		if (xmkdir(dir, S_IRWXU) != EXIT_SUCCESS) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("tag: %s: Cannot create tag: %s\n"),
-				p ? p : tag, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("tag: %s: Cannot create "
+				"tag: %s\n"), p ? p : tag, strerror(errno));
 			free(p);
 			return EXIT_FAILURE;
 		}
@@ -372,7 +375,8 @@ tag_file(char *name, char *tag)
 	}
 
 	if (new_tag == 1) {
-		printf(_("Created new tag %s%s%s\n"), conf.colorize ? BOLD : "", p ? p : tag, df_c);
+		printf(_("Created new tag %s%s%s\n"),
+			conf.colorize ? BOLD : "", p ? p : tag, df_c);
 		reload_tags();
 	}
 	free(p);
@@ -508,7 +512,8 @@ untag(char **args, const size_t n, size_t *t)
 			errno = 0;
 			if (unlinkat(AT_FDCWD, f, 0) == -1) {
 				exit_status = errno;
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", args[i], strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n",
+					args[i], strerror(errno));
 			} else {
 				(*t)++;
 			}
@@ -530,7 +535,8 @@ untag_files(char **args)
 	size_t i, n = 0;
 
 	for (i = 1; args[i]; i++) {
-		if (*args[i] == ':' && *(args[i] + 1) && untag(args, i, &n) == EXIT_FAILURE)
+		if (*args[i] == ':' && *(args[i] + 1)
+		&& untag(args, i, &n) == EXIT_FAILURE)
 			exit_status = EXIT_FAILURE;
 	}
 
@@ -585,7 +591,8 @@ recursive_mv_tags(const char *src, const char *dst)
 
 	n = scandir(src_dir, &a, NULL, alphasort);
 	if (n == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", src_dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n",
+			src_dir, strerror(errno));
 		return errno;
 	}
 
@@ -624,14 +631,16 @@ merge_tags(char **args)
 	errno = 0;
 	int exit_status = recursive_mv_tags(src, dst);
 	if (exit_status != EXIT_SUCCESS) {
-		fprintf(stderr, _("tag: Cannot merge tags: error moving tagged files\n"));
+		fprintf(stderr, _("tag: Cannot merge tags: error moving "
+			"tagged files\n"));
 		return exit_status;
 	}
 
 	char src_dir[PATH_MAX];
 	snprintf(src_dir, PATH_MAX, "%s/%s", tags_dir, src);
 	if (rmdir(src_dir) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n", src_dir, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n",
+			src_dir, strerror(errno));
 		return errno;
 	}
 
@@ -719,7 +728,8 @@ tags_function(char **args)
 	if (*a[1] == 'n' && strcmp(a[1], "new") == 0)
 		{ exit_status = create_tags(a); goto END; }
 
-	if ((*a[1] == 'r' && (strcmp(a[1], "rm") == 0 || strcmp(a[1], "remove") == 0))
+	if ((*a[1] == 'r' && (strcmp(a[1], "rm") == 0
+	|| strcmp(a[1], "remove") == 0))
 	|| (*a[1] == 'd' && strcmp(a[1], "del") == 0))
 		{ exit_status = remove_tags(a); goto END; }
 

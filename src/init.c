@@ -29,7 +29,8 @@
 #include <fcntl.h>
 #include <getopt.h>
 
-#if defined(__linux__) || defined(__HAIKU__) || defined(__sun) || defined(__CYGWIN__)
+#if defined(__linux__) || defined(__HAIKU__) || defined(__sun) \
+|| defined(__CYGWIN__)
 # include <grp.h> /* getgrouplist(3) */
 #endif
 
@@ -58,7 +59,8 @@
 #include "config.h"
 #include "exec.h"
 #include "init.h"
-#if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) || defined(_NO_TRASH)
+#if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) \
+|| defined(_NO_TRASH)
 # include "messages.h"
 #endif
 #include "mime.h"
@@ -425,7 +427,8 @@ init_history(void)
 /* If path was not set (neither in the config file nor via command line nor
  * via the RestoreLastPath option), set the default (CWD), and if CWD is not
  * set, use the user's home directory, and if the home cannot be found either,
- * try the root directory, and if there's no access to the root dir either, exit */
+ * try the root directory, and if there's no access to the root dir either,
+ * exit */
 static void
 set_cur_workspace(void)
 {
@@ -439,7 +442,8 @@ set_cur_workspace(void)
 			workspaces[cur_ws].path = savestring(user.home, user.home_len);
 		} else {
 			if (access("/", R_OK | X_OK) == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: /: %s\n", PROGRAM_NAME, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: /: %s\n",
+					PROGRAM_NAME, strerror(errno));
 				exit(EXIT_FAILURE);
 			} else {
 				workspaces[cur_ws].path = savestring("/", 1);
@@ -463,7 +467,8 @@ set_start_path(void)
 	if (cur_ws > MAX_WS - 1) {
 		cur_ws = DEF_CUR_WS;
 		_err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
-			"\nFalling back to workspace %zu\n"), PROGRAM_NAME, cur_ws, cur_ws + 1);
+			"\nFalling back to workspace %zu\n"),
+			PROGRAM_NAME, cur_ws, cur_ws + 1);
 	}
 
 	prev_ws = cur_ws;
@@ -490,7 +495,8 @@ set_start_path(void)
 
 	/* Set OLDPWD */
 	char *pwd = getenv("PWD");
-	if (pwd && workspaces[cur_ws].path && strcmp(workspaces[cur_ws].path, pwd) != 0)
+	if (pwd && workspaces[cur_ws].path
+	&& strcmp(workspaces[cur_ws].path, pwd) != 0)
 		setenv("OLDPWD", pwd, 1);
 
 	dir_changed = 1;
@@ -665,7 +671,8 @@ get_data_dir(void)
 	char p[PATH_MAX];
 	snprintf(p, sizeof(p), "%s/%s/%src", STRINGIZE(CLIFM_DATADIR), PNL, PNL);
 	if (stat(p, &a) != -1 && S_ISREG(a.st_mode)) {
-		data_dir = savestring(STRINGIZE(CLIFM_DATADIR), strlen(STRINGIZE(CLIFM_DATADIR)));
+		data_dir = savestring(STRINGIZE(CLIFM_DATADIR),
+			strlen(STRINGIZE(CLIFM_DATADIR)));
 		return;
 	}
 #endif /* CLIFM_DATADIR */
@@ -748,7 +755,8 @@ is_secure_env(void)
 
 	size_t i;
 	for(i = 0; argv_bk[i]; i++) {
-		if (*argv_bk[i] == '-' && (strncmp(argv_bk[i], "--secure-env", 12) == 0))
+		if (*argv_bk[i] == '-'
+		&& (strncmp(argv_bk[i], "--secure-env", 12) == 0))
 			return 1;
 	}
 
@@ -759,7 +767,8 @@ is_secure_env(void)
  * Return an array with the ID's of groups to which the user belongs
  * NGROUPS is set to the number of groups
  * NOTE: getgroups(3) does not include the user's main group
- * We use getgroups(3) on TERMUX because getgrouplist(3) always returns zero groups */
+ * We use getgroups(3) on TERMUX because getgrouplist(3) always returns
+ * zero groups */
 static gid_t *
 get_user_groups(const char *name, const gid_t gid, int *ngroups)
 {
@@ -769,7 +778,8 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 	UNUSED(name); UNUSED(gid);
 	gid_t *g = (gid_t *)xnmalloc(NGROUPS_MAX, sizeof(g));
 	if ((n = getgroups(NGROUPS_MAX, g)) == -1) {
-		_err('e', PRINT_PROMPT, "%s: getgroups: %s\n", PROGRAM_NAME, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: getgroups: %s\n",
+			PROGRAM_NAME, strerror(errno));
 		free(g);
 		return (gid_t *)NULL;
 	}
@@ -865,7 +875,8 @@ get_user_data(void)
 	tmp_user.uid = geteuid();
 	pw = getpwuid(tmp_user.uid);
 	if (!pw) { /* Fallback to environment variables (if not secure-env) */
-		_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n", PROGRAM_NAME, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n",
+			PROGRAM_NAME, strerror(errno));
 		return get_user_data_env();
 	}
 
@@ -1334,7 +1345,8 @@ load_remotes(void)
 	int fd;
 	FILE *fp = open_fstream_r(remotes_file, &fd);
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", remotes_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
+			remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1522,7 +1534,8 @@ load_prompts(void)
 	int fd;
 	FILE *fp = open_fstream_r(prompts_file, &fd);
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", prompts_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
+			prompts_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1633,7 +1646,8 @@ get_home_sec_env(void)
 	uid_t u = geteuid();
 	pw = getpwuid(u);
 	if (!pw) {
-		_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n", PROGRAM_NAME, strerror(errno));
+		_err('e', PRINT_PROMPT, "%s: getpwuid: %s\n",
+			PROGRAM_NAME, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
@@ -1647,7 +1661,8 @@ open_reg_exit(char *filename, const int url, const int preview)
 	char *homedir = (xargs.secure_env == 1 || xargs.secure_env_full == 1)
 		? get_home_sec_env() : getenv("HOME");
 	if (!homedir) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: Could not retrieve the home directory\n", PROGRAM_NAME);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: Could not retrieve the "
+			"home directory\n", PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -1658,7 +1673,8 @@ open_reg_exit(char *filename, const int url, const int preview)
 	if (alt_preview_file && preview == 1) {
 		mime_file = savestring(alt_preview_file, strlen(alt_preview_file));
 	} else {
-		mime_file_len = strlen(homedir) + (alt_profile ? strlen(alt_profile) : 7) + 40;
+		mime_file_len = strlen(homedir)
+			+ (alt_profile ? strlen(alt_profile) : 7) + 40;
 		mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
 		sprintf(mime_file, "%s/.config/clifm/profiles/%s/%s.clifm",
 				homedir, alt_profile ? alt_profile : "default",
@@ -1724,7 +1740,8 @@ resolve_positional_param(char *file)
 	if (*file == '.') {
 		char _tmp[PATH_MAX];
 		if (realpath(file, _tmp) == NULL || !*_tmp)
-			_err('e', PRINT_PROMPT, _("%s: Error expanding path\n"), PROGRAM_NAME);
+			_err('e', PRINT_PROMPT, _("%s: Error expanding path\n"),
+				PROGRAM_NAME);
 		else
 			_exp_path = savestring(_tmp, strlen(_tmp));
 	} else {
@@ -1822,7 +1839,8 @@ stat_file(char *file)
 	char *p = (char *)NULL;
 	if (*file == '~') {
 		if (!(p = tilde_expand(file))) {
-			fprintf(stderr, _("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, file);
+			fprintf(stderr, _("%s: %s: Error expanding tilde\n"),
+				PROGRAM_NAME, file);
 			exit(EXIT_FAILURE);
 		}
 	} else {
@@ -2152,8 +2170,9 @@ external_arguments(int argc, char **argv)
 			int a = atoi(optarg);
 			if (!is_number(optarg) || a < 0 || a > 3) {
 				fprintf(stderr, "%s: bell: valid options are 0:none, 1:audible, "
-					"2:visible (requires readline >= 8.1), 3:flash. Defaults to 'visible', "
-					"and, if not possible, 'none'.\n", PROGRAM_NAME);
+					"2:visible (requires readline >= 8.1), 3:flash. Defaults "
+					"to 'visible', and, if not possible, 'none'.\n",
+					PROGRAM_NAME);
 				exit(EXIT_FAILURE);
 			}
 			xargs.bell_style = a; break;
@@ -2163,7 +2182,8 @@ external_arguments(int argc, char **argv)
 #ifndef _NO_FZF
 			xargs.smenutab = 1; fzftab = 1; tabmode = SMENU_TAB; break;
 #else
-			fprintf(stderr, _("%s: smenu-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			fprintf(stderr, _("%s: smenu-tab: %s\n"),
+				PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
 		case 255: xargs.virtual_dir_full_paths = 1; break;
@@ -2177,7 +2197,8 @@ external_arguments(int argc, char **argv)
 			}
 			break;
 
-		case 257: xargs.desktop_notifications = conf.desktop_notifications = 1; break;
+		case 257: xargs.desktop_notifications = conf.desktop_notifications = 1;
+			break;
 		case 258:
 			xargs.vt100 = 1;
 			xargs.clear_screen = conf.clear_screen = 0;
@@ -2193,7 +2214,8 @@ external_arguments(int argc, char **argv)
 			conf.fzf_preview = optc == 260 ? 1 : 2;
 			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB;
 #else
-			fprintf(stderr, _("%s: fzf-preview: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			fprintf(stderr, _("%s: fzf-preview: %s\n"),
+				PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
 			break;
@@ -2209,7 +2231,8 @@ external_arguments(int argc, char **argv)
 #ifndef _NO_FZF
 			xargs.fzftab = fzftab = 1; tabmode = FZF_TAB; break;
 #else
-			fprintf(stderr, _("%s: fzf-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			fprintf(stderr, _("%s: fzf-tab: %s\n"),
+				PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
 
@@ -2375,8 +2398,8 @@ external_arguments(int argc, char **argv)
 			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
 			if (ret != EXIT_SUCCESS) {
 				_err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory "
-					"(error %d)\nFalling back to default configuration directory\n"),
-					PROGRAM_NAME, alt_dir_value, ret);
+					"(error %d)\nFalling back to default configuration "
+					"directory\n"), PROGRAM_NAME, alt_dir_value, ret);
 				dir_ok = 0;
 			}
 		}
@@ -2450,13 +2473,14 @@ external_arguments(int argc, char **argv)
 				*_tmp = '\0';
 				char *p = realpath(path_value, _tmp);
 				if (!p) {
-					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-						path_value, strerror(errno));
+					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
+						PROGRAM_NAME, path_value, strerror(errno));
 					exit(errno);
 				}
 				xstrsncpy(path_tmp, p, PATH_MAX);
 			} else {
-				snprintf(path_tmp, PATH_MAX - 1, "%s/%s", getenv("PWD"), path_value);
+				snprintf(path_tmp, PATH_MAX - 1, "%s/%s",
+					getenv("PWD"), path_value);
 			}
 		} else {
 			xstrsncpy(path_tmp, path_value, PATH_MAX);
@@ -2683,12 +2707,14 @@ get_sel_files(void)
 		if (fstatat(AT_FDCWD, line, &a, AT_SYMLINK_NOFOLLOW) == -1)
 			continue;
 
-		sel_elements = (struct sel_t *)xrealloc(sel_elements, (sel_n + 2) * sizeof(struct sel_t));
+		sel_elements = (struct sel_t *)xrealloc(sel_elements,
+				(sel_n + 2) * sizeof(struct sel_t));
 		sel_elements[sel_n].name = savestring(line, len);
 		sel_elements[sel_n].size = (off_t)UNSET;
 		/* Store device and inode number to identify later selected files
 		 * and mark them in the files list */
-		sel_devino = (struct devino_t *)xrealloc(sel_devino, (sel_n + 1) * sizeof(struct devino_t));
+		sel_devino = (struct devino_t *)xrealloc(sel_devino,
+				(sel_n + 1) * sizeof(struct devino_t));
 		sel_devino[sel_n].ino = a.st_ino;
 		sel_devino[sel_n].dev = a.st_dev;
 		sel_n++;
@@ -2884,7 +2910,8 @@ get_last_path(void)
 			cur_ws = ws_n;
 
 		if (ws_n >= 0 && ws_n < MAX_WS && !workspaces[ws_n].path)
-			workspaces[ws_n].path = savestring(p + 2, strnlen(p + 2, sizeof(line) - 2));
+			workspaces[ws_n].path = savestring(p + 2,
+					strnlen(p + 2, sizeof(line) - 2));
 	}
 
 	close_fstream(fp, fd);
@@ -3531,7 +3558,8 @@ check_options(void)
 
 	if (!conf.fzftab_options) {
 		if (conf.colorize == 1 || !getenv("FZF_DEFAULT_OPTS")) {
-			char *pp = conf.colorize == 1 ? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
+			char *pp = conf.colorize == 1
+				? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
 			conf.fzftab_options = savestring(pp, strlen(pp));
 		} else {
 			conf.fzftab_options = savestring("", 1);
@@ -3543,9 +3571,11 @@ check_options(void)
 	smenutab_options_env = (xargs.secure_env_full != 1 && tabmode == SMENU_TAB)
 		? getenv("CLIFM_SMENU_OPTIONS") : (char *)NULL;
 
-	if (smenutab_options_env && sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
+	if (smenutab_options_env
+	&& sanitize_cmd(smenutab_options_env, SNT_BLACKLIST) != 0) {
 		_err('w', PRINT_PROMPT, "%s: CLIFM_SMENU_OPTIONS contains unsafe "
-			"characters (<>|;&$`). Falling back to default values.\n", PROGRAM_NAME);
+			"characters (<>|;&$`). Falling back to default values.\n",
+			PROGRAM_NAME);
 		smenutab_options_env = (char *)NULL;
 	}
 

@@ -181,7 +181,8 @@ gen_pwd(int c)
 	char *temp = (char *)NULL, *tmp_path = (char *)NULL;
 	int free_tmp_path = 0;
 
-	if (user.home && strncmp(workspaces[cur_ws].path, user.home, user.home_len) == 0)
+	if (user.home
+	&& strncmp(workspaces[cur_ws].path, user.home, user.home_len) == 0)
 		tmp_path = home_tilde(workspaces[cur_ws].path, &free_tmp_path);
 
 	if (!tmp_path)
@@ -869,7 +870,8 @@ static inline char *
 construct_prompt(const char *decoded_prompt)
 {
 	/* Construct indicators: MSGS (ERR, WARN, and NOTICE), SEL, and TRASH */
-	char err_ind[N_IND], warn_ind[N_IND], notice_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND];
+	char err_ind[N_IND], warn_ind[N_IND],
+		notice_ind[N_IND], trash_ind[N_IND], sel_ind[N_IND];
 	*err_ind = *warn_ind = *notice_ind = *trash_ind = *sel_ind = '\0';
 
 	if (prompt_notif == 1) {
@@ -880,7 +882,8 @@ construct_prompt(const char *decoded_prompt)
 		if (msgs.notice > 0)
 			snprintf(notice_ind, N_IND, "%sN%zu%s", nm_c, msgs.notice, RL_NC);
 		if (trash_n > 2)
-			snprintf(trash_ind, N_IND, "%sT%zu%s", ti_c, (size_t)trash_n - 2, RL_NC);
+			snprintf(trash_ind, N_IND, "%sT%zu%s",
+				ti_c, (size_t)trash_n - 2, RL_NC);
 		if (sel_n > 0)
 			snprintf(sel_ind, N_IND, "%s*%zu%s", li_c, sel_n, RL_NC);
 	}
@@ -1071,13 +1074,15 @@ set_prompt(char *name)
 		return EXIT_FAILURE;
 
 	if (prompts_n == 0) {
-		fprintf(stderr, _("prompt: No extra prompts defined. Using the default prompt\n"));
+		fprintf(stderr, _("prompt: No extra prompts defined. Using the "
+			"default prompt\n"));
 		return EXIT_FAILURE;
 	}
 
 	char *p = dequote_str(name, 0);
 	if (!p) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: Error dequoting string\n", name);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: Error dequoting "
+			"string\n", name);
 		return EXIT_FAILURE;
 	}
 
@@ -1122,7 +1127,8 @@ edit_prompts_file(char *app)
 
 	struct stat a;
 	if (stat(prompts_file, &a) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: %s\n", prompts_file, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: %s\n",
+			prompts_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

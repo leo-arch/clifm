@@ -345,8 +345,8 @@ sanitize_gral(char *cmd)
 	return EXIT_SUCCESS;
 }
 
-/* Returns 1 if at least one character in CMD is a non-escaped blacklisted char (<>|;&$)
- * Oterwise, returns 0 */
+/* Returns 1 if at least one character in CMD is a non-escaped
+ * blacklisted char (<>|;&$). Oterwise, returns 0 */
 static int
 sanitize_blacklist(char *cmd)
 {
@@ -437,7 +437,8 @@ sanitize_cmd(char *str, int type)
 	}
 
 	if (exit_status == EXIT_FAILURE) {
-		_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, str, _(UNSAFE_CMD));
+		_err('w', PRINT_PROMPT, "%s: %s: %s\n",
+			PROGRAM_NAME, str, _(UNSAFE_CMD));
 		return EXIT_FAILURE;
 	}
 

@@ -845,12 +845,14 @@ _list(void)
 		/* Initialize inotify */
 		inotify_fd = inotify_init1(IN_NONBLOCK);
 		if (inotify_fd < 0) {
-			_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME, strerror(errno));
+			_err('w', PRINT_PROMPT, "%s: inotify: %s\n",
+				PROGRAM_NAME, strerror(errno));
 		}
 #elif defined(BSD_KQUEUE)
 		kq = kqueue();
 		if (kq < 0) {
-			_err('w', PRINT_PROMPT, "%s: kqueue: %s\n", PROGRAM_NAME, strerror(errno));
+			_err('w', PRINT_PROMPT, "%s: kqueue: %s\n",
+				PROGRAM_NAME, strerror(errno));
 		}
 #endif
 
@@ -926,7 +928,8 @@ get_hostname(void)
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		hostname[0] = '?';
 		hostname[1] = '\0';
-		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"), PROGRAM_NAME);
+		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"),
+			PROGRAM_NAME);
 	}
 }
 

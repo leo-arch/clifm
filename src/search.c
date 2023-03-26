@@ -140,19 +140,21 @@ search_glob(char **args, const int invert)
 		case 's': file_type = invert == 1 ? DT_SOCK : S_IFSOCK; break;
 		case 'x': run_find(search_path, args[0]); return EXIT_SUCCESS;
 		default:
-			fprintf(stderr, _("search: '%c': Unrecognized file type\n"), (char)file_type);
+			fprintf(stderr, _("search: '%c': Unrecognized file "
+				"type\n"), (char)file_type);
 			return 2; /* Return 2 to avoid trying the regex approach */
 		}
 	}
 
-	/* If we have a path ("/str /path"), chdir into it, since glob() works on CWD */
+	/* If we have a path ("/str /path"), chdir into it, since glob()
+	 * works on CWD */
 	if (search_path && *search_path) {
 		/* Deescape the search path, if necessary */
 		if (strchr(search_path, '\\')) {
 			char *deq_dir = dequote_str(search_path, 0);
 			if (!deq_dir) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("search: %s: Error dequoting file name\n"),
-					args[1]);
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("search: %s: Error "
+					"dequoting file name\n"), args[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -591,7 +593,8 @@ search_regex(char **args, const int invert, const int case_sens)
 		case 's': file_type = DT_SOCK; break;
 		case 'x': run_find(search_path, args[0]); return EXIT_SUCCESS;
 		default:
-			fprintf(stderr, _("search: '%c': Unrecognized file type\n"), (char)file_type);
+			fprintf(stderr, _("search: '%c': Unrecognized file "
+				"type\n"), (char)file_type);
 			return EXIT_FAILURE;
 		}
 	}
@@ -627,7 +630,8 @@ search_regex(char **args, const int invert, const int case_sens)
 
 		if (search_path && *search_path) {
 			if (xchdir(search_path, NO_TITLE) == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n", search_path, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "search: %s: %s\n",
+					search_path, strerror(errno));
 				return EXIT_FAILURE;
 			}
 
@@ -960,12 +964,15 @@ search_function(char **args)
 			return (ret == 2 ? 1 : ret);
 
 		if (conf.search_strategy == GLOB_ONLY) {
-			char *s = (conf.autocd == 1 && !args[1] && (search_flags & NO_GLOB_CHAR)
-					&& rl_line_buffer) ? strrchr(rl_line_buffer, '/') : (char *)NULL;
+			char *s = (conf.autocd == 1 && !args[1]
+				&& (search_flags & NO_GLOB_CHAR)
+				&& rl_line_buffer) ? strrchr(rl_line_buffer, '/')
+				: (char *)NULL;
 
 			if (s && s != rl_line_buffer) {
 				/* Input string looks like a path: let's err like it was */
-				fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
+				fprintf(stderr, _("cd: %s: %s\n"),
+					rl_line_buffer, strerror(ENOENT));
 				return ENOENT;
 			} else {
 				fputs(_("search: No matches found\n"), stderr);

@@ -361,7 +361,8 @@ int rl_toggle_max_filename_len(int count, int key)
 	if (conf.max_name_len == UNSET)
 		print_reload_msg(_("Max name length unset\n"));
 	else
-		print_reload_msg(_("Max name length set back to %d\n"), conf.max_name_len);
+		print_reload_msg(_("Max name length set back to %d\n"),
+			conf.max_name_len);
 
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;
@@ -401,7 +402,8 @@ rl_prepend_sudo(int count, int key)
 	}
 
 	char *c = (char *)NULL;
-	if (conf.highlight == 1 && conf.colorize == 1 && cur_color && cur_color != tx_c) {
+	if (conf.highlight == 1 && conf.colorize == 1
+	&& cur_color && cur_color != tx_c) {
 		c = cur_color;
 		fputs(tx_c, stdout);
 	}
@@ -610,7 +612,8 @@ rl_accept_suggestion(int count, int key)
 			trimmed = 1;
 		} else { /* Last word: No word delimiter */
 			size_t len = strlen(suggestion_buf);
-			if (len > 0 && suggestion_buf[len - 1] != '/' && suggestion_buf[len - 1] != ' ')
+			if (len > 0 && suggestion_buf[len - 1] != '/'
+			&& suggestion_buf[len - 1] != ' ')
 				suggestion.type = NO_SUG;
 			accept_first_word_last = 1;
 			s = (char *)NULL;
@@ -722,7 +725,8 @@ rl_accept_suggestion(int count, int key)
 
 		my_insert_text(p ? p : suggestion_buf, NULL, 0);
 
-		if (suggestion.type != BM_PREFIX_SUG && (fzftab != 1 || (suggestion.type != TAGT_SUG)))
+		if (suggestion.type != BM_PREFIX_SUG
+		&& (fzftab != 1 || (suggestion.type != TAGT_SUG)))
 			rl_stuff_char(' ');
 		free(p);
 		}
@@ -946,9 +950,11 @@ rl_light(int count, int key)
 	conf.light_mode = conf.light_mode == 1 ? 0 : 1;
 
 	if (conf.light_mode == 1)
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Switched to light mode\n"), mi_c, df_c);
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Switched to light "
+			"mode\n"), mi_c, df_c);
 	else
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Switched back to normal mode\n"), mi_c, df_c);
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Switched back to normal "
+			"mode\n"), mi_c, df_c);
 
 	if (conf.autols == 1)
 		run_kb_cmd("rf");
@@ -974,7 +980,8 @@ rl_hidden(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Hidden files %s\n"), conf.show_hidden ? "enabled" : "disabled");
+	print_reload_msg(_("Hidden files %s\n"),
+		conf.show_hidden ? "enabled" : "disabled");
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
@@ -1825,8 +1832,9 @@ rl_toggle_disk_usage(int count, int key)
 	UNUSED(count); UNUSED(key);
 
 	/* Default values */
-	static int dsort = DEF_SORT, dlong = DEF_LONG_VIEW, ddirsize = DEF_FULL_DIR_SIZE,
-		ddf = DEF_LIST_DIRS_FIRST, dapparent = DEF_APPARENT_SIZE;
+	static int dsort = DEF_SORT, dlong = DEF_LONG_VIEW,
+		ddirsize = DEF_FULL_DIR_SIZE, ddf = DEF_LIST_DIRS_FIRST,
+		dapparent = DEF_APPARENT_SIZE;
 
 	if (xargs.disk_usage_analyzer == 1) {
 		xargs.disk_usage_analyzer = 0;
@@ -1958,7 +1966,8 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 		if (!p || !*p) continue;
 
 		if (renameat(AT_FDCWD, file_info[i].name, AT_FDCWD, p) == -1)
-			_err('w', PRINT_PROMPT, "renameat: %s: %s\n", file_info[i].name, strerror(errno));
+			_err('w', PRINT_PROMPT, "renameat: %s: %s\n",
+				file_info[i].name, strerror(errno));
 
 		if (xargs.virtual_dir_full_paths == 1) free(p);
 		free(rp);

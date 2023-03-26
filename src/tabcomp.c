@@ -78,9 +78,10 @@ typedef char *rl_cpvfunc_t;
 #define CPR     "\x1b[6n" /* Cursor position report */
 #define CPR_LEN (sizeof(CPR) - 1)
 
-#define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL || (c) == TCMP_RANGES \
-|| (c) == TCMP_DESEL || (c) == TCMP_JUMP || (c) == TCMP_TAGS_F || (c) == TCMP_GLOB \
-|| (c) == TCMP_FILE_TYPES_FILES || (c) == TCMP_BM_PATHS)
+#define SHOW_PREVIEWS(c) ((c) == TCMP_PATH || (c) == TCMP_SEL \
+|| (c) == TCMP_RANGES || (c) == TCMP_DESEL || (c) == TCMP_JUMP \
+|| (c) == TCMP_TAGS_F || (c) == TCMP_GLOB || (c) == TCMP_FILE_TYPES_FILES \
+|| (c) == TCMP_BM_PATHS)
 
 #define PUTX(c) \
 	if (CTRL_CHAR(c)) { \
@@ -383,7 +384,8 @@ fzftab_color(char *filename, const struct stat *attr)
 		char *cl = get_file_color(filename, attr);
 
 		if (cl && (check_ext == 0 || cl == nf_c || cl == ca_c
-		|| (attr->st_mode & 00100) || (attr->st_mode & 00010) || (attr->st_mode & 00001)))
+		|| (attr->st_mode & 00100) || (attr->st_mode & 00010)
+		|| (attr->st_mode & 00001)))
 			return cl;
 
 		/* If trashed file, remove the trash extension, so we can get the
@@ -449,7 +451,8 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 	}
 
 	/* Tilde */
-	if (*dir == '~' && (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_BM_PATHS
+	if (*dir == '~' && (cur_comp_type == TCMP_PATH
+	|| cur_comp_type == TCMP_BM_PATHS
 	|| cur_comp_type == TCMP_SEL || cur_comp_type == TCMP_DESEL) ) {
 		char *exp_path = tilde_expand(matches[i]);
 		if (exp_path) {
@@ -478,7 +481,8 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 
 	if (cur_comp_type == TCMP_PATH || cur_comp_type == TCMP_RANGES) {
 		char tmp_path[PATH_MAX];
-		snprintf(tmp_path, sizeof(tmp_path), "%s/%s", workspaces[cur_ws].path, dir);
+		snprintf(tmp_path, sizeof(tmp_path), "%s/%s",
+			workspaces[cur_ws].path, dir);
 		if (lstat(tmp_path, &attr) != -1)
 			return fzftab_color(tmp_path, &attr);
 		return uf_c;
@@ -497,7 +501,8 @@ get_entry_color(char **matches, const size_t i, const char *norm_prefix)
 }
 
 static void
-write_completion(char *buf, const size_t *offset, int *exit_status, const int multi)
+write_completion(char *buf, const size_t *offset, int *exit_status,
+	const int multi)
 {
 	/* Remove ending new line char */
 	char *n = strchr(buf, '\n');
@@ -509,7 +514,8 @@ write_completion(char *buf, const size_t *offset, int *exit_status, const int mu
 		if (blen > 0 && buf[blen - 1] == '/')
 			buf[blen - 1] = '\0';
 		if (rl_line_buffer && *rl_line_buffer == '/' && rl_end > 0
-		&& !strchr(rl_line_buffer + 1, '/') && !strchr(rl_line_buffer + 1, ' ')) {
+		&& !strchr(rl_line_buffer + 1, '/')
+		&& !strchr(rl_line_buffer + 1, ' ')) {
 			rl_delete_text(0, rl_end);
 			rl_end = rl_point = 0;
 		}
@@ -728,7 +734,8 @@ get_preview_win_width(const int offset)
 }
 
 static int
-run_finder(const size_t *height, const int *offset, const char *lw, const int multi)
+run_finder(const size_t *height, const int *offset, const char *lw,
+	const int multi)
 {
 	int prev = (conf.fzf_preview > 0 && SHOW_PREVIEWS(cur_comp_type) == 1) ? 1 : 0;
 	int prev_hidden = conf.fzf_preview == 2 ? 1 : 0;
@@ -1419,7 +1426,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * is calculated the first time we print the prompt (in my_rl_getc
 	 * (readline.c)) */
 
-	if (text && conf.fuzzy_match == 1 && ct != TCMP_TAGS_F && ct != TCMP_DIRHIST)
+	if (text && conf.fuzzy_match == 1 && ct != TCMP_TAGS_F
+	&& ct != TCMP_DIRHIST)
 		/* text is not NULL whenever a common prefix was added, replacing
 		 * the original query string */
 		finder_offset -= (int)(wc_xstrlen(matches[0]) - wc_xstrlen(text));
@@ -1461,7 +1469,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	char *lb = rl_line_buffer;
 
 	if (ct == TCMP_TAGS_F) {
-		if (rl_end > 0 && lb && *lb == 't' && *(lb + 1) == 'u' && lb[rl_end - 1] == ' ') {
+		if (rl_end > 0 && lb && *lb == 't' && *(lb + 1) == 'u'
+		&& lb[rl_end - 1] == ' ') {
 			/* Coming from untag ('tu :TAG ') */
 			finder_offset++;
 		} else { /* Coming from tag expression ('t:FULL_TAG') */
@@ -1591,7 +1600,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	size_t prefix_len = calculate_prefix_len(matches[0]);
 
 	if (rl_point < rl_end && ct != TCMP_PATH && ct != TCMP_CMD) {
-		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_point) : (char *)NULL;
+		char *s = rl_line_buffer
+			? get_last_chr(rl_line_buffer, ' ', rl_point) : (char *)NULL;
 		int start = s ? (int)(s - rl_line_buffer + 1) : 0;
 		rl_delete_text(start, rl_point);
 		rl_point = start;
@@ -1692,7 +1702,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else if (ct == TCMP_FILE_TYPES_FILES || ct == TCMP_CMD_DESC) {
-		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer, ' ', rl_end) : (char *)NULL;
+		char *s = rl_line_buffer
+			? get_last_chr(rl_line_buffer, ' ', rl_end) : (char *)NULL;
 		rl_point = !s ? 0 : (int)(s - rl_line_buffer + 1);
 		rl_delete_text(rl_point, rl_end);
 		rl_end = rl_point;
@@ -1733,7 +1744,8 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 			buf[j] = '\0';
 
 		char *p = (char *)NULL;
-		if (ct != TCMP_OPENWITH && ct != TCMP_PATH && ct != TCMP_HIST && !multi) {
+		if (ct != TCMP_OPENWITH && ct != TCMP_PATH
+		&& ct != TCMP_HIST && !multi) {
 			p = escape_str(buf);
 			if (!p) {
 				free(buf);
@@ -2065,7 +2077,8 @@ AFTER_USUAL_COMPLETION:
 #ifndef _NO_HIGHLIGHT
 			if (conf.highlight && !wrong_cmd) {
 				size_t k, l = 0;
-				size_t _start = (*replacement == '\\' && *(replacement + 1) == '~') ? 1 : 0;
+				size_t _start = (*replacement == '\\'
+					&& *(replacement + 1) == '~') ? 1 : 0;
 				char *cc = cur_color;
 				HIDE_CURSOR;
 				fputs(tx_c, stdout);
@@ -2155,8 +2168,10 @@ AFTER_USUAL_COMPLETION:
 
 			/* Let's append an ending character to the inserted match */
 			if (cur_comp_type == TCMP_OWNERSHIP) {
-				char *sc = rl_line_buffer ? strchr(rl_line_buffer, ':') : (char *)NULL;
-				size_t l = wc_xstrlen(sc ? sc + 1 : rl_line_buffer ? rl_line_buffer : "");
+				char *sc = rl_line_buffer
+					? strchr(rl_line_buffer, ':') : (char *)NULL;
+				size_t l = wc_xstrlen(sc ? sc + 1
+					: (rl_line_buffer ? rl_line_buffer : ""));
 				rl_insert_text(matches[0] + l);
 				if (!sc)
 					rl_stuff_char(':');
@@ -2219,7 +2234,8 @@ AFTER_USUAL_COMPLETION:
 
 //							rl_redisplay();
 //							fputs(cc ? cc : "", stdout);
-							fputs(rl_point < rl_end ? tx_c : (cc ? cc : ""), stdout);
+							fputs(rl_point < rl_end ? tx_c
+								: (cc ? cc : ""), stdout);
 						} else {
 							rl_insert_text("/");
 						}
@@ -2288,7 +2304,8 @@ DISPLAY_MATCHES:
 					fputs(tx_c, stdout);
 				}
 #endif /* !_NO_HIGHLIGHT */
-				fprintf(rl_outstream, "Display all %d possibilities? (y or n) ", len);
+				fprintf(rl_outstream, "Display all %d possibilities? "
+					"(y or n) ", len);
 				fflush(rl_outstream);
 				if (!get_y_or_n())
 					goto RESTART;
@@ -2435,7 +2452,8 @@ CALC_OFFSET:
 		}
 
 		if (cur_comp_type == TCMP_RANGES || cur_comp_type == TCMP_BACKDIR
-		|| cur_comp_type == TCMP_FILE_TYPES_FILES || cur_comp_type == TCMP_FILE_TYPES_OPTS
+		|| cur_comp_type == TCMP_FILE_TYPES_FILES
+		|| cur_comp_type == TCMP_FILE_TYPES_OPTS
 		|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_MIME_LIST
 		|| cur_comp_type == TCMP_CMD_DESC || cur_comp_type == TCMP_SEL
 		|| cur_comp_type == TCMP_DIRHIST) /* We don't want to highlight the matching part */
@@ -2485,9 +2503,10 @@ CALC_OFFSET:
 				} else {
 					if (tab_offset) {
 						/* Print the matching part of the match */
-						printf("\x1b[0m%s%s\x1b[0m%s", ts_c, qq ? qq : matches[0],
-						(cur_comp_type == TCMP_CMD) ? (conf.colorize
-						? ex_c : "") : fc_c);
+						printf("\x1b[0m%s%s\x1b[0m%s",
+							ts_c, qq ? qq : matches[0],
+							(cur_comp_type == TCMP_CMD) ? (conf.colorize
+							? ex_c : "") : fc_c);
 					}
 
 					/* Now print the non-matching part of the match */
@@ -2576,7 +2595,8 @@ RESTART:
 		break;
 
 	default:
-		fprintf(stderr, "\r\nreadline: %c: Bad value for what_to_do in tab_complete\n", what_to_do);
+		fprintf(stderr, "\r\nreadline: %c: Bad value for what_to_do "
+			"in tab_complete\n", what_to_do);
 		exit(EXIT_FAILURE);
 		break;
 	}

@@ -806,8 +806,11 @@ get_size_unit(off_t size)
 	 * We don't want to print the reminder when it is zero */
 
 	const char *const u = "BKMGTPEZY";
-	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c", (s == 0 || s - (float)x == 0) /* NOLINT */
-		? 0 : 2, (double)s, u[n], (u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
+	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c",
+		(s == 0 || s - (float)x == 0) ? 0 : 2, /* NOLINT */
+		(double)s,
+		u[n],
+		(u[n] != 'B' && xargs.si == 1) ? 'B' : 0);
 
 	return str;
 }

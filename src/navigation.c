@@ -236,7 +236,8 @@ set_ws_filter(const int n)
 static void
 set_workspace_opts(const int n)
 {
-	if (workspace_opts[n].color_scheme && workspace_opts[n].color_scheme != cur_cscheme)
+	if (workspace_opts[n].color_scheme
+	&& workspace_opts[n].color_scheme != cur_cscheme)
 		set_colors(workspace_opts[n].color_scheme, 0);
 
 	if (workspace_opts[n].filter.str && *workspace_opts[n].filter.str) {
@@ -444,7 +445,8 @@ get_bd_matches(const char *str, int *n, int mode)
 	while(1) {
 		char *p = (char *)NULL;
 		if (str && *str) { /* Non-empty query string */
-			p = conf.case_sens_path_comp ? strstr(cwd, str) : strcasestr(cwd, (char *)str);
+			p = conf.case_sens_path_comp
+				? strstr(cwd, str) : strcasestr(cwd, (char *)str);
 			if (!p)
 				break;
 		}
@@ -547,14 +549,16 @@ static int
 backdir_directory(char *dir, const char *str)
 {
 	if (!dir) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bd: %s: Error dequoting string\n"), str);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bd: %s: Error dequoting "
+			"string\n"), str);
 		return EXIT_FAILURE;
 	}
 
 	if (*dir == '~') {
 		char *exp_path = tilde_expand(dir);
 		if (!exp_path) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bd: %s: Error expanding tilde\n"), dir);
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bd: %s: Error "
+				"expanding tilde\n"), dir);
 			return EXIT_FAILURE;
 		}
 		dir = exp_path;
@@ -727,7 +731,8 @@ go_home(const int cd_flag)
 	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
 		int err = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", user.home, strerror(err));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n",
+				user.home, strerror(err));
 		return err;
 	}
 
@@ -909,14 +914,17 @@ print_dirhist(char *query)
 		if (!old_pwd[i] || *old_pwd[i] == _ESC)
 			continue;
 
-		if (query && (conf.fuzzy_match == 1 ? fuzzy_match(query, old_pwd[i], len, fuzzy_str_type) == 0
+		if (query && (conf.fuzzy_match == 1
+		? fuzzy_match(query, old_pwd[i], len, fuzzy_str_type) == 0
 		: !strstr(old_pwd[i], query) ) )
 			continue;
 
 		if (i == dirhist_cur_index)
-			printf(" %s%-*d%s %s%s%s\n", el_c, n, i + 1, df_c, mi_c, old_pwd[i], df_c);
+			printf(" %s%-*d%s %s%s%s\n", el_c, n, i + 1, df_c, mi_c,
+				old_pwd[i], df_c);
 		else
-			printf(" %s%-*d%s %s%s%s\n", el_c, n, i + 1, df_c, di_c, old_pwd[i], df_c);
+			printf(" %s%-*d%s %s%s%s\n", el_c, n, i + 1, df_c, di_c,
+				old_pwd[i], df_c);
 	}
 }
 
@@ -953,7 +961,8 @@ change_to_dirhist_num(int n)
 
 	int ret = xchdir(old_pwd[n], SET_TITLE);
 	if (ret != 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "history: %s: %s\n",	old_pwd[n], strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "history: %s: %s\n",
+			old_pwd[n], strerror(errno));
 		return EXIT_FAILURE;
 	}
 

@@ -70,7 +70,8 @@ save_sel(void)
 
 	if (sel_n == 0) {
 		if (unlink(sel_file) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",	sel_file, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
+				sel_file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 		return EXIT_SUCCESS;
@@ -106,7 +107,8 @@ select_file(char *file)
 	/* Check if FILE is already in the selection box */
 	j = (int)sel_n;
 	while (--j >= 0) {
-		if (*file == *sel_elements[j].name && strcmp(sel_elements[j].name, file) == 0) {
+		if (*file == *sel_elements[j].name
+		&& strcmp(sel_elements[j].name, file) == 0) {
 			exists = 1;
 			break;
 		}
@@ -186,7 +188,8 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 		} else {
 			ret = scandir(sel_path, &ent, skip_files, xalphasort);
 			if (ret == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", sel_path, strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
+					sel_path, strerror(errno));
 				globfree(&gbuf);
 				return (-1);
 			}
@@ -343,8 +346,8 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 			&& !*(workspaces[cur_ws].path + 1)) {
 				snprintf(tmp_path, PATH_MAX - 1, "/%s", file_info[i].name);
 			} else {
-				snprintf(tmp_path, PATH_MAX - 1, "%s/%s", workspaces[cur_ws].path,
-						file_info[i].name);
+				snprintf(tmp_path, PATH_MAX - 1, "%s/%s",
+					workspaces[cur_ws].path, file_info[i].name);
 			}
 
 			if (regexec(&regex, file_info[i].name, 0, NULL, 0) == EXIT_SUCCESS) {
@@ -359,7 +362,8 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 		int filesn = scandir(sel_path, &list, skip_files, xalphasort);
 
 		if (filesn == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", sel_path, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
+				sel_path, strerror(errno));
 			return (-1);
 		}
 
@@ -452,7 +456,8 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 		if (*(*args)[i] == '~') {
 			char *exp_path = tilde_expand((*args)[i]);
 			if (!exp_path) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", (*args)[i], strerror(errno));
+				_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
+					(*args)[i], strerror(errno));
 				return (char *)NULL;
 			}
 
@@ -474,7 +479,8 @@ construct_sel_path(char *sel_path)
 	xstrsncpy(tmpdir, sel_path, sizeof(tmpdir) - 1);
 
 	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",	sel_path, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
+			sel_path, strerror(errno));
 		return (char *)NULL;
 	}
 
@@ -595,7 +601,8 @@ print_selected_files(void)
 }
 
 static int
-print_sel_results(const int new_sel, const char *sel_path, const char *pattern, const int err)
+print_sel_results(const int new_sel, const char *sel_path,
+	const char *pattern, const int err)
 {
 	if (new_sel > 0 && xargs.stealth_mode != 1 && sel_file
 	&& save_sel() != EXIT_SUCCESS) {
@@ -672,7 +679,8 @@ select_filename(char *arg, char *dir, int *err)
 		char *tmp = construct_sel_filename(dir, name);
 		struct stat attr;
 		if (lstat(tmp, &attr) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", arg, strerror(errno));
+			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
+				arg, strerror(errno));
 			(*err)++;
 		} else {
 			int r = select_file(tmp);
@@ -686,7 +694,8 @@ select_filename(char *arg, char *dir, int *err)
 
 	struct stat a;
 	if (lstat(arg, &a) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",	name, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
+			name, strerror(errno));
 		(*err)++;
 	} else {
 		int r = select_file(name);
@@ -847,7 +856,8 @@ edit_selfile(void)
 	time_t mtime_old = (time_t)attr.st_mtime;
 
 	if (open_file(sel_file) != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("sel: Could not open the selections file\n"));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("sel: Could not open "
+			"the selections file\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -865,7 +875,8 @@ edit_selfile(void)
 	return ret;
 
 ERROR:
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", sel_file, strerror(errno));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
+		sel_file, strerror(errno));
 	return EXIT_FAILURE;
 }
 
