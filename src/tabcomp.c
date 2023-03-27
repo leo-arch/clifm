@@ -812,7 +812,7 @@ ctrl-d:deselect-all,ctrl-t:toggle-all" : "",
 
 	int dr = (flags & DELAYED_REFRESH) ? 1 : 0;
 	flags &= ~DELAYED_REFRESH;
-	int ret = launch_execle(cmd); /* lgtm [cpp/command-line-injection] */
+	int ret = launch_execle(cmd);
 
 	if (prev == 1)
 		clear_fzf();

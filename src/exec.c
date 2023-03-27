@@ -591,7 +591,7 @@ run_shell_cmd(char **args)
 	/* Calling the system shell is vulnerable to command injection, true.
 	 * But it is the user here who is directly running the command: this
 	 * should not be taken as an untrusted source */
-	int exit_status = launch_execle(cmd); /* lgtm [cpp/command-line-injection] */
+	int exit_status = launch_execle(cmd);
 	free(cmd);
 
 /* For the time being, this is too slow on Cygwin */
