@@ -6,11 +6,6 @@
 <h1 align="center">CliFM</h1>
 <h2 align="center">The Command Line File Manager</h2>
 <h4 align="center">No GUI, no TUI, no menus. Just you and a (powerful, file-management oriented) command line</h4>
-<!---
-<h3 align="center">Fast, extensible, lightweight</h3>
-<h4 align="center">Linux, Termux (Android), FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS, Haiku, Cygwin</h4>
-<h4 align="center">x86, ARM, PowerPC</h4>
--->
 <h4 align="center"><a
 href="https://github.com/leo-arch/clifm/#floppy_disk-installation">Install</a> · <a
 href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a> · <a
@@ -48,20 +43,6 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 ---
 
-## Table of contents
-🔸 [Brief description](#space_invader-brief-description) \
-🔸 [Features](#heavy_check_mark-features) \
-🔸 [Introduction video](#clapper-introduction-video) \
-🔸 [Installation](#floppy_disk-installation) \
-🔸 [Getting started](#bulb-getting-started) \
-🔸 [What's new?](#newspaper-whats-new) \
-🔸 [Support](#support) \
-🔸 [License](#license) \
-🔸 [Contributing](#contributing) \
-🔸 [Community](#community)
-
----
-
 ## :space_invader: Brief description
 
 **Clifm** is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
@@ -80,7 +61,7 @@ Briefly put, with **clifm** the command-line is always already there, never hidd
 
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="https://i.postimg.cc/YC77qSLK/interface-1-7-9.png"></p>
-<p align="center">We only need 7 keystrokes to move all selected files into the <i>images</i> directory</p>
+<p align="center">You only need 7 keystrokes to move all selected files into the <i>images</i> directory: <b>m sel 8</b></p>
 
 ---
 
@@ -316,25 +297,27 @@ For more details consult the [changelog file](https://github.com/leo-arch/clifm/
 
 ## Support
 
-**Clifm** is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). Consult the [compilation page](https://github.com/leo-arch/clifm/blob/master/src/README.md#5-compilation).\
+**Clifm** is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). Consult the [compilation page](https://github.com/leo-arch/clifm/blob/master/src/README.md#5-compilation).
+
 Successfully tested and running flawlessly on Termux (Android), FreeBSD, NetBSD, OpenBSD, DragonFly, MacOS, Haiku, and Cygwin, on x86, ARM, and PowerPC architectures.
 
 ---
 
 ## License
-This project is licensed GPL version 2 (or later). \
+This project is licensed GPL version 2 (or later).
 See the [LICENSE file](https://github.com/leo-arch/clifm/blob/master/LICENSE) for details.
 
 ---
 
 ## Contributing
-Yes. Please see our [contribution guidelines](https://github.com/leo-arch/clifm/wiki/CONTRIBUTING) for details.
+Constributions are always welcome! Please see our [contribution guidelines](https://github.com/leo-arch/clifm/wiki/CONTRIBUTING) for details.
 [![Translation status](https://hosted.weblate.org/widgets/clifm/-/clifm/svg-badge.svg)](https://hosted.weblate.org/engage/clifm/?utm_source=widget) at Hosted Weblate.
 
 ---
 
 ## Community
-Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always welcome. \
+Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always useful.
+
 The [Discussions section](https://github.com/leo-arch/clifm/discussions) of this repo is also open to input.
 
 ---
