@@ -2673,7 +2673,9 @@ CHECK_FIRST_WORD:
 	} else if (point_is_first_word && rl_point < rl_end
 	&& (printed = check_completions(word, wlen, CHECK_MATCH)) != NO_MATCH) {
 		if (c == ' ' && printed != FULL_MATCH)
-			printed = NO_MATCH;
+			/* We have a partial match for a file name. If not a command
+			 * name, let's return NO_MATCH */
+			printed = check_cmds(word, wlen, CHECK_MATCH);
 
 	} else {
 		if (wlen > 0 && word[wlen - 1] == ' ')
