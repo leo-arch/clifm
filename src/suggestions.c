@@ -2637,16 +2637,23 @@ rl_suggestions(const unsigned char c)
 	if (nwords > 1)
 		goto NO_SUGGESTION;
 
-	if ((*word == 'b' || *word == 't' || *word == 's') && *(word + 1) == ':')
+CHECK_FIRST_WORD:
+
+	word = first_word ? first_word : last_word;
+
+	/* 'b:' (bookmarks), 's:' (sel files) and 't:' (tags) constructs */
+	if ((*word == 'b' || *word == 's' || *word == 't') && *(word + 1) == ':')
 		goto NO_SUGGESTION;
 
-CHECK_FIRST_WORD:
-	word = first_word ? first_word : last_word;
-	if (!word || !*word || (c == ' ' && (*word == '\''
-	|| *word == '"' || *word == '$' || *word == '#')) || *word == '<'
-	|| *word == '>' || *word == '!' || *word == '{' || *word == '['
-	|| *word == '(' || strchr(word, '=') || *rl_line_buffer == ' '
-	|| *word == '|' || *word == ';' || *word == '&') {
+	if (!word || !*word
+
+	|| (c == ' ' && (*word == '\''
+	|| *word == '"' || *word == '$' || *word == '#'))
+
+	|| *word == '<' || *word == '>' || *word == '!' || *word == '{'
+	|| *word == '[' || *word == '(' || strchr(word, '=')
+	|| *rl_line_buffer == ' ' || *word == '|' || *word == ';'
+	|| *word == '&') {
 		if (suggestion.printed && suggestion_buf)
 			clear_suggestion(CS_FREEBUF);
 		goto SUCCESS;
