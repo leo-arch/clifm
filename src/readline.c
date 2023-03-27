@@ -3094,6 +3094,15 @@ my_rl_completion(const char *text, int start, int end)
 		escaped = 1;
 	}
 
+#ifndef _NO_HIGHLIGHT
+	if (conf.highlight == 1 && rl_point < rl_end)
+	/* Prevent the inserted word from being printed using the current color,
+	 * say, options or quotes color
+	 * Drawback: whatever comes next to our word will be decolorized as well.
+	 * But no color is better than wrong (and partially) colored word */
+		cur_color = (char *)NULL;
+#endif
+
 	/* Do not complete when the cursor is on a word. Ex: dir/_ilename */
 	if (rl_point < rl_end && rl_line_buffer[rl_point] != ' ') {
 		rl_attempted_completion_over = 1;
