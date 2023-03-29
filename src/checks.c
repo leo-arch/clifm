@@ -153,6 +153,7 @@ set_term_caps(const int i)
 	term_caps.hide_cursor = TERM_INFO[i].hide_cursor;
 	term_caps.clear = TERM_INFO[i].ed;
 	term_caps.del_scrollback = TERM_INFO[i].del_scrollback;
+	term_caps.req_cur_pos = TERM_INFO[i].req_cur_pos;
 
 	term_caps.color = true_color == 1 ? TRUE_COLOR
 		: (TERM_INFO[i].color > 0 ? TERM_INFO[i].color : 0);

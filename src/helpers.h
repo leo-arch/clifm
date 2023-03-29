@@ -1125,6 +1125,7 @@ struct termcaps_t {
 	int home;  // Move cursor to line 1, column 1
 	int clear; // ED (erase display)
 	int del_scrollback; // E3
+	int req_cur_pos; // CPR (cursor position request)
 };
 extern struct termcaps_t term_caps;
 

@@ -2216,7 +2216,7 @@ set_default_keybinds(void)
 	/* Settings */
 	rl_bind_keyseq("\\M-w", rl_toggle_virtualdir_full_paths);
 	rl_bind_keyseq("\\M-t", rl_clear_msgs);
-	/*      rl_bind_keyseq("", rl_next_profile);
+	/*rl_bind_keyseq("", rl_next_profile);
 	rl_bind_keyseq("", rl_previous_profile); */
 	rl_bind_keyseq("\\M-o", rl_lock);
 	rl_bind_keyseq("\\C-r", rl_refresh);

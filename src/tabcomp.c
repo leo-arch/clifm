@@ -666,19 +666,19 @@ get_last_word(char *str)
 }
 
 static void
-set_fzf_env_vars(const int h)
+set_fzf_env_vars(const int height)
 {
-	int c = 0, l = 0;
+	int col = 0, line = 0;
 
-	if (!(flags & PREVIEWER)) {
-		get_cursor_position(&c, &l);
-		if (l + h - 1 > term_lines)
-			l -= ((l + h - 1) - term_lines);
+	if (!(flags & PREVIEWER) && term_caps.req_cur_pos == 1) {
+		get_cursor_position(&col, &line);
+		if (line + height - 1 > term_lines)
+			line -= ((line + height - 1) - term_lines);
 	}
 
 	/* Let's correct image coordinates on the screen based on the preview
 	 * window style */
-	int x = term_cols, y = l;
+	int x = term_cols, y = line;
 	switch (fzf_preview_border_type) {
 	case FZF_BORDER_BOTTOM: /* fallthrough */
 	case FZF_BORDER_NONE:   /* fallthrough */
