@@ -773,7 +773,7 @@ get_cmd_path(const char *cmd)
 	size_t i;
 	for (i = 0; i < path_n; i++) { /* Check each path in PATH */
 	/* Append cmd to each path and check if it exists and is executable */
-		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i], cmd); /* NOLINT */
+		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i].path, cmd); /* NOLINT */
 		if (access(cmd_path, X_OK) == 0)
 			return cmd_path;
 	}

@@ -1464,10 +1464,9 @@ free_stuff(void)
 	if (paths) {
 		i = (int)path_n;
 		while (--i >= 0)
-			free(paths[i]);
+			free(paths[i].path);
 		free(paths);
 	}
-	free(paths_timestamps);
 
 	if (cdpaths) {
 		i = (int)cdpath_n;

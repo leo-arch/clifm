@@ -1180,6 +1180,12 @@ struct shades_t {
 extern struct shades_t date_shades;
 extern struct shades_t size_shades;
 
+struct paths_t {
+	char *path;
+	time_t mtime;
+};
+extern struct paths_t *paths;
+
 enum tab_mode {
 	STD_TAB =   0,
 	FZF_TAB =   1,
@@ -1421,12 +1427,10 @@ extern char
 	**ext_colors,
 	**messages,
 	**old_pwd,
-	**paths,
 	**profile_names,
 	**prompt_cmds,
 	**tags;
 
-extern time_t *paths_timestamps;
 extern regex_t regex_exp;
 extern char **environ;
 

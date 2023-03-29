@@ -438,9 +438,9 @@ check_paths_timestamps(void)
 	int status = EXIT_SUCCESS;
 
 	while (--i >= 0) {
-		if (paths[i] && stat(paths[i], &a) != -1
-		&& a.st_mtime != paths_timestamps[i]) {
-			paths_timestamps[i] = a.st_mtime;
+		if (paths[i].path && stat(paths[i].path, &a) != -1
+		&& a.st_mtime != paths[i].mtime) {
+			paths[i].mtime = a.st_mtime;
 			status = EXIT_FAILURE;
 		}
 	}
@@ -480,7 +480,7 @@ reload_binaries(void)
 	if (paths) {
 		int j = (int)path_n;
 		while (--j >= 0)
-			free(paths[j]);
+			free(paths[j].path);
 		free(paths);
 	}
 

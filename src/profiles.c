@@ -251,7 +251,7 @@ profile_set(char *prof)
 	if (paths) {
 		i = (int)path_n;
 		while (--i >= 0)
-			free(paths[i]);
+			free(paths[i].path);
 		free(paths);
 	}
 

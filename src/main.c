@@ -83,9 +83,9 @@ struct props_t prop_fields;
 struct termcaps_t term_caps;
 struct filter_t filter;
 struct config_t conf;
-
 struct shades_t date_shades;
 struct shades_t size_shades;
+struct paths_t *paths = (struct paths_t *)NULL;
 
 struct sort_t _sorts[] = {
     {"none", 0, 0},
@@ -287,12 +287,9 @@ char
 	**ext_colors = (char **)NULL,
 	**messages = (char **)NULL,
 	**old_pwd = (char **)NULL,
-	**paths = (char **)NULL,
 	**profile_names = (char **)NULL,
 	**prompt_cmds = (char **)NULL,
 	**tags = (char **)NULL;
-
-time_t *paths_timestamps = (time_t *)NULL;
 
 /* Colors */
 char

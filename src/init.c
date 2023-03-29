@@ -2795,16 +2795,13 @@ get_paths_timestamps(const size_t n)
 	if (n == 0)
 		return;
 
-	free(paths_timestamps);
-	paths_timestamps = (time_t *)xnmalloc(n, sizeof(time_t));
-
 	struct stat a;
 	int i = (int)n;
 	while (--i >= 0) {
-		if (paths[i] && stat(paths[i], &a) != -1)
-			paths_timestamps[i] = a.st_mtime;
+		if (paths[i].path && stat(paths[i].path, &a) != -1)
+			paths[i].mtime = a.st_mtime;
 		else
-			paths_timestamps[i] = 0;
+			paths[i].mtime = 0;
 	}
 }
 
@@ -2844,7 +2841,7 @@ get_path_env(void)
 	char *path_tmp = malloced_ptr == 1 ? ptr : savestring(ptr, strlen(ptr));
 
 	size_t c = count_chars(path_tmp, ':') + 1;
-	paths = (char **)xnmalloc(c + 1, sizeof(char *));
+	paths = (struct paths_t *)xnmalloc(c + 1, sizeof(struct paths_t));
 
 	/* Get each path in PATH */
 	size_t n = 0;
@@ -2856,7 +2853,7 @@ get_path_env(void)
 		char d = *q;
 		*q = '\0';
 		if (*p && (q - p) > 0) {
-			paths[n] = savestring(p, (size_t)(q - p));
+			paths[n].path = savestring(p, (size_t)(q - p));
 			n++;
 		}
 
@@ -2866,7 +2863,7 @@ get_path_env(void)
 		p = ++q;
 	}
 
-	paths[n] = (char *)NULL;
+	paths[n].path = (char *)NULL;
 	free(path_tmp);
 
 	get_paths_timestamps(n);
@@ -3045,12 +3042,13 @@ get_path_programs(void)
 
 		i = (int)path_n;
 		while (--i >= 0) {
-			if (!paths[i] || !*paths[i] || xchdir(paths[i], NO_TITLE) == -1) {
+			if (!paths[i].path || !*paths[i].path
+			|| xchdir(paths[i].path, NO_TITLE) == -1) {
 				cmd_n[i] = 0;
 				continue;
 			}
 
-			cmd_n[i] = scandir(paths[i], &commands_bin[i],
+			cmd_n[i] = scandir(paths[i].path, &commands_bin[i],
 #if defined(__CYGWIN__)
 					NULL, xalphasort);
 #else

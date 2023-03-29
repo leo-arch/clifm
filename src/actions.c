@@ -308,7 +308,7 @@ edit_actions(char *app)
 	if (paths) {
 		size_t i;
 		for (i = 0; i < path_n; i++)
-			free(paths[i]);
+			free(paths[i].path);
 		free(paths);
 	}
 
