@@ -986,9 +986,10 @@ create_tmp_files(void)
 
 	/* Once the parent directory exists, create the user's directory to
 	 * store the list of selected files: TMP_DIR/clifm/username/.selbox_PROFILE.
-	 * We use here very restrictive permissions (700), since only the corresponding
-	 * user must be able to read and/or modify this list */
-	sprintf(tmp_dir, "%s/%s/%s", P_tmpdir, PNL, user.name ? user.name : "unknown");
+	 * We use here very restrictive permissions (700), since only the
+	 * corresponding user must be able to read and/or modify this list */
+	sprintf(tmp_dir, "%s/%s/%s", P_tmpdir, PNL,
+		user.name ? user.name : "unknown");
 	if (stat(tmp_dir, &attr) == -1) {
 		if (xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
 			selfile_ok = 0;
@@ -1002,7 +1003,8 @@ create_tmp_files(void)
 		if (!sel_file) {
 			selfile_ok = 0;
 			_err('w', PRINT_PROMPT, "%s: %s: Directory not writable. Selected "
-				"files will be lost after program exit\n", PROGRAM_NAME, tmp_dir);
+				"files will be lost after program exit\n",
+				PROGRAM_NAME, tmp_dir);
 		}
 	}
 
@@ -1011,7 +1013,8 @@ create_tmp_files(void)
 	if (sel_file)
 		return;
 
-	/*"We will write a temporary selfile in /tmp. Check if this latter is available */
+	/*"We will write a temporary selfile in /tmp. Check if this latter is
+	 * available */
 	if (tmp_root_ok == 0) {
 		_err('w', PRINT_PROMPT, "%s: Could not create the selections file.\n"
 			"Selected files will be lost after program exit\n",

@@ -2468,11 +2468,8 @@ exec_cmd(char **comm)
 			puts(_(ARCHIVE_USAGE));
 			return EXIT_SUCCESS;
 		}
-
-		if (comm[0][1] == 'c')
-			exit_code = archiver(comm, 'c');
-		else
-			exit_code = archiver(comm, 'd');
+                                  /* Either 'c' or 'd' */
+		exit_code = archiver(comm, comm[0][1]);
 #else
 		fprintf(stderr, "%s: archiver: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
@@ -2544,7 +2541,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "mime") == 0))
 		return (exit_code = lira_function(comm));
 
-	else if (!conf.autols && *comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2])
+	else if (conf.autols == 0 && *comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2])
 		return (exit_code = ls_function());
 
 	/* #### PROFILE #### */

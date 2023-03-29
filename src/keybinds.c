@@ -29,8 +29,10 @@
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
 # include <ereadline/readline/readline.h>
+//# include <ereadline/readline/history.h> // history_arg_extract
 #else
 # include <readline/readline.h>
+//# include <readline/history.h> // history_arg_extract
 #endif
 
 #ifdef __TINYC__
@@ -884,7 +886,7 @@ rl_last_dir(int count, int key)
 	if (dirhist_cur_index + 1 == dirhist_total_index)
 		return EXIT_SUCCESS;
 
-	char cmd[PATH_MAX + 4];
+	char cmd[32 + 4]; /* 32 should be more than enough to store a signed int */
 	sprintf(cmd, "b !%d", dirhist_total_index);
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
@@ -1676,30 +1678,36 @@ rl_onlydirs(int count, int key)
 
 #ifndef _NO_HIGHLIGHT
 static void
-print_highlight_string(char *s)
+print_highlight_string(char *s, const int insert_point)
 {
 	if (!s || !*s)
 		return;
 
 	size_t i, l = 0;
-	rl_delete_text(0, rl_end);
-	rl_point = rl_end = 0;
+
+	rl_delete_text(insert_point, rl_end);
+	rl_point = rl_end = insert_point;
 	fputs(tx_c, stdout);
 	cur_color = tx_c;
+
 	char q[PATH_MAX];
 	for (i = 0; s[i]; i++) {
 		rl_highlight(s, i, SET_COLOR);
+
 		if ((signed char)s[i] < 0) {
 			q[l] = s[i];
 			l++;
+
 			if ((signed char)s[i + 1] >= 0) {
 				q[l] = '\0';
 				l = 0;
 				rl_insert_text(q);
 				rl_redisplay();
 			}
+
 			continue;
 		}
+
 		q[0] = s[i];
 		q[1] = '\0';
 		rl_insert_text(q);
@@ -1718,7 +1726,7 @@ print_cmdhist_line(int n, int beg_line)
 
 #ifndef _NO_HIGHLIGHT
 	if (conf.highlight == 1)
-		print_highlight_string(history[n].cmd);
+		print_highlight_string(history[n].cmd, 0);
 	else
 #endif
 	{
@@ -1800,7 +1808,6 @@ static int
 rl_cmdhist(int count, int key)
 {
 	UNUSED(count);
-//	if (rl_inhibit_completion == 1)
 	if (rl_nohist == 1)
 		return EXIT_SUCCESS;
 
@@ -1932,6 +1939,58 @@ rl_del_last_word(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+/*
+static int
+xrl_yank_last_arg(int count, int key)
+{
+	UNUSED(key);
+
+	int p = (int)curhistindex;
+
+	if (--p < 0)
+		return EXIT_FAILURE;
+
+#ifndef _NO_SUGGESTIONS
+	if (suggestion.printed == 1 && suggestion_buf) {
+		clear_suggestion(CS_FREEBUF);
+		fputs(df_c, stdout);
+	}
+#endif
+
+//	rl_yank_nth_arg(rl_explicit_arg ? count : '$', key);
+//	return EXIT_SUCCESS;
+
+	char *last_arg = history_arg_extract(count, count, history[p].cmd);
+	if (!last_arg)
+		last_arg = history[p].cmd;
+
+	curhistindex = (size_t)p;
+
+	HIDE_CURSOR;
+	int rl_point_bk = rl_point;
+
+#ifndef _NO_HIGHLIGHT
+	if (conf.highlight == 1) {
+		print_highlight_string(last_arg, rl_point);
+	} else
+#endif
+	{
+		rl_delete_text(rl_point, rl_end);
+		fputs(tx_c, stdout);
+		cur_color = tx_c;
+		rl_insert_text(last_arg);
+	}
+
+	UNHIDE_CURSOR;
+	rl_point = rl_point_bk;
+	cur_color = df_c;
+	fputs(df_c, stdout);
+
+	if (last_arg != history[p].cmd)
+		free(last_arg);
+
+	return EXIT_SUCCESS;
+} */
 
 /*
 void
@@ -2080,6 +2139,8 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("toggle-disk-usage"), rl_toggle_disk_usage);
 	rl_bind_keyseq(find_key("toggle-max-name-len"), rl_toggle_max_filename_len);
 	rl_bind_keyseq(find_key("quit"), rl_quit);
+
+//	rl_bind_keyseq(find_key("yank-last-arg"), xrl_yank_last_arg);
 
 	/* Plugins */
 	rl_bind_keyseq(find_key("plugin1"), rl_plugin1);
