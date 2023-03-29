@@ -2789,6 +2789,25 @@ count_chars(const char *s, const char c)
 	return n;
 }
 
+static void
+get_paths_timestamps(const size_t n)
+{
+	if (n == 0)
+		return;
+
+	free(paths_timestamps);
+	paths_timestamps = (time_t *)xnmalloc(n, sizeof(time_t));
+
+	struct stat a;
+	int i = (int)n;
+	while (--i >= 0) {
+		if (paths[i] && stat(paths[i], &a) != -1)
+			paths_timestamps[i] = a.st_mtime;
+		else
+			paths_timestamps[i] = 0;
+	}
+}
+
 /* Store all paths in the PATH environment variable into a globally
  * declared array (paths)
  * Returns the number of stored paths  */
@@ -2849,6 +2868,8 @@ get_path_env(void)
 
 	paths[n] = (char *)NULL;
 	free(path_tmp);
+
+	get_paths_timestamps(n);
 
 	return n;
 }

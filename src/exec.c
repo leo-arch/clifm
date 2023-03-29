@@ -424,6 +424,30 @@ graceful_quit(char **args)
 }
 
 #if !defined(__CYGWIN__)
+/* Get current modification time for each path in PATH and compare it to
+ * the time cached (in paths_timestamps)
+ * Return 1 if at least one timestamp is different, or 0 otherwise */
+static int
+check_paths_timestamps(void)
+{
+	if (path_n == 0)
+		return EXIT_SUCCESS;
+
+	struct stat a;
+	int i = (int)path_n;
+	int status = EXIT_SUCCESS;
+
+	while (--i >= 0) {
+		if (paths[i] && stat(paths[i], &a) != -1
+		&& a.st_mtime != paths_timestamps[i]) {
+			paths_timestamps[i] = a.st_mtime;
+			status = EXIT_FAILURE;
+		}
+	}
+
+	return status;
+}
+
 /* Reload the list of available commands in PATH for TAB completion.
  * Why? If this list is not updated, whenever some new program is
  * installed, renamed, or removed from some of the paths in PATH
@@ -442,6 +466,9 @@ graceful_quit(char **args)
 static inline void
 reload_binaries(void)
 {
+	if (check_paths_timestamps() == EXIT_SUCCESS)
+		return;
+
 	if (bin_commands) {
 		int j = (int)path_progsn;
 		while (--j >= 0)

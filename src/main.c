@@ -292,6 +292,8 @@ char
 	**prompt_cmds = (char **)NULL,
 	**tags = (char **)NULL;
 
+time_t *paths_timestamps = (time_t *)NULL;
+
 /* Colors */
 char
 	/* File types */

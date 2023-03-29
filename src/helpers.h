@@ -1426,6 +1426,7 @@ extern char
 	**prompt_cmds,
 	**tags;
 
+extern time_t *paths_timestamps;
 extern regex_t regex_exp;
 extern char **environ;
 
