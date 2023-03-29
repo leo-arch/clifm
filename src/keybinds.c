@@ -811,7 +811,7 @@ rl_refresh(int count, int key)
 }
 
 static int
-rl_parent_dir(int count, int key)
+rl_dir_parent(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	/* If already root dir, do nothing */
@@ -821,7 +821,7 @@ rl_parent_dir(int count, int key)
 }
 
 static int
-rl_root_dir(int count, int key)
+rl_dir_root(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	/* If already root dir, do nothing */
@@ -831,7 +831,7 @@ rl_root_dir(int count, int key)
 }
 
 static int
-rl_home_dir(int count, int key)
+rl_dir_home(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	/* If already in home, do nothing */
@@ -842,7 +842,7 @@ rl_home_dir(int count, int key)
 }
 
 static int
-rl_previous_dir(int count, int key)
+rl_dir_previous(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	/* If already at the beginning of dir hist, do nothing */
@@ -853,7 +853,7 @@ rl_previous_dir(int count, int key)
 }
 
 static int
-rl_next_dir(int count, int key)
+rl_dir_next(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 
@@ -865,7 +865,7 @@ rl_next_dir(int count, int key)
 }
 
 static int
-rl_first_dir(int count, int key)
+rl_dir_first(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	/* If already at the beginning of dir hist, do nothing */
@@ -876,7 +876,7 @@ rl_first_dir(int count, int key)
 }
 
 static int
-rl_last_dir(int count, int key)
+rl_dir_last(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
@@ -1313,7 +1313,7 @@ get_cur_prof(int *cur, int *total)
 }
 
 static int
-rl_previous_profile(int count, int key)
+rl_profile_previous(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
@@ -1325,7 +1325,8 @@ rl_previous_profile(int count, int key)
 	int prev_prof, cur_prof = -1, total_profs = 0;
 	get_cur_prof(&cur_prof, &total_profs);
 
-	if (cur_prof == -1 || !profile_names[cur_prof])
+	if (cur_prof == -1 || !profile_names[cur_prof]
+	|| total_profs <= 1)
 		return EXIT_FAILURE;
 
 	prev_prof = cur_prof - 1;
@@ -1347,7 +1348,7 @@ rl_previous_profile(int count, int key)
 }
 
 static int
-rl_next_profile(int count, int key)
+rl_profile_next(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
@@ -1365,7 +1366,8 @@ rl_next_profile(int count, int key)
 	next_prof = cur_prof + 1;
 	total_profs--;
 
-	if (next_prof > (int)total_profs || !profile_names[next_prof])
+	if (next_prof > (int)total_profs || !profile_names[next_prof]
+	|| total_profs <= 1)
 		next_prof = 0;
 
 	if (conf.clear_screen) {
@@ -1528,7 +1530,7 @@ rl_manpage(int count, int key)
 }
 
 static int
-rl_pinned_dir(int count, int key)
+rl_dir_pinned(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (!pinned_dir) {
@@ -2057,28 +2059,28 @@ set_keybinds_from_file(void)
 	 * rxvt, xterm, kernel console */
 	/*      rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
 	rl_bind_keyseq("\\M-+", rl_test); */
-	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
-	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
-	rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
-	rl_bind_keyseq(find_key("parent-dir4"), rl_parent_dir);
-	rl_bind_keyseq(find_key("previous-dir"), rl_previous_dir);
-	rl_bind_keyseq(find_key("previous-dir2"), rl_previous_dir);
-	rl_bind_keyseq(find_key("previous-dir3"), rl_previous_dir);
-	rl_bind_keyseq(find_key("previous-dir4"), rl_previous_dir);
-	rl_bind_keyseq(find_key("next-dir"), rl_next_dir);
-	rl_bind_keyseq(find_key("next-dir2"), rl_next_dir);
-	rl_bind_keyseq(find_key("next-dir3"), rl_next_dir);
-	rl_bind_keyseq(find_key("next-dir4"), rl_next_dir);
-	rl_bind_keyseq(find_key("home-dir"), rl_home_dir);
-	rl_bind_keyseq(find_key("home-dir2"), rl_home_dir);
-	rl_bind_keyseq(find_key("home-dir3"), rl_home_dir);
-	rl_bind_keyseq(find_key("home-dir4"), rl_home_dir);
-	rl_bind_keyseq(find_key("root-dir"), rl_root_dir);
-	rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
-	rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
-	rl_bind_keyseq(find_key("first-dir"), rl_first_dir);
-	rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
-	rl_bind_keyseq(find_key("pinned-dir"), rl_pinned_dir);
+	rl_bind_keyseq(find_key("parent-dir"), rl_dir_parent);
+	rl_bind_keyseq(find_key("parent-dir2"), rl_dir_parent);
+	rl_bind_keyseq(find_key("parent-dir3"), rl_dir_parent);
+	rl_bind_keyseq(find_key("parent-dir4"), rl_dir_parent);
+	rl_bind_keyseq(find_key("previous-dir"), rl_dir_previous);
+	rl_bind_keyseq(find_key("previous-dir2"), rl_dir_previous);
+	rl_bind_keyseq(find_key("previous-dir3"), rl_dir_previous);
+	rl_bind_keyseq(find_key("previous-dir4"), rl_dir_previous);
+	rl_bind_keyseq(find_key("next-dir"), rl_dir_next);
+	rl_bind_keyseq(find_key("next-dir2"), rl_dir_next);
+	rl_bind_keyseq(find_key("next-dir3"), rl_dir_next);
+	rl_bind_keyseq(find_key("next-dir4"), rl_dir_next);
+	rl_bind_keyseq(find_key("home-dir"), rl_dir_home);
+	rl_bind_keyseq(find_key("home-dir2"), rl_dir_home);
+	rl_bind_keyseq(find_key("home-dir3"), rl_dir_home);
+	rl_bind_keyseq(find_key("home-dir4"), rl_dir_home);
+	rl_bind_keyseq(find_key("root-dir"), rl_dir_root);
+	rl_bind_keyseq(find_key("root-dir2"), rl_dir_root);
+	rl_bind_keyseq(find_key("root-dir3"), rl_dir_root);
+	rl_bind_keyseq(find_key("first-dir"), rl_dir_first);
+	rl_bind_keyseq(find_key("last-dir"), rl_dir_last);
+	rl_bind_keyseq(find_key("pinned-dir"), rl_dir_pinned);
 	rl_bind_keyseq(find_key("workspace1"), rl_ws1);
 	rl_bind_keyseq(find_key("workspace2"), rl_ws2);
 	rl_bind_keyseq(find_key("workspace3"), rl_ws3);
@@ -2112,8 +2114,8 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("toggle-virtualdir-full-paths"), rl_toggle_virtualdir_full_paths);
 	rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
 #ifndef _NO_PROFILES
-	rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
-	rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
+	rl_bind_keyseq(find_key("next-profile"), rl_profile_next);
+	rl_bind_keyseq(find_key("previous-profile"), rl_profile_previous);
 #endif /* _NO_PROFILES */
 	rl_bind_keyseq(find_key("quit"), rl_quit);
 	rl_bind_keyseq(find_key("lock"), rl_lock);
@@ -2161,27 +2163,27 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\e[13~", rl_kbinds_help);
 
 	/* Navigation */
-	rl_bind_keyseq("\\M-u", rl_parent_dir);
-	rl_bind_keyseq("\\e[a", rl_parent_dir);
-	rl_bind_keyseq("\\e[2A", rl_parent_dir);
-	rl_bind_keyseq("\\e[1;2A", rl_parent_dir);
-	rl_bind_keyseq("\\M-j", rl_previous_dir);
-	rl_bind_keyseq("\\e[d", rl_previous_dir);
-	rl_bind_keyseq("\\e[2D", rl_previous_dir);
-	rl_bind_keyseq("\\e[1;2D", rl_previous_dir);
-	rl_bind_keyseq("\\M-k", rl_next_dir);
-	rl_bind_keyseq("\\e[c", rl_next_dir);
-	rl_bind_keyseq("\\e[2C", rl_next_dir);
-	rl_bind_keyseq("\\e[1;2C", rl_next_dir);
-	rl_bind_keyseq("\\M-e", rl_home_dir);
-	rl_bind_keyseq("\\e[1~", rl_home_dir);
-	rl_bind_keyseq("\\e[7~", rl_home_dir);
-	rl_bind_keyseq("\\e[H", rl_home_dir);
-	rl_bind_keyseq("\\M-r", rl_root_dir);
-	rl_bind_keyseq("\\e/", rl_root_dir);
-	rl_bind_keyseq("\\C-\\M-j", rl_first_dir);
-	rl_bind_keyseq("\\C-\\M-k", rl_last_dir);
-	rl_bind_keyseq("\\M-p", rl_pinned_dir);
+	rl_bind_keyseq("\\M-u", rl_dir_parent);
+	rl_bind_keyseq("\\e[a", rl_dir_parent);
+	rl_bind_keyseq("\\e[2A", rl_dir_parent);
+	rl_bind_keyseq("\\e[1;2A", rl_dir_parent);
+	rl_bind_keyseq("\\M-j", rl_dir_previous);
+	rl_bind_keyseq("\\e[d", rl_dir_previous);
+	rl_bind_keyseq("\\e[2D", rl_dir_previous);
+	rl_bind_keyseq("\\e[1;2D", rl_dir_previous);
+	rl_bind_keyseq("\\M-k", rl_dir_next);
+	rl_bind_keyseq("\\e[c", rl_dir_next);
+	rl_bind_keyseq("\\e[2C", rl_dir_next);
+	rl_bind_keyseq("\\e[1;2C", rl_dir_next);
+	rl_bind_keyseq("\\M-e", rl_dir_home);
+	rl_bind_keyseq("\\e[1~", rl_dir_home);
+	rl_bind_keyseq("\\e[7~", rl_dir_home);
+	rl_bind_keyseq("\\e[H", rl_dir_home);
+	rl_bind_keyseq("\\M-r", rl_dir_root);
+	rl_bind_keyseq("\\e/", rl_dir_root);
+	rl_bind_keyseq("\\C-\\M-j", rl_dir_first);
+	rl_bind_keyseq("\\C-\\M-k", rl_dir_last);
+	rl_bind_keyseq("\\M-p", rl_dir_pinned);
 	rl_bind_keyseq("\\M-1", rl_ws1);
 	rl_bind_keyseq("\\M-2", rl_ws2);
 	rl_bind_keyseq("\\M-3", rl_ws3);
