@@ -1407,7 +1407,7 @@ get_properties(char *filename, const int dsize)
 		printf("%s%s%s ", csize, human_size, cend);
 
 		if (total_size > size_mult_factor)
-			printf("/ %s%zuB%s ", csize, total_size, cend);
+			printf("/ %s%juB%s ", csize, (uintmax_t)total_size, cend);
 
 		printf("(%s%s)\n", conf.apparent_size == 1 ? "apparent" : "real",
 			xargs.si == 1 ? " / si" : "");
