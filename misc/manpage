@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Mar 22, 2023" "clifm 1.11" "CLIFM Manual"
+.TH "CLIFM" "1" "Mar 29, 2023" "clifm 1.11.2" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -925,7 +925,7 @@ If only a name/number is entered, it is taken as the user who owns the file(s).
 Use the \fIpc\fR command to edit files permissions.
 .TP
 .B ow \fIELN/FILE\fR [\fIAPPLICATION\fR]
-Print a list of available applications associated to _ELN/FILENAME (either via its MIME type or its file extension), allowing the user to choose one of these applications, and then open the file with the selected application. In simple words, this is what in most GUI file managers is called \fBOpen with...\fR This command supports TAB completion: just type "\fIow filename \fR", then press TAB, and those applications able to open FILENAME will be listed.
+Print a list of available applications associated to ELN/FILE (either via its MIME type or its file extension), allowing the user to choose one of these applications, and then open the file with the selected application. In simple words, this is what in most GUI file managers is called \fBOpen with...\fR This command supports TAB completion: just type "\fIow filename <TAB>\fR" and those applications able to open ELN/FILE will be listed.
 .TP
 .B opener \fR[\fIdefault\fR] [\fIAPPLICATION\fR]
 with no argument, prints the currently used resource opener (by default, \fILira\fR, \fBclifm\fR's built\-in opener). Otherwise, set APPLICATION (say \fIrifle\fR or \fIxdg-open\fR) as opener or, if \fIdefault\fR is passed instead, use \fILira\fR.

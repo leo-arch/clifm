@@ -253,7 +253,7 @@ int
 get_exit_code(const int status, const int exec_flag)
 {
 	if (WIFSIGNALED(status))
-		/* As required by exit(1p), we return a value greater than 128 (EXEC_SIGINT) */
+	/* As required by exit(1p), we return a value greater than 128 (EXEC_SIGINT) */
 		return (EXEC_SIGINT + WTERMSIG(status));
 	if (WIFEXITED(status))
 		return WEXITSTATUS(status);
@@ -272,7 +272,8 @@ run_in_foreground(pid_t pid)
 
 	/* waitpid() failed */
 	int ret = errno;
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n",
+		PROGRAM_NAME, strerror(errno));
 	return ret;
 }
 
@@ -283,7 +284,8 @@ run_in_background(pid_t pid)
 
 	if (waitpid(pid, &status, WNOHANG) == -1) {
 		int ret = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n",
+			PROGRAM_NAME, strerror(errno));
 		return ret;
 	}
 
@@ -347,7 +349,8 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	int status = 0;
 	pid_t pid = fork();
 	if (pid < 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fork: %s\n",
+			PROGRAM_NAME, strerror(errno));
 		return errno;
 	} else if (pid == 0) {
 		if (bg == 0) {
@@ -379,7 +382,8 @@ launch_execve(char **cmd, const int bg, const int xflags)
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], NOTFOUND_MSG);
 			_exit(EXEC_NOTFOUND); /* 127, as required by exit(1p) */
 		} else {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0],
+				strerror(errno));
 			_exit(errno);
 		}
 	}
@@ -415,7 +419,8 @@ graceful_quit(char **args)
 		if ((strcmp(args[0], "kill") == 0 && atoi(args[i]) == (int)own_pid)
 		|| ((strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)
 		&& bin_name && strcmp(args[i], bin_name) == 0)) {
-			fprintf(stderr, _("%s: To gracefully quit enter 'q'\n"), PROGRAM_NAME);
+			fprintf(stderr, _("%s: To gracefully quit enter 'q'\n"),
+				PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 	}
@@ -425,8 +430,8 @@ graceful_quit(char **args)
 
 #if !defined(__CYGWIN__)
 /* Get current modification time for each path in PATH and compare it to
- * the time cached (in paths_timestamps)
- * Return 1 if at least one timestamp is different, or 0 otherwise */
+ * the cached time (in paths[n].mtime)
+ * Return 1 if at least one timestamp differs, or 0 otherwise */
 static int
 check_paths_timestamps(void)
 {
@@ -452,17 +457,7 @@ check_paths_timestamps(void)
  * Why? If this list is not updated, whenever some new program is
  * installed, renamed, or removed from some of the paths in PATH
  * while in CliFM, this latter needs to be restarted in order
- * to be able to recognize the new program for TAB completion
- *
- * Why the RELOADING_BINARIES flag? While reloading binaries we need
- * to momentarilly change the current directory to those dirs in PATH.
- * Now, it might happen that we get a SIGWINCH signal when doing this.
- * The problem is that, upon SIGWICH, CliFM attempts to reload
- * the current list of files, and in order to succesfully do so
- * we need to be in the current directory informed by CliFM
- * So, the RELOADING_BINARIES flag just informs the SIGWHINCH handler
- * (sigwich_handler()) that we are reloading binaries so that it can
- * handle the case appropriately */
+ * to be able to recognize the new program for TAB completion */
 static inline void
 reload_binaries(void)
 {
@@ -499,13 +494,15 @@ _export(char *arg)
 	 * and parameter substitution block. Let's deescape it */
 	char *ds = dequote_str(arg, 0);
 	if (!ds) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error dequoting argument\n"), PNL);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error dequoting "
+			"argument\n"), PNL);
 		return (-1);
 	}
 
 	char *p = strchr(ds, '=');
 	if (!p || !*(p + 1)) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Empty assignement\n"), PNL, ds);
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Empty "
+			"assignement\n"), PNL, ds);
 		free(ds);
 		return (-1);
 	}
@@ -514,8 +511,10 @@ _export(char *arg)
 
 	*p = '\0';
 	int ret = setenv(ds, p + 1, 1);
-	if (ret == -1)
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+	if (ret == -1) {
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
+			PROGRAM_NAME, strerror(errno));
+	}
 	*p = '=';
 
 	free(ds);
@@ -844,7 +843,8 @@ autocd_function(char *arg)
 		conf.autocd = 0;
 		printf(_("Autocd disabled\n"));
 	} else if (strcmp(arg, "status") == 0) {
-		printf(_("Autocd is %s\n"), conf.autocd == 1 ? _("enabled") : _("disabled"));
+		printf(_("Autocd is %s\n"), conf.autocd == 1
+			? _("enabled") : _("disabled"));
 	} else if (IS_HELP(arg)) {
 		puts(_(AUTOCD_USAGE));
 	} else {
@@ -870,7 +870,8 @@ auto_open_function(char *arg)
 		conf.auto_open = 0;
 		printf(_("Auto-open disabled\n"));
 	} else if (strcmp(arg, "status") == 0) {
-		printf(_("Auto-open is %s\n"), conf.auto_open == 1 ? _("enabled") : _("disabled"));
+		printf(_("Auto-open is %s\n"), conf.auto_open == 1
+			? _("enabled") : _("disabled"));
 	} else if (IS_HELP(arg)) {
 		puts(_(AUTO_OPEN_USAGE));
 	} else {
@@ -1003,7 +1004,8 @@ opener_function(char *arg)
 
 	if (strcmp(arg, "default") != 0 && strcmp(arg, "lira") != 0)
 		conf.opener = savestring(arg, strlen(arg));
-	printf(_("Opener set to '%s'\n"), conf.opener ? conf.opener : "lira (built-in)");
+	printf(_("Opener set to '%s'\n"), conf.opener
+		? conf.opener : "lira (built-in)");
 
 	return EXIT_SUCCESS;
 }
@@ -1451,7 +1453,8 @@ check_actions(char **args)
 				_err('n', PRINT_PROMPT, "%s: The 'dh' plugin is deprecated. "
 					"Use the built-in 'dh' command instead disabling the "
 					"'dh' plugin ('actions edit'). Once done, run 'dh --help' "
-					"for more information about the new command.\n", PROGRAM_NAME);
+					"for more information about the new command.\n",
+					PROGRAM_NAME);
 			}
 
 			setenv("CLIFM_PLUGIN_NAME", usr_actions[i].name, 1);
@@ -1630,7 +1633,8 @@ check_auto_second(char **args)
 	 * not ./file and not /path/to/file */
 	if (conf.auto_open == 1 && S_ISREG(attr.st_mode)
 	&& (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))
-	|| (!is_bin_cmd(tmp) && !(*tmp == '.' && *(tmp + 1) == '/') && *tmp != '/' ) ) )
+	|| (!is_bin_cmd(tmp) && !(*tmp == '.' && *(tmp + 1) == '/')
+	&& *tmp != '/' ) ) )
 		return auto_open_file(args, tmp);
 
 	free(tmp);
@@ -1958,7 +1962,8 @@ print_cwd(void)
 	char *buf = getcwd(p, sizeof(p));
 	if (!buf) {
 		int err = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: getcwd: %s\n", PROGRAM_NAME, strerror(err));
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: getcwd: %s\n",
+			PROGRAM_NAME, strerror(err));
 		return err;
 	}
 
@@ -2018,8 +2023,8 @@ preview_edit(char *app)
 
 	int ret = EXIT_SUCCESS;
 	if (app) {
-		char *c[] = { app, file, NULL };
-		ret = launch_execve(c, FOREGROUND, E_NOFLAG);
+		char *cmd[] = { app, file, NULL };
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		ret = open_file(file);
 	}
@@ -2449,7 +2454,8 @@ exec_cmd(char **comm)
 
 	/*     ############### SEARCH ##################     */
 	else if ( (*comm[0] == '/' && is_path(comm[0]) == 0)
-	|| (*comm[0] == '/' && !comm[0][1] && comm[1] && *comm[1] == '-' && IS_HELP(comm[1])) )
+	|| (*comm[0] == '/' && !comm[0][1] && comm[1] && *comm[1] == '-'
+	&& IS_HELP(comm[1])) )
 		return (exit_code = search_function(comm));
 
 	/*      ############## HISTORY ##################     */
@@ -2568,7 +2574,8 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "mime") == 0))
 		return (exit_code = lira_function(comm));
 
-	else if (conf.autols == 0 && *comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2])
+	else if (conf.autols == 0 && *comm[0] == 'l' && comm[0][1] == 's'
+	&& !comm[0][2])
 		return (exit_code = ls_function());
 
 	/* #### PROFILE #### */
@@ -2701,7 +2708,8 @@ exec_cmd(char **comm)
 
 		if (bin_name && *bin_name && *comm[0] == *bin_name
 		&& strcmp(comm[0], bin_name) == 0) {
-			fprintf(stderr, _("%s: To launch a new instance use the 'x' command\n"), PROGRAM_NAME);
+			fprintf(stderr, _("%s: To launch a new instance use the 'x' "
+				"command\n"), PROGRAM_NAME);
 			return (exit_code = EXIT_FAILURE);
 		}
 

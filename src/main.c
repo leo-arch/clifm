@@ -551,7 +551,8 @@ const struct cmdslist_t internal_cmds[] = {
 };
 size_t internal_cmds_n = 0;
 
-/* A list of internal commands and fixed parameters for the auto-suggestions system */
+/* A list of internal commands and fixed parameters for the auto-suggestions
+ * system */
 const struct cmdslist_t param_str[] = {
 	{"actions edit", 12},
 	{"autocd on", 9},
@@ -1071,7 +1072,8 @@ main(int argc, char *argv[])
 	if (!(flags & PATH_PROGRAMS_ALREADY_LOADED))
 		get_path_programs();
 
-	/* Check third-party programs availability: finders (fzf, fzy, smenu), udevil, and udisks2 */
+	/* Check third-party programs availability: finders (fzf, fzy, smenu),
+	 * udevil, and udisks2 */
 	check_third_party_cmds();
 #ifndef _NO_FZF
 	check_completion_mode();
