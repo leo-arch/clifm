@@ -3785,12 +3785,44 @@ set_rl_init_file(void)
 	free(rl_file);
 }
 
+#ifdef CLIFM_TEST_INPUT
+/* Use the file specified by CLIFM_TEST_INPUT_FILE environment variable as an
+ * alternative input source instead of stdin
+ * Each line in this file will be executed as if it were entered in the
+ * command line */
+static void
+set_rl_input_file(void)
+{
+	char *input_file = getenv("CLIFM_TEST_INPUT_FILE");
+	if (!input_file) {
+		fprintf(stderr, _("%s: An input file must be provided via the "
+			"CLIFM_TEST_INPUT_FILE environment variable\n"), PROGRAM_NAME);
+		UNHIDE_CURSOR;
+		exit(EXIT_FAILURE);
+	}
+
+	FILE *fstream = fopen(input_file, "r");
+	if (!fstream) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+			input_file, strerror(errno));
+		UNHIDE_CURSOR;
+		exit(EXIT_FAILURE);
+	}
+
+	rl_instream = fstream;
+}
+#endif /* CLIFM_TEST_INPUT */
+
 int
 initialize_readline(void)
 {
+#ifdef CLIFM_TEST_INPUT
+	set_rl_input_file();
+#endif /* CLIFM_TEST_INPUT */
+
 #ifdef _VANILLA_READLINE
 	return EXIT_SUCCESS;
-#endif
+#endif /* _VANILLA_READLINE */
 
 	/* Set the name of the program using readline. Mostly used for
 	 * conditional constructs in the inputrc file */

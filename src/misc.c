@@ -1604,6 +1604,11 @@ free_stuff(void)
 	xrl_discard_keymap(km);
 #endif // __clang__ */
 
+#ifdef CLIFM_TEST_INPUT
+	if (rl_instream)
+		fclose(rl_instream);
+#endif /* CLIFM_TEST_INPUT */
+
 	/* Restore the color of the running terminal */
 	if (conf.colorize == 1 && xargs.list_and_quit != 1)
 		fputs("\x1b[0;39;49m", stdout);
