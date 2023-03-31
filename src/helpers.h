@@ -237,11 +237,11 @@ extern int watch;
  * 16 bits per flag, that is (1 << 15) */
 
 /* Internal flags */
-#define GUI           (1 << 0)
-#define IS_USRVAR_DEF (1 << 1)
+#define GUI                 (1 << 0)
+#define IS_USRVAR_DEF       (1 << 1)
 
 /* Used by the refresh on resize feature */
-#define DELAYED_REFRESH    (1 << 2)
+#define DELAYED_REFRESH     (1 << 2)
 #define PATH_PROGRAMS_ALREADY_LOADED (1 << 3)
 
 #define FIRST_WORD_IS_ELN   (1 << 4)
@@ -258,10 +258,13 @@ extern int watch;
 #define NO_FIX_RL_POINT     (1 << 13)
 #define FAILED_ALIAS        (1 << 14)
 
-/* Flags for finder binaries */
-#define FZF_BIN_OK    (1 << 0)
-#define FZY_BIN_OK    (1 << 1)
-#define SMENU_BIN_OK  (1 << 2)
+/* Flags for third party binaries */
+#define FZF_BIN_OK     (1 << 0)
+#define FZY_BIN_OK     (1 << 1)
+#define SMENU_BIN_OK   (1 << 2)
+#define GNU_DU_BIN_DU  (1 << 3)
+/* 'gdu' is the GNU version of 'du' used by BSD systems */
+#define GNU_DU_BIN_GDU (1 << 4)
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)
@@ -1266,7 +1269,7 @@ extern struct termios orig_termios;
 /* Bit flag holders */
 extern int
 	flags,
-	finder_flags,
+	bin_flags,
 	search_flags;
 
 /* Internal state flags */

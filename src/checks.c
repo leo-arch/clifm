@@ -235,27 +235,27 @@ void
 check_completion_mode(void)
 {
 	if (fzftab == 1) { /* fzftab is zero only if running with --stdtab */
-		if (!(finder_flags & FZF_BIN_OK) && tabmode == FZF_TAB) {
+		if (!(bin_flags & FZF_BIN_OK) && tabmode == FZF_TAB) {
 			_err('w', PRINT_PROMPT, _("%s: fzf: Command not found. Falling "
 				"back to standard TAB completion\n"), PROGRAM_NAME);
 			tabmode = STD_TAB;
 			fzftab = 0;
 		}
 
-		if (!(finder_flags & FZY_BIN_OK) && tabmode == FZY_TAB) {
+		if (!(bin_flags & FZY_BIN_OK) && tabmode == FZY_TAB) {
 			_err('w', PRINT_PROMPT, _("%s: fzy: Command not found. Falling "
 				"back to the default value (fzf, if found, or standard)\n"),
 				PROGRAM_NAME);
-			tabmode = (finder_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
-		} else if (!(finder_flags & SMENU_BIN_OK) && tabmode == SMENU_TAB) {
+			tabmode = (bin_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
+		} else if (!(bin_flags & SMENU_BIN_OK) && tabmode == SMENU_TAB) {
 			_err('w', PRINT_PROMPT, _("%s: smenu: Command not found. Falling "
 				"back to the default value (fzf, if found, or standard)\n"),
 				PROGRAM_NAME);
-			tabmode = (finder_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
+			tabmode = (bin_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
 		}
 
 		if (tabmode == STD_TAB) {
-			if (finder_flags & FZF_BIN_OK)
+			if (bin_flags & FZF_BIN_OK)
 				/* We have the fzf binary, let's run in FZF mode */
 				tabmode = FZF_TAB;
 			else
@@ -280,19 +280,19 @@ check_third_party_cmds_alt(void)
 
 	if ( (p = get_cmd_path("fzf")) ) {
 		free(p);
-		finder_flags |= FZF_BIN_OK;
+		bin_flags |= FZF_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
 	if ( (p = get_cmd_path("fzy")) ) {
 		free(p);
-		finder_flags |= FZY_BIN_OK;
+		bin_flags |= FZY_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
 	if ( (p = get_cmd_path("smenu")) ) {
 		free(p);
-		finder_flags |= SMENU_BIN_OK;
+		bin_flags |= SMENU_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
@@ -304,6 +304,12 @@ check_third_party_cmds_alt(void)
 		free(p); udevilok = 1;
 	}
 
+#if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
+	if ( (p = get_cmd_path("gdu")) ) {
+		free(p); bin_flags |= GNU_DU_BIN_GDU;
+	}
+#endif /* !HAVE_GNU_DU && !_BE_POSIX */
+
 	set_mount_cmd(udisks2ok, udevilok);
 }
 
@@ -311,6 +317,10 @@ check_third_party_cmds_alt(void)
 void
 check_third_party_cmds(void)
 {
+#if defined(HAVE_GNU_DU)
+	bin_flags |= GNU_DU_BIN_DU;
+#endif /* HAVE_GNU_DU */
+
 	if (conf.ext_cmd_ok == 0) {
 		/* We haven't loaded system binaries. Let's run an alternative,
 		 * though slower, check. */
@@ -318,28 +328,34 @@ check_third_party_cmds(void)
 		return;
 	}
 
+
 	int udisks2ok = 0, udevilok = 0;
 	int i = (int)path_progsn;
 
 	while (--i >= 0) {
 		if (*bin_commands[i] != 'u' && *bin_commands[i] != 'f'
-		&& *bin_commands[i] != 's')
+		&& *bin_commands[i] != 's'
+#if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
+		&& *bin_commands[i] != 'g')
+#else
+		)
+#endif /* !HAVE_GNU_DU && !_BE_POSIX */
 			continue;
 
 		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzf") == 0) {
-			finder_flags |= FZF_BIN_OK;
+			bin_flags |= FZF_BIN_OK;
 			if (fzftab == UNSET)
 				fzftab = 1;
 		}
 
 		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzy") == 0) {
-			finder_flags |= FZY_BIN_OK;
+			bin_flags |= FZY_BIN_OK;
 			if (fzftab == UNSET)
 				fzftab = 1;
 		}
 
 		if (*bin_commands[i] == 's' && strcmp(bin_commands[i], "smenu") == 0) {
-			finder_flags |= SMENU_BIN_OK;
+			bin_flags |= SMENU_BIN_OK;
 			if (fzftab == UNSET)
 				fzftab = 1;
 		}
@@ -350,8 +366,19 @@ check_third_party_cmds(void)
 		if (*bin_commands[i] == 'u' && strcmp(bin_commands[i], "udevil") == 0)
 			udevilok = 1;
 
+#if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
+		if (*bin_commands[i] == 'g' && strcmp(bin_commands[i] + 1, "du") == 0) {
+			bin_flags |= GNU_DU_BIN_GDU;
+		}
+#endif /* !HAVE_GNU_DU && !_BE_POSIX */
+
 		if (udevilok == 1 && udisks2ok == 1
-		&& (finder_flags & (FZF_BIN_OK | FZY_BIN_OK | SMENU_BIN_OK)))
+		&& (bin_flags & (FZF_BIN_OK & FZY_BIN_OK & SMENU_BIN_OK
+#if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
+		& GNU_DU_BIN_GDU)))
+#else
+		)))
+#endif /* !HAVE_GNU_DU && !_BE_POSIX */
 			break;
 	}
 

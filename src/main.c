@@ -114,7 +114,7 @@ unsigned short term_cols;
 /* Bit flag holders */
 int
 	flags = 0,
-	finder_flags = 0,
+	bin_flags = 0,
 	search_flags = 0;
 
 struct termios

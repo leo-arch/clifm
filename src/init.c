@@ -2236,14 +2236,7 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_FAILURE);
 #endif /* !_NO_FZF */
 
-		case 264:
-#ifdef __linux__
-			xargs.si = 1; break;
-#else
-			fprintf(stderr, _("%s: si: This option is available on Linux "
-				"only\n"), PROGRAM_NAME);
-			exit(EXIT_FAILURE);
-#endif /* __linux__ */
+		case 264: xargs.si = 1; break;
 
 		case 265:
 			if (!optarg || !*optarg || *optarg == '-')
@@ -3559,7 +3552,7 @@ check_options(void)
 			/* This flag will be true only when reloading the config file,
 			 * because the check for the fzf binary is made at startup AFTER
 			 * reading the config file (check_third_party_cmds() in checks.c) */
-			if (finder_flags & FZF_BIN_OK)
+			if (bin_flags & FZF_BIN_OK)
 				fzftab = 1;
 		} else {
 			fzftab = xargs.fzftab;

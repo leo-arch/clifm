@@ -210,11 +210,8 @@ get_total_size(const int link_to_dir, char *filename)
 	if (term_caps.suggestions == 0) {
 		fputs("Retrieving file size... ", stdout);
 		fflush(stdout);
-#if defined(HAVE_GNU_DU)
-		total_size = dir_size(*_path ? _path : filename, 1);
-#else
-		total_size = dir_size(*_path ? _path : filename, 0);
-#endif /* HAVE_GNU_DU */
+		total_size = dir_size(*_path ? _path : filename,
+			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0);
 		fputs("\r                       \r", stdout);
 		fputs(_("Total size: \t"), stdout);
 	} else {
@@ -222,14 +219,12 @@ get_total_size(const int link_to_dir, char *filename)
 		HIDE_CURSOR;
 		fputs("Calculating... ", stdout);
 		fflush(stdout);
-#if defined(HAVE_GNU_DU)
-		total_size = dir_size(*_path ? _path : filename, 1);
-#else
-		total_size = dir_size(*_path ? _path : filename, 0);
-#endif /* HAVE_GNU_DU */
+		total_size = dir_size(*_path ? _path : filename,
+			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0);
 		MOVE_CURSOR_LEFT(15);
 		ERASE_TO_RIGHT;
 		UNHIDE_CURSOR;
+		fflush(stdout);
 	}
 
 	return total_size;
@@ -1389,12 +1384,13 @@ get_properties(char *filename, const int dsize)
 
 	int size_mult_factor = xargs.si == 1 ? 1000 : 1024;
 
-#if defined(HAVE_GNU_DU)
-	off_t total_size_kb = total_size > size_mult_factor
-		? (total_size / size_mult_factor) : total_size;
-#else
-	off_t total_size_kb = total_size;
-#endif /* HAVE_GNU_DU */
+	off_t total_size_kb = 0;
+	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
+		total_size_kb = total_size > size_mult_factor
+			? (total_size / size_mult_factor) : total_size;
+	} else {
+		total_size_kb = total_size;
+	}
 
 	if (!*dz_c) {
 		get_color_size(total_size_kb * size_mult_factor, sf, sizeof(sf));
@@ -1402,8 +1398,12 @@ get_properties(char *filename, const int dsize)
 	}
 
 	char *human_size = get_size_unit(total_size_kb * size_mult_factor);
-	if (human_size) {
-#if defined(HAVE_GNU_DU)
+	if (!human_size) {
+		puts("?");
+		goto END;
+	}
+
+	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
 		printf("%s%s%s ", csize, human_size, cend);
 
 		if (total_size > size_mult_factor)
@@ -1411,13 +1411,10 @@ get_properties(char *filename, const int dsize)
 
 		printf("(%s%s)\n", conf.apparent_size == 1 ? "apparent" : "real",
 			xargs.si == 1 ? " / si" : "");
-#else
-		printf("%s%s%s\n", csize, human_size, cend);
-#endif /* HAVE_GNU_DU */
-		free(human_size);
 	} else {
-		puts("?");
+		printf("%s%s%s\n", csize, human_size, cend);
 	}
+	free(human_size);
 
 END:
 	free(size_type);

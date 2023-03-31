@@ -379,7 +379,7 @@ dump_config(void)
 	char *ss = get_tab_comp_mode_str();
 	print_config_value("TabCompletionMode", ss,
 #ifndef _NO_FZF
-		(finder_flags & FZF_BIN_OK) ? "fzf" : "standard",
+		(bin_flags & FZF_BIN_OK) ? "fzf" : "standard",
 #else
 		"standard",
 #endif
@@ -3525,24 +3525,24 @@ static void
 update_finder_binaries_status(void)
 {
 	char *p = (char *)NULL;
-	if (!(finder_flags & FZF_BIN_OK)) {
+	if (!(bin_flags & FZF_BIN_OK)) {
 		if ((p = get_cmd_path("fzf"))) {
 			free(p);
-			finder_flags |= FZF_BIN_OK;
+			bin_flags |= FZF_BIN_OK;
 		}
 	}
 
-	if (!(finder_flags & FZY_BIN_OK)) {
+	if (!(bin_flags & FZY_BIN_OK)) {
 		if ((p = get_cmd_path("fzy"))) {
 			free(p);
-			finder_flags |= FZY_BIN_OK;
+			bin_flags |= FZY_BIN_OK;
 		}
 	}
 
-	if (!(finder_flags & SMENU_BIN_OK)) {
+	if (!(bin_flags & SMENU_BIN_OK)) {
 		if ((p = get_cmd_path("smenu"))) {
 			free(p);
-			finder_flags |= SMENU_BIN_OK;
+			bin_flags |= SMENU_BIN_OK;
 		}
 	}
 }
