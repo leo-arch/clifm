@@ -2138,6 +2138,17 @@ dirhist_function(char *dir)
 	return cd_function(dir, CD_PRINT_ERROR);
 }
 
+static int
+long_view_function(const char *arg)
+{
+	if (arg && IS_HELP(arg)) {
+		puts(LL_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	return rl_long_view(0, 0);
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2419,6 +2430,10 @@ exec_cmd(char **comm)
 		exit_code = run_and_refresh(comm, 0);
 		kbind_busy = 0;
 	}
+
+	else if (*comm[0] == 'l' && (comm[0][1] == 'v' || comm[0][1] == 'l')
+	&& !comm[0][2])
+		return (exit_code = long_view_function(comm[1] ? comm[1] : (char *)NULL));
 
 	/*    ############# PREVIEW FILES ##################     */
 	else if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0)

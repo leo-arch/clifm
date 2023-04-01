@@ -466,6 +466,8 @@ const struct cmdslist_t internal_cmds[] = {
 	{"le", 2}, //"ln",
 	{"lm", 2},
 	{"log", 3},
+	{"ll", 2},
+	{"lv", 2},
 	{"m", 1}, //"mv",
 	{"md", 2},
 //	{"mkdir", },

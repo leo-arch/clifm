@@ -33,6 +33,7 @@ int  kbinds_function(char **);
 int  load_keybinds(void);
 void readline_kbinds(void);
 int  rl_quit(int, int);
+int  rl_long_view(int, int);
 
 __END_DECLS
 

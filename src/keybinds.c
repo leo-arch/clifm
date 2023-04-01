@@ -893,8 +893,8 @@ rl_dir_last(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-static int
-rl_long(int count, int key)
+int
+rl_long_view(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy || xargs.disk_usage_analyzer == 1)
@@ -2123,7 +2123,7 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
 	rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
 	rl_bind_keyseq(find_key("toggle-hidden2"), rl_hidden);
-	rl_bind_keyseq(find_key("toggle-long"), rl_long);
+	rl_bind_keyseq(find_key("toggle-long"), rl_long_view);
 	rl_bind_keyseq(find_key("toggle-light"), rl_light);
 	rl_bind_keyseq(find_key("dirs-first"), rl_dirs_first);
 	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
@@ -2223,7 +2223,7 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\M-c", rl_clear_line);
 	rl_bind_keyseq("\\M-i", rl_hidden);
 	rl_bind_keyseq("\\M-.", rl_hidden);
-	rl_bind_keyseq("\\M-l", rl_long);
+	rl_bind_keyseq("\\M-l", rl_long_view);
 	rl_bind_keyseq("\\M-y", rl_light);
 	rl_bind_keyseq("\\M-g", rl_dirs_first);
 	rl_bind_keyseq("\\M-z", rl_sort_previous);

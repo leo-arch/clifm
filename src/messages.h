@@ -572,6 +572,10 @@ For information about the matching algorithm consult the manpage\n\n\
 - Edit the symbolic link named file.link\n\
     le file.link"
 
+#define LL_USAGE "Toggle long view mode\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  ll, lv"
+
 #define LM_USAGE "Set light mode on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   lm [on, off]"
@@ -917,7 +921,7 @@ Note: Both numbers and names are allowed\n\n\
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge]\n\
+  tag [ls, list] [new] [del, rm, remove] [mv, rename] [untag] [merge]\n\
       [FILE]... [[:]TAG]\n\n\
 Instead of the long format described above, you can use any of the\n\
 following shortcuts as well:\n\
@@ -1283,6 +1287,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  icons              Set icons on/off\n\
  j                  The directory jumper function\n\
  kb, keybinds       Manage keybindings\n\
+ ll, lv             Toggle long view mode\n\
  lm                 Set the light mode on/off\n\
  log                Manage your logs\n\
  media              (Un)mount storage devices\n\
@@ -1467,12 +1472,12 @@ ac sel              Compress/archive selected files (1)\n\n\
 #define QUICK_HELP_MISC "\
 MISC\n\
 ----\n\
-cmd --help     Get help for command 'cmd'\n\
+CMD --help     Get help for command CMD\n\
 help <TAB>     List available help topics\n\
 F1             Open the manpage\n\
 ih             Run the interactive help plugin (requires fzf)\n\
 config | F10   View/edit the configuration file\n\
-Alt-l          Toggle detail/long view mode\n\
+ll | Alt-l     Toggle detail/long view mode\n\
 Alt-.          Toggle hidden files\n\
 Alt-TAB        Toggle disk usage analyzer mode\n\
 kb edit | F9   Edit keybindings\n\
@@ -1590,6 +1595,7 @@ being free, we consider them all equally unethical [...]\""
 #define KB_DESC      " (manage keybindings)"
 #define L_DESC       " (create a symbolic link)"
 #define LE_DESC      " (edit a symbolic link)"
+#define LL_DESC      " (toggle long view)"
 #define LM_DESC      " (set light mode on/off)"
 #define LOG_DESC     " (manage logs)"
 #define M_DESC       " (move files)"

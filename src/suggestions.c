@@ -196,8 +196,10 @@ check_int_cmd_desc(const char *s, const size_t l)
 			if (*(s + 1) == 'b') return KB_DESC;
 		}
 
-		else if (*s == 'l' && *(s + 1) == 'm')
-			return LM_DESC;
+		else if (*s == 'l') {
+			if (*(s + 1) == 'l' || *(s + 1) == 'v') return LL_DESC;
+			if (*(s + 1) == 'm') return LM_DESC;
+		}
 
 		else if (*s == 'm') {
 			if (*(s + 1) == 'd') return MD_DESC;

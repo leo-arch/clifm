@@ -175,6 +175,7 @@ int_cmds_generator(const char *text, int state)
 		"kb      (manage keybindings)",
 		"l       (create a symbolic link)",
 		"le      (edit a symbolic link)",
+		"ll      (toggle long view)",
 		"lm      (set light mode on-off)",
 		"log     (manage logs)",
 		"m       (move files)",
