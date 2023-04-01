@@ -59,9 +59,13 @@ Briefly put, with **clifm** the command-line is always already there, never hidd
 
 ---
 
+[![demo](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N.svg)](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N?autoplay=1)
+
+<!---
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="https://i.postimg.cc/YC77qSLK/interface-1-7-9.png"></p>
 <p align="center">You only need 7 keystrokes to move all selected files into the <i>images</i> directory: <b>m sel 8</b></p>
+-->
 
 ---
 
