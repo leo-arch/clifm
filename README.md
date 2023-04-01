@@ -35,10 +35,14 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 -->
 </p>
 
+---
+
+[![demo](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N.svg)](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N?autoplay=1)
+
 <!---
-<a href="https://lgtm.com/projects/g/leo-arch/clifm/context:cpp"><img alt="Language grade: C/C++" src="https://img.shields.io/lgtm/grade/cpp/g/leo-arch/clifm.svg?logo=lgtm&logoWidth=18"/></a>
-<a href="https://codecov.io/gh/leo-arch/clifm"><img src="https://codecov.io/gh/leo-arch/clifm/branch/master/graph/badge.svg?token=YC3NIS180Z"/></a>
-[![LGTM](https://img.shields.io/lgtm/grade/cpp/g/leo-arch/clifm.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/leo-arch/clifm/context:cpp)
+<h4 align="center">CliFM's interface</h4>
+<p align="center"><img src="https://i.postimg.cc/YC77qSLK/interface-1-7-9.png"></p>
+<p align="center">You only need 7 keystrokes to move all selected files into the <i>images</i> directory: <b>m sel 8</b></p>
 -->
 
 ---
@@ -54,18 +58,10 @@ If working with the command-line, your workflow is not affected at all, but just
 Briefly put, with **clifm** the command-line is always already there, never hidden :godmode: :muscle:
 
 ---
+
 <sup>1</sup> <i>For more information about these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>. \
+
 <sup>2</sup> <i>For a detailed description consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki</i>.
-
----
-
-[![demo](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N.svg)](https://asciinema.org/a/ov5HnwdlPvnR7ucfDrQMfeg2N?autoplay=1)
-
-<!---
-<h4 align="center">CliFM's interface</h4>
-<p align="center"><img src="https://i.postimg.cc/YC77qSLK/interface-1-7-9.png"></p>
-<p align="center">You only need 7 keystrokes to move all selected files into the <i>images</i> directory: <b>m sel 8</b></p>
--->
 
 ---
 
