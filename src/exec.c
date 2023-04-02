@@ -692,12 +692,15 @@ set_max_files(char **args)
 }
 
 static int
-dirs_first_function(char *arg)
+dirs_first_function(const char *arg)
 {
 	if (conf.autols == 0)
 		return EXIT_SUCCESS;
 
-	if (!arg || IS_HELP(arg)) {
+	if (!arg)
+		return rl_toggle_only_dirs(0, 0);
+
+	if (IS_HELP(arg)) {
 		puts(_(FF_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -715,9 +718,6 @@ dirs_first_function(char *arg)
 		conf.list_dirs_first = 0;
 		if (conf.autols == 1) reload_dirlist();
 		print_reload_msg(_("Directories first disabled\n"));
-	} else {
-		fprintf(stderr, "%s\n", _(FF_USAGE));
-		return EXIT_FAILURE;
 	}
 
 	return exit_status;
@@ -1011,26 +1011,36 @@ opener_function(char *arg)
 }
 
 static int
-lightmode_function(char *arg)
+lightmode_function(const char *arg)
 {
-	if (!arg || IS_HELP(arg)) {
-		fprintf(stderr, "%s\n", _(LM_USAGE));
+	if (!arg)
+		return rl_toggle_light_mode(0, 0);
+
+	if (IS_HELP(arg)) {
+		puts(LM_USAGE);
 		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 'o' && strcmp(arg, "on") == 0) {
+		if (conf.light_mode == 1) {
+			puts(_("Light mode already on"));
+			return EXIT_SUCCESS;
+		}
 		conf.light_mode = 1;
 		if (conf.autols == 1)
 			reload_dirlist();
-		print_reload_msg(_("Switched to light mode\n"));
+		print_reload_msg(_("Light mode enabled\n"));
 	} else if (*arg == 'o' && strcmp(arg, "off") == 0) {
+		if (conf.light_mode == 0) {
+			puts(_("Light mode already off"));
+			return EXIT_SUCCESS;
+		}
 		conf.light_mode = 0;
 		if (conf.autols == 1)
 			reload_dirlist();
-		print_reload_msg(_("Switched back to normal mode\n"));
+		print_reload_msg(_("Light mode disabled\n"));
 	} else {
-		puts(_(LM_USAGE));
-		return EXIT_FAILURE;
+		puts(LM_USAGE);
 	}
 
 	return EXIT_SUCCESS;
@@ -1140,45 +1150,38 @@ _log_function(char **args)
 }
 
 static int
-hidden_function(char **comm)
+hidden_files_function(const char *arg)
 {
+	if (!arg)
+		return rl_toggle_hidden_files(0, 0);
+
+	if (IS_HELP(arg)) {
+		puts(_(HF_USAGE));
+		return EXIT_SUCCESS;
+	}
+
 	int exit_status = EXIT_SUCCESS;
 
-	if (strcmp(comm[1], "status") == 0) {
+	if (strcmp(arg, "status") == 0) {
 		printf(_("Hidden files is %s\n"), conf.show_hidden
 			? _("enabled") : _("disabled"));
-	} else if (strcmp(comm[1], "off") == 0) {
+	} else if (strcmp(arg, "off") == 0) {
 		conf.show_hidden = 0;
 		if (conf.autols == 1) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
 		print_reload_msg(_("Hidden files disabled\n"));
-	} else if (strcmp(comm[1], "on") == 0) {
+	} else if (strcmp(arg, "on") == 0) {
 		conf.show_hidden = 1;
 		if (conf.autols == 1) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
 		print_reload_msg(_("Hidden files enabled\n"));
-	} else {
-		fprintf(stderr, "%s\n", _(HF_USAGE));
 	}
 
 	return exit_status;
-}
-
-static int
-_hidden_function(char **args)
-{
-	if (!args[1] || IS_HELP(args[1])) {
-		/* The same message is in hidden_function(), and printed
-		 * whenever an invalid argument is entered */
-		puts(_(HF_USAGE));
-		return EXIT_SUCCESS;
-	}
-
-	return hidden_function(args);
 }
 
 static int
@@ -2650,7 +2653,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'a' && strcmp(comm[0], "alias") == 0)
 		return (exit_code = alias_function(comm));
 
-	/* #### EDIT #### */
+	/* #### EDIT, CONFIG #### */
 	/* The 'edit' command is deprecated */
 	else if ((*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
 	|| (*comm[0] == 'c' && strcmp(comm[0], "config") == 0))
@@ -2663,7 +2666,7 @@ exec_cmd(char **comm)
 	/* #### HIDDEN FILES #### */
 	else if (*comm[0] == 'h' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "hidden") == 0))
-		return (exit_code = _hidden_function(comm));
+		return (exit_code = hidden_files_function(comm[1]));
 
 	/* #### AUTOCD #### */
 	else if (*comm[0] == 'a' && (strcmp(comm[0], "acd") == 0

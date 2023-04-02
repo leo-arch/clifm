@@ -900,6 +900,11 @@ rl_toggle_long_view(int count, int key)
 	if (kbind_busy || xargs.disk_usage_analyzer == 1)
 		return EXIT_SUCCESS;
 
+#ifndef _NO_SUGGESTIONS
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+#endif
+
 	conf.long_view = conf.long_view == 1 ? 0 : 1;
 
 	if (conf.autols == 1) {
@@ -942,38 +947,44 @@ rl_toggle_dirs_first(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-static int
+int
 rl_toggle_light_mode(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	conf.light_mode = conf.light_mode == 1 ? 0 : 1;
+#ifndef _NO_SUGGESTIONS
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+#endif
 
-	if (conf.light_mode == 1)
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Switched to light "
-			"mode\n"), mi_c, df_c);
-	else
-		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s->%s Switched back to normal "
-			"mode\n"), mi_c, df_c);
+	conf.light_mode = conf.light_mode ? 0 : 1;
 
-	if (conf.autols == 1)
-		run_kb_cmd("rf");
+	if (conf.autols == 1) {
+		if (conf.clear_screen == 0)
+			putchar('\n');
+		reload_dirlist();
+	}
 
+	print_reload_msg(_("Light mode %s\n"),
+		conf.light_mode ? _("enabled") : _("disabled"));
+	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
 
-static int
+int
 rl_toggle_hidden_files(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
+
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif
+
 	conf.show_hidden = conf.show_hidden ? 0 : 1;
 
 	if (conf.autols == 1) {
@@ -992,7 +1003,7 @@ static int
 rl_open_config(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	return run_kb_cmd("edit");
+	return run_kb_cmd("config");
 }
 
 static int
@@ -1655,8 +1666,8 @@ rl_launch_view(int count, int key)
 	return run_kb_cmd("view");
 }
 
-static int
-rl_onlydirs(int count, int key)
+int
+rl_toggle_only_dirs(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 
@@ -2128,7 +2139,7 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("dirs-first"), rl_toggle_dirs_first);
 	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
 	rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
-	rl_bind_keyseq(find_key("only-dirs"), rl_onlydirs);
+	rl_bind_keyseq(find_key("only-dirs"), rl_toggle_only_dirs);
 
 	/* Misc */
 	rl_bind_keyseq(find_key("launch-view"), rl_launch_view);
@@ -2228,7 +2239,7 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\M-g", rl_toggle_dirs_first);
 	rl_bind_keyseq("\\M-z", rl_sort_previous);
 	rl_bind_keyseq("\\M-x", rl_sort_next);
-	rl_bind_keyseq("\\M-,", rl_onlydirs);
+	rl_bind_keyseq("\\M-,", rl_toggle_only_dirs);
 
 	rl_bind_keyseq("\\M--", rl_launch_view);
 	rl_bind_keyseq("\\C-x", rl_new_instance);
