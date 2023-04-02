@@ -1476,18 +1476,18 @@ CMD --help     Get help for command CMD\n\
 help <TAB>     List available help topics\n\
 F1             Open the manpage\n\
 ih             Run the interactive help plugin (requires fzf)\n\
-config | F10   View/edit the configuration file\n\
 ll | Alt-l     Toggle detail/long view mode\n\
 hf | Alt-.     Toggle hidden files\n\
-Alt-TAB        Toggle disk usage analyzer mode\n\
-kb edit | F9   Edit keybindings\n\
+rf | Ctrl-l    Clear the screen (also Enter on empty line)\n\
+config | F10   View/edit the configuration file\n\
 mm edit | F6   Change default associated applications\n\
+kb edit | F9   Edit keybindings\n\
 view edit | F7 Change previewing applications\n\
 mm info 12     Get MIME information for the file whose ELN is 12\n\
+Alt-TAB        Toggle disk usage analyzer mode\n\
 cs             Manage color schemes\n\
 Right          Accept the entire suggestion\n\
 Alt-f          Accept the first/next word of the current suggestion\n\
-Enter | Ctrl-l Reprint the current list of files\n\
 pf set test    Change to the profile named 'test'\n\
 st size rev    Sort files by size in reverse order\n\
 Alt-x | Alt-z  Change sort order\n\
@@ -1495,7 +1495,7 @@ media          (Un)mount storage devices\n\
 net work       Mount the network resource named 'work'\n\
 actions        List available actions/plugins\n\
 icons on       Enable icons\n\
-q              I'm tired, quit\n\
+q | F12        I'm tired, quit\n\
 Q              cd on quit (consult the manpage)"
 
 #define ASCII_LOGO_BIG "\
