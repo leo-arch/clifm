@@ -894,7 +894,7 @@ rl_dir_last(int count, int key)
 }
 
 int
-rl_long_view(int count, int key)
+rl_toggle_long_view(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy || xargs.disk_usage_analyzer == 1)
@@ -917,7 +917,7 @@ rl_long_view(int count, int key)
 }
 
 static int
-rl_dirs_first(int count, int key)
+rl_toggle_dirs_first(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
@@ -943,7 +943,7 @@ rl_dirs_first(int count, int key)
 }
 
 static int
-rl_light(int count, int key)
+rl_toggle_light_mode(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
@@ -965,7 +965,7 @@ rl_light(int count, int key)
 }
 
 static int
-rl_hidden(int count, int key)
+rl_toggle_hidden_files(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
@@ -2121,11 +2121,11 @@ set_keybinds_from_file(void)
 	rl_bind_keyseq(find_key("lock"), rl_lock);
 	rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
 	rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
-	rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
-	rl_bind_keyseq(find_key("toggle-hidden2"), rl_hidden);
-	rl_bind_keyseq(find_key("toggle-long"), rl_long_view);
-	rl_bind_keyseq(find_key("toggle-light"), rl_light);
-	rl_bind_keyseq(find_key("dirs-first"), rl_dirs_first);
+	rl_bind_keyseq(find_key("toggle-hidden"), rl_toggle_hidden_files);
+	rl_bind_keyseq(find_key("toggle-hidden2"), rl_toggle_hidden_files);
+	rl_bind_keyseq(find_key("toggle-long"), rl_toggle_long_view);
+	rl_bind_keyseq(find_key("toggle-light"), rl_toggle_light_mode);
+	rl_bind_keyseq(find_key("dirs-first"), rl_toggle_dirs_first);
 	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
 	rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
 	rl_bind_keyseq(find_key("only-dirs"), rl_onlydirs);
@@ -2221,11 +2221,11 @@ set_default_keybinds(void)
 	rl_bind_keyseq("\\M-o", rl_lock);
 	rl_bind_keyseq("\\C-r", rl_refresh);
 	rl_bind_keyseq("\\M-c", rl_clear_line);
-	rl_bind_keyseq("\\M-i", rl_hidden);
-	rl_bind_keyseq("\\M-.", rl_hidden);
-	rl_bind_keyseq("\\M-l", rl_long_view);
-	rl_bind_keyseq("\\M-y", rl_light);
-	rl_bind_keyseq("\\M-g", rl_dirs_first);
+	rl_bind_keyseq("\\M-i", rl_toggle_hidden_files);
+	rl_bind_keyseq("\\M-.", rl_toggle_hidden_files);
+	rl_bind_keyseq("\\M-l", rl_toggle_long_view);
+	rl_bind_keyseq("\\M-y", rl_toggle_light_mode);
+	rl_bind_keyseq("\\M-g", rl_toggle_dirs_first);
 	rl_bind_keyseq("\\M-z", rl_sort_previous);
 	rl_bind_keyseq("\\M-x", rl_sort_next);
 	rl_bind_keyseq("\\M-,", rl_onlydirs);

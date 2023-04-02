@@ -2146,7 +2146,7 @@ long_view_function(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	return rl_long_view(0, 0);
+	return rl_toggle_long_view(0, 0);
 }
 
 /* Take the command entered by the user, already splitted into substrings
