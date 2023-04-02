@@ -323,4 +323,6 @@ The [Discussions section](https://github.com/leo-arch/clifm/discussions) of this
 ---
 
 ## Developer
-[Leo Abramovich](https://github.com/leo-arch) <<leo.clifm@outlook.com>>
+[Leo Abramovich](https://github.com/leo-arch) <<leo.clifm@outlook.com>>.
+
+Special thanks to [all those who have contributed to this project](https://github.com/leo-arch/clifm/graphs/contributors).
