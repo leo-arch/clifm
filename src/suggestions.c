@@ -248,9 +248,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 			if (*(s + 1) == 'y') return TY_DESC;
 		}
 
-		else if (*s == 'u' && *(s + 1) == 'c')
-			return UC_DESC;
-
 		else if (*s == 'v' && *(s + 1) == 'v')
 			return VV_DESC;
 
@@ -383,8 +380,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return RF_DESC;
 		if (*s == 'u' && strcmp(s + 1, "ntrash") == 0)
 			return U_DESC;
-		if (*s == 'u' && strcmp(s + 1, "nicode") == 0)
-			return UC_DESC;
 		if (*s == 'v' && strcmp(s + 1, "ersion") == 0)
 			return VER_DESC;
 	}

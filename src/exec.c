@@ -2431,9 +2431,10 @@ exec_cmd(char **comm)
 		kbind_busy = 0;
 	}
 
+	/*    ########### TOGGLE LONG VIEW ##################     */
 	else if (*comm[0] == 'l' && (comm[0][1] == 'v' || comm[0][1] == 'l')
 	&& !comm[0][2])
-		return (exit_code = long_view_function(comm[1] ? comm[1] : (char *)NULL));
+		return (exit_code = long_view_function(comm[1]));
 
 	/*    ############# PREVIEW FILES ##################     */
 	else if (*comm[0] == 'v' && strcmp(comm[0], "view") == 0)

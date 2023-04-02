@@ -220,7 +220,6 @@ int_cmds_generator(const char *text, int state)
 		"ty      (merge tags)",
 		"t       (trash files)",
 		"u       (restore trashed files using a menu)",
-		"uc      (set Unicode on-off)",
 		"unpin   (unpin the pinned directory)",
 		"v       (copy selected files here: v sel, or paste sel)",
 		"ver     (print version information)",
