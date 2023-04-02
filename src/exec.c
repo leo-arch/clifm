@@ -803,7 +803,7 @@ pager_function(char *arg)
 }
 
 static int
-ext_args_function(char *arg)
+ext_cmds_function(char *arg)
 {
 	if (!arg || IS_HELP(arg)) {
 		puts(_(EXT_USAGE));
@@ -1285,7 +1285,7 @@ refresh_function(const int old_exit_code)
 }
 
 static int
-export_function(char **args)
+export_files_function(char **args)
 {
 	if (args[1] && IS_HELP(args[1])) {
 		puts(_(EXPORT_USAGE));
@@ -2152,6 +2152,28 @@ long_view_function(const char *arg)
 	return rl_toggle_long_view(0, 0);
 }
 
+/* Remove the variable VAR from the environment */
+static int
+unset_function(const char *var)
+{
+	if (!var || !*var) {
+		printf("unset: A variable name is required\n");
+		return EXIT_SUCCESS;
+	}
+
+	if (IS_HELP(var)) {
+		puts(UNSET_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	if (unsetenv(var) == -1) {
+		fprintf(stderr, "unset: %s: %s\n", var, strerror(errno));
+		return errno;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2561,7 +2583,7 @@ exec_cmd(char **comm)
 		return (exit_code = kbinds_function(comm));
 
 	else if (*comm[0] == 'e' && strcmp(comm[0], "exp") == 0)
-		return (exit_code = export_function(comm));
+		return (exit_code = export_files_function(comm));
 
 	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0)
 		return (exit_code = opener_function(comm[1]));
@@ -2623,7 +2645,7 @@ exec_cmd(char **comm)
 	/* #### EXT #### */
 	else if (*comm[0] == 'e' && comm[0][1] == 'x' && comm[0][2] == 't'
 	&& !comm[0][3])
-		return (exit_code = ext_args_function(comm[1]));
+		return (exit_code = ext_cmds_function(comm[1]));
 
 	/* #### PAGER #### */
 	else if (*comm[0] == 'p' && ((comm[0][1] == 'g' && !comm[0][2])
@@ -2688,8 +2710,13 @@ exec_cmd(char **comm)
 	}
 
 	else if ((*comm[0] == '?' && !comm[0][1]) || strcmp(comm[0], "help") == 0) {
-		return (exit_code = quick_help(comm[1] ? comm[1] : NULL));
+		return (exit_code = quick_help(comm[1]));
 	}
+
+	else if (*comm[0] == 'u' && strcmp(comm[0], "unset") == 0) {
+		return unset_function(comm[1]);
+	}
+
 
 	/* These functions just print stuff, so that the value of exit_code
 	 * is always zero, that is to say, success */
