@@ -1478,7 +1478,7 @@ F1             Open the manpage\n\
 ih             Run the interactive help plugin (requires fzf)\n\
 config | F10   View/edit the configuration file\n\
 ll | Alt-l     Toggle detail/long view mode\n\
-Alt-.          Toggle hidden files\n\
+hf | Alt-.     Toggle hidden files\n\
 Alt-TAB        Toggle disk usage analyzer mode\n\
 kb edit | F9   Edit keybindings\n\
 mm edit | F6   Change default associated applications\n\
