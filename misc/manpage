@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 1, 2023" "clifm 1.11.3" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 2, 2023" "clifm 1.11.3" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2974,25 +2974,25 @@ lb lb
 l l.
 Command	Description
 T{
-hf on/off (Alt-.)
+hf (Alt-.)
 T}	Toggle hidden files
+T{
+ll (Alt-l)
+T}	Toggle detail/long view mode
+T{
+rf (Enter -on empty line- or Ctrl-l)
+T}	Reprint the current list of files
 T{
 Alt-,
 T}	Toggle list-directories-only
 T{
-Alt-l
-T}	Toggle detail/long view mode
-T{
 Alt-TAB, Ctrl-Alt-i
 T}	Toggle disk usage analyzer mode
-T{
-rf (Enter)
-T}	Reprint the current list of files
 T{
 !<TAB>
 T}	Navigate through the command history
 T{
-config (also 'edit' or F10)
+config (F10)
 T}	View/edit the main configuration file
 T{
 pf set test
