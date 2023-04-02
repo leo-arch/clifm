@@ -59,7 +59,7 @@ Briefly put, with **clifm** the command-line is always already there, never hidd
 
 ---
 
-<sup>1</sup> <i>For more information about these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>. \
+<sup>1</sup> <i>For more information about these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>.
 
 <sup>2</sup> <i>For a detailed description consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki</i>.
 
