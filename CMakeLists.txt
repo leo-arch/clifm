@@ -26,6 +26,13 @@ if(APPLE)
     ${Readline_LINK_LIBRARIES}
     ${Magic_LINK_LIBRARIES}
   )
+elseif(CYGWIN)
+  target_link_libraries(clifm PUBLIC
+    readline
+    acl
+    magic
+    intl
+  )
 elseif(UNIX)
   target_link_libraries(clifm PUBLIC
     readline
