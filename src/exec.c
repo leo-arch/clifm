@@ -484,14 +484,57 @@ reload_binaries(void)
 }
 #endif /* !__CYGWIN__ */
 
+/* Little export implementation. What it lacks? Command substitution
+ * Export ARG, in the form "VAR=VALUE" to the environment */
+static int
+export_var_function(char *arg)
+{
+	if (!arg || !*arg) {
+		fputs(_("export: A parameter, in the form VAR=VALUE, "
+			"is required\n"), stderr);
+		return EXIT_FAILURE;
+	}
+
+	if (IS_HELP(arg)) {
+		puts(EXPORT_VAR_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	/* ARG might have been escaped by parse_input_str(), in the command
+	 * and parameter substitution block. Let's deescape it */
+	char *ds = dequote_str(arg, 0);
+	if (!ds) {
+		fputs(_("export: Error dequoting argument\n"), stderr);
+		return EXIT_FAILURE;
+	}
+
+	char *p = strchr(ds, '=');
+	if (!p || !*(p + 1)) {
+		fprintf(stderr, _("export: %s: Empty assignement\n"), ds);
+		free(ds);
+		return EXIT_FAILURE;
+	}
+
+	errno = 0;
+
+	*p = '\0';
+	if (setenv(ds, p + 1, 1) == -1)
+		fprintf(stderr, "export: %s\n", strerror(errno));
+	*p = '=';
+
+	free(ds);
+	return errno;
+}
+
+/*
 static int
 _export(char *arg)
 {
 	if (!arg || !*arg)
 		return (-1);
 
-	/* ARG might have been escaped by parse_input_str(), in the command
-	 * and parameter substitution block. Let's deescape it */
+	// ARG might have been escaped by parse_input_str(), in the command
+	// and parameter substitution block. Let's deescape it
 	char *ds = dequote_str(arg, 0);
 	if (!ds) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error dequoting "
@@ -519,7 +562,7 @@ _export(char *arg)
 
 	free(ds);
 	return errno;
-}
+} */
 
 static inline void
 append_ampersand(char **cmd, size_t *len)
@@ -606,11 +649,11 @@ run_shell_cmd(char **args)
 		return EXIT_FAILURE;
 
 	/* Little export implementation. What it lacks? Command substitution */
-	if (*args[0] == 'e' && strcmp(args[0], "export") == 0 && args[1]) {
+/*	if (*args[0] == 'e' && strcmp(args[0], "export") == 0 && args[1]) {
 		int exit_status = _export(args[1]);
 		if (exit_status != -1)
 			return exit_status;
-	}
+	} */
 
 	char *cmd = construct_shell_cmd(args);
 
@@ -1288,7 +1331,7 @@ static int
 export_files_function(char **args)
 {
 	if (args[1] && IS_HELP(args[1])) {
-		puts(_(EXPORT_USAGE));
+		puts(_(EXPORT_FILES_USAGE));
 		return EXIT_SUCCESS;
 	}
 
@@ -2705,16 +2748,24 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "commands") == 0))
 		return (exit_code = list_commands());
 
+	/* #### PATH, CWD #### */
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) {
 		return (exit_code = print_cwd());
 	}
 
+	/* #### HELP #### */
 	else if ((*comm[0] == '?' && !comm[0][1]) || strcmp(comm[0], "help") == 0) {
 		return (exit_code = quick_help(comm[1]));
 	}
 
+	/* #### EXPORT #### */
+	else if (*comm[0] == 'e' && strcmp(comm[0], "export") == 0) {
+		return (exit_code = export_var_function(comm[1]));
+	}
+
+	/* #### UNSET #### */
 	else if (*comm[0] == 'u' && strcmp(comm[0], "unset") == 0) {
-		return unset_function(comm[1]);
+		return (exit_code = unset_function(comm[1]));
 	}
 
 

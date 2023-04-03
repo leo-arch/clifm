@@ -296,7 +296,7 @@ Parameters passed to cp: -a"
 \x1b[1mUSAGE\x1b[0m\n\
   ext [on, off, status]"
 
-#define EXPORT_USAGE "Export files to a temporary file\n\n\
+#define EXPORT_FILES_USAGE "Export files to a temporary file\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   exp [ELN/FILE]...\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -304,6 +304,10 @@ Parameters passed to cp: -a"
     exp sel\n\
 - Export all PDF files in the current directory\n\
     exp *.pdf"
+
+#define EXPORT_VAR_USAGE "Add a variable to the environment\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  export NAME=VALUE"
 
 #define FC_USAGE "Turn on/off the files counter for directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -995,9 +999,9 @@ Mark the files you need via TAB and then press Enter or Right"
 - Untrash files selectively using a menu\n\
     u (or 'u <TAB>' to choose from a list - multi-selection is allowed)"
 
-#define UNSET_USAGE "Remove a variable from the environment\n\n\
+#define UNSET_USAGE "Delete a variable from the environment\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  unset VAR"
+  unset NAME"
 
 #define UNTRASH_USAGE "Restore files from the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
