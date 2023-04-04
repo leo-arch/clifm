@@ -2573,3 +2573,17 @@ reload_dirlist(void)
 	list_dir();
 	exit_code = bk;
 }
+
+void
+refresh_screen(void)
+{
+	if (conf.autols == 0) {
+		CLEAR;
+		return;
+	}
+
+	int bk = conf.clear_screen;
+	conf.clear_screen = 1;
+	reload_dirlist();
+	conf.clear_screen = bk;
+}

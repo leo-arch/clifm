@@ -1013,7 +1013,8 @@ prompt(void)
 		if (conf.autols == 1 && ((flags & DELAYED_REFRESH)
 		|| xargs.refresh_on_empty_line == 1)) {
 			flags &= ~DELAYED_REFRESH;
-			reload_dirlist();
+			refresh_screen();
+//			reload_dirlist();
 		} else {
 			flags &= ~DELAYED_REFRESH;
 		}

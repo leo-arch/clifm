@@ -1321,8 +1321,13 @@ ow_function(char **args)
 static int
 refresh_function(const int old_exit_code)
 {
-	if (conf.autols == 1)
+//	if (conf.autols == 1) {
+		refresh_screen();
+/*		int bk = conf.clear_screen;
+		conf.clear_screen = 1;
 		reload_dirlist();
+		conf.clear_screen = bk; */
+//	}
 
 	return old_exit_code;
 }
@@ -1701,11 +1706,10 @@ static int
 ls_function(void)
 {
 	free_dirlist();
-	int exit_status = list_dir();
-	if (get_sel_files() != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+	int ret = list_dir();
+	get_sel_files();
 
-	return exit_status;
+	return ret;
 }
 
 static int

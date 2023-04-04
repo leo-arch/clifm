@@ -30,6 +30,7 @@ __BEGIN_DECLS
 void free_dirlist(void);
 int  list_dir(void);
 void reload_dirlist(void);
+void refresh_screen(void);
 
 __END_DECLS
 
