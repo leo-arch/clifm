@@ -48,7 +48,8 @@
 #include "misc.h"
 #include "history.h"
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__CYGWIN__)
+# define HAVE_PROC_MOUNTS
 # define DISK_LABELS_PATH "/dev/disk/by-label"
 #endif
 
@@ -128,7 +129,7 @@ get_block_devices(void)
 #endif // __linux__
 */
 
-#ifdef __linux__
+#ifdef HAVE_PROC_MOUNTS
 static char **
 get_block_devices(void)
 {
@@ -456,7 +457,7 @@ mount_dev(int n)
 
 	return EXIT_SUCCESS;
 }
-#endif /* __linux__ */
+#endif /* HAVE_PROC_MOUNTS */
 
 static void
 free_media(void)
@@ -500,37 +501,36 @@ int
 media_menu(int mode)
 {
 #if defined(__HAIKU__)
-	fprintf(stderr, _("%s: %s: This feature is not available on Haiku\n"),
-		PROGRAM_NAME, mode == MEDIA_LIST ? _("Mountpoints") : _("Media"));
+	fprintf(stderr, _("%s: This feature is not available on Haiku\n"),
+		mode == MEDIA_LIST ? _("mountpoints") : _("media"));
 	return EXIT_FAILURE;
-#endif
+#endif /* __HAIKU__ */
 
-#ifndef __linux__
+#ifndef HAVE_PROC_MOUNTS
 	if (mode == MEDIA_MOUNT) {
-		fprintf(stderr, _("%s: media: Function only available on Linux "
-			"systems\n"), PROGRAM_NAME);
+		fputs(_("media: Function only available on Linux systems\n"), stderr);
 		return EXIT_FAILURE;
 	}
-#endif
+#endif /* HAVE_PROC_MOUNTS */
 
 	if (mode == MEDIA_MOUNT && xargs.mount_cmd == UNSET) {
-		fprintf(stderr, _("%s: media: No mount command found. Install either "
-			"udevil or udisks2\n"), PROGRAM_NAME);
+		fputs(_("media: No mount command found. Install either "
+			"udevil or udisks2\n"), stderr);
 		return EXIT_FAILURE;
 	}
 
-#ifdef __linux__
+#ifdef HAVE_PROC_MOUNTS
 	printf("%s%s%s\n\n", BOLD, mode == MEDIA_LIST ? _("Mountpoints")
 			: _("Mounted devices"), df_c);
 #else
 	printf(_("%sMountpoints%s\n\n"), BOLD, df_c);
-#endif
+#endif /* HAVE_PROC_MOUNTS */
 
 	media = (struct mnt_t *)xnmalloc(1, sizeof(struct mnt_t));
 	mp_n = 0;
 	int exit_status = EXIT_SUCCESS;
 
-#ifdef __linux__
+#ifdef HAVE_PROC_MOUNTS
 	if (list_mounted_devs(mode) == EXIT_FAILURE) {
 		free(media);
 		media = (struct mnt_t *)NULL;
@@ -549,18 +549,18 @@ media_menu(int mode)
 #elif defined(__NetBSD__)
 	struct statvfs *fslist;
 	mp_n = (size_t)getmntinfo(&fslist, MNT_NOWAIT);
-#endif /* __linux__ */
+#endif /* HAVE_PROC_MOUNTS */
 
 	/* This should never happen: There should always be a mountpoint,
 	 * at least "/" */
 	// cppcheck-suppress knownConditionTrueFalse
 	if (mp_n == 0) {
-#ifdef __linux__
+#ifdef HAVE_PROC_MOUNTS
 		printf(_("%s: There are no available %s\n"), mode == MEDIA_LIST ? "mp"
 			: "media", mode == MEDIA_LIST ? _("mountpoints") : _("devices"));
 #else
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
-#endif
+#endif /* HAVE_PROC_MOUNTS */
 		return EXIT_SUCCESS;
 	}
 
@@ -592,7 +592,7 @@ media_menu(int mode)
 	/* Update filesystem counter as it would be used to free() the
 	 * mountpoints entries later (below) */
 	mp_n = (size_t)j;
-#endif
+#endif /* BSD || APPLE */
 
 	putchar('\n');
 	int n = -1;
@@ -606,14 +606,14 @@ media_menu(int mode)
 
 	char *input = (char *)NULL;
 	while (!input) {
-#ifdef __linux__
+#ifdef HAVE_PROC_MOUNTS
 		if (mode == MEDIA_LIST)
 			input = rl_no_hist(_("Choose a mountpoint: "));
 		else
 			input = rl_no_hist(_("Choose a mountpoint/device: "));
 #else
 		input = rl_no_hist(_("Choose a mountpoint: "));
-#endif
+#endif /* HAVE_PROC_MOUNTS */
 		if (!input)
 			continue;
 
@@ -660,7 +660,7 @@ media_menu(int mode)
 		return exit_status;
 	}
 
-#ifdef __linux__
+#ifdef HAVE_PROC_MOUNTS
 	if (mode == MEDIA_MOUNT) {
 		if (!media[n].mnt) {
 			/* The device is unmounted: mount it */
@@ -676,7 +676,7 @@ media_menu(int mode)
 			goto EXIT;
 		}
 	}
-#endif /* __linux__ */
+#endif /* HAVE_PROC_MOUNTS */
 
 	if (xchdir(media[n].mnt, SET_TITLE) != EXIT_SUCCESS) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
