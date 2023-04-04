@@ -28,7 +28,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+|| defined(__DragonFly__)
 # include <sys/mount.h>
 # include <sys/sysctl.h>
 #elif defined(__APPLE__)
@@ -507,14 +508,14 @@ media_menu(int mode)
 #ifndef __linux__
 	if (mode == MEDIA_MOUNT) {
 		fprintf(stderr, _("%s: media: Function only available on Linux "
-				"systems\n"), PROGRAM_NAME);
+			"systems\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 #endif
 
 	if (mode == MEDIA_MOUNT && xargs.mount_cmd == UNSET) {
 		fprintf(stderr, _("%s: media: No mount command found. Install either "
-				"udevil or udisks2\n"), PROGRAM_NAME);
+			"udevil or udisks2\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -541,7 +542,8 @@ media_menu(int mode)
 	if (mode == MEDIA_MOUNT)
 		list_unmounted_devs();
 
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__) \
+|| defined(__DragonFly__)
 	struct statfs *fslist;
 	mp_n = (size_t)getmntinfo(&fslist, MNT_NOWAIT);
 #elif defined(__NetBSD__)
@@ -563,7 +565,7 @@ media_menu(int mode)
 	}
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
-|| defined(__APPLE__)
+|| defined(__APPLE__) || defined(__DragonFly__)
 	int i, j;
 	for (i = j = 0; i < (int)mp_n; i++) {
 		/* Do not list all mountpoints, but only those corresponding
