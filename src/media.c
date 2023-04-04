@@ -475,7 +475,7 @@ free_media(void)
 static int
 print_dev_info(int n)
 {
-	if (!media[n].dev)
+	if (!media[n].dev || xargs.mount_cmd == UNSET)
 		return EXIT_FAILURE;
 
 	int exit_status = EXIT_SUCCESS;
@@ -501,7 +501,7 @@ media_menu(int mode)
 {
 #if defined(__HAIKU__)
 	fprintf(stderr, _("%s: %s: This feature is not available on Haiku\n"),
-			PROGRAM_NAME, mode == MEDIA_LIST ? _("Mountpoints") : _("Media"));
+		PROGRAM_NAME, mode == MEDIA_LIST ? _("Mountpoints") : _("Media"));
 	return EXIT_FAILURE;
 #endif
 
@@ -599,7 +599,8 @@ media_menu(int mode)
 	/* Ask the user and mount/unmount or chdir into the selected
 	 * device/mountpoint */
 	puts(_("Enter 'q' to quit"));
-	puts(_("Enter 'iELN' for device information. Ex: i4"));
+	if (xargs.mount_cmd != UNSET)
+		puts(_("Enter 'iELN' for device information. Ex: i4"));
 
 	int info = 0;
 
