@@ -83,12 +83,10 @@
 #endif // _PALAND_PRINTF */
 #define xprintf printf
 
-//#include <readline/readline.h>
-
 /* Macros for run_dir_cmd function */
-#define DIR_IN 0
+#define DIR_IN  0
 #define DIR_OUT 1
-#define DIR_IN_NAME ".cfm.in"
+#define DIR_IN_NAME  ".cfm.in"
 #define DIR_OUT_NAME ".cfm.out"
 
 /* Amount of digits of the files counter of the longest directory */
@@ -198,11 +196,13 @@ print_disk_usage(void)
 		return;
 	}
 
-	char *free_space = get_size_unit((off_t)(stat.f_frsize * stat.f_bavail));
+	char *free_space = get_size_unit((off_t)(stat.f_bavail * stat.f_frsize));
 	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
+	int free_percentage = (int)(((stat.f_bavail * stat.f_frsize) * 100)
+		/ (stat.f_blocks * stat.f_frsize));
 
-	print_reload_msg(_("%s/%s free\n"),
-		free_space ? free_space : "?", size ? size : "?");
+	print_reload_msg(_("%s/%s (%d%% free)\n"),
+		free_space ? free_space : "?", size ? size : "?", free_percentage);
 
 	free(free_space);
 	free(size);
