@@ -313,6 +313,9 @@ disable the auto-suggestions system
 \fB\-\-no\-tips\fR
 disable startup tips
 .TP
+\fB\-\-no\-trim\-names\fR
+do not trim file names (see \fIMaxFilenameLen\fR in the configuration file)
+.TP
 \fB\-\-no\-warning\-prompt\fR
 disable the warning prompt (used to highlight invalid command names)
 .TP
