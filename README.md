@@ -49,8 +49,16 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 ## :space_invader: Brief description
 
-**Clifm** is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
+**Clifm** is not so much about features (though it provides quite a lot of them), but about design, about the way in which you interact with your file system.
 
+Most terminal file managers out there (if not all) are built/designed using the **TUI** principles, much like the superb `Midnight Commander` or `Ranger`. But **clifm** is built rather based on the **CLI** principles: do not navigate through a big menu of files, **just type it!**, exactly as you do in your shell, but easier and faster.
+
+**Clifm** indeed is a **C**ommand **L**ine **I**nterface **F**ile **M**anager. \
+It is not better, **it's just different!** :wink:
+
+For a detailed description consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki.
+
+<!--
 Unlike most terminal file managers out there, indeed, **clifm** replaces the traditional TUI interface (also known as curses or text-menu based interface) by a command-line interface (CLI),<sup>1</sup> also known as REPL.<sup>2</sup>
 
 If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic files listing, files selection, bookmarks, tags, directory jumper, directory and commands history, auto-cd and auto-open, bulk rename, TAB completion, autosuggestions, and a trash system, among [other features](#features). In this sense, **clifm** is certainly a file manager, but also a shell extension.
@@ -61,7 +69,8 @@ Briefly put, with **clifm** the command-line is always already there, never hidd
 
 <sup>1</sup> <i>For more information about these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>.
 
-<sup>2</sup> <i>For a detailed description consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki</i>.
+For a detailed description consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki</i>.
+-->
 
 ---
 
