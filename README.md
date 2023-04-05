@@ -53,7 +53,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 
 Most terminal file managers out there (if not all) are built/designed using the **TUI** principles, much like the superb `Midnight Commander` or `Ranger`. But **clifm** is built rather based on the **CLI** principles: do not navigate through a big menu of files, **just type it!**, exactly as you do in your shell, but easier and faster.
 
-**Clifm** is not better, **it's just different!** :wink:
+Not better, **just different!** :wink:
 
 For a detailed description consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of our Wiki.
 
