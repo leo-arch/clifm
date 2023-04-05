@@ -1014,7 +1014,6 @@ prompt(void)
 		|| xargs.refresh_on_empty_line == 1)) {
 			flags &= ~DELAYED_REFRESH;
 			refresh_screen();
-//			reload_dirlist();
 		} else {
 			flags &= ~DELAYED_REFRESH;
 		}

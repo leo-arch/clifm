@@ -1321,14 +1321,7 @@ ow_function(char **args)
 static int
 refresh_function(const int old_exit_code)
 {
-//	if (conf.autols == 1) {
-		refresh_screen();
-/*		int bk = conf.clear_screen;
-		conf.clear_screen = 1;
-		reload_dirlist();
-		conf.clear_screen = bk; */
-//	}
-
+	refresh_screen();
 	return old_exit_code;
 }
 

@@ -677,6 +677,113 @@ get_user_input(int *a, const size_t *nn)
 	return input;
 }
 
+static void
+set_exec_flags(char *str, int *exec_flags)
+{
+	if (*str == 'E') {
+		*exec_flags |= E_NOSTDERR;
+		if (*(str + 1) == 'O')
+			*exec_flags |= E_NOSTDOUT;
+	} else if (*str == 'O') {
+		*exec_flags |= E_NOSTDOUT;
+		if (*(str + 1) == 'E')
+			*exec_flags |= E_NOSTDERR;
+	}
+}
+
+/* Expand %f placeholder, stderr/stdout flags, and environment variables
+ * in the opening application line */
+static size_t
+expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
+{
+	size_t f = 0, i;
+	char **a = *cmd;
+	*exec_flags = E_NOFLAG;
+
+	for (i = 0; a[i]; i++) {
+		/* Expand %f pĺaceholder */
+		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
+			a[i] = (char *)xrealloc(a[i], (strlen(fpath) + 1) * sizeof(char));
+			strcpy(a[i], fpath);
+			f = 1;
+			continue;
+		}
+
+		if (*a[i] == '!' && (a[i][1] == 'E' || a[i][1] == 'O')) {
+			set_exec_flags(a[i] + 1, exec_flags);
+			free(a[i]);
+			a[i] = (char *)NULL;
+			continue;
+		}
+
+		/* Expand environment variable */
+		if (*a[i] == '$' && *(a[i] + 1) >= 'A' && *(a[i] + 1) <= 'Z') {
+			char *p = expand_env(a[i]);
+			if (!p)
+				continue;
+			a[i] = (char *)xrealloc(a[i], (strlen(p) + 1) * sizeof(char *));
+			strcpy(a[i], p);
+			free(p);
+			continue;
+		}
+
+		/* Check if the command needs to be backgrounded */
+		if (*a[i] == '&') {
+			bg_proc = 1;
+			free(a[i]);
+			a[i] = (char *)NULL;
+		}
+	}
+
+	*n = i;
+	return f;
+}
+
+/* Open the file FPATH via the application APP */
+static int
+run_mime_app(char **app, char **fpath)
+{
+	char **cmd = split_str(*app, NO_UPDATE_ARGS);
+	if (!cmd) {
+		free(*app);
+#ifndef __CYGWIN__
+	// fpath is an argument passed to mime_open(), which should not be freed
+		free(*fpath);
+#endif
+		return EXIT_FAILURE;
+	}
+
+	int exec_flags = 0;
+	size_t i = 0;
+	size_t f = expand_app_fields(&cmd, &i, *fpath, &exec_flags);
+	size_t n = i;
+
+	/* If no %f placeholder was found, append file name */
+	if (f == 0) {
+		cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
+		cmd[i] = savestring(*fpath, strlen(*fpath));
+		cmd[i + 1] = (char *)NULL;
+		n++;
+	}
+
+	int ret = launch_execve(cmd, (bg_proc && !open_in_foreground)
+			? BACKGROUND : FOREGROUND, exec_flags);
+
+	for (i = 0; i < n; i++)
+		free(cmd[i]);
+	free(cmd);
+
+	free(*app);
+#ifndef __CYGWIN__
+	// fpath is an argument passed to mime_open(), which should not be freed
+	free(*fpath);
+#endif
+
+	if (ret == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+	return EXIT_FAILURE;
+}
+
 static int
 mime_list_open(char **apps, char *file)
 {
@@ -738,7 +845,16 @@ mime_list_open(char **apps, char *file)
 	if (strchr(app, ' ')) {
 		size_t f = 0;
 		char **cmd = split_str(app, NO_UPDATE_ARGS);
+		int exec_flags = E_NOFLAG;
+
 		for (i = 0; cmd[i]; i++) {
+			if (*cmd[i] == '!' && (cmd[i][1] == 'E' || cmd[i][1] == 'O')) {
+				set_exec_flags(cmd[i] + 1, &exec_flags);
+				free(cmd[i]);
+				cmd[i] = (char *)NULL;
+				continue;
+			}
+
 			if (*cmd[i] == '&') {
 				bg_proc = 1;
 				free(cmd[i]);
@@ -760,7 +876,7 @@ mime_list_open(char **apps, char *file)
 		}
 
 		/* If file to be opened was not specified via %f, append
-		 * ir to the cmd array */
+		 * it to the cmd array */
 		if (f == 0) {
 			cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
 			cmd[i] = savestring(file, strlen(file));
@@ -768,7 +884,7 @@ mime_list_open(char **apps, char *file)
 		}
 
 		if (launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-		bg_proc ? E_NOSTDERR : E_NOFLAG) == EXIT_SUCCESS)
+		exec_flags) == EXIT_SUCCESS)
 			ret = EXIT_SUCCESS;
 
 		for (i = 0; cmd[i]; i++)
@@ -1072,7 +1188,7 @@ run_cmd_noargs(char *arg, char *name)
 }
 
 static void
-append_params(char **args, char *name, char ***cmd)
+append_params(char **args, char *name, char ***cmd, int *exec_flags)
 {
 	size_t i, n = 1, f = 0;
 	for (i = 1; args[i]; i++) {
@@ -1080,6 +1196,11 @@ append_params(char **args, char *name, char ***cmd)
 			f = 1;
 			(*cmd)[n] = savestring(name, strlen(name));
 			n++;
+			continue;
+		}
+
+		if (*args[i] == '!' && (args[i][1] == 'E' || args[i][1] == 'O')) {
+			set_exec_flags(args[i] + 1, exec_flags);
 			continue;
 		}
 
@@ -1118,10 +1239,10 @@ run_cmd_plus_args(char **args, char *name)
 	char **cmd = (char **)xnmalloc(i + 2, sizeof(char *));
 	cmd[0] = savestring(args[0], strlen(args[0]));
 
-	append_params(args, name, &cmd);
+	int exec_flags = E_NOFLAG;
+	append_params(args, name, &cmd, &exec_flags);
 
-	int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND,
-			bg_proc ? E_NOSTDERR : E_NOFLAG);
+	int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, exec_flags);
 
 	for (i = 0; cmd[i]; i++)
 		free(cmd[i]);
@@ -1138,12 +1259,30 @@ join_and_run(char **args, char *name)
 	if (!args || !args[0])
 		return EXIT_FAILURE;
 
-	/* Just an application name */
-	if (!args[1])
+	/* Application name plus parameters (array): 'ow FILE CMD ARG...' */
+	if (args[1])
+		return run_cmd_plus_args(args, name);
+
+	/* Just an application name: 'ow FILE CMD' */
+	if (!strchr(args[0], ' '))
 		return run_cmd_noargs(args[0], name);
 
-	/* Application name plus parameters */
-	return run_cmd_plus_args(args, name);
+	/* Command is a quoted string: 'ow FILE "CMD ARG ARG..."' */
+	char *deq_str = dequote_str(args[0], 0);
+	char **ss = split_str(deq_str ? deq_str : args[0], NO_UPDATE_ARGS);
+	free(deq_str);
+
+	if (!ss)
+		return EXIT_FAILURE;
+
+	int ret = run_cmd_plus_args(ss, name);
+
+	size_t i;
+	for (i = 0; ss[i]; i++)
+		free(ss[i]);
+	free(ss);
+
+	return ret;
 }
 
 /* Display available opening applications for FILENAME, get user input,
@@ -1360,6 +1499,7 @@ mime_open_with(char *filename, char **args)
 	for (i = 0; apps[i]; i++)
 		free(apps[i]);
 	free(apps);
+
 	free(name);
 
 	return ret;
@@ -1575,113 +1715,6 @@ run_archiver(char **fpath, char **app)
 	return exit_status;
 }
 #endif /* _NO_ARCHIVING */
-
-static void
-set_exec_flags(char *s, int *f)
-{
-	if (*s == 'E') {
-		*f |= E_NOSTDERR;
-		if (*(s + 1) == 'O')
-			*f |= E_NOSTDOUT;
-	} else if (*s == 'O') {
-		*f |= E_NOSTDOUT;
-		if (*(s + 1) == 'E')
-			*f |= E_NOSTDERR;
-	}
-}
-
-/* Expand %f placeholder, stderr/stdout flags, and environment variables
- * in the opening application line */
-static size_t
-expand_app_fields(char ***cmd, size_t *n, char *fpath, int *exec_flags)
-{
-	size_t f = 0, i;
-	char **a = *cmd;
-	*exec_flags = E_NOFLAG;
-
-	for (i = 0; a[i]; i++) {
-		/* Expand %f pĺaceholder */
-		if (*a[i] == '%' && *(a[i] + 1) == 'f') {
-			a[i] = (char *)xrealloc(a[i], (strlen(fpath) + 1) * sizeof(char));
-			strcpy(a[i], fpath);
-			f = 1;
-			continue;
-		}
-
-		if (*a[i] == '!') {
-			set_exec_flags(a[i] + 1, exec_flags);
-			free(a[i]);
-			a[i] = (char *)NULL;
-			continue;
-		}
-
-		/* Expand environment variable */
-		if (*a[i] == '$' && *(a[i] + 1) >= 'A' && *(a[i] + 1) <= 'Z') {
-			char *p = expand_env(a[i]);
-			if (!p)
-				continue;
-			a[i] = (char *)xrealloc(a[i], (strlen(p) + 1) * sizeof(char *));
-			strcpy(a[i], p);
-			free(p);
-			continue;
-		}
-
-		/* Check if the command needs to be backgrounded */
-		if (*a[i] == '&') {
-			bg_proc = 1;
-			free(a[i]);
-			a[i] = (char *)NULL;
-		}
-	}
-
-	*n = i;
-	return f;
-}
-
-/* Open the file FPATH via the application APP */
-static int
-run_mime_app(char **app, char **fpath)
-{
-	char **cmd = split_str(*app, NO_UPDATE_ARGS);
-	if (!cmd) {
-		free(*app);
-#ifndef __CYGWIN__
-	// fpath is an argument passed to mime_open(), which should not be freed
-		free(*fpath);
-#endif
-		return EXIT_FAILURE;
-	}
-
-	int exec_flags = 0;
-	size_t i = 0;
-	size_t f = expand_app_fields(&cmd, &i, *fpath, &exec_flags);
-	size_t n = i;
-
-	/* If no %f placeholder was found, append file name */
-	if (f == 0) {
-		cmd = (char **)xrealloc(cmd, (i + 2) * sizeof(char *));
-		cmd[i] = savestring(*fpath, strlen(*fpath));
-		cmd[i + 1] = (char *)NULL;
-		n++;
-	}
-
-	int ret = launch_execve(cmd, (bg_proc && !open_in_foreground)
-			? BACKGROUND : FOREGROUND, exec_flags);
-
-	for (i = 0; i < n; i++)
-		free(cmd[i]);
-	free(cmd);
-
-	free(*app);
-#ifndef __CYGWIN__
-	// fpath is an argument passed to mime_open(), which should not be freed
-	free(*fpath);
-#endif
-
-	if (ret == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
-	return EXIT_FAILURE;
-}
 
 #ifdef _NO_MAGIC
 /* Check the existence of the 'file' command */

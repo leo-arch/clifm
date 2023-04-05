@@ -1608,58 +1608,12 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else if (ct == TCMP_OPENWITH) {
-		/* Interpret the corresponding cmd line in the mimelist file
-		 * and replace the input string by the interpreted line */
-		char *sp = (char *)NULL;
-		if (rl_line_buffer) {
-			sp = strchr(rl_line_buffer, ' ');
-			if (!sp || !*(sp++)) {
-				free(buf);
-				return EXIT_FAILURE;
-			}
-		} else {
+		/* If multiple words ("CMD ARG..."), quote the string */
+		if (strchr(buf, ' ')) {
+			char *tmp = (char *)xnmalloc(strlen(buf) + 3, sizeof(char));
+			sprintf(tmp, "\"%s\"", buf);
 			free(buf);
-			return EXIT_FAILURE;
-		}
-
-		char *t = sp;
-		while (*t) {
-			if (t != sp && *t == ' ' && *(t - 1) != '\\') {
-				*t = '\0';
-				break;
-			}
-			++t;
-		}
-
-		size_t splen = (size_t)(t - sp);
-		if (splen > 0 && sp[splen - 1] == '/') {
-			splen--;
-			sp[splen] = '\0';
-		}
-
-		rl_delete_text(0, rl_end);
-		rl_point = rl_end = 0;
-		prefix_len = 0;
-
-		t = strchr(buf, '%');
-		if (t && *(t + 1) == 'f') {
-			char *ss = replace_substr(buf, "%f", sp);
-			if (ss) {
-				buf = (char *)xrealloc(buf, (strlen(ss) + 1) * sizeof(char));
-				strcpy(buf, ss);
-				free(ss);
-			}
-		} else {
-			size_t blen = strlen(buf);
-			if (blen > 0 && buf[blen - 1] == '\n') {
-				blen--;
-				buf[blen] = '\0';
-			}
-			splen = strlen(sp);
-			buf = (char *)xrealloc(buf, (blen + splen + 2) * sizeof(char));
-			buf[blen] = ' ';
-			buf[blen + 1] = '\0';
-			xstrsncpy(buf + blen + 1, sp, splen);
+			buf = tmp;
 		}
 	}
 

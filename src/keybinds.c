@@ -803,8 +803,6 @@ rl_refresh(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-//	if (conf.clear_screen)
-//		CLEAR;
 	keybind_exec_cmd("rf");
 	rl_reset_line_state();
 	return EXIT_SUCCESS;
