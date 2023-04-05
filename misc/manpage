@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 2, 2023" "clifm 1.11.3" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 4, 2023" "clifm 1.11.4" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -474,7 +474,7 @@ NOTE: Make sure alias names do not conflict with other commands, either internal
 .B ao, auto-open \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
 toggle the auto-open function on/off. If set to on, \fIFILE\fR amounts to \fIopen\ FILE\fR.
 .TP
-.B b, back \fR[\fIh\fR, \fIhist\fR] [\fIclear\fR] [\fI!ELN\fR]
+.B b, back \fR[\fIh\fR, \fIhist\fR] [\fIclear\fR] [\fIW!ELN\fR]
 unlike \fIcd\ ..\fR, which sends you to the parent directory of the current directory, this command (with no argument) sends you back to the previously visited directory.
 .sp
 \fBclifm\fR keeps a record of all visited directories. You can see this list by typing \fIb\ hist\fR or \fIb\ h\fR, and you can access any element in this list by simply passing the corresponding ELN in this list to the \fIback\fR command. Example:
@@ -927,11 +927,15 @@ If only a name/number is entered, it is taken as the user who owns the file(s).
 .sp
 Use the \fIpc\fR command to edit files permissions.
 .TP
-.B ow \fIELN/FILE\fR [\fIAPPLICATION\fR]
-Print a list of available applications associated to ELN/FILE (either via its MIME type or its file extension), allowing the user to choose one of these applications, and then open the file with the selected application. In simple words, this is what in most GUI file managers is called \fBOpen with...\fR This command supports TAB completion: just type "\fIow filename <TAB>\fR" and those applications able to open ELN/FILE will be listed.
-.TP
 .B opener \fR[\fIdefault\fR] [\fIAPPLICATION\fR]
 with no argument, prints the currently used resource opener (by default, \fILira\fR, \fBclifm\fR's built\-in opener). Otherwise, set APPLICATION (say \fIrifle\fR or \fIxdg-open\fR) as opener or, if \fIdefault\fR is passed instead, use \fILira\fR.
+.TP
+.B ow \fIELN/FILE\fR [\fIAPPLICATION\fR]
+If APPLICATION is specified, open ELN/FILE with APPLICATION. In case you need to add parameters to APPLICATION, it is recommended to quote the expression: \fIow FILE "APP ARG..."\fR.
+.sp
+If no APPLICATION is specified, the list of available applications associated to ELN/FILE (either via its MIME type or its file extension) is printed, allowing the user to choose one of these applications, and then open the file with the selected application.
+.sp
+This command supports TAB completion. Just type "\fIow filename <TAB>\fR" and those applications able to open ELN/FILE will be listed.
 .TP
 .B p, pr, prop \fIELN/FILE\fR...
 print file properties for ELN/FILE. The output of this function is much like the combined output of \fIls\ \-l\fR and \fIstat\fR. By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content).
