@@ -82,6 +82,7 @@ args=(
     '--no-restore-last-path[do not restore last visited directory at startup]'
 	'--no-suggestions[disable auto-suggestions]'
 	'--no-tips[disable startup tips]'
+	'--no-trim-names[do not trim file names]'
 	'--no-warning-prompt[disable the warning prompt, used to highlight invalid command names]'
 	'--no-welcome-message[disable the welcome message]'
 	'--only-dirs[list only directories and symbolic links to directories]'
