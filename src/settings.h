@@ -317,6 +317,7 @@ xf=01;31:xs=00;32:"
 #define DEF_TIPS 1
 #define DEF_TOGGLE_WORKSPACES 1
 #define DEF_TRASRM 0
+#define DEF_TRIM_NAMES 1
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
 

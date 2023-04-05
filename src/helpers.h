@@ -710,6 +710,9 @@ struct config_t {
 	int max_jump_total_rank;
 	int max_log;
 	int max_name_len;
+
+	int max_name_len_bk;
+
 	int max_path;
 	int max_printselfiles;
 	int min_jump_rank;
@@ -733,6 +736,9 @@ struct config_t {
 	int suggest_filetype_color;
 	int suggestions;
 	int tips;
+
+	int trim_names;
+
 #ifndef _NO_TRASH
 	int tr_as_rm;
 #else
@@ -1023,6 +1029,7 @@ struct param_t {
 #ifndef _NO_TRASH
 	int trasrm;
 #endif
+	int trim_names;
 	int virtual_dir_full_paths;
 	int vt100;
 	int welcome_message;

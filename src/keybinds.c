@@ -341,8 +341,10 @@ int rl_toggle_max_filename_len(int count, int key)
 		return EXIT_SUCCESS;
 
 	static int mnl_bk = 0, flag = 0;
-	if (flag == 0) {
-		mnl_bk = conf.max_name_len;
+
+	if (flag == 0 || conf.trim_names == 0) {
+		mnl_bk = conf.max_name_len_bk;
+//		mnl_bk = conf.max_name_len;
 		flag = 1;
 	}
 
@@ -363,8 +365,7 @@ int rl_toggle_max_filename_len(int count, int key)
 	if (conf.max_name_len == UNSET)
 		print_reload_msg(_("Max name length unset\n"));
 	else
-		print_reload_msg(_("Max name length set back to %d\n"),
-			conf.max_name_len);
+		print_reload_msg(_("Max name length set to %d\n"), conf.max_name_len);
 
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;

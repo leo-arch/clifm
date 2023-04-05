@@ -1222,6 +1222,7 @@ base name (if \\z is used in the prompt)\
 \n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
+\n      --no-trim-names\t\t Do not trim file names\
 \n      --no-warning-prompt\t Disable the warning prompt\
 \n      --no-welcome-message\t Disable the welcome message\
 \n      --only-dirs\t\t List only directories and symbolic links to directories\

@@ -1490,8 +1490,8 @@ create_config(char *file)
 ;LogCmds=%s\n\n"
 
 	    "# Minimum length at which a file name can be trimmed in long view mode\n\
-# (including ELN length and spaces). When running in long mode, this setting\n\
-# overrides MaxFilenameLen\n\
+# (including ELN length and spaces). If running in long mode, this setting\n\
+# overrides MaxFilenameLen whenever this latter is smaller than MINFILENAMETRIM\n\
 ;MinFilenameTrim=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
@@ -1655,12 +1655,15 @@ create_config(char *file)
 # greater than or equal to this value (say, 1000)\n\
 ;Pager=%s\n\n"
 
-	"# Maximum file name length for listed files. Names larger than\n\
-# MAXFILENAMELEN will be truncated at MAXFILENAMELEN using a tilde.\n\
+	"# Maximum file name length for listed files. If TrimNames is set to\n\
+# true, names larger than MAXFILENAMELEN will be truncated at MAXFILENAMELEN\n\
+# using a tilde.\n\
 # Set it to -1 (or empty) to remove this limit.\n\
 # When running in long mode, this setting is overriden by MinFilenameTrim\n\
 # whenever MAXFILENAMELEN is smaller than MINFILENAMETRIM.\n\
-;MaxFilenameLen=%d\n\n",
+;MaxFilenameLen=%d\n\n\
+# Trim file names longer than MAXFILENAMELEN\n\
+;TrimNames=%s\n\n",
 
 		DEF_LIGHT_MODE == 1 ? "true" : "false",
 		DEF_CLASSIFY == 1 ? "true" : "false",
@@ -1677,7 +1680,8 @@ create_config(char *file)
 		DEF_CASE_SENS_SEARCH == 1 ? "true" : "false",
 		DEF_UNICODE == 1 ? "true" : "false",
 		DEF_PAGER == 1 ? "true" : "false",
-		DEF_MAX_NAME_LEN
+		DEF_MAX_NAME_LEN,
+		DEF_TRIM_NAMES == 1 ? "true" : "false"
 		);
 
 	fprintf(config_fp,
@@ -3022,6 +3026,11 @@ read_config(void)
 			set_config_bool_value(line + 10, &conf.tr_as_rm);
 		}
 #endif
+
+		else if (xargs.trim_names == UNSET && *line == 'T'
+		&& strncmp(line, "TrimNames=", 10) == 0) {
+			set_config_bool_value(line + 10, &conf.trim_names);
+		}
 
 		else if (*line == 'U' && strncmp(line, "Unicode=", 8) == 0) {
 			set_config_bool_value(line + 8, &conf.unicode);

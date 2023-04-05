@@ -182,6 +182,9 @@ init_conf_struct(void)
 	conf.max_log = UNSET;
 	conf.max_jump_total_rank = UNSET;
 	conf.max_name_len = DEF_MAX_NAME_LEN;
+
+	conf.max_name_len_bk = 0;
+
 	conf.max_path = UNSET;
 	conf.max_printselfiles = UNSET;
 	conf.min_jump_rank = JUMP_UNSET; /* UNSET (-1) is a valid value for MinJumpRank */
@@ -204,6 +207,9 @@ init_conf_struct(void)
 	conf.suggest_filetype_color = UNSET;
 	conf.suggestions = UNSET;
 	conf.tips = UNSET;
+
+	conf.trim_names = UNSET;
+
 #ifndef _NO_TRASH
 	conf.tr_as_rm = UNSET;
 #endif
@@ -1994,6 +2000,7 @@ external_arguments(int argc, char **argv)
 		{"data-dir", required_argument, 0, 265},
 		{"fuzzy-algo", required_argument, 0, 266},
 		{"sel-file", required_argument, 0, 267},
+		{"no-trim-names", no_argument, 0, 268},
 	    {0, 0, 0, 0}
 	};
 
@@ -2257,6 +2264,7 @@ external_arguments(int argc, char **argv)
 			break;
 
 		case 267: set_custom_selfile(optarg); break;
+		case 268: xargs.trim_names = conf.trim_names = 0; break;
 
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
 		case 'A': conf.show_hidden = xargs.hidden = 1; break;
@@ -2599,6 +2607,7 @@ unset_xargs(void)
 #ifndef _NO_TRASH
 	xargs.trasrm = UNSET;
 #endif
+	xargs.trim_names = UNSET;
 	xargs.virtual_dir_full_paths = UNSET;
 	xargs.vt100 = UNSET;
 	xargs.welcome_message = UNSET;
@@ -3379,6 +3388,17 @@ check_time_str(void)
 void
 check_options(void)
 {
+	if (conf.trim_names == UNSET) {
+		if (xargs.trim_names == UNSET)
+			conf.trim_names = DEF_TRIM_NAMES;
+		else
+			conf.trim_names = xargs.trim_names;
+	}
+
+	conf.max_name_len_bk = conf.max_name_len;
+	if (conf.trim_names == 0)
+		conf.max_name_len = UNSET;
+
 	if (conf.relative_time == UNSET)
 		conf.relative_time = DEF_RELATIVE_TIME;
 
