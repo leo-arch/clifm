@@ -33,9 +33,9 @@ int  kbinds_function(char **);
 int  load_keybinds(void);
 void readline_kbinds(void);
 int  rl_quit(int, int);
+int  rl_toggle_dirs_first(int, int);
 int  rl_toggle_long_view(int, int);
 int  rl_toggle_hidden_files(int, int);
-int  rl_toggle_only_dirs(int, int);
 int  rl_toggle_light_mode(int, int);
 
 __END_DECLS

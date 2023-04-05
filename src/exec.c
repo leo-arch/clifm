@@ -741,7 +741,7 @@ dirs_first_function(const char *arg)
 		return EXIT_SUCCESS;
 
 	if (!arg)
-		return rl_toggle_only_dirs(0, 0);
+		return rl_toggle_dirs_first(0, 0);
 
 	if (IS_HELP(arg)) {
 		puts(_(FF_USAGE));

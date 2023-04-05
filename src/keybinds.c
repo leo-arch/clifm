@@ -920,7 +920,7 @@ rl_toggle_long_view(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-static int
+int
 rl_toggle_dirs_first(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
@@ -1665,7 +1665,7 @@ rl_launch_view(int count, int key)
 	return run_kb_cmd("view");
 }
 
-int
+static int
 rl_toggle_only_dirs(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
