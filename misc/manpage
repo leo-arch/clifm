@@ -2981,7 +2981,7 @@ ll (Alt-l)
 T}	Toggle detail/long view mode
 T{
 rf (Enter -on empty line- or Ctrl-l)
-T}	Reprint the current list of files
+T}	Clear/refresh the screen
 T{
 Alt-,
 T}	Toggle list-directories-only
