@@ -1102,6 +1102,119 @@ set_default_size_shades(void)
 	set_shades(tmp, SIZE_SHADES);
 }
 
+/* Check if LINE contains a valid color code, and store it into the
+ * ext_colors global array
+ * If LINE contains a color variable, expand it, check it, and store it */
+static int
+store_extension_line(char *line, size_t len)
+{
+	/* Remove the leading "*." from the extension line */
+	if (len <= 2 || *line != '*' || *(line + 1) != '.' || !*(line + 2))
+		return EXIT_FAILURE;
+	line += 2;
+	len -= 2;
+
+	char *q = strchr(line, '=');
+	if (!q || !*(q + 1) || q == line)
+		return EXIT_FAILURE;
+
+	*q = '\0';
+#ifndef CLIFM_SUCKLESS
+	char *c = (char *)NULL;
+	if (is_color_code(q + 1) == 0 && (c = check_defs(q + 1)) == NULL)
+#else
+	if (is_color_code(q + 1) == 0)
+#endif /* !CLIFM_SUCKLESS */
+		return EXIT_FAILURE;
+
+	ext_colors = (char **)xrealloc(ext_colors,
+		(ext_colors_n + 1) * sizeof(char *));
+#ifndef CLIFM_SUCKLESS
+	if (c) {
+		if (*c == '#') {
+			char *cc = hex2rgb(c);
+			size_t clen = (size_t)(q - line) + 3 + (cc ? strlen(cc) : 0);
+			ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
+			sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, cc ? cc : "0");
+		} else {
+			size_t clen = (size_t)(q - line) + strlen(c) + 3;
+			ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
+			sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, c);
+		}
+	} else
+#endif /* !CLIFM_SUCKLESS */
+	{
+		ext_colors[ext_colors_n] = (char *)xnmalloc(len + 3, sizeof(char));
+		sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, q + 1);
+	}
+
+	*q = '=';
+	ext_colors_n++;
+
+	return EXIT_SUCCESS;
+}
+
+static void
+free_extension_colors(void)
+{
+	int i = (int)ext_colors_n;
+	while (--i >= 0)
+		free(ext_colors[i]);
+	free(ext_colors);
+	ext_colors = (char **)NULL;
+	ext_colors_n = 0;
+}
+
+static void
+split_extension_colors(char *extcolors)
+{
+	char *p = extcolors, *buf = (char *)NULL;
+	size_t len = 0;
+	int eol = 0;
+
+	free_extension_colors();
+
+	while (eol == 0) {
+		switch (*p) {
+
+		case '\0': /* fallthrough */
+		case '\n': /* fallthrough */
+		case ':':
+			if (!buf || !*buf) {
+				eol = 1;
+				break;
+			}
+			buf[len] = '\0';
+			if (store_extension_line(buf, len) == EXIT_SUCCESS)
+				*buf = '\0';
+
+			if (!*p)
+				eol = 1;
+			len = 0;
+			p++;
+
+			break;
+
+		default:
+			buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
+			buf[len] = *p;
+			len++;
+			p++;
+			break;
+		}
+	}
+
+	p = (char *)NULL;
+
+	free(buf);
+
+	if (ext_colors) {
+		ext_colors = (char **)xrealloc(ext_colors,
+			(ext_colors_n + 1) * sizeof(char *));
+		ext_colors[ext_colors_n] = (char *)NULL;
+	}
+}
+
 void
 set_default_colors(void)
 {
@@ -1110,6 +1223,9 @@ set_default_colors(void)
 
 	if (date_shades.type == SHADE_TYPE_UNSET)
 		set_default_date_shades();
+
+	if (!ext_colors)
+		split_extension_colors(DEF_EXT_COLORS);
 
 	if (!*hb_c) strcpy(hb_c, DEF_HB_C);
 	if (!*hc_c) strcpy(hc_c, DEF_HC_C);
@@ -1204,17 +1320,6 @@ set_default_colors(void)
 	if (!*do_c) strcpy(do_c, term_caps.color >= 256 ? DEF_DO_C256 : DEF_DO_C);
 	if (!*dp_c) strcpy(dp_c, term_caps.color >= 256 ? DEF_DP_C256 : DEF_DP_C);
 	if (!*dn_c) strcpy(dn_c, DEF_DN_C);
-}
-
-static void
-free_extension_colors(void)
-{
-	int i = (int)ext_colors_n;
-	while (--i >= 0)
-		free(ext_colors[i]);
-	free(ext_colors);
-	ext_colors = (char **)NULL;
-	ext_colors_n = 0;
 }
 
 /* Set a pointer to the current color scheme */
@@ -1613,108 +1718,6 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	return EXIT_SUCCESS;
 }
 #endif /* !CLIFM_SUCKLESS */
-
-/* Check if LINE contains a valid color code, and store it into the
- * ext_colors global array
- * If LINE contains a color variable, expand it, check it, and store it */
-static int
-store_extension_line(char *line, size_t len)
-{
-	/* Remove the leading "*." from the extension line */
-	if (len <= 2 || *line != '*' || *(line + 1) != '.' || !*(line + 2))
-		return EXIT_FAILURE;
-	line += 2;
-	len -= 2;
-
-	char *q = strchr(line, '=');
-	if (!q || !*(q + 1) || q == line)
-		return EXIT_FAILURE;
-
-	*q = '\0';
-#ifndef CLIFM_SUCKLESS
-	char *c = (char *)NULL;
-	if (is_color_code(q + 1) == 0 && (c = check_defs(q + 1)) == NULL)
-#else
-	if (is_color_code(q + 1) == 0)
-#endif /* !CLIFM_SUCKLESS */
-		return EXIT_FAILURE;
-
-	ext_colors = (char **)xrealloc(ext_colors,
-		(ext_colors_n + 1) * sizeof(char *));
-#ifndef CLIFM_SUCKLESS
-	if (c) {
-		if (*c == '#') {
-			char *cc = hex2rgb(c);
-			size_t clen = (size_t)(q - line) + 3 + (cc ? strlen(cc) : 0);
-			ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
-			sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, cc ? cc : "0");
-		} else {
-			size_t clen = (size_t)(q - line) + strlen(c) + 3;
-			ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
-			sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, c);
-		}
-	} else
-#endif /* !CLIFM_SUCKLESS */
-	{
-		ext_colors[ext_colors_n] = (char *)xnmalloc(len + 3, sizeof(char));
-		sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, q + 1);
-	}
-
-	*q = '=';
-	ext_colors_n++;
-
-	return EXIT_SUCCESS;
-}
-
-static void
-split_extension_colors(char *extcolors)
-{
-	char *p = extcolors, *buf = (char *)NULL;
-	size_t len = 0;
-	int eol = 0;
-
-	free_extension_colors();
-
-	while (eol == 0) {
-		switch (*p) {
-
-		case '\0': /* fallthrough */
-		case '\n': /* fallthrough */
-		case ':':
-			if (!buf || !*buf) {
-				eol = 1;
-				break;
-			}
-			buf[len] = '\0';
-			if (store_extension_line(buf, len) == EXIT_SUCCESS)
-				*buf = '\0';
-
-			if (!*p)
-				eol = 1;
-			len = 0;
-			p++;
-
-			break;
-
-		default:
-			buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
-			buf[len] = *p;
-			len++;
-			p++;
-			break;
-		}
-	}
-
-	p = (char *)NULL;
-
-	free(buf);
-
-	if (ext_colors) {
-		ext_colors = (char **)xrealloc(ext_colors,
-			(ext_colors_n + 1) * sizeof(char *));
-		ext_colors[ext_colors_n] = (char *)NULL;
-	}
-}
 
 /* Split the colors line COLORS_LINE and set the corresponding colors
  * according to TYPE (either interface or file type color) */
