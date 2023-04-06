@@ -590,9 +590,6 @@ find_cmd(const struct cmdslist_t *cmds_list, const size_t list_size, char *cmd)
 		cmd[d] = (char)c;
 
 	return found;
-/*	if (found)
-		return 1;
-	return 0; */
 }
 
 int

@@ -351,9 +351,7 @@ get_ext_color(char *ext)
 	 * will be larger */
 	static char tmp_ext[NAME_MAX];
 	char *ptr = tmp_ext;
-//	int case_sensitive_ext = 0;
 
-//	if (case_sensitive_ext == 0) {
 	int i;
 	for (i = 0; ext[i] && i < NAME_MAX; i++) {
 		if (ext[i] >= 'A' && ext[i] <= 'Z')
@@ -362,9 +360,6 @@ get_ext_color(char *ext)
 		tmp_ext[i] = ext[i];
 	}
 	tmp_ext[i] = '\0';
-//	} else {
-//		ptr = ext;
-//	}
 
 	i = (int)ext_colors_n;
 	while (--i >= 0) {

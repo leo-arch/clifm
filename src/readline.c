@@ -2587,7 +2587,7 @@ check_tagged_files(char *tag)
 	tagged_files_n = 0;
 
 	char dir[PATH_MAX];
-	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, tag);
+	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 	int n = scandir(dir, &tagged_files, NULL, alphasort);
 	if (n == -1)
 		return (char **)NULL;

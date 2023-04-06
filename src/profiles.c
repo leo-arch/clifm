@@ -144,12 +144,6 @@ profile_set(char *prof)
 	}
 
 	int i;
-/*	if (msgs_n) {
-		i = (int)msgs_n;
-		while (--i >= 0)
-			free(messages[i]);
-	}
-	msgs_n = msgs.error = msgs.warning = msgs.notice = 0; */
 
 	if (conf.restore_last_path)
 		save_last_path();
@@ -205,13 +199,6 @@ profile_set(char *prof)
 	actions_n = 0;
 
 	exec_profile();
-
-/*	if (msgs_n) {
-		i = (int)msgs_n;
-		while (--i >= 0)
-			free(messages[i]);
-	}
-	msgs_n = msgs.error = msgs.warning = msgs.notice = 0; */
 
 	if (config_ok) {
 		/* Shrink the log file if needed */

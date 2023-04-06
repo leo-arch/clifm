@@ -805,7 +805,9 @@ get_size_unit(off_t size)
 	/* If (s - x || s - (float)x) == 0, then S has no reminder (zero)
 	 * We don't want to print the reminder when it is zero */
 
-	const char *const u = "BKMGTPEZY";
+	/* R: Ronnabyte, Q: Quettabyte. It's highly unlikely to have files of
+	 * these huge sizes in the near future, but anyway... */
+	const char *const u = "BKMGTPEZYRQ";
 	snprintf(str, MAX_UNIT_SIZE, "%.*f%c%c",
 		(s == 0 || s - (float)x == 0) ? 0 : 2, /* NOLINT */
 		(double)s,

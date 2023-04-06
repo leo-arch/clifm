@@ -1003,6 +1003,8 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 				snprintf(tmp, sizeof(tmp), "\x1b[%sm", c);
 				c = tmp;
 			}
+		} else {
+			c = uf_c;
 		}
 		free(p);
 	}

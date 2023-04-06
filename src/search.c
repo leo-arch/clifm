@@ -508,18 +508,11 @@ SCANDIR_ERROR:
 
 		colors_list(pfiles[i], NO_ELN, name_pad,
 		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE);
-
-/*		colors_list(pfiles[i], !search_path ? eln[i] : NO_ELN,
-		    (last_column == 1 || i == (found - 1)) ? NO_PAD :
-		    (int)(flongest - files_len[i]) + 1,
-		    (last_column == 1 || i == found - 1) ? 1 : NO_NEWLINE); */
 	}
 	tab_offset = t;
 
 	print_reload_msg(_("Matches found: %d%s\n"), found,
 		conf.search_strategy != GLOB_ONLY ? " (glob)" : "");
-/*	printf(_("\nMatches found: %d%s\n"), found,
-		conf.search_strategy != GLOB_ONLY ? " (glob)" : ""); */
 
 END:
 	/* Free stuff */

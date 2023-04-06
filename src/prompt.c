@@ -223,7 +223,6 @@ gen_workspace(void)
 		cl = df_c;
 	}
 
-//	snprintf(s, __WS_STR_LEN, "%s%d\001%s\002", cl, cur_ws + 1, df_c);
 	if (workspaces[cur_ws].name)
 		snprintf(s, __WS_STR_LEN, "%s%s", cl, workspaces[cur_ws].name);
 	else

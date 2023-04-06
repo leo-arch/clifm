@@ -3123,9 +3123,6 @@ get_path_programs(void)
 
 			free(commands_bin[i]);
 		}
-
-//		free(commands_bin);
-//		free(cmd_n);
 	}
 
 	free(commands_bin);
