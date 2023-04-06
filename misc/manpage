@@ -2407,7 +2407,7 @@ td images
 T}	tag del images	Remove the tag \fIimages\fR \fB(3)\fR
 T{
 tu :work file1 dir2
-T}	tag untag :work file1 dir2	Untag a few files from \fIwork\fR
+T}	tag untag :work file1 dir2	Untag a few files from \fIwork\fR \fB(4)\fR
 .TE
 
 .sp
@@ -2416,8 +2416,8 @@ T}	tag untag :work file1 dir2	Untag a few files from \fIwork\fR
 \fB(2)\fR All files tagged as \fIpng\fR will be now tagged as \fIimage\fRs, and the \fIpng\fR tag will be removed.
 .sp 0
 \fB(3)\fR Untag all files tagged as \fIimages\fR and remove the tag itself
-.sp
-\fBNOTE\fR: TAB completion is available to complete tagged files. If using the FZF mode, multi-selection is also available via the TAB key.
+.sp 0
+\fB(4)\fR TAB completion is available to complete tagged files. If using the FZF mode, multiple files can be selected using the the TAB key.
 .sp
 \fB4. Operating on tagged files\fR
 .sp
