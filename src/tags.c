@@ -92,7 +92,7 @@ check_tagged_file(const char *tag, const char *name)
 {
 	struct stat a;
 	char tmp[PATH_MAX];
-	snprintf(tmp, PATH_MAX, "%s/%s/%s", tags_dir, tag, name);
+	snprintf(tmp, sizeof(tmp), "%s/%s/%s", tags_dir, tag, name);
 
 	if (SELFORPARENT(name) || lstat(tmp, &a) == -1 || !S_ISLNK(a.st_mode))
 		return 0;
@@ -107,7 +107,7 @@ print_tagged_file(char *name, const char *tag)
 {
 	char dir[PATH_MAX], tmp[PATH_MAX];
 	*tmp = '\0';
-	snprintf(dir, PATH_MAX, "%s/%s/%s", tags_dir, tag, name);
+	snprintf(dir, sizeof(dir), "%s/%s/%s", tags_dir, tag, name);
 	char *ret = realpath(dir, tmp);
 	if (!ret)
 		return;
@@ -151,7 +151,7 @@ list_files_in_tag(char *name)
 		}
 	}
 	char tmp[PATH_MAX];
-	snprintf(tmp, PATH_MAX, "%s/%s", tags_dir, name);
+	snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, name);
 
 	struct dirent **t = (struct dirent **)NULL;
 	int n = scandir(tmp, &t, NULL, conf.case_sens_list ? xalphasort : alphasort_insensitive);
@@ -227,7 +227,7 @@ list_tags(char **args)
 	size_t i;
 	for (i = 0; tags[i]; i++) {
 		char p[PATH_MAX];
-		snprintf(p, PATH_MAX, "%s/%s", tags_dir, tags[i]);
+		snprintf(p, sizeof(p), "%s/%s", tags_dir, tags[i]);
 		int n = count_dir(p, NO_CPOP);
 		if (n > 2)
 			printf("%-*s [%s%d%s]\n", pad, tags[i], mi_c, n - 2, df_c);
@@ -265,7 +265,7 @@ create_tags(char **args)
 			}
 		}
 
-		snprintf(dir, PATH_MAX, "%s/%s", tags_dir, args[i]);
+		snprintf(dir, sizeof(dir), "%s/%s", tags_dir, args[i]);
 
 		struct stat a;
 		if (lstat(dir, &a) != -1) {
@@ -308,7 +308,7 @@ remove_tags(char **args)
 		}
 
 		char dir[PATH_MAX];
-		snprintf(dir, PATH_MAX, "%s/%s", tags_dir, args[i]);
+		snprintf(dir, sizeof(dir), "%s/%s", tags_dir, args[i]);
 
 		struct stat a;
 		if (stat(dir, &a) == -1 || !S_ISDIR(a.st_mode))
@@ -316,8 +316,7 @@ remove_tags(char **args)
 
 		char *cmd[] = {"rm", "-r", "--", dir, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS) {
-			printf(_("%s: %s: Successfully removed tag\n"),
-				PROGRAM_NAME, args[i]);
+			printf(_("%s: Successfully removed tag\n"), args[i]);
 			reload_tags();
 		} else {
 			exit_status = EXIT_FAILURE;
@@ -361,7 +360,7 @@ tag_file(char *name, char *tag)
 	if (strchr(tag, '\\'))
 		p = dequote_str(tag, 0);
 	char dir[PATH_MAX];
-	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, p ? p : tag);
+	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, p ? p : tag);
 
 	struct stat a;
 	if (stat(dir, &a) == -1) {
@@ -383,15 +382,14 @@ tag_file(char *name, char *tag)
 
 	char name_path[PATH_MAX];
 	*name_path = '\0';
-	if (*name != '/')
-		snprintf(name_path, PATH_MAX, "%s/%s", workspaces[cur_ws].path, name);
+	if (*name != '/') {
+		snprintf(name_path, sizeof(name_path), "%s/%s",
+			workspaces[cur_ws].path, name);
+	}
 
 	char link[PATH_MAX + NAME_MAX], *q = (char *)NULL;
 	char *link_path = replace_slashes(*name_path ? name_path : name, ':');
 
-//	if (*name == '/')
-//		q = strrchr(name, '/');
-//	snprintf(link, sizeof(link), "%s/%s", dir, (q && *(++q)) ? q : link_path);
 	snprintf(link, sizeof(link), "%s/%s", dir, link_path);
 	free(link_path);
 
@@ -440,18 +438,22 @@ tag_files(char **args)
 	if (!tag_names || tag_names[0] == -1) {
 		free(tag_names);
 		fprintf(stderr, _("tag: No tag specified. Specify a tag via :TAG. "
-			"E.g. tag FILE1 FILE2 :TAG\n"));
+			"E.g. 'tag add FILE1 FILE2 :TAG'\n"));
 		return EXIT_FAILURE;
 	}
 
 	size_t i, j, n = 0;
-	for (i = 1; args[i]; i++) {
+	size_t start = (args[1] && strcmp(args[1], "add") == 0) ? 2 : 1;
+
+//	for (i = 1; args[i]; i++) {
+	for (i = start; args[i]; i++) {
 		if (*args[i] != ':')
 			n++;
 	}
 
 	for (i = 0; tag_names[i] != -1; i++) {
-		for (j = 1; args[j]; j++) {
+//		for (j = 1; args[j]; j++) {
+		for (j = start; args[j]; j++) {
 			if (*args[j] == ':')
 				continue;
 
@@ -503,7 +505,7 @@ untag(char **args, const size_t n, size_t *t)
 		char *q = exp ? exp : p;
 		char *r = replace_slashes(q, ':');
 
-		snprintf(f, PATH_MAX + NAME_MAX, "%s/%s", dir, r ? r : q);
+		snprintf(f, sizeof(f), "%s/%s", dir, r ? r : q);
 		free(deq);
 		free(exp);
 		free(r);
@@ -563,10 +565,10 @@ rename_tag(char **args)
 	}
 
 	char old_dir[PATH_MAX];
-	snprintf(old_dir, PATH_MAX, "%s/%s", tags_dir, old);
+	snprintf(old_dir, sizeof(old_dir), "%s/%s", tags_dir, old);
 
 	char new_dir[PATH_MAX];
-	snprintf(new_dir, PATH_MAX, "%s/%s", tags_dir, new);
+	snprintf(new_dir, sizeof(new_dir), "%s/%s", tags_dir, new);
 
 	if (rename(old_dir, new_dir) == -1) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s\n", strerror(errno));
@@ -587,7 +589,7 @@ recursive_mv_tags(const char *src, const char *dst)
 	char src_dir[PATH_MAX], dst_dir[PATH_MAX];
 	struct dirent **a = (struct dirent **)NULL;
 
-	snprintf(src_dir, PATH_MAX, "%s/%s", tags_dir, src);
+	snprintf(src_dir, sizeof(src_dir), "%s/%s", tags_dir, src);
 
 	n = scandir(src_dir, &a, NULL, alphasort);
 	if (n == -1) {
@@ -596,7 +598,7 @@ recursive_mv_tags(const char *src, const char *dst)
 		return errno;
 	}
 
-	snprintf(dst_dir, PATH_MAX, "%s/%s", tags_dir, dst);
+	snprintf(dst_dir, sizeof(dst_dir), "%s/%s", tags_dir, dst);
 
 	for (i = 0; i < n; i++) {
 		if (SELFORPARENT(a[i]->d_name)) {
@@ -637,7 +639,7 @@ merge_tags(char **args)
 	}
 
 	char src_dir[PATH_MAX];
-	snprintf(src_dir, PATH_MAX, "%s/%s", tags_dir, src);
+	snprintf(src_dir, sizeof(src_dir), "%s/%s", tags_dir, src);
 	if (rmdir(src_dir) == -1) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "tag: %s: %s\n",
 			src_dir, strerror(errno));
@@ -646,17 +648,17 @@ merge_tags(char **args)
 
 	reload_tags();
 	printf(_("Successfully merged %s%s%s into %s%s%s\n"),
-		conf.colorize ? BOLD : "", src, df_c,
-		conf.colorize ? BOLD : "", dst, df_c);
+		conf.colorize == 1 ? BOLD : "", src, df_c,
+		conf.colorize == 1 ? BOLD : "", dst, df_c);
 
 	return EXIT_SUCCESS;
 }
 
 /* Perform the following expansions:
- * ta -> tag
- * td -> tag rm
+ * ta -> tag add
+ * td -> tag del
  * tl -> tag list
- * tm -> tag rename (mv)
+ * tm -> tag rename
  * tn -> tag new
  * tu -> tag untag
  * ty -> tag merge
@@ -672,14 +674,15 @@ reconstruct_input(char **args)
 	a[0] = savestring("tag", 3);
 
 	switch(args[0][1]) {
-	case 'a': c = 1; break;
-	case 'd': a[1] = savestring("rm", 2); c = 2; break;
-	case 'l': a[1] = savestring("ls", 2); c = 2; break;
-	case 'm': a[1] = savestring("mv", 2); c = 2; break;
+//	case 'a': c = 1; break;
+	case 'a': a[1] = savestring("add", 3); c = 2; break;
+	case 'd': a[1] = savestring("del", 3); c = 2; break;
+	case 'l': a[1] = savestring("list", 4); c = 2; break;
+	case 'm': a[1] = savestring("rename", 6); c = 2; break;
 	case 'n': a[1] = savestring("new", 3); c = 2; break;
 	case 'u': a[1] = savestring("untag", 5); c = 2; break;
 	case 'y': a[1] = savestring("merge", 5); c = 2; break;
-	default: a[1] = savestring("-h", 2); c = 2; break;
+	default:  a[1] = savestring("-h", 2); c = 2; break;
 	}
 
 	for (n = 1; args[n]; n++) {
@@ -715,7 +718,7 @@ tags_function(char **args)
 		{ puts(_(TAG_USAGE)); goto END; }
 
 	char b[] = "adlmnuy";
-	if (strspn(a[0] + 1, b))
+	if (strcmp(a[0], "tag") != 0 && strspn(a[0] + 1, b))
 		{ a = reconstruct_input(args); free_args = 1; }
 
 	if (!a[1] || (*a[1] == 'l' && (strcmp(a[1], "ls") == 0
@@ -740,6 +743,7 @@ tags_function(char **args)
 	if (*a[1] == 'u' && strcmp(a[1], "untag") == 0)
 		{ exit_status = untag_files(a); goto END; }
 
+	/* Either 'tag FILE :TAG' or 'tag add FILE :TAG' */
 	exit_status = tag_files(a);
 
 END:

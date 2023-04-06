@@ -925,11 +925,11 @@ Note: Both numbers and names are allowed\n\n\
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  tag [del, list, merge, new, rename, untag]\n\
+  tag [add, del, list, merge, new, rename, untag]\n\
       [FILE]... [[:]TAG]\n\n\
 Instead of the long format described above, you can use any of the\n\
 following shortcuts as well:\n\n\
-  ta: Tag files as ...       (same as 'tag FILE... :TAG')\n\
+  ta: Tag files as ...       (same as 'tag add')\n\
   td: Delete tag(s)          (same as 'tag del')\n\
   tl: List tags/tagged files (same as 'tag list')\n\
   tm: Rename (mv) tag        (same as 'tag rename')\n\
