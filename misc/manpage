@@ -1057,7 +1057,7 @@ The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Tra
 .sp
 To undelete/untrash trashed files see the \fIundel\fR command below.
 .TP
-.B tag \fR[\fIdel\fR, \fIlist\fR, \fInew\fR, \fImerge\fR, \fIrename\fR, \fIuntag\fR] [\fIFILE\fR]... [[\fI:\fR]\fITAG\fR]
+.B tag \fR[\fIadd\fR, \fIdel\fR, \fIlist\fR, \fInew\fR, \fImerge\fR, \fIrename\fR, \fIuntag\fR] [\fIFILE\fR]... [[\fI:\fR]\fITAG\fR]
 \fItag\fR is the main \fIEtiqueta\fR command, \fBclifm\fR's built-in files tagging system. See the \fBFILE TAGS\fR section for a complete description of this command.
 .TP
 .B te \fIFILE\fR...
@@ -2337,7 +2337,7 @@ Every time a new tag is created, a new directory named as the tag itself is crea
 .sp
 \fItag\fR is the main \fBEtiqueta\fR command and is used to handle file tags. Its syntax is as follows:
 
- tag [del, list, new, merge, rename, untag] [FILE]... [[:]TAG]
+ tag [add, del, list, new, merge, rename, untag] [FILE]... [[:]TAG]
 
 NOTE: The \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag FILES(s) :TAG ...', to tag files, and 'tag untag :TAG file1 file2', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag remove png', to delete the tag named \fIpng\fR.
 .sp
@@ -2351,7 +2351,7 @@ l l l.
 Short format	Long format	Description
 T{
 ta
-T}	tag FILE... :TAG	Tag files
+T}	tag add	Tag files
 T{
 td
 T}	tag del	Delete tag(s)
@@ -2392,32 +2392,34 @@ tn dogs cats
 T}	tag new dogs cats	Create two empty tags: \fIdogs\fR and \fIcats\fR
 T{
 ta *.png :images :png
-T}	tag *.png :images :png	Tag PNG files as both \fIimages\fR and \fIpng\fR \fB(1)\fR
+T}	tag add *.png :images :png	Tag PNG files as both \fIimages\fR and \fIpng\fR \fB(1) (2)\fR
 T{
 ta sel :special
-T}	tag sel :special	Tag all selected files as \fIspecial\fR
+T}	tag add sel :special	Tag all selected files as \fIspecial\fR
 T{
 tr documents docs
 T}	tag rename documents docs	Rename the tag \fIdocuments\fR as \fIdocs\fR
 T{
 ty png images
-T}	tag merge png images	Merge the tag \fIpng\fR into \fIimages\fR \fB(2)\fR
+T}	tag merge png images	Merge the tag \fIpng\fR into \fIimages\fR \fB(3)\fR
 T{
 td images
-T}	tag del images	Remove the tag \fIimages\fR \fB(3)\fR
+T}	tag del images	Remove the tag \fIimages\fR \fB(4)\fR
 T{
 tu :work file1 dir2
-T}	tag untag :work file1 dir2	Untag a few files from \fIwork\fR \fB(4)\fR
+T}	tag untag :work file1 dir2	Untag a few files from \fIwork\fR \fB(5)\fR
 .TE
 
 .sp
 \fB(1)\fR Tags are created if they do not exist
 .sp 0
-\fB(2)\fR All files tagged as \fIpng\fR will be now tagged as \fIimage\fRs, and the \fIpng\fR tag will be removed.
+\fB(2)\fR Since \fIadd\fR is the default action, it can be omitted: \fItag *.png :images :png\fR.
 .sp 0
-\fB(3)\fR Untag all files tagged as \fIimages\fR and remove the tag itself
+\fB(3)\fR All files tagged as \fIpng\fR will be now tagged as \fIimage\fRs, and the \fIpng\fR tag will be removed.
 .sp 0
-\fB(4)\fR TAB completion is available to complete tagged files. If using the FZF mode, multiple files can be selected using the the TAB key.
+\fB(4)\fR Untag all files tagged as \fIimages\fR and remove the tag itself
+.sp 0
+\fB(5)\fR TAB completion is available to complete tagged files. If using the FZF mode, multiple files can be selected using the the TAB key.
 .sp
 \fB4. Operating on tagged files\fR
 .sp
