@@ -925,22 +925,22 @@ Note: Both numbers and names are allowed\n\n\
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  tag [ls, list] [new] [del, rm, remove] [mv, rename] [untag] [merge]\n\
+  tag [del, list, merge, new, rename, untag]\n\
       [FILE]... [[:]TAG]\n\n\
 Instead of the long format described above, you can use any of the\n\
-following shortcuts as well:\n\
-  ta: Tag files as ...\n\
-  td: Delete tag(s)\n\
-  tl: List tags or tagged files\n\
-  tm: Rename (mv) tag\n\
-  tn: Create new tag(s)\n\
-  tu: Untag file(s)\n\
-  ty: Merge two tags\n\n\
+following shortcuts as well:\n\n\
+  ta: Tag files as ...       (same as 'tag FILE... :TAG')\n\
+  td: Delete tag(s)          (same as 'tag del')\n\
+  tl: List tags/tagged files (same as 'tag list')\n\
+  tm: Rename (mv) tag        (same as 'tag rename')\n\
+  tn: Create new tag(s)      (same as 'tag new')\n\
+  tu: Untag file(s)          (same as 'tag untag')\n\
+  ty: Merge two tags         (same as 'tag merge')\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available tags\n\
     tl (or 't:<TAB>')\n\
 - List files tagged as 'pdf'\n\
-    tl pdf (or 't:pdf<TAB>')\n\
+    tl pdf (or 't:pdf<TAB>')'\n\
 - Tag all .PNG files in the current directory as both 'images' and 'png'\n\
     ta *.png :images :png\n\
   Note: Tags are created if they do not exist\n\
