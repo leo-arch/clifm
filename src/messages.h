@@ -932,32 +932,33 @@ following shortcuts as well:\n\n\
   ta: Tag files as ...       (same as 'tag add')\n\
   td: Delete tag(s)          (same as 'tag del')\n\
   tl: List tags/tagged files (same as 'tag list')\n\
-  tm: Rename (mv) tag        (same as 'tag rename')\n\
+  tm: Rename tag             (same as 'tag rename')\n\
   tn: Create new tag(s)      (same as 'tag new')\n\
   tu: Untag file(s)          (same as 'tag untag')\n\
   ty: Merge two tags         (same as 'tag merge')\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available tags\n\
-    tl (or 't:<TAB>')\n\
+    tag list (or 't:<TAB>')\n\
 - List files tagged as 'pdf'\n\
-    tl pdf (or 't:pdf<TAB>')'\n\
+    tag list pdf (or 't:pdf<TAB>')'\n\
 - Tag all .PNG files in the current directory as both 'images' and 'png'\n\
-    ta *.png :images :png\n\
-  Note: Tags are created if they do not exist\n\
+    tag add *.png :images :png\n\
+    Note: Tags are created if they do not exist\n\
+    Note 2: Since 'add' is the default action, it can be omitted\n\
 - Tag all selected files as 'special'\n\
-    ta sel :special\n\
+    tag add sel :special\n\
 - Rename tag 'documents' as 'docs'\n\
-    tm documents docs\n\
+    tag rename documents docs\n\
 - Merge tag 'png' into 'images'\n\
-    ty png images\n\
-  Note: All files tagged as 'png' will be now tagged as 'images', \
+    tag merge png images\n\
+    Note: All files tagged as 'png' will be now tagged as 'images', \
 and the 'png' tag will be removed\n\
 - Remove the tag 'images' (untag all files tagged as 'images')\n\
-    td images\n\
+    tag del images\n\
 - Untag a few files from the 'work' tag\n\
-    tu :work file1 image.png dir2\n\
+    tag untag :work file1 image.png dir2\n\
     or\n\
-    tu :<TAB> (and then TAB again to select tagged files)\n\
+    tag untag :<TAB> (and then TAB again to select tagged files)\n\n\
 Operating on tagged files (t:TAG)\n\
 - Print the file properties of all files tagged as 'docs'\n\
     p t:docs (or 'p t:<TAB>' to choose from a list)\n\
