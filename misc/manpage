@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 4, 2023" "clifm 1.11.4" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 6, 2023" "clifm 1.11.4" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1057,7 +1057,7 @@ The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Tra
 .sp
 To undelete/untrash trashed files see the \fIundel\fR command below.
 .TP
-.B tag \fR[\fIls\fR, \fIlist\fR] [\fInew\fR] [\fIrm\fR, \fIremove\fR] [\fImv\fR, \fIrename\fR] [\fIuntag\fR] [\fImerge\fR] [\fIFILE\fR]... [[\fI:\fR]\fITAG\fR]
+.B tag \fR[\fIdel\fR, \fIlist\fR, \fInew\fR, \fImerge\fR, \fIrename\fR, \fIuntag\fR] [\fIFILE\fR]... [[\fI:\fR]\fITAG\fR]
 \fItag\fR is the main \fIEtiqueta\fR command, \fBclifm\fR's built-in files tagging system. See the \fBFILE TAGS\fR section for a complete description of this command.
 .TP
 .B te \fIFILE\fR...
@@ -2337,76 +2337,109 @@ Every time a new tag is created, a new directory named as the tag itself is crea
 .sp
 \fItag\fR is the main \fBEtiqueta\fR command and is used to handle file tags. Its syntax is as follows:
 
- tag [ls, list] [new] [rm, remove] [mv, rename] [untag] [merge] [FILE]... [[:]TAG]
+ tag [del, list, new, merge, rename, untag] [FILE]... [[:]TAG]
 
-NOTE: the \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag FILES(s) :TAG ...', to tag files, and 'tag untag :TAG file1 file2', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag remove png', to delete the tag named \fIpng\fR.
+NOTE: The \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag FILES(s) :TAG ...', to tag files, and 'tag untag :TAG file1 file2', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag remove png', to delete the tag named \fIpng\fR.
 .sp
-The following command shortcuts are available:
- \fBta\fR    Tag files
- \fBtd\fR    Delete tag(s)
- \fBtl\fR    List tags or tagged files
- \fBtm\fR    Rename (mv) tag
- \fBtn\fR    Create new tag(s)
- \fBtu\fR    Untag file(s)
- \fBty\fR    Merge two tags
+Both short and long command format can be used:
+
+.sp
+.TS
+allbox;
+lb lb lb
+l l l.
+Short format	Long format	Description
+T{
+ta
+T}	tag FILE... :TAG	Tag files
+T{
+td
+T}	tag del	Delete tag(s)
+T{
+tl
+T}	tag list	List tags or tagged files
+T{
+tm
+T}	tag rename	Rename tags
+T{
+tn
+T}	tag new	Create new tag(s)
+T{
+tu
+T}	tag untag	Untag file(s)
+T{
+ty
+T}	tag merge	Merge two tags
+.TE
+
 .sp
 \fB3. Usage examples\fR
-.sp
-- List available tags:
 
- \fBtl\fR
 .sp
-- Tag all .PNG files in the current directory as both \fIimages\fR and \fIpng\fR:
+.TS
+allbox;
+lb lb lb
+l l l.
+Short format	Long format	Description
+T{
+tl
+T}	tag list	List available tags
+T{
+tl work
+T}	tag list work	List all files tagged as \fIwork\fR
+T{
+tn dogs cats
+T}	tag new dogs cats	Create two empty tags: \fIdogs\fR and \fIcats\fR
+T{
+ta *.png :images :png
+T}	tag *.png :images :png	Tag PNG files as both \fIimages\fR and \fIpng\fR \fB(1)\fR
+T{
+ta sel :special
+T}	tag sel :special	Tag all selected files as \fIspecial\fR
+T{
+tr documents docs
+T}	tag rename documents docs	Rename the tag \fIdocuments\fR as \fIdocs\fR
+T{
+ty png images
+T}	tag merge png images	Merge the tag \fIpng\fR into \fIimages\fR \fB(2)\fR
+T{
+td images
+T}	tag del images	Remove the tag \fIimages\fR \fB(3)\fR
+T{
+tu :work file1 dir2
+T}	tag untag :work file1 dir2	Untag a few files from \fIwork\fR
+.TE
 
- \fBta *.png :images :png\fR
 .sp
-\fBNOTE\fR: Tags are created if they do not exist
-.sp
-- Tag all selected files as \fIspecial\fR:
-
- \fBta sel :special\fR
-.sp
-- List all files tagged as work and all files tagged as \fIdocuments\fR:
-
- \fBtl work documents\fR
-.sp
-- Rename the tag \fIdocuments\fR as \fIdocs\fR:
-
- \fBtm documents docs\fR
-.sp
-- Merge the tag \fIpng\fR into \fIimages\fR:
-
- \fBty png images\fR
-.sp
-\fBNOTE\fR: All files tagged as \fIpng\fR will be now tagged as \fIimage\fRs, and the \fIpng\fR tag will be removed.
-.sp
-- Remove the tag \fIimages\fR (untag all files tagged as \fIimages\fR):
-
- \fBtd images\fR
-.sp
-- Untag a few files from the \fIwork\fR:
-
- \fBtu :work file1 image.png dir2\fR
+\fB(1)\fR Tags are created if they do not exist
+.sp 0
+\fB(2)\fR All files tagged as \fIpng\fR will be now tagged as \fIimage\fRs, and the \fIpng\fR tag will be removed.
+.sp 0
+\fB(3)\fR Untag all files tagged as \fIimages\fR and remove the tag itself
 .sp
 \fBNOTE\fR: TAB completion is available to complete tagged files. If using the FZF mode, multi-selection is also available via the TAB key.
 .sp
 \fB4. Operating on tagged files\fR
 .sp
 The \fIt:TAG\fR construct (or tag expression) is used to operate on tagged files via any command, be it internal or external. A few examples:
-.sp
-- Print the file properties of all files tagged as \fIdocs\fR:
 
- \fBp t:docs\fR
 .sp
-\fBNOTE\fR: TAB completion is available to expand tag expressions into one or more of the corresponding tagged files. If using the FZF mode, multi-selection is also available via the TAB key.
-.sp
-- Remove all files tagged as \fIimages\fR:
+.TS
+allbox;
+lb lb
+l l.
+Command	Description
+T{
+p t:docs
+T}	Print properties of files tagged as \fIdocs\fR
+T{
+r t:images
+T}	Remove all files tagged as \fIimages\fR
+T{
+stat t:docs t:work
+T}	Run stat(1) over all files tagged as \fIdocs\fR and all files tagged as \fIwork\fR
+.TE
 
- \fBr t:images\fR
-.sp
-- Run \fBstat\fR(1) over all files tagged as \fIwork\fR and all files tagged as \fIdocs\fR:
-
- \fBstat t:work t:docs\fR
 .sp
 \fB4.1 Operating on \fIspecific\fB tagged files\fR
 .sp
