@@ -2339,7 +2339,7 @@ Every time a new tag is created, a new directory named as the tag itself is crea
 
  tag [add, del, list, new, merge, rename, untag] [FILE]... [[:]TAG]
 
-NOTE: The \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag FILES(s) :TAG ...', to tag files, and 'tag untag :TAG file1 file2', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag remove png', to delete the tag named \fIpng\fR.
+NOTE: The \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag add FILES(s) :TAG ...', to tag files, and 'tag untag :TAG file1 file2', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag del png', to delete the tag named \fIpng\fR.
 .sp
 Both short and long command format can be used:
 
