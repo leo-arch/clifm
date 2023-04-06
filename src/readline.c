@@ -2881,8 +2881,9 @@ tag_complete(const char *text)
 		default: break;
 		}
 	} else { /* MATCH LONG OPTIONS */
-		if (strncmp(l, "tag ", 4) != 0)
+		if (strncmp(l, "tag ", 4) != 0) {
 			return comp;
+		}
 		char *p = l + 4;
 		if (!*p || strncmp(p, "untag ", 6) == 0) {
 			if (text && *text == ':') { /* We have a tag name */
@@ -2895,6 +2896,8 @@ tag_complete(const char *text)
 		|| strncmp(p, "merge ", 6) == 0) {
 			if (*p == 'r' || *p == 'l') flags |= MULTI_SEL;
 			comp = 1; cur_comp_type = TCMP_TAGS_S;
+		} else if (text && *text == ':') {
+			comp = 1; cur_comp_type = TCMP_TAGS_C;
 		}
 	}
 
