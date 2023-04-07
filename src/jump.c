@@ -789,6 +789,7 @@ dirjump(char **args, int mode)
 	    best_ranked = 0, max = -1, k;
 
 	j = match;
+
 	while (--j >= 0) {
 		if (!matches[j])
 			continue;
@@ -796,73 +797,74 @@ dirjump(char **args, int mode)
 		found = 1;
 
 		if (jump_opt == JLIST) {
-			printf("%s\n", matches[j]);
-		} else {
-//			int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
-			int days_since_first = (int)(now - first[j]) / 86400;
+			colors_list(matches[j], 0, 0 , 1);
+			continue;
+		}
 
-			/* Calculate the rank as frecency. The algorithm is based
-			 * on Mozilla, zoxide, and z.lua. See:
-			 * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
-			 * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
-			 * "https://github.com/skywind3000/z.lua#aging" */
-			int rank;
-			rank = days_since_first > 0 ? ((int)visits[j] * VISIT_BONUS)
-					/ days_since_first : ((int)visits[j] * VISIT_BONUS);
+//		int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
+		int days_since_first = (int)(now - first[j]) / 86400;
 
-//			int hours_since_last = (int)(now - last[j]) / 60 / 60;
-			int hours_since_last = (int)(now - last[j]) / 3600;
+		/* Calculate the rank as frecency. The algorithm is based
+		 * on Mozilla, zoxide, and z.lua. See:
+		 * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
+		 * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
+		 * "https://github.com/skywind3000/z.lua#aging" */
+		int rank;
+		rank = days_since_first > 0 ? ((int)visits[j] * VISIT_BONUS)
+				/ days_since_first : ((int)visits[j] * VISIT_BONUS);
 
-			/* Credit or penalty based on last directory access */
-			int tmp_rank = rank;
-			if (hours_since_last == 0) /* Last hour */
-				rank = JHOUR(tmp_rank);
-			else if (hours_since_last <= 24) /* Last day */
-				rank = JDAY(tmp_rank);
-			else if (hours_since_last <= 168) /* Last week */
-				rank = JWEEK(tmp_rank);
-			else /* More than a week */
-				rank = JOLDER(tmp_rank);
+//		int hours_since_last = (int)(now - last[j]) / 60 / 60;
+		int hours_since_last = (int)(now - last[j]) / 3600;
 
-			/* Matches in directory basename have extra credit */
-			char *tmp = strrchr(matches[j], '/');
-			if (tmp && *(++tmp)) {
-				if (strstr(tmp, args[args_n]))
-					rank += BASENAME_BONUS;
+		/* Credit or penalty based on last directory access */
+		int tmp_rank = rank;
+		if (hours_since_last == 0) /* Last hour */
+			rank = JHOUR(tmp_rank);
+		else if (hours_since_last <= 24) /* Last day */
+			rank = JDAY(tmp_rank);
+		else if (hours_since_last <= 168) /* Last week */
+			rank = JWEEK(tmp_rank);
+		else /* More than a week */
+			rank = JOLDER(tmp_rank);
+
+		/* Matches in directory basename have extra credit */
+		char *tmp = strrchr(matches[j], '/');
+		if (tmp && *(++tmp)) {
+			if (strstr(tmp, args[args_n]))
+				rank += BASENAME_BONUS;
+		}
+
+		/* Bookmarked directories have extra credit */
+		k = (int)bm_n;
+		while (--k >= 0) {
+			if (bookmarks[k].path && bookmarks[k].path[1] == matches[j][1]
+			&& strcmp(bookmarks[k].path, matches[j]) == 0) {
+				rank += BOOKMARK_BONUS;
+				break;
 			}
+		}
 
-			/* Bookmarked directories have extra credit */
-			k = (int)bm_n;
-			while (--k >= 0) {
-				if (bookmarks[k].path && bookmarks[k].path[1] == matches[j][1]
-				&& strcmp(bookmarks[k].path, matches[j]) == 0) {
-					rank += BOOKMARK_BONUS;
-					break;
-				}
+		if (pinned_dir && pinned_dir[1] == matches[j][1]
+		&& strcmp(pinned_dir, matches[j]) == 0)
+			rank += PINNED_BONUS;
+
+		k = MAX_WS;
+		while (--k >= 0) {
+			if (workspaces[k].path && workspaces[k].path[1] == matches[j][1]
+			&& strcmp(workspaces[k].path, matches[j]) == 0) {
+				rank += WORKSPACE_BONUS;
+				break;
 			}
+		}
 
-			if (pinned_dir && pinned_dir[1] == matches[j][1]
-			&& strcmp(pinned_dir, matches[j]) == 0)
-				rank += PINNED_BONUS;
+		if (reduce) {
+			tmp_rank = rank;
+			rank = tmp_rank / reduce;
+		}
 
-			k = MAX_WS;
-			while (--k >= 0) {
-				if (workspaces[k].path && workspaces[k].path[1] == matches[j][1]
-				&& strcmp(workspaces[k].path, matches[j]) == 0) {
-					rank += WORKSPACE_BONUS;
-					break;
-				}
-			}
-
-			if (reduce) {
-				tmp_rank = rank;
-				rank = tmp_rank / reduce;
-			}
-
-			if (rank > max) {
-				max = rank;
-				best_ranked = j;
-			}
+		if (rank > max) {
+			max = rank;
+			best_ranked = j;
 		}
 	}
 
