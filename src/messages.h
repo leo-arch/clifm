@@ -520,26 +520,24 @@ You can also access the commands history via the exclamation mark (!)\n\
 \x1b[1mUSAGE\x1b[0m\n\
   icons [on, off]"
 
-#define JUMP_USAGE "Change to a directory in the jump database\n\n\
+#define JUMP_USAGE "Change to a directory in the jump database (visited directories)\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   j [--purge [NUM]] [--edit [APP]], jc, jp, jl [STRING]..., jo [NUM], je\n\n\
 For information about the matching algorithm consult the manpage\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
-- Print the list of entries in the jump database (visited directories)\n\
+- Print the list of entries in the jump database\n\
     j (or jl)\n\
-- List all entries matching the string 'str'\n\
+- List all entries matching \"str\"\n\
     jl str\n\
-- Change to any visited directory containing the string 'bui'\n\
+- Jump (cd) to the best ranked directory matching \"bui\"\n\
     j bui\n\
     Note: Hit TAB to get a list of possible matches: 'j bui<TAB>'\n\
 - If not enough, use multiple query strings\n\
     j ho bui\n\
     Note: Most likey, this will take you to /home/build\n\
-- Change to any visited directory that is PARENT of the current directory\n\
-  and contains the string 'str'\n\
+- Jump to the best ranked PARENT directory matching \"str\"\n\
     jp str\n\
-- Change to any visited directory that is CHILD of the current directory\n\
-  and contains the string 'str'\n\
+- Jump to the best ranked CHILD directory matching \"str\"\n\
     jc str\n\
 - Open/edit the jump database\n\
     je (also 'j --edit')\n\
