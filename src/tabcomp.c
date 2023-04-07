@@ -504,6 +504,9 @@ static void
 write_completion(char *buf, const size_t *offset, int *exit_status,
 	const int multi)
 {
+	if (cur_comp_type == TCMP_TAGS_F)
+		ERASE_TO_RIGHT;
+
 	/* Remove ending new line char */
 	char *n = strchr(buf, '\n');
 	if (n)

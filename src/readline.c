@@ -2877,7 +2877,7 @@ tag_complete(const char *text)
 		case 'd': /* fallthough */
 		case 'l': /* fallthough */
 		case 'm': /* fallthough */
-//		case 'n': /* fallthough */
+//		case 'n': /* Just a new tag name: no completion */
 		case 'y':
 			if (*(l + 1) == 'd' || *(l + 1) == 'l') flags |= MULTI_SEL;
 			comp = 1; cur_comp_type = TCMP_TAGS_S; break;
@@ -2894,12 +2894,10 @@ tag_complete(const char *text)
 			} else if (*p == 'u') { /* We have a tagged file */
 				comp = 2;
 			}
-//		} else if (strncmp(p, "remove ", 7) == 0 || strncmp(p, "list ", 5) == 0
 		} else if (strncmp(p, "del ", 4) == 0 || strncmp(p, "list ", 5) == 0
 		/*|| strncmp(p, "new ", 4) == 0 */ || strncmp(p, "rename ", 7) == 0
 		|| strncmp(p, "merge ", 6) == 0) {
 			if (*p == 'd' || *p == 'r' || *p == 'l') flags |= MULTI_SEL;
-//			if (*p == 'r' || *p == 'l') flags |= MULTI_SEL;
 			comp = 1; cur_comp_type = TCMP_TAGS_S;
 		} else if (text && *text == ':') {
 			comp = 1; cur_comp_type = TCMP_TAGS_C;
