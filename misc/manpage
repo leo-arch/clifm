@@ -2391,6 +2391,9 @@ T{
 tl work
 T}	tag list work	List all files tagged as \fIwork\fR
 T{
+tl file.txt
+T}	tag list file.txt	List tags applied to the file \fIfile.txt\fR
+T{
 tn dogs cats
 T}	tag new dogs cats	Create two empty tags: \fIdogs\fR and \fIcats\fR
 T{
