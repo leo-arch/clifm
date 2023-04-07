@@ -943,6 +943,8 @@ following shortcuts as well:\n\n\
     tag list-full\n\
 - List files tagged as 'pdf'\n\
     tag list pdf (or 't:pdf<TAB>')'\n\
+- List tags applied to the file 'file.txt'\n\
+    tag list file.txt\n\
 - Tag all .PNG files in the current directory as both 'images' and 'png'\n\
     tag add *.png :images :png\n\
     Note: Tags are created if they do not exist\n\
