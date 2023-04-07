@@ -740,6 +740,7 @@ const struct cmdslist_t param_str[] = {
 	{"tag add", 7},
 	{"tag del", 7},
 	{"tag list", 8},
+	{"tag list-full", 13},
 //	{"tag rm", 6},
 	{"tag merge", 9},
 	{"tag new", 7},

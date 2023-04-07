@@ -35,6 +35,7 @@
 #include <readline/tilde.h>
 
 #include "aux.h"
+#include "colors.h" // colors_list()
 #include "misc.h"
 #include "exec.h"
 #include "init.h"
@@ -130,10 +131,15 @@ print_tagged_file(char *name, const char *tag)
 		}
 	}
 
-	char *p = strrchr(tmp, '/');
+	putchar(' ');
+	char *abbr_name = abbreviate_file_name(tmp);
+	colors_list(abbr_name ? abbr_name : tmp, 0, 0, 1);
+	if (abbr_name != tmp)
+		free(abbr_name);
+/*	char *p = strrchr(tmp, '/');
 	if (p && p != q)
 		*p = '\0';
-	printf("%s%s%s [%s]\n", mi_c, (p && *(p + 1)) ? p + 1 : tmp, df_c, tmp);
+	printf("%s%s%s [%s]\n", mi_c, (p && *(p + 1)) ? p + 1 : tmp, df_c, tmp); */
 
 	if (free_name == 1)
 		free(q);
@@ -150,22 +156,20 @@ list_files_in_tag(char *name)
 			free(p);
 		}
 	}
+
 	char tmp[PATH_MAX];
 	snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, name);
 
 	struct dirent **t = (struct dirent **)NULL;
 	int n = scandir(tmp, &t, NULL, conf.case_sens_list ? xalphasort : alphasort_insensitive);
-	if (n == -1) {
-		fprintf(stderr, _("tag: %s: No such tag\n"), name);
-		return EXIT_FAILURE;
-	}
+	if (n == -1)
+		return errno;
 
 	size_t i;
 	if (n <= 2) {
 		for (i = 0; i < (size_t)n; i++)
 			free(t[i]);
 		free(t);
-		printf(_("No file tagged as '%s'\n"), name);
 		return EXIT_SUCCESS;
 	}
 
@@ -186,8 +190,8 @@ list_files_in_tag(char *name)
 	return EXIT_SUCCESS;
 }
 
-/* Return the longest tag name
- * Used to pad the output of 'tag ls' command */
+/* Return the length of longest tag name
+ * Used to pad the output of the 'tag list' command */
 static size_t
 get_longest_tag(void)
 {
@@ -202,43 +206,151 @@ get_longest_tag(void)
 	return _longest;
 }
 
-/* Print the list of available tags, plus the amount of tagged files for
- * each tag */
+/* List all tags applied to the file whose device ID is DEV and inode number
+ * is INO */
+static void
+list_tags_having_file(const dev_t dev, const ino_t ino)
+{
+	if (!tags_dir || !tags)
+		return;
+
+	DIR *dir;
+	struct dirent *ent;
+	struct stat a;
+
+	size_t i;
+	for (i = 0; tags[i]; i++) {
+		char tmp[PATH_MAX];
+		snprintf(tmp, sizeof(tmp), "%s/%s", tags_dir, tags[i]);
+		if ((dir = opendir(tmp)) == NULL)
+			continue;
+
+		while ((ent = readdir(dir))) {
+			char full_name[PATH_MAX + NAME_MAX + 2];
+			snprintf(full_name, sizeof(full_name), "%s/%s", tmp, ent->d_name);
+			if (stat(full_name, &a) == -1)
+				continue;
+
+			if (a.st_dev == dev && a.st_ino == ino) {
+				printf(" %s%s%s\n", mi_c, tags[i], NC);
+				break;
+			}
+		}
+
+		closedir(dir);
+	}
+}
+
+/* Check whether NAME is a valid and existent tag name
+ * Returns 1 if true or zero otherwise */
+int
+is_tag(char *name)
+{
+	if (!name || !*name)
+		return 0;
+
+	if (strchr(name, '\\')) {
+		char *deq = dequote_str(name, 0);
+		if (deq) {
+			strcpy(name, deq);
+			free(deq);
+		}
+	}
+
+	int i = (int)tags_n;
+	while (--i >= 0) {
+		if (*name == *tags[i] && strcmp(name, tags[i]) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
+/* Print the list of available tags and all files tagged as each tag */
+static int
+list_tags_full(void)
+{
+	if (tags_n == 0) {
+		puts(_("tag: No tags"));
+		return EXIT_SUCCESS;
+	}
+
+	size_t i;
+	int exit_status = EXIT_SUCCESS;
+
+	for (i = 0; tags[i]; i++) {
+		printf(_("Files tagged as %s%s%s:\n"), conf.colorize == 1 ? BOLD : "'",
+			tags[i], conf.colorize == 1 ? NC : "'");
+		if (list_files_in_tag(tags[i]) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+
+		if (tags[i + 1])
+			putchar('\n');
+	}
+
+	return exit_status;
+}
+
 static int
 list_tags(char **args)
 {
 	if (tags_n == 0)
 		return print_no_tags();
 
-	if (args[1] && args[2]) {
-		int exit_status = EXIT_SUCCESS;
-		size_t i;
-		for (i = 2; args[i]; i++) {
-			if (args[3])
-				printf("%s:\n", args[i]);
+	size_t i;
+	int exit_status = EXIT_SUCCESS;
+
+	if (!args || !args[0] || !args[1] || !args[2]) {
+		/* 'tag list': list all tags */
+		int pad = (int)get_longest_tag();
+
+		for (i = 0; tags[i]; i++) {
+			char p[PATH_MAX];
+			snprintf(p, sizeof(p), "%s/%s", tags_dir, tags[i]);
+			int n = count_dir(p, NO_CPOP);
+			if (n > 2)
+				printf("%-*s [%s%d%s]\n", pad, tags[i], mi_c, n - 2, df_c);
+			else
+				printf("%-*s  -\n", pad, tags[i]);
+		}
+
+		return EXIT_SUCCESS;
+	}
+
+	for (i = 2; args[i]; i++) {
+		if (!is_tag(args[i])) {
+			/* 'tag list FILENAME' */
+			char *p = dequote_str(args[i], 0);
+
+			struct stat a;
+			if (lstat(p ? p : args[i], &a) == -1) {
+				exit_status = errno;
+				fprintf(stderr, "%s: %s\n", p ? p : args[i], strerror(errno));
+				free(p);
+				continue;
+			}
+
+			printf(_("%s%s%s is tagged as:\n"), conf.colorize == 1 ? BOLD : "'",
+				p ? p : args[i], conf.colorize == 1 ? NC : "'");
+			free(p);
+			list_tags_having_file(a.st_dev, a.st_ino);
+
+		} else {
+			/* 'tag list TAG' */
+			printf(_("Files tagged as %s%s%s:\n"), conf.colorize == 1 ? BOLD : "'",
+				args[i], conf.colorize == 1 ? BOLD : "'");
 			if (list_files_in_tag(args[i]) == EXIT_FAILURE)
 				exit_status = EXIT_FAILURE;
 		}
-		return exit_status;
+
+		if (args[i + 1])
+			putchar('\n');
 	}
 
-	int pad = (int)get_longest_tag();
-
-	size_t i;
-	for (i = 0; tags[i]; i++) {
-		char p[PATH_MAX];
-		snprintf(p, sizeof(p), "%s/%s", tags_dir, tags[i]);
-		int n = count_dir(p, NO_CPOP);
-		if (n > 2)
-			printf("%-*s [%s%d%s]\n", pad, tags[i], mi_c, n - 2, df_c);
-		else
-			printf("%-*s  -\n", pad, tags[i]);
-	}
-
-	return EXIT_SUCCESS;
+	return exit_status;
 }
 
-static inline void
+static void
 reload_tags(void)
 {
 	free_tags();
@@ -324,31 +436,6 @@ remove_tags(char **args)
 	}
 
 	return exit_status;
-}
-
-/* Check whether NAME is a valid and existent tag name
- * Returns 1 if true or zero otherwise */
-int
-is_tag(char *name)
-{
-	if (!name || !*name)
-		return 0;
-
-	if (strchr(name, '\\')) {
-		char *deq = dequote_str(name, 0);
-		if (deq) {
-			strcpy(name, deq);
-			free(deq);
-		}
-	}
-
-	int i = (int)tags_n;
-	while (--i >= 0) {
-		if (*name == *tags[i] && strcmp(name, tags[i]) == 0)
-			return 1;
-	}
-
-	return 0;
 }
 
 /* Tag the file named NAME as TAG */
@@ -445,14 +532,12 @@ tag_files(char **args)
 	size_t i, j, n = 0;
 	size_t start = (args[1] && strcmp(args[1], "add") == 0) ? 2 : 1;
 
-//	for (i = 1; args[i]; i++) {
 	for (i = start; args[i]; i++) {
 		if (*args[i] != ':')
 			n++;
 	}
 
 	for (i = 0; tag_names[i] != -1; i++) {
-//		for (j = 1; args[j]; j++) {
 		for (j = start; args[j]; j++) {
 			if (*args[j] == ':')
 				continue;
@@ -617,6 +702,7 @@ recursive_mv_tags(const char *src, const char *dst)
 	return exit_status;
 }
 
+/* Merge tags ARGS[2] and ARGS[3] */
 static int
 merge_tags(char **args)
 {
@@ -674,7 +760,6 @@ reconstruct_input(char **args)
 	a[0] = savestring("tag", 3);
 
 	switch(args[0][1]) {
-//	case 'a': c = 1; break;
 	case 'a': a[1] = savestring("add", 3); c = 2; break;
 	case 'd': a[1] = savestring("del", 3); c = 2; break;
 	case 'l': a[1] = savestring("list", 4); c = 2; break;
@@ -694,6 +779,7 @@ reconstruct_input(char **args)
 	return a;
 }
 
+/* Free stuff in A (if needed) and exit the tag function */
 static int
 end_tag_function(const int exit_status, char **a, const int free_args)
 {
@@ -708,22 +794,38 @@ end_tag_function(const int exit_status, char **a, const int free_args)
 	return exit_status;
 }
 
+/* Check whether we should print help message or not */
+static int
+is_tag_help(char **args)
+{
+	int first_is_help = (args[1] && IS_HELP(args[1]));
+
+	if (strcmp(args[0], "tl") == 0)
+		return first_is_help;
+
+	return (!args[1] || first_is_help || (args[2] && IS_HELP(args[2])));
+}
+
+/* Handle tag actions according to ARGS */
 int
 tags_function(char **args)
 {
 	int exit_status = EXIT_SUCCESS, free_args = 0;
 	char **a = args;
 
-	if ((a[1] && IS_HELP(a[1]))	|| (a[1] && a[2] && IS_HELP(a[2])))
+	if (is_tag_help(a))
 		{ puts(_(TAG_USAGE)); goto END; }
 
 	char b[] = "adlmnuy";
 	if (strcmp(a[0], "tag") != 0 && strspn(a[0] + 1, b))
 		{ a = reconstruct_input(args); free_args = 1; }
 
-	if (!a[1] || (*a[1] == 'l' && (strcmp(a[1], "ls") == 0
-	|| strcmp(a[1], "list") == 0)))
+	if (*a[1] == 'l' && (strcmp(a[1], "ls") == 0
+	|| strcmp(a[1], "list") == 0))
 		{ exit_status = list_tags(a); goto END; }
+
+	if (*a[1] == 'l' && strcmp(a[1], "list-full") == 0)
+		{ exit_status = list_tags_full(); goto END; }
 
 	if (*a[1] == 'm' && strcmp(a[1], "merge") == 0)
 		{ exit_status = merge_tags(a); goto END; }

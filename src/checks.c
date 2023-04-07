@@ -768,6 +768,7 @@ is_internal_f(const char *restrict cmd)
 		{"tag", 3},
 		{"ta", 2},
 		{"te", 2},
+		{"tl", 2},
 		{"unlink", 6},
 		{"v", 1},
 		{"vv", 2},

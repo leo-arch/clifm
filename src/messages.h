@@ -925,7 +925,7 @@ Note: Both numbers and names are allowed\n\n\
 
 #define TAG_USAGE "(Un)tag files and/or directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  tag [add, del, list, merge, new, rename, untag]\n\
+  tag [add, del, list, list-full, merge, new, rename, untag]\n\
       [FILE]... [[:]TAG]\n\n\
 Instead of the long format described above, you can use any of the\n\
 following shortcuts as well:\n\n\
@@ -939,6 +939,8 @@ following shortcuts as well:\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available tags\n\
     tag list (or 't:<TAB>')\n\
+- List available tags and each tagged file\n\
+    tag list-full\n\
 - List files tagged as 'pdf'\n\
     tag list pdf (or 't:pdf<TAB>')'\n\
 - Tag all .PNG files in the current directory as both 'images' and 'png'\n\

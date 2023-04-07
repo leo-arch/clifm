@@ -317,7 +317,8 @@ extern int watch;
 #define _BGREEN (conf.colorize == 1 ? "\x1b[1;32m" : "")
 #define D_CYAN  (conf.colorize == 1 ? "\x1b[0;36m" : "")
 #define BOLD    (conf.colorize == 1 ? "\x1b[1m" : "")
-#define NC      (conf.colorize == 1 ? "\x1b[0m" : "") /* Reset color attributes to terminal defaults */
+/* NC: Reset color attributes to terminal defaults */
+#define NC      (conf.colorize == 1 ? "\x1b[0m" : "")
 
 /* Format to use for suggestions when running colorless */
 #define SUG_NO_COLOR "\x1b[0m" /* No color */

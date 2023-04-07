@@ -210,14 +210,8 @@ int_cmds_generator(const char *text, int state)
 		"st      (change files sorting order)",
 		"stats   (print files statistics)",
 		"tag     (tag files)",
-//		"td      (delete tags)",
 		"te      (toggle the executable bit on files)",
 		"tips    (print tips)",
-//		"tl      (list tags or tagged files)",
-//		"tm      (rename tags)",
-//		"tn      (create tags)",
-//		"tu      (untag files)",
-//		"ty      (merge tags)",
 		"t       (trash files)",
 		"u       (restore trashed files using a menu)",
 		"unpin   (unpin the pinned directory)",
@@ -2725,10 +2719,8 @@ options_generator(const char *text, int state)
 	/* tag */
 	} else if (*l == 't' && l[1] == 'a' && l[2] == 'g' && l[3] == ' ') {
 		_opts[0] = "add"; _opts[1] = "del"; _opts[2] = "list";
-		_opts[3] = "merge"; _opts[4] = "new"; _opts[5] = "rename";
-		_opts[6] = "untag"; _opts[7] = NULL;
-//		_opts[0] = "list"; _opts[1] = "new"; _opts[2] = "remove";
-//		_opts[3] = "rename"; _opts[4] = "untag"; _opts[5] = "merge"; _opts[6] = NULL;
+		_opts[3] = "list-full"; _opts[4] = "merge"; _opts[5] = "new";
+		_opts[6] = "rename"; _opts[7] = "untag"; _opts[8] = NULL;
 #endif /* !_NO_TAGS */
 	/* mm */
 	} else if (*l == 'm' && l[1] == 'm' && l[2] == ' ') {

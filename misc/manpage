@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 6, 2023" "clifm 1.11.4" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 7, 2023" "clifm 1.11.5" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1057,7 +1057,7 @@ The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Tra
 .sp
 To undelete/untrash trashed files see the \fIundel\fR command below.
 .TP
-.B tag \fR[\fIadd\fR, \fIdel\fR, \fIlist\fR, \fInew\fR, \fImerge\fR, \fIrename\fR, \fIuntag\fR] [\fIFILE\fR]... [[\fI:\fR]\fITAG\fR]
+.B tag \fR[\fIadd\fR, \fIdel\fR, \fIlist\fR, \fIlist-full\fR, \fInew\fR, \fImerge\fR, \fIrename\fR, \fIuntag\fR] [\fIFILE\fR]... [[\fI:\fR]\fITAG\fR]
 \fItag\fR is the main \fIEtiqueta\fR command, \fBclifm\fR's built-in files tagging system. See the \fBFILE TAGS\fR section for a complete description of this command.
 .TP
 .B te \fIFILE\fR...
@@ -2337,7 +2337,7 @@ Every time a new tag is created, a new directory named as the tag itself is crea
 .sp
 \fItag\fR is the main \fBEtiqueta\fR command and is used to handle file tags. Its syntax is as follows:
 
- tag [add, del, list, new, merge, rename, untag] [FILE]... [[:]TAG]
+ tag [add, del, list, list-full, new, merge, rename, untag] [FILE]... [[:]TAG]
 
 NOTE: The \fI:TAG\fR notation is used for commands taking both file and tag names: 'tag add FILES(s) :TAG ...', to tag files, and 'tag untag :TAG file1 file2', to untag files. Otherwise, \fITAG\fR is used (without the leading colon). For example: '\fItag new docs\fR', to create a new tag named \fIdocs\fR, or 'tag del png', to delete the tag named \fIpng\fR.
 .sp
@@ -2384,6 +2384,9 @@ Short format	Long format	Description
 T{
 tl
 T}	tag list	List available tags
+T{
+-
+T}	tag list-full	List available tags and all tagged files
 T{
 tl work
 T}	tag list work	List all files tagged as \fIwork\fR
