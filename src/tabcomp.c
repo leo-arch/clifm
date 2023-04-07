@@ -505,6 +505,9 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 	const int multi)
 {
 	if (cur_comp_type == TCMP_TAGS_F)
+		/* Needed in case the replacement string is shorter than the query
+		 * string. Tagged files (TCMP_TAGS_F) is a possible case. We might
+		 * need to consider other completion types as well. */
 		ERASE_TO_RIGHT;
 
 	/* Remove ending new line char */
@@ -642,30 +645,29 @@ write_completion(char *buf, const size_t *offset, int *exit_status,
 		free(p);
 }
 
-/* Get word after last non-escaped slash */
+/* Return a pointer to the beginning of the word right after the last
+ * non-escaped slash in STR, or STR if none is found. */
 static char *
 get_last_word(char *str)
 {
-	char *sl = str;
-	char *d = (char *)NULL;
-	while (*sl) {
-		if (sl == str) {
-			if (*sl == '/')
-				d = sl;
+	char *ptr = str;
+	char *word = (char *)NULL;
+
+	while (*ptr) {
+		if (ptr == str) {
+			if (*ptr == '/')
+				word = ptr;
 		} else {
-			if (*sl == '/' && *(sl - 1) != '\\')
-				d = sl;
+			if (*ptr == '/' && *(ptr - 1) != '\\')
+				word = ptr;
 		}
-		sl++;
+		ptr++;
 	}
 
-	if (!d) {
+	if (!word)
 		return str;
-	} else {
-		if (*d == '/')
-			return d + 1;
-		return d;
-	}
+
+	return *word == '/' ? word + 1 : word;
 }
 
 static void
@@ -853,7 +855,7 @@ get_tagged_file_target(char *filename)
 	if (strchr(filename, '\\'))
 		p = dequote_str(filename, 0);
 
-	snprintf(dir, PATH_MAX, "%s/%s/%s", tags_dir, cur_tag, p ? p : filename);
+	snprintf(dir, sizeof(dir), "%s/%s/%s", tags_dir, cur_tag, p ? p : filename);
 	free(p);
 
 	char *rpath = realpath(dir, NULL);
@@ -932,13 +934,11 @@ get_finder_output(const int multi, char *base)
 		char *q = line;
 		if (multi == 1) {
 			char *s = line;
-// TESTING PREVIEW SEL!!
 			if ((flags & PREVIEWER) && workspaces[cur_ws].path) {
 				char f[PATH_MAX];
 				snprintf(f, sizeof(f), "%s/%s", workspaces[cur_ws].path, s);
 				select_file(f);
 				continue;
-// TESTING PREVIEW SEL!!
 			} else if (cur_comp_type == TCMP_GLOB) {
 				s = get_glob_file_target(line, initial_path);
 			} else if (cur_comp_type == TCMP_TAGS_F && tags_dir && cur_tag) {
@@ -1261,7 +1261,6 @@ is_multi_sel(void)
 		return 0;
 
 	char *l = rl_line_buffer;
-//	char *lws = strrchr(rl_line_buffer, ' ');
 	char *lws = get_last_chr(rl_line_buffer, ' ', rl_point);
 
 	/* Do not allow multi-sel if we have a path, only file names */

@@ -1233,6 +1233,9 @@ append_params(char **args, char *name, char ***cmd, int *exec_flags)
 static int
 run_cmd_plus_args(char **args, char *name)
 {
+	if (!args || !args[0])
+		return EXIT_FAILURE;
+
 	size_t i;
 	for (i = 0; args[i]; i++);
 
@@ -1248,17 +1251,12 @@ run_cmd_plus_args(char **args, char *name)
 		free(cmd[i]);
 	free(cmd);
 
-	if (ret == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
-	return EXIT_FAILURE;
+	return ret == EXIT_SUCCESS ? ret : EXIT_FAILURE;
 }
 
 static int
 join_and_run(char **args, char *name)
 {
-	if (!args || !args[0])
-		return EXIT_FAILURE;
-
 	/* Application name plus parameters (array): 'ow FILE CMD ARG...' */
 	if (args[1])
 		return run_cmd_plus_args(args, name);
@@ -1327,7 +1325,7 @@ mime_open_with(char *filename, char **args)
 	/* ow FILE APP [ARGS]
 	 * We already have the opening app. Just join the app, option
 	 * parameters, and file name, and execute the command */
-	if (args) {
+	if (args && args[0]) {
 		int ret = join_and_run(args, name);
 		free(name);
 		return ret;
