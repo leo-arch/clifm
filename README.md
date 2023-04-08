@@ -1,11 +1,10 @@
 <p align="center">
 	<a href="https://github.com/leo-arch/clifm">
-		<img src="https://i.postimg.cc/Gm5vxMLp/256x256c.png" alt="CliFM logo" width="160" height="160">
+		<img src="misc/logo/clifm-banner.png" alt="CliFM logo">
 	</a>
 </p>
-<h1 align="center">CliFM</h1>
 <h2 align="center">The Command Line File Manager</h2>
-<h4 align="center">No GUI, no TUI, no menus. Just you and a (powerful, file-management oriented) command line</h4>
+<h4 align="center">No GUI, no TUI, AND no menus. Just you and a powerful, file-management oriented command line.</h4>
 <h4 align="center"><a
 href="https://github.com/leo-arch/clifm/#floppy_disk-installation">Install</a> · <a
 href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a> · <a
