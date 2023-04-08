@@ -151,6 +151,9 @@ init_conf_struct(void)
 	conf.clear_screen = UNSET;
 	conf.cmd_desc_sug = UNSET;
 	conf.colorize = UNSET;
+
+	conf.color_lnk_as_target = DEF_COLOR_LNK_AS_TARGET;
+
 	conf.columned = UNSET;
 	conf.cp_cmd = UNSET;
 	conf.desktop_notifications = UNSET;

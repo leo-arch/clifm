@@ -57,6 +57,11 @@
 # Note: Setting this option to false disables the files counter.
 ;Classify=true
 
+# Symbolic links are colored as the target file name. An indicator character
+# (by default '@') is placed at the beginning of the name to mark it as a
+# symbolic link
+;ColorLinksAsTarget=false
+
 # How to list files: 0 = vertically (like ls(1) would), 1 = horizontally
 ;ListingMode=0
 

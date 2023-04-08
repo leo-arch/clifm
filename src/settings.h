@@ -237,6 +237,9 @@ xf=01;31:xs=00;32:"
 #define DEF_COLOR_SCHEME "default"
 #define DEF_COLOR_SCHEME_256 "default-256"
 #define DEF_COLORS 1
+
+#define DEF_COLOR_LNK_AS_TARGET 0
+
 //#define DEF_CONTROL_D_EXITS 1
 #define DEF_CP_CMD CP_CP
 #define DEF_CUR_WS 0

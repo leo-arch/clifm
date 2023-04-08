@@ -683,6 +683,9 @@ struct config_t {
 	int clear_screen;
 	int cmd_desc_sug;
 	int colorize;
+
+	int color_lnk_as_target;
+
 	int columned;
 	int cp_cmd;
 	int desktop_notifications;
@@ -748,6 +751,7 @@ struct config_t {
 	int unicode;
 	int warning_prompt;
 	int welcome_message;
+	int pad3;
 
 	char *opener;
 	char *encoded_prompt;
