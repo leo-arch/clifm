@@ -4,9 +4,9 @@
 <svg
    version="1.1"
    id="svg98"
-   width="239.95427"
-   height="97.577995"
-   viewBox="0 0 239.95427 97.577998"
+   width="238.50606"
+   height="81.919998"
+   viewBox="0 0 238.50606 81.92"
    sodipodi:docname="clifm-banner.svg"
    inkscape:export-filename="/home/jackson/clifm/misc/logo/clifm-banner.png"
    inkscape:export-xdpi="687.33099"
@@ -28,8 +28,8 @@
      inkscape:pagecheckerboard="0"
      showgrid="false"
      inkscape:zoom="4.6783677"
-     inkscape:cx="105.48551"
-     inkscape:cy="56.857437"
+     inkscape:cx="87.53053"
+     inkscape:cy="65.407429"
      inkscape:window-width="2560"
      inkscape:window-height="1371"
      inkscape:window-x="2560"
@@ -57,18 +57,18 @@
      inkscape:groupmode="layer"
      inkscape:label="Image"
      id="g104"
-     transform="translate(79.354286,20.946377)">
+     transform="translate(44.38389,8.9383188)">
     <rect
-       style="fill:#e5e5e5;fill-opacity:1;stroke:none;stroke-width:3.53226;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:stroke fill markers"
+       style="fill:#e5e5e5;fill-opacity:1;stroke:none;stroke-width:3.10666;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:stroke fill markers"
        id="rect42956"
-       width="239.95427"
-       height="97.577995"
-       x="-79.354286"
-       y="-20.946377"
-       ry="6.2534471" />
+       width="238.50606"
+       height="75.939713"
+       x="-44.383888"
+       y="-5.5585475"
+       ry="7.7824535" />
     <g
        id="g43198"
-       transform="translate(0,-0.34685421)">
+       transform="translate(17.890433,3.8322052)">
       <rect
          style="fill:#2a2a2a;fill-opacity:1;stroke:none;stroke-width:3.78;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:stroke fill markers"
          id="rect8820"
@@ -117,13 +117,13 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:0.81;font-family:'Secular One';-inkscape-font-specification:'Secular One, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle"
-       x="88.936729"
-       y="42.082623"
+       x="112.16802"
+       y="46.65131"
        id="text25414"><tspan
          sodipodi:role="line"
          id="tspan25412"
-         x="88.936729"
-         y="42.082623"
+         x="112.16802"
+         y="46.65131"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;font-family:'Secular One';-inkscape-font-specification:'Secular One, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal">CliFM</tspan></text>
   </g>
 </svg>
