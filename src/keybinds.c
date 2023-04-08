@@ -914,7 +914,7 @@ rl_toggle_long_view(int count, int key)
 		reload_dirlist();
 	}
 
-	print_reload_msg(_("Long view mode %s\n"),
+	print_reload_msg(_("Long view %s\n"),
 		conf.long_view == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;

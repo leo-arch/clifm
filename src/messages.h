@@ -471,11 +471,12 @@ files in the current directory:\n\n\
 
 #define HF_USAGE "Set hidden files on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  hf, hidden [on, off, status]\n\n\
+  hf, hh, hidden [on, off, status]\n\n\
 \x1b[1mEXAMPLE\x1b[0m\n\
 - Show hidden files\n\
-    hf on\n\
-  Note: Press Alt-. to toggle hidden files on/off"
+    hh on\n\
+- Toggle hidden files\n\
+    hh (or Alt-.)"
 
 #define HISTEXEC_USAGE "Access commands history entries\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -576,7 +577,12 @@ For information about the matching algorithm consult the manpage\n\n\
 
 #define LL_USAGE "Toggle long view mode\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  ll, lv"
+  ll, lv [on, off]\n\n\
+\x1b[1mEXAMPLE\x1b[0m\n\
+- Change to long view\n\
+    ll on\n\
+- Toggle long view\n\
+    ll (or Alt-l)"
 
 #define LM_USAGE "Set light mode on/off\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

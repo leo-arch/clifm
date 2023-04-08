@@ -139,11 +139,11 @@ int_cmds_generator(const char *text, int state)
 	static char *cmd_desc[] = {
 		"/       (search files)",
 		"ac      (archive-compress files)",
-		"acd     (set autocd on-off)",
+		"acd     (set autocd on/off)",
 		"actions (manage actions-plugins)",
 		"ad      (dearchive-decompress files)",
 		"alias   (manage aliases)",
-		"ao      (set auto-open on-off)",
+		"ao      (set auto-open on/off)",
 		"b       (go back in the directory history list)",
 		"bd      (change to a parent directory)",
 		"bl      (create symbolic links in bulk)",
@@ -152,7 +152,7 @@ int_cmds_generator(const char *text, int state)
 		"br      (rename files in bulk)",
 		"c       (copy files)",
 		"cd      (change directory)",
-		"cl      (set columns on-off)",
+		"cl      (set columns on/off)",
 		"cmd     (jump to the COMMANDS section in the manpage)",
 		"colors  (print currently used file type colors)",
 		"config  (edit the main configuration file)",
@@ -161,22 +161,22 @@ int_cmds_generator(const char *text, int state)
 		"d       (duplicate files)",
 		"ds      (deselect files)",
 		"exp     (export file names to a temporary file)",
-		"ext     (set external-shell commands on-off)",
+		"ext     (set external-shell commands on/off)",
 		"f       (go forth in the directory history list)",
-		"fc      (set the files counter on-off)",
-		"ff      (set list-directories-first on-off)",
+		"fc      (set the files counter on/off)",
+		"ff      (toggle list-directories-first on/off)",
 		"fs      (what is free software?)",
 		"ft      (set a files filter)",
 		"fz      (print directories full size - long view only)",
-		"hf      (set show-hidden-files on-off)",
+		"hh      (toggle show-hidden-files on/off)",
 		"history (manage the commands history)",
 		"icons   (set icons on-off)",
 		"j       (jump to a visited directory)",
 		"kb      (manage keybindings)",
 		"l       (create a symbolic link)",
 		"le      (edit a symbolic link)",
-		"ll      (toggle long view)",
-		"lm      (set light mode on-off)",
+		"ll      (toggle long view on/off)",
+		"lm      (toggle light mode on/off)",
 		"log     (manage logs)",
 		"m       (move files)",
 		"md      (create directories)",
@@ -194,7 +194,7 @@ int_cmds_generator(const char *text, int state)
 		"p       (print files properties)",
 		"pc      (change files permissions)",
 		"pf      (manage profiles)",
-		"pg      (set the files pager on-off)",
+		"pg      (set the files pager on/off)",
 		"pin     (pin a directory)",
 		"pp      (print files properties - with full directory size)",
 		"prompt  (switch-edit prompt)",
@@ -2702,12 +2702,13 @@ options_generator(const char *text, int state)
 	if ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ') || strncmp(l, "acd ", 4) == 0) )
 	|| (*l == 'e' && strncmp(l, "ext ", 4) == 0)
 	|| (*l == 'f' && l[1] == 'f' && l[2] == ' ')
-	|| (*l == 'h' && l[1] == 'f' && l[2] == ' ')
+	|| (*l == 'h' && (l[1] == 'f' || l[1] == 'h') && l[2] == ' ')
 	|| (*l == 'p' && l[1] == 'g' && l[2] == ' ') ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
-	/* cl, icons */
+	/* cl, icons, ll-lv */
 	} else if ( (*l == 'c' && l[1] == 'l' && l[2] == ' ')
-	|| (*l == 'i' && strncmp(l, "icons ", 6) == 0) ) {
+	|| (*l == 'i' && strncmp(l, "icons ", 6) == 0)
+	|| (*l == 'l' && (l[1] == 'v' || l[1] == 'l') && l[2] == ' ') ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = NULL;
 #ifndef _NO_PROFILES
 	/* pf */

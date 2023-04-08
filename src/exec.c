@@ -2184,12 +2184,22 @@ dirhist_function(char *dir)
 static int
 long_view_function(const char *arg)
 {
-	if (arg && IS_HELP(arg)) {
+	if (!arg)
+		return rl_toggle_long_view(0, 0);
+
+	if (IS_HELP(arg) || (strcmp(arg, "on") != 0 && strcmp(arg, "off") != 0)) {
 		puts(LL_USAGE);
 		return EXIT_SUCCESS;
 	}
 
-	return rl_toggle_long_view(0, 0);
+	conf.long_view = arg[1] == 'n' ? 1 : 0;
+	if (conf.autols == 1)
+		reload_dirlist();
+
+	print_reload_msg(_("Long view %s\n"), arg[1] == 'n'
+		? _("enabled") : _("disabled"));
+
+	return EXIT_SUCCESS;
 }
 
 /* Remove the variable VAR from the environment */
@@ -2726,8 +2736,8 @@ exec_cmd(char **comm)
 		return (exit_code = history_function(comm));
 
 	/* #### HIDDEN FILES #### */
-	else if (*comm[0] == 'h' && ((comm[0][1] == 'f' && !comm[0][2])
-	|| strcmp(comm[0], "hidden") == 0))
+	else if (*comm[0] == 'h' && (((comm[0][1] == 'f' || comm[0][1] == 'h')
+	&& !comm[0][2]) || strcmp(comm[0], "hidden") == 0))
 		return (exit_code = hidden_files_function(comm[1]));
 
 	/* #### AUTOCD #### */

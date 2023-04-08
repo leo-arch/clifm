@@ -189,7 +189,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 			if (*(s + 1) == 'z') return FZ_DESC;
 		}
 
-		else if (*s == 'h' && *(s + 1) == 'f')
+		else if (*s == 'h' && (*(s + 1) == 'f' || *(s + 1) == 'h'))
 			return HF_DESC;
 
 		else if (*s == 'k') {
