@@ -192,7 +192,7 @@ get_link_color(char *name, int *link_dir, const int dsize)
 		*link_dir = (follow_symlinks == 1 && dsize == 1) ? 1 : 0;
 		color = get_dir_color(name, a.st_mode, a.st_nlink);
 	} else {
-		color = get_file_color(name, &a);
+		color = get_regfile_color(name, &a);
 	}
 
 	return color;

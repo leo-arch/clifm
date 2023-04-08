@@ -717,7 +717,7 @@ print_suggestion(const char *str, size_t offset, char *color)
 
 static inline char *
 get_reg_file_color(const char *filename, const struct stat *attr,
-				int *free_color)
+                   int *free_color)
 {
 	if (conf.light_mode == 1) return fi_c;
 	if (access(filename, R_OK) == -1) return nf_c;
