@@ -563,7 +563,7 @@ _purge_jumpdb(char *arg)
 	return purge_low_ranked_entries(n);
 }
 
-/* Jump into best ranked directory matched by ARGS */
+/* Jump into the best ranked directory matching query strings in ARGS */
 int
 dirjump(char **args, int mode)
 {

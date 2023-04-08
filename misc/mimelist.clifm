@@ -133,4 +133,4 @@ X:^font/.*=fontforge;fontpreview
 X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent
 
 # Fallback to another resource opener as last resource
-.*=xdg-open;mimeo;mimeopen -n;whippet -m;open;linopen;
+.*=handlr open;mimeopen -n;rifle;mimeo;xdg-open;open;
