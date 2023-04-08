@@ -234,13 +234,17 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <details>
 <summary>Click here to expand</summary>
 
+* `Development`
+  - Colorize symlinks according to the target file via `ColorLinksAsTarget` in the config file.
+  - File names trimming can now be disabled permanently via the `TrimNames` option in the config file.
+  - Improved interface fot the `tag` command.
 * `version 1.11 (Cobb)`
   - Files apparent size is used now by default. Revert via `--no-apparent-size` or setting `ApparentSize` to `false` in the config file. 
-  - **NEW**: [**Clifm** will try to run in 256 colors mode if support is detected](https://github.com/leo-arch/clifm/wiki/Customization#color-support). Just comment out the `ColorScheme` option in the config file (or set it either to an empty value or to `default-256`) to enable this feature.
-  - **NEW**: [Mark files with extended attributes (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode)
-  - **NEW**: [Customizable timestamps, including relative times (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles)
-  - **NEW**: [Color gradients for file sizes and timestamps (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details)
-  - **NEW**: [Use `config dump` to print the list of settings and their current value (highlighting those differing from default values)](https://github.com/leo-arch/clifm/wiki/Introduction#config-reset-dump-application)
+  - [**Clifm** will try to run in 256 colors mode if support is detected](https://github.com/leo-arch/clifm/wiki/Customization#color-support). Just comment out the `ColorScheme` option in the config file (or set it either to an empty value or to `default-256`) to enable this feature.
+  - [Mark files with extended attributes (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode)
+  - [Customizable timestamps, including relative times (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles)
+  - [Color gradients for file sizes and timestamps (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details)
+  - [Use `config dump` to print the list of settings and their current value (highlighting those differing from default values)](https://github.com/leo-arch/clifm/wiki/Introduction#config-reset-dump-application)
   - The [`config` command](https://github.com/leo-arch/clifm/wiki/Introduction#config-reset-application) is now used to open/edit the main configuration file (`edit` can still be used, but is deprecated and might be removed in a future release)
   - `FzfPreview` (file previews in TAB completion - fzf mode only) is now enabled by default (disable via `--no-fzfpreview`)
   - Improved jump table screen (via the [`j` command](https://github.com/leo-arch/clifm/wiki/Introduction#j---purge-num---edit-jc-jl-jp-str--jo-num-je))
