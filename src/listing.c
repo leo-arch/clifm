@@ -2340,12 +2340,12 @@ list_dir(void)
 				file_info[n].xattr = 0;
 				stats.broken_link++;
 			} else {
-				/* Uncomment to colorize link as target instead of link itself */
 				char tmp[PATH_MAX]; *tmp = '\0';
+				char *ret = (char *)NULL;
 				if (check_ext == 1 && conf.color_lnk_as_target == 1)
-					realpath(ename, tmp);
+					ret = realpath(ename, tmp);
 
-				char *lname = *tmp ? tmp : ename;
+				char *lname = (ret && *tmp) ? tmp : ename;
 				if (S_ISDIR(attrl.st_mode)) {
 					file_info[n].dir = 1;
 					file_info[n].filesn = conf.files_counter == 1
