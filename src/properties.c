@@ -1147,12 +1147,11 @@ get_properties(char *filename, const int dsize)
 	case S_IFLNK:
 		file_type = 'l';
 		ctype = ln_c;
-		if (conf.colorize == 0) {
+		linkname = realpath(filename, (char *)NULL);
+		if (conf.colorize == 0)
 			color = ln_c;
-		} else {
-			linkname = realpath(filename, (char *)NULL);
+		else
 			color = linkname ? ln_c : or_c;
-		}
 		break;
 
 	case S_IFBLK:  file_type = 'b'; color = ctype = bd_c; break;
