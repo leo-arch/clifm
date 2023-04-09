@@ -165,28 +165,28 @@ xf=01;31:xs=00;32:"
 /* Colors for the properties and long/detail view functions */
 #define DEF_DD_C     "\x1b[00;36m" /* Modification date */
 #define DEF_DG_C     "\x1b[00;33m" /* UID, GID */
-#define DEF_DG_C256  "\x1b[0;38;5;214m"
+#define DEF_DG_C256  "\x1b[0;38;5;215m"
 #define DEF_DN_C     "\x1b[00;02;37m" /* Dash (no attribute) */
 #define DEF_DO_C     "\x1b[00;36m" /* Perms in octal */
-#define DEF_DO_C256  "\x1b[0;38;5;50m"
+#define DEF_DO_C256  "\x1b[0;38;5;79m"
 #define DEF_DP_C     "\x1b[00;36m" /* SUID, SGID, Sticky */
-#define DEF_DP_C256  "\x1b[0;38;5;50m"
+#define DEF_DP_C256  "\x1b[0;38;5;79m"
 #define DEF_DR_C     "\x1b[00;33m" /* Read perm */
-#define DEF_DR_C256  "\x1b[0;38;5;227m"
+#define DEF_DR_C256  "\x1b[0;38;5;228m"
 #define DEF_DW_C     "\x1b[00;31m" /* Write perm */
-#define DEF_DW_C256  "\x1b[0;38;5;196m"
+#define DEF_DW_C256  "\x1b[0;38;5;197m"
 #define DEF_DXD_C    "\x1b[00;32m" /* Execute perm (dirs) */
-#define DEF_DXD_C256 "\x1b[0;38;5;40m"
+#define DEF_DXD_C256 "\x1b[0;38;5;77m"
 #define DEF_DXR_C    "\x1b[00;36m" /* Execute perm (reg files) */
-#define DEF_DXR_C256 "\x1b[0;38;5;50m"
+#define DEF_DXR_C256 "\x1b[0;38;5;79m"
 #define DEF_DZ_C     "\x1b[00;32m" /* Size (only for dirs) */
 
-/* Default color shades and attributes for date field in file properties */
-#define DEF_DATE_SHADES_256 "2,196-2,231,253,250,247,244"
+/* Default color shades for date field in file properties */
+#define DEF_DATE_SHADES_256 "2,197-2,231,253,250,247,244"
 #define DEF_DATE_SHADES_8   "1,31-2,36-1,36,36-2"
 
-/* Default color shades and attributes for size field in file properties */
-#define DEF_SIZE_SHADES_256 "2,196-2,43,112,227,214,202"
+/* Default color shades for size field in file properties */
+#define DEF_SIZE_SHADES_256 "2,197-2,79,77,228,215,203"
 #define DEF_SIZE_SHADES_8   "1,31-2,32,33,31"
 
 /* This one is purely internal: cur_color is set to this value when
