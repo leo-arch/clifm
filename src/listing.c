@@ -679,9 +679,11 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 		}
 
 		if (conf.no_eln == 0) { /* Print ELN */
-			char ind_chr = file_info[i].sel == 1 ? SELFILE_CHR
-				: ((conf.icons == 0 && file_info[i].symlink == 1
-				&& conf.color_lnk_as_target == 1) ? LINK_CHR : ' ');
+
+			char ind_chr = file_info[i].sel ? SELFILE_CHR
+				: ((conf.color_lnk_as_target == 1 && file_info[i].symlink == 1
+				&& follow_symlinks == 1 && conf.icons == 0)
+				? LINK_CHR : ' ');
 			char *ind_chr_color = file_info[i].sel == 1 ? li_c : "";
 
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
@@ -781,8 +783,9 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 	char ind_chr = file_info[i].sel ? SELFILE_CHR
-		: ((conf.icons == 0 && file_info[i].symlink == 1
-		&& conf.color_lnk_as_target == 1) ? LINK_CHR : ' ');
+		: ((conf.color_lnk_as_target == 1 && file_info[i].symlink == 1
+		&& follow_symlinks == 1 && conf.icons == 0)
+		? LINK_CHR : ' ');
 	char *ind_chr_color = file_info[i].sel ? li_cb : "";
 
 #ifndef _NO_ICONS
