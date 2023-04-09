@@ -682,7 +682,11 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 
 			char ind_chr = file_info[i].sel ? SELFILE_CHR
 				: ((conf.color_lnk_as_target == 1 && file_info[i].symlink == 1
+#ifndef _NO_ICONS
 				&& follow_symlinks == 1 && conf.icons == 0)
+#else
+				&& follow_symlinks == 1)
+#endif
 				? LINK_CHR : ' ');
 			char *ind_chr_color = file_info[i].sel == 1 ? li_c : "";
 
@@ -784,7 +788,11 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 
 	char ind_chr = file_info[i].sel ? SELFILE_CHR
 		: ((conf.color_lnk_as_target == 1 && file_info[i].symlink == 1
+#ifndef _NO_ICONS
 		&& follow_symlinks == 1 && conf.icons == 0)
+#else
+		&& follow_symlinks == 1)
+#endif
 		? LINK_CHR : ' ');
 	char *ind_chr_color = file_info[i].sel ? li_cb : "";
 
