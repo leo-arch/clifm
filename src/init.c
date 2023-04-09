@@ -397,7 +397,7 @@ init_history(void)
 {
 	/* Shrink the log and the directory history files */
 	if (log_file)
-		truncate_file(log_file, conf.max_log);
+		truncate_file(log_file, conf.max_log, 0);
 
 	if (!hist_file)
 		return EXIT_FAILURE;
@@ -3253,7 +3253,7 @@ load_dirhist(void)
 		return EXIT_FAILURE;
 
 	if (dirhist_file)
-		truncate_file(dirhist_file, conf.max_dirhist);
+		truncate_file(dirhist_file, conf.max_dirhist, 1);
 
 	int fd;
 	FILE *fp = open_fstream_r(dirhist_file, &fd);

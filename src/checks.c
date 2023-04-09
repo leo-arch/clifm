@@ -920,9 +920,10 @@ check_for_alias(char **args)
 	return (char **)NULL;
 }
 
-/* Keep only the last MAX records in FILE */
+/* Keep only the last MAX records in FILE
+ * If CHECK_DUPS is 1, skip consecutive equal entries */
 void
-truncate_file(char *file, int max)
+truncate_file(char *file, const int max, const int check_dups)
 {
 	if (!config_ok || !file)
 		return;
@@ -1005,7 +1006,7 @@ truncate_file(char *file, int max)
 
 	while (getline(&line, &line_size, fp) > 0) {
 		// Skip consecutive equal entries
-		if (prev_line && line_size == prev_line_size
+		if (check_dups == 1 && prev_line && line_size == prev_line_size
 		&& strcmp(line, prev_line) == 0)
 			continue;
 
@@ -1017,9 +1018,11 @@ truncate_file(char *file, int max)
 			fprintf(fpp, "%s", line);
 #endif
 
-		free(prev_line);
-		prev_line = savestring(line, line_size);
-		prev_line_size = line_size;
+		if (check_dups == 1) {
+			free(prev_line);
+			prev_line = savestring(line, line_size);
+			prev_line_size = line_size;
+		}
 	}
 
 	free(prev_line);
