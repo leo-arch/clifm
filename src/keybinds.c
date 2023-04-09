@@ -1852,8 +1852,7 @@ rl_toggle_disk_usage(int count, int key)
 
 	/* Default values */
 	static int dsort = DEF_SORT, dlong = DEF_LONG_VIEW,
-		ddirsize = DEF_FULL_DIR_SIZE, ddf = DEF_LIST_DIRS_FIRST,
-		dapparent = DEF_APPARENT_SIZE;
+		ddirsize = DEF_FULL_DIR_SIZE, ddf = DEF_LIST_DIRS_FIRST;
 
 	if (xargs.disk_usage_analyzer == 1) {
 		xargs.disk_usage_analyzer = 0;
@@ -1861,17 +1860,15 @@ rl_toggle_disk_usage(int count, int key)
 		conf.long_view = dlong;
 		conf.full_dir_size = ddirsize;
 		conf.list_dirs_first = ddf;
-		conf.apparent_size = dapparent;
 	} else {
 		xargs.disk_usage_analyzer = 1;
 		dsort = conf.sort;
 		dlong = conf.long_view;
 		ddirsize = conf.full_dir_size;
 		ddf = conf.list_dirs_first;
-		dapparent = conf.apparent_size;
 
 		conf.sort = STSIZE;
-		conf.long_view = conf.full_dir_size = conf.apparent_size = 1;
+		conf.long_view = conf.full_dir_size = 1;
 		conf.list_dirs_first = 0;
 	}
 

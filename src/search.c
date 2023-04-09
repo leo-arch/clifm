@@ -494,7 +494,6 @@ SCANDIR_ERROR:
 		if (!search_path) {
 			printf("%s%*d%s%s%c%s%s%s%s%c", el_c, eln_pad, eln[i], df_c,
 				ind_chr_color, ind_chr, df_c,
-//			printf("%s%*d%s %s%s%s%c", el_c, eln_pad, eln[i], df_c,
 #ifndef _NO_ICONS
 				conf.icons == 1 ? file_info[eln[i] - 1].icon_color : "",
 				conf.icons == 1 ? file_info[eln[i] - 1].icon : "",
@@ -885,9 +884,8 @@ search_regex(char **args, const int invert, const int case_sens)
 			char *ind_chr_color = file_info[regex_index[i]].sel == 1 ? li_cb : "";
 
 			if (!search_path) {
-//				printf("%s%*d%s %s%s%s%c", el_c, eln_pad, regex_index[i] + 1, df_c,
-				printf("%s%*d%s%s%c%s%s%s%s%c", el_c, eln_pad, regex_index[i] + 1, df_c,
-					ind_chr_color, ind_chr, df_c,
+				printf("%s%*d%s%s%c%s%s%s%s%c", el_c, eln_pad,
+					regex_index[i] + 1, df_c, ind_chr_color, ind_chr, df_c,
 #ifndef _NO_ICONS
 					conf.icons == 1 ? file_info[regex_index[i]].icon_color : "",
 					conf.icons == 1 ? file_info[regex_index[i]].icon : "",
