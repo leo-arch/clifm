@@ -1191,12 +1191,12 @@ get_properties(char *filename, const int dsize)
 
 	/* File properties */
 	struct perms_t perms = get_file_perms(attr.st_mode);
-	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s%s "
+	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s%s "
 		"Links: %s%zu%s "),
 		cnum_val, attr.st_mode & 07777, cend,
-		t_ctype, file_type, cend,
-		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, cend,
-		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, cend,
+		t_ctype, file_type, dn_c,
+		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
+		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
 		perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend,
 		is_acl(filename) ? "+" : "", cbold, (size_t)link_n, cend);
 
@@ -1620,10 +1620,10 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	if (prop_fields.perm == PERM_SYMBOLIC) {
 		struct perms_t perms = get_file_perms(props->mode);
 		snprintf(attr_s, sizeof(attr_s),
-			"%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s/%s%c%s%c%s%c%s",
-			t_ctype, file_type, cend,
-			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, cend,
-			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, cend,
+			"%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s",
+			t_ctype, file_type, dn_c,
+			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
+			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend);
 	} else if (prop_fields.perm == PERM_NUMERIC) {
 		snprintf(attr_s, sizeof(attr_s), "%s%04o%s", do_c,
