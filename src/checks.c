@@ -922,7 +922,7 @@ check_for_alias(char **args)
 
 /* Keep only the last MAX records in FILE */
 void
-check_file_size(char *file, int max)
+truncate_file(char *file, int max)
 {
 	if (!config_ok || !file)
 		return;
@@ -941,8 +941,7 @@ check_file_size(char *file, int max)
 			close_fstream(fp, fd);
 		}
 
-		return; /* Return anyway, for, being a new empty file, there's
-		no need to truncate it */
+		return; /* Exit: we do not need to truncate a new empty file */
 	}
 
 	/* Once we know the files exists, keep only MAX entries */
@@ -1001,7 +1000,15 @@ check_file_size(char *file, int max)
 	size_t line_size = 0;
 	char *line = (char *)NULL;
 
+	char *prev_line = (char *)NULL;
+	size_t prev_line_size = 0;
+
 	while (getline(&line, &line_size, fp) > 0) {
+		// Skip consecutive equal entries
+		if (prev_line && line_size == prev_line_size
+		&& strcmp(line, prev_line) == 0)
+			continue;
+
 		/* Delete old entries = copy only new ones */
 		if (i++ >= n - (max - 1))
 #if !defined(__HAIKU__) && !defined(__sun)
@@ -1009,7 +1016,13 @@ check_file_size(char *file, int max)
 #else
 			fprintf(fpp, "%s", line);
 #endif
+
+		free(prev_line);
+		prev_line = savestring(line, line_size);
+		prev_line_size = line_size;
 	}
+
+	free(prev_line);
 
 #if defined(__HAIKU__) || defined(__sun)
 	fclose(fpp);

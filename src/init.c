@@ -395,12 +395,12 @@ get_home(void)
 int
 init_history(void)
 {
+	/* Shrink the log and the directory history files */
+	if (log_file)
+		truncate_file(log_file, conf.max_log);
+
 	if (!hist_file)
 		return EXIT_FAILURE;
-
-	/* Shrink the log file size */
-	if (log_file)
-		check_file_size(log_file, conf.max_log);
 
 	/* Get history */
 	history_comment_char = '#';
@@ -3251,6 +3251,9 @@ load_dirhist(void)
 {
 	if (!config_ok || !dirhist_file)
 		return EXIT_FAILURE;
+
+	if (dirhist_file)
+		truncate_file(dirhist_file, conf.max_dirhist);
 
 	int fd;
 	FILE *fp = open_fstream_r(dirhist_file, &fd);

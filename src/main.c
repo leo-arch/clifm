@@ -1124,8 +1124,6 @@ main(int argc, char *argv[])
 		add_to_jumpdb(workspaces[cur_ws].path);
 
 	initialize_readline();
-	/*Trim the directory history file if necessary */
-//	check_file_size(dirhist_file, conf.max_dirhist);
 	check_working_shell();
 	get_prompt_cmds();
 

@@ -39,7 +39,7 @@ int  log_function(char **);
 void log_msg(char *, const int, const int, const int);
 int  record_cmd(char *);
 int  run_history_cmd(const char *);
-int  save_dirhist(void);
+//int  save_dirhist(void);
 
 __END_DECLS
 

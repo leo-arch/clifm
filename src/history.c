@@ -321,6 +321,7 @@ log_msg(char *_msg, const int print_prompt, const int logme,
 	write_msg_into_logfile(_msg);
 }
 
+/*
 int
 save_dirhist(void)
 {
@@ -337,12 +338,12 @@ save_dirhist(void)
 		return EXIT_FAILURE;
 	}
 
-	/* Let's keep only the last MaxDirhist entries */
+	// Let's keep only the last MaxDirhist entries
 	int i, n = dirhist_total_index <= conf.max_dirhist ? 0
 		: dirhist_total_index - conf.max_dirhist;
 
 	for (i = n; i < dirhist_total_index; i++) {
-		/* Exclude invalid/consecutive equal entries */
+		// Exclude invalid/consecutive equal entries
 		if (!old_pwd[i] || *old_pwd[i] == _ESC || (i > 0 && old_pwd[i - 1]
 		&& strcmp(old_pwd[i - 1], old_pwd[i]) == 0))
 			continue;
@@ -352,6 +353,23 @@ save_dirhist(void)
 
 	fclose(fp);
 	return EXIT_SUCCESS;
+} */
+
+static void
+append_to_dirhist_file(const char *dir_path)
+{
+	if (!dirhist_file || !dir_path || !*dir_path || xargs.stealth_mode == 1)
+		return;
+
+	FILE *fp = fopen(dirhist_file, "a");
+	if (!fp) {
+		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error saving "
+			"directory entry: %s\n"), PROGRAM_NAME, dir_path, strerror(errno));
+		return;
+	}
+
+	fprintf(fp, "%s\n", dir_path);
+	fclose(fp);
 }
 
 /* Add DIR_PATH to visited directory history (old_pwd) */
@@ -372,6 +390,9 @@ add_to_dirhist(const char *dir_path)
 
 		dirhist_cur_index = dirhist_total_index;
 		old_pwd[dirhist_total_index] = savestring(dir_path, strlen(dir_path));
+
+		append_to_dirhist_file(dir_path);
+
 		dirhist_total_index++;
 		old_pwd[dirhist_total_index] = (char *)NULL;
 	}

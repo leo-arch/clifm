@@ -30,7 +30,8 @@ __BEGIN_DECLS
 #ifndef _NO_FZF
 void check_completion_mode(void);
 #endif
-void check_file_size(char *, int);
+
+//void check_file_size(char *, int);
 int  check_file_access(const mode_t, const uid_t, const gid_t);
 char **check_for_alias(char **);
 int  check_glob_char(const char *, const int);
@@ -50,6 +51,7 @@ int  is_internal_f(const char *restrict);
 int  is_number(const char *restrict);
 int  is_acl(char *);
 int  is_url(char *);
+void truncate_file(char *, int);
 
 __END_DECLS
 

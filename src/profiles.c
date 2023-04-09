@@ -202,7 +202,7 @@ profile_set(char *prof)
 
 	if (config_ok) {
 		/* Shrink the log file if needed */
-		check_file_size(log_file, conf.max_log);
+		truncate_file(log_file, conf.max_log);
 
 		/* Reset history */
 		if (access(hist_file, F_OK | W_OK) == 0) {

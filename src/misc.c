@@ -1398,7 +1398,7 @@ free_stuff(void)
 	if (xargs.stealth_mode != 1)
 		save_jumpdb();
 
-	save_dirhist();
+//	save_dirhist();
 
 	if (conf.restore_last_path || conf.cd_on_quit)
 		save_last_path();
