@@ -817,6 +817,9 @@ get_size_unit(off_t size)
 	return str;
 }
 
+/* Return the full size of the directory DIR using du(1)
+ * The size is reported in bytes if SIZE_IN_BYTES is set to 1
+ * Otherwise, human format is used */
 off_t
 dir_size(char *dir, const int size_in_bytes)
 {
