@@ -678,21 +678,23 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 			(*counter)++;
 		}
 
-		if (conf.no_eln == 0) { /* Print ELN */
-
-			char ind_chr = file_info[i].sel ? SELFILE_CHR
-				: ((conf.color_lnk_as_target == 1 && file_info[i].symlink == 1
+		char ind_chr = file_info[i].sel ? SELFILE_CHR
+			: ((conf.color_lnk_as_target == 1 && file_info[i].symlink == 1
 #ifndef _NO_ICONS
-				&& follow_symlinks == 1 && conf.icons == 0)
+			&& follow_symlinks == 1 && conf.icons == 0)
 #else
-				&& follow_symlinks == 1)
+			&& follow_symlinks == 1)
 #endif
-				? LINK_CHR : ' ');
-			char *ind_chr_color = file_info[i].sel == 1 ? li_c : "";
+			? LINK_CHR : ' ');
+		char *ind_chr_color = file_info[i].sel == 1 ? li_c : "";
 
+		if (conf.no_eln == 0) {
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
 				ind_chr_color, ind_chr, df_c);
+		} else {
+			printf("%s%c%s", ind_chr_color, ind_chr, df_c);
 		}
+
 		/* Print the remaining part of the entry */
 		print_entry_props(&file_info[i], (size_t)space_left, ug_max,
 			ino_max, fc_max, size_max, have_xattr);
