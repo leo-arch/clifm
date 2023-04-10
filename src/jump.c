@@ -76,8 +76,8 @@ rank_entry(const int i, const time_t now, int *days_since_first,
 
 	int rank;
 	rank = *days_since_first > 1
-		   ? ((int)jump_db[i].visits * VISIT_BONUS) / *days_since_first
-		   : (int)jump_db[i].visits * VISIT_BONUS;
+		? ((int)jump_db[i].visits * VISIT_BONUS) / *days_since_first
+		: (int)jump_db[i].visits * VISIT_BONUS;
 
 	int tmp_rank = rank;
 	if (*hours_since_last == 0) { /* Last hour */
@@ -94,7 +94,8 @@ rank_entry(const int i, const time_t now, int *days_since_first,
 
 	int j = (int)bm_n;//, bpw = 0; /* Bookmarked, pinned or workspace */
 	while (--j >= 0) {
-		if (bookmarks[j].path && bookmarks[j].path[1] == jump_db[i].path[1]
+		if (bookmarks[j].path && *bookmarks[j].path
+		&& bookmarks[j].path[1] == jump_db[i].path[1]
 		&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
 			rank += BOOKMARK_BONUS;
 			jump_db[i].keep = 1;
@@ -102,7 +103,7 @@ rank_entry(const int i, const time_t now, int *days_since_first,
 		}
 	}
 
-	if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
+	if (pinned_dir && *pinned_dir && pinned_dir[1] == jump_db[i].path[1]
 	&& strcmp(pinned_dir, jump_db[i].path) == 0) {
 		rank += PINNED_BONUS;
 		jump_db[i].keep = 1;
@@ -110,7 +111,8 @@ rank_entry(const int i, const time_t now, int *days_since_first,
 
 	j = MAX_WS;
 	while (--j >= 0) {
-		if (workspaces[j].path && workspaces[j].path[1] == jump_db[i].path[1]
+		if (workspaces[j].path && *workspaces[j].path
+		&& workspaces[j].path[1] == jump_db[i].path[1]
 		&& strcmp(jump_db[i].path, workspaces[j].path) == 0) {
 			rank += WORKSPACE_BONUS;
 			jump_db[i].keep = 1;
@@ -178,7 +180,7 @@ add_to_jumpdb(const char *dir)
 			continue;
 
 		/* Jump entries are all absolute paths, so that they all start with
-		 * a slash. Let's start comparing then the second char */
+		 * a slash. Let's start comparing then from the second char */
 		if (dir[1] == jump_db[i].path[1] && strcmp(jump_db[i].path, dir) == 0) {
 			jump_db[i].visits++;
 			jump_db[i].last_visit = time(NULL);
@@ -213,7 +215,7 @@ save_jumpdb(void)
 	int i, reduce = 0, total_rank = 0;
 	time_t now = time(NULL);
 
-	/* Calculate both total rank sum and rank for each entry */
+	/* Calculate both total rank sum, and rank for each entry */
 	i = (int)jump_n;
 	while (--i >= 0) {
 		if (!IS_VALID_JUMP_ENTRY(i))

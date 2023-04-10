@@ -785,13 +785,13 @@ struct timespec timeout;
 #endif
 int watch = UNSET;
 
-/* This is the main structure of any basic shell
-	 1 - Infinite loop
-	 2 - Grab user input
-	 3 - Parse user input
-	 4 - Execute command
+/* This is the main structure of any basic shell (a REPL)
+	 1 - Grab user input
+	 2 - Parse user input
+	 3 - Execute command
+	 4 - Grab user input again
 	 See https://brennan.io/2015/01/16/write-a-shell-in-c/
-	 */
+*/
 static inline void
 run_main_loop(void)
 {

@@ -42,6 +42,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <readline/tilde.h>
+
 #if defined(__OpenBSD__)
 # include <ereadline/readline/history.h> /* history_write_timestamps */
 #else
@@ -59,10 +60,13 @@
 #include "config.h"
 #include "exec.h"
 #include "init.h"
+#include "jump.h" /* add_to_jumpdb() */
+
 #if defined(_NO_PROFILES) || defined(_NO_FZF) || defined(_NO_ICONS) \
 || defined(_NO_TRASH)
 # include "messages.h"
 #endif
+
 #include "mime.h"
 #include "misc.h"
 #include "navigation.h"
@@ -953,7 +957,7 @@ check_tag(char *name)
 		return EXIT_FAILURE;
 
 	char dir[PATH_MAX];
-	snprintf(dir, PATH_MAX, "%s/%s", tags_dir, name);
+	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, name);
 
 	struct stat a;
 	if (stat(dir, &a) == -1 || !S_ISDIR(a.st_mode))
@@ -1002,6 +1006,54 @@ load_tags(void)
 	free(t);
 
 	tags[tags_n] = (char *)NULL;
+}
+
+/* Make sure no entry in the directory history is absent in the jump database.
+ *
+ * Why do we need this?
+ * Jump entries are stored IN MEMORY and written to disk ONLY AT EXIT, where
+ * the ENTIRE database is rewritten with values taken from this memory, which
+ * is private to the current instance. So, whatever jump entry was added from a
+ * second instance (provided this second instance was closed before the first
+ * one) will be lost.
+ *
+ * One of the drawbacks of this approach is that IT ONLY RETRIEVES NEW ENTRIES
+ * BUT WON'T UPDATE EXISTING ONES with values coming from the second instance:
+ * they're lost.
+ *
+*/
+static void
+sync_jumpdb_with_dirhist(void)
+{
+	if (!old_pwd)
+		return;
+
+	int i = dirhist_total_index;
+	size_t j = 0;
+
+	while (--i >= 0) {
+		if (!old_pwd[i] || !*old_pwd[i])
+			continue;
+
+		size_t old_pwd_len = strlen(old_pwd[i]);
+
+		int found = 0;
+		for (j = 0; j < jump_n; j++) {
+			if (!jump_db[j].path || !*jump_db[j].path
+			|| old_pwd[i][1] != jump_db[j].path[1]
+			|| old_pwd_len != jump_db[j].len
+			|| old_pwd[i][old_pwd_len - 1] != jump_db[j].path[jump_db[j].len - 1])
+				continue;
+
+			if (strcmp(old_pwd[i] + 1, jump_db[j].path + 1) == 0) {
+				found = 1;
+				break;
+			}
+		}
+
+		if (found == 0)
+			add_to_jumpdb(old_pwd[i]);
+	}
 }
 
 /* Reconstruct the jump database from the database file */
@@ -1139,8 +1191,11 @@ load_jumpdb(void)
 	jump_db[jump_n].keep = 0;
 	jump_db[jump_n].visits = 0;
 	jump_db[jump_n].first_visit = -1;
+
+	sync_jumpdb_with_dirhist();
 }
 
+/* Load bookmarks from the bookmarks file */
 int
 load_bookmarks(void)
 {
@@ -1276,7 +1331,7 @@ load_bookmarks(void)
 	return EXIT_SUCCESS;
 }
 
-/* Store actions from the actions file into a struct */
+/* Load actions from the actions file */
 int
 load_actions(void)
 {
@@ -3252,8 +3307,7 @@ load_dirhist(void)
 	if (!config_ok || !dirhist_file)
 		return EXIT_FAILURE;
 
-	if (dirhist_file)
-		truncate_file(dirhist_file, conf.max_dirhist, 1);
+	truncate_file(dirhist_file, conf.max_dirhist, 1);
 
 	int fd;
 	FILE *fp = open_fstream_r(dirhist_file, &fd);
