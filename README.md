@@ -238,6 +238,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - Colorize symlinks according to the target file via `ColorLinksAsTarget` in the config file.
   - File names trimming can now be disabled permanently via the `TrimNames` option in the config file.
   - Improved interface fot the `tag` command.
+  - Improved synchronization between multiple instances.
 * `version 1.11 (Cobb)`
   - Files apparent size is used now by default. Revert via `--no-apparent-size` or setting `ApparentSize` to `false` in the config file. 
   - [**Clifm** will try to run in 256 colors mode if support is detected](https://github.com/leo-arch/clifm/wiki/Customization#color-support). Just comment out the `ColorScheme` option in the config file (or set it either to an empty value or to `default-256`) to enable this feature.
