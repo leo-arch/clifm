@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 7, 2023" "clifm 1.11.5" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 10, 2023" "clifm 1.11.7" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1018,7 +1018,7 @@ Glob and regular expressions could be used together. For example: \fIs ^[r|R].*d
 .sp
 It is important to note that glob expressions are evaluated before regular expressions, in such a way that any pattern that could be understood by both kinds of pattern matching mechanisms will be evaluated first according to the former, that is, as a glob expression. For example, '.*', as regular expression, should match all files. However, since glob expressions are evaluated first, it will only match hidden files. To select all files using a glob expression, try '.* *', or, with a regular expression: '^' or '(.*?)'. The keyboard shortcut \fIAlt\-a\fR is also available to perform the same operation.
 .sp
-The Selection Box is accessible to different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behavior via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox.clifm\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename.clifm\fR is used (this is the default).
+The Selection Box is accessible from different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behavior via the \fIShareSelbox\fR option in the configuration file. If \fIShareSelbox\fR is enabled, selected files are stored in \fI/tmp/clifm/username/.selbox.clifm\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename.clifm\fR is used (this is the default).
 .sp
 \fBOperating on selected files\fR
 .sp
