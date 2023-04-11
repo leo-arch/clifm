@@ -190,9 +190,21 @@ get_link_color(char *name, int *link_dir, const int dsize)
 
 	if (S_ISDIR(a.st_mode)) {
 		*link_dir = (follow_symlinks == 1 && dsize == 1) ? 1 : 0;
-		color = get_dir_color(name, a.st_mode, a.st_nlink);
+		if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 1)
+			color = get_dir_color(name, a.st_mode, a.st_nlink, -1);
+		else
+			color = nd_c;
 	} else {
-		color = get_regfile_color(name, &a);
+		switch(a.st_mode & S_IFMT) {
+		case S_IFSOCK: color = so_c; break;
+		case S_IFIFO:  color = pi_c; break;
+		case S_IFBLK:  color = bd_c; break;
+		case S_IFCHR:  color = cd_c; break;
+		case S_IFREG:
+			color = get_regfile_color(name, &a);
+			break;
+		default: color = df_c; break;
+		}
 	}
 
 	return color;
@@ -1141,7 +1153,7 @@ get_properties(char *filename, const int dsize)
 		else if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
 			color = nd_c;
 		else
-			color = get_dir_color(filename, attr.st_mode, attr.st_nlink);
+			color = get_dir_color(filename, attr.st_mode, attr.st_nlink, -1);
 		break;
 
 	case S_IFLNK:

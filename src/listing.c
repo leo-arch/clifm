@@ -2289,9 +2289,9 @@ list_dir(void)
 
 		switch (file_info[n].type) {
 
-		case DT_DIR:
+		case DT_DIR: {
 #ifndef _NO_ICONS
-			if (conf.icons) {
+			if (conf.icons == 1) {
 				get_dir_icon(file_info[n].name, (int)n);
 
 				/* If set from the color scheme file */
@@ -2299,32 +2299,24 @@ list_dir(void)
 					file_info[n].icon_color = dir_ico_c;
 			}
 #endif /* _NO_ICONS */
-			if (conf.files_counter) {
-				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
-			} else {
-				if (stat_ok
-				&& check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
-					file_info[n].filesn = -1;
-				else
-					file_info[n].filesn = 1;
-			}
-			if (file_info[n].filesn > 0) { /* S_ISVTX*/
-				file_info[n].color = stat_ok ? ((attr.st_mode & 01000)
-						? ((attr.st_mode & 00002) ? tw_c : st_c)
-						: ((attr.st_mode & 00002) ? ow_c : di_c))
-						: df_c;
-				/* S_ISWOTH*/
-			} else if (file_info[n].filesn == 0) {
-				file_info[n].color = stat_ok ? ((attr.st_mode & 01000)
-						? ((attr.st_mode & 00002) ? tw_c : st_c)
-						: ((attr.st_mode & 00002) ? ow_c : ed_c))
-						: df_c;
-			} else {
+			int daccess = (stat_ok == 1 &&
+			check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 1);
+
+			file_info[n].filesn = conf.files_counter == 1
+				? (count_dir(ename, NO_CPOP) - 2) : 1;
+
+			if (daccess == 0 || file_info[n].filesn < 0) {
 				file_info[n].color = nd_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
-#endif
+#endif /* _NO_ICONS */
+			} else {
+				file_info[n].color = stat_ok ? ((attr.st_mode & 01000)
+					? ((attr.st_mode & 00002) ? tw_c : st_c)
+					: ((attr.st_mode & 00002) ? ow_c
+					: (file_info[n].filesn == 0 ? ed_c : di_c)))
+					: df_c;
 			}
 
 			/* Let's gather some file statistics based on the file type color */
@@ -2336,6 +2328,7 @@ list_dir(void)
 				if (file_info[n].color == st_c) {
 					stats.sticky++;
 			}
+			}
 
 			break;
 
@@ -2343,37 +2336,54 @@ list_dir(void)
 #ifndef _NO_ICONS
 			file_info[n].icon = ICON_LINK;
 #endif
-			if (!follow_symlinks) {
+			if (follow_symlinks == 0) {
 				file_info[n].color = ln_c;
 				break;
 			}
+
 			struct stat attrl;
 			if (fstatat(fd, ename, &attrl, 0) == -1) {
 				file_info[n].color = or_c;
 				file_info[n].xattr = 0;
 				stats.broken_link++;
-			} else {
-				char tmp[PATH_MAX]; *tmp = '\0';
-				char *ret = (char *)NULL;
-				if (check_ext == 1 && conf.color_lnk_as_target == 1)
-					ret = realpath(ename, tmp);
+				break;
+			}
 
-				char *lname = (ret && *tmp) ? tmp : ename;
-				if (S_ISDIR(attrl.st_mode)) {
-					file_info[n].dir = 1;
-					file_info[n].filesn = conf.files_counter == 1
-						? (count_dir(ename, NO_CPOP) - 2) : 0;
-/*					conf.files_counter
-					    ? (file_info[n].filesn = (count_dir(ename, NO_CPOP) - 2))
-					    : (file_info[n].filesn = 0); */
-					file_info[n].color = conf.color_lnk_as_target == 1
-						? get_dir_color(lname, attrl.st_mode, attrl.st_nlink)
-						: ln_c;
+			char tmp[PATH_MAX]; *tmp = '\0';
+			char *ret = (char *)NULL;
+			if (conf.color_lnk_as_target == 1)
+				ret = realpath(ename, tmp);
+
+			char *lname = (ret && *tmp) ? tmp : ename;
+			if (S_ISDIR(attrl.st_mode)) {
+				file_info[n].dir = 1;
+				file_info[n].filesn = conf.files_counter == 1
+					? (count_dir(ename, NO_CPOP) - 2) : 1;
+
+				int dfiles = conf.files_counter == 1
+					? (file_info[n].filesn == 2 ? 3
+					: file_info[n].filesn) : 3; // 3 == populated
+
+				file_info[n].color = conf.color_lnk_as_target == 1
+					? (check_file_access(attrl.st_mode, attrl.st_uid,
+					attrl.st_gid) == 0 ? nd_c
+					: get_dir_color(lname, attrl.st_mode, attrl.st_nlink,
+					dfiles)) : ln_c;
+			} else {
+				if (conf.color_lnk_as_target == 1) {
+					switch(attrl.st_mode & S_IFMT) {
+					case S_IFSOCK: file_info[n].color = so_c; break;
+					case S_IFIFO:  file_info[n].color = pi_c; break;
+					case S_IFBLK:  file_info[n].color = bd_c; break;
+					case S_IFCHR:  file_info[n].color = cd_c; break;
+					case S_IFREG:
+						file_info[n].color = get_regfile_color(lname, &attrl);
+						break;
+					default: file_info[n].color = df_c; break;
+					}
 				} else {
-					file_info[n].color = conf.color_lnk_as_target == 1
-						? get_regfile_color(lname, &attrl) : ln_c;
+					file_info[n].color = ln_c;
 				}
-//				file_info[n].color = ln_c;
 			}
 			}
 			break;

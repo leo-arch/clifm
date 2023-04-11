@@ -763,7 +763,7 @@ get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 		if (conf.light_mode == 1) return di_c;
 		if (access(filename, R_OK | X_OK) != 0)
 			return nd_c;
-		color = get_dir_color(filename, attr->st_mode, attr->st_nlink);
+		color = get_dir_color(filename, attr->st_mode, attr->st_nlink, -1);
 		break;
 
 	case S_IFREG:

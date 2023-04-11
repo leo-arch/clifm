@@ -33,10 +33,9 @@ int  cschemes_function(char **);
 #ifndef CLIFM_SUCKLESS
 size_t get_colorschemes(void);
 #endif /* CLIFM_SUCKLESS */
-char *get_dir_color(const char *, const mode_t, const nlink_t);
+char *get_dir_color(const char *, const mode_t, const nlink_t, const int);
 char *get_ext_color(char *);
 char *get_file_color(const char *, const struct stat *);
-//char *get_regfile_color(const char *filename, const struct stat attr);
 char *get_regfile_color(const char *, const struct stat *);
 int  import_color_scheme(const char *);
 void remove_bold_attr(char **);
@@ -45,7 +44,6 @@ void reset_filetype_colors(void);
 void reset_iface_colors(void);
 int  set_colors(const char *, const int);
 void set_default_colors(void);
-//void unset_suggestions_color(void);
 
 __END_DECLS
 

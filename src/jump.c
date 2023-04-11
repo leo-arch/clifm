@@ -346,7 +346,7 @@ _get_dir_color(const char *filename, const struct stat a)
 		return or_c;
 	}
 
-	return get_dir_color(filename, a.st_mode, a.st_nlink);
+	return get_dir_color(filename, a.st_mode, a.st_nlink, -1);
 }
 
 /* Compare ranks A and B (used to sort jump entries by rank)*/

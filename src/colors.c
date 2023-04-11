@@ -170,9 +170,12 @@ get_regfile_color(const char *filename, const struct stat *attr)
 
 /* Retrieve the color corresponding to dir FILENAME with mode MODE
  * If LINKS > 2, we know the directory is populated, so that there's no need
- * to run count_dir() */
+ * to run count_dir(). If COUNT > -1, we already know whether the
+ * directory is populatoed or not: use this value for FILES_DIR (do not run
+ * count_dir() either). */
 char *
-get_dir_color(const char *filename, const mode_t mode, const nlink_t links)
+get_dir_color(const char *filename, const mode_t mode, const nlink_t links,
+	const int count)
 {
 	char *color = (char *)NULL;
 	int sticky = 0;
@@ -183,8 +186,8 @@ get_dir_color(const char *filename, const mode_t mode, const nlink_t links)
 	if (mode & S_IWOTH)
 		is_oth_w = 1;
 
-	size_t files_dir = links > 2 ? (size_t)links
-		: (size_t)count_dir(filename, CPOP);
+	size_t files_dir = count > -1 ? (size_t)count : (links > 2 ? (size_t)links
+		: (size_t)count_dir(filename, CPOP));
 
 	color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
 		   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
@@ -1931,7 +1934,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 			else if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
 				color = nd_c;
 			else
-				color = get_dir_color(ent, attr.st_mode, attr.st_nlink);
+				color = get_dir_color(ent, attr.st_mode, attr.st_nlink, -1);
 			break;
 
 		case S_IFLNK: {
