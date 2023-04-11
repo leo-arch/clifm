@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 10, 2023" "clifm 1.11.7" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 11, 2023" "clifm 1.11.7" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1435,8 +1435,7 @@ Colors are specified using the same format used by \fBdircolors\fR(1) and the \f
 .sp
  di = directory
  ed = empty directory
- nd = directory with no read permission
- ne = empty directory with no read permission
+ nd = directory with no read/exec permission
  fi = regular file
  ef = empty regular file
  nf = file with no access permission

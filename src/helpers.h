@@ -1470,7 +1470,6 @@ extern char
 	ln_c[MAX_COLOR], /* Symlink */
 	mh_c[MAX_COLOR], /* Multi-hardlink file */
 	nd_c[MAX_COLOR], /* No read directory */
-	ne_c[MAX_COLOR], /* No read empty dir */
 	nf_c[MAX_COLOR], /* No read file */
 	no_c[MAX_COLOR], /* Unknown */
 	or_c[MAX_COLOR], /* Broken symlink */

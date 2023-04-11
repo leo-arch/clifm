@@ -29,7 +29,7 @@
 
 /* Default color definitions */
 #define DEF_FILE_COLORS "bd=01;33:ca=30;41:cd=01:di=01;34:ed=02;34:\
-ee=32:ef=02:ex=01;32:fi=0:ln=01;36:mh=30;46:nd=04;01;31:ne=02;04;31:nf=02;04;31:\
+ee=32:ef=02:ex=01;32:fi=0:ln=01;36:mh=30;46:nd=04;01;31:nf=02;04;31:\
 no=31;47:or=02;04;36:ow=34;42:pi=35:so=01;35:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:uf=02;04;37:"
 
@@ -93,7 +93,6 @@ xf=01;31:xs=00;32:"
 #define DEF_LN_C  "\x1b[01;36m" /* Symbolic link */
 #define DEF_MH_C  "\x1b[30;46m" /* Multi-link */
 #define DEF_ND_C  "\x1b[01;31m" /* Unaccessible dir */
-#define DEF_NE_C  "\x1b[02;31m" /* Empty dir no read permission */
 #define DEF_NF_C  "\x1b[02;31m" /* Unaccessible file */
 #define DEF_NO_C  "\x1b[00;31;47m" /* Unknown file type */
 #define DEF_OR_C  "\x1b[02;36m" /* Orphaned/broken symlink */

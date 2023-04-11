@@ -443,7 +443,6 @@ reset_filetype_colors(void)
 	*nf_c = '\0';
 	*di_c = '\0';
 	*ed_c = '\0';
-	*ne_c = '\0';
 	*ex_c = '\0';
 	*ee_c = '\0';
 	*bd_c = '\0';
@@ -807,8 +806,6 @@ set_filetype_colors(char **colors, const size_t words)
 		else if (*colors[i] == 'n') {
 			if (colors[i][1] == 'd')
 				set_color(colors[i] + 3, nd_c, RL_PRINTABLE);
-			else if (colors[i][1] == 'e')
-				set_color(colors[i] + 3, ne_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'f')
 				set_color(colors[i] + 3, nf_c, RL_PRINTABLE);
 			else if (colors[i][1] == 'o')
@@ -1283,7 +1280,6 @@ set_default_colors(void)
 	if (!*di_c) strcpy(di_c, DEF_DI_C);
 	if (!*nd_c) strcpy(nd_c, DEF_ND_C);
 	if (!*ed_c) strcpy(ed_c, DEF_ED_C);
-	if (!*ne_c) strcpy(ne_c, DEF_NE_C);
 	if (!*fi_c) strcpy(fi_c, DEF_FI_C);
 	if (!*ef_c) strcpy(ef_c, DEF_EF_C);
 	if (!*nf_c) strcpy(nf_c, DEF_NF_C);
@@ -2110,10 +2106,8 @@ color_codes(void)
 
 	printf(_(" %sfile name%s: di: Directory*\n"), di_c, df_c);
 	printf(_(" %sfile name%s: ed: EMPTY directory\n"), ed_c, df_c);
-	printf(_(" %sfile name%s: nd: Directory with no read permission\n"),
+	printf(_(" %sfile name%s: nd: Directory with no read/exec permission\n"),
 	    nd_c, df_c);
-	printf(_(" %sfile name%s: ne: EMPTY directory with no read "
-		 "permission\n"), ne_c, df_c);
 	printf(_(" %sfile name%s: fi: Regular file\n"), fi_c, df_c);
 	printf(_(" %sfile name%s: ef: Empty (zero-lenght) file\n"), ef_c, df_c);
 	printf(_(" %sfile name%s: nf: File with no read permission\n"),
