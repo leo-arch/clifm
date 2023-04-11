@@ -686,7 +686,7 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 			&& follow_symlinks == 1)
 #endif
 			? LINK_CHR : ' ');
-		char *ind_chr_color = file_info[i].sel == 1 ? li_c : "";
+		char *ind_chr_color = file_info[i].sel == 1 ? li_cb : "";
 
 		if (conf.no_eln == 0) {
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
