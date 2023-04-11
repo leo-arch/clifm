@@ -1019,12 +1019,7 @@ check_shell_functions(char *str)
 static int
 is_fused_param(char *str)
 {
-	/* If coming from a keybind, executed via run_kb_cmd(), the parameter
-	 * passed to this function is a string literal, which makes the line
-	 * "*q = '\0'" below segfault. For the time being skip calls comming from
-	 * a keybinding (rl_dispatching != 0) */
-	if (!str || !*str || !*(str + 1) || rl_dispatching != 0)
-//	if (!str || !*str || !*(str + 1))
+	if (!str || !*str || !*(str + 1))
 		return EXIT_FAILURE;
 
 	char *p = str, *q = (char *)NULL;
