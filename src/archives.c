@@ -563,10 +563,10 @@ is_compressed(char *file, int test_iso)
 
 	char archiver_tmp_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		snprintf(archiver_tmp_file, PATH_MAX - 1, "%s/.clifm%s",
+		snprintf(archiver_tmp_file, sizeof(archiver_tmp_file), "%s/.clifm%s",
 			P_tmpdir, rand_ext);
 	else
-		snprintf(archiver_tmp_file, PATH_MAX - 1, "%s/.clifm%s",
+		snprintf(archiver_tmp_file, sizeof(archiver_tmp_file), "%s/.clifm%s",
 			tmp_dir, rand_ext);
 	free(rand_ext);
 

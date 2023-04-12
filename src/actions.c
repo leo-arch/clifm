@@ -57,10 +57,11 @@ get_plugin_path(char *action, int *status)
 
 	char *cmd = (char *)NULL;
 	int dir_path = 0;
+	size_t cmd_len = 0;
 
 	if (strchr(action, '/')) {
 		cmd = (char *)xnmalloc(action_len + 1, sizeof(char));
-		strcpy(cmd, action); /* NOLINT */
+		xstrsncpy(cmd, action, action_len + 1);
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
@@ -69,34 +70,29 @@ get_plugin_path(char *action, int *status)
 			*status = EXIT_FAILURE;
 			return (char *)NULL;
 		}
-		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2, sizeof(char));
-		sprintf(cmd, "%s/%s", plugins_dir, action); /* NOLINT */
+		cmd_len = action_len + strlen(plugins_dir) + 2;
+		cmd = (char *)xnmalloc(cmd_len, sizeof(char));
+		snprintf(cmd, cmd_len, "%s/%s", plugins_dir, action);
 	}
 
 	/* Check if the action file exists and is executable */
-	if (access(cmd, X_OK) == -1) {
-		/* If not in local dir, check system data dir as well */
-		if (data_dir && dir_path == 0) {
-			cmd = (char *)xrealloc(cmd, (action_len + strlen(data_dir)
-				+ strlen(PNL) + 11) * sizeof(char));
-			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action); /* NOLINT */
-			if (access(cmd, X_OK) == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
-					cmd, strerror(errno));
-				free(cmd);
-				*status = errno;
-				return (char *)NULL;
-			}
-		} else {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
-				cmd, strerror(errno));
-			free(cmd);
-			*status = errno;
-			return (char *)NULL;
-		}
+	if (access(cmd, X_OK) == 0)
+		return cmd;
+
+	/* Not in local dir. Let's check the system data dir as well */
+	if (data_dir && dir_path == 0) {
+		cmd_len = action_len + strlen(data_dir)	+ strlen(PNL) + 11;
+		cmd = (char *)xrealloc(cmd, cmd_len * sizeof(char));
+		snprintf(cmd, cmd_len, "%s/%s/plugins/%s", data_dir, PNL, action);
+		if (access(cmd, X_OK) == 0)
+			return cmd;
 	}
 
-	return cmd;
+	free(cmd);
+	*status = ENOENT;
+	_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
+		action, strerror(ENOENT));
+	return (char *)NULL;
 }
 
 int
