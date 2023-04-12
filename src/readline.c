@@ -3299,7 +3299,7 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* #### INTERNAL COMMANDS EXPANSION #### */
 		if (xrename == 0 && *text == 'c' && *(text + 1) == 'm'
-		&& *(text + 2) == 'd') {
+		&& *(text + 2) == 'd' && !*(text + 3)) {
 			if ((matches = rl_completion_matches(text, &int_cmds_generator))) {
 				cur_comp_type = TCMP_CMD_DESC;
 				return matches;

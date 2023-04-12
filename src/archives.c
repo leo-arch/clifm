@@ -240,11 +240,11 @@ create_mountpoint(char *file)
 
 	if (xargs.stealth_mode == 1) {
 		mountpoint = (char *)xnmalloc(strlen(tfile) + P_tmpdir_len + 15,
-					sizeof(char));
+			sizeof(char));
 		sprintf(mountpoint, "%s/clifm-mounts/%s", P_tmpdir, tfile); /* NOLINT */
 	} else {
 		mountpoint = (char *)xnmalloc(config_dir_len + strlen(tfile) + 9,
-					sizeof(char));
+			sizeof(char));
 		sprintf(mountpoint, "%s/mounts/%s", config_dir, tfile); /* NOLINT */
 	}
 
