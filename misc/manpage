@@ -2185,7 +2185,7 @@ wall
 T}	Set image as wallpaper	\fB(7)\fR
 T{
 \fIunset\fR
-T}	Copy line buffer to the clipboard	xclip \fB(8)\fR
+T}	Copy line buffer to the clipboard	\fB(8)\fR
 .TE
 
 .sp
@@ -2207,7 +2207,7 @@ Whereas this plugin provides basic Git integration, it could be easily modified 
 .sp
 \fB(7)\fR feh, xloadimage, hsetroot, or nitrogen (for X); swww or swaybg (for Wayland)
 .sp
-\fB(8)\fR Consult the plugin file itself (\fIxclip.sh\fR) for more information
+\fB(8)\fR Dependencies: cb, wl-copy, xclip, xsel, pbcopy, termux-clipboard-set, clipboard, or clip. Consult the plugin file itself (\fIxclip.sh\fR) for more information
 
 .B Dependencies of the previewer plugin (fzfnav.sh)
 

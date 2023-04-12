@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # Description: Copy the contents of the line buffer to the clipboard
-# Dependencies: xclip(1)
+# Dependencies:
+#  Any of the following: cb, wl-copy, xclip, xsel, pbcopy, termux-clipboard-set, clipboard, or clip
 # License: GPL3
 # Author: L. Abramovich
 
