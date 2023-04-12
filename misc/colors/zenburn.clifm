@@ -48,7 +48,7 @@ define WC=38;2;255;255;255;48;2;140;208;211
 define KW=38;2;47;47;47;48;2;255;255;255
 define RK=38;2;241;140;150;48;2;70;70;70
 
-FiletypeColors="di=BS:nd=UBR:ed=S:ne=UR:fi=W:ef=DW:ex=BG:ee=G:ln=BC:or=UC:nf=UR:mh=RC:pi=BM:so=BV:bd=BW:cd=BW:su=KR:sg=KY:ca=WGr:tw=WR:ow=UWR:st=WC:no=KW:uf=RK:"
+FiletypeColors="di=BS:nd=UBR:ed=S:fi=W:ef=DW:ex=BG:ee=G:ln=BC:or=UC:nf=UR:mh=RC:pi=BM:so=BV:bd=BW:cd=BW:su=KR:sg=KY:ca=WGr:tw=WR:ow=UWR:st=WC:no=KW:uf=RK:"
 
 InterfaceColors="bm=BC:df=W:dl=BG2:dd=:dg=Y:dn=DW:dr=Y:do=C:dp=M:dw=R:dxd=G:dxr=C:dz=:el=BR:em=BR:fc=DS:hb=C:hc=DR:hd=G:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:li=BG:mi=BC:nm=BG:si=BB:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:ti=BC:ts=UM:tt=BDC:tx=W:wc=BC:wm=BY:wp=DR:ws1=C:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
 

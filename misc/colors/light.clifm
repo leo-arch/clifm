@@ -53,7 +53,7 @@ define WB=37;44
 define URW=4;31;47
 define URK=4;31;40
 
-FiletypeColors="di=BB:nd=UBR:ed=B:ne=UR:fi=K:ef=BDY:nf=R:ln=BDC:mh=KC:or=UDC:pi=DM:so=M:bd=BDY:cd=BDK:su=WR:sg=KY:ca=KR:tw=KG:ow=BlGr:st=WB:ex=R2:ee=DR2:no=URW:uf=URK:"
+FiletypeColors="di=BB:nd=UBR:ed=B:fi=K:ef=BDY:nf=R:ln=BDC:mh=KC:or=UDC:pi=DM:so=M:bd=BDY:cd=BDK:su=WR:sg=KY:ca=KR:tw=KG:ow=BlGr:st=WB:ex=R2:ee=DR2:no=URW:uf=URK:"
 
 InterfaceColors="el=DG:mi=BDM:dl=DB:tx=D:df=K:fc=DB:wc=BD:li=G:si=B:ti=C:em=R:wm=Y:nm=G:bm=DC:dn=DW:dr=Y:dw=R:dxd=G:dxr=C:dg=G:dd=B:dz=G:do=C:dp=M:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:hb=C:hc=DR:hd=C:he=c:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:tt=BDC:ts=UR:wp=DR:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=DG:xf=R"
 

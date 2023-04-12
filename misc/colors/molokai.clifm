@@ -61,7 +61,7 @@ define KG=38;2;0;0;0;48;2;0;255;135
 define UBlR=4;38;2;102;217;239;48;2;255;74;68
 define RBl=38;2;255;74;68;48;2;102;217;239
 
-FiletypeColors="sg=KY:su=WR:cd=BD:uf=UBlR:pi=KB:tw=RBl:di=B:ed=DB:nd=UBR:ne=UDB:ex=BR:ln=R:no=UBlR:ow=BlGr:or=UKM:ca=KR:st=KG:mh=RC:bd=BK:so=KM:fi=0:ef=2:nf=UR"
+FiletypeColors="sg=KY:su=WR:cd=BD:uf=UBlR:pi=KB:tw=RBl:di=B:ed=DB:nd=UBR:ex=BR:ln=R:no=UBlR:ow=BlGr:or=UKM:ca=KR:st=KG:mh=RC:bd=BK:so=KM:fi=0:ef=2:nf=UR"
 
 InterfaceColors="el=O:mi=BC:dl=DW:tx=D:df=D:fc=DB:wc=BC:li=BG:si=BB:ti=BC:em=BR:wm=BY:nm=BG:bm=BC:dn=DW:dr=Y:dw=R:dxd=G:dxr=C:dg=O:dd=:dz=:do=C:dp=M:sb=DY:sc=DR:sf=UDC:sh=DM:sp=DR:sx=DG:hb=C:hc=DR:hd=C:he=C:hn=M:hp=C:hq=Y:hr=R:hs=G:hv=G:tt=BDC:ts=UM:wp=DR:ws1=B:ws2=R:ws3=Y:ws4=G:ws5=C:ws6=C:ws7=C:ws8=C:xs=G:xf=BR:"
 
