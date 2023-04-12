@@ -485,45 +485,54 @@ reload_binaries(void)
 #endif /* !__CYGWIN__ */
 
 /* Little export implementation. What it lacks? Command substitution
- * Export ARG, in the form "VAR=VALUE" to the environment */
+ * Export variables in ARG, in the form "VAR=VALUE", to the environment */
 static int
-export_var_function(char *arg)
+export_var_function(char **args)
 {
-	if (!arg || !*arg) {
+	if (!args || !args[0] || !*args[0]) {
 		fputs(_("export: A parameter, in the form VAR=VALUE, "
 			"is required\n"), stderr);
 		return EXIT_FAILURE;
 	}
 
-	if (IS_HELP(arg)) {
+	if (IS_HELP(args[0])) {
 		puts(EXPORT_VAR_USAGE);
 		return EXIT_SUCCESS;
 	}
 
-	/* ARG might have been escaped by parse_input_str(), in the command
-	 * and parameter substitution block. Let's deescape it */
-	char *ds = dequote_str(arg, 0);
-	if (!ds) {
-		fputs(_("export: Error dequoting argument\n"), stderr);
-		return EXIT_FAILURE;
-	}
+	int status = EXIT_SUCCESS;
+	size_t i;
+	for (i = 0; args[i]; i++) {
+		/* ARG might have been escaped by parse_input_str(), in the command
+		 * and parameter substitution block. Let's deescape it */
+		char *ds = dequote_str(args[i], 0);
+		if (!ds) {
+			fputs(_("export: Error dequoting argument\n"), stderr);
+			status = EXIT_FAILURE;
+			continue;
+		}
 
-	char *p = strchr(ds, '=');
-	if (!p || !*(p + 1)) {
-		fprintf(stderr, _("export: %s: Empty assignement\n"), ds);
+		char *p = strchr(ds, '=');
+		if (!p || !*(p + 1)) {
+			fprintf(stderr, _("export: %s: Empty assignement\n"), ds);
+			free(ds);
+			status = EXIT_FAILURE;
+			continue;
+		}
+
+		errno = 0;
+
+		*p = '\0';
+		if (setenv(ds, p + 1, 1) == -1) {
+			status = errno;
+			fprintf(stderr, "export: %s\n", strerror(errno));
+		}
+		*p = '=';
+
 		free(ds);
-		return EXIT_FAILURE;
 	}
 
-	errno = 0;
-
-	*p = '\0';
-	if (setenv(ds, p + 1, 1) == -1)
-		fprintf(stderr, "export: %s\n", strerror(errno));
-	*p = '=';
-
-	free(ds);
-	return errno;
+	return status;
 }
 
 /*
@@ -2771,7 +2780,7 @@ exec_cmd(char **comm)
 
 	/* #### EXPORT #### */
 	else if (*comm[0] == 'e' && strcmp(comm[0], "export") == 0) {
-		return (exit_code = export_var_function(comm[1]));
+		return (exit_code = export_var_function(comm + 1));
 	}
 
 	/* #### UNSET #### */

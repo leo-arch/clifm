@@ -305,9 +305,9 @@ Parameters passed to cp: -a"
 - Export all PDF files in the current directory\n\
     exp *.pdf"
 
-#define EXPORT_VAR_USAGE "Add a variable to the environment\n\n\
+#define EXPORT_VAR_USAGE "Add one or more variables to the environment\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  export NAME=VALUE"
+  export NAME=VALUE..."
 
 #define FC_USAGE "Turn on/off the files counter for directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
