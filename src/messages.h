@@ -1008,9 +1008,9 @@ Mark the files you need via TAB and then press Enter or Right"
 - Untrash files selectively using a menu\n\
     u (or 'u <TAB>' to choose from a list - multi-selection is allowed)"
 
-#define UNSET_USAGE "Delete a variable from the environment\n\n\
+#define UNSET_USAGE "Delete variables from the environment\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  unset NAME"
+  unset NAME..."
 
 #define UNTRASH_USAGE "Restore files from the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

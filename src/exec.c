@@ -2202,26 +2202,30 @@ long_view_function(const char *arg)
 	return EXIT_SUCCESS;
 }
 
-/* Remove the variable VAR from the environment */
+/* Remove variables specificied in VAR from the environment */
 static int
-unset_function(const char *var)
+unset_function(char **var)
 {
-	if (!var || !*var) {
+	if (!var || !var[0]) {
 		printf("unset: A variable name is required\n");
 		return EXIT_SUCCESS;
 	}
 
-	if (IS_HELP(var)) {
+	if (IS_HELP(var[0])) {
 		puts(UNSET_USAGE);
 		return EXIT_SUCCESS;
 	}
 
-	if (unsetenv(var) == -1) {
-		fprintf(stderr, "unset: %s: %s\n", var, strerror(errno));
-		return errno;
+	int status = EXIT_SUCCESS;
+	size_t i;
+	for (i = 0; var[i]; i++) {
+		if (unsetenv(var[i]) == -1) {
+			status = errno;
+			fprintf(stderr, "unset: %s: %s\n", var[i], strerror(errno));
+		}
 	}
 
-	return EXIT_SUCCESS;
+	return status;
 }
 
 /* Take the command entered by the user, already splitted into substrings
@@ -2772,7 +2776,7 @@ exec_cmd(char **comm)
 
 	/* #### UNSET #### */
 	else if (*comm[0] == 'u' && strcmp(comm[0], "unset") == 0) {
-		return (exit_code = unset_function(comm[1]));
+		return (exit_code = unset_function(comm + 1));
 	}
 
 

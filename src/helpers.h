@@ -586,14 +586,14 @@ extern int watch;
 
 /* UINT_MAX is 4294967295 == 10 digits */
 #define DIGINUM(n) (((n) < 10) ? 1 \
-		: ((n) < 100)        ? 2 \
-		: ((n) < 1000)       ? 3 \
-		: ((n) < 10000)      ? 4 \
-		: ((n) < 100000)     ? 5 \
-		: ((n) < 1000000)    ? 6 \
-		: ((n) < 10000000)   ? 7 \
-		: ((n) < 100000000)  ? 8 \
-		: ((n) < 1000000000) ? 9 \
+		: ((n) < 100)        ? 2   \
+		: ((n) < 1000)       ? 3   \
+		: ((n) < 10000)      ? 4   \
+		: ((n) < 100000)     ? 5   \
+		: ((n) < 1000000)    ? 6   \
+		: ((n) < 10000000)   ? 7   \
+		: ((n) < 100000000)  ? 8   \
+		: ((n) < 1000000000) ? 9   \
 				      : 10)
 #define IS_DIGIT(n) ((unsigned int)(n) >= '0' && (unsigned int)(n) <= '9')
 #define IS_ALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
@@ -601,8 +601,8 @@ extern int watch;
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
 
 #define FILE_URI_PREFIX_LEN 7
-#define IS_FILE_URI(f) ((f)[4] == ':' \
-				&& (f)[FILE_URI_PREFIX_LEN] \
+#define IS_FILE_URI(f) ((f)[4] == ':'                                  \
+				&& (f)[FILE_URI_PREFIX_LEN]                            \
 				&& strncmp((f), "file://", FILE_URI_PREFIX_LEN) == 0)
 
 #define IS_HELP(s) (*(s) == '-' && (((s)[1] == 'h' && !(s)[2]) \
@@ -611,10 +611,10 @@ extern int watch;
 /* TERMINAL ESCAPE CODES */
 #define CLEAR \
 	if (term_caps.home == 1 && term_caps.clear == 1) { \
-		if (term_caps.del_scrollback == 1) \
-			fputs("\x1b[H\x1b[2J\x1b[3J", stdout); \
-		else \
-			fputs("\x1b[H\x1b[J", stdout); \
+		if (term_caps.del_scrollback == 1)             \
+			fputs("\x1b[H\x1b[2J\x1b[3J", stdout);     \
+		else                                           \
+			fputs("\x1b[H\x1b[J", stdout);             \
 	}
 
 #define MOVE_CURSOR_DOWN(n)      printf("\x1b[%dB", (n))  /* CUD */
@@ -1521,16 +1521,17 @@ extern char
 	hv_c[MAX_COLOR], /* Variables $ */
 	hw_c[MAX_COLOR], /* Wrong, non-existent command name */
 
-	dr_c[MAX_COLOR], /* Read */
-	dw_c[MAX_COLOR], /* Write */
+	/* File properties */
+	dr_c[MAX_COLOR],  /* Read */
+	dw_c[MAX_COLOR],  /* Write */
 	dxd_c[MAX_COLOR], /* Execute (dirs) */
 	dxr_c[MAX_COLOR], /* Execute (reg files) */
-	dg_c[MAX_COLOR], /* UID, GID */
-	dd_c[MAX_COLOR], /* Date */
-	dz_c[MAX_COLOR], /* Size (dirs) > */
-	do_c[MAX_COLOR], /* Octal representation > */
-	dp_c[MAX_COLOR], /* Special files (SUID, SGID, etc) */
-	dn_c[MAX_COLOR], /* dash (none) */
+	dg_c[MAX_COLOR],  /* UID, GID */
+	dd_c[MAX_COLOR],  /* Date */
+	dz_c[MAX_COLOR],  /* Size (dirs) */
+	do_c[MAX_COLOR],  /* Octal representation */
+	dp_c[MAX_COLOR],  /* Special files (SUID, SGID, etc) */
+	dn_c[MAX_COLOR],  /* dash (none) */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

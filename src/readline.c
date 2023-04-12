@@ -1711,7 +1711,39 @@ bm_paths_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-/* Used by environment variables completion */
+/* Used for the 'unset' command */
+static char *
+env_vars_generator(const char *text, int state)
+{
+	if (!environ)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while ((name = environ[i++]) != NULL) {
+		if (conf.case_sens_path_comp ? strncmp(name, text, len) == 0
+		: strncasecmp(name, text, len) == 0) {
+			char *p = strchr(name, '=');
+			if (!p)
+				continue;
+			*p = '\0';
+			char *q = strdup(name);
+			*p = '=';
+			return q;
+		}
+	}
+
+	return (char *)NULL;
+}
+
+/* Complete environment variables ($VAR) */
 static char *
 environ_generator(const char *text, int state)
 {
@@ -1735,7 +1767,7 @@ environ_generator(const char *text, int state)
 				continue;
 			*p = '\0';
 			char tmp[NAME_MAX];
-			snprintf(tmp, NAME_MAX, "$%s", name);
+			snprintf(tmp, sizeof(tmp), "$%s", name);
 			char *q = strdup(tmp);
 			*p = '=';
 			return q;
@@ -3675,6 +3707,12 @@ my_rl_completion(const char *text, int start, int end)
 				return matches;
 			}
 			rl_sort_completion_matches = 1;
+		}
+
+		/* ### COMPLETIONS FOR THE 'UNSET' COMMAND ### */
+		if (*lb == 'u' && strncmp(lb, "unset ", 6) == 0) {
+			if ((matches = rl_completion_matches(text, &env_vars_generator)))
+				return matches;
 		}
 
 		/* ### NET COMMAND COMPLETION ### */
