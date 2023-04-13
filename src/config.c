@@ -1006,7 +1006,7 @@ create_actions_file(char *file)
 		"music=music_player.sh\n"
 		"ml=mime_list.sh\n"
 		"ptot=pdf_viewer.sh\n"
-		"plugin1=xclip.sh.sh\n"
+		"plugin1=xclip.sh\n"
 		"rrm=recur_rm.sh\n"
 		"update=update.sh\n"
 		"vid=vid_viewer.sh\n"
