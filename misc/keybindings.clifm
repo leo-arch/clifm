@@ -125,6 +125,7 @@ toggle-disk-usage:\C-\M-i
 toggle-virtualdir-full-paths:\M-w
 trash-sel:\C-\M-t
 untrash-all:\C-\M-u
+xclip:\C-y
 
 # F6-12
 edit-color-scheme:\e[19~
