@@ -39,3 +39,4 @@ rrm=recur_rm.sh
 update=update.sh
 vid=vid_viewer.sh
 wall=wallpaper_setter.sh
+plugin1=xclip.sh

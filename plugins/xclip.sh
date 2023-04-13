@@ -6,12 +6,7 @@
 # License: GPL3
 # Author: L. Abramovich
 
-# How to use
-# 1. Drop this plugin into the plugins directory (~/.config/clifm/plugins)
-# 2. Run 'actions edit' and bind this plugin to an action adding this line: "plugin1=xclip.sh"
-# 3. Bind a keyboard shortcut (say Ctrl-y) to the newly created action:
-#    Run 'kb edit' and add this line: "plugin1=\C-y"
-# 4. Restart clifm
+# Added as a keybinding (Ctrl-y) under /misc/keybindings.clifm
 
 if [ -z "$CLIFM_LINE" ]; then
 	printf "clifm: Empty line buffer\n" 2>&1
