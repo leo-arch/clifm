@@ -125,7 +125,6 @@ toggle-disk-usage:\C-\M-i
 toggle-virtualdir-full-paths:\M-w
 trash-sel:\C-\M-t
 untrash-all:\C-\M-u
-xclip:\C-y
 
 # F6-12
 edit-color-scheme:\e[19~
@@ -144,7 +143,7 @@ quit:\e[24~
 # "plugin1=myplugin.sh"
 # 3) Set a keybinding here for pluginx. Ex: "plugin1:\M-7"
 
-#plugin1:
+plugin1:\C-y
 #plugin2:
 #plugin3:
 #plugin4:
