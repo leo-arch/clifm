@@ -6,7 +6,7 @@
 # License: GPL3
 # Author: L. Abramovich
 
-# Added as a keybinding (Ctrl-y) under /misc/keybindings.clifm
+# Bound by default to Ctrl-y
 
 if [ -z "$CLIFM_LINE" ]; then
 	printf "clifm: Empty line buffer\n" 2>&1

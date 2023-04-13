@@ -143,7 +143,9 @@ quit:\e[24~
 # "plugin1=myplugin.sh"
 # 3) Set a keybinding here for pluginx. Ex: "plugin1:\M-7"
 
+# Bound to the xclip plugin
 plugin1:\C-y
+
 #plugin2:
 #plugin3:
 #plugin4:

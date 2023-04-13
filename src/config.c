@@ -827,7 +827,9 @@ quit:\\e[24~\n\
 # 2) Link pluginx to your plugin using the 'actions edit' command. Ex:\n\
 # \"plugin1=myplugin.sh\"\n\
 # 3) Set a keybinding here for pluginx. Ex: \"plugin1:\\M-7\"\n\n\
-#plugin1:\n\
+\n\
+# Bound to the xclip plugin\n\
+plugin1:\\C-y\n\n\
 #plugin2:\n\
 #plugin3:\n\
 #plugin4:\n",
@@ -1004,6 +1006,7 @@ create_actions_file(char *file)
 		"music=music_player.sh\n"
 		"ml=mime_list.sh\n"
 		"ptot=pdf_viewer.sh\n"
+		"plugin1=xclip.sh.sh\n"
 		"rrm=recur_rm.sh\n"
 		"update=update.sh\n"
 		"vid=vid_viewer.sh\n"
