@@ -10,7 +10,7 @@
 # 1. Drop this plugin into the plugins directory (~/.config/clifm/plugins)
 # 2. Run 'actions edit' and bind this plugin to an action adding this line: "plugin1=xclip.sh"
 # 3. Bind a keyboard shortcut (say Ctrl-y) to the newly created action:
-#    Run 'kb edit' and add this line: "plugin1=\C-y"
+#    Run 'kb edit' and add this line: "plugin1:\C-y"
 # 4. Restart clifm
 
 if [ -z "$CLIFM_LINE" ]; then
