@@ -716,6 +716,11 @@ merge_tags(char **args)
 
 	char *src = args[2], *dst = args[3];
 
+	if (strcmp(src, dst) == 0) {
+		fputs(_("tag: Source and destiny are the same tag\n"), stderr);
+		return EXIT_FAILURE;
+	}
+
 	errno = 0;
 	int exit_status = recursive_mv_tags(src, dst);
 	if (exit_status != EXIT_SUCCESS) {
