@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 11, 2023" "clifm 1.11.7" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 13, 2023" "clifm 1.11.7" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1297,7 +1297,9 @@ T}	All .txt files (CWD)
 .TP
 \fBAlt\-x:\fR Switch to next sorting method
 .TP
-\fBC\-x:\fR Launch new instance of the program
+\fBC\-x:\fR Launch a new instance of \fBclifm\fR
+.TP
+\fBC\-y:\fR Copy the contents of the line buffer to the clipboard \fB(1)\fR
 .TP
 \fBF1:\fR Go to the manpage
 .TP
@@ -1319,9 +1321,11 @@ T}	All .txt files (CWD)
 .TP
 \fBF12:\fR Quit
 .TP
-NOTE: C stands for Control and S for Shift.
+NOTE: \fBC\fR stands for Control and \fBS\fR for Shift.
 .TP
 NOTE 2: Some of these keybindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
+.TP
+\fB(1)\fR This shortcut is bound to the \fIxclip\fR plugin. See the \fBPLUGINS\fR section below for more information.
 .TP
 Haiku terminal: Most of these keybindings won't work on the Haiku terminal, since Alt plays here the role Ctrl usually plays in most other systems (see the Haiku documentation). To fix this just set your custom keybindings.
 .TP
@@ -2184,8 +2188,8 @@ T{
 wall
 T}	Set image as wallpaper	\fB(7)\fR
 T{
-\fIunset\fR
-T}	Copy line buffer to the clipboard	\fB(8)\fR
+Ctrl-y
+T}	Copy the line buffer to the clipboard	\fB(8)\fR
 .TE
 
 .sp
