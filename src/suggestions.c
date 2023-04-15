@@ -93,41 +93,6 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 }
 #endif */
 
-/*
-#define P_HASH    1426843782
-#define PR_HASH   1109929557
-#define PROP_HASH 2548745446
-
-#include <stdint.h>
-#define HASH_SEED 13344
-// Murmur One Byte At A Time 32 bit hashing algorithm
-// Source: https://github.com/aappleby/smhasher/blob/master/src/Hashes.cpp
-static uint32_t
-hashme32(const char *str, const uint32_t seed)
-{
-	uint32_t h = seed;
-	for (; *str; ++str) {
-		h ^= (uint32_t)*str;
-		h *= 0x5bd1e995;
-		h ^= h >> 15;
-	}
-	return h;
-}
-
-static char *
-check_int_cmd_desc_hash(const char *s)
-{
-	if (!s || !*s)
-		return (char *)NULL;
-
-	uint32_t h = hashme32(s, HASH_SEED);
-
-	if (h == P_HASH || h == PR_HASH || h == PROP_HASH)
-		return P_DESC;
-
-	return (char *)NULL;
-} */
-
 static char *
 check_int_cmd_desc(const char *s, const size_t l)
 {

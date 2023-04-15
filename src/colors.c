@@ -341,15 +341,41 @@ END:
 }
 #endif /* CLIFM_SUCKLESS */
 
-/* Returns a pointer to the corresponding color code for the file
- * extension EXT */
-char *
-get_ext_color(char *ext)
+/* Look for the hash HASH in the hash table.
+ * Return a pointer to the corresponding color if found or NULL
+ *
+ * NOTE: We check all available hashes to avoid conflicts.
+ * The hash table is built on user supplied data (color scheme file)
+ * so that we cannot assume in advance that there will be no conflicts.
+ * However, at least with the color schemes provided by default, we do know
+ * there are no conflicts. In this latter case we can return the first matching
+ * entry, which is a performace improvement. But we cannot assume the user
+ * is using one of the provided themes and that it has been not modified. */
+/*
+static char *
+check_ext_hash(const size_t hash, size_t *count)
 {
-	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
-		return (char *)NULL;
+	char *p = (char *)NULL;
+	size_t i;
+	for (i = 0; i < ext_colors_n; i++) {
+		if (!ext_colors[i].name || !ext_colors[i].value
+		|| hash != ext_colors[i].hash)
+			continue;
 
-	/* Hold extensions names. NAME_MAX should be enough: no file name should
+//		(*count)++;
+//		return ext_colors[i].value; // No conflicts check: faster, but might fail
+
+		p = ext_colors[i].value;
+		(*count)++;
+	}
+
+	return p;
+} */
+
+static char *
+check_ext_string(const char *ext)
+{
+	/* Hold extension names. NAME_MAX should be enough: no file name should
 	 * go beyond NAME_MAX, so it's pretty safe to assume that no file extension
 	 * will be larger */
 	static char tmp_ext[NAME_MAX];
@@ -366,10 +392,11 @@ get_ext_color(char *ext)
 
 	i = (int)ext_colors_n;
 	while (--i >= 0) {
-		if (!ext_colors[i] || !*ext_colors[i] || *ptr != *ext_colors[i])
+		if (!ext_colors[i].name || !*ext_colors[i].name
+		|| *ptr != *ext_colors[i].name)
 			continue;
 
-		char *p = ptr + 1, *q = ext_colors[i] + 1;
+		char *p = ptr + 1, *q = ext_colors[i].name + 1;
 
 		size_t match = 1;
 		while (*p) {
@@ -381,14 +408,36 @@ get_ext_color(char *ext)
 			q++;
 		}
 
-		if (match == 0 || *q != '=')
+		if (match == 0 || *q != '\0')
 			continue;
 
-		q++;
-		return *q ? q : (char *)NULL;
+		return ext_colors[i].value;
 	}
 
 	return (char *)NULL;
+}
+
+/* Returns a pointer to the corresponding color code for the file
+ * extension EXT.
+ * The hash table is checked first, and, in case of a conflict, a regular
+ * string comparison is performed to resolve it. */
+char *
+get_ext_color(char *ext)
+{
+	if (!ext || !*ext || !*(++ext) || ext_colors_n == 0)
+		return (char *)NULL;
+
+/*	size_t count = 0;
+	char *ret = check_ext_hash(hashme(ext, 0), &count);
+	if (count == 0)
+		return (char *)NULL;
+
+	if (ret && count == 1)
+		return ret; */
+
+	/* We have a conflict: a single hash is used for two or more extensions.
+	 * Let's try to match the extension name itself */
+	return check_ext_string(ext);
 }
 
 #ifndef CLIFM_SUCKLESS
@@ -1107,7 +1156,7 @@ store_extension_line(char *line, size_t len)
 	if (len <= 2 || *line != '*' || *(line + 1) != '.' || !*(line + 2))
 		return EXIT_FAILURE;
 	line += 2;
-	len -= 2;
+	UNUSED(len);
 
 	char *q = strchr(line, '=');
 	if (!q || !*(q + 1) || q == line)
@@ -1122,25 +1171,33 @@ store_extension_line(char *line, size_t len)
 #endif /* !CLIFM_SUCKLESS */
 		return EXIT_FAILURE;
 
-	ext_colors = (char **)xrealloc(ext_colors,
-		(ext_colors_n + 1) * sizeof(char *));
+	ext_colors = (struct ext_t *)xrealloc(ext_colors,
+		(ext_colors_n + 1) * sizeof(struct ext_t));
+
 #ifndef CLIFM_SUCKLESS
 	if (c) {
 		if (*c == '#') {
 			char *cc = hex2rgb(c);
-			size_t clen = (size_t)(q - line) + 3 + (cc ? strlen(cc) : 0);
-			ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
-			sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, cc ? cc : "0");
+			ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
+			ext_colors[ext_colors_n].value =
+				(char *)xnmalloc((cc ? strlen(cc) : 1) + 3, sizeof(char));
+			sprintf(ext_colors[ext_colors_n].value, "0;%s", cc ? cc : "");
+//			ext_colors[ext_colors_n].hash = hashme(line, 0);
 		} else {
-			size_t clen = (size_t)(q - line) + strlen(c) + 3;
-			ext_colors[ext_colors_n] = (char *)xnmalloc(clen + 1, sizeof(char));
-			sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, c);
+			ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
+			ext_colors[ext_colors_n].value =
+				(char *)xnmalloc(strlen(c) + 3, sizeof(char));
+			sprintf(ext_colors[ext_colors_n].value, "0;%s", c);
+//			ext_color[ext_colors_n].hash = hashme(line, 0);
 		}
 	} else
 #endif /* !CLIFM_SUCKLESS */
 	{
-		ext_colors[ext_colors_n] = (char *)xnmalloc(len + 3, sizeof(char));
-		sprintf(ext_colors[ext_colors_n], "%s=0;%s", line, q + 1);
+		ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
+		ext_colors[ext_colors_n].value =
+			(char *)xnmalloc(strlen(q + 1) + 3, sizeof(char));
+		sprintf(ext_colors[ext_colors_n].value, "0;%s", q + 1);
+//		ext_colors[ext_colors_n].hash = hashme(line, 0);
 	}
 
 	*q = '=';
@@ -1153,10 +1210,12 @@ static void
 free_extension_colors(void)
 {
 	int i = (int)ext_colors_n;
-	while (--i >= 0)
-		free(ext_colors[i]);
+	while (--i >= 0) {
+		free(ext_colors[i].name);
+		free(ext_colors[i].value);
+	}
 	free(ext_colors);
-	ext_colors = (char **)NULL;
+	ext_colors = (struct ext_t *)NULL;
 	ext_colors_n = 0;
 }
 
@@ -1203,10 +1262,12 @@ split_extension_colors(char *extcolors)
 
 	free(buf);
 
+
 	if (ext_colors) {
-		ext_colors = (char **)xrealloc(ext_colors,
-			(ext_colors_n + 1) * sizeof(char *));
-		ext_colors[ext_colors_n] = (char *)NULL;
+		ext_colors = (struct ext_t *)xrealloc(ext_colors,
+			(ext_colors_n + 1) * sizeof(struct ext_t));
+		ext_colors[ext_colors_n].name = (char *)NULL;
+		ext_colors[ext_colors_n].value = (char *)NULL;
 	}
 }
 
@@ -2146,17 +2207,11 @@ color_codes(void)
 		 "and RGB/true colors as well.\n\n"), PROGRAM_NAME);
 
 	if (ext_colors_n > 0) {
-		size_t i, j;
+		size_t i;
 		printf(_("%sExtension colors%s\n\n"), BOLD, df_c);
 		for (i = 0; i < ext_colors_n; i++) {
-			char *ret = strrchr(ext_colors[i], '=');
-			if (!ret)
-				continue;
-
-			printf(" \x1b[%sm*.", ret + 1);
-			for (j = 0; ext_colors[i][j] != '='; j++)
-				putchar(ext_colors[i][j]);
-			puts(NC);
+			printf(" \x1b[%sm*.%s%s\n", ext_colors[i].value,
+				ext_colors[i].name, NC);
 		}
 		putchar('\n');
 	}

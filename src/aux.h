@@ -69,6 +69,10 @@ char *xitoa(int);
 char xgetchar(void);
 int  xmkdir(char *, mode_t);
 
+#ifndef _NO_ICONS
+size_t hashme(const char *, const int);
+#endif
+
 /* Some memory wrapper functions */
 void *xrealloc(void *, size_t);
 void *xcalloc(size_t, size_t);

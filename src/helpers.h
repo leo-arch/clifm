@@ -1202,6 +1202,13 @@ struct paths_t {
 };
 extern struct paths_t *paths;
 
+struct ext_t {
+	char  *name;
+	char  *value;
+//	size_t hash;
+};
+extern struct ext_t *ext_colors;
+
 enum tab_mode {
 	STD_TAB =   0,
 	FZF_TAB =   1,
@@ -1373,6 +1380,12 @@ extern size_t
 	usrvar_n,
 	zombies;
 
+#if !defined(_NO_ICONS)
+extern size_t *name_icons_hashes;
+extern size_t *dir_icons_hashes;
+extern size_t *ext_icons_hashes;
+#endif
+
 extern struct termios shell_tmodes;
 extern pid_t own_pid;
 extern time_t props_now;
@@ -1440,7 +1453,6 @@ extern char
 	**bin_commands,
 	**cdpaths,
 	**color_schemes,
-	**ext_colors,
 	**messages,
 	**old_pwd,
 	**profile_names,

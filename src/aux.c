@@ -50,6 +50,33 @@
 # include "highlight.h"
 #endif
 
+#ifndef _NO_ICONS
+/* Generate a hash of the string STR (case sensitively if CASE_SENTITIVE is
+ * set to 1).
+ * Based on the sdbm algorithm (see http://www.cse.yorku.ca/~oz/hash.html),
+ * released under the public-domain. */
+size_t
+hashme(const char *str, const int case_sensitive) {
+	size_t hash = 0;
+
+	/* Two while loops, so that we don't need to check CASE_SENSITIVE for
+	 * each character in STR */
+	if (case_sensitive == 1) {
+		while (*str) {
+			hash = (size_t)*str	+ (hash << 6) + (hash << 16) - hash;
+			str++;
+		}
+	} else {
+		while (*str) {
+			hash = (size_t)TOUPPER(*str) + (hash << 6) + (hash << 16) - hash;
+			str++;
+		}
+	}
+
+	return hash;
+}
+#endif /* !_NO_ICONS */
+
 void
 gen_time_str(char *buf, const size_t size, const time_t _time)
 {

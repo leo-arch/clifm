@@ -1367,12 +1367,13 @@ free_workspaces_filters(void)
 void
 free_stuff(void)
 {
-/*#ifdef RL_INPUT_TEST
-	if (test_input_stream)
-		fclose(test_input_stream);
-#endif // RL_INPUT_TEST */
-
 	int i = 0;
+
+#if !defined(_NO_ICONS)
+	free(name_icons_hashes);
+	free(dir_icons_hashes);
+	free(ext_icons_hashes);
+#endif
 
 	free(conf.time_str);
 
@@ -1539,8 +1540,10 @@ free_stuff(void)
 
 	if (ext_colors_n) {
 		i = (int)ext_colors_n;
-		while (--i >= 0)
-			free(ext_colors[i]);
+		while (--i >= 0) {
+			free(ext_colors[i].name);
+			free(ext_colors[i].value);
+		}
 		free(ext_colors);
 	}
 

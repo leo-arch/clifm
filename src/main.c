@@ -86,6 +86,7 @@ struct config_t conf;
 struct shades_t date_shades;
 struct shades_t size_shades;
 struct paths_t *paths = (struct paths_t *)NULL;
+struct ext_t *ext_colors = (struct ext_t *)NULL;
 
 struct sort_t _sorts[] = {
     {"none", 0, 0},
@@ -220,6 +221,12 @@ size_t
 	usrvar_n = 0,
 	zombies = 0;
 
+#if !defined(_NO_ICONS)
+size_t *name_icons_hashes = (size_t *)0;
+size_t *dir_icons_hashes = (size_t *)0;
+size_t *ext_icons_hashes = (size_t *)0;
+#endif
+
 char
 	cur_prompt_name[NAME_MAX + 1] = "",
 	div_line[NAME_MAX + 1],
@@ -284,7 +291,6 @@ char
 	**bin_commands = (char **)NULL,
 	**cdpaths = (char **)NULL,
 	**color_schemes = (char **)NULL,
-	**ext_colors = (char **)NULL,
 	**messages = (char **)NULL,
 	**old_pwd = (char **)NULL,
 	**profile_names = (char **)NULL,
@@ -1018,6 +1024,9 @@ main(int argc, char *argv[])
 	init_conf_struct();
 	init_filter();
 	init_msgs();
+#if !defined(_NO_ICONS)
+	init_icons_hashes();
+#endif
 /*	init_file_flags(); */
 
 	set_locale();

@@ -105,6 +105,46 @@ struct trim_t {
 
 static struct trim_t trim;
 
+#if !defined(_NO_ICONS)
+static void
+set_icon_names_hashes(void)
+{
+	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
+	name_icons_hashes = (size_t *)xnmalloc((size_t)i + 1, sizeof(size_t));
+
+	while (--i >= 0)
+		name_icons_hashes[i] = hashme(icon_filenames[i].name, 0);
+}
+
+static void
+set_dir_names_hashes(void)
+{
+	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
+	dir_icons_hashes = (size_t *)xnmalloc((size_t)i + 1, sizeof(size_t));
+
+	while (--i >= 0)
+		dir_icons_hashes[i] = hashme(icon_dirnames[i].name, 0);
+}
+
+static void
+set_ext_names_hashes(void)
+{
+	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
+	ext_icons_hashes = (size_t *)xnmalloc((size_t)i + 1,  sizeof(size_t));
+
+	while (--i >= 0)
+		ext_icons_hashes[i] = hashme(icon_ext[i].name, 0);
+}
+
+void
+init_icons_hashes(void)
+{
+	set_icon_names_hashes();
+	set_dir_names_hashes();
+	set_ext_names_hashes();
+}
+#endif // !_NO_ICONS
+
 #if defined(TOURBIN_QSORT)
 static inline void
 swap_ent(size_t id1, size_t id2)
@@ -272,14 +312,15 @@ get_name_icon(const char *file, int n)
 	if (!file)
 		return 0;
 
+	size_t nhash = hashme(file, 0);
+
 	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
 	while (--i >= 0) {
-		if (TOUPPER(*file) == TOUPPER(*icon_filenames[i].name)
-		&& strcasecmp(file, icon_filenames[i].name) == 0) {
-			file_info[n].icon = icon_filenames[i].icon;
-			file_info[n].icon_color = icon_filenames[i].color;
-			return 1;
-		}
+		if (nhash != name_icons_hashes[i])
+			continue;
+		file_info[n].icon = icon_filenames[i].icon;
+		file_info[n].icon_color = icon_filenames[i].color;
+		return 1;
 	}
 
 	return 0;
@@ -297,14 +338,15 @@ get_dir_icon(const char *dir, int n)
 	if (!dir)
 		return;
 
+	size_t dhash = hashme(dir, 0);
+
 	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
 	while (--i >= 0) {
-		if (TOUPPER(*dir) == TOUPPER(*icon_dirnames[i].name)
-		&& strcasecmp(dir, icon_dirnames[i].name) == 0) {
-			file_info[n].icon = icon_dirnames[i].icon;
-			file_info[n].icon_color = icon_dirnames[i].color;
-			break;
-		}
+		if (dhash != dir_icons_hashes[i])
+			continue;
+		file_info[n].icon = icon_dirnames[i].icon;
+		file_info[n].icon_color = icon_dirnames[i].color;
+		break;
 	}
 }
 
@@ -323,15 +365,15 @@ get_ext_icon(const char *restrict ext, int n)
 
 	ext++;
 
+	size_t ehash = hashme(ext, 0);
+
 	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
 	while (--i >= 0) {
-		/* Tolower */
-		char c = (*ext >= 'A' && *ext <= 'Z') ? (char)(*ext - 'A' + 'a') : *ext;
-		if (c == *icon_ext[i].name && strcasecmp(ext, icon_ext[i].name) == 0) {
-			file_info[n].icon = icon_ext[i].icon;
-			file_info[n].icon_color = icon_ext[i].color;
-			break;
-		}
+		if (ehash != ext_icons_hashes[i])
+			continue;
+		file_info[n].icon = icon_ext[i].icon;
+		file_info[n].icon_color = icon_ext[i].color;
+		break;
 	}
 }
 #endif /* _NO_ICONS */

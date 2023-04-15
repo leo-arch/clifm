@@ -32,6 +32,10 @@ int  list_dir(void);
 void reload_dirlist(void);
 void refresh_screen(void);
 
+#ifndef _NO_ICONS
+void init_icons_hashes(void);
+#endif
+
 __END_DECLS
 
 #endif /* LISTING_H */
