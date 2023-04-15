@@ -1247,7 +1247,6 @@ split_extension_colors(char *extcolors)
 
 	free(buf);
 
-
 	if (ext_colors) {
 		ext_colors = (struct ext_t *)xrealloc(ext_colors,
 			(ext_colors_n + 1) * sizeof(struct ext_t));
