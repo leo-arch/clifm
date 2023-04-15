@@ -1150,10 +1150,10 @@ set_default_size_shades(void)
  * ext_colors global array
  * If LINE contains a color variable, expand it, check it, and store it */
 static int
-store_extension_line(char *line, size_t len)
+store_extension_line(char *line)
 {
 	/* Remove the leading "*." from the extension line */
-	if (len <= 2 || *line != '*' || *(line + 1) != '.' || !*(line + 2))
+	if (!line || *line != '*' || *(line + 1) != '.' || !*(line + 2))
 		return EXIT_FAILURE;
 	line += 2;
 
@@ -1163,51 +1163,27 @@ store_extension_line(char *line, size_t len)
 
 	*q = '\0';
 
+	char *def = (char *)NULL;
 #ifndef CLIFM_SUCKLESS
-	char *c = (char *)NULL;
-	if (is_color_code(q + 1) == 0 && (c = check_defs(q + 1)) == NULL)
+	if (is_color_code(q + 1) == 0 && (def = check_defs(q + 1)) == NULL)
 #else
 	if (is_color_code(q + 1) == 0)
 #endif /* !CLIFM_SUCKLESS */
 		return EXIT_FAILURE;
 
+	char *tmp = (def && *def) ? def : q + 1;
+	char *code = *tmp == '#' ? hex2rgb(tmp) : tmp;
+	if (!code || !*code)
+		return EXIT_FAILURE;
+
 	ext_colors = (struct ext_t *)xrealloc(ext_colors,
 		(ext_colors_n + 1) * sizeof(struct ext_t));
 
-#ifndef CLIFM_SUCKLESS
-	if (c) {
-		if (*c == '#') {
-			char *cc = hex2rgb(c);
-			ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
-			ext_colors[ext_colors_n].value =
-				(char *)xnmalloc((cc ? strlen(cc) : 1) + 3, sizeof(char));
-			sprintf(ext_colors[ext_colors_n].value, "0;%s", cc ? cc : "");
-//			ext_colors[ext_colors_n].hash = hashme(line, 0);
-		} else {
-			ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
-			ext_colors[ext_colors_n].value =
-				(char *)xnmalloc(strlen(c) + 3, sizeof(char));
-			sprintf(ext_colors[ext_colors_n].value, "0;%s", c);
-//			ext_color[ext_colors_n].hash = hashme(line, 0);
-		}
-	} else
-#endif /* !CLIFM_SUCKLESS */
-	{
-		if (*(q + 1) == '#') {
-			char *cc = hex2rgb(q + 1);
-			ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
-			ext_colors[ext_colors_n].value =
-				(char *)xnmalloc((cc ? strlen(cc) : 1) + 3, sizeof(char));
-			sprintf(ext_colors[ext_colors_n].value, "0;%s", cc ? cc : "");
-//			ext_colors[ext_colors_n].hash = hashme(line, 0);
-		} else {
-			ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
-			ext_colors[ext_colors_n].value =
-				(char *)xnmalloc(strlen(q + 1) + 3, sizeof(char));
-			sprintf(ext_colors[ext_colors_n].value, "0;%s", q + 1);
-	//		ext_colors[ext_colors_n].hash = hashme(line, 0);
-		}
-	}
+	ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
+	ext_colors[ext_colors_n].value =
+		(char *)xnmalloc(strlen(code) + 3, sizeof(char));
+	sprintf(ext_colors[ext_colors_n].value, "0;%s", code);
+//	ext_color[ext_colors_n].hash = hashme(line, 0);
 
 	*q = '=';
 	ext_colors_n++;
@@ -1248,7 +1224,7 @@ split_extension_colors(char *extcolors)
 				break;
 			}
 			buf[len] = '\0';
-			if (store_extension_line(buf, len) == EXIT_SUCCESS)
+			if (store_extension_line(buf) == EXIT_SUCCESS)
 				*buf = '\0';
 
 			if (!*p)
