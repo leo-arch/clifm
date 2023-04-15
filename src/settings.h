@@ -231,10 +231,7 @@ xf=01;31:xs=00;32:"
 #define DEF_COLOR_SCHEME "default"
 #define DEF_COLOR_SCHEME_256 "default-256"
 #define DEF_COLORS 1
-
 #define DEF_COLOR_LNK_AS_TARGET 0
-
-//#define DEF_CONTROL_D_EXITS 1
 #define DEF_CP_CMD CP_CP
 #define DEF_CUR_WS 0
 #define DEF_CWD_IN_TITLE 0
@@ -344,9 +341,7 @@ xf=01;31:xs=00;32:"
 #define DEF_RM_FORCE 0
 
 #define SUG_STRATS 7
-
 #define MAX_WS 8
-
 #define MIN_SCREEN_WIDTH 20
 #define MIN_SCREEN_HEIGHT 5
 

@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 13, 2023" "clifm 1.11.7" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 15, 2023" "clifm 1.11.9" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1086,9 +1086,9 @@ preview files in the current directory (full screen). Requires \fBfzf\fR(1). Alt
 .sp
 To edit the previewer configuration file, just enter \fIview edit\fR, or \fIview edit vi\fR to open it with a specific application, in this case, \fBvi\fR(1).
 .sp
-Since version 1.8.1, this command allows files selection. Mark files with the TAB key and then press Enter or Right to confirm: marked files will be automatically sent to the Selection box.
+By pressing Enter or Right, the currently highlighted file will be selected and \fIview\fR closed. To select multiple files just mark them with the TAB key and then press Enter or Right to confirm. To quit \fIview\fR press Escape or Left.
 .sp
-For image previews consult the Wiki (\fIhttps://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev\fR).
+For \fBimage previews\fR consult the Wiki (\fIhttps://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev\fR).
 .sp
 For further information consult the \fBSHOTGUN\fR section below.
 .TP
