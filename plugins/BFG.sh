@@ -56,7 +56,9 @@ EOF
 }
 
 uz_image() {
+	# shellcheck disable=SC2317
 	calculate_position
+	# shellcheck disable=SC2317
 	printf '{"action": "add", "identifier": "clifm-preview", "x": "%s", "y": "%s", "width": "%s", "height": "%s", "path": "%s"}\n' "$X" "$Y" "$COLUMNS" "$LINES" "$1" > "$FIFO_UEBERZUG"
 }
 
