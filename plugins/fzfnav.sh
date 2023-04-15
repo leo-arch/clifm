@@ -746,19 +746,10 @@ fi
 # shellcheck source=/dev/null
 . "$CLIFM_PLUGINS_HELPER"
 
-old_pwd="$PWD"
-
 main "$@"
 
 # Erase the FZF window
-#_lines="${LINES:-100}"
-#printf "\033[%dM" "$_lines"
-
-# Clear the screen (and change dir if needed)
-if [ "$old_pwd" != "$PWD" ]; then
-	echo "cd $PWD; rf" > "$CLIFM_BUS"
-else
-	echo "rf" > "$CLIFM_BUS"
-fi
+_lines="${LINES:-100}"
+printf "\033[%dM" "$_lines"
 
 exit 0
