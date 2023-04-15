@@ -61,7 +61,9 @@ KEYBINDINGS
 HOME_PLUGINS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins"
 
 uz_cleanup() {
-    rm "$FIFO_UEBERZUG" 2>/dev/null
+	# shellcheck disable=SC2317
+    rm -- "$FIFO_UEBERZUG" 2>/dev/null
+	# shellcheck disable=SC2317
     pkill -P $$ >/dev/null
 }
 
@@ -744,10 +746,19 @@ fi
 # shellcheck source=/dev/null
 . "$CLIFM_PLUGINS_HELPER"
 
+old_pwd="$PWD"
+
 main "$@"
 
 # Erase the FZF window
-_lines="${LINES:-100}"
-printf "\033[%dM" "$_lines"
+#_lines="${LINES:-100}"
+#printf "\033[%dM" "$_lines"
+
+# Clear the screen (and change dir if needed)
+if [ "$old_pwd" != "$PWD" ]; then
+	echo "cd $PWD; rf" > "$CLIFM_BUS"
+else
+	echo "rf" > "$CLIFM_BUS"
+fi
 
 exit 0
