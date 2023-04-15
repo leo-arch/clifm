@@ -1156,13 +1156,13 @@ store_extension_line(char *line, size_t len)
 	if (len <= 2 || *line != '*' || *(line + 1) != '.' || !*(line + 2))
 		return EXIT_FAILURE;
 	line += 2;
-	UNUSED(len);
 
 	char *q = strchr(line, '=');
 	if (!q || !*(q + 1) || q == line)
 		return EXIT_FAILURE;
 
 	*q = '\0';
+
 #ifndef CLIFM_SUCKLESS
 	char *c = (char *)NULL;
 	if (is_color_code(q + 1) == 0 && (c = check_defs(q + 1)) == NULL)
@@ -1193,11 +1193,20 @@ store_extension_line(char *line, size_t len)
 	} else
 #endif /* !CLIFM_SUCKLESS */
 	{
-		ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
-		ext_colors[ext_colors_n].value =
-			(char *)xnmalloc(strlen(q + 1) + 3, sizeof(char));
-		sprintf(ext_colors[ext_colors_n].value, "0;%s", q + 1);
-//		ext_colors[ext_colors_n].hash = hashme(line, 0);
+		if (*(q + 1) == '#') {
+			char *cc = hex2rgb(q + 1);
+			ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
+			ext_colors[ext_colors_n].value =
+				(char *)xnmalloc((cc ? strlen(cc) : 1) + 3, sizeof(char));
+			sprintf(ext_colors[ext_colors_n].value, "0;%s", cc ? cc : "");
+//			ext_colors[ext_colors_n].hash = hashme(line, 0);
+		} else {
+			ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
+			ext_colors[ext_colors_n].value =
+				(char *)xnmalloc(strlen(q + 1) + 3, sizeof(char));
+			sprintf(ext_colors[ext_colors_n].value, "0;%s", q + 1);
+	//		ext_colors[ext_colors_n].hash = hashme(line, 0);
+		}
 	}
 
 	*q = '=';
