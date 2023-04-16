@@ -2157,17 +2157,6 @@ rl_suggestions(const unsigned char c)
 	&& (printed = check_fastback(word)) != NO_MATCH)
 		goto SUCCESS;
 
-	/* Internal command description */
-	char *cdesc = (char *)NULL;
-	if (conf.cmd_desc_sug == 1 && c != ' ' && nwords == 1
-	&& (!rl_line_buffer || (rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '))
-	&& (cdesc = check_int_cmd_desc(word, wlen)) != NULL) {
-		suggestion.type = CMD_DESC_SUG;
-		print_suggestion(cdesc, 0, sd_c);
-		printed = PARTIAL_MATCH;
-		goto SUCCESS;
-	}
-
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
 	&& !(flags & BAEJ_SUGGESTION) && !IS_DIGIT(c)) {
@@ -2194,8 +2183,43 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
+	/* 3.b) Internal command description */
+	char *cdesc = (char *)NULL;
+	if (conf.cmd_desc_sug == 1 && c != ' ' && nwords == 1
+	&& (!rl_line_buffer || (rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '))
+	&& (cdesc = check_int_cmd_desc(word, wlen)) != NULL) {
+		suggestion.type = CMD_DESC_SUG;
+		print_suggestion(cdesc, 0, sd_c);
+		printed = PARTIAL_MATCH;
+		goto SUCCESS;
+	}
+
+	/* 3.c) Internal commands fixed parameters */
+	if (nwords > 1) {
+		/* 3.c.1) Suggest the sel keyword only if not first word */
+		if (sel_n > 0 && *word == 's' && strncmp(word, "sel", wlen) == 0) {
+			suggestion.type = SEL_SUG;
+			printed = 1;
+			print_suggestion("sel", wlen, sx_c);
+			goto SUCCESS;
+		}
+
+		/* 3.c.2) Check commands fixed parameters */
+		printed = check_int_params(full_line, (size_t)rl_end);
+		if (printed != NO_MATCH) {
+			zero_offset = 1;
+			goto SUCCESS;
+		}
+
+		/* 3.c.3) Let's suggest --help for internal commands */
+		if (*word == '-') {
+			if ((printed = check_help(full_line, word)) != NO_MATCH)
+				goto SUCCESS;
+		}
+	}
+
 	char *lb = rl_line_buffer;
-	/* 3.b) Let's suggest non-fixed parameters for internal commands
+	/* 3.d) Let's suggest non-fixed parameters for internal commands
 	 * Only if second word or more (first word is the command name) */
 
 	switch (nwords > 1 ? *lb : '\0') {
@@ -2325,7 +2349,7 @@ rl_suggestions(const unsigned char c)
 		break;
 
 #ifndef _NO_TAGS
-	case 't': /* Tags */
+	case 't': /* Tag command */
 		if ((lb[1] == 'a' || lb[1] == 'u') && lb[2] == ' ') {
 			if (*word == ':' && *(word + 1)
 			&& (printed = check_tags(word + 1, wlen - 1, TAGC_SUG)) != NO_MATCH)
@@ -2351,50 +2375,35 @@ rl_suggestions(const unsigned char c)
 	default: break;
 	}
 
-	/* 3.c) Check CliFM internal parameters */
-	if (nwords > 1) {
-		/* 3.c.1) Suggest the sel keyword only if not first word */
-		if (sel_n > 0 && *word == 's' && strncmp(word, "sel", wlen) == 0) {
-			suggestion.type = SEL_SUG;
-			printed = 1;
-			print_suggestion("sel", wlen, sx_c);
-			goto SUCCESS;
-		}
-
-		/* 3.c.2) Check commands fixed parameters */
-		printed = check_int_params(full_line, (size_t)rl_end);
-		if (printed != NO_MATCH) {
-			zero_offset = 1;
-			goto SUCCESS;
-		}
-
-		/* 3.c.3) Let's suggest --help for internal commands */
-		if (*word == '-') {
-			if ((printed = check_help(full_line, word)) != NO_MATCH)
-				goto SUCCESS;
-		}
-
-	}
-
-	/* 3.c.4) Variable names, both environment and internal */
+	/* 3.d.1) Variable names, both environment and internal */
 	if (*word == '$') {
 		if ((printed = check_variables(word + 1, wlen - 1)) != NO_MATCH)
 			goto SUCCESS;
 	}
 
-	/* 3.c.5) ~usernames */
+	/* 3.d.2) ~usernames */
 	if (*word == '~' && *(word + 1) != '/') {
 		if ((printed = check_users(word + 1, wlen - 1)) != NO_MATCH)
 			goto SUCCESS;
 	}
 
+	/* 3.d.2) Bookmark names (b:) */
 	if (*word == 'b' && *(word + 1) == ':' && *(word + 2)) {
 		if ((printed = check_bookmark_names(word, wlen)) != NO_MATCH)
 			goto SUCCESS;
 	}
 
-	/* 3.d) Execute the following checks in the order specified by
-	 * suggestion_strategy (the value is taken form the configuration file) */
+#ifndef _NO_TAGS
+	/* 3.d.3) Tag names (t:) */
+	if (*lb != ';' && *lb != ':' && *word == 't' && *(word + 1) == ':'
+	&& *(word + 2)) {
+		if ((printed = check_tags(word + 2, wlen - 2, TAGT_SUG)) != NO_MATCH)
+			goto SUCCESS;
+	}
+#endif /* _NO_TAGS */
+
+	/* 3.e) Execute the following checks in the order specified by
+	 * suggestion_strategy (the value is taken from the configuration file) */
 	size_t st;
 	int flag = 0;
 
@@ -2404,7 +2413,7 @@ rl_suggestions(const unsigned char c)
 	for (st = 0; st < SUG_STRATS; st++) {
 		switch(conf.suggestion_strategy[st]) {
 
-		case 'a': /* 3.d.1) Aliases */
+		case 'a': /* 3.e.1) Aliases */
 			flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;
 			if (flag == CHECK_MATCH && suggestion.printed)
 				clear_suggestion(CS_FREEBUF);
@@ -2413,7 +2422,7 @@ rl_suggestions(const unsigned char c)
 				goto SUCCESS;
 			break;
 
-		case 'c': /* 3.d.2) Path completion */
+		case 'c': /* 3.e.2) Path completion */
 			if (rl_point < rl_end && c == '/') goto NO_SUGGESTION;
 
 			/* First word and neither autocd nor auto-open */
@@ -2461,7 +2470,7 @@ rl_suggestions(const unsigned char c)
 
 			break;
 
-		case 'e': /* 3.d.3) ELN's */
+		case 'e': /* 3.e.3) ELN's */
 			if (nwords == 1 && first_word) {
 				word = first_word;
 				wlen = strlen(word);
@@ -2494,7 +2503,7 @@ rl_suggestions(const unsigned char c)
 			}
 			break;
 
-		case 'f': /* 3.d.4) File names in CWD */
+		case 'f': /* 3.e.4) File names in CWD */
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
 			if (!last_space && conf.autocd == 0 && conf.auto_open == 0)
@@ -2545,7 +2554,7 @@ rl_suggestions(const unsigned char c)
 
 			break;
 
-		case 'h': /* 3.d.5) Commands history */
+		case 'h': /* 3.e.5) Commands history */
 			printed = check_history(full_line, (size_t)rl_end);
 			if (printed != NO_MATCH) {
 				zero_offset = 1;
@@ -2553,7 +2562,7 @@ rl_suggestions(const unsigned char c)
 			}
 			break;
 
-		case 'j': /* 3.d.6) Jump database */
+		case 'j': /* 3.e.6) Jump database */
 			/* We don't care about auto-open here: the jump function
 			 * deals with directories only */
 			if (!last_space && conf.autocd == 0)
@@ -2584,14 +2593,6 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
-#ifndef _NO_TAGS
-	if (*lb != ';' && *lb != ':' && *word == 't' && *(word + 1) == ':'
-	&& *(word + 2)) {
-		if ((printed = check_tags(word + 2, wlen - 2, TAGT_SUG)) != NO_MATCH)
-			goto SUCCESS;
-	}
-#endif /* _NO_TAGS */
-
 	/* 3.f) Cmds in PATH and CliFM internals cmds, but only for the first word */
 	if (nwords > 1)
 		goto NO_SUGGESTION;
@@ -2600,7 +2601,7 @@ CHECK_FIRST_WORD:
 
 	word = first_word ? first_word : last_word;
 
-	/* 'b:' (bookmarks), 's:' (sel files) and 't:' (tags) constructs */
+	/* Skip 'b:' (bookmarks), 's:' (sel files) and 't:' (tags) constructs */
 	if ((*word == 'b' || *word == 's' || *word == 't') && *(word + 1) == ':')
 		goto NO_SUGGESTION;
 
