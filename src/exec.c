@@ -2549,7 +2549,7 @@ exec_cmd(char **comm)
 
 	/*    ############### PROMPT ##################     */
 	else if (*comm[0] == 'p' && strcmp(comm[0], "prompt") == 0)
-		return (exit_code = prompt_function(comm[1], comm[1] ? comm[2] : NULL));
+		return (exit_code = prompt_function(comm + 1));
 
 	/*    ############### PROPERTIES ##################     */
 	else if (*comm[0] == 'p' && (!comm[0][1] || strcmp(comm[0], "pr") == 0

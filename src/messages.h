@@ -164,7 +164,7 @@ change this suffix)"
   You can add a shortcut as well: 'bm add /media/mount mount m'\n\
   Note: Regular files can be bookmarked too\n\
 - Access the bookmark named 'mount'\n\
-    bm mount (or 'bm <TAB>' to choose from a list)\n\
+    bm mount (also 'b:<TAB>' or 'bm <TAB>' to choose from a list)\n\
     Note: Shortcuts can be used as well: 'bm m'\n\
 - Remove the bookmark named 'mount'\n\
     bm del mount (or 'bm del <TAB>' to choose from a list)\n\
@@ -803,12 +803,13 @@ Note: Use the 'oc' command to edit files ownership"
 
 #define PROMPT_USAGE "Change current prompt\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  prompt [NAME, edit [APP], list, reload, unset]\n\
+  prompt [set NAME] [list] [unset] [edit [APP]] [reload]\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available prompts\n\
-    prompt list (or 'prompt <TAB>' to choose from a list)\n\
+    prompt list (or 'prompt set <TAB>' to choose from a list)\n\
 - Change prompt to the prompt named MYPROMPT\n\
-    prompt MYPROMPT\n\
+    prompt set MYPROMPT\n\
+    Since 'set' is the default action, it can be omitted: 'prompt MYPROMPT'\n\
 - Edit the prompts file\n\
     prompt edit\n\
 - Edit the prompts file with vi\n\

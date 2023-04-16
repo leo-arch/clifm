@@ -709,6 +709,7 @@ const struct cmdslist_t param_str[] = {
 	{"prompt edit", 11},
 	{"prompt list", 11},
 	{"prompt reload", 13},
+	{"prompt set", 10},
 	{"prompt unset", 12},
 	{"r -f", 4},
 	{"r --force", 9},

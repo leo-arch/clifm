@@ -1160,23 +1160,25 @@ edit_prompts_file(char *app)
 }
 
 int
-prompt_function(char *arg, char *app)
+//prompt_function(char *arg, char *app)
+prompt_function(char **args)
 {
-	if (!arg || !*arg || (*arg == 'l' && strcmp(arg, "list") == 0))
+	if (!args[0] || !*args[0] || (*args[0] == 'l'
+	&& strcmp(args[0], "list") == 0))
 		return list_prompts();
 
-	if (IS_HELP(arg)) {
+	if (IS_HELP(args[0])) {
 		puts(PROMPT_USAGE);
 		return EXIT_SUCCESS;
 	}
 
-	if (*arg == 'u' && strcmp(arg, "unset") == 0)
+	if (*args[0] == 'u' && strcmp(args[0], "unset") == 0)
 		return set_default_prompt();
 
-	if (*arg == 'e' && strcmp(arg, "edit") == 0)
-		return edit_prompts_file(app);
+	if (*args[0] == 'e' && strcmp(args[0], "edit") == 0)
+		return edit_prompts_file(args[1]);
 
-	if (*arg == 'r' && strcmp(arg, "reload") == 0) {
+	if (*args[0] == 'r' && strcmp(args[0], "reload") == 0) {
 		int ret = load_prompts();
 		if (ret == EXIT_SUCCESS) {
 			printf(_("%s: Prompts successfully reloaded\n"), PROGRAM_NAME);
@@ -1185,5 +1187,8 @@ prompt_function(char *arg, char *app)
 		return ret;
 	}
 
-	return set_prompt(arg);
+	if (*args[0] == 's' && strcmp(args[0], "set") == 0)
+		return set_prompt(args[1]);
+
+	return set_prompt(args[0]);
 }

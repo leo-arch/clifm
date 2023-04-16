@@ -2745,9 +2745,12 @@ options_generator(const char *text, int state)
 #ifndef _NO_PROFILES
 	/* pf */
 	} else if (*l == 'p' && l[1] == 'f' && l[2] == ' ') {
-		_opts[0] = "list"; _opts[1] = "set"; _opts[2] = "add";
+		_opts[0] = "set"; _opts[1] = "list"; _opts[2] = "add";
 		_opts[3] = "del"; _opts[4] = "rename"; _opts[5] = NULL;
 #endif /* _NO_PROFILES */
+	} else if (*l == 'p' && strncmp(l, "prompt ", 7) == 0) {
+		_opts[0] = "set"; _opts[1] = "list"; _opts[2] = "unset";
+		_opts[3] = "edit"; _opts[4] = "reload"; _opts[5] = NULL;
 #ifndef _NO_TAGS
 	/* tag */
 	} else if (*l == 't' && l[1] == 'a' && l[2] == 'g' && l[3] == ' ') {
@@ -3396,6 +3399,12 @@ my_rl_completion(const char *text, int start, int end)
 		if (xrename == 1 || xrename == 3)
 			return (char **)NULL;
 
+		rl_sort_completion_matches = 0;
+		/* Complete with specific options for internal commands */
+		if ((matches = rl_completion_matches(text, &options_generator)))
+			return matches;
+		rl_sort_completion_matches = 1;
+
 		/* Command names completion for words after process separator: ; | && */
 		if (nwords == 1 && rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '
 		/* No command name contains slashes */
@@ -3478,8 +3487,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 #endif /* _NO_LIRA */
 
-		/* #### PROMPT #### */
-		if (*lb == 'p' && lb[1] == 'r' && strncmp(lb, "prompt " , 7) == 0) {
+		/* #### PROMPT (only for 'prompt set') #### */
+		if (*lb == 'p' && lb[1] == 'r' && strncmp(lb, "prompt set " , 11) == 0) {
 			char *p = dequote_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &prompts_generator);
 			free(p);
@@ -3720,11 +3729,11 @@ my_rl_completion(const char *text, int start, int end)
 				return matches;
 		}
 
-		rl_sort_completion_matches = 0;
-		/* Complete with specific options for internal commands */
+/*		rl_sort_completion_matches = 0;
+		// Complete with specific options for internal commands
 		if ((matches = rl_completion_matches(text, &options_generator)))
 			return matches;
-		rl_sort_completion_matches = 1;
+		rl_sort_completion_matches = 1; */
 
 		/* ### NET COMMAND COMPLETION ### */
 		if (*lb == 'n' && strncmp(lb, "net ", 4) == 0) {

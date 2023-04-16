@@ -2309,7 +2309,7 @@ rl_suggestions(const unsigned char c)
 		}
 #endif /* !_NO_PROFILES */
 
-		if (lb[1] == 'r' && strncmp(lb, "prompt ", 7) == 0) {
+		if (lb[1] == 'r' && strncmp(lb, "prompt set ", 11) == 0) {
 			printed = check_prompts(word, wlen);
 			if (prompts_n > 0 && printed != NO_MATCH)
 				goto SUCCESS;
