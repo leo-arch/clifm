@@ -833,7 +833,7 @@ with no arguments, prints the list of messages in the current session. The \fIcl
 .B n, new \fR[\fIFILE\fR]... [\fIDIR/\fR]...
 create new empty files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name and created via the shell command \fImkdir\ \-p\fR. Else, it will be created via \fBtouch\fR(1). Ex: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is specified, the user will be asked for one. If one or more of the specified file names already exist, ".new" will be appended to the file name.
 .TP
-.B net \fR[\fINAME\fR] [\fIedit\fR] [\fIm\fR, \fImount NAME\fR] [\fIu\fR, \fIunmount NAME\fR]
+.B net \fR[\fINAME\fR] [\fIlist\fR] [\fIedit\fR] [\fIm\fR, \fImount NAME\fR] [\fIu\fR, \fIunmount NAME\fR]
 \fB1. The configuration file\fR
 .sp
 The \fInet\fR command manages connections to remote systems via a simple samba-like configuration file (\fI$HOME/.config/clifm/profiles/PROFILE/nets.clifm\fR). Here you can specify multiple remotes and options for each of these remotes. Syntax example for this file:
@@ -898,11 +898,11 @@ If the device data is unknown, as it often happens when it comes to removable de
 .sp
 \fB2. Command syntax\fR
 .sp
-Without arguments, \fInet\fR lists the configuration for each remote available in the configuration file.
+Without arguments (or via the \fIlist\fR subcommand), \fInet\fR lists the configuration for each remote available in the configuration file.
 .sp
 Use the \fIedit\fR option to edit the remotes configuration file. If no further argument is specified, the file will be opened with the current resource opener. However, you can pass an application as second parameter to open to configuration file. Example: 'net edit nano'.
 .sp
-If not already mounted, the \fIm\fR, \fImount\fR option mounts the specified remote using the mount command and the mounpoint specified in the confifuration file and automatically cd into the corresponding mountpoint. Example: \fInet m smb_work\fR. \fIm\fR, \fImount\fR could be omitted, so that \fInet smb_work\fR amounts to \fInet m smb_work\fR. TAB completion is available for this function.
+If not already mounted, the \fIm\fR, \fImount\fR option mounts the specified remote using the mount command and the mounpoint specified in the confifuration file and automatically cd into the corresponding mountpoint. Example: \fInet m smb_work\fR. Since \fImount\fR is the default action, it can be omitted: \fInet smb_work\fR.
 .sp
 The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmount command specified in the configuration file. For example: \fInet u smb_work\fR. TAB completion is also available for this function.
 .sp
