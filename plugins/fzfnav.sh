@@ -40,15 +40,12 @@ HELP="USAGE
   Type in the prompt to filter the current list of files. Regular expressions are \
 allowed.
 
-  At exit (Ctrl-q) CliFM will change to the last visited directory or \
-open the last accepted file (Enter). Press Esc to cancel and exit.
-
   Use the --edit command line option to edit the configuration file.
 
 KEYBINDINGS
 
   * Left: Change to parent directory
-  * Right/Enter: Change to the highlighted directory or open the highlighted file and exit
+  * Right/Enter: Change to the highlighted directory or open the highlighted file
   * Home/end: Change to first/last file in the files list
   * TAB: Select currently highlighted file
   * Ctrl-s: Select all
@@ -56,7 +53,9 @@ KEYBINDINGS
   * Ctrl-t: Toggle selection
   * Alt-s: Confirm selection (do it before changing directory or the current selection will be lost)
   * Shift-up/down: Move one line up/down in the preview window
-  * Alt-up/down: Move to the beginning/end in the preview window"
+  * Alt-up/down: Move to the beginning/end in the preview window
+  * Ctrl-q/Ctrl-c: Change to the last visited directory and exit
+  * Esc: Cancel and exit"
 
 HOME_PLUGINS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins"
 
