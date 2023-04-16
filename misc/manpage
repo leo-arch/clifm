@@ -664,9 +664,6 @@ Duplicate files passed as parameters, either directories or regular files. The u
 .sp
 If \fBrsync\fR(1) is found, it will be used as follows: \fIrsync\ \-aczvAXHS\ \-\-progress\fR. Else, \fBcp\fR(1) will be used: \fIcp\ \-a\fR.
 .TP
-.B dc \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
-toggle the files counter function on/off.
-.TP
 .B dh \fR[\fISTRING\fR] [\fIPATH\fR] [\fI!ELN\fR]
 With no parameters, it prints the directory history list. To filter this list just pass a string: only entries matching this string will be displayed. In both cases, TAB completion is available. For example: \fIdh down<TAB>\fR will list only those entries matching \fIdown\fR (fuzzily, if \fIfuzzy-matching\fR is enabled).
 .sp
@@ -696,8 +693,8 @@ toggle external commands on/off.
 .B f, forth \fR[\fIh\fR, \fIhist\fR] [\fIclear\fR] [\fI!ELN\fR]
 it works just like the \fIback\fR function, but it goes forward in the history record. Of course, you can use \fIf\ hist\fR, \fIf\ h\fR, and \fIf\ !ELN\fR.
 .TP
-.B  fc, filescounter \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
-By default, \fBclifm\fR prints the amount of files contained by listed directories next to directories name. However, since this is an expensive feature, It might be desirable, for example, when listing files in a remote machine, to disable this feature. Use the 'off' option to disable it. To permanently disable it, use the FilesCounter option in the configuration file.
+.B  fc \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR]
+By default, \fBclifm\fR prints the amount of files contained by listed directories next to directories name. However, since this is an expensive feature, it might be desirable (for example, when listing files in a remote machine) to disable this feature. Use the \fIoff\fR subcommand to disable it. To permanently disable it, use the \fIFilesCounter\fR option in the configuration file.
 .TP
 .B ff, dirs-first \fR[\fIon\fR, \fIoff\fR, \fIstatus\fI]
 toggle list directories first on/off.
@@ -790,8 +787,8 @@ An alternative way of navigating the jump database is using the jumper plugin (l
 .sp
 Take a look at the \fIdh\fR command as well.
 .TP
-.B kb, keybinds \fR[\fIedit\fR [\fIAPP\fR]] [\fIreset\fR] [\fIreadline\fR]
-with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the \fIedit\fR option (the file will be opened with APP, if specified, or with the default associated application otherwise). If you somehow messed up your keybindings, use the 'reset' option to create a fresh keybindings file with the default values. To list readline keybindings, use the \fIreadline\fR option. Bear in mind that these keybindings are not provided by \fBclifm\fR, but by readline itself, and as such depend on the system settings (they can be customized however via the \fI~/.inputrc\fR file).
+.B kb, keybinds \fR[\fIlist\fR] [\fIedit\fR [\fIAPP\fR]] [\fIreset\fR] [\fIreadline\fR]
+with no argument (or if the argument is \fIlist\fR), prints the current keyboard codes and their associated functions. To edit the keybindings file, use the \fIedit\fR option (the file will be opened with APP, if specified, or with the default associated application otherwise). If you somehow messed up your keybindings, use the 'reset' option to create a fresh keybindings file with the default values. To list readline keybindings, use the \fIreadline\fR option. Bear in mind that these keybindings are not provided by \fBclifm\fR, but by readline itself, and as such depend on the system settings (they can be customized however via the \fI~/.inputrc\fR file).
 .TP
 .B ll, lv \fR[\fIon\fR, \fIoff\fR]
 Toggle long/detail view mode
@@ -965,7 +962,7 @@ If you just need to toggle the executable permission bit on a file, you can use 
 .sp
 Use the \fIoc\fR command to edit files ownership.
 .TP
-.B pf, prof, profile \fR[\fIls\fR, \fIlist\fR] [\fIset\fR, \fIadd\fR, \fIdel PROFILE\fR] [\fIrename PROFILE NEW_NAME\fR]
+.B pf, profile \fR[\fIls\fR, \fIlist\fR] [\fIset\fR, \fIadd\fR, \fIdel PROFILE\fR] [\fIrename PROFILE NEW_NAME\fR]
 with no arguments, prints the name of the currently used profile. Use the \fIls\fR or \fIlist\fR option to list available profiles. To switch, add, delete, or rename a profile, use the \fIset\fR, \fIadd\fR, \fIdel\fR, and \fIrename\fR options respectively.
 .TP
 .B pg, pager \fR[\fIon\fR, \fIoff\fR, \fIstatus\fR, [\fINUM\fR]]
