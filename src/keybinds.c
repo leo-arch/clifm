@@ -156,7 +156,7 @@ kbinds_function(char **args)
 	if (!args)
 		return EXIT_FAILURE;
 
-	if (!args[1]) {
+	if (!args[1] || strcmp(args[1], "list") == 0) {
 		if (kbinds_n == 0) {
 			printf(_("%s: kb: No keybindings defined\n"), PROGRAM_NAME);
 			return EXIT_SUCCESS;

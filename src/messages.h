@@ -311,7 +311,7 @@ Parameters passed to cp: -a"
 
 #define FC_USAGE "Turn on/off the files counter for directories\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  fc, filescounter [on, off, status]"
+  fc [on, off, status]"
 
 #define FILE_DETAILS "List file details\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -553,12 +553,12 @@ For information about the matching algorithm consult the manpage\n\n\
     Note: To remove a specific entry, just remove the corresponding line\n\
     from the database ('je' or 'j --edit')"
 
-#define KB_USAGE "Manage keybindings\n\n\
+#define KB_USAGE "Manage key bindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  kb, keybinds [edit [APP]] [reset] [readline]\n\n\
+  kb, keybinds [list] [edit [APP]] [reset] [readline]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List your current key bindings\n\
-    kb\n\
+    kb (or 'kb list')\n\
 - Open/edit the key bindings file\n\
     kb edit\n\
 - Open/edit the key bindings file using mousepad\n\
@@ -588,9 +588,9 @@ For information about the matching algorithm consult the manpage\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   lm [on, off]"
 
-#define LOG_USAGE "List or clear CliFM logs\n\n\
+#define LOG_USAGE "Manage CliFM logs\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  log [clear]"
+  log [on, off, clear, status]"
 
 #define MEDIA_USAGE "List available media devices, allowing you to mount or \
 unmount them\n\
@@ -775,12 +775,12 @@ Note: Use the 'oc' command to edit files ownership"
 
 #define PROFILES_USAGE "Manage profiles\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  pf, prof, profile [ls, list] [set, add, del PROFILE] [rename PROFILE NEW_NAME]\n\n\
+  pf, profile [ls, list] [set, add, del PROFILE] [rename PROFILE NEW_NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the current profile name\n\
     pf\n\
 - List available profiles\n\
-    pf ls\n\
+    pf list\n\
 - Switch to the profile 'myprofile'\n\
     pf set myprofile (or 'pf set <TAB>' to choose from a list)\n\
 - Add a new profile named new_profile\n\

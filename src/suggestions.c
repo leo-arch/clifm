@@ -373,9 +373,6 @@ check_int_cmd_desc(const char *s, const size_t l)
 	else if (l == 11 && *s == 'c' && strcmp(s + 1, "olorscheme") == 0)
 		return CS_DESC;
 
-	else if (l == 12 && *s == 'f' && strcmp(s + 1, "ilescounter") == 0)
-		return FC_DESC;
-
 	return (char *)NULL;
 }
 
