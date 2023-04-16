@@ -331,7 +331,7 @@ remotes_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	if (!args[1])
+	if (!args[1] || (*args[1] == 'l' && strcmp(args[1], "list") == 0))
 		return remotes_list();
 
 	if (IS_HELP(args[1])) {

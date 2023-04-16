@@ -685,6 +685,7 @@ const struct cmdslist_t param_str[] = {
 	{"mime import", 11},
 	{"msg clear", 9},
 	{"messages clear", 14},
+	{"net list", 8},
 	{"net edit", 8},
 	{"net mount", 9},
 	{"net unmount", 11},

@@ -650,14 +650,15 @@ To get information about a device, enter iELN. For example: i12"
 
 #define NET_USAGE "Manage network resources\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  net [NAME] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\n\
+  net [NAME] [list] [edit [APP]] [m, mount NAME] [u, unmount NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available remote resources (like SSHFS or samba)\n\
-    net (or 'net <TAB>')\n\
+    net (or 'net list')\n\
 - Mount the remote resource named 'work'\n\
-    net work (or 'net m work', 'net mount work', or 'net m <TAB>')\n\
+    net mount work (also 'net m work' or 'net m <TAB>')\n\
+    Since 'mount' is the default action, it can be ommited: 'net work'\n\
 - Unmount the remote resource named 'work'\n\
-    net u work (or 'net unmount work' or 'net u <TAB>')\n\
+    net unmount work (or 'net u work' or 'net u <TAB>')\n\
 - Open/edit the net configuration file\n\
     net edit\n\
 - Open/edit the net configuration file using nano\n\

@@ -2757,7 +2757,12 @@ options_generator(const char *text, int state)
 #endif /* !_NO_TAGS */
 	/* mm */
 	} else if (*l == 'm' && l[1] == 'm' && l[2] == ' ') {
-		_opts[0] = "info"; _opts[1] = "edit"; _opts[2] = "import"; _opts[3] = NULL;
+		_opts[0] = "info"; _opts[1] = "edit"; _opts[2] = "import";
+		_opts[3] = NULL;
+	/* net */
+	} else if (*l == 'n' && l[1] == 'e' && l[2] == 't' && l[3] == ' ') {
+		_opts[0] = "mount"; _opts[1] = "unmount"; _opts[2] = "list";
+		_opts[3] = "edit"; _opts[4] = NULL;
 	/* history */
 	} else if (*l == 'h' && strncmp(l, "history ", 8) == 0) {
 		_opts[0] = "edit"; _opts[1] = "clear"; _opts[2] = "on";
@@ -3715,6 +3720,12 @@ my_rl_completion(const char *text, int start, int end)
 				return matches;
 		}
 
+		rl_sort_completion_matches = 0;
+		/* Complete with specific options for internal commands */
+		if ((matches = rl_completion_matches(text, &options_generator)))
+			return matches;
+		rl_sort_completion_matches = 1;
+
 		/* ### NET COMMAND COMPLETION ### */
 		if (*lb == 'n' && strncmp(lb, "net ", 4) == 0) {
 			char *p = dequote_str((char *)text, 0);
@@ -3725,12 +3736,6 @@ my_rl_completion(const char *text, int start, int end)
 				return matches;
 			}
 		}
-
-		rl_sort_completion_matches = 0;
-		/* Complete with specific options for internal commands */
-		if ((matches = rl_completion_matches(text, &options_generator)))
-			return matches;
-		rl_sort_completion_matches = 1;
 
 		/* If we have an internal command not dealing with file names,
 		 * do not perform completion */
