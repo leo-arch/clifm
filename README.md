@@ -97,24 +97,24 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [File filters](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters)
   - [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program)
   - [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions)
-  - [copy(-as), move(-as)](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), [interactive rename](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), and [open-with](https://github.com/leo-arch/clifm/wiki/Introduction#ow-elnfilename-application) functions
-  - [File names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n)
+  - [copy(-as), move(-as)](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), [interactive rename](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r), and [open-with](https://github.com/leo-arch/clifm/wiki/Introduction#ow) functions
+  - [File names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach)
   - [Autocommands](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
-  - [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd-on-off-status), [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open-on-off-status), and [autols](https://github.com/leo-arch/clifm/wiki/Common-Operations#navigation)
+  - [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd), [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open), and [autols](https://github.com/leo-arch/clifm/wiki/Common-Operations#navigation)
   - [Directory jumper](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide)
   - [Virtual directories](https://github.com/leo-arch/clifm/wiki/Advanced#virtual-directories)
   - [Fastback - Quickly change to any parent directory](https://github.com/leo-arch/clifm/wiki/Introduction#fastback)
   - [A built-in resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) (supports regular expressions and is able to discern between GUI and non-GUI environments)
   - [A built-in Freedesktop-compliant trash system](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files)
   - [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
-  - [Eleven sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev)
+  - [Eleven sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort)
   - [Bulk operations](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-operations): rename, create, remove, and create symbolik links in bulk
   - [Files encryption/decryption (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Copy files to your smart phone (plugin)](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660)
   - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
-  - File permissions/ownership editor via the [`pc`](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-) and [`oc`](https://github.com/leo-arch/clifm/wiki/Introduction#oc-elnfile-) commands respectively 
-  - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-list-edit-app-m-mount-name-u-unmount-name)
+  - File permissions/ownership editor via the [`pc`](https://github.com/leo-arch/clifm/wiki/Introduction#pc) and [`oc`](https://github.com/leo-arch/clifm/wiki/Introduction#oc) commands respectively 
+  - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net)
   - [Mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
   - [Advanced Copy](https://github.com/leo-arch/clifm/wiki/Advanced#cpmv-with-a-progress-bar) support (just `cp` and `mv` with a nice progress bar)
   - Directory history map to keep in sight previous, current, and next entries in the directory history list
@@ -131,10 +131,10 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - Bash-like quoting system
   - Shell commands execution
   - Sequential and conditional commands execution
-  - [Directory](https://github.com/leo-arch/clifm/wiki/Introduction#b-back-h-hist-clear-eln) and [commands](https://github.com/leo-arch/clifm/wiki/Introduction/#commands-history) history
+  - [Directory](https://github.com/leo-arch/clifm/wiki/Introduction#b-back) and [commands](https://github.com/leo-arch/clifm/wiki/Introduction/#commands-history) history
   - [Glob and regular expressions](https://github.com/leo-arch/clifm/wiki/Advanced#wildcards-and-regex) (including inverse matching)
   - [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases)
-  - [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status)
+  - [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log)
   - [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup)
 - Modes
   - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode), also known as incognito or private mode
@@ -151,14 +151,14 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout)
 - Misc
   - [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-  - [File previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via TAB completion or the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app))
+  - [File previews](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via TAB completion or the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view))
   - [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk), including emoji-icons :smirk:
   - [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
   - [Desktop notifications](https://github.com/leo-arch/clifm/wiki/Specifics#desktop-notifications)
   - Unicode suppport
   - Disk usage
   - [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions
-  - [A built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status-num) for files listing
+  - [A built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager) for files listing
   - Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
 <h4 align="center"><br><i>Auto-suggestions in action</i></h4>
 <p align="center"><img src="https://i.postimg.cc/1XSKBRh8/suggestions.gif"></a></p>
@@ -245,19 +245,19 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - [Mark files with extended attributes (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#longdetail-view-mode)
   - [Customizable timestamps, including relative times (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#time-styles)
   - [Color gradients for file sizes and timestamps (long view)](https://github.com/leo-arch/clifm/wiki/Common-Operations#file-details)
-  - [Use `config dump` to print the list of settings and their current value (highlighting those differing from default values)](https://github.com/leo-arch/clifm/wiki/Introduction#config-reset-dump-application)
-  - The [`config` command](https://github.com/leo-arch/clifm/wiki/Introduction#config-reset-application) is now used to open/edit the main configuration file (`edit` can still be used, but is deprecated and might be removed in a future release)
+  - [Use `config dump` to print the list of settings and their current value (highlighting those differing from default values)](https://github.com/leo-arch/clifm/wiki/Introduction#config)
+  - The [`config` command](https://github.com/leo-arch/clifm/wiki/Introduction#config) is now used to open/edit the main configuration file (`edit` can still be used, but is deprecated and might be removed in a future release)
   - `FzfPreview` (file previews in TAB completion - fzf mode only) is now enabled by default (disable via `--no-fzfpreview`)
-  - Improved jump table screen (via the [`j` command](https://github.com/leo-arch/clifm/wiki/Introduction#j---purge-num---edit-jc-jl-jp-str--jo-num-je))
-  - [Purge the jump database via the `--purge` option](https://github.com/leo-arch/clifm/wiki/Introduction#j---purge-num---edit-jc-jl-jp-str--jo-num-je)
+  - Improved jump table screen (via the [`j` command](https://github.com/leo-arch/clifm/wiki/Introduction#j-jc-jl-jp-jo-je))
+  - [Purge the jump database via the `--purge` option](https://github.com/leo-arch/clifm/wiki/Introduction#j-jc-jl-jp-jo-je)
 * `version 1.10 (Swordmaster)`:
-  - [Quickly access the directory history list via the `dh` command](https://github.com/leo-arch/clifm/wiki/Introduction#dh-string-path-eln). The `dh` plugin, just as the `bh` and `fh` commands, is now deprecated.
-  - [History timestamps](https://github.com/leo-arch/clifm/wiki/Introduction#history-edit-clear--n-on-off-status-show-time)
+  - [Quickly access the directory history list via the `dh` command](https://github.com/leo-arch/clifm/wiki/Introduction#dh). The `dh` plugin, just as the `bh` and `fh` commands, is now deprecated.
+  - [History timestamps](https://github.com/leo-arch/clifm/wiki/Introduction#history)
   - `s:` works now like `sel` keyword, to be in line with `t:` (for tags) and `b:` (for bookmarks). Consult the [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) section.
   - The `:b` construct was removed. `b:` now lists bookmark names instead of paths. `b:mybm` expands to the path pointed to by the bookmark named `mybm`. The `ExpandBookmarks` option (config file) is now deprecated, just as the bookmarks suggestions strategy (in the `SuggestionStrategy` option). See the [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks) section.
   - Bookmarks can be created directly from the command line, without an interactive prompt: `bm add FILE BM_NAME`.
-  - [Rename profiles via the `rename` subcommand](https://github.com/leo-arch/clifm/wiki/Introduction#pf-prof-profile-ls-list-set-add-del-profile-rename-profile-new_name)
-  - [`oc`, a files ownership editor](https://github.com/leo-arch/clifm/wiki/Introduction#oc-elnfile-)
+  - [Rename profiles via the `rename` subcommand](https://github.com/leo-arch/clifm/wiki/Introduction#pf-profile)
+  - [`oc`, a files ownership editor](https://github.com/leo-arch/clifm/wiki/Introduction#oc)
   - Get list of commands and a brief description via `cmd<TAB>` 
   - [Suggest a brief description for internal commands](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)
   - Set a custom selections file via the `--sel-file` flag
@@ -266,21 +266,21 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
   - [Automatic expansion for bookmarks, file type, and MIME type filters](https://github.com/leo-arch/clifm/wiki/Advanced#grouping-files-via-automatic-expansion)
   - [Private workspace settings](https://github.com/leo-arch/clifm/wiki/Specifics#workspace-settings)
   - [Run autocommands based on workspaces, and not just on paths](https://github.com/leo-arch/clifm/wiki/Specifics#autocommands)
-  - [Run the pager based on the current amount of files](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status-num)
+  - [Run the pager based on the current amount of files](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager)
   - Files counter for directories in long view mode
-  - [Filter files by file type](https://github.com/leo-arch/clifm/wiki/Introduction#ft-filter-unset-regexfile-type-char)
+  - [Filter files by file type](https://github.com/leo-arch/clifm/wiki/Introduction#ft-filter)
   - [Filter files by MIME type](https://github.com/leo-arch/clifm/wiki/Advanced/#quickly-filtering-files-with-the-tab-key)
-  - [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-)
+  - [`pc`, a file permissions editor](https://github.com/leo-arch/clifm/wiki/Introduction#pc)
   - `cd -` works now just like in most shells
-  - The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) can now select files via <kbd>TAB</kbd>
-  - Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app) via <kbd>Alt+-</kbd>
+  - The [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view) can now select files via <kbd>TAB</kbd>
+  - Launch the [`view` command](https://github.com/leo-arch/clifm/wiki/Introduction#view) via <kbd>Alt+-</kbd>
   - Use `--fzfpreview-hidden` to start the preview window hidden (toggle via <kbd>Alt-p</kbd>)
 * `version 1.8 (Otis)`:
   - If upgrading from a previous version (optional, but recommended):
     - <kbd>F7</kbd> opens now shotgun's configuration file (instead of the jump database file). Update `keybindings.clifm`: removing the file and restarting is enough. Manually: run `kb edit` and then replace `open-jump-db:\e[18~` by `open-preview:\e[18~`.
     - New specific options to control the files preview window. Add the following options to the `FzfTabOptions` line in your theme file (via the `cs edit` command) or just copy the theme file from the data directory (usually `/usr/local/share/clifm/colors`): `--bind alt-p:toggle-preview,change:top,alt-up:preview-page-up,alt-down:preview-page-down --preview-window=wrap,border-left --color="border:7:dim"`.
   - [`clifmimg` plugin, for image previews](https://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev#image-previews)
-  - [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view-edit-app)
+  - [`view` command, to preview files in full screen](https://github.com/leo-arch/clifm/wiki/Introduction#view)
   - [TAB completion with file previews](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion-with-file-previews)
   - [Shotgun, a built-in files previewer](https://github.com/leo-arch/clifm/wiki/Advanced#shotgun)
   - Improved Unicode support for the suggestions system
