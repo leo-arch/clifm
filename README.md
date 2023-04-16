@@ -114,7 +114,7 @@ Besides common file operations such as copy, move, remove, etc., _clifm_ provide
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660)
   - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r)
   - File permissions/ownership editor via the [`pc`](https://github.com/leo-arch/clifm/wiki/Introduction#pc-elnfile-) and [`oc`](https://github.com/leo-arch/clifm/wiki/Introduction#oc-elnfile-) commands respectively 
-  - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name)
+  - [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-list-edit-app-m-mount-name-u-unmount-name)
   - [Mount/unmount storage devices](https://github.com/leo-arch/clifm/wiki/Introduction#media)
   - [Advanced Copy](https://github.com/leo-arch/clifm/wiki/Advanced#cpmv-with-a-progress-bar) support (just `cp` and `mv` with a nice progress bar)
   - Directory history map to keep in sight previous, current, and next entries in the directory history list
