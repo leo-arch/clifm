@@ -1039,9 +1039,9 @@ list_prompts(void)
 			continue;
 		if (*cur_prompt_name == *prompts[i].name
 		&& strcmp(cur_prompt_name, prompts[i].name) == 0)
-			printf("%s%s%s\n", mi_c, prompts[i].name, df_c);
+			printf("%s>%s %s\n", mi_c, df_c, prompts[i].name);
 		else
-			printf("%s\n", prompts[i].name);
+			printf("  %s\n", prompts[i].name);
 	}
 
 	return EXIT_SUCCESS;
