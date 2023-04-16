@@ -777,7 +777,7 @@ Note: Use the 'oc' command to edit files ownership"
 
 #define PROFILES_USAGE "Manage profiles\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  pf, profile [ls, list] [set, add, del PROFILE] [rename PROFILE NEW_NAME]\n\n\
+  pf, profile [list] [set, add, del PROFILE] [rename PROFILE NEW_NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the current profile name\n\
     pf\n\
@@ -794,7 +794,7 @@ Note: Use the 'oc' command to edit files ownership"
 
 #define PROP_USAGE "Print files properties\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  p, pr, pp, prop [ELN/FILE]...\n\n\
+  p, pp, prop [ELN/FILE]...\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the properties of the file whose ELN is 12\n\
     p 12 (or 'p <TAB>' to choose from a list)\n\
@@ -995,14 +995,14 @@ Mark the files you need via TAB and then press Enter or Right"
 
 #define TRASH_USAGE "Send one or multiple files to the trash can\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  t, tr, trash [ELN/FILE]... [ls, list] [clear, empty] [del]\n\n\
+  t, trash [ELN/FILE]... [list] [clear] [empty] [del]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Trash the file whose ELN is 12\n\
     t 12 (or 't <TAB>' to choose from a list - multi-selection is allowed)\n\
 - Trash all files ending with .sh\n\
     t *.sh\n\
 - List currently trashed files\n\
-    t (or 't ls', 't list', or 't <TAB>')\n\
+    t (or 't list', or 't <TAB>')\n\
 - Remove/delete trashed files using a menu (permanent removal)\n\
     t del\n\
 - Remove/delete all files from the trash can (permanent removal)\n\

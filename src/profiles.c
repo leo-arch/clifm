@@ -409,8 +409,15 @@ static int
 print_profiles(void)
 {
 	size_t i;
-	for (i = 0; profile_names[i]; i++)
-		printf("%s\n", profile_names[i]);
+	char *cur_prof = alt_profile ? alt_profile : "default";
+
+	for (i = 0; profile_names[i]; i++) {
+		if (*cur_prof == *profile_names[i]
+		&& strcmp(cur_prof, profile_names[i]) == 0)
+			printf("%s>%s %s\n", mi_c, df_c, profile_names[i]);
+		else
+			printf("  %s\n", profile_names[i]);
+	}
 
 	return EXIT_SUCCESS;
 }

@@ -937,7 +937,7 @@ If no APPLICATION is specified, the list of available applications associated to
 .sp
 This command supports TAB completion. Just type "\fIow filename <TAB>\fR" and those applications able to open ELN/FILE will be listed.
 .TP
-.B p, pr, prop \fIELN/FILE\fR...
+.B p, prop \fIELN/FILE\fR...
 print file properties for ELN/FILE. The output of this function is much like the combined output of \fIls\ \-l\fR and \fIstat\fR. By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content).
 .sp
 If you need to list the properties of all files in the current directory, try the long view mode (\fIAlt-l\fR). Fields displayed in this mode can be customized using the \fIPropFields\fR option in the configuration file. For custom timestamp formats use the \fITimeStyle\fR option.
@@ -1047,7 +1047,7 @@ By default, files are sorted from less to more (ex: from 'a' to 'z' if using the
 .B stats
 print statistics about files in the current directory (not available in light mode).
 .TP
-.B t, tr, trash \fR[\fIELN/FILE\fR]... [\fIls\fR, \fIlist\fR] [\fIclear\fR, \fIempty\fR] [\fIdel\fR [\fIFILE\fR]...]]
+.B t, trash \fR[\fIELN/FILE\fR]... [\fIls\fR, \fIlist\fR] [\fIclear\fR, \fIempty\fR] [\fIdel\fR [\fIFILE\fR]...]]
 with no argument (or by passing the \fIls\fR option), it prints the list of currently trashed files. The \fIclear\fR or \fIempty\fR parameter removes all files from the trash can, while the \fIdel\fR parameter lists trashed files allowing the user to remove one or more of them. If using \fIdel\fR, TAB completion to list/select currently trashed files is available.
 .sp
 The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the Freedesktop specification, it is able to handle files trashed by different Trash implementations.
