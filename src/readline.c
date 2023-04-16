@@ -2731,16 +2731,19 @@ options_generator(const char *text, int state)
 	char *_opts[MAX_OPTS] = {0};
 
 	/* acd, ao, ext, ff, hf, pg */
-	if ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ') || strncmp(l, "acd ", 4) == 0) )
+	if ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ')
+	|| strncmp(l, "acd ", 4) == 0) )
 	|| (*l == 'e' && strncmp(l, "ext ", 4) == 0)
 	|| (*l == 'f' && (l[1] == 'f' || l[1] == 'c') && l[2] == ' ')
 	|| (*l == 'h' && (l[1] == 'f' || l[1] == 'h') && l[2] == ' ')
 	|| (*l == 'p' && l[1] == 'g' && l[2] == ' ') ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
-	/* cl, icons, ll-lv */
+	/* cl, icons, ll-lv, lm, and fz */
 	} else if ( (*l == 'c' && l[1] == 'l' && l[2] == ' ')
 	|| (*l == 'i' && strncmp(l, "icons ", 6) == 0)
-	|| (*l == 'l' && (l[1] == 'v' || l[1] == 'l') && l[2] == ' ') ) {
+	|| (*l == 'l' && (l[1] == 'v' || l[1] == 'l' || l[1] == 'm')
+	&& l[2] == ' ')
+	|| (*l == 'f' && l[1] == 'z' && l[2] == ' ') ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = NULL;
 	/* log */
 	} else if (*l == 'l' && strncmp(l, "log ", 4) == 0) {
@@ -2803,9 +2806,6 @@ options_generator(const char *text, int state)
 	/* b, f */
 	} else if ((*l == 'b' && l[1] == ' ') || (*l == 'f' && l[1] == ' ')) {
 		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;
-	/* fz */
-	} else if (*l == 'f' && l[1] == 'z' && l[2] == ' ') {
-		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = NULL;
 	} else {
 		/* kb, keybinds */
 		if ((*l == 'k' && l[1] == 'b' && l[2] == ' ')

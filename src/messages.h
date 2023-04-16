@@ -283,14 +283,16 @@ Parameters passed to cp: -a"
 
 #define EDIT_USAGE "Edit the main configuration file\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  edit [reset] [APPLICATION]\n\n\
+  config [reset] [dump] [APPLICATION]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Open/edit the configuration file\n\
-    edit (or F10)\n\
+    config (or F10)\n\
 - Open/edit the configuration file using nano\n\
-    edit nano\n\
+    config nano\n\
+- Print current values, highlighting those deviating from default values\n\
+    config dump\n\
 - Create a fresh configuration file (making a backup of the old one)\n\
-    edit reset"
+    config reset"
 
 #define EXT_USAGE "Turn on/off the use of external commands\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

@@ -268,8 +268,8 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return O_DESC;
 		if (*s == 'p' && strcmp(s + 1, "ath") == 0)
 			return CWD_DESC;
-		if (*s == 'p' && strcmp(s + 1, "rof") == 0)
-			return PF_DESC;
+//		if (*s == 'p' && strcmp(s + 1, "rof") == 0)
+//			return PF_DESC;
 		if (*s == 'p' && strcmp(s + 1, "rop") == 0)
 			return P_DESC;
 //		if (*s == 'q' && strcmp(s + 1, "uit") == 0)
