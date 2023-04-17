@@ -355,13 +355,13 @@ xstrverscmp(const char *s1, const char *s2)
 	switch (state) {
 	case VCMP: return diff;
 	case VLEN:
-		while (*p1 && *p2 && IS_DIGIT(*p1)) {
+		while (*p1 && IS_DIGIT(*p1)) {
 			p1++;
-			if (!IS_DIGIT(*p2))
+			if (!*p2 || !IS_DIGIT(*p2))
 				return 1;
 			p2++;
 		}
-		return IS_DIGIT(*p2) ? -1 : diff;
+		return (*p2 && IS_DIGIT(*p2)) ? -1 : diff;
 
 	default: return state;
 	}
