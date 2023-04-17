@@ -1229,11 +1229,11 @@ get_properties(char *filename, const int dsize)
 			free(n);
 		free(linkname);
 	} else { /* Broken link */
-		char link[PATH_MAX] = "";
-		ssize_t ret = readlinkat(AT_FDCWD, filename, link, sizeof(link));
-		if (ret) {
-			printf(_("\tName: %s%s%s -> %s (broken link)\n"), color,
-				wname ? wname : filename, df_c, link);
+		char target[PATH_MAX] = "";;
+		ssize_t ret = readlinkat(AT_FDCWD, filename, target, sizeof(target));
+		if (ret != -1 && *target) {
+			printf(_("\tName: %s%s%s -> %s%s%s (broken link)\n"), color,
+				wname ? wname : filename, df_c, uf_c, target, df_c);
 		} else {
 			printf(_("\tName: %s%s%s -> ???\n"), color, wname ? wname
 				: filename, df_c);

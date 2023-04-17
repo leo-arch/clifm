@@ -1197,8 +1197,15 @@ edit_link(char *link)
 	/* Get file pointed to by symlink and report to the user */
 	char *real_path = realpath(link, NULL);
 	if (!real_path) {
-		printf(_("%s%s%s currently pointing to nowhere (broken link)\n"),
-			or_c, link, df_c);
+		char target[PATH_MAX] = "";
+		ssize_t ret = readlinkat(AT_FDCWD, link, target, sizeof(target));
+		if (ret != -1 && *target) {
+			printf(_("%s%s%s currently pointing to %s%s%s (broken link)\n"),
+				or_c, link, df_c, uf_c, target, df_c);
+		} else {
+			printf(_("%s%s%s currently pointing to: ??? (broken link)\n"),
+				or_c, link, df_c);
+		}
 	} else {
 		printf(_("%s%s%s currently pointing to "), ln_c, link, df_c);
 		colors_list(real_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
