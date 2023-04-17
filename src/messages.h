@@ -50,12 +50,12 @@ use the -h,--help flag. Example: \"- --help\"."
 
 #define ALIAS_USAGE "List, print, or import aliases\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  alias [import FILE] [ls, list] [NAME]\n\n\
+  alias [import FILE] [list] [NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available aliases\n\
     alias\n\
   or\n\
-    alias ls (or 'alias <TAB>')\n\
+    alias list (or 'alias <TAB>')\n\
 - Print a specific alias definition\n\
     alias my_alias\n\
 - Import aliases from ~/.bashrc\n\
