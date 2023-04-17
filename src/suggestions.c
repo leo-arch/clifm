@@ -2164,7 +2164,7 @@ rl_suggestions(const unsigned char c)
 			/* Skip the j cmd: we always want the BAEJ suggestion here */
 			if (full_line && *full_line == 'j' && full_line[1] == ' ') {
 				;
-			} else if (*full_line == *suggestion_buf
+			} else if (full_line && *full_line == *suggestion_buf
 			&& strncmp(full_line, suggestion_buf, (size_t)rl_end) == 0) {
 				printed = PARTIAL_MATCH;
 				zero_offset = 1;
