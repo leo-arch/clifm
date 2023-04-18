@@ -965,10 +965,13 @@ set_iface_colors(char **colors, const size_t words)
 				set_color(colors[i] + 3, hv_c, RL_PRINTABLE);
 		}
 
-		else if (*colors[i] == 'l' && colors[i][1] == 'i'
-		&& colors[i][2] == '=') {
-			set_color(colors[i] + 3, li_c, RL_NO_PRINTABLE);
-			set_color(colors[i] + 3, li_cb, RL_PRINTABLE);
+		else if (*colors[i] == 'l') {
+			if (colors[i][1] == 'i' && colors[i][2] == '=') {
+				set_color(colors[i] + 3, li_c, RL_NO_PRINTABLE);
+				set_color(colors[i] + 3, li_cb, RL_PRINTABLE);
+			} else if (colors[i][1] == 'c' && colors[i][2] == '=') {
+				set_color(colors[i] + 3, lc_c, RL_PRINTABLE);
+			}
 		}
 
 		else if (*colors[i] == 'm' && colors[i][1] == 'i'
@@ -1298,6 +1301,9 @@ set_default_colors(void)
 	if (!*fc_c) strcpy(fc_c, DEF_FC_C);
 	if (!*wc_c) strcpy(wc_c, DEF_WC_C);
 	if (!*tx_c) strcpy(tx_c, DEF_TX_C);
+
+	if (!*lc_c) strcpy(lc_c, term_caps.color >= 256 ? DEF_LC_C_256 : DEF_LC_C);
+
 	if (!*li_c) strcpy(li_c, DEF_LI_C);
 	if (!*li_cb) strcpy(li_cb, DEF_LI_CB);
 	if (!*ti_c) strcpy(ti_c, DEF_TI_C);

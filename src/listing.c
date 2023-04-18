@@ -830,15 +830,14 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 	if (diff)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
+	int print_ind_char = (conf.color_lnk_as_target == 1
+		&& file_info[i].symlink == 1 && follow_symlinks == 1
+		&& conf.icons == 0);
+
 	char ind_chr = file_info[i].sel ? SELFILE_CHR
-		: ((conf.color_lnk_as_target == 1 && file_info[i].symlink == 1
-#ifndef _NO_ICONS
-		&& follow_symlinks == 1 && conf.icons == 0)
-#else
-		&& follow_symlinks == 1)
-#endif
-		? LINK_CHR : ' ');
-	char *ind_chr_color = file_info[i].sel ? li_cb : "";
+		: (print_ind_char == 1 ? LINK_CHR : ' ');
+	char *ind_chr_color = file_info[i].sel ? li_cb
+		: (print_ind_char == 1 ? lc_c : "");
 
 #ifndef _NO_ICONS
 	if (conf.icons) {

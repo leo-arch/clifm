@@ -35,7 +35,7 @@ tw=30;42:uf=02;04;37:"
 
 #define DEF_IFACE_COLORS "bm=01;36:dd=:df=0:dg=:dl=02;37:\
 dn=00;02;37:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:\
-el=00;36:em=01;31:fc=00;02;37:hb=00;36:hc=02;31:\
+el=00;36:em=01;31:fc=00;02;37:hb=00;36:hc=02;31:lc=:\
 hd=00;36:he=00;36:hn=0:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:\
 li=01;32:mi=01;36:nm=01;32:sb=00;02;33:sc=02;36:sd=00;02;37:\
 sf=04;02;36:sh=02;35:si=01;34:sp=02;31:sx=02;32:sz=00;02;04;35:\
@@ -116,6 +116,10 @@ xf=01;31:xs=00;32:"
 #define DEF_TX_C  "\x1b[0m" /* Input text */
 #define DEF_WC_C  "\x1b[01;36m" /* Welcome message */
 #define DEF_WM_C  "\001\x1b[01;33m\002" /* Warning msg indicator */
+
+/* Symlink char indicator (for ColorLinksAsTarget only) */
+#define DEF_LC_C      "\x1b[1;36m"
+#define DEF_LC_C_256  "\x1b[1;38;5;44m"
 
 #define DEF_TS_C  "\x1b[04;35m" /* Matching prefix for TAB completed possible entries */
 #define DEF_TT_C  "\x1b[01;02;36m" /* Tilde for trimmed file names */

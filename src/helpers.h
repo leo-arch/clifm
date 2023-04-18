@@ -698,11 +698,12 @@ struct config_t {
 	int fuzzy_match_algo;
 	int fzf_preview;
 	int highlight;
-#ifndef _NO_ICONS
+	int icons;
+/*#ifndef _NO_ICONS
 	int icons;
 #else
-	int pad1; /* Keep the struct alignment */
-#endif /* !_NO_ICONS */
+	int pad1; // Keep the struct alignment
+#endif // !_NO_ICONS */
 	int light_mode;
 	int list_dirs_first;
 	int listing_mode;
@@ -1500,6 +1501,7 @@ extern char
 	df_c[MAX_COLOR], /* Default color */
 	dl_c[MAX_COLOR], /* Dividing line */
 	el_c[MAX_COLOR], /* ELN color */
+	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* TAB completion suffix */
 	tt_c[MAX_COLOR], /* Tilde for trimmed files */

@@ -1515,6 +1515,7 @@ The following codes are used for different interface elements (in the \fIInterfa
  df  = default color
  dl  = dividing line
  el  = ELN color
+ lc  = Symbolic link indicator (\fIColorLinksAsTarget\fR only)
  mi  = misc indicators (disk usage, sort method, bulk rename, jump database list)
  ts  = matching suffix for possible TAB completed entries
  tt  = tilde for trimmed file names

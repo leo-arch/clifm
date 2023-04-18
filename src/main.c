@@ -330,6 +330,7 @@ char
 	df_c[MAX_COLOR], /* Default color */
 	dl_c[MAX_COLOR], /* Dividing line index */
 	el_c[MAX_COLOR], /* ELN */
+	lc_c[MAX_COLOR], /* Symlink character (ColorLinkAsTarget only) */
 	mi_c[MAX_COLOR], /* Misc indicators */
 	ts_c[MAX_COLOR], /* TAB completion suffix */
 	wc_c[MAX_COLOR], /* Welcome message color */
