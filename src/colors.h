@@ -36,7 +36,7 @@ size_t get_colorschemes(void);
 char *get_dir_color(const char *, const mode_t, const nlink_t, const int);
 char *get_ext_color(char *);
 char *get_file_color(const char *, const struct stat *);
-char *get_regfile_color(const char *, const struct stat *);
+char *get_regfile_color(const char *, const struct stat *, int *);
 int  import_color_scheme(const char *);
 void remove_bold_attr(char **);
 char *remove_trash_ext(char **);

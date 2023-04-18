@@ -139,8 +139,9 @@ remove_bold_attr(char **str)
 }
 
 char *
-get_regfile_color(const char *filename, const struct stat *attr)
+get_regfile_color(const char *filename, const struct stat *attr, int *is_ext)
 {
+	*is_ext = 0;
 	if (conf.colorize == 0)
 		return fi_c;
 
@@ -164,8 +165,10 @@ get_regfile_color(const char *filename, const struct stat *attr)
 	snprintf(tmp_color, sizeof(tmp_color), "\x1b[%sm", extcolor); // NOLINT
 	color = tmp_color;
 	extcolor = (char *)NULL;
+	*is_ext = 1;
 
-	return color ? color : fi_c;
+	return color;
+//	return color ? color : fi_c;
 }
 
 /* Retrieve the color corresponding to dir FILENAME with mode MODE
@@ -1968,8 +1971,9 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	} else {
 		switch (attr.st_mode & S_IFMT) {
 		case S_IFREG: {
+			int ext = 0;
 			char *d = remove_trash_ext(&ent);
-			color = get_regfile_color(ent, &attr);
+			color = get_regfile_color(ent, &attr, &ext);
 			if (d)
 				*d = '.';
 			}

@@ -2091,6 +2091,36 @@ reset_stats(void)
 	stats.unstat = 0;
 }
 
+/* Get the color of a link target NAME, whose file attributes are ATTR,
+ * and write the result into the file_info array at index I. */
+static void
+get_link_target_color(const char *name, const struct stat *attr, const size_t i)
+{
+	switch (attr->st_mode & S_IFMT) {
+	case S_IFSOCK: file_info[i].color = so_c; break;
+	case S_IFIFO:  file_info[i].color = pi_c; break;
+	case S_IFBLK:  file_info[i].color = bd_c; break;
+	case S_IFCHR:  file_info[i].color = cd_c; break;
+	case S_IFREG: {
+		int ext = 0;
+		char *color = get_regfile_color(name, attr, &ext);
+
+		if (!color) {
+			file_info[i].color = fi_c;
+			return;
+		}
+
+		if (ext == 1)
+			file_info[i].ext_color = savestring(color, strlen(color));
+
+		file_info[i].color = ext == 1 ? file_info[i].ext_color : color;
+		}
+		break;
+
+	default: file_info[i].color = df_c; break;
+	}
+}
+
 /* List files in the current working directory. Uses file type colors
  * and columns. Return zero on success or one on error */
 int
@@ -2411,20 +2441,10 @@ list_dir(void)
 					: get_dir_color(lname, attrl.st_mode, attrl.st_nlink,
 					dfiles)) : ln_c;
 			} else {
-				if (conf.color_lnk_as_target == 1) {
-					switch(attrl.st_mode & S_IFMT) {
-					case S_IFSOCK: file_info[n].color = so_c; break;
-					case S_IFIFO:  file_info[n].color = pi_c; break;
-					case S_IFBLK:  file_info[n].color = bd_c; break;
-					case S_IFCHR:  file_info[n].color = cd_c; break;
-					case S_IFREG:
-						file_info[n].color = get_regfile_color(lname, &attrl);
-						break;
-					default: file_info[n].color = df_c; break;
-					}
-				} else {
+				if (conf.color_lnk_as_target == 1)
+					get_link_target_color(lname, &attrl, n);
+				else
 					file_info[n].color = ln_c;
-				}
 			}
 			}
 			break;

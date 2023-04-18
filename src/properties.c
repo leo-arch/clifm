@@ -200,8 +200,10 @@ get_link_color(char *name, int *link_dir, const int dsize)
 		case S_IFIFO:  color = pi_c; break;
 		case S_IFBLK:  color = bd_c; break;
 		case S_IFCHR:  color = cd_c; break;
-		case S_IFREG:
-			color = get_regfile_color(name, &a);
+		case S_IFREG: {
+			int ext = 0;
+			color = get_regfile_color(name, &a, &ext);
+			}
 			break;
 		default: color = df_c; break;
 		}
@@ -1140,9 +1142,11 @@ get_properties(char *filename, const int dsize)
 	}
 
 	switch (attr.st_mode & S_IFMT) {
-	case S_IFREG:
+	case S_IFREG: {
 		file_type = '.';
-		color = get_regfile_color(filename, &attr);
+		int ext = 0;
+		color = get_regfile_color(filename, &attr, &ext);
+		}
 		break;
 
 	case S_IFDIR:
