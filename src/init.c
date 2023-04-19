@@ -182,7 +182,7 @@ init_conf_struct(void)
 	conf.list_dirs_first = UNSET;
 	conf.listing_mode = UNSET;
 	conf.log_cmds = UNSET;
-	conf.logs_enabled = UNSET;
+	conf.log_msgs = UNSET;
 	conf.long_view = UNSET;
 	conf.max_dirhist = UNSET;
 	conf.max_hist = UNSET;
@@ -1984,7 +1984,7 @@ external_arguments(int argc, char **argv)
 		{"no-files-counter", no_argument, 0, 210},
 		{"no-welcome-message", no_argument, 0, 211},
 		{"no-clear-screen", no_argument, 0, 212},
-		{"enable-logs", no_argument, 0, 213},
+//		{"enable-logs", no_argument, 0, 213},
 		{"max-path", required_argument, 0, 214},
 		{"opener", required_argument, 0, 215},
 		{"only-dirs", no_argument, 0, 217},
@@ -2085,7 +2085,7 @@ external_arguments(int argc, char **argv)
 		case 210: xargs.files_counter = conf.files_counter = 0; break;
 		case 211: xargs.welcome_message = conf.welcome_message = 0; break;
 		case 212: xargs.clear_screen = conf.clear_screen = 0; break;
-		case 213: xargs.logs = conf.logs_enabled = 1;	break;
+//		case 213: xargs.logs = conf.log_msgs = 1;	break;
 
 		case 214: {
 			if (!is_number(optarg))
@@ -2610,7 +2610,6 @@ unset_xargs(void)
 	xargs.int_vars = UNSET;
 	xargs.light = UNSET;
 	xargs.list_and_quit = UNSET;
-	xargs.logs = UNSET;
 	xargs.longview = UNSET;
 	xargs.max_dirhist = UNSET;
 	xargs.max_path = UNSET;
@@ -3829,12 +3828,8 @@ check_options(void)
 			conf.max_path = xargs.max_path;
 	}
 
-	if (conf.logs_enabled == UNSET) {
-		if (xargs.logs == UNSET)
-			conf.logs_enabled = DEF_LOGS_ENABLED;
-		else
-			conf.logs_enabled = xargs.logs;
-	}
+	if (conf.log_msgs == UNSET)
+		conf.log_msgs = DEF_LOG_MSGS;
 
 	if (conf.log_cmds == UNSET)
 		conf.log_cmds = DEF_LOG_CMDS;

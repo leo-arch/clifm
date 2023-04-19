@@ -59,7 +59,7 @@ get_date(void)
 }
 
 /* Print available logs */
-static int
+int
 print_logs(void)
 {
 	FILE *log_fp = fopen(log_file, "r");
@@ -79,86 +79,41 @@ print_logs(void)
 	return EXIT_SUCCESS;
 }
 
-/* Log CMD into LOG_FILE (global) */
+/* Clear all logs: remove the log file, but then log this command itself:
+ * "log clear". */
 int
-log_function(char **cmd)
+clear_logs(void)
 {
-	if (xargs.stealth_mode == 1)
-		return EXIT_SUCCESS;
+	if (log_file && remove(log_file) == -1) {
+		xerror("log: %s: %s\n", log_file, strerror(errno));
+		return errno;
+	}
 
-	/* If cmd logs are disabled, allow only "log" commands */
-	if (conf.log_cmds == 0) {
-		if (cmd && cmd[0] && strcmp(cmd[0], "log") != 0)
-			return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
+}
+
+/* Log LAST_CMD (global) into LOG_FILE */
+int
+log_cmd(void)
+{
+	if (xargs.stealth_mode == 1 || !last_cmd || conf.log_cmds == 0) {
+		free(last_cmd);
+		last_cmd = (char *)NULL;
+		return EXIT_SUCCESS;
 	}
 
 	if (config_ok == 0 || !log_file)
 		return EXIT_FAILURE;
 
-	int clear_log = 0;
-
-	/* If the command was just 'log' */
-	if (cmd && cmd[0] && *cmd[0] == 'l' && strcmp(cmd[0], "log") == 0 && !cmd[1])
-		return print_logs();
-
-	else if (cmd && cmd[0] && *cmd[0] == 'l' && strcmp(cmd[0], "log") == 0
-	&& cmd[1]) {
-		if (*cmd[1] == 'c' && strcmp(cmd[1], "clear") == 0) {
-			clear_log = 1;
-		} else if (*cmd[1] == 's' && strcmp(cmd[1], "status") == 0) {
-			printf(_("log: Logs are %s\n"), (conf.logs_enabled == 1)
-				? _("enabled") : _("disabled"));
-			return EXIT_SUCCESS;
-		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "on") == 0) {
-			if (conf.logs_enabled == 1) {
-				puts(_("log: Logs already enabled"));
-			} else {
-				conf.logs_enabled = 1;
-				puts(_("log: Logs enabled"));
-			}
-			return EXIT_SUCCESS;
-		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "off") == 0) {
-			/* If logs were already disabled, just exit. Otherwise, log
-			 * the "log off" command */
-			if (conf.logs_enabled == 0) {
-				puts(_("log: Logs already disabled"));
-				return EXIT_SUCCESS;
-			} else {
-				puts(_("log: Logs disabled"));
-				conf.logs_enabled = 0;
-			}
-		}
-	}
-
 	/* Construct the log line */
-	if (!last_cmd) {
-		if (conf.log_cmds == 0) {
-			/* When cmd logs are disabled, "log clear" and "log off" are
-			 * the only commands that can reach this code */
-			if (clear_log == 1) {
-				last_cmd = (char *)xnmalloc(10, sizeof(char));
-				strcpy(last_cmd, "log clear");
-			} else {
-				last_cmd = (char *)xnmalloc(8, sizeof(char));
-				strcpy(last_cmd, "log off");
-			}
-		} else {
-		/* last_cmd should never be NULL if logs are enabled (this
-		 * variable is set immediately after taking valid user input
-		 * in the prompt function). However ... */
-			last_cmd = (char *)xnmalloc(23, sizeof(char));
-			strcpy(last_cmd, _("Error getting command!"));
-		}
-	}
-
 	char *date = get_date();
 
-	size_t log_len = strlen(date)
+	size_t log_len = strlen(date ? date : "unknown")
 		+ (workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 2)
 		+ strlen(last_cmd) + 8;
 
 	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
-	snprintf(full_log, log_len, "c:[%s] %s:%s\n", date,
+	snprintf(full_log, log_len, "c:[%s] %s:%s\n", date ? date : "unknown",
 		workspaces[cur_ws].path ? workspaces[cur_ws].path : "?", last_cmd);
 
 	free(date);
@@ -168,11 +123,7 @@ log_function(char **cmd)
 	/* Write the log into LOG_FILE */
 	FILE *log_fp;
 
-	if (clear_log == 0) /* Append the log to the existing logs */
-		log_fp = fopen(log_file, "a");
-	else /* Overwrite the log file leaving only the 'log clear' command */
-		log_fp = fopen(log_file, "w+");
-
+	log_fp = fopen(log_file, "a");
 	if (!log_fp) {
 		_err('e', PRINT_PROMPT, "log: %s: %s\n", log_file, strerror(errno));
 		free(full_log);
@@ -203,7 +154,7 @@ write_msg_into_logfile(const char *_msg)
 	}
 
 	char *date = get_date();
-	fprintf(msg_fp, "m:[%s] %s", date, _msg);
+	fprintf(msg_fp, "m:[%s] %s", date ? date : "unknown", _msg);
 	fclose(msg_fp);
 	free(date);
 }
@@ -301,7 +252,7 @@ send_desktop_notification(char *msg)
  * If PRINT_PROMPT is not 1, MSG is printed directly here
  *
  * Finally, if logs are enabled and LOGME is 1, write the message into the log
- * file as follows: "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
+ * file as follows: "m:[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
 void
 log_msg(char *_msg, const int print_prompt, const int logme,
 	const int add_to_msgs_list)
@@ -330,7 +281,7 @@ log_msg(char *_msg, const int print_prompt, const int logme,
 	}
 
 	if (xargs.stealth_mode == 1 || config_ok == 0 || !log_file || !*log_file
-	|| logme != 1 || conf.logs_enabled == 0)
+	|| logme != 1 || conf.log_msgs == 0)
 		return;
 
 	write_msg_into_logfile(_msg);
@@ -431,7 +382,7 @@ add_to_dirhist(const char *dir_path)
 }
 
 static int
-reload_history(char **args)
+reload_history(void)
 {
 	clear_history();
 	read_history(hist_file);
@@ -439,9 +390,6 @@ reload_history(char **args)
 
 	/* Update the history array */
 	int ret = get_history();
-
-	if (log_function(args) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
 
 	return ret;
 }
@@ -478,7 +426,8 @@ edit_history(char **args)
 	/* If modification times differ, the file was modified after being
 	 * opened */
 	if (mtime_bfr != (time_t)attr.st_mtime) {
-		ret = reload_history(args);
+//		ret = reload_history(args);
+		ret = reload_history();
 		print_reload_msg(_("File modified. History entries reloaded\n"));
 		return ret;
 	}
@@ -501,7 +450,7 @@ _clear_history(char **args)
 	fclose(hist_fp);
 
 	/* Reset readline history */
-	return reload_history(args);
+	return reload_history();
 }
 
 static int

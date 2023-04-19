@@ -580,7 +580,7 @@ For information about the matching algorithm consult the manpage\n\n\
 #define LL_USAGE "Toggle long view mode\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   ll, lv [on, off]\n\n\
-\x1b[1mEXAMPLE\x1b[0m\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
 - Change to long view\n\
     ll on\n\
 - Toggle long view\n\
@@ -590,9 +590,18 @@ For information about the matching algorithm consult the manpage\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   lm [on, off]"
 
-#define LOG_USAGE "Manage CliFM logs\n\n\
+#define LOG_USAGE "Manage Clifm logs\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  log [on, off, clear, status]"
+  log [cmd, msg [on, off, status]] [clear]\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print logs\n\
+    log\n\
+- Enable command logs\n\
+    log cmd on\n\
+- Disable message logs\n\
+    log msg off\n\
+- Clear all logs\n\
+    log clear"
 
 #define MEDIA_USAGE "List available media devices, allowing you to mount or \
 unmount them\n\

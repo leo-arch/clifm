@@ -320,8 +320,8 @@ dump_config(void)
 	n = DEF_LOG_CMDS;
 	print_config_value("LogCmds", &conf.log_cmds, &n, DUMP_CONFIG_BOOL);
 
-	n = DEF_LOGS_ENABLED;
-	print_config_value("Logs", &conf.logs_enabled, &n, DUMP_CONFIG_BOOL);
+	n = DEF_LOG_MSGS;
+	print_config_value("LogMsgs", &conf.log_msgs, &n, DUMP_CONFIG_BOOL);
 
 	n = DEF_LONG_VIEW;
 	print_config_value("LongViewMode", &conf.long_view, &n, DUMP_CONFIG_BOOL);
@@ -513,6 +513,10 @@ edit_function(char **args)
 		return EXIT_FAILURE;
 	}
 
+	char *opening_app = args[1];
+	if (args[1] && strcmp(args[1], "edit") == 0)
+		opening_app = args[2];
+
 	/* Get modification time of the config file before opening it */
 	struct stat attr;
 
@@ -528,8 +532,8 @@ edit_function(char **args)
 	int ret = EXIT_SUCCESS;
 
 	/* If there is an argument... */
-	if (args[1]) {
-		char *cmd[] = {args[1], config_file, NULL};
+	if (opening_app) {
+		char *cmd[] = {opening_app, config_file, NULL};
 		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	} else {
 		/* If no application was passed as 2nd argument */
@@ -1565,9 +1569,8 @@ create_main_config_file(char *file)
 # If running in long view, print directories full size (including contents)\n\
 ;FullDirSize=%s\n\n\
 # Log errors and warnings\n\
-;Logs=%s\n\
-# Keep a record of external commands and internal commands able to\n\
-# modify the files system (e.g. 'r', 'c', 'm', and so on). Logs must be set to true\n\
+;LogMsgs=%s\n\
+# Log commands entered in the command line\n\
 ;LogCmds=%s\n\n"
 
 	    "# Minimum length at which a file name can be trimmed in long view mode\n\
@@ -1610,7 +1613,7 @@ create_main_config_file(char *file)
 		DEF_PROP_FIELDS,
 		DEF_APPARENT_SIZE == 1 ? "true" : "false",
 		DEF_FULL_DIR_SIZE == 1 ? "true" : "false",
-		DEF_LOGS_ENABLED == 1 ? "true" : "false",
+		DEF_LOG_MSGS == 1 ? "true" : "false",
 		DEF_LOG_CMDS == 1 ? "true" : "false",
 		DEF_MIN_NAME_TRIM,
 		DEF_MIN_JUMP_RANK,
@@ -2775,9 +2778,14 @@ read_config(void)
 			set_config_bool_value(line + 13, &conf.long_view);
 		}
 
-		else if (xargs.logs == UNSET && *line == 'L'
-		&& strncmp(line, "Logs=", 5) == 0) {
-			set_config_bool_value(line + 5, &conf.logs_enabled);
+		////////// DEPRECATED!!
+		else if (*line == 'L' && strncmp(line, "Logs=", 5) == 0) {
+			set_config_bool_value(line + 5, &conf.log_msgs);
+		}
+		//////////
+
+		else if (*line == 'L' && strncmp(line, "LogMsgs=", 8) == 0) {
+			set_config_bool_value(line + 8, &conf.log_msgs);
 		}
 
 		else if (*line == 'L' && strncmp(line, "LogCmds=", 8) == 0) {
@@ -3563,9 +3571,6 @@ check_cmd_line_options(void)
 
 	if (xargs.light != UNSET)
 		conf.light_mode = xargs.light;
-
-	if (xargs.logs != UNSET)
-		conf.logs_enabled = xargs.logs;
 
 	if (xargs.longview != UNSET)
 		conf.long_view = xargs.longview;

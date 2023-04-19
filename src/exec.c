@@ -128,10 +128,11 @@ run_and_refresh(char **cmd, const int skip_force)
 	if (!cmd)
 		return EXIT_FAILURE;
 
-	log_function(cmd);
-
 	char *new_name = (char *)NULL;
 	if (xrename == 1) {
+		if (!cmd[1])
+			return EINVAL;
+
 		/* If we have a number, either it was not expanded by parse_input_str(),
 		 * in which case it is an invalid ELN, or it was expanded to a file named
 		 * as a number. Let's check if we have such file name in the files list */
@@ -220,7 +221,6 @@ run_and_refresh(char **cmd, const int skip_force)
 	tcmd[n] = (char *)NULL;
 	int ret = launch_execve(tcmd, FOREGROUND, E_NOFLAG);
 
-//	for (i = 0; tcmd[i]; i++)
 	for (i = 0; i < n; i++)
 		free(tcmd[i]);
 	free(tcmd);
@@ -650,19 +650,8 @@ check_shell_cmd_condtions(char **args)
 static int
 run_shell_cmd(char **args)
 {
-	/* 'no_log' will be true when running profile or prompt commands */
-	if (!no_log)
-		log_function(args);
-
 	if (check_shell_cmd_condtions(args) == EXIT_FAILURE)
 		return EXIT_FAILURE;
-
-	/* Little export implementation. What it lacks? Command substitution */
-/*	if (*args[0] == 'e' && strcmp(args[0], "export") == 0 && args[1]) {
-		int exit_status = _export(args[1]);
-		if (exit_status != -1)
-			return exit_status;
-	} */
 
 	char *cmd = construct_shell_cmd(args);
 
@@ -1180,25 +1169,6 @@ alias_function(char **args)
 		return list_aliases();
 
 	return print_alias(args[1]);
-}
-
-static int
-_log_function(char **args)
-{
-	if (args[1] && IS_HELP(args[1])) {
-		puts(_(LOG_USAGE));
-		return EXIT_SUCCESS;
-	}
-
-	/* I make this check here, and not in the function itself,
-	 * because this function is also called by other instances of
-	 * the program where no message should be printed */
-	if (!config_ok) {
-		fprintf(stderr, _("%s: Log function disabled\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
-
-	return log_function(args);
 }
 
 static int
@@ -2237,6 +2207,83 @@ unset_function(char **var)
 	return status;
 }
 
+static int
+run_log_cmd(char **args)
+{
+	if (config_ok == 0) {
+		fprintf(stderr, _("%s: Log function disabled\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	if (!args || !args[0])
+		return print_logs();
+
+	if (IS_HELP(args[0])) {
+		puts(LOG_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	if (*args[0] == 'c' && strcmp(args[0], "clear") == 0) {
+		int ret = clear_logs();
+		if (ret == EXIT_SUCCESS)
+			printf("log: Logs cleared\n");
+		return ret;
+	}
+
+	if (*args[0] == 'c' && strcmp(args[0], "cmd") == 0) {
+		if (!args[1] || !*args[1]) {
+			fprintf(stderr, "%s\n", LOG_USAGE);
+			return EXIT_FAILURE;
+		}
+
+		if (*args[1] == 's' && strcmp(args[1], "status") == 0) {
+			printf(_("log: Command logs are %s\n"), (conf.log_cmds == 1)
+				? _("enabled") : _("disabled"));
+			return EXIT_SUCCESS;
+		}
+
+		if (*args[1] == 'o' && strcmp(args[1], "on") == 0) {
+			conf.log_cmds = 1;
+			puts(_("log: Command logs enabled"));
+			return EXIT_SUCCESS;
+		}
+
+		if (*args[1] == 'o' && strcmp(args[1], "off") == 0) {
+			conf.log_cmds = 0;
+			puts(_("log: Logs disabled"));
+			return EXIT_SUCCESS;
+		}
+	}
+
+	if (*args[0] == 'm' && strcmp(args[0], "msg") == 0) {
+		if (!args[1] || !*args[1]) {
+			fprintf(stderr, "%s\n", LOG_USAGE);
+			return EXIT_FAILURE;
+		}
+
+		if (*args[1] == 's' && strcmp(args[1], "status") == 0) {
+			printf(_("log: Message logs are %s\n"), (conf.log_msgs == 1)
+				? _("enabled") : _("disabled"));
+			return EXIT_SUCCESS;
+		}
+
+		if (*args[1] == 'o' && strcmp(args[1], "on") == 0) {
+			conf.log_msgs = 1;
+			puts(_("log: Logs enabled"));
+			return EXIT_SUCCESS;
+		}
+
+		if (*args[1] == 'o' && strcmp(args[1], "off") == 0) {
+			conf.log_msgs = 0;
+			puts(_("log: Logs disabled"));
+			return EXIT_SUCCESS;
+		}
+	}
+
+	fprintf(stderr, "%s\n", LOG_USAGE);
+	return EXIT_FAILURE;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error
@@ -2727,7 +2774,7 @@ exec_cmd(char **comm)
 
 	/* #### LOG #### */
 	else if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0)
-		return (exit_code = _log_function(comm));
+		return (exit_code = run_log_cmd(comm + 1));
 
 	/* #### MESSAGES #### */
 	else if (*comm[0] == 'm' && (strcmp(comm[0], "msg") == 0

@@ -51,13 +51,6 @@
 # include "suggestions.h"
 #endif
 
-/*
-#ifndef _NO_TRASH
-# include "trash.h"
-#else
-# include <time.h>
-#endif */
-
 #define CTLESC '\001'
 #define CTLNUL '\177'
 
@@ -954,16 +947,13 @@ initialize_prompt_data(void)
 static inline void
 log_and_record(char *input)
 {
-	/* Keep a literal copy of the last entered command to compose the
-	 * commands log, if needed and enabled */
-	if (conf.logs_enabled) {
+	if (conf.log_cmds == 1) {
 		free(last_cmd);
 		last_cmd = savestring(input, strlen(input));
+		log_cmd();
 	}
 
-	/* Do not record empty lines, exit, history commands, consecutively
-	 * equal inputs, or lines starting with space */
-	if (record_cmd(input))
+	if (record_cmd(input) == 1)
 		add_to_cmdhist(input);
 }
 /*
@@ -988,7 +978,8 @@ prompt(void)
 	/* Generate the prompt string using the prompt line in the config
 	 * file (stored in encoded_prompt at startup) */
 	char *decoded_prompt = decode_prompt(conf.encoded_prompt);
-	char *the_prompt = construct_prompt(decoded_prompt ? decoded_prompt : EMERGENCY_PROMPT);
+	char *the_prompt = construct_prompt(decoded_prompt
+		? decoded_prompt : EMERGENCY_PROMPT);
 	free(decoded_prompt);
 
 	/* Tell my_rl_getc() (readline.c) to recalculate the length

@@ -351,7 +351,6 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		return (struct bleach_t *)NULL;
 
 	*edited_names = 1;
-	log_function(NULL);
 
 	char f[PATH_MAX];
 	if (xargs.stealth_mode == 1)

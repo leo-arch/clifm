@@ -575,6 +575,9 @@ extern int watch;
 # define strcasestr xstrcasestr
 #endif /* (__linux || __CYGWIN__) && _BE_POSIX */
 
+//#define xerror(format, ...) _err(ERR_NO_STORE, NOPRINT_PROMPT, (format), __VA_ARGS__)
+#define xerror(...) _err(ERR_NO_STORE, NOPRINT_PROMPT, __VA_ARGS__)
+
 #define ENTRY_N 64
 
 /* Macros to calculate file sizes */
@@ -708,7 +711,7 @@ struct config_t {
 	int list_dirs_first;
 	int listing_mode;
 	int log_cmds;
-	int logs_enabled;
+	int log_msgs;
 	int long_view;
 	int max_dirhist;
 	int max_hist;
@@ -1000,7 +1003,6 @@ struct param_t {
 	int int_vars;
 	int list_and_quit;
 	int light;
-	int logs;
 	int longview;
 	int max_dirhist;
 	int max_files;

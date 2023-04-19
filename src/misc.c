@@ -130,14 +130,16 @@ set_eln_color(void)
 
 /* Custom POSIX implementation of GNU asprintf() modified to log program
  * messages.
+ *
  * MSG_TYPE is one of: 'e', 'f', 'w', 'n', zero (meaning this
  * latter that no message mark (E, W, or N) will be added to the prompt).
- * Messages with a msg_type on 'n' (or -1) are not logged
+ * Messages with a msg_type on 'n' are not logged.
  * 'f' means that the message must be printed forcefully, even if identical
  * to the previous one, without printing any message mark.
- * MSG_TYPE also accepts -1 and -2 as values:
- * -1: Print the message but do not log it
- * -2: Log but do not store the message into the messages array
+ * MSG_TYPE also accepts ERR_NO_LOG (-1) and ERR_NO_STORE (-2) as values:
+ * ERR_NO_LOG: Print the message but do not log it.
+ * ERR_NO_STORE: Log but do not store the message into the messages array.
+ *
  * PROMPT_FLAG tells whether to print the message immediately before the next
  * prompt or rather in place.
  *  */

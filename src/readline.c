@@ -2724,63 +2724,79 @@ options_generator(const char *text, int state)
 		w = rl_count_words();
 	}
 
-	if (w != 2) /* Complete internal options only for the second word */
-		return (char *)NULL;
-
 #define MAX_OPTS 22
 	char *_opts[MAX_OPTS] = {0};
 
-	/* acd, ao, ext, ff, hf, pg */
-	if ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ')
+	/* acd, ao, ext, ff, hf, pg (second word only) */
+	if (w == 2 && ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ')
 	|| strncmp(l, "acd ", 4) == 0) )
 	|| (*l == 'e' && strncmp(l, "ext ", 4) == 0)
 	|| (*l == 'f' && (l[1] == 'f' || l[1] == 'c') && l[2] == ' ')
 	|| (*l == 'h' && (l[1] == 'f' || l[1] == 'h') && l[2] == ' ')
-	|| (*l == 'p' && l[1] == 'g' && l[2] == ' ') ) {
+	|| (*l == 'p' && l[1] == 'g' && l[2] == ' ') ) ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
+
 	/* cl, icons, ll-lv, lm, and fz */
-	} else if ( (*l == 'c' && l[1] == 'l' && l[2] == ' ')
+	} else if (w == 2 && ( (*l == 'c' && l[1] == 'l' && l[2] == ' ')
 	|| (*l == 'i' && strncmp(l, "icons ", 6) == 0)
 	|| (*l == 'l' && (l[1] == 'v' || l[1] == 'l' || l[1] == 'm')
 	&& l[2] == ' ')
-	|| (*l == 'f' && l[1] == 'z' && l[2] == ' ') ) {
+	|| (*l == 'f' && l[1] == 'z' && l[2] == ' ') ) ) {
 		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = NULL;
+
+	/* config */
+	} else if (w == 2 && *l == 'c' && strncmp(l, "config ", 7) == 0) {
+		_opts[0] = "edit"; _opts[1] = "dump"; _opts[2] = "reset";
+		_opts[3] = NULL;
+
 	/* log */
-	} else if (*l == 'l' && strncmp(l, "log ", 4) == 0) {
-		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "clear";
-		_opts[3] = "status"; _opts[4] = NULL;
+	} else if (w == 3 && *l == 'l' && (strncmp(l, "log msg ", 8) == 0
+	|| strncmp(l, "log cmd ", 8) == 0) ) {
+		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
+	} else if (w == 2 && *l == 'l' && strncmp(l, "log ", 4) == 0) {
+		_opts[0] = "cmd"; _opts[1] = "msg"; _opts[2] = "clear"; _opts[3] = NULL;
+
 #ifndef _NO_PROFILES
 	/* pf */
-	} else if ((*l == 'p' && l[1] == 'f' && l[2] == ' ')
-	|| strncmp(l, "profile ", 8) == 0) {
+	} else if (w == 2 && ( (*l == 'p' && l[1] == 'f' && l[2] == ' ')
+	|| strncmp(l, "profile ", 8) == 0 ) ) {
 		_opts[0] = "set"; _opts[1] = "list"; _opts[2] = "add";
 		_opts[3] = "del"; _opts[4] = "rename"; _opts[5] = NULL;
 #endif /* _NO_PROFILES */
-	} else if (*l == 'p' && strncmp(l, "prompt ", 7) == 0) {
+
+	/* prompt */
+	} else if (w == 2 && *l == 'p' && strncmp(l, "prompt ", 7) == 0) {
 		_opts[0] = "set"; _opts[1] = "list"; _opts[2] = "unset";
 		_opts[3] = "edit"; _opts[4] = "reload"; _opts[5] = NULL;
 #ifndef _NO_TAGS
+
 	/* tag */
-	} else if (*l == 't' && l[1] == 'a' && l[2] == 'g' && l[3] == ' ') {
+	} else if (w == 2 && *l == 't' && l[1] == 'a' && l[2] == 'g' && l[3] == ' ') {
 		_opts[0] = "add"; _opts[1] = "del"; _opts[2] = "list";
 		_opts[3] = "list-full"; _opts[4] = "merge"; _opts[5] = "new";
 		_opts[6] = "rename"; _opts[7] = "untag"; _opts[8] = NULL;
 #endif /* !_NO_TAGS */
+
 	/* mm */
-	} else if (*l == 'm' && l[1] == 'm' && l[2] == ' ') {
+	} else if (w == 2 && *l == 'm' && l[1] == 'm' && l[2] == ' ') {
 		_opts[0] = "info"; _opts[1] = "edit"; _opts[2] = "import";
 		_opts[3] = NULL;
+
 	/* net */
-	} else if (*l == 'n' && l[1] == 'e' && l[2] == 't' && l[3] == ' ') {
+	} else if (w == 2 && *l == 'n' && l[1] == 'e'
+	&& l[2] == 't' && l[3] == ' ') {
 		_opts[0] = "mount"; _opts[1] = "unmount"; _opts[2] = "list";
 		_opts[3] = "edit"; _opts[4] = NULL;
+
 	/* history */
-	} else if (*l == 'h' && strncmp(l, "history ", 8) == 0) {
+	} else if (w == 2 && *l == 'h' && strncmp(l, "history ", 8) == 0) {
 		_opts[0] = "edit"; _opts[1] = "clear"; _opts[2] = "on";
 		_opts[3] = "off"; _opts[4] = "status"; _opts[5] = "show-time";
 		_opts[6] = NULL;
+
 	/* help topics */
-	} else if (*l == 'h' && l[1] == 'e' && strncmp(l, "help ", 5) == 0) {
+	} else if (w == 2 && *l == 'h' && l[1] == 'e'
+	&& strncmp(l, "help ", 5) == 0) {
 		_opts[0] = "archives";
 		_opts[1] = "autocommands";
 		_opts[2] = "basics";
@@ -2803,13 +2819,16 @@ options_generator(const char *text, int state)
 		_opts[19] = "theming";
 		_opts[20] = "trash";
 		_opts[21] = NULL;
+
 	/* b, f */
-	} else if ((*l == 'b' && l[1] == ' ') || (*l == 'f' && l[1] == ' ')) {
+	} else if (w == 2 && ( (*l == 'b' && l[1] == ' ')
+	|| (*l == 'f' && l[1] == ' ') ) ) {
 		_opts[0] = "hist"; _opts[1] = "clear"; _opts[2] = NULL;
+
 	} else {
 		/* kb, keybinds */
-		if ((*l == 'k' && l[1] == 'b' && l[2] == ' ')
-		|| strncmp(l, "keybinds ", 9) == 0) {
+		if (w == 2 && ( (*l == 'k' && l[1] == 'b' && l[2] == ' ')
+		|| strncmp(l, "keybinds ", 9) == 0) ) {
 			_opts[0] = "list"; _opts[1] = "edit"; _opts[2] = "reset";
 			_opts[3] = "readline"; _opts[4] = NULL;
 		}

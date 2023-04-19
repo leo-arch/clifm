@@ -597,8 +597,9 @@ const struct cmdslist_t param_str[] = {
 	{"edit dump", 9},
 /////////
 	{"config", 6},
-	{"config reset", 12},
+	{"config edit", 11},
 	{"config dump", 11},
+	{"config reset", 12},
 	{"ext on", 6},
 	{"ext off", 7},
 	{"ext status", 10},
@@ -674,6 +675,13 @@ const struct cmdslist_t param_str[] = {
 	{"lv off", 6},
 
 	{"log clear", 9},
+	{"log cmd on", 10},
+	{"log cmd off", 11},
+	{"log cmd status", 14},
+	{"log msg on", 10},
+	{"log msg off", 11},
+	{"log msg status", 14},
+
 	{"m -f", 4},
 	{"m --force", 9},
 	{"mf unset", 8},

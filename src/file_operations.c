@@ -633,8 +633,6 @@ toggle_exec(const char *file, mode_t mode)
 	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
 	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0111);
 
-	log_function(NULL);
-
 	int fd = open(file, O_WRONLY);
 	if (fd == -1) {
 		_err(ERR_NO_STORE, NOPRINT_PROMPT, "xchmod: %s: %s\n", file,
@@ -702,8 +700,6 @@ dup_file(char **cmd)
 		dest_dir[dlen - 1] = '\0';
 		dlen--;
 	}
-
-	log_function(NULL);
 
 	char *rsync_path = get_cmd_path("rsync");
 	int exit_status =  EXIT_SUCCESS;
@@ -792,8 +788,6 @@ create_file(char **cmd)
 		puts(_(NEW_USAGE));
 		return EXIT_SUCCESS;
 	}
-
-	log_function(NULL);
 
 	int exit_status = EXIT_SUCCESS;
 	int free_cmd = 0;
@@ -1163,8 +1157,6 @@ edit_link(char *link)
 	if (!link || !*link)
 		return EXIT_FAILURE;
 
-	log_function(NULL);
-
 	/* Dequote the file name, if necessary */
 	if (strchr(link, '\\')) {
 		char *tmp = dequote_str(link, 0);
@@ -1377,8 +1369,6 @@ validate_vv_dest_dir(const char *file)
 int
 cp_mv_file(char **args, const int copy_and_rename, const int force)
 {
-	log_function(NULL);
-
 	/* vv command */
 	if (copy_and_rename == 1
 	&& validate_vv_dest_dir(args[args_n]) == EXIT_FAILURE)
@@ -1497,8 +1487,6 @@ int
 remove_file(char **args)
 {
 	int cwd = 0, exit_status = EXIT_SUCCESS, errs = 0;
-
-	log_function(NULL);
 
 	struct stat a;
 	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
@@ -1638,8 +1626,6 @@ bulk_rename(char **args)
 		puts(_(BULK_USAGE));
 		return EXIT_SUCCESS;
 	}
-
-	log_function(NULL);
 
 	int exit_status = EXIT_SUCCESS;
 
@@ -2005,8 +1991,6 @@ batch_link(char **args)
 		puts(_(BL_USAGE));
 		return EXIT_SUCCESS;
 	}
-
-	log_function(NULL);
 
 	puts("Suffix defaults to '.link'");
 	flags |= NO_FIX_RL_POINT;

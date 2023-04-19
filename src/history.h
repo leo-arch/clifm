@@ -33,13 +33,14 @@ __BEGIN_DECLS
 
 void add_to_cmdhist(char *);
 void add_to_dirhist(const char *);
+int  clear_logs(void);
 int  get_history(void);
 int  history_function(char **);
-int  log_function(char **);
+int  log_cmd(void);
 void log_msg(char *, const int, const int, const int);
+int  print_logs(void);
 int  record_cmd(char *);
 int  run_history_cmd(const char *);
-//int  save_dirhist(void);
 
 __END_DECLS
 
