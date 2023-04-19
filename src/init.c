@@ -672,7 +672,7 @@ END:
 
 /* Get the system data directory (usually /usr/local/share),
  * Try first CLIFM_DATADIR, defined in the Makefile, then a few standard
- * paths, and finally guessing based on whatever argv[0] provides */
+ * paths, and finally try to guess based on whatever argv[0] provides. */
 void
 get_data_dir(void)
 {
@@ -723,26 +723,6 @@ check_env_filter(void)
 	filter.env = 1;
 	set_filter_type(*p);
 	filter.str = savestring(p, strlen(p));
-}
-
-char *
-get_date(void)
-{
-	time_t rawtime = time(NULL);
-	struct tm tm;
-	localtime_r(&rawtime, &tm);
-	size_t date_max = 128;
-
-	char *p = (char *)malloc((date_max + 1) * sizeof(char)), *date;
-	if (p) {
-		date = p;
-		p = (char *)NULL;
-	} else {
-		return (char *)NULL;
-	}
-
-	strftime(date, date_max, "%Y-%m-%dT%T%z", &tm);
-	return date;
 }
 
 static pid_t

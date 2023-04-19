@@ -34,7 +34,6 @@ void external_arguments(int, char **);
 void get_aliases(void);
 size_t get_cdpath(void);
 void get_data_dir(void);
-char *get_date(void);
 int  get_home(void);
 int  get_last_path(void);
 size_t get_path_env(void);

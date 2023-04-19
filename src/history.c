@@ -40,6 +40,24 @@
 #include "messages.h"
 #include "file_operations.h"
 
+/* Return a string with the current date.
+ * Used to compose log entries. */
+static char *
+get_date(void)
+{
+	time_t rawtime = time(NULL);
+	struct tm tm;
+	localtime_r(&rawtime, &tm);
+	size_t date_max = 128;
+
+	char *date = (char *)malloc((date_max + 1) * sizeof(char));
+	if (!date)
+		return (char *)NULL;
+
+	strftime(date, date_max, "%Y-%m-%dT%T%z", &tm);
+	return date;
+}
+
 /* Print available logs */
 static int
 print_logs(void)
@@ -88,25 +106,25 @@ log_function(char **cmd)
 		if (*cmd[1] == 'c' && strcmp(cmd[1], "clear") == 0) {
 			clear_log = 1;
 		} else if (*cmd[1] == 's' && strcmp(cmd[1], "status") == 0) {
-			printf(_("Logs %s\n"), (conf.logs_enabled == 1)
+			printf(_("log: Logs are %s\n"), (conf.logs_enabled == 1)
 				? _("enabled") : _("disabled"));
 			return EXIT_SUCCESS;
 		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "on") == 0) {
 			if (conf.logs_enabled == 1) {
-				puts(_("Logs already enabled"));
+				puts(_("log: Logs already enabled"));
 			} else {
 				conf.logs_enabled = 1;
-				puts(_("Logs successfully enabled"));
+				puts(_("log: Logs enabled"));
 			}
 			return EXIT_SUCCESS;
 		} else if (*cmd[1] == 'o' && strcmp(cmd[1], "off") == 0) {
 			/* If logs were already disabled, just exit. Otherwise, log
 			 * the "log off" command */
 			if (conf.logs_enabled == 0) {
-				puts(_("Logs already disabled"));
+				puts(_("log: Logs already disabled"));
 				return EXIT_SUCCESS;
 			} else {
-				puts(_("Logs succesfully disabled"));
+				puts(_("log: Logs disabled"));
 				conf.logs_enabled = 0;
 			}
 		}
@@ -135,9 +153,6 @@ log_function(char **cmd)
 
 	char *date = get_date();
 
-// Fix comp warning with -O3 and -Wformat -Werror=format-security
-// Why? date comes from get_date(), which returns at most 128 bytes
-//	size_t log_len = strnlen(date, 128);
 	size_t log_len = strlen(date)
 		+ (workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 2)
 		+ strlen(last_cmd) + 8;
