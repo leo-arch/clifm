@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 15, 2023" "clifm 1.11.9" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 19, 2023" "clifm 1.11.10" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -203,9 +203,6 @@ enable desktop notifications. Enter \fIhelp desktop-notifications\fR in \fBclifm
 .TP
 \fB\-\-disk\-usage\fR
 show disk usage (free/total) for the file system the current directory belongs to
-.TP
-\fB\-\-enable\-logs\fR
-enable program logs. See the \fIlog\fR command for more information
 .TP
 \fB\-\-fzfpreview-hidden\fR
 enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle it via Alt-p)
@@ -643,14 +640,16 @@ show this list of commands. A more convenient way of getting information about \
 .B colors
 print the list of currently used color codes
 .TP
-.B config \fR[\fIreset\fR, \fIdump\fR] [\fIAPP\fR]
-open the main configuration file (F10 key is also available). If an application is specified (\fIAPP\fR), it will be used to open the configuration file. Edit settings to your liking if necessary, save, and quit the editor. Changes are automatically applied.
+.B config \fR[\fIedit\fR [\fIAPP\fR]] [\fIreset\fR, \fIdump\fR]
+Manage the main configuration file.
 .sp
-Use the \fIreset\fR subcommand to generate a fresh configuration file and create a backup copy of the old one (named clifmrc.YYYYMMDD@HH:MM:SS).
+To edit the configuration file use the \fIedit\fR subcommand. If an application is specified (\fIconfig edit APP\fR), \fIAPP\fR will be used to open the file (otherwise, the default associated program will be used). Edit settings to your liking if necessary, save, and quit the editor. Changes are automatically applied. Note that, since \fIedit\fR is the default action, it can be omitted. Enter just \fIconfig\fR to open the configuration file, or \fIconfig APP\fR to open it using \fIAPP\fR.
 .sp
-The \fIdump\fR subcommand prints the list of settings (as defined in the main configuration file) with their current value. Those differing from default values are highlighted, and the default value is displayed in brackets.
+Use the \fIreset\fR subcommand to generate a fresh configuration file and create a backup copy of the old one (named \fIclifmrc.YYYYMMDD@HH:MM:SS\fR).
 .sp
-The \fIedit\fR command (though deprecated) can be used as well instead of \fIconfig\fR.
+The \fIdump\fR subcommand prints the list of settings (as defined in the main configuration file) with their current value. Those differing from the default values are highlighted, and the default value for the corresponding option is displayed in brackets.
+.sp
+\fBNOTE\fR: The \fIedit\fR command (though deprecated) can be used as well instead of \fIconfig\fR.
 .TP
 .B cs, colorschemes \fR[\fIedit\fR [\fIAPP\fR]] [\fIn\fR, \fIname\fR] [\fINAME\fR]
 with no arguments, list available color schemes (\fIcs name\fR (or \fIcs n\fR) to print the current color scheme name).
@@ -796,8 +795,12 @@ Toggle long/detail view mode
 .B lm \fR[\fIon\fR, \fIoff\fR]
 Toggle the light mode on/off. This option, aimed at making files listing faster than the default mode, is especially useful for really old hardware or when working on remote machines (for more information see the \fBNOTE ON SPEED\fR section below).
 .TP
-.B log \fR[\fIclear\fR] [\fIon\fR, \fIoff\fR, \fIstatus\fR]
-with no arguments, it prints the contents of the log file. If \fIclear\fR is passed as argument, all the logs will be deleted. \fIon\fR, \fIoff\fR, and \fIstatus\fR enable, disable, and check the status of the \fIlog\fR function for the current session.
+.B log \fR[\fIcmd\fR [\fIon\fR, \fIoff\fR, \fIstatus\fR]] [\fImsg\fR [\fIon\fR, \fIoff\fR, \fIstatus\fR]] [\fIclear\fR]
+with no arguments, it prints the contents of the log file. If \fIclear\fR is passed as argument, all the logs will be deleted. 
+.sp
+The \fIon\fR, \fIoff\fR, and \fIstatus\fR subcommands enable, disable, and print the status of the \fIlog\fR function, either for commands (if \fIcmd\fR is used) or for messages (if \fImsg\fR is used instead). Example: \fIlog cmd on\fR, to enable command logs.
+.sp
+Consult the \fBFILES\fR section below for information about how logs are written into the logs file.
 .TP
 .B media
 .sp
@@ -2822,9 +2825,9 @@ A list of commands entered by the user and used by the history function.
 The log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/log.clifm\fR.
 This file contains \fBclifm\fR's logs. There are two kinds of logs: 1. messages, and 2. commands.
 .sp
-Message logs are a record of errors and warnings and have the following form: "m:[date] msg". Enable these logs using the \fILogs\fR option in the configuration file, the \fI\-\-enable\-logs\fR flag, or the \fIlog\fR command.
+Message logs are a record of errors and warnings and have the following form: "m:[date] msg".
 .sp
-Command logs keep track of external commands and internal commands able to modify the filesystem. These logs have this form: "c:[date] current_working_directory:cmd". Enable these logs via the \fICmdLogs\fR option in the configuration file.
+Command logs keep track of commands entered in the command line. These logs have this form: "c:[date] current_working_directory:cmd".
 .TP
 .B KANGAROO DATABASE
 The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/jump.clifm\fR.
