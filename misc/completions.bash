@@ -85,7 +85,6 @@ _clifm ()
         --data-dir
         --dektop-notifications
         --disk-usage
-        --enable-logs
         --full-dir-size
         --fuzzy-matching
         --fzfpreview-hidden

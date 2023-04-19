@@ -49,7 +49,6 @@ args=(
 	'--data-dir=[use PATH as data directory]:directory:_directories'
 	'--desktop-notifications[enable desktop notifications]'
 	'--disk-usage[show disk usage (free/total) for the filesystem to which the current directory belongs]'
-	'--enable-logs[enable program logs]'
 	'--full-dir-size[print size of directories and their contents in long view mode]'
 	'--fuzzy-matching[enable fuzzy matches for filename/path completions and suggestions]'
 	'--fzfpreview-hidden[same as --fzftab, but with the preview window hidden. Toggle it via Alt-p]'
