@@ -343,14 +343,20 @@ actions_function(char **args)
 				    mi_c, df_c, usr_actions[i].value);
 			}
 			return EXIT_SUCCESS;
-		} else {
-			printf(_("actions: No actions defined. Use the 'actions edit' "
-				"command to add new actions\n"));
-			return EXIT_FAILURE;
 		}
 
-	} else if (strcmp(args[1], "edit") == 0) {
-		return edit_actions(args[2] ? args[2] : NULL);
+		if (xargs.stealth_mode == 1) {
+			fputs(_("actions: Plugins are not allowed in stealth "
+				"mode\n"), stderr);
+		} else {
+			fputs(_("actions: No actions defined. Use the 'actions edit' "
+				"command to add new actions\n"), stdout);
+		}
+		return EXIT_SUCCESS;
+	}
+
+	if (strcmp(args[1], "edit") == 0) {
+		return edit_actions(args[2]);
 
 	} else if (IS_HELP(args[1])) {
 		puts(_(ACTIONS_USAGE));

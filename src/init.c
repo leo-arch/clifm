@@ -525,12 +525,12 @@ try_standard_data_dirs(void)
 		snprintf(home_local, sizeof(home_local), "%s/.local/share", user.home);
 
 	char *data_dirs[] = {
+		home_local,
 		"/usr/local/share",
 		"/usr/share",
 		"/opt/local/share",
 		"/opt/share",
 		"/opt/clifm/share",
-		home_local,
 #if defined(__HAIKU__)
 		"/boot/system/non-packaged/data",
 		"/boot/system/data",

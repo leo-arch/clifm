@@ -146,7 +146,7 @@ get_tab_comp_mode_str(void)
 {
 	char *s = (char *)xnmalloc(9, sizeof(char));
 
-	switch(tabmode) {
+	switch (tabmode) {
 	case FZF_TAB: strcpy(s, "fzf"); break;
 	case FZY_TAB: strcpy(s, "fzy"); break;
 	case SMENU_TAB: strcpy(s, "smenu"); break;
@@ -558,9 +558,12 @@ edit_function(char **args)
 	return ret;
 }
 
-/* Find the plugins-helper file and set CLIFM_PLUGINS_HELPER accordingly
+/* Find the plugins-helper file and set CLIFM_PLUGINS_HELPER accordingly.
  * This envionment variable will be used by plugins. Returns zero on
- * success or one on error */
+ * success or one on error.
+ * Try first the plugins directory.
+ * If not there, try the data dir.
+ * Else, try some standard locations. */
 static int
 setenv_plugins_helper(void)
 {
@@ -587,7 +590,15 @@ setenv_plugins_helper(void)
 			return EXIT_SUCCESS;
 	}
 
+	char home_local[PATH_MAX];
+	*home_local = '\0';
+	if (user.home && *user.home) {
+		snprintf(home_local, sizeof(home_local),
+			"%s/.local/share/clifm/plugins/plugins-helper", user.home);
+	}
+
 	const char *_paths[] = {
+		home_local,
 #if defined(__HAIKU__)
 		"/boot/system/non-packaged/data/clifm/plugins/plugins-helper",
 		"/boot/system/data/clifm/plugins/plugins-helper",
@@ -597,7 +608,9 @@ setenv_plugins_helper(void)
 #else
 		"/usr/share/clifm/plugins/plugins-helper",
 		"/usr/local/share/clifm/plugins/plugins-helper",
-#endif
+		"/opt/local/share/clifm/plugins/plugins-helper",
+		"/opt/share/clifm/plugins/plugins-helper",
+#endif /* __HAIKU__ */
 		NULL};
 
 	size_t i;
