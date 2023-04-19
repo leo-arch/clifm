@@ -28,7 +28,7 @@
 __BEGIN_DECLS
 
 int  create_bm_file(void);
-int  create_config(char *);
+int  create_main_config_file(char *);
 int  create_kbinds_file(void);
 int  create_mime_file(char *, int);
 void create_tmp_files(void);

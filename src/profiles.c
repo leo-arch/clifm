@@ -340,8 +340,8 @@ profile_add(char *prof)
 	if (create_mime_file(nmime_file, 1) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
-	/* #### CREATE THE CONFIG FILE #### */
-	if (create_config(nconfig_file) != EXIT_SUCCESS)
+	/* #### CREATE THE MAIN CONFIG FILE #### */
+	if (create_main_config_file(nconfig_file) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	/* Free stuff */

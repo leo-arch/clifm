@@ -99,7 +99,7 @@ regen_config(void)
 		printf(_("Old configuration file stored as '%s'\n"), bk);
 	}
 
-	if (create_config(config_file) != EXIT_SUCCESS)
+	if (create_main_config_file(config_file) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	printf(_("New configuration file written to '%s'\n"), config_file);
@@ -520,7 +520,7 @@ edit_function(char **args)
 	 * is running) clifmrc doesn't exist, recreate the configuration file.
 	 * Then run 'stat' again to reread the attributes of the file */
 	if (stat(config_file, &attr) == -1) {
-		create_config(config_file);
+		create_main_config_file(config_file);
 		stat(config_file, &attr);
 	}
 
@@ -1414,7 +1414,7 @@ import_rl_file(void)
 }
 
 int
-create_config(char *file)
+create_main_config_file(char *file)
 {
 	/* First, try to import it from DATADIR */
 	char src_filename[NAME_MAX];
@@ -2029,7 +2029,7 @@ create_config_files(void)
 				 * #####################*/
 
 	if (stat(config_file, &attr) == -1)
-		config_ok = create_config(config_file) == EXIT_SUCCESS ? 1 : 0;
+		config_ok = create_main_config_file(config_file) == EXIT_SUCCESS ? 1 : 0;
 
 	if (config_ok == 0)
 		return;
