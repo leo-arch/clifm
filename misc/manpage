@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 19, 2023" "clifm 1.11.10" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 20, 2023" "clifm 1.11.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2821,13 +2821,11 @@ Just the list of the user's bookmarks used by the bookmarks function.
 The history file is \fI~/.config/clifm/profiles/PROFILE/history.clifm\fR.
 A list of commands entered by the user and used by the history function.
 .TP
-.B LOG FILE
-The log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/log.clifm\fR.
-This file contains \fBclifm\fR's logs. There are two kinds of logs: 1. messages, and 2. commands.
-.sp
-Message logs are a record of errors and warnings and have the following form: "m:[date] msg".
-.sp
-Command logs keep track of commands entered in the command line. These logs have this form: "c:[date] current_working_directory:cmd".
+.B COMMANDS LOG FILE
+The commands log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/cmdlogs.clifm\fR. Command logs keep track of commands entered in the command line. These logs have this form: "[date] current_working_directory:command".
+.TP
+.B MESSAGES LOG FILE
+The messages log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/msglogs.clifm\fR. Message logs are a record of errors and warnings and have the following form: "[date] message".
 .TP
 .B KANGAROO DATABASE
 The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/jump.clifm\fR.
