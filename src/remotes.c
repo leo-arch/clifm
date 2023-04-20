@@ -84,8 +84,7 @@ dequote_remote_name(char *name)
 			strcpy(name, deq);
 			free(deq);
 		} else {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: Error dequoting "
-				"resource name\n", name);
+			xerror("net: %s: Error dequoting resource name\n", name);
 			return EXIT_FAILURE;
 		}
 	}
@@ -134,8 +133,7 @@ _create_mountpoint(int i)
 	char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n",
-			remotes[i].mountpoint, strerror(errno));
+		xerror("net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -161,8 +159,7 @@ cd_to_mountpoint(int i)
 static inline int
 print_cd_error(int i)
 {
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes[i].mountpoint,
-		strerror(errno));
+	xerror("net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
 	return EXIT_FAILURE;
 }
 
@@ -222,20 +219,17 @@ remotes_unmount(char *name)
 		return EXIT_FAILURE;
 
 	if (remotes[i].mounted == 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Not mounted\n"),
-			remotes[i].name);
+		xerror(_("net: %s: Not mounted\n"), remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
 	if (!remotes[i].mountpoint) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: Error getting "
-			"mountpoint for '%s'\n"), remotes[i].name);
+		xerror(_("net: Error getting mountpoint for '%s'\n"), remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
 	if (!remotes[i].unmount_cmd) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: No unmount command "
-			"for '%s'\n"), remotes[i].name);
+		xerror(_("net: No unmount command for '%s'\n"), remotes[i].name);
 		return EXIT_FAILURE;
 	}
 
@@ -253,8 +247,8 @@ remotes_unmount(char *name)
 
 		char *p = strrchr(remotes[i].mountpoint, '/');
 		if (!p) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("net: %s: Error getting "
-				"parent directory\n"), remotes[i].mountpoint);
+			xerror(_("net: %s: Error getting parent directory\n"),
+				remotes[i].mountpoint);
 			return EXIT_FAILURE;
 		}
 
@@ -262,8 +256,7 @@ remotes_unmount(char *name)
 		errno = 0;
 		if (xchdir(remotes[i].mountpoint, SET_TITLE) == EXIT_FAILURE) {
 			*p = '/';
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n",
-				remotes[i].mountpoint, strerror(errno));
+			xerror("net: %s: %s\n", remotes[i].mountpoint, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -288,8 +281,7 @@ remotes_edit(char *app)
 
 	struct stat attr;
 	if (stat(remotes_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file,
-			strerror(errno));
+		xerror("net: %s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -309,8 +301,7 @@ remotes_edit(char *app)
 		return ret;
 
 	if (stat(remotes_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "net: %s: %s\n", remotes_file,
-			strerror(errno));
+		xerror("net: %s: %s\n", remotes_file, strerror(errno));
 		return errno;
 	}
 

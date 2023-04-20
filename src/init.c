@@ -400,8 +400,10 @@ int
 init_history(void)
 {
 	/* Shrink the log and the directory history files */
-	if (log_file)
-		truncate_file(log_file, conf.max_log, 0);
+	if (msgs_log_file)
+		truncate_file(msgs_log_file, conf.max_log, 0);
+	if (cmds_log_file)
+		truncate_file(cmds_log_file, conf.max_log, 0);
 
 	if (!hist_file)
 		return EXIT_FAILURE;
@@ -455,8 +457,7 @@ set_cur_workspace(void)
 			workspaces[cur_ws].path = savestring(user.home, user.home_len);
 		} else {
 			if (access("/", R_OK | X_OK) == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: /: %s\n",
-					PROGRAM_NAME, strerror(errno));
+				xerror("%s: /: %s\n", PROGRAM_NAME, strerror(errno));
 				exit(EXIT_FAILURE);
 			} else {
 				workspaces[cur_ws].path = savestring("/", 1);
@@ -1389,8 +1390,7 @@ load_remotes(void)
 	int fd;
 	FILE *fp = open_fstream_r(remotes_file, &fd);
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
-			remotes_file, strerror(errno));
+		xerror("%s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1578,8 +1578,7 @@ load_prompts(void)
 	int fd;
 	FILE *fp = open_fstream_r(prompts_file, &fd);
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
-			prompts_file, strerror(errno));
+		xerror("%s: %s\n", prompts_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1705,8 +1704,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 	char *homedir = (xargs.secure_env == 1 || xargs.secure_env_full == 1)
 		? get_home_sec_env() : getenv("HOME");
 	if (!homedir) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: Could not retrieve the "
-			"home directory\n", PROGRAM_NAME);
+		xerror("%s: Could not retrieve the home directory\n", PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -1800,8 +1798,7 @@ resolve_positional_param(char *file)
 	if (IS_FILE_URI(_path)) {
 		_path = file + 7;
 		if (stat(_path, &attr) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-				_exp_path, strerror(errno));
+			xerror("%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
 			free(_exp_path);
 			exit(errno);
 		}
@@ -1809,15 +1806,13 @@ resolve_positional_param(char *file)
 		url = 1;
 	} else {
 		if (stat(_exp_path, &attr) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-				_exp_path, strerror(errno));
+			xerror("%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
 			free(_exp_path);
 			exit(errno);
 		}
 
 		if (!S_ISDIR(attr.st_mode)) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-				_exp_path, strerror(ENOTDIR));
+			xerror("%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(ENOTDIR));
 			free(_exp_path);
 			exit(ENOTDIR);
 		}
@@ -1848,8 +1843,7 @@ open_preview_file(char *file, const int mode)
 	if (IS_FILE_URI(_path)) {
 		_path = file + 7;
 		if (stat(_path, &attr) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-				file, strerror(errno));
+			xerror("%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
 		}
 		url = 0;
@@ -1859,8 +1853,7 @@ open_preview_file(char *file, const int mode)
 	if (is_url(_path) == EXIT_FAILURE) {
 		url = 0;
 		if (*_path != '~' && stat(_path, &attr) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-				_path, strerror(errno));
+			xerror("%s: %s: %s\n", PROGRAM_NAME, _path, strerror(errno));
 			exit(errno);
 		}
 	}
@@ -2512,8 +2505,8 @@ external_arguments(int argc, char **argv)
 				*_tmp = '\0';
 				char *p = realpath(path_value, _tmp);
 				if (!p) {
-					_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
-						PROGRAM_NAME, path_value, strerror(errno));
+					xerror("%s: %s: %s\n", PROGRAM_NAME,
+						path_value, strerror(errno));
 					exit(errno);
 				}
 				xstrsncpy(path_tmp, p, PATH_MAX);
@@ -2534,8 +2527,7 @@ external_arguments(int argc, char **argv)
 			workspaces[cur_ws].path = savestring(path_tmp, strlen(path_tmp));
 		} else { /* Error changing directory */
 			if (xargs.list_and_quit == 1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-					path_tmp, strerror(errno));
+				xerror("%s: %s: %s\n", PROGRAM_NAME, path_tmp, strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 

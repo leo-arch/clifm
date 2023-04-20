@@ -29,18 +29,26 @@
 #define NO_HIST_TIME 0
 #define HIST_TIME    1
 
+/* Macros for clear_logs() and print_logs() */
+#define MSG_LOGS 1
+#define CMD_LOGS 0
+
 __BEGIN_DECLS
 
 void add_to_cmdhist(char *);
 void add_to_dirhist(const char *);
-int  clear_logs(void);
+int  clear_logs(const int);
 int  get_history(void);
 int  history_function(char **);
 int  log_cmd(void);
 void log_msg(char *, const int, const int, const int);
-int  print_logs(void);
+int  print_logs(const int);
 int  record_cmd(char *);
 int  run_history_cmd(const char *);
+
+////// TEMPORAL CODE
+void split_old_log_file(void);
+////////////////////
 
 __END_DECLS
 

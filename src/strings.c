@@ -1349,7 +1349,7 @@ eln_expand(char ***substr, const size_t i)
 	char *esc_str = escape_str(file_info[j].name);
 
 	if (!esc_str) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting file name\n"),
+		xerror(_("%s: %s: Error quoting file name\n"),
 			PROGRAM_NAME, file_info[num - 1].name);
 
 		/* Free whatever was allocated thus far */
@@ -1414,8 +1414,8 @@ expand_sel(char ***substr)
 		/* Escape selected file names and copy them into tmp array */
 		char *esc_str = escape_str(sel_elements[i].name);
 		if (!esc_str) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error quoting "
-				"file name\n"), PROGRAM_NAME, sel_elements[j].name);
+			xerror(_("%s: %s: Error quoting file name\n"),
+				PROGRAM_NAME, sel_elements[j].name);
 			/* Free elements selected thus far and all the input substrings */
 			size_t k = 0;
 			for (k = 0; k < j; k++)
@@ -2018,8 +2018,7 @@ parse_input_str(char *str)
 				strcpy(substr[i], real_path);
 				free(real_path);
 			} else if (link_ok == 1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("realpath: %s: %s\n"),
-					substr[i], strerror(errno));
+				xerror(_("realpath: %s: %s\n"), substr[i], strerror(errno));
 				size_t j;
 				for (j = 0; j <= args_n; j++)
 					free(substr[j]);
@@ -2365,9 +2364,8 @@ parse_input_str(char *str)
 						glob_cmd[j] = esc_str;
 						j++;
 					} else {
-						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error "
-							"quoting file name\n"), PROGRAM_NAME,
-							globbuf.gl_pathv[i]);
+						xerror(_("%s: %s: Error quoting file name\n"),
+							PROGRAM_NAME, globbuf.gl_pathv[i]);
 						size_t k = 0;
 						for (k = 0; k < j; k++)
 							free(glob_cmd[k]);
@@ -2440,9 +2438,8 @@ parse_input_str(char *str)
 						word_cmd[j] = esc_str;
 						j++;
 					} else {
-						_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error "
-							"quoting file name\n"), PROGRAM_NAME,
-							wordbuf.we_wordv[i]);
+						xerror(_("%s: %s: Error quoting file name\n"),
+							PROGRAM_NAME, wordbuf.we_wordv[i]);
 
 						size_t k = 0;
 						for (k = 0; k < j; k++)

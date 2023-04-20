@@ -272,8 +272,7 @@ run_in_foreground(pid_t pid)
 
 	/* waitpid() failed */
 	int ret = errno;
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n",
-		PROGRAM_NAME, strerror(errno));
+	xerror("%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 	return ret;
 }
 
@@ -284,8 +283,7 @@ run_in_background(pid_t pid)
 
 	if (waitpid(pid, &status, WNOHANG) == -1) {
 		int ret = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: waitpid: %s\n",
-			PROGRAM_NAME, strerror(errno));
+		xerror("%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		return ret;
 	}
 
@@ -349,8 +347,7 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	int status = 0;
 	pid_t pid = fork();
 	if (pid < 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fork: %s\n",
-			PROGRAM_NAME, strerror(errno));
+		xerror("%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		return errno;
 	} else if (pid == 0) {
 		if (bg == 0) {
@@ -546,15 +543,13 @@ _export(char *arg)
 	// and parameter substitution block. Let's deescape it
 	char *ds = dequote_str(arg, 0);
 	if (!ds) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error dequoting "
-			"argument\n"), PNL);
+		xerror(_("%s: Error dequoting argument\n"), PNL);
 		return (-1);
 	}
 
 	char *p = strchr(ds, '=');
 	if (!p || !*(p + 1)) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Empty "
-			"assignement\n"), PNL, ds);
+		xerror(_("%s: %s: Empty assignement\n"), PNL, ds);
 		free(ds);
 		return (-1);
 	}
@@ -564,8 +559,7 @@ _export(char *arg)
 	*p = '\0';
 	int ret = setenv(ds, p + 1, 1);
 	if (ret == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
-			PROGRAM_NAME, strerror(errno));
+		xerror("%s: %s\n", PROGRAM_NAME, strerror(errno));
 	}
 	*p = '=';
 
@@ -1984,8 +1978,7 @@ print_cwd(void)
 	char *buf = getcwd(p, sizeof(p));
 	if (!buf) {
 		int err = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: getcwd: %s\n",
-			PROGRAM_NAME, strerror(err));
+		xerror("%s: getcwd: %s\n", PROGRAM_NAME, strerror(err));
 		return err;
 	}
 
@@ -2215,26 +2208,14 @@ run_log_cmd(char **args)
 		return EXIT_FAILURE;
 	}
 
-	if (!args || !args[0])
-		return print_logs();
-
-	if (IS_HELP(args[0])) {
+	if (!args[0] || IS_HELP(args[0])) {
 		puts(LOG_USAGE);
 		return EXIT_SUCCESS;
 	}
 
-	if (*args[0] == 'c' && strcmp(args[0], "clear") == 0) {
-		int ret = clear_logs();
-		if (ret == EXIT_SUCCESS)
-			printf("log: Logs cleared\n");
-		return ret;
-	}
-
 	if (*args[0] == 'c' && strcmp(args[0], "cmd") == 0) {
-		if (!args[1] || !*args[1]) {
-			fprintf(stderr, "%s\n", LOG_USAGE);
-			return EXIT_FAILURE;
-		}
+		if (!args[1] || strcmp(args[1], "list") == 0)
+			return print_logs(CMD_LOGS);
 
 		if (*args[1] == 's' && strcmp(args[1], "status") == 0) {
 			printf(_("log: Command logs are %s\n"), (conf.log_cmds == 1)
@@ -2253,13 +2234,18 @@ run_log_cmd(char **args)
 			puts(_("log: Logs disabled"));
 			return EXIT_SUCCESS;
 		}
+
+		if (*args[1] == 'c' && strcmp(args[1], "clear") == 0) {
+			int ret = clear_logs(CMD_LOGS);
+			if (ret == EXIT_SUCCESS)
+				printf("log: Command logs cleared\n");
+			return ret;
+		}
 	}
 
 	if (*args[0] == 'm' && strcmp(args[0], "msg") == 0) {
-		if (!args[1] || !*args[1]) {
-			fprintf(stderr, "%s\n", LOG_USAGE);
-			return EXIT_FAILURE;
-		}
+		if (!args[1] || strcmp(args[1], "list") == 0)
+			return print_logs(MSG_LOGS);
 
 		if (*args[1] == 's' && strcmp(args[1], "status") == 0) {
 			printf(_("log: Message logs are %s\n"), (conf.log_msgs == 1)
@@ -2277,6 +2263,13 @@ run_log_cmd(char **args)
 			conf.log_msgs = 0;
 			puts(_("log: Logs disabled"));
 			return EXIT_SUCCESS;
+		}
+
+		if (*args[1] == 'c' && strcmp(args[1], "clear") == 0) {
+			int ret = clear_logs(MSG_LOGS);
+			if (ret == EXIT_SUCCESS)
+				printf(_("log: Message logs cleared\n"));
+			return ret;
 		}
 	}
 

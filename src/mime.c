@@ -300,8 +300,7 @@ get_app(const char *mime, const char *filename)
 
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
-			err_name, mime_file, strerror(errno));
+		xerror("%s: %s: %s\n", err_name, mime_file, strerror(errno));
 		return (char *)NULL;
 	}
 
@@ -383,15 +382,13 @@ get_mime(char *file)
 
 	FILE *file_fp = fopen(mime_tmp_file, "w");
 	if (!file_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n", err_name,
-			mime_tmp_file, strerror(errno));
+		xerror("%s: fopen: %s: %s\n", err_name, mime_tmp_file, strerror(errno));
 		return (char *)NULL;
 	}
 
 	FILE *file_fp_err = fopen("/dev/null", "w");
 	if (!file_fp_err) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: /dev/null: %s\n",
-			err_name, strerror(errno));
+		xerror("%s: /dev/null: %s\n", err_name, strerror(errno));
 		fclose(file_fp);
 		return (char *)NULL;
 	}
@@ -401,8 +398,7 @@ get_mime(char *file)
 
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
-			err_name, strerror(errno));
+		xerror("%s: %s\n", err_name, strerror(errno));
 		fclose(file_fp);
 		fclose(file_fp_err);
 		return (char *)NULL;
@@ -410,8 +406,7 @@ get_mime(char *file)
 
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
-			err_name, strerror(errno));
+		xerror("%s: %s\n", err_name, strerror(errno));
 		fclose(file_fp);
 		fclose(file_fp_err);
 		return (char *)NULL;
@@ -488,16 +483,14 @@ mime_import(char *file)
 	}
 
 	if (!user.home) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error getting home "
-			"directory\n"), err_name);
+		xerror(_("%s: Error getting home directory\n"), err_name);
 		return (-1);
 	}
 
 	/* Open the new mimelist file */
 	FILE *mime_fp = fopen(file, "w");
 	if (!mime_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n",
-			err_name, file, strerror(errno));
+		xerror("%s: fopen: %s: %s\n", err_name, file, strerror(errno));
 		return (-1);
 	}
 
@@ -578,8 +571,7 @@ mime_edit(char **args)
 	}
 
 	if (!mime_file || !*mime_file) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: The mimelist file name is "
-			"undefined\n", err_name);
+		xerror("%s: The mimelist file name is undefined\n", err_name);
 		return EXIT_FAILURE;
 	}
 
@@ -587,13 +579,12 @@ mime_edit(char **args)
 	struct stat a;
 	if (stat(mime_file, &a) == -1) {
 		if (create_mime_file(mime_file, 1) != EXIT_SUCCESS) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: Cannot access "
-				"the mimelist file. %s\n", err_name, strerror(ENOENT));
+			xerror("%s: Cannot access the mimelist file. %s\n",
+				err_name, strerror(ENOENT));
 			return ENOENT;
 		}
 		if (stat(mime_file, &a) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", err_name,
-				mime_file, strerror(errno));
+			xerror("%s: %s: %s\n", err_name, mime_file, strerror(errno));
 			return errno;
 		}
 	}
@@ -1182,8 +1173,7 @@ run_cmd_noargs(char *arg, char *name)
 	if (ret == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
-		err_name, arg, strerror(ret));
+	xerror("%s: %s: %s\n", err_name, arg, strerror(ret));
 	return EXIT_FAILURE;
 }
 
@@ -1574,14 +1564,13 @@ mime_info(char *arg, char **fpath, char **deq)
 	}
 
 	if (!*fpath) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", err_name, arg,
-		    (is_number(arg) == 1) ? _("No such ELN") : strerror(errno));
+		xerror("%s: %s: %s\n", err_name, arg, (is_number(arg) == 1)
+			? _("No such ELN") : strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (access(*fpath, R_OK) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
-			err_name, *fpath, strerror(errno));
+		xerror("%s: %s: %s\n", err_name, *fpath, strerror(errno));
 		free(*fpath);
 		return EXIT_FAILURE;
 	}
@@ -1611,15 +1600,13 @@ get_open_file_path(char **args, char **fpath, char **deq)
 	if (!*fpath) {
 		*fpath = realpath(f, NULL);
 		if (!*fpath) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
-				err_name, f, strerror(errno));
+			xerror("%s: %s: %s\n", err_name, f, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
 
 	if (xargs.preview == 0 && access(*fpath, R_OK) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n",
-			err_name, *fpath, strerror(errno));
+		xerror("%s: %s: %s\n", err_name, *fpath, strerror(errno));
 		free(*fpath);
 		return EXIT_FAILURE;
 	}
@@ -1669,8 +1656,7 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 static int
 print_error_no_mime(char **fpath)
 {
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error getting mime-type\n"),
-		err_name);
+	xerror(_("%s: Error getting mime-type\n"), err_name);
 	free(*fpath);
 	return EXIT_FAILURE;
 }
@@ -1721,8 +1707,7 @@ check_file_cmd(void)
 {
 	char *p = get_cmd_path("file");
 	if (!p) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: file: Command not "
-			"found\n"), err_name);
+		xerror(_("%s: file: Command not found\n"), err_name);
 		return EXIT_FAILURE;
 	}
 
@@ -1772,8 +1757,7 @@ mime_open(char **args)
 	}
 
 	if (!file_path) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s\n",
-			args[file_index], strerror(errno));
+		xerror("%s: %s\n", args[file_index], strerror(errno));
 		return EXIT_FAILURE;
 	}
 

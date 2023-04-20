@@ -2752,9 +2752,10 @@ options_generator(const char *text, int state)
 	/* log */
 	} else if (w == 3 && *l == 'l' && (strncmp(l, "log msg ", 8) == 0
 	|| strncmp(l, "log cmd ", 8) == 0) ) {
-		_opts[0] = "on"; _opts[1] = "off"; _opts[2] = "status"; _opts[3] = NULL;
+		_opts[0] = "list"; _opts[1] = "on"; _opts[2] = "off";
+		_opts[3] = "status"; _opts[4] = "clear"; _opts[5] = NULL;
 	} else if (w == 2 && *l == 'l' && strncmp(l, "log ", 4) == 0) {
-		_opts[0] = "cmd"; _opts[1] = "msg"; _opts[2] = "clear"; _opts[3] = NULL;
+		_opts[0] = "cmd"; _opts[1] = "msg"; _opts[2] = NULL;
 
 #ifndef _NO_PROFILES
 	/* pf */

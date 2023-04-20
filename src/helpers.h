@@ -576,6 +576,8 @@ extern int watch;
 #endif /* (__linux || __CYGWIN__) && _BE_POSIX */
 
 //#define xerror(format, ...) _err(ERR_NO_STORE, NOPRINT_PROMPT, (format), __VA_ARGS__)
+/* Log the message and print it to STDOUT, but do not store it into the
+ * messages array. */
 #define xerror(...) _err(ERR_NO_STORE, NOPRINT_PROMPT, __VA_ARGS__)
 
 #define ENTRY_N 64
@@ -1414,6 +1416,7 @@ extern char
 	*alt_profile,
 	*bin_name,
 	*bm_file,
+	*cmds_log_file,
 	*colors_dir,
 	*config_dir,
 	*config_dir_gral,
@@ -1428,8 +1431,8 @@ extern char
 	*kbinds_file,
 	*jump_suggestion,
 	*last_cmd,
-	*log_file,
 	*mime_file,
+	*msgs_log_file,
 	*pinned_dir,
 	*plugins_dir,
 	*profile_file,

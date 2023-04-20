@@ -413,8 +413,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	int exit_status = open_file(f);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "bleach: %s: %s\n",
-			f, strerror(errno));
+		xerror("bleach: %s: %s\n", f, strerror(errno));
 		if (unlinkat(fd, f, 0) == -1)
 			_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
 		close_fstream(fp, fd);
@@ -535,8 +534,7 @@ bleach_files(char **names)
 	for (; names[i]; i++) {
 		char *dstr = dequote_str(names[i], 0);
 		if (!dstr) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bleach: %s: Error "
-				"dequoting file name\n"), names[i]);
+			xerror(_("bleach: %s: Error dequoting file name\n"), names[i]);
 			continue;
 		}
 		strcpy(names[i], dstr);
@@ -672,8 +670,7 @@ CONFIRM:
 			}
 
 			if (renameat(AT_FDCWD, o, AT_FDCWD, r) == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "bleach: renameat: %s: %s\n",
-					o, strerror(errno));
+				xerror("bleach: renameat: %s: %s\n", o, strerror(errno));
 				total_rename--;
 				exit_status = EXIT_FAILURE;
 			}

@@ -269,8 +269,7 @@ switch_workspace(int tmp_ws)
 		    strlen(workspaces[cur_ws].path));
 	} else {
 		if (access(workspaces[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "ws: %s: %s\n",
-				workspaces[tmp_ws].path, strerror(errno));
+			xerror("ws: %s: %s\n", workspaces[tmp_ws].path, strerror(errno));
 			free(workspaces[tmp_ws].path);
 			workspaces[tmp_ws].path = savestring(workspaces[cur_ws].path,
 				strlen(workspaces[cur_ws].path));
@@ -278,8 +277,7 @@ switch_workspace(int tmp_ws)
 	}
 
 	if (xchdir(workspaces[tmp_ws].path, SET_TITLE) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "ws: %s: %s\n",
-			workspaces[tmp_ws].path, strerror(errno));
+		xerror("ws: %s: %s\n", workspaces[tmp_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -549,16 +547,14 @@ static int
 backdir_directory(char *dir, const char *str)
 {
 	if (!dir) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bd: %s: Error dequoting "
-			"string\n"), str);
+		xerror(_("bd: %s: Error dequoting string\n"), str);
 		return EXIT_FAILURE;
 	}
 
 	if (*dir == '~') {
 		char *exp_path = tilde_expand(dir);
 		if (!exp_path) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bd: %s: Error "
-				"expanding tilde\n"), dir);
+			xerror(_("bd: %s: Error expanding tilde\n"), dir);
 			return EXIT_FAILURE;
 		}
 		dir = exp_path;
@@ -724,15 +720,14 @@ go_home(const int cd_flag)
 {
 	if (!user.home) {
 		if (cd_flag == CD_PRINT_ERROR)
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("cd: Home directory not found\n"));
+			xerror("%s\n", _("cd: Home directory not found"));
 		return ENOENT;
 	}
 
 	if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
 		int err = errno;
 		if (cd_flag == CD_PRINT_ERROR)
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n",
-				user.home, strerror(err));
+			xerror("cd: %s: %s\n", user.home, strerror(err));
 		return err;
 	}
 
@@ -768,8 +763,7 @@ change_to_path(char *new_path, const int cd_flag)
 //	char *q = realpath(p ? p : new_path, NULL);
 	if (!q) {
 		if (cd_flag == CD_PRINT_ERROR) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("cd: %s: Error normalizing "
-				"path\n"), new_path);
+			xerror(_("cd: %s: Error normalizing path\n"), new_path);
 		}
 		free(p);
 		return EXIT_FAILURE;
@@ -779,8 +773,7 @@ change_to_path(char *new_path, const int cd_flag)
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
 		int err = errno;
 		if (cd_flag == CD_PRINT_ERROR) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n", new_path,
-				strerror(err));
+			xerror("cd: %s: %s\n", new_path, strerror(err));
 		}
 		free(q);
 		/* Most shells return 1 in case of cd error. However, 1, as a general
@@ -961,8 +954,7 @@ change_to_dirhist_num(int n)
 
 	int ret = xchdir(old_pwd[n], SET_TITLE);
 	if (ret != 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "history: %s: %s\n",
-			old_pwd[n], strerror(errno));
+		xerror("history: %s: %s\n", old_pwd[n], strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1056,8 +1048,7 @@ back_function(char **args)
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
 
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n",
-	    old_pwd[dirhist_cur_index], strerror(errno));
+	xerror("cd: %s: %s\n", old_pwd[dirhist_cur_index], strerror(errno));
 
 	/* Invalidate this entry */
 	*old_pwd[dirhist_cur_index] = _ESC;
@@ -1098,8 +1089,7 @@ forth_function(char **args)
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS)
 		return set_path(old_pwd[dirhist_cur_index]);
 
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "cd: %s: %s\n",
-		old_pwd[dirhist_cur_index], strerror(errno));
+	xerror("cd: %s: %s\n", old_pwd[dirhist_cur_index], strerror(errno));
 
 	/* Invalidate this entry */
 	*old_pwd[dirhist_cur_index] = _ESC;

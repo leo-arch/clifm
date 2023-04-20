@@ -71,8 +71,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		char *p = get_cmd_path(s1);
 		if (!p) { /* S1 is neither a directory nor a valid application */
 			int ec = stat_ret != -1 ? ENOTDIR : ENOENT;
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "rr: %s: %s\n", s1,
-				strerror(ec));
+			xerror("rr: %s: %s\n", s1, strerror(ec));
 			return ec;
 		}
 		/* S1 is an application name. TARGET defaults to CWD */
@@ -98,7 +97,7 @@ parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 		return EXIT_SUCCESS;
 	}
 	/* S2 is not a valid application name */
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "rr: %s: %s\n", s2, strerror(ENOENT));
+	xerror("rr: %s: %s\n", s2, strerror(ENOENT));
 	return ENOENT;
 }
 
@@ -113,8 +112,7 @@ create_tmp_file(char **file, int *fd)
 	errno = 0;
 	*fd = mkstemp(*file);
 	if (*fd == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "rr: mkstemp: %s: %s\n",
-			*file, strerror(errno));
+		xerror("rr: mkstemp: %s: %s\n", *file, strerror(errno));
 		free(*file);
 		return EXIT_FAILURE;
 	}
@@ -183,8 +181,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 		*n = scandir(target, a, NULL, alphasort);
 		if (*n == -1) {
 			int tmp_err = errno;
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "rr: %s: %s", target,
-				strerror(errno));
+			xerror("rr: %s: %s", target, strerror(errno));
 			fclose(fp);
 			return tmp_err;
 		}
@@ -218,8 +215,7 @@ open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 		if (exit_status == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
 
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("rr: %s: Cannot open file\n"),
-			tmp_file);
+		xerror(_("rr: %s: Cannot open file\n"), tmp_file);
 
 		size_t i;
 		for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
@@ -635,15 +631,13 @@ toggle_exec(const char *file, mode_t mode)
 
 	int fd = open(file, O_WRONLY);
 	if (fd == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "xchmod: %s: %s\n", file,
-			strerror(errno));
+		xerror("xchmod: %s: %s\n", file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (fchmod(fd, mode) == -1) {
 		close(fd);
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "xchmod: %s: %s\n", file,
-			strerror(errno));
+		xerror("xchmod: %s: %s\n", file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -672,8 +666,7 @@ get_dup_file_dest_dir(void)
 			return (char *)NULL;
 		}
 		if (access(dir , R_OK | W_OK | X_OK) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "dup: %s: %s\n",	dir,
-				strerror(errno));
+			xerror("dup: %s: %s\n",	dir, strerror(errno));
 			free(dir);
 			dir = (char *)NULL;
 			continue;
@@ -712,8 +705,7 @@ dup_file(char **cmd)
 		if (strchr(source, '\\')) {
 			char *deq_str = dequote_str(source, 0);
 			if (!deq_str) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "dup: %s: Error dequoting "
-					"file name\n", source);
+				xerror("dup: %s: Error dequoting file name\n", source);
 				continue;
 			}
 			strcpy(source, deq_str);
@@ -1016,8 +1008,7 @@ open_function(char **cmd)
 		if (strchr(cmd[1], '\\')) {
 			char *deq_path = dequote_str(cmd[1], 0);
 			if (!deq_path) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("open: %s: Error "
-					"dequoting filename\n"), cmd[1]);
+				xerror(_("open: %s: Error dequoting filename\n"), cmd[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -1031,8 +1022,7 @@ open_function(char **cmd)
 	/* Check file existence */
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "open: %s: %s\n", cmd[1],
-			strerror(errno));
+		xerror("open: %s: %s\n", cmd[1], strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1161,8 +1151,7 @@ edit_link(char *link)
 	if (strchr(link, '\\')) {
 		char *tmp = dequote_str(link, 0);
 		if (!tmp) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("le: %s: Error dequoting "
-				"file\n"), link);
+			xerror(_("le: %s: Error dequoting file\n"), link);
 			return EXIT_FAILURE;
 		}
 
@@ -1177,7 +1166,7 @@ edit_link(char *link)
 	/* Check we have a valid symbolic link */
 	struct stat attr;
 	if (lstat(link, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "le: %s: %s\n", link, strerror(errno));
+		xerror("le: %s: %s\n", link, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1232,8 +1221,7 @@ edit_link(char *link)
 	if (strchr(new_path, '\\')) {
 		char *tmp = dequote_str(new_path, 0);
 		if (!tmp) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("le: %s: Error dequoting "
-				"file\n"), new_path);
+			xerror(_("le: %s: Error dequoting file\n"), new_path);
 			free(new_path);
 			return EXIT_FAILURE;
 		}
@@ -1526,14 +1514,12 @@ remove_file(char **args)
 					if (S_ISDIR(a.st_mode))
 						dirs = 1;
 				} else {
-					_err(ERR_NO_STORE, NOPRINT_PROMPT, "r: %s: %s\n",
-						tmp, strerror(errno));
+					xerror("r: %s: %s\n", tmp, strerror(errno));
 					errs++;
 				}
 				free(tmp);
 			} else {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "r: %s: Error dequoting "
-					"file name\n", args[i]);
+				xerror("r: %s: Error dequoting file name\n", args[i]);
 				continue;
 			}
 		} else {
@@ -1543,8 +1529,7 @@ remove_file(char **args)
 				if (S_ISDIR(a.st_mode))
 					dirs = 1;
 			} else {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "r: %s: %s\n",
-					args[i], strerror(errno));
+				xerror("r: %s: %s\n", args[i], strerror(errno));
 				errs++;
 			}
 		}
@@ -1668,8 +1653,7 @@ bulk_rename(char **args)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, _("br: %s: Error "
-					"dequoting file name\n"), args[i]);
+				xerror(_("br: %s: Error dequoting file name\n"), args[i]);
 				continue;
 			}
 			strcpy(args[i], deq_file);
@@ -1681,8 +1665,7 @@ bulk_rename(char **args)
 		&& args[i][2] == '/') ) ) {
 			char *p = realpath(args[i], NULL);
 			if (!p) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "br: %s: %s\n", args[i],
-					strerror(errno));
+				xerror("br: %s: %s\n", args[i], strerror(errno));
 				continue;
 			}
 			free(args[i]);
@@ -1732,8 +1715,8 @@ bulk_rename(char **args)
 	exit_status = open_file(bulk_file);
 	open_in_foreground = 0;
 	if (exit_status != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "br: %s\n",
-			errno != 0 ? strerror(errno) : "Error opening temporary file");
+		xerror("br: %s\n", errno != 0
+			? strerror(errno) : "Error opening temporary file");
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
 				bulk_file, strerror(errno));
@@ -1923,8 +1906,7 @@ export(char **filenames, int open)
 
 	int fd = mkstemp(tmp_file);
 	if (fd == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "exp: %s: %s\n",
-			tmp_file, strerror(errno));
+		xerror("exp: %s: %s\n", tmp_file, strerror(errno));
 		free(tmp_file);
 		return (char *)NULL;
 	}
@@ -1933,8 +1915,7 @@ export(char **filenames, int open)
 #if defined(__HAIKU__) || defined(__sun)
 	FILE *fp = fopen(tmp_file, "w");
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "exp: %s: %s\n",
-			tmp_file, strerror(errno));
+		xerror("exp: %s: %s\n", tmp_file, strerror(errno));
 		free(tmp_file);
 		return (char *)NULL;
 	}
@@ -2031,8 +2012,8 @@ batch_link(char **args)
 		char *ptr = strrchr(tmp, '/');
 		if (symlinkat(args[i], AT_FDCWD, (ptr && ++ptr) ? ptr : tmp) == -1) {
 			exit_status = errno;
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("bl: symlinkat: %s: Cannot "
-				"create symlink: %s\n"), ptr ? ptr : tmp, strerror(errno));
+			xerror(_("bl: symlinkat: %s: Cannot create symlink: %s\n"),
+				ptr ? ptr : tmp, strerror(errno));
 		}
 	}
 

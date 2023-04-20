@@ -317,8 +317,7 @@ normalize_path(char *src, size_t src_len)
 	if (strchr(src, '\\')) {
 		tmp = dequote_str(src, 0);
 		if (!tmp) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error deescaping "
-				"string\n"), PROGRAM_NAME, src);
+			xerror(_("%s: %s: Error deescaping string\n"), PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
 		size_t tlen = strlen(tmp);
@@ -333,8 +332,7 @@ normalize_path(char *src, size_t src_len)
 	if (*src == '~') {
 		tmp = tilde_expand(src);
 		if (!tmp) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error expanding "
-				"tilde\n"), PROGRAM_NAME, src);
+			xerror(_("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, src);
 			return (char *)NULL;
 		}
 		size_t tlen = strlen(tmp);
@@ -1049,8 +1047,7 @@ xgetchar(void)
 	char c = 0;
 
 	if (tcgetattr(STDIN_FILENO, &oldt) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: tcgetattr: %s\n",
-			PROGRAM_NAME, strerror(errno));
+		xerror("%s: tcgetattr: %s\n", PROGRAM_NAME, strerror(errno));
 		return 0;
 	}
 	newt = oldt;

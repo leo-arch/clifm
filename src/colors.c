@@ -1539,8 +1539,8 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 	FILE *fp_colors = fopen(colorscheme_file, "r");
 	if (!fp_colors) {
 		if (!env) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: colors: %s: %s\n",
-				PROGRAM_NAME, colorscheme_file, strerror(errno));
+			xerror("%s: colors: %s: %s\n", PROGRAM_NAME,
+				colorscheme_file, strerror(errno));
 			return EXIT_FAILURE;
 		} else {
 			_err('w', PRINT_PROMPT, _("%s: colors: %s: No such color scheme. "

@@ -1747,8 +1747,8 @@ list_dir_light(void)
 	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			workspaces[cur_ws].path, strerror(errno));
+		xerror("%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
+			strerror(errno));
 		close_dir = 0;
 		goto END;
 	}
@@ -2196,8 +2196,8 @@ list_dir(void)
 	char *largest_name = (char *)NULL, *largest_color = (char *)NULL;
 
 	if ((dir = opendir(workspaces[cur_ws].path)) == NULL) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			workspaces[cur_ws].path, strerror(errno));
+		xerror("%s: %s: %s\n", PROGRAM_NAME, workspaces[cur_ws].path,
+			strerror(errno));
 		close_dir = 0;
 		goto END;
 	}

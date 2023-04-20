@@ -320,8 +320,7 @@ list_mounted_devs(int mode)
 {
 	FILE *fp = fopen("/proc/mounts", "r");
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "mp: fopen: /proc/mounts: %s\n",
-			strerror(errno));
+		xerror("mp: fopen: /proc/mounts: %s\n", strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -443,8 +442,7 @@ mount_dev(int n)
 	/* Recover the mountpoint used by the mounting command */
 	char *p = strstr(out_line, " at ");
 	if (!p || *(p + 4) != '/') {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error retrieving "
-			"mountpoint\n"), PROGRAM_NAME);
+		xerror(_("%s: Error retrieving mountpoint\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 	p += 4;
@@ -679,8 +677,7 @@ media_menu(int mode)
 #endif /* HAVE_PROC_MOUNTS */
 
 	if (xchdir(media[n].mnt, SET_TITLE) != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			media[n].mnt, strerror(errno));
+		xerror("%s: %s: %s\n", PROGRAM_NAME, media[n].mnt, strerror(errno));
 		exit_status = EXIT_FAILURE;
 		goto EXIT;
 	}

@@ -1071,8 +1071,7 @@ set_prompt(char *name)
 
 	char *p = dequote_str(name, 0);
 	if (!p) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: Error dequoting "
-			"string\n", name);
+		xerror(_("prompt: %s: Error dequoting string\n"), name);
 		return EXIT_FAILURE;
 	}
 
@@ -1111,14 +1110,13 @@ edit_prompts_file(char *app)
 	}
 
 	if (!prompts_file || !*prompts_file) {
-		fprintf(stderr, "prompt: No prompts file found\n");
+		fprintf(stderr, _("prompt: No prompts file found\n"));
 		return EXIT_FAILURE;
 	}
 
 	struct stat a;
 	if (stat(prompts_file, &a) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "prompt: %s: %s\n",
-			prompts_file, strerror(errno));
+		xerror("prompt: %s: %s\n", prompts_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

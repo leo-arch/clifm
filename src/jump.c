@@ -273,8 +273,7 @@ edit_jumpdb(char *app)
 
 	struct stat attr;
 	if (stat(jump_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "jump: %s: %s\n",
-			jump_file, strerror(errno));
+		xerror("jump: %s: %s\n", jump_file, strerror(errno));
 		free(jump_file);
 		return EXIT_FAILURE;
 	}

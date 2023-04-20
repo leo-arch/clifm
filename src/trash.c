@@ -148,8 +148,7 @@ wx_parent_check(char *file)
 			parent[0] = '/';
 			parent[1] = '\0';
 		} else {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Error getting "
-				"parent directory\n"), file);
+			xerror(_("trash: %s: Error getting parent directory\n"), file);
 			return EXIT_FAILURE;
 		}
 	}
@@ -245,8 +244,8 @@ wx_parent_check(char *file)
 
 	/* DO NOT TRASH BLOCK AND CHAR DEVICES */
 	default:
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s (%s): Unsupported "
-			"file type\n"), file, S_ISBLK(attr.st_mode) ? "Block device"
+		xerror(_("trash: %s (%s): Unsupported file type\n"),
+			file, S_ISBLK(attr.st_mode) ? "Block device"
 		    : (S_ISCHR(attr.st_mode) ? _("Character device")
 		    : _("Unknown file type")));
 		exit_status = EXIT_FAILURE;
@@ -303,8 +302,8 @@ trash_clear(void)
 		free(file2);
 
 		if (ret != EXIT_SUCCESS) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Error removing "
-				"trashed file\n"),  trash_files[i]->d_name);
+			xerror(_("trash: %s: Error removing trashed file\n"),
+				trash_files[i]->d_name);
 			exit_status = ret;
 			/* If there is at least one error, return error */
 		}
@@ -336,8 +335,7 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 	/* Check file's existence */
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "trash: %s: %s\n",
-			file, strerror(errno));
+		xerror("trash: %s: %s\n", file, strerror(errno));
 		return errno;
 	}
 
@@ -361,8 +359,7 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 	 * current date and time */
 	char *filename = strrchr(*file != '/' ? full_path : file, '/');
 	if (!filename || !*(++filename)) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Error getting "
-			"file name\n"), file);
+		xerror(_("trash: %s: Error getting file name\n"), file);
 		return EXIT_FAILURE;
 	}
 
@@ -403,8 +400,7 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 	dest = (char *)NULL;
 
 	if (ret != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Failed moving "
-			"file to Trash\n"), file);
+		xerror(_("trash: %s: Failed moving file to Trash\n"), file);
 		free(file_suffix);
 		return ret;
 	}
@@ -417,8 +413,7 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 
 	FILE *info_fp = fopen(info_file, "w");
 	if (!info_fp) { /* If error creating the info file */
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "trash: %s: %s\n",
-			info_file, strerror(errno));
+		xerror("trash: %s: %s\n", info_file, strerror(errno));
 		/* Remove the trash file */
 		char *trash_file = (char *)NULL;
 		trash_file = (char *)xnmalloc(strlen(trash_files_dir)
@@ -429,9 +424,8 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
 		free(trash_file);
 		if (ret != EXIT_SUCCESS) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s/%s: Failed "
-				"removing trash file\nTry removing it manually\n"),
-				trash_files_dir, file_suffix);
+			xerror(_("trash: %s/%s: Failed removing trash file\nTry "
+				"removing it manually\n"), trash_files_dir, file_suffix);
 		}
 
 		free(file_suffix);
@@ -450,8 +444,7 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 			url_str = url_encode(file);
 
 		if (!url_str) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Failed "
-				"encoding path\n"), file);
+			xerror(_("trash: %s: Failed encoding path\n"), file);
 
 			fclose(info_fp);
 			free(info_file);
@@ -484,14 +477,12 @@ remove_file_from_trash(char *name)
 	int err = 0, err_file = 0, err_info = 0;
 	struct stat a;
 	if (stat(rm_file, &a) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "trash: %s: %s\n",
-			rm_file, strerror(errno));
+		xerror("trash: %s: %s\n", rm_file, strerror(errno));
 		err_file = err = errno;
 	}
 	if (stat(rm_info, &a) == -1) {
 		if (err_file == EXIT_SUCCESS)
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "trash: %s: %s\n",
-				rm_info, strerror(errno));
+			xerror("trash: %s: %s\n", rm_info, strerror(errno));
 		err_info = err = errno;
 	}
 
@@ -617,9 +608,8 @@ remove_from_trash(char **args)
 			for (j = 0; j < (size_t)files_n; j++) {
 				ret = remove_file_from_trash(trash_files[j]->d_name);
 				if (ret != EXIT_SUCCESS) {
-					_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Cannot "
-						"remove file from the trash can\n"),
-						trash_files[j]->d_name);
+					xerror(_("trash: %s: Cannot remove file from the "
+						"trash can\n"), trash_files[j]->d_name);
 					exit_status = EXIT_FAILURE;
 				} else {
 					removed_files++;
@@ -672,8 +662,8 @@ remove_from_trash(char **args)
 
 		ret = remove_file_from_trash(trash_files[rm_num - 1]->d_name);
 		if (ret != EXIT_SUCCESS) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Cannot remove "
-				"file from the trash can\n"), trash_files[rm_num - 1]->d_name);
+			xerror(_("trash: %s: Cannot remove file from the trash can\n"),
+				trash_files[rm_num - 1]->d_name);
 			exit_status = EXIT_FAILURE;
 		} else {
 			removed_files++;
@@ -709,8 +699,8 @@ untrash_element(char *file)
 	FILE *info_fp;
 	info_fp = fopen(undel_info, "r");
 	if (!info_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("undel: Info file for '%s' not "
-			"found. Try restoring the file manually\n"), file);
+		xerror(_("undel: Info file for '%s' not found. Try restoring "
+			"the file manually\n"), file);
 		return errno;
 	}
 
@@ -747,8 +737,7 @@ untrash_element(char *file)
 	/* Decode original path's URL format */
 	char *url_decoded = url_decode(orig_path);
 	if (!url_decoded) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("undel: %s: Error decoding "
-			"original path\n"), orig_path);
+		xerror(_("undel: %s: Error decoding original path\n"), orig_path);
 		free(orig_path);
 		return EXIT_FAILURE;
 	}
@@ -774,8 +763,7 @@ untrash_element(char *file)
 	}
 
 	if (access(parent, F_OK | X_OK | W_OK) != 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "undel: %s: %s\n",
-			parent, strerror(errno));
+		xerror("undel: %s: %s\n", parent, strerror(errno));
 		free(parent);
 		free(url_decoded);
 		return errno;
@@ -792,8 +780,7 @@ untrash_element(char *file)
 
 	int ret = renameat(AT_FDCWD, undel_file, AT_FDCWD, url_decoded);
 	if (ret == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "undel: %s: %s\n",
-			undel_file, strerror(errno));
+		xerror("undel: %s: %s\n", undel_file, strerror(errno));
 		free(url_decoded);
 		return errno;
 	}
@@ -803,8 +790,7 @@ untrash_element(char *file)
 	char *cmd[] = {"rm", "-rf", "--", undel_info, NULL};
 	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	if (ret != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("undel: %s: Error removing "
-			"info file\n"), undel_info);
+		xerror(_("undel: %s: Error removing info file\n"), undel_info);
 		return ret;
 	}
 
@@ -1024,7 +1010,7 @@ list_trashed_files(void)
 			? xalphasort : alphasort_insensitive);
 
 	if (files_n == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "trash: %s\n", strerror(errno));
+		xerror("trash: %s\n", strerror(errno));
 		return EXIT_FAILURE;
 	}
 	if (files_n <= 0) {
@@ -1087,16 +1073,14 @@ check_trash_file(char *deq_file)
 
 	struct stat a;
 	if (lstat(deq_file, &a) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: %s\n"),
-			deq_file, strerror(errno));
+		xerror(_("trash: %s: %s\n"), deq_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* Do not trash block or character devices */
 	if (S_ISBLK(a.st_mode) || S_ISCHR(a.st_mode)) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("trash: %s: Cannot trash a "
-			"%s device\n"), deq_file, S_ISCHR(a.st_mode)
-			? _("character") : _("block"));
+		xerror(_("trash: %s: Cannot trash a %s device\n"), deq_file,
+			S_ISCHR(a.st_mode) ? _("character") : _("block"));
 		return EXIT_FAILURE;
 	}
 
@@ -1141,8 +1125,7 @@ trash_files_args(char **args)
 	for (i = 1; args[i]; i++) {
 		char *deq_file = dequote_str(args[i], 0);
 		if (!deq_file) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "trash: %s: Error dequoting "
-				"file\n", args[i]);
+			xerror("trash: %s: Error dequoting file\n", args[i]);
 			continue;
 		}
 

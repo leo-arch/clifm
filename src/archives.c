@@ -262,8 +262,7 @@ static int
 cd_to_mountpoint(char *file, char *mountpoint)
 {
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n",
-			mountpoint, strerror(errno));
+		xerror("archiver: %s: %s\n", mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -384,8 +383,7 @@ create_iso(char *in_file, char *out_file)
 {
 	struct stat attr;
 	if (lstat(in_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n",
-			in_file, strerror(errno));
+		xerror("archiver: %s: %s\n", in_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -402,8 +400,8 @@ create_iso(char *in_file, char *out_file)
 		return create_iso_from_block_dev(in_file, out_file);
 
 	/* If any other file format */
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: Invalid file format. "
-		"File should be either a directory or a block device\n", in_file);
+	xerror(_("archiver: %s: Invalid file format. File should be either "
+		"a directory or a block device\n"), in_file);
 	return EXIT_FAILURE;
 }
 
@@ -447,15 +445,13 @@ check_iso(char *file)
 	int fd;
 	FILE *fp = open_fstream_w(iso_tmp_file, &fd);
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n",
-			iso_tmp_file, strerror(errno));
+		xerror("archiver: %s: %s\n", iso_tmp_file, strerror(errno));
 		return (-1);
 	}
 
 	FILE *fpp = fopen("/dev/null", "w");
 	if (!fpp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: /dev/null: %s\n",
-			strerror(errno));
+		xerror("archiver: /dev/null: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		return (-1);
 	}
@@ -465,7 +461,7 @@ check_iso(char *file)
 
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s\n", strerror(errno));
+		xerror("archiver: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		fclose(fpp);
 		return (-1);
@@ -473,7 +469,7 @@ check_iso(char *file)
 
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s\n", strerror(errno));
+		xerror("archiver: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		fclose(fpp);
 		return (-1);
@@ -573,15 +569,13 @@ is_compressed(char *file, int test_iso)
 	int fd;
 	FILE *fp = open_fstream_w(archiver_tmp_file, &fd);
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s: %s\n",
-			archiver_tmp_file, strerror(errno));
+		xerror("archiver: %s: %s\n", archiver_tmp_file, strerror(errno));
 		return (-1);
 	}
 
 	FILE *fpp = fopen("/dev/null", "w");
 	if (!fpp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: /dev/null: %s\n",
-			strerror(errno));
+		xerror("archiver: /dev/null: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		return (-1);
 	}
@@ -591,7 +585,7 @@ is_compressed(char *file, int test_iso)
 
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s\n", strerror(errno));
+		xerror("archiver: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		fclose(fpp);
 		return (-1);
@@ -599,7 +593,7 @@ is_compressed(char *file, int test_iso)
 
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "archiver: %s\n", strerror(errno));
+		xerror("archiver: %s\n", strerror(errno));
 		close_fstream(fp, fd);
 		fclose(fpp);
 		return -1;
@@ -721,8 +715,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	int exit_status = EXIT_SUCCESS;
 	char *deq_file = dequote_str(in_file, 0);
 	if (!deq_file) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("archiver: %s: Error "
-			"dequoting file name\n"), in_file);
+		xerror(_("archiver: %s: Error dequoting file name\n"), in_file);
 		return EXIT_FAILURE;
 	}
 
@@ -918,8 +911,7 @@ check_not_compressed(char **args)
 		}
 
 		if (is_compressed(args[i], 1) != 0) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT,
-				_("archiver: %s: Not an archive/compressed file\n"), args[i]);
+			xerror(_("archiver: %s: Not an archive/compressed file\n"), args[i]);
 			return 1;
 		}
 	}

@@ -40,6 +40,66 @@
 #include "messages.h"
 #include "file_operations.h"
 
+////// TEMPORAL CODE
+/* Split the old log file: messages go into the message logs file, and commands
+ * into the command logs file. */
+void
+split_old_log_file(void)
+{
+	/* 1) Create the old file path */
+	char *new_file = msgs_log_file ? msgs_log_file : cmds_log_file;
+	if (!new_file)
+		return;
+
+	char *p = strrchr(new_file, '/');
+	if (!p)
+		return;
+
+	*p = '\0';
+	char old_file[PATH_MAX];
+	snprintf(old_file, sizeof(old_file), "%s/log.clifm", new_file);
+	*p = '/';
+
+	/* 2) Open the 3 files */
+	FILE *old = fopen(old_file, "r");
+	if (!old)
+		return;
+
+	FILE *msg = fopen(msgs_log_file, "a");
+	if (!msg) {
+		fclose(old);
+		return;
+	}
+
+	FILE *cmd = fopen(cmds_log_file, "a");
+	if (!cmd) {
+		fclose(msg);
+		fclose(old);
+		return;
+	}
+
+	/* 3) Read the old file and move lines to the new ones accordingly */
+	size_t line_size = 0;
+	char *line = (char *)NULL;
+
+	while (getline(&line, &line_size, old) > 0) {
+		if (!line || !*line || (*line != 'c' && *line != 'm')
+		|| line[1] != ':' || !line[2])
+			continue;
+
+		fprintf(*line == 'm' ? msg : cmd, "%s", line + 2);
+	}
+
+	free(line);
+	fclose(old);
+	fclose(msg);
+	fclose(cmd);
+
+	/* 4) Remove the old file */
+	remove(old_file);
+}
+////////////////////
+
 /* Return a string with the current date.
  * Used to compose log entries. */
 static char *
@@ -58,13 +118,15 @@ get_date(void)
 	return date;
 }
 
-/* Print available logs */
+/* Print available logs, for messages, if MSG is 1, or for commands otherwise. */
 int
-print_logs(void)
+print_logs(const int flag)
 {
-	FILE *log_fp = fopen(log_file, "r");
+	char *file = flag == MSG_LOGS ? msgs_log_file : cmds_log_file;
+
+	FILE *log_fp = fopen(file, "r");
 	if (!log_fp) {
-		_err(0, NOPRINT_PROMPT, "log: %s: %s\n", log_file, strerror(errno));
+		_err(0, NOPRINT_PROMPT, "log: %s: %s\n", file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -79,15 +141,48 @@ print_logs(void)
 	return EXIT_SUCCESS;
 }
 
-/* Clear all logs: remove the log file, but then log this command itself:
- * "log clear". */
-int
-clear_logs(void)
+static int
+gen_file(char *file)
 {
-	if (log_file && remove(log_file) == -1) {
-		xerror("log: %s: %s\n", log_file, strerror(errno));
+	int fd = 0;
+	FILE *fp = (FILE *)NULL;
+
+	fp = open_fstream_w(file, &fd);
+	if (!fp)
+		return EXIT_FAILURE;
+
+	close_fstream(fp, fd);
+	return EXIT_SUCCESS;
+}
+
+/* Clear logs (the message logs if FLAG is CLR_MSG_LOGS, or the command logs
+ * otherwise).
+ * Delete the file, recreate it, and write the last command ("log msg/cmd clear")
+ * into the command logs file. */
+int
+clear_logs(const int flag)
+{
+	char *file = flag == MSG_LOGS ? msgs_log_file : cmds_log_file;
+
+	if (!file || !*file)
+		return EXIT_SUCCESS;
+
+	if (remove(file) == -1) {
+		xerror("log: %s: %s\n", file, strerror(errno));
 		return errno;
 	}
+
+	int ret = gen_file(file);
+	if (ret != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	free(last_cmd);
+	last_cmd = savestring(flag == MSG_LOGS
+		? "log msg clear" : "log cmd clear", 13);
+	int bk = conf.log_cmds;
+	conf.log_cmds = 1;
+	log_cmd();
+	conf.log_cmds = bk;
 
 	return EXIT_SUCCESS;
 }
@@ -102,7 +197,7 @@ log_cmd(void)
 		return EXIT_SUCCESS;
 	}
 
-	if (config_ok == 0 || !log_file)
+	if (config_ok == 0 || !cmds_log_file)
 		return EXIT_FAILURE;
 
 	/* Construct the log line */
@@ -110,10 +205,10 @@ log_cmd(void)
 
 	size_t log_len = strlen(date ? date : "unknown")
 		+ (workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 2)
-		+ strlen(last_cmd) + 8;
+		+ strlen(last_cmd) + 6;
 
 	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
-	snprintf(full_log, log_len, "c:[%s] %s:%s\n", date ? date : "unknown",
+	snprintf(full_log, log_len, "[%s] %s:%s\n", date ? date : "unknown",
 		workspaces[cur_ws].path ? workspaces[cur_ws].path : "?", last_cmd);
 
 	free(date);
@@ -123,9 +218,9 @@ log_cmd(void)
 	/* Write the log into LOG_FILE */
 	FILE *log_fp;
 
-	log_fp = fopen(log_file, "a");
+	log_fp = fopen(cmds_log_file, "a");
 	if (!log_fp) {
-		_err('e', PRINT_PROMPT, "log: %s: %s\n", log_file, strerror(errno));
+		_err('e', PRINT_PROMPT, "log: %s: %s\n", cmds_log_file, strerror(errno));
 		free(full_log);
 		return EXIT_FAILURE;
 	}
@@ -141,12 +236,13 @@ log_cmd(void)
 static void
 write_msg_into_logfile(const char *_msg)
 {
-	FILE *msg_fp = fopen(log_file, "a");
+	FILE *msg_fp = fopen(msgs_log_file, "a");
 	if (!msg_fp) {
 		/* Do not log this error: We might enter into an infinite loop
 		 * trying to access a file that cannot be accessed. Just warn the user
 		 * and print the error to STDERR */
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, log_file, strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+			msgs_log_file, strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
 		putchar('\n');
@@ -154,7 +250,7 @@ write_msg_into_logfile(const char *_msg)
 	}
 
 	char *date = get_date();
-	fprintf(msg_fp, "m:[%s] %s", date ? date : "unknown", _msg);
+	fprintf(msg_fp, "[%s] %s", date ? date : "unknown", _msg);
 	fclose(msg_fp);
 	free(date);
 }
@@ -280,8 +376,8 @@ log_msg(char *_msg, const int print_prompt, const int logme,
 		fputs(_msg, stderr);
 	}
 
-	if (xargs.stealth_mode == 1 || config_ok == 0 || !log_file || !*log_file
-	|| logme != 1 || conf.log_msgs == 0)
+	if (xargs.stealth_mode == 1 || config_ok == 0 || !msgs_log_file
+	|| !*msgs_log_file || logme != 1 || conf.log_msgs == 0)
 		return;
 
 	write_msg_into_logfile(_msg);
@@ -299,8 +395,8 @@ save_dirhist(void)
 
 	FILE *fp = fopen(dirhist_file, "w");
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Error saving "
-			"directory history: %s\n"), PROGRAM_NAME, strerror(errno));
+		xerror(_("%s: Error saving directory history: %s\n"),
+			PROGRAM_NAME, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -329,8 +425,8 @@ append_to_dirhist_file(const char *dir_path)
 
 	FILE *fp = fopen(dirhist_file, "a");
 	if (!fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: %s: Error saving "
-			"directory entry: %s\n"), PROGRAM_NAME, dir_path, strerror(errno));
+		xerror(_("%s: %s: Error saving directory entry: %s\n"),
+			PROGRAM_NAME, dir_path, strerror(errno));
 		return;
 	}
 
@@ -400,8 +496,7 @@ edit_history(char **args)
 	struct stat attr;
 	if (stat(hist_file, &attr) == -1) {
 		int err = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "history: %s: %s\n",
-			hist_file, strerror(errno));
+		xerror("history: %s: %s\n", hist_file, strerror(errno));
 		return err;
 	}
 	time_t mtime_bfr = (time_t)attr.st_mtime;
@@ -602,8 +697,7 @@ run_hist_num(const char *cmd)
 
 	char **cmd_hist = parse_input_str(history[num - 1].cmd);
 	if (!cmd_hist) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing "
-			"history command\n"));
+		xerror("%s\n", _("history: Error parsing history command"));
 		return EXIT_FAILURE;
 	}
 
@@ -622,8 +716,7 @@ run_last_hist_cmd(void)
 
 	char **cmd_hist = parse_input_str(history[current_hist_n - 1].cmd);
 	if (!cmd_hist) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing "
-			"history command\n"));
+		xerror("%s\n", _("history: Error parsing history command"));
 		return EXIT_FAILURE;
 	}
 
@@ -656,8 +749,7 @@ run_last_lessn_hist_cmd(const char *cmd)
 		return exit_status;
 	}
 
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, _("history: Error parsing "
-		"history command\n"));
+	xerror("%s\n", _("history: Error parsing history command"));
 	return EXIT_FAILURE;
 }
 

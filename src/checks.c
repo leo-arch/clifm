@@ -199,8 +199,7 @@ check_term(void)
 {
 	char *_term = getenv("TERM");
 	if (!_term || !*_term) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: TERM environment "
-			"variable not set\n"), PROGRAM_NAME);
+		xerror(_("%s: TERM environment variable not set\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -448,8 +447,8 @@ get_sudo_path(void)
 	int ret = errno;
 
 	if (!sudo) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			p ? p : DEF_SUDO_CMD, strerror(ENOENT));
+		xerror("%s: %s: %s\n", PROGRAM_NAME, p ? p : DEF_SUDO_CMD,
+			strerror(ENOENT));
 		errno = ret;
 		return (char *)NULL;
 	}
@@ -472,8 +471,7 @@ check_immutable_bit(char *file)
 
 	fd = open(file, O_RDONLY);
 	if (fd == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "open: %s: %s\n", file,
-			strerror(errno));
+		xerror("open: %s: %s\n", file, strerror(errno));
 		return (-1);
 	}
 
@@ -482,8 +480,7 @@ check_immutable_bit(char *file)
 	close(fd);
 
 	if (ret == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "ioctl: %s: %s\n", file,
-			strerror(saved_errno));
+		xerror("ioctl: %s: %s\n", file, strerror(saved_errno));
 		return (-1);
 	}
 
@@ -890,8 +887,7 @@ check_for_alias(char **args)
 		if (!alias_comm) {
 //			args_n = 0;
 			/* The error message should have been printed by parse_input_str()
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Aliased command exited
-				with error\n"), PROGRAM_NAME); */
+			xerror(_("%s: Aliased command exited with error\n"), PROGRAM_NAME); */
 
 			flags |= FAILED_ALIAS; /* Prevent exec_cmd() from being executed */
 			return (char **)NULL;
@@ -979,8 +975,7 @@ truncate_file(char *file, const int max, const int check_dups)
 
 	int fdd = mkstemp(tmp);
 	if (fdd == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "log: %s: %s", tmp,
-			strerror(errno));
+		xerror("log: %s: %s", tmp, strerror(errno));
 		close_fstream(fp, fd);
 		free(tmp);
 		return;

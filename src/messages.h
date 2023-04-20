@@ -592,16 +592,16 @@ For information about the matching algorithm consult the manpage\n\n\
 
 #define LOG_USAGE "Manage Clifm logs\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  log [cmd, msg [on, off, status]] [clear]\n\n\
+  log [cmd, msg] [list, on, off, status, clear]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
-- Print logs\n\
-    log\n\
+- Print message logs\n\
+    log msg list (or just 'log msg')\n\
 - Enable command logs\n\
     log cmd on\n\
 - Disable message logs\n\
     log msg off\n\
-- Clear all logs\n\
-    log clear"
+- Clear message logs\n\
+    log msg clear"
 
 #define MEDIA_USAGE "List available media devices, allowing you to mount or \
 unmount them\n\

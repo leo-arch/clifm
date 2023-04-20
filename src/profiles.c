@@ -202,7 +202,8 @@ profile_set(char *prof)
 
 	if (config_ok) {
 		/* Shrink the log file if needed */
-		truncate_file(log_file, conf.max_log, 0);
+		truncate_file(msgs_log_file, conf.max_log, 0);
+		truncate_file(cmds_log_file, conf.max_log, 0);
 
 		/* Reset history */
 		if (access(hist_file, F_OK | W_OK) == 0) {
@@ -255,15 +256,14 @@ profile_set(char *prof)
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
 		if (!*cwd) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: %s\n", strerror(errno));
+			xerror("pf: %s\n", strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
 	if (xchdir(workspaces[cur_ws].path, SET_TITLE) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: %s: %s\n",
-			workspaces[cur_ws].path, strerror(errno));
+		xerror("pf: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -290,8 +290,8 @@ profile_add(char *prof)
 	}
 
 	if (!home_ok) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pf: %s: Cannot create profile: "
-			"Home directory not found\n"), prof);
+		xerror(_("pf: %s: Cannot create profile: Home directory "
+			"not found\n"), prof);
 		return EXIT_FAILURE;
 	}
 
@@ -303,7 +303,7 @@ profile_add(char *prof)
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
 	if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("pf: mkdir: %s: Error creating "
+		xerror(_("pf: mkdir: %s: Error creating "
 			"configuration directory\n"), nconfig_dir);
 		free(nconfig_dir);
 		return EXIT_FAILURE;
@@ -326,8 +326,7 @@ profile_add(char *prof)
 	FILE *hist_fp = fopen(nhist_file, "w+");
 
 	if (!hist_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "pf: fopen: %s: %s\n",
-			nhist_file, strerror(errno));
+		xerror("pf: fopen: %s: %s\n", nhist_file, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	} else {
 		/* To avoid malloc errors in read_history(), do not create

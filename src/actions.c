@@ -65,8 +65,7 @@ get_plugin_path(char *action, int *status)
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
 		if (!plugins_dir || !*plugins_dir) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("actions: Plugins "
-				"directory not defined\n"));
+			xerror("%s\n", _("actions: Plugins directory not defined"));
 			*status = EXIT_FAILURE;
 			return (char *)NULL;
 		}
@@ -90,8 +89,7 @@ get_plugin_path(char *action, int *status)
 
 	free(cmd);
 	*status = ENOENT;
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
-		action, strerror(ENOENT));
+	xerror("actions: %s: %s\n", action, strerror(ENOENT));
 	return (char *)NULL;
 }
 
@@ -131,8 +129,7 @@ run_action(char *action, char **args)
 	setenv("CLIFM_BUS", fifo_path, 1);
 
 	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
-			fifo_path, strerror(errno));
+		xerror("actions: %s: %s\n", fifo_path, strerror(errno));
 		unsetenv("CLIFM_BUS");
 		return EXIT_FAILURE;
 	}
@@ -188,8 +185,7 @@ run_action(char *action, char **args)
 		exit_status = get_exit_code(status, EXEC_FG_PROC);
 	} else {
 		exit_status = errno;
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: waitpid: %s\n",
-			strerror(errno));
+		xerror("actions: waitpid: %s\n", strerror(errno));
 	}
 
 	/* If the pipe is empty */
@@ -260,8 +256,7 @@ edit_actions(char *app)
 	/* Get actions file's current modification time */
 	struct stat attr;
 	if (stat(actions_file, &attr) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "actions: %s: %s\n",
-			actions_file, strerror(errno));
+		xerror("actions: %s: %s\n", actions_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

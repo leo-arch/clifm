@@ -70,8 +70,7 @@ save_sel(void)
 
 	if (sel_n == 0) {
 		if (unlink(sel_file) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
-				sel_file, strerror(errno));
+			xerror("sel: %s: %s\n", sel_file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 		return EXIT_SUCCESS;
@@ -188,8 +187,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 		} else {
 			ret = scandir(sel_path, &ent, skip_files, xalphasort);
 			if (ret == -1) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
-					sel_path, strerror(errno));
+				xerror("sel: %s: %s\n", sel_path, strerror(errno));
 				globfree(&gbuf);
 				return (-1);
 			}
@@ -362,8 +360,7 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 		int filesn = scandir(sel_path, &list, skip_files, xalphasort);
 
 		if (filesn == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
-				sel_path, strerror(errno));
+			xerror("sel: %s: %s\n", sel_path, strerror(errno));
 			return (-1);
 		}
 
@@ -456,8 +453,7 @@ parse_sel_params(char ***args, int *ifiletype, mode_t *filetype, int *isel_path)
 		if (*(*args)[i] == '~') {
 			char *exp_path = tilde_expand((*args)[i]);
 			if (!exp_path) {
-				_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
-					(*args)[i], strerror(errno));
+				xerror("sel: %s: %s\n", (*args)[i], strerror(errno));
 				return (char *)NULL;
 			}
 
@@ -479,15 +475,14 @@ construct_sel_path(char *sel_path)
 	xstrsncpy(tmpdir, sel_path, sizeof(tmpdir) - 1);
 
 	if (*sel_path == '.' && realpath(sel_path, tmpdir) == NULL) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
-			sel_path, strerror(errno));
+		xerror("sel: %s: %s\n", sel_path, strerror(errno));
 		return (char *)NULL;
 	}
 
 	if (*sel_path == '~') {
 		char *exp_path = tilde_expand(sel_path);
 		if (!exp_path) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, _("sel: Error expanding path\n"));
+			xerror("%s\n", _("sel: Error expanding path"));
 			return (char *)NULL;
 		}
 		strcpy(tmpdir, exp_path);
@@ -526,13 +521,13 @@ check_sel_path(char **sel_path)
 		return (char *)NULL;
 
 	if (access(dir, X_OK) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", dir, strerror(errno));
+		xerror("sel: %s: %s\n", dir, strerror(errno));
 		free(dir);
 		return (char *)NULL;
 	}
 
 	if (xchdir(dir, NO_TITLE) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n", dir, strerror(errno));
+		xerror("sel: %s: %s\n", dir, strerror(errno));
 		free(dir);
 		return (char *)NULL;
 	}
@@ -612,8 +607,7 @@ print_sel_results(const int new_sel, const char *sel_path,
 	}
 
 	if (sel_path && xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
-			workspaces[cur_ws].path, strerror(errno));
+		xerror("sel: %s: %s\n", workspaces[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -679,8 +673,7 @@ select_filename(char *arg, char *dir, int *err)
 		char *tmp = construct_sel_filename(dir, name);
 		struct stat attr;
 		if (lstat(tmp, &attr) == -1) {
-			_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
-				arg, strerror(errno));
+			xerror("sel: %s: %s\n", arg, strerror(errno));
 			(*err)++;
 		} else {
 			int r = select_file(tmp);
@@ -694,8 +687,7 @@ select_filename(char *arg, char *dir, int *err)
 
 	struct stat a;
 	if (lstat(arg, &a) == -1) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
-			name, strerror(errno));
+		xerror("sel: %s: %s\n", name, strerror(errno));
 		(*err)++;
 	} else {
 		int r = select_file(name);
@@ -856,8 +848,7 @@ edit_selfile(void)
 	time_t mtime_old = (time_t)attr.st_mtime;
 
 	if (open_file(sel_file) != EXIT_SUCCESS) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("sel: Could not open "
-			"the selections file\n"));
+		xerror("%s\n", _("sel: Could not open the selections file"));
 		return EXIT_FAILURE;
 	}
 
@@ -875,8 +866,7 @@ edit_selfile(void)
 	return ret;
 
 ERROR:
-	_err(ERR_NO_STORE, NOPRINT_PROMPT, "sel: %s: %s\n",
-		sel_file, strerror(errno));
+	xerror("sel: %s: %s\n", sel_file, strerror(errno));
 	return EXIT_FAILURE;
 }
 

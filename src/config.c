@@ -45,8 +45,13 @@
 #include "file_operations.h"
 #include "autocmds.h"
 
+////// TEMPORAL CODE
 /* Only for config files migration. Remove when needed */
 #include "readline.h"
+
+/* Only for old log file split. Remove when needed */
+#include "history.h"
+////////////////////
 
 #define DUMP_CONFIG_STR  0
 #define DUMP_CONFIG_INT  1
@@ -508,8 +513,7 @@ edit_function(char **args)
 		return regen_config();
 
 	if (config_ok == 0) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, _("%s: Cannot access the "
-			"configuration file\n"), PROGRAM_NAME);
+		xerror(_("%s: Cannot access the configuration file\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -1377,8 +1381,11 @@ define_config_file_names(void)
 		alt_bm_file = (char *)NULL;
 	}
 
-	log_file = (char *)xnmalloc(config_dir_len + 11, sizeof(char));
-	sprintf(log_file, "%s/log.clifm", config_dir);
+	msgs_log_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+	sprintf(msgs_log_file, "%s/msglogs.clifm", config_dir);
+
+	cmds_log_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
+	sprintf(cmds_log_file, "%s/cmdlogs.clifm", config_dir);
 
 	hist_file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
 	sprintf(hist_file, "%s/history.clifm", config_dir);
@@ -1444,8 +1451,7 @@ create_main_config_file(char *file)
 	FILE *config_fp = open_fstream_w(file, &fd);
 
 	if (!config_fp) {
-		_err(ERR_NO_STORE, NOPRINT_PROMPT, "%s: fopen: %s: %s\n",
-			PROGRAM_NAME, file, strerror(errno));
+		xerror("%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -3347,6 +3353,12 @@ init_config(void)
 
 	define_config_file_names();
 	create_config_files();
+
+///////// TEMPORAL CODE
+	split_old_log_file();
+///////////////////////
+
+
 #ifndef CLIFM_SUCKLESS
 	cschemes_n = get_colorschemes();
 
@@ -3392,10 +3404,13 @@ reset_variables(void)
 #endif
 
 	free(bm_file);
-	free(log_file);
+	free(msgs_log_file);
+	free(cmds_log_file);
+	bm_file = msgs_log_file = cmds_log_file = (char *)NULL;
+
 	free(hist_file);
 	free(dirhist_file);
-	bm_file = log_file = hist_file = dirhist_file = (char *)NULL;
+	hist_file = dirhist_file = (char *)NULL;
 
 	free(config_file);
 	free(profile_file);
