@@ -1202,7 +1202,8 @@ get_properties(char *filename, const int dsize)
 		wname = truncate_wname(filename);
 
 	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
-	remove_bold_attr(&t_ctype);
+	if (xargs.no_bold != 1)
+		remove_bold_attr(t_ctype);
 
 	/* File properties */
 	struct perms_t perms = get_file_perms(attr.st_mode);
@@ -1557,7 +1558,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	}
 
 	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
-	remove_bold_attr(&t_ctype);
+	if (xargs.no_bold != 1)
+		remove_bold_attr(t_ctype);
 
 	/* Let's compose each properties field individually to be able to
 	 * print only the desired ones. This is specified via the PropFields

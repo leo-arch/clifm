@@ -663,6 +663,9 @@ get_rgb(char *hex, int *attr, int *r, int *g, int *b)
 	&& *(hex + 7) <= '9' && !*(hex + 8))
 		*attr = *(hex + 7) - '0';
 
+	if (xargs.no_bold == 1 && *attr == 1)
+		*attr = 0;
+
 	return 0;
 }
 

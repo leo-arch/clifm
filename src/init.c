@@ -2032,6 +2032,7 @@ external_arguments(int argc, char **argv)
 		{"fuzzy-algo", required_argument, 0, 266},
 		{"sel-file", required_argument, 0, 267},
 		{"no-trim-names", no_argument, 0, 268},
+		{"no-bold", no_argument, 0, 269},
 	    {0, 0, 0, 0}
 	};
 
@@ -2296,6 +2297,7 @@ external_arguments(int argc, char **argv)
 
 		case 267: set_custom_selfile(optarg); break;
 		case 268: xargs.trim_names = conf.trim_names = 0; break;
+		case 269: xargs.no_bold = 1; break;
 
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
 		case 'A': conf.show_hidden = xargs.hidden = 1; break;
@@ -2606,6 +2608,9 @@ unset_xargs(void)
 	xargs.max_dirhist = UNSET;
 	xargs.max_path = UNSET;
 	xargs.mount_cmd = UNSET;
+
+	xargs.no_bold = UNSET;
+
 	xargs.no_dirjump = UNSET;
 	xargs.noeln = UNSET;
 	xargs.only_dirs = UNSET;

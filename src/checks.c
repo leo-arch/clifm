@@ -856,7 +856,7 @@ check_regex(char *str)
 char **
 check_for_alias(char **args)
 {
-	/* Do not expand alias is first word is an ELN */
+	/* Do not expand alias if first word is an ELN */
 	if (aliases_n == 0 || !aliases || !args || flags & FIRST_WORD_IS_ELN)
 		return (char **)NULL;
 

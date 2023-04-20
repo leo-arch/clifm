@@ -1010,6 +1010,9 @@ struct param_t {
 	int max_files;
 	int max_path;
 	int mount_cmd;
+
+	int no_bold;
+
 	int no_dirjump;
 	int noeln;
 	int only_dirs;

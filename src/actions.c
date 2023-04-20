@@ -44,8 +44,8 @@
 #include "misc.h"
 
 /* Get the executable's path of the action ACTION
- * Returns this path on success and NULL on error, in which case STATUS
- * is set to the appropriate error code */
+ * Returns this path on success or NULL on error, in which case STATUS
+ * is set to the appropriate error code. */
 static char *
 get_plugin_path(char *action, int *status)
 {
@@ -178,7 +178,7 @@ run_action(char *action, char **args)
 	buf[buf_len] = '\0';
 	close(rfd);
 
-	/* Wait for the child to finish. Otherwise, the child is left as
+	/* Wait for the child to finish. Otherwise, the child is left as a
 	 * zombie process. Store plugin exit status in EXIT_STATUS */
 	int status = 0, exit_status = 0;
 	if (waitpid(pid, &status, 0) > 0) {

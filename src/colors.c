@@ -85,12 +85,12 @@ static size_t defs_n = 0;
  * and long view mode). It takes the user defined color of the
  * corresponding file type (e.g. dirs) and removes the bold attribute */
 void
-remove_bold_attr(char **str)
+remove_bold_attr(char *str)
 {
-	if (!*str || !*(*str))
+	if (!str || !*str)
 		return;
 
-	char *p = *str, *q = *str;
+	char *p = str, *q = str;
 	size_t c = 0;
 
 	while (1) {
@@ -1191,6 +1191,9 @@ store_extension_line(char *line)
 	sprintf(ext_colors[ext_colors_n].value, "0;%s", code);
 //	ext_color[ext_colors_n].hash = hashme(line, 0);
 
+	if (xargs.no_bold == 1)
+		remove_bold_attr(ext_colors[ext_colors_n].value);
+
 	*q = '=';
 	ext_colors_n++;
 
@@ -1825,6 +1828,109 @@ split_color_line(char *colors_line, const int type)
 		set_iface_colors(colors, words);
 }
 
+static void
+disable_bold(void)
+{
+	/* File types */
+	remove_bold_attr(bd_c);
+	remove_bold_attr(ca_c);
+	remove_bold_attr(cd_c);
+	remove_bold_attr(di_c);
+	remove_bold_attr(ed_c);
+	remove_bold_attr(ee_c);
+	remove_bold_attr(ef_c);
+	remove_bold_attr(ex_c);
+	remove_bold_attr(fi_c);
+	remove_bold_attr(ln_c);
+	remove_bold_attr(mh_c);
+	remove_bold_attr(nd_c);
+	remove_bold_attr(nf_c);
+	remove_bold_attr(no_c);
+	remove_bold_attr(or_c);
+	remove_bold_attr(ow_c);
+	remove_bold_attr(pi_c);
+	remove_bold_attr(sg_c);
+	remove_bold_attr(so_c);
+	remove_bold_attr(st_c);
+	remove_bold_attr(su_c);
+	remove_bold_attr(tw_c);
+	remove_bold_attr(uf_c);
+
+	/* Interface */
+	remove_bold_attr(bm_c);
+	remove_bold_attr(fc_c);
+	remove_bold_attr(df_c);
+	remove_bold_attr(dl_c);
+	remove_bold_attr(el_c);
+	remove_bold_attr(lc_c);
+	remove_bold_attr(mi_c);
+	remove_bold_attr(ts_c);
+	remove_bold_attr(wc_c);
+	remove_bold_attr(wp_c);
+	remove_bold_attr(tt_c);
+
+	/* Suggestions */
+	remove_bold_attr(sb_c);
+	remove_bold_attr(sc_c);
+	remove_bold_attr(sd_c);
+	remove_bold_attr(sh_c);
+	remove_bold_attr(sf_c);
+	remove_bold_attr(sx_c);
+	remove_bold_attr(sp_c);
+	remove_bold_attr(sz_c);
+
+#ifndef _NO_ICONS
+	remove_bold_attr(dir_ico_c);
+#endif
+
+	/* Syntax highlighting */
+	remove_bold_attr(hb_c);
+	remove_bold_attr(hc_c);
+	remove_bold_attr(hd_c);
+	remove_bold_attr(he_c);
+	remove_bold_attr(hn_c);
+	remove_bold_attr(hp_c);
+	remove_bold_attr(hq_c);
+	remove_bold_attr(hr_c);
+	remove_bold_attr(hs_c);
+	remove_bold_attr(hv_c);
+	remove_bold_attr(hw_c);
+
+	/* File properties */
+	remove_bold_attr(dr_c);
+	remove_bold_attr(dw_c);
+	remove_bold_attr(dxd_c);
+	remove_bold_attr(dxr_c);
+	remove_bold_attr(dg_c);
+	remove_bold_attr(dd_c);
+	remove_bold_attr(dz_c);
+	remove_bold_attr(do_c);
+	remove_bold_attr(dp_c);
+	remove_bold_attr(dn_c);
+
+	/* Workspaces */
+	remove_bold_attr(ws1_c);
+	remove_bold_attr(ws2_c);
+	remove_bold_attr(ws3_c);
+	remove_bold_attr(ws4_c);
+	remove_bold_attr(ws5_c);
+	remove_bold_attr(ws6_c);
+	remove_bold_attr(ws7_c);
+	remove_bold_attr(ws8_c);
+
+	/* Prompt indicators */
+	remove_bold_attr(em_c);
+	remove_bold_attr(li_c);
+	remove_bold_attr(li_cb);
+	remove_bold_attr(nm_c);
+	remove_bold_attr(wm_c);
+	remove_bold_attr(si_c);
+	remove_bold_attr(ti_c);
+	remove_bold_attr(tx_c);
+	remove_bold_attr(xs_c);
+	remove_bold_attr(xf_c);
+}
+
 /* Get color codes values from either the environment or the config file
  * and set colors accordingly. If some value is not found or is a wrong
  * value, the default is set. */
@@ -1891,6 +1997,9 @@ set_colors(const char *colorscheme, const int check_env)
 
 	/* If some color is unset or is a wrong color code, set the default value */
 	set_default_colors();
+
+	if (xargs.no_bold == 1)
+		disable_bold();
 
 	return EXIT_SUCCESS;
 }
