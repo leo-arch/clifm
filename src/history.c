@@ -40,6 +40,7 @@
 #include "messages.h"
 #include "file_operations.h"
 
+#ifndef _NO_SPLIT_LOG
 ////// TEMPORAL CODE
 /* Split the old log file: messages go into the message logs file, and commands
  * into the command logs file. */
@@ -99,6 +100,7 @@ split_old_log_file(void)
 	remove(old_file);
 }
 ////////////////////
+#endif // _NO_SPLIT_LOG
 
 /* Return a string with the current date.
  * Used to compose log entries. */

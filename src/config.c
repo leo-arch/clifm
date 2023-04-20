@@ -47,10 +47,14 @@
 
 ////// TEMPORAL CODE
 /* Only for config files migration. Remove when needed */
-#include "readline.h"
+#ifndef _NO_RENAME_CONFIG
+# include "readline.h" // check_cfm_files()
+#endif // _NO_RENAME_CONFIG
 
 /* Only for old log file split. Remove when needed */
-#include "history.h"
+#ifndef _NO_SPLIT_LOG
+# include "history.h" // split_old_log_file()
+#endif
 ////////////////////
 
 #define DUMP_CONFIG_STR  0
@@ -3355,7 +3359,9 @@ init_config(void)
 	create_config_files();
 
 ///////// TEMPORAL CODE
+#ifndef _NO_SPLIT_LOG
 	split_old_log_file();
+#endif
 ///////////////////////
 
 

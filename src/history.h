@@ -47,7 +47,9 @@ int  record_cmd(char *);
 int  run_history_cmd(const char *);
 
 ////// TEMPORAL CODE
+#ifndef _NO_SPLIT_LOG
 void split_old_log_file(void);
+#endif
 ////////////////////
 
 __END_DECLS
