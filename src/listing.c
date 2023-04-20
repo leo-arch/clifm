@@ -688,7 +688,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 
 	/* Available space (term cols) to print the file name */
 	int space_left = (int)term_cols - (prop_fields.len + have_xattr
-		+ (int)fc_max + (int)size_max + (int)ug_max + (int)ino_max);
+		+ (int)fc_max + (int)size_max + (int)ug_max + (int)ino_max
+		+ (conf.icons == 1 ? 3 : 0));
 
 	if (space_left < conf.min_name_trim)
 		space_left = conf.min_name_trim;

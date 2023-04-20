@@ -510,7 +510,7 @@ extern int watch;
 #define SNT_GRAL      5
 #define SNT_DISPLAY   6 /* Sanitize DISPLAY environment variable */
 #define SNT_MISC      7 /* Used to sanitize a few environment variables */
-#define SNT_NONE      8 /* Trusted command: do not sanitize*/
+#define SNT_NONE      8 /* Trusted command: do not sanitize */
 #define SNT_BLACKLIST 9
 
 /* Macros for the TYPE field of the filter_t struct */
