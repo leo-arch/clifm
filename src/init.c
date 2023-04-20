@@ -3382,7 +3382,8 @@ check_time_str(void)
 		return;
 
 	if (conf.relative_time == 1) {
-		prop_fields.len += (7 + 1); // extra space to avoid the screen right edge
+	/* +1 = extra space to avoid hitting the screen right edge in long view */
+		prop_fields.len += (7 + 1);
 		strncpy(invalid_time_str, " -     ", MAX_TIME_STR);
 		return;
 	}
