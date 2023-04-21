@@ -316,7 +316,7 @@ extern int watch;
 #define _RED    (conf.colorize == 1 ? "\x1b[1;31m" : "")
 #define _BGREEN (conf.colorize == 1 ? "\x1b[1;32m" : "")
 #define D_CYAN  (conf.colorize == 1 ? "\x1b[0;36m" : "")
-#define BOLD    (conf.colorize == 1 ? "\x1b[1m" : "")
+#define BOLD    ((xargs.no_bold == 0 && conf.colorize == 1) ? "\x1b[1m" : "")
 /* NC: Reset color attributes to terminal defaults */
 #define NC      (conf.colorize == 1 ? "\x1b[0m" : "")
 

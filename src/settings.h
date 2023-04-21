@@ -90,7 +90,7 @@ xf=01;31:xs=00;32:"
 #define DEF_ND_C  "\x1b[01;31m" /* Unaccessible dir */
 #define DEF_NF_C  "\x1b[02;31m" /* Unaccessible file */
 #define DEF_NO_C  "\x1b[00;31;47m" /* Unknown file type */
-#define DEF_OR_C  "\x1b[02;36m" /* Orphaned/broken symlink */
+#define DEF_OR_C  "\x1b[02;04;36m" /* Orphaned/broken symlink */
 #define DEF_OW_C  "\x1b[34;42m" /* Other-writable */
 #define DEF_PI_C  "\x1b[00;35m" /* FIFO/pipe */
 #define DEF_SG_C  "\x1b[30;43m" /* SGID file */
