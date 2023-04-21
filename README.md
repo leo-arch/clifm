@@ -235,6 +235,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - Disable bold colors via `--no-bold`.
   - Colorize symlinks according to the target file via `ColorLinksAsTarget` in the config file.
   - File names trimming can now be disabled permanently via the `TrimNames` option in the config file.
   - Improved interface fot the `tag` command.
