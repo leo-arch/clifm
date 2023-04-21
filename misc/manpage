@@ -244,7 +244,10 @@ list only up to \fINUM\fR files. Use -1 or 'unset' to remove the files limit (de
 set the maximum number of characters after which the current directory in the prompt line will be abbreviated to the directory base name (if \\z is used in the prompt)
 .TP
 \fB\-\-no\-apparent\-size\fR
-print file sizes as used blocks instead of used bytes (apparent sizes)
+print file sizes as used blocks instead of used bytes (apparent size)
+.TP
+\fB\-\-no\-bold\fR
+disable bold colors (applies to all color schemes)
 .TP
 \fB\-\-no\-cd\-auto\fR
 by default, \fBclifm\fR changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of \fIcd\fR

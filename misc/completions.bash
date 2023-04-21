@@ -97,12 +97,13 @@ _clifm ()
         --max-files
         --max-path
         --no-apparent-size
-        --no-dir-jumper
+        --no-bold
         --no-cd-auto
         --no-classify
         --no-clear-screen
         --no-color
         --no-columns
+        --no-dir-jumper
         --no-file-cap
         --no-file-ext
         --no-files-counter
