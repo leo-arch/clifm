@@ -1540,9 +1540,23 @@ Color codes can be used for file extensions as well (regular files only) using t
 .TP
 \fBNote\fR: Non-accessible (non-readable by the current user), executable (including SUID and SGID) files, and files with capabilities take precedence over file extensions. For example, the file \fIfile.mp3\fR, if executable, will be printed using the color code associated to executable files (\fIex\fR) even if there is a color code associated to \fI.mp3\fR files.
 .TP
-Six digits \fBhexadecimal\fR color codes are supported as well using this general format: \fB#RRGGBB[-[1-9]]\fR, where 1-9 is a display attribute. For example, if you want directories to be bold Spring Green: \fBdi=#00ff7f-1\fR.
+Six digits \fBhexadecimal\fR color codes are supported as well using this general format: \fB#RRGGBB[-[1-9]]\fR, where 1-9 is a display attribute. This is the list of attributes:
+.sp
+ 1: Bold or increased intensity
+ 2: Faint, decreased intensity or dim
+ 3: Italic (Not widely supported)
+ 4: Underline
+ 5: Slow blink
+ 6: Rapid blink
+ 7: Reverse video or invert
+ 8: Conceal or hide (Not widely supported)
+ 9: Crossed-out or strike
+
+ \fBNote\fR: Some attributes might not be supported by all terminal emulators.
 .TP
-Finally, \fBXterm-like color names\fR (for 256 colors) are also supported. For example: \fBex=DodgerBlue2\fR.
+For example, if you want directories to be bold Spring Green: \fBdi=#00ff7f-1\fR
+.TP
+Finally, \fBXterm-like color names\fR are also supported. For example: \fBex=DodgerBlue2\fR.
 .TP
 This is the list of color names (as defined by \fBvifm\fR(1)):
 .sp
@@ -1632,6 +1646,8 @@ This is the list of color names (as defined by \fBvifm\fR(1)):
  83 SeaGreen2             169 HotPink2              255 Grey93
  84 SeaGreen1             170 Orchid
  85 SeaGreen1_2           171 MediumOrchid1
+.TP
+Just as with hex colors, a single attribute can be appended to color names. For example, \fISteelBlue1-1\fR to get the bold version of this color.
 .TP
 \fBColor variables\fR
 .TP

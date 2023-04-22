@@ -561,23 +561,42 @@ is_color_code(const char *str)
 }
 
 #ifndef CLIFM_SUCKLESS
-/* If STR is a valid Xterm-like color name, return the value of this name */
+/* If STR is a valid Xterm-like color name, return the value for this name.
+ * If an attribute is appended to the name (ex: NAME-1), return value for this
+ * name plus the corresponding attribute. */
 static char *
-check_names(const char *str)
+check_names(char *str)
 {
+	char attr = 0;
+	char *dash = strchr(str, '-');
+	if (dash && *(dash + 1)) {
+		*dash = '\0';
+		attr = *(dash + 1);
+	}
+
+	int found = -1;
 	size_t i;
 	for (i = 0; color_names[i].name; i++) {
 		if (*str == *color_names[i].name
-		&& strcmp(str + 1, color_names[i].name + 1) == 0)
-			return color_names[i].value;
+		&& strcmp(str + 1, color_names[i].name + 1) == 0) {
+			found = (int)i;
+			break;
+		}
 	}
 
-	return (char *)NULL;
+	if (found == -1)
+		return (char *)NULL;
+
+	if (attr == 0)
+		return color_names[found].value;
+
+	snprintf(tmp_color, sizeof(tmp_color), "%c;%s", attr, color_names[found].value);
+	return tmp_color;
 }
 
 /* If STR is a valid color variable name, return the value of this variable */
 static char *
-check_defs(const char *str)
+check_defs(char *str)
 {
 	if (defs_n == 0 || !str || !*str)
 		return (char *)NULL;
