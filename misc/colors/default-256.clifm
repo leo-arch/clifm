@@ -57,6 +57,7 @@
 # Or, as a definition:
 #
 # define Green=DarkSeaGreen1
+# el=Green
 #
 # For the complete list of color names consult the manpage.
 
