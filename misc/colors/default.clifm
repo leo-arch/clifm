@@ -42,8 +42,23 @@
 # ExtColors
 # DirIconColor
 #
-# For example, if 'M' is defined as "00;01;36", we can use this color for
-# ELN's as follows: "el=M" (see below) 
+# For example;
+#
+# define M=1;36
+# el=M
+#
+# Here we define 'M' as "00;01;36", and then we use this color for ELN's,
+# whose code is 'el' (see below).
+
+### Xterm-like color names are also supported. Example:
+#
+# el=DarkSeaGreen1
+#
+# Or, as a definition:
+#
+# define Green=DarkSeaGreen1
+#
+# For the complete list of color names consult the manpage.
 
 define D=0   # Default terminal color
 define BD=1  # Bold
@@ -69,7 +84,7 @@ define M=35       # Magenta
 define BM=1;35    # Bold Magenta
 define DM=2;35    # Dimmed magenta
 define UM=4;35    # Underlined magenta
-define UDM=4;2;35 # Underlined dimmed magenta
+define UDM=2;4;35 # Underlined dimmed magenta
 
 define C=36       # Cyan
 define BC=1;36    # Bold cyan
