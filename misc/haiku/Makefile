@@ -106,5 +106,6 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1.gz
 	$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
+	$(RM) -- $(DESTDIR)$(DATADIR)/fish/vendor_completions/$(BIN).fish
 	$(RM) -r -- $(DESTDIR)$(PROG_DATADIR)
 	@printf "Successfully uninstalled $(BIN)\n"

@@ -75,6 +75,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(MANDIR)/man1/$(BIN).1*
 	$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
+	$(RM) -- $(DESTDIR)$(DATADIR)/fish/vendor_completions.d/$(BIN).fish
 	$(RM) -- $(DESTDIR)$(DESKTOPPREFIX)/$(BIN).desktop
 	$(RM) -r -- $(DESTDIR)$(PROG_DATADIR)
 	$(RM) -- $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps/$(BIN).svg
