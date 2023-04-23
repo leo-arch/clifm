@@ -2963,9 +2963,10 @@ get_last_path(void)
 		if (cur && cur_ws == UNSET)
 			cur_ws = ws_n;
 
-		if (ws_n >= 0 && ws_n < MAX_WS && !workspaces[ws_n].path)
+		if (ws_n >= 0 && ws_n < MAX_WS && !workspaces[ws_n].path) {
 			workspaces[ws_n].path = savestring(p + 2,
-					strnlen(p + 2, sizeof(line) - 2));
+				strnlen(p + 2, sizeof(line) - 2));
+		}
 	}
 
 	close_fstream(fp, fd);

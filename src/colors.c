@@ -65,16 +65,16 @@
 
 #ifndef CLIFM_SUCKLESS
 /* A struct to hold color variables */
-struct defs_t {
+struct colors_t {
 	char *name;
 	char *value;
 };
 
-static struct defs_t *defs;
+static struct colors_t *defs;
 static size_t defs_n = 0;
 
 /* Xterm-like color names taken from vifm(1) */
-static struct defs_t color_names[] = {
+static struct colors_t color_names[] = {
 	{"Black", "38;5;0"},
 	{"Red", "38;5;1"},
 	{"Green", "38;5;2"},
@@ -637,7 +637,7 @@ clear_defs(void)
 	defs_n = 0;
 END:
 	free(defs);
-	defs = (struct defs_t *)NULL;
+	defs = (struct colors_t *)NULL;
 }
 #endif /* CLIFM_SUCKLESS */
 
@@ -1771,7 +1771,7 @@ store_definition(char *str)
 	defs_n++;
 }
 
-/* Initialize the defs_t struct */
+/* Initialize the colors_t struct */
 static void
 init_defs(void)
 {
@@ -1824,7 +1824,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 			char **extcolors, char **ifacecolors, const int env)
 {
 	/* Allocate some memory for custom color variables */
-	defs = (struct defs_t *)xnmalloc(MAX_DEFS + 1, sizeof(struct defs_t));
+	defs = (struct colors_t *)xnmalloc(MAX_DEFS + 1, sizeof(struct colors_t));
 	defs_n = 0;
 	init_defs();
 
