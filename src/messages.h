@@ -1183,7 +1183,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -k, --keybindings-file=FILE\t Specify an alternative keybindings file\
 \n  -l, --no-long-view\t\t Disable long/detail view mode (default)\
 \n  -L, --long-view\t\t Enable long/detail view mode\
-\n  -m, --dihist-map\t\t Enable the directory history map\
+\n  -m, --dirhist-map\t\t Enable the directory history map\
 \n  -o, --no-autols\t\t Do not list files automatically\
 \n  -O, --autols\t\t\t List files automatically (default)\
 \n  -p, --path=PATH\t\t Use PATH as CliFM's starting path (deprecated: use positional \
@@ -1201,17 +1201,20 @@ on an empty line\
 \n  -z, --sort=METHOD\t\t Sort files by METHOD (see the manpage)"
 
 #define LONG_OPTIONS_A "\
+\n      --bell=STYLE\t\t Set terminal bell style to: 0 (none), 1 (audible), 2 (visible), 3 (flash)\
 \n      --case-sens-dirjump\t Do not ignore case when consulting the jump \
 database (via the 'j' command)\
 \n      --case-sens-path-comp\t Enable case sensitive path completion\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
 \n      --color-scheme=NAME\t Use color scheme NAME\
 \n      --cwd-in-title\t\t Print current directory in the terminal window title\
+\n      --data-dir\t\t Use PATH as data directory\
 \n      --desktop-notifications\t Enable desktop notifications\
 \n      --disk-usage\t\t Show disk usage (free/total)\
 \n      --enable-logs\t\t Enable program logs\
 \n      --full-dir-size\t\t Print the size of directories and their contents \
 (long view only)\
+\n      --fuzzy-algo\t\t Set fuzzy algorithm for fuzzy matching to '1' or '2'\
 \n      --fuzzy-matching\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
 \n      --fzfpreview-hidden\t Enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle with Alt-p)\
@@ -1223,9 +1226,9 @@ and paths\
 \n      --list-and-quit\t\t List files and quit\
 \n      --max-dirhist=NUM\t\t Maximum number of visited directories to recall\
 \n      --max-files=NUM\t\t List only up to NUM files\
-\n      --max-path=NUM\t\t Number of characters \
-after which the current directory in the prompt will be abreviated to its \
-base name (if \\z is used in the prompt)\
+\n      --max-path=NUM\t\t Abbreviate current directory in prompt after NUM characters \
+(if \\z is used in the prompt line)\
+\n      --mnt-udisks2\t\t Use 'udisks2' instead of 'udevil' for the 'media' command\
 \n      --no-apparent-size\t Inform file sizes as used blocks instead of used bytes (apparent size)\
 \n      --no-bold\t\t\t Disable bold colors (applies to all color schemes)\
 \n      --no-cd-auto\t\t Disable the autocd function\
@@ -1242,6 +1245,7 @@ base name (if \\z is used in the prompt)\
 \n      --no-highlight\t\t Disable syntax highlighting\
 \n      --no-history\t\t Do not write commands into the history file\
 \n      --no-open-auto\t\t Same as no-cd-auto, but for files\
+\n      --no-refresh-on-resize\t Do not attempt to refresh the files list upon window's resize\
 \n      --no-restore-last-path\t Do not record the last visited directory\
 \n      --no-suggestions\t\t Disable auto-suggestions\
 \n      --no-tips\t\t\t Disable startup tips\
@@ -1260,17 +1264,18 @@ CliFM's built-in opener\
 \n      --secure-env-full\t\t Run in a sanitized environment (full mode)\
 \n      --sel-file=FILE\t\t Set FILE as custom selections file\
 \n      --share-selbox\t\t Make the Selection Box common to different profiles\
-\n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\
-\n      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
+\n      --shotgun-file=FILE\t Set FILE as shotgun configuration file\n"
+
+#define LONG_OPTIONS_B "\
+      --si\t\t\t Print sizes in powers of 1000 instead of 1024\
 \n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
 \n      --smenutab\t\t Use smenu to display completion matches\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
-'rm' to prevent accidental deletions\n"
-
-#define LONG_OPTIONS_B "\
-      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
-\n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\n"
+'rm' to prevent accidental deletions\
+\n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
+\n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\
+\n      --vt100\t\t\t Run in vt100 compatibility mode\n"
 
 #define CLIFM_COMMANDS_HEADER "\
 For a complete description of all the below \

@@ -114,7 +114,6 @@ _clifm ()
         --no-highlight
         --no-history
         --no-open-auto
-        --no-props-color
         --no-refresh-on-resize
         --no-restore-last-path
         --no-suggestions

@@ -46,14 +46,15 @@ complete -c clifm -s x -l no-ext-cmds -d 'Disallow the use of external commands'
 complete -c clifm -s y -l light-mode -d 'Run in light mode'
 
 complete -c clifm -s z -l sort -r -d 'Set sorting order' -x -a 'none name size atime btime ctime mtime version extension inode owner group'
+
 complete -c clifm -l case-sens-dirjump -d 'Do not ignore case when consulting the jump database'
 complete -c clifm -l case-sens-path-comp -d 'Enable case sensitive path completion'
 complete -c clifm -l cd-on-quit -d 'Enable cd-on-quit (consult the manpage)'
 
+complete -c clifm -l bell -r -d 'Set the terminal bell style' -x -a '0 1 2 3'
 complete -c clifm -l color-scheme -r -d 'Set a color scheme' -x -a '(ls ~/.config/clifm/colors/*.clifm | awk -F\'/\' \'{print $NF}\' | cut -d\'.\' -f1)'
 complete -c clifm -l data-dir -r -d "Set an alternative data directory"
 
-complete -c clifm -l bell -r -d 'Set the terminal bell style' -x -a '0 1 2 3'
 complete -c clifm -l cwd-in-title -d 'Print current directory in window\'s title'
 complete -c clifm -l desktop-notifications -d 'Enable desktop notifications'
 complete -c clifm -l disk-usage -d 'Show disk usage (free/total)'
