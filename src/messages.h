@@ -1212,9 +1212,9 @@ database (via the 'j' command)\
 \n      --enable-logs\t\t Enable program logs\
 \n      --full-dir-size\t\t Print the size of directories and their contents \
 (long view only)\
-\n      --fuzzy-match\t\t Enable fuzzy TAB completion/suggestions for file names \
+\n      --fuzzy-matching\t\t Enable fuzzy TAB completion/suggestions for file names \
 and paths\
-\n      --fzfpreview-hidden\t Enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle it with Alt-p)\
+\n      --fzfpreview-hidden\t Enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle with Alt-p)\
 \n      --fzftab\t\t\t Use fzf to display completion matches (default if fzf binary is found)\
 \n      --fzytab\t\t\t Use fzy to display completion matches\
 \n      --icons\t\t\t Enable icons\
