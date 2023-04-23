@@ -250,14 +250,14 @@ ExtColors="*.tar=ARCHIVE:*.tgz=ARCHIVE:*.arc=ARCHIVE:*.arj=ARCHIVE:*.taz=ARCHIVE
 #    "#ffaff00-4" -> "underlined orange" (24-bit colors notation)
 
 #DateShades="1,31-2,36-1,36,36-2"
-#DateShades="2,197-2,231,253,250,247,244"
+DateShades="2,197-2,231,253,250,247,244"
 #DateShades="3,#ff005f-2,#ffffff,#dadada,#bcbcbc,#9e9e9e,#808080"
 
 #NOTE: For DateShades to work, the 'dd' color code (solid color for dates) needs to be unset (default)
 
 # Same as DateShades, but for file sizes
 #SizeShades="1,31-2,32,33,31"
-#SizeShades="2,197-2,79,77,228,215,203"
+SizeShades="2,197-2,79,77,228,215,203"
 #SizeShades="3,#ff005f-2,#5fd7af,#5fd75f,#ffff87,#ffaf5f,#ff5f5f"
 
 #NOTE: For SizeShades to work, the 'dz' color code (solid color for sizes) needs to be unset (default)
@@ -270,7 +270,6 @@ DirIconColor="Y"
 # You can use here either prompt codes (see the prompts.clifm file for details)
 # or a prompt name defined in the prompts file
 Prompt="clifm"
-#Prompt=curves
 # Override prompt values (as defined in the prompts file)
 #Prompt=""
 #Notifications=

@@ -1301,24 +1301,25 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  cd                 Change directory\n\
  cl, columns        Set columns on/off\n\
  cmd, commands      Jump to the COMMANDS section in the manpage\n\
- config, edit       Open/edit the main configuration file\n\
- cs, colorscheme    Manage color schemes\n\
+ config             Open/edit the main configuration file\n\
+ cs, colorscheme    Switch/edit color schemes\n\
  d, dup             Duplicate files\n\
  dh                 Access the directory history list\n\
  ds, desel          Deselect selected files\n\
  exp                Export file names to a temporary file\n\
  ext                Set external/shell commands on/off\n\
  f, forth           Go forth in the directory history list\n\
- fc, filescounter   Set the files counter on/off\n\
+ fc                 Set the files counter on/off\n\
  ff, dirs-first     Set list-directories-first on/off\n\
  fs                 What is free software?\n\
  ft, filter         Set a files filter\n\
  fz                 Printf directories full size (long view mode only)\n\
- hf, hidden         Set show-hidden-files on/off\n\
+ hh, hidden         Set show-hidden-files on/off\n\
  history            Manage the commands history\n\
  icons              Set icons on/off\n\
  j                  The directory jumper function\n\
  kb, keybinds       Manage keybindings\n\
+ le                 Edit symbolic link target\n\
  ll, lv             Toggle long view mode\n\
  lm                 Set the light mode on/off\n\
  log                Manage your logs\n\
@@ -1333,10 +1334,10 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  oc                 Change files ownership interactively\n\
  ow                 Open a file with ...\n\
  opener             Set a custom resource opener\n\
- p, pr, pp, prop    Print file properties\n\
+ p, pp, prop        Print files properties\n\
  path, cwd          Print the current working directory\n\
  pc                 Change files permissions interactively\n\
- pf, prof, profile  Manage profiles\n\
+ pf, profile        Manage profiles\n\
  pg, pager          Set the files pager on/off\n\
  pin                Pin a directory\n\
  prompt             Switch/edit prompt\n\
@@ -1350,7 +1351,7 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  splash             Print the splash screen\n\
  st, sort           Change files sorting order\n\
  stats              Print file statistics\n\
- t, tr, trash       Send files to the trash can\n\
+ t, trash           Send files to the trash can\n\
  tag                Tag files\n\
  te                 Toggle the executable bit on files\n\
  tips               Print tips\n\
@@ -1375,7 +1376,8 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  M-m           List mountpoints\n\
  M-h           Show directory history\n\
  M-t           Clear messages\n\
- C-r           Refresh the screen\n\
+ C-l           Clear the screen\n\
+ C-y           Copy the current line buffer to the clipboard\n\
  M-s           Open the Selection Box\n\
  M-a           Select all files in the current working directory\n\
  M-d           Deselect all selected files\n\
@@ -1509,7 +1511,7 @@ help <TAB>     List available help topics\n\
 F1             Open the manpage\n\
 ih             Run the interactive help plugin (requires fzf)\n\
 ll | Alt-l     Toggle detail/long view mode\n\
-hf | Alt-.     Toggle hidden files\n\
+hh | Alt-.     Toggle hidden files\n\
 rf | Ctrl-l    Clear the screen (also Enter on empty line)\n\
 config | F10   View/edit the configuration file\n\
 mm edit | F6   Change default associated applications\n\
