@@ -40,7 +40,7 @@ args=(
 	{-x,--no-ext-cmds}'[disallow the use of external commands]'
 	{-y,--light-mode}'[enable the light mode]'
 	{-z+,--sort=}'[sort files by METHOD]:method:->methods'
-	'--bell[set terminal bell style: 0=none; 1=audible; 2=viusal (default); 3=flash]:bell:->bells'
+	'--bell=[set terminal bell style: 0=none; 1=audible; 2=viusal (default); 3=flash]:bell:->bells'
 	'--case-sens-dirjump[do not ignore case when consulting the jump database]'
 	'--case-sens-path-comp[do not ignore case when completing file names]'
 	'--cd-on-quit[write last visited path to $XDG_CONFIG_HOME/clifm/.last to be accessed later by a shell funtion]'
@@ -51,6 +51,7 @@ args=(
 	'--disk-usage[show disk usage (free/total) for the filesystem to which the current directory belongs]'
 	'--full-dir-size[print size of directories and their contents in long view mode]'
 	'--fuzzy-matching[enable fuzzy matches for filename/path completions and suggestions]'
+	'--fuzzy-algo=[fuzzy matching algorithm]:algo:->algos'
 	'--fzfpreview-hidden[same as --fzftab, but with the preview window hidden. Toggle it via Alt-p]'
 	'--fzftab[use FZF to display completion matches]'
 	'--fzytab[use FZY to display completion matches]'
@@ -61,6 +62,7 @@ args=(
 	'--max-dirhist=[maximum number of visited directories to remember]:int:'
 	'--max-files=[list only up to NUM files]:int:'
 	'--max-path=[set the maximun number of characters of the prompt path]:int:'
+	'--mnt-udisks2[use udisks2 instead of udevil for the media command]'
 	'--no-apparent-size[print file sizes as used blocks instead of used bytes]'
 	'--no-bold[disable bold colors]'
 	'--no-cd-auto[force the use of '\''cd'\'' to change directories]'
@@ -103,6 +105,7 @@ args=(
 	'--trash-as-rm[the '\''r'\'' command executes '\''trash'\'' instead of '\''rm'\'']'
 	'--virtual-dir=[use PATH as CliFM virtual directory]:directory:_directories'
 	'--virtual-dir-full-paths[print full path file names in virtual directories]'
+	'--vt100[run in vt100 compatibility mode]'
 	'*:filename:_files'
 )
 
@@ -114,17 +117,25 @@ case "$state" in
 		prof_files=( $(basename -a $HOME/.config/clifm/profiles/*) )
 		_multi_parts / prof_files
 	;;
+
 	bells)
 		_values -s , 'bells' 0 1 2 3
 	;;
+
+	algos)
+		_values -s , 'algos' 1 2
+	;;
+
 	colorschemes)
 		local -a color_schemes
 		color_schemes=( $(basename -a $HOME/.config/clifm/colors/* | cut -d. -f1) )
 		_multi_parts / color_schemes
 	;;
+
 	methods)
-		_values -s , 'methods' 0 1 2 3 4 5 6 7 8 9 10
+		_values -s , 'methods' none name size atime btime mtime version extension inode owner group
 	;;
+
 	workspaces)
 		_values -s , 'workspaces' 1 2 3 4 5 6 7 8
 	;;

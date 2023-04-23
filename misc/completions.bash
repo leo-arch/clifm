@@ -36,8 +36,8 @@ _clifm ()
         --no-pager
         -h
         --help
-        -H
-        --horizontal-list
+		-H
+		--horizontal-list
         -i
         --no-case-sensitive
         -I
@@ -76,7 +76,7 @@ _clifm ()
         --light-mode
         -z
         --sort
-        --bell
+		--bell
         --case-sens-dirjump
         --case-sens-path-comp
         --cd-on-quit
@@ -85,7 +85,9 @@ _clifm ()
         --data-dir
         --dektop-notifications
         --disk-usage
+        --enable-logs
         --full-dir-size
+        --fuzzy-algo
         --fuzzy-matching
         --fzfpreview-hidden
         --fzftab
@@ -96,14 +98,14 @@ _clifm ()
         --max-dirhist
         --max-files
         --max-path
+        --mnt-udisk2
         --no-apparent-size
-        --no-bold
+        --no-dir-jumper
         --no-cd-auto
         --no-classify
         --no-clear-screen
         --no-color
         --no-columns
-        --no-dir-jumper
         --no-file-cap
         --no-file-ext
         --no-files-counter
@@ -117,8 +119,7 @@ _clifm ()
         --no-restore-last-path
         --no-suggestions
         --no-tips
-        --no-trim-names
-        --no-warning-prompt
+		--no-warning-prompt
         --no-welcome-message
         --only-dirs
         --open
@@ -138,12 +139,13 @@ _clifm ()
         --trash-as-rm
         --virtual-dir
         --virtual-dir-full-paths
+        --vt100
     )
 
     if [[ $prev == "-b" || $prev == "-c" || $prev == "-k" || $prev == "-p" || $prev == "--open" || $prev == "--preview" || $prev == "--shotgun-file" ]]; then
         COMPREPLY=( $(compgen -f -d -- "$cur") )
 
-    elif [[ $prev == "-P" ]]; then
+    elif [[ $prev == "-P" || $prev == "--profile" ]]; then
         local profiles=$(basename -a $(ls -Ad ~/.config/clifm/profiles/*))
         COMPREPLY=( $(compgen -W "$profiles" -- "$cur") )
 
@@ -151,17 +153,25 @@ _clifm ()
         local schemes=$(basename -a $(ls -Ad ~/.config/clifm/colors/*) | cut -d"." -f1)
         COMPREPLY=( $(compgen -W "$schemes" -- "$cur") )
 
-    elif [[ $prev == -z || $prev == "--sort" ]]; then
-        local args=$(echo -e "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\m11")
+	elif [[ $prev == "--fuzzy-algo" ]]; then
+		local args=$(echo -e "1\n2")
+		COMPREPLY=( $(compgen -W "$args" -- "$cur") )
+
+    elif [[ $prev == "-z" || $prev == "--sort" ]]; then
+		local args=$(echo -e "none\nname\nsize\natime\nbtime\nctime\nmtime\nversion\nextension\ninode\nowner\ngroup")
         COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "--bell" ]]; then
-	    local args=(echo -e "0\n1\n2\n3")
+	    local args=$(echo -e "0\n1\n2\n3")
 	    COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == "--opener" ]]; then
 	    local apps=$(ls -AG $(echo $PATH | awk -F':' '{ for (i=1; i<NF; i++) print $i}') | grep -v "/\|^$")
         COMPREPLY=( $(compgen -W "$apps" -- "$cur") )
+
+	elif [[ $prev == "-w" || $prev == "--workspace" ]]; then
+		local args=$(echo -e "1\n2\n3\n4\n5\n6\n7\n8")
+        COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $cur == -* ]]; then
         COMPREPLY=( $(compgen -W "${opts[*]}" -- "$cur") )
