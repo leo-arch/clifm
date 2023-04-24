@@ -2287,7 +2287,7 @@ external_arguments(int argc, char **argv)
 		case 266: {
 			int a = optarg ? atoi(optarg) : -1;
 			if (!optarg || a < 1 || a > FUZZY_ALGO_MAX) {
-				fprintf(stderr, "%s: fuzzy-algo: Valid arguments are 1 "
+				fprintf(stderr, "%s: fuzzy-algo: Valid arguments are either 1 "
 					"or 2\n", PROGRAM_NAME);
 				exit(EXIT_FAILURE);
 			}

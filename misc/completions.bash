@@ -85,7 +85,6 @@ _clifm ()
         --data-dir
         --dektop-notifications
         --disk-usage
-        --enable-logs
         --full-dir-size
         --fuzzy-algo
         --fuzzy-matching
@@ -94,18 +93,20 @@ _clifm ()
         --fzytab
         --icons
         --icons-use-file-color
+        --int-vars
         --list-and-quit
         --max-dirhist
         --max-files
         --max-path
         --mnt-udisk2
         --no-apparent-size
-        --no-dir-jumper
+        --no-bold
         --no-cd-auto
         --no-classify
         --no-clear-screen
         --no-color
         --no-columns
+        --no-dir-jumper
         --no-file-cap
         --no-file-ext
         --no-files-counter
@@ -118,6 +119,7 @@ _clifm ()
         --no-restore-last-path
         --no-suggestions
         --no-tips
+        --no-trim-names
 		--no-warning-prompt
         --no-welcome-message
         --only-dirs
@@ -132,6 +134,7 @@ _clifm ()
         --sel-file
         --share-selbox
         --shotgun-file
+        --si
         --smenutab
         --sort-reverse
         --stdtab

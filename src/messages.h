@@ -1211,7 +1211,6 @@ database (via the 'j' command)\
 \n      --data-dir\t\t Use PATH as data directory\
 \n      --desktop-notifications\t Enable desktop notifications\
 \n      --disk-usage\t\t Show disk usage (free/total)\
-\n      --enable-logs\t\t Enable program logs\
 \n      --full-dir-size\t\t Print the size of directories and their contents \
 (long view only)\
 \n      --fuzzy-algo\t\t Set fuzzy algorithm for fuzzy matching to '1' or '2'\
@@ -1268,8 +1267,8 @@ CliFM's built-in opener\
 
 #define LONG_OPTIONS_B "\
       --si\t\t\t Print sizes in powers of 1000 instead of 1024\
-\n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
 \n      --smenutab\t\t Use smenu to display completion matches\
+\n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
 'rm' to prevent accidental deletions\

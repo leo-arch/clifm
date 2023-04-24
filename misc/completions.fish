@@ -47,18 +47,17 @@ complete -c clifm -s y -l light-mode -d 'Run in light mode'
 
 complete -c clifm -s z -l sort -r -d 'Set sorting order' -x -a 'none name size atime btime ctime mtime version extension inode owner group'
 
+complete -c clifm -l bell -r -d 'Set the terminal bell style' -x -a '0 1 2 3'
 complete -c clifm -l case-sens-dirjump -d 'Do not ignore case when consulting the jump database'
 complete -c clifm -l case-sens-path-comp -d 'Enable case sensitive path completion'
 complete -c clifm -l cd-on-quit -d 'Enable cd-on-quit (consult the manpage)'
 
-complete -c clifm -l bell -r -d 'Set the terminal bell style' -x -a '0 1 2 3'
 complete -c clifm -l color-scheme -r -d 'Set a color scheme' -x -a '(ls ~/.config/clifm/colors/*.clifm | awk -F\'/\' \'{print $NF}\' | cut -d\'.\' -f1)'
+complete -c clifm -l cwd-in-title -d 'Print current directory in window\'s title'
 complete -c clifm -l data-dir -r -d "Set an alternative data directory"
 
-complete -c clifm -l cwd-in-title -d 'Print current directory in window\'s title'
 complete -c clifm -l desktop-notifications -d 'Enable desktop notifications'
 complete -c clifm -l disk-usage -d 'Show disk usage (free/total)'
-complete -c clifm -l enable-logs -d 'Enable program logs'
 complete -c clifm -l full-dir-size -d 'Print full directories size (long view)'
 complete -c clifm -l fuzzy-algo -r -d 'Select the algorithm used for fuzzy matching' -x -a '1 2'
 complete -c clifm -l fuzzy-matching -d 'Enable fuzzy TAB completion/suggestions for file names and paths'
@@ -91,6 +90,7 @@ complete -c clifm -l no-fzfpreview -d 'Disable file preview for TAB completion (
 complete -c clifm -l no-highlight -d 'Disable syntax highlighting'
 complete -c clifm -l no-history -d 'Do not write command into the history file'
 complete -c clifm -l no-open-auto -d 'Same as no-cd-auto, but for files'
+complete -c clifm -l no-refresh-on-resize -d 'Do not update the files list upon window\'s resize'
 complete -c clifm -l no-restore-last-path -d 'Do not record the last visited directory'
 complete -c clifm -l no-suggestions -d 'Disable auto-suggestions'
 complete -c clifm -l no-tips -d 'Disable startup tips'
@@ -116,11 +116,11 @@ complete -c clifm -l share-selbox -d 'Make the Selection Box common to different
 complete -c clifm -l shotgun-file -r -d 'Set a custom configuration file for shotgun'
 
 complete -c clifm -l si -d 'Print sizes in powers of 1000 instead of 1024'
-complete -c clifm -l sort-reverse -d 'Sort in reverse order, e.g. z-a instead of a-z'
 complete -c clifm -l smenutab -d 'Use smenu to display completion matches'
+complete -c clifm -l sort-reverse -d 'Sort in reverse order, e.g. z-a instead of a-z'
 complete -c clifm -l stdtab -d 'Force the use of the standard TAB completion mode (readline)'
 complete -c clifm -l trash-as-rm -d 'The \'r\' command executes \'trash\' instead of \'rm\' to prevent accidental deletions'
 complete -c clifm -l virtual-dir-full-paths -d 'Files in virtual directories are listed as full paths instead of target base names'
 
 complete -c clifm -l virtual-dir -r -d 'Absolute path to a directory to be used as virtual directory'
-complete -c clifm -l vt100 -d 'Run in vt100 compatibility mode'
+complete -c clifm -l vt100 -d 'Run in VT100 compatibility mode'
