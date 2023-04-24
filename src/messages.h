@@ -982,7 +982,7 @@ following shortcuts as well:\n\n\
     tag rename documents docs\n\
 - Merge tag 'png' into 'images'\n\
     tag merge png images\n\
-  Note: All files tagged as 'png' will be now tagged as 'images', \
+  Note: All files tagged as 'png' will be now tagged as 'images',\n\
   and the 'png' tag will be removed\n\
 - Remove the tag 'images' (untag all files tagged as 'images')\n\
     tag del images\n\
