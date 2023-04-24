@@ -464,7 +464,7 @@ All arguments passed to the action command are passed to the script or program a
 The plugins provided with \fBclifm\fR (take a look at the plugins directory) could be used as a starting point to create custom plugins.
 .TP
 .B alias \fR[\fIimport FILE\fR] [\fIls\fR,\fIlist\fR] [\fINAME\fR]
-with no argument (or with \fIls,list\fR parameters), it prints the list of available aliases, if any. To get the description of a specific alias just enter \fIalias\fR followed by the alias name. To write a new alias simply enter \fIedit\fR (or press F10) to open the configuration file and add a line like this: "alias name='command args...'" or "alias name='directory'".
+with no argument (or with \fIls,list\fR parameters), it prints the list of available aliases, if any. To get the description of an specific alias just enter \fIalias\fR followed by the alias name. To write a new alias simply enter \fIedit\fR (or press F10) to open the configuration file and add a line like this: "alias name='command args...'" or "alias name='directory'".
 .sp
 To import aliases from a file, provided it contains aliases in the specified form, use the \fIimport\fR parameter. Aliases conflicting with some of the internal commands won't be imported.
 .sp
@@ -535,7 +535,7 @@ Note that there is no need to type the entire directory name; if the query is un
 The query string could match any part of a directory name: \fIbd er\fR, for instance, will take you to \fI/home/user\fR, since it is an unambiguous query.
 .TP
 .B bl \fIELN/FILE\fR...
-Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
+Create symbolic links (in the current directory) for each specified file. The user will be asked to enter an specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
 .TP
 .B bm, bookmarks \fR[\fIa\fR, \fIadd\fR \fIFILENAME\fR \fINAME\fR [\fISHORTCUT\fR]] [\fId\fR, \fIdel\fR [\fINAME\fR]] [\fIe, edit\fR [\fIAPP\fR]] [\fINAME\fR, \fISHORTCUT\fR]
 Bookmarks can be manager either from the bookmarks manager screen or from the command line.
@@ -675,7 +675,7 @@ If \fBrsync\fR(1) is found, it will be used as follows: \fIrsync\ \-aczvAXHS\ \-
 .B dh \fR[\fISTRING\fR] [\fIPATH\fR] [\fI!ELN\fR]
 With no parameters, it prints the directory history list. To filter this list just pass a string: only entries matching this string will be displayed. In both cases, TAB completion is available. For example: \fIdh down<TAB>\fR will list only those entries matching \fIdown\fR (fuzzily, if \fIfuzzy-matching\fR is enabled).
 .sp
-To access a specific entry, you can pass the entry number preceded by an exclamation mark. For example, if you want the entry number 12, just enter \fIdh !12\fR to change to the corresponding directory.
+To access an specific entry, you can pass the entry number preceded by an exclamation mark. For example, if you want the entry number 12, just enter \fIdh !12\fR to change to the corresponding directory.
 .sp
 Finally, if an absolute path is passed as first parameter, \fIdh\fR works just as the \fIcd\fR command.
 .sp
@@ -789,7 +789,7 @@ T}	Print all entries in the database containing the word "foo"
 .sp
 Use the \fI--purge\fR option to shrink the database. Without further parameters, \fI--purge\fR removes all non-existent (un-stat'able) directories from the database. If a numeric parameter is passed, by contrast, all entries ranked below this number will be removed from the database. For example, \fIj --purge 100\fR will remove all entries ranked below 100.
 .sp
-You can also manually edit the database file using the \fIje\fR (or \fIj --edit\fR) command: edit whatever needs to be edited, save changes, and close the editor. This is useful, for example, to remove a specific entry/directory from the database.
+You can also manually edit the database file using the \fIje\fR (or \fIj --edit\fR) command: edit whatever needs to be edited, save changes, and close the editor. This is useful, for example, to remove an specific entry/directory from the database.
 .sp
 An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and bound by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Just enter \fI++\fR to perform a fuzzy search over the jump database.
 .sp
@@ -1095,7 +1095,7 @@ show \fBclifm\fR version details.
 .B view \fR[\fIedit\fR [\fIAPP\fR]]
 preview files in the current directory (full screen). Requires \fBfzf\fR(1). Alt+- is also available.
 .sp
-To edit the previewer configuration file, just enter \fIview edit\fR, or \fIview edit vi\fR to open it with a specific application, in this case, \fBvi\fR(1).
+To edit the previewer configuration file, just enter \fIview edit\fR, or \fIview edit vi\fR to open it with an specific application, in this case, \fBvi\fR(1).
 .sp
 By pressing Enter or Right, the currently highlighted file will be selected and \fIview\fR closed. To select multiple files just mark them with the TAB key and then press Enter or Right to confirm. To quit \fIview\fR press Escape or Left.
 .sp
@@ -2186,7 +2186,7 @@ To list available actions and the plugins they are linked to, just run \fIaction
 
 To execute a given plugin, just enter the corresponding action name (plus parameters if requiered).
 
-To get information about a specific plugin, enter the action name followed by \fI--help\fR.
+To get information about an specific plugin, enter the action name followed by \fI--help\fR.
 
 Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
 
@@ -2375,7 +2375,7 @@ Add a line preceded by the \fIautocmd\fR keyword to the config file. The general
 .sp
 \fBTARGET\fR specifies the object to which subsequent commands will apply. It can match either \fBdirectory names (paths)\fR or \fBworkspaces\fR.
 .sp
-1. To match directory names use a glob pattern. If no glob metacharacter is provided, the string will be compared as is to the current working directory. To invert the meaning of a pattern, prepend an exclamation mark. To match all directories under a specific directory (including this directory itself) use the double asterisk (**). A few examples:
+1. To match directory names use a glob pattern. If no glob metacharacter is provided, the string will be compared as is to the current working directory. To invert the meaning of a pattern, prepend an exclamation mark. To match all directories under an specific directory (including this directory itself) use the double asterisk (**). A few examples:
 .sp
  \fB~/Downloads\fR      Match exactly the Downloads directory (and \fIonly\fR this directory) in your home directory
  \fB~/Downloads/*\fR    Match all subdirectories in ~/Downloads (\fIexcluding\fR the Downloads directory itself)

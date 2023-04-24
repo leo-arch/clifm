@@ -45,7 +45,7 @@ An action definition has the following form: \"NAME=plugin\", for example:\n\
 \"//=rgfind.sh\".\n\
 To run a plugin just enter the action name. So, to run the rgfind.sh plugin,\n\
 just enter \"//\".\n\
-Some plugins accept parameters. To get information about a specific plugin\n\
+Some plugins accept parameters. To get information about an specific plugin\n\
 use the -h,--help flag. Example: \"- --help\"."
 
 #define ALIAS_USAGE "List, print, or import aliases\n\n\
@@ -56,7 +56,7 @@ use the -h,--help flag. Example: \"- --help\"."
     alias\n\
   or\n\
     alias list (or 'alias <TAB>')\n\
-- Print a specific alias definition\n\
+- Print an specific alias definition\n\
     alias my_alias\n\
 - Import aliases from ~/.bashrc\n\
     alias import ~/.bashrc\n\
@@ -552,7 +552,7 @@ For information about the matching algorithm consult the manpage\n\n\
     at startup, set PurgeJumpDB to true in the configuration file\n\
 - Purge the database from entries ranked below 100\n\
     j --purge 100\n\
-    Note: To remove a specific entry, just remove the corresponding line\n\
+    Note: To remove an specific entry, just remove the corresponding line\n\
     from the database ('je' or 'j --edit')"
 
 #define KB_USAGE "Manage key bindings\n\n\
@@ -743,14 +743,17 @@ Note: Use the 'pc' command to edit files permissions"
 - Set the resources opener back to the default (Lira)\n\
     opener default"
 
-#define OW_USAGE "Open a file with a specific application\n\n\
+#define OW_USAGE "Open a file with an specific application\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   ow ELN/FILE\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
-- Choose opening application for test.c from a menu\n\
-    ow test.c (or 'ow test.c <TAB>' to get a list of applications able to\n\
-  open this file)\n\
-- Open the file test.c with geany\n\
+- Choose opening application for the file 'test.c' from a menu\n\
+    ow test.c\n\
+  or\n\
+    ow test.c <TAB>' (to get a list of available applications)\n\
+  Note: available applications are taken from the mimelist file (see the\n\
+  'mime' command), and only valid and installed applications are listed.\n\
+- Open the file 'test.c' with geany\n\
     ow test.c geany"
 
 #define PAGER_USAGE "Set the files list pager on/off\n\n\
@@ -762,7 +765,7 @@ whenever the amount of files in the current directory is greater than or\n\
 equal to this value (say, 1000). 1 amounts to 'on' and 0 to 'off'\n\n\
 Note: You can also try the 'pager' plugin running 'gg'"
 
-#define PC_USAGE "Interactively edit file permissions\n\n\
+#define PC_USAGE "Interactively edit files permissions\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   pc FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -1287,7 +1290,7 @@ You can also try the interactive help plugin (it depends on FZF): just \
 enter 'ih', that's it.\n\
 Help topics are available as well. Type 'help <TAB>' to get a list of topics.\n\n\
 The following is just a list of available commands and a brief description.\n\
-For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
+For more information about an specific command run 'CMD -h' or 'CMD --help'.\n"
 
 #define CLIFM_COMMANDS "\
  ELN/FILE/DIR       Auto-open and autocd functions\n\
@@ -1663,7 +1666,7 @@ being free, we consider them all equally unethical [...]\""
 #define Q_DESC       " (quit)"
 #define QU_DESC      " (exit - cd on quit)"
 #define R_DESC       " (remove files)"
-#define RF_DESC      " (reprint the current list of files)"
+#define RF_DESC      " (refresh/clear the screen)"
 #define RL_DESC      " (reload the configuration file)"
 #define RR_DESC      " (remove files in bulk)"
 #define SB_DESC      " (access the selection box)"
