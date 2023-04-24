@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Apr 20, 2023" "clifm 1.11.11" "CLIFM Manual"
+.TH "CLIFM" "1" "Apr 24, 2023" "clifm 1.11.12" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -204,6 +204,15 @@ enable desktop notifications. Enter \fIhelp desktop-notifications\fR in \fBclifm
 \fB\-\-disk\-usage\fR
 show disk usage (free/total) for the file system the current directory belongs to
 .TP
+\fB\-\-full\-dir\-size\fR
+if running in long view, print directories size and their contents
+.TP
+\fB\-\-fuzzy\-algo\fR=\fI\,VER\/\fR
+fuzzy matching algorithm, where \fIVER\fR is either \fI1\fR (faster, but not Unicode aware), or \fI2\fR (slower, Unicode aware)
+.TP
+\fB\-\-fuzzy\-matching\fR
+enable fuzzy matches for filename/path completions and suggestions
+.TP
 \fB\-\-fzfpreview-hidden\fR
 enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle it via Alt-p)
 .TP
@@ -213,26 +222,17 @@ use \fIfzf\fR to display completion matches
 \fB\-\-fzytab\fR
 use \fIfzy\fR to display completion matches
 .TP
-\fB\-\-full\-dir\-size\fR
-if running in long view, print directories size and their contents
-.TP
-\fB\-\-fuzzy\-matching\fR
-enable fuzzy matches for filename/path completions and suggestions
-.TP
-\fB\-\-fuzzy\-algo\fR=\fI\,VER\/\fR
-fuzzy matching algorithm, where \fIVER\fR is either \fI1\fR (faster, but not Unicode aware), or \fI2\fR (slower, Unicode aware)
-.TP
 \fB\-\-icons\fR
 enable icons
 .TP
 \fB\-\-icons\-use\-file\-color\fR
 instead of an specific color, icons take the color of the corresponding file name (specified either via file type or via file extension). Useful when building custom color schemes. This option implies \fB--icons\fR. Only if compiled with support for either icons-in-terminal or Nerdfonts. The default build is compiled with emoji-icons support, in which case this option is ignored (Unicode icons has their own color built-in)
 .TP
+\fB\-\-int\-vars
+allow the use of internal variables (ex: \fIVAR=/bin; cd $VAR\fR)
+.TP
 \fB\-\-list\-and\-quit\fR
 list files and quit. It may be used in conjunction parameter substitution. Ex: 'clifm --list-and-quit /etc'
-.TP
-\fB\-\-mnt\-udisks2\fR
-use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
 .TP
 \fB\-\-max\-dirhist\fR
 maximum number of visited directories to remember
@@ -243,6 +243,9 @@ list only up to \fINUM\fR files. Use -1 or 'unset' to remove the files limit (de
 \fB\-\-max\-path\fR=\fI\,NUM\/\fR
 set the maximum number of characters after which the current directory in the prompt line will be abbreviated to the directory base name (if \\z is used in the prompt)
 .TP
+\fB\-\-mnt\-udisks2\fR
+use \fIudisks2\fR instead of \fIudevil\fR (default), for the \fImedia\fR command
+.TP
 \fB\-\-no\-apparent\-size\fR
 print file sizes as used blocks instead of used bytes (apparent size)
 .TP
@@ -251,9 +254,6 @@ disable bold colors (applies to all color schemes)
 .TP
 \fB\-\-no\-cd\-auto\fR
 by default, \fBclifm\fR changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of \fIcd\fR
-.TP
-\fB\-\-no\-dir\-jumper\fR
-disable the directory jumper function
 .TP
 \fB\-\-no-classify\fR
 by default, \fBclifm\fR appends a file type indicator character to file names when running with no colors (see the \fB--no-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
@@ -276,6 +276,9 @@ disable colors
 .TP
 \fB\-\-no\-columns\fR
 disable columns for files listing
+.TP
+\fB\-\-no\-dir\-jumper\fR
+disable the directory jumper function
 .TP
 \fB\-\-no\-file\-cap\fR
 do not check files capabilities when listing files
@@ -359,7 +362,7 @@ make the Selection Box common (that is, accessible) to different profiles. By de
 Set \fIFILE\fR as shotgun's configuration file. Only effective if running as a standalone files previewer via the \fI\-\-preview\fR switch. See the \fBSHOTGUN\fR section below for more information
 .TP
 \fB\-\-si\fR
-print sizes in powers of 1000, as defined in the International System of Units (SI), instead of 1024 (Linux only)
+print sizes in powers of 1000, as defined in the International System of Units (SI), instead of 1024
 .TP
 \fB\-\-smenutab\fR
 use \fIsmenu\fR to display completion matches
@@ -378,6 +381,9 @@ use PATH as CliFM's virtual directory
 .TP
 \fB\-\-virtual\-dir\-full\-paths\fR
 print file names in virtual directories as full paths instead of just base names
+.TP
+\fB\-\-vt100\fR
+run in VT100 compatibility mode
 .PP
 Options precedence order: 1) command line flags; 2) configuration file; 3) default values.
 
