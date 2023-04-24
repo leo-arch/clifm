@@ -1853,7 +1853,7 @@ set_cp_cmd(char **cmd, const int cp_force)
 			conf.cp_cmd = CP_CP_FORCE;
 	}
 
-	switch(conf.cp_cmd) {
+	switch (conf.cp_cmd) {
 	case CP_ADVCP:
 		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVCP_CMD) + 1) * sizeof(char));
 		strcpy(*cmd, _DEF_ADVCP_CMD);
@@ -1931,35 +1931,6 @@ check_zombies(void)
 	if (waitpid(-1, &status, WNOHANG) > 0)
 		zombies--;
 }
-
-/*
-static int
-bring_to_foreground(char *str)
-{
-	if (!str || !*str || IS_HELP(str)) {
-		puts("Usage: fg PID");
-		return EXIT_SUCCESS;
-	}
-
-	if (!is_number(str)) {
-		fprintf(stderr, "%s: %s: Not a valid PID\n", PROGRAM_NAME, str);
-		return EXIT_FAILURE;
-	}
-
-	int pid = atoi(str);
-	if (kill((pid_t)pid, SIGCONT) == -1) {
-		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-		return errno;
-	}
-
-	int status = 0;
-	if (waitpid(pid, &status, 0) <= 0) {
-		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
-		return errno;
-	}
-
-	return EXIT_SUCCESS;
-} */
 
 /* Print the current working directory. Try first our own internal representation
  * (workspaces array). If something went wrong, fallback to getcwd(3) */
@@ -2381,8 +2352,7 @@ exec_cmd(char **comm)
 
 	/*    ############### BULK REMOVE ##################     */
 	else if (*comm[0] == 'r' && comm[0][1] == 'r' && !comm[0][2])
-		exit_code = bulk_remove(comm[1] ? comm[1] : NULL,
-			(comm[1] && comm[2]) ? comm[2] : NULL);
+		exit_code = bulk_remove(comm[1], comm[1] ? comm[2] : NULL);
 
 	/*     ################# TAGS ##################     */
 	else if (*comm[0] == 't'
@@ -2449,7 +2419,7 @@ exec_cmd(char **comm)
 			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
 				copy_and_rename = 1;
 
-			use_force = is_force_param(comm[1] ? comm[1] : (char *)NULL);
+			use_force = is_force_param(comm[1]);
 			set_cp_cmd(&comm[0], use_force);
 
 		} else if (*comm[0] == 'm' && !comm[0][1]) {
@@ -2460,7 +2430,7 @@ exec_cmd(char **comm)
 			if (!sel_is_last && comm[1] && !comm[2])
 				xrename = 1;
 
-			use_force = is_force_param(comm[1] ? comm[1] : (char *)NULL);
+			use_force = is_force_param(comm[1]);
 			set_mv_cmd(&comm[0], use_force);
 		}
 
@@ -2825,7 +2795,6 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'u' && strcmp(comm[0], "unset") == 0) {
 		return (exit_code = unset_function(comm + 1));
 	}
-
 
 	/* These functions just print stuff, so that the value of exit_code
 	 * is always zero, that is to say, success */

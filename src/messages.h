@@ -183,8 +183,9 @@ Note: When using TAB completion only bookmark names are listed"
   br, bulk ELN/FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Bulk rename all files ending with .pdf in the current directory\n\
-    br *.pdf (or 'br <TAB> to choose from a list - mutli-selection is\n\
-  allowed')\n\
+    br *.pdf\n\
+  or\n\
+    'br <TAB>' to choose from a list (mutli-selection is allowed)\n\
 - Bulk rename all selected files\n\
     br sel"
 
@@ -319,7 +320,7 @@ Parameters passed to cp: -a"
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Toggle long/detail view mode\n\
     Alt-l\n\
-  Note: use PropFields in the configuration file to customize output\n\
+  Note: Use PropFields in the configuration file to customize output\n\
   fields (and TimeStyle for custom timestamp formats)\n\
 - Print properties of the file whose ELN is 4\n\
     p4\n\
@@ -534,10 +535,10 @@ For information about the matching algorithm consult the manpage\n\n\
     jl str\n\
 - Jump (cd) to the best ranked directory matching \"bui\"\n\
     j bui\n\
-    Note: Hit TAB to get a list of possible matches: 'j bui<TAB>'\n\
+  Note: Hit TAB to get a list of possible matches: 'j bui<TAB>'\n\
 - If not enough, use multiple query strings\n\
     j ho bui\n\
-    Note: Most likey, this will take you to /home/build\n\
+  Note: Most likey, this will take you to '/home/build'\n\
 - Jump to the best ranked PARENT directory matching \"str\"\n\
     jp str\n\
 - Jump to the best ranked CHILD directory matching \"str\"\n\
@@ -548,12 +549,12 @@ For information about the matching algorithm consult the manpage\n\n\
     j --edit vim\n\
 - Purge the database from non-existent directories\n\
     j --purge\n\
-    Note: To automatically purge the database from non-existent directories\n\
-    at startup, set PurgeJumpDB to true in the configuration file\n\
+  Note: To automatically purge the database from non-existent directories\n\
+  at startup, set PurgeJumpDB to true in the configuration file\n\
 - Purge the database from entries ranked below 100\n\
     j --purge 100\n\
-    Note: To remove an specific entry, just remove the corresponding line\n\
-    from the database ('je' or 'j --edit')"
+  Note: To remove an specific entry, just remove the corresponding line\n\
+  from the database ('je' or 'j --edit')"
 
 #define KB_USAGE "Manage key bindings\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -627,7 +628,7 @@ To get information about a device, enter iELN. For example: i12"
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Open the file 'book.pdf' with the default opening application\n\
     mm open book.pdf\n\
-  Note: since 'open' is the default action, it can be omitted: 'mm book.pdf'.\n\
+  Note: Since 'open' is the default action, it can be omitted: 'mm book.pdf'.\n\
   This command is the same as 'open book.pdf' or just 'book.pdf'\n\
 - Get MIME information for the file whose ELN is 12\n\
     mm info 12\n\
@@ -671,7 +672,7 @@ To get information about a device, enter iELN. For example: i12"
     net (or 'net list')\n\
 - Mount the remote resource named 'work'\n\
     net mount work (also 'net m work' or 'net m <TAB>')\n\
-    Since 'mount' is the default action, it can be ommited: 'net work'\n\
+  Note: Since 'mount' is the default action, it can be ommited: 'net work'\n\
 - Unmount the remote resource named 'work'\n\
     net unmount work (or 'net u work' or 'net u <TAB>')\n\
 - Open/edit the net configuration file\n\
@@ -689,10 +690,10 @@ To get information about a device, enter iELN. For example: i12"
     n file1 file2\n\
 - Create two directories named dir1 and dir2\n\
     n dir1/ dir2/\n\
-    Note: Note the ending slashes\n\
+  Note: Note the ending slashes\n\
 - Both of the above at once:\n\
     n file1 file2 dir1/ dir2/\n\n\
-Parent directories are created if necessary. For example, if you run:\n\
+Parent directories are created if necessary. For example, if you run\n\
     n dir/subdir/file\n\
 both 'dir' and 'subdir' directories will be created if they do not exist"
 
@@ -701,9 +702,9 @@ both 'dir' and 'subdir' directories will be created if they do not exist"
   oc FILE...\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Change ownership of selected files\n\
-  oc sel\n\
+    oc sel\n\
 - Change ownership of all .iso files\n\
-  oc *.iso\n\n\
+    oc *.iso\n\n\
 \x1b[1mNOTES\x1b[0m\n\
 A template is presented to the user to be edited.\n\n\
 Only user and primary group common to all files passed as\n\
@@ -714,11 +715,11 @@ Both names and ID numbers are allowed (TAB completion is available).\n\n\
 If only a name/number is entered, it is taken as user.\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Change user to root\n\
-  root (or \"0\")\n\
+    root (or \"0\")\n\
 - Change primary group to video\n\
-  :video (or \":981\")\n\
+    :video (or \":981\")\n\
 - Change user to peter and primary group to audio\n\
-  peter:audio (or \"1000:986\" or \"peter:986\" or \"1000:audio\")\n\n\
+    peter:audio (or \"1000:986\" or \"peter:986\" or \"1000:audio\")\n\n\
 Note: Use the 'pc' command to edit files permissions"
 
 #define OPEN_USAGE "Open a file\n\n\
@@ -750,8 +751,8 @@ Note: Use the 'pc' command to edit files permissions"
 - Choose opening application for the file 'test.c' from a menu\n\
     ow test.c\n\
   or\n\
-    ow test.c <TAB>' (to get a list of available applications)\n\
-  Note: available applications are taken from the mimelist file (see the\n\
+    'ow test.c <TAB>' (to get a list of available applications)\n\
+  Note: Available applications are taken from the mimelist file (see the\n\
   'mime' command), and only valid and installed applications are listed.\n\
 - Open the file 'test.c' with geany\n\
     ow test.c geany"
@@ -971,21 +972,21 @@ following shortcuts as well:\n\n\
     tag list file.txt\n\
 - Tag all .PNG files in the current directory as both 'images' and 'png'\n\
     tag add *.png :images :png\n\
-    Note: Tags are created if they do not exist\n\
-    Note 2: Since 'add' is the default action, it can be omitted\n\
+  Note: Tags are created if they do not exist\n\
+  Note 2: Since 'add' is the default action, it can be omitted\n\
 - Tag all selected files as 'special'\n\
     tag add sel :special\n\
 - Rename tag 'documents' as 'docs'\n\
     tag rename documents docs\n\
 - Merge tag 'png' into 'images'\n\
     tag merge png images\n\
-    Note: All files tagged as 'png' will be now tagged as 'images', \
-and the 'png' tag will be removed\n\
+  Note: All files tagged as 'png' will be now tagged as 'images', \
+  and the 'png' tag will be removed\n\
 - Remove the tag 'images' (untag all files tagged as 'images')\n\
     tag del images\n\
 - Untag a few files from the 'work' tag\n\
     tag untag :work file1 image.png dir2\n\
-    or\n\
+  or\n\
     tag untag :<TAB> (and then TAB again to select tagged files)\n\n\
 Operating on tagged files (t:TAG)\n\
 - Print the file properties of all files tagged as 'docs'\n\
@@ -1001,8 +1002,9 @@ Mark the files you need via TAB and then press Enter or Right"
 
 #define TE_USAGE "Toggle the executable bit on files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  te ELN/FILE... (or 'te <TAB>' to choose from a list - multi-selection\n\
-  is allowed)\n\n\
+    te ELN/FILE...\n\
+  or\n\
+    'te <TAB>' to choose from a list (multi-selection is allowed)\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Set the executable bit on all shell scripts in the current directory\n\
     te *.sh\n\
@@ -1014,7 +1016,9 @@ Mark the files you need via TAB and then press Enter or Right"
   t, trash [ELN/FILE]... [list] [clear] [empty] [del]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Trash the file whose ELN is 12\n\
-    t 12 (or 't <TAB>' to choose from a list - multi-selection is allowed)\n\
+    t 12\n\
+  or\n\
+    't <TAB>' to choose from a list (multi-selection is allowed)\n\
 - Trash all files ending with .sh\n\
     t *.sh\n\
 - List currently trashed files\n\
@@ -1026,7 +1030,9 @@ Mark the files you need via TAB and then press Enter or Right"
 - Untrash all trashed files (restore them to their original location)\n\
     u *\n\
 - Untrash files selectively using a menu\n\
-    u (or 'u <TAB>' to choose from a list - multi-selection is allowed)"
+    u\n\
+  or\n\
+    'u <TAB>' to choose from a list (multi-selection is allowed)"
 
 #define UNSET_USAGE "Delete variables from the environment\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -1039,7 +1045,9 @@ Mark the files you need via TAB and then press Enter or Right"
 - Untrash all trashed files (restore them to their original location)\n\
     u *\n\
 - Untrash files selectively using a menu\n\
-    u (or 'u <TAB>' to choose from a list - multi-selection is allowed)\n\n\
+    u\n\
+  or\n\
+    'u <TAB>' to choose from a list (multi-selection is allowed)\n\n\
 Note: Use the 'trash' command to trash files. Try 'trash --help'"
 
 #define VV_USAGE "Copy files into a directory and bulk rename them at once\n\n\
@@ -1063,7 +1071,7 @@ Note: Use the 'trash' command to trash files. Try 'trash --help'"
     view edit vi\n\n\
 Enter 'help file-previews' for more information"
 
-#define WRAPPERS_USAGE "c (v, paste), l, m, md, and r commands are wrappers \
+#define WRAPPERS_USAGE "c, l, m, md, and r commands are wrappers \
 for cp(1), ln(1), mv(1),\nmkdir(1), and rm(1) shell commands respectively.\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
 c  -> cp -iRp\n\
@@ -1075,8 +1083,8 @@ r  -> rm -I (for non-directories) (2)\n\n\
 (1) 'rm -dr' on NetBSD/OpenBSD/MacOS.\n    Note: -d is not supported by the POSIX version of rm(1)\n\
 (2) 'rm -f' on NetBSD/OpenBSD/MacOS\n\n\
 The 'paste' command is equivalent to 'c' and exists only for semantic\n\
-reasons. For example, to copy selected files into the current directory,\n\
-it makes sense to write 'paste sel', or its shortened version, 'v sel'.\n\n\
+reasons. For example, if you want to copy selected files into the current\n\
+directory, it makes sense to write 'paste sel'.\n\n\
 By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
 (-i), i.e. prompting before overwriting a file. To run non-interactivelly\n\
 instead, use the -f,--force parameter (see the examples below). You can\n\
@@ -1094,17 +1102,17 @@ Example: cp -abf ...\n\n\
     c file1 dir1/file2\n\
 - Copy all selected files into the current directory\n\
     c sel\n\
-    Note: If destiny directory is omitted, the current directory is assumed\n\
+  Note: If destiny directory is omitted, the current directory is assumed\n\
 - Copy all selected files into the current directory (non-interactively):\n\
     c -f sel\n\
 - Move all selected files into the directory named testdir\n\
     m sel testdir\n\
-- Rename file1 as file_test\n\
+- Rename 'file1' as 'file_test'\n\
     m file1 file_test\n\
-- Interactively rename file1\n\
+- Interactively rename 'file1'\n\
     m file1\n\
-    Note: The user is prompted to enter a new name using the old name as\n\
-    template\n\
+  Note: The user is prompted to enter a new name using the old name as\n\
+  template\n\
 - Move all selected files into the current directory (non-interactively)\n\
     m -f sel\n\
 - Remove all selected files\n\
@@ -1112,13 +1120,13 @@ Example: cp -abf ...\n\n\
 - Remove all selected files (non-interactively)\n\
     r -f sel\n\
 - Create a symbolic link pointing to the directory whose ELN is 12 named\n\
-  link\n\
+  'link'\n\
     l 12 link\n\
-- Create a directory named mydir\n\
+- Create a directory named 'mydir'\n\
     md mydir\n\
-    Note: To create files and directories you can use the 'n' command as\n\
-    well. See 'n --help'\n\
-- Edit the symbolic link named mylink\n\
+  Note: To create files and directories you can use the 'n' command as\n\
+  well. See 'n --help'\n\
+- Edit the symbolic link named 'mylink'\n\
     le mylink\n\n\
 Use the 'vv' command to copy files into a directory and bulk rename them\n\
 at once. See 'vv --help'\n\n\
@@ -1368,7 +1376,6 @@ For more information about an specific command run 'CMD -h' or 'CMD --help'.\n"
  tips               Print tips\n\
  u, undel, untrash  Restore trashed files (via a menu)\n\
  unpin              Unpin the pinned directory\n\
- v, paste sel       Copy selected files into the current directory\n\
  vv                 Copy and rename files at once\n\
  ver, version       Print version information\n\
  view               Preview files in the current directory\n\

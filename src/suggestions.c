@@ -116,7 +116,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 		if (*s == 's') return SEL_DESC;
 		if (*s == 't') return TRASH_DESC;
 		if (*s == 'u') return U_DESC;
-		if (*s == 'v') return V_DESC;
+//		if (*s == 'v') return V_DESC;
 		if (*s == 'x') return X_DESC;
 		if (*s == 'X') return XU_DESC;
 	}
@@ -295,8 +295,8 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return MEDIA_DESC;
 		if (*s == 'p' && strcmp(s + 1, "ager") == 0)
 			return PG_DESC;
-		if (*s == 'p' && strcmp(s + 1, "aste") == 0)
-			return V_DESC;
+//		if (*s == 'p' && strcmp(s + 1, "aste") == 0)
+//			return V_DESC;
 		if (*s == 's' && strcmp(s + 1, "tats") == 0)
 			return STATS_DESC;
 		if (*s == 't' && strcmp(s + 1, "rash") == 0)

@@ -215,7 +215,6 @@ int_cmds_generator(const char *text, int state)
 		"t       (trash files)",
 		"u       (restore trashed files using a menu)",
 		"unpin   (unpin the pinned directory)",
-		"v       (copy selected files here: v sel, or paste sel)",
 		"ver     (print version information)",
 		"view    (preview files in the current directory)",
 		"vv      (copy and rename files in bulk at once)",
