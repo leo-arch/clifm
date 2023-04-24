@@ -1179,7 +1179,7 @@ hidden_files_function(const char *arg)
 	int exit_status = EXIT_SUCCESS;
 
 	if (strcmp(arg, "status") == 0) {
-		printf(_("Hidden files is %s\n"), conf.show_hidden
+		printf(_("Show-hidden-files is %s\n"), conf.show_hidden
 			? _("enabled") : _("disabled"));
 	} else if (strcmp(arg, "off") == 0) {
 		conf.show_hidden = 0;
@@ -1190,10 +1190,8 @@ hidden_files_function(const char *arg)
 		print_reload_msg(_("Hidden files disabled\n"));
 	} else if (strcmp(arg, "on") == 0) {
 		conf.show_hidden = 1;
-		if (conf.autols == 1) {
-			free_dirlist();
-			exit_status = list_dir();
-		}
+		if (conf.autols == 1)
+			reload_dirlist();
 		print_reload_msg(_("Hidden files enabled\n"));
 	}
 

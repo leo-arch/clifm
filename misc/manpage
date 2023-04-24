@@ -804,10 +804,8 @@ Toggle long/detail view mode
 .B lm \fR[\fIon\fR, \fIoff\fR]
 Toggle the light mode on/off. This option, aimed at making files listing faster than the default mode, is especially useful for really old hardware or when working on remote machines (for more information see the \fBNOTE ON SPEED\fR section below).
 .TP
-.B log \fR[\fIcmd\fR [\fIon\fR, \fIoff\fR, \fIstatus\fR]] [\fImsg\fR [\fIon\fR, \fIoff\fR, \fIstatus\fR]] [\fIclear\fR]
-with no arguments, it prints the contents of the log file. If \fIclear\fR is passed as argument, all the logs will be deleted. 
-.sp
-The \fIon\fR, \fIoff\fR, and \fIstatus\fR subcommands enable, disable, and print the status of the \fIlog\fR function, either for commands (if \fIcmd\fR is used) or for messages (if \fImsg\fR is used instead). Example: \fIlog cmd on\fR, to enable command logs.
+.B log \fR[\fIcmd\fR [\fIlist\fR, \fIon\fR, \fIoff\fR, \fIstatus\fR, \fIclear\fR]] [\fImsg\fR [\fIlist\fR, \fIon\fR, \fIoff\fR, \fIstatus\fR, \fIclear\fR]]
+Enable, disable, clear, list or check the status of the program logs, either message (errors and warnings) or command logs. Example: \fIlog cmd on\fR, to enable command logs, or \fIlog msg clear\fR, to clear/remove message logs.
 .sp
 Consult the \fBFILES\fR section below for information about how logs are written into the logs file.
 .TP
