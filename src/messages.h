@@ -70,10 +70,12 @@ use the -h,--help flag. Example: \"- --help\"."
 - Compress/archive all selected files\n\
     ac sel\n\
 - Compress/archive a range of files\n\
-    ac 12-24 (or 'ac <TAB>' to choose from a list - multi-selection is allowed)\n\
+    ac 12-24\n\
+  or\n\
+    'ac <TAB>' to choose from a list (multi-selection is allowed)\n\
 - Decompress/dearchive a file\n\
     ad file.tar.gz\n\
-  or just open the file and CliFM will prompt the appropriate menu\n\
+  or just open the file (the appropriate menu will be displayed)\n\
     o file.tar.gz (or just 'file.tar.gz')\n\n\
 \x1b[1mDEPENDENCIES\x1b[0m\n\
 zstd(1)           Everything related to Zstandard\n\
@@ -1310,7 +1312,7 @@ For more information about an specific command run 'CMD -h' or 'CMD --help'.\n"
  alias              Manage aliases\n\
  ao, auto-open      Set auto-open on/off\n\
  b, back            Go back in the directory history list\n\
- bb, bleach         A file names cleaner\n\
+ bb, bleach         Clean up non-ASCII file names\n\
  bd                 Go back to a parent directory\n\
  bl                 Create symbolic links in bulk\n\
  bm, bookmarks      Manage bookmarks\n\
@@ -1485,70 +1487,70 @@ view | Alt+-             Preview files in the current directory (requires fzf)\n
 #define QUICK_HELP_BASIC_OPERATIONS "\
 BASIC FILE OPERATIONS\n\
 ---------------------\n\
-myfile.txt          Open 'myfile.txt' with the default associated application\n\
-myfile.txt vi       Open 'myfile.txt' with vi (also 'vi myfile.txt')\n\
-12                  Open the file whose ELN is 12\n\
-12&                 Open the file whose ELN is 12 in the background\n\
-ow 10 | ow 10 <TAB> Choose opening application for the file whose ELN is 10\n\
-p4                  Print the properties of the file whose ELN is 4\n\
-/*.png              Search for files ending with .png in the current dir\n\
-s *.c               Select all C files\n\
-s 1-4 8 19-26       Select multiple files by ELN\n\
-sb | s:<TAB>        List currently selected files\n\
-ds | ds <TAB>       Deselect a few selected files\n\
-ds * | Alt-d        Deselect all selected files\n\
-bm add mydir mybm   Bookmark the directory named 'mydir' as 'mybm'\n\
-bm del mybm         Remove the bookmark named 'mybm'\n\
-tag --help          Learn about tagging files\n\
-n myfile            Create a new file named 'myfile'\n\
-n mydir/            Create a new directory named 'mydir'\n\
-c sel               Copy selected files into the current directory (1)\n\
-r sel               Remove all selected files (1)\n\
-br sel              Bulk rename selected files (1)\n\
-c 34 file_copy      Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
-cr myfile           Copy 'myfile' to a remote location\n\
-m 45 3              Move the file whose ELN is 45 to the dir whose ELN is 3\n\
-m myfile.txt        Interactively rename 'myfile.txt'\n\
-l myfile mylink     Create a symbolic link named 'mylink' pointing to 'myfile'\n\
-le mylink           Edit the symbolic link 'mylink'\n\
-oc myfile           Edit file ownership of the file 'myfile'\n\
-pc myfile           Edit file properties of the file 'myfile'\n\
-te *.sh             Toggle the executable bit on all .sh files\n\
-t 12-18             Send the files whose ELN's are 12-18 to the trash can\n\
-t del | t del <TAB> Permanently remove trashed files using a menu\n\
-t empty             Empty the trash can\n\
-u | u <TAB>         Undelete trashed files using a menu\n\
-ac sel              Compress/archive selected files (1)\n\n\
+myfile.txt           Open 'myfile.txt' with the default associated application\n\
+myfile.txt vi        Open 'myfile.txt' with vi (also 'vi myfile.txt')\n\
+12                   Open the file whose ELN is 12\n\
+12&                  Open the file whose ELN is 12 in the background\n\
+ow 10 | ow 10 <TAB>  Choose opening application for the file whose ELN is 10\n\
+p 4                  Print the properties of the file whose ELN is 4\n\
+/*.png               Search for files ending with .png in the current directory\n\
+s *.c                Select all C files\n\
+s 1-4 8 19-26        Select multiple files by ELN\n\
+sb | s:<TAB>         List currently selected files\n\
+ds | ds <TAB>        Deselect a few selected files\n\
+ds * | Alt-d         Deselect all selected files\n\
+bm add mydir mybm    Bookmark the directory named 'mydir' as 'mybm'\n\
+bm del mybm          Remove the bookmark named 'mybm'\n\
+tag --help           Learn about file tags\n\
+n myfile             Create a new file named 'myfile'\n\
+n mydir/             Create a new directory named 'mydir'\n\
+c sel                Copy selected files into the current directory (1)\n\
+r sel                Remove all selected files (1)\n\
+br sel               Bulk rename selected files (1)\n\
+c 34 file_copy       Copy the file whose ELN is 34 as 'file_copy' in the CWD\n\
+cr myfile            Copy 'myfile' to a remote location\n\
+m 45 3               Move the file whose ELN is 45 to the dir whose ELN is 3\n\
+m myfile.txt         Interactively rename 'myfile.txt'\n\
+l myfile mylink      Create a symbolic link named 'mylink' pointing to 'myfile'\n\
+le mylink            Edit the symbolic link 'mylink'\n\
+oc myfile            Edit file ownership of the file 'myfile'\n\
+pc myfile            Edit file properties of the file 'myfile'\n\
+te *.sh              Toggle the executable bit on all .sh files\n\
+t 12-18              Send the files whose ELN's are 12-18 to the trash can\n\
+t del | t del <TAB>  Permanently remove trashed files using a menu\n\
+t empty              Empty the trash can\n\
+u | u <TAB>          Undelete trashed files using a menu\n\
+ac sel               Compress/archive selected files (1)\n\n\
 (1) 's:' can be used instead of the 'sel' keyword"
 
 #define QUICK_HELP_MISC "\
 MISC\n\
 ----\n\
-CMD --help     Get help for command CMD\n\
-help <TAB>     List available help topics\n\
-F1             Open the manpage\n\
-ih             Run the interactive help plugin (requires fzf)\n\
-ll | Alt-l     Toggle detail/long view mode\n\
-hh | Alt-.     Toggle hidden files\n\
-rf | Ctrl-l    Clear the screen (also Enter on empty line)\n\
-config | F10   View/edit the configuration file\n\
-mm edit | F6   Change default associated applications\n\
-kb edit | F9   Edit keybindings\n\
-view edit | F7 Change previewing applications\n\
-mm info 12     Get MIME information for the file whose ELN is 12\n\
-Alt-TAB        Toggle disk usage analyzer mode\n\
-cs             Manage color schemes\n\
-Right          Accept the entire suggestion\n\
-Alt-f          Accept the first/next word of the current suggestion\n\
-pf set test    Change to the profile named 'test'\n\
-st size rev    Sort files by size in reverse order\n\
-Alt-x | Alt-z  Change sort order\n\
-media          (Un)mount storage devices\n\
-net work       Mount the network resource named 'work'\n\
-actions        List available actions/plugins\n\
-icons on       Enable icons\n\
-q | F12        I'm tired, quit\n\
-Q              cd on quit (consult the manpage)"
+CMD --help      Get help for command CMD\n\
+help <TAB>      List available help topics\n\
+F1              Open the manpage\n\
+ih              Run the interactive help plugin (requires fzf)\n\
+ll | Alt-l      Toggle detail/long view mode\n\
+hh | Alt-.      Toggle hidden files\n\
+rf | Ctrl-l     Clear the screen (also Enter on empty line)\n\
+config | F10    View/edit the configuration file\n\
+mm edit | F6    Change default associated applications\n\
+kb edit | F9    Edit keybindings\n\
+view edit | F7  Change previewing applications\n\
+mm info 12      Get MIME information for the file whose ELN is 12\n\
+Alt-TAB         Toggle the disk usage analyzer mode\n\
+cs              Manage color schemes\n\
+Right           Accept the entire suggestion\n\
+Alt-f           Accept the first/next word of the current suggestion\n\
+pf set test     Change to the profile named 'test'\n\
+st size rev     Sort files by size in reverse order\n\
+Alt-x | Alt-z   Switch sort order\n\
+media           (Un)mount storage devices\n\
+net work        Mount the network resource named 'work'\n\
+actions         List available actions/plugins\n\
+icons on        Enable icons\n\
+q | F12         I'm tired, quit\n\
+Q               cd on quit (consult the manpage)"
 
 #define ASCII_LOGO_BIG "\
      .okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkd. \n\
