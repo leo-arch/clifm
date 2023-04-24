@@ -327,7 +327,7 @@ get_largest_action_name(void)
 int
 actions_function(char **args)
 {
-	if (!args[1]) {
+	if (!args[1] || strcmp(args[1], "list") == 0) {
 		if (actions_n > 0) {
 			/* Just list available actions */
 			printf(_("To run a plugin just enter its action name\n"

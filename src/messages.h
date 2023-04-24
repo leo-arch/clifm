@@ -31,14 +31,14 @@
 
 #define ACTIONS_USAGE "List or edit actions/plugins\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  actions [edit [APP]]\n\n\
+  actions [list] [edit [APP]]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available actions/plugins\n\
-    actions\n\
+    actions list\n\
+  Note: Since 'list' is the default action, it can be omitted\n\
 - Open/edit the actions configuration file with nano\n\
     actions edit nano\n\
-- Open/edit the actions configuration file with the default associated\n\
-  application\n\
+- Open/edit the actions configuration file with the default application\n\
     actions edit\n\n\
 Actions are just names for plugins.\n\
 An action definition has the following form: \"NAME=plugin\", for example:\n\
@@ -1696,7 +1696,7 @@ being free, we consider them all equally unethical [...]\""
 #define TRASH_DESC   " (trash files)"
 #define U_DESC       " (restore trashed files using a menu)"
 #define UNPIN_DESC   " (unpin the pinned directory)"
-#define V_DESC       " (copy selected files here: v sel, or paste sel)"
+//#define V_DESC       " (copy selected files here: v sel, or paste sel)"
 #define VER_DESC     " (print version information)"
 #define VIEW_DESC    " (preview files in the current directory)"
 #define VV_DESC      " (copy and rename files in bulk at once)"

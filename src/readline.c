@@ -2746,6 +2746,10 @@ options_generator(const char *text, int state)
 		_opts[0] = "edit"; _opts[1] = "dump"; _opts[2] = "reset";
 		_opts[3] = NULL;
 
+	/* actions */
+	} else if (w == 2 && *l == 'a' && strncmp(l, "actions ", 8) == 0) {
+		_opts[0] = "list"; _opts[1] = "edit"; _opts[2] = NULL;
+
 	/* log */
 	} else if (w == 3 && *l == 'l' && (strncmp(l, "log msg ", 8) == 0
 	|| strncmp(l, "log cmd ", 8) == 0) ) {
