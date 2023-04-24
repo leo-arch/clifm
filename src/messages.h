@@ -1293,17 +1293,17 @@ The following is just a list of available commands and a brief description.\n\
 For more information about an specific command run 'CMD -h' or 'CMD --help'.\n"
 
 #define CLIFM_COMMANDS "\
- ELN/FILE/DIR       Auto-open and autocd functions\n\
- /PATTERN           Quick search\n\
+ ELN/FILE/DIR       Auto-open/autocd files/directories\n\
+ /PATTERN           Search for files\n\
  ;[CMD], :[CMD]     Run CMD via the system shell\n\
- ac, ad             Archiving functions\n\
+ ac, ad             (De)archive files\n\
  acd, autocd        Set auto-cd on/off\n\
  actions            Manage actions/plugins\n\
  alias              Manage aliases\n\
  ao, auto-open      Set auto-open on/off\n\
  b, back            Go back in the directory history list\n\
  bb, bleach         A file names cleaner\n\
- bd                 Go back to any parent directory\n\
+ bd                 Go back to a parent directory\n\
  bl                 Create symbolic links in bulk\n\
  bm, bookmarks      Manage bookmarks\n\
  br, bulk           Rename files in bulk\n\
@@ -1321,25 +1321,25 @@ For more information about an specific command run 'CMD -h' or 'CMD --help'.\n"
  ext                Set external/shell commands on/off\n\
  f, forth           Go forth in the directory history list\n\
  fc                 Set the files counter on/off\n\
- ff, dirs-first     Set list-directories-first on/off\n\
+ ff, dirs-first     Toggle list-directories-first on/off\n\
  fs                 What is free software?\n\
  ft, filter         Set a files filter\n\
- fz                 Printf directories full size (long view mode only)\n\
- hh, hidden         Set show-hidden-files on/off\n\
+ fz                 Print directories full size (long view mode only)\n\
+ hh, hidden         Toggle hidden files on/off\n\
  history            Manage the commands history\n\
  icons              Set icons on/off\n\
- j                  The directory jumper function\n\
+ j                  Jump to a visited directory\n\
  kb, keybinds       Manage keybindings\n\
  le                 Edit symbolic link target\n\
- ll, lv             Toggle long view mode\n\
- lm                 Set the light mode on/off\n\
+ ll, lv             Toggle long view mode on/off\n\
+ lm                 Toggle the light mode on/off\n\
  log                Manage your logs\n\
  media              (Un)mount storage devices\n\
  mf                 Limit the number of listed files\n\
- mm, mime           The resource opener\n\
+ mm, mime           Manage default opening applications\n\
  mp, mountpoints    Change to a mountpoint\n\
  msg, messages      Print system messages\n\
- n, new             Create new files\n\
+ n, new             Create new files/directories\n\
  net                Manage network/remote resources\n\
  o, open            Open a file\n\
  oc                 Change files ownership interactively\n\
@@ -1351,23 +1351,23 @@ For more information about an specific command run 'CMD -h' or 'CMD --help'.\n"
  pf, profile        Manage profiles\n\
  pg, pager          Set the files pager on/off\n\
  pin                Pin a directory\n\
- prompt             Switch/edit prompt\n\
+ prompt             Switch/edit the prompt\n\
  q, quit, exit      Quit clifm\n\
  Q                  CD on quit\n\
- rf, refresh        Reprint the current list of files\n\
+ rf, refresh        Refresh/clear the screen\n\
  rl, reload         Reload the main configuration file\n\
  rr                 Remove files in bulk\n\
  s, sel             Select files\n\
  sb, selbox         Access the Selection Box\n\
  splash             Print the splash screen\n\
  st, sort           Change files sorting order\n\
- stats              Print file statistics\n\
+ stats              Print files statistics\n\
  t, trash           Send files to the trash can\n\
  tag                Tag files\n\
  te                 Toggle the executable bit on files\n\
  tips               Print tips\n\
- u, undel, untrash  Restore trashed files\n\
- unpin              Unpin the currently pinned directory\n\
+ u, undel, untrash  Restore trashed files (via a menu)\n\
+ unpin              Unpin the pinned directory\n\
  v, paste sel       Copy selected files into the current directory\n\
  vv                 Copy and rename files at once\n\
  ver, version       Print version information\n\
