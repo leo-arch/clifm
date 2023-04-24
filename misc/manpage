@@ -824,8 +824,12 @@ To get information about a device, enter \fIiELN\fR, for example, \fIi12\fR, pro
 .B mf \fR[\fINUM\fR, \fIunset\fR]
 List only up to NUM files (valid range: >= 0). Use \fIunset\fR to list all files (default). An indicator (listed_files/total_files) will be printed below the list of files whenever some file is excluded from the current list (e.g. 20/310). Note however that though some files are excluded, all of them are loaded anyway, so that you can still perform any valid operation on them. For example, even if only 10 files are listed, you can still search for ALL symbolic links in the corresponding directory using the appropriate command: \fI/*\ -l\fR.
 .TP
-.B mm, mime \fR[\fIinfo ELN/FILENAME\fR] [\fIedit\fR] [\fIimport\fR]
-This is \fILira\fR, \fBclifm\fR's resource opener. The \fIinfo\fR option prints the MIME information about ELN/FILENAME: its MIME type, and, if any, the application associated to this file name or to the file's MIME type.
+.B mm, mime \fR[\fIopen FILE\fR] [\fIinfo FILE\fR] [\fIedit\fR [\fIAPP\fR]] [\fIimport\fR]
+This is \fILira\fR, \fBclifm\fR's resource opener.
+.sp
+Use the \fIopen\fR subcommand to open a file with the default associated application. Note that, since \fIopen\fR is the default action, it can be omitted. For example: \fImm file.pdf\fR. The same can be achieved more easily via the \fIopen\fI command: \fIopen file.pdf\fR (or using the short command, \fIo file.pdf). Or, even shorter, just \fIfile.pdf\fR.
+.sp
+The \fIinfo\fR option prints MIME information about FILE: its MIME type, and, if any, the application associated to this file name or to the file's MIME type.
 .sp
 The \fIedit\fR option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running \fImm\ info\ FILE\fR), and then add a value for it to the MIME list file using the \fIedit\fR option (\fImm\ edit\fI or F6). Check the \fBRESOURCE OPENER\fR section below for information about the mimelist file syntax.
 .sp

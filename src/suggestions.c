@@ -186,7 +186,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 			if (*(s + 1) == 'c') return PC_DESC;
 			if (*(s + 1) == 'f') return PF_DESC;
 			if (*(s + 1) == 'g') return PG_DESC;
-			if (*(s + 1) == 'r') return P_DESC;
+//			if (*(s + 1) == 'r') return P_DESC;
 			if (*(s + 1) == 'p') return PP_DESC;
 		}
 
@@ -208,7 +208,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 			if (*(s + 1) == 'l') return TL_DESC;
 			if (*(s + 1) == 'm') return TM_DESC;
 			if (*(s + 1) == 'n') return TN_DESC;
-			if (*(s + 1) == 'r') return TRASH_DESC;
+//			if (*(s + 1) == 'r') return TRASH_DESC;
 			if (*(s + 1) == 'u') return TU_DESC;
 			if (*(s + 1) == 'y') return TY_DESC;
 		}

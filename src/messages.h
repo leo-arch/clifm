@@ -623,8 +623,12 @@ To get information about a device, enter iELN. For example: i12"
 
 #define MIME_USAGE "Set default opening applications based on MIME types or file names\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  mm, mime [info ELN/FILENAME] [edit [APP]] [import]\n\n\
+  mm, mime [open FILE] [info FILE] [edit [APP]] [import]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
+- Open the file 'book.pdf' with the default opening application\n\
+    mm open book.pdf\n\
+  Note: since 'open' is the default action, it can be omitted: 'mm book.pdf'.\n\
+  This command is the same as 'open book.pdf' or just 'book.pdf'\n\
 - Get MIME information for the file whose ELN is 12\n\
     mm info 12\n\
 - Open/edit the MIME configuration file\n\
@@ -638,8 +642,8 @@ To get information about a device, enter iELN. For example: i12"
       mm info myfile\n\
     2) Edit the mimelist file\n\
       mm edit (or F6)\n\
-    Once in the file, find the appropriate entry and add the opening\n\
-    application you want\n\
+    Once in the file, find the appropriate entry and add the desired\n\
+    opening application\n\
   For more information consult the manpage"
 
 #define MSG_USAGE "List available CliFM messages\n\n\
