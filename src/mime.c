@@ -1720,13 +1720,13 @@ static int
 print_mime_help(void)
 {
 	puts(_(MIME_USAGE));
-	return EXIT_FAILURE;
+	return EXIT_SUCCESS;
 }
 
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
  * former providing MIME info about the corresponding file and the
- * latter opening the MIME list file */
+ * latter opening the MIME list file. */
 int
 mime_open(char **args)
 {

@@ -2727,7 +2727,7 @@ options_generator(const char *text, int state)
 #define MAX_OPTS 22
 	char *_opts[MAX_OPTS] = {0};
 
-	/* acd, ao, ext, ff, hf, pg (second word only) */
+	/* acd, ao, ext, ff, hf, pg (w == 2 -> second word only) */
 	if (w == 2 && ( ( *l == 'a' && ((l[1] == 'o' && l[2] == ' ')
 	|| strncmp(l, "acd ", 4) == 0) )
 	|| (*l == 'e' && strncmp(l, "ext ", 4) == 0)
@@ -2757,8 +2757,14 @@ options_generator(const char *text, int state)
 	} else if (w == 2 && *l == 'l' && strncmp(l, "log ", 4) == 0) {
 		_opts[0] = "cmd"; _opts[1] = "msg"; _opts[2] = NULL;
 
+	/* mime */
+	} else if (w == 2 && *l == 'm' && ((l[1] == 'm' && l[2] == ' ')
+	|| strncmp(l, "mime ", 5) == 0)) {
+		_opts[0] = "open"; _opts[1] = "info"; _opts[2] = "edit";
+		_opts[3] = "import"; _opts[4] = NULL;
+
 #ifndef _NO_PROFILES
-	/* pf */
+	/* profile */
 	} else if (w == 2 && ( (*l == 'p' && l[1] == 'f' && l[2] == ' ')
 	|| strncmp(l, "profile ", 8) == 0 ) ) {
 		_opts[0] = "set"; _opts[1] = "list"; _opts[2] = "add";
@@ -2777,11 +2783,6 @@ options_generator(const char *text, int state)
 		_opts[3] = "list-full"; _opts[4] = "merge"; _opts[5] = "new";
 		_opts[6] = "rename"; _opts[7] = "untag"; _opts[8] = NULL;
 #endif /* !_NO_TAGS */
-
-	/* mm */
-	} else if (w == 2 && *l == 'm' && l[1] == 'm' && l[2] == ' ') {
-		_opts[0] = "info"; _opts[1] = "edit"; _opts[2] = "import";
-		_opts[3] = NULL;
 
 	/* net */
 	} else if (w == 2 && *l == 'n' && l[1] == 'e'
@@ -3365,8 +3366,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* #### INTERNAL COMMANDS EXPANSION #### */
-		if (xrename == 0 && *text == 'c' && *(text + 1) == 'm'
-		&& *(text + 2) == 'd' && !*(text + 3)) {
+		if (xrename == 0 && ((*text == 'c' && *(text + 1) == 'm'
+		&& *(text + 2) == 'd' && !*(text + 3)) || strcmp(text, "commands") == 0)) {
 			if ((matches = rl_completion_matches(text, &int_cmds_generator))) {
 				cur_comp_type = TCMP_CMD_DESC;
 				return matches;
