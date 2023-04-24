@@ -4,7 +4,7 @@
 # Written by L. Abramovich
 # License: GPL3
 
-# Dependencies: man, sed, less, fzf or rofi
+# Dependencies: man, sed, less, and fzf or rofi
 
 if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
 	name="${CLIFM_PLUGIN_NAME:-$(basename "$0")}"
@@ -89,27 +89,28 @@ bl @
 bm, bookmarks@
 br, bulk@
 c, l@
-cc, colors@
+colors@
 cd @
 cl, columns@
 cmd, commands@
 config @
-cs, colorscheme@
+cs, colorschemes@
 d, dup@
 ds, desel@
 exp @
 ext @
 f, forth@
-fc, filescounter@
-ff, folders-first@
+fc @
+ff, dirs-first@
 ft, filter@
 fz @
-hf, hidden@
+hf, hh, hidden@
 history @
 icons @
-j, @
+j @
 kb, keybinds@
 log @
+ll, lv@
 lm @
 media@
 mf @
@@ -125,9 +126,10 @@ ow @
 path, cwd@
 pc @
 pin @
-pf, prof, profile@
+pf, profile@
 pg, pager@
-p, pr, prop@
+p, prop@
+prompt@
 q, quit, exit, Q@
 rl, reload@
 rf, refresh@
@@ -137,14 +139,14 @@ sb, selbox@
 splash @
 st, sort@
 stats @
-t, tr, trash@
+t, trash@
 tag @
 te @
 tips @
 u, undel, untrash@
-uc, unicode@
 unpin @
-v, vv, paste@
+v, paste@
+vv @
 view@
 ver, version@
 ws@

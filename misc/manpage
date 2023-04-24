@@ -139,10 +139,10 @@ enable the long-view mode to list files and their properties. By default, the fo
 enable the directory history map to keep in view previous, current and next entries in the directory history list
 .TP
 \fB\-o\fR, \fB\-\-no\-autols\fR
-\fIcd\fR works like the shell \fIcd\fR command: change directory but do not list files automatically
+the internal \fIcd\fR command works like the shell \fIcd\fR command: change directory but do not list files automatically
 .TP
 \fB\-O\fR, \fB\-\-autols\fR
-\fIcd\fR changes directory and lists files automatically (default)
+the \fIcd\fR command changes directory AND lists files automatically (default)
 .TP
 \fB\-p\fR, \fB\-\-path\fR=\fI\,PATH\/\fR
 use \fIPATH\fR as \fBclifm\fR starting path. Default starting path is the current working directory. If no workspace is specified via the \fB--workspace\fR option (see below), the first workspace (1) is used. This option is deprecated: use positional parameters instead.
@@ -157,7 +157,7 @@ do not refresh the current list of files when pressing the Enter key on an empty
 enable the splash screen
 .TP
 \fB\-S\fR, \fB\-\-stealth-mode\fR
-in stealth mode (also known as incognito or private mode) no trace is left on the host system. Nothing is read from files nor any file is created: all settings are set to the default values. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
+in stealth mode (also known as incognito or private mode) no trace is left on the host system. Nothing is read from files nor any file is created: all settings are set to the default values. However, most settings can still be controlled via command line options and dedicated environment variables (see the \fBENVIRONMENT\fR section below). Take a look as well to the \fIhistory\fR command and the \fI--no-history\fR command line switch.
 .TP
 \fB\-t\fR, \fB\-\-disk\-usage\-analyzer\fR
 run in disk usage analyzer mode. Equivalent to \fI--sort=size --long-view --full-dir-size --no-dirs-first\fR. The total size of the current directory, plus the name and size of the largest file will be printed after the list of files. Press \fICtrl-Alt-i\fR (or \fIAlt-TAB\fR) to toggle this mode on/off in-place.
