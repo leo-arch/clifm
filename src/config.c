@@ -95,7 +95,7 @@ regen_config(void)
 		if (!localtime_r(&rawtime, &t))
 			return EXIT_FAILURE;
 
-		char date[18];
+		char date[18] = "";
 		strftime(date, sizeof(date), "%Y%m%d@%H:%M:%S", &t);
 
 		char bk[PATH_MAX];

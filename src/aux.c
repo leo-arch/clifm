@@ -83,6 +83,7 @@ gen_time_str(char *buf, const size_t size, const time_t _time)
 	struct tm t;
 
 	if (_time >= 0 && localtime_r(&_time, &t)) {
+		*buf = '\0';
 		strftime(buf, size, DEF_TIME_STYLE_LONG, &t);
 		return;
 	}
