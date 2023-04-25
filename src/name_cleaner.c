@@ -307,9 +307,9 @@ clean_file_name(char *restrict name)
 
 	if (!*p) { /* Empty file name */
 		time_t rawtime = time(NULL);
-		struct tm tm;
-		localtime_r(&rawtime, &tm);
-		char *suffix = gen_date_suffix(tm);
+		struct tm t;
+		char *suffix = localtime_r(&rawtime, &t)
+			? gen_date_suffix(t) : (char *)NULL;
 		if (!suffix) {
 			free(p);
 			return (char *)NULL;

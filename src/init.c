@@ -3397,10 +3397,9 @@ check_time_str(void)
 	/* Get length of the current time format */
 	struct tm tm;
 	time_t t = time(NULL);
-	localtime_r(&t, &tm);
 	char tim[MAX_TIME_STR];
 	char *tfmt = conf.time_str ? conf.time_str : DEF_TIME_STYLE_OLDER;
-	size_t l = strftime(tim, sizeof(tim), tfmt, &tm);
+	size_t l = localtime_r(&t, &tm) ? strftime(tim, sizeof(tim), tfmt, &tm) : 0;
 
 	/* Construct the invalid time format string (used when we get an
 	 * invalid file timestamp) */

@@ -1163,10 +1163,7 @@ get_properties(char *filename, const int dsize)
 		file_type = 'l';
 		ctype = ln_c;
 		linkname = realpath(filename, (char *)NULL);
-		if (conf.colorize == 0)
-			color = ln_c;
-		else
-			color = linkname ? ln_c : or_c;
+		color = (conf.colorize == 0 || linkname) ? ln_c : or_c;
 		break;
 
 	case S_IFBLK:  file_type = 'b'; color = ctype = bd_c; break;
@@ -1273,9 +1270,9 @@ get_properties(char *filename, const int dsize)
 	printf(_("\tInode: %s%ju%s"), cbold, (uintmax_t)attr.st_ino, cend);
 
 	printf(_("  Uid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("UNKNOWN")
-			: owner->pw_name, cend);
+		: owner->pw_name, cend);
 	printf(_("  Gid: %s%u (%s)%s"), cid, attr.st_gid, !group ? _("UNKNOWN")
-			: group->gr_name, cend);
+		: group->gr_name, cend);
 
 	if (S_ISCHR(attr.st_mode) || S_ISBLK(attr.st_mode)) {
 		d = attr.st_rdev;
@@ -1680,10 +1677,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		/* time + 2 colors + space + NUL byte */
 	char time_s[MAX_TIME_STR + (MAX_COLOR * 2) + 2];
 	if (prop_fields.time != 0) {
-		if (props->ltime >= 0) {
-			struct tm t;
-			localtime_r(&props->ltime, &t);
-
+		struct tm t;
+		if (props->ltime >= 0 && localtime_r(&props->ltime, &t)) {
 			time_t age = props_now - props->ltime;
 			/* AGE is negative if file time is in the future */
 

@@ -108,15 +108,15 @@ static char *
 get_date(void)
 {
 	time_t rawtime = time(NULL);
-	struct tm tm;
-	localtime_r(&rawtime, &tm);
-	size_t date_max = 128;
-
-	char *date = (char *)malloc((date_max + 1) * sizeof(char));
-	if (!date)
+	struct tm t;
+	if (!localtime_r(&rawtime, &t))
 		return (char *)NULL;
 
-	strftime(date, date_max, "%Y-%m-%dT%T%z", &tm);
+	size_t date_max = MAX_TIME_STR;
+	char *date = (char *)xnmalloc(date_max + 1, sizeof(char));
+	*date = '\0';
+
+	strftime(date, date_max, "%Y-%m-%dT%T%z", &t);
 	return date;
 }
 

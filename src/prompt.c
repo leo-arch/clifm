@@ -105,9 +105,10 @@ gen_time(const int c)
 	char *temp = (char *)NULL;
 	time_t rawtime = time(NULL);
 	struct tm tm;
-	localtime_r(&rawtime, &tm);
 
-	if (c == 't') {
+	if (!localtime_r(&rawtime, &tm)) {
+		temp = savestring("?", 1);
+	} else if (c == 't') {
 		char time[9] = "";
 		strftime(time, sizeof(time), "%H:%M:%S", &tm);
 		temp = savestring(time, sizeof(time));

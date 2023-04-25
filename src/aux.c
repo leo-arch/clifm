@@ -80,14 +80,15 @@ hashme(const char *str, const int case_sensitive) {
 void
 gen_time_str(char *buf, const size_t size, const time_t _time)
 {
-	if (_time >= 0) {
-		struct tm tm;
-		localtime_r(&_time, &tm);
-		strftime(buf, size, DEF_TIME_STYLE_LONG, &tm);
-	} else {
-		*buf = '-';
-		buf[1] = '\0';
+	struct tm t;
+
+	if (_time >= 0 && localtime_r(&_time, &t)) {
+		strftime(buf, size, DEF_TIME_STYLE_LONG, &t);
+		return;
 	}
+
+	*buf = '-';
+	buf[1] = '\0';
 }
 
 /* Store the fzf preview window border style to later fix coordinates if

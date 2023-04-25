@@ -1111,9 +1111,8 @@ static int
 trash_files_args(char **args)
 {
 	time_t rawtime = time(NULL);
-	struct tm tm;
-	localtime_r(&rawtime, &tm);
-	char *suffix = gen_date_suffix(tm);
+	struct tm t;
+	char *suffix = localtime_r(&rawtime, &t) ? gen_date_suffix(t) : (char *)NULL;
 	if (!suffix)
 		return EXIT_FAILURE;
 
@@ -1140,7 +1139,7 @@ trash_files_args(char **args)
 			cwd = is_file_in_cwd(deq_file);
 
 		/* Once here, everything is fine: trash the file */
-		if (trash_element(suffix, &tm, deq_file) == EXIT_SUCCESS) {
+		if (trash_element(suffix, &t, deq_file) == EXIT_SUCCESS) {
 			trashed_files++;
 			if (print_removed_files == 1) {
 				/* Store indices of successfully trashed files */

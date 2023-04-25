@@ -92,7 +92,8 @@ regen_config(void)
 	if (config_found == 1) {
 		time_t rawtime = time(NULL);
 		struct tm t;
-		localtime_r(&rawtime, &t);
+		if (!localtime_r(&rawtime, &t))
+			return EXIT_FAILURE;
 
 		char date[18];
 		strftime(date, sizeof(date), "%Y%m%d@%H:%M:%S", &t);
