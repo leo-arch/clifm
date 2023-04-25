@@ -86,7 +86,7 @@
 # d: inode number
 # p|n = permissions: either symbolic (p) or numeric/octal (n)
 # i = user/group IDs
-# a|m|c = last (a)ccess, (m)odification, or status (c)hange time (YYYY-MM-DD HH:MM:SS)
+# a|m|c = last (a)ccess, (m)odification, or status (c)hange time
 # s|S = size (either human readable (s) or bytes (S))
 # x = extended attributes (marked as '@')
 # A single dash ("-") disables all fields

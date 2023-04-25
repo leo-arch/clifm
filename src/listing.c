@@ -2317,7 +2317,7 @@ list_dir(void)
 					have_xattr = 1;
 				}
 #endif /* _LINUX_XATTR */
-				switch(prop_fields.time) {
+				switch (prop_fields.time) {
 				case PROP_TIME_ACCESS: file_info[n].ltime = (time_t)attr.st_atime; break;
 				case PROP_TIME_CHANGE: file_info[n].ltime = (time_t)attr.st_ctime; break;
 				case PROP_TIME_MOD: file_info[n].ltime = (time_t)attr.st_mtime; break;

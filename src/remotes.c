@@ -200,7 +200,7 @@ remotes_mount(char *name)
 		return print_cd_error(i);
 
 	int exit_status = EXIT_SUCCESS;
-	if (conf.autols) {
+	if (conf.autols == 1) {
 		exit_status = cd_to_mountpoint(i);
 	} else {
 		printf(_("%s: %s: Remote mounted on %s\n"), PROGRAM_NAME,
@@ -264,6 +264,9 @@ remotes_unmount(char *name)
 		workspaces[cur_ws].path = savestring(remotes[i].mountpoint,
 			strlen(remotes[i].mountpoint));
 		*p = '/';
+
+		if (conf.autols == 1)
+			reload_dirlist();
 	}
 
 	if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)

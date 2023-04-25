@@ -257,7 +257,7 @@ set_prop_fields(char *line)
 
 	size_t i;
 	for (i = 0; i < PROP_FIELDS_SIZE && line[i]; i++) {
-		switch(line[i]) {
+		switch (line[i]) {
 		case 'f': prop_fields.counter = 1; break;
 		case 'd': prop_fields.inode = 1; break;
 		case 'p': prop_fields.perm = PERM_SYMBOLIC; break;
