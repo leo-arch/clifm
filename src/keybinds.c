@@ -251,11 +251,13 @@ load_keybinds(void)
 static void
 rl_update_prompt(void)
 {
+	HIDE_CURSOR;
 	int b = xargs.refresh_on_empty_line;
 	xargs.refresh_on_empty_line = 0;
 	char *input = prompt();
 	free(input);
 	xargs.refresh_on_empty_line = b;
+	UNHIDE_CURSOR;
 }
 
 /* Runs any command recognized by CliFM via a keybind. Example:
@@ -801,11 +803,14 @@ static int
 rl_refresh(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
+
 	if (kbind_busy)
 		return EXIT_SUCCESS;
+
 	char cmd[] = "rf";
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
+
 	return EXIT_SUCCESS;
 }
 
