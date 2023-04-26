@@ -321,13 +321,15 @@ Parameters passed to cp: -a"
 #define FILE_DETAILS "List file details\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Toggle long/detail view mode\n\
-    Alt-l\n\
+    ll (also Alt-l)\n\
   Note: Use PropFields in the configuration file to customize output\n\
   fields (and TimeStyle for custom timestamp formats)\n\
 - Print properties of the file whose ELN is 4\n\
     p4\n\
 - Print file properties, including directory full size\n\
-    pp DIR"
+    pp DIR\n\n\
+Note: An exclamation mark (!) before directory sizes means that an\n\
+error ocurred while reading a subdirectory, so sizes may not be accurate"
 
 #define FILE_SIZE_USAGE "File sizes/disk usage\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\

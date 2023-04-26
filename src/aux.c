@@ -851,7 +851,7 @@ get_size_unit(off_t size)
  * The size is reported in bytes if SIZE_IN_BYTES is set to 1
  * Otherwise, human format is used */
 off_t
-dir_size(char *dir, const int size_in_bytes)
+dir_size(char *dir, const int size_in_bytes, int *status)
 {
 	if (!dir || !*dir)
 		return (-1);
@@ -892,15 +892,15 @@ dir_size(char *dir, const int size_in_bytes)
 		char *bin = (bin_flags & GNU_DU_BIN_DU) ? "du" : "gdu";
 		if (conf.apparent_size != 1) {
 			char *cmd[] = {bin, "-s", block_size, "--", dir, NULL};
-			launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+			*status = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 		} else {
 			char *cmd[] = {bin, "-s", "--apparent-size", block_size,
 				"--", dir, NULL};
-			launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+			*status = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 		}
 	} else {
 		char *cmd[] = {"du", "-ks", "--", dir, NULL};
-		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+		*status = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	}
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */

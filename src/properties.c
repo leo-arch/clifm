@@ -195,7 +195,7 @@ get_link_color(char *name, int *link_dir, const int dsize)
 		else
 			color = nd_c;
 	} else {
-		switch(a.st_mode & S_IFMT) {
+		switch (a.st_mode & S_IFMT) {
 		case S_IFSOCK: color = so_c; break;
 		case S_IFIFO:  color = pi_c; break;
 		case S_IFBLK:  color = bd_c; break;
@@ -213,7 +213,7 @@ get_link_color(char *name, int *link_dir, const int dsize)
 }
 
 static off_t
-get_total_size(const int link_to_dir, char *filename)
+get_total_size(const int link_to_dir, char *filename, int *status)
 {
 	off_t total_size = 0;
 
@@ -222,20 +222,20 @@ get_total_size(const int link_to_dir, char *filename)
 		snprintf(_path, sizeof(_path), "%s/", filename);
 
 	if (term_caps.suggestions == 0) {
-		fputs("Retrieving file size... ", stdout);
+		fputs("Scanning... ", stdout);
 		fflush(stdout);
 		total_size = dir_size(*_path ? _path : filename,
-			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0);
-		fputs("\r                       \r", stdout);
+			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
+		fputs("\r           \r", stdout);
 		fputs(_("Total size: \t"), stdout);
 	} else {
 		fputs(_("Total size: \t"), stdout);
 		HIDE_CURSOR;
-		fputs("Calculating... ", stdout);
+		fputs("Scanning...", stdout);
 		fflush(stdout);
 		total_size = dir_size(*_path ? _path : filename,
-			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0);
-		MOVE_CURSOR_LEFT(15);
+			(bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) ? 1 : 0, status);
+		MOVE_CURSOR_LEFT(11);
 		ERASE_TO_RIGHT;
 		UNHIDE_CURSOR;
 		fflush(stdout);
@@ -1383,8 +1383,9 @@ get_properties(char *filename, const int dsize)
 	if (dsize == 0) /* We're running 'p', not 'pp' */
 		goto END;
 
+	int du_status = 0;
 	off_t total_size = file_perm == 1
-		? get_total_size(link_to_dir, filename) : (-2);
+		? get_total_size(link_to_dir, filename, &du_status) : (-2);
 
 	if (total_size < 0) {
 		if (total_size == -2) /* No access */
@@ -1416,7 +1417,11 @@ get_properties(char *filename, const int dsize)
 	}
 
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
-		printf("%s%s%s ", csize, human_size, cend);
+		char err[sizeof(xf_c) + 6]; *err = '\0';
+		if (du_status != 0)
+			snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+
+		printf("%s%s%s%s ", err, csize, human_size, cend);
 
 		if (total_size > size_mult_factor)
 			printf("/ %s%juB%s ", csize, (uintmax_t)total_size, cend);
@@ -1719,7 +1724,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	char *size_type = (char *)NULL;
 	/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars
 	 * (see aux.h) */
-	char size_s[MAX_UNIT_SIZE + (MAX_COLOR * 2) + 1];
+	char size_s[MAX_UNIT_SIZE + (MAX_COLOR * 3) + 1];
 	if (prop_fields.size >= 1) {
 		if (!(S_ISCHR(props->mode) || S_ISBLK(props->mode))
 		|| xargs.disk_usage_analyzer == 1) {
@@ -1734,8 +1739,15 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 						size_type = get_size_unit(props->size);
 					}
 
-					snprintf(size_s, sizeof(size_s), "%s%s%s", csize,
-						size_type ? size_type : "?", cend);
+					char err[sizeof(xf_c) + 6]; *err = '\0';
+					if (props->dir == 1 && conf.full_dir_size == 1
+					&& props->du_status != 0) {
+						snprintf(err, sizeof(err), "%s%c%s", xf_c,
+							DU_ERR_CHAR, NC);
+					}
+
+					snprintf(size_s, sizeof(size_s), "%s%s%s%s",
+						err, csize, size_type ? size_type : "?", cend);
 				} else {
 					snprintf(size_s, sizeof(size_s), "%s%*ju%s", csize,
 						(int)size_max, (uintmax_t)props->size, cend);

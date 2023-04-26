@@ -536,8 +536,10 @@ check_sel_path(char **sel_path)
 }
 
 static off_t
-get_sel_file_size(size_t i)
+get_sel_file_size(size_t i, int *status)
 {
+	*status = 0;
+
 	if (sel_elements[i].size != (off_t)UNSET)
 		return sel_elements[i].size;
 
@@ -546,19 +548,26 @@ get_sel_file_size(size_t i)
 		return (off_t)-1;
 
 	int base = xargs.si == 1 ? 1000 : 1024;
-	if (S_ISDIR(attr.st_mode))
-		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name, 0) * base);
-	else
+	if (S_ISDIR(attr.st_mode)) {
+		sel_elements[i].size = (off_t)(dir_size(sel_elements[i].name,
+			0, status) * base);
+	} else {
 		sel_elements[i].size = (off_t)FILE_SIZE;
+	}
 
 	return sel_elements[i].size;
 }
 
-static inline void
-print_total_size(off_t total)
+static void
+print_total_size(off_t total, const int status)
 {
 	char *human_size = get_size_unit(total);
-	printf(_("%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
+
+	char err[sizeof(xf_c) + 6]; *err = '\0';
+	if (status != 0)
+		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+
+	printf(_("%s%sTotal size%s: %s%s\n"), df_c, BOLD, df_c, err, human_size);
 	free(human_size);
 }
 
@@ -574,6 +583,7 @@ print_selected_files(void)
 	off_t total = 0;
 	tab_offset = 0;
 
+	int status = 0;
 	uint8_t epad = DIGINUM(sel_n);
 
 	flags |= IN_SELBOX_SCREEN;
@@ -582,7 +592,10 @@ print_selected_files(void)
 		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE);
 
 		printf(_("Calculating file size... ")); fflush(stdout);
-		off_t s = get_sel_file_size(i);
+		int ret = 0;
+		off_t s = get_sel_file_size(i, &ret);
+		if (ret != 0)
+			status = ret;
 		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
 
 		if (s != (off_t)-1)
@@ -592,7 +605,7 @@ print_selected_files(void)
 	tab_offset = t;
 
 	putchar('\n');
-	print_total_size(total);
+	print_total_size(total, status);
 }
 
 static int
@@ -763,7 +776,7 @@ show_sel_files(void)
 		return;
 	}
 
-	if (conf.clear_screen)
+	if (conf.clear_screen == 1)
 		CLEAR;
 
 	printf(_("%s%sSelection Box%s\n"), df_c, BOLD, df_c);
@@ -782,6 +795,7 @@ show_sel_files(void)
 	size_t t = tab_offset;
 	tab_offset = 0;
 	uint8_t epad = DIGINUM(sel_n);
+	int status = 0;
 
 	flags |= IN_SELBOX_SCREEN;
 	for (i = 0; i < sel_n; i++) {
@@ -819,7 +833,10 @@ show_sel_files(void)
 		colors_list(sel_elements[i].name, NO_ELN, NO_PAD, PRINT_NEWLINE);
 
 		printf(_("Calculating file size... ")); fflush(stdout);
-		off_t s = get_sel_file_size(i);
+		int ret = 0;
+		off_t s = get_sel_file_size(i, &ret);
+		if (ret != 0)
+			status = ret;
 		putchar('\r'); ERASE_TO_RIGHT; fflush(stdout);
 		if (s != (off_t)-1)
 			total += s;
@@ -828,10 +845,14 @@ show_sel_files(void)
 	tab_offset = t;
 
 	char *human_size = get_size_unit(total);
-	printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
+	char err[sizeof(xf_c) + 6]; *err = '\0';
+	if (status != 0)
+		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+
+	printf(_("\n%s%sTotal size%s: %s%s\n"), df_c, BOLD, df_c, err, human_size);
 	free(human_size);
 
-	if (reset_pager)
+	if (reset_pager == 1)
 		conf.pager = 1;
 }
 

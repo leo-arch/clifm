@@ -624,7 +624,7 @@ set_long_attribs(const int n, const struct stat *attr)
 	file_info[n].mode = attr->st_mode;
 	file_info[n].rdev = attr->st_rdev;
 
-	switch(prop_fields.time) {
+	switch (prop_fields.time) {
 	case PROP_TIME_ACCESS: file_info[n].ltime = (time_t)attr->st_atime; break;
 	case PROP_TIME_CHANGE: file_info[n].ltime = (time_t)attr->st_ctime; break;
 	case PROP_TIME_MOD: file_info[n].ltime = (time_t)attr->st_mtime; break;
@@ -635,7 +635,8 @@ set_long_attribs(const int n, const struct stat *attr)
 		char name[PATH_MAX]; *name = '\0';
 		if (file_info[n].type == DT_LNK) /* Symlink to directory */
 			snprintf(name, sizeof(name), "%s/", file_info[n].name);
-		file_info[n].size = dir_size(*name ? name : file_info[n].name, 0);
+		file_info[n].size = dir_size(*name ? name : file_info[n].name, 0,
+			&file_info[n].du_status);
 	} else {
 		file_info[n].size = FILE_SIZE_PTR;
 	}
@@ -2065,6 +2066,7 @@ init_fileinfo(const size_t n)
 	file_info[n].ltime = 0; /* For long view mode */
 	file_info[n].time = 0;
 	file_info[n].xattr = 0;
+	file_info[n].du_status = 0;
 /*	file_info[n].dev = 0;
 	file_info[n].ino = 0; */
 }
@@ -2162,7 +2164,7 @@ list_dir(void)
 	if (xargs.disk_usage_analyzer == 1
 	|| (conf.long_view == 1 && conf.full_dir_size == 1)) {
 		UNHIDE_CURSOR;
-		fputs(_("Retrieving file sizes. Please wait... "), stdout);
+		fputs(_("Scanning... "), stdout);
 		fflush(stdout);
 		if (xargs.list_and_quit != 1)
 			HIDE_CURSOR;

@@ -883,6 +883,8 @@ struct fileinfo {
 	int symlink;
 	int sel;
 	int xattr;
+	int du_status; /* Exit status of du(1) for dir full sizes */
+	int pad;
 	size_t len;
 	mode_t mode; /* Store st_mode (for long view mode) */
 	mode_t type; /* Store d_type value */
