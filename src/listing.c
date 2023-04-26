@@ -381,7 +381,7 @@ get_ext_icon(const char *restrict ext, int n)
 static int
 post_listing(DIR *dir, const int close_dir, const int reset_pager)
 {
-	if (close_dir && closedir(dir) == -1)
+	if (close_dir == 1 && closedir(dir) == -1)
 		return EXIT_FAILURE;
 
 /* Let plugins and external programs running in clifm know whether
@@ -401,23 +401,23 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 
 	print_div_line();
 
-	if (conf.dirhist_map) { /* Print current, previous, and next entries */
+	if (conf.dirhist_map == 1) { /* Print current, previous, and next entries */
 		print_dirhist_map();
 		print_div_line();
 	}
 
-	if (conf.disk_usage)
+	if (conf.disk_usage == 1)
 		print_disk_usage();
 
-	if (sort_switch) {
+	if (sort_switch == 1) {
 		print_reload_msg(_("Sorted by "));
 		print_sort_method();
 	}
 
-	if (switch_cscheme)
+	if (switch_cscheme == 1)
 		printf(_("Color scheme %s->%s %s\n"), mi_c, df_c, cur_cscheme);
 
-	if (conf.print_selfiles && sel_n > 0)
+	if (conf.print_selfiles == 1 && sel_n > 0)
 		_print_selfiles(term_lines);
 
 	return EXIT_SUCCESS;
@@ -800,7 +800,7 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 {
 	*ind_char = 0;
 	char *end_color = df_c;
-	if (file_info[i].dir)
+	if (file_info[i].dir == 1)
 		end_color = fc_c;
 
 	char *wname = (char *)NULL;
@@ -813,7 +813,7 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view
+	if (files > 1 && conf.max_name_len != UNSET && conf.long_view == 0
 	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
@@ -828,7 +828,7 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 
 	char trim_diff[8];
 	*trim_diff = '\0';
-	if (diff)
+	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 	int print_ind_char = (conf.color_lnk_as_target == 1
@@ -841,9 +841,9 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 		: (print_ind_char == 1 ? lc_c : "");
 
 #ifndef _NO_ICONS
-	if (conf.icons) {
-		if (conf.no_eln) {
-			if (_trim) {
+	if (conf.icons == 1) {
+		if (conf.no_eln == 1) {
+			if (_trim > 0) {
 				xprintf("%s%c%s%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					ind_chr_color, ind_chr, df_c,
 					file_info[i].icon_color, file_info[i].icon,
@@ -859,7 +859,7 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 					file_info[i].color, n, end_color);
 			}
 		} else {
-			if (_trim) {
+			if (_trim > 0) {
 				xprintf("%s%*d%s%s%c%s%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					el_c, pad, i + 1, df_c, ind_chr_color, ind_chr,
 					df_c, file_info[i].icon_color, file_info[i].icon,
@@ -878,8 +878,8 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 	} else
 #endif
 	{
-		if (conf.no_eln) {
-			if (_trim) {
+		if (conf.no_eln == 1) {
+			if (_trim > 0) {
 				xprintf("%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s", ind_chr_color,
 					(sel_n > 0 || conf.color_lnk_as_target == 1) ? ind_chr : 0,
 					df_c, file_info[i].color, (wchar_t *)n, trim_diff,
@@ -893,7 +893,7 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 					df_c, file_info[i].color, n, end_color);
 			}
 		} else {
-			if (_trim) {
+			if (_trim > 0) {
 				xprintf("%s%*d%s%s%c%s%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					el_c, pad, i + 1, df_c, ind_chr_color,
 					ind_chr,
@@ -910,19 +910,19 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 		}
 	}
 
-	if (conf.classify) {
+	if (conf.classify == 1) {
 		/* Append directory indicator and files counter */
 		switch (file_info[i].type) {
 		case DT_DIR:
 			putchar(DIR_CHR);
-			if (file_info[i].filesn > 0 && conf.files_counter)
+			if (file_info[i].filesn > 0 && conf.files_counter == 1)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
 
 		case DT_LNK:
-			if (file_info[i].dir)
+			if (file_info[i].dir == 1)
 				putchar(DIR_CHR);
-			if (file_info[i].filesn > 0 && conf.files_counter)
+			if (file_info[i].filesn > 0 && conf.files_counter == 1)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
 		}
@@ -947,7 +947,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view
+	if (files > 1 && conf.max_name_len != UNSET && conf.long_view == 0
 	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
@@ -962,13 +962,13 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 
 	char trim_diff[8];
 	*trim_diff = '\0';
-	if (diff)
+	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 #ifndef _NO_ICONS
-	if (conf.icons) {
-		if (conf.no_eln) {
-			if (_trim) {
+	if (conf.icons == 1) {
+		if (conf.no_eln == 1) {
+			if (_trim > 0) {
 				xprintf("%c%s%ls%s%c%s", file_info[i].sel ? SELFILE_CHR : ' ',
 					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
@@ -977,7 +977,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 				file_info[i].icon, n);
 			}
 		} else {
-			if (_trim) {
+			if (_trim > 0) {
 				xprintf("%s%*d%s%c%s%ls%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', file_info[i].icon,
 					(wchar_t *)n, trim_diff, TRIMFILE_CHR,
@@ -990,8 +990,8 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 	} else
 #endif /* _NO_ICONS */
 	{
-		if (conf.no_eln) {
-			if (_trim) {
+		if (conf.no_eln == 1) {
+			if (_trim > 0) {
 				xprintf("%c%ls%s%c%s", file_info[i].sel ? SELFILE_CHR : ' ',
 					(wchar_t *)n, trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
@@ -999,7 +999,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 				xprintf("%c%s", file_info[i].sel ? SELFILE_CHR : ' ', n);
 			}
 		} else {
-			if (_trim) {
+			if (_trim > 0) {
 				xprintf("%s%*d%s%c%ls%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', (wchar_t *)n,
 					trim_diff, TRIMFILE_CHR, _trim == TRIM_EXT
@@ -1011,13 +1011,13 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 		}
 	}
 
-	if (conf.classify) {
+	if (conf.classify == 1) {
 		/* Append file type indicator */
 		switch (file_info[i].type) {
 		case DT_DIR:
 			*ind_char = 0;
 			putchar(DIR_CHR);
-			if (file_info[i].filesn > 0 && conf.files_counter)
+			if (file_info[i].filesn > 0 && conf.files_counter == 1)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
 
@@ -1027,7 +1027,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 			} else if (file_info[i].dir) {
 				*ind_char = 0;
 				putchar(DIR_CHR);
-				if (file_info[i].filesn > 0 && conf.files_counter)
+				if (file_info[i].filesn > 0 && conf.files_counter == 1)
 					fputs(xitoa(file_info[i].filesn), stdout);
 			} else {
 				putchar(LINK_CHR);
@@ -1035,7 +1035,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 			break;
 
 		case DT_REG:
-			if (file_info[i].exec)
+			if (file_info[i].exec == 1)
 				putchar(EXEC_CHR);
 			else
 				*ind_char = 0;
@@ -1061,14 +1061,16 @@ pad_filename(int *ind_char, const int i, const int pad,
 	int cur_len = 0;
 
 #ifndef _NO_ICONS
-	cur_len = pad + 1 + (conf.icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	cur_len = pad + 1 + (conf.icons == 1 ? 3 : 0) + (int)file_info[i].len
+		+ (*ind_char ? 1 : 0);
 #else
 	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
 
-	if (file_info[i].dir && conf.classify) {
+	if (file_info[i].dir == 1 && conf.classify == 1) {
 		cur_len++;
-		if (file_info[i].filesn > 0 && conf.files_counter && file_info[i].ruser)
+		if (file_info[i].filesn > 0 && conf.files_counter == 1
+		&& file_info[i].ruser == 1)
 			cur_len += DIGINUM((int)file_info[i].filesn);
 	}
 
@@ -1088,7 +1090,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad,
 {
 	*ind_char = 0;
 	char *end_color = df_c;
-	if (file_info[i].dir)
+	if (file_info[i].dir == 1)
 		end_color = fc_c;
 
 	char *wname = (char *)NULL;
@@ -1101,14 +1103,14 @@ print_entry_color_light(int *ind_char, const int i, const int pad,
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view
+	if (files > 1 && conf.max_name_len != UNSET && conf.long_view == 0
 	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		get_ext_info(i, &_trim, &ext_len);
 
 		xstrsncpy(tname, wname ? wname : file_info[i].name,
-				(NAME_MAX * sizeof(wchar_t)) - 1);
+			(NAME_MAX * sizeof(wchar_t)) - 1);
 		diff = u8truncstr(tname, (size_t)_max - 1 - ext_len);
 		file_info[i].len = (size_t)_max;
 		n = tname;
@@ -1116,16 +1118,16 @@ print_entry_color_light(int *ind_char, const int i, const int pad,
 
 	char trim_diff[8];
 	*trim_diff = '\0';
-	if (diff)
+	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 #ifndef _NO_ICONS
-	if (conf.icons) {
+	if (conf.icons == 1) {
 		if (xargs.icons_use_file_color == 1)
 			file_info[i].icon_color = file_info[i].color;
 
-		if (conf.no_eln) {
-			if (_trim) {
+		if (conf.no_eln == 1) {
+			if (_trim > 0) {
 				xprintf("%s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					file_info[i].icon_color, file_info[i].icon,
 					file_info[i].color, (wchar_t *)n, trim_diff,
@@ -1138,7 +1140,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad,
 					file_info[i].icon, file_info[i].color, n, end_color);
 			}
 		} else {
-			if (_trim) {
+			if (_trim > 0) {
 				xprintf("%s%*d%s %s%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					el_c, pad, i + 1, df_c,	file_info[i].icon_color,
 					file_info[i].icon, file_info[i].color, (wchar_t *)n,
@@ -1155,8 +1157,8 @@ print_entry_color_light(int *ind_char, const int i, const int pad,
 	} else
 #endif /* _NO_ICONS */
 	{
-		if (conf.no_eln) {
-			if (_trim) {
+		if (conf.no_eln == 1) {
+			if (_trim > 0) {
 				xprintf("%s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					file_info[i].color, (wchar_t *)n,
 					trim_diff, tt_c, TRIMFILE_CHR,
@@ -1167,7 +1169,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad,
 				xprintf("%s%s%s", file_info[i].color, n, end_color);
 			}
 		} else {
-			if (_trim) {
+			if (_trim > 0) {
 				xprintf("%s%*d%s %s%ls%s\x1b[0m%s%c\x1b[0m%s%s%s",
 					el_c, pad, i + 1, df_c,	file_info[i].color, (wchar_t *)n,
 					trim_diff, tt_c, TRIMFILE_CHR,
@@ -1181,9 +1183,9 @@ print_entry_color_light(int *ind_char, const int i, const int pad,
 		}
 	}
 
-	if (file_info[i].dir && conf.classify) {
+	if (file_info[i].dir == 1 && conf.classify == 1) {
 		putchar(DIR_CHR);
-		if (file_info[i].filesn > 0 && conf.files_counter)
+		if (file_info[i].filesn > 0 && conf.files_counter == 1)
 			fputs(xitoa(file_info[i].filesn), stdout);
 	}
 
@@ -1207,7 +1209,7 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 	char *n = wname ? wname : file_info[i].name;
 	int _trim = 0, diff = 0;
 	char tname[NAME_MAX * sizeof(wchar_t)];
-	if (files > 1 && conf.max_name_len != UNSET && !conf.long_view
+	if (files > 1 && conf.max_name_len != UNSET && conf.long_view == 0
 	&& (int)file_info[i].len > _max) {
 		_trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
@@ -1222,13 +1224,13 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 
 	char trim_diff[8];
 	*trim_diff = '\0';
-	if (diff)
+	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
 #ifndef _NO_ICONS
-	if (conf.icons) {
-		if (conf.no_eln) {
-			if (_trim) {
+	if (conf.icons == 1) {
+		if (conf.no_eln == 1) {
+			if (_trim > 0) {
 				xprintf("%s %ls%s%c%s", file_info[i].icon, (wchar_t *)n,
 					trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
@@ -1236,7 +1238,7 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 				xprintf("%s %s", file_info[i].icon, n);
 			}
 		} else {
-			if (_trim) {
+			if (_trim > 0) {
 				xprintf("%s%*d%s %s %ls%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
@@ -1248,15 +1250,15 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 	} else
 #endif /* _NO_ICONS */
 	{
-		if (conf.no_eln) {
-			if (_trim) {
+		if (conf.no_eln == 1) {
+			if (_trim > 0) {
 				printf("%ls%s%c%s", (wchar_t *)n, trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
 				fputs(file_info[i].name, stdout);
 			}
 		} else {
-			if (_trim) {
+			if (_trim > 0) {
 				xprintf("%s%*d%s %ls%s%c%s", el_c, pad, i + 1, df_c,
 					(wchar_t *)n, trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
@@ -1266,12 +1268,12 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 		}
 	}
 
-	if (conf.classify) {
+	if (conf.classify == 1) {
 		switch (file_info[i].type) {
 		case DT_DIR:
 			*ind_char = 0;
 			putchar(DIR_CHR);
-			if (file_info[i].filesn > 0 && conf.files_counter)
+			if (file_info[i].filesn > 0 && conf.files_counter == 1)
 				fputs(xitoa(file_info[i].filesn), stdout);
 			break;
 
@@ -1295,16 +1297,17 @@ pad_filename_light(int *ind_char, const int i, const int pad,
 {
 	int cur_len = 0;
 #ifndef _NO_ICONS
-	cur_len = pad + 1 + (conf.icons ? 3 : 0) + (int)file_info[i].len + (*ind_char ? 1 : 0);
+	cur_len = pad + 1 + (conf.icons == 1 ? 3 : 0)
+		+ (int)file_info[i].len + (*ind_char ? 1 : 0);
 #else
 	cur_len = pad + 1 + (int)file_info[i].len + (*ind_char ? 1 : 0);
 #endif
 
-	if (conf.classify) {
-		if (file_info[i].dir)
+	if (conf.classify == 1) {
+		if (file_info[i].dir == 1)
 			cur_len++;
-		if (file_info[i].filesn > 0 && conf.files_counter
-		&& file_info[i].ruser)
+		if (file_info[i].filesn > 0 && conf.files_counter == 1
+		&& file_info[i].ruser == 1)
 			cur_len += DIGINUM((int)file_info[i].filesn);
 	}
 
@@ -1358,7 +1361,7 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		}
 
 		int ind_char = 1;
-		if (!conf.classify)
+		if (conf.classify == 0)
 			ind_char = 0;
 
 				/* ##########################
@@ -1392,17 +1395,17 @@ list_files_horizontal(size_t *counter, int *reset_pager, const int pad,
 		int fc = file_info[i].dir != 1 ? (int)longest_fc : 0;
 		int _max = conf.max_name_len + fc;
 
-		file_info[i].eln_n = conf.no_eln ? -1 : DIGINUM(i + 1);
+		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
 
 		print_entry_function(&ind_char, i, pad, _max);
 
-		if (!last_column)
+		if (last_column == 0)
 			pad_filename_function(&ind_char, i, pad, termcap_move_right);
 		else
 			putchar('\n');
 	}
 
-	if (!last_column)
+	if (last_column == 0)
 		putchar('\n');
 }
 
@@ -1468,11 +1471,11 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		}
 
 		int ind_char = 1;
-		if (!conf.classify)
+		if (conf.classify == 0)
 			ind_char = 0;
 
 		if (x >= nn || !file_info[x].name) {
-			if (last_column)
+			if (last_column == 1)
 				/* Last column is empty. Ex:
 				 * 1 file  3 file3  5 file5
 				 * 2 file2 4 file4  HERE
@@ -1522,11 +1525,11 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 		int fc = file_info[x].dir != 1 ? (int)longest_fc : 0;
 		int _max = conf.max_name_len + fc;
 
-		file_info[x].eln_n = conf.no_eln ? -1 : DIGINUM(x + 1);
+		file_info[x].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(x + 1);
 
 		print_entry_function(&ind_char, x, pad, _max);
 
-		if (!last_column)
+		if (last_column == 0)
 			pad_filename_function(&ind_char, x, pad, termcap_move_right);
 		else
 			/* Last column is populated. Ex:
@@ -1536,7 +1539,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 			putchar('\n');
 	}
 
-	if (!last_column)
+	if (last_column == 0)
 		putchar('\n');
 }
 
@@ -1551,13 +1554,13 @@ run_dir_cmd(const int mode)
 	char path[PATH_MAX];
 
 	if (mode == DIR_IN) {
-		snprintf(path, PATH_MAX - 1, "%s/%s",
+		snprintf(path, sizeof(path), "%s/%s",
 			workspaces[cur_ws].path, DIR_IN_NAME);
 	} else {
 		if (mode == DIR_OUT) {
 			if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
 				return;
-			snprintf(path, PATH_MAX - 1, "%s/%s",
+			snprintf(path, sizeof(path), "%s/%s",
 				old_pwd[dirhist_cur_index - 1], DIR_OUT_NAME);
 		}
 	}
@@ -1770,7 +1773,7 @@ list_dir_light(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (dir_changed)
+		if (dir_changed == 1)
 			check_autocmd_file(ename);
 
 		/* Skip files according to a regex filter */
@@ -1786,15 +1789,15 @@ list_dir_light(void)
 			}
 		}
 
-		if (!conf.show_hidden && *ename == '.')
+		if (conf.show_hidden == 0 && *ename == '.')
 			continue;
 #ifndef _DIRENT_HAVE_D_TYPE
 		struct stat attr;
 		if (lstat(ename, &attr) == -1)
 			continue;
-		if (conf.only_dirs && !S_ISDIR(attr.st_mode))
+		if (conf.only_dirs == 1 && !S_ISDIR(attr.st_mode))
 #else
-		if (conf.only_dirs && ent->d_type != DT_DIR)
+		if (conf.only_dirs == 1 && ent->d_type != DT_DIR)
 #endif /* !_DIRENT_HAVE_D_TYPE */
 			continue;
 
@@ -1860,10 +1863,9 @@ list_dir_light(void)
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
 #endif
 		switch (file_info[n].type) {
-
 		case DT_DIR:
 #ifndef _NO_ICONS
-			if (conf.icons) {
+			if (conf.icons == 1) {
 				file_info[n].icon = DEF_DIR_ICON;
 				file_info[n].icon_color = DEF_DIR_ICON_COLOR;
 //				get_dir_icon(file_info[n].name, (int)n);
@@ -1911,7 +1913,7 @@ list_dir_light(void)
 		}
 
 #ifndef _NO_ICONS
-		if (xargs.icons_use_file_color == 1 && conf.icons)
+		if (xargs.icons_use_file_color == 1 && conf.icons == 1)
 			file_info[n].icon_color = file_info[n].color;
 #endif
 
@@ -1950,14 +1952,14 @@ list_dir_light(void)
 	int pad = (max_files != UNSET && (int)files > max_files)
 		? DIGINUM(max_files) : DIGINUM(files);
 
-	if (conf.sort)
+	if (conf.sort != SNONE)
 		ENTSORT(file_info, n, entrycmp);
 
 	size_t counter = 0;
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
-	if (conf.columned || conf.long_view) {
+	if (conf.columned == 1 || conf.long_view == 1) {
 		int nn = (int)n;
 		get_longest_filename(nn, pad);
 	}
@@ -2140,13 +2142,13 @@ list_dir(void)
 	if (xargs.list_and_quit != 1)
 		HIDE_CURSOR;
 
-	if (dir_changed && autocmds_n) {
-		if (autocmd_set)
+	if (dir_changed == 1 && autocmds_n > 0) {
+		if (autocmd_set == 1)
 			revert_autocmd_opts();
 		check_autocmds();
 	}
 
-	if (dir_changed && dir_out) {
+	if (dir_changed == 1 && dir_out == 1) {
 		run_dir_cmd(DIR_OUT);
 		dir_out = 0;
 	}
@@ -2177,7 +2179,7 @@ list_dir(void)
 	if (conf.long_view == 1)
 		props_now = time(NULL);
 
-	if (conf.light_mode)
+	if (conf.light_mode == 1)
 		return list_dir_light();
 
 	int virtual_dir = 0;
@@ -2225,7 +2227,7 @@ list_dir(void)
 			continue;
 
 		/* Check .cfm.in and .cfm.out files for the autocommands function */
-		if (dir_changed)
+		if (dir_changed == 1)
 			check_autocmd_file(ename);
 
 		/* Filter files according to a regex filter */
@@ -2243,7 +2245,7 @@ list_dir(void)
 
 		if (*ename == '.') {
 			stats.hidden++;
-			if (!conf.show_hidden)
+			if (conf.show_hidden == 0)
 				continue;
 		}
 
@@ -2290,7 +2292,7 @@ list_dir(void)
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
-		if (stat_ok) {
+		if (stat_ok == 1) {
 			switch (attr.st_mode & S_IFMT) {
 			case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
 			case S_IFCHR: file_info[n].type = DT_CHR; stats.char_dev++; break;
@@ -2360,7 +2362,6 @@ list_dir(void)
 		}
 
 		switch (file_info[n].type) {
-
 		case DT_DIR: {
 #ifndef _NO_ICONS
 			if (conf.icons == 1) {
@@ -2372,7 +2373,7 @@ list_dir(void)
 			}
 #endif /* _NO_ICONS */
 			int daccess = (stat_ok == 1 &&
-			check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 1);
+				check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 1);
 
 			file_info[n].filesn = conf.files_counter == 1
 				? (count_dir(ename, NO_CPOP) - 2) : 1;
@@ -2384,7 +2385,7 @@ list_dir(void)
 				file_info[n].icon_color = YELLOW;
 #endif /* _NO_ICONS */
 			} else {
-				file_info[n].color = stat_ok ? ((attr.st_mode & 01000)
+				file_info[n].color = stat_ok == 1 ? ((attr.st_mode & 01000)
 					? ((attr.st_mode & 00002) ? tw_c : st_c)
 					: ((attr.st_mode & 00002) ? ow_c
 					: (file_info[n].filesn == 0 ? ed_c : di_c)))
@@ -2455,21 +2456,21 @@ list_dir(void)
 			cap_t cap;
 #endif
 			/* Do not perform the access check if the user is root */
-			if (user.uid != 0 && stat_ok
+			if (user.uid != 0 && stat_ok == 1
 			&& check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0) {
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
 #endif
 				file_info[n].color = nf_c;
-			} else if (stat_ok && (attr.st_mode & 04000)) { /* SUID */
+			} else if (stat_ok == 1 && (attr.st_mode & 04000)) { /* SUID */
 				file_info[n].exec = 1;
 				stats.exec++; stats.suid++;
 				file_info[n].color = su_c;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif
-			} else if (stat_ok && (attr.st_mode & 02000)) { /* SGID */
+			} else if (stat_ok == 1 && (attr.st_mode & 02000)) { /* SGID */
 				file_info[n].exec = 1;
 				stats.exec++; stats.sgid++;
 				file_info[n].color = sg_c;
@@ -2479,14 +2480,14 @@ list_dir(void)
 			}
 
 #ifdef _LINUX_CAP
-			else if (check_cap && (cap = cap_get_file(ename))) {
+			else if (check_cap == 1 && (cap = cap_get_file(ename))) {
 				file_info[n].color = ca_c;
 				stats.caps++;
 				cap_free(cap);
 			}
 #endif
 
-			else if (stat_ok && ((attr.st_mode & 00100) /* Exec */
+			else if (stat_ok == 1 && ((attr.st_mode & 00100) /* Exec */
 			|| (attr.st_mode & 00010) || (attr.st_mode & 00001))) {
 				file_info[n].exec = 1;
 				stats.exec++;
@@ -2596,7 +2597,7 @@ list_dir(void)
 		 * #    SORT FILES ACCORDING TO SORT METHOD    #
 		 * ############################################# */
 
-	if (conf.sort)
+	if (conf.sort != SNONE)
 		ENTSORT(file_info, n, entrycmp);
 
 		/* ##########################################
@@ -2607,7 +2608,7 @@ list_dir(void)
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
-	if (conf.columned || conf.long_view) {
+	if (conf.columned == 1 || conf.long_view == 1) {
 		int nn = (int)n;
 		get_longest_filename(nn, pad);
 	}
@@ -2646,7 +2647,8 @@ END:
 	if (excluded_files > 0)
 		printf(_("Excluded files: %d\n"), excluded_files);
 
-	if (xargs.disk_usage_analyzer == 1 && conf.long_view && conf.full_dir_size)
+	if (xargs.disk_usage_analyzer == 1 && conf.long_view == 1
+	&& conf.full_dir_size == 1)
 		print_analysis_stats(total_size, largest_size, largest_color, largest_name);
 
 #ifdef _LIST_SPEED
@@ -2660,7 +2662,7 @@ END:
 void
 free_dirlist(void)
 {
-	if (!file_info || !files)
+	if (!file_info || files == 0)
 		return;
 
 	int i = (int)files;

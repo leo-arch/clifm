@@ -325,13 +325,9 @@ static inline char *
 gen_user_flag(void)
 {
 	char *temp = (char *)xnmalloc(2, sizeof(char));
-
-	if (user.uid == 0)
-		*temp = '#';
-	else
-		*temp = '$';
-
+	*temp = user.uid == 0 ? '#' : '$';
 	temp[1] = '\0';
+
 	return temp;
 }
 
@@ -339,7 +335,8 @@ static inline char *
 gen_mode(void)
 {
 	char *temp = (char *)xnmalloc(2, sizeof(char));
-	if (conf.light_mode) {
+
+	if (conf.light_mode == 1) {
 		*temp = 'L';
 		temp[1] = '\0';
 	} else {

@@ -65,7 +65,7 @@ size_t new_seln = 0; */
 int
 save_sel(void)
 {
-	if (!selfile_ok || !config_ok || !sel_file)
+	if (selfile_ok == 0 || config_ok == 0 || !sel_file)
 		return EXIT_FAILURE;
 
 	if (sel_n == 0) {

@@ -1458,8 +1458,7 @@ get_ext_info_long(const char *name, const size_t name_len, int *trim,
 }
 
 /* Calculate the relative time of AGE, which is the difference between
- * NOW and the corresponding file time
- * At most LEN bytes are copied into S */
+ * NOW and the corresponding file time. */
 static void
 calc_relative_time(const time_t age, char *s)
 {

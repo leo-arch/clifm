@@ -30,7 +30,6 @@ __BEGIN_DECLS
 int  add_to_jumpdb(const char *);
 void save_jumpdb(void);
 int  dirjump(char **, int);
-int  run_autojump(char **);
 
 __END_DECLS
 

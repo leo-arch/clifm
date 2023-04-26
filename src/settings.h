@@ -219,7 +219,6 @@ xf=01;31:xs=00;32:"
 /* Default options */
 #define DEF_APPARENT_SIZE 1
 #define DEF_AUTOCD 1
-#define DEF_AUTOJUMP 0
 #define DEF_AUTO_OPEN 1
 #define DEF_AUTOLS 1
 #define DEF_CASE_SENS_LIST 0
@@ -236,6 +235,7 @@ xf=01;31:xs=00;32:"
 #define DEF_COLOR_SCHEME_256 "default-256"
 #define DEF_COLORS 1
 #define DEF_COLOR_LNK_AS_TARGET 0
+#define DEF_COLUMNS 1
 #define DEF_CP_CMD CP_CP
 #define DEF_CUR_WS 0
 #define DEF_CWD_IN_TITLE 0
@@ -244,7 +244,6 @@ xf=01;31:xs=00;32:"
 #define DEF_DISK_USAGE 0
 #define DEF_DIV_LINE "-"
 #define DEF_ELN_USE_WORKSPACE_COLOR 0
-//#define DEF_EXPAND_BOOKMARKS 0
 #define DEF_EXT_CMD_OK 1
 #define DEF_FILES_COUNTER 1
 #define DEF_FOLLOW_SYMLINKS 1

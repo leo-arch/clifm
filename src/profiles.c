@@ -200,7 +200,7 @@ profile_set(char *prof)
 
 	exec_profile();
 
-	if (config_ok) {
+	if (config_ok == 1) {
 		/* Shrink the log file if needed */
 		truncate_file(msgs_log_file, conf.max_log, 0);
 		truncate_file(cmds_log_file, conf.max_log, 0);
@@ -246,7 +246,7 @@ profile_set(char *prof)
 	path_n = (size_t)get_path_env();
 	get_path_programs();
 
-	if (conf.restore_last_path)
+	if (conf.restore_last_path == 1)
 		get_last_path();
 
 	if (cur_ws == UNSET)

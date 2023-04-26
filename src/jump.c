@@ -199,7 +199,7 @@ add_to_jumpdb(const char *dir)
 void
 save_jumpdb(void)
 {
-	if (xargs.no_dirjump == 1 || !config_ok || !config_dir || !jump_db
+	if (xargs.no_dirjump == 1 || config_ok == 0 || !config_dir || !jump_db
 	|| jump_n == 0)
 		return;
 
@@ -263,7 +263,7 @@ save_jumpdb(void)
 int
 edit_jumpdb(char *app)
 {
-	if (!config_ok || !config_dir)
+	if (config_ok == 0 || !config_dir)
 		return EXIT_FAILURE;
 
 	save_jumpdb();
@@ -891,45 +891,3 @@ dirjump(char **args, int mode)
 	free(visits);
 	return exit_status;
 }
-
-/* This function is called if the autojump option is enabled. If the
- * first word in CMD is not a program in PATH, append the j command to
- * the current command line and run the dirjump function */
-/*
-int
-run_autojump(char **cmd)
-{
-	if (!cmd || !cmd[0] || !*cmd[0] || is_internal_c(cmd[0]))
-		return -1;
-
-	char *ret = get_cmd_path(cmd[0]);
-	if (ret) {
-		free(ret);
-		return -1;
-	}
-
-	int i;
-
-	char **tmp_cmd = (char **)xnmalloc(args_n + 3, sizeof(char *));
-	tmp_cmd[0] = (char *)xnmalloc(2, sizeof(char));
-	*_cmd[0] = 'j';
-	tmp_cmd[0][1] = '\0';
-
-	for (i = 0; i <= (int)args_n; i++) {
-		tmp_cmd[i + 1] = (char *)xnmalloc(strlen(cmd[i]) + 1, sizeof(char));
-		strcpy(tmp_cmd[i + 1], cmd[i]);
-	}
-
-	tmp_cmd[args_n + 2] = (char *)NULL;
-
-	args_n++;
-	exit_code = dirjump(tmp_cmd, NO_SUG_JUMP);
-	args_n--;
-
-	i = (int)args_n + 2;
-	while (--i >= 0)
-		free(tmp_cmd[i]);
-	free(tmp_cmd);
-
-	return exit_code;
-} */

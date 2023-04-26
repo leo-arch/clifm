@@ -2598,7 +2598,6 @@ read_config(void)
 	*prop_fields_str = '\0';
 
 	while (fgets(line, (int)sizeof(line), config_fp)) {
-//		if (*line == '\n' || *line == '#' || *line == ';')
 		if (*line < 'A' || *line > 'z')
 			continue;
 
@@ -2707,12 +2706,6 @@ read_config(void)
 		else if (*line == 'D' && strncmp(line, "DividingLine=", 13) == 0) {
 			set_div_line(line + 13);
 		}
-
-/*		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
-		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
-			if (set_config_bool_value(line + 16, &conf.expand_bookmarks) == -1)
-				continue;
-		} */
 
 		else if (xargs.ext == UNSET && *line == 'E'
 		&& strncmp(line, "ExternalCommands=", 17) == 0) {
@@ -3484,7 +3477,6 @@ reset_variables(void)
 
 	free_workspaces_filters();
 
-	autojump = UNSET;
 	check_cap = UNSET;
 	check_ext = UNSET;
 	follow_symlinks = UNSET;
@@ -3521,129 +3513,6 @@ reset_variables(void)
 #endif
 
 	pmsg = NOMSG;
-}
-
-static void
-check_cmd_line_options(void)
-{
-#ifndef _NO_SUGGESTIONS
-	if (xargs.suggestions != UNSET)
-		conf.suggestions = xargs.suggestions;
-#endif
-
-#ifndef _NO_TRASH
-	if (xargs.trasrm != UNSET)
-		conf.tr_as_rm = xargs.trasrm;
-#endif
-
-#ifndef _NO_ICONS
-	if (xargs.icons != UNSET)
-		conf.icons = xargs.icons;
-#endif
-
-	if (xargs.auto_open != UNSET)
-		conf.auto_open = xargs.auto_open;
-
-	if (xargs.autocd != UNSET)
-		conf.autocd = xargs.autocd;
-
-	if (xargs.autojump != UNSET)
-		autojump = xargs.autojump;
-	if (autojump)
-		conf.autocd = 1;
-
-	if (xargs.case_sens_dirjump != UNSET)
-		conf.case_sens_dirjump = xargs.case_sens_dirjump;
-
-	if (xargs.case_sens_path_comp != UNSET)
-		conf.case_sens_path_comp = xargs.case_sens_path_comp;
-
-	if (xargs.autols != UNSET)
-		conf.autols = xargs.autols;
-
-	if (xargs.cd_on_quit != UNSET)
-		conf.cd_on_quit = xargs.cd_on_quit;
-
-	if (xargs.classify != UNSET)
-		conf.classify = xargs.classify;
-
-	if (xargs.clear_screen != UNSET)
-		conf.clear_screen = xargs.clear_screen;
-
-	if (xargs.dirmap != UNSET)
-		conf.dirhist_map = xargs.dirmap;
-
-	if (xargs.disk_usage != UNSET)
-		conf.disk_usage = xargs.disk_usage;
-
-/*	if (xargs.expand_bookmarks != UNSET)
-		conf.expand_bookmarks = xargs.expand_bookmarks; */
-
-	if (xargs.ext != UNSET)
-		conf.ext_cmd_ok = xargs.ext;
-
-	if (xargs.dirs_first != UNSET)
-		conf.list_dirs_first = xargs.dirs_first;
-
-	if (xargs.files_counter != UNSET)
-		conf.files_counter = xargs.files_counter;
-
-	if (xargs.hidden != UNSET)
-		conf.show_hidden = xargs.hidden;
-
-	if (xargs.light != UNSET)
-		conf.light_mode = xargs.light;
-
-	if (xargs.longview != UNSET)
-		conf.long_view = xargs.longview;
-
-	if (xargs.max_dirhist != UNSET)
-		conf.max_dirhist = xargs.max_dirhist;
-
-	if (xargs.max_path != UNSET)
-		conf.max_path = xargs.max_path;
-
-	if (xargs.colorize != UNSET)
-		conf.colorize = xargs.colorize;
-
-	if (xargs.columns != UNSET)
-		conf.columned = xargs.columns;
-
-	if (xargs.noeln != UNSET)
-		conf.no_eln = xargs.noeln;
-
-	if (xargs.only_dirs != UNSET)
-		conf.only_dirs = xargs.only_dirs;
-
-	if (xargs.pager != UNSET)
-		conf.pager = xargs.pager;
-
-	if (xargs.printsel != UNSET)
-		conf.print_selfiles = xargs.printsel;
-
-	if (xargs.restore_last_path != UNSET)
-		conf.restore_last_path = xargs.restore_last_path;
-
-	if (xargs.case_sens_list != UNSET)
-		conf.case_sens_list = xargs.case_sens_list;
-
-	if (xargs.share_selbox != UNSET)
-		conf.share_selbox = xargs.share_selbox;
-
-	if (xargs.sort != UNSET)
-		conf.sort = xargs.sort;
-
-	if (xargs.sort_reverse != UNSET)
-		conf.sort_reverse = xargs.sort_reverse;
-
-	if (xargs.splash != UNSET)
-		conf.splash_screen = xargs.splash;
-
-	if (xargs.tips != UNSET)
-		conf.tips = xargs.tips;
-
-	if (xargs.welcome_message != UNSET)
-		conf.welcome_message = xargs.welcome_message;
 }
 
 #ifndef _NO_FZF
@@ -3691,7 +3560,7 @@ reload_config(void)
 	create_tmp_files();
 
 	/* If some option was set via command line, keep that value for any profile */
-	check_cmd_line_options();
+//	check_cmd_line_options();
 
 #ifndef _NO_FZF
 	if (tabmode_bk != tabmode)

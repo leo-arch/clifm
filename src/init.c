@@ -163,7 +163,6 @@ init_conf_struct(void)
 	conf.desktop_notifications = UNSET;
 	conf.dirhist_map = UNSET;
 	conf.disk_usage = UNSET;
-//	conf.expand_bookmarks = UNSET;
 	conf.ext_cmd_ok = UNSET;
 	conf.files_counter = UNSET;
 	conf.full_dir_size = UNSET;
@@ -177,6 +176,8 @@ init_conf_struct(void)
 #endif
 #ifndef _NO_ICONS
 	conf.icons = UNSET;
+#else
+	conf.icons = 0;
 #endif
 	conf.light_mode = UNSET;
 	conf.list_dirs_first = UNSET;
@@ -1041,7 +1042,7 @@ sync_jumpdb_with_dirhist(void)
 void
 load_jumpdb(void)
 {
-	if (xargs.no_dirjump == 1 || !config_ok || !config_dir)
+	if (xargs.no_dirjump == 1 || config_ok == 0 || !config_dir)
 		return;
 
 	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
@@ -1316,11 +1317,11 @@ load_bookmarks(void)
 int
 load_actions(void)
 {
-	if (!config_ok || !actions_file)
+	if (config_ok == 0 || !actions_file)
 		return EXIT_FAILURE;
 
 	/* Free the actions struct array */
-	if (actions_n) {
+	if (actions_n > 0) {
 		int i = (int)actions_n;
 		while (--i >= 0) {
 			free(usr_actions[i].name);
@@ -2079,7 +2080,6 @@ external_arguments(int argc, char **argv)
 		case 210: xargs.files_counter = conf.files_counter = 0; break;
 		case 211: xargs.welcome_message = conf.welcome_message = 0; break;
 		case 212: xargs.clear_screen = conf.clear_screen = 0; break;
-//		case 213: xargs.logs = conf.log_msgs = 1;	break;
 
 		case 214: {
 			if (!is_number(optarg))
@@ -2161,13 +2161,12 @@ external_arguments(int argc, char **argv)
 				open_prev_mode = OPEN_FILE; /* --open */
 		} break;
 
-		case 232: xargs.printsel = 1; break;
+		case 232: xargs.printsel = conf.print_selfiles = 1; break;
 		case 233:
 #ifndef _NO_SUGGESTIONS
 			xargs.suggestions = conf.suggestions = 0;
 #endif /* !_NO_SUGGESTIONS */
 			break;
-//		case 234: xargs.autojump = autojump = 0; break;
 		case 235:
 #ifndef _NO_HIGHLIGHT
 			xargs.highlight = conf.highlight = 0;
@@ -2554,7 +2553,6 @@ unset_xargs(void)
 	xargs.apparent_size = UNSET;
 	xargs.auto_open = UNSET;
 	xargs.autocd = UNSET;
-	xargs.autojump = UNSET;
 	xargs.autols= UNSET;
 	xargs.bell_style = UNSET;
 	xargs.bm_file = UNSET;
@@ -2577,7 +2575,6 @@ unset_xargs(void)
 	xargs.disk_usage = UNSET;
 	xargs.disk_usage_analyzer = UNSET;
 	xargs.eln_use_workspace_color = UNSET;
-//	xargs.expand_bookmarks = UNSET;
 	xargs.ext = UNSET;
 	xargs.dirs_first = UNSET;
 	xargs.files_counter = UNSET;
@@ -2699,7 +2696,7 @@ init_shell(void)
 int
 get_sel_files(void)
 {
-	if (!selfile_ok || !config_ok || !sel_file)
+	if (selfile_ok == 0 || config_ok == 0 || !sel_file)
 		return EXIT_FAILURE;
 
 	size_t selnbk = sel_n;
@@ -2978,7 +2975,7 @@ get_last_path(void)
 int
 load_pinned_dir(void)
 {
-	if (!config_ok || !config_dir)
+	if (config_ok == 0 || !config_dir)
 		return EXIT_FAILURE;
 
 	char *pin_file = (char *)xnmalloc(config_dir_len + 6, sizeof(char));
@@ -3206,7 +3203,7 @@ write_alias(char *s, char *p)
 	}
 }
 
-static inline int
+static int
 alias_exists(char *s)
 {
 	int i = (int)aliases_n;
@@ -3224,7 +3221,7 @@ alias_exists(char *s)
 void
 get_aliases(void)
 {
-	if (!config_ok || !config_file)
+	if (config_ok == 0 || !config_file)
 		return;
 
 	int fd;
@@ -3261,7 +3258,7 @@ get_aliases(void)
 	close_fstream(fp, fd);
 }
 
-static inline void
+static void
 write_dirhist(char *line, ssize_t len)
 {
 	if (!line || !*line || *line == '\n')
@@ -3281,7 +3278,7 @@ write_dirhist(char *line, ssize_t len)
 int
 load_dirhist(void)
 {
-	if (!config_ok || !dirhist_file)
+	if (config_ok == 0 || !dirhist_file)
 		return EXIT_FAILURE;
 
 	truncate_file(dirhist_file, conf.max_dirhist, 1);
@@ -3321,7 +3318,7 @@ load_dirhist(void)
 	return EXIT_SUCCESS;
 }
 
-static inline void
+static void
 free_prompt_cmds(void)
 {
 	size_t i;
@@ -3335,7 +3332,7 @@ free_prompt_cmds(void)
 void
 get_prompt_cmds(void)
 {
-	if (!config_ok || !config_file)
+	if (config_ok == 0 || !config_file)
 		return;
 
 	int fd;
@@ -3429,6 +3426,9 @@ check_options(void)
 			conf.trim_names = xargs.trim_names;
 	}
 
+	if (conf.columned == UNSET)
+		conf.columned = DEF_COLUMNS;
+
 	conf.max_name_len_bk = conf.max_name_len;
 	if (conf.trim_names == 0)
 		conf.max_name_len = UNSET;
@@ -3500,13 +3500,6 @@ check_options(void)
 		else
 			hist_status = xargs.history;
 	}
-
-/*	if (!conf.usr_cscheme) {
-		if (term_caps.color >= 256)
-			conf.usr_cscheme = savestring("default-256", 11);
-		else
-			conf.usr_cscheme = savestring("default", 7);
-	} */
 
 	if (!conf.wprompt_str) {
 		if (conf.colorize == 1)
@@ -3888,15 +3881,6 @@ check_options(void)
 			conf.auto_open = xargs.auto_open;
 	}
 
-	if (autojump == UNSET) {
-		if (xargs.autojump == UNSET)
-			autojump = DEF_AUTOJUMP;
-		else
-			autojump = xargs.autojump;
-		if (autojump == 1)
-			conf.autocd = 1;
-	}
-
 	if (conf.cd_on_quit == UNSET) {
 		if (xargs.cd_on_quit == UNSET)
 			conf.cd_on_quit = DEF_CD_ON_QUIT;
@@ -3948,6 +3932,7 @@ check_options(void)
 		conf.term = savestring(DEF_TERM_CMD, strlen(DEF_TERM_CMD));
 
 	if (!conf.encoded_prompt || !*conf.encoded_prompt) {
+		free(conf.encoded_prompt);
 		char *t = conf.colorize == 1 ? DEFAULT_PROMPT : DEFAULT_PROMPT_NO_COLOR;
 		conf.encoded_prompt = savestring(t, strlen(t));
 	}

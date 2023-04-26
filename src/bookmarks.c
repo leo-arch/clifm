@@ -855,10 +855,6 @@ bm_open(char **cmd)
 		|| (bookmarks[i].name && *p == *bookmarks[i].name
 		&& strcmp(p, bookmarks[i].name) == 0)) {
 
-/*		|| (conf.expand_bookmarks && bookmarks[i].path
-		&& *p == *bookmarks[i].path
-		&& strcmp(p, bookmarks[i].path) == 0)) { */
-
 			if (!bookmarks[i].path) {
 				fprintf(stderr, _("%s: Invalid bookmark\n"), p);
 				if (p != cmd[1]) free(p);

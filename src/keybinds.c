@@ -192,11 +192,11 @@ kbinds_function(char **args)
 int
 load_keybinds(void)
 {
-	if (!config_ok || !kbinds_file)
+	if (config_ok == 0 || !kbinds_file)
 		return EXIT_FAILURE;
 
 	/* Free the keybinds struct array */
-	if (kbinds_n) {
+	if (kbinds_n > 0) {
 		int i = (int)kbinds_n;
 
 		while (--i >= 0) {
@@ -284,7 +284,7 @@ keybind_exec_cmd(char *str)
 		 * flag will be set to 1 and no keybinding will work. Once the
 		 * corresponding function exited, set the kbind_busy flag to zero,
 		 * so that keybindings work again */
-		if (kbind_busy)
+		if (kbind_busy == 1)
 			kbind_busy = 0;
 
 		int i = (int)args_n + 1;
@@ -305,7 +305,7 @@ run_kb_cmd(char *cmd)
 	if (!cmd || !*cmd)
 		return EXIT_FAILURE;
 
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	if (conf.colorize == 1 && wrong_cmd == 1) {
@@ -339,7 +339,7 @@ find_key(char *function)
 int rl_toggle_max_filename_len(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	static int mnl_bk = 0, flag = 0;
@@ -567,7 +567,7 @@ static int
 rl_accept_suggestion(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy) {
+	if (kbind_busy == 1) {
 		/* If not at the end of the typed string, just move the cursor
 		 * forward one column */
 		if (rl_point < rl_end)
@@ -804,7 +804,7 @@ rl_refresh(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	char cmd[] = "rf";
@@ -892,7 +892,7 @@ static int
 rl_dir_last(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	/* If already at the end of dir hist, do nothing */
@@ -910,7 +910,7 @@ int
 rl_toggle_long_view(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy || xargs.disk_usage_analyzer == 1)
+	if (kbind_busy == 1 || xargs.disk_usage_analyzer == 1)
 		return EXIT_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
@@ -938,7 +938,7 @@ int
 rl_toggle_dirs_first(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
@@ -964,7 +964,7 @@ int
 rl_toggle_light_mode(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
@@ -997,7 +997,7 @@ int
 rl_toggle_hidden_files(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 #ifndef _NO_SUGGESTIONS
@@ -1115,7 +1115,7 @@ static int
 rl_bookmarks(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	kbind_busy = 1;
@@ -1137,7 +1137,7 @@ static int
 rl_clear_line(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy && xrename == 0)
+	if (kbind_busy == 1 && xrename == 0)
 		return EXIT_SUCCESS;
 
 	nwords = 0;
@@ -1176,8 +1176,9 @@ static int
 rl_sort_next(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
+
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
@@ -1202,8 +1203,9 @@ static int
 rl_sort_previous(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
+
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
@@ -1258,7 +1260,7 @@ static int
 rl_remove_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	rl_deprep_terminal();
@@ -1273,7 +1275,7 @@ static int
 rl_export_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	char cmd[] = "exp sel";
@@ -1286,7 +1288,7 @@ static int
 rl_move_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	char cmd[] = "m sel";
@@ -1299,7 +1301,7 @@ static int
 rl_rename_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	char cmd[] = "br sel";
@@ -1312,7 +1314,7 @@ static int
 rl_paste_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	rl_deprep_terminal();
@@ -1327,7 +1329,7 @@ int
 rl_quit(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	puts("\n");
@@ -1363,7 +1365,7 @@ static int
 rl_profile_previous(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1398,7 +1400,7 @@ static int
 rl_profile_next(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1481,7 +1483,7 @@ static int
 rl_open_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	char cmd[PATH_MAX + 3];
@@ -1497,7 +1499,7 @@ static int
 rl_bm_sel(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	char cmd[PATH_MAX + 6];
@@ -1737,7 +1739,7 @@ rl_toggle_only_dirs(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
 
-	if (kbind_busy)
+	if (kbind_busy == 1)
 		return EXIT_SUCCESS;
 
 	conf.only_dirs = conf.only_dirs ? 0 : 1;

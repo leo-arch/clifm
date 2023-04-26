@@ -88,7 +88,7 @@ skip_files(const struct dirent *ent)
 		return 0;
 
 	/* If not hidden files */
-	if (!conf.show_hidden && *ent->d_name == '.')
+	if (conf.show_hidden == 0 && *ent->d_name == '.')
 		return 0;
 
 	return 1;
@@ -298,13 +298,13 @@ entrycmp(const void *a, const void *b)
 	struct fileinfo *pb = (struct fileinfo *)b;
 	int ret = 0, st = conf.sort;
 
-	if (conf.list_dirs_first) {
+	if (conf.list_dirs_first == 1) {
 		ret = sort_dirs(pa->dir, pb->dir);
 		if (ret != 0)
 			return ret;
 	}
 
-	if (conf.light_mode && (st == SOWN || st == SGRP))
+	if (conf.light_mode == 1 && (st == SOWN || st == SGRP))
 		st = SNAME;
 
 	switch (st) {
@@ -374,7 +374,7 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 static inline void
 print_owner_group_sort(int mode)
 {
-	if (conf.light_mode) {
+	if (conf.light_mode == 1) {
 		printf(_("%s (not available: using 'name') %s\n"),
 			(mode == SOWN) ? "owner" : "group",
 			(conf.sort_reverse == 1) ? "[rev]" : "");

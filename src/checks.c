@@ -921,7 +921,7 @@ check_for_alias(char **args)
 void
 truncate_file(char *file, const int max, const int check_dups)
 {
-	if (!config_ok || !file)
+	if (config_ok == 0 || !file)
 		return;
 
 	/* Create the file, if it doesn't exist */

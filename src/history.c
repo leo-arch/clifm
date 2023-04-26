@@ -807,7 +807,7 @@ run_history_cmd(const char *cmd)
 int
 get_history(void)
 {
-	if (!config_ok || !hist_file) return EXIT_FAILURE;
+	if (config_ok == 0 || !hist_file) return EXIT_FAILURE;
 
 	if (current_hist_n == 0) { /* Coming from main() */
 		history = (struct history_t *)xcalloc(1, sizeof(struct history_t));

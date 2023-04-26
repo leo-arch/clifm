@@ -1847,11 +1847,6 @@ parse_input_str(char *str)
 			if (expand_bm_name(&substr[i]) == EXIT_SUCCESS)
 				continue;
 		}
-/*		if (conf.expand_bookmarks == 1) {
-			// Do not perform further checks on the expanded bookmark
-			if (expand_bm_name(&substr[i]) == EXIT_SUCCESS)
-				continue;
-		} */
 
 		/* ############################################# */
 
