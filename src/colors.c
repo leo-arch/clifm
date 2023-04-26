@@ -758,7 +758,8 @@ strip_color_line(const char *str, char mode)
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z')
 			|| *str == '=' || *str == ';' || *str == ':'
-			|| *str == '#' || *str == '-')
+			|| *str == '#' || *str == '-'
+			|| *str == '_') // Color names might contain an underscore
 				{buf[len] = *str; len++;}
 			str++;
 		}
@@ -769,7 +770,8 @@ strip_color_line(const char *str, char mode)
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z') || *str == '*' || *str == '.'
 			|| *str == '=' || *str == ';' || *str == ':'
-			|| *str == '#' || *str == '-')
+			|| *str == '#' || *str == '-'
+			|| *str == '_') // Color names might contain an underscore)
 				{buf[len] = *str; len++;}
 			str++;
 		}
