@@ -136,10 +136,10 @@
 #define PROGRAM_NAME "clifm"
 #define PNL "clifm" /* Program name lowercase */
 #define PROGRAM_DESC "The command line file manager"
-#define VERSION "1.12.rc1"
+#define VERSION "1.12.rc2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
-#define DATE "Apr 24, 2023"
+#define DATE "Apr 26, 2023"
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
@@ -1302,7 +1302,6 @@ extern int
 extern int
 	argc_bk, /* A copy of argc taken from main() */
 	autocmd_set,
-//	autojump,
 	bell,
 	bg_proc,
 	check_cap,
