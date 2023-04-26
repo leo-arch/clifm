@@ -967,7 +967,7 @@ rl_toggle_light_mode(int count, int key)
 		free_suggestion();
 #endif
 
-	conf.light_mode = conf.light_mode ? 0 : 1;
+	conf.light_mode = conf.light_mode == 1 ? 0 : 1;
 
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
@@ -976,8 +976,15 @@ rl_toggle_light_mode(int count, int key)
 	}
 
 	print_reload_msg(_("Light mode %s\n"),
-		conf.light_mode ? _("enabled") : _("disabled"));
+		conf.light_mode == 1 ? _("enabled") : _("disabled"));
 	xrl_reset_line_state();
+
+	/* RL_DISPATCHING is zero when called from lightmode_function(),
+	 * in exec.c. Otherwise, it is called from a keybinding and
+	 * rl_update_prompt() must be executed. */
+	if (rl_dispatching == 1)
+		rl_update_prompt();
+
 	return EXIT_SUCCESS;
 }
 
@@ -993,7 +1000,7 @@ rl_toggle_hidden_files(int count, int key)
 		free_suggestion();
 #endif
 
-	conf.show_hidden = conf.show_hidden ? 0 : 1;
+	conf.show_hidden = conf.show_hidden == 1 ? 0 : 1;
 
 	if (conf.autols == 1) {
 		if (conf.clear_screen == 0)
@@ -1002,7 +1009,7 @@ rl_toggle_hidden_files(int count, int key)
 	}
 
 	print_reload_msg(_("Hidden files %s\n"),
-		conf.show_hidden ? "enabled" : "disabled");
+		conf.show_hidden == 1 ? "enabled" : "disabled");
 	xrl_reset_line_state();
 	return EXIT_SUCCESS;
 }
