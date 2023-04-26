@@ -28,104 +28,104 @@
 /* User settings */
 
 /* Default color definitions */
-#define DEF_FILE_COLORS "bd=01;33:ca=30;41:cd=01:di=01;34:ed=02;34:\
-ee=32:ef=02:ex=01;32:fi=0:ln=01;36:mh=30;46:nd=04;01;31:nf=02;04;31:\
-no=31;47:or=02;04;36:ow=34;42:pi=35:so=01;35:su=37;41:sg=30;43:st=37;44:\
-tw=30;42:uf=02;04;37:"
+#define DEF_FILE_COLORS "bd=1;33:ca=30;41:cd=1:di=1;34:ed=2;34:\
+ee=32:ef=2:ex=1;32:fi=0:ln=1;36:mh=30;46:nd=4;1;31:nf=2;4;31:\
+no=31;47:or=2;4;36:ow=34;42:pi=35:so=1;35:su=37;41:sg=30;43:st=37;44:\
+tw=30;42:uf=2;4;37:"
 
-#define DEF_IFACE_COLORS "bm=01;36:dd=:df=0:dg=:dl=02;37:\
-dn=00;02;37:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:\
-el=00;36:em=01;31:fc=00;02;37:hb=00;36:hc=02;31:lc=:\
-hd=00;36:he=00;36:hn=0:hp=00;36:hq=00;33:hr=00;31:hs=00;32:hv=00;32:\
-li=01;32:mi=01;36:nm=01;32:sb=00;02;33:sc=02;36:sd=00;02;37:\
-sf=04;02;36:sh=02;35:si=01;34:sp=02;31:sx=02;32:sz=00;02;04;35:\
-ti=01;36:ts=04;35:tt=02;01;36:tx=0:\
-wc=01;36:wm=01;33:wp=00;02;31:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:\
-xf=01;31:xs=00;32:"
+#define DEF_IFACE_COLORS "bm=1;36:dd=:df=0:dg=:dl=2;37:\
+dn=0;2;37:do=:dp=:dr=:dw=:dxd=:dxr=:dz=:\
+el=0;36:em=1;31:fc=0;2;37:hb=0;36:hc=2;31:lc=:\
+hd=0;36:he=0;36:hn=0:hp=0;36:hq=0;33:hr=0;31:hs=0;32:hv=0;32:\
+li=1;32:mi=1;36:nm=1;32:sb=0;2;33:sc=2;36:sd=0;2;37:\
+sf=4;2;36:sh=2;35:si=1;34:sp=02;31:sx=02;32:sz=0;2;4;35:\
+ti=1;36:ts=4;35:tt=2;1;36:tx=0:\
+wc=1;36:wm=1;33:wp=0;2;31:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:\
+xf=1;31:xs=0;32:"
 
 /* Definition order: archive, image, video, sound, document, code, uninmportant */
-#define DEF_EXT_COLORS "*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:\
-*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:\
-*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:\
-*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:\
-*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:\
-*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:\
-*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:\
-*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:\
-*.apk=01;31:*.avif=35:*.jpg=35:*.jpeg=35:*.jxl=35:*.mjpg=35:*.mjpeg=35:\
+#define DEF_EXT_COLORS "*.tar=1;31:*.tgz=1;31:*.arc=1;31:*.arj=1;31:\
+*.taz=1;31:*.lha=1;31:*.lz4=1;31:*.lzh=1;31:*.lzma=1;31:*.tlz=1;31:\
+*.txz=1;31:*.tzo=1;31:*.t7z=1;31:*.zip=1;31:*.z=1;31:*.dz=1;31:\
+*.gz=1;31:*.lrz=1;31:*.lz=1;31:*.lzo=1;31:*.xz=1;31:*.zst=1;31:\
+*.tzst=1;31:*.bz2=1;31:*.bz=1;31:*.tbz=1;31:*.tbz2=1;31:*.tz=1;31:\
+*.deb=1;31:*.rpm=1;31:*.jar=1;31:*.war=1;31:*.ear=1;31:*.sar=1;31:\
+*.rar=1;31:*.alz=1;31:*.ace=1;31:*.zoo=1;31:*.cpio=1;31:*.7z=1;31:\
+*.rz=1;31:*.cab=1;31:*.wim=1;31:*.swm=1;31:*.dwm=1;31:*.esd=1;31:\
+*.apk=1;31:*.avif=35:*.jpg=35:*.jpeg=35:*.jxl=35:*.mjpg=35:*.mjpeg=35:\
 *.gif=35:*.bmp=35:*.xbm=35:*.xpm=35:*.png=35:*.svg=35:*.svgz=35:*.pcx=35:\
 *.pbm=35:*.pgm=35:*.ppm=35:*.tga=35:*.tif=35:*.tiff=35:*.mng=35:\
-*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:\
-*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:\
-*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:\
-*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:\
-*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:\
-*.ogx=01;35:\
+*.mov=1;35:*.mpg=1;35:*.mpeg=1;35:*.m2v=1;35:*.mkv=1;35:*.webm=1;35:\
+*.webp=1;35:*.ogm=1;35:*.mp4=1;35:*.m4v=1;35:*.mp4v=1;35:*.vob=1;35:\
+*.qt=1;35:*.nuv=1;35:*.wmv=1;35:*.asf=1;35:*.rm=1;35:*.rmvb=1;35:\
+*.flc=1;35:*.avi=1;35:*.fli=1;35:*.flv=1;35:*.gl=1;35:*.dl=1;35:\
+*.xcf=1;35:*.xwd=1;35:*.yuv=1;35:*.cgm=1;35:*.emf=1;35:*.ogv=1;35:\
+*.ogx=1;35:\
 *.aac=36:*.au=36:*.m4a=36:*.mid=36:*.midi=36:*.mp3=36:*.mka=36:*.ogg=36:\
 *.opus=36:*.spx=36:*.wma=36:*.wv=36:*.wav=36:*.flac=36:*.aif=36:\
-*.pdf=01:*.djvu=01:*.epub=01:*.mobi=01:*.cbr=01:*.cbz=01:*.ps=01:*.sxw=01:\
-*.doc=01:*.docx=01:*.xls=01:*.xlsx=01:*.xlr=01:*.sxi=01:*.ppt=01:*.pptx=01:\
-*.odt=01:*.ods=01:*.odp=01:*.rtf=01:\
-*.c=01;33:*.c++=01;33:*.h=01;33:*.cc=01;33:*.cpp=01;33:*.h++=01;33:\
-*.hh=01;33:*.go=01;33:*.java=01;33:*.js=01;33:*.lua=01;33:*.rb=01;33:*.rs=01;33:\
-*.kt=01;33:*.kts=01;33:*.hs=01;33:*.pl=01;33:*.vb=01;33:*.html=01;33:*.htm=01;33:\
-*.shtml=01;33:xhtml=01;33:*.xml=01;33:*.php=01;33:*.tex=01;33:*.ltx=01;33:\
-*.md=01;33:\
-*.cache=02;37:*.tmp=02;37:*.temp=02;37:*.log=02;37:*.bak=02;37:*.bk=02;37:\
-*.in=02;37:*.out=02;37:*.part=02;37:*.aux=02;37:*.old=02;37:*.orig=02;37:\
-*.rej=02;37:*.swp=02;37:*.pid=02;37:"
+*.pdf=1:*.djvu=1:*.epub=1:*.mobi=1:*.cbr=1:*.cbz=1:*.ps=1:*.sxw=1:\
+*.doc=1:*.docx=1:*.xls=1:*.xlsx=1:*.xlr=1:*.sxi=1:*.ppt=1:*.pptx=1:\
+*.odt=1:*.ods=1:*.odp=1:*.rtf=1:\
+*.c=1;33:*.c++=1;33:*.h=1;33:*.cc=1;33:*.cpp=1;33:*.h++=1;33:\
+*.hh=1;33:*.go=1;33:*.java=1;33:*.js=1;33:*.lua=1;33:*.rb=1;33:*.rs=1;33:\
+*.kt=1;33:*.kts=1;33:*.hs=1;33:*.pl=1;33:*.vb=1;33:*.html=01;33:*.htm=1;33:\
+*.shtml=1;33:xhtml=1;33:*.xml=1;33:*.php=1;33:*.tex=1;33:*.ltx=1;33:\
+*.md=1;33:\
+*.cache=2;37:*.tmp=2;37:*.temp=2;37:*.log=2;37:*.bak=2;37:*.bk=2;37:\
+*.in=2;37:*.out=2;37:*.part=2;37:*.aux=2;37:*.old=2;37:*.orig=2;37:\
+*.rej=2;37:*.swp=2;37:*.pid=2;37:"
 
 /* Filetypes */
-#define DEF_BD_C  "\x1b[01;33m" /* Block device */
+#define DEF_BD_C  "\x1b[1;33m" /* Block device */
 #define DEF_CA_C  "\x1b[30;41m" /* File with capabilities */
-#define DEF_CD_C  "\x1b[00;01m" /* Character device */
-#define DEF_DI_C  "\x1b[01;34m" /* Dir */
-#define DEF_ED_C  "\x1b[02;34m" /* Empty dir */
-#define DEF_EE_C  "\x1b[00;32m" /* Empty executable file */
-#define DEF_EF_C  "\x1b[00;02m" /* Empty regular file */
-#define DEF_EX_C  "\x1b[01;32m" /* Executable file */
+#define DEF_CD_C  "\x1b[0;1m" /* Character device */
+#define DEF_DI_C  "\x1b[1;34m" /* Dir */
+#define DEF_ED_C  "\x1b[2;34m" /* Empty dir */
+#define DEF_EE_C  "\x1b[0;32m" /* Empty executable file */
+#define DEF_EF_C  "\x1b[0;2m" /* Empty regular file */
+#define DEF_EX_C  "\x1b[1;32m" /* Executable file */
 #define DEF_FI_C  "\x1b[0m"     /* Regular file */
-#define DEF_LN_C  "\x1b[01;36m" /* Symbolic link */
+#define DEF_LN_C  "\x1b[1;36m" /* Symbolic link */
 #define DEF_MH_C  "\x1b[30;46m" /* Multi-link */
-#define DEF_ND_C  "\x1b[01;31m" /* Unaccessible dir */
-#define DEF_NF_C  "\x1b[02;31m" /* Unaccessible file */
-#define DEF_NO_C  "\x1b[00;31;47m" /* Unknown file type */
-#define DEF_OR_C  "\x1b[02;04;36m" /* Orphaned/broken symlink */
+#define DEF_ND_C  "\x1b[1;31m" /* Unaccessible dir */
+#define DEF_NF_C  "\x1b[2;31m" /* Unaccessible file */
+#define DEF_NO_C  "\x1b[0;31;47m" /* Unknown file type */
+#define DEF_OR_C  "\x1b[2;4;36m" /* Orphaned/broken symlink */
 #define DEF_OW_C  "\x1b[34;42m" /* Other-writable */
-#define DEF_PI_C  "\x1b[00;35m" /* FIFO/pipe */
+#define DEF_PI_C  "\x1b[0;35m" /* FIFO/pipe */
 #define DEF_SG_C  "\x1b[30;43m" /* SGID file */
-#define DEF_SO_C  "\x1b[01;35m" /* Socket */
+#define DEF_SO_C  "\x1b[1;35m" /* Socket */
 #define DEF_ST_C  "\x1b[37;44m" /* Sticky bit set */
 #define DEF_SU_C  "\x1b[37;41m" /* SUID file */
 #define DEF_TW_C  "\x1b[30;42m" /* Sticky and other-writable */
-#define DEF_UF_C  "\x1b[02;04;37m" /* Un'stat'able file */
+#define DEF_UF_C  "\x1b[2;4;37m" /* Un'stat'able file */
 
 /* Interface */
-#define DEF_BM_C  "\x1b[01;36m" /* Bookmarked dirs in bookmarks screen */
+#define DEF_BM_C  "\x1b[1;36m" /* Bookmarked dirs in bookmarks screen */
 #define DEF_DF_C  "\x1b[0m" /* Reset attributes: default terminal color */
-#define DEF_DL_C  "\x1b[02;37m" /* Dividing line */
-#define DEF_EL_C  "\x1b[00;36m" /* ELN's */
-#define DEF_EM_C  "\001\x1b[01;31m\002" /* Error msg indicator */
-#define DEF_FC_C  "\x1b[00;02;37m" /* Files counter */
-#define DEF_LI_C  "\001\x1b[01;32m\002" /* Sel files indicator (prompt) */
-#define DEF_LI_CB "\x1b[01;32m" /* Sel files indicator (files list) */
-#define DEF_MI_C  "\x1b[01;36m" /* Misc */
-#define DEF_NM_C  "\001\x1b[01;32m\002" /* Notice msg indicator */
-#define DEF_SI_C  "\001\x1b[01;34m\002" /* Stealth mode indicator */
-#define DEF_TI_C  "\001\x1b[01;36m\002" /* Trash indicator */
+#define DEF_DL_C  "\x1b[2;37m" /* Dividing line */
+#define DEF_EL_C  "\x1b[0;36m" /* ELN's */
+#define DEF_EM_C  "\001\x1b[1;31m\002" /* Error msg indicator */
+#define DEF_FC_C  "\x1b[0;2;37m" /* Files counter */
+#define DEF_LI_C  "\001\x1b[1;32m\002" /* Sel files indicator (prompt) */
+#define DEF_LI_CB "\x1b[1;32m" /* Sel files indicator (files list) */
+#define DEF_MI_C  "\x1b[1;36m" /* Misc */
+#define DEF_NM_C  "\001\x1b[1;32m\002" /* Notice msg indicator */
+#define DEF_SI_C  "\001\x1b[1;34m\002" /* Stealth mode indicator */
+#define DEF_TI_C  "\001\x1b[1;36m\002" /* Trash indicator */
 #define DEF_TX_C  "\x1b[0m" /* Input text */
-#define DEF_WC_C  "\x1b[01;36m" /* Welcome message */
-#define DEF_WM_C  "\001\x1b[01;33m\002" /* Warning msg indicator */
+#define DEF_WC_C  "\x1b[1;36m" /* Welcome message */
+#define DEF_WM_C  "\001\x1b[1;33m\002" /* Warning msg indicator */
 
 /* Symlink char indicator (for ColorLinksAsTarget only) */
 #define DEF_LC_C      "\x1b[1;36m"
 #define DEF_LC_C_256  "\x1b[0;38;5;43m"
 
-#define DEF_TS_C  "\x1b[04;35m" /* Matching prefix for TAB completed possible entries */
-#define DEF_TT_C  "\x1b[01;02;36m" /* Tilde for trimmed file names */
-#define DEF_WP_C  "\x1b[00;02;31m" /* Warning prompt input text */
+#define DEF_TS_C  "\x1b[4;35m" /* Matching prefix for TAB completed possible entries */
+#define DEF_TT_C  "\x1b[1;2;36m" /* Tilde for trimmed file names */
+#define DEF_WP_C  "\x1b[0;2;31m" /* Warning prompt input text */
 #define DEF_XS_C  "\001\x1b[32m\002" /* Exit code: success */
-#define DEF_XF_C  "\001\x1b[01;31m\002" /* Exit code: failure */
+#define DEF_XF_C  "\001\x1b[1;31m\002" /* Exit code: failure */
 
 /* Workspaces */
 #define DEF_WS1_C "\001\x1b[34m\002"
@@ -138,46 +138,45 @@ xf=01;31:xs=00;32:"
 #define DEF_WS8_C "\001\x1b[36m\002"
 
 /* Suggestions */
-#define DEF_SB_C "\x1b[02;33m"    /* Shell built-ins */
-#define DEF_SC_C "\x1b[02;36m"    /* Aliases and binaries in PATH */
-#define DEF_SD_C "\x1b[02;37m"    /* Internal commands description */
-#define DEF_SH_C "\x1b[02;35m"    /* Commands history */
-#define DEF_SF_C "\x1b[02;04;36m" /* ELN's, bookmark, file, and directory names */
-#define DEF_SP_C "\x1b[02;31m"    /* Suggestions pointer (12 > filename) */
-#define DEF_SX_C "\x1b[02;32m"    /* Internal commands and parameters */
-#define DEF_SZ_C "\x1b[02;04;35m" /* File names (fuzzy) */
+#define DEF_SB_C "\x1b[2;33m"   /* Shell built-ins */
+#define DEF_SC_C "\x1b[2;36m"   /* Aliases and binaries in PATH */
+#define DEF_SD_C "\x1b[2;37m"   /* Internal commands description */
+#define DEF_SH_C "\x1b[2;35m"   /* Commands history */
+#define DEF_SF_C "\x1b[2;4;36m" /* ELN's, bookmark, file, and directory names */
+#define DEF_SP_C "\x1b[2;31m"   /* Suggestions pointer (12 > filename) */
+#define DEF_SX_C "\x1b[2;32m"   /* Internal commands and parameters */
+#define DEF_SZ_C "\x1b[2;4;35m" /* File names (fuzzy) */
 
 /* Highlight */
-#define DEF_HB_C "\x1b[00;36m" /* Parenthesis, Brackets ( {[()]} ) */
-#define DEF_HC_C "\x1b[02;37m" /* Comments (#comment) */
-#define DEF_HD_C "\x1b[00;36m" /* Slashes (for paths) */
-#define DEF_HE_C "\x1b[00;36m" /* Expansion operators (* ~) */
-//#define DEF_HN_C "\x1b[00;35m" /* Numbers (including ELN's) */
-#define DEF_HN_C "\x1b[0m" /* Numbers (including ELN's) */
-#define DEF_HP_C "\x1b[00;36m" /* Parameters (e.g. -h --help) */
-#define DEF_HQ_C "\x1b[00;33m" /* Quotes (single and double) */
-#define DEF_HR_C "\x1b[00;31m" /* Redirection operator (>) */
-#define DEF_HS_C "\x1b[00;32m" /* Process separators (; & |)*/
-#define DEF_HV_C "\x1b[00;32m" /* Variables ($VAR) */
+#define DEF_HB_C "\x1b[0;36m" /* Parenthesis, Brackets ( {[()]} ) */
+#define DEF_HC_C "\x1b[2;37m" /* Comments (#comment) */
+#define DEF_HD_C "\x1b[0;36m" /* Slashes (for paths) */
+#define DEF_HE_C "\x1b[0;36m" /* Expansion operators (* ~) */
+#define DEF_HN_C "\x1b[0m"    /* Numbers (including ELN's) */
+#define DEF_HP_C "\x1b[0;36m" /* Parameters (e.g. -h --help) */
+#define DEF_HQ_C "\x1b[0;33m" /* Quotes (single and double) */
+#define DEF_HR_C "\x1b[0;31m" /* Redirection operator (>) */
+#define DEF_HS_C "\x1b[0;32m" /* Process separators (; & |)*/
+#define DEF_HV_C "\x1b[0;32m" /* Variables ($VAR) */
 
 /* Colors for the properties and long/detail view functions */
-#define DEF_DD_C     "\x1b[00;36m" /* Modification date */
-#define DEF_DG_C     "\x1b[00;33m" /* UID, GID */
-#define DEF_DG_C256  "\x1b[0;38;5;215m"
-#define DEF_DN_C     "\x1b[00;02;37m" /* Dash (no attribute) */
-#define DEF_DO_C     "\x1b[00;36m" /* Perms in octal */
+#define DEF_DD_C     "\x1b[0;36m" /* Modification date */
+#define DEF_DG_C     "\x1b[0;35m" /* UID, GID */
+#define DEF_DG_C256  "\x1b[0;38;5;140m"
+#define DEF_DN_C     "\x1b[0;2;37m" /* Dash (no attribute) */
+#define DEF_DO_C     "\x1b[0;36m" /* Perms in octal */
 #define DEF_DO_C256  "\x1b[0;38;5;79m"
-#define DEF_DP_C     "\x1b[00;36m" /* SUID, SGID, Sticky */
+#define DEF_DP_C     "\x1b[0;36m" /* SUID, SGID, Sticky */
 #define DEF_DP_C256  "\x1b[0;38;5;79m"
-#define DEF_DR_C     "\x1b[00;33m" /* Read perm */
+#define DEF_DR_C     "\x1b[0;33m" /* Read perm */
 #define DEF_DR_C256  "\x1b[0;38;5;228m"
-#define DEF_DW_C     "\x1b[00;31m" /* Write perm */
+#define DEF_DW_C     "\x1b[0;31m" /* Write perm */
 #define DEF_DW_C256  "\x1b[0;38;5;197m"
-#define DEF_DXD_C    "\x1b[00;32m" /* Execute perm (dirs) */
+#define DEF_DXD_C    "\x1b[0;32m" /* Execute perm (dirs) */
 #define DEF_DXD_C256 "\x1b[0;38;5;77m"
-#define DEF_DXR_C    "\x1b[00;36m" /* Execute perm (reg files) */
+#define DEF_DXR_C    "\x1b[0;36m" /* Execute perm (reg files) */
 #define DEF_DXR_C256 "\x1b[0;38;5;79m"
-#define DEF_DZ_C     "\x1b[00;32m" /* Size (only for dirs) */
+#define DEF_DZ_C     "\x1b[0;32m" /* Size (only for dirs) */
 
 /* Default color shades for date field in file properties */
 #define DEF_DATE_SHADES_256 "2,197-2,231,253,250,247,244"
@@ -193,7 +192,7 @@ xf=01;31:xs=00;32:"
 //#define DEF_HW_C "\x1b[00;31m"
 //#define DEF_HW_C DEF_WP_C
 
-#define DEF_DIR_ICO_C "\x1b[00;33m"
+#define DEF_DIR_ICO_C "\x1b[0;33m"
 
 /* Characters used to classify files when running colorless and classify
  * is enabled */
