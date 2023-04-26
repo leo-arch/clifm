@@ -826,7 +826,7 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 		n = tname;
 	}
 
-	char trim_diff[8];
+	char trim_diff[14];
 	*trim_diff = '\0';
 	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
@@ -960,7 +960,7 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 		n = tname;
 	}
 
-	char trim_diff[8];
+	char trim_diff[14];
 	*trim_diff = '\0';
 	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
@@ -1116,7 +1116,7 @@ print_entry_color_light(int *ind_char, const int i, const int pad,
 		n = tname;
 	}
 
-	char trim_diff[8];
+	char trim_diff[14];
 	*trim_diff = '\0';
 	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
@@ -1222,7 +1222,7 @@ print_entry_nocolor_light(int *ind_char, const int i, const int pad,
 		n = tname;
 	}
 
-	char trim_diff[8];
+	char trim_diff[14];
 	*trim_diff = '\0';
 	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
