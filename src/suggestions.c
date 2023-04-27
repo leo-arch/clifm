@@ -144,6 +144,7 @@ check_int_cmd_desc(const char *s, const size_t l)
 
 		else if (*s == 'd') {
 			if (*(s + 1) == 's') return DS_DESC;
+			if (*(s + 1) == 'h') return DH_DESC;
 		}
 
 		else if (*s == 'f') {
