@@ -490,17 +490,17 @@ compile_filter(void)
 {
 	if (filter.type == FILTER_FILE_NAME) {
 		if (regcomp(&regex_exp, filter.str, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
-			fputs(_("ft: Invalid regular expression\n"), stderr);
+			xerror("%s\n", _("ft: Invalid regular expression"));
 			regfree(&regex_exp);
 			goto ERR;
 		}
 	} else if (filter.type == FILTER_FILE_TYPE) {
 		if (validate_file_type_filter() != EXIT_SUCCESS) {
-			fputs(_("ft: Invalid file type filter\n"), stderr);
+			xerror("%s\n", _("ft: Invalid file type filter"));
 			goto ERR;
 		}
 	} else {
-		fputs(_("ft: Invalid filter\n"), stderr);
+		xerror("%s\n", _("ft: Invalid filter"));
 		goto ERR;
 	}
 
@@ -738,13 +738,13 @@ static inline int
 check_new_instance_init_conditions(void)
 {
 	if (!conf.term) {
-		fprintf(stderr, _("%s: Default terminal not set. Use the "
+		xerror(_("%s: Default terminal not set. Use the "
 			"configuration file (F10) to set it\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
 	if (!(flags & GUI)) {
-		fprintf(stderr, _("%s: Function only available for graphical "
+		xerror(_("%s: Function only available for graphical "
 			"environments\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -764,7 +764,7 @@ check_dir(char **dir)
 	}
 
 	if (!S_ISDIR(attr.st_mode)) {
-		fprintf(stderr, _("%s: %s: Not a directory\n"), PROGRAM_NAME, *dir);
+		xerror(_("%s: %s: Not a directory\n"), PROGRAM_NAME, *dir);
 		return ENOTDIR;
 	}
 
@@ -993,7 +993,7 @@ alias_import(char *file)
 				continue;
 
 			if (is_internal_c(alias_name)) {
-				fprintf(stderr, _("%s: Alias conflicts with internal "
+				xerror(_("%s: Alias conflicts with internal "
 					"command\n"), alias_name);
 				free(alias_name);
 				continue;
@@ -1039,8 +1039,7 @@ alias_import(char *file)
 				/* Write the new alias into CliFM's config file */
 				fputs(line, config_fp);
 			} else {
-				fprintf(stderr, _("%s: Alias already exists\n"),
-				    alias_name);
+				xerror(_("%s: Alias already exists\n"), alias_name);
 			}
 
 			free(alias_name);
@@ -1053,7 +1052,7 @@ alias_import(char *file)
 
 	/* No alias was found in FILE */
 	if (alias_found == 0) {
-		fprintf(stderr, _("%s: %s: No alias found\n"), PROGRAM_NAME, rfile);
+		xerror(_("%s: %s: No alias found\n"), PROGRAM_NAME, rfile);
 		return EXIT_FAILURE;
 	}
 
@@ -1062,7 +1061,7 @@ alias_import(char *file)
 	 * existed) */
 	else {
 		if (alias_imported == 0) {
-			fprintf(stderr, _("%s: No alias imported\n"), PROGRAM_NAME);
+			xerror(_("%s: No alias imported\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 	}
@@ -2233,7 +2232,7 @@ run_help_topic(char *topic)
 	if (*topic == 't' && strcmp(topic, "trash") == 0)
 		return print_trash_topic();
 
-	fprintf(stderr, "%s: help: %s: No such help topic\n", PROGRAM_NAME, topic);
+	xerror("%s: help: %s: No such help topic\n", PROGRAM_NAME, topic);
 	return EXIT_FAILURE;
 }
 

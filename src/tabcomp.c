@@ -2553,7 +2553,7 @@ RESTART:
 		break;
 
 	default:
-		fprintf(stderr, "\r\nreadline: %c: Bad value for what_to_do "
+		xerror("\r\nreadline: %c: Bad value for what_to_do "
 			"in tab_complete\n", what_to_do);
 		exit(EXIT_FAILURE);
 		break;

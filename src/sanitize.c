@@ -62,7 +62,7 @@ xclearenv(void)
 		memcpy(namebuf, environ[0], len);
 		namebuf[len] = '\0';
 		if (unsetenv(namebuf) == -1) {
-			fprintf(stderr, "%s: unsetenv: %s: %s\n", PROGRAM_NAME,
+			xerror("%s: unsetenv: %s: %s\n", PROGRAM_NAME,
 				namebuf, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
@@ -104,15 +104,15 @@ int
 xsecure_env(const int mode)
 {
 #ifdef __HAIKU__
-	fprintf(stderr, "%s: secure-env: This feature is not available "
+	xerror("%s: secure-env: This feature is not available "
 		"on Haiku\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #elif __NetBSD__
-	fprintf(stderr, "%s: secure-env: This feature is not available "
+	xerror("%s: secure-env: This feature is not available "
 		"on NetBSD\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #elif __APPLE__
-	fprintf(stderr, "%s: secure-env: This feature is not available "
+	xerror("%s: secure-env: This feature is not available "
 		"on MacOS\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #endif /* __APPLE__ */

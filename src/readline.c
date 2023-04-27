@@ -3875,7 +3875,7 @@ set_rl_input_file(void)
 {
 	char *input_file = getenv("CLIFM_TEST_INPUT_FILE");
 	if (!input_file) {
-		fprintf(stderr, _("%s: An input file must be provided via the "
+		xerror(_("%s: An input file must be provided via the "
 			"CLIFM_TEST_INPUT_FILE environment variable\n"), PROGRAM_NAME);
 		UNHIDE_CURSOR;
 		exit(EXIT_FAILURE);
@@ -3883,8 +3883,7 @@ set_rl_input_file(void)
 
 	FILE *fstream = fopen(input_file, "r");
 	if (!fstream) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			input_file, strerror(errno));
+		xerror("%s: %s: %s\n", PROGRAM_NAME, input_file, strerror(errno));
 		UNHIDE_CURSOR;
 		exit(EXIT_FAILURE);
 	}

@@ -947,12 +947,12 @@ static int
 edit_colorscheme(char *app)
 {
 	if (!colors_dir) {
-		fprintf(stderr, _("cs: No color scheme found\n"));
+		xerror("%s\n", _("cs: No color scheme found"));
 		return EXIT_FAILURE;
 	}
 
 	if (!cur_cscheme) {
-		fprintf(stderr, _("cs: Current color scheme is unknown\n"));
+		xerror("%s\n", _("cs: Current color scheme is unknown"));
 		return EXIT_FAILURE;
 	}
 
@@ -962,7 +962,7 @@ edit_colorscheme(char *app)
 	snprintf(file, sizeof(file), "%s/%s.clifm", colors_dir, cur_cscheme); /* NOLINT */
 	if (stat(file, &attr) == -1
 	&& import_color_scheme(cur_cscheme) != EXIT_SUCCESS) {
-		fprintf(stderr, _("cs: %s: No such color scheme\n"), cur_cscheme);
+		xerror(_("cs: %s: No such color scheme\n"), cur_cscheme);
 		return EXIT_FAILURE;
 	}
 
@@ -1023,7 +1023,7 @@ set_colorscheme(char *arg)
 	}
 
 	if (cs_found == 0)
-		fprintf(stderr, _("cs: %s: No such color scheme\n"), p);
+		xerror(_("cs: %s: No such color scheme\n"), p);
 
 	free(p);
 
@@ -1041,7 +1041,7 @@ cschemes_function(char **args)
 	return EXIT_FAILURE;
 #else
 	if (xargs.stealth_mode == 1) {
-		fprintf(stderr, _("%s: colors: %s\nTIP: To change the "
+		xerror(_("%s: colors: %s\nTIP: To change the "
 			"current color scheme use the following environment "
 			"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
 			"and CLIFM_EXT_COLORS\n"), PROGRAM_NAME, STEALTH_DISABLED);

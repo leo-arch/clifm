@@ -172,8 +172,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 	} else {
 		if (count_dir(target, CPOP) <= 2) {
 			int tmp_err = EXIT_FAILURE;
-			fprintf(stderr, _("%s: %s: Directory empty\n"), PROGRAM_NAME,
-				target);
+			xerror(_("%s: %s: Directory empty\n"), PROGRAM_NAME, target);
 			fclose(fp);
 			return tmp_err;
 		}
@@ -839,7 +838,7 @@ create_file(char **cmd)
 			int ret = strncmp(cmd[i], workspaces[cur_ws].path, hlen);
 			char *name = (ret == 0 && *(cmd[i] + hlen) && *(cmd[i] + hlen + 1))
 				? cmd[i] + hlen + 1 : cmd[i];
-			fprintf(stderr, "%s: File exists\n", name);
+			xerror("%s: File exists\n", name);
 			if (cmd[i + 1]) {
 				printf(_("Press any key to continue ..."));
 				xgetchar();
@@ -1048,7 +1047,7 @@ open_function(char **cmd)
 	case S_IFLNK: {
 		int ret = get_link_ref(file);
 		if (ret == -1) {
-			fprintf(stderr, _("open: %s: Broken symbolic link\n"), file);
+			xerror(_("open: %s: Broken symbolic link\n"), file);
 			return EXIT_FAILURE;
 		} else if (ret == S_IFDIR) {
 			return cd_function(file, CD_PRINT_ERROR);
@@ -1071,7 +1070,7 @@ open_function(char **cmd)
 	/* If neither directory nor regular file nor symlink (to directory
 	 * or regular file), print the corresponding error message and exit */
 	if (no_open_file == 1) {
-		fprintf(stderr, _("open: %s (%s): Cannot open file\nTry "
+		xerror(_("open: %s (%s): Cannot open file\nTry "
 			"'APP FILE' or 'open FILE APP'\n"), cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
@@ -1084,7 +1083,7 @@ open_function(char **cmd)
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 		ret = open_file(file);
 		if (!conf.opener && ret == EXIT_FAILURE) {
-			fprintf(stderr, _("%s: Add a new entry to the mimelist file "
+			xerror(_("%s: Add a new entry to the mimelist file "
 				"('mime edit' or F6) or run 'APP FILE' or 'open FILE APP'\n"),
 				PROGRAM_NAME);
 			return EXIT_FAILURE;
@@ -1099,12 +1098,12 @@ open_function(char **cmd)
 		return EXIT_SUCCESS;
 
 	if (ret == EXEC_NOTFOUND || ret == EACCES) {
-		fprintf(stderr, "open: %s: %s\nTry 'open --help' for more "
+		xerror("open: %s: %s\nTry 'open --help' for more "
 			"information\n", cmd[2], NOTFOUND_MSG);
 		return EXEC_NOTFOUND;
 	}
 
-	fprintf(stderr, "open: %s: %s\n", cmd[2], strerror(ret));
+	xerror("open: %s: %s\n", cmd[2], strerror(ret));
 	return ret;
 }
 
@@ -1171,7 +1170,7 @@ edit_link(char *link)
 	}
 
 	if (!S_ISLNK(attr.st_mode)) {
-		fprintf(stderr, _("le: %s: Not a symbolic link\n"), link);
+		xerror(_("le: %s: Not a symbolic link\n"), link);
 		return EXIT_FAILURE;
 	}
 
@@ -1205,7 +1204,7 @@ edit_link(char *link)
 			if (file_info[a].name)
 				new_path = savestring(file_info[a].name, strlen(file_info[a].name));
 		} else {
-			fprintf(stderr, _("le: %s: Invalid ELN\n"), new_path);
+			xerror(_("le: %s: Invalid ELN\n"), new_path);
 			free(new_path);
 			return EXIT_FAILURE;
 		}
@@ -1335,17 +1334,17 @@ validate_vv_dest_dir(const char *file)
 
 	struct stat a;
 	if (stat(file, &a) == -1) {
-		fprintf(stderr, "vv: %s: %s\n", file, strerror(errno));
+		xerror("vv: %s: %s\n", file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (!S_ISDIR(a.st_mode)) {
-		fprintf(stderr, _("vv: %s: Not a directory\n"), file);
+		xerror(_("vv: %s: Not a directory\n"), file);
 		return EXIT_FAILURE;
 	}
 
 	if (strcmp(workspaces[cur_ws].path, file) == 0) {
-		fputs(_("vv: Destiny directory is the current directory\n"), stderr);
+		xerror("%s\n", _("vv: Destiny directory is the current directory"));
 		return EXIT_FAILURE;
 	}
 
@@ -1673,7 +1672,7 @@ bulk_rename(char **args)
 		}
 
 		if (lstat(args[i], &attr) == -1) {
-			fprintf(stderr, "br: %s: %s\n", args[i], strerror(errno));
+			xerror("br: %s: %s\n", args[i], strerror(errno));
 			continue;
 		} else {
 			counter++;
@@ -1758,7 +1757,7 @@ bulk_rename(char **args)
 	}
 
 	if (arg_total != file_total) {
-		fputs(_("br: Line mismatch in renaming file\n"), stderr);
+		xerror("%s\n", _("br: Line mismatch in renaming file"));
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
 				bulk_file, strerror(errno));

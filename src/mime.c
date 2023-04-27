@@ -365,7 +365,7 @@ static char *
 get_mime(char *file)
 {
 	if (!file || !*file) {
-		fputs(_("Error opening temporary file\n"), stderr);
+		xerror("%s\n", _("Error opening temporary file"));
 		return (char *)NULL;
 	}
 
@@ -467,17 +467,17 @@ static int
 mime_import(char *file)
 {
 #if defined(__HAIKU__)
-	fprintf(stderr, "%s: Importing MIME associations is not supported "
+	xerror("%s: Importing MIME associations is not supported "
 		"on Haiku\n", err_name);
 	return (-1);
 #elif defined(__APPLE__)
-	fprintf(stderr, "%s: Importing MIME associations is not supported "
+	xerror("%s: Importing MIME associations is not supported "
 		"on MacOS\n", err_name);
 	return (-1);
 #endif
 
 	if (!(flags & GUI)) { /* Not in X, exit */
-		fprintf(stderr, _("%s: Nothing was imported. No graphical "
+		xerror(_("%s: Nothing was imported. No graphical "
 			"environment found\n"), err_name);
 		return (-1);
 	}
@@ -555,7 +555,7 @@ mime_import(char *file)
 	free(local_path);
 
 	if (mime_defs == 0)
-		fprintf(stderr, _("%s: Nothing was imported. No MIME association "
+		xerror(_("%s: Nothing was imported. No MIME association "
 			"found\n"), err_name);
 
 	fclose(mime_fp);
@@ -1619,7 +1619,7 @@ static int
 handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 {
 	if (xargs.preview == 1) {
-		fprintf(stderr, _("shotgun: %s: No associated application found\n"
+		xerror(_("shotgun: %s: No associated application found\n"
 			"Fix this in then configuration file:\n%s\n"), arg, mime_file);
 		return EXIT_FAILURE;
 	}
@@ -1638,12 +1638,11 @@ handle_no_app(const int info, char **fpath, char **mime, const char *arg)
 
 			return exit_status;
 		} else {
-			fprintf(stderr, _("%s: %s: No associated application found\n"),
+			xerror(_("%s: %s: No associated application found\n"),
 				err_name, arg);
 		}
 #else
-		fprintf(stderr, _("%s: %s: No associated application found\n"),
-			err_name, arg);
+		xerror(_("%s: %s: No associated application found\n"), err_name, arg);
 #endif
 	}
 

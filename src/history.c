@@ -243,8 +243,7 @@ write_msg_into_logfile(const char *_msg)
 		/* Do not log this error: We might enter into an infinite loop
 		 * trying to access a file that cannot be accessed. Just warn the user
 		 * and print the error to STDERR */
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-			msgs_log_file, strerror(errno));
+		xerror("%s: %s: %s\n", PROGRAM_NAME, msgs_log_file, strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
 		putchar('\n');
@@ -328,13 +327,13 @@ send_desktop_notification(char *msg)
 		return;
 
 	/* Error: warn and print the original message */
-	fprintf(stderr, "%s: Notification daemon error: %s\n"
+	xerror("%s: Notification daemon error: %s\n"
 		"Disable desktop notifications (run 'help desktop-notifications' "
 		"for details) or %s to silence this "
 		"warning (original message printed below)\n", PROGRAM_NAME,
 		strerror(ret), ret == ENOENT ? "install a notification daemon"
 		: "fix this error (consult your daemon's documentation)");
-	fprintf(stderr, "%s\n", msg);
+	xerror("%s\n", msg);
 }
 
 /* Handle the error message MSG.
@@ -620,7 +619,7 @@ history_function(char **args)
 	}
 
 	if (config_ok == 0) {
-		fprintf(stderr, _("%s: History function disabled\n"), PROGRAM_NAME);
+		xerror(_("%s: History function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -690,7 +689,7 @@ run_hist_num(const char *cmd)
 	int num = atoi(cmd);
 
 	if (num <= 0 || num > (int)current_hist_n) {
-		fprintf(stderr, _("history: !%s: event not found\n"), cmd);
+		xerror(_("history: !%s: event not found\n"), cmd);
 		return EXIT_FAILURE;
 	}
 
@@ -735,7 +734,7 @@ run_last_lessn_hist_cmd(const char *cmd)
 	int acmd = atoi(cmd + 1);
 
 	if (!is_number(cmd + 1) || acmd <= 0 || acmd > (int)current_hist_n - 1) {
-		fprintf(stderr, _("history: !%s: Event not found\n"), cmd);
+		xerror(_("history: !%s: Event not found\n"), cmd);
 		return EXIT_FAILURE;
 	}
 
@@ -774,7 +773,7 @@ run_hist_string(const char *cmd)
 		return exit_status;
 	}
 
-	fprintf(stderr, _("history: !%s: Event not found\n"), cmd);
+	xerror(_("history: !%s: Event not found\n"), cmd);
 	return EXIT_FAILURE;
 }
 

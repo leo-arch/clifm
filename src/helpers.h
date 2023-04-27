@@ -575,8 +575,7 @@ extern int watch;
 # define strcasestr xstrcasestr
 #endif /* (__linux || __CYGWIN__) && _BE_POSIX */
 
-//#define xerror(format, ...) _err(ERR_NO_STORE, NOPRINT_PROMPT, (format), __VA_ARGS__)
-/* Log the message and print it to STDOUT, but do not store it into the
+/* Log the message and print it to STDERR, but do not store it into the
  * messages array. */
 #define xerror(...) _err(ERR_NO_STORE, NOPRINT_PROMPT, __VA_ARGS__)
 

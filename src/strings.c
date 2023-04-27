@@ -727,7 +727,7 @@ split_str(const char *str, const int update_args)
 			/* If the while loop stopped with a null byte, there was
 			 * no ending close (either ')' or '`')*/
 			if (!*str) {
-				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, close);
+				xerror(_("%s: Missing '%c'\n"), PROGRAM_NAME, close);
 				free(buf);
 				buf = (char *)NULL;
 				int i = (int)words;
@@ -782,7 +782,7 @@ split_str(const char *str, const int update_args)
 			/* The above while breaks with NULL or quote, so that if
 			 * *STR is a null byte there was not ending quote */
 			if (!*str) {
-				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, quote);
+				xerror(_("%s: Missing '%c'\n"), PROGRAM_NAME, quote);
 				/* Free the current buffer and whatever was already allocated */
 				free(buf);
 				buf = (char *)NULL;
@@ -1385,7 +1385,7 @@ expand_sel(char ***substr)
 
 	if (sel_n == 0) {
 		/* 'sel' is an argument, but there are no selected files */
-		fprintf(stderr, _("%c%s: No selected files%c"),
+		xerror(_("%c%s: No selected files%c"),
 			/* rl_dispatching equals one if coming from a keybind */
 			rl_dispatching == 1 ? '\n' : '\0', PROGRAM_NAME,
 			rl_dispatching == 1 ? '\0' : '\n');
@@ -2066,7 +2066,7 @@ parse_input_str(char *str)
 			continue;
 		}
 
-		fprintf(stderr, _("%s: %c: Invalid file type filter. Run 'help "
+		xerror(_("%s: %c: Invalid file type filter. Run 'help "
 			"file-filters' for more information\n"), PROGRAM_NAME,
 			substr[i][1]);
 	}

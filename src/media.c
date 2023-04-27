@@ -189,13 +189,13 @@ static int
 unmount_dev(size_t i, const int n)
 {
 	if (xargs.mount_cmd == UNSET) {
-		fprintf(stderr, _("%s: No mount application found. Install either "
+		xerror(_("%s: No mount application found. Install either "
 			"udevil or udisks2\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
 	if ((unsigned int)n + (unsigned int)1 < (unsigned int)1 || n + 1 > (int)i) {
-		fprintf(stderr, _("%s: %d: Invalid ELN\n"), PROGRAM_NAME, n + 1);
+		xerror(_("%s: %d: Invalid ELN\n"), PROGRAM_NAME, n + 1);
 		return EXIT_FAILURE;
 	}
 
@@ -394,7 +394,7 @@ static int
 mount_dev(int n)
 {
 	if (xargs.mount_cmd == UNSET) {
-		fprintf(stderr, _("%s: No mount application found. Install either "
+		xerror(_("%s: No mount application found. Install either "
 			"udevil or udisks2\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -499,21 +499,21 @@ int
 media_menu(int mode)
 {
 #if defined(__HAIKU__)
-	fprintf(stderr, _("%s: This feature is not available on Haiku\n"),
+	xerror(_("%s: This feature is not available on Haiku\n"),
 		mode == MEDIA_LIST ? _("mountpoints") : _("media"));
 	return EXIT_FAILURE;
 #endif /* __HAIKU__ */
 
 #ifndef HAVE_PROC_MOUNTS
 	if (mode == MEDIA_MOUNT) {
-		fputs(_("media: Function only available on Linux systems\n"), stderr);
+		xerror("%s\n", _("media: Function only available on Linux systems"));
 		return EXIT_FAILURE;
 	}
 #endif /* HAVE_PROC_MOUNTS */
 
 	if (mode == MEDIA_MOUNT && xargs.mount_cmd == UNSET) {
-		fputs(_("media: No mount command found. Install either "
-			"udevil or udisks2\n"), stderr);
+		xerror("%s\n", _("media: No mount command found. Install either "
+			"udevil or udisks2"));
 		return EXIT_FAILURE;
 	}
 
@@ -633,7 +633,7 @@ media_menu(int mode)
 		}
 		int atoi_num = atoi(p);
 		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
-			fprintf(stderr, "%s: %s: Invalid ELN\n", PROGRAM_NAME, input);
+			xerror("%s: %s: Invalid ELN\n", PROGRAM_NAME, input);
 			free(input);
 			input = (char *)NULL;
 			continue;

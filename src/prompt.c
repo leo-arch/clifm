@@ -468,7 +468,7 @@ gen_emergency_prompt(void)
 	static int f = 0;
 	if (f == 0) {
 		f = 1;
-		fprintf(stderr, _("%s: %s\n"), PROGRAM_NAME, EMERGENCY_PROMPT_MSG);
+		xerror("%s: %s\n", PROGRAM_NAME, EMERGENCY_PROMPT_MSG);
 	}
 	char *_prompt = savestring(EMERGENCY_PROMPT, EMERGENCY_PROMPT_LEN);
 	return _prompt;
@@ -1062,8 +1062,8 @@ set_prompt(char *name)
 		return EXIT_FAILURE;
 
 	if (prompts_n == 0) {
-		fprintf(stderr, _("prompt: No extra prompts defined. Using the "
-			"default prompt\n"));
+		xerror("%s\n", _("prompt: No extra prompts defined. Using the "
+			"default prompt"));
 		return EXIT_FAILURE;
 	}
 
@@ -1082,7 +1082,7 @@ set_prompt(char *name)
 		return switch_prompt((size_t)i);
 	}
 
-	fprintf(stderr, _("prompt: %s: No such prompt\n"), p);
+	xerror(_("prompt: %s: No such prompt\n"), p);
 	free(p);
 	return EXIT_FAILURE;
 }
@@ -1108,7 +1108,7 @@ edit_prompts_file(char *app)
 	}
 
 	if (!prompts_file || !*prompts_file) {
-		fprintf(stderr, _("prompt: No prompts file found\n"));
+		xerror("%s\n", _("prompt: No prompts file found"));
 		return EXIT_FAILURE;
 	}
 

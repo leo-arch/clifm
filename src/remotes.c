@@ -114,13 +114,12 @@ get_remote(char *name)
 	}
 
 	if (found == 0) {
-		fprintf(stderr, _("net: %s: No such remote\n"), name);
+		xerror(_("net: %s: No such remote\n"), name);
 		return (-1);
 	}
 
 	if (!remotes[i].mountpoint) {
-		fprintf(stderr, _("net: No mountpoint specified for '%s'\n"),
-			remotes[i].name);
+		xerror(_("net: No mountpoint specified for '%s'\n"), remotes[i].name);
 		return (-1);
 	}
 
@@ -166,8 +165,7 @@ print_cd_error(int i)
 static inline int
 print_no_mount_cmd_error(int i)
 {
-	fprintf(stderr, _("net: No mount command specified for '%s'\n"),
-		remotes[i].name);
+	xerror(_("net: No mount command specified for '%s'\n"), remotes[i].name);
 	return EXIT_FAILURE;
 }
 
@@ -427,7 +425,7 @@ autounmount_remotes(void)
 			printf(_("%s: net: %s: Unmounting remote...\n"), PROGRAM_NAME,
 				remotes[i].name);
 			if ((ret = launch_execle(remotes[i].unmount_cmd)) != EXIT_SUCCESS) {
-				fprintf(stderr, _("%s: net: %s: Unmount command failed with "
+				xerror(_("%s: net: %s: Unmount command failed with "
 					"error code %d\n"), PROGRAM_NAME, remotes[i].name, ret);
 				exit_status = EXIT_FAILURE;
 			}

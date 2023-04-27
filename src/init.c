@@ -823,7 +823,7 @@ get_user_data_env(void)
 	if (!tmp_user.home || !*tmp_user.home || stat(tmp_user.home, &a) == -1
 	|| !S_ISDIR(a.st_mode)) {
 		free(tmp_user.home);
-		fprintf(stderr, "%s: Home directory not found. Exiting.\n", PROGRAM_NAME);
+		xerror("%s: Home directory not found. Exiting.\n", PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -903,14 +903,14 @@ get_user_data(void)
 
 	if (homedir == pw->pw_dir && (!homedir
 	|| stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
-		fprintf(stderr, _("%s: %s: Invalid home directory in the password "
+		xerror(_("%s: %s: Invalid home directory in the password "
 			"database.\nSomething is really wrong. Exiting.\n"), PROGRAM_NAME,
 			homedir ? homedir : "!");
 		exit(errno);
 	}
 
 	if (!homedir) {
-		fprintf(stderr, _("%s: Home directory not found.\n"
+		xerror(_("%s: Home directory not found.\n"
 			"Something is really wrong. Exiting.\n"), PROGRAM_NAME);
 		exit(errno);
 	}
@@ -1792,7 +1792,7 @@ resolve_positional_param(char *file)
 	}
 
 	if (!_exp_path) {
-		fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
+		xerror(_("%s: Error expanding path\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
@@ -1877,8 +1877,7 @@ stat_file(char *file)
 	char *p = (char *)NULL;
 	if (*file == '~') {
 		if (!(p = tilde_expand(file))) {
-			fprintf(stderr, _("%s: %s: Error expanding tilde\n"),
-				PROGRAM_NAME, file);
+			xerror(_("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, file);
 			exit(EXIT_FAILURE);
 		}
 	} else {
@@ -1887,7 +1886,7 @@ stat_file(char *file)
 
 	struct stat a;
 	if (stat(p, &a) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, p, strerror(errno));
+		xerror("%s: %s: %s\n", PROGRAM_NAME, p, strerror(errno));
 		if (p != file)
 			free(p);
 		exit(errno);

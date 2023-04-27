@@ -165,7 +165,7 @@ check_workspace_num(char *str, int *tmp_ws)
 {
 	int istr = atoi(str);
 	if (istr <= 0 || istr > MAX_WS) {
-		fprintf(stderr, _("ws: %d: No such workspace (valid workspaces: "
+		xerror(_("ws: %d: No such workspace (valid workspaces: "
 			"1-%d)\n"), istr, MAX_WS);
 		return EXIT_FAILURE;
 	}
@@ -173,7 +173,7 @@ check_workspace_num(char *str, int *tmp_ws)
 	*tmp_ws = istr - 1;
 
 	if (*tmp_ws == cur_ws) {
-		fprintf(stderr, _("ws: %d: Is the current workspace\n"), *tmp_ws + 1);
+		xerror(_("ws: %d: Is the current workspace\n"), *tmp_ws + 1);
 		return EXIT_SUCCESS;
 	}
 
@@ -323,7 +323,7 @@ get_workspace_by_name(char *name, const int check_current)
 		|| strcmp(workspaces[n].name, q) != 0)
 			continue;
 		if (n == cur_ws && check_current == 1) {
-			fprintf(stderr, _("ws: %s: Is the current workspace\n"), q);
+			xerror(_("ws: %s: Is the current workspace\n"), q);
 			free(p);
 			return (-1);
 		}
@@ -331,7 +331,7 @@ get_workspace_by_name(char *name, const int check_current)
 		return n;
 	}
 
-	fprintf(stderr, _("ws: %s: No such workspace\n"), q);
+	xerror(_("ws: %s: No such workspace\n"), q);
 	free(p);
 	return (-1);
 }
@@ -343,7 +343,7 @@ unset_workspace(char *str)
 
 	char *name = dequote_str(str, 0);
 	if (!name) {
-		fprintf(stderr, "ws: %s: Error dequoting name\n", str);
+		xerror("ws: %s: Error dequoting name\n", str);
 		return EXIT_FAILURE;
 	}
 
@@ -356,19 +356,19 @@ unset_workspace(char *str)
 	}
 
 	if (n < 1 || n > MAX_WS) {
-		fprintf(stderr, _("ws: %s: No such workspace (valid workspaces: "
+		xerror(_("ws: %s: No such workspace (valid workspaces: "
 			"1-%d)\n"), name, MAX_WS);
 		goto ERROR;
 	}
 
 	n--;
 	if (n == cur_ws) {
-		fprintf(stderr, _("ws: %s: Is the current workspace\n"), name);
+		xerror(_("ws: %s: Is the current workspace\n"), name);
 		goto ERROR;
 	}
 
 	if (!workspaces[n].path) {
-		fprintf(stderr, _("ws: %s: Already unset\n"), name);
+		xerror(_("ws: %s: Already unset\n"), name);
 		goto ERROR;
 	}
 
@@ -637,7 +637,7 @@ backdir(char* str)
 	free(deq_str);
 
 	if (n == 0) {
-		fprintf(stderr, _("bd: %s: No matches found\n"), str);
+		xerror(_("bd: %s: No matches found\n"), str);
 		return EXIT_FAILURE;
 	}
 
@@ -744,7 +744,7 @@ static int
 change_to_path(char *new_path, const int cd_flag)
 {
 	if (!new_path || !*new_path) {
-		fprintf(stderr, _("cd: Path is NULL or empty\n"));
+		xerror("%s\n", _("cd: Path is NULL or empty"));
 		return EINVAL;
 	}
 
@@ -942,13 +942,13 @@ static int
 change_to_dirhist_num(int n)
 {
 	if (n <= 0 || n > dirhist_total_index) {
-		fprintf(stderr, _("history: %d: No such ELN\n"), n);
+		xerror(_("history: %d: No such ELN\n"), n);
 		return EXIT_FAILURE;
 	}
 
 	n--;
 	if (!old_pwd[n] || *old_pwd[n] == _ESC) {
-		fprintf(stderr, _("history: Invalid history entry\n"));
+		xerror("%s\n", _("history: Invalid history entry"));
 		return EXIT_FAILURE;
 	}
 

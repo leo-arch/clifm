@@ -287,7 +287,7 @@ mount_iso(char *file)
 {
 #if !defined(__linux__)
 	UNUSED(file);
-	fprintf(stderr, "mount: This feature is for Linux only\n");
+	xerror("%s\n", "mount: This feature is for Linux only");
 	return EXIT_SUCCESS;
 #else
 	char *mountpoint = create_mountpoint(file);
@@ -412,7 +412,7 @@ static int
 check_iso(char *file)
 {
 	if (!file || !*file) {
-		fputs(_("Error querying file type\n"), stderr);
+		xerror("%s\n", _("Error querying file type"));
 		return (-1);
 	}
 
@@ -421,7 +421,7 @@ check_iso(char *file)
 #ifndef _NO_MAGIC
 	char *t = xmagic(file, TEXT_DESC);
 	if (!t) {
-		fputs(_("Error querying file type\n"), stderr);
+		xerror("%s\n", _("Error querying file type"));
 		return (-1);
 	}
 
@@ -522,7 +522,7 @@ int
 is_compressed(char *file, int test_iso)
 {
 	if (!file || !*file) {
-		fputs(_("Error querying file type\n"), stderr);
+		xerror("%s\n", _("Error querying file type"));
 		return (-1);
 	}
 
@@ -531,7 +531,7 @@ is_compressed(char *file, int test_iso)
 #ifndef _NO_MAGIC
 	char *t = xmagic(file, TEXT_DESC);
 	if (!t) {
-		fputs(_("Error querying file type\n"), stderr);
+		xerror("%s\n", _("Error querying file type"));
 		return (-1);
 	}
 
@@ -694,7 +694,7 @@ get_archive_filename(void)
 			return add_default_extension(name);
 
 		if (dot == name) { /* Dot is first char */
-			fprintf(stderr, _("Invalid file name\n"));
+			xerror("%s\n", _("Invalid file name"));
 			free(name);
 			name = (char *)NULL;
 			continue;
@@ -1157,7 +1157,7 @@ static int
 list_mounted_files(char *mountpoint)
 {
 	if (xchdir(mountpoint, SET_TITLE) == -1) {
-		fprintf(stderr, "archiver: %s: %s\n", mountpoint, strerror(errno));
+		xerror("archiver: %s: %s\n", mountpoint, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

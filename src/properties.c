@@ -306,7 +306,7 @@ static int
 validate_octal_perms(char *s, const size_t l)
 {
 	if (l > 4 || l < 3) {
-		fprintf(stderr, _("pc: %s digits. Either 3 or 4 are "
+		xerror(_("pc: %s digits. Either 3 or 4 are "
 			"expected\n"), l > 4 ? _("Too many") : _("Too few"));
 		return EXIT_FAILURE;
 	}
@@ -314,7 +314,7 @@ validate_octal_perms(char *s, const size_t l)
 	size_t i;
 	for (i = 0; s[i]; i++) {
 		if (s[i] < '0' || s[i] > '7') {
-			fprintf(stderr, _("pc: %c: Invalid digit. Values in the range 0-7 "
+			xerror(_("pc: %c: Invalid digit. Values in the range 0-7 "
 				"are expected for each field\n"), s[i]);
 			return EXIT_FAILURE;
 		}
@@ -335,7 +335,7 @@ validate_symbolic_perms(const char *s)
 		case 3: /* fallthrough */
 		case 6:
 			if (s[i] != '-' && s[i] != 'r') {
-				fprintf(stderr, _("pc: Invalid character in field %zu: "
+				xerror(_("pc: Invalid character in field %zu: "
 					"%s-r%s are expected\n"), i + 1, BOLD, NC);
 				return EXIT_FAILURE;
 			}
@@ -345,7 +345,7 @@ validate_symbolic_perms(const char *s)
 		case 4: /* fallthrough */
 		case 7:
 			if (s[i] != '-' && s[i] != 'w') {
-				fprintf(stderr, _("pc: Invalid character in field %zu: "
+				xerror(_("pc: Invalid character in field %zu: "
 					"%s-w%s are expected\n"), i + 1, BOLD, NC);
 				return EXIT_FAILURE;
 			}
@@ -354,7 +354,7 @@ validate_symbolic_perms(const char *s)
 		case 2: /* fallthrough */
 		case 5:
 			if (s[i] != '-' && s[i] != 'x' && TOUPPER(s[i]) != 'S') {
-				fprintf(stderr, _("pc: Invalid character in field %zu: "
+				xerror(_("pc: Invalid character in field %zu: "
 					"%s-xsS%s are expected\n"), i + 1, BOLD, NC);
 				return EXIT_FAILURE;
 			}
@@ -362,7 +362,7 @@ validate_symbolic_perms(const char *s)
 
 		case 8:
 			if (s[i] != '-' && s[i] != 'x' && TOUPPER(s[i]) != 'T') {
-				fprintf(stderr, _("pc: Invalid character in field %zu: "
+				xerror(_("pc: Invalid character in field %zu: "
 					"%s-xtT%s are expected\n"), i + 1, BOLD, NC);
 				return EXIT_FAILURE;
 			}
@@ -385,7 +385,7 @@ validate_new_perms(char *s)
 		return validate_octal_perms(s, l);
 
 	if (l != 9) {
-		fprintf(stderr, _("pc: %s characters: 9 are expected\n"),
+		xerror(_("pc: %s characters: 9 are expected\n"),
 			l < 9 ? _("Too few") : _("Too many"));
 		return EXIT_FAILURE;
 	}
@@ -545,7 +545,7 @@ get_perm_str(char **s, int *diff)
 	/* Single file */
 	struct stat a;
 	if (stat(s[0], &a) == -1) {
-		fprintf(stderr, "stat: %s: %s\n", s[0], strerror(errno));
+		xerror("stat: %s: %s\n", s[0], strerror(errno));
 		free(ptr);
 		return (char *)NULL;
 	}
@@ -600,7 +600,7 @@ set_file_perms(char **args)
 		if (fchmodat(AT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
 			n++;
 		} else {
-			fprintf(stderr, "pc: %s: %s\n", args[i], strerror(errno));
+			xerror("pc: %s: %s\n", args[i], strerror(errno));
 			ret = errno;
 		}
 		fflush(stdout);
@@ -662,7 +662,7 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 	*exit_status = EXIT_SUCCESS;
 	struct stat a;
 	if (stat(args[0], &a) == -1) {
-		fprintf(stderr, "oc: %s: %s\n", args[0], strerror(errno));
+		xerror("oc: %s: %s\n", args[0], strerror(errno));
 		*exit_status = errno;
 		return (char *)NULL;
 	}
@@ -673,7 +673,7 @@ get_common_ownership(char **args, int *exit_status, int *diff)
 
 	for (i = 1; args[i]; i++) {
 		if (stat(args[i], &b) == -1) {
-			fprintf(stderr, "oc: %s: %s\n", args[i], strerror(errno));
+			xerror("oc: %s: %s\n", args[i], strerror(errno));
 			*exit_status = errno;
 			return (char *)NULL;
 		}
@@ -751,7 +751,7 @@ set_file_owner(char **args)
 			owner = getpwnam(new_own);
 
 		if (!owner || !owner->pw_name) {
-			fprintf(stderr, _("oc: %s: Invalid user\n"), new_own);
+			xerror(_("oc: %s: Invalid user\n"), new_own);
 			free(new_own);
 			return EXIT_FAILURE;
 		}
@@ -764,7 +764,7 @@ set_file_owner(char **args)
 			group = getgrnam(new_group);
 
 		if (!group || !group->gr_name) {
-			fprintf(stderr, _("oc: %s: Invalid group\n"), new_group);
+			xerror(_("oc: %s: Invalid group\n"), new_group);
 			free(new_own);
 			return EXIT_FAILURE;
 		}
@@ -776,7 +776,7 @@ set_file_owner(char **args)
 
 	for (i = 1; args[i]; i++) {
 		if (stat(args[i], &a) == -1) {
-			fprintf(stderr, "%s: %s\n", args[i], strerror(errno));
+			xerror("%s: %s\n", args[i], strerror(errno));
 			free(new_own);
 			return errno;
 		}
@@ -785,7 +785,7 @@ set_file_owner(char **args)
 		*new_own ? owner->pw_uid : a.st_uid,
 		new_group ? group->gr_gid : a.st_gid,
 		0) == -1) {
-			fprintf(stderr, "chown: %s: %s\n", args[i], strerror(errno));
+			xerror("chown: %s: %s\n", args[i], strerror(errno));
 			exit_status = errno;
 			continue;
 		}
@@ -1021,7 +1021,7 @@ print_extended_attributes(char *s)
 	/* Determine the length of the buffer needed */
 	buflen = listxattr(s, NULL, 0);
 	if (buflen == -1) {
-		fprintf(stderr, "%s\n", strerror(errno));
+		xerror("%s\n", strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1036,7 +1036,7 @@ print_extended_attributes(char *s)
 	/* Copy the list of attribute keys to the buffer */
 	buflen = listxattr(s, buf, (size_t)buflen);
 	if (buflen == -1) {
-		fprintf(stderr, "%s\n", strerror(errno));
+		xerror("%s\n", strerror(errno));
 		free(buf);
 		return EXIT_FAILURE;
 	}

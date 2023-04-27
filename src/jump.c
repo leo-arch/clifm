@@ -557,7 +557,7 @@ _purge_jumpdb(char *arg)
 
 	int n = atoi(arg);
 	if (n < 0) {
-		fprintf(stderr, _("jump: %s: Invalid value\n"), arg);
+		xerror(_("jump: %s: Invalid value\n"), arg);
 		return EXIT_FAILURE;
 	}
 
@@ -609,7 +609,7 @@ dirjump(char **args, int mode)
 	case 'l': jump_opt = JLIST; break;
 	case '\0': jump_opt = NONE; break;
 	default:
-		fprintf(stderr, _("jump: '%c': Invalid option\n"), args[0][1]);
+		xerror(_("jump: '%c': Invalid option\n"), args[0][1]);
 		fprintf(stderr, "%s\n", _(JUMP_USAGE));
 		return EXIT_FAILURE;
 	}
@@ -630,8 +630,7 @@ dirjump(char **args, int mode)
 			int int_order = atoi(args[1]);
 			if (int_order <= 0 || int_order > (int)jump_n) {
 				if (mode == NO_SUG_JUMP) {
-					fprintf(stderr, _("jump: %s: No such order "
-						"number\n"), args[1]);
+					xerror(_("jump: %s: No such order number\n"), args[1]);
 				}
 				return EXIT_FAILURE;
 			}

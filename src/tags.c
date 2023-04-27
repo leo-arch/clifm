@@ -46,12 +46,10 @@
 static int
 print_tag_creation_error(const char *link, mode_t mode)
 {
-	if (S_ISLNK(mode)) {
-		fprintf(stderr, _("tag: %s: File already tagged\n"), link);
-	} else {
-		fprintf(stderr, _("tag: %s: Cannot create tag: file already "
-			"exists\n"), link);
-	}
+	if (S_ISLNK(mode))
+		xerror(_("tag: %s: File already tagged\n"), link);
+	else
+		xerror(_("tag: %s: Cannot create tag: file already exists\n"), link);
 
 	return EXIT_FAILURE;
 }
@@ -74,7 +72,7 @@ print_no_tags(void)
 static int
 print_no_such_tag(const char *name)
 {
-	fprintf(stderr, _("tag: %s: No such tag\n"), name);
+	xerror(_("tag: %s: No such tag\n"), name);
 	return EXIT_FAILURE;
 }
 
@@ -325,7 +323,7 @@ list_tags(char **args)
 			struct stat a;
 			if (lstat(p ? p : args[i], &a) == -1) {
 				exit_status = errno;
-				fprintf(stderr, "%s: %s\n", p ? p : args[i], strerror(errno));
+				xerror("%s: %s\n", p ? p : args[i], strerror(errno));
 				free(p);
 				continue;
 			}
@@ -524,8 +522,8 @@ tag_files(char **args)
 	int *tag_names = get_tags(args);
 	if (!tag_names || tag_names[0] == -1) {
 		free(tag_names);
-		fprintf(stderr, _("tag: No tag specified. Specify a tag via :TAG. "
-			"E.g. 'tag add FILE1 FILE2 :TAG'\n"));
+		xerror("%s\n", _("tag: No tag specified. Specify a tag via :TAG. "
+			"E.g. 'tag add FILE1 FILE2 :TAG'"));
 		return EXIT_FAILURE;
 	}
 
@@ -604,7 +602,7 @@ untag(char **args, const size_t n, size_t *t)
 				(*t)++;
 			}
 		} else {
-			fprintf(stderr, _("tag: %s: File not tagged as %s%s%s\n"),
+			xerror(_("tag: %s: File not tagged as %s%s%s\n"),
 				args[i], conf.colorize ? BOLD : "", args[n] + 1, df_c);
 			continue;
 		}
@@ -644,7 +642,7 @@ rename_tag(char **args)
 		return print_no_such_tag(old);
 
 	if (*old == *new && strcmp(old, new) == 0) {
-		fprintf(stderr, "tag: New and old file names are the same\n");
+		xerror("%s\n", "tag: New and old file names are the same");
 		return EXIT_FAILURE;
 	}
 
@@ -715,15 +713,14 @@ merge_tags(char **args)
 	char *src = args[2], *dst = args[3];
 
 	if (strcmp(src, dst) == 0) {
-		fputs(_("tag: Source and destiny are the same tag\n"), stderr);
+		xerror("%s\n", _("tag: Source and destiny are the same tag"));
 		return EXIT_FAILURE;
 	}
 
 	errno = 0;
 	int exit_status = recursive_mv_tags(src, dst);
 	if (exit_status != EXIT_SUCCESS) {
-		fprintf(stderr, _("tag: Cannot merge tags: error moving "
-			"tagged files\n"));
+		xerror("%s\n", _("tag: Cannot merge tags: error moving tagged files"));
 		return exit_status;
 	}
 

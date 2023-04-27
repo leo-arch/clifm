@@ -145,7 +145,7 @@ run_and_refresh(char **cmd, const int skip_force)
 					break;
 			}
 			if (i == -1) {
-				fprintf(stderr, _("%s: %s: No such ELN\n"), PROGRAM_NAME, cmd[1]);
+				xerror(_("%s: %s: No such ELN\n"), PROGRAM_NAME, cmd[1]);
 				xrename = 0;
 				return ENOENT;
 			}
@@ -156,7 +156,7 @@ run_and_refresh(char **cmd, const int skip_force)
 			free(p);
 			if (ret == -1) {
 				xrename = 0;
-				fprintf(stderr, "m: %s: %s\n", cmd[1], strerror(errno));
+				xerror("m: %s: %s\n", cmd[1], strerror(errno));
 				return errno;
 			}
 		}
@@ -376,11 +376,10 @@ launch_execve(char **cmd, const int bg, const int xflags)
 		/* These error messages will be printed only if E_NOSTDERR is not set.
 		 * Otherwise, the caller should print the error messages itself */
 		if (errno == ENOENT) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], NOTFOUND_MSG);
+			xerror("%s: %s: %s\n", PROGRAM_NAME, cmd[0], NOTFOUND_MSG);
 			_exit(EXEC_NOTFOUND); /* 127, as required by exit(1p) */
 		} else {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0],
-				strerror(errno));
+			xerror("%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
 			_exit(errno);
 		}
 	}
@@ -487,8 +486,8 @@ static int
 export_var_function(char **args)
 {
 	if (!args || !args[0] || !*args[0]) {
-		fputs(_("export: A parameter, in the form VAR=VALUE, "
-			"is required\n"), stderr);
+		xerror("%s\n", _("export: A parameter, in the form VAR=VALUE, "
+			"is required"));
 		return EXIT_FAILURE;
 	}
 
@@ -504,14 +503,14 @@ export_var_function(char **args)
 		 * and parameter substitution block. Let's deescape it */
 		char *ds = dequote_str(args[i], 0);
 		if (!ds) {
-			fputs(_("export: Error dequoting argument\n"), stderr);
+			xerror("%s\n", _("export: Error dequoting argument"));
 			status = EXIT_FAILURE;
 			continue;
 		}
 
 		char *p = strchr(ds, '=');
 		if (!p || !*(p + 1)) {
-			fprintf(stderr, _("export: %s: Empty assignement\n"), ds);
+			xerror(_("export: %s: Empty assignement\n"), ds);
 			free(ds);
 			status = EXIT_FAILURE;
 			continue;
@@ -522,7 +521,7 @@ export_var_function(char **args)
 		*p = '\0';
 		if (setenv(ds, p + 1, 1) == -1) {
 			status = errno;
-			fprintf(stderr, "export: %s\n", strerror(errno));
+			xerror("export: %s\n", strerror(errno));
 		}
 		*p = '=';
 
@@ -633,7 +632,7 @@ check_shell_cmd_condtions(char **args)
 	}
 
 	if (conf.ext_cmd_ok == 0) {
-		fprintf(stderr, _("%s: External commands are not allowed. "
+		xerror(_("%s: External commands are not allowed. "
 			"Run 'ext on' to enable them.\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -715,7 +714,7 @@ set_max_files(char **args)
 
 	long inum = strtol(args[1], NULL, 10);
 	if (inum == LONG_MAX || inum == LONG_MIN || inum <= 0) {
-		fprintf(stderr, _("%s: %s: Invalid number\n"), PROGRAM_NAME, args[1]);
+		xerror(_("%s: %s: Invalid number\n"), PROGRAM_NAME, args[1]);
 		return (exit_code = EXIT_FAILURE);
 	}
 
@@ -813,7 +812,7 @@ pager_function(char *arg)
 	if (is_number(arg)) {
 		int n = xatoi(arg);
 		if (n == INT_MIN) {
-			fprintf(stderr, _("pg: xatoi: Error converting to integer\n"));
+			xerror("%s\n", _("pg: xatoi: Error converting to integer"));
 			return EXIT_FAILURE;
 		}
 		conf.pager = n;
@@ -953,7 +952,7 @@ icons_function(char *arg)
 {
 #ifdef _NO_ICONS
 	UNUSED(arg);
-	fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	xerror(_("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_SUCCESS;
 #else
 	if (!arg || IS_HELP(arg)) {
@@ -1133,7 +1132,7 @@ print_alias(char *name)
 		}
 	}
 
-	fprintf(stderr, _("%s: %s: No such alias\n"), PROGRAM_NAME, name);
+	xerror(_("%s: %s: No such alias\n"), PROGRAM_NAME, name);
 	return EXIT_FAILURE;
 }
 
@@ -1219,7 +1218,7 @@ _toggle_exec(char **args)
 		}
 
 		if (lstat(args[i], &attr) == -1) {
-			fprintf(stderr, "stat: %s: %s\n", args[i], strerror(errno));
+			xerror("stat: %s: %s\n", args[i], strerror(errno));
 			exit_status = EXIT_FAILURE;
 			continue;
 		}
@@ -1284,7 +1283,7 @@ ow_function(char **args)
 	return EXIT_SUCCESS;
 #else
 	UNUSED(args);
-	fprintf(stderr, "%s: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+	xerror("%s: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
 #endif
 }
@@ -1443,7 +1442,7 @@ check_pinned_file(char **args)
 	int i = (int)args_n + 1;
 	while (--i >= 0) {
 		if (*args[i] == ',' && !args[i][1]) {
-			fprintf(stderr, _("%s: No pinned file\n"), PROGRAM_NAME);
+			xerror(_("%s: No pinned file\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 	}
@@ -1495,7 +1494,7 @@ launch_shell(char **args)
 
 	if (args[0][1] == ';' || args[0][1] == ':') {
 		/* If double semi colon or colon (or ";:" or ":;") */
-		fprintf(stderr, _("%s: '%s': Syntax error\n"), PROGRAM_NAME, args[0]);
+		xerror(_("%s: '%s': Syntax error\n"), PROGRAM_NAME, args[0]);
 		return EXIT_FAILURE;
 	}
 
@@ -1603,7 +1602,7 @@ autocd_dir(char *tmp)
 	if (conf.autocd) {
 		ret = cd_function(tmp, CD_PRINT_ERROR);
 	} else {
-		fprintf(stderr, _("%s: cd: %s: Is a directory\n"), PROGRAM_NAME, tmp);
+		xerror(_("%s: cd: %s: Is a directory\n"), PROGRAM_NAME, tmp);
 		ret = EISDIR;
 	}
 	free(tmp);
@@ -1683,7 +1682,7 @@ lira_function(char **args)
 	return mime_open(args);
 #else
 	UNUSED(args);
-	fprintf(stderr, "%s: lira: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+	xerror("%s: lira: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
 #endif
 }
@@ -1770,7 +1769,7 @@ _trash_function(char **args, int *_cont)
 	return exit_status;
 #else
 	UNUSED(args);
-	fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+	xerror(_("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 	*_cont = 0;
 	return EXIT_FAILURE;
 #endif /* !_NO_TRASH */
@@ -1795,7 +1794,7 @@ _untrash_function(char **args, int *_cont)
 	return exit_status;
 #else
 	UNUSED(args);
-	fprintf(stderr, "%s: trash: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+	xerror("%s: trash: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	*_cont = 0;
 	return EXIT_FAILURE;
 #endif /* !_NO_TRASH */
@@ -1810,8 +1809,7 @@ toggle_full_dir_size(const char *arg)
 	}
 
 	if (*arg != 'o') {
-		fprintf(stderr, _("%s: %s: Invalid argument. Try 'fz -h'\n"),
-			PROGRAM_NAME, arg);
+		xerror(_("%s: %s: Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
 		return EXIT_FAILURE;
 	}
 
@@ -1837,8 +1835,7 @@ toggle_full_dir_size(const char *arg)
 		return EXIT_SUCCESS;
 	}
 
-	fprintf(stderr, _("%s: %s: Invalid argument. Try 'fz -h'\n"),
-		PROGRAM_NAME, arg);
+	xerror(_("%s: %s: Invalid argument. Try 'fz -h'\n"), PROGRAM_NAME, arg);
 	return EXIT_FAILURE;
 }
 
@@ -2021,7 +2018,7 @@ static int
 preview_function(char **args)
 {
 #ifdef _NO_FZF
-	fprintf(stderr, "%s: view: fzf: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+	xerror("%s: view: fzf: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 	return EXIT_FAILURE;
 #endif /* _NO_FZF */
 
@@ -2101,13 +2098,13 @@ dirhist_function(char *dir)
 	if (*dir == '!' && is_number(dir + 1)) {
 		int n = atoi(dir + 1);
 		if (n <= 0 || n > dirhist_total_index) {
-			fprintf(stderr, _("dh: %d: No such entry number\n"), n);
+			xerror(_("dh: %d: No such entry number\n"), n);
 			return EXIT_FAILURE;
 		}
 
 		n--;
 		if (!old_pwd[n] || *old_pwd[n] == _ESC) {
-			fprintf(stderr, _("dh: Invalid history entry\n"));
+			xerror("%s\n", _("dh: Invalid history entry"));
 			return EXIT_FAILURE;
 		}
 
@@ -2162,7 +2159,7 @@ unset_function(char **var)
 	for (i = 0; var[i]; i++) {
 		if (unsetenv(var[i]) == -1) {
 			status = errno;
-			fprintf(stderr, "unset: %s: %s\n", var[i], strerror(errno));
+			xerror("unset: %s: %s\n", var[i], strerror(errno));
 		}
 	}
 
@@ -2173,7 +2170,7 @@ static int
 run_log_cmd(char **args)
 {
 	if (config_ok == 0) {
-		fprintf(stderr, _("%s: Log function disabled\n"), PROGRAM_NAME);
+		xerror(_("%s: Log function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -2200,7 +2197,7 @@ run_log_cmd(char **args)
 
 		if (*args[1] == 'o' && strcmp(args[1], "off") == 0) {
 			conf.log_cmds = 0;
-			puts(_("log: Logs disabled"));
+			puts(_("log: Command logs disabled"));
 			return EXIT_SUCCESS;
 		}
 
@@ -2224,13 +2221,13 @@ run_log_cmd(char **args)
 
 		if (*args[1] == 'o' && strcmp(args[1], "on") == 0) {
 			conf.log_msgs = 1;
-			puts(_("log: Logs enabled"));
+			puts(_("log: Message logs enabled"));
 			return EXIT_SUCCESS;
 		}
 
 		if (*args[1] == 'o' && strcmp(args[1], "off") == 0) {
 			conf.log_msgs = 0;
-			puts(_("log: Logs disabled"));
+			puts(_("log: Message logs disabled"));
 			return EXIT_SUCCESS;
 		}
 
@@ -2363,7 +2360,7 @@ exec_cmd(char **comm)
 		exit_code = tags_function(comm);
 #else
 	{
-		fprintf(stderr, "%s: tag: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
+		xerror("%s: tag: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 		return EXIT_FAILURE;
 	}
 #endif
@@ -2600,7 +2597,7 @@ exec_cmd(char **comm)
 #ifndef _NO_BLEACH
 		exit_code = bleach_files(comm);
 #else
-		fprintf(stderr, "%s: bleach: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
+		xerror("%s: bleach: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 		return EXIT_FAILURE;
 #endif
 	}
@@ -2616,7 +2613,7 @@ exec_cmd(char **comm)
                                   /* Either 'c' or 'd' */
 		exit_code = archiver(comm, comm[0][1]);
 #else
-		fprintf(stderr, "%s: archiver: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
+		xerror("%s: archiver: %s\n", PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
 #endif
 	}
@@ -2696,7 +2693,7 @@ exec_cmd(char **comm)
 #ifndef _NO_PROFILES
 		return (exit_code = profile_function(comm));
 #else
-		{ fprintf(stderr, "%s: prof: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
+		{ xerror("%s: prof: %s\n", PROGRAM_NAME, NOT_AVAILABLE);
 		return EXIT_FAILURE; }
 #endif /* _NO_PROFILES */
 

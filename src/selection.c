@@ -123,7 +123,7 @@ select_file(char *file)
 
 		new_sel++;
 	} else {
-		fprintf(stderr, _("sel: %s: Already selected\n"), file);
+		xerror(_("sel: %s: Already selected\n"), file);
 	}
 
 	return new_sel;
@@ -325,7 +325,7 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 
 	regex_t regex;
 	if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
-		fprintf(stderr, _("sel: %s: Invalid regular expression\n"), str);
+		xerror(_("sel: %s: Invalid regular expression\n"), str);
 
 		regfree(&regex);
 		return (-1);
@@ -426,7 +426,7 @@ convert_filetype(mode_t *filetype)
 	case 'b': *filetype = DT_BLK; break;
 	case 'c': *filetype = DT_CHR; break;
 	default:
-		fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
+		xerror(_("%s: '%c': Unrecognized file type\n"),
 		    PROGRAM_NAME, (char)*filetype);
 		return EXIT_FAILURE;
 	}
@@ -939,7 +939,7 @@ desel_entries(char **desel_elements, size_t desel_n, int desel_screen)
 			dn--;
 			err = 1;
 			if (desel_screen == 0) {
-				fprintf(stderr, _("%s: %s: No such selected file\n"),
+				xerror(_("%s: %s: No such selected file\n"),
 					PROGRAM_NAME, desel_path[i]);
 			}
 			continue;

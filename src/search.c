@@ -586,8 +586,7 @@ search_regex(char **args, const int invert, const int case_sens)
 		case 's': file_type = DT_SOCK; break;
 		case 'x': run_find(search_path, args[0]); return EXIT_SUCCESS;
 		default:
-			fprintf(stderr, _("search: '%c': Unrecognized file "
-				"type\n"), (char)file_type);
+			xerror(_("search: '%c': Unrecognized file type\n"), (char)file_type);
 			return EXIT_FAILURE;
 		}
 	}
@@ -673,7 +672,7 @@ search_regex(char **args, const int invert, const int case_sens)
 	int ret = regcomp(&regex_files, search_str, reg_flags);
 
 	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("'%s': Invalid regular expression\n"), search_str);
+		xerror(_("'%s': Invalid regular expression\n"), search_str);
 		regfree(&regex_files);
 
 		if (search_path) {
@@ -718,7 +717,7 @@ search_regex(char **args, const int invert, const int case_sens)
 
 		if (s && s != rl_line_buffer) {
 			/* Input string looks like a path: let's err like it was */
-			fprintf(stderr, _("cd: %s: %s\n"), rl_line_buffer, strerror(ENOENT));
+			xerror("cd: %s: %s\n", rl_line_buffer, strerror(ENOENT));
 			exit_status = ENOENT;
 		} else if (search_flags & NO_GLOB_CHAR) {
 			fputs(_("search: No matches found\n"), stderr);
@@ -962,8 +961,7 @@ search_function(char **args)
 
 			if (s && s != rl_line_buffer) {
 				/* Input string looks like a path: let's err like it was */
-				fprintf(stderr, _("cd: %s: %s\n"),
-					rl_line_buffer, strerror(ENOENT));
+				xerror("cd: %s: %s\n", rl_line_buffer, strerror(ENOENT));
 				return ENOENT;
 			} else {
 				fputs(_("search: No matches found\n"), stderr);

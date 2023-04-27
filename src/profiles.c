@@ -130,7 +130,7 @@ profile_set(char *prof)
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
 	if (found == -1) {
-		fprintf(stderr, _("pf: %s: No such profile\nTo add a new "
+		xerror(_("pf: %s: No such profile\nTo add a new "
 			"profile enter 'pf add PROFILE'\n"), prof);
 		return EXIT_FAILURE;
 	}
@@ -285,7 +285,7 @@ profile_add(char *prof)
 
 	int found = check_profile(prof);
 	if (found != -1) {
-		fprintf(stderr, _("pf: %s: Profile already exists\n"), prof);
+		xerror(_("pf: %s: Profile already exists\n"), prof);
 		return EXIT_FAILURE;
 	}
 
@@ -358,7 +358,7 @@ profile_add(char *prof)
 
 		get_profile_names();
 	} else {
-		fprintf(stderr, _("pf: %s: Error creating profile\n"), prof);
+		xerror(_("pf: %s: Error creating profile\n"), prof);
 	}
 
 	return exit_status;
@@ -379,7 +379,7 @@ profile_del(char *prof)
 	/* Check if prof is a valid profile */
 	int found = check_profile(prof);
 	if (found == -1) {
-		fprintf(stderr, _("pf: %s: No such profile\n"), prof);
+		xerror(_("pf: %s: No such profile\n"), prof);
 		return EXIT_FAILURE;
 	}
 
@@ -391,7 +391,7 @@ profile_del(char *prof)
 	free(tmp);
 
 	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("pf: %s: Error removing profile\n"), prof);
+		xerror(_("pf: %s: Error removing profile\n"), prof);
 		return ret;
 	}
 
@@ -471,7 +471,7 @@ rename_profile(char **args)
 	}
 
 	if (!config_dir_gral) {
-		fprintf(stderr, _("pf: Configuration directory is not set\n"));
+		xerror(_("pf: Configuration directory is not set\n"));
 		return EXIT_FAILURE;
 	}
 
@@ -488,7 +488,7 @@ rename_profile(char **args)
 
 	int src_pf_index = check_profile(args[0]);
 	if (src_pf_index == -1) {
-		fprintf(stderr, _("pf: %s: No such profile\n"), args[0]);
+		xerror(_("pf: %s: No such profile\n"), args[0]);
 		return EXIT_FAILURE;
 	}
 
@@ -498,7 +498,7 @@ rename_profile(char **args)
 
 	struct stat a;
 	if (lstat(src_pf_name, &a) == -1) {
-		fprintf(stderr, "pf: %s: %s\n", src_pf_name, strerror(errno));
+		xerror("pf: %s: %s\n", src_pf_name, strerror(errno));
 		return errno;
 	}
 
@@ -515,7 +515,7 @@ rename_profile(char **args)
 	char *cmd[] = {"mv", "--", src_pf_name, dst_pf_name, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("pf: Error renaming profile\n"));
+		xerror(_("pf: Error renaming profile\n"));
 		return ret;
 	}
 

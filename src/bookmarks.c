@@ -214,7 +214,7 @@ bookmark_del(char *name)
 
 	/* If bookmark name was passed but it is not a valid bookmark */
 	else if (name) {
-		fprintf(stderr, _("bookmarks: %s: No such bookmark\n"), name);
+		xerror(_("bookmarks: %s: No such bookmark\n"), name);
 		free_bms(bms, bmn);
 		fclose(bm_fp);
 		return EXIT_FAILURE;
@@ -258,8 +258,7 @@ bookmark_del(char *name)
 		} else {
 			int n = atoi(del_elements[i]);
 			if (is_number(del_elements[i]) && (n <= 0 || n > (int)bmn)) {
-				fprintf(stderr, _("bookmarks: %s: No such bookmark\n"),
-					del_elements[i]);
+				xerror(_("bookmarks: %s: No such bookmark\n"), del_elements[i]);
 				quit = 1;
 			}
 		}
@@ -427,8 +426,7 @@ bookmark_add(char *file)
 				tmp_line[tmp_line_len - 1] = '\0';
 
 			if (strcmp(tmp_line, file) == 0) {
-				fprintf(stderr, _("bookmarks: %s: Path already bookmarked\n"),
-					file);
+				xerror(_("bookmarks: %s: Path already bookmarked\n"), file);
 				dup = 1;
 				break;
 			}
@@ -487,8 +485,7 @@ bookmark_add(char *file)
 			if (!tmp_line)
 				continue;
 			if (strcmp(hk, tmp_line) == 0) {
-				fprintf(stderr, _("bookmarks: %s: Shortcut already taken\n"),
-					hk);
+				xerror(_("bookmarks: %s: Shortcut already taken\n"), hk);
 				dup = 1;
 				free(tmp_line);
 				break;
@@ -543,7 +540,7 @@ bookmark_add(char *file)
 			if (!tmp_line)
 				continue;
 			if (*name == *tmp_line && strcmp(name, tmp_line) == 0) {
-				fprintf(stderr, _("bookmarks: %s: Name already taken\n"), name);
+				xerror(_("bookmarks: %s: Name already taken\n"), name);
 				dup = 1;
 				free(tmp_line);
 				break;
@@ -760,7 +757,7 @@ get_bm_path(char *arg)
 	if (is_number(arg)) {
 		int num = atoi(arg);
 		if (num <= 0 || (size_t)num > bm_n) {
-			fprintf(stderr, _("%s: No such ELN\n"), arg);
+			xerror(_("%s: No such ELN\n"), arg);
 			return (char *)NULL;
 		}
 		return bookmarks[num - 1].path;
@@ -776,12 +773,12 @@ get_bm_path(char *arg)
 			if (bookmarks[i].path)
 				return bookmarks[i].path;
 
-			fprintf(stderr, _("%s: Invalid bookmark\n"), arg);
+			xerror(_("%s: Invalid bookmark\n"), arg);
 			return (char *)NULL;
 		}
 	}
 
-	fprintf(stderr, _("%s: No such bookmark\n"), arg);
+	xerror(_("%s: No such bookmark\n"), arg);
 	return (char *)NULL;
 }
 
@@ -856,7 +853,7 @@ bm_open(char **cmd)
 		&& strcmp(p, bookmarks[i].name) == 0)) {
 
 			if (!bookmarks[i].path) {
-				fprintf(stderr, _("%s: Invalid bookmark\n"), p);
+				xerror(_("%s: Invalid bookmark\n"), p);
 				if (p != cmd[1]) free(p);
 				return EXIT_FAILURE;
 			}
@@ -872,7 +869,7 @@ bm_open(char **cmd)
 		}
 	}
 
-	fprintf(stderr, _("%s: No such bookmark\n"), p);
+	xerror(_("%s: No such bookmark\n"), p);
 	if (p != cmd[1]) free(p);
 	return EXIT_FAILURE;
 }
@@ -891,7 +888,7 @@ check_bm_path(char *file)
 		if (!bookmarks[i].path)
 			continue;
 		if (*f == *bookmarks[i].path && strcmp(f, bookmarks[i].path) == 0) {
-			fprintf(stderr, "bookmarks: %s: Path already "
+			xerror("bookmarks: %s: Path already "
 				"bookmarked as '%s'\n", f, bookmarks[i].name
 				? bookmarks[i].name : "unnamed");
 			free(p);
@@ -913,7 +910,7 @@ name_is_reserved_keyword(const char *name)
 	|| *name == 'a') && !*(name + 1))
 	|| strcmp(name, "quit") == 0 || strcmp(name, "edit") == 0
 	|| strcmp(name, "del") == 0 || strcmp(name, "add") == 0) {
-		fprintf(stderr, _("bookmarks: '%s': Reserved bookmark keyword\n"), name);
+		xerror(_("bookmarks: '%s': Reserved bookmark keyword\n"), name);
 		return 1;
 	}
 
@@ -935,7 +932,7 @@ check_bm_name(const char *name)
 			continue;
 		if (*name == *bookmarks[i].name
 		&& strcmp(name, bookmarks[i].name) == 0) {
-			fprintf(stderr, _("bookmarks: %s: Name already taken\n"), name);
+			xerror(_("bookmarks: %s: Name already taken\n"), name);
 			return 0;
 		}
 	}
@@ -958,8 +955,7 @@ check_bm_shortcut(const char *shortcut)
 			continue;
 		if (*shortcut == *bookmarks[i].shortcut
 		&& strcmp(shortcut, bookmarks[i].shortcut) == 0) {
-			fprintf(stderr, _("bookmarks: %s: Shortcut already taken\n"),
-				shortcut);
+			xerror(_("bookmarks: %s: Shortcut already taken\n"), shortcut);
 			return 0;
 		}
 	}
@@ -1084,7 +1080,7 @@ bookmarks_function(char **cmd)
 	}
 
 	if (config_ok == 0) {
-		fprintf(stderr, _("%s: Bookmarks function disabled\n"), PROGRAM_NAME);
+		xerror(_("%s: Bookmarks function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 

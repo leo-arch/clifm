@@ -102,7 +102,7 @@ recur_perm_check(const char *dirname)
 				  * calls to the function will allways return error
 				  * (even if there's no actual error) */
 				recur_perm_error_flag = 1;
-				fprintf(stderr, _("%s: Permission denied\n"), dirpath);
+				xerror(_("%s: Permission denied\n"), dirpath);
 			}
 
 			recur_perm_check(dirpath);
@@ -134,7 +134,7 @@ wx_parent_check(char *file)
 		file[file_len - 1] = '\0';
 
 	if (lstat(file, &attr) == -1) {
-		fprintf(stderr, _("%s: %s\n"), file, strerror(errno));
+		xerror("%s: %s\n", file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -161,7 +161,7 @@ wx_parent_check(char *file)
 			/* Error message is printed by check_immutable_bit() itself */
 			exit_status = EXIT_FAILURE;
 		} else if (ret == 1) {
-			fprintf(stderr, _("%s: Directory is immutable\n"), file);
+			xerror(_("%s: Directory is immutable\n"), file);
 			exit_status = EXIT_FAILURE;
 		} else if (access(parent, W_OK | X_OK) == 0) {
 		/* Check the parent for appropriate permissions */
@@ -193,15 +193,14 @@ wx_parent_check(char *file)
 						exit_status = EXIT_SUCCESS;
 					}
 				} else { /* No permission for subdir */
-					fprintf(stderr, _("%s: Permission denied\n"),
-					    file);
+					xerror(_("%s: Permission denied\n"), file);
 					exit_status = EXIT_FAILURE;
 				}
 			} else {
 				exit_status = EXIT_SUCCESS;
 			}
 		} else { /* No permission for parent */
-			fprintf(stderr, _("%s: Permission denied\n"), parent);
+			xerror(_("%s: Permission denied\n"), parent);
 			exit_status = EXIT_FAILURE;
 		}
 		break;
@@ -213,14 +212,14 @@ wx_parent_check(char *file)
 			/* Error message is printed by check_immutable_bit() itself */
 			exit_status = EXIT_FAILURE;
 		} else if (ret == 1) {
-			fprintf(stderr, _("%s: File is immutable\n"), file);
+			xerror(_("%s: File is immutable\n"), file);
 			exit_status = EXIT_FAILURE;
 		} else {
 			if (parent) {
 				if (access(parent, W_OK | X_OK) == 0) {
 					exit_status = EXIT_SUCCESS;
 				} else {
-					fprintf(stderr, _("%s: Permission denied\n"), parent);
+					xerror(_("%s: Permission denied\n"), parent);
 					exit_status = EXIT_FAILURE;
 				}
 			}
@@ -236,7 +235,7 @@ wx_parent_check(char *file)
 			if (access(parent, W_OK | X_OK) == 0) {
 				exit_status = EXIT_SUCCESS;
 			} else {
-				fprintf(stderr, _("%s: Permission denied\n"), parent);
+				xerror(_("%s: Permission denied\n"), parent);
 				exit_status = EXIT_FAILURE;
 			}
 		}
@@ -633,7 +632,7 @@ remove_from_trash(char **args)
 		}
 
 		else if (!is_number(rm_elements[i])) {
-			fprintf(stderr, _("trash: %s: Invalid ELN\n"), rm_elements[i]);
+			xerror(_("trash: %s: Invalid ELN\n"), rm_elements[i]);
 			exit_status = EXIT_FAILURE;
 
 			size_t j;
@@ -654,7 +653,7 @@ remove_from_trash(char **args)
 	for (i = 0; rm_elements[i]; i++) {
 		int rm_num = atoi(rm_elements[i]);
 		if (rm_num <= 0 || rm_num > files_n) {
-			fprintf(stderr, _("trash: %d: Invalid ELN\n"), rm_num);
+			xerror(_("trash: %d: Invalid ELN\n"), rm_num);
 			free(rm_elements[i]);
 			exit_status = EXIT_FAILURE;
 			continue;
@@ -773,7 +772,7 @@ untrash_element(char *file)
 
 	struct stat a;
 	if (stat(url_decoded, &a) != -1) {
-		fprintf(stderr, _("undel: %s: Destination file exists\n"), url_decoded);
+		xerror(_("undel: %s: Destination file exists\n"), url_decoded);
 		free(url_decoded);
 		return EEXIST;
 	}
@@ -804,7 +803,7 @@ untrash_function(char **comm)
 		return EXIT_FAILURE;
 
 	if (trash_ok == 0 || !trash_dir || !trash_files_dir || !trash_info_dir) {
-		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
+		xerror(_("%s: Trash function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -935,7 +934,7 @@ untrash_function(char **comm)
 
 			free_and_return = 1;
 		} else if (!is_number(undel_elements[i])) {
-			fprintf(stderr, _("undel: %s: Invalid ELN\n"), undel_elements[i]);
+			xerror(_("undel: %s: Invalid ELN\n"), undel_elements[i]);
 			exit_status = EXIT_FAILURE;
 			free_and_return = 1;
 		}
@@ -963,7 +962,7 @@ untrash_function(char **comm)
 		int undel_num = atoi(undel_elements[i]);
 
 		if (undel_num <= 0 || undel_num > trash_files_n) {
-			fprintf(stderr, _("undel: %d: Invalid ELN\n"), undel_num);
+			xerror(_("undel: %d: Invalid ELN\n"), undel_num);
 			free(undel_elements[i]);
 			continue;
 		}
@@ -1049,7 +1048,7 @@ check_trash_file(char *deq_file)
 
 	/* Do not trash any of the parent directories of TRASH_DIR */
 	if (strncmp(tmp_cmd, trash_dir, strlen(tmp_cmd)) == 0) {
-		fprintf(stderr, _("trash: Cannot trash '%s'\n"), tmp_cmd);
+		xerror(_("trash: Cannot trash '%s'\n"), tmp_cmd);
 		return EXIT_FAILURE;
 	}
 
@@ -1191,7 +1190,7 @@ trash_function(char **args)
 		return EXIT_FAILURE;
 
 	if (trash_ok == 0 || !trash_dir || !trash_info_dir || !trash_files_dir) {
-		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
+		xerror(_("%s: Trash function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
