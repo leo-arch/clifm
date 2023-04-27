@@ -1921,8 +1921,8 @@ create_def_color_scheme(void)
 
 			"# Color shades used to colorize timestamps and file sizes. Consult the\n\
 # manpage for more information\n"
-			"#DateShades=\"%s\"\n"
-			"#SizeShades=\"%s\"\n\n"
+			"DateShades=\"%s\"\n"
+			"SizeShades=\"%s\"\n\n"
 
 			"DirIconColor=\"00;33\"\n\n"
 			"DividingLine=\"%s\"\n\n"

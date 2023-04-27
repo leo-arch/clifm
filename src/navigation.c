@@ -745,7 +745,7 @@ change_to_path(char *new_path, const int cd_flag)
 {
 	if (!new_path || !*new_path) {
 		xerror("%s\n", _("cd: Path is NULL or empty"));
-		return EINVAL;
+		return ENOENT;
 	}
 
 	if (strchr(new_path, '\\')) {
@@ -760,11 +760,10 @@ change_to_path(char *new_path, const int cd_flag)
 	errno = 0;
 	char *r = p ? p : new_path;
 	char *q = normalize_path(r, strlen(r));
-//	char *q = realpath(p ? p : new_path, NULL);
+
 	if (!q) {
-		if (cd_flag == CD_PRINT_ERROR) {
+		if (cd_flag == CD_PRINT_ERROR)
 			xerror(_("cd: %s: Error normalizing path\n"), new_path);
-		}
 		free(p);
 		return EXIT_FAILURE;
 	}
@@ -772,15 +771,18 @@ change_to_path(char *new_path, const int cd_flag)
 
 	if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
 		int err = errno;
-		if (cd_flag == CD_PRINT_ERROR) {
+		if (cd_flag == CD_PRINT_ERROR)
 			xerror("cd: %s: %s\n", new_path, strerror(err));
-		}
+
 		free(q);
-		/* Most shells return 1 in case of cd error. However, 1, as a general
-		 * error code, is not quite informative. Why not to return the actual
-		 * error code returned by chdir(3)? Let's do that.
-		 * Note that POSIX only requires for cd to return >0 in case of error
-		 * (see cd(1p)). So, we're fine. */
+
+		/* Most shells return 1 in case of EACCESS error. However, 1, as a
+		 * general error code, is not quite informative. Why not to return the
+		 * actual error code returned by chdir(3)? Note that POSIX only requires
+		 * for cd to return >0 in case of error (see cd(1p)). */
+		if (err == EACCES)
+			return EXIT_FAILURE;
+
 		return err;
 	}
 
