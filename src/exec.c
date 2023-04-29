@@ -1223,7 +1223,7 @@ _toggle_exec(char **args)
 			continue;
 		}
 
-		if (toggle_exec(args[i], attr.st_mode, attr.st_uid) == EXIT_FAILURE)
+		if (toggle_exec(args[i], attr.st_mode) == EXIT_FAILURE)
 			exit_status = EXIT_FAILURE;
 		else
 			n++;

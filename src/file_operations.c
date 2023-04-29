@@ -623,33 +623,18 @@ xchmod(const char *file, const char *mode_str, const int flag)
 
 /* Toggle executable bits on the file named FILE */
 int
-toggle_exec(const char *file, mode_t mode, const uid_t uid)
+toggle_exec(const char *file, mode_t mode)
 {
-	if (uid != user.uid) {
-		xerror("te: Changing permissions of '%s': %s\n",
-			file, strerror(EPERM));
-		return EXIT_FAILURE;
-	}
-
 	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
 	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0111);
 	// Set it only for owner, unset it for every one
 //	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0100);
 
-	int fd = open(file, O_RDWR);
-	if (fd == -1) {
-		xerror("te: %s: %s\n", file, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	if (fchmod(fd, mode) == -1) {
-		close(fd);
+	if (fchmodat(AT_FDCWD, file, mode, 0) == -1) {
 		xerror("te: Changing permissions of '%s': %s\n",
 			file, strerror(errno));
 		return EXIT_FAILURE;
 	}
-
-	close(fd);
 
 	return EXIT_SUCCESS;
 }
