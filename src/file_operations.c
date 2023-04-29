@@ -1136,8 +1136,9 @@ get_new_link_target(char *cur_target)
 static void
 print_current_target(const char *link, char **target)
 {
+	printf(_("Current target -> "));
+
 	if (*target) {
-		printf(_("Current target -> "));
 		colors_list(*target, NO_ELN, NO_PAD, PRINT_NEWLINE);
 		return;
 	}
@@ -1146,14 +1147,14 @@ print_current_target(const char *link, char **target)
 	ssize_t ret = readlinkat(AT_FDCWD, link, tmp, sizeof(tmp));
 
 	if (ret != -1 && *tmp) {
-		printf(_("Current target -> %s%s%s (broken link)\n"),
+		printf(_("%s%s%s (broken link)\n"),
 			uf_c, tmp, df_c);
 		free(*target);
 		*target = savestring(tmp, strlen(tmp));
 		return;
 	}
 
-	printf(_("Current target -> ??? (broken link)\n"));
+	printf(_("??? (broken link)\n"));
 	return;
 }
 
@@ -1197,6 +1198,13 @@ edit_link(char *link)
 	print_current_target(link, &real_path);
 
 	char *new_path = get_new_link_target(real_path);
+	if (new_path && strcmp(new_path, real_path) == 0) {
+		free(real_path);
+		free(new_path);
+		printf("te: Nothing to do\n");
+		return (EXIT_SUCCESS);
+	}
+
 	free(real_path);
 	if (!new_path) /* The user pressed C-d */
 		return EXIT_SUCCESS;
@@ -1221,7 +1229,7 @@ edit_link(char *link)
 		return EXIT_FAILURE;
 	}
 
-	printf(_("'%s' successfully relinked to "), link);
+	printf(_("'%s' relinked to "), link);
 	fflush(stdout);
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 	free(new_path);
