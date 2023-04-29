@@ -1564,15 +1564,12 @@ bulk_rename(char **args)
 	int exit_status = EXIT_SUCCESS;
 
 	char bulk_file[PATH_MAX];
-	if (xargs.stealth_mode == 1)
-		snprintf(bulk_file, sizeof(bulk_file), "%s/%s", P_tmpdir, TMP_FILENAME);
-	else
-		snprintf(bulk_file, sizeof(bulk_file), "%s/%s", tmp_dir, TMP_FILENAME);
+	snprintf(bulk_file, sizeof(bulk_file), "%s/%s",
+		xargs.stealth_mode == 1 ? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(bulk_file);
 	if (fd == -1) {
-		_err('e', PRINT_PROMPT, "br: mkstemp: %s: %s\n",
-			bulk_file, strerror(errno));
+		xerror("br: mkstemp: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1582,8 +1579,7 @@ bulk_rename(char **args)
 #if defined(__HAIKU__) || defined(__sun)
 	fp = fopen(bulk_file, "w");
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "br: fopen: %s: %s\n",
-			bulk_file, strerror(errno));
+		xerror("br: fopen: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 #endif
@@ -1624,9 +1620,9 @@ bulk_rename(char **args)
 		if (lstat(args[i], &attr) == -1) {
 			xerror("br: %s: %s\n", args[i], strerror(errno));
 			continue;
-		} else {
-			counter++;
 		}
+
+		counter++;
 
 #if !defined(__HAIKU__) && !defined(__sun)
 		dprintf(fd, "%s\n", args[i]);
@@ -1642,14 +1638,13 @@ bulk_rename(char **args)
 
 	if (counter == 0) { /* No valid file name */
 		if (unlinkat(fd, bulk_file, 0) == -1)
-			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
-				bulk_file, strerror(errno));
+			xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "br: %s: %s\n", bulk_file, strerror(errno));
+		xerror("br: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1663,22 +1658,17 @@ bulk_rename(char **args)
 	open_in_foreground = 1;
 	exit_status = open_file(bulk_file);
 	open_in_foreground = 0;
+
 	if (exit_status != EXIT_SUCCESS) {
 		xerror("br: %s\n", errno != 0
-			? strerror(errno) : "Error opening temporary file");
-		if (unlinkat(fd, bulk_file, 0) == -1) {
-			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
-				bulk_file, strerror(errno));
-			exit_status = errno;
-		}
-		close_fstream(fp, fd);
-		return exit_status;
+			? strerror(errno) : _("Error opening temporary file"));
+		goto ERROR;
 	}
 
 	close_fstream(fp, fd);
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "br: %s: %s\n", bulk_file, strerror(errno));
+		xerror("br: %s: %s\n", bulk_file, strerror(errno));
 		return errno;
 	}
 
@@ -1687,13 +1677,7 @@ bulk_rename(char **args)
 	fstat(fd, &attr);
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		puts(_("br: Nothing to do"));
-		if (unlinkat(fd, bulk_file, 0) == -1) {
-			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
-				bulk_file, strerror(errno));
-			exit_status = errno;
-		}
-		close_fstream(fp, fd);
-		return exit_status;
+		goto ERROR;
 	}
 
 	/* Make sure there are as many lines in the bulk file as files
@@ -1708,13 +1692,7 @@ bulk_rename(char **args)
 
 	if (arg_total != file_total) {
 		xerror("%s\n", _("br: Line mismatch in renaming file"));
-		if (unlinkat(fd, bulk_file, 0) == -1) {
-			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
-				bulk_file, strerror(errno));
-			exit_status = errno;
-		}
-		close_fstream(fp, fd);
-		return exit_status;
+		goto ERROR;
 	}
 
 	/* Go back to the beginning of the bulk file, again */
@@ -1742,65 +1720,17 @@ bulk_rename(char **args)
 	}
 
 	/* If no file name was modified */
-	if (!modified) {
-		puts(_("br: Nothing to do"));
-		if (unlinkat(fd, bulk_file, 0) == -1) {
-			_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
-				bulk_file, strerror(errno));
-			exit_status = errno;
-		}
+	if (modified == 0) {
 		free(line);
-		close_fstream(fp, fd);
-		return exit_status;
+		puts(_("br: Nothing to do"));
+		goto ERROR;
 	}
 
 	/* Ask the user for confirmation */
-	char *answer = (char *)NULL;
-	while (!answer) {
-		answer = rl_no_hist(_("Continue? [y/N] "));
-		if (answer && *answer && strlen(answer) > 1) {
-			free(answer);
-			answer = (char *)NULL;
-			continue;
-		}
-
-		if (!answer) {
-			free(line);
-			if (unlinkat(fd, bulk_file, 0) == -1) {
-				_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
-					bulk_file, strerror(errno));
-				exit_status = errno;
-			}
-			close_fstream(fp, fd);
-			return exit_status;
-		}
-
-		switch (*answer) {
-		case 'y': /* fallthrough */
-		case 'Y': break;
-
-		case 'q': /* fallthrough */
-		case 'n': /* fallthrough */
-		case 'N': /* fallthrough */
-		case '\0':
-			free(answer);
-			free(line);
-			if (unlinkat(fd, bulk_file, 0) == -1) {
-				_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
-					bulk_file, strerror(errno));
-				exit_status = errno;
-			}
-			close_fstream(fp, fd);
-			return exit_status;
-
-		default:
-			free(answer);
-			answer = (char *)NULL;
-			break;
-		}
+	if (rl_get_y_or_n("Continue? [y/n] ") == 0) {
+		free(line);
+		goto ERROR;
 	}
-
-	free(answer);
 
 	/* Once again */
 	fseek(fp, 0L, SEEK_SET);
@@ -1830,8 +1760,7 @@ bulk_rename(char **args)
 	free(line);
 
 	if (unlinkat(fd, bulk_file, 0) == -1) {
-		_err('e', PRINT_PROMPT, "br: unlinkat: %s: %s\n",
-			bulk_file, strerror(errno));
+		xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		exit_status = errno;
 	}
 	close_fstream(fp, fd);
@@ -1841,6 +1770,14 @@ bulk_rename(char **args)
 		reload_dirlist();
 #endif
 
+	return exit_status;
+
+ERROR:
+	if (unlinkat(fd, bulk_file, 0) == -1) {
+		xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
+		exit_status = errno;
+	}
+	close_fstream(fp, fd);
 	return exit_status;
 }
 
