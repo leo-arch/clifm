@@ -1201,7 +1201,7 @@ edit_link(char *link)
 	if (new_path && strcmp(new_path, real_path) == 0) {
 		free(real_path);
 		free(new_path);
-		printf("te: Nothing to do\n");
+		puts(_("le: Nothing to do"));
 		return (EXIT_SUCCESS);
 	}
 
