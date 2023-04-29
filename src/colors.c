@@ -1897,20 +1897,6 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 			continue;
 		}
 
-		/* THIS OPTION IS DEPRECATED */
-		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {
-			char *p = line + 12;
-			if (*p < ' ')
-				continue;
-
-			if (*p == 'd' && strncmp(p, "default", 7) == 0)
-				prompt_notif = 1;
-			else if (*p == 'c' && strncmp(p, "custom", 6) == 0)
-				prompt_notif = 0;
-			else
-				prompt_notif = DEF_PROMPT_NOTIF;
-		}
-
 		/* The following values override those set via the Prompt line
 		 * (provided it was set to a valid prompt name, as defined in the
 		 * prompts file)*/
@@ -1964,6 +1950,7 @@ read_color_scheme_file(const char *colorscheme, char **filecolors,
 			free(conf.wprompt_str);
 			conf.wprompt_str = savestring(q, strlen(q));
 		}
+
 #ifndef _NO_FZF
 		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
 			char *p = line + 14;

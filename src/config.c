@@ -2575,6 +2575,81 @@ CONT:
 }
 
 static void
+set_sug_strat(const char *line)
+{
+	char opt_str[SUG_STRATS + 3] = "";
+	if (sscanf(line, "%9s\n", opt_str) == -1)
+		return;
+
+	char *tmp = remove_quotes(opt_str);
+	if (!tmp)
+		return;
+
+	int fail = 0;
+	size_t s;
+	for (s = 0; tmp[s]; s++) {
+		if (tmp[s] != 'a' && tmp[s] != 'b'
+		&& tmp[s] != 'c' && tmp[s] != 'e'
+		&& tmp[s] != 'f' && tmp[s] != 'h'
+		&& tmp[s] != 'j' && tmp[s] != '-') {
+			fail = 1;
+			break;
+		}
+	}
+
+	if (fail == 1 || s != SUG_STRATS)
+		return;
+
+	free(conf.suggestion_strategy);
+	conf.suggestion_strategy = savestring(tmp, strnlen(tmp, sizeof(tmp)));
+}
+
+static void
+set_tabcomp_mode(const char *line)
+{
+	char opt_str[11] = "";
+	if (sscanf(line, "%10s\n", opt_str) == -1)
+		return;
+
+	char *tmp = remove_quotes(opt_str);
+	if (!tmp)
+		return;
+
+	if (strncmp(tmp, "standard", 8) == 0) {
+		fzftab = 0; tabmode = STD_TAB;
+	} else if (strncmp(tmp, "fzf", 3) == 0) {
+		fzftab = 1; tabmode = FZF_TAB;
+	} else if (strncmp(tmp, "fzy", 3) == 0) {
+		fzftab = 1; tabmode = FZY_TAB;
+	} else if (strncmp(tmp, "smenu", 5) == 0) {
+		fzftab = 1; tabmode = SMENU_TAB;
+	}
+}
+
+static void
+set_starting_path(char *line)
+{
+	char *tmp = get_line_value(line);
+	if (!tmp)
+		return;
+
+	/* If starting path is not NULL, and exists, and is a directory, and the
+	 * user has appropriate permissions, set path to starting path. If any of
+	 * these conditions is false, path will be set to default, that is, CWD */
+	if (xchdir(tmp, SET_TITLE) == 0) {
+		if (cur_ws < 0)
+			cur_ws = 0;
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(tmp, strlen(tmp));
+		return;
+	}
+
+	_err('w', PRINT_PROMPT, _("%s: chdir: %s: %s. Using the "
+		"current working directory as starting path\n"),
+		PROGRAM_NAME, tmp, strerror(errno));
+}
+
+static void
 read_config(void)
 {
 	int fd;
@@ -2748,13 +2823,6 @@ read_config(void)
 				continue;
 		}
 
-#ifndef _NO_HIGHLIGHT
-		else if (xargs.highlight == UNSET && *line == 'S'
-		&& strncmp(line, "SyntaxHighlighting=", 19) == 0) {
-			set_config_bool_value(line + 19, &conf.highlight);
-		}
-#endif /* !_NO_HIGHLIGHT */
-
 #ifndef _NO_ICONS
 		else if (xargs.icons == UNSET && *line == 'I'
 		&& strncmp(line, "Icons=", 6) == 0) {
@@ -2908,37 +2976,12 @@ read_config(void)
 			set_config_bool_value(line + 25, &conf.private_ws_settings);
 		}
 
-		/* This option has been moved to the color scheme file and is here
-		 * only for backward compatibility */
-		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
-			free(conf.encoded_prompt);
-			conf.encoded_prompt = (char *)NULL;
-			char *p = strchr(line, '=');
-			if (p && *(++p))
-				conf.encoded_prompt = savestring(p, strlen(p));
-		}
-
-		/* This option is DEPRECATED! Replaced by "Notifications", in the
-		 * color scheme file */
-		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {
-			char opt_str[8] = "";
-			ret = sscanf(line + 12, "%7s\n", opt_str);
-			if (ret == -1)
-				continue;
-			if (strncmp(opt_str, "default", 7) == 0)
-				prompt_notif = 1;
-			else if (strncmp(opt_str, "custom", 6) == 0)
-				prompt_notif = 0;
-			else
-				prompt_notif = DEF_PROMPT_NOTIF;
-		}
-
 		else if (*line == 'P' && strncmp(line, "PropFields=", 11) == 0) {
 			char *tmp = get_line_value(line + 11);
-			if (!tmp)
-				continue;
-			xstrsncpy(prop_fields_str, tmp, PROP_FIELDS_SIZE);
-			set_prop_fields(prop_fields_str);
+			if (tmp) {
+				xstrsncpy(prop_fields_str, tmp, PROP_FIELDS_SIZE);
+				set_prop_fields(prop_fields_str);
+			}
 		}
 
 		else if (*line == 'P' && strncmp(line, "PurgeJumpDB=", 12) == 0) {
@@ -2995,24 +3038,7 @@ read_config(void)
 
 		else if (xargs.path == UNSET && cur_ws == UNSET && *line == 'S'
 		&& strncmp(line, "StartingPath=", 13) == 0) {
-			char *tmp = get_line_value(line + 13);
-			if (!tmp)
-				continue;
-
-			/* If starting path is not NULL, and exists, and is a
-			 * directory, and the user has appropriate permissions,
-			 * set path to starting path. If any of these conditions
-			 * is false, path will be set to default, that is, CWD */
-			if (xchdir(tmp, SET_TITLE) == 0) {
-				if (cur_ws < 0)
-					cur_ws = 0;
-				free(workspaces[cur_ws].path);
-				workspaces[cur_ws].path = savestring(tmp, strlen(tmp));
-			} else {
-				_err('w', PRINT_PROMPT, _("%s: chdir: %s: %s. Using the "
-					"current working directory as starting path\n"),
-					PROGRAM_NAME, tmp, strerror(errno));
-			}
+			set_starting_path(line + 13);
 		}
 
 #ifndef _NO_SUGGESTIONS
@@ -3027,72 +3053,24 @@ read_config(void)
 
 		else if (*line == 'S'
 		&& strncmp(line, "SuggestionStrategy=", 19) == 0) {
-			char opt_str[SUG_STRATS + 1] = "";
-			ret = sscanf(line + 19, "%7s\n", opt_str);
-			if (ret == -1)
-				continue;
-			int fail = 0;
-			size_t s;
-			for (s = 0; opt_str[s]; s++) {
-				if (opt_str[s] != 'a' && opt_str[s] != 'b'
-				&& opt_str[s] != 'c' && opt_str[s] != 'e'
-				&& opt_str[s] != 'f' && opt_str[s] != 'h'
-				&& opt_str[s] != 'j' && opt_str[s] != '-') {
-					fail = 1;
-					break;
-				}
-			}
-			if (fail == 1 || s != SUG_STRATS)
-				continue;
-			free(conf.suggestion_strategy);
-			conf.suggestion_strategy = savestring(opt_str,
-				strnlen(opt_str, sizeof(opt_str)));
+			set_sug_strat(line + 19);
 		}
 #endif /* !_NO_SUGGESTIONS */
+
+#ifndef _NO_HIGHLIGHT
+		else if (xargs.highlight == UNSET && *line == 'S'
+		&& strncmp(line, "SyntaxHighlighting=", 19) == 0) {
+			set_config_bool_value(line + 19, &conf.highlight);
+		}
+#endif /* !_NO_HIGHLIGHT */
 
 #ifndef _NO_FZF
 		else if (xargs.fzftab == UNSET
 		&& xargs.fzytab == UNSET && xargs.smenutab == UNSET
 		&& *line == 'T' && strncmp(line, "TabCompletionMode=", 18) == 0) {
-			char opt_str[9] = "";
-			ret = sscanf(line + 18, "%8s\n", opt_str);
-			if (ret == -1)
-				continue;
-			if (strncmp(opt_str, "standard", 8) == 0) {
-				fzftab = 0; tabmode = STD_TAB;
-			} else if (strncmp(opt_str, "fzf", 3) == 0) {
-				fzftab = 1; tabmode = FZF_TAB;
-			} else if (strncmp(opt_str, "fzy", 3) == 0) {
-				fzftab = 1; tabmode = FZY_TAB;
-			} else if (strncmp(opt_str, "smenu", 5) == 0) {
-				fzftab = 1; tabmode = SMENU_TAB;
-			}
+			set_tabcomp_mode(line + 18);
 		}
 #endif /* !_NO_FZF */
-
-		else if (*line == 'F' && strncmp(line, "FzfTabOptions=", 14) == 0) {
-			char *tmp = get_line_value(line + 14);
-			if (!tmp)
-				continue;
-			if (*tmp == 'n' && strcmp(tmp, "none") == 0) {
-				conf.fzftab_options = (char *)xnmalloc(1, sizeof(char));
-				*conf.fzftab_options = '\0';
-			} else {
-				free(conf.fzftab_options);
-				if (sanitize_cmd(tmp, SNT_BLACKLIST) == EXIT_SUCCESS) {
-					conf.fzftab_options = savestring(tmp, strlen(tmp));
-				} else {
-					_err('w', PRINT_PROMPT, _("%s: FzfTabOptions contains "
-						"unsafe characters (<>|;&$`). Falling back to default "
-						"values.\n"), PROGRAM_NAME);
-					char *p = conf.colorize == 1
-						? DEF_FZFTAB_OPTIONS : DEF_FZFTAB_OPTIONS_NO_COLOR;
-					conf.fzftab_options = savestring(p, strlen(p));
-				}
-				if (strstr(conf.fzftab_options, "--height"))
-					fzf_height_set = 1;
-			}
-		}
 
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
 			char *opt = line + 12;
@@ -3136,22 +3114,6 @@ read_config(void)
 
 		else if (*line == 'U' && strncmp(line, "Unicode=", 8) == 0) {
 			set_config_bool_value(line + 8, &conf.unicode);
-		}
-
-	/* Both WarningPrompt and WarningPromptStr have been moved to the color
-	 * scheme file and are here just for backwards compatibility */
-		else if (xargs.warning_prompt == UNSET && *line == 'W'
-		&& strncmp(line, "WarningPrompt=", 14) == 0) {
-			set_config_bool_value(line + 14, &conf.warning_prompt);
-		}
-
-		else if (*line == 'W'
-		&& strncmp(line, "WarningPromptStr=", 17) == 0) {
-			char *tmp = get_line_value(line + 17);
-			if (!tmp)
-				continue;
-			free(conf.wprompt_str);
-			conf.wprompt_str = savestring(tmp, strlen(tmp));
 		}
 
 		else if (xargs.welcome_message == UNSET && *line == 'W'
