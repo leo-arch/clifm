@@ -1105,7 +1105,7 @@ static char *
 get_new_link_target(char *cur_target)
 {
 	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), _("Enter new target (Ctrl-d to quit)\n"
+	snprintf(_prompt, sizeof(_prompt), _("Edit target (Ctrl-d to quit)\n"
 		"\001%s\002>\001%s\002 "), mi_c, tx_c);
 
 	char *new_target = (char *)NULL;
@@ -1133,7 +1133,31 @@ get_new_link_target(char *cur_target)
 	return n;
 }
 
-/* Relink symlink to new path */
+static void
+print_current_target(const char *link, char **target)
+{
+	if (*target) {
+		printf(_("Current target -> "));
+		colors_list(*target, NO_ELN, NO_PAD, PRINT_NEWLINE);
+		return;
+	}
+
+	char tmp[PATH_MAX] = "";
+	ssize_t ret = readlinkat(AT_FDCWD, link, tmp, sizeof(tmp));
+
+	if (ret != -1 && *tmp) {
+		printf(_("Current target -> %s%s%s (broken link)\n"),
+			uf_c, tmp, df_c);
+		free(*target);
+		*target = savestring(tmp, strlen(tmp));
+		return;
+	}
+
+	printf(_("Current target -> ??? (broken link)\n"));
+	return;
+}
+
+/* Relink the symbolic link LINK to a new target */
 int
 edit_link(char *link)
 {
@@ -1170,93 +1194,19 @@ edit_link(char *link)
 
 	/* Get file pointed to by symlink and report to the user */
 	char *real_path = realpath(link, NULL);
-	if (!real_path) {
-		char target[PATH_MAX] = "";
-		ssize_t ret = readlinkat(AT_FDCWD, link, target, sizeof(target));
-		if (ret != -1 && *target) {
-			printf(_("%s%s%s: Current target -> %s%s%s (broken link)\n"),
-				or_c, link, df_c, uf_c, target, df_c);
-		} else {
-			printf(_("%s%s%s: Current target -> ??? (broken link)\n"),
-				or_c, link, df_c);
-		}
-	} else {
-		printf(_("%s%s%s: Current target -> "), ln_c, link, df_c);
-		colors_list(real_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
-	}
+	print_current_target(link, &real_path);
 
 	char *new_path = get_new_link_target(real_path);
 	free(real_path);
 	if (!new_path) /* The user pressed C-d */
 		return EXIT_SUCCESS;
 
-	/* If an ELN, replace by the corresponding file name */
-	if (is_number(new_path)) {
-		int a = atoi(new_path);
-		if (a > 0 && a <= (int)files) {
-			--a;
-			if (file_info[a].name)
-				new_path = savestring(file_info[a].name, strlen(file_info[a].name));
-		} else {
-			xerror(_("le: %s: Invalid ELN\n"), new_path);
-			free(new_path);
-			return EXIT_FAILURE;
-		}
-	}
-
-	/* Remove terminating space. TAB completion puts a final space
-	 * after file names */
-	size_t path_len = strlen(new_path);
-	if (path_len > 0 && new_path[path_len - 1] == ' ')
-		new_path[path_len - 1] = '\0';
-
-	/* Dequote new path, if needed */
-	if (strchr(new_path, '\\')) {
-		char *tmp = dequote_str(new_path, 0);
-		if (!tmp) {
-			xerror(_("le: %s: Error dequoting file\n"), new_path);
-			free(new_path);
-			return EXIT_FAILURE;
-		}
-
-		strcpy(new_path, tmp);
-		free(tmp);
-	}
-
 	/* Check new_path existence and warn the user if it does not exist */
 	if (lstat(new_path, &attr) == -1) {
-		printf("%s: %s\n", new_path, strerror(errno));
-		char *answer = (char *)NULL;
-		while (!answer) {
-			answer = rl_no_hist(_("Relink as a broken symbolic link? [y/n] "));
-			if (!answer)
-				continue;
-			if (!*answer) {
-				free(answer);
-				answer = (char *)NULL;
-				continue;
-			}
-
-			if (*answer != 'y' && *answer != 'n' && *answer != 'q') {
-				free(answer);
-				answer = (char *)NULL;
-				continue;
-			}
-
-			if (answer[1]) {
-				free(answer);
-				answer = (char *)NULL;
-				continue;
-			}
-
-			if (*answer == 'y') {
-				free(answer);
-				break;
-			} else {
-				free(answer);
-				free(new_path);
-				return EXIT_SUCCESS;
-			}
+		xerror("%s: %s\n", new_path, strerror(errno));
+		if (rl_get_y_or_n(_("Relink as a broken symbolic link? [y/n] ")) == 0) {
+			free(new_path);
+			return EXIT_SUCCESS;
 		}
 	}
 
@@ -1271,14 +1221,10 @@ edit_link(char *link)
 		return EXIT_FAILURE;
 	}
 
-	real_path = realpath(link, NULL);
-	printf(_("%s%s%s successfully relinked to "),
-		real_path ? ln_c : or_c, link, df_c);
+	printf(_("'%s' successfully relinked to "), link);
 	fflush(stdout);
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 	free(new_path);
-	if (real_path)
-		free(real_path);
 
 	return EXIT_SUCCESS;
 }
@@ -1514,7 +1460,7 @@ remove_file(char **args)
 				}
 				free(tmp);
 			} else {
-				xerror("r: %s: Error dequoting file name\n", args[i]);
+				xerror(_("r: %s: Error dequoting file name\n"), args[i]);
 				continue;
 			}
 		} else {
@@ -1533,7 +1479,7 @@ remove_file(char **args)
 	rm_cmd[j] = (char *)NULL;
 
 	if (errs > 0 && j > 3) { /* If errors but at least one file was deleted */
-		fputs("Press any key to continue... ", stdout);
+		fputs(_("Press any key to continue... "), stdout);
 		xgetchar();
 	}
 
