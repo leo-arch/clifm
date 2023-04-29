@@ -1135,168 +1135,6 @@ create_tmp_files(void)
 		"reboots\n"), PROGRAM_NAME, tmp_dir);
 }
 
-/* THIS IS TEMPORAL CODE!
- * It is intended to rename config files from .cfm to .clifm, and should
- * be removed once this transition has been made (2 releases?) */
-
-#if !defined(_NO_RENAME_CONFIG)
-#include <dirent.h>
-static void
-rename_cfm_files(char *dir)
-{
-	struct dirent **_files = (struct dirent **)NULL;
-	int n = scandir(dir, &_files, NULL, NULL);
-
-	if (n == -1)
-		return;
-
-	size_t i;
-	for (i = 0; i < (size_t)n; i++) {
-		if (SELFORPARENT(_files[i]->d_name)) {
-			free(_files[i]);
-			continue;
-		}
-
-		char *p = strrchr(_files[i]->d_name, '.');
-		if (!p || !*(p + 1) || strcmp(p, ".cfm") != 0) {
-			free(_files[i]);
-			continue;
-		}
-
-		*p = '\0';
-		char src[PATH_MAX], dst[PATH_MAX];
-		snprintf(src, sizeof(src), "%s/%s.cfm", dir, _files[i]->d_name);
-		snprintf(dst, sizeof(dst), "%s/%s.clifm", dir, _files[i]->d_name);
-
-		if (rename(src, dst) == -1)
-			_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, src,
-				strerror(errno));
-		free(_files[i]);
-	}
-
-	free(_files);
-}
-
-#ifndef _NO_PROFILES
-static void
-rename_profile_files(char *dir)
-{
-	char p[PATH_MAX];
-	snprintf(p, sizeof(p), "%s/profiles", dir);
-	struct stat a;
-	if (stat(p, &a) == -1)
-		return;
-
-	struct dirent **_files = (struct dirent **)NULL;
-	int n = scandir(p, &_files, NULL, NULL);
-
-	if (n == -1)
-		return;
-
-	size_t i;
-	for (i = 0; i < (size_t)n; i++) {
-		if (SELFORPARENT(_files[i]->d_name)) {
-			free(_files[i]);
-			continue;
-		}
-
-		char tmp[PATH_MAX * 2];
-		snprintf(tmp, sizeof(tmp), "%s/%s", p, _files[i]->d_name);
-
-#if !defined(_DIRENT_HAVE_D_TYPE)
-		if (stat(tmp, &a) == -1) {
-			free(_files[i]);
-			continue;
-		}
-		if (S_ISDIR(a.st_mode))
-#else
-		if (_files[i]->d_type == DT_DIR)
-#endif /* !_DIRENT_HAVE_D_TYPE */
-			rename_cfm_files(tmp);
-
-		free(_files[i]);
-	}
-
-	free(_files);
-}
-#endif /* _NO_PROFILES */
-
-static void
-rename_color_files(char *dir)
-{
-	char p[PATH_MAX];
-	snprintf(p, sizeof(p), "%s/colors", dir);
-
-	struct stat a;
-	if (stat(p, &a) != -1)
-		rename_cfm_files(p);
-}
-
-static void
-rename_config_files(char *dir)
-{
-	rename_cfm_files(dir);
-	rename_color_files(dir);
-#ifndef _NO_PROFILES
-	rename_profile_files(dir);
-#endif
-}
-
-static void
-check_cfm_files(void)
-{
-	/* Let's suppose that, if keybindings.cfm doesn't exist, the
-	 * transition has been already made (or this is a fresh installation) */
-	struct stat a;
-	char q[PATH_MAX + 17];
-	snprintf(q, sizeof(q), "%s/keybindings.cfm", config_dir_gral);
-	if (stat(q, &a) == -1)
-		return;
-
-	/* Old .cfm files found alongside new .clifm files. This happens if
-	 * the user says "no" when asked about replacing old files. Just warn
-	 * the user */
-	char qq[PATH_MAX + 19];
-	snprintf(qq, sizeof(qq), "%s/keybindings.clifm", config_dir_gral);
-	if (stat(qq, &a) == EXIT_SUCCESS) {
-		_err('n', PRINT_PROMPT, "%s: Old .cfm config files were found "
-			"in %s directory. They will not be used anymore: remove/rename "
-			"them (to .clifm files) to silence this warning.\n", PROGRAM_NAME,
-			config_dir_gral);
-		return;
-	}
-
-	fprintf(stderr, "##################\n"
-	"# IMPORTANT NOTE #\n"
-	"##################\n\n"
-	"%s transitioned from .cfm to .clifm file extension for its "
-	"configuration files.\n"
-	"This has been done to avoid conflicts with the ColdFusion Markup Language file "
-	"extension (cfm).\n"
-	"Your config files, including color schemes, will be automatically renamed, "
-	"that's all: nothing will be lost.\n"
-	"Note that if you cancel this operation (by pressing 'n'), new .clifm config files will be "
-	"created and the\nold .cfm ones will be kept, but ignored (in which case you "
-	"should manually remove/rename them to silence this warning).\n\n"
-	"If you prefer to perform a manual transition, please follow these steps:\n"
-	"1. Press 'n' (clifm will start as usual, using the new configuration files)\n"
-	"2. cd into the appropriate directories (those containing .cfm files, i.e, clifm, "
-	"clifm/colors, and /clifm/profiles)\n"
-	"3. Bulk rename .cfm files as .clifm files: 'br *.cfm' (or, file by "
-	"file: 'm FILE.cfm FILE.clifm')\n"
-	"4. Restart clifm\n",
-	_PROGRAM_NAME);
-
-	putchar('\n');
-	if (rl_get_y_or_n("Rename configuration files automatically? [y/n] ") != 1)
-		return;
-
-	rename_config_files(config_dir_gral);
-	_err('n', PRINT_PROMPT, "%s: Configuration files changed from .cfm to .clifm "
-		"file extension\n", PROGRAM_NAME);
-}
-#endif /* !_NO_RENAME_CONFIG */
-
 static void
 define_config_file_names(void)
 {
@@ -1322,10 +1160,6 @@ define_config_file_names(void)
 			sprintf(config_dir_gral, "%s/.config/%s", user.home, PNL);
 		}
 	}
-
-#if !defined(_NO_RENAME_CONFIG)
-	check_cfm_files();
-#endif /* !_NO_RENAME_CONFIG */
 
 	size_t config_gral_len = strlen(config_dir_gral);
 
@@ -2649,6 +2483,7 @@ set_starting_path(char *line)
 		PROGRAM_NAME, tmp, strerror(errno));
 }
 
+/* Read the main configuration file and set options accordingly */
 static void
 read_config(void)
 {
@@ -3186,7 +3021,8 @@ check_colors(void)
 	&& ((cfc && *cfc) || (ccf && *ccf && *ccf != '0'))) {
 		if (term_caps.color == 0)
 			/* The user is forcing the use of colors even when the terminal
-			 * reports no color capability. Let's assume a highly compatible value */
+			 * reports no color capability. Let's assume a highly compatible
+			 * value */
 			term_caps.color = 8;
 		conf.colorize = 1;
 	}
@@ -3210,7 +3046,7 @@ check_colors(void)
 }
 
 #ifndef _NO_FZF
-/* Just check if --height is specified in FZF_DEFAULT_OPTS */
+/* Just check if --height is set in FZF_DEFAULT_OPTS */
 static int
 get_fzf_win_height(void)
 {
@@ -3261,7 +3097,7 @@ create_trash_dirs(void)
 	else if (access(trash_dir, W_OK) == -1) {
 		trash_ok = 0;
 		_err('w', PRINT_PROMPT, _("%s: %s: Directory not writable. "
-				"Trash function disabled\n"), PROGRAM_NAME, trash_dir);
+			"Trash function disabled\n"), PROGRAM_NAME, trash_dir);
 	}
 }
 
