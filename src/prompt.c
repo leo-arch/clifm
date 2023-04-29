@@ -793,7 +793,7 @@ run_prompt_cmds(void)
 static inline void
 update_trash_indicator(void)
 {
-	if (trash_ok) {
+	if (trash_ok == 1) {
 		int n = count_dir(trash_files_dir, NO_CPOP);
 		if (n <= 2)
 			trash_n = 0;

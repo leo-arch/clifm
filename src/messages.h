@@ -246,7 +246,7 @@ notifications on your screen. For troubleshoting, consult your \
 daemon's documentation\n\n\
 Tip: You can always check notifications using the 'msg' command"
 
-#define DH_USAGE "Access the directory history list\n\n\
+#define DH_USAGE "Query the directory history list\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   dh [STRING] [PATH] [!ELN]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -651,7 +651,7 @@ To get information about a device, enter iELN. For example: i12"
     opening application\n\
   For more information consult the manpage"
 
-#define MSG_USAGE "List available CliFM messages\n\n\
+#define MSG_USAGE "List available Clifm messages\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   msg, messages [clear]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\

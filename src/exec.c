@@ -1223,14 +1223,16 @@ _toggle_exec(char **args)
 			continue;
 		}
 
-		if (toggle_exec(args[i], attr.st_mode) == -1)
+		if (toggle_exec(args[i], attr.st_mode, attr.st_uid) == EXIT_FAILURE)
 			exit_status = EXIT_FAILURE;
 		else
 			n++;
 	}
 
 	if (n > 0) {
-		if (conf.autols == 1) reload_dirlist();
+		if (conf.autols == 1 && exit_status == EXIT_SUCCESS)
+			reload_dirlist();
+
 		print_reload_msg(_("Toggled executable bit on %zu %s\n"),
 			n, n > 1 ? _("files") : _("file"));
 	}

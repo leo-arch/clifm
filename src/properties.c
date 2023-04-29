@@ -557,7 +557,7 @@ get_perm_str(char **s, int *diff)
 	return ptr;
 }
 
-/* Change permissions of files passed via ARGS */
+/* Interactively change permissions of files passed via ARGS */
 int
 set_file_perms(char **args)
 {
@@ -579,12 +579,14 @@ set_file_perms(char **args)
 
 	int diff = 0; /* Either a single file o multiple files with same perms */
 	char *pstr = get_perm_str(args + 1, &diff);
-	if (!pstr) return errno;
+	if (!pstr)
+		return errno;
 
 	char *new_perms = get_new_perms(pstr, diff);
 	free(pstr);
 
-	if (!new_perms) return EXIT_SUCCESS;
+	if (!new_perms)
+		return EXIT_SUCCESS;
 
 	if (validate_new_perms(new_perms) != EXIT_SUCCESS) {
 		free(new_perms);
@@ -600,7 +602,8 @@ set_file_perms(char **args)
 		if (fchmodat(AT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
 			n++;
 		} else {
-			xerror("pc: %s: %s\n", args[i], strerror(errno));
+			xerror("pc: Changing permissions of '%s': %s\n",
+				args[i], strerror(errno));
 			ret = errno;
 		}
 		fflush(stdout);

@@ -2358,7 +2358,7 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 		if (!*(q + 1) || (*(q + 1) == '/' && !*(q + 2)))
 			xstrsncpy(t, user.home, PATH_MAX - 1);
 		else
-			snprintf(t, PATH_MAX, "%s/%s", user.home, q + 2);
+			snprintf(t, sizeof(t), "%s/%s", user.home, q + 2);
 		p = t;
 	}
 

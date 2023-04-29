@@ -621,22 +621,31 @@ xchmod(const char *file, const char *mode_str, const int flag)
 	return EXIT_SUCCESS;
 }
 
-/* Toggle executable bit on file */
+/* Toggle executable bits on the file named FILE */
 int
-toggle_exec(const char *file, mode_t mode)
+toggle_exec(const char *file, mode_t mode, const uid_t uid)
 {
+	if (uid != user.uid) {
+		xerror("te: Changing permissions of '%s': %s\n",
+			file, strerror(EPERM));
+		return EXIT_FAILURE;
+	}
+
 	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
 	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0111);
+	// Set it only for owner, unset it for every one
+//	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0100);
 
-	int fd = open(file, O_WRONLY);
+	int fd = open(file, O_RDWR);
 	if (fd == -1) {
-		xerror("xchmod: %s: %s\n", file, strerror(errno));
+		xerror("te: %s: %s\n", file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (fchmod(fd, mode) == -1) {
 		close(fd);
-		xerror("xchmod: %s: %s\n", file, strerror(errno));
+		xerror("te: Changing permissions of '%s': %s\n",
+			file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1457,9 +1466,11 @@ list_removed_files(char **cmd, const size_t start, const int cwd)
 
 	if (conf.autols == 1 && cwd == 1)
 		reload_dirlist();
+
 	for (i = 0; i < c; i++) {
 		if (!removed_files[i] || !*removed_files[i])
 			continue;
+
 		char *p = abbreviate_file_name(removed_files[i]);
 		printf("%s\n", p ? p : removed_files[i]);
 		if (p && p != removed_files[i])
