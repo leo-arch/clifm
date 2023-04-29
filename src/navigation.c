@@ -734,8 +734,10 @@ go_home(const int cd_flag)
 	if (old_pwd && old_pwd[dirhist_cur_index])
 		set_oldpwd(old_pwd[dirhist_cur_index], user.home);
 
-	free(workspaces[cur_ws].path);
-	workspaces[cur_ws].path = savestring(user.home, strlen(user.home));
+	if (workspaces) {
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(user.home, strlen(user.home));
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -787,11 +789,14 @@ change_to_path(char *new_path, const int cd_flag)
 		return err;
 	}
 
-	if (workspaces && workspaces[cur_ws].path)
-		set_oldpwd(workspaces[cur_ws].path, q);
+	if (workspaces) {
+		if (workspaces[cur_ws].path)
+			set_oldpwd(workspaces[cur_ws].path, q);
 
-	free(workspaces[cur_ws].path);
-	workspaces[cur_ws].path = savestring(q, strlen(q));
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(q, strlen(q));
+	}
+
 	free(q);
 
 	return EXIT_SUCCESS;
