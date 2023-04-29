@@ -1360,6 +1360,10 @@ free_stuff(void)
 {
 	int i = 0;
 
+#ifdef RUN_CMD
+	free(cmd_line_cmd);
+#endif
+
 #if !defined(_NO_ICONS)
 	free(name_icons_hashes);
 	free(dir_icons_hashes);
@@ -1607,7 +1611,7 @@ free_stuff(void)
 
 	/* Restore the color of the running terminal */
 	if (conf.colorize == 1 && xargs.list_and_quit != 1)
-		fputs("\x1b[0;39;49m", stdout);
+		RESTORE_COLOR;
 }
 
 /* Get current terminal dimensions and store them in TERM_COLS and

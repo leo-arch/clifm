@@ -239,6 +239,10 @@ char
 	prop_fields_str[PROP_FIELDS_SIZE + 1] = "",
 	invalid_time_str[MAX_TIME_STR] = "",
 
+#ifdef RUN_CMD
+	*cmd_line_cmd = (char *)NULL,
+#endif
+
 	*actions_file = (char *)NULL,
 	*alt_bm_file = (char *)NULL,
 	*alt_config_dir = (char *)NULL,
@@ -798,6 +802,43 @@ struct timespec timeout;
 #endif
 int watch = UNSET;
 
+#ifdef RUN_CMD
+// Run the command passed via --cmd and exit
+static void
+run_and_exit(void)
+{
+	/* 1) Parse input string */
+	int i = 0;
+	char **cmd = parse_input_str(cmd_line_cmd);
+	if (!cmd)
+		exit(EXIT_FAILURE);
+
+	/* 2) Execute input string */
+	char **alias_cmd = check_for_alias(cmd);
+	if (alias_cmd) {
+		/* If an alias is found, check_for_alias() frees CMD and returns
+		 * ALIAS_CMD in its place to be executed by exec_cmd() */
+		exec_cmd(alias_cmd);
+
+		for (i = 0; alias_cmd[i]; i++)
+			free(alias_cmd[i]);
+		free(alias_cmd);
+		exit(exit_code);
+	}
+
+	if (!(flags & FAILED_ALIAS))
+		exec_cmd(cmd);
+	flags &= ~FAILED_ALIAS;
+
+	for (i = 0; cmd[i]; i++)
+		free(cmd[i]);
+	free(cmd);
+
+	UNHIDE_CURSOR;
+	exit(exit_code);
+}
+#endif // RUN_CMD
+
 /* This is the main structure of any basic shell (a REPL)
 	 1 - Grab user input
 	 2 - Parse user input
@@ -808,6 +849,11 @@ int watch = UNSET;
 static inline void
 run_main_loop(void)
 {
+#ifdef RUN_CMD
+	if (cmd_line_cmd)
+		run_and_exit();
+#endif
+
 	int i;
 	/* 1) Infinite loop to keep the program running */
 	while (1) {
@@ -861,6 +907,11 @@ set_root_indicator(void)
 static inline void
 _list(void)
 {
+#ifdef RUN_CMD
+	if (cmd_line_cmd)
+		return;
+#endif
+
 	if (conf.autols == 1 && isatty(STDIN_FILENO)) {
 #ifdef LINUX_INOTIFY
 		/* Initialize inotify */

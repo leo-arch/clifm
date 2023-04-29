@@ -645,6 +645,7 @@ extern int watch;
 #define HIDE_CURSOR     fputs(term_caps.hide_cursor == 1 ? "\x1b[?25l" : "", stdout) /* DECTCEM */
 #define UNHIDE_CURSOR   fputs(term_caps.hide_cursor == 1 ? "\x1b[?25h" : "", stdout)
 
+#define RESTORE_COLOR   fputs("\x1b[0;39;49m", stdout)
 #define SET_RVIDEO      fputs("\x1b[?5h", stderr) /* DECSCNM: Enable reverse video */
 #define UNSET_RVIDEO    fputs("\x1b[?5l", stderr)
 #define SET_LINE_WRAP   fputs("\x1b[?7h", stderr) /* DECAWM */
@@ -1408,6 +1409,10 @@ extern char
 	_fmatch[PATH_MAX + 1], /* First regular match if fuzzy matching is enabled */
 	prop_fields_str[PROP_FIELDS_SIZE + 1],
 	invalid_time_str[MAX_TIME_STR],
+
+#ifdef RUN_CMD
+	*cmd_line_cmd,
+#endif
 
 	*actions_file,
 	*alt_config_dir,

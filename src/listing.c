@@ -189,6 +189,11 @@ set_div_line_color(void)
 static void
 print_div_line(void)
 {
+#ifdef RUN_CMD
+	if (cmd_line_cmd)
+		return;
+#endif
+
 	if (conf.colorize == 1)
 		set_div_line_color();
 
@@ -2489,8 +2494,12 @@ list_dir(void)
 			}
 #endif
 
-			else if (stat_ok == 1 && ((attr.st_mode & 00100) /* Exec */
+			else if (stat_ok == 1
+			&& ((attr.st_mode & 00100) // Exec
 			|| (attr.st_mode & 00010) || (attr.st_mode & 00001))) {
+/*			&& (((attr.st_mode & 00100) && attr.st_uid == user.uid) // Exec
+			|| ((attr.st_mode & 00010) && attr.st_gid == user.gid)
+			|| (attr.st_mode & 00001))) { */
 				file_info[n].exec = 1;
 				stats.exec++;
 #ifndef _NO_ICONS
@@ -2681,6 +2690,11 @@ free_dirlist(void)
 void
 reload_dirlist(void)
 {
+#ifdef RUN_CMD
+	if (cmd_line_cmd)
+		return;
+#endif
+
 	free_dirlist();
 	int bk = exit_code;
 	list_dir();

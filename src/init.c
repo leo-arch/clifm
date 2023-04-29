@@ -1933,6 +1933,11 @@ external_arguments(int argc, char **argv)
 		{"show-hidden", no_argument, 0, 'A'},
 		{"bookmarks-file", required_argument, 0, 'b'},
 		{"config-file", required_argument, 0, 'c'},
+
+#ifdef RUN_CMD
+		{"cmd", required_argument, 0, 'C'},
+#endif
+
 		{"config-dir", required_argument, 0, 'D'},
 		{"no-eln", no_argument, 0, 'e'},
 		{"eln-use-workspace-color", no_argument, 0, 'E'},
@@ -2051,7 +2056,12 @@ external_arguments(int argc, char **argv)
 	int open_prev_mode = 0;
 
 	while ((optc = getopt_long(argc, argv,
-		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:Wxyz:", longopts, (int *)0)) != EOF) {
+#ifdef RUN_CMD
+		    "+aAb:c:C:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:Wxyz:",
+#else
+		    "+aAb:c:D:eEfFgGhHiIk:lLmoOp:P:rsStUuvw:Wxyz:",
+#endif
+			longopts, (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
 		 * an argument here. The plus char (+) tells getopt to stop
@@ -2301,6 +2311,17 @@ external_arguments(int argc, char **argv)
 		case 'A': conf.show_hidden = xargs.hidden = 1; break;
 		case 'b': xargs.bm_file = 1; bm_value = optarg; break;
 		case 'c': xargs.config = 1; config_value = optarg; break;
+
+#ifdef RUN_CMD
+		case 'C':
+			if (!optarg || !*optarg || *optarg == '-') {
+				err_arg_required("--cmd");
+				exit(EXIT_FAILURE);
+			}
+			cmd_line_cmd = savestring(optarg, strlen(optarg));
+			break;
+#endif
+
 		case 'D': alt_dir_value = optarg; break;
 		case 'e': xargs.noeln = conf.no_eln = 1; break;
 		case 'E': xargs.eln_use_workspace_color = 1; break;
