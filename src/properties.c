@@ -988,8 +988,7 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 		snprintf(l, 32, "%ju", (uintmax_t)largest);
 	}
 
-	char *tsize = _BGREEN,
-		 *lsize = _BGREEN;
+	char *tsize = _BGREEN, *lsize = _BGREEN;
 
 	char ts[MAX_SHADE_LEN], ls[MAX_SHADE_LEN];
 	if (term_caps.color > 0 && !*dz_c) {
@@ -1006,7 +1005,7 @@ print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 		conf.colorize == 1 ? lsize : "" , l ? l : "?",
 		conf.colorize == 1 ? tx_c : "",
 		name ? '[' : 0,
-		(conf.colorize && color) ? color : "",
+		(conf.colorize == 1 && color) ? color : "",
 		name ? name : "", tx_c,
 		name ? ']' : 0);
 

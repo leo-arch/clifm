@@ -1718,10 +1718,11 @@ open_reg_exit(char *filename, const int url, const int preview)
 	} else {
 		mime_file_len = strlen(homedir)
 			+ (alt_profile ? strlen(alt_profile) : 7) + 40;
+
 		mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
 		sprintf(mime_file, "%s/.config/clifm/profiles/%s/%s.clifm",
-				homedir, alt_profile ? alt_profile : "default",
-				preview == 1 ? "preview" : "mimelist");
+			homedir, alt_profile ? alt_profile : "default",
+			preview == 1 ? "preview" : "mimelist");
 	}
 
 	if (path_n == 0)
@@ -2371,6 +2372,9 @@ external_arguments(int argc, char **argv)
 			switch (optopt) {
 			case 'b': /* fallthrough */
 			case 'c': /* fallthrough */
+#ifdef RUN_CMD
+			case 'C': /* fallthrough */
+#endif
 			case 'D': /* fallthrough */
 			case 'k': /* fallthrough */
 			case 'p': /* fallthrough */
@@ -3314,7 +3318,7 @@ load_dirhist(void)
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp))
 		dirs++;
 
-	if (!dirs) {
+	if (dirs == 0) {
 		close_fstream(fp, fd);
 		return EXIT_SUCCESS;
 	}

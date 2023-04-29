@@ -326,10 +326,8 @@ remotes_function(char **args)
 	if (!args[1] || (*args[1] == 'l' && strcmp(args[1], "list") == 0))
 		return remotes_list();
 
-	if (IS_HELP(args[1])) {
-		puts(_(NET_USAGE));
-		return EXIT_SUCCESS;
-	}
+	if (IS_HELP(args[1]))
+		{ puts(_(NET_USAGE)); return EXIT_SUCCESS; }
 
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return remotes_edit(args[2]);
@@ -359,8 +357,9 @@ automount_remotes(void)
 	if (remotes_n == 0)
 		return EXIT_SUCCESS;
 
-	int i = (int)remotes_n,
-		exit_status = EXIT_SUCCESS;
+	int i = (int)remotes_n;
+	int exit_status = EXIT_SUCCESS;
+
 	while (--i >= 0) {
 		if (remotes[i].name && remotes[i].auto_mount == 1
 		&& remotes[i].mountpoint && remotes[i].mount_cmd) {

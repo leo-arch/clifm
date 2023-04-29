@@ -1091,12 +1091,9 @@ url_encode(char *str)
 	 * 1 extra byte for the null byte terminator: each char in STR will
 	 * be, if encoded, %XX (3 chars) */
 
-	/* Copies of STR and BUF pointers to be able
-	 * to increase and/or decrease them without loosing the original
-	 * memory location */
-	char *pstr, *pbuf;
-	pstr = str;
-	pbuf = buf;
+	/* Copies of STR and BUF pointers to be able to increase and/or decrease
+	 * them without loosing the original memory location */
+	char *pstr = str, *pbuf = buf;
 
 	for (; *pstr; pstr++) {
 #if defined(__CYGWIN__)

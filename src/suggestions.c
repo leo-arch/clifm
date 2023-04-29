@@ -867,9 +867,7 @@ print_match(char *match, const size_t len)
 	}
 
 	free(p);
-
 	suggestion.type = COMP_SUG;
-
 	match_print(match, len, color, append_slash);
 
 	if (free_color)

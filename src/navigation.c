@@ -261,7 +261,7 @@ set_workspace_opts(const int n)
 }
 
 static int
-switch_workspace(int tmp_ws)
+switch_workspace(const int tmp_ws)
 {
 	/* If new workspace has no path yet, copy the path of the current workspace */
 	if (!workspaces[tmp_ws].path) {
@@ -294,7 +294,8 @@ switch_workspace(int tmp_ws)
 	if (conf.private_ws_settings == 1)
 		set_workspace_opts(cur_ws);
 
-	set_oldpwd(old_pwd[dirhist_cur_index], workspaces[cur_ws].path);
+	if (old_pwd)
+		set_oldpwd(old_pwd[dirhist_cur_index], workspaces[cur_ws].path);
 
 	if (conf.autols == 1)
 		reload_dirlist();

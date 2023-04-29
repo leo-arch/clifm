@@ -684,9 +684,9 @@ check_ext_string(const char *ext)
 	int i;
 	for (i = 0; ext[i] && i < NAME_MAX; i++) {
 		if (ext[i] >= 'A' && ext[i] <= 'Z')
-			tmp_ext[i] = ext[i] + ' ';
+			tmp_ext[i] = ext[i] + ' '; // tolower
 		else
-		tmp_ext[i] = ext[i];
+			tmp_ext[i] = ext[i];
 	}
 	tmp_ext[i] = '\0';
 
@@ -758,8 +758,7 @@ strip_color_line(const char *str, char mode)
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z')
 			|| *str == '=' || *str == ';' || *str == ':'
-			|| *str == '#' || *str == '-'
-			|| *str == '_') // Color names might contain an underscore
+			|| *str == '#' || *str == '-' || *str == '_')
 				{buf[len] = *str; len++;}
 			str++;
 		}
@@ -770,8 +769,7 @@ strip_color_line(const char *str, char mode)
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
 			|| (*str >= 'A' && *str <= 'Z') || *str == '*' || *str == '.'
 			|| *str == '=' || *str == ';' || *str == ':'
-			|| *str == '#' || *str == '-'
-			|| *str == '_') // Color names might contain an underscore)
+			|| *str == '#' || *str == '-' || *str == '_')
 				{buf[len] = *str; len++;}
 			str++;
 		}

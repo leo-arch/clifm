@@ -1200,10 +1200,8 @@ hidden_files_function(const char *arg)
 static int
 _toggle_exec(char **args)
 {
-	if (!args[1] || IS_HELP(args[1])) {
-		puts(_(TE_USAGE));
-		return EXIT_SUCCESS;
-	}
+	if (!args[1] || IS_HELP(args[1]))
+		{ puts(_(TE_USAGE)); return EXIT_SUCCESS; }
 
 	int exit_status = EXIT_SUCCESS;
 	size_t i, n = 0;
@@ -1545,22 +1543,22 @@ check_auto_first(char **args)
 	if (!args || !args[0] || !*args[0])
 		return (-1);
 
-	if (*args[0] == '/' || (!conf.autocd && !conf.auto_open) || (args[1]
-	&& (*args[1] != '&' || args[1][1])))
+	if (*args[0] == '/' || (conf.autocd == 0 && conf.auto_open == 0)
+	|| (args[1] && (*args[1] != '&' || args[1][1])))
 		return (-1);
 
 	if (*args[0] == 'e' && strcmp(args[0], "edit") == 0)
 		return (-1);
 
 	char *deq_str = (char *)NULL;
-	if (conf.autocd || conf.auto_open)
+	if (conf.autocd == 1 || conf.auto_open == 1)
 		expand_and_deescape(&args[0], &deq_str);
 
 	char *tmp = deq_str ? deq_str : args[0];
 	size_t len = strlen(tmp);
 	if (len > 0 && tmp[len - 1] == '/') tmp[len - 1] = '\0';
 
-	if (conf.autocd && cdpath_n && !args[1]
+	if (conf.autocd == 1 && cdpath_n > 0 && !args[1]
 	&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
 		free(deq_str);
 		return EXIT_SUCCESS;

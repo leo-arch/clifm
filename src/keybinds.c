@@ -2115,7 +2115,6 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	print_reload_msg(_("Switched to %s names\n"),
 		xargs.virtual_dir_full_paths == 1 ? _("long") : _("short"));
 	xrl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -2331,17 +2330,6 @@ set_hardcoded_keybinds(void)
 
 	rl_bind_keyseq("\\M-q", rl_del_last_word);
 	rl_bind_key('\t', rl_tab_comp);
-/*	char *term = getenv("TERM");
-	tgetent(NULL, term);
-	char *_right_arrow = tgetstr("nd", NULL);
-	char *s_right_arrow = tgetstr("%i", NULL);
-	char *s_left_arrow = tgetstr("#4", NULL); */
-
-	/* Bind Right arrow key and Ctrl-f to accept the whole suggestion */
-/*	rl_bind_keyseq(_right_arrow, rl_accept_suggestion);
-	rl_bind_key(6, rl_accept_suggestion);
-	rl_bind_keyseq(s_left_arrow, rl_previous_dir);
-	rl_bind_keyseq(s_right_arrow, rl_next_dir); */
 
 #ifndef _NO_SUGGESTIONS
 # ifndef __HAIKU__

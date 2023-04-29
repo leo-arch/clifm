@@ -398,7 +398,7 @@ clean_cmd(char *str)
 	return EXIT_SUCCESS;
 }
 
-/* Sanitize CMD according to TYPE. Returns zero if safe command or
+/* Sanitize CMD according to TYPE. Returns zero if command is safe or
  * one if not */
 int
 sanitize_cmd(char *str, int type)
@@ -408,19 +408,16 @@ sanitize_cmd(char *str, int type)
 
 	int exit_status = EXIT_FAILURE;
 
-	switch(type) {
+	switch (type) {
 	case SNT_MIME:
 		if (clean_cmd(str) != EXIT_SUCCESS)
 			/* Error message already pŕinted by clean_cmd() */
 			return EXIT_FAILURE;
 		exit_status = sanitize_mime(str);
 		break;
-	case SNT_NET:
-		exit_status = sanitize_net(str); break;
-	case SNT_DISPLAY:
-		return sanitize_display(str);
-	case SNT_MISC:
-		return sanitize_misc(str);
+	case SNT_NET: exit_status = sanitize_net(str); break;
+	case SNT_DISPLAY: return sanitize_display(str);
+	case SNT_MISC: return sanitize_misc(str);
 	case SNT_PROFILE: /* fallthrough */
 	case SNT_PROMPT:  /* fallthrough */
 	case SNT_AUTOCMD: /* fallthrough */
