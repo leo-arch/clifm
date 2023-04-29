@@ -1919,6 +1919,167 @@ set_custom_selfile(char *file)
 		"selections file\n"), PROGRAM_NAME, file);
 }
 
+static void
+set_alt_bm_file(char *file)
+{
+	char *p = (char *)NULL;
+
+	if (*file == '~') {
+		p = tilde_expand(file);
+		file = p;
+	}
+
+	if (access(file, R_OK) == -1) {
+		_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+			"Falling back to the default bookmarks file\n"),
+		    PROGRAM_NAME, file, strerror(errno));
+		free(p);
+		return;
+	}
+
+	alt_bm_file = savestring(file, strlen(file));
+	_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
+		"bookmarks file\n"), PROGRAM_NAME);
+
+	free(p);
+}
+
+static void
+set_alt_config_dir(char *dir)
+{
+	char *dir_exp = (char *)NULL;
+
+	if (*dir == '~') {
+		dir_exp = tilde_expand(dir);
+		dir = dir_exp;
+	}
+
+	int dir_ok = 1;
+	struct stat attr;
+
+	if (stat(dir, &attr) == -1) {
+		char *tmp_cmd[] = {"mkdir", "-p", dir, NULL};
+		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
+		if (ret != EXIT_SUCCESS) {
+			_err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory "
+				"(error %d)\nFalling back to default configuration "
+				"directory\n"), PROGRAM_NAME, dir, ret);
+			dir_ok = 0;
+		}
+	}
+
+	if (access(dir, W_OK) == -1) {
+		if (dir_ok == 1) {
+			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+				"Falling back to default configuration directory\n"),
+				PROGRAM_NAME, dir, strerror(errno));
+		}
+	} else {
+		alt_config_dir = savestring(dir, strlen(dir));
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: %s: Using alternative "
+			"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
+	}
+
+	free(dir_exp);
+}
+
+static void
+set_alt_kbinds_file(char *file)
+{
+	char *kbinds_exp = (char *)NULL;
+	if (*file == '~') {
+		kbinds_exp = tilde_expand(file);
+		file = kbinds_exp;
+	}
+
+	if (access(file, R_OK) == -1) {
+		_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+			"Falling back to the default keybindings file\n"),
+		    PROGRAM_NAME, file, strerror(errno));
+	} else {
+		alt_kbinds_file = savestring(file, strlen(file));
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
+			"keybindings file\n"), PROGRAM_NAME);
+	}
+
+	free(kbinds_exp);
+}
+
+static void
+set_alt_config_file(char *file)
+{
+	char *config_exp = (char *)NULL;
+
+	if (*file == '~') {
+		config_exp = tilde_expand(file);
+		file = config_exp;
+	}
+
+	if (access(file, R_OK) == -1) {
+		_err('e', PRINT_PROMPT, _("%s: %s: %s\nFalling back to default\n"),
+			PROGRAM_NAME, file, strerror(errno));
+		xargs.config = -1;
+	} else {
+		alt_config_file = savestring(file, strlen(file));
+		_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: Loaded alternative "
+			"configuration file\n"), PROGRAM_NAME);
+	}
+
+	free(config_exp);
+}
+
+static void
+_set_starting_path(char *_path)
+{
+	char *path_exp = (char *)NULL;
+	char path_tmp[PATH_MAX];
+
+	if (*_path == '~') {
+		path_exp = tilde_expand(_path);
+		xstrsncpy(path_tmp, path_exp, sizeof(path_tmp));
+
+	} else if (*_path != '/') {
+		if (*_path == '.') {
+			char _tmp[PATH_MAX];
+			*_tmp = '\0';
+
+			char *p = realpath(_path, _tmp);
+			if (!p) {
+				xerror("%s: %s: %s\n", PROGRAM_NAME, _path, strerror(errno));
+				exit(errno);
+			}
+
+			xstrsncpy(path_tmp, p, sizeof(path_tmp));
+		} else {
+			snprintf(path_tmp, sizeof(path_tmp), "%s/%s",
+				getenv("PWD"), _path);
+		}
+
+	} else {
+		xstrsncpy(path_tmp, _path, sizeof(path_tmp));
+	}
+
+	if (xchdir(path_tmp, SET_TITLE) == 0) {
+		if (cur_ws == UNSET)
+			cur_ws = DEF_CUR_WS;
+
+		if (workspaces[cur_ws].path)
+			free(workspaces[cur_ws].path);
+
+		workspaces[cur_ws].path = savestring(path_tmp, strlen(path_tmp));
+	} else { /* Error changing directory */
+		if (xargs.list_and_quit == 1) {
+			xerror("%s: %s: %s\n", PROGRAM_NAME, path_tmp, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+
+		_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			path_tmp, strerror(errno));
+	}
+
+	free(path_exp);
+}
+
 /* Evaluate external arguments, if any, and change initial variables to
  * its corresponding value */
 void
@@ -2416,152 +2577,25 @@ external_arguments(int argc, char **argv)
 	if (argv[i])
 		path_value = resolve_positional_param(argv[i]);
 
-	if (bm_value) {
-		char *bm_exp = (char *)NULL;
+	if (path_value)
+		_set_starting_path(path_value);
 
-		if (*bm_value == '~') {
-			bm_exp = tilde_expand(bm_value);
-			bm_value = bm_exp;
-		}
-
-		if (access(bm_value, R_OK) == -1) {
-			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
-				"Falling back to the default bookmarks file\n"),
-			    PROGRAM_NAME, bm_value, strerror(errno));
-		} else {
-			alt_bm_file = savestring(bm_value, strlen(bm_value));
-			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
-				"bookmarks file\n"), PROGRAM_NAME);
-		}
-	}
+	if (bm_value)
+		set_alt_bm_file(bm_value);
 
 	if (virtual_dir_value) {
 		stdin_tmp_dir = savestring(virtual_dir_value, strlen(virtual_dir_value));
 		setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
 	}
 
-	if (alt_dir_value) {
-		char *dir_exp = (char *)NULL;
+	if (alt_dir_value)
+		set_alt_config_dir(alt_dir_value);
 
-		if (*alt_dir_value == '~') {
-			dir_exp = tilde_expand(alt_dir_value);
-			alt_dir_value = dir_exp;
-		}
+	if (kbinds_value)
+		set_alt_kbinds_file(kbinds_value);
 
-		int dir_ok = 1;
-		struct stat attr;
-		if (stat(alt_dir_value, &attr) == -1) {
-			char *tmp_cmd[] = {"mkdir", "-p", alt_dir_value, NULL};
-			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
-			if (ret != EXIT_SUCCESS) {
-				_err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory "
-					"(error %d)\nFalling back to default configuration "
-					"directory\n"), PROGRAM_NAME, alt_dir_value, ret);
-				dir_ok = 0;
-			}
-		}
-
-		if (access(alt_dir_value, W_OK) == -1) {
-			if (dir_ok) {
-				_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
-					"Falling back to default configuration directory\n"),
-					PROGRAM_NAME, alt_dir_value, strerror(errno));
-			}
-		} else {
-			alt_config_dir = savestring(alt_dir_value, strlen(alt_dir_value));
-			_err(ERR_NO_LOG, PRINT_PROMPT, _("%s: %s: Using alternative "
-				"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
-		}
-
-		free(dir_exp);
-	}
-
-	if (kbinds_value) {
-		char *kbinds_exp = (char *)NULL;
-		if (*kbinds_value == '~') {
-			kbinds_exp = tilde_expand(kbinds_value);
-			kbinds_value = kbinds_exp;
-		}
-
-		if (access(kbinds_value, R_OK) == -1) {
-			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
-				"Falling back to the default keybindings file\n"),
-			    PROGRAM_NAME, kbinds_value, strerror(errno));
-		} else {
-			alt_kbinds_file = savestring(kbinds_value, strlen(kbinds_value));
-			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
-				"keybindings file\n"), PROGRAM_NAME);
-		}
-
-		free(kbinds_exp);
-	}
-
-	if (xargs.config && config_value) {
-		char *config_exp = (char *)NULL;
-
-		if (*config_value == '~') {
-			config_exp = tilde_expand(config_value);
-			config_value = config_exp;
-		}
-
-		if (access(config_value, R_OK) == -1) {
-			_err('e', PRINT_PROMPT, _("%s: %s: %s\nFalling back to default\n"),
-				PROGRAM_NAME, config_value, strerror(errno));
-			xargs.config = -1;
-		} else {
-			alt_config_file = savestring(config_value, strlen(config_value));
-			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
-				"configuration file\n"), PROGRAM_NAME);
-		}
-
-		free(config_exp);
-	}
-
-	if (path_value) {
-		char *path_exp = (char *)NULL;
-		char path_tmp[PATH_MAX];
-
-		if (*path_value == '~') {
-			path_exp = tilde_expand(path_value);
-			xstrsncpy(path_tmp, path_exp, PATH_MAX);
-		} else if (*path_value != '/') {
-			if (*path_value == '.') {
-				char _tmp[PATH_MAX];
-				*_tmp = '\0';
-				char *p = realpath(path_value, _tmp);
-				if (!p) {
-					xerror("%s: %s: %s\n", PROGRAM_NAME,
-						path_value, strerror(errno));
-					exit(errno);
-				}
-				xstrsncpy(path_tmp, p, PATH_MAX);
-			} else {
-				snprintf(path_tmp, PATH_MAX - 1, "%s/%s",
-					getenv("PWD"), path_value);
-			}
-		} else {
-			xstrsncpy(path_tmp, path_value, PATH_MAX);
-		}
-
-		if (xchdir(path_tmp, SET_TITLE) == 0) {
-			if (cur_ws == UNSET)
-				cur_ws = DEF_CUR_WS;
-			if (workspaces[cur_ws].path)
-				free(workspaces[cur_ws].path);
-
-			workspaces[cur_ws].path = savestring(path_tmp, strlen(path_tmp));
-		} else { /* Error changing directory */
-			if (xargs.list_and_quit == 1) {
-				xerror("%s: %s: %s\n", PROGRAM_NAME, path_tmp, strerror(errno));
-				exit(EXIT_FAILURE);
-			}
-
-			_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			    path_tmp, strerror(errno));
-		}
-
-		free(path_exp);
-	}
+	if (xargs.config && config_value)
+		set_alt_config_file(config_value);
 
 #ifndef _NO_PROFILES
 	if (alt_profile_value) {
