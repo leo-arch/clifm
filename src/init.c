@@ -1774,61 +1774,6 @@ set_sort(char *arg)
 	xargs.sort = conf.sort;
 }
 
-static char *
-resolve_positional_param(char *file)
-{
-	struct stat attr;
-	int url = 0;
-	char *_path = file, *_exp_path = (char *)NULL;
-
-	if (*file == '.') {
-		char _tmp[PATH_MAX];
-		if (realpath(file, _tmp) == NULL || !*_tmp)
-			_err('e', PRINT_PROMPT, _("%s: Error expanding path\n"),
-				PROGRAM_NAME);
-		else
-			_exp_path = savestring(_tmp, strlen(_tmp));
-	} else {
-		_exp_path = tilde_expand(file);
-	}
-
-	if (!_exp_path) {
-		xerror(_("%s: Error expanding path\n"), PROGRAM_NAME);
-		exit(EXIT_FAILURE);
-	}
-
-	if (IS_FILE_URI(_path)) {
-		_path = file + 7;
-		if (stat(_path, &attr) == -1) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
-			free(_exp_path);
-			exit(errno);
-		}
-	} else if (is_url(_exp_path) == EXIT_SUCCESS) {
-		url = 1;
-	} else {
-		if (stat(_exp_path, &attr) == -1) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(errno));
-			free(_exp_path);
-			exit(errno);
-		}
-
-		if (!S_ISDIR(attr.st_mode)) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, _exp_path, strerror(ENOTDIR));
-			free(_exp_path);
-			exit(ENOTDIR);
-		}
-	}
-
-	free(_exp_path);
-
-	if (url == 1 || !S_ISDIR(attr.st_mode))
-		open_reg_exit(_path, url, 0);
-
-	xargs.path = 1;
-	return _path;
-}
-
 /* Open/preview FILE according to MODE: either PREVIEW_FILE or OPEN_FILE */
 static void
 open_preview_file(char *file, const int mode)
@@ -2028,56 +1973,96 @@ set_alt_config_file(char *file)
 	free(config_exp);
 }
 
+static char *
+resolve_path(char *file)
+{
+	char *_path = (char *)NULL;
+
+	if (*file == '.') {
+		_path = realpath(file, NULL);
+		if (!_path) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			exit(errno);
+		}
+
+	} else if (*file == '~') {
+		_path = tilde_expand(file);
+		if (!_path) {
+			fprintf(stderr, "%s: %s: Error expanding tilde\n",
+				PROGRAM_NAME, file);
+			exit(EXIT_FAILURE);
+		}
+
+	} else if (*file == '/') {
+		_path = savestring(file, strlen(file));
+
+	} else {
+		char *cwd = getcwd(NULL, 0);
+		if (!cwd) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			exit(errno);
+		}
+
+		_path = (char *)xnmalloc(strlen(cwd) + strlen(file) + 2, sizeof(char));
+		sprintf(_path, "%s/%s", cwd, file);
+		free(cwd);
+	}
+
+	return _path;
+}
+
+static char *
+resolve_starting_path(char *file)
+{
+	char *_path = (char *)NULL;
+
+	if (IS_FILE_URI(file)) {
+		_path = savestring(file + 7, strlen(file + 7));
+
+	} else if (is_url(file) == EXIT_SUCCESS) {
+		open_reg_exit(file, 1, 0);
+		exit(EXIT_SUCCESS); /* Never reached */
+
+	} else {
+		_path = resolve_path(file);
+	}
+
+	struct stat a;
+	if (stat(_path, &a) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		free(_path);
+		exit(errno);
+	}
+
+	if (!S_ISDIR(a.st_mode)) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(ENOTDIR));
+		free(_path);
+		exit(ENOTDIR);
+	}
+
+	xargs.path = 1;
+	return _path;
+}
+
 static void
 _set_starting_path(char *_path)
 {
-	char *path_exp = (char *)NULL;
-	char path_tmp[PATH_MAX];
-
-	if (*_path == '~') {
-		path_exp = tilde_expand(_path);
-		xstrsncpy(path_tmp, path_exp, sizeof(path_tmp));
-
-	} else if (*_path != '/') {
-		if (*_path == '.') {
-			char _tmp[PATH_MAX];
-			*_tmp = '\0';
-
-			char *p = realpath(_path, _tmp);
-			if (!p) {
-				xerror("%s: %s: %s\n", PROGRAM_NAME, _path, strerror(errno));
-				exit(errno);
-			}
-
-			xstrsncpy(path_tmp, p, sizeof(path_tmp));
-		} else {
-			snprintf(path_tmp, sizeof(path_tmp), "%s/%s",
-				getenv("PWD"), _path);
-		}
-
-	} else {
-		xstrsncpy(path_tmp, _path, sizeof(path_tmp));
-	}
-
-	if (xchdir(path_tmp, SET_TITLE) == 0) {
+	if (xchdir(_path, SET_TITLE) == 0) {
 		if (cur_ws == UNSET)
 			cur_ws = DEF_CUR_WS;
 
-		if (workspaces[cur_ws].path)
-			free(workspaces[cur_ws].path);
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(_path, strlen(_path));
 
-		workspaces[cur_ws].path = savestring(path_tmp, strlen(path_tmp));
 	} else { /* Error changing directory */
 		if (xargs.list_and_quit == 1) {
-			xerror("%s: %s: %s\n", PROGRAM_NAME, path_tmp, strerror(errno));
+			xerror("%s: %s: %s\n", PROGRAM_NAME, _path, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 
 		_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			path_tmp, strerror(errno));
+			_path, strerror(errno));
 	}
-
-	free(path_exp);
 }
 
 /* Evaluate external arguments, if any, and change initial variables to
@@ -2204,18 +2189,19 @@ external_arguments(int argc, char **argv)
 	};
 
 	int optc;
+	int open_prev_mode = 0;
+
 	/* Variables to store arguments to options */
 	char *path_value = (char *)NULL,
 #ifndef _NO_PROFILES
-		 *alt_profile_value = (char *)NULL,
+		*alt_profile_value = (char *)NULL,
 #endif
-	     *alt_dir_value = (char *)NULL,
-	     *config_value = (char *)NULL,
-	     *kbinds_value = (char *)NULL,
-		 *virtual_dir_value = (char *)NULL,
-	     *bm_value = (char *)NULL,
-	     *open_prev_file = (char *)NULL;
-	int open_prev_mode = 0;
+		*alt_dir_value = (char *)NULL,
+		*config_value = (char *)NULL,
+		*kbinds_value = (char *)NULL,
+		*virtual_dir_value = (char *)NULL,
+		*bm_value = (char *)NULL,
+		*open_prev_file = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
 #ifdef RUN_CMD
@@ -2572,13 +2558,16 @@ external_arguments(int argc, char **argv)
 		exit(EXIT_SUCCESS); /* Never reached */
 	}
 
-	/* Positional parameters. If a directory, use it as CliFM's starting path */
-	int i = optind;
-	if (argv[i])
-		path_value = resolve_positional_param(argv[i]);
+	char *_path = (char *)NULL;
+	if (argv[optind]) /* Starting path passed as positional parameter */
+		_path = resolve_starting_path(argv[optind]);
+	else if (path_value) /* Starting path passed via -p */
+		_path = resolve_starting_path(path_value);
 
-	if (path_value)
-		_set_starting_path(path_value);
+	if (_path) {
+		_set_starting_path(_path);
+		free(_path);
+	}
 
 	if (bm_value)
 		set_alt_bm_file(bm_value);

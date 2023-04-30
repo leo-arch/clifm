@@ -1186,9 +1186,9 @@ Page Down: Advance one page\nq: Stop pagging\n"
 #define SHORT_OPTIONS "\
 \n  -a, --no-hidden\t\t Do not show hidden files (default)\
 \n  -A, --show-hidden\t\t Show hidden files\
-\n  -b, --bookmarks-file=FILE\t Specify an alternative bookmarks file\
-\n  -c, --config-file=FILE\t Specify an alternative configuration file\
-\n  -D, --config-dir=DIR\t\t Specify an alternative configuration directory\
+\n  -b, --bookmarks-file=FILE\t Set an alternative bookmarks file\
+\n  -c, --config-file=FILE\t Set an alternative configuration file\
+\n  -D, --config-dir=DIR\t\t Set an alternative configuration directory\
 \n  -e, --no-eln\t\t\t Do not print ELN's (entry list number)\
 \n  -E, --eln-use-workspace-color\t ELN's use the current workspace color\
 \n  -f, --no-dirs-first\t\t Do not list directories first\
@@ -1199,7 +1199,7 @@ Page Down: Advance one page\nq: Stop pagging\n"
 \n  -H, --horizontal-list\t\t List files horizontally\
 \n  -i, --no-case-sensitive\t No case-sensitive files listing (default)\
 \n  -I, --case-sensitive\t\t Case-sensitive files listing\
-\n  -k, --keybindings-file=FILE\t Specify an alternative keybindings file\
+\n  -k, --keybindings-file=FILE\t Set an alternative keybindings file\
 \n  -l, --no-long-view\t\t Disable long/detail view mode (default)\
 \n  -L, --long-view\t\t Enable long/detail view mode\
 \n  -m, --dirhist-map\t\t Enable the directory history map\
@@ -1227,7 +1227,7 @@ database (via the 'j' command)\
 \n      --cd-on-quit\t\t Enable cd-on-quit functionality (see the manpage)\
 \n      --color-scheme=NAME\t Use color scheme NAME\
 \n      --cwd-in-title\t\t Print current directory in the terminal window title\
-\n      --data-dir\t\t Use PATH as data directory\
+\n      --data-dir=PATH\t\t Use PATH as data directory\
 \n      --desktop-notifications\t Enable desktop notifications\
 \n      --disk-usage\t\t Show disk usage (free/total)\
 \n      --full-dir-size\t\t Print the size of directories and their contents \
