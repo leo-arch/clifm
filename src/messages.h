@@ -1290,7 +1290,7 @@ CliFM's built-in opener\
 \n      --sort-reverse\t\t Sort in reverse order, e.g. z-a instead of a-z\
 \n      --stdtab\t\t\t Force the use of the standard TAB completion mode (readline)\
 \n      --trash-as-rm\t\t The 'r' command executes 'trash' instead of \
-'rm' to prevent accidental deletions\
+rm(1) to prevent accidental deletions\
 \n      --virtual-dir-full-paths\t Files in virtual directories are listed as full paths instead of target base names\
 \n      --virtual-dir=PATH\t Absolute path to a directory to be used as virtual directory\
 \n      --vt100\t\t\t Run in vt100 compatibility mode\n"

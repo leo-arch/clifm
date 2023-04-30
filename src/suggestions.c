@@ -2387,14 +2387,14 @@ rl_suggestions(const unsigned char c)
 			goto SUCCESS;
 	}
 
-	/* 3.d.2) Bookmark names (b:) */
+	/* 3.d.3) Bookmark names (b:) */
 	if (*word == 'b' && *(word + 1) == ':' && *(word + 2)) {
 		if ((printed = check_bookmark_names(word, wlen)) != NO_MATCH)
 			goto SUCCESS;
 	}
 
 #ifndef _NO_TAGS
-	/* 3.d.3) Tag names (t:) */
+	/* 3.d.4) Tag names (t:) */
 	if (*lb != ';' && *lb != ':' && *word == 't' && *(word + 1) == ':'
 	&& *(word + 2)) {
 		if ((printed = check_tags(word + 2, wlen - 2, TAGT_SUG)) != NO_MATCH)
@@ -2524,7 +2524,7 @@ rl_suggestions(const unsigned char c)
 			if (*word == '/') /* Absolute path: nothing to do here */
 				break;
 
-			/* If we have "/x...", we're not looking for files in the CWD */
+			/* If we have a slash, we're not looking for files in the CWD */
 			char *p = strchr(word, '/');
 			if (p && *(p + 1))
 				break;
