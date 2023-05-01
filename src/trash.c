@@ -792,9 +792,20 @@ untrash_element(char *file)
 
 	int ret = renameat(AT_FDCWD, undel_file, AT_FDCWD, url_decoded);
 	if (ret == -1) {
-		xerror("undel: %s: %s\n", undel_file, strerror(errno));
-		free(url_decoded);
-		return errno;
+		if (errno == EXDEV) {
+			/* Destination file is on a different file system, which is why
+			 * rename(3) doesn't work: let's try moving the file. */
+			char *cmd[] = {"mv", "--", undel_file, url_decoded, NULL};
+			ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+			if (ret != EXIT_SUCCESS) {
+				free(url_decoded);
+				return ret;
+			}
+		} else {
+			xerror("undel: %s: %s\n", undel_file, strerror(errno));
+			free(url_decoded);
+			return errno;
+		}
 	}
 
 	free(url_decoded);
