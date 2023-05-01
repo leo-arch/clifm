@@ -842,12 +842,29 @@ cd_function(char *new_path, const int cd_flag)
 	return ret;
 }
 
-/* Convert ... n into ../.. n */
-/* and ../.. n into the corresponding path */
+/* Return a pointer to the first occurrence in the string STR of a byte that
+ * is not C. Otherwise, if only C is found, NULL is returned. */
+static char *
+xstrcpbrk(char *str, const char c)
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	while (*str) {
+		if (*str != c)
+			return str;
+		str++;
+	}
+
+	return (char *)NULL;
+}
+
+/* Convert "... n" into "../.. n"
+ * and "../.. n" into the corresponding path. */
 char *
 fastback(char *str)
 {
-	if (!str || !*str)
+	if (!str || !*str || xstrcpbrk(str, '.'))
 		return (char *)NULL;
 
 	char *p = str;
@@ -867,12 +884,6 @@ fastback(char *str)
 		return (char *)NULL;
 
 	char q[PATH_MAX];
-/*	char *q = (char *)NULL;
-	if (rem)
-		q = (char *)xnmalloc((dots * 3 + strlen(rem) + 2), sizeof(char));
-	else
-		q = (char *)xnmalloc((dots * 3), sizeof(char)); */
-
 	q[0] = '.';
 	q[1] = '.';
 
@@ -892,17 +903,10 @@ fastback(char *str)
 			q[i + 1] = '\0';
 			i++;
 		}
-//		strcat(q, rem);
-//		strncat(q, rem, sizeof(q) - strlen(q) - 1);
 		strncat(q, rem, sizeof(q) - i - 1);
 	}
 
-//	return q;
-
 	return normalize_path(q, i);
-
-//	return realpath(q, NULL);
-//	free(q);
 }
 
 void
