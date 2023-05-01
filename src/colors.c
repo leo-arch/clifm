@@ -577,8 +577,8 @@ check_names(char *str)
 	int found = -1;
 	size_t i;
 	for (i = 0; color_names[i].name; i++) {
-		if (*str == *color_names[i].name
-		&& strcmp(str + 1, color_names[i].name + 1) == 0) {
+		if (TOUPPER(*str) == TOUPPER(*color_names[i].name)
+		&& strcasecmp(str + 1, color_names[i].name + 1) == 0) {
 			found = (int)i;
 			break;
 		}
@@ -590,7 +590,8 @@ check_names(char *str)
 	if (attr == 0)
 		return color_names[found].value;
 
-	snprintf(tmp_color, sizeof(tmp_color), "%c;%s", attr, color_names[found].value);
+	snprintf(tmp_color, sizeof(tmp_color), "%c;%s", attr,
+		color_names[found].value);
 	return tmp_color;
 }
 
@@ -1759,7 +1760,7 @@ store_definition(char *str)
 		}
 	}
 
-	if (*value >= 'A' && *value <= 'Z') {
+	if ((*value >= 'A' && *value <= 'Z') || (*value >= 'a' && *value <= 'z')) {
 		char *ret = check_names(value);
 		if (ret) {
 			value = ret;
