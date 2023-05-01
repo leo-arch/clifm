@@ -727,15 +727,14 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 			(*counter)++;
 		}
 
-		char ind_chr = file_info[i].sel ? SELFILE_CHR
-			: ((conf.color_lnk_as_target == 1 && file_info[i].symlink == 1
-#ifndef _NO_ICONS
-			&& follow_symlinks == 1 && conf.icons == 0)
-#else
-			&& follow_symlinks == 1)
-#endif
-			? LINK_CHR : ' ');
-		char *ind_chr_color = file_info[i].sel == 1 ? li_cb : "";
+		int print_ind_char = (conf.color_lnk_as_target == 1
+			&& file_info[i].symlink == 1 && follow_symlinks == 1
+			&& conf.icons == 0);
+
+		char ind_chr = file_info[i].sel == 1 ? SELFILE_CHR
+			: (print_ind_char == 1 ? LINK_CHR : ' ');
+		char *ind_chr_color = file_info[i].sel == 1 ? li_cb
+			: (print_ind_char == 1 ? lc_c : "");
 
 		if (conf.no_eln == 0) {
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
