@@ -167,6 +167,9 @@ run_action(char *action, char **args)
 		rfd = open(fifo_path, O_RDONLY);
 	while (rfd == -1 && errno == EINTR);
 
+	if (rfd == -1)
+		return errno;
+
 	char buf[PATH_MAX];
 	*buf = '\0';
 	ssize_t buf_len = 0;

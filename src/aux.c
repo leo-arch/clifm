@@ -849,7 +849,8 @@ get_size_unit(off_t size)
 
 /* Return the full size of the directory DIR using du(1)
  * The size is reported in bytes if SIZE_IN_BYTES is set to 1
- * Otherwise, human format is used */
+ * Otherwise, human format is used.
+ * STATUS is updated to the command exit code. */
 off_t
 dir_size(char *dir, const int size_in_bytes, int *status)
 {
@@ -870,12 +871,15 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 		return (-1);
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
+	if (stdout_bk == -1) {
+		close(fd);
+		unlink(file);
+		return (-1);
+	}
 
 	/* Redirect stdout to the desired file */
-	int r = dup2(fd, STDOUT_FILENO);
+	dup2(fd, STDOUT_FILENO);
 	close(fd);
-	if (r == -1)
-		return (-1);
 
 	if (bin_flags & (GNU_DU_BIN_DU | GNU_DU_BIN_GDU)) {
 		char *block_size = (char *)NULL;

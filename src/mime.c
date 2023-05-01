@@ -500,6 +500,16 @@ mime_import(char *file)
 	char *config_path = (char *)NULL, *local_path = (char *)NULL;
 	config_path = (char *)xnmalloc(home_len + 23, sizeof(char));
 	local_path = (char *)xnmalloc(home_len + 41, sizeof(char));
+	/* xnmalloc will exit in case of error. However, GCC-13's analyzer
+	 * complains about both vars not being checked for NULL. So, let's add
+	 * the corresponding checks to silence the warning. */
+	if (!config_path || !local_path) {
+		free(config_path);
+		free(local_path);
+		fclose(mime_fp);
+		return (-1);
+	}
+
 	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
 	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
 
@@ -524,7 +534,7 @@ mime_import(char *file)
 		int header_found = 0;
 
 		while (getline(&line, &line_size, sys_mime_fp) > 0) {
-			if (!header_found
+			if (header_found == 0
 			&& (strncmp(line, "[Default Applications]", 22) == 0
 			|| strncmp(line, "[Added Associations]", 20) == 0)) {
 				header_found = 1;

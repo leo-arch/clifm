@@ -334,6 +334,9 @@ list_mounted_devs(int mode)
 
 		/* Use strtok(3) to split LINE into tokens using space as IFS */
 		char *str = strtok(line, " ");
+		if (!str)
+			continue;
+
 		size_t counter = 0, dev_len = strlen(str);
 
 		media = (struct mnt_t *)xrealloc(media, (mp_n + 2) * sizeof(struct mnt_t));
