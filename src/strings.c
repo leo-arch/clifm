@@ -767,7 +767,9 @@ split_str(const char *str, const int update_args)
 			 * the last quote or NULL */
 			while (*str && *str != quote) {
 				/* If char has special meaning, escape it */
-				if (!(flags & IN_BOOKMARKS_SCREEN) && is_quote_char(*str)) {
+//				if (!(flags & IN_BOOKMARKS_SCREEN) && is_quote_char(*str)) {
+				if (!(flags & IN_BOOKMARKS_SCREEN) && (is_quote_char(*str)
+				|| *str == '.')) { // escape '.' to prevent realpath expansions
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 					buf[buf_len] = '\\';
 					buf_len++;
@@ -1760,10 +1762,9 @@ parse_input_str(char *str)
 					 * ###################### */
 #ifndef _NO_TRASH
 	if (conf.tr_as_rm && substr[0] && *substr[0] == 'r' && !substr[0][1]) {
-		substr[0] = (char *)xrealloc(substr[0], 3 * sizeof(char));
+		substr[0] = (char *)xrealloc(substr[0], 2 * sizeof(char));
 		*substr[0] = 't';
-		substr[0][1] = 'r';
-		substr[0][2] = '\0';
+		substr[0][1] = '\0';
 	}
 #endif /* !_NO_TRASH*/
 
@@ -2013,7 +2014,7 @@ parse_input_str(char *str)
 				strcpy(substr[i], real_path);
 				free(real_path);
 			} else if (link_ok == 1) {
-				xerror(_("realpath: %s: %s\n"), substr[i], strerror(errno));
+				xerror("realpath: %s: %s\n", substr[i], strerror(errno));
 				size_t j;
 				for (j = 0; j <= args_n; j++)
 					free(substr[j]);

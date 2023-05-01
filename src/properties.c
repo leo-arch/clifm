@@ -1112,7 +1112,7 @@ get_properties(char *filename, const int dsize)
 	/* Check file existence */
 	struct stat attr;
 	if (lstat(filename, &attr) == -1) {
-		xerror("pr: %s: %s\n", filename, strerror(errno));
+		xerror("prop: %s: %s\n", filename, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
