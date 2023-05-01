@@ -1028,8 +1028,7 @@ mime_open_with_tab(char *filename, const char *prefix)
 
 		while (*tmp) {
 			size_t app_len = 0;
-			/* Split the appplications line into substrings, if
-			 * any */
+			/* Split the appplications line into substrings, if any */
 			while (*tmp != '\0' && *tmp != ';'
 			&& *tmp != '\n' && *tmp != '\'' && *tmp != '"') {
 				app[app_len] = *tmp;

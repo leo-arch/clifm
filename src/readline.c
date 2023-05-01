@@ -3147,6 +3147,61 @@ rl_swap_fields(char ***a)
 	(*a)[2] = (char *)NULL;
 }
 
+#ifndef _NO_LIRA
+/* Return 1 if the command STR accepts 'edit' as subcommand. Otherwise,
+ * return 0. */
+static int
+cmd_takes_edit(char *str)
+{
+	static char *cmds[] = {
+		"actions",
+		"bm", "bookmarks",
+		"config",
+		"edit", // DEPRECATED
+		"cs", "colorschemes",
+		"history",
+		"kb", "keybinds",
+		"mm", "mime",
+		"net",
+		"prompt",
+		"view",
+		NULL
+	};
+
+	size_t i;
+	for (i = 0; cmds[i]; i++)
+		if (*str == *cmds[i] && strcmp(str + 1, cmds[i] + 1) == 0)
+			return 1;
+
+	return 0;
+}
+
+/* Return 1 if command in STR is an internal command and the first subcommand
+ * is 'edit'. Otherwise, return 0. */
+static int
+is_edit(char *str)
+{
+	if (!str || !*str)
+		return 0;
+
+	char *p = strchr(str, ' ');
+	if (!p || *(p + 1) != 'e' || !*(p + 2))
+		return 0;
+
+	*p = '\0';
+	if (cmd_takes_edit(str) != 1) {
+		*p = ' ';
+		return 0;
+	}
+	*p = ' ';
+
+	if (strncmp(p + 2, "dit ", 4) != 0)
+		return 0;
+
+	return 1;
+}
+#endif /* !_NO_LIRA */
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -3499,6 +3554,12 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 #ifndef _NO_LIRA
+		/* #### OPENING APPS FOR INTERNAL CMDS TAKING 'EDIT' AS SUBCOMMAND */
+		if (is_edit(lb) == 1 && config_file) {
+			if ((matches = mime_open_with_tab(config_file, text)))
+				return matches;
+		}
+
 		/* #### OPEN WITH #### */
 		if (rl_end > 4 && *lb == 'o' && lb[1] == 'w' && lb[2] == ' '
 		&& lb[3] && lb[3] != ' ') {
