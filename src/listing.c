@@ -89,6 +89,8 @@
 #define DIR_IN_NAME  ".cfm.in"
 #define DIR_OUT_NAME ".cfm.out"
 
+#define EMPTY_STR ""
+
 /* Amount of digits of the files counter of the longest directory */
 static size_t longest_fc = 0;
 static int pager_bk = 0;
@@ -683,6 +685,22 @@ get_max_size(void)
 	return size_max;
 }
 
+/* Return a pointer to the indicator char color and update IND_CHR to the
+ * corresponding indicator character for the file whose index is INDEX. */
+static inline char *
+get_ind_char(const int index, int *ind_chr)
+{
+	int print_ind_char = (conf.color_lnk_as_target == 1
+		&& file_info[index].symlink == 1 && follow_symlinks == 1
+		&& conf.icons == 0);
+
+	*ind_chr = file_info[index].sel == 1 ? SELFILE_CHR
+		: (print_ind_char == 1 ? LINK_CHR : ' ');
+
+	return file_info[index].sel == 1 ? li_cb
+		: (print_ind_char == 1 ? lc_c : EMPTY_STR);
+}
+
 static void
 print_long_mode(size_t *counter, int *reset_pager, const int pad,
 	const size_t ug_max, const size_t ino_max, const uint8_t have_xattr)
@@ -727,14 +745,8 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 			(*counter)++;
 		}
 
-		int print_ind_char = (conf.color_lnk_as_target == 1
-			&& file_info[i].symlink == 1 && follow_symlinks == 1
-			&& conf.icons == 0);
-
-		char ind_chr = file_info[i].sel == 1 ? SELFILE_CHR
-			: (print_ind_char == 1 ? LINK_CHR : ' ');
-		char *ind_chr_color = file_info[i].sel == 1 ? li_cb
-			: (print_ind_char == 1 ? lc_c : "");
+		int ind_chr = 0;
+		char *ind_chr_color = get_ind_char(i, &ind_chr);
 
 		if (conf.no_eln == 0) {
 			printf("%s%*d%s%s%c%s", el_c, pad, i + 1, df_c,
@@ -836,14 +848,8 @@ print_entry_color(int *ind_char, const int i, const int pad, const int _max)
 	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
-	int print_ind_char = (conf.color_lnk_as_target == 1
-		&& file_info[i].symlink == 1 && follow_symlinks == 1
-		&& conf.icons == 0);
-
-	char ind_chr = file_info[i].sel ? SELFILE_CHR
-		: (print_ind_char == 1 ? LINK_CHR : ' ');
-	char *ind_chr_color = file_info[i].sel ? li_cb
-		: (print_ind_char == 1 ? lc_c : "");
+	int ind_chr = 0;
+	char *ind_chr_color = get_ind_char(i, &ind_chr);
 
 #ifndef _NO_ICONS
 	if (conf.icons == 1) {
