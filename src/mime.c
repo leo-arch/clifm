@@ -940,20 +940,20 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 		 *file_name = (char *)NULL,
 		 **apps = (char **)NULL;
 
-	int free_name = 1;
 	if (*filename == '~') {
 		char *ename = tilde_expand(filename);
 		if (!ename)
 			return (char **)NULL;
 		name = ename;
-		free_name = 0;
 	}
 
 	if (strchr(name ? name : filename, '\\')) {
 		deq_file = dequote_str(name ? name : filename, 0);
+		if (!deq_file)
+			goto FAIL;
+		free(name);
 		name = realpath(deq_file, NULL);
 		free(deq_file);
-		deq_file = (char *)NULL;
 	}
 
 	if (!name) {
@@ -1159,8 +1159,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 
 FAIL:
 	free(mime);
-	if (free_name == 1)
-		free(name);
+	free(name);
 
 	return (char **)NULL;
 }
