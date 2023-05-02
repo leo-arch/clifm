@@ -921,8 +921,13 @@ mime_list_open(char **apps, char *file)
 	return ret;
 }
 
+/* Return available applications, taken from the mimelist file, to open
+ * the file FILENAME, where PREFIX is the partially entered word.
+ * If EDIT is set to 1 (which is the case when completing opening applications
+ * for the 'edit' subcommand), only command names are returned (not parameters)
+ * */
 char **
-mime_open_with_tab(char *filename, const char *prefix)
+mime_open_with_tab(char *filename, const char *prefix, const int edit)
 {
 	if (!filename || !mime_file)
 		return (char **)NULL;
@@ -1109,7 +1114,9 @@ mime_open_with_tab(char *filename, const char *prefix)
 				file_path = get_cmd_path(app);
 			}
 
-			if (ret)
+			/* We are completing the 'edit' subcommand. Complete command
+			 * names only (not parameters) */
+			if (ret && edit == 0)
 				*ret = ' ';
 
 			if (!file_path)

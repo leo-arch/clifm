@@ -3556,7 +3556,7 @@ my_rl_completion(const char *text, int start, int end)
 #ifndef _NO_LIRA
 		/* #### OPENING APPS FOR INTERNAL CMDS TAKING 'EDIT' AS SUBCOMMAND */
 		if (is_edit(lb) == 1 && config_file) {
-			if ((matches = mime_open_with_tab(config_file, text)))
+			if ((matches = mime_open_with_tab(config_file, text, 1)))
 				return matches;
 		}
 
@@ -3567,7 +3567,7 @@ my_rl_completion(const char *text, int start, int end)
 			char *s = strrchr(p, ' ');
 			if (s)
 				*s = '\0';
-			matches = mime_open_with_tab(p, text);
+			matches = mime_open_with_tab(p, text, 0);
 			if (s)
 				*s = ' ';
 			if (matches) {
