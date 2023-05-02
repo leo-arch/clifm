@@ -141,7 +141,7 @@ When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, alw
 Submitted code must be compiled without any warning/error using the following compiler flags:
 
 ```sh
--Wall -Wextra -Werror -pedantic -Wshadow -Wformat=2 -Wformat-security -Wconversion -Wsign-conversion -Wunused -Wnull-dereference -fstack-protector-strong -fstack-clash-protection -fcf-protection -Wvla -std=c99
+-O2 -D_FORTIFY_SOURCE=2 -Wall -Wextra -Werror -pedantic -Wshadow -Wformat=2 -Wformat-security -Wconversion -Wsign-conversion -Wunused -Wnull-dereference -fstack-protector-strong -fstack-clash-protection -fcf-protection -Wvla -std=c99
 ```
 
 To make sure your structs are properly aligned, add `-Wpadded` to detect misalignments and correct them by adding some padding if necessary. 
