@@ -923,11 +923,11 @@ mime_list_open(char **apps, char *file)
 
 /* Return available applications, taken from the mimelist file, to open
  * the file FILENAME, where PREFIX is the partially entered word.
- * If EDIT is set to 1 (which is the case when completing opening applications
- * for the 'edit' subcommand), only command names are returned (not parameters)
- * */
+ * If ONLY_NAMES is set to 1 (which is the case when completing opening
+ * applications for the 'edit' subcommand), only command names are returned
+ * (not parameters). */
 char **
-mime_open_with_tab(char *filename, const char *prefix, const int edit)
+mime_open_with_tab(char *filename, const char *prefix, const int only_names)
 {
 	if (!filename || !mime_file)
 		return (char **)NULL;
@@ -979,7 +979,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int edit)
 	size_t appsn = 1;
 
 	/* This is the first element in the matches array, which contains
-	 * the already matched string */
+	 * the already matched string. */
 	apps = (char **)xnmalloc(appsn + 1, sizeof(char *));
 	if (prefix) {
 		apps[0] = savestring(prefix, strlen(prefix));
@@ -988,9 +988,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int edit)
 		*apps[0] = '\0';
 	}
 
-	size_t prefix_len = 0;
-	if (prefix)
-		prefix_len = strlen(prefix);
+	size_t prefix_len = prefix ? strlen(prefix) : 0;
 
 	size_t line_size = 0;
 	char *line = (char *)NULL, *app = (char *)NULL;
@@ -1023,7 +1021,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int edit)
 
 		regfree(&regex);
 
-		if (!found)
+		if (found == 0)
 			continue;
 
 		tmp++; /* We don't want the '=' char */
@@ -1049,10 +1047,9 @@ mime_open_with_tab(char *filename, const char *prefix, const int edit)
 				continue;
 			}
 
-			if (prefix) {
-				if (strncmp(prefix, app, prefix_len) != 0)
-					continue;
-			}
+			if (prefix && strncmp(prefix, app, prefix_len) != 0)
+				continue;
+
 			app[app_len] = '\0';
 
 			/* Do not list duplicated entries */
@@ -1070,14 +1067,13 @@ mime_open_with_tab(char *filename, const char *prefix, const int edit)
 			char *file_path = (char *)NULL;
 
 			/* Expand environment variables */
-			char *appb = (char *)NULL;
+			char *app_env = (char *)NULL;
 			if (strchr(app, '$')) {
 				char *t = expand_env(app);
 				if (t) {
-					/* appb: A copy of the original string: let's display
-					 * the env var name itself instead of its expanded
-					 * value */
-					appb = savestring(app, strlen(app));
+					/* app_env: A copy of the original string: let's display the
+					 * env var name itself instead of its expanded value */
+					app_env = savestring(app, strlen(app));
 					/* app: the expanded value */
 					app = (char *)xrealloc(app, (app_len + strlen(t) + 1) * sizeof(char));
 					strcpy(app, t);
@@ -1088,7 +1084,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int edit)
 			}
 
 			/* If app contains spaces, the command to check is
-			 * the string before the first space */
+			 * the string before the first space. */
 			char *ret = strchr(app, ' ');
 			if (ret)
 				*ret = '\0';
@@ -1114,9 +1110,9 @@ mime_open_with_tab(char *filename, const char *prefix, const int edit)
 				file_path = get_cmd_path(app);
 			}
 
-			/* We are completing the 'edit' subcommand. Complete command
+			/* We are completing the 'edit' subcommand. Return command
 			 * names only (not parameters) */
-			if (ret && edit == 0)
+			if (ret && only_names == 0)
 				*ret = ' ';
 
 			if (!file_path)
@@ -1129,16 +1125,15 @@ mime_open_with_tab(char *filename, const char *prefix, const int edit)
 			}
 
 			apps = (char **)xrealloc(apps, (appsn + 2) * sizeof(char *));
-			/* appb is not NULL if we have an environment variable */
-			if (appb) {
-				apps[appsn] = savestring(appb, strlen(appb));
-				appsn++;
-				free(appb);
+			/* app_env is not NULL if we have an environment variable */
+			if (app_env) {
+				apps[appsn] = savestring(app_env, strlen(app_env));
+				free(app_env);
 			} else {
 				apps[appsn] = savestring(app, strlen(app));
-				appsn++;
 			}
 
+			appsn++;
 			tmp++;
 		}
 	}
@@ -1164,7 +1159,7 @@ mime_open_with_tab(char *filename, const char *prefix, const int edit)
 
 FAIL:
 	free(mime);
-	if (free_name)
+	if (free_name == 1)
 		free(name);
 
 	return (char **)NULL;

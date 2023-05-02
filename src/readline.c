@@ -3556,8 +3556,10 @@ my_rl_completion(const char *text, int start, int end)
 #ifndef _NO_LIRA
 		/* #### OPENING APPS FOR INTERNAL CMDS TAKING 'EDIT' AS SUBCOMMAND */
 		if (is_edit(lb) == 1 && config_file) {
-			if ((matches = mime_open_with_tab(config_file, text, 1)))
+			if ((matches = mime_open_with_tab(config_file, text, 1))) {
+				cur_comp_type = TCMP_OPENWITH;
 				return matches;
+			}
 		}
 
 		/* #### OPEN WITH #### */
