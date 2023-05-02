@@ -60,11 +60,11 @@
 #define EMOJI_DISK "💿"
 #define EMOJI_DOCKER "🐋"
 #define EMOJI_DOWNLOAD "📥"
-#define EMOJI_ELECTRON " ⚛"
+#define EMOJI_ELECTRON "⚛ "
 #define EMOJI_ELIXIR "💧"
 #define EMOJI_ENCRYPTED "🔒"
 #define EMOJI_ERLANG EMOJI_C
-#define EMOJI_EXEC " ⚙"
+#define EMOJI_EXEC "⚙ "
 #define EMOJI_FILE "📄"
 #define EMOJI_FOLDER "📂"
 #define EMOJI_FONT "🔤"
@@ -76,7 +76,7 @@
 #define EMOJI_JAVA "☕"
 #define EMOJI_JAVASCRIPT EMOJI_SCRIPT
 #define EMOJI_KEY "🔑"
-#define EMOJI_LICENSE " ⚖"
+#define EMOJI_LICENSE "⚖ "
 #define EMOJI_LINK "🔗"
 #define EMOJI_LINUX "🐧"
 #define EMOJI_LIST "✅"
@@ -84,7 +84,7 @@
 #define EMOJI_LUA "🌘"
 #define EMOJI_MAKE "🛠 "
 #define EMOJI_MANUAL "❔"
-#define EMOJI_MARKDOWN " ⬇"
+#define EMOJI_MARKDOWN "⬇ "
 #define EMOJI_MOVIE "🎬"
 #define EMOJI_MUSIC "🎧"
 #define EMOJI_NASM EMOJI_C
