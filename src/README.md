@@ -268,8 +268,16 @@ strip --strip-unneeded --remove-section=.comment --remove-section=.note clifm
 ### Compiling features in/out
 
 **Clifm** allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a POSIX compliant executable without icons support:
+
 ```sh
 gcc ... -D_BE_POSIX -D_NO_ICONS ...
+```
+
+You can also use the `CPPFLAGS` variable. For example:
+
+```sh
+export CPPFLAGS="$CPPFLAGS -D_BE_POSIX -D_NO_ICONS"
+make
 ```
 
 If using GNU Make you can pass these options directly to **make**(1) via a GNU specific Makefile:
