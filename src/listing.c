@@ -1707,7 +1707,7 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 
 	int match = 0;
 
-	switch(*(filter.str + 1)) {
+	switch (*(filter.str + 1)) {
 	case 'b': if (S_ISBLK(mode)) match = 1; break;
 	case 'd': if (S_ISDIR(mode)) match = 1; break;
 	case 'c': if (S_ISCHR(mode)) match = 1; break;
@@ -1872,6 +1872,9 @@ list_dir_light(void)
 #ifndef _NO_ICONS
 		file_info[n].icon = DEF_FILE_ICON;
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+#else
+		file_info[n].icon = (char *)NULL;
+		file_info[n].icon_color = df_c;
 #endif
 		switch (file_info[n].type) {
 		case DT_DIR:
@@ -2304,6 +2307,11 @@ list_dir(void)
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
+#ifdef _NO_ICONS
+		file_info[n].icon = (char *)NULL;
+		file_info[n].icon_color = df_c;
+#endif /* _NO_ICONS */
+
 		if (stat_ok == 1) {
 			switch (attr.st_mode & S_IFMT) {
 			case S_IFBLK: file_info[n].type = DT_BLK; stats.block_dev++; break;
@@ -2383,7 +2391,7 @@ list_dir(void)
 				if (*dir_ico_c)
 					file_info[n].icon_color = dir_ico_c;
 			}
-#endif /* _NO_ICONS */
+#endif /* !_NO_ICONS */
 			int daccess = (stat_ok == 1 &&
 				check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 1);
 
@@ -2395,7 +2403,7 @@ list_dir(void)
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
-#endif /* _NO_ICONS */
+#endif /* !_NO_ICONS */
 			} else {
 				file_info[n].color = stat_ok == 1 ? ((attr.st_mode & 01000)
 					? ((attr.st_mode & 00002) ? tw_c : st_c)

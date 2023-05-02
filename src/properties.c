@@ -1807,11 +1807,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	*trim_s = trim > 0 ? TRIMFILE_CHR : 0;
 	*xattr_s = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 
-#ifndef _NO_ICONS
 	printf("%s%s%s%s%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  " /* File name*/
-#else
-	printf("%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  " /* File name*/
-#endif
 		   "%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
@@ -1820,13 +1816,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		   "%s" /* Time */
 		   "%s\n", /* Size / device info */
 
-#ifndef _NO_ICONS
-		conf.colorize ? props->icon_color : "",
-		conf.icons ? props->icon : "", conf.icons ? " " : "", df_c,
-#endif
-		conf.colorize ? props->color : "",
+		(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
+		conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
+
+		conf.colorize == 1 ? props->color : "",
 		(wchar_t *)tname, trim_diff,
-		conf.light_mode ? "\x1b[0m" : df_c, pad, "", df_c,
+		conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
 		trim ? tt_c : "", trim_s,
 		trim == TRIM_EXT ? props->color : "",
 		trim == TRIM_EXT ? ext_name : "",

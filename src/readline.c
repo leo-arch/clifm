@@ -3151,7 +3151,7 @@ rl_swap_fields(char ***a)
 /* Return 1 if the command STR accepts 'edit' as subcommand. Otherwise,
  * return 0. */
 static int
-cmd_takes_edit(char *str)
+cmd_takes_edit(const char *str)
 {
 	static char *cmds[] = {
 		"actions",
@@ -3179,7 +3179,7 @@ cmd_takes_edit(char *str)
 /* Return 1 if command in STR is an internal command and the first subcommand
  * is 'edit'. Otherwise, return 0. */
 static int
-is_edit(char *str)
+is_edit(const char *str)
 {
 	if (!str || !*str)
 		return 0;
@@ -3556,6 +3556,11 @@ my_rl_completion(const char *text, int start, int end)
 #ifndef _NO_LIRA
 		/* #### OPENING APPS FOR INTERNAL CMDS TAKING 'EDIT' AS SUBCOMMAND */
 		if (is_edit(lb) == 1 && config_file) {
+			/* mime_open_with_tab needs a file name to match against the
+			 * mimelist file and get the list of opening applications.
+			 * Now, since here we are listing apps to open config files,
+			 * i.e. text files, any config file will do the trick, in this
+			 * case, the main config file (CONFIG_FILE). */
 			if ((matches = mime_open_with_tab(config_file, text, 1))) {
 				cur_comp_type = TCMP_OPENWITH;
 				return matches;

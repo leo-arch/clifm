@@ -870,10 +870,8 @@ struct fileinfo {
 	char *color;
 	char *ext_color;
 	char *ext_name;
-#ifndef _NO_ICONS
 	char *icon;
 	char *icon_color;
-#endif
 	char *name;
 	int dir;
 	int eln_n;
