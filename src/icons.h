@@ -62,6 +62,7 @@ char
     ICON_BINARY[] = NERD_BINARY,
     ICON_C[] = NERD_C,
     ICON_CD[] = NERD_OPTICALDISK,
+	ICON_CHESS[] = NERD_CHESS,
     ICON_CLOJURE[] = NERD_CLOJURE,
     ICON_CODE[] = NERD_FILE,
     ICON_COFFEE[] = NERD_COFFEE,
@@ -128,6 +129,7 @@ char
 
     ICON_ARCH[] = NERD_ARCHLINUX,
     ICON_DEBIAN[] = NERD_DEBIAN,
+	ICON_NIX[] = NERD_NIX,
     ICON_REDHAT[] = NERD_REDHAT,
 
     /* Dir names */
@@ -162,6 +164,7 @@ char
     ICON_BINARY[] = OCT_FILE_BINARY,
     ICON_C[] = MFIZZ_C,
     ICON_CD[] = LINEA_MUSIC_CD,
+    ICON_CHESS[] = FA_FILE_O,
     ICON_CLOJURE[] = DEV_CLOJURE_ALT,
     ICON_CODE[] = FA_FILE_CODE_O,
     ICON_COFFEE[] = DEV_COFFEESCRIPT,
@@ -228,6 +231,7 @@ char
 
     ICON_ARCH[] = MFIZZ_ARCHLINUX,
     ICON_DEBIAN[] = MFIZZ_DEBIAN,
+    ICON_NIX[] = LINUX_NIXOS,
     ICON_REDHAT[] = LINUX_REDHAT,
 
     /* Dir names */
@@ -262,6 +266,7 @@ char
     ICON_BINARY[] = EMOJI_BINARY,
     ICON_C[] = EMOJI_C,
     ICON_CD[] = EMOJI_DISK,
+    ICON_CHESS[] = EMOJI_CHESS,
     ICON_CLOJURE[] = EMOJI_FILE,
     ICON_CODE[] = EMOJI_SCRIPT,
     ICON_COFFEE[] = EMOJI_COFFEE,
@@ -278,7 +283,7 @@ char
     ICON_DOCKER[] = EMOJI_DOCKER,
     ICON_ELECTRON[] = EMOJI_ELECTRON,
     ICON_ELF[] = EMOJI_LINUX,
-    ICON_ELIXIR[] = EMOJI_FILE,
+    ICON_ELIXIR[] = EMOJI_ELIXIR,
     ICON_ELM[] = EMOJI_FILE,
     ICON_ERLANG[] = EMOJI_ERLANG,
     ICON_EXCEL[] = EMOJI_STYLESHEET,
@@ -328,6 +333,7 @@ char
 
     ICON_ARCH[] = EMOJI_MAKE,
     ICON_REDHAT[] = EMOJI_ARCHIVE,
+    ICON_NIX[] = EMOJI_SCRIPT,
     ICON_DEBIAN[] = EMOJI_ARCHIVE,
 
     /* Dir names */
@@ -410,6 +416,7 @@ struct icons_t icon_ext[] = {
 
     {"c", ICON_C, BLUE},
     {"c++", ICON_CPP, WHITE},
+    {"cabal", ICON_HASKELL, BLUE},
     {"cab", ICON_ARCHIVE, YELLOW},
     {"cbr", ICON_ARCHIVE, YELLOW},
     {"cbz", ICON_ARCHIVE, YELLOW},
@@ -452,6 +459,7 @@ struct icons_t icon_ext[] = {
     {"exs", ICON_ELIXIR, BLUE},
 
     {"f#", ICON_FSHARP, WHITE},
+    {"fen", ICON_CHESS, WHITE},
     {"fish", ICON_SCRIPT, WHITE},
     {"flac", ICON_AUDIO, YELLOW},
     {"flv", ICON_VID, BLUE},
@@ -468,7 +476,9 @@ struct icons_t icon_ext[] = {
     {"gzip", ICON_ARCHIVE, YELLOW},
 
     {"h", ICON_C, BLUE},
+    {"heex", ICON_ELIXIR, BLUE},
     {"hh", ICON_CPP, WHITE},
+    {"hpp", ICON_CPP, WHITE},
     {"htaccess", ICON_CONF, WHITE},
     {"htpasswd", ICON_CONF, WHITE},
     {"hrl", ICON_ERLANG, RED},
@@ -490,10 +500,13 @@ struct icons_t icon_ext[] = {
     {"js", ICON_JAVASCRIPT, WHITE},
     {"json", ICON_JAVASCRIPT, WHITE},
     {"jsx", ICON_ELECTRON, GREEN},
+    {"jxl", ICON_IMG, GREEN},
 
     {"key", ICON_KEY, YELLOW},
+    {"ksh", ICON_SCRIPT, WHITE},
 
     {"lha", ICON_ARCHIVE, YELLOW},
+    {"lhs", ICON_HASKELL, BLUE},
     {"log", ICON_TXT, WHITE},
     {"lua", ICON_LUA, WHITE},
     {"lz4", ICON_ARCHIVE, YELLOW},
@@ -515,6 +528,8 @@ struct icons_t icon_ext[] = {
     {"mpg", ICON_VID, BLUE},
     {"msi", ICON_WINDOWS, BLUE},
 
+    {"nix", ICON_NIX, BLUE},
+
     {"o", ICON_BINARY, WHITE},
     {"odp", ICON_OPENOFFICE, BLUE},
     {"odt", ICON_OPENOFFICE, BLUE},
@@ -522,6 +537,7 @@ struct icons_t icon_ext[] = {
     {"ogg", ICON_AUDIO, YELLOW},
     {"ogv", ICON_VID, BLUE},
     {"opdownload", ICON_DOWNLOADS, WHITE},
+    {"opus", ICON_AUDIO, YELLOW},
     {"otf", ICON_FONT, WHITE},
     {"out", ICON_ELF, WHITE},
 
@@ -529,6 +545,7 @@ struct icons_t icon_ext[] = {
     {"patch", ICON_PATCH, WHITE},
     {"pem", ICON_KEY, YELLOW},
     {"pdf", ICON_PDF, RED},
+    {"pgn", ICON_CHESS, WHITE},
     {"php", ICON_PHP, WHITE},
     {"pl", ICON_PERL, YELLOW},
     {"plx", ICON_PERL, YELLOW},
@@ -538,6 +555,7 @@ struct icons_t icon_ext[] = {
     {"ppt", ICON_POWERPOINT, WHITE},
     {"pptx", ICON_POWERPOINT, WHITE},
     {"ps", ICON_POSTSCRIPT, RED},
+    {"psb", ICON_PHOTOSHOP, WHITE},
     {"psv", ICON_PHOTOSHOP, WHITE},
     {"psd", ICON_PHOTOSHOP, WHITE},
     {"py", ICON_PYTHON, GREEN},
@@ -581,6 +599,7 @@ struct icons_t icon_ext[] = {
     {"vid", ICON_VID, BLUE},
     {"vim", ICON_VIM, GREEN},
     {"vimrc", ICON_VIM, GREEN},
+    {"vtt", ICON_COMMENTS, WHITE},
 
     {"wav", ICON_AUDIO, YELLOW},
     {"webm", ICON_VID, BLUE},
@@ -589,6 +608,7 @@ struct icons_t icon_ext[] = {
     {"wmv", ICON_VID, BLUE},
 
     {"xbps", ICON_ARCHIVE, YELLOW},
+    {"xcf", ICON_IMG, GREEN},
     {"xthml", ICON_HTML, WHITE},
     {"xls", ICON_EXCEL, GREEN},
     {"xlsx", ICON_EXCEL, GREEN},
@@ -618,7 +638,7 @@ struct icons_t icon_dirnames[] = {
     {"Public", ICON_PUBLIC, DEF_DIR_ICON_COLOR},
     {"Steam", ICON_STEAM, DEF_DIR_ICON_COLOR},
     {"Templates", ICON_TEMPLATES, DEF_DIR_ICON_COLOR},
-    {"Trash", ICON_TRASH, DEF_DIR_ICON_COLOR},
+//    {"Trash", ICON_TRASH, DEF_DIR_ICON_COLOR},
     {"Videos", ICON_VIDEOS, DEF_DIR_ICON_COLOR},
 };
 

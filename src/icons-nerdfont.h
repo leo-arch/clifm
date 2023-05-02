@@ -77,6 +77,7 @@
 #define NERD_CLOJURE       "\ue76a"
 #define NERD_JAVASCRIPT    "\ue74e"
 #define NERD_LINUX         "\uf83c"
+#define NERD_NIX           "\uf313"
 #define NERD_FSHARP        "\ue7a7"
 #define NERD_RUBY          "\ue23e"
 #define NERD_C             "\ue61e"
@@ -128,7 +129,7 @@
 #define NERD_COMMENTS      "\uf086"
 #define NERD_VISUALSTUDIO  "\ufb0f"
 #define NERD_DROPBOX       "\uf6e2"
-#define NERD_STEAM         "\uf9d2"
+#define NERD_STEAM         "\uf1b7"
 
 #define NERD_ARCHLINUX     "\uf303"
 #define NERD_REDHAT        "\uf316"
