@@ -813,7 +813,7 @@ skip_leading_backslashes(char **str, size_t *len)
 static void
 match_print(char *match, size_t len, char *color, const int append_slash)
 {
-	char t[NAME_MAX + 2];
+	char t[PATH_MAX + 2];
 	*t = '\0';
 
 	if (append_slash == 1)

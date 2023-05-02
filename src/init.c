@@ -543,7 +543,7 @@ try_standard_data_dirs(void)
 	struct stat a;
 
 	for (i = 0; data_dirs[i]; i++) {
-		char tmp[PATH_MAX];
+		char tmp[PATH_MAX + 5 + 10];
 		snprintf(tmp, sizeof(tmp), "%s/%s/%src", data_dirs[i], PNL, PNL);
 
 		if (stat(tmp, &a) == -1 || !S_ISREG(a.st_mode))
