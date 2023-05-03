@@ -679,7 +679,7 @@ print_tips(const int all)
 		"Press Alt-q to delete the last entered word",
 		"Check ELN ranges by pressing TAB: '1-12<TAB>'",
 		"Operate on specific selected files: 'sel<TAB>' or 's:<TAB>'",
-		"Use the 'ow' command to open a file with an specific application",
+		"Use the 'ow' command to open a file with a specific application",
 		"Limit the amount of files listed on the screen via the 'mf' command",
 		"Set a maximum file name length for listed files via the MaxFilenameLen "
 		"option in the configuration file (F10)",

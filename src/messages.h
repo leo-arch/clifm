@@ -43,9 +43,9 @@
 Actions are just names for plugins.\n\
 An action definition has the following form: \"NAME=plugin\", for example:\n\
 \"//=rgfind.sh\".\n\
-To run a plugin just enter the action name. So, to run the rgfind.sh plugin,\n\
-just enter \"//\".\n\
-Some plugins accept parameters. To get information about an specific plugin\n\
+To run a plugin enter the action name. For example, to run the rgfind.sh plugin,\n\
+enter \"//\".\n\
+Some plugins accept parameters. To get information about a specific plugin\n\
 use the -h,--help flag. Example: \"- --help\"."
 
 #define ALIAS_USAGE "List, print, or import aliases\n\n\
@@ -56,7 +56,7 @@ use the -h,--help flag. Example: \"- --help\"."
     alias\n\
   or\n\
     alias list (or 'alias <TAB>')\n\
-- Print an specific alias definition\n\
+- Print a specific alias definition\n\
     alias my_alias\n\
 - Import aliases from ~/.bashrc\n\
     alias import ~/.bashrc\n\
@@ -557,7 +557,7 @@ For information about the matching algorithm consult the manpage\n\n\
   at startup, set PurgeJumpDB to true in the configuration file\n\
 - Purge the database from entries ranked below 100\n\
     j --purge 100\n\
-  Note: To remove an specific entry, just remove the corresponding line\n\
+  Note: To remove a specific entry, delete the corresponding line\n\
   from the database ('je' or 'j --edit')"
 
 #define KB_USAGE "Manage key bindings\n\n\
@@ -666,7 +666,7 @@ To get information about a device, enter iELN. For example: i12"
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available mountpoints\n\
     mp\n\
-  Once here, just select the mountpoint you want to change to"
+  Once here, select the mountpoint you want to change to"
 
 #define NET_USAGE "Manage network resources\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -748,7 +748,7 @@ Note: Use the 'pc' command to edit files permissions"
 - Set the resources opener back to the default (Lira)\n\
     opener default"
 
-#define OW_USAGE "Open a file with an specific application\n\n\
+#define OW_USAGE "Open a file with a specific application\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   ow ELN/FILE\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -1097,7 +1097,7 @@ in the configuration file ('edit' or F10).\n\n\
 Just as 'c' and 'm', the 'r' command accepts -f,--force as paramater to\n\
 prevent rm(1) from prompting before removals. Set rmForce to true in the\n\
 configuration file to make this option permanent.\n\n\
-To use different parameters, just run the corresponding utility, as usual.\n\
+To use different parameters, run the corresponding utility, as usual.\n\
 Example: cp -abf ...\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Create a copy of file1 named file2\n\
@@ -1302,7 +1302,7 @@ You can also try the interactive help plugin (it depends on FZF): just \
 enter 'ih', that's it.\n\
 Help topics are available as well. Type 'help <TAB>' to get a list of topics.\n\n\
 The following is just a list of available commands and a brief description.\n\
-For more information about an specific command run 'CMD -h' or 'CMD --help'.\n"
+For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
 
 #define CLIFM_COMMANDS "\
  ELN/FILE/DIR       Auto-open/autocd files/directories\n\
