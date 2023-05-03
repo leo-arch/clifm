@@ -235,10 +235,13 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - [Improved logs system](https://github.com/leo-arch/clifm/wiki/Introduction#log).
+  - Better TAB completion for internal commands.
+  - Allow the use of [Xterm-like color names in color schemes](https://github.com/leo-arch/clifm/wiki/Customization#xterm-like-color-names-256-colors).
   - Disable bold colors via `--no-bold`.
   - Colorize symlinks according to the target file via `ColorLinksAsTarget` in the config file.
-  - File names trimming can now be disabled permanently via the `TrimNames` option in the config file.
-  - Improved interface fot the `tag` command.
+  - File names trimming can now be disabled permanently via the `TrimNames` option in the config file and `--no-trim-names`.
+  - Improved interface fot the [`tag` command](https://github.com/leo-arch/clifm/wiki/Introduction#tag).
   - Improved synchronization between multiple instances.
 * `version 1.11 (Cobb)`
   - Files apparent size is used now by default. Revert via `--no-apparent-size` or setting `ApparentSize` to `false` in the config file. 
