@@ -57,13 +57,13 @@ clifm \- The Command Line File Manager
 .SH 1. GETTING HELP
 There are several ways of getting help in \fBclifm\fR. Once in the program, enter \fI?\fR or \fIhelp\fR for some basic usage examples, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to jump to the \fBKEYBOARD SHORTCUTS\fR section.
 .sp
-To get help about some specific topic, type \fIhelp <TAB>\fR to get a list of available help topics. Choose the topic you want and then just press Enter.
+To get help about some specific topic, type \fIhelp <TAB>\fR to get a list of available help topics. Choose the topic you want and then press Enter.
 .sp
 For a list of available commands and a brief description type \fIcmd<TAB>\fR.
 .sp
 Help for all internal commands can be accessed via the \fI-h\fR or \fI--help\fR flags. For example, to get help about the selection function, \fIs -h\fR or \fIs --help\fR.
 .sp
-A convenient way of getting full information about \fBclifm\fR commands is via the \fIih\fR action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Just enter \fIih\fR to run the plugin (it depends on \fBfzf\fR(1)) and select the command you want to obtain information about.
+A convenient way of getting full information about \fBclifm\fR commands is via the \fIih\fR action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Enter \fIih\fR to run the plugin (it depends on \fBfzf\fR(1)) and select the command you want to obtain information about.
 .sp
 For a quick introduction jump to the \fBEXAMPLES\fR section at the bottom of this document.
 
@@ -253,7 +253,7 @@ print file sizes as used blocks instead of used bytes (apparent size)
 disable bold colors (applies to all color schemes)
 .TP
 \fB\-\-no\-cd\-auto\fR
-by default, \fBclifm\fR changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of \fIcd\fR
+by default, \fBclifm\fR changes directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of \fIcd\fR
 .TP
 \fB\-\-no-classify\fR
 by default, \fBclifm\fR appends a file type indicator character to file names when running with no colors (see the \fB--no-color\fR option below) and a directory indicator (plus a files counter) when running with colors. Classification characters are: 
@@ -403,7 +403,7 @@ Help for all commands listed here can be accessed via the \fI-h\fR or \fI--help\
 if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, \fIFILE\fR amounts to \fIopen\ FILE\fR or \fIo\ FILE\fR, and \fIDIR\fR to \fIcd\ DIR\fR. ELN's, of course, are allowed. Example: \fI12\fR.
 .TP
 .B /\fIPATTERN\fR [\fI\-filetype\fR] [\fI-x\fR] [\fIDIR\fR]
-this is the \fBquick search\fR function. Just type \fI/\fR followed by a glob or regular (or extended regular) expression, and \fBclifm\fR will list all matches in the current working directory. For example, both \fI/*.pdf\fR and \fI/.pdf$\fR expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression.
+this is the \fBquick search\fR function. Type \fI/\fR followed by a glob or regular (or extended regular) expression, and \fBclifm\fR will list all matches in the current working directory. For example, both \fI/*.pdf\fR and \fI/.pdf$\fR expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression.
 .sp
 You can list previously used search patterns via TAB: \fI/*<TAB>\fR.
 .sp
@@ -468,7 +468,7 @@ All arguments passed to the action command are passed to the script or program a
 The plugins provided with \fBclifm\fR (take a look at the plugins directory) could be used as a starting point to create custom plugins.
 .TP
 .B alias \fR[\fIimport FILE\fR] [\fIls\fR,\fIlist\fR] [\fINAME\fR]
-with no argument (or with \fIls,list\fR parameters), it prints the list of available aliases, if any. To get the description of an specific alias just enter \fIalias\fR followed by the alias name. To write a new alias simply enter \fIedit\fR (or press F10) to open the configuration file and add a line like this: "alias name='command args...'" or "alias name='directory'".
+with no argument (or with \fIls,list\fR parameters), it prints the list of available aliases, if any. To get the description of an specific alias enter \fIalias\fR followed by the alias name. To write a new alias simply enter \fIedit\fR (or press F10) to open the configuration file and add a line like this: "alias name='command args...'" or "alias name='directory'".
 .sp
 To import aliases from a file, provided it contains aliases in the specified form, use the \fIimport\fR parameter. Aliases conflicting with some of the internal commands won't be imported.
 .sp
@@ -480,7 +480,7 @@ To create multiple aliases for files at once, this is the recommended procedure:
  alias b1='file2'
  alias c1='file3'
 
-NOTE: Make sure alias names do not conflict with other commands, either internal or external. To bypass the conflicts check, performed automatically by the 'alias import' command, you can just edit the aliases file manually (F10).
+NOTE: Make sure alias names do not conflict with other commands, either internal or external. To bypass the conflicts check, performed automatically by the 'alias import' command, you can edit the aliases file manually (F10).
 
 4) Finally, import this file with the \fIalias\fR function: \fIalias\ import\ tmp_file\fR. Now, you can access any of these files by entering just a few characters: a1, b1, and c1.
 .TP
@@ -598,7 +598,7 @@ T}	Select all bookmarks at once
 .TE
 
 .sp
- \fB(1)\fR If your are not sure about where a bookmark points to, just type \fIb:NAME<TAB>\fR.
+ \fB(1)\fR If your are not sure about where a bookmark points to, type \fIb:NAME<TAB>\fR.
 .TP
 .B br, bulk \fIELN/FILE\fR...
 rename at once all files passed as arguments to the function. It accepts single and multiple file names, wildcards, ELN ranges, and the \fIsel\fR keyword. Example: \fIbr\ myfile\ 4\-10\ sel\fR.
@@ -618,7 +618,7 @@ By default, the \fIc\fR, \fIm\fR, and \fIr\fR commands execute \fBcp\fR(1), \fBm
 .sp
 On systems not supporting the \fI\-I\fR switch (NetBSD, OpenBSD, and MacOS), the \fIr\fR command executes \fBrm\fR(1) as follows: \fIrm \-drf\fR for directories, and \fIrm \-f\fR for files. Note that, if compiled with _BE_POSIX, the \fI\-d\fR flag is not available, in which case \fIrm \-rf\fR is used instead.
 .sp
-To use these commands without any of these arguments, or with any other argument you want, just use the non-abbreviated (shell) command, for instance, \fIcp\fR instead of \fIc\fR. Of course, you can also create aliases to use you preferred commands, for example, "c='cp \-adp'". Consult the \fIalias\fR command above for more information.
+To use these commands without any of these arguments, or with any other argument you want, use the non-abbreviated (shell) command, for instance, \fIcp\fR instead of \fIc\fR. Of course, you can also create aliases to use you preferred commands, for example, "c='cp \-adp'". Consult the \fIalias\fR command above for more information.
 .sp
 The \fIl\fR command allows the use of the \fIe, edit\fR option to modify the destination of a symbolic link. Example: \fIl\ edit\ 12\fR (or \fIle\ 12\fR)  to relink the symbolic link corresponding to the file whose ELN is 12.
 .sp
@@ -669,7 +669,7 @@ with no arguments, list available color schemes (\fIcs name\fR (or \fIcs n\fR) t
 .sp
 Use the \fIedit\fR subcommand to open/edit the configuration file of the current color scheme (open with APP if specified or via the default associated application).
 .sp
-To switch color schemes just specify the color scheme name: \fIcs NAME\fR. (TAB completion is available: \fIcs <TAB>\fR).
+To switch color schemes, specify the color scheme name: \fIcs NAME\fR. (TAB completion is available: \fIcs <TAB>\fR).
 .TP
 .B d, dup \fIFILE\fR...
 Duplicate files passed as parameters, either directories or regular files. The user will be asked for a destiny directory. Duplicated file names are generated by appending ".copy" to the basename of each source file. For example: \fId\ /my/file\fR will copy \fI/my/file\fR into the directory selected by the user as \fIfile.copy\fR. If \fIfile.copy\fR already exists, an extra suffix will be added as follows: \fIfile.copy\-N\fR, where N is a positive integer (starting at 1).
@@ -677,9 +677,9 @@ Duplicate files passed as parameters, either directories or regular files. The u
 If \fBrsync\fR(1) is found, it will be used as follows: \fIrsync\ \-aczvAXHS\ \-\-progress\fR. Else, \fBcp\fR(1) will be used: \fIcp\ \-a\fR.
 .TP
 .B dh \fR[\fISTRING\fR] [\fIPATH\fR] [\fI!ELN\fR]
-With no parameters, it prints the directory history list. To filter this list just pass a string: only entries matching this string will be displayed. In both cases, TAB completion is available. For example: \fIdh down<TAB>\fR will list only those entries matching \fIdown\fR (fuzzily, if \fIfuzzy-matching\fR is enabled).
+With no parameters, it prints the directory history list. To filter this list just pass a query string: only entries matching this query will be displayed. In both cases, TAB completion is available. For example: \fIdh down<TAB>\fR will list only those entries matching \fIdown\fR (fuzzily, if \fIfuzzy-matching\fR is enabled).
 .sp
-To access an specific entry, you can pass the entry number preceded by an exclamation mark. For example, if you want the entry number 12, just enter \fIdh !12\fR to change to the corresponding directory.
+To access an specific entry, you can pass the entry number preceded by an exclamation mark. For example, if you want the entry number 12, enter \fIdh !12\fR to change to the corresponding directory.
 .sp
 Finally, if an absolute path is passed as first parameter, \fIdh\fR works just as the \fIcd\fR command.
 .sp
@@ -765,7 +765,7 @@ Multiple query strings could be passed to the function. For example, \fIj\ et\ m
 .sp
 The backslash (\\) and the slash (/) could be used to instruct \fBKangaroo\fR to search for the string query only in the first or last path segment of each entry in the database respectively. Let's suppose we have two entries matching \fBsrc\fR in the database: \fI/media/src/images\fR and \fI/home/user/Downloads/clifm/src\fR. If the first entry is better ranked than the second, \fIj src\fR will match this first entry. However, if what we really want is the second entry, appending a slash to the query string instructs \fBKangaroo\fR to only match entries having src in the last path segment, here \fI/home/user/Downloads/clifm/src\fR.
 .sp
-Since it is not always obvious or easy to know where exactly a query string will take you, \fBclifm\fR (if the suggestions system is enabled) will print, at the right of the cursor, the path matched by \fBKangaroo\fR. If that is the actually intended path, just press the Right arrow key to accept the suggestion. Otherwise, it will be ignored. You can also use TAB completion to print the list of matches for the current query string. For example: \fIj - c<TAB>\fR to list all entries in the directory history list containing a dash (-) and a 'c'.
+Since it is not always obvious or easy to know where exactly a query string will take you, \fBclifm\fR (if the suggestions system is enabled) will print, at the right of the cursor, the path matched by \fBKangaroo\fR. If that is the actually intended path, press the Right arrow key to accept the suggestion. Otherwise, it will be ignored. You can also use TAB completion to print the list of matches for the current query string. For example: \fIj - c<TAB>\fR to list all entries in the directory history list containing a dash (-) and a 'c'.
 .sp
 \fIj\fR accepts five modifiers: 'e', 'p' 'c', 'o', and 'l', the first standing for "edit", the second for "parent", the third for "child", the fourth for "order", and the last one for 'list'. Thus, \fIje\fR (or \fIj --edit\fR) will open the jump database to be edited if needed; \fIjc\fR will search for files querying only child directories relative to the current working directory, while \fIjp\fR will do the same but for parent directories. \fIjo\fR allows to specify an order number (the left most value in the jump list) instead of a string or a file name, in which case no matching process is performed. Finally, \fIjl\fR just prints the matches for the given query string(s), but without changing the current directory. Examples:
 
@@ -795,7 +795,7 @@ Use the \fI--purge\fR option to shrink the database. Without further parameters,
 .sp
 You can also manually edit the database file using the \fIje\fR (or \fIj --edit\fR) command: edit whatever needs to be edited, save changes, and close the editor. This is useful, for example, to remove an specific entry/directory from the database.
 .sp
-An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and bound by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Just enter \fI++\fR to perform a fuzzy search over the jump database.
+An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and bound by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Enter \fI++\fR to perform a fuzzy search over the jump database.
 .sp
 Take a look at the \fIdh\fR command as well.
 .TP
@@ -921,12 +921,12 @@ If not already mounted, the \fIm\fR, \fImount\fR option mounts the specified rem
 .sp
 The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmount command specified in the configuration file. For example: \fInet u smb_work\fR. TAB completion is also available for this function.
 .sp
-\fBNOTE\fR: If you only need to copy some files to a remote location (including mobile phones) without the need to mount the resource, you can make use of the cprm.sh plugin, bound by default to the \fIcr\fR action. Just set up your remotes (\fIcr \-\-edit\fR) and then simply send the file you want (\fIcr FILE\fR). That's all.
+\fBNOTE\fR: If you only need to copy some files to a remote location (including mobile phones) without the need to mount the resource, you can make use of the cprm.sh plugin, bound by default to the \fIcr\fR action. Set up your remotes (\fIcr \-\-edit\fR) and then send the file you want (\fIcr FILE\fR).
 .TP
 .B o, open \fIELN/FILE\fR [\fIAPPLICATION\fR]
 open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see above), a regular file, or a symbolic link to either of the two. For example: \fIo\ 12\fR, \fIo\ filename\fR, \fIo\ /path/to/filename\fR.
 .sp
-By default, the \fIopen\fR function will open files with the default application associated to them via \fILira\fR, the built\-in resource opener (see the \fImime\fR command above). However, if you want to open a file with a different application, just add the application name as second argument, e.g. \fIo\ 12\ leafpad\fR or \fIo12\ leafpad\fR.
+By default, the \fIopen\fR function will open files with the default application associated to them via \fILira\fR, the built\-in resource opener (see the \fImime\fR command above). However, if you want to open a file with a different application, add the application name as second argument, e.g. \fIo\ 12\ leafpad\fR or \fIo12\ leafpad\fR.
 .sp
 If you want to run the program in the background, simply add the ampersand character, as usual: \fIo\ 12\ &\fR, \fIo\ 12&\fR, \fIo12&\fR or (if auto-open is enabled) just \fI12&\fR.
 .sp
@@ -953,7 +953,7 @@ If APPLICATION is specified, open ELN/FILE with APPLICATION. In case you need to
 .sp
 If no APPLICATION is specified, the list of available applications associated to ELN/FILE (either via its MIME type or its file extension) is printed, allowing the user to choose one of these applications, and then open the file with the selected application.
 .sp
-This command supports TAB completion. Just type "\fIow filename <TAB>\fR" and those applications able to open ELN/FILE will be listed.
+This command supports TAB completion. Type "\fIow filename <TAB>\fR" and those applications able to open ELN/FILE will be listed.
 .TP
 .B p, prop \fIELN/FILE\fR...
 print file properties for ELN/FILE. The output of this function is much like the combined output of \fIls\ \-l\fR and \fIstat\fR. By default, directories size is not shown. Use \fIpp\fR instead of just \fIp\fR to print directories size as well (it could take longer depending on the directory's content).
@@ -1027,7 +1027,7 @@ Just as in the \fIsearch\fR function, it is also possible to further filter the 
 .sp
 By default, the selection function operates on the current working directory. To select files in any other directory use the ":PATH" expression. For example, to select all regular files with a .conf extension in the /etc directory, the command would be: \fIs\ .*\\.conf$\ \-r :/etc\fR, or using wildcards: \fIs *.conf \-r\ :/etc\fR. Of course, you can also do just \fIs -r /etc/*.conf\fR.
 .sp
-Just as in the case of the \fIsearch\fR function, inverse matching is supported for patterns, either wildcards or regular expressions. To invert or reverse the meaning and action of a pattern, just prepend an exclamation mark (!). E.g., to select all non-hidden regular files in the Documents directory, issue this command: \fIs !^\.\ \-r :Documents\fR, or, to select all directories in /etc, except those ending with ".d": \fIs !*.d \-d :/etc\fR.
+Just as in the case of the \fIsearch\fR function, inverse matching is supported for patterns, either wildcards or regular expressions. To invert or reverse the meaning and action of a pattern, prepend an exclamation mark (!). E.g., to select all non-hidden regular files in the Documents directory, issue this command: \fIs !^\.\ \-r :Documents\fR, or, to select all directories in /etc, except those ending with ".d": \fIs !*.d \-d :/etc\fR.
 .sp
 Glob and regular expressions could be used together. For example: \fIs ^[r|R].*d$ /etc/*.conf\fR will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in the \fI/etc\fR directory. However, this use is discouraged if both patterns refer to the same directory, since the second one will probably override the result of the first one.
 .sp
@@ -1095,9 +1095,9 @@ show \fBclifm\fR version details.
 .B view \fR[\fIedit\fR [\fIAPP\fR]]
 preview files in the current directory (full screen). Requires \fBfzf\fR(1). Alt+- is also available.
 .sp
-To edit the previewer configuration file, just enter \fIview edit\fR, or \fIview edit vi\fR to open it with an specific application, in this case, \fBvi\fR(1).
+To edit the previewer configuration file, enter \fIview edit\fR, or \fIview edit vi\fR to open it with an specific application, in this case, \fBvi\fR(1).
 .sp
-By pressing Enter or Right, the currently highlighted file will be selected and \fIview\fR closed. To select multiple files just mark them with the TAB key and then press Enter or Right to confirm. To quit \fIview\fR press Escape or Left.
+By pressing Enter or Right, the currently highlighted file will be selected and \fIview\fR closed. To select multiple files, mark them with the TAB key and then press Enter or Right to confirm. To quit \fIview\fR press Escape or Left.
 .sp
 For \fBimage previews\fR consult the Wiki (\fIhttps://github.com/leo-arch/clifm/tree/master/misc/tools/imgprev\fR).
 .sp
@@ -1338,7 +1338,7 @@ NOTE 2: Some of these keybindings might not work on your console/terminal emulat
 .TP
 \fB(1)\fR This shortcut is bound to the \fIxclip\fR plugin. See the \fBPLUGINS\fR section below for more information.
 .TP
-Haiku terminal: Most of these keybindings won't work on the Haiku terminal, since Alt plays here the role Ctrl usually plays in most other systems (see the Haiku documentation). To fix this just set your custom keybindings.
+Haiku terminal: Most of these keybindings won't work on the Haiku terminal, since Alt plays here the role Ctrl usually plays in most other systems (see the Haiku documentation). To fix this, set your custom keybindings.
 .TP
 Kernel built-in console: Key sequences involving the Shift key (S-up, S-left, and S-right in our case) will just not work. Use the alternative key sequences instead: M-u, M-j, and M-k respectively
 .TP
@@ -1367,7 +1367,7 @@ In case some of these keybindings are already used by your Window Manager, you o
 .TP
 \fBCustomizing keybindings\fR
 .TP
-The above are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command (or pressing F9) or just editing the keybindings file (see the \fBFILES\fR section below) to your liking.
+The above are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command (or pressing F9), or editing the keybindings file (see the \fBFILES\fR section below) to your liking.
 .TP
 Since \fBclifm\fR does not depend on the curses library, keybindings are set up via ANSI escape codes, for example, "\e[17~" for the F6 key. The two main difficulties with ANSI escape codes are: 1) They are not intuitive at all, and 2) They vary depending on the terminal emulator used. This is why we provide a plugin (kbgen) to more easily configure your keybindings.
 .TP
@@ -1377,7 +1377,7 @@ The plugin can be found in the plugins directory as a C source file. The first s
 .TP
 \fBNote\fR: Depending on your system, you might need to link against the curses library adding either \fB-lcurses\fR or \fB-lncurses\fR to the above line. 
 .TP
-Now, just run the plugin entering './kbgen'. Use either octal, hexadecimal codes or symbols. Example: For F12 'kbgen' will print the following lines:
+Now, run the plugin by entering './kbgen'. Use either octal, hexadecimal codes or symbols. Example: For F12 'kbgen' will print the following lines:
 .sp
  Hex  | Oct  | Symbol
  ---- | ---- | ------
@@ -1880,7 +1880,7 @@ The wrong command name check is omitted if the input string:
  Is an assignment (ex: foo=var)
  It is escaped (ex: \\string)
 .TP
-The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt just modify the \fIWarningPrompt\fR line in the prompts file (via the \fIprompt edit\fR command). It defaults to
+The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt, modify the \fIWarningPrompt\fR line in the prompts file (via the \fIprompt edit\fR command). It defaults to
 
  \fB"\\[\\e[0m\\]\\[\\e[00;02;31m\\](!) > "\fR
 .TP
@@ -1897,7 +1897,7 @@ To disable this feature use the \fI--no-warning-prompt\fR command line switch or
 .TP
 The line dividing the current list of files and the prompt. It could be customized via the \fIDividingLine\fR option in the color scheme file to fit your prompt design and/or color scheme.
 .TP
-\fIDividingLine\fR accepts one or more ASCII or Unicode characters (in both cases you only need to type/paste here the chosen character(s)). If only one character is specified (by default, "-"), it will be repeatedly printed to fulfill the current line up to the right edge of the screen or terminal window. If you don't want to cover the whole line, just specify three or more characters, in which case only these characters (and no more) will be used as dividing line. For example: "------->". To use an empty line, set \fIDividingLineChar\fR to "0" (that is, as a character, not as a number). Finally, is this value is not set, a special line drawn with box-drawing characters will be used (box-drawing characters are not supported by all terminal-emulators).
+\fIDividingLine\fR accepts one or more ASCII or Unicode characters (in both cases you only need to type/paste here the chosen character(s)). If only one character is specified (by default, "-"), it will be repeatedly printed to fulfill the current line up to the right edge of the screen or terminal window. If you don't want to cover the whole line, specify three or more characters, in which case only these characters (and no more) will be used as dividing line. For example: "------->". To use an empty line, set \fIDividingLineChar\fR to "0" (that is, as a character, not as a number). Finally, is this value is not set, a special line drawn with box-drawing characters will be used (box-drawing characters are not supported by all terminal-emulators).
 .TP
 The color of this line is set via the \fIdl\fR color code in the color scheme file. Consult the \fBCOLOR CODE\fR section above for more information.
 .TP
@@ -1931,7 +1931,7 @@ Consult \fBfzf\fR(1) for more information.
 .TP
 If set neither in \fIFzfTabOptions\fR nor in \fBFZF_DEFAULT_OPTS\fR (in this order), the height of the FZF window is set to the default value: 40% of the current terminal amount of line/rows.
 .TP
-To use FZF global values (defined in \fBFZF_DEFAULT_OPTS\fR), just set \fIFzfTabOptions\fR to \fInone\fR.
+To use FZF global values (defined in \fBFZF_DEFAULT_OPTS\fR), set \fIFzfTabOptions\fR to \fInone\fR.
 .TP
 File previews are available in FZF mode via \fIshotgun\fR. See the \fBSHOTGUN\fR section above.
 .TP
@@ -2139,7 +2139,7 @@ i. Shell builtins \fB(2)\fR
 .sp
 \fBNote\fR: By default, a brief description for internal commands is suggested. You can disable this feature via the \fISuggestCmdDesc\fR option in the configuration file.
 .sp
-To accept the entire suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press \fBEnter\fR to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
+To accept the entire suggestion press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press \fBEnter\fR to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
 
 To accept the first suggested word only (up to first slash or space), press rather \fIAlt\-Right\fR or \fIAlt\-f\fR. Not available for ELN's, aliases and bookmarks names.
 
@@ -2182,9 +2182,9 @@ Plugins are just scripts or programs (written in any language) intended to add, 
 
 \fBNote\fR: In \fIstealth mode\fR, since access to configuration files is not allowed, plugins are disabled.
 
-To list available actions and the plugins they are linked to, just run \fIactions\fR.
+To list available actions and the plugins they are linked to, run \fIactions\fR.
 
-To execute a given plugin, just enter the corresponding action name (plus parameters if requiered).
+To execute a given plugin, enter the corresponding action name (plus parameters if requiered).
 
 To get information about an specific plugin, enter the action name followed by \fI--help\fR.
 
@@ -2200,7 +2200,7 @@ A convenient helper script is provided to get a consistent look across all plugi
     # shellcheck source=/dev/null
     . "$CLIFM_PLUGINS_HELPER"
 
-Plugins can talk to \fBclifm\fR via a dedicated pipe created for this purpose and exposed via an environment variable (\fBCLIFM_BUS\fR). Just write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the \fIopen\fR function, changing the current directory to the new path, if a directory, or opening it with the \fIresource opener\fR, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
+Plugins can talk to \fBclifm\fR via a dedicated pipe created for this purpose and exposed via an environment variable (\fBCLIFM_BUS\fR). Write to the pipe and \fBclifm\fR will hear and handle the message immediately after the plugin's execution. If the message is a path, \fBclifm\fR will run the \fIopen\fR function, changing the current directory to the new path, if a directory, or opening it with the \fIresource opener\fR, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
 
     \'echo "/tmp" > "$CLIFM_BUS"\' tells \fBclifm\fR to change the current directory to /tmp
 
@@ -2362,7 +2362,7 @@ To run the \fIpager.sh\fR plugin, for example, you only need to enter the corres
 .TP
 \fBNote 2\fR: An alternative files previewing function (built-in, and thereby faster than \fIBFG\fR) is provided by \fIshotgun\fR. See the \fBSHOTGUN\fR section above for more information.
 .TP
-In addition to the built\-in \fIBFG\fR previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR(1). To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
+In addition to the built\-in \fIBFG\fR previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR(1). To use \fBscope\fR, edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path to the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1.
 .TP
 .TP
 Take a look at the Wiki for more information: \fIhttps://github.com/clifm/wiki/Advanced#plugins\fR
@@ -2445,7 +2445,7 @@ The content of these files is a single instruction, either a shell command or, i
 .sp
 If a directory contains a file named \fI.cfm.in\fR, \fBclifm\fR will execute (via the system shell) its content when \fBentering\fR this directory (before listing files). If the file is named rather \fI.cfm.out\fR, its content will be executed immediately after \fBleaving\fR this directory (and before listing the new directory's content).
 .sp
-For example, if you want a simple notification whenever you enter or leave your home directory, just create both \fI.cfm.in\fR and \fI.cfm.out\fR files in the home directory with the following content:
+For example, if you want a simple notification whenever you enter or leave your home directory, create both \fI.cfm.in\fR and \fI.cfm.out\fR files in the home directory with the following content:
 .sp
 For \fI.cfm.in\fR:
    printf "Entering %s ...\\n" "$PWD"
@@ -2589,7 +2589,7 @@ Let's suppose you have a tag named \fIwork\fR which contains ten tagged files, b
 .sp
  \fBp t:work<TAB>\fR
 
-The list of files tagged as \fIwork\fR will be displayed via FZF. Now just mark the two files you need using \fBTAB\fR, press \fBEnter\fR or \fBRight\fR, and the full path to both files will be inserted into the command line. So, '\fBp t:work\fR' will be replaced by '\fBp /path/to/work1.odt /path/to/work2.odt\fR'.
+The list of files tagged as \fIwork\fR will be displayed via FZF. Now mark the two files you need using \fBTAB\fR, press \fBEnter\fR or \fBRight\fR, and the full path to both files will be inserted into the command line. So, '\fBp t:work\fR' will be replaced by '\fBp /path/to/work1.odt /path/to/work2.odt\fR'.
 
 .SH 16. VIRTUAL DIRECTORIES
 CliFM is able to read and list files from the standard input stream (STDIN). Each file in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
@@ -2647,7 +2647,7 @@ Of course, individual files can also be used:
 .sp
 Once executed, the vt plugin will launch a new instance of CliFM (on a new terminal emulator window) where you can operate on the specified files as if they were just normal files. Once done, quit this new instance (via the \fIq\fR command) to return to the primary instance of CliFM.
 .sp
-\fBNote\fR: By default, the terminal emulator used is \fBxterm\fR(1), but can easily be customized by just editing the plugin script (\fIvirtualize.sh\fR).
+\fBNote\fR: By default, the terminal emulator used is \fBxterm\fR(1), but it can be changed by editing the plugin script (\fIvirtualize.sh\fR).
 .sp
 If navigating the file system, you can quickly go back to the virtual directory using the \fI\-d\fR option: \fIvt -d\fR. The navigation keys (see the \fBKEYBOARD SHORTCUTS\fR section above) and the \fBCLIFM_VIRTUAL_DIR\fR environment variable are also available (\fIShift\-Left\fR/\fIShift\-Right\fR or \fRcd $CLIFM_VIRTUAL_DIR\fR).
 .sp
@@ -2906,7 +2906,7 @@ By default, \fBclifm\fR starts in the current working directory. However, you ca
 .SH 22. FILES
 .TP
 .B CONFIGURATION FILE
-The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/local/share/clifm\fR), and if not found, it will be created anew with default values. Here you can permanently set up \fBclifm\fR options, define aliases, prompt commands, and autocommands. You can access the configuration file either via the \fIconfig\fR command (or \fIedit\fR) or just pressing F10.
+The main configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/local/share/clifm\fR), and if not found, it will be created anew with default values. Here you can permanently set up \fBclifm\fR options, define aliases, prompt commands, and autocommands. You can access the configuration file either via the \fIconfig\fR command or pressing F10.
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
 .TP
@@ -2924,7 +2924,7 @@ The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings,cfm\fR. It will be
 The directory used to store programs or scripts pointed to by actions (in other words, plugins) is \fIDATADIR/clifm/plugins\fR (usually \fI/usr/share/clifm/plugins\fR). To edit these plugins copy them to \fI$XDG_CONFIG_HOME/clifm/plugins\fR and edit them to your liking. Plugins in this local directory take precedence over those in the system one.
 .TP
 .B COLORS DIRECTORY
-This directory, \fI$DATADIR/clifm/colors\fR, contains available color schemes (or just themes) as files with a \fI.clifm\fR extension. You can copy these themes to the local colors directory (\fI$XDG_CONFIG_HOME/clifm/colors\fR) and edit them to your liking (or just create new themes from the ground up). Themes in the local colors directory take precedence over those in the system directory. You can create as many themes as you want by just dropping them into the local colors directory. The default color scheme file (\fIdefault.clifm\fR) can be used as a guide.
+This directory, \fI$DATADIR/clifm/colors\fR, contains available color schemes (or just themes) as files with a \fI.clifm\fR extension. You can copy these themes to the local colors directory (\fI$XDG_CONFIG_HOME/clifm/colors\fR) and edit them to your liking (or create new themes from the ground up). Themes in the local colors directory take precedence over those in the system directory. You can create as many themes as you want by dropping them into the local colors directory. The default color scheme file (\fIdefault.clifm\fR) can be used as a guide.
 .TP
 .B ACTIONS FILE
 The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.clifm\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
