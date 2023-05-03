@@ -1,27 +1,36 @@
-# Keybindings file for CliFM
+                ##############################
+                # Keybindings file for CliFM #
+                ##############################
+
+# Empty and commented lines are omitted.
 
 # Emacs style key escapes are the simplest way of setting your
 # keybindings. For example, use "action:\C-t" to bind the action name
 # 'action' to Ctrl-t
-# Note: available action names are defined below
+# Note: Available action names are defined below
 
 # If you need some more control, hex, octal, and decimal notation is
-# also supported (this is needed for example for function keys). For
+# supported as well (this is needed for example for function keys). For
 # the sake of simplicity, CliFM provides a plugin to easily get the
 # adequate codes.
-# Use the 'kbgen' plugin (compile it first: gcc -o kbgen kbgen.c) to 
-# find out the escape code for the key o key sequence you want. Use 
+
+# Use the 'kbgen' plugin (compile it first: 'gcc -o kbgen kbgen.c') to
+# find out the escape code for the key or key sequence you want. Use
 # either octal, hexadecimal codes or symbols.
-# Ex: For Alt-/ (in rxvt terminals) 'kbgen' will print the following 
+#
+# Example: For Alt-/ (in rxvt terminals) 'kbgen' will print the following
 # lines:
+#
 # Hex  | Oct | Symbol
 # ---- | ---- | ------
 # \x1b | \033 | ESC (\e)
 # \x2f | \057 | /
+#
 # In this case, the keybinding, if using symbols, is: "\e/:function"
 # In case you prefer the hex codes it would be: \x1b\x2f:function.
 # GNU emacs escape sequences are also allowed (ex: "\M-a", Alt-a
 # in most keyboards, or "\C-r" for Ctrl-r).
+
 # Some codes, especially those involving keys like Ctrl or the arrow
 # keys, vary depending on the terminal emulator and the system settings.
 # These keybindings should be set up thus on a per terminal basis.

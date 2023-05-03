@@ -999,7 +999,7 @@ create_actions_file(char *file)
 		"# bound to an executable file located either in "
 		"DATADIR/clifm/plugins\n"
 		"# (usually /usr/local/share/clifm/plugins) or in "
-		"$XDG_CONFIG_HOME/clifm/plugins.\n"
+		"$XDG_CONFIG_HOME/clifm/plugins (usually ~/.config/clifm/plugins).\n"
 		"# Actions can be executed directly from "
 		"%s command line, as if they\n"
 		"# were any other command, and the associated "
@@ -2148,9 +2148,9 @@ create_bm_file(void)
 	}
 
 	fprintf(fp, "### This is the bookmarks file for %s ###\n\n"
-		    "# Empty and commented lines are ommited\n"
-		    "# Make your changes, save, and exit\n"
-		    "# To remove a bookmark, delete the corresponding line, save, and exit\n"
+		    "# Empty and commented lines are omitted.\n\n"
+		    "# Make your changes, save, and exit.\n\n"
+		    "# To remove a bookmark, delete the corresponding line, save, and exit\n\n"
 		    "# Changes are applied automatically at exit (to cancel just quit the editor).\n\n"
 		    "# The bookmarks syntax is: [shortcut]name:path\n"
 		    "# Example:\n"

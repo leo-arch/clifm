@@ -3,13 +3,13 @@
                   #      CliFM's files previewer       #
                   ######################################
 
-# Commented and blank lines are omitted
+# Commented and blank lines are omitted.
 
 # It is recommended to edit this file setting your preferred applications
-# first: the previewing process will be smoother and faster this way
-# You can even remove whatever applications you don't use
+# first: the previewing process will be smoother and faster this way.
+# You can even remove whatever applications you don't use.
 
-# For syntax details consult the mimelist.clifm file
+# For syntax details consult the mimelist.clifm file (via 'mm edit')
 
 # Uncomment this line to use pistol (or any other previewing script)
 #.*=pistol
