@@ -721,15 +721,15 @@ print_tips(const int all)
 		size_t i;
 		for (i = 0; i < tipsn; i++) {
 			printf("%s%sTIP %zu%s: %s\n",
-				conf.colorize ? df_c : "", conf.colorize ? BOLD : "",
-				i, conf.colorize ? df_c : "", TIPS[i]);
+				conf.colorize == 1 ? df_c : "", conf.colorize == 1 ? BOLD : "",
+				i, conf.colorize == 1 ? df_c : "", TIPS[i]);
 		}
 		return;
 	}
 
 	srand((unsigned int)time(NULL));
-	printf("%s%sTIP%s: %s\n", conf.colorize ? df_c : "",
-		conf.colorize ? BOLD : "", conf.colorize ? df_c : "",
+	printf("%s%sTIP%s: %s\n", conf.colorize == 1 ? df_c : "",
+		conf.colorize == 1 ? BOLD : "", conf.colorize == 1 ? df_c : "",
 		TIPS[rand() % (int)tipsn]);
 }
 
@@ -854,15 +854,10 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 			free((*cmd)[i]);
 		free(*cmd);
 	} else {
-/*		fprintf(stderr, _("%s: No option specified for '%s'\n"
-				"Trying '%s -e %s %s'\n"), PROGRAM_NAME, conf.term,
-				conf.term, *self, workspaces[cur_ws].path); */
 		if (sudo) {
-//			char *tcmd[] = {conf.term, "-e", *_sudo, *self, *dir, NULL};
 			char *tcmd[] = {conf.term, *_sudo, *self, *dir, NULL};
 			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
 		} else {
-//			char *tcmd[] = {conf.term, "-e", *self, *dir, NULL};
 			char *tcmd[] = {conf.term, *self, *dir, NULL};
 			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
 		}
@@ -1267,16 +1262,19 @@ expand_prompt_name(char *name)
 			continue;
 		if (prompts[i].regular) {
 			free(conf.encoded_prompt);
-			conf.encoded_prompt = savestring(prompts[i].regular, strlen(prompts[i].regular));
+			conf.encoded_prompt = savestring(prompts[i].regular,
+				strlen(prompts[i].regular));
 		}
 		if (prompts[i].warning) {
 			free(conf.wprompt_str);
-			conf.wprompt_str = savestring(prompts[i].warning, strlen(prompts[i].warning));
+			conf.wprompt_str = savestring(prompts[i].warning,
+				strlen(prompts[i].warning));
 		}
 		prompt_notif = prompts[i].notifications;
 		conf.warning_prompt = prompts[i].warning_prompt_enabled;
 
-		xstrsncpy(cur_prompt_name, prompts[i].name, sizeof(cur_prompt_name) - 1);
+		xstrsncpy(cur_prompt_name, prompts[i].name,
+			sizeof(cur_prompt_name) - 1);
 		return EXIT_SUCCESS;
 	}
 
@@ -1993,7 +1991,7 @@ int
 list_commands(void)
 {
 	char cmd[PATH_MAX];
-	snprintf(cmd, PATH_MAX - 1, "export PAGER=\"less -p '^[0-9]+\\.[[:space:]]COMMANDS'\"; man %s\n",
+	snprintf(cmd, sizeof(cmd), "export PAGER=\"less -p '^[0-9]+\\.[[:space:]]COMMANDS'\"; man %s\n",
 			PNL);
 	if (launch_execle(cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -2175,7 +2173,7 @@ print_search_topic(void)
 static int
 print_theming_topic(void)
 {
-	puts(_("Take a look at the 'colorschemes', 'prompt', and 'edit' commands"));
+	puts(_("Take a look at the 'colorschemes', 'prompt', and 'config' commands"));
 	print_more_info();
 	return EXIT_SUCCESS;
 }
@@ -2360,48 +2358,50 @@ void
 bonus_function(void)
 {
 	char *phrases[] = {
-	    "\"Vamos Boca Juniors Carajo!\" (La mitad + 1)",
-	    "\"Hey! Look behind you! A three-headed monkey! (G. Threepweed)",
-	    "\"Free as in free speech, not as in free beer\" (R. M. S)",
-	    "\"Nothing great has been made in the world without passion\" (G. W. F. Hegel)",
-	    "\"Simplicity is the ultimate sophistication\" (Leo Da Vinci)",
-	    "\"Yo vendí semillas de alambre de púa, al contado, y me lo agradecieron\" (Marquitos, 9 Reinas)",
-	    "\"I'm so happy, because today I've found my friends, they're in my head\" (K. D. Cobain)",
-	    "\"The best code is written with the delete key\" (Someone, somewhere, sometime)",
-	    "\"I'm selling these fine leather jackets\" (Indy)",
-	    "\"I pray to God to make me free of God\" (Meister Eckhart)",
-	    "¡Truco y quiero retruco mierda!",
-	    "\"The are no facts, only interpretations\" (F. Nietzsche)",
-	    "\"This is a lie\" (The liar paradox)",
-	    "\"There are two ways to write error-free programs; only the third one works\" (Alan J. Perlis)",
-	    "The man who sold the world was later sold by the big G",
-	    "A programmer is always one year older than themself",
-	    "A smartphone is anything but smart",
-	    "And he did it: he killed the one who killed him",
-	    ">++('>",
-	    ":(){:|:&};:",
-	    "Keep it simple, stupid",
-	    "If ain't broken, brake it",
-	    "\"I only know that I know nothing\" (Socrates)",
-	    "(Learned) Ignorance is the true outcome of wisdom (Nicholas "
-	    "of Cusa)",
-	    "True intelligence is about questions, not answers",
-	    "Humanity is just an arrow released towards God",
-	    "Buzz is right: infinity is our only and ultimate aim",
-	    "That stain will never ever be erased (La 12)",
-	    "\"A work of art is never finished, but adandoned\" (J. L. Guerrero)",
-	    "At the beginning, software was hardware; but today hardware is "
-	    "being absorbed by software",
-	    "\"Juremos con gloria morir\"",
-	    "\"Given enough eyeballs, all bugs are shallow.\" (Linus' law)",
-	    "\"We're gonna need a bigger boat.\" (Caleb)",
-	    "\"Ein Verletzter, Alarm, Alarm!\"",
-	    "\"There is not knowledge that is not power\"",
-	    "idkfa",
-	    "\"Computer updated [...] Establish communications, priority alpha\"",
-	    "\"Step one: find plans, step two: save world, step three: get out of my house!\"",
-	    "\"Leave my loneliness unbroken!, quit the bust above my door! Quoth the raven: Nevermore.\"",
-	    NULL};
+		"\"Vamos Boca Juniors Carajo!\" (La mitad + 1)",
+		"\"Hey! Look behind you! A three-headed monkey! (G. Threepweed)",
+		"\"Free as in free speech, not as in free beer\" (R. M. S)",
+		"\"Nothing great has been made in the world without passion\" (G. W. F. Hegel)",
+		"\"Simplicity is the ultimate sophistication\" (Leo Da Vinci)",
+		"\"Yo vendí semillas de alambre de púa, al contado, y me lo agradecieron\" (Marquitos, 9 Reinas)",
+		"\"I'm so happy, because today I've found my friends, they're in my head\" (K. D. Cobain)",
+		"\"The best code is written with the delete key\" (Someone, somewhere, sometime)",
+		"\"I'm selling these fine leather jackets\" (Indy)",
+		"\"I pray to God to make me free of God\" (Meister Eckhart)",
+		"¡Truco y quiero retruco mierda!",
+		"\"The are no facts, only interpretations\" (F. Nietzsche)",
+		"\"This is a lie\" (The liar paradox)",
+		"\"There are two ways to write error-free programs; only the third one works\" (Alan J. Perlis)",
+		"The man who sold the world was later sold by the big G",
+		"A programmer is always one year older than themself",
+		"A smartphone is anything but smart",
+		"And he did it: he killed the man who killed him",
+		">++('>",
+		":(){:|:&};:",
+		"Keep it simple, stupid",
+		"If ain't broken, brake it",
+		"\"I only know that I know nothing\" (Socrates)",
+		"(Learned) Ignorance is the true outcome of wisdom (Nicholas "
+		"of Cusa)",
+		"True intelligence is about questions, not answers",
+		"Humanity is just an arrow released towards God",
+		"Buzz is right: infinity is our only and ultimate aim",
+		"That stain will never ever be erased (La 12)",
+		"\"Una obra de arte no se termina, se abandona\" (L. J. Guerrero)",
+		"At the beginning, software was hardware; but today hardware is "
+		"being absorbed by software",
+		"\"Juremos con gloria morir\"",
+		"\"Given enough eyeballs, all bugs are shallow.\" (Linus' law)",
+		"\"We're gonna need a bigger boat.\" (Caleb)",
+		"\"Ein Verletzter, Alarm, Alarm!\"",
+		"\"There is not knowledge that is not power\"",
+		"idkfa",
+		"This is the second best file manager I've ever seen!",
+		"\"La inmortalidad es baladí\" (J. L. Borges)",
+		"\"Computer updated [...] Establish communications, priority alpha\"",
+		"\"Step one: find plans, step two: save world, step three: get out of my house!\"",
+		"\"Leave my loneliness unbroken!, quit the bust above my door! Quoth the raven: Nevermore.\" (E. A. Poe)",
+		NULL};
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
 	srand((unsigned int)time(NULL));
