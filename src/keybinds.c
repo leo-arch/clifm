@@ -2111,6 +2111,10 @@ rl_toggle_virtualdir_full_paths(int count, int key)
 	}
 
 	xchmod(stdin_tmp_dir, "0500", 1);
+
+	if (conf.clear_screen == 0)
+		putchar('\n');
+
 	reload_dirlist();
 	print_reload_msg(_("Switched to %s names\n"),
 		xargs.virtual_dir_full_paths == 1 ? _("long") : _("short"));
