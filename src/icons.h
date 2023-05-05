@@ -638,7 +638,6 @@ struct icons_t icon_dirnames[] = {
     {"Public", ICON_PUBLIC, DEF_DIR_ICON_COLOR},
     {"Steam", ICON_STEAM, DEF_DIR_ICON_COLOR},
     {"Templates", ICON_TEMPLATES, DEF_DIR_ICON_COLOR},
-//    {"Trash", ICON_TRASH, DEF_DIR_ICON_COLOR},
     {"Videos", ICON_VIDEOS, DEF_DIR_ICON_COLOR},
 };
 

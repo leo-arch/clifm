@@ -535,7 +535,7 @@ get_longest_filename(const int n, const int pad)
 
 	while (--i >= 0) {
 		size_t total_len = 0;
-		file_info[i].eln_n = conf.no_eln ? -1 : DIGINUM(i + 1);
+		file_info[i].eln_n = conf.no_eln == 1 ? -1 : DIGINUM(i + 1);
 
 		size_t blen = file_info[i].len;
 		if (file_info[i].len > (size_t)conf.max_name_len)
@@ -545,17 +545,17 @@ get_longest_filename(const int n, const int pad)
 
 		file_info[i].len = blen;
 
-		if (!conf.long_view && conf.classify) {
+		if (conf.long_view == 0 && conf.classify == 1) {
 			if (file_info[i].dir)
 				total_len++;
 
-			if (file_info[i].filesn > 0 && conf.files_counter)
+			if (file_info[i].filesn > 0 && conf.files_counter == 1)
 				total_len += DIGINUM(file_info[i].filesn);
 
-			if (!file_info[i].dir && !conf.colorize) {
+			if (file_info[i].dir == 0 && conf.colorize == 0) {
 				switch (file_info[i].type) {
 				case DT_REG:
-					if (file_info[i].exec)
+					if (file_info[i].exec == 1)
 						total_len++;
 					break;
 				case DT_BLK:  /* fallthrough */
@@ -571,21 +571,14 @@ get_longest_filename(const int n, const int pad)
 
 		if (total_len > longest) {
 			longest_index = i;
-			if (conf.listing_mode == VERTLIST) {
+			if (conf.listing_mode == VERTLIST || max_files == UNSET
+			|| i < max_files)
 				longest = total_len;
-			} else {
-				if (max_files == UNSET) {
-					longest = total_len;
-				} else {
-					if (i < max_files)
-						longest = total_len;
-				}
-			}
 		}
 	}
 
 #ifndef _NO_ICONS
-	if (conf.icons && !conf.long_view && conf.columned)
+	if (conf.icons == 1 && conf.long_view == 0 && conf.columned == 1)
 		longest += 3;
 #endif
 
@@ -602,23 +595,20 @@ get_longest_filename(const int n, const int pad)
 	 * */
 
 	longest_fc = 0;
-	if (conf.max_name_len != UNSET && file_info[longest_index].dir == 1) {
-		if (file_info[longest_index].filesn > 0 && conf.files_counter == 1) {
-			/* We add 1 here to count the slash between the dir name
-			 * and the files counter too. However, in doing this the space
-			 * between the trimmed file name and the next column is too
-			 * tight (only one). By not adding it we get an extra space
-			 * to relax a bit the space between columns */
-/*			longest_fc = DIGINUM(file_info[longest_index].filesn) + 1; */
-			longest_fc = DIGINUM(file_info[longest_index].filesn);
-			size_t t = (size_t)pad + (size_t)conf.max_name_len + 1 + longest_fc;
-			if (t > longest)
-				longest_fc -= t - longest;
-			if ((int)longest_fc < 0)
-				longest_fc = 0;
-		}
-/*		else
-			longest_fc = 1; */
+	if (conf.max_name_len != UNSET && file_info[longest_index].dir == 1
+	&& file_info[longest_index].filesn > 0 && conf.files_counter == 1) {
+		/* We add 1 here to count the slash between the dir name
+		 * and the files counter too. However, in doing this the space
+		 * between the trimmed file name and the next column is too
+		 * tight (only one). By not adding it we get an extra space
+		 * to relax a bit the space between columns */
+/*		longest_fc = DIGINUM(file_info[longest_index].filesn) + 1; */
+		longest_fc = DIGINUM(file_info[longest_index].filesn);
+		size_t t = (size_t)pad + (size_t)conf.max_name_len + 1 + longest_fc;
+		if (t > longest)
+			longest_fc -= t - longest;
+		if ((int)longest_fc < 0)
+			longest_fc = 0;
 	}
 }
 
@@ -980,21 +970,21 @@ print_entry_nocolor(int *ind_char, const int i, const int pad, const int _max)
 	if (conf.icons == 1) {
 		if (conf.no_eln == 1) {
 			if (_trim > 0) {
-				xprintf("%c%s%ls%s%c%s", file_info[i].sel ? SELFILE_CHR : ' ',
+				xprintf("%c%s %ls%s%c%s", file_info[i].sel ? SELFILE_CHR : ' ',
 					file_info[i].icon, (wchar_t *)n, trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
-				xprintf("%c%s%s", file_info[i].sel ? SELFILE_CHR : ' ',
+				xprintf("%c%s %s", file_info[i].sel ? SELFILE_CHR : ' ',
 				file_info[i].icon, n);
 			}
 		} else {
 			if (_trim > 0) {
-				xprintf("%s%*d%s%c%s%ls%s%c%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%*d%s%c%s %ls%s%c%s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', file_info[i].icon,
 					(wchar_t *)n, trim_diff, TRIMFILE_CHR,
 					_trim == TRIM_EXT ? file_info[i].ext_name : "");
 			} else {
-				xprintf("%s%*d%s%c%s%s", el_c, pad, i + 1, df_c,
+				xprintf("%s%*d%s%c%s %s", el_c, pad, i + 1, df_c,
 					file_info[i].sel ? SELFILE_CHR : ' ', file_info[i].icon, n);
 			}
 		}

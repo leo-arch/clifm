@@ -559,6 +559,12 @@ extern int watch;
 
 #define MAX_TIME_STR 256
 
+#define SHADE_TYPE_UNSET     0
+#define SHADE_TYPE_8COLORS   1
+#define SHADE_TYPE_256COLORS 2
+#define SHADE_TYPE_TRUECOLOR 3
+#define NUM_SHADES 6
+
 /* Function macros */
 #define itoa xitoa /* itoa does not exist in some OS's */
 #define atoi xatoi /* xatoi is just a secure atoi */
@@ -704,11 +710,6 @@ struct config_t {
 	int fzf_preview;
 	int highlight;
 	int icons;
-/*#ifndef _NO_ICONS
-	int icons;
-#else
-	int pad1; // Keep the struct alignment
-#endif // !_NO_ICONS */
 	int light_mode;
 	int list_dirs_first;
 	int listing_mode;
@@ -720,9 +721,7 @@ struct config_t {
 	int max_jump_total_rank;
 	int max_log;
 	int max_name_len;
-
 	int max_name_len_bk;
-
 	int max_path;
 	int max_printselfiles;
 	int min_jump_rank;
@@ -746,9 +745,7 @@ struct config_t {
 	int suggest_filetype_color;
 	int suggestions;
 	int tips;
-
 	int trim_names;
-
 #ifndef _NO_TRASH
 	int tr_as_rm;
 #else
@@ -1009,9 +1006,7 @@ struct param_t {
 	int max_files;
 	int max_path;
 	int mount_cmd;
-
 	int no_bold;
-
 	int no_dirjump;
 	int noeln;
 	int only_dirs;
@@ -1182,13 +1177,7 @@ struct history_t {
 };
 extern struct history_t *history;
 
-#define SHADE_TYPE_UNSET     0
-#define SHADE_TYPE_8COLORS   1
-#define SHADE_TYPE_256COLORS 2
-#define SHADE_TYPE_TRUECOLOR 3
-
-#define NUM_SHADES 6
-// Structs to hold color info for size and date fields in file properties
+/* Structs to hold color info for size and date fields in file properties */
 struct rgb_t {
 	uint8_t attr;
 	uint8_t R;
@@ -1386,7 +1375,7 @@ extern size_t
 	usrvar_n,
 	zombies;
 
-#if !defined(_NO_ICONS)
+#ifndef _NO_ICONS
 extern size_t *name_icons_hashes;
 extern size_t *dir_icons_hashes;
 extern size_t *ext_icons_hashes;
