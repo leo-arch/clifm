@@ -843,7 +843,7 @@ check_regex(char *str)
 	}
 
 	/* And if STR is not a file name, take it as a possible regex */
-	if (char_found) {
+	if (char_found == 1) {
 		if (access(str, F_OK) == -1)
 			return EXIT_SUCCESS;
 	}
@@ -852,7 +852,7 @@ check_regex(char *str)
 }
 
 /* Returns the parsed aliased command in an array of strings if
- * matching alias is found, or NULL if not */
+ * matching alias is found, or NULL if not. */
 char **
 check_for_alias(char **args)
 {
@@ -882,13 +882,8 @@ check_for_alias(char **args)
 
 		args_n = 0; /* Reset args_n to be used by parse_input_str() */
 
-		/* Parse the aliased cmd */
 		char **alias_comm = parse_input_str(aliases[i].cmd);
 		if (!alias_comm) {
-//			args_n = 0;
-			/* The error message should have been printed by parse_input_str()
-			xerror(_("%s: Aliased command exited with error\n"), PROGRAM_NAME); */
-
 			flags |= FAILED_ALIAS; /* Prevent exec_cmd() from being executed */
 			return (char **)NULL;
 		}
@@ -903,7 +898,6 @@ check_for_alias(char **args)
 			}
 		}
 
-		/* Add a terminating NULL string */
 		alias_comm[args_n + 1] = (char *)NULL;
 
 		/* Free original command */

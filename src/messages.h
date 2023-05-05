@@ -665,8 +665,8 @@ To get information about a device, enter iELN. For example: i12"
   mp, mountpoints\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - List available mountpoints\n\
-    mp\n\
-  Once here, select the mountpoint you want to change to"
+    mp (or Alt-m)\n\
+  Once there, select the mountpoint you want to change to"
 
 #define NET_USAGE "Manage network resources\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
@@ -676,7 +676,7 @@ To get information about a device, enter iELN. For example: i12"
     net (or 'net list')\n\
 - Mount the remote resource named 'work'\n\
     net mount work (also 'net m work' or 'net m <TAB>')\n\
-  Note: Since 'mount' is the default action, it can be ommited: 'net work'\n\
+  Note: Since 'mount' is the default action, it can be omitted: 'net work'\n\
 - Unmount the remote resource named 'work'\n\
     net unmount work (or 'net u work' or 'net u <TAB>')\n\
 - Open/edit the net configuration file\n\

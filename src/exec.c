@@ -2454,8 +2454,9 @@ exec_cmd(char **comm)
 	}
 
 	/*     ############### SELECTION ##################     */
-	else if (*comm[0] == 's' && (!comm[0][1] || strcmp(comm[0], "sel") == 0))
+	else if (*comm[0] == 's' && (!comm[0][1] || strcmp(comm[0], "sel") == 0)) {
 		return (exit_code = sel_function(comm));
+	}
 
 	else if (*comm[0] == 's' && (strcmp(comm[0], "sb") == 0
 	|| strcmp(comm[0], "selbox") == 0)) {

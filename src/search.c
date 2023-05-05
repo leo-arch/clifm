@@ -684,7 +684,7 @@ search_regex(char **args, const int invert, const int case_sens)
 
 	size_t found = 0;
 	int *regex_index = (int *)xnmalloc((search_path ? (size_t)tmp_files
-					: files) + 1, sizeof(int));
+		: files) + 1, sizeof(int));
 
 	for (i = 0; i < (search_path ? (size_t)tmp_files : files); i++) {
 		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
