@@ -632,6 +632,7 @@ set_long_attribs(const int n, const struct stat *attr)
 		char name[PATH_MAX]; *name = '\0';
 		if (file_info[n].type == DT_LNK) /* Symlink to directory */
 			snprintf(name, sizeof(name), "%s/", file_info[n].name);
+
 		file_info[n].size = dir_size(*name ? name : file_info[n].name, 0,
 			&file_info[n].du_status);
 	} else {
@@ -774,10 +775,12 @@ get_ext_info(const int i, int *_trim, size_t *ext_len)
 {
 	if (file_info[i].ext_name) {
 		*_trim = TRIM_EXT;
-		if (conf.unicode == 0)
-			*ext_len = file_info[i].len - (size_t)(file_info[i].ext_name - file_info[i].name);
-		else
+		if (conf.unicode == 0) {
+			*ext_len = file_info[i].len - (size_t)(file_info[i].ext_name
+				- file_info[i].name);
+		} else {
 			*ext_len = wc_xstrlen(file_info[i].ext_name);
+		}
 
 		if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
 			*ext_len = 0;
@@ -790,10 +793,12 @@ get_ext_info(const int i, int *_trim, size_t *ext_len)
 	if (e && e != file_info[i].name && *(e + 1)) {
 		file_info[i].ext_name = e;
 		*_trim = TRIM_EXT;
-		if (conf.unicode == 0)
-			*ext_len = file_info[i].len - (size_t)(file_info[i].ext_name - file_info[i].name);
-		else
+		if (conf.unicode == 0) {
+			*ext_len = file_info[i].len - (size_t)(file_info[i].ext_name
+				- file_info[i].name);
+		} else {
 			*ext_len = wc_xstrlen(file_info[i].ext_name);
+		}
 
 		if ((int)*ext_len >= conf.max_name_len || (int)*ext_len <= 0) {
 			*ext_len = 0;
