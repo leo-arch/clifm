@@ -161,7 +161,7 @@ char
 
     /* Extensions */
     ICON_ACCESS[] = FILE_ACCESS,
-    ICON_ARCHIVE[] = FA_FILE_ARCHIVE_O,
+    ICON_ARCHIVE[] = FA_ARCHIVE,
     ICON_AUDIO[] = FA_FILE_AUDIO_O,
     ICON_BINARY[] = OCT_FILE_BINARY,
     ICON_C[] = MFIZZ_C,
@@ -178,7 +178,7 @@ char
     ICON_CSHARP[] = MFIZZ_CSHARP,
     ICON_CSS[] = MFIZZ_CSS3_ALT,
     ICON_DART[] = DEV_DART,
-    ICON_DATABASE[] = MFIZZ_DATABASE_ALT2,
+    ICON_DATABASE[] = FA_DATABASE,
     ICON_DIFF[] = FILE_DIFF,
     ICON_DOCKER[] = MFIZZ_DOCKER,
     ICON_ELECTRON[] = FILE_ELECTRON,
@@ -416,6 +416,9 @@ struct icons_t icon_ext[] = {
 
     {"bash", ICON_SCRIPT, WHITE},
     {"bat", ICON_SCRIPT, WHITE},
+#if defined(_ICONS_IN_TERMINAL)
+    {"bib", FILE_BIBTEX, B_WHITE},
+#endif
     {"bin", ICON_EXEC, WHITE},
     {"bmp", ICON_IMG, GREEN},
     {"bz2", ICON_ARCHIVE, YELLOW},
@@ -596,6 +599,9 @@ struct icons_t icon_ext[] = {
     {"t", ICON_PERL, YELLOW},
     {"tar", ICON_ARCHIVE, YELLOW},
     {"tbz2", ICON_ARCHIVE, YELLOW},
+#if defined(_ICONS_IN_TERMINAL)
+    {"tex", FILE_TEX, B_WHITE},
+#endif
     {"tgz", ICON_ARCHIVE, YELLOW},
     {"tiff", ICON_IMG, GREEN},
     {"toml", ICON_CONF, WHITE},
