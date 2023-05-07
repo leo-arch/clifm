@@ -85,6 +85,7 @@
 #define NERD_HASKELL       ""
 #define NERD_HTML          "󰗀"
 #define NERD_REACT         ""
+#define NERD_ROM           ""
 #define NERD_PYTHON        ""
 #define NERD_DATABASE      ""
 #define NERD_PLAYLIST      "󰐑"
