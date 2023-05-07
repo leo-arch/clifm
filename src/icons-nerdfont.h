@@ -108,6 +108,7 @@
 #define NERD_PHP           "󰌟"
 #define NERD_PLAYLIST      "󰲸"
 #define NERD_PYTHON        ""
+#define NERD_R             "󰟔"
 #define NERD_REACT         ""
 #define NERD_ROM           ""
 #define NERD_RSS           ""
