@@ -42,6 +42,7 @@
 #define ICONS_EMOJI
 
 #define EMOJI_ARCHIVE "📦"
+#define EMOJI_ASM EMOJI_C
 #define EMOJI_AUDIO "🎵"
 #define EMOJI_BINARY "📓"
 #define EMOJI_BRIEFCASE "💼"
@@ -87,7 +88,6 @@
 #define EMOJI_MARKDOWN "⬇ "
 #define EMOJI_MOVIE "🎬"
 #define EMOJI_MUSIC "🎧"
-#define EMOJI_NASM EMOJI_C
 #define EMOJI_NOTE "📝"
 #define EMOJI_OCAML "🐫"
 #define EMOJI_PATCH "🩹"
