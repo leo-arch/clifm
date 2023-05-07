@@ -39,7 +39,7 @@
 
 /* Generics */
 #define NERD_DIRECTORY     ""
-#define NERD_FILE          ""
+#define NERD_FILE          ""
 #define NERD_EXEC          ""
 #define NERD_MANUAL        "󱓷"
 #define NERD_LINK          ""
@@ -112,7 +112,7 @@
 #define NERD_RSS           ""
 #define NERD_PERL          ""
 
-#define NERD_TXT           NERD_FILE
+#define NERD_TXT           ""
 #define NERD_VIM           ""
 #define NERD_BINARY        ""
 #define NERD_LOCK          ""
