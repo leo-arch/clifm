@@ -104,7 +104,7 @@
 #define EMOJI_PHOTO "📸"
 #define EMOJI_PICTURE "📷"
 #define EMOJI_PLAYLIST EMOJI_MUSIC
-#define EMOJI_POSTSCRIPT EMOJI_CODE
+#define EMOJI_POSTSCRIPT EMOJI_PDF
 #define EMOJI_PRESENTATION "📙"
 #define EMOJI_PUBLIC "👁 "
 #define EMOJI_PYTHON "🐍"
