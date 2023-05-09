@@ -683,7 +683,7 @@ get_ind_char(const int index, int *ind_chr)
 {
 	int print_ind_char = (conf.color_lnk_as_target == 1
 		&& file_info[index].symlink == 1 && follow_symlinks == 1
-		&& conf.icons == 0);
+		&& conf.icons == 0 && conf.light_mode == 0);
 
 	*ind_chr = file_info[index].sel == 1 ? SELFILE_CHR
 		: (print_ind_char == 1 ? LINK_CHR : ' ');
@@ -1877,7 +1877,6 @@ list_dir_light(void)
 			if (conf.icons == 1) {
 				file_info[n].icon = DEF_DIR_ICON;
 				file_info[n].icon_color = DEF_DIR_ICON_COLOR;
-//				get_dir_icon(file_info[n].name, (int)n);
 				/* If set from the color scheme file */
 				if (*dir_ico_c)
 					file_info[n].icon_color = dir_ico_c;
