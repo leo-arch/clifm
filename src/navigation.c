@@ -780,11 +780,11 @@ change_to_path(char *new_path, const int cd_flag)
 
 		free(q);
 
-		/* Most shells return 1 in case of EACCESS error. However, 1, as a
-		 * general error code, is not quite informative. Why not to return the
+		/* Most shells return 1 in case of EACCESS/ENOENT error. However, 1, as
+		 * a general error code, is not quite informative. Why not to return the
 		 * actual error code returned by chdir(3)? Note that POSIX only requires
 		 * for cd to return >0 in case of error (see cd(1p)). */
-		if (err == EACCES)
+		if (err == EACCES || err == ENOENT)
 			return EXIT_FAILURE;
 
 		return err;
