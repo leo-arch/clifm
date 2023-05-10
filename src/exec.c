@@ -624,6 +624,13 @@ construct_shell_cmd(char **args)
 static inline int
 check_shell_cmd_condtions(char **args)
 {
+	/* No shell command ends with a slash */
+	size_t len = (args && args[0]) ? strlen(args[0]) : 0;
+	if (len && args[0][len - 1] == '/') {
+		xerror("cd: %s: %s\n", args[0], strerror(ENOENT));
+		return EXIT_FAILURE;
+	}
+
 	/* Prevent ungraceful exit */
 	if ((*args[0] == 'k' || *args[0] == 'p') && (strcmp(args[0], "kill") == 0
 	|| strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)) {
@@ -643,7 +650,7 @@ check_shell_cmd_condtions(char **args)
 static int
 run_shell_cmd(char **args)
 {
-	if (check_shell_cmd_condtions(args) == EXIT_FAILURE)
+	if (check_shell_cmd_condtions(args) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	char *cmd = construct_shell_cmd(args);
@@ -1556,7 +1563,11 @@ check_auto_first(char **args)
 
 	char *tmp = deq_str ? deq_str : args[0];
 	size_t len = strlen(tmp);
-	if (len > 0 && tmp[len - 1] == '/') tmp[len - 1] = '\0';
+	int rem_slash = 0;
+	if (len > 0 && tmp[len - 1] == '/') {
+		rem_slash = 1;
+		tmp[len - 1] = '\0';
+	}
 
 	if (conf.autocd == 1 && cdpath_n > 0 && !args[1]
 	&& cd_function(tmp, CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
@@ -1576,6 +1587,9 @@ check_auto_first(char **args)
 			return ret;
 		break;
 	}
+
+	if (rem_slash == 1)
+		tmp[len - 1] = '/';
 
 	free(deq_str);
 	return (-1);
