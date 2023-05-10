@@ -691,10 +691,12 @@ check_ext_string(const char *ext)
 	}
 	tmp_ext[i] = '\0';
 
+	size_t len = (size_t)i;
+
 	i = (int)ext_colors_n;
 	while (--i >= 0) {
 		if (!ext_colors[i].name || !*ext_colors[i].name
-		|| *ptr != *ext_colors[i].name)
+		|| ext_colors[i].len != len || *ptr != *ext_colors[i].name)
 			continue;
 
 		char *p = ptr + 1, *q = ext_colors[i].name + 1;
@@ -1459,6 +1461,7 @@ store_extension_line(char *line)
 	/* Remove the leading "*." from the extension line */
 	if (!line || *line != '*' || *(line + 1) != '.' || !*(line + 2))
 		return EXIT_FAILURE;
+
 	line += 2;
 
 	char *q = strchr(line, '=');
@@ -1483,7 +1486,9 @@ store_extension_line(char *line)
 	ext_colors = (struct ext_t *)xrealloc(ext_colors,
 		(ext_colors_n + 1) * sizeof(struct ext_t));
 
-	ext_colors[ext_colors_n].name = savestring(line, (size_t)(q - line));
+	size_t len = (size_t)(q - line);
+	ext_colors[ext_colors_n].len = len;
+	ext_colors[ext_colors_n].name = savestring(line, len);
 	ext_colors[ext_colors_n].value =
 		(char *)xnmalloc(strlen(code) + 3, sizeof(char));
 	sprintf(ext_colors[ext_colors_n].value, "0;%s", code);
