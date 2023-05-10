@@ -622,13 +622,13 @@ construct_shell_cmd(char **args)
 }
 
 static inline int
-check_shell_cmd_condtions(char **args)
+check_shell_cmd_conditions(char **args)
 {
-	/* No shell command ends with a slash */
-	size_t len = (args && args[0]) ? strlen(args[0]) : 0;
-	if (len && args[0][len - 1] == '/') {
-		xerror("cd: %s: %s\n", args[0], strerror(ENOENT));
-		return EXIT_FAILURE;
+	/* No shell command name contains a slash */
+	if (args && args[0] && strchr(args[0], '/')) {
+		xerror("%s: %s: %s\n", conf.autocd == 1 ? "cd" : "open",
+			args[0], strerror(ENOENT));
+		return conf.autocd == 1 ? EXIT_FAILURE : EXEC_NOTFOUND;
 	}
 
 	/* Prevent ungraceful exit */
@@ -650,8 +650,9 @@ check_shell_cmd_condtions(char **args)
 static int
 run_shell_cmd(char **args)
 {
-	if (check_shell_cmd_condtions(args) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+	int ret = check_shell_cmd_conditions(args);
+	if (ret != EXIT_SUCCESS)
+		return ret;
 
 	char *cmd = construct_shell_cmd(args);
 
