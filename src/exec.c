@@ -624,8 +624,9 @@ construct_shell_cmd(char **args)
 static inline int
 check_shell_cmd_conditions(char **args)
 {
-	/* No shell command name contains a slash */
-	if (args && args[0] && strchr(args[0], '/')) {
+	/* No command name ends with a slash */
+	size_t len = (args && args[0]) ? strlen(args[0]) : 0;
+	if (len > 0 && args[0][len - 1] == '/') {
 		xerror("%s: %s: %s\n", conf.autocd == 1 ? "cd" : "open",
 			args[0], strerror(ENOENT));
 		return conf.autocd == 1 ? EXIT_FAILURE : EXEC_NOTFOUND;
