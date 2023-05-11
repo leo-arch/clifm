@@ -45,17 +45,6 @@
 
 #define BD_CONTINUE 2
 
-/* Set OLDPWD environment variable, provided we are not changing to the
- * same directory (OLD != NEW) */
-static void
-set_oldpwd(const char *old, const char *new)
-{
-	if (!old || !new || strcmp(old, new) == 0)
-		return;
-
-	setenv("OLDPWD", old, 1);
-}
-
 static size_t
 get_longest_workspace_name(void)
 {
@@ -293,9 +282,6 @@ switch_workspace(const int tmp_ws)
 
 	if (conf.private_ws_settings == 1)
 		set_workspace_opts(cur_ws);
-
-	if (old_pwd)
-		set_oldpwd(old_pwd[dirhist_cur_index], workspaces[cur_ws].path);
 
 	if (conf.autols == 1)
 		reload_dirlist();
@@ -654,8 +640,19 @@ backdir(char* str)
 	return exit_status;
 }
 
-/* Make sure DIR exists, it is actually a directory and is readable.
- * Only then change directory */
+/* Change the current directory.
+ *
+ * Make sure DIR exists, it is actually a directory and is readable.
+ * Only then change directory.
+ *
+ * CD_FLAG is either SET_TITLE or NO_TITLE. In the latter case we have just a
+ * temporary directory change that should not be registered nor informed to
+ * the user. For example, when checking trahsed files we change to the Trash
+ * dir, check files, and immediately return to the directory we came from).
+ *
+ * PWD and OLDPWD are updated only if CD_FLAG is SET_TITLE, that is, when the
+ * current directory is explicitly changed by the user. The terminal window
+ * title is changed accordingly as well, provided cwd_in_title is enabled. */
 int
 xchdir(char *dir, const int cd_flag)
 {
@@ -672,9 +669,16 @@ xchdir(char *dir, const int cd_flag)
 
 	int ret = chdir(dir);
 
-	if (ret == 0) {
+	if (ret == 0 && cd_flag == SET_TITLE) {
+		char *p = getenv("PWD");
+		/* Do not set OLDPWD is changing to the same directory ("cd ."
+		 * and similar commands). */
+		if (p && strcmp(p, dir) != 0)
+			setenv("OLDPWD", p, 1);
+
 		setenv("PWD", dir, 1);
-		if (cd_flag == SET_TITLE && xargs.cwd_in_title == 1)
+
+		if (xargs.cwd_in_title == 1)
 			set_term_title(dir);
 	}
 
@@ -735,9 +739,6 @@ go_home(const int cd_flag)
 		return err;
 	}
 
-	if (old_pwd && old_pwd[dirhist_cur_index])
-		set_oldpwd(old_pwd[dirhist_cur_index], user.home);
-
 	if (workspaces) {
 		free(workspaces[cur_ws].path);
 		workspaces[cur_ws].path = savestring(user.home, strlen(user.home));
@@ -794,9 +795,6 @@ change_to_path(char *new_path, const int cd_flag)
 	}
 
 	if (workspaces) {
-		if (workspaces[cur_ws].path)
-			set_oldpwd(workspaces[cur_ws].path, q);
-
 		free(workspaces[cur_ws].path);
 		workspaces[cur_ws].path = savestring(q, strlen(q));
 	}
@@ -975,8 +973,6 @@ change_to_dirhist_num(int n)
 		return EXIT_FAILURE;
 	}
 
-	set_oldpwd(old_pwd[dirhist_cur_index], old_pwd[n]);
-
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(old_pwd[n], strlen(old_pwd[n]));
 
@@ -1015,8 +1011,6 @@ surf_hist(char **args)
 static int
 set_path(const char *new_path)
 {
-	set_oldpwd(workspaces[cur_ws].path, new_path);
-
 	free(workspaces[cur_ws].path);
 	workspaces[cur_ws].path = savestring(new_path, strlen(new_path));
 	if (!workspaces[cur_ws].path)
