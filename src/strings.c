@@ -1706,7 +1706,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 				if (SELFORPARENT(globbuf.gl_pathv[i]))
 					continue;
 
-				// Escape the globbed file name and copy it
+				/* Escape the globbed file name and copy it */
 				char *esc_str = escape_str(globbuf.gl_pathv[i]);
 				if (esc_str) {
 					glob_cmd[j] = esc_str;
@@ -1763,10 +1763,10 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 
 	for (w = 0; w < word_n; w++) {
 		if (is_sel_cmd == 1) {
-			// If the command is 'sel', perform only command substitution
-			// and environment variables expansion. Otherwise, wordexp(3)
-			// modifies the input string and breaks other expansions made
-			// by the sel function, mostly regex expansion.
+			/* If the command is 'sel', perform only command substitution
+			 * and environment variables expansion. Otherwise, wordexp(3)
+			 * modifies the input string and breaks other expansions made
+			 * by the sel function, mostly regex expansion. */
 			char *p = strchr((*substr)[word_array[w] + (int)old_pathc], '$');
 			if (p && *(p + 1) != '(' && (*(p + 1) < 'A' || *(p + 1) > 'Z'))
 				continue;
@@ -1790,7 +1790,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 			}
 
 			for (i = 0; i < wordbuf.we_wordc; i++) {
-				// Escape the globbed file name and copy it
+				/* Escape the globbed file name and copy it */
 				char *esc_str = escape_str(wordbuf.we_wordv[i]);
 				if (esc_str) {
 					word_cmd[j] = esc_str;
@@ -1848,12 +1848,12 @@ check_ranges(char ***substr, int **range_array)
 		size_t len = strlen((*substr)[i]);
 
 		for (j = 0; (*substr)[i][j]; j++) {
-			// If some alphabetic char, besides '-', is found in the
-			// string, we have no range
+			/* If some alphabetic char, besides '-', is found in the
+			 * string, we have no range */
 			if ((*substr)[i][j] != '-' && !IS_DIGIT((*substr)[i][j]))
 				break;
 
-			// If a range is found, store its index
+			/* If a range is found, store its index */
 			if (j > 0 && j < len && (*substr)[i][j] == '-'
 			&& IS_DIGIT((*substr)[i][j - 1])
 			&& IS_DIGIT((*substr)[i][j + 1])) {
@@ -2128,21 +2128,20 @@ gen_full_line(char **str, const int fusedcmd_ok)
 static int
 check_int_var(char *str)
 {
-	// Remove leading spaces. This: '   a="test"' should be
-	// taken as a valid variable declaration
+	/* Remove leading spaces. This: '   a="test"' should be
+	 * taken as a valid variable declaration */
 	char *p = str;
 	while (*p == ' ' || *p == '\t')
 		p++;
 
-	// If first non-space is a number, it's not a variable name
+	/* If first non-space is a number, it's not a variable name */
 	if (IS_DIGIT(*p))
 		return 0;
 
 	int space_found = 0;
-	// If there are no spaces before '=', take it as a
-	// variable. This check is done in order to avoid
-	// taking as a variable things like:
-	// 'ls -color=auto'
+	/* If there are no spaces before '=', take it as a
+	 * variable. This check is done in order to avoid
+	 * taking as a variable things "ls --color=auto" */
 	while (*p != '=') {
 		if (*(p++) == ' ')
 			space_found = 1;
@@ -2438,6 +2437,10 @@ parse_input_str(char *str)
 				continue;
 		}
 
+			/* ###################################
+			 * #   2.d) SEL KEYWORD EXPANSION    #
+			 * ################################### */
+
 		/* Expand 'sel' only as argument, not as command */
 		if (i > 0 && *substr[i] == 's' && ((substr[i][1] == ':'
 		&& !substr[i][2]) || strcmp(substr[i], "sel") == 0))
@@ -2445,7 +2448,7 @@ parse_input_str(char *str)
 	}
 
 			/* ####################################
-			 * #       2.d) RANGES EXPANSION      #
+			 * #       2.e) RANGES EXPANSION      #
 			 * ####################################*/
 
 	/* Expand expressions like "1-3" to "1 2 3" if all the numbers in
@@ -2453,7 +2456,7 @@ parse_input_str(char *str)
 	expand_ranges(&substr);
 
 				/* ##########################
-				 * #   2.e) SEL EXPANSION   #
+				 * #   2.f) SEL EXPANSION   #
 				 * ##########################*/
 
 	if (is_sel > 0) {
@@ -2474,7 +2477,7 @@ parse_input_str(char *str)
 			continue;
 
 				/* ##########################
-				 * #   2.f) ELN EXPANSION   #
+				 * #   2.g) ELN EXPANSION   #
 				 * ########################## */
 
 		if (_expand_eln(substr[i]) == 1) {
@@ -2483,7 +2486,7 @@ parse_input_str(char *str)
 		}
 
 			/* ###################################
-			 * #   2.g) USER DEFINED VARIABLES   #
+			 * #   2.h) USER DEFINED VARIABLES   #
 			 * ###################################*/
 
 		if (int_vars == 1 && usrvar_n > 0) {
@@ -2493,7 +2496,7 @@ parse_input_str(char *str)
 		}
 
 				/* ###############################
-				 * #  2.h) ENVIRONEMNT VARIABLES  #
+				 * #  2.i) ENVIRONEMNT VARIABLES  #
 				 * ###############################*/
 
 		if (*substr[i] == '$') {
@@ -2506,7 +2509,7 @@ parse_input_str(char *str)
 		}
 
 				/* ################################
-				 * #  2.i) TILDE: ~user and home  #
+				 * #  2.j) TILDE: ~user and home  #
 				 * ################################ */
 
 		if (*substr[i] == '~') {
@@ -2518,7 +2521,7 @@ parse_input_str(char *str)
 		}
 
 				/* ##################################
-				 * #  2.j) SYMLINKS IN VIRTUAL DIR  #
+				 * #  2.k) SYMLINKS IN VIRTUAL DIR  #
 				 * ################################## */
 
 		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
@@ -2533,7 +2536,7 @@ parse_input_str(char *str)
 	}
 
 				/* ################################
-				 * #     2.k) TAGS EXPANSION      #
+				 * #     2.l) TAGS EXPANSION      #
 				 * ###############################*/
 
 #ifndef _NO_TAGS
@@ -2555,26 +2558,26 @@ parse_input_str(char *str)
 #endif /* _NO_TAGS */
 
 				/* ###############################
-				 * #    2.l) FILE TYPE (=CHAR)   #
+				 * #    2.m) FILE TYPE (=CHAR)   #
 				 * ###############################*/
 
 	expand_file_type(&substr);
 
 				/* #################################
-				 * #   2.m) MIME TYPE (@PATTERN)   #
+				 * #   2.n) MIME TYPE (@PATTERN)   #
 				 * #################################*/
 #ifndef _NO_MAGIC
 	expand_mime_type(&substr);
 #endif /* !_NO_MAGIC */
 
 				/* ##############################
-				 * #    2.n) BOOKMARKS (b:)     #
+				 * #    2.o) BOOKMARKS (b:)     #
 				 * ##############################*/
 
 	expand_bookmarks(&substr);
 
 
-	/* #### 3) NULL TERMINATE THE INPUT STRING ARRAY #### */
+	/* #### NULL TERMINATE THE INPUT STRING ARRAY #### */
 	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
 	substr[args_n + 1] = (char *)NULL;
 
@@ -2582,19 +2585,20 @@ parse_input_str(char *str)
 	if (is_internal(substr[0]) == 0 && is_action == 0)
 		return substr;
 
-	/* #############################################################
-	 * #         ONLY FOR INTERNAL COMMANDS AND PLUGINS            #
-	 * #############################################################*/
+		/* ####################################################
+		 * #          3) SHELL-LIKE EXPANSIONS                #
+		 * #      Only for internal commands and plugins      #
+		 * #################################################### */
 
-	/* Some clifm functions are purely internal, that is, they are not
+	/* Most clifm functions are purely internal, that is, they are not
 	 * wrappers of a shell command and do not call the system shell at all.
 	 * For this reason, some expansions normally made by the system shell
-	 * must be made here (in the lobby [got it?]) in order to be able to
-	 * understand these expansions at all. */
+	 * (wildcards, regular expressions, and command substitution) must be
+	 * made here (in the lobby [got it?]) in order to be able to understand
+	 * these expansions at all. */
 
-			/* ########################################
-			 * #   4) WILDCARDS AND BRACE EXPANSION   #
-			 * ######################################## */
+	/* Let's first mark substrings containing special expansion made by either
+	 * glob(3) and wordexp(3) */
 
 	int *glob_array = (int *)xnmalloc(INT_ARRAY_MAX, sizeof(int));
 	size_t glob_n = 0;
@@ -2651,6 +2655,10 @@ parse_input_str(char *str)
 		}
 	}
 
+			/* ##########################################
+			 * #   3.a) WILDCARDS AND BRACE EXPANSION   #
+			 * ########################################## */
+
 	if (glob_n > 0 && glob_expand(substr) == 1) {
 		if (expand_glob(&substr, glob_array, glob_n) == -1)
 			return (char **)NULL;
@@ -2658,9 +2666,10 @@ parse_input_str(char *str)
 
 	free(glob_array);
 
-		/* #############################################
-		 * #    5) COMMAND & PARAMETER SUBSTITUTION    #
-		 * ############################################# */
+		/* ###############################################
+		 * #    3.b) COMMAND & PARAMETER SUBSTITUTION    #
+		 * ############################################### */
+
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 	if (word_n > 0) {
 		if (expand_word(&substr, word_array, word_n) == -1)
@@ -2670,14 +2679,14 @@ parse_input_str(char *str)
 	free(word_array);
 #endif /* !__HAIKU__ && !__OpenBSD && !__ANDROID__ */
 
-		/* #############################################
-		 * #             6) REGEX EXPANSION            #
-		 * ############################################# */
+			/* #######################################
+			 * #       3.c) REGEX EXPANSION          #
+			 * ####################################### */
 
 	if (regex_expand(substr[0]) == 1)
 		expand_regex(&substr);
 
-	/* #### 7) NULL TERMINATE THE INPUT STRING ARRAY #### */
+	/* #### NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
 	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
 

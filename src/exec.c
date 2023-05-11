@@ -421,7 +421,7 @@ graceful_quit(char **args)
 		}
 	}
 
-	return (-1);
+	return EXIT_SUCCESS;
 }
 
 #if !defined(__CYGWIN__)
@@ -635,7 +635,7 @@ check_shell_cmd_conditions(char **args)
 	/* Prevent ungraceful exit */
 	if ((*args[0] == 'k' || *args[0] == 'p') && (strcmp(args[0], "kill") == 0
 	|| strcmp(args[0], "killall") == 0 || strcmp(args[0], "pkill") == 0)) {
-		if (graceful_quit(args) != -1)
+		if (graceful_quit(args) != EXIT_SUCCESS)
 			return EXIT_FAILURE;
 	}
 
@@ -659,11 +659,11 @@ run_shell_cmd(char **args)
 
 	/* Calling the system shell is vulnerable to command injection, true.
 	 * But it is the user here who is directly running the command: this
-	 * should not be taken as an untrusted source */
+	 * should not be taken as an untrusted source. */
 	int exit_status = launch_execle(cmd);
 	free(cmd);
 
-/* For the time being, this is too slow on Cygwin */
+/* For the time being, this is too slow on Cygwin. */
 #if !defined(__CYGWIN__)
 	reload_binaries();
 #endif

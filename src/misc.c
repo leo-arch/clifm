@@ -2397,9 +2397,10 @@ bonus_function(void)
 		"\"There is not knowledge that is not power\"",
 		"idkfa",
 		"This is the second best file manager I've ever seen!",
+		"Winners don't use TUIs",
 		"\"La inmortalidad es baladí\" (J. L. Borges)",
 		"\"Computer updated [...] Establish communications, priority alpha\"",
-		"\"Step one: find plans, step two: save world, step three: get out of my house!\"",
+		"\"Step one: find plans, step two: save world, step three: get out of my house!\" (Dr. Fred)",
 		"\"Leave my loneliness unbroken!, quit the bust above my door! Quoth the raven: Nevermore.\" (E. A. Poe)",
 		NULL};
 

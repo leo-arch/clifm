@@ -672,8 +672,11 @@ xchdir(char *dir, const int cd_flag)
 
 	int ret = chdir(dir);
 
-	if (cd_flag == SET_TITLE && ret == 0 && xargs.cwd_in_title == 1)
-		set_term_title(dir);
+	if (ret == 0) {
+		setenv("PWD", dir, 1);
+		if (cd_flag == SET_TITLE && xargs.cwd_in_title == 1)
+			set_term_title(dir);
+	}
 
 	return ret;
 }
