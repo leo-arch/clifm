@@ -67,8 +67,6 @@ typedef char *rl_cpvfunc_t;
 # include "mime.h" /* MIME-type filter expansion */
 #endif /* _NO_MAGIC */
 
-static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
-
 /* Macros for xstrverscmp() */
 /* states: S_N: normal, S_I: comparing integral part, S_F: comparing
            fractionnal parts, S_Z: idem but with leading Zeroes only */
@@ -85,7 +83,7 @@ static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
  * Minimize the danger of non-null terminated strings
  * However, nothing beyond MAX_STR_LEN length will be correctly measured */
 #define MAX_STR_LEN 4096
-#define INT_ARRAY_MAX 10
+#define INT_ARRAY_MAX 64
 
 #define IS_FILE_TYPE_FILTER(x) ((x) == 'b' || (x) == 'c' || (x) == 'C' \
 || (x) == 'd' || (x) == 'f' || (x) == 'g' || (x) == 'h' || (x) == 'l' \
@@ -96,6 +94,14 @@ static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 
 #define IS_WORD(x, y) (((x) == '$' && ((y) == '(' || (y) == '{')) \
 || ((x) == '`' && (y) != ' ') || (x) == '~' || (x) == '$')
+
+static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
+
+/* Each word in the command line is marked with a 1, if quoted, or with a
+ * 0 otherwise. No expansion will be performed on quoted words.
+ * Drawback: Words beyond the INT_ARRAY_MAX won't be checked, and thereby,
+ * expansions will be made even if the word is quoted. */
+static char quoted_words[INT_ARRAY_MAX];
 
 /* Get the last occurrence of the (non-escaped) character C in STR (whose length is LEN)
  * Return a pointer to it if found or NULL if not */
@@ -657,7 +663,17 @@ remove_quotes(char *str)
 
 	if (!blank)
 		return p;
+
 	return (char *)NULL;
+}
+
+/* Set all slots in the quoted_words array to zero. */
+static void
+init_quoted_words(void)
+{
+	size_t i;
+	for (i = 0; i < sizeof(quoted_words); i++)
+		quoted_words[i] = 0;
 }
 
 /* This function takes a string as argument and splits it into substrings
@@ -674,6 +690,8 @@ split_str(const char *str, const int update_args)
 {
 	if (!str)
 		return (char **)NULL;
+
+	init_quoted_words();
 
 	size_t buf_len = 0, words = 0, str_len = 0;
 	char *buf = (char *)NULL;
@@ -773,7 +791,6 @@ split_str(const char *str, const int update_args)
 			 * the last quote or NULL */
 			while (*str && *str != quote) {
 				/* If char has special meaning, escape it */
-//				if (!(flags & IN_BOOKMARKS_SCREEN) && is_quote_char(*str)) {
 				if (!(flags & IN_BOOKMARKS_SCREEN) && (is_quote_char(*str)
 				|| *str == '.')) { // escape '.' to prevent realpath expansions
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
@@ -801,6 +818,12 @@ split_str(const char *str, const int update_args)
 				free(substr);
 				return (char **)NULL;
 			}
+
+			/* If coming from parse_input_str (main command line), mark
+			 * quoted words: no expansion will be made on these words. */
+			if (update_args == 1)
+				quoted_words[words] = 1;
+
 			break;
 
 		/* TAB, new line char, and space are taken as word breaking characters */
@@ -1842,7 +1865,7 @@ check_ranges(char ***substr, int **range_array)
 	size_t i = 0, j = 0, n = 0;
 
 	for (i = 0; i <= args_n; i++) {
-		if (!(*substr)[i])
+		if (!(*substr)[i] || quoted_words[i] == 1)
 			continue;
 
 		size_t len = strlen((*substr)[i]);
@@ -2267,9 +2290,7 @@ parse_input_str(char *str)
 	 * true and send the whole string to exec_cmd(), in which case no
 	 * expansion is made: the command is send to the system shell as
 	 * is. */
-	if (*str == ';' || *str == ':')
-		send_shell = 1;
-	else if (check_shell_functions(str))
+	if (*str == ';' || *str == ':' || check_shell_functions(str) == 1)
 		send_shell = 1;
 
 	if (send_shell == 0) {
@@ -2373,7 +2394,7 @@ parse_input_str(char *str)
 	is_sel = 0, sel_is_last = 0;
 
 	for (i = 0; i <= args_n; i++) {
-		if (!substr[i])
+		if (!substr[i] || quoted_words[i] == 1)
 			continue;
 
 #ifndef _NO_TAGS
@@ -2473,7 +2494,7 @@ parse_input_str(char *str)
 		stdin_dir_ok = 1;
 
 	for (i = 0; i <= args_n; i++) {
-		if (!substr[i])
+		if (!substr[i] || quoted_words[i] == 1)
 			continue;
 
 				/* ##########################
@@ -2609,7 +2630,7 @@ parse_input_str(char *str)
 #endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
 	for (i = 0; substr[i]; i++) {
-		if (is_action == 1 && i == 0)
+		if ((is_action == 1 && i == 0) || quoted_words[i] == 1)
 			continue;
 		/* Do not perform any of the expansions below for selected
 		 * elements: they are full path file names that, as such, do not
@@ -2627,13 +2648,15 @@ parse_input_str(char *str)
 		if (substr[0][0] == '/' && i == 0)
 			continue;
 
+		/* Let's make wordexp(3) ignore escaped words. */
+		int is_escaped = strchr(substr[i], '\\') ? 1 : 0;
+
 		size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
-			/* Brace and wildcard expansion is made by glob(3) as well */
+			/* Brace and wildcard expansion is made by glob(3). */
 			if (IS_GLOB(substr[i][j], substr[i][j + 1])) {
 				/* Strings containing these characters are taken as wildacard
-				 * patterns and are expanded by the glob function.
-				 * See glob(7). */
+				 * patterns and are expanded by the glob function. See glob(7). */
 				if (glob_n < INT_ARRAY_MAX) {
 					glob_array[glob_n] = (int)i;
 					glob_n++;
@@ -2641,9 +2664,9 @@ parse_input_str(char *str)
 			}
 
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
-			/* Command substitution, tilde and environment variables
+			/* Command substitution, tilde, and environment variables
 			 * expansion is made by wordexp(3) */
-			if (IS_WORD(substr[i][j], substr[i][j + 1])) {
+			if (is_escaped == 0 && IS_WORD(substr[i][j], substr[i][j + 1])) {
 				/* Unlike glob() and tilde_expand(), wordexp() can expand tilde
 				 * and env vars even in the middle of a string. Ex: $HOME/Downloads */
 				if (word_n < INT_ARRAY_MAX) {
@@ -2678,6 +2701,7 @@ parse_input_str(char *str)
 
 	free(word_array);
 #endif /* !__HAIKU__ && !__OpenBSD && !__ANDROID__ */
+
 
 			/* #######################################
 			 * #       3.c) REGEX EXPANSION          #
