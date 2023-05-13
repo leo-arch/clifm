@@ -331,6 +331,7 @@ normalize_path(char *src, size_t src_len)
 
 	/* Deescape SRC */
 	char *tmp = (char *)NULL;
+	int is_escaped = *src == '\\';
 
 	if (strchr(src, '\\')) {
 		tmp = dequote_str(src, 0);
@@ -347,7 +348,7 @@ normalize_path(char *src, size_t src_len)
 	}
 
 	/* Expand tilde */
-	if (*src == '~') {
+	if (is_escaped == 0 && *src == '~') {
 		tmp = tilde_expand(src);
 		if (!tmp) {
 			xerror(_("%s: %s: Error expanding tilde\n"), PROGRAM_NAME, src);

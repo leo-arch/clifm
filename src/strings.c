@@ -667,7 +667,9 @@ remove_quotes(char *str)
 	return (char *)NULL;
 }
 
-/* Set all slots in the quoted_words array to zero. */
+/* Set all slots in the quoted_words array to zero.
+ * QUOTED_WORDS is used to keep track (by array index) of all quoted words
+ * in the command line. */
 static void
 init_quoted_words(void)
 {
@@ -676,11 +678,23 @@ init_quoted_words(void)
 		quoted_words[i] = 0;
 }
 
+/* Some commands need quotes to be preserved (they'll handle quotes themselves
+ * later). Return 1 if true or 0 otherwise. */
+int
+cmd_keeps_quotes(const char *str)
+{
+	if (flags & IN_BOOKMARKS_SCREEN)
+		return 0;
+
+	return (strncmp(str, "ft ", 3) == 0 || strncmp(str, "filter ", 7) == 0
+	|| strncmp(str, "n ", 2) == 0 || strncmp(str, "new ", 4) == 0);
+}
+
 /* This function takes a string as argument and splits it into substrings
  * taking tab, new line char, and space as word delimiters, except when
  * they are preceded by a quote char (single or double quotes) or in
  * case of command substitution ($(cmd) or `cmd`), in which case
- * eveything before the corresponding closing char is taken as one single
+ * eveything before the corresponding closing char is taken as a single
  * string. It also escapes special chars. It returns an array of
  * split strings (without leading and terminating spaces) or NULL if
  * str is NULL or if no substring was found, i.e., if str contains
@@ -699,11 +713,7 @@ split_str(const char *str, const int update_args)
 	int quote = 0, close = 0;
 	char **substr = (char **)NULL;
 
-	/* Do not dequote expressions for the filter command */
-	int ft_cmd = 0;
-	if (!(flags & IN_BOOKMARKS_SCREEN) && *str == 'f' && ((*(str + 1) == 't'
-	&& *(str + 2) == ' ') || strncmp(str, "filter ", 7) == 0))
-		ft_cmd = 1;
+	int keep_quotes = cmd_keeps_quotes(str);
 
 	while (*str) {
 		switch (*str) {
@@ -775,8 +785,8 @@ split_str(const char *str, const int update_args)
 
 		case '\'': /* fallthrough */
 		case '"':
-			/* If the quote is escaped, it has no special meaning */
-			if (ft_cmd || (str_len && *(str - 1) == '\\')) {
+			/* If the quote is escaped, keep it. */
+			if (keep_quotes == 1 || (str_len && *(str - 1) == '\\')) {
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
@@ -993,7 +1003,7 @@ split_fused_param(char *str)
 }
 
 static int
-check_shell_functions(char *str)
+check_shell_functions(const char *str)
 {
 	if (!str || !*str)
 		return 0;

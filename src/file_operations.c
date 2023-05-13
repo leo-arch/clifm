@@ -813,10 +813,19 @@ create_file(char **cmd)
 	size_t i, hlen = workspaces[cur_ws].path
 		? strlen(workspaces[cur_ws].path) : 0;
 	for (i = 1; cmd[i]; i++) {
-		size_t flen = strlen(cmd[i]);
-		int is_dir = (flen > 1 && cmd[i][flen - 1] == '/') ? 1 : 0;
+		char *p = cmd[i];
+		if (*cmd[i] == '\'' || *cmd[i] == '"')
+			p = remove_quotes(cmd[i]);
 
-		char *npath = normalize_path(cmd[i], flen);
+		size_t flen = strlen(p);
+		int is_dir = (flen > 1 && p[flen - 1] == '/') ? 1 : 0;
+
+		char *npath = (char *)NULL;
+		if (p == cmd[i])
+			npath = normalize_path(p, flen);
+		else /* Quoted string. Copy it verbatim. */
+			npath = savestring(p, flen);
+
 		if (!npath) {
 			*cmd[i] = '\0'; /* Invalidate this entry */
 			continue;
