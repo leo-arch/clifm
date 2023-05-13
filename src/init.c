@@ -73,6 +73,7 @@
 #include "sort.h"
 #include "file_operations.h"
 #include "autocmds.h"
+#include "profiles.h"
 #include "sanitize.h"
 #include "selection.h"
 
@@ -1979,7 +1980,7 @@ resolve_path(char *file)
 	char *_path = (char *)NULL;
 
 	if (*file == '.') {
-		_path = realpath(file, NULL);
+		_path = normalize_path(file, strlen(file));
 		if (!_path) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
@@ -2589,7 +2590,13 @@ external_arguments(int argc, char **argv)
 #ifndef _NO_PROFILES
 	if (alt_profile_value) {
 		free(alt_profile);
-		alt_profile = savestring(alt_profile_value, strlen(alt_profile_value));
+		if (validate_profile_name(alt_profile_value) == EXIT_SUCCESS) {
+			alt_profile = savestring(alt_profile_value, strlen(alt_profile_value));
+		} else {
+			fprintf(stderr, "%s: %s: Invalid profile name\n", PROGRAM_NAME,
+				alt_profile_value);
+			exit(EXIT_FAILURE);
+		}
 	}
 #endif
 }

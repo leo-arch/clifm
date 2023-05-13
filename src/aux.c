@@ -307,6 +307,22 @@ abbreviate_file_name(char *str)
 	return str;
 }
 
+static char *
+get_cwd(char *buf, const size_t buflen)
+{
+	if (workspaces && cur_ws >= 0 && workspaces[cur_ws].path)
+		return workspaces[cur_ws].path;
+
+	char *tmp = getenv("PWD");
+	if (tmp)
+		return tmp;
+
+	getcwd(buf, buflen);
+	tmp = buf;
+
+	return tmp;
+}
+
 char *
 normalize_path(char *src, size_t src_len)
 {
@@ -354,16 +370,18 @@ normalize_path(char *src, size_t src_len)
 
 	if (l == 0 || *s != '/') {
 		/* Relative path */
-		size_t pwd_len;
-		pwd_len = strlen(workspaces[cur_ws].path);
-		if (pwd_len == 1 && *workspaces[cur_ws].path == '/') {
+		char p[PATH_MAX];
+		char *cwd = get_cwd(p, sizeof(p));
+
+		size_t pwd_len = (cwd && *cwd) ? strlen(cwd) : 0;
+		if (pwd_len == 1 && *cwd == '/') {
 			/* If CWD is root (/) do not copy anything. Just create a buffer
 			 * big enough to hold "/dir", which will be appended next */
 			res = (char *)xnmalloc(l + 2, sizeof(char));
 			res_len = 0;
 		} else {
 			res = (char *)xnmalloc(pwd_len + 1 + l + 1, sizeof(char));
-			memcpy(res, workspaces[cur_ws].path, pwd_len);
+			memcpy(res, cwd, pwd_len);
 			res_len = pwd_len;
 		}
 	} else {

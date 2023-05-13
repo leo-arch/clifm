@@ -30,6 +30,7 @@ __BEGIN_DECLS
 int get_profile_names(void);
 int profile_function(char **);
 int profile_set(char *);
+int validate_profile_name(const char *name);
 
 __END_DECLS
 

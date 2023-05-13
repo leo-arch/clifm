@@ -429,11 +429,26 @@ print_current_profile(void)
 	return EXIT_SUCCESS;
 }
 
+int
+validate_profile_name(const char *name)
+{
+	if (!name || !*name || *name == '.' || *name == '~' || *name == '$'
+	|| strchr(name, '/'))
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
 static int
 create_profile(char *name)
 {
-	if (name)
-		return profile_add(name);
+	if (name) {
+		if (validate_profile_name(name) == EXIT_SUCCESS)
+			return profile_add(name);
+
+		xerror(_("pf: %s: Invalid profile name\n"), name);
+		return EXIT_FAILURE;
+	}
 
 	fprintf(stderr, "%s\n", PROFILES_USAGE);
 	return EXIT_FAILURE;
@@ -472,6 +487,11 @@ rename_profile(char **args)
 
 	if (!config_dir_gral) {
 		xerror(_("pf: Configuration directory is not set\n"));
+		return EXIT_FAILURE;
+	}
+
+	if (validate_profile_name(args[1]) != EXIT_SUCCESS) {
+		xerror(_("pf: %s: Invalid profile name\n"), args[1]);
 		return EXIT_FAILURE;
 	}
 

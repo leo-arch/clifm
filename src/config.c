@@ -45,12 +45,6 @@
 #include "file_operations.h"
 #include "autocmds.h"
 
-////// TEMPORAL CODE
-/* Only for config files migration. Remove when needed */
-#ifndef _NO_RENAME_CONFIG
-# include "readline.h" // check_cfm_files()
-#endif // _NO_RENAME_CONFIG
-
 /* Only for old log file split. Remove when needed */
 #ifndef _NO_SPLIT_LOG
 # include "history.h" // split_old_log_file()
