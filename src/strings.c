@@ -2235,8 +2235,8 @@ check_int_var(char *str)
 static int
 check_chained_cmds(char *str)
 {
-	// User defined variables are always internal, so that there is
-	// no need to check whatever else is in the command string
+	/* User defined variables are always internal, so that there is
+	 * no need to check whatever else is in the command string */
 	if (flags & IS_USRVAR_DEF) {
 		exec_chained_cmds(str);
 		return 1;
@@ -2246,7 +2246,7 @@ check_chained_cmds(char *str)
 	size_t str_len = strlen(str), len = 0, internal_ok = 0;
 	char *buf = (char *)NULL;
 
-	// Get each word (cmd) in STR
+	/* Get each word (cmd) in STR */
 	buf = (char *)xnmalloc(str_len + 1, sizeof(char));
 	for (i = 0; i < str_len; i++) {
 		while (str[i] && str[i] != ' ' && str[i] != ';' && str[i] != '&') {
@@ -2281,33 +2281,19 @@ check_chained_cmds(char *str)
  * This function is one of the keys of CliFM. It will perform a series of
  * actions:
  * 1) Take the string stored by readline and get its substrings without
- * spaces.
- * 2) In case of user defined variable (var=value), it will pass the
+ * leading and trailing spaces (dequoting/deescaping if necessary).
+ * 2) In case of user defined variables (var=value), it will pass the
  * whole string to exec_cmd(), which will take care of storing the
  * variable;
  * 3) If the input string begins with ';' or ':' the whole string is
- * send to exec_cmd(), where it will be directly executed by the system
- * shell (via launch_execle()) to prevent all of the expansions made
- * here.
+ * sent to exec_cmd(), where it will be directly executed by the system
+ * shell.
  * 4) The following expansions (especific to CLiFM) are performed here:
- * ELN's, "sel" keyword, ranges of numbers (ELN's), pinned dir and
- * bookmark names, and, for internal commands only, tilde, braces,
- * wildcards, command and paramenter substitution, and regex expansion
- * are performed here as well.
- * These expansions are the most import part of this function.
+ * ELN's, "sel" keyword, ranges of numbers (ELN's), tags, pinned dir,
+ * bookmark names, environment variables, file types (=x), mime types (@...),
+ * path normalization, fastback, and, for internal commands only, tilde,
+ * braces, wildcards, command and paramenter substitution, and regex.
  */
-
-/* NOTE: Though file names could consist of everything except of slash
- * and null characters, POSIX.1 recommends restricting file names to
- * consist of the following characters: letters (a-z, A-Z), numbers
- * (0-9), period (.), dash (-), and underscore ( _ ).
-
- * NOTE 2: There is no any need to pass anything to this function, since
- * the input string I need here is already in the readline buffer. So,
- * instead of taking the buffer from a function parameter (str) I could
- * simply use rl_line_buffer. However, since I use this function to
- * parse other strings, like history lines, I need to keep the str
- * argument */
 char **
 parse_input_str(char *str)
 {
@@ -2399,10 +2385,8 @@ parse_input_str(char *str)
 	 * terminating and double spaces. */
 	char **substr = split_str(str, UPDATE_ARGS);
 
-	/** ###################### */
 	if (fusedcmd_ok == 1) /* Just in case split_fusedcmd returned NULL */
 		free(str);
-	/** ###################### */
 
 	if (!substr)
 		return (char **)NULL;
