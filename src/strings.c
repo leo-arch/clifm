@@ -2659,8 +2659,10 @@ parse_input_str(char *str)
 		if (substr[0][0] == '/' && i == 0)
 			continue;
 
+#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 		/* Let's make wordexp(3) ignore escaped words. */
 		int is_escaped = strchr(substr[i], '\\') ? 1 : 0;
+#endif /* !__HAIKU__ && !OpenBSD && !__ANDROID__ */
 
 		size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
