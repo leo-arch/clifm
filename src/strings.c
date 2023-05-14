@@ -32,7 +32,7 @@
 
 #include "helpers.h"
 
-#ifdef __HAIKU__
+#if defined(__HAIKU__)
 # include <stdint.h>
 #endif
 #include <glob.h>
@@ -83,7 +83,7 @@ typedef char *rl_cpvfunc_t;
  * Minimize the danger of non-null terminated strings
  * However, nothing beyond MAX_STR_LEN length will be correctly measured */
 #define MAX_STR_LEN 4096
-#define INT_ARRAY_MAX 64
+#define INT_ARRAY_MAX 32
 
 #define IS_FILE_TYPE_FILTER(x) ((x) == 'b' || (x) == 'c' || (x) == 'C' \
 || (x) == 'd' || (x) == 'f' || (x) == 'g' || (x) == 'h' || (x) == 'l' \
@@ -97,11 +97,11 @@ typedef char *rl_cpvfunc_t;
 
 static char len_buf[ARG_MAX * sizeof(wchar_t)] __attribute__((aligned));
 
-/* Each word in the command line is marked with a 1, if quoted, or with a
- * 0 otherwise. No expansion will be performed on quoted words.
- * Drawback: Words beyond the INT_ARRAY_MAX won't be checked, and thereby,
- * expansions will be made even if the word is quoted. */
-static char quoted_words[INT_ARRAY_MAX];
+/* QUOTED_WORDS stores indices of words quoted in the command line so that we
+ * can keep track of them and prevent expanding them when spliting the
+ * input string (in parse_input_str()). */
+static int quoted_words[INT_ARRAY_MAX];
+#define QWORDS_ARRAY_LEN (sizeof(quoted_words) / sizeof(int))
 
 /* Get the last occurrence of the (non-escaped) character C in STR (whose length is LEN)
  * Return a pointer to it if found or NULL if not */
@@ -120,24 +120,6 @@ get_last_chr(char *str, const char c, const int len)
 
 	return (char *)NULL;
 }
-
-/* Get the last occurrence of a non-escaped space in STR (whose length is LEN)
- * Return a pointer to it if found or NULL if not */
-/*char *
-get_last_space(char *str, const int len)
-{
-	if (!str || !*str)
-		return (char *)NULL;
-
-	int i = len;
-	while (--i >= 0) {
-		if ((i > 0 && str[i] == ' ' && str[i - 1] != '\\')
-		|| (i == 0 && str[i] == ' '))
-			return str + i;
-	}
-
-	return (char *)NULL;
-} */
 
 char *
 replace_slashes(char *str, const char c)
@@ -667,15 +649,48 @@ remove_quotes(char *str)
 	return (char *)NULL;
 }
 
-/* Set all slots in the quoted_words array to zero.
+/* Set all slots in the QUOTED_WORDS array to -1 to mark uninitialized slots.
  * QUOTED_WORDS is used to keep track (by array index) of all quoted words
  * in the command line. */
 static void
 init_quoted_words(void)
 {
 	size_t i;
-	for (i = 0; i < sizeof(quoted_words); i++)
-		quoted_words[i] = 0;
+	for (i = 0; i < QWORDS_ARRAY_LEN; i++)
+		quoted_words[i] = -1;
+}
+
+/* After expanding multiple fields from an expandable expression, say 'sel',
+ * we lost track of quoted words, because the old indices point now to
+ * expanded fields.
+ * Ex: 'p sel "12"' -> the quoted word index is originally 2, but after the
+ * expansion of the 'sel' keyword, the index 2 points now to a selected file
+ *
+ * This function updates quoted word indices taking into account the starting
+ * point, i.e. the word after the expandable expression (START), and the amount
+ * of actually expanded fields (N). */
+static void
+update_quoted_words_index(const size_t start, const size_t added_items)
+{
+	size_t s = start + 1;
+	size_t n = added_items - (added_items > 0 ? 1 : 0);
+
+	size_t i;
+	for (i = 0; i < QWORDS_ARRAY_LEN; i++)
+		if (quoted_words[i] > -1 && (size_t)quoted_words[i] >= s)
+			quoted_words[i] += (int)n;
+}
+
+/* Return 1 if the word at index INDEX is quoted, or zero otherwise. */
+static int
+is_quoted_word(const size_t index)
+{
+	size_t i;
+	for (i = 0; i < QWORDS_ARRAY_LEN; i++)
+		if (index == (size_t)quoted_words[i])
+			return 1;
+
+	return 0;
 }
 
 /* Some commands need quotes to be preserved (they'll handle quotes themselves
@@ -832,7 +847,7 @@ split_str(const char *str, const int update_args)
 			/* If coming from parse_input_str (main command line), mark
 			 * quoted words: no expansion will be made on these words. */
 			if (update_args == 1)
-				quoted_words[words] = 1;
+				quoted_words[words] = (int)words;
 
 			break;
 
@@ -1106,7 +1121,8 @@ expand_tag(char ***args, const int tag_index)
 	if (!s)
 		return 0;
 
-	char *tag = (s[tag_index] && *(s[tag_index] + 2)) ? s[tag_index] + 2 : (char *)NULL;
+	char *tag = (s[tag_index] && *(s[tag_index] + 1) && *(s[tag_index] + 2))
+		? s[tag_index] + 2 : (char *)NULL;
 	if (!tag || !*tag || !tags_dir || is_tag(tag) == 0)
 		return 0;
 
@@ -1114,7 +1130,8 @@ expand_tag(char ***args, const int tag_index)
 	snprintf(dir, sizeof(dir), "%s/%s", tags_dir, tag);
 
 	struct dirent **t = (struct dirent **)NULL;
-	int n = scandir(dir, &t, NULL, conf.case_sens_list ? xalphasort : alphasort_insensitive);
+	int n = scandir(dir, &t, NULL, conf.case_sens_list
+		? xalphasort : alphasort_insensitive);
 	if (n == -1)
 		return 0;
 
@@ -1151,8 +1168,11 @@ expand_tag(char ***args, const int tag_index)
 		char rpath[MAX_STR_LEN];
 		*rpath = '\0';
 		char *ret = realpath(filename, rpath);
-		if (!ret || !*rpath)
-			continue;
+		if (!ret || !*rpath) {
+			/* This tagged file points to a non-existent file. Just copy
+			 * the tag path. */
+			xstrsncpy(rpath, filename, sizeof(rpath));
+		}
 
 		char *esc_str = escape_str(rpath);
 		char *q = esc_str ? esc_str : rpath;
@@ -1164,6 +1184,8 @@ expand_tag(char ***args, const int tag_index)
 
 	/* Append whatever is after the tag expression */
 	for (i = (size_t)tag_index + 1; i <= args_n; i++) {
+		if (!s[i])
+			continue;
 		p[j] = savestring(s[i], strlen(s[i]));
 		j++;
 	}
@@ -1183,9 +1205,43 @@ expand_tag(char ***args, const int tag_index)
 	 * warning emitted by GCC(12.1) analyzer is a false positive */
 	*args = p;
 
-	args_n = (j >= 1) ? j - 1 : 0;
+	args_n = (j > 0) ? j - 1 : 0;
 	/* Do not count self and parent dirs */
 	return (size_t)n - 2;
+}
+
+static void
+expand_tags(char ***substr)
+{
+	size_t ntags = 0, i;
+	int *tag_index = (int *)NULL;
+
+	for (i = 0; (*substr)[i]; i++) {
+		if (*(*substr)[i] == 't' && *((*substr)[i] + 1) == ':') {
+			tag_index = (int *)xrealloc(tag_index, (ntags + 2) * sizeof(int));
+			tag_index[ntags] = (int)i;
+			ntags++;
+			tag_index[ntags] = -1;
+		}
+	}
+
+	if (ntags == 0)
+		return;
+
+	for (i = 0; i < ntags; i++) {
+		size_t tn = expand_tag(substr, tag_index[i]);
+		/* TN is the amount of files tagged as SUBSTR[TAG_INDEX[I]]
+		 * Let's update the index of the next tag expression using this
+		 * value: if the next tag expression was at index 2, and if
+		 * the current tag expression was expanded to 3 files,
+		 * the new index of the next tag expression is 4 (the space
+		 * occupied by the first expanded file is the same used
+		 * by the current tag expression, so that it doesn't count) */
+		if (tn > 0 && tag_index[i + 1] != -1)
+			tag_index[i + 1] += ((int)tn - 1);
+	}
+
+	free(tag_index);
 }
 #endif /* NO_TAGS */
 
@@ -1343,6 +1399,8 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 	if (sn == 0)
 		return (char **)NULL;
 
+	update_quoted_words_index(i, sn);
+
 	/* 2. Store fields in DST after the field to be expanded (I) */
 	char **tail = args_n - i > 0
 		? (char **)xnmalloc(args_n - i + 1, sizeof(char *)) : (char **)NULL;
@@ -1381,7 +1439,7 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 }
 
 /* Expand the ELN at SUBSTR[I] into the corresponding file name */
-static int
+static void
 eln_expand(char ***substr, const size_t i)
 {
 	int num = atoi((*substr)[i]);
@@ -1392,17 +1450,8 @@ eln_expand(char ***substr, const size_t i)
 	int j = num - 1;
 	char *esc_str = escape_str(file_info[j].name);
 
-	if (!esc_str) {
-		xerror(_("%s: %s: Error quoting file name\n"),
-			PROGRAM_NAME, file_info[num - 1].name);
-
-		/* Free whatever was allocated thus far */
-		for (j = 0; j <= (int)args_n; j++)
-			free((*substr)[j]);
-		free(*substr);
-
-		return EXIT_FAILURE;
-	}
+	if (!esc_str)
+		return;
 
 	if (i == 0)
 		flags |= FIRST_WORD_IS_ELN;
@@ -1418,30 +1467,15 @@ eln_expand(char ***substr, const size_t i)
 		free((*substr)[i]);
 		(*substr)[i] = esc_str;
 	}
-
-	return EXIT_SUCCESS;
 }
 
-/* Expand the 'sel' keyword in SUBSTR by all selected files */
-static int
+static void
 expand_sel(char ***substr)
 {
 	size_t i = 0;
 
-	if (sel_n == 0) {
-		/* 'sel' is an argument, but there are no selected files */
-		xerror(_("%c%s: No selected files%c"),
-			/* rl_dispatching equals one if coming from a keybind */
-			rl_dispatching == 1 ? '\n' : '\0', PROGRAM_NAME,
-			rl_dispatching == 1 ? '\0' : '\n');
-
-		for (i = 0; i <= args_n; i++)
-			free((*substr)[i]);
-		free(*substr);
-		*substr = (char **)NULL;
-
-		return EXIT_FAILURE;
-	}
+	if (sel_n == 0)
+		return;
 
 	size_t j = 0;
 	char **sel_array = (char **)xnmalloc(args_n + sel_n + 2, sizeof(char *));
@@ -1454,26 +1488,14 @@ expand_sel(char ***substr)
 		j++;
 	}
 
+	update_quoted_words_index((size_t)is_sel, sel_n);
+
 	/* 2. Add all selected files (in place of 'sel') */
 	for (i = 0; i < sel_n; i++) {
 		/* Escape selected file names and copy them into tmp array */
 		char *esc_str = escape_str(sel_elements[i].name);
-		if (!esc_str) {
-			xerror(_("%s: %s: Error quoting file name\n"),
-				PROGRAM_NAME, sel_elements[j].name);
-			/* Free elements selected thus far and all the input substrings */
-			size_t k = 0;
-			for (k = 0; k < j; k++)
-				free(sel_array[k]);
-			free(sel_array);
-
-			for (k = 0; k <= args_n; k++)
-				free((*substr)[k]);
-			free(*substr);
-			*substr = (char **)NULL;
-
-			return EXIT_FAILURE;
-		}
+		if (!esc_str)
+			continue;
 
 		sel_array[j] = esc_str;
 		j++;
@@ -1495,8 +1517,26 @@ expand_sel(char ***substr)
 	(*substr) = sel_array;
 
 	args_n = j - 1;
+}
 
-	return EXIT_SUCCESS;
+/* Expand the 'sel' keyword (or 's:') in SUBSTR to all selected files */
+static void
+expand_sel_keyword(char ***substr)
+{
+	size_t i;
+	for (i = 1; (*substr)[i]; i++) {
+		if (*(*substr)[i] != 's')
+			continue;
+
+		if (((*substr)[i][1] == ':'	&& !(*substr)[i][2])
+		|| strcmp((*substr)[i], "sel") == 0) {
+			is_sel = (int)i;
+			if ((size_t)is_sel == args_n)
+				sel_is_last = 1;
+
+			expand_sel(substr);
+		}
+	}
 }
 
 /* Expand the bookmark name NAME into the corresponding bookmark path.
@@ -1728,7 +1768,8 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 		if (globbuf.gl_pathc) {
 			size_t j = 0;
 			char **glob_cmd = (char **)NULL;
-			glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1, sizeof(char *));
+			glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1,
+				sizeof(char *));
 
 			for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
 				glob_cmd[j] = savestring((*substr)[i], strlen((*substr)[i]));
@@ -1875,7 +1916,7 @@ check_ranges(char ***substr, int **range_array)
 	size_t i = 0, j = 0, n = 0;
 
 	for (i = 0; i <= args_n; i++) {
-		if (!(*substr)[i] || quoted_words[i] == 1)
+		if (!(*substr)[i] || is_quoted_word(i))
 			continue;
 
 		size_t len = strlen((*substr)[i]);
@@ -1925,6 +1966,9 @@ expand_ranges(char ***substr)
 		if (ranges) {
 			j = 0;
 			for (ranges_n = 0; ranges[ranges_n]; ranges_n++);
+
+			update_quoted_words_index((size_t)range_array[r]
+				+ old_ranges_n, ranges_n);
 
 			char **ranges_cmd = (char **)NULL;
 			ranges_cmd = (char **)xcalloc(args_n + ranges_n + 2,
@@ -2270,10 +2314,6 @@ parse_input_str(char *str)
 
 	size_t i = 0;
 	int fusedcmd_ok = 0;
-#ifndef _NO_TAGS
-	size_t ntags = 0;
-	int *tag_index = (int *)NULL;
-#endif /* NO_TAGS */
 
 	flags &= ~FIRST_WORD_IS_ELN;
 
@@ -2403,131 +2443,29 @@ parse_input_str(char *str)
 	 * the system shell. */
 	is_sel = 0, sel_is_last = 0;
 
-	for (i = 0; i <= args_n; i++) {
-		if (!substr[i] || quoted_words[i] == 1)
-			continue;
-
-#ifndef _NO_TAGS
-		/* Store the indices of tag expressions (t:TAG)*/
-		if (*substr[i] == 't' && *(substr[i] + 1) == ':') {
-			tag_index = (int *)xrealloc(tag_index, (ntags + 2) * sizeof(int));
-			tag_index[ntags] = (int)i;
-			ntags++;
-			tag_index[ntags] = -1;
-		}
-#endif
-
-		/* Normalize URI file scheme
-		 * file:///some/file -> /some/file */
-		size_t slen = strlen(substr[i]);
-		if (slen > FILE_URI_PREFIX_LEN && IS_FILE_URI(substr[i])) {
-			char tmp[PATH_MAX];
-			xstrsncpy(tmp, substr[i], sizeof(tmp) - 1);
-			strcpy(substr[i], tmp + FILE_URI_PREFIX_LEN);
-		}
-
-		/* Replace . and .. by absolute paths */
-		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
-		&& !substr[i][2]))) || strstr(substr[i], "/..")) {
-			char *tmp = normalize_path(substr[i], strlen(substr[i]));
-			if (tmp) {
-				free(substr[i]);
-				substr[i] = tmp;
-			}
-		}
-
-			/* ######################################
-			 * #     2.a) FASTBACK EXPANSION        #
-			 * ###################################### */
-
-		if (*substr[i] == '.' && substr[i][1] == '.' && substr[i][2] == '.') {
-			char *tmp = fastback(substr[i]);
-			if (tmp) {
-				free(substr[i]);
-				substr[i] = tmp;
-			}
-		}
-
-			/* ######################################
-			 * #     2.b) PINNED DIR EXPANSION      #
-			 * ###################################### */
-
-		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
-			substr[i] = (char *)xrealloc(substr[i], (strlen(pinned_dir) + 1)
-				* sizeof(char));
-			strcpy(substr[i], pinned_dir);
-		}
-
-			/* ######################################
-			 * #   2.c) BOOKMARK NAMES EXPANSION    #
-			 * ###################################### */
-
-		/* Expand bookmark name (b:NAME) into the corresponding path */
-		if (*substr[i] == 'b' && substr[i][1] == ':' && substr[i][2]) {
-			if (expand_bm_name(&substr[i]) == EXIT_SUCCESS)
-				continue;
-		}
-
-			/* ###################################
-			 * #   2.d) SEL KEYWORD EXPANSION    #
-			 * ################################### */
-
-		/* Expand 'sel' only as argument, not as command */
-		if (i > 0 && *substr[i] == 's' && ((substr[i][1] == ':'
-		&& !substr[i][2]) || strcmp(substr[i], "sel") == 0))
-			is_sel = (int)i;
-	}
-
-			/* ####################################
-			 * #       2.e) RANGES EXPANSION      #
-			 * ####################################*/
-
-	/* Expand expressions like "1-3" to "1 2 3" if all the numbers in
-	 * the range correspond to an ELN */
-	expand_ranges(&substr);
-
-				/* ##########################
-				 * #   2.f) SEL EXPANSION   #
-				 * ##########################*/
-
-	if (is_sel > 0) {
-		if ((size_t)is_sel == args_n)
-			sel_is_last = 1;
-
-		if (expand_sel(&substr) == EXIT_FAILURE)
-			return (char **)NULL;
-	}
-
-
 	int stdin_dir_ok = 0;
 	if (stdin_tmp_dir && strcmp(workspaces[cur_ws].path, stdin_tmp_dir) == 0)
 		stdin_dir_ok = 1;
 
+	/* Let's expand ranges first: the numbers resulting from the expanded range
+	 * will be expanded into the corresponding file names by eln_expand() bwlow. */
+	expand_ranges(&substr);
+
 	for (i = 0; i <= args_n; i++) {
-		if (!substr[i] || quoted_words[i] == 1)
+		if (!substr[i] || is_quoted_word(i))
 			continue;
 
+		/* The following expansions expand into a SINGLE field */
+
 				/* ##########################
-				 * #   2.g) ELN EXPANSION   #
+				 * #   2.1) ELN EXPANSION   #
 				 * ########################## */
 
-		if (_expand_eln(substr[i]) == 1) {
-			if (eln_expand(&substr, i) == EXIT_FAILURE)
-				return (char **)NULL;
-		}
+		if (_expand_eln(substr[i]) == 1)
+			eln_expand(&substr, i);
 
-			/* ###################################
-			 * #   2.h) USER DEFINED VARIABLES   #
-			 * ###################################*/
-
-		if (int_vars == 1 && usrvar_n > 0) {
-			if (substr[i][0] == '$' && substr[i][1] && substr[i][1] != '('
-			&& substr[i][1] != '{')
-				expand_int_var(&substr[i]);
-		}
-
-				/* ###############################
-				 * #  2.i) ENVIRONEMNT VARIABLES  #
+				/* ################################
+				 * #  2.2) ENVIRONEMNT VARIABLES  #
 				 * ###############################*/
 
 		if (*substr[i] == '$') {
@@ -2540,7 +2478,7 @@ parse_input_str(char *str)
 		}
 
 				/* ################################
-				 * #  2.j) TILDE: ~user and home  #
+				 * #  2.3) TILDE: ~user and home  #
 				 * ################################ */
 
 		if (*substr[i] == '~') {
@@ -2551,9 +2489,76 @@ parse_input_str(char *str)
 			}
 		}
 
-				/* ##################################
-				 * #  2.k) SYMLINKS IN VIRTUAL DIR  #
-				 * ################################## */
+			/* ##################################
+			 * #     2.4) URI file scheme       #
+			 * ################################## */
+			/* file:///some/file -> /some/file */
+
+		size_t slen = strlen(substr[i]);
+		if (slen > FILE_URI_PREFIX_LEN && IS_FILE_URI(substr[i])) {
+			char tmp[PATH_MAX];
+			xstrsncpy(tmp, substr[i], sizeof(tmp) - 1);
+			strcpy(substr[i], tmp + FILE_URI_PREFIX_LEN);
+		}
+
+			/* ###############################
+			 * #     2.5) "." and ".."       #
+			 * ############################### */
+
+		if ((*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
+		&& !substr[i][2]))) || strstr(substr[i], "/..")) {
+			char *tmp = normalize_path(substr[i], strlen(substr[i]));
+			if (tmp) {
+				free(substr[i]);
+				substr[i] = tmp;
+			}
+		}
+
+			/* ######################################
+			 * #     2.6) FASTBACK EXPANSION        #
+			 * ###################################### */
+
+		if (*substr[i] == '.' && substr[i][1] == '.' && substr[i][2] == '.') {
+			char *tmp = fastback(substr[i]);
+			if (tmp) {
+				free(substr[i]);
+				substr[i] = tmp;
+			}
+		}
+
+			/* ######################################
+			 * #     2.7) PINNED DIR EXPANSION      #
+			 * ###################################### */
+
+		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
+			substr[i] = (char *)xrealloc(substr[i], (strlen(pinned_dir) + 1)
+				* sizeof(char));
+			strcpy(substr[i], pinned_dir);
+		}
+
+			/* ######################################
+			 * #   2.8) BOOKMARK NAMES EXPANSION    #
+			 * ###################################### */
+
+		/* Expand bookmark name (b:NAME) into the corresponding path */
+		if (*substr[i] == 'b' && substr[i][1] == ':' && substr[i][2]) {
+			if (expand_bm_name(&substr[i]) == EXIT_SUCCESS)
+				continue;
+		}
+
+			/* ###################################
+			 * #   2.9) USER DEFINED VARIABLES   #
+			 * ###################################*/
+
+		if (int_vars == 1 && usrvar_n > 0) {
+			if (substr[i][0] == '$' && substr[i][1] && substr[i][1] != '('
+			&& substr[i][1] != '{')
+				expand_int_var(&substr[i]);
+		}
+
+			/* ###################################
+			 * #  2.10) SYMLINKS IN VIRTUAL DIR  #
+			 * ################################### */
 
 		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
 		if (stdin_dir_ok == 1) {
@@ -2566,44 +2571,38 @@ parse_input_str(char *str)
 		}
 	}
 
-				/* ################################
-				 * #     2.l) TAGS EXPANSION      #
-				 * ###############################*/
+	/* The following expansions expand into MULTIPLE fields */
+
+				/* ###########################
+				 * #   2.11) SEL EXPANSION   #
+				 * ########################### */
+
+	expand_sel_keyword(&substr);
+
+				/* #################################
+				 * #     2.12) TAGS EXPANSION      #
+				 * ################################# */
 
 #ifndef _NO_TAGS
-	if (ntags > 0) {
-		for (i = 0; i < ntags; i++) {
-			size_t tn = expand_tag(&substr, tag_index[i]);
-			/* TN is the amount of files tagged as SUBSTR[TAG_INDEX[I]]
-			 * Let's update the index of the next tag expression using this
-			 * value: if the next tag expression was at index 2, and if
-			 * the current tag expression was expanded to 3 files,
-			 * the new index of the next tag expression is 4 (the space
-			 * occupied by the first expanded file is the same used
-			 * by the current tag expression, so that it doesn't count) */
-			if (tn > 0 && tag_index[i + 1] != -1)
-				tag_index[i + 1] += ((int)tn - 1);
-		}
-		free(tag_index);
-	}
+	expand_tags(&substr);
 #endif /* _NO_TAGS */
 
-				/* ###############################
-				 * #    2.m) FILE TYPE (=CHAR)   #
-				 * ###############################*/
+				/* ################################
+				 * #    2.13) FILE TYPE (=CHAR)   #
+				 * ################################ */
 
 	expand_file_type(&substr);
 
-				/* #################################
-				 * #   2.n) MIME TYPE (@PATTERN)   #
-				 * #################################*/
+				/* ##################################
+				 * #   2.14) MIME TYPE (@PATTERN)   #
+				 * ################################## */
 #ifndef _NO_MAGIC
 	expand_mime_type(&substr);
 #endif /* !_NO_MAGIC */
 
-				/* ##############################
-				 * #    2.o) BOOKMARKS (b:)     #
-				 * ##############################*/
+				/* ###############################
+				 * #    2.15) BOOKMARKS (b:)     #
+				 * ############################### */
 
 	expand_bookmarks(&substr);
 
@@ -2640,7 +2639,7 @@ parse_input_str(char *str)
 #endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
 	for (i = 0; substr[i]; i++) {
-		if ((is_action == 1 && i == 0) || quoted_words[i] == 1)
+		if ((is_action == 1 && i == 0) || is_quoted_word(i))
 			continue;
 		/* Do not perform any of the expansions below for selected
 		 * elements: they are full path file names that, as such, do not
@@ -2689,7 +2688,7 @@ parse_input_str(char *str)
 	}
 
 			/* ##########################################
-			 * #   3.a) WILDCARDS AND BRACE EXPANSION   #
+			 * #   3.1) WILDCARDS AND BRACE EXPANSION   #
 			 * ########################################## */
 
 	if (glob_n > 0 && glob_expand(substr) == 1) {
@@ -2700,7 +2699,7 @@ parse_input_str(char *str)
 	free(glob_array);
 
 		/* ###############################################
-		 * #    3.b) COMMAND & PARAMETER SUBSTITUTION    #
+		 * #    3.2) COMMAND & PARAMETER SUBSTITUTION    #
 		 * ############################################### */
 
 #if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
@@ -2714,7 +2713,7 @@ parse_input_str(char *str)
 
 
 			/* #######################################
-			 * #       3.c) REGEX EXPANSION          #
+			 * #       3.3) REGEX EXPANSION          #
 			 * ####################################### */
 
 	if (regex_expand(substr[0]) == 1)
