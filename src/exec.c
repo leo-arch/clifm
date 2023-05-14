@@ -1945,8 +1945,9 @@ check_zombies(void)
 		zombies--;
 }
 
-/* Print the current working directory. Try first our own internal representation
- * (workspaces array). If something went wrong, fallback to getcwd(3) */
+/* Print the current working directory. Try first our own internal
+ * representation (workspaces array). If something went wrong, fallback
+ * to PWD/getcwd(3). */
 static int
 print_cwd(void)
 {
@@ -1955,20 +1956,20 @@ print_cwd(void)
 		return EXIT_SUCCESS;
 	}
 
-	char p[PATH_MAX];
-	*p = '\0';
-	char *buf = getcwd(p, sizeof(p));
-	if (!buf) {
-		int err = errno;
-		xerror("%s: getcwd: %s\n", PROGRAM_NAME, strerror(err));
-		return err;
+	char p[PATH_MAX]; *p = '\0';
+	char *cwd = get_cwd(p, sizeof(p), 0);
+
+	if (!cwd || !*cwd) {
+		xerror(_("%s: Error getting the current working directory\n"),
+			PROGRAM_NAME);
+		return EXIT_FAILURE;
 	}
 
-	printf("%s\n", p);
+	printf("%s\n", cwd);
 	return EXIT_SUCCESS;
 }
 
-/* Return 1 if STR is a path, zero otherwise */
+/* Return 1 if STR is a path, zero otherwise. */
 static int
 is_path(char *str)
 {

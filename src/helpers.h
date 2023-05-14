@@ -588,8 +588,10 @@ extern int watch;
 #define ENTRY_N 64
 
 /* Macros to calculate file sizes */
-#define FILE_SIZE_PTR (conf.apparent_size == 1 ? attr->st_size : attr->st_blocks * S_BLKSIZE)
-#define FILE_SIZE (conf.apparent_size == 1 ? attr.st_size : attr.st_blocks * S_BLKSIZE)
+#define FILE_SIZE_PTR (conf.apparent_size == 1 ? attr->st_size \
+		: attr->st_blocks * S_BLKSIZE)
+#define FILE_SIZE (conf.apparent_size == 1 ? attr.st_size \
+		: attr.st_blocks * S_BLKSIZE)
 
 #define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))

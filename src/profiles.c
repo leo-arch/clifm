@@ -253,9 +253,10 @@ profile_set(char *prof)
 		cur_ws = DEF_CUR_WS;
 
 	if (!workspaces[cur_ws].path) {
-		char cwd[PATH_MAX] = "";
-		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
-		if (!*cwd) {
+		char tmp[PATH_MAX] = "";
+		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
+
+		if (!cwd || !*cwd) {
 			xerror("pf: %s\n", strerror(errno));
 			exit(EXIT_FAILURE);
 		}

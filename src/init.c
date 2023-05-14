@@ -443,31 +443,35 @@ init_history(void)
 
 /* If path was not set (neither in the config file nor via command line nor
  * via the RestoreLastPath option), set the default (CWD), and if CWD is not
- * set, use the user's home directory, and if the home cannot be found either,
- * try the root directory, and if there's no access to the root dir either,
- * exit */
+ * set, use the user's home directory, and if the home dir cannot be found
+ * either, try the root directory, and if we have no access to the root dir
+ * either, exit. */
 static void
 set_cur_workspace(void)
 {
 	if (workspaces[cur_ws].path)
 		return;
 
-	char cwd[PATH_MAX] = "";
-	if (getcwd(cwd, sizeof(cwd)) == NULL) { /* avoid compiler warning */ }
-	if (!*cwd || strlen(cwd) == 0) {
-		if (user.home) {
-			workspaces[cur_ws].path = savestring(user.home, user.home_len);
-		} else {
-			if (access("/", R_OK | X_OK) == -1) {
-				xerror("%s: /: %s\n", PROGRAM_NAME, strerror(errno));
-				exit(EXIT_FAILURE);
-			} else {
-				workspaces[cur_ws].path = savestring("/", 1);
-			}
-		}
-	} else {
+	char p[PATH_MAX] = "";
+	char *cwd = get_cwd(p, sizeof(p), 0);
+
+	if (cwd && *cwd) {
 		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
+		return;
 	}
+
+	if (user.home) {
+		workspaces[cur_ws].path = savestring(user.home, user.home_len);
+		return;
+	}
+
+	if (access("/", R_OK | X_OK) != -1) {
+		workspaces[cur_ws].path = savestring("/", 1);
+		return;
+	}
+
+	xerror("%s: /: %s\n", PROGRAM_NAME, strerror(errno));
+	exit(EXIT_FAILURE);
 }
 
 int
@@ -491,28 +495,30 @@ set_start_path(void)
 	set_cur_workspace();
 
 	/* Make path the CWD */
-	/* If chdir() fails, set path to CWD, list files and print the
-	 * error message. If no access to CWD either, exit */
-	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
+	int ret = xchdir(workspaces[cur_ws].path, NO_TITLE);
+
+	char tmp[PATH_MAX] = "";
+	char *pwd = get_cwd(tmp, sizeof(tmp), 0);
+
+	/* If chdir() fails, set path to PWD, list files and print the
+	 * error message. If no access to PWD either, exit */
+	if (ret == -1) {
 		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
 		    workspaces[cur_ws].path, strerror(errno));
 
-		char cwd[PATH_MAX] = "";
-		if (getcwd(cwd, sizeof(cwd)) == NULL) {
+		if (!pwd || !*pwd) {
 			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failure "
 				"retrieving current working directory\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 		}
 
-		if (workspaces[cur_ws].path)
-			free(workspaces[cur_ws].path);
-		workspaces[cur_ws].path = savestring(cwd, strlen(cwd));
+		free(workspaces[cur_ws].path);
+		workspaces[cur_ws].path = savestring(pwd, strlen(pwd));
 	}
 
 	/* Set OLDPWD */
-	char *pwd = getenv("PWD");
-	if (pwd && workspaces[cur_ws].path
-	&& strcmp(workspaces[cur_ws].path, pwd) != 0)
+	if (pwd && *pwd && (!workspaces || !workspaces[cur_ws].path
+	|| strcmp(workspaces[cur_ws].path, pwd) != 0))
 		setenv("OLDPWD", pwd, 1);
 
 	dir_changed = 1;
@@ -1998,15 +2004,16 @@ resolve_path(char *file)
 		_path = savestring(file, strlen(file));
 
 	} else {
-		char *cwd = getcwd(NULL, 0);
-		if (!cwd) {
+		char tmp[PATH_MAX] = "";
+		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
+
+		if (!cwd || !*cwd) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 			exit(errno);
 		}
 
 		_path = (char *)xnmalloc(strlen(cwd) + strlen(file) + 2, sizeof(char));
 		sprintf(_path, "%s/%s", cwd, file);
-		free(cwd);
 	}
 
 	return _path;
@@ -2067,15 +2074,15 @@ _set_starting_path(char *_path)
 }
 
 /* Evaluate external arguments, if any, and change initial variables to
- * its corresponding value */
+ * its corresponding value. */
 void
 external_arguments(int argc, char **argv)
 {
 	/* Disable automatic error messages to be able to handle them ourselves
-	 * via the '?' case in the switch */
+	 * via the '?' case in the switch. */
 	opterr = optind = 0;
 
-	/* Link long (--option) and short options (-o) for the getopt_long function */
+	/* Link long (--option) and short options (-o) for the getopt_long function. */
 	static struct option longopts[] = {
 		{"no-hidden", no_argument, 0, 'a'},
 		{"show-hidden", no_argument, 0, 'A'},
@@ -2116,7 +2123,7 @@ external_arguments(int argc, char **argv)
 		{"sort", required_argument, 0, 'z'},
 
 		/* Only long options. Let's use values >= 200 to avoid conflicts
-		 * with short options (a-Z == 65-122) */
+		 * with short options (a-Z == 65-122). */
 		{"no-cd-auto", no_argument, 0, 200},
 		{"no-open-auto", no_argument, 0, 201},
 		{"no-restore-last-path", no_argument, 0, 202},
@@ -2192,7 +2199,7 @@ external_arguments(int argc, char **argv)
 	int optc;
 	int open_prev_mode = 0;
 
-	/* Variables to store arguments to options */
+	/* Variables to store arguments to options. */
 	char *path_value = (char *)NULL,
 #ifndef _NO_PROFILES
 		*alt_profile_value = (char *)NULL,
@@ -2584,7 +2591,7 @@ external_arguments(int argc, char **argv)
 	if (kbinds_value)
 		set_alt_kbinds_file(kbinds_value);
 
-	if (xargs.config && config_value)
+	if (xargs.config == 1 && config_value)
 		set_alt_config_file(config_value);
 
 #ifndef _NO_PROFILES
@@ -3122,8 +3129,8 @@ get_path_programs(void)
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
 	if (conf.ext_cmd_ok == 1) {
-		char cwd[PATH_MAX];
-		if (getcwd(cwd, sizeof(cwd)) == NULL) {/* Avoid compiler warning */}
+		char tmp[PATH_MAX] = "";
+		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
 		commands_bin = (struct dirent ***)xnmalloc(path_n, sizeof(struct dirent));
 		cmd_n = (int *)xnmalloc(path_n, sizeof(int));

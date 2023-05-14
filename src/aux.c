@@ -307,13 +307,14 @@ abbreviate_file_name(char *str)
 	return str;
 }
 
-static char *
-get_cwd(char *buf, const size_t buflen)
+char *
+get_cwd(char *buf, const size_t buflen, const int check_workspace)
 {
-	if (workspaces && cur_ws >= 0 && workspaces[cur_ws].path)
+	if (check_workspace == 1 && workspaces && cur_ws >= 0
+	&& workspaces[cur_ws].path)
 		return workspaces[cur_ws].path;
 
-	char *tmp = getenv("PWD");
+	char *tmp = xargs.secure_env_full != 1 ? getenv("PWD") : (char *)NULL;
 	if (tmp)
 		return tmp;
 
@@ -372,7 +373,7 @@ normalize_path(char *src, size_t src_len)
 	if (l == 0 || *s != '/') {
 		/* Relative path */
 		char p[PATH_MAX]; *p = '\0';
-		char *cwd = get_cwd(p, sizeof(p));
+		char *cwd = get_cwd(p, sizeof(p), 1);
 
 		size_t pwd_len = (cwd && *cwd) ? strlen(cwd) : 0;
 		if (pwd_len == 1 && *cwd == '/') {

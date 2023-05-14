@@ -40,6 +40,7 @@ __BEGIN_DECLS
 
 int  _expand_eln(const char *);
 char *abbreviate_file_name(char *);
+char *get_cwd(char *, const size_t, const int);
 void close_fstream(FILE *, int);
 int  count_dir(const char *, int);
 off_t dir_size(char *, const int, int *);

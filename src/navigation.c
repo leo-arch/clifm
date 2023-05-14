@@ -670,10 +670,12 @@ xchdir(char *dir, const int cd_flag)
 	int ret = chdir(dir);
 
 	if (ret == 0 && cd_flag == SET_TITLE) {
-		char *p = getenv("PWD");
-		/* Do not set OLDPWD is changing to the same directory ("cd ."
+		char tmp[PATH_MAX]; *tmp = '\0';
+		char *p = get_cwd(tmp, sizeof(tmp), 0);
+
+		/* Do not set OLDPWD if changing to the same directory ("cd ."
 		 * and similar commands). */
-		if (p && strcmp(p, dir) != 0)
+		if (p && *p && strcmp(p, dir) != 0)
 			setenv("OLDPWD", p, 1);
 
 		setenv("PWD", dir, 1);

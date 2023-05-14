@@ -1745,10 +1745,11 @@ handle_stdin(void)
 	if (xargs.stealth_mode != 1)
 		setenv("CLIFM_VIRTUAL_DIR", stdin_tmp_dir, 1);
 
-	/* Get CWD: we need it to prepend it to relative paths */
-	char *cwd = (char *)NULL;
-	cwd = getcwd(NULL, 0);
-	if (!cwd) {
+	/* Get CWD: we need it to prepend it to relative paths. */
+	char t[PATH_MAX] = "";
+	char *cwd = get_cwd(t, sizeof(t), 0);
+
+	if (!cwd || !*cwd) {
 		exit_status = errno;
 		goto FREE_N_EXIT;
 	}
@@ -1846,7 +1847,7 @@ END:
 			fprintf(stderr, "Press any key to continue... ");
 			xgetchar();
 		}
-		free(cwd);
+
 		free(buf);
 		exit(EXIT_FAILURE);
 	}
@@ -1869,8 +1870,6 @@ END:
 		free(cwd);
 		goto FREE_N_EXIT;
 	}
-
-	free(cwd);
 
 	if (workspaces[cur_ws].path)
 		free(workspaces[cur_ws].path);
