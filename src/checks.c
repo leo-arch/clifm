@@ -170,6 +170,11 @@ set_term_caps(const int i)
 static void
 check_term_support(const char *_term)
 {
+	if (!_term || !*_term) {
+		set_term_caps(-1);
+		return;
+	}
+
 	size_t i, len = strlen(_term);
 	/* Color and cursor position request support */
 	int index = -1;
@@ -199,8 +204,8 @@ check_term(void)
 {
 	char *_term = getenv("TERM");
 	if (!_term || !*_term) {
-		xerror(_("%s: TERM environment variable not set\n"), PROGRAM_NAME);
-		exit(EXIT_FAILURE);
+		_err('w', PRINT_PROMPT, _("%s: TERM environment variable is not set.\n"
+			"Running in full compatibility mode\n"), PROGRAM_NAME);
 	}
 
 	check_term_support(_term);
