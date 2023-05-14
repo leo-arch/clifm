@@ -317,8 +317,8 @@ get_cwd(char *buf, const size_t buflen)
 	if (tmp)
 		return tmp;
 
-	getcwd(buf, buflen);
-	tmp = buf;
+	char *ret = getcwd(buf, buflen);
+	tmp = (ret && *buf) ? buf : (char *)NULL;
 
 	return tmp;
 }
@@ -371,7 +371,7 @@ normalize_path(char *src, size_t src_len)
 
 	if (l == 0 || *s != '/') {
 		/* Relative path */
-		char p[PATH_MAX];
+		char p[PATH_MAX]; *p = '\0';
 		char *cwd = get_cwd(p, sizeof(p));
 
 		size_t pwd_len = (cwd && *cwd) ? strlen(cwd) : 0;

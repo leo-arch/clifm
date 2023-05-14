@@ -1171,7 +1171,7 @@ expand_tag(char ***args, const int tag_index)
 		if (!ret || !*rpath) {
 			/* This tagged file points to a non-existent file. Just copy
 			 * the tag path. */
-			xstrsncpy(rpath, filename, sizeof(rpath));
+			xstrsncpy(rpath, filename, sizeof(rpath) - 1);
 		}
 
 		char *esc_str = escape_str(rpath);
@@ -1825,6 +1825,7 @@ expand_glob(char ***substr, const int *glob_array, const size_t glob_n)
 	return 0;
 }
 
+#if !defined(__HAIKU__) && !defined(__OpenBSD__) && !defined(__ANDROID__)
 static int
 expand_word(char ***substr, const int *word_array, const size_t word_n)
 {
@@ -1909,6 +1910,7 @@ expand_word(char ***substr, const int *word_array, const size_t word_n)
 
 	return 0;
 }
+#endif /* !__HAIKU__ && !__OpenBSD__ && !__ANDROID__ */
 
 static size_t
 check_ranges(char ***substr, int **range_array)
