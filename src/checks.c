@@ -204,8 +204,9 @@ check_term(void)
 {
 	char *_term = getenv("TERM");
 	if (!_term || !*_term) {
-		_err('w', PRINT_PROMPT, _("%s: TERM environment variable is not set.\n"
-			"Running in full compatibility mode\n"), PROGRAM_NAME);
+		_term = "xterm";
+		_err('w', PRINT_PROMPT, _("%s: The TERM environment variable is unset.\n"
+			"Running in xterm compatibility mode\n"), PROGRAM_NAME);
 	}
 
 	check_term_support(_term);

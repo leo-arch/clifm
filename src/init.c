@@ -494,14 +494,14 @@ set_start_path(void)
 	prev_ws = cur_ws;
 	set_cur_workspace();
 
-	/* Make path the CWD */
+	/* Make path the CWD. */
 	int ret = xchdir(workspaces[cur_ws].path, NO_TITLE);
 
 	char tmp[PATH_MAX] = "";
 	char *pwd = get_cwd(tmp, sizeof(tmp), 0);
 
 	/* If chdir() fails, set path to PWD, list files and print the
-	 * error message. If no access to PWD either, exit */
+	 * error message. If no access to PWD either, exit. */
 	if (ret == -1) {
 		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
 		    workspaces[cur_ws].path, strerror(errno));
@@ -516,7 +516,7 @@ set_start_path(void)
 		workspaces[cur_ws].path = savestring(pwd, strlen(pwd));
 	}
 
-	/* Set OLDPWD */
+	/* Set OLDPWD. */
 	if (pwd && *pwd && (!workspaces || !workspaces[cur_ws].path
 	|| strcmp(workspaces[cur_ws].path, pwd) != 0))
 		setenv("OLDPWD", pwd, 1);
@@ -3119,8 +3119,7 @@ cygwin_exclude_file(char *name)
 #endif /* __CYGWIN__ */
 
 /* Get the list of files in PATH, plus CliFM internal commands, and send
- * them into an array to be read by my readline custom auto-complete
- * function (my_rl_completion) */
+ * them into an array to be read by my_rl_completion(). */
 void
 get_path_programs(void)
 {
@@ -3132,7 +3131,8 @@ get_path_programs(void)
 		char tmp[PATH_MAX] = "";
 		char *cwd = get_cwd(tmp, sizeof(tmp), 0);
 
-		commands_bin = (struct dirent ***)xnmalloc(path_n, sizeof(struct dirent));
+		commands_bin = (struct dirent ***)xnmalloc(path_n,
+			sizeof(struct dirent));
 		cmd_n = (int *)xnmalloc(path_n, sizeof(int));
 
 		i = (int)path_n;
@@ -3160,14 +3160,16 @@ get_path_programs(void)
 	}
 
 	/* Add internal commands */
-	for (internal_cmds_n = 0; internal_cmds[internal_cmds_n].name; internal_cmds_n++);
+	for (internal_cmds_n = 0; internal_cmds[internal_cmds_n].name;
+		internal_cmds_n++);
 
 	bin_commands = (char **)xnmalloc((size_t)total_cmd + internal_cmds_n +
 			     aliases_n + actions_n + 2, sizeof(char *));
 
 	i = (int)internal_cmds_n;
 	while (--i >= 0) {
-		bin_commands[l] = savestring(internal_cmds[i].name, internal_cmds[i].len);
+		bin_commands[l] = savestring(internal_cmds[i].name,
+			internal_cmds[i].len);
 		l++;
 	}
 
@@ -3175,7 +3177,8 @@ get_path_programs(void)
 	if (aliases_n > 0) {
 		i = (int)aliases_n;
 		while (--i >= 0) {
-			bin_commands[l] = savestring(aliases[i].name, strlen(aliases[i].name));
+			bin_commands[l] = savestring(aliases[i].name,
+				strlen(aliases[i].name));
 			l++;
 		}
 	}
@@ -3184,7 +3187,8 @@ get_path_programs(void)
 	if (actions_n > 0) {
 		i = (int)actions_n;
 		while (--i >= 0) {
-			bin_commands[l] = savestring(usr_actions[i].name, strlen(usr_actions[i].name));
+			bin_commands[l] = savestring(usr_actions[i].name,
+				strlen(usr_actions[i].name));
 			l++;
 		}
 	}
