@@ -374,8 +374,13 @@ normalize_path(char *src, size_t src_len)
 		/* Relative path */
 		char p[PATH_MAX]; *p = '\0';
 		char *cwd = get_cwd(p, sizeof(p), 1);
+		if (!cwd || !*cwd) {
+			xerror(_("%s: Error getting current directory\n"), PROGRAM_NAME);
+			free(tmp);
+			return (char *)NULL;
+		}
 
-		size_t pwd_len = (cwd && *cwd) ? strlen(cwd) : 0;
+		size_t pwd_len = strlen(cwd);
 		if (pwd_len == 1 && *cwd == '/') {
 			/* If CWD is root (/) do not copy anything. Just create a buffer
 			 * big enough to hold "/dir", which will be appended next */
