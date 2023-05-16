@@ -1,3 +1,93 @@
+1.12 - Blondbeard
+
+Bug fixes
+* Warning prompt color persists after recovering from wrong command
+* Size of empty dirs is zero when apparent-size is disabled (should print '4k' instead)
+* A file of 1024 bytes exactly is displayed as 1024B instead of 1K
+* Cannot open links to regular files (neither 'ELN' nor 'FILENAME' nor 'FILENAME APP')
+* Warning prompt triggered when more than one word and editing first word to 's:', 'b:', or 't:' constructs
+* Wrong color when TAB completing in the middle of the line and whatever is next is colored (ex: quotes)
+* 'update.sh' plugin is unable to retrieve lastest upstream version
+* Attempting to switch profiles when there is only one
+* Partially printed directory size ('pp' command) on wsvt25 console (NetBSD)
+* When you type "uc" a command description is provided, but the command doesn't exist anymore
+* 'mp' command not working on DragonFly BSD
+* 'ls' returns exit code 1 (even when there is no error) when running with --no-autols
+* 'ow' not honoring "![EO]" notation in the opening application string
+* Wrong color for non-existent tagged files
+* No completion for 'tag FILE :<TAB>'
+* Query string not correctly cleared when TAB completed text is shorter (tagged files insertion)
+* Extension color no honored by the 'p' command for symlink targets
+* When running colorless, links are always shown as broken in 'p' command
+* When toggling the disk usage analyzer (Alt-TAB) the value of apparent-size is changed
+* Directory history from different instances is not preserved: the last instance overwrites everything.
+* New jumpt entries (visited directories) generated from a second instance is not preserved
+* Selected files indicator not shown in long view if ELN's are disabled
+* Wrong color for symlink target in 'p' command when the target is a special file
+* Unaccessible directory not colored as such when the user has not execute permission
+* The 'ne' color code has no effect at all. Removed.
+* Crash when attempting to run a plugin via a keyboard shortcut.
+* "cmdxxxx<TAB>" performs TAB completion as if the string were just "cmd"
+* Some internal subcommands are never suggested
+* Version sort not correctly sorting ('file10' before 'file9'!)
+* Wrong screen width when using icons in long view and file names are not trimmed
+* Description for some commands is never suggested 
+* 'mm --help' returns 1 (error) as exit status
+* Some shell completion for Bash and Zsh are broken
+* Files list not reloaded when unmounting remote
+* --print-sel is not working
+* Crash when changing dir and the directory history is empty
+* 'te' command reports success even if the operation failed (e.g. permission denied)
+* A file named "...file" is wrongly converted into "../../" by the fastback function
+* Cannot untrash file if destiny (original path) is on a different file system
+* Misaligned emoji-icons in foot (Wayland)
+* Wrong files alignment in virtual dirs when clear-screen is disabled
+* Select files using the same glob expression twice: wrong files got selected.
+* Missing space between icon and file name when running with --no-color
+* Broken nerdfont icons since NerdFont 3.0
+* PWD not properly set in case of symlinks to directories
+* Words in the command line are expanded even if quoted or escaped (ex: "s '~'")
+* "clifm -P ." creates a profile that cannot be managed via the 'pf' command
+* Crash when expanding a tag some of whose tagged files are not existent, and is followed by another tag expression
+
+New features/improvements
+* Print dir sizes ('p' command) as human-size/bytes (as done for regular files) (GNU 'du' only)
+* Reload the list of binaries only when timestamps of paths in PATH differ from cached values (this might be noticeable on low-spec systems)
+* Warn when attempting to merge a tag with itself
+* Honor 'apparent-size' and 'si' options for directories on BSD systems 
+* New command: 'unset', to remove variables from the environment
+* New command: 'll', to toggle long view mode
+* 'ff', 'hf', and 'lm' commands just toggle state if no parameter is given
+* 'hh' is now an alias for 'hf, hidden'
+* Add free percentage to disk usage message (--disk-usage, DiskUsage)
+* 'rf' clears the screen even when ClearScreen is set to false
+* Make file names trimming optional via TrimNames (config file) and --no-trim-names 
+* Set colors for file extension to default values when running in stealth mode
+* Allow listing tags applied to an specific file ('tag list FILENAME...')
+* Colorize output of the 'jl' command
+* New option: 'ColorLinksAsTarget', to colorize symlinks as target files
+* Replace slash by dot as permission groups separator char (long view and 'p' command)
+* New plugin: 'xclip.sh', to copy the current line buffer to the clipboard via a custom keybinding
+* 'export' can now export multiple variables at once
+* Allow directly assigning hex colors to file extensions in color scheme files
+* Inform target name when editing a broken symbolic link
+* Append an 'add' subcommand to 'tag' for consistency with the remaining subcommands
+* Add 'edit' subcommand to the 'config' command
+* Add 'list' subcommand to the 'net' command
+* Add 'set' subcommand to the 'prompt' command
+* Add 'list' subcommand to 'kb'. Add both 'list' and 'readline' to TAB completion.
+* The 'log' command has now this syntax: log [cmd, msg [on, off, status, clear]]
+* TAB complete available subcommands for 'actions', 'config', 'fc', 'mime', 'net', 'log', and 'prompt' commands.
+* 'filescounter' command was removed (only 'fc' remains)
+* Improve logs system
+* Old log.clifm file split into two: cmdlogs.clifm and msglogs.clifm
+* Disable the use of bold colors via --no-bold
+* Allow the use of xterm-like color names in color schemes
+* Completions file for the Fish shell
+* Dir full sizes are preceded by '!' whenever there was an error reading a subdir (total size may not be accurate)
+* 'cd' returns 1 in case of EACCESS error, like most shells do.
+* TAB complete 'cmd edit <TAB>' with available text editors (for all internal commands taking 'edit' as subcommand)
+
 1.11 - Cobb
 
 Bug Fixes
