@@ -764,7 +764,7 @@ dup_file(char **cmd)
 	free(dest_dir);
 	free(rsync_path);
 	return exit_status;
-} 
+}
 
 int
 create_file(char **cmd)
@@ -1429,6 +1429,39 @@ list_removed_files(char **cmd, const size_t start, const int cwd)
 	free(removed_files);
 }
 
+/* Return the appropriate parameters for rm(1), depending on:
+ * 1. The installed version of rm
+ * 2. The list of files to be removed contains at least 1 dir (DIRS)
+ * 3. We should run interactively (RM_FORCE) */
+static char *
+set_rm_params(const int dirs, const int rm_force)
+{
+	if (dirs == 1) {
+#if defined(_BE_POSIX)
+		return (rm_force == 1 ? "-rf" : "-r");
+#elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
+		if (bin_flags & BSD_HAVE_COREUTILS)
+			return (rm_force == 1 ? "-drf" : "-dIr");
+		else
+			return (rm_force == 1 ? "-drf" : "-dr");
+#else
+		return (rm_force == 1 ? "-drf" : "-dIr");
+#endif
+	}
+
+// No directories
+#if defined(_BE_POSIX)
+	return "-f";
+#elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
+	if (bin_flags & BSD_HAVE_COREUTILS)
+		return (rm_force == 1 ? "-f" : "-I");
+	else
+		return "-f";
+#else
+	return (rm_force == 1 ? "-f" : "-I");
+#endif
+}
+
 int
 remove_file(char **args)
 {
@@ -1436,61 +1469,49 @@ remove_file(char **args)
 
 	struct stat a;
 	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
-	int i, j = 3, dirs = 0;
+	int i, j, dirs = 0;
 
-	int bk_rm_force = conf.rm_force;
+	int rm_force = conf.rm_force == 1 ? 1 : 0;
 
-	i = (is_force_param(args[1] ? args[1] : (char *)NULL) == 1) ? 2 : 1;
+	i = (is_force_param(args[1]) == 1) ? 2 : 1;
 	if (i == 2)
-		conf.rm_force = 1;
+		rm_force = 1;
 
-	for (; args[i]; i++) {
+	for (j = 3; args[i]; i++) {
+		/* Let's start storing file names in 3: 0 is for 'rm', and 1
+		 * and 2 for parameters, including end of parameters (--). */
 
-		size_t l = strlen(args[i]);
 		/* If we have a symlink to dir ending with a slash, stat(3) takes it
 		 * as a directory, and then rm(1) complains that cannot remove it,
 		 * because "Is a directory". So, let's remove the ending slash:
 		 * stat(3) will take it as the symlink it is and rm(1) will remove
-		 * the symlink (not the target), without complains */
-		if (l > 0 && args[i][l - 1] == '/')
-			args[i][l - 1] = '\0';
+		 * the symlink (not the target), without complains. */
+		size_t len = strlen(args[i]);
+		if (len > 0 && args[i][len - 1] == '/')
+			args[i][len - 1] = '\0';
 
 		/* Check if at least one file is in the current directory. If not,
-		 * there is no need to refresh the screen */
+		 * there is no need to refresh the screen. */
 		if (cwd == 0)
 			cwd = is_file_in_cwd(args[i]);
 
-		char *tmp = (char *)NULL;
-		if (strchr(args[i], '\\')) {
-			tmp = dequote_str(args[i], 0);
-			if (tmp) {
-				/* Start storing file names in 3: 0 is for 'rm', and 1
-				 * and 2 for parameters, including end of parameters (--) */
-				if (lstat(tmp, &a) != -1) {
-					rm_cmd[j] = savestring(tmp, strlen(tmp));
-					j++;
-					if (S_ISDIR(a.st_mode))
-						dirs = 1;
-				} else {
-					xerror("r: %s: %s\n", tmp, strerror(errno));
-					errs++;
-				}
-				free(tmp);
-			} else {
-				xerror(_("r: %s: Error dequoting file name\n"), args[i]);
-				continue;
-			}
-		} else {
-			if (lstat(args[i], &a) != -1) {
-				rm_cmd[j] = savestring(args[i], strlen(args[i]));
-				j++;
-				if (S_ISDIR(a.st_mode))
-					dirs = 1;
-			} else {
-				xerror("r: %s: %s\n", args[i], strerror(errno));
-				errs++;
-			}
+		char *tmp = dequote_str(args[i], 0);
+		if (!tmp) {
+			xerror(_("r: %s: Error dequoting file name\n"), args[i]);
+			continue;
 		}
+
+		if (lstat(tmp, &a) != -1) {
+			rm_cmd[j] = savestring(tmp, strlen(tmp));
+			j++;
+			if (S_ISDIR(a.st_mode))
+				dirs = 1;
+		} else {
+			xerror("r: %s: %s\n", tmp, strerror(errno));
+			errs++;
+		}
+
+		free(tmp);
 	}
 
 	rm_cmd[j] = (char *)NULL;
@@ -1502,34 +1523,22 @@ remove_file(char **args)
 
 	if (j == 3) { /* No file to be deleted */
 		free(rm_cmd);
-		conf.rm_force = bk_rm_force;
 		return EXIT_FAILURE;
 	}
 
-	rm_cmd[0] = savestring("rm", 2);
-
-	if (dirs == 1)
-#if defined(_BE_POSIX)
-		rm_cmd[1] = savestring(conf.rm_force == 1
-			? "-rf" : "-r", conf.rm_force == 1 ? 3 : 2);
-#elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
-		rm_cmd[1] = savestring(conf.rm_force == 1
-			? "-drf" : "-dr", conf.rm_force == 1 ? 4 : 3);
-#else /* Linux and FreeBSD only */
-		rm_cmd[1] = savestring(conf.rm_force == 1 ? "-drf" : "-dIr", 4);
-#endif /* _BE_POSIX */
+	if (bin_flags & BSD_HAVE_COREUTILS)
+		rm_cmd[0] = savestring("grm", 3);
 	else
-#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__) \
-|| defined(_BE_POSIX)
-		rm_cmd[1] = savestring("-f", 2);
-#else /* Linux and FreeBSD only */
-		rm_cmd[1] = savestring(conf.rm_force == 1 ? "-f" : "-I", 2);
-#endif /* __NetBSD__ || __OpenBSD__ || __APPLE__ */
+		rm_cmd[0] = savestring("rm", 2);
+
+	rm_cmd[1] = (char *)xnmalloc(5, sizeof(char));
+	snprintf(rm_cmd[1], 5, "%s", set_rm_params(dirs, rm_force));
 
 	rm_cmd[2] = savestring("--", 2);
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
+
 #if defined(__HAIKU__) ||  defined(__CYGWIN__)
 	else {
 		if (cwd == 1 && conf.autols == 1 && strcmp(args[1], "--help") != 0
@@ -1548,7 +1557,6 @@ remove_file(char **args)
 		free(rm_cmd[i]);
 	free(rm_cmd);
 
-	conf.rm_force = bk_rm_force;
 	return exit_status;
 }
 

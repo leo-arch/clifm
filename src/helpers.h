@@ -265,6 +265,13 @@ extern int watch;
 #define GNU_DU_BIN_DU  (1 << 3)
 /* 'gdu' is the GNU version of 'du' used by BSD systems */
 #define GNU_DU_BIN_GDU (1 << 4)
+/* In BSD systems, the coreutils package provides the GNU versions for
+ * cp, mv, and rm, named gcp, gmv, and grm respectively. */
+#define BSD_HAVE_COREUTILS (1 << 5)
+#if (defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)) \
+&& !defined(_BE_POSIX)
+# define CHECK_COREUTILS
+#endif
 
 /* File ownership flags (used by check_file_access() in checks.c) */
 #define R_USR (1 << 1)

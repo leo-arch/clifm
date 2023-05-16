@@ -1902,10 +1902,6 @@ set_mv_cmd(char **cmd, const int mv_force)
 {
 	int bk_mv_cmd = conf.mv_cmd;
 	if (mv_force == 1) {
-/*		if (conf.mv_cmd == CP_ADVCP)
-			conf.mv_cmd = CP_ADVCP_FORCE;
-		else if (conf.mv_cmd == CP_CP)
-			conf.mv_cmd = CP_CP_FORCE; */
 		if (conf.mv_cmd == MV_ADVMV)
 			conf.mv_cmd = MV_ADVMV_FORCE;
 		else if (conf.mv_cmd == MV_MV)

@@ -315,6 +315,12 @@ check_third_party_cmds_alt(void)
 	}
 #endif /* !HAVE_GNU_DU && !_BE_POSIX */
 
+#if defined(CHECK_COREUTILS)
+	if ( (p = get_cmd_path("grm")) ) {
+		free(p); bin_flags |= BSD_HAVE_COREUTILS;
+	}
+#endif // CHECK_COREUTILS
+
 	set_mount_cmd(udisks2ok, udevilok);
 }
 
@@ -334,7 +340,11 @@ check_third_party_cmds(void)
 	}
 
 
-	int udisks2ok = 0, udevilok = 0;
+	int udisks2ok = 0, udevilok = 0, check_coreutils = 0;
+#if defined(CHECK_COREUTILS)
+	check_coreutils = 1;
+#endif // CHECK_COREUTILS
+
 	int i = (int)path_progsn;
 
 	while (--i >= 0) {
@@ -372,12 +382,18 @@ check_third_party_cmds(void)
 			udevilok = 1;
 
 #if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
-		if (*bin_commands[i] == 'g' && strcmp(bin_commands[i] + 1, "du") == 0) {
+		if (*bin_commands[i] == 'g' && strcmp(bin_commands[i] + 1, "du") == 0)
 			bin_flags |= GNU_DU_BIN_GDU;
-		}
 #endif /* !HAVE_GNU_DU && !_BE_POSIX */
 
-		if (udevilok == 1 && udisks2ok == 1
+#if defined(CHECK_COREUTILS)
+		if (*bin_commands[i] == 'g' && strcmp(bin_commands[i] + 1, "rm") == 0) {
+			bin_flags |= BSD_HAVE_COREUTILS;
+			check_coreutils = 0;
+		}
+#endif // CHECK_COREUTILS
+
+		if (udevilok == 1 && udisks2ok == 1 && check_coreutils == 0
 		&& (bin_flags & (FZF_BIN_OK & FZY_BIN_OK & SMENU_BIN_OK
 #if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
 		& GNU_DU_BIN_GDU)))
