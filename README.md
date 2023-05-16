@@ -28,6 +28,7 @@ href="https://github.com/leo-arch/clifm/issues">Report bug</a></h4>
 <p align="center">
 <a href="https://github.com/leo-arch/clifm/actions/workflows/codeql-analysis.yml"><img src="https://github.com/leo-arch/clifm/actions/workflows/codeql-analysis.yml/badge.svg?branch=master"></a>
 <a href="https://www.codacy.com/gh/leo-arch/clifm/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=leo-arch/clifm&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/c2c24860fce64d2aa6ca8e1dd0981d6d"/></a>
+<a href="https://build.opensuse.org/package/show/home:archcrack/CliFM"><img src="https://build.opensuse.org/projects/home:archcrack/packages/CliFM/badge.svg?type=default"></a>
 <!---
 <a href="https://app.codiga.io/project/30518/dashboard"><img alt="Code grade" src="https://api.codiga.io/project/30518/status/svg"/></a>
 -->
