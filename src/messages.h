@@ -1082,10 +1082,14 @@ c  -> cp -iRp\n\
 l  -> ln -sn\n\
 m  -> mv -i\n\
 md -> mkdir -p\n\
-r  -> rm -dIr (for directories) (1)\n\
-r  -> rm -I (for non-directories) (2)\n\n\
-(1) 'rm -dr' on NetBSD/OpenBSD/MacOS.\n    Note: -d is not supported by the POSIX version of rm(1)\n\
-(2) 'rm -f' on NetBSD/OpenBSD/MacOS\n\n\
+r  -> rm -dIr (for directories) (1)(2)(4)\n\
+r  -> rm -I (for non-directories) (1)(3)(4)\n\n\
+(1) On NetBSD/OpenBSD/MacOS 'grm' (the GNU version of 'rm') is used\n\
+    if available.\n\
+(2) On NetBSD/OpenBSD/MacOS, 'rm -dr' is used if 'grm' is not available.\n\
+(3) On NetBSD/OpenBSD/MacOS, 'rm -f' is used if 'grm' is not available.\n\
+(4) In case of multiple files, 'rm -dIr' is used if at least one file is\n\
+    a directory.\n\n\
 The 'paste' command is equivalent to 'c' and exists only for semantic\n\
 reasons. For example, if you want to copy selected files into the current\n\
 directory, it makes sense to write 'paste sel'.\n\n\
@@ -1093,7 +1097,7 @@ By default, both the 'c' and 'm' commands run cp(1)/mv(1) interactively\n\
 (-i), i.e. prompting before overwriting a file. To run non-interactivelly\n\
 instead, use the -f,--force parameter (see the examples below). You can\n\
 also permanently run in non-interactive mode using the cpCmd/mvCmd options\n\
-in the configuration file ('edit' or F10).\n\n\
+in the configuration file ('config' or F10).\n\n\
 Just as 'c' and 'm', the 'r' command accepts -f,--force as paramater to\n\
 prevent rm(1) from prompting before removals. Set rmForce to true in the\n\
 configuration file to make this option permanent.\n\n\

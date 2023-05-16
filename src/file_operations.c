@@ -1449,7 +1449,7 @@ set_rm_params(const int dirs, const int rm_force)
 #endif
 	}
 
-// No directories
+/* No directories */
 #if defined(_BE_POSIX)
 	return "-f";
 #elif defined(__NetBSD__) || defined(__OpenBSD__) || defined(__APPLE__)

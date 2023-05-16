@@ -610,13 +610,15 @@ This built-in bulk rename function won't deal with deletions, replacements, file
 \fBc\fR, \fBl \fR[\fIe\fR, \fIedit\fR], \fBm\fR, \fBmd\fR, \fBr\fR
 short for the following commands respectively: \fIcp\ \-iRp\fR, \fIln\ \-sn\fR, \fImv\ \-i\fR, \fImkdir\ \-p\fR, and \fIrm\ \-I\fR (for files) or \fIrm\ \-dIr\fR (for directories).
 .sp
+Note that, in case of multiple files, the \fIr\fR command executes \fIrm -dIr\fR if at least one file is a directory.
+.sp
 By default, the \fIc\fR, \fIm\fR, and \fIr\fR commands execute \fBcp\fR(1), \fBmv\fR(1), and \fBrm\fR(1) respectively in interactive mode (using the \fI\-i/\-I\fR switches) to ask for confirmation before operations. Since this might sometimes be quite intrusive (specially when operating on large amount of files), it is possible to turn interactivity off in two different ways:
 
   a) For the current command only: via the \fI\-f\fR, \fI\-\-force\fR switch. Example: \fIc \-f sel\fR, \fIm \-f sel\fR, or \fIr \-f *\fR.
 
   b) Permanently. Use the \fIcpCmd\fR, \fImvCmd\fR, and \fIrmForce\fR options in the configuration file to permanently set any of these commands to non-interactive mode.
 .sp
-On systems not supporting the \fI\-I\fR switch (NetBSD, OpenBSD, and MacOS), the \fIr\fR command executes \fBrm\fR(1) as follows: \fIrm \-drf\fR for directories, and \fIrm \-f\fR for files. Note that, if compiled with _BE_POSIX, the \fI\-d\fR flag is not available, in which case \fIrm \-rf\fR is used instead.
+On NetBSD, OpenBSD, and MacOS, \fIgrm\fR (the GNU version of \fIrm\fR) is used if available. If not, the \fIr\fR command executes \fBrm\fR(1) as follows: \fIrm \-drf\fR for directories, and \fIrm \-f\fR for files. Note that, if compiled with _BE_POSIX, the \fI\-d\fR flag is not available, in which case \fIrm \-rf\fR is used instead.
 .sp
 To use these commands without any of these arguments, or with any other argument you want, use the non-abbreviated (shell) command, for instance, \fIcp\fR instead of \fIc\fR. Of course, you can also create aliases to use you preferred commands, for example, "c='cp \-adp'". Consult the \fIalias\fR command above for more information.
 .sp
