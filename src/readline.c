@@ -1275,14 +1275,14 @@ my_rl_path_completion(const char *text, int state)
 		type = ent->d_type;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 
-		if (((conf.suggestions == 1 && nwords == 1)
+		if (((conf.suggestions == 1 && words_num == 1)
 		|| !strchr(rl_line_buffer, ' '))
 		&& ((type == DT_DIR && conf.autocd == 0)
 		|| (type != DT_DIR && conf.auto_open == 0)))
 			continue;
 
 		/* Only dir names for cd */
-		if ((conf.suggestions == 0 || nwords > 1) && conf.fuzzy_match == 1
+		if ((conf.suggestions == 0 || words_num > 1) && conf.fuzzy_match == 1
 		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && type != DT_DIR)
 			continue;
@@ -1886,13 +1886,13 @@ filenames_gen_text(const char *text, int state)
 	while (i < files && (name = file_info[i].name) != NULL) {
 		i++;
 		/* If first word, filter files according to autocd and auto-open values */
-		if (((conf.suggestions == 1 && nwords == 1) || !strchr(rl_line_buffer, ' '))
+		if (((conf.suggestions == 1 && words_num == 1) || !strchr(rl_line_buffer, ' '))
 		&& ( (file_info[i - 1].dir == 1 && conf.autocd == 0)
 		|| (file_info[i - 1].dir == 0 && conf.auto_open == 0) ))
 			continue;
 
 		/* If cd, list only directories */
-		if ((conf.suggestions == 0 || nwords > 1
+		if ((conf.suggestions == 0 || words_num > 1
 		|| (rl_end > 0 && rl_line_buffer[rl_end - 1] == ' '))
 		&& rl_line_buffer && *rl_line_buffer == 'c' && rl_line_buffer[1] == 'd'
 		&& rl_line_buffer[2] == ' ' && file_info[i - 1].dir == 0)
@@ -1930,7 +1930,7 @@ filenames_gen_eln(const char *text, int state)
 	while (i < files && (name = file_info[i++].name) != NULL) {
 		if (*name == *file_info[num_text - 1].name
 		&& strcmp(name, file_info[num_text - 1].name) == 0) {
-			if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c'
+			if (words_num > 1 && rl_line_buffer && *rl_line_buffer == 'c'
 			&& rl_line_buffer[1] == 'd'
 			&& rl_line_buffer[2] == ' ' && file_info[num_text - 1].dir == 0)
 				continue;
@@ -3304,7 +3304,7 @@ my_rl_completion(const char *text, int start, int end)
 				rl_swap_fields(&matches);
 			cur_comp_type = TCMP_GLOB;
 			rl_filename_completion_desired = 1;
-			if (nwords > 1)
+			if (words_num > 1)
 				flags |= MULTI_SEL;
 			return matches;
 		}
@@ -3490,7 +3490,7 @@ my_rl_completion(const char *text, int start, int end)
 		rl_sort_completion_matches = 1;
 
 		/* Command names completion for words after process separator: ; | && */
-		if (nwords == 1 && rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '
+		if (words_num == 1 && rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '
 		/* No command name contains slashes */
 		&& (*text != '/' || !strchr(text, '/'))) {
 			matches = rl_completion_matches(text, &bin_cmd_generator);
@@ -3526,7 +3526,7 @@ my_rl_completion(const char *text, int start, int end)
 		/* #### DIRECTORY HISTORY COMPLETION #### */
 		if (((*lb == 'b' || *lb == 'f' || *lb == 'd') && lb[1] == 'h'
 		&& lb[2] == ' ') && !strchr(text, '/')
-		&& (conf.suggestions == 0 || nwords <= 2)) {
+		&& (conf.suggestions == 0 || words_num <= 2)) {
 			char *p = dequote_str((char *)text, 0);
 			matches = rl_completion_matches(p ? p : text, &dirhist_generator);
 			free(p);
@@ -3539,9 +3539,9 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* #### BACKDIR COMPLETION #### */
-		if (*text != '/' && nwords <= 2 && rl_end >= 3
+		if (*text != '/' && words_num <= 2 && rl_end >= 3
 		&& *lb == 'b' && lb[1] == 'd' && lb[2] == ' ') {
-			if (nwords < 2 || (rl_end && lb[rl_end - 1] != ' ')) {
+			if (words_num < 2 || (rl_end && lb[rl_end - 1] != ' ')) {
 				int n = 0;
 				char *p = dequote_str((char *)text, 0);
 				matches = get_bd_matches(p ? p : text, &n, BD_TAB);
@@ -3743,7 +3743,7 @@ my_rl_completion(const char *text, int start, int end)
 					return matches;
 				}
 				return (char **)NULL;
-			} else if (nwords > 3) {
+			} else if (words_num > 3) {
 				// THIS ONLY WORKS WITH SUGGESTIONS ENABLED. FIX!!
 				/* Do not complete anything after "bm add FILE" */
 				rl_attempted_completion_over = 1;
@@ -3807,7 +3807,7 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* ### WORKSPACES COMPLETION ### */
-		if (*lb == 'w' && strncmp(lb, "ws ", 3) == 0 && nwords <= 2) {
+		if (*lb == 'w' && strncmp(lb, "ws ", 3) == 0 && words_num <= 2) {
 			rl_sort_completion_matches = 0;
 			rl_attempted_completion_over = 1;
 			char *p = dequote_str((char *)text, 0);

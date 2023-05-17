@@ -1644,7 +1644,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	|| ct == TCMP_BM_PATHS || ct == TCMP_BM_PREFIX
 	|| ct == TCMP_TAGS_T || ct == TCMP_DIRHIST) {
 		char *s = rl_line_buffer ? get_last_chr(rl_line_buffer,
-			(ct == TCMP_GLOB && nwords == 1) ? '/' : ' ', rl_end) : (char *)NULL;
+			(ct == TCMP_GLOB && words_num == 1) ? '/' : ' ', rl_end) : (char *)NULL;
 		if (s) {
 			rl_point = (int)(s - rl_line_buffer + 1);
 			rl_delete_text(rl_point, rl_end);
@@ -1721,7 +1721,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	free(buf);
 
 #ifndef _NO_SUGGESTIONS
-	if (conf.suggestions && nwords == 1 && wrong_cmd == 1) {
+	if (conf.suggestions && words_num == 1 && wrong_cmd == 1) {
 		fputs(NC, stdout);
 		fflush(stdout);
 		rl_restore_prompt();

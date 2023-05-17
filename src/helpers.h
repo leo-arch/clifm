@@ -1371,7 +1371,6 @@ extern size_t
 	kbinds_n,
 	longest,
 	msgs_n,
-	nwords,
 	P_tmpdir_len,
 	path_n,
 	path_progsn,
@@ -1383,6 +1382,7 @@ extern size_t
 	tags_n,
 	trash_n,
 	usrvar_n,
+	words_num,
 	zombies;
 
 #ifndef _NO_ICONS

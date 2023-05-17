@@ -207,7 +207,6 @@ size_t
 	kbinds_n = 0,
 	longest = 0,
 	msgs_n = 0,
-	nwords = 0,
 	P_tmpdir_len = 0,
 	path_n = 0,
 	path_progsn = 0,
@@ -219,6 +218,7 @@ size_t
 	tags_n = 0,
 	trash_n = 0,
 	usrvar_n = 0,
+	words_num = 0,
 	zombies = 0;
 
 #if !defined(_NO_ICONS)

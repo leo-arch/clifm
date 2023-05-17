@@ -384,7 +384,7 @@ recover_from_wrong_cmd(void)
 	/* Check rl_dispathing to know whether we are called from a keybind,
 	 * in which case we should skip this check */
 	if (rl_line_buffer && (rl_dispatching == 0
-	|| (nwords > 1 && point_is_first_word == 0))) {
+	|| (words_num > 1 && point_is_first_word == 0))) {
 		char *p = (strrchr(rl_line_buffer, ' '));
 		if (p && p != rl_line_buffer && *(p - 1) != '\\' && *(p + 1) != ' ')
 			return EXIT_FAILURE;
@@ -598,12 +598,12 @@ print_suggestion(const char *str, size_t offset, char *color)
 		return;
 
 	if (wrong_cmd == 1) {
-		if (nwords > 1)
+		if (words_num > 1)
 			return;
 		recover_from_wrong_cmd();
 	}
 
-	if (nwords == 1 && rl_end > 0 && rl_line_buffer
+	if (words_num == 1 && rl_end > 0 && rl_line_buffer
 	&& rl_line_buffer[rl_end - 1] == ' ' && (rl_end == 1
 	|| rl_line_buffer[rl_end - 2] != '\\') && suggestion.type != HIST_SUG) {
 		// We have "cmd     " (with one or more trailing spaces)
@@ -899,7 +899,7 @@ check_completions(char *str, size_t len, const int print)
 	if (len == 0)
 		return NO_MATCH;
 
-	if (conf.fuzzy_match != 0 && nwords == 1 && *str != '/'
+	if (conf.fuzzy_match != 0 && words_num == 1 && *str != '/'
 	&& is_internal_c(str))
 		return NO_MATCH;
 
@@ -907,7 +907,7 @@ check_completions(char *str, size_t len, const int print)
 	suggestion.filetype = DT_REG;
 	cur_comp_type = TCMP_NONE;
 
-	if (print == 0 && nwords == 1) {
+	if (print == 0 && words_num == 1) {
 		// First (and only) word followed by a space
 		struct stat a;
 		if (lstat(str, &a) == 0) {
@@ -951,7 +951,7 @@ check_completions(char *str, size_t len, const unsigned char c, const int print)
 	skip_trailing_spaces(&str, &len);
 	skip_leading_backslashes(&str, &len);
 
-	if (conf.fuzzy_match != 0 && nwords == 1 && *str != '/' && is_internal_c(str))
+	if (conf.fuzzy_match != 0 && words_num == 1 && *str != '/' && is_internal_c(str))
 		return NO_MATCH;
 
 	int printed = NO_MATCH;
@@ -1080,7 +1080,7 @@ check_filenames(char *str, size_t len, const int first_word,
 		|| (file_info[i].dir == 0 && conf.auto_open == 0) ) )
 			continue;
 
-		if (nwords > 1 && rl_line_buffer && *rl_line_buffer == 'c'
+		if (words_num > 1 && rl_line_buffer && *rl_line_buffer == 'c'
 		&& rl_line_buffer[1] == 'd' && rl_line_buffer[2] == ' '
 		&& file_info[i].dir == 0)
 			continue;
@@ -1364,7 +1364,7 @@ check_eln(const char *str, const int print)
 
 	int n = atoi(str);
 	if ( n < 1 || n > (int)files || !file_info[n - 1].name
-	|| ( nwords == 1 && ( (file_info[n - 1].dir == 1 && conf.autocd == 0)
+	|| ( words_num == 1 && ( (file_info[n - 1].dir == 1 && conf.autocd == 0)
 	|| (file_info[n - 1].dir == 0 && conf.auto_open == 0) ) ) )
 		return NO_MATCH;
 
@@ -1656,8 +1656,8 @@ print_warning_prompt(const char fc, unsigned char lc)
 	free(decoded_prompt);
 
 	if (conf.highlight == 1
-	&& ( (rl_point < rl_end && nwords > 1)
-	|| (lc == ' ' && nwords == 1) ) )
+	&& ( (rl_point < rl_end && words_num > 1)
+	|| (lc == ' ' && words_num == 1) ) )
 		turn_it_wrong();
 }
 
@@ -2102,7 +2102,7 @@ rl_suggestions(const unsigned char c)
 
 	/* Count words */
 	size_t full_word = 0, start_word = 0;
-	nwords = count_words(&start_word, &full_word);
+	words_num = count_words(&start_word, &full_word);
 
 	/* And a copy of the first word as well */
 	char *first_word = (char *)NULL;
@@ -2113,14 +2113,14 @@ rl_suggestions(const unsigned char c)
 		rl_line_buffer[full_word] = ' ';
 	}
 
-	char *word = (nwords == 1 && c != ' ' && first_word)
+	char *word = (words_num == 1 && c != ' ' && first_word)
 		? first_word : last_word;
 	size_t wlen = strlen(word);
 
 	/* If more than one word and the cursor is on the first word,
 	 * jump to the check command name section */
 	point_is_first_word = 0;
-	if (nwords >= 2 && rl_point <= (int)full_word + 1) {
+	if (words_num >= 2 && rl_point <= (int)full_word + 1) {
 		point_is_first_word = 1;
 		goto CHECK_FIRST_WORD;
 	}
@@ -2133,7 +2133,7 @@ rl_suggestions(const unsigned char c)
 		goto SUCCESS;
 	}
 
-	if (int_vars == 1 && c == '=' && nwords == 1 && wrong_cmd == 1) {
+	if (int_vars == 1 && c == '=' && words_num == 1 && wrong_cmd == 1) {
 		recover_from_wrong_cmd();
 		goto SUCCESS;
 	}
@@ -2164,7 +2164,7 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.a) Internal command description */
 	char *cdesc = (char *)NULL;
-	if (conf.cmd_desc_sug == 1 && c != ' ' && nwords == 1
+	if (conf.cmd_desc_sug == 1 && c != ' ' && words_num == 1
 	&& (!rl_line_buffer || (rl_end > 0 && rl_line_buffer[rl_end - 1] != ' '))
 	&& (cdesc = check_int_cmd_desc(word, wlen)) != NULL) {
 		suggestion.type = CMD_DESC_SUG;
@@ -2200,7 +2200,7 @@ rl_suggestions(const unsigned char c)
 	}
 
 	/* 3.c) Internal commands fixed parameters */
-	if (nwords > 1) {
+	if (words_num > 1) {
 		/* 3.c.1) Suggest the sel keyword only if not first word */
 		if (sel_n > 0 && *word == 's' && strncmp(word, "sel", wlen) == 0) {
 			suggestion.type = SEL_SUG;
@@ -2227,7 +2227,7 @@ rl_suggestions(const unsigned char c)
 	/* 3.d) Let's suggest non-fixed parameters for internal commands
 	 * Only if second word or more (first word is the command name) */
 
-	switch (nwords > 1 ? *lb : '\0') {
+	switch (words_num > 1 ? *lb : '\0') {
 	case 'b': /* Bookmark names */
 		if (bm_n > 0 && lb[1] == 'm' && lb[2] == ' ') {
 			if (!(*(lb + 3) == 'a' && *(lb + 4) == ' ')
@@ -2240,7 +2240,7 @@ rl_suggestions(const unsigned char c)
 					if (*(lb + 3) != '-') // Might be --help, let it continue
 						goto FAIL;
 				}
-			} else if (nwords > 3) {
+			} else if (words_num > 3) {
 				goto FAIL;
 			}
 		}
@@ -2258,7 +2258,7 @@ rl_suggestions(const unsigned char c)
 		}
 
 		/* REMOVE AS SOON AS BH IS REPLACED BY DH!! */
-		else if (nwords == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
+		else if (words_num == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
 		&& lb[1] == 'h' && lb[2] == ' ' && !strchr(word, '/')) {
 			if (lb[1] == 'h' && lb[2] == ' ' && (lb[3] == '-'
 			|| strncmp(lb + 3, "--help", strlen(lb + 3)) == 0))
@@ -2286,7 +2286,7 @@ rl_suggestions(const unsigned char c)
 		if (lb[1] == 'h' && lb[2] == ' ' && (lb[3] == '-'
 		|| strncmp(lb + 3, "--help", strlen(lb + 3)) == 0))
 			break;
-		if (nwords == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
+		if (words_num == 2 && old_pwd && dirhist_total_index > 0 && wlen > 0
 		&& lb[1] == 'h' && lb[2] == ' ' && !strchr(word, '/')) {
 			if ((printed = check_dirhist(word, wlen)) != NO_MATCH) {
 				goto SUCCESS;
@@ -2322,7 +2322,7 @@ rl_suggestions(const unsigned char c)
 
 	case 'p': /* Profiles */
 #ifndef _NO_PROFILES
-		if (profile_names && nwords == 3 && lb[1] == 'f' && lb[2] == ' '
+		if (profile_names && words_num == 3 && lb[1] == 'f' && lb[2] == ' '
 		&& (strncmp(lb + 3, "set ", 4) == 0 || strncmp(lb + 3, "del ", 4) == 0
 		|| strncmp(lb + 3, "rename ", 7) == 0)) {
 			if ((printed = check_profiles(word, wlen)) != NO_MATCH) {
@@ -2345,7 +2345,7 @@ rl_suggestions(const unsigned char c)
 	case 's': /* Sort */
 		if (((lb[1] == 't' && lb[2] == ' ') || strncmp(lb, "sort ", 5) == 0)
 		&& is_number(word)) {
-			if (nwords > 2)
+			if (words_num > 2)
 				goto FAIL;
 			if ((printed = check_sort_methods(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
@@ -2370,7 +2370,7 @@ rl_suggestions(const unsigned char c)
 
 	case 'w': /* Workspaces */
 		if (lb[1] == 's' && lb[2] == ' ') {
-			if (nwords > 2)
+			if (words_num > 2)
 				goto FAIL;
 			if ((printed = check_workspaces(word, wlen)) != NO_MATCH)
 				goto SUCCESS;
@@ -2444,7 +2444,7 @@ rl_suggestions(const unsigned char c)
 				flags &= ~STATE_COMPLETING;
 			}
 
-			if (nwords == 1) {
+			if (words_num == 1) {
 				word = first_word ? first_word : last_word;
 				wlen = strlen(word);
 			}
@@ -2476,7 +2476,7 @@ rl_suggestions(const unsigned char c)
 			break;
 
 		case 'e': /* 3.e.3) ELN's */
-			if (nwords == 1 && first_word) {
+			if (words_num == 1 && first_word) {
 				word = first_word;
 				wlen = strlen(word);
 			}
@@ -2514,7 +2514,7 @@ rl_suggestions(const unsigned char c)
 			if (!last_space && conf.autocd == 0 && conf.auto_open == 0)
 				break;
 
-			if (nwords == 1) {
+			if (words_num == 1) {
 				word = (first_word && *first_word) ? first_word : last_word;
 				wlen = strlen(word);
 			}
@@ -2573,7 +2573,7 @@ rl_suggestions(const unsigned char c)
 			if (!last_space && conf.autocd == 0)
 				break;
 
-			if (nwords == 1) {
+			if (words_num == 1) {
 				word = (first_word && *first_word) ? first_word : last_word;
 				wlen = strlen(word);
 			}
@@ -2599,7 +2599,7 @@ rl_suggestions(const unsigned char c)
 	}
 
 	/* 3.f) Cmds in PATH and CliFM internals cmds, but only for the first word */
-	if (nwords > 1)
+	if (words_num > 1)
 		goto NO_SUGGESTION;
 
 CHECK_FIRST_WORD:
@@ -2651,7 +2651,7 @@ CHECK_FIRST_WORD:
 	}
 
 	if (printed != NO_MATCH) {
-		if (wrong_cmd && (nwords == 1 || point_is_first_word)) {
+		if (wrong_cmd && (words_num == 1 || point_is_first_word)) {
 			rl_dispatching = 1;
 			recover_from_wrong_cmd();
 			rl_dispatching = 0;
@@ -2691,7 +2691,7 @@ SUCCESS:
 
 		suggestion.printed = rl_point < rl_end ? 0 : 1;
 
-		if (wrong_cmd == 1 && nwords == 1) {
+		if (wrong_cmd == 1 && words_num == 1) {
 			rl_dispatching = 1;
 			recover_from_wrong_cmd();
 			rl_dispatching = 0;

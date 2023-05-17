@@ -1140,7 +1140,7 @@ rl_clear_line(int count, int key)
 	if (kbind_busy == 1 && xrename == 0)
 		return EXIT_SUCCESS;
 
-	nwords = 0;
+	words_num = 0;
 	fzf_open_with = 0;
 
 #ifndef _NO_HIGHLIGHT

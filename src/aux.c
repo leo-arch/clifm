@@ -211,7 +211,7 @@ _expand_eln(const char *text)
 	if (a <= 0 || a > (int)files)
 		return 0;
 
-	if (nwords == 1) { /* First word */
+	if (words_num == 1) { /* First word */
 		if (file_info[a - 1].dir && conf.autocd == 0)
 			return 0;
 		if (file_info[a - 1].dir == 0 && conf.auto_open == 0)
