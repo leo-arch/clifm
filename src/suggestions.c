@@ -2133,6 +2133,11 @@ rl_suggestions(const unsigned char c)
 		goto SUCCESS;
 	}
 
+	if (int_vars == 1 && c == '=' && nwords == 1 && wrong_cmd == 1) {
+		recover_from_wrong_cmd();
+		goto SUCCESS;
+	}
+
 	/* '~' or '~/' */
 	if (word && *word == '~' && (!word[1] || (word[1] == '/' && !word[2]))) {
 		if (wrong_cmd)
