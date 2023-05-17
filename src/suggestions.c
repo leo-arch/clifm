@@ -2133,7 +2133,7 @@ rl_suggestions(const unsigned char c)
 		goto SUCCESS;
 	}
 
-	if (int_vars == 1 && c == '=' && words_num == 1 && wrong_cmd == 1) {
+	if (c == '=' && words_num == 1 && wrong_cmd == 1) {
 		recover_from_wrong_cmd();
 		goto SUCCESS;
 	}
