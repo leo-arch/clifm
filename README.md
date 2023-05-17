@@ -238,7 +238,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <details>
 <summary>Click here to expand</summary>
 
-* `Development`
+* `1.12 (Blondebeard)`
   - [Improved logs system](https://github.com/leo-arch/clifm/wiki/Introduction#log).
   - Better TAB completion for internal commands.
   - Allow the use of [Xterm-like color names in color schemes](https://github.com/leo-arch/clifm/wiki/Customization#xterm-like-color-names-256-colors).
