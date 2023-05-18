@@ -171,11 +171,11 @@ profile_set(char *prof)
 	reload_config();
 
 	/* Check whether we have a working shell */
-	if (access(user.shell, X_OK) == -1) {
+/*	if (access(user.shell, X_OK) == -1) {
 		_err('w', PRINT_PROMPT, _("pf: %s: System shell not found. Please "
 			"edit the configuration file to specify a working shell.\n"),
 			user.shell);
-	}
+	} */
 
 	i = (int)usrvar_n;
 	while (--i >= 0) {

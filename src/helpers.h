@@ -497,6 +497,7 @@ extern int watch;
 #define SHELL_KSH  4
 #define SHELL_TCSH 5
 #define SHELL_ZSH  6
+#define SHELL_POSIX SHELL_DASH
 
 #define BELL_NONE    0
 #define BELL_AUDIBLE 1
@@ -798,6 +799,7 @@ struct user_t {
 	char *home;
 	char *name;
 	char *shell;
+	char *shell_basename;
 	size_t home_len;
 	uid_t uid;
 	gid_t gid;     /* Primary user group */

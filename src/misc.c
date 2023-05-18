@@ -1579,6 +1579,7 @@ free_stuff(void)
 	free(user.name);
 	free(user.home);
 	free(user.shell);
+	free(user.shell_basename);
 
 	free(user.groups);
 

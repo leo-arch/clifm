@@ -292,6 +292,42 @@ run_in_background(pid_t pid)
 	return get_exit_code(status, EXEC_BG_PROC);
 }
 
+//////// TESTING CUSTOM_SHELL
+static int
+xsystem(const char *cmd)
+{
+	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGCHLD, SIG_BLOCK);
+
+	char *_shell = user.shell;
+//	char *_shell_name = user.shell_basename;
+//	if (!_shell || !_shell_name) {
+	if (!_shell) {
+		_shell = "/bin/sh";
+//		_shell_name = "sh";
+	}
+
+	int status = 0;
+	pid_t pid = fork();
+
+	if (pid < 0)
+		return (-1);
+
+	if (pid == 0) {
+//		execl("/bin/sh", "sh", "-c", cmd, (char *)NULL);
+//		execl(sshell, sshell_basename, "-c", cmd, (char *)NULL);
+		execl(_shell, _shell, "-c", cmd, (char *)NULL);
+		_exit(errno);
+	} else {
+		if (waitpid(pid, &status, 0) > 0)
+			return status;
+
+		return (-1);
+	}
+}
+//////// TESTING CUSTOM_SHELL
+
 /* Execute a command using the system shell (/bin/sh), which takes care
  * of special functions such as pipes and stream redirection, special
  * chars like wildcards, quotes, and escape sequences. Use only when the
@@ -310,7 +346,10 @@ launch_execle(const char *cmd)
 	&& xargs.secure_env == 0)
 		sanitize_cmd_environ();
 
-	int status = system(cmd);
+//	int status = system(cmd);
+//////// TESTING CUSTOM_SHELL
+	int status = xsystem(cmd);
+//////// TESTING CUSTOM_SHELL
 
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
 	&& xargs.secure_env == 0)
@@ -1397,6 +1436,7 @@ reload_function(void)
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
+		print_reload_msg("Configuration file reloaded\n");
 	}
 
 	return exit_status;

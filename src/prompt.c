@@ -376,7 +376,11 @@ gen_non_print_sequence(const int c)
 static inline char *
 gen_shell_name(void)
 {
-	char *p = (char *)NULL,
+	if (user.shell && user.shell_basename)
+		return savestring(user.shell_basename, strlen(user.shell_basename));
+
+	return savestring("unknown", 7);
+/*	char *p = (char *)NULL,
 		 *shell_name = strrchr(user.shell, '/');
 
 	if (shell_name && *(shell_name + 1))
@@ -384,7 +388,7 @@ gen_shell_name(void)
 	else
 		p = user.shell;
 
-	return savestring(p, strlen(p));
+	return savestring(p, strlen(p)); */
 }
 
 static inline void

@@ -1171,19 +1171,19 @@ check_builtins(const char *str, const size_t len, const int print)
 {
 	char **b = (char **)NULL;
 
-	switch(shell) {
+	switch (shell) {
 	case SHELL_NONE: return NO_MATCH;
 	case SHELL_BASH: b = bash_builtins; break;
 	case SHELL_DASH: b = dash_builtins; break;
 	case SHELL_FISH: b = fish_builtins; break;
-	case SHELL_KSH: b = ksh_builtins; break;
+	case SHELL_KSH:  b = ksh_builtins; break;
 	case SHELL_TCSH: b = tcsh_builtins; break;
-	case SHELL_ZSH: b = zsh_builtins; break;
+	case SHELL_ZSH:  b = zsh_builtins; break;
 	default: return NO_MATCH;
 	}
 
 	size_t i;
-	for(i = 0; b[i]; i++) {
+	for (i = 0; b[i]; i++) {
 		if (*str != *b[i])
 			continue;
 

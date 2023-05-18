@@ -300,21 +300,46 @@ set_prop_fields(char *line)
 int
 get_sys_shell(void)
 {
-	char l[PATH_MAX];
+	user.shell_basename = (char *)NULL;
+
+//	if (!user.shell || !user.shell_basename)
+	if (!user.shell)
+		return SHELL_POSIX;
+
+	char tmp[PATH_MAX];
+	*tmp = '\0';
+	char *ret = realpath(user.shell, tmp);
+	if (!ret || !*tmp)
+		return SHELL_POSIX;
+
+	ret = strrchr(tmp, '/');
+	if (!ret || !*(ret + 1))
+		return SHELL_POSIX;
+
+	char *s = ret + 1;
+	user.shell_basename = savestring(s, strlen(s));
+
+//	char *s = user.shell_basename;
+/*	char l[PATH_MAX];
 	*l = '\0';
-	ssize_t ret = readlinkat(AT_FDCWD, "/bin/sh", l, PATH_MAX);
 
-	if (!*l || ret == -1)
-		return SHELL_NONE;
+	if (user.shell) {
+		xstrsncpy(l, user.shell, sizeof(l));
+	} else {
+		ssize_t ret = readlinkat(AT_FDCWD, "/bin/sh", l, sizeof(l));
 
-	l[ret] = '\0';
+		if (!*l || ret == -1)
+			return SHELL_NONE;
+
+		l[ret] = '\0';
+	}
 
 	char *s = (char *)NULL;
 	char *p = strrchr(l, '/');
 	if (p && *(++p))
 		s = p;
 	else
-		s = l;
+		s = l; */
 
 	if (*s == 'b' && strcmp(s, "bash") == 0)
 		return SHELL_BASH;
@@ -325,7 +350,7 @@ get_sys_shell(void)
 	if (*s == 'z' && strcmp(s, "zsh") == 0)
 		return SHELL_ZSH;
 
-	return SHELL_NONE;
+	return SHELL_POSIX;
 }
 
 #ifndef _NO_GETTEXT
@@ -809,6 +834,67 @@ get_user_groups(const char *name, const gid_t gid, int *ngroups)
 	return g;
 }
 
+/* Return the value of the environment variable S, allocated via malloc if
+ * ALLOC is 1, or just a pointer to the value if 0 */
+char *
+xgetenv(const char *s, const int alloc)
+{
+	if (!s || !*s)
+		return (char *)NULL;
+
+	char *p = getenv(s);
+	if (p && *p)
+		return alloc == 1 ? savestring(p, strlen(p)) : p;
+
+	return (char *)NULL;
+}
+
+/* The user specified a custom shell via the CLIFM_SHELL environment variable.
+ * Since this will be used to run shell commands, it's better to make sure
+ * we have a valid shell, that is, one of the shells specified in
+ * '/etc/shells'.
+ * Return EXIT_SUCCESS if found or EXIT_FAILURE if not. */
+static int
+check_etc_shells(char *file)
+{
+	int fd;
+	FILE *fp = open_fstream_r("/etc/shells", &fd);
+	if (!fp)
+		return EXIT_FAILURE;
+
+	int ret = EXIT_FAILURE;
+	char line[PATH_MAX];
+
+	while (fgets(line, (int)sizeof(line), fp)) {
+		if (*line != '/')
+			continue;
+
+		size_t len = strlen(line);
+		if (len > 0 && line[len - 1] == '\n')
+			line[len - 1] = '\0';
+
+		if (strcmp(line, file) == 0) {
+			ret = EXIT_SUCCESS;
+			break;
+		}
+	}
+
+	close_fstream(fp, fd);
+	return ret;
+}
+
+static void
+validate_custom_shell(char **file)
+{
+	if (!*file || check_etc_shells(*file) == EXIT_FAILURE) {
+		_err('w', PRINT_PROMPT, "%s: %s: Invalid shell. Falling back to "
+			"'/bin/sh'.\nCheck '/etc/shells' for a list of valid shells.\n",
+			PROGRAM_NAME, *file ? *file : "NULL");
+		free(*file);
+		*file = savestring("/bin/sh", 7);
+	}
+}
+
 /* Get user data from environment variables. Used only in case getpwuid() failed */
 static struct user_t
 get_user_data_env(void)
@@ -817,7 +903,7 @@ get_user_data_env(void)
 	tmp_user.home = (char *)NULL;
 	/* If secure-env, do not fallback to environment variables */
 	int sec_env = is_secure_env();
-	char *t = sec_env == 0 ? getenv("HOME") : (char *)NULL;
+	char *t = sec_env == 0 ? xgetenv("HOME", 0) : (char *)NULL;
 
 	if (t) {
 		char *p = realpath(t, NULL);
@@ -835,7 +921,7 @@ get_user_data_env(void)
 	}
 
 	tmp_user.home_len = strlen(tmp_user.home);
-	t = sec_env == 0 ? getenv("USER") : (char *)NULL;;
+	t = sec_env == 0 ? xgetenv("USER", 0) : (char *)NULL;;
 	tmp_user.name = t ? savestring(t, strlen(t)) : (char *)NULL;
 
 	tmp_user.gid = getgid();
@@ -845,25 +931,17 @@ get_user_data_env(void)
 	else
 		tmp_user.groups = (gid_t *)NULL;
 
-	t = sec_env == 0 ? getenv("SHELL") : (char *)NULL;
+	char *p = xgetenv("CLIFM_SHELL", 0);
+	t = sec_env == 0 ? (p ? p : xgetenv("SHELL", 0)) : (char *)NULL;
 	tmp_user.shell = t ? savestring(t, strlen(t)) : (char *)NULL;
 
+	if (p && t == p) // CLIFM_SHELL
+		validate_custom_shell(&tmp_user.shell);
+
+//	p = tmp_user.shell ? strrchr(tmp_user.shell, '/') : (char *)NULL;
+//	tmp_user.shell_basename = (p && *(p + 1)) ? p + 1 : (char *)NULL;
+
 	return tmp_user;
-}
-
-/* Return the value of the environment variable S, allocated via malloc if
- * ALLOC is 1, or just a pointer to the value if 0 */
-char *
-xgetenv(const char *s, const int alloc)
-{
-	if (!s || !*s)
-		return (char *)NULL;
-
-	char *p = getenv(s);
-	if (p && *p)
-		return alloc == 1 ? savestring(p, strlen(p)) : p;
-
-	return (char *)NULL;
 }
 
 /* Retrieve user information and store it in a user_t struct for later access */
@@ -887,19 +965,30 @@ get_user_data(void)
 	tmp_user.ngroups = 0;
 	tmp_user.groups = get_user_groups(pw->pw_name, pw->pw_gid, &tmp_user.ngroups);
 
+	int is_custom_shell = 0;
 	struct stat a;
 	char *homedir = (char *)NULL;
-	if (is_secure_env() == 0) {
-		char *q = xgetenv("USER", 1);
-		tmp_user.name = q ? q : savestring(pw->pw_name, strlen(pw->pw_name));
-		q = xgetenv("SHELL", 1);
-		tmp_user.shell = q ? q : savestring(pw->pw_shell, strlen(pw->pw_shell));
-		q = xgetenv("HOME", 0);
-		homedir = q ? q : pw->pw_dir;
 
-		if (homedir == q && q && (stat(q, &a) == -1 || !S_ISDIR(a.st_mode))) {
+	if (is_secure_env() == 0) {
+		char *p = xgetenv("USER", 1);
+		tmp_user.name = p ? p : savestring(pw->pw_name, strlen(pw->pw_name));
+
+//		q = xgetenv("SHELL", 1);
+//////// TESTING CUSTOM_SHELL
+		char *custom_shell = xgetenv("CLIFM_SHELL", 1);
+		p = custom_shell ? custom_shell : xgetenv("SHELL", 1);
+		if (custom_shell)
+			is_custom_shell = 1;
+//////// TESTING CUSTOM_SHELL
+
+		tmp_user.shell = p ? p : savestring(pw->pw_shell, strlen(pw->pw_shell));
+
+		p = xgetenv("HOME", 0);
+		homedir = p ? p : pw->pw_dir;
+
+		if (homedir == p && p && (stat(p, &a) == -1 || !S_ISDIR(a.st_mode))) {
 			_err('e', PRINT_PROMPT, _("%s: %s: Home directory not found\n"
-				"Falling back to %s\n"), PROGRAM_NAME, q, pw->pw_dir);
+				"Falling back to %s\n"), PROGRAM_NAME, p, pw->pw_dir);
 			homedir = pw->pw_dir;
 		}
 	} else {
@@ -907,6 +996,14 @@ get_user_data(void)
 		tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 		homedir = pw->pw_dir;
 	}
+
+//////// TESTING CUSTOM_SHELL
+	if (is_custom_shell == 1)
+		validate_custom_shell(&tmp_user.shell);
+
+//	char *p = tmp_user.shell ? strrchr(tmp_user.shell, '/') : (char *)NULL;
+//	tmp_user.shell_basename = (p && *(p + 1)) ? p + 1 : (char *)NULL;
+//////// TESTING CUSTOM_SHELL
 
 	if (homedir == pw->pw_dir && (!homedir
 	|| stat(homedir, &a) == -1 || !S_ISDIR(a.st_mode))) {
@@ -3980,18 +4077,26 @@ check_options(void)
 	if (conf.max_log == UNSET)
 		conf.max_log = DEF_MAX_LOG;
 
-	if (!user.shell) {
+	/* This block was needed when Shell was an option in the config file.
+	 * Let's keep it in case we readd this option. For the time being, the
+	 * shell used to run external commands is set via environment variables,
+	 * either CLIFM_SHELL, or SHELL. */
+/*	if (!user.shell) {
 		struct user_t tmp_user = get_user_data();
 		user.shell = tmp_user.shell;
 
-		/* We don't need these values of the user struct: free them */
+		// We don't need these values of the user struct: free them
 		free(tmp_user.name);
 		free(tmp_user.home);
 		free(tmp_user.groups);
 
 		if (!user.shell)
 			user.shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));
-	}
+
+		free(user.shell_basename);
+		user.shell_basename = (char *)NULL;
+		shell = get_sys_shell();
+	} */
 
 	if (!conf.term)
 		conf.term = savestring(DEF_TERM_CMD, strlen(DEF_TERM_CMD));

@@ -3262,8 +3262,10 @@ reset_variables(void)
 	conf.usr_cscheme = (char *)NULL;
 	cur_cscheme = (char *)NULL;
 
-	free(user.shell);
+/*	free(user.shell);
 	user.shell = (char *)NULL;
+	free(user.shell_basename);
+	user.shell_basename = (char *)NULL; */
 
 	init_conf_struct();
 
@@ -3341,6 +3343,7 @@ reload_config(void)
 #ifndef _NO_FZF
 	enum tab_mode tabmode_bk = tabmode;
 #endif /* !_NO_FZF */
+
 	reset_variables();
 
 	/* Set up config files and options */
