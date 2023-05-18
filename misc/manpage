@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "May 16, 2023" "clifm 1.12" "CLIFM Manual"
+.TH "CLIFM" "1" "May 18, 2023" "clifm 1.12.2" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -2759,8 +2759,15 @@ Define a file filter. If set, this variable overrides the \fIFilter\fR option in
 .B CLIFM_SUDO_CMD
 Name of the authenticator program (used by the \fIX\fR command, to launch a new instance of CliFM as root, and the \fIAlt-v\fR keybinding, to prepend the authenticator program name (by default "sudo", or "doas" if compiled on OpenBSD) to the current command line
 .TP
+.B CLIFM_SHELL
+An absolute path to the shell \fBclifm\fR will use to run external commands. Only values found in \fI/etc/shells\fR are allowed.
+.TP
+.B SHELL
+Same as \fBCLIFM_SHELL\fR. Note however that \fBCLIFM_SHELL\fR takes precedence over \fBSHELL\fR.
+.TP
 .B FZF_DEFAULT_OPTS
 A quoted list of options to be passed to FZF (if used for TAB completion)
+.TP
 .TP
 Except when running in stealth mode, \fBclifm\fR sets the following environment variables:
 .TP
@@ -2883,12 +2890,21 @@ As a rule of thumb, when using chained commands make sure to always expand ELN's
 
 \fBExternal commands\fR:
 
-\fBclifm\fR is not limited to its own set of internal commands, like open, sel, trash, etc., but it can run any external command as well, provided external commands are allowed (see the \fI\-x\fR option, the \fIext\fR command, or the configuration file). By beginning the external command by a colon or a semicolon (':', ';') you tell \fBclifm\fR not to parse the input string, but instead letting this task to the system shell. However, bear in mind that \fBclifm\fR is not intended to be used as a shell, but as the file manager it is.
+\fBclifm\fR is not limited to its own set of internal commands, like open, sel, trash, etc. It can run any external command as well, provided external commands are allowed (see the \fI\-x\fR option, the \fIext\fR command, or the configuration file).
+.sp
+External commands are executed using an actual shell (say, \fI/bin/bash\fR), which is specified by \fBclifm\fR as follows:
+  1. If the \fBCLIFM_SHELL\fR environment variable is set, this value is used.
+  2. If the \fBSHELL\fR environment variable is set, this value is used.
+  3. If none of the above, the value will be taken from the \fIpasswd\fR database (via \fBgetpwuid\fR(3)).
+.sp
+By beginning the external command by a colon or a semicolon (':', ';') you tell \fBclifm\fR not to parse the input string, but instead letting this task to the system shell.
+.sp
+Bear in mind that \fBclifm\fR is not intended to be used as a shell, but as the file manager it is.
 .sp
 
 \fBTerminal emulators and non-ASCII characters\fR:
 
-It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the Spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by basic terminal emulators like Aterm.
+It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the Spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by more basic terminal emulators like Aterm.
 .sp
 
 \fBSpaces and file names\fR:
