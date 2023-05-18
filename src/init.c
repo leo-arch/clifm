@@ -975,7 +975,11 @@ get_user_data(void)
 
 //		q = xgetenv("SHELL", 1);
 //////// TESTING CUSTOM_SHELL
+#if !defined(__TERMUX__) && !defined(__HAIKU__)
 		char *custom_shell = xgetenv("CLIFM_SHELL", 1);
+#else
+		char *custom_shell = (char *)NULL;
+#endif // !__TERMUX__ && !__HAIKU__
 		p = custom_shell ? custom_shell : xgetenv("SHELL", 1);
 		if (custom_shell)
 			is_custom_shell = 1;
