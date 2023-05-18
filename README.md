@@ -238,6 +238,8 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <details>
 <summary>Click here to expand</summary>
 
+* `Development`
+  - [Run external commands using any shell you like via the **CLIFM_SHELL** environment variable](https://github.com/leo-arch/clifm/wiki/FAQ#large_blue_diamond-how-do-i-run-with-a-different-shell.).
 * `1.12 (Blondebeard)`
   - [Improved logs system](https://github.com/leo-arch/clifm/wiki/Introduction#log).
   - Better TAB completion for internal commands.
