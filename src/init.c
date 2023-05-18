@@ -855,12 +855,14 @@ xgetenv(const char *s, const int alloc)
  * '/etc/shells'.
  * Return EXIT_SUCCESS if found or EXIT_FAILURE if not. */
 static int
-check_etc_shells(char *file)
+check_etc_shells(char *file, int *_errno)
 {
 	int fd;
 	FILE *fp = open_fstream_r("/etc/shells", &fd);
-	if (!fp)
+	if (!fp) {
+		*_errno = errno;
 		return EXIT_FAILURE;
+	}
 
 	int ret = EXIT_FAILURE;
 	char line[PATH_MAX];
@@ -886,13 +888,23 @@ check_etc_shells(char *file)
 static void
 validate_custom_shell(char **file)
 {
-	if (!*file || check_etc_shells(*file) == EXIT_FAILURE) {
+	int _errno = 0;
+	errno = 0;
+
+	if (*file && check_etc_shells(*file, &_errno) == EXIT_SUCCESS)
+		return;
+
+	if (_errno == 0) {
 		_err('w', PRINT_PROMPT, "%s: %s: Invalid shell. Falling back to "
 			"'/bin/sh'.\nCheck '/etc/shells' for a list of valid shells.\n",
 			PROGRAM_NAME, *file ? *file : "NULL");
-		free(*file);
-		*file = savestring("/bin/sh", 7);
+	} else {
+		_err('w', PRINT_PROMPT, "%s: /etc/shells: %s.\nCannot validate shell. "
+			"Falling back to '/bin/sh'.\n", PROGRAM_NAME, strerror(_errno));
 	}
+
+	free(*file);
+	*file = savestring("/bin/sh", 7);
 }
 
 /* Get user data from environment variables. Used only in case getpwuid() failed */
@@ -938,9 +950,6 @@ get_user_data_env(void)
 	if (p && t == p) // CLIFM_SHELL
 		validate_custom_shell(&tmp_user.shell);
 
-//	p = tmp_user.shell ? strrchr(tmp_user.shell, '/') : (char *)NULL;
-//	tmp_user.shell_basename = (p && *(p + 1)) ? p + 1 : (char *)NULL;
-
 	return tmp_user;
 }
 
@@ -975,11 +984,7 @@ get_user_data(void)
 
 //		q = xgetenv("SHELL", 1);
 //////// TESTING CUSTOM_SHELL
-#if !defined(__TERMUX__) && !defined(__HAIKU__)
 		char *custom_shell = xgetenv("CLIFM_SHELL", 1);
-#else
-		char *custom_shell = (char *)NULL;
-#endif // !__TERMUX__ && !__HAIKU__
 		p = custom_shell ? custom_shell : xgetenv("SHELL", 1);
 		if (custom_shell)
 			is_custom_shell = 1;
