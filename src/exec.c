@@ -296,10 +296,6 @@ run_in_background(pid_t pid)
 static int
 xsystem(const char *cmd)
 {
-	signal(SIGINT, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
-	signal(SIGCHLD, SIG_BLOCK);
-
 	char *_shell = user.shell;
 //	char *_shell_name = user.shell_basename;
 //	if (!_shell || !_shell_name) {
@@ -315,6 +311,10 @@ xsystem(const char *cmd)
 		return (-1);
 
 	if (pid == 0) {
+		signal(SIGINT, SIG_DFL);
+		signal(SIGQUIT, SIG_DFL);
+		signal(SIGTSTP, SIG_DFL);
+
 //		execl("/bin/sh", "sh", "-c", cmd, (char *)NULL);
 //		execl(sshell, sshell_basename, "-c", cmd, (char *)NULL);
 		execl(_shell, _shell, "-c", cmd, (char *)NULL);
@@ -338,10 +338,6 @@ launch_execle(const char *cmd)
 	if (!cmd || !*cmd)
 		return EXEC_NULLPARAM;
 
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
-	signal(SIGTSTP, SIG_DFL);
-
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
 	&& xargs.secure_env == 0)
 		sanitize_cmd_environ();
@@ -354,8 +350,6 @@ launch_execle(const char *cmd)
 	if (xargs.secure_cmds == 1 && xargs.secure_env_full == 0
 	&& xargs.secure_env == 0)
 		restore_cmd_environ();
-
-	set_signals_to_ignore();
 
 	int exit_status = get_exit_code(status, EXEC_FG_PROC);
 

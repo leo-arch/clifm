@@ -972,6 +972,7 @@ check_working_directory(void)
 }
 
 /* Check whether we have a working shell */
+/*
 static inline void
 check_working_shell(void)
 {
@@ -980,7 +981,7 @@ check_working_shell(void)
 			"Please edit the configuration file to specify a working "
 			"shell.\n"), PROGRAM_NAME, user.shell);
 	}
-}
+} */
 
 #ifndef _NO_TRASH
 static inline void
@@ -1191,7 +1192,7 @@ main(int argc, char *argv[])
 		add_to_jumpdb(workspaces[cur_ws].path);
 
 	initialize_readline();
-	check_working_shell();
+//	check_working_shell();
 	get_prompt_cmds();
 
 #ifndef _NO_TRASH
