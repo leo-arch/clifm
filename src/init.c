@@ -300,8 +300,6 @@ set_prop_fields(char *line)
 int
 get_sys_shell(void)
 {
-	user.shell_basename = (char *)NULL;
-
 //	if (!user.shell || !user.shell_basename)
 	if (!user.shell)
 		return SHELL_POSIX;
@@ -895,12 +893,12 @@ validate_custom_shell(char **file)
 		return;
 
 	if (_errno == 0) {
-		_err('w', PRINT_PROMPT, "%s: %s: Invalid shell. Falling back to "
-			"'/bin/sh'.\nCheck '/etc/shells' for a list of valid shells.\n",
+		_err('w', PRINT_PROMPT, _("%s: %s: Invalid shell. Falling back to "
+			"'/bin/sh'.\nCheck '/etc/shells' for a list of valid shells.\n"),
 			PROGRAM_NAME, *file ? *file : "NULL");
 	} else {
-		_err('w', PRINT_PROMPT, "%s: /etc/shells: %s.\nCannot validate shell. "
-			"Falling back to '/bin/sh'.\n", PROGRAM_NAME, strerror(_errno));
+		_err('w', PRINT_PROMPT, _("%s: /etc/shells: %s.\nCannot validate shell. "
+			"Falling back to '/bin/sh'.\n"), PROGRAM_NAME, strerror(_errno));
 	}
 
 	free(*file);
@@ -947,6 +945,7 @@ get_user_data_env(void)
 	t = sec_env == 0 ? (p ? p : xgetenv("SHELL", 0)) : (char *)NULL;
 	tmp_user.shell = t ? savestring(t, strlen(t)) : (char *)NULL;
 
+	tmp_user.shell_basename = (char *)NULL;
 	if (p && t == p) // CLIFM_SHELL
 		validate_custom_shell(&tmp_user.shell);
 
@@ -1007,6 +1006,7 @@ get_user_data(void)
 	}
 
 //////// TESTING CUSTOM_SHELL
+	tmp_user.shell_basename = (char *)NULL;
 	if (is_custom_shell == 1)
 		validate_custom_shell(&tmp_user.shell);
 
