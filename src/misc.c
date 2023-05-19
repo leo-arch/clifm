@@ -721,10 +721,11 @@ print_tips(const int all)
 
 	if (all == 1) {
 		size_t i;
+		int l = DIGINUM(tipsn);
 		for (i = 0; i < tipsn; i++) {
-			printf("%s%sTIP %zu%s: %s\n",
+			printf("%s%sTIP %*zu%s: %s\n",
 				conf.colorize == 1 ? df_c : "", conf.colorize == 1 ? BOLD : "",
-				i, conf.colorize == 1 ? df_c : "", TIPS[i]);
+				l, i, conf.colorize == 1 ? df_c : "", TIPS[i]);
 		}
 		return;
 	}
