@@ -335,7 +335,6 @@ See the [LICENSE file](https://github.com/leo-arch/clifm/blob/master/LICENSE) fo
 
 ## Contributing
 Contributions are kindly welcome! Please see our [contribution guidelines](https://github.com/leo-arch/clifm/wiki/CONTRIBUTING) for details.
-[![Translation status](https://hosted.weblate.org/widgets/clifm/-/clifm/svg-badge.svg)](https://hosted.weblate.org/engage/clifm/?utm_source=widget) at Hosted Weblate.
 
 ---
 
