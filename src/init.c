@@ -1849,7 +1849,7 @@ open_reg_exit(char *filename, const int url, const int preview)
 #endif
 
 	char *p = (char *)NULL;
-	if (preview == 1 && *filename == '~')
+	if (*filename == '~')
 		p = tilde_expand(filename);
 
 	int ret = open_file(p ? p : filename);
