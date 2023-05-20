@@ -769,9 +769,9 @@ get_own_pid(void)
 	return pid;
 }
 
-/* Return 1 is secure-env is enabled. Otherwise, return 0
+/* Return 1 is secure-env is enabled. Otherwise, return 0.
  * Used only at an early stage, where command line options haven't been
- * parsed yet */
+ * parsed yet. */
 static int
 is_secure_env(void)
 {
@@ -779,7 +779,7 @@ is_secure_env(void)
 		return 0;
 
 	size_t i;
-	for(i = 0; argv_bk[i]; i++) {
+	for (i = 0; argv_bk[i]; i++) {
 		if (*argv_bk[i] == '-'
 		&& (strncmp(argv_bk[i], "--secure-env", 12) == 0))
 			return 1;
@@ -788,12 +788,12 @@ is_secure_env(void)
 	return 0;
 }
 
-/* Retrieve user groups
+/* Retrieve user groups.
  * Return an array with the ID's of groups to which the user belongs
- * NGROUPS is set to the number of groups
- * NOTE: getgroups(3) does not include the user's main group
+ * NGROUPS is set to the number of groups.
+ * NOTE: getgroups(3) does not include the user's main group.
  * We use getgroups(3) on TERMUX because getgrouplist(3) always returns
- * zero groups */
+ * zero groups. */
 static gid_t *
 get_user_groups(const char *name, const gid_t gid, int *ngroups)
 {
@@ -892,6 +892,8 @@ validate_custom_shell(char **file)
 	if (*file && check_etc_shells(*file, &_errno) == EXIT_SUCCESS)
 		return;
 
+	/* check_etc_shells() sets errno to a positive value only if /etc/shells
+	 * couldn't be found/accessed. */
 	if (_errno == 0) {
 		_err('w', PRINT_PROMPT, _("%s: %s: Invalid shell. Falling back to "
 			"'/bin/sh'.\nCheck '/etc/shells' for a list of valid shells.\n"),
@@ -931,7 +933,7 @@ get_user_data_env(void)
 	}
 
 	tmp_user.home_len = strlen(tmp_user.home);
-	t = sec_env == 0 ? xgetenv("USER", 0) : (char *)NULL;;
+	t = sec_env == 0 ? xgetenv("USER", 0) : (char *)NULL;
 	tmp_user.name = t ? savestring(t, strlen(t)) : (char *)NULL;
 
 	tmp_user.gid = getgid();

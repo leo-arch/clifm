@@ -293,34 +293,34 @@ run_in_background(pid_t pid)
 }
 
 //////// TESTING CUSTOM_SHELL
+/* Implementation of system(3).
+ * Unlike system(3), which runs a command using '/bin/sh' as the executing
+ * shell, xsystem() uses a custom shell (user.shell) specified via CLIFM_SHELL
+ * or SHELL, falling back to '/bin/sh' only if none of this variables was set. */
 static int
 xsystem(const char *cmd)
 {
-	char *_shell = user.shell;
-//	char *_shell_name = user.shell_basename;
-//	if (!_shell || !_shell_name) {
-	if (!_shell) {
-		_shell = "/bin/sh";
-//		_shell_name = "sh";
+	char *shell_path = user.shell;
+	char *shell_name = user.shell_basename;
+	if (!shell_path || !*shell_path || !shell_name || !*shell_name) {
+		shell_path = "/bin/sh";
+		shell_name = "sh";
 	}
 
 	int status = 0;
 	pid_t pid = fork();
 
-	if (pid < 0)
+	if (pid < 0) {
 		return (-1);
-
-	if (pid == 0) {
+	} else if (pid == 0) {
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTSTP, SIG_DFL);
 
-//		execl("/bin/sh", "sh", "-c", cmd, (char *)NULL);
-//		execl(sshell, sshell_basename, "-c", cmd, (char *)NULL);
-		execl(_shell, _shell, "-c", cmd, (char *)NULL);
+		execl(shell_path, shell_name, "-c", cmd, (char *)NULL);
 		_exit(errno);
 	} else {
-		if (waitpid(pid, &status, 0) > 0)
+		if (waitpid(pid, &status, 0) == pid)
 			return status;
 
 		return (-1);
@@ -328,10 +328,16 @@ xsystem(const char *cmd)
 }
 //////// TESTING CUSTOM_SHELL
 
-/* Execute a command using the system shell (/bin/sh), which takes care
- * of special functions such as pipes and stream redirection, special
- * chars like wildcards, quotes, and escape sequences. Use only when the
- * shell is needed; otherwise, launch_execve() should be used instead. */
+/* Execute a command using the system shell.
+ *
+ * The shell to be used is specified via CLIFM_SHELL or SHELL environment
+ * variables (in this order). If none is set, '/bin/sh' is used instead.
+ *
+ * The shell takes care of special functions such as pipes and stream redirection,
+ * special chars like wildcards, quotes, and escape sequences.
+ *
+ * Use only when the shell is needed; otherwise, launch_execve() should be
+ * used instead. */
 int
 launch_execle(const char *cmd)
 {
@@ -385,7 +391,7 @@ launch_execve(char **cmd, const int bg, const int xflags)
 	} else if (pid == 0) {
 		if (bg == 0) {
 			/* If the program runs in the foreground, reenable signals only
-			 * for the child, in case they were disabled for the parent */
+			 * for the child, in case they were disabled for the parent. */
 			signal(SIGHUP, SIG_DFL);
 			signal(SIGINT, SIG_DFL);
 			signal(SIGQUIT, SIG_DFL);
@@ -407,10 +413,10 @@ launch_execve(char **cmd, const int bg, const int xflags)
 
 		execvp(cmd[0], cmd);
 		/* These error messages will be printed only if E_NOSTDERR is not set.
-		 * Otherwise, the caller should print the error messages itself */
+		 * Otherwise, the caller should print the error messages itself. */
 		if (errno == ENOENT) {
 			xerror("%s: %s: %s\n", PROGRAM_NAME, cmd[0], NOTFOUND_MSG);
-			_exit(EXEC_NOTFOUND); /* 127, as required by exit(1p) */
+			_exit(EXEC_NOTFOUND); /* 127, as required by exit(1p). */
 		} else {
 			xerror("%s: %s: %s\n", PROGRAM_NAME, cmd[0], strerror(errno));
 			_exit(errno);
@@ -459,8 +465,8 @@ graceful_quit(char **args)
 
 #if !defined(__CYGWIN__)
 /* Get current modification time for each path in PATH and compare it to
- * the cached time (in paths[n].mtime)
- * Return 1 if at least one timestamp differs, or 0 otherwise */
+ * the cached time (in paths[n].mtime).
+ * Return 1 if at least one timestamp differs, or 0 otherwise. */
 static int
 check_paths_timestamps(void)
 {
@@ -617,7 +623,7 @@ static inline char *
 construct_shell_cmd(char **args)
 {
 	/* Bypass CliFM's parsing, expansions, and checks to be executed
-	 * DIRECTLY by the system shell (launch_execle()) */
+	 * DIRECTLY by the system shell (launch_execle()). */
 	char *first = args[0];
 	if (*args[0] == ':' || *args[0] == ';')
 		first++;
@@ -632,7 +638,7 @@ construct_shell_cmd(char **args)
 	size_t i;
 	for (i = 1; args[i]; i++) {
 		/* Dest string (cmd) is NULL terminated, just as the source
-		 * string (comm[i]) */
+		 * string (comm[i]). */
 		if (i > 1) {
 			cmd[len - 3] = ' ';
 			cmd[len - 2] = '\0';
@@ -640,7 +646,7 @@ construct_shell_cmd(char **args)
 		len += strlen(args[i]) + 1;
 		/* LEN holds the previous size of the buffer, plus space, the
 		 * ampersand character, and the new src string. The buffer is
-		 * thus big enough */
+		 * thus big enough. */
 		cmd = (char *)xrealloc(cmd, (len + 3 + (bg_proc ? 2 : 0)
 				+ (fzf_open_with ? 12 : 0)) * sizeof(char));
 		strcat(cmd, args[i]);
