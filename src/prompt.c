@@ -202,7 +202,7 @@ gen_workspace(void)
 	char *cl = (char *)NULL;
 
 	if (conf.colorize == 1) {
-		switch(cur_ws + 1) {
+		switch (cur_ws + 1) {
 		case 1: cl = *ws1_c ? ws1_c : DEF_WS1_C; break;
 		case 2: cl = *ws2_c ? ws2_c : DEF_WS2_C; break;
 		case 3: cl = *ws3_c ? ws3_c : DEF_WS3_C; break;
@@ -483,7 +483,7 @@ gen_stats_str(int flag)
 {
 	size_t val = 0;
 
-	switch(flag) {
+	switch (flag) {
 	case STATS_BLK: val = stats.block_dev; break;
 	case STATS_BROKEN_L: val = stats.broken_link; break;
 	case STATS_CAP: val = stats.caps; break;
@@ -529,7 +529,7 @@ gen_notification(int flag)
 		p = (char *)xnmalloc(sizeof(size_t) + 2, sizeof(char));
 	*p = '\0';
 
-	switch(flag) {
+	switch (flag) {
 	case NOTIF_ERROR:
 		if (msgs.error > 0)
 			sprintf(p, "E%zu", msgs.error);

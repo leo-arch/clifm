@@ -108,7 +108,7 @@ set_fzf_preview_border_type(void)
 			return;
 	}
 
-	switch(*(p + 7)) {
+	switch (*(p + 7)) {
 	case 'b':
 		if (*(p + 8) == 'o' && *(p + 9) == 't')
 			fzf_preview_border_type = FZF_BORDER_BOTTOM;
@@ -407,7 +407,7 @@ normalize_path(char *src, size_t src_len)
 			next = end;
 		len = (size_t)(next - ptr);
 
-		switch(len) {
+		switch (len) {
 		case 0: continue;
 
 		case 1:
@@ -454,7 +454,7 @@ normalize_path(char *src, size_t src_len)
 void
 rl_ring_bell(void)
 {
-	switch(bell) {
+	switch (bell) {
 	case BELL_AUDIBLE:
 		RING_BELL; fflush(stderr); return;
 

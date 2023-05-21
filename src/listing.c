@@ -170,7 +170,7 @@ set_div_line_color(void)
 	}
 
 	/* If div line color isn't set, use the current workspace color */
-	switch(cur_ws) {
+	switch (cur_ws) {
 	case 0: fputs(*ws1_c ? ws1_c : DEF_DL_C, stdout); break;
 	case 1: fputs(*ws2_c ? ws2_c : DEF_DL_C, stdout); break;
 	case 2: fputs(*ws3_c ? ws3_c : DEF_DL_C, stdout); break;
@@ -1673,7 +1673,7 @@ exclude_file_type_light(const unsigned char type)
 
 	int match = 0;
 
-	switch(*(filter.str + 1)) {
+	switch (*(filter.str + 1)) {
 	case 'd': if (type == DT_DIR) match = 1; break;
 	case 'f': if (type == DT_REG) match = 1; break;
 	case 'l': if (type == DT_LNK) match = 1; break;

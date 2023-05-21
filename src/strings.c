@@ -976,7 +976,7 @@ split_fused_param(char *str)
 	char *p = str, *pp = str, *b = buf;
 	size_t words = 1;
 	while (*p) {
-		switch(*p) {
+		switch (*p) {
 		case ' ': /* We only allow splitting for first command word */
 			if (c && *(p - 1) != ' ' && *(p - 1) != '|'
 			&& *(p - 1) != '&' && *(p - 1) != ';')
@@ -1034,7 +1034,7 @@ check_shell_functions(const char *str)
 
 /*	char **b = (char **)NULL;
 
-	switch(shell) {
+	switch (shell) {
 	case SHELL_NONE: return 0;
 	case SHELL_BASH: b = bash_builtins; break;
 	case SHELL_DASH: b = dash_builtins; break;
@@ -1290,7 +1290,7 @@ expand_file_type_filter(const char t)
 	char **f = (char **)xnmalloc(files + 1, sizeof(char *));
 
 	while (i < files && (name = file_info[i].name)) {
-		switch(t) {
+		switch (t) {
 		case 'b':
 			if (file_info[i].type == DT_BLK)
 				f[n++] = strdup(name);

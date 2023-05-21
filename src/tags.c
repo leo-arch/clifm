@@ -758,7 +758,7 @@ reconstruct_input(char **args)
 
 	a[0] = savestring("tag", 3);
 
-	switch(args[0][1]) {
+	switch (args[0][1]) {
 	case 'a': a[1] = savestring("add", 3); c = 2; break;
 	case 'd': a[1] = savestring("del", 3); c = 2; break;
 	case 'l': a[1] = savestring("list", 4); c = 2; break;

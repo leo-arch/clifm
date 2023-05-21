@@ -72,7 +72,7 @@ get_workspace_color(const uint8_t num)
 	if (conf.colorize == 0)
 		return df_c;
 
-	switch(num + 1) {
+	switch (num + 1) {
 	case 1: return *ws1_c ? ws1_c : DEF_WS1_C;
 	case 2: return *ws2_c ? ws2_c : DEF_WS2_C;
 	case 3: return *ws3_c ? ws3_c : DEF_WS3_C;

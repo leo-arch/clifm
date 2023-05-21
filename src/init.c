@@ -3187,7 +3187,7 @@ static int check_cmd_ext(const char *s)
 	if (!s || !*s)
 		return 1;
 
-	switch(TOUPPER(*s)) {
+	switch (TOUPPER(*s)) {
 	case 'B': // bat
 		return (TOUPPER(s[1]) == 'A' && TOUPPER(s[2]) == 'T' && !s[3]) ? 0 : 1;
 	case 'C': // cmd

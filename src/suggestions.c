@@ -722,7 +722,7 @@ get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 {
 	char *color = no_c;
 
-	switch(attr->st_mode & S_IFMT) {
+	switch (attr->st_mode & S_IFMT) {
 	case S_IFDIR:
 		if (conf.light_mode == 1) return di_c;
 		if (access(filename, R_OK | X_OK) != 0)
@@ -2416,7 +2416,7 @@ rl_suggestions(const unsigned char c)
 	int escaped = (wlen > 1 && word[wlen - 2] == '\\') ? 1 : 0;
 
 	for (st = 0; st < SUG_STRATS; st++) {
-		switch(conf.suggestion_strategy[st]) {
+		switch (conf.suggestion_strategy[st]) {
 
 		case 'a': /* 3.e.1) Aliases */
 			flag = c == ' ' ? CHECK_MATCH : PRINT_MATCH;

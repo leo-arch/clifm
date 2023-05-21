@@ -848,7 +848,7 @@ pager_function(char *arg)
 	}
 
 	if (*arg == 's' && strcmp(arg, "status") == 0) {
-		switch(conf.pager) {
+		switch (conf.pager) {
 		case 0: puts(_("The pager is disabled")); break;
 		case 1: puts(_("The pager is enabled")); break;
 		default: printf(_("The pager is set to %d\n"), conf.pager); break;
@@ -1948,7 +1948,7 @@ set_mv_cmd(char **cmd, const int mv_force)
 			conf.mv_cmd = MV_MV_FORCE;
 	}
 
-	switch(conf.mv_cmd) {
+	switch (conf.mv_cmd) {
 	case MV_ADVMV:
 		*cmd = (char *)xrealloc(*cmd, (strlen(_DEF_ADVMV_CMD) + 1) * sizeof(char));
 		strcpy(*cmd, _DEF_ADVMV_CMD);

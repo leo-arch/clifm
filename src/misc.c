@@ -115,7 +115,7 @@ get_newname(const char *_prompt, char *old_name)
 void
 set_eln_color(void)
 {
-	switch(cur_ws) {
+	switch (cur_ws) {
 	case 0: strcpy(el_c, *ws1_c ? ws1_c : DEF_EL_C); break;
 	case 1: strcpy(el_c, *ws2_c ? ws2_c : DEF_EL_C); break;
 	case 2: strcpy(el_c, *ws3_c ? ws3_c : DEF_EL_C); break;

@@ -353,7 +353,7 @@ sanitize_blacklist(char *cmd)
 
 	size_t i;
 	for (i = 0; cmd[i]; i++) {
-		switch(cmd[i]) {
+		switch (cmd[i]) {
 		case '<': /* fallthrough */
 		case '>': /* fallthrough */
 		case '|': /* fallthrough */

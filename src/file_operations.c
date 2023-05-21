@@ -123,7 +123,7 @@ create_tmp_file(char **file, int *fd)
 static char
 get_file_suffix(mode_t type)
 {
-	switch(type) {
+	switch (type) {
 	case DT_DIR: return '/';
 	case DT_REG: return 0;
 	case DT_LNK: return '@';

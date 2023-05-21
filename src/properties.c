@@ -330,7 +330,7 @@ validate_symbolic_perms(const char *s)
 {
 	size_t i;
 	for (i = 0; i < 9; i++) {
-		switch(i) {
+		switch (i) {
 		case 0: /* fallthrough */
 		case 3: /* fallthrough */
 		case 6:
@@ -950,7 +950,7 @@ get_color_age8(const time_t t, char *str, const size_t len)
 static void
 get_color_size(const off_t s, char *str, const size_t len)
 {
-	switch(size_shades.type) {
+	switch (size_shades.type) {
 	case SHADE_TYPE_8COLORS: get_color_size8(s, str, len); break;
 	case SHADE_TYPE_256COLORS: get_color_size256(s, str, len); break;
 	case SHADE_TYPE_TRUECOLOR: get_color_size_truecolor(s, str, len); break;
@@ -963,7 +963,7 @@ get_color_size(const off_t s, char *str, const size_t len)
 static void
 get_color_age(const time_t t, char *str, const size_t len)
 {
-	switch(date_shades.type) {
+	switch (date_shades.type) {
 	case SHADE_TYPE_8COLORS: get_color_age8(t, str, len); break;
 	case SHADE_TYPE_256COLORS: get_color_age256(t, str, len); break;
 	case SHADE_TYPE_TRUECOLOR: get_color_age_truecolor(t, str, len); break;

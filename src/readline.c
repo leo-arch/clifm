@@ -113,7 +113,7 @@ rl_get_y_or_n(const char *_msg)
 			continue;
 		}
 
-		switch(*answer) {
+		switch (*answer) {
 		case 'y': /* fallthrough */
 		case 'Y': free(answer); return 1;
 		case 'n': /* fallthrough */
@@ -2927,7 +2927,7 @@ tag_complete(const char *text)
 	char *l = rl_line_buffer;
 	int comp = 0;
 	if (*(l + 1) && *(l + 2) == ' ') {
-		switch(*(l + 1)) {
+		switch (*(l + 1)) {
 		case 'a': /* fallthough */
 		case 'u':
 			if (text && *text == ':') { /* We have a tag name */
@@ -2973,7 +2973,7 @@ tag_complete(const char *text)
 static int
 check_file_type_opts(const char c)
 {
-	switch(c) {
+	switch (c) {
 	case 'b': return stats.block_dev > 0 ? 1 : 0;
 	case 'c': return stats.char_dev > 0 ? 1 : 0;
 	case 'd': return stats.dir > 0 ? 1 : 0;
@@ -3041,7 +3041,7 @@ file_types_generator(const char *text, int state)
 
 	char *ret = (char *)NULL;
 	while (i < files && (name = file_info[i].name)) {
-		switch(*text) {
+		switch (*text) {
 		case 'b':
 			if (file_info[i].type == DT_BLK)
 				ret = strdup(name);

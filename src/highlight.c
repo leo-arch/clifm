@@ -137,7 +137,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	}
 
 	if (prev != 0) {
-		switch(prev) {
+		switch (prev) {
 		case ')': /* fallthrough */
 		case ']': /* fallthrough */
 		case '}': cl = tx_c; break;
@@ -153,7 +153,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		}
 	}
 
-	switch(c) {
+	switch (c) {
 	case ' ':
 		if (cur_color != hq_c && cur_color != hc_c)
 			cl = tx_c;

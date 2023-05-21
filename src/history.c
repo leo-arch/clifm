@@ -266,7 +266,7 @@ send_desktop_notification(char *msg)
 
 	char type[12];
 	*type = '\0';
-	switch(pmsg) {
+	switch (pmsg) {
 #if defined(__HAIKU__)
 	case ERROR: snprintf(type, sizeof(type), "error"); break;
 	case WARNING: snprintf(type, sizeof(type), "important"); break;
@@ -601,7 +601,7 @@ toggle_history(const char *arg)
 	if (!arg || !*arg)
 		return EXIT_FAILURE;
 
-	switch(*arg) {
+	switch (*arg) {
 	case 'o':
 		hist_status = (*(arg + 1) == 'n' ? 1 : 0);
 		return print_hist_status();
@@ -941,7 +941,7 @@ record_cmd(char *input)
 	if (amp_rm == 1)
 		p[len - 1] = '&';
 
-	switch(*p) {
+	switch (*p) {
 	case '.': /* Self, parent, and fastback */
 		if (!*(p + 1) || (*(p + 1) == '.' && (!*(p + 2) || *(p + 2) == '.') ) )
 			return 0;

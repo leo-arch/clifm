@@ -2308,7 +2308,7 @@ set_listing_mode(const char *line)
 	if (n == INT_MIN)
 		goto END;
 
-	switch(n) {
+	switch (n) {
 	case VERTLIST: conf.listing_mode = VERTLIST; return;
 	case HORLIST: conf.listing_mode = HORLIST; return;
 	default: break;
@@ -2324,7 +2324,7 @@ set_search_strategy(const char *line)
 	if (!line || *line < '0' || *line > '2')
 		return;
 
-	switch(*line) {
+	switch (*line) {
 	case '0': conf.search_strategy = GLOB_ONLY; break;
 	case '1': conf.search_strategy = REGEX_ONLY; break;
 	case '2': conf.search_strategy = GLOB_REGEX; break;

@@ -487,7 +487,7 @@ my_insert_text(char *text, char *s, const char _s)
 						break;
 					}
 				}
-				switch(t[i]) {
+				switch (t[i]) {
 				case '/': /* fallthrough */
 				case '"': /* fallthrough */
 				case '\'': /* fallthrough */
@@ -644,8 +644,7 @@ rl_accept_suggestion(int count, int key)
 		clear_suggestion(CS_KEEPBUF);
 
 	/* Complete according to the suggestion type */
-	switch(suggestion.type) {
-
+	switch (suggestion.type) {
 	case BACKDIR_SUG:    /* fallthrough */
 	case JCMD_SUG:       /* fallthrough */
 	case BOOKMARK_SUG:   /* fallthrough */
