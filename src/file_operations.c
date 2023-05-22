@@ -1378,16 +1378,20 @@ cp_mv_file(char **args, const int copy_and_rename, const int force)
 
 /* Print the list of files removed via the most recent call to the 'r' command */
 static void
-list_removed_files(char **cmd, const size_t start, const int cwd)
+list_removed_files(char **cmd, const size_t *dirs, const size_t start,
+	const int cwd)
 {
 	size_t i, c = 0;
 	for (i = start; cmd[i]; i++);
 	char **removed_files = (char **)xnmalloc(i + 1, sizeof(char *));
+	size_t *_dirs = (size_t *)xnmalloc(i + 1, sizeof(size_t));
 
 	struct stat a;
 	for (i = start; cmd[i]; i++) {
+		_dirs[c] = 0;
 		if (lstat(cmd[i], &a) == -1 && errno == ENOENT) {
 			removed_files[c] = cmd[i];
+			_dirs[c] = dirs[i];
 			c++;
 		}
 	}
@@ -1395,6 +1399,7 @@ list_removed_files(char **cmd, const size_t start, const int cwd)
 
 	if (c == 0) { /* No file was removed */
 		free(removed_files);
+		free(_dirs);
 		return;
 	}
 
@@ -1406,12 +1411,14 @@ list_removed_files(char **cmd, const size_t start, const int cwd)
 			continue;
 
 		char *p = abbreviate_file_name(removed_files[i]);
-		printf("%s\n", p ? p : removed_files[i]);
+		printf("%s%c\n", p ? p : removed_files[i], _dirs[i] == 1 ? '/' : 0);
 		if (p && p != removed_files[i])
 			free(p);
 	}
+
 	print_reload_msg(_("%zu file(s) removed\n"), c);
 
+	free(_dirs);
 	free(removed_files);
 }
 
@@ -1455,8 +1462,12 @@ remove_file(char **args)
 
 	struct stat a;
 	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
-	int i, j, dirs = 0;
+	/* Let's remember which removed files were directories. DIRS wil be later
+	 * passed to list_removed_files() to append a slash to directories when
+	 * reporting removed files. A bit convoluted, but it works. */
+	size_t *dirs = (size_t *)xnmalloc(args_n + 4, sizeof(size_t));
 
+	int i, j, have_dirs = 0;
 	int rm_force = conf.rm_force == 1 ? 1 : 0;
 
 	i = (is_force_param(args[1]) == 1) ? 2 : 1;
@@ -1489,9 +1500,13 @@ remove_file(char **args)
 
 		if (lstat(tmp, &a) != -1) {
 			rm_cmd[j] = savestring(tmp, strlen(tmp));
+			if (S_ISDIR(a.st_mode)) {
+				dirs[j] = 1;
+				have_dirs = 1;
+			} else {
+				dirs[j] = 0;
+			}
 			j++;
-			if (S_ISDIR(a.st_mode))
-				dirs = 1;
 		} else {
 			xerror("r: %s: %s\n", tmp, strerror(errno));
 			errs++;
@@ -1509,6 +1524,7 @@ remove_file(char **args)
 
 	if (j == 3) { /* No file to be deleted */
 		free(rm_cmd);
+		free(dirs);
 		return EXIT_FAILURE;
 	}
 
@@ -1518,7 +1534,7 @@ remove_file(char **args)
 		rm_cmd[0] = savestring("rm", 2);
 
 	rm_cmd[1] = (char *)xnmalloc(5, sizeof(char));
-	snprintf(rm_cmd[1], 5, "%s", set_rm_params(dirs, rm_force));
+	snprintf(rm_cmd[1], 5, "%s", set_rm_params(have_dirs, rm_force));
 
 	rm_cmd[2] = savestring("--", 2);
 
@@ -1537,11 +1553,13 @@ remove_file(char **args)
 		deselect_all();
 
 	if (print_removed_files == 1)
-		list_removed_files(rm_cmd, 3, cwd);
+		list_removed_files(rm_cmd, dirs, 3, cwd);
 
 	for (i = 0; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
 	free(rm_cmd);
+
+	free(dirs);
 
 	return exit_status;
 }
