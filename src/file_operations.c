@@ -803,9 +803,9 @@ CONT:
 		n = ret + 1;
 	}
 
-	if (*n && status != EXIT_FAILURE) { /* Reg file */
-		/* Reg file creation mode (666). open(3) will modify this according to
-		 * the current umask value. */
+	if (*n && status != EXIT_FAILURE) { /* Regular file */
+		/* Regular file creation mode (666). open(3) will modify this according
+		 * to the current umask value. */
 		mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 		int fd = open(name, O_WRONLY | O_CREAT | O_EXCL, mode);
 		if (fd == -1) {
@@ -820,35 +820,32 @@ CONT:
 }
 
 static void
-print_created_files(char **nfiles, const size_t nfiles_n, const size_t hlen)
+list_created_files(char **nfiles, const size_t nfiles_n)
 {
+	size_t i;
 	int file_in_cwd = 0;
 	int n = workspaces[cur_ws].path
 		? count_dir(workspaces[cur_ws].path, NO_CPOP) - 2 : 0;
+
 	if (n > 0 && (size_t)n > files)
 		file_in_cwd = 1;
 
 	if (conf.autols == 1 && file_in_cwd == 1)
 		reload_dirlist();
 
-	size_t i;
-	int ret = 0;
-
 	for (i = 0; nfiles[i]; i++) {
-		ret = workspaces[cur_ws].path
-			? strncmp(nfiles[i], workspaces[cur_ws].path, hlen) : -1;
-
-		char *name = (ret == 0 && *(nfiles[i] + hlen)
-			&& *(nfiles[i] + hlen + 1)) ? nfiles[i] + hlen + 1 : nfiles[i];
-
-		printf("%s\n", name);
+		char *f = abbreviate_file_name(nfiles[i]);
+		char *p = f ? f : nfiles[i];
+		puts((*p == '.' && p[1] == '/') ? p + 2 : p);
+		if (f && f != nfiles[i])
+			free(f);
 	}
 
 	print_reload_msg("%zu file(s) created\n", nfiles_n);
 }
 
 static int
-ask_and_create_file(const size_t hlen)
+ask_and_create_file(void)
 {
 	puts(_("End filename with a slash to create a directory"));
 	char _prompt[NAME_MAX];
@@ -873,7 +870,7 @@ ask_and_create_file(const size_t hlen)
 		return exit_status;
 
 	char *f[] = { filename, (char *)NULL };
-	print_created_files(f, 1, hlen);
+	list_created_files(f, 1);
 
 	free(filename);
 	return exit_status;
@@ -888,6 +885,8 @@ format_new_filename(char **name)
 
 	size_t flen = strlen(p);
 	int is_dir = (flen > 1 && p[flen - 1] == '/') ? 1 : 0;
+	if (is_dir == 1)
+		p[flen - 1 ] = '\0'; /* Remove ending slash */
 
 	char *npath = (char *)NULL;
 	if (p == *name)
@@ -914,15 +913,14 @@ press_key_to_continue(void)
 }
 
 static int
-err_file_exists(char *name, const char *next, const size_t hlen)
+err_file_exists(char *name, const char *next)
 {
-	int ret = (workspaces && workspaces[cur_ws].path)
-		? strncmp(name, workspaces[cur_ws].path, hlen) : 0;
-
-	char *n = (ret == 0 && *(name + hlen) && *(name + hlen + 1))
-		? name + hlen + 1 : name;
-
-	xerror("new: %s: %s\n", n, strerror(EEXIST));
+	char *n = abbreviate_file_name(name);
+	char *p = n ? n : name;
+	xerror("new: %s: %s\n", (*p == '.' && p[1] == '/')
+		? p + 2 : p, strerror(EEXIST));
+	if (n && n != name)
+		free(n);
 
 	if (next)
 		press_key_to_continue();
@@ -940,13 +938,10 @@ create_files(char **cmd)
 
 	int exit_status = EXIT_SUCCESS;
 	size_t i;
-	size_t hlen = workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 0;
-	/* hlen calculates the length of the current directory. This will be used
-	 * later to remove the current dir from file names informed as created. */
 
 	/* If no argument provided, ask the user for a filename, create it and exit */
 	if (!cmd[1])
-		return ask_and_create_file(hlen);
+		return ask_and_create_file();
 
 	/* Store pointers to actually created files into a pointers array. */
 	char **new_files = (char **)xnmalloc(args_n + 1, sizeof(char *));
@@ -960,7 +955,7 @@ create_files(char **cmd)
 		/* Skip existent files. */
 		struct stat a;
 		if (lstat(cmd[i], &a) == 0) {
-			exit_status = err_file_exists(cmd[i], cmd[i + 1], hlen);
+			exit_status = err_file_exists(cmd[i], cmd[i + 1]);
 			continue;
 		}
 
@@ -975,7 +970,7 @@ create_files(char **cmd)
 	new_files[new_files_n] = (char *)NULL;
 
 	if (new_files_n > 0)
-		print_created_files(new_files, new_files_n, hlen);
+		list_created_files(new_files, new_files_n);
 
 	free(new_files);
 	return exit_status;
@@ -1411,7 +1406,9 @@ list_removed_files(char **cmd, const size_t *dirs, const size_t start,
 			continue;
 
 		char *p = abbreviate_file_name(removed_files[i]);
-		printf("%s%c\n", p ? p : removed_files[i], _dirs[i] == 1 ? '/' : 0);
+		fputs(p ? p : removed_files[i], stdout);
+		puts(_dirs[i] == 1 ? "/" : "");
+
 		if (p && p != removed_files[i])
 			free(p);
 	}
@@ -1528,15 +1525,9 @@ remove_file(char **args)
 		return EXIT_FAILURE;
 	}
 
-	if (bin_flags & BSD_HAVE_COREUTILS)
-		rm_cmd[0] = savestring("grm", 3);
-	else
-		rm_cmd[0] = savestring("rm", 2);
-
-	rm_cmd[1] = (char *)xnmalloc(5, sizeof(char));
-	snprintf(rm_cmd[1], 5, "%s", set_rm_params(have_dirs, rm_force));
-
-	rm_cmd[2] = savestring("--", 2);
+	rm_cmd[0] = (bin_flags & BSD_HAVE_COREUTILS) ? "grm" : "rm";
+	rm_cmd[1] = set_rm_params(have_dirs, rm_force);
+	rm_cmd[2] = "--";
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
@@ -1555,7 +1546,7 @@ remove_file(char **args)
 	if (print_removed_files == 1)
 		list_removed_files(rm_cmd, dirs, 3, cwd);
 
-	for (i = 0; rm_cmd[i]; i++)
+	for (i = 3; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
 	free(rm_cmd);
 
