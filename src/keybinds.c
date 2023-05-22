@@ -269,8 +269,8 @@ keybind_exec_cmd(char *str)
 	args_n = 0;
 
 #ifndef _NO_SUGGESTIONS
-	if (suggestion.printed && suggestion_buf)
-		free_suggestion();
+	if (suggestion.printed == 1 && suggestion_buf)
+		clear_suggestion(CS_FREEBUF);
 #endif
 
 	int exit_status = EXIT_FAILURE;
