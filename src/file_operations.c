@@ -766,8 +766,172 @@ dup_file(char **cmd)
 	return exit_status;
 }
 
+/* Create the file named NAME, as a directory, if ending wit a slash, or as
+ * a regular file otherwise.
+ * Parent directories are created if they do not exist.
+ * Returns EXIT_SUCCESS on success or EXIT_FAILURE on error. */
+static int
+create_file(char *name)
+{
+	struct stat a;
+	char *ret = (char *)NULL;
+	char *n = name;
+	int status = EXIT_SUCCESS;
+
+	/* Dir creation mode (777). mkdir(3) will modify this according to the
+	 * current umask value. */
+	mode_t mode = S_IRWXU | S_IRWXG | S_IRWXO;
+
+	if (*n == '/') /* Skip root dir. */
+		n++;
+
+	/* Recursively create parent dirs (and dir itself if basename is a dir). */
+	while ((ret = strchr(n, '/'))) {
+		*ret = '\0';
+		if (lstat(name, &a) != -1) /* dir exists */
+			goto CONT;
+
+		errno = 0;
+		if (mkdirat(AT_FDCWD, name, mode) == -1) {
+			xerror("new: %s: %s\n", name, strerror(errno));
+			status = EXIT_FAILURE;
+			break;
+		}
+
+CONT:
+		*ret = '/';
+		n = ret + 1;
+	}
+
+	if (*n && status != EXIT_FAILURE) { /* Reg file */
+		/* Reg file creation mode (666). open(3) will modify this according to
+		 * the current umask value. */
+		mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+		int fd = open(name, O_WRONLY | O_CREAT | O_EXCL, mode);
+		if (fd == -1) {
+			xerror("new: %s: %s\n", name, strerror(errno));
+			status = EXIT_FAILURE;
+		} else {
+			close(fd);
+		}
+	}
+
+	return status;
+}
+
+static void
+print_created_files(char **nfiles, const size_t nfiles_n, const size_t hlen)
+{
+	int file_in_cwd = 0;
+	int n = workspaces[cur_ws].path
+		? count_dir(workspaces[cur_ws].path, NO_CPOP) - 2 : 0;
+	if (n > 0 && (size_t)n > files)
+		file_in_cwd = 1;
+
+	if (conf.autols == 1 && file_in_cwd == 1)
+		reload_dirlist();
+
+	size_t i;
+	int ret = 0;
+
+	for (i = 0; nfiles[i]; i++) {
+		ret = workspaces[cur_ws].path
+			? strncmp(nfiles[i], workspaces[cur_ws].path, hlen) : -1;
+
+		char *name = (ret == 0 && *(nfiles[i] + hlen)
+			&& *(nfiles[i] + hlen + 1)) ? nfiles[i] + hlen + 1 : nfiles[i];
+
+		printf("%s\n", name);
+	}
+
+	print_reload_msg("%zu file(s) created\n", nfiles_n);
+}
+
+static int
+ask_and_create_file(const size_t hlen)
+{
+	puts(_("End filename with a slash to create a directory"));
+	char _prompt[NAME_MAX];
+	snprintf(_prompt, sizeof(_prompt), _("Enter new file name "
+		"(Ctrl-d to quit)\n\001%s\002>\001%s\002 "), mi_c, tx_c);
+
+	char *filename = (char *)NULL;
+	while (!filename) {
+		filename = get_newname(_prompt, (char *)NULL);
+
+		if (!filename) /* The user pressed Ctrl-d */
+			return EXIT_SUCCESS;
+
+		if (is_blank_name(filename) == 1) {
+			free(filename);
+			filename = (char *)NULL;
+		}
+	}
+
+	int exit_status = create_file(filename);
+	if (exit_status != EXIT_SUCCESS)
+		return exit_status;
+
+	char *f[] = { filename, (char *)NULL };
+	print_created_files(f, 1, hlen);
+
+	free(filename);
+	return exit_status;
+}
+
+static int
+format_new_filename(char **name)
+{
+	char *p = *name;
+	if (*(*name) == '\'' || *(*name) == '"')
+		p = remove_quotes(*name);
+
+	size_t flen = strlen(p);
+	int is_dir = (flen > 1 && p[flen - 1] == '/') ? 1 : 0;
+
+	char *npath = (char *)NULL;
+	if (p == *name)
+		npath = normalize_path(p, flen);
+	else /* Quoted string. Copy it verbatim. */
+		npath = savestring(p, flen);
+
+	if (!npath)
+		return EXIT_FAILURE;
+
+	*name = (char *)xrealloc(*name, (strlen(npath) + 2) * sizeof(char));
+	sprintf(*name, "%s%c", npath, is_dir == 1 ? '/' : 0);
+	free(npath);
+
+	return EXIT_SUCCESS;
+}
+
+static void
+press_key_to_continue(void)
+{
+	printf(_("Press any key to continue ..."));
+	xgetchar();
+	putchar('\n');
+}
+
+static int
+err_file_exists(char *name, const char *next, const size_t hlen)
+{
+	int ret = (workspaces && workspaces[cur_ws].path)
+		? strncmp(name, workspaces[cur_ws].path, hlen) : 0;
+
+	char *n = (ret == 0 && *(name + hlen) && *(name + hlen + 1))
+		? name + hlen + 1 : name;
+
+	xerror("new: %s: %s\n", n, strerror(EEXIST));
+
+	if (next)
+		press_key_to_continue();
+
+	return EXIT_FAILURE;
+}
+
 int
-create_file(char **cmd)
+create_files(char **cmd)
 {
 	if (cmd[1] && IS_HELP(cmd[1])) {
 		puts(_(NEW_USAGE));
@@ -775,223 +939,45 @@ create_file(char **cmd)
 	}
 
 	int exit_status = EXIT_SUCCESS;
-	int free_cmd = 0;
+	size_t i;
+	size_t hlen = workspaces[cur_ws].path ? strlen(workspaces[cur_ws].path) : 0;
+	/* hlen calculates the length of the current directory. This will be used
+	 * later to remove the current dir from file names informed as created. */
 
-	/* If no argument provided, ask the user for a filename */
-	if (!cmd[1]) {
-		puts(_("End filename with a slash to create a directory"));
-		char _prompt[NAME_MAX];
-		snprintf(_prompt, sizeof(_prompt), _("Enter new file name "
-			"(Ctrl-d to quit)\n\001%s\002>\001%s\002 "), mi_c, tx_c);
-		char *filename = (char *)NULL;
-		while (!filename) {
-			filename = get_newname(_prompt, (char *)NULL);
+	/* If no argument provided, ask the user for a filename, create it and exit */
+	if (!cmd[1])
+		return ask_and_create_file(hlen);
 
-			if (!filename) /* The user pressed Ctrl-d */
-				return EXIT_SUCCESS;
+	/* Store pointers to actually created files into a pointers array. */
+	char **new_files = (char **)xnmalloc(args_n + 1, sizeof(char *));
+	size_t new_files_n = 0;
 
-			if (is_blank_name(filename) == 1) {
-				free(filename);
-				filename = (char *)NULL;
-			}
-		}
-
-		/* Once we have the filename, reconstruct the cmd array */
-		char **tmp_cmd = (char **)xnmalloc(args_n + 3, sizeof(char *));
-		tmp_cmd[0] = (char *)xnmalloc(2, sizeof(char));
-		*tmp_cmd[0] = 'n';
-		tmp_cmd[0][1] = '\0';
-		tmp_cmd[1] = (char *)xnmalloc(strlen(filename) + 1, sizeof(char));
-		strcpy(tmp_cmd[1], filename);
-		tmp_cmd[2] = (char *)NULL;
-		cmd = tmp_cmd;
-		free_cmd = 1;
-		free(filename);
-	}
-
-	/* Properly format filenames */
-	size_t i, hlen = workspaces[cur_ws].path
-		? strlen(workspaces[cur_ws].path) : 0;
 	for (i = 1; cmd[i]; i++) {
-		char *p = cmd[i];
-		if (*cmd[i] == '\'' || *cmd[i] == '"')
-			p = remove_quotes(cmd[i]);
-
-		size_t flen = strlen(p);
-		int is_dir = (flen > 1 && p[flen - 1] == '/') ? 1 : 0;
-
-		char *npath = (char *)NULL;
-		if (p == cmd[i])
-			npath = normalize_path(p, flen);
-		else /* Quoted string. Copy it verbatim. */
-			npath = savestring(p, flen);
-
-		if (!npath) {
-			*cmd[i] = '\0'; /* Invalidate this entry */
+		/* Properly format filename. */
+		if (format_new_filename(&cmd[i]) == EXIT_FAILURE)
 			continue;
-		}
 
-		cmd[i] = (char *)xrealloc(cmd[i], (strlen(npath) + 2) * sizeof(char));
-		sprintf(cmd[i], "%s%c", npath, is_dir == 1 ? '/' : 0);
-		free(npath);
-
-		/* If the file already exists, skip it */
+		/* Skip existent files. */
 		struct stat a;
 		if (lstat(cmd[i], &a) == 0) {
-			int ret = strncmp(cmd[i], workspaces[cur_ws].path, hlen);
-			char *name = (ret == 0 && *(cmd[i] + hlen) && *(cmd[i] + hlen + 1))
-				? cmd[i] + hlen + 1 : cmd[i];
-			xerror("%s: File exists\n", name);
-			if (cmd[i + 1]) {
-				printf(_("Press any key to continue ..."));
-				xgetchar();
-				putchar('\n');
-			}
-			exit_status = EXIT_FAILURE;
-			*cmd[i] = '\0'; /* Invalidate entry */
-
+			exit_status = err_file_exists(cmd[i], cmd[i + 1], hlen);
 			continue;
 		}
 
-		/* If we have DIR/FILE and DIR doesn't exit, create DIR */
-		char *ls = strrchr(cmd[i], '/');
-		if (!ls || !*(ls + 1) || ls == cmd[i])
-			continue; /* Last slash is either the first or the last char */
-
-		*ls = '\0';
-		if (stat(cmd[i], &a) != -1) { /* Parent dir exists */
-			*ls = '/';
-			continue;
-		}
-
-		char *md_cmd[] = {"mkdir", "-p", cmd[i], NULL};
-		if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			*cmd[i] = '\0'; /* Invalidate this entry */
-			if (cmd[i + 1]) {
-				printf(_("Press any key to continue ..."));
-				xgetchar();
-				putchar('\n');
-			}
-			exit_status = EXIT_FAILURE;
-		}
-		*ls = '/';
-	}
-
-	/* Construct commands */
-	size_t files_num = i - 1;
-
-	char **nfiles = (char **)xnmalloc(files_num + 2, sizeof(char *));
-	char **ndirs = (char **)xnmalloc(files_num + 3, sizeof(char *));
-
-	/* Let's use 'touch' for files and 'mkdir -p' for dirs */
-	nfiles[0] = (char *)xnmalloc(6, sizeof(char));
-	strcpy(nfiles[0], "touch");
-
-	ndirs[0] = (char *)xnmalloc(6, sizeof(char));
-	strcpy(ndirs[0], "mkdir");
-
-	ndirs[1] = (char *)xnmalloc(3, sizeof(char));
-	ndirs[1][0] = '-';
-	ndirs[1][1] = 'p';
-	ndirs[1][2] = '\0';
-
-	size_t cnfiles = 1, cndirs = 2;
-
-	for (i = 1; cmd[i]; i++) {
-		if (!*cmd[i])
-			continue;
-		size_t cmd_len = strlen(cmd[i]);
-		/* File names ending with a slash are taken as directory names */
-		if (cmd_len > 0 && cmd[i][cmd_len - 1] == '/') {
-			ndirs[cndirs] = cmd[i];
-			cndirs++;
-		} else {
-			nfiles[cnfiles] = cmd[i];
-			cnfiles++;
+		if ((exit_status = create_file(cmd[i])) == EXIT_SUCCESS) {
+			new_files[new_files_n] = cmd[i];
+			new_files_n++;
+		} else if (cmd[i + 1]) {
+			press_key_to_continue();
 		}
 	}
 
-	ndirs[cndirs] = (char *)NULL;
-	nfiles[cnfiles] = (char *)NULL;
+	new_files[new_files_n] = (char *)NULL;
 
-	size_t total = (cndirs - 2) + (cnfiles - 1);
-	int ret = 0;
-	/* Execute commands */
-	if (cnfiles > 1) {
-		if ((ret = launch_execve(nfiles, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS) {
-			if (total > 1) {
-				printf(_("Press any key to continue ..."));
-				xgetchar();
-				putchar('\n');
-			}
-			exit_status = ret;
-		}
-	}
+	if (new_files_n > 0)
+		print_created_files(new_files, new_files_n, hlen);
 
-	if (cndirs > 2) {
-		if ((ret = launch_execve(ndirs, FOREGROUND, E_NOFLAG)) != EXIT_SUCCESS) {
-			if (total > 1) {
-				printf(_("Press any key to continue ..."));
-				xgetchar();
-				putchar('\n');
-			}
-			exit_status = ret;
-		}
-	}
-
-	free(nfiles[0]);
-	free(ndirs[0]);
-	free(ndirs[1]);
-	free(nfiles);
-	free(ndirs);
-
-	int file_in_cwd = 0;
-	int n = workspaces[cur_ws].path
-		? count_dir(workspaces[cur_ws].path, NO_CPOP) - 2 : 0;
-	if (n > 0 && (size_t)n > files)
-		file_in_cwd = 1;
-
-	if (total > 0) {
-		if (conf.autols == 1 && file_in_cwd == 1)
-			reload_dirlist();
-
-		for (i = 1; cmd[i]; i++) {
-			if (!*cmd[i])
-				continue;
-
-			int dup = 0;
-			for (size_t j = i + 1; cmd[j]; j++) {
-				if (*cmd[i] == *cmd[j] && strcmp(cmd[i], cmd[j]) == 0) {
-					dup = 1;
-					break;
-				}
-			}
-			if (dup == 1) {
-				total--;
-				continue;
-			}
-
-			struct stat a;
-			if (stat(cmd[i], &a) != -1) {
-				ret = workspaces[cur_ws].path
-					? strncmp(cmd[i], workspaces[cur_ws].path, hlen) : -1;
-				char *name = (ret == 0 && *(cmd[i] + hlen) && *(cmd[i] + hlen + 1))
-					? cmd[i] + hlen + 1 : cmd[i];
-				printf("%s\n", name);
-			} else {
-				total--;
-			}
-		}
-		if (total > 0)
-			print_reload_msg(_("%zu file(s) created\n"), total);
-	}
-
-	if (free_cmd == 1) {
-		for (i = 0; cmd[i]; i++)
-			free(cmd[i]);
-		free(cmd);
-	}
-
+	free(new_files);
 	return exit_status;
 }
 
