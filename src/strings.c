@@ -3085,7 +3085,7 @@ dequote_str(char *text, int mt)
 		return (char *)NULL;
 
 	/* At most, we need as many bytes as in text (in case no escape
-	 * sequence is found) */
+	 * sequence is found). */
 	char *buf = (char *)NULL;
 	buf = (char *)xnmalloc(strlen(text) + 1, sizeof(char));
 	size_t len = 0;

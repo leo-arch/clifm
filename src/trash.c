@@ -1121,11 +1121,30 @@ print_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 	for (i = 0; i < trashed_n; i++) {
 		if (!args[trashed[i]] || !*args[trashed[i]])
 			continue;
-		char *p = (char *)NULL;
-		if (strchr(args[trashed[i]], '\\'))
-			p = dequote_str(args[trashed[i]], 0);
-		printf("%s\n", p ? p : args[trashed[i]]);
-		free(p);
+
+		char *p = args[trashed[i]];
+		if (strchr(args[trashed[i]], '\\')
+		&& !(p = dequote_str(args[trashed[i]], 0)) ) {
+			xerror("trash: %s: Error dequoting file name\n", args[trashed[i]]);
+			continue;
+		}
+
+		char *tmp = abbreviate_file_name(p);
+		if (!tmp) {
+			xerror("trash: %s: Error abbreviating file name\n", p);
+			if (p && p != args[trashed[i]])
+				free(p);
+			continue;
+		}
+
+		char *name = (*tmp == '.' && tmp[1] == '/') ? tmp + 2 : tmp;
+
+		puts(name);
+
+		if (tmp && tmp != p)
+			free(tmp);
+		if (p && p != args[trashed[i]])
+			free(p);
 	}
 }
 
