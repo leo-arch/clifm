@@ -883,6 +883,9 @@ format_new_filename(char **name)
 	if (*(*name) == '\'' || *(*name) == '"')
 		p = remove_quotes(*name);
 
+	if (!p || !*p)
+		return EXIT_FAILURE;
+
 	size_t flen = strlen(p);
 	int is_dir = (flen > 1 && p[flen - 1] == '/') ? 1 : 0;
 	if (is_dir == 1)
@@ -949,8 +952,10 @@ create_files(char **cmd)
 
 	for (i = 1; cmd[i]; i++) {
 		/* Properly format filename. */
-		if (format_new_filename(&cmd[i]) == EXIT_FAILURE)
+		if (format_new_filename(&cmd[i]) == EXIT_FAILURE) {
+			exit_status = EXIT_FAILURE;
 			continue;
+		}
 
 		/* Skip existent files. */
 		struct stat a;
