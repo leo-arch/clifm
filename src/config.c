@@ -681,6 +681,31 @@ set_sel_file(void)
 	return;
 }
 
+static int
+import_from_data_dir(char *src_filename, char *dest)
+{
+	if (!data_dir || !src_filename || !dest
+	|| !*data_dir || !*src_filename || !*dest)
+		return EXIT_FAILURE;
+
+	struct stat attr;
+	char sys_file[PATH_MAX];
+	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PNL,
+		src_filename);
+	if (stat(sys_file, &attr) == -1)
+		return EXIT_FAILURE;
+
+	char *cmd[] = {"cp", sys_file, dest, NULL};
+	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	if (ret == EXIT_SUCCESS) {
+		/* Make sure config files have always 600 permissions. */
+		chmod(dest, S_IRUSR | S_IWUSR);
+		return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
 int
 create_kbinds_file(void)
 {
@@ -693,19 +718,12 @@ create_kbinds_file(void)
 		return EXIT_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-	if (data_dir) {
-		char sys_file[PATH_MAX];
-		snprintf(sys_file, sizeof(sys_file), "%s/%s/keybindings.clifm",
-			data_dir, PNL);
-		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
-			char *cmd[] = {"cp", sys_file, kbinds_file, NULL};
-			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
-				return EXIT_SUCCESS;
-		}
-	}
+	if (import_from_data_dir("keybindings.clifm", kbinds_file) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
 
 	/* Else, create it */
-	FILE *fp = fopen(kbinds_file, "w");
+	int fd = 0;
+	FILE *fp = open_fstream_w(kbinds_file, &fd);
 	if (!fp) {
 		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
 			strerror(errno));
@@ -855,30 +873,8 @@ plugin1:\\C-y\n\n\
 #plugin4:\n",
 	    PROGRAM_NAME);
 
-	fclose(fp);
+	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
-}
-
-static int
-import_from_data_dir(char *src_filename, char *dest)
-{
-	if (!data_dir || !src_filename || !dest
-	|| !*data_dir || !*src_filename || !*dest)
-		return EXIT_FAILURE;
-
-	struct stat attr;
-	char sys_file[PATH_MAX];
-	snprintf(sys_file, sizeof(sys_file), "%s/%s/%s", data_dir, PNL,
-		src_filename);
-	if (stat(sys_file, &attr) == -1)
-		return EXIT_FAILURE;
-
-	char *cmd[] = {"cp", sys_file, dest, NULL};
-	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	if (ret == EXIT_SUCCESS)
-		return EXIT_SUCCESS;
-
-	return EXIT_FAILURE;
 }
 
 static int
@@ -894,7 +890,7 @@ create_preview_file(void)
 	if (import_from_data_dir("preview.clifm", file) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	int fd;
+	int fd = 0;
 	FILE *fp = open_fstream_w(file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
@@ -977,7 +973,7 @@ create_actions_file(char *file)
 		return EXIT_SUCCESS;
 
 	/* Else, create it */
-	int fd;
+	int fd = 0;
 	FILE *fp = open_fstream_w(file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
@@ -1796,18 +1792,11 @@ create_remotes_file(void)
 		return EXIT_SUCCESS;
 
 	/* Let's try to copy the file from DATADIR */
-	char sys_remotes[PATH_MAX];
-	snprintf(sys_remotes, sizeof(sys_remotes), "%s/%s/nets.clifm",
-		data_dir, PNL);
-
-	if (stat(sys_remotes, &attr) == EXIT_SUCCESS) {
-		char *cmd[] = {"cp", "-f", sys_remotes, remotes_file, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
-			return EXIT_SUCCESS;
-	}
+	if (import_from_data_dir("nets.clifm", remotes_file) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
 
 	/* If not in DATADIR, let's create a minimal file here */
-	int fd;
+	int fd = 0;
 	FILE *fp = open_fstream_w(remotes_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
@@ -1894,7 +1883,8 @@ create_config_files(void)
 				 * ###################### */
 
 	if (stat(profile_file, &attr) == -1) {
-		FILE *profile_fp = fopen(profile_file, "w");
+		int fd = 0;
+		FILE *profile_fp = open_fstream_w(profile_file, &fd);
 		if (!profile_fp) {
 			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
 			    profile_file, strerror(errno));
@@ -1906,7 +1896,7 @@ create_config_files(void)
 				"# want a multi-line command, just write a script for it:\n"
 				"#sh /path/to/my/script.sh\n"),
 				_PROGRAM_NAME, _PROGRAM_NAME);
-			fclose(profile_fp);
+			close_fstream(profile_fp, fd);
 		}
 	}
 
@@ -2134,7 +2124,8 @@ create_bm_file(void)
 	if (stat(bm_file, &attr) != -1)
 		return EXIT_SUCCESS;
 
-	FILE *fp = fopen(bm_file, "w+");
+	int fd = 0;
+	FILE *fp = open_fstream_w(bm_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file,
 			strerror(errno));
@@ -2150,8 +2141,8 @@ create_bm_file(void)
 		    "# Example:\n"
 		    "[c]clifm:%s\n",
 	    PROGRAM_NAME, config_dir ? config_dir : "path/to/file");
-	fclose(fp);
 
+	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
 }
 

@@ -1110,7 +1110,7 @@ check_trash_file(char *deq_file)
 	return EXIT_SUCCESS;
 }
 
-/* Print the list of successfully trashed files */
+/* Print the list of successfully trashed files. */
 static void
 print_trashed_files(char **args, const int *trashed, const size_t trashed_n)
 {
@@ -1210,7 +1210,7 @@ trash_files_args(char **args)
 		 * If this file was in the current dir, the screen will be refreshed
 		 * after this function (by inotify/kqueue), hidding the error message.
 		 * So let's pause here to prevent the error from being hidden, and
-		 * then refresh the list of files ourselves */
+		 * then refresh the list of files ourselves. */
 		if (conf.autols == 1) {
 			fputs(_("Press any key to continue... \n"), stderr);
 			xgetchar();

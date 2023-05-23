@@ -447,7 +447,8 @@ init_history(void)
 		history_truncate_file(hist_file, conf.max_hist);
 	} else {
 	/* If the history file doesn't exist, create it */
-		FILE *hist_fp = fopen(hist_file, "w+");
+		int fd = 0;
+		FILE *hist_fp = open_fstream_w(hist_file, &fd);
 		if (!hist_fp) {
 			_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
 			    PROGRAM_NAME, hist_file, strerror(errno));
@@ -457,7 +458,7 @@ init_history(void)
 			fputs("edit\n", hist_fp);
 			/* There is no need to run read_history() here, since
 			 * the history file is still empty */
-			fclose(hist_fp);
+			close_fstream(hist_fp, fd);
 		}
 	}
 

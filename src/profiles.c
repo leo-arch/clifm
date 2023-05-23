@@ -211,10 +211,11 @@ profile_set(char *prof)
 			read_history(hist_file);
 			history_truncate_file(hist_file, conf.max_hist);
 		} else {
-			FILE *hist_fp = fopen(hist_file, "w");
+			int fd = 0;
+			FILE *hist_fp = open_fstream_w(hist_file, &fd);
 			if (hist_fp) {
 				fputs("edit\n", hist_fp);
-				fclose(hist_fp);
+				close_fstream(hist_fp, fd);
 			} else {
 				_err('w', PRINT_PROMPT, _("pf: Error opening the "
 					"history file\n"));
@@ -324,8 +325,8 @@ profile_add(char *prof)
 	/* Create config files */
 
 	/* #### CREATE THE HISTORY FILE #### */
-	FILE *hist_fp = fopen(nhist_file, "w+");
-
+	int fd = 0;
+	FILE *hist_fp = open_fstream_w(nhist_file, &fd);
 	if (!hist_fp) {
 		xerror("pf: fopen: %s: %s\n", nhist_file, strerror(errno));
 		exit_status = EXIT_FAILURE;
@@ -333,7 +334,7 @@ profile_add(char *prof)
 		/* To avoid malloc errors in read_history(), do not create
 		 * an empty file */
 		fputs("edit\n", hist_fp);
-		fclose(hist_fp);
+		close_fstream(hist_fp, fd);
 	}
 
 	/* #### CREATE THE MIME CONFIG FILE #### */
