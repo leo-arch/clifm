@@ -698,7 +698,7 @@ remove_from_trash(char **args)
 }
 
 static int
-untrash_element(char *file)
+untrash_file(char *file)
 {
 	if (!file)
 		return EXIT_FAILURE;
@@ -820,6 +820,66 @@ untrash_element(char *file)
 	return EXIT_SUCCESS;
 }
 
+/* Untrash all trashed files. */
+static int
+untrash_all(struct dirent ***trash_files, const int trash_files_n)
+{
+	size_t j;
+	int exit_status = EXIT_SUCCESS;
+
+	for (j = 0; j < (size_t)trash_files_n; j++) {
+		if (untrash_file((*trash_files)[j]->d_name) != 0)
+			exit_status = EXIT_FAILURE;
+		free((*trash_files)[j]);
+	}
+	free(*trash_files);
+
+	if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
+		_err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
+		    workspaces[cur_ws].path, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (conf.autols == 1)
+		reload_dirlist();
+	print_reload_msg(_("0 trashed files\n"));
+
+	return exit_status;
+}
+
+/* Untrash files passed as parameters (ARGS). */
+static int
+untrash_files(char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+	size_t i, untrashed_files = 0;
+
+	for (i = 0; args[i]; i++) {
+		char *d = (char *)NULL;
+		if (strchr(args[i], '\\'))
+			d = dequote_str(args[i], 0);
+
+		if (untrash_file(d ? d : args[i]) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+		else
+			untrashed_files++;
+
+		free(d);
+	}
+
+	if (exit_status == EXIT_SUCCESS) {
+		size_t n = count_trashed_files();
+
+		if (conf.autols == 1)
+			reload_dirlist();
+
+		print_reload_msg(_("%zu file(s) untrashed\n"), untrashed_files);
+		print_reload_msg(_("%zu total trashed file(s)\n"), n);
+	}
+
+	return exit_status;
+}
+
 int
 untrash_function(char **comm)
 {
@@ -834,30 +894,10 @@ untrash_function(char **comm)
 	int exit_status = EXIT_SUCCESS;
 
 	if (comm[1] && *comm[1] != '*' && strcmp(comm[1], "a") != 0
-	&& strcmp(comm[1], "all") != 0) {
-		size_t j, untrashed_files = 0;
-		for (j = 1; comm[j]; j++) {
-			char *d = (char *)NULL;
-			if (strchr(comm[j], '\\'))
-				d = dequote_str(comm[j], 0);
-			if (untrash_element(d ? d : comm[j]) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
-			else
-				untrashed_files++;
-			free(d);
-		}
-		if (exit_status == EXIT_SUCCESS) {
-			size_t n = count_trashed_files();
-			if (conf.autols == 1)
-				reload_dirlist();
-			print_reload_msg(_("%zu file(s) untrashed\n"), untrashed_files);
-			print_reload_msg(_("%zu total trashed file(s)\n"), n);
-		}
+	&& strcmp(comm[1], "all") != 0)
+		return untrash_files(comm + 1);
 
-		return exit_status;
-	}
-
-	/* Change CWD to the trash directory to make scandir() work */
+	/* Change CWD to the trash directory to make scandir(3) work. */
 	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
 			trash_files_dir, strerror(errno));
@@ -883,27 +923,8 @@ untrash_function(char **comm)
 
 	/* if "undel all" (or "u a" or "u *") */
 	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
-	|| strcmp(comm[1], "all") == 0)) {
-		size_t j;
-		for (j = 0; j < (size_t)trash_files_n; j++) {
-			if (untrash_element(trash_files[j]->d_name) != 0)
-				exit_status = EXIT_FAILURE;
-			free(trash_files[j]);
-		}
-		free(trash_files);
-
-		if (xchdir(workspaces[cur_ws].path, NO_TITLE) == -1) {
-			_err(0, NOPRINT_PROMPT, "undel: %s: %s\n",
-			    workspaces[cur_ws].path, strerror(errno));
-			return EXIT_FAILURE;
-		}
-
-		if (conf.autols == 1)
-			reload_dirlist();
-		print_reload_msg(_("0 trashed files\n"));
-
-		return exit_status;
-	}
+	|| strcmp(comm[1], "all") == 0))
+		return untrash_all(&trash_files, trash_files_n);
 
 	/* List trashed files */
 	printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
@@ -953,7 +974,7 @@ untrash_function(char **comm)
 		} else if (strcmp(undel_elements[i], "*") == 0) {
 			size_t j;
 			for (j = 0; j < (size_t)trash_files_n; j++)
-				if (untrash_element(trash_files[j]->d_name) != 0)
+				if (untrash_file(trash_files[j]->d_name) != 0)
 					exit_status = EXIT_FAILURE;
 
 			free_and_return = 1;
@@ -964,8 +985,8 @@ untrash_function(char **comm)
 		}
 	}
 
-	/* Free and return if any of the above conditions is true */
-	if (free_and_return) {
+	/* Free and return if any of the above conditions is true. */
+	if (free_and_return == 1) {
 		size_t j = 0;
 		for (j = 0; j < (size_t)undel_n; j++)
 			free(undel_elements[j]);
@@ -992,7 +1013,7 @@ untrash_function(char **comm)
 		}
 
 		/* If valid ELN */
-		if (untrash_element(trash_files[undel_num - 1]->d_name) != EXIT_SUCCESS)
+		if (untrash_file(trash_files[undel_num - 1]->d_name) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
 		free(undel_elements[i]);
