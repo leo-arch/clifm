@@ -157,7 +157,6 @@ int_cmds_generator(const char *text, int state)
 		"colors  (print currently used file type colors)",
 		"config  (edit the main configuration file)",
 		"cs      (manage color schemes)",
-		"cwd     (print the current directory)",
 		"dup     (duplicate files)",
 		"ds      (deselect files)",
 		"exp     (export file names to a temporary file)",

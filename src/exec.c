@@ -1981,27 +1981,53 @@ check_zombies(void)
 		zombies--;
 }
 
-/* Print the current working directory. Try first our own internal
- * representation (workspaces array). If something went wrong, fallback
- * to PWD/getcwd(3). */
+/* Builtin version of pwd(1). Print the current working directory.
+ * Try first our own internal representation (workspaces array). If something
+ * goes wrong, fallback to $PWD/getcwd(3) (via get_cwd()). */
 static int
-print_cwd(void)
+print_cwd(const char *arg)
 {
-	if (workspaces && workspaces[cur_ws].path) {
-		printf("%s\n", workspaces[cur_ws].path);
-		return EXIT_SUCCESS;
+	int resolve_links = 0;
+	char *pwd = (char *)NULL;
+
+	if (arg && *arg == '-') {
+		if (arg[1] == 'P')  {
+			resolve_links = 1;
+		} else if (IS_HELP(arg)) {
+			puts(PWD_DESC);
+			return EXIT_SUCCESS;
+		} else if (arg[1] != 'L') {
+			xerror("pwd: %s: Invalid option\nUsage: pwd [-LP]\n", arg);
+			return EXIT_FAILURE;
+		}
 	}
 
-	char p[PATH_MAX]; *p = '\0';
-	char *cwd = get_cwd(p, sizeof(p), 0);
+	if (workspaces && workspaces[cur_ws].path) {
+		pwd = workspaces[cur_ws].path;
+	} else {
+		char p[PATH_MAX]; *p = '\0';
+		pwd = get_cwd(p, sizeof(p), 0);
+	}
 
-	if (!cwd || !*cwd) {
+	if (!pwd || !*pwd) {
 		xerror(_("%s: Error getting the current working directory\n"),
 			PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
-	printf("%s\n", cwd);
+	if (resolve_links == 0) {
+		puts(pwd);
+		return EXIT_SUCCESS;
+	}
+
+	char p[PATH_MAX]; *p = '\0';
+	char *real_path = realpath(pwd, p);
+	if (!real_path) {
+		xerror("pwd: %s: %s\n", pwd, strerror(errno));
+		return errno;
+	}
+
+	puts(p);
 	return EXIT_SUCCESS;
 }
 
@@ -2827,8 +2853,9 @@ exec_cmd(char **comm)
 		return (exit_code = list_commands());
 
 	/* #### PATH, CWD #### */
-	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) {
-		return (exit_code = print_cwd());
+	else if ((*comm[0] == 'p' && (strcmp(comm[0], "pwd") == 0
+	|| strcmp(comm[0], "path") == 0)) || strcmp(comm[0], "cwd") == 0) {
+		return (exit_code = print_cwd(comm[1]));
 	}
 
 	/* #### HELP #### */
@@ -2841,6 +2868,7 @@ exec_cmd(char **comm)
 		return (exit_code = export_var_function(comm + 1));
 	}
 
+	/* #### UMASK #### */
 	else if (*comm[0] == 'u' && strcmp(comm[0], "umask") == 0) {
 		return (exit_code = umask_function(comm[1]));
 	}

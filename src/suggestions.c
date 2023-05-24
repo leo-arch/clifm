@@ -226,8 +226,8 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return ACD_DESC;
 		if (*s == 'c' && *(s + 1) == 'm' && *(s + 2) == 'd')
 			return CMD_DESC;
-		if (*s == 'c' && *(s + 1) == 'w' && *(s + 2) == 'd')
-			return CWD_DESC;
+//		if (*s == 'c' && *(s + 1) == 'w' && *(s + 2) == 'd')
+//			return CWD_DESC;
 		if (*s == 'd' && *(s + 1) == 'u' && *(s + 2) == 'p')
 			return D_DESC;
 		if (*s == 'e' && *(s + 1) == 'x') {
@@ -267,8 +267,8 @@ check_int_cmd_desc(const char *s, const size_t l)
 			return MM_DESC;
 		if (*s == 'o' && strcmp(s + 1, "pen") == 0)
 			return O_DESC;
-		if (*s == 'p' && strcmp(s + 1, "ath") == 0)
-			return CWD_DESC;
+//		if (*s == 'p' && strcmp(s + 1, "ath") == 0)
+//			return CWD_DESC;
 //		if (*s == 'p' && strcmp(s + 1, "rof") == 0)
 //			return PF_DESC;
 		if (*s == 'p' && strcmp(s + 1, "rop") == 0)

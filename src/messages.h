@@ -845,6 +845,15 @@ Note: To permanently set a new prompt edit the current\n\
 color scheme file ('cs edit'), and set the Prompt field to\n\
 whatever prompt you like."
 
+#define PWD_DESC "Print the name of the current working directory\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  pwd [-LP]\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the logical working directory (do not resolve symlinks)\n\
+    pwd (or 'pwd -L')\n\
+- Print the physical working directory (resolve all symlinks)\n\
+    pwd -P"
+
 #define QUIT_HELP "Exit clifm\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   Q, q, quit, exit\n\n\

@@ -442,6 +442,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"commands", 8},
 	{"cs", 2},
 	{"colorschemes", 12},
+	{"cwd", 3}, // deprecate this one, just as 'path'
 	{"d", 1},
 	{"dup", 3},
 	{"ds", 2},
@@ -503,8 +504,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"pp", 2},
 	{"pr", 2},
 	{"prop", 4},
-	{"path", 4},
-	{"cwd", 3},
+	{"path", 4}, // deprecate this one, just as 'cwd'
 	{"paste", 5},
 	{"pf", 2},
 	{"prof", 4},
@@ -514,6 +514,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"pin", 3},
 	{"unpin", 5},
 	{"prompt", 6},
+	{"pwd", 3},
 	{"q", 1},
 	{"Q", 1},
 	{"quit", 4},
