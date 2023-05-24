@@ -51,7 +51,7 @@ init_ueberzug() {
 
 	mkfifo "$CLIFM_FIFO_UEBERZUG"
 	tail -f "$CLIFM_FIFO_UEBERZUG" \
-	| ueberzug layer --silent --parser json > /dev/null 2>&1 &
+	| ueberzug layer --silent --parser json &
 }
 
 if ! type clifm > /dev/null 2>&1; then
