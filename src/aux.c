@@ -1158,6 +1158,7 @@ read_octal(char *str)
 	int n = atoi(str);
 	if (n == INT_MIN)
 		return (-1);
+
 	int num = n;
 	int dec_value = 0;
 

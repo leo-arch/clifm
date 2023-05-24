@@ -80,11 +80,11 @@ umask_function(char *arg)
 		goto ERROR;
 
 	umask((mode_t)new_umask);
-	printf(_("New umask set to '%04o'\n"), new_umask);
+	printf(_("File-creation mask set to '%04o'\n"), new_umask);
 	return EXIT_SUCCESS;
 
 ERROR:
-	xerror(_("umask: '%s': Not an octal number from 000 to 777\n"), arg);
+	xerror(_("umask: %s: Out of range (valid values are 000-777)\n"), arg);
 	return EXIT_FAILURE;
 }
 
