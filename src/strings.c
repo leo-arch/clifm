@@ -1645,6 +1645,7 @@ expand_file_type(char ***substr)
 	free(file_type_array);
 }
 
+#ifndef _NO_MAGIC
 static void
 expand_mime_type(char ***substr)
 {
@@ -1672,6 +1673,7 @@ expand_mime_type(char ***substr)
 
 		char **p = *((*substr)[index] + 1)
 			? expand_mime_type_filter((*substr)[index] + 1) : (char **)NULL;
+
 		size_t c = 0;
 		if (p) {
 			char **ret = insert_fields(substr, &p, (size_t)index, &c);
@@ -1703,6 +1705,7 @@ expand_mime_type(char ***substr)
 
 	free(mime_type_array);
 }
+#endif /* !_NO_MAGIC */
 
 static void
 expand_bookmarks(char ***substr)
