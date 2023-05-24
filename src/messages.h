@@ -813,17 +813,6 @@ Note: Use the 'oc' command to edit files ownership"
 - Rename the profile 'myprofile' as 'cool_name'\n\
     pf rename myprofile cool_name"
 
-#define PROP_USAGE "Print files properties\n\n\
-\x1b[1mUSAGE\x1b[0m\n\
-  p, pp, prop [ELN/FILE]...\n\n\
-\x1b[1mEXAMPLES\x1b[0m\n\
-- Print the properties of the file whose ELN is 12\n\
-    p 12 (or 'p <TAB>' to choose from a list)\n\
-- Print the properties of all selected files\n\
-    p sel\n\
-- Print the properties of the directory 'dir' (including total size)\n\
-    pp dir"
-
 #define PROMPT_USAGE "Change current prompt\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   prompt [set NAME] [list] [unset] [edit [APP]] [reload]\n\
@@ -844,6 +833,20 @@ Note: Use the 'oc' command to edit files ownership"
 Note: To permanently set a new prompt edit the current\n\
 color scheme file ('cs edit'), and set the Prompt field to\n\
 whatever prompt you like."
+
+#define PROP_USAGE "Print files properties\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  p, pp, prop [ELN/FILE]...\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the properties of the file whose ELN is 12\n\
+    p 12 (or 'p <TAB>' to choose from a list)\n\
+- Print the properties of all selected files\n\
+    p sel\n\
+- Print the properties of the directory 'dir' (including total size)\n\
+    pp dir\n\n\
+Note that, in case of symbolic links to directories, this command displays\n\
+information about the link target if the provided file name ends with a slash.\n\
+Otherwise, information about the link itself is displayed."
 
 #define PWD_DESC "Print the name of the current working directory\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
