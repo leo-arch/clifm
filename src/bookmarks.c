@@ -120,8 +120,7 @@ free_bms(char **_bms, const size_t _bmn)
 static int
 bookmark_del(char *name)
 {
-	FILE *bm_fp = NULL;
-	bm_fp = fopen(bm_file, "r");
+	FILE *bm_fp = fopen(bm_file, "r");
 	if (!bm_fp)
 		return EXIT_FAILURE;
 
@@ -271,15 +270,14 @@ bookmark_del(char *name)
 		}
 	}
 
-	/* If "*", simply remove the bookmarks file */
+	/* If "*", simply remove the bookmarks file. */
 	/* If there is some "*" in the input line (like "1 5 6-9 *"), it
 	 * makes no sense to remove singles bookmarks: Just delete all of
-	 * them at once */
+	 * them at once. */
 	for (i = 0; del_elements[i]; i++) {
 		if (strcmp(del_elements[i], "*") == 0) {
 			/* Create a backup copy of the bookmarks file, just in case */
-			char *bk_file = (char *)NULL;
-			bk_file = (char *)xcalloc(config_dir_len + 14, sizeof(char));
+			char *bk_file = (char *)xcalloc(config_dir_len + 14, sizeof(char));
 			sprintf(bk_file, "%s/bookmarks.bk", config_dir); /* NOLINT */
 			char *tmp_cmd[] = {"cp", bm_file, bk_file, NULL};
 
@@ -313,11 +311,11 @@ bookmark_del(char *name)
 
 	/* Remove single bookmarks */
 	/* Open a temporary file */
-	char *tmp_file = (char *)NULL;
-	tmp_file = (char *)xnmalloc(config_dir_len + 8, sizeof(char));
+	char *tmp_file = (char *)xnmalloc(config_dir_len + 8, sizeof(char));
 	sprintf(tmp_file, "%s/bm_tmp", config_dir); /* NOLINT */
 
-	FILE *tmp_fp = fopen(tmp_file, "w+");
+	int fd = 0;
+	FILE *tmp_fp = open_fstream_w(tmp_file, &fd);
 	if (!tmp_fp) {
 		free_bms(bms, bmn);
 		free_del_elements(del_elements);
@@ -364,17 +362,17 @@ bookmark_del(char *name)
 	free_bms(bms, bmn);
 
 	fclose(bm_fp);
-	fclose(tmp_fp);
+	close_fstream(tmp_fp, fd);
 
 	/* Remove the old bookmarks file and make the tmp file the new
-	 * bookmarks file*/
+	 * bookmarks file. */
 	unlink(bm_file);
 	rename(tmp_file, bm_file);
 	free(tmp_file);
 
 	reload_bookmarks();
 
-	/* If the bookmark to be removed was specified in command line */
+	/* If the bookmark to be removed was specified in command line. */
 	if (cmd_line != -1)
 		printf(_("bookmarks: Successfully removed %s%s%s\n"), BOLD, name, NC);
 

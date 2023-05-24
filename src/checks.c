@@ -957,7 +957,7 @@ truncate_file(char *file, const int max, const int check_dups)
 		return; /* Exit: we do not need to truncate a new empty file */
 	}
 
-	/* Once we know the files exists, keep only MAX entries */
+	/* Once we know the files exists, keep only MAX entries. */
 	fp = open_fstream_r(file, &fd);
 	if (!fp) {
 		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,

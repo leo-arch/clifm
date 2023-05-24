@@ -370,17 +370,17 @@ get_mime(char *file)
 	}
 
 	char *rand_ext = gen_rand_str(6);
-	if (!rand_ext)
-		return (char *)NULL;
 
 	char mime_tmp_file[PATH_MAX];
-	snprintf(mime_tmp_file, PATH_MAX, "%s/mime.%s", tmp_dir, rand_ext);
+	snprintf(mime_tmp_file, sizeof(mime_tmp_file), "%s/mime.%s", tmp_dir,
+		rand_ext ? rand_ext : "Hu?+65");
 	free(rand_ext);
 
 	if (access(mime_tmp_file, F_OK) == 0)
 		unlink(mime_tmp_file);
 
-	FILE *file_fp = fopen(mime_tmp_file, "w");
+	int fd = 0;
+	FILE *file_fp = open_fstream_w(mime_tmp_file, &fd);
 	if (!file_fp) {
 		xerror("%s: fopen: %s: %s\n", err_name, mime_tmp_file, strerror(errno));
 		return (char *)NULL;
@@ -389,7 +389,7 @@ get_mime(char *file)
 	FILE *file_fp_err = fopen("/dev/null", "w");
 	if (!file_fp_err) {
 		xerror("%s: /dev/null: %s\n", err_name, strerror(errno));
-		fclose(file_fp);
+		close_fstream(file_fp, fd);
 		return (char *)NULL;
 	}
 
@@ -399,7 +399,7 @@ get_mime(char *file)
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
 		xerror("%s: %s\n", err_name, strerror(errno));
-		fclose(file_fp);
+		close_fstream(file_fp, fd);
 		fclose(file_fp_err);
 		return (char *)NULL;
 	}
@@ -407,12 +407,12 @@ get_mime(char *file)
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
 		xerror("%s: %s\n", err_name, strerror(errno));
-		fclose(file_fp);
+		close_fstream(file_fp, fd);
 		fclose(file_fp_err);
 		return (char *)NULL;
 	}
 
-	fclose(file_fp);
+	close_fstream(file_fp, fd);
 	fclose(file_fp_err);
 
 	char *cmd[] = {"file", "--mime-type", file, NULL};
@@ -456,6 +456,7 @@ get_mime(char *file)
 
 	fclose(file_fp);
 	unlink(mime_tmp_file);
+
 	return mime_type;
 }
 #endif /* !_NO_MAGIC */
@@ -488,7 +489,8 @@ mime_import(char *file)
 	}
 
 	/* Open the new mimelist file */
-	FILE *mime_fp = fopen(file, "w");
+	int fd = 0;
+	FILE *mime_fp = open_fstream_w(file, &fd);
 	if (!mime_fp) {
 		xerror("%s: fopen: %s: %s\n", err_name, file, strerror(errno));
 		return (-1);
@@ -506,7 +508,7 @@ mime_import(char *file)
 	if (!config_path || !local_path) {
 		free(config_path);
 		free(local_path);
-		fclose(mime_fp);
+		close_fstream(mime_fp, fd);
 		return (-1);
 	}
 
@@ -568,7 +570,7 @@ mime_import(char *file)
 		xerror(_("%s: Nothing was imported. No MIME association "
 			"found\n"), err_name);
 
-	fclose(mime_fp);
+	close_fstream(mime_fp, fd);
 	return mime_defs;
 }
 
@@ -1547,9 +1549,9 @@ import_mime(void)
 
 	int mime_defs = mime_import(new);
 	if (mime_defs > 0) {
-		printf(_("%d MIME association(s) imported from the system\n"
+		printf(_("%d MIME association(s) imported from the system.\n"
 			"File stored as %s\nAdd these new associations to your mimelist "
-			"file running 'mm edit'\n"), mime_defs, new);
+			"file running 'mm edit'.\n"), mime_defs, new);
 		return EXIT_SUCCESS;
 	}
 

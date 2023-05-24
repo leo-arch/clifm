@@ -154,9 +154,10 @@ print_file(FILE *fp, char *name, mode_t type)
 
 static int
 write_files_to_tmp(struct dirent ***a, int *n, const char *target,
-	const char *tmp_file)
+	char *tmp_file)
 {
-	FILE *fp = fopen(tmp_file, "w");
+	int fd = 0;
+	FILE *fp = open_fstream_w(tmp_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: rr: fopen: %s: %s\n", PROGRAM_NAME,
 			tmp_file, strerror(errno));
@@ -199,7 +200,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 		}
 	}
 
-	fclose(fp);
+	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
 }
 
@@ -1594,7 +1595,8 @@ bulk_rename(char **args)
 	FILE *fp = (FILE *)NULL;
 
 #if defined(__HAIKU__) || defined(__sun)
-	fp = fopen(bulk_file, "w");
+	int tmp_fd = 0;
+	fp = open_fstream_w(bulk_file, &tmp_fd);
 	if (!fp) {
 		xerror("br: fopen: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -1648,7 +1650,7 @@ bulk_rename(char **args)
 #endif
 	}
 #if defined(__HAIKU__) || defined(__sun)
-	fclose(fp);
+	close_fstream(fp, tmp_fd);
 #endif
 	arg_total = i;
 	close(fd);
@@ -1816,7 +1818,8 @@ export(char **filenames, int open)
 	
 	size_t i;
 #if defined(__HAIKU__) || defined(__sun)
-	FILE *fp = fopen(tmp_file, "w");
+	int tmp_fd = 0;
+	FILE *fp = open_fstream_w(tmp_file, &tmp_fd);
 	if (!fp) {
 		xerror("exp: %s: %s\n", tmp_file, strerror(errno));
 		free(tmp_file);
@@ -1824,7 +1827,7 @@ export(char **filenames, int open)
 	}
 #endif
 
-	/* If no argument, export files in CWD */
+	/* If no argument, export files in CWD. */
 	if (!filenames[1]) {
 		for (i = 0; file_info[i].name; i++)
 #if !defined(__HAIKU__) && !defined(__sun)
@@ -1845,7 +1848,7 @@ export(char **filenames, int open)
 		}
 	}
 #if defined(__HAIKU__) || defined(__sun)
-	fclose(fp);
+	close_fstream(fp, tmp_fd);
 #endif
 	close(fd);
 
@@ -1853,12 +1856,11 @@ export(char **filenames, int open)
 		return tmp_file;
 
 	int ret = open_file(tmp_file);
-	if (ret == EXIT_SUCCESS) {
+	if (ret == EXIT_SUCCESS)
 		return tmp_file;
-	} else {
-		free(tmp_file);
-		return (char *)NULL;
-	}
+
+	free(tmp_file);
+	return (char *)NULL;
 }
 
 /* Create a symlink for each file in ARGS + 1

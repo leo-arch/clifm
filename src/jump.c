@@ -195,7 +195,7 @@ add_to_jumpdb(const char *dir)
 	return add_jump_entry(dir);
 }
 
-/* Store the jump database into a file */
+/* Store the jump database into a file. */
 void
 save_jumpdb(void)
 {
@@ -206,7 +206,8 @@ save_jumpdb(void)
 	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 	sprintf(jump_file, "%s/jump.clifm", config_dir);
 
-	FILE *fp = fopen(jump_file, "w+");
+	int fd = 0;
+	FILE *fp = open_fstream_w(jump_file, &fd);
 	if (!fp) {
 		free(jump_file);
 		return;
@@ -256,7 +257,7 @@ save_jumpdb(void)
 	}
 
 	fprintf(fp, "@%d\n", total_rank);
-	fclose(fp);
+	close_fstream(fp, fd);
 	free(jump_file);
 }
 

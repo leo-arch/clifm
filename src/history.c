@@ -391,10 +391,11 @@ save_dirhist(void)
 	if (!dirhist_file)
 		return EXIT_FAILURE;
 
-	if (!old_pwd || !old_pwd[0])
+	if (!old_pwd || !*old_pwd)
 		return EXIT_SUCCESS;
 
-	FILE *fp = fopen(dirhist_file, "w");
+	int fd = 0;
+	FILE *fp = open_fstream_w(dirhist_file, &fd);
 	if (!fp) {
 		xerror(_("%s: Error saving directory history: %s\n"),
 			PROGRAM_NAME, strerror(errno));
@@ -414,7 +415,7 @@ save_dirhist(void)
 		fprintf(fp, "%s\n", old_pwd[i]);
 	}
 
-	fclose(fp);
+	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
 } */
 
@@ -534,7 +535,7 @@ edit_history(char **args)
 static int
 _clear_history(char **args)
 {
-	/* Let's overwrite whatever was there */
+	/* Let's overwrite whatever was there. */
 	FILE *hist_fp = fopen(hist_file, "w+");
 	if (!hist_fp) {
 		_err(0, NOPRINT_PROMPT, "history: %s: %s\n", hist_file, strerror(errno));

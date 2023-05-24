@@ -1244,26 +1244,20 @@ define_config_file_names(void)
 	return;
 }
 
+/* Import readline.clifm from data directory. */
 static int
 import_rl_file(void)
 {
 	if (!data_dir || !config_dir_gral)
 		return EXIT_FAILURE;
 
-	char tmp[PATH_MAX];
-	snprintf(tmp, sizeof(tmp), "%s/readline.clifm", config_dir_gral);
+	char dest[PATH_MAX];
+	snprintf(dest, sizeof(dest), "%s/readline.clifm", config_dir_gral);
 	struct stat attr;
-	if (lstat(tmp, &attr) == 0)
+	if (lstat(dest, &attr) == 0)
 		return EXIT_SUCCESS;
 
-	snprintf(tmp, sizeof(tmp), "%s/%s/readline.clifm", data_dir, PNL);
-	if (stat(tmp, &attr) == EXIT_SUCCESS) {
-		char *cmd[] = {"cp", tmp, config_dir_gral, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
-			return EXIT_SUCCESS;
-	}
-
-	return EXIT_FAILURE;
+	return import_from_data_dir("readline.clifm", dest);
 }
 
 int

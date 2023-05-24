@@ -329,34 +329,57 @@ trash_clear(void)
 }
 
 static int
+del_trash_file_and_exit(char **file_suffix, char **info_file)
+{
+	char *trash_file = (char *)xnmalloc(strlen(trash_files_dir)
+		+ strlen(*file_suffix) + 2, sizeof(char));
+	sprintf(trash_file, "%s/%s", trash_files_dir, *file_suffix);
+
+	char *tmp_cmd[] = {"rm", "-rf", "--", trash_file, NULL};
+	int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+	free(trash_file);
+
+	if (ret != EXIT_SUCCESS) {
+		xerror(_("trash: %s/%s: Failed removing trash file\nTry "
+			"removing it manually\n"), trash_files_dir, *file_suffix);
+	}
+
+	free(*file_suffix);
+	free(*info_file);
+
+	return ret;
+}
+
+static int
 trash_element(const char *suffix, const struct tm *tm, char *file)
 {
-	/* Check file's existence */
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
 		xerror("trash: %s: %s\n", file, strerror(errno));
 		return errno;
 	}
 
-	/* Check whether the user has enough permissions to remove file */
+	char *tmpfile = file;
 	char full_path[PATH_MAX];
 
-	if (*file != '/') { /* If relative path */
+	if (*file != '/') { /* If relative path, make it absolute. */
 		if (!workspaces[cur_ws].path)
 			return EXIT_FAILURE;
-		/* Construct absolute path for file */
+
 		snprintf(full_path, sizeof(full_path), "%s/%s",
 			workspaces[cur_ws].path, file);
+		tmpfile = full_path;
 	}
 
-	if (wx_parent_check(*file != '/' ? full_path : file) != 0)
+	/* Check whether the user has enough permissions to remove file */
+	if (wx_parent_check(tmpfile) != 0)
 		return EXIT_FAILURE;
 
 	int ret = -1;
 
 	/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
-	 * current date and time */
-	char *filename = strrchr(*file != '/' ? full_path : file, '/');
+	 * current date and time. */
+	char *filename = strrchr(tmpfile, '/');
 	if (!filename || !*(++filename)) {
 		xerror(_("trash: %s: Error getting file name\n"), file);
 		return EXIT_FAILURE;
@@ -365,7 +388,7 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 	/* If the length of the trashed file name (orig_filename.suffix) is
 	 * longer than NAME_MAX (255), trim the original filename, so that
 	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
-	 * than NAME_MAX */
+	 * than NAME_MAX. */
 	size_t filename_len = strlen(filename);
 	size_t suffix_len = strlen(suffix);
 	int size = (int)(filename_len + suffix_len + 11) - NAME_MAX;
@@ -376,7 +399,7 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 		/* If SIZE is a positive value, that is, the trashed file name
 		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name
 		 * SIZE bytes. Terminate the original file name (FILENAME) with
-		 * a tilde (~), to let the user know it is trimmed */
+		 * a tilde (~), to let the user know it is trimmed. */
 		filename[filename_len - (size_t)size - 1] = '~';
 		filename[filename_len - (size_t)size] = '\0';
 	}
@@ -385,84 +408,57 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 	char *file_suffix = (char *)xnmalloc(file_suffix_len, sizeof(char));
 	sprintf(file_suffix, "%s.%s", filename, suffix);
 
-	/* Move the original file into the trash directory */
+	/* Move the original file into the trash directory. */
 	/* NOTE: It is guaranteed (by check_trash_file()) that FILE does not
-	 * end with a slash */
-	char *dest = (char *)NULL;
-	dest = (char *)xnmalloc(strlen(trash_files_dir) + strlen(file_suffix) + 2,
-			sizeof(char));
+	 * end with a slash. */
+	char *dest = (char *)xnmalloc(strlen(trash_files_dir)
+		+ strlen(file_suffix) + 2, sizeof(char));
 	sprintf(dest, "%s/%s", trash_files_dir, file_suffix);
-	char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
 
+	char *tmp_cmd[] = {"mv", "--", file, dest, NULL};
 	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 	free(dest);
-	dest = (char *)NULL;
 
 	if (ret != EXIT_SUCCESS) {
-		xerror(_("trash: %s: Failed moving file to Trash\n"), file);
+		xerror(_("trash: %s: Error moving file to Trash\n"), file);
 		free(file_suffix);
 		return ret;
 	}
 
 	/* Generate the info file */
 	size_t info_file_len = strlen(trash_info_dir) + strlen(file_suffix) + 12;
-
 	char *info_file = (char *)xnmalloc(info_file_len, sizeof(char));
 	sprintf(info_file, "%s/%s.trashinfo", trash_info_dir, file_suffix);
 
-	FILE *info_fp = fopen(info_file, "w");
-	if (!info_fp) { /* If error creating the info file */
+	int fd = 0;
+	FILE *info_fp = open_fstream_w(info_file, &fd);
+	if (!info_fp) {
 		xerror("trash: %s: %s\n", info_file, strerror(errno));
-		/* Remove the trash file */
-		char *trash_file = (char *)NULL;
-		trash_file = (char *)xnmalloc(strlen(trash_files_dir)
-						+ strlen(file_suffix) + 2, sizeof(char));
-		sprintf(trash_file, "%s/%s", trash_files_dir, file_suffix);
-
-		char *tmp_cmd2[] = {"rm", "-rf", "--", trash_file, NULL};
-		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
-		free(trash_file);
-		if (ret != EXIT_SUCCESS) {
-			xerror(_("trash: %s/%s: Failed removing trash file\nTry "
-				"removing it manually\n"), trash_files_dir, file_suffix);
-		}
-
-		free(file_suffix);
-		free(info_file);
-
-		return ret;
+		return del_trash_file_and_exit(&file_suffix, &info_file);
 	}
 
-	else { /* If info file was generated successfully */
-		/* Encode path to URL format (RF 2396) */
-		char *url_str = (char *)NULL;
+	ret = EXIT_SUCCESS;
 
-		if (*file != '/')
-			url_str = url_encode(full_path);
-		else
-			url_str = url_encode(file);
-
-		if (!url_str) {
-			xerror(_("trash: %s: Failed encoding path\n"), file);
-
-			fclose(info_fp);
-			free(info_file);
-			free(file_suffix);
-			return EXIT_FAILURE;
-		}
-
-		fprintf(info_fp,
-		    "[Trash Info]\nPath=%s\nDeletionDate=%d-%d-%dT%d:%d:%d\n",
-		    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-		    tm->tm_hour, tm->tm_min, tm->tm_sec);
-		fclose(info_fp);
-		free(url_str);
-		url_str = (char *)NULL;
+	/* Encode path to URL format (RF 2396) */
+	char *url_str = url_encode(tmpfile);
+	if (!url_str) {
+		xerror(_("trash: %s: Error encoding path\n"), file);
+		ret = EXIT_FAILURE;
+		goto END;
 	}
 
+	fprintf(info_fp,
+	    "[Trash Info]\nPath=%s\nDeletionDate=%d-%d-%dT%d:%d:%d\n",
+	    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+	    tm->tm_hour, tm->tm_min, tm->tm_sec);
+
+	free(url_str);
+
+END:
+	close_fstream(info_fp, fd);
 	free(info_file);
 	free(file_suffix);
-	return EXIT_SUCCESS;
+	return ret;
 }
 
 /* Remove NAME file and the corresponding .trashinfo file from the trash can */

@@ -1348,7 +1348,7 @@ clean_rl_buffer(const char *text)
  * completions. This common prefix should be the same as the query string when
  * performing regular matches. But it might not be the same as the
  * original query string when performing fuzzy match: then, we need a copy of
- * this original query string (ORIGINAL_QUERY) to later be passed to FZF
+ * this original query string (ORIGINAL_QUERY) to later be passed to FZF.
  * Example:
  * Query string: '.f'
  * Returned matches (fuzzy):
@@ -1360,7 +1360,8 @@ clean_rl_buffer(const char *text)
 static int
 finder_tabcomp(char **matches, const char *text, char *original_query)
 {
-	FILE *fp = fopen(finder_in_file, "w");
+	int fd = 0;
+	FILE *fp = open_fstream_w(finder_in_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
 			finder_in_file, strerror(errno));
@@ -1372,7 +1373,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* Store possible completions in FINDER_IN_FILE to pass them to FZF */
 	size_t i = store_completions(matches, fp);
 
-	fclose(fp);
+	close_fstream(fp, fd);
 
 	/* Set a pointer to the last word (either space or slash) in the
 	 * input buffer. We use this to highlight the matching prefix in FZF */
@@ -1387,7 +1388,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	/* If not already defined (environment or config file), calculate the
 	 * height of the FZF window based on the amount of entries. This
-	 * specifies how many entries will be displayed at once */
+	 * specifies how many entries will be displayed at once. */
 	size_t height = 0;
 
 	if (fzf_height_set == 0 || tabmode == FZY_TAB) {
@@ -1397,15 +1398,15 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	enum comp_type ct = cur_comp_type;
 	/* Calculate the offset (left padding) of the FZF window based on
-	 * cursor position and current query string
+	 * cursor position and current query string.
 	 * We don't want to place the finder's window too much to the right,
 	 * making its contents unreadable: let's make sure we have at least
-	 * 20 chars (40 if previews are enabled) for the finder's window */
+	 * 20 chars (40 if previews are enabled) for the finder's window. */
 	int fspace = (tabmode == FZF_TAB && conf.fzf_preview == 1
 		&& SHOW_PREVIEWS(ct) == 1) ? 40 : 20;
 
 	/* If showing previews, let's reserve at least a quarter of the
-	 * terminal height */
+	 * terminal height. */
 	int min_prev_height = term_lines / 4;
 	if (fspace == 40 && (int)height < min_prev_height
 	&& min_prev_height > 0) /* fspace == 40: We're previewing files */
@@ -1548,13 +1549,13 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (finder_offset == 0) {
 		/* Not enough space to align the window with the last word. Let's
 		 * try to align it with the prompt. If not enough space either, send
-		 * the window to the leftmost side of the screen */
+		 * the window to the leftmost side of the screen. */
 		finder_offset = prompt_offset >= 3 ? prompt_offset - 3 : prompt_offset;
 		if (finder_offset > max_finder_offset)
 			finder_offset = 0;
 	}
 
-	/* TAB completion cases allowing multi-selection */
+	/* TAB completion cases allowing multi-selection. */
 	int multi = is_multi_sel();
 
 	char *q = query;
@@ -1567,7 +1568,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 
 	char *dq = q ? (strchr(q, '\\') ? dequote_str(q, 0) : q) : (char *)NULL;
 
-	/* Run the finder application and store the ouput into the FINDER_OUT_FILE file */
+	/* Run the finder application and store the ouput into FINDER_OUT_FILE. */
 	int ret = run_finder(&height, &finder_offset, dq, multi);
 
 	if (dq && dq != q)
@@ -1575,7 +1576,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	unlink(finder_in_file);
 
 	/* Calculate currently used lines to go back to the correct cursor
-	 * position after quitting FZF */
+	 * position after quitting FZF. */
 	int lines = 1;
 
 	if (total_line_len > term_cols) {
@@ -1588,19 +1589,18 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	if (!(flags & PREVIEWER))
 		MOVE_CURSOR_UP(lines);
 
-	/* No results (the user pressed ESC or the Left arrow key) */
+	/* No results (the user pressed ESC or the Left arrow key). */
 	if (ret != EXIT_SUCCESS) {
 		unlink(finder_out_file);
 		return clean_rl_buffer(text);
 	}
 
 	char *buf = get_finder_output(multi, matches[0]);
-
 	if (!buf)
 		return EXIT_FAILURE;
 
 	/* Calculate the length of the matching prefix to insert into the
-	 * line buffer only the non-matched part of the string returned by FZF */
+	 * line buffer only the non-matched part of the string returned by FZF. */
 	size_t prefix_len = calculate_prefix_len(matches[0]);
 
 	if (rl_point < rl_end && ct != TCMP_PATH && ct != TCMP_CMD) {
@@ -1612,7 +1612,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	}
 
 	else if (ct == TCMP_OPENWITH) {
-		/* If multiple words ("CMD ARG..."), quote the string */
+		/* If multiple words ("CMD ARG..."), quote the string. */
 		if (strchr(buf, ' ')) {
 			char *tmp = (char *)xnmalloc(strlen(buf) + 3, sizeof(char));
 			sprintf(tmp, "\"%s\"", buf);

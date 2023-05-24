@@ -1100,7 +1100,8 @@ save_last_path(void)
 	char *last_dir = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 	sprintf(last_dir, "%s/.last", config_dir);
 
-	FILE *last_fp = fopen(last_dir, "w");
+	int fd = 0;
+	FILE *last_fp = open_fstream_w(last_dir, &fd);
 	if (!last_fp) {
 		xerror(_("%s: Error saving last visited directory: %s\n"),
 			PROGRAM_NAME, strerror(errno));
@@ -1117,15 +1118,15 @@ save_last_path(void)
 		}
 	}
 
-	fclose(last_fp);
+	close_fstream(last_fp, fd);
 
-	char *last_dir_tmp = xnmalloc(strlen(config_dir_gral) + 7, sizeof(char *));
+	char *last_dir_tmp = (char *)xnmalloc(strlen(config_dir_gral) + 7, sizeof(char *));
 	sprintf(last_dir_tmp, "%s/.last", config_dir_gral);
 
 	if (conf.cd_on_quit == 1) {
 		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	} else { /* If not cd on quit, remove the file */
+	} else { /* If not cd on quit, remove the file. */
 		char *cmd[] = {"rm", "-f", "--", last_dir_tmp, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
@@ -1895,7 +1896,7 @@ FREE_N_EXIT:
 	return exit_status;
 }
 
-/* Save pinned in a file */
+/* Save pinned directory into a file. */
 static int
 save_pinned_dir(void)
 {
@@ -1905,13 +1906,14 @@ save_pinned_dir(void)
 	char *pin_file = (char *)xnmalloc(config_dir_len + 7, sizeof(char));
 	sprintf(pin_file, "%s/.pin", config_dir);
 
-	FILE *fp = fopen(pin_file, "w");
+	int fd = 0;
+	FILE *fp = open_fstream_w(pin_file, &fd);
 	if (!fp) {
 		xerror(_("%s: Error storing pinned directory: %s\n"),
 			PROGRAM_NAME, strerror(errno));
 	} else {
 		fprintf(fp, "%s", pinned_dir);
-		fclose(fp);
+		close_fstream(fp, fd);
 	}
 
 	free(pin_file);

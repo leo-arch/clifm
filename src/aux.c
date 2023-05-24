@@ -141,22 +141,23 @@ kitty_clear(void)
 
 /* Remove any image printed by ueberzug.
  * This function assumes:
- * 1) That ueberzug was launched using the json parser (default)
- * 2) That the pipe was created and exported as FIFO_UEBERZUG
- * 3) That the indentifier string was set to "clifm-preview" */
+ * 1) That ueberzug was launched using the json parser (default).
+ * 2) That the pipe was created and exported as FIFO_UEBERZUG.
+ * 3) That the identifier string was set to "clifm-preview". */
 static void
-ueberzug_clear(const char *file)
+ueberzug_clear(char *file)
 {
-	FILE *fp = fopen(file, "w");
+	int fd = 0;
+	FILE *fp = open_fstream_w(file, &fd);
 	if (!fp)
 		return;
 
 	fprintf(fp, "{\"action\": \"remove\", \"identifier\": \"clifm-preview\"}\n");
-	fclose(fp);
+	close_fstream(fp, fd);
 }
 
 /* Let's clear images printed on the terminal screen, either via
- * ueberzug(1) or the kitty image protocol */
+ * ueberzug(1) or the kitty image protocol. */
 void
 clear_term_img(void)
 {
@@ -170,11 +171,11 @@ clear_term_img(void)
 		return;
 
 	/* This works, but it's too slow. Replace by ACP escape codes (both for
-	 * displaying and removing the image). Take a look at how ranger does it */
+	 * displaying and removing the image). Take a look at how ranger does it. */
 
 	/* CLIFM_KITTY_IMG is set by the clifmrun plugin to a temp file name,
 	 * which is then created (empty) by the clifmimg plugin every time an
-	 * image is displayed via the kitty protocol */
+	 * image is displayed via the kitty protocol. */
 	p = getenv("CLIFM_KITTY_IMG");
 	struct stat a;
 	if (p && stat(p, &a) != -1) {
