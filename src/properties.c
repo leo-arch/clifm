@@ -180,7 +180,8 @@ get_file_attrs(char *file)
 #endif /* LINUX_FILE_ATTRS */
 
 static char *
-get_link_color(char *name, int *link_dir, const int dsize)
+//get_link_color(char *name, int *link_dir, const int dsize)
+get_link_color(char *name)
 {
 	struct stat a;
 	char *color = no_c;
@@ -189,7 +190,7 @@ get_link_color(char *name, int *link_dir, const int dsize)
 		return color;
 
 	if (S_ISDIR(a.st_mode)) {
-		*link_dir = (follow_symlinks == 1 && dsize == 1) ? 1 : 0;
+//		*link_dir = (follow_symlinks == 1 && dsize == 1) ? 1 : 0;
 		if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 1)
 			color = get_dir_color(name, a.st_mode, a.st_nlink, -1);
 		else
@@ -213,13 +214,14 @@ get_link_color(char *name, int *link_dir, const int dsize)
 }
 
 static off_t
-get_total_size(const int link_to_dir, char *filename, int *status)
+//get_total_size(const int link_to_dir, char *filename, int *status)
+get_total_size(char *filename, int *status)
 {
 	off_t total_size = 0;
 
 	char _path[PATH_MAX]; *_path = '\0';
-	if (link_to_dir == 1)
-		snprintf(_path, sizeof(_path), "%s/", filename);
+//	if (link_to_dir == 1)
+//		snprintf(_path, sizeof(_path), "%s/", filename);
 
 	if (term_caps.suggestions == 0) {
 		fputs("Scanning... ", stdout);
@@ -1101,9 +1103,9 @@ get_properties(char *filename, const int dsize)
 		return EXIT_FAILURE;
 
 	/* Remove ending slash */
-	size_t len = strlen(filename);
+/*	size_t len = strlen(filename);
 	if (len > 1 && filename[len - 1] == '/')
-		filename[len - 1] = '\0';
+		filename[len - 1] = '\0'; */
 
 	/* Remove leading "./" */
 	if (*filename == '.' && *(filename + 1) == '/' && *(filename + 2))
@@ -1217,14 +1219,15 @@ get_properties(char *filename, const int dsize)
 
 	free(t_ctype);
 
-	int link_to_dir = 0;
+//	int link_to_dir = 0;
 
 	if (file_type == 0) {
 		printf(_("\tName: %s%s%s\n"), no_c, wname ? wname : filename, df_c);
 	} else if (file_type != 'l') {
 		printf(_("\tName: %s%s%s\n"), color, wname ? wname : filename, df_c);
 	} else if (linkname) {
-		char *link_color = get_link_color(linkname, &link_to_dir, dsize);
+//		char *link_color = get_link_color(linkname, &link_to_dir, dsize);
+		char *link_color = get_link_color(linkname);
 		char *n = abbreviate_file_name(linkname);
 		printf(_("\tName: %s%s%s -> %s%s%s\n"), color, wname ? wname
 			: filename, df_c, link_color, n ? n : linkname, NC);
@@ -1362,8 +1365,13 @@ get_properties(char *filename, const int dsize)
 # endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || _STATX */
 #endif /* !_BE_POSIX && !__DragonFly__ && !__OpenBSD__ */
 
+////////////
+//	link_to_dir = 0;
+////////////
+
 	/* File size (human size / bytes (apparent|real [/ si])) */
-	if (!S_ISDIR(attr.st_mode) && link_to_dir == 0) {
+//	if (!S_ISDIR(attr.st_mode) && link_to_dir == 0) {
+	if (!S_ISDIR(attr.st_mode)) {
 		printf(_("Size: \t\t%s%s%s"), csize, size_type ? size_type : "?", cend);
 
 		int bigger_than_bytes = (conf.apparent_size == 1 ? attr.st_size
@@ -1387,7 +1395,8 @@ get_properties(char *filename, const int dsize)
 
 	int du_status = 0;
 	off_t total_size = file_perm == 1
-		? get_total_size(link_to_dir, filename, &du_status) : (-2);
+//		? get_total_size(link_to_dir, filename, &du_status) : (-2);
+		? get_total_size(filename, &du_status) : (-2);
 
 	if (total_size < 0) {
 		if (total_size == -2) /* No access */
