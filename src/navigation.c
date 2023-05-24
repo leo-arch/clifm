@@ -45,6 +45,56 @@
 
 #define BD_CONTINUE 2
 
+/* Builtin version of pwd(1). Print the current working directory.
+ * Try first our own internal representation (workspaces array). If something
+ * goes wrong, fallback to $PWD/getcwd(3) (via get_cwd()). */
+int
+pwd_function(const char *arg)
+{
+	int resolve_links = 0;
+	char *pwd = (char *)NULL;
+
+	if (arg && *arg == '-') {
+		if (arg[1] == 'P')  {
+			resolve_links = 1;
+		} else if (IS_HELP(arg)) {
+			puts(PWD_DESC);
+			return EXIT_SUCCESS;
+		} else if (arg[1] != 'L') {
+			xerror("pwd: %s: Invalid option\nUsage: pwd [-LP]\n", arg);
+			return EXIT_FAILURE;
+		}
+	}
+
+	if (workspaces && workspaces[cur_ws].path) {
+		pwd = workspaces[cur_ws].path;
+	} else {
+		char p[PATH_MAX]; *p = '\0';
+		pwd = get_cwd(p, sizeof(p), 0);
+	}
+
+	if (!pwd || !*pwd) {
+		xerror(_("%s: Error getting the current working directory\n"),
+			PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	if (resolve_links == 0) {
+		puts(pwd);
+		return EXIT_SUCCESS;
+	}
+
+	char p[PATH_MAX]; *p = '\0';
+	char *real_path = realpath(pwd, p);
+	if (!real_path) {
+		xerror("pwd: %s: %s\n", pwd, strerror(errno));
+		return errno;
+	}
+
+	puts(p);
+	return EXIT_SUCCESS;
+}
+
 static size_t
 get_longest_workspace_name(void)
 {

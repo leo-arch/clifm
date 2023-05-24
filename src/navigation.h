@@ -28,14 +28,15 @@
 __BEGIN_DECLS
 
 int  back_function(char **);
-int  forth_function(char **);
-int  xchdir(char *, const int);
+int  backdir(char *);
 int  cd_function(char *, const int);
 char *fastback(char *);
+int  forth_function(char **);
+char **get_bd_matches(const char *, int *, int);
 int  handle_workspaces(char **);
 void print_dirhist(char *);
-int  backdir(char *);
-char **get_bd_matches(const char *, int *, int);
+int  pwd_function(const char *);
+int  xchdir(char *, const int);
 
 __END_DECLS
 
