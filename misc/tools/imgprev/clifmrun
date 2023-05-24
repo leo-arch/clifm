@@ -46,26 +46,48 @@ ueberzug_cleanup() {
     pkill -P $$ >/dev/null
 }
 
+# Prior to ueberzug 18.2.0, we need to silence stderr to avoid printing
+# garbage on the screen
+silence_stderr() {
+	str="$(ueberzug version)"
+	major="$(echo "$str" | cut -d'.' -f1)"
+	minor="$(echo "$str" | cut -d'.' -f2)"
+
+	if [ "$major" -ge 18 ] && [ "$minor" -ge 2 ]; then
+		echo 0
+	else
+		echo 1
+	fi
+}
+
 init_ueberzug() {
 	CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
 	PREVIEW_DIR="$CACHE_DIR/previews"
 	! [ -d "$PREVIEW_DIR" ] && mkdir -p "$PREVIEW_DIR"
+
 	export CLIFM_FIFO_UEBERZUG="$CACHE_DIR/ueberzug-${$}"
 
 	mkfifo "$CLIFM_FIFO_UEBERZUG"
-	tail -f "$CLIFM_FIFO_UEBERZUG" \
-	| ueberzug layer --silent --parser json &
+
+	if [ "$(silence_stderr)" = "0" ]; then
+		tail -f "$CLIFM_FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+	else
+		tail -f "$CLIFM_FIFO_UEBERZUG" | ueberzug layer --silent --parser json > /dev/null 2>&1 &
+	fi
 }
 
 if ! type clifm > /dev/null 2>&1; then
 	printf "clifm: Command not found\n"
 	exit 127
+
 elif [ "$TERM" = "xterm-kitty" ] && { [ -n "$CLIFM_KITTY_NO_UEBERZUG" ] \
 || [ -n "$WAYLAND_DISPLAY" ]; }; then
 	export CLIFM_KITTY_IMG="${TMPDIR:-/tmp}/clifm_kitty_img"
 	clifm "$@"
+
 elif ! type ueberzug > /dev/null 2>&1 || [ -z "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
 	clifm "$@"
+
 else
 	trap ueberzug_cleanup EXIT
 	init_ueberzug
