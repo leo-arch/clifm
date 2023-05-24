@@ -13,6 +13,9 @@
 # The first parameter tells what kind of file is to be converted/displayed
 # The second one is the file name to be converted/displayed.
 
+# NOTE: Since the original ueberzug is unmaintained, we recommend using this
+# fork instead: https://github.com/ueber-devel/ueberzug.
+
 ######################
 # Usage
 ######################

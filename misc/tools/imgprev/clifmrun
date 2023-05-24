@@ -30,6 +30,9 @@
 #
 # NOTE: Ueberzug needs to run on a graphical environment. Wayland is not supported.
 #
+# NOTE 2: Since the original ueberzug is unmaintained, we recommend using this fork
+# instead: https://github.com/ueber-devel/ueberzug
+#
 # If running on the kitty terminal you can set CLIFM_KITTY_NO_UEBERZUG to 1 to use
 # the kitty image protocol itself (currently slower than ueberzug). Run as follows:
 #

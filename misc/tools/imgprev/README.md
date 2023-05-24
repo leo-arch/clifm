@@ -24,7 +24,9 @@
 
 ## Description
 
-Based on [vifmimg](https://github.com/cirala/vifmimg), these scripts ([clifmimg](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) and [clifmrun](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)) are intended to provide image preview capabilities to **clifm** using either [ueberzug](https://github.com/ueber-devel/ueberzug) (default) or the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) (currently experimental and slower). Bear in mind that `ueberzug` only works on X11.
+Based on [vifmimg](https://github.com/cirala/vifmimg), these scripts ([clifmimg](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmimg) and [clifmrun](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun)) are intended to provide image preview capabilities to **clifm** using either [ueberzug](https://github.com/ueber-devel/ueberzug) (default)<sup>1</sup> or the [kitty image protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/) (currently experimental and slower). Bear in mind that `ueberzug` only works on X11.
+
+<sup>1</sup> Since the original `ueberzug` is not maintained anymore, we strongly recommend using this fork instead: https://github.com/ueber-devel/ueberzug.
 
 ### clifmrun
 
