@@ -549,6 +549,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"undel", 5},
 	{"unset", 5},
 	{"untrash", 7},
+	{"umask", 5},
 	{"v", 1},
 	{"vv", 2},
 	{"ver", 3},

@@ -56,6 +56,38 @@
 # Remove the files you want to be deleted, save and exit\n\
 # Just quit the editor without any edit to cancel the operation\n\n"
 
+/* Print/set the file creation mode mask (umask). */
+int
+umask_function(char *arg)
+{
+	if (!arg) {
+		mode_t old_umask = umask(0);
+		printf("%04o\n", old_umask);
+		umask(old_umask);
+		return EXIT_SUCCESS;
+	}
+
+	if (IS_HELP(arg)) {
+		puts(UMASK_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	if (!IS_DIGIT(*arg) || !is_number(arg))
+		goto ERROR;
+
+	int new_umask = read_octal(arg);
+	if (new_umask < 0 || new_umask > 0777)
+		goto ERROR;
+
+	umask((mode_t)new_umask);
+	printf(_("New umask set to '%04o'\n"), new_umask);
+	return EXIT_SUCCESS;
+
+ERROR:
+	xerror(_("umask: '%s': Not an octal number from 000 to 777\n"), arg);
+	return EXIT_FAILURE;
+}
+
 static int
 parse_bulk_remove_params(char *s1, char *s2, char **app, char **target)
 {

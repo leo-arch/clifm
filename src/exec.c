@@ -2710,9 +2710,8 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0)
 		return (exit_code = opener_function(comm[1]));
 
-	else if (*comm[0] == 't' && strcmp(comm[0], "tips") == 0) {
-		print_tips(1); return EXIT_SUCCESS;
-	}
+	else if (*comm[0] == 't' && strcmp(comm[0], "tips") == 0)
+		{ print_tips(1); return EXIT_SUCCESS; }
 
 	else if (*comm[0] == 'a' && strcmp(comm[0], "actions") == 0)
 		return (exit_code = actions_function(comm));
@@ -2840,6 +2839,10 @@ exec_cmd(char **comm)
 	/* #### EXPORT #### */
 	else if (*comm[0] == 'e' && strcmp(comm[0], "export") == 0) {
 		return (exit_code = export_var_function(comm + 1));
+	}
+
+	else if (*comm[0] == 'u' && strcmp(comm[0], "umask") == 0) {
+		return (exit_code = umask_function(comm[1]));
 	}
 
 	/* #### UNSET #### */

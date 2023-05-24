@@ -1038,6 +1038,15 @@ Mark the files you need via TAB and then press Enter or Right"
   or\n\
     'u <TAB>' to choose from a list (multi-selection is allowed)"
 
+#define UMASK_USAGE "Print/set the file creation mode mask\n\n\
+\x1b[1mUSAGE\x1b[0m\n\
+  umask [MODE]\n\n\
+\x1b[1mEXAMPLES\x1b[0m\n\
+- Print the current value\n\
+    umask\n\
+- Change value to 077\n\
+    umask 077"
+
 #define UNSET_USAGE "Delete variables from the environment\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
   unset NAME..."
