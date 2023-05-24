@@ -4,28 +4,18 @@
 # All changes are licensed under GPL-3.0
 # Authors: cirala, L. Abramovich
 
-# Description
+# DESCRIPTION
+#
 # Launch an instance of ueberzug(1) and set the appropriate values so that
 # it can be used by clifm to display images via the 'clifmimg' script.
-# Consult the documentation to find out how to set shotgun to use 'clifmimg'
+# Consult the 'clifmimg' file itself for instructions on how to set up clifm's
+# shotgun to preview images via 'clifmimg'.
 #
-# Previews for FZF completion need to be enabled. Run as follows:
-#
-# ./clifmrun --fzfpreview
-#
-# Or copy this script somewhere in your $PATH and then
-#
-# clifmrun --fzfpreview
-#
-# Needless to say, you can create an alias for this command to make things
-# a bit easier. For example, a bash alias would look like this:
-#
-# alias c='clifmrun --fzfpreview'
-#
-# You can also set the FzfPreview option in clifm's main configuration file
-# to true and then drop the --fzfpreview parameter in the above lines
+# Previews for TAB completion (in FZF mode) are enabled by default. In any case,
+# check the FzfPreview option in clifm's main configuration file.
 
-# Dependencies:
+# DEPENDENCIES
+#
 # ueberzug
 #
 # NOTE: Ueberzug needs to run on a graphical environment. Wayland is not supported.
