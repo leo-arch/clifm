@@ -95,9 +95,9 @@ static struct dirent **tagged_files = (struct dirent **)NULL;
 static int tagged_files_n = 0;
 #endif
 
-/* Get user input (y/n, uppercase is allowed) using _MSG as message
- * The question will be repeated until 'y' or 'n' is entered
- * Returns 1 if 'y' and zero if 'n' */
+/* Get user input (y/n, uppercase is allowed) using _MSG as message.
+ * The question will be repeated until 'y' or 'n' is entered.
+ * Returns 1 if 'y' or 0 if 'n'. */
 int
 rl_get_y_or_n(const char *_msg)
 {

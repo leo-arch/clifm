@@ -800,10 +800,12 @@ get_path_dir(char **dir)
 static char **
 get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 {
-	if (!strchr(conf.term, ' ')) return (char **)NULL;
+	if (!conf.term || !strchr(conf.term, ' '))
+		return (char **)NULL;
 
 	char **tmp_term = get_substr(conf.term, ' ');
-	if (!tmp_term) return (char **)NULL;
+	if (!tmp_term)
+		return (char **)NULL;
 
 	int i;
 	for (i = 0; tmp_term[i]; i++);
@@ -837,6 +839,25 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 	return cmd;
 }
 
+/* Print the command CMD and ask the user for confirmation.
+ * Returns 1 if yes or 0 if no. */
+int
+confirm_sudo_cmd(char **cmd)
+{
+	if (!cmd)
+		return 0;
+
+	size_t i;
+	for (i = 0; cmd[i]; i++) {
+		fputs(cmd[i], stdout);
+		putchar(' ');
+	}
+	if (i > 0)
+		putchar('\n');
+
+	return rl_get_y_or_n(_("Run command? [y/n] "));
+}
+
 /* Launch a new instance using CMD. If CMD is NULL, try "CONF.TERM clifm"
  * Returns the exit status of the executed command */
 static int
@@ -851,7 +872,9 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 	setenv("CLIFM_OWN_CHILD", "1", 1);
 
 	if (*cmd) {
-		ret = launch_execve(*cmd, BACKGROUND, E_NOFLAG);
+		ret = (sudo == 0 || confirm_sudo_cmd(*cmd) == 1)
+			? launch_execve(*cmd, BACKGROUND, E_NOFLAG)
+			: EXIT_SUCCESS;
 		size_t i;
 		for (i = 0; (*cmd)[i]; i++)
 			free((*cmd)[i]);
@@ -859,7 +882,9 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 	} else {
 		if (sudo == 1) {
 			char *tcmd[] = {conf.term, *_sudo, *self, *dir, NULL};
-			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
+			ret = (confirm_sudo_cmd(tcmd) == 1)
+				? launch_execve(tcmd, BACKGROUND, E_NOFLAG)
+				: EXIT_SUCCESS;
 		} else {
 			char *tcmd[] = {conf.term, *self, *dir, NULL};
 			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);

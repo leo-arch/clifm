@@ -30,6 +30,7 @@ __BEGIN_DECLS
 int  _err(int msg_type, int, const char *, ...);
 int  alias_import(char *);
 void bonus_function(void);
+int  confirm_sudo_cmd(char **);
 int  create_usr_var(char *);
 int  expand_prompt_name(char *);
 int  filter_function(char *);

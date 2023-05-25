@@ -304,6 +304,12 @@ mount_iso(char *file)
 	}
 
 	char *cmd[] = {sudo, "mount", "-o", "loop", file, mountpoint, NULL};
+	if (confirm_sudo_cmd(cmd) == 0) {
+		free(mountpoint);
+		free(sudo);
+		return EXIT_SUCCESS;
+	}
+
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		free(mountpoint);
 		free(sudo);
@@ -370,8 +376,11 @@ create_iso_from_block_dev(char *in_file, char *out_file)
 	int exit_status = EXIT_SUCCESS;
 	char *cmd[] = {sudo, "dd", if_option, of_option, "bs=64k",
 	    "conv=noerror,sync", "status=progress", NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+
+	if (confirm_sudo_cmd(cmd) == 1) {
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
 
 	free(sudo);
 	free(if_option);
@@ -407,9 +416,8 @@ create_iso(char *in_file, char *out_file)
 	return EXIT_FAILURE;
 }
 
-/* Run the 'file' command on FILE and look for "ISO 9660" and
- * string in its output. Returns zero if found, one if not, and -1
- * in case of error */
+/* Check the MIME type of the file named FILE and look for "ISO 9660" in its
+ * output. Returns zero if found, one if not, and -1 in case of error. */
 static int
 check_iso(char *file)
 {
