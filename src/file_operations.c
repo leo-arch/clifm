@@ -677,26 +677,51 @@ get_dup_file_dest_dir(void)
 {
 	char *dir = (char *)NULL;
 
-	puts("Enter '.' for current directory ('q' to quit)");
+	puts(_("Enter destiny directory\n"
+		"Tip: \".\" for current directory (Ctrl-d to quit)"));
+	char _prompt[NAME_MAX];
+	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
+
 	while (!dir) {
-		dir = rl_no_hist("Destiny directory: ");
-		if (!dir)
-			continue;
-		if (!*dir) {
-			free(dir);
-			dir = (char *)NULL;
-			continue;
-		}
-		if (*dir == 'q' && !*(dir + 1)) {
-			free(dir);
+		dir = get_newname(_prompt, (char *)NULL);
+		if (!dir) /* The user pressed ctrl-d */
 			return (char *)NULL;
+
+		/* Expand ELN */
+		if (IS_DIGIT(*dir) && is_number(dir)) {
+			int n = atoi(dir);
+			if (n > 0 && (size_t)n <= files) {
+				free(dir);
+				char *name = file_info[n - 1].name;
+				dir = savestring(name, strlen(name));
+			}
+		} else if (*dir == '~') { // Expand tilde
+			char *tmp = tilde_expand(dir);
+			if (tmp) {
+				free(dir);
+				dir = tmp;
+			}
 		}
-		if (access(dir , R_OK | W_OK | X_OK) == -1) {
-			xerror("dup: %s: %s\n",	dir, strerror(errno));
-			free(dir);
-			dir = (char *)NULL;
-			continue;
+
+		/* Check if file exists, is a directory, and user has access */
+		struct stat a;
+		errno = 0;
+		if (stat(dir, &a) == -1) {
+			goto ERROR;
+		} else if (!S_ISDIR(a.st_mode)) {
+			errno = ENOTDIR;
+			goto ERROR;
+		} else if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 0) {
+			errno = EACCES;
+			goto ERROR;
 		}
+
+		break;
+
+ERROR:
+		xerror("dup: %s: %s\n", dir, strerror(errno));
+		free(dir);
+		dir = (char *)NULL;
 	}
 
 	return dir;
@@ -727,6 +752,8 @@ dup_file(char **cmd)
 	for (i = 1; cmd[i]; i++) {
 		if (!cmd[i] || !*cmd[i])
 			continue;
+
+		/* 1. Construct file names. */
 		char *source = cmd[i];
 		if (strchr(source, '\\')) {
 			char *deq_str = dequote_str(source, 0);
@@ -751,18 +778,24 @@ dup_file(char **cmd)
 		char *tmp = strrchr(source, '/');
 		char *source_name;
 
-		if (tmp && *(tmp + 1))
+		source_name = (tmp && *(tmp + 1)) ? tmp + 1 : source;
+/*		if (tmp && *(tmp + 1))
 			source_name = tmp + 1;
 		else
-			source_name = source;
+			source_name = source; */
 
 		char tmp_dest[PATH_MAX];
-		if (strcmp(dest_dir, "/") != 0)
+		if (*dest_dir == '/' && !dest_dir[1]) // root dir
+			snprintf(tmp_dest, sizeof(tmp_dest), "/%s.copy", source_name);
+		else
+			snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy",
+				dest_dir, source_name);
+/*		if (strcmp(dest_dir, "/") != 0)
 			snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy",
 				dest_dir, source_name);
 		else
 			snprintf(tmp_dest, sizeof(tmp_dest), "%s%s.copy",
-				dest_dir, source_name);
+				dest_dir, source_name); */
 
 		char bk[PATH_MAX + 11];
 		xstrsncpy(bk, tmp_dest, PATH_MAX);
@@ -777,6 +810,7 @@ dup_file(char **cmd)
 		if (rem_slash == 1)
 			source[source_len - 1] = '/';
 
+		/* 2. Run command. */
 		if (rsync_path) {
 			char *_cmd[] = {"rsync", "-aczvAXHS", "--progress", source, dest, NULL};
 			if (launch_execve(_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -880,10 +914,10 @@ list_created_files(char **nfiles, const size_t nfiles_n)
 static int
 ask_and_create_file(void)
 {
-	puts(_("End filename with a slash to create a directory"));
+	puts(_("Enter new file name\n"
+		"Tip: End filename with a slash to create a directory (Ctrl-d to quit)"));
 	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), _("Enter new file name "
-		"(Ctrl-d to quit)\n\001%s\002>\001%s\002 "), mi_c, tx_c);
+	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	char *filename = (char *)NULL;
 	while (!filename) {
@@ -891,19 +925,13 @@ ask_and_create_file(void)
 
 		if (!filename) /* The user pressed Ctrl-d */
 			return EXIT_SUCCESS;
-
-		if (is_blank_name(filename) == 1) {
-			free(filename);
-			filename = (char *)NULL;
-		}
 	}
 
 	int exit_status = create_file(filename);
-	if (exit_status != EXIT_SUCCESS)
-		return exit_status;
-
-	char *f[] = { filename, (char *)NULL };
-	list_created_files(f, 1);
+	if (exit_status == EXIT_SUCCESS) {
+		char *f[] = { filename, (char *)NULL };
+		list_created_files(f, 1);
+	}
 
 	free(filename);
 	return exit_status;

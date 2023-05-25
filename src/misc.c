@@ -90,7 +90,7 @@ is_blank_name(const char *s)
 char *
 get_newname(const char *_prompt, char *old_name)
 {
-	xrename = 1;
+	xrename = rl_nohist = 1;
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 
@@ -100,12 +100,31 @@ get_newname(const char *_prompt, char *old_name)
 
 	char *new_name = (char *)NULL;
 	if (rl_callback_handler_input) {
-		new_name = savestring(rl_callback_handler_input, strlen(rl_callback_handler_input));
+		char *p = remove_quotes(rl_callback_handler_input);
+		if (!p || !*p) { /* Input was "" (empty string) */
+			free(rl_callback_handler_input);
+			rl_callback_handler_input = (char *)NULL;
+			goto END;
+		}
+
+		char *deq = dequote_str(p, 0);
+		char *tmp = deq ? deq : p;
+
+		size_t len = strlen(tmp);
+		int i = len > 1 ? (int)len - 1 : 0;
+		while (tmp[i] == ' ') {
+			tmp[i] = '\0';
+			i--;
+		}
+
+		new_name = savestring(tmp, (size_t)i + 1);
+		free(deq);
 		free(rl_callback_handler_input);
 		rl_callback_handler_input = (char *)NULL;
 	}
 
-	xrename = 0;
+END:
+	xrename = rl_nohist = 0;
 	prompt_offset = poffset_bk;
 
 	return new_name;
