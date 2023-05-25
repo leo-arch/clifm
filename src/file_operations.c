@@ -925,6 +925,18 @@ ask_and_create_file(void)
 
 		if (!filename) /* The user pressed Ctrl-d */
 			return EXIT_SUCCESS;
+
+		if (*filename == '~') {
+			char *tmp = tilde_expand(filename);
+			if (tmp) {
+				free(filename);
+				filename = tmp;
+			} else {
+				xerror("new: %s: Error expanding tilde\n", filename);
+				free(filename);
+				return EXIT_FAILURE;
+			}
+		}
 	}
 
 	int exit_status = create_file(filename);
