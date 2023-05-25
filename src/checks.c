@@ -795,6 +795,8 @@ is_internal_f(const char *restrict cmd)
 		{"v", 1},
 		{"vv", 2},
 		{"ws", 2},
+		{"x", 1},
+		{"X", 1},
 		{NULL, 0}
 	};
 
