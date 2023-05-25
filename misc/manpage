@@ -2756,7 +2756,7 @@ Force the use of colors, even if the terminal informs that it does not support c
 Define a file filter. If set, this variable overrides the \fIFilter\fR option in the configuration file
 .TP
 .B CLIFM_SUDO_CMD
-Name of the authenticator program (used by the \fIX\fR command, to launch a new instance of CliFM as root, and the \fIAlt-v\fR keybinding, to prepend the authenticator program name (by default "sudo", or "doas" if compiled on OpenBSD) to the current command line
+Name of the authenticator program. Used by the \fIX\fR command (to launch a new instance of CliFM as root), the \fIAlt-v\fR keybinding (to prepend the authenticator program name to the current command line), and for some operations on archives (ISO files). Defaults to \fIsudo\fR (or \fIdoas\fR if compiled on OpenBSD). Example: \fICLIFM_SUDO_CMD=doas clifm\fI.
 .TP
 .B CLIFM_SHELL
 An absolute path to the shell \fBclifm\fR will use to run external commands. Only values found in \fI/etc/shells\fR are allowed.
