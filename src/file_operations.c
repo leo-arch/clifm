@@ -480,9 +480,9 @@ diff_files(char *tmp_file, int n)
 static int
 nothing_to_do(char **tmp_file, struct dirent ***a, const int n, const int fd)
 {
-	printf(_("rr: Nothing to do\n"));
-	close(fd);
+	puts(_("rr: Nothing to do"));
 	unlinkat(fd, *tmp_file, 0);
+	close(fd);
 	free(*tmp_file);
 
 	int i = n;
@@ -540,8 +540,8 @@ bulk_remove(char *s1, char *s2)
 	free(__files);
 
 END:
-	close(fd);
 	unlinkat(fd, tmp_file, 0);
+	close(fd);
 	free(tmp_file);
 	return ret;
 }
