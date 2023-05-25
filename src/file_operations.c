@@ -677,8 +677,8 @@ get_dup_file_dest_dir(void)
 {
 	char *dir = (char *)NULL;
 
-	puts(_("Enter destiny directory\n"
-		"Tip: \".\" for current directory (Ctrl-d to quit)"));
+	puts(_("Enter destiny directory (Ctrl-d to quit)\n"
+		"Tip: \".\" for current directory"));
 	char _prompt[NAME_MAX];
 	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
@@ -914,8 +914,8 @@ list_created_files(char **nfiles, const size_t nfiles_n)
 static int
 ask_and_create_file(void)
 {
-	puts(_("Enter new file name\n"
-		"Tip: End filename with a slash to create a directory (Ctrl-d to quit)"));
+	puts(_("Enter new file name (Ctrl-d to quit)\n"
+		"Tip: End name with a slash to create a directory"));
 	char _prompt[NAME_MAX];
 	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
@@ -932,7 +932,7 @@ ask_and_create_file(void)
 				free(filename);
 				filename = tmp;
 			} else {
-				xerror("new: %s: Error expanding tilde\n", filename);
+				xerror(_("new: %s: Error expanding tilde\n"), filename);
 				free(filename);
 				return EXIT_FAILURE;
 			}
