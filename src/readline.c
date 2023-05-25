@@ -137,7 +137,7 @@ int_cmds_generator(const char *text, int state)
 		i = 0;
 
 	static char *cmd_desc[] = {
-		"/       (search files)",
+		"/       (search for files)",
 		"ac      (archive-compress files)",
 		"acd     (set autocd on/off)",
 		"actions (manage actions-plugins)",
@@ -168,12 +168,12 @@ int_cmds_generator(const char *text, int state)
 		"fz      (print directories full size - long view only)",
 		"hh      (toggle show-hidden-files on/off)",
 		"history (manage the commands history)",
-		"icons   (set icons on-off)",
+		"icons   (set icons on/off)",
 		"j       (jump to a visited directory)",
 		"kb      (manage keybindings)",
 		"l       (create a symbolic link)",
 		"le      (edit a symbolic link)",
-		"ll      (toggle long view on/off)",
+		"ll      (toggle long/detail view on/off)",
 		"lm      (toggle light mode on/off)",
 		"log     (manage logs)",
 		"m       (move files)",

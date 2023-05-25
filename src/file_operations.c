@@ -481,9 +481,9 @@ static int
 nothing_to_do(char **tmp_file, struct dirent ***a, const int n, const int fd)
 {
 	printf(_("rr: Nothing to do\n"));
+	close(fd);
 	unlinkat(fd, *tmp_file, 0);
 	free(*tmp_file);
-	close(fd);
 
 	int i = n;
 	while (--i >= 0)
@@ -540,8 +540,8 @@ bulk_remove(char *s1, char *s2)
 	free(__files);
 
 END:
-	unlinkat(fd, tmp_file, 0);
 	close(fd);
+	unlinkat(fd, tmp_file, 0);
 	free(tmp_file);
 	return ret;
 }
