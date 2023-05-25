@@ -3589,10 +3589,38 @@ check_time_str(void)
 }
 #pragma GCC diagnostic pop
 
+static void
+set_sudo_cmd(void)
+{
+	if (sudo_cmd)
+		return;
+
+	sudo_cmd = (xargs.secure_env != 1 && xargs.secure_env_full != 1
+		&& xargs.secure_cmds != 1) ? getenv("CLIFM_SUDO_CMD") : (char *)NULL;
+
+	if (!sudo_cmd || !*sudo_cmd) {
+		sudo_cmd = DEF_SUDO_CMD;
+		return;
+	}
+
+	char *sudo_path = get_cmd_path(sudo_cmd);
+	if (sudo_path) {
+		free(sudo_path);
+		return;
+	}
+
+	_err('w', PRINT_PROMPT, _("%s: %s: %s\nInvalid authentication program "
+		"(falling back to '%s')\n"), PROGRAM_NAME, sudo_cmd,
+		strerror(errno), DEF_SUDO_CMD);
+	sudo_cmd = DEF_SUDO_CMD;
+}
+
 /* If some option was not set, set it to the default value */
 void
 check_options(void)
 {
+	set_sudo_cmd();
+
 	if (conf.trim_names == UNSET) {
 		if (xargs.trim_names == UNSET)
 			conf.trim_names = DEF_TRIM_NAMES;

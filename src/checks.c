@@ -464,18 +464,21 @@ check_file_access(const mode_t mode, const uid_t uid, const gid_t gid)
 char *
 get_sudo_path(void)
 {
-	char *p = getenv("CLIFM_SUDO_CMD");
-	char *sudo = get_cmd_path(p ? p : DEF_SUDO_CMD);
+	if (!sudo_cmd) {
+		errno = ENOENT;
+		return (char *)NULL;
+	}
+
+	char *sudo_path = get_cmd_path(sudo_cmd);
 	int ret = errno;
 
-	if (!sudo) {
-		xerror("%s: %s: %s\n", PROGRAM_NAME, p ? p : DEF_SUDO_CMD,
-			strerror(ENOENT));
+	if (!sudo_path) {
+		xerror("%s: %s: %s\n", PROGRAM_NAME, sudo_cmd, strerror(ENOENT));
 		errno = ret;
 		return (char *)NULL;
 	}
 
-	return sudo;
+	return sudo_path;
 }
 
 /* Check a file's immutable bit. Returns 1 if true, zero if false, and

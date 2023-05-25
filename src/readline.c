@@ -2023,6 +2023,33 @@ dirhist_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Used by commands completion (external commands only) */
+static char *
+bin_cmd_generator_ext(const char *text, int state)
+{
+	if (!bin_commands)
+		return (char *)NULL;
+
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while ((name = bin_commands[i++]) != NULL) {
+		if (is_internal_c(name) == 1)
+			continue;
+		if (!text || !*text
+		|| (*text == *name && strncmp(name, text, len) == 0))
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
+
 /* Used by commands completion */
 static char *
 bin_cmd_generator(const char *text, int state)
@@ -3499,6 +3526,19 @@ my_rl_completion(const char *text, int start, int end)
 			}
 		}
 
+		/* #### SUDO COMPLETION (ex: "sudo <TAB>") #### */
+		static size_t slen = 0;
+		if (slen == 0)
+			slen = (sudo_cmd && *sudo_cmd) ? strlen(sudo_cmd) : 0;
+		if (slen > 0 && strncmp(lb, sudo_cmd, slen) == 0
+		&& lb[slen] == ' ') {
+			matches = rl_completion_matches(text, &bin_cmd_generator_ext);
+			if (matches) {
+				cur_comp_type = TCMP_CMD;
+				return matches;
+			}
+		}
+
 #ifndef _NO_TAGS
 		/* #### TAGS COMPLETION #### */
 		/* 't? TAG' and 't? :tag' */
@@ -3824,12 +3864,6 @@ my_rl_completion(const char *text, int start, int end)
 			if ((matches = rl_completion_matches(text, &env_vars_generator)))
 				return matches;
 		}
-
-/*		rl_sort_completion_matches = 0;
-		// Complete with specific options for internal commands
-		if ((matches = rl_completion_matches(text, &options_generator)))
-			return matches;
-		rl_sort_completion_matches = 1; */
 
 		/* ### NET COMMAND COMPLETION ### */
 		if (*lb == 'n' && strncmp(lb, "net ", 4) == 0) {

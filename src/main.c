@@ -280,6 +280,7 @@ char
 	*sel_file = (char *)NULL,
 	*smenutab_options_env = (char *)NULL,
 	*stdin_tmp_dir = (char *)NULL,
+	*sudo_cmd = (char *)NULL,
 #ifndef _NO_SUGGESTIONS
 	*suggestion_buf = (char *)NULL,
 #endif

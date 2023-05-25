@@ -372,7 +372,8 @@ int rl_toggle_max_filename_len(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-/* Prepend sudo/doas to the current input string */
+/* Prepend authentication program name (usually sudo or doas) to the current
+ * input string. */
 static int
 rl_prepend_sudo(int count, int key)
 {
@@ -386,8 +387,8 @@ rl_prepend_sudo(int count, int key)
 
 	int free_s = 1;
 	size_t len = 0;
-	char *t = getenv("CLIFM_SUDO_CMD"),
-		 *s = (char *)NULL;
+	char *t = sudo_cmd;
+	char *s = (char *)NULL;
 
 	if (t) {
 		len = strlen(t);

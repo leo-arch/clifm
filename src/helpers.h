@@ -1450,6 +1450,7 @@ extern char
 	*sel_file,
 	*smenutab_options_env,
 	*stdin_tmp_dir,
+	*sudo_cmd,
 #ifndef _NO_SUGGESTIONS
 	*suggestion_buf,
 #endif

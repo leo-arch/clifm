@@ -809,7 +809,7 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 	for (i = 0; tmp_term[i]; i++);
 
 	int num = i;
-	char **cmd = (char **)xnmalloc((size_t)i + (sudo ? 4 : 3), sizeof(char *));
+	char **cmd = (char **)xnmalloc((size_t)i + (sudo == 1 ? 4 : 3), sizeof(char *));
 
 	for (i = 0; tmp_term[i]; i++) {
 		cmd[i] = savestring(tmp_term[i], strlen(tmp_term[i]));
@@ -820,7 +820,7 @@ get_cmd(char *dir, char *_sudo, char *self, const int sudo)
 	i = num - 1;
 	int plus = 1;
 
-	if (sudo) {
+	if (sudo == 1) {
 		cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1, sizeof(char));
 		strcpy(cmd[i + plus], _sudo);
 		plus++;
@@ -857,7 +857,7 @@ launch_new_instance_cmd(char ***cmd, char **self, char **_sudo,
 			free((*cmd)[i]);
 		free(*cmd);
 	} else {
-		if (sudo) {
+		if (sudo == 1) {
 			char *tcmd[] = {conf.term, *_sudo, *self, *dir, NULL};
 			ret = launch_execve(tcmd, BACKGROUND, E_NOFLAG);
 		} else {
@@ -891,21 +891,20 @@ new_instance(char *dir, const int sudo)
 
 	char *_sudo = (char *)NULL;
 #ifndef __HAIKU__
-	if (sudo && !(_sudo = get_sudo_path()))
+	if (sudo == 1 && !(_sudo = get_sudo_path()))
 		return errno;
 #endif
 
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
-		xerror(_("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, dir);
 		free(_sudo);
+		xerror(_("%s: %s: Error dequoting file name\n"), PROGRAM_NAME, dir);
 		return EXIT_FAILURE;
 	}
 
 	char *self = get_cmd_path(PNL);
 	if (!self) {
-		free(_sudo);
-		free(deq_dir);
+		free(_sudo); free(deq_dir);
 		xerror("%s: %s: %s\n", PROGRAM_NAME, PNL, strerror(errno));
 		return errno;
 	}
@@ -1803,14 +1802,14 @@ handle_stdin(void)
 				free_tmp_file = 1;
 			}
 
-			char source[PATH_MAX];
+			char source[PATH_MAX + 1];
 			if (*q != '/' || !q[1])
-				snprintf(source, PATH_MAX, "%s/%s", cwd, q);
+				snprintf(source, sizeof(source), "%s/%s", cwd, q);
 			else
-				xstrsncpy(source, q, PATH_MAX);
+				xstrsncpy(source, q, sizeof(source) - 1);
 
 			char dest[PATH_MAX + 1];
-			snprintf(dest, PATH_MAX, "%s/%s", stdin_tmp_dir, tmp_file);
+			snprintf(dest, sizeof(dest), "%s/%s", stdin_tmp_dir, tmp_file);
 
 			if (symlink(source, dest) == -1) {
 				if (errno == EEXIST && xargs.virtual_dir_full_paths != 1) {
