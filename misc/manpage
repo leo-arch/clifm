@@ -848,9 +848,21 @@ list available mountpoints and change the current working directory to the selec
 with no arguments, prints the list of messages in the current session. The \fIclear\fR option tells \fBclifm\fR to empty the messages list.
 .TP
 .B n, new \fR[\fIFILE\fR]... [\fIDIR/\fR]...
-create new empty files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. Ex: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is provided, the user will be asked to enter one.
+create new empty files and/or directories.
 .sp
-File name validation is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation. See \fIhttps://dwheeler.com/essays/fixing-unix-linux-filenames.html\fR for more information.
+If a file name ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. Ex: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is provided, the user will be asked to enter one.
+.sp
+File name validation is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation.
+.sp
+A name (namely, any component of a path) is considered unsafe if:
+  1. Starts with a dash (-): command option flags collision
+  2. Is a reserved keyword/expression (internal): fastback (...), ELN/range (12, 1-45), and MIME/file type expansion (@query, =x)
+  3. Is a reserved system/shell keyword ('~', '.' ,'..')
+  4. Contains embedded control characters (0x00-0x1f in the ASCII table)
+  5. Contains embedded shell meta-characters (*?:[]"<>|(){}&'!\\;$)
+  6. It is too long (larger than NAME_MAX, usually 255 bytes)
+.sp
+For more information about unsafe file names consult \fIhttps://dwheeler.com/essays/fixing-unix-linux-filenames.html\fR.
 .TP
 .B net \fR[\fINAME\fR] [\fIlist\fR] [\fIedit\fR] [\fIm\fR, \fImount NAME\fR] [\fIu\fR, \fIunmount NAME\fR]
 \fB1. The configuration file\fR
