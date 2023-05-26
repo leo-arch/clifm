@@ -911,8 +911,12 @@ is_valid_filename(char *name)
 	char *n = name;
 	/* Trailing spaces are already ignored (by get_newname()) */
 
-	/* Starting with dash or tilde */
-	if (*n == '-' || *n == '~')
+	/* Starting with dash */
+	if (*n == '-')
+		return 0;
+
+	/* Just "~" */
+	if (*n == '~' && !n[1])
 		return 0;
 
 	/* Single char names that are not alphanumerical (or a single dot) */
@@ -923,7 +927,8 @@ is_valid_filename(char *name)
 	if (*n == '.' && (n[1] == '.' || n[1] == '/') && !n[2])
 		return 0;
 
-	/* Contains control characters (being not UTF-8 leading nor continuation bytes) */
+	/* Contains control characters (being not UTF-8 leading nor
+	 * continuation bytes) */
 	char *s = name;
 	while (*s) {
 		if (*s < ' ' && (*s & 0xC0) != 0xC0 && (*s & 0xC0) != 0x80)
@@ -993,14 +998,6 @@ format_new_filename(char **name)
 	if (!npath)
 		return EXIT_FAILURE;
 
-/*	if (validate_filename(npath) == 0) {
-		xerror(_("new: %s: Not a safe file name\n"), p);
-		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
-			free(npath);
-			return EXIT_FAILURE;
-		}
-	} */
-
 	*name = (char *)xrealloc(*name, (strlen(npath) + 2) * sizeof(char));
 	sprintf(*name, "%s%c", npath, is_dir == 1 ? '/' : 0);
 	free(npath);
@@ -1017,7 +1014,7 @@ press_key_to_continue(void)
 }
 
 static int
-err_file_exists(char *name, const char *next)
+err_file_exists(char *name, const int multi)
 {
 	char *n = abbreviate_file_name(name);
 	char *p = n ? n : name;
@@ -1028,7 +1025,7 @@ err_file_exists(char *name, const char *next)
 	if (n && n != name)
 		free(n);
 
-	if (next)
+	if (multi == 1)
 		press_key_to_continue();
 
 	return EXIT_FAILURE;
@@ -1054,7 +1051,7 @@ ask_and_create_file(void)
 
 	struct stat a;
 	if (lstat(filename, &a) == 0) {
-		exit_status = err_file_exists(filename, (char *)NULL);
+		exit_status = err_file_exists(filename, 0);
 		goto ERROR;
 	}
 
@@ -1062,7 +1059,7 @@ ask_and_create_file(void)
 		xerror(_("new: %s: Not a safe file name\n"), filename);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
 			free(filename);
-			return EXIT_FAILURE;
+			return EXIT_SUCCESS;
 		}
 	}
 
@@ -1078,9 +1075,9 @@ ERROR:
 }
 
 int
-create_files(char **cmd)
+create_files(char **args)
 {
-	if (cmd[1] && IS_HELP(cmd[1])) {
+	if (args[0] && IS_HELP(args[0])) {
 		puts(_(NEW_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -1089,37 +1086,39 @@ create_files(char **cmd)
 	size_t i;
 
 	/* If no argument provided, ask the user for a filename, create it and exit */
-	if (!cmd[1])
+	if (!args[0])
 		return ask_and_create_file();
 
 	/* Store pointers to actually created files into a pointers array. */
 	char **new_files = (char **)xnmalloc(args_n + 1, sizeof(char *));
 	size_t new_files_n = 0;
 
-	for (i = 1; cmd[i]; i++) {
+	for (i = 0; args[i]; i++) {
 		/* Properly format filename. */
-		if (format_new_filename(&cmd[i]) == EXIT_FAILURE) {
+		if (format_new_filename(&args[i]) == EXIT_FAILURE) {
 			exit_status = EXIT_FAILURE;
 			continue;
 		}
 
 		/* Skip existent files. */
 		struct stat a;
-		if (lstat(cmd[i], &a) == 0) {
-			exit_status = err_file_exists(cmd[i], cmd[i + 1]);
+		if (lstat(args[i], &a) == 0) {
+			exit_status = err_file_exists(args[i], args_n > 1);
 			continue;
 		}
 
-		if (validate_filename(cmd[i]) == 0) {
-			xerror(_("new: %s: Not a safe file name\n"), cmd[i]);
+		if (validate_filename(args[i]) == 0) {
+			xerror(_("new: %s: Not a safe file name\n"), args[i]);
 			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
 				continue;
 		}
 
-		if ((exit_status = create_file(cmd[i])) == EXIT_SUCCESS) {
-			new_files[new_files_n] = cmd[i];
+		int ret = create_file(args[i]);
+		if (ret == EXIT_SUCCESS) {
+			new_files[new_files_n] = args[i];
 			new_files_n++;
-		} else if (cmd[i + 1]) {
+		} else if (args_n > 1) {
+			exit_status = EXIT_FAILURE;
 			press_key_to_continue();
 		}
 	}
