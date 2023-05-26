@@ -683,7 +683,9 @@ get_dup_file_dest_dir(void)
 	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	while (!dir) {
-		dir = get_newname(_prompt, (char *)NULL);
+		int quoted = 0;
+		dir = get_newname(_prompt, (char *)NULL, &quoted);
+		UNUSED(quoted);
 		if (!dir) /* The user pressed ctrl-d */
 			return (char *)NULL;
 
@@ -893,7 +895,7 @@ list_created_files(char **nfiles, const size_t nfiles_n)
 	for (i = 0; nfiles[i]; i++) {
 		char *f = abbreviate_file_name(nfiles[i]);
 		char *p = f ? f : nfiles[i];
-		puts((*p == '.' && p[1] == '/') ? p + 2 : p);
+		puts((*p == '.' && p[1] == '/' && p[2]) ? p + 2 : p);
 		if (f && f != nfiles[i])
 			free(f);
 	}
@@ -960,52 +962,6 @@ validate_filename(char *name)
 }
 
 static int
-ask_and_create_file(void)
-{
-	puts(_("Enter new file name (Ctrl-d to quit)\n"
-		"Tip: End name with a slash to create a directory"));
-	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
-
-	char *filename = (char *)NULL;
-	while (!filename) {
-		filename = get_newname(_prompt, (char *)NULL);
-
-		if (!filename) /* The user pressed Ctrl-d */
-			return EXIT_SUCCESS;
-
-		if (*filename == '~') {
-			char *tmp = tilde_expand(filename);
-			if (tmp) {
-				free(filename);
-				filename = tmp;
-			} else {
-				xerror(_("new: %s: Error expanding tilde\n"), filename);
-				free(filename);
-				return EXIT_FAILURE;
-			}
-		}
-
-		if (validate_filename(filename) == 0) {
-			xerror(_("new: %s: Not a safe file name\n"), filename);
-			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
-				free(filename);
-				return EXIT_SUCCESS;
-			}
-		}
-	}
-
-	int exit_status = create_file(filename);
-	if (exit_status == EXIT_SUCCESS) {
-		char *f[] = { filename, (char *)NULL };
-		list_created_files(f, 1);
-	}
-
-	free(filename);
-	return exit_status;
-}
-
-static int
 format_new_filename(char **name)
 {
 	char *p = *name;
@@ -1021,21 +977,29 @@ format_new_filename(char **name)
 		p[flen - 1 ] = '\0'; /* Remove ending slash */
 
 	char *npath = (char *)NULL;
-	if (p == *name)
-		npath = normalize_path(p, flen);
-	else /* Quoted string. Copy it verbatim. */
+	if (p == *name) {
+		char *tilde = (char *)NULL;
+		if (*p == '~')
+			tilde = tilde_expand(p);
+
+		size_t len = tilde ? strlen(tilde) : flen;
+		npath = normalize_path(tilde ? tilde : p, len);
+		free(tilde);
+
+	} else { /* Quoted string. Copy it verbatim. */
 		npath = savestring(p, flen);
+	}
 
 	if (!npath)
 		return EXIT_FAILURE;
 
-	if (validate_filename(npath) == 0) {
+/*	if (validate_filename(npath) == 0) {
 		xerror(_("new: %s: Not a safe file name\n"), p);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
 			free(npath);
 			return EXIT_FAILURE;
 		}
-	}
+	} */
 
 	*name = (char *)xrealloc(*name, (strlen(npath) + 2) * sizeof(char));
 	sprintf(*name, "%s%c", npath, is_dir == 1 ? '/' : 0);
@@ -1057,8 +1021,10 @@ err_file_exists(char *name, const char *next)
 {
 	char *n = abbreviate_file_name(name);
 	char *p = n ? n : name;
-	xerror("new: %s: %s\n", (*p == '.' && p[1] == '/')
+
+	xerror("new: %s: %s\n", (*p == '.' && p[1] == '/' && p[2])
 		? p + 2 : p, strerror(EEXIST));
+
 	if (n && n != name)
 		free(n);
 
@@ -1066,6 +1032,49 @@ err_file_exists(char *name, const char *next)
 		press_key_to_continue();
 
 	return EXIT_FAILURE;
+}
+
+static int
+ask_and_create_file(void)
+{
+	puts(_("Enter new file name (Ctrl-d to quit)\n"
+		"Tip: End name with a slash to create a directory"));
+	char _prompt[NAME_MAX];
+	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
+
+	int quoted = 0;
+	char *filename = get_newname(_prompt, (char *)NULL, &quoted);
+	if (!filename) /* The user pressed Ctrl-d */
+		return EXIT_SUCCESS;
+
+	int exit_status = quoted == 0 ? format_new_filename(&filename)
+		: EXIT_SUCCESS;
+	if (exit_status == EXIT_FAILURE)
+		goto ERROR;
+
+	struct stat a;
+	if (lstat(filename, &a) == 0) {
+		exit_status = err_file_exists(filename, (char *)NULL);
+		goto ERROR;
+	}
+
+	if (validate_filename(filename) == 0) {
+		xerror(_("new: %s: Not a safe file name\n"), filename);
+		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
+			free(filename);
+			return EXIT_FAILURE;
+		}
+	}
+
+	exit_status = create_file(filename);
+	if (exit_status == EXIT_SUCCESS) {
+		char *f[] = { filename, (char *)NULL };
+		list_created_files(f, 1);
+	}
+
+ERROR:
+	free(filename);
+	return exit_status;
 }
 
 int
@@ -1099,6 +1108,12 @@ create_files(char **cmd)
 		if (lstat(cmd[i], &a) == 0) {
 			exit_status = err_file_exists(cmd[i], cmd[i + 1]);
 			continue;
+		}
+
+		if (validate_filename(cmd[i]) == 0) {
+			xerror(_("new: %s: Not a safe file name\n"), cmd[i]);
+			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
+				continue;
 		}
 
 		if ((exit_status = create_file(cmd[i])) == EXIT_SUCCESS) {
@@ -1242,7 +1257,9 @@ get_new_link_target(char *cur_target)
 
 	char *new_target = (char *)NULL;
 	while (!new_target) {
-		new_target = get_newname(_prompt, cur_target);
+		int quoted = 0;
+		new_target = get_newname(_prompt, cur_target, &quoted);
+		UNUSED(quoted);
 
 		if (!new_target) /* The user pressed Ctrl-d */
 			return (char *)NULL;

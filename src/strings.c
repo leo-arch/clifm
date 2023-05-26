@@ -608,7 +608,7 @@ gen_rand_str(size_t len)
 
 /* Removes end of line char and quotes (single and double) from STR.
  * Returns a pointer to the modified STR if the result is non-blank
- * or NULL */
+ * or NULL. */
 char *
 remove_quotes(char *str)
 {

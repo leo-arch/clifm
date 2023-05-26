@@ -95,7 +95,9 @@ get_new_filename(char *cur_name)
 
 	char *new_name = (char *)NULL;
 	while (!new_name) {
-		new_name = get_newname(_prompt, cur_name);
+		int quoted = 0;
+		new_name = get_newname(_prompt, cur_name, &quoted);
+		UNUSED(quoted);
 
 		if (!new_name) /* The user pressed Ctrl-d */
 			return (char *)NULL;

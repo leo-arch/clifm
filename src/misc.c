@@ -87,8 +87,13 @@ is_blank_name(const char *s)
 	return blank;
 }
 
+/* Prompt for a new name using _PROMPT as prompt.
+ * If OLD_NAME is not NULL, it will be used as template for the new name.
+ * If the entered name is quoted, it will be returned verbatim (without quotes),
+ * and QUOTED will be set to 1 (the caller should not perform expansions on
+ * this name). */
 char *
-get_newname(const char *_prompt, char *old_name)
+get_newname(const char *_prompt, char *old_name, int *quoted)
 {
 	xrename = rl_nohist = kbind_busy = 1;
 	int poffset_bk = prompt_offset;
@@ -99,29 +104,36 @@ get_newname(const char *_prompt, char *old_name)
 	free(n);
 
 	char *new_name = (char *)NULL;
-	if (rl_callback_handler_input) {
-		char *p = remove_quotes(rl_callback_handler_input);
-		if (!p || !*p) { /* Input was "" (empty string) */
-			free(rl_callback_handler_input);
-			rl_callback_handler_input = (char *)NULL;
-			goto END;
-		}
+	if (!rl_callback_handler_input)
+		goto END;
 
-		char *deq = dequote_str(p, 0);
-		char *tmp = deq ? deq : p;
+	char *p = remove_quotes(rl_callback_handler_input);
+	if (!p || !*p) /* Input was "" (empty string) */
+		goto FREE_CALLBACK_AND_EXIT;
 
-		size_t len = strlen(tmp);
-		int i = len > 1 ? (int)len - 1 : 0;
-		while (tmp[i] == ' ') {
-			tmp[i] = '\0';
-			i--;
-		}
-
-		new_name = savestring(tmp, (size_t)i + 1);
-		free(deq);
-		free(rl_callback_handler_input);
-		rl_callback_handler_input = (char *)NULL;
+	if (p != rl_callback_handler_input) {
+		/* Quoted: copy input verbatim (without quotes) */
+		*quoted = 1;
+		new_name = savestring(p, strlen(p));
+		goto FREE_CALLBACK_AND_EXIT;
 	}
+
+	char *deq = dequote_str(p, 0);
+	char *tmp = deq ? deq : p;
+
+	size_t len = strlen(tmp);
+	int i = len > 1 ? (int)len - 1 : 0;
+	while (tmp[i] == ' ') {
+		tmp[i] = '\0';
+		i--;
+	}
+
+	new_name = savestring(tmp, (size_t)i + 1);
+	free(deq);
+
+FREE_CALLBACK_AND_EXIT:
+	free(rl_callback_handler_input);
+	rl_callback_handler_input = (char *)NULL;
 
 END:
 	xrename = rl_nohist = kbind_busy = 0;
