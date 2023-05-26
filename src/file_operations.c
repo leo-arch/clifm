@@ -56,6 +56,28 @@
 # Remove the files you want to be deleted, save and exit\n\
 # Just quit the editor without any edit to cancel the operation\n\n"
 
+/* Macros and array used to print unsafe names description messages.
+ * Used by validate_filename(). */
+#define UNSAFE_DASH     0
+#define UNSAFE_MIME     1
+#define UNSAFE_ELN      2
+#define UNSAFE_FASTBACK 3
+#define UNSAFE_RESERVED 4
+#define UNSAFE_CONTROL  5
+#define UNSAFE_META     6
+#define UNSAFE_TOO_LONG 7
+
+static char *unsafe_name_msgs[] = {
+	"Starts with a dash (-): option flag collision",
+	"Reserved (internal: MIME/file type expansion)",
+	"Reserved (internal: ELN/range expansion)",
+	"Reserved (internal: fastback expansion)",
+	"Reserved keyword",
+	"Contains control characters",
+	"Contains shell meta-characters",
+	"Too long"
+};
+
 /* Print/set the file creation mode mask (umask). */
 int
 umask_function(char *arg)
@@ -903,42 +925,95 @@ list_created_files(char **nfiles, const size_t nfiles_n)
 	print_reload_msg("%zu file(s) created\n", nfiles_n);
 }
 
+static int
+is_range(const char *str)
+{
+	if (!str || !*str)
+		return 0;
+
+	char *p = strchr(str, '-');
+	if (!p || !*(p + 1))
+		return 0;
+
+	*p = '\0';
+	if (is_number(str) && is_number(p + 1)) {
+		*p = '-';
+		return 1;
+	}
+
+	*p = '-';
+	return 0;
+}
+
 /* Return 1 if NAME is a valid filename, or 0 if not.
  * See https://dwheeler.com/essays/fixing-unix-linux-filenames.html */
 static int
 is_valid_filename(char *name)
 {
 	char *n = name;
-	/* Trailing spaces are already ignored (by get_newname()) */
+	/* Trailing spaces were already removed (by get_newname()) */
 
 	/* Starting with dash */
-	if (*n == '-')
+	if (*n == '-') {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_DASH]);
 		return 0;
+	}
 
-	/* Just "~" */
-	if (*n == '~' && !n[1])
+	/* Reserved keyword (internal: MIME type and file type expansions) */
+	if ((*n == '=' && n[1] >= 'a' && n[1] <= 'z' && !n[2]) || *n == '@') {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_MIME]);
 		return 0;
+	}
 
-	/* Single char names that are not alphanumerical (or a single dot) */
-	if ((!isalnum(*n) || *n == '.') && !n[1])
+	/* Reserved (internal: ELN/range expansion) */
+	if (is_number(n) || is_range(n)) {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_ELN]);
 		return 0;
+	}
 
-	/* ".." or "./" */
-	if (*n == '.' && (n[1] == '.' || n[1] == '/') && !n[2])
+	/* "~" or ".": Reserved keyword */
+	if ((*n == '~' || *n == '.') && !n[1]) {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_RESERVED]);
 		return 0;
+	}
 
-	/* Contains control characters (being not UTF-8 leading nor
-	 * continuation bytes) */
+	/* ".." or "./": Reserved keyword */
+	if (*n == '.' && (n[1] == '.' || n[1] == '/') && !n[2]) {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_RESERVED]);
+		return 0;
+	}
+
+	int only_dots = 1;
 	char *s = name;
 	while (*s) {
-		if (*s < ' ' && (*s & 0xC0) != 0xC0 && (*s & 0xC0) != 0x80)
+		/* Contains control characters (being not UTF-8 leading nor
+		 * continuation bytes) */
+		if (*s < ' ' && (*s & 0xC0) != 0xC0 && (*s & 0xC0) != 0x80) {
+			printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_CONTROL]);
 			return 0;
+		}
+		/* Contains shell meta-characters */
+		if (strchr("*?:[]\"<>|(){}&'!\\;$", *s)) {
+			printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_META]);
+			return 0;
+		}
+		/* Only dots: Reserved keyword (internal: fastback expansion) */
+		if (*s != '.')
+			only_dots = 0;
+
 		s++;
 	}
 
-	/* Name too long */
-	if (s - name >= NAME_MAX)
+	if (only_dots == 1) {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_FASTBACK]);
 		return 0;
+	}
+
+	/* Name too long */
+	if (s - name >= NAME_MAX) {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_TOO_LONG]);
+		return 0;
+	}
 
 	return 1;
 }
@@ -1056,7 +1131,7 @@ ask_and_create_file(void)
 	}
 
 	if (validate_filename(filename) == 0) {
-		xerror(_("new: %s: Not a safe file name\n"), filename);
+		xerror("new: %s: Unsafe file name\n", filename);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
 			free(filename);
 			return EXIT_SUCCESS;
@@ -1108,7 +1183,7 @@ create_files(char **args)
 		}
 
 		if (validate_filename(args[i]) == 0) {
-			xerror(_("new: %s: Not a safe file name\n"), args[i]);
+			xerror("new: %s: Unsafe file name\n", args[i]);
 			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
 				continue;
 		}
@@ -1951,7 +2026,7 @@ ERROR:
  * into a temporary file. Return the address of this empt file if
  * success (it must be freed) or NULL in case of error */
 char *
-export(char **filenames, int open)
+_export(char **filenames, int open)
 {
 	char *tmp_file = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
 	sprintf(tmp_file, "%s/%s", tmp_dir, TMP_FILENAME);

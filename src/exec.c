@@ -1353,7 +1353,7 @@ export_files_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	char *ret = export(args, 1);
+	char *ret = _export(args, 1);
 	if (ret) {
 		printf(_("Files exported to: %s\n"), ret);
 		free(ret);

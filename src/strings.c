@@ -2240,6 +2240,12 @@ check_int_var(char *str)
 static int
 check_chained_cmds(char *str)
 {
+	/* If the user wants to create a file containing either '|' or ';' in the
+	 * name, they should be allowed. The file name will be later validated by
+	 * the 'new' function itself. */
+	if (str && (strncmp(str, "n ", 2) == 0 || strncmp(str, "new ", 4) == 0))
+		return 0;
+
 	/* User defined variables are always internal, so that there is
 	 * no need to check whatever else is in the command string */
 	if (flags & IS_USRVAR_DEF) {
