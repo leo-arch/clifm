@@ -90,7 +90,7 @@ is_blank_name(const char *s)
 char *
 get_newname(const char *_prompt, char *old_name)
 {
-	xrename = rl_nohist = 1;
+	xrename = rl_nohist = kbind_busy = 1;
 	int poffset_bk = prompt_offset;
 	prompt_offset = 3;
 
@@ -124,7 +124,7 @@ get_newname(const char *_prompt, char *old_name)
 	}
 
 END:
-	xrename = rl_nohist = 0;
+	xrename = rl_nohist = kbind_busy = 0;
 	prompt_offset = poffset_bk;
 
 	return new_name;

@@ -1063,7 +1063,7 @@ static int
 rl_open_preview(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
-	if (!config_dir)
+	if (!config_dir || kbind_busy == 1)
 		return EXIT_FAILURE;
 
 	char *file = (char *)xnmalloc(config_dir_len + 15, sizeof(char));
@@ -1086,6 +1086,9 @@ rl_open_mime(int count, int key)
 static int
 rl_mountpoints(int count, int key)
 {
+	if (kbind_busy == 1)
+		return EXIT_SUCCESS;
+
 	UNUSED(count); UNUSED(key);
 	/* Call the function only if it's not already running */
 	kbind_busy = 1;
@@ -1535,6 +1538,9 @@ run_man_cmd(char *str)
 static int
 rl_kbinds_help(int count, int key)
 {
+	if (kbind_busy == 1)
+		return EXIT_SUCCESS;
+
 	UNUSED(count); UNUSED(key);
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1554,6 +1560,9 @@ rl_kbinds_help(int count, int key)
 static int
 rl_cmds_help(int count, int key)
 {
+	if (kbind_busy == 1)
+		return EXIT_SUCCESS;
+
 	UNUSED(count); UNUSED(key);
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -1572,6 +1581,9 @@ rl_cmds_help(int count, int key)
 static int
 rl_manpage(int count, int key)
 {
+	if (kbind_busy == 1)
+		return EXIT_SUCCESS;
+
 	UNUSED(count); UNUSED(key);
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)

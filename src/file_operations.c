@@ -779,10 +779,6 @@ dup_file(char **cmd)
 		char *source_name;
 
 		source_name = (tmp && *(tmp + 1)) ? tmp + 1 : source;
-/*		if (tmp && *(tmp + 1))
-			source_name = tmp + 1;
-		else
-			source_name = source; */
 
 		char tmp_dest[PATH_MAX];
 		if (*dest_dir == '/' && !dest_dir[1]) // root dir
@@ -790,12 +786,6 @@ dup_file(char **cmd)
 		else
 			snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy",
 				dest_dir, source_name);
-/*		if (strcmp(dest_dir, "/") != 0)
-			snprintf(tmp_dest, sizeof(tmp_dest), "%s/%s.copy",
-				dest_dir, source_name);
-		else
-			snprintf(tmp_dest, sizeof(tmp_dest), "%s%s.copy",
-				dest_dir, source_name); */
 
 		char bk[PATH_MAX + 11];
 		xstrsncpy(bk, tmp_dest, PATH_MAX);
@@ -911,6 +901,64 @@ list_created_files(char **nfiles, const size_t nfiles_n)
 	print_reload_msg("%zu file(s) created\n", nfiles_n);
 }
 
+/* Return 1 if NAME is a valid filename, or 0 if not.
+ * See https://dwheeler.com/essays/fixing-unix-linux-filenames.html */
+static int
+is_valid_filename(char *name)
+{
+	char *n = name;
+	/* Trailing spaces are already ignored (by get_newname()) */
+
+	/* Starting with dash or tilde */
+	if (*n == '-' || *n == '~')
+		return 0;
+
+	/* Single char names that are not alphanumerical (or a single dot) */
+	if ((!isalnum(*n) || *n == '.') && !n[1])
+		return 0;
+
+	/* ".." or "./" */
+	if (*n == '.' && (n[1] == '.' || n[1] == '/') && !n[2])
+		return 0;
+
+	/* Contains control characters (being not UTF-8 leading nor continuation bytes) */
+	char *s = name;
+	while (*s) {
+		if (*s < ' ' && (*s & 0xC0) != 0xC0 && (*s & 0xC0) != 0x80)
+			return 0;
+		s++;
+	}
+
+	/* Name too long */
+	if (s - name >= NAME_MAX)
+		return 0;
+
+	return 1;
+}
+
+/* Return 0 if the file path NAME (or any component in it) is an invalid name.
+ * Otherwise, return 1. */
+static int
+validate_filename(char *name)
+{
+	if (!name || !*name)
+		return 0;
+
+	char *tmp = savestring(name, strlen(name));
+	char *str = strtok(tmp, "/");
+	int ret = 0;
+
+	while (str) {
+		if ((ret = is_valid_filename(str)) == 0)
+			break;
+
+		str = strtok(NULL, "/");
+	}
+
+	free(tmp);
+	return ret;
+}
+
 static int
 ask_and_create_file(void)
 {
@@ -935,6 +983,14 @@ ask_and_create_file(void)
 				xerror(_("new: %s: Error expanding tilde\n"), filename);
 				free(filename);
 				return EXIT_FAILURE;
+			}
+		}
+
+		if (validate_filename(filename) == 0) {
+			xerror(_("new: %s: Not a safe file name\n"), filename);
+			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
+				free(filename);
+				return EXIT_SUCCESS;
 			}
 		}
 	}
@@ -972,6 +1028,14 @@ format_new_filename(char **name)
 
 	if (!npath)
 		return EXIT_FAILURE;
+
+	if (validate_filename(npath) == 0) {
+		xerror(_("new: %s: Not a safe file name\n"), p);
+		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
+			free(npath);
+			return EXIT_FAILURE;
+		}
+	}
 
 	*name = (char *)xrealloc(*name, (strlen(npath) + 2) * sizeof(char));
 	sprintf(*name, "%s%c", npath, is_dir == 1 ? '/' : 0);
@@ -1172,9 +1236,9 @@ open_function(char **cmd)
 static char *
 get_new_link_target(char *cur_target)
 {
+	puts("Edit target (Ctrl-d to quit)");
 	char _prompt[NAME_MAX];
-	snprintf(_prompt, sizeof(_prompt), _("Edit target (Ctrl-d to quit)\n"
-		"\001%s\002>\001%s\002 "), mi_c, tx_c);
+	snprintf(_prompt, sizeof(_prompt), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
 	char *new_target = (char *)NULL;
 	while (!new_target) {
@@ -1182,11 +1246,6 @@ get_new_link_target(char *cur_target)
 
 		if (!new_target) /* The user pressed Ctrl-d */
 			return (char *)NULL;
-
-		if (is_blank_name(new_target) == 1) {
-			free(new_target);
-			new_target = (char *)NULL;
-		}
 	}
 
 	size_t l = strlen(new_target);

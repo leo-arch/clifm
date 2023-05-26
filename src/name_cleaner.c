@@ -77,8 +77,8 @@
 #define UTF_8_ENCODED_2_BYTES      0xC0
 
 #define BLEACH_TMP_HEADER "# CliFM - Bleach\n\
-# Edit replacement file names as you wish, save, and close the editor\n\
-# You will be asked for confirmation at exit\n\n"
+# Edit replacement file names as you wish, save, and close the editor.\n\
+# You will be asked for confirmation at exit.\n\n"
 
 #define check_width(chr, size) if ((chr & UTF_8_ENCODED_ ## size ## _BYTES_MASK) == UTF_8_ENCODED_ ## size ## _BYTES) { return size; }
 #define unpack_start(chr, size) ((unsigned char) chr & ~UTF_8_ENCODED_ ## size ## _BYTES_MASK)
@@ -126,7 +126,6 @@ translate_unsafe_char(unsigned char c)
 
 	return t;
 }
-
 
 static int
 get_uft8_dec_value(size_t *i, char *str)
@@ -560,14 +559,9 @@ bleach_files(char **names)
 		if (sl) {
 			*sl = '\0';
 			bfiles[f].replacement = (char *)xnmalloc(nlen + strlen(p) + 2, sizeof(char));
-//			Fix comp warning with -O3 and -Wformat -Werror=format-security
-//			Why? p comes from clean_file_name(), which returns at most NAME_MAX
-//			bfiles[f].replacement = (char *)xnmalloc(nlen + strnlen(p, NAME_MAX) + 2, sizeof(char));
 			sprintf(bfiles[f].replacement, "%s/%s", names[i], p);
 			*sl = '/';
 		} else {
-//			Fix comp warning with -O3 and -Wformat -Werror=format-security
-//			bfiles[f].replacement = savestring(p, strnlen(p, NAME_MAX));
 			bfiles[f].replacement = savestring(p, strlen(p));
 		}
 		printf("%s %s->%s %s\n",
