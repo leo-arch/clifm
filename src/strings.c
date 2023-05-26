@@ -805,6 +805,8 @@ split_str(const char *str, const int update_args)
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 				buf[buf_len] = *str;
 				buf_len++;
+				if (update_args == 1)
+					quoted_words[words] = (int)words;
 				break;
 			}
 
