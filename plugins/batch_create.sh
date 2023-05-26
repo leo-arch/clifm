@@ -26,11 +26,14 @@ DIRS=$(mktemp "$TMP_DIR/clifm_bn_dirs.XXXXXX")
 dirsn=0
 filesn=0
 
-printf "# CliFM - Create files in batch \n\
-# Write here file names to be created \n\
-# End file name with a slash to create a directory \n\
-# Empty and commented lines are omitted \n\
-# Just quit the editor to cancel the operation\n\n" > "$TMP"
+printf "# CliFM - Create files in batch\n\
+#\n\
+# Write below the file names to be created.\n\
+# End file names with a slash to create a directory.\n\
+# Empty and commented lines are omitted.\n\
+#\n\
+# Once you're done, save and exit.
+# Just quit the editor (without saving) to cancel the operation.\n\n" > "$TMP"
 
 "${EDITOR:-nano}" "$TMP"
 
