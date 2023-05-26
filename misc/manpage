@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "May 24, 2023" "clifm 1.12.4" "CLIFM Manual"
+.TH "CLIFM" "1" "May 26, 2023" "clifm 1.12.5" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -848,7 +848,9 @@ list available mountpoints and change the current working directory to the selec
 with no arguments, prints the list of messages in the current session. The \fIclear\fR option tells \fBclifm\fR to empty the messages list.
 .TP
 .B n, new \fR[\fIFILE\fR]... [\fIDIR/\fR]...
-create new empty files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. Ex: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is specified, the user will be asked for one.
+create new empty files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name. Else, it will be created as a regular file. Ex: \fIn\ myfile\ mydir/\fR, to create a file named \fImyfile\fR and a directory named \fImydir\fR. If no file name is provided, the user will be asked to enter one.
+.sp
+File name validation is performed over names before creation. In case of an unsafe name, the user is warned and asked for confirmation. See \fIhttps://dwheeler.com/essays/fixing-unix-linux-filenames.html\fR for more information.
 .TP
 .B net \fR[\fINAME\fR] [\fIlist\fR] [\fIedit\fR] [\fIm\fR, \fImount NAME\fR] [\fIu\fR, \fIunmount NAME\fR]
 \fB1. The configuration file\fR

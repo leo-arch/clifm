@@ -139,7 +139,7 @@
 #define VERSION "1.12.5"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "https://github.com/leo-arch/clifm"
-#define DATE "May 25, 2023"
+#define DATE "May 26, 2023"
 #define LICENSE "GPL2+"
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
