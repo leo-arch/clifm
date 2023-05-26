@@ -239,6 +239,7 @@ For a complete description please consult our [Wiki](https://github.com/leo-arch
 <summary>Click here to expand</summary>
 
 * `Development`
+  - [File names validation via the `new` command](https://github.com/leo-arch/clifm/wiki/Introduction#n-new).
   - If using the [new ueberzug](https://github.com/ueber-devel/ueberzug) (18.2.0), please update your [`clifmrun` file](https://github.com/leo-arch/clifm/blob/master/misc/tools/imgprev/clifmrun) to get image previews working again.
   - [Run external commands using any shell you like via the **CLIFM_SHELL** environment variable](https://github.com/leo-arch/clifm/wiki/FAQ#large_blue_diamond-how-do-i-run-with-a-different-shell.).
 * `1.12 (Blondebeard)`
