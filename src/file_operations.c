@@ -58,21 +58,23 @@
 
 /* Macros and array used to print unsafe names description messages.
  * Used by validate_filename(). */
-#define UNSAFE_DASH     0
-#define UNSAFE_MIME     1
-#define UNSAFE_ELN      2
-#define UNSAFE_FASTBACK 3
-#define UNSAFE_RESERVED 4
-#define UNSAFE_CONTROL  5
-#define UNSAFE_META     6
-#define UNSAFE_TOO_LONG 7
+#define UNSAFE_DASH      0
+#define UNSAFE_MIME      1
+#define UNSAFE_ELN       2
+#define UNSAFE_FASTBACK  3
+#define UNSAFE_BTS_CONST 4
+#define UNSAFE_SYS_KEY   5
+#define UNSAFE_CONTROL   6
+#define UNSAFE_META      7
+#define UNSAFE_TOO_LONG  8
 
 static char *unsafe_name_msgs[] = {
-	"Starts with a dash (-): option flag collision",
+	"Starts with a dash (-): command option flags collision",
 	"Reserved (internal: MIME/file type expansion)",
 	"Reserved (internal: ELN/range expansion)",
 	"Reserved (internal: fastback expansion)",
-	"Reserved keyword",
+	"Reserved (internal: bookmarks, tags, and selected files constructs)",
+	"Reserved shell/system keyword",
 	"Contains control characters",
 	"Contains shell meta-characters",
 	"Too long"
@@ -945,7 +947,7 @@ is_range(const char *str)
 	return 0;
 }
 
-/* Return 1 if NAME is a valid filename, or 0 if not.
+/* Return 1 if NAME is a safe filename, or 0 if not.
  * See https://dwheeler.com/essays/fixing-unix-linux-filenames.html */
 static int
 is_valid_filename(char *name)
@@ -965,6 +967,19 @@ is_valid_filename(char *name)
 		return 0;
 	}
 
+	/* Reserved keyword (internal: bookmarks, tags, and selected files
+	 * constructs) */
+	if (((*n == 'b' || *n == 's') && n[1] == ':')
+	|| strcmp(n, "sel") == 0) {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_BTS_CONST]);
+		return 0;
+	}
+
+	if (*n == 't' && n[1] == ':' && n[2]) {
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_BTS_CONST]);
+		return 0;
+	}
+
 	/* Reserved (internal: ELN/range expansion) */
 	if (is_number(n) || is_range(n)) {
 		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_ELN]);
@@ -973,13 +988,13 @@ is_valid_filename(char *name)
 
 	/* "~" or ".": Reserved keyword */
 	if ((*n == '~' || *n == '.') && !n[1]) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_RESERVED]);
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_SYS_KEY]);
 		return 0;
 	}
 
 	/* ".." or "./": Reserved keyword */
 	if (*n == '.' && (n[1] == '.' || n[1] == '/') && !n[2]) {
-		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_RESERVED]);
+		printf("%s: %s\n", name, unsafe_name_msgs[UNSAFE_SYS_KEY]);
 		return 0;
 	}
 

@@ -1217,9 +1217,11 @@ expand_tags(char ***substr)
 {
 	size_t ntags = 0, i;
 	int *tag_index = (int *)NULL;
+	struct stat a;
 
 	for (i = 0; (*substr)[i]; i++) {
-		if (*(*substr)[i] == 't' && *((*substr)[i] + 1) == ':') {
+		if (*(*substr)[i] == 't' && *((*substr)[i] + 1) == ':'
+		&& lstat((*substr)[i], &a) == -1) {
 			tag_index = (int *)xrealloc(tag_index, (ntags + 2) * sizeof(int));
 			tag_index[ntags] = (int)i;
 			ntags++;
@@ -1444,6 +1446,10 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 static void
 eln_expand(char ***substr, const size_t i)
 {
+	struct stat a;
+	if (lstat((*substr)[i], &a) != -1)
+		return;
+
 	int num = atoi((*substr)[i]);
 	/* Because of _expand_eln(), which is called immediately before this
 	 * function, it is guaranteed that NUM won't over/under-flow:
@@ -1451,7 +1457,6 @@ eln_expand(char ***substr, const size_t i)
 	 * never greater than INT_MAX) */
 	int j = num - 1;
 	char *esc_str = escape_str(file_info[j].name);
-
 	if (!esc_str)
 		return;
 
@@ -1525,13 +1530,16 @@ expand_sel(char ***substr)
 static void
 expand_sel_keyword(char ***substr)
 {
+	struct stat a;
 	size_t i;
+
 	for (i = 1; (*substr)[i]; i++) {
 		if (*(*substr)[i] != 's')
 			continue;
 
-		if (((*substr)[i][1] == ':'	&& !(*substr)[i][2])
-		|| strcmp((*substr)[i], "sel") == 0) {
+		if ( ( ((*substr)[i][1] == ':' && !(*substr)[i][2])
+		|| strcmp((*substr)[i], "sel") == 0)
+		&& lstat((*substr)[i], &a) == -1) {
 			is_sel = (int)i;
 			if ((size_t)is_sel == args_n)
 				sel_is_last = 1;
@@ -1921,9 +1929,10 @@ static size_t
 check_ranges(char ***substr, int **range_array)
 {
 	size_t i = 0, j = 0, n = 0;
+	struct stat a;
 
 	for (i = 0; i <= args_n; i++) {
-		if (!(*substr)[i] || is_quoted_word(i))
+		if (!(*substr)[i] || is_quoted_word(i) || lstat((*substr)[i], &a) != -1)
 			continue;
 
 		size_t len = strlen((*substr)[i]);
@@ -1968,7 +1977,7 @@ expand_ranges(char ***substr)
 	for (r = 0; r < ranges_ok; r++) {
 		size_t ranges_n = 0;
 		int *ranges = expand_range((*substr)[range_array[r] +
-					(int)old_ranges_n], 1);
+			(int)old_ranges_n], 1);
 
 		if (ranges) {
 			j = 0;
@@ -2774,6 +2783,10 @@ int *
 expand_range(char *str, int listdir)
 {
 	if (!str || !*str)
+		return (int *)NULL;
+
+	struct stat a;
+	if (lstat(str, &a) != -1)
 		return (int *)NULL;
 
 	char *p = strchr(str, '-');
