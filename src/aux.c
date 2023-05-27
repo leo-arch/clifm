@@ -938,19 +938,14 @@ S_IFIFO: 10000 / 4096
 int
 get_link_ref(const char *link)
 {
-	if (!link)
+	if (!link || !*link)
 		return (-1);
 
-	char *linkname = realpath(link, (char *)NULL);
-	if (!linkname)
+	struct stat a;
+	if (stat(link, &a) == -1)
 		return (-1);
 
-	struct stat attr;
-	int ret = stat(linkname, &attr);
-	free(linkname);
-	if (ret == -1)
-		return (-1);
-	return (int)(attr.st_mode & S_IFMT);
+	return (int)(a.st_mode & S_IFMT);
 }
 
 /* Transform an integer (N) into a string of chars

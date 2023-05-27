@@ -1256,7 +1256,7 @@ open_function(char **cmd)
 	}
 
 	/* Check file type: only directories, symlinks, and regular files
-	 * will be opened */
+	 * will be opened. */
 	char no_open_file = 1;
 	const char *file_type = (char *)NULL;
 	const char *types[] = {

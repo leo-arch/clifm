@@ -941,48 +941,6 @@ check_completions(char *str, size_t len, const int print)
 	return printed;
 }
 
-/*
-static int
-check_completions(char *str, size_t len, const unsigned char c, const int print)
-{
-	if (!str || !*str)
-		return NO_MATCH;
-
-	skip_trailing_spaces(&str, &len);
-	skip_leading_backslashes(&str, &len);
-
-	if (conf.fuzzy_match != 0 && words_num == 1 && *str != '/' && is_internal_c(str))
-		return NO_MATCH;
-
-	int printed = NO_MATCH;
-	suggestion.filetype = DT_REG;
-
-	if (len == 0)
-		return NO_MATCH;
-
-	cur_comp_type = TCMP_NONE;
-	*_fmatch = '\0';
-	flags |= STATE_SUGGESTING;
-	char *_match = my_rl_path_completion(str, 0);
-	flags &= ~STATE_SUGGESTING;
-	if (!_match && !*_fmatch)
-		return NO_MATCH;
-
-	cur_comp_type = TCMP_PATH; // Required by print_match()
-	if (print == 0)
-		printed = get_print_status(str, _match ? _match : _fmatch, len);
-	else
-		printed = print_match(_match ? _match : _fmatch, len, c);
-	*_fmatch = '\0';
-
-	cur_comp_type = printed == NO_MATCH ? TCMP_NONE : TCMP_PATH;
-	free(_match);
-//	if (_match != str)
-//		free(_match);
-
-	return printed;
-} */
-
 static inline void
 print_directory_suggestion(const size_t i, const size_t len, char *color)
 {
