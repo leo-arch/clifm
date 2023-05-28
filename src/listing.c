@@ -2163,8 +2163,8 @@ list_dir(void)
 	}
 
 	if (conf.clear_screen == 1) {
-		// For some reason we need to clear the screen twice to prevent
-		// a garbage first line when scrolling up
+		/* For some reason we need to clear the screen twice to prevent
+		 * a garbage first line when scrolling up */
 		CLEAR; fflush(stdout);
 	}
 

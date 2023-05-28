@@ -336,15 +336,15 @@ static struct colors_t color_names[] = {
 #endif /* !CLIFM_SUCKLESS */
 
 /* Turn the first or second field of a color code sequence, provided
- * it is either 1 or 01 (bold attribute), into 0 (regular)
- * It returns no value: the change is made in place via a pointer
+ * it is either 1 or 01 (bold attribute), into 0 (regular).
+ * It returns no value: the change is made in place via a pointer.
  * STR must be a color code with this form: \x1b[xx;xx;xx...
- * It cannot handle the bold attribute beyond the second field
- * Though this is usually enough, it's far from ideal
+ * It cannot handle the bold attribute beyond the second field.
+ * Though this is usually enough, it's far from ideal.
  *
  * This function is used to print properties strings ('p' command
  * and long view mode). It takes the user defined color of the
- * corresponding file type (e.g. dirs) and removes the bold attribute */
+ * corresponding file type (e.g. dirs) and removes the bold attribute. */
 void
 remove_bold_attr(char *str)
 {

@@ -87,6 +87,31 @@
 
 #define MAX_SHADE_LEN 26 /* "\x1b[0;x;38;2;xxx;xxx;xxxm\0" */
 
+/* These macros define the max length for each properties field (long view).
+ * These lengths are construed based on how each field is built (i,.e. displayed).
+ * We first construct and store (in the stack, to avoid expensive heap
+ * allocation) the appropeiate value, and then print them all
+ * (print_entry_props()). */
+
+/* 14 colors + 15 single chars + NUL byte */
+#define PERM_STR_LEN ((MAX_COLOR * 14) + 16) /* construct_file_perms() */
+
+#define TIME_STR_LEN (MAX_TIME_STR + (MAX_COLOR * 2) + 2) /* construct_timestamp() */
+
+/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars (see aux.h) */
+#define SIZE_STR_LEN (MAX_UNIT_SIZE + (MAX_COLOR * 3) + 1) /* construct_file_size() */
+
+/* Let's suppose that IDs go up to 999 billions (12 digits)
+ * * 2 IDs + pad (at most 12 more digits) == 36
+ * 39 == 36 + colon + space + NUL byte */
+#define ID_STR_LEN   ((MAX_COLOR * 2) + 39) /* construct_id_field() */
+
+/* Max inode number able to hold: 999 billions! Padding could be as long
+ * as max inode lenght - 1 */
+#define INO_STR_LEN  ((MAX_COLOR * 2) + ((12 + 1) * 2))
+
+#define FC_STR_LEN   ((MAX_COLOR * 2) + 32) /* construct_files_counter() */
+
 struct perms_t {
 	/* Field colors */
 	char *cur;
@@ -122,7 +147,7 @@ static int
 print_file_attrs(const int aflags)
 {
 	if (aflags == -1) {
-		printf("Unavailable\n");
+		puts("Unavailable");
 		return EXIT_FAILURE;
 	}
 
@@ -303,7 +328,7 @@ get_file_perms(const mode_t mode)
 }
 
 /* Returns EXIT_SUCCESS if the permissions string S (in octal notation)
- * is a valid permissions string or EXIT_FAILURE otherwise */
+ * is a valid permissions string, or EXIT_FAILURE otherwise. */
 static int
 validate_octal_perms(char *s, const size_t l)
 {
@@ -325,8 +350,8 @@ validate_octal_perms(char *s, const size_t l)
 	return EXIT_SUCCESS;
 }
 
-/* Validate each field of a symbolic permissions string
- * Returns EXIT_SUCCESS on success and EXIT_FAILURE on error */
+/* Validate each field of a symbolic permissions string.
+ * Returns EXIT_SUCCESS on success and EXIT_FAILURE on error. */
 static int
 validate_symbolic_perms(const char *s)
 {
@@ -378,7 +403,7 @@ validate_symbolic_perms(const char *s)
 }
 
 /* Returns EXIT_SUCCESS if the permissions string S is a valid permissions
- * string or EXIT_FAILURE otherwise */
+ * string, or EXIT_FAILURE otherwise. */
 static int
 validate_new_perms(char *s)
 {
@@ -396,7 +421,7 @@ validate_new_perms(char *s)
 }
 
 /* Convert permissions in symbolic notation given by S into octal notation
- * and return it as a string */
+ * and return it as a string. */
 static char *
 perm2octal(char *s)
 {
@@ -425,10 +450,10 @@ perm2octal(char *s)
 	return p;
 }
 
-/* Ask the user to edit permissions given by STR and return the edited string
+/* Ask the user to edit permissions given by STR and return the edited string.
  * If DIFF is set to 0, we are editing a single file or multiple files with the
  * same set of permissions. Otherwise, we have multiple files with different
- * sets of permissions */
+ * sets of permissions. */
 static char *
 get_new_perms(char *str, const int diff)
 {
@@ -559,7 +584,7 @@ get_perm_str(char **s, int *diff)
 	return ptr;
 }
 
-/* Interactively change permissions of files passed via ARGS */
+/* Interactively change permissions of files passed via ARGS. */
 int
 set_file_perms(char **args)
 {
@@ -750,7 +775,7 @@ set_file_owner(char **args)
 	struct group *group = (struct group *)NULL;
 
 	/* Validate new ownership */
-	if (*new_own) { /* *NEW_OWN is null in case of ":group" or ":gid" */
+	if (*new_own) { /* NEW_OWN is null in case of ":group" or ":gid" */
 		if (is_number(new_own))
 			owner = getpwuid((uid_t)atoi(new_own));
 		else
@@ -820,7 +845,7 @@ set_file_owner(char **args)
 	return exit_status;
 }
 
-/* Get gradient color based on file size (true colors version) */
+/* Get color shade based on file size (true colors version). */
 static void
 get_color_size_truecolor(const off_t s, char *str, const size_t len)
 {
@@ -840,7 +865,7 @@ get_color_size_truecolor(const off_t s, char *str, const size_t len)
 		size_shades.shades[n].B);
 }
 
-/* Get gradient color based on file time (true colors version) */
+/* Get color shade based on file time (true colors version). */
 static void
 get_color_age_truecolor(const time_t t, char *str, const size_t len)
 {
@@ -861,7 +886,7 @@ get_color_age_truecolor(const time_t t, char *str, const size_t len)
 		date_shades.shades[n].B);
 }
 
-/* Get gradient color based on file size (256 colors version) */
+/* Get color shade based on file size (256 colors version). */
 static void
 get_color_size256(const off_t s, char *str, const size_t len)
 {
@@ -879,7 +904,7 @@ get_color_size256(const off_t s, char *str, const size_t len)
 		size_shades.shades[n].R);
 }
 
-/* Get gradient color based on file time (256 colors version) */
+/* Get color shade based on file time (256 colors version). */
 static void
 get_color_age256(const time_t t, char *str, const size_t len)
 {
@@ -931,7 +956,7 @@ get_color_age8(const time_t t, char *str, const size_t len)
 		date_shades.shades[n].R);
 }
 
-/* Get gradient color (based on size) for the file whose size is S.
+/* Get color shade (based on size) for the file whose size is S.
  * Store color in STR, whose len is LEN. */
 static void
 get_color_size(const off_t s, char *str, const size_t len)
@@ -944,7 +969,7 @@ get_color_size(const off_t s, char *str, const size_t len)
 	}
 }
 
-/* Get gradient color (based on time) for the file whose time is T.
+/* Get color shade (based on time) for the file whose time is T.
  * Store color in STR, whose len is LEN. */
 static void
 get_color_age(const time_t t, char *str, const size_t len)
@@ -1004,7 +1029,7 @@ print_extended_attributes(char *s)
 		/* Determine length of the value */
 		vallen = getxattr(s, key, NULL, 0);
 		if (vallen == -1)
-			printf("%s\n", strerror(errno));
+			puts(strerror(errno));
 
 		if (vallen > 0) {
 
@@ -1015,16 +1040,16 @@ print_extended_attributes(char *s)
 			/* Copy value to buffer */
 			vallen = getxattr(s, key, val, (size_t)vallen);
 			if (vallen == -1) {
-				printf("%s\n", strerror(errno));
+				puts(strerror(errno));
 			} else {
 				/* Output attribute value */
 				val[vallen] = '\0';
-				printf("%s\n", val);
+				puts(val);
 			}
 
 			free(val);
 		} else if (vallen == 0) {
-			printf("<no value>\n");
+			puts("<no value>");
 		}
 
 		/* Forward to next attribute key */
@@ -1085,24 +1110,23 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 }
 
 static void
-print_file_perms(char *filename, const struct stat *attr, const char file_type,
-	const char *ctype)
+print_file_perms(char *filename, const struct stat *attr,
+	const char file_type_char, const char *file_type_char_color)
 {
-	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
+	char tmp_file_type_char_color[MAX_COLOR + 1];
+	xstrsncpy(tmp_file_type_char_color, file_type_char_color, MAX_COLOR);
 	if (xargs.no_bold != 1)
-		remove_bold_attr(t_ctype);
+		remove_bold_attr(tmp_file_type_char_color);
 
 	struct perms_t perms = get_file_perms(attr->st_mode);
 	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s%s "
 		"Links: %s%zu%s "),
 		do_c, attr->st_mode & 0777, df_c,
-		t_ctype, file_type, dn_c,
+		tmp_file_type_char_color, file_type_char, dn_c,
 		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
 		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
 		perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c,
 		is_acl(filename) ? "+" : "", BOLD, (size_t)attr->st_nlink, df_c);
-
-	free(t_ctype);
 }
 
 static void
@@ -1510,13 +1534,13 @@ calc_relative_time(const time_t age, char *s)
 static void
 construct_and_print_filename(const struct fileinfo *props, size_t max)
 {
-	//  If file name length is greater than max, truncate it
-	// to max (later a tilde (~) will be appended to let the user know
-	// the file name was truncated).
+	/* If file name length is greater than max, truncate it to max (later a
+	 * tilde (~) will be appended to let the user know the file name was
+	 * truncated). */
 	char tname[PATH_MAX * sizeof(wchar_t)];
 	int trim = 0;
 
-	// Handle file names with embedded control characters
+	/* Handle file names with embedded control characters */
 	size_t plen = props->len;
 	char *wname = (char *)NULL;
 	if (props->len == 0) {
@@ -1554,7 +1578,7 @@ construct_and_print_filename(const struct fileinfo *props, size_t max)
 		cur_len -= (size_t)rest;
 	}
 
-	// Calculate pad for each file name
+	/* Calculate pad for each file name */
 	int pad = (int)(max - cur_len);
 	if (pad < 0)
 		pad = 0;
@@ -1586,29 +1610,29 @@ construct_and_print_filename(const struct fileinfo *props, size_t max)
 }
 
 static int
-construct_file_size(const struct fileinfo *props, char **size_type,
-	char *size_s, const size_t size_s_len, const size_t size_max)
+construct_file_size(const struct fileinfo *props, char *size_str,
+	const size_t size_max)
 {
 	int file_perm = check_file_access(props->mode, props->uid, props->gid);
 
 	if (prop_fields.size < 1) {
-		*size_s = '\0';
+		*size_str = '\0';
 		return file_perm;
 	}
 
 	if ((S_ISCHR(props->mode) || S_ISBLK(props->mode))
 	&& xargs.disk_usage_analyzer != 1) {
-		snprintf(size_s, size_s_len, "%ju,%ju",
+		snprintf(size_str, SIZE_STR_LEN, "%ju,%ju",
 			(uintmax_t)major(props->rdev), (uintmax_t)minor(props->rdev));
 		return file_perm;
 	}
 
 	if (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1) {
-		snprintf(size_s, size_s_len, "%s-%s", dn_c, df_c);
+		snprintf(size_str, SIZE_STR_LEN, "%s-%s", dn_c, df_c);
 		return file_perm;
 	}
 
-	// Let's construct the color for the current file size
+	/* Let's construct the color for the current file size */
 	char *csize = props->dir == 1 ? dz_c : df_c;
 	char sf[MAX_SHADE_LEN];
 	if (conf.colorize == 1) {
@@ -1623,115 +1647,116 @@ construct_file_size(const struct fileinfo *props, char **size_type,
 	}
 
 	if (prop_fields.size != PROP_SIZE_HUMAN) {
-		snprintf(size_s, size_s_len, "%s%*ju%s", csize,
+		snprintf(size_str, SIZE_STR_LEN, "%s%*ju%s", csize,
 			(int)size_max, (uintmax_t)props->size, df_c);
 		return file_perm;
 	}
 
+	char *size_unit = (char *)NULL;
 	if (props->dir == 1 && conf.full_dir_size == 1) {
-		*size_type = get_size_unit(props->size *
+		size_unit = get_size_unit(props->size *
 			(xargs.si == 1 ? 1000 : 1024));
 	} else {
-		*size_type = get_size_unit(props->size);
+		size_unit = get_size_unit(props->size);
 	}
 
 	char err[sizeof(xf_c) + 6]; *err = '\0';
 	if (props->dir == 1 && conf.full_dir_size == 1
-	&& props->du_status != 0) {
+	&& props->du_status != 0)
 		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
-	}
 
-	snprintf(size_s, size_s_len, "%s%s%s%s",
-		err, csize, *size_type ? *size_type : "?", df_c);
+	snprintf(size_str, SIZE_STR_LEN, "%s%s%s%s",
+		err, csize, size_unit ? size_unit : "?", df_c);
 
+	free(size_unit);
 	return file_perm;
 }
 
 static void
-construct_file_perms(const mode_t mode, char *attr_s, const size_t attr_s_len,
-	const char file_type, const char *ctype)
+construct_file_perms(const mode_t mode, char *perm_str, const char file_type,
+	const char *ctype)
 {
-	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
+	char tmp_ctype[MAX_COLOR + 1];
+	xstrsncpy(tmp_ctype, ctype, MAX_COLOR);
 	if (xargs.no_bold != 1)
-		remove_bold_attr(t_ctype);
+		remove_bold_attr(tmp_ctype);
 
 	if (prop_fields.perm == PERM_SYMBOLIC) {
 		struct perms_t perms = get_file_perms(mode);
-		snprintf(attr_s, attr_s_len,
+		snprintf(perm_str, PERM_STR_LEN,
 			"%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s",
-			t_ctype, file_type, dn_c,
+			tmp_ctype, file_type, dn_c,
 			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
 			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c);
 
 	} else if (prop_fields.perm == PERM_NUMERIC) {
-		snprintf(attr_s, attr_s_len, "%s%04o%s", do_c, mode & 0777, df_c);
+		snprintf(perm_str, PERM_STR_LEN, "%s%04o%s", do_c, mode & 0777, df_c);
 
 	} else {
-		*attr_s = '\0';
+		*perm_str = '\0';
 	}
-
-	free(t_ctype);
 }
 
 static void
-construct_timestamp(char *time_s, const size_t time_s_len, const time_t ltime)
+construct_timestamp(char *time_str, const time_t ltime)
 {
 	if (prop_fields.time == 0) {
-		*time_s = '\0';
+		*time_str = '\0';
 		return;
 	}
 
-	// Let's construct color shade for the current timestamp
+	/* Let's construct the color for the current timestamp. */
 	char *cdate = dd_c;
 	char df[MAX_SHADE_LEN];
-	if (conf.colorize == 1) {
-		if (!*dd_c) {
-			get_color_age(ltime, df, sizeof(df));
-			cdate = df;
-		}
+	if (conf.colorize == 1 && !*dd_c) {
+		get_color_age(ltime, df, sizeof(df));
+		cdate = df;
 	}
 
 	char file_time[MAX_TIME_STR];
 	struct tm t;
 
 	if (ltime >= 0 && localtime_r(&ltime, &t)) {
+		/* PROPS_NOW (global) is set by list_dir(), in listing.c before
+		 * calling print_entry_props(), which calls this function. */
 		time_t age = props_now - ltime;
-		// AGE is negative if file time is in the future
+		/* AGE is negative if file time is in the future. */
 
 		if (conf.relative_time == 1) {
 			calc_relative_time(age < 0 ? age - (age * 2) : age, file_time);
 		} else {
-			// Let's consider a file to be recent if it is within the past
-			// six months (like ls(1) does)
+			/* If not user defined, let's mimic ls(1) behavior: a file is
+			 * considered recent if it is within the past six months. */
 			uint8_t recent = age >= 0 && age < 14515200LL;
-			// 14515200 == 6*4*7*24*60*60 == six months
-			// If not user defined, let's mimic ls(1) behavior
+			/* 14515200 == 6*4*7*24*60*60 == six months */
 			char *tfmt = conf.time_str ? conf.time_str :
 				(recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER);
-			// GCC (not clang) complains about tfmt being not a string
-			// literal. Let's silence this warning until we find a better
-			// approach.
+
+			/* GCC (not clang) complains about tfmt being not a string
+			 * literal. Let's silence this warning until we find a better
+			 * approach. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 			strftime(file_time, sizeof(file_time), tfmt, &t);
 #pragma GCC diagnostic pop
 		}
 	} else {
-		// INVALID_TIME_STR is generated by check_time_str() in init.c
+		/* INVALID_TIME_STR (global) is generated at startup by
+		 * check_time_str(), in init.c. */
 		strcpy(file_time, invalid_time_str);
 	}
 
-	snprintf(time_s, time_s_len, "%s%s%s ", cdate, *file_time
+	snprintf(time_str, TIME_STR_LEN, "%s%s%s ", cdate, *file_time
 		? file_time : "?", df_c);
 }
 
 static void
-construct_id_field(const struct fileinfo *props, char *id_s,
-	const size_t id_s_len, const char *id_color, const size_t ug_max)
+construct_id_field(const struct fileinfo *props, char *id_str,
+	const char *id_color, const size_t ug_max)
 {
 	if (prop_fields.ids != 1) {
-		*id_s = '\0';
+		*id_str = '\0';
 		return;
 	}
 
@@ -1742,8 +1767,27 @@ construct_id_field(const struct fileinfo *props, char *id_s,
 	if (u + g < (int)ug_max)
 		ug_pad = (int)ug_max - u;
 
-	snprintf(id_s, id_s_len, "%s%u:%-*u%s ", id_color, props->uid,
+	snprintf(id_str, ID_STR_LEN, "%s%u:%-*u%s ", id_color, props->uid,
 		ug_pad, props->gid, df_c);
+}
+
+static void
+construct_files_counter(const struct fileinfo *props, char *fc_str,
+	const size_t fc_max)
+{
+	/* FC_MAX is zero if there are no subdirs in the current dir */
+	if (conf.files_counter == 0 || fc_max == 0 || prop_fields.counter == 0) {
+		*fc_str = '\0';
+		return;
+	}
+
+	if (props->dir == 1 && props->filesn > 0) {
+		snprintf(fc_str, FC_STR_LEN, "%s%*d%s ", fc_c, (int)fc_max,
+			(int)props->filesn, df_c);
+	} else {
+		snprintf(fc_str, FC_STR_LEN, "%s%*c%s ", dn_c, (int)fc_max,
+			'-', df_c);
+	}
 }
 
 static void
@@ -1764,25 +1808,6 @@ set_file_type_and_color(const mode_t mode, char *type, char **color)
 		*color = df_c;
 }
 
-static void
-construct_files_counter(const struct fileinfo *props, char *fc_str,
-	const size_t fc_str_len, const size_t fc_max)
-{
-	/* FC_MAX is zero if there are no subdirs in the current dir */
-	if (conf.files_counter == 0 || fc_max == 0 || prop_fields.counter == 0) {
-		*fc_str = '\0';
-		return;
-	}
-
-	if (props->dir == 1 && props->filesn > 0) {
-		snprintf(fc_str, fc_str_len, "%s%*d%s ", fc_c, (int)fc_max,
-			(int)props->filesn, df_c);
-	} else {
-		snprintf(fc_str, fc_str_len, "%s%*c%s ", dn_c, (int)fc_max,
-			'-', df_c);
-	}
-}
-
 /* Compose the properties line for the current file name.
  * This function is called by list_dir(), in listing.c, for each file name
  * in the current directory when running in long view mode, and after
@@ -1792,8 +1817,6 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	const size_t ino_max, const size_t fc_max, const size_t size_max,
 	const uint8_t have_xattr)
 {
-	/* Let's set file properties and the corresponding colors */
-
 	char file_type = 0; /* File type indicator */
 	char *ctype = dn_c; /* Color for file type */
 
@@ -1803,89 +1826,43 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	 * print only the desired ones. This is specified via the PropFields
 	 * option in the config file. */
 
-				/* ###########################
-				 * #      1. FILE NAME       #
-				 * ########################### */
-
 	construct_and_print_filename(props, max);
 
-				/* ###########################
-				 * #     2. PERMISSIONS      #
-				 * ########################### */
+	char perm_str[PERM_STR_LEN];
+	construct_file_perms(props->mode, perm_str, file_type, ctype);
 
-		/* 14 colors + 15 single chars + NUL byte */
-	char attr_s[(MAX_COLOR * 14) + 16];
-	construct_file_perms(props->mode, attr_s, sizeof(attr_s), file_type, ctype);
+	char time_str[TIME_STR_LEN];
+	construct_timestamp(time_str, props->ltime);
 
-				/* #############################
-				 * #      3. FILE TIME         #
-				 * ############################# */
-
-	/* Whether time is access, modification, or status change, this value is
-	 * set by list_dir, in listing.c (file_info[n].ltime) before calling this
-	 * function */
-		/* time + 2 colors + space + NUL byte */
-	char time_s[MAX_TIME_STR + (MAX_COLOR * 2) + 2];
-	construct_timestamp(time_s, sizeof(time_s), props->ltime);
-
-
-				/* ###########################
-				 * #       4. FILE SIZE      #
-				 * ########################### */
-
-	/* size_s is either file size or "major,minor" IDs in case of special
-	 * files (char and block devs) */
-	char *size_type = (char *)NULL;
-	/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars
-	 * (see aux.h) */
-	char size_s[MAX_UNIT_SIZE + (MAX_COLOR * 3) + 1];
-	int file_perm = construct_file_size(props, &size_type, size_s,
-		sizeof(size_s), size_max);
-
-				/* ###########################
-				 * #    5. USER/GROUP IDS    #
-				 * ########################### */
+	/* size_str is either file size or "major,minor" IDs in case of special
+	 * files (char and block devs). */
+	char size_str[SIZE_STR_LEN];
+	int file_perm = construct_file_size(props, size_str, size_max);
 
 	char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
-	/* Let's suppose that IDs go up to 999 billions (12 digits)
-	 * 2 IDs + pad (at most 12 more digits) == 36
-	 * 39 == 36 + colon + space + NUL byte */
-	char id_s[(MAX_COLOR * 2) + 39];
-	construct_id_field(props, id_s, sizeof(id_s), id_color, ug_max);
+	char id_str[ID_STR_LEN];
+	construct_id_field(props, id_str, id_color, ug_max);
 
-				/* ###########################
-				 * #      6. FILE INODE      #
-				 * ########################### */
-
-	/* Max inode number able to hold: 999 billions! Padding could be as long
-	 * as max inode lenght - 1 */
-	char ino_s[(MAX_COLOR * 2) + ((12 + 1) * 2)];
-	*ino_s = '\0';
+	char ino_str[INO_STR_LEN];
+	*ino_str = '\0';
 	if (prop_fields.inode == 1) {
-		snprintf(ino_s, sizeof(ino_s), "%s%*ju %s", tx_c, (int)ino_max,
+		snprintf(ino_str, INO_STR_LEN, "%s%*ju %s", tx_c, (int)ino_max,
 			(uintmax_t)props->inode, df_c);
 	}
 
-				/* ############################
-				 * #  7. FILES COUNTER (DIRS) #
-				 * ############################ */
+	char fc_str[FC_STR_LEN];
+	construct_files_counter(props, fc_str, fc_max);
 
-	char fc_str[(MAX_COLOR * 2) + 32];
-	construct_files_counter(props, fc_str, sizeof(fc_str), fc_max);
+	char xattr_str[2] = {0};
+	*xattr_str = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 
-
-					/* ######################
-					 * #   8. PRINT STUFF   #
-					 * ###################### */
+	/* Print stuff */
 
 	/* These are just two characters, which we would normally print like this:
 	 * %c <-- x ? 'x' : 0
 	 * However, some terminals, like 'cons25', print the 0 above graphically,
 	 * as a space, which is not what we want here. To fix this, let's print
 	 * these chars as strings, and not as chars */
-	char xattr_s[2] = {0};
-	*xattr_s = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
-
 	printf("%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
@@ -1895,14 +1872,12 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		   "%s\n", /* Size / device info */
 
 		prop_fields.counter != 0 ? fc_str : "",
-		prop_fields.inode == 1 ? ino_s : "",
-		prop_fields.perm != 0 ? attr_s : "",
-		xattr_s,
-		prop_fields.ids == 1 ? id_s : "",
-		prop_fields.time != 0 ? time_s : "",
-		prop_fields.size != 0 ? size_s : "");
-
-	free(size_type);
+		prop_fields.inode == 1 ? ino_str : "",
+		prop_fields.perm != 0 ? perm_str : "",
+		xattr_str,
+		prop_fields.ids == 1 ? id_str : "",
+		prop_fields.time != 0 ? time_str : "",
+		prop_fields.size != 0 ? size_str : "");
 
 	return EXIT_SUCCESS;
 }
