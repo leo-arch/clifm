@@ -144,6 +144,9 @@
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
 #if defined(__TINYC__)
+//# define __STDC_NO_VLA__ 1
+/* Compilation fails on TinyC since 2021 due to regex.h.
+ * See https://www.mail-archive.com/bug-gnulib@gnu.org/msg41564.html */
 void *__dso_handle;
 #endif /* __TINYC__ */
 

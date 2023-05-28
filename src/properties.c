@@ -1192,6 +1192,10 @@ static void
 print_file_details(char *filename, const struct stat *attr, const char file_type,
 	const int file_perm)
 {
+#if !defined(LINUX_FILE_ATTRS) && !defined(_LINUX_XATTR)
+	UNUSED(filename);
+#endif
+
 	struct passwd *owner = getpwuid(attr->st_uid);
 	struct group *group = getgrgid(attr->st_gid);
 
@@ -1311,7 +1315,7 @@ print_timestamps(char *filename, const struct stat *attr)
 		cbdate = btf;
 	}
 #  else /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE */
-	time_t bt = attr.st_birthtime;
+	time_t bt = attr->st_birthtime;
 	gen_time_str(creation_time, sizeof(creation_time), bt);
 
 	if (conf.colorize == 1 && !*dd_c) {
