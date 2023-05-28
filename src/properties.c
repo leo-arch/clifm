@@ -568,14 +568,14 @@ set_file_perms(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	int j;
-	for (j = 1; args[j]; j++) {
-		if (!strchr(args[j], '\\'))
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		if (!strchr(args[i], '\\'))
 			continue;
-		char *t = dequote_str(args[j], 0);
+		char *t = dequote_str(args[i], 0);
 		if (t) {
-			free(args[j]);
-			args[j] = t;
+			free(args[i]);
+			args[i] = t;
 		}
 	}
 
@@ -598,13 +598,13 @@ set_file_perms(char **args)
 	char *octal_str = IS_DIGIT(*new_perms) ? new_perms : perm2octal(new_perms);
 
 	int ret = EXIT_SUCCESS;
-	size_t i, n = 0;
+	size_t n = 0;
 	mode_t mode = (mode_t)strtol(octal_str, 0, 8);
 	for (i = 1; args[i]; i++) {
 		if (fchmodat(AT_FDCWD, args[i], mode, 0) == EXIT_SUCCESS) {
 			n++;
 		} else {
-			xerror("pc: Changing permissions of '%s': %s\n",
+			xerror(_("pc: Changing permissions of '%s': %s\n"),
 				args[i], strerror(errno));
 			ret = errno;
 		}
@@ -617,6 +617,7 @@ set_file_perms(char **args)
 	free(new_perms);
 	if (octal_str != new_perms)
 		free(octal_str);
+
 	return ret;
 }
 
@@ -867,23 +868,11 @@ get_color_size256(const off_t s, char *str, const size_t len)
 	long long base = xargs.si == 1 ? 1000 : 1024;
 	uint8_t n = 0;
 
-/* LSD uses this criteria and colors:
- * Bytes and Kb = small (229)
- * Mb = medium (216)
- * * = large (172) */
-
-/* EXA uses this criteria and colors:
- * Byte (118)
- * Kb (190)
- * Mb (226)
- * Gb (220)
- * Larger (214) */
-
-	if      (s <                base) n = 1; // Bytes
-	else if (s <           base*base) n = 2; // Kb
-	else if (s <      base*base*base) n = 3; // Mb
-	else if (s < base*base*base*base) n = 4; // Gb
-	else				              n = 5; // Larger
+	if      (s <                base) n = 1; /* Bytes */
+	else if (s <           base*base) n = 2; /* Kb */
+	else if (s <      base*base*base) n = 3; /* Mb */
+	else if (s < base*base*base*base) n = 4; /* Gb */
+	else				              n = 5; /* Larger */
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm",
 		size_shades.shades[n].attr,
@@ -899,17 +888,12 @@ get_color_age256(const time_t t, char *str, const size_t len)
 	time_t age = props_now - t;
 	uint8_t n;
 
-/* LSD uses this criteria and colors:
- * HourOld (40)
- * DayOld (42)
- * Older (36) */
-
 	if      (age <             0LL) n = 0;
-	else if (age <=        60*60LL) n = 1; // One hour or less
-	else if (age <=     24*60*60LL) n = 2; // One day or less
-	else if (age <=   7*24*60*60LL) n = 3; // One weak or less
-	else if (age <= 4*7*24*60*60LL) n = 4; // One month or less
-	else                            n = 5; // Older
+	else if (age <=        60*60LL) n = 1; /* One hour or less */
+	else if (age <=     24*60*60LL) n = 2; /* One day or less */
+	else if (age <=   7*24*60*60LL) n = 3; /* One weak or less */
+	else if (age <= 4*7*24*60*60LL) n = 4; /* One month or less */
+	else                            n = 5; /* Older */
 
 	snprintf(str, len, "\x1b[0;%d;38;5;%dm",
 		date_shades.shades[n].attr,
@@ -922,9 +906,9 @@ get_color_size8(const off_t s, char *str, const size_t len)
 	long long base = xargs.si == 1 ? 1000 : 1024;
 	uint8_t n;
 
-	if      (s <      base*base) n = 1; // Byte and Kb
-	else if (s < base*base*base) n = 2; // Mb
-	else		                 n = 3; // Larger
+	if      (s <      base*base) n = 1; /* Byte and Kb */
+	else if (s < base*base*base) n = 2; /* Mb */
+	else		                 n = 3; /* Larger */
 
 	snprintf(str, len, "\x1b[0;%d;%dm",
 		size_shades.shades[n].attr,
@@ -938,9 +922,9 @@ get_color_age8(const time_t t, char *str, const size_t len)
 	uint8_t n;
 
 	if      (age <         0LL) n = 0;
-	else if (age <=    60*60LL) n = 1; // One hour or less
-	else if (age <= 24*60*60LL) n = 2; // One day or less
-	else                        n = 3; // Older
+	else if (age <=    60*60LL) n = 1; /* One hour or less */
+	else if (age <= 24*60*60LL) n = 2; /* One day or less */
+	else                        n = 3; /* Older */
 
 	snprintf(str, len, "\x1b[0;%d;%dm",
 		date_shades.shades[n].attr,
@@ -1096,161 +1080,127 @@ print_extended_attributes(char *s)
 }
 #endif /* _LINUX_XATTR */
 
-static int
-get_properties(char *filename, const int dsize)
+static char *
+get_file_type_and_color(const char *filename, const struct stat *attr,
+	char *file_type, char **ctype)
 {
-	if (!filename || !*filename)
-		return EXIT_FAILURE;
+	char *color = fi_c;
 
-	/* Remove ending slash */
-/*	size_t len = strlen(filename);
-	if (len > 1 && filename[len - 1] == '/')
-		filename[len - 1] = '\0'; */
-
-	/* Remove leading "./" */
-	if (*filename == '.' && *(filename + 1) == '/' && *(filename + 2))
-		filename += 2;
-
-	/* Check file existence */
-	struct stat attr;
-	if (lstat(filename, &attr) == -1) {
-		xerror("prop: %s: %s\n", filename, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	/* Get file size */
-	char *size_type = get_size_unit(FILE_SIZE);
-
-	/* Get file type (and color) */
-	char file_type = 0;
-	char *linkname = (char *)NULL, *color = (char *)NULL;
-
-	char *cnum_val = do_c, /* Color for properties octal value */
-		 *ctype = dn_c,    /* Color for file type */
-		 *cid = BOLD,      /* Color for UID and GID */
-		 *csize = dz_c,    /* Color for file size */
-		 *cdate = dd_c,    /* Color for dates */
-		 *cbold = BOLD,    /* Just bold */
-		 *cend = df_c;     /* Ending olor */
-
-	int file_perm = check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
-	if (file_perm == 1)
-		cid = dg_c;
-
-	char sf[MAX_SHADE_LEN];
-	*sf = '\0';
-	if (conf.colorize == 1 && !*dz_c && !S_ISDIR(attr.st_mode)) {
-		get_color_size(FILE_SIZE, sf, sizeof(sf));
-		csize = sf;
-	}
-
-	switch (attr.st_mode & S_IFMT) {
-	case S_IFREG: {
-		file_type = '.';
-		int ext = 0;
-		color = get_regfile_color(filename, &attr, &ext);
+	switch (attr->st_mode & S_IFMT) {
+	case S_IFREG:
+		*file_type = '.';
+		if (conf.colorize == 1) {
+			int ext = 0;
+			color = get_regfile_color(filename, attr, &ext);
 		}
 		break;
 
 	case S_IFDIR:
-		file_type = 'd';
-		ctype = di_c;
+		*file_type = 'd';
+		*ctype = di_c;
 		if (conf.colorize == 0)
-			color = di_c;
-		else if (check_file_access(attr.st_mode, attr.st_uid, attr.st_gid) == 0)
+			break;
+
+		if (check_file_access(attr->st_mode, attr->st_uid,
+		attr->st_gid) == 0)
 			color = nd_c;
 		else
-			color = get_dir_color(filename, attr.st_mode, attr.st_nlink, -1);
+			color = get_dir_color(filename, attr->st_mode, attr->st_nlink, -1);
 		break;
 
 	case S_IFLNK:
-		file_type = 'l';
-		ctype = ln_c;
-		linkname = realpath(filename, (char *)NULL);
-		color = (conf.colorize == 0 || linkname) ? ln_c : or_c;
+		*file_type = 'l';
+		*ctype = color = ln_c;
 		break;
 
-	case S_IFBLK:  file_type = 'b'; color = ctype = bd_c; break;
-	case S_IFCHR:  file_type = 'c'; color = ctype = cd_c; break;
-	case S_IFIFO:  file_type = 'p'; color = ctype = pi_c; break;
-	case S_IFSOCK: file_type = 's'; color = ctype = so_c; break;
-	default:       file_type = '?'; color = no_c; break;
+	case S_IFBLK:  *file_type = 'b'; color = *ctype = bd_c; break;
+	case S_IFCHR:  *file_type = 'c'; color = *ctype = cd_c; break;
+	case S_IFIFO:  *file_type = 'p'; color = *ctype = pi_c; break;
+	case S_IFSOCK: *file_type = 's'; color = *ctype = so_c; break;
+	default:       *file_type = '?'; color = no_c; break;
 	}
 
-	if (!color)
-		color = fi_c;
+	if (conf.colorize == 0)
+		color = *ctype = df_c;
 
-	if (conf.colorize == 0) {
-		cdate = df_c;
-		csize = df_c;
-		cid = df_c;
-		cnum_val = df_c;
-		color = df_c;
-		ctype = df_c;
-		cend = df_c;
-		cbold = df_c;
-	}
+	return color;
+}
 
-	nlink_t link_n = attr.st_nlink;
-	uid_t owner_id = attr.st_uid;
-	gid_t group_id = attr.st_gid;
-	struct passwd *owner = getpwuid(owner_id);
-	struct group *group = getgrgid(group_id);
-
-	char *wname = (char *)NULL;
-	size_t wlen = wc_xstrlen(filename);
-	if (wlen == 0)
-		wname = truncate_wname(filename);
-
+static void
+print_file_perms(char *filename, const struct stat *attr, const char file_type,
+	const char *ctype)
+{
 	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
 	if (xargs.no_bold != 1)
 		remove_bold_attr(t_ctype);
 
-	/* File properties */
-	struct perms_t perms = get_file_perms(attr.st_mode);
+	struct perms_t perms = get_file_perms(attr->st_mode);
 	printf(_("(%s%04o%s)%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s%s "
 		"Links: %s%zu%s "),
-		cnum_val, attr.st_mode & 07777, cend,
+		do_c, attr->st_mode & 0777, df_c,
 		t_ctype, file_type, dn_c,
 		perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
 		perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
-		perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend,
-		is_acl(filename) ? "+" : "", cbold, (size_t)link_n, cend);
+		perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c,
+		is_acl(filename) ? "+" : "", BOLD, (size_t)attr->st_nlink, df_c);
 
 	free(t_ctype);
+}
 
-//	int link_to_dir = 0;
+static void
+print_file_name(char *filename, const char *color, const char file_type,
+	const mode_t mode)
+{
+	char *wname = wc_xstrlen(filename) == 0 ? truncate_wname(filename)
+		: (char *)NULL;
 
-	if (file_type == 0) {
-		printf(_("\tName: %s%s%s\n"), no_c, wname ? wname : filename, df_c);
-	} else if (file_type != 'l') {
-		printf(_("\tName: %s%s%s\n"), color, wname ? wname : filename, df_c);
+	char *linkname = S_ISLNK(mode) ? realpath(filename, (char *)NULL)
+		: (char *)NULL;
+
+	if (file_type != 'l') {
+		printf(_("\tName: %s%s%s\n"), file_type == 0 ? no_c : color,
+			wname ? wname : filename, df_c);
+
 	} else if (linkname) {
-//		char *link_color = get_link_color(linkname, &link_to_dir, dsize);
 		char *link_color = get_link_color(linkname);
-		char *n = abbreviate_file_name(linkname);
-		printf(_("\tName: %s%s%s -> %s%s%s\n"), color, wname ? wname
-			: filename, df_c, link_color, n ? n : linkname, NC);
-		if (n != linkname)
-			free(n);
+		char *name = abbreviate_file_name(linkname);
+
+		printf(_("\tName: %s%s%s -> %s%s%s\n"), ln_c, wname ? wname
+			: filename, df_c, link_color, name ? name : linkname, NC);
+
+		if (name != linkname)
+			free(name);
 		free(linkname);
+
 	} else { /* Broken link */
 		char target[PATH_MAX] = "";;
 		ssize_t ret = readlinkat(AT_FDCWD, filename, target, sizeof(target));
+
 		if (ret != -1 && *target) {
-			printf(_("\tName: %s%s%s -> %s%s%s (broken link)\n"), color,
+			printf(_("\tName: %s%s%s -> %s%s%s (broken link)\n"), or_c,
 				wname ? wname : filename, df_c, uf_c, target, df_c);
 		} else {
-			printf(_("\tName: %s%s%s -> ???\n"), color, wname ? wname
+			printf(_("\tName: %s%s%s -> ???\n"), or_c, wname ? wname
 				: filename, df_c);
 		}
 	}
 
 	free(wname);
+}
 
-	/* File type */
+static void
+print_file_details(char *filename, const struct stat *attr, const char file_type,
+	const int file_perm)
+{
+	struct passwd *owner = getpwuid(attr->st_uid);
+	struct group *group = getgrgid(attr->st_gid);
+
+	char *id_color = conf.colorize == 0 ? "" : (file_perm == 1 ? dg_c : BOLD);
+	char *cend = conf.colorize == 1 ? df_c : "";
+
 	if (conf.colorize == 1)
 		printf("%s", BOLD);
+
 	switch (file_type) {
 	case '.': printf(_("Regular file")); break;
 	case 'b': printf(_("Block special file")); break;
@@ -1261,35 +1211,34 @@ get_properties(char *filename, const int dsize)
 	case 's': printf(_("Socket")); break;
 	default: break;
 	}
+
 	if (conf.colorize == 1)
 		printf("%s", cend);
 
-	/* Details */
-	printf(_("\tBlocks: %s%jd%s"), cbold, (intmax_t)attr.st_blocks, cend);
-	printf(_("  Block size: %s%d%s"), cbold, S_BLKSIZE, cend);
-	printf(_("  IO Block: %s%jd%s\n"), cbold, (intmax_t)attr.st_blksize, cend);
+	printf(_("\tBlocks: %s%jd%s"), BOLD, (intmax_t)attr->st_blocks, cend);
+	printf(_("  Block size: %s%d%s"), BOLD, S_BLKSIZE, cend);
+	printf(_("  IO Block: %s%jd%s\n"), BOLD, (intmax_t)attr->st_blksize, cend);
 
-	dev_t d = attr.st_dev;
-	printf(_("Device: %s%ju,%ju%s"), cbold, (uintmax_t)major(d),
-		(uintmax_t)minor(d), cend);
-	printf(_("\tInode: %s%ju%s"), cbold, (uintmax_t)attr.st_ino, cend);
+	printf(_("Device: %s%ju,%ju%s"), BOLD, (uintmax_t)major(attr->st_dev),
+		(uintmax_t)minor(attr->st_dev), cend);
+	printf(_("\tInode: %s%ju%s"), BOLD, (uintmax_t)attr->st_ino, cend);
 
-	printf(_("  Uid: %s%u (%s)%s"), cid, attr.st_uid, !owner ? _("UNKNOWN")
-		: owner->pw_name, cend);
-	printf(_("  Gid: %s%u (%s)%s"), cid, attr.st_gid, !group ? _("UNKNOWN")
-		: group->gr_name, cend);
+	printf(_("  Uid: %s%u (%s)%s"), id_color, attr->st_uid, !owner
+		? _("UNKNOWN") : owner->pw_name, cend);
+	printf(_("  Gid: %s%u (%s)%s"), id_color, attr->st_gid, !group
+		? _("UNKNOWN") : group->gr_name, cend);
 
-	if (S_ISCHR(attr.st_mode) || S_ISBLK(attr.st_mode)) {
-		d = attr.st_rdev;
-		printf(_("  Device type: %s%ju,%ju%s\n"), cbold, (uintmax_t)major(d),
-			(uintmax_t)minor(d), cend);
+	if (S_ISCHR(attr->st_mode) || S_ISBLK(attr->st_mode)) {
+		printf(_("  Device type: %s%ju,%ju%s\n"), BOLD,
+			(uintmax_t)major(attr->st_rdev), (uintmax_t)minor(attr->st_rdev),
+			cend);
 	} else {
 		putchar('\n');
 	}
 
 #if defined(LINUX_FILE_ATTRS)
 	printf("Attributes: \t");
-	if (S_ISDIR(attr.st_mode) || S_ISREG(attr.st_mode))
+	if (S_ISDIR(attr->st_mode) || S_ISREG(attr->st_mode))
 		print_file_attrs(get_file_attrs(filename));
 	else
 		puts("Unavailable");
@@ -1299,29 +1248,39 @@ get_properties(char *filename, const int dsize)
 	printf("Xattributes:\t");
 	print_extended_attributes(filename);
 #endif /* _LINUX_XATTR */
+}
 
-	/* Timestamps */
+static void
+print_timestamps(char *filename, const struct stat *attr)
+{
+#if !defined(_STATX)
+	UNUSED(filename);
+#endif
+
+	char *cdate = conf.colorize == 1 ? dd_c : "";
+	char *cend = conf.colorize == 1 ? df_c : "";
+
 	char mod_time[MAX_TIME_STR];
 	char access_time[MAX_TIME_STR];
 	char change_time[MAX_TIME_STR];
 
-	gen_time_str(mod_time, sizeof(mod_time), attr.st_mtime);
-	gen_time_str(access_time, sizeof(access_time), attr.st_atime);
-	gen_time_str(change_time, sizeof(change_time), attr.st_ctime);
+	gen_time_str(mod_time, sizeof(mod_time), attr->st_mtime);
+	gen_time_str(access_time, sizeof(access_time), attr->st_atime);
+	gen_time_str(change_time, sizeof(change_time), attr->st_ctime);
 
-	char *cadate = cdate,
-		 *cmdate = cdate,
-		 *ccdate = cdate;
+	char *cadate = cdate;
+	char *cmdate = cdate;
+	char *ccdate = cdate;
 
 	char atf[MAX_SHADE_LEN], mtf[MAX_SHADE_LEN], ctf[MAX_SHADE_LEN];
 	*atf = *mtf = *ctf = '\0';
 	if (conf.colorize == 1 && !*dd_c) {
 		props_now = time(NULL);
-		get_color_age(attr.st_atime, atf, sizeof(atf));
+		get_color_age(attr->st_atime, atf, sizeof(atf));
 		cadate = atf;
-		get_color_age(attr.st_mtime, mtf, sizeof(mtf));
+		get_color_age(attr->st_mtime, mtf, sizeof(mtf));
 		cmdate = mtf;
-		get_color_age(attr.st_ctime, ctf, sizeof(ctf));
+		get_color_age(attr->st_ctime, ctf, sizeof(ctf));
 		ccdate = ctf;
 	}
 
@@ -1364,23 +1323,33 @@ get_properties(char *filename, const int dsize)
 	printf(_("Birth: \t\t%s%s%s\n"), cbdate, creation_time, cend);
 # endif /* HAVE_ST_BIRTHTIME || __BSD_VISIBLE || _STATX */
 #endif /* !_BE_POSIX && !__DragonFly__ && !__OpenBSD__ */
+}
 
-////////////
-//	link_to_dir = 0;
-////////////
+static void
+print_file_size(char *filename, const struct stat *attr, const int file_perm,
+	const int full_dirsize)
+{
+	char *size_unit = get_size_unit(FILE_SIZE_PTR);
+	char *csize = dz_c;
+	char *cend = conf.colorize == 1 ? df_c : "";
 
-	/* File size (human size / bytes (apparent|real [/ si])) */
-//	if (!S_ISDIR(attr.st_mode) && link_to_dir == 0) {
-	if (!S_ISDIR(attr.st_mode)) {
-		printf(_("Size: \t\t%s%s%s"), csize, size_type ? size_type : "?", cend);
+	char sf[MAX_SHADE_LEN];
+	*sf = '\0';
+	if (conf.colorize == 1 && !*dz_c && !S_ISDIR(attr->st_mode)) {
+		get_color_size(FILE_SIZE_PTR, sf, sizeof(sf));
+		csize = sf;
+	}
 
-		int bigger_than_bytes = (conf.apparent_size == 1 ? attr.st_size
-			: (attr.st_blocks * S_BLKSIZE)) > (xargs.si == 1 ? 1000 : 1024);
+	if (!S_ISDIR(attr->st_mode)) {
+		printf(_("Size: \t\t%s%s%s"), csize, size_unit ? size_unit : "?", cend);
+
+		int bigger_than_bytes = (conf.apparent_size == 1 ? attr->st_size
+			: (attr->st_blocks * S_BLKSIZE)) > (xargs.si == 1 ? 1000 : 1024);
 
 		if (bigger_than_bytes == 1) {
 			printf(" / %s%juB%s", csize, conf.apparent_size == 1
-				? (uintmax_t)attr.st_size
-				: (uintmax_t)attr.st_blocks * S_BLKSIZE, cend);
+				? (uintmax_t)attr->st_size
+				: (uintmax_t)attr->st_blocks * S_BLKSIZE, cend);
 		}
 
 		printf(" (%s%s)\n", conf.apparent_size == 1 ? _("apparent")
@@ -1390,12 +1359,11 @@ get_properties(char *filename, const int dsize)
 		goto END;
 	}
 
-	if (dsize == 0) /* We're running 'p', not 'pp' */
+	if (full_dirsize == 0) /* We're running 'p', not 'pp'. */
 		goto END;
 
 	int du_status = 0;
 	off_t total_size = file_perm == 1
-//		? get_total_size(link_to_dir, filename, &du_status) : (-2);
 		? get_total_size(filename, &du_status) : (-2);
 
 	if (total_size < 0) {
@@ -1442,10 +1410,45 @@ get_properties(char *filename, const int dsize)
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
 	}
+
 	free(human_size);
 
 END:
-	free(size_type);
+	free(size_unit);
+}
+
+/* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
+ * If DSIZE is set to 1, print full directory size as well using du(1). */
+static int
+get_properties(char *filename, const int full_dirsize)
+{
+	if (!filename || !*filename)
+		return EXIT_FAILURE;
+
+	/* Remove leading "./" */
+	if (*filename == '.' && *(filename + 1) == '/' && *(filename + 2))
+		filename += 2;
+
+	/* Check file existence */
+	struct stat attr;
+	if (lstat(filename, &attr) == -1) {
+		xerror("prop: %s: %s\n", filename, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	char file_type = 0;
+	char *ctype = dn_c; /* Color for file type char */
+
+	int file_perm = check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
+
+	char *color = get_file_type_and_color(filename, &attr, &file_type, &ctype);
+
+	print_file_perms(filename, &attr, file_type, ctype);
+	print_file_name(filename, color, file_type, attr.st_mode);
+	print_file_details(filename, &attr, file_type, file_perm);
+	print_timestamps(filename, &attr);
+	print_file_size(filename, &attr, file_perm, full_dirsize);
+
 	return EXIT_SUCCESS;
 }
 
@@ -1509,10 +1512,10 @@ calc_relative_time(const time_t age, char *s)
 	}
 }
 
-/* Compose the properties line for the current file name
+/* Compose the properties line for the current file name.
  * This function is called by list_dir(), in listing.c, for each file name
  * in the current directory when running in long view mode, and after
- * printing the corresponding ELN */
+ * printing the corresponding ELN. */
 int
 print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	const size_t ino_max, const size_t fc_max, const size_t size_max,
@@ -1656,7 +1659,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend);
 	} else if (prop_fields.perm == PERM_NUMERIC) {
 		snprintf(attr_s, sizeof(attr_s), "%s%04o%s", do_c,
-			props->mode & 07777, cend);
+			props->mode & 0777, cend);
 	} else {
 		*attr_s = '\0';
 	}
@@ -1851,20 +1854,15 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 }
 
 int
-properties_function(char **args)
+properties_function(char **args, const int full_dirsize)
 {
 	if (!args)
 		return EXIT_FAILURE;
 
 	size_t i;
 	int exit_status = EXIT_SUCCESS;
-	int _dir_size = 0;
 
-	if (*args[0] == 'p' && args[0][1] == 'p' && !args[0][2])
-		_dir_size = 1;
-
-	/* If "pr file..." */
-	for (i = 1; i <= args_n; i++) {
+	for (i = 0; args[i]; i++) {
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
@@ -1877,7 +1875,7 @@ properties_function(char **args)
 			args[i] = deq_file;
 		}
 
-		if (get_properties(args[i], _dir_size) != 0)
+		if (get_properties(args[i], full_dirsize) != 0)
 			exit_status = EXIT_FAILURE;
 	}
 

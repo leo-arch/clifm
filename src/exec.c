@@ -1315,7 +1315,8 @@ props_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	return properties_function(args);
+	int full_dirsize = args[0][1] == 'p'; /* Command is 'pp' */
+	return properties_function(args + 1, full_dirsize);
 }
 
 static int

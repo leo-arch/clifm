@@ -55,7 +55,7 @@
 
 __BEGIN_DECLS
 
-int  properties_function(char **);
+int  properties_function(char **, const int);
 void print_analysis_stats(off_t, off_t, char *, char *);
 int  print_entry_props(const struct fileinfo *, size_t, const size_t,
 	 const size_t, const size_t, const size_t, const uint8_t);
