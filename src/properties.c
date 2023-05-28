@@ -1850,16 +1850,17 @@ print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 	char fc_str[FC_STR_LEN];
 	construct_files_counter(props, fc_str, maxes->files_counter);
 
+	/* We only need a single character to print the xattributes indicator,
+	 * which would be normally printed like this:
+	 * printf("%c", x ? 'x' : 0);
+	 * However, some terminals, like 'cons25', print the 0 above graphically,
+	 * as a space, which is not what we want here. To fix this, let's
+	 * construct this char as a string. */
 	char xattr_str[2] = {0};
 	*xattr_str = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 
 	/* Print stuff */
 
-	/* These are just two characters, which we would normally print like this:
-	 * %c <-- x ? 'x' : 0
-	 * However, some terminals, like 'cons25', print the 0 above graphically,
-	 * as a space, which is not what we want here. To fix this, let's print
-	 * these chars as strings, and not as chars */
 	printf("%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
