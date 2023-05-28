@@ -56,9 +56,9 @@
 __BEGIN_DECLS
 
 int  properties_function(char **, const int);
-void print_analysis_stats(off_t, off_t, char *, char *);
-int  print_entry_props(const struct fileinfo *, size_t, const size_t,
-	 const size_t, const size_t, const size_t, const uint8_t);
+void print_analysis_stats(const off_t, const off_t, const char *, const char *);
+int  print_entry_props(const struct fileinfo *, const struct maxes_t *,
+	const uint8_t);
 int  set_file_perms(char **);
 int  set_file_owner(char **);
 

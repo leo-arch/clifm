@@ -1532,7 +1532,8 @@ calc_relative_time(const time_t age, char *s)
 }
 
 static void
-construct_and_print_filename(const struct fileinfo *props, size_t max)
+construct_and_print_filename(const struct fileinfo *props,
+	const size_t max_namelen)
 {
 	/* If file name length is greater than max, truncate it to max (later a
 	 * tilde (~) will be appended to let the user know the file name was
@@ -1551,17 +1552,14 @@ construct_and_print_filename(const struct fileinfo *props, size_t max)
 	size_t n = (max_files > UNSET && files > (size_t)max_files)
 		? (size_t)max_files : files;
 	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen;
-#ifndef _NO_ICONS
-	if (conf.icons == 1) {
+
+	if (conf.icons == 1)
 		cur_len += 3;
-		max += 3;
-	}
-#endif
 
 	int diff = 0;
 	char *ext_name = (char *)NULL;
-	if (cur_len > max) {
-		int rest = (int)(cur_len - max);
+	if (cur_len > max_namelen) {
+		int rest = (int)(cur_len - max_namelen);
 		trim = TRIM_NO_EXT;
 		size_t ext_len = 0;
 		ext_name = get_ext_info_long(props->name, plen, &trim, &ext_len);
@@ -1579,7 +1577,7 @@ construct_and_print_filename(const struct fileinfo *props, size_t max)
 	}
 
 	/* Calculate pad for each file name */
-	int pad = (int)(max - cur_len);
+	int pad = (int)(max_namelen - cur_len);
 	if (pad < 0)
 		pad = 0;
 
@@ -1810,11 +1808,10 @@ set_file_type_and_color(const mode_t mode, char *type, char **color)
 
 /* Compose the properties line for the current file name.
  * This function is called by list_dir(), in listing.c, for each file name
- * in the current directory when running in long view mode, and after
- * printing the corresponding ELN. */
+ * in the current directory when running in long view mode (after
+ * printing the corresponding ELN). */
 int
-print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
-	const size_t ino_max, const size_t fc_max, const size_t size_max,
+print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 	const uint8_t have_xattr)
 {
 	char file_type = 0; /* File type indicator */
@@ -1826,7 +1823,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	 * print only the desired ones. This is specified via the PropFields
 	 * option in the config file. */
 
-	construct_and_print_filename(props, max);
+	construct_and_print_filename(props, maxes->name);
 
 	char perm_str[PERM_STR_LEN];
 	construct_file_perms(props->mode, perm_str, file_type, ctype);
@@ -1835,23 +1832,23 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	construct_timestamp(time_str, props->ltime);
 
 	/* size_str is either file size or "major,minor" IDs in case of special
-	 * files (char and block devs). */
+	 * files (char and block devices). */
 	char size_str[SIZE_STR_LEN];
-	int file_perm = construct_file_size(props, size_str, size_max);
+	int file_perm = construct_file_size(props, size_str, maxes->size);
 
 	char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
 	char id_str[ID_STR_LEN];
-	construct_id_field(props, id_str, id_color, ug_max);
+	construct_id_field(props, id_str, id_color, maxes->ids);
 
 	char ino_str[INO_STR_LEN];
 	*ino_str = '\0';
 	if (prop_fields.inode == 1) {
-		snprintf(ino_str, INO_STR_LEN, "%s%*ju %s", tx_c, (int)ino_max,
+		snprintf(ino_str, INO_STR_LEN, "%s%*ju %s", tx_c, (int)maxes->inode,
 			(uintmax_t)props->inode, df_c);
 	}
 
 	char fc_str[FC_STR_LEN];
-	construct_files_counter(props, fc_str, fc_max);
+	construct_files_counter(props, fc_str, maxes->files_counter);
 
 	char xattr_str[2] = {0};
 	*xattr_str = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
@@ -1884,7 +1881,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 
 /* Print final stats for the disk usage analyzer mode: total and largest file */
 void
-print_analysis_stats(off_t total, off_t largest, char *color, char *name)
+print_analysis_stats(const off_t total, const off_t largest,
+	const char *color, const char *name)
 {
 	char *t = (char *)NULL;
 	char *l = (char *)NULL;

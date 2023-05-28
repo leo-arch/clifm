@@ -746,9 +746,15 @@ print_long_mode(size_t *counter, int *reset_pager, const int pad,
 			printf("%s%c%s", ind_chr_color, ind_chr, df_c);
 		}
 
+		struct maxes_t maxes;
+		maxes.name = (size_t)space_left + (conf.icons == 1 ? 3 : 0);
+		maxes.ids = ug_max;
+		maxes.inode = ino_max;
+		maxes.files_counter = fc_max;
+		maxes.size = size_max;
+
 		/* Print the remaining part of the entry */
-		print_entry_props(&file_info[i], (size_t)space_left, ug_max,
-			ino_max, fc_max, size_max, have_xattr);
+		print_entry_props(&file_info[i], &maxes, have_xattr);
 	}
 }
 
