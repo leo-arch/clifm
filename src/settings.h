@@ -167,8 +167,8 @@ xf=1;31:xs=0;32:"
 #define DEF_DN_C     "\x1b[0;2;37m" /* Dash (no attribute) */
 #define DEF_DO_C     "\x1b[0;36m" /* Perms in octal */
 #define DEF_DO_C256  "\x1b[0;38;5;79m"
-#define DEF_DP_C     "\x1b[0;36m" /* SUID, SGID, Sticky */
-#define DEF_DP_C256  "\x1b[0;38;5;79m"
+#define DEF_DP_C     "\x1b[0;35m" /* SUID, SGID, Sticky */
+#define DEF_DP_C256  "\x1b[0;38;5;140m"
 #define DEF_DR_C     "\x1b[0;33m" /* Read perm */
 #define DEF_DR_C256  "\x1b[0;38;5;228m"
 #define DEF_DW_C     "\x1b[0;31m" /* Write perm */
