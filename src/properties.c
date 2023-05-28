@@ -957,48 +957,6 @@ get_color_age(const time_t t, char *str, const size_t len)
 	}
 }
 
-/* Print final stats for the disk usage analyzer mode: total and largest file */
-void
-print_analysis_stats(off_t total, off_t largest, char *color, char *name)
-{
-	char *t = (char *)NULL;
-	char *l = (char *)NULL;
-
-	if (prop_fields.size == PROP_SIZE_HUMAN) {
-		t = get_size_unit(total);
-		l = get_size_unit(largest);
-	} else {
-		t = (char *)xnmalloc(32, sizeof(char));
-		l = (char *)xnmalloc(32, sizeof(char));
-		snprintf(t, 32, "%ju", (uintmax_t)total);
-		snprintf(l, 32, "%ju", (uintmax_t)largest);
-	}
-
-	char *tsize = _BGREEN, *lsize = _BGREEN;
-
-	char ts[MAX_SHADE_LEN], ls[MAX_SHADE_LEN];
-	if (term_caps.color > 0 && !*dz_c) {
-		get_color_size(total, ts, sizeof(ts));
-		tsize = ts;
-		get_color_size(largest, ls, sizeof(ls));
-		lsize = ls;
-	}
-
-	printf(_("Total size:   %s%s%s\n"
-		"Largest file: %s%s%s %c%s%s%s%c\n"),
-		conf.colorize == 1 ? tsize : "" , t ? t : "?",
-		conf.colorize == 1 ? tx_c : "",
-		conf.colorize == 1 ? lsize : "" , l ? l : "?",
-		conf.colorize == 1 ? tx_c : "",
-		name ? '[' : 0,
-		(conf.colorize == 1 && color) ? color : "",
-		name ? name : "", tx_c,
-		name ? ']' : 0);
-
-	free(t);
-	free(l);
-}
-
 #if defined(_LINUX_XATTR)
 static int
 print_extended_attributes(char *s)
@@ -1456,6 +1414,39 @@ get_properties(char *filename, const int full_dirsize)
 	return EXIT_SUCCESS;
 }
 
+int
+properties_function(char **args, const int full_dirsize)
+{
+	if (!args)
+		return EXIT_FAILURE;
+
+	size_t i;
+	int exit_status = EXIT_SUCCESS;
+
+	for (i = 0; args[i]; i++) {
+		if (strchr(args[i], '\\')) {
+			char *deq_file = dequote_str(args[i], 0);
+			if (!deq_file) {
+				xerror(_("pr: %s: Error dequoting file name\n"), args[i]);
+				exit_status = EXIT_FAILURE;
+				continue;
+			}
+
+			free(args[i]);
+			args[i] = deq_file;
+		}
+
+		if (get_properties(args[i], full_dirsize) != 0)
+			exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
+/* #################################################################
+ * The following functions handle file properties in long view mode
+ * #################################################################*/
+
 static char *
 get_ext_info_long(const char *name, const size_t name_len, int *trim,
 	size_t *ext_len)
@@ -1516,85 +1507,16 @@ calc_relative_time(const time_t age, char *s)
 	}
 }
 
-/* Compose the properties line for the current file name.
- * This function is called by list_dir(), in listing.c, for each file name
- * in the current directory when running in long view mode, and after
- * printing the corresponding ELN. */
-int
-print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
-	const size_t ino_max, const size_t fc_max, const size_t size_max,
-	const uint8_t have_xattr)
+static void
+construct_and_print_filename(const struct fileinfo *props, size_t max)
 {
-	/* Let's get file properties and the corresponding colors */
-
-	char file_type = 0; /* File type indicator */
-	char *ctype = dn_c, /* Color for file type */
-		 *cdate = dd_c, /* Color for dates */
-		 *cid = df_c,   /* Color for UID and GID */
-		 *csize = props->dir ? dz_c : df_c, /* Directories size */
-		 *cend = df_c;  /* Ending Color */
-
-	/* Let's construct color shades for file size and time fields */
-	char sf[MAX_SHADE_LEN], df[MAX_SHADE_LEN];
-
-	if (conf.colorize == 1) {
-		off_t s = props->size;
-		if (props->dir == 1 && conf.full_dir_size == 1)
-			s = props->size * (xargs.si == 1 ? 1000 : 1024);
-
-		if (!*dz_c) {
-			get_color_size(s, sf, sizeof(sf));
-			csize = sf;
-		}
-
-		if (!*dd_c) {
-			get_color_age(props->ltime, df, sizeof(df));
-			cdate = df;
-		}
-	}
-
-	int file_perm = check_file_access(props->mode, props->uid, props->gid);
-	if (file_perm == 1)
-		cid = dg_c;
-
-	switch (props->mode & S_IFMT) {
-	case S_IFREG:  file_type = '.'; break;
-	case S_IFDIR:  file_type = 'd'; ctype = di_c; break;
-	case S_IFLNK:  file_type = 'l'; ctype = ln_c; break;
-	case S_IFSOCK: file_type = 's'; ctype = so_c; break;
-	case S_IFBLK:  file_type = 'b'; ctype = bd_c; break;
-	case S_IFCHR:  file_type = 'c'; ctype = cd_c; break;
-	case S_IFIFO:  file_type = 'p'; ctype = pi_c; break;
-	default:       file_type = '?'; break;
-	}
-
-	if (conf.colorize == 0) {
-		cdate = df_c;
-		csize = df_c;
-		cid = df_c;
-		ctype = df_c;
-		cend = df_c;
-	}
-
-	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
-	if (xargs.no_bold != 1)
-		remove_bold_attr(t_ctype);
-
-	/* Let's compose each properties field individually to be able to
-	 * print only the desired ones. This is specified via the PropFields
-	 * option in the config file */
-
-				/* ###########################
-				 * #      1. FILE NAME       #
-				 * ########################### */
-
-	/*  If file name length is greater than max, truncate it
-	 * to max (later a tilde (~) will be appended to let the user know
-	 * the file name was truncated) */
+	//  If file name length is greater than max, truncate it
+	// to max (later a tilde (~) will be appended to let the user know
+	// the file name was truncated).
 	char tname[PATH_MAX * sizeof(wchar_t)];
 	int trim = 0;
 
-	/* Handle file names with embedded control characters */
+	// Handle file names with embedded control characters
 	size_t plen = props->len;
 	char *wname = (char *)NULL;
 	if (props->len == 0) {
@@ -1632,7 +1554,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		cur_len -= (size_t)rest;
 	}
 
-	/* Calculate pad for each file name */
+	// Calculate pad for each file name
 	int pad = (int)(max - cur_len);
 	if (pad < 0)
 		pad = 0;
@@ -1647,94 +1569,268 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	if (diff > 0)
 		snprintf(trim_diff, sizeof(trim_diff), "\x1b[%dC", diff);
 
+	char trim_s[2] = {0};
+	*trim_s = trim > 0 ? TRIMFILE_CHR : 0;
+
+	printf("%s%s%s%s%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  ",
+		(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
+		conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
+
+		conf.colorize == 1 ? props->color : "",
+		(wchar_t *)tname, trim_diff,
+		conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
+		trim ? tt_c : "", trim_s,
+		trim == TRIM_EXT ? props->color : "",
+		trim == TRIM_EXT ? ext_name : "",
+		trim == TRIM_EXT ? df_c : "");
+}
+
+static int
+construct_file_size(const struct fileinfo *props, char **size_type,
+	char *size_s, const size_t size_s_len, const size_t size_max)
+{
+	int file_perm = check_file_access(props->mode, props->uid, props->gid);
+
+	if (prop_fields.size < 1) {
+		*size_s = '\0';
+		return file_perm;
+	}
+
+	if ((S_ISCHR(props->mode) || S_ISBLK(props->mode))
+	&& xargs.disk_usage_analyzer != 1) {
+		snprintf(size_s, size_s_len, "%ju,%ju",
+			(uintmax_t)major(props->rdev), (uintmax_t)minor(props->rdev));
+		return file_perm;
+	}
+
+	if (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1) {
+		snprintf(size_s, size_s_len, "%s-%s", dn_c, df_c);
+		return file_perm;
+	}
+
+	// Let's construct the color for the current file size
+	char *csize = props->dir == 1 ? dz_c : df_c;
+	char sf[MAX_SHADE_LEN];
+	if (conf.colorize == 1) {
+		off_t s = props->size;
+		if (props->dir == 1 && conf.full_dir_size == 1)
+			s = props->size * (xargs.si == 1 ? 1000 : 1024);
+
+		if (!*dz_c) {
+			get_color_size(s, sf, sizeof(sf));
+			csize = sf;
+		}
+	}
+
+	if (prop_fields.size != PROP_SIZE_HUMAN) {
+		snprintf(size_s, size_s_len, "%s%*ju%s", csize,
+			(int)size_max, (uintmax_t)props->size, df_c);
+		return file_perm;
+	}
+
+	if (props->dir == 1 && conf.full_dir_size == 1) {
+		*size_type = get_size_unit(props->size *
+			(xargs.si == 1 ? 1000 : 1024));
+	} else {
+		*size_type = get_size_unit(props->size);
+	}
+
+	char err[sizeof(xf_c) + 6]; *err = '\0';
+	if (props->dir == 1 && conf.full_dir_size == 1
+	&& props->du_status != 0) {
+		snprintf(err, sizeof(err), "%s%c%s", xf_c, DU_ERR_CHAR, NC);
+	}
+
+	snprintf(size_s, size_s_len, "%s%s%s%s",
+		err, csize, *size_type ? *size_type : "?", df_c);
+
+	return file_perm;
+}
+
+static void
+construct_file_perms(const mode_t mode, char *attr_s, const size_t attr_s_len,
+	const char file_type, const char *ctype)
+{
+	char *t_ctype = savestring(ctype, strnlen(ctype, MAX_COLOR));
+	if (xargs.no_bold != 1)
+		remove_bold_attr(t_ctype);
+
+	if (prop_fields.perm == PERM_SYMBOLIC) {
+		struct perms_t perms = get_file_perms(mode);
+		snprintf(attr_s, attr_s_len,
+			"%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s",
+			t_ctype, file_type, dn_c,
+			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
+			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
+			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, df_c);
+
+	} else if (prop_fields.perm == PERM_NUMERIC) {
+		snprintf(attr_s, attr_s_len, "%s%04o%s", do_c, mode & 0777, df_c);
+
+	} else {
+		*attr_s = '\0';
+	}
+
+	free(t_ctype);
+}
+
+static void
+construct_timestamp(char *time_s, const size_t time_s_len, const time_t ltime)
+{
+	if (prop_fields.time == 0) {
+		*time_s = '\0';
+		return;
+	}
+
+	// Let's construct color shade for the current timestamp
+	char *cdate = dd_c;
+	char df[MAX_SHADE_LEN];
+	if (conf.colorize == 1) {
+		if (!*dd_c) {
+			get_color_age(ltime, df, sizeof(df));
+			cdate = df;
+		}
+	}
+
+	char file_time[MAX_TIME_STR];
+	struct tm t;
+
+	if (ltime >= 0 && localtime_r(&ltime, &t)) {
+		time_t age = props_now - ltime;
+		// AGE is negative if file time is in the future
+
+		if (conf.relative_time == 1) {
+			calc_relative_time(age < 0 ? age - (age * 2) : age, file_time);
+		} else {
+			// Let's consider a file to be recent if it is within the past
+			// six months (like ls(1) does)
+			uint8_t recent = age >= 0 && age < 14515200LL;
+			// 14515200 == 6*4*7*24*60*60 == six months
+			// If not user defined, let's mimic ls(1) behavior
+			char *tfmt = conf.time_str ? conf.time_str :
+				(recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER);
+			// GCC (not clang) complains about tfmt being not a string
+			// literal. Let's silence this warning until we find a better
+			// approach.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+			strftime(file_time, sizeof(file_time), tfmt, &t);
+#pragma GCC diagnostic pop
+		}
+	} else {
+		// INVALID_TIME_STR is generated by check_time_str() in init.c
+		strcpy(file_time, invalid_time_str);
+	}
+
+	snprintf(time_s, time_s_len, "%s%s%s ", cdate, *file_time
+		? file_time : "?", df_c);
+}
+
+static void
+construct_id_field(const struct fileinfo *props, char *id_s,
+	const size_t id_s_len, const char *id_color, const size_t ug_max)
+{
+	if (prop_fields.ids != 1) {
+		*id_s = '\0';
+		return;
+	}
+
+	int ug_pad = 0, u = 0, g = 0;
+
+	/* Calculate right pad for UID:GID string */
+	u = DIGINUM(props->uid), g = DIGINUM(props->gid);
+	if (u + g < (int)ug_max)
+		ug_pad = (int)ug_max - u;
+
+	snprintf(id_s, id_s_len, "%s%u:%-*u%s ", id_color, props->uid,
+		ug_pad, props->gid, df_c);
+}
+
+static void
+set_file_type_and_color(const mode_t mode, char *type, char **color)
+{
+	switch (mode & S_IFMT) {
+	case S_IFREG:  *type = '.'; break;
+	case S_IFDIR:  *type = 'd'; *color = di_c; break;
+	case S_IFLNK:  *type = 'l'; *color = ln_c; break;
+	case S_IFSOCK: *type = 's'; *color = so_c; break;
+	case S_IFBLK:  *type = 'b'; *color = bd_c; break;
+	case S_IFCHR:  *type = 'c'; *color = cd_c; break;
+	case S_IFIFO:  *type = 'p'; *color = pi_c; break;
+	default:       *type = '?'; break;
+	}
+
+	if (conf.colorize == 0)
+		*color = df_c;
+}
+
+static void
+construct_files_counter(const struct fileinfo *props, char *fc_str,
+	const size_t fc_str_len, const size_t fc_max)
+{
+	/* FC_MAX is zero if there are no subdirs in the current dir */
+	if (conf.files_counter == 0 || fc_max == 0 || prop_fields.counter == 0) {
+		*fc_str = '\0';
+		return;
+	}
+
+	if (props->dir == 1 && props->filesn > 0) {
+		snprintf(fc_str, fc_str_len, "%s%*d%s ", fc_c, (int)fc_max,
+			(int)props->filesn, df_c);
+	} else {
+		snprintf(fc_str, fc_str_len, "%s%*c%s ", dn_c, (int)fc_max,
+			'-', df_c);
+	}
+}
+
+/* Compose the properties line for the current file name.
+ * This function is called by list_dir(), in listing.c, for each file name
+ * in the current directory when running in long view mode, and after
+ * printing the corresponding ELN. */
+int
+print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
+	const size_t ino_max, const size_t fc_max, const size_t size_max,
+	const uint8_t have_xattr)
+{
+	/* Let's set file properties and the corresponding colors */
+
+	char file_type = 0; /* File type indicator */
+	char *ctype = dn_c; /* Color for file type */
+
+	set_file_type_and_color(props->mode, &file_type, &ctype);
+
+	/* Let's compose each properties field individually to be able to
+	 * print only the desired ones. This is specified via the PropFields
+	 * option in the config file. */
+
+				/* ###########################
+				 * #      1. FILE NAME       #
+				 * ########################### */
+
+	construct_and_print_filename(props, max);
+
 				/* ###########################
 				 * #     2. PERMISSIONS      #
 				 * ########################### */
 
 		/* 14 colors + 15 single chars + NUL byte */
 	char attr_s[(MAX_COLOR * 14) + 16];
-	if (prop_fields.perm == PERM_SYMBOLIC) {
-		struct perms_t perms = get_file_perms(props->mode);
-		snprintf(attr_s, sizeof(attr_s),
-			"%s%c%s/%s%c%s%c%s%c%s.%s%c%s%c%s%c%s.%s%c%s%c%s%c%s",
-			t_ctype, file_type, dn_c,
-			perms.cur, perms.ur, perms.cuw, perms.uw, perms.cux, perms.ux, dn_c,
-			perms.cgr, perms.gr, perms.cgw, perms.gw, perms.cgx, perms.gx, dn_c,
-			perms.cor, perms.or, perms.cow, perms.ow, perms.cox, perms.ox, cend);
-	} else if (prop_fields.perm == PERM_NUMERIC) {
-		snprintf(attr_s, sizeof(attr_s), "%s%04o%s", do_c,
-			props->mode & 0777, cend);
-	} else {
-		*attr_s = '\0';
-	}
+	construct_file_perms(props->mode, attr_s, sizeof(attr_s), file_type, ctype);
 
-				/* ###########################
-				 * #    3. USER/GROUP IDS    #
-				 * ########################### */
-
-	int ug_pad = 0, u = 0, g = 0;
-	/* Let's suppose that IDs go up to 999 billions (12 digits)
-	 * 2 IDs + pad (at most 12 more digits) == 36
-	 * 39 == 36 + colon + space + NUL byte */
-	char id_s[(MAX_COLOR * 2) + 39];
-	if (prop_fields.ids == 1) {
-		/* Calculate right pad for UID:GID string */
-		u = DIGINUM(props->uid), g = DIGINUM(props->gid);
-		if (u + g < (int)ug_max)
-			ug_pad = (int)ug_max - u;
-		snprintf(id_s, sizeof(id_s), "%s%u:%-*u%s ", cid, props->uid,
-			ug_pad, props->gid, cend);
-	} else {
-		*id_s = '\0';
-	}
-
-				/* ###############################
-				 * #        4. FILE TIME         #
-				 * ############################### */
+				/* #############################
+				 * #      3. FILE TIME         #
+				 * ############################# */
 
 	/* Whether time is access, modification, or status change, this value is
 	 * set by list_dir, in listing.c (file_info[n].ltime) before calling this
 	 * function */
-	char file_time[MAX_TIME_STR];
 		/* time + 2 colors + space + NUL byte */
 	char time_s[MAX_TIME_STR + (MAX_COLOR * 2) + 2];
-	if (prop_fields.time != 0) {
-		struct tm t;
-		if (props->ltime >= 0 && localtime_r(&props->ltime, &t)) {
-			time_t age = props_now - props->ltime;
-			/* AGE is negative if file time is in the future */
+	construct_timestamp(time_s, sizeof(time_s), props->ltime);
 
-			if (conf.relative_time == 1) {
-				calc_relative_time(age < 0 ? age - (age * 2) : age, file_time);
-			} else {
-				/* Let's consider a file to be recent if it is within the past
-				 * six months (like ls(1) does) */
-				uint8_t recent = age >= 0 && age < 14515200LL;
-				/* 14515200 == 6*4*7*24*60*60 == six months */
-				/* If not user defined, let's mimic ls(1) behavior */
-				char *tfmt = conf.time_str ? conf.time_str :
-					(recent ? DEF_TIME_STYLE_RECENT : DEF_TIME_STYLE_OLDER);
-				/* GCC (not clang) complains about tfmt being not a string
-				 * literal. Let's silence this warning until we find a better
-				 * approach. */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-				strftime(file_time, sizeof(file_time), tfmt, &t);
-#pragma GCC diagnostic pop
-			}
-		} else {
-			/* INVALID_TIME_STR is generated by check_time_str() in init.c */
-			strcpy(file_time, invalid_time_str);
-		}
-		snprintf(time_s, sizeof(time_s), "%s%s%s ", cdate, *file_time
-			? file_time : "?", cend);
-	} else {
-		*file_time = '\0';
-		*time_s = '\0';
-	}
 
 				/* ###########################
-				 * #       5. FILE SIZE      #
+				 * #       4. FILE SIZE      #
 				 * ########################### */
 
 	/* size_s is either file size or "major,minor" IDs in case of special
@@ -1743,41 +1839,19 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	/* get_size_unit() returns a string of at most MAX_UNIT_SIZE chars
 	 * (see aux.h) */
 	char size_s[MAX_UNIT_SIZE + (MAX_COLOR * 3) + 1];
-	if (prop_fields.size >= 1) {
-		if (!(S_ISCHR(props->mode) || S_ISBLK(props->mode))
-		|| xargs.disk_usage_analyzer == 1) {
-			if (file_perm == 0 && props->dir == 1 && conf.full_dir_size == 1) {
-				snprintf(size_s, sizeof(size_s), "%s-%s", dn_c, cend);
-			} else {
-				if (prop_fields.size == PROP_SIZE_HUMAN) {
-					if (props->dir == 1 && conf.full_dir_size == 1) {
-						size_type = get_size_unit(props->size *
-							(xargs.si == 1 ? 1000 : 1024));
-					} else {
-						size_type = get_size_unit(props->size);
-					}
+	int file_perm = construct_file_size(props, &size_type, size_s,
+		sizeof(size_s), size_max);
 
-					char err[sizeof(xf_c) + 6]; *err = '\0';
-					if (props->dir == 1 && conf.full_dir_size == 1
-					&& props->du_status != 0) {
-						snprintf(err, sizeof(err), "%s%c%s", xf_c,
-							DU_ERR_CHAR, NC);
-					}
+				/* ###########################
+				 * #    5. USER/GROUP IDS    #
+				 * ########################### */
 
-					snprintf(size_s, sizeof(size_s), "%s%s%s%s",
-						err, csize, size_type ? size_type : "?", cend);
-				} else {
-					snprintf(size_s, sizeof(size_s), "%s%*ju%s", csize,
-						(int)size_max, (uintmax_t)props->size, cend);
-				}
-			}
-		} else {
-			snprintf(size_s, sizeof(size_s), "%ju,%ju",
-				(uintmax_t)major(props->rdev), (uintmax_t)minor(props->rdev));
-		}
-	} else {
-		*size_s = '\0';
-	}
+	char *id_color = (file_perm == 1 && conf.colorize == 1) ? dg_c : df_c;
+	/* Let's suppose that IDs go up to 999 billions (12 digits)
+	 * 2 IDs + pad (at most 12 more digits) == 36
+	 * 39 == 36 + colon + space + NUL byte */
+	char id_s[(MAX_COLOR * 2) + 39];
+	construct_id_field(props, id_s, sizeof(id_s), id_color, ug_max);
 
 				/* ###########################
 				 * #      6. FILE INODE      #
@@ -1789,7 +1863,7 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	*ino_s = '\0';
 	if (prop_fields.inode == 1) {
 		snprintf(ino_s, sizeof(ino_s), "%s%*ju %s", tx_c, (int)ino_max,
-			(uintmax_t)props->inode, cend);
+			(uintmax_t)props->inode, df_c);
 	}
 
 				/* ############################
@@ -1797,17 +1871,8 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 				 * ############################ */
 
 	char fc_str[(MAX_COLOR * 2) + 32];
-	*fc_str = '\0';
-	/* FC_MAX is zero if there are no subdirs in the current dir */
-	if (conf.files_counter == 1 && fc_max > 0 && prop_fields.counter == 1) {
-		if (props->dir == 1 && props->filesn > 0) {
-			snprintf(fc_str, sizeof(fc_str), "%s%*d%s ", fc_c, (int)fc_max,
-				(int)props->filesn, cend);
-		} else {
-			snprintf(fc_str, sizeof(fc_str), "%s%*c%s ", dn_c, (int)fc_max,
-				'-', cend);
-		}
-	}
+	construct_files_counter(props, fc_str, sizeof(fc_str), fc_max);
+
 
 					/* ######################
 					 * #   8. PRINT STUFF   #
@@ -1818,30 +1883,16 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 	 * However, some terminals, like 'cons25', print the 0 above graphically,
 	 * as a space, which is not what we want here. To fix this, let's print
 	 * these chars as strings, and not as chars */
-	char trim_s[2] = {0};
 	char xattr_s[2] = {0};
-	*trim_s = trim > 0 ? TRIMFILE_CHR : 0;
 	*xattr_s = have_xattr == 1 ? (props->xattr == 1 ? XATTR_CHAR : ' ') : 0;
 
-	printf("%s%s%s%s%s%ls%s%s%-*s%s\x1b[0m%s%s\x1b[0m%s%s%s  " /* File name*/
-		   "%s" /* Files counter for dirs */
+	printf("%s" /* Files counter for dirs */
 		   "\x1b[0m%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s " /* Extended attributes (@) */
 		   "%s" /* User and group ID */
 		   "%s" /* Time */
 		   "%s\n", /* Size / device info */
-
-		(conf.colorize == 1 && conf.icons == 1) ? props->icon_color : "",
-		conf.icons == 1 ? props->icon : "", conf.icons == 1 ? " " : "", df_c,
-
-		conf.colorize == 1 ? props->color : "",
-		(wchar_t *)tname, trim_diff,
-		conf.light_mode == 1 ? "\x1b[0m" : df_c, pad, "", df_c,
-		trim ? tt_c : "", trim_s,
-		trim == TRIM_EXT ? props->color : "",
-		trim == TRIM_EXT ? ext_name : "",
-		trim == TRIM_EXT ? df_c : "",
 
 		prop_fields.counter != 0 ? fc_str : "",
 		prop_fields.inode == 1 ? ino_s : "",
@@ -1851,37 +1902,49 @@ print_entry_props(const struct fileinfo *props, size_t max, const size_t ug_max,
 		prop_fields.time != 0 ? time_s : "",
 		prop_fields.size != 0 ? size_s : "");
 
-	free(t_ctype);
 	free(size_type);
 
 	return EXIT_SUCCESS;
 }
 
-int
-properties_function(char **args, const int full_dirsize)
+/* Print final stats for the disk usage analyzer mode: total and largest file */
+void
+print_analysis_stats(off_t total, off_t largest, char *color, char *name)
 {
-	if (!args)
-		return EXIT_FAILURE;
+	char *t = (char *)NULL;
+	char *l = (char *)NULL;
 
-	size_t i;
-	int exit_status = EXIT_SUCCESS;
-
-	for (i = 0; args[i]; i++) {
-		if (strchr(args[i], '\\')) {
-			char *deq_file = dequote_str(args[i], 0);
-			if (!deq_file) {
-				xerror(_("pr: %s: Error dequoting file name\n"), args[i]);
-				exit_status = EXIT_FAILURE;
-				continue;
-			}
-
-			free(args[i]);
-			args[i] = deq_file;
-		}
-
-		if (get_properties(args[i], full_dirsize) != 0)
-			exit_status = EXIT_FAILURE;
+	if (prop_fields.size == PROP_SIZE_HUMAN) {
+		t = get_size_unit(total);
+		l = get_size_unit(largest);
+	} else {
+		t = (char *)xnmalloc(32, sizeof(char));
+		l = (char *)xnmalloc(32, sizeof(char));
+		snprintf(t, 32, "%ju", (uintmax_t)total);
+		snprintf(l, 32, "%ju", (uintmax_t)largest);
 	}
 
-	return exit_status;
+	char *tsize = _BGREEN, *lsize = _BGREEN;
+
+	char ts[MAX_SHADE_LEN], ls[MAX_SHADE_LEN];
+	if (term_caps.color > 0 && !*dz_c) {
+		get_color_size(total, ts, sizeof(ts));
+		tsize = ts;
+		get_color_size(largest, ls, sizeof(ls));
+		lsize = ls;
+	}
+
+	printf(_("Total size:   %s%s%s\n"
+		"Largest file: %s%s%s %c%s%s%s%c\n"),
+		conf.colorize == 1 ? tsize : "" , t ? t : "?",
+		conf.colorize == 1 ? tx_c : "",
+		conf.colorize == 1 ? lsize : "" , l ? l : "?",
+		conf.colorize == 1 ? tx_c : "",
+		name ? '[' : 0,
+		(conf.colorize == 1 && color) ? color : "",
+		name ? name : "", tx_c,
+		name ? ']' : 0);
+
+	free(t);
+	free(l);
 }
