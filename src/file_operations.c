@@ -1134,6 +1134,14 @@ ask_and_create_file(void)
 	if (!filename) /* The user pressed Ctrl-d */
 		return EXIT_SUCCESS;
 
+	if (validate_filename(filename) == 0) {
+		xerror("new: %s: Unsafe file name\n", filename);
+		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
+			free(filename);
+			return EXIT_SUCCESS;
+		}
+	}
+
 	int exit_status = quoted == 0 ? format_new_filename(&filename)
 		: EXIT_SUCCESS;
 	if (exit_status == EXIT_FAILURE)
@@ -1143,14 +1151,6 @@ ask_and_create_file(void)
 	if (lstat(filename, &a) == 0) {
 		exit_status = err_file_exists(filename, 0);
 		goto ERROR;
-	}
-
-	if (validate_filename(filename) == 0) {
-		xerror("new: %s: Unsafe file name\n", filename);
-		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
-			free(filename);
-			return EXIT_SUCCESS;
-		}
 	}
 
 	exit_status = create_file(filename);
@@ -1184,6 +1184,12 @@ create_files(char **args)
 	size_t new_files_n = 0;
 
 	for (i = 0; args[i]; i++) {
+		if (validate_filename(args[i]) == 0) {
+			xerror("new: %s: Unsafe file name\n", args[i]);
+			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
+				continue;
+		}
+
 		/* Properly format filename. */
 		if (format_new_filename(&args[i]) == EXIT_FAILURE) {
 			exit_status = EXIT_FAILURE;
@@ -1195,12 +1201,6 @@ create_files(char **args)
 		if (lstat(args[i], &a) == 0) {
 			exit_status = err_file_exists(args[i], args_n > 1);
 			continue;
-		}
-
-		if (validate_filename(args[i]) == 0) {
-			xerror("new: %s: Unsafe file name\n", args[i]);
-			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
-				continue;
 		}
 
 		int ret = create_file(args[i]);
