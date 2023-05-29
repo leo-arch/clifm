@@ -1135,7 +1135,7 @@ ask_and_create_file(void)
 		return EXIT_SUCCESS;
 
 	if (validate_filename(filename) == 0) {
-		xerror("new: %s: Unsafe file name\n", filename);
+		xerror(_("new: %s: Unsafe file name\n"), filename);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
 			free(filename);
 			return EXIT_SUCCESS;
@@ -1185,7 +1185,7 @@ create_files(char **args)
 
 	for (i = 0; args[i]; i++) {
 		if (validate_filename(args[i]) == 0) {
-			xerror("new: %s: Unsafe file name\n", args[i]);
+			xerror(_("new: %s: Unsafe file name\n"), args[i]);
 			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
 				continue;
 		}
