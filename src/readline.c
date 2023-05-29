@@ -3085,7 +3085,7 @@ file_types_generator(const char *text, int state)
 				ret = strdup(name);
 			break;
 		case 'f':
-			if (file_info[i].dir == 0)
+			if (file_info[i].type == DT_REG)
 				ret = strdup(name);
 			break;
 		case 'h':

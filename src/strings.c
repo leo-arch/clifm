@@ -1312,7 +1312,7 @@ expand_file_type_filter(const char t)
 				f[n++] = strdup(name);
 			break;
 		case 'f':
-			if (file_info[i].dir == 0)
+			if (file_info[i].type == DT_REG)
 				f[n++] = strdup(name);
 			break;
 		case 'h':

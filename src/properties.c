@@ -1551,8 +1551,8 @@ construct_and_print_filename(const struct fileinfo *props,
 
 	size_t n = (max_files > UNSET && files > (size_t)max_files)
 		? (size_t)max_files : files;
-	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen;
 
+	size_t cur_len = (size_t)DIGINUM(n) + 1 + plen;
 	if (conf.icons == 1)
 		cur_len += 3;
 
@@ -1815,7 +1815,7 @@ print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 	const uint8_t have_xattr)
 {
 	char file_type = 0; /* File type indicator */
-	char *ctype = dn_c; /* Color for file type */
+	char *ctype = dn_c; /* Color for file type indicator */
 
 	set_file_type_and_color(props->mode, &file_type, &ctype);
 
