@@ -1446,10 +1446,6 @@ insert_fields(char ***dst, char ***src, const size_t i, size_t *num)
 static void
 eln_expand(char ***substr, const size_t i)
 {
-	struct stat a;
-	if (lstat((*substr)[i], &a) != -1)
-		return;
-
 	int num = atoi((*substr)[i]);
 	/* Because of _expand_eln(), which is called immediately before this
 	 * function, it is guaranteed that NUM won't over/under-flow:
