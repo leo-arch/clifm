@@ -701,8 +701,8 @@ cmd_keeps_quotes(const char *str)
 	if (flags & IN_BOOKMARKS_SCREEN)
 		return 0;
 
-	return (strncmp(str, "ft ", 3) == 0 || strncmp(str, "filter ", 7) == 0
-	|| strncmp(str, "n ", 2) == 0 || strncmp(str, "new ", 4) == 0);
+	return (strncmp(str, "ft ", 3) == 0 || strncmp(str, "filter ", 7) == 0);
+//	|| strncmp(str, "n ", 2) == 0 || strncmp(str, "new ", 4) == 0);
 }
 
 /* This function takes a string as argument and splits it into substrings
