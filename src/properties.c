@@ -239,14 +239,12 @@ get_link_color(char *name)
 }
 
 static off_t
-//get_total_size(const int link_to_dir, char *filename, int *status)
 get_total_size(char *filename, int *status)
 {
 	off_t total_size = 0;
 
 	char _path[PATH_MAX]; *_path = '\0';
-//	if (link_to_dir == 1)
-//		snprintf(_path, sizeof(_path), "%s/", filename);
+	snprintf(_path, sizeof(_path), "%s/", filename);
 
 	if (term_caps.suggestions == 0) {
 		fputs("Scanning... ", stdout);
@@ -1084,8 +1082,7 @@ get_file_type_and_color(const char *filename, const struct stat *attr,
 		if (conf.colorize == 0)
 			break;
 
-		if (check_file_access(attr->st_mode, attr->st_uid,
-		attr->st_gid) == 0)
+		if (check_file_access(attr->st_mode, attr->st_uid, attr->st_gid) == 0)
 			color = nd_c;
 		else
 			color = get_dir_color(filename, attr->st_mode, attr->st_nlink, -1);
@@ -1417,7 +1414,8 @@ get_properties(char *filename, const int full_dirsize)
 
 	/* Check file existence */
 	struct stat attr;
-	if (lstat(filename, &attr) == -1) {
+	int ret = full_dirsize == 1 ? stat(filename, &attr) : lstat(filename, &attr);
+	if (ret == -1) {
 		xerror("prop: %s: %s\n", filename, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -1427,7 +1425,14 @@ get_properties(char *filename, const int full_dirsize)
 
 	int file_perm = check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
 
-	char *color = get_file_type_and_color(filename, &attr, &file_type, &ctype);
+	char *linkname = (char *)NULL;
+	if (full_dirsize == 1 && conf.colorize == 1)
+		linkname = realpath(filename, (char *)NULL);
+
+	char *color = get_file_type_and_color(linkname ? linkname : filename,
+		&attr, &file_type, &ctype);
+
+	free(linkname);
 
 	print_file_perms(filename, &attr, file_type, ctype);
 	print_file_name(filename, color, file_type, attr.st_mode);
