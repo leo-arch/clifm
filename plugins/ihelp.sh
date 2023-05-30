@@ -127,7 +127,7 @@ pc @
 pin @
 pf, profile@
 pg, pager@
-p, prop@
+p, pp, prop@
 prompt@
 q, quit, exit, Q@
 rl, reload@
