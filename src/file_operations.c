@@ -1033,26 +1033,58 @@ is_valid_filename(char *name)
 	return 1;
 }
 
-/* Return 0 if the file path NAME (or any component in it) is an invalid name.
- * Otherwise, return 1. */
+/* Returns 0 if the file path NAME (or any component in it) does not exist and
+ * is an invalid name. Otherwise, it returns 1.
+ * If NAME is escaped, it is replaced by the unescaped name. */
 static int
-validate_filename(char *name)
+validate_filename(char **name)
 {
-	if (!name || !*name)
+	if (!*name || !*(*name))
 		return 0;
 
-	char *tmp = savestring(name, strlen(name));
-	char *str = strtok(tmp, "/");
-	int ret = 0;
-
-	while (str) {
-		if ((ret = is_valid_filename(str)) == 0)
-			break;
-
-		str = strtok(NULL, "/");
+	char *deq = dequote_str(*name, 0);
+	if (!deq) {
+		xerror(_("new: %s: Error dequoting file name\n"), *name);
+		return 0;
 	}
 
-	free(tmp);
+	free(*name);
+	*name = deq;
+
+	char *tmp = *deq != '/' ? deq : deq + 1;
+	char *p = tmp, *q = tmp;
+	struct stat a;
+	int ret = 1;
+
+	while (1) {
+		if (!*q) { /* Basename */
+			if (lstat(deq, &a) == -1)
+				ret = is_valid_filename(p);
+			break;
+		}
+
+		if (*q != '/')
+			goto NEXT;
+
+		/* Path component */
+		*q = '\0';
+
+		if (lstat(deq, &a) == -1 && (ret = is_valid_filename(p)) == 0) {
+			*q = '/';
+			break;
+		}
+
+		*q = '/';
+
+		if (!*(q + 1))
+			break;
+
+		p = q + 1;
+
+NEXT:
+		++q;
+	}
+
 	return ret;
 }
 
@@ -1134,7 +1166,7 @@ ask_and_create_file(void)
 	if (!filename) /* The user pressed Ctrl-d */
 		return EXIT_SUCCESS;
 
-	if (validate_filename(filename) == 0) {
+	if (validate_filename(&filename) == 0) {
 		xerror(_("new: %s: Unsafe file name\n"), filename);
 		if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0) {
 			free(filename);
@@ -1175,16 +1207,17 @@ create_files(char **args)
 	int exit_status = EXIT_SUCCESS;
 	size_t i;
 
-	/* If no argument provided, ask the user for a filename, create it and exit */
+	/* If no argument provided, ask the user for a filename, create it and exit. */
 	if (!args[0])
 		return ask_and_create_file();
 
-	/* Store pointers to actually created files into a pointers array. */
+	/* Store pointers to actually created files into a pointers array.
+	 * We'll use this later to print the names of actually created files. */
 	char **new_files = (char **)xnmalloc(args_n + 1, sizeof(char *));
 	size_t new_files_n = 0;
 
 	for (i = 0; args[i]; i++) {
-		if (validate_filename(args[i]) == 0) {
+		if (validate_filename(&args[i]) == 0) {
 			xerror(_("new: %s: Unsafe file name\n"), args[i]);
 			if (rl_get_y_or_n(_("Continue? [y/n] ")) == 0)
 				continue;
@@ -1248,7 +1281,7 @@ open_function(char **cmd)
 
 	char *file = cmd[1];
 
-	/* Check file existence */
+	/* Check file existence. */
 	struct stat attr;
 	if (lstat(file, &attr) == -1) {
 		xerror("open: %s: %s\n", cmd[1], strerror(errno));
@@ -1268,7 +1301,7 @@ open_function(char **cmd)
 		NULL};
 
 	switch ((attr.st_mode & S_IFMT)) {
-	/* Store file type to compose and print the error message, if necessary */
+	/* Store file type to compose and print the error message, if necessary. */
 	case S_IFBLK: file_type = types[OPEN_BLK]; break;
 	case S_IFCHR: file_type = types[OPEN_CHR]; break;
 	case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
@@ -1298,7 +1331,7 @@ open_function(char **cmd)
 	}
 
 	/* If neither directory nor regular file nor symlink (to directory
-	 * or regular file), print the corresponding error message and exit */
+	 * or regular file), print the corresponding error message and exit. */
 	if (no_open_file == 1) {
 		xerror(_("open: %s (%s): Cannot open file\nTry "
 			"'APP FILE' or 'open FILE APP'\n"), cmd[1], file_type);
@@ -1308,7 +1341,7 @@ open_function(char **cmd)
 	int ret = EXIT_SUCCESS;
 
 	/* At this point we know that the file to be openend is either a regular
-	 * file or a symlink to a regular file. So, just open the file */
+	 * file or a symlink to a regular file. So, just open the file. */
 
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 		ret = open_file(file);
@@ -1321,7 +1354,7 @@ open_function(char **cmd)
 		return ret;
 	}
 
-	/* Some application was specified to open the file */
+	/* Some application was specified to open the file. Use it. */
 	char *tmp_cmd[] = {cmd[2], file, NULL};
 	ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 	if (ret == EXIT_SUCCESS)
