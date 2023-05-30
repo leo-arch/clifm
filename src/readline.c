@@ -194,7 +194,7 @@ int_cmds_generator(const char *text, int state)
 		"pf      (manage profiles)",
 		"pg      (set the files pager on/off)",
 		"pin     (pin a directory)",
-		"pp      (print files properties - with full directory size)",
+		"pp      (print files properties - follow links/full dir size)",
 		"prompt  (switch/edit prompt)",
 		"q       (quit)",
 		"Q       (exit - cd on quit)",
