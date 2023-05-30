@@ -329,7 +329,8 @@ Parameters passed to cp: -a"
 - Print file properties, including directory full size\n\
     pp DIR\n\n\
 Note: An exclamation mark (!) before directory sizes means that an\n\
-error ocurred while reading a subdirectory, so sizes may not be accurate"
+error ocurred while reading a subdirectory, so sizes may not be accurate\n\n\
+Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 
 #define FILE_SIZE_USAGE "File sizes/disk usage\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
@@ -846,7 +847,9 @@ whatever prompt you like."
     pp dir\n\n\
 Note that, in case of symbolic links to directories, this command displays\n\
 information about the link target if the provided file name ends with a slash.\n\
-Otherwise, information about the link itself is displayed."
+Otherwise, information about the link itself is displayed.\n\n\
+Secondly, and unlike 'p', which always provides information about links\n\
+themselves, 'pp' always follows symlinks to their target file."
 
 #define PWD_DESC "Print the name of the current working directory\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
