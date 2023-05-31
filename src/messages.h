@@ -1387,7 +1387,6 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  ow                 Open a file with ...\n\
  opener             Set a custom resource opener\n\
  p, pp, prop        Print files properties\n\
- path, cwd          Print the current working directory\n\
  pc                 Change files permissions interactively\n\
  pf, profile        Manage profiles\n\
  pg, pager          Set the files pager on/off\n\
@@ -1413,7 +1412,12 @@ For more information about a specific command run 'CMD -h' or 'CMD --help'.\n"
  ver, version       Print version information\n\
  view               Preview files in the current directory\n\
  ws                 Switch workspaces\n\
- x, X               Launch a new instance of clifm\n"
+ x, X               Launch a new instance of clifm (as root if 'X')\n\n\
+ Shell-builtins implementations\n\
+ export             Export variables to the environment\n\
+ pwd                Print the current working directory\n\
+ umask              Print/set umask\n\
+ unset              Remove variables from the environment\n"
 
 #define CLIFM_KEYBOARD_SHORTCUTS "DEFAULT KEYBOARD SHORTCUTS:\n\n\
  Right, C-f    Accept the entire suggestion\n\

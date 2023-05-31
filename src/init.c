@@ -2709,7 +2709,7 @@ external_arguments(int argc, char **argv)
 		if (validate_profile_name(alt_profile_value) == EXIT_SUCCESS) {
 			alt_profile = savestring(alt_profile_value, strlen(alt_profile_value));
 		} else {
-			fprintf(stderr, "%s: %s: Invalid profile name\n", PROGRAM_NAME,
+			fprintf(stderr, _("%s: %s: Invalid profile name\n"), PROGRAM_NAME,
 				alt_profile_value);
 			exit(EXIT_FAILURE);
 		}

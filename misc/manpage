@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "May 30, 2023" "clifm 1.12.7" "CLIFM Manual"
+.TH "CLIFM" "1" "May 31, 2023" "clifm 1.12.7" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -1139,6 +1139,24 @@ Make local settings private to the current workspace by setting the \fIPrivateWo
 .TP
 .B x, X \fR[\fIDIR\fR]
 open DIR, or the current working directory if DIR is not specified, in a new instance of \fBclifm\fR (as root if \fIX\fR, as the current unprivileged user if \fIx\fR) using the value of \fITerminalCmd\fR (from the configuration file) as terminal emulator. If this value is not set, \fIxterm\fR will be used as fallback terminal emulator. This function is only available for graphical environments.
+.TP
+.B Shell-builtins implementations
+.sp
+.B pwd \fR[\fI\-LP\fR]
+.sp
+  print the current working directory
+.sp
+.B export \fINAME=VALUE\fR...
+.sp
+  export variables to the environment
+.sp
+.B umask \fR[\fIVALUE\fR]
+.sp
+  print/set the current umask value
+.sp
+.B unset \fINAME\fR
+.sp
+  remove a variable from the environment
 
 .SH 5. FILE FILTERS
 \fBClifm\fR provides multiple ways to filter the current list of files:

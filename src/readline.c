@@ -2804,6 +2804,7 @@ options_generator(const char *text, int state)
 		_opts[3] = "edit"; _opts[4] = "reload"; _opts[5] = NULL;
 #ifndef _NO_TAGS
 
+	/* pwd */
 	} else if (w == 2 && *l == 'p' && l[1] == 'w' && l[2] == 'd' && l[3] == ' ') {
 		_opts[0] = "-L"; _opts[1] = "-P"; _opts[2] = NULL;
 
