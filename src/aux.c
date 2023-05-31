@@ -948,8 +948,8 @@ get_link_ref(const char *link)
 	return (int)(a.st_mode & S_IFMT);
 }
 
-/* Transform an integer (N) into a string of chars
- * This exists because some Operating systems do not support itoa */
+/* Transform an integer (N) into a string of chars.
+ * This exists because some operating systems do not support itoa(3). */
 char *
 xitoa(int n)
 {

@@ -393,7 +393,6 @@ bookmark_add(char *file)
 			+ strlen(file) + 2), sizeof(char));
 		sprintf(tmp_file, "%s/%s", workspaces[cur_ws].path, file); /* NOLINT */
 		file = tmp_file;
-		tmp_file = (char *)NULL;
 		mod_file = 1;
 	}
 
@@ -442,18 +441,16 @@ bookmark_add(char *file)
 	line = (char *)NULL;
 	fclose(bm_fp);
 
+	int exit_status = EXIT_SUCCESS;
+	char *name = (char *)NULL, *hk = (char *)NULL, *tmp = (char *)NULL;
+
 	if (dup == 1) {
-		for (i = 0; i < bmn; i++)
-			free(bms[i]);
-		free(bms);
-		if (mod_file)
-			free(file);
-		return EXIT_FAILURE;
+		exit_status = EXIT_FAILURE;
+		goto END;
 	}
 
 	/* If path is available */
 
-	char *name = (char *)NULL, *hk = (char *)NULL, *tmp = (char *)NULL;
 	char _prompt[(MAX_COLOR * 2) + 17];
 
 	/* Ask for data to construct the bookmark line. Both values could be NULL */
@@ -464,15 +461,8 @@ bookmark_add(char *file)
 		RL_PROMPT_START_IGNORE, tx_c, RL_PROMPT_END_IGNORE);
 	hk = rl_no_hist(_prompt);
 
-	if (hk && *hk == 'q' && !*(hk + 1)) {
-		free(hk);
-		for (i = 0; i < bmn; i++)
-			free(bms[i]);
-		free(bms);
-		if (mod_file)
-			free(file);
-		return EXIT_SUCCESS;
-	}
+	if (hk && *hk == 'q' && !*(hk + 1))
+		goto END;
 
 	/* Check if hotkey is available */
 	if (hk) {
@@ -494,14 +484,8 @@ bookmark_add(char *file)
 	}
 
 	if (dup == 1) {
-		if (hk)
-			free(hk);
-		for (i = 0; i < bmn; i++)
-			free(bms[i]);
-		free(bms);
-		if (mod_file)
-			free(file);
-		return EXIT_FAILURE;
+		exit_status = EXIT_FAILURE;
+		goto END;
 	}
 
 	snprintf(_prompt, sizeof(_prompt), "%c%s%c>%c%s%c Name: ",
@@ -509,16 +493,8 @@ bookmark_add(char *file)
 		RL_PROMPT_START_IGNORE, tx_c, RL_PROMPT_END_IGNORE);
 	name = rl_no_hist(_prompt);
 
-	if (name && *name == 'q' && !*(name + 1)) {
-		free(hk);
-		free(name);
-		for (i = 0; i < bmn; i++)
-			free(bms[i]);
-		free(bms);
-		if (mod_file)
-			free(file);
-		return EXIT_SUCCESS;
-	}
+	if (name && *name == 'q' && !*(name + 1))
+		goto END;
 
 	if (name) {
 		/* Check name is not duplicated */
@@ -548,15 +524,8 @@ bookmark_add(char *file)
 		}
 
 		if (dup == 1) {
-			free(name);
-			if (hk)
-				free(hk);
-			for (i = 0; i < bmn; i++)
-				free(bms[i]);
-			free(bms);
-			if (mod_file)
-				free(file);
-			return EXIT_FAILURE;
+			exit_status = EXIT_FAILURE;
+			goto END;
 		}
 
 		/* Generate the bookmark line */
@@ -621,6 +590,17 @@ bookmark_add(char *file)
 	reload_bookmarks(); /* Update bookmarks for TAB completion */
 
 	return EXIT_SUCCESS;
+
+END:
+	free(name);
+	free(hk);
+	for (i = 0; i < bmn; i++)
+		free(bms[i]);
+	free(bms);
+	if (mod_file == 1)
+		free(file);
+
+	return exit_status;
 }
 
 static int
