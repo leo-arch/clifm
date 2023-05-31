@@ -2414,7 +2414,9 @@ CALC_OFFSET:
 		|| cur_comp_type == TCMP_FILE_TYPES_OPTS
 		|| cur_comp_type == TCMP_BM_PATHS || cur_comp_type == TCMP_MIME_LIST
 		|| cur_comp_type == TCMP_CMD_DESC || cur_comp_type == TCMP_SEL
-		|| cur_comp_type == TCMP_DIRHIST) /* We don't want to highlight the matching part */
+		|| cur_comp_type == TCMP_DIRHIST
+		|| (tabmode == STD_TAB && cur_comp_type == TCMP_JUMP))
+			/* We don't want to highlight the matching part */
 			tab_offset = 0;
 
 		if (cur_comp_type == TCMP_PATH && ptr && *ptr == '/' && tab_offset > 0)
@@ -2426,7 +2428,6 @@ CALC_OFFSET:
 			else
 				tab_offset--;
 		}
-
 
 #ifndef _NO_TRASH
 		/* If printing trashed files, let's change to the trash dir

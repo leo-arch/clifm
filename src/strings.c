@@ -928,7 +928,7 @@ split_str(const char *str, const int update_args)
 	}
 }
 
-/* Return 1 if STR contains only numbers of a range of numbers, and zero if not */
+/* Return 1 if STR contains only numbers or a range of numbers, or 0 if not. */
 static int
 check_fused_param(const char *str)
 {
@@ -952,6 +952,7 @@ check_fused_param(const char *str)
 
 	if (ok && c <= 1)
 		return 1;
+
 	return 0;
 }
 
