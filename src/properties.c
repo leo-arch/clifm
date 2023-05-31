@@ -1400,10 +1400,34 @@ END:
 	free(size_unit);
 }
 
-/* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
- * If DSIZE is set to 1, print full directory size as well using du(1). */
 static int
-get_properties(char *filename, const int full_dirsize)
+err_no_file(const char *filename, const int errnum, const int follow_link)
+{
+	if (follow_link == 0)
+		goto END;
+
+	struct stat a;
+	if (lstat(filename, &a) == -1 || !S_ISLNK(a.st_mode))
+		goto END;
+
+	char target[PATH_MAX + 1];
+	ssize_t len = readlink(filename, target, sizeof(target) - 1);
+	if (len > 0) {
+		target[len] = '\0';
+		xerror("prop: %s -> %s: Broken symbolic link\n", filename, target);
+		return EXIT_FAILURE;
+	}
+
+END:
+	xerror("prop: %s: %s\n", filename, strerror(errnum));
+	return EXIT_FAILURE;
+}
+
+/* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
+ * If FOLLOW_LINK is set to 1, in which case we're running the 'pp' command,
+ * symbolic links are followed and directories size is calculated recursively. */
+static int
+get_properties(char *filename, const int follow_link)
 {
 	if (!filename || !*filename)
 		return EXIT_FAILURE;
@@ -1414,19 +1438,17 @@ get_properties(char *filename, const int full_dirsize)
 
 	/* Check file existence */
 	struct stat attr;
-	int ret = full_dirsize == 1 ? stat(filename, &attr) : lstat(filename, &attr);
-	if (ret == -1) {
-		xerror("prop: %s: %s\n", filename, strerror(errno));
-		return EXIT_FAILURE;
-	}
+	int ret = follow_link == 1 ? stat(filename, &attr) : lstat(filename, &attr);
+	if (ret == -1)
+		return err_no_file(filename, errno, follow_link);
 
-	char file_type = 0;
+	char file_type = 0; /* File type char indicator */
 	char *ctype = dn_c; /* Color for file type char */
 
 	int file_perm = check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
 
 	char *linkname = (char *)NULL;
-	if (full_dirsize == 1 && conf.colorize == 1)
+	if (follow_link == 1 && conf.colorize == 1)
 		linkname = realpath(filename, (char *)NULL);
 
 	char *color = get_file_type_and_color(linkname ? linkname : filename,
@@ -1438,7 +1460,7 @@ get_properties(char *filename, const int full_dirsize)
 	print_file_name(filename, color, file_type, attr.st_mode);
 	print_file_details(filename, &attr, file_type, file_perm);
 	print_timestamps(filename, &attr);
-	print_file_size(filename, &attr, file_perm, full_dirsize);
+	print_file_size(filename, &attr, file_perm, follow_link);
 
 	return EXIT_SUCCESS;
 }
