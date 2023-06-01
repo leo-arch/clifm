@@ -2387,6 +2387,7 @@ CONT:
 	return;
 }
 
+#ifndef _NO_SUGGESTIONS
 static void
 set_sug_strat(const char *line)
 {
@@ -2416,7 +2417,9 @@ set_sug_strat(const char *line)
 	free(conf.suggestion_strategy);
 	conf.suggestion_strategy = savestring(tmp, strnlen(tmp, sizeof(tmp)));
 }
+#endif /* _NO_SUGGESTIONS */
 
+#ifndef _NO_FZF
 static void
 set_tabcomp_mode(const char *line)
 {
@@ -2438,6 +2441,7 @@ set_tabcomp_mode(const char *line)
 		fzftab = 1; tabmode = SMENU_TAB;
 	}
 }
+#endif /* _NO_FZF */
 
 static void
 set_starting_path(char *line)

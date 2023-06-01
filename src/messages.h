@@ -162,7 +162,7 @@ change this suffix)"
 - Open the bookmarks screen\n\
     bm (Alt-b)\n\
 - Bookmark the directory /media/mount as 'mount'\n\
-    bm add /media/mount mnt\n\
+    bm add /media/mount mount\n\
   You can add a shortcut as well: 'bm add /media/mount mount m'\n\
   Note: Regular files can be bookmarked too\n\
 - Access the bookmark named 'mount'\n\
