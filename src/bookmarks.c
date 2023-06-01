@@ -1032,7 +1032,7 @@ add_bookmark(char **cmd)
 	if (access(p, F_OK) != 0) {
 		xerror("bookmarks: %s: %s\n", p, strerror(errno));
 		free(p);
-		return errno;
+		return EXIT_FAILURE;
 	}
 
 	int ret = EXIT_SUCCESS;
