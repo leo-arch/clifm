@@ -44,6 +44,13 @@
 
 #define NO_BOOKMARKS "bookmarks: No bookmarks\nUse 'bm add dir/ name' \
 to create a bookmark\nTry 'bm --help' for more information"
+
+#define BM_ADD_NO_PARAM "bookmarks: A file and a name are required\n\
+Example: 'bm add dir/ name'\nTry 'bm --help' for more information"
+
+#define BM_DEL_NO_PARAM "bookmarks: A name is required\n\
+Example: 'bm del name'\nTry 'bm --help' for more information"
+
 #define PRINT_BM_HEADER 1
 #define NO_BM_HEADER    0
 #define BM_SCREEN       1 /* The edit function is called from the bookmarks screen */
@@ -198,12 +205,18 @@ print_bookmarks(void)
 			sc_pad = 0;
 
 		printf("%s%s%-*zu%s%c%s%c%s%c%s%-*s %s%s%s\n",
-			NC, el_c, eln_pad, i + 1, df_c, ls > 0 ? ' ' : 0,
-		    BOLD, sc_ok == 1 ? '[' : 0, sc_ok == 1 ? bookmarks[i].shortcut : "",
+			NC, el_c, eln_pad, i + 1, df_c, /* ELN */
+			ls > 0 ? ' ' : 0,
+
+		    BOLD, sc_ok == 1 ? '[' : 0, /* Shortcut */
+		    sc_ok == 1 ? bookmarks[i].shortcut : "",
 		    sc_ok == 1 ? ']' : 0, df_c, sc_pad, "",
-		    non_existent ? (conf.colorize ? uf_c : "\x1b[0m\x1b[4m")
-		    : (!is_dir ? fi_c : (name_ok ? bm_c : di_c)),
-		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
+
+		    non_existent == 1 ? (conf.colorize == 1 /* Name */
+		    ? uf_c : "\x1b[0m\x1b[4m")
+		    : (is_dir == 0 ? fi_c : (name_ok == 1 ? bm_c : di_c)),
+		    name_ok == 1 ? bookmarks[i].name
+		    : bookmarks[i].path, df_c); /* Path */
 	}
 }
 
@@ -538,8 +551,8 @@ ERROR:
 static int
 add_bookmark(char **cmd)
 {
-	if (!cmd || !cmd[0]) {
-		puts(_(BOOKMARKS_USAGE));
+	if (!cmd || !cmd[0] || !cmd[1]) {
+		puts(BM_ADD_NO_PARAM);
 		return EXIT_SUCCESS;
 	}
 
@@ -551,14 +564,6 @@ add_bookmark(char **cmd)
 
 	if (access(p, F_OK) != 0) {
 		xerror("bookmarks: %s: %s\n", p, strerror(errno));
-		free(p);
-		return EXIT_FAILURE;
-	}
-
-	if (!cmd[1]) {
-		xerror("%s\n", "bookmarks: A name is required\n"
-			"Example: bm add dir/ name\n"
-			"Try 'bm --help' for more information");
 		free(p);
 		return EXIT_FAILURE;
 	}
@@ -674,9 +679,7 @@ del_bookmarks(char **args)
 	}
 
 	if (!args || !args[0]) {
-		xerror("bookmarks: A bookmark name is required\n"
-			"Example: bm del name\n"
-			"Try 'bm --help' for more information\n");
+		xerror("%s\n", BM_DEL_NO_PARAM);
 		return EXIT_FAILURE;
 	}
 
