@@ -582,8 +582,9 @@ mark_bookmarks_for_deletion(char **args, int *exit_status)
 		char *name = p ? p : args[i];
 		int index = -1;
 
-		if ((index = check_bm_name(name, 0)) != -1
-		|| (index = check_bm_shortcut(name, 0)) != -1) {
+		if ( ((index = check_bm_name(name, 0)) != -1
+		|| (index = check_bm_shortcut(name, 0)) != -1)
+		&& *bookmarks[index].path) {
 			*bookmarks[index].path = '\0';
 			printf("%s: Bookmark removed\n", name);
 			counter++;
