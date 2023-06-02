@@ -546,7 +546,7 @@ Bookmarks can be manager either from the bookmarks manager screen or from the co
 .sp
 \fB1. The bookmarks manager screen\fR
 .sp
-To access the bookmarks manager screen simply enter \fIbm\fR. Here you can cd into the desired bookmark by entering either its ELN, shortcut, or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). Make your changes, save, and exit.
+To access the bookmarks manager screen simply enter \fIbm\fR. Here you can cd into the desired bookmark by entering either its ELN or name (regular files can be bookmarked as well). In this screen you can also add, remove, or edit your bookmarks by simply entering 'e' to edit the bookmarks file (which is simply a list of lines with this format: \fIname:path\fR. Ex: "docs:/home/user/documents"). Make your changes, save, and exit.
 .sp
 \fB2. The command line\fR
 .TS
@@ -556,10 +556,10 @@ l l.
 Command	Description
 T{
 bm add /media/mount mnt
-T}	Bookmark the \fI/media/mount\fR directory as "mnt" \fB(1)\fR
+T}	Bookmark the \fI/media/mount\fR directory as "mnt"
 T{
 bm mnt
-T}	Change to/open the bookmark named "mnt" \fB(2)\fR
+T}	Change to/open the bookmark named "mnt"
 T{
 bm del mnt
 T}	Delete the bookmark named "mnt"
@@ -568,10 +568,6 @@ bm edit
 T}	Edit your bookmarks
 .TE
 
-.sp
- \fB(1)\fR A shortcut (i.e. short name) can be specified as well. For example \fIbm add /media/mount mnt m\fR
-.sp 0
- \fB(2)\fR Shortcuts can be used as well: \fI bm m\fR
 .sp
 A handy use for the bookmarks function is to create bookmarks using short names, which will be later easily accessible via TAB completion.
 .sp
