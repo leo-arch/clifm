@@ -157,19 +157,17 @@ change this suffix)"
 
 #define BOOKMARKS_USAGE "Manage bookmarks\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  bm, bookmarks [a, add FILENAME NAME [SHORTCUT]] [d, del [NAME]] [e, edit [APP]] [NAME, SHORTCUT]\n\n\
+  bm, bookmarks [a, add FILENAME NAME] [d, del [NAME]] [e, edit [APP]] [NAME]\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Open the bookmarks screen\n\
     bm (Alt-b)\n\
-- Bookmark the directory /media/mount as 'mount'\n\
-    bm add /media/mount mount\n\
-  You can add a shortcut as well: 'bm add /media/mount mount m'\n\
+- Bookmark the directory /media/mount as 'mnt'\n\
+    bm add /media/mount mnt\n\
   Note: Regular files can be bookmarked too\n\
-- Access the bookmark named 'mount'\n\
-    bm mount (also 'b:<TAB>' or 'bm <TAB>' to choose from a list)\n\
-    Note: Shortcuts can be used as well: 'bm m'\n\
-- Remove the bookmark named 'mount'\n\
-    bm del mount (or 'bm del <TAB>' to choose from a list)\n\
+- Access the bookmark named 'mnt'\n\
+    bm mnt (also 'b:<TAB>' or 'bm <TAB>' to choose from a list)\n\
+- Remove the bookmark named 'mnt'\n\
+    bm del mnt (or 'bm del <TAB>' to choose from a list)\n\
 - Edit the bookmarks file manually\n\
     bm edit (or F11)\n\
 - Edit the bookmarks file using vi\n\
@@ -177,8 +175,7 @@ change this suffix)"
 - Print file properties of specific bookmarks using the 'b:' construct\n\
     p b:<TAB> (multi-selection is allowed)\n\
 - Select all bookmarks at once\n\
-    s b:\n\n\
-Note: When using TAB completion only bookmark names are listed"
+    s b:"
 
 #define BULK_USAGE "Bulk rename files\n\n\
 \x1b[1mUSAGE\x1b[0m\n\

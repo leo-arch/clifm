@@ -1293,6 +1293,17 @@ load_jumpdb(void)
 	sync_jumpdb_with_dirhist();
 }
 
+static char *
+save_bm_path(char *file)
+{
+	if (!file || !*file)
+		return (char *)NULL;
+
+	char *p = *file != '/' ? normalize_path(file, strlen(file)) : (char *)NULL;
+
+	return p ? p : savestring(file, strlen(file));
+}
+
 /* Load bookmarks from the bookmarks file */
 int
 load_bookmarks(void)
@@ -1366,10 +1377,7 @@ load_bookmarks(void)
 
 			if (!tmp) {
 				bookmarks[bm_n].name = (char *)NULL;
-				if (*p)
-					bookmarks[bm_n].path = savestring(p, strlen(p));
-				else
-					bookmarks[bm_n].path = (char *)NULL;
+				bookmarks[bm_n].path = save_bm_path(p);
 				bm_n++;
 				continue;
 			}
@@ -1383,7 +1391,7 @@ load_bookmarks(void)
 				continue;
 			}
 
-			bookmarks[bm_n].path = savestring(tmp, strlen(tmp));
+			bookmarks[bm_n].path = save_bm_path(tmp);
 			bm_n++;
 			continue;
 		}
@@ -1408,7 +1416,7 @@ load_bookmarks(void)
 			bm_n++;
 			continue;
 		} else {
-			bookmarks[bm_n].path = savestring(tmp, strlen(tmp));
+			bookmarks[bm_n].path = save_bm_path(tmp);
 			bm_n++;
 		}
 	}
