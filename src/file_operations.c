@@ -495,10 +495,8 @@ diff_files(char *tmp_file, int n)
 	}
 
 	fclose(fp);
-	if (c == n)
-		return 0;
 
-	return 1;
+	return (c < n ? 1 : 0);
 }
 
 static int
