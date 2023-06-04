@@ -76,8 +76,7 @@ save_sel(void)
 		return EXIT_SUCCESS;
 	}
 
-	int fd = 0;
-	FILE *fp = open_fstream_w(sel_file, &fd);
+	FILE *fp = fopen(sel_file, "w");
 	if (!fp) {
 		xerror("sel: %s: %s\n", sel_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -89,7 +88,7 @@ save_sel(void)
 		fputc('\n', fp);
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
