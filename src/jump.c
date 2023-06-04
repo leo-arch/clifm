@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h> /* unlink(3) */
 
 #if defined(__OpenBSD__) || defined(__NetBSD__) \
 || defined(__FreeBSD__) || defined(__APPLE__) || defined(__HAIKU__)
@@ -137,7 +138,7 @@ free_jump_database(void)
 }
 
 static int
-add_jump_entry(const char *dir)
+add_jump_entry(const char *dir, const size_t dir_len)
 {
 	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2) * sizeof(struct jump_t));
 	jump_db[jump_n].visits = 1;
@@ -146,9 +147,8 @@ add_jump_entry(const char *dir)
 	jump_db[jump_n].last_visit = now;
 	jump_db[jump_n].rank = 0;
 	jump_db[jump_n].keep = 0;
-
-	jump_db[jump_n].len = strlen(dir);
-	jump_db[jump_n].path = savestring(dir, jump_db[jump_n].len);
+	jump_db[jump_n].len = dir_len;
+	jump_db[jump_n].path = savestring(dir, dir_len);
 	jump_n++;
 
 	jump_db[jump_n].path = (char *)NULL;
@@ -162,12 +162,19 @@ add_jump_entry(const char *dir)
 	return EXIT_SUCCESS;
 }
 
-/* Add DIR to the jump database */
+/* Add DIR to the jump database. If already there, just update the number of
+ * visits and the last visit time. */
 int
-add_to_jumpdb(const char *dir)
+add_to_jumpdb(char *dir)
 {
 	if (xargs.no_dirjump == 1 || !dir || !*dir)
 		return EXIT_FAILURE;
+
+	size_t dir_len = strlen(dir);
+	if (dir_len > 1 && dir[dir_len - 1] == '/') {
+		dir[dir_len - 1] = '\0';
+		dir_len--;
+	}
 
 	if (!jump_db) {
 		jump_db = (struct jump_t *)xnmalloc(1, sizeof(struct jump_t));
@@ -176,12 +183,13 @@ add_to_jumpdb(const char *dir)
 
 	int i = (int)jump_n, new_entry = 1;
 	while (--i >= 0) {
-		if (!IS_VALID_JUMP_ENTRY(i))
+		/* Jump entries are all absolute paths, so that they all start with
+		 * a slash. Let's start comparing them from the second char. */
+		if (!IS_VALID_JUMP_ENTRY(i) || dir_len != jump_db[i].len
+		|| dir[1] != jump_db[i].path[1])
 			continue;
 
-		/* Jump entries are all absolute paths, so that they all start with
-		 * a slash. Let's start comparing then from the second char */
-		if (dir[1] == jump_db[i].path[1] && strcmp(jump_db[i].path, dir) == 0) {
+		if (strcmp(jump_db[i].path, dir) == 0) {
 			jump_db[i].visits++;
 			jump_db[i].last_visit = time(NULL);
 			new_entry = 0;
@@ -192,7 +200,7 @@ add_to_jumpdb(const char *dir)
 	if (new_entry == 0)
 		return EXIT_SUCCESS;
 
-	return add_jump_entry(dir);
+	return add_jump_entry(dir, dir_len);
 }
 
 /* Store the jump database into a file. */
@@ -205,6 +213,8 @@ save_jumpdb(void)
 
 	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 	sprintf(jump_file, "%s/jump.clifm", config_dir);
+
+	unlink(jump_file);
 
 	int fd = 0;
 	FILE *fp = open_fstream_w(jump_file, &fd);

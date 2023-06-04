@@ -27,7 +27,7 @@
 
 __BEGIN_DECLS
 
-int  add_to_jumpdb(const char *);
+int  add_to_jumpdb(char *);
 void save_jumpdb(void);
 int  dirjump(char **, int);
 
