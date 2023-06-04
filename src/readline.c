@@ -3306,7 +3306,13 @@ complete_ranges(char *text, int *exit_status)
 		return (char **)NULL;
 	}
 
+	int a = atoi(text);
+	int b = atoi(r + 1);
 	*r = '-';
+
+	if (a < 1 || b < 1 || a >= b || b > (int)files)
+		return (char **)NULL;
+
 	char **matches = rl_completion_matches(text, &filenames_gen_ranges);
 	if (!matches)
 		return (char **)NULL;
