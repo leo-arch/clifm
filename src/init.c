@@ -1171,15 +1171,15 @@ load_jumpdb(void)
 		return;
 	}
 
-	char tmp_line[PATH_MAX];
+	char tmp_line[PATH_MAX + 32];
 	size_t jump_lines = 0;
 
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
-		if (*tmp_line != '\n' && *tmp_line >= '0' && *tmp_line <= '9')
+		if (*tmp_line >= '0' && *tmp_line <= '9')
 			jump_lines++;
 	}
 
-	if (!jump_lines) {
+	if (jump_lines == 0) {
 		free(jump_file);
 		close_fstream(fp, fd);
 		return;
@@ -1194,8 +1194,9 @@ load_jumpdb(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		if (!*line || *line == '\n' || *line == '#')
+		if (*line < '0')
 			continue;
+
 		if (*line == '@') {
 			if (line[line_len - 1] == '\n')
 				line[line_len - 1] = '\0';
@@ -1205,6 +1206,7 @@ load_jumpdb(void)
 			}
 			continue;
 		}
+
 		if (*line < '0' || *line > '9')
 			continue;
 
@@ -1277,7 +1279,7 @@ load_jumpdb(void)
 	free(line);
 	free(jump_file);
 
-	if (!jump_n) {
+	if (jump_n == 0) {
 		free(jump_db);
 		jump_db = (struct jump_t *)NULL;
 		return;
