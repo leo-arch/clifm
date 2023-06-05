@@ -1373,7 +1373,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	/* Store possible completions in FINDER_IN_FILE to pass them to FZF */
 	size_t i = store_completions(matches, fp);
 
-	close_fstream(fp, fd);
+	fclose(fp);
 
 	/* Set a pointer to the last word (either space or slash) in the
 	 * input buffer. We use this to highlight the matching prefix in FZF */
