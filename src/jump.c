@@ -265,7 +265,7 @@ save_jumpdb(void)
 	}
 
 	fprintf(fp, "@%d\n", total_rank);
-	close_fstream(fp, fd);
+	fclose(fp);
 	free(jump_file);
 }
 

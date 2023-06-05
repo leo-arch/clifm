@@ -193,7 +193,7 @@ get_start_path_and_ws_names(char **sp, char **ws)
 		}
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 }
 
 /* Dump current value of config options (as defined in the config file),
@@ -873,7 +873,7 @@ plugin1:\\C-y\n\n\
 #plugin4:\n",
 	    PROGRAM_NAME);
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
@@ -956,7 +956,7 @@ application/x-bittorrent=transmission-show --;\n\
 # Fallback\n\
 .*=file -b --;true;\n");
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
@@ -1030,7 +1030,7 @@ create_actions_file(char *file)
 		"wall=wallpaper_setter.sh\n",
 	    PROGRAM_NAME, PROGRAM_NAME);
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
@@ -1665,7 +1665,7 @@ create_main_config_file(char *file)
 #autocmd ~/Downloads !/usr/share/clifm/plugins/fzfnav.sh\n\n",
 	    config_fp);
 
-	close_fstream(config_fp, fd);
+	fclose(config_fp);
 	return EXIT_SUCCESS;
 }
 
@@ -1769,7 +1769,7 @@ itself via escape codes. See the manpage for more information\n"
 		DEF_WPROMPT_STR,
 		DEF_FZFTAB_OPTIONS);
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return;
 }
 
@@ -1816,7 +1816,7 @@ create_remotes_file(void)
 		"# Automatically unmount this remote at exit\n"
 		"# AutoUnmount=true\n\n", PROGRAM_NAME);
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
@@ -1890,7 +1890,7 @@ create_config_files(void)
 				"# want a multi-line command, just write a script for it:\n"
 				"#sh /path/to/my/script.sh\n"),
 				_PROGRAM_NAME, _PROGRAM_NAME);
-			close_fstream(profile_fp, fd);
+			fclose(profile_fp);
 		}
 	}
 
@@ -2068,7 +2068,7 @@ X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk
 \n\
 # Fallback to another resource opener as last resource\n\
 .*=xdg-open;mimeo;mimeopen -n;whippet -m;open;linopen;\n");
-	close_fstream(fp, fd);
+	fclose(fp);
 
 	return EXIT_SUCCESS;
 }
@@ -2136,7 +2136,7 @@ create_bm_file(void)
 		"clifm:%s\n",
 		PROGRAM_NAME, config_dir ? config_dir : "/path/to/file");
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
@@ -2953,7 +2953,7 @@ read_config(void)
 		}
 	}
 
-	close_fstream(config_fp, fd);
+	fclose(config_fp);
 
 	if (xargs.disk_usage_analyzer == 1) {
 		conf.sort = STSIZE;

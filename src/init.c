@@ -458,7 +458,7 @@ init_history(void)
 			fputs("edit\n", hist_fp);
 			/* There is no need to run read_history() here, since
 			 * the history file is still empty */
-			close_fstream(hist_fp, fd);
+			fclose(hist_fp);
 		}
 	}
 
@@ -880,7 +880,7 @@ check_etc_shells(char *file, int *_errno)
 		}
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return ret;
 }
 
@@ -1181,7 +1181,7 @@ load_jumpdb(void)
 
 	if (jump_lines == 0) {
 		free(jump_file);
-		close_fstream(fp, fd);
+		fclose(fp);
 		return;
 	}
 
@@ -1275,7 +1275,7 @@ load_jumpdb(void)
 		jump_n++;
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	free(line);
 	free(jump_file);
 
@@ -1330,7 +1330,7 @@ load_bookmarks(void)
 	}
 
 	if (bm_total == 0) {
-		close_fstream(fp, fd);
+		fclose(fp);
 		return EXIT_SUCCESS;
 	}
 
@@ -1424,7 +1424,7 @@ load_bookmarks(void)
 	}
 
 	free(line);
-	close_fstream(fp, fd);
+	fclose(fp);
 
 	if (bm_n == 0) {
 		free(bookmarks);
@@ -1490,7 +1490,7 @@ load_actions(void)
 	}
 
 	free(line);
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
@@ -1637,7 +1637,7 @@ load_remotes(void)
 	}
 
 	free(line);
-	close_fstream(fp, fd);
+	fclose(fp);
 
 	if (remotes[n].name) {
 		++n;
@@ -1795,7 +1795,7 @@ load_prompts(void)
 	}
 
 	free(line);
-	close_fstream(fp, fd);
+	fclose(fp);
 
 	if (prompts[n].name) {
 		++n;
@@ -2935,7 +2935,7 @@ get_sel_files(void)
 		sel_elements[sel_n].size = (off_t)UNSET;
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	/* If previous and current amount of sel files don't match (mostly
 	 * because some selected files were removed), recreate the selections
 	 * file to reflect current state */
@@ -3146,7 +3146,7 @@ get_last_path(void)
 		}
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	free(last_file);
 	return EXIT_SUCCESS;
 }
@@ -3171,13 +3171,13 @@ load_pinned_dir(void)
 	char line[PATH_MAX] = "";
 	if (fgets(line, (int)sizeof(line), fp) == NULL) {
 		free(pin_file);
-		close_fstream(fp, fd);
+		fclose(fp);
 		return EXIT_FAILURE;
 	}
 
 	if (!*line || !strchr(line, '/')) {
 		free(pin_file);
-		close_fstream(fp, fd);
+		fclose(fp);
 		return EXIT_FAILURE;
 	}
 
@@ -3187,7 +3187,7 @@ load_pinned_dir(void)
 	}
 
 	pinned_dir = savestring(line, strlen(line));
-	close_fstream(fp, fd);
+	fclose(fp);
 	free(pin_file);
 	return EXIT_SUCCESS;
 }
@@ -3439,7 +3439,7 @@ get_aliases(void)
 	}
 
 	free(line);
-	close_fstream(fp, fd);
+	fclose(fp);
 }
 
 static void
@@ -3479,7 +3479,7 @@ load_dirhist(void)
 		dirs++;
 
 	if (dirs == 0) {
-		close_fstream(fp, fd);
+		fclose(fp);
 		return EXIT_SUCCESS;
 	}
 
@@ -3495,7 +3495,7 @@ load_dirhist(void)
 	while ((line_len = getline(&line, &line_size, fp)) > 0)
 		write_dirhist(line, line_len);
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	old_pwd[dirhist_total_index] = (char *)NULL;
 	free(line);
 	dirhist_cur_index = dirhist_total_index - 1;
@@ -3549,7 +3549,7 @@ get_prompt_cmds(void)
 	}
 
 	free(line);
-	close_fstream(fp, fd);
+	fclose(fp);
 }
 
 /* Get the length of the current time format

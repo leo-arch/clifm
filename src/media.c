@@ -434,12 +434,12 @@ mount_dev(int n)
 	char out_line[PATH_MAX];
 	if (fgets(out_line, (int)sizeof(out_line), fp) == NULL) {
 		/* Error is printed by the mount command itself */
-		close_fstream(fp, fd);
+		fclose(fp);
 		unlink(file);
 		return EXIT_FAILURE;
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	unlink(file);
 
 	/* Recover the mountpoint used by the mounting command */

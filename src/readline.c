@@ -323,7 +323,7 @@ get_shell_cmd_opts(char *cmd)
 	}
 
 	*ext_opts[n] = '\0'; /* Mark the end of the options array */
-	close_fstream(fp, fd);
+	fclose(fp);
 	return n;
 }
 
@@ -4349,7 +4349,7 @@ set_rl_init_file(void)
 		}
 		fprintf(fp, "# This is readline's configuration file for %s\n",
 			_PROGRAM_NAME);
-		close_fstream(fp, fd);
+		fclose(fp);
 	}
 
 	rl_read_init_file(rl_file);

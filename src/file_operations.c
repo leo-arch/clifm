@@ -256,7 +256,7 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 		}
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
@@ -1916,7 +1916,7 @@ bulk_rename(char **args)
 #endif
 	}
 #if defined(__HAIKU__) || defined(__sun)
-	close_fstream(fp, tmp_fd);
+	fclose(fp);
 #endif
 	arg_total = i;
 	close(fd);
@@ -1950,7 +1950,7 @@ bulk_rename(char **args)
 		goto ERROR;
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
 		xerror("br: %s: %s\n", bulk_file, strerror(errno));
@@ -2048,7 +2048,7 @@ bulk_rename(char **args)
 		xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		exit_status = errno;
 	}
-	close_fstream(fp, fd);
+	fclose(fp);
 
 #if defined(__HAIKU__) || defined(__CYGWIN__)
 	if (conf.autols == 1)
@@ -2062,7 +2062,7 @@ ERROR:
 		xerror("br: unlinkat: %s: %s\n", bulk_file, strerror(errno));
 		exit_status = errno;
 	}
-	close_fstream(fp, fd);
+	fclose(fp);
 	return exit_status;
 }
 
@@ -2114,7 +2114,7 @@ _export(char **filenames, int open)
 		}
 	}
 #if defined(__HAIKU__) || defined(__sun)
-	close_fstream(fp, tmp_fd);
+	fclose(fp);
 #endif
 	close(fd);
 

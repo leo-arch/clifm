@@ -462,7 +462,7 @@ check_iso(char *file)
 	FILE *fpp = fopen("/dev/null", "w");
 	if (!fpp) {
 		xerror("archiver: /dev/null: %s\n", strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		return (-1);
 	}
 
@@ -472,7 +472,7 @@ check_iso(char *file)
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
 		xerror("archiver: %s\n", strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		fclose(fpp);
 		return (-1);
 	}
@@ -480,12 +480,12 @@ check_iso(char *file)
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
 		xerror("archiver: %s\n", strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		fclose(fpp);
 		return (-1);
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	fclose(fpp);
 
 	char *cmd[] = {"file", "-b", file, NULL};
@@ -504,14 +504,14 @@ check_iso(char *file)
 		if (fp) {
 			char line[255] = "";
 			if (fgets(line, (int)sizeof(line), fp) == NULL) {
-				close_fstream(fp, fd);
+				fclose(fp);
 				unlink(iso_tmp_file);
 				return EXIT_FAILURE;
 			}
 			char *ret = strstr(line, "ISO 9660");
 			if (ret)
 				is_iso = 1;
-			close_fstream(fp, fd);
+			fclose(fp);
 		}
 		unlink(iso_tmp_file);
 	}
@@ -586,7 +586,7 @@ is_compressed(char *file, int test_iso)
 	FILE *fpp = fopen("/dev/null", "w");
 	if (!fpp) {
 		xerror("archiver: /dev/null: %s\n", strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		return (-1);
 	}
 
@@ -596,7 +596,7 @@ is_compressed(char *file, int test_iso)
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
 		xerror("archiver: %s\n", strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		fclose(fpp);
 		return (-1);
 	}
@@ -604,12 +604,12 @@ is_compressed(char *file, int test_iso)
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
 		xerror("archiver: %s\n", strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		fclose(fpp);
 		return -1;
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	fclose(fpp);
 
 	char *cmd[] = {"file", "-b", file, NULL};
@@ -628,7 +628,7 @@ is_compressed(char *file, int test_iso)
 		if (fp) {
 			char line[255];
 			if (fgets(line, (int)sizeof(line), fp) == NULL) {
-				close_fstream(fp, fd);
+				fclose(fp);
 				unlink(archiver_tmp_file);
 				return EXIT_FAILURE;
 			}
@@ -649,7 +649,7 @@ is_compressed(char *file, int test_iso)
 				}
 			}
 
-			close_fstream(fp, fd);
+			fclose(fp);
 		}
 
 		unlink(archiver_tmp_file);

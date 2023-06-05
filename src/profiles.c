@@ -215,7 +215,7 @@ profile_set(char *prof)
 			FILE *hist_fp = open_fstream_w(hist_file, &fd);
 			if (hist_fp) {
 				fputs("edit\n", hist_fp);
-				close_fstream(hist_fp, fd);
+				fclose(hist_fp);
 			} else {
 				_err('w', PRINT_PROMPT, _("pf: Error opening the "
 					"history file\n"));
@@ -334,7 +334,7 @@ profile_add(char *prof)
 		/* To avoid malloc errors in read_history(), do not create
 		 * an empty file */
 		fputs("edit\n", hist_fp);
-		close_fstream(hist_fp, fd);
+		fclose(hist_fp);
 	}
 
 	/* #### CREATE THE MIME CONFIG FILE #### */

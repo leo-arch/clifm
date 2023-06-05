@@ -956,7 +956,7 @@ truncate_file(char *file, const int max, const int check_dups)
 			_err(0, NOPRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		} else {
-			close_fstream(fp, fd);
+			fclose(fp);
 		}
 
 		return; /* Exit: we do not need to truncate a new empty file */
@@ -979,7 +979,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	}
 
 	if (n <= max) {
-		close_fstream(fp, fd);
+		fclose(fp);
 		return;
 	}
 
@@ -997,7 +997,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	int fdd = mkstemp(tmp);
 	if (fdd == -1) {
 		xerror("log: %s: %s", tmp, strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		free(tmp);
 		return;
 	}
@@ -1007,7 +1007,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	if (!fpp) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp,
 			strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		free(tmp);
 		return;
 	}
@@ -1051,7 +1051,7 @@ truncate_file(char *file, const int max, const int check_dups)
 	unlinkat(fd, file, 0);
 	renameat(fdd, tmp, fd, file);
 	close(fdd);
-	close_fstream(fp, fd);
+	fclose(fp);
 	free(tmp);
 
 	return;

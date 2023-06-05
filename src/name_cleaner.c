@@ -415,11 +415,11 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 		xerror("bleach: %s: %s\n", f, strerror(errno));
 		if (unlinkat(fd, f, 0) == -1)
 			_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		return (struct bleach_t *)NULL;
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	fp = open_fstream_r(f, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
@@ -432,7 +432,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		if (unlinkat(fd, f, 0) == -1)
 			_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		*edited_names = 0;
 		return bfiles; /* Return the original list of files */
 	}
@@ -511,7 +511,7 @@ edit_replacements(struct bleach_t *bfiles, size_t *n, int *edited_names)
 
 	if (unlinkat(fd, f, 0) == -1)
 		_err('e', PRINT_PROMPT, "bleach: %s: %s\n", f, strerror(errno));
-	close_fstream(fp, fd);
+	fclose(fp);
 
 	return bfiles;
 }

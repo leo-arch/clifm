@@ -389,7 +389,7 @@ get_mime(char *file)
 	FILE *file_fp_err = fopen("/dev/null", "w");
 	if (!file_fp_err) {
 		xerror("%s: /dev/null: %s\n", err_name, strerror(errno));
-		close_fstream(file_fp, fd);
+		fclose(file_fp);
 		return (char *)NULL;
 	}
 
@@ -399,7 +399,7 @@ get_mime(char *file)
 	/* Redirect stdout to the desired file */
 	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
 		xerror("%s: %s\n", err_name, strerror(errno));
-		close_fstream(file_fp, fd);
+		fclose(file_fp);
 		fclose(file_fp_err);
 		return (char *)NULL;
 	}
@@ -407,12 +407,12 @@ get_mime(char *file)
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
 		xerror("%s: %s\n", err_name, strerror(errno));
-		close_fstream(file_fp, fd);
+		fclose(file_fp);
 		fclose(file_fp_err);
 		return (char *)NULL;
 	}
 
-	close_fstream(file_fp, fd);
+	fclose(file_fp);
 	fclose(file_fp_err);
 
 	char *cmd[] = {"file", "--mime-type", file, NULL};
@@ -508,7 +508,7 @@ mime_import(char *file)
 	if (!config_path || !local_path) {
 		free(config_path);
 		free(local_path);
-		close_fstream(mime_fp, fd);
+		fclose(mime_fp);
 		return (-1);
 	}
 
@@ -570,7 +570,7 @@ mime_import(char *file)
 		xerror(_("%s: Nothing was imported. No MIME association "
 			"found\n"), err_name);
 
-	close_fstream(mime_fp, fd);
+	fclose(mime_fp);
 	return mime_defs;
 }
 

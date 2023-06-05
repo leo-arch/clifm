@@ -702,7 +702,7 @@ del_bookmarks(char **args)
 	if (!tmp_fp) {
 		xerror("%s: %s\nbookmarks: Error creating temporary file\n",
 			tmp_file, strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		return EXIT_FAILURE;
 	}
 
@@ -710,8 +710,8 @@ del_bookmarks(char **args)
 	size_t n = mark_bookmarks_for_deletion(args, &exit_status);
 
 	if (n == 0) {
-		close_fstream(fp, fd);
-		close_fstream(tmp_fp, tmp_fd);
+		fclose(fp);
+		fclose(tmp_fp);
 		unlink(tmp_file);
 		return exit_status;
 	}
@@ -729,8 +729,8 @@ del_bookmarks(char **args)
 
 	free(line);
 
-	close_fstream(fp, fd);
-	close_fstream(tmp_fp, tmp_fd);
+	fclose(fp);
+	fclose(tmp_fp);
 
 	if (removed > 0) {
 		unlink(bm_file);

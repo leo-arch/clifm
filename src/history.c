@@ -153,7 +153,7 @@ gen_file(char *file)
 	if (!fp)
 		return EXIT_FAILURE;
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
@@ -415,7 +415,7 @@ save_dirhist(void)
 		fprintf(fp, "%s\n", old_pwd[i]);
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 } */
 

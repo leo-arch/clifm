@@ -89,7 +89,7 @@ save_sel(void)
 		fputc('\n', fp);
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 

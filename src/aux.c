@@ -153,7 +153,7 @@ ueberzug_clear(char *file)
 		return;
 
 	fprintf(fp, "{\"action\": \"remove\", \"identifier\": \"clifm-preview\"}\n");
-	close_fstream(fp, fd);
+	fclose(fp);
 }
 
 /* Let's clear images printed on the terminal screen, either via
@@ -568,16 +568,6 @@ open_fstream_w(char *name, int *fd)
 	return fp;
 }
 
-/* Close file stream FP and file descriptor FD */
-void
-close_fstream(FILE *fp, int fd)
-{
-	fclose(fp);
-//	No need to close FD: it is automatically closed by fclose(3)
-	UNUSED(fd);
-//	close(fd);
-}
-
 /* Transform S_IFXXX (MODE) into the corresponding DT_XXX constant */
 inline mode_t
 get_dt(const mode_t mode)
@@ -910,7 +900,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 	 * digits, 32 is more than enough */
 	char line[32];
 	if (fgets(line, (int)sizeof(line), fp) == NULL) {
-		close_fstream(fp, fd);
+		fclose(fp);
 		unlink(file);
 		return (-1);
 	}
@@ -921,7 +911,7 @@ dir_size(char *dir, const int size_in_bytes, int *status)
 		retval = (off_t)atoll(line);
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	unlink(file);
 	return retval;
 }

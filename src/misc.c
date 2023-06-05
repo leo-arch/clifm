@@ -1027,7 +1027,7 @@ alias_import(char *file)
 	FILE *config_fp = fopen(config_file, "a");
 	if (!config_fp) {
 		xerror("%s: %s: %s\n", PROGRAM_NAME, config_file, strerror(errno));
-		close_fstream(fp, fd);
+		fclose(fp);
 		return EXIT_FAILURE;
 	}
 
@@ -1101,7 +1101,7 @@ alias_import(char *file)
 	}
 
 	free(line);
-	close_fstream(fp, fd);
+	fclose(fp);
 	fclose(config_fp);
 
 	/* No alias was found in FILE */
@@ -1173,7 +1173,7 @@ save_last_path(void)
 		}
 	}
 
-	close_fstream(last_fp, fd);
+	fclose(last_fp);
 
 	char *last_dir_tmp = (char *)xnmalloc(strlen(config_dir_gral) + 7, sizeof(char *));
 	sprintf(last_dir_tmp, "%s/.last", config_dir_gral);
@@ -1968,7 +1968,7 @@ save_pinned_dir(void)
 			PROGRAM_NAME, strerror(errno));
 	} else {
 		fprintf(fp, "%s", pinned_dir);
-		close_fstream(fp, fd);
+		fclose(fp);
 	}
 
 	free(pin_file);
@@ -2357,7 +2357,7 @@ quick_help(char *topic)
 	}
 	unlink(tmp_file);
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	free(_pager);
 
 	if (ret != EXIT_SUCCESS)

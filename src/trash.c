@@ -455,7 +455,7 @@ trash_element(const char *suffix, const struct tm *tm, char *file)
 	free(url_str);
 
 END:
-	close_fstream(info_fp, fd);
+	fclose(info_fp);
 	free(info_file);
 	free(file_suffix);
 	return ret;
