@@ -263,30 +263,28 @@ write_files_to_tmp(struct dirent ***a, int *n, const char *target,
 static int
 open_tmp_file(struct dirent ***a, int n, char *tmp_file, char *app)
 {
+	int exit_status = EXIT_SUCCESS;
+	size_t i;
+
 	if (!app || !*app) {
 		open_in_foreground = 1;
-		int exit_status = open_file(tmp_file);
+		exit_status = open_file(tmp_file);
 		open_in_foreground = 0;
 
 		if (exit_status == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
 
 		xerror(_("rr: %s: Cannot open file\n"), tmp_file);
-
-		size_t i;
-		for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
-			free((*a)[i]);
-		free(*a);
-		return exit_status;
+		goto END;
 	}
 
 	char *cmd[] = {app, tmp_file, NULL};
-	int exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+	exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 	if (exit_status == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	size_t i;
+END:
 	for (i = 0; i < (size_t)n && *a && (*a)[i]; i++)
 		free((*a)[i]);
 	free(*a);
@@ -549,17 +547,17 @@ bulk_remove(char *s1, char *s2)
 	if (old_t == attr.st_mtime || diff_files(tmp_file, num) == 0)
 		return nothing_to_do(&tmp_file, &a, n, fd);
 
-	char **__files = get_files_from_tmp_file(tmp_file, target, n);
-	if (!__files)
+	char **rfiles = get_files_from_tmp_file(tmp_file, target, n);
+	if (!rfiles)
 		goto END;
 
-	char **rem_files = get_remove_files(target, __files, &a, n);
+	char **rem_files = get_remove_files(target, rfiles, &a, n);
 
 	ret = bulk_remove_files(&rem_files);
 
-	for (i = 0; __files[i]; i++)
-		free(__files[i]);
-	free(__files);
+	for (i = 0; rfiles[i]; i++)
+		free(rfiles[i]);
+	free(rfiles);
 
 END:
 	unlinkat(fd, tmp_file, 0);

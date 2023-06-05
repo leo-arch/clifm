@@ -214,8 +214,6 @@ save_jumpdb(void)
 	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
 	sprintf(jump_file, "%s/jump.clifm", config_dir);
 
-	unlink(jump_file);
-
 	int fd = 0;
 	FILE *fp = open_fstream_w(jump_file, &fd);
 	if (!fp) {

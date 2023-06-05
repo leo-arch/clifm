@@ -546,15 +546,16 @@ open_fstream_r(char *name, int *fd)
 	return fp;
 }
 
-/* Create a file for writing. Return a file stream associated to a file
- * descriptor (FD) for the file named NAME */
+/* Create a file for writing (truncating it to zero length if it already exists).
+ * Return a file stream associated to a file descriptor (FD) for the file
+ * named NAME. */
 FILE *
 open_fstream_w(char *name, int *fd)
 {
 	if (!name || !*name)
 		return (FILE *)NULL;
 
-	*fd = open(name, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+	*fd = open(name, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (*fd == -1)
 		return (FILE *)NULL;
 
