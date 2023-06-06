@@ -152,7 +152,7 @@ get_tab_comp_mode_str(void)
 
 	switch (tabmode) {
 	case FZF_TAB: strcpy(s, "fzf"); break;
-	case FZY_TAB: strcpy(s, "fzy"); break;
+	case FNF_TAB: strcpy(s, "fnf"); break;
 	case SMENU_TAB: strcpy(s, "smenu"); break;
 	case STD_TAB: strcpy(s, "standard"); break;
 	default: free(s); s = (char *)NULL; break;
@@ -2435,8 +2435,8 @@ set_tabcomp_mode(const char *line)
 		fzftab = 0; tabmode = STD_TAB;
 	} else if (strncmp(tmp, "fzf", 3) == 0) {
 		fzftab = 1; tabmode = FZF_TAB;
-	} else if (strncmp(tmp, "fzy", 3) == 0) {
-		fzftab = 1; tabmode = FZY_TAB;
+	} else if (strncmp(tmp, "fnf", 3) == 0) {
+		fzftab = 1; tabmode = FNF_TAB;
 	} else if (strncmp(tmp, "smenu", 5) == 0) {
 		fzftab = 1; tabmode = SMENU_TAB;
 	}
@@ -2884,7 +2884,7 @@ read_config(void)
 
 #ifndef _NO_FZF
 		else if (xargs.fzftab == UNSET
-		&& xargs.fzytab == UNSET && xargs.smenutab == UNSET
+		&& xargs.fnftab == UNSET && xargs.smenutab == UNSET
 		&& *line == 'T' && strncmp(line, "TabCompletionMode=", 18) == 0) {
 			set_tabcomp_mode(line + 18);
 		}
@@ -3310,10 +3310,10 @@ update_finder_binaries_status(void)
 		}
 	}
 
-	if (!(bin_flags & FZY_BIN_OK)) {
-		if ((p = get_cmd_path("fzy"))) {
+	if (!(bin_flags & FNF_BIN_OK)) {
+		if ((p = get_cmd_path("fnf"))) {
 			free(p);
-			bin_flags |= FZY_BIN_OK;
+			bin_flags |= FNF_BIN_OK;
 		}
 	}
 

@@ -753,8 +753,8 @@ run_finder(const size_t *height, const int *offset, const char *lw,
 		snprintf(height_str, sizeof(height_str), "--height=%zu", *height);
 
 	char cmd[(PATH_MAX * 2) + (NAME_MAX * 2)];
-	if (tabmode == FZY_TAB) {
-		snprintf(cmd, sizeof(cmd), "fzy "
+	if (tabmode == FNF_TAB) {
+		snprintf(cmd, sizeof(cmd), "fnf "
 				"--read-null --pad=%d --query=\"%s\" --reverse "
 				"--tab-accepts --right-accepts --left-aborts "
 				"--lines=%zu %s %s < %s > %s",
@@ -1391,7 +1391,7 @@ finder_tabcomp(char **matches, const char *text, char *original_query)
 	 * specifies how many entries will be displayed at once. */
 	size_t height = 0;
 
-	if (fzf_height_set == 0 || tabmode == FZY_TAB) {
+	if (fzf_height_set == 0 || tabmode == FNF_TAB) {
 		size_t max_height = set_fzf_max_win_height();
 		height = (i + 1 > max_height) ? max_height : i;
 	}

@@ -247,8 +247,8 @@ check_completion_mode(void)
 			fzftab = 0;
 		}
 
-		if (!(bin_flags & FZY_BIN_OK) && tabmode == FZY_TAB) {
-			_err('w', PRINT_PROMPT, _("%s: fzy: Command not found. Falling "
+		if (!(bin_flags & FNF_BIN_OK) && tabmode == FNF_TAB) {
+			_err('w', PRINT_PROMPT, _("%s: fnf: Command not found. Falling "
 				"back to the default value (fzf, if found, or standard)\n"),
 				PROGRAM_NAME);
 			tabmode = (bin_flags & FZF_BIN_OK) ? FZF_TAB : STD_TAB;
@@ -289,9 +289,9 @@ check_third_party_cmds_alt(void)
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
-	if ( (p = get_cmd_path("fzy")) ) {
+	if ( (p = get_cmd_path("fnf")) ) {
 		free(p);
-		bin_flags |= FZY_BIN_OK;
+		bin_flags |= FNF_BIN_OK;
 		if (fzftab == UNSET) fzftab = 1;
 	}
 
@@ -363,8 +363,8 @@ check_third_party_cmds(void)
 				fzftab = 1;
 		}
 
-		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fzy") == 0) {
-			bin_flags |= FZY_BIN_OK;
+		if (*bin_commands[i] == 'f' && strcmp(bin_commands[i], "fnf") == 0) {
+			bin_flags |= FNF_BIN_OK;
 			if (fzftab == UNSET)
 				fzftab = 1;
 		}
@@ -394,7 +394,7 @@ check_third_party_cmds(void)
 #endif // CHECK_COREUTILS
 
 		if (udevilok == 1 && udisks2ok == 1 && check_coreutils == 0
-		&& (bin_flags & (FZF_BIN_OK & FZY_BIN_OK & SMENU_BIN_OK
+		&& (bin_flags & (FZF_BIN_OK & FNF_BIN_OK & SMENU_BIN_OK
 #if !defined(HAVE_GNU_DU) && !defined(_BE_POSIX)
 		& GNU_DU_BIN_GDU)))
 #else

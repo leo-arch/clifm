@@ -2312,6 +2312,7 @@ external_arguments(int argc, char **argv)
 		{"sel-file", required_argument, 0, 267},
 		{"no-trim-names", no_argument, 0, 268},
 		{"no-bold", no_argument, 0, 269},
+		{"fnftab", no_argument, 0, 270},
 	    {0, 0, 0, 0}
 	};
 
@@ -2481,12 +2482,10 @@ external_arguments(int argc, char **argv)
 		case 248: xargs.apparent_size = conf.apparent_size = 0; break;
 		case 249: xargs.history = 0; break;
 		case 250:
-#ifndef _NO_FZF
-			xargs.fzytab = 1; fzftab = 1; tabmode = FZY_TAB; break;
-#else
-			fprintf(stderr, _("%s: fzy-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			fprintf(stderr, "%s: --fzytab: We have migrated to 'fnf'.\n"
+				"Install 'fnf' (https://github.com/leo-arch/fnf) and then "
+				"use --fnftab instead\n", PROGRAM_NAME);
 			exit(EXIT_FAILURE);
-#endif /* _NO_FZF */
 		case 251: xargs.refresh_on_resize = 0; break;
 		case 252: {
 			int a = atoi(optarg);
@@ -2581,6 +2580,14 @@ external_arguments(int argc, char **argv)
 		case 267: set_custom_selfile(optarg); break;
 		case 268: xargs.trim_names = conf.trim_names = 0; break;
 		case 269: xargs.no_bold = 1; break;
+
+		case 270:
+#ifndef _NO_FZF
+			xargs.fnftab = 1; fzftab = 1; tabmode = FNF_TAB; break;
+#else
+			fprintf(stderr, _("%s: fnf-tab: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+			exit(EXIT_FAILURE);
+#endif /* _NO_FZF */
 
 		case 'a': conf.show_hidden = xargs.hidden = 0; break;
 		case 'A': conf.show_hidden = xargs.hidden = 1; break;
@@ -2765,7 +2772,7 @@ unset_xargs(void)
 	xargs.fzf_preview = UNSET;
 #ifndef _NO_FZF
 	xargs.fzftab = UNSET;
-	xargs.fzytab = UNSET;
+	xargs.fnftab = UNSET;
 	xargs.smenutab = UNSET;
 #endif
 	xargs.hidden = UNSET;
@@ -3817,8 +3824,8 @@ check_options(void)
 			fzftab = xargs.fzftab;
 		}
 
-		if (xargs.fzytab == 1)
-			tabmode = FZY_TAB;
+		if (xargs.fnftab == 1)
+			tabmode = FNF_TAB;
 		else if (xargs.fzftab == 1)
 			tabmode = FZF_TAB;
 		else if (xargs.smenutab == 1)

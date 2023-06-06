@@ -263,7 +263,7 @@ extern int watch;
 
 /* Flags for third party binaries */
 #define FZF_BIN_OK     (1 << 0)
-#define FZY_BIN_OK     (1 << 1)
+#define FNF_BIN_OK     (1 << 1)
 #define SMENU_BIN_OK   (1 << 2)
 #define GNU_DU_BIN_DU  (1 << 3)
 /* 'gdu' is the GNU version of 'du' used by BSD systems */
@@ -1009,7 +1009,7 @@ struct param_t {
 	int fzf_preview;
 #ifndef _NO_FZF
 	int fzftab;
-	int fzytab;
+	int fnftab;
 	int smenutab;
 #endif
 	int hidden;
@@ -1233,7 +1233,7 @@ extern struct ext_t *ext_colors;
 enum tab_mode {
 	STD_TAB =   0,
 	FZF_TAB =   1,
-	FZY_TAB =   2,
+	FNF_TAB =   2,
 	SMENU_TAB = 3
 };
 

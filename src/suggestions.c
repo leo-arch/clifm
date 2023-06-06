@@ -382,7 +382,7 @@ int
 recover_from_wrong_cmd(void)
 {
 	/* Check rl_dispathing to know whether we are called from a keybind,
-	 * in which case we should skip this check */
+	 * in which case we should skip this check. */
 	if (rl_line_buffer && (rl_dispatching == 0
 	|| (words_num > 1 && point_is_first_word == 0))) {
 		char *p = (strrchr(rl_line_buffer, ' '));
