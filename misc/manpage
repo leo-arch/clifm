@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "May 31, 2023" "clifm 1.12.7" "CLIFM Manual"
+.TH "CLIFM" "1" "Jun 6, 2023" "clifm 1.12.9" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -219,8 +219,8 @@ enable file previews for TAB completion (fzf mode only) with the preview window 
 \fB\-\-fzftab\fR
 use \fIfzf\fR to display completion matches
 .TP
-\fB\-\-fzytab\fR
-use \fIfzy\fR to display completion matches
+\fB\-\-fnftab\fR
+use \fIfnf\fR to display completion matches
 .TP
 \fB\-\-icons\fR
 enable icons
@@ -1949,7 +1949,7 @@ If using the FZF mode for TAB completion (see below), you can operate only on \f
 .TP
 \fBTAB completion\fR
 .TP
-There are four modes for TAB completion: \fIstandard\fR (interface provided by readline), \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later), \fIfzy\fR (\fIhttps://github.com/leo-arch/fzy\fR), and \fIsmenu\fR (\fIhttps://github.com/p-gen/smenu\fR). By default, if the \fIfzf\fR binary is found in \fBPATH\fR, \fBclifm\fR will attempt to use \fIfzf\fR to display completions. You can force the use of the remaining modes via the \fI\-\-stdtab\fR, \fI\-\-fzytab\fR, and \fI\-\-smenutab\fR command line switches. The \fITabCompletionMode\fR option in the configuration file can be used to permanently set the TAB completion mode.
+There are four modes for TAB completion: \fIstandard\fR (interface provided by readline), \fIfzf\fR, which depends on \fBFZF\fR (\fIhttps://github.com/junegunn/fzf\fR) (version 0.18.0 or later), \fIfnf\fR (\fIhttps://github.com/leo-arch/fnf\fR), and \fIsmenu\fR (\fIhttps://github.com/p-gen/smenu\fR). By default, if the \fIfzf\fR binary is found in \fBPATH\fR, \fBclifm\fR will attempt to use \fIfzf\fR to display completions. You can force the use of the remaining modes via the \fI\-\-stdtab\fR, \fI\-\-fnftab\fR, and \fI\-\-smenutab\fR command line switches. The \fITabCompletionMode\fR option in the configuration file can be used to permanently set the TAB completion mode.
 .TP
 If using the \fIfzf\fR mode, the completions interface can be customized using the \fIFzfTabOptions\fR option in the color scheme file. \-\-height, \-\-margin, +i/\-i, \-\-read0, \-\-query, and \-\-ansi will be appended to set up some details of the completions interface. Set this value to \fInone\fR to pass no option, to the empty string to load the default values, or to any other custom value. Unless set to \fInone\fR, any option specified here will override \fBFZF_DEFAULT_OPTS\fR.
 .TP
@@ -1972,7 +1972,7 @@ If using the \fIsmenu\fR mode, the interface can be customized using the \fBCLIF
 .TP
 Consult \fBsmenu\fR(1) for more information.
 .TP
-For information about how to customize \fIfzy\fR consult \fBfzy\fR(1).
+For information about how to customize \fIfnf\fR consult \fBfnf\fR(1).
 .TP
 \fBClifm\fR can perform fuzzy TAB completion (just as suggestions) for file names and paths (e.g. "dwn" is completed/suggested as "Downloads"). To enable this feature use the \fI\-\-fuzzy\-matching\fR command line switch or set \fIFuzzyMatching\fR to \fItrue\fR in the configuration file.
 .TP
@@ -3177,7 +3177,7 @@ T}	Rename the file whose ELN is 4 \fB(8)\fR
 .sp 0
  \fB(3)\fR Since \fBclifm\fR is integrated to the system shell, you can also use any of the shell commands you usually use to create new files. Ex: \fItouch myfile\fR or \fInano myfile\fR
 .sp 0
- \fB(4)\fR Only for non-standard TAB completion: fzf, fzy, smenu
+ \fB(4)\fR Only for non-standard TAB completion: fzf, fnf, smenu
 .sp 0
  \fB(5)\fR You can also TAB expand the \fIsel\fR keyword: \fIp sel<TAB>\fR to list selected files (and optionally mark multiple selected files to operate on)
 .sp 0
