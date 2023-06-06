@@ -1128,28 +1128,33 @@ print_file_perms(char *filename, const struct stat *attr,
 
 static void
 print_file_name(char *filename, const char *color, const char file_type,
-	const mode_t mode)
+	const mode_t mode, const char *link_target)
 {
 	char *wname = wc_xstrlen(filename) == 0 ? truncate_wname(filename)
 		: (char *)NULL;
 
-	char *linkname = S_ISLNK(mode) ? realpath(filename, (char *)NULL)
+	char *target_name = (S_ISLNK(mode)) ? realpath(filename, (char *)NULL)
 		: (char *)NULL;
 
 	if (file_type != 'l') {
-		printf(_("\tName: %s%s%s\n"), file_type == 0 ? no_c : color,
-			wname ? wname : filename, df_c);
+		if (link_target) { /* 'pp' on a symlink */
+			printf(_("\tName: %s%s%s <- %s%s%s\n"), file_type == 0 ? no_c : color,
+				link_target, df_c, ln_c, wname ? wname : filename, df_c);
+		} else {
+			printf(_("\tName: %s%s%s\n"), file_type == 0 ? no_c : color,
+				wname ? wname : filename, df_c);
+		}
 
-	} else if (linkname) {
-		char *link_color = get_link_color(linkname);
-		char *name = abbreviate_file_name(linkname);
+	} else if (target_name) {
+		char *link_color = get_link_color(target_name);
+		char *name = abbreviate_file_name(target_name);
 
 		printf(_("\tName: %s%s%s -> %s%s%s\n"), ln_c, wname ? wname
-			: filename, df_c, link_color, name ? name : linkname, NC);
+			: filename, df_c, link_color, name ? name : target_name, df_c);
 
-		if (name != linkname)
+		if (name != target_name)
 			free(name);
-		free(linkname);
+		free(target_name);
 
 	} else { /* Broken link */
 		char target[PATH_MAX] = "";;
@@ -1436,28 +1441,36 @@ get_properties(char *filename, const int follow_link)
 	if (*filename == '.' && *(filename + 1) == '/' && *(filename + 2))
 		filename += 2;
 
-	/* Check file existence */
+	/* Check file existence. */
 	struct stat attr;
+
 	int ret = follow_link == 1 ? stat(filename, &attr) : lstat(filename, &attr);
 	if (ret == -1)
 		return err_no_file(filename, errno, follow_link);
 
-	char file_type = 0; /* File type char indicator */
-	char *ctype = dn_c; /* Color for file type char */
+	char file_type = 0; /* File type char indicator. */
+	char *ctype = dn_c; /* Color for file type char. */
 
 	int file_perm = check_file_access(attr.st_mode, attr.st_uid, attr.st_gid);
 
-	char *linkname = (char *)NULL;
-	if (follow_link == 1 && conf.colorize == 1)
-		linkname = realpath(filename, (char *)NULL);
+	char *link_target = (char *)NULL;
+	if (follow_link == 1) {
+		/* pp: In case of a symlink we want both the symlink name (FILENAME)
+		 * and the target name (LINK_TARGET). */
+		struct stat b;
+		if (lstat(filename, &b) != -1 && S_ISLNK(b.st_mode)) {
+			char *tmp = realpath(filename, (char *)NULL);
+			link_target = tmp ? abbreviate_file_name(tmp) : (char *)NULL;
+			free(tmp);
+		}
+	}
 
-	char *color = get_file_type_and_color(linkname ? linkname : filename,
+	char *color = get_file_type_and_color(link_target ? link_target : filename,
 		&attr, &file_type, &ctype);
 
-	free(linkname);
-
 	print_file_perms(filename, &attr, file_type, ctype);
-	print_file_name(filename, color, file_type, attr.st_mode);
+	print_file_name(filename, color, file_type, attr.st_mode, link_target);
+	free(link_target);
 	print_file_details(filename, &attr, file_type, file_perm);
 	print_timestamps(filename, &attr);
 	print_file_size(filename, &attr, file_perm, follow_link);
