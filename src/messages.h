@@ -438,7 +438,7 @@ Other ways of filtering files in the current directory:\n\n\
 * /query       Quick search function: consult the 'search' help topic\n\
 * Alt-.        Toggle hidden files\n\
 * Alt-,        Toggle list-only-dirs\n\
-* Just press TAB (fzf/fzy mode) and perform a fuzzy search\n\n\
+* Just press TAB (fzf/fnf mode) and perform a fuzzy search\n\n\
 You can also operate on files filtered by file type and/or MIME type as\n\
 follows:\n\n\
     CMD =file-type-char @query\n\n\
@@ -937,7 +937,7 @@ Recognized file types: (d)irectory, (r)egular file, symbolic (l)ink,\n\
     s ^d.* -r :/etc\n\
 - Select all files in the current directory (including hidden files)\n\
     s * .* (or Alt-a)\n\
-- Interactively select files in '/media' (requires fzf, fzy, or smenu\n\
+- Interactively select files in '/media' (requires fzf, fnf, or smenu\n\
   TAB completion mode)\n\
     s /media/*<TAB>\n\
 - List currently selected files\n\
@@ -1263,7 +1263,7 @@ database (via the 'j' command)\
 and paths\
 \n      --fzfpreview-hidden\t Enable file previews for TAB completion (fzf mode only) with the preview window hidden (toggle with Alt-p)\
 \n      --fzftab\t\t\t Use fzf to display completion matches (default if fzf binary is found)\
-\n      --fzytab\t\t\t Use fzy to display completion matches\
+\n      --fnftab\t\t\t Use fnf to display completion matches\
 \n      --icons\t\t\t Enable icons\
 \n      --icons-use-file-color\t Icon colors follow file colors\
 \n      --int-vars\t\t Enable internal variables\

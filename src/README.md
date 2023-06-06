@@ -294,7 +294,7 @@ make -f misc/GNU/Makefile _BE_POSIX=1 _NO_ICONS=1
 | `_NO_ARCHIVING` | Disable [archiving](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support |
 | `_NO_BLEACH` | Disable support for [`Bleach`, the built-in file names cleaner](https://github.com/leo-arch/clifm/wiki/Introduction#bb-bleach-elnfile--n) |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
-| `_NO_FZF` | Disable support for [alternative TAB completers](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (fzf, fzy, and smenu) |
+| `_NO_FZF` | Disable support for [alternative TAB completers](https://github.com/leo-arch/clifm/wiki/Specifics#tab-completion) (fzf, fnf, and smenu) |
 | `_NO_HIGHLIGHT`| Disable [syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting) support |
 | `_NO_ICONS` | Disable [icons](https://github.com/leo-arch/clifm/wiki/Advanced/#icons-smirk) support |
 | `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support. Implies `_NO_MAGIC` |
@@ -304,7 +304,7 @@ make -f misc/GNU/Makefile _BE_POSIX=1 _NO_ICONS=1
 | `_NO_PROFILES` | Disable [user profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles) support |
 | `_NO_TRASH` | Disable [trash](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files) support |
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
-| `_VANILLA_READLINE` | Disable all **clifm** specific features added to readline: syntax highlighting, autosuggestions, TAB completion for **clifm** specific features/commands, and alternative TAB completion modes (fzf, fzy, and smenu) |
+| `_VANILLA_READLINE` | Disable all **clifm** specific features added to readline: syntax highlighting, autosuggestions, TAB completion for **clifm** specific features/commands, and alternative TAB completion modes (fzf, fnf, and smenu) |
 
 <sup>1</sup> Only one feature is lost (Linux): Files birth time. We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
 

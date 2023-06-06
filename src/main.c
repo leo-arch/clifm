@@ -1151,7 +1151,7 @@ main(int argc, char *argv[])
 	if (!(flags & PATH_PROGRAMS_ALREADY_LOADED))
 		get_path_programs();
 
-	/* Check third-party programs availability: finders (fzf, fzy, smenu),
+	/* Check third-party programs availability: finders (fzf, fnf, smenu),
 	 * udevil, and udisks2 */
 	check_third_party_cmds();
 #ifndef _NO_FZF

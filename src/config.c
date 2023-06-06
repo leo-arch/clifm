@@ -57,7 +57,7 @@
 
 #ifndef _NO_FZF
 /* Determine input and output files to be used by the fuzzy finder (either
- * fzf or fzy)
+ * fzf or fnf)
  * Let's do this even if fzftab is not enabled at startup, because this feature
  * can be enabled in place editing the config file */
 void
@@ -1359,7 +1359,7 @@ create_main_config_file(char *file)
 		"# Fuzzy matching algorithm: 1 (faster, non-Unicode), 2 (slower, Unicode)\n\
 ;FuzzyAlgorithm=%d\n\n"
 
-		"# TAB completion mode: 'standard', 'fzf', 'fzy', or 'smenu'. Defaults to\n\
+		"# TAB completion mode: 'standard', 'fzf', 'fnf', or 'smenu'. Defaults to\n\
 # 'fzf' if the binary is found in PATH. Otherwise, the standard mode is used\n\
 ;TabCompletionMode=\n\n"
 

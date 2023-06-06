@@ -233,8 +233,8 @@ set_mount_cmd(const int udisks2ok, const int udevilok)
 }
 
 #ifndef _NO_FZF
-/* fzf, fzy, and smenu are used as alternative TAB completion mechanisms.
- * fzy and smenu fallback to default if not found.
+/* fzf, fnf, and smenu are used as alternative TAB completion mechanisms.
+ * fnf and smenu fallback to default if not found.
  * The default value is fzf, if found, or standard (readline). */
 void
 check_completion_mode(void)

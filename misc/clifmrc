@@ -214,7 +214,7 @@
 # 2 = slower, Unicode aware
 ;FuzzyAlgorithm=2
 
-# TAB completion mode: 'standard', 'fzf', 'fzy' or 'smenu'. Defaults
+# TAB completion mode: 'standard', 'fzf', 'fnf' or 'smenu'. Defaults
 # to 'fzf' if the binary is found in PATH. Othwerwise, the standard
 # mode is used
 ;TabCompletionMode=

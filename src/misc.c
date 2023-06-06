@@ -742,7 +742,7 @@ print_tips(const int all)
 		"Preview files in the current directory using the 'view' command (requires fzf)",
 		"Press Alt+- to launch the files previewer (requires fzf)",
 		"Customize previewing applications: 'view edit' or F7",
-		"Interactively select files (requires fzf, fzy, or smenu). Ex: 's /dir/*<TAB>'",
+		"Interactively select files (requires fzf, fnf, or smenu). Ex: 's /dir/*<TAB>'",
 		"Change files permissions/ownership using the 'pc' and 'oc' commands respectively",
 		"Set a custom shell to run external commands. Ex: 'CLIFM_SHELL=/bin/dash clifm'",
 		"Print all tips: 'tips'",
