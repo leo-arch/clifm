@@ -139,20 +139,21 @@ get_block_devices(void)
 		return (char **)NULL;
 
 	char **bd = (char **)NULL;
-	size_t i = 0, n = 0;
-	for (; (int)i < block_n; i++) {
-#ifndef _DIRENT_HAVE_D_TYPE
+	size_t i, n = 0;
+
+	for (i = 0; (int)i < block_n; i++) {
+# ifndef _DIRENT_HAVE_D_TYPE
 		char bpath[PATH_MAX];
-		snprintf(bpath, PATH_MAX, "/dev/%s", blockdev[i]->d_name);
+		snprintf(bpath, sizeof(bpath), "/dev/%s", blockdev[i]->d_name);
 		struct stat a;
 		if (stat(bpath, &a) == -1) {
 			free(blockdev[i]);
 			continue;
 		}
 		if (!S_ISBLK(a.st_mode)) {
-#else
+# else
 		if (blockdev[i]->d_type != DT_BLK) {
-#endif /* !_DIRENT_HAVE_D_TYPE */
+# endif /* !_DIRENT_HAVE_D_TYPE */
 			free(blockdev[i]);
 			continue;
 		}
@@ -212,12 +213,13 @@ unmount_dev(size_t i, const int n)
 	}
 
 	char *cmd[] = {xargs.mount_cmd == MNT_UDISKS2 ? "udisksctl" : "udevil",
-					"unmount", "-b", media[n].dev, NULL};
+			"unmount", "-b", media[n].dev, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	if (exit_status != EXIT_FAILURE && xargs.mount_cmd == MNT_UDEVIL)
 		printf(_("%s: Unmounted %s\n"), PROGRAM_NAME, media[n].dev);
+
 	return exit_status;
 }
 
@@ -231,8 +233,9 @@ get_dev_label(void)
 		return (char *)NULL;
 
 	char *label = (char *)NULL;
-	int i = 0;
-	for (; i < ln; i++) {
+	int i;
+
+	for (i = 0; i < ln; i++) {
 		if (label) {
 			free(labels[i]);
 			continue;
@@ -240,7 +243,7 @@ get_dev_label(void)
 
 		char *name = labels[i]->d_name;
 		char lpath[PATH_MAX];
-		snprintf(lpath, PATH_MAX, "%s/%s", DISK_LABELS_PATH, name);
+		snprintf(lpath, sizeof(lpath), "%s/%s", DISK_LABELS_PATH, name);
 		char *rpath = realpath(lpath, NULL);
 		if (!rpath) {
 			free(labels[i]);
@@ -271,6 +274,7 @@ get_dev_label(void)
 static void
 list_unmounted_devs(void)
 {
+	int i;
 	size_t k = mp_n;
 	char **unm_devs = (char **)NULL;
 	unm_devs = get_block_devices();
@@ -279,8 +283,8 @@ list_unmounted_devs(void)
 		return;
 
 	printf(_("\n%sUnmounted devices%s\n\n"), BOLD, df_c);
-	int i = 0;
-	for (; unm_devs[i]; i++) {
+
+	for (i = 0; unm_devs[i]; i++) {
 		int skip = 0;
 		size_t j = 0;
 		// Skip already mounted devices
@@ -302,9 +306,10 @@ list_unmounted_devs(void)
 
 		if (media[mp_n].label)
 			printf("%s%zu %s%s [%s%s%s]\n", el_c, mp_n + 1, df_c,
-					media[mp_n].dev, mi_c, media[mp_n].label, df_c);
+				media[mp_n].dev, mi_c, media[mp_n].label, df_c);
 		else
 			printf("%s%zu %s%s\n", el_c, mp_n + 1, df_c, media[mp_n].dev);
+
 		mp_n++;
 		free(unm_devs[i]);
 	}
@@ -403,7 +408,7 @@ mount_dev(int n)
 	}
 
 	char file[PATH_MAX];
-	snprintf(file, PATH_MAX, "%s/%s", xargs.stealth_mode == 1
+	snprintf(file, sizeof(file), "%s/%s", xargs.stealth_mode == 1
 		? P_tmpdir : tmp_dir, TMP_FILENAME);
 
 	int fd = mkstemp(file);
@@ -460,6 +465,7 @@ mount_dev(int n)
 }
 #endif /* HAVE_PROC_MOUNTS */
 
+#ifndef __HAIKU__
 static void
 free_media(void)
 {
@@ -494,12 +500,121 @@ print_dev_info(int n)
 	return exit_status;
 }
 
+# if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
+|| defined(__DragonFly__) || defined(__APPLE__)
+static size_t
+#  ifdef __NetBSD__
+list_mountpoints_bsd(struct statvfs *fslist)
+#  else
+list_mountpoints_bsd(struct statfs *fslist)
+#  endif /* __NetBSD__ */
+{
+	size_t i, j = 0;
+
+	for (i = 0; i < mp_n; i++) {
+		// Do not list all mountpoints, but only those corresponding
+		// to a block device (/dev)
+		if (strncmp(fslist[i].f_mntfromname, "/dev/", 5) != 0)
+			continue;
+
+		printf("%s%zu%s %s%s%s (%s)\n", el_c, j + 1, df_c,
+		    (access(fslist[i].f_mntonname, R_OK | X_OK) == 0)
+		    ? di_c : nd_c, fslist[i].f_mntonname,
+		    df_c, fslist[i].f_mntfromname);
+
+		/* Store the mountpoint into the mounpoints struct */
+		media = (struct mnt_t *)xrealloc(media, (j + 2) * sizeof(struct mnt_t));
+		media[j].mnt = savestring(fslist[i].f_mntonname,
+			strlen(fslist[i].f_mntonname));
+		media[j].label = (char *)NULL;
+		media[j].dev = (char *)NULL;
+		j++;
+	}
+
+	media[j].dev = (char *)NULL;
+	media[j].mnt = (char *)NULL;
+	media[j].label = (char *)NULL;
+
+	return j;
+}
+# endif /* BSD || APPLE */
+
+static int
+get_mnt_input(const int mode, int *info)
+{
+	int n = -1;
+	/* Ask the user and mount/unmount or chdir into the selected
+	 * device/mountpoint */
+	puts(_("Enter 'q' to quit"));
+	if (xargs.mount_cmd != UNSET)
+		puts(_("Enter 'iELN' for device information. Ex: i4"));
+
+	char *input = (char *)NULL;
+	while (!input) {
+# ifdef HAVE_PROC_MOUNTS
+		if (mode == MEDIA_LIST)
+			input = rl_no_hist(_("Choose a mountpoint: "));
+		else
+			input = rl_no_hist(_("Choose a mountpoint/device: "));
+# else
+		input = rl_no_hist(_("Choose a mountpoint: "));
+# endif /* HAVE_PROC_MOUNTS */
+		if (!input || !*input) {
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+
+		if (*input == 'q' && *(input + 1) == '\0') {
+			if (conf.autols == 1)
+				reload_dirlist();
+			free(input);
+			return (-1);
+		}
+
+		char *p = input;
+		if (*p == 'i') {
+			*info = 1;
+			++p;
+		}
+
+		int atoi_num = atoi(p);
+		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
+			xerror("%s: %s: Invalid ELN\n", PROGRAM_NAME, input);
+			free(input);
+			input = (char *)NULL;
+			continue;
+		}
+
+		n = atoi_num - 1;
+	}
+
+	free(input);
+	return n;
+}
+
+static int
+print_mnt_info(const int n)
+{
+	int exit_status = print_dev_info(n);
+
+	if (exit_status == EXIT_SUCCESS) {
+		printf("\nPress any key to continue... ");
+		xgetchar();
+		putchar('\n');
+	}
+
+	free_media();
+	return exit_status;
+}
+#endif /* !__HAIKU__ */
+
 /* If MODE is MEDIA_MOUNT (used by the 'media' command) list mounted and
  * unmounted devices allowing the user to mount or unmount any of them.
  * If MODE is rather MEDIA_LIST (used by the 'mp' command), just list
  * available mountpoints and allow the user to cd into the selected one */
 int
-media_menu(int mode)
+media_menu(const int mode)
 {
 #if defined(__HAIKU__)
 	xerror(_("%s: This feature is not available on Haiku\n"),
@@ -529,7 +644,6 @@ media_menu(int mode)
 
 	media = (struct mnt_t *)xnmalloc(1, sizeof(struct mnt_t));
 	mp_n = 0;
-	int exit_status = EXIT_SUCCESS;
 
 #ifdef HAVE_PROC_MOUNTS
 	if (list_mounted_devs(mode) == EXIT_FAILURE) {
@@ -538,7 +652,7 @@ media_menu(int mode)
 		return EXIT_FAILURE;
 	}
 
-	size_t k = mp_n;
+	size_t mp_n_bk = mp_n;
 
 	if (mode == MEDIA_MOUNT)
 		list_unmounted_devs();
@@ -567,96 +681,19 @@ media_menu(int mode)
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__APPLE__) || defined(__DragonFly__)
-	int i, j;
-	for (i = j = 0; i < (int)mp_n; i++) {
-		/* Do not list all mountpoints, but only those corresponding
-		 * to a block device (/dev) */
-		if (strncmp(fslist[i].f_mntfromname, "/dev/", 5) == 0) {
-			printf("%s%d%s %s%s%s (%s)\n", el_c, j + 1, df_c,
-			    (access(fslist[i].f_mntonname, R_OK | X_OK) == 0)
-			    ? di_c : nd_c, fslist[i].f_mntonname,
-			    df_c, fslist[i].f_mntfromname);
-			/* Store the mountpoint into the mounpoints struct */
-			media = (struct mnt_t *)xrealloc(media,
-				    (j + 2) * sizeof(struct mnt_t));
-			media[j].mnt = savestring(fslist[i].f_mntonname,
-					strlen(fslist[i].f_mntonname));
-			media[j].label = (char *)NULL;
-			media[j].dev = (char *)NULL;
-			j++;
-		}
-	}
-
-	media[j].dev = (char *)NULL;
-	media[j].mnt = (char *)NULL;
-	media[j].label = (char *)NULL;
-	/* Update filesystem counter as it would be used to free() the
-	 * mountpoints entries later (below) */
-	mp_n = (size_t)j;
+	mp_n = list_mountpoints_bsd(fslist);
 #endif /* BSD || APPLE */
 
 	putchar('\n');
-	int n = -1;
-	/* Ask the user and mount/unmount or chdir into the selected
-	 * device/mountpoint */
-	puts(_("Enter 'q' to quit"));
-	if (xargs.mount_cmd != UNSET)
-		puts(_("Enter 'iELN' for device information. Ex: i4"));
-
 	int info = 0;
+	int n = get_mnt_input(mode, &info);
 
-	char *input = (char *)NULL;
-	while (!input) {
-#ifdef HAVE_PROC_MOUNTS
-		if (mode == MEDIA_LIST)
-			input = rl_no_hist(_("Choose a mountpoint: "));
-		else
-			input = rl_no_hist(_("Choose a mountpoint/device: "));
-#else
-		input = rl_no_hist(_("Choose a mountpoint: "));
-#endif /* HAVE_PROC_MOUNTS */
-		if (!input)
-			continue;
-
-		if (!*input) {
-			free(input);
-			input = (char *)NULL;
-			continue;
-		}
-
-		if (*input == 'q' && *(input + 1) == '\0') {
-			if (conf.autols == 1) reload_dirlist();
-			goto EXIT;
-		}
-
-		char *p = input;
-		if (*p == 'i') {
-			info = 1;
-			++p;
-		}
-		int atoi_num = atoi(p);
-		if (atoi_num <= 0 || atoi_num > (int)mp_n) {
-			xerror("%s: %s: Invalid ELN\n", PROGRAM_NAME, input);
-			free(input);
-			input = (char *)NULL;
-			continue;
-		}
-
-		n = atoi_num - 1;
-	}
-
+	int exit_status = EXIT_SUCCESS;
 	if (n == -1)
 		goto EXIT;
 
 	if (info == 1) {
-		exit_status = print_dev_info(n);
-		if (exit_status == EXIT_SUCCESS) {
-			printf("\nPress any key to continue... ");
-			xgetchar();
-			putchar('\n');
-		}
-		free(input);
-		free_media();
+		exit_status = print_mnt_info(n);
 		media_menu(mode);
 		return exit_status;
 	}
@@ -671,7 +708,7 @@ media_menu(int mode)
 			}
 		} else {
 			/* The device is mounted: unmount it */
-			int ret = unmount_dev(k, n);
+			int ret = unmount_dev(mp_n_bk, n);
 			if (ret == EXIT_FAILURE)
 				exit_status = EXIT_FAILURE;
 			goto EXIT;
@@ -695,7 +732,6 @@ media_menu(int mode)
 	add_to_jumpdb(workspaces[cur_ws].path);
 
 EXIT:
-	free(input);
 	free_media();
 	return exit_status;
 }

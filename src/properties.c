@@ -1456,7 +1456,8 @@ get_properties(char *filename, const int follow_link)
 	char *link_target = (char *)NULL;
 	if (follow_link == 1) {
 		/* pp: In case of a symlink we want both the symlink name (FILENAME)
-		 * and the target name (LINK_TARGET). */
+		 * and the target name (LINK_TARGET): the Name field in the output
+		 * will be printed as follows: "Name: target <- link name". */
 		struct stat b;
 		if (lstat(filename, &b) != -1 && S_ISLNK(b.st_mode)) {
 			char *tmp = realpath(filename, (char *)NULL);
