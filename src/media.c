@@ -465,7 +465,6 @@ mount_dev(int n)
 }
 #endif /* HAVE_PROC_MOUNTS */
 
-#ifndef __HAIKU__
 static void
 free_media(void)
 {
@@ -500,14 +499,14 @@ print_dev_info(int n)
 	return exit_status;
 }
 
-# if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
 || defined(__DragonFly__) || defined(__APPLE__)
 static size_t
-#  ifdef __NetBSD__
+# ifdef __NetBSD__
 list_mountpoints_bsd(struct statvfs *fslist)
-#  else
+# else
 list_mountpoints_bsd(struct statfs *fslist)
-#  endif /* __NetBSD__ */
+# endif /* __NetBSD__ */
 {
 	size_t i, j = 0;
 
@@ -537,7 +536,7 @@ list_mountpoints_bsd(struct statfs *fslist)
 
 	return j;
 }
-# endif /* BSD || APPLE */
+#endif /* BSD || APPLE */
 
 static int
 get_mnt_input(const int mode, int *info)
@@ -551,14 +550,15 @@ get_mnt_input(const int mode, int *info)
 
 	char *input = (char *)NULL;
 	while (!input) {
-# ifdef HAVE_PROC_MOUNTS
+#ifdef HAVE_PROC_MOUNTS
 		if (mode == MEDIA_LIST)
 			input = rl_no_hist(_("Choose a mountpoint: "));
 		else
 			input = rl_no_hist(_("Choose a mountpoint/device: "));
-# else
+#else
+		UNUSED(mode);
 		input = rl_no_hist(_("Choose a mountpoint: "));
-# endif /* HAVE_PROC_MOUNTS */
+#endif /* HAVE_PROC_MOUNTS */
 		if (!input || !*input) {
 			free(input);
 			input = (char *)NULL;
@@ -607,7 +607,6 @@ print_mnt_info(const int n)
 	free_media();
 	return exit_status;
 }
-#endif /* !__HAIKU__ */
 
 /* If MODE is MEDIA_MOUNT (used by the 'media' command) list mounted and
  * unmounted devices allowing the user to mount or unmount any of them.
