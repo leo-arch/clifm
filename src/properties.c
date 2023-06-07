@@ -1461,7 +1461,8 @@ get_properties(char *filename, const int follow_link)
 		if (lstat(filename, &b) != -1 && S_ISLNK(b.st_mode)) {
 			char *tmp = realpath(filename, (char *)NULL);
 			link_target = tmp ? abbreviate_file_name(tmp) : (char *)NULL;
-			free(tmp);
+			if (link_target != tmp)
+				free(tmp);
 		}
 	}
 

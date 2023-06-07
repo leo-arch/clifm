@@ -429,7 +429,6 @@ get_regfile_color(const char *filename, const struct stat *attr, int *is_ext)
 	*is_ext = 1;
 
 	return color;
-//	return color ? color : fi_c;
 }
 
 /* Retrieve the color corresponding to dir FILENAME with mode MODE
@@ -750,7 +749,8 @@ get_ext_color(char *ext)
 static char *
 strip_color_line(const char *str, char mode)
 {
-	if (!str || !*str) return (char *)NULL;
+	if (!str || !*str)
+		return (char *)NULL;
 
 	char *buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
 	size_t len = 0;
@@ -780,8 +780,10 @@ strip_color_line(const char *str, char mode)
 	default: break;
 	}
 
-	if (!len || !*buf)
-		{free(buf); return (char *)NULL;}
+	if (!len || !*buf) {
+		free(buf);
+		return (char *)NULL;
+	}
 
 	buf[len] = '\0';
 	return buf;
@@ -2323,7 +2325,7 @@ remove_trash_ext(char **ent)
 
 /* Print the entry ENT using color codes and ELN as ELN, right padding PAD
  * chars and terminate ENT with or without a new line char (NEW_LINE
- * 1 or 0 respectivelly)
+ * 1 or 0 respectivelly).
  * ELN could be:
  * > 0: The ELN of a file in CWD
  * -1: Error getting ELN
@@ -2331,7 +2333,7 @@ remove_trash_ext(char **ent)
 void
 colors_list(char *ent, const int eln, const int pad, const int new_line)
 {
-	char index[sizeof(int) + 8];
+	char index[32];
 	*index = '\0';
 
 	if (eln > 0)
@@ -2346,8 +2348,8 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	char *eln_color = *index == '?' ? mi_c : el_c;
 
 	if (*q == '~') {
-		if (!*(q + 1) || (*(q + 1) == '/' && !*(q + 2)))
-			xstrsncpy(t, user.home, PATH_MAX - 1);
+		if (!q[1] || (q[1] == '/' && !q[2]))
+			xstrsncpy(t, user.home, sizeof(t) - 1);
 		else
 			snprintf(t, sizeof(t), "%s/%s", user.home, q + 2);
 		p = t;
@@ -2355,15 +2357,15 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 
 	size_t len = strlen(p);
 	int rem_slash = 0;
-	/* Remove the ending slash: lstat() won't take a symlink to dir as
-	 * a symlink (but as a dir), if the file name ends with a slash */
+	/* Remove the ending slash: lstat(3) won't take a symlink to dir as
+	 * a symlink (but as a dir), if the file name ends with a slash. */
 	if (len > 1 && p[len - 1] == '/') {
 		p[len - 1] = '\0';
 		rem_slash = 1;
 	}
 
 	int ret = lstat(p, &attr);
-	if (rem_slash)
+	if (rem_slash == 1)
 		p[len - 1] = '/';
 
 	char *wname = (char *)NULL;
