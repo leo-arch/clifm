@@ -94,9 +94,9 @@ There are two ways to set autocommands:\n\
   2) By placing a '.cfm.in' and/or a '.cfm.out' file in the corresponding\n\
   directory\n\n\
 Example using the first method:\n\
-Edit the configuration file ('edit' or F10) and add the following line:\n\n\
+Edit the configuration file ('config' or F10) and add the following line:\n\n\
   autocmd /media/remotes/** fc=0,lm=1\n\n\
-This instructs CliFM to always disable the files counter and to run in\n\
+This instructs clifm to always disable the files counter and to run in\n\
 light mode whenever you enter the /media/remotes directory (or any\n\
 subdirectory).\n\n\
 Example using the second method:\n\
@@ -353,7 +353,7 @@ Note 2: Unlink 'p', 'pp' always follows symlinks to their target file."
 directory (depends on fzf).\n\n\
 To add file previews to TAB completion (fzf mode only), use the --fzfpreview\n\
 command line option, or set FzfPreview to true in the configuration file\n\
-('edit' or F10).\n\n\
+('config' or F10).\n\n\
 Enabling image previews (either ueberzug (X11 only) or the Kitty terminal\n\
 are required)\n\
 \n\
