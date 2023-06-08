@@ -1558,7 +1558,7 @@ list_files_vertical(size_t *counter, int *reset_pager, const int pad,
 /* Execute commands in either DIR_IN_NAME or DIR_OUT_NAME files.
  * MODE (either DIR_IN or DIR_OUT) tells the function whether to check
  * for DIR_IN_NAME or DIR_OUT_NAME files.
- * Used by the autocommands function */
+ * Used by the autocommands function. */
 static void
 run_dir_cmd(const int mode)
 {
@@ -1568,13 +1568,11 @@ run_dir_cmd(const int mode)
 	if (mode == DIR_IN) {
 		snprintf(path, sizeof(path), "%s/%s",
 			workspaces[cur_ws].path, DIR_IN_NAME);
-	} else {
-		if (mode == DIR_OUT) {
-			if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
-				return;
-			snprintf(path, sizeof(path), "%s/%s",
-				old_pwd[dirhist_cur_index - 1], DIR_OUT_NAME);
-		}
+	} else { /* DIR_OUT */
+		if (dirhist_cur_index <= 0 || !old_pwd[dirhist_cur_index - 1])
+			return;
+		snprintf(path, sizeof(path), "%s/%s",
+			old_pwd[dirhist_cur_index - 1], DIR_OUT_NAME);
 	}
 
 	fp = fopen(path, "r");
