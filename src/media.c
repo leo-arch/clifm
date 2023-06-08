@@ -28,7 +28,15 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+
+#if defined(__linux__) || defined(__CYGWIN__)
+# include <mntent.h>
+# define HAVE_PROC_MOUNTS
+# define DISK_LABELS_PATH "/dev/disk/by-label"
+# ifndef _PATH_MOUNTED
+#  define _PATH_MOUNTED "/etc/mtab"
+# endif
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 || defined(__DragonFly__)
 # include <sys/mount.h>
 # include <sys/sysctl.h>
@@ -36,7 +44,8 @@
 # include <sys/param.h>
 # include <sys/ucred.h>
 # include <sys/mount.h>
-#endif
+#endif /* __linux__ || __CYGWIN__ */
+
 #include <dirent.h>
 
 #include "aux.h"
@@ -48,15 +57,10 @@
 #include "misc.h"
 #include "history.h"
 
-#if defined(__linux__) || defined(__CYGWIN__)
-# define HAVE_PROC_MOUNTS
-# define DISK_LABELS_PATH "/dev/disk/by-label"
-#endif
-
 /* Information about devices */
 struct mnt_t {
-	char *mnt; /* Mountpoint */
-	char *dev; /* Device name (ex: /dev/sda1) */
+	char *mnt;   /* Mountpoint */
+	char *dev;   /* Device name (ex: /dev/sda1) */
 	char *label; /* Device label */
 };
 
@@ -275,10 +279,8 @@ static void
 list_unmounted_devs(void)
 {
 	int i;
-	size_t k = mp_n;
-	char **unm_devs = (char **)NULL;
-	unm_devs = get_block_devices();
-
+	size_t mp_n_bk = mp_n;
+	char **unm_devs = get_block_devices();
 	if (!unm_devs)
 		return;
 
@@ -286,13 +288,14 @@ list_unmounted_devs(void)
 
 	for (i = 0; unm_devs[i]; i++) {
 		int skip = 0;
-		size_t j = 0;
-		// Skip already mounted devices
-		for (; j < k; j++) {
+		size_t j;
+		/* Skip already mounted devices */
+		for (j = 0; j < mp_n_bk; j++) {
 			if (strcmp(media[j].dev, unm_devs[i]) == 0)
 				skip = 1;
 		}
-		if (skip) {
+
+		if (skip == 1) {
 			free(unm_devs[i]);
 			continue;
 		}
@@ -321,74 +324,42 @@ list_unmounted_devs(void)
 }
 
 static int
-list_mounted_devs(int mode)
+list_mounted_devs(const int mode)
 {
-	FILE *fp = fopen("/proc/mounts", "r");
+	struct mntent *ent;
+
+	/* MOUNTED is defined in mntent.h and points to the canonical file
+	 * (usually /etc/mtab) containing mounted file systems. */
+	FILE *fp = setmntent(_PATH_MOUNTED, "r");
 	if (!fp) {
-		xerror("mp: fopen: /proc/mounts: %s\n", strerror(errno));
+		xerror("mp: setmntent: %s: %s\n", _PATH_MOUNTED, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	size_t line_size = 0;
-	char *line = (char *)NULL;
-
-	while (getline(&line, &line_size, fp) > 0) {
-		/* List only mountpoints corresponding to a block device (/dev) */
-		if (strncmp(line, "/dev/", 5) != 0)
+	while ((ent = getmntent(fp)) != NULL) {
+		if (strncmp(ent->mnt_fsname, "/dev/", 5) != 0)
 			continue;
 
-		/* Use strtok(3) to split LINE into tokens using space as IFS */
-		char *str = strtok(line, " ");
-		if (!str)
-			continue;
-
-		size_t counter = 0, dev_len = strlen(str);
+		if (mode == MEDIA_LIST) {
+			printf("%s%zu%s %s%s%s [%s]\n", el_c, mp_n + 1,
+				df_c, (access(ent->mnt_dir, R_OK | X_OK) == 0) ? di_c : nd_c,
+				ent->mnt_dir, df_c, ent->mnt_fsname);
+		} else {
+			printf("%s%zu%s %s [%s%s%s]\n", el_c, mp_n + 1,
+				df_c, ent->mnt_fsname,
+				(access(ent->mnt_dir, R_OK | X_OK) == 0) ? di_c
+				: nd_c, ent->mnt_dir, df_c);
+		}
 
 		media = (struct mnt_t *)xrealloc(media, (mp_n + 2) * sizeof(struct mnt_t));
-		media[mp_n].dev = savestring(str, dev_len);
+		media[mp_n].mnt = savestring(ent->mnt_dir, strlen(ent->mnt_dir));
+		media[mp_n].dev = savestring(ent->mnt_fsname, strlen(ent->mnt_fsname));
 		media[mp_n].label = (char *)NULL;
-		/* Print only the first two fields of each /proc/mounts line */
-		while (str && counter < 2) {
-			if (counter == 1) { /* 1 == second field */
-				/* /proc/mounts encode special chars as octal.
-				 * Let's decode it */
-				char *p = strchr(str, '\\');
-				if (p && *(p + 1)) {
-					char *q = p;
-					p++;
-					char pp = 0;
-					p += 3;
-					pp = *p;
-					*p = '\0';
-					int d = read_octal(q + 1);
-					*p = pp;
-					*q = (char)d;
-					strcpy(q + 1, q + 4);
-				}
 
-				if (mode == MEDIA_LIST) {
-					printf("%s%zu%s %s%s%s [%s]\n", el_c, mp_n + 1,
-						df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c,
-						str, df_c, media[mp_n].dev);
-				} else {
-					printf("%s%zu%s %s [%s%s%s]\n", el_c, mp_n + 1,
-						df_c, media[mp_n].dev,
-						(access(str, R_OK | X_OK) == 0) ? di_c
-						: nd_c, str, df_c);
-				}
-
-				/* Store the second field (mountpoint) into an array */
-				media[mp_n].mnt = savestring(str, strlen(str));
-				mp_n++;
-			}
-
-			str = strtok(NULL, " ,");
-			counter++;
-		}
+		mp_n++;
 	}
 
-	free(line);
-	fclose(fp);
+	endmntent(fp);
 
 	media[mp_n].dev = (char *)NULL;
 	media[mp_n].mnt = (char *)NULL;
@@ -399,7 +370,7 @@ list_mounted_devs(int mode)
 
 /* Mount device and store mountpoint */
 static int
-mount_dev(int n)
+mount_dev(const int n)
 {
 	if (xargs.mount_cmd == UNSET) {
 		xerror(_("%s: No mount application found. Install either "
@@ -511,8 +482,8 @@ list_mountpoints_bsd(struct statfs *fslist)
 	size_t i, j = 0;
 
 	for (i = 0; i < mp_n; i++) {
-		// Do not list all mountpoints, but only those corresponding
-		// to a block device (/dev)
+		/* Do not list all mountpoints, but only those corresponding
+		 * to a block device (/dev) */
 		if (strncmp(fslist[i].f_mntfromname, "/dev/", 5) != 0)
 			continue;
 
