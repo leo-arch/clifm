@@ -89,24 +89,28 @@ check_autocmds(void)
 			n = 2;
 			if (p[plen - 3] == '/')
 				n++;
+
 			if (*p == '~') {
 				p[plen - n] = '\0';
 				char *path = tilde_expand(p);
 				if (!path)
 					continue;
+
 				p[plen - n] = (n == 2 ? '*' : '/');
 				size_t tlen = strlen(path);
 				int ret = strncmp(path, workspaces[cur_ws].path, tlen);
 				free(path);
+
 				if (ret == 0) {
 					found = 1;
 					goto RUN_AUTOCMD;
 				}
+
 			} else { /* We have an absolute path */
 				/* If (plen - n) == 0 we have "/\**", that is, match everything:
 				 * no need to perform any check. */
-				if (plen - n == 0
-				|| strncmp(autocmds[i].pattern, workspaces[cur_ws].path, plen - n) == 0) {
+				if (plen - n == 0 || strncmp(autocmds[i].pattern,
+				workspaces[cur_ws].path, plen - n) == 0) {
 					found = 1;
 					goto RUN_AUTOCMD;
 				}
@@ -115,7 +119,8 @@ check_autocmds(void)
 
 		/* Glob expression or plain text for PATTERN */
 		glob_t g;
-		int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK | GLOB_TILDE | GLOB_BRACE, NULL, &g);
+		int ret = glob(p, GLOB_NOSORT | GLOB_NOCHECK | GLOB_TILDE
+		| GLOB_BRACE, NULL, &g);
 
 		if (ret != EXIT_SUCCESS) {
 			globfree(&g);
@@ -232,8 +237,6 @@ set_autocmd_opt(char *opt)
 	if (!p || !*(++p))
 		return;
 
-	autocmds[autocmds_n].color_scheme = (char *)NULL;
-
 	*(p - 1) = '\0';
 	if (*opt == 'c' && opt[1] == 's') {
 		int i = (int)cschemes_n;
@@ -276,24 +279,15 @@ static void
 init_autocmd_opts(void)
 {
 	autocmds[autocmds_n].cmd = (char *)NULL;
-//	autocmds[autocmds_n].color_scheme = opts.color_scheme;
-//	autocmds[autocmds_n].files_counter = opts.files_counter;
-//	autocmds[autocmds_n].light_mode = opts.light_mode;
-//	autocmds[autocmds_n].long_view = opts.long_view;
 	autocmds[autocmds_n].color_scheme = cur_cscheme;
 	autocmds[autocmds_n].files_counter = conf.files_counter;
 	autocmds[autocmds_n].light_mode = conf.light_mode;
 	autocmds[autocmds_n].long_view = conf.long_view;
-
 	autocmds[autocmds_n].max_files = max_files;
 	autocmds[autocmds_n].max_name_len = conf.max_name_len;
 	autocmds[autocmds_n].only_dirs = conf.only_dirs;
-
-//	autocmds[autocmds_n].pager = opts.pager;
-//	autocmds[autocmds_n].show_hidden = opts.show_hidden;
 	autocmds[autocmds_n].pager = conf.pager;
 	autocmds[autocmds_n].show_hidden = conf.show_hidden;
-
 	autocmds[autocmds_n].sort = conf.sort;
 	autocmds[autocmds_n].sort_reverse = conf.sort_reverse;
 }
