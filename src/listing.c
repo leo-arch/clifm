@@ -149,7 +149,7 @@ init_icons_hashes(void)
 
 #if defined(TOURBIN_QSORT)
 static inline void
-swap_ent(size_t id1, size_t id2)
+swap_ent(const size_t id1, const size_t id2)
 {
 	struct fileinfo _dent, *pdent1 = &file_info[id1], *pdent2 =  &file_info[id2];
 
@@ -258,7 +258,7 @@ print_disk_usage(void)
 }
 
 static void
-_print_selfiles(unsigned short t_rows)
+_print_selfiles(const unsigned short t_rows)
 {
 	int limit = conf.max_printselfiles;
 
@@ -314,7 +314,7 @@ print_dirhist_map(void)
 #ifndef _NO_ICONS
 /* Set the icon field to the corresponding icon for FILE */
 static int
-get_name_icon(const char *file, int n)
+get_name_icon(const char *file, const int n)
 {
 	if (!file)
 		return 0;
@@ -336,7 +336,7 @@ get_name_icon(const char *file, int n)
 /* Set the icon field to the corresponding icon for DIR. If not found,
  * set the default icon */
 static void
-get_dir_icon(const char *dir, int n)
+get_dir_icon(const char *dir, const int n)
 {
 	/* Default values for directories */
 	file_info[n].icon = DEF_DIR_ICON;
@@ -360,7 +360,7 @@ get_dir_icon(const char *dir, int n)
 /* Set the icon field to the corresponding icon for EXT. If not found,
  * set the default icon */
 static void
-get_ext_icon(const char *restrict ext, int n)
+get_ext_icon(const char *restrict ext, const int n)
 {
 	if (!file_info[n].icon) {
 		file_info[n].icon = DEF_FILE_ICON;
@@ -1615,7 +1615,7 @@ check_autocmd_file(const char *s)
 }
 
 static void
-get_largest(size_t i, off_t *size, char **name, char **color, off_t *total)
+get_largest(const size_t i, off_t *size, char **name, char **color, off_t *total)
 {
 	/* Only directories and regular files should be counted */
 	if (file_info[i].type != DT_DIR && file_info[i].type != DT_REG)
@@ -1717,13 +1717,12 @@ exclude_file_type(const mode_t mode, const nlink_t links)
 	case 'p': if (S_ISFIFO(mode)) match = 1; break;
 	case 's': if (S_ISSOCK(mode)) match = 1; break;
 
-	case 'g': if (mode & 02000) match = 1; break; // SGID
+	case 'g': if (mode & 02000) match = 1; break; /* SGID */
 	case 'h': if (links > 1 && !S_ISDIR(mode)) match = 1; break;
-	case 'o': if (mode & 00002) match = 1; break; // Other writable
-	case 't': if (mode & 01000) match = 1; break; // Sticky
-	case 'u': if (mode & 04000) match = 1; break; // SUID
-	case 'x': // Executable
-//		if (S_ISREG(mode) && ((mode & S_IXUSR) || (mode & S_IXGRP) || (mode & S_IXOTH))) {
+	case 'o': if (mode & 00002) match = 1; break; /* Other writable */
+	case 't': if (mode & 01000) match = 1; break; /* Sticky */
+	case 'u': if (mode & 04000) match = 1; break; /* SUID */
+	case 'x': /* Executable */
 		if (S_ISREG(mode) && ((mode & 00100) || (mode & 00010) || (mode & 00001)))
 			match = 1;
 		break;

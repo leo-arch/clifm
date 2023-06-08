@@ -67,72 +67,6 @@ struct mnt_t {
 static struct mnt_t *media = (struct mnt_t *)NULL;
 static size_t mp_n = 0;
 
-/*
-#ifdef __linux__
-static struct udev_device*
-get_child(struct udev* udev, struct udev_device* parent, const char* subsystem)
-{
-	struct udev_device* child = NULL;
-	struct udev_enumerate *enumerate = udev_enumerate_new(udev);
-
-	udev_enumerate_add_match_parent(enumerate, parent);
-	udev_enumerate_add_match_subsystem(enumerate, subsystem);
-	udev_enumerate_scan_devices(enumerate);
-
-	struct udev_list_entry *devices = udev_enumerate_get_list_entry(enumerate);
-	struct udev_list_entry *entry;
-
-	udev_list_entry_foreach(entry, devices) {
-		const char *path = udev_list_entry_get_name(entry);
-		child = udev_device_new_from_syspath(udev, path);
-		break;
-	}
-
-	udev_enumerate_unref(enumerate);
-	return child;
-}
-
-// Return an array of block devices partitions
-static char **
-get_block_devices(void)
-{
-	struct udev* udev = udev_new();
-	struct udev_enumerate* enumerate = udev_enumerate_new(udev);
-
-	udev_enumerate_add_match_property(enumerate, "DEVTYPE", "partition");
-	udev_enumerate_scan_devices(enumerate);
-
-	struct udev_list_entry *devices = udev_enumerate_get_list_entry(enumerate);
-	struct udev_list_entry *entry;
-
-	char **mps = (char **)NULL;
-	size_t n = 0;
-
-	udev_list_entry_foreach(entry, devices) {
-	const char* path = udev_list_entry_get_name(entry);
-	struct udev_device* scsi = udev_device_new_from_syspath(udev, path);
-
-	struct udev_device* block = get_child(udev, scsi, "block");
-
-	const char *dev = udev_device_get_devnode(block);
-	mps = (char **)xrealloc(mps, (n + 2) * sizeof(char *));
-	mps[n++] = savestring(dev, strlen(dev));
-
-	if (block)
-		udev_device_unref(block);
-
-	udev_device_unref(scsi);
-	}
-	mps[n] = (char *)NULL;
-
-	udev_enumerate_unref(enumerate);
-	udev_unref(udev);
-
-	return mps;
-}
-#endif // __linux__
-*/
-
 #ifdef HAVE_PROC_MOUNTS
 static char **
 get_block_devices(void)
@@ -328,8 +262,6 @@ list_mounted_devs(const int mode)
 {
 	struct mntent *ent;
 
-	/* MOUNTED is defined in mntent.h and points to the canonical file
-	 * (usually /etc/mtab) containing mounted file systems. */
 	FILE *fp = setmntent(_PATH_MOUNTED, "r");
 	if (!fp) {
 		xerror("mp: setmntent: %s: %s\n", _PATH_MOUNTED, strerror(errno));
@@ -368,7 +300,7 @@ list_mounted_devs(const int mode)
 	return EXIT_SUCCESS;
 }
 
-/* Mount device and store mountpoint */
+/* Mount device and store mountpoint (at media[N]). */
 static int
 mount_dev(const int n)
 {
@@ -418,7 +350,7 @@ mount_dev(const int n)
 	fclose(fp);
 	unlink(file);
 
-	/* Recover the mountpoint used by the mounting command */
+	/* Recover the mountpoint used by the mounting command. */
 	char *p = strstr(out_line, " at ");
 	if (!p || *(p + 4) != '/') {
 		xerror(_("%s: Error retrieving mountpoint\n"), PROGRAM_NAME);
@@ -513,8 +445,6 @@ static int
 get_mnt_input(const int mode, int *info)
 {
 	int n = -1;
-	/* Ask the user and mount/unmount or chdir into the selected
-	 * device/mountpoint */
 	puts(_("Enter 'q' to quit"));
 	if (xargs.mount_cmd != UNSET)
 		puts(_("Enter 'iELN' for device information. Ex: i4"));
@@ -600,7 +530,7 @@ media_menu(const int mode)
 #endif /* HAVE_PROC_MOUNTS */
 
 	if (mode == MEDIA_MOUNT && xargs.mount_cmd == UNSET) {
-		xerror("%s\n", _("media: No mount command found. Install either "
+		xerror("%s\n", _("media: No mount application found. Install either "
 			"udevil or udisks2"));
 		return EXIT_FAILURE;
 	}
