@@ -604,7 +604,7 @@ extern int watch;
 #define FILE_SIZE (conf.apparent_size == 1 ? attr.st_size \
 		: attr.st_blocks * S_BLKSIZE)
 
-#define UNUSED(x) (void)x /* Just silence the compiler's warning */
+#define UNUSED(x) (void)(x) /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 
 /* UINT_MAX is 4294967295 == 10 digits */
@@ -650,7 +650,7 @@ extern int watch;
 #define ERASE_TO_LEFT            fputs("\x1b[1K", stdout) /* EL1 */
 #define ERASE_TO_RIGHT_AND_BELOW fputs("\x1b[J", stdout)  /* ED0 */
 
-#define	SUGGEST_BAEJ(offset,color) printf("\x1b[%dC%s>\x1b[0m ", (offset), (color))
+#define	SUGGEST_BAEJ(offset, color) printf("\x1b[%dC%s>\x1b[0m ", (offset), (color))
 /* ######## */
 
 /* Sequences used by the pad_filename function (listing.c):

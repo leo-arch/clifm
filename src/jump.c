@@ -61,6 +61,14 @@
 #define IS_VALID_JUMP_ENTRY(n) ((!jump_db[(n)].path || !*jump_db[(n)].path \
 || jump_db[(n)].rank == JUMP_ENTRY_PURGED) ? 0 : 1)
 
+struct jump_entry_t {
+	char *match;
+	char *needle;
+	size_t visits;
+	time_t first;
+	time_t last;
+};
+
 /* Calculate the rank as frecency. The algorithm is based
  * on Mozilla, zoxide, and z.lua. See:
  * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
@@ -138,7 +146,7 @@ free_jump_database(void)
 }
 
 static int
-add_jump_entry(const char *dir, const size_t dir_len)
+add_new_jump_entry(const char *dir, const size_t dir_len)
 {
 	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2) * sizeof(struct jump_t));
 	jump_db[jump_n].visits = 1;
@@ -200,7 +208,7 @@ add_to_jumpdb(char *dir)
 	if (new_entry == 0)
 		return EXIT_SUCCESS;
 
-	return add_jump_entry(dir, dir_len);
+	return add_new_jump_entry(dir, dir_len);
 }
 
 /* Store the jump database into a file. */
@@ -554,7 +562,7 @@ purge_low_ranked_entries(const int limit)
 }
 
 static int
-_purge_jumpdb(char *arg)
+purge_jump_database(char *arg)
 {
 	if (!arg || !*arg)
 		return purge_invalid_entries();
@@ -573,9 +581,96 @@ _purge_jumpdb(char *arg)
 	return purge_low_ranked_entries(n);
 }
 
-/* Jump into the best ranked directory matching query strings in ARGS */
+static int
+handle_jump_order(char *arg, const int mode)
+{
+	if (!arg) {
+		if (mode == NO_SUG_JUMP)
+			fprintf(stderr, "%s\n", _(JUMP_USAGE));
+		return EXIT_FAILURE;
+	}
+
+	if (!is_number(arg)) {
+		if (mode == NO_SUG_JUMP)
+			return cd_function(arg, CD_PRINT_ERROR);
+
+		return EXIT_FAILURE;
+	}
+
+	int int_order = atoi(arg);
+	if (int_order <= 0 || int_order > (int)jump_n) {
+		if (mode == NO_SUG_JUMP)
+			xerror(_("jump: %s: No such order number\n"), arg);
+		return EXIT_FAILURE;
+	}
+
+	if (mode == NO_SUG_JUMP)
+		return cd_function(jump_db[int_order - 1].path, CD_PRINT_ERROR);
+
+	return save_suggestion(jump_db[int_order - 1].path);
+}
+
+static int
+check_jump_params(char **args, const time_t now, const int reduce)
+{
+	if (args[0][1] == 'e')
+		return edit_jumpdb(args[1]);
+
+	if (!args[1])
+		return print_jump_table(reduce, now);
+
+	if (IS_HELP(args[1])) {
+		puts(_(JUMP_USAGE));
+		return EXIT_SUCCESS;
+	}
+
+	if (*args[1] == '-' && strcmp(args[1], "--edit") == 0)
+		return edit_jumpdb(args[2]);
+
+	if (*args[1] == '-' && strcmp(args[1], "--purge") == 0)
+		return purge_jump_database(args[2]);
+
+	return (-1);
+}
+
+static void
+mark_target_segment(char *str, int *first_segment, int *last_segment)
+{
+	size_t len = strlen(str);
+
+	if (len > 0 && str[len - 1] == '/') {
+		str[len - 1] = '\0';
+		*last_segment = 1;
+		*first_segment = 0;
+	} else if (len > 0 && str[len - 1] == '\\') {
+		str[len - 1] = '\0';
+		*last_segment = 0;
+		*first_segment = 1;
+	} else {
+		*last_segment = 0;
+		*first_segment = 0;
+	}
+}
+
+/* Found the best ranked directory matching query strings in ARGS.
+ *
+ * The rank is calculated as frecency. The algorithm is based on Mozilla,
+ * zoxide, and z.lua. See:
+ * https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency
+ * https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging
+ * https://github.com/skywind3000/z.lua#aging
+ *
+ * If MODE is NO_SUG_JUMP, we're running the 'j' command (or any of its
+ * variants [jo, je, jc, jp, --edit or --purge]), in which case matches are
+ * handled according to the specific command.
+ *
+ * Otherwise, the function has been called from the suggestions system, in
+ * which case the best ranked directory is stored in the suggestions
+ * buffer (jump_suggestion) to be suggested by the suggestions system.
+ *
+ * Returns 1 (if matches are found) or 0. */
 int
-dirjump(char **args, int mode)
+dirjump(char **args, const int mode)
 {
 	if (xargs.no_dirjump == 1 && mode == NO_SUG_JUMP) {
 		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
@@ -586,35 +681,22 @@ dirjump(char **args, int mode)
 	int reduce = 0;
 
 	/* If the sum total of ranks is greater than max, divide each entry
-	 * to make the sum total less than or equal to max */
+	 * to make the sum total less than or equal to max. */
 	if (jump_total_rank > conf.max_jump_total_rank)
 		reduce = (jump_total_rank / conf.max_jump_total_rank) + 1;
 
-	/* If no parameter (and no 'je'), print the list of entries in the jump
-	 * database together with the corresponding information */
 	if (mode == NO_SUG_JUMP) {
-		if (!args[1] && args[0][1] != 'e')
-			return print_jump_table(reduce, now);
-
-		if (args[1] && IS_HELP(args[1])) {
-			puts(_(JUMP_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		if (args[1] && *args[1] == '-' && strcmp(args[1], "--edit") == 0)
-			return edit_jumpdb(args[2]);
-
-		if (args[1] && *args[1] == '-' && strcmp(args[1], "--purge") == 0)
-			return _purge_jumpdb(args[2]);
+		int ret = check_jump_params(args, now, reduce);
+		if (ret != -1)
+			return ret;
 	}
 
 	enum jump jump_opt = NONE;
 
 	switch (args[0][1]) {
-	case 'e': return edit_jumpdb(args[1]);
 	case 'c': jump_opt = JCHILD; break;
 	case 'p': jump_opt = JPARENT; break;
-	case 'o': jump_opt = JORDER; break;
+	case 'o': return handle_jump_order(args[1], mode);
 	case 'l': jump_opt = JLIST; break;
 	case '\0': jump_opt = NONE; break;
 	default:
@@ -623,34 +705,7 @@ dirjump(char **args, int mode)
 		return EXIT_FAILURE;
 	}
 
-	if (jump_opt == JORDER) {
-		if (!args[1]) {
-			if (mode == NO_SUG_JUMP)
-				fprintf(stderr, "%s\n", _(JUMP_USAGE));
-			return EXIT_FAILURE;
-		}
-
-		if (!is_number(args[1])) {
-			if (mode == NO_SUG_JUMP)
-				return cd_function(args[1], CD_PRINT_ERROR);
-			else
-				return EXIT_FAILURE;
-		} else {
-			int int_order = atoi(args[1]);
-			if (int_order <= 0 || int_order > (int)jump_n) {
-				if (mode == NO_SUG_JUMP) {
-					xerror(_("jump: %s: No such order number\n"), args[1]);
-				}
-				return EXIT_FAILURE;
-			}
-
-			if (mode == NO_SUG_JUMP)
-				return cd_function(jump_db[int_order - 1].path, CD_PRINT_ERROR);
-			return save_suggestion(jump_db[int_order - 1].path);
-		}
-	}
-
-	/* If ARG is an actual directory, just cd into it */
+	/* If ARG is an actual directory, just cd into it. */
 	struct stat attr;
 	if (args[1] && !args[2] && lstat(args[1], &attr) != -1) {
 		if (mode == NO_SUG_JUMP)
@@ -658,38 +713,25 @@ dirjump(char **args, int mode)
 		return save_suggestion(args[1]);
 	}
 
-	/* Jump into a visited directory using ARGS as filter(s) */
+	/* Find the best ranked directory using ARGS as filter(s). */
 	size_t i;
 	int j, match = 0;
-	char **matches = (char **)xnmalloc(jump_n + 1, sizeof(char *));
-	char **needles = (char **)xnmalloc(jump_n + 1, sizeof(char *));
-	size_t *visits = (size_t *)xnmalloc(jump_n + 1, sizeof(size_t));
-	time_t *first = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
-	time_t *last = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
-	int last_segment = 0, first_segment = 0;
+
+	struct jump_entry_t *entry = (struct jump_entry_t *)xnmalloc(
+		jump_n + 1, sizeof(struct jump_entry_t));
 
 	for (i = 1; args[i]; i++) {
 		/* 1) Using the first parameter, get a list of matches in the
-		 * database */
+		 * database. */
 
 		/* If the query string ends with a slash, we want this query
-		 * string to match only the last segment of the path (i.e.,
-		 * there must be no slash after the match) */
-		size_t _len = strlen(args[i]);
-		if (_len > 0 && args[i][_len - 1] == '/') {
-			args[i][_len - 1] = '\0';
-			last_segment = 1;
-			first_segment = 0;
-		} else if (_len > 0 && args[i][_len - 1] == '\\') {
-			args[i][_len - 1] = '\0';
-			last_segment = 0;
-			first_segment = 1;
-		} else {
-			last_segment = 0;
-			first_segment = 0;
-		}
+		 * string to match only the LAST segment of the path, and if it ends
+		 * with a backslash instead, we want this query to match only the
+		 * FIRST segment of the path. */
+		int last_segment = 0, first_segment = 0;
+		mark_target_segment(args[i], &first_segment, &last_segment);
 
-		if (!match) {
+		if (match == 0) {
 			j = (int)jump_n;
 			while (--j >= 0) {
 				if (!IS_VALID_JUMP_ENTRY(j))
@@ -698,15 +740,15 @@ dirjump(char **args, int mode)
 				/* Pointer to the beginning of the search str in the
 				 * jump entry. Used to search for subsequent search
 				 * strings starting from this position in the entry
-				 * and not before */
+				 * and not before. */
 				char *needle = conf.case_sens_dirjump
-							? strstr(jump_db[j].path, args[i])
-							: strcasestr(jump_db[j].path, args[i]);
+					? strstr(jump_db[j].path, args[i])
+					: strcasestr(jump_db[j].path, args[i]);
 
-				if (!needle || (last_segment && strchr(needle, '/')))
+				if (!needle || (last_segment == 1 && strchr(needle, '/')))
 					continue;
 
-				if (first_segment) {
+				if (first_segment == 1) {
 					char p = *needle;
 					*needle = '\0';
 					if (strrchr(jump_db[j].path, '/') != jump_db[j].path) {
@@ -723,8 +765,7 @@ dirjump(char **args, int mode)
 					continue;
 
 				int exclude = 0;
-				/* Filter matches according to parent or
-				 * child options */
+				/* Filter matches according to parent or child options. */
 				switch (jump_opt) {
 				case JPARENT:
 					if (workspaces[cur_ws].path
@@ -741,58 +782,59 @@ dirjump(char **args, int mode)
 				default: break;
 				}
 
-				if (exclude)
+				if (exclude == 1)
 					continue;
 
-				visits[match] = jump_db[j].visits;
-				first[match] = jump_db[j].first_visit;
-				last[match] = jump_db[j].last_visit;
-				needles[match] = needle;
-				matches[match++] = jump_db[j].path;
+				entry[match].visits = jump_db[j].visits;
+				entry[match].first = jump_db[j].first_visit;
+				entry[match].last = jump_db[j].last_visit;
+				entry[match].needle = needle;
+				entry[match].match = jump_db[j].path;
+				match++;
 			}
 		}
 
 		/* 2) Once we have the list of matches, perform a reverse
 		 * matching process, that is, excluding non-matches,
-		 * using subsequent parameters */
+		 * using subsequent parameters. */
 		else {
 			j = (int)match;
 			while (--j >= 0) {
-				if (!matches[j] || !*matches[j]) {
-					matches[j] = (char *)NULL;
+				if (!entry[j].match || !*entry[j].match) {
+					entry[j].match = (char *)NULL;
 					continue;
 				}
 
-				char *_needle = conf.case_sens_dirjump
-						? strstr(needles[j] + 1, args[i])
-						: strcasestr(needles[j] + 1, args[i]);
+				char *needle = conf.case_sens_dirjump
+					? strstr(entry[j].needle + 1, args[i])
+					: strcasestr(entry[j].needle + 1, args[i]);
 
-				if (!_needle || (last_segment && strchr(_needle, '/'))){
-					matches[j] = (char *)NULL;
+				if (!needle || (last_segment == 1 && strchr(needle, '/'))){
+					entry[j].match = (char *)NULL;
 					continue;
 				}
 
-				if (first_segment) {
-					char p = *_needle;
-					*_needle = '\0';
-					if (strrchr(matches[j], '/') != matches[j]) {
-						*_needle = p;
-						matches[j] = (char *)NULL;
+				if (first_segment == 1) {
+					char p = *needle;
+					*needle = '\0';
+					if (strrchr(entry[j].match, '/') != entry[j].match) {
+						*needle = p;
+						entry[j].match = (char *)NULL;
 						continue;
 					}
-					*_needle = p;
+					*needle = p;
 				}
 
-				/* Update the needle for the next search string */
-				needles[j] = _needle;
+				/* Update the needle for the next search string. */
+				entry[j].needle = needle;
 			}
 		}
 	}
 
-	/* 3) If something remains, we have at least one match */
+	/* If something remains, we have at least one match. */
 
-	/* 4) Further filter the list of matches by frecency, so that only
-	 * the best ranked directory will be returned */
+	/* 3) Further filter the list of matches by frecency, so that only
+	 * the best ranked directory will be returned. */
 
 	int found = 0, exit_status = EXIT_FAILURE,
 	    best_ranked = 0, max = -1, k;
@@ -800,73 +842,69 @@ dirjump(char **args, int mode)
 	j = match;
 
 	while (--j >= 0) {
-		if (!matches[j])
+		if (!entry[j].match)
 			continue;
 
 		found = 1;
 
 		if (jump_opt == JLIST) {
-			colors_list(matches[j], 0, 0 , 1);
+			colors_list(entry[j].match, 0, 0 , 1);
 			continue;
 		}
 
-//		int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
-		int days_since_first = (int)(now - first[j]) / 86400;
+		/* 86400 = 60 secs / 60 misc / 24 hours */
+		int days_since_first = (int)(now - entry[j].first) / 86400;
 
-		/* Calculate the rank as frecency. The algorithm is based
-		 * on Mozilla, zoxide, and z.lua. See:
-		 * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
-		 * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
-		 * "https://github.com/skywind3000/z.lua#aging" */
+		/* Calculate the rank as frecency. */
 		int rank;
-		rank = days_since_first > 0 ? ((int)visits[j] * VISIT_BONUS)
-				/ days_since_first : ((int)visits[j] * VISIT_BONUS);
+		rank = days_since_first > 0 ? ((int)entry[j].visits * VISIT_BONUS)
+				/ days_since_first : ((int)entry[j].visits * VISIT_BONUS);
 
-//		int hours_since_last = (int)(now - last[j]) / 60 / 60;
-		int hours_since_last = (int)(now - last[j]) / 3600;
+		/* 3600 = 60 secs / 60 mins */
+		int hours_since_last = (int)(now - entry[j].last) / 3600;
 
-		/* Credit or penalty based on last directory access */
+		/* Credit or penalty based on last directory access. */
 		int tmp_rank = rank;
-		if (hours_since_last == 0) /* Last hour */
+		if (hours_since_last == 0)        /* Last hour */
 			rank = JHOUR(tmp_rank);
-		else if (hours_since_last <= 24) /* Last day */
+		else if (hours_since_last <= 24)  /* Last day */
 			rank = JDAY(tmp_rank);
 		else if (hours_since_last <= 168) /* Last week */
 			rank = JWEEK(tmp_rank);
 		else /* More than a week */
 			rank = JOLDER(tmp_rank);
 
-		/* Matches in directory basename have extra credit */
-		char *tmp = strrchr(matches[j], '/');
+		/* Matches in directory basename, bookmarked and pinned directories,
+		 * and directories currently in a workspace, have extra credit */
+		char *tmp = strrchr(entry[j].match, '/');
 		if (tmp && *(++tmp)) {
 			if (strstr(tmp, args[args_n]))
 				rank += BASENAME_BONUS;
 		}
 
-		/* Bookmarked directories have extra credit */
 		k = (int)bm_n;
 		while (--k >= 0) {
-			if (bookmarks[k].path && bookmarks[k].path[1] == matches[j][1]
-			&& strcmp(bookmarks[k].path, matches[j]) == 0) {
+			if (bookmarks[k].path && bookmarks[k].path[1] == entry[j].match[1]
+			&& strcmp(bookmarks[k].path, entry[j].match) == 0) {
 				rank += BOOKMARK_BONUS;
 				break;
 			}
 		}
 
-		if (pinned_dir && pinned_dir[1] == matches[j][1]
-		&& strcmp(pinned_dir, matches[j]) == 0)
+		if (pinned_dir && pinned_dir[1] == entry[j].match[1]
+		&& strcmp(pinned_dir, entry[j].match) == 0)
 			rank += PINNED_BONUS;
 
 		k = MAX_WS;
 		while (--k >= 0) {
-			if (workspaces[k].path && workspaces[k].path[1] == matches[j][1]
-			&& strcmp(workspaces[k].path, matches[j]) == 0) {
+			if (workspaces[k].path && workspaces[k].path[1] == entry[j].match[1]
+			&& strcmp(workspaces[k].path, entry[j].match) == 0) {
 				rank += WORKSPACE_BONUS;
 				break;
 			}
 		}
 
-		if (reduce) {
+		if (reduce > 0) {
 			tmp_rank = rank;
 			rank = tmp_rank / reduce;
 		}
@@ -881,21 +919,20 @@ dirjump(char **args, int mode)
 		if (mode == NO_SUG_JUMP)
 			puts(_("jump: No matches found"));
 		exit_status = EXIT_FAILURE;
-	} else {
-		if (jump_opt != JLIST) {
-			if (mode == NO_SUG_JUMP)
-				exit_status = cd_function(matches[best_ranked], CD_PRINT_ERROR);
-			else
-				exit_status = save_suggestion(matches[best_ranked]);
-		} else {
-			exit_status = EXIT_SUCCESS;
-		}
+		goto END;
 	}
 
-	free(matches);
-	free(needles);
-	free(first);
-	free(last);
-	free(visits);
+	if (jump_opt == JLIST) {
+		exit_status = EXIT_SUCCESS;
+		goto END;
+	}
+
+	if (mode == NO_SUG_JUMP)
+		exit_status = cd_function(entry[best_ranked].match, CD_PRINT_ERROR);
+	else
+		exit_status = save_suggestion(entry[best_ranked].match);
+
+END:
+	free(entry);
 	return exit_status;
 }
