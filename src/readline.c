@@ -434,18 +434,18 @@ construct_wide_char(unsigned char c)
 
 /* Handle the input char C and sepcify what to do next based on this char
  * Return values:
- * SUGGEST_ONLY = Do not insert char (already inserted here). Make suggestions
- * RL_INSERT_ONLY = Let readline insert the char. Do not suggest
- * SKIP_CHAR = Do not insert char. Do not suggest
- * SKIP_CHAR_NO_REDISPLAY = Same as SKIP_CHAR, but do not call rl_redisplay() */
+ * SUGGEST_ONLY = Do not insert char (already inserted here). Make suggestions.
+ * RL_INSERT_ONLY = Let readline insert the char. Do not suggest.
+ * SKIP_CHAR = Do not insert char. Do not suggest.
+ * SKIP_CHAR_NO_REDISPLAY = Same as SKIP_CHAR, but do not call rl_redisplay(). */
 static int
 rl_exclude_input(unsigned char c)
 {
-	/* If del or backspace, highlight, but do not suggest */
+	/* If del or backspace, highlight, but do not suggest. */
 	int _del = 0;
 
 	/* Disable suggestions while in vi command mode and reenable them
-	 * when changing back to insert mode */
+	 * when changing back to insert mode. */
 	if (rl_editing_mode == 0) {
 		if (rl_readline_state & RL_STATE_VICMDONCE) {
 			if (c == 'i') {
@@ -461,12 +461,12 @@ rl_exclude_input(unsigned char c)
 		}
 	}
 
-	/* Skip escape sequences, mostly arrow keys */
+	/* Skip escape sequences, mostly arrow keys. */
 	if (rl_readline_state & RL_STATE_MOREINPUT) {
 		if (c == '~') {
 #ifndef _NO_SUGGESTIONS
 			if (rl_point != rl_end && suggestion.printed) {
-				/* This should be the delete key */
+				/* This should be the delete key. */
 				remove_suggestion_not_end();
 			} else {
 				if (suggestion.printed)
@@ -484,7 +484,7 @@ rl_exclude_input(unsigned char c)
 
 		/* Handle history events. If a suggestion has been printed and
 		 * a history event is triggered (usually via the Up and Down arrow
-		 * keys), the suggestion buffer won't be freed. Let's do it here */
+		 * keys), the suggestion buffer won't be freed. Let's do it here. */
 #ifndef _NO_SUGGESTIONS
 		else if ((c == 'A' || c == 'B') && suggestion_buf)
 			clear_suggestion(CS_FREEBUF);
@@ -505,19 +505,19 @@ rl_exclude_input(unsigned char c)
 	}
 
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
-	 * enter (13), and escape (27) */
+	 * enter (13), and escape (27). */
 	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC)
 		return RL_INSERT_CHAR;
 
 	/* Multi-byte char. Send it directly to the input buffer. We can't
-	 * process it here, since we process only single bytes */
+	 * process it here, since we process only single bytes. */
 	if ((c & 0xc0) == 0xc0 || (c & 0xc0) == 0x80)
 		return construct_wide_char(c);
 
 	if (c != _ESC)
 		cmdhist_flag = 0;
 
-	/* Skip backspace, Enter, and TAB keys */
+	/* Skip backspace, Enter, and TAB keys. */
 	switch (c) {
 		case DELETE: /* fallthrough */
 		case BS:
@@ -568,7 +568,7 @@ rl_exclude_input(unsigned char c)
 END:
 #ifndef _NO_SUGGESTIONS
 	s = strcntchrlst(rl_line_buffer, ' ');
-	/* Do not take into account final spaces */
+	/* Do not take into account final spaces. */
 	if (s >= 0 && !rl_line_buffer[s + 1])
 		s = -1;
 	if (rl_point != rl_end && c != _ESC) {
@@ -576,7 +576,7 @@ END:
 			if (suggestion.printed)
 				remove_suggestion_not_end();
 		}
-		if (wrong_cmd == 1) { /* Wrong cmd and we are on the first word */
+		if (wrong_cmd == 1) { /* Wrong cmd and we are on the first word. */
 			char *fs = strchr(rl_line_buffer, ' ');
 			if (fs && rl_line_buffer + rl_point <= fs)
 				s = -1;
@@ -591,10 +591,10 @@ END:
 		if (_del > 0) {
 #ifndef _NO_SUGGESTIONS
 			/* Since we have removed a char, let's check if there is
-			 * a suggestion available using the modified input line */
+			 * a suggestion available using the modified input line. */
 			if (wrong_cmd == 1 && s == -1 && rl_end > 0) {
 				/* If a suggestion is found, the normal prompt will be
-				 * restored and wrong_cmd will be set to zero */
+				 * restored and wrong_cmd will be set to zero. */
 				rl_suggestions((unsigned char)rl_line_buffer[rl_end - 1]);
 				return SKIP_CHAR;
 			}
@@ -642,21 +642,21 @@ END:
 
 /* Unicode aware implementation of readline's rl_expand_prompt()
  * Returns the amount of terminal columns taken by the last prompt line,
- * 0 if P is NULL or empty, and FALLBACK_PROMPT_OFFSET in case of error
+ * 0 if STR is NULL or empty, and FALLBACK_PROMPT_OFFSET in case of error
  * (malformed prompt: either RL_PROMPT_START_IGNORE or RL_PROMPT_END_IGNORE
- * is missing) */
+ * is missing). */
 static int
-xrl_expand_prompt(char *p)
+xrl_expand_prompt(char *str)
 {
-	if (!p || !*p)
+	if (!str || !*str)
 		return 0;
 
-	int n = 0;
-	while (*p) {
-		char *q = strchr(p, RL_PROMPT_START_IGNORE);
-		if (!q) {
-			char *qq = strchr(p, RL_PROMPT_END_IGNORE);
-			if (qq) {
+	int count = 0;
+	while (*str) {
+		char *start = strchr(str, RL_PROMPT_START_IGNORE);
+		if (!start) {
+			char *end = strchr(str, RL_PROMPT_END_IGNORE);
+			if (end) {
 				_err('w', PRINT_PROMPT, "%s: Malformed prompt: "
 					"RL_PROMPT_END_IGNORE (\\%d) without "
 					"RL_PROMPT_START_IGNORE (\\%d)\n", PROGRAM_NAME,
@@ -665,18 +665,18 @@ xrl_expand_prompt(char *p)
 			}
 
 			/* No ignore characters found */
-			return (int)wc_xstrlen(p);
+			return (int)wc_xstrlen(str);
 		}
 
-		if (q != p) {
-			char t = *q;
-			*q = '\0';
-			n += (int)wc_xstrlen(p);
-			*q = t;
+		if (start != str) {
+			char c = *start;
+			*start = '\0';
+			count += (int)wc_xstrlen(str);
+			*start = c;
 		}
 
-		char *qq = strchr(q, RL_PROMPT_END_IGNORE);
-		if (!qq) {
+		char *end = strchr(start, RL_PROMPT_END_IGNORE);
+		if (!end) {
 			_err('w', PRINT_PROMPT, "%s: Malformed prompt: "
 				"RL_PROMPT_START_IGNORE (\\%d) without "
 				"RL_PROMPT_END_IGNORE (\\%d)\n", PROGRAM_NAME,
@@ -684,40 +684,40 @@ xrl_expand_prompt(char *p)
 			return FALLBACK_PROMPT_OFFSET;
 		}
 
-		if (*(++qq))
-			p = qq;
+		if (*(++end))
+			str = end;
 		else
 			break;
 	}
 
-	return n;
+	return count;
 }
 
-/* Get amount of visible chars in the last line of the prompt (P) */
+/* Get amount of visible chars in the last line of the prompt (STR). */
 static int
-get_prompt_offset(char *p)
+get_prompt_offset(char *str)
 {
-	if (!p || !*p)
+	if (!str || !*str)
 		return 0;
 
-	char *l = strrchr(p, '\n');
-	return xrl_expand_prompt((l && *(++l)) ? l : p) + 1;
+	char *newline = strrchr(str, '\n');
+	return xrl_expand_prompt((newline && *(++newline)) ? newline : str) + 1;
 }
 
 /* Whenever we are on a secondary prompt, multi-byte chars are present, and
  * we press Right on such char, rl_point gets the wrong cursor offset.
  * This function corrects this offset.
  * NOTE: This is just a workaround. No correction should be made because
- * nothing should be corrected in the first place. The question is: why
- * rl_point is wrong here, and why does this happen only in secondary prompts? */
+ * nothing should be corrected in the first place. The question is: why is
+ * rl_point wrong here, and why does this happen only in secondary prompts? */
 static void
 fix_rl_point(const unsigned char c)
 {
 	if (!RL_ISSTATE(RL_STATE_MOREINPUT) || c != 'C')
 		return;
 
-	char d = rl_line_buffer[rl_point];
-	if ((d & 0xc0) != 0x80 && (d & 0xc0) != 0xc0)
+	char point = rl_line_buffer[rl_point];
+	if ((point & 0xc0) != 0x80 && (point & 0xc0) != 0xc0)
 		return;
 
 	int mlen = mblen(rl_line_buffer + rl_point, __MB_LEN_MAX);
@@ -747,7 +747,6 @@ my_rl_getc(FILE *stream)
 		if (result > 0 && result == sizeof(unsigned char)) {
 			/* Ctrl-d (empty command line only). Let's check the previous
 			 * char wasn't ESC to prevent Ctrl-Alt-d to be taken as Ctrl-d */
-//			if (c == 4 && control_d_exits == 1 && prev != _ESC && rl_nohist == 0
 			if (c == 4 && prev != _ESC && rl_nohist == 0
 			&& (!rl_line_buffer || !*rl_line_buffer))
 				rl_quit(0, 0);
