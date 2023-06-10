@@ -69,6 +69,10 @@ struct jump_entry_t {
 	time_t last;
 };
 
+#define FIRST_SEGMENT (1 << 0)
+#define LAST_SEGMENT  (1 << 1)
+#define NO_SEGMENT    (1 << 2)
+
 /* Calculate the rank as frecency. The algorithm is based
  * on Mozilla, zoxide, and z.lua. See:
  * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
@@ -581,7 +585,7 @@ purge_jump_database(char *arg)
 	return purge_low_ranked_entries(n);
 }
 
-static int
+static inline int
 handle_jump_order(char *arg, const int mode)
 {
 	if (!arg) {
@@ -610,7 +614,7 @@ handle_jump_order(char *arg, const int mode)
 	return save_suggestion(jump_db[int_order - 1].path);
 }
 
-static int
+static inline int
 check_jump_params(char **args, const time_t now, const int reduce)
 {
 	if (args[0][1] == 'e')
@@ -633,23 +637,116 @@ check_jump_params(char **args, const time_t now, const int reduce)
 	return (-1);
 }
 
-static void
-mark_target_segment(char *str, int *first_segment, int *last_segment)
+static inline int
+mark_target_segment(char *str)
 {
 	size_t len = strlen(str);
+	int segment = 0;
 
 	if (len > 0 && str[len - 1] == '/') {
 		str[len - 1] = '\0';
-		*last_segment = 1;
-		*first_segment = 0;
+		segment |= LAST_SEGMENT;
 	} else if (len > 0 && str[len - 1] == '\\') {
 		str[len - 1] = '\0';
-		*last_segment = 0;
-		*first_segment = 1;
-	} else {
-		*last_segment = 0;
-		*first_segment = 0;
+		segment |= FIRST_SEGMENT;
 	}
+
+	return segment;
+}
+
+/* Return a pointer to the beggining of the string QUERY in the path NEEDLE.
+ * If used for the first time (checking the first query string), NEEDLE is
+ * the same as MATCH. Otherwise, NEEDLE points to a char in MATCH.
+ * SEGMENT is a flag: LAST_SEGMENT or FIRST_SEGMENT. In both cases the
+ * resulting string will be checked to match for the first or last segment
+ * of the full match (MATCH). If not NULL is returned. */
+static inline char *
+get_needle(const char *needle, const char *match, const char *query,
+	const int segment)
+{
+	char *ret = conf.case_sens_dirjump == 1 ? strstr(needle, query)
+		: strcasestr(needle, query);
+
+	if (!ret || ((segment & LAST_SEGMENT) && strchr(ret, '/')))
+		return (char *)NULL;
+
+	if (segment & FIRST_SEGMENT) {
+		char p = *ret;
+		*ret = '\0';
+
+		if (strrchr(match, '/') != match) {
+			*ret = p;
+			return (char *)NULL;
+		}
+
+		*ret = p;
+	}
+
+	return ret;
+}
+
+static inline int
+rank_tmp_entry(const struct jump_entry_t entry, const time_t now,
+	const int reduce, const char *last_arg)
+{
+	/* 86400 = 60 secs / 60 misc / 24 hours */
+	int days_since_first = (int)(now - entry.first) / 86400;
+
+	/* Calculate the rank as frecency. */
+	int rank = days_since_first > 0 ? ((int)entry.visits * VISIT_BONUS)
+		/ days_since_first : ((int)entry.visits * VISIT_BONUS);
+
+	/* 3600 = 60 secs / 60 mins */
+	int hours_since_last = (int)(now - entry.last) / 3600;
+
+	/* Credit or penalty based on last directory access. */
+	int tmp_rank = rank;
+
+	if (hours_since_last == 0)        /* Last hour */
+		rank = JHOUR(tmp_rank);
+	else if (hours_since_last <= 24)  /* Last day */
+		rank = JDAY(tmp_rank);
+	else if (hours_since_last <= 168) /* Last week */
+		rank = JWEEK(tmp_rank);
+	else 							  /* More than a week */
+		rank = JOLDER(tmp_rank);
+
+	/* Matches in directory basename, bookmarked and pinned directories,
+	 * and directories currently in a workspace, have extra credit. */
+	char *tmp = strrchr(entry.match, '/');
+	if (tmp && *(++tmp)) {
+		if (strstr(tmp, last_arg))
+			rank += BASENAME_BONUS;
+	}
+
+	int i = (int)bm_n;
+	while (--i >= 0) {
+		if (bookmarks[i].path && bookmarks[i].path[1] == entry.match[1]
+		&& strcmp(bookmarks[i].path, entry.match) == 0) {
+			rank += BOOKMARK_BONUS;
+			break;
+		}
+	}
+
+	if (pinned_dir && pinned_dir[1] == entry.match[1]
+	&& strcmp(pinned_dir, entry.match) == 0)
+		rank += PINNED_BONUS;
+
+	i = MAX_WS;
+	while (--i >= 0) {
+		if (workspaces[i].path && workspaces[i].path[1] == entry.match[1]
+		&& strcmp(workspaces[i].path, entry.match) == 0) {
+			rank += WORKSPACE_BONUS;
+			break;
+		}
+	}
+
+	if (reduce > 0) {
+		tmp_rank = rank;
+		rank = tmp_rank / reduce;
+	}
+
+	return rank;
 }
 
 /* Found the best ranked directory matching query strings in ARGS.
@@ -728,8 +825,7 @@ dirjump(char **args, const int mode)
 		 * string to match only the LAST segment of the path, and if it ends
 		 * with a backslash instead, we want this query to match only the
 		 * FIRST segment of the path. */
-		int last_segment = 0, first_segment = 0;
-		mark_target_segment(args[i], &first_segment, &last_segment);
+		int segment = mark_target_segment(args[i]);
 
 		if (match == 0) {
 			j = (int)jump_n;
@@ -737,31 +833,20 @@ dirjump(char **args, const int mode)
 				if (!IS_VALID_JUMP_ENTRY(j))
 					continue;
 
-				/* Pointer to the beginning of the search str in the
-				 * jump entry. Used to search for subsequent search
-				 * strings starting from this position in the entry
-				 * and not before. */
-				char *needle = conf.case_sens_dirjump
-					? strstr(jump_db[j].path, args[i])
-					: strcasestr(jump_db[j].path, args[i]);
-
-				if (!needle || (last_segment == 1 && strchr(needle, '/')))
-					continue;
-
-				if (first_segment == 1) {
-					char p = *needle;
-					*needle = '\0';
-					if (strrchr(jump_db[j].path, '/') != jump_db[j].path) {
-						*needle = p;
-						continue;
-					}
-					*needle = p;
-				}
-
 				/* Exclue CWD */
 				if (workspaces[cur_ws].path
 				&& jump_db[j].path[1] == workspaces[cur_ws].path[1]
 				&& strcmp(jump_db[j].path, workspaces[cur_ws].path) == 0)
+					continue;
+
+				/* Pointer to the beginning of the search str in the
+				 * jump entry. Used to search for subsequent search
+				 * strings starting from this position in the entry
+				 * and not before. */
+				char *needle = get_needle(jump_db[j].path,
+					jump_db[j].path, args[i], segment);
+
+				if (!needle)
 					continue;
 
 				int exclude = 0;
@@ -805,27 +890,14 @@ dirjump(char **args, const int mode)
 					continue;
 				}
 
-				char *needle = conf.case_sens_dirjump
-					? strstr(entry[j].needle + 1, args[i])
-					: strcasestr(entry[j].needle + 1, args[i]);
+				char *needle = get_needle(entry[j].needle + 1,
+					entry[j].match, args[i], segment);
 
-				if (!needle || (last_segment == 1 && strchr(needle, '/'))){
+				if (!needle) {
 					entry[j].match = (char *)NULL;
 					continue;
 				}
 
-				if (first_segment == 1) {
-					char p = *needle;
-					*needle = '\0';
-					if (strrchr(entry[j].match, '/') != entry[j].match) {
-						*needle = p;
-						entry[j].match = (char *)NULL;
-						continue;
-					}
-					*needle = p;
-				}
-
-				/* Update the needle for the next search string. */
 				entry[j].needle = needle;
 			}
 		}
@@ -836,8 +908,8 @@ dirjump(char **args, const int mode)
 	/* 3) Further filter the list of matches by frecency, so that only
 	 * the best ranked directory will be returned. */
 
-	int found = 0, exit_status = EXIT_FAILURE,
-	    best_ranked = 0, max = -1, k;
+	int found = 0, exit_status = EXIT_FAILURE, max = -1;
+	char *best_ranked = (char *)NULL;
 
 	j = match;
 
@@ -852,66 +924,11 @@ dirjump(char **args, const int mode)
 			continue;
 		}
 
-		/* 86400 = 60 secs / 60 misc / 24 hours */
-		int days_since_first = (int)(now - entry[j].first) / 86400;
-
-		/* Calculate the rank as frecency. */
-		int rank;
-		rank = days_since_first > 0 ? ((int)entry[j].visits * VISIT_BONUS)
-				/ days_since_first : ((int)entry[j].visits * VISIT_BONUS);
-
-		/* 3600 = 60 secs / 60 mins */
-		int hours_since_last = (int)(now - entry[j].last) / 3600;
-
-		/* Credit or penalty based on last directory access. */
-		int tmp_rank = rank;
-		if (hours_since_last == 0)        /* Last hour */
-			rank = JHOUR(tmp_rank);
-		else if (hours_since_last <= 24)  /* Last day */
-			rank = JDAY(tmp_rank);
-		else if (hours_since_last <= 168) /* Last week */
-			rank = JWEEK(tmp_rank);
-		else /* More than a week */
-			rank = JOLDER(tmp_rank);
-
-		/* Matches in directory basename, bookmarked and pinned directories,
-		 * and directories currently in a workspace, have extra credit */
-		char *tmp = strrchr(entry[j].match, '/');
-		if (tmp && *(++tmp)) {
-			if (strstr(tmp, args[args_n]))
-				rank += BASENAME_BONUS;
-		}
-
-		k = (int)bm_n;
-		while (--k >= 0) {
-			if (bookmarks[k].path && bookmarks[k].path[1] == entry[j].match[1]
-			&& strcmp(bookmarks[k].path, entry[j].match) == 0) {
-				rank += BOOKMARK_BONUS;
-				break;
-			}
-		}
-
-		if (pinned_dir && pinned_dir[1] == entry[j].match[1]
-		&& strcmp(pinned_dir, entry[j].match) == 0)
-			rank += PINNED_BONUS;
-
-		k = MAX_WS;
-		while (--k >= 0) {
-			if (workspaces[k].path && workspaces[k].path[1] == entry[j].match[1]
-			&& strcmp(workspaces[k].path, entry[j].match) == 0) {
-				rank += WORKSPACE_BONUS;
-				break;
-			}
-		}
-
-		if (reduce > 0) {
-			tmp_rank = rank;
-			rank = tmp_rank / reduce;
-		}
+		int rank = rank_tmp_entry(entry[j], now, reduce, args[args_n]);
 
 		if (rank > max) {
 			max = rank;
-			best_ranked = j;
+			best_ranked = entry[j].match;
 		}
 	}
 
@@ -928,9 +945,9 @@ dirjump(char **args, const int mode)
 	}
 
 	if (mode == NO_SUG_JUMP)
-		exit_status = cd_function(entry[best_ranked].match, CD_PRINT_ERROR);
+		exit_status = cd_function(best_ranked, CD_PRINT_ERROR);
 	else
-		exit_status = save_suggestion(entry[best_ranked].match);
+		exit_status = save_suggestion(best_ranked);
 
 END:
 	free(entry);

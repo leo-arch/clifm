@@ -79,7 +79,6 @@ typedef char *rl_cpvfunc_t;
 /* The maximum number of bytes we need to contain any Unicode code point
  * as a C string: 4 bytes plus a trailing nul byte. */
 #define UTF8_MAX_LEN 5
-#define UTF8_BAD_LEADING_BYTE -1
 
 #define SUGGEST_ONLY             0
 #define RL_INSERT_CHAR           1
@@ -371,44 +370,10 @@ leftmost_bell(void)
 }
 #endif /* !_NO_SUGGESTIONS */
 
-/* This function returns the number of bytes in a UTF-8 sequence by inspecting only
- * the leading byte (C). Return values other than 2, 3, or 4 are considered invalid
- * and UTF8_BAD_LEADING_BYTE (-1) is returned instead (UTF-8 is multi-byte, but only
- * up to 4 bytes. Hence, valid values are 2-4)
- *
- * UTF-8 uses bits 5, 6, and 7 in the first byte of a sequence to indicate
- * the remaining length. If all three are set, the sequence is 3 additional
- * bytes (4 in total, including the leading byte). If only the first of these
- * from the left (the 7th bit) is set, the sequence is 1 additional byte. If
- * the first two from the left are set, the sequence is 2 additional bytes.
- * Hence, we want to examine these three bits (the value here is just an example):
- *
- *   11110111
- *    ^^^
- *
- * The value is shifted down by 4 (c >>= 4) then AND'd with 7 (c &= 7). This
- * leaves only the 1st, 2nd, and 3rd bits from the right as the only possible
- * ones set. The values of these bits are 1, 2, and 4 respectively (from right to left).
- *
- *  00000111
- *       ^^^
- *
- * If the value is now 4 (100), only the first bit from the left (of the three
- * we are considering) is set, meaning that we have 1 additional byte (2 in total),
- * so we return 2.
- *
- * Otherwise, the value is either 7 (111), meaning all three bits are set, so
- * the sequence is 4 bytes in total, or 6 (110), meaning the first two from the
- * left are set, so the sequence is 3 bytes in total.
- *
- * This covers the range of valid Unicode characters expressed in UTF-8. that is,
- * 0x0000 - 0x10ffff
- *
- * NOTE: Complex emoji characters, like national flags, are not supported: they
- * might take up to 28 bytes (ex: the Scotland flag).
- * */
-
-/* See https://stackoverflow.com/questions/22790900/get-length-of-multibyte-utf-8-sequence */
+/* Return the number of bytes in a UTF-8 sequence by inspecting only the
+ * leading byte (C).
+ * Taken from
+ * https://stackoverflow.com/questions/22790900/get-length-of-multibyte-utf-8-sequence */
 static int
 utf8_bytes(unsigned char c)
 {
@@ -418,10 +383,7 @@ utf8_bytes(unsigned char c)
     if (c == 4)
 		return 2;
 
-//	if (c == 6 || c == 7)
 	return c - 3;
-
-//	return UTF8_BAD_LEADING_BYTE;
 }
 
 /* Construct a wide-char byte by byte
@@ -441,7 +403,7 @@ construct_wide_char(unsigned char c)
 		wc_bytes = utf8_bytes(c);
 
 	/* utf8_bytes returns -1 in case of error, and a zero bytes wide-char
-	 * should never happen */
+	 * should never happen. */
 	if (wc_bytes < 1)
 		return SKIP_CHAR_NO_REDISPLAY;
 
