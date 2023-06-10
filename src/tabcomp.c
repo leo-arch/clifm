@@ -835,7 +835,7 @@ set_fzf_max_win_height(void)
 }
 
 /* FILENAME is just a symlink name from the tags dir.
- * Let's get the target path */
+ * Let's get the target path. */
 static char *
 get_tagged_file_target(char *filename)
 {
@@ -980,17 +980,21 @@ get_finder_output(const int multi, char *base)
 }
 
 static void
-write_comp_to_file(char *entry, const char *color, FILE **fp)
+write_comp_to_file(char *entry, const char *color, FILE *fp)
 {
 	char *c = (char *)NULL, tmp[MAX_COLOR + 4];
+	char end_char = tabmode == SMENU_TAB ? '\n' : '\0';
+
 	if (cur_comp_type == TCMP_TAGS_F || cur_comp_type == TCMP_GLOB
 	|| cur_comp_type == TCMP_FILE_TYPES_FILES) {
 		size_t len = strlen(entry);
 		if (len > 1 && entry[len - 1] == '/')
 			entry[len - 1] = '\0';
+
 		char *p = (char *)NULL;
 		if (*entry == '~')
 			p = tilde_expand(entry);
+
 		struct stat a;
 		if (lstat(p ? p : entry, &a) != -1) {
 			c = fzftab_color(entry, &a);
@@ -1001,23 +1005,18 @@ write_comp_to_file(char *entry, const char *color, FILE **fp)
 		} else {
 			c = uf_c;
 		}
+
 		free(p);
 	}
 
 	if (wc_xstrlen(entry) == 0) {
 		char *wname = truncate_wname(entry);
-		if (tabmode == SMENU_TAB)
-			fprintf(*fp, "%s%c", wname ? wname : entry, '\n');
-		else
-			fprintf(*fp, "%s%c", wname ? wname : entry, '\0');
+		fprintf(fp, "%s%c", wname ? wname : entry, end_char);
 		free(wname);
 		return;
 	}
 
-	if (tabmode == SMENU_TAB)
-		fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\n');
-	else
-		fprintf(*fp, "%s%s%s%c", c ? c : color, entry, NC, '\0');
+	fprintf(fp, "%s%s%s%c", c ? c : color, entry, NC, end_char);
 }
 
 /* Store possible completions (MATCHES) in FINDER_IN_FILE to pass them to the finder,
@@ -1111,7 +1110,7 @@ store_completions(char **matches)
 		}
 
 		if (*entry)
-			write_comp_to_file(entry, color, &fp);
+			write_comp_to_file(entry, color, fp);
 	}
 
 #ifndef _NO_TRASH
