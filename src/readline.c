@@ -418,10 +418,10 @@ utf8_bytes(unsigned char c)
     if (c == 4)
 		return 2;
 
-	if (c == 6 || c == 7)
-		return c - 3;
+//	if (c == 6 || c == 7)
+	return c - 3;
 
-	return UTF8_BAD_LEADING_BYTE;
+//	return UTF8_BAD_LEADING_BYTE;
 }
 
 /* Construct a wide-char byte by byte
