@@ -164,20 +164,20 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	case '\\': /* fallthrough */
 	case ENTER: cl = tx_c; break;
 	case '~': /* fallthrough */
-	case '*': cl = (cur_color != hq_c) ? he_c : (char *)NULL; break;
+	case '*': cl = (cur_color != hq_c) ? he_c : cl; break;
 	case '=': /* fallthrough */
 	case '(': /* fallthrough */
 	case ')': /* fallthrough */
 	case '[': /* fallthrough */
 	case ']': /* fallthrough */
 	case '{': /* fallthrough */
-	case '}': cl = (cur_color != hq_c) ? hb_c : (char *)NULL; break;
+	case '}': cl = (cur_color != hq_c) ? hb_c : cl; break;
 	case '|': /* fallthrough */
 	case '&': /* fallthrough */
-	case ';': cl = (cur_color != hq_c) ? hs_c : (char *)NULL; break;
+	case ';': cl = (cur_color != hq_c) ? hs_c : cl; break;
 	case '<': /* fallthrough */
-	case '>': cl = (cur_color != hq_c) ? hr_c : (char *)NULL; break;
-	case '$': cl = (cur_color != hq_c) ? hv_c : (char *)NULL; break;
+	case '>': cl = (cur_color != hq_c) ? hr_c : cl; break;
+	case '$': cl = (cur_color != hq_c) ? hv_c : cl; break;
 	case '-':
 		if (prev == ' ' || prev == 0)
 			cl = (cur_color != hq_c) ? hp_c : (char *)NULL;
