@@ -91,7 +91,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	if (cur_color == hw_c && !sp)
 		goto END;
 
-	if (*rl_line_buffer != ';' && *rl_line_buffer != ':'
+/*	if (*rl_line_buffer != ';' && *rl_line_buffer != ':'
 	&& cur_color != hq_c && c >= '0' && c <= '9') {
 		if (prev == ' ' || prev == 0 || cur_color == hn_c || rl_end == 1) {
 			char *a = strchr(str + pos, ' ');
@@ -114,7 +114,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 				goto END;
 			}
 		}
-	}
+	} */
 
 	size_t qn[2] = {0};
 	size_t m = 0;
@@ -154,11 +154,24 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	}
 
 	switch (c) {
+	case '0': /* fallthrough */
+	case '1': /* fallthrough */
+	case '2': /* fallthrough */
+	case '3': /* fallthrough */
+	case '4': /* fallthrough */
+	case '5': /* fallthrough */
+	case '6': /* fallthrough */
+	case '7': /* fallthrough */
+	case '8': /* fallthrough */
+	case '9':
+		if (cur_color != hq_c)
+			cl = hn_c;
+		break;
 	case ' ':
 		if (cur_color != hq_c && cur_color != hc_c)
 			cl = tx_c;
 		break;
-	case '/': cl = (cur_color != hq_c) ? hd_c : (char *)NULL; break;
+	case '/': cl = (cur_color != hq_c) ? hd_c : cl; break;
 	case '\'': /* fallthrough */
 	case '"': cl = hq_c; break;
 	case '\\': /* fallthrough */
@@ -262,14 +275,6 @@ recolorize_line(void)
 		rl_redisplay();
 
 	i = 0;
-
-/*	int point = rl_point;
-	int copy_start = point > 0 ? point - 1 : 0;
-	int start = point;
-	char *ss = rl_copy_text(copy_start, rl_end);
-	rl_delete_text(start, rl_end);
-	rl_point = rl_end = start;
-	i = point ? 1 : 0; */
 
 	size_t l = 0;
 
