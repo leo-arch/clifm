@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "Jun 6, 2023" "clifm 1.12.9" "CLIFM Manual"
+.TH "CLIFM" "1" "Jun 11, 2023" "clifm 1.12.11" "CLIFM Manual"
 .SH NAME
 clifm \- The Command Line File Manager
 .SH SYNOPSIS
@@ -752,7 +752,7 @@ You can use the exclamation mark (!) to perform some history commands:
 .B icons \fR[\fIon\fR, \fIoff\fR]
 toggle icons on/off
 .TP
-.B j [\fI\-\-purge\fR [\fINUM\fR]] [\fI\-\-edit\fR], jc, jl, jp \fR[\fISTR\fR]..., \fBjo\fR [\fINUM\fR], \fBje\fR
+.B j [\fI\-\-purge\fR [\fINUM\fR]] [\fI\-\-edit\fR], jc, jl, jp \fR[\fISTR\fR]..., \fBje\fR
 \fIj\fR is the fastest way of using \fBKangaroo\fR, a \fBdirectory jumper\fR function used to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
 With no argument, \fIj\fR just lists the entries in the jump database, printing: \fBa)\fI order number of the corresponding entry, \fBb)\fI total sum of visits, \fBc)\fR days since the first visit, \fBd)\fI hours since the last visit, \fBe)\fR the rank value, and \fBf)\fR the directory name itself. An asterisk next to the rank value means that the corresponding directory will not be removed from the database, despite its rank, either becuase it has been visited in the lasat 24 hours, or because it is bookmarked, pinned, or currently active in some workspace.
@@ -765,7 +765,7 @@ The backslash (\\) and the slash (/) could be used to instruct \fBKangaroo\fR to
 .sp
 Since it is not always obvious or easy to know where exactly a query string will take you, \fBclifm\fR (if the suggestions system is enabled) will print, at the right of the cursor, the path matched by \fBKangaroo\fR. If that is the actually intended path, press the Right arrow key to accept the suggestion. Otherwise, it will be ignored. You can also use TAB completion to print the list of matches for the current query string. For example: \fIj - c<TAB>\fR to list all entries in the directory history list containing a dash (-) and a 'c'.
 .sp
-\fIj\fR accepts five modifiers: 'e', 'p' 'c', 'o', and 'l', the first standing for "edit", the second for "parent", the third for "child", the fourth for "order", and the last one for 'list'. Thus, \fIje\fR (or \fIj --edit\fR) will open the jump database to be edited if needed; \fIjc\fR will search for files querying only child directories relative to the current working directory, while \fIjp\fR will do the same but for parent directories. \fIjo\fR allows to specify an order number (the left most value in the jump list) instead of a string or a file name, in which case no matching process is performed. Finally, \fIjl\fR just prints the matches for the given query string(s), but without changing the current directory. Examples:
+\fIj\fR accepts four modifiers: 'e', 'p' 'c', and 'l', the first standing for "edit", the second for "parent", the third for "child", and the last one for 'list'. Thus, \fIje\fR (or \fIj --edit\fR) will open the jump database to be edited if needed; \fIjc\fR will search for files querying only child directories relative to the current working directory, while \fIjp\fR will do the same but for parent directories. Finally, \fIjl\fR just prints the matches for the given query string(s), but without changing the current directory. Examples:
 
 .TS
 allbox;
@@ -778,9 +778,6 @@ T}	Change to the best ranked \fBparent\fR directory containing the string "foo".
 T{
 jc bar test
 T}	Change to the best ranked \fBchild\fR directory containing the string "bar" and "test"
-T{
-jo 13
-T}	Change into the directory corresponding to the order number 13 \fB(1)\fR
 T{
 jl foo
 T}	Print all entries in the database containing the word "foo"
