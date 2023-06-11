@@ -116,22 +116,24 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		}
 	} */
 
-	size_t qn[2] = {0};
-	size_t m = 0;
-	for (; m < (size_t)rl_point; m++) {
-		if (rl_line_buffer[m] == '\'') {
-			if (qn[_DOUBLE] == 1 || (m && rl_line_buffer[m - 1] == '\\'))
+	size_t quote[2] = {0};
+	size_t i;
+	for (i = 0; i < (size_t)rl_point; i++) {
+		if (rl_line_buffer[i] == '\'') {
+			if (quote[_DOUBLE] == 1
+			|| (i > 0 && rl_line_buffer[i - 1] == '\\'))
 				continue;
-			qn[_SINGLE]++;
-			if (qn[_SINGLE] > 2)
-				qn[_SINGLE] = 1;
+			quote[_SINGLE]++;
+			if (quote[_SINGLE] > 2)
+				quote[_SINGLE] = 1;
 		} else {
-			if (rl_line_buffer[m] == '"') {
-				if (qn[_SINGLE] == 1 || (m && rl_line_buffer[m - 1] == '\\'))
+			if (rl_line_buffer[i] == '"') {
+				if (quote[_SINGLE] == 1
+				|| (i > 0 && rl_line_buffer[i - 1] == '\\'))
 					continue;
-				qn[_DOUBLE]++;
-				if (qn[_DOUBLE] > 2)
-					qn[_DOUBLE] = 1;
+				quote[_DOUBLE]++;
+				if (quote[_DOUBLE] > 2)
+					quote[_DOUBLE] = 1;
 			}
 		}
 	}
@@ -142,11 +144,11 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		case ']': /* fallthrough */
 		case '}': cl = tx_c; break;
 		case '\'':
-			if (cur_color == hq_c && qn[_SINGLE] == 2)
+			if (cur_color == hq_c && quote[_SINGLE] == 2)
 				cl = tx_c;
 			break;
 		case '"':
-			if (cur_color == hq_c && qn[_DOUBLE] == 2)
+			if (cur_color == hq_c && quote[_DOUBLE] == 2)
 				cl = tx_c;
 			break;
 		default: break;
@@ -209,9 +211,9 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	}
 
 	if (cur_color == hq_c) {
-		if (qn[_SINGLE] == 1)
+		if (quote[_SINGLE] == 1)
 			cl = (char *)NULL;
-		else if (qn[_DOUBLE] == 1)
+		else if (quote[_DOUBLE] == 1)
 			cl = (char *)NULL;
 	}
 
