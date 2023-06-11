@@ -473,7 +473,7 @@ const struct cmdslist_t internal_cmds[] = {
 	{"jc", 2},
 	{"jl", 2},
 	{"jp", 2},
-	{"jo", 2},
+//	{"jo", 2},
 	{"kb", 2},
 	{"keybinds", 8},
 	{"l", 1},

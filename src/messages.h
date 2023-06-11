@@ -528,7 +528,7 @@ You can also access the commands history via the exclamation mark (!)\n\
 
 #define JUMP_USAGE "Change to a directory in the jump database (visited directories)\n\n\
 \x1b[1mUSAGE\x1b[0m\n\
-  j [--purge [NUM]] [--edit [APP]], jc, jp, jl [STRING]..., jo [NUM], je\n\n\
+  j [--purge [NUM]] [--edit [APP]], jc, jp, jl [STRING]..., je\n\n\
 For information about the matching algorithm consult the manpage\n\n\
 \x1b[1mEXAMPLES\x1b[0m\n\
 - Print the list of entries in the jump database\n\

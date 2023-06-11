@@ -73,6 +73,89 @@ struct jump_entry_t {
 #define LAST_SEGMENT  (1 << 1)
 #define NO_SEGMENT    (1 << 2)
 
+/* Getting the total rank of an entry:
+ * 1) rank = calculate_base_credit()
+ * 2) rank += calculate_bonus_credit() */
+
+/* Calcualte the base credit for a directory based on time data
+ * (DAYS_SINCE_FIRST and HOURS_SINCE_LAST) and number of visits (VISITS).
+ * If the directory has been visited within the last day, KEEP will be
+ * set to 1, so that it won't be removed from the database, no matter
+ * its current rank. */
+static int
+calculate_base_credit(const int days_since_first, const int hours_since_last,
+	const int visits, int *keep)
+{
+	int rank = days_since_first > 1
+		? ((int)visits * VISIT_BONUS) / days_since_first
+		: ((int)visits * VISIT_BONUS);
+
+	/* Credit or penalty based on last directory access. */
+	int tmp_rank = rank;
+
+	if (hours_since_last == 0) {          /* Last hour */
+		*keep = 1;
+		rank = JHOUR(tmp_rank);
+	} else if (hours_since_last <= 24) {  /* Last day */
+		*keep = 1;
+		rank = JDAY(tmp_rank);
+	} else if (hours_since_last <= 168) { /* Last week */
+		rank = JWEEK(tmp_rank);
+	} else { 							  /* More than a week */
+		rank = JOLDER(tmp_rank);
+	}
+
+	return rank;
+}
+
+/* Calculate bonus credit for the entry ENTRY.
+ * Matches in directory basename, bookmarked and pinned directories,
+ * just as directories currently in a workspace, have bonus credit. */
+static int
+calculate_bonus_credit(const char *entry, const char *query, int *keep)
+{
+	if (!entry || !*entry)
+		return 0;
+
+	int bonus = 0;
+
+	char *tmp = query ? strrchr(entry, '/') : (char *)NULL;
+	if (tmp && *(++tmp)) {
+		if (strstr(tmp, query))
+			bonus += BASENAME_BONUS;
+	}
+
+	int i = (int)bm_n;
+	while (--i >= 0) {
+		if (bookmarks[i].path && *bookmarks[i].path
+		&& bookmarks[i].path[1] == entry[1]
+		&& strcmp(bookmarks[i].path, entry) == 0) {
+			*keep = 1;
+			bonus += BOOKMARK_BONUS;
+			break;
+		}
+	}
+
+	if (pinned_dir && *pinned_dir && pinned_dir[1] == entry[1]
+	&& strcmp(pinned_dir, entry) == 0) {
+		*keep = 1;
+		bonus += PINNED_BONUS;
+	}
+
+	i = MAX_WS;
+	while (--i >= 0) {
+		if (workspaces[i].path && *workspaces[i].path
+		&& workspaces[i].path[1] == entry[1]
+		&& strcmp(workspaces[i].path, entry) == 0) {
+			*keep = 1;
+			bonus += WORKSPACE_BONUS;
+			break;
+		}
+	}
+
+	return bonus;
+}
+
 /* Calculate the rank as frecency. The algorithm is based
  * on Mozilla, zoxide, and z.lua. See:
  * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
@@ -82,56 +165,17 @@ static int
 rank_entry(const int i, const time_t now, int *days_since_first,
 	int *hours_since_last)
 {
-//	int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
-//	int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
+	/* 86400 = 60 secs / 60 misc / 24 hours */
 	*days_since_first = (int)(now - jump_db[i].first_visit) / 86400;
+	/* 3600 = 60 secs / 60 mins */
 	*hours_since_last = (int)(now - jump_db[i].last_visit) / 3600;
 
-	int rank;
-	rank = *days_since_first > 1
-		? ((int)jump_db[i].visits * VISIT_BONUS) / *days_since_first
-		: (int)jump_db[i].visits * VISIT_BONUS;
+	int keep = 0;
+	int rank = calculate_base_credit(*days_since_first, *hours_since_last,
+		(int)jump_db[i].visits, &keep);
 
-	int tmp_rank = rank;
-	if (*hours_since_last == 0) { /* Last hour */
-		rank = JHOUR(tmp_rank);
-		jump_db[i].keep = 1;
-	} else if (*hours_since_last <= 24) { /* Last day */
-		rank = JDAY(tmp_rank);
-		jump_db[i].keep = 1;
-	} else if (*hours_since_last <= 168) { /* Last week */
-		rank = JWEEK(tmp_rank);
-	} else { /* More than a week */
-		rank = JOLDER(tmp_rank);
-	}
-
-	int j = (int)bm_n;//, bpw = 0; /* Bookmarked, pinned or workspace */
-	while (--j >= 0) {
-		if (bookmarks[j].path && *bookmarks[j].path
-		&& bookmarks[j].path[1] == jump_db[i].path[1]
-		&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
-			rank += BOOKMARK_BONUS;
-			jump_db[i].keep = 1;
-			break;
-		}
-	}
-
-	if (pinned_dir && *pinned_dir && pinned_dir[1] == jump_db[i].path[1]
-	&& strcmp(pinned_dir, jump_db[i].path) == 0) {
-		rank += PINNED_BONUS;
-		jump_db[i].keep = 1;
-	}
-
-	j = MAX_WS;
-	while (--j >= 0) {
-		if (workspaces[j].path && *workspaces[j].path
-		&& workspaces[j].path[1] == jump_db[i].path[1]
-		&& strcmp(jump_db[i].path, workspaces[j].path) == 0) {
-			rank += WORKSPACE_BONUS;
-			jump_db[i].keep = 1;
-			break;
-		}
-	}
+	rank += calculate_bonus_credit(jump_db[i].path, (char *)NULL, &keep);
+	jump_db[i].keep = keep;
 
 	return rank;
 }
@@ -223,15 +267,13 @@ save_jumpdb(void)
 	|| jump_n == 0)
 		return;
 
-	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
-	sprintf(jump_file, "%s/jump.clifm", config_dir);
+	char jump_file[PATH_MAX];
+	snprintf(jump_file, sizeof(jump_file), "%s/jump.clifm", config_dir);
 
 	int fd = 0;
 	FILE *fp = open_fstream_w(jump_file, &fd);
-	if (!fp) {
-		free(jump_file);
+	if (!fp)
 		return;
-	}
 
 	int i, reduce = 0, total_rank = 0;
 	time_t now = time(NULL);
@@ -278,7 +320,6 @@ save_jumpdb(void)
 
 	fprintf(fp, "@%d\n", total_rank);
 	fclose(fp);
-	free(jump_file);
 }
 
 int
@@ -289,13 +330,12 @@ edit_jumpdb(char *app)
 
 	save_jumpdb();
 
-	char *jump_file = (char *)xnmalloc(config_dir_len + 12, sizeof(char));
-	sprintf(jump_file, "%s/jump.clifm", config_dir);
+	char jump_file[PATH_MAX];
+	snprintf(jump_file, sizeof(jump_file), "%s/jump.clifm", config_dir);
 
 	struct stat attr;
 	if (stat(jump_file, &attr) == -1) {
 		xerror("jump: %s: %s\n", jump_file, strerror(errno));
-		free(jump_file);
 		return EXIT_FAILURE;
 	}
 
@@ -311,29 +351,24 @@ edit_jumpdb(char *app)
 		open_in_foreground = 0;
 	}
 
-	if (ret != EXIT_SUCCESS) {
-		free(jump_file);
+	if (ret != EXIT_SUCCESS)
 		return ret;
-	}
 
 	stat(jump_file, &attr);
 
-	if (mtime_bfr == (time_t)attr.st_mtime) {
-		free(jump_file);
+	if (mtime_bfr == (time_t)attr.st_mtime)
 		return EXIT_SUCCESS;
-	}
 
 	if (jump_db)
 		free_jump_database();
 
 	load_jumpdb();
-	free(jump_file);
 	return EXIT_SUCCESS;
 }
 
 /* Save jump entry into the suggestions buffer. */
 static int
-save_suggestion(char *str)
+save_jump_suggestion(char *str)
 {
 	if (!str || !*str)
 		return EXIT_FAILURE;
@@ -588,6 +623,7 @@ purge_jump_database(char *arg)
 	return purge_low_ranked_entries(n);
 }
 
+/*
 static inline int
 handle_jump_order(char *arg, const int mode)
 {
@@ -615,8 +651,8 @@ handle_jump_order(char *arg, const int mode)
 	if (mode == NO_SUG_JUMP)
 		return cd_function(jump_db[int_order - 1].path, CD_PRINT_ERROR);
 
-	return save_suggestion(jump_db[int_order - 1].path);
-}
+	return save_jump_suggestion(jump_db[int_order - 1].path);
+} */
 
 static inline int
 check_jump_params(char **args, const time_t now, const int reduce)
@@ -691,62 +727,22 @@ get_needle(const char *needle, const char *match, const char *query,
 
 static inline int
 rank_tmp_entry(const struct jump_entry_t entry, const time_t now,
-	const int reduce, const char *last_arg)
+	const int reduce, const char *query)
 {
 	/* 86400 = 60 secs / 60 misc / 24 hours */
 	int days_since_first = (int)(now - entry.first) / 86400;
-
-	/* Calculate the rank as frecency. */
-	int rank = days_since_first > 0 ? ((int)entry.visits * VISIT_BONUS)
-		/ days_since_first : ((int)entry.visits * VISIT_BONUS);
-
 	/* 3600 = 60 secs / 60 mins */
 	int hours_since_last = (int)(now - entry.last) / 3600;
 
-	/* Credit or penalty based on last directory access. */
-	int tmp_rank = rank;
+	int keep = 0;
+	int rank = calculate_base_credit(days_since_first, hours_since_last,
+		(int)entry.visits, &keep);
 
-	if (hours_since_last == 0)        /* Last hour */
-		rank = JHOUR(tmp_rank);
-	else if (hours_since_last <= 24)  /* Last day */
-		rank = JDAY(tmp_rank);
-	else if (hours_since_last <= 168) /* Last week */
-		rank = JWEEK(tmp_rank);
-	else 							  /* More than a week */
-		rank = JOLDER(tmp_rank);
-
-	/* Matches in directory basename, bookmarked and pinned directories,
-	 * and directories currently in a workspace, have extra credit. */
-	char *tmp = strrchr(entry.match, '/');
-	if (tmp && *(++tmp)) {
-		if (strstr(tmp, last_arg))
-			rank += BASENAME_BONUS;
-	}
-
-	int i = (int)bm_n;
-	while (--i >= 0) {
-		if (bookmarks[i].path && bookmarks[i].path[1] == entry.match[1]
-		&& strcmp(bookmarks[i].path, entry.match) == 0) {
-			rank += BOOKMARK_BONUS;
-			break;
-		}
-	}
-
-	if (pinned_dir && pinned_dir[1] == entry.match[1]
-	&& strcmp(pinned_dir, entry.match) == 0)
-		rank += PINNED_BONUS;
-
-	i = MAX_WS;
-	while (--i >= 0) {
-		if (workspaces[i].path && workspaces[i].path[1] == entry.match[1]
-		&& strcmp(workspaces[i].path, entry.match) == 0) {
-			rank += WORKSPACE_BONUS;
-			break;
-		}
-	}
+	rank += calculate_bonus_credit(entry.match, query, &keep);
+	UNUSED(keep);
 
 	if (reduce > 0) {
-		tmp_rank = rank;
+		int tmp_rank = rank;
 		rank = tmp_rank / reduce;
 	}
 
@@ -797,7 +793,7 @@ dirjump(char **args, const int mode)
 	switch (args[0][1]) {
 	case 'c': jump_opt = JCHILD; break;
 	case 'p': jump_opt = JPARENT; break;
-	case 'o': return handle_jump_order(args[1], mode);
+//	case 'o': return handle_jump_order(args[1], mode);
 	case 'l': jump_opt = JLIST; break;
 	case '\0': jump_opt = NONE; break;
 	default:
@@ -811,7 +807,7 @@ dirjump(char **args, const int mode)
 	if (args[1] && !args[2] && lstat(args[1], &attr) != -1) {
 		if (mode == NO_SUG_JUMP)
 			return cd_function(args[1], CD_PRINT_ERROR);
-		return save_suggestion(args[1]);
+		return save_jump_suggestion(args[1]);
 	}
 
 	/* Find the best ranked directory using ARGS as filter(s). */
@@ -951,7 +947,7 @@ dirjump(char **args, const int mode)
 	if (mode == NO_SUG_JUMP)
 		exit_status = cd_function(best_ranked, CD_PRINT_ERROR);
 	else
-		exit_status = save_suggestion(best_ranked);
+		exit_status = save_jump_suggestion(best_ranked);
 
 END:
 	free(entry);

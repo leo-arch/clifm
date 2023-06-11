@@ -2261,8 +2261,9 @@ rl_suggestions(const unsigned char c)
 		if (lb[1] == ' ' && lb[2] == '-' && (lb[3] == 'h'
 		|| strncmp(lb + 2, "--help", strlen(lb + 2)) == 0))
 			break;
-		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'o'
-		|| lb[1] == 'p') && lb[2] == ' ')) {
+//		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'o'
+//		|| lb[1] == 'p') && lb[2] == ' ')) {
+		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'p') && lb[2] == ' ')) {
 			if ((printed = check_jcmd(full_line)) != NO_MATCH) {
 				zero_offset = 1;
 				goto SUCCESS;

@@ -3227,6 +3227,7 @@ complete_bookmark_names(char *text, const size_t words_n, int *exit_status)
 	return matches;
 }
 
+/*
 static char **
 complete_dirjump_jo(char *text, const int n, int *exit_status)
 {
@@ -3251,7 +3252,7 @@ complete_dirjump_jo(char *text, const int n, int *exit_status)
 	*exit_status = EXIT_SUCCESS;
 
 	return matches;
-}
+} */
 
 static char **
 complete_ranges(char *text, int *exit_status)
@@ -4185,9 +4186,9 @@ FIRST_WORD_COMP:
 			return (char **)NULL;
 
 		/* Dirjump: jo command */
-		matches = complete_dirjump_jo((char *)text, n, &exit_status);
+/*		matches = complete_dirjump_jo((char *)text, n, &exit_status);
 		if (exit_status == EXIT_SUCCESS)
-			return matches;
+			return matches; */
 
 		/* Sort number */
 		if (*lb == 's' && (strncmp(lb, "st ", 3) == 0
