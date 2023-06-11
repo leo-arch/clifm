@@ -331,10 +331,13 @@ edit_jumpdb(char *app)
 	return EXIT_SUCCESS;
 }
 
-/* Save jump entry into the suggestions buffer */
+/* Save jump entry into the suggestions buffer. */
 static int
 save_suggestion(char *str)
 {
+	if (!str || !*str)
+		return EXIT_FAILURE;
+
 	free(jump_suggestion);
 	size_t len = strlen(str);
 
@@ -602,7 +605,8 @@ handle_jump_order(char *arg, const int mode)
 	}
 
 	int int_order = atoi(arg);
-	if (int_order <= 0 || int_order > (int)jump_n) {
+	if (int_order <= 0 || int_order > (int)jump_n
+	|| !jump_db || !jump_db[int_order - 1].path) {
 		if (mode == NO_SUG_JUMP)
 			xerror(_("jump: %s: No such order number\n"), arg);
 		return EXIT_FAILURE;

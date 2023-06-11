@@ -2373,7 +2373,8 @@ colors_list(char *ent, const int eln, const int pad, const int new_line)
 	if (wlen == 0)
 		wname = truncate_wname(ent);
 
-	char *color = fi_c;
+//	char *color = fi_c;
+	char *color = (char *)NULL;
 
 	if (ret == -1) {
 		color = uf_c;

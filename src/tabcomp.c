@@ -1257,7 +1257,7 @@ calculate_prefix_len(char *str, const char *query, const char *lw)
 }
 
 /* Let's define whether we have a case which allows multi-selection
- * Returns 1 if true or zero if false */
+ * Returns 1 if true or zero if false. */
 static int
 is_multi_sel(void)
 {
@@ -1304,11 +1304,11 @@ is_multi_sel(void)
 	}
 }
 
-/* Clean the input buffer in case the user cancelled the completion pressing ESC */
+/* Clean the input buffer in case the user cancelled the completion pressing ESC. */
 /* If all possible completions share a common prefix, this prefix is
  * automatically appended to the query string. However, the user
  * cancelled here the completion (pressing ESC), so that we need to
- * remove this prefix by reinserting the original query string */
+ * remove this prefix by reinserting the original query string. */
 static int
 clean_rl_buffer(const char *text)
 {
@@ -1319,10 +1319,10 @@ clean_rl_buffer(const char *text)
 		return EXIT_SUCCESS;
 
 	/* If the previous char is not space, then a common prefix was appended:
-	 * remove it */
+	 * remove it. */
 	if ((rl_end > 0 && rl_line_buffer && rl_line_buffer[rl_end - 1] != ' ')
 	|| (rl_end >= 2 && rl_line_buffer && rl_line_buffer[rl_end - 2] == '\\')) {
-		/* Find the last non-escaped space */
+		/* Find the last non-escaped space. */
 		int i = rl_end, sp = -1;
 		while (--i >= 0) {
 			if (rl_line_buffer[i] == ' ' && i > 0
@@ -1334,10 +1334,10 @@ clean_rl_buffer(const char *text)
 
 		if (sp != -1) {
 			/* If found, remove the content of the input line starting
-			 * exactly one char after the last space */
+			 * exactly one char after the last space. */
 			rl_delete_text(sp + 1, rl_end);
 			rl_point = rl_end = sp + 1;
-		} else { /* No space: delete the entire line */
+		} else { /* No space: delete the entire line. */
 			rl_delete_text(0, rl_end);
 			rl_point = rl_end = 0;
 		}
@@ -1550,7 +1550,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 	}
 
 	else if (ct == TCMP_OPENWITH) {
-		// If multiple words ("CMD ARG..."), quote the string.
+		/* If multiple words ("CMD ARG..."), quote the string. */
 		if (strchr(*buf, ' ')) {
 			char *tmp = (char *)xnmalloc(strlen(*buf) + 3, sizeof(char));
 			sprintf(tmp, "\"%s\"", *buf);
@@ -1602,7 +1602,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 
 	else {
 		if ((conf.case_sens_path_comp == 0 || conf.fuzzy_match == 1) && query) {
-			// Honor case insensitive completion/fuzzy matches
+			/* Honor case insensitive completion/fuzzy matches. */
 			if (strncmp(matches[0], *buf, *prefix_len) != 0) {
 				int bk = rl_point;
 				rl_delete_text(bk - (int)*prefix_len, rl_end);
@@ -1616,7 +1616,7 @@ do_some_cleanup(char **buf, char **matches, const char *query,
 static int
 do_completion(char *buf, const size_t prefix_len, const int multi)
 {
-	/* Some buffer clean up: remove new line char and ending spaces */
+	/* Some buffer clean up: remove new line char and ending spaces. */
 	size_t blen = strlen(buf);
 	int j = (int)blen;
 	if (j > 0 && buf[j - 1] == '\n') {

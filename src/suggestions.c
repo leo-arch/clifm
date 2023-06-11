@@ -720,7 +720,8 @@ get_reg_file_color(const char *filename, const struct stat *attr,
 static char *
 get_comp_color(const char *filename, const struct stat *attr, int *free_color)
 {
-	char *color = no_c;
+//	char *color = no_c;
+	char *color = (char *)NULL;
 
 	switch (attr->st_mode & S_IFMT) {
 	case S_IFDIR:
