@@ -71,7 +71,6 @@ struct jump_entry_t {
 
 #define FIRST_SEGMENT (1 << 0)
 #define LAST_SEGMENT  (1 << 1)
-#define NO_SEGMENT    (1 << 2)
 
 /* Getting the total rank of an entry:
  * 1) rank = calculate_base_credit()
@@ -758,7 +757,7 @@ rank_tmp_entry(const struct jump_entry_t entry, const time_t now,
  * https://github.com/skywind3000/z.lua#aging
  *
  * If MODE is NO_SUG_JUMP, we're running the 'j' command (or any of its
- * variants [jo, je, jc, jp, --edit or --purge]), in which case matches are
+ * variants [je, jc, jp, --edit or --purge]), in which case matches are
  * handled according to the specific command.
  *
  * Otherwise, the function has been called from the suggestions system, in

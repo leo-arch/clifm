@@ -93,6 +93,9 @@
  * allocation) the appropeiate value, and then print them all
  * (print_entry_props()). */
 
+/* A path (2, or the compiler complains), plus 7 colors, plus an icon */
+//#define NAME_STR_LEN ((PATH_MAX * sizeof(wchar_t) * 2) + (MAX_COLOR * 7) + 3)
+
 /* 14 colors + 15 single chars + NUL byte */
 #define PERM_STR_LEN ((MAX_COLOR * 14) + 16) /* construct_file_perms() */
 
@@ -108,7 +111,7 @@
 
 /* Max inode number able to hold: 999 billions! Padding could be as long
  * as max inode lenght - 1 */
-#define INO_STR_LEN  ((MAX_COLOR * 2) + ((12 + 1) * 2))
+#define INO_STR_LEN  ((MAX_COLOR * 2) + ((12 + 1) * 2) + 4)
 
 #define FC_STR_LEN   ((MAX_COLOR * 2) + 32) /* construct_files_counter() */
 
@@ -147,7 +150,7 @@ static int
 print_file_attrs(const int aflags)
 {
 	if (aflags == -1) {
-		puts("Unavailable");
+		puts(_("Unavailable"));
 		return EXIT_FAILURE;
 	}
 
@@ -186,10 +189,10 @@ print_file_attrs(const int aflags)
 static int
 get_file_attrs(char *file)
 {
-#if !defined(FS_IOC_GETFLAGS)
+# if !defined(FS_IOC_GETFLAGS)
 	UNUSED(file);
 	return (-1);
-#else
+# else
 	int attr, fd, ret = 0;
 
 	fd = open(file, O_RDONLY);
@@ -200,12 +203,11 @@ get_file_attrs(char *file)
 	close(fd);
 
 	return (ret == -1 ? -1 : attr);
-#endif /* !FS_IOC_GETFLAGS */
+# endif /* !FS_IOC_GETFLAGS */
 }
 #endif /* LINUX_FILE_ATTRS */
 
 static char *
-//get_link_color(char *name, int *link_dir, const int dsize)
 get_link_color(char *name)
 {
 	struct stat a;
@@ -215,7 +217,6 @@ get_link_color(char *name)
 		return color;
 
 	if (S_ISDIR(a.st_mode)) {
-//		*link_dir = (follow_symlinks == 1 && dsize == 1) ? 1 : 0;
 		if (check_file_access(a.st_mode, a.st_uid, a.st_gid) == 1)
 			color = get_dir_color(name, a.st_mode, a.st_nlink, -1);
 		else
@@ -460,11 +461,11 @@ get_new_perms(char *str, const int diff)
 	xrename = 2; /* Completely disable TAB completion */
 
 	if (diff == 1) {
-		puts(_("Files with different sets of permissions\n"
-			"Only shared permission bits are set in the template"));
+		printf(_("%sFiles with different sets of permissions\n"
+			"Only shared permission bits are set in the template"), tx_c);
 	}
-	puts("Edit file permissions (Ctrl-d to quit)\n"
-		"Both symbolic and numeric notation are supported");
+	printf(_("%sEdit file permissions (Ctrl-d to quit)\n"
+		"Both symbolic and numeric notation are supported"), tx_c);
 	char m[(MAX_COLOR * 2) + 7];
 	snprintf(m, sizeof(m), "\001%s\002>\001%s\002 ", mi_c, tx_c);
 
@@ -850,11 +851,11 @@ get_color_size_truecolor(const off_t s, char *str, const size_t len)
 	long long base = xargs.si == 1 ? 1000 : 1024;
 	uint8_t n = 0;
 
-	if      (s <                base) n = 1; // Bytes
-	else if (s <           base*base) n = 2; // Kb
-	else if (s <      base*base*base) n = 3; // Mb
-	else if (s < base*base*base*base) n = 4; // Gb
-	else				              n = 5; // Larger
+	if      (s <                base) n = 1; /* Bytes */
+	else if (s <           base*base) n = 2; /* Kb */
+	else if (s <      base*base*base) n = 3; /* Mb */
+	else if (s < base*base*base*base) n = 4; /* Gb */
+	else				              n = 5; /* Larger */
 
 	snprintf(str, len, "\x1b[0;%d;38;2;%d;%d;%dm",
 		size_shades.shades[n].attr,
@@ -995,7 +996,7 @@ print_extended_attributes(char *s)
 	}
 
 	if (buflen == 0) {
-		puts("None");
+		puts(_("None"));
 		return EXIT_SUCCESS;
 	}
 
@@ -1012,7 +1013,7 @@ print_extended_attributes(char *s)
 
 	/* Loop over the list of zero terminated strings with the
 	 * attribute keys. Use the remaining buffer length to determine
-	 * the end of the list */
+	 * the end of the list. */
 	key = buf;
 	size_t count = 0;
 	while (buflen > 0) {
@@ -1047,7 +1048,7 @@ print_extended_attributes(char *s)
 
 			free(val);
 		} else if (vallen == 0) {
-			puts("<no value>");
+			puts(_("<no value>"));
 		}
 
 		/* Forward to next attribute key */
@@ -1187,21 +1188,21 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	char *cend = conf.colorize == 1 ? df_c : "";
 
 	if (conf.colorize == 1)
-		printf("%s", BOLD);
+		fputs(BOLD, stdout);
 
 	switch (file_type) {
-	case '.': printf(_("Regular file")); break;
-	case 'b': printf(_("Block special file")); break;
-	case 'c': printf(_("Character special file")); break;
-	case 'd': printf(_("Directory")); break;
-	case 'l': printf(_("Symbolic link")); break;
-	case 'p': printf(_("Fifo")); break;
-	case 's': printf(_("Socket")); break;
+	case '.': fputs(_("Regular file"), stdout); break;
+	case 'b': fputs(_("Block special file"), stdout); break;
+	case 'c': fputs(_("Character special file"), stdout); break;
+	case 'd': fputs(_("Directory"), stdout); break;
+	case 'l': fputs(_("Symbolic link"), stdout); break;
+	case 'p': fputs(_("Fifo"), stdout); break;
+	case 's': fputs(_("Socket"), stdout); break;
 	default: break;
 	}
 
 	if (conf.colorize == 1)
-		printf("%s", cend);
+		fputs(cend, stdout);
 
 	printf(_("\tBlocks: %s%jd%s"), BOLD, (intmax_t)attr->st_blocks, cend);
 	printf(_("  Block size: %s%d%s"), BOLD, S_BLKSIZE, cend);
@@ -1225,15 +1226,15 @@ print_file_details(char *filename, const struct stat *attr, const char file_type
 	}
 
 #if defined(LINUX_FILE_ATTRS)
-	printf("Attributes: \t");
+	fputs(_("Attributes: \t"), stdout);
 	if (S_ISDIR(attr->st_mode) || S_ISREG(attr->st_mode))
 		print_file_attrs(get_file_attrs(filename));
 	else
-		puts("Unavailable");
+		puts(_("Unavailable"));
 #endif /* LINUX_FILE_ATTRS */
 
 #if defined(_LINUX_XATTR)
-	printf("Xattributes:\t");
+	fputs(_("Xattributes:\t"), stdout);
 	print_extended_attributes(filename);
 #endif /* _LINUX_XATTR */
 }
@@ -1393,7 +1394,7 @@ print_file_size(char *filename, const struct stat *attr, const int file_perm,
 		if (total_size > size_mult_factor)
 			printf("/ %s%juB%s ", csize, (uintmax_t)total_size, cend);
 
-		printf("(%s%s)\n", conf.apparent_size == 1 ? "apparent" : "real",
+		printf("(%s%s)\n", conf.apparent_size == 1 ? _("apparent") : _("real"),
 			xargs.si == 1 ? " / si" : "");
 	} else {
 		printf("%s%s%s\n", csize, human_size, cend);
@@ -1419,7 +1420,7 @@ err_no_file(const char *filename, const int errnum, const int follow_link)
 	ssize_t len = readlink(filename, target, sizeof(target) - 1);
 	if (len > 0) {
 		target[len] = '\0';
-		xerror("prop: %s -> %s: Broken symbolic link\n", filename, target);
+		xerror(_("prop: %s -> %s: Broken symbolic link\n"), filename, target);
 		return EXIT_FAILURE;
 	}
 
@@ -1429,8 +1430,9 @@ END:
 }
 
 /* Retrieve information for the file named FILENAME in a stat(1)-like fashion.
- * If FOLLOW_LINK is set to 1, in which case we're running the 'pp' command,
- * symbolic links are followed and directories size is calculated recursively. */
+ * If FOLLOW_LINK is set to 1, in which case we're running the 'pp' command
+ * instead of just 'p', symbolic links are followed and directories size is
+ * calculated recursively. */
 static int
 get_properties(char *filename, const int follow_link)
 {
@@ -1457,7 +1459,7 @@ get_properties(char *filename, const int follow_link)
 	if (follow_link == 1) {
 		/* pp: In case of a symlink we want both the symlink name (FILENAME)
 		 * and the target name (LINK_TARGET): the Name field in the output
-		 * will be printed as follows: "Name: target <- link name". */
+		 * will be printed as follows: "Name: target <- link_name". */
 		struct stat b;
 		if (lstat(filename, &b) != -1 && S_ISLNK(b.st_mode)) {
 			char *tmp = realpath(filename, (char *)NULL);
@@ -1481,7 +1483,7 @@ get_properties(char *filename, const int follow_link)
 }
 
 int
-properties_function(char **args, const int full_dirsize)
+properties_function(char **args, const int follow_link)
 {
 	if (!args)
 		return EXIT_FAILURE;
@@ -1502,7 +1504,7 @@ properties_function(char **args, const int full_dirsize)
 			args[i] = deq_file;
 		}
 
-		if (get_properties(args[i], full_dirsize) != 0)
+		if (get_properties(args[i], follow_link) != 0)
 			exit_status = EXIT_FAILURE;
 	}
 
@@ -1885,7 +1887,7 @@ print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 	char ino_str[INO_STR_LEN];
 	*ino_str = '\0';
 	if (prop_fields.inode == 1) {
-		snprintf(ino_str, INO_STR_LEN, "%s%*ju %s", tx_c, (int)maxes->inode,
+		snprintf(ino_str, INO_STR_LEN, "\x1b[0m%s%*ju %s", tx_c, (int)maxes->inode,
 			(uintmax_t)props->inode, df_c);
 	}
 
@@ -1904,7 +1906,7 @@ print_entry_props(const struct fileinfo *props,	const struct maxes_t *maxes,
 	/* Print stuff */
 
 	printf("%s" /* Files counter for dirs */
-		   "\x1b[0m%s" /* Inode */
+		   "%s" /* Inode */
 		   "%s" /* Permissions */
 		   "%s " /* Extended attributes (@) */
 		   "%s" /* User and group ID */
