@@ -40,7 +40,7 @@ hd=0;36:he=0;36:hn=0:hp=0;36:hq=0;33:hr=0;31:hs=0;32:hv=0;32:\
 li=1;32:mi=1;36:nm=1;32:sb=0;2;33:sc=2;36:sd=0;2;37:\
 sf=4;2;36:sh=2;35:si=1;34:sp=02;31:sx=02;32:sz=0;2;4;35:\
 ti=1;36:ts=4;35:tt=2;1;36:tx=0:\
-wc=1;36:wm=1;33:wp=0;2;31:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:\
+wc=1;36:wm=1;33:ws1=34:ws2=31:ws3=33:ws4=32:ws5=36:ws6=36:ws7=36:ws8=36:\
 xf=1;31:xs=0;32:"
 
 /* Definition order: archive, image, video, sound, document, code, uninmportant */

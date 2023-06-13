@@ -1533,7 +1533,6 @@ The following codes are used for different interface elements (in the \fIInterfa
  nm = notice message indicator
  si = stealth mode indicator
  tx = command line text (regular prompt)
- wp = command line text (warning prompt)
 
  \fBFile properties\fR
  dd  = last access/change/modification time \fB(1)\fR
@@ -1908,11 +1907,9 @@ The wrong command name check is omitted if the input string:
 .TP
 The warning prompt could be customized by means of the same rules used by the regular prompt. To use a custom warning prompt, modify the \fIWarningPrompt\fR line in the prompts file (via the \fIprompt edit\fR command). It defaults to
 
- \fB"\\[\\e[0m\\]\\[\\e[00;02;31m\\](!) > "\fR
+ \fB"\\[\\e[0;2;31m\\](!) > "\fR
 .TP
 the last line of the regular prompt will become "\fB(!) > \fR", printed in a dimmed red color, including the input string.
-.TP
-To change the color of the input text while in the warning prompt use the \fBwp\fR color code (see the \fBCOLOR CODES\fR section above). It defaults to dimmed red, just as the warning prompt itself.
 .TP
 To disable this feature use the \fI--no-warning-prompt\fR command line switch or set the \fIEnableWarningPrompt\fR option to \fBfalse\fR in the prompts file.
 .TP
